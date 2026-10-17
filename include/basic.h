@@ -12,6 +12,8 @@ typedef struct dds3Basic_t dds3Basic_t;
 typedef struct dds3BasicFunction_t dds3BasicFunction_t;
 typedef struct dds3PoseSet_t dds3PoseSet_t;
 typedef struct dds3BasicArrayHandle_t dds3BasicArrayHandle_t;
+typedef struct dds3BasicArray_t dds3BasicArray_t;
+typedef struct dds3WorldBasic_t dds3WorldBasic_t;
 typedef struct dds3PathBasicControl_t dds3PathBasicControl_t;
 
 /* Bodies not recovered yet: reached only through pointers. */
@@ -82,6 +84,36 @@ struct dds3BasicArrayHandle_t
     u16 count;
     dds3BasicArrayHandle_t *next;
     dds3BasicArrayHandle_t *prev;
+};
+
+/* One slot of the world's shared basic array. dds3AddWorld builds the free
+ * chain over it with an 8-byte stride; next and prev are -1 terminated. */
+struct dds3BasicArray_t
+{
+    dds3Basic_t *target;
+    s16 next;
+    s16 prev;
+};
+
+/* The world basic's workdata: the scene list, the two selected scenes, and the
+ * shared basic array with its free chain and the handles carved out of it.
+ * basicarray is a pointer: worldconstructor stores a word there and every
+ * reader indexes it, so the IDB's inline dds3BasicArray_t[10000] (which also
+ * moves basicarraycnt to +0x13894) is not this build's layout. */
+struct dds3WorldBasic_t
+{
+    dds3Basic_t *firstscene;
+    dds3Basic_t *lastscene;
+    dds3Basic_t *activescene;
+    dds3Basic_t *controlscene;
+    sdfMemHandle_t *basicarray_hndl;
+    dds3BasicArray_t *basicarray;
+    u16 basicarraycnt;
+    s16 firstempty;
+    s16 lastempty;
+    u16 emptycount;
+    dds3BasicArrayHandle_t *firstheader;
+    dds3BasicArrayHandle_t *lastheader;
 };
 
 /* Path playback for a camera or object following a spline.
