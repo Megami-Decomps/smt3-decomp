@@ -1,30 +1,389 @@
 #include "common.h"
+#include "kernel.h"
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", DeleteProcessList);
+extern dds3ProcessID_t *startinglistf;
+/* The IDB name clashes with another unit's, so the generated symbol table
+ * spells this tail pointer startinglistl_0. */
+extern dds3ProcessID_t *startinglistl_0;
+extern u32 startinglistcnt;
+extern dds3ProcessID_t *endinglistf;
+extern dds3ProcessID_t *endinglistl;
+extern u32 endinglistcnt;
+extern dds3ProcessID_t *runprocess;
+extern dds3ProcessID_t *runninglistf;
+extern dds3ProcessID_t *runninglistl;
+extern u32 runninglistcnt;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", AddProcessList);
+void DeleteProcessList(dds3ProcessID_t *delp);
+void AddProcessList(dds3ProcessID_t *addp);
+void StartProcess(dds3ProcessID_t *setp);
+void StartingProcess(void);
+void KillProcess(dds3ProcessID_t *killp);
+void EndProcess(dds3ProcessID_t *endp);
+void dds3UnlinkProcess(dds3ProcessID_t *unp);
+s32 RunProcess(dds3ProcessID_t *runp);
+void RunningProcess(void);
+void dds3EndingProcess(void);
+void ChangeProcessFlag(s32 onoff, dds3ProcessID_t *target, u32 flag, s32 type);
+s32 dds3ExistProcess(dds3ProcessID_t *id);
+dds3ProcessID_t *dds3SearchProcessName(char *name);
+s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
+void ChangeProcessFlagChild(s32 onoff, dds3ProcessID_t *target, u32 flag);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", StartProcess);
+void *sdfChipAllocDirect(u32 size);
+void sdfChipFreeDirect(void *ptr);
+int printf(const char *fmt, ...);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", StartingProcess);
+void DeleteProcessList(dds3ProcessID_t *delp)
+{
+    if ((delp->flag & 0xF) == 0) {
+        return;
+    }
+    if ((delp->flag & 0xF) >= 4) {
+        return;
+    }
+
+    if (delp->prev != NULL) {
+        delp->prev->next = delp->next;
+    } else {
+        switch (delp->flag & 0xF) {
+        case 1:
+            startinglistf = delp->next;
+            break;
+        case 2:
+            runninglistf = delp->next;
+            break;
+        case 3:
+            endinglistf = delp->next;
+            break;
+        }
+    }
+
+    if (delp->next != NULL) {
+        delp->next->prev = delp->prev;
+    } else {
+        switch (delp->flag & 0xF) {
+        case 1:
+            startinglistl_0 = delp->prev;
+            break;
+        case 2:
+            runninglistl = delp->prev;
+            break;
+        case 3:
+            endinglistl = delp->prev;
+            break;
+        }
+    }
+
+    delp->next = NULL;
+    delp->prev = NULL;
+
+    switch (delp->flag & 0xF) {
+    case 1:
+        startinglistcnt--;
+        break;
+    case 2:
+        runninglistcnt--;
+        break;
+    case 3:
+        endinglistcnt--;
+        break;
+    }
+}
+
+void AddProcessList(dds3ProcessID_t *addp)
+{
+    dds3ProcessID_t *p;
+
+    switch (addp->flag & 0xF) {
+    case 1:
+        p = startinglistf;
+        break;
+    case 2:
+        p = runninglistf;
+        break;
+    case 3:
+        p = endinglistf;
+        break;
+    case 0:
+    default:
+        return;
+    }
+
+    if (p == NULL) {
+        switch (addp->flag & 0xF) {
+        case 1:
+            startinglistf = addp;
+            startinglistl_0 = addp;
+            break;
+        case 2:
+            runninglistf = addp;
+            runninglistl = addp;
+            break;
+        case 3:
+            endinglistf = addp;
+            endinglistl = addp;
+            break;
+        }
+        addp->prev = NULL;
+        addp->next = NULL;
+    } else {
+        while (p != NULL) {
+            if (addp->priority < p->priority) {
+                if (p->prev != NULL) {
+                    p->prev->next = addp;
+                    addp->prev = p->prev;
+                    addp->next = p;
+                    p->prev = addp;
+                } else {
+                    switch (addp->flag & 0xF) {
+                    case 1:
+                        startinglistf = addp;
+                        break;
+                    case 2:
+                        runninglistf = addp;
+                        break;
+                    case 3:
+                        endinglistf = addp;
+                        break;
+                    }
+                    addp->prev = NULL;
+                    addp->next = p;
+                    p->prev = addp;
+                }
+                break;
+            }
+            p = p->next;
+        }
+        if (p == NULL) {
+            switch (addp->flag & 0xF) {
+            case 1:
+                startinglistl_0->next = addp;
+                addp->prev = startinglistl_0;
+                startinglistl_0 = addp;
+                break;
+            case 2:
+                runninglistl->next = addp;
+                addp->prev = runninglistl;
+                runninglistl = addp;
+                break;
+            case 3:
+                endinglistl->next = addp;
+                addp->prev = endinglistl;
+                endinglistl = addp;
+                break;
+            }
+            addp->next = NULL;
+        }
+    }
+
+    switch (addp->flag & 0xF) {
+    case 1:
+        startinglistcnt++;
+        break;
+    case 2:
+        runninglistcnt++;
+        break;
+    case 3:
+        endinglistcnt++;
+        break;
+    }
+}
+
+void StartProcess(dds3ProcessID_t *setp)
+{
+    DeleteProcessList(setp);
+    setp->flag = (setp->flag & ~0xF) | 2;
+    AddProcessList(setp);
+    setp->starttime = 0;
+    setp->runtime = 0;
+}
+
+void StartingProcess(void)
+{
+    dds3ProcessID_t *p;
+    dds3ProcessID_t *startp;
+
+    p = startinglistf;
+    while (p != NULL) {
+        if (p->starttimer > 0) {
+            p->starttimer--;
+        }
+        startp = p;
+        p = p->next;
+        if (startp->starttimer == 0) {
+            StartProcess(startp);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", RunProcess);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", RunningProcess);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", KillProcess);
+void KillProcess(dds3ProcessID_t *killp)
+{
+    dds3ProcessID_t *p;
+    dds3ProcessID_t *nextp;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", EndProcess);
+    p = killp->child;
+    while (p != NULL) {
+        nextp = p->sibling;
+        dds3KillProcess(p, 0);
+        p = nextp;
+    }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3EndingProcess);
+    DeleteProcessList(killp);
+    printf("shutdown %s!!\n", killp->name);
+    if (killp->shutdownfunc != NULL) {
+        killp->shutdownfunc(killp);
+    }
+    killp->flag &= ~0xF;
+    dds3UnlinkProcess(killp);
+    sdfChipFreeDirect(killp);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", ChangeProcessFlagChild);
+void EndProcess(dds3ProcessID_t *endp)
+{
+    u32 stat = endp->flag & 0xF;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", ChangeProcessFlag);
+    if (stat < 3) {
+        if (stat == 0) {
+            return;
+        }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3GetProcessCount);
+        DeleteProcessList(endp);
+        endp->flag = (endp->flag & ~0xF) | 3;
+        AddProcessList(endp);
+        if (endp->shutdowntimer == 0) {
+            KillProcess(endp);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3SearchProcessNumber);
+
+void dds3EndingProcess(void)
+{
+    dds3ProcessID_t *p;
+    dds3ProcessID_t *endp;
+
+    p = endinglistf;
+    while (p != NULL) {
+        if (p->shutdowntimer > 0) {
+            p->shutdowntimer--;
+        }
+        endp = p;
+        p = p->next;
+        if (endp->shutdowntimer == 0) {
+            KillProcess(endp);
+        }
+    }
+}
+
+
+void ChangeProcessFlagChild(s32 onoff, dds3ProcessID_t *target, u32 flag)
+{
+    dds3ProcessID_t *p;
+
+    if (onoff != 0) {
+        target->flag |= flag & 0x0FFFFFF0;
+    } else {
+        target->flag &= ~(flag & 0x0FFFFFF0);
+    }
+    p = target->child;
+    while (p != NULL) {
+        ChangeProcessFlagChild(onoff, p, flag);
+        p = p->sibling;
+    }
+}
+
+/* The 0x0FFFFFF0 mask keeps callers out of the state nibble and the top four
+ * bits of flag. */
+void ChangeProcessFlag(s32 onoff, dds3ProcessID_t *target, u32 flag, s32 type)
+{
+    dds3ProcessID_t *p = NULL;
+    s32 list;
+
+    switch (type) {
+    case 0:
+        if (onoff != 0) {
+            target->flag |= flag & 0x0FFFFFF0;
+        } else {
+            target->flag &= ~(flag & 0x0FFFFFF0);
+        }
+        return;
+    case 1:
+    case 3:
+        for (list = 0; list < 3; list++) {
+            switch (list) {
+            case 0:
+                p = startinglistf;
+                break;
+            case 1:
+                p = runninglistf;
+                break;
+            case 2:
+                p = endinglistf;
+                break;
+            }
+            if (p != NULL) {
+                u32 mask = flag & 0x0FFFFFF0;
+
+                while (p != NULL) {
+                    if ((p != target && type == 1) || type == 3) {
+                        if (onoff != 0) {
+                            p->flag |= mask;
+                        } else {
+                            p->flag &= ~mask;
+                        }
+                    }
+                    p = p->next;
+                }
+            }
+        }
+        return;
+    case 2:
+        ChangeProcessFlagChild(onoff, target, flag);
+        break;
+    }
+}
+
+u32 dds3GetProcessCount(u32 stat)
+{
+    switch (stat & 0xF) {
+    case 1:
+        return startinglistcnt;
+    case 2:
+        return runninglistcnt;
+    case 3:
+        return endinglistcnt;
+    }
+    return 0;
+}
+
+dds3ProcessID_t *dds3SearchProcessNumber(u32 stat, s32 n)
+{
+    dds3ProcessID_t *p = startinglistf;
+    s32 i;
+
+    switch (stat & 0xF) {
+    case 1:
+        break;
+    case 2:
+        p = runninglistf;
+        break;
+    case 3:
+        p = endinglistf;
+        break;
+    case 0:
+    default:
+        return NULL;
+    }
+    for (i = 0; i < n && p != NULL; i++) {
+        p = p->next;
+    }
+    return p;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", DebugProcess);
 
@@ -34,43 +393,302 @@ INCLUDE_ASM(const s32, "kernel/dds3KernelCore", DebugProcessTree);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3PrintProcessTree);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3ProcessMain);
+s32 dds3ProcessMain(void)
+{
+    StartingProcess();
+    RunningProcess();
+    dds3EndingProcess();
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3StartProcess);
+/* namehash is the name's byte sum, which dds3SearchProcessName uses to reject
+ * most candidates without a compare. */
+dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
+                                  dds3ProcessFunc_t processfunc, dds3ProcessFunc_t shutdownfunc,
+                                  void *data)
+{
+    dds3ProcessID_t *setp = sdfChipAllocDirect(sizeof(dds3ProcessID_t));
+    s32 i = 0;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3KillProcessName);
+    if (setp == NULL) {
+        return NULL;
+    }
+    setp->namehash = 0;
+    while ((setp->name[i] = namestr[i]) != 0 && i < 0x18) {
+        setp->namehash += namestr[i];
+        i++;
+    }
+    setp->priority = priority;
+    setp->flag = 1;
+    setp->starttimer = starttimer;
+    setp->shutdowntimer = shutdowntimer;
+    setp->processfunc = processfunc;
+    setp->shutdownfunc = shutdownfunc;
+    setp->workdata = data;
+    setp->name[0x17] = 0;
+    setp->starttime = 0;
+    setp->runtime = 0;
+    setp->next = NULL;
+    setp->prev = NULL;
+    setp->parent = NULL;
+    setp->child = NULL;
+    setp->sibling = NULL;
+    AddProcessList(setp);
+    if (setp->starttimer == 0) {
+        StartProcess(setp);
+    }
+    return setp;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3KillProcess);
+s32 dds3KillProcessName(char *name, s32 shutdowntimer)
+{
+    dds3ProcessID_t *id = dds3SearchProcessName(name);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3EndProcess);
+    if (id == NULL) {
+        return 0;
+    }
+    return dds3KillProcess(id, shutdowntimer);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3SetShutdownTimer);
+s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer)
+{
+    if (id == NULL || id == (dds3ProcessID_t *)-1) {
+        return 0;
+    }
+    switch (id->flag & 0xF) {
+    case 1:
+    case 2:
+        id->shutdowntimer = shutdowntimer;
+        EndProcess(id);
+        return 1;
+    case 3:
+        id->shutdowntimer = shutdowntimer;
+        if (id->shutdowntimer == 0) {
+            KillProcess(id);
+            return 1;
+        }
+        break;
+    case 0:
+    default:
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3GetProcessStat);
+void dds3EndProcess(dds3ProcessID_t *id)
+{
+    if ((id->flag & 0xF) == 2) {
+        DeleteProcessList(id);
+        id->flag = (id->flag & ~0xF) | 3;
+        AddProcessList(id);
+    }
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3SearchProcessName);
+void dds3SetShutdownTimer(dds3ProcessID_t *id, s32 newtimer)
+{
+    u32 stat = id->flag & 0xF;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3SearchProcessPriority);
+    if (stat != 0) {
+        if (stat < 4) {
+            id->shutdowntimer = newtimer;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3ExistProcess);
+u32 dds3GetProcessStat(dds3ProcessID_t *id)
+{
+    u32 stat;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3GetProcessStartTime);
+    if (!dds3ExistProcess(id)) {
+        return 0;
+    }
+    stat = id->flag & 0xF;
+    if (stat >= 4) {
+        stat = 0;
+    }
+    return stat;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3GetProcessRunTime);
+/* The name compare runs back to front, from the terminator down to byte 0. */
+dds3ProcessID_t *dds3SearchProcessName(char *name)
+{
+    s32 len;
+    s32 hash;
+    s32 list;
+    s32 i;
+    dds3ProcessID_t *p;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3SetProcessData);
+    p = NULL;
+    hash = 0;
+    len = 0;
+    while (name[len] != '\0') {
+        hash += name[len];
+        len++;
+    }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3GetProcessData);
+    for (list = 0; list < 3; list++) {
+        switch (list) {
+        case 0:
+            p = startinglistf;
+            break;
+        case 1:
+            p = runninglistf;
+            break;
+        case 2:
+            p = endinglistf;
+            break;
+        }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3DebugNowProcess);
+        while (p != NULL) {
+            if (p->namehash == hash) {
+                for (i = len;; i--) {
+                    if (name[i] != p->name[i]) {
+                        break;
+                    }
+                    if (i == 0) {
+                        return p;
+                    }
+                }
+            }
+            p = p->next;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3LinkProcess);
+dds3ProcessID_t *dds3SearchProcessPriority(u32 priority)
+{
+    s32 list;
+    dds3ProcessID_t *p;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3UnlinkProcess);
+    p = NULL;
+    for (list = 0; list < 3; list++) {
+        switch (list) {
+        case 0:
+            p = startinglistf;
+            break;
+        case 1:
+            p = runninglistf;
+            break;
+        case 2:
+            p = endinglistf;
+            break;
+        }
+        while (p != NULL) {
+            if (p->priority == priority) {
+                return p;
+            }
+            p = p->next;
+        }
+    }
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3SetProcessFlag);
+s32 dds3ExistProcess(dds3ProcessID_t *id)
+{
+    dds3ProcessID_t *p = NULL;
+    s32 list;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3ResetProcessFlag);
+    for (list = 0; list < 3; list++) {
+        switch (list) {
+        case 0:
+            p = startinglistf;
+            break;
+        case 1:
+            p = runninglistf;
+            break;
+        case 2:
+            p = endinglistf;
+            break;
+        }
+        while (p != NULL) {
+            if (p == id) {
+                return 1;
+            }
+            p = p->next;
+        }
+    }
+    return 0;
+}
+
+u32 dds3GetProcessStartTime(dds3ProcessID_t *id)
+{
+    return id->starttime;
+}
+
+u32 dds3GetProcessRunTime(dds3ProcessID_t *id)
+{
+    return id->runtime;
+}
+
+void dds3SetProcessData(dds3ProcessID_t *id, void *data)
+{
+    id->workdata = data;
+}
+
+void *dds3GetProcessData(dds3ProcessID_t *id)
+{
+    return id->workdata;
+}
+
+void dds3DebugNowProcess(void)
+{
+    if (runprocess == NULL) {
+        printf("now process [NULL]\n");
+    } else {
+        printf("now process [%s]\n", runprocess->name);
+    }
+}
+
+void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child)
+{
+    dds3ProcessID_t *p;
+
+    if (child->parent != NULL) {
+        dds3UnlinkProcess(child);
+    }
+    if (parent->child != NULL) {
+        p = parent->child;
+        while (p->sibling != NULL) {
+            p = p->sibling;
+        }
+        p->sibling = child;
+    } else {
+        parent->child = child;
+    }
+    child->parent = parent;
+}
+
+void dds3UnlinkProcess(dds3ProcessID_t *unp)
+{
+    dds3ProcessID_t *parent = unp->parent;
+    dds3ProcessID_t *p;
+
+    if (parent == NULL) {
+        return;
+    }
+    if (parent->child == unp) {
+        parent->child = unp->sibling;
+    } else {
+        p = parent->child;
+        while (p->sibling != unp) {
+            p = p->sibling;
+        }
+        p->sibling = unp->sibling;
+    }
+    unp->parent = NULL;
+    unp->sibling = NULL;
+}
+
+void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type)
+{
+    ChangeProcessFlag(1, target, flag, type);
+}
+
+void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type)
+{
+    ChangeProcessFlag(0, target, flag, type);
+}
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", startinglistf);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", startinglistl_0);
@@ -106,4 +724,3 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8A0);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8A8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8B0);
-
