@@ -1,0 +1,11 @@
+splat64[mips]==0.39.1
+spimdisasm==1.40.2
+rabbitizer==1.14.3
+pyelftools
+pycdlib
+pyyaml
+ninja
+ninja_syntax
+# optional helpers
+m2c @ git+https://github.com/matt-kempster/m2c.git
+zstandard; python_version < "3.14"

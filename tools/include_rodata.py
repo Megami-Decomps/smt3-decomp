@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""Place INCLUDE_RODATA for the rodata splat could not give to one asm function.
+
+    python3 tools/include_rodata.py [smt3]
+
+With per-unit .rodata (tools/split_rodata.py) a unit's rodata is emitted in
+source order: each INCLUDE_ASM brings the rodata splat migrated into that
+function's asm file, and each C function brings what the compiler emits for it
+(jump tables). Two kinds of rodata have no such home:
+
+- rodata of functions that are already C but whose C does not yet produce it
+  (strings and constants still referenced as extern D_ symbols); splat leaves it
+  in asm/<v>/matchings/<unit>/<func>.s. It goes directly before that function.
+  Once the C writes the literal itself (the D_ symbol no longer appears in the
+  function), the compiler emits it and no line is needed.
+- rodata several functions share, or that only .data tables point at; splat
+  writes it to asm/<v>/nonmatchings/<unit>/<sym>.s. It goes where its address
+  falls: before the first function whose rodata comes after it, or at the end.
+- named rodata defined by the C unit (including aligned vectors) stays at its
+  definition. The compiler provides that symbol even if an asm function still
+  references it, so no INCLUDE_RODATA may duplicate it.
+
+The first two kinds get per-symbol files in asm/<v>/nonmatchings/<unit>/ and an
+INCLUDE_RODATA line. Placement is recomputed on every run.
+"""
+import re
+import sys
+from pathlib import Path
+
+from include_sdata import DATA_DEF
+
+ROOT = Path(__file__).resolve().parent.parent
+INCLUDE = re.compile(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);$', re.M)
+INCLUDE_ASM = re.compile(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);$', re.M)
+DEF = re.compile(r"^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{?[ \t]*$", re.M)
+LABEL = re.compile(r"^dlabel (\w+)\n\s*/\* [0-9A-F]+ ([0-9A-F]{8})", re.M)
+SYMBOL_BLOCK = re.compile(r"(?:\.align \d+\n)?nonmatching (\w+).*?enddlabel \1\n", re.S)
+
+
+def rodata_part(path):
+    text = path.read_text() if path.exists() else ""
+    return text.split(".section .text", 1)[0] if text.startswith(".section .rodata") else ""
+
+
+def place(version):
+    added = 0
+    for c in sorted((ROOT / "src" / version).rglob("*.c")):
+        unit = c.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
+        nonmatchings = ROOT / "asm" / version / "nonmatchings" / unit
+        matchings = ROOT / "asm" / version / "matchings" / unit
+        if not nonmatchings.is_dir() and not matchings.is_dir():
+            # Nothing of the unit was split (its lines are left over from a split).
+            text = c.read_text()
+            stripped = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
+            if stripped != text:
+                c.write_text(stripped)
+            continue
+        # The unit's rodata as splat last split it; INCLUDE_RODATA lines and per-symbol
+        # files for anything else are left over from an earlier split.
+        full = ROOT / "asm" / version / "data" / f"{unit}.rodata.s"
+        labels = dict(LABEL.findall(full.read_text())) if full.exists() else {}
+        owned = set(labels)
+        unit_rodata = set(owned)
+        # Symbols splat migrated into an asm function's own file come with its
+        # INCLUDE_ASM and must not be included again.
+        for f in nonmatchings.glob("*.s"):
+            if "glabel " in f.read_text():
+                owned -= {n for n, _ in LABEL.findall(rodata_part(f))}
+        text = c.read_text()
+        # Placed from scratch every time: once a function compiles its own
+        # literal, the lines around it must move with it.
+        text = re.sub(r'^INCLUDE_RODATA\([^,]+,\s*"[^"]+",\s*(\w+)\);\n\n?', "", text, flags=re.M)
+        defined_at = {
+            m.group(1): m.start() for m in DATA_DEF.finditer(text)
+            if m.group(1) in unit_rodata
+        }
+        # Rodata a C function no longer names is compiled by that function itself
+        # (a string literal): nothing to include.
+        # The retail references come from the unit's full disassembly, which
+        # also covers rodata several functions share (splat leaves that
+        # standalone instead of in one function's file).
+        full = ROOT / "asm" / version / f"{unit}.s"
+        retail_refs = {}
+        if full.exists():
+            for f in re.finditer(r"^glabel (\w+)\n(.*?)^endlabel \1", full.read_text(), re.M | re.S):
+                retail_refs[f.group(1)] = set(re.findall(r"%lo\((\w+)\)", f.group(2)))
+        compiled = set()
+        for m in DEF.finditer(text):
+            code = function_text(text, m.start())
+            for sym in retail_refs.get(m.group(1), ()):
+                # Named (renamed D_) rodata counts too: compiled &= unit_rodata below.
+                if (sym.startswith(("D_", "jtbl_")) or sym in unit_rodata) and not re.search(rf"\b{sym}\b", code):
+                    compiled.add(sym)
+        # Only this unit's own rodata can be compiled here: other names a C
+        # function writes differently (D_X[9] for retail's D_Y) are other data.
+        compiled &= unit_rodata
+        compiled -= defined_at.keys()
+        # ... unless an asm function still needs the retail copy (check_unit SHARED).
+        for f in INCLUDE_ASM.findall(text):
+            compiled -= retail_refs.get(f, set())
+        # A string that only a compiled initializer table points at (`.word` entries of
+        # a table the C now writes as `{"..", ..}`) is compiled with that table: no
+        # function names it and no other rodata or data word holds it.
+        asm_named = set().union(*retail_refs.values()) if retail_refs else set()
+        holders = word_holders(version)
+        grown = True
+        while grown:
+            grown = False
+            for sym in unit_rodata - compiled - set(defined_at):
+                held = holders.get(sym)
+                if held and held <= compiled and sym not in asm_named \
+                        and not re.search(rf"\b{sym}\b", text):
+                    compiled.add(sym)
+                    grown = True
+        # The compiler emits each such literal with the first function using it.
+        compiled_at = {}
+        for m in DEF.finditer(text):
+            for sym in retail_refs.get(m.group(1), ()):
+                if sym in compiled:
+                    compiled_at.setdefault(sym, m.start())
+        owned -= compiled
+        owned -= defined_at.keys()
+        have = set(INCLUDE.findall(text))
+        anchors = []   # (address, position in text or None, symbol, needs a line)
+        for sym, pos in defined_at.items():
+            anchors.append((int(labels[sym], 16), pos, None, False))
+        for m in INCLUDE_ASM.finditer(text):
+            for _, addr in LABEL.findall(rodata_part(nonmatchings / f"{m.group(1)}.s")):
+                anchors.append((int(addr, 16), m.start(), None, False))
+        for m in DEF.finditer(text):
+            rodata = rodata_part(matchings / f"{m.group(1)}.s")
+            for block in SYMBOL_BLOCK.finditer(rodata):
+                sym = block.group(1)
+                addr = int(LABEL.search(block.group(0)).group(2), 16)
+                if sym in defined_at:
+                    continue  # the named C definition is the address anchor
+                if sym.startswith("jtbl_") or sym in compiled:
+                    anchors.append((addr, m.start(), None, False))  # the C emits it
+                    continue
+                out = nonmatchings / f"{sym}.s"
+                if not out.exists():
+                    # A unit whose functions are all C still includes the rodata they name.
+                    nonmatchings.mkdir(parents=True, exist_ok=True)
+                    out.write_text(".section .rodata\n\n" + block.group(0))
+                # Placed by address like any other included symbol: a function may
+                # use rodata the compiler emitted after later functions.
+                anchors.append((addr, None, sym, sym not in have))
+        for sym, pos in compiled_at.items():
+            if not any(a[2] == sym for a in anchors):
+                anchors.append((int(labels[sym], 16), pos, None, False))
+        for s in [s for s in nonmatchings.glob("*.s") if "glabel " not in s.read_text()]:
+            align_file(s)
+            m = LABEL.search(s.read_text())
+            if m and m.group(1) in owned and not any(sym == m.group(1) for _, _, sym, _ in anchors):
+                anchors.append((int(m.group(2), 16), None, m.group(1), m.group(1) not in have))
+        anchors.sort(key=lambda a: a[0])
+        # Floating symbols take the position of the next anchored one.
+        following = len(text)
+        placed = []
+        for addr, pos, sym, needed in reversed(anchors):
+            pos = following if pos is None else pos
+            following = pos
+            placed.append((pos, addr, sym, needed))
+        positions = [pos for pos, *_ in sorted(placed, key=lambda p: p[1])]
+        if positions != sorted(positions):
+            print(f"warning: {c.relative_to(ROOT)}: rodata order does not follow function order")
+        inserts = {}
+        for pos, addr, sym, needed in sorted(placed, key=lambda p: p[1]):
+            if needed:
+                inserts.setdefault(pos, []).append(sym)
+        for pos in sorted(inserts, reverse=True):
+            lines = "".join(f'INCLUDE_RODATA(const s32, "{unit}", {s});\n\n' for s in inserts[pos])
+            text = text[:pos] + ("\n" if pos == len(text) else "") + lines + text[pos:]
+            added += len(inserts[pos])
+        # One blank line before each included item, however often this reruns.
+        text = re.sub(r"\n{3,}(?=INCLUDE_(?:RODATA|SDATA)\()", "\n\n", text)
+        c.write_text(text)
+    print(f"{version}: {added} INCLUDE_RODATA lines")
+
+
+def align_file(path):
+    """Give a standalone rodata file the alignment its address allows (at most
+    8, or 16 for a jump table). ee-gcc aligned every literal it emitted; once a
+    neighbour is compiled from C, the included data must realign exactly as
+    the original did. At the retail address this adds no padding."""
+    text = path.read_text()
+    m = LABEL.search(text)
+    if not m or re.search(r"^\.align \d+\nnonmatching", text, re.M):
+        return
+    addr = int(m.group(2), 16)
+    cap = 4 if m.group(1).startswith("jtbl_") else 3
+    k = next(k for k in range(cap, -1, -1) if addr % (1 << k) == 0)
+    path.write_text(re.sub(r"^nonmatching", f".align {k}\nnonmatching", text, count=1, flags=re.M))
+
+
+_WORD_HOLDERS = {}
+
+
+def word_holders(version):
+    """Map each symbol named by a `.word` entry anywhere in the version's data to
+    the set of data symbols whose block holds that entry."""
+    if version not in _WORD_HOLDERS:
+        holders = {}
+        for path in (ROOT / "asm" / version / "data").rglob("*.s"):
+            current = None
+            for line in path.read_text().splitlines():
+                m = re.match(r"\s*dlabel (\w+)", line)
+                if m:
+                    current = m.group(1)
+                    continue
+                m = re.search(r"\.word (\w+)\s*$", line)
+                if m and current and not m.group(1).startswith("0x"):
+                    holders.setdefault(m.group(1), set()).add(current)
+        _WORD_HOLDERS[version] = holders
+    return _WORD_HOLDERS[version]
+
+
+def function_text(text, start):
+    """Text of the C function definition starting at `start`."""
+    depth, i = 0, text.index("{", start)
+    for j in range(i, len(text)):
+        depth += {"{": 1, "}": -1}.get(text[j], 0)
+        if depth == 0:
+            return text[start:j + 1]
+    return text[start:]
+
+
+if __name__ == "__main__":
+    for v in sys.argv[1:] or ["smt3"]:
+        place(v)
