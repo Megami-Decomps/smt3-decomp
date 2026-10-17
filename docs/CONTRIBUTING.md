@@ -21,7 +21,8 @@ bytes, and it has to reach that the way the original developers would have.
   - permuter output landed as it came out. A decomp-permuter hit is a hint:
     reduce it to the smallest change that still matches, land it only if it is
     code a person would write, and say in the commit message what the change
-    gives the compiler.
+    gives the compiler. `tools/perm_unit.py` runs the permuter inside the real
+    unit with only those kinds of mutations enabled.
 - **Plausible source.** Use structs for recurring layouts, real types (no `u64`
   unless the value is 64-bit), meaningful parameter and local names, and
   natural loops and switches.
@@ -111,6 +112,30 @@ explains the available sources and what counts as evidence. Keep an original nam
 whenever a source supplies one; renaming for consistency is a later job. Re-check
 every unit you renamed in: a new name can change how neighbouring functions
 compile.
+
+## Permuter (optional)
+
+For a draft that is close but holds a residual the source shape does not
+explain, a search can tell you which change supplies the missing property.
+`tools/perm_unit.py` runs [decomp-permuter](https://github.com/simonlindholm/decomp-permuter)
+inside the real unit, so the candidate sees the unit's small-data, no-throw and
+flag facts instead of a standalone file's.
+
+```sh
+export DECOMP_PERMUTER=../decomp-permuter       # default: next to this repo
+python3 tools/perm_unit.py import src/smt3/code_<vram>.c NAME draft.c
+$DECOMP_PERMUTER/permuter.py build/permuter/smt3_NAME -j8 --best-only --stop-on-zero
+```
+
+`draft.c` holds your C for `NAME` (declarations ahead of it are kept), and the
+unit must still have the function as `INCLUDE_ASM`. Score 0 means the candidate
+assembles to the retail function including frame and local offsets.
+
+A hit is a hint, not a landing. Reduce it to the smallest change a person would
+write, then verify it the normal way: `tools/check_unit.py` on the complete unit
+and `ninja`. Raw permuter output does not count as decompiled, whatever it
+scores. Only mutations that keep source ordinary are enabled; `permuter_settings.toml`
+serves the permuter's own `import.py` for the standalone flow.
 
 ## Naming and type conventions
 
