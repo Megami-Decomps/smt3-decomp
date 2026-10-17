@@ -33,8 +33,15 @@ Regenerate it rather than editing the generated block; hand-curated symbols go a
 `// BEGIN ida` and win.
 
 Every `mcp__ida__*` call and `ida.py` invocation needs `instance=13339` (or
-`SLUS_209.11`). Omitting it silently targets a different game's database. The export
-is read-only: never rename, patch, define or save through the IDB.
+`SLUS_209.11`). Omitting it silently targets a different game's database.
+
+The IDB is read-only for ordinary work: never patch, define or save through it. The
+one exception is correcting a name or type the retail code proves wrong, which is
+expected rather than optional, because `symbol_addrs.txt` is generated from the IDB
+and a correction made only in the generated file is lost on the next export. Correct
+it in the IDB, re-run `tools/ida_symbols.py`, and verify the build still matches.
+Rename only what the code proves: an allocation site, an init function, a stride, a
+caller. Confirmed cases so far are recorded in `docs/idb-corrections.md`.
 
 Translation-unit recovery has not been done. All of `.text` after crt0 is one
 `code_001001D8` unit, so `src/smt3/code_001001D8.c` holds every `INCLUDE_ASM` stub.
