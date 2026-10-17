@@ -1,0 +1,37 @@
+# Copyrighted inputs: never commit
+*.iso
+*.ISO
+*.bin
+*.elf
+*.7z
+*.zip
+*.cue
+orig/*/
+!orig/.gitkeep
+
+# Generated
+/asm/
+/assets/
+/build/
+/tools/bin/
+/tools/compilers/
+/tools/glibc32/
+/build.ninja
+/.ninja_*
+/objdiff.json
+/report.json
+/report.json.raw
+/ctx.c
+config/*/undefined_funcs_auto.txt
+config/*/undefined_syms_auto.txt
+config/*/checksum.sha1
+config/*/*.ld
+*.o
+*.d
+__pycache__/
+*.pyc
+.venv/
+
+# tools/cc.sh scratch directories
+/.[0-9a-f][0-9a-f]/
+/.[0-9a-f][0-9a-f][0-9a-f][0-9a-f]/
