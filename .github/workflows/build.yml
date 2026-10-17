@@ -1,0 +1,98 @@
+# This repository is local-only today, so nothing runs this workflow yet. It is
+# kept in the shape the build needs so it works unchanged if a remote is added.
+name: Build
+
+on:
+  push:
+  pull_request:
+
+# Read-only token: the job runs repository build scripts.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ninja-build cpp
+          python3 -m pip install -q -r requirements.txt
+
+      # Runs without the retail executable.
+      - name: Test tooling
+        run: |
+          for test in tools/test_*.py; do
+            echo "== $test"
+            python3 "$test"
+          done
+
+      # The retail executable is copyrighted and is never committed here. A
+      # fork or a public clone has no way to obtain it, so the build, checksum
+      # and report steps below are skipped instead of pretending to verify
+      # anything. To run them, provide a private source of orig/smt3/SLUS_209.11
+      # through the ORIG_REPO and ORIG_DEPLOY_KEY secrets.
+      - name: Check for the retail executable
+        id: orig
+        env:
+          REPO: ${{ secrets.ORIG_REPO }}
+          KEY: ${{ secrets.ORIG_DEPLOY_KEY }}
+        run: |
+          if [ -n "$REPO" ] && [ -n "$KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No retail executable available: tooling tests ran, the matching build and SHA-1 verification were skipped."
+          fi
+
+      - name: Fetch the retail executable
+        if: steps.orig.outputs.available == 'true'
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ secrets.ORIG_REPO }}
+          ssh-key: ${{ secrets.ORIG_DEPLOY_KEY }}
+          path: .orig-src
+          persist-credentials: false
+
+      # Fails loudly rather than skipping: the secrets were set, so the file
+      # is meant to be here.
+      - name: Place the retail executable
+        if: steps.orig.outputs.available == 'true'
+        run: |
+          mkdir -p orig/smt3
+          if [ ! -f .orig-src/orig/smt3/SLUS_209.11 ]; then
+            echo "ORIG_REPO has no orig/smt3/SLUS_209.11" >&2
+            exit 1
+          fi
+          cp .orig-src/orig/smt3/SLUS_209.11 orig/smt3/
+          rm -rf .orig-src
+          echo "5facfbf7916836613449c922e26a4ec412207b32  orig/smt3/SLUS_209.11" | sha1sum -c -
+
+      - name: Download build tools
+        if: steps.orig.outputs.available == 'true'
+        run: python3 tools/download_tools.py
+
+      - name: Configure
+        if: steps.orig.outputs.available == 'true'
+        run: python3 configure.py
+
+      # ninja's checksum step fails unless the linked ELF is byte-identical to
+      # retail.
+      - name: Build and verify
+        if: steps.orig.outputs.available == 'true'
+        run: ninja
+
+      - name: Source coverage
+        if: steps.orig.outputs.available == 'true'
+        run: python3 tools/progress.py smt3
