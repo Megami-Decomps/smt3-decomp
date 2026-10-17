@@ -1,0 +1,98 @@
+name: "Shin Megami Tensei III: Nocturne (USA) (SLUS_209.11)"
+sha1: 5facfbf7916836613449c922e26a4ec412207b32
+options:
+  basename: SLUS_209.11
+  platform: ps2
+  compiler: EEGCC
+  base_path: ../..
+  target_path: orig/smt3/SLUS_209.11
+  elf_path: build/smt3/SLUS_209.11.elf
+  asset_path: assets/smt3
+  asm_path: asm/smt3
+  src_path: src/smt3
+  build_path: build/smt3
+  ld_script_path: build/smt3/SLUS_209.11.ld
+  ld_dependencies: True
+  symbol_addrs_path:
+    - config/smt3/symbol_addrs.txt
+  reloc_addrs_path:
+    - config/smt3/reloc_addrs.txt
+  undefined_funcs_auto_path: config/smt3/undefined_funcs_auto.txt
+  undefined_syms_auto_path: config/smt3/undefined_syms_auto.txt
+
+  gp_value: 0x00554170
+  # The original assembler (ee-as 2.9-ee) is used for C and INCLUDE_ASM alike,
+  # so keep register names numeric: old gas predates some o32 aliases.
+  mips_abi_gpr: numeric
+  mips_abi_float_regs: numeric
+  named_regs_for_c_funcs: False
+  add_set_gp_64: False
+  use_legacy_include_asm: True
+  asm_inc_header: ""
+  generate_asm_macros_files: False
+  find_file_boundaries: True
+  disassemble_all: True
+  make_full_disasm_for_code: True
+  disasm_unknown: True
+  create_undefined_funcs_auto: True
+  create_undefined_syms_auto: True
+  string_encoding: ASCII
+  data_string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_guesser_level: 2
+  section_order: [".text", ".data", ".rodata", ".lit4", ".sdata", ".sbss", ".bss"]
+  o_as_suffix: True
+  ld_bss_is_noload: True
+  emit_subalign: False
+  ld_align_segment_vram_end: False
+  ld_align_section_vram_end: False
+  ld_generate_symbol_per_data_segment: True
+
+segments:
+  # ELF file header + 3 program headers at 0x34, then zeros to the first loaded
+  # page; not loaded. The retail ELF keeps its section headers, so the file also
+  # has a trailer segment (below) that no program header covers.
+  - [0x0, bin, elf_header]
+
+  - name: main
+    type: code
+    align: 1
+    start: 0x1000
+    vram: 0x100000
+    # vram_end = vram + (rom_end - rom_start) + bss_size must land on .vubss
+    # (0x005A0330), the end of .bss and of PT_LOAD[2]'s memsz.
+    bss_size: 0x4E7DC
+    subsegments:
+      # No TU recovery yet: .text is one unit per splat's own file boundaries.
+      # The first splat run reports candidate boundaries (find_file_boundaries);
+      # each confirmed one becomes another c subsegment named code_<vram>.
+      - [0x1000, asm, hand/crt0]  # 8 pad bytes, _start (0x100008, clears all 128-bit GPRs), 2 stubs; ends where dds3FirstInit begins, as in DDS
+      - [0x11D8, c, code_001001D8]
+      # .vutext (0x002E6E50, 0xE7B0): VU1 microcode, never EE code. The 12 zero
+      # bytes of .text tail padding before it fall at the end of the unit above.
+      - [0x1E7E50, textbin, vutext]
+      # .ctors + .dtors (both ffffffff 00000000) + .reginfo, then zeros to .data.
+      - [0x1F6600, databin, ctors_dtors_reginfo]
+      - [0x1F6680, data, data]
+      - [0x42E940, databin, eh_frame]
+      # .vudata (0x300) plus the zeros up to .rodata's 16-byte boundary.
+      - [0x42E944, databin, vudata]
+      - [0x42EC80, rodata, rodata_0052DC80]
+      - [0x42ECA0, .rodata, code_001001D8]
+      - [0x44D180, .lit4, code_001001D8]
+      - [0x44F7D4, lit4, lit4_pad]
+      - [0x44F800, sdata, sdata_0054E800]
+      - [0x44F828, .sdata, code_001001D8]
+      # .sbss and .bss are noload, so they start at the segment's rom end.
+      # Retail puts both on 128-byte boundaries (configure.py's align_bss).
+      # .vubss is zero-length at the end of .bss and needs no subsegment.
+      - { start: 0x452B54, type: sbss, vram: 0x551B80, name: sbss }
+      - { start: 0x452B54, type: bss, vram: 0x552180, name: bss }
+
+  # Starts one byte inside .sdata: its size (0x3355) is not a multiple of 4 and
+  # spimdisasm emits whole words, so the terminator of the last string (".ips")
+  # comes from this blob. Then .sdata tail padding, .DVP.ovlytab/.ovlystrtab/
+  # .overlay.* (VU overlay tables and microcode copies), .shstrtab and the 28
+  # section headers; none of this is loaded.
+  - [0x452B54, bin, elf_trailer]
+  - [0x457410]

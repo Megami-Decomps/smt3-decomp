@@ -1,0 +1,11 @@
+{
+  "smt3": {
+    "title": "Shin Megami Tensei III: Nocturne (USA)",
+    "serial": "SLUS_209.11",
+    "iso_glob": "*Nocturne (USA)*.iso",
+    "elf_sha1": "5facfbf7916836613449c922e26a4ec412207b32",
+    "elf_size": 4551696,
+    "entry": "0x00100008",
+    "gp": "0x00554170"
+  }
+}
