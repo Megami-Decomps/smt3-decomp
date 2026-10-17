@@ -1,0 +1,84 @@
+# Candidate SMT3 (SLUS_209.11) translation-unit ranges. NOT a splat config.
+# Produced by tools/pair_dds1.py: SLUS_209.11 functions paired one-to-one against
+# byte-identical SLUS_209.74 (DDS1) functions with relocations and jump targets
+# masked, then dds-decomp's DDS1 unit names carried back along those pairs. The
+# names are dds-decomp's, projected there from a Nocturne Dec 26 2002 debug build's
+# __FILE__ strings. Method and limits: docs/tu-recovery.md.
+#
+# Columns, tab separated:
+#   start           first SMT3 vram labelled for this unit
+#   end             last SMT3 vram labelled for this unit (a function start, not its end)
+#   unit            dds-decomp unit name (directory/file, no extension)
+#   labelled        SMT3 functions in [start, end] carrying this label
+#   functions       all SMT3 functions in [start, end]
+#   contradictions  functions in that span labelled for a different unit
+#   status          candidate (no contradictions) or rejected
+#   hd              agree / near / mixed / disagree / no-hd, from SMT3 HD source names
+#   hd_source       the HD source file most of the span's functions came from
+#   hd_agree        of the span's HD-known functions, how many name this unit
+#   hd_known        how many of the span's functions have an HD source name
+#   hd_files        distinct HD source files in the span; above 1 the range is too wide
+#   note            first contradicting address and the units it belongs to
+start	end	unit	labelled	functions	contradictions	status	hd	hd_source	hd_agree	hd_known	hd_files	note
+0x001009A0	0x00101AF8	kernel/dds3KernelCore	22	31	0	candidate	agree	dds3KernelCore.c	28	28	1	
+0x00102848	0x00102E78	kernel/dds3AdminiProcess	6	11	0	candidate	agree	dds3AdminiProcess.c	11	11	1	
+0x001055A8	0x00106EE0	kernel/dds3KernelDraw	32	41	0	candidate	agree	dds3KernelDraw.c	41	41	1	
+0x00109C58	0x0010A0D0	script/scrScriptProcess	9	13	0	candidate	agree	ScrScriptProcess.c	3	3	1	
+0x0010A590	0x0010B7A8	script/scrTraceCode	41	41	0	candidate	agree	ScrTraceCode.c	41	41	1	
+0x0010B908	0x0010D030	script/scrCommonCommand	37	69	0	candidate	mixed	scrCommonCommand.c	63	69	2	
+0x0010E048	0x0010E048	basic/dds3Basic	1	1	0	candidate	agree	dds3Basic.c	1	1	1	
+0x0010E528	0x0010EA38	basic/dds3WorldBasic	12	12	0	candidate	agree	dds3WorldBasic.c	12	12	1	
+0x0010F378	0x0010F598	basic/dds3SceneBasic	4	6	0	candidate	agree	dds3SceneBasic.c	6	6	1	
+0x0010F918	0x0010F940	basic/dds3AreaBasic	2	2	0	candidate	agree	dds3AreaBasic.c	2	2	1	
+0x0010FCB0	0x0010FCB0	basic/dds3MoverBasic	1	1	0	candidate	agree	dds3MoverBasic.c	1	1	1	
+0x00110070	0x00112280	basic/dds3ObjectBase	14	24	0	candidate	agree	dds3ObjectBase.c	24	24	1	
+0x001123D0	0x00112910	basic/dds3CameraObjectBasic	10	15	0	candidate	agree	dds3CameraObjectBasic.c	10	10	1	
+0x00113B40	0x00115158	basic/dds3EffectObjectBasic	25	36	0	candidate	agree	dds3EffectObjectBasic.c	36	36	1	
+0x00115620	0x00115660	basic/dds3EventObjectBasic	2	2	0	candidate	agree	dds3EventObjectBasic.c	2	2	1	
+0x00115810	0x00115860	basic/dds3LightObjectBasic	2	2	0	candidate	agree	dds3LightObjectBasic.c	2	2	1	
+0x00115F28	0x00115F28	basic/dds3ModelRangeBasic	1	1	0	candidate	no-hd		0	0	0	
+0x00116410	0x001165B0	basic/dds3PathBasic	3	3	0	candidate	agree	dds3PathBasic.c	3	3	1	
+0x001179E8	0x00117A60	misc/l2d	2	2	0	candidate	no-hd		0	0	0	
+0x00125D40	0x0013C3D8	field/fldFileResolver	70	197	0	candidate	mixed	fldDraw.c	34	153	8	
+0x00144428	0x001444D8	field/fldPanel	4	4	0	candidate	agree	fldPanel.c	4	4	1	
+0x0015AA68	0x0015ADA0	effect/effManager	10	17	0	candidate	agree	effManager.c	16	16	1	
+0x0015B320	0x0015CF40	effect/billManager	13	24	0	candidate	agree	billManager.c	24	24	1	
+0x00163780	0x00164F10	effect/parManager	17	23	0	candidate	agree	parManager.c	22	22	1	
+0x00168228	0x001698D8	effect/polyManager	21	26	0	candidate	agree	polyManager.c	26	26	1	
+0x0016AE08	0x0016B6C8	effect/effBattle	7	19	0	candidate	agree	effBattle.c	19	19	1	
+0x0016E8E0	0x0016F268	effect/effBattleMisc	2	10	0	candidate	agree	effBattleMisc.c	10	10	1	
+0x00176560	0x0017D0A0	effect/effPCPThunder	38	64	0	candidate	mixed	effPCPThunder.c	39	51	3	
+0x0017D248	0x00181F18	effect/effPCPFlash	49	103	0	candidate	agree	effPCPFlash.c	103	103	1	
+0x00183C08	0x00188920	effect/effPCPScatter	46	75	0	candidate	agree	effPCPScatter.c	75	75	1	
+0x00189440	0x00189440	effect/effPCPNeedle	1	1	0	candidate	agree	effPCPNeedle.c	1	1	1	
+0x0018A208	0x001973C0	effect/effPCPMisc	182	367	0	candidate	agree	effPCPMisc.c	366	366	1	
+0x00199CD0	0x0019E2A0	effect/effPCPBoss	11	72	0	candidate	agree	effPCPBoss.c	72	72	1	
+0x001A21C0	0x001A26F0	effect/effBlur_Filter	3	8	0	candidate	agree	effBlur_Filter.c	7	7	1	
+0x001A3510	0x001A3F40	effect/effModelTrackPoly	11	17	0	candidate	agree	effModelTrackPoly.c	16	16	1	
+0x001A54E0	0x001A8B38	effect/effMagatuhi	26	41	0	candidate	agree	effMagatuhi.c	36	36	1	
+0x001ABE38	0x001AC090	effect/effMath	2	3	0	candidate	agree	effMath.c	2	2	1	
+0x001AC0A8	0x001AFFB0	effect/effEvent	45	92	0	candidate	mixed	effEvent.c	56	59	2	
+0x001C5FD0	0x001C6018	interface/fmGslCont	2	2	0	candidate	agree	fmgslCont.c	2	2	1	
+0x001C6CE0	0x001C8730	interface/frFont	27	55	0	candidate	agree	frFont.c	53	53	1	
+0x001CC150	0x001CC2B8	interface/itfPanel	5	5	0	candidate	agree	itfPanel.c	5	5	1	
+0x001CD510	0x001CF9B0	interface/itfMesManager	50	78	0	candidate	agree	itfMesManager.c	78	78	1	
+0x001DC0F8	0x001DE220	model/mdlManager	61	73	0	candidate	agree	mdlManager.c	53	53	1	
+0x001E17A8	0x001E1C78	event/evtStage	8	10	0	candidate	agree	evtStage.c	9	9	1	
+0x001E2168	0x001E4080	event/evtUnitManager	18	30	0	candidate	agree	evtUnitManager.c	29	29	1	
+0x001E6870	0x001E87F0	event/evtCommand	49	69	0	candidate	agree	evtCommand.c	69	69	1	
+0x001EC3D8	0x001ECE70	event/evtEventViewer	2	21	0	candidate	agree	evtEventViewer.c	19	19	1	
+0x001F1CD0	0x001F40E8	event/evtPolygonMovie	16	43	0	candidate	mixed	evtPolygonMovie.c	26	41	2	
+0x001F4340	0x001F4340	event/evtPicture	1	1	0	candidate	agree	evtPicture.c	1	1	1	
+0x001FA488	0x001FAB80	event/evtEventPack	8	9	0	candidate	near	EventPack.c	3	3	1	
+0x002966C0	0x00296C88	file/fileManager	18	23	0	candidate	agree	file_Manager.c	16	16	1	
+0x0029B398	0x0029B728	mc/mcManager	12	17	0	candidate	disagree	sdfMc.c	0	7	1	
+0x002A87F0	0x002A87F0	sdf/sdfThread	1	1	0	candidate	no-hd		0	0	0	
+0x002A8BD8	0x002A8D18	sdf/sdfChip	2	3	0	candidate	agree	sdfChip.c	3	3	1	
+0x002A8FD0	0x002A9288	sdf/sdfMemory	5	6	0	candidate	agree	sdfMemory.c	6	6	1	
+0x002A9B00	0x002A9CF8	sdf/sdfGraph	6	6	0	candidate	agree	sdfGraph.c	6	6	1	
+0x002AB658	0x002ABE38	sdf/sdfTex	10	15	0	candidate	agree	sdfTex.c	15	15	1	
+0x002B08E8	0x002B2238	sdf/sdfModel	24	26	0	candidate	agree	sdfModel.c	25	25	1	
+0x002B3B50	0x002B5958	sdf/sdfMotion	75	80	0	candidate	agree	sdfMotion.c	78	78	1	
+0x002BC7E0	0x002BCFD0	sdf/sdfDevCons	9	14	0	candidate	agree	sdfDevCons.c	9	9	1	
+0x002C53C8	0x002C5BB8	sdf/sdfMovie	7	7	0	candidate	no-hd		0	0	0	
+0x002C62A0	0x002C6D18	sdf/sdfPacDecode	20	21	0	candidate	agree	sdf_PacDecode.c	9	9	1	
