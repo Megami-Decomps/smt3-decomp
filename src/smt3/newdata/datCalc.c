@@ -1,18 +1,80 @@
 #include "common.h"
+#include "datCalc.h"
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetBaseMaxHp);
+extern s32 evtBitCheck(s32 no);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetBaseMaxMp);
+s32 datGetBaseMaxHp(datUnitWork_t *work)
+{
+    s32 maxHp;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetNormalAtkPow);
+    if (work->flag & 4) {
+        maxHp = (work->level + datGetParam(work, 3)) * 6;
+    } else {
+        maxHp = (work->level + datGetParam(work, 3)) * 6;
+    }
+
+    if ((work->flag & 0x20) == 0 && maxHp > 999) {
+        maxHp = 999;
+    }
+    return maxHp;
+}
+
+s32 datGetBaseMaxMp(datUnitWork_t *work)
+{
+    s32 maxMp;
+
+    if (work->flag & 4) {
+        maxMp = ((work->level + datGetParam(work, 2)) * 2) * 1.5;
+    } else {
+        maxMp = ((work->level + datGetParam(work, 2)) * 2) * 1.5;
+    }
+
+    if ((work->flag & 0x20) == 0 && maxMp > 999) {
+        maxMp = 999;
+    }
+    return maxMp;
+}
+
+s32 datGetNormalAtkPow(datUnitWork_t *work)
+{
+    s32 atkPow;
+
+    if (work->flag & 4) {
+        if (work->flag & 0x20) {
+            atkPow = (datGetParam(work, 0) + work->level) * 2;
+        } else {
+            atkPow = (datGetParam(work, 0) + work->level) * 2;
+        }
+    } else {
+        atkPow = (datGetParam(work, 0) + work->level) * 2;
+    }
+
+    if ((work->badstatus & 0xFFF) == 0x40) {
+        atkPow = atkPow / 2;
+    }
+    return atkPow;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetMagicAtkPow);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetNormalHitPow);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetMagicHitPow);
+s32 datGetMagicHitPow(datUnitWork_t *work)
+{
+    s32 ma;
+    s32 lu;
+    s32 hitPow;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetDefPow);
+    ma = datGetParam(work, 2);
+    lu = datGetParam(work, 5);
+    hitPow = ma * 2 + work->level;
+    return hitPow + (lu + 5) / 2 + 0xF;
+}
+
+s32 datGetDefPow(datUnitWork_t *work)
+{
+    return (datGetParam(work, 3) + work->level) * 2;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetSakePow);
 
@@ -46,13 +108,54 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datGetMaxHp);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetMaxMp);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddHp);
+s32 datAddHp(datUnitWork_t *work, s32 hp)
+{
+    s32 newhp;
+
+    newhp = work->hp + hp;
+    if (newhp < 0) {
+        newhp = 0;
+    }
+    if (newhp > work->maxhp) {
+        newhp = work->maxhp;
+    }
+    work->hp = newhp;
+    return newhp;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddMp);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetBaseParam);
+s32 datGetBaseParam(datUnitWork_t *work, s32 paratype)
+{
+    s32 param;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetParam);
+    if (work->flag & 4) {
+        param = work->param[paratype] + work->skillparam[paratype];
+    } else {
+        param = work->param[paratype] + work->skillparam[paratype] + work->levelupparam[paratype];
+    }
+
+    if (param < 1) {
+        param = 1;
+    }
+    if (param > 0x28) {
+        param = 0x28;
+    }
+    return param;
+}
+
+s32 datGetParam(datUnitWork_t *work, s32 paratype)
+{
+    s32 param = datGetBaseParam(work, paratype);
+
+    if ((work->badstatus & 0xFFF) == 0x200 && paratype != 4) {
+        param = 1;
+    }
+    if (param < 1) {
+        param = 1;
+    }
+    return param;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datCheckSyojiSkill);
 
@@ -166,7 +269,22 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashGetRec);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashUpdRec);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashChk);
+s32 datBossRashChk(s32 eid)
+{
+    datBossPress_t *press;
+    s32 i;
+
+    press = datBossPress;
+    for (i = 0; i < 40; ++i) {
+        if (press->encid == eid) {
+            if (evtBitCheck(press->flag) != 0) {
+                return 1;
+            }
+        }
+        press++;
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "newdata/datCalc", D_005431A8);
 
