@@ -10,6 +10,7 @@ orig/*/
 !orig/.gitkeep
 
 # Generated
+/.claude/worktrees/
 /asm/
 /assets/
 /build/
