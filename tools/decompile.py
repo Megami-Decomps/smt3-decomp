@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Run m2c on a not-yet-decompiled function with its unit's context.
 
-    python tools/decompile.py func_0019D160
-    python tools/decompile.py func_0019D160 -- --stack-structs   # extra m2c flags
+    python tools/decompile.py dds3FirstInit
+    python tools/decompile.py dds3FirstInit -- --stack-structs   # extra m2c flags
 
 Finds asm/<v>/nonmatchings/**/<func>.s, flattens the owning C file's headers
 (tools/m2ctx.py) and prints m2c's output for the ee-gcc target.

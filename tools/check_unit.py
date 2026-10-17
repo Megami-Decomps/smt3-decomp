@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check a C unit's decompiled functions against retail without running ninja.
 
-    python3 tools/check_unit.py src/smt3/main/code_00100000.c [-v] [--func func_00100100]
+    python3 tools/check_unit.py src/smt3/code_001001D8.c [-v] [--func dds3FirstInit]
 
 Compiles the unit with -DSKIP_ASM (only real C) through tools/cc.sh into a temp dir,
 so any number of these can run at once. For each function the object defines, the
@@ -658,7 +658,7 @@ def main():
     ap.add_argument("-v", "--verbose", action="store_true", help="print every differing instruction")
     ap.add_argument("--func", help="only report this function")
     ap.add_argument("--source", type=Path, help="compile this file instead of the unit (same unit layout)")
-    ap.add_argument("--cflags", default="", help="extra cc1 flags (experiments; see flag_probe.py)")
+    ap.add_argument("--cflags", default="", help="extra cc1 flags (experiments)")
     args = ap.parse_args()
     unit = args.unit.resolve()
     source = args.source.resolve() if args.source else unit
@@ -1371,7 +1371,7 @@ def main():
                      unit.read_text()):
             continue
         print(f"ASMBODY {name}: {asm} of {total} instructions are inline asm; mark it as an SDK copy "
-              "or VU0 routine, or keep it as INCLUDE_ASM (docs/idioms.md, Inline asm)")
+              "or VU0 routine, or keep it as INCLUDE_ASM (docs/CONTRIBUTING.md)")
     # Top-level C functions must keep retail order (the object's text is laid out in
     # source order). Nested functions are indented and GCC emits them before their
     # owner, so their actual object offsets provide the ordering check instead.

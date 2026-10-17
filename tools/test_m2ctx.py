@@ -32,6 +32,10 @@ class ContextTests(unittest.TestCase):
         self.assertIn("struct Unit", text)
         self.assertNotIn("hidden", text)
 
+    def test_versions_reads_the_repository_configuration(self) -> None:
+        # The -DVERSION_<V> define is driven by these keys, not a hardcoded list.
+        self.assertIn("smt3", m2ctx.versions())
+
     def test_version_define_selects_the_native_layout(self) -> None:
         header = (
             "#ifdef VERSION_SMT3\n"

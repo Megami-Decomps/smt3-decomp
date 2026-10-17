@@ -334,7 +334,7 @@ def source_for(obj: Path, version: str) -> tuple[str, Path]:
 
 
 def objdiff_progress_category(version: str, name: str) -> str:
-    # splat exposes the binary VU1 program as a text unit, not EE code.
+    # splat exposes the VU1 microcode and its data as asm units, not EE code.
     if Path(name).name in ("vutext", "vudata"):
         return "vu1"
     # Whole functions Atlus wrote in assembly (crt0, VU0 loops) are `asm` segments
@@ -429,7 +429,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 text = (ROOT / src).read_text(errors="replace")
                 eeasm = []
                 nonmatchings = Path("asm") / version / "nonmatchings"
-                for _, folder, name in include_directives(text):
+                for _, folder, name in include_directives(text, context=str(src)):
                     asm = nonmatchings / folder / f"{name}.s"
                     out = Path("build") / "eeasm" / asm
                     n.build(str(out), "eeasm", str(asm), implicit=["tools/eeas_compat.py"])

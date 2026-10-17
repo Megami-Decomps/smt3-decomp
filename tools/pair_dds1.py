@@ -6,7 +6,6 @@ unit name from dds-decomp's config/dds1/SLUS_209.74.yaml over, writes tu_candida
 
 import argparse
 import base64
-import hashlib
 import json
 import os
 import re
@@ -29,7 +28,7 @@ IDA_SCRIPTS = Path(
 DDS1_VRAM_DELTA = 0xFF000
 # Trivial stubs match by chance, so dds-decomp's projection kept a 16-byte floor.
 MIN_SIZE = 16
-# Units dds-decomp itself marked as likely mispairs in docs/tu-names.md.
+# Units dds-decomp itself marked as likely mispairs in its own docs/tu-names.md.
 DROPPED_UNITS = {
     "newbattle/nbSound",
     "newbattle/nbMisc",

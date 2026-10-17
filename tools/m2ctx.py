@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Flatten a C file's headers into ctx.c for m2c, decomp.me and the permuter.
 
-    python tools/m2ctx.py src/smt3/main/code_00100000.c        # writes ./ctx.c
-    python tools/m2ctx.py src/smt3/main/code_00100000.c -o -   # stdout
+    python tools/m2ctx.py src/smt3/code_001001D8.c        # writes ./ctx.c
+    python tools/m2ctx.py src/smt3/code_001001D8.c -o -   # stdout
 
 Only declarations survive: the file's own function bodies are dropped by the
 preprocessor pass because INCLUDE_ASM expands to nothing under M2CTX, and the

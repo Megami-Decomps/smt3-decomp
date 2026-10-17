@@ -1,11 +1,14 @@
 """Native padding at and within a translation unit's rodata boundary."""
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import eeas_compat  # noqa: E402
 from eeas_compat import realign_rodata  # noqa: E402
 
 
@@ -39,6 +42,31 @@ class RodataAlignmentTests(unittest.TestCase):
 
     def test_block_before_unit_keeps_alignment(self):
         self.assertIn(".align 3", self.convert(0x1020, 0x1040))
+
+
+class VersionDetectionTests(unittest.TestCase):
+    """The version comes from the path and names config/versions.json's keys: the
+    .lit4 pool and the rodata realignment are skipped without it."""
+
+    def version(self, relative):
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / relative
+            src.parent.mkdir(parents=True, exist_ok=True)
+            src.write_text("")
+            argv = ["eeas_compat.py", str(src), str(Path(tmp) / "out.s")]
+            with patch.object(eeas_compat, "Pool") as pool, \
+                    patch.object(sys, "argv", argv):
+                eeas_compat.main()
+            return pool.call_args.args[0] if pool.call_args else None
+
+    def test_a_split_asm_path_selects_its_version(self):
+        self.assertEqual(
+            self.version("asm/smt3/nonmatchings/code_001001D8/dds3FirstInit.s"),
+            "smt3",
+        )
+
+    def test_a_path_outside_the_version_tree_has_no_pool(self):
+        self.assertIsNone(self.version("scratch/experiment.s"))
 
 
 if __name__ == "__main__":

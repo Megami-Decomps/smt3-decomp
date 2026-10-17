@@ -2,8 +2,8 @@
 """Small, shared primitives for comparing MIPS code after relocation.
 
 Object files leave address fields and literal-pool offsets unresolved.  These
-helpers describe the linked values that both ``check_unit.py`` and progress
-report reconciliation compare against the retail executable.
+helpers describe the linked values that ``check_unit.py`` compares against
+the retail executable.
 """
 
 

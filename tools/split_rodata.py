@@ -29,7 +29,10 @@ ROOT = Path(__file__).resolve().parent.parent
 _VERSIONS_PATH = ROOT / "config/versions.json"
 VERSIONS = json.loads(_VERSIONS_PATH.read_text()) if _VERSIONS_PATH.exists() else {}
 LABEL = re.compile(r"^(?:dlabel|glabel|jlabel) (\w+)\n\s*/\* [0-9A-F]+ ([0-9A-F]{8})", re.M)
-REF = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/.*?\b\w+?_([0-9A-F]{8})\b")
+REF = re.compile(r"/\* [0-9A-F]+ ([0-9A-F]{8}) [0-9A-F]{8} \*/(.*)")
+# D_0054E744 carries its address; a symbol_addrs.txt name does not, so named
+# symbols are resolved through the labels the section's own asm defines.
+IDENT = re.compile(r"\b([A-Za-z_]\w*)\b")
 RODATA_ROW = re.compile(r"^(\s+- \[)0x([0-9A-Fa-f]+), rodata, rodata\](.*)$", re.M)
 
 
@@ -60,14 +63,20 @@ def owners(version, section="rodata"):
         for n, a in LABEL.findall(path.read_text()):
             found.setdefault(int(a, 16), n)
     syms = sorted(found.items())
+    by_name = {n: a for a, n in syms}
     addrs, starts = [a for a, _ in syms], [t[0] for t in text]
     owner = [None] * len(syms)
     for path in asm.rglob("*.s"):
         if path.relative_to(asm).parts[0] in ("data", "nonmatchings", "matchings"):
             continue
         for m in REF.finditer(path.read_text()):
-            pc, target = int(m.group(1), 16), int(m.group(2), 16)
-            if lo <= target < hi:
+            pc = int(m.group(1), 16)
+            for name in IDENT.findall(m.group(2)):
+                suffix = name.rpartition("_")[2]
+                target = int(suffix, 16) if len(suffix) == 8 and all(
+                    c in "0123456789ABCDEF" for c in suffix) else by_name.get(name)
+                if target is None or not lo <= target < hi:
+                    continue
                 i = bisect.bisect_right(addrs, target) - 1
                 seg = bisect.bisect_right(starts, pc) - 1
                 owner[i] = seg if owner[i] is None else min(owner[i], seg)
