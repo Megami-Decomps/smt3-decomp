@@ -1,0 +1,1433 @@
+#!/usr/bin/env python3
+"""Check a C unit's decompiled functions against retail without running ninja.
+
+    python3 tools/check_unit.py src/smt3/main/code_00100000.c [-v] [--func func_00100100]
+
+Compiles the unit with -DSKIP_ASM (only real C) through tools/cc.sh into a temp dir,
+so any number of these can run at once. For each function the object defines, the
+bytes are compared with the retail ELF at the symbol's address. Words with a
+relocation are compared by resolved target when the symbol has a known address
+(func_/D_XXXXXXXX, config/<v>/symbol_addrs.txt); relocations against local
+sections (.rodata/.data of this unit) are masked. `ninja` remains the final proof.
+Exit status 0 only if every compiled function matches and any requested --func
+name is emitted by the SKIP_ASM compile.
+"""
+import argparse
+import os
+import re
+import struct
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from retail_elf import RETAIL, ROOT, VERSIONS, load_segments, off_to_va, va_to_off  # noqa: E402
+from symbol_aliases import load_symbol_aliases  # noqa: E402
+from resolved_code import (  # noqa: E402
+    hi_lo_addend,
+    instruction_shape_matches,
+    linked_gprel_field,
+    linked_hi_field,
+    linked_jump_field,
+    linked_lo_field,
+    literal_pool_offset,
+    retail_literal_address,
+    sext16,
+)
+
+BIN = ROOT / "tools/bin"
+ROW = re.compile(r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;")
+AUTO = re.compile(r"^(?:func|D|jtbl)_([0-9A-F]{8})(?:\.\d+)?$")
+
+
+def symbols(version):
+    # Splat's linker script supplies this absolute ABI symbol, not a C/BSS object.
+    out = {"_gp": int(VERSIONS[version]["gp"], 16)}
+    for line in (ROOT / "config" / version / "symbol_addrs.txt").read_text().splitlines():
+        if m := ROW.match(line):
+            out.setdefault(m.group(1), int(m.group(2), 16))
+    return out
+
+
+def symbol_sizes(version):
+    """Read explicit native extents; an address interval may include alignment."""
+    out = {}
+    for line in (ROOT / "config" / version / "symbol_addrs.txt").read_text().splitlines():
+        row = ROW.match(line)
+        size = re.search(r"\bsize:([^\s/]+)", line)
+        if row and size:
+            out[row.group(1)] = int(size.group(1), 0)
+    return out
+
+
+def address(name, syms):
+    if name in syms:
+        return syms[name]
+    m = AUTO.match(name)
+    return int(m.group(1), 16) if m else None
+
+
+def run(*cmd, **kw):
+    return subprocess.run(cmd, check=True, capture_output=True, text=True, **kw).stdout
+
+
+def sections(obj):
+    """{name: (offset, size)} for every section of an ELF32 object."""
+    data = Path(obj).read_bytes()
+    shoff = struct.unpack_from("<I", data, 0x20)[0]
+    shnum, shstrndx = struct.unpack_from("<HH", data, 0x30)
+    sh = [struct.unpack_from("<10I", data, shoff + i * 40) for i in range(shnum)]
+    names = sh[shstrndx][4]
+    return data, {data[names + s[0]:data.index(b"\0", names + s[0])].decode(): (s[4], s[5]) for s in sh}
+
+
+def text_section(obj):
+    data, secs = sections(obj)
+    off, size = secs.get(".text", (0, 0))
+    return data[off:off + size]
+
+
+# Only units with their own .rodata subsegment (tools/split_rodata.py) may emit
+# rodata; jump tables are checked entry by entry and literals against native
+# bytes. Initialized .data additionally requires an explicit bounded YAML owner
+# and exact object/byte/relocation checks. A unit may emit zero-initialized data
+# only when the YAML gives the matching section an exact, bounded dict-form
+# subsegment; all other data remains fail-closed.
+DATA_SECTIONS = (".rodata", ".data", ".sdata", ".sbss", ".bss", ".lit4", ".lit8")
+YAML_ITEM = re.compile(
+    r"^(?P<indent>[ \t]*)-\s*(?P<body>[^\n#]*?)(?:\s+#.*)?$", re.M
+)
+
+
+def _inline_yaml_fields(body):
+    """Parse the scalar fields from one simple inline YAML mapping."""
+    body = body.strip()
+    if not body.startswith("{") or not body.endswith("}"):
+        return None
+    fields = {}
+    for field in body[1:-1].split(","):
+        if ":" not in field:
+            return None
+        key, value = field.split(":", 1)
+        fields[key.strip()] = value.strip().strip("'\"")
+    return fields
+
+
+def owned_nobits_range(yaml_text, unit, section):
+    """Return an exact per-unit NOBITS ``(vram, size)``, or None.
+
+    NOBITS subsegments share a file offset, so their retail size comes from
+    consecutive VRAM boundaries.  Accept only an unambiguous inline mapping
+    whose immediate sibling is another inline mapping with a greater VRAM.
+    """
+    if section not in (".sbss", ".bss"):
+        raise ValueError(f"unsupported NOBITS section {section!r}")
+    items = list(YAML_ITEM.finditer(yaml_text))
+    matches = []
+    for index, item in enumerate(items):
+        fields = _inline_yaml_fields(item.group("body"))
+        if fields is None or fields.get("type") != section \
+                or fields.get("name") != unit:
+            continue
+        try:
+            start = int(fields["vram"], 0)
+        except (KeyError, ValueError):
+            continue
+        sibling = None
+        indent = len(item.group("indent"))
+        for later in items[index + 1:]:
+            later_indent = len(later.group("indent"))
+            if later_indent < indent:
+                break
+            if later_indent == indent:
+                sibling = later
+                break
+        if sibling is None:
+            continue
+        next_fields = _inline_yaml_fields(sibling.group("body"))
+        try:
+            end = int(next_fields["vram"], 0) if next_fields is not None else 0
+        except (KeyError, ValueError):
+            continue
+        if end > start:
+            matches.append((start, end - start))
+    return matches[0] if len(matches) == 1 else None
+
+
+def owned_bss_range(yaml_text, unit):
+    """Compatibility wrapper for an exact source-owned .bss span."""
+    return owned_nobits_range(yaml_text, unit, ".bss")
+
+
+def owned_nobits_size(yaml_text, unit, section):
+    owned = owned_nobits_range(yaml_text, unit, section)
+    return owned[1] if owned is not None else None
+
+
+def owned_bss_size(yaml_text, unit):
+    """Compatibility wrapper for an exact source-owned .bss size."""
+    return owned_nobits_size(yaml_text, unit, ".bss")
+
+
+def nobits_symbols(objdump_text, section_name):
+    """Return explicit NOBITS ``(offset, size, name, is_object)`` rows.
+
+    The B/b letter printed by nm establishes storage, but not the ELF symbol
+    type.  Objdump's ``O`` marker is the STT_OBJECT fact needed before local
+    NOBITS relocations may be treated as belonging to a recovered object.
+    """
+    if section_name not in (".sbss", ".bss"):
+        raise ValueError(f"unsupported NOBITS section {section_name!r}")
+    result = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if section_name not in parts:
+            continue
+        section = parts.index(section_name)
+        if section == 0 or section + 2 >= len(parts):
+            continue
+        try:
+            offset = int(parts[0], 16)
+            size = int(parts[section + 1], 16)
+        except ValueError:
+            continue
+        name = parts[section + 2]
+        if name == section_name:
+            continue
+        result.append((offset, size, name, "O" in parts[1:section]))
+    return result
+
+
+def bss_symbols(objdump_text):
+    """Compatibility wrapper for explicit .bss symbols."""
+    return nobits_symbols(objdump_text, ".bss")
+
+
+def _retail_nobits_inventory(start, size, syms, explicit_sizes=None):
+    """Derive canonical ``(offset, size, name)`` rows from symbol_addrs.
+
+    Every symbol_addrs address inside the exact owned span is authoritative.
+    The absolute linker _gp address is not an object boundary or alias.  Aliases
+    at one address are separate required names for the same object extent;
+    their spelling order is canonicalized because ELF symbol-table order is
+    not a source-layout fact. An explicit native size applies to all names at
+    that address and must fit before the next address; alignment is not part
+    of the object. Without that fact, retain the full address interval.
+    """
+    end = start + size
+    addressed = sorted(
+        (retail, name)
+        for name, retail in syms.items()
+        if name != "_gp" and start <= retail < end
+    )
+    if not addressed:
+        return [], ["retail span has no symbol_addrs inventory"]
+
+    addresses = sorted({retail for retail, _ in addressed})
+    problems = []
+    if addresses[0] != start:
+        problems.append(
+            f"retail inventory begins at +0x{addresses[0] - start:X}, expected +0x0"
+        )
+    next_address = {
+        retail: addresses[index + 1] if index + 1 < len(addresses) else end
+        for index, retail in enumerate(addresses)
+    }
+    explicit_sizes = explicit_sizes or {}
+    extents = {}
+    for retail in addresses:
+        declared = {explicit_sizes[name] for addr, name in addressed
+                    if addr == retail and name in explicit_sizes}
+        if len(declared) > 1:
+            problems.append(f"conflicting explicit sizes at +0x{retail - start:X}")
+        extent = min(declared) if declared else next_address[retail] - retail
+        if extent <= 0 or extent > next_address[retail] - retail:
+            problems.append(
+                f"explicit size {extent:#x} at +0x{retail - start:X} "
+                "must be positive and fit within its retail address interval"
+            )
+        extents[retail] = extent
+    inventory = [(retail - start, extents[retail], name)
+                 for retail, name in addressed]
+    return inventory, problems
+
+
+def nobits_ownership_problems(
+        yaml_text, unit, section_name, section_size, emitted, syms, aliases=(),
+        explicit_sizes=None):
+    """Explain why emitted NOBITS does not exactly implement its retail span.
+
+    The YAML owns the bounded address range.  Every ``symbol_addrs`` fact in
+    that range forms the canonical retail inventory, including same-address
+    object aliases. Validated non-owning interior aliases are checked against
+    their primary object's extent and do not split or allocate storage.
+    The object must emit the remaining inventory one-for-one with each name
+    at the native address and size as STT_OBJECT. Explicit native extents may
+    leave alignment gaps but cannot cross another primary. This fails
+    closed when the retail inventory is absent or does not begin at the span.
+    """
+    owned = owned_nobits_range(yaml_text, unit, section_name)
+    if owned is None:
+        return [f"no unambiguous dict-form retail {section_name} span"]
+    start, expected_size = owned
+    problems = []
+    if section_size != expected_size:
+        problems.append(
+            f"section size 0x{section_size:X}, retail span 0x{expected_size:X}"
+        )
+    local_aliases = [alias for alias in aliases
+                     if alias.unit == unit and alias.section == section_name]
+    alias_names = {alias.name for alias in local_aliases}
+    inventory, inventory_problems = _retail_nobits_inventory(
+        start, expected_size, {name: addr for name, addr in syms.items()
+                               if name not in alias_names}, explicit_sizes
+    )
+    problems.extend(inventory_problems)
+    canonical = {
+        name: (offset, size)
+        for offset, size, name in inventory
+    }
+
+    for alias in local_aliases:
+        owner = canonical.get(alias.owner)
+        if owner is None:
+            problems.append(f"{alias.name}: primary owner {alias.owner} is outside this span")
+        elif not 0 <= alias.offset < owner[1] \
+                or start + owner[0] + alias.offset != alias.address:
+            problems.append(f"{alias.name}: not inside native {alias.owner} at its declared offset")
+
+    seen_names = set()
+    for offset, size, name, is_object in sorted(
+        emitted, key=lambda row: (row[0], row[2], row[1], row[3])
+    ):
+        if name in seen_names:
+            problems.append(f"duplicate symbol {name}")
+        seen_names.add(name)
+        if not is_object:
+            problems.append(f"{name} is not STT_OBJECT")
+        expected = canonical.get(name)
+        if expected is None:
+            problems.append(f"extra emitted symbol {name}")
+            continue
+        expected_offset, expected_object_size = expected
+        if offset != expected_offset:
+            problems.append(
+                f"{name} is at +0x{offset:X}, retail inventory requires "
+                f"+0x{expected_offset:X}"
+            )
+        if size != expected_object_size:
+            problems.append(
+                f"{name} has size 0x{size:X}, retail inventory requires "
+                f"0x{expected_object_size:X}"
+            )
+
+    for offset, size, name in inventory:
+        if name not in seen_names:
+            problems.append(
+                f"missing retail symbol {name} at +0x{offset:X} size 0x{size:X}"
+            )
+    if not emitted:
+        problems.append(
+            "section has no explicit symbols"
+        )
+    return problems
+
+
+def bss_ownership_problems(yaml_text, unit, section_size, emitted, syms):
+    """Compatibility wrapper for exact .bss ownership diagnostics."""
+    return nobits_ownership_problems(
+        yaml_text, unit, ".bss", section_size, emitted, syms
+    )
+
+
+def common_symbols(nm_text):
+    """Return sized COMMON/SCOMMON definitions from `nm -S` output."""
+    result = []
+    for line in nm_text.splitlines():
+        parts = line.split()
+        if len(parts) == 4 and parts[2] in "Cc":
+            result.append((parts[3], int(parts[1], 16)))
+    return result
+
+
+def section_symbols(objdump_text, section):
+    """Return (offset, size, name) definitions in one object section.
+
+    `nm` deliberately collapses `.data` and `.sdata` to the same symbol type,
+    while the ownership check needs to distinguish them.  The objdump symbol
+    table retains the defining section name.
+    """
+    result = []
+    for line in objdump_text.splitlines():
+        parts = line.split()
+        if len(parts) >= 6 and parts[-3] == section and "O" in parts[1:-3]:
+            try:
+                result.append((int(parts[0], 16), int(parts[-2], 16), parts[-1]))
+            except ValueError:
+                pass
+    return result
+
+
+def owns_exact_section_item(definitions, syms, offset, size, retail_addr):
+    """Whether one exact object symbol maps this item to its retail address."""
+    return any(obj_off == offset and obj_size == size
+               and address(name, syms) == retail_addr
+               for obj_off, obj_size, name in definitions)
+
+
+def source_owned_item_size(definitions, syms, offset, retail_addr):
+    """Return an unambiguous source-owned item's declared size, if any."""
+    sizes = {obj_size for obj_off, obj_size, name in definitions
+             if obj_off == offset and address(name, syms) == retail_addr}
+    return sizes.pop() if len(sizes) == 1 else None
+
+
+def relocations(obj):
+    """{section: {offset: (type, symbol)}} for verified content sections."""
+    out, section = {name: {} for name in (".text", ".rodata", ".data", ".sdata")}, None
+    for line in run(str(BIN / "mips-ps2-decompals-objdump"), "-r", str(obj)).splitlines():
+        if line.startswith("RELOCATION RECORDS FOR"):
+            section = line.split("[", 1)[1].rstrip("]:")
+            continue
+        parts = line.split()
+        if section in out and len(parts) >= 3 and re.fullmatch(r"[0-9a-f]{8}", parts[0]):
+            out[section][int(parts[0], 16)] = (parts[1], parts[2])
+    return out
+
+
+def relocate_sdata_item(item, item_offset, relocs, funcs, syms,
+                        section_bases=None):
+    """Apply resolvable R_MIPS_32 relocations to one emitted data item.
+
+    Object files store section-relative addends for pointers into their own
+    text. Resolve those through the owning function's retail address so the
+    source-owned pointer value can be compared with the linked executable.
+    """
+    linked = bytearray(item)
+    problems = []
+    item_end = item_offset + len(item)
+    for off, (rtype, sym) in sorted(relocs.items()):
+        if off < item_offset or off + 4 > item_end:
+            continue
+        at = off - item_offset
+        addend = struct.unpack_from("<I", linked, at)[0]
+        base = sym.split("+", 1)[0]
+        target = None
+        if rtype != "R_MIPS_32":
+            problems.append(f"unsupported {rtype} at +0x{at:X}")
+            continue
+        if base == ".text":
+            owner = next(((obj_off, size, name) for obj_off, size, name in funcs
+                          if obj_off <= addend < obj_off + size), None)
+            owner_addr = address(owner[2], syms) if owner else None
+            if owner_addr is not None:
+                target = owner_addr + addend - owner[0]
+        elif section_bases and base in section_bases:
+            # Relocatable local-section references carry a section-relative
+            # addend.  Resolve them from the exact owner subsegment origin.
+            target = section_bases[base] + addend
+        else:
+            base_addr = address(base, syms)
+            if base_addr is not None:
+                target = base_addr + addend
+        if target is None:
+            problems.append(f"unresolved {rtype} {sym} at +0x{at:X}")
+            continue
+        struct.pack_into("<I", linked, at, target & 0xFFFFFFFF)
+    return bytes(linked), problems
+
+
+def initialized_data_problems(section_range, section_origin, retail_span,
+                               data, definitions, relocs, funcs,
+                               full_data, full_definitions, full_relocs,
+                               full_funcs, syms, section_bases):
+    """Validate one explicitly owned, initialized .data section in both builds.
+
+    The YAML range owns the section's possible extent. Every emitted object
+    must have an unambiguous native symbol, exact STT_OBJECT placement/size in
+    both contexts, and every nonzero byte must belong to an object. Relocated
+    standalone and full-unit contents are resolved before comparison.
+    """
+    problems = []
+    if section_range is None:
+        return ["unit has no unambiguous YAML-owned .data range"]
+    if section_origin is None:
+        return ["YAML-owned .data range has no retail section address"]
+    start, end = section_range
+    span = end - start
+    if len(retail_span) != span:
+        return ["retail .data span is unavailable or truncated"]
+    if len(data) > span or len(full_data) > span:
+        problems.append(
+            f"emitted extent exceeds its 0x{span:X}-byte YAML-owned span")
+    if len(data) != len(full_data):
+        problems.append(
+            f"standalone/full .data extents differ (0x{len(data):X} vs 0x{len(full_data):X})")
+    if not definitions or not full_definitions:
+        problems.append(".data has no STT_OBJECT definitions in both contexts")
+        return problems
+
+    standalone = {(name): (off, size) for off, size, name in definitions}
+    full = {(name): (off, size) for off, size, name in full_definitions}
+    if len(standalone) != len(definitions) or len(full) != len(full_definitions):
+        problems.append(".data has duplicate STT_OBJECT names")
+    if standalone != full:
+        problems.append("standalone/full .data STT_OBJECT inventories differ")
+
+    def check_inventory(blob, inventory, blob_relocs, label):
+        covered = bytearray(len(blob))
+        for off, size, name in inventory:
+            if size <= 0 or off < 0 or off + size > len(blob):
+                problems.append(f"{label} {name}: invalid STT_OBJECT extent +0x{off:X}/0x{size:X}")
+                continue
+            if any(covered[off:off + size]):
+                problems.append(f"{label} {name}: overlapping STT_OBJECT extent")
+            covered[off:off + size] = b"\1" * size
+            addr = address(name, syms)
+            if addr is None:
+                problems.append(f"{label} {name}: no unambiguous native symbol address")
+            elif addr < section_origin or addr - section_origin != off:
+                problems.append(
+                    f"{label} {name}: object offset +0x{off:X} does not match native address 0x{addr:08X}")
+        for reloc_off in blob_relocs:
+            if reloc_off < 0 or reloc_off + 4 > len(blob):
+                problems.append(f"{label} relocation outside emitted .data at +0x{reloc_off:X}")
+            elif not any(off <= reloc_off and reloc_off + 4 <= off + size
+                         for off, size, _ in inventory):
+                problems.append(f"{label} relocation is outside an STT_OBJECT at +0x{reloc_off:X}")
+        for off, byte in enumerate(blob):
+            if byte and not covered[off]:
+                problems.append(f"{label} unowned nonzero byte at +0x{off:X}")
+                break
+
+    check_inventory(data, definitions, relocs, "standalone")
+    check_inventory(full_data, full_definitions, full_relocs, "full-unit")
+    for blob, blob_relocs, blob_funcs, label in (
+            (data, relocs, funcs, "standalone"),
+            (full_data, full_relocs, full_funcs, "full-unit")):
+        linked, relocation_problems = relocate_sdata_item(
+            blob, 0, blob_relocs, blob_funcs, syms, section_bases)
+        if relocation_problems:
+            problems.extend(f"{label} {problem}" for problem in relocation_problems)
+        elif linked != retail_span[:len(blob)]:
+            problems.append(f"{label} .data bytes/relocations differ from retail")
+        if len(blob) <= span and any(retail_span[len(blob):]):
+            problems.append(f"{label} omits nonzero bytes at the end of its YAML-owned .data span")
+    return problems
+
+
+def trim_sdata_item(item, item_offset, relocs):
+    """Drop alignment padding without truncating relocation-backed words."""
+    reloc_words = {off - item_offset for off in relocs
+                   if item_offset <= off < item_offset + len(item)}
+    if reloc_words:
+        return item[:max(max(reloc_words) + 4, len(item.rstrip(b"\0")))]
+    nul = item.find(b"\0")
+    return item[:nul + 1] if nul >= 0 and not any(item[nul:]) \
+        else item.rstrip(b"\0") or item[:4]
+
+
+def rodata_code_pointers(data, offset, end, relocs, funcs, syms, function_addrs):
+    """Resolve a consecutive table of case labels or function pointers.
+
+    A callback array can mix section-relative pointers to compiled functions
+    with named pointers to functions still supplied by assembly. Both forms
+    refer to code; a named data symbol must still end the code-pointer table.
+    """
+    entries = []
+    while offset + 4 <= end:
+        rtype, sym = relocs.get(offset, ("", ""))
+        base = sym.split("+", 1)[0]
+        target = address(base, syms)
+        if base != ".text" and target not in function_addrs:
+            break
+        addend = struct.unpack_from("<I", data, offset)[0]
+        if base == ".text":
+            owner = next(((o, s, n) for o, s, n in funcs
+                          if o <= addend < o + s), None)
+            target = address(owner[2], syms) if owner else None
+            if target is not None:
+                target += addend - owner[0]
+        else:
+            target += addend
+        entries.append((offset, target if rtype == "R_MIPS_32" else None))
+        offset += 4
+    return entries
+
+
+def inline_asm_share(text):
+    """{function: (inline asm instructions, all instructions)} from cc1 output
+    (asm statements sit between `#APP` and `#NO_APP`)."""
+    share, cur, app, asm, total = {}, None, False, 0, 0
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith(".ent\t") or s.startswith(".ent "):
+            cur, asm, total = s.split()[1], 0, 0
+        elif s.startswith(".end\t") or s.startswith(".end "):
+            if cur:
+                share[cur] = (asm, total)
+            cur = None
+        elif s in ("#APP", "#NO_APP"):
+            app = s == "#APP"
+        elif cur and re.match(r"[a-z]", s) and not s.endswith(":"):
+            total += 1
+            asm += app
+    return share
+
+
+def owns_rodata(version, unit, section="rodata"):
+    yaml = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
+    return re.search(rf"\.{section}, {re.escape(unit)}\]", yaml) is not None
+
+
+def owned_rom_range(yaml_text, unit, section):
+    """Bound one explicit per-unit initialized section by its next sibling."""
+    items = list(YAML_ITEM.finditer(yaml_text))
+    ranges = []
+    for index, item in enumerate(items):
+        match = re.fullmatch(
+            rf"\[0x([0-9A-Fa-f]+),\s*{re.escape(section)},\s*{re.escape(unit)}\]",
+            item.group("body").strip())
+        if match is None:
+            continue
+        start = int(match.group(1), 16)
+        indent = len(item.group("indent"))
+        for later in items[index + 1:]:
+            later_indent = len(later.group("indent"))
+            if later_indent < indent:
+                break
+            if later_indent != indent:
+                continue
+            next_list = re.match(r"\[0x([0-9A-Fa-f]+),", later.group("body"))
+            fields = _inline_yaml_fields(later.group("body"))
+            try:
+                end = int(next_list.group(1), 16) if next_list else int(fields["start"], 0)
+            except (TypeError, KeyError, ValueError):
+                break
+            if end > start:
+                ranges.append((start, end))
+            break
+    return ranges[0] if len(ranges) == 1 else None
+
+
+def asm_literal_users(source_text, asm_dir, syms, addr):
+    """Find remaining ASM consumers in the source being checked."""
+    names = set(re.findall(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
+    sym = next((n for n, a in syms.items() if a == addr), f"D_{addr:08X}")
+    pat = re.compile(rf"%(?:hi|lo|gp_rel)\({re.escape(sym)}\)")
+    return sorted(n for n in names if (asm_dir / f"{n}.s").exists()
+                  and pat.search((asm_dir / f"{n}.s").read_text()))
+
+
+def text_comparison_extent(text, offset, size, address, next_address):
+    """Keep the existing overrun gate, but allow its bounded prefix to be shown."""
+    if next_address is not None and address + size > next_address:
+        boundary = next_address - address
+        if any(text[offset + boundary:offset + size]):
+            return boundary, True
+    # Zero padding keeps the original comparison and acceptance rules.
+    return size, False
+
+
+def native_function_size(assembly, name):
+    """Read the function's own extent, excluding padding before its neighbour."""
+    match = re.search(rf"^nonmatching\s+{re.escape(name)},\s*(0x[0-9A-Fa-f]+)\b",
+                      assembly, re.M)
+    size = int(match[1], 16) if match else None
+    return size if size and size % 4 == 0 else None
+
+
+def text_residual_summary(size, comparison_size, diffs, native_size=None):
+    """Report distinct differing words and coverage, without granting match credit."""
+    prefix_size = min(comparison_size, native_size) if native_size is not None else comparison_size
+    different = len({offset for offset, *_ in diffs if offset < prefix_size})
+    matching = prefix_size // 4 - different
+    summary = (f"text prefix: {matching} matching, {different} differing words; "
+               f"{size} emitted bytes")
+    if native_size is not None:
+        summary += (f", {native_size} native bytes; "
+                    f"{max(native_size - size, 0)} uncovered, "
+                    f"{max(size - native_size, 0)} excess bytes")
+    return summary
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("unit", type=Path)
+    ap.add_argument("-v", "--verbose", action="store_true", help="print every differing instruction")
+    ap.add_argument("--func", help="only report this function")
+    ap.add_argument("--source", type=Path, help="compile this file instead of the unit (same unit layout)")
+    ap.add_argument("--cflags", default="", help="extra cc1 flags (experiments; see flag_probe.py)")
+    args = ap.parse_args()
+    unit = args.unit.resolve()
+    source = args.source.resolve() if args.source else unit
+    source_text = source.read_text()
+    version = unit.relative_to(ROOT / "src").parts[0]
+    unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
+    syms = symbols(version)
+    aliases = load_symbol_aliases(ROOT, version)
+    syms.update({alias.name: alias.address for alias in aliases})
+    sys.path.insert(0, str(ROOT / "tools"))
+    from eeas_compat import lit4_range
+    lit4_lo, lit4_hi = lit4_range((ROOT / RETAIL[version]).read_bytes())
+    func_starts = sorted({int(m.group(2), 16) for m in re.finditer(
+        r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)})
+    gp = int(VERSIONS[version]["gp"], 16)
+    retail = (ROOT / RETAIL[version]).read_bytes()
+    segs = load_segments(retail)
+    yaml_text = (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text()
+    sdata_range = owned_rom_range(yaml_text, unit_name, ".sdata")
+    rodata_range = owned_rom_range(yaml_text, unit_name, ".rodata")
+    data_range = owned_rom_range(yaml_text, unit_name, ".data")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        obj = Path(tmp) / "unit.o"
+        # cc.sh compiles under the unit's own path (and flags) even for --source.
+        env = dict(os.environ, SMT3_VERSION=version, SMT3_AS_UNIT=str(unit.relative_to(ROOT)))
+        asm_text = Path(tmp) / "unit.s"
+        env_s = dict(env, SMT3_KEEP_S=str(asm_text))
+        extra = args.cflags.split()
+        r = subprocess.run([str(ROOT / "tools/cc.sh"), "-DSKIP_ASM", *extra,
+                            str(source), "-o", str(obj)],
+                           capture_output=True, text=True, env=env_s)
+        asm_share = inline_asm_share(asm_text.read_text()) if asm_text.exists() else {}
+        if r.returncode:
+            sys.stderr.write(r.stderr)
+            sys.exit(f"compile failed: {args.unit}")
+        text = text_section(obj)
+        data, secs = sections(obj)
+        emitted = {n: secs[n][1] for n in DATA_SECTIONS if secs.get(n, (0, 0))[1]}
+        l4_off, l4_size = secs.get(".lit4", (0, 0))
+        lit4 = data[l4_off:l4_off + l4_size]
+        ri_off, ri_size = secs.get(".reginfo", (0, 0))
+        gp0 = struct.unpack_from("<i", data, ri_off + 20)[0] if ri_size >= 24 else 0
+        sd_off, sd_size = secs.get(".sdata", (0, 0))
+        sdata = data[sd_off:sd_off + sd_size]
+        ro_off, ro_size = secs.get(".rodata", (0, 0))
+        rodata = data[ro_off:ro_off + ro_size]
+        da_off, da_size = secs.get(".data", (0, 0))
+        data_section = data[da_off:da_off + da_size]
+        all_relocs = relocations(obj)
+        relocs, rodata_relocs = all_relocs[".text"], all_relocs[".rodata"]
+        sdata_relocs = all_relocs[".sdata"]
+        defined_symbols = run(
+            str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only", str(obj)
+        )
+        has_nobits = any(emitted.get(section) for section in (".sbss", ".bss"))
+        needs_object_symbols = has_nobits or bool(
+            emitted.get(".sdata") or emitted.get(".rodata") or emitted.get(".data"))
+        object_symbols = run(
+            str(BIN / "mips-ps2-decompals-objdump"), "-t", str(obj)
+        ) if needs_object_symbols else ""
+        explicit_nobits = {
+            section: nobits_symbols(object_symbols, section)
+            for section in (".sbss", ".bss")
+        }
+        sdata_symbols = section_symbols(object_symbols, ".sdata")
+        rodata_symbols = section_symbols(object_symbols, ".rodata")
+        data_symbols = section_symbols(object_symbols, ".data")
+        funcs = []
+        for line in defined_symbols.splitlines():
+            parts = line.split()
+            if len(parts) == 4 and parts[2] in "Tt":
+                funcs.append((int(parts[0], 16), int(parts[1], 16), parts[3]))
+        common = common_symbols(defined_symbols)
+        undefined = {l.split()[-1] for l in run(str(BIN / "mips-ps2-decompals-nm"), "-u", str(obj)).splitlines() if l.strip()}
+        # The build compiles the unit with its asm included, not with SKIP_ASM.
+        # ee-gcc 2.96's CSE hashes symbol-name addresses, so the preprocessed
+        # text around a function can change its code: compare each C function
+        # as the build compiles it, relocated fields masked.
+        context = {}
+        context_words = {}  # full-unit words that differ from retail
+        data_context = []
+        owned_rodata = []
+        owned_data_checked = False
+        as_built = set()  # differs under SKIP_ASM, but the build's code matches retail
+        ro_diff = None    # first retail address where the full unit's .rodata differs
+        full = Path(tmp) / "full.o"
+        rf = subprocess.run([str(ROOT / "tools/cc.sh"), *extra,
+                             str(source), "-o", str(full)],
+                            capture_output=True, text=True, env=env)
+        if rf.returncode == 0:
+            ftext, frel = text_section(full), relocations(full)[".text"]
+            fsyms = {p[3]: (int(p[0], 16), int(p[1], 16)) for p in (
+                l.split() for l in run(str(BIN / "mips-ps2-decompals-nm"), "-S", "--defined-only",
+                                       str(full)).splitlines()) if len(p) == 4 and p[2] in "Tt"}
+
+            def masked(code, base, rels):
+                words = list(struct.unpack_from(f"<{len(code) // 4}I", code))
+                for i in range(len(words)):
+                    r = rels.get(base + 4 * i)
+                    if r:
+                        words[i] &= 0xFC000000 if r[0] == "R_MIPS_26" else 0xFFFF0000
+                return words
+
+            for off, size, name in funcs:
+                if name in fsyms:
+                    foff, fsize = fsyms[name]
+                    if fsize != size or masked(ftext[foff:foff + fsize], foff, frel) != \
+                            masked(text[off:off + size], off, relocs):
+                        # The build links the full-unit code: if that matches retail
+                        # (relocated fields masked), only the SKIP_ASM compile differs.
+                        addr = address(name, syms)
+                        roff = va_to_off(segs, addr) if addr is not None else None
+                        if roff is not None and masked(ftext[foff:foff + fsize], foff, frel) == \
+                                masked(retail[roff:roff + fsize], foff, frel):
+                            as_built.add(name)
+                        else:
+                            context[name] = (fsize, size)
+                            if roff is not None:
+                                built = masked(ftext[foff:foff + fsize], foff, frel)
+                                want = masked(retail[roff:roff + fsize], foff, frel)
+                                context_words[name] = [(4 * i, x, y) for i, (x, y) in
+                                                       enumerate(zip(built, want)) if x != y]
+            # The build links the full unit's .rodata at the retail start of the
+            # unit's .rodata subsegment: its bytes (relocated words masked) must be
+            # retail's, in retail order. Catches string literals and
+            # INCLUDE_RODATA items that come out in a different order.
+            fdata, fsecs = sections(full)
+            full_objdump = run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full))
+            if emitted.get(".data") and not args.func and data_range is not None:
+                owned_data_checked = True
+                data_start, data_end = data_range
+                full_data_off, full_data_size = fsecs.get(".data", (0, 0))
+                section_bases = {}
+                for section, owned_range in (
+                        (".data", data_range), (".rodata", rodata_range),
+                        (".sdata", sdata_range)):
+                    if owned_range is not None:
+                        origin = off_to_va(segs, owned_range[0])
+                        if origin is not None:
+                            section_bases[section] = origin
+                initialized_problems = initialized_data_problems(
+                    data_range, off_to_va(segs, data_start),
+                    retail[data_start:data_end], data_section, data_symbols,
+                    all_relocs[".data"], funcs,
+                    fdata[full_data_off:full_data_off + full_data_size],
+                    section_symbols(full_objdump, ".data"),
+                    relocations(full)[".data"],
+                    [(off, size, name) for name, (off, size) in fsyms.items()],
+                    syms, section_bases)
+                data_context.extend(f".data {problem}" for problem in initialized_problems)
+            if sdata_symbols and sdata_range:
+                full_sdata = {
+                    name: (off, size) for off, size, name in section_symbols(
+                        run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".sdata")
+                }
+                fsd_off, fsd_size = fsecs.get(".sdata", (0, 0))
+                fsd_relocs = relocations(full)[".sdata"]
+                full_funcs = [(off, size, name) for name, (off, size) in fsyms.items()]
+                start, end = sdata_range
+                sdata_origin = off_to_va(segs, start)
+                section_bases = {".sdata": sdata_origin} if sdata_origin is not None else {}
+                full_bytes, full_problems = relocate_sdata_item(
+                    fdata[fsd_off:fsd_off + fsd_size], 0, fsd_relocs, full_funcs,
+                    syms, section_bases)
+                sdata_span_matches = (
+                    fsd_size <= end - start and not full_problems
+                    and full_bytes == retail[start:start + fsd_size]
+                    and not any(retail[start + fsd_size:end]))
+                if fsd_size > end - start or full_problems or full_bytes != retail[start:start + fsd_size]:
+                    data_context.append(
+                        "full unit's .sdata bytes/relocations differ from its retail span"
+                        + (f" ({'; '.join(full_problems)})" if full_problems else ""))
+                elif any(retail[start + fsd_size:end]):
+                    data_context.append("full unit omits nonzero bytes at the end of its retail .sdata span")
+                for skip_off, size, name in sdata_symbols:
+                    addr = address(name, syms)
+                    retail_off = va_to_off(segs, addr) if addr is not None else None
+                    actual = full_sdata.get(name)
+                    if retail_off is None and sdata_span_matches and actual is not None:
+                        # Local/static C objects may have no symbol_addrs row.
+                        # Once the entire full-unit section is byte-exact at
+                        # the owned origin, its STT_OBJECT offset is a concrete
+                        # retail address fact, not an address-name guess.
+                        retail_off = start + actual[0]
+                        addr = off_to_va(segs, retail_off)
+                        if addr is not None:
+                            syms[name] = addr
+                        else:
+                            retail_off = None
+                    if retail_off is None:
+                        data_context.append(f"{name}: source-owned .sdata object has no retail address")
+                        continue
+                    if not start <= retail_off < end or retail_off + size > end:
+                        data_context.append(f"{name}: outside the unit's retail .sdata span")
+                    elif actual is None:
+                        data_context.append(f"{name}: not STT_OBJECT in the full unit's .sdata")
+                    elif actual != (retail_off - start, size):
+                        data_context.append(
+                            f"{name}: full-unit offset/size {actual}, "
+                            f"retail requires {(retail_off - start, size)}")
+                    else:
+                        off = actual[0]
+                        item = fdata[fsd_off + off:fsd_off + off + size]
+                        linked, problems = relocate_sdata_item(
+                            item, off, fsd_relocs, full_funcs, syms, section_bases)
+                        if off + size > fsd_size or problems or linked != retail[retail_off:retail_off + size]:
+                            data_context.append(
+                                f"{name}: full-unit .sdata bytes/relocations differ from retail"
+                                + (f" ({'; '.join(problems)})" if problems else ""))
+            if rodata_symbols and rodata_range:
+                full_rodata = {
+                    name: (off, size) for off, size, name in section_symbols(
+                        run(str(BIN / "mips-ps2-decompals-objdump"), "-t", str(full)), ".rodata")
+                }
+                fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+                full_ro_relocs = relocations(full)[".rodata"]
+                start, end = rodata_range
+                for skip_off, size, name in rodata_symbols:
+                    addr = address(name, syms)
+                    retail_off = va_to_off(segs, addr) if addr is not None else None
+                    actual = full_rodata.get(name)
+                    # Relocated objects retain the existing pointer/table checks.
+                    if retail_off is None or any(
+                            skip_off <= off < skip_off + size for off in rodata_relocs):
+                        continue
+                    if actual is None:
+                        data_context.append(f"{name}: not STT_OBJECT in the full unit's .rodata")
+                        continue
+                    off, full_size = actual
+                    if any(off <= reloc_off < off + full_size for reloc_off in full_ro_relocs):
+                        continue
+                    if not start <= retail_off < end or retail_off + size > end:
+                        data_context.append(f"{name}: outside the unit's retail .rodata span")
+                    elif actual != (retail_off - start, size):
+                        data_context.append(f"{name}: full-unit .rodata offset/size differs from retail")
+                    elif off + size > fro_size or skip_off + size > ro_size or (
+                            fdata[fro_off + off:fro_off + off + size]
+                            != retail[retail_off:retail_off + size]) or (
+                            rodata[skip_off:skip_off + size]
+                            != retail[retail_off:retail_off + size]):
+                        data_context.append(f"{name}: source-owned .rodata bytes differ from retail")
+                    else:
+                        owned_rodata.append((skip_off, skip_off + size))
+            fro_off, fro_size = fsecs.get(".rodata", (0, 0))
+            ro_start = re.search(rf"\[0x([0-9A-F]+), \.rodata, {re.escape(unit_name)}\]",
+                                 (ROOT / "config" / version / f"{VERSIONS[version]['serial']}.yaml").read_text())
+            if fro_size and ro_start:
+                mine = bytearray(fdata[fro_off:fro_off + fro_size])
+                roff = int(ro_start.group(1), 16)
+                want = bytearray(retail[roff:roff + fro_size])
+                for off in relocations(full)[".rodata"]:
+                    mine[off:off + 4] = want[off:off + 4] = b"\0\0\0\0"
+                if mine != want:
+                    first = next(i for i in range(fro_size) if mine[i] != want[i])
+                    ro_diff = f"0x{roff + 0xFF000 + first:08X}"
+        else:
+            # Usually an INCLUDE_ASM whose asm file splat has not written yet
+            # (run configure.py --force-split). Unverifiable is not clean.
+            context["(unit)"] = (0, 0)
+            sys.stderr.write(rf.stderr[-2000:])
+
+    ok = bad = 0
+    if args.func and not any(name == args.func for _, _, name in funcs):
+        bad += 1
+        print(f"MISSING {args.func}: requested function not emitted by the SKIP_ASM compile")
+    if "(unit)" in context:
+        bad += 1
+        print("NOASM the unit does not compile with its asm included (missing asm file? "
+              "run configure.py --force-split); build-context check not possible")
+        del context["(unit)"]
+    for name, (fsize, size) in context.items():
+        if not args.func or name == args.func:
+            bad += 1
+            print(f"CONTEXT {name}: compiles differently inside the full unit ({fsize} vs {size} bytes "
+                  "alone); the build uses the full-unit code, so this function does not match there")
+            words = context_words.get(name, [])
+            if words:
+                print(f"       full unit vs retail: {len(words)} of {fsize // 4} words differ "
+                      "(relocated fields masked)")
+            for i, built, want in (words if args.verbose else words[:3]):
+                print(f"       +0x{i:03X} full {built:08X} retail {want:08X}")
+    if ro_diff and not args.func:
+        bad += 1
+        print(f"RODATA the full unit's .rodata differs from retail at {ro_diff} (string literal "
+              "or INCLUDE_RODATA order/content); the build links it there")
+    if not args.func:
+        for problem in data_context:
+            bad += 1
+            print(f"DATA CONTEXT {problem}")
+    tables = []  # (offset in our .rodata, retail address, function)
+    bounds = []  # .rodata items of unexamined functions: they only end a neighbour
+    small = []   # the same for .sdata
+    for off, size, name in sorted(funcs):
+        # Filtering reports must not change the compiled section's item
+        # boundaries. Tables of other C functions remain in SKIP_ASM's
+        # .rodata, even when --func excludes their comparisons. As-built
+        # functions likewise delimit neighbours without being checked here.
+        if (args.func and name != args.func) or name in as_built:
+            hi = None
+            for i in range(0, size, 4):
+                r = relocs.get(off + i)
+                if r and r[1].split("+")[0] == ".rodata":
+                    w = struct.unpack_from("<I", text, off + i)[0]
+                    if r[0] == "R_MIPS_HI16":
+                        hi = w & 0xFFFF
+                    elif r[0] == "R_MIPS_LO16" and hi is not None:
+                        bounds.append((hi << 16) + sext16(w))
+        if args.func and name != args.func:
+            continue
+        addr = address(name, syms)
+        if addr is None:
+            print(f"?    {name}: no address (add it to symbol_addrs.txt or use func_XXXXXXXX)")
+            bad += 1
+            continue
+        if name in as_built:
+            ok += 1
+            print(f"OK   {name} @ 0x{addr:08X} (as built in the full unit; the SKIP_ASM compile differs)")
+            continue
+        roff = va_to_off(segs, addr)
+        diffs = []
+        # A function may not run into the next retail function: that means the
+        # retail "start" there is really part of this one (tools/find_fragments.py).
+        nxt = next((a for a in func_starts if a > addr), None)
+        comparison_size, overrun = text_comparison_extent(text, off, size, addr, nxt)
+        if overrun:
+            print(f"OVER {name} @ 0x{addr:08X}: runs past the next function at 0x{nxt:08X}")
+            bad += 1
+        pending_hi = {}
+        rodata_hi = sdata_hi = None
+        text_hi = {}  # lui destination register -> (index, mine, want)
+        for i in range(0, comparison_size, 4):
+            mine = struct.unpack_from("<I", text, off + i)[0]
+            want = struct.unpack_from("<I", retail, roff + i)[0]
+            rel = relocations_at = relocs.get(off + i)
+            if rel is None:
+                if mine != want:
+                    diffs.append((i, mine, want, ""))
+                continue
+            rtype, sym = relocations_at
+            base = sym.split("+")[0]
+            target = address(base, syms)
+            if not instruction_shape_matches(mine, want, rtype):
+                diffs.append((i, mine, want, f"{rtype} {sym}"))
+                continue
+            if target is not None and lit4_lo <= target < lit4_hi:
+                diffs.append((i, mine, want, f"{sym} is a .lit4 pool constant: write the float literal"))
+                continue
+            if base == ".lit4":
+                # A float constant: our pool offset differs from retail's (asm
+                # functions are not compiled here), so compare the value itself.
+                at = literal_pool_offset(mine, gp0)  # object gp is .reginfo's
+                ours = struct.unpack_from("<I", lit4, at)[0] if 0 <= at <= len(lit4) - 4 else None
+                theirs = struct.unpack_from("<I", retail, va_to_off(segs, retail_literal_address(want, gp)))[0]
+                if ours != theirs:
+                    diffs.append((i, mine, want, f"float constant {ours if ours is None else hex(ours)} vs retail {theirs:#x}"))
+                continue
+            if base == ".sdata":
+                # Small data the C emits (a short literal or a variable it defines):
+                # remember where each side keeps it, compare the bytes below.
+                if rtype == "R_MIPS_HI16":
+                    sdata_hi = (mine & 0xFFFF, want & 0xFFFF)
+                elif rtype == "R_MIPS_LO16" and sdata_hi:
+                    small.append(((sdata_hi[0] << 16) + sext16(mine),
+                                  (sdata_hi[1] << 16) + sext16(want), name))
+                elif rtype == "R_MIPS_GPREL16":
+                    small.append((sext16(mine) + gp0, gp + sext16(want), name))
+                continue
+            if base == ".rodata":
+                # A switch's jump table: remember where each side keeps it.
+                if rtype == "R_MIPS_HI16":
+                    rodata_hi = (mine & 0xFFFF, want & 0xFFFF)
+                elif rtype == "R_MIPS_LO16" and rodata_hi:
+                    tables.append(((rodata_hi[0] << 16) + sext16(mine),
+                                   (rodata_hi[1] << 16) + sext16(want), name))
+                continue
+            if base == ".text" and rtype == "R_MIPS_26":
+                # A call into this unit's own C: the field holds our offset.
+                # Map it to the function there and compare with retail's target.
+                tgt = (mine & 0x3FFFFFF) << 2
+                owner = next(((o, n) for o, s, n in funcs if o <= tgt < o + s), None)
+                where = address(owner[1], syms) if owner else None
+                if where is None or (want & 0x3FFFFFF) != ((where + tgt - owner[0]) >> 2) & 0x3FFFFFF:
+                    diffs.append((i, mine, want, f"{rtype} into {owner[1] if owner else '?'} "
+                                                 "(retail calls a different function)"))
+                continue
+            if base == ".text" and rtype in ("R_MIPS_HI16", "R_MIPS_LO16"):
+                # A function pointer into this unit's own C (lui/addiu pair). Pair
+                # each LO16 with the lui that loaded its base register: gcc can
+                # hoist one pair's lui above another's.
+                if rtype == "R_MIPS_HI16":
+                    text_hi[(mine >> 16) & 0x1F] = (i, mine, want)
+                    continue
+                hi = text_hi.get((mine >> 21) & 0x1F)
+                if hi is None:
+                    continue
+                tgt = ((hi[1] & 0xFFFF) << 16) + sext16(mine)
+                theirs = ((hi[2] & 0xFFFF) << 16) + sext16(want)
+                owner = next(((o, n) for o, s, n in funcs if o <= tgt < o + s), None)
+                where = address(owner[1], syms) if owner else None
+                if where is None or where + tgt - owner[0] != theirs:
+                    diffs.append((i, mine, want, f"{rtype} address of {owner[1] if owner else '?'} "
+                                                 "(retail uses a different function)"))
+                continue
+            if target is None:
+                continue  # other local section: masked
+            addend = mine & 0x3FFFFFF if rtype == "R_MIPS_26" else sext16(mine)
+            if rtype == "R_MIPS_26":
+                good = (want & 0x3FFFFFF) == linked_jump_field(target, addend)
+            elif rtype == "R_MIPS_HI16":
+                pending_hi.setdefault(base, []).append((i, mine, want, rtype, sym, target))
+                good = True
+            elif rtype == "R_MIPS_LO16":
+                good = (want & 0xFFFF) == linked_lo_field(target, addend)
+                for hi in pending_hi.pop(base, []):
+                    combined_addend = hi_lo_addend(hi[1], mine)
+                    if (hi[2] & 0xFFFF) != linked_hi_field(target, combined_addend):
+                        diffs.append(hi[:3] + (f"{hi[3]} {hi[4]}",))
+            elif rtype == "R_MIPS_GPREL16":
+                good = (want & 0xFFFF) == linked_gprel_field(target, addend, gp)
+            else:
+                good = True
+            if not good:
+                diffs.append((i, mine, want, f"{rtype} {sym} (retail uses a different address)"))
+        # An HI16 whose LO16 was emitted against another symbol form (e.g. the
+        # section rather than a unit-local rodata label) has no pair here: check
+        # its high field with its own addend alone, as the linker resolves it.
+        for pending in pending_hi.values():
+            for hi in pending:
+                if (hi[2] & 0xFFFF) != linked_hi_field(hi[5], hi_lo_addend(hi[1], 0)):
+                    diffs.append(hi[:3] + (f"{hi[3]} {hi[4]} (unpaired HI16)",))
+        if diffs:
+            if not overrun:
+                bad += 1
+            print(f"DIFF {name} @ 0x{addr:08X}: {len(diffs)} of {comparison_size // 4} words differ"
+                  f" (first at +0x{diffs[0][0]:X})")
+        if diffs or overrun:
+            assembly = ROOT / "asm" / version / "nonmatchings" / unit_name / f"{name}.s"
+            native_size = native_function_size(assembly.read_text(), name) if assembly.exists() else None
+            print("       " + text_residual_summary(size, comparison_size, diffs, native_size))
+            for i, mine, want, note in (diffs if args.verbose else diffs[:3]):
+                print(f"       +0x{i:03X} mine {mine:08X} retail {want:08X} {note}")
+        else:
+            ok += 1
+            print(f"OK   {name} @ 0x{addr:08X} ({size} bytes)")
+    asm_dir = ROOT / "asm" / version / "nonmatchings" / unit_name
+    def asm_users(addr):
+        return asm_literal_users(source_text, asm_dir, syms, addr)
+    # The unit's whole .rodata as splat split it (symbols later moved into
+    # function files are listed there too).
+    ro_file = ROOT / "asm" / version / "data" / f"{unit_name}.rodata.s"
+    ro_text = ro_file.read_text() if ro_file.exists() else ""
+    retail_labels = sorted((int(a, 16), k) for k, a in re.findall(r"^dlabel (D|jtbl)_([0-9A-F]{8})\b", ro_text, re.M))
+    # Labels renamed in symbol_addrs (e.g. a named table) mark item starts too.
+    retail_labels += sorted((syms[n], "D") for n in re.findall(r"^dlabel (\w+)\b", ro_text, re.M)
+                            if not AUTO.match(n) and n in syms)
+    retail_labels.sort()
+    # The unit's retail .rodata ends where the next subsegment starts: bytes
+    # between the last item and that end are the unit's own padding too.
+    ro_rows = sorted((int(o, 16), u) for o, u in re.findall(r"\[0x([0-9A-F]+), \.?rodata(?:, ([^\]\s]+))?\]", yaml_text))
+    here = next((i for i, (_, u) in enumerate(ro_rows) if u == unit_name), None)
+    if here is not None and here + 1 < len(ro_rows):
+        retail_labels.append((ro_rows[here + 1][0] + 0xFF000, "end"))
+        retail_labels.sort()
+
+    def next_unit_aligned16():
+        """The unit after this one starts 16-aligned and holds a jump table, so
+        its .rodata section is 16-aligned and the linker pads up to it."""
+        if here is None or here + 1 >= len(ro_rows) or not ro_rows[here + 1][1]:
+            return False
+        nxt_file = ROOT / "asm" / version / "data" / f"{ro_rows[here + 1][1]}.rodata.s"
+        return (ro_rows[here + 1][0] + 0xFF000) % 16 == 0 and nxt_file.exists() \
+            and re.search(r"^dlabel jtbl_", nxt_file.read_text(), re.M) is not None
+
+    def retail_padding(addr, size):
+        """Bytes between an item's 8-aligned end and the next retail symbol
+        (jump tables are 16-aligned; so is the start of a following unit whose
+        .rodata holds one, the linker pads the gap)."""
+        nxt, kind = next(((a, k) for a, k in retail_labels if a > addr), (None, None))
+        end = (addr + size + 7) & ~7
+        if nxt is None or nxt <= end or kind == "jtbl" and nxt == (end + 15) & ~15:
+            return 0
+        if kind == "end" and nxt == (end + 15) & ~15 and next_unit_aligned16():
+            return 0
+        return nxt - end
+
+    included = set(re.findall(r'^INCLUDE_(?:ASM|RODATA)\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
+    eeasm_dir = ROOT / "build" / "eeasm" / "asm" / version / "nonmatchings" / unit_name
+
+    def realigned(addr):
+        """The retail item at addr is an included asm blob that eeas_compat
+        16-aligns (`.align 4`), so the object supplies the padding before it."""
+        pat = re.compile(rf"^\.align 4\n(?:.*\n){{0,3}}dlabel (?:D|jtbl)_{addr:08X}\b", re.M)
+        return any(pat.search(p.read_text()) for p in (eeasm_dir / f"{n}.s" for n in included) if p.exists())
+
+    def object_supplies_gap(table_off, retail_addr, size):
+        """The object's next item after the table sits at the same distance as
+        retail's next item, with only zero padding between: the compiled
+        section reproduces the gap itself."""
+        nxt = next((a for a, _ in retail_labels if a > retail_addr), None)
+        obj_next = next((s for s in starts if s > table_off), None)
+        if nxt is None or obj_next is None or obj_next >= len(rodata):
+            return False
+        return obj_next - table_off == nxt - retail_addr and not any(rodata[table_off + size:obj_next])
+
+
+    # Rodata the C emits: jump tables (every entry must land on the retail case
+    # label) and data items such as string literals (bytes must equal retail's).
+    funcs_by_off = sorted(funcs)
+    covered = set()
+    # Items the object's own initializer tables point at (string literals of a
+    # `{"..", ..}` table) start an item too: the REL addend is the target offset.
+    pointed = {struct.unpack_from("<I", rodata, o)[0] for o, (_, s) in rodata_relocs.items()
+               if s == ".rodata" and o + 4 <= len(rodata)}
+    starts = sorted({t[0] for t in tables} | set(bounds) | {p for p in pointed if p < len(rodata)}
+                    | {len(rodata)})
+    # Two retail copies that the C compiles to one object item: gcc merged
+    # identical constants (e.g. two equal string initializers) that the
+    # original kept apart, so the unit's rodata comes out short.
+    by_off = {}
+    for table_off, retail_addr, name in tables:
+        by_off.setdefault(table_off, {}).setdefault(retail_addr, name)
+    for off, uses in by_off.items():
+        if len(uses) > 1:
+            bad += 1
+            print(f"MERGED rodata: {', '.join(f'{n} (retail 0x{a:08X})' for a, n in sorted(uses.items()))} "
+                  "share one compiled item; retail has separate copies (brace-initialize, or keep the extern)")
+    for table_off, retail_addr, name in dict.fromkeys(tables):
+        if not 0 <= table_off < len(rodata):
+            continue
+        end = next(s for s in starts if s > table_off)
+        code_pointers = rodata_code_pointers(
+            rodata, table_off, end, rodata_relocs, funcs_by_off, syms, func_starts)
+        if not code_pointers:
+            item = rodata[table_off:end]
+            # Words the linker fills in (a table of pointers to strings or
+            # data) hold only an addend here: compare the rest, and leave the
+            # pointer values to the full build's checksum.
+            reloc_words = {o - table_off for o in rodata_relocs if table_off <= o < end}
+            nul = item.find(b"\0")
+            if reloc_words:
+                item = item[:max(max(reloc_words) + 4, len(item.rstrip(b"\0")))]
+            elif nul >= 0 and all(32 <= c < 127 or c in b"\t\n\r\x1b" for c in item[:nul]) \
+                    and not any(item[nul:]):
+                item = item[:nul + 1]  # a string; the rest is alignment
+            else:
+                item = item.rstrip(b"\0") or item[:4]
+            theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
+            mine_cmp, theirs_cmp = bytearray(item), bytearray(theirs)
+            for w in reloc_words:
+                mine_cmp[w:w + 4] = theirs_cmp[w:w + 4] = b"\0\0\0\0"
+            if mine_cmp != theirs_cmp:
+                bad += 1
+                print(f"DIFF rodata of {name} (retail 0x{retail_addr:08X}): {item[:40]!r} vs {theirs[:40]!r}")
+            elif (pad := retail_padding(retail_addr, len(item))) and \
+                    rodata[table_off + len(item):end][:pad + ((len(item) + 7) & ~7) - len(item)] \
+                    != retail[va_to_off(segs, retail_addr) + len(item):][:pad + ((len(item) + 7) & ~7) - len(item)]:
+                # (An array whose last elements are zero loses them to rstrip above;
+                # when the object emits exactly retail's following bytes, it is complete.)
+                # The retail symbol runs on past the literal (unreferenced data
+                # after it); a compiled literal would drop those bytes.
+                bad += 1
+                print(f"PAD rodata of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
+                      "after it that no C emits: keep the extern D_ symbol")
+            elif users := asm_users(retail_addr):
+                # The object keeps one copy; an asm function still pulls in its own.
+                bad += 1
+                print(f"SHARED rodata of {name} (retail 0x{retail_addr:08X}) is also used by asm "
+                      f"{', '.join(users)}: keep the extern D_ symbol until they are C")
+            covered.update(range(table_off, end))
+            continue
+        k, wrong = 0, 0
+        # Stop at the next table: with the asm skipped, tables of C functions
+        # that retail keeps apart can sit back to back here.
+        for pointer_off, target in code_pointers:
+            want = struct.unpack_from("<I", retail, va_to_off(segs, retail_addr + 4 * k))[0]
+            if target is None or target != want:
+                wrong += 1
+            covered.update(range(pointer_off, pointer_off + 4))
+            k += 1
+        if wrong:
+            bad += 1
+            print(f"DIFF jump table of {name} (retail 0x{retail_addr:08X}): {wrong} of {k} entries differ")
+        elif (pad := retail_padding(retail_addr, 4 * k)) and not next(
+                (k2 == "end" and a == (retail_addr + 4 * k + 15) & ~15
+                 or a == (retail_addr + 4 * k + 15) & ~15 and realigned(a)
+                 for a, k2 in retail_labels if a > retail_addr), False) \
+                and not object_supplies_gap(table_off, retail_addr, 4 * k):
+            # Retail has bytes after the table before the next item of this
+            # unit that nothing supplies once the table is C. Padding up to the
+            # unit's own end comes from the linker's section alignment, padding
+            # before a 16-aligned asm blob from its `.align 4`, and padding
+            # before a 16-aligned C item (ee-gcc aligns objects of 16+ bytes to
+            # 16) from the object itself.
+            bad += 1
+            print(f"PAD jump table of {name} (retail 0x{retail_addr:08X}): retail has {pad} more bytes "
+                  "after it that no C or asm supplies; keep the function as asm")
+    # Unexamined items and the strings a compiled table points at: compared by
+    # the full-unit .rodata check (or outside the requested --func scope).
+    for b in set(bounds) | pointed:
+        if 0 <= b < len(rodata):
+            covered.update(range(b, next(s for s in starts if s > b)))
+    for start, end in owned_rodata:
+        covered.update(range(start, end))
+    stray = [o for o in range(ro_size) if o not in covered and rodata[o]]
+    if emitted.get(".rodata") and owns_rodata(version, unit_name) and not stray:
+        del emitted[".rodata"]
+    # A source-owned object can be consumed exclusively from another unit.
+    # Its explicit symbol still supplies the native item address and width;
+    # full-unit placement and bytes were checked above, including ASM context.
+    if sdata_range:
+        start, end = sdata_range
+        for off, size, name in sdata_symbols:
+            addr = address(name, syms)
+            retail_off = va_to_off(segs, addr) if addr is not None else None
+            if retail_off is not None and start <= retail_off and retail_off + size <= end:
+                small.append((off, addr, name))
+    sd_starts = sorted({o for o, _, _ in small} | {len(sdata)})
+    sd_covered = set()
+    for off, retail_addr, name in dict.fromkeys(small):
+        if not 0 <= off < len(sdata):
+            continue
+        end = next(s for s in sd_starts if s > off)
+        item = sdata[off:end]
+        owned_size = source_owned_item_size(sdata_symbols, syms, off, retail_addr)
+        item = item[:owned_size] if owned_size is not None and owned_size <= len(item) \
+            else trim_sdata_item(item, off, sdata_relocs)
+        theirs = retail[va_to_off(segs, retail_addr):][:len(item)]
+        linked_item, relocation_problems = relocate_sdata_item(
+            item, off, sdata_relocs, funcs, syms,
+            {".sdata": off_to_va(segs, sdata_range[0])}
+            if sdata_range and off_to_va(segs, sdata_range[0]) is not None else None)
+        if relocation_problems:
+            bad += 1
+            print(f"RELOC sdata of {name} (retail 0x{retail_addr:08X}): "
+                  f"{'; '.join(relocation_problems)}")
+        elif linked_item != theirs:
+            bad += 1
+            print(f"DIFF sdata of {name} (retail 0x{retail_addr:08X}): "
+                  f"{linked_item[:24]!r} vs {theirs[:24]!r}")
+        elif (users := asm_users(retail_addr)) and not owns_exact_section_item(
+                sdata_symbols, syms, off, len(item), retail_addr):
+            bad += 1
+            print(f"SHARED sdata of {name} (retail 0x{retail_addr:08X}) is also used by asm {', '.join(users)}: "
+                  "keep the extern D_ symbol until they are C")
+        sd_covered.update(range(off, end))
+    if emitted.get(".sdata") and owns_rodata(version, unit_name, "sdata") \
+            and not [o for o in range(len(sdata)) if o not in sd_covered and sdata[o]]:
+        del emitted[".sdata"]
+    if emitted.get(".lit4") and owns_rodata(version, unit_name, "lit4"):
+        del emitted[".lit4"]  # every constant was compared with retail above
+    owned_nobits = {
+        section: owned_nobits_size(yaml_text, unit_name, section)
+        for section in (".sbss", ".bss")
+    }
+    for section, expected in owned_nobits.items():
+        if not emitted.get(section) or expected is None:
+            continue
+        problems = nobits_ownership_problems(
+            yaml_text, unit_name, section, emitted[section],
+            explicit_nobits[section], syms, aliases, symbol_sizes(version)
+        )
+        if problems and not args.func:
+            for problem in problems:
+                bad += 1
+                print(f"DATA NOBITS {section} {problem}")
+            del emitted[section]  # every failure was reported specifically
+        elif not problems:
+            del emitted[section]
+    if owned_data_checked:
+        # Its bounded source/full-unit payload was either validated above or
+        # reported with a specific DATA CONTEXT diagnostic.
+        emitted.pop(".data", None)
+    # --func compares one function: the rest of the unit's data is not its business.
+    if not args.func:
+        for name, size in common:
+            bad += 1
+            print(f"DATA COMMON {name}: 0x{size:X} bytes emitted by the unit; "
+                  "use an explicit, owned .bss definition")
+    for name, size in ({} if args.func else emitted).items():
+        bad += 1
+        if name == ".rodata" and owns_rodata(version, unit_name):
+            why = "rodata no instruction refers to (unused static data?)"
+        elif name == ".data":
+            why = "initialized data needs an explicit bounded YAML owner and matching native objects"
+        elif name in owned_nobits and owned_nobits[name] is not None:
+            why = f"the unit's retail {name} span is 0x{owned_nobits[name]:X} bytes"
+        else:
+            why = ("reference the existing D_ symbol instead or keep the function as INCLUDE_ASM "
+                   "(this section has no accepted per-unit source owner)")
+        print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
+    # Constructs that force codegen rather than express the original source.
+    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", unit.read_text(), flags=re.S)
+    for pattern, why in ((r"goto\s*\*", "computed goto (write the switch)"),
+                         (r"&&\s*[A-Za-z_]\w*\s*[,}]", "label address table (write the switch)"),
+                         (r"\bregister\b[^;]*\basm\s*\(", "register pinned with asm()")):
+        for m in re.finditer(pattern, source_text):
+            bad += 1
+            print(f"TRICK line {source_text.count(chr(10), 0, m.start()) + 1}: {why}")
+    # A C function whose code is mostly inline asm may be handwritten code in
+    # disguise. Two kinds are real C: copies of SDK routines that Sony wrote as C
+    # with an asm body (`/* libvu0: sceVu0Name */` above the definition), and VU0
+    # routines in the same style, whose asm takes its values from C operands and
+    # has no branches (`/* vu0 routine: ... */`). Anything else is reported;
+    # it is not a difference, but progress must not count it as C.
+    for name, (asm, total) in sorted(asm_share.items()):
+        if (args.func and name != args.func) or asm < 8 or asm * 2 <= total:
+            continue
+        if re.search(rf"(?:libvu0|vu0 routine):[^\n]*\n(?:[^\n]*\n){{0,2}}[^\n]*\b{re.escape(name)}\s*\(",
+                     unit.read_text()):
+            continue
+        print(f"ASMBODY {name}: {asm} of {total} instructions are inline asm; mark it as an SDK copy "
+              "or VU0 routine, or keep it as INCLUDE_ASM (docs/idioms.md, Inline asm)")
+    # Top-level C functions must keep retail order (the object's text is laid out in
+    # source order). Nested functions are indented and GCC emits them before their
+    # owner, so their actual object offsets provide the ordering check instead.
+    # (an implicit-int K&R definition starts with the function name itself)
+    order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^(?:[A-Za-z_][^;\n=]*?\b)?([A-Za-z_]\w*)\s*\([^;\n]*\)\s*\{?\s*$',
+                       unit.read_text(), re.M)
+    placed = [(0, address(a or b, syms), a or b) for a, b in order if address(a or b, syms) is not None]
+    for (_, a, n), (_, b, m) in zip(placed, placed[1:]):
+        if b < a:
+            bad += 1
+            print(f"ORDER {m} (0x{b:08X}) comes after {n} (0x{a:08X}) in the source; move it back")
+    seen = {}
+    for _, _, n in placed:
+        seen[n] = seen.get(n, 0) + 1
+    for n in [n for n, k in seen.items() if k > 1]:
+        bad += 1
+        print(f"TWICE {n}: both C and INCLUDE_ASM (or two definitions) in the unit")
+    # Every retail function of the unit must still be there, as C or INCLUDE_ASM.
+    full = ROOT / "asm" / version / f"{unit_name}.s"
+    if full.exists() and not args.func:
+        source = unit.read_text()
+        for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
+            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
+                bad += 1
+                print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
+    # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
+    # (a stale local asm tree still defines the old label, so the local build hides it).
+    renamed = {f"func_{int(a, 16):08X}": n for n, a in re.findall(
+        r"^\s*(\w+)\s*=\s*0x([0-9A-Fa-f]+)\s*;[^\n]*type:func", (ROOT / "config" / version / "symbol_addrs.txt").read_text(), re.M)
+        if not n.startswith("func_")}
+    for old in sorted(set(re.findall(r"\bfunc_[0-9A-F]{8}\b", unit.read_text())) & renamed.keys()):
+        bad += 1
+        print(f"STALE {old}: symbol_addrs names it {renamed[old]}; use that name")
+    # A symbol the C references but nothing defines (symbol_addrs, the
+    # undefined_*_auto lists, a splat label, or C in this game's tree) links only
+    # against a stale build tree. Real names count too: a mistyped or other-game
+    # name compiles and matches (relocations are compared by address) yet fails the link.
+    known = set(syms) | set(re.findall(r"^\s*(?:PROVIDE\s*\(\s*)?(\w+)\s*=", "".join(
+        p.read_text() for p in (ROOT / "config" / version).glob("undefined_*_auto.txt")), re.M))
+    wanted = undefined - known
+    if wanted:
+        alt = "|".join(sorted(wanted))
+        wanted -= set(subprocess.run(["grep", "-rhoE", rf"^\s*(glabel|dlabel|jlabel|nonmatching) ({alt})\b",
+                                      str(ROOT / "asm" / version)], capture_output=True, text=True).stdout.split()[1::2])
+    if wanted:
+        for path in subprocess.run(["grep", "-rlwE", "|".join(sorted(wanted)), str(ROOT / "src" / version)],
+                                   capture_output=True, text=True).stdout.splitlines():
+            source = Path(path).read_text()
+            wanted = {n for n in wanted if not re.search(
+                rf"^(?!extern\b)[A-Za-z_][^;\n]*\b{n}\s*(\([^;]*$|(\[[^\]]*\])*\s*[=;])", source, re.M)}
+        for name in sorted(wanted):
+            bad += 1
+            print(f"UNDEF {name}: nothing defines it (symbol_addrs, splat label or C); a fresh link fails")
+    print(f"{ok} match, {bad} differ")
+    sys.exit(1 if bad else 0)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""Apply function/data names with provenance.
+
+    python3 tools/names.py apply smt3 names.tsv   # rows: <old name|0xADDR> <new> <evidence|inferred> <note>
+
+Every applied name becomes a curated row in config/<v>/symbol_addrs.txt (above the
+generated blocks, so it wins) and a line in config/<v>/name_sources.txt:
+
+    0x002CF76C  sdfAddHandler  evidence  string "sdfAddHandler : unknown type %d"
+    0x00216CC8  mdlManagerSetFlag  inferred  stores arg to mdl->flags
+
+`evidence` means the binary itself names the function: a message inside it that
+carries its own name (`sdfAddHandler : unknown type %d`). Names from the IDB,
+other decomps, task labels and our own choices are `inferred`: someone chose
+them, following the module-prefix camelCase convention of the evidence names;
+revise freely. C references in src/<v> are renamed; unmatched functions need
+`python3 configure.py --force-split <v>` so asm files follow.
+"""
+import argparse
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+ROW = re.compile(r"^\s*(\S+)\s*=\s*0x([0-9A-Fa-f]+)\s*;(.*)$")
+IDENT = re.compile(r"^[A-Za-z_]\w*$")
+CURATED_END = "// BEGIN "  # first generated block, if symbol_addrs.txt has one
+
+
+def symbols(version):
+    path = ROOT / "config" / version / "symbol_addrs.txt"
+    rows = {}
+    for line in path.read_text().splitlines():
+        if m := ROW.match(line):
+            rows.setdefault(int(m[2], 16), (m[1], m[3].strip()))
+    return path, rows
+
+
+def cmd_apply(args):
+    sym_path, rows = symbols(args.version)
+    by_name = {name: addr for addr, (name, _) in rows.items()}
+    sources = ROOT / "config" / args.version / "name_sources.txt"
+    provenance = {}
+    if sources.exists():
+        for line in sources.read_text().splitlines():
+            if line.strip() and not line.startswith("#"):
+                provenance[int(line.split()[0], 16)] = line
+    renames, curated, errors = {}, {}, []
+    for n, line in enumerate(Path(args.file).read_text().splitlines(), 1):
+        if not line.strip() or line.startswith("#"):
+            continue
+        old, new, kind, *note = line.split("\t") if "\t" in line else line.split(None, 3)
+        addr = int(old, 16) if old.startswith("0x") else by_name.get(old)
+        if addr is None or addr not in rows:
+            errors.append(f"line {n}: unknown symbol {old}")
+            continue
+        if kind not in ("evidence", "inferred") or not IDENT.match(new):
+            errors.append(f"line {n}: bad kind or name: {kind} {new}")
+            continue
+        if by_name.get(new, addr) != addr:
+            errors.append(f"line {n}: {new} already names 0x{by_name[new]:08X}")
+            continue
+        current, attrs = rows[addr]
+        if current != new:
+            renames[current] = new
+        by_name.pop(current, None)
+        by_name[new] = addr
+        rows[addr] = (new, attrs)
+        curated[addr] = f"{new} = 0x{addr:08X}; {attrs}".rstrip()
+        provenance[addr] = f"0x{addr:08X}\t{new}\t{kind}\t{' '.join(note).strip()}"
+    for e in errors:
+        print(e, file=sys.stderr)
+    if errors and not args.force:
+        sys.exit("nothing applied (use --force to apply the valid rows)")
+
+    # symbol_addrs: drop every other row at a renamed address, insert/replace curated rows.
+    lines = sym_path.read_text().splitlines()
+    end = next((i for i, line in enumerate(lines) if line.startswith(CURATED_END)), len(lines))
+    head, tail = lines[:end], lines[end:]
+    keep = lambda line: not ((m := ROW.match(line)) and int(m[2], 16) in curated)
+    head, tail = [l for l in head if keep(l)], [l for l in tail if keep(l)]
+    marker = "// Names from tools/names.py (provenance: name_sources.txt)"
+    if marker not in head:
+        head.append(marker)
+    at = head.index(marker) + 1
+    block = sorted([l for l in head[at:] if ROW.match(l)] + list(curated.values()),
+                   key=lambda l: int(ROW.match(l)[2], 16))
+    head = head[:at] + block
+    sym_path.write_text("\n".join(head + tail) + "\n")
+
+    sources.write_text("# addr\tname\tevidence|inferred\tnote\n" +
+                       "\n".join(provenance[a] for a in sorted(provenance)) + "\n")
+    if renames:
+        pattern = re.compile(r"\b(" + "|".join(map(re.escape, renames)) + r")\b")
+        for path in (ROOT / "src" / args.version).rglob("*.c"):
+            text = path.read_text()
+            changed = pattern.sub(lambda m: renames[m[1]], text)
+            if changed != text:
+                path.write_text(changed)
+    print(f"{len(curated)} names applied, {len(renames)} renamed in src/{args.version}")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    a = sub.add_parser("apply")
+    a.add_argument("version")
+    a.add_argument("file")
+    a.add_argument("--force", action="store_true", help="apply valid rows despite errors")
+    args = ap.parse_args()
+    {"apply": cmd_apply}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    main()
