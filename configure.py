@@ -341,7 +341,20 @@ def objdiff_progress_category(version: str, name: str) -> str:
     # under hand/, not C targets; like the SDK they never enter the game-code totals.
     if name.startswith(f"asm/{version}/hand/"):
         return "handwritten"
+    # splat's .data/.rodata/.bss segments have no base object, so objdiff scores
+    # their empty code comparison as 100%. Keep them out of the game denominator.
+    if name.startswith(f"asm/{version}/data/"):
+        return "data"
     return "sdk" if "/sdk/" in name else "game"
+
+
+def used_categories(categories: list[dict], units: list[dict]) -> list[dict]:
+    """Drop categories that no unit belongs to.
+
+    objdiff measures an empty category as 100% matched, which reads as a
+    finished component rather than an absent one."""
+    present = {c for unit in units for c in unit["metadata"]["progress_categories"]}
+    return [c for c in categories if c["id"] in present]
 
 
 def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
@@ -494,6 +507,7 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
         {"id": "sdk", "name": "Sony SDK / C runtime"},
         {"id": "vu1", "name": "VU1 microcode (binary)"},
         {"id": "handwritten", "name": "Handwritten assembly (not C)"},
+        {"id": "data", "name": "Split data segments (not compared)"},
     ]
     config = {
         "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
@@ -514,12 +528,13 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
             if row["base"]:
                 unit["base_path"] = row["base"]
             config["units"].append(unit)
-    config["progress_categories"] = [{"id": v, "name": VERSIONS[v]["title"]} for v in units] + categories
+    config["progress_categories"] = used_categories(
+        [{"id": v, "name": VERSIONS[v]["title"]} for v in units] + categories, config["units"])
     (ROOT / "objdiff.json").write_text(json.dumps(config, indent=2) + "\n")
     # Per-version configs for the per-version reports; objdiff resolves paths
     # relative to the config's directory.
     for version in units:
-        sub = dict(config, units=[], progress_categories=categories)
+        sub = dict(config, units=[])
         for unit in config["units"]:
             if unit["name"].split("/", 1)[0] != version:
                 continue
@@ -530,13 +545,14 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
                 if key in unit:
                     unit[key] = str(Path("..", "..", unit[key]))
             sub["units"].append(unit)
+        sub["progress_categories"] = used_categories(categories, sub["units"])
         path = ROOT / "build" / version / "objdiff.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(sub, indent=2) + "\n")
         # decomp.dev's headline uses the report's overall matching-code measure.
         # Give it a coherent game-only project, while keeping the full config
         # above available for SDK/VU diagnostics and report.all.json.
-        primary = dict(sub, units=[], progress_categories=[c for c in categories if c["id"] == "game"])
+        primary = dict(sub, units=[])
         for unit in sub["units"]:
             if "game" not in unit["metadata"]["progress_categories"]:
                 continue
@@ -545,6 +561,7 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
                 if key in unit:
                     unit[key] = str(Path("..", unit[key]))
             primary["units"].append(unit)
+        primary["progress_categories"] = used_categories(categories, primary["units"])
         path = ROOT / "build" / version / "progress" / "objdiff.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(primary, indent=2) + "\n")

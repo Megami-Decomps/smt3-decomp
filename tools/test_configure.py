@@ -320,9 +320,14 @@ class ObjdiffProgressTests(unittest.TestCase):
                     "target": f"build/{VERSION}/hand/vu/example.o",
                     "base": None,
                 },
+                {
+                    "name": f"asm/{VERSION}/data/data.data",
+                    "target": f"build/{VERSION}/data/data.data.o",
+                    "base": None,
+                },
             ]
         }
-        self.categories = ["game", "sdk", "vu1", "game", "handwritten"]
+        self.categories = ["game", "sdk", "vu1", "game", "handwritten", "data"]
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(configure, "ROOT", Path(tmp)), \
                 patch.dict(configure.VERSIONS,
@@ -345,7 +350,7 @@ class ObjdiffProgressTests(unittest.TestCase):
     def test_categories_separate_vu1_sdk_handwritten_and_game_code(self) -> None:
         self.assertEqual(
             [category["id"] for category in self.combined["progress_categories"]],
-            [VERSION, "game", "sdk", "vu1", "handwritten"],
+            [VERSION, "game", "sdk", "vu1", "handwritten", "data"],
         )
         for unit, category in zip(self.combined["units"], self.categories):
             self.assertEqual(unit["metadata"]["progress_categories"], [VERSION, category])
@@ -353,7 +358,7 @@ class ObjdiffProgressTests(unittest.TestCase):
     def test_per_version_config_rebases_paths_and_keeps_all_categories(self) -> None:
         self.assertEqual(
             [category["id"] for category in self.per_version["progress_categories"]],
-            ["game", "sdk", "vu1", "handwritten"],
+            ["game", "sdk", "vu1", "handwritten", "data"],
         )
         for actual, row, category in zip(
             self.per_version["units"], self.units[VERSION], self.categories
@@ -376,6 +381,26 @@ class ObjdiffProgressTests(unittest.TestCase):
             self.assertEqual(
                 actual.get("base_path"), "../../../" + row["base"] if row["base"] else None
             )
+
+    def test_split_data_segments_are_not_game_code(self) -> None:
+        for name in (f"asm/{VERSION}/data/data.data", f"asm/{VERSION}/data/bss.bss"):
+            self.assertEqual(configure.objdiff_progress_category(VERSION, name), "data")
+        for name in (f"asm/{VERSION}/data/vutext", f"asm/{VERSION}/data/vudata"):
+            self.assertEqual(configure.objdiff_progress_category(VERSION, name), "vu1")
+        self.assertNotIn("data", [unit["name"] for unit in self.primary["units"]])
+
+    def test_categories_without_units_are_dropped(self) -> None:
+        units = {VERSION: [row for row in self.units[VERSION] if "/sdk/" not in row["name"]]}
+        with tempfile.TemporaryDirectory() as tmp, \
+                patch.object(configure, "ROOT", Path(tmp)), \
+                patch.dict(configure.VERSIONS,
+                           {VERSION: {"serial": SERIAL, "title": "Nocturne (USA)"}}):
+            configure.write_objdiff(units)
+            combined = json.loads((Path(tmp) / "objdiff.json").read_text())
+            per_version = json.loads(
+                (Path(tmp) / "build" / VERSION / "objdiff.json").read_text())
+        for config in (combined, per_version):
+            self.assertNotIn("sdk", [c["id"] for c in config["progress_categories"]])
 
     def test_report_targets_use_matching_projects_and_object_dependencies(self) -> None:
         writer = Mock()
