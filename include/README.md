@@ -97,6 +97,8 @@ carried from HD unchecked; the headers say so.
 | `dds3BasicArrayHandle_t` | 16 | `dds3GetBasicArrayHandle` calls `sdfChipAllocDirect(0x10)` |
 | `dds3PathBasicControl_t` | 36 | `dds3AllocPathBasicWorkData` calls `sdfChipAllocDirect(36)` |
 | `dds3BasicFunction_t` | 24 | **HD only.** See below. |
+| `dds3BasicArray_t` | 8 | `dds3AddWorld` strides the array it builds by 8 |
+| `dds3WorldBasic_t` | 40 | `worldconstructor` calls `sdfChipAllocDirect(0x28)` |
 
 `dds3Basic_t`: `name` +8, `type` +12 (the basic type in the top byte), `workdata`
 +24, `poseset` +28, `next` +32 and `prev` +36 (from `dds3DeleteBasic`'s unlink),
@@ -114,6 +116,27 @@ into 112..191.
 `dds3BasicArrayHandle_t`: the three `s16` indices start at -1 (+0/+2/+4),
 `count` is the `u16` at +6 that `dds3GetBasicArrayCount` returns, `next` +8 and
 `prev` +12 are zeroed at creation.
+
+`dds3WorldBasic_t` is confirmed field by field by one function: `worldconstructor`
+allocates 40 bytes, stores them into the world basic's `workdata` +0x18, and
+initialises every member, as words at 0, 4, 8, 0xC, 0x10, 0x14, 0x20 and 0x24 and
+as halfwords at 0x18 (0), 0x1A (-1), 0x1C (-1) and 0x1E (0). Four more functions
+agree independently: `dds3AddScene` and `dds3DeleteScene` on `firstscene` +0 and
+`lastscene` +4, `dds3SetActiveScene`/`dds3GetActiveScene` on `activescene` +8,
+`dds3SetControlScene`/`dds3GetControlScene` on `controlscene` +0xC,
+`dds3DeleteAllBasicArray` on `firstempty` +0x1A, `lastempty` +0x1C and
+`emptycount` +0x1E, and `dds3GetBasicArrayHandle` on `firstheader` +0x20 and
+`lastheader` +0x24, which it links a new handle onto through the handle's own
+`next` +8 and `prev` +0xC.
+
+`basicarray` +0x14 is a **pointer**, which the IDB gets wrong: its
+`dds3WorldBasic_t` declares an inline `dds3BasicArray_t[10000]` there and so puts
+`basicarraycnt` at +0x13894. `worldconstructor` stores one word at +0x14 and
+`dds3SetBasicArray`, `dds3GetBasicArray` and `dds3DeleteAllBasicArray` all load
+that word and add `8 * index` to it. `dds3BasicArray_t`'s own 8-byte stride and
+its `next` +4 and `prev` +6 come from `dds3AddWorld`, which threads the free
+chain through them and writes -1 into `prev` for slot 0 and into `next` for the
+last slot.
 
 `dds3BasicFunction_t`: `constructor` +0 (called by `dds3AllocBasic`, returning 1 on
 success), `destructor` +4 (`dds3DeleteBasic`), `mainprocuder` +8 and
@@ -136,6 +159,7 @@ its stride: `reserve1`, `reserve2` and the 24-byte size are HD's and
 | `sdfChipCB_tag` | 12 | `sdfChipAllocDirect` indexes `sdfChipCB` with `(i*2+i)*4` |
 | `sdfChipPageInfo_tag` | 24 | `sdfChipInit` divides by `0x1018` (4096 + 24) and strides by 24 |
 | `sdfMemHandle_t` | 16 | `sdfMemInit` calls `sdfChipAllocDirect(16)` |
+| `sdfMemHandleCB_t` | 40 | `sdfMemCB` is 0x577F18 and the next global 0x577F40 |
 | `sdfGsMemSlice_t` | 28 | `sdfGsMemInit` calls `sdfChipAllocDirect(28)` |
 | `sdfTexHandle_t` | 64 | `sdfTexNew` calls `sdfChipAllocZeroDirect(64)` |
 | `sdfTexPacket_t` | 64 | `sdfTexMakeGIFPacketSub` calls `sdfChipAllocDirect(64)` |
@@ -155,13 +179,30 @@ uses `lhu`), `mlock` +14 as `u16` (`sdfMemLock` increments it with `lhu`/`sh`).
 A block's size is the next handle's `ptr` minus its own, which `sdfMemGetSize`
 computes, so `prev` +0 and `next` +4 are fixed too.
 
+`sdfMemHandleCB_t` is confirmed field by field by `sdfMemInit`, which writes both
+embedded guard handles (+0/4/8/0xC/0xE and +0x10/0x14/0x18/0x1C/0x1E, each with
+`stat` 2 and `mlock` -1), `allocPtr` +0x20 and `allocSize` +0x24, and hands the
+first real handle `&sdfMemCB.tailGuard` as its `next`. The guards are inline
+here; the HD build holds pointers to them. `enum sdf_mem_stat` is from
+`sdfMemAllocDirect`, which takes the first handle whose `stat` is 0, stops at the
+one whose `stat` is 2, and stamps the one it took 1, and from
+`sdfMemFreeDirect`, which writes 0 back.
+
 `sdfTexHandle_t`: `prev`/`next` from `sdfTexLink`; `width` +12 and `height` +14 as
 `s16`, `pixelGsHandle` +16, `clutGsHandle` +20, `numOfCLUT` +24, `CLUTFormat` +25,
 `pixelFormat` +26, `numOfMipmap` +27 and `clutColor` +56 all from `sdfTexNew`'s
 stores at the matching widths; `packet` +40 from `sdfTexGetPacket`, `numOfCLUT`
-again from `sdfTexGetCLUTCount`'s `lbu`. Nine fields in the middle are IDB names at
+again from `sdfTexGetCLUTCount`'s `lbu`. Six fields in the middle are IDB names at
 IDB positions with no load or store found for them, and are marked `unconfirmed`
 in the header; the 64-byte size bounds them.
+
+`sdfTexSetMonoClut` pins the last three. It reads `clutData` +48 as the source,
+divides `clutDataSize` +52 by 4 or 2 depending on `CLUTFormat` +25 to get the
+entry count, then loads `monoClutData` +60 as a word, allocates it with
+`sdfAllocAuto` if it is null, stores it back, and fills it with one `sb` per
+entry. So `monoClutData` is a `u8 *` to a lazily built intensity table, not the
+`u8` the IDB has; the struct is 64 bytes either way, since the pointer exactly
+replaces the old field plus its three bytes of tail padding.
 
 `sdfMat_t`: `duty` +6, `packet[2]` +8, `ambient` +16, `diffuse` +20,
 `multiTexDiffuse` +24, `fdBias` +64 and `fdSoften` +68 from `sdfMatNew`;
@@ -446,6 +487,271 @@ the top of this document:
   `sdfModelMorphParm_t *target[2]`, 8 bytes. `sdfModelMakeMorphList` writes two
   8-byte pairs per 16-byte element, so the targets are inline.
 
+### draw.h
+
+The GS side: the frame buffers, the three-slot draw queue, the draw environment,
+and the A+D register packets the `sdfPrim` and `sdf2D` builders file into an
+ordering table. Every one of these is a packet whose first 32 bytes are
+`sdfGrPacketHeader_t` (`libsdf.h`), written by `sdfGrSetRegsPacketHeader`: the
+DMA tag's `qwc` is the register count plus one, its `dat1` is a VIF DIRECT of
+the same length, and the GIF tag's NLOOP is the register count with REGS 0xE,
+A+D. That one function is what makes each packet's size `32 + 16 * regs`.
+
+| struct | size | evidence |
+|---|---|---|
+| `sdfGrScreenDef_t` | 12 | `sdfGrSetFrameSetMode` indexes `sdfGrFrameModes` by `mode * 12` |
+| `sdfGrFrameSet_t` | 20 | fields through `zbuffHandle` +0x10; `sdfGrFreeFrameSet` frees the last one |
+| `sdfGrDrawState_t` | 16 | `sdfGrReqDraw` and `sdfDrawSync` index `sdfGrDrawState` with `sll 4` |
+| `sdfGrDrawDefParmPacket_t` | 64 | `sdfGrSetDrawDefParmPacket` writes four A+D pairs |
+| `sdfGrDrawFramePacket_t` | 64 | `sdfGrSetDrawFramePacket` writes four |
+| `sdfGrClearPacket_t` | 80 | `sdfGrSetClearPacket` writes five |
+| `sdfGrDrawEnv_t` | 368 | `sdfGrSetDrawEnv` passes 21 registers, and writes to +0x168 |
+| `sdf2DTexPacket_t` | 80 | `sdf2DGetTexPacketSize` returns 0x50 |
+| `sdfPrimTransElem_t` | 32 | `sdfPrimSetOpaqueElem` writes two A+D pairs |
+| `sdfPrimTransPacket_t` | 64 | `sdfPrimSetOpaquePacket` writes a two-register header at +0 and the elem at +0x20 |
+| `sdfPrimTexflushElem_t` | 16 | `sdfPrimSetTexflushElem` writes one pair |
+| `sdfPrimTexflushPacket_t` | 48 | `sdfPrimSetTexflushPacket`, one register |
+| `sdfPrimBitBltElem_t` | 64 | `sdfPrimSetBitBltElem` writes four pairs |
+| `sdfPrimBitBltPacket_t` | 96 | `sdfPrimSetBitBltPacket`, four registers |
+| `sdfModelDrawEnvSet_t` | 96 | `sdfModelSetDrawEnv` strides the four sets by 0x60 |
+| `sdfModelDrawEnvTerm_t` | 48 | the same function's tail, a draw tag then a DMA tag at +0x20 |
+| `sdfModelDrawEnv_t` | 432 | four sets then the terminator at +0x180 |
+
+`sdfGrFrameSet_t` is confirmed field by field three times over.
+`sdfGrSetFrameSetMode` writes `w` +0, `h` +2 and `buffH` +4 as `sh` and
+`pixelFormat` +6 and `zbuffFormat` +7 as `sb`, and clears +8, +0xC and +0x10.
+`sdfGrMakeFrameSet` allocates the two frame buffers at `w` by `buffH` in
+`pixelFormat` into +8 and +0xC and the depth buffer in `zbuffFormat` into +0x10,
+and `sdfGrFreeFrameSet` frees exactly those three. `sdfGrSetDrawEnv` indexes
+`frameHandle` by `buffId` with a stride of 4, which is what makes it an array of
+two rather than two fields.
+
+`sdfGrDrawState_t`: `tag` +0 and `preDrawHead` +4 from `sdfGrReqDraw`, which
+zeroes both and then stores the submitted draw tag and the head of the predraw
+chain; `sdfGrDrawFrame` walks that chain through `sdfPreDrawHook_t.next` +0 and
+calls `predrawFunc` +4, which is how the second field is known to be a hook and
+not a tag. `mode` +8, `buffId` +9, `frameId` +0xA and `halfOffset` +0xB are all
+`lbu`/`sb`: `sdfGrReqDraw` writes `sdfFrameId` into +9, `sdfGrDrawFrame` writes
+`sdfGrDrawFrameId` into +0xA and the field parity into +0xB, and
+`sdfDeliverDrawEnd` is handed +8, +0xA and +0xB in that order. `sdfDrawSync`
+reads +8 and compares it against 2, so it is a state and not a flag. +0xC is
+never read; it is named `pad`.
+
+The four register packets are confirmed register by register, because each
+builder writes both halves of every A+D pair and the register address names the
+field: `sdfGrSetDrawDefParmPacket` writes PRMODECONT 0x1A, COLCLAMP 0x46, DTHE
+0x45 and TEXA 0x3B at +0, +0x10, +0x20 and +0x30; `sdfGrSetDrawFramePacket`
+writes FRAME, ZBUF, XYOFFSET and SCISSOR, choosing the context-2 address of each
+when its `aContext` argument is set; `sdfGrSetClearPacket` writes TEST, PRIM,
+RGBAQ and two XYZ2; `sdf2DMakeTexPacket` writes TEX1, TEX0 and CLAMP, taking
+each address from the caller's base so the same packet serves either context.
+`sdfGrSetDrawEnv` then places `defParm` +0x20, `frame1` +0x60, `frame2` +0xA0,
+`clear` +0xE0 and the four loose registers at +0x130, +0x140, +0x150 and +0x160.
+
+`sdfPrimTransElem_t` has eight builders, one per transparency layer per context,
+and all eight write TEST at +0 and ALPHA at +0x10. `enum sdf_gs_alpha` and
+`enum sdf_gs_test` are the values they write: `SDF_GS_ALPHA_BLEND` 0x44 with
+`SDF_GS_TEST_ALPHAGEQ` 0x717FB from `sdfPrimSetOpaqueElem` and
+`sdfPrimSetSemiTransElem` (identical bodies but for the register addresses),
+`SDF_GS_ALPHA_ADD` 0x48 and `SDF_GS_ALPHA_SUBTRACT` 0x42 both with
+`SDF_GS_TEST_NOZWRITE` 0x71801 from the `AddTrans` and `SubTrans` setters, and
+`SDF_GS_TEST_DRAWENV` 0x517FB from `sdfGrSetDrawEnv`. `enum sdf_gs_reg` lists
+only the register addresses one of the functions read in this pass actually
+writes.
+
+`sdfModelDrawEnv_t` is `sdfModelSetDrawEnv` end to end: it calls
+`sdfPrimSetOpaquePacket`, `sdfPrimSetSemiTransPacket`, `sdfPrimSetAddTransPacket`
+and `sdfPrimSetSubTransPacket` on +0x20, +0x80, +0xE0 and +0x140, so the sets are
+96 bytes apart with the packet at +0x20 of each; it then runs
+`sdfDrawTagInit`/`sdfDrawTagLink` on each set's own +0, stamps a VIF FLUSH into
+each packet's `dat0` at set+0x28, and finally initialises a fifth draw tag at
++0x180 whose one packet is the DMA tag at +0x1A0. `sdfModelDrawEnvLinkOt` files
+set *i* through `ot[i]->regFunc` +0x10 and the terminator through `ot[3]`'s.
+
+`sdfGrScreenDef_t` is the one struct here with an unconfirmed field.
+`sdfGrSetFrameSetMode` reads +0, +2 and +4 as `lh` and +6 and +8 as `lhu`, so the
+table entry's `pixelFormat` and `zbuffFormat` are `u16` where the frame set's are
+`u8`; the 12-byte stride leaves a halfword at +0xA that nothing in `sdfGraph.c`
+reads. It is HD's `fieldFrameMode`, marked unconfirmed.
+
+`sdfModelDrawEnv*` sit in `draw.h` rather than `model.h`, against the `sdfModel*`
+naming, because they are nothing but `sdfDrawTag_t` and `sdfPrimTransPacket_t`
+and `model.h` does not include this header. `sdfGrScreenDef_t` is HD's name for
+the mode table entry; the IDB has no type for it.
+
+### draw3d.h
+
+The camera, light, fog and transform packets VU1 shades with, and the
+generated-geometry path that turns a mesh into GS primitives on VU0.
+`libsdf.h` declares `sdf3DLightParallelPacket_t` and `sdf3DFogPacket_t` as opaque
+so `sdfDrawTag_t` can point at them; this is where they get bodies.
+
+| struct | size | evidence |
+|---|---|---|
+| `sdf3DScreenParam_t` | 160 | `sdf3DSetCamera` copies 160 bytes into `sdf3DScreenParam` |
+| `sdf3DViewportPacket_t` | 208 | `sdf3DMakeViewportPacket` sets `qwc` 12 and writes to +0xCC |
+| `sdf3DTmPacketData_t` | 128 | `sdf3DPrimSetTmPacket` writes +0 through +0x7C |
+| `sdf3DLightParallelPacket_t` | 224 | `sdf3DMakeLightParallelPacket` sets `qwc` 13 |
+| `sdf3DFogParam_t` | 20 | fields through `color` +0x10; see below |
+| `sdf3DFogPacket_t` | 80 | `dds3DrawFirstProcess` calls `sdfGrAllocPacketBuff(0x50)` |
+| `sdf3DInitPacket_t` | 32 | `sdf3DLinkInitPacket` writes two DMA tags |
+| `sdf3DPrimPolyParm_t` | 44 | `sdf3DPrimMakePoly` reads +0 through +0x28 and nothing beyond |
+| `sdfCorePacketHeader_t` | 16 | the prim header sits at +0x10 |
+| `sdfCorePrimHeader_t` | 8 | `corePktInitCb` reads four halfwords and takes the payload from +8 |
+| `sdfCorePacket_t` | 24 | `sdfCoreDrawScanOneSkinNodes` reads the bone count at +0x18 |
+| `corePktCb_t` | **unproven** | offsets only; see below |
+
+`sdf3DScreenParam_t` is confirmed field by field by `sdf3DMakeScreenParam`
+alone. It reads `flags` +0 (testing bit 1 for the half-height Y scale and bit 2
+for deriving `projDist` from `fovy`), `aspect` +4, `projDist` +8, `fovy` +0xC,
+`ox` +0x10, `oy` +0x14, `width` +0x18, `height` +0x1C, `zMin` +0x20, `zMax`
++0x24, `nearClip` +0x28 and `farClip` +0x2C, stores the projection as four
+`sqc2` at +0x30, and writes `scale` +0x70..0x7C and `trans` +0x80..0x8C one float
+at a time. `cameraPos` +0x90 is `sdf3DMakeViewportPacket`'s, which inverts the
+camera matrix and stores the result into both the packet and the parameter. The
+160-byte size is `sdf3DSetCamera`'s copy into the global `sdf3DScreenParam`: it
+runs from the parameter to parameter+160 in 32-byte steps, and the global at
+0x529670 ends exactly where `sdf3DScreenTm` begins at 0x529710. Two names in the
+IDB's data, `sdfDrawFaceListParam` at 0x5296E0 and `sdfDrawFaceListParam2` at
+0x5296F0, are that global's own `scale` and `trans` quadwords labelled
+separately, not neighbouring globals.
+
+`sdf3DLightParallelPacket_t` is confirmed field by field by
+`sdf3DMakeLightParallelPacket`, which opens with `sh 13` at +0 (13 quadwords of
+payload after a 16-byte header, which is the 224 bytes exactly) and the two VIF
+codes at +8 and +0xC. Its loop runs three times writing one float into each of
++0x10, +0x20 and +0x30 and advancing by 4, so `normal[3]` holds the three light
+directions as a matrix's *columns*; the same loop writes `color[i]` as a
+quadword at +0x50 + 0x10i, and `colorBase` +0x40 is a `lq`/`sq` copy of
+`color[0]`. The ambient argument lands in both +0x80 and +0x90, which is
+`color[3]` and `color[4]`, and the lighting matrix is four `sqc2` at +0xA0.
+
+`sdf3DFogPacket_t` is confirmed field by field by `sdf3DMakeFogPacket`: the DMA
+tag 0x20000004 at +0, the VIF codes at +8, `fogParm[4]` at +0x10 as four
+`swc1`, the GIF tag at +0x20 with REGS 0xE, the A+D pair at +0x30 whose register
+is 0x3D, GS FOGCOL, `mscal` +0x40 and the three zeroed words to +0x4C. The size
+is also the literal its only caller allocates. `sdfCoreDrawSetFog` reads
+`fogParm` back as one `lq` from +0x10, which pins it again.
+
+`sdf3DFogParam_t` is the argument of that function, read at +0, +4, +8, +0xC and
++0x10. The names are HD's and the arithmetic agrees with them: `fogParm[0]` is
++4 and `fogParm[1]` is +0, which is the minimum then the maximum, and the depth
+terms divide by `+0xC - +8`, which is far minus near. No allocation of one was
+found, so the 20-byte size is only its own fields.
+
+`sdf3DTmPacketData_t` closes the `void *tmPacket` `model.h` left open.
+`sdf3DPrimSetTmPacket` stores the world matrix as four `sqc2` at +0..0x30, the
+three rows it derives for normals at +0x40, +0x50 and +0x60, and the four
+command words at +0x70 (ITOP 0x04000010, MSCAL 0x14000014, then two zeroes), so
+one packet is 128 bytes and `sdfModelNode_t.tmPacket`'s 256 is two of them, one
+per frame buffer, exactly as the `frameId * 128` index said.
+
+`sdfCorePacket_t` is the type `sdfModelLinkOt`'s type 3 path reaches through
+`sdfCorePacketGen`. That function reads `packetType` +0 as `lbu` and switches on
+7 and 8, `matIndex` +6 as `lhu` and indexes the root's material list by it,
+`extData[0]` +8 as a word and splits it into a shape count and a morph index,
+and hands `packet + 0x10` to `corePktInitCb`. `corePktInitCb` reads four
+halfwords from there into the draw state, as `faceCount`, `pointCount`,
+`attrBits` masked by the draw's own mask (keeping the unmasked copy as
+`orgAttrBits`) and `packetBits`, and takes the mesh body as `primHeader + 8`.
+`sdfCoreDrawScanOneSkinNodes` confirms the same two offsets from the other end:
+it tests `packetBits` at packet+0x16 for 0x800 and then reads the bone count at
+packet+0x18 and the bone ids from +0x1A. So the header is 16, the prim header 8
+and the payload starts at 24. `mpgType` +1, `priority` +2 and `size` +4 have no
+reader in any of the functions read, and are marked unconfirmed; they are
+`sdfShapePacket_t`'s first eight bytes, where the equivalents *are* confirmed.
+
+`sdf3DPrimPolyParm_t` is confirmed field by field by `sdf3DPrimMakePoly`:
+`faceCount` +0 and `pointCount` +2 as `lh`, `attr` +4 as `lhu` or'd with 0x68,
+`attrInhibit` +6 as `lhu` then inverted, `color` +8, and then one `lw` per array
+at +0xC, +0x10, +0x14, +0x18, +0x1C and +0x20, each non-null one adding its own
+PRIM bit and its own UNPACK; `allocator` +0x24, called in place of
+`sdfGrAllocPacketBuff` when set, and `zBias` +0x28 as `lwc1`. Nothing is read
+past +0x28, so the struct is 44.
+
+`corePktCb_t` is the exception in this document: **its offsets are proven and
+its size is not**. `sdfCorePacketGen` is the only function that declares one, on
+its own stack, so there is no allocation and no stride. Every offset from
+`tmSave` +0 to `matPacket2` +0xB4 is a load or a store: `corePktInitCb` writes
++0x40, +0x42, +0x44, +0x48, +0x4C, +0x80 and +0x90; `corePktSetupPointBuff`
+writes +0x64 through +0x74 and puts `&cb->extPointTop` into +0x7C;
+`corePktOpenAndEmit` writes the opened packet buffer at +0x80, the closing tag's
+address at +0x84 and the VU1 address at +0x88 and +0x8C, which `corePktClosePacket`
+reads back and compares to decide whether anything was emitted;
+`corePktClipFace` and `corePktBuildFaceList` write +0x50 and +0x52 and read
++0x94 and +0xAC;
+the emit routines read +0x54, +0x58, +0x5C, +0x60, +0x78 and +0xA4;
+`sdfCorePacketGen` writes +0x9C, +0xA0, +0xA4 and +0xA8 as it lays out the
+arrays, +0xAC as `+1.0` or `-1.0` from its `reverse` argument, and +0xB0 and
++0xB4 as copies of `attrBits` and `matPacketPtr`. `tmSave` is an inline
+`sdfMatrix4_t`: `sdfCorePacketGen` stores four quadwords into +0..0x30 and
+`corePktEmitTexTris`, `corePktBuildFaceList` and `corePktRelightBackFaces` `lq`
+them back. The header therefore declares the struct through +0xB4, 184 bytes,
+and `tools/header_layout.c` carries offsets for it and no size.
+
+`vertexPtr` +0x98 is the one named field with no access found: in the paths read
+the vertex base stays in a register and is passed as an argument. The three
+pointer and two count slots at +0x64..+0x74 are named from HD; the code shows
+`corePktSetupPointBuff` filling them from the vertex count, but not which is
+which.
+
+`enum sdf_core_attr` and `enum sdf_core_packet_bit` are the bit tests in
+`sdfCorePacketGen`, `corePktEmitAllPasses` and `corePktOpenAndEmit`: 0x10
+textured, 0x800 skinned and 0x1000 blend-shaped in the geometry word, 0x1000 the
+multi-texture pass and 0x4000 the two-sided second batch in the attribute word.
+The names are sdfhook's, which took them from the same branches.
+
+#### sdfGsState_t is not a game type
+
+It is sdfhook's own helper: a C++ struct with default member values and a
+`constexpr sdfGetGsStateForOt` that returns one per ordering table. No such
+struct exists in the IDB and nothing in the binary lays those three values out
+side by side. The engine's representation is the A+D register pair in
+`sdfPrimTransElem_t`, so what is ported here is the pair of enums in `draw.h`
+instead. sdfhook's *values* are right: its `{0x48, 0x71801}` for table 2 and
+`{0x42, 0x71801}` for table 3, with `{0x44, 0x717FB}` for 0 and 1, are exactly
+what `sdfModelSetDrawEnv`'s four setters write, in that order.
+
+#### Disagreements with sdfhook
+
+Three, all resolved in favour of the retail code.
+
+- `corePktCb_t`: sdfhook asserts 320 bytes. 320 is `sdfCorePacketGen`'s whole
+  stack frame, which also holds that function's own spill slots: it saves `$ra`
+  at frame+0x128 and two FPRs at +0x130 and +0x138, which cannot be inside a
+  struct it passes by pointer. No `corePkt*` callee touches anything above
+  +0xB4. So 320 is not a size claim about the struct and is not asserted here;
+  every sdfhook offset from +0 to +0xB4 agrees with this header.
+- `corePktCb_t.head`: sdfhook has `u8 head[64]`. The first 64 bytes are a
+  matrix, written as four `sqc2` and read back as `lq` by three different
+  routines, so it is declared `sdfMatrix4_t tmSave`, which is also HD's name for
+  it. Nothing about the layout differs.
+- `sdfGrDrawState_t.field_C`: sdfhook names it `field_C`, which is honest and
+  matches the code. It is `pad` here on the same evidence: nothing reads it.
+
+Everything else checked in this pass agrees with sdfhook exactly, including the
+two sizes it could only have got from the same `qwc` fields (`sdf3DFogPacket_t`
+80 and `sdf3DLightParallelPacket_t` 224, both of which its own header records
+having corrected once).
+
+#### Disagreements with the HD reconstruction
+
+Two more instances of failure modes this document already lists, plus one new
+one:
+
+- **An inline struct became a pointer, again.** HD's `sdfCorePacketCb_t.tmSave`
+  is a `sdfMatrix4_t *`. It is the inline 64-byte matrix above, which is what
+  puts every HD field from `faceCount` on 0x3C below its real offset.
+- **An inline array became a pointer, again.** HD's `sdf3DFogPacket_t` has
+  `dmatag`, `giftag` and `fogColor` as pointers and so comes out at 28 bytes
+  instead of 80. All three are inline tags the DMAC and GIF read in place.
+- **New: a halfword pair became one field and vice versa.** HD's
+  `sdfGrScreenDef_t` gives `pixelFormat` and `zbuffFormat` as `u16` and
+  `sdfGrFrameSet_t` as `u8`. Both are right, and they are different types for
+  the same thing: `sdfGrSetFrameSetMode` reads the table's with `lhu` and writes
+  the frame set's with `sb`. A type copied from the wrong one of the two would
+  move every pointer in the frame set.
+
 ## What was deliberately left out
 
 The HD set is 272 headers, most of it per-effect particle state
@@ -455,24 +761,36 @@ use until someone decompiles that effect. Also left behind:
 - `effect.h` (3673 lines), `newbattle.h`, `field.h`, `facility.h`, `event.h`,
   `camp.h`, `newdata.h` and the rest of the gameplay headers. Each needs the same
   per-struct verification as the above and none of it is foundational.
-- The 3D and core-packet half of sdfhook: `sdf3DScreenParam_t`,
-  `sdf3DLightParallelPacket_t`, `sdf3DFogPacket_t`, `sdf3DPrimPolyParm_t`,
-  `sdfCorePacket_t`, `sdfGsState_t`, `corePktCb_t`, `sdfGrDrawEnv_t` and the
-  2D primitive packets. `sdfDrawTag_t` already points at the first two as
-  opaque types, and `sdfModelLinkOt`'s type 3 path goes through
-  `sdfCorePacketGen`, so that is the natural next block.
-- `sdf3DTmPacketData_t`: `sdfModelNode_t.tmPacket` is 256 bytes from
-  `sdfModelAllocTmPacket`, indexed by `frameId * 128`, which is all this pass
-  proved. The field layout of one 128-byte packet is `sdf3DPrimSetTmPacket`'s
-  and was not recovered, so the member stays `void *`.
-- The generated-geometry shape packet types, `sdfShapePacket_t.packetType` 4
-  through 8. `sdfModelLinkDrawPacket` only forwards them to `sdfCorePacketGen`,
-  so their bodies belong with the core-packet block above.
-- `sdfGrFrameSet_t`, `sdfGrDrawState_t` and the rest of sdfhook's frame and
-  draw-environment types. `sdfGrOt_t` is here because the model and billboard
-  paths both end in its `regFunc`; the others do not.
+- The body of a generated mesh: `corePktCb_t.dataPtr` points at a VIF stream
+  whose UNPACKs `sdfCorePacketGen` walks with pointer arithmetic and never a
+  struct, so there is nothing to declare but the counts and flags in
+  `sdfCorePrimHeader_t`, which `draw3d.h` has. The batch header sdfhook calls
+  `sdfCoreBatchHeader_t` is that same four-halfword header read at a different
+  address, not a second type.
+- `corePktCb_t`'s size. See `draw3d.h` above: the offsets are proven and the
+  size needs a second declaration site, which does not exist in this binary.
+- The rest of sdfhook's draw-environment family: `sdfGrStdDrawEnv_t` (544),
+  `sdfGrStdDrawEnvExt_t`, `sdfGrAlphaMaskPacket_t`, `sdfGrFramePacket_t`,
+  `sdfGrDrawFrame_t` and `frDrawEnvPkt_t`. All are compositions of the four
+  register packets `draw.h` now has, over `sdfGrSetStdDrawEnv`,
+  `sdfGrStdDrawEnvPredraw` and `sdfGrSetFramePacket`, which were not read in
+  this pass. The same goes for the per-primitive `sdfPrim*Elem_t` family
+  (`Sprite`, `F3`, `F4`, `G3`, `G4`, `Ft3`, `Ft4`, `Gt3`, `Gt4`, `Rect`,
+  `Line`, `BoxLine`): one `sdfPrimSet*Elem` and one `sdfPrimLink*` each, 24
+  functions, mechanical but not yet done.
+- The GIF PACKED register structs (`sdfGifRgbaq_t`, `sdfGifUv_t`,
+  `sdfGifXyz2_t`, `sdfGrSpritePrim_t`) and the register bitfield helpers
+  sdfhook carries. `draw.h` has the register *addresses* as `enum sdf_gs_reg`
+  and the four ALPHA and TEST words the engine actually writes; the field
+  decompositions are hardware documentation, not recovered layout.
+- `sdfLoadImagePacket_t` (176) and `sdfStoreImagePacket_t`, over `sdfSetLoadImage`
+  and `sdfSetStoreImage`. Both open with the `sdfPrimBitBltElem_t` that
+  `draw.h` proves, so they are the cheapest thing left on this list.
 - `dds3DrawEnv_t`: 15 pointer fields in HD, expanded inline in the IDB to 7136
-  bytes. Neither reading is checked against code, so it is not here.
+  bytes. Neither reading is checked against code, so it is not here. sdfhook
+  has it inline at every member, which is now the more likely reading given
+  `sdfGrFrameSet_t` and `sdfMemHandleCB_t` both turned out that way, but it
+  still needs `dds3InitDrawEnvSub` read end to end.
 - `types.h`: `common.h` already supplies the primitives, and the sdf math types
   live in `libsdf.h` where the engine keeps them. HD's `UNKNOWN_ARRAY_SIZE` and
   `UNKNOWN_DEFINE_VALUE` placeholders are not carried over.
@@ -498,7 +816,7 @@ number above with the array-sized-by-condition trick, since ee-gcc 2.96 has no
 
 `python3 tools/test_headers.py` compiles it with the project's own `cc1` and
 `ee-as`, then compiles it again with one size deliberately wrong to prove the
-claims are not passing vacuously. It prints the claim count on success, 381 as
+claims are not passing vacuously. It prints the claim count on success, 559 as
 of this pass. A wrong number gives `size of array 'static_assert_mNN' is
 negative`.
 

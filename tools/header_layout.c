@@ -10,6 +10,8 @@
 #include "model.h"
 #include "motion.h"
 #include "billboard.h"
+#include "draw.h"
+#include "draw3d.h"
 
 #define ASSERT_AT(line, cond) typedef char static_assert_##line[(cond) ? 1 : -1]
 #define SZ(line, type, bytes) ASSERT_AT(line, sizeof(type) == (bytes))
@@ -438,6 +440,168 @@ OFF(d77, sdfMultiBillBoardVc1Packet_t, vif_unpack6, 124);
 OFF(d78, sdfMultiBillBoardVc1Packet_t, xyOffset, 128);
 OFF(d79, sdfMultiBillBoardVc1Packet_t, vif_itop, 160);
 OFF(d80, sdfMultiBillBoardVc1Packet_t, vif_mscal, 164);
+
+/* draw.h */
+SZ(g01, sdfGrScreenDef_t, 12);
+SZ(g02, sdfGrFrameSet_t, 20);
+SZ(g03, sdfGrDrawState_t, 16);
+SZ(g04, sdfGrDrawDefParmPacket_t, 64);
+SZ(g05, sdfGrDrawFramePacket_t, 64);
+SZ(g06, sdfGrClearPacket_t, 80);
+SZ(g07, sdfGrDrawEnv_t, 368);
+SZ(g08, sdf2DTexPacket_t, 80);
+SZ(g09, sdfPrimTransElem_t, 32);
+SZ(g10, sdfPrimTransPacket_t, 64);
+SZ(g11, sdfPrimTexflushElem_t, 16);
+SZ(g12, sdfPrimTexflushPacket_t, 48);
+SZ(g13, sdfPrimBitBltElem_t, 64);
+SZ(g14, sdfPrimBitBltPacket_t, 96);
+SZ(g15, sdfModelDrawEnvSet_t, 96);
+SZ(g16, sdfModelDrawEnvTerm_t, 48);
+SZ(g17, sdfModelDrawEnv_t, 432);
+
+OFF(g20, sdfGrScreenDef_t, pixelFormat, 6);
+OFF(g21, sdfGrScreenDef_t, zbuffFormat, 8);
+OFF(g22, sdfGrFrameSet_t, buffH, 4);
+OFF(g23, sdfGrFrameSet_t, pixelFormat, 6);
+OFF(g24, sdfGrFrameSet_t, zbuffFormat, 7);
+OFF(g25, sdfGrFrameSet_t, frameHandle, 8);
+OFF(g26, sdfGrFrameSet_t, zbuffHandle, 16);
+OFF(g27, sdfGrDrawState_t, preDrawHead, 4);
+OFF(g28, sdfGrDrawState_t, mode, 8);
+OFF(g29, sdfGrDrawState_t, buffId, 9);
+OFF(g30, sdfGrDrawState_t, frameId, 10);
+OFF(g31, sdfGrDrawState_t, halfOffset, 11);
+OFF(g32, sdfGrDrawDefParmPacket_t, colclamp, 16);
+OFF(g33, sdfGrDrawDefParmPacket_t, dthe, 32);
+OFF(g34, sdfGrDrawDefParmPacket_t, texa, 48);
+OFF(g35, sdfGrDrawFramePacket_t, zbuf, 16);
+OFF(g36, sdfGrDrawFramePacket_t, xyoffset, 32);
+OFF(g37, sdfGrDrawFramePacket_t, scissor, 48);
+OFF(g38, sdfGrClearPacket_t, prim, 16);
+OFF(g39, sdfGrClearPacket_t, rgbaq, 32);
+OFF(g40, sdfGrClearPacket_t, xyzA, 48);
+OFF(g41, sdfGrClearPacket_t, xyzB, 64);
+OFF(g42, sdfGrDrawEnv_t, defParm, 32);
+OFF(g43, sdfGrDrawEnv_t, frame1, 96);
+OFF(g44, sdfGrDrawEnv_t, frame2, 160);
+OFF(g45, sdfGrDrawEnv_t, clear, 224);
+OFF(g46, sdfGrDrawEnv_t, test1, 304);
+OFF(g47, sdfGrDrawEnv_t, alpha1, 320);
+OFF(g48, sdfGrDrawEnv_t, test2, 336);
+OFF(g49, sdfGrDrawEnv_t, alpha2, 352);
+OFF(g50, sdf2DTexPacket_t, tex1, 32);
+OFF(g51, sdf2DTexPacket_t, tex0, 48);
+OFF(g52, sdf2DTexPacket_t, clamp, 64);
+OFF(g53, sdfPrimTransElem_t, alpha, 16);
+OFF(g54, sdfPrimTransPacket_t, elem, 32);
+OFF(g55, sdfPrimTexflushPacket_t, elem, 32);
+OFF(g56, sdfPrimBitBltElem_t, trxpos, 16);
+OFF(g57, sdfPrimBitBltElem_t, trxreg, 32);
+OFF(g58, sdfPrimBitBltElem_t, trxdir, 48);
+OFF(g59, sdfPrimBitBltPacket_t, bitblt, 32);
+OFF(g60, sdfModelDrawEnvSet_t, transPacket, 32);
+OFF(g61, sdfModelDrawEnvTerm_t, footer, 32);
+OFF(g62, sdfModelDrawEnv_t, term, 384);
+
+/* draw3d.h */
+SZ(v01, sdf3DScreenParam_t, 160);
+SZ(v02, sdf3DViewportPacket_t, 208);
+SZ(v03, sdf3DTmPacketData_t, 128);
+SZ(v04, sdf3DLightParallelPacket_t, 224);
+SZ(v05, sdf3DFogParam_t, 20);
+SZ(v06, sdf3DFogPacket_t, 80);
+SZ(v07, sdf3DInitPacket_t, 32);
+SZ(v08, sdf3DPrimPolyParm_t, 44);
+SZ(v09, sdfCorePacketHeader_t, 16);
+SZ(v10, sdfCorePrimHeader_t, 8);
+SZ(v11, sdfCorePacket_t, 24);
+
+OFF(v20, sdf3DScreenParam_t, aspect, 4);
+OFF(v21, sdf3DScreenParam_t, projDist, 8);
+OFF(v22, sdf3DScreenParam_t, fovy, 12);
+OFF(v23, sdf3DScreenParam_t, ox, 16);
+OFF(v24, sdf3DScreenParam_t, oy, 20);
+OFF(v25, sdf3DScreenParam_t, width, 24);
+OFF(v26, sdf3DScreenParam_t, height, 28);
+OFF(v27, sdf3DScreenParam_t, zMin, 32);
+OFF(v28, sdf3DScreenParam_t, zMax, 36);
+OFF(v29, sdf3DScreenParam_t, nearClip, 40);
+OFF(v30, sdf3DScreenParam_t, farClip, 44);
+OFF(v31, sdf3DScreenParam_t, TM, 48);
+OFF(v32, sdf3DScreenParam_t, scale, 112);
+OFF(v33, sdf3DScreenParam_t, trans, 128);
+OFF(v34, sdf3DScreenParam_t, cameraPos, 144);
+OFF(v35, sdf3DViewportPacket_t, cameraTm, 16);
+OFF(v36, sdf3DViewportPacket_t, TM, 80);
+OFF(v37, sdf3DViewportPacket_t, scale, 144);
+OFF(v38, sdf3DViewportPacket_t, trans, 160);
+OFF(v39, sdf3DViewportPacket_t, cameraPos, 176);
+OFF(v40, sdf3DViewportPacket_t, itop, 192);
+OFF(v41, sdf3DViewportPacket_t, mscal, 196);
+OFF(v42, sdf3DTmPacketData_t, cmd, 112);
+OFF(v43, sdf3DLightParallelPacket_t, normal, 16);
+OFF(v44, sdf3DLightParallelPacket_t, colorBase, 64);
+OFF(v45, sdf3DLightParallelPacket_t, color, 80);
+OFF(v46, sdf3DLightParallelPacket_t, TM, 160);
+OFF(v47, sdf3DFogParam_t, fogMin, 4);
+OFF(v48, sdf3DFogParam_t, fogNear, 8);
+OFF(v49, sdf3DFogParam_t, fogFar, 12);
+OFF(v50, sdf3DFogParam_t, color, 16);
+OFF(v51, sdf3DFogPacket_t, fogParm, 16);
+OFF(v52, sdf3DFogPacket_t, giftag, 32);
+OFF(v53, sdf3DFogPacket_t, fogColor, 48);
+OFF(v54, sdf3DFogPacket_t, mscal, 64);
+OFF(v55, sdf3DInitPacket_t, linktag, 16);
+OFF(v56, sdf3DPrimPolyParm_t, pointCount, 2);
+OFF(v57, sdf3DPrimPolyParm_t, attr, 4);
+OFF(v58, sdf3DPrimPolyParm_t, attrInhibit, 6);
+OFF(v59, sdf3DPrimPolyParm_t, color, 8);
+OFF(v60, sdf3DPrimPolyParm_t, faceIndex, 12);
+OFF(v61, sdf3DPrimPolyParm_t, vertex, 16);
+OFF(v62, sdf3DPrimPolyParm_t, normal, 20);
+OFF(v63, sdf3DPrimPolyParm_t, uv, 24);
+OFF(v64, sdf3DPrimPolyParm_t, multiUv, 28);
+OFF(v65, sdf3DPrimPolyParm_t, vertexColor, 32);
+OFF(v66, sdf3DPrimPolyParm_t, allocator, 36);
+OFF(v67, sdf3DPrimPolyParm_t, zBias, 40);
+OFF(v68, sdfCorePacketHeader_t, matIndex, 6);
+OFF(v69, sdfCorePacketHeader_t, extData, 8);
+OFF(v70, sdfCorePrimHeader_t, pointCount, 2);
+OFF(v71, sdfCorePrimHeader_t, attrBits, 4);
+OFF(v72, sdfCorePrimHeader_t, packetBits, 6);
+OFF(v73, sdfCorePacket_t, prim, 16);
+OFF(v80, corePktCb_t, faceCount, 64);
+OFF(v81, corePktCb_t, pointCount, 66);
+OFF(v82, corePktCb_t, attrBits, 68);
+OFF(v83, corePktCb_t, packetBits, 72);
+OFF(v84, corePktCb_t, orgAttrBits, 76);
+OFF(v85, corePktCb_t, drawFaceCount, 80);
+OFF(v86, corePktCb_t, backfaceCount, 82);
+OFF(v87, corePktCb_t, matPacketPtr, 84);
+OFF(v88, corePktCb_t, color, 88);
+OFF(v89, corePktCb_t, fdSoften, 92);
+OFF(v90, corePktCb_t, fdBias, 96);
+OFF(v91, corePktCb_t, pointBuff, 100);
+OFF(v92, corePktCb_t, freePointBuff, 104);
+OFF(v93, corePktCb_t, extPointBuff, 108);
+OFF(v94, corePktCb_t, freePointCount, 112);
+OFF(v95, corePktCb_t, extPointCount, 116);
+OFF(v96, corePktCb_t, extPointTop, 120);
+OFF(v97, corePktCb_t, extPointLink, 124);
+OFF(v98, corePktCb_t, packetOpenPtr, 128);
+OFF(v99, corePktCb_t, packetTopPtr, 132);
+OFF(va0, corePktCb_t, packetStartPtr, 136);
+OFF(va1, corePktCb_t, packetPtr, 140);
+OFF(va2, corePktCb_t, dataPtr, 144);
+OFF(va3, corePktCb_t, facePtr, 148);
+OFF(va4, corePktCb_t, normalPtr, 156);
+OFF(va5, corePktCb_t, uvPtr, 160);
+OFF(va6, corePktCb_t, uv2Ptr, 164);
+OFF(va7, corePktCb_t, vertColPtr, 168);
+OFF(va8, corePktCb_t, backfaceSign, 172);
+OFF(va9, corePktCb_t, savedAttrBits, 176);
+OFF(vb0, corePktCb_t, matPacket2, 180);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;
