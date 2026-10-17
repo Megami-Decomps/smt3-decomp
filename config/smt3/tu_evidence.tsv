@@ -1,0 +1,525 @@
+# Translation-unit boundary evidence found inside SLUS_209.11 itself.
+# NOT a splat config. Produced by tools/find_boundaries.py from the split asm,
+# the retail ELF and the HD reconstruction's per-function source map.
+# config/smt3/tu_candidates.tsv is an independent source: it carries DDS1 unit
+# names over byte-identical function pairs. Only the dds1 column here looks at
+# it, so a row agreeing with it has two witnesses rather than one.
+# 
+# The rule the rest leans on: ee-gcc emits a string literal, a jump table and a
+# .lit4 word into the object that uses it, and the linker lays each object's
+# data out in text order. Two functions naming the same such symbol are one
+# unit, and so are two whose references invert that address order, with
+# everything between them. A boundary can lie at such a group's edge, never
+# inside one, so a row inside a group reads as refuted.
+# 
+# Rules tried that produce no rows, because they are at chance against the DDS1
+# range starts:
+#   .rodata/.lit4/.sdata ownership runs. Data is contiguous across objects too,
+#   so the function where ownership moves on says nothing: 918/541/292 such
+#   positions, 6/5/0 on a range start, 5.9/3.5/1.9 expected by chance.
+#   Duplicate .lit4 words. ee-as does not merge equal constants inside one
+#   object here: 224 values appear twice under a single function.
+#   Call locality. Call edges shorter than 10, 20 or 40 functions cross a range
+#   start as often as any other position.
+#   tools/find_nosibcall.py finds no run without a sibling call and
+#   tools/find_fragments.py no false function start, so neither bounds anything.
+#
+# Regenerate: python3 tools/find_boundaries.py smt3
+#
+# Columns, tab separated:
+#   addr      candidate boundary vram: the function that would start the next unit
+#   kind      dup-string / core-edge / hd-source / prefix / dup-func
+#   strength  strong / medium / weak, or refuted: inside a proven same-unit group
+#   window    positions the boundary could take, the last of them addr (1 = exact)
+#   detail    what was observed
+#   dds1      start: a tu_candidates.tsv range starts here. window:<unit>: up to 8 functions before that range's start, where its real start can still be. inside:<unit>: contradicts that range. -: no range nearby
+addr	kind	strength	window	detail	dds1
+0x00101C50	hd-source	weak	1	HD source dds3KernelCore.c -> sdfDefaultMain.c, 12 then 1 functions	window:kernel/dds3AdminiProcess
+0x00101DD8	hd-source	weak	1	HD source sdfDefaultMain.c -> dds3KernelProcess.c, 1 then 5 functions	window:kernel/dds3AdminiProcess
+0x00102800	hd-source	weak	1	HD source dds3KernelProcess.c -> dds3AdminiProcess.c, 5 then 1 functions	window:kernel/dds3AdminiProcess
+0x00102FB8	core-edge	medium	1	first of a 3-function same-unit group ending 0x00103238	-
+0x00102FB8	prefix	medium	1	name prefix dds3 -> fcl, 13 then 6 functions	-
+0x00103420	core-edge	weak	1	after a 3-function same-unit group starting 0x00102FB8	-
+0x00103618	hd-source	weak	1	HD source dds3DebugMenu.c -> dds3KernelMisc.c, 1 then 4 functions	-
+0x00104670	hd-source	weak	1	HD source dds3StartMenu.c -> dds3Randomize.c, 5 then 1 functions	-
+0x00104698	hd-source	weak	1	HD source dds3Randomize.c -> dds3KernelDraw.c, 1 then 8 functions	-
+0x00108AC8	core-edge	medium	1	first of a 2-function same-unit group ending 0x00108B00	-
+0x00108AC8	hd-source	strong	1	HD source dds3KernelDraw.c -> dds3SequenceList.c, 74 then 11 functions	-
+0x00108B28	core-edge	weak	1	after a 2-function same-unit group starting 0x00108AC8	-
+0x00109848	prefix	weak	1	name prefix func -> scr, 2 then 3 functions	window:script/scrScriptProcess
+0x0010A2C0	hd-source	medium	1	HD source ScrScriptProcess.c -> ScrTraceCode.c, 7 then 57 functions	window:script/scrTraceCode
+0x0010B858	hd-source	medium	1	HD source ScrTraceCode.c -> scrCommonCommand.c, 57 then 67 functions	window:script/scrCommonCommand
+0x0010CF38	hd-source	strong	1	HD source scrCommonCommand.c -> scrParameterCommand.c, 67 then 28 functions	inside:script/scrCommonCommand
+0x0010CF38	prefix	medium	1	name prefix scr -> prm, 82 then 28 functions	inside:script/scrCommonCommand
+0x0010D730	hd-source	medium	1	HD source scrParameterCommand.c -> dds3DbgBasic.c, 28 then 3 functions	-
+0x0010F800	hd-source	medium	1	HD source dds3SceneBasic.c -> dds3AreaBasic.c, 27 then 6 functions	window:basic/dds3AreaBasic
+0x0010FC38	hd-source	medium	1	HD source dds3AreaBasic.c -> dds3MoverBasic.c, 6 then 10 functions	window:basic/dds3MoverBasic
+0x00112370	prefix	weak	1	name prefix dds3 -> func, 27 then 4 functions	window:basic/dds3CameraObjectBasic
+0x00113300	hd-source	medium	1	HD source dds3UnitObjectBasic.c -> dds3MatterObjectBasic.c, 12 then 12 functions	-
+0x001139A8	hd-source	medium	1	HD source dds3MatterObjectBasic.c -> dds3EffectObjectBasic.c, 12 then 41 functions	window:basic/dds3EffectObjectBasic
+0x001155D0	hd-source	medium	1	HD source dds3EffectObjectBasic.c -> dds3EventObjectBasic.c, 41 then 5 functions	window:basic/dds3EventObjectBasic
+0x00115620	dup-func	weak	45	0x40 bytes identical to 0x00113508 (dds3MatterObjectBasicDestructor)	start
+0x00115738	hd-source	medium	1	HD source dds3EventObjectBasic.c -> dds3LightObjectBasic.c, 5 then 13 functions	window:basic/dds3LightObjectBasic
+0x00115D50	hd-source	weak	1	HD source dds3PathBasic.c -> dds3ModelBasic.c, 1 then 2 functions	window:basic/dds3ModelRangeBasic
+0x00116AD0	hd-source	weak	1	HD source dds3PathBasic.c -> dds3PointBasic.c, 3 then 2 functions	-
+0x00116B28	hd-source	weak	1	HD source dds3PointBasic.c -> dds3GlobalWork.c, 2 then 1 functions	-
+0x00118DC0	core-edge	weak	1	first of a 2-function same-unit group ending 0x00118DF8	-
+0x00118E18	core-edge	weak	1	after a 2-function same-unit group starting 0x00118DC0	-
+0x0011C790	prefix	weak	1	name prefix fld -> func, 6 then 3 functions	-
+0x0011C7F8	prefix	weak	1	name prefix func -> fld, 3 then 25 functions	-
+0x0011FC58	hd-source	medium	1	HD source fldTest.c -> fldGlobal.c, 4 then 3 functions	-
+0x00120120	prefix	weak	1	name prefix fld -> dds3, 25 then 2 functions	-
+0x001201E0	prefix	weak	1	name prefix dds3 -> fld, 2 then 3 functions	-
+0x00121758	core-edge	medium	1	first of a 4-function same-unit group ending 0x00121A20	-
+0x00121B10	core-edge	medium	1	after a 4-function same-unit group starting 0x00121758	-
+0x00123C10	core-edge	medium	1	first of a 2-function same-unit group ending 0x001241F0	-
+0x00123C10	hd-source	strong	1	HD source fldMain.c -> fldProcess.c, 53 then 10 functions	-
+0x00124218	core-edge	weak	1	after a 2-function same-unit group starting 0x00123C10	-
+0x00124218	core-edge	medium	1	first of a 5-function same-unit group ending 0x00124538	-
+0x00124790	core-edge	medium	1	after a 5-function same-unit group starting 0x00124218	-
+0x00125A08	core-edge	medium	1	first of a 2-function same-unit group ending 0x00125B18	window:field/fldFileResolver
+0x00125A08	dup-string	medium	57	'fldProcSequence' at 0x00531690 and 0x00531940; boundary at or after 0x00121840	window:field/fldFileResolver
+0x00125BD0	core-edge	weak	1	after a 2-function same-unit group starting 0x00125A08	window:field/fldFileResolver
+0x00125D40	hd-source	weak	1	HD source fldProcess.c -> fldFileResolver.c, 1 then 25 functions	start
+0x00127378	core-edge	medium	1	first of a 15-function same-unit group ending 0x00127BC8	inside:field/fldFileResolver
+0x00128088	core-edge	medium	1	after a 15-function same-unit group starting 0x00127378	inside:field/fldFileResolver
+0x00128470	core-edge	weak	1	first of a 2-function same-unit group ending 0x00128658	inside:field/fldFileResolver
+0x00128840	core-edge	weak	1	after a 2-function same-unit group starting 0x00128470	inside:field/fldFileResolver
+0x00128848	hd-source	medium	1	HD source fldFileResolver.c -> fldDraw.c, 8 then 9 functions	inside:field/fldFileResolver
+0x0012DFF0	hd-source	weak	1	HD source fldCamera.c -> dds3UnityEx.c, 1 then 1 functions	inside:field/fldFileResolver
+0x0012F718	core-edge	weak	1	first of a 2-function same-unit group ending 0x0012FC08	inside:field/fldFileResolver
+0x0012FC08	dup-string	refuted	109	'fldProcSequence' at 0x00531940 and 0x00531C18; boundary at or after 0x00125B18	inside:field/fldFileResolver
+0x0012FCD8	core-edge	weak	1	after a 2-function same-unit group starting 0x0012F718	inside:field/fldFileResolver
+0x0012FD38	hd-source	medium	1	HD source fldCamera.c -> fldPlayer.c, 4 then 30 functions	inside:field/fldFileResolver
+0x001356D0	hd-source	weak	1	HD source fldPlayer.c -> fldSky.c, 30 then 2 functions	inside:field/fldFileResolver
+0x0013B658	prefix	weak	1	name prefix fld -> func, 5 then 3 functions	inside:field/fldFileResolver
+0x00141758	core-edge	medium	1	first of a 2-function same-unit group ending 0x00141D10	-
+0x00141758	dup-string	medium	124	'elvstart_label' at 0x00531BF0 and 0x00531F28; boundary at or after 0x0012FC08	-
+0x001421E8	core-edge	weak	1	after a 2-function same-unit group starting 0x00141758	-
+0x00144798	hd-source	weak	1	HD source fldPanel.c -> fldSe.c, 13 then 1 functions	-
+0x0014F148	core-edge	strong	1	first of a 4-function same-unit group ending 0x0014FDC0	-
+0x0014F148	dup-string	medium	330	'fldTitle' at 0x00531AB8 and 0x005327B0; boundary at or after 0x00128408	-
+0x0014FEF0	core-edge	strong	1	after a 4-function same-unit group starting 0x0014F148	-
+0x0014FEF0	core-edge	strong	1	first of a 4-function same-unit group ending 0x00150788	-
+0x0014FEF0	dup-string	medium	331	'fldTitleMini' at 0x00531AC8 and 0x00532820; boundary at or after 0x00128408	-
+0x00150BB8	core-edge	medium	1	after a 4-function same-unit group starting 0x0014FEF0	-
+0x001518D0	hd-source	weak	1	HD source fldSnow.c -> slMain.c, 2 then 6 functions	-
+0x00153658	core-edge	strong	1	first of a 64-function same-unit group ending 0x00157130	-
+0x00153658	dup-string	medium	289	'fldProcSequence' at 0x00531C18 and 0x005328C0; boundary at or after 0x0012FCD8	-
+0x00157158	core-edge	medium	1	after a 64-function same-unit group starting 0x00153658	-
+0x00157F18	hd-source	medium	1	HD source slMain.c -> fldCommand.c, 95 then 10 functions	-
+0x0015A8F0	hd-source	strong	1	HD source fldCommand.c -> effManager.c, 80 then 19 functions	window:effect/effManager
+0x0015A8F0	prefix	medium	1	name prefix fld -> dds3, 80 then 25 functions	window:effect/effManager
+0x0015B0A0	hd-source	medium	1	HD source effManager.c -> billManager.c, 3 then 36 functions	window:effect/billManager
+0x0015DE98	hd-source	medium	1	HD source billManager.c -> parManager.c, 28 then 60 functions	-
+0x0015EEB0	dup-func	weak	6	0x48 bytes identical to 0x0015E860 (dds3Particle_SmokeAllBuffInit)	-
+0x00160048	dup-func	weak	12	0x48 bytes identical to 0x0015EEB0 (dds3Particle_SparkAllBuffInit)	-
+0x00160748	dup-func	weak	6	0x48 bytes identical to 0x00160048 (dds3Particle_SphereSpiralAllBuffInit)	-
+0x00160790	dup-func	weak	24	0x50 bytes identical to 0x0015E8A8 (dds3Particle_SmokeSetScale)	-
+0x001613B0	dup-func	weak	12	0x48 bytes identical to 0x00160748 (dds3Particle_SphereSmokeAllBuffInit)	-
+0x001613F8	dup-func	weak	30	0x50 bytes identical to 0x0015EEF8 (dds3Particle_SparkSetScale)	-
+0x00162400	dup-func	weak	14	0x48 bytes identical to 0x001613B0 (dds3Particle_Spark2AllBuffInit)	-
+0x00162448	dup-func	weak	14	0x50 bytes identical to 0x001613F8 (dds3Particle_Spark2SetScale)	-
+0x00162F30	dup-func	weak	6	0x48 bytes identical to 0x00162400 (dds3Particle_SparkOffsetAllBuffInit)	-
+0x00162F78	dup-func	weak	32	0x50 bytes identical to 0x00160790 (dds3Particle_SphereSmokeSetScale)	window:effect/parManager
+0x001635A0	dup-func	weak	6	0x48 bytes identical to 0x00162F30 (dds3Particle_SmokeOffsetAllBuffInit)	window:effect/parManager
+0x001635E8	dup-func	weak	44	0x40 bytes identical to 0x00160090 (dds3Particle_SphereSpiralSetScale)	window:effect/parManager
+0x00164B10	dup-func	weak	138	0x80 bytes identical to 0x0015C5D0 (dds3Billboard_P2AColorMul)	inside:effect/parManager
+0x00165A40	hd-source	medium	1	HD source parManager.c -> polyManager.c, 20 then 8 functions	-
+0x0016A018	hd-source	strong	1	HD source polyManager.c -> effPacket.c, 51 then 4 functions	-
+0x0016A018	prefix	medium	1	name prefix dds3 -> eff, 236 then 4 functions	-
+0x0016A510	prefix	weak	1	name prefix eff -> dds3, 4 then 3 functions	-
+0x0016A9C0	hd-source	medium	1	HD source effPacket.c -> effBattle.c, 1 then 62 functions	window:effect/effBattle
+0x0016A9C0	prefix	medium	1	name prefix dds3 -> eff, 3 then 58 functions	window:effect/effBattle
+0x0016B7A8	core-edge	medium	1	first of a 11-function same-unit group ending 0x0016BA40	-
+0x0016BA68	core-edge	medium	1	after a 11-function same-unit group starting 0x0016B7A8	-
+0x0016C5E8	hd-source	medium	1	HD source effBattle.c -> effBattleMisc.c, 62 then 7 functions	-
+0x0016F490	hd-source	medium	1	HD source effBattleMisc.c -> effBattleLight.c, 16 then 13 functions	-
+0x0016FC90	hd-source	medium	1	HD source effBattleLight.c -> effBattleSystem.c, 13 then 255 functions	-
+0x00170680	dup-func	weak	10	0x40 bytes identical to 0x00170498 (effBTLSys_Sleep_Delete)	-
+0x00170868	dup-func	weak	40	0x40 bytes identical to 0x00170058 (effBTLSys_Shock_Delete)	-
+0x00170D08	dup-func	weak	30	0x40 bytes identical to 0x00170680 (effBTLSys_Panic_Delete)	-
+0x00170FA0	dup-func	weak	20	0x40 bytes identical to 0x00170B18 (effBTLSys_Close_SetColor)	-
+0x00171170	dup-func	weak	40	0x40 bytes identical to 0x00170868 (effBTLSys_Bind_Delete)	-
+0x001718B8	dup-func	weak	50	0x40 bytes identical to 0x00170FA0 (effBTLSys_Charm_SetColor)	-
+0x00172288	dup-func	weak	1	0x48 bytes identical to 0x00172240 (effBTLSys_Kyusyuu_Delete)	-
+0x001728A0	dup-func	weak	1	0x58 bytes identical to 0x00172848 (effBTLSys_Attack_Delete)	-
+0x00172F10	dup-func	weak	1	0x88 bytes identical to 0x00172E88 (effBTLSys_AttackC_Delete)	-
+0x00174858	prefix	weak	1	name prefix eff -> func, 310 then 5 functions	-
+0x00174880	prefix	weak	1	name prefix func -> eff, 5 then 10 functions	-
+0x00174AB8	prefix	weak	1	name prefix eff -> func, 10 then 3 functions	-
+0x00174CB8	prefix	weak	1	name prefix func -> eff, 3 then 3 functions	-
+0x001762F8	hd-source	strong	1	HD source effPart.c -> effPCPThunder.c, 34 then 8 functions	window:effect/effPCPThunder
+0x001762F8	prefix	medium	1	name prefix dds3 -> eff, 40 then 26 functions	window:effect/effPCPThunder
+0x00177AB0	prefix	weak	1	name prefix eff -> func, 26 then 4 functions	inside:effect/effPCPThunder
+0x00178128	prefix	weak	1	name prefix func -> eff, 4 then 39 functions	inside:effect/effPCPThunder
+0x00179150	dup-func	weak	7	0xA0 bytes identical to 0x001786D0 (effPCP_ThunderPolyDrawOff)	inside:effect/effPCPThunder
+0x0017AC10	hd-source	medium	1	HD source effPCPThunder.c -> effPCPBezier.c, 30 then 13 functions	inside:effect/effPCPThunder
+0x0017C958	prefix	weak	1	name prefix eff -> dds3, 39 then 6 functions	inside:effect/effPCPThunder
+0x0017D0A0	hd-source	strong	1	HD source effPCPBezier.c -> effPCPFlash.c, 13 then 125 functions	inside:effect/effPCPThunder
+0x0017D0A0	prefix	medium	1	name prefix dds3 -> eff, 6 then 122 functions	inside:effect/effPCPThunder
+0x00182B20	prefix	weak	1	name prefix eff -> dds3, 122 then 26 functions	-
+0x001838B8	hd-source	strong	1	HD source effPCPFlash.c -> effPCPScatter.c, 3 then 90 functions	window:effect/effPCPScatter
+0x001838B8	prefix	medium	1	name prefix dds3 -> eff, 26 then 27 functions	window:effect/effPCPScatter
+0x00185C80	prefix	weak	1	name prefix eff -> dds3, 27 then 10 functions	inside:effect/effPCPScatter
+0x001860E8	prefix	weak	1	name prefix dds3 -> eff, 10 then 44 functions	inside:effect/effPCPScatter
+0x00187638	dup-func	weak	11	0x60 bytes identical to 0x00186B00 (effPCPWhirlwindPolySetRotateMatrix)	inside:effect/effPCPScatter
+0x001881E8	dup-func	weak	11	0x60 bytes identical to 0x00187638 (effPCPWhirlwind2PolySetRotateMatrix)	inside:effect/effPCPScatter
+0x00188B68	prefix	weak	1	name prefix eff -> dds3, 44 then 9 functions	-
+0x00189110	hd-source	strong	1	HD source effPCPScatter.c -> effPCPNeedle.c, 90 then 17 functions	window:effect/effPCPNeedle
+0x00189110	prefix	medium	1	name prefix dds3 -> eff, 9 then 8 functions	window:effect/effPCPNeedle
+0x00189A48	prefix	weak	1	name prefix eff -> dds3, 8 then 9 functions	-
+0x0018A168	hd-source	strong	1	HD source effPCPNeedle.c -> effPCPMisc.c, 17 then 332 functions	window:effect/effPCPMisc
+0x0018A168	prefix	medium	1	name prefix dds3 -> eff, 9 then 294 functions	window:effect/effPCPMisc
+0x0018C478	dup-func	weak	8	0x58 bytes identical to 0x0018C000 (effPCPZiodin01Delete)	inside:effect/effPCPMisc
+0x0018C508	dup-func	weak	8	0xF0 bytes identical to 0x0018C090 (effPCPZiodin01Draw)	inside:effect/effPCPMisc
+0x0018CD88	dup-func	weak	16	0x58 bytes identical to 0x0018C478 (effPCPZiodin02Delete)	inside:effect/effPCPMisc
+0x0018CE18	dup-func	weak	16	0xF0 bytes identical to 0x0018C508 (effPCPZiodin02Draw)	inside:effect/effPCPMisc
+0x0018D0F8	dup-func	weak	8	0x58 bytes identical to 0x0018CD88 (effPCPZiodin04Delete)	inside:effect/effPCPMisc
+0x0018D188	dup-func	weak	8	0xF0 bytes identical to 0x0018CE18 (effPCPZiodin04Draw)	inside:effect/effPCPMisc
+0x0018DB50	dup-func	weak	40	0x58 bytes identical to 0x0018C910 (effPCPZiodin03Delete)	inside:effect/effPCPMisc
+0x0018DBE0	dup-func	weak	40	0xF0 bytes identical to 0x0018C9A0 (effPCPZiodin03Draw)	inside:effect/effPCPMisc
+0x00192920	dup-func	weak	8	0x100 bytes identical to 0x00192620 (effPCPBufuraIceDraw)	inside:effect/effPCPMisc
+0x00193488	prefix	weak	1	name prefix eff -> dds3, 294 then 3 functions	inside:effect/effPCPMisc
+0x001937D0	prefix	weak	1	name prefix dds3 -> eff, 3 then 260 functions	inside:effect/effPCPMisc
+0x00197DD0	hd-source	medium	1	HD source effPCPMisc.c -> effPCPBoss.c, 54 then 14 functions	-
+0x00198868	dup-func	weak	4	0x98 bytes identical to 0x00198200 (effPCPBossONGYCreate)	-
+0x001A1678	prefix	weak	1	name prefix eff -> dds3, 260 then 19 functions	-
+0x001A2F38	hd-source	medium	1	HD source effBlur_Filter.c -> effModelTrackPoly.c, 3 then 16 functions	window:effect/effModelTrackPoly
+0x001A8BD0	prefix	weak	1	name prefix eff -> dds3, 54 then 5 functions	-
+0x001AA598	prefix	weak	1	name prefix eff -> func, 3 then 3 functions	-
+0x001AACF8	prefix	weak	1	name prefix func -> dds3, 3 then 18 functions	-
+0x001ABC88	dup-func	weak	1651	0x80 bytes identical to 0x00164B10 (dds3ParticleColorBlend)	window:effect/effMath
+0x001ABD90	prefix	weak	1	name prefix eff -> dds3, 5 then 3 functions	window:effect/effMath
+0x001AC508	prefix	weak	1	name prefix func -> eff, 3 then 9 functions	inside:effect/effEvent
+0x001B0A60	prefix	weak	1	name prefix dds3 -> func, 3 then 4 functions	-
+0x001B0CD8	prefix	weak	1	name prefix func -> dds3, 4 then 2 functions	-
+0x001B1370	prefix	weak	1	name prefix dds3 -> func, 5 then 3 functions	-
+0x001B84E0	hd-source	medium	1	HD source nbCameraSkill.c -> nbCameraNego.c, 5 then 11 functions	-
+0x001B8F88	hd-source	medium	1	HD source nbCameraNego.c -> nbCameraCommand.c, 11 then 17 functions	-
+0x001BA6E0	hd-source	weak	1	HD source nbCameraCommand.c -> nbCameraPress.c, 17 then 2 functions	-
+0x001BA828	hd-source	medium	1	HD source nbCameraPress.c -> nbCameraBoss.c, 3 then 126 functions	-
+0x001C55F8	hd-source	medium	1	HD source nbCameraBoss.c -> nbCameraHelper.c, 126 then 13 functions	-
+0x001C5788	core-edge	weak	1	first of a 2-function same-unit group ending 0x001C58A0	-
+0x001C5978	core-edge	weak	1	after a 2-function same-unit group starting 0x001C5788	-
+0x001C5998	dup-string	medium	1500	'BED SELECT' at 0x00533A40 and 0x00535898; boundary at or after 0x00174930	-
+0x001C5D60	hd-source	medium	1	HD source nbCameraHelper.c -> fmgslCont.c, 13 then 6 functions	window:interface/fmGslCont
+0x001C9530	hd-source	medium	1	HD source frFont.c -> frName.c, 8 then 8 functions	-
+0x001CAD00	dup-string	medium	3481	'test_font' at 0x0052E260 and 0x00535A28; boundary at or after 0x00109630	-
+0x001CAFF8	dup-func	weak	85	0x58 bytes identical to 0x001C7BA8 (frSetFontColor)	-
+0x001CC080	hd-source	medium	1	HD source itfMisc.c -> itfPanel.c, 5 then 30 functions	window:interface/itfPanel
+0x001CD2E0	hd-source	medium	1	HD source itfPanel.c -> itfMesManager.c, 30 then 113 functions	window:interface/itfMesManager
+0x001CF8B8	dup-func	weak	218	0x58 bytes identical to 0x001C7B50 (frSetFontColorNo)	inside:interface/itfMesManager
+0x001CF910	dup-func	weak	132	0x50 bytes identical to 0x001CB050 (itfMiscChangeFontAlpha)	inside:interface/itfMesManager
+0x001D1470	hd-source	weak	1	HD source itfMesManager.c -> itfTestMesManager.c, 4 then 1 functions	-
+0x001D32A8	dup-func	weak	2	0x40 bytes identical to 0x001D3050 (pb_draw_exit_Shutdown)	-
+0x001D45C0	core-edge	medium	1	first of a 6-function same-unit group ending 0x001D4918	-
+0x001D4A00	core-edge	medium	1	after a 6-function same-unit group starting 0x001D45C0	-
+0x001D4D40	core-edge	medium	1	first of a 15-function same-unit group ending 0x001D58E0	-
+0x001D4F20	dup-string	refuted	3980	'DebugOwner' at 0x0052DF78 and 0x00535E90; boundary at or after 0x00103180	-
+0x001D5980	core-edge	strong	1	after a 15-function same-unit group starting 0x001D4D40	-
+0x001D5980	hd-source	medium	1	HD source pbMenu.c -> pbGame.c, 3 then 1 functions	-
+0x001D6B08	core-edge	strong	1	first of a 46-function same-unit group ending 0x001D8EC8	-
+0x001D6B08	dup-string	medium	15	'DebugOwner' at 0x00535E90 and 0x00535F08; boundary at or after 0x001D4FA8	-
+0x001D6B08	dup-string	medium	34	'puzzleBoy-root' at 0x00535DF0 and 0x00535EF8; boundary at or after 0x001D4A00	-
+0x001D88A0	dup-func	refuted	0	0x128 bytes identical to 0x001D8778 (pbSetGameCamera1)	-
+0x001D8F80	core-edge	medium	1	after a 46-function same-unit group starting 0x001D6B08	-
+0x001DB140	hd-source	weak	1	HD source pbKeyConv.c -> pbMCard.c, 2 then 11 functions	-
+0x001DB370	core-edge	weak	1	first of a 2-function same-unit group ending 0x001DB4E0	-
+0x001DB660	core-edge	weak	1	after a 2-function same-unit group starting 0x001DB370	-
+0x001DB970	hd-source	weak	1	HD source pbErrorDraw.c -> pbDebugMode.c, 1 then 2 functions	-
+0x001DC0F8	hd-source	medium	1	HD source pbDebugMode.c -> mdlManager.c, 4 then 23 functions	start
+0x001DEA58	hd-source	weak	1	HD source mdlManager.c -> mdlEffect.c, 4 then 2 functions	-
+0x001E0F80	hd-source	weak	1	HD source EventBit.c -> evtBitEditor.c, 6 then 1 functions	window:event/evtStage
+0x001E13C8	hd-source	weak	1	HD source evtBitEditor.c -> evtStage.c, 1 then 4 functions	window:event/evtStage
+0x001E1F10	hd-source	medium	1	HD source evtStage.c -> evtUnitManager.c, 14 then 12 functions	window:event/evtUnitManager
+0x001E4B50	hd-source	weak	1	HD source evtUnitManager.c -> evtCommand.c, 1 then 11 functions	-
+0x001E6100	core-edge	weak	1	first of a 3-function same-unit group ending 0x001E6210	-
+0x001E62C0	core-edge	weak	1	after a 3-function same-unit group starting 0x001E6100	-
+0x001E6570	dup-func	weak	1	0x40 bytes identical to 0x001E6530 (evtCommand_EFFMG2_PRESET)	window:event/evtCommand
+0x001E7BF0	core-edge	weak	1	first of a 2-function same-unit group ending 0x001E7DE0	inside:event/evtCommand
+0x001E7EA0	core-edge	weak	1	after a 2-function same-unit group starting 0x001E7BF0	inside:event/evtCommand
+0x001E7F58	core-edge	weak	1	first of a 3-function same-unit group ending 0x001E80B8	inside:event/evtCommand
+0x001E8138	core-edge	weak	1	after a 3-function same-unit group starting 0x001E7F58	inside:event/evtCommand
+0x001EB208	dup-string	medium	233	'/event/e%03d/e%03d/scr/e%03d.bf' at 0x0053A808 and 0x0053B2C8; boundary at or after 0x001E1AB0	-
+0x001EB548	core-edge	weak	1	first of a 2-function same-unit group ending 0x001EB590	-
+0x001EB5C8	core-edge	weak	1	after a 2-function same-unit group starting 0x001EB548	window:event/evtEventViewer
+0x001F00B8	core-edge	weak	1	first of a 2-function same-unit group ending 0x001F0150	-
+0x001F0170	core-edge	medium	1	after a 2-function same-unit group starting 0x001F00B8	-
+0x001F0170	hd-source	strong	1	HD source evtEventViewer.c -> evtPolygonMovie.c, 35 then 10 functions	-
+0x001F3998	dup-string	medium	118	'PolygonMovie' at 0x0053B2F8 and 0x0053BC88; boundary at or after 0x001EB5C8	inside:event/evtPolygonMovie
+0x001F3A70	hd-source	medium	1	HD source evtPolygonMovie.c -> evtPicture.c, 3 then 15 functions	inside:event/evtPolygonMovie
+0x001F4518	hd-source	weak	1	HD source evtPicture.c -> evtSky.c, 1 then 8 functions	-
+0x001F4718	hd-source	weak	1	HD source evtSky.c -> evtEventViewerFrameVar.c, 8 then 2 functions	-
+0x001F4B28	hd-source	weak	1	HD source evtEventViewerFrameVar.c -> evtEventViewerMenu.c, 2 then 32 functions	-
+0x001F4CE8	core-edge	medium	1	first of a 19-function same-unit group ending 0x001F5EA0	-
+0x001F5050	dup-func	refuted	0	0x50 bytes identical to 0x001F4CE8 (evtFloatChangeHead)	-
+0x001F6158	core-edge	medium	1	after a 19-function same-unit group starting 0x001F4CE8	-
+0x001F68F0	dup-string	medium	112	'BLACK IN' at 0x0053B710 and 0x0053C240; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'BLACK OUT' at 0x0053B700 and 0x0053C230; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'DISP OFF' at 0x0053B770 and 0x0053C2A0; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'MSHADOW ON' at 0x0053B750 and 0x0053C280; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'SHADOW OFF' at 0x0053B760 and 0x0053C290; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'VSHADOW ON' at 0x0053B740 and 0x0053C270; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'WHITE IN' at 0x0053B730 and 0x0053C260; boundary at or after 0x001EEA38	-
+0x001F68F0	dup-string	medium	112	'WHITE OUT' at 0x0053B720 and 0x0053C250; boundary at or after 0x001EEA38	-
+0x001F8BA0	dup-string	medium	100	'%s_MOTION' at 0x0053BB30 and 0x0053C5A8; boundary at or after 0x001F20C8	-
+0x001FAD78	prefix	weak	1	name prefix evt -> cmb, 13 then 2 functions	-
+0x001FB8D0	core-edge	weak	1	first of a 2-function same-unit group ending 0x001FB970	-
+0x001FB9B0	core-edge	medium	1	after a 2-function same-unit group starting 0x001FB8D0	-
+0x001FB9B0	prefix	medium	1	name prefix fcl -> cmb, 10 then 20 functions	-
+0x001FD428	prefix	weak	1	name prefix cmb -> cmp, 20 then 2 functions	-
+0x001FD498	prefix	weak	1	name prefix cmp -> cmb, 2 then 30 functions	-
+0x00203F18	prefix	weak	1	name prefix cmb -> func, 28 then 5 functions	-
+0x00205F98	core-edge	weak	1	first of a 3-function same-unit group ending 0x00206028	-
+0x00205FC0	dup-string	refuted	308	'PolygonMovie' at 0x0053BC88 and 0x0053CF20; boundary at or after 0x001F3A70	-
+0x00206308	core-edge	medium	1	after a 3-function same-unit group starting 0x00205F98	-
+0x00206308	prefix	medium	1	name prefix cmb -> func, 4 then 5 functions	-
+0x00206A38	prefix	weak	1	name prefix func -> shop, 2 then 2 functions	-
+0x00207018	core-edge	weak	1	first of a 2-function same-unit group ending 0x00207100	-
+0x00207140	core-edge	weak	1	after a 2-function same-unit group starting 0x00207018	-
+0x002071E0	prefix	weak	1	name prefix func -> shp, 2 then 7 functions	-
+0x002076A0	prefix	weak	1	name prefix shp -> shop, 7 then 15 functions	-
+0x002088D0	prefix	weak	1	name prefix shop -> shp, 15 then 14 functions	-
+0x00209A10	prefix	weak	1	name prefix shp -> shop, 14 then 4 functions	-
+0x00209D18	prefix	weak	1	name prefix shop -> fcl, 4 then 2 functions	-
+0x00209D88	prefix	weak	1	name prefix fcl -> func, 2 then 3 functions	-
+0x00209E60	prefix	weak	1	name prefix func -> rag, 3 then 9 functions	-
+0x0020A088	dup-func	weak	1	0x88 bytes identical to 0x0020A000 (ragInitHeartsList)	-
+0x0020A110	dup-func	weak	1	0x88 bytes identical to 0x0020A088 (ragInitList2)	-
+0x0020A758	prefix	weak	1	name prefix rag -> fcl, 9 then 8 functions	-
+0x0020ACA8	core-edge	weak	1	first of a 2-function same-unit group ending 0x0020AD68	-
+0x0020ADA8	core-edge	weak	1	after a 2-function same-unit group starting 0x0020ACA8	-
+0x0020C3F8	hd-source	weak	1	HD source fclRagDraw.c -> fclRagUpdate.c, 5 then 2 functions	-
+0x0020D5F0	prefix	weak	1	name prefix rag -> fcl, 38 then 11 functions	-
+0x0020DA88	core-edge	weak	1	first of a 2-function same-unit group ending 0x0020DB50	-
+0x0020DB90	core-edge	weak	1	after a 2-function same-unit group starting 0x0020DA88	-
+0x0020EF70	hd-source	weak	1	HD source fclRecoverDraw.c -> fclRecoverUpdate.c, 1 then 8 functions	-
+0x0020FD50	hd-source	medium	1	HD source fclRecoverUpdate.c -> fclTerminalInit.c, 3 then 1 functions	-
+0x0020FD50	prefix	medium	1	name prefix rcv -> trm, 27 then 2 functions	-
+0x00210260	prefix	weak	1	name prefix trm -> fcl, 8 then 12 functions	-
+0x002108B8	core-edge	weak	1	first of a 2-function same-unit group ending 0x00210978	-
+0x002109B8	core-edge	weak	1	after a 2-function same-unit group starting 0x002108B8	-
+0x00210B38	prefix	weak	1	name prefix trm -> func, 2 then 3 functions	-
+0x00210BB8	prefix	weak	1	name prefix func -> trm, 3 then 24 functions	-
+0x002120B0	prefix	weak	1	name prefix trm -> fcl, 24 then 17 functions	-
+0x00212C08	prefix	weak	1	name prefix fcl -> trm, 17 then 2 functions	-
+0x002131E0	dup-func	weak	1	0x50 bytes identical to 0x00213190 (func_00213190)	-
+0x00213E40	prefix	weak	1	name prefix func -> fcl, 2 then 36 functions	-
+0x00216618	hd-source	weak	1	HD source fclDebug.c -> fclEncyc.c, 2 then 17 functions	-
+0x00216690	core-edge	medium	1	first of a 2-function same-unit group ending 0x00216828	-
+0x00216690	dup-string	medium	570	'Register' at 0x0053C7C8 and 0x0053D708; boundary at or after 0x001FAA38	-
+0x002168C8	core-edge	weak	1	after a 2-function same-unit group starting 0x00216690	-
+0x00216910	core-edge	weak	1	first of a 2-function same-unit group ending 0x00216A18	-
+0x00216B20	core-edge	weak	1	after a 2-function same-unit group starting 0x00216910	-
+0x00218980	dup-func	weak	3	0xD0 bytes identical to 0x002186D0 (DrawPhaseReadStatus)	-
+0x0021E7D8	hd-source	medium	1	HD source fclEncyc.c -> fclRibbon.c, 5 then 6 functions	-
+0x0021F618	hd-source	medium	1	HD source fclRibbon.c -> rstinit.c, 7 then 14 functions	-
+0x0021FC50	core-edge	weak	1	first of a 2-function same-unit group ending 0x0021FD00	-
+0x0021FD40	core-edge	weak	1	after a 2-function same-unit group starting 0x0021FC50	-
+0x0021FE18	prefix	weak	1	name prefix rst -> func, 3 then 2 functions	-
+0x0021FE50	prefix	weak	1	name prefix func -> rst, 2 then 35 functions	-
+0x00221D00	prefix	weak	1	name prefix rst -> cmb, 4 then 2 functions	-
+0x002221E8	prefix	weak	1	name prefix dat -> rst, 3 then 2 functions	-
+0x002224D8	prefix	weak	1	name prefix cmb -> dat, 5 then 2 functions	-
+0x00223628	prefix	weak	1	name prefix rst -> dat, 2 then 3 functions	-
+0x00223748	prefix	weak	1	name prefix dat -> func, 3 then 2 functions	-
+0x00224028	hd-source	weak	1	HD source rstdraw.c -> rstupdate.c, 2 then 2 functions	-
+0x002262C8	prefix	weak	1	name prefix rst -> func, 28 then 4 functions	-
+0x002277E8	core-edge	medium	1	first of a 5-function same-unit group ending 0x00228670	-
+0x002286A0	core-edge	medium	1	after a 5-function same-unit group starting 0x002277E8	-
+0x00228710	dup-func	weak	4268	0x50 bytes identical to 0x00151DE8 (slKanjiDrawN)	-
+0x00229560	core-edge	medium	1	first of a 5-function same-unit group ending 0x0022A458	-
+0x0022A488	core-edge	medium	1	after a 5-function same-unit group starting 0x00229560	-
+0x0022A560	hd-source	weak	1	HD source ModeSelect.c -> dds3CreateData.c, 2 then 1 functions	-
+0x0022B5E8	core-edge	weak	1	first of a 3-function same-unit group ending 0x0022B6B8	-
+0x0022B6E0	core-edge	medium	1	after a 3-function same-unit group starting 0x0022B5E8	-
+0x0022B6E0	hd-source	medium	1	HD source stfMain.c -> mviManager.c, 1 then 2 functions	-
+0x0022B8C8	prefix	weak	1	name prefix dds3 -> movie, 3 then 6 functions	-
+0x0022BFF8	core-edge	weak	1	first of a 2-function same-unit group ending 0x0022C048	-
+0x0022C088	core-edge	weak	1	after a 2-function same-unit group starting 0x0022BFF8	-
+0x0022C578	prefix	weak	1	name prefix movie -> rst, 4 then 2 functions	-
+0x0022C598	dup-string	medium	938	'Magatama' at 0x0053C7D8 and 0x0053F438; boundary at or after 0x001FAA38	-
+0x0022CE00	core-edge	weak	1	first of a 2-function same-unit group ending 0x0022CEC8	-
+0x0022CF08	core-edge	weak	1	after a 2-function same-unit group starting 0x0022CE00	-
+0x0022CF40	prefix	weak	1	name prefix camp -> cmp, 2 then 35 functions	-
+0x0022F6D0	prefix	weak	1	name prefix cmp -> nme, 14 then 10 functions	-
+0x002303A8	prefix	weak	1	name prefix nme -> cmp, 10 then 3 functions	-
+0x00231138	prefix	weak	1	name prefix camp -> cmp, 8 then 3 functions	-
+0x002314C0	prefix	weak	1	name prefix cmp -> camp, 3 then 2 functions	-
+0x00231990	prefix	weak	1	name prefix camp -> cmp, 2 then 3 functions	-
+0x00231D98	prefix	weak	1	name prefix cmp -> camp, 3 then 2 functions	-
+0x002323A8	prefix	weak	1	name prefix camp -> cmp, 2 then 2 functions	-
+0x002325B8	prefix	weak	1	name prefix cmp -> camp, 2 then 4 functions	-
+0x002328C8	dup-func	weak	293	0x58 bytes identical to 0x00221DD8 (cmbChkGetHearts)	-
+0x002329F8	prefix	weak	1	name prefix cmp -> camp, 5 then 3 functions	-
+0x002335F8	prefix	weak	1	name prefix camp -> fcl, 4 then 5 functions	-
+0x002341A8	prefix	weak	1	name prefix fcl -> camp, 2 then 11 functions	-
+0x00235218	prefix	weak	1	name prefix camp -> cmp, 2 then 5 functions	-
+0x002356C0	prefix	weak	1	name prefix cmp -> camp, 5 then 10 functions	-
+0x00235EA0	prefix	weak	1	name prefix func -> cmp, 2 then 2 functions	-
+0x002391C8	prefix	weak	1	name prefix cmp -> camp, 21 then 2 functions	-
+0x002392A0	prefix	weak	1	name prefix camp -> cmp, 2 then 9 functions	-
+0x0023A958	prefix	weak	1	name prefix cmp -> func, 14 then 4 functions	-
+0x0023AAC0	prefix	weak	1	name prefix func -> cmp, 2 then 9 functions	-
+0x0023AFD0	prefix	weak	1	name prefix cmp -> camp, 2 then 3 functions	-
+0x0023BA18	prefix	weak	1	name prefix fcl -> cmp, 2 then 13 functions	-
+0x0023C9C0	prefix	weak	1	name prefix cmp -> camp, 13 then 6 functions	-
+0x0023DFB8	prefix	weak	1	name prefix camp -> cmp, 3 then 2 functions	-
+0x0023E140	prefix	weak	1	name prefix cmp -> camp, 2 then 4 functions	-
+0x0023E9C0	prefix	weak	1	name prefix camp -> cmp, 4 then 3 functions	-
+0x0023ECF0	prefix	weak	1	name prefix cmp -> func, 3 then 2 functions	-
+0x0023F8E0	prefix	weak	1	name prefix rst -> cmp, 2 then 3 functions	-
+0x0023F9F8	prefix	weak	1	name prefix cmp -> func, 3 then 3 functions	-
+0x0023FB90	prefix	weak	1	name prefix func -> cmp, 3 then 2 functions	-
+0x002426F0	prefix	weak	1	name prefix cmp -> func, 5 then 2 functions	-
+0x00242760	prefix	weak	1	name prefix func -> cmp, 2 then 8 functions	-
+0x002460B0	hd-source	medium	1	HD source datCalc.c -> datDebugUnit.c, 82 then 3 functions	-
+0x00246998	hd-source	weak	1	HD source nbInit.c -> nbMainProcess.c, 2 then 21 functions	-
+0x002497A0	core-edge	weak	1	first of a 2-function same-unit group ending 0x00249850	-
+0x002499F8	core-edge	weak	1	after a 2-function same-unit group starting 0x002497A0	-
+0x00249C28	hd-source	medium	1	HD source nbMaeProcess.c -> nbAtoProcess.c, 5 then 6 functions	-
+0x0024C470	dup-string	medium	5302	'BTL_DEF_LIGHT' at 0x00531970 and 0x00543618; boundary at or after 0x001265D8	-
+0x0024CE78	hd-source	weak	1	HD source nbStageProcess.c -> nbUnitProcess.c, 1 then 4 functions	-
+0x00258048	hd-source	medium	1	HD source nbActionProcess.c -> nbMisc.c, 78 then 6 functions	-
+0x00259C90	hd-source	medium	1	HD source nbMisc.c -> nbCommSelProcess.c, 8 then 24 functions	-
+0x00259CF8	core-edge	medium	1	first of a 38-function same-unit group ending 0x0025D620	-
+0x0025D690	core-edge	strong	1	after a 38-function same-unit group starting 0x00259CF8	-
+0x0025D690	core-edge	strong	1	first of a 22-function same-unit group ending 0x0025E870	-
+0x0025D690	hd-source	strong	1	HD source nbCommSelProcess.c -> nbTarSelProcess.c, 14 then 5 functions	-
+0x0025D948	hd-source	refuted	1	HD source nbTarSelProcess.c -> nbMisc.c, 5 then 1 functions	-
+0x0025DA78	hd-source	refuted	1	HD source nbMisc.c -> nbTarSelProcess.c, 1 then 5 functions	-
+0x0025E8E0	core-edge	strong	1	after a 22-function same-unit group starting 0x0025D690	-
+0x0025E8E0	core-edge	strong	1	first of a 58-function same-unit group ending 0x00261490	-
+0x0025E8E0	hd-source	strong	1	HD source nbTarSelProcess.c -> nbKoukaProcess.c, 6 then 3 functions	-
+0x00261500	core-edge	strong	1	after a 58-function same-unit group starting 0x0025E8E0	-
+0x00261500	hd-source	strong	1	HD source nbKoukaProcess.c -> nbMakePacket.c, 22 then 72 functions	-
+0x002654B8	hd-source	medium	1	HD source nbMakePacket.c -> nbCalc.c, 5 then 65 functions	-
+0x00268620	core-edge	weak	1	first of a 3-function same-unit group ending 0x002688D0	-
+0x00268C60	core-edge	weak	1	after a 3-function same-unit group starting 0x00268620	-
+0x0026A8A0	hd-source	medium	1	HD source nbCalc.c -> nbNegoProcess.c, 65 then 34 functions	-
+0x0026CD80	hd-source	medium	1	HD source nbNegoProcess.c -> NbNegoFlowOne.c, 4 then 38 functions	-
+0x00272718	hd-source	medium	1	HD source NbNegoFlowTwo.c -> NbNegoFlowOk.c, 76 then 21 functions	-
+0x00274228	hd-source	medium	1	HD source NbNegoFlowNg.c -> NbNegoFlowFullMoon.c, 33 then 17 functions	-
+0x00274DB8	dup-func	weak	25	0x48 bytes identical to 0x00273E08 (Flow10_23)	-
+0x00274E90	hd-source	medium	1	HD source NbNegoFlowFullMoon.c -> NbNegoFlowStock.c, 17 then 3 functions	-
+0x00274F38	hd-source	medium	1	HD source NbNegoFlowStock.c -> NbNegoFlowDouchara.c, 3 then 14 functions	-
+0x00275780	hd-source	medium	1	HD source NbNegoFlowDouchara.c -> NbNegoFlowInnen.c, 14 then 22 functions	-
+0x00275DF8	hd-source	medium	1	HD source NbNegoFlowInnen.c -> NbNegoFlowQuestion.c, 22 then 11 functions	-
+0x00276760	hd-source	medium	1	HD source NbNegoFlowQuestion.c -> NbNegoFlowFight.c, 11 then 20 functions	-
+0x00276D08	hd-source	medium	1	HD source NbNegoFlowFight.c -> NbNegoFlowDrain.c, 20 then 10 functions	-
+0x002773B8	hd-source	medium	1	HD source NbNegoFlowDrain.c -> NbNegoFlowBinjo.c, 10 then 3 functions	-
+0x002774A8	hd-source	medium	1	HD source NbNegoFlowBinjo.c -> NbNegoFlowMukan.c, 3 then 36 functions	-
+0x002779B0	dup-func	weak	91	0x48 bytes identical to 0x00274DB8 (Flow2_15)	-
+0x00277E20	dup-string	medium	167	'plv = %d, elv = %d\n' at 0x005450E0 and 0x00545218; boundary at or after 0x002729E8	-
+0x002782C8	dup-func	weak	158	0x50 bytes identical to 0x00273128 (Flow9_22)	-
+0x002783A0	dup-func	weak	19	0x48 bytes identical to 0x002779B0 (Flow12_25)	-
+0x00278748	hd-source	medium	1	HD source NbNegoFlowMukan.c -> NbNegoFlowSensei.c, 36 then 13 functions	-
+0x00278CB8	hd-source	medium	1	HD source NbNegoFlowSensei.c -> NbNegoFlowInoti.c, 13 then 17 functions	-
+0x00279388	dup-func	weak	39	0x50 bytes identical to 0x002782C8 (Flow12_37)	-
+0x002794B0	hd-source	medium	1	HD source NbNegoFlowInoti.c -> NbNegoFlowKoketa.c, 17 then 4 functions	-
+0x00279690	hd-source	medium	1	HD source NbNegoFlowKoketa.c -> nbPanelProcess.c, 4 then 7 functions	-
+0x00282A70	dup-func	weak	3776	0x80 bytes identical to 0x001ABC88 (effMagaCylinderCalcColor)	-
+0x00283630	hd-source	medium	1	HD source nbPanelProcess.c -> nbDebugProcess.c, 53 then 13 functions	-
+0x002853D8	hd-source	medium	1	HD source nbDebugProcess.c -> nbAi.c, 6 then 3 functions	-
+0x00287D78	hd-source	medium	1	HD source nbAi.c -> nbAiScript.c, 19 then 72 functions	-
+0x00288E18	hd-source	weak	1	HD source nbAiScript.c -> nbHelpProcess.c, 72 then 2 functions	-
+0x00289A00	hd-source	weak	1	HD source nbHelpProcess.c -> nbAutoCommProcess.c, 1 then 2 functions	-
+0x00289B30	hd-source	weak	1	HD source nbAutoCommProcess.c -> nbFormation.c, 2 then 16 functions	-
+0x0028C920	core-edge	medium	1	first of a 2-function same-unit group ending 0x0028C948	-
+0x0028C920	dup-string	medium	7005	'battle test' at 0x0052E250 and 0x00545B90; boundary at or after 0x001090D8	-
+0x0028C9F0	core-edge	medium	1	after a 2-function same-unit group starting 0x0028C920	-
+0x0028C9F0	hd-source	strong	1	HD source nbTest.c -> nbEncount.c, 15 then 5 functions	-
+0x0028D4B8	dup-string	medium	897	'/sound/MIDI%04X.SMG' at 0x00543B40 and 0x00545BF0; boundary at or after 0x00255260	-
+0x0028E470	dup-func	weak	188	0x40 bytes identical to 0x002874C8 (Sel_RND)	-
+0x002919E0	hd-source	weak	1	HD source nbE901.c -> nbE902.c, 1 then 1 functions	-
+0x00293CF8	dup-string	medium	10	'/model/devil/boss/0x%x.PB' at 0x005467C0 and 0x00546800; boundary at or after 0x00292DF0	-
+0x00294708	dup-string	medium	11	'/model/devil/boss/0x%x.PB' at 0x00546800 and 0x00546840; boundary at or after 0x00293E08	-
+0x00296648	hd-source	weak	1	HD source nbE915.c -> file_Manager.c, 1 then 2 functions	window:file/fileManager
+0x00297928	prefix	weak	1	name prefix file -> nme, 9 then 2 functions	-
+0x00297990	core-edge	medium	1	first of a 14-function same-unit group ending 0x00298050	-
+0x00298140	core-edge	medium	1	after a 14-function same-unit group starting 0x00297990	-
+0x002984E0	core-edge	weak	1	first of a 2-function same-unit group ending 0x00298600	-
+0x00298640	core-edge	weak	1	after a 2-function same-unit group starting 0x002984E0	-
+0x0029B0A8	hd-source	medium	1	HD source Nme_Update.c -> sdfMc.c, 1 then 3 functions	-
+0x0029B0A8	prefix	medium	1	name prefix nme -> sdf, 16 then 31 functions	-
+0x0029B560	dup-func	weak	6	0x50 bytes identical to 0x0029B3F8 (sdfMcFuncChdir1)	inside:mc/mcManager
+0x0029B5D8	dup-func	weak	4	0x60 bytes identical to 0x0029B4E0 (sdfMcFuncGetDir1)	inside:mc/mcManager
+0x0029B650	dup-func	weak	4	0x50 bytes identical to 0x0029B560 (sdfMcFuncDelete1)	inside:mc/mcManager
+0x0029B728	dup-func	weak	2	0x58 bytes identical to 0x0029B6B8 (sdfMcFuncRead1)	inside:mc/mcManager
+0x0029CAF0	core-edge	weak	1	first of a 2-function same-unit group ending 0x0029CBA0	-
+0x0029CBE0	core-edge	weak	1	after a 2-function same-unit group starting 0x0029CAF0	-
+0x0029CE88	hd-source	medium	1	HD source dds3ConfigMain.c -> pipeMain.c, 3 then 5 functions	-
+0x0029CFF0	core-edge	medium	1	first of a 3-function same-unit group ending 0x0029D0C0	-
+0x0029CFF0	dup-string	medium	6630	'PipeMain' at 0x00531AA8 and 0x005488F0; boundary at or after 0x00128408	-
+0x0029D0E8	core-edge	medium	1	after a 3-function same-unit group starting 0x0029CFF0	-
+0x0029D0E8	dup-func	weak	7277	0x48 bytes identical to 0x001097E8 (datDebugPrintf)	-
+0x0029D130	hd-source	medium	1	HD source pipeMain.c -> pipeSection.c, 5 then 12 functions	-
+0x0029FBE8	hd-source	weak	1	HD source pipeSection.c -> pipeSelect.c, 23 then 2 functions	-
+0x0029FBF8	hd-source	weak	1	HD source pipeSelect.c -> pipeObject.c, 2 then 42 functions	-
+0x002A2050	prefix	weak	1	name prefix obj -> pipe, 24 then 3 functions	-
+0x002A20A0	prefix	weak	1	name prefix pipe -> obj, 3 then 2 functions	-
+0x002A2CE0	hd-source	medium	1	HD source pipeObject.c -> pipePosTable.c, 42 then 4 functions	-
+0x002A2F48	prefix	weak	1	name prefix pipe -> func, 2 then 2 functions	-
+0x002A4BD0	hd-source	medium	1	HD source pipeModel.c -> pipeEffect.c, 14 then 4 functions	-
+0x002A53A0	hd-source	weak	1	HD source pipeEffect.c -> pipeMakaAnim.c, 1 then 2 functions	-
+0x002A8758	prefix	weak	1	name prefix sdf -> func, 2 then 2 functions	window:sdf/sdfThread
+0x002A8F00	hd-source	medium	1	HD source sdfChip.c -> sdfMemory.c, 11 then 15 functions	window:sdf/sdfMemory
+0x002AA350	hd-source	medium	1	HD source sdfGraph.c -> sdfGsMemory.c, 15 then 14 functions	-
+0x002AA980	hd-source	medium	1	HD source sdfGsMemory.c -> sdfImageSet.c, 14 then 8 functions	-
+0x002AAF60	hd-source	medium	1	HD source sdfImageSet.c -> sdfTex.c, 8 then 40 functions	-
+0x002AC138	hd-source	medium	1	HD source sdfTex.c -> sdfGsMemIO.c, 40 then 6 functions	-
+0x002AC760	hd-source	medium	1	HD source sdfGsMemIO.c -> sdfDelayedResrc.c, 6 then 6 functions	-
+0x002AE090	hd-source	medium	1	HD source sdfDraw.c -> sdfPrim.c, 38 then 49 functions	-
+0x002B0390	hd-source	medium	1	HD source sdfPrim.c -> sdfModel.c, 49 then 35 functions	-
+0x002B2A60	hd-source	medium	1	HD source sdfModel.c -> sdfMat.c, 4 then 43 functions	-
+0x002B4BB0	dup-func	weak	1	0x58 bytes identical to 0x002B4B58 (sdfMotCLBK_modelVisibleSeek)	inside:sdf/sdfMotion
+0x002B5CD0	hd-source	medium	1	HD source sdfMotion.c -> sdfVu0.c, 80 then 36 functions	-
+0x002B67D8	hd-source	weak	1	HD source sdfVu0.c -> sdfVu1.c, 2 then 1 functions	-
+0x002B9178	prefix	weak	1	name prefix core -> sdf, 38 then 7 functions	-
+0x002B9C18	hd-source	medium	1	HD source sdfCoreDraw.c -> sdf2D.c, 7 then 8 functions	-
+0x002B9E30	hd-source	medium	1	HD source sdf2D.c -> sdf3D.c, 8 then 11 functions	-
+0x002BA890	hd-source	medium	1	HD source sdf3D.c -> sdf3DPrim.c, 11 then 5 functions	-
+0x002BAF18	hd-source	medium	1	HD source sdf3DPrim.c -> sdfBillBoard.c, 5 then 13 functions	-
+0x002BBEE0	hd-source	medium	1	HD source sdfBillBoard.c -> sdf_PadManager.c, 13 then 8 functions	-
+0x002BC5F8	hd-source	medium	1	HD source sdf_PadManager.c -> sdfDevCons.c, 8 then 5 functions	-
+0x002BD340	hd-source	weak	1	HD source sdfDevCons.c -> sdfPrint.c, 1 then 2 functions	-
+0x002BD5D0	hd-source	medium	1	HD source sdfPrint.c -> sdfCd.c, 3 then 15 functions	-
+0x002BDED8	core-edge	weak	1	first of a 2-function same-unit group ending 0x002BDF68	-
+0x002BDFE8	core-edge	weak	1	after a 2-function same-unit group starting 0x002BDED8	-
+0x002BE020	hd-source	medium	1	HD source sdfCd.c -> sdfFile.c, 15 then 17 functions	-
+0x002BF9A0	hd-source	medium	1	HD source sdfFileIO.c -> sdfHdd.c, 21 then 3 functions	-
+0x002BFBD8	hd-source	weak	1	HD source sdfHdd.c -> sdfDev9.c, 3 then 1 functions	-
+0x002C0060	hd-source	medium	1	HD source sdfMisc.c -> sdfMath.c, 3 then 8 functions	-
+0x002C0488	hd-source	weak	1	HD source sdfMath.c -> sdfQuat.c, 8 then 1 functions	-
+0x002C0BA8	hd-source	medium	1	HD source sdfQuat.c -> dds3KernelCore.c, 9 then 3 functions	-
+0x002C0C98	hd-source	medium	1	HD source dds3KernelCore.c -> sdfRand.c, 3 then 2 functions	-
+0x002C0C98	prefix	medium	1	name prefix dds3 -> sdf, 3 then 15 functions	-
+0x002C1670	prefix	weak	1	name prefix sdf -> p2sd, 15 then 8 functions	-
+0x002C1800	prefix	weak	1	name prefix p2sd -> sdf, 8 then 3 functions	-
+0x002C18D8	prefix	weak	1	name prefix sdf -> p2sd, 3 then 2 functions	-
+0x002C22E0	prefix	weak	1	name prefix p2sd -> sdf, 24 then 2 functions	-
+0x002C2B38	core-edge	weak	1	first of a 2-function same-unit group ending 0x002C2CB0	-
+0x002C3388	core-edge	weak	1	after a 2-function same-unit group starting 0x002C2B38	-
+0x002C3388	core-edge	weak	1	first of a 2-function same-unit group ending 0x002C3478	-
+0x002C3568	core-edge	weak	1	after a 2-function same-unit group starting 0x002C3388	-
+0x002C3730	core-edge	medium	1	first of a 7-function same-unit group ending 0x002C3968	-
+0x002C3928	dup-func	refuted	0	0x40 bytes identical to 0x002C3888 (sdfFixupModelBinary)	-
+0x002C39C8	core-edge	strong	1	after a 7-function same-unit group starting 0x002C3730	-
+0x002C39C8	hd-source	medium	1	HD source sdfDevFile.c -> sdfAddrResolve.c, 8 then 1 functions	-
+0x002C3AB0	hd-source	weak	1	HD source sdfAddrResolve.c -> sdfIpu.c, 1 then 8 functions	-
+0x002C5080	prefix	weak	1	name prefix sdf -> movie, 2 then 2 functions	window:sdf/sdfMovie
+0x002C6010	prefix	weak	1	name prefix movie -> sdf, 9 then 5 functions	-
+0x002C6900	dup-func	weak	2	0x60 bytes identical to 0x002C6870 (sdfPacModelDecoderEndFunc)	inside:sdf/sdfPacDecode
+0x002C6F38	hd-source	weak	1	HD source sdf_PacDecode.c -> sdf_Decomp.c, 4 then 2 functions	-
+0x002C81A8	prefix	weak	1	name prefix sdf -> sce, 10 then 3 functions	-
+0x002C9748	core-edge	weak	1	first of a 2-function same-unit group ending 0x002C97B8	-
+0x002C9840	core-edge	weak	1	after a 2-function same-unit group starting 0x002C9748	-
+0x002CD160	core-edge	weak	1	first of a 3-function same-unit group ending 0x002CD418	-
+0x002CD680	core-edge	weak	1	after a 3-function same-unit group starting 0x002CD160	-
+0x002CD9F0	dup-func	weak	4	0x68 bytes identical to 0x002CD6E8 (setD4_CHCR)	-
+0x002D1E08	prefix	weak	1	name prefix sdf -> libc, 2 then 4 functions	-
+0x002D3410	prefix	weak	1	name prefix libc -> sdf, 10 then 2 functions	-
+0x002D6600	dup-string	medium	7915	'0123456789ABCDEF' at 0x00531B28 and 0x0054B6C0; boundary at or after 0x00128658	-
+0x002D8378	dup-string	medium	7	'NaN' at 0x0054B698 and 0x0054B890; boundary at or after 0x002D7CE8	-
+0x002DE6D0	dup-func	weak	404	0xA8 bytes identical to 0x002CCF68 (_sceRpcGetPacket)	-

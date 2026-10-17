@@ -121,3 +121,24 @@ A reviewer must confirm, per range:
 | `script/scrCommonCommand` 0x0010B908-0x0010D030 | 6 functions are HD `scrParameterCommand.c`. dds-decomp already widened this unit on a Persona 4 transfer, so its end is the part to re-check. |
 | `effect/effEvent` 0x001AC0A8-0x001AFFB0 | 3 functions are HD `effDebug.c` and 34 of the span's names are `Eve_*`, not `eff*`. dds-decomp notes this unit's DDS1 start was itself chosen from compile-order evidence. |
 | `misc/l2d`, `basic/dds3ModelRangeBasic`, `sdf/sdfThread`, `sdf/sdfMovie` | No HD name anywhere in the span, so DDS1 is the only witness. `sdf/sdfThread` is a single function and `basic/dds3ModelRangeBasic` likewise. |
+
+## Applied
+
+60 of the candidate units are now `c` subsegments in
+`config/smt3/SLUS_209.11.yaml`, with the unowned stretches between them left as
+`code_<vram>` units, for 92 code units in total. The build was verified
+byte-identical after the boundaries landed.
+
+Two things this page does not yet carry, because the work that applied the
+boundaries was interrupted before recording them:
+
+- Per-candidate verdicts in `config/smt3/tu_candidates.tsv`. The status columns
+  still describe the candidates as proposed, not as applied or rejected, so the
+  file no longer says which of the 62 became a unit.
+- The resolution of the six disputed cases listed above. The applied set is
+  evidence that each boundary relinks byte-identically, which is not the same as
+  evidence that it is an original file boundary.
+
+`config/smt3/tu_evidence.tsv` holds boundary evidence found in this binary
+alone, independent of the DDS1 pairing. Comparing the two is the next step:
+a boundary both sources agree on is far stronger than either alone.
