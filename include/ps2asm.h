@@ -1259,4 +1259,143 @@ __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f))
+/* ---- sequences that units wrote out in place ---- */
+
+/* ---- sequences that units wrote out in place ---- */
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_MULT() __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvmul.xyzw vf2, vf10, vf11\n" \
+    "\tvopmula.xyz ACC, vf10, vf11\n" \
+    "\tvmaddaw.xyz ACC, vf11, vf10\n" \
+    "\tvmaddaw.xyz ACC, vf10, vf11\n" \
+    "\tvopmsub.xyz vf10, vf11, vf10\n" \
+    "\tvmulaw.w ACC, vf10, vf11\n" \
+    "\tvmsubax.w ACC, vf0, vf2\n" \
+    "\tvmsubay.w ACC, vf0, vf2\n" \
+    "\tvmsubz.w vf10, vf0, vf2\n" \
+    "\t.set reorder\n" \
+    : : : "memory")
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_INVERSE() __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvmul.xyzw vf2, vf10, vf10\n" \
+    "\tvaddax.w ACC, vf2, vf2x\n" \
+    "\tvmadday.w ACC, vf0, vf2y\n" \
+    "\tvmaddz.w vf3, vf0, vf2z\n" \
+    "\tvmove.w vf2, vf10\n" \
+    "\tvdiv Q, vf0w, vf3w\n" \
+    "\tvsub.xyz vf2, vf0, vf10\n" \
+    "\tvwaitq\n" \
+    "\tvmulq.xyzw vf10, vf2, Q\n" \
+    "\t.set reorder")
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_NORMALIZE() __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvmul.xyzw vf2, vf10, vf10\n" \
+    "\tvaddax.w ACC, vf2, vf2\n" \
+    "\tvmadday.w ACC, vf0, vf2\n" \
+    "\tvmaddz.w vf3, vf0, vf2\n" \
+    "\tvrsqrt Q, vf0w, vf3w\n" \
+    "\tvwaitq\n" \
+    "\tvmulq.xyzw vf10, vf10, Q\n" \
+    "\t.set reorder")
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_SDF_2_C0510(componentMetric) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvaddw.xyz vf1, vf0, vf0w\n" \
+    "\tvmul.xyzw vf2, vf10, vf10\n" \
+    "\tvmulay.x ACC, vf2, vf2y\n" \
+    "\tvmaddaz.x ACC, vf1, vf2z\n" \
+    "\tvmaddw.x vf2, vf1, vf2w\n" \
+    "\tqmfc2.ni $2, vf2\n" \
+    "\tmtc1 $2, %0\n" \
+    "\t.set reorder" \
+    : "=f" (componentMetric))
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_FROM_ROTATION(trigValue) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tmfc1 $2, %0\n" \
+    "\tqmtc2.ni $2, vf2\n" \
+    "\tvmulx.w vf10, vf0, vf2x\n" \
+    "\t.set reorder" \
+    : : "f" (trigValue))
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_FROM_ROTATION_B(trigValue) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tmfc1 $2, %0\n" \
+    "\tqmtc2.ni $2, vf2\n" \
+    "\tvmulx.w vf11, vf0, vf2x\n" \
+    "\t.set reorder" \
+    : : "f" (trigValue))
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_TO_MATRIX() __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvaddw.xyz vf1, vf0, vf0w\n" \
+    "\tvadd.xyzw vf2, vf10, vf10\n" \
+    "\tvmulx.w vf28, vf0, vf0x\n" \
+    "\tvmulx.w vf29, vf0, vf0x\n" \
+    "\tvmulx.w vf30, vf0, vf0x\n" \
+    "\tvmul.xyzw vf3, vf10, vf2\n" \
+    "\tvmuly.xyzw vf4, vf10, vf2y\n" \
+    "\tvmulz.xyzw vf5, vf10, vf2z\n" \
+    "\tvmulx.xyzw vf6, vf10, vf2x\n" \
+    "\tvaddaw.xyz ACC, vf0, vf0w\n" \
+    "\tvmsubay.x ACC, vf1, vf3y\n" \
+    "\tvmsubz.x vf28, vf1, vf3z\n" \
+    "\tvmsubax.y ACC, vf1, vf3x\n" \
+    "\tvmsubz.y vf29, vf1, vf3z\n" \
+    "\tvmsubax.z ACC, vf1, vf3x\n" \
+    "\tvmsuby.z vf30, vf1, vf3y\n" \
+    "\tvmulax.y ACC, vf1, vf4x\n" \
+    "\tvmsubw.y vf28, vf1, vf5w\n" \
+    "\tvaddw.x vf29, vf4, vf5w\n" \
+    "\tvsubw.x vf30, vf5, vf4w\n" \
+    "\tvmulax.z ACC, vf1, vf5x\n" \
+    "\tvmaddw.z vf28, vf1, vf4w\n" \
+    "\tvmulay.z ACC, vf1, vf5y\n" \
+    "\tvmsubw.z vf29, vf1, vf6w\n" \
+    "\tvaddw.y vf30, vf5, vf6w\n" \
+    "\tvmove.xyzw vf31, vf0\n" \
+    "\t.set reorder" \
+    : : : "memory")
+
+/* From src/smt3/code_002BD340.c. */
+#define VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tqmfc2.ni $2, vf10\n" \
+    "\tpexew $2, $2\n" \
+    "\tmtc1 $2, %0\n" \
+    "\tqmfc2.ni $2, vf10\n" \
+    "\tmtc1 $2, %1\n" \
+    "\t.set reorder" \
+    : "=f" (rotatedZ), "=f" (rotatedX) : : "$2", "memory")
+
+/* ---- sequences that units wrote out in place ---- */
+
+/* From src/smt3/model/mdlManager.c. */
+#define VU0_SEQ_MDL_PACK_DEV_SLOT_COLOR(age, unit) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %1, vf2\n\t" \
+    "vitof0.xyzw vf2, vf2\n\t" \
+    "vmulaw.xyzw ACC, vf10, vf0w\n\t" \
+    "vmaddx.xyzw vf2, vf11, vf2x\n\t" \
+    "vmul.xyzw vf10, vf2, vf12\n\t" \
+    "qmtc2.ni %2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t" \
+    "vftoi0.xyzw vf10, vf10\n\t" \
+    "qmfc2.ni %0, vf10\n\t" \
+    "ppach %0, $0, %0\n\t" \
+    "ppacb %0, $0, %0\n\t" \
+    ".set reorder" \
+    : "=&r"(rgba[0]) \
+    : "r"(age), "r"(unit))
+
 #endif /* PS2ASM_H */

@@ -2095,71 +2095,27 @@ f32 sdfClipAngleValuePI(f32 angle) {
 /* vu0 routine: shared quaternion registers are the input/output interface. */
 void Mult(void)
 {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvmul.xyzw vf2, vf10, vf11\n"
-        "\tvopmula.xyz ACC, vf10, vf11\n"
-        "\tvmaddaw.xyz ACC, vf11, vf10\n"
-        "\tvmaddaw.xyz ACC, vf10, vf11\n"
-        "\tvopmsub.xyz vf10, vf11, vf10\n"
-        "\tvmulaw.w ACC, vf10, vf11\n"
-        "\tvmsubax.w ACC, vf0, vf2\n"
-        "\tvmsubay.w ACC, vf0, vf2\n"
-        "\tvmsubz.w vf10, vf0, vf2\n"
-        "\t.set reorder\n"
-        : : : "memory");
+    VU0_SEQ_MULT();
 }
 
 /* vu0 routine: the conjugate over the squared norm. */
 void Inverse(void)
 {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvmul.xyzw vf2, vf10, vf10\n"
-        "\tvaddax.w ACC, vf2, vf2x\n"
-        "\tvmadday.w ACC, vf0, vf2y\n"
-        "\tvmaddz.w vf3, vf0, vf2z\n"
-        "\tvmove.w vf2, vf10\n"
-        "\tvdiv Q, vf0w, vf3w\n"
-        "\tvsub.xyz vf2, vf0, vf10\n"
-        "\tvwaitq\n"
-        "\tvmulq.xyzw vf10, vf2, Q\n"
-        "\t.set reorder"
-        );
+    VU0_SEQ_INVERSE();
 }
 
 /* vu0 routine: normalize all four components of vf10. The IDB called this
  * SDF_QUAT_INNERPRODUCT, which belongs to the dot product below. */
 void Normalize(void)
 {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvmul.xyzw vf2, vf10, vf10\n"
-        "\tvaddax.w ACC, vf2, vf2\n"
-        "\tvmadday.w ACC, vf0, vf2\n"
-        "\tvmaddz.w vf3, vf0, vf2\n"
-        "\tvrsqrt Q, vf0w, vf3w\n"
-        "\tvwaitq\n"
-        "\tvmulq.xyzw vf10, vf10, Q\n"
-        "\t.set reorder"
-        );
+    VU0_SEQ_NORMALIZE();
 }
 
 /* vu0 routine: retail reduces (x*x)*(y*y) + z*z + w*w, not squared length. */
 f32 sdf_2C0510(void)
 {
     f32 componentMetric;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvaddw.xyz vf1, vf0, vf0w\n"
-        "\tvmul.xyzw vf2, vf10, vf10\n"
-        "\tvmulay.x ACC, vf2, vf2y\n"
-        "\tvmaddaz.x ACC, vf1, vf2z\n"
-        "\tvmaddw.x vf2, vf1, vf2w\n"
-        "\tqmfc2.ni $2, vf2\n"
-        "\tmtc1 $2, %0\n"
-        "\t.set reorder"
-        : "=f" (componentMetric));
+    VU0_SEQ_SDF_2_C0510(componentMetric);
     return componentMetric;
 }
 
@@ -2178,13 +2134,7 @@ void FromRotation(f32 angle)
     f32 trigValue = sdfSin(halfAngle);
     SDF_VU0_SCALEVECTOR_V0(trigValue);
     trigValue = sdfCos(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tmfc1 $2, %0\n"
-        "\tqmtc2.ni $2, vf2\n"
-        "\tvmulx.w vf10, vf0, vf2x\n"
-        "\t.set reorder"
-        : : "f" (trigValue));
+    VU0_SEQ_FROM_ROTATION(trigValue);
 }
 
 /* As above, but write the second VU quaternion register (vf11). */
@@ -2194,48 +2144,13 @@ void FromRotation_B(f32 angle)
     f32 trigValue = sdfSin(halfAngle);
     SDF_VU0_SCALEVECTOR_B_V0(trigValue);
     trigValue = sdfCos(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tmfc1 $2, %0\n"
-        "\tqmtc2.ni $2, vf2\n"
-        "\tvmulx.w vf11, vf0, vf2x\n"
-        "\t.set reorder"
-        : : "f" (trigValue));
+    VU0_SEQ_FROM_ROTATION_B(trigValue);
 }
 
 /* vu0 routine: shared quaternion registers are the input/output interface. */
 void ToMatrix(void)
 {
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvaddw.xyz vf1, vf0, vf0w\n"
-        "\tvadd.xyzw vf2, vf10, vf10\n"
-        "\tvmulx.w vf28, vf0, vf0x\n"
-        "\tvmulx.w vf29, vf0, vf0x\n"
-        "\tvmulx.w vf30, vf0, vf0x\n"
-        "\tvmul.xyzw vf3, vf10, vf2\n"
-        "\tvmuly.xyzw vf4, vf10, vf2y\n"
-        "\tvmulz.xyzw vf5, vf10, vf2z\n"
-        "\tvmulx.xyzw vf6, vf10, vf2x\n"
-        "\tvaddaw.xyz ACC, vf0, vf0w\n"
-        "\tvmsubay.x ACC, vf1, vf3y\n"
-        "\tvmsubz.x vf28, vf1, vf3z\n"
-        "\tvmsubax.y ACC, vf1, vf3x\n"
-        "\tvmsubz.y vf29, vf1, vf3z\n"
-        "\tvmsubax.z ACC, vf1, vf3x\n"
-        "\tvmsuby.z vf30, vf1, vf3y\n"
-        "\tvmulax.y ACC, vf1, vf4x\n"
-        "\tvmsubw.y vf28, vf1, vf5w\n"
-        "\tvaddw.x vf29, vf4, vf5w\n"
-        "\tvsubw.x vf30, vf5, vf4w\n"
-        "\tvmulax.z ACC, vf1, vf5x\n"
-        "\tvmaddw.z vf28, vf1, vf4w\n"
-        "\tvmulay.z ACC, vf1, vf5y\n"
-        "\tvmsubw.z vf29, vf1, vf6w\n"
-        "\tvaddw.y vf30, vf5, vf6w\n"
-        "\tvmove.xyzw vf31, vf0\n"
-        "\t.set reorder"
-        : : : "memory");
+    VU0_SEQ_TO_MATRIX();
 }
 
 void FromEulerXYZ(f32 x, f32 y, f32 z);
@@ -2362,15 +2277,7 @@ f32 EulerAngleAxisY(void)
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
     SDF_VU0_LOADVECTOR_BARRIER(D_00529620);
     SDF_VU0_APPLYMATRIX_XYZ();
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tqmfc2.ni $2, vf10\n"
-        "\tpexew $2, $2\n"
-        "\tmtc1 $2, %0\n"
-        "\tqmfc2.ni $2, vf10\n"
-        "\tmtc1 $2, %1\n"
-        "\t.set reorder"
-        : "=f" (rotatedZ), "=f" (rotatedX) : : "$2", "memory");
+    VU0_SEQ_EULER_ANGLE_AXIS_Y(rotatedZ, rotatedX);
     return sdfAtan2(rotatedZ, rotatedX);
 }
 
