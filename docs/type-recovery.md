@@ -1,6 +1,7 @@
 # Type recovery
 
-[Names](names.md) covers where function and unit names come from. This covers
+[Names](names.md) covers where function and unit names come from, and
+[Naming drift](naming-drift.md) audits every other kind of name. This covers
 struct, union and enum types, which have a different problem: early
 decompilation work invented types instead of using the recovered ones, and an
 invented type encodes wrong field offsets and sizes into the source where an

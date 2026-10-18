@@ -163,6 +163,26 @@ typedef struct {
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\tvmadday.xyzw ACC, vf29, vf10y\n\t" \
     "vmaddz.xyzw vf10, vf30, vf10z\n\t.set reorder")
 
+/* vf10 = vf10*(1 - t) + vf11*t. vf2 holds t broadcast and vf3.w holds 1 - t;
+ * $2 carries the bits, and is deliberately not a clobber: the engine's own
+ * sequence does not list it, and cc1 then picks $2 for a nearby address the
+ * way retail does. The _BITS form takes a
+ * GPR that already holds them, which is what retail emits when one blend
+ * factor drives several lerps. */
+#define VU0_LERP_VF10_VF11(t) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\t" \
+    "vmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
+    : : "f" (t))
+#define VU0_LERP_VF10_VF11_BITS(r) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\t" \
+    "vsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\t" \
+    "vmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
+    : : "r" (r))
+/* binary32 bits of a float in a GPR (mfc1), for the _BITS forms. */
+#define PS2_FLOAT_BITS(out, f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 %0, %1\n\t.set reorder" : "=r" (out) : "f" (f))
+
 /* vf10 = vf10 x vf11 over xyz: the outer-product pair. */
 #define SDF_VU0_OUTERPRODUCT() __asm__ volatile ( \
     ".set noreorder\n\tvopmula.xyz ACC, vf10, vf11\n\t" \

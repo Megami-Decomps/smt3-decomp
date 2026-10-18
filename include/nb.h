@@ -108,7 +108,8 @@ typedef struct nbMainProcessData_t
     u32 exp;
     u8 unkA8[0xC];
     s32 unkB4;
-    u8 unkB8[8];
+    u8 unkB8[4];
+    dds3ProcessID_t *unkBC;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
     dds3ProcessID_t *atoProcess;
     u8 unkC8[4];

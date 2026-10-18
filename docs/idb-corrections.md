@@ -31,6 +31,27 @@ After each correction: re-run `tools/ida_symbols.py --instance SLUS_209.11`, re-
 `MODEL_LOD_CHG` setters write. Either the allocation size or that field is wrong. See
 [Type recovery](type-recovery.md).
 
+`datUnitWork_t` is the one case so far where the IDB's field *order* does not
+describe this ELF. The IDB has a 0x120-byte record: `namecode` as `u16[8]`,
+`skillcnt` as `s32`, `skill` as `s32[24]`, and no field between `levelupparam`
+and `keisyoskill`. Narrowing those three to the PS2 widths produces a 0xEC
+record, which is the right size, with every field from `namecode` onward six
+bytes earlier than retail puts it. Three functions contradict that layout and
+pin the repo's instead: `datGetBaseParam` (0x00243E78) reads `levelupparam` at
++0x7A, `SetAction_AI` (0x00253BF8) stores `nowtform` at +0x6A, and
+`rstChkAddSkill` (0x0021FFB8) reads `skill[2]` at +0x38. The PS2 record keeps
+`namecode` at 8 bytes, `skillcnt` as `s32`, `skill` as `u16[24]`, and carries
+six bytes at +0x80 that the HD build does not have.
+
+What the IDB does settle is the tail, which the repo had as `skillSlots`,
+`skillOrder` and `unkCE[0x1E]` at offsets that were already right: they are
+`keisyoskill[24]`, `keiattr[24]`, then `hensinmae`, `getdevilhearts[4]`,
+`hensinmaeexp` and `fullnamecode[8]`, which tile +0xCE to +0xEC exactly.
+
+A matching build does not confirm a field name. Both layouts total 0xEC and
+both matched every function that does not touch the disputed range, which is
+why this was only caught by changing the layout and rebuilding.
+
 `sdfMatPacket_t`'s two transform blocks are inline, not pointers: `sdfMatSetUvwParm`
 (0x002B3620) writes six floats at the pointer it is handed, `sdfMatUpdatePacket` passes
 packet+0x68 and the multi-texture path passes packet+0x80.

@@ -92,6 +92,8 @@ typedef struct nbParty_t
     u16 hojoskill[8];
 } nbParty_t;
 typedef struct effBTL_t effBTL_t;
+/* 0xE0 bytes; only the field this unit reads is named. */
+typedef struct { s16 id; u16 unk_02; s32 refcnt; u8 pad[0xD8]; } nbStatWork_t;
 typedef struct effBTLCutHandle_t effBTLCutHandle_t;
 /* Only the fields this unit touches are named; the rest of the layout is unconfirmed. */
 typedef struct nbMainProcessData_t
@@ -102,7 +104,9 @@ typedef struct nbMainProcessData_t
     u8 unk_14[0x4];
     s16 playerpcnt;
     s16 enemypcnt;
-    u8 unk_1C[0xC];
+    u8 unk_1C[0x4];
+    nbStatWork_t *statwork;
+    void *statbuf;
     s32 unk_28;
     u8 unk_2C[0x8];
     s32 encno;
@@ -127,7 +131,8 @@ typedef struct nbMainProcessData_t
     u32 exp;
     u8 unk_A8[0x14];
     dds3ProcessID_t *mainproc;
-    u8 unk_C0[0x44];
+    u8 unk_C0[0x40];
+    dds3ProcessID_t *debugproc;
     dds3ProcessID_t *aiproc;
     dds3ProcessID_t *pnlproc;
     dds3ProcessID_t *helpproc;
@@ -135,6 +140,9 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *encproc;
     u8 unk_118[0x8];
     void *pnltex[4];
+    u8 unk_130[0x8];
+    void *modelpack;
+    void *modelpackbuf;
 } nbMainProcessData_t;
 typedef struct
 {
@@ -204,7 +212,8 @@ typedef struct nbHelpProcessData_t
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u8 unk_04[0x20];
+    u32 unk_04;
+    u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
     datUnitWork_t *work;
@@ -410,7 +419,8 @@ typedef struct
 {
     s8 unk_00;
     s8 esc;
-    u8 unk_02[0x24];
+    u8 unk_02[0x22];
+    u16 unk_24;
 } nbEncountForm_t;
 
 typedef struct
@@ -622,6 +632,170 @@ extern void p2sdSetBgmTrack(s32 track);
 extern s32 nbBgmFadeState;
 extern void p2sdStopBGM(s32 no);
 extern void func_002C1E70(s32 no);
+extern s32 nbGetInfoMsg(s32 type);
+extern void nbSetMesItem(s32 msgid, s32 it);
+typedef struct { u16 mes; u8 pad[0x3A]; } nbInnenEntry_t;
+extern nbInnenEntry_t D_003E315E[];
+typedef struct { s32 unk_00; u8 pad[0x64]; } nbNegoSkillEntry_t;
+extern nbNegoSkillEntry_t D_003E1338[];
+typedef struct { u8 unk_00[0x9]; u8 unk_09; u8 pad[0x26]; } nbMasterTextEntry_t;
+extern nbMasterTextEntry_t master_text[];
+extern void nbCameraSetTarget(nbFormation_t *form);
+extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern s32 datGetPlayerLevel(void);
+extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type);
+extern void mdlPackDecode(s32 group, s32 id, s32 mode, void *data, s32 size);
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+extern void func_0024D938(void *e);
+extern u32 dds3DrawFlag;
+extern void nbPanelPressGaugeStart(void);
+extern void nbPanelPressTurnGaugeAnimStart2(void);
+extern void nbPanelPressTurnOmit(void);
+extern char D_00546820[];
+extern char D_00546880[];
+extern char D_00545380[];
+extern char D_00545CE0[];
+extern char D_00551560[];
+/* 28-byte entries; only the fields this unit reads are named. */
+typedef struct {
+    s32 unk_00;
+    u8 unk_04[0x8];
+    s32 unk_0C;
+    s32 unk_10;
+    u16 fadetime;
+    u16 fadeoutframe;
+    u16 fadestopframe;
+    u16 fadeinframe;
+} nbEventEntry_t;
+extern nbEventEntry_t nbEventEntryTable[];
+typedef struct { datUnitWork_t *unit; s32 time; } nbBadCurseEntry_t;
+extern nbBadCurseEntry_t nbBadCurseTable[];
+extern s32 nbBadCurseTimer;
+/* The nb event script work; only the fields this unit touches are named. */
+typedef struct nbEventProcessData_t {
+    nbMainProcessData_t *data;
+    s32 unk_04;
+    s32 unk_08;
+    s32 step;
+    s32 frame;
+} nbEventProcessData_t;
+extern void nbFreeEffectSlot(nbEventProcessData_t *e);
+typedef struct {
+    s32 unk_00;
+    s32 maka;
+    s32 unk_08;
+    s32 unk_0C;
+    s32 unk_10;
+    u8 unk_14[0x8];
+    s32 unk_1C;
+    s32 unk_20;
+    s32 unk_24;
+    s32 unk_28;
+} nbMakaWork_t;
+extern nbMakaWork_t *GetMakaProcessData(void);
+extern void nbSetJyokyoMes(nbActionProcessData_t *a, s32 mes, s32 type, s32 id);
+extern s32 ChkAiHojo(s32 formindex, s32 hojotype);
+extern s32 nbFindStockSkillError(void);
+extern nbFormation_t *nbGetEventForm(nbEventProcessData_t *e);
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                               s32 motion);
+extern void nbSetTargetProcess(s32 a, s32 b, s32 c, s32 d, s32 e);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(s32 a, s32 b, s32 c, s32 d);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *basic, u32 stat);
+extern u8 datModelParamTable[];
+extern u8 D_003494B0[];
+/* 60-byte entries; only the fields this unit reads are named. */
+typedef struct {
+    s16 id;
+    u16 pid;
+    u16 eid;
+    u16 unk_06;
+    struct { u16 item; u16 pad; } phase[13];
+} nbInnenRec_t;
+extern nbInnenRec_t D_003E3158[];
+extern s32 datGetRace(datUnitWork_t *unit);
+extern s32 datSearchDevilStock(s32 id);
+extern void nbCameraSetBougai(nbFormation_t *form);
+extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
+extern char D_005450E0[];
+/* 420-byte entries; only the field this unit reads is named. */
+typedef struct { u8 unk_00[0x4]; u16 unk_04; u8 pad[0x1A2]; } nbEncountEntry_t;
+extern nbEncountEntry_t nbEncountTable[];
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 seid);
+extern void effBTLSkillEnd(void);
+extern s32 evtBitCheck(s32 bit);
+extern void evtBitOn(s32 bit);
+extern u8 datNegoReqTable[];
+extern u8 datNegoTuikaReqtype[];
+extern void nbLoadUnitGroup(s32 a, s32 b, s32 c);
+extern void *nbEncProcess2_5(dds3ProcessID_t *id);
+extern s32 nbMakaProcess1(dds3ProcessID_t *id);
+extern void nbMakaShutdown(dds3ProcessID_t *id);
+extern nbMakaWork_t *nbAllocMakaWork(void);
+extern s32 nbGetNegoKureMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
+extern void nbFreeFormResources(nbMainProcessData_t *data, s32 index);
+extern void *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(void *p);
+extern s32 p2sdLoadCheckMidi(s32 no);
+extern void p2sdLoadSMGFile(s32 no);
+extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void nbSetMaeFlag(s32 flag);
+extern void nbMakaStep(nbMakaWork_t *w);
+extern void nbDrawMakaNum(nbMakaWork_t *w, s32 x, s32 y, u32 col, s32 n);
+extern u32 menucur;
+extern s32 (*D_00527518[])(nbEventProcessData_t *e);
+extern s32 nbEncProcess1(dds3ProcessID_t *id);
+extern void nbEncShutdown(dds3ProcessID_t *id);
+extern char D_00551550[];
+extern char D_00546500[];
+extern char D_005467E0[];
+extern s32 nbFindFormIndex(s32 id);
+/* 0x30 bytes; only the fields this unit touches are named. */
+typedef struct {
+    nbMainProcessData_t *data;
+    s32 unk_04;
+    u8 unk_08[0xC];
+    s32 unk_14;
+    s32 unk_18;
+    u8 unk_1C[0x14];
+} nbDebugWork_t;
+extern char D_005464A8[];
+extern char D_005464C0[];
+extern s32 nbCheckLoadGroup(s32 group);
+extern void nbDelAllKoukaPacketType(s32 type);
+extern s32 nbMaeCheckDone(void);
+extern void nbMaeWaitStep(void);
+extern void MoveSub(nbEventProcessData_t *e);
+extern void pacFileHandleFree_(void *h);
+extern s32 pacLoadUseTail(char *name);
+extern void sdfMemFreeDirect(void *p);
+extern s32 sprintf(char *buf, const char *format, ...);
+extern s32 nbMakeModelPackName(s32 no);
+extern char D_00546548[];
+extern char D_00546860[];
+extern char D_00546898[];
+extern char D_005468B0[];
+extern char D_005468C8[];
+extern char D_005468D8[];
+extern char D_00546570[];
+extern char D_005467F0[];
+extern char D_00546830[];
+extern char D_00546870[];
+extern nbInnenEntry_t D_003E317C[];
+extern nbInnenEntry_t D_003E317E[];
+extern s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n);
+extern s32 nbGetQuestionType(datUnitWork_t *unit);
+extern s32 datCheckTalk(datUnitWork_t *unit);
+extern s32 datCheckStockFull(void);
+extern s32 datCheckItem(s32 item, s32 cnt);
+extern void nbPanelDraw(s32 show);
+extern void nbMakaDispOn(s32 no);
+extern s32 datCheckDying(datUnitWork_t *unit);
+extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                            s32 type, s32 hp, s32 mp, s32 bad);
+extern s32 nbCheckFlowUnit(nbNegoProcessData_t *n);
+extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern char D_00545208[]; /* "pwork hp = %d\n" */
 // @@DECLS@@
 extern void datAddMaka(s32 maka);
 extern void datAddItem(s32 item, s32 cnt);
@@ -2283,21 +2457,63 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckNegoMessage);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetNegoMesVar);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoYaruMakkaA);
+s32 nbGetNegoYaruMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
+{
+    s32 maka;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoYaruMakkaB);
+    maka = (datDevilTable[b->id].dropmakka * (dds3GetRandIntA(0, 4) + 5) + 5) / 10 * 10;
+    return maka != 0 ? maka : 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoKureMakkaA);
+s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
+{
+    s32 maka;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoKureMakkaB);
+    maka = nbGetNegoKureMakkaA(n, a, b);
+    maka = (maka * (dds3GetRandIntA(0, 30) + 40) / 100 + 5) / 10 * 10;
+    return maka != 0 ? maka : 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoKureHpA);
+s32 nbGetNegoKureMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
+{
+    s32 maka;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoKureHpB);
+    maka = (s32)((f32)(b->level * (dds3GetRandIntA(0, 10) + 21)) * 0.8f);
+    maka = (maka + 5) / 10 * 10;
+    return maka != 0 ? maka : 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoKureMpA);
+s32 nbGetNegoKureMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
+{
+    s32 maka;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoKureMpB);
+    maka = nbGetNegoKureMakkaA(n, a, b);
+    maka = (maka * (dds3GetRandIntA(0, 20) + 50) / 100 + 5) / 10 * 10;
+    return maka != 0 ? maka : 1;
+}
+
+s32 nbGetNegoKureHpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
+{
+    if (evtBitCheck(8) != 0) {
+        return b->maxhp * (dds3GetRandIntA(0, 10) + 20) / 100;
+    }
+    return b->maxhp * (dds3GetRandIntA(0, 8) + 14) / 100;
+}
+
+s32 nbGetNegoKureHpB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+{
+    return ework->maxhp * (dds3GetRandIntA(0, 10) + 10) / 100;
+}
+
+s32 nbGetNegoKureMpA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+{
+    return ework->maxmp * (dds3GetRandIntA(0, 30) + 10) / 100;
+}
+
+s32 nbGetNegoKureMpB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+{
+    return ework->maxmp * (dds3GetRandIntA(0, 10) + 10) / 100;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetKureItemA);
 
@@ -2329,11 +2545,36 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetInfoMsg);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckSelectMesJoukenAri);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetNegoNoMotion);
+s32 nbSetNegoNoMotion(nbNegoProcessData_t *n, nbFormation_t *form)
+{
+    nbClsNegoMessage(n);
+    nbAddMotionKoukaPacket(0, (s32)n->actdata, form, 0xF);
+    nbAddSePacket2(0, (s32)n->actdata, nbPlayMotionSe(form) + 1);
+    return 0xF;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetNegoYesMotion);
+s32 nbSetNegoYesMotion(nbNegoProcessData_t *n, nbFormation_t *form)
+{
+    nbClsNegoMessage(n);
+    nbAddMotionKoukaPacket(0, (s32)n->actdata, form, 0xE);
+    nbAddSePacket2(0, (s32)n->actdata, nbPlayMotionSe(form));
+    return 0xF;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFlowFindUnitEntry);
+s32 nbFlowFindUnitEntry(nbNegoProcessData_t *n)
+{
+    nbInnenRec_t *p;
+    s32 i;
+
+    p = D_003E3158;
+    for (i = 0; i < 64; i++) {
+        if (p->id != 0 && n->pwork->id == p->pid && n->ework->id == p->eid) {
+            return i;
+        }
+        p++;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoDebugPrint);
 
@@ -2345,7 +2586,14 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoProcessMessageChk);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoProcessMessage);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoSetProcessData);
+s32 nbNegoSetProcessData(dds3ProcessID_t *id)
+{
+    nbNegoProcessData_t *n;
+
+    n = dds3GetProcessData(id);
+    n->data->negoresult = n->endtype;
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoProcess1);
 
@@ -2355,7 +2603,18 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", InitNegoProcessData);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitNegoProcess);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_3);
+s32 Flow1_3(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10005);
+    nbAddNegoIdKouho(n, 0x1001F);
+    n->workid[3] = 0x10004;
+    if (datCheckTalk(n->pwork) != 0 || (n->actdata->unk_04 & 0x20) == 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_4);
 
@@ -2368,7 +2627,17 @@ s32 Flow1_6(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_7);
+s32 Flow1_7(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10008);
+    nbAddNegoIdKouho(n, 0x10003);
+    if (datCheckTalk(n->ework) != 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
 s32 Flow1_8(nbNegoProcessData_t *n)
 {
@@ -2396,21 +2665,81 @@ s32 Flow1_13(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_14);
+s32 Flow1_14(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x1000F);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 6, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_15);
+s32 Flow1_15(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x10010);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 7, 0);
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_16);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_17);
+s32 Flow1_17(nbNegoProcessData_t *n)
+{
+    nbSetMesMakka(n->helpmsg, n->getmakka);
+    nbDispNegoMessage(n, n->helpmsg, 4, 0);
+    datAddMaka(-n->getmakka);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_18);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_19);
+s32 Flow1_19(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10014);
+    nbAddNegoIdKouho(n, 0x1001F);
+    n->workid[3] = 0x40001;
+    n->nextnegoid = n->nextkouho[0];
+    if ((n->pwork->flag & 4) == 0 && (n->ework->flag & 4) == 0 &&
+        n->pwork->id == n->ework->id) {
+        n->flag1_6 = 0;
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_20);
+s32 Flow1_20(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10015);
+    nbAddNegoIdKouho(n, 0x1001F);
+    n->workid[3] = 0x30001;
+    n->nextnegoid = n->nextkouho[0];
+    if ((n->ework->flag & 4) == 0 && datSearchDevilStock(n->ework->id) >= 0 &&
+        n->negoreqtype == 0) {
+        n->flag1_6 = 0;
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_21);
+s32 Flow1_21(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10016);
+    nbAddNegoIdKouho(n, 0x1001B);
+    if (n->data->enemypcnt == 1) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    if ((n->data->stat & 0x800000) == 0) {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_22);
 
@@ -2420,9 +2749,40 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_24);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_25);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_26);
+s32 Flow1_26(nbNegoProcessData_t *n)
+{
+    s32 entry;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_27);
+    nbAddNegoIdKouho(n, 0x10012);
+    nbAddNegoIdKouho(n, 0x1001F);
+    n->workid[3] = 0x50001;
+    if (evtGetAgeOfMoon() == 8) {
+        n->nextnegoid = n->nextkouho[0];
+        return 0;
+    }
+    entry = nbFlowFindUnitEntry(n);
+    if (entry != -1) {
+        n->innen_id = entry;
+        n->flag1_6 = 0;
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
+
+s32 Flow1_27(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x1001F);
+    nbAddNegoIdKouho(n, 0x1001C);
+    n->workid[3] = 0x1001E;
+    if (master_text[n->ework->id].unk_09 == 1) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_28);
 
@@ -2432,9 +2792,29 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_30);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_31);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_34);
+s32 Flow1_34(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10023);
+    nbAddNegoIdKouho(n, 0x10026);
+    if (D_003E1338[n->negoskillid - 0x180].unk_00 == 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_35);
+s32 Flow1_35(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10024);
+    nbAddNegoIdKouho(n, 0x10025);
+    if (datGetPlayerLevel() < datDevilTable[n->ework->id].level) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 s32 Flow1_36(nbNegoProcessData_t *n)
 {
@@ -2444,7 +2824,15 @@ s32 Flow1_36(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_37);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_38);
+s32 Flow1_38(nbNegoProcessData_t *n)
+{
+    if (datDevilTable[n->ework->id].race == 0x21 && n->negoskillid == 0x193) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x64, 0);
+        return 1;
+    }
+    nbAddNegoIdKouho(n, 0x60001);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_39);
 
@@ -2465,29 +2853,117 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_80);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_81);
+s32 Flow6_81(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60004);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x126, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_3);
+s32 Flow6_3(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x60004);
+        nbDispNegoMessage(n, n->aisyomsg[n->ekucyo], n->aisyomes, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_4);
+s32 Flow6_4(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60005);
+    nbAddNegoIdKouho(n, 0x90001);
+    if (dds3GetRandIntA(0, 100) < 65) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_5);
+s32 Flow6_5(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60009);
+    nbDispNegoMessage(n, n->aisyomsg[n->ekucyo], 0x26, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_6);
+s32 Flow6_6(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x60007);
+        nbDispNegoMessage(n, n->aisyomsg[n->ekucyo], n->aisyomes, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_7);
+s32 Flow6_7(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60008);
+    nbAddNegoIdKouho(n, 0xA0001);
+    if (dds3GetRandIntA(0, 100) < 70) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_8);
+s32 Flow6_8(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60009);
+    nbDispNegoMessage(n, n->aisyomsg[n->ekucyo], 0x27, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_9);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_10);
+s32 Flow6_10(nbNegoProcessData_t *n)
+{
+    if (n->requesttype != 4) {
+        n->requesttype = 4;
+        n->prevreqtype = 4;
+    }
+    nbAddNegoIdKouho(n, 0x60046);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x42, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_11);
+s32 Flow6_11(nbNegoProcessData_t *n)
+{
+    if (n->requesttype != 3) {
+        n->requesttype = 3;
+        n->prevreqtype = 3;
+    }
+    nbAddNegoIdKouho(n, 0x60046);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x41, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_12);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_13);
+s32 Flow6_13(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60010);
+    nbAddNegoIdKouho(n, 0x6000E);
+    n->nextnegoid = n->nextkouho[0];
+    if (datCheckDying(n->ework) != 0) {
+        if (dds3GetRandIntA(0, 100) < 70) {
+            n->nextnegoid = n->nextkouho[1];
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_14);
 
@@ -2497,13 +2973,34 @@ s32 Flow6_15(nbNegoProcessData_t *n)
     return 2;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_16);
+s32 Flow6_16(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60046);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x43, 0);
+    nbMakaDispOn(0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_17);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_18);
+s32 Flow6_18(nbNegoProcessData_t *n)
+{
+    if (n->requesttype == 1) {
+        n->requestdata /= 2;
+    }
+    nbAddNegoIdKouho(n, 0x60014);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_19);
+s32 Flow6_19(nbNegoProcessData_t *n)
+{
+    if (n->requesttype == 1) {
+        n->requestdata *= 2;
+    }
+    nbAddNegoIdKouho(n, 0x60014);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_20);
 
@@ -2517,27 +3014,101 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_23);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_24);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_25);
+s32 Flow6_25(nbNegoProcessData_t *n)
+{
+    s32 mes;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_26);
+    nbAddNegoIdKouho(n, 0x6001A);
+    do {
+        mes = dds3GetRandIntA(0, 4) + 0x25;
+    } while (mes == n->mes6_25);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+    n->mes6_25 = mes;
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_27);
+s32 Flow6_26(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6001B);
+    nbAddNegoIdKouho(n, 0x6001C);
+    if (nbGetHojoSkillWorkCnt(n) > 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
+
+s32 Flow6_27(nbNegoProcessData_t *n)
+{
+    s32 r;
+
+    nbAddNegoIdKouho(n, 0x60034);
+    nbAddNegoIdKouho(n, 0x6001C);
+    n->workid[0] = 0x6001D;
+    n->workid[1] = 0x60021;
+    r = nbSearchHojoSkillWork(n, 3);
+    if (r != 0) {
+        n->hojopartyindex = (u32)r >> 16;
+        n->hojoskillid = r & 0xFFFF;
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_28);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_29);
+s32 Flow6_29(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6001E);
+    nbAddNegoIdKouho(n, 0x60020);
+    if (n->hojoaisyo == 1) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_30);
+s32 Flow6_30(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6001F);
+    nbDispNegoMessage(n, n->aisyomsg[n->ekucyo], n->hojoaisyomes, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_31);
+s32 Flow6_31(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90001);
+    nbAddNegoIdKouho(n, 0x60023);
+    if (dds3GetRandIntA(0, 10) != 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_32);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_33);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_34);
+s32 Flow6_34(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60026);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x47, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_35);
+s32 Flow6_35(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x60027;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x114, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_36);
 
@@ -2559,21 +3130,112 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_42);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_43);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_44);
+s32 Flow6_44(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0017);
+    nbAddNegoIdKouho(n, 0x6002D);
+    if (nbGetHojoSkillWorkCnt(n) > 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_45);
+s32 Flow6_45(nbNegoProcessData_t *n)
+{
+    s32 r;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_46);
+    nbAddNegoIdKouho(n, 0xA0017);
+    nbAddNegoIdKouho(n, 0x60034);
+    n->workid[0] = 0x6002E;
+    n->workid[1] = 0x6002F;
+    r = nbSearchHojoSkillWork(n, 2);
+    if (r != 0) {
+        n->hojopartyindex = (u32)r >> 16;
+        n->hojoskillid = r & 0xFFFF;
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_47);
+s32 Flow6_46(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x60009;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x4F, 0);
+    n->cnt6_36 = 0;
+    n->cnt6_37 = 0;
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_48);
+s32 Flow6_47(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    nbDispNegoMessage(n, n->helpmsg2, 9, 0);
+    n->waitframe = 60;
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_49);
+s32 Flow6_48(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60031);
+    nbAddNegoIdKouho(n, 0xA0001);
+    if (n->cnt6_58 >= 3) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_50);
+s32 Flow6_49(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60032);
+    nbAddNegoIdKouho(n, 0x60041);
+    n->workid[2] = 0x60045;
+    if (n->requesttype == 1) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_51);
+s32 Flow6_50(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60033);
+    nbAddNegoIdKouho(n, 0x60041);
+    n->workid[2] = 0x60045;
+    if (nbGetHojoSkillWorkCnt(n) > 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
+
+s32 Flow6_51(nbNegoProcessData_t *n)
+{
+    s32 r;
+
+    nbAddNegoIdKouho(n, 0x60034);
+    nbAddNegoIdKouho(n, 0x60041);
+    n->workid[2] = 0x60045;
+    n->workid[0] = 0x6003A;
+    n->workid[1] = 0x6003F;
+    r = nbSearchHojoSkillWork(n, 0);
+    if (r != 0) {
+        n->hojopartyindex = (u32)r >> 16;
+        n->hojoskillid = r & 0xFFFF;
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 s32 Flow6_52(nbNegoProcessData_t *n)
 {
@@ -2592,37 +3254,140 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_74);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_54);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_55);
+s32 Flow6_55(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60038);
+    nbDispNegoMessage(n, n->flowmsg[n->temp_param[0]], n->temp_param[1], 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_56);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_57);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_58);
+s32 Flow6_58(nbNegoProcessData_t *n)
+{
+    n->requestdata /= 2;
+    n->cnt6_58++;
+    nbAddNegoIdKouho(n, 0x6003B);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_59);
+s32 Flow6_59(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60047);
+    nbAddNegoIdKouho(n, 0x60048);
+    nbAddNegoIdKouho(n, 0x60049);
+    if (n->cnt6_58 < 4) {
+        if (n->cnt6_58 > 0) {
+            n->nextnegoid = n->nextkouho[n->cnt6_58 - 1];
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_71);
+s32 Flow6_71(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x6003C;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x5A, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_60);
+s32 Flow6_60(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60046);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x55, 0);
+    nbMakaDispOn(0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_72);
+s32 Flow6_72(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x6003D;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x5B, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_61);
+s32 Flow6_61(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60046);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x56, 0);
+    nbMakaDispOn(0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_73);
+s32 Flow6_73(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x6003E;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x5C, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_62);
+s32 Flow6_62(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60046);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x57, 0);
+    nbMakaDispOn(0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_63);
+s32 Flow6_63(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x6004A);
+        n->workid[6] = 0x60040;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x53, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_64);
+s32 Flow6_64(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60046);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x54, 0);
+    nbMakaDispOn(0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_65);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_66);
+s32 Flow6_66(nbNegoProcessData_t *n)
+{
+    n->cnt6_66++;
+    nbAddNegoIdKouho(n, 0x60043);
+    nbAddNegoIdKouho(n, 0xA0001);
+    if (n->cnt6_66 < 4) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_67);
+s32 Flow6_67(nbNegoProcessData_t *n)
+{
+    s32 mes;
+
+    nbAddNegoIdKouho(n, n->workid[2]);
+    do {
+        mes = dds3GetRandIntA(0, 4) + 0x21;
+    } while (mes == n->mes6_67);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+    n->mes6_67 = mes;
+    return 0;
+}
 
 s32 Flow6_69(nbNegoProcessData_t *n)
 {
@@ -2637,36 +3402,119 @@ s32 nbNegoFlowTwo(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_2);
+s32 Flow9_2(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x90003);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA7, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_3);
+s32 Flow9_3(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90004);
+    nbAddNegoIdKouho(n, 0x90006);
+    if (datCheckStockFull() != 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_4);
+s32 Flow9_4(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90005);
+    nbAddNegoIdKouho(n, 0x90009);
+    printf(D_005450E0, datGetPlayerLevel(), n->ework->level);
+    if (datGetPlayerLevel() < n->ework->level) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_5);
+s32 Flow9_5(nbNegoProcessData_t *n)
+{
+    n->actdata->unk_04 |= 8;
+    nbAddNegoIdKouho(n, 0x90007);
+    nbDispNegoMessage(n, n->helpmsg, 2, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_6);
+s32 Flow9_6(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x9000A);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xAB, 0);
+    return 0;
+}
 
 s32 Flow9_7(nbNegoProcessData_t *n)
 {
     return 9;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_9);
+s32 Flow9_9(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x9000A);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xAC, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_10);
+s32 Flow9_10(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xAD, 0);
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005450E0);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_11);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_13);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_14);
+s32 Flow9_14(nbNegoProcessData_t *n)
+{
+    n->actdata->unk_04 |= 8;
+    nbAddNegoIdKouho(n, 0x9000F);
+    nbSetMesMakka(n->helpmsg, n->getmakka);
+    nbDispNegoMessage(n, n->helpmsg, 3, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_15);
+s32 Flow9_15(nbNegoProcessData_t *n)
+{
+    u8 *p;
+
+    nbAddNegoIdKouho(n, 0xA001C);
+    datAddMaka(n->getmakka);
+    if (n->negoskillid == 0x191) {
+        p = (u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8);
+        if (*p < 0xFF) {
+            *p = *p + 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_16);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_17);
+s32 Flow9_17(nbNegoProcessData_t *n)
+{
+    n->actdata->unk_04 |= 8;
+    nbAddNegoIdKouho(n, 0x90012);
+    nbSetMesItem(n->helpmsg, n->getitem);
+    nbDispNegoMessage(n, n->helpmsg, 5, 0);
+    return 0;
+}
 
 s32 Flow9_18(nbNegoProcessData_t *n)
 {
@@ -2675,13 +3523,36 @@ s32 Flow9_18(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_19);
+s32 Flow9_19(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x90014);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xAA, 0);
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_20);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_21);
+s32 Flow9_21(nbNegoProcessData_t *n)
+{
+    n->actdata->unk_04 |= 8;
+    nbAddNegoIdKouho(n, 0x90016);
+    n->getinfomsg = nbGetInfoMsg(n->getinfotype);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_22);
+s32 Flow9_22(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001C);
+    nbDispNegoMessage(n, n->infomsg[n->ekucyo], n->getinfomsg, 0);
+    return 0;
+}
 
 s32 nbNegoFlowOk(nbNegoProcessData_t *n)
 {
@@ -2698,37 +3569,132 @@ s32 nbCheckFlowUnit(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_2);
+s32 Flow10_2(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xA0003);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], dds3GetRandIntA(0, 2) + 0xD7, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_3);
+s32 Flow10_3(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0006);
+    nbAddNegoIdKouho(n, 0xA0004);
+    if (nbGetHojoSkillWorkCnt(n) > 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_4);
+s32 Flow10_4(nbNegoProcessData_t *n)
+{
+    s32 r;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_5);
+    nbAddNegoIdKouho(n, 0x60034);
+    nbAddNegoIdKouho(n, 0xA0006);
+    n->workid[0] = 0xA000A;
+    n->workid[1] = 0xA0005;
+    r = nbSearchHojoSkillWork(n, 1);
+    if (r != 0) {
+        n->hojopartyindex = (u32)r >> 16;
+        n->hojoskillid = r & 0xFFFF;
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
+
+s32 Flow10_5(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xA0006);
+        nbCameraSetTarget(n->eform);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xDA, 0);
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_6);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_7);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_8);
+s32 Flow10_8(nbNegoProcessData_t *n)
+{
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xDB, 0);
+    if (nbCheckFlowUnit(n) == 1) {
+        nbAddNegoIdKouho(n, 0xA0021);
+        n->temp_param[0] = 4;
+        return 0;
+    }
+    return 4;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_9);
+s32 Flow10_9(nbNegoProcessData_t *n)
+{
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xDF, 0);
+    if (nbCheckFlowUnit(n) == 1) {
+        nbAddNegoIdKouho(n, 0xA0021);
+        n->temp_param[0] = 4;
+        return 0;
+    }
+    return 4;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_33);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_10);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_11);
+s32 Flow10_11(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA000C);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE0, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_12);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_13);
+s32 Flow10_13(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0010);
+    nbAddNegoIdKouho(n, 0xA0010);
+    nbAddNegoIdKouho(n, 0xA0011);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 3)];
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_15);
+s32 Flow10_15(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0012);
+    n->getmakka = nbGetNegoYaruMakkaB(n, n->pwork, n->ework);
+    nbCameraSetTarget(n->eform);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->getmakka);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE2, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_16);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_17);
+s32 Flow10_17(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0014);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE3, 0);
+    return 0;
+}
 
 s32 Flow10_18(nbNegoProcessData_t *n)
 {
@@ -2744,34 +3710,101 @@ s32 Flow10_19(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_20);
+s32 Flow10_20(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0020);
+    nbClsNegoMessage(n);
+    nbPanelDraw(1);
+    nbMakeKaifukuPacket(0, 0, n->pform, 0, n->pwork->maxhp, -1, 0);
+    nbAddHitEffKoukaPacket(0, 0, n->pform, 8);
+    n->waitframe = 0;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_21);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_22);
+s32 Flow10_22(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0017);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xEA, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_23);
+s32 Flow10_23(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    nbDispNegoMessage(n, n->helpmsg, 1, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_24);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_25);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_26);
+s32 Flow10_26(nbNegoProcessData_t *n)
+{
+    s32 r;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_27);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE5, 0);
+    r = nbCheckFlowUnit(n);
+    if (r == 1) {
+        nbAddNegoIdKouho(n, 0xA0021);
+        n->temp_param[0] = r;
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_28);
+s32 Flow10_27(nbNegoProcessData_t *n)
+{
+    s32 r;
+
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE9, 0);
+    r = nbCheckFlowUnit(n);
+    if (r == 1) {
+        nbAddNegoIdKouho(n, 0xA0021);
+        n->temp_param[0] = r;
+        return 0;
+    }
+    return 1;
+}
+
+s32 Flow10_28(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0017);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE4, 0);
+    return 0;
+}
 
 s32 Flow10_29(nbNegoProcessData_t *n)
 {
     return 2;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_30);
+s32 Flow10_30(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0016);
+    nbSetMesMakka(n->helpmsg, n->getmakka);
+    nbDispNegoMessage(n, n->helpmsg, 3, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_31);
+s32 Flow10_31(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0016);
+    nbSetMesItem(n->helpmsg, n->getitem);
+    nbDispNegoMessage(n, n->helpmsg, 5, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_32);
+s32 Flow10_32(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0016);
+    nbDispNegoMessage(n, n->helpmsg2, 7, 0);
+    nbPanelDraw(0);
+    n->waitframe = 60;
+    return 0;
+}
 
 s32 nbNegoFlowNg(nbNegoProcessData_t *n)
 {
@@ -2788,7 +3821,20 @@ s32 Flow2_3(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_4);
+s32 Flow2_4(nbNegoProcessData_t *n)
+{
+    u8 *p;
+    s32 q;
+
+    nbAddNegoIdKouho(n, 0x20005);
+    q = nbGetQuestionType(n->ework);
+    n->qtype = q;
+    p = (u8 *)(q + (s32)DDS3_GBWK + 0x1CE8);
+    if (*p < 0xFF) {
+        *p = *p + 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_5);
 
@@ -2811,24 +3857,71 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_9);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_10);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_11);
+s32 Flow2_11(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001C);
+    n->getmakka = nbGetNegoYaruMakkaB(n, n->pwork, n->ework);
+    nbSetMesMakka(n->helpmsg, n->getmakka);
+    nbDispNegoMessage(n, n->helpmsg, 3, 0);
+    datAddMaka(n->getmakka);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_12);
+s32 Flow2_12(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90007);
+    nbDispNegoMessage(n, n->helpmsg, 9, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_13);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_14);
+s32 Flow2_14(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x2000F);
+    nbAddNegoIdKouho(n, 0x20010);
+    nbCameraSetTarget(n->eform);
+    if (dds3GetRandIntA(0, 2) == 0) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x2F, 0);
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x2E, 0);
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_15);
+s32 Flow2_15(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    nbDispNegoMessage(n, n->helpmsg, 1, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_16);
+s32 Flow2_16(nbNegoProcessData_t *n)
+{
+    if (n->negoskillid == 0x18B) {
+        if (n->pwork->hp != 0) {
+            nbAddNegoIdKouho(n, 0xA0021);
+            n->temp_param[0] = 4;
+            return 0;
+        }
+        return 4;
+    }
+    return 4;
+}
 
 s32 nbNegoFlowFullMoon(nbNegoProcessData_t *n)
 {
     return D_004EF780[(u16)n->nownegoid](n);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow3_1);
+s32 Flow3_1(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x30002);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x30, 0);
+    return 0;
+}
 
 s32 Flow3_2(nbNegoProcessData_t *n)
 {
@@ -2843,7 +3936,13 @@ s32 nbNegoFlowStock(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_2);
+s32 Flow4_2(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x40003);
+    nbAddNegoIdKouho(n, 0x4000C);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+    return 0;
+}
 
 s32 Flow4_3(nbNegoProcessData_t *n)
 {
@@ -2851,13 +3950,32 @@ s32 Flow4_3(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_4);
+s32 Flow4_4(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x40005);
+    nbAddNegoIdKouho(n, 0x40006);
+    nbAddNegoIdKouho(n, 0x40007);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 3)];
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_5);
+s32 Flow4_5(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x40008);
+    n->getmakka = nbGetNegoYaruMakkaB(n, n->pwork, n->ework);
+    nbSetMesMakka(n->flowmsg[n->ekucyo], n->getmakka);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x33, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_6);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_7);
+s32 Flow4_7(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x4000A);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x35, 0);
+    return 0;
+}
 
 s32 Flow4_8(nbNegoProcessData_t *n)
 {
@@ -2873,11 +3991,25 @@ s32 Flow4_9(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_10);
+s32 Flow4_10(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x4000B);
+    nbClsNegoMessage(n);
+    nbPanelDraw(1);
+    nbMakeKaifukuPacket(0, 0, n->pform, 0, n->pwork->maxhp, -1, 0);
+    nbAddHitEffKoukaPacket(0, 0, n->pform, 8);
+    n->waitframe = 0;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_11);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_12);
+s32 Flow4_12(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x4000D);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x32, 0);
+    return 0;
+}
 
 s32 Flow4_13(nbNegoProcessData_t *n)
 {
@@ -2900,7 +4032,18 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_3);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_4);
+s32 Flow5_4(nbNegoProcessData_t *n)
+{
+    switch (D_003E315E[n->innen_id].mes) {
+    case 0:
+        nbAddNegoIdKouho(n, 0x50006);
+        n->nextnegoid = n->nextkouho[0];
+        break;
+    case 1:
+        return 4;
+    }
+    return 0;
+}
 
 s32 Flow5_5(nbNegoProcessData_t *n)
 {
@@ -2919,7 +4062,16 @@ s32 Flow5_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_9);
+s32 Flow5_9(nbNegoProcessData_t *n)
+{
+    if (D_003E3158[n->innen_id].phase[n->nownegophase].item == 0) {
+        return 2;
+    }
+    n->getitem = D_003E3158[n->innen_id].phase[n->nownegophase].item;
+    nbSetMesItem(n->helpmsg, n->getitem);
+    nbDispNegoMessage(n, n->helpmsg, 8, 0);
+    return 0;
+}
 
 s32 Flow5_10(nbNegoProcessData_t *n)
 {
@@ -2941,9 +4093,18 @@ s32 Flow5_13(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_14);
+s32 Flow5_14(nbNegoProcessData_t *n)
+{
+    nbDispNegoMessage(n, n->innenmsg, D_003E317E[n->innen_id].mes, 0);
+    return 6;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_15);
+s32 Flow5_15(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x50012);
+    nbDispNegoMessage(n, n->innenmsg, D_003E317C[n->innen_id].mes, 0);
+    return 0;
+}
 
 s32 Flow5_16(nbNegoProcessData_t *n)
 {
@@ -2967,7 +4128,16 @@ s32 Flow5_20(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_21);
+s32 Flow5_21(nbNegoProcessData_t *n)
+{
+    if (D_003E3158[n->innen_id].phase[n->nownegophase].item == 0) {
+        return 6;
+    }
+    n->getitem = D_003E3158[n->innen_id].phase[n->nownegophase].item;
+    nbSetMesItem(n->helpmsg, n->getitem);
+    nbDispNegoMessage(n, n->helpmsg, 5, 0);
+    return 0;
+}
 
 s32 nbNegoFlowInnen(nbNegoProcessData_t *n)
 {
@@ -2994,16 +4164,46 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow7_23);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow7_24);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow7_25);
+s32 Flow7_25(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, n->workid[4]);
+        nbDispNegoMessage(n, n->questionmsg, 0x27, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow7_26);
+s32 Flow7_26(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, n->workid[5]);
+        n->workid[2] = 0x60045;
+        nbDispNegoMessage(n, n->questionmsg, 0x28, 0);
+        break;
+    }
+    return 0;
+}
 
 s32 nbNegoFlowQuestion(nbNegoProcessData_t *n)
 {
     return D_004EF868[(u16)n->nownegoid](n);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_1);
+s32 Flow8_1(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x80002);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x9F, 0);
+    return 0;
+}
 
 s32 Flow8_2(nbNegoProcessData_t *n)
 {
@@ -3011,7 +4211,13 @@ s32 Flow8_2(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_3);
+s32 Flow8_3(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x80004);
+    nbAddNegoIdKouho(n, 0x80008);
+    nbAddNegoIdKouho(n, 0x8000B);
+    return 0;
+}
 
 s32 Flow8_4(nbNegoProcessData_t *n)
 {
@@ -3019,9 +4225,20 @@ s32 Flow8_4(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_5);
+s32 Flow8_5(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x80006);
+    nbAddNegoIdKouho(n, 0x80007);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_6);
+s32 Flow8_6(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90001);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA0, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_7);
 
@@ -3052,11 +4269,33 @@ s32 Flow8_11(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_12);
+s32 Flow8_12(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], dds3GetRandIntA(0, 2) + 0xA4, 0);
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_13);
+s32 Flow8_13(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x80011);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA6, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_14);
+s32 Flow8_14(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x8000F);
+    nbAddNegoIdKouho(n, 0x80010);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_15);
 
@@ -3072,7 +4311,12 @@ s32 Flow8_17(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_18);
+s32 Flow8_18(nbNegoProcessData_t *n)
+{
+    nbSetMesMakka(n->helpmsg, 6600);
+    nbDispNegoMessage(n, n->helpmsg, 4, 0);
+    return 1;
+}
 
 s32 Flow8_19(nbNegoProcessData_t *n)
 {
@@ -3094,15 +4338,64 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_3);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_4);
+s32 Flow11_4(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xB0006);
+    nbAddNegoIdKouho(n, 0xB0005);
+    nbPanelPartyHide();
+    printf(D_00545208, n->pwork->hp);
+    if (n->pwork->hp == 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_5);
+s32 Flow11_5(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x80013);
+    nbAddNegoIdKouho(n, 0xB0009);
+    if (n->pwork->flag & 4) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_6);
+s32 Flow11_6(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xB0007);
+    nbAddNegoIdKouho(n, 0xB0008);
+    if (n->requesthpmp == 1) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_7);
+s32 Flow11_7(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xB0009);
+    nbAddNegoIdKouho(n, 0x60018);
+    if (n->pwork->mp != 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else if (n->requestdata < 0x32) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_8);
+s32 Flow11_8(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60018);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], dds3GetRandIntA(0, 2) == 0 ? 0x99 : 0x9C, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_9);
 
@@ -3118,7 +4411,19 @@ s32 Flow14_1(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow14_2);
+s32 Flow14_2(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x1001E);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x110, 0);
+        break;
+    }
+    return 0;
+}
 
 s32 nbNegoFlowBinjo(nbNegoProcessData_t *n)
 {
@@ -3138,25 +4443,138 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_3);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_4);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_24);
+s32 Flow12_24(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC0019);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xED, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_25);
+s32 Flow12_25(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    nbDispNegoMessage(n, n->helpmsg, 1, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_16);
+s32 Flow12_16(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001A);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xEE, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_17);
+s32 Flow12_17(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC002E);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xEF, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_18);
+s32 Flow12_18(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001A);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF0, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_19);
+s32 Flow12_19(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC002E);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF1, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_20);
+s32 Flow12_20(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001A);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF2, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_21);
+s32 Flow12_21(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC002E);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF3, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_22);
+s32 Flow12_22(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001A);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF4, 0);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_23);
+s32 Flow12_23(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC002E);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF5, 0);
+        break;
+    }
+    return 0;
+}
 
 s32 Flow12_26(nbNegoProcessData_t *n)
 {
@@ -3164,11 +4582,35 @@ s32 Flow12_26(nbNegoProcessData_t *n)
     return 0;
 }
 
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545208);
+
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_27);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_28);
+s32 Flow12_28(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC001D);
+    if (n->negotype != 2) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF9, 0);
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x105, 0);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_29);
+s32 Flow12_29(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xD4, 1);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001E);
+        nbAddNegoIdKouho(n, 0xC0026);
+        n->nextnegoid = n->nextkouho[n->nowselect];
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_30);
 
@@ -3178,19 +4620,73 @@ s32 Flow12_31(nbNegoProcessData_t *n)
     return 9;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_35);
+s32 Flow12_35(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC0024);
+    if (n->negotype != 2) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF6, 0);
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x102, 0);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_36);
+s32 Flow12_36(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC0025);
+    if (dds3GetRandIntA(0, 2) == 0) {
+        n->getinfotype = 0;
+    } else {
+        n->getinfotype = 2;
+    }
+    n->getinfomsg = nbGetInfoMsg(n->getinfotype);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_37);
+s32 Flow12_37(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001C);
+    nbDispNegoMessage(n, n->infomsg[n->ekucyo], n->getinfomsg, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_38);
+s32 Flow12_38(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC0027);
+    if (dds3GetRandIntA(0, 2) == 0) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x108, 0);
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x109, 0);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_39);
+s32 Flow12_39(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    nbDispNegoMessage(n, n->helpmsg, 1, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_40);
+s32 Flow12_40(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC0029);
+    if (n->negotype != 2) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF7, 0);
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x103, 0);
+    }
+    n->getmakka = nbGetNegoYaruMakkaB(n, n->pwork, n->ework);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_41);
+s32 Flow12_41(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC002A);
+    nbSetMesMakka(n->helpmsg, n->getmakka);
+    nbDispNegoMessage(n, n->helpmsg, 3, 0);
+    return 0;
+}
 
 s32 Flow12_42(nbNegoProcessData_t *n)
 {
@@ -3201,7 +4697,13 @@ s32 Flow12_42(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_43);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_44);
+s32 Flow12_44(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC002D);
+    nbSetMesItem(n->helpmsg, n->getitem);
+    nbDispNegoMessage(n, n->helpmsg, 5, 0);
+    return 0;
+}
 
 s32 Flow12_45(nbNegoProcessData_t *n)
 {
@@ -3216,7 +4718,17 @@ s32 Flow12_46(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_47);
+s32 Flow12_47(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC0030);
+    nbAddNegoIdKouho(n, 0xC0031);
+    if (dds3GetRandIntA(0, 2) == 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 s32 Flow12_48(nbNegoProcessData_t *n)
 {
@@ -3241,25 +4753,114 @@ s32 Flow13_1(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_2);
+s32 Flow13_2(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xD0003);
+    nbAddNegoIdKouho(n, 0xD0004);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+    if (datGetRace(n->ework) == 0x15 || datGetRace(n->ework) == 0x16 ||
+        datGetRace(n->ework) == 0x17) {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_3);
+s32 Flow13_3(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x70001);
+    n->workid[4] = 0xC001A;
+    n->workid[5] = 0xD000B;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xFE, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_4);
+s32 Flow13_4(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xD0005);
+    n->requesttype = 0;
+    n->requestdata = nbGetKureItemA(n, n->pwork, n->ework);
+    nbSetMesItem(n->flowmsg[n->ekucyo], n->requestdata);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xFF, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_5);
+s32 Flow13_5(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xD3, 1);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xD0006);
+        nbAddNegoIdKouho(n, 0xD0007);
+        if (n->nowselect == 0) {
+            n->nextnegoid = n->nextkouho[0];
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_6);
+s32 Flow13_6(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xD0009);
+    nbAddNegoIdKouho(n, 0xD0008);
+    if (datCheckItem(n->requestdata, 1) != 0) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_7);
+s32 Flow13_7(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xD000A);
+    nbAddNegoIdKouho(n, 0xD000C);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_12);
+s32 Flow13_12(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001C);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x116, 0);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_8);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_9);
+s32 Flow13_9(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001A);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x101, 0);
+        datAddItem(n->requestdata, -1);
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_10);
+s32 Flow13_10(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x100, 0);
+        break;
+    case 2:
+        return 1;
+    }
+    return 0;
+}
 
 s32 Flow13_11(nbNegoProcessData_t *n)
 {
@@ -3282,7 +4883,24 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_5);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_6);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_7);
+s32 Flow15_7(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xD2, 1);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xF0008);
+        nbAddNegoIdKouho(n, 0xF0017);
+        if (n->nowselect == 0) {
+            n->nextnegoid = n->nextkouho[0];
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_8);
 
@@ -3294,11 +4912,31 @@ s32 Flow15_11(nbNegoProcessData_t *n)
     return 3;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_12);
+s32 Flow15_12(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xF0011);
+    nbDispNegoMessage(n, n->helpmsg, 3, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_13);
+s32 Flow15_13(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xF0012);
+    nbDispNegoMessage(n, n->helpmsg, 5, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_14);
+s32 Flow15_14(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xF0013);
+    if (dds3GetRandIntA(0, 2) == 0) {
+        n->getinfotype = 0;
+    } else {
+        n->getinfotype = 2;
+    }
+    n->getinfomsg = nbGetInfoMsg(n->getinfotype);
+    return 0;
+}
 
 s32 Flow15_17(nbNegoProcessData_t *n)
 {
@@ -3307,11 +4945,34 @@ s32 Flow15_17(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_18);
+s32 Flow15_18(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001D);
+    if ((u32)(n->requestdata - 1) < 0x9F) {
+        datAddItem(n->requestdata, 1);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_19);
+s32 Flow15_19(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA001C);
+    nbDispNegoMessage(n, n->infomsg[n->ekucyo], n->getinfomsg, 0);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_20);
+s32 Flow15_20(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xF0016);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x10E, 0);
+        break;
+    }
+    return 0;
+}
 
 s32 Flow15_22(nbNegoProcessData_t *n)
 {
@@ -3329,7 +4990,22 @@ s32 nbNegoFlowInoti(nbNegoProcessData_t *n)
     return D_004EFA60[(u16)n->nownegoid](n);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow16_1);
+s32 Flow16_1(nbNegoProcessData_t *n)
+{
+    s32 race;
+
+    nbAddNegoIdKouho(n, 0x100002);
+    nbAddNegoIdKouho(n, 0x100003);
+    nbAddMojiEffKoukaPacket(0, 0x1E, (s32)n->actdata, n->eform, 0);
+    nbCameraSetBougai(n->eform);
+    race = datGetRace(n->ework);
+    if (race < 0x18) {
+        if (race >= 0x15) {
+            n->nextnegoid = n->nextkouho[1];
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow16_2);
 
@@ -3415,7 +5091,16 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCenterText);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelHPColor);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelMPColor);
+u32 nbPanelMPColor(datUnitWork_t *unit)
+{
+    s32 pct;
+
+    pct = unit->mp * 100 / unit->maxmp;
+    if (pct < 0x19) {
+        return 0x754B3D80;
+    }
+    return pct < 0x32 ? 0xB4A06480 : 0xA09DC380;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelCursorDraw);
 
@@ -3456,7 +5141,15 @@ void nbPanelPressGaugeStart(void)
     nbPanelPGTurnOld = -1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressGaugeReset);
+void nbPanelPressGaugeReset(void)
+{
+    printf(D_00545380);
+    nbPanelPressGaugeStart();
+    nbPanelPressTurnGaugeAnimStart2();
+    nbPanelPressTurnOmit();
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545380);
 
 void nbPanelPressGaugeShow(void)
 {
@@ -3498,7 +5191,17 @@ void nbPanelPressTurnInit(void)
     nbPanelPTOmit = 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurnRun);
+s32 nbPanelPressTurnRun(void)
+{
+    s32 run;
+
+    run = 0;
+    if (nbPanelPT_1_Process != 0 || nbPanelPT_2_Process != 0 || nbPanelPT_3_Process != 0 ||
+        nbPanelPTAProcess != 0 || nbPanelPTP_1_Process != 0) {
+        run = 1;
+    }
+    return run;
+}
 
 s32 nbPanelPressTurnGaugeRun(void)
 {
@@ -3718,7 +5421,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SelectMot);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SelectDevil);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetSelect);
+void SetSelect(void)
+{
+    nbSetTargetProcess(0, 0, 0, 0, 3);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetDvlChange);
 
@@ -3732,19 +5438,59 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetNextSeq);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbDebugProcess1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbDebugShutdown);
+void nbDebugShutdown(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", InitDebugProcessData);
+    data = nbGetMainProcessData();
+    sdfChipFreeDirect(dds3GetProcessData(id));
+    data->debugproc = NULL;
+}
+
+nbDebugWork_t *InitDebugProcessData(nbMainProcessData_t *data)
+{
+    nbDebugWork_t *w;
+
+    w = sdfChipAllocDirect(sizeof(nbDebugWork_t));
+    memset(w, 0, sizeof(nbDebugWork_t));
+    w->data = data;
+    w->unk_04 = 0;
+    w->unk_14 = 0;
+    w->unk_18 = 0;
+    menucur = 0;
+    return w;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitDebugProcess);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_MYHP);
+s32 Chk_MYHP(nbActionProcessData_t *a, s32 hp)
+{
+    if (a->work->hp * 100 / a->work->maxhp <= hp) {
+        a->unk_190 = 1 << a->form->formindex;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_MYMP);
+s32 Chk_MYMP(nbActionProcessData_t *a, s32 mp)
+{
+    if (a->work->mp <= mp) {
+        a->unk_190 = 1 << a->form->formindex;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRHP);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_DMGCNT_285578);
+s32 Chk_DMGCNT_285578(nbActionProcessData_t *a, s32 n)
+{
+    if (nbGetHojoCounter(a->form->formindex, 0) >= n) {
+        a->unk_190 = 1 << a->form->formindex;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_CHKCNT_2855D8);
 
@@ -3752,7 +5498,14 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRCNT);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENCNT);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_MYBAD);
+s32 Chk_MYBAD(nbActionProcessData_t *a, s32 badstat)
+{
+    if ((a->work->badstatus & 0xFFF) == badstat) {
+        a->unk_190 = 1 << a->form->formindex;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRBAD);
 
@@ -3784,17 +5537,49 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENLIGHT);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENDARK);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_SENSEI_286530);
+s32 Chk_SENSEI_286530(nbActionProcessData_t *a)
+{
+    if (ChkAiHojo(a->form->formindex, 0x11) != 0) {
+        a->unk_190 = 1 << a->form->formindex;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_PLV);
+s32 Chk_PLV(nbActionProcessData_t *a, s32 lv)
+{
+    if (datGetPlayerLevel() < lv) {
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_PPARTYLV);
+s32 Chk_PPARTYLV(nbActionProcessData_t *a, s32 lv)
+{
+    if (nbGetLvAvg(a->data, 0) < lv) {
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_TURN);
+s32 Chk_TURN(nbActionProcessData_t *a, s32 turn)
+{
+    if (a->data->turn < turn) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENHAMAMHK);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_SKILLNOMP);
+s32 Chk_SKILLNOMP(nbActionProcessData_t *a, s32 nskill)
+{
+    if (nbCheckSkillCost(a->form->formindex, nskill) != 0) {
+        a->unk_190 = 1 << a->form->formindex;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbAiChkJoken);
 
@@ -3822,9 +5607,35 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_DARK);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_PLAYER);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_JOKEN);
+void Sel_JOKEN(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    s32 i;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_RND);
+    form = a->data->form;
+    for (i = 0; i < 16; i++) {
+        one = 1;
+        if ((form->stat & 4) && (a->unk_190 & (one << i))) {
+            form->stat |= 8;
+        }
+        form++;
+    }
+}
+
+void Sel_RND(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    s32 i;
+
+    form = a->data->form;
+    for (i = 0; i < 16; i++) {
+        if (form->stat & 4) {
+            form->stat |= 8;
+        }
+        form++;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetSingleTarget2);
 
@@ -5026,7 +6837,17 @@ void nbPlaySe(s32 no)
     p2sdPlaySE(no, 0x7F, 0x3F);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMotionTable);
+s32 nbGetMotionTable(s32 unitid, s32 index)
+{
+    u8 *p;
+
+    if (unitid == 0) {
+        p = D_003494B0;
+    } else {
+        p = datModelParamTable + unitid * 784;
+    }
+    return *(s8 *)(p + index * 28 + 0x31);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMotionByIndex);
 
@@ -5061,15 +6882,61 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMidiFile);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckPackLoad);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindFreeFormSlot);
+s32 nbFindFreeFormSlot(void)
+{
+    nbStatWork_t *stat;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindFormIndex);
+    stat = nbGetMainProcessData()->statwork;
+    for (i = 0; i < 10; i++) {
+        if (stat[i].id == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+s32 nbFindFormIndex(s32 id)
+{
+    nbStatWork_t *stat;
+    s32 i;
+
+    stat = nbGetMainProcessData()->statwork;
+    for (i = 0; i < 10; i++) {
+        if (stat->id != 0 && stat->unk_02 == id) {
+            return i;
+        }
+        stat++;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeFormResources);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeAllFormResources);
+void nbFreeAllFormResources(nbMainProcessData_t *data)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbAllocMainProcessData);
+    for (i = 0; i < 10; i++) {
+        nbFreeFormResources(data, i);
+    }
+    sdfMemFreeDirect(data->statbuf);
+    data->statwork = NULL;
+    data->statbuf = NULL;
+}
+
+void nbAllocMainProcessData(nbMainProcessData_t *data)
+{
+    void *p;
+
+    p = sdfMemAllocDirect(0x8C0);
+    data->statbuf = p;
+    data->statwork = sdfMemLock(p);
+    memset(data->statwork, 0, 0x8C0);
+    if (p2sdLoadCheckMidi(0x10000) == 0) {
+        p2sdLoadSMGFile(0x10000);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMaeCheckDone);
 
@@ -5105,7 +6972,13 @@ void nbBgmFadeOut(void)
     p2sdStopBGM(nbBgmFadeState);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBgmStop);
+void nbBgmStop(void)
+{
+    printf(D_00545CE0, nbBgmSaved, nbBgmFadeState);
+    p2sdStopBGM(bgmno);
+    p2sdStopBGM(nbBgmFadeState);
+    p2sdStopBGM(0x2B0000);
+}
 
 void nb_28DE10(void)
 {
@@ -5119,13 +6992,29 @@ void nb_28DE28(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess3);
 
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545CE0);
+
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess2_6);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess2_55);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess2_5);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess2);
+void *nbEncProcess2(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data;
+
+    data = nbGetMainProcessData();
+    if (nbCheckLoadGroup(1) != 0) {
+        return NULL;
+    }
+    if ((data->stat & 0x10) != 0) {
+        nbLoadUnitGroup(0, 0, 1);
+    } else {
+        nbLoadUnitGroup(0, 1, 0);
+    }
+    return nbEncProcess2_5;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess1);
 
@@ -5134,11 +7023,30 @@ void nbEncShutdown(dds3ProcessID_t *id)
     nbGetMainProcessData()->encproc = NULL;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitEncProcess);
+void nbInitEncProcess(nbMainProcessData_t *data)
+{
+    dds3ProcessID_t *id;
+
+    id = dds3StartProcess(D_00551550, 0x3F9, 1, 1, nbEncProcess1, nbEncShutdown, NULL);
+    dds3LinkProcess(data->mainproc, id);
+    data->encproc = id;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCollectBadCurseUnits);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMarkBadCurseUnits);
+void nbMarkBadCurseUnits(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    s32 i;
+
+    form = a->data->form;
+    for (i = 0; i < 16; i++) {
+        if (form->stat & 4) {
+            form->stat |= 8;
+        }
+        form++;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBadCurseApplyMove);
 
@@ -5160,7 +7068,16 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBadCurseStep6);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBadCurseStep0);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBadCurseStep7);
+s32 nbBadCurseStep7(nbActionProcessData_t *a)
+{
+    datUnitWork_t *w;
+
+    w = a->work;
+    w->nowcommand = 10;
+    w->nowindex = 0;
+    nbSetJyokyoMes(a, 0x4C, 1, w->id);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetBadCurseStep);
 
@@ -5172,25 +7089,93 @@ INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545D40);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbApplyBadCurse);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", GetMakaProcessData);
+nbMakaWork_t *GetMakaProcessData(void)
+{
+    dds3ProcessID_t *id;
+
+    id = dds3SearchProcessName(D_00551560);
+    if (id == NULL) {
+        return NULL;
+    }
+    return dds3GetProcessData(id);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaDispOn);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaDispOff);
+void nbMakaDispOff(void)
+{
+    nbMakaWork_t *w;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPow10);
+    w = GetMakaProcessData();
+    if (w->unk_08 != 0) {
+        if (w->unk_1C == 0) {
+            w->unk_24 = 0x14;
+        }
+        w->unk_00 = 2;
+    }
+}
+
+u32 nbPow10(u32 v, s32 n)
+{
+    s32 p;
+
+    p = 10;
+    if (n > 0) {
+        do {
+            p = p * 10;
+            n--;
+        } while (n != 0);
+    }
+    return (v % p) / (p / 10);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbDrawMakaNum);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaStep);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaProcess1);
+s32 nbMakaProcess1(dds3ProcessID_t *id)
+{
+    nbMakaWork_t *w;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaShutdown);
+    w = dds3GetProcessData(id);
+    nbMakaStep(w);
+    if (w->unk_08 != 0) {
+        nbDrawMakaNum(w, w->unk_0C, w->unk_10, 0x80808080, w->unk_28);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbAllocMakaWork);
+void nbMakaShutdown(dds3ProcessID_t *id)
+{
+    void *w;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitMakaProcess);
+    w = dds3GetProcessData(id);
+    if (w != NULL) {
+        sdfChipFreeDirect(w);
+    }
+}
+
+nbMakaWork_t *nbAllocMakaWork(void)
+{
+    nbMakaWork_t *w;
+
+    w = sdfChipAllocDirect(sizeof(nbMakaWork_t));
+    memset(w, 0, sizeof(nbMakaWork_t));
+    w->maka = *(s32 *)(DDS3_GBWK + 0xA48);
+    return w;
+}
+
+dds3ProcessID_t *nbInitMakaProcess(dds3ProcessID_t *parent)
+{
+    dds3ProcessID_t *id;
+
+    id = dds3StartProcess(D_00551560, 0x2B0E, 1, 1, nbMakaProcess1, nbMakaShutdown,
+                          nbAllocMakaWork());
+    if (parent != NULL) {
+        dds3LinkProcess(parent, id);
+    }
+    return id;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetEventEntry);
 
@@ -5200,29 +7185,88 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckEventEntries);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbStartEventPacks);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbUpdateEventProcessData);
+void nbUpdateEventProcessData(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_0028FA30);
+    e = dds3GetProcessData(id);
+    if (e != NULL) {
+        e->unk_08++;
+        e->frame++;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeEffectSlot);
+s32 func_0028FA30(nbEventProcessData_t *e)
+{
+    if (e == NULL) {
+        return 0;
+    }
+    return e->step;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_0028FA68);
+void nbFreeEffectSlot(nbEventProcessData_t *e)
+{
+    if (e != NULL) {
+        e->step++;
+        e->frame = 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetEventForm);
+void func_0028FA68(nbEventProcessData_t *e, s32 step)
+{
+    if (e != NULL) {
+        e->step = step;
+        e->frame = 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCreateBasicEffect);
+nbFormation_t *nbGetEventForm(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
+
+    form = nbGetMainProcessData()->form + 4;
+    for (i = 4; i < 14; i++) {
+        if (form->stat & 1) {
+            return form;
+        }
+        form++;
+    }
+    return NULL;
+}
+
+dds3Basic_t *nbCreateBasicEffect(s32 a, s32 b, s32 c, s32 d)
+{
+    dds3Basic_t *basic;
+
+    basic = dds3AddBEDEffectObjectBasic2(a, b, c, d);
+    dds3EffectObjectBasicStatOn(basic, 1);
+    return basic;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", ResetWaitMotion);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetWaitMotion);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetDeadEventFadeTime);
+s32 nbGetDeadEventFadeTime(s32 eventno)
+{
+    return nbEventEntryTable[eventno % 100].fadetime;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetDeadEventFadeOutFrame);
+s32 nbGetDeadEventFadeOutFrame(s32 eventno)
+{
+    return nbEventEntryTable[eventno % 100].fadeoutframe;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetDeadEventFadeInFrame);
+s32 nbGetDeadEventFadeInFrame(s32 eventno)
+{
+    return nbEventEntryTable[eventno % 100].fadeinframe;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetDeadEventFadeStopFrame);
+s32 nbGetDeadEventFadeStopFrame(s32 eventno)
+{
+    return nbEventEntryTable[eventno % 100].fadestopframe;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEventProcess3);
 
@@ -5238,13 +7282,53 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitEventProcess);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindStockSkillError);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpAnyButtonGuideActive);
+s32 cmpAnyButtonGuideActive(datUnitWork_t **list, s32 cnt)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpButtonGuideShowDone);
+    for (i = 0; i < cnt; i++) {
+        if ((list[i]->badstatus & 0xFFF) == 0x800) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpButtonGuideHideDone);
+s32 cmpButtonGuideShowDone(datUnitWork_t **list, s32 cnt)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpFindButtonGuideByFlag);
+    for (i = 0; i < cnt; i++) {
+        if (list[i]->hp < list[i]->maxhp) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+s32 cmpButtonGuideHideDone(datUnitWork_t **list, s32 cnt)
+{
+    s32 i;
+
+    for (i = 0; i < cnt; i++) {
+        if (list[i]->mp < list[i]->maxmp) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+s32 cmpFindButtonGuideByFlag(datUnitWork_t **list, s32 cnt, s32 mask)
+{
+    s32 i;
+
+    for (i = 0; i < cnt; i++) {
+        if ((list[i]->badstatus & 0xFFF) & mask) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", CheckHojo);
 
@@ -5260,19 +7344,51 @@ INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546138);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpClearButtonGuide);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadDefaultModelPack);
+void nbLoadDefaultModelPack(nbMainProcessData_t *data)
+{
+    if (data->encno == 0x14D && data->modelpack == NULL) {
+        data->modelpack = (void *)nbMakeModelPackName(0xFF);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckEventPackLoaded);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeEventPack);
+void nbFreeEventPack(nbMainProcessData_t *data)
+{
+    if (data->modelpack != NULL) {
+        pacFileHandleFree_(data->modelpack);
+        data->modelpack = NULL;
+    }
+    if (data->modelpackbuf != NULL) {
+        sdfMemFreeDirect(data->modelpackbuf);
+        data->modelpackbuf = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetModelHandleOnce);
+void nbSetModelHandleOnce(nbFormation_t *form, NB_FILEHANDLE_T *packh)
+{
+    if (form->packh == NULL) {
+        form->packh = packh;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeModelPackName);
+s32 nbMakeModelPackName(s32 no)
+{
+    char name[0x40];
+    s32 h;
+
+    sprintf(name, D_005464A8, no);
+    h = pacLoadUseTail(name);
+    printf(D_005464C0, name);
+    return h;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadModelPackIfEnabled);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbDecodeModelPack);
+void nbDecodeModelPack(void *data, s32 size, s32 group, s32 id)
+{
+    mdlPackDecode(group, id, 0x101, data, size);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMotionData);
 
@@ -5292,13 +7408,28 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SyuGo);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SyuGo2);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Cls1);
+s32 Cls1(nbEventProcessData_t *e)
+{
+    func_0024D938(e);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Daisupe);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", ReadWait2);
+s32 ReadWait2(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x1F && nbCheckLoadGroup(1) == 0) {
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Wait2_nbE901);
+s32 Wait2_nbE901(nbEventProcessData_t *e)
+{
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Syutugen2);
 
@@ -5308,9 +7439,21 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE901Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Pos1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetForm);
+s32 SetForm(nbEventProcessData_t *e)
+{
+    nbSetEnemyFormation(e->data);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE902_Wait1);
+s32 nbE902_Wait1(nbEventProcessData_t *e)
+{
+    nbGetEventForm(e);
+    if (*(u16 *)(datModelParamTable + 0x3386E) < e->frame) {
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SelectCopy);
 
@@ -5320,7 +7463,18 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Wait2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Hontai);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE902_End);
+s32 nbE902_End(nbEventProcessData_t *e)
+{
+    if (e->frame > 0) {
+        printf(D_00546500);
+        effBTLSkillEnd();
+        if (evtBitCheck(0xBF0) != 0) {
+            e->data->stat &= ~8;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE902Process_1);
 
@@ -5328,7 +7482,12 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Hatudo);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE903_Wait1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Parts1);
+s32 Parts1(nbEventProcessData_t *e)
+{
+    nbAddMotionKoukaPacket(0, 0, nbGetEventForm(e), 0x10);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", PartsEffect1);
 
@@ -5338,13 +7497,31 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", PartsEffect2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", EffDel);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE903_End);
+s32 nbE903_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x1F) {
+        printf(D_00546548);
+        e->data->stat |= 0x2000;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE903Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Test);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE904_End);
+s32 nbE904_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0xBF) {
+        printf(D_00546570);
+        e->data->endtype = 1;
+        return 1;
+    }
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005464A8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005464C0);
 
@@ -5372,15 +7549,38 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Model1Wait_2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE905_Model2Start);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_002930E8);
+s32 func_002930E8(nbEventProcessData_t *e)
+{
+    dds3DrawFlag |= 0x2000000;
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE905_End);
+s32 nbE905_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x24) {
+        if (nbMaeCheckDone() != 0) {
+            printf(D_005467E0);
+            nbMaeWaitStep();
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE905Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE906_Test);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE906_End);
+s32 nbE906_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x1A5) {
+        printf(D_005467F0);
+        e->data->endtype = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE906Process_1);
 
@@ -5398,15 +7598,41 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE907_Model2Start);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Model2Wait_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Model2Wait_15);
+s32 Model2Wait_15(nbEventProcessData_t *e)
+{
+    if (nbMaeCheckDone() != 0) {
+        nbMaeWaitStep();
+    }
+    if (e->frame >= 0x76) {
+        if (nbMaeCheckDone() != 0) {
+            nbFreeEffectSlot(e);
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE907_End);
+s32 nbE907_End(nbEventProcessData_t *e)
+{
+    if (e->frame > 0) {
+        printf(D_00546820);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE907Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE908_Test);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE908_End);
+s32 nbE908_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x10F) {
+        printf(D_00546830);
+        e->data->endtype = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE908Process_1);
 
@@ -5422,27 +7648,91 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE909_Model1Wait_2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Model2Start);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE909_Model2Wait_1);
+s32 nbE909_Model2Wait_1(nbEventProcessData_t *e)
+{
+    evtSetUnitMotion(nbGetEventForm(e)->hunit, 0x11, 0, 0, 0);
+    dds3DrawFlag |= 0x2000000;
+    e->data->encno = 0x30E;
+    nbSetMaeFlag(0);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE909_Model2Wait_15);
+s32 nbE909_Model2Wait_15(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x51) {
+        if (nbMaeCheckDone() != 0) {
+            nbMaeWaitStep();
+            nbFreeEffectSlot(e);
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE909_End);
+s32 nbE909_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x1A) {
+        printf(D_00546860);
+        e->data->stat &= ~8;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE909Process_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE910_Test);
+s32 nbE910_Test(nbEventProcessData_t *e)
+{
+    nbPanelAllHide();
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE910_End);
+s32 nbE910_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x15) {
+        printf(D_00546870);
+        e->data->endtype = 8;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE910Process_1);
+s32 nbE910Process_1(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+
+    e = dds3GetProcessData(id);
+    if (D_00527518[e->step](e) != 0) {
+        return -1;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Effect1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Wait1);
+s32 Wait1(nbEventProcessData_t *e)
+{
+    if (e->frame == 1) {
+        nbSetEnemyFormation(e->data);
+        nbAllFormDispOn();
+        nbGroupFormDispOff(0);
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Effect2);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE911_End);
+s32 nbE911_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 2) {
+        printf(D_00546880);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE911Process_1);
 
@@ -5452,29 +7742,71 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE912_Wait1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", MoveSub);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Move1);
+s32 Move1(nbEventProcessData_t *e)
+{
+    MoveSub(e);
+    if (e->frame == 0x55 && nbCheckLoadGroup(1) == 0) {
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE912_Effect1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE912_End);
+s32 nbE912_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x10) {
+        printf(D_00546898);
+        e->data->stat &= ~8;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nb_295D98);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE913_Test);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE913_End);
+s32 nbE913_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0xD3) {
+        printf(D_005468B0);
+        nbDelAllKoukaPacketType(0x2B);
+        e->data->endtype = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE913Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE914_Test);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE914_End);
+s32 nbE914_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x10F) {
+        printf(D_005468C8);
+        nbDelAllKoukaPacketType(0x2B);
+        e->data->endtype = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE914Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915_Test);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915_End);
+s32 nbE915_End(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x173) {
+        printf(D_005468D8);
+        nbDelAllKoukaPacketType(0x2B);
+        e->data->endtype = 1;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915Process_1);
 

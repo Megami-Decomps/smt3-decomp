@@ -25,7 +25,7 @@ Both IDBs are read-only here. The IDAPython payload reads function bounds and
 bytes and nothing else.
 
 The three evidence orders used throughout: the IDB and the retail bytes decide;
-`/home/wsl/projects/smt3hd-reconstructed-sources` is often right but lossy, a
+`a checkout of smt3-reconstructed-sources` is often right but lossy, a
 hint rather than proof; a DDS1-carried name is a claim about the name, and only
 a lower bound on the range.
 

@@ -67,8 +67,10 @@ typedef struct
 } datBossPress_t;
 
 /* datCalc pins the parameters through levelupparam. cmbCountSkills,
- * rstClearSkillSlot and cmbClearSkillSlots pin 24 halfword stock-skill slots
- * at +0x86. cmbClearStockEntry clears the complete native 0xEC-byte record. */
+ * rstClearSkillSlot and cmbClearSkillSlots pin 24 halfword inherited-skill
+ * slots at +0x86. cmbClearStockEntry clears the complete native 0xEC record.
+ * The IDB's field order differs: it has no field at +0x80 and widens namecode,
+ * skillcnt and skill, which retail contradicts here. See docs/idb-corrections.md. */
 typedef struct datUnitWork_t
 {
     /* 0x00 */ u32 flag;
@@ -99,9 +101,12 @@ typedef struct datUnitWork_t
     /* 0x74 */ s8 mitamaparam[6];
     /* 0x7A */ s8 levelupparam[6];
     /* 0x80 */ u8 unk80[6];
-    /* 0x86 */ u16 skillSlots[24];
-    /* 0xB6 */ u8 skillOrder[24];
-    /* 0xCE */ u8 unkCE[0x1E];
+    /* 0x86 */ u16 keisyoskill[24];
+    /* 0xB6 */ u8 keiattr[24];
+    /* 0xCE */ u16 hensinmae;
+    /* 0xD0 */ u16 getdevilhearts[4];
+    /* 0xD8 */ u32 hensinmaeexp;
+    /* 0xDC */ u16 fullnamecode[8];
 } datUnitWork_t;
 
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
@@ -111,7 +116,9 @@ typedef struct
 {
     u8 unk00;
     s8 unk01;
-    u8 unk02[0x1A];
+    u8 unk02[0x16];
+    u16 unk18;
+    u8 unk1A[2];
 } datUnitVisualPart_t;
 
 typedef struct datUnitVisual_t
