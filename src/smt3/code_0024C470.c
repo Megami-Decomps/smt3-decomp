@@ -3,9 +3,6 @@
 #include "nb.h"
 #include "ps2asm.h"
 
-#define NB_RESTORE_MATRIX() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
-    "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")
 
 extern f32 aViewEye[];
 extern f32 D_002FA240[];
@@ -878,7 +875,7 @@ s32 nbClipEffectNum(s32 screenPosition[4])
         return 0;
 
     SDF_VU0_COPYVECTOR_C_TO_A();
-    NB_RESTORE_MATRIX();
+    SDF_VU0_COPYMATRIX_B_TO_A();
     projectionData = dds3ScreenParam + 12;
     MultMatrixRev(projectionData);
     SDF_VU0_APPLYMATRIX_XYZ1();

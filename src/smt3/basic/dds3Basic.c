@@ -10,10 +10,6 @@ extern f32 fabsf(f32 value);
 
 void dds3BackupPoseSet(dds3PoseSet_t *pose);
 
-#define VU0_LOAD_VF11_BARRIER(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
-    : : "r" (src) : "memory")
-
 
 extern u32 dds3ObjectIdCounter;
 

@@ -324,11 +324,6 @@ typedef struct {
 #define SDF_VU0_SUBVECTOR_B_C() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf11, vf11, vf12\n\t.set reorder")
 
-/* vf10 = (1 - t) * vf10 + t * vf11, with float bits passed in a GPR. */
-#define SDF_VU0_INTERPOLATE(t) __asm__ volatile ( \
-    ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
-    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
-    : : "r" (t))
 
 #define SDF_VU0_LOADVECTOR_C(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" \
@@ -374,9 +369,6 @@ typedef struct {
 #define SDF_VU0_GETVECTOR_X(out) __asm__ volatile ( \
     ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
-#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
 
 #define VU0_STORE_MATRIX_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
@@ -627,4 +619,632 @@ typedef struct {
     "\tvmaddx.xyzw vf10, vf12, vf3x\n" \
     "\t.set reorder")
 
+
+/* ---- operations recovered in one unit each ---- */
+
+/* from basic/dds3EffectObjectBasic.c */
+#define VU0_TRANSLATION_FROM_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\t" \
+    "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
+    "vmaddw.xyzw vf31, vf31, vf10w\n\t.set reorder")
+
+/* from basic/dds3PathBasic.c */
+#define VU0_MUL_VF10_SCALAR(value) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $2, %0\n\t" \
+    "qmtc2.ni $2, $vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t" \
+    ".set reorder" \
+    : : "f" (value) : "$2", "memory")
+#define VU0_LERP_SCALE(value) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (value))
+
+/* from code_00116AD0.c */
+/* ps2asm.h's EE_SQRT_F32 is volatile, which pins the surrounding schedule.
+   This form lets cc1 hoist the compare constants above the sqrt. */
+#define EE_SQRT_F32_SCHED(out, in) __asm__ ( \
+    ".set noreorder\n\tsqrt.s %0, %1\n\t.set reorder" : "=f" (out) : "f" (in))
+
+/* from code_001AC0A8.c */
+#define VU0_LOAD_MATRIX_B_F32(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src), "m" (*(const effDebugMatrix_t *)(src)))
+
+/* from code_001DEA58.c */
+#define SDF_VU0_SUBVECTOR_A_C() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf10, vf10, vf12\n\t.set reorder")
+
+/* from code_0024C470.c */
+#define SDF_VU0_COPYMATRIX_B_TO_A() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
+    "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")
+
+/* from code_002B5CD0.c */
+#define SDF_VU0_STOREMATRIX_B(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf24, 0(%0)\n\t" \
+    "sqc2 vf25, 16(%0)\n\t" \
+    "sqc2 vf26, 32(%0)\n\t" \
+    "sqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "memory")
+#define SDF_VU0_COPYMATRIX_A_TO_C() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf20, vf28\n\tvmove.xyzw vf21, vf29\n\t" \
+    "vmove.xyzw vf22, vf30\n\tvmove.xyzw vf23, vf31\n\t.set reorder")
+#define SDF_VU0_COPYMATRIX_B_TO_C() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf20, vf24\n\tvmove.xyzw vf21, vf25\n\t" \
+    "vmove.xyzw vf22, vf26\n\tvmove.xyzw vf23, vf27\n\t.set reorder")
+#define SDF_VU0_COPYMATRIX_C_TO_A() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf20\n\tvmove.xyzw vf29, vf21\n\t" \
+    "vmove.xyzw vf30, vf22\n\tvmove.xyzw vf31, vf23\n\t.set reorder")
+#define SDF_VU0_COPYMATRIX_C_TO_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf20\n\tvmove.xyzw vf25, vf21\n\t" \
+    "vmove.xyzw vf26, vf22\n\tvmove.xyzw vf27, vf23\n\t.set reorder")
+#define SDF_VU0_LOADIDENTITY_B() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf24, vf0, vf0\n\tvmr32.xyzw vf26, vf0\n\t" \
+    "vmove.xyzw vf27, vf0\n\tvaddw.x vf24, vf24, vf0w\n\tvmr32.xyzw vf25, vf26\n\t.set reorder")
+/* The three rotated basis rows saved across a nested packet build. */
+#define VU0_STORE_VF24_VF25_VF26(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf24, 0(%0)\n\tsqc2 vf25, 16(%0)\n\t" \
+    "sqc2 vf26, 32(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_LOAD_VF24_VF25_VF26(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf24, 0(%0)\n\tlqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_MATRIX4_MUL_BANK_B_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf24, vf28x\n\tvmadday.xyzw ACC, vf25, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf28z\n\tvmaddw.xyzw vf28, vf27, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf29x\n\tvmadday.xyzw ACC, vf25, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf29z\n\tvmaddw.xyzw vf29, vf27, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf30x\n\tvmadday.xyzw ACC, vf25, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf30z\n\tvmaddw.xyzw vf30, vf27, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf31x\n\tvmadday.xyzw ACC, vf25, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf31z\n\tvmaddw.xyzw vf31, vf27, vf31w\n\t" \
+    ".set reorder" \
+    : : : "memory")
+#define VU0_MATRIX4_MUL_BANK_C_RIGHT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf28, vf20x\n\tvmadday.xyzw ACC, vf29, vf20y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf20z\n\tvmaddw.xyzw vf2, vf31, vf20w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf21x\n\tvmadday.xyzw ACC, vf29, vf21y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf21z\n\tvmaddw.xyzw vf3, vf31, vf21w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf22x\n\tvmadday.xyzw ACC, vf29, vf22y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf22z\n\tvmaddw.xyzw vf4, vf31, vf22w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf23x\n\tvmadday.xyzw ACC, vf29, vf23y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf23z\n\tvmaddw.xyzw vf31, vf31, vf23w\n\t" \
+    "vmove.xyzw vf28, vf2\n\tvmove.xyzw vf29, vf3\n\tvmove.xyzw vf30, vf4\n\t" \
+    ".set reorder")
+#define VU0_MATRIX4_MUL_BANK_C_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf20, vf28x\n\tvmadday.xyzw ACC, vf21, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf28z\n\tvmaddw.xyzw vf28, vf23, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf29x\n\tvmadday.xyzw ACC, vf21, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf29z\n\tvmaddw.xyzw vf29, vf23, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf30x\n\tvmadday.xyzw ACC, vf21, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf30z\n\tvmaddw.xyzw vf30, vf23, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf31x\n\tvmadday.xyzw ACC, vf21, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf31z\n\tvmaddw.xyzw vf31, vf23, vf31w\n\t" \
+    ".set reorder")
+#define SDF_VU0_TRANSMATRIX() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf31\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\tpcpyud $11, $13, $15\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\tqmtc2.ni $11, vf31\n\t" \
+    ".set reorder\n")
+#define VU0_MATRIX4_INVERT_RIGID() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\t" \
+    "vmove.w vf31, vf0\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\t" \
+    "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
+    "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
+    ".set reorder\n")
+#define VU0_COPY_VF31_TO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder")
+#define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf5, 0x10(%1)\n\t" \
+    "lqc2 vf6, 0x20(%1)\n\tlqc2 vf7, 0x30(%1)\n\t" \
+    "lqc2 vf3, 0x50(%0)\n\tlqc2 vf4, 0x60(%0)\n\t" \
+    "vmulax.xyz ACC, vf5, vf2x\n\tvmadday.xyz ACC, vf6, vf2y\n\tvmaddz.xyz vf24, vf7, vf2z\n\t" \
+    "vmulax.xyz ACC, vf5, vf3x\n\tvmadday.xyz ACC, vf6, vf3y\n\tvmaddz.xyz vf25, vf7, vf3z\n\t" \
+    "vmulax.xyz ACC, vf5, vf4x\n\tvmadday.xyz ACC, vf6, vf4y\n\tvmaddz.xyz vf26, vf7, vf4z\n\t" \
+    "sqc2 vf2, 0x0(%2)\n\tsqc2 vf3, 0x10(%2)\n\tsqc2 vf4, 0x20(%2)\n\t.set reorder" \
+    : : "r" (vectors), "r" (matrix), "r" (cache) : "memory")
+#define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
+    : "=m" (*(QuadF32 *)(dst)) \
+    : "r" (dst), "r" (src), "m" (*(const QuadF32 *)(src)) \
+    : "$2")
+#define EE_LOAD_UNALIGNED_WORD(out, src) __asm__ volatile ( \
+    "lwr %0, 0(%1)\n\t" \
+    "lwl %0, 3(%1)" \
+    : "=&r"(out) : "r"(src))
+#define VU0_MATRIX4_INVERT_SCALED() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmula.xyz ACC, vf28, vf28\n\tvmadda.xyz ACC, vf29, vf29\n\tvmadd.xyz vf2, vf30, vf30\n\t" \
+    "vaddw.xyz vf3, vf0, vf0w\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
+    "vdiv Q, vf0w, vf2x\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\t" \
+    "vwaitq\n\tvmulq.x vf3, vf3, Q\n\t" \
+    "vdiv Q, vf0w, vf2y\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\t" \
+    "vwaitq\n\tvmulq.y vf3, vf3, Q\n\t" \
+    "vdiv Q, vf0w, vf2z\n\t" \
+    "vwaitq\n\tvmulq.z vf3, vf3, Q\n\t" \
+    "vmul.xyz vf28, vf28, vf3\n\tvmul.xyz vf29, vf29, vf3\n\tvmul.xyz vf30, vf30, vf3\n\t" \
+    "vmula.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
+    "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
+    ".set reorder\n")
+#define VU0_MATRIX4_MUL_BANK_B_RIGHT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf28, vf24x\n\tvmadday.xyzw ACC, vf29, vf24y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf24z\n\tvmaddw.xyzw vf2, vf31, vf24w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf25x\n\tvmadday.xyzw ACC, vf29, vf25y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf25z\n\tvmaddw.xyzw vf3, vf31, vf25w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf26x\n\tvmadday.xyzw ACC, vf29, vf26y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf26z\n\tvmaddw.xyzw vf4, vf31, vf26w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf27x\n\tvmadday.xyzw ACC, vf29, vf27y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf27z\n\tvmaddw.xyzw vf31, vf31, vf27w\n\t" \
+    "vmove.xyzw vf28, vf2\n\tvmove.xyzw vf29, vf3\n\tvmove.xyzw vf30, vf4\n\t" \
+    ".set reorder")
+#define VU0_SET_CLIP_PLANES(bias, eye, projection) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\t" \
+    "lqc2 vf21, 0(%1)\n\tlqc2 vf22, 0x70(%2)\n\t" \
+    "lqc2 vf23, 0x80(%2)\n\tvaddz.x vf23, vf23, vf2z\n\t.set reorder" \
+    : : "r" (bias), "r" (eye), "r" (projection))
+#define VU0_STORE_MATRIX_AND_UNIT_ROWS(dst) __asm__ volatile ( \
+    ".set noreorder\n\t.set noat\n\t" \
+    "lui $1, 0x3F80\n\t" \
+    "mtc1 $1, $f0\n\t" \
+    "vmula.xyz ACC, vf28, vf28\n\t" \
+    "vmadda.xyz ACC, vf29, vf29\n\t" \
+    "vmadd.xyz vf2, vf30, vf30\n\t" \
+    "vrsqrt Q, vf0w, vf2y\n\t" \
+    "qmfc2.ni $2, vf2\n\t" \
+    "mtc1 $2, $f2\n\t" \
+    "rsqrt.s $f2, $f0, $f2\n\t" \
+    "sqc2 vf28, 0x0(%0)\n\t" \
+    "sqc2 vf29, 0x10(%0)\n\t" \
+    "sqc2 vf30, 0x20(%0)\n\t" \
+    "sqc2 vf31, 0x30(%0)\n\t" \
+    "vwaitq\n\t" \
+    "vaddq.y vf3, vf0, Q\n\t" \
+    "vrsqrt Q, vf0w, vf2z\n\t" \
+    "mfc1 $2, $f2\n\t" \
+    "qmtc2.ni $2, vf4\n\t" \
+    "vmove.x vf3, vf4\n\t" \
+    "vwaitq\n\t" \
+    "vaddq.z vf3, vf0, Q\n\t" \
+    "vmul.xyz vf4, vf28, vf3\n\t" \
+    "vmul.xyz vf5, vf29, vf3\n\t" \
+    "vmul.xyz vf6, vf30, vf3\n\t" \
+    "sqc2 vf4, 0x40(%0)\n\t" \
+    "sqc2 vf5, 0x50(%0)\n\t" \
+    "sqc2 vf6, 0x60(%0)\n\t" \
+    ".set at\n\t.set reorder" \
+    : : "r" (dst) : "$1", "$2", "$f0", "$f2", "memory")
+#define EE_MMI_RGBA_MULTIPLY_VECTOR(out, a, b, unit) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlb $3, $0, %2\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "pextlh $3, $0, $3\n\t" \
+    "qmtc2.ni $2, vf2\n\t" \
+    "qmtc2.ni $3, vf3\n\t" \
+    "qmtc2.ni %3, vf4\n\t" \
+    "vitof0.xyzw vf2, vf2\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "vmul.xyzw vf2, vf2, vf3\n\t" \
+    "vmulx.xyzw vf2, vf2, vf4x\n\t" \
+    "qmfc2.ni %0, vf2\n\t" \
+    ".set reorder" \
+    : "=r" (out) : "r" (a), "r" (b), "r" (unit) : "$2", "$3")
+#define VU0_ROTATE_BASIS_X(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf29\n\t" \
+    "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmaddx.xyzw $vf29, $vf30, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf30, $vf3x\n\tvmsubx.xyzw $vf30, $vf4, $vf2x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+#define VU0_ROTATE_BASIS_Y(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf28\n\t" \
+    "vmulax.xyzw ACC, $vf28, $vf3x\n\tvmsubx.xyzw $vf28, $vf30, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf4, $vf2x\n\tvmaddx.xyzw $vf30, $vf30, $vf3x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+#define VU0_ROTATE_BASIS_Z(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf28\n\t" \
+    "vmulax.xyzw ACC, $vf28, $vf3x\n\tvmaddx.xyzw $vf28, $vf29, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmsubx.xyzw $vf29, $vf4, $vf2x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+#define VU0_TRIANGLE_FACING(out, a, b, c) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf2, 0(%1)\n\tlqc2 vf3, 0(%2)\n\tlqc2 vf4, 0(%3)\n\t" \
+    "vsub.xyz vf2, vf2, vf3\n\tvsub.xyz vf4, vf4, vf3\n\tvsub.xyz vf3, vf21, vf3\n\t" \
+    "vopmula.xyz ACC, vf2, vf4\n\tvopmsub.xyz vf2, vf4, vf2\n\t" \
+    "vmul.xyz vf2, vf2, vf3\n\tvadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
+    "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : "r" (a), "r" (b), "r" (c) : "$2")
+#define VU0_BLEND_NODE_XY(node, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (first), "r" (second) : "memory")
+#define VU0_BLEND_NODE_VECTORS(node, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "lqc2 vf10, 0x20(%1)\n\tlqc2 vf11, 0x20(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "vmulaw.xyzw ACC, vf10, vf0w\n\tvmaddaw.xyzw ACC, vf11, vf2w\n\tvmsubw.xyzw vf16, vf10, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\tsqc2 vf16, 0x20(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (first), "r" (second) : "memory")
+#define VU0_INTERPOLATE_CLIP_VERTEX(out, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vaddx.w vf2, vf0, vf0x\n\tlbu $2, 0x50(%1)\n\tlqc2 vf4, 0x10(%1)\n\tlqc2 vf5, 0x10(%2)\n\t" \
+    "andi $2, $2, 0x1\n\tbne $0, $2, 1f\n\tlqc2 vf6, 0x0(%1)\n\tvsubw.w vf2, vf1, vf0w\n" \
+    "1:\n\tlqc2 vf7, 0x0(%2)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vsubw.w vf12, vf2, vf4w\n\tvsubw.w vf13, vf5, vf4w\n\tvsub.xyzw vf14, vf7, vf6\n\t" \
+    "vdiv Q, vf12w, vf13w\n\tlqc2 vf10, 0x20(%1)\n\tvsub.xyzw vf15, vf9, vf8\n\t" \
+    "vmulaw.xyzw ACC, vf6, vf0w\n\tsqc2 vf10, 0x20(%0)\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
+    "vmaddq.xyzw vf14, vf14, Q\n\tvmulaw.xyzw ACC, vf8, vf0w\n\tvmaddq.xy vf15, vf15, Q\n\t" \
+    "sqc2 vf14, 0x0(%0)\n\tsw $2, 0x4C(%0)\n\tsqc2 vf15, 0x30(%0)\n\tsqc2 vf2, 0x10(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (out), "r" (first), "r" (second) : "$2", "memory")
+#define VU0_BUILD_PACKED_COLOR_TRANSFORM(dst, reference, packedColor, firstColor, secondColor, blend) \
+__asm__ volatile ( \
+        ".set noreorder\n\t" \
+        "pextlb $2, $0, %3\n\t" \
+        "pextlb $3, $0, %4\n\t" \
+        "pextlb $4, $0, %2\n\t" \
+        "pextlh $2, $0, $2\n\t" \
+        "pextlh $3, $0, $3\n\t" \
+        "pextlh $4, $0, $4\n\t" \
+        "qmtc2.ni $2, vf2\n\t" \
+        "qmtc2.ni $3, vf3\n\t" \
+        "qmtc2.ni $4, vf4\n\t" \
+        "qmtc2.ni %5, vf5\n\t" \
+        "qmtc2.ni %6, vf6\n\t" \
+        "qmtc2.ni %7, vf7\n\t" \
+        "vitof0.xyzw vf2, vf2\n\t" \
+        "vitof0.xyzw vf3, vf3\n\t" \
+        "vitof0.xyzw vf4, vf4\n\t" \
+        "lqc2 vf8, 0x40(%1)\n\t" \
+        "lqc2 vf9, 0x80(%1)\n\t" \
+        "vmulx.xyzw vf2, vf2, vf6x\n\t" \
+        "vmulx.xyzw vf3, vf3, vf6x\n\t" \
+        "vmove.w vf9, vf0\n\t" \
+        "vmulx.w vf8, vf8, vf0x\n\t" \
+        "vmulw.w vf4, vf4, vf2w\n\t" \
+        "vmul.xyz vf9, vf3, vf9\n\t" \
+        "vmul.xyz vf8, vf2, vf8\n\t" \
+        "vmulaw.xyz ACC, vf9, vf0w\n\t" \
+        "vmaddax.xyz ACC, vf8, vf5x\n\t" \
+        "vmsubx.xyz vf9, vf9, vf5x\n\t" \
+        "vmul.xyzw vf8, vf8, vf4\n\t" \
+        "vmul.xyzw vf9, vf9, vf4\n\t" \
+        "vminix.xyzw vf8, vf8, vf7x\n\t" \
+        "vsub.xyz vf8, vf8, vf9\n\t" \
+        "sqc2 vf9, 0x10(%0)\n\t" \
+        "sqc2 vf8, 0x20(%0)\n\t" \
+        ".set reorder" \
+        : : "r"(dst), "r"(reference), "r"(packedColor), \
+            "r"(firstColor), "r"(secondColor), "r"(blend), \
+            "r"(0.0078125f), "r"(0x437F0000) \
+        : "$2", "$3", "$4", "memory")
+
+/* from code_002C6F38.c */
+/* The wire-model clipper keeps the segment in vf10/vf11, its colours in
+ * vf8/vf9, the viewport scale and offset in vf14/vf15 and the plane in vf2. */
+#define VU0_LOAD_VF14(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf14, 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_LOAD_VF15_AT16(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf15, 16(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_TRANSFORM_POINT_VF11() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf11x\n\tvmadday.xyzw ACC, vf29, vf11y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf11z\n\tvmaddw.xyzw vf11, vf31, vf0w\n\t.set reorder")
+#define SDF_VU0_CLIPTEST_B() __asm__ volatile ( \
+    ".set noreorder\n\tvclipw.xyz vf11, vf11w\n\t.set reorder")
+#define SDF_VU0_CLIPTESTWAIT(out) __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
+    : "=r" (out))
+#define VU0_STORE_VF8_AT0(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf8, 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_STORE_VF10_AT16(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 16(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_STORE_VF9_AT32(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf9, 32(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_STORE_VF11_AT48(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf11, 48(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_POSITIVE_CLIP_PLANE_VF2() __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz vf2, vf0, vf0w\n\t" \
+    "vmulw.w vf2, vf0, vf0w\n\t.set reorder")
+#define VU0_NEGATIVE_CLIP_PLANE_VF2() __asm__ volatile ( \
+    ".set noreorder\n\tvsubw.xyzw vf2, vf0, vf0w\n\t" \
+    "vsubw.w vf2, vf0, vf0w\n\t.set reorder")
+#define VU0_CLIP_SEGMENT_PREP_FIRST() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulw.xyzw vf3, vf2, vf10w\n\t" \
+    "vmulw.xyzw vf4, vf2, vf11w\n\t" \
+    "vsub.xyzw vf5, vf11, vf10\n\t" \
+    "vsub.xyzw vf6, vf9, vf8\n\t" \
+    "vsub.xyzw vf3, vf10, vf3\n\t" \
+    "vsub.xyzw vf4, vf11, vf4\n\t" \
+    "vsub.xyzw vf4, vf4, vf3\n\t.set reorder")
+#define VU0_CLIP_SEGMENT_PREP_SECOND() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulw.xyzw vf3, vf2, vf11w\n\t" \
+    "vmulw.xyzw vf4, vf2, vf10w\n\t" \
+    "vsub.xyzw vf5, vf10, vf11\n\t" \
+    "vsub.xyzw vf6, vf8, vf9\n\t" \
+    "vsub.xyzw vf3, vf11, vf3\n\t" \
+    "vsub.xyzw vf4, vf10, vf4\n\t" \
+    "vsub.xyzw vf4, vf4, vf3\n\t.set reorder")
+#define VU0_CLIP_RATIO_X() __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\tvdiv Q, vf3x, vf4x\n\t.set reorder")
+#define VU0_CLIP_RATIO_Y() __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\tvdiv Q, vf3y, vf4y\n\t.set reorder")
+#define VU0_CLIP_RATIO_Z() __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\tvdiv Q, vf3z, vf4z\n\t.set reorder")
+#define VU0_PROJECT_COLORED_SEGMENT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vdiv Q, vf0w, vf10w\n\t" \
+    "vmul.xyz vf10, vf10, vf14\n\t" \
+    "vmulaw.xyz ACC, vf15, vf0w\n\t" \
+    "vmulx.w vf10, vf10, vf0x\n\t" \
+    "vftoi0.xyzw vf8, vf8\n\tvwaitq\n\t" \
+    "vmaddq.xyz vf10, vf10, Q\n\t" \
+    "vdiv Q, vf0w, vf11w\n\t" \
+    "vmul.xyz vf11, vf11, vf14\n\t" \
+    "vmulx.w vf11, vf11, vf0x\n\t" \
+    "vftoi4.xyzw vf10, vf10\n\t" \
+    "vftoi0.xyzw vf9, vf9\n\tvwaitq\n\t" \
+    "vmaddq.xyz vf11, vf11, Q\n\t" \
+    "vftoi4.xyzw vf11, vf11\n\t.set reorder")
+#define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "lw $2, 0(%1)\n" \
+    "pextlb $2, $0, $2\n" \
+    "pextlh $2, $0, $2\n" \
+    "qmtc2.ni $2, vf10\n" \
+    "vitof0.xyzw vf10, vf10\n" \
+    "qmtc2.ni %0, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    ".set reorder" \
+    : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
+#define EE_MMI_RGBA_TO_VF8(rgba) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %0\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf8\n\t" \
+    "vitof0.xyzw vf8, vf8\n\t" \
+    ".set reorder" \
+    : : "r" (rgba) : "$2")
+#define EE_MMI_RGBA_TO_VF9(rgba) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %0\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf9\n\t" \
+    "vitof0.xyzw vf9, vf9\n\t" \
+    ".set reorder" \
+    : : "r" (rgba) : "$2")
+#define VU0_CLIP_SEGMENT_UPDATE_FIRST() __asm__ volatile ( \
+    ".set noreorder\n\tvwaitq\n\tvaddq.x vf2, vf0, Q\n\tvabs.x vf2, vf2\n\t" \
+    "vmulaw.xyzw ACC, vf10, vf0w\n\t" \
+    "vmaddx.xyzw vf10, vf5, vf2x\n\t" \
+    "vmulaw.xyzw ACC, vf8, vf0w\n\t" \
+    "vmaddx.xyzw vf8, vf6, vf2x\n\t" \
+    "vclipw.xyz vf10, vf10w\n\t.set reorder")
+#define VU0_CLIP_SEGMENT_UPDATE_SECOND() __asm__ volatile ( \
+    ".set noreorder\n\tvwaitq\n\tvaddq.x vf2, vf0, Q\n\tvabs.x vf2, vf2\n\t" \
+    "vmulaw.xyzw ACC, vf11, vf0w\n\t" \
+    "vmaddx.xyzw vf11, vf5, vf2x\n\t" \
+    "vmulaw.xyzw ACC, vf9, vf0w\n\t" \
+    "vmaddx.xyzw vf9, vf6, vf2x\n\t" \
+    "vclipw.xyz vf11, vf11w\n\t.set reorder")
+
+/* from effect/effPCPScatter.c */
+/* Load-normalize-store of one packed vector in a single block ("+m" operand
+ * with a memory clobber). */
+#define VU0_NORMALIZE_PACKED_VECTOR(v) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, %0\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\tsqc2 vf10, %0\n\t.set reorder" \
+    : "+m" (v) :: "memory")
+
+/* from effect/parManager.c */
+#define VU0_COPY_VF24_TO_VF28() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " "vf28" ", " "vf24" "\n\t.set reorder")
+#define VU0_COPY_VF25_TO_VF29() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " "vf29" ", " "vf25" "\n\t.set reorder")
+#define VU0_COPY_VF26_TO_VF30() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " "vf30" ", " "vf26" "\n\t.set reorder")
+#define VU0_COPY_VF27_TO_VF31() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " "vf31" ", " "vf27" "\n\t.set reorder")
+#define SDF_VU0_STOREVECTOR_C(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " "vf12" ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+
+/* from kernel/dds3KernelDraw.c */
+/* Concrete SDK register transfers used by the quaternion and projection paths.
+ * VF2 is the scalar/swap scratch; C float transfers use the SDK's $2 scratch. */
+#define SDF_VU0_SWAPVECTOR_A_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf11\n\t" \
+    "vmove.xyzw vf11, vf2\n\t.set reorder")
+#define MMI_RGBA_PACK_255(out) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %1\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \
+    "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
+    : "=r" (out) : "f" (255.0f))
+
+/* from script/scrCommonCommand.c */
+#define VU0_SET_VF10_X_BITS(r) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.x $vf10, $vf0, $vf2x\n\t.set reorder" \
+    : : "r" (r))
+#define VU0_SET_VF10_Y_BITS(r) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" \
+    : : "r" (r))
+#define VU0_SET_VF10_Z_BITS(r) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.z $vf10, $vf0, $vf2x\n\t.set reorder" \
+    : : "r" (r))
+
+/* from sdf/sdfModel.c */
+#define VU0_MUL_MATRIX_ROWS_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf28, vf28, vf10\n\tvmul.xyz vf29, vf29, vf10\n\t" \
+    "vmul.xyz vf30, vf30, vf10\n\t.set reorder" \
+    : : : "memory")
+#define VU0_STORE_MATRIX_M(a, b, c, d) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, %0\n\tsqc2 vf29, %1\n\tsqc2 vf30, %2\n\tsqc2 vf31, %3\n\t" \
+    ".set reorder" \
+    : : "m" (a), "m" (b), "m" (c), "m" (d) : "memory")
+#define VU0_CLIP_TEST_BOX_CORNERS(flags, bounds) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%1)\n\tldl $2, 7(%1)\n\tlw $3, 8(%1)\n\t" \
+    "ldr $6, 0xC(%1)\n\tldl $6, 0x13(%1)\n\tlw $7, 0x14(%1)\n\t" \
+    "pcpyld $2, $3, $2\n\tpcpyld $6, $7, $6\n\tqmtc2.ni $2, vf2\n\tqmtc2.ni $6, vf3\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf2z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf2y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vnop\n\tcfc2.ni $2, $vi18\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf2x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf4, vf31, vf0w\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf3x\n\tvmadday.xyzw ACC, vf29, vf3y\n\tvmaddaz.xyzw ACC, vf30, vf3z\n\tvmaddw.xyzw vf5, vf31, vf0w\n\t" \
+    "vclipw.xyz vf4, vf4w\n\t" \
+    "vnop\n\tvnop\n\t" \
+    "vclipw.xyz vf5, vf5w\n\t" \
+    "vnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni $3, $vi18\n\t" \
+    "and %0, $2, $3\n\t.set reorder" \
+    : "=r" (flags) : "r" (bounds) : "$2", "$3", "$6", "$7", "memory")
+
+/* from sdf/sdfMotion.c */
+/* SDK packed-key and VU interpolation sequences used by model channels. */
+#define VU0_LERP_VF10_W(t) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t" \
+    "vmove.w vf10, vf0\n\t.set reorder" \
+    : : "f" (t))
+#define VU0_LERP_VF10_COPY(t) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t" \
+    "vmove.xyzw vf11, vf10\n\t.set reorder" \
+    : : "f" (t))
+/* Retail repeats the first pointer and transfers the raw z word to vf3;
+ * preserve these two SDK sequence defects (SMT3 0x002B4258, DDS1 twin). */
+#define VU0_LERP_VEC3_KEYS(first, second, t) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %2, vf4\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "lw $3, 8(%0)\n\t" \
+    "ldr $4, 0(%0)\n\t" \
+    "ldl $4, 7(%0)\n\t" \
+    "lw $5, 8(%0)\n\t" \
+    "pcpyld $2, $3, $2\n\t" \
+    "pcpyld $4, $5, $4\n\t" \
+    "vsubx.w vf5, vf0, vf4x\n\t" \
+    "vmulx.xyzw vf10, vf0, vf0x\n\t" \
+    "qmtc2.ni $2, vf2\n\t" \
+    "qmtc2.ni $3, vf3\n\t" \
+    "vmulaw.xyz ACC, vf2, vf5w\n\t" \
+    "vmaddx.xyz vf10, vf3, vf4x\n\t" \
+    ".set reorder" \
+    : : "r" (first), "r" (second), "r" (t) : "$2", "$3", "$4", "$5")
+#define SDF_VU0_LOADVECTOR_UNALIGN_B(p) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "lw $3, 8(%0)\n\t" \
+    "pcpyld $2, $3, $2\n\t" \
+    "qmtc2.ni $2, " "vf11" "\n\t" \
+    ".set reorder" \
+    : : "r"(p) : "$2", "$3")
+#define SDF_VU0_LOADSHORTVECTOR(p) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "pextlh $2, $2, $0\n\t" \
+    "psraw $2, $2, 16\n\t" \
+    "qmtc2.ni $2, " "vf10" "\n\t" \
+    "vitof12.xyzw " "vf10" ", " "vf10" "\n\t" \
+    ".set reorder" \
+    : : "r"(p) : "$2")
+#define SDF_VU0_LOADSHORTVECTOR_B(p) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "ldr $2, 0(%0)\n\t" \
+    "ldl $2, 7(%0)\n\t" \
+    "pextlh $2, $2, $0\n\t" \
+    "psraw $2, $2, 16\n\t" \
+    "qmtc2.ni $2, " "vf11" "\n\t" \
+    "vitof12.xyzw " "vf11" ", " "vf11" "\n\t" \
+    ".set reorder" \
+    : : "r"(p) : "$2")
+#define SDF_MOT_STORE_VF28_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " "vf28" ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define SDF_MOT_STORE_VF29_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " "vf29" ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define SDF_MOT_STORE_VF30_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " "vf30" ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+/* out = a + (b - a) * t per RGBA byte lane, rounded through vf3x. `half` is
+ * 0.5f in a general register. */
+#define SDF_MOT_RGBA_LERP(out, a, b, t, half) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %4, vf3\n\t" \
+    "mfc1 $8, %3\n\t" \
+    "pextlb $4, $0, %1\n\t" \
+    "pextlb $5, $0, %2\n\t" \
+    "vsub.xyzw vf2, vf0, vf0\n\t" \
+    "qmtc2.ni $8, vf4\n\t" \
+    "pextlh $4, $0, $4\n\t" \
+    "pextlh $5, $0, $5\n\t" \
+    "vaddax.xyzw ACC, vf2, vf3x\n\t" \
+    "vsubx.w vf5, vf0, vf4x\n\t" \
+    "qmtc2.ni $4, vf2\n\t" \
+    "qmtc2.ni $5, vf3\n\t" \
+    "vsubx.w vf5, vf0, vf4x\n\t" \
+    "vitof0.xyzw vf2, vf2\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "vmaddaw.xyzw ACC, vf2, vf5w\n\t" \
+    "vmaddx.xyzw vf5, vf3, vf4x\n\t" \
+    "vftoi0.xyzw vf4, vf5\n\t" \
+    "qmfc2.ni $4, vf4\n\t" \
+    "ppach $5, $0, $4\n\t" \
+    "ppacb %0, $0, $5\n\t" \
+    ".set reorder" \
+    : "=r" (out) : "r" (a), "r" (b), "f" (t), "r" (half) : "$4", "$5", "$6", "$7", "$8")
 #endif /* PS2ASM_H */

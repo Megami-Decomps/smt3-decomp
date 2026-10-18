@@ -30,14 +30,6 @@ typedef struct
 {
     f32 rows[4][4];
 } effDebugMatrix_t;
-#define VU0_LOAD_MATRIX_B_F32(src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf24, 0(%0)\n\t" \
-    "lqc2 vf25, 16(%0)\n\t" \
-    "lqc2 vf26, 32(%0)\n\t" \
-    "lqc2 vf27, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (src), "m" (*(const effDebugMatrix_t *)(src)))
 
 typedef struct
 {

@@ -52,19 +52,6 @@ typedef struct
     sdfGrTagStdReg_t blend[2];
 } dds3ZClearPacket_t;
 
-/* Concrete SDK register transfers used by the quaternion and projection paths.
- * VF2 is the scalar/swap scratch; C float transfers use the SDK's $2 scratch. */
-#define SDF_VU0_SWAPVECTOR_A_B() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf11\n\t" \
-    "vmove.xyzw vf11, vf2\n\t.set reorder")
-#define SDF_VU0_COPYMATRIX_A_TO_B() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
-    "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
-#define MMI_RGBA_PACK_255(out) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %1\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \
-    "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
-    : "=r" (out) : "f" (255.0f))
 
 extern u32 dds3DrawFlag;
 extern u8 fadergba[4];

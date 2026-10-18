@@ -66,13 +66,6 @@ extern s32 dds3EffectGetState(void *effect);
 extern s32 dds3BillboardGetAnimState(void *bill);
 extern void effEveBEDCutSetParams(void *cut, const void *parameters);
 
-#define SDF_VU0_COPYMATRIX_A_TO_B() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
-    "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
-#define VU0_TRANSLATION_FROM_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\t" \
-    "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
-    "vmaddw.xyzw vf31, vf31, vf10w\n\t.set reorder")
 
 typedef struct
 {

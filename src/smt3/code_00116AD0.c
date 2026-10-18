@@ -31,11 +31,6 @@ extern s32 dds3EffectFldTypeIsSpecial(s32 charId);
 extern s32 dds3EffectFldCharToType(s32 charId);
 
 
-/* ps2asm.h's EE_SQRT_F32 is volatile, which pins the surrounding schedule.
-   This form lets cc1 hoist the compare constants above the sqrt. */
-#define EE_SQRT_F32_SCHED(out, in) __asm__ ( \
-    ".set noreorder\n\tsqrt.s %0, %1\n\t.set reorder" : "=f" (out) : "f" (in))
-
 extern f32 sdfAtan2(f32 x, f32 z);
 extern dds3Basic_t *dds3GetControlScene(void);
 extern void dds3GetPosPoseSet(dds3Basic_t *basic);

@@ -82,106 +82,6 @@ typedef struct SdfPacket {
     u64 unk18;
 } SdfPacket;
 #define SDF_POOL_FREE_KIND 0xFFFF
-/* The wire-model clipper keeps the segment in vf10/vf11, its colours in
- * vf8/vf9, the viewport scale and offset in vf14/vf15 and the plane in vf2. */
-#define VU0_LOAD_VF14(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf14, 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-#define VU0_LOAD_VF15_AT16(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf15, 16(%0)\n\t.set reorder" \
-    : : "r" (src))
-#define VU0_TRANSFORM_POINT_VF11() __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf11x\n\tvmadday.xyzw ACC, vf29, vf11y\n\t" \
-    "vmaddaz.xyzw ACC, vf30, vf11z\n\tvmaddw.xyzw vf11, vf31, vf0w\n\t.set reorder")
-#define SDF_VU0_CLIPTEST_B() __asm__ volatile ( \
-    ".set noreorder\n\tvclipw.xyz vf11, vf11w\n\t.set reorder")
-#define SDF_VU0_CLIPTESTWAIT(out) __asm__ volatile ( \
-    ".set noreorder\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
-    : "=r" (out))
-#define VU0_STORE_VF8_AT0(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf8, 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
-#define VU0_STORE_VF10_AT16(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf10, 16(%0)\n\t.set reorder" \
-    : : "r" (dst))
-#define VU0_STORE_VF9_AT32(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf9, 32(%0)\n\t.set reorder" \
-    : : "r" (dst))
-#define VU0_STORE_VF11_AT48(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf11, 48(%0)\n\t.set reorder" \
-    : : "r" (dst))
-#define VU0_POSITIVE_CLIP_PLANE_VF2() __asm__ volatile ( \
-    ".set noreorder\n\tvaddw.xyz vf2, vf0, vf0w\n\t" \
-    "vmulw.w vf2, vf0, vf0w\n\t.set reorder")
-#define VU0_NEGATIVE_CLIP_PLANE_VF2() __asm__ volatile ( \
-    ".set noreorder\n\tvsubw.xyzw vf2, vf0, vf0w\n\t" \
-    "vsubw.w vf2, vf0, vf0w\n\t.set reorder")
-#define VU0_CLIP_SEGMENT_PREP_FIRST() __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "vmulw.xyzw vf3, vf2, vf10w\n\t" \
-    "vmulw.xyzw vf4, vf2, vf11w\n\t" \
-    "vsub.xyzw vf5, vf11, vf10\n\t" \
-    "vsub.xyzw vf6, vf9, vf8\n\t" \
-    "vsub.xyzw vf3, vf10, vf3\n\t" \
-    "vsub.xyzw vf4, vf11, vf4\n\t" \
-    "vsub.xyzw vf4, vf4, vf3\n\t.set reorder")
-#define VU0_CLIP_SEGMENT_PREP_SECOND() __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "vmulw.xyzw vf3, vf2, vf11w\n\t" \
-    "vmulw.xyzw vf4, vf2, vf10w\n\t" \
-    "vsub.xyzw vf5, vf10, vf11\n\t" \
-    "vsub.xyzw vf6, vf8, vf9\n\t" \
-    "vsub.xyzw vf3, vf11, vf3\n\t" \
-    "vsub.xyzw vf4, vf10, vf4\n\t" \
-    "vsub.xyzw vf4, vf4, vf3\n\t.set reorder")
-#define VU0_CLIP_RATIO_X() __asm__ volatile ( \
-    ".set noreorder\n\tvnop\n\tvnop\n\tvdiv Q, vf3x, vf4x\n\t.set reorder")
-#define VU0_CLIP_RATIO_Y() __asm__ volatile ( \
-    ".set noreorder\n\tvnop\n\tvnop\n\tvdiv Q, vf3y, vf4y\n\t.set reorder")
-#define VU0_CLIP_RATIO_Z() __asm__ volatile ( \
-    ".set noreorder\n\tvnop\n\tvnop\n\tvdiv Q, vf3z, vf4z\n\t.set reorder")
-#define VU0_PROJECT_COLORED_SEGMENT() __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "vdiv Q, vf0w, vf10w\n\t" \
-    "vmul.xyz vf10, vf10, vf14\n\t" \
-    "vmulaw.xyz ACC, vf15, vf0w\n\t" \
-    "vmulx.w vf10, vf10, vf0x\n\t" \
-    "vftoi0.xyzw vf8, vf8\n\tvwaitq\n\t" \
-    "vmaddq.xyz vf10, vf10, Q\n\t" \
-    "vdiv Q, vf0w, vf11w\n\t" \
-    "vmul.xyz vf11, vf11, vf14\n\t" \
-    "vmulx.w vf11, vf11, vf0x\n\t" \
-    "vftoi4.xyzw vf10, vf10\n\t" \
-    "vftoi0.xyzw vf9, vf9\n\tvwaitq\n\t" \
-    "vmaddq.xyz vf11, vf11, Q\n\t" \
-    "vftoi4.xyzw vf11, vf11\n\t.set reorder")
-#define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
-    ".set noreorder\n" \
-    "lw $2, 0(%1)\n" \
-    "pextlb $2, $0, $2\n" \
-    "pextlh $2, $0, $2\n" \
-    "qmtc2.ni $2, vf10\n" \
-    "vitof0.xyzw vf10, vf10\n" \
-    "qmtc2.ni %0, vf2\n" \
-    "vmulx.xyzw vf10, vf10, vf2x\n" \
-    ".set reorder" \
-    : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
-#define EE_MMI_RGBA_TO_VF8(rgba) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "pextlb $2, $0, %0\n\t" \
-    "pextlh $2, $0, $2\n\t" \
-    "qmtc2.ni $2, vf8\n\t" \
-    "vitof0.xyzw vf8, vf8\n\t" \
-    ".set reorder" \
-    : : "r" (rgba) : "$2")
-#define EE_MMI_RGBA_TO_VF9(rgba) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "pextlb $2, $0, %0\n\t" \
-    "pextlh $2, $0, $2\n\t" \
-    "qmtc2.ni $2, vf9\n\t" \
-    "vitof0.xyzw vf9, vf9\n\t" \
-    ".set reorder" \
-    : : "r" (rgba) : "$2")
 /* Protocol IDs use distinct byte-sized storage codes in DevState. */
 typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
@@ -294,20 +194,6 @@ typedef struct PacWork {
     u8 *dataCursor; /* 0x0C */
     u8 packet[0]; /* 0x10: copied packet header, extensions, and data */
 } PacWork;
-#define VU0_CLIP_SEGMENT_UPDATE_FIRST() __asm__ volatile ( \
-    ".set noreorder\n\tvwaitq\n\tvaddq.x vf2, vf0, Q\n\tvabs.x vf2, vf2\n\t" \
-    "vmulaw.xyzw ACC, vf10, vf0w\n\t" \
-    "vmaddx.xyzw vf10, vf5, vf2x\n\t" \
-    "vmulaw.xyzw ACC, vf8, vf0w\n\t" \
-    "vmaddx.xyzw vf8, vf6, vf2x\n\t" \
-    "vclipw.xyz vf10, vf10w\n\t.set reorder")
-#define VU0_CLIP_SEGMENT_UPDATE_SECOND() __asm__ volatile ( \
-    ".set noreorder\n\tvwaitq\n\tvaddq.x vf2, vf0, Q\n\tvabs.x vf2, vf2\n\t" \
-    "vmulaw.xyzw ACC, vf11, vf0w\n\t" \
-    "vmaddx.xyzw vf11, vf5, vf2x\n\t" \
-    "vmulaw.xyzw ACC, vf9, vf0w\n\t" \
-    "vmaddx.xyzw vf9, vf6, vf2x\n\t" \
-    "vclipw.xyz vf11, vf11w\n\t.set reorder")
 /* Allocate a workspace sized by stackBytes, pass the thread entry to
  * CreateThreadSimple, and return that function's result unchanged. */
 s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority);

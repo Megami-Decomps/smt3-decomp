@@ -22,19 +22,6 @@ extern void dds3FreeSplineHandle(s32 spline);
 extern void sdfChipFreeDirect(void *ptr);
 
 
-#define VU0_MUL_VF10_SCALAR(value) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "mfc1 $2, %0\n\t" \
-    "qmtc2.ni $2, $vf2\n\t" \
-    "vmulx.xyzw vf10, vf10, vf2x\n\t" \
-    ".set reorder" \
-    : : "f" (value) : "$2", "memory")
-
-
-#define VU0_LERP_SCALE(value) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (value))
-
 void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f32 frame) {
     u32 count = keys->count;
     u32 i;

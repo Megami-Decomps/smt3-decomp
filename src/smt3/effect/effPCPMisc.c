@@ -2298,18 +2298,6 @@ struct sdfVector3_t {
  * bank being accumulated in place. */
 
 
-/* vf28-vf31 out to four quadwords with no memory clobber: retail keeps the
- * destination address in a register across the store. */
-#define VU0_STORE_MATRIX_NOMEM(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "sqc2 vf28, 0(%0)\n\t" \
-    "sqc2 vf29, 16(%0)\n\t" \
-    "sqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst))
-
-
 extern void dds3BillboardDraw(BillObj *effect);
 
 void dds3BillboardSetMode(struct BillObj *billboard, s32 mode);
