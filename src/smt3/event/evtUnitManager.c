@@ -15,8 +15,15 @@
     ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
     : : "r" (dst))
 
-#define VU0_SCALAR_OP(f, insn) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
+/* A C float broadcast through vf2.x, then the one operation that uses it. */
+#define VU0_SCALE_VF10(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
+    : : "f" (f))
+
+#define VU0_SET_VF10_Y(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f))
 
 #define VU0_SET_AXIS_CLEAR_W(f, axis) __asm__ volatile ( \
@@ -185,7 +192,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
     VU0_LOAD_VF(vf10, a);
     VU0_LOAD_VF(vf11, b);
     VU0_SUB(vf10, vf10, vf11);
-    VU0_SCALAR_OP(0.0f, "vaddx.y vf10, vf0, vf2x");
+    VU0_SET_VF10_Y(0.0f);
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
@@ -199,7 +206,7 @@ void evtGetUnitDirVector(evtUnit_t *unit) {
     v[3] = 1.0f;
     VU0_LOAD_VF(vf10, v);
     VU0_NORMALIZE_VF10();
-    VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_VF10(-1.0f);
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
@@ -592,7 +599,7 @@ s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
     VU0_MOVE_VF(vf10, vf30);
     VU0_SET_AXIS_CLEAR_W(0.0f, y);
     VU0_NORMALIZE_VF10();
-    VU0_SCALAR_OP(-1.0f, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_VF10(-1.0f);
     VU0_LOAD_VF(vf11, &unit->effObj->poseset->pos);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, v);
@@ -616,7 +623,7 @@ s32 evtUnitMoveType0(evtUnit_t *unit) {
         VU0_NORMALIZE_VF10();
     }
     scale = unit->motionParameter * 0.1f;
-    VU0_SCALAR_OP(scale, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_VF10(scale);
     VU0_STORE_VF(vf10, v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;

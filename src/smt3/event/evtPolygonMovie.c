@@ -11,12 +11,23 @@
     ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
 
-#define VU0_SCALAR_OP(f, insn) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
+/* A C float broadcast through vf2.x, then the one operation that uses it.
+ * The _COMPONENT and _W forms declare $2 clobbered and the scales do not,
+ * which is what each caller's retail register allocation needs. */
+#define VU0_SCALE_VF10(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
     : : "f" (f))
 
-#define VU0_SCALAR_OP_CLOBBER(f, insn) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" insn "\n\t.set reorder" \
+#define VU0_SCALE_VF11(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
+    : : "f" (f))
+
+/* vf10.w = vf0.w * scalar, so the lane is set rather than scaled. */
+#define VU0_SET_VF10_W(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.w vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f) : "$2")
 
 #define VU0_SCALE_VF(vf, f) __asm__ volatile ( \
@@ -48,8 +59,10 @@
     ".set noreorder\n\tvaddw.x vf2, vf0, vf10w\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : : "$2")
 
-#define VU0_SET_VF10_COMPONENT(axis, f) \
-    VU0_SCALAR_OP_CLOBBER(f, "vaddx." #axis " vf10, vf0, vf2x")
+#define VU0_SET_VF10_COMPONENT(axis, f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vaddx." #axis " vf10, vf0, vf2x\n\t.set reorder" \
+    : : "f" (f) : "$2")
 
 
 
@@ -170,7 +183,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 /* One asm location for every arm's w set, so jump2 can cross-jump them. */
 static inline void evtSetBlendVecW(f32 w)
 {
-    VU0_SCALAR_OP_CLOBBER(w, "vmulx.w vf10, vf0, vf2x");
+    VU0_SET_VF10_W(w);
 }
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", UnitFrameFunc);
@@ -293,13 +306,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         VU0_LOAD_VF(vf10, D_0032C7F0);
     }
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_VF10(1.0f - t);
     if (b != NULL) {
         VU0_LOAD_VF(vf11, b);
     } else {
         VU0_LOAD_VF(vf11, D_0032C7F0);
     }
-    VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_SCALE_VF11(t);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, out);
     if (a != NULL) {
@@ -307,13 +320,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         VU0_LOAD_VF(vf10, D_0032C800);
     }
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_VF10(1.0f - t);
     if (b != NULL) {
         VU0_LOAD_VF(vf11, b + 4);
     } else {
         VU0_LOAD_VF(vf11, D_0032C800);
     }
-    VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_SCALE_VF11(t);
     VU0_ADD(vf10, vf10, vf11);
     VU0_STORE_VF(vf10, out + 4);
     if (a != NULL) {
@@ -321,13 +334,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         VU0_LOAD_VF(vf10, D_0032C810);
     }
-    VU0_SCALAR_OP(1.0f - t, "vmulx.xyzw vf10, vf10, vf2x");
+    VU0_SCALE_VF10(1.0f - t);
     if (b != NULL) {
         VU0_LOAD_VF(vf11, b + 8);
     } else {
         VU0_LOAD_VF(vf11, D_0032C810);
     }
-    VU0_SCALAR_OP(t, "vmulx.xyzw vf11, vf11, vf2x");
+    VU0_SCALE_VF11(t);
     VU0_ADD(vf10, vf10, vf11);
     VU0_SET_W_ONE(vf10);
     VU0_STORE_VF(vf10, out + 8);
