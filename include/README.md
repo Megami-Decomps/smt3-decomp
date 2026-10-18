@@ -1058,7 +1058,7 @@ What the bodies establish: `SDF_VU0_LOADVECTOR` writes the first working
 vector, `SDF_VU0_ADDVECTOR` does `A = A + B`, `SDF_VU0_INNERPRODUCT` returns
 `Dot(A, B)` and `SDF_VU0_GETVECTOR_Y` returns `vct_A.y`. That fixes A, B and C
 onto `vf10`, `vf11` and `vf12`, which is the convention the retail inlines
-already follow. 80 macros carry these names, covering about 2,800 call sites.
+already follow. 94 macros carry these names, covering about 3,000 call sites.
 
 The other prefixes are this repository's own, for operations the engine library
 does not name:
@@ -1123,7 +1123,7 @@ names rather than one name and an `#undef`:
 | `EE_SQRT_F32_SCHED` | not `volatile`, so cc1 may hoist the surrounding compares |
 | `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
-Every operation is defined once, in `ps2asm.h`: 229 macros there and no asm
+Every operation is defined once, in `ps2asm.h`: 230 macros there and no asm
 macro left in any unit. The five that used to stay local for a differing operand
 section are now named for what differs -- `SDF_VU0_SCALEVECTOR_V0`,
 `SDF_VU0_SCALEVECTOR_B_V0` and `SDF_VU0_SETVECTOR_Y_V0` carry the scalar through `$2`

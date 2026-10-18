@@ -60,7 +60,7 @@ were flattened here:
 
 **A basic asm is not an extended asm with no operands.** `__asm__ volatile
 ("...")` and `__asm__ volatile ("..." : :)` are scheduled differently by cc1
-2.96. `VU0_COPY_VF10_TO_VF11_EXTENDED` and `VU0_SUB_VF10_VF11_EXTENDED` carry the
+2.96. `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED` and `SDF_VU0_SUBVECTOR_EXTENDED` carry the
 second spelling because `mdlSetBlur` only matches with it: with the plain form,
 the float constants it materialises come out in the other order. A macro whose
 name ends in `_EXTENDED` means precisely that.
@@ -71,7 +71,7 @@ allocation or a different schedule. Those variants carry distinct names rather
 than one name per unit; `include/README.md` tabulates them. A port that
 collapses them into one function will drift on those call sites.
 
-Every operation now has exactly one definition, in `ps2asm.h`: 229 macros, and
+Every operation now has exactly one definition, in `ps2asm.h`: 230 macros, and
 no asm macro left in any unit.
 
 ## The operations
