@@ -1,4 +1,7 @@
 #include "common.h"
+#include "basic.h"
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
+
 
 INCLUDE_ASM(const s32, "basic/dds3SceneBasic", sceneconstructor);
 
@@ -52,4 +55,19 @@ INCLUDE_ASM(const s32, "basic/dds3SceneBasic", dds3GetMapNo);
 
 INCLUDE_ASM(const s32, "basic/dds3SceneBasic", dds3SceneBasicSearchNameAndType);
 
-INCLUDE_ASM(const s32, "basic/dds3SceneBasic", dds3SceneBasicSearchName);
+dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name)
+{
+    dds3Basic_t *basic;
+    s32 type;
+
+    if (scene == NULL || name == NULL) {
+        return NULL;
+    }
+    for (type = 0; type < BASIC_TYPE_MAX; type++) {
+        basic = dds3SceneBasicSearchNameAndType(scene, type, name);
+        if (basic != NULL) {
+            return basic;
+        }
+    }
+    return NULL;
+}
