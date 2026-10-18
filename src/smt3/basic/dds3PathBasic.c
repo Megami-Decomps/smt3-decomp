@@ -108,11 +108,18 @@ extern void Lerp(f32 weight);
     ".set reorder" \
     : : "f" (value) : "$2", "memory")
 
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF11() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder")
 
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+#define VU0_ZERO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
+
+#define VU0_LOAD_VF10(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+
+#define VU0_LOAD_VF11(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
     : : "r" (src))
 
 #define VU0_ADD_VF10_VF11() __asm__ volatile ( \
@@ -150,7 +157,7 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work)
         VU0_SET_VF10_Y(points[segment + 1][1]);
         VU0_SET_VF10_Z(points[segment + 1][2]);
         VU0_MUL_VF10_SCALAR(weight);
-        VU0_MOVE_VF(vf11, vf10);
+        VU0_COPY_VF10_TO_VF11();
         VU0_SET_VF10_X(points[segment][0]);
         VU0_SET_VF10_Y(points[segment][1]);
         VU0_SET_VF10_Z(points[segment][2]);
@@ -158,7 +165,7 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work)
         VU0_ADD_VF10_VF11();
         VU0_CLEAR_VF10_W();
     } else {
-        VU0_MOVE_VF(vf10, vf0);
+        VU0_ZERO_VF10();
     }
 }
 
@@ -176,12 +183,12 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *work)
         dds3PathEvalSpline(&segment, &weight, keys, work->time);
         quaternions = keys->data.rotation;
         first = &quaternions[segment];
-        VU0_LOAD_VF(vf10, first);
+        VU0_LOAD_VF10(first);
         second = &quaternions[segment] + 1;
-        VU0_LOAD_VF(vf11, second);
+        VU0_LOAD_VF11(second);
         Lerp(weight);
     } else {
-        VU0_MOVE_VF(vf10, vf0);
+        VU0_ZERO_VF10();
     }
 }
 
