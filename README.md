@@ -5,9 +5,9 @@
 
 [Build Status]: https://github.com/Megami-Decomps/smt3-decomp/actions/workflows/build.yml/badge.svg
 [actions]: https://github.com/Megami-Decomps/smt3-decomp/actions/workflows/build.yml
-[smt3-code]: https://decomp.dev/Megami-Decomps/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_code_percent&label=code%20bytes
-[smt3-functions]: https://decomp.dev/Megami-Decomps/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_functions_percent&label=functions
-[smt3-progress]: https://decomp.dev/Megami-Decomps/smt3-decomp/smt3?category=game
+[smt3-code]: https://img.shields.io/endpoint?url=https%3A%2F%2Fmegami-decomps.github.io%2Fsmt3-decomp%2Fbadges%2Fcode.json
+[smt3-functions]: https://img.shields.io/endpoint?url=https%3A%2F%2Fmegami-decomps.github.io%2Fsmt3-decomp%2Fbadges%2Ffunctions.json
+[smt3-progress]: https://megami-decomps.github.io/smt3-decomp/
 
 A work-in-progress **matching decompilation** of *Shin Megami Tensei III:
 Nocturne* for PlayStation 2. The goal is to understand and document how the
@@ -49,11 +49,11 @@ those 1,374 are the empty functions splat emitted directly.
 
 The badges above track matched game and engine code bytes and function
 counts. Assembly fallbacks earn zero credit, and SDK/runtime code, handwritten
-assembly and VU1 microcode sit outside those totals. They read from
-[decomp.dev](https://decomp.dev/tge-was-taken/smt3-decomp/smt3?category=game),
-which ingests the report CI uploads on every push to `main`, so they go live
-with the first run that has the retail executable available. See
-[Reading progress](docs/progress.md) for how the numbers are measured.
+assembly and VU1 microcode sit outside those totals. They read from the
+[progress site](https://megami-decomps.github.io/smt3-decomp/), which CI
+publishes to GitHub Pages on every push to `main` that has the retail
+executable available. See [Reading progress](docs/progress.md) for how the
+numbers are measured.
 
 ## Quickstart
 
