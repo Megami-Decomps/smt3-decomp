@@ -133,23 +133,23 @@ verified in the same run.
 
 | Measure | Game code (98 units) | Whole binary (108 units) |
 |---|---|---|
-| Code bytes matched | 579,228 / 1,976,292 (29.309%) | 579,228 / 2,036,072 (28.448%) |
-| Functions matched | 5,073 / 9,694 (52.33%) | 5,073 / 9,699 (52.30%) |
+| Code bytes matched | 593,740 / 1,976,292 (30.043%) | 593,740 / 2,036,072 (29.161%) |
+| Functions matched | 5,363 / 9,694 (55.32%) | 5,363 / 9,699 (55.29%) |
 
-`python tools/progress.py smt3` reports the same 5,073 functions and 579,228
+`python tools/progress.py smt3` reports the same 5,363 functions and 593,740
 bytes from the source inventory alone, which is the cross-check that matters:
 the reconciler credits nothing that is still an `INCLUDE_ASM` line, and the
-source inventory credits nothing the link does not supply from C. 4,621
+source inventory credits nothing the link does not supply from C. 4,331
 `INCLUDE_ASM` lines remain in `src/smt3`.
 
-Raw objdiff, before reconciliation, reports 4,866 functions and 497,796 bytes
-for the same tree (`build/smt3/report.json.raw`). The 207-function, 81,432-byte gap
+Raw objdiff, before reconciliation, reports 5,153 functions and 512,244 bytes
+for the same tree (`build/smt3/report.json.raw`). The 210-function, 81,496-byte gap
 is in the other direction from what the caveats below might suggest: those
 functions are exact in the linked image and imperfect in the `-DSKIP_ASM` base
 object, so raw objdiff understates them. Reconciliation moves credit both ways
 and only on evidence from the real link.
 
-591 of the 5,073 are two-instruction functions, 8 bytes each, 4,728 bytes in
+588 of the 5,363 are two-instruction functions, 8 bytes each, 4,704 bytes in
 total: empty bodies that compile to `jr $ra; nop` and returns of a single
 value. The function percentage is the measure that flatters the work most,
 since an 8-byte function and a 120-byte one count the same; code bytes are the
