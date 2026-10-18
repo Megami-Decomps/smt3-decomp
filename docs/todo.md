@@ -1,0 +1,2 @@
+# VU1 code matching
+Reuse the annotated vu1 code from sdfhook into the repository, as VU1 asm. Alternatively reuse vu2c to reproduce matching, equivalent code or at least annotate the asm in such a way the annotated vu2c output can be largely reproduced.
