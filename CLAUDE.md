@@ -43,9 +43,10 @@ it in the IDB, re-run `tools/ida_symbols.py`, and verify the build still matches
 Rename only what the code proves: an allocation site, an init function, a stride, a
 caller. Confirmed cases so far are recorded in `docs/idb-corrections.md`.
 
-Translation-unit recovery has not been done. All of `.text` after crt0 is one
-`code_001001D8` unit, so `src/smt3/code_001001D8.c` holds every `INCLUDE_ASM` stub.
-Splitting it needs boundary evidence (`tools/find_tus.py`), not guesses.
+`.text` is split into 96 units, 69 under recovered names and the rest still called
+`code_<vram>`. Moving a boundary or naming a unit needs evidence from
+`tools/find_tus.py`, the IDB or an HD source run, not a guess, and the relinked image
+must stay byte-identical afterwards: see `docs/tu-recovery.md`.
 
 ## Remote
 

@@ -32,9 +32,10 @@ the `.DVP.*` VU overlay tables and the section-header region byte for byte.
 
 The build is verified: `ninja` relinks the split objects and `objcopy`s the
 result into a file byte-identical to the retail executable, reproduced from a
-clean tree. 9,584 of the 9,694 functions in the single translation unit are
-still `INCLUDE_ASM` fallbacks; the 110 in C are the empty and near-empty ones
-splat emitted directly.
+clean tree. `.text` is split into 96 translation units, 69 of them under their
+recovered names. 9,513 of the 9,694 functions are still `INCLUDE_ASM`
+fallbacks; 181 are in C, which is 9,644 of 1,976,292 code bytes. Most of those
+181 are the empty and near-empty functions splat emitted directly.
 
 There are no progress badges and no published tracker page. See
 [Reading progress](docs/progress.md) for what would be measured and how.
