@@ -25,6 +25,7 @@ it was measured on DDS and not on this ELF.
 | one exit, default set before the branch | replace an early `return 0` with `s32 ret = f(); if (...) ret = g(); return ret;` |
 | `jal` and a full epilogue | assign the call's result to a variable instead of `return f();`, which ee-gcc 2.96 sibcalls |
 | `sltiu i, N` counting up | make the loop index `u32`, or subscript with it, instead of post-incrementing a pointer. A `for` whose index is unused in the body becomes a downcounter |
+| `blez n` then a `bnez` downcounter | a `for` to a variable bound whose index the body does not use. With a constant bound the same shape counts `n-1` down to 0 and tests `bgez` instead |
 | `slt` then `sltiu` | write `if (a < b) return 0; return 1;` rather than `return a >= b` |
 | explicit branches where you emit `andi` or `sltiu` | gcc folds `(x & 1) ? 1 : 0` and `f() == 0`. Usually unreachable from C |
 | the same field stores duplicated per `switch` case | write the full store list in each case and let gcc merge the tail. Hoisting the values into locals does not match |
@@ -35,6 +36,9 @@ it was measured on DDS and not on this ELF.
 | two `andi`s and two branches on one field | nested `if`s. `(x & 1) && (x & 2)` is folded to `(x & 3) == 3` |
 | a three-case `switch` testing something other than the middle case first | an explicit `goto` dispatch. gcc 2.96's `balance_case_nodes` splits exactly three nodes at the middle one, so a `switch` over 1, 2 and 3 always tests 2 first |
 | `j callee` with the full epilogue in front | make the call the last unconditional statement: invert a trailing `if` into an early `return` so the call is not inside it |
+| `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
+| the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
+| separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
 
 ## Addressing and types
 
@@ -45,7 +49,10 @@ it was measured on DDS and not on this ELF.
   site, not from narrowing the field's declared type.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
-  `tools/check_unit.py` says so when you get it wrong.
+  `tools/check_unit.py` says so when you get it wrong. This also empties a
+  branch delay slot: as an `extern` the `lwc1` gets scheduled into it, while
+  the literal becomes a `li.s` macro that `ee-as` cannot place there, which
+  is how retail's `nop` appears.
 - Holding a struct address in a local (`nbCamera_t *p = &pNbCamera;`)
   reproduces retail keeping it in a saved register. Placement matters:
   initialising it at the declaration puts an `addiu` in the prologue and
@@ -64,7 +71,15 @@ it was measured on DDS and not on this ELF.
   holds inside a loop retail re-reads: go through the outer pointer each
   iteration, since a cached local gets hoisted out and costs an instruction.
 - `addu` operand order follows the cast order: `(u8 *)ofs + (u32)base` emits
-  `addu rd, ofs, base`, and `(u8 *)base + ofs` emits the reverse.
+  `addu rd, ofs, base`, and `(u8 *)base + ofs` emits the reverse. The same
+  distinction separates pointer from integer arithmetic: `base + i` emits
+  `addu base, i`, and retail's `addu i, base` needs the base cast to an
+  integer first.
+- A `gp`-addressed global can be cached in a local for part of a function.
+  Where retail reloads it once for a loop and once for the tail, use the
+  global inside the loop and a local pointer for the tail.
+- `andi 0xff` after a `jal` comes from declaring the callee `s32` and casting
+  at the use site, `(u8)f()`, not from giving it a `u8` return type.
 - When retail biases a base once and stores at `0(reg)`, the induction
   variable is a pointer to the field, not to the struct. A struct pointer with
   a constant displacement gives `sw $0, 0xD0(reg)` instead.
@@ -155,10 +170,11 @@ These have been ruled out repeatedly and are not worth a second attempt:
 - `xori reg, reg, 0` in front of a `movn`. No `!= 0` shape (plain `if`,
   ternary, `> 0`, `>= 1`, explicit `^ 0`, a `continue`, a local of either
   width) adds it; every one of them emits the `movn` alone.
-- A `jal` plus a shared epilogue in a `switch` default arm whose sibling
-  cases all sibcall. Case order, `return` against `break`, a dead assignment
-  of the result, and a non-void or struct return type on the callee all leave
-  the default arm a sibcall.
+- A `jal` plus a shared epilogue in a `switch` default arm, where `return`
+  against `break`, a non-void or struct return type on the callee, and a dead
+  assignment of the call's *result* all leave the arm a sibcall. A dead store
+  to another variable does work, so try that first: see the tail-call row
+  above.
 
 A function whose body is mostly inline assembly is refused by the production
 report anyway, at 8 instructions and more than half the body, so writing one
@@ -187,3 +203,12 @@ function body:
   callers placed above the definition, which matters if the unit is split.
 - `nbMakaDispOn` needs `GetMakaProcessData` to take an argument, as the HD
   reconstruction shows, but it is defined `(void)` in this unit.
+
+Two in `code_001FAE80` are blocked by the machine and the split rather than
+by C:
+
+- `func_00213DF0` uses `mult1`, the EE's second multiply pipe, which no C
+  expression reaches.
+- `fclDrawSpriteEx`'s split assembly holds two symbols, so writing C for one
+  would drop the other's bytes. That is a boundary problem, not a matching
+  one.
