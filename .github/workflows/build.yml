@@ -22,11 +22,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      # The compiler is needed before the tool tests: tools/test_headers.py
+      # compiles every header with cc1.
       - name: Install dependencies
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q ninja-build cpp
           python3 -m pip install -q -r requirements.txt
+          python3 tools/download_tools.py
 
       # Runs without the retail executable.
       - name: Test tooling
@@ -76,10 +79,6 @@ jobs:
           cp .orig-src/orig/smt3/SLUS_209.11 orig/smt3/
           rm -rf .orig-src
           echo "5facfbf7916836613449c922e26a4ec412207b32  orig/smt3/SLUS_209.11" | sha1sum -c -
-
-      - name: Download build tools
-        if: steps.orig.outputs.available == 'true'
-        run: python3 tools/download_tools.py
 
       - name: Configure
         if: steps.orig.outputs.available == 'true'
