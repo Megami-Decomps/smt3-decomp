@@ -1096,20 +1096,26 @@ and `VU0_SUB_VF10_VF11_EXTENDED` exist only because `mdlSetBlur` needs the
 extended spelling; substituting the plain form moves the float constants it
 materialises and breaks the match. A macro named `_EXTENDED` means exactly this.
 
-**The operand section is part of the macro.** Two macros that assemble the same
-instruction but declare different clobbers or constraints produce different
-register allocation. Four names are still defined per unit for that reason, each
-with an `#undef` and a comment saying what differs:
+**The operand section is part of the macro**, and so is `volatile`. Two macros
+that assemble the same instruction but declare different clobbers, different
+constraints, or drop `volatile` produce different register allocation or let cc1
+move the block. `EE_SQRT_F32_SCHED` is the plain form of `EE_SQRT_F32` for
+exactly that reason: folding it into the volatile one moved three functions in
+`code_00116AD0`. Where two macros differ only in this way they get different
+names rather than one name and an `#undef`:
 
-| name | why it stays local |
+| name | what differs |
 | --- | --- |
-| `SDF_VU0_LOADVECTOR` in `model/mdlManager.c` | the load has to act as a memory barrier |
-| `SDF_VU0_SCALEVECTOR` in `model/mdlManager.c`, `event/evtUnitManager.c`, `event/evtPolygonMovie.c` | retail carries the bits through `$2`, not a register cc1 picks |
-| `SDF_VU0_SCALEVECTOR_B` in `event/evtPolygonMovie.c` | as above |
-| `SDF_VU0_SETVECTOR_Y` in `event/evtUnitManager.c` | declares no `$2` clobber, where the shared one does |
+| `VU0_LOAD_VF10_BARRIER` | the load clobbers memory; `SDF_VU0_LOADVECTOR` does not |
+| `VU0_SCALEVECTOR_V0`, `VU0_SCALEVECTOR_B_V0`, `VU0_SETVECTOR_Y_V0` | the scalar reaches vf2.x through `$2`, not a register cc1 picks |
+| `EE_SQRT_F32_SCHED` | not `volatile`, so cc1 may hoist the surrounding compares |
+| `VU0_COPY_VF10_TO_VF11_EXTENDED`, `VU0_SUB_VF10_VF11_EXTENDED` | an empty operand list rather than a basic asm |
 
-Everything else is defined once, in `ps2asm.h`, and the units include it: 143
-macros there, 252 definitions in total across the tree.
+Every operation is defined once, in `ps2asm.h`: 229 macros there and no asm
+macro left in any unit. The five that used to stay local for a differing operand
+section are now named for what differs -- `VU0_SCALEVECTOR_V0`,
+`VU0_SCALEVECTOR_B_V0` and `VU0_SETVECTOR_Y_V0` carry the scalar through `$2`
+rather than a register cc1 picks -- so nothing needs an `#undef` any more.
 
 The engine's own convention makes that practical. The VU0 inlines in the retail
 code always use the same registers for the same roles, so the macros fix them:

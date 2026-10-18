@@ -218,23 +218,32 @@ The code between the applied units is still in `code_<vram>` fillers, and
 244 HD source-run boundaries fall inside them. Ranked by how many independent
 sources back each one.
 
-### Tier 1: rename only, no new cut
+### Tier 1: applied
 
-These filler subsegments already exist, already relink, and hold exactly one HD
-source file. Only the name is missing. The name comes from the HD map except
-where a dds-decomp unit name exists, which is noted.
+All seven are in the split. `kernel/dds3KernelMain`, `kernel/dds3SequenceList`,
+`script/scrParameterCommand`, `effect/effPacket`, `effect/effPCPBezier`,
+`newbattle/nbCameraHelper` and `sdf/sdfMat` now carry their recovered names.
 
-| Subsegment | Proposed unit | Functions | Evidence |
+Three more boundaries that already existed as filler edges have been named the
+same way, which needs no cut and no data split:
+
+| Was | Now | Functions | Evidence |
 |---|---|---|---|
-| `code_00108AC8` `0x00108AC8-0x00109C58` | `kernel/dds3SequenceList` | 139, 129 HD-named | HD `dds3SequenceList.c` run, and a same-unit group starts at `0x00108AC8` (`CallDebug`..`ExitDebug`): two sources, the strongest unapplied boundary in the image |
-| `code_0017AC10` `0x0017AC10-0x0017D0A0` | `effect/effPCPBezier` | 13 | HD run; resolves the Thunder/Bezier dispute; both edges are already applied boundaries |
-| `code_002B2A60` `0x002B2A60-0x002B3B20` | `sdf/sdfMat` | 44, 43 HD-named | HD run fills the whole filler |
-| `code_0016A018` `0x0016A018-0x0016A9C0` | `effect/effPacket` | 7 | HD run fills the filler, and the name prefix changes `dds3` -> `eff` at the same function |
-| `code_001001D8` `0x001001D8-0x001005E8` | `kernel/dds3KernelMain` | 15, 14 HD-named | HD run fills the filler; the unit starts where crt0 ends, at `dds3FirstInit` |
-| `code_0010CF38` `0x0010CF38-0x0010DCB8` | `script/scrParameterCommand` | 28 of 32 | HD run plus the `scr` -> `prm` prefix change; the last 4 functions are HD `dds3DbgBasic.c`, so a second cut at `0x0010D730` finishes it |
-| `code_001AAE28` `0x001AAE28-0x001ABA68` | `newbattle/nbCameraHelper` | 16, 12 HD-named | HD run, but HD also has a second `nbCameraHelper.c` run at `0x001C55F8`, so one of the two is the map being lossy. Apply last of this tier. |
+| `code_0024C470` | `newbattle/nbStageProcess` | 71 | HD run plus the duplicate `BTL_DEF_LIGHT` literal |
+| `code_0025D690` | `newbattle/nbTarSelProcess` | 2 | HD run; a same-unit group starts here and the previous one ends |
+| `code_00128848` | `field/fldDraw` | 143 | HD run of 51 named functions, and the edge was already applied |
+
+`tools/compare_boundaries.py` scores all three as `supported`. 74 of the 98 `c`
+subsegments are now named, leaving 24 `code_<vram>` fillers.
 
 ### Tier 2: new cut, two independent sources
+
+A cut is not a rename. These rows give a unit's **start**; the split gives the
+tail everything up to the next existing boundary, so a cut applied on its own
+labels whatever follows with the new name too. Each of these therefore needs its
+*end* established as well, from the next HD source run, before the name is
+honest -- and then `.rodata`, `.lit4` and `.sdata` have to split with it. None of
+that is true of the tier 1 renames above, which is why those went in first.
 
 An HD source-run boundary that also carries a binary-only row. `0x00108AC8` is
 in tier 1 because its cut is already applied.

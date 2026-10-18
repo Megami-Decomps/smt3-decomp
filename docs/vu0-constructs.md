@@ -65,10 +65,14 @@ second spelling because `mdlSetBlur` only matches with it: with the plain form,
 the float constants it materialises come out in the other order. A macro whose
 name ends in `_EXTENDED` means precisely that.
 
-**The operand section is part of the operation.** Same instruction, different
-clobbers, different register allocation. Four names stay defined per unit for
-that reason and `include/README.md` tabulates them; a port that collapses them
-into one function will drift on those call sites.
+**The operand section is part of the operation**, and so is `volatile`. Same
+instruction, different clobbers or a missing `volatile`, different register
+allocation or a different schedule. Those variants carry distinct names rather
+than one name per unit; `include/README.md` tabulates them. A port that
+collapses them into one function will drift on those call sites.
+
+Every operation now has exactly one definition, in `ps2asm.h`: 229 macros, and
+no asm macro left in any unit.
 
 ## The operations
 
