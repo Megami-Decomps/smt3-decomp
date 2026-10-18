@@ -713,5 +713,26 @@ OFF(p85, datUnitWork_t, levelupparam, 0x7A);
 OFF(p86, datUnitWork_t, skill, 0x34);
 SZ(p82, datUnitWork_t, 0xEC);
 
+OFF(p83, nbMainProcessData_t, activeunit, 0x1C);
+OFF(p84, nbMainProcessData_t, formationtype, 0x38);
+OFF(p85, nbMainProcessData_t, order, 0x48);
+OFF(p86, nbMainProcessData_t, orderindex, 0x54);
+OFF(p87, nbMainProcessData_t, previndex, 0x56);
+OFF(p88, nbMainProcessData_t, prevcommand, 0x58);
+OFF(p89, nbMainProcessData_t, prevcommind, 0x5A);
+OFF(p90, nbMainProcessData_t, prevflag, 0x5C);
+OFF(p91, nbMainProcessData_t, debug, 0x5E);
+OFF(p92, nbMainProcessData_t, stat, 0x60);
+OFF(p93, nbMainProcessData_t, flag, 0x64);
+OFF(p94, nbMainProcessData_t, turn, 0x68);
+OFF(p95, nbMainProcessData_t, phasetime, 0x6C);
+OFF(p96, nbMainProcessData_t, battletime, 0x70);
+OFF(p97, nbMainProcessData_t, press3, 0x74);
+OFF(p98, nbMainProcessData_t, tarSelProcess, 0xEC);
+OFF(p99, nbMainProcessData_t, negoProcess, 0xF8);
+OFF(p100, nbMainProcessData_t, debugProcess, 0x100);
+OFF(p101, nbMainProcessData_t, aiScriptProcess, 0x104);
+OFF(p102, nbMainProcessData_t, autoCommProcess, 0x110);
+
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;

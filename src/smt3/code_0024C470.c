@@ -30,32 +30,49 @@ typedef struct nbTimeList_t {
 
 typedef struct nbActionProcessData_t {
     nbMainProcessData_t *data;
-    u32 unk04;
+    u32 stat;
     s8 seq;
     s8 nextseq;
-    s16 unk0A;
-    s32 unk0C;
-    u8 unk10[8];
-    s32 unk18;
-    u8 unk1C[0xC];
+    s16 seqtime;
+    s32 seqcnt;
+    s32 skilltime;
+    f32 press;
+    s32 newpresstype;
+    s16 newpress_p;
+    s16 newpress_ten;
+    s32 newaddpresstype;
+    struct nbParty_t *party;
     nbFormation_t *form;
     datUnitWork_t *work;
-    u8 unk30[0xC];
-    s32 unk3C;
-    u8 unk40[8];
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    s32 unk54;
-    u8 unk58[0xC];
-    s32 unk64;
-    u8 unk68[0xC];
-    void *unk74;
+    s32 partyindex;
+    s32 type;
+    s32 target;
+    u32 select;
+    u32 timer;
+    s32 runerr;
+    s32 jyokyomes;
+    s32 jyo_varid;
+    s32 jyo_varind;
+    s32 adata;
+    s32 autoskill;
+    s32 allhpdamage;
+    s32 allmpdamage;
+    s32 massuruid;
+    u32 negotype;
+    s32 motion;
+    s32 motse;
+    void *hEffBTL;
     u8 unk78[0x10];
     nbTimeList_t timelist[32];
-    u8 unk188[4];
+    u32 packettime;
     s32 hitstopframe;
 } nbActionProcessData_t;
+
+/* 128-byte party records; this unit only reads the leading flag word. */
+struct nbParty_t {
+    u16 flag;
+    u8 unk02[0x7E];
+};
 
 typedef struct pmdProcessWork_t {
     nbFormation_t *form;
@@ -92,10 +109,30 @@ typedef struct nbDeadEvent_t {
 typedef struct nbCommSelProcessData_t {
     void *handle;
     nbMainProcessData_t *data;
-    u8 unk08[4];
+    nbActionProcessData_t *act;
     s8 stat;
-    u8 unk0D[0x14A7];
+    u8 nowtype;
+    s16 pad0E;
+    s32 drawtype;
+    s32 drawcursor;
+    s32 drawlisty;
+    s32 nowcursor[6];
+    s32 nowlisty[6];
+    struct nbParty_t *my;
+    struct nbParty_t *partytarget;
+    u16 commlist[6][288];
+    s32 commcnt[6];
+    s8 commdisable[6][288];
+    s32 cnt;
+    f32 smritu;
     u32 unk14B4;
+    s32 ox;
+    s32 oy;
+    s32 oz;
+    s32 alpha;
+    s32 helpa;
+    f32 ritu;
+    s32 openwait;
 } nbCommSelProcessData_t;
 
 extern char D_005441A8[];
@@ -147,6 +184,17 @@ extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 extern void nbAddFlareChargePacket(s32 start, nbActionProcessData_t *a, s32 type);
 
 void SetNextActionSeq(nbActionProcessData_t *a, s32 nextseq);
+void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd);
+extern void nbAddAnalyzePacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form);
+extern void nbPanelAnalyzeStart(void);
+extern struct nbParty_t *nbGetPartyFromFormindex(s32 formindex);
+extern void nbMakeReturnPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party);
+extern void nbDelAllKoukaPacketType(s32 type);
+extern void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
+                                 nbActionProcessData_t *a);
+void MemoryCommand(nbCommSelProcessData_t *s);
+s32 GetCommListCnt(nbCommSelProcessData_t *s, s32 type);
+extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
 nbCommSelProcessData_t *GetCommSelProcessData(void);
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 s32 nbGetUnitID(datUnitWork_t *work);
@@ -262,7 +310,16 @@ s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part)
 
 INCLUDE_ASM(const s32, "code_0024C470", nbGetMotionActframe);
 
-INCLUDE_ASM(const s32, "code_0024C470", nbGetMotionSpeed);
+f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed)
+{
+    datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
+    f32 motspeed = *(f32 *)visual->part[part].unk02;
+
+    if (speed != 1.0f) {
+        motspeed *= speed;
+    }
+    return motspeed;
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", nbGetMotionNo);
 
@@ -313,7 +370,31 @@ INCLUDE_ASM(const s32, "code_0024C470", nbSetBadstatMotion);
 
 INCLUDE_ASM(const s32, "code_0024C470", nbSetBadstatMotion2);
 
-INCLUDE_ASM(const s32, "code_0024C470", nbInitUnitEffect);
+void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect)
+{
+    s32 stat = form->stat;
+    u32 flag;
+
+    if ((stat & 1) == 0) {
+        return;
+    }
+    if ((stat & 0x40) == 0) {
+        return;
+    }
+    if ((stat & 2) != 0) {
+        return;
+    }
+    flag = form->flag & ~6;
+    form->type = 4;
+    form->time = 0;
+    form->flag = flag | 1;
+    if (kage != 0) {
+        form->flag = flag | 9;
+    }
+    if (noeffect == 0) {
+        form->anime |= 0x200;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", nbLoadUnitGroup);
 
@@ -393,12 +474,27 @@ void nbCheckPacketState(nbActionProcessData_t *a, s32 startframe)
 
 INCLUDE_ASM(const s32, "code_0024C470", SetDeadPacket);
 
-INCLUDE_ASM(const s32, "code_0024C470", SetPress);
+void SetPress(nbActionProcessData_t *a, f32 press)
+{
+    if (press < -1.0f) {
+        if (press < a->press) {
+            a->press = press;
+        }
+    } else if (press > -1.0f) {
+        if (a->press >= -1.0f) {
+            if (a->press < press || a->press == 0.0f) {
+                a->press = press;
+            }
+        }
+    } else if (a->press == 0.0f) {
+        a->press = press;
+    }
+}
 
 void SetNewPress(nbActionProcessData_t *a, s32 presstype)
 {
-    if (a->unk18 < presstype) {
-        a->unk18 = presstype;
+    if (a->newpresstype < presstype) {
+        a->newpresstype = presstype;
     }
 }
 
@@ -410,7 +506,11 @@ void SetHitStopFrame(nbActionProcessData_t *a, s32 frame)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0024C470", SetEnemyEscapePacket);
+void SetEnemyEscapePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
+{
+    nbMakeReturnPacket(start, a, nbGetPartyFromFormindex(formindex));
+    SetTimeList(a, formindex, start, 0x1E, 0x1E);
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", SetAuroraPacket);
 
@@ -425,7 +525,12 @@ INCLUDE_ASM(const s32, "code_0024C470", SetMakaPacket);
 
 INCLUDE_ASM(const s32, "code_0024C470", SetTorafuPacket);
 
-INCLUDE_ASM(const s32, "code_0024C470", SetAnalyzePacket);
+void SetAnalyzePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
+{
+    nbAddAnalyzePacket(start + 2, a, &a->data->form[formindex]);
+    nbPanelAnalyzeStart();
+    a->stat |= 0x10;
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", SetPlayerSummonPacket);
 
@@ -503,9 +608,42 @@ s32 GetEndTime(nbActionProcessData_t *a, s32 formindex)
     return a->timelist[formindex].end;
 }
 
-INCLUDE_ASM(const s32, "code_0024C470", OverwriteTimeList);
+void OverwriteTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd)
+{
+    if (unlockadd >= 0) {
+        if (a->timelist[formindex].unlock < time + unlockadd) {
+            a->timelist[formindex].unlock = time + unlockadd;
+        }
+    }
+    if (endadd >= 0) {
+        if (a->timelist[formindex].end < time + endadd) {
+            a->timelist[formindex].end = time + endadd;
+        }
+        if (a->timelist[formindex].end < a->timelist[formindex].unlock) {
+            a->timelist[formindex].end = a->timelist[formindex].unlock;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0024C470", SetTimeList);
+void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd)
+{
+    if (time < a->timelist[formindex].unlock) {
+        time = a->timelist[formindex].unlock;
+    }
+    if (unlockadd >= 0) {
+        if (a->timelist[formindex].unlock < time + unlockadd) {
+            a->timelist[formindex].unlock = time + unlockadd;
+        }
+    }
+    if (endadd >= 0) {
+        if (a->timelist[formindex].end < time + endadd) {
+            a->timelist[formindex].end = time + endadd;
+        }
+        if (a->timelist[formindex].end < a->timelist[formindex].unlock) {
+            a->timelist[formindex].end = a->timelist[formindex].unlock;
+        }
+    }
+}
 
 s32 GetAllEndTime(nbActionProcessData_t *a)
 {
@@ -587,7 +725,17 @@ void SetAction_NON(void) {
 
 INCLUDE_ASM(const s32, "code_0024C470", CheckAction_NON);
 
-INCLUDE_ASM(const s32, "code_0024C470", SetAction_COMM);
+void SetAction_COMM(nbActionProcessData_t *a)
+{
+    if ((a->data->stat & 0x40) != 0) {
+        a->stat |= 0x80;
+    } else {
+        nbDelAllKoukaPacketType(0x26);
+    }
+    nbPanelAllShow();
+    nbPanelPressGaugeShow();
+    nbInitCommSelProcess(a->data, a->party, a);
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", CheckAction_COMM);
 
@@ -620,7 +768,7 @@ void SetAction_DEADSCRIPT(nbActionProcessData_t *a)
 {
     ClearTimeList(a);
     SetHpForTimeList(a);
-    nbInitAiScript(a, a->unk54);
+    nbInitAiScript(a, a->adata);
 }
 
 INCLUDE_ASM(const s32, "code_0024C470", CheckAction_DEADSCRIPT);
@@ -635,7 +783,7 @@ INCLUDE_ASM(const s32, "code_0024C470", CheckAction_BAD);
 
 void SetAction_BADWAIT(nbActionProcessData_t *a)
 {
-    a->unk04 |= 0x20;
+    a->stat |= 0x20;
     if ((a->data->stat & 8) != 0) {
         nbCameraSetState(0x19);
         return;
@@ -654,7 +802,7 @@ INCLUDE_ASM(const s32, "code_0024C470", CheckAction_TARSEL);
 
 void SetAction_STKSEL(nbActionProcessData_t *a)
 {
-    a->unk3C = 0;
+    a->select = 0;
     nbPanelStockSelectInit();
     nbPanelStockSelect(a->data, 0);
     StkSelId = -1;
@@ -758,9 +906,9 @@ void SetAction_ATO(void) {
 
 s32 CheckAction_ATO(nbActionProcessData_t *a)
 {
-    if (a->unk74 != NULL) {
-        effBTLDelete(a->unk74);
-        a->unk74 = NULL;
+    if (a->hEffBTL != NULL) {
+        effBTLDelete(a->hEffBTL);
+        a->hEffBTL = NULL;
     }
     SetNextActionSeq(a, 0x16);
     return 1;
@@ -804,8 +952,8 @@ void SetActionSeq(nbActionProcessData_t *a, s32 seq)
 {
     a->seq = seq;
     a->nextseq = 0;
-    a->unk0A = 0;
-    a->unk0C = 0;
+    a->seqtime = 0;
+    a->seqcnt = 0;
     ActionFuncTable[(s8)seq].set(a);
 }
 
@@ -853,7 +1001,25 @@ void nbSetOrder(void)
 
 INCLUDE_ASM(const s32, "code_0024C470", nbSetNextOrder);
 
-INCLUDE_ASM(const s32, "code_0024C470", nbUpdateOrder);
+void nbUpdateOrder(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s8 *order = data->order;
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        if (*order >= 0) {
+            u16 flag = data->party[*order].flag;
+
+            if ((flag & 1) == 0) {
+                *order = -1;
+            } else if ((flag & 0x20) != 0) {
+                *order = -1;
+            }
+        }
+        order++;
+    }
+}
 
 /* vu0 routine: project vf10 only when it lies in the forward view cone. */
 s32 nbClipEffectNum(s32 screenPosition[4])
@@ -934,9 +1100,20 @@ void nbSetDevilNameMes(s32 hmsg, s32 no, datUnitWork_t *work)
     itfMesMngSetVar(hmsg, no, work->id, 1);
 }
 
-INCLUDE_ASM(const s32, "code_0024C470", nbSetJyokyoMes);
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind)
+{
+    a->jyokyomes = nbGetJyokyoMes(a->data, jyokyomes);
+    a->jyo_varid = varid;
+    a->jyo_varind = varind;
+}
 
-INCLUDE_ASM(const s32, "code_0024C470", nbGetJyokyoMes);
+s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes)
+{
+    if ((data->stat & 8) != 0) {
+        return jyokyomes + 1;
+    }
+    return jyokyomes;
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", nbGetModelColor);
 
@@ -1024,7 +1201,7 @@ s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid)
     s32 no = datGetItemSkillNo(itemid);
 
     if (itemid == 1) {
-        no = a->unk64;
+        no = a->massuruid;
     }
     return no;
 }
@@ -1085,15 +1262,94 @@ INCLUDE_ASM(const s32, "code_0024C470", DispHelp1);
 
 INCLUDE_ASM(const s32, "code_0024C470", DispCommandList2);
 
-INCLUDE_ASM(const s32, "code_0024C470", CheckSelectError);
+s32 CheckSelectError(nbCommSelProcessData_t *s)
+{
+    s32 type = s->nowtype;
 
-INCLUDE_ASM(const s32, "code_0024C470", MemoryCommand);
+    if (s->commcnt[type] == 0) {
+        return 1;
+    }
+    return s->commdisable[type][s->nowcursor[type]] > 0;
+}
 
-INCLUDE_ASM(const s32, "code_0024C470", GetNextCommType);
+void MemoryCommand(nbCommSelProcessData_t *s)
+{
+    datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
+    s32 type = s->nowtype;
+    u16 d = s->commlist[type][s->nowcursor[type]];
+
+    switch (type) {
+    case 0:
+    case 4:
+    case 5:
+        switch (d) {
+        case 0x8000:
+            work->nowtform = 0;
+            work->prevcommand = 0;
+            break;
+        case 0x8001:
+            work->prevcommand = 0;
+            work->nowtform = 2;
+            break;
+        case 0x8002:
+            work->prevcommand = 0;
+            work->nowtform = 3;
+            break;
+        case 0x8003:
+            work->prevcommand = 0;
+            work->nowtform = 7;
+            break;
+        default:
+            work->prevcommand = d;
+            work->nowtform = 1;
+            break;
+        }
+        break;
+    case 1:
+        if (d == 0x8004) {
+            work->nowtform = 4;
+            work->prevcommand = 0x180;
+            break;
+        }
+        work->prevcommand = d;
+        work->nowtform = 4;
+        break;
+    case 2:
+        work->prevcommand = d;
+        work->nowtform = 5;
+        break;
+    case 3:
+        work->prevcommand = d;
+        work->nowtform = 6;
+        break;
+    }
+}
+
+s32 GetNextCommType(nbCommSelProcessData_t *s, s32 dir)
+{
+    s32 type = s->nowtype;
+    s32 i;
+
+    i = 0;
+    do {
+        type = (dir != 0 ? type + 1 : type + 5) % 6;
+        if (s->commcnt[type] > 0) {
+            return type;
+        }
+        i++;
+    } while (i < 6);
+    return type;
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", SelectCommandList);
 
-INCLUDE_ASM(const s32, "code_0024C470", SelectCommandListAuto);
+void SelectCommandListAuto(nbCommSelProcessData_t *s)
+{
+    if (CheckSelectError(s) == 0) {
+        s->stat = 3;
+        MemoryCommand(s);
+    }
+}
 
 s32 nbGetCommSelStat(void)
 {
@@ -1128,7 +1384,24 @@ void nbCommSelShutdown(dds3ProcessID_t *id)
 
 INCLUDE_ASM(const s32, "code_0024C470", SetCommList);
 
-INCLUDE_ASM(const s32, "code_0024C470", SetPrevCursor);
+void SetPrevCursor(nbCommSelProcessData_t *s, s32 type, s32 ind)
+{
+    s32 listcnt = GetCommListCnt(s, type);
+    s32 y = ind;
+
+    s->nowtype = type;
+    s->nowcursor[type] = ind;
+    s->nowlisty[type] = ind;
+    if (y + listcnt >= s->commcnt[type]) {
+        y -= y + listcnt - s->commcnt[type];
+        s->nowlisty[type] = (y < 0) ? 0 : y;
+    }
+    if (s->commdisable[type][ind] != 0) {
+        s->nowtype = 0;
+        s->nowcursor[type] = 0;
+        s->nowlisty[type] = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", SetCommCursor2);
 

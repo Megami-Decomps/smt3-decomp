@@ -84,14 +84,31 @@ typedef struct nbMainProcessData_t
     u8 unk_14[4];
     s16 playerpcnt;
     s16 enemypcnt;
-    u8 unk_1C[0x18];
+    s16 activeunit;                        /* 0x01C */
+    u8 unk_1E[0x16];
     s32 encno;                             /* 0x034 */
-    u8 unk_38[8];
+    s32 formationtype;                     /* 0x038 */
+    u8 unk_3C[4];
     s32 actionstackp;                      /* 0x040 */
     u32 endtype;
-    u8 unk_48[0x18];
+    s8 order[12];                          /* 0x048 */
+    s8 orderindex;
+    u8 pad_55;
+    s16 previndex;                         /* 0x056 */
+    u16 prevcommand;
+    u16 prevcommind;
+    u16 prevflag;
+    u16 debug;
     u32 stat;                              /* 0x060 */
-    u8 unk_64[0x14];
+    u32 flag;
+    u8 turn;                               /* 0x068 */
+    s8 phase;
+    s8 nextphase;
+    u8 esccnt;
+    u16 phasetime;                         /* 0x06C */
+    u16 pad_6E;
+    u32 battletime;                        /* 0x070 */
+    f32 press3;
     s16 unk78;
     s16 unk7A;
     s16 unk7C;
@@ -118,9 +135,16 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *unkD4[4];
     s32 unkE4;
     dds3ProcessID_t *unkE8;
-    u8 unkEC[0x10];
+    dds3ProcessID_t *tarSelProcess;         /* 0x0EC */
+    dds3ProcessID_t *effectProcess;
+    dds3ProcessID_t *koukaProcess;
+    dds3ProcessID_t *negoProcess;           /* 0x0F8 */
     void *camera;                          /* 0x0FC */
-    u8 unk100[0x14];
+    dds3ProcessID_t *debugProcess;          /* 0x100 */
+    dds3ProcessID_t *aiScriptProcess;       /* 0x104 */
+    dds3ProcessID_t *panelProcess;
+    dds3ProcessID_t *helpProcess;
+    dds3ProcessID_t *autoCommProcess;
     dds3ProcessID_t *encounterProcess;      /* 0x114 */
     u8 unk118[4];
     struct effBTL_t *residentEffect;         /* 0x11C */

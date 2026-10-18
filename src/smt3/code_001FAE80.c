@@ -15,6 +15,13 @@ typedef struct
     s8 count;
 } cmpSkillList_t;
 
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[0x38];
+    /* 0x38 */ u16 skillCount;
+    /* 0x3A */ u16 skill[12];
+} cmbUnitSkills_t;
+
 extern char D_0053C928[];
 extern char D_0053C938[];
 extern char D_0054FB00[];
@@ -109,7 +116,39 @@ extern s32 campStatusActive;
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x360];
+    /* 0x0000 */ u16 unk_00;
+    /* 0x0002 */ u16 index;
+    /* 0x0004 */ u8 shift;
+    /* 0x0005 */ u8 unk_05[3];
+} cmpCursorPos_t;
+
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x17C];
+    /* 0x017C */ cmpCursorPos_t cursorPos;
+} lstListWindow_t;
+
+/* The save-work fields this unit reaches that the shared dds3GlobalWork_t view
+ * leaves as padding or does not cover at all. */
+typedef struct
+{
+    /* 0x00000 */ u8 unk_00000[0x1914];
+    /* 0x01914 */ u8 id[0x10];
+    /* 0x01924 */ s32 idCount;
+    /* 0x01928 */ u8 unk_01928[0x10558];
+    /* 0x11E80 */ s32 recordCount;
+} dds3GlobalWorkView_t;
+
+typedef struct
+{
+    /* 0x0000 */ u8 unk_00[0x20];
+    /* 0x0020 */ f32 screenOfsX;
+    /* 0x0024 */ f32 screenOfsY;
+    /* 0x0028 */ u8 unk_28[0x10];
+    /* 0x0038 */ s32 texHandle[7];
+    /* 0x0054 */ u8 unk_54[0x10];
+    /* 0x0064 */ s16 listCursor[16];
+    /* 0x0084 */ u8 unk_84[0x2DC];
     /* 0x0360 */ void *explainData;
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
@@ -151,7 +190,10 @@ extern u8 cmpStatusModelReady;
 typedef struct
 {
     /* 0x00 */ void *allocation;
-    /* 0x04 */ u8 unk_04[8];
+    /* 0x04 */ s16 unk_04;
+    /* 0x06 */ s16 unk_06;
+    /* 0x08 */ s16 unk_08;
+    /* 0x0A */ s16 unk_0A;
     /* 0x0C */ s32 flags;
     /* 0x10 */ s32 unk_10;
     /* 0x14 */ s32 activeTime;
@@ -199,7 +241,8 @@ extern s8 gProcessStat_3;
 typedef struct
 {
     s8 state;
-    u8 unk_01[3];
+    u8 param;
+    u8 unk_02[2];
     s32 value;
 } cmpCursorSlot_t;
 
@@ -900,6 +943,21 @@ typedef struct
     /* 0x04 */ u16 unk_04;
 } cmpMsgEntry_t;
 
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000;
+    /* 0x0001 */ s8 unk_0001;
+    /* 0x0002 */ u8 unk_0002[3];
+    /* 0x0005 */ s8 unk_0005;
+    /* 0x0006 */ u8 unk_0006[2];
+    /* 0x0008 */ s32 unk_0008;
+    /* 0x000C */ u8 unk_000C[0x2380];
+    /* 0x238C */ s32 script;
+    /* 0x2390 */ s32 scriptArg;
+} shpUpdateWork_t;
+
+extern shpUpdateWork_t *shopUpdateWork;
+
 extern cmpMsgEntry_t D_00345DD0[];
 extern cmpMsgEntry_t D_00345DA0[];
 typedef struct
@@ -913,12 +971,12 @@ typedef struct
     /* 0x14 */ s32 unk_14;
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ void (*calcSizes)(void);
+    /* 0x20 */ void (*calcSizes)();
 } fclRagTex_t;
 
 extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
-                          void (*calc)(void));
-extern void fclRagTexCalcSizes(void);
+                          void (*calc)());
+extern void fclRagTexCalcSizes();
 extern u8 ragHeartsTable[];
 extern campStatusPanel_t *campDhUpdateWork;
 extern s8 cmpGetHeartsIconId(s8 index);
@@ -1381,7 +1439,11 @@ void cmbClearStockEntry(cmbUnit_t *unit)
     memset(unit, 0, 0xEC);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbClearUnitSkills);
+void cmbClearUnitSkills(cmbUnitSkills_t *unit)
+{
+    memset(unit->skill, 0, sizeof(unit->skill));
+    unit->skillCount = 0;
+}
 
 void cmbClearSkillSlots(cmbUnit_t *unit)
 {
@@ -1534,7 +1596,21 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbChangeSequence);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbWaitCancelButton);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbSwitchRibbon);
+extern void fclRbnSwitchActive(fclRbnWork_t *rbn, s32 index);
+
+void cmbSwitchRibbon(void)
+{
+    s32 index = CMB_GBWK->unk_1650A;
+
+    if (CMB_GBWK->unk_4118 == -1) {
+        s32 prev = index - 1;
+
+        if (index == 3) {
+            index = prev;
+        }
+    }
+    fclRbnSwitchActive(CMB_GBWK->ribbon, index);
+}
 
 s32 cmbChkIkenieEnable(void)
 {
@@ -1929,7 +2005,21 @@ void func_00207178(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00207198);
+s32 func_00207198(s32 value, s8 align)
+{
+    s8 rem = value % align;
+
+    if (rem != 0) {
+        if (align < 0) {
+            value -= rem;
+        } else {
+            value += align - rem;
+        }
+    } else {
+        value += align;
+    }
+    return value;
+}
 
 u16 shpGetItemPrice(s32 index, s8 sell)
 {
@@ -2017,7 +2107,13 @@ INCLUDE_ASM(const s32, "code_001FAE80", shpUpdateSeqConfirm);
 
 INCLUDE_ASM(const s32, "code_001FAE80", shpUpdateSeqPay);
 
-INCLUDE_ASM(const s32, "code_001FAE80", shpServiceTicketItem);
+void shpServiceTicketItem(void)
+{
+    shopUpdateWork->unk_0005 = 1;
+    shopUpdateWork->unk_0008 =
+        fclScriptStart(shopUpdateWork->script, 0xC, &shopUpdateWork->scriptArg);
+    shopUpdateWork->unk_0001 = 0xB;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", shpServiceTicket);
 
@@ -2399,7 +2495,16 @@ s32 rcvGetHealCost(void)
     return 400;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvGetPriceForUnit);
+extern s32 rcvCalcPriceRecover(datUnitWork_t *work);
+
+s32 rcvGetPriceForUnit(datUnitWork_t *work)
+{
+    s32 price = rcvCalcPriceRecover(work);
+
+    price += rcvGetStatusPrice(work);
+    price += rcvGetRevivePrice(work);
+    return price;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvGetRecoverPrice);
 
@@ -3002,7 +3107,22 @@ s32 cmpItemOrder(u8 *a, u8 *b)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00213CD8);
+s32 func_00213CD8(u8 *list, s32 count, u8 value)
+{
+    s32 kept = 0;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if (list[i] != value) {
+            u8 entry = list[i];
+
+            list[i] = 0;
+            list[kept] = entry;
+            kept++;
+        }
+    }
+    return kept;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", shuffleIndices);
 
@@ -3078,7 +3198,16 @@ s32 fclDestroyMessage(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclChkMessage);
+s32 fclChkMessage(void)
+{
+    if (gMsgID < 0) {
+        return 0;
+    }
+    if (gMsgInvFlag != 0 && gMsgFlag == 2) {
+        return 0;
+    }
+    return (s8)(u8)gMsgFlag;
+}
 
 s32 fclChkSelMessage(void)
 {
@@ -3224,9 +3353,28 @@ INCLUDE_ASM(const s32, "code_001FAE80", func_00214FD8);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclRagCalcTexSize);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclRagTexCalcSizes);
+extern s32 fclRagCalcTexSize(s32 size, s32 mode);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclRagTexInit);
+void fclRagTexCalcSizes(fclRagTex_t *tex)
+{
+    s32 mode = tex->unk_14;
+
+    tex->unk_04 = fclRagCalcTexSize(tex->unk_0C, mode);
+    tex->unk_08 = fclRagCalcTexSize(tex->unk_10, mode);
+}
+
+void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, void (*calc)())
+{
+    tex->unk_00 = 0;
+    tex->unk_04 = a;
+    tex->unk_08 = b;
+    tex->unk_0C = c;
+    tex->unk_10 = d;
+    tex->unk_14 = e;
+    tex->unk_18 = f;
+    tex->calcSizes = calc;
+    calc(tex);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclRunPanelAnim);
 
@@ -3359,14 +3507,28 @@ s32 fclChkDbgProcess(void)
     return fclDbgPID != 0;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", GetPriceForSummon);
+s32 GetPriceForSummon(s32 arg0, s32 arg1, s32 arg2, s32 level, s32 str, s32 mag, s32 vit, s32 agi)
+{
+    s32 total = level + str + mag + vit + agi;
+
+    return total * total / 20 * 100;
+}
 
 s32 fclEncycWork(void)
 {
     return g_pinst != NULL;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclEncycInitRecord);
+void fclEncycInitRecord(s32 mode)
+{
+    s32 *count = &((dds3GlobalWorkView_t *)DDS3_GBWK)->recordCount;
+
+    if (mode == 0) {
+        *count = 0;
+    }
+    g_pinst = NULL;
+    g_pdebug = NULL;
+}
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D6D8);
 
@@ -3505,7 +3667,13 @@ INCLUDE_ASM(const s32, "code_001FAE80", RegistAll);
 
 INCLUDE_ASM(const s32, "code_001FAE80", InitListWindow);
 
-INCLUDE_ASM(const s32, "code_001FAE80", PushListwinCursor);
+void PushListwinCursor(fclEncycWork_t *pinst, lstListWindow_t *plistwin, s32 stack)
+{
+    cmpCursorPos_t *cur = &plistwin->cursorPos;
+
+    pinst->listCursor[stack * 2] = cur->index;
+    pinst->listCursor[stack * 2 + 1] = cur->shift;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", PopListwinCursor);
 
@@ -3710,7 +3878,18 @@ INCLUDE_ASM(const s32, "code_001FAE80", DrawRegistKeyHelp);
 
 INCLUDE_ASM(const s32, "code_001FAE80", DrawReadMainHelp);
 
-INCLUDE_ASM(const s32, "code_001FAE80", InitializeDebug_fclEncyc);
+void InitializeDebug_fclEncyc(void)
+{
+    void *buf = sdfMemAllocDirect(0xC);
+    fclRbnWork_t *work = (fclRbnWork_t *)sdfMemLock(buf);
+
+    work->allocation = buf;
+    work->unk_04 = 0;
+    work->unk_06 = 0;
+    work->unk_08 = 0;
+    work->unk_0A = 0;
+    g_pdebug = work;
+}
 
 void ReleaseDebug_fclEncyc(void)
 {
@@ -4107,7 +4286,16 @@ u16 rstGetHeartsSkillAt(u8 race, s8 index)
     return D_00339E00[race].heartsSkill[index].skill;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00222250);
+extern s8 D_00339E1A[];
+
+/* The row stride is not a multiple of the entry stride, so the index is in bytes. */
+s8 func_00222250(u8 index, s8 slot)
+{
+    if (slot >= 8) {
+        return -1;
+    }
+    return D_00339E1A[slot * 4 + index * 0x42];
+}
 
 s16 datGetDevilParam(u8 devilId)
 {
@@ -4292,7 +4480,15 @@ s32 rstFindPowerUpSkill(u16 skillId)
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstRollPowerUpSkill);
 
-INCLUDE_ASM(const s32, "code_001FAE80", datCalcDevilExp);
+s32 datCalcDevilExp(s32 level)
+{
+    s32 exp = (s32)((f32)(level * level * level) * 1.42f + -5.0f);
+
+    if (exp < 0) {
+        exp = 0;
+    }
+    return exp;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", datCopyDevilWorkEntry);
 
@@ -4520,7 +4716,15 @@ void func_002262D8(void) {
 void func_002262E0(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", sdfSndMakeFilename);
+extern char D_0054FD18[]; /* "/sound/" */
+extern char *strcat(char *dst, const char *src);
+extern void *memcpy(void *dst, const void *src, u32 size);
+
+char *sdfSndMakeFilename(char *dst, const char *name)
+{
+    memcpy(dst, D_0054FD18, 8);
+    return strcat(dst, name);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", sndInit);
 
@@ -7275,7 +7479,12 @@ s8 cmpGetCursorRow(cmpCursorWork_t *cursor)
     return cursor->unk_04;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpMoveStockCursor);
+extern void cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
+
+void cmpMoveStockCursor(s8 index, s8 dir, u8 *base)
+{
+    cmpMoveCursor2((cmpCursorWork_t *)(base + index * 0x103C + 0xAC), dir);
+}
 
 void func_00242320(s8 value, u8 *work)
 {
@@ -7320,7 +7529,10 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpChkSeqInfo);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUpdateSeqInfo);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpUpdateTerminate);
+void cmpUpdateTerminate(cmpInfoWindow_t *window)
+{
+    window->flags |= (*(vu8 *)&window->flags & 0x70) << 1;
+}
 
 void cmp_242918(s32 id, u8 bits)
 {
