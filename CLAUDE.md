@@ -47,7 +47,8 @@ Translation-unit recovery has not been done. All of `.text` after crt0 is one
 `code_001001D8` unit, so `src/smt3/code_001001D8.c` holds every `INCLUDE_ASM` stub.
 Splitting it needs boundary evidence (`tools/find_tus.py`), not guesses.
 
-## Local only
+## Remote
 
-This repo has no remote and must not get one. Do not create a GitHub repo, add a
-remote, or push.
+`origin` is <https://github.com/tge-was-taken/smt3-decomp>, public. Push `main` there;
+nothing from the retail game is tracked, so check that before adding anything under
+`orig/` or a new build directory.
