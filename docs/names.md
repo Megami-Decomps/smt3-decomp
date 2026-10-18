@@ -4,15 +4,16 @@
 finds no `__FILE__` paths or any other `.c` filename. Every name in this repo
 therefore comes from another build of the game or from a contributor.
 
-Struct, union and enum types have their own page: see
-[Type recovery](type-recovery.md).
+Struct, union and enum types have their own page, [Type recovery](type-recovery.md).
+The audit of member, enum, define and function names against the IDB is in
+[Naming drift](naming-drift.md).
 
 ## Sources
 
 | Source | What it gives | State |
 |---|---|---|
 | SMT3 HD symbol recovery, applied to the PS2 IDB | 9,470 of 9,571 function names at PS2 addresses | seeded into this repo |
-| [smt3hd-reconstructed-sources](https://github.com/smt-ret/smt3hd-reconstructed-sources) | 272 headers, 647 source file names, struct layouts and field names | not imported yet |
+| [smt3-reconstructed-sources](https://github.com/smt-ret/smt3-reconstructed-sources) | 272 headers, 647 source file names, struct layouts and field names | not imported yet |
 | Nocturne JP debug build `SLPM_652.42` (Dec 26 2002) | `__FILE__` paths and the code that references them | no copy in this repo |
 
 ### SMT3 HD symbol recovery
@@ -32,7 +33,7 @@ is not a name this binary carries for that function itself as inferred.
 
 ### Reconstructed sources and headers
 
-`smt3hd-reconstructed-sources` reconstructs the original source tree from the
+`smt3-reconstructed-sources` reconstructs the original source tree from the
 same HD metadata: 272 headers under `include/`, 647 `.c` files under `src/`,
 and a `symbols.txt` address map of 11,595 functions with the source file each
 belongs to. That file map is the best available list of the game's original
@@ -42,6 +43,28 @@ layouts and field names.
 
 Its addresses are HD build addresses, not PS2 addresses, so the file map does
 not place a PS2 function in a file by itself. Pairing the two is open work.
+
+The repository was renamed from `smt3hd-reconstructed-sources`; the old URL
+still redirects.
+
+#### Using it on a function that will not match
+
+The bodies are transpiler output, not source. Call arguments are often
+flattened to `0` and some control flow is gone, so a body cannot be copied.
+What survives is worth checking whenever a reconstruction is close but not
+exact:
+
+- the real parameter list, where the assembly only shows registers,
+- which functions the body calls, and in what order,
+- which field name an offset corresponds to, as a second opinion before adding
+  a field to a shared header,
+- which translation unit the function belonged to, by grepping `src/` for its
+  name.
+
+The IDB stays authoritative over all of it, and a name or layout this ELF
+proves wrong is wrong here too. Treat it the way
+[the dds-decomp pairing](dds-port.md) is treated: a lead to verify, never
+evidence on its own.
 
 ### The Nocturne debug build
 

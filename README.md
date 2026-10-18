@@ -105,7 +105,7 @@ code until this repo has its own.
   toolchain findings, matching rules and confirmed source idioms carry over
   directly. dds-decomp ships no license file; it is used here with
   attribution.
-- [smt3hd-reconstructed-sources](https://github.com/smt-ret/smt3hd-reconstructed-sources)
+- [smt3-reconstructed-sources](https://github.com/smt-ret/smt3-reconstructed-sources)
   for the SMT3 HD derived names, reconstructed headers and source file names,
   and all existing SMT3
   decompilation efforts and the naming and type conventions this repo follows.

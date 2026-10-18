@@ -79,6 +79,24 @@ decomp.me works for single functions (compiler `ee-gcc2.96`, flags `-O2`);
 `tools/m2ctx.py` writes the context. asm-differ reads `diff_settings.py`, and
 decomp-permuter reads `permuter_settings.toml`.
 
+When a function reproduces all but a few words, two references usually say more
+than another permutation:
+
+- [smt3-reconstructed-sources](https://github.com/smt-ret/smt3-reconstructed-sources)
+  gives the real parameter list, the calls a body makes and in what order, and
+  the field name behind an offset. The bodies are transpiler output with
+  arguments often flattened to `0`, so they are a lead, not source. See
+  [Names](names.md#using-it-on-a-function-that-will-not-match).
+- [dds-decomp](https://github.com/Megami-Decomps/dds-decomp) already has C for
+  part of this engine. `tools/dds_reuse.py` pairs it against the remaining
+  `INCLUDE_ASM` functions; [the port notes](dds-port.md) cover how far the
+  pairing can be trusted.
+
+Two recurring causes of a near miss, both source-shape problems rather than
+anything to chase in the registers: an address that is a `.lit4` pool entry
+rather than a global, which `tools/check_unit.py` says outright; and C that
+needs one register more than retail, which shifts every allocation by one.
+
 ## 3. Verify
 
 ```sh

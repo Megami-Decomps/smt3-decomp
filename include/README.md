@@ -20,7 +20,7 @@ Three sources, in order of authority:
    PS2 layouts with static size and offset assertions, taken from the same IDB and
    held honest by the renderer reproducing emulated frames. Primary source for the
    sdf types.
-3. **[smt3hd-reconstructed-sources](https://github.com/smt-ret)** (smt-ret), a
+3. **[smt3-reconstructed-sources](https://github.com/smt-ret)** (smt-ret), a
    reconstruction of the SMT3 source from SMT3 HD's il2cpp metadata. Its headers
    supply the original file grouping, field names and enum member names, which the
    IDB does not carry. Its *layouts* are a C#/IL transpilation artifact and are not
