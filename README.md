@@ -3,11 +3,11 @@
 [![Build Status]][actions]
 [![smt3-code]][smt3-progress] [![smt3-functions]][smt3-progress]
 
-[Build Status]: https://github.com/Megami-Recomps/smt3-decomp/actions/workflows/build.yml/badge.svg
-[actions]: https://github.com/Megami-Recomps/smt3-decomp/actions/workflows/build.yml
-[smt3-code]: https://decomp.dev/Megami-Recomps/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_code_percent&label=code%20bytes
-[smt3-functions]: https://decomp.dev/Megami-Recomps/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_functions_percent&label=functions
-[smt3-progress]: https://decomp.dev/Megami-Recomps/smt3-decomp/smt3?category=game
+[Build Status]: https://github.com/Megami-Decomps/smt3-decomp/actions/workflows/build.yml/badge.svg
+[actions]: https://github.com/Megami-Decomps/smt3-decomp/actions/workflows/build.yml
+[smt3-code]: https://decomp.dev/Megami-Decomps/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_code_percent&label=code%20bytes
+[smt3-functions]: https://decomp.dev/Megami-Decomps/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_functions_percent&label=functions
+[smt3-progress]: https://decomp.dev/Megami-Decomps/smt3-decomp/smt3?category=game
 
 A work-in-progress **matching decompilation** of *Shin Megami Tensei III:
 Nocturne* for PlayStation 2. The goal is to understand and document how the
