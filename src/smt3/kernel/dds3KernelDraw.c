@@ -57,23 +57,6 @@ typedef struct
 #define VU0_SWAP_VF10_VF11() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf11\n\t" \
     "vmove.xyzw vf11, vf2\n\t.set reorder")
-#define VU0_ZERO_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
-#define VU0_GET_VF10_X(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-#define VU0_GET_VF10_Y(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tprot3w $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-#define VU0_GET_VF10_Z(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tpexew $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-#define VU0_SET_VF10_Z(value) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vaddx.z vf10, vf0, vf2x\n\t.set reorder" : : "f" (value) : "$2")
-#define VU0_SET_VF10_W(value) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.w vf10, vf0, vf2x\n\t.set reorder" : : "f" (value) : "$2")
 #define VU0_COPY_MATRIX_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
@@ -82,9 +65,6 @@ typedef struct
     "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \
     "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
     : "=r" (out) : "f" (255.0f))
-/* No memory barrier: native dds3SetLightDir recomputes the slot after its call. */
-#define VU0_STORE_VF10_UNCLOBBERED(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (dst))
 
 extern u32 dds3DrawFlag;
 extern u8 fadergba[4];

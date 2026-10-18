@@ -1,6 +1,7 @@
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+
 #include "effect.h"
 
 /* Screen pixel pair in the debug overlay's own 1/16 pixel grid. */
@@ -37,23 +38,6 @@ typedef struct
     "lqc2 vf27, 48(%0)\n\t" \
     ".set reorder" \
     : : "r" (src), "m" (*(const effDebugMatrix_t *)(src)))
-#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t.set reorder" \
-    : : "r" (dst))
-/* MMI shuffle builds all four identity rows directly from vf0. */
-#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "qmfc2.ni $5, $vf0\n\t" \
-    "pextuw $4, $0, $5\n\t" \
-    "pextuw $2, $0, $4\n\t" \
-    "pextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\t" \
-    "sq $3, 0x10(%0)\n\t" \
-    "sq $4, 0x20(%0)\n\t" \
-    "sq $5, 0x30(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 
 typedef struct
 {

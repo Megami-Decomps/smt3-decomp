@@ -510,30 +510,6 @@ extern f32 D_0031FA10[4];
 
 extern f32 D_0031FA20[4];
 
-/*
- * sceVu0UnitMatrix as libvu0 expands it (scratch registers hard-coded by the
- * SDK):
- *     qmfc2.ni $5, vf0            ; (0,0,0,1)
- *     pextuw   $4, $0, $5         ; (0,0,1,0) row 2
- *     pextuw   $2, $0, $4         ; (1,0,0,0) row 0
- *     pextuw   $3, $4, $0         ; (0,1,0,0) row 1
- *     sq $2,0(dst); sq $3,0x10(dst); sq $4,0x20(dst); sq $5,0x30(dst)
- * The four `sq` are part of the idiom: retail stores the identity rows from
- * the registers the shuffle left them in. Tried: sixteen u32 stores of 0/1
- * (gcc 2.96 emits sw of $0 and a constant, never qmfc2/pextuw or sq).
- */
-#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "qmfc2.ni $5, $vf0\n\t" \
-    "pextuw $4, $0, $5\n\t" \
-    "pextuw $2, $0, $4\n\t" \
-    "pextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\t" \
-    "sq $3, 0x10(%0)\n\t" \
-    "sq $4, 0x20(%0)\n\t" \
-    "sq $5, 0x30(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 
 /* The two titles register these eight compact table rows at matching indices.
  * These names describe registrations only; serialized kinds remain u16. */
@@ -2323,16 +2299,6 @@ struct sdfVector3_t {
 #define VU0_ADD_VF31_VF10_XYZ() __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder")
 
-/* Load four quadwords into the second matrix bank vf24-vf27 (the right-hand
- * operand of the sdf matrix-multiply routines). */
-#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf24, 0(%0)\n\t" \
-    "lqc2 vf25, 16(%0)\n\t" \
-    "lqc2 vf26, 32(%0)\n\t" \
-    "lqc2 vf27, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (src) : "memory")
 
 /* vf28-vf31 out to four quadwords with no memory clobber: retail keeps the
  * destination address in a register across the store. */
@@ -2345,10 +2311,6 @@ struct sdfVector3_t {
     ".set reorder" \
     : : "r" (dst))
 
-/* The same single-quadword store, no memory clobber. */
-#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
 
 extern void dds3BillboardDraw(BillObj *effect);
 

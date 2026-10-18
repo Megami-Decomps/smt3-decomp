@@ -1,7 +1,7 @@
 #include "common.h"
 #include "libsdf.h"
 #include "effBattle.h"
-
+#include "ps2asm.h"
 typedef struct effEveBEDParams_t {
     f32 position[4];
     f32 orientation[4];
@@ -262,36 +262,6 @@ typedef struct effChanSource_t {
 } effChanSource_t;
 
 
-#define VU0_ADD(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-
-
-#define VU0_CROSS_XYZ(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder")
-
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
-
-#define VU0_MUL(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
-    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
-    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
-#define VU0_SUB(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
 extern f32 D_00320B88[];
 extern f32 aViewEye[4];
 extern u8 aViewDown[];
@@ -350,8 +320,6 @@ void dds3EffectPartSetPosition(dds3EffectPart_t *work, void *source);
 void dds3EffectPartDraw(dds3EffectPart_t *work);
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
 extern effArrHdr_t *dds3Bezier4PCreate(s32 count);
-
-
 
 
 void Eve_BlurON(void) {

@@ -502,19 +502,7 @@ struct sdfVector3_t {
  */
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
-/* vf10 += vf12: the vf12 spare the thunder builders park a vector in. */
-#define VU0_ADD_VF10_VF12() __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder")
 
-/* vf11 -= vf10. */
-#define VU0_SUB_VF11_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw vf11, vf11, vf10\n\t.set reorder")
-
-/* One quadword out of vf10 or vf11 with no memory clobber: the sphere rotate
- * loops keep the vertex address in a register across the store. */
-#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
 #define VU0_STORE_VF11_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" \
     : : "r" (dst))

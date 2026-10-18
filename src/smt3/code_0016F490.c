@@ -99,7 +99,6 @@ u32 dds3EffectPCPDataGetType(dds3EffectPCPData_t *hPCPData, u32 number);
 void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
 
 
-
 typedef struct
 {
     u8 unknown00[0x20];
@@ -270,13 +269,6 @@ void effBTLModelColorMain(void);
 void evtUnitLightOff(evtUnit_t *hUnit, s32 param);
 void evtSetUnitColorRGB(evtUnit_t *hUnit, s32 param, u32 color);
 
-/* ps2asm.h stores the matrix bank only as a whole. */
-#define VU0_STORE_VF28(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
-#define VU0_STORE_VF29(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
-#define VU0_STORE_VF30(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 
 void *dds3EffectFileListCreate(const char *path, s32 max);
 void *dds3EffectFileListWindowCreate(void *hFileList);

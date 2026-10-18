@@ -1,21 +1,12 @@
 #include "common.h"
 #include "event.h"
 #include "kernel.h"
+#include "ps2asm.h"
 
-
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
-#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
-
-/* A C float broadcast through vf2.x, then the one operation that uses it. */
+/* A C float broadcast through vf2.x, then the one operation that uses it.
+ * Kept local: retail carries the bits through $2 here, not through
+ * a register cc1 picks. */
+#undef VU0_SCALE_VF10
 #define VU0_SCALE_VF10(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
@@ -31,40 +22,9 @@
     "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
     : : "f" (f))
 
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
-
-#define VU0_SUB(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-#define VU0_ADD(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 
 #define VU0_CLEAR_W(vf) __asm__ volatile ( \
     ".set noreorder\n\tvmulx.w " #vf ", " #vf ", vf0x\n\t.set reorder")
-
-#define VU0_LENGTH_VF10(out) __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvaddy.x vf2, vf2, vf2y\n\t" \
-    "vaddz.x vf2, vf2, vf2z\n\tvsqrt Q, vf2x\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
-    "mtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-
-#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
-    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
-    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
-
-#define EE_MMI_RGBA_UNPACK(src, unit) __asm__ volatile ( \
-    ".set noreorder\n" \
-    "lw $2, 0(%0)\n" \
-    "pextlb $2, $0, $2\n" \
-    "pextlh $2, $0, $2\n" \
-    "qmtc2.ni $2, vf10\n" \
-    "vitof0.xyzw vf10, vf10\n" \
-    "qmtc2.ni %1, vf2\n" \
-    "vmulx.xyzw vf10, vf10, vf2x\n" \
-    ".set reorder" \
-    : : "r"(src), "r"(unit) : "$2", "memory")
 
 
 f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *value);
@@ -182,9 +142,6 @@ s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale);
 void dds3GetPosPoseSetMCR(dds3Basic_t *object, u128 *vector);
 
 extern void evtGetUnitDirVector(evtUnit_t *unit);
-
-
-
 
 
 /* vf10 = (a - b) with y replaced by 0 */

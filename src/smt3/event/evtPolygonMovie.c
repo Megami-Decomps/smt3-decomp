@@ -2,68 +2,37 @@
 #include "kernel.h"
 #include "libsdf.h"
 #include "effect.h"
-
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
+#include "ps2asm.h"
 
 /* A C float broadcast through vf2.x, then the one operation that uses it.
  * The _COMPONENT and _W forms declare $2 clobbered and the scales do not,
- * which is what each caller's retail register allocation needs. */
+ * which is what each caller's retail register allocation needs.
+ * Kept local: retail carries the bits through $2 here, not through
+ * a register cc1 picks. */
+#undef VU0_SCALE_VF10
 #define VU0_SCALE_VF10(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
     : : "f" (f))
 
+/* Kept local: retail carries the bits through $2 here, not through
+ * a register cc1 picks. */
+#undef VU0_SCALE_VF11
 #define VU0_SCALE_VF11(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
     : : "f" (f))
 
-/* vf10.w = vf0.w * scalar, so the lane is set rather than scaled. */
-#define VU0_SET_VF10_W(f) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.w vf10, vf0, vf2x\n\t.set reorder" \
-    : : "f" (f) : "$2")
 
 #define VU0_SCALE_VF(vf, f) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw " #vf ", " #vf ", vf2x\n\t.set reorder" \
     : : "r" (f))
 
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
-
-#define VU0_ADD(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-#define VU0_SET_W_ONE(vf) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.w " #vf ", vf0\n\t.set reorder")
-
-#define VU0_GET_VF10_X(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-
-#define VU0_GET_VF10_Y(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tprot3w $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-
-#define VU0_GET_VF10_Z(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tpexew $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-
-#define VU0_GET_VF10_W(out) __asm__ volatile ( \
-    ".set noreorder\n\tvaddw.x vf2, vf0, vf10w\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
 
 #define VU0_SET_VF10_COMPONENT(axis, f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx." #axis " vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f) : "$2")
-
 
 
 void *dds3GetProcessData(dds3ProcessID_t *task);

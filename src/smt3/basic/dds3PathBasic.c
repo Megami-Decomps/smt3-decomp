@@ -1,6 +1,6 @@
 #include "common.h"
 #include "basic.h"
-
+#include "ps2asm.h"
 
 #define DDS3_PATH_CURVE_POSITION 0
 #define DDS3_PATH_CURVE_ROTATION 2
@@ -39,13 +39,6 @@ extern void sdfChipFreeDirect(void *ptr);
     ".set reorder" \
     : : "f" (value) : "$2")
 
-#define VU0_SET_VF10_Z(value) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "mfc1 $2, %0\n\t" \
-    "qmtc2.ni $2, $vf2\n\t" \
-    "vaddx.z vf10, vf0, vf2x\n\t" \
-    ".set reorder" \
-    : : "f" (value) : "$2")
 
 #define VU0_MUL_VF10_SCALAR(value) __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -55,44 +48,10 @@ extern void sdfChipFreeDirect(void *ptr);
     ".set reorder" \
     : : "f" (value) : "$2", "memory")
 
-#define VU0_COPY_VF10_TO_VF11() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder")
 
-#define VU0_ZERO_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
-
-#define VU0_LOAD_VF10(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-#define VU0_LOAD_VF11(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-#define VU0_ADD_VF10_VF11() __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw vf10, vf10, vf11\n\t.set reorder")
-
-#define VU0_CLEAR_VF10_W() __asm__ volatile ( \
-    ".set noreorder\n\tvmulx.w vf10, vf10, vf0x\n\t.set reorder")
-
-#define VU0_SET_VF10_W(value) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.w vf10, vf0, vf2x\n\t.set reorder" : : "f" (value) : "$2")
 #define VU0_LERP_SCALE(value) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (value))
-#define VU0_GET_VF10_X(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
-    : "=f" (out) : : "$2")
-#define VU0_GET_VF10_Y(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tprot3w $2, $2\n\t" \
-    "mtc1 $2, %0\n\t.set reorder" : "=f" (out) : : "$2")
-#define VU0_GET_VF10_Z(out) __asm__ volatile ( \
-    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tpexew $2, $2\n\t" \
-    "mtc1 $2, %0\n\t.set reorder" : "=f" (out) : : "$2")
-#define VU0_GET_VF10_W(out) __asm__ volatile ( \
-    ".set noreorder\n\tvaddw.x vf2, vf0, vf10w\n\tqmfc2.ni $2, vf2\n\t" \
-    "mtc1 $2, %0\n\t.set reorder" : "=f" (out) : : "$2")
 
 void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f32 frame) {
     u32 count = keys->count;

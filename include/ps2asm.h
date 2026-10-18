@@ -339,4 +339,131 @@ typedef struct {
     ".set reorder" \
     : : "r" (dst), "r" (value) : "$2", "memory")
 
+/* ---- operations taken on a register named at the call site ---- */
+
+/* The vf register is a literal token in the macro body, so one definition
+ * covers every register the units use. Units that need a different operand
+ * constraint for the same operation keep their own definition and say why. */
+
+#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+
+#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
+#define VU0_ADD(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+#define VU0_SUB(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+#define VU0_MUL(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+
+#define VU0_SET_W_ONE(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.w " #vf ", vf0\n\t.set reorder")
+/* vf10 = vf0, so xyz go to zero and w to one. */
+#define VU0_ZERO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
+
+#define VU0_CROSS_XYZ(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder")
+/* The matrix bank times the named source, source w taken as one. */
+#define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+/* Each matrix row scaled by its own lane of the named vector. */
+#define VU0_SCALE_MATRIX_ROWS(src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.xyzw vf28, vf28, " #src "x\n\tvmuly.xyzw vf29, vf29, " #src "y\n\t" \
+    "vmulz.xyzw vf30, vf30, " #src "z\n\t.set reorder")
+
+#define VU0_GET_VF10_X(out) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+
+#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t.set reorder" \
+    : : "r" (dst))
+/* Memory to memory through the matrix bank, which it leaves loaded. */
+#define VU0_COPY_MATRIX(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%1)\n\tlqc2 vf29, 16(%1)\n\t" \
+    "lqc2 vf30, 32(%1)\n\tlqc2 vf31, 48(%1)\n\t" \
+    "sqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\tsqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst), "r" (src) : "memory")
+
+/* An identity matrix built in GPRs from vf0 and stored, with no VU0
+ * arithmetic: pextuw walks the one in vf0.w down the four rows. */
+#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $5, $vf0\n\t" \
+    "pextuw $4, $0, $5\n\tpextuw $2, $0, $4\n\tpextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\tsq $3, 0x10(%0)\n\t" \
+    "sq $4, 0x20(%0)\n\tsq $5, 0x30(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+
+/* The same unpack as MMI_RGBA_UNPACK with the operands spelled the way the
+ * event and model units write them. */
+#define EE_MMI_RGBA_UNPACK(src, unit) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "lw $2, 0(%0)\n" \
+    "pextlb $2, $0, $2\n" \
+    "pextlh $2, $0, $2\n" \
+    "qmtc2.ni $2, vf10\n" \
+    "vitof0.xyzw vf10, vf10\n" \
+    "qmtc2.ni %1, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    ".set reorder" \
+    : : "r"(src), "r"(unit) : "$2", "memory")
+
+
+/* ---- lane reads and writes through $2, and the single-register stores ---- */
+
+#define VU0_GET_VF10_W(out) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.x vf2, vf0, vf10w\n\tqmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+#define VU0_GET_VF10_Y(out) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tprot3w $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+#define VU0_GET_VF10_Z(out) __asm__ volatile ( \
+    ".set noreorder\n\tqmfc2.ni $2, vf10\n\tpexew $2, $2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : : "$2")
+
+/* vf10.w and vf10.z set from a C float, vf0 supplying the one. */
+
+#define VU0_SET_VF10_W(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.w vf10, vf0, vf2x\n\t.set reorder" \
+    : : "f" (f) : "$2")
+#define VU0_SET_VF10_Z(value) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vaddx.z vf10, vf0, vf2x\n\t.set reorder" : : "f" (value) : "$2")
+
+#define VU0_STORE_VF28(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
+#define VU0_STORE_VF29(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
+#define VU0_STORE_VF30(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
+
+#define VU0_SUB_VF11_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf11, vf11, vf10\n\t.set reorder")
+
+/* An identity matrix in the bank: vmr32 rotates the one in vf0.w into
+ * place for each row. */
+#define VU0_SET_UNIT_MATRIX() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\t" \
+    "vmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder")
+
 #endif /* PS2ASM_H */

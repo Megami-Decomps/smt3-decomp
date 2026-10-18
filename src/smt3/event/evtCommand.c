@@ -8,12 +8,6 @@ struct EffNodeDescriptor;
 extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, const struct EffNodeDescriptor *resource);
 extern dds3ProcessID_t *evtStartPolygonMovie2(u32 priority, s32 eventId, s32 sceneId);
 
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
 
 void scrSetIntReturnValue(s32 retVal);
 
@@ -164,7 +158,6 @@ void dds3ObjectBaseCreateMover(void *object);
 void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
 
 
-
 s32 fldCommand_GetHojiID(char *name);
 
 s32 fldGbSetGimic(s32 worldKey, s32 roomGroup, s32 roomNumber, s32 enabled);
@@ -226,7 +219,7 @@ void evtSetUnitColorA(evtUnit_t *unit, s32 duration, u32 color);
 
 
 #include "basic.h"
-
+#include "ps2asm.h"
 extern void dds3EffectObjectPresetMG12(dds3Basic_t *basic);
 
 extern s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *basic, dds3Basic_t *p0,

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "effBattle.h"
+#include "ps2asm.h"
 
 /* Formation extent view. The retail accessors read radius/height at +0x50/+0x54
  * and uniform scale at +0x5C; this is not a claim about the full formation size. */
@@ -29,26 +30,6 @@ extern void ReverseMatrix(void);
 extern void SetRotateMatrixX(f32 angle);
 extern void SetRotateMatrixY_B(f32 angle);
 extern void MultMatrixRevNoArg(void);
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
-
-#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "sqc2 vf28, 0(%0)\n\t" \
-    "sqc2 vf29, 16(%0)\n\t" \
-    "sqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "memory")
-
-#define VU0_SET_UNIT_MATRIX(a, b, c, d) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #a ", vf0, vf0\n\tvmr32.xyzw " #c ", vf0\n\t" \
-    "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
 
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetSphereCenter);
@@ -106,7 +87,7 @@ void effBTLModelGetMarkMatrix2(effBTLModel_t *model, s32 mark) {
     if (effBTLModelGetMarkMatrix(model, mark) != 0) {
         return;
     }
-    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+    VU0_SET_UNIT_MATRIX();
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetCenter);

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "ps2asm.h"
+
 #include "sdf_lighting.h"
 
 typedef f32 (*sdfLightSources_t[3])[4];
@@ -61,18 +62,6 @@ typedef int s128 __attribute__((mode(TI)));
 /* Write three axis components and twice acos(W), using the native small
  * denominator fallback when sqrt(1-W*W) is near zero. */
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
-#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "qmfc2.ni $5, $vf0\n\t" \
-    "pextuw $4, $0, $5\n\t" \
-    "pextuw $2, $0, $4\n\t" \
-    "pextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\t" \
-    "sq $3, 0x10(%0)\n\t" \
-    "sq $4, 0x20(%0)\n\t" \
-    "sq $5, 0x30(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 #define EE_MMI_STORE_VEC3_VALUE(dst, value) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "pcpyud $2, %1, $0\n\t" \
@@ -81,14 +70,6 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "sw $2, 8(%0)\n\t" \
     ".set reorder" \
     : : "r"(dst), "r"(value) : "$2", "memory")
-#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf24, 0(%0)\n\t" \
-    "lqc2 vf25, 16(%0)\n\t" \
-    "lqc2 vf26, 32(%0)\n\t" \
-    "lqc2 vf27, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (src) : "memory")
 #define VU0_STORE_MATRIX_B(dst) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "sqc2 vf24, 0(%0)\n\t" \
@@ -527,10 +508,6 @@ extern u128 corePktFogParm;
 /* Cache the object's vector only when its address changes, not its contents. */
 
 
-
-
-
-
 extern u8 vu0MicroPacket[];
 extern u8 vu1MicroPacket[];
 extern s32 sceDmaSync(void *, s32, s32);
@@ -598,12 +575,8 @@ extern u32 sdf3DPrimDefaultFaceIndex[];
 /* Serialize the requested VIF attribute streams into one aligned DMA packet. */
 
 
-
-
 /* Build a one-vertex textured-quad VIF packet: the position, color, the four
  * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
-
-
 
 
 /* Build XYZ and attribute VIF streams; return the packet address.
@@ -614,8 +587,6 @@ extern u32 sdf3DPrimDefaultFaceIndex[];
 /* Build a one-vertex VIF packet for a two-texture quad: the position, both
  * colors, the interleaved primary/secondary UV corners (copied as unaligned
  * words) and the eight quad corner coordinates. */
-
-
 
 
 /* Build a quad packet from paired colors and per-corner UV sets. */
@@ -635,8 +606,6 @@ extern u32 sdf3DPrimDefaultFaceIndex[];
 /* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
  * position, colors, interleaved primary/secondary UV corners (copied as
  * unaligned words) and the eight quad corner coordinates. */
-
-
 
 
 /* Build the wider attribute VIF stream; return the packet address.
@@ -741,11 +710,7 @@ typedef struct sdf3DScreenParam_t {
 /* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
 
 
-
-
 /* Bind the selected pair of model slot indices and weights. */
-
-
 
 
 /* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
@@ -759,29 +724,6 @@ typedef struct sdf3DScreenParam_t {
 
 /* Matrix registers: vf28-vf31 are the primary matrix, vf24-vf27 its
  * alternate bank, and vf20-vf23 a third bank copied between the two. */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* libvu0: sceVu0UnitMatrix */
@@ -962,9 +904,6 @@ void corePktEmitTexTrisCtx2(VuWork *work, u64 samplingState, u64 textureState,
     "vmul.xyz vf2, vf2, vf3\n\tvadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
     "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : "r" (a), "r" (b), "r" (c) : "$2")
-#define VU0_SET_UNIT_MATRIX() __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\t" \
-    "vmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder")
 #define VU0_BLEND_NODE_XY(node, first, second) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \

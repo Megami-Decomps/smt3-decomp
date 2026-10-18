@@ -3,6 +3,7 @@
 
 #include "libsdf.h"
 #include "ps2asm.h"
+
 #include "billboard.h"
 
 typedef struct EffUnitObject {
@@ -120,33 +121,8 @@ typedef struct BillLinkedValue {
 } BillLinkedValue;
 
 
-#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "qmfc2.ni $5, $vf0\n\t" \
-    "pextuw $4, $0, $5\n\t" \
-    "pextuw $2, $0, $4\n\t" \
-    "pextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\t" \
-    "sq $3, 0x10(%0)\n\t" \
-    "sq $4, 0x20(%0)\n\t" \
-    "sq $5, 0x30(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
-
 #define EFF_MAGATUHI_VECTOR_WORD_COUNT 4
 
-#define VU0_COPY_MATRIX(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf28, 0(%1)\n\t" \
-    "lqc2 vf29, 16(%1)\n\t" \
-    "lqc2 vf30, 32(%1)\n\t" \
-    "lqc2 vf31, 48(%1)\n\t" \
-    "sqc2 vf28, 0(%0)\n\t" \
-    "sqc2 vf29, 16(%0)\n\t" \
-    "sqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst), "r" (src) : "memory")
 
 /* Initialize the paired texture/state list, then append one quad to each
  * child stream. The second child owns the geometry and common batch count. */

@@ -1,15 +1,7 @@
 #include "common.h"
 #include "event.h"
 #include "kernel.h"
-
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
+#include "ps2asm.h"
 void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
 
 u32 dds3AllocObjectId(void);
@@ -153,8 +145,6 @@ dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(void *object);
 void dds3PathBasicPauseOff(dds3PathBasicControl_t *value);
 
 void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *value, f32 multiplier);
-
-
 
 
 void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
