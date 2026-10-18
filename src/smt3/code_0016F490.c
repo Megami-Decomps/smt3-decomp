@@ -1,9 +1,6 @@
 #include "common.h"
 #include "motion.h"
-
-/* lqc2 into vf10, which the mdlSet* entry points read as their argument. */
-#define VU0_LOAD_VF10_PTR(src) __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" ::"r"(src))
-#define VU0_LOAD_VF10_MEM(src) __asm__ volatile(".set noreorder\n\tlqc2 $vf10, %0\n\t.set reorder" ::"m"(*(src)))
+#include "ps2asm.h"
 
 extern u128 D_0031DF60;
 extern u128 D_0031DF70;
@@ -73,6 +70,25 @@ void mdlSetColor(dds3ModelHandle_t *aHandle, u32 aColor);
 void mdlLoopMotion(dds3ModelHandle_t *aHandle, s32 aGroup, s32 aNumber);
 
 extern dds3EffectFunc_t dds3EffectFuncTable[7];
+extern void *D_002F69B8[4];
+extern s32 D_0054F1E4;
+extern s32 effBTLCutCount;
+extern u32 effBTLCutMaxTable[4];
+
+/* Header of a packed model an effect part carries, followed by the pack data. */
+typedef struct
+{
+    u32 size;
+    u8 reserve[0xC];
+    u8 data[1];
+} dds3EffectPartModelData_t;
+
+void *dds3BillboardCreate(s32 kind, u32 data);
+void mdlPackDecode(s32 group, s32 id, s32 mode, const u8 *data, s32 size);
+void mdlLink(dds3ModelHandle_t *hModel, void **surfaces);
+void mdlFree(dds3ModelHandle_t *hModel);
+void effBTLSkillStart(s32 id, s32 param);
+void effBTLSkillEnd(void);
 extern dds3EffectFunc_t EffectPCPFuncTable[];
 extern void **D_0031DDD0[];
 
@@ -90,522 +106,2259 @@ u32 dds3EffectPCPDataGetParam(dds3EffectPCPData_t *hPCPData);
 u32 dds3EffectPCPDataGetType(dds3EffectPCPData_t *hPCPData, u32 number);
 void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightInit);
+typedef struct effBTL_t effBTL_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightON);
+typedef struct
+{
+    u32 unknown00;
+    u8 unknown04[0xC];
+    sdfVector4_t position;
+    u8 unknown20[0x30];
+    u32 unknown50;
+    u8 unknown54[0x38];
+    dds3ModelHandle_t *hModel;
+} evtUnitHandle_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightOFF);
+typedef struct
+{
+    u8 unknown00[0x20];
+    sdfVector4_t position;
+    u8 unknown30[0x24];
+    f32 unknown54;
+    u8 unknown58[0x4];
+    f32 unknown5C;
+    u8 unknown60[0x18];
+    u32 flags;
+    u8 unknown7C[0x10];
+    evtUnitHandle_t *unit;
+    u8 unknown90[0x2];
+    s16 unknown92;
+    u8 unknown94[0x8];
+    u32 color;
+    u8 unknownA0[0x50];
+} nbFormation_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightCompulsionOFF);
+typedef struct
+{
+    u8 unknown00[0x20];
+    f32 unknown20;
+} effPCPThunderSpherePolyLowParam_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightModelSet);
+/* One entry of an effBTLSystem_*_PartList table. */
+typedef struct
+{
+    u16 type;
+    char *fileName;
+    void *pData;
+    u16 refCount;
+    effPartHandle_t *hPart;
+    effBTL_t *hBTLEffect;
+    sdfMemHandle_t *hMem;
+} effBTLSystem_Part_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightGroupSet);
+extern effBTLSystem_Part_t effBTLSystem_Freeze_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Sleep_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Panic_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Bind_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Poison_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Charm_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Curse_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_CurseCAMP_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Stone_Dead_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Hansya_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Kyusyuu_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Return_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Attack_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_AttackC_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Encount_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Nego_Kaihuku_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Nego_Kyusyu_PartList[];
+extern effBTLSystem_Part_t effBTLSystem_Nego_Stone_PartList[];
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightSet);
+extern u8 effBTLSystem_Shock_ThunderSpherePolyLowParam[];
+extern u8 effBTLSystem_Bind_ThunderSpherePolyLowParam[];
+extern u8 effBTLSystem_Paralyze_ThunderSpherePolyLowParam[];
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLModelColorSet);
+/* One effect family of the effBTLSystem table, indexed by the family id. */
+typedef struct
+{
+    void *(*create)(nbFormation_t *);
+    void (*destroy)(void *);
+    void (*destroy2)(void *);
+    void (*setColor)(void *, u32);
+    void (*draw)(void *);
+    u32 (*getLength)(void *);
+    void (*dataLoad)(void);
+    void (*dataFree)(void);
+    void (*partHandleCreate)(void);
+    void (*partHandleDelete)(void);
+    u32 rgba;
+    s8 active;
+    u8 reserve2D[3];
+    s32 unknown30;
+    effBTLSystem_Part_t *pPartList;
+} effBTLSystemFunc_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightStart);
+typedef struct
+{
+    s32 family;
+    void *hEffect;
+    nbFormation_t *pFormation;
+} effBTLSystemHandle_t;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightEnd);
+extern effBTLSystemFunc_t D_0031BF00[];
+
+void effBTLSystemCut1DataFree(void);
+void effBTLSystemCut1PartHandleCreate(void);
+void effBTLSystemCut1PartHandleDelete(void);
+
+/* One shared cut effect of the effBTLSystemCut1 table. */
+typedef struct
+{
+    char *fileName;
+    effBTL_t *hBTLEffect;
+    s32 refCount;
+    void *pData;
+    sdfMemHandle_t *hMem;
+} effBTLSystemCut1Data_t;
+
+extern effBTLSystemCut1Data_t effBTLSystemCut1Data[];
+
+void *effBTLCutGetUserData(void *hCut);
+void effBTLCutSetUserData(void *hCut, void *pUserData);
+
+extern u32 effBTLPointLightProcess;
+extern s8 effBTLFieldColorOn;
+extern s8 D_0054F0F1;
+extern s32 D_0054F0F4;
+extern u8 effBTLDebugCameraAllEdit;
+extern u8 effBTLDebugCameraAllTable;
+extern u8 D_0054F1C3;
+extern s8 effBTLSkillActive;
+extern void *nbHelperViewer;
+extern u32 dds3DebugSign;
+extern u8 D_0054F1DF;
+extern s32 D_0054F130;
+extern s8 D_0054F134;
+extern u8 D_0031D000[];
+extern void *D_00551DA0;
+extern void *D_00551DA4;
+extern char D_0054F100[];
+extern char effBedNameBuf[];
+
+#define COPY_QWORD(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
+    : : "r" (dst), "r" (src) : "memory", "$2")
+
+typedef struct
+{
+    u8 type;
+    u8 unknown01;
+    u8 unknown02;
+    u8 unknown03;
+    u32 unknown04;
+    u32 unknown08;
+    u32 unknown0C;
+    u32 unknown10;
+    u32 unknown14;
+    u32 unknown18;
+    u32 unknown1C;
+    u32 unknown20;
+} effBTLPointLightParam_t;
+
+typedef struct
+{
+    u32 unknown00;
+    u32 unknown04;
+    u32 unknown08;
+    u32 unknown0C;
+    u32 unknown10;
+    u32 unknown14;
+    u32 unknown18;
+} effBTLModelColorParam_t;
+
+/* One light the battle effects place, 32 of them indexed by the formation id. */
+typedef struct
+{
+    effBTLPointLightParam_t param;
+    u32 unknown24;
+    effBTLModelColorParam_t color;
+    u32 unknown44;
+} effBTLPointLight_t;
+
+/* The unit position and model id a light starts from. */
+typedef struct
+{
+    sdfVector4_t position;
+    u32 unknown10;
+    u32 unknown14;
+    u8 reserve18[0x8];
+} effBTLPointLightBase_t;
+
+extern effBTLPointLight_t effBTLPointLight[32];
+extern effBTLPointLightBase_t effBTLPointLightBase[32];
+
+s32 effBTLModelGetID(nbFormation_t *pFormation);
+u32 effBTLSkillGetInvokeParty(void);
+u32 effBTLSkillGetTargetParty(void);
+void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pFormation);
+void effBTLPointLightGroupSet(effBTLPointLightParam_t *pParam, u32 mask);
+void effBTLPointLightStart(void);
+void effBTLPointLightMain(void);
+void effBTLPointLightEnd(void);
+void effBTLModelColorMain(void);
+void evtUnitLightOff(evtUnitHandle_t *hUnit, s32 param);
+void evtSetUnitColorRGB(evtUnitHandle_t *hUnit, s32 param, u32 color);
+
+/* ps2asm.h stores the matrix bank only as a whole. */
+#define VU0_STORE_VF28(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
+#define VU0_STORE_VF29(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
+#define VU0_STORE_VF30(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
+
+void *dds3EffectFileListCreate(const char *path, s32 max);
+void *dds3EffectFileListWindowCreate(void *hFileList);
+void dds3EffectFileListWindowSetPos(void *hWindow, s32 x, s32 y);
+void dds3EffectFileListWindowSetOt(void *hWindow, s32 ot);
+void dds3EffectFileListWindowSetPadWait(void *hWindow, s32 wait);
+void dds3EffectFileListWindowSetWindowColor(void *hWindow, u32 color, u32 frameColor);
+void func_001750D0(s32 param);
+void *dblurUpdateHandle(void *hBlur);
+void *nbGetMainProcessData(void);
+
+/* A part whose type is this one is an effBTL cut, not a dds3 effect part. */
+#define EFFBTL_PART_TYPE_BTL 0xFFFD
+
+/* Effect handle shared by the families that hold one part and a frame count. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+} effBTLSysPart_t;
+
+void sdfMemFreeDirect(sdfMemHandle_t *hMem);
+void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
+void effBTLModelGetMarkPosition3(dds3ModelHandle_t *hModel, s32 mark);
+void mdlSetClutColor(dds3ModelHandle_t *hModel, u32 color, f32 ratio);
+void *effBTLBindCreateTrack(void *pParam);
+void effPCPThunderSpherePolyLowDelete(void *hTrack);
+void effPCPThunderSpherePolyLowDraw(void *hTrack);
+void effPCPThunderSpherePolyLowSetPosition(void *hTrack, sdfVector4_t *pPosition);
+void effPCPThunderSpherePolyLowSetScale(void *hTrack, f32 scale);
+void effPCPThunderSpherePolyLowSetColor(void *hTrack, u32 color);
+effPCPThunderSpherePolyLowParam_t *effPCPThunderSpherePolyLowGetParam(void *hTrack);
+
+/* Effect handle of the families that hold one effPCP track and a frame count. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    void *hTrack;
+} effBTLSysTrack_t;
+
+/* Effect handle of the families that only recolour the unit model. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+} effBTLSysFrame_t;
+
+/* Effect handle of the Poison family, which keeps the unit model it marks. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    dds3ModelHandle_t *hModel;
+} effBTLSysPoison_t;
+
+/* Effect handle of the families that hold two parts. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+} effBTLSysPart2_t;
+
+/* Effect handle of the Close family: two parts plus the unit model. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+    dds3ModelHandle_t *hModel;
+} effBTLSysClose_t;
+
+void dds3SpPoly_RollRingSetEndless(void *hRollRing);
+
+/* Effect handle of the families that play one battle cut. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    void *hCut;
+} effBTLSysCut_t;
+
+/* One entry of datSkillTable, 320 skills. */
+typedef struct
+{
+    u16 unknown00;
+    u8 unknown02;
+    u8 unknown03[0x39];
+} datSkill_t;
+
+extern datSkill_t datSkillTable[];
+
+s32 effBTLSkillGetID(void);
+
+/* Effect handle of the Hansya family, two parts behind its own work area. */
+typedef struct
+{
+    u8 reserve00[0xE0];
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+} effBTLSysHansya_t;
+
+/* Effect handle of the Kyusyuu family, four parts. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+    effPartHandle_t *hPart3;
+    effPartHandle_t *hPart4;
+} effBTLSysPart4_t;
+
+/* Effect handle of the Attack family, six parts. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+    effPartHandle_t *hPart3;
+    effPartHandle_t *hPart4;
+    effPartHandle_t *hPart5;
+    effPartHandle_t *hPart6;
+} effBTLSysPart6_t;
+
+/* Effect handle of the AttackC family, the Attack parts plus six of its own. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+    effPartHandle_t *hPart3;
+    effPartHandle_t *hPart4;
+    effPartHandle_t *hPart5;
+    effPartHandle_t *hPart6;
+    effPartHandle_t *hPart7;
+    effPartHandle_t *hPart8;
+    effPartHandle_t *hPart9;
+    effPartHandle_t *hPart10;
+    effPartHandle_t *hPart11;
+    effPartHandle_t *hPart12;
+} effBTLSysPart12_t;
+
+/* Effect handle of the Stone_Dead family, which holds three parts. */
+typedef struct
+{
+    nbFormation_t *pFormation;
+    u32 frame;
+    effPartHandle_t *hPart;
+    effPartHandle_t *hPart2;
+    effPartHandle_t *hPart3;
+} effBTLSysPart3_t;
+
+void *effBTLCutCreate(effBTL_t *hBTLEffect, s32 type, nbFormation_t *pFormation, s32 param);
+void effBTLCutDelete(void *hCut);
+void effBTLCutDraw(void *hCut);
+u32 effBTLCutGetCutEndFrame(void *hCut);
+void effBTLModelHide(nbFormation_t *pFormation);
+void mdlSingleMotion(void *hModel, s32 motion, s32 flag);
+void effBTLSystem_Part_DataLoad(effBTLSystem_Part_t *pPartList, u32 count);
+void effBTLSystem_Part_DataFree(effBTLSystem_Part_t *pPartList, u32 count);
+void effBTLSystem_Part_HandleCreate(effBTLSystem_Part_t *pPartList, u32 count);
+void effBTLSystem_Part_HandleDelete(effBTLSystem_Part_t *pPartList, u32 count);
+dds3ModelHandle_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
+u16 dds3EffectPartGetType(effPartHandle_t *hEffPart);
+u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number);
+void dds3EffectPartDelete(effPartHandle_t *hEffPart);
+effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPart);
+void dds3EffectPartDraw(effPartHandle_t *hEffPart);
+void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPosition);
+void dds3EffectPartSetScale(effPartHandle_t *hEffPart, f32 scale);
+void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 color);
+void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 rgb);
+f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation);
+f32 effBTLPartGetScalePtr(nbFormation_t *pFormation);
+f32 effBTLPartCalcScale(nbFormation_t *pFormation);
+effBTL_t *effBTLCreate(void *pData);
+void effBTLDelete(effBTL_t *hBTLEffect);
+void evtSetUnitColorRGB(evtUnitHandle_t *hUnit, s32 frame, u32 rgb);
+
+void effBTLPointLightInit(void)
+{
+    effBTLPointLightProcess = 0;
+}
+
+void effBTLPointLightON(void)
+{
+    if (effBTLPointLightProcess == 0) {
+        effBTLPointLightProcess = 1;
+    } else {
+        effBTLPointLightProcess = 2;
+    }
+}
+
+void effBTLPointLightOFF(void)
+{
+    if (effBTLPointLightProcess != 0) {
+        effBTLPointLightProcess = 3;
+    }
+}
+
+void effBTLPointLightCompulsionOFF(void)
+{
+    nbFormation_t *pFormation;
+    s32 i;
+
+    pFormation = *(nbFormation_t **)nbGetMainProcessData();
+    for (i = 0x1F; i >= 0; i--) {
+        if ((pFormation->flags & 3) == 3 && pFormation->unit != NULL) {
+            evtUnitLightOff(pFormation->unit, 0);
+            evtSetUnitColorRGB(pFormation->unit, 0xC, pFormation->color);
+        }
+        pFormation++;
+    }
+    effBTLPointLightProcess = 0;
+}
+
+void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pFormation)
+{
+    effBTLPointLight_t *pLight;
+    s32 id;
+
+    pLight = &effBTLPointLight[pFormation->unknown92];
+    pLight->param = *pParam;
+    id = effBTLModelGetID(pFormation);
+    if (id == 0x125 || id == 0x108) {
+        pLight->param.unknown08 = 0x80FFB996;
+        pLight->param.unknown0C = 0x80503214;
+    }
+    pLight->unknown24 = 0;
+}
+
+void effBTLPointLightGroupSet(effBTLPointLightParam_t *pParam, u32 mask)
+{
+    nbFormation_t *pFormation;
+    s32 i;
+
+    pFormation = *(nbFormation_t **)nbGetMainProcessData();
+    for (i = 0x1F; i >= 0; i--) {
+        if ((pFormation->flags & mask) != 0 && (pFormation->flags & 3) == 3) {
+            effBTLPointLightModelSet(pParam, pFormation);
+        }
+        pFormation++;
+    }
+}
+
+void effBTLPointLightSet(effBTLPointLightParam_t *pParam, nbFormation_t *pFormation)
+{
+    if (pParam->unknown10 == pParam->unknown18) {
+        return;
+    }
+    switch (pParam->type) {
+    case 0:
+        effBTLPointLightModelSet(pParam, pFormation);
+        break;
+    case 1:
+        effBTLPointLightGroupSet(pParam, effBTLSkillGetInvokeParty());
+        break;
+    case 2:
+        effBTLPointLightGroupSet(pParam, effBTLSkillGetTargetParty());
+        break;
+    case 3:
+        effBTLPointLightGroupSet(pParam, 0x700);
+        break;
+    }
+}
+
+void effBTLModelColorSet(effBTLModelColorParam_t *pParam, nbFormation_t *pFormation)
+{
+    effBTLPointLight_t *pLight;
+    s32 id;
+
+    id = effBTLModelGetID(pFormation);
+    if (id != 0x125 && id != 0x108) {
+        pLight = &effBTLPointLight[pFormation->unknown92];
+        pLight->color = *pParam;
+        pLight->unknown44 = 0;
+    }
+}
+
+void effBTLPointLightStart(void)
+{
+    nbFormation_t *pFormation;
+    effBTLPointLightBase_t *pBase;
+    evtUnitHandle_t *hUnit;
+    s32 i;
+
+    memset(effBTLPointLight, -1, sizeof(effBTLPointLight));
+    pFormation = *(nbFormation_t **)nbGetMainProcessData();
+    pBase = effBTLPointLightBase;
+    for (i = 0; i < 32; i++) {
+        if ((pFormation->flags & 3) == 3) {
+            hUnit = pFormation->unit;
+            if (hUnit != NULL) {
+                COPY_QWORD(pBase, &hUnit->position);
+                pBase->unknown10 = hUnit->unknown00;
+                pBase->unknown14 = hUnit->unknown50;
+            }
+        }
+        pFormation++;
+        pBase++;
+    }
+}
+
+void effBTLPointLightEnd(void)
+{
+    nbFormation_t *pFormation;
+    s32 i;
+
+    pFormation = *(nbFormation_t **)nbGetMainProcessData();
+    for (i = 0x1F; i >= 0; i--) {
+        if ((pFormation->flags & 3) == 3 && pFormation->unit != NULL) {
+            evtUnitLightOff(pFormation->unit, 0xC);
+            evtSetUnitColorRGB(pFormation->unit, 0xC, pFormation->color);
+        }
+        pFormation++;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightMain);
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLModelColorMain);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightRun);
+void effBTLPointLightRun(void)
+{
+    switch (effBTLPointLightProcess) {
+    case 0:
+        break;
+    case 1:
+        effBTLPointLightStart();
+        effBTLPointLightProcess = 2;
+        break;
+    case 2:
+        effBTLPointLightMain();
+        effBTLModelColorMain();
+        break;
+    case 3:
+        effBTLPointLightEnd();
+        effBTLPointLightProcess = 0;
+        break;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystem_SetUnitColorRGB);
+void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 rgb)
+{
+    if (pFormation->unit != NULL) {
+        evtSetUnitColorRGB(pFormation->unit, frame, rgb);
+        pFormation->color = (pFormation->color & 0xFF000000) | (rgb & 0xFFFFFF);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystem_GetScalePtr);
+f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
+{
+    if (pFormation->unit != NULL) {
+        return effBTLPartGetScalePtr(pFormation);
+    } else {
+        return effBTLPartCalcScale(pFormation);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSystem_Part_DataLoad);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystem_Part_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystem_Part_HandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystem_Part_HandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Shock_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Freeze_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Sleep_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Panic_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Bind_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Close_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Poison_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Charm_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_Delete2);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_SetColor);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_Draw);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_GetLength);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_DataLoad);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_DataFree);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_PartHandleCreate);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Paralyze_PartHandleDelete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_Create);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_Delete);
-
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_Delete2);
+void effBTLSystem_Part_DataFree(effBTLSystem_Part_t *pPartList, u32 count)
+{
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        sdfMemFreeDirect(pPartList->hMem);
+        pPartList++;
+    }
+}
+
+void effBTLSystem_Part_HandleCreate(effBTLSystem_Part_t *pPartList, u32 count)
+{
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        if (pPartList->refCount == 0) {
+            if (pPartList->type != EFFBTL_PART_TYPE_BTL) {
+                pPartList->hPart = dds3EffectPartCreate(pPartList->type, pPartList->pData);
+            } else {
+                pPartList->hBTLEffect = effBTLCreate(pPartList->pData);
+            }
+        }
+        pPartList->refCount++;
+        pPartList++;
+    }
+}
+
+void effBTLSystem_Part_HandleDelete(effBTLSystem_Part_t *pPartList, u32 count)
+{
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        if (--pPartList->refCount == 0) {
+            if (pPartList->type != EFFBTL_PART_TYPE_BTL) {
+                dds3EffectPartDelete(pPartList->hPart);
+            } else {
+                effBTLDelete(pPartList->hBTLEffect);
+            }
+        }
+        pPartList++;
+    }
+}
+
+effBTLSysTrack_t *effBTLSys_Shock_Create(nbFormation_t *pFormation)
+{
+    effBTLSysTrack_t *hEffect;
+    effPCPThunderSpherePolyLowParam_t *pParam;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysTrack_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Shock_ThunderSpherePolyLowParam);
+    effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    pParam = effPCPThunderSpherePolyLowGetParam(hEffect->hTrack);
+    pParam->unknown20 = hEffect->pFormation->unknown54 * hEffect->pFormation->unknown5C * 0.85f;
+    return hEffect;
+}
+
+void effBTLSys_Shock_Delete(effBTLSysTrack_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Shock_Delete2(effBTLSysTrack_t *hEffect)
+{
+    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Shock_SetColor(effBTLSysTrack_t *hEffect, u32 color)
+{
+    effPCPThunderSpherePolyLowSetColor(hEffect->hTrack, color);
+}
+
+void effBTLSys_Shock_Draw(effBTLSysTrack_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    VU0_STORE_VF10_TO(position);
+    effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
+    effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Shock_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Shock_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Freeze_PartList, 0);
+}
+
+void effBTLSys_Shock_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Freeze_PartList, 0);
+}
+
+void effBTLSys_Shock_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Freeze_PartList, 0);
+}
+
+void effBTLSys_Shock_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Freeze_PartList, 0);
+}
+
+effBTLSysPart_t *effBTLSys_Freeze_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Freeze_PartList[0].hPart);
+    dds3EffectPartSetScale(hEffect->hPart, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    return hEffect;
+}
+
+void effBTLSys_Freeze_Delete(effBTLSysPart_t *hEffect)
+{
+    hEffect->pFormation->unit->hModel->stat &= ~2;
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 0, 0x80808080);
+    mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x808080, 0.0f);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Freeze_Delete2(effBTLSysPart_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Freeze_SetColor(effBTLSysPart_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+}
+
+void effBTLSys_Freeze_Draw(effBTLSysPart_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 0, 0x80FFF8BC);
+        mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x80FFC39B, 1.0f);
+        hEffect->pFormation->unit->hModel->stat |= 2;
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartDraw(hEffect->hPart);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Freeze_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Freeze_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Freeze_PartList, 1);
+}
+
+void effBTLSys_Freeze_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Freeze_PartList, 1);
+}
+
+void effBTLSys_Freeze_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Freeze_PartList, 1);
+}
+
+void effBTLSys_Freeze_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Freeze_PartList, 1);
+}
+
+effBTLSysPart_t *effBTLSys_Sleep_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Sleep_PartList[0].hPart);
+    dds3EffectPartSetScale(hEffect->hPart, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    return hEffect;
+}
+
+void effBTLSys_Sleep_Delete(effBTLSysPart_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Sleep_Delete2(effBTLSysPart_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Sleep_SetColor(effBTLSysPart_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+}
+
+void effBTLSys_Sleep_Draw(effBTLSysPart_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFB97D);
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartDraw(hEffect->hPart);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Sleep_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Sleep_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Sleep_PartList, 1);
+}
+
+void effBTLSys_Sleep_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Sleep_PartList, 1);
+}
+
+void effBTLSys_Sleep_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Sleep_PartList, 1);
+}
+
+void effBTLSys_Sleep_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Sleep_PartList, 1);
+}
+
+effBTLSysPart_t *effBTLSys_Panic_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Panic_PartList[0].hPart);
+    dds3EffectPartSetScale(hEffect->hPart, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    return hEffect;
+}
+
+void effBTLSys_Panic_Delete(effBTLSysPart_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Panic_Delete2(effBTLSysPart_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Panic_SetColor(effBTLSysPart_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+}
+
+void effBTLSys_Panic_Draw(effBTLSysPart_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x8058B8FF);
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartDraw(hEffect->hPart);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Panic_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Panic_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Panic_PartList, 1);
+}
+
+void effBTLSys_Panic_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Panic_PartList, 1);
+}
+
+void effBTLSys_Panic_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Panic_PartList, 1);
+}
+
+void effBTLSys_Panic_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Panic_PartList, 1);
+}
+
+effBTLSysTrack_t *effBTLSys_Bind_Create(nbFormation_t *pFormation)
+{
+    effBTLSysTrack_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysTrack_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Bind_ThunderSpherePolyLowParam);
+    effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    return hEffect;
+}
+
+void effBTLSys_Bind_Delete(effBTLSysTrack_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Bind_Delete2(effBTLSysTrack_t *hEffect)
+{
+    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Bind_SetColor(effBTLSysTrack_t *hEffect, u32 color)
+{
+    effPCPThunderSpherePolyLowSetColor(hEffect->hTrack, color);
+}
+
+void effBTLSys_Bind_Draw(effBTLSysTrack_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x8080FFD7);
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    VU0_STORE_VF10_TO(position);
+    effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
+    effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Bind_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Bind_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Bind_PartList, 0);
+}
+
+void effBTLSys_Bind_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Bind_PartList, 0);
+}
+
+void effBTLSys_Bind_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Bind_PartList, 0);
+}
+
+void effBTLSys_Bind_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Bind_PartList, 0);
+}
+
+effBTLSysClose_t *effBTLSys_Close_Create(nbFormation_t *pFormation)
+{
+    effBTLSysClose_t *hEffect;
+    f32 scale;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysClose_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    if (pFormation->unit != NULL) {
+        hEffect->hModel = pFormation->unit->hModel;
+    } else {
+        hEffect->hModel = NULL;
+    }
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Bind_PartList[0].hPart);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Bind_PartList[1].hPart);
+    scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
+    dds3EffectPartSetScale(hEffect->hPart, scale);
+    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    return hEffect;
+}
+
+void effBTLSys_Close_Delete(effBTLSysClose_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Close_Delete2(effBTLSysClose_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    dds3EffectPartDelete(hEffect->hPart2);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Close_SetColor(effBTLSysClose_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hEffect->hPart2, color);
+}
+
+void effBTLSys_Close_Draw(effBTLSysClose_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
+    }
+    effBTLModelGetMarkPosition3(hEffect->hModel, 2);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartSetPosition(hEffect->hPart2, &position);
+    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hEffect->hPart))->pHandle);
+    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hEffect->hPart2))->pHandle);
+    dds3EffectPartDraw(hEffect->hPart);
+    dds3EffectPartDraw(hEffect->hPart2);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Close_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Close_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Bind_PartList, 2);
+}
+
+void effBTLSys_Close_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Bind_PartList, 2);
+}
+
+void effBTLSys_Close_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Bind_PartList, 2);
+}
+
+void effBTLSys_Close_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Bind_PartList, 2);
+}
+
+effBTLSysPoison_t *effBTLSys_Poison_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPoison_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPoison_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    if (pFormation->unit != NULL) {
+        hEffect->hModel = pFormation->unit->hModel;
+    } else {
+        hEffect->hModel = NULL;
+    }
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Poison_PartList[0].hPart);
+    dds3EffectPartSetScale(hEffect->hPart, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    return hEffect;
+}
+
+void effBTLSys_Poison_Delete(effBTLSysPoison_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Poison_Delete2(effBTLSysPoison_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Poison_SetColor(effBTLSysPoison_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+}
+
+void effBTLSys_Poison_Draw(effBTLSysPoison_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80A53A6C);
+    }
+    effBTLModelGetMarkPosition3(hEffect->hModel, 2);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartDraw(hEffect->hPart);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Poison_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Poison_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Poison_PartList, 1);
+}
+
+void effBTLSys_Poison_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Poison_PartList, 1);
+}
+
+void effBTLSys_Poison_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Poison_PartList, 1);
+}
+
+void effBTLSys_Poison_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Poison_PartList, 1);
+}
+
+effBTLSysPart2_t *effBTLSys_Charm_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart2_t *hEffect;
+    f32 scale;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart2_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Charm_PartList[0].hPart);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Charm_PartList[1].hPart);
+    scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
+    dds3EffectPartSetScale(hEffect->hPart, scale);
+    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    return hEffect;
+}
+
+void effBTLSys_Charm_Delete(effBTLSysPart2_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hEffect->hPart);
+    dds3EffectPartDelete(hEffect->hPart2);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Charm_Delete2(effBTLSysPart2_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    dds3EffectPartDelete(hEffect->hPart2);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Charm_SetColor(effBTLSysPart2_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hEffect->hPart2, color);
+}
+
+void effBTLSys_Charm_Draw(effBTLSysPart2_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x808064FF);
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartSetPosition(hEffect->hPart2, &position);
+    dds3EffectPartDraw(hEffect->hPart);
+    dds3EffectPartDraw(hEffect->hPart2);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Charm_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Charm_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Charm_PartList, 2);
+}
+
+void effBTLSys_Charm_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Charm_PartList, 2);
+}
+
+void effBTLSys_Charm_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Charm_PartList, 2);
+}
+
+void effBTLSys_Charm_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Charm_PartList, 2);
+}
+
+effBTLSysTrack_t *effBTLSys_Paralyze_Create(nbFormation_t *pFormation)
+{
+    effBTLSysTrack_t *hEffect;
+    effPCPThunderSpherePolyLowParam_t *pParam;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysTrack_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Paralyze_ThunderSpherePolyLowParam);
+    effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    pParam = effPCPThunderSpherePolyLowGetParam(hEffect->hTrack);
+    pParam->unknown20 = hEffect->pFormation->unknown54 * hEffect->pFormation->unknown5C * 0.85f;
+    return hEffect;
+}
+
+void effBTLSys_Paralyze_Delete(effBTLSysTrack_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Paralyze_Delete2(effBTLSysTrack_t *hEffect)
+{
+    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Paralyze_SetColor(effBTLSysTrack_t *hEffect, u32 color)
+{
+    effPCPThunderSpherePolyLowSetColor(hEffect->hTrack, color);
+}
+
+void effBTLSys_Paralyze_Draw(effBTLSysTrack_t *hEffect)
+{
+    sdfVector4_t position;
+
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80589BFF);
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    VU0_STORE_VF10_TO(position);
+    effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
+    effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
+    hEffect->frame++;
+}
+
+u32 effBTLSys_Paralyze_GetLength(void *hEffect)
+{
+    return 0;
+}
+
+void effBTLSys_Paralyze_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Curse_PartList, 0);
+}
+
+void effBTLSys_Paralyze_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Curse_PartList, 0);
+}
+
+void effBTLSys_Paralyze_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Curse_PartList, 0);
+}
+
+void effBTLSys_Paralyze_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Curse_PartList, 0);
+}
+
+effBTLSysFrame_t *effBTLSys_Fly_Create(nbFormation_t *pFormation)
+{
+    effBTLSysFrame_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysFrame_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    return hEffect;
+}
+
+void effBTLSys_Fly_Delete(effBTLSysFrame_t *hEffect)
+{
+    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Fly_Delete2(effBTLSysFrame_t *hEffect)
+{
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Fly_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_Draw);
+void effBTLSys_Fly_Draw(effBTLSysFrame_t *hEffect)
+{
+    if (hEffect->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
+    }
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_GetLength);
+u32 effBTLSys_Fly_GetLength(void *hEffect)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_DataLoad);
+void effBTLSys_Fly_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_DataFree);
+void effBTLSys_Fly_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_PartHandleCreate);
+void effBTLSys_Fly_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Fly_PartHandleDelete);
+void effBTLSys_Fly_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Create);
+effBTLSysFrame_t *effBTLSys_Stone_Create(nbFormation_t *pFormation)
+{
+    effBTLSysFrame_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysFrame_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Delete2);
+void effBTLSys_Stone_Delete(effBTLSysFrame_t *hEffect)
+{
+    dds3ModelHandle_t *hModel = hEffect->pFormation->unit->hModel;
+
+    hModel->stat &= ~2;
+    mdlSetClutColor(hModel, 0x808080, 0.0f);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Stone_Delete2(effBTLSysFrame_t *hEffect)
+{
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Stone_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Draw);
+void effBTLSys_Stone_Draw(effBTLSysFrame_t *hEffect)
+{
+    if (hEffect->frame == 0) {
+        mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x80FFEBE1, 1.0f);
+        hEffect->pFormation->unit->hModel->stat |= 2;
+    }
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_GetLength);
+u32 effBTLSys_Stone_GetLength(void *hEffect)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_DataLoad);
+void effBTLSys_Stone_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_DataFree);
+void effBTLSys_Stone_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_PartHandleCreate);
+void effBTLSys_Stone_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_PartHandleDelete);
+void effBTLSys_Stone_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Curse_PartList, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_Create);
+effBTLSysPart_t *effBTLSys_Curse_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Curse_PartList[0].hPart);
+    dds3EffectPartSetScale(hEffect->hPart, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_Delete2);
+void effBTLSys_Curse_Delete(effBTLSysPart_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_SetColor);
+void effBTLSys_Curse_Delete2(effBTLSysPart_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_Draw);
+void effBTLSys_Curse_SetColor(effBTLSysPart_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_GetLength);
+void effBTLSys_Curse_Draw(effBTLSysPart_t *hEffect)
+{
+    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->position);
+    dds3EffectPartDraw(hEffect->hPart);
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_DataLoad);
+u32 effBTLSys_Curse_GetLength(void *hEffect)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_DataFree);
+void effBTLSys_Curse_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Curse_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_PartHandleCreate);
+void effBTLSys_Curse_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Curse_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Curse_PartHandleDelete);
+void effBTLSys_Curse_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Curse_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_Create);
+void effBTLSys_Curse_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Curse_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_Delete);
+effBTLSysPart2_t *effBTLSys_CurseCAMP_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart2_t *hEffect;
+    f32 scale;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_Delete2);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart2_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_CurseCAMP_PartList[0].hPart);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_CurseCAMP_PartList[1].hPart);
+    scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
+    dds3EffectPartSetScale(hEffect->hPart, scale);
+    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_SetColor);
+void effBTLSys_CurseCAMP_Delete(effBTLSysPart2_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    dds3EffectPartDelete(hEffect->hPart2);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_Draw);
+void effBTLSys_CurseCAMP_Delete2(effBTLSysPart2_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart);
+    dds3EffectPartDelete(hEffect->hPart2);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_GetLength);
+void effBTLSys_CurseCAMP_SetColor(effBTLSysPart2_t *hEffect, u32 color)
+{
+    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hEffect->hPart2, color);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_DataLoad);
+void effBTLSys_CurseCAMP_Draw(effBTLSysPart2_t *hEffect)
+{
+    sdfVector4_t position;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_DataFree);
+    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->position);
+    position.x = hEffect->pFormation->position.x;
+    position.y = hEffect->pFormation->position.y - 100.0f;
+    position.z = hEffect->pFormation->position.z;
+    dds3EffectPartSetPosition(hEffect->hPart2, &position);
+    dds3EffectPartDraw(hEffect->hPart);
+    dds3EffectPartDraw(hEffect->hPart2);
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_PartHandleCreate);
+u32 effBTLSys_CurseCAMP_GetLength(void *hEffect)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_CurseCAMP_PartHandleDelete);
+void effBTLSys_CurseCAMP_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_CurseCAMP_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_Create);
+void effBTLSys_CurseCAMP_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_CurseCAMP_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_Delete);
+void effBTLSys_CurseCAMP_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_CurseCAMP_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_Delete2);
+void effBTLSys_CurseCAMP_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_CurseCAMP_PartList, 2);
+}
+
+effBTLSysPart3_t *effBTLSys_Stone_Dead_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart3_t *hEffect;
+    f32 scale;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart3_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Stone_Dead_PartList[0].hPart);
+    mdlSingleMotion(dds3EffectPartGetHandle(hEffect->hPart), 0, 0);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Stone_Dead_PartList[1].hPart);
+    hEffect->hPart3 = dds3EffectPartCopy(effBTLSystem_Stone_Dead_PartList[2].hPart);
+    scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
+    dds3EffectPartSetScale(hEffect->hPart, scale);
+    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    dds3EffectPartSetScale(hEffect->hPart3, scale);
+    return hEffect;
+}
+
+void effBTLSys_Stone_Dead_Delete(effBTLSysPart3_t *hEffect)
+{
+    mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x808080, 0.0f);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Stone_Dead_Delete2(effBTLSysPart3_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Stone_Dead_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_Draw);
+void effBTLSys_Stone_Dead_Draw(effBTLSysPart3_t *hEffect)
+{
+    sdfVector4_t position;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_GetLength);
+    if (hEffect->frame == 0) {
+        effBTLModelHide(hEffect->pFormation);
+        mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x80FFEBE1, 1.0f);
+        hEffect->pFormation->unit->hModel->stat |= 2;
+    }
+    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    VU0_STORE_VF10_TO(position);
+    dds3EffectPartSetPosition(hEffect->hPart3, &position);
+    dds3EffectPartSetPosition(hEffect->hPart2, &position);
+    dds3EffectPartSetPosition(hEffect->hPart, &position);
+    dds3EffectPartDraw(hEffect->hPart3);
+    dds3EffectPartDraw(hEffect->hPart2);
+    if (hEffect->frame >= 2) {
+        dds3EffectPartDraw(hEffect->hPart);
+    }
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_DataLoad);
+u32 effBTLSys_Stone_Dead_GetLength(void *hEffect)
+{
+    return 50;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_DataFree);
+void effBTLSys_Stone_Dead_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Stone_Dead_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_PartHandleCreate);
+void effBTLSys_Stone_Dead_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Stone_Dead_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Stone_Dead_PartHandleDelete);
+void effBTLSys_Stone_Dead_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Stone_Dead_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_Create);
+void effBTLSys_Stone_Dead_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Stone_Dead_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_Delete);
+effBTLSysHansya_t *effBTLSys_Hansya_Create(nbFormation_t *pFormation)
+{
+    effBTLSysHansya_t *hEffect;
+    f32 scale;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_Delete2);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysHansya_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Hansya_PartList[0].hPart);
+    mdlLoopMotion(dds3EffectPartGetHandle(hEffect->hPart), 0, 0);
+    if (datSkillTable[effBTLSkillGetID()].unknown02 == 0) {
+        hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Hansya_PartList[1].hPart);
+    } else {
+        hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Hansya_PartList[2].hPart);
+    }
+    scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
+    dds3EffectPartSetScale(hEffect->hPart, scale);
+    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    return hEffect;
+}
+
+void effBTLSys_Hansya_Delete(effBTLSysHansya_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Hansya_Delete2(effBTLSysHansya_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Hansya_SetColor(void) {
 }
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_Draw);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_GetLength);
+u32 effBTLSys_Hansya_GetLength(void *hEffect)
+{
+    return 15;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_DataLoad);
+void effBTLSys_Hansya_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Hansya_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_DataFree);
+void effBTLSys_Hansya_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Hansya_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_PartHandleCreate);
+void effBTLSys_Hansya_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Hansya_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Hansya_PartHandleDelete);
+void effBTLSys_Hansya_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Hansya_PartList, 3);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_Create);
+effBTLSysPart4_t *effBTLSys_Kyusyuu_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart4_t *hEffect;
+    f32 scale;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart4_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Kyusyuu_PartList[0].hPart);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Kyusyuu_PartList[0].hPart);
+    hEffect->hPart3 = dds3EffectPartCopy(effBTLSystem_Kyusyuu_PartList[0].hPart);
+    hEffect->hPart4 = dds3EffectPartCopy(effBTLSystem_Kyusyuu_PartList[1].hPart);
+    scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
+    dds3EffectPartSetScale(hEffect->hPart, scale);
+    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    dds3EffectPartSetScale(hEffect->hPart3, scale);
+    dds3EffectPartSetScale(hEffect->hPart4, scale);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_Delete2);
+void effBTLSys_Kyusyuu_Delete(effBTLSysPart4_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart4);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Kyusyuu_Delete2(effBTLSysPart4_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart4);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Kyusyuu_SetColor(void) {
 }
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_Draw);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_GetLength);
+u32 effBTLSys_Kyusyuu_GetLength(void *hEffect)
+{
+    return 25;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_DataLoad);
+void effBTLSys_Kyusyuu_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Kyusyuu_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_DataFree);
+void effBTLSys_Kyusyuu_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Kyusyuu_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_PartHandleCreate);
+void effBTLSys_Kyusyuu_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Kyusyuu_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Kyusyuu_PartHandleDelete);
+void effBTLSys_Kyusyuu_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Kyusyuu_PartList, 2);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_Create);
+effBTLSysCut_t *effBTLSys_Return_Create(nbFormation_t *pFormation)
+{
+    effBTLSysCut_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysCut_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hCut = effBTLCutCreate(effBTLSystem_Return_PartList[0].hBTLEffect, 3, pFormation, 0);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_Delete2);
+void effBTLSys_Return_Delete(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Return_Delete2(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Return_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_Draw);
+void effBTLSys_Return_Draw(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDraw(hEffect->hCut);
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_GetLength);
+u32 effBTLSys_Return_GetLength(effBTLSysCut_t *hEffect)
+{
+    return effBTLCutGetCutEndFrame(hEffect->hCut);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_DataLoad);
+void effBTLSys_Return_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Return_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_DataFree);
+void effBTLSys_Return_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Return_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_PartHandleCreate);
+void effBTLSys_Return_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Return_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Return_PartHandleDelete);
+void effBTLSys_Return_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Return_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_Create);
+effBTLSysPart6_t *effBTLSys_Attack_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart6_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart6_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Attack_PartList[0].hPart);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[1].hPart);
+    hEffect->hPart3 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[2].hPart);
+    hEffect->hPart4 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[3].hPart);
+    hEffect->hPart5 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[4].hPart);
+    hEffect->hPart6 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[5].hPart);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_Delete2);
+void effBTLSys_Attack_Delete(effBTLSysPart6_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart6);
+    dds3EffectPartDelete(hEffect->hPart5);
+    dds3EffectPartDelete(hEffect->hPart4);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Attack_Delete2(effBTLSysPart6_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart6);
+    dds3EffectPartDelete(hEffect->hPart5);
+    dds3EffectPartDelete(hEffect->hPart4);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_Attack_SetColor(void) {
 }
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_Draw);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_GetLength);
+u32 effBTLSys_Attack_GetLength(void *hEffect)
+{
+    return 20;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_DataLoad);
+void effBTLSys_Attack_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Attack_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_DataFree);
+void effBTLSys_Attack_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Attack_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_PartHandleCreate);
+void effBTLSys_Attack_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Attack_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Attack_PartHandleDelete);
+void effBTLSys_Attack_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Attack_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_Create);
+effBTLSysPart12_t *effBTLSys_AttackC_Create(nbFormation_t *pFormation)
+{
+    effBTLSysPart12_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysPart12_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Attack_PartList[0].hPart);
+    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[1].hPart);
+    hEffect->hPart3 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[2].hPart);
+    hEffect->hPart4 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[3].hPart);
+    hEffect->hPart5 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[4].hPart);
+    hEffect->hPart6 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[5].hPart);
+    hEffect->hPart7 = dds3EffectPartCopy(effBTLSystem_AttackC_PartList[0].hPart);
+    hEffect->hPart8 = dds3EffectPartCopy(effBTLSystem_AttackC_PartList[1].hPart);
+    hEffect->hPart9 = dds3EffectPartCopy(effBTLSystem_AttackC_PartList[2].hPart);
+    hEffect->hPart10 = dds3EffectPartCopy(effBTLSystem_AttackC_PartList[3].hPart);
+    hEffect->hPart11 = dds3EffectPartCopy(effBTLSystem_AttackC_PartList[4].hPart);
+    hEffect->hPart12 = dds3EffectPartCopy(effBTLSystem_AttackC_PartList[5].hPart);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_Delete2);
+void effBTLSys_AttackC_Delete(effBTLSysPart12_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart12);
+    dds3EffectPartDelete(hEffect->hPart11);
+    dds3EffectPartDelete(hEffect->hPart10);
+    dds3EffectPartDelete(hEffect->hPart9);
+    dds3EffectPartDelete(hEffect->hPart8);
+    dds3EffectPartDelete(hEffect->hPart7);
+    dds3EffectPartDelete(hEffect->hPart6);
+    dds3EffectPartDelete(hEffect->hPart5);
+    dds3EffectPartDelete(hEffect->hPart4);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_AttackC_Delete2(effBTLSysPart12_t *hEffect)
+{
+    dds3EffectPartDelete(hEffect->hPart12);
+    dds3EffectPartDelete(hEffect->hPart11);
+    dds3EffectPartDelete(hEffect->hPart10);
+    dds3EffectPartDelete(hEffect->hPart9);
+    dds3EffectPartDelete(hEffect->hPart8);
+    dds3EffectPartDelete(hEffect->hPart7);
+    dds3EffectPartDelete(hEffect->hPart6);
+    dds3EffectPartDelete(hEffect->hPart5);
+    dds3EffectPartDelete(hEffect->hPart4);
+    dds3EffectPartDelete(hEffect->hPart3);
+    dds3EffectPartDelete(hEffect->hPart2);
+    dds3EffectPartDelete(hEffect->hPart);
+    sdfChipFreeDirect(hEffect);
+}
 
 void effBTLSys_AttackC_SetColor(void) {
 }
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_Draw);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_GetLength);
+u32 effBTLSys_AttackC_GetLength(void *hEffect)
+{
+    return 20;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_DataLoad);
+void effBTLSys_AttackC_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_AttackC_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_DataFree);
+void effBTLSys_AttackC_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_AttackC_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_PartHandleCreate);
+void effBTLSys_AttackC_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_AttackC_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_AttackC_PartHandleDelete);
+void effBTLSys_AttackC_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_AttackC_PartList, 6);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_Create);
+effBTLSysCut_t *effBTLSys_Encount_Create(nbFormation_t *pFormation)
+{
+    effBTLSysCut_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysCut_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hCut = effBTLCutCreate(effBTLSystem_Encount_PartList[0].hBTLEffect, 3, pFormation, 0);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_Delete2);
+void effBTLSys_Encount_Delete(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_Draw);
+void effBTLSys_Encount_Delete2(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSys_Encount_Draw(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDraw(hEffect->hCut);
+    hEffect->frame++;
+}
 
 void effBTLSys_Encount_SetColor(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_GetLength);
+u32 effBTLSys_Encount_GetLength(effBTLSysCut_t *hEffect)
+{
+    return effBTLCutGetCutEndFrame(hEffect->hCut);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_DataLoad);
+void effBTLSys_Encount_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Encount_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_DataFree);
+void effBTLSys_Encount_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Encount_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_PartHandleCreate);
+void effBTLSys_Encount_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Encount_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Encount_PartHandleDelete);
+void effBTLSys_Encount_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Encount_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_Create);
+effBTLSysCut_t *effBTLSys_Nego_Kaihuku_Create(nbFormation_t *pFormation)
+{
+    effBTLSysCut_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_Delete);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysCut_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hCut = effBTLCutCreate(effBTLSystem_Nego_Kaihuku_PartList[0].hBTLEffect, 3, pFormation, 0);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_Delete2);
+void effBTLSys_Nego_Kaihuku_Delete(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_Draw);
+void effBTLSys_Nego_Kaihuku_Delete2(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_GetLength);
+void effBTLSys_Nego_Kaihuku_Draw(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDraw(hEffect->hCut);
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_DataLoad);
+u32 effBTLSys_Nego_Kaihuku_GetLength(effBTLSysCut_t *hEffect)
+{
+    return effBTLCutGetCutEndFrame(hEffect->hCut);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_DataFree);
+void effBTLSys_Nego_Kaihuku_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Nego_Kaihuku_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_PartHandleCreate);
+void effBTLSys_Nego_Kaihuku_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Nego_Kaihuku_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kaihuku_PartHandleDelete);
+void effBTLSys_Nego_Kaihuku_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Nego_Kaihuku_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_Create);
+void effBTLSys_Nego_Kaihuku_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Nego_Kaihuku_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_Delete);
+effBTLSysCut_t *effBTLSys_Nego_Kyusyu_Create(nbFormation_t *pFormation)
+{
+    effBTLSysCut_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_Delete2);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysCut_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hCut = effBTLCutCreate(effBTLSystem_Nego_Kyusyu_PartList[0].hBTLEffect, 3, pFormation, 0);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_Draw);
+void effBTLSys_Nego_Kyusyu_Delete(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_GetLength);
+void effBTLSys_Nego_Kyusyu_Delete2(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_DataLoad);
+void effBTLSys_Nego_Kyusyu_Draw(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDraw(hEffect->hCut);
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_DataFree);
+u32 effBTLSys_Nego_Kyusyu_GetLength(effBTLSysCut_t *hEffect)
+{
+    return effBTLCutGetCutEndFrame(hEffect->hCut);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_PartHandleCreate);
+void effBTLSys_Nego_Kyusyu_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Nego_Kyusyu_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Kyusyu_PartHandleDelete);
+void effBTLSys_Nego_Kyusyu_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Nego_Kyusyu_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_Create);
+void effBTLSys_Nego_Kyusyu_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Nego_Kyusyu_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_Delete);
+void effBTLSys_Nego_Kyusyu_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Nego_Kyusyu_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_Delete2);
+effBTLSysCut_t *effBTLSys_Nego_Stone_Create(nbFormation_t *pFormation)
+{
+    effBTLSysCut_t *hEffect;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_Draw);
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSysCut_t));
+    hEffect->pFormation = pFormation;
+    hEffect->frame = 0;
+    hEffect->hCut = effBTLCutCreate(effBTLSystem_Nego_Stone_PartList[0].hBTLEffect, 3, pFormation, 0);
+    return hEffect;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_GetLength);
+void effBTLSys_Nego_Stone_Delete(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_DataLoad);
+void effBTLSys_Nego_Stone_Delete2(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDelete(hEffect->hCut);
+    sdfChipFreeDirect(hEffect);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_DataFree);
+void effBTLSys_Nego_Stone_Draw(effBTLSysCut_t *hEffect)
+{
+    effBTLCutDraw(hEffect->hCut);
+    hEffect->frame++;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_PartHandleCreate);
+u32 effBTLSys_Nego_Stone_GetLength(effBTLSysCut_t *hEffect)
+{
+    return effBTLCutGetCutEndFrame(hEffect->hCut);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSys_Nego_Stone_PartHandleDelete);
+void effBTLSys_Nego_Stone_DataLoad(void)
+{
+    effBTLSystem_Part_DataLoad(effBTLSystem_Nego_Stone_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemCreate);
+void effBTLSys_Nego_Stone_DataFree(void)
+{
+    effBTLSystem_Part_DataFree(effBTLSystem_Nego_Stone_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemDelete);
+void effBTLSys_Nego_Stone_PartHandleCreate(void)
+{
+    effBTLSystem_Part_HandleCreate(effBTLSystem_Nego_Stone_PartList, 1);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemDelete2);
+void effBTLSys_Nego_Stone_PartHandleDelete(void)
+{
+    effBTLSystem_Part_HandleDelete(effBTLSystem_Nego_Stone_PartList, 1);
+}
+
+effBTLSystemHandle_t *effBTLSystemCreate(nbFormation_t *pFormation, s32 family)
+{
+    effBTLSystemHandle_t *hEffect;
+
+    hEffect = sdfChipAllocDirect(sizeof(effBTLSystemHandle_t));
+    hEffect->family = family;
+    hEffect->pFormation = pFormation;
+    if (D_0031BF00[family].create != NULL) {
+        hEffect->hEffect = D_0031BF00[family].create(pFormation);
+    }
+    return hEffect;
+}
+
+void effBTLSystemDelete(effBTLSystemHandle_t *hEffect)
+{
+    if (D_0031BF00[hEffect->family].destroy != NULL) {
+        D_0031BF00[hEffect->family].destroy(hEffect->hEffect);
+    }
+    sdfChipFreeDirect(hEffect);
+}
+
+void effBTLSystemDelete2(effBTLSystemHandle_t *hEffect)
+{
+    if (D_0031BF00[hEffect->family].destroy2 != NULL) {
+        D_0031BF00[hEffect->family].destroy2(hEffect->hEffect);
+    }
+    sdfChipFreeDirect(hEffect);
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemDraw);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemGetLength);
+u32 effBTLSystemGetLength(effBTLSystemHandle_t *hEffect)
+{
+    if (D_0031BF00[hEffect->family].getLength != NULL) {
+        return D_0031BF00[hEffect->family].getLength(hEffect->hEffect);
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemGetID);
+s32 effBTLSystemGetID(effBTLSystemHandle_t *hEffect)
+{
+    return hEffect->family;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemGetRGBA);
+u32 effBTLSystemGetRGBA(s32 family)
+{
+    return D_0031BF00[family].rgba;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemCut1DataFree);
+void effBTLSystemCut1DataFree(void)
+{
+    u32 i;
+
+    for (i = 0; i < 0x19; i++) {
+        if (effBTLSystemCut1Data[i].hMem != NULL) {
+            sdfMemFreeDirect(effBTLSystemCut1Data[i].hMem);
+        }
+        if (effBTLSystemCut1Data[i].hBTLEffect != NULL) {
+            effBTLDelete(effBTLSystemCut1Data[i].hBTLEffect);
+            effBTLSystemCut1Data[i].hBTLEffect = NULL;
+            effBTLSystemCut1Data[i].refCount = 0;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "code_0016F490", D_00533318);
 
@@ -727,28 +2480,114 @@ INCLUDE_RODATA(const s32, "code_0016F490", D_005338D8);
 
 INCLUDE_RODATA(const s32, "code_0016F490", D_005338F8);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemCut1Create);
+void *effBTLSystemCut1Create(nbFormation_t *pFormation, s32 cut)
+{
+    effBTLSystemCut1Data_t *pData;
+    void *hCut;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemCut1Draw);
+loop:
+    pData = &effBTLSystemCut1Data[cut];
+    if (pData->pData == NULL) {
+        cut = 1;
+        goto loop;
+    }
+    if (pData->refCount == 0) {
+        pData->hBTLEffect = effBTLCreate(pData->pData);
+        printf("effBTLSys:effBTLCreate[%d]\n", cut);
+    }
+    pData->refCount++;
+    hCut = effBTLCutCreate(pData->hBTLEffect, 0, pFormation, 0);
+    printf("effBTLSys:effBTLCutCreate\n");
+    effBTLCutSetUserData(hCut, pData);
+    return hCut;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemCut1Delete);
+void effBTLSystemCut1Draw(void *hCut)
+{
+    effBTLCutDraw(hCut);
+}
+
+void effBTLSystemCut1Delete(void *hCut)
+{
+    effBTLSystemCut1Data_t *pData;
+
+    pData = effBTLCutGetUserData(hCut);
+    effBTLCutDelete(hCut);
+    printf("effBTLSys:effBTLCutDelete\n");
+    pData->refCount--;
+    if (pData->refCount == 0) {
+        effBTLDelete(pData->hBTLEffect);
+        pData->hBTLEffect = NULL;
+        printf("effBTLSys:effBTLDelete\n");
+    }
+}
 
 void effBTLSystemCut1PartHandleCreate(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemCut1PartHandleDelete);
+void effBTLSystemCut1PartHandleDelete(void)
+{
+    u32 i;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLEncountStart);
+    for (i = 0; i < 0x19; i++) {
+        if (effBTLSystemCut1Data[i].hBTLEffect != NULL) {
+            effBTLDelete(effBTLSystemCut1Data[i].hBTLEffect);
+            effBTLSystemCut1Data[i].hBTLEffect = NULL;
+            effBTLSystemCut1Data[i].refCount = 0;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLEncountEnd);
+void effBTLEncountStart(void)
+{
+    effBTLSkillStart(0x200, 0);
+}
+
+void effBTLEncountEnd(void)
+{
+    effBTLSkillEnd();
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemInit);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemEnd);
+void effBTLSystemEnd(void)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemPartHandleCreate);
+    effBTLSystemCut1DataFree();
+    for (i = 0; i <= 0x1D; i++) {
+        if (D_0031BF00[i].dataFree != NULL) {
+            D_0031BF00[i].dataFree();
+        }
+    }
+    printf("effBTLSys:DataFree\n");
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSystemPartHandleDelete);
+void effBTLSystemPartHandleCreate(void)
+{
+    s32 i;
+
+    effBTLSystemCut1PartHandleCreate();
+    for (i = 0; i <= 0x1D; i++) {
+        if (D_0031BF00[i].active != 0 && D_0031BF00[i].partHandleCreate != NULL) {
+            D_0031BF00[i].partHandleCreate();
+        }
+    }
+    printf("effBTLSys:PartHandleCreate\n");
+}
+
+void effBTLSystemPartHandleDelete(void)
+{
+    s32 i;
+
+    effBTLSystemCut1PartHandleDelete();
+    for (i = 0; i <= 0x1D; i++) {
+        if (D_0031BF00[i].active != 0 && D_0031BF00[i].partHandleDelete != NULL) {
+            D_0031BF00[i].partHandleDelete();
+        }
+    }
+    printf("effBTLSys:PartHandleDelete\n");
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", effCAMPBadCreate);
 
@@ -771,23 +2610,60 @@ void func_00174870(void) {
 void func_00174878(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSetFieldColor);
+void effBTLSetFieldColor(s32 on)
+{
+    effBTLFieldColorOn = on;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", eff_174888);
+s32 eff_174888(void)
+{
+    return D_0054F0F1;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLFieldColorIsOn);
+s32 effBTLFieldColorIsOn(void)
+{
+    return effBTLFieldColorOn;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", eff_174898);
+s32 eff_174898(void)
+{
+    return D_0054F0F4;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effMakeBedFileName);
+char *effMakeBedFileName(u32 id)
+{
+    if (id < 0x10) {
+        sprintf(effBedNameBuf, "%s00%X.BED", D_0054F100, id);
+    } else if (id < 0x100) {
+        sprintf(effBedNameBuf, "%s0%X.BED", D_0054F100, id);
+    } else {
+        sprintf(effBedNameBuf, "%s%X.BED", D_0054F100, id);
+    }
+    return effBedNameBuf;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSkillSetActive);
+void effBTLSkillSetActive(void)
+{
+    effBTLSkillActive = TRUE;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLSkillClearActive);
+void effBTLSkillClearActive(void)
+{
+    effBTLSkillActive = FALSE;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLCutReset);
+void effBTLCutReset(void)
+{
+    effBTLCutCount = 0;
+    memset(effBTLCutMaxTable, 0, sizeof(effBTLCutMaxTable));
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLCutSetMax);
+void effBTLCutSetMax(u8 cut, u32 max)
+{
+    if (effBTLCutMaxTable[cut] < max) {
+        effBTLCutMaxTable[cut] = max;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLCutDebugPrint);
 
@@ -799,7 +2675,16 @@ INCLUDE_ASM(const s32, "code_0016F490", func_00174C50);
 
 INCLUDE_RODATA(const s32, "code_0016F490", D_00533A40);
 
-INCLUDE_ASM(const s32, "code_0016F490", effMakeBedPath);
+char *effMakeBedPath(char *path)
+{
+    D_00551DA0 = dds3EffectFileListCreate("/efftool/bed/", 8);
+    D_00551DA4 = dds3EffectFileListWindowCreate(D_00551DA0);
+    dds3EffectFileListWindowSetPos(D_00551DA4, 0xF0, 0xD0);
+    dds3EffectFileListWindowSetOt(D_00551DA4, 1);
+    dds3EffectFileListWindowSetPadWait(D_00551DA4, 0x53);
+    dds3EffectFileListWindowSetWindowColor(D_00551DA4, 0x80806020, 0x80000000);
+    return path;
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", eff_174D38);
 
@@ -815,13 +2700,25 @@ INCLUDE_ASM(const s32, "code_0016F490", eff_175070);
 
 INCLUDE_ASM(const s32, "code_0016F490", func_001750D0);
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLDebug_CameraAllEditCheck);
+u32 effBTLDebug_CameraAllEditCheck(void)
+{
+    return effBTLDebugCameraAllEdit;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", effBTLDebug_CameraAllTableCheck);
+u32 effBTLDebug_CameraAllTableCheck(void)
+{
+    return effBTLDebugCameraAllTable;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", eff_175328);
+u32 eff_175328(void)
+{
+    return D_0054F1C3;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", nbSetHelperViewer);
+void nbSetHelperViewer(void *pViewer)
+{
+    nbHelperViewer = pViewer;
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", nb_175338);
 
@@ -885,9 +2782,24 @@ INCLUDE_RODATA(const s32, "code_0016F490", D_00533C10);
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLDebugPrintDistance);
 
-INCLUDE_ASM(const s32, "code_0016F490", eff_175768);
+void eff_175768(void)
+{
+    if (dds3DebugSign != 0) {
+        func_00174858();
+        effBTLSkillActive = FALSE;
+        D_0054F1DF = 0;
+        D_0054F130 = 0;
+        nbHelperViewer = D_0031D000;
+        D_0054F134 = 0;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", eff_1757A8);
+void eff_1757A8(void)
+{
+    if (dds3DebugSign != 0) {
+        func_00174868();
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", eff_1757D8);
 
@@ -898,9 +2810,15 @@ void InitModelCollisionEditorProcess(void)
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartGetHandle);
+dds3ModelHandle_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart)
+{
+    return hEffPart->pHandle;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartGetType);
+u16 dds3EffectPartGetType(effPartHandle_t *hEffPart)
+{
+    return hEffPart->type;
+}
 
 effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData)
 {
@@ -918,7 +2836,10 @@ void dds3EffectPartDelete(effPartHandle_t *hEffPart)
     sdfChipFreeDirect(hEffPart);
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartDraw);
+void dds3EffectPartDraw(effPartHandle_t *hEffPart)
+{
+    dds3EffectFuncTable[hEffPart->type].draw(hEffPart->pHandle);
+}
 
 effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc)
 {
@@ -930,21 +2851,57 @@ effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc)
     return hEffPart;
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetPosition);
+void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPosition)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setPosition != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setPosition(hEffPart->pHandle, pPosition);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetScale);
+void dds3EffectPartSetScale(effPartHandle_t *hEffPart, f32 scale)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setScale != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setScale(hEffPart->pHandle, scale);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetRotateMatrix);
+void dds3EffectPartSetRotateMatrix(effPartHandle_t *hEffPart, void *pMatrix)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setRotateMatrix != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setRotateMatrix(hEffPart->pHandle, pMatrix);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetColor);
+void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 color)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setColor != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setColor(hEffPart->pHandle, color);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetDirection);
+void dds3EffectPartSetDirection(effPartHandle_t *hEffPart, void *pMatrix)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setDirection != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setDirection(hEffPart->pHandle, pMatrix);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetArea);
+void dds3EffectPartSetArea(effPartHandle_t *hEffPart, f32 area)
+{
+    if (dds3EffectFuncTable[hEffPart->type].setArea != NULL) {
+        dds3EffectFuncTable[hEffPart->type].setArea(hEffPart->pHandle, area);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartTMXBillboardCreate);
+void *dds3EffectPartTMXBillboardCreate(u32 data)
+{
+    return dds3BillboardCreate(0, data);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartP2ABillboardCreate);
+void *dds3EffectPartP2ABillboardCreate(u32 data)
+{
+    return dds3BillboardCreate(1, data);
+}
 
 void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
 {
@@ -953,11 +2910,11 @@ void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
 
 void dds3EffectPartModelInit(dds3ModelHandle_t *hModel)
 {
-    VU0_LOAD_VF10_PTR(&D_0031DF60);
+    VU0_LOAD_VF10(&D_0031DF60);
     mdlSetPosition(hModel);
-    VU0_LOAD_VF10_PTR(&D_0031DF70);
+    VU0_LOAD_VF10(&D_0031DF70);
     mdlSetRotate(hModel);
-    VU0_LOAD_VF10_PTR(&D_0031DF80);
+    VU0_LOAD_VF10(&D_0031DF80);
     mdlSetScale(hModel);
     mdlSetColor(hModel, 0x80808080);
     if (hModel->motionCtrlr != NULL) {
@@ -967,11 +2924,26 @@ void dds3EffectPartModelInit(dds3ModelHandle_t *hModel)
     hModel->stat &= ~1;
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelCreate);
+dds3ModelHandle_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
+{
+    dds3ModelHandle_t *hModel;
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelDraw);
+    mdlPackDecode(7, D_0054F1E4, 0x101, pData->data, pData->size);
+    hModel = mdlLoad(7, D_0054F1E4);
+    dds3EffectPartModelInit(hModel);
+    D_0054F1E4++;
+    return hModel;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelDelete);
+void dds3EffectPartModelDraw(dds3ModelHandle_t *hModel)
+{
+    mdlLink(hModel, D_002F69B8);
+}
+
+void dds3EffectPartModelDelete(dds3ModelHandle_t *hModel)
+{
+    mdlFree(hModel);
+}
 
 dds3ModelHandle_t *dds3EffectPartModelCopy(void *hData)
 {
@@ -986,20 +2958,33 @@ dds3ModelHandle_t *dds3EffectPartModelCopy(void *hData)
     return hModel;
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetPosition);
+void dds3EffectPartModelSetPosition(dds3ModelHandle_t *hModel, sdfVector4_t *pPosition)
+{
+    VU0_LOAD_VF10(pPosition);
+    mdlSetPosition(hModel);
+}
 
 void dds3EffectPartModelSetScale(void *hData, f32 scale)
 {
     f32 v[3];
 
     v[0] = v[1] = v[2] = scale;
-    VU0_LOAD_VF10_MEM(v);
+    VU0_LOAD_VF10_FROM(v[0]);
     mdlSetScale(hData);
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetRotateMatrix);
+void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *hModel, sdfMatrix4_t *pMatrix)
+{
+    VU0_LOAD_MATRIX(pMatrix);
+    VU0_STORE_VF28(&hModel->modelRoot->tm.m[0]);
+    VU0_STORE_VF29(&hModel->modelRoot->tm.m[4]);
+    VU0_STORE_VF30(&hModel->modelRoot->tm.m[8]);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetColor);
+void dds3EffectPartModelSetColor(dds3ModelHandle_t *hModel, u32 color)
+{
+    mdlSetColor(hModel, color);
+}
 
 dds3EffectPCP_t *dds3EffectPCPCreate(dds3EffectPCPData_t *hPCPData)
 {
@@ -1084,9 +3069,15 @@ void dds3EffectPCPSetArea(dds3EffectPCP_t *hPCP, f32 area)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetKateg);
+u32 dds3EffectPCPDataGetKateg(dds3EffectPCPData_t *hPCPData)
+{
+    return hPCPData->kateg;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetParam);
+u32 dds3EffectPCPDataGetParam(dds3EffectPCPData_t *hPCPData)
+{
+    return hPCPData->param;
+}
 
 void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number)
 {
@@ -1095,9 +3086,19 @@ void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number)
     return (u8 *)hPCPData + part->offset;
 }
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetSize);
+u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    dds3EffectPCPData_Part_t *part = &hPCPData->pcpData[number];
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetType);
+    return part->size;
+}
+
+u32 dds3EffectPCPDataGetType(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    dds3EffectPCPData_Part_t *part = &hPCPData->pcpData[number];
+
+    return part->type;
+}
 
 effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 number)
 {
