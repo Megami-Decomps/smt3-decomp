@@ -66,20 +66,13 @@ extern s32 dds3EffectGetState(void *effect);
 extern s32 dds3BillboardGetAnimState(void *bill);
 extern void effEveBEDCutSetParams(void *cut, const void *parameters);
 
-/* The primary and secondary VU0 matrix banks are the SDK's implicit operands. */
-#define VU0_IDENTITY_MATRIX() __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\t" \
-    "vmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\t" \
-    "vmr32.xyzw vf29, vf30\n\t.set reorder")
-#define VU0_SAVE_MATRIX_BANK() __asm__ volatile ( \
+#define SDF_VU0_COPYMATRIX_A_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
 #define VU0_TRANSLATION_FROM_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\t" \
     "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
     "vmaddw.xyzw vf31, vf31, vf10w\n\t.set reorder")
-#define VU0_ORIGIN_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
 
 typedef struct
 {
@@ -375,17 +368,17 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
                     ToMatrix();
                     break;
                 default:
-                    VU0_IDENTITY_MATRIX();
+                    SDF_VU0_LOADIDENTITY();
                     break;
                 }
             }
-            VU0_SAVE_MATRIX_BANK();
-            VU0_IDENTITY_MATRIX();
+            SDF_VU0_COPYMATRIX_A_TO_B();
+            SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR(work->linkpos);
             SDF_VU0_VECTOR_W_SET_ONE();
             VU0_TRANSLATION_FROM_VF10();
             MultMatrixRevNoArg();
-            VU0_ORIGIN_VF10();
+            SDF_VU0_LOADIDENTITYVECTOR();
             SDF_VU0_APPLYMATRIX();
             if ((work->stat & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
                 switch (work->linkbasictype) {

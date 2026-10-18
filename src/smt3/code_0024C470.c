@@ -6,8 +6,6 @@
 #define NB_RESTORE_MATRIX() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
     "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")
-#define NB_VIEW_FORWARD() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
 
 extern f32 aViewEye[];
 extern f32 D_002FA240[];
@@ -871,9 +869,9 @@ s32 nbClipEffectNum(s32 screenPosition[4])
     SDF_VU0_NORMALIZE();
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADMATRIX(D_002FA240);
-    VU0_COPY_MATRIX_TO_SECONDARY();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
-    NB_VIEW_FORWARD();
+    VU0_COPY_VF30_TO_VF10();
     SDF_VU0_NORMALIZE();
     SDF_VU0_INNERPRODUCT(forwardDot);
     if (forwardDot <= 0.5f)

@@ -81,7 +81,6 @@ typedef struct {
 } dbgConsCtl_t;
 
 
-
 struct fldLightSet_t {
     u8 fadeArea;
     u8 pad1[3];
@@ -364,7 +363,6 @@ extern u8 sdfTexEmbedded_2FC4A0[];
 extern sdfMat_t *sdfMatNew(void);
 
 
-
 s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset);
 
 sdfGrPacketHeader_t *sdf2DAllocSprite(s32 loopCount);
@@ -434,7 +432,6 @@ u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
 extern void *memset(void *, int, unsigned int);
 
 
-
 void sdfFreeAutoDelayed(void *data);
 
 void sdfLinkStoreImage(
@@ -473,7 +470,6 @@ extern u8 D_0054EC58[];
 f32 sdfSin(f32 angle);
 
 f32 sdfCos(f32 angle);
-
 
 
 f32 sdfAtan2(f32 y, f32 x);
@@ -522,16 +518,7 @@ extern f32 R360_LR(f32 fromAngle, f32 toAngle);
 extern f32 fabsf(f32);
 
 
-
-
-
-
 extern u32 fldRunDanteGunFlag[];
-
-
-
-
-
 
 
 extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
@@ -714,7 +701,6 @@ s32 fldLoadNextFile(s32 area, s32 room);
 extern u32 gFld_ElvTakasa;
 
 extern s32 fldDoorWarpTarget;
-
 
 
 /* fldDoorTable stride, 100 bytes; only the warp effect id is reached here. */
@@ -986,7 +972,7 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
-    VU0_COPY_MATRIX_TO_SECONDARY();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     VU0_LOAD_VF10_FROM(*(const Quad *)vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
@@ -1005,7 +991,7 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 
     SDF_VU0_LOADMATRIX(aProjMatrix);
     MultMatrixRev(&dds3ScreenParam2.TM);
-    VU0_COPY_MATRIX_TO_SECONDARY();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     VU0_LOAD_VF10_FROM(*(const Quad *)vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
@@ -1021,7 +1007,7 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
 void fldPoint3To2_A(void) {
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
-    VU0_COPY_MATRIX_TO_SECONDARY();
+    SDF_VU0_COPYMATRIX_A_TO_B();
 }
 
 void fldPoint3To2_B(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {

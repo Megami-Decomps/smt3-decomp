@@ -392,19 +392,11 @@ extern sdfDelayedResrcChunk_t *sdfDelayedResrcLink;
 /* Find a texture by resource key, walking from the newest node to older ones. */
 
 
-
-
 /* Transfer setup, deferred image metadata, and its linked primitive-reset tail. */
-
-
-
-
 
 
 /* Allocate metadata plus a patchable DMA payload, registering both list views.
  * The drawing arguments remain opaque and are forwarded to the native builder. */
-
-
 
 
 /* Allocate a descriptor packet, delegate its opaque options, and append its range. */
@@ -428,8 +420,6 @@ extern sdfDelayedResrcChunk_t *sdfDelayedResrcLink;
 
 
 /* Return one for an active rotation, a queued chain, or either delayed slot. */
-
-
 
 
 extern struct sdfMemHandle_t *sdfGrPacketBuffHandle;

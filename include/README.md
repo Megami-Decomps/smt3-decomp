@@ -526,7 +526,7 @@ declaring private copies; the state remains the native 0x38 bytes that
 The emitted macros in `ps2asm.h` are canonical across these ports. In
 particular, particle code reuses the vf12 load, vf10/vf12 add, secondary-bank
 load and unclobbered vf10 store. The battle camera reuses
-`VU0_COPY_MATRIX_TO_SECONDARY`. Memory-operand and memory-clobber variants are
+`SDF_VU0_COPYMATRIX_A_TO_B`. Memory-operand and memory-clobber variants are
 intentionally distinct compiler contracts, even when their EE opcode is the
 same; changing those contracts can change surrounding C code generation.
 Upstream's specialized unit-local VU0 sequences retain their exact operand
@@ -1154,7 +1154,7 @@ Measured against this `cc1` and Sony's `ee-as -G8`, not assumed:
   statements next to one decides which `$f` register a float lands in (first
   written takes the lowest free one) and which address computation is emitted
   first. Matching a VU0 routine is mostly getting that order right, not the asm.
-- `VU0_COPY_MATRIX_TO_SECONDARY` preserves `vf28`–`vf31` in `vf24`–`vf27`.
+- `SDF_VU0_COPYMATRIX_A_TO_B` preserves `vf28`–`vf31` in `vf24`–`vf27`.
   `fldPoint3To2` and `fldPoint3To2H` use this after `MultMatrixRev`, before
   projecting their input point. The four `vmove.xyzw` operations are visible at
   `0x00128DAC` and `0x00128E84` in SLUS_209.11.

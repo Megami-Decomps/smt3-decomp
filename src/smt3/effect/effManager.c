@@ -2,6 +2,7 @@
 #include "kernel.h"
 #include "libsdf.h"
 
+#include "ps2asm.h"
 extern void dds3ParticleManagerExit(void);
 extern void dds3PolygonManagerExit(void);
 extern void dds3BillboardManagerExit(void);
@@ -56,20 +57,6 @@ typedef struct effLegacyInstance_t
     sdfMatrix4_t matrixB0;
 } effLegacyInstance_t;
 
-/* sceVu0UnitMatrix as libvu0 expands it: the shuffle leaves the identity rows
- * in $2..$5 and stores them. gcc 2.96 never emits qmfc2/pextuw/sq itself. */
-#define EFF_UNIT_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "qmfc2.ni $5, $vf0\n\t" \
-    "pextuw $4, $0, $5\n\t" \
-    "pextuw $2, $0, $4\n\t" \
-    "pextuw $3, $4, $0\n\t" \
-    "sq $2, 0(%0)\n\t" \
-    "sq $3, 0x10(%0)\n\t" \
-    "sq $4, 0x20(%0)\n\t" \
-    "sq $5, 0x30(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 
 extern void *sdfChipAllocDirect(u32 size);
 extern void sdfChipFreeDirect(void *ptr);
@@ -193,11 +180,11 @@ effNode_t *dds3EffectLoad(effResourceHeader_t *header)
         case 0:
         case 1:
             instance = (effLegacyInstance_t *)node->instance;
-            EFF_UNIT_MATRIX(&instance->matrixB0);
+            SDF_VU0_STOREIDENTITY(&instance->matrixB0);
             break;
         case 2:
             instance = (effLegacyInstance_t *)node->instance;
-            EFF_UNIT_MATRIX(&instance->matrix20);
+            SDF_VU0_STOREIDENTITY(&instance->matrix20);
             break;
         }
         printf("effManager:set Identity matrix\n");

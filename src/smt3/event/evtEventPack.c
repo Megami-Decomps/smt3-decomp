@@ -3,7 +3,6 @@
 #include "kernel.h"
 
 
-
 dds3ProcessID_t *dds3SearchProcessName(const char *name);
 
 dds3ProcessID_t *evtSearchEventPack(u32 taskId);
@@ -182,9 +181,6 @@ struct FileRequest *fileLoad(const char *requestName);
 extern char D_0054FAC0[];
 
 extern char D_0056D148[];
-
-
-
 
 
 dds3ProcessID_t *evtSearchEventPack(u32 taskId) {

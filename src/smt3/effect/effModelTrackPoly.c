@@ -377,9 +377,9 @@ void dds3HermitianTrackPolySetVertex(Dds3HermitianTrackPoly_t *data, const u128 
             do {
                 sampleWeight += sampleWeightStep;
                 Eff_HermitianSpline(firstHistory, sampleWeight);
-                VU0_STORE_VF10_UNCLOBBERED(firstSampleOutput);
+                VU0_STORE_VF10_NOMEM(firstSampleOutput);
                 Eff_HermitianSpline(secondHistory, sampleWeight);
-                VU0_STORE_VF10_UNCLOBBERED(secondSampleOutput);
+                VU0_STORE_VF10_NOMEM(secondSampleOutput);
                 firstSampleOutput = firstSampleOutputBase;
                 sampleIndex--;
                 dds3HermitianTrackPolySetVertexSub(data, firstSampleOutput);
@@ -409,9 +409,9 @@ void dds3HermitianTrackPolySetVertex(Dds3HermitianTrackPoly_t *data, const u128 
             do {
                 sampleWeight += sampleWeightStep;
                 Eff_HermitianSpline(firstHistory, sampleWeight);
-                VU0_STORE_VF10_UNCLOBBERED(firstSampleOutput);
+                VU0_STORE_VF10_NOMEM(firstSampleOutput);
                 Eff_HermitianSpline(secondHistory, sampleWeight);
-                VU0_STORE_VF10_UNCLOBBERED(secondSampleOutput);
+                VU0_STORE_VF10_NOMEM(secondSampleOutput);
                 firstSampleOutput = firstSampleOutputBase;
                 dds3HermitianTrackPolySetVertexSub(data, firstSampleOutput);
                 sampleIndex++;

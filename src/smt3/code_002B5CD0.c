@@ -62,14 +62,6 @@ typedef int s128 __attribute__((mode(TI)));
 /* Write three axis components and twice acos(W), using the native small
  * denominator fallback when sqrt(1-W*W) is near zero. */
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
-#define EE_MMI_STORE_VEC3_VALUE(dst, value) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "pcpyud $2, %1, $0\n\t" \
-    "sdr %1, 0(%0)\n\t" \
-    "sdl %1, 7(%0)\n\t" \
-    "sw $2, 8(%0)\n\t" \
-    ".set reorder" \
-    : : "r"(dst), "r"(value) : "$2", "memory")
 #define SDF_VU0_STOREMATRIX_B(dst) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "sqc2 vf24, 0(%0)\n\t" \
@@ -3108,7 +3100,7 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
     vector = request->positions;
     i = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+        MMI_STORE_VEC3_VALUE(cursor, *vector);
         cursor += 3;
         vector++;
         i++;
@@ -3119,7 +3111,7 @@ u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
         *cursor++ = countCode | stripWords | 0x6800C000;
         i = 0;
         do {
-            EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+            MMI_STORE_VEC3_VALUE(cursor, *vector);
             cursor += 3;
             vector++;
             i++;
@@ -3241,7 +3233,7 @@ u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const 
     cursor = packet + 10;
     vertexIndex = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
+        MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
         cursor += 3;
         vertexIndex++;
     } while (vertexIndex != vertexCount);
@@ -3345,7 +3337,7 @@ u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttribu
     cursor = packet + 10;
     i = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        MMI_STORE_VEC3_VALUE(cursor, positions[i]);
         cursor += 3;
         i++;
     } while (i != count);
@@ -3449,7 +3441,7 @@ u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
     cursor = packet + 10;
     i = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        MMI_STORE_VEC3_VALUE(cursor, positions[i]);
         cursor += 3;
         i++;
     } while (i != count);
@@ -3545,7 +3537,7 @@ u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAt
     cursor = packet + 10;
     vertexIndex = 0;
     do {
-        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
+        MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
         cursor += 3;
         vertexIndex++;
     } while (vertexIndex != vertexCount);

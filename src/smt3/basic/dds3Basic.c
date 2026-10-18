@@ -10,10 +10,6 @@ extern f32 fabsf(f32 value);
 
 void dds3BackupPoseSet(dds3PoseSet_t *pose);
 
-/* The SDK's zero vector has w = 1, suitable for positions and quaternions. */
-#define VU0_STORE_ORIGIN(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
 #define VU0_LOAD_VF11_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
@@ -60,7 +56,7 @@ s32 dds3InitPoseSet(dds3Basic_t *basic)
     }
     pose->flag = POSESET_FLAG_UPDATEPOSE;
     dds3BackupPoseSet(pose);
-    VU0_STORE_ORIGIN(&pose->plane);
+    VU0_STORE_VF0(&pose->plane);
     basic->poseset = pose;
     pose->frameFall = 0;
     pose->r = 0.0f;
@@ -97,9 +93,9 @@ void dds3BackupPoseSet(dds3PoseSet_t *pose)
     sdfVector4_t *rotation;
     sdfVector4_t *scale;
 
-    VU0_STORE_ORIGIN(position);
+    VU0_STORE_VF0(position);
     rotation = &pose->rot;
-    VU0_STORE_ORIGIN(rotation);
+    VU0_STORE_VF0(rotation);
     VU0_UNIT_SCALE();
     scale = &pose->scl;
     SDF_VU0_STOREVECTOR(scale);

@@ -39,7 +39,6 @@ typedef struct fldSkyBuffer_t fldSkyBuffer_t;
 extern u32 fldLoadNextStatus[];
 
 
-
 /* Kind 3 allocates 0x10 bytes in dds3AllocateClearedObjectWork. */
 struct fldMoverWork_t {
     dds3Basic_t *target; /* 0x00: object whose transform is updated. */

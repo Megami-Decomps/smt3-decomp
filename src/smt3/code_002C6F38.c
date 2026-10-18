@@ -212,8 +212,6 @@ enum {
 /* Read the entry count word, size the list for it and arm the skip handler. */
 
 
-
-
 enum {
     SDF_DECODE_READ_COMMAND = 1,
     SDF_DECODE_READ_COUNT_LOW = 2,
@@ -243,8 +241,6 @@ enum {
 extern const u8 *D_00594780[16];
 /* Incrementally decode the PAC byte stream, preserving partial commands when
  * the caller's input chunk ends. */
-
-
 
 
 extern f32 sdfDrawFaceListParam[][4];

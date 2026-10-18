@@ -269,9 +269,6 @@ extern void dds3FlashPolyListSetBlend(void *pool, s32 blend);
 extern effCrackWork_t *effPCPCrackCreate(effCrackParam_t *param, void *effectParam);
 extern effCrackWork_t *effPCPCrackCopy(effCrackWork_t *src);
 
-/* vf10 = vf0, the hardwired (0,0,0,1). */
-#define VU0_COPY_VF0_TO_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
 
 extern void *effPCPBossTexHandle;
 extern s32 D_0054F1F4;
@@ -499,7 +496,7 @@ void effPCPCrackInit(effCrackWork_t *work)
                 colors->color[2] = 0;
                 colors->color[3] = 0;
                 colors->color[4] = 0;
-                VU0_COPY_VF0_TO_VF10();
+                SDF_VU0_LOADIDENTITYVECTOR();
                 SDF_VU0_STOREVECTOR(vertices);
                 SDF_VU0_STOREVECTOR(vertices + 4);
                 SDF_VU0_STOREVECTOR(vertices + 8);

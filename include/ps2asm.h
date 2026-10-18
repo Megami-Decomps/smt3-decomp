@@ -69,7 +69,7 @@ typedef struct {
     : : "r" (dst) : "memory")
 
 /* Preserve the current transform in the secondary matrix bank. */
-#define VU0_COPY_MATRIX_TO_SECONDARY() __asm__ volatile ( \
+#define SDF_VU0_COPYMATRIX_A_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
 
@@ -174,7 +174,7 @@ typedef struct {
     "vsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\t" \
     "vmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
     : : "f" (t))
-#define VU0_LERP_VF10_VF11_BITS(r) __asm__ volatile ( \
+#define SDF_VU0_INTERPOLATE(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\t" \
     "vsubx.w vf3, vf0, vf2x\n\tvmulax.xyzw ACC, vf11, vf2x\n\t" \
     "vmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
@@ -312,12 +312,12 @@ typedef struct {
 
 /* SDK input-address-only store: audited VU pipelines only. Unlike the
  * normal store it does not invalidate values cached from unrelated memory. */
-#define VU0_STORE_VF10_UNCLOBBERED(dst) __asm__ volatile ( \
+#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
     : : "r" (dst))
 
 /* Cell gradient vector operations. */
-#define VU0_LOAD_VF11_MEMORY(src) __asm__ volatile ( \
+#define VU0_LOAD_VF11_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
 
@@ -378,7 +378,7 @@ typedef struct {
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
     : : "r" (dst))
 
-#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
+#define VU0_STORE_MATRIX_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
     "sqc2 vf31, 48(%0)\n\t.set reorder" \
     : : "r" (dst))

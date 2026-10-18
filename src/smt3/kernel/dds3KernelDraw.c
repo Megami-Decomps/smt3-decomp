@@ -57,7 +57,7 @@ typedef struct
 #define SDF_VU0_SWAPVECTOR_A_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf11\n\t" \
     "vmove.xyzw vf11, vf2\n\t.set reorder")
-#define VU0_COPY_MATRIX_TO_B() __asm__ volatile ( \
+#define SDF_VU0_COPYMATRIX_A_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
 #define MMI_RGBA_PACK_255(out) __asm__ volatile ( \
@@ -1408,7 +1408,7 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction)
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
-            VU0_STORE_VF10_UNCLOBBERED(D_00557240[lightIndex]);
+            VU0_STORE_VF10_NOMEM(D_00557240[lightIndex]);
             dds3RotationArc();
             SDF_VU0_STOREVECTOR(D_00557270[lightIndex]);
         }
@@ -1811,7 +1811,7 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z)
     point[3] = 1.0f;
     SDF_VU0_LOADMATRIX(&D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
-    VU0_COPY_MATRIX_TO_B();
+    SDF_VU0_COPYMATRIX_A_TO_B();
     SDF_VU0_LOADVECTOR(point);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();

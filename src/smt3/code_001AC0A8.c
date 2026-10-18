@@ -363,7 +363,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
         SetRotateMatrixX(1.5707963f);
         VU0_LOAD_MATRIX_B_F32(matrix);
         MultMatrixNoArg();
-        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+        VU0_STORE_MATRIX_NOMEM(matrix);
     }
     surface = &sdfGrOtTable[44];
     ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);

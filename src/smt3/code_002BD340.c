@@ -11,7 +11,6 @@ typedef struct
 } sdfCdImageEntry_t;
 
 
-
 struct movieStream_t;
 struct SoundFormat;
 struct sdfGsMemSlice_t;
@@ -101,7 +100,6 @@ s32 sdfFileCmdClose(void *aHandle);
 s32 sdfFileCmdFree(sdfFileCmd_t *aCmd);
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 void sdfChipFreeDirect(void *aPtr);
-
 
 
 typedef struct
