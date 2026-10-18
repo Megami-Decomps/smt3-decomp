@@ -52,6 +52,6 @@ must stay byte-identical afterwards: see `docs/tu-recovery.md`.
 
 ## Remote
 
-`origin` is <https://github.com/tge-was-taken/smt3-decomp>, public. Push `main` there;
+`origin` is <https://github.com/Megami-Decomps/smt3-decomp>, public. Push `main` there;
 nothing from the retail game is tracked, so check that before adding anything under
 `orig/` or a new build directory.
