@@ -1,4 +1,172 @@
 #include "common.h"
+#include "libsdf.h"
+
+typedef struct
+{
+    u32 lsn;
+    u32 unk4;
+    s32 size;
+} sdfCdImageEntry_t;
+
+typedef struct
+{
+    u8 unk00[0x16];
+    s8 stat;
+    u8 unk17[0x11];
+    s32 fd;
+    s32 error;
+} sdfFileCmd_t;
+
+
+struct MovObj;
+struct SoundFormat;
+struct SdfTexResource;
+struct SdfStreamInputDmaTag;
+
+typedef struct IpuDmaState
+{
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
+} IpuDmaState;
+
+typedef struct SdfStreamFrameNode
+{
+    struct SdfStreamFrameNode *streamPrev;
+    struct SdfStreamFrameNode *streamNext;
+    struct SdfStreamFrameNode *next;
+    u8 active;
+    u8 queued;
+    u8 ipuCycleInitialized;
+    u8 drained;
+    u8 playbackPhase;
+    u8 inputFeedEnabled;
+    u8 inputDmaStartPending;
+    u8 pendingPlaybackSubmissions;
+    u8 audioMode;
+    u8 loopMode;
+    u8 playbackCadenceStep;
+    u8 playbackCadenceRemainder;
+    u8 bufferIndex;
+    u8 transferPacketIndex;
+    u8 completedBufferCount;
+    u8 pad1B;
+    s32 bufferSize;
+    void *frameBuffers[2];
+    void *transferPacketBuffers[2];
+    u32 transferPacketBytes;
+    s32 resourceWord;
+    struct SdfTexResource *textureHead;
+    u16 width;
+    u16 height;
+    u32 cycleLength;
+    u32 tickCount;
+    s32 playbackFrameIndex;
+    struct SdfStreamInputDmaTag *inputDmaChain;
+    u8 headerReady;
+    u8 done;
+    u8 filledSlots;
+    u8 firstSlot;
+    u8 *scratchBuffer;
+    u8 pad58[4];
+    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+    struct MovObj *readContext;
+    u8 inputFeedDmaInFlight;
+    u8 unk65;
+    u8 pad66[2];
+    IpuDmaState dma;
+} SdfStreamFrameNode;
+
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+
+void sdfIpuStrmDecodeInit(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext);
+void sdfIpuSetDecodeParams(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext);
+void sdfIpuAttachTask(SdfStreamFrameNode *aNode);
+
+u32 dds3GetRandA(void *aState);
+s32 strlen(const char *aStr);
+s32 sdfSndCmdTrans(void);
+s32 SleepThread(void);
+s32 sdfCreateSema(s32 aInit, s32 aMax, s32 aAttr);
+s32 sceCdInit(s32 aMode);
+s32 sceCdMmode(s32 aMode);
+s32 sceCdStStop(void);
+
+extern s8 sdfSndBurstReqMode;
+extern sdfCdImageEntry_t *sdfCdImageCurrFile;
+extern s32 sdfCdImageFd;
+extern s32 sdfCdTrayMode;
+
+s32 sdfFileCmdClose(void *aHandle);
+s32 sdfFileCmdFree(sdfFileCmd_t *aCmd);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+void sdfChipFreeDirect(void *aPtr);
+
+
+
+typedef struct
+{
+    u32 unk0;
+    u8 unk4;
+    u8 unk5;
+    u16 unk6;
+} p2sdLoadEntry_t;
+
+extern p2sdLoadEntry_t LastLoad[];
+extern u32 sdfFileLengthWork;
+extern u32 sdfFileSeekWork;
+
+s32 sdfSndSendCmd(s32 aCmd, s32 aArg1, void *aData, s32 aSize);
+sdfCdImageEntry_t *sdfCdImageSearchFile(const char *aFileName, s32 *aOutLsn, s32 *aOutSize);
+s32 sdfFileCmdFileSize(void *aHandle);
+s32 sdfFileCmdSeek(void *aHandle, s32 aOffset, s32 aOrigin);
+
+extern s32 WaitSema(s32 aSemaId);
+extern s32 SignalSema(s32 aSemaId);
+extern s32 iSignalSema(s32 aSemaId);
+extern s32 sdfFileSemaId;
+extern u8 sdfFileDefaultSrcType;
+extern u8 sdfFileCmdDefaultDevice;
+extern u8 sdfFileCmdThreadPrioCheckCounter;
+extern u32 p2sdPcmCallback;
+extern u32 sdfSndMap[];
+#define SDF_PI_2 1.5707963f
+
+
+f32 sdfSin(f32 aRad);
+void sdfFileCmdThreadSetPrio(s32 aPrio);
+s32 sdfFileCmdRead(void *aHandle, void *aBuffer, s32 aSize);
+void *sdfDevLoadFile(const char *aFileName, u32 *aOutData, u32 *aOutSize, s32 aAlign);
+
+extern char sdfFileHostRootPath[];
+extern void *sdfCdImageDirData;
+extern u32 p2sdPcmState;
+extern u32 p2sdPcmBusy;
+extern u8 D_00593890[];
+
+typedef struct
+{
+    u8 unk00[0x10];
+    s32 resolveOffset;
+    s32 resolveCount;
+    u8 unk18[8];
+} sdfBinaryHeader_t;
+
+extern SdfStreamFrameNode *sdfIpuTaskLink;
+extern const char D_00549640[];
+
+void FatalError(const char *aMessage) __attribute__((noreturn));
+void sdfAddressResolver(void *aBase, void *aTarget, void *aTable, s32 aCount);
+s32 sdfFileCmdUnlink(void *aCmd);
+s32 sdfFileCmdDequeue(void *aCmd);
+s32 sceClose(s32 aFd);
+char *strcat(char *aDest, const char *aSrc);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfPrintRpcFunc);
 
@@ -12,7 +180,10 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfPuts);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfPrintf);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageGetDirData);
+void *sdfCdImageGetDirData(void)
+{
+    return sdfCdImageDirData;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfCdWaitTrayClose);
 
@@ -28,19 +199,54 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageLoadStart);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageRead);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageClose);
+void sdfCdImageClose(void)
+{
+    if (sdfCdImageCurrFile != 0) {
+        WaitSema(sdfCdImageFd);
+        sceCdStStop();
+        SignalSema(sdfCdImageFd);
+        sdfCdImageCurrFile = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageCheckExist);
+s32 sdfCdImageCheckExist(const char *aFileName)
+{
+    s32 lsn;
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageGetFileSize);
+    return sdfCdImageSearchFile(aFileName, &lsn, NULL) != 0;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageGetCurrFileSize);
+s32 sdfCdImageGetFileSize(const char *aFileName)
+{
+    s32 lsn;
+    sdfCdImageEntry_t *entry = sdfCdImageSearchFile(aFileName, &lsn, NULL);
+
+    if (entry == NULL) {
+        return -1;
+    }
+    return entry->size;
+}
+
+s32 sdfCdImageGetCurrFileSize(void)
+{
+    sdfCdImageEntry_t *file = sdfCdImageCurrFile;
+
+    if (file == NULL) {
+        FatalError(D_00549640);
+    }
+    return file->size;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageLoadDir);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfCdImageInit);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCdInit);
+s32 sdfCdInit(void)
+{
+    sdfCdImageFd = sdfCreateSema(1, 0xFF, 0);
+    sceCdInit(0);
+    return sceCdMmode(sdfCdTrayMode);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileSetCdFilename);
 
@@ -48,33 +254,86 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfFileSetHostFilename);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileSetHddFilename);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileChkCdFile);
+s32 sdfFileChkCdFile(char *aFileName)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileChkHostFile);
+s32 sdfFileChkHostFile(char *aFileName)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileChkHddFile);
+s32 sdfFileChkHddFile(char *aFileName)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileMakeFilename);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileCallback);
+s32 sdfFileCallback(void *aCmd, s32 aOp, s32 aArg, s32 aResult)
+{
+    switch (aOp) {
+    case 4:
+        sdfFileLengthWork = aResult;
+        break;
+    case 3:
+        sdfFileSeekWork = aResult;
+        break;
+    }
+    return SignalSema(sdfFileSemaId);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileOpen);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCheckExist);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileClose);
+void sdfFileClose(void *aHandle)
+{
+    sdfFileCmdClose(aHandle);
+    WaitSema(sdfFileSemaId);
+    sdfFileCmdFree(aHandle);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileRead);
+s32 sdfFileRead(void *aHandle, void *aBuffer, s32 aSize)
+{
+    sdfFileCmdRead(aHandle, aBuffer, aSize);
+    return WaitSema(sdfFileSemaId);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileLength);
+u32 sdfFileLength(void *aHandle)
+{
+    sdfFileCmdFileSize(aHandle);
+    WaitSema(sdfFileSemaId);
+    return sdfFileLengthWork;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileSeek);
+u32 sdfFileSeek(void *aHandle, s32 aOffset, s32 aOrigin)
+{
+    sdfFileCmdSeek(aHandle, aOffset, aOrigin);
+    WaitSema(sdfFileSemaId);
+    return sdfFileSeekWork;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileSetHostRoot);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileGetHostRoot);
+char *sdfFileGetHostRoot(void)
+{
+    return sdfFileHostRootPath;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileSetDefaultSrc);
+static void sdfFileCmdSetDefaultDevice(s32 aDevice);
+
+void sdfFileSetDefaultSrc(s32 aSrcType)
+{
+    sdfFileDefaultSrcType = aSrcType;
+    sdfFileCmdSetDefaultDevice(aSrcType);
+}
+
+static void sdfFileCmdSetDefaultDevice(s32 aDevice)
+{
+    sdfFileCmdDefaultDevice = aDevice;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdAllocHandle);
 
@@ -82,9 +341,20 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdUnlink);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdDequeue);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdReleaseHandle);
+s32 sdfFileCmdReleaseHandle(sdfFileCmd_t *aCmd)
+{
+    s32 fd = aCmd->fd;
+
+    aCmd->fd = -1;
+    if (fd >= 0) {
+        sceClose(fd);
+    }
+    return sdfFileCmdDequeue(aCmd);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdFinish);
+
+INCLUDE_RODATA(const s32, "code_002BD340", D_00549640);
 
 INCLUDE_RODATA(const s32, "code_002BD340", D_00549658);
 
@@ -110,7 +380,15 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdRead);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdWrite);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdClearError);
+s32 sdfFileCmdClearError(sdfFileCmd_t *aCmd)
+{
+    if (aCmd->stat != 9) {
+        return -1;
+    }
+    aCmd->error = 0;
+    aCmd->stat = 7;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdClose);
 
@@ -122,17 +400,35 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdWriteFile);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdThreadSetPrio);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdThreadSetLoPrio);
+void sdfFileCmdThreadSetLoPrio(void)
+{
+    sdfFileCmdThreadPrioCheckCounter = 3;
+    sdfFileCmdThreadSetPrio(0x78);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdThreadSetHiPrio);
+void sdfFileCmdThreadSetHiPrio(void)
+{
+    sdfFileCmdThreadSetPrio(0x48);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdThreadCheckPrio);
+void sdfFileCmdThreadCheckPrio(void)
+{
+    if (sdfFileCmdThreadPrioCheckCounter != 0) {
+        sdfFileCmdThreadPrioCheckCounter--;
+        if (sdfFileCmdThreadPrioCheckCounter == 0) {
+            sdfFileCmdThreadSetHiPrio();
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfFileCmdStartThread);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfHddPowerOffTh);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfHddPowerOffHandler);
+void sdfHddPowerOffHandler(s32 aSemaId)
+{
+    iSignalSema(aSemaId);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfHddInit);
 
@@ -144,23 +440,48 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfZeroMemQuad);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfStrdupChip);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfBcdToDecimal);
+s32 sdfBcdToDecimal(s32 aBcd)
+{
+    s32 result = 0;
+    s32 scale = 1;
+
+    while (aBcd > 0) {
+        result += (aBcd & 0xF) * scale;
+        aBcd >>= 4;
+        scale *= 10;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdf_2BFE08);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfItemArrayNew);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfItemArrayFree);
+void sdfItemArrayFree(sdfItemArray_t *aArray)
+{
+    sdfMemFreeDirect(aArray->memHandle);
+    sdfChipFreeDirect(aArray);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfItemArrayGrow);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfSin);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfCos);
+f32 sdfCos(f32 aRad)
+{
+    return sdfSin(aRad + SDF_PI_2);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfTableInterpolation);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfAtan);
+f32 sdfAtan(f32 aX)
+{
+    f32 x2 = aX * aX;
+    f32 x3 = x2 * aX;
+    f32 x5 = x2 * x3;
+
+    return aX * 0.9999998f + x3 * -0.33325735f + x5 * 0.19388643f;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfAtan2);
 
@@ -202,7 +523,10 @@ INCLUDE_ASM(const s32, "code_002BD340", dds3GetRandA);
 
 INCLUDE_ASM(const s32, "code_002BD340", dds3GetRandFloatA);
 
-INCLUDE_ASM(const s32, "code_002BD340", dds3GetRandIntA);
+u32 dds3GetRandIntA(void *aState, u32 aRange)
+{
+    return dds3GetRandA(aState) % aRange;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfRandomize);
 
@@ -214,16 +538,33 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfSndIopAlloc);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfSndCmdTrans);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfSndCmdIFThread);
+void sdfSndCmdIFThread(void)
+{
+    for (;;) {
+        SleepThread();
+        if (sdfSndBurstReqMode == 0) {
+            while (sdfSndCmdTrans() == 0) {
+                ;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfSndInitCmdIF);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfSndSendCmd);
 
-void sdfSndSyncCmd(void) {
+void sdfSndSyncCmd(s32 aHandle)
+{
 }
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfSndSendSyncCmd);
+s32 sdfSndSendSyncCmd(s32 aCmd, s32 aArg1, void *aData, s32 aSize)
+{
+    s32 handle = sdfSndSendCmd(aCmd, aArg1, aData, aSize);
+
+    sdfSndSyncCmd(handle);
+    return handle;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfSndTransToIOP);
 
@@ -237,19 +578,41 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfSndInit);
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdPlayBGM);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdSendStopCmd);
+s32 p2sdSendStopCmd(s32 aId)
+{
+    s32 arg = aId;
+
+    return sdfSndSendCmd(0x30, 0, &arg, 0x10);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdResumeBgm);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdStopSe);
+s32 p2sdStopSe(s32 aId)
+{
+    s32 arg = aId;
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdStopAllBgm);
+    return sdfSndSendCmd(0x30, 0, &arg, 0x10);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1788);
+s32 p2sdStopAllBgm(void)
+{
+    return sdfSndSendCmd(0x1A0, 0, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdStopAllSe);
+s32 p2sd_2C1788(void)
+{
+    return sdfSndSendCmd(0x210, 0, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C17D8);
+s32 p2sdStopAllSe(void)
+{
+    return sdfSndSendCmd(0x40, 0, 0, 0);
+}
+
+s32 p2sd_2C17D8(s32 aSeId)
+{
+    return sdfSndSendCmd(aSeId | 0x50, 0, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfSndLoadHDFile);
 
@@ -271,11 +634,17 @@ INCLUDE_ASM(const s32, "code_002BD340", p2sdLoadCheckMidi);
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdLoadSMGFile);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1D78);
+u64 p2sd_2C1D78(const char *aName)
+{
+    return sdfSndSendSyncCmd(0xA0, 0, (void *)aName, strlen(aName));
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdSetPcmBuffer);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1E10);
+u64 p2sd_2C1E10(s32 aCh)
+{
+    return sdfSndSendSyncCmd((aCh & 0xF) | 0x1C0, 0, NULL, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1E40);
 
@@ -283,49 +652,130 @@ INCLUDE_ASM(const s32, "code_002BD340", func_002C1E70);
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1EA0);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1EF8);
+u8 p2sd_2C1EF8(s32 aIndex)
+{
+    return LastLoad[aIndex].unk4;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1F10);
+u8 p2sd_2C1F10(s32 aIndex)
+{
+    return LastLoad[aIndex].unk5;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1F28);
+s32 p2sd_2C1F28(s32 aIndex)
+{
+    s32 remaining = LastLoad[aIndex].unk4 - LastLoad[aIndex].unk5;
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1F50);
+    if (remaining > 0) {
+        return remaining;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1F60);
+u8 *p2sd_2C1F50(void)
+{
+    return D_00593890;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1F70);
+p2sdLoadEntry_t *p2sd_2C1F60(void)
+{
+    return LastLoad;
+}
+
+u32 p2sd_2C1F70(u32 *aOutValue)
+{
+    if (aOutValue != NULL) {
+        *aOutValue = sdfSndMap[0x77];
+    }
+    return sdfSndMap[0x76];
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C1F90);
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdPlayBGMFade);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdFadeOutBgm);
+s32 p2sdFadeOutBgm(s32 aId)
+{
+    struct
+    {
+        s32 id;
+        s32 unk4;
+        s16 fade;
+    } arg;
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdStopBGM);
+    arg.id = aId;
+    arg.unk4 = 0;
+    arg.fade = 0x17F;
+    return sdfSndSendCmd(0x20, 0, &arg, 0x10);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdBgmVolDown);
+s32 p2sdStopBGM(s32 aId)
+{
+    s32 arg = aId;
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdBgmVolUp);
+    return sdfSndSendCmd(0xD0, 0, &arg, 0x10);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdSetBgmTrack);
+s32 p2sdBgmVolDown(void)
+{
+    return sdfSndSendCmd(0x180, 0, 0, 0);
+}
+
+s32 p2sdBgmVolUp(void)
+{
+    return sdfSndSendCmd(0x190, 0, 0, 0);
+}
+
+void p2sdSetBgmTrack(s32 aTrack)
+{
+    sdfSndSendCmd(0xE0 | ((aTrack + 1) & 0xF), 0, NULL, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdLoadPcmFile);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdGetPcmState);
+u32 p2sdGetPcmState(void)
+{
+    return p2sdPcmState;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdSyncSound);
+s32 p2sdSyncSound(void)
+{
+    return sdfSndSendSyncCmd(0x100, 0, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C21A8);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C21D8);
+s32 p2sd_2C21D8(u32 aCh)
+{
+    if (aCh > 16) {
+        aCh = 16;
+    }
+    if (aCh == 0) {
+        aCh = 1;
+    }
+    return sdfSndSendSyncCmd((aCh - 1) | 0x1D0, 0, NULL, 0);
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdSetPcmCallback);
+u32 p2sdSetPcmCallback(u32 aCallback)
+{
+    if (p2sdPcmBusy != 0) {
+        return 0;
+    }
+    p2sdPcmCallback = aCallback;
+    return aCallback;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sdPlayPcm);
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C2280);
+u32 p2sd_2C2280(void)
+{
+    return p2sdPcmBusy;
+}
 
-INCLUDE_ASM(const s32, "code_002BD340", p2sdSyncMovie);
+s32 p2sdSyncMovie(void)
+{
+    return sdfSndSendSyncCmd(0x100, 0, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", p2sd_2C22B0);
 
@@ -371,7 +821,10 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfDumpChipMemory);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfDevLoadFile);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfDevLoadFileEx);
+void *sdfDevLoadFileEx(const char *aFileName, u32 *aOutData, u32 *aOutSize)
+{
+    return sdfDevLoadFile(aFileName, aOutData, aOutSize, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfDevLoadTex);
 
@@ -379,11 +832,23 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfTexSetTB);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfDevLoadTexList);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFixupModelBinary);
+void *sdfFixupModelBinary(sdfBinaryHeader_t *aHeader)
+{
+    void *body = aHeader + 1;
+
+    sdfAddressResolver(body, body, (u8 *)body + aHeader->resolveOffset, aHeader->resolveCount);
+    return body;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfDevLoadModel);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfFixupMotionBinary);
+void *sdfFixupMotionBinary(sdfBinaryHeader_t *aHeader)
+{
+    void *body = aHeader + 1;
+
+    sdfAddressResolver(body, body, (u8 *)body + aHeader->resolveOffset, aHeader->resolveCount);
+    return body;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfDevLoadMotion);
 
@@ -393,9 +858,31 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuDetachQueue);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuAttachQueue);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfIpuAttachTask);
+void sdfIpuAttachTask(SdfStreamFrameNode *aNode)
+{
+    SdfStreamFrameNode **link = &sdfIpuTaskLink;
+    SdfStreamFrameNode *cur;
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfIpuDetachTask);
+    for (cur = *link; cur != NULL; cur = *link) {
+        link = &cur->next;
+    }
+    *link = aNode;
+    aNode->next = NULL;
+}
+
+void sdfIpuDetachTask(SdfStreamFrameNode *aNode)
+{
+    SdfStreamFrameNode **link = &sdfIpuTaskLink;
+    SdfStreamFrameNode *cur;
+
+    for (cur = *link; cur != NULL; cur = *link) {
+        if (cur == aNode) {
+            *link = cur->next;
+            return;
+        }
+        link = &cur->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuAllocBuff);
 
@@ -431,9 +918,25 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuFromDmacHandler);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuToDmacHandler);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfIpuGetActivePacket);
+void *sdfIpuGetActivePacket(SdfStreamFrameNode *aNode)
+{
+    void *packet = NULL;
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfIpuGetActiveFrame);
+    if (aNode->completedBufferCount != 0) {
+        packet = aNode->frameBuffers[aNode->transferPacketIndex];
+    }
+    return packet;
+}
+
+void *sdfIpuGetActiveFrame(SdfStreamFrameNode *aNode)
+{
+    void *frame = NULL;
+
+    if (aNode->completedBufferCount != 0) {
+        frame = aNode->transferPacketBuffers[aNode->transferPacketIndex];
+    }
+    return frame;
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuFinishActiveFrame);
 
@@ -441,11 +944,21 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuSetChainTag);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuRunDecode);
 
-INCLUDE_ASM(const s32, "code_002BD340", sdfIpuStartDecodeTask);
+void sdfIpuStartDecodeTask(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext, s32 aResourceWord)
+{
+    sdfIpuSetDecodeParams(aNode, aFormat, aRead, aContext);
+    aNode->resourceWord = aResourceWord;
+    sdfIpuAttachTask(aNode);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuSetOutputTex);
 
-INCLUDE_ASM(const s32, "code_002BD340", movieAttachDecodeTask);
+void movieAttachDecodeTask(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext, s32 aResourceWord)
+{
+    sdfIpuStrmDecodeInit(aNode, aFormat, aRead, aContext);
+    aNode->resourceWord = aResourceWord;
+    sdfIpuAttachTask(aNode);
+}
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuInit);
 

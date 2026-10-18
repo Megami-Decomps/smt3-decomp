@@ -1,8 +1,76 @@
 #include "common.h"
+#include "libsdf.h"
+#include "kernel.h"
+#include "ps2asm.h"
+
+/* fldDoorTable stride, 100 bytes; only the warp effect id is reached here. */
+typedef struct {
+    u8 unk00[0x12];
+    s16 warpEff;
+    u8 unk14[0x50];
+} fldDoorData_t;
+
+extern fldDoorData_t fldDoorTable[256];
+extern s32 scriptlabel;
+extern void *fldDrwZBuf;
+extern f32 fldWmFastMove;
+extern void *D_0054EC68;
+extern s32 gfldPlayerHasiCnt;
+extern s32 gfldPlayerDamegeCnt;
+extern s32 fldPlayerStepDist;
+extern s32 gSkyTblAnime;
+extern s32 gSkyTblAnimeCntI;
+extern s32 gSkyTblBaseIdx;
+extern s32 D_002FC0EC __attribute__((section(".data")));
+extern char D_0054EC80[];
+
+extern void *sdfAllocAuto(u32 size);
+extern void sdfFreeAutoDelayed(void *p);
+extern void dds3EffectPartialMultiBlurDelete(void *p);
+extern void fldSkySetTbl(s32 idx, s32 flag);
+extern s32 encDrawProc(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 flag, dds3ProcessFunc_t func, void *arg,
+                                         void *parent);
+
+typedef struct {
+    s32 px;
+    s32 py;
+    s32 sx;
+    s32 sy;
+    u32 pz;
+    u32 panelCol;
+    u32 frameCol;
+    s32 cx;
+    s32 cy;
+    s32 cz;
+    sdfDrawTag_t *tag;
+} dbgConsCtl_t;
+
+extern sdfGrOt_t sdfGrOtTable[85];
+extern s32 gencOn;
+extern s32 gencMode;
+extern s32 rsetFrameMaskOtOffset;
+extern s32 gFilterAlpha;
+extern s32 gFilterAnime;
+extern s32 gFilterAnimeCntF;
+extern s32 gFilterAnimeOfsA;
+extern s32 fldCamResetOn;
+extern s32 fldCamMiwatasi;
+extern s32 fldElvCameraScene;
+extern s32 fldWmWarpMode;
+extern s32 gFldWapPanel;
+extern s32 fldSkyAlphaOfs __attribute__((section(".data")));
+
+extern void fldCamSetChaseCore(f32 height);
 
 INCLUDE_ASM(const s32, "code_00128848", fldDrawInit);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrawGetOt);
+sdfGrOt_t *fldDrawGetOt(void)
+{
+    return &sdfGrOtTable[rsetFrameMaskOtOffset];
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", DrwSprite2D);
 
@@ -18,7 +86,11 @@ INCLUDE_ASM(const s32, "code_00128848", fldPoint3To2_A);
 
 INCLUDE_ASM(const s32, "code_00128848", fldPoint3To2_B);
 
-INCLUDE_ASM(const s32, "code_00128848", rsetOtOfs);
+void rsetOtOfs(s32 ofs)
+{
+    rsetFrameMaskOtOffset = ofs;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", rsetTexa);
 
@@ -70,9 +142,22 @@ INCLUDE_ASM(const s32, "code_00128848", fldDrawPosCol);
 
 INCLUDE_ASM(const s32, "code_00128848", fldDraw2DBar);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrwZAlloc);
+void fldDrwZAlloc(void)
+{
+    if (fldDrwZBuf == NULL) {
+        fldDrwZBuf = sdfAllocAuto(0x70000);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrwZFree);
+
+void fldDrwZFree(void)
+{
+    if (fldDrwZBuf != NULL) {
+        sdfFreeAutoDelayed(fldDrwZBuf);
+        fldDrwZBuf = NULL;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldDrwZSave);
 
@@ -80,7 +165,11 @@ INCLUDE_ASM(const s32, "code_00128848", fldDrwZLoad);
 
 INCLUDE_ASM(const s32, "code_00128848", fldKanjiDraw);
 
-INCLUDE_ASM(const s32, "code_00128848", LF);
+void LF(dbgConsCtl_t *cons)
+{
+    cons->cy += 0x60;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", initDrawTag);
 
@@ -102,17 +191,37 @@ INCLUDE_ASM(const s32, "code_00128848", fldDbgPrintStr2DCF);
 
 INCLUDE_ASM(const s32, "code_00128848", fldDrawMaruKage);
 
-INCLUDE_ASM(const s32, "code_00128848", nbGetEncountOn);
+s32 nbGetEncountOn(void)
+{
+    return gencOn;
+}
 
-INCLUDE_ASM(const s32, "code_00128848", nbSetEncountMode);
+
+void nbSetEncountMode(s32 mode)
+{
+    gencMode = mode;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", encDrawProc);
 
-INCLUDE_ASM(const s32, "code_00128848", encFreeBlur);
+void encFreeBlur(void)
+{
+    gencOn = 0;
+    if (D_0054EC68 != NULL) {
+        dds3EffectPartialMultiBlurDelete(D_0054EC68);
+        D_0054EC68 = NULL;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", encStart);
 
-INCLUDE_ASM(const s32, "code_00128848", encInitProcess);
+void encInitProcess(void)
+{
+    dds3StartProcess(D_0054EC80, 0x2B0F, 0, 1, encDrawProc, NULL, NULL);
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldCalcAngleBetween);
 
@@ -122,7 +231,11 @@ INCLUDE_ASM(const s32, "code_00128848", fldCamCalcSlopeOffset);
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamSetLeng);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamResetNpc);
+void fldCamResetNpc(void)
+{
+    fldCamResetOn = 0;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamCalcSaka);
 
@@ -146,9 +259,17 @@ INCLUDE_ASM(const s32, "code_00128848", fldEventUpdateEx_Unity_2);
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamSetChaseCore);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamSetChase);
+void fldCamSetChase(void)
+{
+    fldCamSetChaseCore(0.0f);
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamUpdateDefault);
+
+void fldCamUpdateDefault(void)
+{
+    fldCamSetChaseCore(8.0f);
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamUpdateChase);
 
@@ -160,7 +281,10 @@ INCLUDE_ASM(const s32, "code_00128848", fldSetElvCameraScene);
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamElvTask);
 
-INCLUDE_ASM(const s32, "code_00128848", fldClearElvCameraScene);
+void fldClearElvCameraScene(void)
+{
+    fldElvCameraScene = 0;
+}
 
 INCLUDE_RODATA(const s32, "code_00128848", D_00531BF0);
 
@@ -168,7 +292,11 @@ INCLUDE_ASM(const s32, "code_00128848", fldCamMain);
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamSyukanSuriawase);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamMiwatasiChk);
+s32 fldCamMiwatasiChk(void)
+{
+    return fldCamMiwatasi;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamNpcCamChk);
 
@@ -196,9 +324,20 @@ INCLUDE_RODATA(const s32, "code_00128848", D_00531C60);
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Nml);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_WarpStart);
+void fldPlayerCalc_WarpStart(void)
+{
+    fldWmWarpMode = 1;
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_FastStart);
+
+void fldPlayerCalc_FastStart(void)
+{
+    if (fldWmWarpMode == 0) {
+        fldWmWarpMode = 2;
+        fldWmFastMove = 60.0f;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Wm3);
 
@@ -220,7 +359,14 @@ INCLUDE_RODATA(const s32, "code_00128848", D_00531D48);
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerChkAna);
+s32 fldPlayerChkAna(void)
+{
+    if (gfldPlayerHasiCnt == 0 && fldPlayerStepDist == 0 && gfldPlayerDamegeCnt == 0) {
+        return 0;
+    }
+    return 1;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerOff);
 
@@ -258,17 +404,48 @@ INCLUDE_ASM(const s32, "code_00128848", fldSkyDrawFilter);
 
 INCLUDE_ASM(const s32, "code_00128848", fldSkySetFilter);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSetFilterAnime);
+void fldSetFilterAnime(s32 anime)
+{
+    gFilterAnime = anime;
+    gFilterAnimeCntF = 0;
+    gFilterAnimeOfsA = 0;
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetAlpha);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyGetAlpha);
+void fldSkySetAlpha(s32 alpha)
+{
+    gFilterAlpha = alpha;
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetAlphaOfs);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyGetAlphaOfs);
+s32 fldSkyGetAlpha(void)
+{
+    return gFilterAlpha;
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetTableAnime);
+
+void fldSkySetAlphaOfs(s32 ofs)
+{
+    fldSkyAlphaOfs = ofs;
+}
+
+
+s32 fldSkyGetAlphaOfs(void)
+{
+    return fldSkyAlphaOfs;
+}
+
+
+void fldSkySetTableAnime(s32 anime)
+{
+    s32 idx = D_002FC0EC;
+
+    gSkyTblAnime = anime;
+    gSkyTblAnimeCntI = 0;
+    gSkyTblBaseIdx = idx;
+    fldSkySetTbl(idx, 1);
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldSkyCalcTable);
 
@@ -298,9 +475,20 @@ INCLUDE_ASM(const s32, "code_00128848", fldAllocPlaneTable);
 
 INCLUDE_ASM(const s32, "code_00128848", fldFreeMatterTable);
 
-INCLUDE_ASM(const s32, "code_00128848", fldVecDot);
+f32 fldVecDot(sdfVector4_t *a, sdfVector4_t *b)
+{
+    return a->x * b->x + a->y * b->y + a->z * b->z;
+}
 
-INCLUDE_ASM(const s32, "code_00128848", MATH_VectorLength);
+
+f32 MATH_VectorLength(sdfVector4_t *v)
+{
+    f32 len;
+
+    EE_SQRT_F32(len, v->x * v->x + v->y * v->y + v->z * v->z);
+    return len;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldMakeEveHitPlanes);
 
@@ -352,6 +540,7 @@ INCLUDE_ASM(const s32, "code_00128848", fldClearEveRngTable);
 INCLUDE_ASM(const s32, "code_00128848", fldEveHit_End);
 
 INCLUDE_ASM(const s32, "code_00128848", fldEveHit_AddEveData);
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldEveHit_AddEveHit);
 
@@ -421,7 +610,11 @@ INCLUDE_ASM(const s32, "code_00128848", fldDoor_Find2);
 
 INCLUDE_ASM(const s32, "code_00128848", fldDoor_Find3);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_GetWarpEff);
+s32 fldDoor_GetWarpEff(void)
+{
+    return fldDoorTable[scriptlabel].warpEff;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldWapGetDoor);
 
@@ -429,7 +622,11 @@ INCLUDE_ASM(const s32, "code_00128848", fldDoorRun_FindStart);
 
 INCLUDE_ASM(const s32, "code_00128848", fldDoor_ExitCamera);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_ChkWarp);
+s32 fldDoor_ChkWarp(void)
+{
+    return gFldWapPanel == 8;
+}
+
 
 INCLUDE_ASM(const s32, "code_00128848", fldWap_SetBgm);
 
