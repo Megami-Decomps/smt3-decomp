@@ -224,7 +224,7 @@ s32 evtGetNextMovePos(evtUnit_t *unit) {
         }
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)unit->pathHandle, t);
         dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-        VU0_STORE_VF($vf10, unit->targetVector);
+        VU0_STORE_VF(vf10, unit->targetVector);
         return 1;
     }
     return 0;
@@ -591,14 +591,14 @@ s32 evtUnitMoveTypePathTrace(evtUnit_t *unit) {
 
     dds3PathBasicControlIsFinished((dds3PathBasicControl_t *)unit->pathHandle);
     dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-    VU0_STORE_VF($vf10, v);
+    VU0_STORE_VF(vf10, v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3PathBasicControlGetRot((dds3PathBasicControl_t *)unit->pathHandle);
         VU0_MOVE_VF(vf11, vf10);
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
-        VU0_STORE_VF($vf10, v);
+        VU0_STORE_VF(vf10, v);
         dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
     return 1;
@@ -697,7 +697,7 @@ void evtSetUnitMove3(evtUnit_t *work, s32 pathObjectKey, s32 frames, s32 directi
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
     work->linkedUnit = pathSource;
     dds3PathBasicControlGetPos(path);
-    VU0_STORE_VF($vf10, work->targetVector);
+    VU0_STORE_VF(vf10, work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = directionOffset;
     work->motionCallback = 0;

@@ -545,7 +545,7 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
     VU0_MOVE_VF(vf11, vf10);
     FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
     Mult();
-    VU0_STORE_VF($vf10, v);
+    VU0_STORE_VF(vf10, v);
     dds3SetRotPoseSet(unit, (u128 *)v);
     return 1;
 }
@@ -1253,7 +1253,7 @@ u32 evtCommand_EFFECT_ROT_XYZ(void) {
         VU0_MOVE_VF(vf11, vf10);
         FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
         Mult();
-        VU0_STORE_VF($vf10, v);
+        VU0_STORE_VF(vf10, v);
         dds3SetRotPoseSet(obj, (u128 *)v);
     }
     return 1;
