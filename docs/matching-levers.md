@@ -9,6 +9,14 @@ permuter.
 Read the retail assembly first and ask which of these it is. Guessing at
 source shapes at random costs more than the reading does.
 
+Three references in [dds-decomp](https://github.com/Megami-Decomps/dds-decomp)
+go further than this page, since it is the same engine and compiler:
+`docs/idioms.md` is 14,000 lines of source shapes confirmed to produce
+specific ee-gcc 2.96 output, `docs/compiler-decision-atlas.md` locates which
+pass is responsible for a mismatch, and `docs/matching-investigation.md` is
+the method for finding the missing source fact. Check each claim here, since
+it was measured on DDS and not on this ELF.
+
 ## Control flow
 
 | Retail shows | Change |
@@ -52,10 +60,22 @@ Adjacent constant stores come out in reverse source order, so swapping them
 is the first thing to try on a two-word diff. A short-circuit `||` with one
 store beats an if/else chain that stores in each arm.
 
+## Check the whole unit, not the function you edited
+
+ee-gcc's output for one function can change with code earlier in the file, so
+a function that matched can stop matching because of an unrelated edit.
+`tools/check_unit.py` reports that as `CONTEXT <name>: compiles differently
+inside the full unit`. Always read the whole unit's result, not the line for
+the function you were working on.
+
 ## When to stop
 
 Revert to `INCLUDE_ASM` rather than leave a differing function: a near miss
 earns no credit and hides the fact that the unit is incomplete.
+`python tools/revert_differing.py <unit.c>` puts every function the unit
+check will not credit back to `INCLUDE_ASM`, which is faster and safer than
+doing it by hand. Run `configure.py --force-split` afterwards, since the set
+of `INCLUDE_ASM` lines has changed.
 
 These have been ruled out repeatedly and are not worth a second attempt:
 
