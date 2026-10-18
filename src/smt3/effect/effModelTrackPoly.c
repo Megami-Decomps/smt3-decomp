@@ -1,4 +1,34 @@
 #include "common.h"
+#include "ps2asm.h"
+
+typedef struct
+{
+    u8 pad00[0x18];
+    void *model;
+} EffTrackPolyModelObject_t;
+
+typedef struct
+{
+    EffTrackPolyModelObject_t *object;
+    s32 mark0;
+    s32 mark1;
+    u8 pad0C[0x2C];
+    void *trackPoly;
+} EffModelTrackPoly_t;
+
+/* The ring holds `capacity` vertex pairs; `head` is one past the newest. */
+typedef struct
+{
+    u8 pad00[8];
+    s32 capacity;
+    s32 count;
+    s32 head;
+    s32 division;
+    void *vertices;
+} Dds3HermitianTrackPoly_t;
+
+extern s32 sdfModelGetMarkPos(void *model, s32 mark);
+extern void dds3HermitianTrackPolySetVertex(void *poly, void *pair);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyCreate);
 
@@ -6,7 +36,17 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyDelete);
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyReset);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyGetMarkPosition);
+void Eff_ModelTrackPolyGetMarkPosition(EffModelTrackPoly_t *work)
+{
+    QuadF32 pair[2];
+    EffTrackPolyModelObject_t *object = work->object;
+
+    sdfModelGetMarkPos(object->model, work->mark0);
+    VU0_STORE_VF10_TO(pair[0]);
+    sdfModelGetMarkPos(object->model, work->mark1);
+    VU0_STORE_VF10(&pair[1]);
+    dds3HermitianTrackPolySetVertex(work->trackPoly, pair);
+}
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyVertexSet);
 
@@ -40,7 +80,18 @@ INCLUDE_ASM(const s32, "effect/effModelTrackPoly", dds3HermitianTrackPolySetBlen
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", dds3HermitianTrackPolySetVC);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", dds3HermitianTrackPolyGetVertex);
+void dds3HermitianTrackPolyGetVertex(Dds3HermitianTrackPoly_t *poly, void *first, void *second, s32 back)
+{
+    s32 index = poly->head - 2 * (poly->division * (back - 1) + back);
+    u8 *vertex;
+
+    if (index < 2) {
+        index += poly->capacity - 2;
+    }
+    vertex = (u8 *)poly->vertices + index * 16;
+    PS2_COPY_QUAD(first, vertex);
+    PS2_COPY_QUAD(second, vertex + 16);
+}
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", dds3HermitianTrackPolySetCurrent);
 
