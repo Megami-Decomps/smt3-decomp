@@ -2447,6 +2447,10 @@ EffEventWork *effEveBEDCutCreate(struct SoundMixer *owner, u16 kind, const void 
 
 void effEveBEDCutDelete(EffEventWork *work);
 
+void effEveBEDCutSetParams(EffEventWork *work, const void *params);
+
+void effEveBEDCutDraw(EffEventWork *work);
+
 void effEveBEDDelete(struct SoundMixer *mixer);
 
 extern u8 effPCP_ShockWave01_ThunderSpherePoly_Param[];
@@ -5653,7 +5657,47 @@ void effPCPMakkaSetScale(EffPCPSprayWork *work, f32 scale) {
     work->scale = scale;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCreate);
+EffPCPDriftEventWork *effPCPRadiateBEDCreate(EffPCPDriftEventParams *params, void *ownerParams) {
+    u32 count = params->count;
+    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 24 + 0x11C);
+    EffPCPDriftEventWork *work = sdfMemLock(handle);
+    EffPCPEventPlace place;
+    EffPCPDriftEventRow *entry;
+    s32 spread;
+    u32 i;
+
+    work->params = *params;
+    entry = (EffPCPDriftEventRow *)(work + 1);
+    work->handle = handle;
+    work->color = 0x80808080;
+    work->unk10C = 1;
+    work->entries = entry;
+    work->scale = 1.0f;
+    work->owner = effEveBEDCreate(ownerParams);
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    place.color = 0x80808080;
+    spread = work->params.delaySpread;
+    for (i = 0; i < count; i++) {
+        entry->event = effEveBEDCutCreate(work->owner, 2, &place);
+        if (spread > 0) {
+            entry->frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % spread);
+        } else {
+            entry->frame = 0;
+        }
+        entry++;
+    }
+    return work;
+}
 
 EffPCPDriftEventWork *effPCPRadiateBEDCreatePCF(void *data) {
     EffPCPDriftEventParams *params = dds3EffectPCPDataGetData(data, 0);
@@ -5661,7 +5705,47 @@ EffPCPDriftEventWork *effPCPRadiateBEDCreatePCF(void *data) {
     return effPCPRadiateBEDCreate(params, dds3EffectPCPDataGetData(data, 1));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCopy);
+EffPCPDriftEventWork *effPCPRadiateBEDCopy(EffPCPDriftEventWork *src) {
+    u32 count = src->params.count;
+    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 24 + 0x11C);
+    EffPCPDriftEventWork *work = sdfMemLock(handle);
+    EffPCPEventPlace place;
+    EffPCPDriftEventRow *entry;
+    s32 spread;
+    u32 i;
+
+    work->params = src->params;
+    entry = (EffPCPDriftEventRow *)(work + 1);
+    work->handle = handle;
+    work->color = 0x80808080;
+    work->unk10C = 0;
+    work->entries = entry;
+    work->scale = 1.0f;
+    work->owner = src->owner;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    place.color = 0x80808080;
+    spread = work->params.delaySpread;
+    for (i = 0; i < count; i++) {
+        entry->event = effEveBEDCutCreate(src->owner, 2, &place);
+        if (spread > 0) {
+            entry->frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % spread);
+        } else {
+            entry->frame = 0;
+        }
+        entry++;
+    }
+    return work;
+}
 
 void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
     u32 i = 0;
@@ -5681,9 +5765,85 @@ void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
     sdfMemFreeDirect(work->handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDPartInit);
+void effPCPRadiateBEDPartInit(EffPCPDriftEventWork *work, s32 index) {
+    EffPCPDriftEventRow *slot;
+    f32 spread;
+    f32 scale;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDDraw);
+    slot = &work->entries[index];
+    scale = work->scale;
+    spread = work->params.startJitter;
+    slot->position = work->params.startPosition * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread)) * scale;
+    spread = work->params.endJitter;
+    slot->positionStep = (work->params.endPosition * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
+    slot->angle = 6.2831852f / (f32)work->params.count * (f32)index;
+    spread = work->params.angleJitter;
+    slot->angleStep = work->params.angleStep * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
+}
+
+void effPCPRadiateBEDDraw(EffPCPDriftEventWork *work) {
+    EffPCPEventPlace place;
+    f32 base[4] __attribute__((aligned(16)));
+    u32 count = work->params.count;
+    s32 duration = work->params.duration;
+    s32 fadeIn = work->params.fadeIn;
+    s32 fadeOut = work->params.fadeOut;
+    f32 angleDecay = work->params.angleDecay;
+    EffPCPDriftEventRow *entry = work->entries;
+    u32 color = work->color;
+    u32 i;
+    s32 frame;
+
+    PS2_COPY_QUAD(base, work->params.position);
+    if (duration == 0) {
+        return;
+    }
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    for (i = 0; i < count; i++, entry++) {
+        frame = entry->frame;
+
+        if (frame <= duration) {
+            if (frame == 0) {
+                effPCPRadiateBEDPartInit(work, i);
+                frame = entry->frame;
+            }
+            if (frame >= 0) {
+                f32 angle = entry->angle;
+                f32 radius = entry->position;
+                f32 cosine;
+                f32 sine;
+                f32 t;
+
+                cosine = sdfCos(angle);
+                sine = sdfSin(angle);
+                place.payload[0] = base[0] + cosine * radius;
+                place.payload[1] = base[1];
+                place.payload[2] = base[2] + sine * radius;
+                entry->position += entry->positionStep;
+                entry->angle += entry->angleStep;
+                entry->angleStep *= angleDecay;
+                if (frame < fadeIn && fadeIn != 0) {
+                    t = (f32)frame / (f32)fadeIn;
+                } else if (duration - frame <= fadeOut && fadeOut != 0) {
+                    t = (f32)(duration - frame) / (f32)fadeOut;
+                } else {
+                    t = 1.0f;
+                }
+                place.color = effColorBlend(color & 0xFFFFFF, color, t);
+                effEveBEDCutSetParams(entry->event, &place);
+                effEveBEDCutDraw(entry->event);
+                frame = entry->frame;
+            }
+            entry->frame = frame + 1;
+        }
+    }
+}
 
 void effPCPRadiateBEDSetPosition(EffPCPDriftEventWork *work, const void *source) {
     PS2_COPY_QUAD(work, source);
@@ -5697,7 +5857,49 @@ void effPCPRadiateBEDSetColor(EffPCPDriftEventWork *work, u32 color) {
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCreate);
+EffPCPPairedEventWork *effPCPRadiateTBCreate(
+    EffPCPPairedEventParams *params, void *ownerAParams, void *ownerBParams) {
+    u32 count = params->count;
+    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 32 + 0xA4);
+    EffPCPPairedEventWork *work = sdfMemLock(handle);
+    EffPCPEventPlace place;
+    EffPCPPairedEventRow *entry;
+    s32 spread;
+    u32 i;
+
+    work->params = *params;
+    entry = (EffPCPPairedEventRow *)(work + 1);
+    work->handle = handle;
+    work->entries = entry;
+    work->color = 0x80808080;
+    if (work->params.delaySpread <= 0) {
+        work->params.delaySpread = 1;
+    }
+    work->unk98 = 1;
+    work->ownerA = effEveBEDCreate(ownerAParams);
+    work->ownerB = effEveBEDCreate(ownerBParams);
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    place.color = 0x80808080;
+    spread = work->params.delaySpread;
+    for (i = 0; i < count; i++) {
+        entry->fragment = effPCP_ThunderPolyCreate(&params->fragmentParams);
+        entry->eventA = effEveBEDCutCreate(work->ownerA, 2, &place);
+        entry->eventB = effEveBEDCutCreate(work->ownerB, 2, &place);
+        entry->frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % spread);
+        entry++;
+    }
+    return work;
+}
 
 EffPCPPairedEventWork *effPCPRadiateTBCreatePCF(void *data) {
     EffPCPPairedEventParams *params = dds3EffectPCPDataGetData(data, 0);
@@ -5706,7 +5908,45 @@ EffPCPPairedEventWork *effPCPRadiateTBCreatePCF(void *data) {
     return effPCPRadiateTBCreate(params, ownerAParams, dds3EffectPCPDataGetData(data, 2));
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCopy);
+EffPCPPairedEventWork *effPCPRadiateTBCopy(EffPCPPairedEventWork *src) {
+    u32 count = src->params.count;
+    struct SdfMemBlock *handle = sdfMemAllocDirect(count * 32 + 0xA4);
+    EffPCPPairedEventWork *work = sdfMemLock(handle);
+    EffPCPEventPlace place;
+    EffPCPPairedEventRow *entry;
+    s32 spread;
+    u32 i;
+
+    work->params = src->params;
+    entry = (EffPCPPairedEventRow *)(work + 1);
+    work->handle = handle;
+    work->entries = entry;
+    work->color = 0x80808080;
+    work->unk98 = 0;
+    work->ownerA = src->ownerA;
+    work->ownerB = src->ownerB;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    place.color = 0x80808080;
+    spread = work->params.delaySpread;
+    for (i = 0; i < count; i++) {
+        entry->fragment = effPCP_ThunderPolyCreate(&src->params.fragmentParams);
+        entry->eventA = effEveBEDCutCreate(src->ownerA, 2, &place);
+        entry->eventB = effEveBEDCutCreate(src->ownerB, 2, &place);
+        entry->frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % spread);
+        entry++;
+    }
+    return work;
+}
 
 void effPCPRadiateTBDelete(EffPCPPairedEventWork *work) {
     u32 i = 0;
@@ -5731,7 +5971,22 @@ void effPCPRadiateTBDelete(EffPCPPairedEventWork *work) {
     sdfMemFreeDirect(work->handle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBPartInit);
+void effPCPRadiateTBPartInit(EffPCPPairedEventWork *work, s32 index) {
+    EffPCPPairedEventRow *slot;
+    f32 spread;
+
+    slot = &work->entries[index];
+    slot->phase = 6.2831852f / work->params.count * index;
+    spread = work->params.radiusJitter;
+    slot->radius = work->params.baseRadius * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
+    slot->tilt = 0;
+    spread = work->params.tiltJitter;
+    if (dds3GetRandA((EffRandState *)dds3EffectBase) & 1) {
+        slot->tiltStep = work->params.baseTiltStep * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
+    } else {
+        slot->tiltStep = -work->params.baseTiltStep * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBDraw);
 
