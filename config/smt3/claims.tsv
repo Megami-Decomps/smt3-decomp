@@ -18,9 +18,10 @@ src/smt3/newbattle/nbStageProcess.c	u8	done	2026-10-18	140 / 64312	interrupted b
 src/smt3/code_002C6F38.c	-	-	-	602 / 119280	newlib; outside the game-code denominator, do not claim
 src/smt3/code_001FAE80.c	w1	open	2026-10-19	872 / 260124	-
 src/smt3/newbattle/nbMakePacket.c	w2	open	2026-10-19	332 / 155996	-
-src/smt3/field/fldDraw.c	w3	open	2026-10-19	69 / 79840	-
+src/smt3/field/fldDraw.c	w3	done	2026-10-19	69 / 79840	two drafts kept: fldSkyDrawFilter at 682 of 694 words, fldStatusSet at 36 of 62
 src/smt3/code_001B0858.c	w4	open	2026-10-19	145 / 74212	-
 src/smt3/code_00144798.c	w5	open	2026-10-19	88 / 69728	-
 src/smt3/newbattle/nbStageProcess.c	w6	open	2026-10-19	140 / 64312	-
 src/smt3/code_0029B780.c	w7	open	2026-10-19	135 / 43052	-
 src/smt3/code_001D1470.c	w8	open	2026-10-19	173 / 37672	-
+src/smt3/code_001F4518.c	w9	open	2026-10-19	57 / 21708	23 of its 57 are high-confidence dds pairings, the densest left
