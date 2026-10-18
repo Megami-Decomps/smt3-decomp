@@ -53,8 +53,11 @@ def compile_unit(path: Path) -> str:
          "-DVERSION_SMT3", "-DSKIP_ASM", "-DNON_MATCHING",
          "-quiet", "-O2", str(path), "-o", "/dev/null"],
         capture_output=True, text=True, cwd=ROOT)
+    # cc1 brackets its diagnostics with context lines that carry no line
+    # number ("file: In function `x':", "file: At top level:"). Keeping those
+    # made any unit that merely warns look like a failure.
     return "\n".join(l for l in out.stderr.split("\n")
-                     if l.strip() and "warning:" not in l)
+                     if re.search(r":\d+: ", l) and "warning:" not in l)
 
 
 if __name__ == "__main__":

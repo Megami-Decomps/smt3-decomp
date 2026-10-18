@@ -39,6 +39,8 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| a flat `beq` chain over four or more contiguous `case` values | make the switch index a `u32` local. With `s32` ee-gcc splits the balanced tree with an `sltiu` range test before the lowest compare; unsigned makes the left subtree bounded below, so `index < 1` folds to the `beqz` retail emits |
+| a call's constant arguments set up above the `if` that guards the call | invert the test into an early `return`, so the call is no longer inside a nested block |
 
 ## Addressing and types
 
@@ -103,6 +105,18 @@ it was measured on DDS and not on this ELF.
 - Pick the VU0 load by how retail forms the address:
   `SDF_VU0_LOADVECTOR(ptr)` where it computes the address into a register,
   `SDF_VU0_LOADVECTOR_MEMOPS` where it addresses the frame directly.
+- Copy a vector quadword with `SDF_VU0_COPYVECTOR(dst, src)`, not a struct or
+  `u128` assignment. The macro is one asm block, so the `lq`/`sq` pair stays
+  together and the delay slot goes to the next call's argument; a `u128`
+  assignment is two insns the scheduler splits, and it also hoists the `lq`
+  above a store to the source that precedes it.
+- A loop-invariant float constant that retail materialises into a saved fp
+  register ahead of the loop index's init comes from a named local assigned
+  before the loop. Written as a literal in the body gcc still hoists it, but
+  into the preheader after the index init, which rotates four instructions.
+- `sltiu` on a function result comes from a `u32` at the use site, either an
+  unsigned return type or a cast. `effBTLModelGetGroupNumber(mask) < 2` with
+  an `s32` declaration gives `slti`.
 
 ## Function-local constant arrays
 
