@@ -52,7 +52,7 @@ s32 dds3InitPoseSet(dds3Basic_t *basic)
     }
     pose->flag = POSESET_FLAG_UPDATEPOSE;
     dds3BackupPoseSet(pose);
-    VU0_STORE_VF0(&pose->plane);
+    SDF_VU0_STOREIDENTITYVECTOR(&pose->plane);
     basic->poseset = pose;
     pose->frameFall = 0;
     pose->r = 0.0f;
@@ -89,10 +89,10 @@ void dds3BackupPoseSet(dds3PoseSet_t *pose)
     sdfVector4_t *rotation;
     sdfVector4_t *scale;
 
-    VU0_STORE_VF0(position);
+    SDF_VU0_STOREIDENTITYVECTOR(position);
     rotation = &pose->rot;
-    VU0_STORE_VF0(rotation);
-    VU0_UNIT_SCALE();
+    SDF_VU0_STOREIDENTITYVECTOR(rotation);
+    SDF_VU0_SETSCALE1VECTOR();
     scale = &pose->scl;
     SDF_VU0_STOREVECTOR(scale);
 }
@@ -208,7 +208,7 @@ void dds3MakeMatrix(const sdfVector4_t *scale, const sdfVector4_t *rotation,
     SDF_VU0_LOADVECTOR(rotation);
     ToMatrix();
     SDF_VU0_LOADVECTOR(scale);
-    VU0_SCALE_MATRIX_ROWS_VF10();
+    SDF_VU0_SCALE_XYZ();
     SDF_VU0_LOADVECTOR(translation);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();

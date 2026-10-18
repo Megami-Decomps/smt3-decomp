@@ -485,7 +485,7 @@ typedef struct {
     ".set noreorder\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
 #define SDF_VU0_RESET_ROW3() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf31, vf0\n\t.set reorder")
-#define VU0_SCALE_MATRIX_ROWS_VF10() __asm__ volatile ( \
+#define SDF_VU0_SCALE_XYZ() __asm__ volatile ( \
     ".set noreorder\n\tvmulx.xyzw vf28, vf28, vf10x\n\tvmuly.xyzw vf29, vf29, vf10y\n\t" \
     "vmulz.xyzw vf30, vf30, vf10z\n\t.set reorder")
 #define VU0_SET_VF10_Y_CLEAR_W(f) __asm__ volatile ( \
@@ -524,13 +524,13 @@ typedef struct {
     "vaddx.y vf10, vf0, vf2x\n\t" \
     ".set reorder" \
     : : "f" (value) : "$2")
-#define VU0_STORE_VF0(dst) __asm__ volatile ( \
+#define SDF_VU0_STOREIDENTITYVECTOR(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
 #define SDF_VU0_STOREVECTOR_B_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" \
     : : "r" (dst))
-#define VU0_UNIT_SCALE() __asm__ volatile ( \
+#define SDF_VU0_SETSCALE1VECTOR() __asm__ volatile ( \
     ".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\t" \
     "vmulx.w vf10, vf0, vf0x\n\t.set reorder" : : : "memory")
 
@@ -626,7 +626,7 @@ typedef struct {
 /* ---- operations recovered in one unit each ---- */
 
 /* from basic/dds3EffectObjectBasic.c */
-#define VU0_TRANSLATION_FROM_VF10() __asm__ volatile ( \
+#define SDF_VU0_TRANSLATE() __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\t" \
     "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
     "vmaddw.xyzw vf31, vf31, vf10w\n\t.set reorder")
@@ -1117,11 +1117,11 @@ __asm__ volatile ( \
     : : "r" (r))
 
 /* from sdf/sdfModel.c */
-#define VU0_MUL_MATRIX_ROWS_VF10() __asm__ volatile ( \
+#define SDF_VU0_SCALE_XYZ_REV() __asm__ volatile ( \
     ".set noreorder\n\tvmul.xyz vf28, vf28, vf10\n\tvmul.xyz vf29, vf29, vf10\n\t" \
     "vmul.xyz vf30, vf30, vf10\n\t.set reorder" \
     : : : "memory")
-#define VU0_STORE_MATRIX_M(a, b, c, d) __asm__ volatile ( \
+#define SDF_VU0_STOREMATRIX_MEMOPS(a, b, c, d) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf28, %0\n\tsqc2 vf29, %1\n\tsqc2 vf30, %2\n\tsqc2 vf31, %3\n\t" \
     ".set reorder" \
     : : "m" (a), "m" (b), "m" (c), "m" (d) : "memory")

@@ -369,7 +369,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
             SDF_VU0_LOADIDENTITY();
             SDF_VU0_LOADVECTOR(work->linkpos);
             SDF_VU0_VECTOR_W_SET_ONE();
-            VU0_TRANSLATION_FROM_VF10();
+            SDF_VU0_TRANSLATE();
             MultMatrixRevNoArg();
             SDF_VU0_LOADIDENTITYVECTOR();
             SDF_VU0_APPLYMATRIX();

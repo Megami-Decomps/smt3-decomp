@@ -1366,7 +1366,7 @@ void StoreRotateMatrixAxis(f32 angle, const sdfVector3_t *axis, sdfMatrix4_t *ma
     matrix->m[9] = y * z * (1.0f - cosine) - x * sine;
     matrix->m[10] = z * z + (1.0f - z * z) * cosine;
     matrix->m[11] = 0.0f;
-    VU0_STORE_VF0(&matrix->m[12]);
+    SDF_VU0_STOREIDENTITYVECTOR(&matrix->m[12]);
 }
 
 void SetRotateMatrixAxis(f32 angle, const sdfVector3_t* axis)
