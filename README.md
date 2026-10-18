@@ -1,5 +1,14 @@
 # Shin Megami Tensei III: Nocturne
 
+[![Build Status]][actions]
+[![smt3-code]][smt3-progress] [![smt3-functions]][smt3-progress]
+
+[Build Status]: https://github.com/tge-was-taken/smt3-decomp/actions/workflows/build.yml/badge.svg
+[actions]: https://github.com/tge-was-taken/smt3-decomp/actions/workflows/build.yml
+[smt3-code]: https://decomp.dev/tge-was-taken/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_code_percent&label=code%20bytes
+[smt3-functions]: https://decomp.dev/tge-was-taken/smt3-decomp/smt3.svg?mode=shield&category=game&measure=matched_functions_percent&label=functions
+[smt3-progress]: https://decomp.dev/tge-was-taken/smt3-decomp/smt3?category=game
+
 A work-in-progress **matching decompilation** of *Shin Megami Tensei III:
 Nocturne* for PlayStation 2. The goal is to understand and document how the
 game works by reconstructing readable source code from its retail binary.
@@ -37,8 +46,13 @@ recovered names. 9,513 of the 9,694 functions are still `INCLUDE_ASM`
 fallbacks; 181 are in C, which is 9,644 of 1,976,292 code bytes. Most of those
 181 are the empty and near-empty functions splat emitted directly.
 
-There are no progress badges and no published tracker page. See
-[Reading progress](docs/progress.md) for what would be measured and how.
+The badges above track matched game and engine code bytes and function
+counts. Assembly fallbacks earn zero credit, and SDK/runtime code, handwritten
+assembly and VU1 microcode sit outside those totals. They read from
+[decomp.dev](https://decomp.dev/tge-was-taken/smt3-decomp/smt3?category=game),
+which ingests the report CI uploads on every push to `main`, so they go live
+with the first run that has the retail executable available. See
+[Reading progress](docs/progress.md) for how the numbers are measured.
 
 ## Quickstart
 
