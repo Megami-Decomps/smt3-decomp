@@ -17,8 +17,7 @@
  *
  * A function whose C is close but not exact is kept beside its fallback:
  *
- *     \/* NON_MATCHING: 12 of 694 words. Three reload spill slots are
- *      * rotated ... Ruled out: ... *\/
+ *     \/* NON_MATCHING: 12 of 694 words; three spill slots rotated. *\/
  *     #ifdef NON_MATCHING
  *     void f(void) { ... }
  *     #else
@@ -30,10 +29,9 @@
  * there for the next person instead of being thrown away, and
  * tools/check_nonmatching.py compiles it so it cannot rot unnoticed.
  *
- * The comment is the point of keeping it. It must say how close the draft is,
- * what still differs, and which source shapes have been ruled out, or the next
- * person repeats the search. tools/revert_differing.py writes the measured
- * part and leaves a TODO for the rest.
+ * The one-line comment is the point of keeping it: how close, and what
+ * differs. The shapes already ruled out belong in the commit message.
+ * tools/revert_differing.py writes the measured part.
  */
 #if !defined(M2CTX) && !defined(PERMUTER) && !defined(SKIP_ASM)
 

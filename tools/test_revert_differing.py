@@ -111,12 +111,11 @@ class TestWrap(unittest.TestCase):
         self.assertEqual(out[i + 5], 'INCLUDE_ASM(const s32, "field/fldDraw", f);')
         self.assertEqual(out[i + 6], "#endif")
 
-    def test_the_annotation_asks_for_what_is_left(self):
-        """A draft without the difference described is not worth keeping."""
+    def test_the_annotation_is_one_line(self):
+        """The label says how close it is; the reasoning goes in the commit."""
         out = rd.wrap(["void f(void) {", "}"], "u", "f", "3 of 9 words differ")
-        head = "\n".join(out[:out.index("#ifdef NON_MATCHING")])
-        self.assertIn("3 of 9 words differ", head)
-        self.assertIn("TODO", head)
+        self.assertEqual(out.index("#ifdef NON_MATCHING"), 1)
+        self.assertEqual(out[0], "/* NON_MATCHING: 3 of 9 words differ. */")
 
     def test_an_unmeasured_draft_says_so(self):
         out = rd.wrap(["void f(void) {", "}"], "u", "f")

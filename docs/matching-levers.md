@@ -170,18 +170,14 @@ byte-identical, and the function still counts as unmatched everywhere. Run
 has changed, and `python3 tools/check_nonmatching.py` to confirm the draft
 still compiles.
 
-Annotate the draft with what still differs. `revert_differing.py` writes
-check_unit's measurement into a comment above the `#ifdef` and leaves a TODO
-for the rest, which you fill in before committing:
+Label the draft with one line saying how close it is and what differs, which
+`revert_differing.py` writes from check_unit's measurement:
 
-    /* NON_MATCHING: 682 of 694 words, the exact 2776-byte size. Three reload
-     * spill slots are rotated ... Ruled out: a typed local at four scopes,
-     * << for *, nine declaration orders ... */
+    /* NON_MATCHING: 682 of 694 words, exact size; three reload spill slots rotated. */
 
-The comment is why the draft is worth keeping. "682 of 694 words, three spill
-slots rotated, and here is what has been ruled out" tells the next person
-whether to continue, start over, or leave it; "does not match" tells them
-nothing and they repeat the whole search. Say it in the commit message too.
+That one line is why the draft is worth keeping: it tells the next person
+whether to continue, start over, or leave it. The source shapes you ruled out
+go in the commit message, which is where the reasoning for any change belongs.
 `--discard` deletes a draft not worth keeping.
 
 A draft is never evidence of anything. It is not compiled by the build, so

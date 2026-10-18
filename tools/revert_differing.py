@@ -14,10 +14,10 @@ thrown away, wrapped as
     #endif
 
 so the normal build takes the asm and the next person starts from the draft
-instead of from scratch. The comment above it carries check_unit's measured
-difference, and a TODO to say what is actually left and what has been ruled
-out: "12 of 694 words, three spill slots rotated" is what makes a draft worth
-picking up. --discard deletes it instead, for a draft not worth keeping. Structs, prototypes and matching functions are left alone. Run
+instead of from scratch. One line above it says how close it is and what
+differs, "12 of 694 words, three spill slots rotated"; the shapes already
+ruled out go in the commit message, not the source. --discard deletes it
+instead, for a draft not worth keeping. Structs, prototypes and matching functions are left alone. Run
 configure.py --force-split afterwards, since the set of INCLUDE_ASM lines has
 changed, and tools/check_nonmatching.py to confirm the draft still compiles.
 """
@@ -89,10 +89,8 @@ def spans(text):
 
 def wrap(body: list[str], unit: str, name: str, detail: str = "") -> list[str]:
     """The draft kept behind its asm fallback, labelled with what still differs."""
-    note = ["/* NON_MATCHING: " + (detail or "difference not recorded") + ".",
-            " * TODO describe what is left: which registers, slots or scheduling,",
-            " * and the source shapes already ruled out. */"]
-    return (note + ["#ifdef NON_MATCHING"] + body + ["#else",
+    note = f"/* NON_MATCHING: {detail or 'difference not recorded'}. */"
+    return ([note, "#ifdef NON_MATCHING"] + body + ["#else",
             f'INCLUDE_ASM(const s32, "{unit}", {name});', "#endif"])
 
 

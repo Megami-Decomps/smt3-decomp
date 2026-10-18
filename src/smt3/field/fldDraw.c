@@ -2932,18 +2932,7 @@ void fldSkyCalcFilter(void) {
     }
 }
 
-/* NON_MATCHING: 682 of 694 words, the exact 2776-byte size. Three reload spill
- * slots are rotated: retail numbers 0x118 fldSkyDataTable, 0x11C row*8 and
- * 0x120 row*32, this gives row*8, row*32, fldSkyDataTable. Every instruction
- * is otherwise identical. Offsets follow pseudo-register numbers, and
- * -fno-gcse moves 653 of the 682, so the mechanism is GCSE and reload
- * numbering rather than anything the source states. Ruled out: a
- * fldSkyData_t * local at four scopes (folded back to the global), the
- * flattened colour array, pointer and (p + i)-> subscript forms, << for *, a
- * mode local, an if/else chain for the switch, u32 indices, a row-base s32 *,
- * alpha before rgb, hoisted x and y, and nine declaration orders.
- * Transliterated from dds-decomp's fldDrawSkyGradient, the same function at
- * the same size. */
+/* NON_MATCHING: 682 of 694 words, exact size; three reload spill slots rotated. */
 #ifdef NON_MATCHING
 void fldSkyDrawFilter(void) {
     s32 column, row;
@@ -4153,15 +4142,7 @@ void fldKaifukuTest(void) {
     p2sdPlaySE(0x10, 0x7F, 0x3F);
 }
 
-/* NON_MATCHING: 36 of 62 words, the exact 248-byte size. Retail carries two
- * induction variables where this has one: an integer offset added to
- * DDS3_GBWK serving hp and the first badstatus read, and a pointer biased at
- * the badstatus field serving the flag at -0xE. The body never uses the loop
- * index. Ruled out: the typed akuma[i] form, a fldAnahoriAkuma_t * local at
- * three scopes, all eight cast orders of (u8 *)base + ofs against
- * (u8 *)ofs + (u32)base (gcc folds them together here), a u16 * walking
- * badstatus with the flag at p[-0xE], and an explicit second pointer
- * induction. */
+/* NON_MATCHING: 36 of 62 words, exact size; retail has two induction variables. */
 #ifdef NON_MATCHING
 void fldStatusSet(void) {
     s32 i;
