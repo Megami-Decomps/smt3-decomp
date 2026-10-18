@@ -2427,7 +2427,7 @@ u64 *corePktClosePacket(VuWork *work) {
     quadwords = (s32)(cursor - start) >> 4;
 
     while (((u32)cursor & 0x30) != 0) {
-        *(u128 *)cursor = 0;
+        QUAD_ZERO(*(u128 *)cursor);
         cursor += 0x10;
     }
 
@@ -2697,7 +2697,7 @@ void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
     referencePacket = (u64 *)allocatePacket(0x20);
     referencePacket[0] = ((u64)((u32)sdf3DPrimIdentityTm & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
     referencePacket[1] = 0x6C07C000ULL << 32;
-    *(u128 *)&referencePacket[2] = 0;
+    QUAD_ZERO(*(u128 *)&referencePacket[2]);
     sdfDrawTagLinkRef(packetList, (u32)referencePacket);
 }
 
@@ -2732,7 +2732,7 @@ void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
     sdfMatUpdatePacket(asset, (s8)sdfFrameId);
     referencePacket = (u64 *)allocatePacket(0x20);
     sdfMatMakePacket(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfFrameId);
-    *(u128 *)&referencePacket[2] = 0;
+    QUAD_ZERO(*(u128 *)&referencePacket[2]);
     sdfDrawTagLinkRef(packetList, (u32)referencePacket);
 }
 

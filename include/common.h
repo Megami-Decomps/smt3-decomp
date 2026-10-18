@@ -20,6 +20,14 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 #ifndef QWORD_ALIGNED
 #define QWORD_ALIGNED
 #endif
+/* Stores a zero quadword. ee-gcc materialises the 128-bit zero in a
+ * register and stores that, which is what retail does, so the operation stays
+ * written as an assignment here. A build with no 128-bit integer type defines
+ * this as a 16-byte clear instead. */
+#ifndef QUAD_ZERO
+#define QUAD_ZERO(lvalue) ((lvalue) = 0)
+#endif
+
 typedef float f32;
 typedef double f64;
 

@@ -1387,7 +1387,7 @@ sdfGrRefPacketHeader_t *sdfGrNewExPacket(SdfDmaTag *sourceTag) {
     dmaHeader |= SDF_DMA_TAG_REF_WORD;
     dmaHeader |= packedAddress;
     referenceNode->dmaTag = dmaHeader;
-    referenceNode->nextTag = 0;
+    QUAD_ZERO(referenceNode->nextTag);
     referenceNode->vifCommands = sourceTag->vifCommands;
     return referenceNode;
 }
@@ -1666,14 +1666,14 @@ void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet
 void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_t *node) {
     node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->dmaTag = ((u64)((source + 0x1a0) & 0xfffffff) << 32) | 0x30000004;
-    node->nextTag = 0;
+    QUAD_ZERO(node->nextTag);
     sdfDrawTagLinkRef(list, (u32)node);
 }
 
 void sdfGrLinkDrawFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_t *node) {
     node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
     node->dmaTag = ((u64)((source + 0x1e0) & 0xfffffff) << 32) | 0x30000004;
-    node->nextTag = 0;
+    QUAD_ZERO(node->nextTag);
     sdfDrawTagLinkRef(list, (u32)node);
 }
 

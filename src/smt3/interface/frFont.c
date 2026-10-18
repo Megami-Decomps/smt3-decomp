@@ -475,7 +475,7 @@ s32 frConvertVal2N(u32 bitValue) {
 }
 
 void frCreateDrawEnvPacket(frFontGsPacket_t *packet) {
-    packet->dma.value = 0;
+    QUAD_ZERO(packet->dma.value);
     packet->dma.words[0] = 0x70000007;
     packet->dma.words[2] = 0;
     packet->dma.words[3] = 0x50000007;
