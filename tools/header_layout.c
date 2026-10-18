@@ -704,7 +704,11 @@ OFF(p77, nbFormation_t, damageFrames, 0xB8);
 OFF(p78, nbFormation_t, shakePhase, 0xC4);
 OFF(p79, fldAreaWork_t, lightMaIdx, 0xB8);
 SZ(p80, nbFormation_t, 0xF0);
-OFF(p81, datUnitWork_t, skillSlots, 0x86);
+OFF(p81, datUnitWork_t, keisyoskill, 0x86);
+OFF(p83, datUnitWork_t, keiattr, 0xB6);
+OFF(p84, datUnitWork_t, nowtform, 0x6A);
+OFF(p85, datUnitWork_t, levelupparam, 0x7A);
+OFF(p86, datUnitWork_t, skill, 0x34);
 SZ(p82, datUnitWork_t, 0xEC);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
