@@ -1,12 +1,29 @@
 #include "common.h"
+#include "kernel.h"
 
-INCLUDE_ASM(const s32, "code_0025D690", GetTarSelProcessData);
+typedef struct
+{
+    u8 unk00[0x2C];
+    s32 statusTime;
+} nbTarSelWork_t;
+
+extern char D_005442B8[];
+extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern void *dds3GetProcessData(dds3ProcessID_t *process);
+
+nbTarSelWork_t *GetTarSelProcessData(void)
+{
+    return dds3GetProcessData(dds3SearchProcessName(D_005442B8));
+}
 
 INCLUDE_ASM(const s32, "code_0025D690", nbGetTarSelStat);
 
 INCLUDE_ASM(const s32, "code_0025D690", nbSetTarSelStat);
 
-INCLUDE_ASM(const s32, "code_0025D690", nbSetTarSelJyokyoTime);
+void nbSetTarSelJyokyoTime(s32 time)
+{
+    GetTarSelProcessData()->statusTime = time;
+}
 
 INCLUDE_ASM(const s32, "code_0025D690", AnimeTargetCursor);
 

@@ -4,16 +4,26 @@
 #include "kernel.h"
 #include "libsdf.h"
 #include "ps2asm.h"
-
-typedef struct {
-    u16 modelFlag;
-    u8 unk02[0x1A];
-    u16 hojiFlag;
-} fldGbFlags_t;
-
-typedef struct {
-    fldGbFlags_t flags[32];
-} fldGbTypeBlock_t;
+#include "newdata.h"
+#include "field.h"
+extern u8 D_002FA930[];
+extern char *D_002FA938[];
+extern char D_0054EA38[], D_0054EA40[], D_0054EA48[], D_0054EA50[], D_0054EA58[];
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 style, const char *format, ...);
+extern f64 sdfFloatToULong(f32 value);
+extern s32 fldDoor_ElvTakasaToFloor(s32 floor);
+extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type);
+extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *list);
+extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *list);
+extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *list);
+extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *list);
+extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
+extern void rsetOtOfs(u32 buffer);
+extern void fldDrwZSave(void);
+extern void fldDrwZLoad(void);
+extern f32 R360_LR(f32 current, f32 target);
+extern void dds3MenuStepValue(char *text, f32 value);
 
 extern sdfVector4_t fldCamTarget;
 extern s32 fldGb __attribute__((section(".data")));
@@ -49,8 +59,9 @@ typedef struct {
 } fldMapCell_t;
 
 typedef struct {
-    u8 unk00[0x4];
+    u32 firstOffset;
     u32 cellCount;
+    u32 secondOffset;
 } fldRunMapHeader_t;
 
 extern fldWave_t fldWaveBuff[];
@@ -99,48 +110,62 @@ extern void fldSetElvCameraScene(s32 dir);
 
 
 typedef struct {
-    u8 unk00[0x4];
-    u32 flag;
-    u8 unk08[0x2];
-    u16 hp;
-    u8 unk0C[0xE0];
-} fldAnahoriAkuma_t;
-
-/* Only the fields reached from this unit are known. */
-typedef struct {
-    u8 unk00000[0xA4C];
-    u32 maFlags;
-    fldAnahoriAkuma_t akuma[16];
-    u8 unk01910[0x4D48];
-    fldGbTypeBlock_t gb[48];
-    u8 takaraOpen[0x20];
-    u8 unk11A78[0x8];
-    u8 takaraOpenEx[0x20];
-} dds3GlobalWork_t;
-
-typedef struct {
-    u8 unk00[0x4];
-    s32 fld;
-    s32 area;
-    u8 unk0C[0x8];
-    u32 flag;
-    u8 unk18[0xA0];
-    s32 lightMaIdx;
-    u8 unkBC[0x44];
-    f32 posX;
-    u8 unk104[0x4];
-    f32 posZ;
-} fldGlobalWork_t;
-
-typedef struct {
-    u8 unk00[0x34];
+    u8 unk00[0x30];
+    u32 unk30;
     s32 mode;
-    u8 unk38[0x24];
+    u32 sequenceWord38;
+    u32 sequenceWord3C;
+    char name[16];
+    s32 stage;
+    s32 kind;
+    s32 enabled;
     s32 restore;
+    u16 code;
+    u16 sequenceMode;
+    s32 link;
+    u8 unk68[8];
+    char detail[16];
+    char note[16];
+    u32 options;
+    u8 unk94[12];
 } fldSceneParam_t;
+typedef struct {
+    u32 unk00;
+    u32 cellsOffset;
+} fldRunMapGrid_t;
 
-extern dds3GlobalWork_t *DDS3_GBWK;
-extern fldGlobalWork_t fldGlobalBase;
+typedef struct {
+    u32 flags;
+    s32 stage;
+} fldSequenceController_t;
+
+typedef struct {
+    u8 unk00[0x44];
+    s32 enabled;
+    u32 unk48;
+    s32 counter;
+} fldDanteGunWork_t;
+
+extern fldDanteGunWork_t fldRunDanteGunFlag;
+extern u8 fldDoorExitFlag;
+extern u8 fldDoorExitMode[];
+extern char D_0054EB30[];
+extern char D_00531690[], D_00531940[], D_00531950[];
+extern s32 fldProcShutDownFlg;
+extern s32 ProcSequence(dds3ProcessID_t *process);
+extern s32 ProcDraw(dds3ProcessID_t *process);
+extern void fclClearTerminalState(void);
+extern void fldMakeFilePath(char *path, s32 area, s32 floor);
+extern s32 sprintf(char *text, const char *format, ...);
+extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, s32 flags);
+extern s32 slGetExitType(void);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void fldGbInit_System(s32 mode);
+extern void evtBitOn(s32 flag);
+extern void fldSetNextField(s32 field, s32 parameter);
+void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+
 extern fldSceneParam_t fldSceneParam;
 extern u8 D_002FC480[];
 extern s32 gFldNowDZone;
@@ -290,7 +315,7 @@ extern fldRunDante_t fldRun_Dante;
 extern fldUnitControl_t *fldGetUnitControl(void);
 extern fldFollowCameraControl_t *fldGetFollowCameraControl(void);
 
-extern u32 fldAutoMapSeqFlags[1];
+extern fldSequenceController_t fldAutoMapSeqFlags;
 extern u32 fldEncountFlags;
 extern s32 fldRunDanteHandle __attribute__((section(".bss")));
 extern s32 gFldAnahoriAkumaIdx;
@@ -311,7 +336,7 @@ extern sdfMemHandle_t *fldRunMapData;
 extern fldRunMapHeader_t *fldRunMapHeader;
 extern fldMapCell_t *fldRunMapCellData;
 extern void *pFroMapHead;
-extern f32 fldRunMapScale;
+extern void *fldRunMapScale;
 extern s32 D_002FC3D8 __attribute__((section(".data")));
 
 extern dds3Basic_t *dds3AddSceneBasicData(u32 type);
@@ -346,10 +371,9 @@ extern void evtFreeStage(void);
 extern void fldProcShutDown(void);
 extern void fldRunDanteGetDistAngle(f32 *dist, f32 *angle);
 extern void dds3DebugFloatEditEx(f32 *value, u8 *pad, f32 step, f32 min, f32 max, f32 scale);
-extern void dds3DebugIntEditEx(u32 *value, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5, u8 *pad);
-extern void dds3DebugColorEditEx(u32 *value, s32 digits, u8 *pad);
+extern void dds3DebugIntEditEx(void *value, s32 type, s64 min, s64 max, s64 step, s64 bigStep, s8 *pad);
+extern s32 dds3DebugColorEditEx(u32 *value, s32 digits, s8 *pad);
 extern s32 ooyTestDrawProc(dds3ProcessID_t *id);
-extern void fldEsutoMaClear(void);
 
 dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *pData, char *pName)
 {
@@ -535,31 +559,263 @@ sdfDrawTag_t *dds3FontReqAllocDrawTag(void)
     return tag;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3PrimFrameRect);
+u64 *dds3PrimFrameRect(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
+    u64 *packet;
+    s32 right;
+    s32 bottom;
+    u64 depthHigh;
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3PrimLine);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x80);
+    packet[0] = 7;
+    right = x + width;
+    bottom = y + height;
+    depthHigh = (u64)(u32)depth << 32;
+    packet[1] = 0x5000000700000000ULL;
+    packet[2] = 0xB400000000008001ULL;
+    packet[3] = 0x55555105510ULL;
+    packet[4] = 0x146;
+    packet[5] = colorA | 0x3F80000000000000ULL;
+    packet[6] = (u32)(((u32)x & 0xFFFF) | ((u32)y << 16)) | depthHigh;
+    packet[7] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[8] = 0x142;
+    packet[9] = colorB | 0x3F80000000000000ULL;
+    packet[14] = (u32)(((u32)(x - 0x10) & 0xFFFF) | ((u32)(y - 8) << 16)) | depthHigh;
+    packet[10] = packet[14];
+    packet[11] = (u32)(((u32)right & 0xFFFF) | ((u32)(y - 8) << 16)) | depthHigh;
+    packet[12] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[13] = (u32)(((u32)(x - 0x10) & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[15] = 0;
+    return packet;
+}
+
+u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x50);
+
+    packet[0] = 4;
+    packet[1] = 0x5000000400000000ULL;
+    packet[2] = 0x5400000000008001ULL;
+    packet[3] = 0x51510;
+    packet[4] = flags | 0x109;
+    packet[5] = (u32)color0 | ((u64)0xFE00 << 46);
+    packet[6] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | ((u64)((u32)z0 >> 4) << 32);
+    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | ((u64)((u32)z1 >> 4) << 32);
+    packet[9] = 0;
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", dds3PrimLine3D);
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3DebugFloatEditEx);
+void dds3DebugFloatEditEx(f32 *controlledValue, u8 *padState, f32 minimum, f32 maximum, f32 step, f32 bigStep) {
+    f32 adjustedValue = *controlledValue;
+
+    if ((s8)padState[5] & 0x80) {
+        adjustedValue += bigStep;
+        if (maximum < adjustedValue) {
+            adjustedValue = minimum;
+        }
+    } else if (padState[5] & 2) {
+        adjustedValue += bigStep;
+        if (maximum < adjustedValue) {
+            adjustedValue = maximum;
+        }
+    } else if ((s8)padState[4] & 0x80) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < minimum) {
+            adjustedValue = maximum;
+        }
+    } else if (padState[4] & 2) {
+
+        adjustedValue -= bigStep;
+        if (adjustedValue < minimum) {
+            adjustedValue = minimum;
+        }
+    } else if ((s8)padState[7] & 0x80) {
+        adjustedValue += step;
+        if (maximum < adjustedValue) {
+            adjustedValue = minimum;
+        }
+    } else if (padState[7] & 2) {
+        adjustedValue += step;
+        if (maximum < adjustedValue) {
+            adjustedValue = maximum;
+        }
+    } else if ((s8)padState[6] & 0x80) {
+        adjustedValue -= step;
+        if (adjustedValue < minimum) {
+            adjustedValue = maximum;
+        }
+    } else if (padState[6] & 2) {
+        adjustedValue -= step;
+        if (adjustedValue < minimum) {
+            adjustedValue = minimum;
+        }
+    } else {
+        return;
+    }
+    *controlledValue = adjustedValue;
+}
 
 void dds3DebugFloatEdit(f32 *value, f32 step, f32 min, f32 max, f32 scale)
 {
     dds3DebugFloatEditEx(value, &dds3PadButtonState[0x20], step, min, max, scale);
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3DebugIntEditEx);
+void dds3DebugIntEditEx(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep, s8 *padState) {
+    s64 adjustedValue;
+    switch (storageType) {
+    case 1:
+        adjustedValue = *(u8 *)valueAddress;
+        break;
+    case 2:
+        adjustedValue = *(u16 *)valueAddress;
+        break;
+    case 4:
+        adjustedValue = *(u32 *)valueAddress;
+        break;
+    case -1:
+        adjustedValue = *(s8 *)valueAddress;
+        break;
+    case -2:
+        adjustedValue = *(s16 *)valueAddress;
+        break;
+    case -4:
+        adjustedValue = *(s32 *)valueAddress;
+        break;
+    default:
+        return;
+    }
+    if (padState[5] & 0x80) {
+        adjustedValue += bigStep;
+        if (max < adjustedValue) {
+            adjustedValue = min;
+        }
+    } else if (padState[5] & 2) {
+        adjustedValue += bigStep;
+        if (max < adjustedValue) {
+            adjustedValue = max;
+        }
+    } else if (padState[4] & 0x80) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < min) {
+            adjustedValue = max;
+        }
+    } else if (padState[4] & 2) {
+        adjustedValue -= bigStep;
+        if (adjustedValue < min) {
+            adjustedValue = min;
+        }
+    } else if (padState[7] & 0x80) {
+        adjustedValue += step;
+        if (max < adjustedValue) {
+            adjustedValue = min;
+        }
+    } else if (padState[7] & 2) {
+        adjustedValue += step;
+        if (max < adjustedValue) {
+            adjustedValue = max;
+        }
+    } else if (padState[6] & 0x80) {
+        adjustedValue -= step;
+        if (adjustedValue < min) {
+            adjustedValue = max;
 
-void dds3DebugIntEdit(u32 *value, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5)
-{
-    dds3DebugIntEditEx(value, a1, a2, a3, a4, a5, &dds3PadButtonState[0x20]);
+        }
+    } else if (padState[6] & 2) {
+        adjustedValue -= step;
+        if (adjustedValue < min) {
+            adjustedValue = min;
+        }
+    } else {
+        return;
+    }
+    switch (storageType) {
+    case -1:
+    case 1:
+        *(u8 *)valueAddress = adjustedValue;
+        break;
+    case -2:
+    case 2:
+        *(u16 *)valueAddress = adjustedValue;
+        break;
+    case -4:
+    case 4:
+        *(u32 *)valueAddress = adjustedValue;
+        break;
+    }
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3DebugColorEditEx);
+void dds3DebugIntEdit(void *value, s32 a1, s64 a2, s64 a3, s64 a4, s64 a5)
+{
+    dds3DebugIntEditEx(value, a1, a2, a3, a4, a5, (s8 *)&dds3PadButtonState[0x20]);
+}
+
+s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *padState) {
+    s32 originalColor = *color;
+    s32 channelValue = originalColor;
+    s32 updatedColor;
+    switch (channel) {
+    case 0:
+        break;
+    case 1:
+        channelValue = originalColor >> 8;
+        break;
+    case 2:
+        channelValue = originalColor >> 16;
+        break;
+    case 3:
+        channelValue = originalColor >> 24;
+        break;
+    }
+    channelValue &= 0xFF;
+    if (((padState[5] & 0x80) || (padState[7] & 0x80)) && channelValue == 0xFF) {
+        channelValue = 0;
+    } else if (padState[5] & 2) {
+        channelValue += 10;
+        if (channelValue >= 0x100) {
+            channelValue = 0xFF;
+        }
+    } else if (((padState[4] & 0x80) || (padState[6] & 0x80)) && channelValue == 0) {
+        channelValue = 0xFF;
+    } else if (padState[4] & 2) {
+        channelValue -= 10;
+        if (channelValue < 0) {
+            channelValue = 0;
+        }
+    } else if (padState[7] & 2) {
+        channelValue += 1;
+        if (channelValue >= 0x100) {
+            channelValue = 0xFF;
+        }
+    } else if (padState[6] & 2) {
+        channelValue -= 1;
+        if (channelValue < 0) {
+            channelValue = 0;
+        }
+    } else {
+        return 0;
+    }
+    switch (channel) {
+    case 0:
+        updatedColor = (originalColor & 0xFFFFFF00) | channelValue;
+        break;
+    case 1:
+        updatedColor = (originalColor & 0xFFFF00FF) | (channelValue << 8);
+        break;
+    case 2:
+        updatedColor = (originalColor & 0xFF00FFFF) | (channelValue << 16);
+        break;
+    default:
+        updatedColor = (originalColor & 0x00FFFFFF) | (channelValue << 24);
+        break;
+    }
+    *color = updatedColor;
+    return updatedColor != originalColor;
+}
 
 void dds3DebugColorEdit(u32 *value, s32 digits)
 {
-    dds3DebugColorEditEx(value, digits, &dds3PadButtonState[0x20]);
+    dds3DebugColorEditEx(value, digits, (s8 *)&dds3PadButtonState[0x20]);
 }
 
 void dds3MenuStepValue(char *out, f32 value)
@@ -587,9 +843,89 @@ void dds3MenuStepValue(char *out, f32 value)
     out[4] = '\0';
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3PrimDebugTextBox);
+void dds3PrimDebugTextBox(void *packetList, s32 x, s32 y, s32 selected, f32 *values) {
+    char text[16];
+    u32 color = 0x80000000;
+    s32 i;
+    s32 style;
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3PrimDebugTextBoxRGB);
+    if (values != NULL) {
+        color = 0;
+        for (i = 0; i != 3; i++) {
+            s32 channel = values[i] * 128.0f;
+            if (channel > 0) {
+                if (channel >= 256) {
+                    channel = 255;
+                }
+                color |= channel << (i * 8);
+            }
+        }
+        color |= 0x80000000;
+    }
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x510, y + 0x18,
+                     0xFF0080, 0x240, 0xF0, color, 0x40806020));
+    for (i = 0; i != 3; i++) {
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x, y,
+                        0xFF0080, D_002FA930[i], D_002FA938[i]));
+        style = selected == i ? 6 : 0;
+        if (values == NULL) {
+            text[0] = '-';
+            text[1] = '-';
+            text[2] = '-';
+            text[3] = '-';
+            text[4] = 0;
+        } else {
+            dds3MenuStepValue(text, values[i]);
+        }
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(x + 0x180,
+                        y, 0xFF0080, style, text));
+        y += 0x60;
+    }
+}
+
+void dds3PrimDebugTextBoxRGB(void *packetList, s32 x, s32 y, s32 selected,
+                   u32 color, s32 showNormalized) {
+    s32 i;
+    s32 style;
+    s32 channel;
+    const char *label;
+
+    color = (color & 0xFFFFFF) | 0x80000000;
+    sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(x + 0x510, y + 0x18,
+                    0xFF0080, 0x240, 0xF0, color, 0x40806020));
+    for (i = 0; i != 3; i++) {
+        switch (i) {
+        case 0:
+            style = 2;
+            label = D_0054EA48;
+            channel = color & 0xFF;
+            break;
+        case 1:
+            style = 4;
+            label = D_0054EA40;
+            channel = (color >> 8) & 0xFF;
+            break;
+        default:
+            style = 5;
+            label = D_0054EA38;
+            channel = (color >> 16) & 0xFF;
+            break;
+        }
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+                        x, y, 0xFF0080, style, label));
+        sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+                        x + 0x180, y, 0xFF0080, i == selected ? 6 : 0,
+                        D_0054EA50, channel));
+        if (showNormalized != 0) {
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+                            x, y + 0x180, 0xFF0080, style, label));
+            sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
+                            x + 0x240, y + 0x180, 0xFF0080, 0,
+                            D_0054EA58, sdfFloatToULong(channel * (1.0f / 255.0f))));
+        }
+        y += 0x60;
+    }
+}
 
 s32 dds3NullDrawProc(dds3ProcessID_t *id)
 {
@@ -612,7 +948,47 @@ void KillOoyTest(void)
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldElvGetFloorDigits);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldElvSetFloor);
+void fldElvSetFloor(s32 start, s32 end) {
+    s32 first;
+    s32 endEntry;
+
+    first = fldDoor_ElvTakasaToFloor(start);
+    fldElvState = 0;
+    fldElvFloorFrom = first;
+    if (first > 1000) {
+        gFldElvFloorNow = first % 1000;
+    } else {
+        gFldElvFloorNow = first;
+    }
+    if (first > 1000) {
+        fldElvFloorNum = first;
+        fldElvFloorFrom = first % 1000;
+    } else {
+        fldElvFloorNum = -999;
+    }
+
+    endEntry = fldDoor_ElvTakasaToFloor(end);
+    fldElvFloorTo = endEntry;
+    if (endEntry > 1000) {
+        fldElvFloorDisp = endEntry;
+        fldElvFloorTo = endEntry % 1000;
+    } else {
+        fldElvFloorDisp = -999;
+    }
+    if (start == end) {
+        fldElvFloorTarget = -999;
+    } else {
+        fldElvFloorTarget = 0;
+    }
+    if (gFldElvFloorNow != -999 && fldElvFloorTarget != -999) {
+        fldElvFloorTarget++;
+        if (fldElvFloorFrom < fldElvFloorTo) {
+            fldSetElvCameraScene(1);
+        } else {
+            fldSetElvCameraScene(-1);
+        }
+    }
+}
 
 void fldElvReset(void)
 {
@@ -646,7 +1022,36 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_00530F30);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldElvDrawFloorNum);
 
-INCLUDE_ASM(const s32, "code_00116AD0", drawSceneBasicList);
+void drawSceneBasicList(void) {
+    s32 hasEligibleBackground = 0;
+    dds3BasicArrayHandle_t *objectChain;
+    dds3Basic_t *worldObject;
+
+    objectChain = dds3SceneBasicGetList(dds3GetControlScene(), 5);
+    if (objectChain != 0) {
+        if (dds3SetFirstBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0) {
+            do {
+                worldObject = (dds3Basic_t *)dds3GetBasicArray((dds3BasicArrayHandle_t *)objectChain);
+                if (dds3ObjectBaseCheckFlag(worldObject, 0x200) != 0) {
+                    if (dds3ObjectBaseCheckFlag(worldObject, 1) == 0) {
+                        hasEligibleBackground = 1;
+
+                    }
+                }
+            } while (dds3SetNextBasicArray((dds3BasicArrayHandle_t *)objectChain) != 0);
+        }
+        dds3FreeBasicArrayHandle(objectChain);
+    }
+    if (fldGb == 1) {
+        hasEligibleBackground = 0;
+    }
+    if (hasEligibleBackground != 0) {
+        rsetOtOfs(0x24);
+        fldDrwZSave();
+        rsetOtOfs(0x26);
+        fldDrwZLoad();
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldSdwDraw);
 
@@ -679,7 +1084,27 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_005311A8);
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_005311D0);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldMakeFroFileName);
+void fldMakeFroFileName(void) {
+    char directory[0x20];
+    char path[0x40];
+    fldRunMapHeader_t *resource;
+    u32 base;
+    u32 first;
+    u32 second;
+    u32 third;
+
+    fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
+    sprintf(path, "%sF%03d_%03d.FRO", directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
+    fldRunMapData = sdfDevLoadFileEx(path, &resource, 0);
+    base = (u32)resource;
+    first = base + resource->firstOffset;
+    second = base + resource->secondOffset;
+    third = base + ((fldRunMapGrid_t *)second)->cellsOffset;
+    fldRunMapHeader = (fldRunMapHeader_t *)base;
+    fldRunMapCellData = (fldMapCell_t *)first;
+    pFroMapHead = (fldRunMapGrid_t *)second;
+    fldRunMapScale = (void *)third;
+}
 
 void fldFreeRunMapData(void)
 {
@@ -689,7 +1114,7 @@ void fldFreeRunMapData(void)
         fldRunMapHeader = NULL;
         fldRunMapCellData = NULL;
         pFroMapHead = NULL;
-        fldRunMapScale = 0.0f;
+        fldRunMapScale = NULL;
     }
 }
 
@@ -724,8 +1149,8 @@ void fldRunDanteGetDistAngle(f32 *pDist, f32 *pAngle)
     f32 dist;
     f32 angle;
 
-    dx = fldGlobalBase.posX - fldRun_Dante.x;
-    dz = fldGlobalBase.posZ - fldRun_Dante.z;
+    dx = fldGlobalBase.x - fldRun_Dante.x;
+    dz = fldGlobalBase.z - fldRun_Dante.z;
     EE_SQRT_F32_SCHED(dist, dx * dx + dz * dz);
     if (dist < 1.0f) {
         angle = 0.0f;
@@ -755,7 +1180,25 @@ void fldGetDistAngleTo(f32 *pDist, f32 *pAngle, f32 x, f32 z)
     *pAngle = angle;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldTurnToward);
+f32 fldTurnToward(f32 cur, f32 target, f32 speed, f32 minStep) {
+    f32 delta = R360_LR(cur, target);
+    f32 step = delta / speed;
+
+    if (step < 0.0f) {
+        step = -step;
+    }
+    if (step < minStep) {
+        step = minStep;
+    }
+    if ((delta >= 0.0f && delta <= step) || (delta <= 0.0f && -step <= delta)) {
+        delta = target;
+    } else if (delta < 0.0f) {
+        delta = cur - step;
+    } else {
+        delta = cur + step;
+    }
+    return delta;
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunAiCng);
 
@@ -1013,7 +1456,27 @@ s32 fldAutoMapFindFloor(s32 fld, s32 area)
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldDbgWmapStart);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldMainLoadStart);
+void fldMainLoadStart(void) {
+    fldSceneParam_t record;
+    u32 mode;
+
+    if (slGetExitType() == 1) {
+        return;
+    }
+    if (DDS3_GBWK->transition != 0) {
+        mode = 1;
+        dds3AdminiCallSequence(0x29, &mode, 4, 0);
+        return;
+    }
+    fldGbInit_System(1);
+    fldRunDanteGunFlag.counter = 0;
+    fldRunDanteGunFlag.enabled = 1;
+    evtBitOn(0xC0F);
+    fldSetNextField(0, 0);
+    fldSetSceneParam2(&record, 1, 1, D_0054EB30);
+    record.options = 1;
+    dds3AdminiCallSequence(6, &record, 0xA0, 0);
+}
 
 void fldFirstInit(void)
 {
@@ -1029,15 +1492,123 @@ void fldFirstInit(void)
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldInitAllValue);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetSceneParam2);
+void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
+    if (dds3SearchProcessName(D_00531690) != NULL) {
+        if (fldGlobalBase.area == stage) {
+            fldGlobalBase.reuseAreaResources = 1;
+        } else {
+            fclClearTerminalState();
+        }
+    }
+    record->unk30 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
+    strcpy(record->name, name);
+    record->stage = stage;
+    record->enabled = 1;
+    record->restore = 2;
+    record->kind = kind;
+    record->code = 0;
+    record->sequenceMode = 0;
+    record->link = 0;
+    memset(record->detail, 0, sizeof(record->detail));
+    memset(record->note, 0, sizeof(record->note));
+    record->options = 0;
+    fldDoorExitFlag = 0;
+    fldDoorExitMode[0] = 0;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetSceneParam3);
+void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
+    if (dds3SearchProcessName(D_00531690) != NULL) {
+        if (fldGlobalBase.area == stage) {
+            fldGlobalBase.reuseAreaResources = 1;
+        } else {
+            fclClearTerminalState();
+        }
+    }
+    record->unk30 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
+    strcpy(record->name, name);
+    record->stage = stage;
+    record->enabled = 1;
+    record->restore = 3;
+    record->kind = kind;
+    record->code = 0;
+    record->sequenceMode = 0;
+    record->link = 0;
+    memset(record->detail, 0, sizeof(record->detail));
+    memset(record->note, 0, sizeof(record->note));
+    record->options = 0;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetSceneParam4);
+void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
+                    s32 code, s32 link, const char *subname) {
+    if (dds3SearchProcessName(D_00531690) != NULL) {
+        if (fldGlobalBase.area == stage) {
+            fldGlobalBase.reuseAreaResources = 1;
+        } else {
+            fclClearTerminalState();
+        }
+    }
+    record->unk30 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
+    strcpy(record->name, name);
+    record->stage = stage;
+    record->enabled = 1;
+    record->kind = kind;
+    record->code = code;
+    record->link = link;
+    record->restore = 2;
+    record->sequenceMode = 0;
+    strcpy(record->detail, subname);
+    memset(record->note, 0, sizeof(record->note));
+    record->options = 0;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetSceneParam5);
+void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
+                    s32 code, const char *subname) {
+    if (dds3SearchProcessName(D_00531690) != NULL) {
+        if (fldGlobalBase.area == stage) {
+            fldGlobalBase.reuseAreaResources = 1;
+        } else {
+            fclClearTerminalState();
+        }
+    }
+    record->unk30 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
+    strcpy(record->name, name);
+    record->stage = stage;
+    record->enabled = 1;
+    record->restore = 2;
+    record->kind = kind;
+    record->code = code;
+    record->sequenceMode = 0;
+    record->link = 0;
+    memset(record->detail, 0, sizeof(record->detail));
+    strcpy(record->note, subname);
+    record->options = 0;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetSceneParamLoad);
+void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
+                    s32 code, s32 link, const char *subname) {
+    record->unk30 = 0;
+    record->sequenceWord3C = 0;
+    record->sequenceWord38 = 0;
+    strcpy(record->name, name);
+    record->enabled = 1;
+    record->stage = stage;
+    record->kind = kind;
+    record->code = code;
+    record->link = link;
+    record->restore = 2;
+    record->sequenceMode = 0;
+    strcpy(record->detail, subname);
+    memset(record->note, 0, sizeof(record->note));
+    record->options = 0;
+}
 
 s32 fldGetRestoreMode(void)
 {
@@ -1208,41 +1779,41 @@ s32 fldLightMaIdxCalc(void)
 {
     s32 idx = 0x64;
 
-    if (fldGlobalBase.fld == 0x15) {
+    if (fldGlobalBase.area == 0x15) {
         idx = 0x66;
-        if (fldGlobalBase.area == 0x02) {
+        if (fldGlobalBase.floor == 0x02) {
             idx = 0x64;
         }
-        if (fldGlobalBase.area == 0x17) {
+        if (fldGlobalBase.floor == 0x17) {
             idx = 0x65;
         }
     }
-    if (fldGlobalBase.fld == 0x1A) {
+    if (fldGlobalBase.area == 0x1A) {
         idx = 0x66;
-        if (fldGlobalBase.area == 0x12) {
+        if (fldGlobalBase.floor == 0x12) {
             idx = 0x65;
         }
-        if (fldGlobalBase.area == 0x13) {
+        if (fldGlobalBase.floor == 0x13) {
             idx = 0x65;
         }
-        if (fldGlobalBase.area == 0x15) {
+        if (fldGlobalBase.floor == 0x15) {
             idx = 0x65;
         }
     }
-    if (fldGlobalBase.fld == 0x1D) {
+    if (fldGlobalBase.area == 0x1D) {
         idx = 0x66;
-        if (fldGlobalBase.area == 0x01) {
+        if (fldGlobalBase.floor == 0x01) {
             idx = 0x64;
         }
-        if (fldGlobalBase.area == 0x09) {
+        if (fldGlobalBase.floor == 0x09) {
             idx = 0x65;
         }
-        if (fldGlobalBase.area == 0x0A) {
+        if (fldGlobalBase.floor == 0x0A) {
             idx = 0x65;
         }
     }
-    if (fldGlobalBase.fld == 0x25) {
-        if (fldGlobalBase.area == 0x0F) {
+    if (fldGlobalBase.area == 0x25) {
+        if (fldGlobalBase.floor == 0x0F) {
             idx = 0x64;
         }
     }
@@ -1253,14 +1824,14 @@ void fldLightMaClearMsg(void)
 {
     if ((DDS3_GBWK->maFlags & 0x8) != 0) {
         fldLightMaClear();
-        fldGlobalBase.flag |= 0x1;
+        fldGlobalBase.consumedFlags |= 0x1;
     }
 }
 
 void fldLightMaClear(void)
 {
     DDS3_GBWK->maFlags &= ~0x8;
-    fldGlobalBase.flag &= ~0x1;
+    fldGlobalBase.consumedFlags &= ~0x1;
 }
 
 void fldLightMaStart(void)
@@ -1271,7 +1842,7 @@ void fldLightMaStart(void)
         }
         fldGlobalBase.lightMaIdx = fldLightMaIdxCalc();
         DDS3_GBWK->maFlags |= 0x8;
-        fldGlobalBase.flag &= ~0x1;
+        fldGlobalBase.consumedFlags &= ~0x1;
         fldSkySetTblLightMa(fldGlobalBase.lightMaIdx, 0);
     }
 }
@@ -1290,20 +1861,20 @@ void fldRifutoMaClearMsg(void)
 {
     if ((DDS3_GBWK->maFlags & 0x4) != 0) {
         fldRifutoMaClear();
-        fldGlobalBase.flag |= 0x2;
+        fldGlobalBase.consumedFlags |= 0x2;
     }
 }
 
 void fldRifutoMaClear(void)
 {
     DDS3_GBWK->maFlags &= ~0x4;
-    fldGlobalBase.flag &= ~0x2;
+    fldGlobalBase.consumedFlags &= ~0x2;
 }
 
 void fldRifutoMaStart(void)
 {
     DDS3_GBWK->maFlags |= 0x4;
-    fldGlobalBase.flag &= ~0x2;
+    fldGlobalBase.consumedFlags &= ~0x2;
 }
 
 s32 fldRifutoMaChk(void)
@@ -1318,20 +1889,20 @@ void fldRiberaMaClearMsg(void)
 {
     if ((DDS3_GBWK->maFlags & 0x2) != 0) {
         fldRiberaMaClear();
-        fldGlobalBase.flag |= 0x4;
+        fldGlobalBase.consumedFlags |= 0x4;
     }
 }
 
 void fldRiberaMaClear(void)
 {
     DDS3_GBWK->maFlags &= ~0x2;
-    fldGlobalBase.flag &= ~0x4;
+    fldGlobalBase.consumedFlags &= ~0x4;
 }
 
 void fldRiberaMaStart(void)
 {
     DDS3_GBWK->maFlags = (DDS3_GBWK->maFlags | 0x2) & ~0x1;
-    fldGlobalBase.flag &= ~0x4;
+    fldGlobalBase.consumedFlags &= ~0x4;
 }
 
 s32 fldRiberaMaChk(void)
@@ -1346,20 +1917,20 @@ void fldEsutoMaClearMsg(void)
 {
     if ((DDS3_GBWK->maFlags & 0x1) != 0) {
         fldEsutoMaClear();
-        fldGlobalBase.flag |= 0x8;
+        fldGlobalBase.consumedFlags |= 0x8;
     }
 }
 
 void fldEsutoMaClear(void)
 {
     DDS3_GBWK->maFlags &= ~0x1;
-    fldGlobalBase.flag &= ~0x8;
+    fldGlobalBase.consumedFlags &= ~0x8;
 }
 
 void fldEsutoMaStart(void)
 {
     DDS3_GBWK->maFlags = (DDS3_GBWK->maFlags | 0x1) & ~0x2;
-    fldGlobalBase.flag &= ~0x8;
+    fldGlobalBase.consumedFlags &= ~0x8;
 }
 
 s32 fldEsutoMaChk(void)
@@ -1441,17 +2012,17 @@ INCLUDE_ASM(const s32, "code_00116AD0", ProcDraw);
 
 void fldAutoMapSeqSetFlag(u32 flag)
 {
-    fldAutoMapSeqFlags[0] |= flag;
+    fldAutoMapSeqFlags.flags |= flag;
 }
 
 void fldAutoMapSeqClearFlag(u32 flag)
 {
-    fldAutoMapSeqFlags[0] &= ~flag;
+    fldAutoMapSeqFlags.flags &= ~flag;
 }
 
 s32 fldAutoMapSeqTestFlag(u32 flag)
 {
-    return (fldAutoMapSeqFlags[0] & flag) != 0;
+    return (fldAutoMapSeqFlags.flags & flag) != 0;
 }
 
 void fldEncountSetFlag(u32 flag)
@@ -1469,7 +2040,33 @@ s32 fldEncountTestFlag(u32 flag)
     return (fldEncountFlags & flag) != 0;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldProcTrigSequence);
+void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
+    fldSceneParam_t *scene = &fldSceneParam;
+    fldSequenceController_t *controller = &fldAutoMapSeqFlags;
+
+    controller->stage = 0;
+    controller->flags = 0;
+    scene->mode = mode;
+    if (mode == 0) {
+        scene->sequenceWord3C = record->sequenceWord3C;
+        scene->sequenceWord38 = record->sequenceWord38;
+        strcpy(scene->name, record->name);
+        scene->stage = record->stage;
+        scene->code = record->code;
+        scene->kind = record->kind;
+        scene->sequenceMode = record->sequenceMode;
+        scene->enabled = record->enabled;
+        scene->restore = record->restore;
+        scene->link = record->link;
+        strcpy(scene->detail, record->detail);
+        strcpy(scene->note, record->note);
+        scene->options = record->options;
+    }
+    dds3StartProcess(D_00531940, 0x3F7, 0, 0, ProcSequence, 0, 0);
+    dds3StartProcess(D_00531950, 0x2B0A, 0, 0, ProcDraw, 0, 0);
+    fldProcShutDownFlg = 1;
+    InitOoyTest();
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldProcShutDown);
 
@@ -1535,6 +2132,10 @@ void fldProcNextJump(void)
         fldNext_fld = 0;
     }
 }
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531940);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531950);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EA08);
 
@@ -1719,8 +2320,4 @@ INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB8C);
 INCLUDE_SDATA(const s32, "code_00116AD0", fldEncountTimer);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB94);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531940);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531950);
 

@@ -1,6 +1,24 @@
 #include "common.h"
 #include "kernel.h"
-#include "newdata.h"
+#include "nb.h"
+#include "ps2asm.h"
+
+#define NB_RESTORE_MATRIX() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
+    "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")
+#define NB_VIEW_FORWARD() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
+
+extern f32 aViewEye[];
+extern f32 D_002FA240[];
+extern f32 dds3ScreenParam[];
+extern void ReverseMatrix(void);
+extern void MultMatrixRev(f32 *matrix);
+/* These inherited symbol names identify the soft-double conversion and
+ * comparison helpers in this executable, not integer conversion/division. */
+extern f64 sdfFloatToULong(f32 value);
+extern s32 dpdiv(f64 left, f64 right);
+
 
 /* 8-byte rows at +0x88 indexed by formation slot. */
 typedef struct nbTimeList_t {
@@ -9,9 +27,6 @@ typedef struct nbTimeList_t {
     u16 hp;
     u16 pad06;
 } nbTimeList_t;
-
-typedef struct nbMainProcessData_t nbMainProcessData_t;
-typedef struct nbFormation_t nbFormation_t;
 
 typedef struct nbActionProcessData_t {
     nbMainProcessData_t *data;
@@ -41,25 +56,6 @@ typedef struct nbActionProcessData_t {
     u8 unk188[4];
     s32 hitstopframe;
 } nbActionProcessData_t;
-
-typedef struct nbFormation_t {
-    u8 unk00[0x70];
-    s32 unk70;
-    s32 unk74;
-    s32 unk78;
-    s32 unk7C;
-    u8 unk80[0x12];
-    s16 unk92;
-    u8 unk94[0x10];
-    s16 unkA4;
-    u8 unkA6[0x12];
-    s32 unkB8;
-    f32 unkBC;
-    f32 unkC0;
-    s32 unkC4;
-    f32 unkC8;
-    u8 unkCC[0x24];
-} nbFormation_t;
 
 typedef struct pmdProcessWork_t {
     nbFormation_t *form;
@@ -93,33 +89,6 @@ typedef struct nbDeadEvent_t {
     u8 unk04[0xA0];
 } nbDeadEvent_t;
 
-/* 0x310-byte rows; the 0x1C-byte subrows at +0x32 are indexed by part. */
-typedef struct datUnitVisual_t {
-    u8 unk00[0x32];
-    struct {
-        u8 unk00;
-        s8 unk01;
-        u8 unk02[0x1A];
-    } part[8];
-    u8 unk112[0x1FE];
-} datUnitVisual_t;
-
-struct nbMainProcessData_t {
-    u8 unk00[0x60];
-    u32 unk60;
-    u8 unk64[0x14];
-    s16 unk78;
-    s16 unk7A;
-    s16 unk7C;
-    s16 unk7E;
-    u8 unk80[0x4C];
-    s32 unkCC;
-    s32 unkD0;
-    dds3ProcessID_t *unkD4[4];
-    s32 unkE4;
-    dds3ProcessID_t *unkE8;
-};
-
 typedef struct nbCommSelProcessData_t {
     void *handle;
     nbMainProcessData_t *data;
@@ -133,7 +102,6 @@ extern char D_005441A8[];
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3SearchProcessName(const char *name);
-extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern void SetTarget_nbActionProcess(nbActionProcessData_t *a);
 extern s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add);
 extern void fldSkySetAlpha(s32 alp);
@@ -240,7 +208,7 @@ INCLUDE_ASM(const s32, "code_0024C470", nbStageProcess1);
 
 void nbStageShutdown(dds3ProcessID_t *id)
 {
-    nbGetMainProcessData()->unkCC = 0;
+    nbGetMainProcessData()->stageProcess = 0;
     StageFree();
     nbStageState.data = 0;
 }
@@ -280,14 +248,14 @@ INCLUDE_ASM(const s32, "code_0024C470", nbSetWaitMotion);
 
 s32 nbCalcUnitVisual(nbFormation_t *form, s32 part)
 {
-    datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->unk92));
+    datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
 
     return visual->part[part].unk00;
 }
 
 s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part)
 {
-    datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->unk92));
+    datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
 
     return visual->part[part].unk01;
 }
@@ -323,22 +291,22 @@ INCLUDE_ASM(const s32, "code_0024C470", nbRunKoukaType2);
 
 void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
 {
-    form->unk70 = 2;
-    form->unkBC = range;
-    form->unkC4 = 0;
-    form->unkC0 = power;
-    form->unkC8 = power;
+    form->type = 2;
+    form->damageRange = range;
+    form->shakePhase = 0;
+    form->shakePower = power;
+    form->addmovet = power;
 }
 
 INCLUDE_ASM(const s32, "code_0024C470", nbSetDamage);
 
 void nbSetDamage2(nbFormation_t *form, f32 range)
 {
-    form->unk70 = 1;
-    form->unk74 = 0;
-    form->unkB8 = 0x14;
-    form->unkBC = range;
-    form->unkC8 = 0.0f;
+    form->type = 1;
+    form->time = 0;
+    form->damageFrames = 0x14;
+    form->damageRange = range;
+    form->addmovet = 0.0f;
 }
 
 INCLUDE_ASM(const s32, "code_0024C470", nbSetBadstatMotion);
@@ -351,7 +319,7 @@ INCLUDE_ASM(const s32, "code_0024C470", nbLoadUnitGroup);
 
 s32 nbCheckLoad(nbFormation_t *form)
 {
-    s32 flag = form->unk78;
+    s32 flag = form->stat;
 
     if ((flag & 1) == 0) {
         return 0;
@@ -362,7 +330,7 @@ s32 nbCheckLoad(nbFormation_t *form)
     if ((flag & 2) != 0) {
         return 0;
     }
-    if ((form->unk7C & 4) != 0) {
+    if ((form->flag & 4) != 0) {
         return 0;
     }
     return 1;
@@ -392,7 +360,7 @@ s32 CheckLoad_nbUnitProcess(pmdProcessWork_t *wdata)
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        if ((form->unk78 & 1) != 0 && (form->unk7C & 2) != 0) {
+        if ((form->stat & 1) != 0 && (form->flag & 2) != 0) {
             return 1;
         }
         form++;
@@ -410,16 +378,16 @@ INCLUDE_ASM(const s32, "code_0024C470", nbUnitProcess2);
 
 void *nbUnitShutdown(dds3ProcessID_t *id)
 {
-    nbGetMainProcessData()->unkD0 = 0;
+    nbGetMainProcessData()->unitProcess = 0;
 }
 
 INCLUDE_ASM(const s32, "code_0024C470", nbInitUnitProcess);
 
 void nbCheckPacketState(nbActionProcessData_t *a, s32 startframe)
 {
-    if (a->form->unkA4 == 2) {
+    if (a->form->motendtype == 2) {
         nbMakeUnitFadeInPacket(startframe, a, a->form, 0, 2, 4, 4);
-        a->form->unkA4 = 0;
+        a->form->motendtype = 0;
     }
 }
 
@@ -508,7 +476,7 @@ s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add)
 {
     s32 hp;
 
-    if ((a->data->unk60 & 0x20000) != 0) {
+    if ((a->data->stat & 0x20000) != 0) {
         return 0;
     }
     hp = a->timelist[formindex].hp + add;
@@ -668,7 +636,7 @@ INCLUDE_ASM(const s32, "code_0024C470", CheckAction_BAD);
 void SetAction_BADWAIT(nbActionProcessData_t *a)
 {
     a->unk04 |= 0x20;
-    if ((a->data->unk60 & 8) != 0) {
+    if ((a->data->stat & 8) != 0) {
         nbCameraSetState(0x19);
         return;
     }
@@ -876,7 +844,7 @@ INCLUDE_ASM(const s32, "code_0024C470", nbSetOrderSide);
 
 void nbSetOrder(void)
 {
-    if ((nbGetMainProcessData()->unk60 & 8) == 0) {
+    if ((nbGetMainProcessData()->stat & 8) == 0) {
         nbSetOrderSide(0);
         return;
     }
@@ -887,7 +855,47 @@ INCLUDE_ASM(const s32, "code_0024C470", nbSetNextOrder);
 
 INCLUDE_ASM(const s32, "code_0024C470", nbUpdateOrder);
 
-INCLUDE_ASM(const s32, "code_0024C470", nbClipEffectNum);
+/* vu0 routine: project vf10 only when it lies in the forward view cone. */
+s32 nbClipEffectNum(s32 screenPosition[4])
+{
+    f32 viewDistance, forwardDot;
+    f32 *projectionData;
+
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(viewDistance);
+    if (dpdiv(sdfFloatToULong(viewDistance), 16.0) <= 0)
+        return 0;
+
+    VU0_NORMALIZE_VF10();
+    VU0_COPY_VF10_TO_VF11();
+    VU0_LOAD_MATRIX(D_002FA240);
+    VU0_COPY_MATRIX_TO_SECONDARY();
+    ReverseMatrix();
+    NB_VIEW_FORWARD();
+    VU0_NORMALIZE_VF10();
+    VU0_DOT_VF10_VF11(forwardDot);
+    if (forwardDot <= 0.5f)
+        return 0;
+
+    VU0_COPY_VF12_TO_VF10();
+    NB_RESTORE_MATRIX();
+    projectionData = dds3ScreenParam + 12;
+    MultMatrixRev(projectionData);
+    VU0_TRANSFORM_POINT_VF10();
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    projectionData += 16;
+    VU0_LOAD_VF11(projectionData);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(dds3ScreenParam + 32);
+    VU0_ADD_VF10_VF11();
+    VU0_FTOI4_VF10();
+    VU0_STORE_VF10(screenPosition);
+    screenPosition[0] -= 0x7000;
+    screenPosition[1] -= 0x7900;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_0024C470", nbLoadKoukaPos);
 
@@ -966,7 +974,7 @@ datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work)
 
 s32 nbCheckEventDead(nbFormation_t *form)
 {
-    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->unk92));
+    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
     nbDeadEvent_t *p;
 
     if (id == 0) {
@@ -981,7 +989,7 @@ s32 nbCheckEventDead(nbFormation_t *form)
 
 s32 nbCheckDeadScript(nbFormation_t *form)
 {
-    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->unk92));
+    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
     nbDeadEvent_t *p;
 
     if (id == 0) {
@@ -996,7 +1004,7 @@ s32 nbCheckDeadScript(nbFormation_t *form)
 
 s32 nbCheckDeadEvent(nbFormation_t *form)
 {
-    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->unk92));
+    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
     nbDeadEvent_t *p;
 
     if (id == 0) {

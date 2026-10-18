@@ -1,9 +1,123 @@
+#include "fpu.h"
 #include "common.h"
 #include "ps2asm.h"
+#include "basic.h"
+#include "motion.h"
+
+
+/* Native 0x30-byte EE thread descriptor passed to CreateThread. */
+typedef struct {
+    s32 status;
+    void (*entry)(void);
+    void *stack;
+    s32 stackSize;
+    void *gp;
+    s32 priority;
+    u8 unk18[0x18];
+} sdfKernelThreadParam_t;
+
+typedef struct sdfHandlerNode_t {
+    struct sdfHandlerNode_t *next;
+    s32 handlerKind;
+    s32 channel;
+    s32 handlerId;
+} sdfHandlerNode_t;
+
+struct pipeTextureFile_t;
+
+extern char D_00548EB0[]; /* Padded "Pipe_Cam". */
+extern char D_00549018[];
+extern f32 pipeCamShakeVec[], pipeCamShake[], pipeCameraPos[];
+extern dds3Basic_t *pipe_Camera;
+extern s32 _gp, sdfThreadSema, sdfVblankFlag, D_00551824;
+extern u8 sdfPadManagerMode, D_005756C0[], D_005776C0[];
+extern void (*D_00551828)(void);
+extern sdfThCB_t *sdfVblankThreadId;
+extern sdfThCB_t D_00552040;
+
+extern u32 dds3AllocObjectId(void);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(u32 id, f32 *position, f32 *eye, f32 *up);
+extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, f32 *eye);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 radius);
+extern dds3Basic_t *dds3GetControlScene(void);
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+extern void dds3SetScreenFovy(f32 fovy);
+extern s32 fclChkMessage(void);
+extern void fclUpdateMessage(void);
+extern void fclEndMessage(void);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(mdlObj_t *model, s32 index);
+extern u32 dds3GetRandA(void *seed);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
+extern void *dds3AllocConfigWork(s32 mode);
+extern s32 dds3CalcConfig(void *process);
+extern s32 dds3DrawConfig(void *process);
+extern s32 dds3UpdateConfig(void *process);
+extern void dds3DestroyConfig(void *process);
+extern void *dds3StartProcess(const char *name, s32 priority, s32 startDelay, s32 endDelay,
+                             s32 (*update)(void *), void (*destroy)(void *), void *work);
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *data, s32 mode);
+extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *data);
+extern s32 CreateThread(sdfKernelThreadParam_t *parameter);
+extern s32 AddIntcHandler2(s32 channel, s32 handler, s32 argument, s32 next);
+extern s32 AddDmacHandler2(s32 channel, s32 handler, s32 argument, s32 next);
+extern s32 AddSbusIntcHandler(s32 channel, s32 handler);
+extern void DisableIntc(s32 channel);
+extern void RemoveIntcHandler(s32 channel, s32 handlerId);
+extern void RemoveDmacHandler(s32 channel, s32 handlerId);
+extern void RemoveSbusIntcHandler(s32 channel);
+extern s32 SetAlarm(u16 delay, void (*callback)(s32, s32, s32), void *argument);
+extern s32 WaitSema(s32 semaphore);
+extern s32 SignalSema(s32 semaphore);
+extern s32 StartThread(s32 threadId, s32 argument);
+extern void ExitDeleteThread(void);
+extern void TerminateThread(s32 threadId);
+extern void libc_2DBCB0(s32 threadId);
+extern void EnableIntc(s32 channel);
+extern void WakeupThread(s32 threadId);
+extern void InitThread(void);
+extern void sdfPadManager(void);
+extern void sdfPadWork(void);
+extern void sdfFileCmdThreadCheckPrio(void);
+extern void sdfChipInit(u32 bytes);
+extern void sdfMemInit(u32 bytes);
+extern void sdfGsMemInit(void);
+extern void sdfImageSetInit(void);
+extern void sdfTexInit(void);
+extern void sdfPadInitManager(void);
+extern void sdfGrInit(u32 packetBufferBytes);
+extern void sdf3DInit(s32 count);
+extern void sdfCoreDrawInit(s32 bytes);
+extern void sdfRandomizeByTime(void *seed);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memcpy(void *destination, const void *source, u32 bytes);
+extern void *sdfMemGetPtr(void *handle);
+extern void sdfMemFreeDirect(void *handle);
+
+void FatalError(const char *format, ...) __attribute__((noreturn));
+s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
+void *sdfAllocAuto(s32 bytes);
+void sdfFreeAuto(void *allocation);
+void sdfAlarmWakeup(s32 unused0, s32 unused1, s32 threadId);
+void sdfWaitVblank(s32 count);
+void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void), void *stack,
+                           s64 stackBytes, s32 priority, s32 argument);
+s32 sdfInitThreadSystem(void);
+s32 VblankIntcHandler(s32 cause);
+f32 vecLength(f32 *vector);
+f32 vecNormalize(f32 *vector);
+f32 func_002A7DF8(f32 base, f32 exponent);
+
+#define T0_COUNT ((volatile u32 *)0x10000000)
+#define T0_MODE ((volatile u32 *)0x10000010)
+#define HW_WRITE(reg, value) (*(reg) = (value))
+
 
 typedef struct tagpipeBasic {
     void *base;
-    void *mdl;
+    mdlObj_t *mdl;
     u8 unk08[4];
     s32 unk0C;
     f32 pos[3];
@@ -31,7 +145,10 @@ typedef struct tagPipeObject {
 typedef struct tagPipePosTable tagPipePosTable;
 
 typedef struct tagPipeTexture {
-    void *handle;
+    sdfTexHandle_t *handle;
+    sdfMemHandle_t *allocation;
+    struct pipeTextureFile_t *resourceData;
+    u32 unk0C;
 } tagPipeTexture;
 
 typedef struct sdfSemaParam_t {
@@ -50,7 +167,7 @@ extern char D_005488E0[];
 extern char D_005488F0[];
 
 extern void *hWorkArea;
-extern void *sdfDmacHandlerTable;
+extern sdfHandlerNode_t *sdfDmacHandlerTable;
 extern void *D_005516C4;
 extern s32 D_00552054;
 extern char D_00551700[];
@@ -86,7 +203,7 @@ extern void *dds3SearchProcessName(const char *name);
 extern s32 dds3GetConfigFlag(s32 index, s32 *table);
 extern f32 vecDot(f32 *a, f32 *b);
 extern f32 __ieee754_acosf(f32 x);
-extern s32 func_002A87F0(s32 arg0);
+extern sdfThCB_t *func_002A87F0(s32 threadId);
 extern void *fclLoadTexture(char *filename);
 extern void fclSetPanelAnimState(u8 *panel, s8 state);
 extern s32 fclRunPanelAnim(u8 *panel);
@@ -99,10 +216,10 @@ extern void objMyLoad(tagPipeObject *objPtr);
 extern s32 objAdd(tagPipeObject *objPtr);
 extern s32 GetThreadId(void);
 extern void ChangeThreadPriority(s32 thid, s32 prio);
-extern void SleepThread(void);
-extern void sdfIpuRemoveHandler(void *handler);
+extern s32 SleepThread(void);
+extern void sdfIpuRemoveHandler(sdfHandlerNode_t *handler);
 extern s32 dds3KillProcess(void *id, s32 shutdowntimer);
-extern void func_002A8758(s32 arg0);
+extern void func_002A8758(sdfThCB_t *node);
 extern void p2sdPlaySE(s32 midino, s32 vol, s32 pan);
 extern s32 cmpUpdateTerminate(u8 *p);
 extern u8 dds3GetConfigFadeAlpha(void);
@@ -230,7 +347,15 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3AllocConfigWork);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DestroyConfig);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3ConfigProcessStart);
+void dds3ConfigProcessStart(s32 mode) {
+    if (GBWK == 0) {
+        GBWK = dds3AllocConfigWork(mode);
+        dds3StartProcess(D_00551700, 0x3F2, 1, 1, dds3CalcConfig, NULL, GBWK);
+        dds3StartProcess(D_005488D0, 0x2B07, 1, 1, dds3DrawConfig, NULL, GBWK);
+        dds3StartProcess(D_005488E0, 0x520B, 1, 1, dds3UpdateConfig, dds3DestroyConfig, GBWK);
+        dds3ConfigState = 1;
+    }
+}
 
 void dds3ConfigProcessEnd(void)
 {
@@ -288,7 +413,8 @@ s32 ChkPipe(void)
     return dds3SearchProcessName(D_005488F0) != NULL;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", DEBUG_PRINT);
+void DEBUG_PRINT(const char *fmt, ...) {
+}
 
 s32 pipe_Section(void)
 {
@@ -522,7 +648,17 @@ INCLUDE_ASM(const s32, "code_0029B780", PipeTexLoad);
 
 INCLUDE_ASM(const s32, "code_0029B780", PipeTexRelease);
 
-INCLUDE_ASM(const s32, "code_0029B780", texLoad);
+s32 texLoad(const char *name, tagPipeTexture *record) {
+    void *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
+    record->allocation = allocation;
+    record->handle = sdfTexSet(record->resourceData);
+    if (record->allocation != NULL) {
+        sdfMemFreeDelayedDirect(record->allocation);
+        record->allocation = NULL;
+        record->resourceData = NULL;
+    }
+    return 1;
+}
 
 s32 texRelease(tagPipeTexture *texPtr)
 {
@@ -572,9 +708,35 @@ INCLUDE_ASM(const s32, "code_0029B780", PipeCameraAction3);
 
 INCLUDE_ASM(const s32, "code_0029B780", CamActionQuake);
 
-INCLUDE_ASM(const s32, "code_0029B780", AddCamera);
+void AddCamera(void) {
+    dds3Basic_t *scene;
+    dds3Basic_t *camera;
+    f32 *eye = pipeCamShakeVec;
 
-INCLUDE_ASM(const s32, "code_0029B780", CalcCamera);
+    camera = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), pipeCamShake, eye, pipeCameraPos);
+    pipe_Camera = camera;
+    dds3SetUnitObjectId(camera, D_00548EB0);
+    dds3CameraObjectBasicGetCameraTM(pipe_Camera, eye);
+    dds3GetRadiusPoseSet(pipe_Camera, 2.0f);
+    scene = dds3GetControlScene();
+    dds3SetActiveCameraSceneBasic(scene, pipe_Camera);
+    dds3SetScreenFovy(0.87964585f);
+}
+
+void CalcCamera(void) {
+    dds3CameraObjectBasicWorkData_t *cameraData;
+    dds3Basic_t *camera;
+
+    dds3CameraObjectBasicGetCameraTM(pipe_Camera, pipeCamShakeVec);
+    dds3SetPosPoseSet(pipe_Camera, pipeCamShake);
+    camera = pipe_Camera;
+    ((void (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
+    cameraData = pipe_Camera->workdata;
+    PS2_COPY_QUAD(&cameraData->vertical, pipeCameraPos);
+    PS2_COPY_QUAD(&cameraData->upVector, pipeCameraPos);
+}
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548EB0);
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeCheckLevel);
 
@@ -608,7 +770,16 @@ s32 pipeStartMessage(void)
     return fclStartMessage(2);
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeMessDraw);
+s32 pipeMessDraw(void) {
+    s32 finished = 0;
+    if (fclChkMessage()) {
+        fclUpdateMessage();
+    } else {
+        finished = 1;
+        fclEndMessage();
+    }
+    return finished;
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeGetRandomMessage);
 
@@ -668,7 +839,18 @@ INCLUDE_ASM(const s32, "code_0029B780", mymdlVisible);
 
 INCLUDE_ASM(const s32, "code_0029B780", mymdlVisibleAll);
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlSetMotion);
+void mymdlSetMotion(tagpipeBasic *node, f32 frame) {
+    void *motion = mdlGetMotionCtrlr(node->mdl, 0);
+    if (frame < 0.0f) {
+        u32 random = dds3GetRandA(NULL);
+        sdfMotionSeek(motion, (f32)(random % node->mdl->first->frameLength));
+        return;
+    }
+    sdfMotionSeek(motion, frame);
+    /* DDS2 mnuSampleModelMotionAtFrame and SMT3 002A4BB0 retain jal here;
+     * resetting the consumed frame follows the documented tail-call exception. */
+    frame = 0.0f;
+}
 
 void pipeBulrSetLimit(s32 frame)
 {
@@ -787,13 +969,75 @@ s32 pipeDellLink(tagPipeLinkData *pData)
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeFreeLink);
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeCameraLerp);
+void pipeCameraLerp(f32 *vector, f32 angle) {
+    f32 rotated[4];
+    f32 cosine = sdfCos(angle);
+    f32 sine = sdfSin(angle);
 
-INCLUDE_ASM(const s32, "code_0029B780", vec_2A6B80);
+    rotated[1] = vector[1] * cosine + vector[2] * sine;
+    sine = sdfSin(angle);
+    cosine = sdfCos(angle);
+    rotated[2] = vector[1] * -sine + vector[2] * cosine;
+    vector[1] = rotated[1];
+    vector[2] = rotated[2];
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", vecRotate2D);
+void vec_2A6B80(f32 *vector, f32 angle) {
+    f32 rotated[4];
+    f32 cosine = sdfCos(angle);
+    f32 sine = sdfSin(angle);
 
-INCLUDE_ASM(const s32, "code_0029B780", vec_2A6CA8);
+    rotated[0] = vector[0] * cosine - vector[2] * sine;
+    sine = sdfSin(angle);
+    cosine = sdfCos(angle);
+    rotated[2] = vector[0] * sine + vector[2] * cosine;
+    vector[0] = rotated[0];
+    vector[2] = rotated[2];
+}
+
+void vecRotate2D(f32 *vector, f32 angle) {
+    f32 rotated[4];
+    f32 cosine = sdfCos(angle);
+    f32 sine = sdfSin(angle);
+
+    rotated[0] = vector[0] * cosine + vector[1] * sine;
+    sine = sdfSin(angle);
+    cosine = sdfCos(angle);
+    rotated[1] = vector[0] * -sine + vector[1] * cosine;
+    vector[0] = rotated[0];
+    vector[1] = rotated[1];
+}
+
+void vec_2A6CA8(float *vector, float *axis, float angle) {
+    sdfVector4_t normalizedAxis;
+    sdfVector4_t scratch;
+    sdfVector4_t inputVector;
+    float rotationMatrix[9];
+
+    memset(&scratch, 0, sizeof(scratch));
+    scratch.x = axis[0];
+    scratch.y = axis[1];
+    scratch.z = axis[2];
+    normalizedAxis = scratch;
+    memset(&inputVector, 0, sizeof(inputVector));
+    inputVector.x = vector[0];
+    inputVector.y = vector[1];
+    inputVector.z = vector[2];
+    scratch = inputVector;
+    vecNormalize(&normalizedAxis.x);
+    rotationMatrix[0] = normalizedAxis.x * normalizedAxis.x * (1.0f - sdfCos(angle)) + sdfCos(angle);
+    rotationMatrix[1] = normalizedAxis.x * normalizedAxis.y * (1.0f - sdfCos(angle)) - normalizedAxis.z * sdfSin(angle);
+    rotationMatrix[2] = normalizedAxis.x * normalizedAxis.z * (1.0f - sdfCos(angle)) + normalizedAxis.y * sdfSin(angle);
+    rotationMatrix[3] = normalizedAxis.y * normalizedAxis.x * (1.0f - sdfCos(angle)) + normalizedAxis.z * sdfSin(angle);
+    rotationMatrix[4] = normalizedAxis.y * normalizedAxis.y * (1.0f - sdfCos(angle)) + sdfCos(angle);
+    rotationMatrix[5] = normalizedAxis.y * normalizedAxis.z * (1.0f - sdfCos(angle)) - normalizedAxis.x * sdfSin(angle);
+    rotationMatrix[6] = normalizedAxis.z * normalizedAxis.x * (1.0f - sdfCos(angle)) - normalizedAxis.y * sdfSin(angle);
+    rotationMatrix[7] = normalizedAxis.z * normalizedAxis.y * (1.0f - sdfCos(angle)) + normalizedAxis.x * sdfSin(angle);
+    rotationMatrix[8] = normalizedAxis.z * normalizedAxis.z * (1.0f - sdfCos(angle)) + sdfCos(angle);
+    vector[0] = scratch.x * rotationMatrix[0] + scratch.y * rotationMatrix[3] + scratch.z * rotationMatrix[6];
+    vector[1] = scratch.x * rotationMatrix[1] + scratch.y * rotationMatrix[4] + scratch.z * rotationMatrix[7];
+    vector[2] = scratch.x * rotationMatrix[2] + scratch.y * rotationMatrix[5] + scratch.z * rotationMatrix[8];
+}
 
 void vec_2A6FF0(f32 *a, f32 *b)
 {
@@ -830,7 +1074,14 @@ void vecScale(f32 *v, f32 scale)
     v[2] *= scale;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", vecNormalize);
+float vecNormalize(float *vector) {
+    float length = vecLength(vector);
+
+    vector[0] = vector[0] / length;
+    vector[1] = vector[1] / length;
+    vector[2] = vector[2] / length;
+    return length;
+}
 
 f32 vecLength(f32 *v)
 {
@@ -840,26 +1091,199 @@ f32 vecLength(f32 *v)
     return len;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", vecDot);
+float vecDot(float *left, float *right) {
+    sdfVector4_t normalizedLeft;
+    sdfVector4_t normalizedRight;
+
+    normalizedLeft = *(sdfVector4_t *)left;
+    normalizedRight = *(sdfVector4_t *)right;
+    vecNormalize(&normalizedLeft.x);
+    vecNormalize(&normalizedRight.x);
+    return normalizedLeft.x * normalizedRight.x + normalizedLeft.y * normalizedRight.y + normalizedLeft.z * normalizedRight.z;
+}
 
 f32 vecAngleBetween(f32 *a, f32 *b)
 {
     return __ieee754_acosf(vecDot(a, b));
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", vecTranslate);
+void vecTranslate(float *output, float *left, float *right) {
+    sdfVector4_t normalizedLeft;
+    sdfVector4_t normalizedRight;
 
-INCLUDE_ASM(const s32, "code_0029B780", mtxRotateX);
+    normalizedLeft = *(sdfVector4_t *)left;
+    normalizedRight = *(sdfVector4_t *)right;
+    vecNormalize(&normalizedLeft.x);
+    vecNormalize(&normalizedRight.x);
+    output[0] = normalizedLeft.y * normalizedRight.z - normalizedLeft.z * normalizedRight.y;
+    output[1] = normalizedLeft.z * normalizedRight.x - normalizedLeft.x * normalizedRight.z;
+    output[2] = normalizedLeft.x * normalizedRight.y - normalizedLeft.y * normalizedRight.x;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", mtxRotateY);
+void mtxRotateX(sdfMatrix4_t *matrix, f32 angle) {
+    sdfMatrix4_t rotated;
 
-INCLUDE_ASM(const s32, "code_0029B780", mtxRotateZ);
+    rotated.m[0] = matrix->m[0];
+    rotated.m[1] = matrix->m[1];
+    rotated.m[2] = matrix->m[2];
+    rotated.m[3] = matrix->m[3];
+    rotated.m[4] = matrix->m[4] * sdfCos(angle) + matrix->m[8] * sdfSin(angle);
+    rotated.m[5] = matrix->m[5] * sdfCos(angle) + matrix->m[9] * sdfSin(angle);
+    rotated.m[6] = matrix->m[6] * sdfCos(angle) + matrix->m[10] * sdfSin(angle);
+    rotated.m[7] = matrix->m[7] * sdfCos(angle) + matrix->m[11] * sdfSin(angle);
+    rotated.m[8] = matrix->m[4] * -sdfSin(angle) + matrix->m[8] * sdfCos(angle);
+    rotated.m[9] = matrix->m[5] * -sdfSin(angle) + matrix->m[9] * sdfCos(angle);
+    rotated.m[10] = matrix->m[6] * -sdfSin(angle) + matrix->m[10] * sdfCos(angle);
+    rotated.m[11] = matrix->m[7] * -sdfSin(angle) + matrix->m[11] * sdfCos(angle);
+    rotated.m[12] = matrix->m[12];
+    rotated.m[13] = matrix->m[13];
+    rotated.m[14] = matrix->m[14];
+    rotated.m[15] = matrix->m[15];
+    *matrix = rotated;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", mtxStore);
+void mtxRotateY(sdfMatrix4_t *matrix, f32 angle) {
+    sdfMatrix4_t rotated;
 
-INCLUDE_ASM(const s32, "code_0029B780", mtx_2A7B10);
+    rotated.m[0] = matrix->m[0] * sdfCos(angle) + matrix->m[8] * -sdfSin(angle);
+    rotated.m[1] = matrix->m[1] * sdfCos(angle) + matrix->m[9] * -sdfSin(angle);
+    rotated.m[2] = matrix->m[2] * sdfCos(angle) + matrix->m[10] * -sdfSin(angle);
+    rotated.m[3] = matrix->m[3] * sdfCos(angle) + matrix->m[11] * -sdfSin(angle);
+    rotated.m[4] = matrix->m[4];
+    rotated.m[5] = matrix->m[5];
+    rotated.m[6] = matrix->m[6];
+    rotated.m[7] = matrix->m[7];
+    rotated.m[8] = matrix->m[0] * sdfSin(angle) + matrix->m[8] * sdfCos(angle);
+    rotated.m[9] = matrix->m[1] * sdfSin(angle) + matrix->m[9] * sdfCos(angle);
+    rotated.m[10] = matrix->m[2] * sdfSin(angle) + matrix->m[10] * sdfCos(angle);
+    rotated.m[11] = matrix->m[3] * sdfSin(angle) + matrix->m[11] * sdfCos(angle);
+    rotated.m[12] = matrix->m[12];
+    rotated.m[13] = matrix->m[13];
+    rotated.m[14] = matrix->m[14];
+    rotated.m[15] = matrix->m[15];
+    *matrix = rotated;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", mtx_2A7BB8);
+void mtxRotateZ(sdfMatrix4_t *matrix, f32 angle) {
+    sdfMatrix4_t rotated;
+
+    rotated.m[0] = matrix->m[0] * sdfCos(angle) + matrix->m[4] * sdfSin(angle);
+    rotated.m[1] = matrix->m[1] * sdfCos(angle) + matrix->m[5] * sdfSin(angle);
+    rotated.m[2] = matrix->m[2] * sdfCos(angle) + matrix->m[6] * sdfSin(angle);
+    rotated.m[3] = matrix->m[3] * sdfCos(angle) + matrix->m[7] * sdfSin(angle);
+    rotated.m[4] = matrix->m[0] * -sdfSin(angle) + matrix->m[4] * sdfCos(angle);
+    rotated.m[5] = matrix->m[1] * -sdfSin(angle) + matrix->m[5] * sdfCos(angle);
+    rotated.m[6] = matrix->m[2] * -sdfSin(angle) + matrix->m[6] * sdfCos(angle);
+    rotated.m[7] = matrix->m[3] * -sdfSin(angle) + matrix->m[7] * sdfCos(angle);
+    rotated.m[8] = matrix->m[8];
+    rotated.m[9] = matrix->m[9];
+    rotated.m[10] = matrix->m[10];
+    rotated.m[11] = matrix->m[11];
+    rotated.m[12] = matrix->m[12];
+    rotated.m[13] = matrix->m[13];
+    rotated.m[14] = matrix->m[14];
+    rotated.m[15] = matrix->m[15];
+    *matrix = rotated;
+}
+
+void mtxStore(sdfMatrix4_t *destination, sdfMatrix4_t *source) {
+    sdfMatrix4_t sourceCopy = *source;
+
+    destination->m[0] = sourceCopy.m[0];
+    destination->m[1] = sourceCopy.m[4];
+    destination->m[2] = sourceCopy.m[8];
+    destination->m[3] = sourceCopy.m[12];
+    destination->m[4] = sourceCopy.m[1];
+    destination->m[5] = sourceCopy.m[5];
+    destination->m[6] = sourceCopy.m[9];
+    destination->m[7] = sourceCopy.m[13];
+    destination->m[8] = sourceCopy.m[2];
+    destination->m[9] = sourceCopy.m[6];
+    destination->m[10] = sourceCopy.m[10];
+    destination->m[11] = sourceCopy.m[14];
+    destination->m[12] = sourceCopy.m[3];
+    destination->m[13] = sourceCopy.m[7];
+    destination->m[14] = sourceCopy.m[11];
+    destination->m[15] = sourceCopy.m[15];
+}
+
+f32 *mtx_2A7B10(f32 *direction, f32 *matrix) {
+    f32 transformed[4];
+    f32 x = direction[0];
+    f32 y = direction[1];
+    f32 z = direction[2];
+
+    transformed[0] = x * matrix[0] + y * matrix[4] + z * matrix[8];
+    transformed[1] = x * matrix[1] + y * matrix[5] + z * matrix[9];
+    transformed[2] = x * matrix[2] + y * matrix[6] + z * matrix[10];
+    memcpy(direction, transformed, 16);
+    return direction;
+}
+
+void *mtx_2A7BB8(sdfVector4_t *controlPoints, s32 degree, s32 sampleCount) {
+    void *outputBlock;
+    void *coefficientBlock;
+    f32 *coefficients;
+    sdfVector4_t *output;
+    sdfVector4_t *sample;
+    s32 i;
+    s32 j;
+
+    coefficientBlock = sdfMemAllocDirect(degree + 1);
+    coefficients = (f32 *)sdfMemGetPtr(coefficientBlock);
+    outputBlock = sdfMemAllocDirect(sampleCount + 2);
+    output = (sdfVector4_t *)sdfMemGetPtr(outputBlock);
+
+    for (i = 0; i <= degree; i++) {
+        coefficients[i] = 1.0f;
+        for (j = 1; j <= i; j++) {
+            coefficients[i] = (coefficients[i] * (f32)(degree - j + 1)) / (f32)j;
+        }
+    }
+
+    i = 0;
+    output[0].x = controlPoints[0].x;
+    output[0].y = controlPoints[0].y;
+    output[0].z = controlPoints[0].z;
+
+    if (sampleCount >= 0) {
+        sample = output;
+        do {
+            f32 t = (f32)i / (f32)sampleCount;
+            f32 x = 0.0f;
+            f32 y = 0.0f;
+            f32 z = 0.0f;
+
+            j = 0;
+            if (degree >= 0) {
+                sdfVector4_t *point = controlPoints;
+                f32 *coefficient = coefficients;
+                do {
+                    f32 powers = func_002A7DF8(t, (f32)j);
+                    f32 weight;
+
+                    powers *= func_002A7DF8(1.0f - t, (f32)(degree - j));
+                    weight = *coefficient * powers;
+                    x += point->x * weight;
+                    y += point->y * weight;
+                    z += point->z * weight;
+                    point++;
+                    coefficient++;
+                    j++;
+                } while (j <= degree);
+            }
+
+            sample->x = x;
+            sample->y = y;
+            sample->z = z;
+            sample++;
+            i++;
+        } while (i <= sampleCount);
+    }
+
+    sdfMemFreeDirect(coefficientBlock);
+    return outputBlock;
+}
 
 f32 func_002A7DF8(f32 value, f32 count)
 {
@@ -872,7 +1296,44 @@ f32 func_002A7DF8(f32 value, f32 count)
     return result;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", vecDistance);
+void vecDistance(f32 quaternion[4], f32 matrix[4][4]) {
+    f32 trace;
+    f32 scale;
+    s32 i;
+    u8 j;
+    u8 k;
+    f32 xx = matrix[0][0];
+    f32 yy = matrix[1][1];
+    f32 zz = matrix[2][2];
+
+    trace = xx + yy + zz + 1.0f;
+    if (trace >= 1.0f) {
+        scale = fsqrtf(trace) * 2.0f;
+        quaternion[3] = scale * 0.25f;
+        quaternion[0] = (matrix[1][2] - matrix[2][1]) / scale;
+        quaternion[1] = (matrix[2][0] - matrix[0][2]) / scale;
+        quaternion[2] = (matrix[0][1] - matrix[1][0]) / scale;
+    } else {
+        i = xx > yy ? 0 : 1;
+        if (zz > matrix[i][i]) {
+            i = 2;
+        }
+        j = (i + 1) % 3;
+        k = (j + 1) % 3;
+        scale = fsqrtf(matrix[i][i] - matrix[j][j] - matrix[k][k] + 1.0f) * 2.0f;
+        if (scale != 0.0f) {
+            quaternion[i] = scale * 0.25f;
+            quaternion[j] = (matrix[i][j] + matrix[j][i]) / scale;
+            quaternion[k] = (matrix[i][k] + matrix[k][i]) / scale;
+            quaternion[3] = (matrix[j][k] - matrix[k][j]) / scale;
+        } else {
+            quaternion[i] = 1.0f;
+            quaternion[j] = 0.0f;
+            quaternion[k] = 0.0f;
+            quaternion[3] = 0.0f;
+        }
+    }
+}
 
 void sdfDummyFunc(void) {
 }
@@ -887,9 +1348,24 @@ s32 sdfCreateSema(s32 initCount, s32 maxCount, u32 option)
     return CreateSema(&param);
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", CreateThreadSimple);
+s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority) {
+    sdfKernelThreadParam_t param;
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfCreateThreadWithStack);
+    memset(&param, 0, sizeof(param));
+    param.entry = entryAddress;
+    param.stack = workspace;
+    param.stackSize = stackBytes;
+    param.priority = priority;
+    param.gp = &_gp;
+    return CreateThread(&param);
+}
+
+s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority) {
+    void *workspace;
+
+    workspace = sdfAllocAuto(stackBytes);
+    return CreateThreadSimple((void *)entryAddress, workspace, stackBytes, priority);
+}
 
 void *sdfAllocAuto(s32 size)
 {
@@ -911,15 +1387,65 @@ INCLUDE_ASM(const s32, "code_0029B780", sdfFreeAutoDelayed);
 
 INCLUDE_ASM(const s32, "code_0029B780", sdf_2A8258);
 
-INCLUDE_ASM(const s32, "code_0029B780", FatalError);
+void FatalError(const char *format, ...) {
+    for (;;) {
+    }
+}
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548FD8);
+sdfHandlerNode_t *DmacAddHandler(s32 kind, s32 channel, s32 handler, s32 arg, s32 next) {
+    sdfHandlerNode_t *node;
+    s32 id;
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548FF8);
+    switch (kind) {
+    case 0:
+        id = AddIntcHandler2(channel, handler, arg, next);
+        break;
+    case 1:
+        id = AddDmacHandler2(channel, handler, arg, next);
+        break;
+    case 2:
+        id = AddSbusIntcHandler(channel, handler);
+        break;
+    default:
+        FatalError(D_00549018, kind);
+        break;
+    }
+    node = sdfAllocAuto(sizeof(*node));
+    node->handlerKind = kind;
+    node->channel = channel;
+    node->handlerId = id;
+    node->next = sdfDmacHandlerTable;
+    sdfDmacHandlerTable = node;
+    return node;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", DmacAddHandler);
+void sdfIpuRemoveHandler(sdfHandlerNode_t *target) {
+    sdfHandlerNode_t **link = &sdfDmacHandlerTable;
+    sdfHandlerNode_t *node = *link;
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfIpuRemoveHandler);
+    while (node != NULL) {
+        if (node == target) {
+            *link = node->next;
+            switch (node->handlerKind) {
+            case 0:
+                DisableIntc(node->channel);
+                RemoveIntcHandler(node->channel, node->handlerId);
+                break;
+            case 1:
+                RemoveDmacHandler(node->channel, node->handlerId);
+                break;
+            case 2:
+                RemoveSbusIntcHandler(node->channel);
+                break;
+            }
+            sdfFreeAuto(target);
+            return;
+        }
+        /* Non-head handles are followed through their own link. */
+        link = &target->next;
+        node = *link;
+    }
+}
 
 void sdf_2A84D8(void)
 {
@@ -935,7 +1461,12 @@ void sdfAlarmWakeup(s32 arg0, s32 arg1, s32 thid)
     iWakeupThread(thid);
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfDelayThread);
+void sdfDelayThread(u32 delay) {
+    s32 threadId = GetThreadId();
+    CancelWakeupThread(threadId);
+    SetAlarm(delay & 0xFFFF, sdfAlarmWakeup, (void *)threadId);
+    SleepThread();
+}
 
 s32 sdfGetRunTimeCountBase(void)
 {
@@ -947,11 +1478,45 @@ s32 sdfGetRunTimeCount(s32 aBaseTime)
     return (*(volatile u32 *)0x10000000 - aBaseTime) & 0xFFFF;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfSystemThreadProc);
+void sdfSystemThreadProc(void) {
+    for (;;) {
+        sdfWaitVblank(1);
+        sdfPadManager();
+        if (!sdfPadManagerMode) {
+            sdfPadWork();
+        }
+        sdfFileCmdThreadCheckPrio();
+        if (D_00551828 != NULL) {
+            D_00551828();
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3InitSubsystems);
+void dds3InitSubsystems(u32 heapSize, u32 initialHeapSize, u32 packetBufferBytes) {
+    HW_WRITE(T0_MODE, 0x83);
+    HW_WRITE(T0_COUNT, 0);
+    sdfChipInit(initialHeapSize);
+    sdfMemInit(heapSize);
+    sdfGsMemInit();
+    sdfImageSetInit();
+    sdfTexInit();
+    sdfPadInitManager();
+    sdfInitThreadSystem();
+    sdfGrInit(packetBufferBytes);
+    sdf3DInit(0x40);
+    sdfCoreDrawInit(D_00551824);
+    sdfRandomizeByTime(NULL);
+    sdfStartThreadAndWait(&D_00552040, sdfSystemThreadProc, D_005756C0, 0x2000, 0x4C, 0);
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfStartThreadAndWait);
+void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void), void *stack, s64 stackSize, s32 priority, s32 threadArgument) {
+    node->threadId = CreateThreadSimple((void *)entry, stack, (s32)stackSize, priority);
+    WaitSema(sdfThreadSema);
+    node->next = sdfVblankThreadId;
+    sdfVblankThreadId = node;
+    SignalSema(sdfThreadSema);
+    StartThread(node->threadId, threadArgument);
+}
 
 void sdfWaitVblank(s32 count)
 {
@@ -963,9 +1528,46 @@ void sdfWaitVblank(s32 count)
     } while (rest > 0);
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", func_002A8758);
+void func_002A8758(sdfThCB_t *node) {
+    sdfThCB_t **link;
+    sdfThCB_t *current;
+    s32 threadId;
 
-INCLUDE_ASM(const s32, "code_0029B780", func_002A87F0);
+    WaitSema(sdfThreadSema);
+    link = &sdfVblankThreadId;
+    current = *link;
+    while (current != node) {
+        link = &current->next;
+        current = current->next;
+    }
+    *link = node->next;
+    SignalSema(sdfThreadSema);
+    threadId = node->threadId;
+    if (threadId == GetThreadId()) {
+        ExitDeleteThread();
+        return;
+    }
+    TerminateThread(threadId);
+    libc_2DBCB0(threadId);
+}
+
+sdfThCB_t *func_002A87F0(s32 threadId) {
+    sdfThCB_t *node;
+
+    if (threadId < 0) {
+        threadId = GetThreadId();
+    }
+    WaitSema(sdfThreadSema);
+    node = sdfVblankThreadId;
+    while (node != NULL) {
+        if (node->threadId == threadId) {
+            break;
+        }
+        node = node->next;
+    }
+    SignalSema(sdfThreadSema);
+    return node;
+}
 
 void sdf_2A8858(void)
 {
@@ -986,9 +1588,33 @@ s32 VblankIntcHandler(s32 cause)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", VblankThreadProc);
+void VblankThreadProc(void) {
+    sdfThCB_t *threadEntry;
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfInitThreadSystem);
+    DmacAddHandler(0, 2, (s32)VblankIntcHandler, -1, 0);
+    EnableIntc(2);
+    for (;;) {
+        SleepThread();
+        sdfVblankFlag++;
+        WaitSema(sdfThreadSema);
+        for (threadEntry = sdfVblankThreadId; threadEntry != NULL; threadEntry = threadEntry->next) {
+            WakeupThread(threadEntry->threadId);
+        }
+        SignalSema(sdfThreadSema);
+    }
+}
+
+s32 sdfInitThreadSystem(void) {
+    s32 threadId;
+
+    InitThread();
+    sdfVblankFlag = 0;
+    sdfVblankThreadId = NULL;
+    sdfThreadSema = sdfCreateSema(1, 1, 0);
+    threadId = CreateThreadSimple((void *)VblankThreadProc, D_005776C0, 0x800, 0x3E);
+    sdfVblankSema = threadId;
+    return StartThread(threadId, 0);
+}
 
 void sdfSetMainThreadPriority(void)
 {
@@ -998,6 +1624,12 @@ void sdfSetMainThreadPriority(void)
     ChangeThreadPriority(thid, 0x7C);
     SleepThread();
 }
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548FD8);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548FF8);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00549018);
+
 INCLUDE_SDATA(const s32, "code_0029B780", slLoadKillFlag);
 
 INCLUDE_SDATA(const s32, "code_0029B780", D_005516C1);

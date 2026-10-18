@@ -1,4 +1,14 @@
 #include "common.h"
+#include "nb.h"
+#include "effBattle.h"
+
+extern dds3ProcessID_t *dds3SearchProcessPriority(u32 priority);
+extern void *dds3GetProcessData(dds3ProcessID_t *process);
+extern void nbInitPlayer(void);
+extern void nbKillMainProcess(void);
+extern void nbCameraPressProcessInit(void);
+extern void nbMaeWaitStep(void);
+extern void fldSkyBattle(void);
 
 INCLUDE_ASM(const s32, "code_002460B0", DispList);
 
@@ -10,18 +20,27 @@ INCLUDE_RODATA(const s32, "code_002460B0", D_005431F0);
 
 INCLUDE_ASM(const s32, "code_002460B0", datDebugDrawSelectMenu);
 
-INCLUDE_ASM(const s32, "code_002460B0", nb_246898);
+void nb_246898(void)
+{
+    nbInitPlayer();
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nb_2468B0);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbExit);
+void nbExit(void)
+{
+    nbKillMainProcess();
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbCallNewBattle);
 
 void SetDummy(void) {
 }
 
-INCLUDE_ASM(const s32, "code_002460B0", nbGetMainProcessData);
+nbMainProcessData_t *nbGetMainProcessData(void)
+{
+    return dds3GetProcessData(dds3SearchProcessPriority(0x3FA));
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbGetUnitWorkPointer);
 
@@ -63,7 +82,10 @@ INCLUDE_ASM(const s32, "code_002460B0", nbPopAction);
 
 INCLUDE_ASM(const s32, "code_002460B0", nbCheckActionStack);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbClearActionStack);
+void nbClearActionStack(void)
+{
+    nbGetMainProcessData()->actionstackp = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbSetMaePhase);
 
@@ -75,7 +97,10 @@ INCLUDE_ASM(const s32, "code_002460B0", nbSetAtoPhase);
 
 INCLUDE_ASM(const s32, "code_002460B0", nbSetPressMaePhase);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbSetPressNiidaPhase);
+void nbSetPressNiidaPhase(void)
+{
+    nbCameraPressProcessInit();
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbSetActionMaePhase);
 
@@ -103,7 +128,11 @@ INCLUDE_ASM(const s32, "code_002460B0", nbMainProcess1);
 
 INCLUDE_ASM(const s32, "code_002460B0", SetJyocyuData);
 
-INCLUDE_ASM(const s32, "code_002460B0", FreeJyocyuData);
+void FreeJyocyuData(nbMainProcessData_t *work)
+{
+    effBTLDelete(work->residentEffect);
+    work->residentEffect = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", ClearLocalBit);
 
@@ -127,7 +156,11 @@ INCLUDE_ASM(const s32, "code_002460B0", nbInitMainProcess);
 
 INCLUDE_ASM(const s32, "code_002460B0", nbKillMainProcess);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbMaeProcess02Wait);
+s32 nbMaeProcess02Wait(void)
+{
+    nbMaeWaitStep();
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbMaeProcess02Loop);
 
@@ -139,7 +172,10 @@ INCLUDE_ASM(const s32, "code_002460B0", nbMaeProcess01);
 
 INCLUDE_ASM(const s32, "code_002460B0", nbMaeProcess0);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbMaeShutdown);
+void nbMaeShutdown(void)
+{
+    nbGetMainProcessData()->maeProcess = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbInitMaeProcess);
 
@@ -151,7 +187,10 @@ INCLUDE_ASM(const s32, "code_002460B0", nbAtoGameover2Process);
 
 INCLUDE_ASM(const s32, "code_002460B0", nbAtoProcess1);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbAtoShutdown);
+void nbAtoShutdown(void)
+{
+    nbGetMainProcessData()->atoProcess = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002460B0", nbInitAtoProcess);
 
@@ -189,7 +228,24 @@ INCLUDE_ASM(const s32, "code_002460B0", nb_result_Shutdown);
 
 INCLUDE_ASM(const s32, "code_002460B0", nbInitResultProcess);
 
-INCLUDE_ASM(const s32, "code_002460B0", nbLoadStageSky);
+void nbLoadStageSky(void)
+{
+    fldSkyBattle();
+}
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543618);
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543628);
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543648);
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543668);
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543678);
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543688);
+
+INCLUDE_RODATA(const s32, "code_002460B0", D_00543698);
 
 INCLUDE_SDATA(const s32, "code_002460B0", D_00550EB0);
 
@@ -358,18 +414,4 @@ INCLUDE_SDATA(const s32, "code_002460B0", nbResultTex1);
 INCLUDE_SDATA(const s32, "code_002460B0", nbResultTex2);
 
 INCLUDE_SDATA(const s32, "code_002460B0", nbResultTexHandle);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543618);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543628);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543648);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543668);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543678);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543688);
-
-INCLUDE_RODATA(const s32, "code_002460B0", D_00543698);
 

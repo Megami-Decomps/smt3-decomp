@@ -65,10 +65,6 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ datUnitWork_t unit;
-    /* 0x80 */ u8 unk_80[6];
-    /* 0x86 */ u16 skill[24];
-    /* 0xB6 */ u8 skillOrder[24];
-    /* 0xCE */ u8 unk_CE[0x1E];
 } cmbUnit_t;
 
 extern cmbRaceEntry_t D_0032DA70[];
@@ -425,7 +421,7 @@ typedef struct
 
 extern campWork_t *campWork;
 extern datItemEntry_t datItemTable[];
-extern datSkillEntry_t datSkillTable[];
+extern datSkillEntry_t cmbSkillTable[] asm("datSkillTable");
 extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 extern void rstSetMaxHpMp(s32 mode, s32 arg);
@@ -537,7 +533,6 @@ extern void cmpSetInfoWindowHidden(void);
 typedef struct
 {
     /* 0x00 */ datUnitWork_t unit;
-    /* 0x80 */ u8 unk_80[0x6C];
 } dds3PartyUnit_t;
 
 typedef struct
@@ -569,7 +564,7 @@ typedef struct
     /* 0x4740 */ u8 seqMitama[4];
 } ragUpdateWork_t;
 
-extern cmbGlobalWork_t *DDS3_GBWK;
+extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 extern trmCalcWork_t *trmCalcWork;
 extern ragUpdateWork_t *ragUpdateWork;
 extern void fclRunPanelAnim(void *work);
@@ -857,7 +852,7 @@ void fclCombineSetTable(void)
 
 s32 cmbChkGeneralStat(void)
 {
-    if ((DDS3_GBWK->party[0].unit.badstatus & 0x8000) != 0) {
+    if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) != 0) {
         return 1;
     }
     if (evtGetAgeOfMoon() == 8) {
@@ -925,7 +920,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbGetBirthPhase);
 
 s32 cmbBirthDevilIsAvailable(void)
 {
-    u16 flag = DDS3_GBWK->party[0].unit.badstatus & 0x8000;
+    u16 flag = cmbGlobalWork->party[0].unit.badstatus & 0x8000;
 
     return flag != 0;
 }
@@ -1076,7 +1071,7 @@ s8 cmbCountSkills(cmbUnit_t *unit)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->skill[i] == 0) {
+        if (unit->unit.skillSlots[i] == 0) {
             return i;
         }
     }
@@ -1194,7 +1189,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbInheritSkills);
 
 void rstClearSkillSlot(cmbUnit_t *unit, u8 slot)
 {
-    unit->skill[slot] = 0;
+    unit->unit.skillSlots[slot] = 0;
     sortSkillList(unit);
 }
 
@@ -1209,7 +1204,7 @@ s8 rstFindSkillSlot(u16 skill, cmbUnit_t *unit)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->skill[i] == skill) {
+        if (unit->unit.skillSlots[i] == skill) {
             return i;
         }
     }
@@ -1222,7 +1217,7 @@ s8 cmbFindSkillSlot(cmbUnit_t *unit)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->skill[i] != 0) {
+        if (unit->unit.skillSlots[i] != 0) {
             count++;
         }
     }
@@ -1242,7 +1237,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbClearUnitSkills);
 
 void cmbClearSkillSlots(cmbUnit_t *unit)
 {
-    memset(unit->skill, 0, sizeof(unit->skill));
+    memset(unit->unit.skillSlots, 0, sizeof(unit->unit.skillSlots));
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmb_1FF0C8);
@@ -1251,7 +1246,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbApplyEvoUnlock);
 
 void cmbFindStockEnd(s8 devilId)
 {
-    DDS3_GBWK->stock[DDS3_GBWK->stockCount++] = devilId;
+    cmbGlobalWork->stock[cmbGlobalWork->stockCount++] = devilId;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbStoreBirthDevil);
@@ -1368,7 +1363,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbUpdateRoot);
 
 s32 cmbStockIsLocked(s32 index)
 {
-    s32 flag = DDS3_GBWK->party[index].unit.flag & 0x800;
+    s32 flag = cmbGlobalWork->party[index].unit.flag & 0x800;
 
     return flag != 0;
 }
@@ -1771,7 +1766,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", shop_draw_Process);
 u8 shpAddServiceTicket(s32 count)
 {
     datAddItem(0x3D, count);
-    return DDS3_GBWK->unk_1965;
+    return cmbGlobalWork->unk_1965;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", shpGetItemFromItemBox);
@@ -2452,8 +2447,8 @@ void buildSkillSortArray(cmbUnit_t *unit, skillSortEntry_t *out)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        out[i].skill = unit->skill[i];
-        out[i].order = unit->skillOrder[i];
+        out[i].skill = unit->unit.skillSlots[i];
+        out[i].order = unit->unit.skillOrder[i];
     }
 }
 
@@ -2462,8 +2457,8 @@ void applySkillSortArray(cmbUnit_t *unit, skillSortEntry_t *in)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        unit->skill[i] = in[i].skill;
-        unit->skillOrder[i] = in[i].order;
+        unit->unit.skillSlots[i] = in[i].skill;
+        unit->unit.skillOrder[i] = in[i].order;
     }
 }
 
@@ -2917,7 +2912,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclEncycSearch);
 
 s32 fclEncycGetNum(void)
 {
-    return DDS3_GBWK->encycNum;
+    return cmbGlobalWork->encycNum;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclEncycGetRatio);
@@ -3262,8 +3257,8 @@ void rstKillEvoAct(void)
 
 void rstSetTestParam(void)
 {
-    DDS3_GBWK->party[0].unit.exp += 100;
-    DDS3_GBWK->party[4].unit.exp += DDS3_GBWK->party[4].unit.level * 100;
+    cmbGlobalWork->party[0].unit.exp += 100;
+    cmbGlobalWork->party[4].unit.exp += cmbGlobalWork->party[4].unit.level * 100;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstChkLevelUpTarget);
@@ -3274,7 +3269,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstCalcLevelFromExp);
 
 s32 rstCalcExpFromLevel(u8 id, s32 level)
 {
-    return datCopyDevilWorkEntry(&DDS3_GBWK->party[id].unit, level);
+    return datCopyDevilWorkEntry(&cmbGlobalWork->party[id].unit, level);
 }
 
 void rstChkResult2Process(u8 *work)
@@ -3355,7 +3350,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstChkAddSkill);
 
 s16 rstGetEquipHeartsAisyo(void)
 {
-    return datGetDevilParam(DDS3_GBWK->equipHearts);
+    return datGetDevilParam(cmbGlobalWork->equipHearts);
 }
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053DA90);
@@ -3477,12 +3472,12 @@ INCLUDE_ASM(const s32, "code_001FAE80", datGetDevilSlotIndex);
 
 void func_00222120(u8 devilId)
 {
-    DDS3_GBWK->devilSlot[devilId] &= 0xF0;
+    cmbGlobalWork->devilSlot[devilId] &= 0xF0;
 }
 
 s32 datDevilIsRegistered(u8 devilId)
 {
-    u8 flag = DDS3_GBWK->devilSlot[devilId] & 0x80;
+    u8 flag = cmbGlobalWork->devilSlot[devilId] & 0x80;
 
     return flag != 0;
 }
@@ -3491,12 +3486,12 @@ INCLUDE_ASM(const s32, "code_001FAE80", datCountPlayerLND);
 
 s32 datGetDevilSlotState(u8 devilId)
 {
-    return DDS3_GBWK->devilSlot[devilId] & 0xF;
+    return cmbGlobalWork->devilSlot[devilId] & 0xF;
 }
 
 void rstSetDevilRegistered(s8 devilId)
 {
-    DDS3_GBWK->devilSlot[devilId] |= 0x80;
+    cmbGlobalWork->devilSlot[devilId] |= 0x80;
 }
 
 u16 rstGetHeartsSkillAt(u8 race, s8 index)
@@ -3726,7 +3721,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstSetHeartsRecover);
 
 void rstSetHeartsRecoverPlayer(void)
 {
-    dds3PartyUnit_t *pu = &DDS3_GBWK->party[0];
+    dds3PartyUnit_t *pu = &cmbGlobalWork->party[0];
 
     pu->unit.hp = pu->unit.maxhp;
     pu->unit.mp = pu->unit.maxmp;
@@ -4669,7 +4664,7 @@ datUnitWork_t *cmpGetSelectDstStock(void)
 {
     s32 index = cmpGetSelectedStockIndex();
 
-    return &DDS3_GBWK->party[index].unit;
+    return &cmbGlobalWork->party[index].unit;
 }
 
 u16 cmpGetSelectItemID(void)
@@ -5282,7 +5277,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSkillListHeader);
 
 u8 cmpGetSkillIcon(u16 skill)
 {
-    return datSkillTable[skill].icon;
+    return cmbSkillTable[skill].icon;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpGetSkillCost);
@@ -5894,7 +5889,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpRemoveStockSlot);
 
 void cmpCompactStockList(s8 devilId)
 {
-    DDS3_GBWK->stock[DDS3_GBWK->stockCount++] = devilId;
+    cmbGlobalWork->stock[cmbGlobalWork->stockCount++] = devilId;
 }
 
 void cmpClearStockFlag(datUnitWork_t *work)
@@ -5929,7 +5924,7 @@ s32 cmp_240C10(void)
 
 u16 cmpChkSkillBad(u16 skill)
 {
-    datSkillBad_t *bad = &datSkillTable[skill].bad;
+    datSkillBad_t *bad = &cmbSkillTable[skill].bad;
 
     if (bad->kind != 2) {
         return 0;
@@ -6115,15 +6110,15 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpBuildStockNameList);
 
 s8 cmpGetStockCount(void)
 {
-    return DDS3_GBWK->stockCount;
+    return cmbGlobalWork->stockCount;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSortStockList);
 
 s8 func_002426F0(void)
 {
-    if (DDS3_GBWK->stockCount < 0x10) {
-        return DDS3_GBWK->stockCount;
+    if (cmbGlobalWork->stockCount < 0x10) {
+        return cmbGlobalWork->stockCount;
     }
     return -1;
 }

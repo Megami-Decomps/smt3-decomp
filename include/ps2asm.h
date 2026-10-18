@@ -68,6 +68,11 @@ typedef struct {
     "sqc2 vf30, 32(%0)\n\tsqc2 vf31, 48(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
 
+/* Preserve the current transform in the secondary matrix bank. */
+#define VU0_COPY_MATRIX_TO_SECONDARY() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
+    "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
+
 /* ---- GPR <-> VU0 register ---- */
 
 /* qmtc2/qmfc2 with the .ni (no interlock) suffix the SDK inlines use. */
@@ -277,5 +282,61 @@ typedef struct {
 
 #define EE_SYNC() __asm__ volatile ("sync")
 #define EE_SYNC_P() __asm__ volatile ("sync.p")
+
+/* Additional working-register operations used by the trail interpolator. */
+#define VU0_ADD_VF10_VF12() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder")
+
+#define VU0_ADD_VF12_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw vf12, vf12, vf10\n\t.set reorder")
+
+/* SDK input-address-only store: audited VU pipelines only. Unlike the
+ * normal store it does not invalidate values cached from unrelated memory. */
+#define VU0_STORE_VF10_UNCLOBBERED(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+
+/* Cell gradient vector operations. */
+#define VU0_LOAD_VF11_MEMORY(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+
+#define VU0_SUB_VF11_VF12() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf11, vf11, vf12\n\t.set reorder")
+
+/* vf10 = (1 - t) * vf10 + t * vf11, with float bits passed in a GPR. */
+#define VU0_LERP_VF10(t) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvsubx.w vf3, vf0, vf2x\n\t" \
+    "vmulax.xyzw ACC, vf11, vf2x\n\tvmaddw.xyzw vf10, vf10, vf3w\n\t.set reorder" \
+    : : "r" (t))
+
+#define VU0_LOAD_VF12(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+
+/* Ring geometry matrix and working-register operations. */
+
+#define VU0_APPLY_MATRIX_VF11() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf11x\n\tvmadday.xyzw ACC, vf29, vf11y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf11z\n\tvmaddw.xyzw vf11, vf31, vf11w\n\t.set reorder")
+
+#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src) : "memory")
+
+/* Store XYZ from an aligned quadword into the packed VIF stream. */
+#define MMI_STORE_VEC3_VALUE(dst, value) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pcpyud $2, %1, $0\n\t" \
+    "sdr %1, 0(%0)\n\t" \
+    "sdl %1, 7(%0)\n\t" \
+    "sw $2, 8(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst), "r" (value) : "$2", "memory")
 
 #endif /* PS2ASM_H */

@@ -3,6 +3,94 @@
 #include "libsdf.h"
 #include "scr.h"
 
+#include "model.h"
+#include "draw3d.h"
+#include "ps2asm.h"
+
+/* EE GCC promotes %f arguments through SMT3's software conversion helper. */
+__asm__("fptodp = sdfFloatToULong");
+
+typedef struct { s32 x, y, z; u32 style; } pbPrintState_t;
+typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
+typedef struct
+{
+    s16 editing, selection;
+    u32 blink;
+    u8 unk08[8];
+} pbPanelEditor_t;
+typedef struct { const char *title; s32 highlight; } pbColorRow_t;
+typedef struct { u8 value; u8 unk01[3]; } pbColorByte_t;
+typedef union
+{
+    struct { s32 red, green, blue, alpha; };
+    s32 channels[4];
+    pbColorByte_t channelBytes[4];
+} pbColor_t;
+typedef struct { s32 value; } pbPanelValue_t;
+typedef struct pbGroupDB_t pbGroupDB_t;
+/* Common panel work header: its constructor installs process and data links. */
+typedef struct
+{
+    dds3ProcessID_t *process;
+    u32 flags;
+    s16 x, y;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; } data;
+} pbPanel_t;
+typedef struct { sdfMemHandle_t *allocation; } pbDebugWork_t;
+
+/* The native FOV workspace is an unnamed view at pinst + 0xA34. Bind its
+ * assembler address without redefining pinst's message-instance array type
+ * or inventing an overlapping allocation in the generated BSS split. */
+extern pbFovWork_t pbDebugFovWork;
+__asm__("pbDebugFovWork = pinst + 0xA34");
+extern pbPanelEditor_t pbDebugPanel2Pos, pbDebugPanel3X;
+extern pbColorRow_t D_00326C20[6];
+extern pbColor_t D_00326C50;
+extern sdf3DScreenParam_t dds3ScreenParam;
+extern const char *D_00326C08[6];
+extern u8 dds3ScreenBlurFlag;
+extern s16 dds3ScreenBlurAlpha, dds3ScreenBlurScale;
+extern s32 dds3ScreenBlurOfsX[2]; /* Native adjacent X/Y offset pair. */
+extern s32 D_00551EA8, pbDebugPanel3State;
+extern u8 D_0054F584;
+extern s32 pbMoveChar;
+extern f32 cameraAngle, cameraRadius, cameraDegree, cameraDegreeInit;
+extern u8 keyActMode;
+extern dds3ProcessID_t *scr_msg;
+extern pbDebugWork_t *g_pdebug_0;
+extern void *dds3FontReqAllocDrawTag(void);
+extern void *dds3PrimFrameRect(s32, s32, s32, s32, s32, u32, u32);
+extern void sdfDrawTagLink(sdfDrawTag_t *, u32);
+extern void sdfDevSetPrintCB(pbPrintState_t *, s32, s32, s32, s32);
+extern void *sdfDevPrintfEx(void *, const char *, ...);
+extern s32 printf(const char *, ...);
+extern f32 sdfSin(f32 angle);
+extern void mdlSetPosition(mdlObj_t *model);
+extern void mdlSetRotate(mdlObj_t *model);
+extern void FromEuler(void);
+extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfChipFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern s32 pbMapIsValid(void);
+extern void pbPreviousRecord(void);
+extern void *pbFindGroupEntry(pbGroupDB_t *db, u32 group);
+extern pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page);
+void ReleaseDebug_pbDebugMode(void);
+s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
+void pbDrawRotatedPrim(s32 otIndex);
+
+extern char D_0054F530[];
+extern char D_0054F538[];
+extern char D_0054F540[];
+extern char D_0054F548[];
+extern char D_0054F550[];
+extern char D_0054F558[];
+extern char D_0054F588[];
+extern char D_0054F590[];
+extern char D_0054F598[];
+extern char D_0054F5A0[];
+extern char D_0054F5A8[];
+
 typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
 
 typedef struct
@@ -31,7 +119,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 startt
                                          dds3ProcessFunc_t shutdownfunc, void *data);
 extern dds3ProcessID_t *scrStartScript2(s32 handle, u8 *script, s32 arg);
 extern void itfMesMngSetKutiCallback(s32 meshandle, void *func);
-extern s32 itfDebugPrintMark();
+extern void itfDebugPrintMark(void);
 extern void sdfTexFreeDelayed(void *tex);
 extern void *itfMiscLoadTexture(char *name);
 extern void *sdfGrAllocPacketBuff(u32 size);
@@ -104,9 +192,33 @@ INCLUDE_RODATA(const s32, "code_001D1470", D_00535BE8);
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535C00);
 
-INCLUDE_ASM(const s32, "code_001D1470", itfDebugPrintMark);
+void itfDebugPrintMark(void) {
+    printf("********* AAAA ********\n");
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbDebugPrintPanel);
+s32 pbDebugPrintPanel(void) {
+    pbPrintState_t packet;
+    sdfDrawTag_t *list;
+    f32 radiansToDegrees = 57.2957795f;
+
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list,
+                    (u32)dds3PrimFrameRect(0x8500, 0x79C0, 0xFEFFFF,
+                                  0xA80, 0x120, 0x60000000, 0x40806020));
+    sdfDevSetPrintCB(&packet, 0x85C0, 0x7A20, 0xFF0000, 0);
+    sdfDrawTagLink(list,
+                    (u32)sdfDevPrintfEx(&packet, "FOVY: %6.2f",
+                        dds3ScreenParam.fovy * radiansToDegrees));
+    { sdfGrOt_t *ot = &sdfGrOtTable[81]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
+    if (((s8)dds3PadButtonState[0x33]) < 0) {
+        return -1;
+    }
+    pbDebugFovWork.degrees = dds3ScreenParam.fovy * radiansToDegrees;
+    if (pbCalcFovDegrees(&pbDebugFovWork.degrees, 1.0f, 89.0f, 0.1f, 1.0f) != 0) {
+        dds3ScreenParam.fovy = pbDebugFovWork.degrees * 0.0174532925f;
+    }
+    return 0;
+}
 
 s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep)
 {
@@ -183,11 +295,278 @@ s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 f
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbDebugPrintPanel2);
+/* Draw the blur settings and handle selection, editing and cancellation. */
+s32 pbDebugPrintPanel2(void) {
+    pbPrintState_t packet;
+    sdfDrawTag_t *list;
+    s32 row;
+    s32 y;
+    s16 previous;
+    s32 highlight;
 
-INCLUDE_ASM(const s32, "code_001D1470", pbDebugPrintPanel3);
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list,
+        (u32)dds3PrimFrameRect(0x8290, 0x79A8, 0xFEFFFF, 0xC60, 0x1B0, 0x60000000, 0x40806020));
+    sdfDevSetPrintCB(&packet, 0x82C0, 0x79C0, 0xFF0000, 0);
+    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet,
+        "BLUR:        %s", dds3ScreenBlurFlag ? D_0054F530 : D_0054F538));
 
-INCLUDE_ASM(const s32, "code_001D1470", pbAllocPrimPacket);
+    y = 0x7A20;
+    if (pbDebugPanel2Pos.editing == 0) {
+        sdfDevSetPrintCB(&packet, 0x82C0, pbDebugPanel2Pos.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        pbDebugPanel2Pos.blink++;
+        if (pbDebugPanel2Pos.blink < 32 || (pbDebugPanel2Pos.blink & 31) < 18) {
+            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_0054F540));
+        }
+    }
+
+    for (row = 0; row != 3; row++) {
+        sdfDevSetPrintCB(&packet, 0x82C0, y, 0xFF0000, 0);
+        sdfDrawTagLink(list,
+            (u32)sdfDevPrintfEx(&packet, D_0054F548, D_00326C08[row]));
+        highlight = 0;
+        if (pbDebugPanel2Pos.editing != 0 && row == pbDebugPanel2Pos.selection) {
+            highlight = 6;
+        }
+        sdfDevSetPrintCB(&packet, 0x8800, y, 0xFF0000, highlight);
+        switch (row) {
+        case 0:
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurAlpha));
+            break;
+        case 1:
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_0054F550, dds3ScreenBlurScale));
+            break;
+        case 2:
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_0054F558, dds3ScreenBlurOfsX[0], dds3ScreenBlurOfsX[1]));
+            break;
+        }
+        y += 0x60;
+    }
+    sdfDrawTagLink(list,
+        (u32)dds3PrimFrameRect((dds3ScreenBlurOfsX[0] * 16) + 0x7FC0, (dds3ScreenBlurOfsX[1] * 8) + 0x7FE0,
+            0xFF0000, 0x80, 0x40, 0x80008080, 0x80000000));
+    { sdfGrOt_t *ot = &sdfGrOtTable[83]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
+
+    if ((s8)((s8)dds3PadButtonState[0x32]) < 0) {
+        dds3ScreenBlurFlag ^= 1;
+    }
+    if (pbDebugPanel2Pos.editing == 0) {
+        previous = pbDebugPanel2Pos.selection;
+        if ((u8)((s8)dds3PadButtonState[0x36]) & 2) {
+            pbDebugPanel2Pos.selection--;
+            if (pbDebugPanel2Pos.selection < 0) {
+                pbDebugPanel2Pos.selection = 2;
+            }
+        }
+        if ((u8)((s8)dds3PadButtonState[0x37]) & 2) {
+            pbDebugPanel2Pos.selection++;
+            if (pbDebugPanel2Pos.selection >= 3) {
+                pbDebugPanel2Pos.selection = 0;
+            }
+        }
+        if (previous != pbDebugPanel2Pos.selection) {
+            pbDebugPanel2Pos.blink = 0;
+        }
+        if (((s8)dds3PadButtonState[0x31]) < 0) {
+            pbDebugPanel2Pos.editing ^= 1;
+            pbDebugPanel2Pos.blink = 0;
+        }
+        if ((u8)((s8)dds3PadButtonState[0x33]) & 2) {
+            return -1;
+        }
+    } else {
+        if (pbDebugPanel2Pos.selection == 2) {
+            if (((s8)dds3PadButtonState[0x36]) != 0) {
+                dds3ScreenBlurOfsX[1] -= 16;
+                if (dds3ScreenBlurOfsX[1] < -224) {
+                    dds3ScreenBlurOfsX[1] = -224;
+                }
+            }
+            if (((s8)dds3PadButtonState[0x37]) != 0) {
+                dds3ScreenBlurOfsX[1] += 16;
+                if (dds3ScreenBlurOfsX[1] > 224) {
+                    dds3ScreenBlurOfsX[1] = 224;
+                }
+            }
+            if (((s8)dds3PadButtonState[0x34]) != 0) {
+                dds3ScreenBlurOfsX[0] -= 16;
+                if (dds3ScreenBlurOfsX[0] < -256) {
+                    dds3ScreenBlurOfsX[0] = -256;
+                }
+            }
+            if (((s8)dds3PadButtonState[0x35]) != 0) {
+                dds3ScreenBlurOfsX[0] += 16;
+                if (dds3ScreenBlurOfsX[0] > 256) {
+                    dds3ScreenBlurOfsX[0] = 256;
+                }
+            }
+        } else if (pbDebugPanel2Pos.selection == 0) {
+            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+                dds3ScreenBlurAlpha -= 10;
+                if (dds3ScreenBlurAlpha < 0) {
+                    dds3ScreenBlurAlpha = 0;
+                }
+            }
+            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+                dds3ScreenBlurAlpha += 10;
+                if (dds3ScreenBlurAlpha > 255) {
+                    dds3ScreenBlurAlpha = 255;
+                }
+            }
+        } else {
+            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+                dds3ScreenBlurScale -= 10;
+                if (dds3ScreenBlurScale < -255) {
+                    dds3ScreenBlurScale = -255;
+                }
+            }
+            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+                dds3ScreenBlurScale += 10;
+                if (dds3ScreenBlurScale > 255) {
+                    dds3ScreenBlurScale = 255;
+                }
+            }
+        }
+        if (((s8)dds3PadButtonState[0x33]) < 0) {
+            pbDebugPanel2Pos.editing ^= 1;
+            pbDebugPanel2Pos.blink = 0;
+        }
+    }
+    return 0;
+}
+
+/* Draw the four color channels and handle selection and value editing. */
+s32 pbDebugPrintPanel3(void) {
+    pbPrintState_t packet;
+    sdfDrawTag_t *list;
+    s32 row;
+    s32 y = 0x7A20;
+    s16 previousSelection;
+    s32 previousRate;
+    s32 highlight;
+
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list,
+        (u32)dds3PrimFrameRect(0x8950, 0x79A8, 0xFEFFFF, 0x5A0, 0x210, 0x60000000, 0x40806020));
+    sdfDevSetPrintCB(&packet, 0x8980, 0x79C0, 0xFF0000, 0);
+    sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_0054F588));
+    if (pbDebugPanel3X.editing == 0) {
+        sdfDevSetPrintCB(&packet, 0x8980, pbDebugPanel3X.selection * 0x60 + 0x7A20, 0xFF0000, 0);
+        pbDebugPanel3X.blink++;
+        if (pbDebugPanel3X.blink < 32 || (pbDebugPanel3X.blink & 31) < 18) {
+            sdfDrawTagLink(list, (u32)sdfDevPrintfEx(&packet, D_0054F590));
+        }
+    }
+    for (row = 0; row != 4; row++) {
+        sdfDevSetPrintCB(&packet, 0x8980, y, 0xFF0000, D_00326C20[row].highlight);
+        sdfDrawTagLink(list,
+            (u32)sdfDevPrintfEx(&packet, D_0054F598, D_00326C20[row].title));
+        highlight = 0;
+        if (pbDebugPanel3X.editing != 0 && row == pbDebugPanel3X.selection) {
+            highlight = 6;
+        }
+        sdfDevSetPrintCB(&packet, 0x8C80, y, 0xFF0000, highlight);
+        if (row < 4) {
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_0054F5A0, D_00326C50.channels[row]));
+        } else {
+            sdfDrawTagLink(list,
+                (u32)sdfDevPrintfEx(&packet, D_0054F5A8, D_00551EA8));
+        }
+        y += 0x60;
+    }
+    { sdfGrOt_t *ot = &sdfGrOtTable[83]; ((sdfGrOtRegFunc_t)ot->regFunc)(ot, list); }
+    pbDebugPanel3State += D_00551EA8;
+    pbDrawRotatedPrim(0x46);
+    if ((s8)((s8)dds3PadButtonState[0x32]) < 0) {
+        D_0054F584 ^= 1;
+    }
+    if (pbDebugPanel3X.editing == 0) {
+        previousSelection = pbDebugPanel3X.selection;
+        if ((u8)((s8)dds3PadButtonState[0x36]) & 2) {
+            pbDebugPanel3X.selection--;
+            if (pbDebugPanel3X.selection < 0) {
+                pbDebugPanel3X.selection = 3;
+            }
+        }
+        if ((u8)((s8)dds3PadButtonState[0x37]) & 2) {
+            pbDebugPanel3X.selection++;
+            if (pbDebugPanel3X.selection >= 4) {
+                pbDebugPanel3X.selection = 0;
+            }
+        }
+        if (previousSelection != pbDebugPanel3X.selection) {
+            pbDebugPanel3X.blink = 0;
+        }
+        if (((s8)dds3PadButtonState[0x31]) < 0) {
+            pbDebugPanel3X.editing ^= 1;
+            pbDebugPanel3X.blink = 0;
+        }
+        if ((u8)((s8)dds3PadButtonState[0x33]) & 2) {
+            return -1;
+        }
+    } else {
+        if (pbDebugPanel3X.selection < 4) {
+            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+                D_00326C50.channels[pbDebugPanel3X.selection] -= 10;
+                if (D_00326C50.channels[pbDebugPanel3X.selection] < 0) {
+                    D_00326C50.channels[pbDebugPanel3X.selection] = 0;
+                }
+            }
+            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+                D_00326C50.channels[pbDebugPanel3X.selection] += 10;
+                if (D_00326C50.channels[pbDebugPanel3X.selection] > 255) {
+                    D_00326C50.channels[pbDebugPanel3X.selection] = 255;
+                }
+            }
+        } else {
+            previousRate = D_00551EA8;
+            if ((u8)((s8)dds3PadButtonState[0x34]) & 2) {
+                D_00551EA8 -= 0x100;
+                if (D_00551EA8 < 0) {
+                    D_00551EA8 = 0;
+                }
+            }
+            if ((u8)((s8)dds3PadButtonState[0x35]) & 2) {
+                D_00551EA8 += 0x100;
+                if (D_00551EA8 > 0x800) {
+                    D_00551EA8 = 0x800;
+                }
+            }
+            if (previousRate != D_00551EA8) {
+                pbDebugPanel3State = 0;
+            }
+        }
+        if (((s8)dds3PadButtonState[0x33]) < 0) {
+            pbDebugPanel3X.editing ^= 1;
+            pbDebugPanel3X.blink = 0;
+        }
+    }
+    return 0;
+}
+
+u64 *pbAllocPrimPacket(u32 x, u32 y, u32 depth, u32 width, u32 height, u32 color0, u32 color1) {
+    u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x80);
+
+    packet[0] = 7;
+    packet[1] = 0x5000000700000000ULL;
+    packet[2] = 0xB400000000008001ULL;
+    packet[3] = 0xFF515151510ULL;
+    packet[4] = 0x14D;
+    packet[5] = color0 | ((u64)0xFE00 << 46);
+    packet[7] = color0 | ((u64)0xFE00 << 46);
+    packet[9] = color1 | ((u64)0xFE00 << 46);
+    packet[11] = color1 | ((u64)0xFE00 << 46);
+    packet[6] = (u64)((x & 0xFFFF) | (y << 16)) | ((u64)depth << 32);
+    packet[8] = (u64)(((x + width) & 0xFFFF) | (y << 16)) | ((u64)depth << 32);
+    packet[10] = (u64)(((x + width) & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
+    packet[12] = (u64)((x & 0xFFFF) | ((y + height) << 16)) | ((u64)depth << 32);
+    packet[13] = packet[14] = packet[15] = 0;
+    return packet;
+}
 
 void *pbMakeSpritePacket(u64 data, s32 context)
 {
@@ -209,7 +588,30 @@ void *pbMakePrimPacket(u64 data, s32 context)
     return packet;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbDrawRotatedPrim);
+void pbDrawRotatedPrim(s32 surfaceIndex) {
+    u32 color = 0;
+    s32 alpha;
+    s32 i;
+    pbColorByte_t *component;
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    f32 phase;
+
+    phase = (f32)(pbDebugPanel3State % 4096) * (1.0f / 4096.0f);
+    phase = phase * 6.2831852f + 1.5707963f + 0.78539815f;
+    alpha = (s32)((sdfSin(phase) + 1.0f) * 0.5f * D_00326C50.alpha);
+    component = D_00326C50.channelBytes;
+    for (i = 0; i != 3; i++, component++) {
+        color |= component->value << (i * 8);
+    }
+    color |= (u32)alpha << 24;
+    list = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(list, (u32)pbMakeSpritePacket(0x33001, 0));
+    sdfDrawTagLink(list, (u32)pbMakePrimPacket(6, 0));
+    sdfDrawTagLink(list, (u32)pbAllocPrimPacket(0x7000, 0x7900, 0xFEFFFF, 0x2000, 0xE00, color, color));
+    surface = &sdfGrOtTable[surfaceIndex];
+    ((sdfGrOtRegFunc_t)surface->regFunc)(surface, list);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", func_001D2638);
 
@@ -227,11 +629,17 @@ INCLUDE_ASM(const s32, "code_001D1470", pb_draw_mycharacter_Shutdown);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_1D2AD8);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetModelPos);
+void pbSetModelPos(mdlObj_t *model, const f32 *position) {
+    VU0_LOAD_VF10(position);
+    mdlSetPosition(model);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_1D2B18);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetModelRotate);
+void pbSetModelRotate(mdlObj_t *model) {
+    FromEuler();
+    mdlSetRotate(model);
+}
 
 void func_001D2B68(void) {
 }
@@ -255,7 +663,9 @@ void func_001D2D00(void) {
 void pbChangeMotion(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D2D10);
+s32 pb_1D2D10(void) {
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbMoveMyCharcter);
 
@@ -313,13 +723,20 @@ INCLUDE_ASM(const s32, "code_001D1470", pbInitExitDraw);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbSetExitDisp);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetExitDisp);
+s32 pbGetExitDisp(pbPanel_t *panel) {
+    return panel->data.value->value;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetExitPos);
+void pbSetExitPos(pbPanel_t *panel, s32 x, s32 y) {
+    panel->x = x;
+    panel->y = y;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbInitMapBaseDraw);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4140);
+void func_001D4140(pbPanel_t *panel, s32 value) {
+    panel->data.value->value = value;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbLoadTextures);
 
@@ -333,44 +750,62 @@ INCLUDE_ASM(const s32, "code_001D1470", pb_proc_dummy_Shutdown);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_bg_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_bg_Shutdown);
+void pb_draw_bg_Shutdown(dds3ProcessID_t *id) {
+    sdfChipFreeDelayedDirect(id->workdata);
+}
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535DE0);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartMapEditor);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetMoveChar);
+s32 pbGetMoveChar(void) {
+    return pbMoveChar;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartDummy);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartBackGround);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4B28);
+s32 func_001D4B28(void) {
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbMapIsValid);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D4B60);
+s32 pb_1D4B60(void) {
+    return 0;
+}
 
 void func_001D4B68(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D4B70);
+s32 pb_1D4B70(void) {
+    return 0;
+}
 
 void func_001D4B78(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D4B80);
+s32 pb_1D4B80(void) {
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D4B88);
+s32 pb_1D4B88(void) {
+    return 0;
+}
 
 void func_001D4B90(void) {
 }
 
 INCLUDE_ASM(const s32, "code_001D1470", pbLoadSystemDataDone);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4BC0);
+s32 func_001D4BC0(void) {
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4BC8);
+s32 func_001D4BC8(void) {
+    return pbMapIsValid() == 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", func_001D4BE8);
 
@@ -392,7 +827,9 @@ INCLUDE_ASM(const s32, "code_001D1470", func_001D4E70);
 
 INCLUDE_ASM(const s32, "code_001D1470", func_001D4EB0);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4F08);
+void func_001D4F08(void) {
+    pbPreviousRecord();
+}
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535E40);
 
@@ -406,7 +843,9 @@ INCLUDE_ASM(const s32, "code_001D1470", pb_proc_menu_Shutdown);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_load_mapdata_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_load_mapdata_Shutdown);
+void pb_load_mapdata_Shutdown(dds3ProcessID_t *id) {
+    sdfChipFreeDirect(id->workdata);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartMenu);
 
@@ -532,15 +971,25 @@ INCLUDE_ASM(const s32, "code_001D1470", pbStartGiveupConfirm);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbGetCameraParam);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D8EA0);
+void func_001D8EA0(f32 angle) {
+    cameraAngle = angle;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetCameraRadius);
+void pbSetCameraRadius(f32 radius) {
+    cameraRadius = radius;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetCameraDegree);
+void pbSetCameraDegree(f32 degree) {
+    cameraDegree = degree;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetCameraDegreeInit);
+void pbSetCameraDegreeInit(f32 degree) {
+    cameraDegreeInit = degree;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetMessageScriptProc);
+dds3ProcessID_t *pbGetMessageScriptProc(void) {
+    return scr_msg;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbGotoNewStage);
 
@@ -552,7 +1001,10 @@ INCLUDE_ASM(const s32, "code_001D1470", pbFindGroupEntry);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbAddGroupEntry);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbFreeGroupEntry);
+void pbFreeGroupEntry(mdlResrc_t *entry) {
+    sdfMemFreeDirect(entry->resourceHandle);
+    sdfChipFreeDelayedDirect(entry);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbFreeGroupHandles);
 
@@ -570,7 +1022,9 @@ INCLUDE_RODATA(const s32, "code_001D1470", D_00536000);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartBlockDataBase);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSearchGroupDB);
+void *pbSearchGroupDB(pbPanel_t *panel, u32 group) {
+    return pbFindGroupEntry(panel->data.groupDB, group);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDeleteGroupEntry);
 
@@ -592,7 +1046,9 @@ INCLUDE_ASM(const s32, "code_001D1470", pbStartRecord);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbClearRecord);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1DA400);
+s32 pb_1DA400(pbPanel_t *panel) {
+    return panel->data.value->value;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbPushRecord);
 
@@ -614,7 +1070,9 @@ INCLUDE_ASM(const s32, "code_001D1470", pb_draw_help_Shutdown);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartHelp);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001DB020);
+pbPanel_t *func_001DB020(pbPanel_t *parent) {
+    return pbStartHelp(parent, 0);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbResetKeyState);
 
@@ -622,7 +1080,9 @@ INCLUDE_ASM(const s32, "code_001D1470", pbGetKeyAction);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbGetKeyMode);
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001DB0D8);
+void func_001DB0D8(u8 mode) {
+    keyActMode = mode;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbRotRKeyAct);
 
@@ -666,11 +1126,18 @@ INCLUDE_ASM(const s32, "code_001D1470", pbStartErrorDraw);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDebugProc);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbDebugShutdown);
+void pbDebugShutdown(void) {
+    ReleaseDebug_pbDebugMode();
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", InitializeDebug_pbDebugMode);
 
-INCLUDE_ASM(const s32, "code_001D1470", ReleaseDebug_pbDebugMode);
+void ReleaseDebug_pbDebugMode(void) {
+    if (g_pdebug_0 != NULL) {
+        sdfMemFreeDirect(g_pdebug_0->allocation);
+        g_pdebug_0 = NULL;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", DebugProcMenu_pbDebugMode);
 
@@ -689,94 +1156,6 @@ INCLUDE_ASM(const s32, "code_001D1470", DebugProcDegree);
 INCLUDE_ASM(const s32, "code_001D1470", DebugProcStage);
 
 INCLUDE_ASM(const s32, "code_001D1470", DebugProcFree);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F510);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F514);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F518);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F520);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F528);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F530);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F538);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F540);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F548);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F550);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F558);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F560);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F568);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F570);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F578);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F580);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F584);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F588);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F590);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F598);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5A0);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5A8);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5B0);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5B8);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5C0);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5C4);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5D4);
-
-INCLUDE_SDATA(const s32, "code_001D1470", pbMoveCharList);
-
-INCLUDE_SDATA(const s32, "code_001D1470", blockDB);
-
-INCLUDE_SDATA(const s32, "code_001D1470", bmap);
-
-INCLUDE_SDATA(const s32, "code_001D1470", goal);
-
-INCLUDE_SDATA(const s32, "code_001D1470", record);
-
-INCLUDE_SDATA(const s32, "code_001D1470", mapCursor);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5F0);
-
-INCLUDE_SDATA(const s32, "code_001D1470", degree_mode);
-
-INCLUDE_SDATA(const s32, "code_001D1470", pbGameKeyState);
-
-INCLUDE_SDATA(const s32, "code_001D1470", pbMapCursorWork);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5FC);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F600);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F608);
-
-INCLUDE_SDATA(const s32, "code_001D1470", g_pdebug_0);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F614);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F618);
-
-INCLUDE_SDATA(const s32, "code_001D1470", D_0054F620);
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00536690);
 
@@ -2155,4 +2534,92 @@ INCLUDE_RODATA(const s32, "code_001D1470", D_0053A600);
 INCLUDE_RODATA(const s32, "code_001D1470", D_0053A618);
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_0053A630);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F510);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F514);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F518);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F520);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F528);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F530);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F538);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F540);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F548);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F550);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F558);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F560);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F568);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F570);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F578);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F580);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F584);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F588);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F590);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F598);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5A0);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5A8);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5B0);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5B8);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5C0);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5C4);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5D4);
+
+INCLUDE_SDATA(const s32, "code_001D1470", pbMoveCharList);
+
+INCLUDE_SDATA(const s32, "code_001D1470", blockDB);
+
+INCLUDE_SDATA(const s32, "code_001D1470", bmap);
+
+INCLUDE_SDATA(const s32, "code_001D1470", goal);
+
+INCLUDE_SDATA(const s32, "code_001D1470", record);
+
+INCLUDE_SDATA(const s32, "code_001D1470", mapCursor);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5F0);
+
+INCLUDE_SDATA(const s32, "code_001D1470", degree_mode);
+
+INCLUDE_SDATA(const s32, "code_001D1470", pbGameKeyState);
+
+INCLUDE_SDATA(const s32, "code_001D1470", pbMapCursorWork);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F5FC);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F600);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F608);
+
+INCLUDE_SDATA(const s32, "code_001D1470", g_pdebug_0);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F614);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F618);
+
+INCLUDE_SDATA(const s32, "code_001D1470", D_0054F620);
 

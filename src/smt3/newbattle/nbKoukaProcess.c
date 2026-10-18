@@ -1,8 +1,26 @@
 #include "common.h"
+#include "kernel.h"
+#include "nb.h"
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbGetKoukaProcessData);
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbGetKoukaPacketCnt);
+extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void *sdfChipAllocDirect(u32 size);
+extern void nbPanelStockFadeOUT(void);
+extern void nbPanelStockEnd(void);
+extern char D_00544350[];
+
+nbKoukaProcessData_t *nbGetKoukaProcessData(void)
+{
+    return dds3GetProcessData(dds3SearchProcessName(D_00544350));
+}
+
+s32 nbGetKoukaPacketCnt(void)
+{
+    nbKoukaProcessData_t *work = nbGetKoukaProcessData();
+
+    return work->packetcnt;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbGetUniqueIdKoukaPacketCnt);
 
@@ -106,15 +124,30 @@ INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", RunPadShockKouka);
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", RunSkillColorKouka);
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", RunStockPanelFadeOutKouka);
+void RunStockPanelFadeOutKouka(void)
+{
+    nbPanelStockFadeOUT();
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", RunStockPanelEndKouka);
+void RunStockPanelEndKouka(void)
+{
+    nbPanelStockEnd();
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbKoukaProcess1);
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbKoukaShutdown);
 
-INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", InitKoukaProcessData);
+nbKoukaProcessData_t *InitKoukaProcessData(nbMainProcessData_t *battle)
+{
+    nbKoukaProcessData_t *work = sdfChipAllocDirect(sizeof(nbKoukaProcessData_t));
+
+    work->data = battle;
+    work->packetcnt = 0;
+    work->first = NULL;
+    work->last = NULL;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbKoukaProcess", nbInitKoukaProcess);
 

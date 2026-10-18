@@ -1,9 +1,10 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdf_lighting.h"
 
-struct sdfVector3_t;
-struct sdfGrPacketHeader_t;
-struct sdfGrTagStdReg_t;
+typedef f32 (*sdfLightSources_t[3])[4];
+extern f32 D_00529630[4];
+
 struct IpuDmaState;
 struct sdfDrawTag_t;
 union sdfMatUvwParm_t;
@@ -25,7 +26,6 @@ struct DmaPacketHeader;
 struct sdf3DFogPacket_t;
 struct SdfChunkHeader;
 struct SoundFormat;
-struct sdfMatrix4_t;
 struct sdfMatPacket_t;
 struct SdfDmaReferenceChainPacket;
 struct SdfTextureDrawPacket;
@@ -58,13 +58,6 @@ struct SdfGeneratedLookupTexture;
 struct MovPacStream;
 struct sdfFileCmdHandle_t;
 typedef int s128 __attribute__((mode(TI)));
-/* Three-component vector; the VU0 loaders read it as the xyz of a quadword. */
-typedef struct sdfVector3_t
-{
-    f32 x;
-    f32 y;
-    f32 z;
-} sdfVector3_t;
 /* Write three axis components and twice acos(W), using the native small
  * denominator fallback when sqrt(1-W*W) is near zero. */
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
@@ -247,18 +240,6 @@ enum {
     SDF_GS_TRXREG = 0x52,
     SDF_GS_TRXDIR = 0x53
 };
-/* Appending the packet patches the DMA tag's link; the VIF and GIF words
- * retain the renderer's original commands and register-list encoding. */
-typedef struct sdfGrPacketHeader_t {
-    u64 dmaTag;
-    u64 vifCommands;
-    u64 gifTag;
-    u64 gifRegisters;
-} QWORD_ALIGNED sdfGrPacketHeader_t;
-typedef struct sdfGrTagStdReg_t {
-    u64 value;
-    u64 registerId;
-} sdfGrTagStdReg_t;
 /* Serialized byte consumed by the GS texture-state packet builder. */
 typedef u8 SdfTextureClampMode;
 /* IPU register state saved across stream callbacks (0x24 bytes). */
@@ -293,7 +274,7 @@ typedef struct sdfDrawTag_t {
     u32 unk18;
     u32 unk1C;
 } sdfDrawTag_t;
-/* Optional packed or five-float state block owned by an SdfAsset. */
+/* Optional packed or five-float state block owned by an sdfMat_t. */
 typedef union sdfMatUvwParm_t {
     struct {
         u64 unk0;
@@ -693,7 +674,7 @@ typedef struct SdfChunkHeader {
     u32 id;   /* 0x00: zero terminates the chunk stream */
     u32 size; /* 0x04: byte extent to the next chunk */
 } SdfChunkHeader;
-/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+/* Protocol IDs use distinct byte-sized storage codes in sdfFileCmdHandle_t. */
 typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
 /* These four bytes are consumed by the same sound-format initializer. */
@@ -706,17 +687,6 @@ typedef struct SoundFormat {
 /* Normalize the supplied axis and write an XYZW quaternion. The native
  * conversion uses nonnegative square roots for both half-angle components. */
 void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle);
-/* Row-major 4x4 matrix: three axes plus a position row, loaded by VU0. */
-typedef struct sdfMatrix4_t {
-    sdfVector3_t right; /* 0x00 */
-    u32 flags; /* 0x0C */
-    sdfVector3_t up; /* 0x10 */
-    u32 pad1; /* 0x1C */
-    sdfVector3_t at; /* 0x20 */
-    u32 pad2; /* 0x2C */
-    sdfVector3_t pos; /* 0x30 */
-    u32 pad3; /* 0x3C */
-} sdfMatrix4_t;
 #define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
     : "=m" (*(QuadF32 *)(dst)) \
@@ -733,7 +703,7 @@ typedef struct sdfMatPacket_t {
     u32 pad18;             /* 0x18 */
     f32 unk1C;             /* 0x1C */
     u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
-    u32 secondaryMode;     /* 0x24: secondary packet mode copied from SdfAsset */
+    u32 secondaryMode;     /* 0x24: secondary packet mode copied from sdfMat_t */
     f32 y;                 /* 0x28 */
     f32 x;                 /* 0x2C */
     u8 pad30[8];           /* 0x30 */
@@ -872,6 +842,12 @@ typedef struct {
     u8 *vertexColors;      /* 0xA8 */
     f32 depth;             /* 0xAC */
 } VuWork;
+
+extern void corePktXfmUV(void *vertices, s32 count, void *uv, void *transform);
+extern void corePktApplyFaceDivColor(VuWork *work, void *parameters);
+extern void sdfGrClosePacketBuff(u32 cursor);
+void corePktEmitTexTrisCtx2(VuWork *work, u64 samplingState, u64 textureState,
+                          u64 clampState, u64 alphaState, s32 clearPrimitiveFlags);
 #define VU0_MATRIX4_INVERT_SCALED() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vmula.xyz ACC, vf28, vf28\n\tvmadda.xyz ACC, vf29, vf29\n\tvmadd.xyz vf2, vf30, vf30\n\t" \
@@ -1754,19 +1730,19 @@ void StoreRotateMatrixAxis(f32 angle, const sdfVector3_t *axis, sdfMatrix4_t *ma
     y = normalizedAxis[1];
     z = normalizedAxis[2];
 
-    matrix->right.x = x * x + (1.0f - x * x) * cosine;
-    matrix->right.y = x * y * (1.0f - cosine) + z * sine;
-    matrix->right.z = x * z * (1.0f - cosine) - y * sine;
-    matrix->flags = 0;
-    matrix->up.x = x * y * (1.0f - cosine) - z * sine;
-    matrix->up.y = y * y + (1.0f - y * y) * cosine;
-    matrix->up.z = y * z * (1.0f - cosine) + x * sine;
-    matrix->pad1 = 0;
-    matrix->at.x = x * z * (1.0f - cosine) + y * sine;
-    matrix->at.y = y * z * (1.0f - cosine) - x * sine;
-    matrix->at.z = z * z + (1.0f - z * z) * cosine;
-    matrix->pad2 = 0;
-    VU0_STORE_VF0(&matrix->pos);
+    matrix->m[0] = x * x + (1.0f - x * x) * cosine;
+    matrix->m[1] = x * y * (1.0f - cosine) + z * sine;
+    matrix->m[2] = x * z * (1.0f - cosine) - y * sine;
+    matrix->m[3] = 0.0f;
+    matrix->m[4] = x * y * (1.0f - cosine) - z * sine;
+    matrix->m[5] = y * y + (1.0f - y * y) * cosine;
+    matrix->m[6] = y * z * (1.0f - cosine) + x * sine;
+    matrix->m[7] = 0.0f;
+    matrix->m[8] = x * z * (1.0f - cosine) + y * sine;
+    matrix->m[9] = y * z * (1.0f - cosine) - x * sine;
+    matrix->m[10] = z * z + (1.0f - z * z) * cosine;
+    matrix->m[11] = 0.0f;
+    VU0_STORE_VF0(&matrix->m[12]);
 }
 
 void SetRotateMatrixAxis(f32 angle, const sdfVector3_t* axis)
@@ -2538,11 +2514,184 @@ void corePktBuildBackFaceList(VuWork *work) {
     *(VuBlendNode **)work->dmaEnd = NULL;
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitTexTris);
+void corePktEmitTexTris(work)
+    VuWork *work;
+{
+    s32 remaining = work->nodeCount;
+    if (remaining != 0) {
+        u128 *(*nodes)[3] = corePktFaceList;
+        u32 *cursor = work->cursor;
+        s32 first = 1;
+        do {
+            s32 chunk = (remaining <= 0x10) ? remaining : 0x10;
+            remaining -= chunk;
+            while (((u32)cursor & 0xC) != 4) {
+                *cursor++ = 0;
+            }
+            if (first) {
+                sdfMatPacket_t *node;
+                *cursor++ = 0x6501C000;
+                *cursor++ = 4;
+                *cursor++ = ((chunk * 9 + 5) << 16) | 0x6C00C001;
+                node = work->node;
+                first = 0;
+                *(u64 *)cursor = 0x1000000000000003ULL;
+                cursor += 2;
+                *(u64 *)cursor = 0xE;
+                cursor += 2;
+                *(u64 *)cursor = node->primaryTextureState.sampling;
+                cursor += 2;
+                *(u64 *)cursor = 0x14;
+                cursor += 2;
+                *(u64 *)cursor = node->primaryTextureState.texture;
+                cursor += 2;
+                *(u64 *)cursor = 6;
+                cursor += 2;
+                *(u64 *)cursor = node->primaryTextureState.clamp;
+                cursor += 2;
+                *(u64 *)cursor = 8;
+                cursor += 2;
+            } else {
+                *cursor++ = 0x6501C000;
+                *cursor++ = 0;
+                *cursor++ = ((chunk * 9 + 1) << 16) | 0x6C00C001;
+            }
+            *(u64 *)cursor = ((u64)(corePktPrimBase | 3) << 47) | (chunk * 3) | 0x3000400000008000ULL;
+            cursor += 2;
+            *(u64 *)cursor = 0x412;
+            cursor += 2;
+            do {
+                u128 *a = (*nodes)[0];
+                u128 *b = (*nodes)[1];
+                u128 *c = (*nodes)[2];
+                nodes++;
+                ((u128 *)cursor)[0] = a[0];
+                ((u128 *)cursor)[1] = a[3];
+                ((u128 *)cursor)[2] = a[2];
+                ((u128 *)cursor)[3] = b[0];
+                ((u128 *)cursor)[4] = b[3];
+                ((u128 *)cursor)[5] = b[2];
+                ((u128 *)cursor)[6] = c[0];
+                ((u128 *)cursor)[7] = c[3];
+                ((u128 *)cursor)[8] = c[2];
+                cursor += 0x24;
+            } while (--chunk != 0);
+            *cursor++ = 0x14000004;
+        } while (remaining != 0);
+        work->cursor = cursor;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitTexTrisCtx2);
+void corePktEmitTexTrisCtx2(VuWork *work, u64 samplingState, u64 textureState, u64 clampState, u64 alphaState, s32 clearPrimitiveFlags) {
+    s32 remainingTriangles = work->nodeCount;
+    if (remainingTriangles != 0) {
+        u128 *(*triangleRefs)[3] = corePktFaceList;
+        u32 *packetCursor = work->cursor;
+        s32 firstBatch = 1;
+        do {
+            s32 batchTriangles = (remainingTriangles <= 0x10) ? remainingTriangles : 0x10;
+            remainingTriangles -= batchTriangles;
+            while (((u32)packetCursor & 0xC) != 4) {
+                *packetCursor++ = 0;
+            }
+            if (firstBatch) {
+                *packetCursor++ = 0x6501C000;
+                *packetCursor++ = 6;
+                *packetCursor++ = ((batchTriangles * 9 + 7) << 16) | 0x6C00C001;
+                firstBatch = 0;
+                *(u64 *)packetCursor = 0x1000000000000005ULL;
+                packetCursor += 2;
+                *(u64 *)packetCursor = SDF_GIF_REGISTER_AD;
+                packetCursor += 2;
+                *(u64 *)packetCursor = samplingState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x15;
+                packetCursor += 2;
+                *(u64 *)packetCursor = textureState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 7;
+                packetCursor += 2;
+                *(u64 *)packetCursor = clampState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 9;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x51801;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x48;
+                packetCursor += 2;
+                *(u64 *)packetCursor = alphaState;
+                packetCursor += 2;
+                *(u64 *)packetCursor = 0x43;
+                packetCursor += 2;
+            } else {
+                *packetCursor++ = 0x6501C000;
+                *packetCursor++ = 0;
+                *packetCursor++ = ((batchTriangles * 9 + 1) << 16) | 0x6C00C001;
+            }
+            *(u64 *)packetCursor = ((u64)((corePktPrimBase & ~clearPrimitiveFlags) | 0x203) << SDF_GIF_PRIM_SHIFT) | (batchTriangles * 3) | 0x3000400000008000ULL;
+            packetCursor += 2;
+            *(u64 *)packetCursor = 0x412;
+            packetCursor += 2;
+            do {
+                u128 *vertexA = (*triangleRefs)[0];
+                u128 *vertexB = (*triangleRefs)[1];
+                u128 *vertexC = (*triangleRefs)[2];
+                triangleRefs++;
+                ((u128 *)packetCursor)[0] = vertexA[0];
+                ((u128 *)packetCursor)[1] = vertexA[3];
+                ((u128 *)packetCursor)[2] = vertexA[2];
+                ((u128 *)packetCursor)[3] = vertexB[0];
+                ((u128 *)packetCursor)[4] = vertexB[3];
+                ((u128 *)packetCursor)[5] = vertexB[2];
+                ((u128 *)packetCursor)[6] = vertexC[0];
+                ((u128 *)packetCursor)[7] = vertexC[3];
+                ((u128 *)packetCursor)[8] = vertexC[2];
+                packetCursor += 0x24;
+            } while (--batchTriangles != 0);
+            *packetCursor++ = 0x14000004;
+        } while (remainingTriangles != 0);
+        work->cursor = packetCursor;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitTris);
+void corePktEmitTris(work)
+    VuWork *work;
+{
+    s32 remainingTriangles = work->nodeCount;
+    if (remainingTriangles != 0) {
+        u128 *(*triangleRefs)[3] = corePktFaceList;
+        u32 *packetCursor = work->cursor;
+        do {
+            s32 batchTriangles = (remainingTriangles <= 0x18) ? remainingTriangles : 0x18;
+            remainingTriangles -= batchTriangles;
+            while (((u32)packetCursor & 0xC) != 4) {
+                *packetCursor++ = 0;
+            }
+            *packetCursor++ = 0x6501C000;
+            *packetCursor++ = 0x10000;
+            *packetCursor++ = ((batchTriangles * 6 + 1) << 16) | 0x6C00C001;
+            *(u64 *)packetCursor = (batchTriangles * 3) | ((u64)(corePktPrimBase | 3) << SDF_GIF_PRIM_SHIFT) | 0x2000400000008000ULL;
+            packetCursor += 2;
+            *(u64 *)packetCursor = 0x41;
+            packetCursor += 2;
+            do {
+                u128 *vertexA = (*triangleRefs)[0];
+                u128 *vertexB = (*triangleRefs)[1];
+                u128 *vertexC = (*triangleRefs)[2];
+                triangleRefs++;
+                ((u128 *)packetCursor)[0] = vertexA[0];
+                ((u128 *)packetCursor)[1] = vertexA[2];
+                ((u128 *)packetCursor)[2] = vertexB[0];
+                ((u128 *)packetCursor)[3] = vertexB[2];
+                ((u128 *)packetCursor)[4] = vertexC[0];
+                ((u128 *)packetCursor)[5] = vertexC[2];
+                packetCursor += 0x18;
+            } while (--batchTriangles != 0);
+            *packetCursor++ = 0x14000004;
+        } while (remainingTriangles != 0);
+        work->cursor = packetCursor;
+    }
+}
 
 void corePktEmitBase(VuWork *work) {
     if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
@@ -2552,7 +2701,40 @@ void corePktEmitBase(VuWork *work) {
     corePktEmitTris();
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitMultiTexPass);
+void corePktEmitMultiTexPass(VuWork *work) {
+    sdfMatPacket_t *node;
+    u32 mode;
+    u32 secondaryColor;
+    u32 primaryStateWordSecond;
+
+    corePktXfmUV((void *)work->dmaBase, work->param1, work->secondCoordinates,
+                  (u8 *)work->node + 0x80);
+    corePktLerpUVChain(work->blendList);
+    node = work->node;
+    mode = node->secondaryMode;
+    secondaryColor = node->secondaryColor;
+    primaryStateWordSecond = node->unk08;
+    switch (mode) {
+        case 0:
+        case 1:
+        case 2:
+            if (primaryStateWordSecond != secondaryColor) {
+                u128 parameters[3];
+
+                corePktMakeFaceDivParm((SdfVuColorTransform *)parameters, corePktCurrLight, work->packedColor,
+                              secondaryColor, node->unk04, node->unk1C,
+                              node->x + work->offsetX, node->y + work->offsetY);
+                corePktApplyFaceDivColor(work, parameters);
+            }
+            break;
+        case 3:
+            corePktSetConstColor(work, secondaryColor);
+            break;
+    }
+    corePktEmitTexTrisCtx2(work, node->secondaryTextureState.sampling,
+                                  node->secondaryTextureState.texture,
+                                  node->secondaryTextureState.clamp, node->alphaState, 0);
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitRefMapPass);
 
@@ -2595,7 +2777,44 @@ void corePktOpenAndEmit(VuWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktClosePacket);
+u64 *corePktClosePacket(VuWork *work) {
+    u32 cursor;
+    u32 start;
+    s32 quadwords;
+    u32 descriptor;
+    u64 gifTag;
+    u64 *header;
+
+    if (work->packetStart == 0) {
+        return NULL;
+    }
+
+    cursor = (u32)work->cursor;
+    start = (u32)work->ringStart;
+    if (cursor == start) {
+        sdfGrClosePacketBuff(work->packetStart);
+        return NULL;
+    }
+
+    while (((u32)cursor & 0xC) != 0) {
+        *(u32 *)cursor = 0;
+        cursor += 4;
+    }
+    quadwords = (s32)(cursor - start) >> 4;
+
+    while (((u32)cursor & 0x30) != 0) {
+        *(u128 *)cursor = 0;
+        cursor += 0x10;
+    }
+
+    sdfGrClosePacketBuff(cursor & 0x0FFFFFFF);
+    header = (u64 *)work->header;
+    descriptor = 0x20000000 | (quadwords & 0xFFFF);
+    gifTag = 0x1100000000000000ULL;
+    header[0] = descriptor;
+    header[1] = gifTag;
+    return header;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktVu0Run);
 
@@ -2748,6 +2967,8 @@ void sdf3DSetDefaultFog(u8 *sourceObject) {
 }
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeScreenParam);
+
+void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet, sdfLightSources_t sources, f32 *ambient);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeLightParallelPacket);
 
@@ -3596,7 +3817,11 @@ void sdfPadSetAct1(s32 padIndex, u8 strength) {
     sdfPadCb[padIndex].largeMotor = strength;
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadSetAct);
+void sdfPadSetAct(s32 padIndex, s32 smallMotor, s32 largeMotor) {
+    SdfPadEntry *entry = &sdfPadCb[padIndex];
+    entry->smallMotor = smallMotor & 0xFF;
+    sdfPadCb[padIndex].largeMotor = largeMotor & 0xFF;
+}
 
 void sdfPadInitManager(void) {
     s32 padIndex;
@@ -3625,6 +3850,10 @@ void sdfPadInitManager(void) {
     sdfPadManagerMode = 0;
 }
 
+INCLUDE_RODATA(const s32, "code_002B5CD0", D_005495C8);
+
+INCLUDE_RODATA(const s32, "code_002B5CD0", D_005495D8);
+
 INCLUDE_SDATA(const s32, "code_002B5CD0", D_005518B8);
 
 INCLUDE_SDATA(const s32, "code_002B5CD0", sdf3DSpecularTex);
@@ -3646,8 +3875,4 @@ INCLUDE_SDATA(const s32, "code_002B5CD0", D_005518E0);
 INCLUDE_SDATA(const s32, "code_002B5CD0", D_005518E1);
 
 INCLUDE_SDATA(const s32, "code_002B5CD0", D_005518E2);
-
-INCLUDE_RODATA(const s32, "code_002B5CD0", D_005495C8);
-
-INCLUDE_RODATA(const s32, "code_002B5CD0", D_005495D8);
 

@@ -1,5 +1,85 @@
 #include "common.h"
 #include "basic.h"
+#include "ps2asm.h"
+#include "field.h"
+#include "effBattle.h"
+#include "model.h"
+#include "billboard.h"
+
+typedef struct
+{
+    sdfVector4_t position;
+    sdfVector4_t rotation;
+    f32 range;
+    f32 height;
+    f32 parameter;
+    u32 color;
+} dds3EffectEventParameters_t;
+
+typedef struct
+{
+    sdfVector4_t position[2];
+    f32 radius[2];
+} dds3MagaArea_t;
+
+typedef struct
+{
+    sdfVector4_t position[4];
+    f32 radius[4];
+} dds3MagaPoints_t;
+
+extern const dds3EffectEventParameters_t D_00530E20;
+extern const dds3MagaArea_t D_00530E50;
+extern const dds3MagaPoints_t D_00530E78;
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern void dds3BillboardSetPosition(void *bill, const void *position);
+extern void dds3BillboardSetAnimNumber(void *bill, u32 entry);
+extern void dds3EffectSetPosition(void *effect, const void *position);
+extern struct EffNode *dds3EffectLoad(void *descriptor);
+extern struct EffNode *dds3EffectFileLoad(u32 parameter);
+extern  effBTL_t *effEveBEDCreate( effBTL_t *source);
+extern void effMagaSCSetArea(void *effect, const void *parameters);
+extern void effMagaP4SetPoint(void *effect, const void *parameters);
+
+extern sdfVector4_t aViewEye;
+extern s32 dds3EffectObjectAddFld(s32 map, u32 floor, s32 group);
+extern s32 dds3EffectObjectFindFld(s32 map, u32 floor, s32 group);
+extern void dds3BillboardSetRGBA(void *bill, u32 color);
+
+typedef struct
+{
+    sdfVector4_t position;
+    sdfVector4_t rotation;
+} dds3EffectOwnerPose_t;
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *scene, s32 type, dds3Basic_t *basic);
+extern void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *basic);
+extern void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *basic);
+extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 mask);
+extern void ToMatrix(void);
+extern void MultMatrixRevNoArg(void);
+extern void SDF_QUAT_INNERPRODUCT(void);
+extern void dds3EffectSetRotateMatrix(void *effect, const sdfMatrix4_t *matrix);
+extern s32 dds3EffectGetState(void *effect);
+extern s32 dds3BillboardGetAnimState(void *bill);
+extern void effEveBEDCutSetParams(void *cut, const void *parameters);
+
+/* The primary and secondary VU0 matrix banks are the SDK's implicit operands. */
+#define VU0_IDENTITY_MATRIX() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\t" \
+    "vmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\t" \
+    "vmr32.xyzw vf29, vf30\n\t.set reorder")
+#define VU0_SAVE_MATRIX_BANK() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
+    "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
+#define VU0_TRANSLATION_FROM_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf10x\n\t" \
+    "vmadday.xyzw ACC, vf29, vf10y\n\tvmaddaz.xyzw ACC, vf30, vf10z\n\t" \
+    "vmaddw.xyzw vf31, vf31, vf10w\n\t.set reorder")
+#define VU0_ORIGIN_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
 
 typedef struct
 {
@@ -13,26 +93,10 @@ typedef struct
     u32 param1;
 } fldResourceEffect_t;
 
-typedef struct
-{
-    u32 flag;
-    dds3BasicArrayHandle_t *hEventBasicArray;
-    u32 modelType;
-    void *pModel;
-    dds3Basic_t *pBasic[8];
-    void *pUserValue;
-    void *pModelRangeRootNode;
-    void *pMot;
-    s32 MotMode;
-    f32 MotSpeed;
-    u32 svs;
-    s32 sdwchrid;
-    s32 sdwnodeidx[24];
-} dds3ObjectBaseControlWorkData_t;
 
 typedef struct
 {
-    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
+    dds3ObjectBaseControl_t *pObjectBaseControlWorkData;
     u32 stat;
     s32 type;
     void *handle;
@@ -49,10 +113,9 @@ typedef struct
     sdfVector4_t FldExBasePos;
 } dds3EffectObjectBasicWorkData_t;
 
-struct BillObj;
 
-struct BillObj *dds3BillboardCopy(struct BillObj *bill);
-struct BillObj *dds3BillboardCreate(s32 kind, u32 id);
+struct billObj_t *dds3BillboardCopy(struct billObj_t *bill);
+struct billObj_t *dds3BillboardCreate(s32 kind, u32 id);
 void effMagaP4Randomize(void *maga);
 void *memset(void *dst, s32 fill, u32 len);
 void *sdfDevLoadFileEx(void *resource, u32 *id, s32 mode);
@@ -66,12 +129,8 @@ struct BillOut;
 typedef struct BillOut BillOut;
 struct EvtUnit;
 typedef struct EvtUnit EvtUnit;
-struct sdfDrawTag_t;
-typedef struct sdfDrawTag_t sdfDrawTag_t;
 struct DevRequest;
 typedef struct DevRequest DevRequest;
-struct sdfMotionCtrlr_t;
-typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
 struct SdfChunkHeader;
 typedef struct SdfChunkHeader SdfChunkHeader;
 struct SdfDmaTagHeader;
@@ -93,95 +152,6 @@ typedef struct EffNode {
     s32 instance;
     f32 unkC;
 } EffNode;
-
-typedef struct BillRenderPair {
-    struct BillChildPayload *children[2];
-    u16 cameraFacingMode;
-    u16 kind;
-    u32 colors[2];
-    sdfDrawTag_t *packetList;
-    struct BillRenderPair *next;
-} BillRenderPair;
-
-typedef struct BillObj {
-    f32 position[4];
-    f32 childScaleX;
-    f32 childScaleY;
-    f32 unk18;
-    f32 unk1C;
-    f32 rotationAngle;
-    u32 childParam;
-    void (*callback)();
-    u16 kind;
-    u16 requestedPacketListIndex;
-    union {
-        void *payload;
-        struct BillChildPayload *child;
-        struct BillData *animationData;
-    } anon0;
-    BillRenderPair pair;
-    u16 animationActive;
-    u8 pad52[2];
-    u32 modeFlags;
-    u32 animationEntryIndex;
-    s32 entryCount;
-    struct BillOut *resolvedEntries;
-} BillObj;
-
-typedef struct EffAimParams {
-    u8 scaleKind;
-    u8 aimMode;
-    u8 directionMode;
-    u8 pad3;
-    s32 rangeOverride;
-} EffAimParams;
-
-typedef union EffBattleParameterValue {
-    u32 sourceOffset;
-    struct effPartHandle_t *work;
-} EffBattleParameterValue;
-
-typedef struct EffBattleEntry {
-    u16 paramKind;
-    u8 pad02[2];
-    EffBattleParameterValue value;
-    EffAimParams aimParams;
-    u32 zeroKindCount;
-    u8 kind;
-    u8 pad15[3];
-} EffBattleEntry;
-
-typedef struct EffBattleEntryList {
-    s32 triggerFrame;
-    u8 pad04[2];
-    u16 shake;
-    u16 shakeFrame;
-    u16 shakeFade;
-    u8 colorKeys[0x24];
-    u8 rgbKeys[0x18];
-    s32 callbackFrame;
-    u8 pad4C[0x20];
-    u16 count;
-    u8 pad6E[2];
-    s32 colorRampEndFrame;
-    u8 actorScaleEnabled;
-    u8 pad75[3];
-    EffBattleEntry entries[1];
-} EffBattleEntryList;
-
-typedef struct SoundBank {
-    u8 pad00[8];
-    EffBattleEntryList list;
-    u8 pad98[0x580];
-} SoundBank;
-
-typedef struct SoundMixer {
-    SoundBank banks[2];
-    u8 pad0C30[8];
-    struct sdfMemHandle_t *resource;
-    u32 active;
-    BattleEffect *voiceList;
-} SoundMixer;
 
 enum {
     EFF_WORLD_KIND_WORLD_INFO = 0,
@@ -235,10 +205,10 @@ typedef struct EffOwnerBillPayloadView {
 #define EFF_OBJ_OWNER_BILL_KIND 5
 
 typedef struct EffectObjectData {
-    dds3ObjectBaseControlWorkData_t *handle;
+    dds3ObjectBaseControl_t *handle;
     s32 word04;
     struct EvtUnit *transitionWork;
-    dds3ObjectBaseControlWorkData_t *modelHolder;
+    dds3ObjectBaseControl_t *modelHolder;
     s32 activeId;
     u32 followParameterIndex;
     u32 word18;
@@ -253,74 +223,47 @@ typedef struct EffectObjectData {
     f32 limitMax3C;
 } EffectObjectData;
 
-typedef struct sdfModelRootNode_t {
-    DevRequest *list;
-    SdfDrawNode *rootNode;
-    void *assetData;
-    DevRequest *resources;
-    DevRequest *slotPairs;
-    struct sdfMotionCtrlr_t *motionList;
-    u8 unk18;
-    u8 flags;
-    u16 drawFlags;
-    u32 color;
-    f32 matrix[4][4];
-    f32 rotationQuaternion[4];
-    f32 scaleVector[4];
-    struct SdfDmaTagHeader *lighting;
-    struct SdfDmaTagHeader *secondaryLighting;
-    f32 scalarOverrideFirst;
-    f32 scalarOverrideSecond;
-    struct SdfChunkHeader *chunkTable;
-
-    f32 modelScale;
-    u8 lodIndex;
-    u8 pad99[3];
-} sdfModelRootNode_t;
-
 typedef struct EffOwnerBillParamView {
     u8 pad00[0x18];
-    struct sdfModelRootNode_t *model;
+     sdfModelRootNode_t *model;
 } EffOwnerBillParamView;
 
 void dds3EffectDelete(EffNode *node);
-void dds3BillboardDelete(struct BillObj *obj);
+void dds3BillboardDelete(struct billObj_t *obj);
 void effEveBEDCutDelete(EffEventWork *work);
-void effEveBEDDelete(struct SoundMixer *mixer);
+void effEveBEDDelete( effBTL_t *mixer);
 void sdfChipFreeDirect(void *memory);
 s32 dds3InitPoseSet(dds3Basic_t *node);
-void *sdfChipAllocDirect(s32 size);
-dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(void *owner);
-extern void dds3ObjectBaseOnFlag(void *, s32);
+void *sdfChipAllocDirect(u32 size);
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask);
 extern u8 opaque40[0x60];
 void dds3FreePoseSet(dds3Basic_t *node);
-void dds3ObjectBaseFreeControlWorkData(void *objectBase);
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object);
 u8 dds3ObjectBaseCheckFlag(struct dds3Basic_t *object, u32 mask);
 void dds3EffectDraw(EffNode *node);
-extern void dds3BillboardDraw(struct BillObj *bill);
+extern void dds3BillboardDraw(struct billObj_t *bill);
 void effEveBEDCutDraw(EffEventWork *work);
 dds3Basic_t *dds3AddSceneBasicData(s32 kind);
-void dds3ObjectBaseCreateMover(void *object);
-void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);
-void dds3SetRotPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3ObjectBaseCreateMover(dds3Basic_t *object);
+void dds3SetPosPoseSet(dds3Basic_t *object, const sdfVector4_t *vector);
+void dds3SetRotPoseSet(dds3Basic_t *object, const sdfVector4_t *vector);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra);
-extern BillObj *dds3BillboardFileLoad(s32 kind, const char *path);
+extern billObj_t *dds3BillboardFileLoad(s32 kind, const char *path);
 dds3Basic_t *AddTMXEffect(void *bill, void *vec, s32 extra);
 dds3Basic_t *AddBEDEffect();
-void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
-EffEventWork *effEveBEDCutCreate(struct SoundMixer *owner, u16 kind, const void *params);
+void sdfMemFreeDirect( sdfMemHandle_t *allocation);
+EffEventWork *effEveBEDCutCreate( effBTL_t *owner, u16 kind, const void *params);
 u32 dds3AllocObjectId(void);
-dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
+dds3ObjectBaseControl_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
 extern dds3Basic_t *dds3AreaBasicGetFastArea(void);
 void dds3AreaBasicRegistItem(dds3Basic_t *indexOwner, dds3Basic_t *node);
 dds3Basic_t *AddMG12Effect();
 extern void effMagaRandomize(void *bill);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
-void dds3BillboardSetXYOffset(struct BillObj *billboard, f32 width, f32 height);
-void dds3BillboardSetDrawType(struct BillObj *billboard, s32 variantValue);
-void dds3BillboardSetMode(struct BillObj *billboard, s32 mode);
+void dds3BillboardSetXYOffset(struct billObj_t *billboard, f32 width, f32 height);
+void dds3BillboardSetDrawType(struct billObj_t *billboard, s32 variantValue);
+void dds3BillboardSetMode(struct billObj_t *billboard, s32 mode);
 
 void FreeEffectData(dds3EffectObjectBasicWorkData_t *state) {
     dds3EffectObjectBasicWorkData_t *data = state;
@@ -401,7 +344,134 @@ void dds3EffectObjectBasicDestructor(dds3Basic_t *obj) {
     obj->workdata = NULL;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3EffectObjectBasicMainProcedure);
+/* Resolve the owner transform, then forward it to the live effect backend. */
+s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
+{
+    sdfMatrix4_t matrix;
+    sdfVector4_t position;
+    sdfVector4_t rotation = {0, 0, 0, 1.0f};
+    dds3EffectObjectBasicWorkData_t *work;
+    s32 moved = 0;
+    EffNode *effect;
+    billObj_t *bill;
+    s32 result;
+
+    work = basic->workdata;
+    if (work->stat & EFF_OBJ_FLAG_OWNER_LINK) {
+        if (dds3SceneBasicExistBasicFromType(dds3GetActiveScene(), work->linkbasictype,
+                                            work->linkbasic) != 0) {
+            if (work->stat & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) {
+                dds3EffectObjectBasicGetObjectIndex(basic);
+            } else {
+                switch (work->linkbasictype) {
+                case 4: case 5: case 6: case 7: case 8: case 9:
+                    VU0_LOAD_VF10(&work->linkbasic->poseset->rot);
+                    VU0_STORE_VF10(&rotation);
+                    ToMatrix();
+                    break;
+                case EFF_OBJ_OWNER_KIND_EXTRA:
+                    VU0_LOAD_VF10(&((dds3EffectOwnerPose_t *)work->linkbasic->workdata)->rotation);
+                    VU0_STORE_VF10(&rotation);
+                    ToMatrix();
+                    break;
+                default:
+                    VU0_IDENTITY_MATRIX();
+                    break;
+                }
+            }
+            VU0_SAVE_MATRIX_BANK();
+            VU0_IDENTITY_MATRIX();
+            VU0_LOAD_VF10(work->linkpos);
+            VU0_SET_VF10_W_ONE();
+            VU0_TRANSLATION_FROM_VF10();
+            MultMatrixRevNoArg();
+            VU0_ORIGIN_VF10();
+            VU0_APPLY_MATRIX_VF10();
+            if ((work->stat & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
+                switch (work->linkbasictype) {
+                case 4: case 5: case 6: case 7: case 8: case 9:
+                    VU0_LOAD_VF11(&work->linkbasic->poseset->pos);
+                    VU0_ADD_VF10_VF11();
+                    break;
+                case EFF_OBJ_OWNER_KIND_EXTRA:
+                    VU0_LOAD_VF11(&((dds3EffectOwnerPose_t *)work->linkbasic->workdata)->position);
+                    VU0_ADD_VF10_VF11();
+                    break;
+                }
+            }
+            VU0_STORE_VF10(&position);
+            dds3SetRadiusPoseSet(basic->poseset);
+            VU0_STORE_VF10(&basic->poseset->pos);
+            moved = 1;
+            dds3OffPoseSetFlag(basic->poseset, POSESET_FLAG_UPDATEPOSE);
+        } else {
+            dds3EffectObjectBasicUnlinkObject(basic);
+        }
+    } else {
+        dds3OffPoseSetFlag(basic->poseset, POSESET_FLAG_UPDATEPOSE);
+        VU0_LOAD_VF10(&basic->poseset->pos);
+        VU0_SET_VF10_W_ONE();
+        VU0_STORE_VF10(&position);
+        dds3SetRadiusPoseSet(basic->poseset);
+        VU0_LOAD_VF10(&basic->poseset->rot);
+        SDF_QUAT_INNERPRODUCT();
+        VU0_STORE_VF10(&rotation);
+        moved = 1;
+    }
+    switch (work->type) {
+    case EFF_OBJ_STATE_BOUND_BILL:
+        effect = work->handle;
+        if (effect != NULL && moved) {
+            dds3EffectSetPosition(effect, &position);
+            VU0_LOAD_VF10(&rotation);
+            ToMatrix();
+            VU0_STORE_MATRIX(&matrix);
+            dds3EffectSetRotateMatrix(effect, &matrix);
+        }
+        result = dds3EffectGetState(effect);
+    expired:
+        if (result == 0) {
+            u32 flags = work->stat;
+
+            work->stat = flags & ~1;
+            if (flags & 2) {
+                dds3DeleteSceneBasicData(basic);
+            }
+        }
+        return 1;
+    case 2:
+        bill = work->handle;
+        if (bill != NULL && moved) {
+            dds3BillboardSetPosition(bill, &position);
+        }
+        result = dds3BillboardGetAnimState(bill);
+        goto expired;
+    case 3:
+        if (work->handle != NULL && moved) {
+            dds3BillboardSetPosition(work->handle, &position);
+        }
+        return 1;
+    case 4:
+        return 1;
+    case EFF_OBJ_STATE_EVENT_NODE: {
+        void *cut = work->cuth;
+
+        if (cut != NULL) {
+            if (moved) {
+                dds3EffectEventParameters_t *parameters = work->para;
+
+                if (parameters != NULL) {
+                    PS2_COPY_QUAD(&parameters->position, &position);
+                    PS2_COPY_QUAD(&parameters->rotation, &rotation);
+                    effEveBEDCutSetParams(cut, parameters);
+                }
+            }
+        }
+        return 1;
+    }
+    }
+    return 1;
+}
 
 s32 dds3EffectObjectBasicDrawProcedure(dds3Basic_t *obj) {
     dds3EffectObjectBasicWorkData_t *data;
@@ -438,7 +508,10 @@ s32 dds3EffectObjectBasicDrawProcedure(dds3Basic_t *obj) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3EffectObjectBasicGetControlWorkData);
+dds3ObjectBaseControl_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object)
+{
+    return ((dds3EffectObjectBasicWorkData_t *)object->workdata)->pObjectBaseControlWorkData;
+}
 
 dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, void *firstVec, void *secondVec) {
     dds3Basic_t *obj;
@@ -463,17 +536,48 @@ dds3Basic_t *dds3AddEffectObjectBasic(u32 worldCounter, void *firstVec, void *se
     return obj;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", AddP2AEffect);
+dds3Basic_t *AddP2AEffect(void *bill, void *position, s32 rotationAddress)
+{
+    sdfVector4_t vector;
+    dds3Basic_t *basic;
+    dds3EffectObjectBasicWorkData_t *work;
+    dds3ObjectBaseControl_t *control;
+    dds3Basic_t *area;
+
+    memset(&vector, 0, sizeof(vector));
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), position, (void *)rotationAddress);
+    if (basic == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF10(position);
+    VU0_STORE_VF10(&vector);
+    dds3BillboardSetPosition(bill, &vector);
+    work = basic->workdata;
+    work->handle = bill;
+    work->stat = 0;
+    work->type = 2;
+    work->linkbasic = NULL;
+    work->linkindex = 0;
+    work->linkbasictype = 0;
+    control = dds3EffectObjectBasicGetControlWorkData(basic);
+    control->modelType = 2;
+    area = dds3AreaBasicGetFastArea();
+    if (area != NULL) {
+        control->control[5] = area;
+        dds3AreaBasicRegistItem(area, basic);
+    }
+    return basic;
+}
 
 dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *obj, void *firstVector, s32 secondVectorAddress) {
-    struct BillObj *bill;
+    struct billObj_t *bill;
 
-    bill = dds3BillboardCopy((struct BillObj *)((dds3EffectObjectBasicWorkData_t *)obj->workdata)->handle);
+    bill = dds3BillboardCopy((struct billObj_t *)((dds3EffectObjectBasicWorkData_t *)obj->workdata)->handle);
     return AddP2AEffect(bill, firstVector, secondVectorAddress);
 }
 
 void dds3AddP2AEffectObjectBasic2(u32 billId, void *firstVector, s32 secondVectorAddress) {
-    struct BillObj *bill;
+    struct billObj_t *bill;
 
     bill = dds3BillboardCreate(1, billId);
     AddP2AEffect(bill, firstVector, secondVectorAddress);
@@ -486,30 +590,153 @@ dds3Basic_t *dds3AddP2AEffectObjectBasic(const char *path, void *firstVector, s3
     return AddP2AEffect(bill, firstVector, secondVectorAddress);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3EffectObjectBasicSetAnmeID);
+void dds3EffectObjectBasicSetAnmeID(dds3Basic_t *basic, u32 entry)
+{
+    dds3BillboardSetAnimNumber(((dds3EffectObjectBasicWorkData_t *)basic->workdata)->handle, entry);
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", AddTMXEffect);
+dds3Basic_t *AddTMXEffect(void *bill, void *position, s32 rotationAddress)
+{
+    sdfVector4_t vector;
+    dds3Basic_t *basic;
+    dds3EffectObjectBasicWorkData_t *work;
+    dds3ObjectBaseControl_t *control;
+    dds3Basic_t *area;
+
+    memset(&vector, 0, sizeof(vector));
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), position, (void *)rotationAddress);
+    if (basic == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF10(position);
+    VU0_STORE_VF10(&vector);
+    dds3BillboardSetPosition(bill, &vector);
+    work = basic->workdata;
+    work->type = 3;
+    work->handle = bill;
+    work->stat = 0;
+    work->linkbasic = NULL;
+    work->linkindex = 0;
+    work->linkbasictype = 0;
+    control = dds3EffectObjectBasicGetControlWorkData(basic);
+    control->modelType = 2;
+    area = dds3AreaBasicGetFastArea();
+    if (area != NULL) {
+        control->control[5] = area;
+        dds3AreaBasicRegistItem(area, basic);
+    }
+    return basic;
+}
 
 dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *obj, void *firstVector, s32 secondVectorAddress) {
-    struct BillObj *bill;
+    struct billObj_t *bill;
 
-    bill = dds3BillboardCopy((struct BillObj *)((dds3EffectObjectBasicWorkData_t *)obj->workdata)->handle);
+    bill = dds3BillboardCopy((struct billObj_t *)((dds3EffectObjectBasicWorkData_t *)obj->workdata)->handle);
     return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddTMXEffectObjectBasic2);
+void dds3AddTMXEffectObjectBasic2(u32 billID, void *position, s32 rotationAddress)
+{
+    struct billObj_t *bill;
+
+    bill = dds3BillboardCreate(0, billID);
+    AddTMXEffect(bill, position, rotationAddress);
+}
 
 INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddTMXEffectObjectBasic);
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", AddD3PEffect);
+dds3Basic_t *AddD3PEffect(void *effect, void *position, void *rotation)
+{
+    sdfVector4_t vector;
+    dds3Basic_t *basic;
+    dds3EffectObjectBasicWorkData_t *work;
+    dds3ObjectBaseControl_t *control;
+    dds3Basic_t *area;
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddD3PEffectObjectBasic2);
+    memset(&vector, 0, sizeof(vector));
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), position, rotation);
+    if (basic == NULL) {
+        return NULL;
+    }
+    VU0_LOAD_VF10(position);
+    VU0_STORE_VF10(&vector);
+    dds3EffectSetPosition(effect, &vector);
+    work = basic->workdata;
+    work->type = EFF_OBJ_STATE_BOUND_BILL;
+    work->handle = effect;
+    work->stat = 0;
+    work->linkbasic = NULL;
+    work->linkindex = 0;
+    work->linkbasictype = 0;
+    control = dds3EffectObjectBasicGetControlWorkData(basic);
+    control->modelType = 2;
+    area = dds3AreaBasicGetFastArea();
+    if (area != NULL) {
+        control->control[5] = area;
+        dds3AreaBasicRegistItem(area, basic);
+    }
+    return basic;
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddD3PEffectObjectBasic);
+dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *descriptor, void *position, void *rotation)
+{
+    EffNode *effect;
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", AddBEDEffect);
+    effect = dds3EffectLoad(descriptor);
+    return AddD3PEffect(effect, position, rotation);
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddBEDEffectObjectBasic2);
+dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 parameter, void *position, void *rotation)
+{
+    EffNode *effect;
+
+    effect = dds3EffectFileLoad(parameter);
+    return AddD3PEffect(effect, position, rotation);
+}
+
+dds3Basic_t *AddBEDEffect(source, position, rotation)
+    effBTL_t *source;
+    const sdfVector4_t *position;
+    const sdfVector4_t *rotation;
+{
+    dds3EffectEventParameters_t parameters = D_00530E20;
+    dds3Basic_t *basic;
+    effBTL_t *mixer;
+    dds3EffectObjectBasicWorkData_t *work;
+    dds3ObjectBaseControl_t *control;
+    dds3Basic_t *area;
+
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), (void *)position, (void *)rotation);
+    if (basic == NULL) {
+        return NULL;
+    }
+    PS2_COPY_QUAD(&parameters.position, position);
+    PS2_COPY_QUAD(&parameters.rotation, rotation);
+    mixer = effEveBEDCreate(source);
+    work = basic->workdata;
+    work->type = EFF_OBJ_STATE_EVENT_NODE;
+    work->handle = mixer;
+    work->stat = 0;
+    work->cuth = NULL;
+    work->linkbasic = NULL;
+    work->linkindex = 0;
+    work->linkbasictype = 0;
+    work->para = sdfChipAllocDirect(sizeof(parameters));
+    memcpy(work->para, &parameters, sizeof(parameters));
+    control = dds3EffectObjectBasicGetControlWorkData(basic);
+    control->modelType = 2;
+    area = dds3AreaBasicGetFastArea();
+    if (area != NULL) {
+        control->control[5] = area;
+        dds3AreaBasicRegistItem(area, basic);
+    }
+    return basic;
+}
+
+void *dds3AddBEDEffectObjectBasic2(void *source, void *position, void *rotation)
+{
+    return AddBEDEffect(source, position, rotation);
+}
 
 void *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secondVector) {
     u32 resolvedId;
@@ -518,7 +745,7 @@ void *dds3AddBEDEffectObjectBasic(void *resource, void *firstVector, void *secon
 
     resolvedId = 0;
     resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
-    created = AddBEDEffect((SoundMixer *)resolvedId, firstVector, secondVector);
+    created = AddBEDEffect((effBTL_t *)resolvedId, firstVector, secondVector);
     sdfMemFreeDirect(resourceHandle);
     return created;
 }
@@ -546,7 +773,7 @@ void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId) {
 dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
     dds3Basic_t *obj;
     dds3EffectObjectBasicWorkData_t *data;
-    dds3ObjectBaseControlWorkData_t *objectHandle;
+    dds3ObjectBaseControl_t *objectHandle;
     dds3Basic_t *worldNode;
 
     obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
@@ -569,17 +796,81 @@ dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVecto
     objectHandle->modelType = 2;
     worldNode = dds3AreaBasicGetFastArea();
     if (worldNode != NULL) {
-        objectHandle->pBasic[5] = worldNode;
+        objectHandle->control[5] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddESPEffectObjectBasic);
+dds3Basic_t *dds3AddESPEffectObjectBasic(const char *name, void *position, void *rotation, f32 scale)
+{
+    return AddESPEffect(name, position, rotation, scale);
+}
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", AddMG12Effect);
+/* Keep the legacy positional (kind, descriptor) ABI used by the file loader. */
+dds3Basic_t *AddMG12Effect(kind, descriptor)
+    s32 kind;
+    void *descriptor;
+{
+    sdfVector4_t position;
+    sdfVector4_t rotation;
+    dds3MagaArea_t areaParameters;
+    dds3MagaPoints_t pointParameters;
+    EffNode *effect;
+    dds3Basic_t *basic;
+    dds3EffectObjectBasicWorkData_t *work;
+    dds3ObjectBaseControl_t *control;
+    dds3Basic_t *area;
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3AddMG12EffectObjectBasic2);
+    memset(&position, 0, sizeof(position));
+    memset(&rotation, 0, sizeof(rotation));
+    rotation.w = 1.0f;
+    memcpy(&areaParameters, &D_00530E50, sizeof(areaParameters));
+    memcpy(&pointParameters, &D_00530E78, sizeof(pointParameters));
+    effect = dds3EffectLoad(descriptor);
+    basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), &position, &rotation);
+    if (basic == NULL) {
+        return NULL;
+    }
+    work = basic->workdata;
+    work->stat = 0;
+    if (kind == 1) {
+        work->type = EFF_OBJ_STATE_MAGATUHI_TWO_ROWS;
+    } else {
+        work->type = EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS;
+    }
+    work->handle = effect;
+    work->linkbasic = NULL;
+    work->linkindex = 0;
+    work->linkbasictype = 0;
+    work->cuth = sdfChipAllocDirect(0x10);
+    memset(work->cuth, 0, 0x10);
+    switch (kind) {
+    case 1:
+        work->para = sdfChipAllocDirect(sizeof(areaParameters));
+        memcpy(work->para, &areaParameters, sizeof(areaParameters));
+        effMagaSCSetArea(effect, work->para);
+        break;
+    case 2:
+        work->para = sdfChipAllocDirect(sizeof(pointParameters));
+        memcpy(work->para, &pointParameters, sizeof(pointParameters));
+        effMagaP4SetPoint(effect, work->para);
+        break;
+    }
+    control = dds3EffectObjectBasicGetControlWorkData(basic);
+    control->modelType = 2;
+    area = dds3AreaBasicGetFastArea();
+    if (area != NULL) {
+        control->control[5] = area;
+        dds3AreaBasicRegistItem(area, basic);
+    }
+    return basic;
+}
+
+dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, void *descriptor)
+{
+    return AddMG12Effect(kind, descriptor);
+}
 
 void *dds3AddMG12EffectObjectBasic(s32 kind, void *resource) {
     u32 resolvedId;
@@ -610,7 +901,14 @@ dds3EffectObjectBasicWorkData_t *CheckESP(dds3Basic_t *obj) {
     return data;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", GetESPPos);
+s32 GetESPPos(dds3Basic_t *basic)
+{
+    if (CheckESP(basic) == NULL) {
+        return 0;
+    }
+    VU0_LOAD_VF10(&basic->poseset->pos);
+    return 1;
+}
 
 s32 GetESPR(dds3Basic_t *obj) {
     dds3PoseSet_t *parameters;
@@ -639,7 +937,54 @@ s32 dds3EffectObjectPresetMG12(dds3Basic_t *obj) {
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3EffectObjectSetMG12Pos);
+/* Missing parameter sources leave their existing position and radius intact. */
+s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *basic, dds3Basic_t *first,
+                              dds3Basic_t *second, dds3Basic_t *third, dds3Basic_t *fourth)
+{
+    dds3EffectObjectBasicWorkData_t *work;
+    dds3MagaArea_t *area;
+    dds3MagaPoints_t *points;
+
+    if (basic->type >> 24 != EFF_OBJ_KIND) {
+        return 0;
+    }
+    work = basic->workdata;
+    switch (work->type) {
+    case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
+        area = work->para;
+        if (GetESPPos(first)) {
+            VU0_STORE_VF10(&area->position[0]);
+            area->radius[0] = GetESPR(first);
+        }
+        if (GetESPPos(second)) {
+            VU0_STORE_VF10(&area->position[1]);
+            area->radius[1] = GetESPR(second);
+        }
+        effMagaSCSetArea(work->handle, area);
+        return 1;
+    case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
+        points = work->para;
+        if (GetESPPos(first)) {
+            VU0_STORE_VF10(&points->position[0]);
+            points->radius[0] = GetESPR(first);
+        }
+        if (GetESPPos(second)) {
+            VU0_STORE_VF10(&points->position[1]);
+            points->radius[1] = GetESPR(second);
+        }
+        if (GetESPPos(third)) {
+            VU0_STORE_VF10(&points->position[2]);
+            points->radius[2] = GetESPR(third);
+        }
+        if (GetESPPos(fourth)) {
+            VU0_STORE_VF10(&points->position[3]);
+            points->radius[3] = GetESPR(fourth);
+        }
+        effMagaP4SetPoint(work->handle, points);
+        return 1;
+    }
+    return 0;
+}
 
 void dds3EffectObjectBasicStatOn(dds3Basic_t *obj, s32 flags) {
     ((dds3EffectObjectBasicWorkData_t *)obj->workdata)->stat |= flags;
@@ -699,7 +1044,16 @@ s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *obj, dds3Basic_t *owner, s
     return 1;
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3EffectObjectBasicUnlinkObject);
+void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *basic)
+{
+    dds3EffectObjectBasicWorkData_t *work = basic->workdata;
+
+    work->linkindex = 0;
+    work->linkbasic = NULL;
+    work->linkbasictype = 0;
+    work->stat &= ~EFF_OBJ_FLAG_OWNER_LINK;
+    work->stat &= ~EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
+}
 
 void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, fldResourceEffect_t *config) {
     dds3EffectObjectBasicWorkData_t *resource = owner->workdata;
@@ -714,7 +1068,7 @@ void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, fldResourceEffect_t *conf
     switch (resource->pFldEx->type) {
     case 0:
     case 3:
-        dds3BillboardSetXYOffset((struct BillObj *)resource->handle, resource->pFldEx->size[0], resource->pFldEx->size[1]);
+        dds3BillboardSetXYOffset((struct billObj_t *)resource->handle, resource->pFldEx->size[0], resource->pFldEx->size[1]);
         if (resource->pFldEx->type == 3) {
             dds3BillboardSetDrawType(resource->handle, 1);
         }
@@ -735,7 +1089,105 @@ void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, fldResourceEffect_t *conf
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3EffectObjectBasic", dds3EffectObjectBasicCalcFldEx);
+/* Apply field visibility/animation selectors and the view-distance fade. */
+void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
+{
+    dds3EffectObjectBasicWorkData_t *work = basic->workdata;
+    fldResourceEffect_t *config;
+    sdfVector4_t direction __attribute__((aligned(16)));
+    sdfVector4_t normalizedDirection __attribute__((aligned(16)));
+    f32 dx;
+    f32 dy;
+    f32 offset; /* Z delta, then projection distance. */
+    f32 distance;
+    u32 projectionDistance;
+
+    if ((work->stat & 0x10) == 0) {
+        return;
+    }
+    config = work->pFldEx;
+    if (config->groupID != 0) {
+        s32 map = fldGlobalBase.area;
+        u32 floor = fldGlobalBase.floor + 1;
+
+        if (dds3EffectObjectAddFld(map, floor, config->groupID)) {
+            work->stat &= ~1;
+        } else {
+            work->stat |= 1;
+        }
+    }
+    dx = aViewEye.x - work->FldExBasePos.x;
+    dy = aViewEye.y - work->FldExBasePos.y;
+    offset = aViewEye.z - work->FldExBasePos.z;
+    projectionDistance = config->offsetZ;
+    {
+        f32 squaredDistance = dx * dx + dy * dy + offset * offset;
+        EE_SQRT_F32(distance, squaredDistance);
+    }
+    if (projectionDistance != 0) {
+        direction.x = -dx;
+        direction.y = -dy;
+        direction.z = -offset;
+        direction.w = 1.0f;
+        VU0_LOAD_VF10(&direction);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10(&normalizedDirection);
+        {
+            dds3PoseSet_t *pose;
+
+            offset = (f32)projectionDistance;
+            pose = basic->poseset;
+            pose->pos.x = work->FldExBasePos.x - normalizedDirection.x * offset;
+            pose->pos.y = work->FldExBasePos.y - normalizedDirection.y * offset;
+            pose->pos.z = work->FldExBasePos.z - normalizedDirection.z * offset;
+        }
+    }
+    switch (config->type) {
+    case 0:
+    case 3:
+        if (config->param0 == 0 && config->param1 == 0) {
+            return;
+        }
+        {
+            f32 start = (f32)config->param0;
+            f32 end = (f32)config->param1;
+            s32 alpha;
+            u32 color;
+
+            if (distance < start) {
+                color = 0x00808080;
+            } else if (end < distance) {
+                color = 0x80808080;
+            } else {
+                alpha = (s32)(((distance - start) * 128.0f) / (end - start));
+                if (alpha >= 129) {
+                    alpha = 128;
+                }
+                if (alpha < 0) {
+                    alpha = 0;
+                }
+                color = ((u32)alpha << 24) | 0x00808080;
+            }
+            dds3BillboardSetRGBA(work->handle, color);
+        }
+        break;
+    case 2:
+        break;
+    case 1:
+        if (config->groupID != 0) {
+            s32 entry = dds3EffectObjectFindFld(fldGlobalBase.area,
+                                                fldGlobalBase.floor + 1,
+                                                config->groupID);
+
+            if (entry != -1) {
+                dds3BillboardSetAnimNumber(work->handle, (u32)entry);
+            }
+        }
+        break;
+    default:
+        break;
+    }
+}
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00530E20);
 
