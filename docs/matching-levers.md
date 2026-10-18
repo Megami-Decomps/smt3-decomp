@@ -42,6 +42,8 @@ it was measured on DDS and not on this ELF.
 - Holding a struct address in a local (`nbCamera_t *p = &pNbCamera;`)
   reproduces retail keeping it in a saved register. Assigning it after a
   leading call keeps it out of `$16`.
+- Giving a void function an `s32` return type with no `return` statement
+  blocks the sibling call where retail uses `jal` and a full epilogue.
 
 ## Float literals
 
