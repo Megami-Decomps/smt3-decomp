@@ -128,23 +128,23 @@ verified in the same run.
 
 | Measure | Game code (96 units) | Whole binary (106 units) |
 |---|---|---|
-| Code bytes matched | 80,656 / 1,976,292 (4.081%) | 80,656 / 2,036,072 (3.961%) |
-| Functions matched | 721 / 9,694 (7.44%) | 721 / 9,699 (7.43%) |
+| Code bytes matched | 160,696 / 1,976,292 (8.131%) | 160,696 / 2,036,072 (7.892%) |
+| Functions matched | 1,374 / 9,694 (14.17%) | 1,374 / 9,699 (14.17%) |
 
-`python tools/progress.py smt3` reports the same 721 functions and 80,656
+`python tools/progress.py smt3` reports the same 1,374 functions and 160,696
 bytes from the source inventory alone, which is the cross-check that matters:
 the reconciler credits nothing that is still an `INCLUDE_ASM` line, and the
 source inventory credits nothing the link does not supply from C.
 
-Raw objdiff, before reconciliation, reports 677 functions and 67,976 bytes for
-the same tree (`build/smt3/report.json.raw`). The 44-function, 12,680-byte gap
+Raw objdiff, before reconciliation, reports 1,316 functions and 145,140 bytes
+for the same tree (`build/smt3/report.json.raw`). The 58-function, 15,556-byte gap
 is in the other direction from what the caveats below might suggest: those
 functions are exact in the linked image and imperfect in the `-DSKIP_ASM` base
 object, so raw objdiff understates them. Reconciliation moves credit both ways
 and only on evidence from the real link.
 
-110 of the 721 are empty-bodied functions that compile to `jr $ra; nop`, 8
-bytes each, 880 bytes in total. The function percentage is the measure that
+129 of the 1,374 are empty-bodied functions that compile to `jr $ra; nop`, 8
+bytes each, 1,032 bytes in total. The function percentage is the measure that
 flatters the work most, since an empty function and a 120-byte one count the
 same; code bytes are the honest headline.
 
