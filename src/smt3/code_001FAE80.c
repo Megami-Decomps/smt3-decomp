@@ -1209,7 +1209,7 @@ s8 cmbCountSkills(cmbUnit_t *unit)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->unit.skillSlots[i] == 0) {
+        if (unit->unit.keisyoskill[i] == 0) {
             return i;
         }
     }
@@ -1337,7 +1337,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbInheritSkills);
 
 void rstClearSkillSlot(cmbUnit_t *unit, u8 slot)
 {
-    unit->unit.skillSlots[slot] = 0;
+    unit->unit.keisyoskill[slot] = 0;
     sortSkillList(unit);
 }
 
@@ -1352,7 +1352,7 @@ s8 rstFindSkillSlot(u16 skill, cmbUnit_t *unit)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->unit.skillSlots[i] == skill) {
+        if (unit->unit.keisyoskill[i] == skill) {
             return i;
         }
     }
@@ -1365,7 +1365,7 @@ s8 cmbFindSkillSlot(cmbUnit_t *unit)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->unit.skillSlots[i] != 0) {
+        if (unit->unit.keisyoskill[i] != 0) {
             count++;
         }
     }
@@ -1385,7 +1385,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbClearUnitSkills);
 
 void cmbClearSkillSlots(cmbUnit_t *unit)
 {
-    memset(unit->unit.skillSlots, 0, sizeof(unit->unit.skillSlots));
+    memset(unit->unit.keisyoskill, 0, sizeof(unit->unit.keisyoskill));
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmb_1FF0C8);
@@ -2848,8 +2848,8 @@ void buildSkillSortArray(cmbUnit_t *unit, skillSortEntry_t *out)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        out[i].skill = unit->unit.skillSlots[i];
-        out[i].order = unit->unit.skillOrder[i];
+        out[i].skill = unit->unit.keisyoskill[i];
+        out[i].order = unit->unit.keiattr[i];
     }
 }
 
@@ -2858,8 +2858,8 @@ void applySkillSortArray(cmbUnit_t *unit, skillSortEntry_t *in)
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        unit->unit.skillSlots[i] = in[i].skill;
-        unit->unit.skillOrder[i] = in[i].order;
+        unit->unit.keisyoskill[i] = in[i].skill;
+        unit->unit.keiattr[i] = in[i].order;
     }
 }
 
