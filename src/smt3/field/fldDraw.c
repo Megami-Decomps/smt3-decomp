@@ -11,6 +11,9 @@
 #include "field.h"
 #include "model.h"
 #include "motion.h"
+#include "newdata.h"
+#include "event.h"
+#include "effect.h"
 
 typedef struct fldSpriteCorner_t fldSpriteCorner_t;
 typedef struct fldSpriteVertex_t fldSpriteVertex_t;
@@ -525,6 +528,15 @@ extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
+extern u32 D_0054EAF0;
+extern u32 fldPlayerUnit;
+extern f32 D_002FCA60[];
+extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
+extern void evtUnitLightOn(evtUnit_t *unit);
+extern void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 duration, u32 firstColor, u32 secondColor);
+extern void evtSetUnitLightDir(evtUnit_t *unit, s32 duration);
+extern s32 gencStageInnAlp;
+extern s32 encDrawState;
 extern dds3Basic_t *D_0054EAE8;
 
 extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *spawnedObject);
@@ -2162,7 +2174,35 @@ void encFreeBlur(void)
 }
 
 
-INCLUDE_ASM(const s32, "field/fldDraw", encStart);
+extern effBlurTemplateBody_t D_0055DAD8;
+extern effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *body);
+extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 flag);
+
+void encStart(void) {
+    if (nbGetEncountOn() != 0) {
+        return;
+    }
+    gencStageInnAlp = 0x80;
+    D_0055DAD8.source.color = 0x09808080;
+    D_0055DAD8.source.blendControl = 0x44;
+    D_0055DAD8.source.angle = 0.01f;
+    D_0055DAD8.source.displacement = 1.02f;
+    D_0055DAD8.extent = 0x12C;
+    gencMode = 0;
+    encDrawState = 0;
+    D_0055DAD8.source.position[0] = 0;
+    D_0055DAD8.source.position[1] = 0;
+    D_0055DAD8.source.corners[0][0] = 0;
+    D_0055DAD8.source.corners[0][1] = 0;
+    D_0055DAD8.source.corners[1][0] = 0;
+    D_0055DAD8.source.corners[1][1] = 0;
+    D_0054EC68 = dds3EffectPartialMultiBlurCreate(&D_0055DAD8);
+    gencOn = 1;
+    if (dds3GetActiveScene() == NULL) {
+        return;
+    }
+    dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
+}
 
 void encInitProcess(void)
 {
@@ -2350,7 +2390,32 @@ INCLUDE_RODATA(const s32, "field/fldDraw", D_00531BF0);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldCamMain);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldCamSyukanSuriawase);
+extern void *dds3SearchProcessName(const char *name);
+extern void dds3SetScreenFovy(f32 fovy);
+extern f32 fldCamParamTable[][4];
+extern char D_00531BF0[];
+
+void fldCamSyukanSuriawase(void) {
+    fldAreaWork_t *state;
+
+    if (dds3SearchProcessName("fldProcSequence") == NULL) {
+        return;
+    }
+    state = &fldGlobalBase;
+    if (state->mode != 0) {
+        return;
+    }
+    if (evtBitCheck(0xAF0) == 0) {
+        return;
+    }
+    if (scrSearchScriptName(D_00531BF0) != NULL) {
+        return;
+    }
+    if (dds3GetActiveCameraSceneBasic(dds3GetActiveScene()) != fldGetUnitFollowCamera()) {
+        return;
+    }
+    dds3SetScreenFovy(fldCamParamTable[state->cameraParamIndex][3] * 3.14f / 180.0f);
+}
 
 s32 fldCamMiwatasiChk(void)
 {
@@ -2358,7 +2423,15 @@ s32 fldCamMiwatasiChk(void)
 }
 
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldCamNpcCamChk);
+s32 fldCamNpcCamChk(char *name) {
+    if (name == NULL) {
+        return 0;
+    }
+    if (fldGlobalBase.mode == 5 && strcmp(fldGlobalBase.requestedSceneName, name) == 0) {
+        return 1;
+    }
+    return 0;
+}
 
 f32 R360_LR(f32 fromDegrees, f32 toDegrees) {
     f32 diff;
@@ -2510,7 +2583,40 @@ f32 fldPlayerCalc360_4(f32 angle) {
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMirChk);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMotion);
+extern s32 fldPlayerStatus[];
+extern s32 fldChkVortex(void);
+extern void mdlLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex);
+extern void mdlSmoothLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex,
+                                f32 blendLeadFrames, f32 blendFrames);
+
+void fldPlayerMotion(s32 motion, s32 mode, f32 speed) {
+    fldUnitControl_t *ctl;
+    mdlObj_t *model;
+    mdlObj_t *model2 = NULL;
+
+    ctl = fldGetUnitControl();
+    model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
+    if (ctl->handle2 != NULL) {
+        model2 = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle2);
+    }
+    if (motion == mode) {
+        return;
+    }
+    model->first->speed = 1.0f;
+    if (fldChkVortex() != 0) {
+        if (fldPlayerStatus[0] & 2) {
+            mdlLoopMotion(model, 3, 1);
+        } else {
+            mdlLoopMotion(model, 3, 0);
+        }
+    }
+    mdlSmoothLoopMotion(model, 0, mode, speed, speed);
+    if (ctl->handle2 == NULL) {
+        return;
+    }
+    model2->first->speed = 1.0f;
+    mdlSmoothLoopMotion(model2, 0, mode, speed, speed);
+}
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMotionSe);
 
@@ -2646,7 +2752,15 @@ s32 fldPlayerChkAna(void)
 }
 
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerOff);
+void fldPlayerOff(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+
+    dds3ObjectBaseOnFlag(ctl->handle, 1);
+    if (ctl->handle2 != NULL) {
+        dds3ObjectBaseOnFlag(ctl->handle2, 1);
+    }
+    fldPlayerMotReset2();
+}
 
 void fldPlayerOn(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
@@ -2738,9 +2852,48 @@ void fldPlayerMotReset2(void) {
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerPosRot);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldSkyDefaultLoad);
+void fldSkyDefaultLoad(void) {
+    devState_t *fd;
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldSkyFieldLoad);
+    if (fldSkyDefault == NULL) {
+        fldSkyDefault = (void *)sdfMemLock(sdfMemAllocDirect(0xE000));
+    }
+    if (fldSkyDefaultData == NULL) {
+        fldSkyDefaultData = (void *)sdfMemLock(sdfMemAllocDirect(0xE000));
+    }
+    if (fldSkyDataTable == NULL) {
+        fldSkyDataTable = (fldSkyData_t *)sdfMemLock(sdfMemAllocDirect(0x12400));
+    }
+    fd = sdfFileOpen("/fld/f/bin/FILTER.FLD");
+    sdfFileRead(fd, fldSkyDataTable, 0xE000);
+    sdfFileClose(fd);
+    fd = sdfFileOpen("/fld/f/bin/BATTLEBG.SKY");
+    sdfFileRead(fd, fldSkyDefaultData, 0xE000);
+    sdfFileClose(fd);
+}
+
+void fldSkyFieldLoad(s32 area) {
+    char path[64];
+    char directory[32];
+    devState_t *fd;
+
+    gFilterAlpha = 0x80;
+    if (area < 200) {
+        fldMakeFilePath(directory, area, 1);
+        if (fldGlobalBase.area == 0x19 && evtBitCheck(0x599) != 0 && evtBitCheck(0x743) == 0) {
+            sprintf(path, "%sF%03db.SKY", directory, area);
+        } else if (fldGlobalBase.area == 0x18 && evtBitCheck(0x4F) != 0) {
+            sprintf(path, "%sF%03db.SKY", directory, area);
+        } else if (fldGlobalBase.area == 0x18 && evtBitCheck(0x16) != 0 && evtBitCheck(0x3E) == 0) {
+            sprintf(path, "%sF%03dc.SKY", directory, area);
+        } else {
+            sprintf(path, "%sF%03d.SKY", directory, area);
+        }
+        fd = sdfFileOpen(path);
+        sdfFileRead(fd, fldSkyDefault, 0xE000);
+        sdfFileClose(fd);
+    }
+}
 
 void fldGetSkyEntry(const void *src) {
     gFilterAlpha = 0x80;
@@ -2839,11 +2992,149 @@ void fldSkySetTableAnime(s32 anime)
 }
 
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldSkyCalcTable);
+/* The dispatch runs ahead of all three bodies, which a switch or an if chain
+ * over the same three values does not reproduce. */
+void fldSkyCalcTable(void) {
+    s32 anime = gSkyTblAnime;
 
-INCLUDE_ASM(const s32, "field/fldDraw", fld_136800);
+    if (anime == 1) {
+        goto anime1;
+    }
+    if (anime < 2) {
+        return;
+    }
+    if (anime == 2) {
+        goto anime2;
+    }
+    if (anime != 3) {
+        return;
+    }
+    goto anime3;
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldSkySetPlayer);
+anime1:
+    gSkyTblAnimeCntI += 1.0f;
+    if (gSkyTblAnimeCntI == 30.0f) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 30);
+        return;
+    }
+    if (gSkyTblAnimeCntI == 60.0f) {
+        fldSkySetTbl(gSkyTblBaseIdx, 30);
+        gSkyTblAnimeCntI = 0.0f;
+    }
+    return;
+
+anime2:
+    gSkyTblAnimeCntI += 1.0f;
+    if (gSkyTblAnimeCntI == 15.0f) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 1);
+        return;
+    }
+    if (gSkyTblAnimeCntI == 30.0f) {
+        fldSkySetTbl(gSkyTblBaseIdx, 1);
+        gSkyTblAnimeCntI = 0.0f;
+    }
+    return;
+
+anime3:
+    gSkyTblAnimeCntI += 1.0f;
+    if (gSkyTblAnimeCntI == 60.0f) {
+        fldSkySetTbl((gSkyTblBaseIdx + 1) & 0xFF, 60);
+        return;
+    }
+    if (gSkyTblAnimeCntI == 120.0f) {
+        fldSkySetTbl(gSkyTblBaseIdx, 60);
+        gSkyTblAnimeCntI = 0.0f;
+    }
+}
+
+void fld_136800(s32 duration, f32 lightR, f32 lightG, f32 lightB,
+                f32 ambientR, f32 ambientG, f32 ambientB) {
+    evtUnit_t *unit;
+    s32 r, g, b;
+    u32 lightColor, ambientColor;
+
+    if (D_0054EAF0 != 0) {
+        unit = evtGetUnitHandle2((dds3Basic_t *)D_0054EAF0);
+        r = (s32)(lightR * 128.0f);
+        g = (s32)(lightG * 128.0f);
+        b = (s32)(lightB * 128.0f);
+        lightColor = r | (b << 16) | (g << 8) | 0x80000000;
+        r = (s32)(ambientR * 128.0f);
+        g = (s32)(ambientG * 128.0f);
+        b = (s32)(ambientB * 128.0f);
+        ambientColor = r | (b << 16) | (g << 8) | 0x80000000;
+        evtSetUnitLightAndAmbient(unit, duration, lightColor, ambientColor);
+    }
+}
+
+void fldSkySetPlayer(s32 duration, f32 colorAX, f32 colorAY, f32 colorAZ,
+                     f32 colorBX, f32 colorBY, f32 colorBZ,
+                     f32 dirX, f32 dirY, f32 dirZ) {
+    f32 dir[4];
+    evtUnit_t *playerUnit = NULL;
+    evtUnit_t *secondUnit = NULL;
+    evtUnit_t *mainUnit;
+    u32 lightColor, ambientColor;
+    s32 r, g, b;
+
+    if (fldPlayerUnit != 0) {
+        playerUnit = evtGetUnitHandle2((dds3Basic_t *)fldPlayerUnit);
+        evtUnitLightOn(playerUnit);
+    }
+    if (D_0054EAF0 != 0) {
+        secondUnit = evtGetUnitHandle2((dds3Basic_t *)D_0054EAF0);
+        evtUnitLightOn(secondUnit);
+    }
+    mainUnit = evtGetUnitHandle2(D_0054EAE8);
+    evtUnitLightOn(mainUnit);
+
+    r = (s32)(colorAX * 128.0f);
+    g = (s32)(colorAY * 128.0f);
+    b = (s32)(colorAZ * 128.0f);
+    lightColor = r | (b << 16) | (g << 8) | 0x80000000;
+    r = (s32)(colorBX * 128.0f);
+    g = (s32)(colorBY * 128.0f);
+    b = (s32)(colorBZ * 128.0f);
+    ambientColor = r | (b << 16) | (g << 8) | 0x80000000;
+    evtSetUnitLightAndAmbient(mainUnit, duration, lightColor, ambientColor);
+    if (fldPlayerUnit != 0) {
+        evtSetUnitLightAndAmbient(playerUnit, duration, lightColor, ambientColor);
+    }
+    if (D_0054EAF0 != 0) {
+        evtSetUnitLightAndAmbient(secondUnit, duration, lightColor, ambientColor);
+    }
+
+    dir[0] = dirX;
+    dir[1] = dirY;
+    dir[2] = dirZ;
+    dir[3] = 0.0f;
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)dir);
+    evtSetUnitLightDir(mainUnit, duration);
+    if (fldPlayerUnit != 0) {
+        evtSetUnitLightDir(playerUnit, duration);
+    }
+    if (D_0054EAF0 != 0) {
+        evtSetUnitLightDir(secondUnit, duration);
+    }
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)dir);
+    evtSetUnitLightDir(mainUnit, 0);
+    if (fldPlayerUnit != 0) {
+        evtSetUnitLightDir(playerUnit, 0);
+    }
+    if (D_0054EAF0 != 0) {
+        evtSetUnitLightDir(secondUnit, 0);
+    }
+
+    D_002FCA60[0] = colorAX;
+    D_002FCA60[1] = colorAY;
+    D_002FCA60[2] = colorAZ;
+    D_002FCA60[4] = dirX;
+    D_002FCA60[5] = dirY;
+    D_002FCA60[6] = dirZ;
+    fldSkyPlayerIdx[0] = colorBX;
+    fldSkyPlayerIdx[1] = colorBY;
+    fldSkyPlayerIdx[2] = colorBZ;
+}
 
 void fldSkySetTbl(s32 idx, s32 durationMode) {
     fldAreaWork_t *state = &fldGlobalBase;
@@ -3154,7 +3445,86 @@ void fld_1374F0(void) {
     displayPointers[1] = (u32)fldSkyPlayerIdx;
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldSkyRefreshTbl);
+void fldSkyRefreshTbl(void) {
+    fldLightSet_t *light;
+    f32 vec[4];
+    f32 dir[4];
+    f32 *dirp;
+    evtUnit_t *unit;
+    s32 r, g, b;
+    u32 lightColor, ambientColor;
+
+    if (fldGb < 200) {
+        if (fldSkyLightMaTbl != 0) {
+            light = &((fldLightSet_t *)fldSkyDefault)[fldSkyLightMaTbl];
+        } else {
+            light = &((fldLightSet_t *)fldSkyDefault)[fldSkyTable];
+        }
+        fldSkySetFilter(fldRunDanteGunFlag[13], fldRunDanteGunFlag[15], 0);
+        fldSetFilterAnime(fldRunDanteGunFlag[16]);
+        vec[0] = light->drawColorFixedR * 0.00390625f;
+        vec[1] = light->drawColorFixedG * 0.00390625f;
+        vec[2] = light->drawColorFixedB * 0.00390625f;
+        vec[3] = 0;
+        dds3SetFogColor(0, vec);
+        dds3SetFogPara(0, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+        dir[0] = light->lightDirectionAX;
+        dir[1] = light->lightDirectionAY;
+        dir[2] = light->lightDirectionAZ;
+        dir[3] = 0;
+        dirp = dir;
+        dds3SetLightDir(0, 0, dirp);
+        vec[0] = light->lightColorAX;
+        vec[1] = light->lightColorAY;
+        vec[2] = light->lightColorAZ;
+        vec[3] = 0;
+        dds3SetLightColor(0, 0, vec);
+        dir[0] = light->lightDirectionBX;
+        dir[1] = light->lightDirectionBY;
+        dir[2] = light->lightDirectionBZ;
+        dir[3] = 0;
+        dds3SetLightDir(0, 1, dirp);
+        vec[0] = light->lightColorBX;
+        vec[1] = light->lightColorBY;
+        vec[2] = light->lightColorBZ;
+        vec[3] = 0;
+        dds3SetLightColor(0, 1, vec);
+        dir[0] = light->lightDirectionCX;
+        dir[1] = light->lightDirectionCY;
+        dir[2] = light->lightDirectionCZ;
+        dir[3] = 0;
+        dds3SetLightDir(0, 2, dirp);
+        vec[0] = light->lightColorCX;
+        vec[1] = light->lightColorCY;
+        vec[2] = light->lightColorCZ;
+        vec[3] = 0;
+        dds3SetLightColor(0, 2, vec);
+        vec[0] = light->backgroundColorX;
+        vec[1] = light->backgroundColorY;
+        vec[2] = light->backgroundColorZ;
+        vec[3] = 1.0f;
+        dds3SetAmbientColor(0, vec);
+        unit = evtGetUnitHandle2(D_0054EAE8);
+        evtUnitLightOn(unit);
+        r = (s32)(light->unitColorA[0] * 128.0f);
+        g = (s32)(light->unitColorA[1] * 128.0f);
+        b = (s32)(light->unitColorA[2] * 128.0f);
+        lightColor = r | (b << 16) | (g << 8) | 0x80000000;
+        r = (s32)(light->unitColorB[0] * 128.0f);
+        g = (s32)(light->unitColorB[1] * 128.0f);
+        b = (s32)(light->unitColorB[2] * 128.0f);
+        ambientColor = r | (b << 16) | (g << 8) | 0x80000000;
+        evtSetUnitLightAndAmbient(unit, 0, lightColor, ambientColor);
+        dir[0] = light->unitLightDirection[0];
+        dir[1] = light->unitLightDirection[1];
+        dir[2] = light->unitLightDirection[2];
+        dir[3] = 0;
+        SDF_VU0_LOADVECTOR(dirp);
+        evtSetUnitLightDir(unit, 0);
+        SDF_VU0_LOADVECTOR(dir);
+        evtSetUnitLightDir(unit, 0);
+    }
+}
 
 void fldSkyBattle(void) {
     fldLightSet_t *light = &((fldLightSet_t *)fldSkyDefaultData)[fldSkyTable];
@@ -3313,7 +3683,29 @@ void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldClearMatterFlags);
+extern s32 D_0054ED90;
+extern s32 fldHitChkMatter;
+
+void fldClearMatterFlags(void) {
+    s32 count = D_0054EDA0;
+
+    if (count > 0) {
+        dds3Basic_t **node = &((fldValueRecord_t *)fldMatterTable)->worldNode;
+        do {
+            count--;
+            *node = NULL;
+            node = (dds3Basic_t **)((u8 *)node + sizeof(fldValueRecord_t));
+        } while (count != 0);
+    }
+    D_0054EDA0 = 0;
+    fldHitChkMatter = -1;
+    D_0054ED90 = -1;
+    fldPlaneCount = 0;
+    fldItemBoxObjCount = 0;
+    if (fldMatterTable != 0) {
+        fldFreeMatterTable();
+    }
+}
 
 void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex);
@@ -3562,7 +3954,22 @@ void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     fldItemBoxObjCount++;
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldKaifukuTest);
+extern s32 datAddHp(datUnitWork_t *work, s32 hp);
+extern s32 datAddMp(datUnitWork_t *work, s32 mp);
+extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
+
+void fldKaifukuTest(void) {
+    s32 i;
+    s32 ofs = 0;
+
+    for (i = 0; i < 16; i++) {
+        datAddHp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 9999);
+        datAddMp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 9999);
+        *(u16 *)((u8 *)ofs + (u32)DDS3_GBWK + 0xA62) = 0;
+        ofs += 0xEC;
+    }
+    p2sdPlaySE(0x10, 0x7F, 0x3F);
+}
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldStatusSet);
 
