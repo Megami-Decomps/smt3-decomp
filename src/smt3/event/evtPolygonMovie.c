@@ -24,17 +24,6 @@
     : : "f" (f))
 
 
-#define VU0_SCALE_VF(vf, f) __asm__ volatile ( \
-    ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw " #vf ", " #vf ", vf2x\n\t.set reorder" \
-    : : "r" (f))
-
-
-#define VU0_SET_VF10_COMPONENT(axis, f) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vaddx." #axis " vf10, vf0, vf2x\n\t.set reorder" \
-    : : "f" (f) : "$2")
-
-
 void *dds3GetProcessData(dds3ProcessID_t *task);
 
 /* SMT3 allocates and clears 0xD4 bytes; the process flag helpers use its head. */
@@ -271,48 +260,48 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
         t = 0.0f;
     }
     if (a != NULL) {
-        VU0_LOAD_VF(vf10, a);
+        VU0_LOAD_VF10(a);
     } else {
-        VU0_LOAD_VF(vf10, D_0032C7F0);
+        VU0_LOAD_VF10(D_0032C7F0);
     }
     VU0_SCALE_VF10(1.0f - t);
     if (b != NULL) {
-        VU0_LOAD_VF(vf11, b);
+        VU0_LOAD_VF11(b);
     } else {
-        VU0_LOAD_VF(vf11, D_0032C7F0);
+        VU0_LOAD_VF11(D_0032C7F0);
     }
     VU0_SCALE_VF11(t);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, out);
+    VU0_ADD_VF10_VF11();
+    VU0_STORE_VF10(out);
     if (a != NULL) {
-        VU0_LOAD_VF(vf10, a + 4);
+        VU0_LOAD_VF10(a + 4);
     } else {
-        VU0_LOAD_VF(vf10, D_0032C800);
+        VU0_LOAD_VF10(D_0032C800);
     }
     VU0_SCALE_VF10(1.0f - t);
     if (b != NULL) {
-        VU0_LOAD_VF(vf11, b + 4);
+        VU0_LOAD_VF11(b + 4);
     } else {
-        VU0_LOAD_VF(vf11, D_0032C800);
+        VU0_LOAD_VF11(D_0032C800);
     }
     VU0_SCALE_VF11(t);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, out + 4);
+    VU0_ADD_VF10_VF11();
+    VU0_STORE_VF10(out + 4);
     if (a != NULL) {
-        VU0_LOAD_VF(vf10, a + 8);
+        VU0_LOAD_VF10(a + 8);
     } else {
-        VU0_LOAD_VF(vf10, D_0032C810);
+        VU0_LOAD_VF10(D_0032C810);
     }
     VU0_SCALE_VF10(1.0f - t);
     if (b != NULL) {
-        VU0_LOAD_VF(vf11, b + 8);
+        VU0_LOAD_VF11(b + 8);
     } else {
-        VU0_LOAD_VF(vf11, D_0032C810);
+        VU0_LOAD_VF11(D_0032C810);
     }
     VU0_SCALE_VF11(t);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_SET_W_ONE(vf10);
-    VU0_STORE_VF(vf10, out + 8);
+    VU0_ADD_VF10_VF11();
+    VU0_SET_VF10_W_ONE();
+    VU0_STORE_VF10(out + 8);
 }
 
 /* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
@@ -324,31 +313,31 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
         t = 0.0f;
     }
     if (a != NULL) {
-        VU0_SET_VF10_COMPONENT(x, a->vec[0]);
-        VU0_SET_VF10_COMPONENT(y, a->vec[1]);
-        VU0_SET_VF10_COMPONENT(z, a->vec[2]);
+        VU0_SET_VF10_X(a->vec[0]);
+        VU0_SET_VF10_Y(a->vec[1]);
+        VU0_SET_VF10_Z(a->vec[2]);
         evtSetBlendVecW(a->vec[3]);
     } else {
-        VU0_SET_VF10_COMPONENT(x, evtHokanFogParam[1]);
-        VU0_SET_VF10_COMPONENT(y, evtHokanFogParam[0]);
-        VU0_SET_VF10_COMPONENT(z, evtHokanFogParam[2]);
+        VU0_SET_VF10_X(evtHokanFogParam[1]);
+        VU0_SET_VF10_Y(evtHokanFogParam[0]);
+        VU0_SET_VF10_Z(evtHokanFogParam[2]);
         evtSetBlendVecW(evtHokanFogParam[3]);
     }
-    VU0_SCALE_VF(vf10, 1.0f - t);
-    VU0_MOVE_VF(vf11, vf10);
+    VU0_SCALE_VF10_BITS(1.0f - t);
+    VU0_COPY_VF10_TO_VF11();
     if (b != NULL) {
-        VU0_SET_VF10_COMPONENT(x, b->vec[0]);
-        VU0_SET_VF10_COMPONENT(y, b->vec[1]);
-        VU0_SET_VF10_COMPONENT(z, b->vec[2]);
+        VU0_SET_VF10_X(b->vec[0]);
+        VU0_SET_VF10_Y(b->vec[1]);
+        VU0_SET_VF10_Z(b->vec[2]);
         evtSetBlendVecW(b->vec[3]);
     } else {
-        VU0_SET_VF10_COMPONENT(x, evtHokanFogParam[1]);
-        VU0_SET_VF10_COMPONENT(y, evtHokanFogParam[0]);
-        VU0_SET_VF10_COMPONENT(z, evtHokanFogParam[2]);
+        VU0_SET_VF10_X(evtHokanFogParam[1]);
+        VU0_SET_VF10_Y(evtHokanFogParam[0]);
+        VU0_SET_VF10_Z(evtHokanFogParam[2]);
         evtSetBlendVecW(evtHokanFogParam[3]);
     }
-    VU0_SCALE_VF(vf10, t);
-    VU0_ADD(vf10, vf10, vf11);
+    VU0_SCALE_VF10_BITS(t);
+    VU0_ADD_VF10_VF11();
     VU0_GET_VF10_X(out->vec[0]);
     VU0_GET_VF10_Y(out->vec[1]);
     VU0_GET_VF10_Z(out->vec[2]);
@@ -358,15 +347,15 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
     } else {
         eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
-    VU0_SCALE_VF(vf10, 1.0f - t);
-    VU0_MOVE_VF(vf11, vf10);
+    VU0_SCALE_VF10_BITS(1.0f - t);
+    VU0_COPY_VF10_TO_VF11();
     if (b != NULL) {
         eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
     } else {
         eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
-    VU0_SCALE_VF(vf10, t);
-    VU0_ADD(vf10, vf10, vf11);
+    VU0_SCALE_VF10_BITS(t);
+    VU0_ADD_VF10_VF11();
     out->color = eePackRGBAWord(128.0f);
 }
 

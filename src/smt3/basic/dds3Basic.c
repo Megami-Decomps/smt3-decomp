@@ -14,12 +14,6 @@ void dds3BackupPoseSet(dds3PoseSet_t *pose);
 #define VU0_STORE_ORIGIN(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
-#define VU0_UNIT_SCALE() __asm__ volatile ( \
-    ".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\t" \
-    "vmulx.w vf10, vf0, vf0x\n\t.set reorder" : : : "memory")
-#define VU0_LOAD_VF10_BARRIER(src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
-    : : "r" (src) : "memory")
 #define VU0_LOAD_VF11_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")

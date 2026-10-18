@@ -345,41 +345,11 @@ typedef struct {
  * covers every register the units use. Units that need a different operand
  * constraint for the same operation keep their own definition and say why. */
 
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
 
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
-#define VU0_ADD(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-#define VU0_SUB(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-#define VU0_MUL(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-#define VU0_SET_W_ONE(vf) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.w " #vf ", vf0\n\t.set reorder")
 /* vf10 = vf0, so xyz go to zero and w to one. */
 #define VU0_ZERO_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
 
-#define VU0_CROSS_XYZ(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder")
-/* The matrix bank times the named source, source w taken as one. */
-#define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
-    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
-/* Each matrix row scaled by its own lane of the named vector. */
-#define VU0_SCALE_MATRIX_ROWS(src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulx.xyzw vf28, vf28, " #src "x\n\tvmuly.xyzw vf29, vf29, " #src "y\n\t" \
-    "vmulz.xyzw vf30, vf30, " #src "z\n\t.set reorder")
 
 #define VU0_GET_VF10_X(out) __asm__ volatile ( \
     ".set noreorder\n\tqmfc2.ni $2, vf10\n\tmtc1 $2, %0\n\t.set reorder" \
@@ -465,5 +435,96 @@ typedef struct {
 #define VU0_SET_UNIT_MATRIX() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\t" \
     "vmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder")
+
+
+/* ---- fixed-register forms, one name per register pair ---- */
+
+#define EE_MMI_LOAD_MATRIX_COLUMN_VF10(src) __asm__ volatile ( \
+    ".set noreorder\n\tlw $2, 0(%0)\n\tlw $3, 0x10(%0)\n\t" \
+    "lw $4, 0x20(%0)\n\tlw $5, 0x30(%0)\n\t" \
+    "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
+    "pcpyld $2, $4, $2\n\tqmtc2.ni $2, vf10\n\t.set reorder" \
+    : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
+#define VU0_LOAD_VF31(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_LOAD_VF28_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf28, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_LOAD_VF29_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf29, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_LOAD_VF30_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf30, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_LOAD_VF31_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_COPY_VF28_TO_VF24() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\t.set reorder")
+#define VU0_COPY_VF29_TO_VF25() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf25, vf29\n\t.set reorder")
+#define VU0_COPY_VF30_TO_VF26() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf26, vf30\n\t.set reorder")
+#define VU0_COPY_VF31_TO_VF27() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
+#define VU0_COPY_VF0_TO_VF31() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf31, vf0\n\t.set reorder")
+#define VU0_SCALE_MATRIX_ROWS_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.xyzw vf28, vf28, vf10x\n\tvmuly.xyzw vf29, vf29, vf10y\n\t" \
+    "vmulz.xyzw vf30, vf30, vf10z\n\t.set reorder")
+#define VU0_SET_VF10_Y_CLEAR_W(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvaddx.y vf10, vf0, vf2x\n\t" \
+    "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
+    : : "f" (f))
+#define VU0_SET_VF31_W_ONE() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.w vf31, vf0\n\t.set reorder")
+
+#define VU0_COPY_VF10_TO_VF2() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " "vf2" ", " "vf10" "\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF28() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf10\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF29() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf29, vf10\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF30() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf30, vf10\n\t.set reorder")
+#define VU0_COPY_VF2_TO_VF12() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " "vf12" ", " "vf2" "\n\t.set reorder")
+#define VU0_COPY_VF30_TO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
+#define VU0_LOAD_VF10_BARRIER(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_SET_VF10_X(value) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $2, %0\n\t" \
+    "qmtc2.ni $2, $vf2\n\t" \
+    "vaddx.x vf10, vf0, vf2x\n\t" \
+    ".set reorder" \
+    : : "f" (value) : "$2")
+#define VU0_SET_VF10_Y(value) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $2, %0\n\t" \
+    "qmtc2.ni $2, $vf2\n\t" \
+    "vaddx.y vf10, vf0, vf2x\n\t" \
+    ".set reorder" \
+    : : "f" (value) : "$2")
+#define VU0_STORE_VF0(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+#define VU0_STORE_VF11_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_UNIT_SCALE() __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz vf10, vf0, vf0w\n\t" \
+    "vmulx.w vf10, vf0, vf0x\n\t.set reorder" : : : "memory")
+
+/* The extended form: an empty operand list, not a basic asm with no colons.
+ * cc1 2.96 schedules the two differently, and mdlSetBlur only matches with
+ * this spelling. */
+#define VU0_COPY_VF10_TO_VF11_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf11, vf10\n\t.set reorder" : :)
+#define VU0_SUB_VF10_VF11_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf10, vf10, vf11\n\t.set reorder" : :)
 
 #endif /* PS2ASM_H */

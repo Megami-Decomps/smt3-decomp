@@ -21,24 +21,6 @@ extern void Lerp(f32 weight);
 extern void dds3FreeSplineHandle(s32 spline);
 extern void sdfChipFreeDirect(void *ptr);
 
-/* sceVu0 element access: the value goes through $2 into vf2.x, then one field
- * of vf10 at a time. gcc 2.96 emits none of qmtc2/qmfc2/vaddx/prot3w itself. */
-#define VU0_SET_VF10_X(value) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "mfc1 $2, %0\n\t" \
-    "qmtc2.ni $2, $vf2\n\t" \
-    "vaddx.x vf10, vf0, vf2x\n\t" \
-    ".set reorder" \
-    : : "f" (value) : "$2")
-
-#define VU0_SET_VF10_Y(value) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "mfc1 $2, %0\n\t" \
-    "qmtc2.ni $2, $vf2\n\t" \
-    "vaddx.y vf10, vf0, vf2x\n\t" \
-    ".set reorder" \
-    : : "f" (value) : "$2")
-
 
 #define VU0_MUL_VF10_SCALAR(value) __asm__ volatile ( \
     ".set noreorder\n\t" \

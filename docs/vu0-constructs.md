@@ -41,6 +41,35 @@ Anything that runs those two macros without that initialisation drops the z term
 of the dot product and reports the wrong facing. The `vf1` uses in
 `code_002BD340.c` are unaffected: each of those blocks sets `vf1` itself first.
 
+## Every macro parameter is a value
+
+No macro takes a register name, an axis letter or an assembly string. Each
+operation is named for the registers it touches, so a C equivalent is a function
+per name with no preprocessor pasting, and `grep vf12` finds every piece of code
+that touches `vf12`.
+
+21 macros used to take a `vf` or axis token across 229 call sites. Converting
+them cost less than keeping them: 36 of the 50 register tuples in use already had
+an identical fixed-register macro, so the tree ended up with 21 definitions
+removed and 14 added. Before that conversion `VU0_MOVE_VF(vf11, vf10)` and
+`VU0_COPY_VF10_TO_VF11` were both defined and meant the same thing, which is the
+worst of both schemes.
+
+Two distinctions a port must not flatten, both of which cost a match when they
+were flattened here:
+
+**A basic asm is not an extended asm with no operands.** `__asm__ volatile
+("...")` and `__asm__ volatile ("..." : :)` are scheduled differently by cc1
+2.96. `VU0_COPY_VF10_TO_VF11_EXTENDED` and `VU0_SUB_VF10_VF11_EXTENDED` carry the
+second spelling because `mdlSetBlur` only matches with it: with the plain form,
+the float constants it materialises come out in the other order. A macro whose
+name ends in `_EXTENDED` means precisely that.
+
+**The operand section is part of the operation.** Same instruction, different
+clobbers, different register allocation. Four names stay defined per unit for
+that reason and `include/README.md` tabulates them; a port that collapses them
+into one function will drift on those call sites.
+
 ## The operations
 
 | operation | instruction shape | macros |

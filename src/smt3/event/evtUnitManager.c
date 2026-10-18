@@ -12,19 +12,12 @@
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
     : : "f" (f))
 
+/* Kept local: declares no $2 clobber, where basic/dds3PathBasic.c does. */
+#undef VU0_SET_VF10_Y
 #define VU0_SET_VF10_Y(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f))
-
-#define VU0_SET_AXIS_CLEAR_W(f, axis) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvaddx." #axis " vf10, vf0, vf2x\n\t" \
-    "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
-    : : "f" (f))
-
-
-#define VU0_CLEAR_W(vf) __asm__ volatile ( \
-    ".set noreorder\n\tvmulx.w " #vf ", " #vf ", vf0x\n\t.set reorder")
 
 
 f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *value);
@@ -146,9 +139,9 @@ extern void evtGetUnitDirVector(evtUnit_t *unit);
 
 /* vf10 = (a - b) with y replaced by 0 */
 void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
-    VU0_LOAD_VF(vf10, a);
-    VU0_LOAD_VF(vf11, b);
-    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF10(a);
+    VU0_LOAD_VF11(b);
+    VU0_SUB_VF10_VF11();
     VU0_SET_VF10_Y(0.0f);
 }
 
@@ -156,12 +149,12 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 void evtGetUnitDirVector(evtUnit_t *unit) {
     f32 v[4];
 
-    VU0_LOAD_VF(vf10, &unit->effObj->poseset->rot);
+    VU0_LOAD_VF10(&unit->effObj->poseset->rot);
     ToMatrix();
-    VU0_STORE_VF(vf30, v);
+    VU0_STORE_VF30(v);
     v[1] = 0.0f;
     v[3] = 1.0f;
-    VU0_LOAD_VF(vf10, v);
+    VU0_LOAD_VF10(v);
     VU0_NORMALIZE_VF10();
     VU0_SCALE_VF10(-1.0f);
 }
@@ -224,7 +217,7 @@ s32 evtGetNextMovePos(evtUnit_t *unit) {
         }
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)unit->pathHandle, t);
         dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-        VU0_STORE_VF(vf10, unit->targetVector);
+        VU0_STORE_VF10(unit->targetVector);
         return 1;
     }
     return 0;
@@ -242,14 +235,14 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
     dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, 0.0f);
     dds3PathBasicControlGetPos(path);
     do {
-        VU0_MOVE_VF(vf11, vf10);
+        VU0_COPY_VF10_TO_VF11();
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, t);
         dds3PathBasicControlGetPos(path);
-        VU0_MOVE_VF(vf12, vf10);
-        VU0_SUB(vf10, vf10, vf11);
+        VU0_COPY_VF10_TO_VF12();
+        VU0_SUB_VF10_VF11();
         VU0_LENGTH_VF10(segmentLength);
         length += segmentLength;
-        VU0_MOVE_VF(vf10, vf12);
+        VU0_COPY_VF12_TO_VF10();
         t += step;
     } while (t <= 1.0f);
     dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, savedScaleFactor);
@@ -276,9 +269,9 @@ void GetBaseLightRGB(evtUnit_t *unit) {
         color = unit->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-                VU0_LOAD_VF(vf10, info);
+                VU0_LOAD_VF10(info);
     } else {
-                VU0_LOAD_VF(vf10, dds3LightParam.sources[0]);
+                VU0_LOAD_VF10(dds3LightParam.sources[0]);
     }
 }
 
@@ -300,9 +293,9 @@ void GetBaseAmbientRGB(evtUnit_t *unit) {
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-                VU0_LOAD_VF(vf10, info->secondColor);
+                VU0_LOAD_VF10(info->secondColor);
     } else {
-                VU0_LOAD_VF(vf10, dds3LightParam.ambient);
+                VU0_LOAD_VF10(dds3LightParam.ambient);
     }
 }
 
@@ -316,11 +309,11 @@ void GetBaseLightDir(evtUnit_t *unit) {
         }
     }
     if (unit->flags & 0x400) {
-                VU0_LOAD_VF(vf10, unit->vec10);
+                VU0_LOAD_VF10(unit->vec10);
     } else if (ownVector) {
-                VU0_LOAD_VF(vf10, unit->vec10);
+                VU0_LOAD_VF10(unit->vec10);
     } else {
-                VU0_LOAD_VF(vf10, dds3LightParam.sources[0] + 4);
+                VU0_LOAD_VF10(dds3LightParam.sources[0] + 4);
     }
 }
 
@@ -374,11 +367,11 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitLightAndAmbient);
 /* vu0 routine: normalise the target direction and retain the current source. */
 void evtSetUnitLightDir(evtUnit_t *unit, s32 duration) {
     unit->directionDuration = duration;
-    VU0_CLEAR_W(vf10);
+    VU0_CLEAR_VF10_W();
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec30);
+    VU0_STORE_VF10_NOMEM(unit->vec30);
     GetBaseLightDir(unit);
-    VU0_STORE_VF_UNCLOBBERED(vf10, unit->vec20);
+    VU0_STORE_VF10_NOMEM(unit->vec20);
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
@@ -434,7 +427,7 @@ void evtUnitLightOff(evtUnit_t *unit, s32 duration) {
     } else {
         evtSetUnitLightAndAmbient(unit, duration, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
-                VU0_MOVE_VF(vf10, vf0);
+                VU0_ZERO_VF10();
         evtSetUnitLightDir(unit, duration);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }
@@ -551,15 +544,15 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", evtUnitRotationTarget);
 s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
-    VU0_LOAD_VF(vf10, quat);
+    VU0_LOAD_VF10(quat);
     ToMatrix();
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_SET_AXIS_CLEAR_W(0.0f, y);
+    VU0_COPY_VF30_TO_VF10();
+    VU0_SET_VF10_Y_CLEAR_W(0.0f);
     VU0_NORMALIZE_VF10();
     VU0_SCALE_VF10(-1.0f);
-    VU0_LOAD_VF(vf11, &unit->effObj->poseset->pos);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF(vf10, v);
+    VU0_LOAD_VF11(&unit->effObj->poseset->pos);
+    VU0_ADD_VF10_VF11();
+    VU0_STORE_VF10(v);
     return evtUnitRotationTarget(unit, v, angle);
 }
 
@@ -573,15 +566,15 @@ s32 evtUnitMoveType0(evtUnit_t *unit) {
         evtGetUnitDirVector(unit);
         obj = unit->effObj;
     } else {
-        VU0_LOAD_VF(vf10, unit->targetVector);
+        VU0_LOAD_VF10(unit->targetVector);
         obj = unit->effObj;
-        VU0_LOAD_VF(vf11, &obj->poseset->pos);
-        VU0_SUB(vf10, vf10, vf11);
+        VU0_LOAD_VF11(&obj->poseset->pos);
+        VU0_SUB_VF10_VF11();
         VU0_NORMALIZE_VF10();
     }
     scale = unit->motionParameter * 0.1f;
     VU0_SCALE_VF10(scale);
-    VU0_STORE_VF(vf10, v);
+    VU0_STORE_VF10(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;
 }
@@ -591,14 +584,14 @@ s32 evtUnitMoveTypePathTrace(evtUnit_t *unit) {
 
     dds3PathBasicControlIsFinished((dds3PathBasicControl_t *)unit->pathHandle);
     dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-    VU0_STORE_VF(vf10, v);
+    VU0_STORE_VF10(v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3PathBasicControlGetRot((dds3PathBasicControl_t *)unit->pathHandle);
-        VU0_MOVE_VF(vf11, vf10);
+        VU0_COPY_VF10_TO_VF11();
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
-        VU0_STORE_VF(vf10, v);
+        VU0_STORE_VF10(v);
         dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
     return 1;
@@ -697,7 +690,7 @@ void evtSetUnitMove3(evtUnit_t *work, s32 pathObjectKey, s32 frames, s32 directi
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
     work->linkedUnit = pathSource;
     dds3PathBasicControlGetPos(path);
-    VU0_STORE_VF(vf10, work->targetVector);
+    VU0_STORE_VF10(work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = directionOffset;
     work->motionCallback = 0;

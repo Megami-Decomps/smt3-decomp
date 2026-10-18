@@ -59,7 +59,7 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetCircumferencePtr);
 f32 effBTLModelGetHeight(effBTLModel_t *unit) {
     f32 position[4];
     effBTLModelGetSphereCenter(unit);
-    VU0_STORE_VF(vf10, position);
+    VU0_STORE_VF10(position);
     return unit->height * unit->scale * 0.5f - position[1];
 }
 
@@ -193,7 +193,7 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartPtrGetModelCenter);
 /* The selected position provider leaves its vector in vf10. */
 void effBTLPartGetPositionPtr(void *owner, effBTLAimParams_t *request, f32 *out) {
     GetPositionPtrTable[request->scaleKind](owner, request);
-    VU0_STORE_VF(vf10, out);
+    VU0_STORE_VF10(out);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelPositionPtr);
@@ -224,7 +224,7 @@ void effBTLPartGetRotateMatrixPtr(effBTLAimParams_t *request, sdfMatrix4_t *out)
     if (request->aimMode == 4 || request->directionMode == 9) {
         LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
-        VU0_MOVE_VF(vf31, vf0);
+        VU0_COPY_VF0_TO_VF31();
     } else {
         if (request->aimMode == 5 || request->aimMode == 3 || request->directionMode == 8 || request->directionMode == 10) {
             tilt = 3.14159265f / 2.0f;

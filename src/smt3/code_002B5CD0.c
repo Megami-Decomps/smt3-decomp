@@ -100,10 +100,6 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
 #define VU0_SET_UNIT_MATRIX_B() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf24, vf0, vf0\n\tvmr32.xyzw vf26, vf0\n\t" \
     "vmove.xyzw vf27, vf0\n\tvaddw.x vf24, vf24, vf0w\n\tvmr32.xyzw vf25, vf26\n\t.set reorder")
-/* The hardwired (0,0,0,1) stored as a quadword. */
-#define VU0_STORE_VF0(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
 /* The three rotated basis rows saved across a nested packet build. */
 #define VU0_STORE_VF24_VF25_VF26(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf24, 0(%0)\n\tsqc2 vf25, 16(%0)\n\t" \
@@ -165,16 +161,8 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
     "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
     ".set reorder\n")
-#define VU0_COPY_VF10_TO_VF28() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf28, vf10\n\t.set reorder")
-#define VU0_COPY_VF10_TO_VF29() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf29, vf10\n\t.set reorder")
-#define VU0_COPY_VF10_TO_VF30() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf30, vf10\n\t.set reorder")
 #define VU0_COPY_VF10_TO_VF31() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf31, vf10\n\t.set reorder")
-#define VU0_COPY_VF30_TO_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
 #define VU0_COPY_VF31_TO_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder")
 #define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \

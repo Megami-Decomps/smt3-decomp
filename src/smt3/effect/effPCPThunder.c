@@ -503,10 +503,6 @@ struct sdfVector3_t {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 
-#define VU0_STORE_VF11_NOMEM(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
-
 extern EffRandState dds3EffectBase[];
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
