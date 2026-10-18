@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 
 struct RwV3d;
 struct SdfGsPacketHeader;
@@ -80,17 +81,6 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "sq $5, 0x30(%0)\n\t" \
     ".set reorder" \
     : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
-#define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
-    ".set noreorder\n" \
-    "lw $2, 0(%1)\n" \
-    "pextlb $2, $0, $2\n" \
-    "pextlh $2, $0, $2\n" \
-    "qmtc2.ni $2, vf10\n" \
-    "vitof0.xyzw vf10, vf10\n" \
-    "qmtc2.ni %0, vf2\n" \
-    "vmulx.xyzw vf10, vf10, vf2x\n" \
-    ".set reorder" \
-    : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
 #define EE_MMI_STORE_VEC3_VALUE(dst, value) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "pcpyud $2, %1, $0\n\t" \
@@ -99,29 +89,6 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "sw $2, 8(%0)\n\t" \
     ".set reorder" \
     : : "r"(dst), "r"(value) : "$2", "memory")
-#define PCP_COPY_VECTOR(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
-    : : "r" (dst), "r" (src) : "$2", "memory")
-/* The record prevents EE GCC 2.96 from decaying an array asm input. */
-typedef struct {
-    float components[4];
-} PcpVectorCopyF32;
-#define VU0_LOAD_MATRIX(src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf28, 0(%0)\n\t" \
-    "lqc2 vf29, 16(%0)\n\t" \
-    "lqc2 vf30, 32(%0)\n\t" \
-    "lqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (src))
-#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "sqc2 vf28, 0(%0)\n\t" \
-    "sqc2 vf29, 16(%0)\n\t" \
-    "sqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "memory")
 #define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "lqc2 vf24, 0(%0)\n\t" \
@@ -130,18 +97,49 @@ typedef struct {
     "lqc2 vf27, 48(%0)\n\t" \
     ".set reorder" \
     : : "r" (src) : "memory")
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-#define VU0_LOAD_VF_MEMORY(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src) : "memory")
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+#define VU0_STORE_MATRIX_B(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf24, 0(%0)\n\t" \
+    "sqc2 vf25, 16(%0)\n\t" \
+    "sqc2 vf26, 32(%0)\n\t" \
+    "sqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
     : : "r" (dst) : "memory")
-#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+/* The three matrix banks: A is vf28-vf31, B vf24-vf27, C vf20-vf23. */
+#define VU0_COPY_MATRIX_A_TO_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
+    "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
+#define VU0_COPY_MATRIX_A_TO_C() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf20, vf28\n\tvmove.xyzw vf21, vf29\n\t" \
+    "vmove.xyzw vf22, vf30\n\tvmove.xyzw vf23, vf31\n\t.set reorder")
+#define VU0_COPY_MATRIX_B_TO_A() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
+    "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")
+#define VU0_COPY_MATRIX_B_TO_C() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf20, vf24\n\tvmove.xyzw vf21, vf25\n\t" \
+    "vmove.xyzw vf22, vf26\n\tvmove.xyzw vf23, vf27\n\t.set reorder")
+#define VU0_COPY_MATRIX_C_TO_A() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf20\n\tvmove.xyzw vf29, vf21\n\t" \
+    "vmove.xyzw vf30, vf22\n\tvmove.xyzw vf31, vf23\n\t.set reorder")
+#define VU0_COPY_MATRIX_C_TO_B() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf24, vf20\n\tvmove.xyzw vf25, vf21\n\t" \
+    "vmove.xyzw vf26, vf22\n\tvmove.xyzw vf27, vf23\n\t.set reorder")
+#define VU0_SET_UNIT_MATRIX_B() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf24, vf0, vf0\n\tvmr32.xyzw vf26, vf0\n\t" \
+    "vmove.xyzw vf27, vf0\n\tvaddw.x vf24, vf24, vf0w\n\tvmr32.xyzw vf25, vf26\n\t.set reorder")
+/* The hardwired (0,0,0,1) stored as a quadword. */
+#define VU0_STORE_VF0(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+/* The three rotated basis rows saved across a nested packet build. */
+#define VU0_STORE_VF24_VF25_VF26(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf24, 0(%0)\n\tsqc2 vf25, 16(%0)\n\t" \
+    "sqc2 vf26, 32(%0)\n\t.set reorder" \
     : : "r" (dst))
+#define VU0_LOAD_VF24_VF25_VF26(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf24, 0(%0)\n\tlqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t.set reorder" \
+    : : "r" (src))
 #define VU0_MATRIX4_MUL_BANK_B_LEFT() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "vmulax.xyzw ACC, vf24, vf28x\n\tvmadday.xyzw ACC, vf25, vf28y\n\t" \
@@ -154,6 +152,29 @@ typedef struct {
     "vmaddaz.xyzw ACC, vf26, vf31z\n\tvmaddw.xyzw vf31, vf27, vf31w\n\t" \
     ".set reorder" \
     : : : "memory")
+#define VU0_MATRIX4_MUL_BANK_C_RIGHT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf28, vf20x\n\tvmadday.xyzw ACC, vf29, vf20y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf20z\n\tvmaddw.xyzw vf2, vf31, vf20w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf21x\n\tvmadday.xyzw ACC, vf29, vf21y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf21z\n\tvmaddw.xyzw vf3, vf31, vf21w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf22x\n\tvmadday.xyzw ACC, vf29, vf22y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf22z\n\tvmaddw.xyzw vf4, vf31, vf22w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf23x\n\tvmadday.xyzw ACC, vf29, vf23y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf23z\n\tvmaddw.xyzw vf31, vf31, vf23w\n\t" \
+    "vmove.xyzw vf28, vf2\n\tvmove.xyzw vf29, vf3\n\tvmove.xyzw vf30, vf4\n\t" \
+    ".set reorder")
+#define VU0_MATRIX4_MUL_BANK_C_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf20, vf28x\n\tvmadday.xyzw ACC, vf21, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf28z\n\tvmaddw.xyzw vf28, vf23, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf29x\n\tvmadday.xyzw ACC, vf21, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf29z\n\tvmaddw.xyzw vf29, vf23, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf30x\n\tvmadday.xyzw ACC, vf21, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf30z\n\tvmaddw.xyzw vf30, vf23, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf20, vf31x\n\tvmadday.xyzw ACC, vf21, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf22, vf31z\n\tvmaddw.xyzw vf31, vf23, vf31w\n\t" \
+    ".set reorder")
 #define VU0_MATRIX4_TRANSPOSE() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf31\n\t" \
@@ -171,18 +192,18 @@ typedef struct {
     "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
     "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
     ".set reorder\n")
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
-#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
-    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
-    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
-#define VU0_LOAD_VF_AT(vf, off, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
-    : : "r" (src))
-#define VU0_STORE_VF_AT_UNCLOBBERED(vf, off, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
-    : : "r" (dst))
+#define VU0_COPY_VF10_TO_VF28() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf28, vf10\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF29() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf29, vf10\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF30() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf30, vf10\n\t.set reorder")
+#define VU0_COPY_VF10_TO_VF31() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf31, vf10\n\t.set reorder")
+#define VU0_COPY_VF30_TO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
+#define VU0_COPY_VF31_TO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder")
 #define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "lqc2 vf2, 0x40(%0)\n\tlqc2 vf5, 0x10(%1)\n\t" \
@@ -480,6 +501,8 @@ extern u16 corePktBackFaceList[];
 
 
 extern f32 corePktZBias;
+extern u32 sdf3DLightDefault;
+extern u32 sdf3DFogDefault;
 extern f32 sdf3DEyeOffset[4];
 extern u8 sdf3DScreenParam[];
 /* vu0 routine: native clip-plane setup and ordinary triangle fans. */
@@ -695,21 +718,10 @@ typedef struct RwMatrix {
     RwV3d pos; /* 0x30 */
     u32 pad3; /* 0x3C */
 } RwMatrix;
-/*
- * SDK word carriers used by effSampleColorAlphaTracks and the bit-scaled
- * billboard blends. Each conversion owns its native 16-byte workspace.
- * Other unpack/pack operand contracts keep their existing macros.
- * See docs/idioms.md, "SDK RGBA word carriers".
- */
-static inline void eeUnpackRGBAWord(u32 color, u32 unitBits) {
-    u32 rgba[4];
-    rgba[0] = color;
-    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
-}
 #define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
-    : "=m" (*(PcpVectorCopyF32 *)(dst)) \
-    : "r" (dst), "r" (src), "m" (*(const PcpVectorCopyF32 *)(src)) \
+    : "=m" (*(QuadF32 *)(dst)) \
+    : "r" (dst), "r" (src), "m" (*(const QuadF32 *)(src)) \
     : "$2")
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 typedef struct SdfAssetEntry {
@@ -879,12 +891,18 @@ typedef struct {
     "vmula.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
     "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
     ".set reorder\n")
-#define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
-    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
-#define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
-    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+#define VU0_MATRIX4_MUL_BANK_B_RIGHT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf28, vf24x\n\tvmadday.xyzw ACC, vf29, vf24y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf24z\n\tvmaddw.xyzw vf2, vf31, vf24w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf25x\n\tvmadday.xyzw ACC, vf29, vf25y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf25z\n\tvmaddw.xyzw vf3, vf31, vf25w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf26x\n\tvmadday.xyzw ACC, vf29, vf26y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf26z\n\tvmaddw.xyzw vf4, vf31, vf26w\n\t" \
+    "vmulax.xyzw ACC, vf28, vf27x\n\tvmadday.xyzw ACC, vf29, vf27y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, vf27z\n\tvmaddw.xyzw vf31, vf31, vf27w\n\t" \
+    "vmove.xyzw vf28, vf2\n\tvmove.xyzw vf29, vf3\n\tvmove.xyzw vf30, vf4\n\t" \
+    ".set reorder")
 #define VU0_SET_CLIP_PLANES(bias, eye, projection) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\t" \
     "lqc2 vf21, 0(%1)\n\tlqc2 vf22, 0x70(%2)\n\t" \
@@ -962,10 +980,6 @@ typedef struct {
     "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmsubx.xyzw $vf29, $vf4, $vf2x\n\t" \
     ".set reorder\n" \
     : : "f" (c), "f" (s) : "$2", "$3")
-#define VU0_SUB(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-#define VU0_CROSS_XYZ(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder")
 #define VU0_TRIANGLE_FACING(out, a, b, c) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf2, 0(%1)\n\tlqc2 vf3, 0(%2)\n\tlqc2 vf4, 0(%3)\n\t" \
     "vsub.xyz vf2, vf2, vf3\n\tvsub.xyz vf4, vf4, vf3\n\tvsub.xyz vf3, vf21, vf3\n\t" \
@@ -973,9 +987,15 @@ typedef struct {
     "vmul.xyz vf2, vf2, vf3\n\tvadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
     "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
     : "=f" (out) : "r" (a), "r" (b), "r" (c) : "$2")
-#define VU0_SET_UNIT_MATRIX(a, b, c, d) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #a ", vf0, vf0\n\tvmr32.xyzw " #c ", vf0\n\t" \
-    "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
+#define VU0_SET_UNIT_MATRIX() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf28, vf0, vf0\n\tvmr32.xyzw vf30, vf0\n\t" \
+    "vmove.xyzw vf31, vf0\n\tvaddw.x vf28, vf28, vf0w\n\tvmr32.xyzw vf29, vf30\n\t.set reorder")
+#define VU0_BLEND_NODE_XY(node, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (first), "r" (second) : "memory")
 #define VU0_BLEND_NODE_VECTORS(node, first, second) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
@@ -1616,33 +1636,58 @@ void sdfPadSetAct0(s32 padIndex, u16 strength);
 void sdfPadSetAct1(s32 padIndex, u8 strength);
 void sdfPadInitManager(void);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", LoadMatrix);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", LoadMatrix_B);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", StoreMatrix);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", StoreMatrix_B);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixAtoB);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixAtoC);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixBtoA);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixBtoC);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixCtoA);
-
-INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixCtoB);
-
-void LoadIdentity(void) {
-    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+void LoadMatrix(const void *matrix) {
+    VU0_LOAD_MATRIX(matrix);
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", LoadIdentity_B);
+void LoadMatrix_B(const void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", StoreIdentity);
+void StoreMatrix(void *matrix) {
+    VU0_STORE_MATRIX(matrix);
+}
+
+void StoreMatrix_B(void *matrix) {
+    VU0_STORE_MATRIX_B(matrix);
+}
+
+void CopyMatrixAtoB(void) {
+    VU0_COPY_MATRIX_A_TO_B();
+}
+
+void CopyMatrixAtoC(void) {
+    VU0_COPY_MATRIX_A_TO_C();
+}
+
+void CopyMatrixBtoA(void) {
+    VU0_COPY_MATRIX_B_TO_A();
+}
+
+void CopyMatrixBtoC(void) {
+    VU0_COPY_MATRIX_B_TO_C();
+}
+
+void CopyMatrixCtoA(void) {
+    VU0_COPY_MATRIX_C_TO_A();
+}
+
+void CopyMatrixCtoB(void) {
+    VU0_COPY_MATRIX_C_TO_B();
+}
+
+void LoadIdentity(void) {
+    VU0_SET_UNIT_MATRIX();
+}
+
+void LoadIdentity_B(void) {
+    VU0_SET_UNIT_MATRIX_B();
+}
+
+/* vu0 routine: store the unit matrix built from vf0 by MMI lane shuffles */
+void StoreIdentity(f32 *matrix) {
+    EE_MMI_UNIT_MATRIX(matrix);
+}
 
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void DiagMatrix(void) {
@@ -1706,9 +1751,9 @@ void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     f32 cosine = cosf(angle);
     f32 sine = sinf(angle);
 
-    VU0_LOAD_VF(vf10, axis);
+    VU0_LOAD_VF10(axis);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, normalizedAxis);
+    VU0_STORE_VF10(normalizedAxis);
 
     x = normalizedAxis[0];
     y = normalizedAxis[1];
@@ -1726,7 +1771,7 @@ void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     matrix->at.y = y * z * (1.0f - cosine) - x * sine;
     matrix->at.z = z * z + (1.0f - z * z) * cosine;
     matrix->pad2 = 0;
-    VU0_STORE_VF(vf0, &matrix->pos);
+    VU0_STORE_VF0(&matrix->pos);
 }
 
 void SetRotateMatrixAxis(f32 angle, const RwV3d* axis)
@@ -1821,13 +1866,7 @@ void SetRotateMatrixXYZ(const RwV3d *rot)
 /* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
 void MultMatrixNoArg(void)
 {
-    VU0_APPLY_MATRIX(vf2, vf24);
-    VU0_APPLY_MATRIX(vf3, vf25);
-    VU0_APPLY_MATRIX(vf4, vf26);
-    VU0_APPLY_MATRIX(vf31, vf27);
-    VU0_MOVE_VF(vf28, vf2);
-    VU0_MOVE_VF(vf29, vf3);
-    VU0_MOVE_VF(vf30, vf4);
+    VU0_MATRIX4_MUL_BANK_B_RIGHT();
 }
 
 /* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
@@ -1836,9 +1875,17 @@ void MultMatrixRevNoArg(void)
         VU0_MATRIX4_MUL_BANK_B_LEFT();
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixNoArg_C);
+/* vu0 routine: vf28-vf31 = vf20-vf23 * vf28-vf31 (4x4 product) */
+void MultMatrixNoArg_C(void)
+{
+    VU0_MATRIX4_MUL_BANK_C_RIGHT();
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixRevNoArg_C);
+/* vu0 routine: vf28-vf31 = vf28-vf31 * vf20-vf23 (4x4 product) */
+void MultMatrixRevNoArg_C(void)
+{
+    VU0_MATRIX4_MUL_BANK_C_LEFT();
+}
 
 void MultMatrix(void *matrix) {
     VU0_LOAD_MATRIX_B(matrix);
@@ -1850,30 +1897,46 @@ void MultMatrixRev(const void *matrix) {
     MultMatrixRevNoArg();
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", ApplyMatrix);
+void ApplyMatrix(void *dst, const void *src) {
+    VU0_LOAD_VF10(src);
+    VU0_APPLY_MATRIX_VF10();
+    VU0_STORE_VF10(dst);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", InnerProduct);
+f32 InnerProduct(const void *a, const void *b) {
+    f32 product;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", OuterProduct);
+    VU0_LOAD_VF10(a);
+    VU0_LOAD_VF11(b);
+    VU0_DOT_VF10_VF11(product);
+    return product;
+}
+
+void OuterProduct(void *dst, const void *a, const void *b) {
+    VU0_LOAD_VF10(a);
+    VU0_LOAD_VF11(b);
+    VU0_CROSS_VF10_VF11();
+    VU0_STORE_VF10(dst);
+}
 
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
-    VU0_LOAD_VF(vf10, basisOrigin);
-    VU0_MOVE_VF(vf31, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF(vf10, directionPoint);
-    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF10(basisOrigin);
+    VU0_COPY_VF10_TO_VF31();
+    VU0_COPY_VF10_TO_VF11();
+    VU0_LOAD_VF10(directionPoint);
+    VU0_SUB_VF10_VF11();
     VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf30, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_LOAD_VF_MEMORY(vf10, up);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_COPY_VF10_TO_VF30();
+    VU0_COPY_VF10_TO_VF11();
+    VU0_LOAD_VF10(up);
+    VU0_CROSS_VF10_VF11();
     VU0_NORMALIZE_VF10();
-    VU0_MOVE_VF(vf28, vf10);
-    VU0_MOVE_VF(vf11, vf10);
-    VU0_MOVE_VF(vf10, vf30);
-    VU0_CROSS_XYZ(vf10, vf10, vf11);
-    VU0_MOVE_VF(vf29, vf10);
+    VU0_COPY_VF10_TO_VF28();
+    VU0_COPY_VF10_TO_VF11();
+    VU0_COPY_VF30_TO_VF10();
+    VU0_CROSS_VF10_VF11();
+    VU0_COPY_VF10_TO_VF29();
     ReverseMatrix();
 }
 
@@ -1985,7 +2048,15 @@ INCLUDE_ASM(const s32, "code_002B5CD0", corePktRelightBackFaces);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktXfmUV);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktLerpUVChain);
+/* vu0 routine: lerp of the XY pair at +0x30 by the weight at node + 0x40 */
+void corePktLerpUVChain(VuBlendNode *node) {
+    while (node != NULL) {
+        void *firstSourceRow = node->sourceA;
+        void *secondSourceRow = node->sourceB;
+        VU0_BLEND_NODE_XY(node, firstSourceRow, secondSourceRow);
+        node = node->next;
+    }
+}
 
 /* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x40 */
 void corePktLerpUVColorChain(VuBlendNode *node) {
@@ -2515,15 +2586,11 @@ void corePktOpenAndEmit(VuWork *work) {
     work->cursor = (u32 *)ringAddress;
     if ((work->selectedFlags & 0x4000) != 0) {
         u8 savedVectors[0x30];
-        VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
-        VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
+        VU0_STORE_VF24_VF25_VF26(savedVectors);
         corePktBuildFaceList(work);
         corePktEmitAllPasses(work);
         corePktSetupPointBuff(work, work->param1);
-        VU0_LOAD_VF(vf24, savedVectors);
-        VU0_LOAD_VF_AT(vf25, 16, savedVectors);
-        VU0_LOAD_VF_AT(vf26, 32, savedVectors);
+        VU0_LOAD_VF24_VF25_VF26(savedVectors);
         corePktRelightBackFaces(work->dmaBase, work->param1);
         corePktBuildBackFaceList(work);
         corePktEmitAllPasses(work);
@@ -2553,18 +2620,25 @@ void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawSetLight);
+void sdfCoreDrawSetLight(u8 *sourceObject) {
+    corePktCurrLight = (u32)sourceObject;
+}
 
 void sdfCoreDrawSetFog(u8 *sourceObject) {
     if (corePktCurrFog != (u32)sourceObject) {
         corePktCurrFog = (u32)sourceObject;
-        PCP_COPY_VECTOR(&corePktFogParm, sourceObject + 0x10);
+        PS2_COPY_QUAD(&corePktFogParm, sourceObject + 0x10);
     }
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawSetZBias);
+void sdfCoreDrawSetZBias(f32 bias) {
+    corePktZBias = bias;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawReset);
+void sdfCoreDrawReset(void) {
+    corePktCurrLight = 0;
+    corePktCurrFog = 0;
+}
 
 void sdfCoreDrawInit(s32 workspaceBytes) {
     u32 *dmaChannel = sceDmaGetChan(0);
@@ -2576,7 +2650,9 @@ void sdfCoreDrawInit(s32 workspaceBytes) {
     corePktPointBuff = sdfMemLock((struct SdfMemBlock *)(sdfCoreDrawBuffHandle));
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DGetTexPacketSize);
+u32 sdf2DGetTexPacketSize(SdfTex *texture) {
+    return 5 << SDF_DMA_QWORD_SHIFT;
+}
 
 SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
     drawPacket->header.quadwords = 4;
@@ -2610,7 +2686,9 @@ s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount) {
     return (registerCount * loopCount + 2) << SDF_DMA_QWORD_SHIFT;
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DGetPrimPtr);
+void *sdf2DGetPrimPtr(SdfDrawPacket *packet) {
+    return packet + 1;
+}
 
 SdfDrawPacket *sdf2DMakePrimPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
     s32 packetQuadwords = registerCount * loopCount + 1;
@@ -2640,15 +2718,15 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
     VU0_STORE_MATRIX(packet->matrixA);
     MultMatrixRev(node->camera.matrix);
     VU0_STORE_MATRIX(packet->matrixB);
-    VU0_LOAD_VF_MEMORY(vf10, &node->camera.halfWidth);
-    VU0_STORE_VF(vf10, packet->vecA);
-    VU0_LOAD_VF_MEMORY(vf10, &node->camera.originX);
-    VU0_STORE_VF(vf10, packet->vecB);
+    VU0_LOAD_VF10(&node->camera.halfWidth);
+    VU0_STORE_VF10(packet->vecA);
+    VU0_LOAD_VF10(&node->camera.originX);
+    VU0_STORE_VF10(packet->vecB);
     VU0_LOAD_MATRIX(transformMatrix);
     ReverseMatrix();
-    VU0_MOVE_VF(vf10, vf31);
-    VU0_STORE_VF(vf10, packet->vecC);
-    VU0_STORE_VF(vf10, node->inverseOrigin);
+    VU0_COPY_VF31_TO_VF10();
+    VU0_STORE_VF10(packet->vecC);
+    VU0_STORE_VF10(node->inverseOrigin);
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
     packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     packet->unknownC8 = 0;
@@ -2659,16 +2737,20 @@ void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
     MultMatrixRev(node->camera.matrix);
-    VU0_LOAD_VF_MEMORY(vf10, node->inverseOrigin);
+    VU0_LOAD_VF10(node->inverseOrigin);
     VU0_STORE_MATRIX(sdf3DScreenTm);
-    VU0_TRANSFORM_POINT(vf10, vf10);
-    VU0_STORE_VF(vf10, sdf3DEyeOffset);
+    VU0_TRANSFORM_POINT_VF10();
+    VU0_STORE_VF10(sdf3DEyeOffset);
     memcpy(sdf3DScreenParam, node, sizeof(*node));
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DSetDefaultLight);
+void sdf3DSetDefaultLight(u8 *sourceObject) {
+    sdf3DLightDefault = (u32)sourceObject;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DSetDefaultFog);
+void sdf3DSetDefaultFog(u8 *sourceObject) {
+    sdf3DFogDefault = (u32)sourceObject;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeScreenParam);
 
@@ -2984,7 +3066,9 @@ void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color, const void *u
     *(u32 *)(packet + 124) = 0;
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardGetPacketSize);
+s32 sdfBillBoardGetPacketSize(s32 count) {
+    return (count << 6) + 0x40;
+}
 
 /* vu0 routine: pack aligned positions into the VIF three-word stream. */
 u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
@@ -3149,9 +3233,48 @@ u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttribu
     return packet;
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardVcMake1);
+void sdfBillBoardVcMake1(u8 *packet, const f32 *position, const u32 *colors, const void *uv,
+                   const f32 *quad) {
+    *(u16 *)packet = 8;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xD0000000;
+    *(u32 *)(packet + 20) = 0x34134130;
+    *(u32 *)(packet + 24) = 0x41341;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E04C003;
+    *(u32 *)(packet + 56) = colors[0];
+    *(u32 *)(packet + 60) = colors[1];
+    *(u32 *)(packet + 64) = colors[2];
+    *(u32 *)(packet + 68) = colors[3];
+    *(u32 *)(packet + 72) = 0x6504C007;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)uv + 12);
+    *(u32 *)(packet + 92) = 0x6404C00B;
+    *(f32 *)(packet + 96) = quad[0];
+    *(f32 *)(packet + 100) = quad[1];
+    *(f32 *)(packet + 104) = quad[2];
+    *(f32 *)(packet + 108) = quad[3];
+    *(f32 *)(packet + 112) = quad[4];
+    *(f32 *)(packet + 116) = quad[5];
+    *(f32 *)(packet + 120) = quad[6];
+    *(f32 *)(packet + 124) = quad[7];
+    *(u32 *)(packet + 128) = 0x04000006;
+    *(u32 *)(packet + 132) = 0x14000008;
+    *(u32 *)(packet + 136) = 0;
+    *(u32 *)(packet + 140) = 0;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardVcGetPacketSize);
+u32 sdfBillBoardVcGetPacketSize(s32 count) {
+    return (count * 0x4c + 0x4bU) & 0xfffffff0;
+}
 
 u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
                   const void *halfAttributes, const void *wordAttributes,
@@ -3466,7 +3589,9 @@ void sdfPadManager(void) {
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadWork);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadChangeMode);
+void sdfPadChangeMode(s32 padIndex, u8 mode) {
+    sdfPadCb[padIndex].requestedMode = mode;
+}
 
 void sdfPadSetAct0(s32 padIndex, u16 strength) {
     sdfPadCb[padIndex].smallMotor = strength;
