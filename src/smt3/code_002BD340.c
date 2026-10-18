@@ -451,12 +451,6 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuInit);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuClose);
 
-INCLUDE_ASM(const s32, "code_002BD340", movie_2C5080);
-
-INCLUDE_ASM(const s32, "code_002BD340", movieWaitSema);
-
-INCLUDE_ASM(const s32, "code_002BD340", release_movieobj2);
-
 INCLUDE_RODATA(const s32, "code_002BD340", D_0054A2D8);
 
 INCLUDE_SDATA(const s32, "code_002BD340", sdfPrintIopFlag);
@@ -646,8 +640,4 @@ INCLUDE_SDATA(const s32, "code_002BD340", D_00551B30);
 INCLUDE_SDATA(const s32, "code_002BD340", D_00551B38);
 
 INCLUDE_SDATA(const s32, "code_002BD340", D_00551B40);
-
-INCLUDE_SDATA(const s32, "code_002BD340", movieStreamSema);
-
-INCLUDE_SDATA(const s32, "code_002BD340", D_00551B4C);
 

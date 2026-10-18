@@ -174,24 +174,6 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_001B0730);
 
 INCLUDE_ASM(const s32, "effect/effEvent", effEveAPP4Randomize);
 
-INCLUDE_ASM(const s32, "effect/effEvent", dds3AllocSplineHandle);
-
-INCLUDE_ASM(const s32, "effect/effEvent", dds3FreeSplineHandle);
-
-INCLUDE_ASM(const s32, "effect/effEvent", dds3_1B09C0);
-
-INCLUDE_ASM(const s32, "effect/effEvent", func_001B0A60);
-
-INCLUDE_ASM(const s32, "effect/effEvent", func_001B0B90);
-
-INCLUDE_ASM(const s32, "effect/effEvent", func_001B0CC0);
-
-INCLUDE_ASM(const s32, "effect/effEvent", func_001B0CD0);
-
-INCLUDE_ASM(const s32, "effect/effEvent", dds3AllocSplinePoints);
-
-INCLUDE_ASM(const s32, "effect/effEvent", dds3BuildSplinePoints);
-
 INCLUDE_RODATA(const s32, "effect/effEvent", D_00534420);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_00534430);

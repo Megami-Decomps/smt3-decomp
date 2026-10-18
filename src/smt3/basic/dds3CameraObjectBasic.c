@@ -1,5 +1,13 @@
 #include "common.h"
 
+INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112370);
+
+INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_001123D0);
+
+INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_00112410);
+
+INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", func_001124F8);
+
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", MakeCamera);
 
 INCLUDE_ASM(const s32, "basic/dds3CameraObjectBasic", dds3GetCameraObjectBaseControlWorkData);

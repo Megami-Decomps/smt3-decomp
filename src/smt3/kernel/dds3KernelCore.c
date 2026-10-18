@@ -724,3 +724,4 @@ INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8A0);
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8A8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", D_0054E8B0);
+

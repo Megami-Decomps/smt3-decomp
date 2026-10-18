@@ -53,15 +53,6 @@ INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ObjectBaseGetPathControl);
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3GetBaseControlWorkData);
 
 INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ObjectBaseSetControlBasicSvs);
-
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112370);
-
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001123D0);
-
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_00112410);
-
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", func_001124F8);
-
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D0);
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D8);
