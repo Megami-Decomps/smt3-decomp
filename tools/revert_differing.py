@@ -22,34 +22,54 @@ BAD = re.compile(
     r"^(?:DIFF|OVER|CONTEXT|PAD|SHARED)(?: (?:jump table|rodata|sdata) of)? (\w+)\b", re.M)
 
 # A function definition's opening line: a name followed by a parameter list,
-# not a call, a control statement or an INCLUDE_ macro.
-OPEN = re.compile(r"^[A-Za-z_][\w \t*]*?\b([A-Za-z_]\w*)\s*\([^;]*\)\s*$")
+# not a call, a control statement or an INCLUDE_ macro. Both brace styles
+# occur in this tree, the opening brace on the same line or on the next.
+OPEN = re.compile(r"^[A-Za-z_][\w \t*]*?\b([A-Za-z_]\w*)\s*\([^;]*\)\s*\{?\s*$")
 KEYWORDS = {"if", "for", "while", "switch", "return", "sizeof", "else", "do"}
 
 
 def spans(text):
-    """Yield (name, start, end) for each top-level function definition."""
+    """Yield (name, start, end) for each top-level function definition.
+
+    Handles both brace styles in this tree and a signature wrapped over
+    several lines: a definition missed here is reverted silently, so the
+    scanner balances the parameter list rather than matching one line.
+    """
     lines = text.split("\n")
     i = 0
     while i < len(lines):
-        m = OPEN.match(lines[i])
-        if m and m.group(1) not in KEYWORDS and i + 1 < len(lines) and lines[i + 1].startswith("{"):
-            start = i
-            # The signature may span several lines above; walk back over them.
-            while start > 0 and lines[start - 1].strip() not in ("", "}") \
-                    and not lines[start - 1].rstrip().endswith((";", "{", "*/")) \
-                    and not lines[start - 1].lstrip().startswith("#"):
-                start -= 1
-            depth, j = 0, i + 1
-            while j < len(lines):
-                depth += lines[j].count("{") - lines[j].count("}")
-                if depth == 0:
-                    break
-                j += 1
-            yield m.group(1), start, j
-            i = j + 1
-        else:
+        line = lines[i]
+        if not line[:1].isalpha() and line[:1] != "_":
             i += 1
+            continue
+        # Join continuation lines until the parameter list closes.
+        head, j = line, i
+        while head.count("(") > head.count(")") and j + 1 < len(lines):
+            j += 1
+            head += " " + lines[j].strip()
+        m = OPEN.match(" ".join(head.split()))
+        if not m or m.group(1) in KEYWORDS:
+            i += 1
+            continue
+        brace_here = head.rstrip().endswith("{")
+        brace_next = j + 1 < len(lines) and lines[j + 1].startswith("{")
+        if not (brace_here or brace_next):
+            i += 1
+            continue
+        start = i
+        # The return type may sit on its own line above the name.
+        while start > 0 and lines[start - 1].strip() not in ("", "}") \
+                and not lines[start - 1].rstrip().endswith((";", "{", "*/")) \
+                and not lines[start - 1].lstrip().startswith("#"):
+            start -= 1
+        depth, k = 0, j if brace_here else j + 1
+        while k < len(lines):
+            depth += lines[k].count("{") - lines[k].count("}")
+            if depth == 0:
+                break
+            k += 1
+        yield m.group(1), start, k
+        i = k + 1
 
 
 def revert(path: Path, dry_run=False) -> list[str]:
