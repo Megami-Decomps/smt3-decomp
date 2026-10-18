@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 
 struct BattleGroupNode;
 struct BattleGroupSlot;
@@ -46,7 +47,12 @@ struct EffPCPDriftEventRow;
 struct EffPCPDriftEventWork;
 struct EffPCPEventParamHead;
 struct EffPCPEventPlace;
+struct EffPCPAnalyzeWork;
+struct EffPCPBlurExpParams;
+struct EffPCPBlurExpWork;
 struct EffPCPFadeWork;
+struct EffPCPFilterExpParams;
+struct EffPCPFilterExpWork;
 struct EffPCPGroupEntry;
 struct EffPCPGroupHead;
 struct EffPCPGroupSet;
@@ -193,7 +199,14 @@ typedef struct EffThunderVectorCell EffThunderVectorCell;
 typedef struct ParCell ParCell;
 typedef struct ParSystem ParSystem;
 typedef struct EffThunderVectorWork EffThunderVectorWork;
+typedef struct EffPCPAnalyzeWork EffPCPAnalyzeWork;
+typedef struct EffPCPFLEACHBlurParams EffPCPFLEACHBlurParams;
+typedef struct EffPCPFLEACHBlurWork EffPCPFLEACHBlurWork;
 typedef struct EffPCPFadeWork EffPCPFadeWork;
+typedef struct EffPCPFilterExpParams EffPCPFilterExpParams;
+typedef struct EffPCPFilterExpWork EffPCPFilterExpWork;
+typedef struct EffPCPBlurExpParams EffPCPBlurExpParams;
+typedef struct EffPCPBlurExpWork EffPCPBlurExpWork;
 typedef struct EffPCPGroupEntry EffPCPGroupEntry;
 typedef struct EffThunderFragmentParams EffThunderFragmentParams;
 typedef struct EffPCPGroupHead EffPCPGroupHead;
@@ -496,6 +509,12 @@ extern struct SdfPoolNode *D_002F69B8[4];
 extern u8 effPCPZiodin01Vec[];
 
 extern s32 BlinkMultiBlurCount;
+
+extern s8 effPCPBufuLight_Start;
+
+extern f32 D_0031FA10[4];
+
+extern f32 D_0031FA20[4];
 
 /*
  * sceVu0UnitMatrix as libvu0 expands it (scratch registers hard-coded by the
@@ -882,6 +901,36 @@ typedef struct {
 /* Both compact-fade lifecycles use the same 0x3C chip allocation. The
  * resource union is selected by the short rectangle or long textured-blur
  * constructor and each path has its own matching release routine. */
+/* The Exp filter/blur inputs are a fade timeline followed by the resource
+ * block that is handed to the renderer unchanged. */
+struct EffPCPFilterExpParams {
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    EffResourceRectDrawParams draw;
+};
+
+struct EffPCPFilterExpWork {
+    EffPCPFilterExpParams params;
+    u32 color;
+    u32 baseColor;
+    s32 frame;
+};
+
+struct EffPCPBlurExpParams {
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    EffBlurQuad source;
+};
+
+struct EffPCPBlurExpWork {
+    EffPCPBlurExpParams params;
+    u32 color;
+    u32 baseColor;
+    s32 frame;
+};
+
 struct EffPCPCompactFadeWork {
     f32 position[4];
     u8 flags;
@@ -971,6 +1020,29 @@ struct EffPCPCompactScatterParams {
 };
 
 typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
+
+struct EffPCPAnalyzeWork {
+    struct SoundMixer *owner;
+    struct EffEventWork *event;
+    f32 scale;
+    u32 color;
+};
+
+/* The FLEACH blur interpolates the two template bodies across the timeline. */
+struct EffPCPFLEACHBlurParams {
+    EffPCPTexturedBlurParams start;
+    EffPCPTexturedBlurParams end;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+};
+
+struct EffPCPFLEACHBlurWork {
+    EffPCPFLEACHBlurParams params;
+    EffBlurTemplate *obj;
+    s32 frame;
+    u32 color;
+};
 
 struct EffPCPCompactTexturedBlurParams {
     EffPCPCompactTimelineParams timeline;
@@ -2245,18 +2317,6 @@ struct MdlCtx {
     f32 objectRadius; /* Propagated to the rebuilt object's inner radius. */
 };
 
-/*
- * 128-bit vector copy in the style of libvu0's sceVu0CopyVector, which the
- * Sony SDK implements as an asm statement (`lq` into a scratch register, `sq`
- * out of it). The PCP effect setters compile to exactly `lq $2,0(src);
- * sq $2,0(dst); jr $31; nop`: plain C u128 copies give `lq; jr; sq` (the sq
- * moves into the jr delay slot). `.set noreorder` keeps ee-as from filling
- * the slot too, as for fsqrtf. The destination is operand 0 so its address is formed first.
- */
-#define PCP_COPY_VECTOR(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
-    : : "r" (dst), "r" (src) : "$2", "memory")
-
 /* RenderWare XYZ axis used by the native SDF matrix builders. */
 struct RwV3d {
     f32 x;
@@ -2264,33 +2324,10 @@ struct RwV3d {
     f32 z;
 };
 
-#define VU0_ADD(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-/* dst.xyz = a.xyz + b.xyz, retaining dst.w. */
-#define VU0_ADD_XYZ(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyz " #dst ", " #a ", " #b "\n\t.set reorder")
-
-/* dst = primary matrix (vf28-vf31) * src: the core of libvu0
- * sceVu0ApplyMatrix, used with the sdf matrix-bank convention. */
-#define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
-    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
-
-/* vf.w = 0 (vmulx.w vf,vf,vf0x) and vf.w = 1 (vmove.w vf,vf0): the w fix-up
- * retail does before packing a colour or storing a point/direction. */
-#define VU0_CLEAR_W(vf) __asm__ volatile ( \
-    ".set noreorder\n\tvmulx.w " #vf ", " #vf ", vf0x\n\t.set reorder")
-
-/* Load the same four quadwords into vf28-vf31 (no store). */
-#define VU0_LOAD_MATRIX(src) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "lqc2 vf28, 0(%0)\n\t" \
-    "lqc2 vf29, 16(%0)\n\t" \
-    "lqc2 vf30, 32(%0)\n\t" \
-    "lqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (src))
+/* vf31.xyz += vf10.xyz, keeping vf31.w: the translation row of the matrix
+ * bank being accumulated in place. */
+#define VU0_ADD_VF31_VF10_XYZ() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder")
 
 /* Load four quadwords into the second matrix bank vf24-vf27 (the right-hand
  * operand of the sdf matrix-multiply routines). */
@@ -2303,47 +2340,9 @@ struct RwV3d {
     ".set reorder" \
     : : "r" (src) : "memory")
 
-/* One quadword between memory and a named VU0 register. The load has no
- * memory clobber; the store does, matching the standalone COP2 asm idiom. */
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-/* Same load when the source asm also barred compiler memory motion. */
-#define VU0_LOAD_VF_MEMORY(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src) : "memory")
-
-#define VU0_MUL(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
-
-/* vf10 = vf10 / |vf10.xyz| (w untouched):
- *   vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w ACC,vf0,vf2y;
- *   vmaddz.w vf2,vf0,vf2z; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q */
-#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
-    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
-    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
-
-/* dst = 3x3 of the primary matrix (vf28-vf30) times src.xyz: a rotation, no
- * translation (the vmaddz form of the apply above). */
-#define VU0_ROTATE_VEC(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
-    "vmaddz.xyzw " #dst ", vf30, " #src "z\n\t.set reorder")
-
-/* Store vf28-vf31 to four quadwords (pairs with VU0_LOAD_MATRIX). */
-#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
-    ".set noreorder\n\t" \
-    "sqc2 vf28, 0(%0)\n\t" \
-    "sqc2 vf29, 16(%0)\n\t" \
-    "sqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t" \
-    ".set reorder" \
-    : : "r" (dst) : "memory")
-
-/* Same store without a compiler memory clobber, for the effect-allocator sites
- * where retail keeps the matrix address CSE'd across the store. */
-#define VU0_STORE_MATRIX_NOCLOBBER(dst) __asm__ volatile ( \
+/* vf28-vf31 out to four quadwords with no memory clobber: retail keeps the
+ * destination address in a register across the store. */
+#define VU0_STORE_MATRIX_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "sqc2 vf28, 0(%0)\n\t" \
     "sqc2 vf29, 16(%0)\n\t" \
@@ -2352,33 +2351,10 @@ struct RwV3d {
     ".set reorder" \
     : : "r" (dst))
 
-/* Same store for existing asm without a compiler memory clobber (retail keeps
- * the destination address CSE'd across it). */
-#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
-    "sqc2 vf31, 48(%0)\n\t.set reorder" \
+/* The same single-quadword store, no memory clobber. */
+#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
     : : "r" (dst))
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
-#define VU0_STORE_VF_TO_MEMORY(vf, lvalue) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", %0\n\t.set reorder" \
-    : "=m" (lvalue) : : "memory")
-
-/* Legacy SDK input-address-only store, for audited original VU pipelines.
- * This is NOT a general memory barrier: even EE GCC 2.96 can reuse stale
- * reads across branches/loops. Prefer VU0_STORE_VF for new code; see
- * docs/thunder-bezier-matching.md before changing a verified caller. */
-#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst))
-
-/* dst = a - b, dst = a + b, dst = a * b on all four components
- * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
-#define VU0_SUB(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
 
 extern void dds3BillboardDraw(BillObj *effect);
 
@@ -2423,6 +2399,18 @@ EffBlurScaleWork *dds3EffectRippleBlurCreate(EffBlurScaleParams *params);
 
 EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *params);
 
+void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *owner);
+
+void dds3EffectDistortionBlurDelete(EffBlurScatterWork *owner);
+
+void dds3EffectRippleBlurDelete(EffBlurScaleWork *owner);
+
+void dds3EffectFilter(EffResourceRectDrawParams *params);
+
+void dds3EffectBlur(EffBlurQuad *quad);
+
+u32 effColorBlend(u32 to, u32 from, f32 amount);
+
 EffNode *dds3EffectCopy(const EffNode *source);
 
 extern EffSpawnParams effPCPShockWave02Param[];
@@ -2435,6 +2423,12 @@ void dds3EffectSetPosition(struct EffNode *node, const void *vector);
 struct BillObj *dds3BillboardGeneral(s32 index);
 
 EffThunderVectorWork *effPCPThunderSpherePolyCreate(EffThunderAlphaParams *parameters);
+
+void effPCPThunderSpherePolyDelete(EffThunderVectorWork *work);
+
+EffThunderAlphaParams *effPCPThunderSpherePolyGetParam(EffThunderVectorWork *work);
+
+void dds3BillboardDelete(struct BillObj *billboard);
 
 extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
 
@@ -2530,12 +2524,33 @@ extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
 
 void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius);
 
+EffPCPBeamWork *effPCPRingPolyExpCreate(EffPCPBeamParams *params);
+
+EffPCPBeamLargeWork *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *params);
+
+void dds3RingPolyExpListDelete(EffPCPBeamNode *node);
+
+EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(EffPCPSpawnRangeParams *params, void *ownerParams);
+
+EffPCPDriftEventWork *effPCPRadiateBEDCreate(EffPCPDriftEventParams *params, void *ownerParams);
+
+EffPCPPairedEventWork *effPCPRadiateTBCreate(
+    EffPCPPairedEventParams *params, void *ownerAParams, void *ownerBParams);
+
+EffPCPAnalyzeWork *effPCPAnalyzeBEDCreate(void *ownerParams);
+
+void effPCPAnalyzeInit(EffPCPAnalyzeWork *work);
+
+EffPCPFLEACHBlurWork *effPCPFLEACHBlurCreate(EffPCPFLEACHBlurParams *params);
+
 void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *source);
 
 void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source);
 
 EffPCPBlockSetWork *effPCPAgiFireballCreate(
-    const EffPCPBlockSetParams *params, void **blocks);
+    const EffPCPBlockSetParams *params, const EffPCPBlockSet *blocks);
+
+EffPCPGroupSet *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data);
 
 extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
@@ -2606,6 +2621,12 @@ void SetRotateMatrixAxis(f32 angle, const RwV3d *axis);
  * then replace vf28-vf31 with the four transformed vectors. */
 void MultMatrixNoArg(void);
 
+void effBTLFieldLightDirectionSet(const f32 *direction);
+
+void effBTLFieldLightAxisSet(const f32 *axis);
+
+void effBTLFieldLightAnimationSet(s32 kind, f32 value);
+
 void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
                               s32 (*allocatePacket)(s32));
 
@@ -2663,18 +2684,18 @@ static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count
 
     for (i = 0; i < count; i++) {
         obj = (u8 *)effPCP_ThunderPolyGetParam(work->handles[i]);
-        VU0_LOAD_VF($vf10, obj + 0x10);
-        VU0_STORE_VF($vf10, &saved[1]);
-        VU0_LOAD_VF($vf11, work);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF($vf10, obj + 0x10);
-        VU0_LOAD_VF($vf10, obj);
-        VU0_STORE_VF($vf10, &saved[0]);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF($vf10, obj);
+        VU0_LOAD_VF10(obj + 0x10);
+        VU0_STORE_VF10(&saved[1]);
+        VU0_LOAD_VF11(work);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(obj + 0x10);
+        VU0_LOAD_VF10(obj);
+        VU0_STORE_VF10(&saved[0]);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(obj);
         effPCP_ThunderPolyDraw(work->handles[i]);
-        PCP_COPY_VECTOR(obj, &saved[0]);
-        PCP_COPY_VECTOR(obj + 0x10, &saved[1]);
+        PS2_COPY_QUAD(obj, &saved[0]);
+        PS2_COPY_QUAD(obj + 0x10, &saved[1]);
     }
 }
 
@@ -2689,7 +2710,10 @@ EffBillboardSetWork *effPCPSparkleSphereCreate(EffBillboardSetParams *params) {
     return billboard;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereDelete);
+void effPCPSparkleSphereDelete(EffBillboardSetWork *work) {
+    dds3BillboardDelete(work->handle);
+    sdfChipFreeDirect(work);
+}
 
 void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     f32 pos[4];
@@ -2700,21 +2724,21 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     u32 color;
     s32 i;
 
-    VU0_LOAD_VF($vf10, aViewEye);
-    VU0_LOAD_VF($vf11, aViewTarget);
-    VU0_SUB(vf10, vf10, vf11);
+    VU0_LOAD_VF10(aViewEye);
+    VU0_LOAD_VF11(aViewTarget);
+    VU0_SUB_VF10_VF11();
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF($vf10, dir);
+    VU0_STORE_VF10(dir);
     handle = work->handle;
     size[0] = work->scale;
     size[1] = work->scale;
     size[2] = work->scale;
-    VU0_LOAD_VF($vf10, size);
-    VU0_LOAD_VF($vf11, dir);
-    VU0_MUL(vf10, vf10, vf11);
-    VU0_LOAD_VF($vf11, work);
-    VU0_ADD(vf10, vf10, vf11);
-    VU0_STORE_VF($vf10, pos);
+    VU0_LOAD_VF10(size);
+    VU0_LOAD_VF11(dir);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(work);
+    VU0_ADD_VF10_VF11();
+    VU0_STORE_VF10(pos);
     dds3BillboardSetPosition(handle, pos);
     scale = work->scale;
     color = 0x10808080;
@@ -2727,17 +2751,23 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereSetPosition);
+void effPCPSparkleSphereSetPosition(EffBillboardSetWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereSetColor);
+void effPCPSparkleSphereSetColor(EffBillboardSetWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereSetArea);
+void effPCPSparkleSphereSetArea(EffBillboardSetWork *work, f32 area) {
+    work->scale = area;
+}
 
 void effPCPHama01PartInit(EffPCPTwinWork *work, s32 slotIndex) {
     u128 mtx[4];
 
     SetRotateMatrixY((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 6.283185f);
-    VU0_STORE_MATRIX_NOCLOBBER(mtx);
+    VU0_STORE_MATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][0], mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][1], mtx);
     mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][0]), 0, 0);
@@ -2827,7 +2857,7 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
         }
         obj[0] = dds3EffectPartGetHandle(work->pair[slotIndex][0]);
         obj[1] = dds3EffectPartGetHandle(work->pair[slotIndex][1]);
-        VU0_LOAD_VF(vf10, work);
+        VU0_LOAD_VF10(work);
         mdlSetPosition(obj[0]);
         dds3EffectPartSetScale(work->pair[slotIndex][0], work->scale * 1.5f);
         dds3EffectPartSetScale(work->pair[slotIndex][1], 1.75f);
@@ -2835,7 +2865,7 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
         mdlLink(obj[0], D_002F69B8);
         sdfModelGetMarkPos(obj[0]->inner, 1);
         posp = &pos;
-        VU0_STORE_VF_UNCLOBBERED(vf10, posp);
+        VU0_STORE_VF10_NOMEM(posp);
         mdlSetPosition(obj[1]);
         mdlLink(obj[1], D_002F69B8);
         if (work->frame > 0x18) {
@@ -2846,17 +2876,23 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
     work->frame++;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01SetPosition);
+void effPCPHama01SetPosition(EffPCPTwinWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01SetScale);
+void effPCPHama01SetScale(EffPCPTwinWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01SetColor);
+void effPCPHama01SetColor(EffPCPTwinWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
     SetRotateMatrixY((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 6.283185f);
-    VU0_STORE_MATRIX_NOCLOBBER(mtx);
+    VU0_STORE_MATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2], mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2 + 1], mtx);
     mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
@@ -2935,7 +2971,7 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
             pos[0] = work->position[0];
             pos[2] = work->position[2];
             pos[1] = (work->position[1] - work->verticalOffset[i] + 100.0f) * work->scale;
-            VU0_LOAD_VF(vf10, pos);
+            VU0_LOAD_VF10(pos);
             mdlSetPosition(obj[0]);
             dds3EffectPartSetScale(work->handle[i * 2], work->scale * 1.5f);
             dds3EffectPartSetScale(work->handle[i * 2 + 1], 1.5f);
@@ -2948,11 +2984,17 @@ void effPCPHama02Draw(EffPCPStaggered *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02SetPosition);
+void effPCPHama02SetPosition(EffPCPStaggered *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02SetScale);
+void effPCPHama02SetScale(EffPCPStaggered *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02SetColor);
+void effPCPHama02SetColor(EffPCPStaggered *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPHamaonPartInit(EffPCPCrossWork *work, u32 i, u32 j) {
     u128 mtx[4];
@@ -3044,7 +3086,7 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     s32 j;
 
     anchor = dds3EffectPartGetHandle(work->base);
-    VU0_LOAD_VF(vf10, work);
+    VU0_LOAD_VF10(work);
     mdlSetPosition(anchor);
     dds3EffectPartSetScale(work->base, work->scale);
     mdlLink(anchor, D_002F69B8);
@@ -3063,11 +3105,17 @@ void effPCPHamaonDraw(EffPCPCrossWork *work) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonSetPosition);
+void effPCPHamaonSetPosition(EffPCPCrossWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonSetScale);
+void effPCPHamaonSetScale(EffPCPCrossWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonSetColor);
+void effPCPHamaonSetColor(EffPCPCrossWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index) {
 
@@ -3144,23 +3192,29 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
         } else {
             obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
             obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
-            VU0_LOAD_VF_MEMORY(vf10, work);
+            VU0_LOAD_VF10(work);
             mdlSetPosition(obj[0]);
             mdlSetColor(obj[1], work->color);
             mdlLink(obj[0], D_002F69B8);
             sdfModelGetMarkPos(obj[0]->inner, 1);
-            VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
+            VU0_STORE_VF10_NOMEM(&vec);
             mdlSetPosition(obj[1]);
             mdlLink(obj[1], D_002F69B8);
         }
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01SetPosition);
+void effPCPMHanma01SetPosition(EffPCPDelayedPairs *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01SetScale);
+void effPCPMHanma01SetScale(EffPCPDelayedPairs *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01SetColor);
+void effPCPMHanma01SetColor(EffPCPDelayedPairs *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPMudoPartInit(EffPCPChargeWork *work) {
     work->historyCount = 0;
@@ -3183,7 +3237,11 @@ EffPCPChargeWork *effPCPMudoCreate(void *source) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoDelete);
+void effPCPMudoDelete(EffPCPChargeWork *work) {
+    dds3EffectPartDelete(work->primaryHandle);
+    dds3EffectPartDelete(work->secondaryHandle);
+    sdfMemFreeDirect(work->allocationHandle);
+}
 
 EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
     SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
@@ -3203,11 +3261,17 @@ EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoSetPosition);
+void effPCPMudoSetPosition(EffPCPChargeWork *work, const void *source) {
+    PS2_COPY_QUAD(work->vectorWords, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoSetScale);
+void effPCPMudoSetScale(EffPCPChargeWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoSetColor);
+void effPCPMudoSetColor(EffPCPChargeWork *work, u32 color) {
+    work->color = color;
+}
 
 EffPCPSpawnOnceWork *effPCPHwave01Create(void *src) {
     EffPCPSpawnOnceWork *dst;
@@ -3224,7 +3288,11 @@ EffPCPSpawnOnceWork *effPCPHwave01Create(void *src) {
     return dst;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01Delete);
+void effPCPHwave01Delete(EffPCPSpawnOnceWork *work) {
+    dds3EffectPartDelete(work->primaryHandle);
+    dds3EffectPartDelete(work->secondaryHandle);
+    sdfChipFreeDirect(work);
+}
 
 EffPCPSpawnOnceWork *effPCPHwave01Copy(EffPCPSpawnOnceWork *src) {
     EffPCPSpawnOnceWork *dst;
@@ -3246,19 +3314,23 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
     u128 vec;
 
     obj = dds3EffectPartGetHandle(work->primaryHandle);
-    VU0_LOAD_VF_MEMORY(vf10, work->vector);
+    VU0_LOAD_VF10(work->vector);
     mdlSetPosition(obj);
     dds3EffectPartSetColor(work->secondaryHandle, work->color);
     mdlLink(obj, D_002F69B8);
     sdfModelGetMarkPos(obj->inner, 1);
-    VU0_STORE_VF_TO_MEMORY(vf10, vec);
+    VU0_STORE_VF10_TO(vec);
     dds3EffectPartSetPosition(work->secondaryHandle, &vec);
     dds3EffectPartDraw(work->secondaryHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01SetPosition);
+void effPCPHwave01SetPosition(EffPCPSpawnOnceWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01SetColor);
+void effPCPHwave01SetColor(EffPCPSpawnOnceWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPZiodin01Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3292,19 +3364,19 @@ void effPCPZiodin01Init(EffPCPThunderGroup *group) {
         dir[0] = sinv;
         dir[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f + 2.0f;
         dir[2] = cosv;
-        VU0_LOAD_VF($vf10, dir);
+        VU0_LOAD_VF10(dir);
         VU0_NORMALIZE_VF10();
-        VU0_STORE_VF($vf10, dir);
+        VU0_STORE_VF10(dir);
         reach = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 350.0f;
         scale[2] = reach;
         scale[0] = reach;
         scale[1] = -reach;
-        VU0_LOAD_VF($vf10, dir);
-        VU0_LOAD_VF($vf11, scale);
-        VU0_MUL(vf10, vf10, vf11);
-        VU0_LOAD_VF($vf11, effPCPZiodin01Vec);
-        VU0_ADD(vf10, vf10, vf11);
-        VU0_STORE_VF($vf10, D_0031F590);
+        VU0_LOAD_VF10(dir);
+        VU0_LOAD_VF11(scale);
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(effPCPZiodin01Vec);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(D_0031F590);
         if (scale[0] < 250.0f) {
             speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
             life = dds3GetRandA((EffRandState *)dds3EffectBase) % 5 + 5;
@@ -3328,7 +3400,15 @@ void *effPCPZiodin01Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01Delete);
+void effPCPZiodin01Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 11; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPZiodin01Copy(void) {
     void *work;
@@ -3342,11 +3422,17 @@ void effPCPZiodin01Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01SetPosition);
+void effPCPZiodin01SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01SetScale);
+void effPCPZiodin01SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01SetColor);
+void effPCPZiodin01SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPZiodin02Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3382,9 +3468,9 @@ void effPCPZiodin02Init(EffPCPThunderGroup *group) {
         effPCPZiodin02Param->pos[0] = 0;
         effPCPZiodin02Param->pos[2] = 0;
         effPCPZiodin02Param->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPZiodin02Param->pos);
-                VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effPCPZiodin02Param->pos);
+        VU0_LOAD_VF10(effPCPZiodin02Param->pos);
+                VU0_ROTATE_VF10();
+        VU0_STORE_VF10(effPCPZiodin02Param->pos);
         effPCPZiodin02Param->pos[0] += effPCPZiodin02Param->vel[0];
         effPCPZiodin02Param->pos[2] += effPCPZiodin02Param->vel[2];
         if (height < 300.0f) {
@@ -3409,7 +3495,15 @@ void *effPCPZiodin02Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02Delete);
+void effPCPZiodin02Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 11; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPZiodin02Copy(void) {
     void *work;
@@ -3423,11 +3517,17 @@ void effPCPZiodin02Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02SetPosition);
+void effPCPZiodin02SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02SetScale);
+void effPCPZiodin02SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02SetColor);
+void effPCPZiodin02SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPZiodin03Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3461,9 +3561,9 @@ void effPCPZiodin03Init(EffPCPThunderGroup *group) {
         effPCPZiodin03Param->pos[0] = 0;
         effPCPZiodin03Param->pos[2] = 0;
         effPCPZiodin03Param->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPZiodin03Param->pos);
-                VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effPCPZiodin03Param->pos);
+        VU0_LOAD_VF10(effPCPZiodin03Param->pos);
+                VU0_ROTATE_VF10();
+        VU0_STORE_VF10(effPCPZiodin03Param->pos);
         effPCPZiodin03Param->pos[0] += effPCPZiodin03Param->vel[0];
         effPCPZiodin03Param->pos[2] += effPCPZiodin03Param->vel[2];
         if (height < 300.0f) {
@@ -3488,7 +3588,15 @@ void *effPCPZiodin03Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03Delete);
+void effPCPZiodin03Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 29; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPZiodin03Copy(void) {
     void *work;
@@ -3502,11 +3610,17 @@ void effPCPZiodin03Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 30);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03SetPosition);
+void effPCPZiodin03SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03SetScale);
+void effPCPZiodin03SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03SetColor);
+void effPCPZiodin03SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPZiodin04Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3542,9 +3656,9 @@ void effPCPZiodin04Init(EffPCPThunderGroup *group) {
         effPCPZiodin04Param->pos[0] = 0;
         effPCPZiodin04Param->pos[2] = 0;
         effPCPZiodin04Param->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPZiodin04Param->pos);
-                VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effPCPZiodin04Param->pos);
+        VU0_LOAD_VF10(effPCPZiodin04Param->pos);
+                VU0_ROTATE_VF10();
+        VU0_STORE_VF10(effPCPZiodin04Param->pos);
         effPCPZiodin04Param->pos[0] += effPCPZiodin04Param->vel[0];
         effPCPZiodin04Param->pos[2] += effPCPZiodin04Param->vel[2];
         if (height < 300.0f) {
@@ -3569,7 +3683,15 @@ void *effPCPZiodin04Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04Delete);
+void effPCPZiodin04Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 11; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPZiodin04Copy(void) {
     void *work;
@@ -3583,11 +3705,17 @@ void effPCPZiodin04Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04SetPosition);
+void effPCPZiodin04SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04SetScale);
+void effPCPZiodin04SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04SetColor);
+void effPCPZiodin04SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPMZiodin01Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3621,7 +3749,15 @@ void *effPCPMZiodin01Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01Delete);
+void effPCPMZiodin01Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 11; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPMZiodin01Copy(void) {
     void *work;
@@ -3635,11 +3771,17 @@ void effPCPMZiodin01Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 12);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01SetPosition);
+void effPCPMZiodin01SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01SetScale);
+void effPCPMZiodin01SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01SetColor);
+void effPCPMZiodin01SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPMZiodin02Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3660,9 +3802,9 @@ void effPCPMZiodin02Init(EffPCPThunderGroup *group) {
         SetRotateMatrixX((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         SetRotateMatrixZ_B((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
         MultMatrixRevNoArg();
-        VU0_LOAD_VF($vf10, params->pos);
-                VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, params->pos);
+        VU0_LOAD_VF10(params->pos);
+                VU0_ROTATE_VF10();
+        VU0_STORE_VF10(params->pos);
         params->pos[0] += params->vel[0];
         params->pos[2] += params->vel[2];
         group->handles[i] = effPCP_ThunderPolyCreate(params);
@@ -3677,7 +3819,15 @@ void *effPCPMZiodin02Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02Delete);
+void effPCPMZiodin02Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 7; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPMZiodin02Copy(void) {
     void *work;
@@ -3691,11 +3841,17 @@ void effPCPMZiodin02Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 8);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02SetPosition);
+void effPCPMZiodin02SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02SetScale);
+void effPCPMZiodin02SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02SetColor);
+void effPCPMZiodin02SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPShockWave01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
@@ -3713,7 +3869,10 @@ void *effPCPShockWave01Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Delete);
+void effPCPShockWave01Delete(EffPCPFadeWork *work) {
+    effPCPThunderSpherePolyDelete(work->handle);
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPShockWave01Copy(void) {
     void *work;
@@ -3725,11 +3884,17 @@ void *effPCPShockWave01Copy(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01SetPosition);
+void effPCPShockWave01SetPosition(EffPCPFadeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01SetScale);
+void effPCPShockWave01SetScale(EffPCPFadeWork *work, f32 scale) {
+    work->unk10 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01SetColor);
+void effPCPShockWave01SetColor(EffPCPFadeWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPShockWave02Init(EffPCPThunderGroup *group) {
     s32 i;
@@ -3763,9 +3928,9 @@ void effPCPShockWave02Init(EffPCPThunderGroup *group) {
         effPCPShockWave02Param->pos[0] = 0;
         effPCPShockWave02Param->pos[2] = 0;
         effPCPShockWave02Param->pos[1] = -height;
-        VU0_LOAD_VF($vf10, effPCPShockWave02Param->pos);
-                VU0_ROTATE_VEC(vf10, vf10);
-        VU0_STORE_VF($vf10, effPCPShockWave02Param->pos);
+        VU0_LOAD_VF10(effPCPShockWave02Param->pos);
+                VU0_ROTATE_VF10();
+        VU0_STORE_VF10(effPCPShockWave02Param->pos);
         effPCPShockWave02Param->pos[0] += effPCPShockWave02Param->vel[0];
         effPCPShockWave02Param->pos[2] += effPCPShockWave02Param->vel[2];
         if (height < 300.0f) {
@@ -3790,7 +3955,15 @@ void *effPCPShockWave02Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02Delete);
+void effPCPShockWave02Delete(EffPCPThunderGroup *work) {
+    EffThunderFragmentWork **handle = work->handles;
+    s32 remaining;
+
+    for (remaining = 29; remaining >= 0; remaining--) {
+        effPCP_ThunderPolyDelete(*handle++);
+    }
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPShockWave02Copy(void) {
     void *work;
@@ -3804,11 +3977,17 @@ void effPCPShockWave02Draw(EffPCPThunderGroup *work) {
     effPcpShiftThunderHandles(work, 30);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02SetPosition);
+void effPCPShockWave02SetPosition(EffPCPThunderGroup *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02SetScale);
+void effPCPShockWave02SetScale(EffPCPThunderGroup *work, f32 scale) {
+    work->unk14 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02SetColor);
+void effPCPShockWave02SetColor(EffPCPThunderGroup *work, u32 color) {
+    work->unk18 = color;
+}
 
 void effPCPHouden01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
@@ -3826,7 +4005,10 @@ void *effPCPHouden01Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Delete);
+void effPCPHouden01Delete(EffPCPFadeWork *work) {
+    effPCPThunderSpherePolyDelete(work->handle);
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPHouden01Copy(void) {
     void *work;
@@ -3838,11 +4020,17 @@ void *effPCPHouden01Copy(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01SetPosition);
+void effPCPHouden01SetPosition(EffPCPFadeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01SetScale);
+void effPCPHouden01SetScale(EffPCPFadeWork *work, f32 scale) {
+    work->unk10 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01SetColor);
+void effPCPHouden01SetColor(EffPCPFadeWork *work, u32 color) {
+    work->color = color;
+}
 
 EffPCPSharedTrailRef *effPCPBlinkMultiBlurCreate(EffPCPTrailParams *params) {
     EffPCPSharedTrailRef *ref = sdfChipAllocDirect(sizeof(*ref));
@@ -3881,11 +4069,17 @@ void effPCPBlinkMultiBlurDelete(EffPCPSharedTrailRef *work)
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurSetPosition);
+void effPCPBlinkMultiBlurSetPosition(EffPCPSharedTrailRef *work, const void *source) {
+    PS2_COPY_QUAD(pBlinkMultiBlurBase, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurSetColor);
+void effPCPBlinkMultiBlurSetColor(EffPCPSharedTrailRef *work, u32 color) {
+    pBlinkMultiBlurBase->flags = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurSetArea);
+void effPCPBlinkMultiBlurSetArea(EffPCPSharedTrailRef *work, f32 area) {
+    pBlinkMultiBlurBase->sizeInput = area;
+}
 
 EffPCPTrailWork *effPCPMultiBlurExpCreate(EffPCPTrailParams *params) {
     EffPCPTrailWork *work = sdfChipAllocDirect(sizeof(EffPCPTrailWork));
@@ -3906,16 +4100,19 @@ EffPCPTrailWork *effPCPMultiBlurExpCreate(EffPCPTrailParams *params) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpDelete);
+void effPCPMultiBlurExpDelete(EffPCPTrailWork *work) {
+    dds3EffectPartialMultiBlurDelete(work->obj);
+    sdfChipFreeDirect(work);
+}
 
 void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
     EffBlurTemplate *obj;
     f32 pos[4];
 
     obj = work->obj;
-    VU0_LOAD_VF($vf10, work->pos);
+    VU0_LOAD_VF10(work->pos);
     obj->body.extent = (s32)((f32)effPCPBlurScreenOffset(work->sizeInput) * work->scale);
-    VU0_STORE_VF($vf10, pos);
+    VU0_STORE_VF10(pos);
     obj->body.source.position[0] = (s32)pos[0] - 0x800;
     obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
     if (obj->body.extent < work->minSize) {
@@ -3931,11 +4128,17 @@ void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
     dds3EffectPartialMultiBlurDraw(obj);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpSetPosition);
+void effPCPMultiBlurExpSetPosition(EffPCPTrailWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpSetColor);
+void effPCPMultiBlurExpSetColor(EffPCPTrailWork *work, u32 color) {
+    work->flags = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpSetArea);
+void effPCPMultiBlurExpSetArea(EffPCPTrailWork *work, f32 area) {
+    work->sizeInput = area;
+}
 
 EffPCPCompactFadeWork *effPCPMultiFilterExpCreate(EffPCPCompactRectParams *params) {
     EffPCPCompactFadeWork *work;
@@ -3954,7 +4157,9 @@ EffPCPCompactFadeWork *effPCPMultiFilterExpCreate(EffPCPCompactRectParams *param
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpCreatePCF);
+EffPCPCompactFadeWork *effPCPMultiFilterExpCreatePCF(void *data) {
+    return effPCPMultiFilterExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
 void effPCPMultiFilterExpCopy(EffPCPCompactFadeWork *work) {
     EffPCPCompactRectParams params;
@@ -3969,15 +4174,24 @@ void effPCPMultiFilterExpCopy(EffPCPCompactFadeWork *work) {
     effPCPMultiFilterExpCreate(&params);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpDelete);
+void effPCPMultiFilterExpDelete(EffPCPCompactFadeWork *work) {
+    dds3EffectPartialMultiFilterDelete(work->resource.rectangle);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpSetPosition);
+void effPCPMultiFilterExpSetPosition(EffPCPCompactFadeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpSetColor);
+void effPCPMultiFilterExpSetColor(EffPCPCompactFadeWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpSetArea);
+void effPCPMultiFilterExpSetArea(EffPCPCompactFadeWork *work, f32 area) {
+    work->unk34 = area;
+}
 
 EffPCPCompactFadeWork *effPCPMultiBlurExp2Create(EffPCPCompactTexturedBlurParams *params) {
     EffPCPCompactFadeWork *work;
@@ -3996,7 +4210,9 @@ EffPCPCompactFadeWork *effPCPMultiBlurExp2Create(EffPCPCompactTexturedBlurParams
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2CreatePCF);
+EffPCPCompactFadeWork *effPCPMultiBlurExp2CreatePCF(void *data) {
+    return effPCPMultiBlurExp2Create(dds3EffectPCPDataGetData(data, 0));
+}
 
 void effPCPMultiBlurExp2Copy(EffPCPCompactFadeWork *work) {
     EffPCPCompactTexturedBlurParams params;
@@ -4011,39 +4227,134 @@ void effPCPMultiBlurExp2Copy(EffPCPCompactFadeWork *work) {
     effPCPMultiBlurExp2Create(&params);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2Delete);
+void effPCPMultiBlurExp2Delete(EffPCPCompactFadeWork *work) {
+    dds3EffectPartialMultiBlurDelete(work->resource.blur);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2SetPosition);
+void effPCPMultiBlurExp2SetPosition(EffPCPCompactFadeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2SetColor);
+void effPCPMultiBlurExp2SetColor(EffPCPCompactFadeWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2SetArea);
+void effPCPMultiBlurExp2SetArea(EffPCPCompactFadeWork *work, f32 area) {
+    work->unk34 = area;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFilterExpCreate);
+EffPCPFilterExpWork *effPCPFilterExpCreate(EffPCPFilterExpParams *params) {
+    EffPCPFilterExpWork *work = sdfChipAllocDirect(sizeof(EffPCPFilterExpWork));
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFilterExpCreatePCF);
+    work->params = *params;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->baseColor = params->draw.rgba;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFilterExpCopy);
+EffPCPFilterExpWork *effPCPFilterExpCreatePCF(void *data) {
+    return effPCPFilterExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFilterExpDelete);
+EffPCPFilterExpWork *effPCPFilterExpCopy(EffPCPFilterExpWork *work) {
+    return effPCPFilterExpCreate(&work->params);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFilterExpDraw);
+void effPCPFilterExpDelete(EffPCPFilterExpWork *work) {
+    sdfChipFreeDirect(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFilterExpSetColor);
+void effPCPFilterExpDraw(EffPCPFilterExpWork *work) {
+    if (work->frame <= work->params.duration) {
+        s32 fadeIn = work->params.fadeIn;
+        s32 fadeOut = work->params.fadeOut;
+        s32 remaining;
+        f32 alpha;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpCreate);
+        work->params.draw.bounds.left = 0;
+        work->params.draw.bounds.top = 0;
+        work->params.draw.bounds.right = 512;
+        work->params.draw.bounds.bottom = 448;
+        if (work->frame < fadeIn && fadeIn != 0) {
+            alpha = (f32)work->frame / (f32)fadeIn;
+        } else {
+            remaining = work->params.duration - work->frame;
+            if (remaining <= fadeOut && fadeOut != 0) {
+                alpha = (f32)remaining / (f32)fadeOut;
+            } else {
+                alpha = 1.0f;
+            }
+        }
+        work->params.draw.rgba = effMagaCylinderCalcColor(
+            effColorBlend(work->color & 0xFFFFFF, work->color, alpha), work->baseColor);
+        dds3EffectFilter(&work->params.draw);
+        work->frame++;
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpCreatePCF);
+void effPCPFilterExpSetColor(EffPCPFilterExpWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpCopy);
+EffPCPBlurExpWork *effPCPBlurExpCreate(EffPCPBlurExpParams *params) {
+    EffPCPBlurExpWork *work = sdfChipAllocDirect(sizeof(EffPCPBlurExpWork));
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpDelete);
+    work->params = *params;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->baseColor = params->source.color;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpDraw);
+EffPCPBlurExpWork *effPCPBlurExpCreatePCF(void *data) {
+    return effPCPBlurExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpSetColor);
+EffPCPBlurExpWork *effPCPBlurExpCopy(EffPCPBlurExpWork *work) {
+    return effPCPBlurExpCreate(&work->params);
+}
+
+void effPCPBlurExpDelete(EffPCPBlurExpWork *work) {
+    sdfChipFreeDirect(work);
+}
+
+void effPCPBlurExpDraw(EffPCPBlurExpWork *work) {
+    if (work->frame <= work->params.duration) {
+        s32 fadeIn = work->params.fadeIn;
+        s32 fadeOut = work->params.fadeOut;
+        s32 remaining;
+        f32 alpha;
+
+        work->params.source.position[0] = 0;
+        work->params.source.position[1] = 0;
+        work->params.source.corners[0][0] = 0;
+        work->params.source.corners[0][1] = 0;
+        work->params.source.corners[1][0] = 512;
+        work->params.source.corners[1][1] = 448;
+        if (work->frame < fadeIn && fadeIn != 0) {
+            alpha = (f32)work->frame / (f32)fadeIn;
+        } else {
+            remaining = work->params.duration - work->frame;
+            if (remaining <= fadeOut && fadeOut != 0) {
+                alpha = (f32)remaining / (f32)fadeOut;
+            } else {
+                alpha = 1.0f;
+            }
+        }
+        work->params.source.color = effMagaCylinderCalcColor(
+            effColorBlend(work->color & 0xFFFFFF, work->color, alpha), work->baseColor);
+        dds3EffectBlur(&work->params.source);
+        work->frame++;
+    }
+}
+
+void effPCPBlurExpSetColor(EffPCPBlurExpWork *work, u32 color) {
+    work->color = color;
+}
 
 EffPCPCompactWork *effPCPDistortionBlurExpCreate(EffPCPCompactScatterParams *params) {
     EffPCPCompactWork *work;
@@ -4062,7 +4373,9 @@ EffPCPCompactWork *effPCPDistortionBlurExpCreate(EffPCPCompactScatterParams *par
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpCreatePCF);
+EffPCPCompactWork *effPCPDistortionBlurExpCreatePCF(void *data) {
+    return effPCPDistortionBlurExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
 void effPCPDistortionBlurExpCopy(EffPCPCompactWork *work) {
     EffPCPCompactScatterParams params;
@@ -4077,13 +4390,20 @@ void effPCPDistortionBlurExpCopy(EffPCPCompactWork *work) {
     effPCPDistortionBlurExpCreate(&params);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpDelete);
+void effPCPDistortionBlurExpDelete(EffPCPCompactWork *work) {
+    dds3EffectDistortionBlurDelete(work->resource.scatter);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpSetPosition);
+void effPCPDistortionBlurExpSetPosition(EffPCPCompactWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpSetColor);
+void effPCPDistortionBlurExpSetColor(EffPCPCompactWork *work, u32 color) {
+    work->color = color;
+}
 
 EffPCPCompactWork *effPCPRippleBlurExpCreate(EffPCPCompactScaleParams *params) {
     EffPCPCompactWork *work;
@@ -4102,7 +4422,9 @@ EffPCPCompactWork *effPCPRippleBlurExpCreate(EffPCPCompactScaleParams *params) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpCreatePCF);
+EffPCPCompactWork *effPCPRippleBlurExpCreatePCF(void *data) {
+    return effPCPRippleBlurExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
 void effPCPRippleBlurExpCopy(EffPCPCompactWork *work) {
     EffPCPCompactScaleParams params;
@@ -4117,13 +4439,20 @@ void effPCPRippleBlurExpCopy(EffPCPCompactWork *work) {
     effPCPRippleBlurExpCreate(&params);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpDelete);
+void effPCPRippleBlurExpDelete(EffPCPCompactWork *work) {
+    dds3EffectRippleBlurDelete(work->resource.scale);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpSetPosition);
+void effPCPRippleBlurExpSetPosition(EffPCPCompactWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpSetColor);
+void effPCPRippleBlurExpSetColor(EffPCPCompactWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPMegidora01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
@@ -4141,7 +4470,10 @@ void *effPCPMegidora01Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Delete);
+void effPCPMegidora01Delete(EffPCPFadeWork *work) {
+    effPCPThunderSpherePolyDelete(work->handle);
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPMegidora01Copy(void) {
     void *work;
@@ -4153,11 +4485,17 @@ void *effPCPMegidora01Copy(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01SetPosition);
+void effPCPMegidora01SetPosition(EffPCPFadeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01SetScale);
+void effPCPMegidora01SetScale(EffPCPFadeWork *work, f32 scale) {
+    work->unk10 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01SetColor);
+void effPCPMegidora01SetColor(EffPCPFadeWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPMegidoraon01Init(EffPCPFadeWork *work) {
     EffThunderVectorWork *handle;
@@ -4175,7 +4513,10 @@ void *effPCPMegidoraon01Create(void) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Delete);
+void effPCPMegidoraon01Delete(EffPCPFadeWork *work) {
+    effPCPThunderSpherePolyDelete(work->handle);
+    sdfChipFreeDirect(work);
+}
 
 void *effPCPMegidoraon01Copy(void) {
     void *work;
@@ -4187,15 +4528,25 @@ void *effPCPMegidoraon01Copy(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01SetPosition);
+void effPCPMegidoraon01SetPosition(EffPCPFadeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01SetScale);
+void effPCPMegidoraon01SetScale(EffPCPFadeWork *work, f32 scale) {
+    work->unk10 = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01SetColor);
+void effPCPMegidoraon01SetColor(EffPCPFadeWork *work, u32 color) {
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathCreatePCF);
+EffPCPSpanWork *effPCPBreathCreatePCF(void *data) {
+    void *params = dds3EffectPCPDataGetData(data, 0);
+
+    return effPCPBreathCreate(params, dds3EffectPCPDataGetData(data, 1));
+}
 
 EffPCPSpanWork *effPCPBreathCopy(EffPCPSpanWork *work) {
     EffPCPSpanWork *child;
@@ -4207,15 +4558,30 @@ EffPCPSpanWork *effPCPBreathCopy(EffPCPSpanWork *work) {
     return child;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathDelete);
+void effPCPBreathDelete(EffPCPSpanWork *work) {
+    if (work->optionalHandle != NULL) {
+        dds3EffectDelete(work->optionalHandle);
+    }
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathSetPosition);
+void effPCPBreathSetPosition(EffPCPSpanWork *work, const void *source) {
+    PS2_COPY_QUAD(work->params.anchor, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathSetColor);
+void effPCPBreathSetColor(EffPCPSpanWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathSetRotateMatrix);
+/* vu0 routine: turn the source matrix by half a turn around Y */
+void effPCPBreathSetRotateMatrix(EffPCPSpanWork *work, const void *source) {
+    SetRotateMatrixY(3.14159265f);
+    VU0_LOAD_MATRIX_B(source);
+    MultMatrixNoArg();
+    VU0_STORE_MATRIX(work->matrix);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireCreate);
 
@@ -4266,16 +4632,16 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
     for (group = 0; group < 3; group++) {
         s32 start = work->head.groupStartFrame[group];
         if (frame >= start) {
-            VU0_LOAD_VF(vf11, work->head.origin);
+            VU0_LOAD_VF11(work->head.origin);
             VU0_LOAD_MATRIX(basis);
             position[0] = work->head.offset[group][0];
             position[1] = work->head.offset[group][1];
             position[2] = 0;
-            VU0_LOAD_VF_MEMORY(vf10, position);
-            VU0_CLEAR_W(vf10);
-            VU0_APPLY_MATRIX(vf10, vf10);
-            VU0_ADD(vf10, vf10, vf11);
-            VU0_STORE_VF(vf10, position);
+            VU0_LOAD_VF10(position);
+            VU0_CLEAR_VF10_W();
+            VU0_APPLY_MATRIX_VF10();
+            VU0_ADD_VF10_VF11();
+            VU0_STORE_VF10(position);
             for (handleIndex = 0; handleIndex < 7; handleIndex++) {
                 if (frame >= (s32)((u32)work->head.handleDelay[handleIndex] + (u32)start)) {
                     dds3EffectSetRGBA((struct EffNode *)work->handles[group * 7 + handleIndex], color);
@@ -4288,9 +4654,13 @@ void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
     work->frame = (s32)((u32)work->frame + 1);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireSetPosition);
+void effPCPAgiraoFireSetPosition(EffPCPTripleWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireSetColor);
+void effPCPAgiraoFireSetColor(EffPCPTripleWork *work, u32 color) {
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreate);
 
@@ -4349,11 +4719,19 @@ void effPCPAgiFireballDelete(EffPCPBlockSetWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSetPosition);
+void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source) {
+    PS2_COPY_QUAD(work->params.position, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSetColor);
+void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->matrix);
+}
 
 EffPCPBlockSetWork *effPCPAgiFireballSpCreatePCF(void *parameterTable) {
     EffPCPBlockSetWork *work;
@@ -4492,7 +4870,10 @@ EffPCPSpinWork *effPCPBufuIceCopy(EffPCPSpinWork *src) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceDelete);
+void effPCPBufuIceDelete(EffPCPSpinWork *work) {
+    dds3EffectPartDelete(work->handle0);
+    sdfChipFreeDirect(work);
+}
 
 void effPCPBufuIceDraw(EffPCPSpinWork *work) {
     EffParamWork *handle = work->handle0;
@@ -4510,13 +4891,23 @@ void effPCPBufuIceDraw(EffPCPSpinWork *work) {
     work->frame++;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetPosition);
+void effPCPBufuIceSetPosition(EffPCPSpinWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetColor);
+void effPCPBufuIceSetColor(EffPCPSpinWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetScale);
+void effPCPBufuIceSetScale(EffPCPSpinWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPBufuIceSetRotateMatrix(EffPCPSpinWork *work, const void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->matrix);
+}
 
 EffPCPSpinWork *effPCPBufuraIceCreate(void *src) {
     EffPCPSpinWork *work = sdfChipAllocDirect(0x68);
@@ -4544,7 +4935,11 @@ EffPCPSpinWork *effPCPBufuraIceCopy(EffPCPSpinWork *src) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceDelete);
+void effPCPBufuraIceDelete(EffPCPSpinWork *work) {
+    dds3EffectPartDelete(work->handle1);
+    dds3EffectPartDelete(work->handle0);
+    sdfChipFreeDirect(work);
+}
 
 void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
     EffParamWork *handle[2];
@@ -4561,7 +4956,7 @@ void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
     SetRotateMatrixY(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     MultMatrixNoArg();
-    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    VU0_STORE_MATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
     dds3EffectPartDraw(handle[0]);
@@ -4571,13 +4966,23 @@ void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
     work->frame++;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetPosition);
+void effPCPBufuraIceSetPosition(EffPCPSpinWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetColor);
+void effPCPBufuraIceSetColor(EffPCPSpinWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetScale);
+void effPCPBufuraIceSetScale(EffPCPSpinWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPBufuraIceSetRotateMatrix(EffPCPSpinWork *work, const void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->matrix);
+}
 
 EffPCPSpinWork *effPCPBufudnIceCreate(void *src) {
     EffPCPSpinWork *work = sdfChipAllocDirect(0x68);
@@ -4605,7 +5010,11 @@ EffPCPSpinWork *effPCPBufudnIceCopy(EffPCPSpinWork *src) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceDelete);
+void effPCPBufudnIceDelete(EffPCPSpinWork *work) {
+    dds3EffectPartDelete(work->handle1);
+    dds3EffectPartDelete(work->handle0);
+    sdfChipFreeDirect(work);
+}
 
 void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
     EffParamWork *handle[2];
@@ -4622,7 +5031,7 @@ void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
     SetRotateMatrixY(work->angle);
     VU0_LOAD_MATRIX_B(work->matrix);
     MultMatrixNoArg();
-    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    VU0_STORE_MATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
     dds3EffectPartDraw(handle[0]);
@@ -4632,22 +5041,45 @@ void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
     work->frame++;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceSetPosition);
+void effPCPBufudnIceSetPosition(EffPCPSpinWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceSetColor);
+void effPCPBufudnIceSetColor(EffPCPSpinWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceSetScale);
+void effPCPBufudnIceSetScale(EffPCPSpinWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceSetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPBufudnIceSetRotateMatrix(EffPCPSpinWork *work, const void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->matrix);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuLightCreate);
+void *effPCPBufuLightCreate(void *params) {
+    effPCPBufuLight_Start = 1;
+    return NULL;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuLightCopy);
+void *effPCPBufuLightCopy(void *work) {
+    effPCPBufuLight_Start = 1;
+    return NULL;
+}
 
 void effPCPBufuLightDelete(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuLightDraw);
+void effPCPBufuLightDraw(void *work) {
+    if (effPCPBufuLight_Start != 0) {
+        effBTLFieldLightDirectionSet(D_0031FA10);
+        effBTLFieldLightAxisSet(D_0031FA20);
+        effBTLFieldLightAnimationSet(14, 3.9269907f);
+        effPCPBufuLight_Start = 0;
+    }
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate00_0(u32 unused) {
     EffPCPBurstWork *work;
@@ -4659,7 +5091,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate00_0(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy00_0);
+EffPCPBurstWork *effPCPEyeThunderCopy00_0(void) {
+    return effPCPEyeThunderCreate00_0(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate00_1(u32 unused) {
     EffPCPBurstWork *work;
@@ -4671,7 +5105,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate00_1(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy00_1);
+EffPCPBurstWork *effPCPEyeThunderCopy00_1(void) {
+    return effPCPEyeThunderCreate00_1(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate01_0(u32 unused) {
     EffPCPBurstWork *work;
@@ -4683,7 +5119,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate01_0(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy01_0);
+EffPCPBurstWork *effPCPEyeThunderCopy01_0(void) {
+    return effPCPEyeThunderCreate01_0(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate01_1(u32 unused) {
     EffPCPBurstWork *work;
@@ -4695,7 +5133,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate01_1(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy01_1);
+EffPCPBurstWork *effPCPEyeThunderCopy01_1(void) {
+    return effPCPEyeThunderCreate01_1(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate02_0(u32 unused) {
     EffPCPBurstWork *work;
@@ -4707,7 +5147,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate02_0(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy02_0);
+EffPCPBurstWork *effPCPEyeThunderCopy02_0(void) {
+    return effPCPEyeThunderCreate02_0(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate02_1(u32 unused) {
     EffPCPBurstWork *work;
@@ -4719,7 +5161,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate02_1(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy02_1);
+EffPCPBurstWork *effPCPEyeThunderCopy02_1(void) {
+    return effPCPEyeThunderCreate02_1(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate03_0(u32 unused) {
     EffPCPBurstWork *work;
@@ -4731,7 +5175,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate03_0(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy03_0);
+EffPCPBurstWork *effPCPEyeThunderCopy03_0(void) {
+    return effPCPEyeThunderCreate03_0(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate03_1(u32 unused) {
     EffPCPBurstWork *work;
@@ -4743,7 +5189,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate03_1(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy03_1);
+EffPCPBurstWork *effPCPEyeThunderCopy03_1(void) {
+    return effPCPEyeThunderCreate03_1(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate04_0(u32 unused) {
     EffPCPBurstWork *work;
@@ -4755,7 +5203,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate04_0(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy04_0);
+EffPCPBurstWork *effPCPEyeThunderCopy04_0(void) {
+    return effPCPEyeThunderCreate04_0(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate04_1(u32 unused) {
     EffPCPBurstWork *work;
@@ -4767,7 +5217,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate04_1(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy04_1);
+EffPCPBurstWork *effPCPEyeThunderCopy04_1(void) {
+    return effPCPEyeThunderCreate04_1(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate05_0(u32 unused) {
     EffPCPBurstWork *work;
@@ -4779,7 +5231,9 @@ EffPCPBurstWork *effPCPEyeThunderCreate05_0(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy05_0);
+EffPCPBurstWork *effPCPEyeThunderCopy05_0(void) {
+    return effPCPEyeThunderCreate05_0(0);
+}
 
 EffPCPBurstWork *effPCPEyeThunderCreate05_1(u32 unused) {
     EffPCPBurstWork *work;
@@ -4791,15 +5245,24 @@ EffPCPBurstWork *effPCPEyeThunderCreate05_1(u32 unused) {
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy05_1);
+EffPCPBurstWork *effPCPEyeThunderCopy05_1(void) {
+    return effPCPEyeThunderCreate05_1(0);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderDelete);
+void effPCPEyeThunderDelete(EffPCPBurstWork *work) {
+    effPCP_ThunderPolyDelete(work->fragmentWork);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderSetPosition);
+void effPCPEyeThunderSetPosition(EffPCPBurstWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderSetColor);
+void effPCPEyeThunderSetColor(EffPCPBurstWork *work, u32 color) {
+    work->tintColor = color;
+}
 
 EffPCPGrowWork *effPCPThunderSphereExpCreate(EffPCPScaledThunderParams *params) {
     EffPCPGrowWork *work = sdfChipAllocDirect(sizeof(EffPCPGrowWork));
@@ -4823,19 +5286,41 @@ EffPCPGrowWork *effPCPThunderSphereExpCreate(EffPCPScaledThunderParams *params) 
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpCreatePCF);
+EffPCPGrowWork *effPCPThunderSphereExpCreatePCF(void *data) {
+    return effPCPThunderSphereExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpCopy);
+EffPCPGrowWork *effPCPThunderSphereExpCopy(EffPCPGrowWork *work) {
+    EffPCPScaledThunderParams params;
+    EffThunderAlphaParams *res = effPCPThunderSpherePolyGetParam(work->handle);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpDelete);
+    params.duration = work->duration;
+    params.fadeIn = work->fadeIn;
+    params.fadeOut = work->fadeOut;
+    params.base = work->base;
+    params.target = work->target;
+    params.res = *res;
+    return effPCPThunderSphereExpCreate(&params);
+}
+
+void effPCPThunderSphereExpDelete(EffPCPGrowWork *work) {
+    effPCPThunderSpherePolyDelete(work->handle);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpSetPosition);
+void effPCPThunderSphereExpSetPosition(EffPCPGrowWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpSetColor);
+void effPCPThunderSphereExpSetColor(EffPCPGrowWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpSetScale);
+void effPCPThunderSphereExpSetScale(EffPCPGrowWork *work, f32 scale) {
+    work->scale = scale;
+}
 
 /* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
 EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
@@ -4861,7 +5346,11 @@ EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     return node;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", dds3RingPolyExpListDelete);
+void dds3RingPolyExpListDelete(EffPCPBeamNode *node) {
+    sdfMatFreeDelayed(node->assetHandle);
+    sdfMemFreeDirect(node->allocationHandle);
+    sdfChipFreeDirect(node);
+}
 
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
@@ -4880,8 +5369,8 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     VU0_LOAD_MATRIX(node->localMatrix);
     VU0_LOAD_MATRIX_B(node->matrix);
     MultMatrixNoArg();
-    VU0_LOAD_VF(vf10, &node->position);
-    VU0_ADD_XYZ(vf31, vf31, vf10);
+    VU0_LOAD_VF10(&node->position);
+    VU0_ADD_VF31_VF10_XYZ();
     VU0_LOAD_MATRIX_B(scaleMatrix);
     MultMatrixNoArg();
     sdf3DPrimLinkTm(list, 0);
@@ -4916,21 +5405,38 @@ void effPCPRingPolyExpInit(EffPCPBeamWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpCreatePCF);
+EffPCPBeamWork *effPCPRingPolyExpCreatePCF(void *data) {
+    return effPCPRingPolyExpCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpCopy);
+EffPCPBeamWork *effPCPRingPolyExpCopy(EffPCPBeamWork *work) {
+    return effPCPRingPolyExpCreate(&work->params);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpDelete);
+void effPCPRingPolyExpDelete(EffPCPBeamWork *work) {
+    dds3RingPolyExpListDelete(work->node);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetPosition);
+void effPCPRingPolyExpSetPosition(EffPCPBeamWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetScale);
+void effPCPRingPolyExpSetScale(EffPCPBeamWork *work, f32 scale) {
+    work->node->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetColor);
+void effPCPRingPolyExpSetColor(EffPCPBeamWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPRingPolyExpSetRotateMatrix(EffPCPBeamWork *work, const void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->node->localMatrix);
+}
 
 void effPCPRingPolyExpSetDirection(EffPCPBeamWork *work, void *src) {
     VU0_LOAD_MATRIX(src);
@@ -4953,21 +5459,38 @@ void effPCPRingPolyExp2Init(EffPCPBeamLargeWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2CreatePCF);
+EffPCPBeamLargeWork *effPCPRingPolyExp2CreatePCF(void *data) {
+    return effPCPRingPolyExp2Create(dds3EffectPCPDataGetData(data, 0));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2Copy);
+EffPCPBeamLargeWork *effPCPRingPolyExp2Copy(EffPCPBeamLargeWork *work) {
+    return effPCPRingPolyExp2Create(&work->head);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2Delete);
+void effPCPRingPolyExp2Delete(EffPCPBeamLargeWork *work) {
+    dds3RingPolyExpListDelete(work->node);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2SetPosition);
+void effPCPRingPolyExp2SetPosition(EffPCPBeamLargeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2SetScale);
+void effPCPRingPolyExp2SetScale(EffPCPBeamLargeWork *work, f32 scale) {
+    work->node->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2SetColor);
+void effPCPRingPolyExp2SetColor(EffPCPBeamLargeWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2SetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPRingPolyExp2SetRotateMatrix(EffPCPBeamLargeWork *work, const void *source) {
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->node->localMatrix);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderCreate);
 
@@ -5047,11 +5570,17 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderPartInit);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderSetPosition);
+void effPCPRadiateThunderSetPosition(EffPCPGroupSet *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderSetScale);
+void effPCPRadiateThunderSetScale(EffPCPGroupSet *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderSetColor);
+void effPCPRadiateThunderSetColor(EffPCPGroupSet *work, u32 color) {
+    work->color = color;
+}
 
 EffPCPSprayWork *effPCPMakkaCreat(void *src) {
     EffPCPSprayWork *work = sdfChipAllocDirect(sizeof(EffPCPSprayWork));
@@ -5106,7 +5635,7 @@ void effPCPMakkaDelete(EffPCPSprayWork *work) {
 void effPCPMakkaUpdateNode(SdfDrawNode *node) {
     SdfDrawNode *child;
 
-    VU0_STORE_VF(vf10, node->scale);
+    VU0_STORE_VF10(node->scale);
     child = node->children;
     if (child != NULL) {
         do {
@@ -5118,15 +5647,25 @@ void effPCPMakkaUpdateNode(SdfDrawNode *node) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaSetPosition);
+void effPCPMakkaSetPosition(EffPCPSprayWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaSetColor);
+void effPCPMakkaSetColor(EffPCPSprayWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaSetScale);
+void effPCPMakkaSetScale(EffPCPSprayWork *work, f32 scale) {
+    work->scale = scale;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCreatePCF);
+EffPCPDriftEventWork *effPCPRadiateBEDCreatePCF(void *data) {
+    EffPCPDriftEventParams *params = dds3EffectPCPDataGetData(data, 0);
+
+    return effPCPRadiateBEDCreate(params, dds3EffectPCPDataGetData(data, 1));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCopy);
 
@@ -5152,15 +5691,26 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDPartInit);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDSetPosition);
+void effPCPRadiateBEDSetPosition(EffPCPDriftEventWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDSetScale);
+void effPCPRadiateBEDSetScale(EffPCPDriftEventWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDSetColor);
+void effPCPRadiateBEDSetColor(EffPCPDriftEventWork *work, u32 color) {
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCreatePCF);
+EffPCPPairedEventWork *effPCPRadiateTBCreatePCF(void *data) {
+    EffPCPPairedEventParams *params = dds3EffectPCPDataGetData(data, 0);
+    void *ownerAParams = dds3EffectPCPDataGetData(data, 1);
+
+    return effPCPRadiateTBCreate(params, ownerAParams, dds3EffectPCPDataGetData(data, 2));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCopy);
 
@@ -5191,13 +5741,21 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBPartInit);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBSetPosition);
+void effPCPRadiateTBSetPosition(EffPCPPairedEventWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBSetColor);
+void effPCPRadiateTBSetColor(EffPCPPairedEventWork *work, u32 color) {
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDCreatePCF);
+EffPCPSpawnRangeWork *effPCPSpiralBEDCreatePCF(void *data) {
+    EffPCPSpawnRangeParams *params = dds3EffectPCPDataGetData(data, 0);
+
+    return effPCPSpiralBEDCreate(params, dds3EffectPCPDataGetData(data, 1));
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDCopy);
 
@@ -5241,11 +5799,17 @@ void effPCPSpiralBEDPartInit(EffPCPSpawnRangeWork *work, s32 index) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDSetPosition);
+void effPCPSpiralBEDSetPosition(EffPCPSpawnRangeWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDSetScale);
+void effPCPSpiralBEDSetScale(EffPCPSpawnRangeWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDSetColor);
+void effPCPSpiralBEDSetColor(EffPCPSpawnRangeWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCPHelperInit(EffPCPMapEventWork *work) {
     EffPCPEventPlace place;
@@ -5306,7 +5870,12 @@ EffPCPMapEventWork *effPCPHelperBEDCreate(EffPCPEventParamHead *head, void *reso
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDCreatePCF);
+EffPCPMapEventWork *effPCPHelperBEDCreatePCF(void *data) {
+    EffPCPEventParamHead *head = dds3EffectPCPDataGetData(data, 0);
+    void *resourceParams = dds3EffectPCPDataGetData(data, 1);
+
+    return effPCPHelperBEDCreate(head, resourceParams, dds3EffectPCPDataGetData(data, 2));
+}
 
 EffPCPMapEventWork *effPCPHelperBEDCopy(EffPCPMapEventWork *src) {
     EffPCPMapEventWork *work;
@@ -5341,43 +5910,118 @@ void effPCPHelperBEDDelete(EffPCPMapEventWork *work) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDSetPosition);
+void effPCPHelperBEDSetPosition(EffPCPMapEventWork *work, const void *source) {
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDSetScale);
+void effPCPHelperBEDSetScale(EffPCPMapEventWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDSetColor);
+void effPCPHelperBEDSetColor(EffPCPMapEventWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDGetModel);
+void *effPCPHelperBEDGetModel(EffPCPMapEventWork *work) {
+    return dds3EffectPartGetHandle(work->modelResource);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeInit);
+void effPCPAnalyzeInit(EffPCPAnalyzeWork *work) {
+    EffPCPEventPlace place;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDCreate);
+    place.payload[0] = 0;
+    place.payload[1] = -200.0f;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    place.color = 0x80808080;
+    work->event = effEveBEDCutCreate(work->owner, 2, &place);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDCreatePCF);
+EffPCPAnalyzeWork *effPCPAnalyzeBEDCreate(void *ownerParams) {
+    EffPCPAnalyzeWork *work = sdfChipAllocDirect(sizeof(EffPCPAnalyzeWork));
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDCopy);
+    work->owner = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    if (ownerParams != 0) {
+        work->owner = effEveBEDCreate(ownerParams);
+    }
+    if (work->owner != 0) {
+        effPCPAnalyzeInit(work);
+    }
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDDelete);
+EffPCPAnalyzeWork *effPCPAnalyzeBEDCreatePCF(void *data) {
+    return effPCPAnalyzeBEDCreate(dds3EffectPCPDataGetData(data, 0));
+}
+
+EffPCPAnalyzeWork *effPCPAnalyzeBEDCopy(EffPCPAnalyzeWork *src) {
+    EffPCPAnalyzeWork *work = effPCPAnalyzeBEDCreate(0);
+
+    work->owner = src->owner;
+    effPCPAnalyzeInit(work);
+    return work;
+}
+
+void effPCPAnalyzeBEDDelete(EffPCPAnalyzeWork *work) {
+    if (work->event != NULL) {
+        effEveBEDCutDelete(work->event);
+    }
+    if (work->owner->active == 0) {
+        effEveBEDDelete(work->owner);
+    }
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00533CC0);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDSetScale);
+void effPCPAnalyzeBEDSetScale(EffPCPAnalyzeWork *work, f32 scale) {
+    work->scale = scale;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDSetColor);
+void effPCPAnalyzeBEDSetColor(EffPCPAnalyzeWork *work, u32 color) {
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurCreate);
+EffPCPFLEACHBlurWork *effPCPFLEACHBlurCreate(EffPCPFLEACHBlurParams *params) {
+    EffPCPFLEACHBlurWork *work = sdfChipAllocDirect(sizeof(EffPCPFLEACHBlurWork));
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurCreatePCF);
+    work->params = *params;
+    work->obj = NULL;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->obj = dds3EffectPartialMultiBlurCreate(&work->params.start);
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurCopy);
+EffPCPFLEACHBlurWork *effPCPFLEACHBlurCreatePCF(void *data) {
+    return effPCPFLEACHBlurCreate(dds3EffectPCPDataGetData(data, 0));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurDelete);
+EffPCPFLEACHBlurWork *effPCPFLEACHBlurCopy(EffPCPFLEACHBlurWork *work) {
+    return effPCPFLEACHBlurCreate(&work->params);
+}
+
+void effPCPFLEACHBlurDelete(EffPCPFLEACHBlurWork *work) {
+    dds3EffectPartialMultiBlurDelete(work->obj);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPFLEACHBlurSetColor);
+void effPCPFLEACHBlurSetColor(EffPCPFLEACHBlurWork *work, u32 color) {
+    work->color = color;
+}
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", BlinkMultiBlurCount);
 
 INCLUDE_SDATA(const s32, "effect/effPCPMisc", effPCPBufuLight_Start);

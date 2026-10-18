@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 
 struct EffRandState;
 struct EffThunderAlphaParams;
@@ -493,18 +494,6 @@ struct EffThunderVectorWork {
     struct SdfMemBlock *allocationHandle;
 };
 
-/*
- * 128-bit vector copy in the style of libvu0's sceVu0CopyVector, which the
- * Sony SDK implements as an asm statement (`lq` into a scratch register, `sq`
- * out of it). The PCP effect setters compile to exactly `lq $2,0(src);
- * sq $2,0(dst); jr $31; nop`: plain C u128 copies give `lq; jr; sq` (the sq
- * moves into the jr delay slot). `.set noreorder` keeps ee-as from filling
- * the slot too, as for fsqrtf. The destination is operand 0 so its address is formed first.
- */
-#define PCP_COPY_VECTOR(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
-    : : "r" (dst), "r" (src) : "$2", "memory")
-
 /* RenderWare XYZ axis used by the native SDF matrix builders. */
 struct RwV3d {
     f32 x;
@@ -519,60 +508,22 @@ struct RwV3d {
  */
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
-#define VU0_ADD_EXTENDED(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder" : :)
+/* vf10 += vf12: the vf12 spare the thunder builders park a vector in. */
+#define VU0_ADD_VF10_VF12() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder")
 
-#define VU0_CROSS_XYZ_EXTENDED(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder" : :)
+/* vf11 -= vf10. */
+#define VU0_SUB_VF11_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw vf11, vf11, vf10\n\t.set reorder")
 
-/* One quadword between memory and a named VU0 register. The load has no
- * memory clobber; the store does, matching the standalone COP2 asm idiom. */
-#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
-    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (src))
-
-/* Extended-asm forms of the register-only VU operations. The empty operand
- * sections preserve the SDK's volatile ASM_OPERANDS boundary in EE GCC 2.96;
- * basic asm has the same opcodes but is a different compiler representation.
- * All VU registers and ACC/Q effects remain implicit in the SDF VU convention.
- */
-#define VU0_MOVE_VF_EXTENDED(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder" : :)
-
-#define VU0_MUL_EXTENDED(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder" : :)
-
-/* vf10 = vf10 / |vf10.xyz| (w untouched):
- *   vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w ACC,vf0,vf2y;
- *   vmaddz.w vf2,vf0,vf2z; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q */
-#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
-    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
-    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
-
-#define VU0_NORMALIZE_VF10_EXTENDED() __asm__ volatile ( \
-    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
-    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
-    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder" : :)
-
-#define VU0_ROTATE_VEC_EXTENDED(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
-    "vmaddz.xyzw " #dst ", vf30, " #src "z\n\t.set reorder" : :)
-
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
-
-/* Legacy SDK input-address-only store, for audited original VU pipelines.
- * This is NOT a general memory barrier: even EE GCC 2.96 can reuse stale
- * reads across branches/loops. Prefer VU0_STORE_VF for new code; see
- * docs/thunder-bezier-matching.md before changing a verified caller. */
-#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+/* One quadword out of vf10 or vf11 with no memory clobber: the sphere rotate
+ * loops keep the vertex address in a register across the store. */
+#define VU0_STORE_VF10_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
     : : "r" (dst))
-
-#define VU0_SUB_EXTENDED(dst, a, b) __asm__ volatile ( \
-    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder" : :)
+#define VU0_STORE_VF11_NOMEM(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
 
 extern EffRandState dds3EffectBase[];
 
@@ -637,9 +588,9 @@ void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
-    VU0_LOAD_VF(vf10, scratchVector);
+    VU0_LOAD_VF10(scratchVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, scratchVector);
+    VU0_STORE_VF10(scratchVector);
     scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
     cell->placementVector[1] = scratchVector[1];
@@ -647,9 +598,9 @@ void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     scratchVector[1] = 1.0f;
     scratchVector[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
-    VU0_LOAD_VF(vf10, scratchVector);
+    VU0_LOAD_VF10(scratchVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, scratchVector);
+    VU0_STORE_VF10(scratchVector);
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
     cell->rotationAxis[2] = scratchVector[2];
@@ -692,60 +643,60 @@ void effPCPThunderSphereRotate(EffThunderVectorWork *work, s32 index) {
     originalAxis[3] = 0.0f;
     rotationScale = -source->rotationScale;
     radius = source->radius;
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, aViewEye);
-    VU0_SUB_EXTENDED(vf10, vf10, vf11);
-    VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
     placement[0] = source->placementVector[0];
     placement[1] = 0.0f;
     placement[2] = source->placementVector[2];
-    PCP_COPY_VECTOR(origin, work->head.vector.origin);
+    PS2_COPY_QUAD(origin, work->head.vector.origin);
     origin[1] += source->placementVector[1];
 
     for (i = 0; i < count; i++) {
         position[0] = origin[0] + placement[0] * radius;
         position[1] = origin[1] + placement[1] * radius;
         position[2] = origin[2] + placement[2] * radius;
-        PCP_COPY_VECTOR(axis, originalAxis);
+        PS2_COPY_QUAD(axis, originalAxis);
         rotation[0] = dds3GetRandFloatA(dds3EffectBase) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
         rotation[1] = dds3GetRandFloatA(dds3EffectBase) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
         rotation[2] = dds3GetRandFloatA(dds3EffectBase) * (75.0f * (EFF_THUNDER_HALF_TURN / 180.0f));
         SetRotateMatrixXYZ((const struct RwV3d *)rotation);
-        VU0_LOAD_VF(vf10, axis);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+        VU0_LOAD_VF10(axis);
+        VU0_ROTATE_VF10();
+        VU0_STORE_VF10_NOMEM(axis);
         SetRotateMatrixAxis(((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.7f) * rotationScale + rotationScale, (const struct RwV3d *)axis);
-        VU0_LOAD_VF(vf10, placement);
-        VU0_MOVE_VF_EXTENDED(vf11, vf10);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, placement);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, cameraDirection);
-        VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10_EXTENDED();
-        VU0_STORE_VF_UNCLOBBERED(vf10, side);
-        VU0_LOAD_VF(vf11, width);
-        VU0_MUL_EXTENDED(vf10, vf10, vf11);
-        VU0_MOVE_VF_EXTENDED(vf12, vf10);
-        VU0_LOAD_VF(vf10, position);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
-        VU0_MOVE_VF_EXTENDED(vf11, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf12);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
-        VU0_MOVE_VF_EXTENDED(vf10, vf12);
-        VU0_SUB_EXTENDED(vf11, vf11, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 3);
-        VU0_LOAD_VF(vf10, side);
-        VU0_LOAD_VF(vf11, outerWidth);
-        VU0_MUL_EXTENDED(vf10, vf10, vf11);
-        VU0_MOVE_VF_EXTENDED(vf12, vf10);
-        VU0_LOAD_VF(vf10, position);
-        VU0_MOVE_VF_EXTENDED(vf11, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf12);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
-        VU0_MOVE_VF_EXTENDED(vf10, vf12);
-        VU0_SUB_EXTENDED(vf11, vf11, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 4);
+        VU0_LOAD_VF10(placement);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ROTATE_VF10();
+        VU0_STORE_VF10_NOMEM(placement);
+        VU0_SUB_VF10_VF11();
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(side);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_STORE_VF10_NOMEM(vertices + 2);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 3);
+        VU0_LOAD_VF10(side);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 4);
         vertices += 5;
     }
 }
@@ -771,38 +722,38 @@ void effPCPThunderSphereRotateAxis(EffThunderVectorWork *work, s32 index) {
     axis[1] = source->rotationAxis[1];
     axis[2] = source->rotationAxis[2];
     SetRotateMatrixAxis(angle, (const struct RwV3d *)axis);
-    VU0_LOAD_VF(vf10, direction);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    VU0_LOAD_VF10(direction);
+    VU0_ROTATE_VF10();
+    VU0_STORE_VF10(direction);
     source->placementVector[0] = direction[0];
     source->placementVector[2] = direction[2];
-    VU0_LOAD_VF(vf11, work->head.vector.origin);
+    VU0_LOAD_VF11(work->head.vector.origin);
     for (i = 0; i < rows; i++) {
-        VU0_LOAD_VF(vf10, vertices);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
-        VU0_LOAD_VF(vf10, vertices + 1);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
-        VU0_LOAD_VF(vf10, vertices + 2);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 2);
-        VU0_LOAD_VF(vf10, vertices + 3);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 3);
-        VU0_LOAD_VF(vf10, vertices + 4);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 4);
+        VU0_LOAD_VF10(vertices);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices);
+        VU0_LOAD_VF10(vertices + 1);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices + 1);
+        VU0_LOAD_VF10(vertices + 2);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices + 2);
+        VU0_LOAD_VF10(vertices + 3);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices + 3);
+        VU0_LOAD_VF10(vertices + 4);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices + 4);
         vertices += 5;
     }
 }
@@ -868,9 +819,9 @@ void effPCPThunderSphereLowInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
-    VU0_LOAD_VF(vf10, scratchVector);
+    VU0_LOAD_VF10(scratchVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, scratchVector);
+    VU0_STORE_VF10(scratchVector);
     scratchVector[1] = work->head.vector.heightScale * EFF_THUNDER_HALF_SCALE * ((dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN);
     cell->placementVector[0] = scratchVector[0];
     cell->placementVector[1] = scratchVector[1];
@@ -878,9 +829,9 @@ void effPCPThunderSphereLowInit(EffThunderVectorWork *work, s32 index) {
     scratchVector[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
     scratchVector[1] = 1.0f;
     scratchVector[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN * EFF_THUNDER_AXIS_JITTER;
-    VU0_LOAD_VF(vf10, scratchVector);
+    VU0_LOAD_VF10(scratchVector);
     VU0_NORMALIZE_VF10();
-    VU0_STORE_VF(vf10, scratchVector);
+    VU0_STORE_VF10(scratchVector);
     cell->rotationAxis[0] = scratchVector[0];
     cell->rotationAxis[1] = scratchVector[1];
     cell->rotationAxis[2] = scratchVector[2];
@@ -920,49 +871,49 @@ void effPCPThunderSphereLowRotate(EffThunderVectorWork *work, s32 index) {
     originalAxis[2] = source->rotationAxis[2];
     originalAxis[3] = 0.0f;
     radius = source->radius;
-    VU0_LOAD_VF(vf10, aViewTarget);
-    VU0_LOAD_VF(vf11, aViewEye);
-    VU0_SUB_EXTENDED(vf10, vf10, vf11);
-    VU0_STORE_VF_UNCLOBBERED(vf10, cameraDirection);
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
     placement[0] = source->placementVector[0];
     placement[1] = 0.0f;
     placement[2] = source->placementVector[2];
-    PCP_COPY_VECTOR(origin, work->head.vector.origin);
+    PS2_COPY_QUAD(origin, work->head.vector.origin);
     origin[1] += source->placementVector[1];
 
     for (i = 0; i < count; i++) {
         position[0] = origin[0] + placement[0] * radius;
         position[1] = origin[1] + placement[1] * radius;
         position[2] = origin[2] + placement[2] * radius;
-        PCP_COPY_VECTOR(axis, originalAxis);
+        PS2_COPY_QUAD(axis, originalAxis);
         rotation[0] = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 0.5f);
         rotation[1] = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 0.5f);
         rotation[2] = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 0.5f);
         SetRotateMatrixXYZ((const struct RwV3d *)rotation);
-        VU0_LOAD_VF(vf10, axis);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, axis);
+        VU0_LOAD_VF10(axis);
+        VU0_ROTATE_VF10();
+        VU0_STORE_VF10_NOMEM(axis);
         angleJitter = dds3GetRandFloatA(dds3EffectBase);
         rotationScale = -source->rotationScale;
         SetRotateMatrixAxis(((angleJitter - 0.5f) * 2.0f * 0.8f) * rotationScale + rotationScale, (const struct RwV3d *)axis);
-        VU0_LOAD_VF(vf10, placement);
-        VU0_MOVE_VF_EXTENDED(vf11, vf10);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf10, placement);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_LOAD_VF(vf11, cameraDirection);
-        VU0_CROSS_XYZ_EXTENDED(vf10, vf10, vf11);
-        VU0_NORMALIZE_VF10_EXTENDED();
-        VU0_LOAD_VF(vf11, width);
-        VU0_MUL_EXTENDED(vf10, vf10, vf11);
-        VU0_MOVE_VF_EXTENDED(vf12, vf10);
-        VU0_LOAD_VF(vf10, position);
-        VU0_MOVE_VF_EXTENDED(vf11, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf12);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
-        VU0_MOVE_VF_EXTENDED(vf10, vf12);
-        VU0_SUB_EXTENDED(vf11, vf11, vf10);
-        VU0_STORE_VF_UNCLOBBERED(vf11, vertices + 1);
+        VU0_LOAD_VF10(placement);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ROTATE_VF10();
+        VU0_STORE_VF10_NOMEM(placement);
+        VU0_SUB_VF10_VF11();
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 1);
         vertices += 2;
     }
 }
@@ -988,23 +939,23 @@ void effPCPThunderSphereLowRotateAxis(EffThunderVectorWork *work, s32 index) {
     axis[1] = source->rotationAxis[1];
     axis[2] = source->rotationAxis[2];
     SetRotateMatrixAxis(angle, (const struct RwV3d *)axis);
-    VU0_LOAD_VF(vf10, direction);
-    VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-    VU0_STORE_VF_UNCLOBBERED(vf10, direction);
+    VU0_LOAD_VF10(direction);
+    VU0_ROTATE_VF10();
+    VU0_STORE_VF10(direction);
     source->placementVector[0] = direction[0];
     source->placementVector[2] = direction[2];
-    VU0_LOAD_VF(vf11, work->head.vector.origin);
+    VU0_LOAD_VF11(work->head.vector.origin);
     for (i = 0; i < rows; i++) {
-        VU0_LOAD_VF(vf10, vertices);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices);
-        VU0_LOAD_VF(vf10, vertices + 1);
-        VU0_SUB_EXTENDED(vf10, vf10, vf11);
-        VU0_ROTATE_VEC_EXTENDED(vf10, vf10);
-        VU0_ADD_EXTENDED(vf10, vf10, vf11);
-        VU0_STORE_VF_UNCLOBBERED(vf10, vertices + 1);
+        VU0_LOAD_VF10(vertices);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices);
+        VU0_LOAD_VF10(vertices + 1);
+        VU0_SUB_VF10_VF11();
+        VU0_ROTATE_VF10();
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(vertices + 1);
         vertices += 2;
     }
 }
@@ -1273,8 +1224,8 @@ void effPCP_ThunderPolyListDraw(EffThunderGroup *group) {
 
     for (; i < segmentCount; i++) {
         work = group->handles[i];
-        PCP_COPY_VECTOR(work->head.start, points[0]);
-        PCP_COPY_VECTOR(work->head.end, points[1]);
+        PS2_COPY_QUAD(work->head.start, points[0]);
+        PS2_COPY_QUAD(work->head.end, points[1]);
         points++;
         fragmentCount = work->head.fragmentCount;
         color = effMagaCylinderCalcColor(group->color, work->color);

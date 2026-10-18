@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ps2asm.h"
 
 /* One crack segment: the extents effPCPCrackSizeInit randomizes plus the
  * negative age that delays its start. */
@@ -25,7 +26,8 @@ typedef struct effCrackGroup_t
 
 typedef struct effCrackWork_t
 {
-    u8 unk00[0x14];
+    u8 position[0x10];
+    u8 unk10[4];
     f32 frameStep;
     f32 scale;
     u8 unk1C[0x1C];
@@ -48,7 +50,8 @@ typedef struct effCrackWork_t
     void *groupsHandle;
     u32 groupCount;
     u16 cellCount;
-    u8 unk9A[0xA];
+    u8 unk9A[6];
+    u32 color;
     void *system;
     s32 part;
 } effCrackWork_t;
@@ -93,6 +96,152 @@ typedef struct effBaelWork_t
     s32 auxResource;
 } effBaelWork_t;
 
+typedef struct effPCPBossONGY_t
+{
+    u8 unk00[4];
+    void *matrix;
+} effPCPBossONGY_t;
+
+typedef struct effPCPBossBUNSIN_t
+{
+    u8 unk00[0x28];
+    void *matrix;
+} effPCPBossBUNSIN_t;
+
+typedef struct effPCPBossBUNSIN2_t
+{
+    u8 unk00[0x18];
+    effPCPBossBUNSIN_t *parts[3];
+} effPCPBossBUNSIN2_t;
+
+typedef struct effPCPBossDengeki_t
+{
+    u8 unk00[0x74];
+    u32 color;
+} effPCPBossDengeki_t;
+
+typedef struct effPCPBossThunderbolt_t
+{
+    u8 position[0x10];
+    u8 unk10[0x54];
+    void *polyList;
+    u8 unk68[4];
+    u32 color;
+} effPCPBossThunderbolt_t;
+
+typedef struct effPCPBossKAGUInvoke_t
+{
+    u8 unk000[0x430];
+    u32 color;
+} effPCPBossKAGUInvoke_t;
+
+typedef struct effPCPBossKAGUAttack_t
+{
+    u8 unk00[0xF8];
+    u32 color;
+} effPCPBossKAGUAttack_t;
+
+typedef struct effPCPBossKAGUThunderbolt_t
+{
+    u8 position[0x10];
+    u8 unk010[0x104];
+    u32 color;
+} effPCPBossKAGUThunderbolt_t;
+
+typedef struct effPCPBossKAGU2Attack_t
+{
+    u8 unk00[0xB8];
+    u32 color;
+} effPCPBossKAGU2Attack_t;
+
+typedef struct effPCPBossKAGU2MUHENK_t
+{
+    s32 unk00;
+    u32 color;
+} effPCPBossKAGU2MUHENK_t;
+
+typedef struct effPCPBossMETATOBeam_t
+{
+    u8 position[0x10];
+    u8 unk10[0x60];
+    void *polyLists[2];
+    u8 unk78[4];
+    u32 color;
+} effPCPBossMETATOBeam_t;
+
+typedef struct effPCPScreenCrackModel_t
+{
+    u8 unk00[4];
+    s32 part;
+    u8 unk08[4];
+    u32 color;
+} effPCPScreenCrackModel_t;
+
+typedef struct effPCPMuzzleFlash_t
+{
+    u8 matrix[0x40];
+    u8 position[0x10];
+    u8 unk50[8];
+    void *billboard;
+    u8 unk5C[4];
+    f32 scale;
+} effPCPMuzzleFlash_t;
+
+typedef struct effPCPDANTE_Thunder_t
+{
+    u8 position[0x10];
+    u8 matrix[0x40];
+    u8 params[0x68];
+    u32 color;
+    void *poly;
+    u8 unkC0[4];
+    u8 drawRequest;
+    u8 unkC5[3];
+    s32 process;
+} effPCPDANTE_Thunder_t;
+
+typedef struct effPCPDANTE_Damage_t
+{
+    u8 position[0x10];
+    u8 unk010[0x24];
+    u8 unk034;
+    u8 unk035[3];
+    s32 unk038;
+    u8 unk03C[0x100];
+    u32 color;
+} effPCPDANTE_Damage_t;
+
+typedef struct effPCP_PBCamera_t
+{
+    u8 matrix[0x40];
+    u8 position[0x10];
+    u8 unk50[4];
+    s32 part;
+} effPCP_PBCamera_t;
+
+typedef struct effPCPDANTE_ShowTime_t
+{
+    u8 position[0x10];
+    u8 unk010[0xAC];
+    void *textures[2];
+    u8 unk0C4[0x10];
+    u8 texLoaded;
+} effPCPDANTE_ShowTime_t;
+
+typedef struct effPCP_BED_t
+{
+    u8 matrix[0x40];
+    u8 position[0x10];
+    u8 unk50[0xC];
+    u32 color;
+} effPCP_BED_t;
+
+typedef struct effPCP_HBED2_t
+{
+    u8 unk00[0x1C];
+    void *helper;
+} effPCP_HBED2_t;
+
 extern u8 dds3EffectBase[];
 
 extern void *memcpy(void *dst, const void *src, u32 size);
@@ -120,42 +269,129 @@ extern void dds3FlashPolyListSetBlend(void *pool, s32 blend);
 extern effCrackWork_t *effPCPCrackCreate(effCrackParam_t *param, void *effectParam);
 extern effCrackWork_t *effPCPCrackCopy(effCrackWork_t *src);
 
-#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
+/* vf10 = vf0, the hardwired (0,0,0,1). */
+#define VU0_COPY_VF0_TO_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf10, vf0\n\t.set reorder")
 
-#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
-    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
-    : : "r" (dst) : "memory")
+extern void *effPCPBossTexHandle;
+extern s32 D_0054F1F4;
+extern s32 effPCPBossONGY_RFrame;
+extern s32 dds3RenderDrawEnv;
+
+extern void dds3AllocRenderTexture(s32 width, s32 height, f32 arg2);
+extern void dds3RenderTextureON(void);
+extern void dds3RenderTextureOFF(void);
+extern void dds3FreeRenderTexture(void);
+extern void *mdlLoad(u32 group, u32 id);
+extern void mdlFree(void *ctx);
+extern void mdlSmoothLoopMotion(void *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                                f32 blendDurationFrames);
+extern s32 dds3GetKernelCount(void);
+extern s32 printf(const char *format, ...);
+
+extern void sdfMatFreeDelayed(void *asset);
+extern void effPCP_ThunderPolyListDelete(void *list);
+extern void *dds3EffectPCPDataGetData(void *data, u32 number, s32 type);
+extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(void *params);
+
+extern f32 effPCPBossKAGUDrawParam[4];
+extern f32 effPCPBossKAGU2DrawParam[4];
+
+extern void dds3BillboardDelete(void *billboard);
+extern void dds3BillboardSetRGBA(void *billboard, u32 color);
+extern effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(void *params);
+extern effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreate(void *params);
+extern void effPCPBossKAGUThunderboltDrawSub(effPCPBossKAGUThunderbolt_t *work, const f32 *param);
+extern void effPCPCrackDraw(effCrackWork_t *work);
+
+extern void dds3KillProcess(s32 process, s32 flags);
+extern void effPCP_ThunderPolyDelete(void *poly);
+extern void sdfTexFreeDelayed(void *texture);
+extern void mdlSetRotate(void *model);
+extern void effPCP_BED_MatrixToQuaternion(const void *matrix);
+extern void *effPCPHelperBEDGetModel(void *helper);
+extern void effPCPHelperBEDDelete(void *helper);
+extern void effPCPHelperBEDDraw(void *helper);
+extern void effPCPHelperBEDSetPosition(void *helper, const void *source);
+extern void effPCPHelperBEDSetColor(void *helper, u32 color);
+extern void effPCPHelperBEDSetScale(void *helper, f32 scale);
+extern effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(void *params);
+extern effPCPDANTE_Damage_t *effPCPDANTE_Damage_Create(void *params, void *bedParams);
 
 void effPCPCrackSizeInit(effCrackWork_t *work, effCrackCell_t *cell);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYTexRenderStart);
+void effPCPBossONGYTexRenderStart(void)
+{
+    if (D_0054F1F4 == 0) {
+        dds3RenderDrawEnv = 0;
+        dds3AllocRenderTexture(0x100, 0x100, 0.8f);
+        dds3RenderTextureON();
+        effPCPBossTexHandle = mdlLoad(1, 0x10D);
+        mdlSmoothLoopMotion(effPCPBossTexHandle, 0, 0, 0.0f, 4.0f);
+        effPCPBossONGY_RFrame = dds3GetKernelCount() - 1;
+        printf("effPCPBossONGY:Model Load\n");
+    }
+    D_0054F1F4++;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYTexRenderEnd);
+void effPCPBossONGYTexRenderEnd(void)
+{
+    if (--D_0054F1F4 == 0) {
+        dds3RenderTextureOFF();
+        dds3FreeRenderTexture();
+        mdlFree(effPCPBossTexHandle);
+        effPCPBossTexHandle = NULL;
+        printf("effPCPBossONGY:Model Free\n");
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYModelTexRender);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYModelTexRenderCheck);
+s32 effPCPBossONGYModelTexRenderCheck(void)
+{
+    return effPCPBossONGY_RFrame != dds3GetKernelCount();
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYDelete);
+void effPCPBossONGYDelete(effPCPBossONGY_t *work)
+{
+    effPCPBossONGYTexRenderEnd();
+    sdfMatFreeDelayed(work->matrix);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGYGetLength);
+s32 effPCPBossONGYGetLength(void)
+{
+    return 0x16;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGY2Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGY2Delete);
+void effPCPBossONGY2Delete(effPCPBossONGY_t *work)
+{
+    effPCPBossONGYTexRenderEnd();
+    sdfMatFreeDelayed(work->matrix);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGY2Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossONGY2GetLength);
+s32 effPCPBossONGY2GetLength(void)
+{
+    return 0x1B;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDelete);
+void effPCPBossBUNSINDelete(effPCPBossBUNSIN_t *work)
+{
+    effPCPBossONGYTexRenderEnd();
+    sdfMatFreeDelayed(work->matrix);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly);
 
@@ -163,15 +399,27 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINGetLength);
+s32 effPCPBossBUNSINGetLength(void)
+{
+    return 0x18;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSIN2Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSIN2Delete);
+void effPCPBossBUNSIN2Delete(effPCPBossBUNSIN2_t *work)
+{
+    effPCPBossBUNSINDelete(work->parts[2]);
+    effPCPBossBUNSINDelete(work->parts[1]);
+    effPCPBossBUNSINDelete(work->parts[0]);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSIN2Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSIN2GetLength);
+s32 effPCPBossBUNSIN2GetLength(void)
+{
+    return effPCPBossBUNSINGetLength() * 2;
+}
 
 void effPCPCrackSizeInit(effCrackWork_t *work, effCrackCell_t *cell)
 {
@@ -237,12 +485,12 @@ void effPCPCrackInit(effCrackWork_t *work)
                 colors->color[2] = 0;
                 colors->color[3] = 0;
                 colors->color[4] = 0;
-                VU0_MOVE_VF(vf10, vf0);
-                VU0_STORE_VF(vf10, vertices);
-                VU0_STORE_VF(vf10, vertices + 4);
-                VU0_STORE_VF(vf10, vertices + 8);
-                VU0_STORE_VF(vf10, vertices + 12);
-                VU0_STORE_VF(vf10, vertices + 16);
+                VU0_COPY_VF0_TO_VF10();
+                VU0_STORE_VF10(vertices);
+                VU0_STORE_VF10(vertices + 4);
+                VU0_STORE_VF10(vertices + 8);
+                VU0_STORE_VF10(vertices + 12);
+                VU0_STORE_VF10(vertices + 16);
             }
             dds3FlashPolyListSetBlend(group->drawPool, work->blend);
             group->cells = nextCells;
@@ -277,9 +525,15 @@ void effPCPCrackDelete(effCrackWork_t *work)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackSetPosition);
+void effPCPCrackSetPosition(effCrackWork_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackSetColor);
+void effPCPCrackSetColor(effCrackWork_t *work, u32 color)
+{
+    work->color = color;
+}
 
 effBaelWork_t *effPCPBossBaelCreate(void *vector, void *paramA, void *paramB)
 {
@@ -298,13 +552,24 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelCreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelDelete);
+void effPCPBossBaelDelete(effBaelWork_t *work)
+{
+    dds3EffectPartDelete(work->auxResource);
+    dds3EffectPartDelete(work->modelResource);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelSetPosition);
+void effPCPBossBaelSetPosition(effBaelWork_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work->parameterVector, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelSetColor);
+void effPCPBossBaelSetColor(effBaelWork_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiCreate);
 
@@ -316,33 +581,61 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiDelete);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiSetColor);
+void effPCPBossDengekiSetColor(effPCPBossDengeki_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltCreatePCF);
+effPCPBossThunderbolt_t *effPCPBossThunderboltCreatePCF(void *data, s32 index, s32 type)
+{
+    return effPCPBossThunderboltCreate(dds3EffectPCPDataGetData(data, 0, type));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltCopy);
+effPCPBossThunderbolt_t *effPCPBossThunderboltCopy(void *params, s32 index, s32 type)
+{
+    return effPCPBossThunderboltCreate(params);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltDelete);
+void effPCPBossThunderboltDelete(effPCPBossThunderbolt_t *work)
+{
+    effPCP_ThunderPolyListDelete(work->polyList);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltSetPosition);
+void effPCPBossThunderboltSetPosition(effPCPBossThunderbolt_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltSetColor);
+void effPCPBossThunderboltSetColor(effPCPBossThunderbolt_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeCreatePCF);
+effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreatePCF(void *data, s32 index, s32 type)
+{
+    return effPCPBossKAGUInvokeCreate(dds3EffectPCPDataGetData(data, 0, type));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeCopy);
+effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCopy(void *params, s32 index, s32 type)
+{
+    return effPCPBossKAGUInvokeCreate(params);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeDelete);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeSetColor);
+void effPCPBossKAGUInvokeSetColor(effPCPBossKAGUInvoke_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackCreate);
 
@@ -356,7 +649,10 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackGetSplitPoint);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackSetColor);
+void effPCPBossKAGUAttackSetColor(effPCPBossKAGUAttack_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltCreate);
 
@@ -368,11 +664,20 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltDelete);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltDrawSub);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltDraw);
+void effPCPBossKAGUThunderboltDraw(effPCPBossKAGUThunderbolt_t *work)
+{
+    effPCPBossKAGUThunderboltDrawSub(work, effPCPBossKAGUDrawParam);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltSetPosition);
+void effPCPBossKAGUThunderboltSetPosition(effPCPBossKAGUThunderbolt_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltSetColor);
+void effPCPBossKAGUThunderboltSetColor(effPCPBossKAGUThunderbolt_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackCreate);
 
@@ -386,21 +691,46 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackGetSplitPoint);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackSetColor);
+void effPCPBossKAGU2AttackSetColor(effPCPBossKAGU2Attack_t *work, u32 color)
+{
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2ThunderboltDraw);
+void effPCPBossKAGU2ThunderboltDraw(effPCPBossKAGUThunderbolt_t *work)
+{
+    effPCPBossKAGUThunderboltDrawSub(work, effPCPBossKAGU2DrawParam);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKCreate);
+effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreate(void *params)
+{
+    effPCPBossKAGU2MUHENK_t *work = sdfChipAllocDirect(sizeof(effPCPBossKAGU2MUHENK_t));
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKCreatePCF);
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKCopy);
+effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreatePCF(void *data, s32 index, s32 type)
+{
+    return effPCPBossKAGU2MUHENKCreate(dds3EffectPCPDataGetData(data, 0, type));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKDelete);
+effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCopy(void *params, s32 index, s32 type)
+{
+    return effPCPBossKAGU2MUHENKCreate(params);
+}
+
+void effPCPBossKAGU2MUHENKDelete(effPCPBossKAGU2MUHENK_t *work)
+{
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKSetColor);
+void effPCPBossKAGU2MUHENKSetColor(effPCPBossKAGU2MUHENK_t *work, u32 color)
+{
+    work->color = color;
+}
 
 effCrackWork_t *effPCPCrack2Create(effCrackParam_t *param, void *effectParam)
 {
@@ -432,27 +762,56 @@ effCrackWork_t *effPCPCrack2Copy(effCrackWork_t *src)
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrack2Delete);
+void effPCPCrack2Delete(effCrackWork_t *work)
+{
+    effPCPCrackDelete(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrack2Draw);
+void effPCPCrack2Draw(effCrackWork_t *work)
+{
+    effPCPCrackDraw(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrack2SetPosition);
+void effPCPCrack2SetPosition(effCrackWork_t *work, const void *source)
+{
+    effPCPCrackSetPosition(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrack2SetColor);
+void effPCPCrack2SetColor(effCrackWork_t *work, u32 color)
+{
+    effPCPCrackSetColor(work, color);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamCreatePCF);
+effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreatePCF(void *data, s32 index, s32 type)
+{
+    return effPCPBossMETATOBeamCreate(dds3EffectPCPDataGetData(data, 0, type));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamCopy);
+effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCopy(void *params, s32 index, s32 type)
+{
+    return effPCPBossMETATOBeamCreate(params);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamDelete);
+void effPCPBossMETATOBeamDelete(effPCPBossMETATOBeam_t *work)
+{
+    effPCP_ThunderPolyListDelete(work->polyLists[1]);
+    effPCP_ThunderPolyListDelete(work->polyLists[0]);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamSetPosition);
+void effPCPBossMETATOBeamSetPosition(effPCPBossMETATOBeam_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamSetColor);
+void effPCPBossMETATOBeamSetColor(effPCPBossMETATOBeam_t *work, u32 color)
+{
+    work->color = color;
+}
 
 void effPCPScreenCrackModelInit(void) {
 }
@@ -463,11 +822,18 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelCreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelDelete);
+void effPCPScreenCrackModelDelete(effPCPScreenCrackModel_t *work)
+{
+    dds3EffectPartDelete(work->part);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelSetColor);
+void effPCPScreenCrackModelSetColor(effPCPScreenCrackModel_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashCreate);
 
@@ -475,17 +841,35 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashCreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashDelete);
+void effPCPMuzzleFlashDelete(effPCPMuzzleFlash_t *work)
+{
+    dds3BillboardDelete(work->billboard);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashSetColor);
+void effPCPMuzzleFlashSetColor(effPCPMuzzleFlash_t *work, u32 color)
+{
+    dds3BillboardSetRGBA(work->billboard, color);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashSetPosition);
+void effPCPMuzzleFlashSetPosition(effPCPMuzzleFlash_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work->position, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashSetScale);
+void effPCPMuzzleFlashSetScale(effPCPMuzzleFlash_t *work, f32 scale)
+{
+    work->scale = 1.0f;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashSetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPMuzzleFlashSetRotateMatrix(effPCPMuzzleFlash_t *work, const void *source)
+{
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work);
+}
 
 INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DA0);
 
@@ -501,33 +885,68 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_Create);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_ProcessDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_CreatePCF);
+effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_CreatePCF(void *data, s32 index, s32 type)
+{
+    return effPCPDANTE_Thunder_Create(dds3EffectPCPDataGetData(data, 0, type));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_Delete);
+void effPCPDANTE_Thunder_Delete(effPCPDANTE_Thunder_t *work)
+{
+    dds3KillProcess(work->process, 0);
+    effPCP_ThunderPolyDelete(work->poly);
+    sdfChipFreeDirect(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_Copy);
+effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Copy(effPCPDANTE_Thunder_t *src, s32 index, s32 type)
+{
+    return effPCPDANTE_Thunder_Create(src->params);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_DrawSub);
+void effPCPDANTE_Thunder_DrawSub(effPCPDANTE_Thunder_t *work)
+{
+    work->drawRequest = 1;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_SetColor);
+void effPCPDANTE_Thunder_SetColor(effPCPDANTE_Thunder_t *work, u32 color)
+{
+    work->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_SetPosition);
+void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_SetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *work, const void *source)
+{
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work->matrix);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_CreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Copy);
+effPCPDANTE_Damage_t *effPCPDANTE_Damage_Copy(effPCPDANTE_Damage_t *src, s32 index, s32 type)
+{
+    effPCPDANTE_Damage_t *work = effPCPDANTE_Damage_Create(src, NULL);
+
+    work->unk034 = 0;
+    work->unk038 = src->unk038;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Delete);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Run);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_SetColor);
+void effPCPDANTE_Damage_SetColor(effPCPDANTE_Damage_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Create);
 
@@ -535,13 +954,25 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_CreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Copy);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Delete);
+void effPCP_PBCamera_Delete(effPCP_PBCamera_t *work)
+{
+    dds3EffectPartDelete(work->part);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Run);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_SetPosition);
+void effPCP_PBCamera_SetPosition(effPCP_PBCamera_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work->position, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_SetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCP_PBCamera_SetRotateMatrix(effPCP_PBCamera_t *work, const void *source)
+{
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Create);
 
@@ -549,7 +980,14 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_CreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Copy);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Delete);
+void effPCPDANTE_ShowTime_Delete(effPCPDANTE_ShowTime_t *work)
+{
+    if (work->texLoaded != 0) {
+        sdfTexFreeDelayed(work->textures[1]);
+        sdfTexFreeDelayed(work->textures[0]);
+    }
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Sprite_Draw);
 
@@ -561,7 +999,10 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_SetPosition);
+void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work, source);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Create);
 
@@ -575,11 +1016,22 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_MatrixToQuaternion);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Draw);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_SetPosition);
+void effPCP_BED_SetPosition(effPCP_BED_t *work, const void *source)
+{
+    PS2_COPY_QUAD(work->position, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_SetRotateMatrix);
+/* vu0 routine: copy the rotation matrix through vf28-vf31 */
+void effPCP_BED_SetRotateMatrix(effPCP_BED_t *work, const void *source)
+{
+    VU0_LOAD_MATRIX(source);
+    VU0_STORE_MATRIX(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_SetColor);
+void effPCP_BED_SetColor(effPCP_BED_t *work, u32 color)
+{
+    work->color = color;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_Create);
 
@@ -587,17 +1039,39 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_CreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_Copy);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_Delete);
+void effPCP_HBED2_Delete(effPCP_HBED2_t *work)
+{
+    effPCPHelperBEDDelete(work->helper);
+    sdfChipFreeDirect(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_Draw);
+void effPCP_HBED2_Draw(effPCP_HBED2_t *work)
+{
+    effPCPHelperBEDDraw(work->helper);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_SetPosition);
+void effPCP_HBED2_SetPosition(effPCP_HBED2_t *work, const void *source)
+{
+    effPCPHelperBEDSetPosition(work->helper, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_SetRotateMatrix);
+void effPCP_HBED2_SetRotateMatrix(effPCP_HBED2_t *work, const void *source)
+{
+    void *model = effPCPHelperBEDGetModel(work->helper);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_SetColor);
+    effPCP_BED_MatrixToQuaternion(source);
+    mdlSetRotate(model);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_SetScale);
+void effPCP_HBED2_SetColor(effPCP_HBED2_t *work, u32 color)
+{
+    effPCPHelperBEDSetColor(work->helper, color);
+}
+
+void effPCP_HBED2_SetScale(effPCP_HBED2_t *work, f32 scale)
+{
+    effPCPHelperBEDSetScale(work->helper, scale);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPadVibeFadeUpdate);
 
