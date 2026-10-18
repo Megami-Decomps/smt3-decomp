@@ -58,20 +58,39 @@ Confidence is then assigned per smt3 fallback:
 
 ## Numbers
 
-Measured on 2026-10-18 against 6930 remaining smt3 fallbacks totalling 0x1ADE98
+Measured on 2026-10-19 against 3646 remaining smt3 fallbacks totalling 0x140124
 bytes of `.text`. The fallback count drops as work lands, so rerun the tool rather
 than quoting these.
 
 | confidence | functions | bytes    | share of fallback bytes |
 | ---------- | --------- | -------- | ----------------------- |
-| high       | 1779      | 0x058874 | 25.7%                   |
-| medium     | 183       | 0x005728 | 2.6%                    |
-| low        | 579       | 0x01DA28 | 8.4%                    |
-| none       | 4389      | 0x1324D4 | 63.3%                   |
+| high       | 154       | 0x011F7C | 4.2%                    |
+| medium     | 28        | 0x0013D8 | 0.8%                    |
+| low        | 323       | 0x0171B0 | 8.9%                    |
+| none       | 3141      | 0x115C20 | 86.1%                   |
 
-Served by C that already exists: 2541 functions, 0x7B9C4 bytes, 36.7% of the
-remaining work by size. Of the 4389 "none" rows, 4298 have no DDS1 counterpart at
-all and 91 pair to code dds-decomp has not decompiled either.
+Served by C that already exists: 505 functions, 0x2A504 bytes, 13.9% of the
+remaining work by size. Of the 3141 "none" rows, 3072 have no DDS1 counterpart at
+all and 69 pair to code dds-decomp has not decompiled either.
+
+The reuse tiers are nearly spent, and that is the headline rather than a caveat.
+When this was first measured, on 2026-10-18 against 6930 fallbacks, the high tier
+alone was 1779 functions and 25.7% of the remaining bytes. Porting and ordinary
+reconstruction have since consumed almost all of it: the high tier is now 154
+functions and 4.2%. What is left is overwhelmingly SMT3's own game code, with no
+counterpart to port from.
+
+Treat the tiers with the same suspicion the method section describes. On one unit
+10 of 13 high-confidence pairings held; on another all 5 were different functions
+at a similar donor size, and a third unit's 5 were likewise unusable. One pairing
+has held exactly: `fldDrawSkyGradient` against `fldSkyDrawFilter`, the same
+function at the same 0xAD8 size, which transliterated to 682 of 694 words on the
+first compile. Two agents independently reported the HD reconstruction
+([Names](names.md)) as more useful than the pairings.
+
+`build/dds_reuse.tsv` carries a row per function, not per fallback. Filter on
+`smt3_state == "asm"` before counting anything: a tally over every row counts work
+already finished and overstates what is left by several times.
 
 The reuse is concentrated. `effect/*`, `event/*`, `interface/*`, `kernel/*` and the
 `sdf/*` units are largely served; the two biggest unserved blocks are

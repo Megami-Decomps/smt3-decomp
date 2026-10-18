@@ -342,12 +342,17 @@ def confidence(pair: dict, literal: bool) -> str:
 
 # --- report -----------------------------------------------------------------------
 
-FIELDS = ["smt3_addr", "smt3_func", "smt3_unit", "size", "insns", "calls", "confidence",
-          "dds_func", "dds_file", "dds_unit", "dds_have", "dds_size", "run", "how",
-          "evidence"]
+FIELDS = ["smt3_addr", "smt3_func", "smt3_unit", "smt3_state", "size", "insns", "calls",
+          "confidence", "dds_func", "dds_file", "dds_unit", "dds_have", "dds_size", "run",
+          "how", "evidence"]
 HEADER = [
-    "SLUS_209.11 INCLUDE_ASM functions against the C dds-decomp already has.",
+    "Every SLUS_209.11 function against the C dds-decomp already has.",
     "Produced by tools/dds_reuse.py; method, numbers and limits in docs/dds-port.md.",
+    "",
+    "smt3_state says whether the function is still an INCLUDE_ASM fallback (asm) or",
+    "already reconstructed (c). Filter to asm before counting anything: the file has",
+    "a row per function, so a confidence tally over all rows counts work already done",
+    "and overstates what is left by several times.",
     "No DDS1 binary is read, so no pair here is proven at the byte level: confidence",
     "high means a shared .rodata literal or a run of at least six consecutive equal",
     "function sizes, medium a run of three to five, low a single size match or a",
@@ -411,6 +416,7 @@ def main() -> None:
                 evidence.append("unit")
         rows.append({
             "smt3_addr": f"0x{f['addr']:08X}", "smt3_func": f["name"], "smt3_unit": f["unit"],
+            "smt3_state": "asm" if f["name"] in smt3.fallback else "c",
             "size": f"0x{f['size']:X}", "insns": f["insns"], "calls": len(f["calls"]),
             "confidence": conf,
             "dds_func": b["name"] if b else "", "dds_file": b["file"] if b else "",
