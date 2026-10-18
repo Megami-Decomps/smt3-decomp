@@ -128,6 +128,8 @@ extern void Lerp(f32 weight);
 #define VU0_CLEAR_VF10_W() __asm__ volatile ( \
     ".set noreorder\n\tvmulx.w vf10, vf10, vf0x\n\t.set reorder")
 
+INCLUDE_ASM(const s32, "basic/dds3PathBasic", dds3PathEvalSpline);
+
 dds3SceneBasic_t *dds3AddPathBasic(s32 key, void *work, const char *name)
 {
     dds3SceneBasic_t *object = dds3AddSceneBasicData(0x10);

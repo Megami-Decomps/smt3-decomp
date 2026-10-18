@@ -295,11 +295,10 @@ Resolved:
 
 Open, and reported rather than resolved:
 
-- `basic/dds3ModelRangeBasic`. Its start bracket is [0x00115860, 0x00115F28], 18
-  retail functions wide, and it excludes the doc's proposed 0x00115F68 by 0x40 bytes.
-  Exact bounds do not dissolve this, so the disagreement is real rather than scanner
-  error. Its end pins at 0x00116000. Do not apply either start until the gap is
-  explained.
+- `basic/dds3ModelRangeBasic`, resolved by counting functions between two anchors
+  instead of by the bracket. The start is 0x00115EE8, two functions below the
+  0x00115F68 `docs/tu-recovery.md` proposed, which the bracket already excluded. See
+  below.
 - `fldDraw.c`, `scrParameterCommand.c` and `effDebug.c` are absent from the 172, so
   the debug build cannot speak to any cut that rests on them.
 - 7 of the 172 are named nowhere in the HD map: `kernel/dds3TexViewer`, `misc/l2d`,
@@ -350,15 +349,9 @@ new ground.
    `nbCameraClearState` at 0x001B1490. The HD map put the name on the wrong chunk, so
    this span is a target for the two-witness cuts above, not a rename. Until it is
    cut, the name is a label for the chunk and nothing more.
-3. **Settle `basic/dds3ModelRangeBasic`.** Its 18-function bracket excludes the
-   proposed 0x00115F68 outright, and the names in that region do not run in file
-   order: `dds3PathBasicFreeControl`, `dds3SetPathBasicSpline`,
-   `dds3SearchSceneBasicWorkData` and `dds3PathEvalSpline` are interleaved with the
-   `dds3*ModelBasic*` run, which is not something one compiler pass over one file
-   produces. Either some HD names in the region are on the wrong functions or the
-   files are smaller than the names suggest; the debug build's three
-   `dds3ModelRangeBasic.c` reference sites are the way to tell. Cost: hours. Risk:
-   none until something is applied.
+3. **Apply the method of section 9 to the other 15 single-witness brackets.** The
+   `dds3ModelRangeBasic` case shows that a bracket with an anchor just inside it
+   settles to an exact address, which the bracket alone does not.
 
 Then, in order: work the 16 single-witness brackets down by narrowing them with data
 references; use the `.rodata` ordering result when `.rodata` is split;
@@ -387,3 +380,44 @@ hashes to `5facfbf7916836613449c922e26a4ec412207b32`.
   that settles a boundary.
 - Hex-Rays on the debug IDB works, and IDA's 8,813 functions there match the earlier
   scanner count. Decompiler output has not been used for any claim in this document.
+
+## 9. Counting between anchors: three boundaries applied
+
+A bracket says where a file starts to within a few functions. Where an anchor falls
+just inside the bracket, the gap between two anchors can be counted on both sides and
+the boundary comes out exact. The three files after `dds3ModelBasic.c` are the worked
+case, and the first of them is the `dds3ModelRangeBasic` tension section 5 left open.
+
+Three hash anchors fix the frame. Debug 0x0011A7B8 is retail 0x00115E88
+`dds3ModelBasicSetMotion`, debug 0x0011A878 is retail 0x00115F28
+`dds3ModelBasicFreeModel`, and debug 0x0011AA68 is retail 0x00116058
+`dds3PathEvalSpline`, each byte-identical at 92, 64 and 356 bytes. Between them the
+function counts agree exactly:
+
+| debug run | file | functions | retail run |
+|---|---|---|---|
+| 0x0011A818 to 0x0011A99C | `dds3ModelRangeBasic.c` | 5 and 5 | 0x00115EE8 to 0x00115FFC |
+| 0x0011A9A0 to 0x0011AA64 | `dds3EventBasic.c` | 2 and 2 | 0x00116000 to 0x00116057 |
+| 0x0011AA68 on | `dds3PathBasic.c` | | 0x00116058 on |
+
+The runs come from the assert paths: `dds3ModelRangeBasic.c` is referenced from
+0x0011A818, 0x0011A8B8 and 0x0011A940, `dds3EventBasic.c` from 0x0011A9A0 and
+0x0011AA20, `dds3PathBasic.c` first from 0x0011ABD0. The 0x0011A878 anchor sits second
+of five on both sides, so the correspondence is pinned in the middle as well as at
+both ends.
+
+So `dds3ModelRangeBasic.c` starts at 0x00115EE8, not the proposed 0x00115F68, and
+`dds3PathBasic.c` starts at 0x00116058, not the applied 0x001161C0. All three cuts are
+in the config and the image still hashes to
+`5facfbf7916836613449c922e26a4ec412207b32`.
+
+The HD names in the region are what misled the earlier reading. `dds3ModelRangeBasic.c`
+holds functions the HD map calls `dds3AllocModelBasicWorkData`,
+`dds3ModelBasicFreeModel`, `dds3SetPathBasicSpline` and `dds3SearchSceneBasicWorkData`,
+so a name's prefix is not evidence of which file it is in. Those names are untouched:
+the debug build locates the file boundary, not the function names.
+
+What stays open in the region: the remaining `code_00115D38` chunk starts at
+0x00115D38 with `dds3PathBasicFreeControl` and runs to 0x00115EE8, which the debug
+build attributes to `dds3ModelBasic.c`. There is no anchor below it, so its start is
+still only bracketed and it keeps the `code_` name.
