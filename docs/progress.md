@@ -45,11 +45,11 @@ should be labelled as whole-binary rather than game-code progress.
 ```sh
 python tools/progress.py smt3   # source coverage
 ninja objdiff                   # build the comparison objects
-ninja report                    # objdiff reports
+ninja report                    # reconciled reports
 ```
 
 All three work. `ninja report` runs `objdiff-cli report generate` (3.8.1) three
-times and writes:
+times, then reconciles each result with `tools/production_report.py`:
 
 | File | Project | Units | Scope |
 |---|---|---|---|
@@ -57,7 +57,38 @@ times and writes:
 | `build/smt3/report.all.json` | `build/smt3/objdiff.json` | 102 | whole binary, by category |
 | `build/smt3/report.json` | `build/smt3/progress/objdiff.json` | 92 | game-code units only |
 
-With one version key the first two hold the same numbers. `configure.py`
+Each of the three is written three times over: `<file>.raw` is what objdiff
+measured, `<file>` is the same report with code credit replaced by what the
+reconciler can prove, and `<file>.proof.json` is the per-function evidence
+behind that. The published numbers are the reconciled ones.
+
+### What the reconciler proves
+
+`tools/production_report.py` credits a function only when four independent
+pieces of evidence agree, and it does not fall back to anything weaker when one
+is missing:
+
+- **Compiler provenance.** The `.ent`/`.end` pair for the function appears in
+  the cc1 assembly of the C unit, outside any `#APP` block, so the instructions
+  came from the compiler and not from an `INCLUDE_ASM` fallback or inline asm.
+- **An unambiguous production object.** The object the build actually links
+  (not the `-DSKIP_ASM` objdiff base) owns exactly one span for that function.
+- **A link owner.** The link map places that object's `.text` input section at
+  an address, and the linked ELF has a symbol of that name, address and size
+  inside it.
+- **Exact bytes.** The linked bytes over the function's span equal the retail
+  bytes at the same file offset.
+
+The `cc` and `ld` rules write `<out>.proof.json` receipts of SHA-256 hashes for
+their inputs, and the reconciler re-hashes the sources, flags and configs those
+receipts name. A source edited after the build, or a receipt that no longer
+matches, fails the report instead of being reported as progress. A function
+whose body is mostly inline asm (at least 8 instructions and more than half the
+body) is refused as well, since the compiler is then only the frame around
+handwritten code. Any gap in the chain exits non-zero with
+`production report proof failed: ...`.
+
+With one version key the first two reports hold the same numbers. `configure.py`
 assigns each unit a category from its path (`game`, `sdk`, `handwritten`,
 `vu1`, `data`) and omits categories that no unit is in: objdiff measures an
 empty category as 100% matched, which reads as a finished component rather than
@@ -90,31 +121,36 @@ retail. Objdiff answers "does this C emit the retail instructions for this
 function in isolation". Only the checksum build answers "do the retail bytes at
 this address come from C".
 
-## Measured on 2026-10-17
+## Measured on 2026-10-18
 
 At `5facfbf7916836613449c922e26a4ec412207b32`, with the retail checksum
 verified in the same run.
 
-| Measure | Game code (92 units) | Whole binary (102 units) |
+| Measure | Game code (96 units) | Whole binary (106 units) |
 |---|---|---|
-| Code bytes matched | 1,704 / 1,976,292 (0.086%) | 1,704 / 2,036,072 (0.084%) |
-| Functions matched | 119 / 9,694 (1.23%) | 119 / 9,699 (1.23%) |
+| Code bytes matched | 80,656 / 1,976,292 (4.081%) | 80,656 / 2,036,072 (3.961%) |
+| Functions matched | 721 / 9,694 (7.44%) | 721 / 9,699 (7.43%) |
 
-`python tools/progress.py smt3` reports the same 119 functions and 1,704 bytes
-from the source inventory alone, which is the cross-check that matters: the
-report credits nothing that is still an `INCLUDE_ASM` line.
+`python tools/progress.py smt3` reports the same 721 functions and 80,656
+bytes from the source inventory alone, which is the cross-check that matters:
+the reconciler credits nothing that is still an `INCLUDE_ASM` line, and the
+source inventory credits nothing the link does not supply from C.
 
-The 119 are not 119 reconstructions. 110 of them are empty-bodied functions
-that compile to `jr $ra; nop`, 8 bytes each, 880 bytes in total. The remaining
-nine are the reconstructed functions in `src/smt3/newdata/datCalc.c`, 824
-bytes. Substantive C is therefore 824 bytes of 1,976,292 (0.042%) and 9
-functions of 9,694 (0.093%); the function percentage is the one that flatters
-the work most, since an empty function and a 120-byte one count the same.
+Raw objdiff, before reconciliation, reports 677 functions and 67,976 bytes for
+the same tree (`build/smt3/report.json.raw`). The 44-function, 12,680-byte gap
+is in the other direction from what the caveats below might suggest: those
+functions are exact in the linked image and imperfect in the `-DSKIP_ASM` base
+object, so raw objdiff understates them. Reconciliation moves credit both ways
+and only on evidence from the real link.
+
+110 of the 721 are empty-bodied functions that compile to `jr $ra; nop`, 8
+bytes each, 880 bytes in total. The function percentage is the measure that
+flatters the work most, since an empty function and a 120-byte one count the
+same; code bytes are the honest headline.
 
 No function anywhere is partially credited. A function left as `INCLUDE_ASM` is
-absent from the base object, so objdiff scores it 0 rather than part marks:
-every one of the 119 is at 100%, and `matched_code_percent` equals
-`fuzzy_match_percent` for that reason.
+absent from the base object and has no C provider in the link, so it scores 0
+rather than part marks.
 
 Excluded from the game-code denominator, and matched nowhere:
 
@@ -127,22 +163,29 @@ Excluded from the game-code denominator, and matched nowhere:
 ## Percentages in these reports that are not measurements
 
 A unit with no base object has nothing to compare, and objdiff scores an empty
-comparison as 100%. The `data` and `handwritten` rows print percentages of that
-kind (`matched_code_percent: 100` on a unit with no code, `matched_data_percent:
-100` on a unit with no data). They are artifacts of an absent object, not
-progress, and no number from them is quoted above. Data is not compared at all:
-all 2,648,896 bytes of split data sit outside the game report, and the 147,080
-bytes of data in the game report belong to the C units and match 0%.
+comparison as 100%. The `data` and `handwritten` rows of a `.raw` report print
+percentages of that kind (`matched_code_percent: 100` on a unit with no code,
+`matched_data_percent: 100` on a unit with no data). They are artifacts of an
+absent object, not progress. The reconciler recomputes code credit and the
+aggregates over it, so those code figures read 0 in the reconciled report, but
+it leaves data measures alone and the empty-comparison data percentages
+survive. Data is not compared at all: all 2,648,896 bytes of split data sit
+outside the game report, and the 147,080 bytes of data in the game report
+belong to the C units and match 0%.
 
 Objdiff bases are compiled separately with `-DSKIP_ASM`, which changes compiler
 context: ee-gcc 2.96 can then select different instructions, and relocatable
 objects can encode the same final address or literal differently. A function
-can therefore be exact in the real build and imperfect in objdiff. The
-authoritative per-function check is `tools/check_unit.py` plus the retail
-checksum build, as in [Contributing](CONTRIBUTING.md#3-verify).
+can therefore be exact in the real build and imperfect in objdiff, or exact in
+objdiff and not in the linked image. That is the discrepancy the reconciler
+removes: a credited function in a reconciled report is one whose retail bytes
+the linked build demonstrably takes from C, which is the same question
+`tools/check_unit.py` and the retail checksum answer per unit, as in
+[Contributing](CONTRIBUTING.md#3-verify).
 
-dds-decomp solves that discrepancy with a production-proof reporter
-(`tools/production_report.py`) that binds compile and link receipts to the
-linked ELF and gives C credit only for proven production bytes. It is not
-vendored here, so this repo's reports are raw objdiff measures, and nothing is
-published anywhere.
+What is still not a measurement, after reconciliation: the denominator is the
+whole binary rather than game code, because no SDK unit has been identified
+yet; data is never credited; and a function counts once whatever its size, so
+the function percentage flatters small bodies. The reconciler proves ownership
+of bytes, not that a reconstruction is readable or correct beyond matching.
+Nothing is published anywhere; these numbers come from a local `ninja report`.

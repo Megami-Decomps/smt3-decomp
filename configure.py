@@ -362,14 +362,42 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
                               for p in (row["target"], row["base"]) if p})
     n.rule("objdiff_report", f"{OBJDIFF} report generate -p $project -o $out",
            description="objdiff report $out")
+    n.rule(
+        "production_report",
+        f"{sys.executable} tools/production_report.py report --scope $scope $versions $in $out",
+        description="reconcile report $out",
+    )
 
-    def report(out: str, project: str, objs: list[str]) -> None:
+    def report(out: str, project: str, objs: list[str], scope: str) -> None:
+        # $out.raw is what objdiff measured; $out keeps only the code the
+        # reconciler proves C supplies in the linked image.
+        raw = f"{out}.raw"
         project_config = "objdiff.json" if project == "." else f"{project}/objdiff.json"
-        n.build(out, "objdiff_report", implicit=objs + [project_config],
+        n.build(raw, "objdiff_report", implicit=objs + [project_config],
                 variables={"project": project})
+        dependencies = [
+            "tools/production_report.py",
+            "tools/check_unit.py",
+            "tools/resolved_code.py",
+            "tools/retail_elf.py",
+            "config/versions.json",
+        ]
+        for version in units:
+            if scope in ("all", version):
+                dependencies.extend([
+                    f"build/{version}/{VERSIONS[version]['serial']}.ok",
+                    f"build/{version}/{VERSIONS[version]['serial']}.elf.proof.json",
+                    f"config/{version}/symbol_addrs.txt",
+                    f"orig/{version}/{VERSIONS[version]['serial']}",
+                ])
+        n.build(out, "production_report", raw, implicit=dependencies,
+                implicit_outputs=[f"{out}.proof.json"],
+                variables={"scope": scope, "versions": " ".join(
+                    f"--version {version}" for version in units if scope in ("all", version)
+                )})
 
     n.build("objdiff", "phony", objdiff_objects)
-    report("report.json", ".", objdiff_objects)
+    report("report.json", ".", objdiff_objects, "all")
     reports = []
     for version, rows in units.items():
         game_rows = [row for row in rows if objdiff_progress_category(version, row["name"]) == "game"]
@@ -380,7 +408,7 @@ def write_objdiff_reports(n, units: dict[str, list[dict]]) -> None:
             (game_rows, f"build/{version}/progress", f"build/{version}/report.json"),
         ):
             objs = sorted({p for row in selected for p in (row["target"], row["base"]) if p})
-            report(out, project, objs)
+            report(out, project, objs, version)
             reports.append(out)
     n.build("report", "phony", ["report.json"] + reports)
 
@@ -402,14 +430,16 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
         f"{prefix}{CC1} {CC1_DEFINES} {INCLUDES} $cdefs {CC1_FLAGS} $cflags $in -o $out.s && "
-        f"{prefix}{EE_AS} {EE_AS_FLAGS} -o $out $out.s",
+        f"{prefix}{EE_AS} {EE_AS_FLAGS} -o $out $out.s && "
+        f"{sys.executable} tools/production_report.py record-object $in $out",
         description="cc $in",
         depfile="$out.d",
         deps="gcc",
     )
     n.rule(
         "ld",
-        f"{LD} -EL -T $ldscript -T $undef_syms -T $undef_funcs -Map $map --no-check-sections -o $out",
+        f"{LD} -EL -T $ldscript -T $undef_syms -T $undef_funcs -Map $map --no-check-sections -o $out && "
+        f"{sys.executable} tools/production_report.py record-link $out $map $in",
         description="ld $out",
     )
     n.rule("objcopy", f"{OBJCOPY} -O binary $in $out", description="objcopy $out")
@@ -450,13 +480,16 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
                 flags = unit_cflags(version).get(src.relative_to(Path("src") / version).with_suffix("").as_posix(), "")
                 n.build(str(obj), "cc", str(src),
-                        implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt"],
-                        implicit_outputs=[str(obj) + ".s"],
+                        implicit=eeasm + ["include/macro.inc", f"config/{version}/cflags.txt",
+                                          "tools/production_report.py"],
+                        implicit_outputs=[str(obj) + ".s", str(obj) + ".proof.json"],
                         variables={"cdefs": cdefs, "cflags": flags})
                 # objdiff base: the same unit without its INCLUDE_ASM fallbacks, so only C counts.
                 base = Path("build") / version / "base" / src.with_suffix(".o")
-                n.build(str(base), "cc", str(src), implicit=[f"config/{version}/cflags.txt"],
-                        implicit_outputs=[str(base) + ".s"],
+                n.build(str(base), "cc", str(src),
+                        implicit=[f"config/{version}/cflags.txt", "include/macro.inc",
+                                  "tools/production_report.py"],
+                        implicit_outputs=[str(base) + ".s", str(base) + ".proof.json"],
                         variables={"cdefs": f"{cdefs} -DSKIP_ASM", "cflags": flags})
                 # objdiff target: splat's full disassembly of this C unit, assembled as-is.
                 full = Path("asm") / version / src.relative_to(Path("src") / version).with_suffix(".s")
@@ -469,8 +502,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         n.build(
             str(elf), "ld", [str(o) for o in objects],
             implicit=[str(ld_script), f"config/{version}/undefined_syms_auto.txt",
-                      f"config/{version}/undefined_funcs_auto.txt"],
-            implicit_outputs=[str(elf.with_suffix(".map"))],
+                      f"config/{version}/undefined_funcs_auto.txt", "tools/production_report.py"],
+            implicit_outputs=[str(elf.with_suffix(".map")), str(elf) + ".proof.json"],
             variables={
                 "ldscript": str(ld_script),
                 "undef_syms": f"config/{version}/undefined_syms_auto.txt",

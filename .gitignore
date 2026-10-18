@@ -22,6 +22,7 @@ orig/*/
 /objdiff.json
 /report.json
 /report.json.raw
+/report.json.proof.json
 /ctx.c
 config/*/undefined_funcs_auto.txt
 config/*/undefined_syms_auto.txt

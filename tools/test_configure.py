@@ -409,9 +409,13 @@ class ObjdiffProgressTests(unittest.TestCase):
         all_objects = sorted({p for row in self.units[VERSION]
                               for p in (row["target"], row["base"]) if p})
         self.assertEqual(builds["objdiff"].args, ("objdiff", "phony", all_objects))
-        self.assertEqual(builds["report.json"].kwargs, {
+        self.assertEqual(builds["report.json.raw"].kwargs, {
             "implicit": all_objects + ["objdiff.json"], "variables": {"project": "."},
         })
+        self.assertEqual(builds["report.json"].args,
+                         ("report.json", "production_report", "report.json.raw"))
+        self.assertEqual(builds["report.json"].kwargs["variables"],
+                         {"scope": "all", "versions": f"--version {VERSION}"})
         expected_reports = {"report.json"}
         rows = self.units[VERSION]
         for selected, project, out in (
@@ -420,15 +424,37 @@ class ObjdiffProgressTests(unittest.TestCase):
         ):
             expected_reports.add(out)
             objects = sorted({p for row in selected for p in (row["target"], row["base"]) if p})
-            self.assertEqual(builds[out].args, (out, "objdiff_report"))
-            self.assertEqual(builds[out].kwargs, {
+            self.assertEqual(builds[f"{out}.raw"].args, (f"{out}.raw", "objdiff_report"))
+            self.assertEqual(builds[f"{out}.raw"].kwargs, {
                 "implicit": objects + [f"{project}/objdiff.json"], "variables": {"project": project},
             })
+            self.assertEqual(builds[out].args, (out, "production_report", f"{out}.raw"))
+            self.assertEqual(builds[out].kwargs["variables"],
+                             {"scope": VERSION, "versions": f"--version {VERSION}"})
         self.assertEqual(set(builds["report"].args[2]), expected_reports)
         writer.rule.assert_any_call(
             "objdiff_report", f"{configure.OBJDIFF} report generate -p $project -o $out",
             description="objdiff report $out"
         )
+
+    def test_reconciliation_depends_on_the_checked_build_and_its_receipts(self) -> None:
+        writer = Mock()
+        configure.write_objdiff_reports(writer, self.units)
+        reconciled = [call for call in writer.build.call_args_list
+                      if call.args[1] == "production_report"]
+        self.assertEqual(len(reconciled), 3)
+        for call in reconciled:
+            dependencies = call.kwargs["implicit"]
+            self.assertEqual(call.kwargs["implicit_outputs"],
+                             [f"{call.args[0]}.proof.json"])
+            for dependency in (
+                "tools/production_report.py",
+                f"build/{VERSION}/{SERIAL}.ok",
+                f"build/{VERSION}/{SERIAL}.elf.proof.json",
+                f"config/{VERSION}/symbol_addrs.txt",
+                f"orig/{VERSION}/{SERIAL}",
+            ):
+                self.assertIn(dependency, dependencies)
 
 
 class ProgressLabelTests(unittest.TestCase):
