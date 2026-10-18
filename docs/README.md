@@ -18,6 +18,8 @@ quickstart.
   that the retail code proves wrong, and the proof for each.
 - [Naming drift](naming-drift.md): the audit of member, enum, define, function
   and global names against the IDB, and the queue of fixes it found.
+- [Matching levers](matching-levers.md): what to change in the source when a
+  function is close but not exact, and what has been ruled out.
 - [Reading progress](progress.md): how progress would be measured and what
   counts.
 

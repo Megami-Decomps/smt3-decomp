@@ -92,10 +92,9 @@ than another permutation:
   `INCLUDE_ASM` functions; [the port notes](dds-port.md) cover how far the
   pairing can be trusted.
 
-Two recurring causes of a near miss, both source-shape problems rather than
-anything to chase in the registers: an address that is a `.lit4` pool entry
-rather than a global, which `tools/check_unit.py` says outright; and C that
-needs one register more than retail, which shifts every allocation by one.
+[Matching levers](matching-levers.md) is the list to work through when a
+function is close but not exact, including the shapes that have been ruled out
+and are not worth a second attempt.
 
 ## 3. Verify
 
