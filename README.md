@@ -41,11 +41,11 @@ the `.DVP.*` VU overlay tables and the section-header region byte for byte.
 
 The build is verified: `ninja` relinks the split objects and `objcopy`s the
 result into a file byte-identical to the retail executable, reproduced from a
-clean tree. `.text` is split into 96 translation units, 69 of them under their
-recovered names. 6,986 of the 9,694 functions are still `INCLUDE_ASM`
-fallbacks; 2,708 are in C, which is 227,504 of 1,976,292 code bytes, verified
-against the linked image rather than against objdiff's base objects. 341 of
-those 2,708 are two-instruction functions of 8 bytes each, 2,728 bytes in
+clean tree. `.text` is split into 98 translation units, 71 of them under their
+recovered names. 4,621 of the 9,694 functions are still `INCLUDE_ASM`
+fallbacks; 5,073 are in C, which is 579,228 of 1,976,292 code bytes, verified
+against the linked image rather than against objdiff's base objects. 591 of
+those 5,073 are two-instruction functions of 8 bytes each, 4,728 bytes in
 total, so the function share runs well ahead of the byte share.
 
 The badges above track matched game and engine code bytes and function

@@ -3,10 +3,10 @@
 Reconstructed types for the SLUS_209.11 decompilation. `common.h`, `include_asm.h`
 and `macro.inc` belong to the build; the rest are recovered game types.
 
-`ps2asm.h` is included by built units, so editing it changes the image; see its
-section below. The rest are not included anywhere yet, so adding or editing one
-cannot change the build. They are here so a unit that includes `model.h` or
-`scr.h` finds the types the original source would have given it.
+Reconstructed C units share these headers. Changes to a layout or declaration
+must keep every affected whole unit clean under `tools/check_unit.py` and the
+linked image byte-identical. `ps2asm.h` also contains emitted EE extension
+macros; see its section below.
 
 ## Where the names and layouts come from
 
@@ -66,6 +66,26 @@ reason.
 allocator call that creates it; offsets listed are the ones a load or store in the
 code puts beyond doubt.
 
+### font.h and interface.h
+
+These shared layouts are adapted from the matched DDS engine C and checked
+against SLUS_209.11, not copied from remaster layouts:
+
+| struct | size | retail evidence |
+|---|---|---|
+| `fmFontNode_t` | 32 | `fmInitFontMemControl` allocates and links nodes with a `0x20` stride |
+| `frFontRecord_t` | 12 | `frInitFontTable` requests `0xC` bytes per atlas record; refs at +4 and atlas node at +8 |
+| `frTextHandle_t` | 44 | `frInitFontTable` creates the `0x2C` child pool; `frInitTextHandle` and `frSetUserImage` establish its fields |
+| `frFontHandle_t` | 48 | `frInitFontTable` creates the `0x30` parent pool, unlike DDS1's `0x44` pool |
+| `itfPanel_t` | 52 | `itfPnlRegist2` allocates `0x34`; RGBA occupies +`0x20`..+`0x2C` and kind is the byte at +`0x30` |
+| `itfPanelVertex_t` | 8 | `CreateVertexPlain` writes four XY pairs in eight-byte steps |
+
+Font bank, atlas, packet and message-stream types used only by `frFont.c` remain
+unit-local. Message-manager work also remains local: native allocation is
+`0x1D4`, selection options start at +`0x5C`, the two panel pointers are at
++`0x9C`/+`0xA0`, variables at +`0xC4`, and cursor state at +`0x1C4`.
+`itfMesMngInitializeManager` initializes 128 link records, rather than DDS1's 64.
+
 ### kernel.h
 
 | struct | size | evidence |
@@ -88,6 +108,13 @@ sites: 35 distinct values match the HD member the caller's name implies
 `DDS3_PRIORITY_DRAW_PB` 11005 from the `pbInit*Draw` set, and so on) with no
 conflict. `enum dds3_ot`, `enum dds3_model_ot` and `enum dds3_admini_list` are
 carried from HD unchecked; the headers say so.
+
+`RunProcess` also exposes the pad snapshots kept beside the small-data init
+flag: two ports, two sticks per port and two axes per stick occupy eight
+bytes at `0x0054E8F8` (previous) and `0x0054E908` (task-visible). Four status
+bytes follow each axis block at `0x0054E900` and `0x0054E910`. Its clear and
+copy loops prove these extents. Their typed externs remain local to
+`dds3KernelCore.c`; the manual symbol block supplies the native boundaries.
 
 ### basic.h
 
@@ -147,6 +174,14 @@ its stride: `reserve1`, `reserve2` and the 24-byte size are HD's and
 **unconfirmed**.
 
 ### libsdf.h
+
+The vector, matrix, DMA and GIF packet definitions live in the common-only
+`sdf_types.h`, included by `libsdf.h`. Packet constructors can therefore
+reuse their canonical layouts without importing the engine's unrelated owner
+types. The packet header exposes the DMA tag's two 64-bit hardware words as
+`dmaWords.tag` and `dmaWords.vif`, alongside the decoded `dmatag` fields.
+The parallel-light packet exposes its three normal vectors as
+`normalComponents[3][4]` for indexed access.
 
 | struct | size | evidence |
 |---|---|---|
@@ -278,6 +313,34 @@ names in HD order, bracketed by those three anchors and the 32-byte size.
 entry's `comm` without touching `$a0`, and `scrCommand_BIT_ON` reads its argument
 with `scrGetIntPara` and returns 1.
 
+### newdata.h
+
+`dds3GlobalWork_t` is a partial view of `DDS3_GBWK`, shared by the interpreter
+and gameplay data helpers, not a claim about the allocation's complete size.
+`fldMainLoadStart` reads the signed transition halfword at +0xE before
+choosing between the return sequence and initial field loading. This fills
+part of the initial padding without moving the variable banks.
+`PopInt`, `PopFloat` and the global-variable opcodes address the integer bank
+at +0x40 and float bank at +0x440. `dds3GlobalWorkClearFlags` clears both banks
+in one forward pass. `datAddMaka` and `datCheckMaka` access the signed currency
+balance at +0xA48. `fclClearTerminalState` clears the encounter step remainder
+at +0x1CF4 and the halfword encounter gauge at +0x1CF8. `slSetTmnlID` writes
+the two terminal-preview halfwords at +0x11A78/+0x11A7A. Event flags and moon
+state occupy the previously opaque +0x840..+0xA47 region (described below).
+These are one shared view, not parallel save-work prefixes; other gaps remain
+opaque.
+
+The upstream field helpers extend that same view with `maFlags` +0xA4C,
+sixteen 0xEC-byte digging-party records at +0xA50, 48 field-flag blocks at
++0x6658, and treasure-open bits at +0x11A58/+0x11A80. Each field-flag row is
+0x1E bytes. `datUnitVisual_t` combines the packet helpers' scalar prefix with
+the action helpers' eight 0x1C-byte part records at +0x32 and native 0x310
+stride. `datUnitWork_t` retains the verified byte/halfword name and skill
+storage: `nowcommand` is at +0x64, not the later offset implied by unused
+expanded donor fields. Stock-skill helpers read/write 24 halfwords at +0x86;
+they use `datUnitWork_t.skillSlots` directly rather than appending another
+skill array after the already complete 0xEC-byte unit record.
+
 ### model.h
 
 The node tree a loaded model file becomes, plus the shape headers its draw
@@ -353,6 +416,122 @@ packet into a single 32-byte struct that matches neither. The field names are
 `sdfModelTempPacket_t`, which is the same type reached through the root's
 temporary packet list.
 
+The DDS3 model layer now shares its owner/resource layouts between
+`model/mdlManager.c` and the PIB effect interpreter in `code_001DEA58.c`:
+`mdlObj_t`, `mdlResrc_t`, `mdlResrcSlot_t`, `mdlDevSlot_t`, `mdlDevList_t`
+and `mdlEffectResrc_t`. `mdlCreateEffectCtrlr` allocates a controller, stores
+the old owner head at +0, the kind at +4 and motion slot at +6, and links it
+through `mdlObj_t.resourceItems` +0x14. Its payload is a union: anchored
+billboards/effects keep the instance, part slot, MPOS record and offset scale;
+IPU attachments keep the owner, stream object, texture and deferred-start
+parameters. `mdlPibGetChunk` reads the group's PIB pointer at +0xA4;
+`mdlGetEffectResrc` reads the part-list pointer at +0xA8. That part list uses
+the existing `sdfItemArray_t` header, not a texture-specific list.
+`mdlResrc_t.defaultScale` at +0xAC is initialized to 1 by resource
+registration and copied into the new model's three scale components by
+`mdlLoad`; it is not an unidentified resource word.
+
+The event controls share `newdata.h`'s `dds3GlobalWork_t` prefix:
+`evtBitAllOff` clears the event-word bank at +0x840, and the moon controls
+access flags at +0xA40, the sixteen-phase counter at +0xA41 and its float
+timer at +0xA44. No layout beyond these accessed fields is claimed.
+
+The event units reuse those model layouts. Event motion reads the owner's SDK root
+at +0x18, first controller at +0x1C and controller slots at +0x20; the existing
+`sdfModelRootNode_t` and `sdfMotionCtrlr_t` describe those pointees.
+
+### event.h
+
+`evtCreateUnitHandle` allocates and clears **0x148 bytes** for `evtUnit_t`.
+The paired DDS work is larger: SMT3 has no word before `pathHandle` +0x9C,
+no gap before `motionSetup` +0xBE, and no DDS shadow/reference-angle or
+vertical-movement tail. Native setters and command handlers fix `flags`
++0xA4, `motionState` +0xA8, `slotFlags` +0xCC, `tableValues` +0xD8,
+colour duration +0x138 and light-target transition counters +0x144/+0x146.
+The model owner, basic node and motion controllers reuse their existing
+headers. `basic.h`'s `dds3UnitObjectWork_t` describes the event-unit pointer at
+payload +8, control pointer +0xC, linked-light ID +0x10 and ordering table +0x14.
+
+`evtWorldSourceTransformPrefix_t` is the position/quaternion prefix of the
+scene's type-17 source records, shared by stage placement, event motion and
+script effect placement. `basic.h` supplies the complete, 0xAC-byte
+`dds3ObjectBaseControl_t`, including its control-basic array at +0x10 and mover
+in slot 1. Stage, script and field consumers use that same layout rather than
+independent prefix types. Path consumers likewise share the 36-byte
+`dds3PathBasicControl_t` and its typed channel-key union; direction is at +0,
+and the spline handle is at +0x10. Their public declarations live beside the
+types. The serialized scene texture-offset table remains an opaque shared
+pointer type in `libsdf.h`; these ports only forward it.
+
+The upstream native path implementation supplies the canonical transform
+channel: quaternion +0, XYZ position +0x10 and XYZ scale +0x1C, in 0x28-byte
+samples. `dds3PathKeyframes_t.data.transform` and the cursor's `transformKeys`
+name that channel; the cursor and channel types are shared with the retained
+port consumers rather than declared again in the upstream unit.
+
+### Shared DDS port layouts
+
+`effect.h` owns the native blur payloads shared by the renderer, event setup
+and polygon-movie blending: `effBlurQuad_t` (0x28), scale/scatter parameter
+blocks (0x2C), their slot/allocation owners, the texture-backed template body
+(0x2C), resource-rectangle parameters (0x24) and solid-rectangle parameters
+(0x18). These sizes follow the native copy counts and allocation arithmetic.
+Packed RGBA and byte-channel access share one word; position pairs and 2x2
+corners retain the native indexing used by the movie blender.
+
+The same header owns the effect RNG's four words, retained slot-array header
+`effArrHdr_t`, cubic XYZ segment `effCubicBezierSlot_t` (0x38), and seven-point
+`effBezierCurve_t` (0x60). The latter is the curve inside a moving ribbon
+slot, not the ribbon's larger 0x80-byte `effBezierSlot_t`. Particle dispatch
+and thunder effects share `parCell_t`, `parSystem_t` and `sdfVector3_t`; their
+allocation and material pointers use the existing SDF types.
+
+`billboard.h` owns the 0x1C-byte render pair and 0x64-byte `billObj_t`, shared
+by the billboard manager and particles. The pair begins at +0x34 and
+`animationActive` at +0x50. Material, texture and heap layouts in the thunder
+and scatter paths reuse `sdfMat_t`, `sdfMatPacket_t`, `sdfTexHandle_t` and
+`sdfMemHandle_t`, rather than retaining donor-only copies.
+
+`nb.h` owns the shared `nbFormation_t`, `nbMainProcessData_t` and
+`nbKoukaProcessData_t` layouts. Main work includes the action-stack count at
++0x40, camera process at +0xFC, encounter process at +0x114 and event-pack/memory
+pointers at +0x138/+0x13C. These remain accessed fields, not a complete
+main-work size claim. The formation's motion-specific unions describe actual
+reuse of the loading/target words for damage and shake state.
+
+`libsdf.h` owns the shared eight-byte thread registration node `sdfThCB_t`,
+sixteen-byte SIF command and 0x40-byte native texture-file header
+`TMX_HEADER_t`. These use the recovered names recorded in
+[type recovery](../docs/type-recovery.md); particle axes likewise reuse
+`sdfVector3_t` rather than a RenderWare-named duplicate. Texture clamp mode is
+the byte at +0x1B and resource key the word at +0x1C. PAC packet words formerly
+called padding are named `kind` (+2) and `tag` (+8) for the field/model
+consumers that interpret them. The shared `sdfFileCmd_t` prefix combines the
+queue's path pointer at +0x10 with the native device helpers' status byte at
++0x16, file descriptor at +0x28 and error word at +0x2C. This is an accessed
+prefix, not a complete file-command allocation-size claim.
+It remains distinct from the complete 0x40-byte `sdfFileCmdHandle_t` owner:
+a matching prefix is not evidence that the two allocation sizes are equal.
+
+`field.h` owns the 0x0C-byte filename entry and 0x24-byte file-resource row
+shared by the resolver and field loader. Its single `fldAreaWork_t` view of
+`fldGlobalBase` combines the area/floor (+4/+8), consumed flags (+0x14), mode
+(+0x18), requested scene name (+0x20), resource selection (+0x84..+0x8C),
+sequence code (+0xA0), reuse flag (+0xA8), light-spell index (+0xB8) and XYZ
+position (+0x100..+0x108).
+Model and field loading share `sdfPacState_t`/`sdfPacWork_t` rather than
+declaring private copies; the state remains the native 0x38 bytes that
+`sdfPacInit` clears.
+
+The emitted macros in `ps2asm.h` are canonical across these ports. In
+particular, particle code reuses the vf12 load, vf10/vf12 add, secondary-bank
+load and unclobbered vf10 store. The battle camera reuses
+`VU0_COPY_MATRIX_TO_SECONDARY`. Memory-operand and memory-clobber variants are
+intentionally distinct compiler contracts, even when their EE opcode is the
+same; changing those contracts can change surrounding C code generation.
+Upstream's specialized unit-local VU0 sequences retain their exact operand
+constraints and clobbers during header reconciliation.
+
 ### motion.h
 
 | struct | size | evidence |
@@ -387,6 +566,45 @@ and the result dereferenced, so it is an array of pointers.
 per-node chunk pointer by; `numOfKey` +4 and `keyElemSize` +6 and the inline
 `keyFrameList` at +8 are what `sdfMotGetKey` binary-searches and then indexes,
 taking the key data to start after the frame list rounded up to a word.
+
+The channel-specific payloads used only by `sdfMotion.c` stay local there:
+visibility and material-value nodes allocate 20 bytes, UVW nodes 36 bytes,
+and morph nodes 32 bytes. All begin with the existing typed node/target
+prefix; their captured blend state starts at +0x10. UVW capture copies only
+the five meaningful floats (20 bytes), not the material parameter's padding.
+Morph capture preserves both 8-byte target/weight pairs.
+
+The packet decoder's +0x24 pointer in `libsdf.h` has both a typed `decomp`
+view and a byte-buffer `decompBuffer` view. The latter preserves the native
+aliasing relationship with the texture output cursor when installing a
+decoder; neither the 56-byte state layout nor ownership changes.
+
+### Unit-local stream and packet views
+
+The movie-stream records stay in `sdfMovie.c`: `movieOpenStream` clears the
+complete 0xB0-byte owner, with its inline 0x8C-byte IPU task at +0x24. Its
+linear work allocation is 0x14 bytes; PAC work is 0x78 bytes and owns separate
+block-mask and ring-buffer allocations. `movieParseHeader` retains the
+GCC nested `movieMemcpy` helper found in the DDS1 twin: the retail helper
+saves the static-chain argument at sp+0, even though it only calls `memcpy`.
+
+Development-console DMA state stays in `sdfDevCons.c`: a 32-byte alternating
+buffer record, a 96-byte formatted-packet setup header, and 40-byte glyph
+register tuples. These are actual GS 64-bit register payloads. The UV table
+contains packed 32-bit coordinate pairs; its existing public getter exposes
+the same data as halfwords. `sdfDevConsDrawAll` and its DDS1 twin reserve the
+same 0x1040-byte stack allocation around the central 0x1000-byte DMA region.
+Formatted printing consumes a separate sixteen-byte control record: signed
+X/Y/Z words followed by packed RGBA. Its local typed view describes that
+record without changing the public entry point's `u32 *` parameter.
+
+Other single-unit views remain next to their users: the file manager's
+shared request prefix and differently typed callback/queue links; the
+memory-card control stride; the texture-upload request; and the model
+manager's directory entries, 20-byte PIB records and inline PAC headers.
+They do not introduce alternate definitions of the shared model, material
+or motion owners.
+
 
 ### billboard.h
 
@@ -488,15 +706,51 @@ the top of this document:
   `sdfModelMorphParm_t *target[2]`, 8 bytes. `sdfModelMakeMorphList` writes two
   8-byte pairs per 16-byte element, so the targets are inline.
 
+### effBattle.h
+
+The BED bank, cut and eight-byte aim selector layouts shared by the battle
+and event-effect units. `effBTLCreate` allocates `0xC44` bytes: two `0x618`-byte
+banks, eight retained bytes, the allocation handle, active-cut count and list
+head. `effBTLCutCreate` allocates and clears `0x120` bytes. Its frame counter
+is at `+0x08`, part handles start at `+0x20`, callbacks are at `+0x110` and
+`+0x114`, user data at `+0x118`, and the next-cut link at `+0x11C`.
+These are SMT3 offsets, not DDS's eight-byte-larger cut layout.
+`effSolidRectParams_t` is also shared here: packed color, blend control and
+four corner coordinates form the `0x18`-byte filter record consumed by both
+the event controls and the battle field-filter draw path.
+
+`effect/effBattleMisc.c` keeps a local formation-extent view with radius and
+height at `+0x50`/`+0x54` and uniform scale at `+0x5C`; no full formation size
+is asserted. Despite its recovered name, `effBTLPartGetScalePtrSub` returns
+an integer frame duration from `D_00317740` (0, 5, 15 or 30), not a pointer.
+Point-light and model-color callers compare and subtract these durations.
+
+Event-only blur, smoke-particle and Bezier-emitter owners remain local to
+`effect/effEvent.c`. Their parameter prefixes are copied independently of
+the retained texture/allocation handles; the packed BED record copy preserves
+unaligned `0x30`-byte source and destination records. The unmatched batched
+smoke renderer candidate is retained in `nonmatching/effEVECombParSmokeDraw.c`:
+its residual starts at ordering-table address commoning, not particle math.
+The native renderer also proves `sdfGrOt_t.regFunc` takes the ordering-table
+slot and a draw-tag pointer; `libsdf.h` now declares that callback signature.
+
 ### draw.h
 
 The GS side: the frame buffers, the three-slot draw queue, the draw environment,
 and the A+D register packets the `sdfPrim` and `sdf2D` builders file into an
 ordering table. Every one of these is a packet whose first 32 bytes are
-`sdfGrPacketHeader_t` (`libsdf.h`), written by `sdfGrSetRegsPacketHeader`: the
-DMA tag's `qwc` is the register count plus one, its `dat1` is a VIF DIRECT of
+`sdfGrPacketHeader_t` (`sdf_types.h`, also included by `libsdf.h`), written by
+`sdfGrSetRegsPacketHeader`: the DMA tag's `qwc` is the register count plus one,
+its `dat1` is a VIF DIRECT of
 the same length, and the GIF tag's NLOOP is the register count with REGS 0xE,
 A+D. That one function is what makes each packet's size `32 + 16 * regs`.
+
+`sdfGrTagStdReg_t` is the native pair of `u64 data` and `u64 reg` fields.
+The clear packet alone exposes its RGBAQ low word as `clearColor`:
+`dds3InitRenderDrawEnv` at `0x0010493C` replaces that word (draw-tag offset
+`0x120`), retaining Q and the register address. This partial view belongs to
+the clear packet, not to every A+D register write. Keeping the shared register
+record scalar also preserves upstream's matched packet constructors.
 
 | struct | size | evidence |
 |---|---|---|
@@ -585,7 +839,18 @@ the mode table entry; the IDB has no type for it.
 The camera, light, fog and transform packets VU1 shades with, and the
 generated-geometry path that turns a mesh into GS primitives on VU0.
 `libsdf.h` declares `sdf3DLightParallelPacket_t` and `sdf3DFogPacket_t` as opaque
-so `sdfDrawTag_t` can point at them; this is where they get bodies.
+so `sdfDrawTag_t` can point at them. The light packet's sole definition is in
+`sdf_lighting.h`, included here and directly by its constructor; the fog and
+other packet definitions remain in `draw3d.h`.
+
+The game's `dds3LightParam` state in `dds3KernelDraw.c` is not an unbounded
+pointer array: its four parallel-light pointers are followed by an ambient
+vector at `+0x10` and `sdf3DFogParam_t` at `+0x20`. The unit-local
+`dds3LightState_t` names these regions; `dds3FogRange_t` holds the four float
+blend endpoints without a color word. The light and ambient packed-color
+setters remain `INCLUDE_ASM`: their scalar C drafts lose the native frame
+and packing stores, and written-but-unused quadword carriers are not retained
+merely to reproduce those instructions.
 
 | struct | size | evidence |
 |---|---|---|
@@ -753,6 +1018,17 @@ one:
   the frame set's with `sb`. A type copied from the wrong one of the two would
   move every pointer in the frame set.
 
+## fpu.h: shared scalar square roots
+
+`fsqrtf` and `frsqrtf` follow DDS's documented scalar FPU convention. They
+emit the bare EE `sqrt.s` and numerator-over-square-root `rsqrt.s`, without
+the errno-checking library path or gcc's extra hazard nops. The evidence for
+the compiler distinction is DDS `docs/idioms.md`, "Square roots: sqrt.s";
+it is not a claim that every SMT3 square-root site has been audited.
+New callers share these helpers rather than spelling scalar FPU asm locally.
+Absolute values in the DDS ports use the declared C `fabsf` operation;
+functions that require a different scheduling boundary stay `INCLUDE_ASM`.
+
 ## ps2asm.h: the EE extension macros
 
 `ps2asm.h` is the one header the build includes. cc1 2.96 never emits COP2 macro
@@ -814,10 +1090,14 @@ Measured against this `cc1` and Sony's `ee-as -G8`, not assumed:
   statements next to one decides which `$f` register a float lands in (first
   written takes the lowest free one) and which address computation is emitted
   first. Matching a VU0 routine is mostly getting that order right, not the asm.
-- Address CSE is the usual obstacle: gcc will keep a frame address in `$16`
-  across two calls where retail recomputes `addiu $2, $29, off` each time.
-  `effPCPBlurScreenOffset` is left as `INCLUDE_ASM` for that reason, and because
-  cc1 calls `sqrtf` rather than selecting `sqrt.s` under the build's flags.
+- `VU0_COPY_MATRIX_TO_SECONDARY` preserves `vf28`–`vf31` in `vf24`–`vf27`.
+  `fldPoint3To2` and `fldPoint3To2H` use this after `MultMatrixRev`, before
+  projecting their input point. The four `vmove.xyzw` operations are visible at
+  `0x00128DAC` and `0x00128E84` in SLUS_209.11.
+- Address CSE can be an obstacle: gcc may keep a frame address in `$16`
+  across calls where retail recomputes it. `effPCPBlurScreenOffset` now
+  matches with ordinary scalar locals around its VU pipeline and the shared
+  `fpu.h` square-root helper, without per-site scalar asm.
 
 ### What is proven
 
@@ -843,15 +1123,39 @@ macros, `MMI_LOAD_VEC3_VF10`, `MMI_STORE_VEC3`, `MMI_PLZCW` and the barriers.
 Treat an unproven macro as a starting point, and check the emitted `.s`
 (`SMT3_KEEP_S=/tmp/x.s tools/cc.sh ...`) rather than trusting the name.
 
+## Unit-local SDF file, sound and IPU views
+
+`src/smt3/code_002BD340.c` keeps its file-command, sound-command and IPU
+records local: no other C unit currently shares their complete layouts.
+The file handle is the 0x40-byte allocation initialized by
+`sdfFileCmdNewHandle`; its operation/state bytes are at +0x15/+0x16 and
+its callback/context words at +0x38/+0x3C. `sdfIpuCb_t` is the 0x8C-byte
+decoder record cleared by `sdfIpuInitCb`, including two decoded buffers
+at +0x20, two transfer-packet buffers at +0x28 and saved DMA state at +0x68.
+The active-buffer getters use the completion byte at +0x1A and the
+submission index at +0x19, rather than an unrelated MIDI-table view.
+
+The sound work view accounts for SMT3's seven track slots and opaque words
+at +0x1D8/+0x1DC; its two 24-byte MIDI state groups begin at +0x560 with
+a 0x20-byte stride. These offsets differ from the DDS reference layouts.
+`p2sd_2C1F50` returns the 0x10-byte channel rows initialized by
+`sdfSndVoiceMapInit` at `sdfSndMap + 0x10`, not an eight-byte volume view.
+The IPU output-mode byte describes RGBA32, RGBA16 or dithered RGBA16;
+`sdfIpuDecode` turns those selectors into BDEC's OFM/DTE bits using the
+table at 0x00529CE8. Existing allocator, item-array, texture and GS-memory
+owners are reused from `libsdf.h`; concrete vector operations come from
+`ps2asm.h`.
+
 ## What was deliberately left out
 
 The HD set is 272 headers, most of it per-effect particle state
 (`effPCPFlashPolySphere2Exp_tag` and 120 similar), which is wide, shallow and of no
 use until someone decompiles that effect. Also left behind:
 
-- `effect.h` (3673 lines), `newbattle.h`, `field.h`, `facility.h`, `event.h`,
-  `camp.h`, `newdata.h` and the rest of the gameplay headers. Each needs the same
-  per-struct verification as the above and none of it is foundational.
+- The complete HD `effect.h` (3673 lines), `newbattle.h`, `field.h`,
+  `facility.h`, and the rest of the gameplay headers. The small recovered
+  `event.h`, `effect.h`, `field.h` and `nb.h` are native consumed layouts,
+  not imports of those HD gameplay headers.
 - The body of a generated mesh: `corePktCb_t.dataPtr` points at a VIF stream
   whose UNPACKs `sdfCorePacketGen` walks with pointer arithmetic and never a
   struct, so there is nothing to declare but the counts and flags in
@@ -885,18 +1189,16 @@ use until someone decompiles that effect. Also left behind:
 - `types.h`: `common.h` already supplies the primitives, and the sdf math types
   live in `libsdf.h` where the engine keeps them. HD's `UNKNOWN_ARRAY_SIZE` and
   `UNKNOWN_DEFINE_VALUE` placeholders are not carried over.
-- `dds3ModelHandle_t`, `dds3ModelResrc_t` and the rest of HD's `model.h`: the
-  `dds3Model*` layer above `sdfModelRootNode_t`. Used in 79 IDB prototypes and
-  wanted, but no allocation site was found to fix `dds3ModelHandle_t`'s size in
-  either pass. `include/model.h` holds the `sdfModel*` types instead.
+- HD's `dds3ModelHandle_t` and `dds3ModelResrc_t` names and expanded layouts
+  are not imported. The native owner/resource layer is represented by
+  `mdlObj_t` and `mdlResrc_t` in `include/model.h` instead.
 
 ## Checking these headers
 
-The size and offset assertions are not in the headers, since no built unit
-includes a type header yet and a header should not carry a test. They live in
-`tools/header_layout.c`, which includes every header and makes one claim per
-number above with the array-sized-by-condition trick, since ee-gcc 2.96 has no
-`_Static_assert`:
+Size and offset assertions live in `tools/header_layout.c`, rather than in
+the headers consumed by built units. It includes every header and makes one
+claim per documented number with the array-sized-by-condition trick, since
+ee-gcc 2.96 has no `_Static_assert`:
 
 ```c
 #define ASSERT_AT(line, cond) typedef char static_assert_##line[(cond) ? 1 : -1]
@@ -907,9 +1209,8 @@ number above with the array-sized-by-condition trick, since ee-gcc 2.96 has no
 
 `python3 tools/test_headers.py` compiles it with the project's own `cc1` and
 `ee-as`, then compiles it again with one size deliberately wrong to prove the
-claims are not passing vacuously. It prints the claim count on success, 559 as
-of this pass. A wrong number gives `size of array 'static_assert_mNN' is
-negative`.
+claims are not passing vacuously. It prints the current claim count on success.
+A wrong number gives `size of array 'static_assert_mNN' is negative`.
 
 To compile one header on its own, which is also worth doing when adding a type:
 

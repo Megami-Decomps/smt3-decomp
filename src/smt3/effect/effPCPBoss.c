@@ -291,7 +291,7 @@ extern s32 printf(const char *format, ...);
 
 extern void sdfMatFreeDelayed(void *asset);
 extern void effPCP_ThunderPolyListDelete(void *list);
-extern void *dds3EffectPCPDataGetData(void *data, u32 number, s32 type);
+extern void *dds3EffectPCPDataGetData(void *data, u32 number, ...);
 extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(void *params);
 
 extern f32 effPCPBossKAGUDrawParam[4];
@@ -318,6 +318,20 @@ extern void effPCPHelperBEDSetScale(void *helper, f32 scale);
 extern effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(void *params);
 extern effPCPDANTE_Damage_t *effPCPDANTE_Damage_Create(void *params, void *bedParams);
 
+extern s32 D_0054F200[2], D_0054F208[2];
+extern u8 D_0054F210[2], D_0054F218[2];
+extern effBaelWork_t *effPCPBossBaelCreate(void *p0, void *p1, void *p2);
+extern void *effPCPBossDengekiCreate(void *p0, void *p1);
+extern void *effPCPBossKAGUAttackCreate(void *p0, void *p1);
+extern void *effPCPBossKAGUThunderboltCreate(void *p0, void *p1, void *p2);
+extern void *effPCPBossKAGU2AttackCreate(void *p0, void *p1);
+extern effCrackWork_t *effPCPCrack2Create(effCrackParam_t *p0, void *p1);
+extern void *effPCPScreenCrackModelCreate(void *p0, void *p1);
+extern void *effPCPMuzzleFlashCreate(void *p0, void *p1);
+extern void *effPCP_PBCamera_Create(void *p0, void *p1);
+extern void *effPCPDANTE_ShowTime_Create(void *p0, void *p1, void *p2);
+extern void *effPCP_BED_Create(void *p0, void *p1);
+extern void *effPCP_HBED2_Create(void *p0, void *p1, void *p2);
 void effPCPCrackSizeInit(effCrackWork_t *work, effCrackCell_t *cell);
 
 void effPCPBossONGYTexRenderStart(void)
@@ -504,7 +518,14 @@ void effPCPCrackInit(effCrackWork_t *work)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackCreatePCF);
+void effPCPCrackCreatePCF(void *parameterTable) {
+    effCrackParam_t *bossParams;
+    void *effectParams;
+
+    bossParams = dds3EffectPCPDataGetData(parameterTable, 0);
+    effectParams = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPCrackCreate(bossParams, effectParams);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackCopy);
 
@@ -548,7 +569,16 @@ effBaelWork_t *effPCPBossBaelCreate(void *vector, void *paramA, void *paramB)
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelCreatePCF);
+void effPCPBossBaelCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+    void *thirdBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
+    effPCPBossBaelCreate(firstBlock, secondBlock, thirdBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelCopy);
 
@@ -573,7 +603,14 @@ void effPCPBossBaelSetColor(effBaelWork_t *work, u32 color)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiCreatePCF);
+void effPCPBossDengekiCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPBossDengekiCreate(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiCopy);
 
@@ -639,7 +676,14 @@ void effPCPBossKAGUInvokeSetColor(effPCPBossKAGUInvoke_t *work, u32 color)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackCreatePCF);
+void effPCPBossKAGUAttackCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPBossKAGUAttackCreate(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackCopy);
 
@@ -656,7 +700,16 @@ void effPCPBossKAGUAttackSetColor(effPCPBossKAGUAttack_t *work, u32 color)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltCreatePCF);
+void effPCPBossKAGUThunderboltCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+    void *thirdBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
+    effPCPBossKAGUThunderboltCreate(firstBlock, secondBlock, thirdBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltCopy);
 
@@ -681,7 +734,14 @@ void effPCPBossKAGUThunderboltSetColor(effPCPBossKAGUThunderbolt_t *work, u32 co
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackCreatePCF);
+void effPCPBossKAGU2AttackCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPBossKAGU2AttackCreate(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackCopy);
 
@@ -746,7 +806,14 @@ effCrackWork_t *effPCPCrack2Create(effCrackParam_t *param, void *effectParam)
     return work;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrack2CreatePCF);
+void effPCPCrack2CreatePCF(void *data) {
+    effCrackParam_t *bossParams;
+    void *effectParams;
+
+    bossParams = dds3EffectPCPDataGetData(data, 0);
+    effectParams = dds3EffectPCPDataGetData(data, 1);
+    effPCPCrack2Create(bossParams, effectParams);
+}
 
 effCrackWork_t *effPCPCrack2Copy(effCrackWork_t *src)
 {
@@ -818,7 +885,14 @@ void effPCPScreenCrackModelInit(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelCreatePCF);
+void effPCPScreenCrackModelCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPScreenCrackModelCreate(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelCopy);
 
@@ -837,7 +911,14 @@ void effPCPScreenCrackModelSetColor(effPCPScreenCrackModel_t *work, u32 color)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashCreatePCF);
+void effPCPMuzzleFlashCreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPMuzzleFlashCreate(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPMuzzleFlashCopy);
 
@@ -928,7 +1009,14 @@ void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *work, const void
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_CreatePCF);
+void effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCPDANTE_Damage_Create(firstBlock, secondBlock);
+}
 
 effPCPDANTE_Damage_t *effPCPDANTE_Damage_Copy(effPCPDANTE_Damage_t *src, s32 index, s32 type)
 {
@@ -950,7 +1038,14 @@ void effPCPDANTE_Damage_SetColor(effPCPDANTE_Damage_t *work, u32 color)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_CreatePCF);
+void effPCP_PBCamera_CreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCP_PBCamera_Create(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Copy);
 
@@ -976,7 +1071,16 @@ void effPCP_PBCamera_SetRotateMatrix(effPCP_PBCamera_t *work, const void *source
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_CreatePCF);
+void effPCPDANTE_ShowTime_CreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+    void *thirdBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
+    effPCPDANTE_ShowTime_Create(firstBlock, secondBlock, thirdBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Copy);
 
@@ -1006,7 +1110,14 @@ void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_t *work, const void *
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_CreatePCF);
+void effPCP_BED_CreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    effPCP_BED_Create(firstBlock, secondBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Copy);
 
@@ -1035,7 +1146,16 @@ void effPCP_BED_SetColor(effPCP_BED_t *work, u32 color)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_Create);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_CreatePCF);
+void effPCP_HBED2_CreatePCF(void *parameterTable) {
+    void *firstBlock;
+    void *secondBlock;
+    void *thirdBlock;
+
+    firstBlock = dds3EffectPCPDataGetData(parameterTable, 0);
+    secondBlock = dds3EffectPCPDataGetData(parameterTable, 1);
+    thirdBlock = dds3EffectPCPDataGetData(parameterTable, 2);
+    effPCP_HBED2_Create(firstBlock, secondBlock, thirdBlock);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_HBED2_Copy);
 
@@ -1075,11 +1195,29 @@ void effPCP_HBED2_SetScale(effPCP_HBED2_t *work, f32 scale)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPadVibeFadeUpdate);
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPadVibeFadeOUT);
+void effPadVibeFadeOUT(u32 port, u8 intensity, s32 frames)
+{
+    if (port < 2) {
+        D_0054F200[port] = frames;
+        D_0054F210[port] = intensity;
+        D_0054F218[port] = 0;
+        D_0054F208[port] = frames;
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPadVibeFadeIN);
+void effPadVibeFadeIN(u32 port, u8 intensity, s32 frames)
+{
+    if (port < 2) {
+        D_0054F200[port] = frames;
+        D_0054F210[port] = intensity;
+        D_0054F218[port] = 1;
+        D_0054F208[port] = frames;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", dds3EffectBlurDrawQuad);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossTexHandle);
 
@@ -1089,9 +1227,11 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossONGY_RFrame);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F1FC);
 
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F200);
+
+INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F208);
+
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F210);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F218);
-
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
 

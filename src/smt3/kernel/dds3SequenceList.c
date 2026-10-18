@@ -2,6 +2,56 @@
 #include "kernel.h"
 #include "scr.h"
 
+extern u32 abcd;
+extern u32 dds3KernelDebugSign;
+extern s32 ChkPipe(void);
+extern void EndPipe(void);
+extern void FinishMovieViewer(void);
+extern void InitMovieViewer(void);
+extern s32 campCheckExitState(void);
+extern void campDebugRegistAll(void);
+extern void campKillProcesses(void);
+extern s32 checkConfigState(void);
+extern s32 checkResultStat(void);
+extern void cmpProcessStart(void);
+extern void dds3ConfigProcessEnd(void);
+extern void dds3ConfigProcessStart(s32 mode);
+extern void evtChkEndProcess(void);
+extern void evtExitSky(void);
+extern void evtFreeStage(void);
+extern void evtInitEventTest(void);
+extern void evtInitEventViewer(void);
+extern void fclCombineProcessEnd(void);
+extern void fclCombineProcessStart(void);
+extern void fclRagProcessEnd(void);
+extern void fclRecoverProcessEnd(void);
+extern void fclRecoverProcessStart(s32 mode);
+extern void fclShopProcessEnd(void);
+extern void fclShopProcessStart(void *requestData);
+extern void fclTerminalProcessEnd(void);
+extern void fldProc_CallSisetuReturn(void);
+extern void fmProcTrigSequence(s32 mode);
+extern s32 fmProcessChk(void);
+extern void frTestFontInit(void);
+extern void func_0022C658(void);
+extern void itfDebugMesMngInitialize(void);
+extern void mselExit(u32 mode);
+extern void mselInit(void);
+extern void nbExitBattleTest(void);
+extern s32 nmeCheckProcessStat(void);
+extern void nmeNameProcessEnd(void);
+extern s32 ragCheckProcessStat(void);
+extern s32 rcvCheckProcessStat(void);
+extern void rstResult2ProcessEnd(void);
+extern void rstResult2ProcessStart(void);
+extern void rstSetTestParam(void);
+extern s32 shpCheckProcessStat(void);
+extern void stfExit(void);
+extern void stfInit(void);
+extern void titleExit(void);
+extern void titleStart(u32 mode);
+extern s32 trmCheckProcessStat(void);
+
 extern char D_0052E210[]; /* "StartSel" */
 extern char D_0052E250[]; /* "battle test" */
 extern char D_0052E260[]; /* "test_font" */
@@ -42,9 +92,15 @@ s32 ExitDebug(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckDebug);
+s32 CheckDebug(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallBootMc);
+void CallBootMc(void)
+{
+    fmProcTrigSequence(3);
+}
 
 s32 ExitBootMc(void)
 {
@@ -61,15 +117,38 @@ s32 ExitBootMc(void)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckBootMc);
+s32 CheckBootMc(void)
+{
+    s32 operationResult;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallTitle);
+    operationResult = fmProcessChk();
+    return operationResult == 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitTitle);
+void CallTitle(u32 unused, u32 *modeOverride)
+{
+    if (modeOverride == 0) {
+        titleStart(0);
+        return;
+    }
+    titleStart(*modeOverride);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckTitle);
+s32 ExitTitle(void)
+{
+    titleExit();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallLoad);
+s32 CheckTitle(void)
+{
+    return 0;
+}
+
+void CallLoad(void)
+{
+    fmProcTrigSequence(1);
+}
 
 s32 ExitLoad(void)
 {
@@ -82,22 +161,48 @@ s32 ExitLoad(void)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckLoad_dds3SequenceList);
+s32 CheckLoad_dds3SequenceList(void)
+{
+    s32 operationResult;
+
+    operationResult = fmProcessChk();
+    return operationResult == 0;
+}
 
 void CallLoad2(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitLoad2);
+s32 ExitLoad2(void)
+{
+    fldMainLoadStart();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckLoad2);
+s32 CheckLoad2(void)
+{
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallStaff);
+void CallStaff(void)
+{
+    stfExit();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitStaff);
+s32 ExitStaff(void)
+{
+    stfInit();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckStaff);
+s32 CheckStaff(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallEndSave);
+void CallEndSave(void)
+{
+    fmProcTrigSequence(2);
+}
 
 s32 ExitEndSave(void)
 {
@@ -114,7 +219,13 @@ s32 ExitEndSave(void)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckEndSave);
+s32 CheckEndSave(void)
+{
+    s32 operationResult;
+
+    operationResult = fmProcessChk();
+    return operationResult == 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallField);
 
@@ -130,14 +241,23 @@ s32 ExitField(void)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckField);
+s32 CheckField(void)
+{
+    return 0;
+}
 
 void CallNewBattle(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitNewBattle);
+s32 ExitNewBattle(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckNewBattle);
+s32 CheckNewBattle(void)
+{
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E210);
 
@@ -147,64 +267,141 @@ INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E230);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitEvent);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckEvent);
+s32 CheckEvent(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallCamp);
+void CallCamp(void)
+{
+    cmpProcessStart();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitCamp);
+s32 ExitCamp(void)
+{
+    campKillProcesses();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckCamp);
+s32 CheckCamp(void)
+{
+    s32 campState;
+
+    campState = campCheckExitState();
+    return campState == 0;
+}
 
 void CallCombine(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitCombine);
+s32 ExitCombine(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckCombine);
+s32 CheckCombine(void)
+{
+    return 1;
+}
 
 void CallShop(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitShop);
+s32 ExitShop(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckShop);
+s32 CheckShop(void)
+{
+    return 1;
+}
 
 void CallRag(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitRag);
+s32 ExitRag(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckRag);
+s32 CheckRag(void)
+{
+    return 1;
+}
 
 void CallRecover(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitRecover);
+s32 ExitRecover(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckRecover);
+s32 CheckRecover(void)
+{
+    return 1;
+}
 
 void CallTerminal(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitTerminal);
+s32 ExitTerminal(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckTerminal);
+s32 CheckTerminal(void)
+{
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallResult2);
+void CallResult2(void)
+{
+    rstResult2ProcessStart();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitResult2);
+s32 ExitResult2(void)
+{
+    fldProcNextJump();
+    rstResult2ProcessEnd();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckResult2);
+s32 CheckResult2(void)
+{
+    s32 taskResult;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallConfig);
+    taskResult = checkResultStat();
+    return taskResult == 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitConfig);
+void CallConfig(void)
+{
+    dds3ConfigProcessStart(1);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckConfig);
+s32 ExitConfig(void)
+{
+    dds3ConfigProcessEnd();
+    return 0;
+}
+
+s32 CheckConfig(void)
+{
+    s32 taskResult;
+
+    taskResult = checkConfigState();
+    return taskResult == 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallNewBattleTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitNewBattleTest);
+s32 ExitNewBattleTest(void)
+{
+    nbExitBattleTest();
+    return 0;
+}
 
 s32 CheckNewBattleTest(void)
 {
@@ -221,70 +418,180 @@ s32 CheckNewBattleTest(void)
 void CallBattleFieldTest(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitBattleFieldTest);
+s32 ExitBattleFieldTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckBattleFieldTest);
+s32 CheckBattleFieldTest(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallKernelTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitKernelTest);
+s32 ExitKernelTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckKernelTest);
+s32 CheckKernelTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallEventTest);
+void CallEventTest(void)
+{
+    abcd = 0;
+    evtInitEventTest();
+    evtInitSky();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitEventTest);
+s32 ExitEventTest(void)
+{
+    evtChkEndProcess();
+    evtExitSky();
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckEventTest);
+s32 CheckEventTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallEventViewer);
+void CallEventViewer(void)
+{
+    dds3KernelDebugSign = 0;
+    evtFreeStage();
+    evtInitEventViewer();
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitEventViewer);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckEventViewer);
+s32 CheckEventViewer(void)
+{
+    return 0;
+}
 
 void CallInterfaceTest(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitInterfaceTest);
+s32 ExitInterfaceTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckInterfaceTest);
+s32 CheckInterfaceTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallMessageScriptTest);
+void CallMessageScriptTest(void)
+{
+    itfDebugMesMngInitialize();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitMessageScriptTest);
+s32 ExitMessageScriptTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckMessageScriptTest);
+s32 CheckMessageScriptTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallCampTest);
+void CallCampTest(void)
+{
+    campDebugRegistAll();
+    func_0022C658();
+    cmpProcessStart();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitCampTest);
+s32 ExitCampTest(void)
+{
+    campKillProcesses();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckCampTest);
+s32 CheckCampTest(void)
+{
+    s32 sceneState;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallCombineTest);
+    sceneState = campCheckExitState();
+    return sceneState == 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitCombineTest);
+void CallCombineTest(void)
+{
+    fclCombineProcessStart();
+}
+
+s32 ExitCombineTest(void)
+{
+    fclCombineProcessEnd();
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckCombineTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallShopTest);
+void CallShopTest(s32 unused, void *requestData)
+{
+    fclShopProcessStart(requestData);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitShopTest);
+s32 ExitShopTest(void)
+{
+    fclShopProcessEnd();
+    fldProc_CallSisetuReturn();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckShopTest);
+s32 CheckShopTest(void)
+{
+    s32 taskExists;
+
+    taskExists = shpCheckProcessStat();
+    return taskExists == 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallRagTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitRagTest);
+s32 ExitRagTest(void)
+{
+    evtExitSky();
+    fclRagProcessEnd();
+    fldProc_CallSisetuReturn();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckRagTest);
+s32 CheckRagTest(void)
+{
+    s32 taskState;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallRecoverTest);
+    taskState = ragCheckProcessStat();
+    return taskState == 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitRecoverTest);
+void CallRecoverTest(void)
+{
+    fclRecoverProcessStart(0);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckRecoverTest);
+s32 ExitRecoverTest(void)
+{
+    fclRecoverProcessEnd();
+    fldProc_CallSisetuReturn();
+    return 0;
+}
+
+s32 CheckRecoverTest(void)
+{
+    s32 taskState;
+
+    taskState = rcvCheckProcessStat();
+    return taskState == 0;
+}
 
 void CallTerminalTest(dds3ProcessID_t *id, s32 *args)
 {
@@ -296,46 +603,105 @@ void CallTerminalTest(dds3ProcessID_t *id, s32 *args)
     fclTerminalProcessStart(0, 1);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitTerminalTest);
+s32 ExitTerminalTest(void)
+{
+    evtExitSky();
+    fclTerminalProcessEnd();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckTerminalTest);
+s32 CheckTerminalTest(void)
+{
+    s32 sceneState;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallResult2Test);
+    sceneState = trmCheckProcessStat();
+    return sceneState == 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitResult2Test);
+void CallResult2Test(void)
+{
+    rstSetTestParam();
+    rstResult2ProcessStart();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckResult2Test);
+s32 ExitResult2Test(void)
+{
+    rstResult2ProcessEnd();
+    return 0;
+}
+
+s32 CheckResult2Test(void)
+{
+    s32 taskResult;
+
+    taskResult = checkResultStat();
+    return taskResult == 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallNameTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitNameTest);
+s32 ExitNameTest(void)
+{
+    nmeNameProcessEnd();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckNameTest);
+s32 CheckNameTest(void)
+{
+    s32 taskResult;
+
+    taskResult = nmeCheckProcessStat();
+    return taskResult == 0;
+}
 
 void CallModelViewerTest(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitModelViewerTest);
+s32 ExitModelViewerTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckModelViewerTest);
+s32 CheckModelViewerTest(void)
+{
+    return 0;
+}
 
 void CallSoundTest(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitSoundTest);
+s32 ExitSoundTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckSoundTest);
+s32 CheckSoundTest(void)
+{
+    return 0;
+}
 
 void CallBillboardTest(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitBillboardTest);
+s32 ExitBillboardTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckBillboardTest);
+s32 CheckBillboardTest(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallFontTest);
+void CallFontTest(void)
+{
+    frTestFontInit();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitFontTest);
+s32 ExitFontTest(void)
+{
+    return 0;
+}
 
 s32 CheckFontTest(void)
 {
@@ -344,49 +710,110 @@ s32 CheckFontTest(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallMapEditor);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitMapEditor);
+s32 ExitMapEditor(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckMapEditor);
+s32 CheckMapEditor(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallPuzzleBoy);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitPuzzleBoy);
+s32 ExitPuzzleBoy(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckPuzzleBoy);
+s32 CheckPuzzleBoy(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallMovieViewerTest);
+void CallMovieViewerTest(void)
+{
+    InitMovieViewer();
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitMovieViewerTest);
+s32 ExitMovieViewerTest(void)
+{
+    FinishMovieViewer();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckMovieViewerTest);
+s32 CheckMovieViewerTest(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallPipe);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitPipe);
+s32 ExitPipe(void)
+{
+    EndPipe();
+    fldProcNextJump();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckPipe);
+s32 CheckPipe(void)
+{
+    s32 sceneState;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallModeSelect);
+    sceneState = ChkPipe();
+    return sceneState == 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitModeSelect);
+void CallModeSelect(u32 unused, u32 *modeOverride)
+{
+    if (modeOverride == 0) {
+        mselExit(0);
+        return;
+    }
+    mselExit(*modeOverride);
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckModeSelect);
+s32 ExitModeSelect(void)
+{
+    mselInit();
+    return 0;
+}
+
+s32 CheckModeSelect(void)
+{
+    return 0;
+}
 
 void CallTgs(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitTgs);
+s32 ExitTgs(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckTgs);
+s32 CheckTgs(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", dat_1097D8);
+s32 dat_1097D8(void)
+{
+    return 0;
+}
 
 void func_001097E0(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", datDebugPrintf);
+void datDebugPrintf(const char *format, ...)
+{
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", scr_109830);
+s32 scr_109830(void)
+{
+    return 0;
+}
 
 void func_00109838(void) {
 }

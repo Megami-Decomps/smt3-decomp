@@ -1,5 +1,170 @@
 #include "common.h"
 #include "newdata.h"
+#include "draw.h"
+#include "draw3d.h"
+#include "basic.h"
+#include "ps2asm.h"
+
+typedef struct
+{
+    u64 colorChannels[2];
+    u64 packedXY;
+    u64 depth;
+} cmpPackedVertex_t;
+
+typedef struct
+{
+    u16 unk00, unk02;
+    u32 unk04;
+    u16 unk08, unk0A;
+    s32 source;
+    u8 hasAudio, stereo, playbackCadenceStep, pad13;
+} movieDescriptor_t;
+
+typedef struct
+{
+    const char *fileName;
+    movieDescriptor_t descriptor;
+} movieResource_t;
+
+/* Read-only counter view into the stream player's work. */
+typedef struct
+{
+    u8 unk00[0x64];
+    u32 cycleLength;
+    u8 unk68[4];
+    s32 playbackFrameIndex;
+} moviePlaybackWork_t;
+
+typedef struct movieListNode_t
+{
+    struct movieListNode_t *next;
+    char path[1]; /* variable-length allocation tail */
+} movieListNode_t;
+
+typedef struct
+{
+    void *task;
+    movieListNode_t *head;
+    s16 top, cursor, total;
+    s8 playing;
+    u8 pad0F;
+    sdfDrawTag_t *packets;
+} movieViewerWork_t;
+
+typedef struct
+{
+    u8 started, cursor, wordPending, blockPending;
+    u32 wordSource, blockSource;
+    s32 word;
+    u8 block[0x40];
+} movieViewerDebugWork_t;
+
+typedef struct
+{
+    u8 unk00[0x78];
+    s32 sourceValue;
+    u8 unk7C[4];
+    s32 destinationValue;
+} fclSceneObjectWork_t;
+
+typedef struct
+{
+    char text[8];
+} __attribute__((packed)) sdfSoundPrefix_t;
+
+
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern u32 sdf2DGetPrimPacketSize(s32 count, s32 format);
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 primitive, s32 count, s64 registers, s32 format);
+extern void *sdf2DGetPrimPtr(sdfGrPacketHeader_t *packet);
+extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *list, s32 mode);
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *list, sdfMat_t *material, s32 context);
+extern void *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
+extern movieResource_t D_00343BE8[];
+extern void *PlayingNo;
+extern movieViewerWork_t movieViewerWork;
+extern sdfDrawTag_t *movieViewerFrame[];
+extern sdfGrOt_t sdfGrOtTable[];
+extern u16 dds3VblanksPerFrame;
+extern s8 dds3PadBitTable[32];
+extern char D_0053F3C8[];
+extern char D_0053F418[];
+extern char D_0054FDA8[];
+extern char D_0054FDB8[];
+extern char D_0053F428[];
+extern char D_0054FDC0[];
+extern char D_0054FDC8[];
+extern void release_movieobj2(moviePlaybackWork_t *movie, sdfGrOt_t *ot);
+extern void movieOpenStream(moviePlaybackWork_t *movie, movieDescriptor_t *descriptor, const char *filename);
+extern void movieCloseStream(moviePlaybackWork_t *movie);
+extern void sdfIpuRunDecode(s32 cadence);
+extern void sdfIpuInit(void);
+extern void movieViewerScanDir(void);
+extern s32 MovieViewerProc(void *process);
+extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 width, s32 height, u32 innerColor, u32 frameColor);
+extern void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet);
+extern void *sdfDevPrintf(s32 x, s32 y, u32 z, s32 flags, const char *format, ...);
+extern void sdfPrimLinkF3(sdfDrawTag_t *list, u32 color, s32 flags, s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 z, s32 context);
+extern void sdfPrimLinkRect(sdfDrawTag_t *list, u32 color, s32 flags, s32 x0, s32 y0, s32 x1, s32 y1, s32 z, s32 context);
+extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
+extern f32 cmpStatusModelBasePos[];
+extern f32 cmpStatusModelPos[];
+extern char D_0054FD18[];
+extern char *strcat(char *destination, const char *source);
+extern dds3Basic_t *dds3GetControlScene(void);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, char *name);
+extern s32 dds3GetMapNo(dds3Basic_t *scene);
+extern void evtLoadArea(s32 major, s32 minor);
+extern void dds3SetBlur(s32 red, s32 green, s32 blue);
+extern void dds3MultiBlurOff(s32 mode);
+extern void dds3DistBlurOff(s32 mode);
+extern void Eve_BlurOFF(void);
+extern void Eve_PartialMultiBlurOFF(void);
+extern void Eve_PartialMultiFilterOFF(void);
+extern void Eve_DistortionBlurOFF(void);
+extern void Eve_FilterOFF(void);
+extern s32 dds3KillProcess(void *process, s32 delay);
+extern void *scrStartScript2(s32 priority, s32 script, s32 value);
+extern void fclClearFlag(s8 index);
+extern u8 gMsgFlag;
+extern s32 itfMesMngInitialize(s32 sub);
+extern void itfMesMngChangeWindowType(s32 window, s32 type, s32 value);
+extern void itfMesMngMarkBitStat(s32 window, u32 flags);
+extern void itfMesMngRequestMessage(s32 window, s32 entry, s32 item);
+extern void itfMesMngSetSelPhase(s32 window, s32 phase);
+extern void itfMesMngRelease(s32 window);
+extern void itfMesMngSetMesPosition(s32 window, s32 x, s32 y);
+extern void itfMesMngSetOffsetY1(s32 window, s32 y);
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **data, u32 *size);
+extern sdfTexHandle_t *sdfTexSet(void *data);
+extern char D_0053D028[];
+extern char D_0053D038[];
+extern char D_0053D1F0[];
+extern char D_0053D200[];
+extern char D_0053D3F8[];
+extern char D_0053D408[];
+extern char D_0053D640[];
+extern char D_0053D650[];
+extern char D_0053D660[];
+extern char D_0053DA90[];
+extern char D_0053DAA0[];
+extern char D_0053F4F0[];
+extern char D_0053F500[];
+extern char D_0054FB48[];
+extern char D_0054FB98[];
+extern char D_0054FBD8[];
+extern char D_0054FCF0[];
+extern char D_0054FE38[];
+extern s8 campExitState;
+extern s8 gProcessStat_4;
+extern void *memset(void *destination, s32 value, u32 size);
+extern void p2sdPlaySE(s32 sound, s32 volume, s32 pan);
+void movieViewerSetFlags(void);
+s32 dds3WaitMovieEnd(void);
+void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex);
 
 typedef struct
 {
@@ -61,12 +226,6 @@ typedef struct
     u8 unk_05[55];
 } datDevilInfo_t;
 
-typedef struct
-{
-    /* 0x00 */ datUnitWork_t unit;
-    /* 0x80 */ u8 unk_80[6];
-    /* 0x86 */ u16 skill[24];
-} cmbUnit_t;
 
 extern cmbRaceEntry_t D_0032DA70[];
 extern cmbPairEntry_t D_0032DB78[];
@@ -77,7 +236,7 @@ extern s32 dds3GetRandA(s32 seed);
 extern s32 datGetMaxHp(datUnitWork_t *work);
 extern s32 datGetMaxMp(datUnitWork_t *work);
 extern s32 cmbLookupCombine(u16 devilA, u16 devilB, s8 flag);
-extern s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, s32 mode, s8 flag);
+extern s32 cmbCalcResultLevel(datUnitWork_t *unitA, datUnitWork_t *unitB, s32 mode, s8 flag);
 extern s32 cmbGetRaceCombineResult(s32 race, u8 level);
 
 extern s32 evtBitCheck(s32 bit);
@@ -175,7 +334,7 @@ typedef struct
 extern cmbSmokeParam_t D_0032DE20[];
 extern rcvWork_t *D_0054FBB0;
 extern char D_0053CF10[];
-extern void sortSkillList(cmbUnit_t *unit);
+extern void sortSkillList(datUnitWork_t *unit);
 extern void p2sdStopBGM(s32 id);
 extern s8 gProcessStat_3;
 
@@ -275,9 +434,9 @@ extern void movieStop(void);
 extern void campUpdateEffectStep(void);
 extern s32 func_00232198(void);
 extern cmpPanelEff_t *cmpPanelEffList;
-extern s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
-extern s32 cmpDrawSprite(s32 id, s32 flag, s32 arg);
-extern s32 cmpDrawSprite2(s32 id, s32 flag, s32 arg);
+extern void cmpDrawSpriteFlag(u8 id, s32 flag, s32 arg);
+extern void cmpDrawSprite(u64 id, s32 flag, s32 arg);
+extern void cmpDrawSprite2(s32 id, s32 flag, s32 arg);
 extern s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
 extern s32 cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
 typedef struct
@@ -341,16 +500,9 @@ typedef struct
     /* 0x04 */ u8 unk_04[4];
 } datItemEntry_t;
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[3];
-    /* 0x03 */ u8 icon;
-    /* 0x04 */ u8 unk_04[0x38];
-} datSkillEntry_t;
 
 extern campWork_t *campWork;
 extern datItemEntry_t datItemTable[];
-extern datSkillEntry_t datSkillTable[];
 extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 extern void rstSetMaxHpMp(s32 mode, s32 arg);
@@ -366,7 +518,7 @@ extern s8 cmpModelInitFlag;
 extern u16 D_0054FEEE;
 extern s32 cmpModelHandle;
 extern fclRbnWork_t *g_pdebug;
-extern s32 cmpDrawBoxLine(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 *g);
+extern void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1, const u32 *colors, u32 surfaceIndex);
 extern void itfMesMngSetVarImmediate(s32 msg, s8 index, s32 value);
 extern void func_00224230(s32 param);
 typedef struct
@@ -700,12 +852,12 @@ s8 cmbFindRaceEntry(u16 devilId, u8 race)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbFindPairEntry);
 
-s8 cmbCountSkills(cmbUnit_t *unit)
+s8 cmbCountSkills(datUnitWork_t *unit)
 {
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->skill[i] == 0) {
+        if (unit->skillSlots[i] == 0) {
             return i;
         }
     }
@@ -718,10 +870,10 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbCalcResultLevel);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbGetRaceCombineResult);
 
-void cmbGetDevilIdAndRace(cmbUnit_t *unit, u16 *devilId, u8 *race)
+void cmbGetDevilIdAndRace(datUnitWork_t *unit, u16 *devilId, u8 *race)
 {
-    *devilId = unit->unit.id;
-    *race = datDevilTable[unit->unit.id].race;
+    *devilId = unit->id;
+    *race = datDevilTable[unit->id].race;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbCheckUnlockedPair);
@@ -769,26 +921,26 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbFindSpecialEntry);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbBuildDevilEntry);
 
-void cmbCalcUnitParam(cmbUnit_t *unit)
+void cmbCalcUnitParam(datUnitWork_t *unit)
 {
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        unit->unit.param[i] += unit->unit.param[i] / 5;
+        unit->param[i] += unit->param[i] / 5;
     }
-    unit->unit.hp = datGetMaxHp(&unit->unit);
-    unit->unit.maxhp = unit->unit.hp;
-    unit->unit.mp = datGetMaxMp(&unit->unit);
-    unit->unit.maxmp = unit->unit.mp;
+    unit->hp = datGetMaxHp(unit);
+    unit->maxhp = unit->hp;
+    unit->mp = datGetMaxMp(unit);
+    unit->maxmp = unit->mp;
 }
 
-u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag, s8 levelFlag)
+u16 cmbCalcCombineResult(datUnitWork_t *unitA, datUnitWork_t *unitB, s8 flag, s8 levelFlag)
 {
     s32 race;
     s32 level;
     s32 result;
 
-    race = cmbLookupCombine(unitA->unit.id, unitB->unit.id, flag);
+    race = cmbLookupCombine(unitA->id, unitB->id, flag);
     level = cmbCalcResultLevel(unitA, unitB, 0, levelFlag);
     result = cmbGetRaceCombineResult(race, level);
     if (result == 0xCD) {
@@ -811,9 +963,9 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragUseItemOnUnit);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbInheritSkills);
 
-void rstClearSkillSlot(cmbUnit_t *unit, u8 slot)
+void rstClearSkillSlot(datUnitWork_t *unit, u8 slot)
 {
-    unit->skill[slot] = 0;
+    unit->skillSlots[slot] = 0;
     sortSkillList(unit);
 }
 
@@ -825,13 +977,13 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbChkSkillOwner);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstFindSkillSlot);
 
-s8 cmbFindSkillSlot(cmbUnit_t *unit)
+s8 cmbFindSkillSlot(datUnitWork_t *unit)
 {
     s32 count = 0;
     s32 i;
 
     for (i = 0; i < 24; i++) {
-        if (unit->skill[i] != 0) {
+        if (unit->skillSlots[i] != 0) {
             count++;
         }
     }
@@ -842,16 +994,16 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbCopyDefaultDevilToStock);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbCopyCustomDevilToStock);
 
-void cmbClearStockEntry(cmbUnit_t *unit)
+void cmbClearStockEntry(datUnitWork_t *unit)
 {
     memset(unit, 0, 0xEC);
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbClearUnitSkills);
 
-void cmbClearSkillSlots(cmbUnit_t *unit)
+void cmbClearSkillSlots(datUnitWork_t *unit)
 {
-    memset(unit->skill, 0, sizeof(unit->skill));
+    memset(unit->skillSlots, 0, sizeof(unit->skillSlots));
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmb_1FF0C8);
@@ -1256,7 +1408,11 @@ INCLUDE_ASM(const s32, "code_001FAE80", shop_update_Shutdown);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclShopProcessStart);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclShopProcessEnd);
+void fclShopProcessEnd(void) {
+    dds3KillProcessName(D_0054FB48, 1);
+    dds3KillProcessName(D_0053D028, 1);
+    dds3KillProcessName(D_0053D038, 1);
+}
 
 s32 shpCheckProcessStat(void)
 {
@@ -1440,7 +1596,11 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclDestroyRag);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclRagProcessStart);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclRagProcessEnd);
+void fclRagProcessEnd(void) {
+    dds3KillProcessName(D_0054FB98, 1);
+    dds3KillProcessName(D_0053D1F0, 1);
+    dds3KillProcessName(D_0053D200, 1);
+}
 
 s32 ragCheckProcessStat(void)
 {
@@ -1583,7 +1743,11 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclDestroyRecover);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclRecoverProcessStart);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclRecoverProcessEnd);
+void fclRecoverProcessEnd(void) {
+    dds3KillProcessName(D_0054FBD8, 1);
+    dds3KillProcessName(D_0053D3F8, 1);
+    dds3KillProcessName(D_0053D408, 1);
+}
 
 s32 rcvCheckProcessStat(void)
 {
@@ -1809,7 +1973,11 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclDestroyTerminal);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalProcessStart);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalProcessEnd);
+void fclTerminalProcessEnd(void) {
+    dds3KillProcessName(D_0053D640, 1);
+    dds3KillProcessName(D_0053D650, 1);
+    dds3KillProcessName(D_0053D660, 1);
+}
 
 s32 trmCheckProcessStat(void)
 {
@@ -2000,11 +2168,38 @@ INCLUDE_ASM(const s32, "code_001FAE80", datGetItemSlotIndex);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclAddItem);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fcl_213998);
+s32 fcl_213998(char *name, dds3Basic_t *destination)
+{
+    dds3Basic_t *source;
+    fclSceneObjectWork_t *destinationWork;
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclLoadStage);
+    source = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 9, name);
+    if (source != NULL) {
+        destinationWork = destination->workdata;
+        destinationWork->destinationValue = ((fclSceneObjectWork_t *)source->workdata)->sourceValue;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclFilterOFF);
+void fclLoadStage(s32 major, s32 minor)
+{
+    s32 map = (major << 16) + minor;
+    if (dds3GetMapNo(dds3GetControlScene()) != map) {
+        evtLoadArea(major, minor);
+    }
+}
+
+void fclFilterOFF(void) {
+    dds3SetBlur(0, 0, 0);
+    dds3MultiBlurOff(0);
+    dds3DistBlurOff(0);
+    Eve_BlurOFF();
+    Eve_PartialMultiBlurOFF();
+    Eve_PartialMultiFilterOFF();
+    Eve_DistortionBlurOFF();
+    Eve_FilterOFF();
+}
 
 void fclFreeStage(void)
 {
@@ -2024,9 +2219,29 @@ void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel
     panel->unk_10 = f;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclScriptForcedEnd);
+s32 fclScriptForcedEnd(void *process)
+{
+    if (process != 0) {
+        if (dds3GetProcessStat(process)) {
+            dds3KillProcess(process, 0);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclScriptStart);
+void *fclScriptStart(s32 script, s32 value, void **processSlot)
+{
+    void *process;
+
+    if (processSlot != 0) {
+        fclScriptForcedEnd(*processSlot);
+    }
+    process = scrStartScript2(0x7D0, script, value);
+    fclClearFlag(0);
+    if (processSlot != 0) {
+        *processSlot = process;
+    }
+    return process;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_00213BB8);
 
@@ -2046,19 +2261,84 @@ s32 cmpItemOrder(u8 *a, u8 *b)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00213CD8);
+s32 func_00213CD8(u8 *buffer, s32 length, u8 excluded) {
+    s32 index;
+    s32 retainedCount = 0;
+    for (index = 0; index < length; index++) {
+        if (buffer[index] != excluded) {
+            u8 value = buffer[index];
+            buffer[index] = 0;
+            buffer[retainedCount++] = value;
+        }
+    }
+    return retainedCount;
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", shuffleIndices);
+void shuffleIndices(u8 *buffer, u32 length, s32 swapCount) {
+    s32 swapIndex;
+    for (swapIndex = 0; swapIndex < swapCount; swapIndex++) {
+        u8 *first = buffer + dds3GetRandA(0) % length;
+        u8 *second = buffer + dds3GetRandA(0) % length;
+        u8 value = *first;
+        *first = *second;
+        *second = value;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_00213DC0);
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00213DF0);
+u32 func_00213DF0(u32 color, u32 scaleFactor) {
+    u32 red = color >> 24;
+    u32 green = (color >> 16) & 0xFF;
+    u32 blue = (color & 0xFF00) >> 8;
+    u32 alpha = color & 0xFF;
+    red = (red * scaleFactor) >> 8;
+    green = (green * scaleFactor) >> 8;
+    blue = (blue * scaleFactor) >> 8;
+    return (red << 24) | (green << 16) | (blue << 8) | alpha;
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclBlendColor);
+u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight) {
+    u32 a0 = firstColor >> 24;
+    u32 r0 = (firstColor & 0xFF0000) >> 16;
+    u32 g0 = (firstColor & 0xFF00) >> 8;
+    u32 b0 = firstColor & 0xFF;
+    u32 a1 = secondColor >> 24;
+    u32 r1 = (secondColor & 0xFF0000) >> 16;
+    u32 g1 = (secondColor & 0xFF00) >> 8;
+    u32 b1 = secondColor & 0xFF;
+    u32 inv;
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclInitMessage);
+    if (weight > 0x100) {
+        weight = 0x200 - weight;
+    }
+    inv = 0x100 - weight;
+    a0 = (a0 * weight + a1 * inv) >> 8;
+    r0 = (r0 * weight + r1 * inv) >> 8;
+    g0 = (g0 * weight + g1 * inv) >> 8;
+    b0 = (b0 * weight + b1 * inv) >> 8;
+    return (a0 << 24) | (r0 << 16) | (g0 << 8) | b0;
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclStartMessage);
+s32 fclInitMessage(s32 sub) {
+    if (gMsgID < 0) {
+        gMsgID = itfMesMngInitialize(sub);
+        itfMesMngChangeWindowType(gMsgID, 2, 0);
+        return 1;
+    }
+    return 0;
+}
+
+s32 fclStartMessage(s32 entry) {
+    if (gMsgID < 0) {
+        return 0;
+    }
+    itfMesMngMarkBitStat(gMsgID, 0x200000);
+    itfMesMngRequestMessage(gMsgID, entry, 0);
+    itfMesMngSetSelPhase(gMsgID, -1);
+    gMsgFlag = 1;
+    return 1;
+}
 
 s32 fclStartSelMessage(s32 no)
 {
@@ -2093,9 +2373,29 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclEndMessageEx);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclEndMessage);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDestroyMessage);
+s32 fclDestroyMessage(void) {
+    s32 window = gMsgID;
+    if (window < 0) {
+        return 0;
+    }
+    itfMesMngRelease(window);
+    gMsgID = -1;
+    gMsgFlag = 0;
+    gMsgInvFlag = 0;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclChkMessage);
+s32 fclChkMessage(void) {
+    if (gMsgID < 0) {
+        return 0;
+    }
+    if (gMsgInvFlag != 0) {
+        if ((s8)gMsgFlag == 2) {
+            return 0;
+        }
+    }
+    return (s8)gMsgFlag;
+}
 
 s32 fclChkSelMessage(void)
 {
@@ -2119,9 +2419,21 @@ s8 fcl_214270(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclSetMessageInvalid);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fcl_2142F0);
+void fcl_2142F0(s32 x, s32 y) {
+    itfMesMngSetMesPosition(gMsgID, x << 4, y << 3);
+    itfMesMngSetOffsetY1(gMsgID, -((0x15F - y) << 3));
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclChkMessageDraw);
+s32 fclChkMessageDraw(void *process)
+{
+    if (dds3GetProcessStat(process) == 1) {
+        return 1;
+    }
+    if (dds3GetProcessStat(process) == 2) {
+        return 1;
+    }
+    return dds3GetProcessStat(process) == 3;
+}
 
 void fclClearFlag(s8 index)
 {
@@ -2155,9 +2467,22 @@ s8 fclGetWorkValue(s8 index)
     return fclWorkValue[index];
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fcl_214428);
+s32 fcl_214428(void)
+{
+    s32 index = scrGetIntPara(0);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fcl_214458);
+    D_00551F80[index] = 1;
+    return 1;
+}
+
+s32 fcl_214458(void) {
+    s32 displayValueIndex = scrGetIntPara(0);
+    if (displayValueIndex >= 0x10) {
+        displayValueIndex = 0xF;
+    }
+    scrSetIntReturnValue(fclWorkValue[displayValueIndex]);
+    return 1;
+}
 
 s32 fclLoadFileDone(s32 unused, s32 cmd, s32 value, s32 unused2, s32 *out)
 {
@@ -2172,7 +2497,16 @@ void fclLoadFileAsync(const char *name, void *buf)
     sdfFileCmdReadFile(name, 0, -1, fclLoadFileDone, buf);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclLoadTexture);
+sdfTexHandle_t *fclLoadTexture(const char *path)
+{
+    void *data;
+    u32 size;
+    sdfMemHandle_t *allocation = sdfDevLoadFileEx(path, &data, &size);
+    sdfTexHandle_t *texture = sdfTexSet(data);
+
+    sdfMemFreeDirect(allocation);
+    return texture;
+}
 
 void fclSetSpriteColor(u8 *sprite, u32 color)
 {
@@ -2693,9 +3027,26 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstDestroyResult2);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstResult2ProcessStart);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstResult2ProcessEnd);
+void rstResult2ProcessEnd(void) {
+    dds3KillProcessName(D_0054FCF0, 1);
+    dds3KillProcessName(D_0053DA90, 1);
+    dds3KillProcessName(D_0053DAA0, 1);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", checkResultStat);
+s32 checkResultStat(void)
+{
+    s32 state = gProcessStat_4;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        gProcessStat_4 = 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstSetLevelUpFlag);
 
@@ -3062,7 +3413,11 @@ void func_002262D8(void) {
 void func_002262E0(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", sdfSndMakeFilename);
+char *sdfSndMakeFilename(char *pathBuffer, const char *filename)
+{
+    *(sdfSoundPrefix_t *)pathBuffer = *(sdfSoundPrefix_t *)D_0054FD18;
+    return strcat(pathBuffer, filename);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", sndInit);
 
@@ -3077,7 +3432,13 @@ s32 snd_226390(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", dds3_2263B8);
+u32 dds3_2263B8(void) {
+    s32 sequence;
+
+    sequence = scrGetIntPara(0);
+    p2sdPlaySE(sequence, 0x7F, 0x3F);
+    return 1;
+}
 
 s32 dds3_2263E8(void)
 {
@@ -3681,7 +4042,47 @@ s32 stfInit(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieDrawProc);
+s32 movieDrawProc(void *task) {
+    release_movieobj2((moviePlaybackWork_t *)D_00343E40, &sdfGrOtTable[57]);
+    return 0;
+}
+
+void moviePlayFile_27041744(const char *fileName, movieDescriptor_t *descriptor) {
+    if (PlayingNo == 0) {
+        movieOpenStream((moviePlaybackWork_t *)D_00343E40, descriptor, fileName);
+        PlayingNo = dds3StartProcess(D_0053F3C8, 0x2afb, 1, 1, movieDrawProc, 0, 0);
+    }
+}
+
+s32 dds3PlayMovieByIndex(s32 movieIndex) {
+    movieResource_t *entry = &D_00343BE8[movieIndex];
+
+    moviePlayFile_27041744(entry->fileName, &entry->descriptor);
+}
+
+void movieStop(void) {
+    if (PlayingNo == 0) {
+        return;
+    }
+    movieCloseStream((moviePlaybackWork_t *)D_00343E40);
+    dds3KillProcess(PlayingNo, 0);
+    PlayingNo = 0;
+}
+
+s32 dds3WaitMovieEnd(void)
+{
+    return sdfMovieIsFinished(D_00343E40);
+}
+
+u8 func_0022B7F8(void)
+{
+    return D_00343E74[0];
+}
+
+s32 movieMan_Process(void) {
+    sdfIpuRunDecode(0x3c / dds3VblanksPerFrame);
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F100);
 
@@ -3735,25 +4136,12 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F390);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F3B0);
 
-INCLUDE_ASM(const s32, "code_001FAE80", moviePlayFile_27041744);
+INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F3C8);
 
-INCLUDE_ASM(const s32, "code_001FAE80", dds3PlayMovieByIndex);
-
-INCLUDE_ASM(const s32, "code_001FAE80", movieStop);
-
-s32 dds3WaitMovieEnd(void)
-{
-    return sdfMovieIsFinished(D_00343E40);
+void dds3StartMovieManager(void) {
+    sdfIpuInit();
+    dds3StartProcess("movieMan", 0x385, 1, 0, movieMan_Process, 0, 0);
 }
-
-u8 func_0022B7F8(void)
-{
-    return D_00343E74[0];
-}
-
-INCLUDE_ASM(const s32, "code_001FAE80", movieMan_Process);
-
-INCLUDE_ASM(const s32, "code_001FAE80", dds3StartMovieManager);
 
 s32 dds3_22B880(void)
 {
@@ -3778,21 +4166,92 @@ s32 movie_22B8F0(void)
     return func_0022B7F8() == 2;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieViewerFree);
+void movieViewerFree(void) {
+    movieListNode_t *node = movieViewerWork.head;
+
+    if (node != NULL) {
+        do {
+            movieListNode_t *next = node->next;
+
+            sdfChipFreeDirect(node);
+            node = next;
+        } while (node != NULL);
+        movieViewerWork.head = NULL;
+        movieViewerWork.top = 0;
+        movieViewerWork.cursor = 0;
+        movieViewerWork.total = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", movieViewerScanDir);
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieViewerStep);
+movieListNode_t *movieViewerStep(void) {
+    movieListNode_t *entry = movieViewerWork.head;
+    s32 remaining = movieViewerWork.cursor;
+    if (entry != 0 && remaining > 0) {
+        do {
+            entry = entry->next;
+            remaining--;
+        } while (entry != 0 && remaining > 0);
+    }
+    return entry;
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieDebugDrawInfo);
+void movieDebugDrawInfo(void) {
+    movieListNode_t *node;
+    sdfDrawTag_t *packets;
+    s32 selected;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_001FAE80", MovieViewerDrawFrameInfo);
+    if (movieViewerWork.head == NULL || movieViewerWork.playing != 0) {
+        return;
+    }
+    packets = movieViewerWork.packets;
+    sdfDrawTagLink(packets, (u32)dds3PrimFrameRect(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000, 0x60404040));
+    selected = movieViewerWork.cursor;
+    i = movieViewerWork.top;
+    node = movieViewerWork.head;
+    selected -= i;
+    for (; i > 0; i--) {
+        node = node->next;
+    }
+    for (i = 0; i < 8 && node != NULL; i++, node = node->next) {
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_0054FDA8, (i == selected) ? '>' : ' ', node->path));
+    }
+    if (movieViewerWork.top != 0) {
+        sdfPrimLinkF3(packets, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8, 0xFF0080, 0);
+    }
+    if (node != NULL) {
+        sdfPrimLinkF3(packets, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08, 0xFF0080, 0);
+    }
+}
+
+void MovieViewerDrawFrameInfo(void) {
+    sdfDrawTag_t *list;
+    if (dds3WaitMovieEnd() == 0) {
+        list = (sdfDrawTag_t *)movieViewerFrame[0];
+        sdfDrawTagLink(list, (u32)dds3PrimFrameRect(0x8810, 0x85E8, 0xFF0080, 0x720, 0x90, 0x30000000, 0x60404040));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(0x8840, 0x8600, 0xFF0080, 0, "%04d/%04d", ((moviePlaybackWork_t *)D_00343E40)->playbackFrameIndex, (s32)((moviePlaybackWork_t *)D_00343E40)->cycleLength));
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", MovieViewerProc);
 
-INCLUDE_ASM(const s32, "code_001FAE80", InitMovieViewer);
+void InitMovieViewer(void) {
+    movieViewerScanDir();
+    movieViewerWork.task = dds3StartProcess(D_0053F418, 0x2b02, 1, 0,
+                                       MovieViewerProc, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", FinishMovieViewer);
+void FinishMovieViewer(void) {
+    void *task = dds3SearchProcessName(D_0053F418);
+    if (task != NULL) {
+        dds3KillProcess(task, 0);
+        movieViewerWork.task = 0;
+        movieStop();
+    }
+    movieViewerFree();
+}
 
 void movieViewerSetFlags(void)
 {
@@ -3800,13 +4259,98 @@ void movieViewerSetFlags(void)
     movieViewerDebugFlag[3] = 1;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieViewerInitRegs);
+void movieViewerInitRegs(void) {
+    ((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordSource = 0x10002010;
+    ((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockSource = (u32)&D_00343E40;
+    movieViewerSetFlags();
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieViewerDrawInfo);
+void movieViewerDrawInfo(void) {
+    if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordPending != 0) {
+        ((movieViewerDebugWork_t *)movieViewerDebugFlag)->word = *(s32 *)((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordSource;
+    }
+    if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockPending != 0) {
+        memcpy(((movieViewerDebugWork_t *)movieViewerDebugFlag)->block, (void *)((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockSource, 0x40);
+    }
+}
 
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F418);
+s32 movieViewerDebugDraw(void) {
+    sdfDrawTag_t *packets;
+    sdfGrOt_t *ot;
+    s32 n;
+    s32 i;
+    s32 x;
+    s32 y;
+    s32 col;
 
-INCLUDE_ASM(const s32, "code_001FAE80", movieViewerDebugDraw);
+    if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->started == 0) {
+        ((movieViewerDebugWork_t *)movieViewerDebugFlag)->started = 1;
+        movieViewerInitRegs();
+    }
+    if (dds3PadBitTable[0x11] != 0) {
+        movieViewerSetFlags();
+    } else if (dds3PadBitTable[0x12] != 0) {
+        movieViewerInitRegs();
+    } else if (dds3PadBitTable[0x15] & 2) {
+        ((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor++;
+        if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor == 0x10) {
+            ((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor = 0;
+        }
+    } else if (dds3PadBitTable[0x14] & 2) {
+        if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor != 0) {
+            ((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor--;
+        } else {
+            ((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor = 0xF;
+        }
+    } else {
+        n = 1 << ((~((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor & 7) * 4);
+        i = ((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor >> 3;
+        if (dds3PadBitTable[0x17] & 2) {
+            if (i == 0) {
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordPending = 0;
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordSource += n;
+            } else {
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockPending = 0;
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockSource += n;
+            }
+        }
+        if (dds3PadBitTable[0x16] & 2) {
+            if (i == 0) {
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordPending = 0;
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordSource -= n;
+            } else {
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockPending = 0;
+                ((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockSource -= n;
+            }
+        }
+    }
+    movieViewerDrawInfo();
+    packets = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(packets, (u32)dds3PrimFrameRect(0x7150, 0x79A8, 0xFF007E, 0x1860, 0x3F0, 0x60000000, 0x40806020));
+    sdfPrimLinkRect(packets, 0x80A03000, 0, (((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor & 7) * 0xC0 + 0x7180, (((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor >> 3) * 0xC0 + 0x79C0, (((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor & 7) * 0xC0 + 0x7240, (((movieViewerDebugWork_t *)movieViewerDebugFlag)->cursor >> 3) * 0xC0 + 0x7A20, 0xFF007F, 0);
+    sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, 0x79C0, 0xFF0080, 0, D_0054FDB8, ((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordSource));
+    if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->wordPending != 0) {
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, D_0054FDB8, ((movieViewerDebugWork_t *)movieViewerDebugFlag)->word));
+    } else {
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7840, 0x79C0, 0xFF0080, 0, D_0053F428));
+    }
+    n = 0;
+    y = 0x7A80;
+    for (i = 0; i != 8; i++, y += 0x60) {
+        sdfDrawTagLink(packets, (u32)sdfDevPrintf(0x7180, y, 0xFF0080, 0, D_0054FDB8, ((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockSource + n));
+        x = 0x7840;
+        for (col = 0; col != 8; col++, x += 0x240, n++) {
+            if (((movieViewerDebugWork_t *)movieViewerDebugFlag)->blockPending != 0) {
+                sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, D_0054FDC0, ((movieViewerDebugWork_t *)movieViewerDebugFlag)->block[n]));
+            } else {
+                sdfDrawTagLink(packets, (u32)sdfDevPrintf(x, y, 0xFF0080, 0, D_0054FDC8));
+            }
+        }
+    }
+    ot = &sdfGrOtTable[81];
+    ot->regFunc(ot, packets);
+    return 0;
+}
 
 void rstSetResultWork(void *work)
 {
@@ -3817,6 +4361,10 @@ void rstClearResultWork(void)
 {
     D_00345D9C[0] = NULL;
 }
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F418);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F428);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F438);
 
@@ -3854,9 +4402,26 @@ INCLUDE_ASM(const s32, "code_001FAE80", camp_update_Shutdown);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpProcessStart);
 
-INCLUDE_ASM(const s32, "code_001FAE80", campKillProcesses);
+void campKillProcesses(void) {
+    dds3KillProcessName(D_0054FE38, 0);
+    dds3KillProcessName(D_0053F4F0, 0);
+    dds3KillProcessName(D_0053F500, 0);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", campCheckExitState);
+s32 campCheckExitState(void)
+{
+    s32 state = campExitState;
+    if (state == 1) {
+        return 1;
+    }
+    if (state < 2) {
+        return 0;
+    }
+    if (state == 2) {
+        campExitState = 0;
+    }
+    return 0;
+}
 
 void cmpSetLoadState(u8 state)
 {
@@ -4413,7 +4978,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSkillListHeader);
 
 u8 cmpGetSkillIcon(u16 skill)
 {
-    return datSkillTable[skill].icon;
+    return datSkillTable.normal[skill].costtype;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpGetSkillCost);
@@ -4424,34 +4989,127 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSkillListScrollBar);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSkillList);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpExpandColor);
+void cmpExpandColor(u64 *channels, u32 color) {
+    u64 blueBits;
+    channels[0] = (color >> 24) | ((u64)((color >> 16) & 0xFF) << 32);
+    blueBits = color & 0xFF00;
+    channels[1] = (blueBits >> 8) | ((u64)(color & 0xFF) << 32);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSetup3DView);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSpriteFlag);
+void cmpDrawSpriteFlag(u8 enabled, s32 alternate, s32 kind) {
+    u32 normalized = enabled != 0;
+    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    u64 *descriptor;
+    sdfDrawTag_t *context;
+    sdfGrOt_t *entry;
 
-s32 func_00239C08(u8 id, s32 arg)
-{
-    return cmpDrawSpriteFlag(id, 0, arg);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
+    descriptor[0] = normalized;
+    if (!alternate) {
+        descriptor[1] = 0x4A;
+    } else {
+        descriptor[1] = 0x4B;
+    }
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
+    entry = &sdfGrOtTable[kind];
+    entry->regFunc(entry, context);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSprite);
-
-s32 fclDrawPanelSprite(s32 id, s32 arg)
+void func_00239C08(u8 id, s32 arg)
 {
-    return cmpDrawSprite(id, 0, arg);
+    cmpDrawSpriteFlag(id, 0, arg);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSprite2);
+void cmpDrawSprite(u64 data, s32 alternate, s32 kind) {
+    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    u64 *descriptor;
+    sdfDrawTag_t *context;
+    sdfGrOt_t *entry;
 
-s32 fclDrawPanelSprite2(s32 id, s32 arg)
-{
-    return cmpDrawSprite2(id, 0, arg);
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
+    descriptor[0] = data;
+    if (!alternate) {
+        descriptor[1] = 0x47;
+    } else {
+        descriptor[1] = 0x48;
+    }
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
+    entry = &sdfGrOtTable[kind];
+    entry->regFunc(entry, context);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSpriteIndexed);
+void fclDrawPanelSprite(u64 id, s32 arg)
+{
+    cmpDrawSprite(id, 0, arg);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSpriteIndexed2);
+void cmpDrawSprite2(s32 data, s32 alternate, s32 kind) {
+    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    u64 *descriptor;
+    sdfDrawTag_t *context;
+    sdfGrOt_t *entry;
+
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
+    descriptor[0] = data;
+    if (!alternate) {
+        descriptor[1] = 0x42;
+    } else {
+        descriptor[1] = 0x43;
+    }
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
+    entry = &sdfGrOtTable[kind];
+    entry->regFunc(entry, context);
+}
+
+void fclDrawPanelSprite2(s32 id, s32 arg)
+{
+    cmpDrawSprite2(id, 0, arg);
+}
+
+void cmpDrawSpriteIndexed(s32 data, s32 kind) {
+    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    u64 *descriptor;
+    sdfDrawTag_t *context;
+    sdfGrOt_t *entry;
+
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
+    descriptor[1] = 0x49;
+    descriptor[0] = data;
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
+    entry = &sdfGrOtTable[kind];
+    entry->regFunc(entry, context);
+}
+
+void cmpDrawSpriteIndexed2(s32 data, s32 kind) {
+    sdfGrPacketHeader_t *packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    u64 *descriptor;
+    sdfDrawTag_t *context;
+    sdfGrOt_t *entry;
+
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    descriptor = (u64 *)sdf2DGetPrimPtr(packet);
+    descriptor[1] = 0x14;
+    descriptor[0] = data;
+    context = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(context);
+    sdfDrawTagLink(context, (u32)packet);
+    entry = &sdfGrOtTable[kind];
+    entry->regFunc(entry, context);
+}
 
 void func_00239F88(s32 *work, s32 value)
 {
@@ -4461,11 +5119,42 @@ void func_00239F88(s32 *work, s32 value)
     work[3] = value;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmp_239FA0);
+void cmp_239FA0(const u32 *xs, const u32 *ys, u32 z, u32 color, u32 surfaceIndex)
+{
+    u32 vertexColors[3] = {color, color, color};
+    cmpDrawTriG(xs, ys, z, vertexColors, surfaceIndex);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawTriG);
+void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 surfaceIndex)
+{
+    sdfGrPacketHeader_t *packet;
+    cmpPackedVertex_t *vertices;
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawBoxSolid);
+    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(6, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x14B, 6, 0x515151, 1);
+    vertices = (cmpPackedVertex_t *)sdf2DGetPrimPtr(packet);
+    cmpExpandColor(vertices[0].colorChannels, colors[0]);
+    vertices[0].packedXY = (xs[0] + 0x7000) | ((u64)(ys[0] + 0x7900) << 32);
+    vertices[0].depth = z;
+    cmpExpandColor(vertices[1].colorChannels, colors[1]);
+    vertices[1].packedXY = (xs[1] + 0x7000) | ((u64)(ys[1] + 0x7900) << 32);
+    vertices[1].depth = z;
+    cmpExpandColor(vertices[2].colorChannels, colors[2]);
+    vertices[2].packedXY = (xs[2] + 0x7000) | ((u64)(ys[2] + 0x7900) << 32);
+    vertices[2].depth = z;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
+
+s32 cmpDrawBoxSolid(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 gsContext, s32 surfaceIndex) {
+    u32 vertexColors[4] = {color, color, color, color};
+    cmpDrawBoxG(x, y, z, width, height, (s32)vertexColors, gsContext, surfaceIndex);
+}
 
 s32 cmpDrawBoxF(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
 {
@@ -4481,18 +5170,84 @@ s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmp_23A360);
 
-void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
+void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, u32 g, u32 surfaceIndex)
 {
-    s32 pair[2];
+    u32 pair[2];
 
     pair[1] = g;
     pair[0] = g;
-    cmpDrawBoxLine(a, b, c, d, e, f, pair);
+    cmpDrawBoxLine(a, b, c, d, e, f, pair, surfaceIndex);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawBoxLine);
+void cmpDrawBoxLine(u32 x0, u32 y0, u32 z0, u32 x1, u32 y1, u32 z1,
+                  const u32 *colors, u32 surfaceIndex)
+{
+    sdfGrPacketHeader_t *packet;
+    cmpPackedVertex_t *vertices;
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDraw3DPoly);
+    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(4, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x149, 4, 0x5151, 1);
+    vertices = (cmpPackedVertex_t *)sdf2DGetPrimPtr(packet);
+    cmpExpandColor(vertices[0].colorChannels, colors[0]);
+    vertices[0].packedXY = (x0 + 0x7000) | ((u64)(y0 + 0x7900) << 32);
+    vertices[0].depth = z0;
+    cmpExpandColor(vertices[1].colorChannels, colors[1]);
+    vertices[1].packedXY = (x1 + 0x7000) | ((u64)(y1 + 0x7900) << 32);
+    vertices[1].depth = z1;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (u32)packet);
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
+
+void cmpDraw3DPoly(const f32 *first, const f32 *second, const f32 *third,
+                   const u32 *colors, s32 unused, sdfMat_t *asset, s32 surfaceIndex) {
+    sdf3DPrimPolyParm_t request;
+    u32 vertexColors[3];
+    f32 textureCoordinates[3][2];
+    sdfVector4_t positions[3];
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    u32 firstColor, secondColor, thirdColor;
+
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(sizeof(sdfDrawTag_t));
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    if (asset != NULL) {
+        sdf3DPrimLinkMat(list, asset, 0);
+    }
+    memset(&request, 0, sizeof(request));
+    firstColor = colors[0];
+    secondColor = colors[1];
+    thirdColor = colors[2];
+    request.faceCount = 1;
+    request.pointCount = 3;
+    request.color = firstColor;
+    request.vertex = positions;
+    request.normal = NULL;
+    request.uv = NULL;
+    vertexColors[0] = firstColor;
+    vertexColors[1] = secondColor;
+    vertexColors[2] = thirdColor;
+    request.vertexColor = vertexColors;
+    PS2_COPY_QUAD(&positions[0], first);
+    PS2_COPY_QUAD(&positions[1], second);
+    PS2_COPY_QUAD(&positions[2], third);
+    /* Retail 0x0023A6E4..0x0023A6FC retains these UV stores with the stream
+     * disabled, as does the DDS1 twin at 0x002C1314..0x002C132C. */
+    textureCoordinates[0][0] = 0.0f;
+    textureCoordinates[0][1] = 0.0f;
+    textureCoordinates[1][0] = 0.0f;
+    textureCoordinates[1][1] = 0.0f;
+    textureCoordinates[2][0] = 0.0f;
+    textureCoordinates[2][1] = 0.0f;
+    sdfDrawTagLink(list, (u32)sdf3DPrimMakePoly(&request));
+    surface = &sdfGrOtTable[surfaceIndex];
+    surface->regFunc(surface, list);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpDisableRGB);
 
@@ -4888,7 +5643,15 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpGetStatusModelMotion);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpGetStatusModelScale);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpResetStatusModelPos);
+void cmpResetStatusModelPos(void)
+{
+    cmpStatusModelBasePos[0] = 0;
+    cmpStatusModelBasePos[1] = 0;
+    cmpStatusModelBasePos[2] = -400.0f;
+    cmpStatusModelPos[0] = 0;
+    cmpStatusModelPos[1] = 0;
+    cmpStatusModelPos[2] = 0;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSetStatusModelPose);
 
@@ -5154,6 +5917,1180 @@ s32 campStatusIsActive(void)
 {
     return campStatusActive != 0;
 }
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540128);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540138);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540148);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540158);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540168);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540178);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540188);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540198);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401C8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401CC);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005401F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540208);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540218);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540228);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540238);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540248);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540258);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540268);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540278);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540288);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540298);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005402A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005402B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005402C8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005402D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005402E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005402F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540308);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540318);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540328);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540338);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540348);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540358);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540368);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540378);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540388);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540398);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005403A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005403B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005403C8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005403D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005403E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005403F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540408);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540418);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540428);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540438);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540448);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540458);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540468);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540478);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540488);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540498);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005404A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005404B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005404C8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005404D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005404E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005404F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540508);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540518);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540528);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540538);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540548);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540558);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540568);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540578);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540588);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540598);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005405A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005405B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005405C8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005405D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005405F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540610);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540628);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540640);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540650);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540668);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540690);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005406A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005406D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005406F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540708);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540718);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540738);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540758);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540770);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540798);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005407A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005407C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005407D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005407E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005407F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540828);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540850);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540888);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005408B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005408E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540908);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540930);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540958);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540978);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540998);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005409B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005409E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A38);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A88);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540AA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540AC8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540AE8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B08);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B38);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B78);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540BA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540BC8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540BE8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C08);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C38);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C98);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540CB8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540CD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540CF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D18);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D58);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D98);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540DC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540DE8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E28);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E58);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E78);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E98);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540EC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540EE8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F08);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F88);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FD8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FE8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541008);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541038);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541060);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541088);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005410A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005410B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005410D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005410E8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541110);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541130);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541148);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541170);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541188);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005411A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005411C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005411D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005411F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541218);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541230);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541248);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541268);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541280);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005412A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005412C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005412D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005412F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541318);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541330);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541358);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541380);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005413A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005413C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005413E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541408);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541430);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541448);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541460);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541478);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541498);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005414B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005414D8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005414F8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541518);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541540);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541558);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541568);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541580);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005415A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005415B8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005415D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005415F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541608);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541620);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541638);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541648);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541660);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541678);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541698);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005416B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005416D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005416F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541710);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541738);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541760);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541780);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005417A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005417C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005417E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541808);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541828);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541850);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541878);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005418A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005418C8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005418E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541908);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541928);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541950);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541970);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541990);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005419A8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005419D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005419F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A08);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A58);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A78);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A98);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541AB8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541AE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B08);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B58);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B78);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541BB8);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541BE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541BF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541ED0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542000);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542010);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542020);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542030);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542040);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542050);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542060);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542070);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542080);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542090);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005420A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005420B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005420C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005420D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005420E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005420F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542100);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542110);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542120);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542130);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542140);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542150);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542160);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542170);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542180);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542190);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005421A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005421B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005421C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005421D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005421E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005421F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542200);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542210);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542220);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542230);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542240);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542250);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542260);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542270);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542280);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542290);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005422A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005422B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005422C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005422D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005422E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005422F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542300);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542310);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542320);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542330);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542340);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542350);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542360);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542370);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542380);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542390);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005423A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005423B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005423C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005423D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005423E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005423F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542400);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542410);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542420);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542430);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542440);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542450);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542460);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542470);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542480);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542490);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005424A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005424B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005424C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005424D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005424E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005424F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542500);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542510);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542520);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542530);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542540);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542550);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542560);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542570);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542580);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542590);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005425A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005425B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005425C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005425D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005425E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005425F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542600);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542610);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542620);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542630);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542640);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542650);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542660);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542670);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542680);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542690);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005426A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005426B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005426C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005426D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005426E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005426F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542700);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542710);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542720);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542730);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542740);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542750);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542760);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542770);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542780);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542790);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005427A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005427B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005427C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005427D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005427E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005427F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542800);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542810);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542820);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542830);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542840);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542850);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542860);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542870);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542880);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542890);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005428A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005428B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005428C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005428D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005428E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005428F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542900);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542910);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542920);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542930);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542940);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542950);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542960);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542970);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542980);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542990);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005429A0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005429B0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005429C0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005429D0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005429E0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005429F0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542ED0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F00);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F10);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F20);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F30);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F40);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F50);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F60);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F70);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F80);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F90);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FA0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FB0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FC0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FD0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FE0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FF0);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543000);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543018);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543028);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543040);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543050);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543060);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543070);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543080);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_00543098);
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_005430A8);
 
 INCLUDE_SDATA(const s32, "code_001FAE80", gProcessStat_0);
 
@@ -6538,1178 +8475,4 @@ INCLUDE_SDATA(const s32, "code_001FAE80", D_00550E98);
 INCLUDE_SDATA(const s32, "code_001FAE80", D_00550EA0);
 
 INCLUDE_SDATA(const s32, "code_001FAE80", D_00550EA8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540128);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540138);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540148);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540158);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540168);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540178);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540188);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540198);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401C8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401CC);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005401F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540208);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540218);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540228);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540238);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540248);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540258);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540268);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540278);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540288);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540298);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005402A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005402B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005402C8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005402D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005402E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005402F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540308);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540318);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540328);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540338);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540348);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540358);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540368);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540378);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540388);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540398);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005403A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005403B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005403C8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005403D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005403E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005403F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540408);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540418);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540428);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540438);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540448);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540458);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540468);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540478);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540488);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540498);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005404A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005404B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005404C8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005404D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005404E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005404F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540508);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540518);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540528);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540538);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540548);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540558);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540568);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540578);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540588);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540598);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005405A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005405B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005405C8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005405D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005405F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540610);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540628);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540640);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540650);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540668);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540690);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005406A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005406D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005406F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540708);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540718);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540738);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540758);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540770);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540798);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005407A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005407C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005407D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005407E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005407F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540828);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540850);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540888);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005408B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005408E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540908);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540930);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540958);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540978);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540998);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005409B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005409E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A38);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540A88);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540AA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540AC8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540AE8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B08);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B38);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540B78);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540BA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540BC8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540BE8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C08);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C38);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540C98);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540CB8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540CD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540CF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D18);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D58);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540D98);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540DC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540DE8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E28);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E58);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E78);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540E98);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540EC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540EE8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F08);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540F88);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FD8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00540FE8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541008);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541038);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541060);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541088);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005410A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005410B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005410D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005410E8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541110);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541130);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541148);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541170);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541188);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005411A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005411C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005411D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005411F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541218);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541230);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541248);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541268);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541280);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005412A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005412C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005412D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005412F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541318);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541330);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541358);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541380);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005413A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005413C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005413E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541408);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541430);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541448);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541460);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541478);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541498);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005414B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005414D8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005414F8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541518);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541540);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541558);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541568);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541580);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005415A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005415B8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005415D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005415F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541608);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541620);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541638);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541648);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541660);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541678);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541698);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005416B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005416D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005416F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541710);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541738);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541760);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541780);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005417A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005417C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005417E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541808);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541828);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541850);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541878);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005418A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005418C8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005418E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541908);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541928);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541950);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541970);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541990);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005419A8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005419D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005419F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A08);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A58);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A78);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541A98);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541AB8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541AE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B08);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B58);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B78);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541B90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541BB8);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541BE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541BF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541C90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541CF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541D90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541DF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541E90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541ED0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541EF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541F90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00541FF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542000);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542010);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542020);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542030);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542040);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542050);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542060);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542070);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542080);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542090);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005420A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005420B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005420C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005420D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005420E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005420F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542100);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542110);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542120);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542130);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542140);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542150);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542160);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542170);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542180);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542190);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005421A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005421B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005421C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005421D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005421E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005421F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542200);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542210);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542220);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542230);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542240);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542250);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542260);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542270);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542280);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542290);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005422A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005422B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005422C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005422D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005422E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005422F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542300);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542310);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542320);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542330);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542340);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542350);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542360);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542370);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542380);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542390);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005423A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005423B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005423C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005423D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005423E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005423F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542400);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542410);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542420);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542430);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542440);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542450);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542460);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542470);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542480);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542490);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005424A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005424B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005424C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005424D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005424E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005424F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542500);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542510);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542520);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542530);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542540);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542550);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542560);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542570);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542580);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542590);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005425A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005425B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005425C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005425D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005425E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005425F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542600);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542610);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542620);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542630);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542640);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542650);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542660);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542670);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542680);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542690);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005426A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005426B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005426C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005426D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005426E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005426F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542700);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542710);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542720);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542730);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542740);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542750);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542760);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542770);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542780);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542790);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005427A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005427B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005427C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005427D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005427E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005427F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542800);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542810);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542820);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542830);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542840);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542850);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542860);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542870);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542880);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542890);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005428A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005428B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005428C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005428D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005428E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005428F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542900);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542910);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542920);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542930);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542940);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542950);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542960);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542970);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542980);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542990);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005429A0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005429B0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005429C0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005429D0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005429E0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005429F0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542A90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542AF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542B90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542BF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542C90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542CF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542D90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542DF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542E90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542ED0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542EF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F00);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F10);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F20);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F30);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F40);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F50);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F60);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F70);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F80);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542F90);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FA0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FB0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FC0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FD0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FE0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00542FF0);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543000);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543018);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543028);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543040);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543050);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543060);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543070);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543080);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_00543098);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_005430A8);
 

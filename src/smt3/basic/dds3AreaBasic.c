@@ -14,9 +14,9 @@ extern char D_0052F7E8[]; /* "not exist a area  エリアが見つかりませ�
 extern s32 printf(const char *fmt, ...);
 extern void *sdfChipAllocDirect(u32 size);
 extern void sdfChipFreeDirect(void *ptr);
-extern dds3Basic_t *dds3AddSceneBasicData(u32 type);
+extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern dds3Basic_t *dds3GetControlScene(void);
-extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, u32 type);
+extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type);
 extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count);
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *handle);
 extern u32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *handle);
@@ -28,7 +28,7 @@ extern s32 dds3AddBasicArray(dds3BasicArrayHandle_t *handle, s32 count);
 extern s32 dds3SetBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic);
 extern s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic);
 extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic, u32 mode);
-extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t *item, u32 itemType);
+extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t *item, s32 itemType);
 
 s32 CB_ReleaseObjectBasic(dds3Basic_t *basic);
 s32 CB_BasicDrawProcuder(dds3Basic_t *basic);
@@ -122,7 +122,17 @@ void dds3AreaBasicRegistItem(dds3Basic_t *area, dds3Basic_t *item)
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3AreaBasic", dds3AreaBasicGetItemArray);
+/* Remove the first matching entry from the list selected by the item's type. */
+void dds3AreaBasicGetItemArray(dds3Basic_t *area, dds3Basic_t *item)
+{
+    dds3BasicArrayHandle_t *handle =
+        dds3AreaBasicReleaseItem(area, dds3AreaBasicTypeHasItems(item->type >> 24));
+
+    dds3SearchDeleteBasicArray(handle, item, DDS3_BASICARRAY_SERACHDELETE_MODE_FIRST);
+    /* Retail and DDS1 dds3RemoveObjectFromOwnerWorldIndex retain a JAL tail.
+     * The consumed list cursor is no longer needed after removal. */
+    handle = NULL;
+}
 
 dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *area, u32 itemType)
 {

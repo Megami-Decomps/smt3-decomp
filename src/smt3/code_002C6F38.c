@@ -1,8 +1,24 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "sdf_types.h"
 
-struct sdfGrPacketHeader_t;
-struct sdfGrTagStdReg_t;
+extern u8 D_00529F20[];
+extern s32 D_0052BA88[];
+extern u8 D_0054B8D8[];
+extern s32 D_0052C2A4[];
+extern u8 D_0059BA98[];
+extern void *libc_2D2648(void *value);
+extern void free(void *allocation);
+s32 libc_2DC670(void);
+extern s32 fflush(void *stream);
+extern void _fwalk(void *reent, s32 (*callback)(void *));
+extern void supplement_crt0(void);
+extern void GetSystemCallTableEntry(void);
+extern void InitAlarm(void);
+extern void InitThread(void);
+extern void InitExecPS2(void);
+extern void InitTLBFunctions(void);
+
 struct IpuDmaState;
 struct SdfPacket;
 struct SdfKeyTreeItem;
@@ -40,18 +56,6 @@ void MultMatrixRev(const void *matrix);
 extern u32 sdfGetRunTimeCountBase(void);
 /* Return the modulo-16-bit elapsed count from the EE timer 0 value. */
 extern u32 sdfGetRunTimeCount(u32 previous);
-/* Appending the packet patches the DMA tag's link; the VIF and GIF words
- * retain the renderer's original commands and register-list encoding. */
-typedef struct sdfGrPacketHeader_t {
-    u64 dmaTag;
-    u64 vifCommands;
-    u64 gifTag;
-    u64 gifRegisters;
-} QWORD_ALIGNED sdfGrPacketHeader_t;
-typedef struct sdfGrTagStdReg_t {
-    u64 value;
-    u64 registerId;
-} sdfGrTagStdReg_t;
 /* Serialized byte consumed by the GS texture-state packet builder. */
 typedef u8 SdfTextureClampMode;
 /* IPU register state saved across stream callbacks (0x24 bytes). */
@@ -182,7 +186,7 @@ typedef struct SdfPacket {
     "vitof0.xyzw vf9, vf9\n\t" \
     ".set reorder" \
     : : "r" (rgba) : "$2")
-/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+/* Protocol IDs use distinct byte-sized storage codes in sdfFileCmdHandle_t. */
 typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
 #define SDF_DEV_EVENT_INACTIVE 0
@@ -602,7 +606,7 @@ typedef struct sdfSortOtNode_tag {
     struct SdfKeyTreeItem *item;  /* 0x08 */
     s32 balance;                  /* 0x0C */
 } sdfSortOtNode_tag;
-/* A key-sorted draw-surface pool: an SdfPoolNode whose append and prepend
+/* A key-sorted draw-surface pool: an sdfGrOt_t whose append and prepend
  * callbacks release a node into the pool and update its free list. */
 typedef struct SdfPool {
     void *link;                                                /* 0x00: the pool entry's link */
@@ -1326,7 +1330,9 @@ void sdfModelSetOtCallbacks(SdfPool *pool) {
 
 INCLUDE_ASM(const s32, "code_002C6F38", sceGsResetGraph);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sceGsGetGParam);
+void *sceGsGetGParam(void) {
+    return D_00529F20;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", sceGsResetPath);
 
@@ -1560,7 +1566,9 @@ INCLUDE_ASM(const s32, "code_002C6F38", sceCdStream);
 
 INCLUDE_ASM(const s32, "code_002C6F38", sceSifMInitRpc);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sceSifMExitRpc);
+void sceSifMExitRpc(void) {
+    D_0052BA88[0] = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _sceRpcGetPacket);
 
@@ -1738,7 +1746,9 @@ INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2618);
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2648);
 
-INCLUDE_ASM(const s32, "code_002C6F38", ctime_4);
+void ctime_4(void *value) {
+    free(libc_2D2648(value));
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2728);
 
@@ -1842,7 +1852,9 @@ INCLUDE_ASM(const s32, "code_002C6F38", __sigtramp);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _kill_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _getpid_r);
+s32 _getpid_r(void *reent) {
+    return libc_2DC670();
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _sprintf_r);
 
@@ -1908,7 +1920,9 @@ INCLUDE_ASM(const s32, "code_002C6F38", __sfmoreglue);
 
 INCLUDE_ASM(const s32, "code_002C6F38", __sfp);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _cleanup_r);
+void _cleanup_r(void *reent) {
+    _fwalk(reent, fflush);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _cleanup);
 
@@ -1938,7 +1952,9 @@ INCLUDE_RODATA(const s32, "code_002C6F38", D_0054B910);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _setlocale_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", func_002DA308);
+void *func_002DA308(void) {
+    return D_0054B8D8;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", setlocale);
 
@@ -2284,7 +2300,9 @@ INCLUDE_ASM(const s32, "code_002C6F38", GetMemorySize);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _InitTLB);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sceResetttyinit);
+void sceResetttyinit(void) {
+    D_0052C2A4[0] = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", VSync);
 
@@ -2296,19 +2314,29 @@ INCLUDE_ASM(const s32, "code_002C6F38", read);
 
 INCLUDE_ASM(const s32, "code_002C6F38", open);
 
-INCLUDE_ASM(const s32, "code_002C6F38", close);
+s32 close(s32 descriptor) {
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", ioctl);
+s32 ioctl(s32 descriptor, s32 request, void *argument) {
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", lseek);
+s32 lseek(s32 descriptor, s32 offset, s32 origin) {
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", sbrk);
 
-INCLUDE_ASM(const s32, "code_002C6F38", isatty);
+s32 isatty(s32 descriptor) {
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", fstat);
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2DC670);
+s32 libc_2DC670(void) {
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", kill);
 
@@ -2410,7 +2438,9 @@ INCLUDE_ASM(const s32, "code_002C6F38", sceSifGetSreg);
 
 INCLUDE_ASM(const s32, "code_002C6F38", sceSifSetSreg);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sceSifGetDataTable);
+void *sceSifGetDataTable(void) {
+    return D_0059BA98;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", sceSifInitCmd);
 
@@ -2650,7 +2680,14 @@ INCLUDE_ASM(const s32, "code_002C6F38", GetSystemCallTableEntry);
 
 INCLUDE_ASM(const s32, "code_002C6F38", setup);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _InitSys);
+void _InitSys(void) {
+    supplement_crt0();
+    GetSystemCallTableEntry();
+    InitAlarm();
+    InitThread();
+    InitExecPS2();
+    InitTLBFunctions();
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", gcc2_compiled__15);
 

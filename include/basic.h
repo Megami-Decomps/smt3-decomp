@@ -15,13 +15,10 @@ typedef struct dds3BasicArrayHandle_t dds3BasicArrayHandle_t;
 typedef struct dds3BasicArray_t dds3BasicArray_t;
 typedef struct dds3WorldBasic_t dds3WorldBasic_t;
 typedef struct dds3PathBasicControl_t dds3PathBasicControl_t;
+typedef s32 (*dds3BasicControlProc_t)(dds3PoseSet_t *pose, dds3Basic_t *basic);
 
 /* Bodies not recovered yet: reached only through pointers. */
 struct effSpline_t;
-struct fldResourcePathData_t_Vector3;
-struct fldResourcePathData_t_Vector4;
-struct fldResourcePathData_t_Float;
-struct fldResourcePathData_t_Light;
 
 /* One vtable per basic type, indexed by dds3BasicFuncTablePtr[type].
  * constructor takes (basic, color) and returns 1 on success; the rest take the
@@ -116,20 +113,148 @@ struct dds3WorldBasic_t
     dds3BasicArrayHandle_t *lastheader;
 };
 
-/* Path playback for a camera or object following a spline.
- * Only the 36-byte size is confirmed; the fields are from the HD metadata. */
-struct dds3PathBasicControl_t
+/* Scene workdata. Each type owns one intrusive list; camera/unit are the
+ * selected members, and the script handle retains the resolved FLW0 image. */
+typedef struct
 {
+    s32 count;
+    dds3Basic_t *head;
+    dds3Basic_t *tail;
+} dds3SceneList_t;
+
+typedef struct
+{
+    s32 mapNo;                         /* 0x00 */
+    sdfMemHandle_t *listHandle;        /* 0x04 */
+    dds3SceneList_t *lists;            /* 0x08 */
+    dds3Basic_t *camera;               /* 0x0C */
+    dds3Basic_t *unit;                 /* 0x10 */
+    u32 fieldHandle;                  /* 0x14 */
+    sdfMemHandle_t *scriptHandle;      /* 0x18 */
+    void *script;                     /* 0x1C */
+    s32 visible;                      /* 0x20 */
+    u8 unk24[0x1C];
+} dds3SceneWork_t;
+
+struct sdfModelRootNode_t;
+struct sdfMotionCtrlr_t;
+
+/* dds3ObjectBaseInitControlWorkData allocates 0xAC bytes. The eight control
+ * slots start with the owning basic; the 24 model-part indices end at +0xA8. */
+typedef struct
+{
+    u32 flag;
+    dds3BasicArrayHandle_t *eventArray;
+    u32 modelType;
+    void *modelHandle;
+    dds3Basic_t *control[8];
+    void *userValue;
+    struct sdfModelRootNode_t *modelRoot;
+    struct sdfMotionCtrlr_t *motion;
+    s32 animeMode;
+    f32 animeSpeed;
+    u32 controlSvs;
+    s32 modelPartCount;
+    s32 modelParts[24];
+} dds3ObjectBaseControl_t;
+
+/* dds3UnitObjectBasicConstructor clears the entire 0x20-byte payload.
+ * Accessors and light linking pin the status, event unit and render fields. */
+typedef struct
+{
+    s32 status;
+    s32 unk04;
+    struct evtUnit_t *unit;
+    dds3ObjectBaseControl_t *control;
+    s32 lightID;
+    s32 ot;
+    u8 unk18[8];
+} dds3UnitObjectWork_t;
+
+/* Camera payload, 0x90 bytes: local eye/up vectors, their world-space
+ * counterparts and the look-at matrix cached by MakeCamera. */
+typedef struct
+{
+    sdfMatrix4_t cameraTM;
+    sdfVector4_t eyeVector;
+    sdfVector4_t vertical;
+    sdfVector4_t targetPos;
+    sdfVector4_t upVector;
+    dds3ObjectBaseControl_t *pObjectBaseControlWorkData;
     u32 mode;
     u32 flag;
-    f32 frameMax;
-    f32 frame;
-    struct effSpline_t *pSplineHandle;
-    struct fldResourcePathData_t_Vector3 *pTransrate;
-    struct fldResourcePathData_t_Vector4 *pRotation;
-    struct fldResourcePathData_t_Float *pFovy;
-    struct fldResourcePathData_t_Light *pLight;
+    f32 fovy;
+} dds3CameraObjectBasicWorkData_t;
+
+/* The ten interpolated light-channel parameters consumed by the mover. */
+typedef struct
+{
+    f32 InsideR;
+    f32 OutsideR;
+    f32 Soften;
+    f32 Bias;
+    f32 DiffuseR;
+    f32 DiffuseG;
+    f32 DiffuseB;
+    f32 AmbientR;
+    f32 AmbientG;
+    f32 AmbientB;
+} fldResourceLightPath_t;
+
+/* Resource channels and their 36-byte playback cursor. */
+typedef struct dds3PathTransform_t
+{
+    f32 rotation[4];
+    f32 position[3];
+    f32 scale[3];
+} dds3PathTransform_t;
+
+typedef struct
+{
+    u32 count;
+    union
+    {
+        f32 *scalar;
+        f32 (*position)[3];
+        f32 (*rotation)[4];
+        dds3PathTransform_t *transform;
+    } data;
+    u32 *frames;
+} dds3PathKeyframes_t;
+
+typedef struct
+{
+    u32 kind;
+    dds3PathKeyframes_t *keys;
+} dds3PathCurveEntry_t;
+
+typedef struct
+{
+    u32 count;
+    dds3PathCurveEntry_t entries[1];
+} dds3PathCurveTable_t;
+
+struct dds3PathBasicControl_t
+{
+    s32 direction;
+    u32 flags;
+    f32 duration;
+    f32 time;
+    s32 spline;
+    dds3PathKeyframes_t *positionKeys;
+    dds3PathKeyframes_t *rotationKeys;
+    dds3PathKeyframes_t *scalarKeys;
+    dds3PathKeyframes_t *transformKeys;
 };
+
+/* Shared object-base and path-control entry points. */
+dds3ObjectBaseControl_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic);
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControl_t *control);
+dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
+dds3ObjectBaseControl_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
+dds3ObjectBaseControl_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *basic);
+void dds3PathBasicControlAlterMode(dds3PathBasicControl_t *work, s32 direction);
+s32 dds3PathBasicControlGetMode(dds3PathBasicControl_t *work);
 
 /* dds3AllocBasic rejects a type outside this range. */
 enum basic_type
@@ -187,5 +312,6 @@ enum dds3_basicarray
     DDS3_BASICARRAY_SERACHDELETE_MODE_ALL = 1,
     DDS3_BASICARRAY_SERACHDELETE_MODE_MAX = 2
 };
+
 
 #endif /* BASIC_H */

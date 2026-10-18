@@ -2,6 +2,9 @@
 #include "datCalc.h"
 
 extern s32 evtBitCheck(s32 no);
+extern s32 GetButuriAttack(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power);
+extern s32 datGetAisyo(datUnitWork_t *work, s32 element);
+extern void func_0022E168(u16 devilId);
 
 s32 datGetBaseMaxHp(datUnitWork_t *work)
 {
@@ -80,7 +83,10 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datGetSakePow);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", GetButuriAttack);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", GetButuriKaifuku);
+s32 GetButuriKaifuku(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power)
+{
+    return GetButuriAttack(skill, attacker, target, power);
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", GetMagicAttack);
 
@@ -102,7 +108,10 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datOverwriteBadStat);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datSetBadStat);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datResetBadStat);
+void datResetBadStat(datUnitWork_t *work, s32 mask)
+{
+    work->badstatus &= ~mask;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetMaxHp);
 
@@ -123,7 +132,19 @@ s32 datAddHp(datUnitWork_t *work, s32 hp)
     return newhp;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddMp);
+s32 datAddMp(datUnitWork_t *work, s32 amount)
+{
+    u32 mp = (u32)work->mp + amount;
+
+    if ((s32)mp < 0) {
+        mp = 0;
+    }
+    if ((s32)work->maxmp < (s32)mp) {
+        mp = work->maxmp;
+    }
+    work->mp = mp;
+    return mp;
+}
 
 s32 datGetBaseParam(datUnitWork_t *work, s32 paratype)
 {
@@ -161,19 +182,45 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datCheckSyojiSkill);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetAisyo);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetAisyoValue);
+u32 datGetAisyoValue(datUnitWork_t *work, s32 element)
+{
+    return (u16)datGetAisyo(work, element);
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetAisyoFlag);
+u32 datGetAisyoFlag(datUnitWork_t *work, s32 element)
+{
+    return datGetAisyo(work, element) & 0xFFFF0000;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetBadStatusAttr);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckDying);
+s32 datCheckDying(datUnitWork_t *work)
+{
+    return work->hp * 100 / work->maxhp < 25;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddMaka);
+void datAddMaka(s32 amount)
+{
+    s32 balance = DDS3_GBWK->maka + amount;
+
+    if (balance < 0) {
+        balance = 0;
+    }
+    if (balance > 9999999) {
+        balance = 9999999;
+    }
+    DDS3_GBWK->maka = balance;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddMakaPar);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckMaka);
+s32 datCheckMaka(s32 amount)
+{
+    if (DDS3_GBWK->maka < amount) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddItem);
 
@@ -223,7 +270,10 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datSearchUniqueDevilStock);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetUniqueDevilId);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddExp);
+void datAddExp(datUnitWork_t *work, s32 amount)
+{
+    work->exp += amount;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddHearts);
 
@@ -255,11 +305,19 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datInitPlayer);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datInitBossPress);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datDelDevil);
+void datDelDevil(u16 devilId)
+{
+    func_0022E168(devilId);
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetItemSkillNo);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetLevelForDraw);
+u16 datGetLevelForDraw(datUnitWork_t *work)
+{
+    s32 level = work->level;
+
+    return level < 100 ? level : 99;
+}
 
 INCLUDE_RODATA(const s32, "newdata/datCalc", D_00543170);
 

@@ -4,9 +4,12 @@
 /* 0x68-byte picture work block; InitPictureProcessData fills the rest. */
 typedef struct
 {
-    u8 unk00[4];
+    u32 flags;
     void *texture;
-    u8 unk08[0x60];
+    s32 ot;
+    u8 unk0C[0x20];
+    s32 priority;
+    u8 unk30[0x38];
 } evtPictureWork_t;
 
 extern char D_0054F8F0[];
@@ -21,6 +24,10 @@ extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 startt
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern evtPictureWork_t *InitPictureProcessData(void);
 extern s32 evtPictureProcess1(dds3ProcessID_t *id);
+extern void *evtPicturePriList;
+extern void evtPicturePriDraw(void);
+extern void evtPicturePriClear(void);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 hierarchy);
 
 INCLUDE_ASM(const s32, "event/evtPicture", evtPicturePriClear);
 
@@ -28,15 +35,34 @@ INCLUDE_ASM(const s32, "event/evtPicture", evtPicturePriAdd);
 
 INCLUDE_ASM(const s32, "event/evtPicture", evtPicturePriDraw);
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtPictureDrawOn);
+void evtPictureDrawOn(dds3ProcessID_t *process)
+{
+    evtPictureWork_t *work = dds3GetProcessData(process);
+    work->flags |= 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtPictureDrawOff);
+void evtPictureDrawOff(dds3ProcessID_t *process)
+{
+    evtPictureWork_t *work = dds3GetProcessData(process);
+    work->flags &= ~1;
+}
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtKillPictureProcess);
+void evtKillPictureProcess(dds3ProcessID_t *process)
+{
+    dds3KillProcess(process, 1);
+}
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtPictureSetOt);
+void evtPictureSetOt(dds3ProcessID_t *process, s32 ot)
+{
+    evtPictureWork_t *work = dds3GetProcessData(process);
+    work->ot = ot;
+}
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtPictureSetPri);
+void evtPictureSetPri(dds3ProcessID_t *process, s32 priority)
+{
+    evtPictureWork_t *work = dds3GetProcessData(process);
+    work->priority = priority;
+}
 
 INCLUDE_ASM(const s32, "event/evtPicture", evtPictureSetSize);
 
@@ -87,9 +113,19 @@ dds3ProcessID_t *evtStartPictureProcess(u32 priority, void *texture)
     return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
 }
 
-INCLUDE_ASM(const s32, "event/evtPicture", picpri_Process);
+s32 picpri_Process(dds3ProcessID_t *process)
+{
+    dds3GetProcessData(process);
+    evtPicturePriDraw();
+    evtPicturePriClear();
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "event/evtPicture", picpri_Shutdown);
+void picpri_Shutdown(dds3ProcessID_t *process)
+{
+    sdfChipFreeDirect(dds3GetProcessData(process));
+    evtPicturePriList = NULL;
+}
 
 INCLUDE_ASM(const s32, "event/evtPicture", evtPicturePriProcessInit);
 INCLUDE_SDATA(const s32, "event/evtPicture", evtPicturePriList);

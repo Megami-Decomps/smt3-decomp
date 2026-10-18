@@ -56,11 +56,21 @@ function you just wrote.
 2. Re-run `python configure.py` after any change to a `config/smt3/` file or
    after renaming a symbol. Splat output and the ninja graph are generated, and
    a stale split silently links old assembly.
+   When replacing assembly functions that own literals with C, use
+   `python configure.py --force-split` to migrate their data ownership too.
+   Run `ninja` to refresh the generated `build/eeasm/` includes before
+   checking the unit if the resplit introduced a new standalone data file.
 3. If the unit is clean and configure is fresh, suspect data placement. A new C
    definition can emit `.rodata`, `.lit4` or `.sdata` that the retail layout
    accounts for somewhere else, which shifts everything after it. The
    `INCLUDE_RODATA` and `INCLUDE_SDATA` lines in the unit exist to hold that
    data; do not delete or reorder them by hand.
+   An `extern` reference does not preserve data that an old `INCLUDE_ASM`
+   brought in with its function. After porting a function with embedded strings
+   or constants that must remain external, run
+   `python configure.py --force-split`: the split postprocessors regenerate
+   the corresponding data imports around the C functions. Plain `configure.py`
+   can reuse its cached split when only C source changed.
 4. `.sbss` and `.bss` are aligned to 128 bytes, as in Sony's `app.cmd`. A
    wrongly sized `.bss` object moves every later object and fails the
    checksum rather than any single function check.
@@ -72,6 +82,18 @@ function you just wrote.
 Remember that the first configure produces a matching build with no C at all.
 A checksum pass is a statement about the build, not about progress; see
 [Reading progress](progress.md).
+
+### Compiler helper names in ports
+
+A unit can match instruction-by-instruction yet fail to link if the compiler
+emits a runtime helper under a name absent from SMT3's symbol map. For example,
+the float-to-double promotion in `dds3PrimDebugTextBoxRGB` emits `fptodp`, while
+the corresponding retail routine has the recovered name `sdfFloatToULong`.
+That call is reconstructed explicitly with the proven signature
+`f64 sdfFloatToULong(f32 value)`. Keep the existing SMT3 symbol and its actual
+argument/return types rather than adding a compatibility alias for the DDS or
+compiler name. The full `ninja` link and checksum remain required after a clean
+unit check.
 
 ## Generated files
 
@@ -113,6 +135,11 @@ ninja objdiff                             # comparison objects for objdiff
 ninja report                              # objdiff reports, see progress.md
 python3 ../asm-differ/diff.py -mwo NAME   # reads diff_settings.py
 ```
+
+The unit checker pairs MIPS HI16/LO16 addends in ELF relocation-table order,
+not instruction order. ee-as can place a loop-backedge `lui` after its
+`addiu` in `.text`, but put both initial and backedge HI16 records before the
+shared LO16 record. `dds3InitRenderDrawEnv` is one such native case.
 
 `permuter_settings.toml` configures decomp-permuter against the same compiler
 and assembler wrappers.

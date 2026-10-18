@@ -1,7 +1,27 @@
 #include "common.h"
+#include "sdf_types.h"
 
-struct sdfGrPacketHeader_t;
-struct sdfGrTagStdReg_t;
+extern u8 sdfFrameId;
+
+#define SDF_PENDING_LAST_SLOT 1
+#define SDF_DMA_TAG_REF_BYTE 0x30
+#define SDF_DMA_CNT_ONE_WORD 0x10000001
+#define SDF_VIF_DIRECT_ONE_FLUSHE 0x5000000110000000ULL
+#define SDF_GIF_PACKED_AD_BITS 0x1000000000008000ULL
+#define SDF_VIF_DIRECT_ONE_NOP 0x5000000100000000ULL
+#define SDF_GS_DEFAULT_TEXA 0x4000000080ULL
+#define SDF_GS_SCENE_TEST 0x517FB
+#define SDF_TEXTURE_SCENE_PAYLOAD_QWORDS 0x15
+#define SDF_GRAPH_DEPTH_BUFFER_INDEX 2
+extern u8 D_0055188A;
+extern u16 sdfReqDrawDelaySleepCount;
+extern u32 sdfDrawFrameCount;
+extern u8 sdfDrawImageTrans;
+extern volatile u8 sdfDrawSyncFlag;
+extern u32 sdfGetRunTimeCountBase(void);
+extern u32 sdfGetRunTimeCount(u32 previousTick);
+extern void sdfWaitVblank(s32 count);
+
 struct SdfGsGouraudTexturedVertex;
 struct SdfGsTwoVertexPayload;
 struct SdfGsTexturedVertex;
@@ -104,18 +124,6 @@ enum {
     SDF_GS_PRIMITIVE_SPRITE = 0x06,
     SDF_GS_CENTERED_VIEW_BOUNDS_TEST = 0x30003
 };
-/* Appending the packet patches the DMA tag's link; the VIF and GIF words
- * retain the renderer's original commands and register-list encoding. */
-typedef struct sdfGrPacketHeader_t {
-    u64 dmaTag;
-    u64 vifCommands;
-    u64 gifTag;
-    u64 gifRegisters;
-} QWORD_ALIGNED sdfGrPacketHeader_t;
-typedef struct sdfGrTagStdReg_t {
-    u64 value;
-    u64 registerId;
-} sdfGrTagStdReg_t;
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
 struct SdfStreamInputDmaTag;
 struct SoundFormat;
@@ -216,7 +224,7 @@ typedef struct sdfPrimBoxLineElem_t {
 #define SDF_GIF_TWO_AD_LOOPS_EOP 0x8002
 extern s8 sdfDelayedResrcFlag;
 extern volatile s8 sdfReqDrawDelayCount;
-/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+/* Protocol IDs use distinct byte-sized storage codes in sdfFileCmdHandle_t. */
 typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
 /* TEST and ALPHA form the two A+D writes shared by the blend builders. */
@@ -732,6 +740,25 @@ typedef struct SdfPacketChain {
     sdfPreDrawTag_t *head;
     sdfPreDrawTag_t *tail;
 } SdfPacketChain;
+
+/* Linked draw environment, including its two frame-mask writes and textures. */
+typedef struct sdfSceneNode_t {
+    SdfPacketPatchLink link;
+    sdfGrFrameSet_t *view;
+    u8 unk0C[4];
+    sdfGrPacketHeader_t header;
+    SdfGsDrawDefaultsRegisters drawDefaults;
+    sdfGrDrawFramePacket_t contextOne;
+    sdfGrDrawFramePacket_t contextTwo;
+    sdfGrClearPacket_t centeredBounds;
+    SdfGsSceneBlendRegisters blendState;
+    sdfGrTagStdReg_t frameContextOne;
+    sdfGrTagStdReg_t frameContextTwo;
+    u8 texturePackets[0x80];
+} sdfSceneNode_t;
+void sdfGrStdDrawEnvPredraw(sdfSceneNode_t *node, s32 bufferIndex);
+void sdfGrSetRefGifPacket(SdfDmaReferenceChainPacket *packet, u32 sourceAddress, s32 qwordCount);
+void sdfGrSetDrawDefParmPacket(SdfGsDrawDefaultsRegisters *packet);
 extern s32 EIntr(void);
 extern s32 D_005520A8[2];
 extern s32 sdfGrPacketBuffSize;
@@ -976,8 +1003,8 @@ void sdfLinkStoreImage(sdfDrawTag_t *list, sdfGsMemSlice_t *source, s32 sourceX,
 }
 
 void sdfLinkStoreFrameImagePredraw(SdfPatchableResourcePacket *packet, s32 entryIndex) {
-    packet->resourcePacket.transfer.bitbltbuf.value =
-        (packet->resourcePacket.transfer.bitbltbuf.value & ~0x3FFF) |
+    packet->resourcePacket.transfer.bitbltbuf.data =
+        (packet->resourcePacket.transfer.bitbltbuf.data & ~0x3FFF) |
         (u64)(u32)(D_00529388.buffers[entryIndex]->word >> 6);
 }
 
@@ -1123,7 +1150,19 @@ void sdfDelayedResrcRelease(sdfDelayedResrcChunk_t *pendingNode) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfDelayedResrcProc);
+void sdfDelayedResrcProc(void) {
+    u32 slotIndex;
+
+    sdfDelayedResrcFlag = 1;
+    WaitSema(sdfDelayedResrcSemaId);
+    sdfDelayedResrcRelease((sdfDelayedResrcChunk_t *)D_005520A8[0]);
+    for (slotIndex = 0; slotIndex < SDF_PENDING_LAST_SLOT; slotIndex++) {
+        D_005520A8[slotIndex] = D_005520A8[slotIndex + 1];
+    }
+    D_005520A8[SDF_PENDING_LAST_SLOT] = (s32)sdfDelayedResrcClose();
+    SignalSema(sdfDelayedResrcSemaId);
+    sdfDelayedResrcFlag = 0;
+}
 
 u64 sdfDelayedResrcCheckFunc(void) {
     u32 slotIndex;
@@ -1177,7 +1216,9 @@ void sdfGrSetupPacketBuff(s32 bufferIndex) {
     sdfGrPacketBuffLimit = D_00551870[bufferIndex] + sdfGrPacketBuffSize;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrGetPacketBuffRemain);
+s32 sdfGrGetPacketBuffRemain(void) {
+    return sdfGrPacketBuffLimit - sdfGrPacketBuffPtr;
+}
 
 s32 sdfGrAllocPacketBuff(s32 size) {
     s32 packet;
@@ -1187,7 +1228,9 @@ s32 sdfGrAllocPacketBuff(s32 size) {
     return packet;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrOpenPacketBuff);
+s32 sdfGrOpenPacketBuff(void) {
+    return sdfGrPacketBuffPtr;
+}
 
 void sdfGrClosePacketBuff(s32 cursorAddress) {
     sdfGrPacketBuffPtr = (cursorAddress + SDF_QWORD_ALIGNMENT_MASK) & ~SDF_QWORD_ALIGNMENT_MASK;
@@ -1218,9 +1261,34 @@ void sdfDrawTagLink(sdfDrawTag_t *list, u32 packet) {
     list->last = packet;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfDrawTagLink2);
+void sdfDrawTagLink2(sdfDrawTag_t *list, u32 packetAddress, u32 rangeTailAddress) {
+    s32 previousTailAddress;
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfDrawTagLinkRef);
+    previousTailAddress = list->last;
+    if (previousTailAddress == 0) {
+        list->first = packetAddress;
+    }
+    else {
+        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
+    }
+    list->last = rangeTailAddress;
+}
+
+void sdfDrawTagLinkRef(sdfDrawTag_t *list, u32 packetAddress) {
+    s32 previousTailAddress;
+
+    ((SdfDmaTag *)packetAddress)->kind = SDF_DMA_TAG_REF_BYTE;
+    previousTailAddress = list->last;
+    if (previousTailAddress == 0) {
+        list->first = packetAddress;
+    }
+    else {
+        ((SdfDmaTag *)previousTailAddress)->kind = SDF_DMA_TAG_NEXT_BYTE;
+        ((SdfDmaTag *)previousTailAddress)->address = packetAddress & SDF_DMA_ADDRESS_MASK;
+    }
+    list->last = packetAddress + SDF_QWORD_BYTES;
+}
 
 void sdfDrawTagLinkRefGif(sdfDrawTag_t *list, u32 packetAddress) {
     s32 previousTailAddress;
@@ -1415,7 +1483,12 @@ sdfDrawTag_t *sdfGrOtClose(sdfGrOt_t *node) {
     return head;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfPreDrawTagInit);
+void sdfPreDrawTagInit(sdfPreDrawTag_t *list) {
+    list->unk0 = 0;
+    list->first = 0;
+    list->last = 0;
+    list->unkC = 0;
+}
 
 void sdfPreDrawTagLink(sdfPreDrawTag_t *list, SdfPacketPatchLink *node) {
     if (list->last == 0) {
@@ -1428,7 +1501,10 @@ void sdfPreDrawTagLink(sdfPreDrawTag_t *list, SdfPacketPatchLink *node) {
     node->next = NULL;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfPreDrawChainInit);
+void sdfPreDrawChainInit(SdfPacketChain *chain) {
+    chain->head = NULL;
+    chain->tail = NULL;
+}
 
 void sdfPreDrawChainLink(SdfPacketChain *chain, sdfPreDrawTag_t *node) {
     if (chain->tail == NULL) {
@@ -1444,13 +1520,22 @@ void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords) {
     s64 dmaQwords;
 
     dmaQwords = payloadQwords + 1;
-    header->vifCommands = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
-    header->gifTag = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
-    header->dmaTag = dmaQwords;
-    header->gifRegisters = SDF_GIF_REGISTER_AD;
+    header->dmaWords.vif = (((dmaQwords | SDF_VIF_DIRECT_WORD) << 32) | SDF_VIF_FLUSHE_WORD);
+    header->giftag.parm = (payloadQwords | (((s64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_EOP_BIT));
+    header->dmaWords.tag = dmaQwords;
+    header->giftag.regs = SDF_GIF_REGISTER_AD;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrSetRefGifPacket);
+void sdfGrSetRefGifPacket(SdfDmaReferenceChainPacket *packet, u32 sourceAddress, s32 qwordCount) {
+    packet->header.dmaWords.tag = SDF_DMA_CNT_ONE_WORD;
+    packet->header.dmaWords.vif = SDF_VIF_DIRECT_ONE_FLUSHE;
+    packet->header.giftag.parm = (u64)qwordCount | SDF_GIF_PACKED_AD_BITS;
+    packet->header.giftag.regs = SDF_GIF_REGISTER_AD;
+    packet->referenceTag = (u32)((qwordCount & SDF_DMA_QWC_MASK) | SDF_DMA_TAG_REF_WORD) | ((u64)(sourceAddress & SDF_DMA_ADDRESS_MASK) << 32);
+    packet->referenceVifCommands = SDF_VIF_DIRECT_ONE_NOP;
+    packet->nextTag = SDF_DMA_TAG_NEXT_WORD;
+    packet->zeroTailWord = 0;
+}
 
 void sdfGrSetDrawFramePacket(sdfGrDrawFramePacket_t *packet, s32 frameAddress, s32 width, s32 height,
                   s32 frameFormat, s32 depthAddress, s32 depthFormat,
@@ -1473,38 +1558,47 @@ void sdfGrSetDrawFramePacket(sdfGrDrawFramePacket_t *packet, s32 frameAddress, s
         offsetRegisterId = SDF_GS_XYOFFSET_2;
         scissorRegisterId = SDF_GS_SCISSOR_2;
     }
-    packet->scissor.registerId = scissorRegisterId;
+    packet->scissor.reg = scissorRegisterId;
     yOffset = (SDF_GS_CENTER_BIAS - height) << 3;
     xOffset = (SDF_GS_CENTER_BIAS - width) << 3;
-    packet->frame.value = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
+    packet->frame.data = (s64)(frameFormat << 24) | (s64)(((width + 63) >> 6) << 16) | (s64)(frameAddress >> 11);
     if (fieldOffset != 0) {
         yOffset += SDF_GS_FIELD_OFFSET_STEP;
     }
-    packet->frame.registerId = frameRegisterId;
-    packet->zbuf.value = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
-    packet->zbuf.registerId = depthRegisterId;
-    packet->xyoffset.registerId = offsetRegisterId;
-    packet->scissor.value = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
-    packet->xyoffset.value = xOffset | ((s64)yOffset << 32);
+    packet->frame.reg = frameRegisterId;
+    packet->zbuf.data = (s64)(depthFormat << 24) | (s64)(depthAddress >> 11);
+    packet->zbuf.reg = depthRegisterId;
+    packet->xyoffset.reg = offsetRegisterId;
+    packet->scissor.data = ((s64)(height - 1) << 48) | ((s64)(width - 1) << 16);
+    packet->xyoffset.data = xOffset | ((s64)yOffset << 32);
 }
 
 void sdfGrSetClearPacket(sdfGrClearPacket_t *packet, s32 width, s32 height, s32 unused0, s32 unused1) {
     u32 lowerBounds = ((SDF_GS_CENTER_BIAS - height) << 19) | ((SDF_GS_CENTER_BIAS - width) << 3);
     u32 upperBounds = ((height + SDF_GS_CENTER_BIAS) << 19) | ((width + SDF_GS_CENTER_BIAS) << 3);
 
-    packet->primitive.registerId = SDF_GS_PRIM;
-    packet->xyz2[0].registerId = SDF_GS_XYZ2;
-    packet->test.value = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
-    packet->test.registerId = SDF_GS_TEST_1;
-    packet->primitive.value = SDF_GS_PRIMITIVE_SPRITE;
-    packet->rgbaq.value = (u64)0xFE00 << 46;
-    packet->rgbaq.registerId = SDF_GS_RGBAQ;
-    packet->xyz2[0].value = lowerBounds;
-    packet->xyz2[1].value = upperBounds;
-    packet->xyz2[1].registerId = SDF_GS_XYZ2;
+    packet->primitive.reg = SDF_GS_PRIM;
+    packet->xyz2[0].reg = SDF_GS_XYZ2;
+    packet->test.data = SDF_GS_CENTERED_VIEW_BOUNDS_TEST;
+    packet->test.reg = SDF_GS_TEST_1;
+    packet->primitive.data = SDF_GS_PRIMITIVE_SPRITE;
+    packet->rgbaq.data = (u64)0xFE00 << 46;
+    packet->rgbaq.reg = SDF_GS_RGBAQ;
+    packet->xyz2[0].data = lowerBounds;
+    packet->xyz2[1].data = upperBounds;
+    packet->xyz2[1].reg = SDF_GS_XYZ2;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrSetDrawDefParmPacket);
+void sdfGrSetDrawDefParmPacket(SdfGsDrawDefaultsRegisters *packet) {
+    packet->prmodecont.data = 1;
+    packet->prmodecont.reg = SDF_GS_PRMODECONT;
+    packet->colclamp.data = 1;
+    packet->colclamp.reg = SDF_GS_COLCLAMP;
+    packet->dthe.data = 0;
+    packet->dthe.reg = SDF_GS_DTHE;
+    packet->texa.data = SDF_GS_DEFAULT_TEXA;
+    packet->texa.reg = SDF_GS_TEXA;
+}
 
 void sdfGrSetDrawFrame(sdfGrDrawFrame_t *packet, s32 frameAddress, s32 width, s32 height,
                            s32 frameFormat, s32 depthAddress, s32 depthFormat, s32 gsContext) {
@@ -1512,20 +1606,73 @@ void sdfGrSetDrawFrame(sdfGrDrawFrame_t *packet, s32 frameAddress, s32 width, s3
     sdfGrSetDrawFramePacket(&packet->registers, frameAddress, width, height, frameFormat, depthAddress, depthFormat, 0, gsContext);
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrSetDrawEnv);
+void sdfGrSetDrawEnv(SdfSceneDrawPacket *packet, sdfGrFrameSet_t *view, s32 bufferIndex) {
+    s32 frameAddress;
+    s32 depthAddress;
+    s32 width;
+    s32 height;
+    s32 frameFormat;
+    s32 depthFormat;
+
+    sdfGrSetRegsPacketHeader(&packet->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
+    frameAddress = view->buffers[bufferIndex]->word;
+    depthAddress = view->buffers[SDF_GRAPH_DEPTH_BUFFER_INDEX]->word;
+    width = view->width;
+    frameFormat = view->bufferFormat;
+    height = view->height;
+    depthFormat = view->auxiliaryFormat;
+    sdfGrSetDrawFramePacket(&packet->contextOne, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_0055188A, 0);
+    sdfGrSetDrawFramePacket(&packet->contextTwo, frameAddress, width, height, frameFormat, depthAddress, depthFormat, D_0055188A, 1);
+    sdfGrSetClearPacket(&packet->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
+    packet->blendState.contextOne.test.data = SDF_GS_SCENE_TEST;
+    packet->blendState.contextOne.test.reg = SDF_GS_TEST_1;
+    packet->blendState.contextOne.alpha.data = SDF_GS_DEFAULT_ALPHA;
+    packet->blendState.contextOne.alpha.reg = SDF_GS_ALPHA_1;
+    packet->blendState.contextTwo.test.data = SDF_GS_SCENE_TEST;
+    packet->blendState.contextTwo.test.reg = SDF_GS_TEST_2;
+    packet->blendState.contextTwo.alpha.data = SDF_GS_DEFAULT_ALPHA;
+    packet->blendState.contextTwo.alpha.reg = SDF_GS_ALPHA_2;
+    sdfGrSetDrawDefParmPacket(&packet->drawDefaults);
+}
 
 INCLUDE_ASM(const s32, "code_002AC138", sdfGrStdDrawEnvPredraw);
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrSetStdDrawEnv);
+void sdfGrSetStdDrawEnv(sdfSceneNode_t *node, sdfGrFrameSet_t *view) {
+    sdfGrSetRegsPacketHeader(&node->header, SDF_TEXTURE_SCENE_PAYLOAD_QWORDS);
+    node->view = view;
+    node->link.patch = sdfGrStdDrawEnvPredraw;
+    sdfGrSetClearPacket(&node->centeredBounds, view->width, view->height, view->bufferFormat, view->auxiliaryFormat);
+    node->blendState.contextOne.test.data = SDF_GS_SCENE_TEST;
+    node->blendState.contextOne.test.reg = SDF_GS_TEST_1;
+    node->blendState.contextOne.alpha.data = SDF_GS_DEFAULT_ALPHA;
+    node->blendState.contextOne.alpha.reg = SDF_GS_ALPHA_1;
+    node->blendState.contextTwo.test.data = SDF_GS_SCENE_TEST;
+    node->blendState.contextTwo.test.reg = SDF_GS_TEST_2;
+    node->blendState.contextTwo.alpha.data = SDF_GS_DEFAULT_ALPHA;
+    node->blendState.contextTwo.alpha.reg = SDF_GS_ALPHA_2;
+    sdfGrSetDrawDefParmPacket(&node->drawDefaults);
+}
 
 void sdfGrLinkStdDrawEnv(sdfDrawTag_t *dmaList, sdfPreDrawTag_t *linkedList, SdfPacketPatchLink *linkedNode) {
     sdfPreDrawTagLink(linkedList, linkedNode);
     sdfDrawTagLink(dmaList, (s32)linkedNode + SDF_QWORD_BYTES);
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrSetFrameMaskRGB);
+void sdfGrSetFrameMaskRGB(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+    if (gsContext == 0) {
+        sdfGrSetRefGifPacket(packet, (u32)(source + 0x180), 1);
+        return;
+    }
+    sdfGrSetRefGifPacket(packet, (u32)(source + 400), 1);
+}
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrSetFrameMaskReset);
+void sdfGrSetFrameMaskReset(const u8 *source, SdfDmaReferenceChainPacket *packet, s32 gsContext) {
+    if (gsContext == 0) {
+        sdfGrSetRefGifPacket(packet, (u32)(source + 0x70), 1);
+        return;
+    }
+    sdfGrSetRefGifPacket(packet, (u32)(source + 0xb0), 1);
+}
 
 void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, sdfGrRefPacketHeader_t *node) {
     node->vifCommands = (((u64)0x50000004 << 16) | 0x1000) << 16;
@@ -1555,13 +1702,13 @@ void sdfGrFramePacketPredraw(sdfGrFramePacket_t *packet, s32 bufferIndex) {
         depthRegister = 0x4F;
     }
     widthPages = (view->width + 63) >> 6;
-    packet->frame.value = ((u64)packet->frameMask << 32) |
+    packet->frame.data = ((u64)packet->frameMask << 32) |
         (u64)(view->buffers[bufferIndex]->word >> 11) |
         ((s64)(view->bufferFormat << 24) | ((s64)widthPages << 16));
-    packet->frame.registerId = frameRegister;
-    packet->zbuf.value = (s64)(view->auxiliaryFormat << 24) |
+    packet->frame.reg = frameRegister;
+    packet->zbuf.data = (s64)(view->auxiliaryFormat << 24) |
         (u64)(view->buffers[2]->word >> 11);
-    packet->zbuf.registerId = depthRegister;
+    packet->zbuf.reg = depthRegister;
 }
 
 void sdfGrSetFramePacket(sdfGrFramePacket_t *packet, sdfGrFrameSet_t *source, u32 frameMask, s32 region, s32 mode) {
@@ -1573,7 +1720,41 @@ void sdfGrSetFramePacket(sdfGrFramePacket_t *packet, sdfGrFrameSet_t *source, u3
     packet->prepare = sdfGrFramePacketPredraw;
 }
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfGrReqDraw);
+void sdfGrReqDraw(sdfDrawTag_t *list, SdfPacketChain *chain) {
+    u32 start = sdfGetRunTimeCountBase();
+    s32 interrupts;
+    s32 index;
+    SdfPacketSlot *slot;
+
+    while (sdfReqDrawDelayCount != 0) {
+    }
+    sdfReqDrawDelaySleepCount = sdfGetRunTimeCount(start);
+    interrupts = DIntr();
+    index = sdfDrawReqQueueIndex + 1;
+    if (index == 3) {
+        index = 0;
+    }
+    slot = &sdfGrDrawState[index];
+    slot->packetList = NULL;
+    slot->callbackHead = NULL;
+    slot->slotUpdatePhase = 0;
+    if (list != NULL && list->last != 0) {
+        slot->packetList = list;
+        if (chain != NULL) {
+            slot->callbackHead = chain->head->first;
+            if (slot->callbackHead != NULL) {
+                chain->tail->last->next = NULL;
+            }
+        }
+        slot->queuedBufferIndex = sdfFrameId;
+    }
+    sdfDrawReqQueueIndex = index;
+    sdfDrawImageTrans = 1;
+    sdfDrawFrameCount++;
+    if (interrupts != 0) {
+        EIntr();
+    }
+}
 
 void sdfGrReqDrawDelay(s32 value) {
     sdfReqDrawDelayCount = (value < 0) ? 0 : value;
@@ -1587,7 +1768,21 @@ void sdfGrInitDraw(void) {
 
 INCLUDE_ASM(const s32, "code_002AC138", sdfGrDrawFrame);
 
-INCLUDE_ASM(const s32, "code_002AC138", sdfDrawSync);
+void sdfDrawSync(void) {
+    SdfPacketSlot *table = sdfGrDrawState;
+
+    for (;;) {
+        while (sdfDrawSyncFlag != 0) {
+        }
+        if (table[sdfDrawReqQueueIndex].packetList == NULL) {
+            break;
+        }
+        if (table[sdfDrawReqQueueIndex].slotUpdatePhase >= 2) {
+            break;
+        }
+        sdfWaitVblank(0);
+    }
+}
 
 sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32)) {
     sdfDrawTag_t *list;
@@ -1612,165 +1807,165 @@ void sdfPrimLinkSimplePacket(s32 listAddress, void (*initialize)(s32), s32 packe
 }
 
 void sdfPrimSetOpaqueElem(sdfPrimTransElem_t *packet) {
-    packet->test.value = SDF_GS_ALPHA_TEST;
-    packet->test.registerId = SDF_GS_TEST_1;
-    packet->alpha.value = SDF_GS_DEFAULT_ALPHA;
-    packet->alpha.registerId = SDF_GS_ALPHA_1;
+    packet->test.data = SDF_GS_ALPHA_TEST;
+    packet->test.reg = SDF_GS_TEST_1;
+    packet->alpha.data = SDF_GS_DEFAULT_ALPHA;
+    packet->alpha.reg = SDF_GS_ALPHA_1;
 }
 
 void sdfPrimSetOpaque2Elem(sdfPrimTransElem_t *packet) {
-    packet->test.value = SDF_GS_ALPHA_TEST;
-    packet->test.registerId = SDF_GS_TEST_2;
-    packet->alpha.value = SDF_GS_DEFAULT_ALPHA;
-    packet->alpha.registerId = SDF_GS_ALPHA_2;
+    packet->test.data = SDF_GS_ALPHA_TEST;
+    packet->test.reg = SDF_GS_TEST_2;
+    packet->alpha.data = SDF_GS_DEFAULT_ALPHA;
+    packet->alpha.reg = SDF_GS_ALPHA_2;
 }
 
 void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *packet) {
     sdfPrimSetOpaqueElem(&packet->registers);
-    packet->header.dmaTag = SDF_ALPHA_DMA_QWORDS;
-    packet->header.vifCommands = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
-    packet->header.gifTag = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
-    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    packet->header.dmaWords.tag = SDF_ALPHA_DMA_QWORDS;
+    packet->header.dmaWords.vif = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
+    packet->header.giftag.parm = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
+    packet->header.giftag.regs = SDF_GIF_REGISTER_AD;
 }
 
 void sdfPrimSetOpaque2Packet(sdfPrimTransPacket_t *packet) {
     sdfPrimSetOpaque2Elem(&packet->registers);
-    packet->header.dmaTag = SDF_ALPHA_DMA_QWORDS;
-    packet->header.vifCommands = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
-    packet->header.gifTag = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
-    packet->header.gifRegisters = SDF_GIF_REGISTER_AD;
+    packet->header.dmaWords.tag = SDF_ALPHA_DMA_QWORDS;
+    packet->header.dmaWords.vif = (((u64)SDF_VIF_DIRECT_THREE_WORD << 16 | SDF_VIF_FLUSHE_HALFWORD) << 16);
+    packet->header.giftag.parm = (((u64)SDF_GIF_ONE_REGISTER_WORD << 32) | SDF_GIF_TWO_AD_LOOPS_EOP);
+    packet->header.giftag.regs = SDF_GIF_REGISTER_AD;
 }
 
 void sdfPrimSetSemiTransElem(sdfPrimTransElem_t *packet) {
-    packet->test.value = 0x717FB;
-    packet->test.registerId = 0x47;
-    packet->alpha.value = 0x44;
-    packet->alpha.registerId = 0x42;
+    packet->test.data = 0x717FB;
+    packet->test.reg = 0x47;
+    packet->alpha.data = 0x44;
+    packet->alpha.reg = 0x42;
 }
 
 void sdfPrimSetSemiTrans2Elem(sdfPrimTransElem_t *packet) {
-    packet->test.value = 0x717FB;
-    packet->test.registerId = 0x48;
-    packet->alpha.value = 0x44;
-    packet->alpha.registerId = 0x43;
+    packet->test.data = 0x717FB;
+    packet->test.reg = 0x48;
+    packet->alpha.data = 0x44;
+    packet->alpha.reg = 0x43;
 }
 
 void sdfPrimSetSemiTransPacket(sdfPrimTransPacket_t *packet) {
     sdfPrimSetSemiTransElem(&packet->registers);
-    packet->header.dmaTag = 3;
-    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 3;
+    packet->header.dmaWords.vif = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetSemiTrans2Packet(sdfPrimTransPacket_t *packet) {
     sdfPrimSetSemiTrans2Elem(&packet->registers);
-    packet->header.dmaTag = 3;
-    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 3;
+    packet->header.dmaWords.vif = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetAddTransElem(sdfPrimTransElem_t *packet) {
-    packet->test.value = 0x71801;
-    packet->test.registerId = 0x47;
-    packet->alpha.value = 0x48;
-    packet->alpha.registerId = 0x42;
+    packet->test.data = 0x71801;
+    packet->test.reg = 0x47;
+    packet->alpha.data = 0x48;
+    packet->alpha.reg = 0x42;
 }
 
 void sdfPrimSetAddTrans2Elem(sdfPrimTransElem_t *packet) {
-    packet->test.value = 0x71801;
-    packet->test.registerId = 0x48;
-    packet->alpha.value = 0x48;
-    packet->alpha.registerId = 0x43;
+    packet->test.data = 0x71801;
+    packet->test.reg = 0x48;
+    packet->alpha.data = 0x48;
+    packet->alpha.reg = 0x43;
 }
 
 void sdfPrimSetAddTransPacket(sdfPrimTransPacket_t *packet) {
     sdfPrimSetAddTransElem(&packet->registers);
-    packet->header.dmaTag = 3;
-    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 3;
+    packet->header.dmaWords.vif = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetAddTrans2Packet(sdfPrimTransPacket_t *packet) {
     sdfPrimSetAddTrans2Elem(&packet->registers);
-    packet->header.dmaTag = 3;
-    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 3;
+    packet->header.dmaWords.vif = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetSubTransElem(sdfPrimTransElem_t *packet) {
-    packet->test.value = 0x71801;
-    packet->test.registerId = 0x47;
-    packet->alpha.value = 0x42;
-    packet->alpha.registerId = 0x42;
+    packet->test.data = 0x71801;
+    packet->test.reg = 0x47;
+    packet->alpha.data = 0x42;
+    packet->alpha.reg = 0x42;
 }
 
 void sdfPrimSetSubTrans2Elem(sdfPrimTransElem_t *packet) {
-    packet->test.value = 0x71801;
-    packet->test.registerId = 0x48;
-    packet->alpha.value = 0x42;
-    packet->alpha.registerId = 0x43;
+    packet->test.data = 0x71801;
+    packet->test.reg = 0x48;
+    packet->alpha.data = 0x42;
+    packet->alpha.reg = 0x43;
 }
 
 void sdfPrimSetSubTransPacket(sdfPrimTransPacket_t *packet) {
     sdfPrimSetSubTransElem(&packet->registers);
-    packet->header.dmaTag = 3;
-    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 3;
+    packet->header.dmaWords.vif = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetSubTrans2Packet(sdfPrimTransPacket_t *packet) {
     sdfPrimSetSubTrans2Elem(&packet->registers);
-    packet->header.dmaTag = 3;
-    packet->header.vifCommands = (((u64)0x50000003 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8002);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 3;
+    packet->header.dmaWords.vif = (((u64)0x50000003 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8002);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetTexflushElem(sdfGrTagStdReg_t *write) {
-    write->value = 0;
-    write->registerId = SDF_GS_TEXFLUSH;
+    write->data = 0;
+    write->reg = SDF_GS_TEXFLUSH;
 }
 
 void sdfPrimSetTexflushPacket(sdfPrimTexflushPacket_t *packet) {
     sdfPrimSetTexflushElem(&packet->textureFlush);
-    packet->header.dmaTag = 2;
-    packet->header.vifCommands = (((u64)0x50000002 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8001);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 2;
+    packet->header.dmaWords.vif = (((u64)0x50000002 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8001);
+    packet->header.giftag.regs = 0xE;
 }
 
 void sdfPrimSetBitBltElem(sdfPrimBitBltElem_t *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                   s64 destinationFormat, s64 destinationX, s64 destinationY,
                   u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                   s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection) {
-    packet->bitbltbuf.value = (destinationFormat << 56) |
+    packet->bitbltbuf.data = (destinationFormat << 56) |
         ((u64)(destinationBufferWidth >> 6) << 48) |
         ((u64)(destinationBufferAddress >> 6) << 32) |
         (sourceFormat << 24) | ((sourceBufferWidth >> 6) << 16) |
         (sourceBufferAddress >> 6);
-    packet->bitbltbuf.registerId = SDF_GS_BITBLTBUF;
-    packet->trxpos.value = (destinationY << 48) | (destinationX << 32) |
+    packet->bitbltbuf.reg = SDF_GS_BITBLTBUF;
+    packet->trxpos.data = (destinationY << 48) | (destinationX << 32) |
         (sourceY << 16) | sourceX;
-    packet->trxpos.registerId = SDF_GS_TRXPOS;
-    packet->trxreg.value = transferWidth | ((u64)transferHeight << 32);
-    packet->trxreg.registerId = SDF_GS_TRXREG;
-    packet->trxdir.value = transferDirection;
-    packet->trxdir.registerId = SDF_GS_TRXDIR;
+    packet->trxpos.reg = SDF_GS_TRXPOS;
+    packet->trxreg.data = transferWidth | ((u64)transferHeight << 32);
+    packet->trxreg.reg = SDF_GS_TRXREG;
+    packet->trxdir.data = transferDirection;
+    packet->trxdir.reg = SDF_GS_TRXDIR;
 }
 
 void sdfPrimSetBitBltPacket(sdfPrimBitBltPacket_t *packet, u32 destinationBufferAddress, s32 destinationBufferWidth,
                                     s64 destinationFormat, s64 destinationX, s64 destinationY,
                                     u32 sourceBufferAddress, s32 sourceBufferWidth, s32 sourceFormat,
                                     s32 sourceX, s32 sourceY, s32 transferWidth, s32 transferHeight, s32 transferDirection) {
-    packet->header.dmaTag = 5;
-    packet->header.vifCommands = (((u64)0x50000005 << 16 | 0x1000) << 16);
-    packet->header.gifTag = (((u64)0x10000000 << 32) | 0x8004);
-    packet->header.gifRegisters = 0xE;
+    packet->header.dmaWords.tag = 5;
+    packet->header.dmaWords.vif = (((u64)0x50000005 << 16 | 0x1000) << 16);
+    packet->header.giftag.parm = (((u64)0x10000000 << 32) | 0x8004);
+    packet->header.giftag.regs = 0xE;
     sdfPrimSetBitBltElem(&packet->transfer, destinationBufferAddress, destinationBufferWidth,
                   destinationFormat, destinationX, destinationY, sourceBufferAddress, sourceBufferWidth,
                   sourceFormat, sourceX, sourceY, transferWidth, transferHeight, transferDirection);
@@ -1794,8 +1989,8 @@ void sdfPrimLinkBitBltPacket(s32 packetList, u32 destinationBufferAddress, s32 d
 }
 
 void sdfPrimFrameMovePredraw(SdfGraphCopyPacket *packet, s32 entryIndex) {
-    packet->draw.transfer.bitbltbuf.value =
-        (packet->draw.transfer.bitbltbuf.value & ~0x3FFF) |
+    packet->draw.transfer.bitbltbuf.data =
+        (packet->draw.transfer.bitbltbuf.data & ~0x3FFF) |
         (u64)(u32)(D_00529388.buffers[entryIndex ^ packet->resourceIndexXor]->word >> 6);
 }
 

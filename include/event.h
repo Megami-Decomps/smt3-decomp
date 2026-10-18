@@ -1,0 +1,144 @@
+#ifndef EVENT_H
+#define EVENT_H
+
+#include "basic.h"
+#include "model.h"
+#include "motion.h"
+
+/* Event-unit allocation: evtCreateUnitHandle allocates/clears 0x148 bytes.
+ * SMT3 omits DDS's extra motion, shadow and vertical-movement members. */
+typedef enum evtUnitMotionState_t {
+    EVT_UNIT_MOTION_STATE_IDLE = 0,
+    EVT_UNIT_MOTION_STATE_SOURCE = 1,
+    EVT_UNIT_MOTION_STATE_MOTION = 2,
+    EVT_UNIT_MOTION_STATE_VECTOR = 3,
+    EVT_UNIT_MOTION_STATE_VALUE = 4
+} evtUnitMotionState_t;
+
+typedef enum evtUnitTransitionSourceKind_t {
+    EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR = 0,
+    EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE = 1,
+    EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE = 2
+} evtUnitTransitionSourceKind_t;
+
+enum evtUnitFlags_t {
+    EVT_UNIT_FLAG_PATH_REVERSE = 0x4,
+    EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR = 0x100,
+    EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR = 0x200,
+    EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS = 0x300,
+    EVT_UNIT_FLAG_RGB_TRANSITION = 0x8000,
+    EVT_UNIT_FLAG_ALPHA_TRANSITION = 0x10000,
+    EVT_UNIT_FLAG_VALUE_CHANGED = 0x20000,
+    EVT_UNIT_FLAG_TARGET_TRANSITION = 0x40000,
+    EVT_UNIT_FLAG_TARGET_BLEND_IN = 0x80000,
+    EVT_UNIT_FLAG_TARGET_BLEND_OUT = 0x100000,
+    EVT_UNIT_FLAG_TARGET_BLEND_PHASES = 0x180000
+};
+
+typedef struct {
+    s16 motionId;
+    s16 startFrame;
+    s16 endFrame;
+} evtUnitMotionSetup_t;
+
+typedef struct evtUnit_t {
+    u32 color;
+    union {
+        s32 objectId;
+        u32 firstCurrent;
+    };
+    union {
+        u8 pad08[8];
+        struct {
+            u32 color08;
+            u32 color0C;
+        };
+    };
+    f32 vec10[4];
+    f32 vec20[4];
+    f32 vec30[4];
+    union {
+        u8 pad40[0x10];
+        f32 vec40[4];
+    };
+    u32 color50;
+    union {
+        u8 pad54[0xC];
+        struct {
+            u32 color54;
+            u32 color58;
+            u32 color5C;
+        };
+    };
+    u32 color60;
+    union {
+        u8 pad64[4];
+        u32 color64;
+    };
+    void *endpointWork;
+    u32 value;
+    f32 targetVector[4];           /* 0x70 */
+    dds3Basic_t *effObj;           /* 0x80 */
+    s32 currentTransitionValue;
+    s32 previousTransitionValue;
+    struct mdlObj_t *owner;
+    void *linkedUnit;
+    s32 (*motionCallback)(struct evtUnit_t *, s32);
+    f32 wobblePhase;
+    s32 pathHandle;                /* 0x9C */
+    f32 pathSpeed;
+    u32 flags;                     /* 0xA4 */
+    s16 motionState;               /* 0xA8 */
+    s16 transitionSourceKind;
+    s16 motionSubmode;
+    s16 motionTicks;
+    s16 motionParameter;
+    s16 directionOffset;
+    f32 transitionMotionScale;
+    s16 waitMotion;
+    s16 waitBlendStart;
+    s16 waitBlendEnd;
+    evtUnitMotionSetup_t motionSetup; /* 0xBE */
+    s16 motionEndFrame;
+    s16 movingTicks;
+    s16 idleTicks;
+    s8 firstSlot;
+    s8 secondSlot;
+    u8 slotFlags[12];              /* 0xCC */
+    s16 tableValues[12];           /* 0xD8 */
+    s16 slotA[12];
+    s16 slotB[12];
+    s16 slotC[12];
+    union {
+        s16 colorDuration;
+        u16 colorFramesRemaining;
+    };
+    union {
+        s16 directionDuration;
+        u16 directionFramesRemaining;
+    };
+    union {
+        u8 pad154[8];
+        struct {
+            u16 rgbElapsed;
+            u16 rgbDuration;
+            u16 alphaElapsed;
+            u16 alphaDuration;
+        };
+    };
+    s16 transitionElapsed;
+    union {
+        s16 transitionDuration;
+        u16 transitionFrameCount;
+    };
+} evtUnit_t;
+
+
+
+/* Transform prefix in the scene's type-17 source records. */
+typedef struct {
+    sdfVector4_t position;
+    f32 rotation[4];
+} evtWorldSourceTransformPrefix_t;
+
+#endif /* EVENT_H */

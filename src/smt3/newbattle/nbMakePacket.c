@@ -1,94 +1,102 @@
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+#include "nb.h"
+#include "basic.h"
 
-typedef struct dds3Basic_t dds3Basic_t;
-typedef struct evtUnitHandle_t evtUnitHandle_t;
-typedef struct effBTLSysHandle_t effBTLSysHandle_t;
-typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
+/* Action operands share the prefix used by code_0024C470. */
+struct nbActionProcessData_t
+{
+    nbMainProcessData_t *data;
+    u32 unk04;
+    s8 seq;
+    s8 nextseq;
+    s16 unk0A;
+    s32 unk0C;
+    u8 unk10[8];
+    s32 unk18;
+    u8 unk1C[0xC];
+    nbFormation_t *form;
+    datUnitWork_t *work;
+};
+
+/* Sprite payload returned by sdf2DGetPrimPtr: one colour and two UV/XYZ
+ * corners. Each corner occupies two quadwords; the full payload is 0x50. */
+typedef struct
+{
+    s32 u, v;
+    u8 unk08[8];
+    s32 x, y;
+    s32 mask;
+    s16 flag;
+    u8 unk1E[2];
+} sdf2DSpriteCorner_t;
 
 typedef struct
 {
-    sdfVector4_t orgpos;
-    sdfVector4_t orgrot;
-    sdfVector4_t pos;
-    sdfVector4_t rot;
-    sdfVector4_t center;
-    f32 r;
-    f32 h;
-    f32 cr;
-    f32 scl;
-    f32 oneshotr;
-    f32 allshotr;
-    f32 movey;
-    f32 movez;
-    s32 type;
-    u32 time;
-    u32 stat;
-    u32 flag;
-    u32 anime;
-    dds3Basic_t *basic;
-    s32 serial;
-    evtUnitHandle_t *hunit;
-    s16 partyindex;
-    s16 formindex;
-    u32 autotime;
-    effBTLSysHandle_t *badeff;
-    u32 modelcol;
-    f32 motspeed;
-    s16 motendtype;
-    s16 motenddata;
-    s16 nexthokan;
-    s16 nexthokanb;
-    s16 waitmot;
-    s16 motcate;
-    s32 reserve4;
-    NB_FILEHANDLE_T *packh;
-    char *akey;
-    s32 read_minor;
-    u32 tartime;
-    f32 range;
-    f32 addmovet;
-    f32 movet;
-    sdfVector4_t tarpos;
-    sdfVector4_t startpos;
-} nbFormation_t;
-typedef struct datUnitWork_t
+    s32 r, g, b, a;
+    sdf2DSpriteCorner_t corner[2];
+} sdf2DSpritePrim_t;
+
+
+
+typedef struct
 {
-    u32 flag;
-    u16 id;
-    u16 hp;
-    u16 maxhp;
-    u16 mp;
-    u16 maxmp;
-    u16 badstatus;
-    u32 exp;
-    u16 level;
-    s8 param[6];
-    s8 skillparam[6];
-    u16 uniqueid;
-    u16 reserve1;
-    u16 reserve2;
-    u16 namecode[8];
-    s32 skillcnt;
-    s32 skill[24];
-    s16 nowcommand;
-    u16 nowindex;
-    s16 nowtarea;
-    s16 nowtform;
-    s16 prevcommand;
-    u16 previndex;
-    s16 prevtarea;
-    s16 prevtform;
-    s8 mitamaparam[6];
-    s8 levelupparam[6];
-    u16 keisyoskill[24];
-    u8 keiattr[24];
-    u16 hensinmae;
-    u16 getdevilhearts[4];
-    u32 hensinmaeexp;
-    u16 fullnamecode[8];
-} datUnitWork_t;
+    sdfGrPacketHeader_t header;
+    sdfGrTagStdReg_t write;
+} nbGsRegisterPacket_t;
+
+extern s32 gnbPnlOtOfs;
+extern s8 nbPanelPGShow;
+extern s8 nbPanelPTOmit;
+extern dds3ProcessID_t *nbPanelPTAProcess;
+extern s8 nbPanelStockRun;
+extern s8 nbPanelStockFadeFlag;
+extern s32 nbPanelAnalyzeProcess;
+extern s32 nbPanelAnalyzeFrame;
+extern datUnitWork_t *pNbPanelAnalyzeUnitWork;
+extern s8 PanelAutoShow;
+extern s8 PanelPartyShow;
+extern s32 nbEncountMax;
+extern s32 bgmno;
+extern s32 nbBgmFadeState;
+extern sdfGrOt_t sdfGrOtTable[];
+
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void *sdf2DMakeStdPacket(s32 packet, s32 size);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void *sdf2DAllocSprite(s32 count);
+extern void *sdf2DGetPrimPtr(s32 packet);
+extern void sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 index);
+extern void nbPanelPressGaugeShow(void);
+extern void nbPanelAutoShow(void);
+void nbPanelPartyShow(void);
+void nbPanelAutoHide(void);
+void nbPanelPartyHide(void);
+void nbPanelPressGaugeHide(void);
+extern void *scrGetData(void);
+extern void scrSetIntReturnValue(s32 value);
+extern void nbRunAi(void *work);
+extern void nbCameraScriptSet1Shot(void *camera);
+extern void nbCameraScriptSetBougai(void *camera);
+extern void nbAllFormDispOn(void);
+extern void nbSetPartyFormation(s32 formation, s32 mask);
+extern void SetBossDummy(void);
+s32 TestProcess1(void);
+extern void p2sdPlaySE(u32 soundId, s32 volume, s32 pan);
+extern u32 nbGetUnitWorkFromAction(struct nbActionProcessData_t *action);
+extern void nbLoadMotionByIndex(u32 unitId, s32 motion);
+extern void nbMakeSeId(u32 unitId);
+extern void p2sdPlayBGM(s32 soundId);
+extern void p2sdStopBGM(s32 soundId);
+extern void func_002C1E70(s32 volume);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void sdfChipFreeDirect(void *work);
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void pacFileHandleFree_(void *pack);
+extern void nbFreeEffectSlot(void);
+
 typedef struct nbParty_t
 {
     u16 flag;
@@ -101,33 +109,6 @@ typedef struct nbParty_t
 } nbParty_t;
 typedef struct effBTL_t effBTL_t;
 typedef struct effBTLCutHandle_t effBTLCutHandle_t;
-/* Only the fields this unit touches are named; the rest of the layout is unconfirmed. */
-typedef struct nbMainProcessData_t
-{
-    nbFormation_t *form;
-    u8 unk_04[0xC];
-    nbParty_t *party;
-    u8 unk_14[0x4];
-    s16 playerpcnt;
-    s16 enemypcnt;
-    u8 unk_1C[0x18];
-    s32 encno;
-    u8 unk_38[0x8];
-    s32 actionstackp;
-    u32 endtype;
-    u8 unk_48[0x18];
-    u32 stat;
-    u8 unk_64[0x24];
-    s32 eventno;
-    s32 eventrid;
-    s16 negopformindex;
-    s16 negoeformindex;
-    s32 negoresult;
-    u8 item[4];
-    u8 itemcnt[4];
-    u32 maka;
-    u32 exp;
-} nbMainProcessData_t;
 typedef struct
 {
     u32 flag;
@@ -156,23 +137,6 @@ typedef struct
     u8 attackinterval;
     u8 reserve1;
 } datDevilFormat_t;
-typedef struct
-{
-    sdfVector4_t center;
-    f32 formsize;
-    f32 formheight;
-    f32 formscale;
-    f32 oneshotr;
-    f32 allshotr;
-    u16 modelsize;
-    u16 shadowsize;
-    u16 badframe;
-    u16 autowait;
-    void *motion;
-    u32 reserve1;
-    u32 reserve2;
-    u32 reserve3;
-} datUnitVisual_t;
 typedef struct nbActionProcessData_t nbActionProcessData_t;
 typedef struct nbNegoProcessData_t
 {
@@ -281,13 +245,6 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-typedef struct nbKoukaProcessData_t
-{
-    nbMainProcessData_t *data;
-    s32 packetcnt;
-    nbKoukaPacket_t *first;
-    nbKoukaPacket_t *last;
-} nbKoukaProcessData_t;
 
 typedef struct effPCPBossBUNSINParam_t
 {
@@ -315,45 +272,6 @@ typedef struct effPCPBossONGY2Param_t
 
 typedef struct
 {
-    u8 flag;
-    u8 use;
-    u8 koukatype;
-    u8 costtype;
-    u16 cost;
-    u16 costbase;
-    u8 targettype;
-    u8 targetarea;
-    u8 targetrule;
-    u8 targetrandom;
-    u16 untargetbadstat;
-    u16 targetprog;
-    u8 hittype;
-    u8 hitlevel;
-    u16 hitprog;
-    u8 targetcntmin;
-    u8 targetcntmax;
-    u16 hptype;
-    s16 hpn;
-    u16 mptype;
-    s16 mpn;
-    s16 hpbase;
-    s16 mpbase;
-    u16 minus;
-    u8 badtype;
-    u8 badlevel;
-    u16 basstatus;
-    u32 hojotype;
-    s8 hojopoint;
-    u8 deadtype;
-    u32 program;
-    s16 criticalpoint;
-    s16 failpoint;
-    s16 magicbase;
-    s16 magiclimit;
-} datNormalSkill_t;
-
-typedef struct
-{
     s8 skillattr;
     s8 type;
     s16 index;
@@ -370,25 +288,10 @@ typedef struct
     u8 unk_02[0x24];
 } nbEncountForm_t;
 
-typedef struct
-{
-    u8 motion;
-    u8 animetype;
-    u8 hatudo;
-    u8 bedno;
-} datNormalSkillVisual_t;
-
-typedef struct
-{
-    datNormalSkill_t normal[288];
-    u8 reserve[8];
-    datNormalSkillVisual_t visual[288];
-} datSkillTable_t;
 
 extern char D_00544890[]; /* "カット長 = %d\n" */
 extern char D_00544900[]; /* "length = %d\n" */
 
-extern nbKoukaProcessData_t *nbGetKoukaProcessData(void);
 extern nbKoukaPacket_t *nbAddKoukaPacket(nbKoukaProcessData_t *k, s32 startframe, s32 framelength,
                                          s32 uniqueid);
 extern effBTL_t *effBTLCreate(u8 *bed);
@@ -406,7 +309,6 @@ extern s32 effPCPBossBUNSIN2GetLength(void);
 extern void *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2Param_t *param);
 extern s32 effPCPBossONGYGetLength(void);
 extern void *effPCPBossONGYCreate(effPCPBossONGYParam_t *param);
-extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern u32 nbGetBadStat(s32 formindex);
 extern s32 nbCheckEventDead(nbFormation_t *form);
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
@@ -2391,7 +2293,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_5);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_6);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_7);
+s32 Flow9_7(void)
+{
+    return 9;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_9);
 
@@ -2479,7 +2384,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_27);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_28);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_29);
+s32 Flow10_29(void)
+{
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_30);
 
@@ -2565,37 +2473,70 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_3);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_4);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_5);
+s32 Flow5_5(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_6);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_7);
+s32 Flow5_7(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_8);
+s32 Flow5_8(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_9);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_10);
+s32 Flow5_10(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_11);
+s32 Flow5_11(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_12);
+s32 Flow5_12(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_13);
+s32 Flow5_13(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_14);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_15);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_16);
+s32 Flow5_16(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_17);
+s32 Flow5_17(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_18);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_19);
+s32 Flow5_19(void)
+{
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_20);
+s32 Flow5_20(void)
+{
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_21);
 
@@ -2659,7 +2600,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_17);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_18);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_19);
+s32 Flow8_19(void)
+{
+    return 4;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoFlowFight);
 
@@ -2757,7 +2701,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_47);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_48);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_49);
+s32 Flow12_49(void)
+{
+    return 4;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoFlowMukan);
 
@@ -2783,7 +2730,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_9);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_10);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_11);
+s32 Flow13_11(void)
+{
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoFlowSensei);
 
@@ -2815,7 +2765,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_19);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_20);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_22);
+s32 Flow15_22(void)
+{
+    return 4;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_23);
 
@@ -2835,21 +2788,126 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnlTexSet);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnlTexDel);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_setOt);
+void nbPnl_setOt(s32 ot)
+{
+    gnbPnlOtOfs = ot;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_rsetTex1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_rsetTest);
+void nbPnl_rsetTest(s32 alphaTestEnable, s32 alphaTestMethod, s32 alphaReference,
+                   s32 alphaFail, s32 destinationAlphaEnable, s32 destinationAlphaMethod,
+                   s32 unused, s32 depthTestMethod) {
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    s32 packet;
+    nbGsRegisterPacket_t *data;
+    sdfGrOt_t *descriptor;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_rsetAlpha);
+    sdfDrawTagInit(command);
+    packet = (s32)sdfGrAllocPacketBuff(0x30);
+    data = (nbGsRegisterPacket_t *)sdf2DMakeStdPacket(packet, 0x30);
+    data->write.data = (depthTestMethod << 17) | 0x10000 | (destinationAlphaMethod << 15) |
+                       (destinationAlphaEnable << 14) | (alphaFail << 12) |
+                       (alphaReference << 4) | (alphaTestMethod << 1) | alphaTestEnable;
+    data->write.reg = 0x47;
+    sdfDrawTagLink(command, packet);
+    descriptor = &sdfGrOtTable[gnbPnlOtOfs];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnlSprite);
+void nbPnl_rsetAlpha(s32 mode) {
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    s32 packet;
+    nbGsRegisterPacket_t *data;
+    sdfGrOt_t *descriptor;
+
+    sdfDrawTagInit(command);
+    packet = (s32)sdfGrAllocPacketBuff(0x30);
+    data = (nbGsRegisterPacket_t *)sdf2DMakeStdPacket(packet, 0x30);
+    switch (mode) {
+    case 1:
+        data->write.data = 0x48;
+        break;
+    case 2:
+        data->write.data = 0x42;
+        break;
+    case 3:
+        data->write.data = 0x84;
+        break;
+    case 4:
+        data->write.data = 0x06;
+        break;
+    case 5:
+        data->write.data = 0x89;
+        break;
+    case 6:
+        data->write.data = 0x42;
+        break;
+    case 10:
+        data->write.data = 0x2A;
+        break;
+    case 20:
+        data->write.data = 0x4A;
+        break;
+    default:
+        data->write.data = 0x44;
+        break;
+    }
+    data->write.reg = 0x42;
+    sdfDrawTagLink(command, packet);
+    descriptor = &sdfGrOtTable[gnbPnlOtOfs];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
+
+void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
+    void *handle = sdf2DAllocSprite(1);
+    sdf2DSpritePrim_t *vtx = (sdf2DSpritePrim_t *)sdf2DGetPrimPtr((s32)handle);
+    s32 ubase = u * 16;
+    s32 xl = x * 16 + 0x7000;
+    s32 vbase = v * 16;
+    s32 yt = y * 8 + 0x7900;
+    sdfDrawTag_t *command;
+    sdfGrOt_t *descriptor;
+
+    vtx->r = color & 0xFF;
+    vtx->g = (color >> 8) & 0xFF;
+    vtx->b = (color >> 16) & 0xFF;
+    vtx->a = (color >> 24) & 0xFF;
+    vtx->corner[0].u = ubase;
+    vtx->corner[0].v = vbase;
+    vtx->corner[0].x = xl;
+    vtx->corner[0].y = yt;
+    vtx->corner[0].mask = -1;
+    vtx->corner[0].flag = 0;
+    vtx->corner[1].u = ubase + uw * 16;
+    vtx->corner[1].v = vbase + vh * 16;
+    vtx->corner[1].x = xl + w * 16;
+    vtx->corner[1].y = yt + h * 8;
+    vtx->corner[1].mask = -1;
+    vtx->corner[1].flag = 0;
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    sdf2DLinkTexPacket(command, texture, 0);
+    sdfDrawTagLink(command, (u32)handle);
+    descriptor = &sdfGrOtTable[gnbPnlOtOfs];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelBaseColorSet);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAllShow);
+void nbPanelAllShow(void)
+{
+    nbPanelPressGaugeShow();
+    nbPanelPartyShow();
+    nbPanelAutoShow();
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAllHide);
+void nbPanelAllHide(void)
+{
+    nbPanelAutoHide();
+    nbPanelPartyHide();
+    nbPanelPressGaugeHide();
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelSpriteCenteringDraw);
 
@@ -2893,7 +2951,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressGaugeReset);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressGaugeShow);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressGaugeHide);
+void nbPanelPressGaugeHide(void)
+{
+    nbPanelPGShow = 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressGaugeEncountHide);
 
@@ -2903,9 +2964,15 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurnInit);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurnRun);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurnGaugeRun);
+s32 nbPanelPressTurnGaugeRun(void)
+{
+    return nbPanelPTAProcess != NULL;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurnOmit);
+void nbPanelPressTurnOmit(void)
+{
+    nbPanelPTOmit = 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurnStart);
 
@@ -2919,11 +2986,17 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPartySelect);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockInit);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockCheckRun);
+s8 nbPanelStockCheckRun(void)
+{
+    return nbPanelStockRun;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockEnd);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockFadeOUT);
+void nbPanelStockFadeOUT(void)
+{
+    nbPanelStockFadeFlag = 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockSelectInit);
 
@@ -2931,21 +3004,43 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockSelectCtrl);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelStockSelect);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAnalyzeInit);
+void nbPanelAnalyzeInit(void)
+{
+    nbPanelAnalyzeProcess = 0;
+    nbPanelAnalyzeFrame = 0;
+    pNbPanelAnalyzeUnitWork = NULL;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAnalyzeStart);
+void nbPanelAnalyzeStart(void)
+{
+    nbPanelAnalyzeFrame = 0;
+    nbPanelAnalyzeProcess = 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAnalyzeEnd);
+void nbPanelAnalyzeEnd(void)
+{
+    nbPanelAnalyzeFrame = 0;
+    nbPanelAnalyzeProcess = 4;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAnalyzeDraw);
+void nbPanelAnalyzeDraw(datUnitWork_t *unit)
+{
+    pNbPanelAnalyzeUnitWork = unit;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAnalyzeRun);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAutoShow);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAutoHide);
+void nbPanelAutoHide(void)
+{
+    PanelAutoShow = 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAutoCheckShow);
+s8 nbPanelAutoCheckShow(void)
+{
+    return PanelAutoShow;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelAutoInit);
 
@@ -2955,9 +3050,15 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelDraw);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelRunProcess);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPartyShow);
+void nbPanelPartyShow(void)
+{
+    PanelPartyShow = 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPartyHide);
+void nbPanelPartyHide(void)
+{
+    PanelPartyShow = 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPartyDraw);
 
@@ -2968,6 +3069,8 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelShutdown);
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitPanelProcess);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelFlashInit);
+
+u32 nbPanelFlashRGBAMulti(u32 colorA, u32 colorB);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelFlashRGBAMulti);
 
@@ -3231,7 +3334,13 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_GET_ALLKOUDO);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_GET_PRESSKOUDO);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_GET_MYLV);
+s32 nbCommand_AI_GET_MYLV(void)
+{
+    nbActionProcessData_t *action = scrGetData();
+
+    scrSetIntReturnValue(action->work->level);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_GET_MYAISYO);
 
@@ -3243,23 +3352,53 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_CHK_ENHAMAMHK);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_CHK_SKILLNOMP);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI);
+s32 nbCommand_AI(void)
+{
+    nbRunAi(scrGetData());
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_AI_TBL);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_CAM_SET);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_CAM_ORG);
+s32 nbCommand_BTL_CAM_ORG(void)
+{
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_CAM_1SHOT);
+s32 nbCommand_BTL_CAM_1SHOT(void)
+{
+    nbActionProcessData_t *action = scrGetData();
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_CAM_2SHOT);
+    nbCameraScriptSet1Shot(action->form);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_CAM_BOUGAI);
+s32 nbCommand_BTL_CAM_2SHOT(void)
+{
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_PNL_OFF);
+s32 nbCommand_BTL_CAM_BOUGAI(void)
+{
+    nbActionProcessData_t *action = scrGetData();
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_PNL_ON);
+    nbCameraScriptSetBougai(action->form);
+    return 1;
+}
+
+s32 nbCommand_BTL_PNL_OFF(void)
+{
+    nbPanelAllHide();
+    nbPanelAutoHide();
+    return 1;
+}
+
+s32 nbCommand_BTL_PNL_ON(void)
+{
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_EVENT);
 
@@ -3271,7 +3410,11 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_PRESS);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_NAKAMA);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_FORM_ALL_ON);
+s32 nbCommand_BTL_FORM_ALL_ON(void)
+{
+    nbAllFormDispOn();
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCommand_BTL_FORM_PLY_ON);
 
@@ -3363,11 +3506,20 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadUnitPos);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", effBTLModelLoadRotate);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCameraGetBossDistance);
+f32 nbCameraGetBossDistance(void)
+{
+    return 800.0f;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCameraGetSummonNear);
+f32 nbCameraGetSummonNear(void)
+{
+    return 50.0f;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCameraGetSummonFar);
+f32 nbCameraGetSummonFar(void)
+{
+    return 100.0f;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_0028A330);
 
@@ -3379,7 +3531,10 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetPartyFormation);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetEnemyFormation);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetPlayerFormation);
+void nbSetPlayerFormation(s32 formation)
+{
+    nbSetPartyFormation(formation, 0x100);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFormatFormation);
 
@@ -3410,13 +3565,20 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess8);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess3);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess7);
+s32 TestProcess7(void)
+{
+    SetBossDummy();
+    return (s32)TestProcess1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess6);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess1);
+s32 TestProcess1(void)
+{
+    return 0;
+}
 
 void TestShutdown(void) {
 }
@@ -3435,7 +3597,12 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncountCalc);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckEncountLevel);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", fclClearTerminalState);
+void fclClearTerminalState(void)
+{
+    DDS3_GBWK->encounterRemainder = 0;
+    DDS3_GBWK->encounterGauge = 0;
+    nbEncountMax = 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_0028CFC8);
 
@@ -3445,17 +3612,26 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitMaeTable);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetUnitWorkFromAction);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPlaySe);
+void nbPlaySe(u32 soundId)
+{
+    p2sdPlaySE(soundId, 0x7F, 0x3F);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMotionTable);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMotionByIndex);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetUnitFromAction);
+void nbGetUnitFromAction(nbActionProcessData_t *action, s32 motion)
+{
+    nbLoadMotionByIndex(nbGetUnitWorkFromAction(action), motion);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeSeId);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPlayMotionSe);
+void nbPlayMotionSe(nbActionProcessData_t *action)
+{
+    nbMakeSeId(nbGetUnitWorkFromAction(action));
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545B90);
 
@@ -3495,17 +3671,30 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetMaeFlag);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbIncResultCounter);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMaeWaitStep);
+void nbMaeWaitStep(void)
+{
+    p2sdPlayBGM(bgmno);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbRestoreBgm);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBgmFadeOut);
+void nbBgmFadeOut(void)
+{
+    p2sdStopBGM(bgmno);
+    p2sdStopBGM(nbBgmFadeState);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbBgmStop);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nb_28DE10);
+void nb_28DE10(void)
+{
+    func_002C1E70(0x7F);
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nb_28DE28);
+void nb_28DE28(void)
+{
+    func_002C1E70(0);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess3);
 
@@ -3519,7 +3708,12 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncShutdown);
+void nbEncShutdown(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *battle = nbGetMainProcessData();
+
+    battle->encounterProcess = NULL;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitEncProcess);
 
@@ -3573,7 +3767,14 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaStep);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaProcess1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakaShutdown);
+void nbMakaShutdown(dds3ProcessID_t *id)
+{
+    void *work = dds3GetProcessData(id);
+
+    if (work != NULL) {
+        sdfChipFreeDirect(work);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbAllocMakaWork);
 
@@ -3589,7 +3790,15 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbStartEventPacks);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbUpdateEventProcessData);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_0028FA30);
+u32 func_0028FA30(dds3Basic_t *basic)
+{
+    u32 type = 0;
+
+    if (basic != NULL) {
+        type = basic->type;
+    }
+    return type;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeEffectSlot);
 
@@ -3625,13 +3834,53 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitEventProcess);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindStockSkillError);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpAnyButtonGuideActive);
+s32 cmpAnyButtonGuideActive(datUnitWork_t **units, s32 count)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpButtonGuideShowDone);
+    for (i = 0; i < count; i++) {
+        if ((units[i]->badstatus & 0xFFF) == 0x800) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpButtonGuideHideDone);
+s32 cmpButtonGuideShowDone(datUnitWork_t **units, s32 count)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", cmpFindButtonGuideByFlag);
+    for (i = 0; i < count; i++) {
+        if (units[i]->hp < units[i]->maxhp) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+s32 cmpButtonGuideHideDone(datUnitWork_t **units, s32 count)
+{
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if (units[i]->mp < units[i]->maxmp) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+s32 cmpFindButtonGuideByFlag(datUnitWork_t **units, s32 count, u32 flags)
+{
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if ((units[i]->badstatus & 0xFFF) & flags) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", CheckHojo);
 
@@ -3651,7 +3900,19 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadDefaultModelPack);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckEventPackLoaded);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeEventPack);
+void nbFreeEventPack(nbMainProcessData_t *battle)
+{
+    void *pack = battle->eventPack;
+
+    if (pack != NULL) {
+        pacFileHandleFree_(pack);
+        battle->eventPack = NULL;
+    }
+    if (battle->eventMemory != NULL) {
+        sdfMemFreeDirect(battle->eventMemory);
+        battle->eventMemory = NULL;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetModelHandleOnce);
 
@@ -3685,7 +3946,11 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Daisupe);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", ReadWait2);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Wait2_nbE901);
+s32 Wait2_nbE901(void)
+{
+    nbFreeEffectSlot();
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Syutugen2);
 
@@ -3864,6 +4129,20 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915_Test);
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915_End);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915Process_1);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546860);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546870);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546880);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546898);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468B0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468C8);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468D8);
 
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551140);
 
@@ -4312,18 +4591,4 @@ INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551638);
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_0055163C);
 
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551640);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546860);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546870);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546880);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546898);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468B0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468C8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468D8);
 

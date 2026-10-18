@@ -166,16 +166,41 @@ right.
    `sdfModelNodeList_t *`, `sdfModelNode_t *`, `sdfModelTexList_t *`,
    `sdfMatList_t *` and `sdfModelMorphList_t *`. The repo types three of them as
    `DevRequest *`, an unrelated invented name.
+5. **`BillChildPayload` has one list too many for the native resource.**
+   Its five `pendingLists` slots move the allocation, batch and next pointers
+   to +0x44/+0x48/+0x4C. The shared `dds3BillResource_tag` has four slots and
+   those pointers at +0x40/+0x44/+0x48. Retail `BillboardLoadTex` at 0x0015B1B0
+   allocates 0x44C bytes and puts the resource after the 0x400-byte batch,
+   leaving 0x4C bytes, then stores exactly those shared-header offsets.
+   `dds3MultiBillboardPktLink` at 0x0015BF20 also loads both batch pointers
+   from +0x44. These two ports remain `INCLUDE_ASM` while the upstream local
+   layout is preserved; a second four-list local type is not introduced.
 
 ## Local duplicates
 
-`code_002AC138.c`, `code_002B5CD0.c` and `code_002C6F38.c` include only
-`common.h` and `ps2asm.h`, so they define `sdfDrawTag_t`, `sdfTexHandle_t`,
-`sdfMat_t`, `sdfGrOt_t` and others locally. The layouts are right; the field
-names differ from `include/libsdf.h` (`first` and `last` against `head` and
-`tail`, `address` against `ptr`, `word` against `addr`). Merging them onto the
-shared headers needs field renames at about 500 call sites and is independent of
-a type rename.
+`code_002AC138.c`, `code_002B5CD0.c` and `code_002C6F38.c` retain local
+`sdfDrawTag_t`, `sdfTexHandle_t`, `sdfMat_t`, `sdfGrOt_t` and other engine-owner
+layouts. Their field names differ from `include/libsdf.h` (`first` and `last`
+against `head` and `tail`, `address` against `ptr`, `word` against `addr`).
+Merging those owners onto the shared headers needs field renames at about
+500 call sites and is independent of a type rename.
+
+The GS foundations are now consolidated too: the three units use
+`sdf_types.h`'s sole `sdfGrTagStdReg_t` and `sdfGrPacketHeader_t` definitions.
+Register writes use `data`/`reg`; headers use `dmatag`/`giftag`. The header's
+`dmaWords.tag` and `dmaWords.vif` views describe the same hardware words as
+`dmatag`'s decoded fields, without adding bytes or alternate local layouts.
+The shared register record keeps upstream's two scalar `u64` fields. Only
+`sdfGrClearPacket_t` overlays its RGBAQ slot with a `u32 clearColor` view for
+the native partial-word update; a union in every register's data field changes
+the upstream constructors' aliasing and scheduling.
+
+The math and DMA foundations are different: `sdf_types.h` holds their sole
+shared definitions, and `sdf_lighting.h` holds the canonical parallel-light
+packet. `code_002B5CD0.c` includes that leaf header rather than retaining its
+invented lighting record, RenderWare matrix or vector copies. The shared
+packet exposes its matrix as `sdfMatrix4_t` and its indexed lighting columns
+as `normalComponents`, without changing the vector type or alignment.
 
 ## Verifying
 

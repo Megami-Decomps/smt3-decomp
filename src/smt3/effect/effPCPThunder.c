@@ -557,21 +557,93 @@ extern f32 aViewTarget[4], aViewEye[4];
 
 extern void SetRotateMatrixXYZ(const struct sdfVector3_t *);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyCreate);
+#define EFF_THUNDER_PARAMETER_BLOCK 0
+#define EFF_THUNDER_MIN_DELAY_SPREAD 1
+#define EFF_THUNDER_SINGLE_CELL 1
+#define EFF_THUNDER_ENDPOINT_VECTOR_BYTES 0x10
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyCreatePCF);
+enum trackPolyTopology {
+    PAR_CELL_TOPOLOGY_PAIR = 0,
+    PAR_CELL_TOPOLOGY_TRIANGLE = 1,
+    PAR_CELL_TOPOLOGY_SIX_VECTOR = 2,
+    PAR_CELL_TOPOLOGY_FIVE_VECTOR = 4
+};
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyCopy);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *allocation);
+extern void *sdfChipAllocDirect(u32 size);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void *dds3EffectPCPDataGetData(void *table, s32 index);
+extern ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell, s32 divisor, u32 kind);
+extern void dds3TrackPolySetMode(ParSystem *system, u16 mode);
+extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, u32 first, u32 second);
+extern void dds3TrackPolyVC3Set_Acute(ParSystem *system, u32 center, u32 middle, u32 edge);
+extern void dds3TrackPolyVC5Set_Acute(ParSystem *system, u32 center, u32 middle, u32 edge);
+extern void dds3TrackPolyVC5Set_AcuteR(ParSystem *system, u32 center, u32 middle, u32 edge);
+extern void dds3TrackPolyVC5Set_AcuteW(ParSystem *system, u32 center, u32 middle, u32 edge);
+extern void dds3TrackPolyVC5Set_Normal(ParSystem *system, s32 center, s32 middle, s32 edge);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
+void func_00177AC8(EffThunderSparkWork *work, s32 index);
+void effPCP_ThunderPolyDrawOff(EffThunderFragmentWork *work, s32 index);
+void effPCP_ThunderPolyLowDrawOff(EffThunderFragmentWork *work, s32 index);
+void effPCP_ThunderRadiatePolyDrawOff(EffThunderCellWork *work, s32 index);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolySetPosition);
+EffThunderVectorWork *effPCPThunderSpherePolyCreate(EffThunderAlphaParams *source) {
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(source->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    EffThunderVectorWork *work = (EffThunderVectorWork *)sdfMemLock(allocation);
+    u32 cellIndex;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolySetColor);
+    work->head.alpha = *source;
+    work->cells = (EffThunderVectorCell *)(work + 1);
+    work->baseRadiusScale = source->radiusScale;
+    work->baseHeightScale = source->heightScale;
+    work->allocationHandle = allocation;
+    work->cellSystem = dds3TrackPolyCreate(work->head.alpha.cellCount, work->head.alpha.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
+    dds3TrackPolyVC5Set_AcuteW(work->cellSystem, work->head.alpha.centerAlphaWord, work->head.alpha.middleAlphaWord, work->head.alpha.edgeAlphaWord);
+    dds3TrackPolySetMode(work->cellSystem, work->head.alpha.systemParam);
+    for (cellIndex = 0; cellIndex < work->head.alpha.cellCount; cellIndex++) {
+        work->cells[cellIndex].delayFrames = 0;
+        work->cells[cellIndex].activeFrames = 0;
+        work->cells[cellIndex].color = 0;
+    }
+    work->tintColor = 0x80808080;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolySetScale);
+void *effPCPThunderSpherePolyCreatePCF(void *parameterTable) {
+    void *parameters;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyGetParam);
+    parameters = dds3EffectPCPDataGetData(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
+    return effPCPThunderSpherePolyCreate(parameters);
+}
+
+void *effPCPThunderSpherePolyCopy(void *source) {
+    return effPCPThunderSpherePolyCreate(source);
+}
+
+void effPCPThunderSpherePolyDelete(EffThunderVectorWork *work) {
+    dds3TrackPolyDelete(work->cellSystem);
+    sdfMemFreeDirect(work->allocationHandle);
+}
+
+void effPCPThunderSpherePolySetPosition(void *destination, void *source) {
+    PS2_COPY_QUAD(destination, source);
+}
+
+void effPCPThunderSpherePolySetColor(EffThunderVectorWork *work, u32 tintColor) {
+    work->tintColor = tintColor;
+}
+
+void effPCPThunderSpherePolySetScale(f32 factor, EffThunderVectorWork *work) {
+    work->head.vector.radiusScale = work->baseRadiusScale * factor;
+    work->head.vector.heightScale = work->baseHeightScale * factor;
+}
+
+EffThunderParameterHead *effPCPThunderSpherePolyGetParam(EffThunderVectorWork *work) {
+    return &work->head;
+}
 
 void effPCPThunderSphereInit(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
@@ -788,21 +860,60 @@ void effPCPThunderSpherePolyDraw(EffThunderVectorWork *work) {
     dds3TrackPolyDraw(work->cellSystem);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effBTLBindCreateTrack);
+EffThunderVectorWork *effBTLBindCreateTrack(EffThunderVectorParams *parameters) {
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->cellCount * sizeof(EffThunderVectorCell) + sizeof(EffThunderVectorWork));
+    EffThunderVectorWork *work = (EffThunderVectorWork *)sdfMemLock(allocationHandle);
+    u32 cellIndex;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowDelete);
+    work->head.vector = *parameters;
+    work->cells = (EffThunderVectorCell *)(work + 1);
+    work->baseRadiusScale = parameters->radiusScale;
+    work->baseHeightScale = parameters->heightScale;
+    work->allocationHandle = allocationHandle;
+    work->cellSystem = dds3TrackPolyCreate(work->head.vector.cellCount, work->head.vector.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
+    dds3TrackPolyVCSet(work->cellSystem, 2, (u32)work->head.vector.dispatchArg, (u32)work->head.vector.dispatchArg);
+    dds3TrackPolySetMode(work->cellSystem, work->head.vector.systemParam);
+    for (cellIndex = 0; cellIndex < work->head.vector.cellCount; cellIndex++) {
+        work->cells[cellIndex].delayFrames = 0;
+        work->cells[cellIndex].activeFrames = 0;
+        work->cells[cellIndex].color = 0;
+    }
+    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowCreate);
+void effPCPThunderSpherePolyLowDelete(EffThunderVectorWork *work) {
+    dds3TrackPolyDelete(work->cellSystem);
+    sdfMemFreeDirect(work->allocationHandle);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowCopy);
+void effPCPThunderSpherePolyLowCreate(void *parameterTable) {
+    void *parameters;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowSetPosition);
+    parameters = dds3EffectPCPDataGetData(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
+    effBTLBindCreateTrack(parameters);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowSetColor);
+void effPCPThunderSpherePolyLowCopy(void *parameters) {
+    effBTLBindCreateTrack(parameters);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowSetScale);
+void effPCPThunderSpherePolyLowSetPosition(void *destination, void *source) {
+    PS2_COPY_QUAD(destination, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCPThunderSpherePolyLowGetParam);
+void effPCPThunderSpherePolyLowSetColor(EffThunderVectorWork *work, u32 tintColor) {
+    work->tintColor = tintColor;
+}
+
+void effPCPThunderSpherePolyLowSetScale(f32 factor, EffThunderVectorWork *work) {
+    work->head.vector.radiusScale = work->baseRadiusScale * factor;
+    work->head.vector.heightScale = work->baseHeightScale * factor;
+}
+
+u32 effPCPThunderSpherePolyLowGetParam(u32 value) {
+    return value;
+}
 
 void effPCPThunderSphereLowInit(EffThunderVectorWork *work, s32 index) {
     EffThunderVectorCell *cell = work->cells + index;
@@ -990,7 +1101,29 @@ void effPCPThunderSpherePolyLowDraw(EffThunderVectorWork *work) {
     dds3TrackPolyDraw(work->cellSystem);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", eff_177850);
+EffThunderSparkWork *eff_177850(EffThunderSparkParams *parameters) {
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
+    EffThunderSparkWork *work = (EffThunderSparkWork *)sdfMemLock(allocationHandle);
+    s32 delaySpread;
+    u32 sparkIndex;
+
+    work->head = *parameters;
+    work->sparks = (EffThunderSpark *)(work + 1);
+    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
+    work->allocationHandle = allocationHandle;
+    if (work->head.startDelaySpread <= 0) {
+        work->head.startDelaySpread = EFF_THUNDER_MIN_DELAY_SPREAD;
+    }
+    delaySpread = work->head.startDelaySpread;
+    for (sparkIndex = 0; sparkIndex < work->head.sparkCount; sparkIndex++) {
+        work->sparks[sparkIndex].system = dds3TrackPolyCreate(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
+        dds3TrackPolyVCSet(work->sparks[sparkIndex].system, 2, (u32)work->head.dispatchArg, (u32)work->head.dispatchArg);
+        dds3TrackPolySetMode(work->sparks[sparkIndex].system, work->head.systemParam);
+        func_00177AC8(work, sparkIndex);
+        work->sparks[sparkIndex].age = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
+    }
+    return work;
+}
 
 void eff_177A48(EffThunderSparkWork *work) {
     s32 sparkCount = (s32)work->head.sparkCount;
@@ -1005,31 +1138,320 @@ void eff_177A48(EffThunderSparkWork *work) {
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00177AB0);
+void func_00177AB0(void *destination, void *source) {
+    PS2_COPY_QUAD(destination, source);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00177AC0);
+void func_00177AC0(EffThunderSparkWork *work, u32 tintColor) {
+    work->tintColor = tintColor;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00177AC8);
+void func_00177AC8(EffThunderSparkWork *work, s32 index) {
+    EffThunderSpark *spark = work->sparks + index;
+    f32 randomness;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", func_00177BC0);
+    spark->verticalOffset = 0;
+    randomness = work->head.verticalSpeedRandomness;
+    spark->verticalSpeed = work->head.verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
+    spark->heightOffset = work->head.heightOffsetRange * dds3GetRandFloatA(dds3EffectBase);
+    spark->orbitAngle = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    randomness = work->head.angularSpeedRandomness;
+    spark->angularSpeed = work->head.angularSpeed * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
+    randomness = work->head.radiusRandomness;
+    spark->orbitRadius = work->head.orbitRadius * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", eff_178128);
+void func_00177BC0(EffThunderSparkWork *work, s32 index) {
+    f32 width[4] __attribute__((aligned(16)));
+    f32 negativeWidth[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 next[4] __attribute__((aligned(16)));
+    f32 basis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 waveScale[4] __attribute__((aligned(16)));
+    f32 stepScale[4] __attribute__((aligned(16)));
+    f32 previousSide[4] __attribute__((aligned(16)));
+    f32 delta[4] __attribute__((aligned(16)));
+    ParSystem *system;
+    ParCell *cell;
+    u128 *vertices;
+    u128 *join;
+    s32 i;
+    s32 segments;
+    f32 distance;
+    f32 amplitude;
+    f32 phase;
+    f32 cycle;
+    f32 currentWave;
+    f32 previousWave;
+    f32 phaseStep;
+    f32 facing;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyCreate);
+    VEC3_SPLAT(width, work->head.width);
+    VEC3_SPLAT(negativeWidth, -width[0]);
+    system = work->sparks[index].system;
+    cell = system->cells;
+    cell->vertexCount = system->vertexWordCount;
+    vertices = cell->history;
+    segments = work->head.halfLife;
+    VU0_LOAD_VF10(work->head.position);
+    VU0_LOAD_VF11(work->head.loweredPosition);
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(direction);
+    distance /= work->head.halfLife;
+    amplitude = work->head.waveAmplitude;
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
+    VU0_LOAD_VF11(direction);
+    VU0_CROSS_VF10_VF11();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(side);
+    phase = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
+    PS2_COPY_QUAD(position, work->head.loweredPosition);
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave);
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(position);
+    VEC3_SPLAT(stepScale, distance);
+    previousWave = currentWave;
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave - previousWave);
+    VU0_LOAD_VF10(direction);
+    VU0_LOAD_VF11(stepScale);
+    VU0_MUL_VF10_VF11();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_ADD_VF10_VF12();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(next);
+    VU0_COPY_VF12_TO_VF10();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(basis);
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyDelete);
+    for (i = 0; i < segments; i++) {
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 1);
+        vertices += 2;
+        PS2_COPY_QUAD(previousSide, basis);
+        PS2_COPY_QUAD(position, next);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 1);
+        vertices += 2;
+        phaseStep = (EFF_THUNDER_HALF_TURN / segments) * 4.0f;
+        cycle += phaseStep;
+        phase += phaseStep;
+        if (cycle > EFF_THUNDER_HALF_TURN) {
+            cycle -= EFF_THUNDER_HALF_TURN;
+            amplitude = work->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
+        }
+        previousWave = currentWave;
+        currentWave = amplitude * sdfSin(phase);
+        VEC3_SPLAT(waveScale, currentWave - previousWave);
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(stepScale);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(side);
+        VU0_LOAD_VF11(waveScale);
+        VU0_MUL_VF10_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(delta);
+        SetRotateMatrixAxis(((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct sdfVector3_t *)cameraDirection);
+        VU0_LOAD_VF10(delta);
+        VU0_ROTATE_VF10();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF11(position);
+        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_STORE_VF11_NOMEM(next);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF10(next);
+        VU0_LOAD_VF11(position);
+        VU0_SUB_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF11(previousSide);
+        VU0_DOT_VF10_VF11(facing);
+        /* Choose the join edge from the new direction relative to the prior side. */
+        if (facing < 0.0f) {
+            join = vertices - 1;
+            VU0_LOAD_VF12(width);
+        } else {
+            join = vertices - 2;
+            VU0_LOAD_VF12(negativeWidth);
+        }
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_COPY_VF12_TO_VF11();
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(join);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10_NOMEM(position);
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolySetPosition);
+void eff_178128(EffThunderSparkWork *work) {
+    f32 position[3];
+    f32 origin[4] __attribute__((aligned(16)));
+    u32 tintColor;
+    s32 count;
+    s32 loop = work->head.loop;
+    s32 duration = work->head.duration;
+    s32 delaySpread = work->head.startDelaySpread;
+    s32 fadeInTime = work->head.fadeInTime;
+    s32 fadeOutTime = work->head.fadeOutTime;
+    f32 heightOffset = work->head.heightOffset;
+    f32 verticalDamping = work->head.verticalDamping;
+    f32 angularDamping = work->head.angularDamping;
+    EffThunderSpark *spark;
+    ParCell *renderCell;
+    s32 i;
+    s32 age;
+    f32 angle;
+    f32 radius;
+    f32 alpha;
+    f32 lowerHeight;
+    u32 color;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolySetColor);
+    tintColor = work->tintColor;
+    PS2_COPY_QUAD(origin, work->head.origin);
+    count = work->head.sparkCount;
+    spark = work->sparks;
+    for (i = 0; i < count; i++, spark++) {
+        age = spark->age;
+        if (age == 0) {
+            func_00177AC8(work, i);
+            dds3TrackPolyListInit(spark->system, 0);
+        } else if (age > 0 && age <= duration) {
+            angle = spark->orbitAngle;
+            radius = spark->orbitRadius;
+            position[0] = origin[0] + sdfCos(angle) * radius;
+            position[1] = origin[1] + spark->verticalOffset - spark->heightOffset;
+            position[2] = origin[2] + sdfSin(angle) * radius;
+            spark->verticalOffset += spark->verticalSpeed;
+            spark->orbitAngle += spark->angularSpeed;
+            spark->verticalSpeed *= verticalDamping;
+            spark->angularSpeed *= angularDamping;
+            if (age < fadeInTime) {
+                alpha = (f32)age / fadeInTime;
+            } else if (duration - age <= fadeOutTime) {
+                alpha = (f32)(duration - age) / fadeOutTime;
+            } else {
+                alpha = 1.0f;
+            }
+            color = effMagaCylinderCalcColor(((u32)(alpha * 127.0f) << 24) | 0x808080, tintColor);
+            renderCell = spark->system->cells;
+            lowerHeight = position[1] - heightOffset;
+            work->head.loweredPosition[0] = position[0];
+            work->head.loweredPosition[1] = lowerHeight;
+            work->head.loweredPosition[2] = position[2];
+            work->head.position[0] = position[0];
+            work->head.position[1] = position[1];
+            work->head.position[2] = position[2];
+            func_00177BC0(work, i);
+            renderCell->color = color;
+            dds3TrackPolyDraw(spark->system);
+        }
+        if (age >= duration && loop) {
+            spark->age = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
+        } else {
+            spark->age++;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyGetParam);
+EffThunderFragmentWork *effPCP_ThunderPolyCreate(EffThunderFragmentParams *parameters) {
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfMemLock(allocationHandle);
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolySetVCAcute);
+    work->head = *parameters;
+    work->fragments = (EffThunderFrag *)(work + 1);
+    work->allocationHandle = allocationHandle;
+    work->system = dds3TrackPolyCreate(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
+    dds3TrackPolyVC5Set_AcuteW(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+    dds3TrackPolySetMode(work->system, work->head.systemParam);
+    for (i = 0; i < work->head.fragmentCount; i++) {
+        effPCP_ThunderPolyDrawOff(work, i);
+    }
+    work->state.updateCount = 0;
+    work->color = EFF_THUNDER_NEUTRAL_COLOR;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolySetVCAcute2);
+void effPCP_ThunderPolyDelete(EffThunderFragmentWork *work) {
+    dds3TrackPolyDelete(work->system);
+    sdfMemFreeDirect(work->allocationHandle);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolySetVCNormal);
+void effPCP_ThunderPolySetPosition(u8 *endpoints, void *anchor) {
+        VU0_LOAD_VF10(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+        VU0_LOAD_VF11(anchor);
+        VU0_STORE_VF11(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+        VU0_SUB_VF11_VF10();
+        VU0_LOAD_VF10(endpoints);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(endpoints);
+}
+
+void effPCP_ThunderPolySetColor(EffThunderFragmentWork *work, u32 color) {
+    work->color = color;
+}
+
+EffThunderFragmentParams *effPCP_ThunderPolyGetParam(EffThunderFragmentWork *work) {
+    return &work->head;
+}
+
+void effPCP_ThunderPolySetVCAcute(EffThunderFragmentWork *work) {
+    dds3TrackPolyVC5Set_Acute(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+}
+
+void effPCP_ThunderPolySetVCAcute2(EffThunderFragmentWork *work) {
+    dds3TrackPolyVC5Set_AcuteR(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+}
+
+void effPCP_ThunderPolySetVCNormal(EffThunderFragmentWork *work) {
+    dds3TrackPolyVC5Set_Normal(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+}
 
 void effPCP_ThunderPolyDrawOff(EffThunderFragmentWork *work, s32 index) {
     EffThunderFrag *fragment = &work->fragments[index];
@@ -1039,7 +1461,201 @@ void effPCP_ThunderPolyDrawOff(EffThunderFragmentWork *work, s32 index) {
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyPartRefresh);
+void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
+    f32 width[4] __attribute__((aligned(16)));
+    f32 outerWidth[4] __attribute__((aligned(16)));
+    f32 negativeOuterWidth[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 next[4] __attribute__((aligned(16)));
+    f32 basis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 waveScale[4] __attribute__((aligned(16)));
+    f32 stepScale[4] __attribute__((aligned(16)));
+    f32 previousSide[4] __attribute__((aligned(16)));
+    f32 delta[4] __attribute__((aligned(16)));
+    ParSystem *system = work->system;
+    ParCell *cell = &system->cells[index];
+    u128 *vertices;
+    u128 *join;
+    s32 i;
+    s32 segments;
+    f32 distance;
+    f32 amplitude;
+    f32 phase;
+    f32 cycle;
+    f32 currentWave;
+    f32 previousWave;
+    f32 phaseStep;
+    f32 facing;
+
+    VEC3_SPLAT(width, work->head.bandWidth);
+    VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth);
+    VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
+    cell->vertexCount = system->vertexWordCount;
+    vertices = cell->history;
+    segments = work->head.halfLife;
+    VU0_LOAD_VF10(work->head.end);
+    VU0_LOAD_VF11(work->head.start);
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(direction);
+    distance /= work->head.halfLife;
+    amplitude = work->head.waveAmplitude;
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
+    VU0_LOAD_VF11(direction);
+    VU0_CROSS_VF10_VF11();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(side);
+    phase = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
+    PS2_COPY_QUAD(position, work->head.start);
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave);
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(position);
+    VEC3_SPLAT(stepScale, distance);
+    previousWave = currentWave;
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave - previousWave);
+    VU0_LOAD_VF10(direction);
+    VU0_LOAD_VF11(stepScale);
+    VU0_MUL_VF10_VF11();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_ADD_VF10_VF12();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(next);
+    VU0_COPY_VF12_TO_VF10();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(basis);
+
+    for (i = 0; i < segments; i++) {
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_LOAD_VF10(position);
+        VU0_STORE_VF10_NOMEM(vertices + 2);
+        VU0_COPY_VF11_TO_VF10();
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 3);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 4);
+        vertices += 5;
+        PS2_COPY_QUAD(previousSide, basis);
+        PS2_COPY_QUAD(position, next);
+        VU0_LOAD_VF10(position);
+        VU0_STORE_VF10_NOMEM(vertices + 2);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 3);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 4);
+        vertices += 5;
+        phaseStep = (EFF_THUNDER_HALF_TURN / segments) * 4.0f;
+        cycle += phaseStep;
+        phase += phaseStep;
+        if (cycle > EFF_THUNDER_HALF_TURN) {
+            cycle -= EFF_THUNDER_HALF_TURN;
+            amplitude = work->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
+        }
+        previousWave = currentWave;
+        currentWave = amplitude * sdfSin(phase);
+        VEC3_SPLAT(waveScale, currentWave - previousWave);
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(stepScale);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(side);
+        VU0_LOAD_VF11(waveScale);
+        VU0_MUL_VF10_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(delta);
+        SetRotateMatrixAxis(((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct sdfVector3_t *)cameraDirection);
+        VU0_LOAD_VF10(delta);
+        VU0_ROTATE_VF10();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF11(position);
+        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_STORE_VF11_NOMEM(next);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF10(next);
+        VU0_LOAD_VF11(position);
+        VU0_SUB_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF11(previousSide);
+        VU0_DOT_VF10_VF11(facing);
+        /* Choose the join edge from the new direction relative to the prior side. */
+        if (facing < 0.0f) {
+            join = vertices - 1;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+        } else {
+            join = vertices - 5;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+        }
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_COPY_VF12_TO_VF11();
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(join);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10_NOMEM(position);
+    }
+}
 
 void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work) {
     s32 i = 0;
@@ -1080,13 +1696,46 @@ void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work) {
     dds3TrackPolyDraw(work->system);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyLowCreate);
+EffThunderFragmentWork *effPCP_ThunderPolyLowCreate(EffThunderFragmentParams *parameters) {
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
+    EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfMemLock(allocationHandle);
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyLowDelete);
+    work->head = *parameters;
+    work->fragments = (EffThunderFrag *)(work + 1);
+    work->allocationHandle = allocationHandle;
+    work->state.secondarySystem = dds3TrackPolyCreate(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_TRIANGLE);
+    dds3TrackPolyVCSet(work->state.secondarySystem, 2, work->head.middleColorWord, work->head.edgeColorWord);
+    dds3TrackPolySetMode(work->state.secondarySystem, work->head.systemParam);
+    work->system = dds3TrackPolyCreate(work->head.fragmentCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
+    dds3TrackPolyVCSet(work->system, 2, work->head.centerColorWord, work->head.centerColorWord);
+    dds3TrackPolySetMode(work->system, work->head.systemParam);
+    for (i = 0; i < work->head.fragmentCount; i++) {
+        effPCP_ThunderPolyLowDrawOff(work, i);
+    }
+    work->color = EFF_THUNDER_NEUTRAL_COLOR;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyLowSetPosition);
+void effPCP_ThunderPolyLowDelete(EffThunderFragmentWork *work) {
+    dds3TrackPolyDelete(work->state.secondarySystem);
+    dds3TrackPolyDelete(work->system);
+    sdfMemFreeDirect(work->allocationHandle);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyLowSetColor);
+void effPCP_ThunderPolyLowSetPosition(u8 *endpoints, void *anchor) {
+        VU0_LOAD_VF10(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+        VU0_LOAD_VF11(anchor);
+        VU0_STORE_VF11(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+        VU0_SUB_VF11_VF10();
+        VU0_LOAD_VF10(endpoints);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(endpoints);
+}
+
+void effPCP_ThunderPolyLowSetColor(EffThunderFragmentWork *work, u32 color) {
+    work->color = color;
+}
 
 void effPCP_ThunderPolyLowDrawOff(EffThunderFragmentWork *work, s32 index) {
     EffThunderFrag *fragment = &work->fragments[index];
@@ -1096,7 +1745,204 @@ void effPCP_ThunderPolyLowDrawOff(EffThunderFragmentWork *work, s32 index) {
     fragment->color = EFF_THUNDER_FRAGMENT_GREY;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyLowPartRefresh);
+void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
+    f32 width[4] __attribute__((aligned(16)));
+    f32 outerWidth[4] __attribute__((aligned(16)));
+    f32 negativeOuterWidth[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 next[4] __attribute__((aligned(16)));
+    f32 basis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 waveScale[4] __attribute__((aligned(16)));
+    f32 stepScale[4] __attribute__((aligned(16)));
+    f32 previousSide[4] __attribute__((aligned(16)));
+    f32 delta[4] __attribute__((aligned(16)));
+    ParSystem *secondarySystem = work->state.secondarySystem;
+    ParSystem *primarySystem = work->system;
+    ParCell *secondaryCell = &secondarySystem->cells[index];
+    ParCell *primaryCell = &primarySystem->cells[index];
+    u128 *vertices;
+    u128 *coreVertices;
+    u128 *join;
+    s32 i;
+    s32 segments;
+    f32 distance;
+    f32 amplitude;
+    f32 phase;
+    f32 cycle;
+    f32 currentWave;
+    f32 previousWave;
+    f32 phaseStep;
+    f32 facing;
+
+    VEC3_SPLAT(width, work->head.coreWidth);
+    VEC3_SPLAT(outerWidth, (width[0] + work->head.edgeWidth) + work->head.bandWidth);
+    VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
+    secondaryCell->vertexCount = secondarySystem->vertexWordCount;
+    primaryCell->vertexCount = primarySystem->vertexWordCount;
+    vertices = secondaryCell->history;
+    coreVertices = primaryCell->history;
+    segments = work->head.halfLife;
+    VU0_LOAD_VF10(work->head.end);
+    VU0_LOAD_VF11(work->head.start);
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(direction);
+    distance /= work->head.halfLife;
+    amplitude = work->head.waveAmplitude;
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
+    VU0_LOAD_VF11(direction);
+    VU0_CROSS_VF10_VF11();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(side);
+    phase = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
+    PS2_COPY_QUAD(position, work->head.start);
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave);
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(position);
+    VEC3_SPLAT(stepScale, distance);
+    previousWave = currentWave;
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave - previousWave);
+    VU0_LOAD_VF10(direction);
+    VU0_LOAD_VF11(stepScale);
+    VU0_MUL_VF10_VF11();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_ADD_VF10_VF12();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(next);
+    VU0_COPY_VF12_TO_VF10();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(basis);
+
+    for (i = 0; i < segments; i++) {
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(coreVertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(coreVertices + 1);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 2);
+        coreVertices += 2;
+        vertices += 3;
+        PS2_COPY_QUAD(previousSide, basis);
+        PS2_COPY_QUAD(position, next);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(coreVertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(coreVertices + 1);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 2);
+        coreVertices += 2;
+        vertices += 3;
+        phaseStep = (EFF_THUNDER_HALF_TURN / segments) * 4.0f;
+        cycle += phaseStep;
+        phase += phaseStep;
+        if (cycle > EFF_THUNDER_HALF_TURN) {
+            cycle -= EFF_THUNDER_HALF_TURN;
+            amplitude = work->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
+        }
+        previousWave = currentWave;
+        currentWave = amplitude * sdfSin(phase);
+        VEC3_SPLAT(waveScale, currentWave - previousWave);
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(stepScale);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(side);
+        VU0_LOAD_VF11(waveScale);
+        VU0_MUL_VF10_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(delta);
+        SetRotateMatrixAxis(((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct sdfVector3_t *)cameraDirection);
+        VU0_LOAD_VF10(delta);
+        VU0_ROTATE_VF10();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF11(position);
+        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_STORE_VF11_NOMEM(next);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF10(next);
+        VU0_LOAD_VF11(position);
+        VU0_SUB_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF11(previousSide);
+        VU0_DOT_VF10_VF11(facing);
+        /* Choose the join edge from the new direction relative to the prior side. */
+        if (facing < 0.0f) {
+            join = vertices - 1;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+        } else {
+            join = vertices - 3;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+        }
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_COPY_VF12_TO_VF11();
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(join);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10_NOMEM(position);
+    }
+}
 
 void effPCP_ThunderPolyLowDraw(EffThunderFragmentWork *work) {
     s32 index = 0;
@@ -1136,29 +1982,199 @@ void effPCP_ThunderPolyLowDraw(EffThunderFragmentWork *work) {
     dds3TrackPolyDraw(work->system);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderRadiatePolyCreate);
+EffThunderCellWork *effPCP_ThunderRadiatePolyCreate(EffThunderCellParams *parameters) {
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->cellCount * sizeof(EffThunderCell) + sizeof(EffThunderCellWork));
+    EffThunderCellWork *work = (EffThunderCellWork *)sdfMemLock(allocationHandle);
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderRadiatePolyDelete);
+    work->head = *parameters;
+    work->cells = (EffThunderCell *)(work + 1);
+    work->allocationHandle = allocationHandle;
+    work->system = dds3TrackPolyCreate(work->head.cellCount, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_SIX_VECTOR);
+    dds3TrackPolyVC3Set_Acute(work->system, work->head.centerColor, work->head.middleColor, work->head.edgeColor);
+    dds3TrackPolySetMode(work->system, work->head.systemParam);
+    for (i = 0; i < work->head.cellCount; i++) {
+        effPCP_ThunderRadiatePolyDrawOff(work, i);
+    }
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderRadiatePolySetPosition);
+void effPCP_ThunderRadiatePolyDelete(EffThunderCellWork *work) {
+    dds3TrackPolyDelete(work->system);
+    sdfMemFreeDirect(work->allocationHandle);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderRadiatePolySetColor);
+void effPCP_ThunderRadiatePolySetPosition(void *destination, void *source) {
+    PS2_COPY_QUAD(destination, source);
+}
+
+void effPCP_ThunderRadiatePolySetColor(EffThunderCellWork *work, u32 value) {
+    work->unk4C = value;
+}
 
 void effPCP_ThunderRadiatePolyDrawOff(EffThunderCellWork *work, s32 index) {
     EffThunderCell *cell = work->cells + index;
     f32 centeredRandom;
 
-    centeredRandom = dds3GetRandFloatA(&dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
+    centeredRandom = dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionX = centeredRandom + centeredRandom;
-    centeredRandom = dds3GetRandFloatA(&dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
+    centeredRandom = dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionY = centeredRandom + centeredRandom;
-    centeredRandom = dds3GetRandFloatA(&dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
+    centeredRandom = dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionZ = centeredRandom + centeredRandom;
     cell->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
     cell->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderRadiatePolyPartRefresh);
+void effPCP_ThunderRadiatePolyPartRefresh(EffThunderCellWork *work, s32 index) {
+    f32 width[4] __attribute__((aligned(16)));
+    f32 bandWidth[4] __attribute__((aligned(16)));
+    f32 outerWidth[4] __attribute__((aligned(16)));
+    f32 negativeOuterWidth[4] __attribute__((aligned(16)));
+    f32 stepScale[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 basis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    ParSystem *system = work->system;
+    EffThunderCell *source = &work->cells[index];
+    ParCell *cell = &system->cells[index];
+    u128 *vertices;
+    u128 *join;
+    s32 i;
+    s32 segments;
+    f32 distance;
+    f32 facing;
+    f32 stepLength;
+
+    VEC3_SPLAT(width, work->head.coreWidth);
+    VEC3_SPLAT(bandWidth, width[0] + work->head.bandWidth);
+    VEC3_SPLAT(outerWidth, bandWidth[0] + work->head.edgeWidth);
+    VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
+    cell->vertexCount = system->vertexWordCount;
+    vertices = cell->history;
+    segments = work->head.halfLife;
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
+    direction[0] = source->directionX;
+    direction[1] = source->directionY;
+    direction[2] = source->directionZ;
+    VU0_LOAD_VF11(direction);
+    VU0_CROSS_VF10_VF11();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(side);
+    distance = work->head.length / work->head.halfLife;
+    PS2_COPY_QUAD(position, work->head.origin);
+
+    for (i = 0; i < segments; i++) {
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 2);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 3);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(bandWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 4);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 5);
+        vertices += 6;
+        stepLength = distance * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.9f);
+        VEC3_SPLAT(stepScale, stepLength);
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(stepScale);
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(position);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10_NOMEM(position);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 2);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 3);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(bandWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 4);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 5);
+        vertices += 6;
+        SetRotateMatrixAxis(((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f) * (70.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct sdfVector3_t *)cameraDirection);
+        VU0_LOAD_VF10(direction);
+        VU0_ROTATE_VF10();
+        VU0_STORE_VF10_NOMEM(direction);
+        VU0_LOAD_VF11(basis);
+        VU0_DOT_VF10_VF11(facing);
+        if (facing < 0.0f) {
+            join = vertices - 1;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+        } else {
+            join = vertices - 6;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+        }
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_COPY_VF12_TO_VF11();
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(join);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10_NOMEM(position);
+    }
+}
 
 void effPCP_ThunderRadiatePolyDraw(EffThunderCellWork *work) {
     s32 i = 0;
@@ -1188,7 +2204,23 @@ void effPCP_ThunderRadiatePolyDraw(EffThunderCellWork *work) {
     dds3TrackPolyDraw(work->system);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyListCreate);
+EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src) {
+    EffThunderGroup *group = sdfChipAllocDirect(sizeof(EffThunderGroup));
+    s32 i;
+
+    memset(group->handles, 0, sizeof(group->handles));
+    group->head = *src;
+    group->handles[0] = effPCP_ThunderPolyCreate(&group->head.params);
+    effPCP_ThunderPolySetVCAcute2(group->handles[0]);
+    for (i = 1; i < src->count - 2; i++) {
+        group->handles[i] = effPCP_ThunderPolyCreate(&group->head.params);
+        effPCP_ThunderPolySetVCNormal(group->handles[i]);
+    }
+    group->handles[i] = effPCP_ThunderPolyCreate(&group->head.params);
+    effPCP_ThunderPolySetVCAcute(group->handles[i]);
+    group->color = 0x80808080;
+    return group;
+}
 
 void effPCP_ThunderPolyListDelete(EffThunderGroup *group) {
     s32 fragmentIndex;
@@ -1199,11 +2231,218 @@ void effPCP_ThunderPolyListDelete(EffThunderGroup *group) {
     sdfChipFreeDirect(group);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyListGetParam);
+EffThunderGroupParams *effPCP_ThunderPolyListGetParam(EffThunderGroup *resource) {
+    return (EffThunderGroupParams *)resource;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyListSetColor);
+void effPCP_ThunderPolyListSetColor(EffThunderGroup *resource, u32 color) {
+    resource->color = color;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPThunder", effPCP_ThunderPolyListPartRefresh);
+void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, const u128 *seed) {
+    f32 width[4] __attribute__((aligned(16)));
+    f32 outerWidth[4] __attribute__((aligned(16)));
+    f32 negativeOuterWidth[4] __attribute__((aligned(16)));
+    f32 position[4] __attribute__((aligned(16)));
+    f32 next[4] __attribute__((aligned(16)));
+    f32 basis[4] __attribute__((aligned(16)));
+    f32 direction[4] __attribute__((aligned(16)));
+    f32 side[4] __attribute__((aligned(16)));
+    f32 cameraDirection[4] __attribute__((aligned(16)));
+    f32 waveScale[4] __attribute__((aligned(16)));
+    f32 stepScale[4] __attribute__((aligned(16)));
+    f32 previousSide[4] __attribute__((aligned(16)));
+    f32 delta[4] __attribute__((aligned(16)));
+    ParSystem *system = work->system;
+    ParCell *cell = &system->cells[index];
+    u128 *vertices;
+    u128 *join;
+    s32 i;
+    s32 segments;
+    f32 distance;
+    f32 amplitude;
+    f32 phase;
+    f32 cycle;
+    f32 currentWave;
+    f32 previousWave;
+    f32 phaseStep;
+    f32 facing;
+
+    VEC3_SPLAT(width, work->head.bandWidth);
+    VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth);
+    VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
+    cell->vertexCount = system->vertexWordCount;
+    vertices = cell->history;
+    segments = work->head.halfLife;
+    VU0_LOAD_VF10(work->head.end);
+    VU0_LOAD_VF11(seed + 3);
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(direction);
+    distance /= work->head.halfLife;
+    amplitude = work->head.waveAmplitude;
+    VU0_LOAD_VF10(aViewTarget);
+    VU0_LOAD_VF11(aViewEye);
+    VU0_SUB_VF10_VF11();
+    VU0_STORE_VF10_NOMEM(cameraDirection);
+    VU0_LOAD_VF11(direction);
+    VU0_CROSS_VF10_VF11();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(side);
+    phase = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
+    PS2_COPY_QUAD(position, seed + 3);
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave);
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(position);
+    VEC3_SPLAT(stepScale, distance);
+    previousWave = currentWave;
+    currentWave = amplitude * sdfSin(phase);
+    VEC3_SPLAT(waveScale, currentWave - previousWave);
+    VU0_LOAD_VF10(direction);
+    VU0_LOAD_VF11(stepScale);
+    VU0_MUL_VF10_VF11();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF10(side);
+    VU0_LOAD_VF11(waveScale);
+    VU0_MUL_VF10_VF11();
+    VU0_ADD_VF10_VF12();
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(position);
+    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_STORE_VF11_NOMEM(next);
+    VU0_COPY_VF12_TO_VF10();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10_NOMEM(basis);
+
+    for (i = 0; i < segments; i++) {
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        if (i > 0) {
+            VU0_COPY_VF10_TO_VF11();
+            VU0_LOAD_VF10(position);
+            VU0_STORE_VF10_NOMEM(vertices + 2);
+            VU0_COPY_VF11_TO_VF10();
+            VU0_LOAD_VF11(width);
+            VU0_MUL_VF10_VF11();
+            VU0_COPY_VF10_TO_VF12();
+            VU0_LOAD_VF10(position);
+            VU0_COPY_VF10_TO_VF11();
+            VU0_ADD_VF10_VF12();
+            VU0_STORE_VF10_NOMEM(vertices + 1);
+            VU0_COPY_VF12_TO_VF10();
+            VU0_SUB_VF11_VF10();
+            VU0_STORE_VF11_NOMEM(vertices + 3);
+            VU0_LOAD_VF10(basis);
+            VU0_LOAD_VF11(outerWidth);
+            VU0_MUL_VF10_VF11();
+            VU0_COPY_VF10_TO_VF12();
+            VU0_LOAD_VF10(position);
+            VU0_COPY_VF10_TO_VF11();
+            VU0_ADD_VF10_VF12();
+            VU0_STORE_VF10_NOMEM(vertices);
+            VU0_COPY_VF12_TO_VF10();
+            VU0_SUB_VF11_VF10();
+            VU0_STORE_VF11_NOMEM(vertices + 4);
+            vertices += 5;
+        } else {
+            PS2_COPY_QUAD(vertices, seed);
+            PS2_COPY_QUAD(vertices + 1, seed + 1);
+            PS2_COPY_QUAD(vertices + 2, seed + 2);
+            PS2_COPY_QUAD(vertices + 3, seed + 3);
+            PS2_COPY_QUAD(vertices + 4, seed + 4);
+            vertices += 5;
+        }
+        PS2_COPY_QUAD(previousSide, basis);
+        PS2_COPY_QUAD(position, next);
+        VU0_LOAD_VF10(position);
+        VU0_STORE_VF10_NOMEM(vertices + 2);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(width);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices + 1);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 3);
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(outerWidth);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(position);
+        VU0_COPY_VF10_TO_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(vertices);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_SUB_VF11_VF10();
+        VU0_STORE_VF11_NOMEM(vertices + 4);
+        vertices += 5;
+        phaseStep = (EFF_THUNDER_HALF_TURN / segments) * 4.0f;
+        cycle += phaseStep;
+        phase += phaseStep;
+        if (cycle > EFF_THUNDER_HALF_TURN) {
+            cycle -= EFF_THUNDER_HALF_TURN;
+            amplitude = work->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
+        }
+        previousWave = currentWave;
+        currentWave = amplitude * sdfSin(phase);
+        VEC3_SPLAT(waveScale, currentWave - previousWave);
+        VU0_LOAD_VF10(direction);
+        VU0_LOAD_VF11(stepScale);
+        VU0_MUL_VF10_VF11();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF10(side);
+        VU0_LOAD_VF11(waveScale);
+        VU0_MUL_VF10_VF11();
+        VU0_ADD_VF10_VF12();
+        VU0_STORE_VF10_NOMEM(delta);
+        SetRotateMatrixAxis(((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f) * (20.0f * (EFF_THUNDER_HALF_TURN / 180.0f)), (const struct sdfVector3_t *)cameraDirection);
+        VU0_LOAD_VF10(delta);
+        VU0_ROTATE_VF10();
+        VU0_COPY_VF10_TO_VF12();
+        VU0_LOAD_VF11(position);
+        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_STORE_VF11_NOMEM(next);
+        VU0_COPY_VF12_TO_VF10();
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF10_NOMEM(basis);
+        VU0_LOAD_VF10(next);
+        VU0_LOAD_VF11(position);
+        VU0_SUB_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_LOAD_VF11(previousSide);
+        VU0_DOT_VF10_VF11(facing);
+        /* Choose the join edge from the new direction relative to the prior side. */
+        if (facing < 0.0f) {
+            join = vertices - 1;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+        } else {
+            join = vertices - 5;
+            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+        }
+        VU0_LOAD_VF10(basis);
+        VU0_LOAD_VF11(cameraDirection);
+        VU0_CROSS_VF10_VF11();
+        VU0_NORMALIZE_VF10();
+        VU0_COPY_VF12_TO_VF11();
+        VU0_MUL_VF10_VF11();
+        VU0_LOAD_VF11(join);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10_NOMEM(position);
+    }
+}
 
 void effPCP_ThunderPolyListDraw(EffThunderGroup *group) {
     s32 i = 0;

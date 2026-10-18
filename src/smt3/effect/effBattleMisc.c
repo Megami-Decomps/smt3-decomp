@@ -1,8 +1,70 @@
 #include "common.h"
+#include "effBattle.h"
+
+/* Formation extent view. The retail accessors read radius/height at +0x50/+0x54
+ * and uniform scale at +0x5C; this is not a claim about the full formation size. */
+typedef struct effBTLModel_t {
+    u8 unk00[0x50];
+    f32 radius;
+    f32 height;
+    u8 unk58[4];
+    f32 scale;
+} effBTLModel_t;
+
+extern void effBTLModelGetSphereCenter(effBTLModel_t *model);
+extern s32 effBTLModelGetMarkPosition(effBTLModel_t *model, s32 mark);
+extern s32 effBTLModelGetMarkMatrix(effBTLModel_t *model, s32 mark);
+extern void nbSetFormPos(effBTLModel_t *model, const f32 *position);
+extern u32 D_00317740[]; /* 0, 5, 15, 30 frames */
+extern void (*GetPositionPtrTable[])(void *owner, effBTLAimParams_t *request);
+extern u32 effBTLSkillGetInvokeParty(void);
+extern u32 effBTLSkillGetTargetParty(void);
+extern void effBTLPartGetPartyPositionPtr(u32 party, void *request);
+extern f32 aViewTarget[4];
+extern f32 aViewEye[4];
+extern f32 aViewDown[4];
+extern f32 effBTL_Ptr_D[];
+extern void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
+extern void ReverseMatrix(void);
+extern void SetRotateMatrixX(f32 angle);
+extern void SetRotateMatrixY_B(f32 angle);
+extern void MultMatrixRevNoArg(void);
+
+#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+
+#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
+
+#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "memory")
+
+#define VU0_SET_UNIT_MATRIX(a, b, c, d) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #a ", vf0, vf0\n\tvmr32.xyzw " #c ", vf0\n\t" \
+    "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
+
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetSphereCenter);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetRadius);
+/* Return the larger unscaled extent multiplied by the unit scale. */
+f32 effBTLModelGetRadius(effBTLModel_t *unit) {
+    f32 radius;
+    f32 height;
+
+    radius = unit->radius;
+    height = unit->height;
+    if (height < radius) {
+        return radius * unit->scale;
+    }
+    return height * unit->scale;
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetDirection);
 
@@ -12,13 +74,27 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetCircumference);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetCircumferencePtr);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetHeight);
+/* Upper Y bound: scaled half-height minus the sampled position's Y. */
+f32 effBTLModelGetHeight(effBTLModel_t *unit) {
+    f32 position[4];
+    effBTLModelGetSphereCenter(unit);
+    VU0_STORE_VF(vf10, position);
+    return unit->height * unit->scale * 0.5f - position[1];
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", func_0016C898);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetMarkPosition);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetMarkPosition2);
+/* Fall back to the bounding-sphere center when the model has no such mark. */
+void effBTLModelGetMarkPosition2(effBTLModel_t *model, s32 mark) {
+    s32 found = effBTLModelGetMarkPosition(model, mark);
+
+    if (found == 0) {
+        effBTLModelGetSphereCenter(model);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetMarkPosition3);
 
@@ -26,7 +102,12 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetMarkPositionEvalTm)
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetMarkMatrix);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetMarkMatrix2);
+void effBTLModelGetMarkMatrix2(effBTLModel_t *model, s32 mark) {
+    if (effBTLModelGetMarkMatrix(model, mark) != 0) {
+        return;
+    }
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetCenter);
 
@@ -54,7 +135,9 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetGroupMaxHeight);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartPtrModelGroupGetCenterAndHeight);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelSetPosition);
+void effBTLModelSetPosition(effBTLModel_t *model, const f32 *position) {
+    nbSetFormPos(model, position);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLGetGroupPos);
 
@@ -111,7 +194,10 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelCheckBossID);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetBadStatus);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetScalePtrSub);
+/* Native point-light/color callers use this four-entry table as frame durations. */
+u32 effBTLPartGetScalePtrSub(s32 index) {
+    return D_00317740[index];
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartCalcScale);
 
@@ -123,15 +209,23 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartPtrResetAllModelCenterO
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartPtrGetModelCenter);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetPositionPtr);
+/* The selected position provider leaves its vector in vf10. */
+void effBTLPartGetPositionPtr(void *owner, effBTLAimParams_t *request, f32 *out) {
+    GetPositionPtrTable[request->scaleKind](owner, request);
+    VU0_STORE_VF(vf10, out);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelPositionPtr);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetPartyPositionPtr);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetInvokePartyPositionPtr);
+void effBTLPartGetInvokePartyPositionPtr(u32 unused, void *request) {
+    effBTLPartGetPartyPositionPtr(effBTLSkillGetInvokeParty(), request);
+}
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetTargetPartyPositionPtr);
+void effBTLPartGetTargetPartyPositionPtr(u32 unused, void *request) {
+    effBTLPartGetPartyPositionPtr(effBTLSkillGetTargetParty(), request);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetWorldPositionPtr);
 
@@ -141,7 +235,28 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetRadiusPtr);
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetPointLightPtr);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetRotateMatrixPtr);
+/* Build a 4x4 basis matrix into `out`: look-at for anchor kind 4 / direction mode 9, else a table-driven rotation. */
+void effBTLPartGetRotateMatrixPtr(effBTLAimParams_t *request, sdfMatrix4_t *out) {
+    f32 angle = 0;
+    f32 tilt = 0;
+
+    if (request->aimMode == 4 || request->directionMode == 9) {
+        LookAtMatrix(aViewTarget, aViewEye, aViewDown);
+        ReverseMatrix();
+        VU0_MOVE_VF(vf31, vf0);
+    } else {
+        if (request->aimMode == 5 || request->aimMode == 3 || request->directionMode == 8 || request->directionMode == 10) {
+            tilt = 3.14159265f / 2.0f;
+        }
+        if (request->directionMode < 9) {
+            angle = effBTL_Ptr_D[request->directionMode];
+        }
+        SetRotateMatrixX(tilt);
+        SetRotateMatrixY_B(angle);
+        MultMatrixRevNoArg();
+    }
+    VU0_STORE_MATRIX(out);
+}
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartDebugPositionPtr);
 
