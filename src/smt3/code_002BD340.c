@@ -1860,9 +1860,9 @@ loop:
         count -= 4;
         done = count < 4;
         PS2_STORE_ZERO_QUAD(p);
-        __asm__ volatile ("sq $0, 0x10(%0)" : : "r" (p) : "memory");
-        __asm__ volatile ("sq $0, 0x20(%0)" : : "r" (p) : "memory");
-        __asm__ volatile ("sq $0, 0x30(%0)" : : "r" (p) : "memory");
+        PS2_STORE_ZERO_QUAD_AT16(p);
+        PS2_STORE_ZERO_QUAD_AT32(p);
+        PS2_STORE_ZERO_QUAD_AT48(p);
         p += 4;
         if (!done) {
             goto loop;
@@ -1870,9 +1870,9 @@ loop:
     }
     switch (count) {
     case 3:
-        __asm__ volatile ("sq $0, 0x20(%0)" : : "r" (p) : "memory");
+        PS2_STORE_ZERO_QUAD_AT32(p);
     case 2:
-        __asm__ volatile ("sq $0, 0x10(%0)" : : "r" (p) : "memory");
+        PS2_STORE_ZERO_QUAD_AT16(p);
     case 1:
         PS2_STORE_ZERO_QUAD(p);
     }
@@ -2357,11 +2357,7 @@ void Slerp(f32 blendAmount) {
             "\t.set reorder"
             );
     } else {
-        __asm__ volatile (
-            ".set noreorder\n"
-            "\tvmove.xyzw vf12, vf11\n"
-            "\t.set reorder"
-            );
+        VU0_COPY_VF11_TO_VF12();
     }
     firstWeight = 1.0f - blendAmount;
     secondWeight = blendAmount;
@@ -2412,11 +2408,7 @@ void Lerp(f32 blendAmount)
             "\t.set reorder"
             );
     } else {
-        __asm__ volatile (
-            ".set noreorder\n"
-            "\tvmove.xyzw vf12, vf11\n"
-            "\t.set reorder"
-            );
+        VU0_COPY_VF11_TO_VF12();
     }
     {
         f32 firstWeight = 1.0f - blendAmount;
@@ -2445,11 +2437,7 @@ f32 EulerAngleAxisY(void)
     f32 rotatedX;
     ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tlqc2 vf10, 0(%0)\n"
-        "\t.set reorder"
-        : : "r" (D_00529620) : "memory");
+    VU0_LOAD_VF10_BARRIER(D_00529620);
     VU0_ROTATE_VF10();
     __asm__ volatile (
         ".set noreorder\n"
@@ -3808,10 +3796,7 @@ void sdfIpuDecodeThread(void) {
 
 s32 sdfIpuFromDmacHandler(void) {
     iWakeupThread(sdfIpuDecodeThId);
-    __asm__ volatile (
-        "sync\n"
-        "\tei"
-        );
+    EE_SYNC_EI();
     return 0;
 }
 
@@ -3833,10 +3818,7 @@ s32 sdfIpuToDmacHandler(void) {
             sdfIpuSetToIpuDma(stream);
         }
     }
-    __asm__ volatile (
-        "sync\n"
-        "\tei"
-        );
+    EE_SYNC_EI();
     return 0;
 }
 

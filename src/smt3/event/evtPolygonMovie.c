@@ -129,12 +129,12 @@ extern void *memcpy(void *dst, const void *src, u32 size);
 static inline void eeUnpackRGBAWordFloat(u32 color, f32 unit) {
     u32 rgba[4];
     rgba[0] = color;
-    __asm__ volatile ( ".set noreorder\n" "lw $2, 0(%0)\n" "pextlb $2, $0, $2\n" "pextlh $2, $0, $2\n" "qmtc2.ni $2, vf10\n" "vitof0.xyzw vf10, vf10\n" "qmtc2.ni %1, vf2\n" "vmulx.xyzw vf10, vf10, vf2x\n" ".set reorder" : : "r"(rgba), "r"(unit) : "$2", "memory");
+    EE_MMI_RGBA_UNPACK(rgba, unit);
 }
 
 static inline u32 eePackRGBAWord(f32 unit) {
     u32 rgba[4];
-    __asm__ volatile ( ".set noreorder\n" "qmtc2.ni %1, vf2\n" "vmulx.xyzw vf10, vf10, vf2x\n" "vftoi0.xyzw vf10, vf10\n" "qmfc2.ni %0, vf10\n" "ppach %0, $0, %0\n" "ppacb %0, $0, %0\n" ".set reorder" : "=&r"(rgba[0]) : "r"(unit));
+    MMI_RGBA_PACK_UNIT(rgba[0], unit);
     return rgba[0];
 }
 

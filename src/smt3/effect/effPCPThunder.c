@@ -1205,7 +1205,7 @@ void func_00177BC0(EffThunderSparkWork *work, s32 index) {
     VU0_LOAD_VF11(waveScale);
     VU0_MUL_VF10_VF11();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(position);
     VEC3_SPLAT(stepScale, distance);
     previousWave = currentWave;
@@ -1221,7 +1221,7 @@ void func_00177BC0(EffThunderSparkWork *work, s32 index) {
     VU0_ADD_VF10_VF12();
     VU0_COPY_VF10_TO_VF12();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(next);
     VU0_COPY_VF12_TO_VF10();
     VU0_NORMALIZE_VF10();
@@ -1282,7 +1282,7 @@ void func_00177BC0(EffThunderSparkWork *work, s32 index) {
         VU0_ROTATE_VF10();
         VU0_COPY_VF10_TO_VF12();
         VU0_LOAD_VF11(position);
-        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_ADD_VF11_VF10_EXTENDED();
         VU0_STORE_VF11_NOMEM(next);
         VU0_COPY_VF12_TO_VF10();
         VU0_NORMALIZE_VF10();
@@ -1505,7 +1505,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_LOAD_VF11(waveScale);
     VU0_MUL_VF10_VF11();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(position);
     VEC3_SPLAT(stepScale, distance);
     previousWave = currentWave;
@@ -1521,7 +1521,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_ADD_VF10_VF12();
     VU0_COPY_VF10_TO_VF12();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(next);
     VU0_COPY_VF12_TO_VF10();
     VU0_NORMALIZE_VF10();
@@ -1610,7 +1610,7 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
         VU0_ROTATE_VF10();
         VU0_COPY_VF10_TO_VF12();
         VU0_LOAD_VF11(position);
-        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_ADD_VF11_VF10_EXTENDED();
         VU0_STORE_VF11_NOMEM(next);
         VU0_COPY_VF12_TO_VF10();
         VU0_NORMALIZE_VF10();
@@ -1624,10 +1624,10 @@ void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
         /* Choose the join edge from the new direction relative to the prior side. */
         if (facing < 0.0f) {
             join = vertices - 1;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+            VU0_LOAD_VF12(outerWidth);
         } else {
             join = vertices - 5;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+            VU0_LOAD_VF12(negativeOuterWidth);
         }
         VU0_LOAD_VF10(basis);
         VU0_LOAD_VF11(cameraDirection);
@@ -1794,7 +1794,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_LOAD_VF11(waveScale);
     VU0_MUL_VF10_VF11();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(position);
     VEC3_SPLAT(stepScale, distance);
     previousWave = currentWave;
@@ -1810,7 +1810,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
     VU0_ADD_VF10_VF12();
     VU0_COPY_VF10_TO_VF12();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(next);
     VU0_COPY_VF12_TO_VF10();
     VU0_NORMALIZE_VF10();
@@ -1897,7 +1897,7 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
         VU0_ROTATE_VF10();
         VU0_COPY_VF10_TO_VF12();
         VU0_LOAD_VF11(position);
-        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_ADD_VF11_VF10_EXTENDED();
         VU0_STORE_VF11_NOMEM(next);
         VU0_COPY_VF12_TO_VF10();
         VU0_NORMALIZE_VF10();
@@ -1911,10 +1911,10 @@ void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
         /* Choose the join edge from the new direction relative to the prior side. */
         if (facing < 0.0f) {
             join = vertices - 1;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+            VU0_LOAD_VF12(outerWidth);
         } else {
             join = vertices - 3;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+            VU0_LOAD_VF12(negativeOuterWidth);
         }
         VU0_LOAD_VF10(basis);
         VU0_LOAD_VF11(cameraDirection);
@@ -2142,10 +2142,10 @@ void effPCP_ThunderRadiatePolyPartRefresh(EffThunderCellWork *work, s32 index) {
         VU0_DOT_VF10_VF11(facing);
         if (facing < 0.0f) {
             join = vertices - 1;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+            VU0_LOAD_VF12(outerWidth);
         } else {
             join = vertices - 6;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+            VU0_LOAD_VF12(negativeOuterWidth);
         }
         VU0_LOAD_VF10(direction);
         VU0_LOAD_VF11(cameraDirection);
@@ -2283,7 +2283,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
     VU0_LOAD_VF11(waveScale);
     VU0_MUL_VF10_VF11();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(position);
     VEC3_SPLAT(stepScale, distance);
     previousWave = currentWave;
@@ -2299,7 +2299,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
     VU0_ADD_VF10_VF12();
     VU0_COPY_VF10_TO_VF12();
     VU0_LOAD_VF11(position);
-    __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+    VU0_ADD_VF11_VF10_EXTENDED();
     VU0_STORE_VF11_NOMEM(next);
     VU0_COPY_VF12_TO_VF10();
     VU0_NORMALIZE_VF10();
@@ -2397,7 +2397,7 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
         VU0_ROTATE_VF10();
         VU0_COPY_VF10_TO_VF12();
         VU0_LOAD_VF11(position);
-        __asm__ volatile (".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :);
+        VU0_ADD_VF11_VF10_EXTENDED();
         VU0_STORE_VF11_NOMEM(next);
         VU0_COPY_VF12_TO_VF10();
         VU0_NORMALIZE_VF10();
@@ -2411,10 +2411,10 @@ void effPCP_ThunderPolyListPartRefresh(EffThunderFragmentWork *work, s32 index, 
         /* Choose the join edge from the new direction relative to the prior side. */
         if (facing < 0.0f) {
             join = vertices - 1;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (outerWidth));
+            VU0_LOAD_VF12(outerWidth);
         } else {
             join = vertices - 5;
-            __asm__ volatile (".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" : : "r" (negativeOuterWidth));
+            VU0_LOAD_VF12(negativeOuterWidth);
         }
         VU0_LOAD_VF10(basis);
         VU0_LOAD_VF11(cameraDirection);

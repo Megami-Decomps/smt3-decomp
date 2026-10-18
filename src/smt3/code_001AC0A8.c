@@ -387,7 +387,7 @@ void effDebugSelectCursorDraw(f32 *position) {
     SetRotateMatrixY(D_0054F274);
     D_0054F274 += 0.10471974313259125f;
     VU0_LOAD_VF10( position);
-    __asm__ volatile(".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder");
+    VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
     packet.primitive = 0x4000;

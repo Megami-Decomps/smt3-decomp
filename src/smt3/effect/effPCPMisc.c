@@ -2296,8 +2296,6 @@ struct sdfVector3_t {
 
 /* vf31.xyz += vf10.xyz, keeping vf31.w: the translation row of the matrix
  * bank being accumulated in place. */
-#define VU0_ADD_VF31_VF10_XYZ() __asm__ volatile ( \
-    ".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder")
 
 
 /* vf28-vf31 out to four quadwords with no memory clobber: retail keeps the

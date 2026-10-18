@@ -161,8 +161,6 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
     "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
     ".set reorder\n")
-#define VU0_COPY_VF10_TO_VF31() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf31, vf10\n\t.set reorder")
 #define VU0_COPY_VF31_TO_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder")
 #define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \

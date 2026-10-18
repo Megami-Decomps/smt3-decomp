@@ -216,14 +216,10 @@ void dds3MakeMatrix(const sdfVector4_t *scale, const sdfVector4_t *rotation,
     VU0_LOAD_VF10(rotation);
     ToMatrix();
     VU0_LOAD_VF10(scale);
-    __asm__ volatile (
-        ".set noreorder\n\t"
-        "vmulx.xyzw vf28, vf28, vf10x\n\t"
-        "vmuly.xyzw vf29, vf29, vf10y\n\t"
-        "vmulz.xyzw vf30, vf30, vf10z\n\t.set reorder");
+    VU0_SCALE_MATRIX_ROWS_VF10();
     VU0_LOAD_VF10(translation);
     VU0_SET_VF10_W_ONE();
-    __asm__ volatile (".set noreorder\n\tvmove.xyzw vf31, vf10\n\t.set reorder");
+    VU0_COPY_VF10_TO_VF31();
 }
 
 /* Load the cached matrix, rebuilding it only when a pose setter invalidated it. */

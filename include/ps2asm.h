@@ -527,4 +527,42 @@ typedef struct {
 #define VU0_SUB_VF10_VF11_EXTENDED() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf10, vf10, vf11\n\t.set reorder" : :)
 
+/* ---- operations that were written out at a call site ---- */
+
+#define VU0_COPY_VF10_TO_VF31() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf31, vf10\n\t.set reorder")
+#define VU0_ADD_VF31_VF10_XYZ() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder")
+
+/* The extended form, as the trail builder spells it. */
+#define VU0_ADD_VF11_VF10_EXTENDED() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw vf11, vf11, vf10\n\t.set reorder" : :)
+
+#define VU0_COPY_VF11_TO_VF12() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf12, vf11\n\t.set reorder")
+
+/* An sq offset is a literal, so the unrolled clear needs one name per step. */
+#define PS2_STORE_ZERO_QUAD_AT16(dst) __asm__ volatile ( \
+    "sq $0, 0x10(%0)" : : "r" (dst) : "memory")
+#define PS2_STORE_ZERO_QUAD_AT32(dst) __asm__ volatile ( \
+    "sq $0, 0x20(%0)" : : "r" (dst) : "memory")
+#define PS2_STORE_ZERO_QUAD_AT48(dst) __asm__ volatile ( \
+    "sq $0, 0x30(%0)" : : "r" (dst) : "memory")
+
+/* COP1 absolute value; cc1 2.96 calls fabsf instead of emitting it. Not
+ * volatile, like the fpu.h helpers: it has an output and no side effect. */
+#define EE_ABS_F32(out, in) __asm__ ( \
+    ".set noreorder\n\tabs.s %0, %1\n\t.set reorder" \
+    : "=f" (out) : "f" (in))
+
+/* Pack an RGBA8888 word down to RGBA5551. */
+#define MMI_PEXT5(out, in) __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
+
+/* The barrier forms: same instruction, but cc1 may not keep memory values
+ * cached across them. */
+#define EE_SYNC_EI() __asm__ volatile("sync\n\tei")
+#define EE_SYNC_BARRIER() __asm__ volatile ("sync" : : : "memory")
+#define EE_SYNC_EI_BARRIER() __asm__ volatile ( \
+    ".set noreorder\n\tsync\n\tei\n\t.set reorder" : : : "memory")
+
 #endif /* PS2ASM_H */

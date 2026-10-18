@@ -5,6 +5,7 @@
 #include "scr.h"
 #include "field.h"
 
+#include "ps2asm.h"
 /* Field-only views, with offsets taken from the SMT3 retail accesses. */
 typedef struct
 {
@@ -582,10 +583,9 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     pos[1] = y;
     pos[2] = z;
     handle = emitter->nodeList->items[0];
-    __asm__ volatile ("lqc2 vf10, 0(%0)" : : "r"(pos) : "memory");
-    __asm__ volatile ("vmove.w vf10, vf0");
-    __asm__ volatile ("sqc2 vf10, 0(%0)"
-                      : : "r"(&emitter->tm.m[12]) : "memory");
+    VU0_LOAD_VF10_BARRIER(pos);
+    VU0_SET_VF10_W_ONE();
+    VU0_STORE_VF10(&emitter->tm.m[12]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
     sdfModelLinkOt(&D_002F6A48, emitter);
