@@ -279,11 +279,15 @@ Resolved:
   `docs/tu-recovery.md` proposed. Its start bracket is [0x002C2B38, 0x002C5170], which
   admits 0x002C5080 and excludes the superseded 0x002C53C8. A single-witness start
   becomes a two-witness one.
-- `basic/dds3CameraObjectBasic` start. The config already carries 0x00112370, the
-  doc's alternative. Its start bracket is [0x00112280, 0x001123D0], only 4 retail
-  functions wide, which admits 0x00112370, admits the doc's primary 0x001123D0 at the
-  upper edge, and excludes the superseded 0x00112500. Confirms what is applied and
-  narrows the remaining choice to two adjacent candidates.
+- `basic/dds3CameraObjectBasic` start, settled at the applied 0x00112370. Its start
+  bracket is [0x00112280, 0x001123D0], 4 retail functions wide, which excludes the
+  superseded 0x00112500 and leaves 0x00112370 and 0x001123D0 as the candidates. The
+  code picks between them: `func_00112370` calls `dds3InitPoseSet`, allocates 0x90
+  bytes and stores the result at `basic->workdata`, and 0x90 is exactly the unit's
+  `dds3CameraObjectBasicWorkData_t` (a 64-byte matrix, four 16-byte vectors, a pointer
+  and three words). `func_001123D0` is its destructor, calling `dds3FreePoseSet` and
+  freeing the same allocation, so it cannot be the first function of the file. The
+  function before, `dds3ObjectBaseSetControlBasicSvs`, ends exactly at 0x00112370.
 - `evtPolygonMovie` to `evtPicture` pins at exactly the doc's 0x001F3A70.
 - `effPCPThunder` to `effPCPBezier` pins at 0x0017AC10; `effPCPBezier` to
   `effPCPFlash` at 0x0017D0A0.
@@ -346,11 +350,15 @@ new ground.
    `nbCameraClearState` at 0x001B1490. The HD map put the name on the wrong chunk, so
    this span is a target for the two-witness cuts above, not a rename. Until it is
    cut, the name is a label for the chunk and nothing more.
-3. **Settle the two boundaries where the brackets are now tight enough to decide.**
-   `basic/dds3CameraObjectBasic` is down to two adjacent candidates in a 4-function
-   bracket, and `basic/dds3ModelRangeBasic` has an 18-function bracket that excludes
-   the proposed 0x00115F68 outright. Both need one disassembly read each, not a
-   search. Cost: an hour. Risk: none until something is applied.
+3. **Settle `basic/dds3ModelRangeBasic`.** Its 18-function bracket excludes the
+   proposed 0x00115F68 outright, and the names in that region do not run in file
+   order: `dds3PathBasicFreeControl`, `dds3SetPathBasicSpline`,
+   `dds3SearchSceneBasicWorkData` and `dds3PathEvalSpline` are interleaved with the
+   `dds3*ModelBasic*` run, which is not something one compiler pass over one file
+   produces. Either some HD names in the region are on the wrong functions or the
+   files are smaller than the names suggest; the debug build's three
+   `dds3ModelRangeBasic.c` reference sites are the way to tell. Cost: hours. Risk:
+   none until something is applied.
 
 Then, in order: work the 16 single-witness brackets down by narrowing them with data
 references; use the `.rodata` ordering result when `.rodata` is split;
