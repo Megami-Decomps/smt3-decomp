@@ -116,7 +116,9 @@ typedef struct
 {
     u8 unk00;
     s8 unk01;
-    u8 unk02[0x1A];
+    u8 unk02[0x16];
+    u16 unk18;
+    u8 unk1A[2];
 } datUnitVisualPart_t;
 
 typedef struct datUnitVisual_t

@@ -17,7 +17,7 @@ typedef struct dds3Spline_t {
     f32 *coefB;
     f32 *coefC;
     s32 unk20;
-    s32 unk24;
+    f32 unk24;
     f32 unk28;
 } dds3Spline_t;
 
@@ -38,33 +38,159 @@ typedef struct nbCameraStateEntry_t {
     u8 unk0D[3];
 } nbCameraStateEntry_t;
 
+typedef struct nbCameraAnim_t {
+    s32 rotateFrames;
+    f32 rotateStep;
+    s32 distanceFrames;
+    f32 distanceStep;
+} nbCameraAnim_t;
+
 typedef struct nbCamera_t {
-    u128 vec00;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
+    sdfVector4_t target;
+    sdfVector4_t direction;
+    f32 distance;
+    f32 fovy;
+    u32 stateChange;
     u32 state;
-    u32 stateFrame;
-    u32 unk30;
-    u32 unk34;
-    u32 unk38;
-    u32 unk3C;
-    u8 unk40[8];
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
-    f32 unk54;
+    u32 stateOld;
+    u32 stateOld2;
+    u32 phase;
+    s32 frame;
+    u32 type;
+    f32 angle;
+    nbCameraAnim_t anim;
 } nbCamera_t;
 
 typedef struct effPartHandle_t effPartHandle_t;
 
 typedef struct nbCameraHelper_t {
-    u8 unk00[0x38];
+    u8 unk00[0x30];
+    u32 unk30;
+    s32 unk34;
     effPartHandle_t *hPart;
 } nbCameraHelper_t;
+
+extern u8 dds3EffectBase[];
+extern u32 dds3GetRandA(u8 *state);
+extern void SetRotateMatrixY(f32 angle);
+extern void effBTLModelAllHide(void);
+extern void effBTLModelGroupGetCenter(u32 mask);
+extern f32 nbCameraGroupGetMaxLength(sdfVector4_t *pCenter, u32 mask);
+extern s32 effBTLModelGetGroupNumber(u32 mask);
+extern void *sdfChipAllocDirect(s32 size);
+extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *name);
+extern void func_001B2158(u32 mask);
+extern f32 func_001B2270(sdfVector4_t *pCenter, u32 mask);
+extern void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pCamera, void *pWork);
+extern void nbCameraState_Start_Set(nbCamera_t *pCamera);
+extern void nbCameraState_Start_BA_Set(nbCamera_t *pCamera);
+extern void nbCameraShot_CommandFixPos_Set2(nbCamera_t *pCamera);
+typedef struct nbCameraUnitWork_t {
+    u8 unk00[0x28];
+    nbFormation_t *pForm;
+} nbCameraUnitWork_t;
+
+/* The per-shot parameters the nbCameraShot_*_Set2 family reads; 0x30 on the
+ * stack at every call site. */
+typedef struct nbCameraSkillInfo_t {
+    u32 shot1;
+    u32 shot23;
+    f32 angleH;
+    f32 angleW;
+    f32 heightMin;
+    f32 widthMin;
+    u32 ptr1;
+    u32 ptr23;
+    u32 anim;
+    u8 pad24[0xC];
+} nbCameraSkillInfo_t;
+
+extern void *dds3GetProcessData(dds3ProcessID_t *process);
+extern void effBTLModelInvokeShow(void);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, u32 mark);
+extern void *dds3EffectFileListCreate(const char *path, s32 max);
+extern void *dds3EffectFileListWindowCreate(void *hFileList);
+extern void dds3EffectFileListWindowSetPos(void *pWork, s32 x, s32 y);
+extern void dds3EffectFileListWindowSetOt(void *pWork, s32 ot);
+extern void dds3EffectFileListWindowSetPadWait(void *pWork, s32 wait);
+extern void dds3EffectFileListWindowSetWindowColor(void *pWork, u32 fill, u32 edge);
+extern const char D_005358A8[];
+extern s32 nbCameraStartState;
+extern u32 D_0054F37C;
+extern char D_00534608[];
+extern char D_00534630[];
+extern char D_00535850[];
+extern char D_00535878[];
+extern s32 printf(const char *format, ...);
+extern f32 effBTLModelGroupGetSphere(u32 mask);
+extern void effBTLModelGroupGetDirection(u32 mask, f32 *pDirection);
+extern f32 sdfAtan(f32 x);
+extern void SetRotateMatrixX(f32 angle);
+extern u32 effBTLSkillGetInvokeParty(void);
+extern s32 nbCameraBossCutFlag;
+extern s32 nbCameraBoss_BSARI1_EP_IT_Set(nbCamera_t *pCamera);
+extern void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
+extern void nbCameraShot_InvokeParty_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pWork);
+extern u128 D_003259C0;
+extern u128 D_003259D0;
+extern u128 D_003259E0;
+extern u128 D_003259F0;
+extern u128 Bsnet_E907_2_EndTarget;
+extern u128 Bsnet_E907_2_EndDirection;
+extern f32 Bsnet_E907_2_StartDistance;
+extern f32 Bsnet_E907_2_EndDistance;
+extern f32 Bsnet_E907_2_Rate;
+extern u128 D_0056B420;
+extern u128 D_0056B430;
+extern u128 D_0056B330;
+extern u128 nbCameraEnemyBadFlag;
+extern f32 nbCameraEnemyBadStep;
+extern f32 nbCameraEnemyBadTarget;
+extern u128 nbCameraCut1EnemyVec;
+extern f32 nbCamera_Cut1Enemy_Distance;
+extern u32 nbCamera_Cut1Enemy_Frame;
+extern f32 nbCamera_Cut1Enemy_Rate;
+extern void nbCameraState_SkillAttack_Init(nbCamera_t *pCamera);
+extern void nbCameraShot_Invoke_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pWork);
+extern void nbCameraShot_TargetParty_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pWork);
+extern void nbCameraShot_PullOne_Init(nbCamera_t *pCamera);
+extern s32 nbCameraHero_Cut2_Run(nbCamera_t *pCamera, void *pWork);
+extern void nbCameraInit(void);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
+                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void ToMatrix(void);
+extern sdfVector4_t nbCameraBSARICut1Vec;
+extern f32 BSARI_Cut1_Rate;
+extern u32 nbCameraHero_Cut_Frame;
+extern char *nbCameraHelperViewerMode;
+extern nbCameraHelper_t *D_0054F3DC;
+extern sdfMemHandle_t *D_0054F3E0;
+extern sdfMemHandle_t *D_0054F3E4;
+extern void *nbCameraHelperViewerState;
+extern void *nbCameraHelperViewerHandle;
+extern u128 D_00320E30;
+extern u128 D_00320E50;
+extern char D_005345C8[];
+extern char D_005345D8[];
+extern s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id);
+extern void nbCameraShutdown(dds3ProcessID_t *id);
+extern s32 nbCameraDraw(dds3ProcessID_t *id);
+extern void effBTLModelGetSphereCenter(nbFormation_t *pFormation);
+extern s32 effBTLModelGetMarkPosition(nbFormation_t *pFormation, s32 mark);
+extern s32 effBTLModelGetMarkPositionEvalTm(nbFormation_t *pFormation, s32 mark);
+extern nbFormation_t *effBTLSkillGetTargetFormation(s32 index);
+extern s32 effBTLModelGetID(nbFormation_t *pFormation);
+extern void nbCameraShot_GroundCollision(nbCamera_t *pCamera);
+extern datUnitVisual_t datModelParamTable[];
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
+extern s32 effBTLDebug_CameraAllTableCheck(void);
+extern u128 D_00324740;
+extern u8 D_0054F370;
+extern u32 D_0054F374;
+extern u8 D_0054F378;
+extern u32 D_0054F37C;
 
 extern nbCamera_t pNbCamera;
 extern nbCameraStateEntry_t nbCameraStateTable[];
@@ -106,7 +232,6 @@ extern void dds3EffectFileListDelete(void *hFileList);
 extern s32 dds3GetRandIntA(s32 low, s32 high);
 
 typedef struct dds3Scene_t dds3Scene_t;
-typedef struct nbCameraSkillInfo_t nbCameraSkillInfo_t;
 
 /* 12-byte rows; nbCameraGetModelAllTable indexes them by unit work slot. */
 typedef struct nbCamera_AllTable_t {
@@ -126,6 +251,8 @@ extern f32 nbCamera_NegoBougai_Rate;
 extern f32 nbCamera_NegoBougai_Distance;
 extern u32 nbCamera_NegoBougai_Frame;
 
+extern nbCamera_AllTable_t nbCameraGetModelAllTable_Dummy[];
+extern nbCamera_AllTable_t D_00325950;
 extern nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation);
 extern void nbCameraState_Start_BA_Animation(nbCamera_t *pCamera);
 extern void nbCameraState_Start_Animation(nbCamera_t *pCamera);
@@ -151,6 +278,7 @@ void dds3BuildSplinePoints(f32 *tangents, f32 *points, u32 count);
 void dds3BuildSplineCoefs(dds3Spline_t *spline, f32 *tangents);
 void dds3BuildSplineCoefsSkipDup(dds3Spline_t *spline, f32 *tangents);
 void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 index, f32 t);
+void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t);
 
 
 dds3Spline_t *dds3AllocSplineHandle(f32 *points, u32 count, s32 flattenEqualComponents) {
@@ -199,7 +327,27 @@ void dds3FreeSplineHandle(dds3Spline_t *pSpline)
     sdfMemFreeDirect(pSpline->handle);
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3_1B09C0);
+s32 dds3_1B09C0(sdfVector4_t *pVertex, dds3Spline_t *pSpline)
+{
+    f32 t = pSpline->unk24;
+    s32 index = pSpline->unk20;
+    s32 running = 1;
+
+    func_001B0A60(pVertex, pSpline, index, t);
+    t += pSpline->unk28;
+    if (t > 1.0f) {
+        t -= 1.0f;
+        index++;
+    }
+    if ((u32)index >= (u32)(pSpline->count - 1)) {
+        t = 0.0f;
+        index = 0;
+        running = 0;
+    }
+    pSpline->unk20 = index;
+    pSpline->unk24 = t;
+    return running;
+}
 
 void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t) {
     f32 *a;
@@ -449,28 +597,99 @@ void func_001B1488(dds3SplineWalk_t *pWalk, f32 step)
 
 void nbCameraClearState(nbCamera_t *pCamera)
 {
-    pCamera->unk48 = 0;
-    pCamera->unk4C = 0;
-    pCamera->unk50 = 0;
-    pCamera->unk54 = 0.0f;
+    pCamera->anim.rotateFrames = 0;
+    pCamera->anim.rotateStep = 0;
+    pCamera->anim.distanceFrames = 0;
+    pCamera->anim.distanceStep = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraAnim_RotateSet);
+void nbCameraAnim_RotateSet(nbCamera_t *pCamera, s32 frames, s32 total, f32 frame)
+{
+    pCamera->anim.rotateFrames = frames;
+    pCamera->anim.rotateStep = frame / frames;
+    SetRotateMatrixY(pCamera->anim.rotateStep * total);
+    VU0_LOAD_VF10(&pCamera->direction);
+    VU0_APPLY_MATRIX_VF10();
+    VU0_STORE_VF10(&pCamera->direction);
+}
 
 void func_001B1518(nbCamera_t *pCamera, s32 frames, s32 count, f32 angle)
 {
     f32 step = -angle / (f32)frames;
 
-    pCamera->unk50 = frames;
-    pCamera->unk54 = step;
-    pCamera->unk20 += step * (f32)count;
+    pCamera->anim.distanceFrames = frames;
+    pCamera->anim.distanceStep = step;
+    pCamera->distance += step * (f32)count;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_InvokeTargetSelect_SearchSet);
+void nbCameraState_InvokeTargetSelect_SearchSet(void)
+{
+    nbMainProcessData_t *pData = nbGetMainProcessData();
+    dds3ProcessID_t *pProcess = pData->unkD4[pData->unkE4];
+    nbFormation_t *pForm = pData->form;
+    nbCameraUnitWork_t *pWork;
+    u32 bits;
+    u32 i;
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_InvokeTarget_SearchSet);
+    if (pProcess == NULL) {
+        return;
+    }
+    pWork = dds3GetProcessData(pProcess);
+    bits = 0;
+    for (i = 0; i < 32; i++) {
+        if ((pForm->stat & 4) != 0) {
+            bits |= 1 << i;
+        }
+        pForm++;
+    }
+    effBTLSkillSetFormationInfo(pWork->pForm->formindex, bits);
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_EnemyParty_SearchSet);
+void nbCameraState_InvokeTarget_SearchSet(void)
+{
+    nbMainProcessData_t *pData = nbGetMainProcessData();
+    dds3ProcessID_t *pProcess = pData->unkD4[pData->unkE4];
+    nbFormation_t *pForm = pData->form;
+    nbCameraUnitWork_t *pWork;
+    u32 bits;
+    u32 i;
+
+    if (pProcess == NULL) {
+        return;
+    }
+    pWork = dds3GetProcessData(pProcess);
+    bits = 0;
+    for (i = 0; i < 32; i++) {
+        if ((pForm->stat & 8) != 0) {
+            bits |= 1 << i;
+        }
+        pForm++;
+    }
+    effBTLSkillSetFormationInfo(pWork->pForm->formindex, bits);
+}
+
+void nbCameraState_EnemyParty_SearchSet(void)
+{
+    nbMainProcessData_t *pData = nbGetMainProcessData();
+    dds3ProcessID_t *pProcess = pData->unkD4[pData->unkE4];
+    nbFormation_t *pForm = pData->form;
+    nbCameraUnitWork_t *pWork;
+    u32 bits;
+    u32 i;
+
+    if (pProcess == NULL) {
+        return;
+    }
+    pWork = dds3GetProcessData(pProcess);
+    bits = 0;
+    for (i = 0; i < 32; i++) {
+        if ((pForm->stat & 0x200) != 0) {
+            bits |= 1 << i;
+        }
+        pForm++;
+    }
+    effBTLSkillSetFormationInfo(pWork->pForm->formindex, bits);
+}
 
 void nbCameraState_DebugShotAll_Init(void)
 {
@@ -480,17 +699,17 @@ void nbCameraState_DebugShotAll_Init(void)
 
 void nbCameraSetState(u16 state)
 {
-    pNbCamera.state = state;
+    pNbCamera.stateChange = state;
     if (nbCameraStateTable[state].reset != 0) {
-        pNbCamera.stateFrame = 0;
+        pNbCamera.state = 0;
     }
 }
 
 void func_001B1770(u16 state)
 {
-    pNbCamera.state = state;
+    pNbCamera.stateChange = state;
     if (nbCameraStateTable[state].reset != 0) {
-        pNbCamera.stateFrame = 0;
+        pNbCamera.state = 0;
     }
 }
 
@@ -525,7 +744,16 @@ void nbCameraEventSetTarget(nbFormation_t *pTargetForm)
     nbCameraSetState(24);
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraScriptSet1Shot);
+void nbCameraScriptSet1Shot(nbFormation_t *pFormation)
+{
+    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->formindex,
+                                1 << pFormation->formindex);
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    effBTLModelAllHide();
+    func_0016E1F8();
+    nbCameraSetState(0x1A);
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraScriptSetBougai);
 
@@ -534,10 +762,10 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraScriptSet);
 void nbCameraInit(void)
 {
     nbCameraShot_All_Set(&pNbCamera);
+    pNbCamera.stateChange = 0;
+    pNbCamera.stateOld2 = 0;
+    pNbCamera.stateOld = 0;
     pNbCamera.state = 0;
-    pNbCamera.unk34 = 0;
-    pNbCamera.unk30 = 0;
-    pNbCamera.stateFrame = 0;
 }
 
 s32 nbCameraCheckNiidaCamera(void)
@@ -563,13 +791,52 @@ void nbCameraShutdown(dds3ProcessID_t *id)
     nbGetMainProcessData()->camera = NULL;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbInitCameraProcess);
+void nbInitCameraProcess(nbMainProcessData_t *pData)
+{
+    dds3ProcessID_t *process = dds3StartProcess(D_005345C8, 0x3FB, 2, 1,
+                                                (dds3ProcessFunc_t)nbCameraProcess_nbCameraProcess,
+                                                (dds3ProcessFunc_t)nbCameraShutdown, NULL);
+
+    dds3LinkProcess(pData->unkBC, process);
+    pData->camera = process;
+    dds3LinkProcess(process, dds3StartProcess(D_005345D8, 0x2B0E, 1, 1,
+                                              (dds3ProcessFunc_t)nbCameraDraw, NULL, NULL));
+    nbCameraInit();
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", func_001B2158);
 
-INCLUDE_ASM(const s32, "code_001B0858", func_001B2270);
+f32 func_001B2270(sdfVector4_t *pCenter, u32 mask)
+{
+    nbFormation_t *pForm = nbGetMainProcessData()->form;
+    f32 length;
+    f32 max = 0.0f;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_001B0858", nb_1B2340);
+    for (i = 0x1F; i >= 0; i--) {
+        if ((pForm->stat & mask) != 0 && (pForm->stat & 1) != 0) {
+            effBTLModelGetSphereCenter(pForm);
+            VU0_LOAD_VF11(pCenter);
+            VU0_SUB_VF10_VF11();
+            VU0_LENGTH_VF10(length);
+            if (length + pForm->r * pForm->scl > max) {
+                max = length + pForm->r * pForm->scl;
+            }
+        }
+        pForm++;
+    }
+    return max;
+}
+
+void nb_1B2340(u32 mask)
+{
+    sdfVector4_t center;
+
+    func_001B2158(mask);
+    VU0_STORE_VF10_TO(center);
+    func_001B2270(&center, mask);
+    VU0_LOAD_VF10_FROM(center);
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Start_Set);
 
@@ -579,7 +846,18 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Start_BA_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Start_BA_Animation);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Start_Init);
+void nbCameraState_Start_Init(void)
+{
+    if ((nbGetMainProcessData()->stat & 0x10) != 0) {
+        nbCameraState_Start_BA_Set(&pNbCamera);
+    } else {
+        nbCameraState_Start_Set(&pNbCamera);
+    }
+    D_0054F370 = 0;
+    D_0054F374 = 0;
+    D_0054F378 = 0;
+    D_0054F37C = 0;
+}
 
 void nbCameraState_Start_Calc(void)
 {
@@ -596,7 +874,20 @@ s32 nb_1B33F0(void)
     return D_00551E08;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraStart);
+s32 nbCameraStart(void)
+{
+    if (D_0054F370 != 0) {
+        D_0054F370 = 0;
+        printf(D_00534608, D_0054F374);
+    }
+    if (D_0054F378 != 0) {
+        if (nbCameraStartState == 5) {
+            D_0054F378 = 0;
+            printf(D_00534630, D_0054F37C);
+        }
+    }
+    return nbCameraStartState == 5;
+}
 
 void func_001B3460(nbCamera_t *pCamera) {
 }
@@ -618,6 +909,8 @@ void nb_1B3490(void)
 
 INCLUDE_ASM(const s32, "code_001B0858", func_001B34B0);
 
+INCLUDE_RODATA(const s32, "code_001B0858", D_00534608);
+
 INCLUDE_RODATA(const s32, "code_001B0858", D_00534630);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCamera_SkillInfo_Set);
@@ -638,7 +931,15 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_One_Calc);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_PullOne_Init);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_PullOne_Calc);
+void nbCameraShot_PullOne_Calc(nbCamera_t *pCamera, f32 rate)
+{
+    nbFormation_t *pForm = effBTLSkillGetInvokeFormation();
+
+    effBTLModelGetSphereCenter(pForm);
+    VU0_STORE_VF10(pCamera);
+    pCamera->target.y -= pForm->h * pForm->scl * 0.5f * rate;
+    nbCameraShot_GroundCollision(pCamera);
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_InvokeTarget_Set2);
 
@@ -661,7 +962,7 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_All_Set3);
 void nbCameraState_Analyze_Set(nbCamera_t *pCamera)
 {
     PS2_COPY_QUAD(&nbCameraAnalyzeVec, pCamera);
-    nbCamera_Analyze_Distance = pCamera->unk20;
+    nbCamera_Analyze_Distance = pCamera->distance;
     nbCamera_Analyze_Rate = 1.0f;
     nbCamera_Analyze_Rate_Add = -0.01f;
     nbCamera_Analyze_Frame = 1;
@@ -670,7 +971,20 @@ void nbCameraState_Analyze_Set(nbCamera_t *pCamera)
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Analyze_Calc);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_All_Set);
+void nbCameraShot_All_Set(nbCamera_t *pCamera)
+{
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    effBTLModelAllShow();
+    pCamera->target.x = -195.3f;
+    pCamera->target.y = -321.2f;
+    pCamera->target.z = -884.7f;
+    pCamera->direction.x = 0.2207f;
+    pCamera->direction.y = 0.2273f;
+    pCamera->direction.z = 0.9485f;
+    pCamera->distance = 1.0f;
+    pCamera->fovy = 0.69813163f;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", bCameraShot_AttackInvokeTargetPartyNear_Set);
 
@@ -706,11 +1020,58 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_PlayerSide_Init);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_EnemySide_Init);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraEnemyPartySet);
+void nbCameraEnemyPartySet(f32 pitch, f32 yaw)
+{
+    nbCameraSkillInfo_t work;
+    nbFormation_t *pForm = nbGetMainProcessData()->form;
+    u32 i = 0;
+    u32 invoke = 0;
+    u32 bits = 0;
+
+    for (; i < 32; i++) {
+        if ((pForm->stat & 0x203) == 0x203) {
+            invoke = i;
+            bits |= 1 << invoke;
+        }
+        pForm++;
+    }
+    effBTLSkillSetFormationInfo(invoke, bits);
+    work.angleH = pitch;
+    work.angleW = yaw;
+    work.heightMin = 0.0f;
+    work.widthMin = 700.0f;
+    nbCameraShot_TargetParty_Set2(&pNbCamera, &work);
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_EnemyBad_Init);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_EnemyBad_Calc);
+void nbCameraState_EnemyBad_Calc(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    sdfVector4_t focus;
+    sdfVector4_t scale;
+    f32 distance = -pCamera->distance;
+
+    nbCameraEnemyBadStep *= 0.925f;
+    scale.x = distance;
+    scale.y = distance;
+    scale.z = distance;
+    VU0_LOAD_VF10(&pCamera->direction);
+    VU0_LOAD_VF11(&scale);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(pCamera);
+    VU0_ADD_VF10_VF11();
+    VU0_STORE_VF10(&focus);
+    VU0_LOAD_VF10(&D_0056B330);
+    VU0_LOAD_VF11(&nbCameraEnemyBadFlag);
+    VU0_LERP_VF10_VF11(nbCameraEnemyBadStep);
+    VU0_STORE_VF10(pCamera);
+    VU0_LOAD_VF11(&focus);
+    VU0_SUB_VF10_VF11();
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10(&pCamera->direction);
+    pCamera->distance = nbCameraEnemyBadTarget * (nbCameraEnemyBadStep * 0.3f + 0.7f);
+}
 
 void nbCameraState_NegoBougai_Init(void)
 {
@@ -718,7 +1079,7 @@ void nbCameraState_NegoBougai_Init(void)
 
     PS2_COPY_QUAD(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
-    nbCamera_NegoBougai_Distance = pCamera->unk20;
+    nbCamera_NegoBougai_Distance = pCamera->distance;
     nbCamera_NegoBougai_Wait = 15;
     nbCamera_NegoBougai_Frame = 0;
 }
@@ -729,7 +1090,7 @@ void nbCameraState_NegoBougai_Init2(void)
 
     PS2_COPY_QUAD(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
-    nbCamera_NegoBougai_Distance = pCamera->unk20;
+    nbCamera_NegoBougai_Distance = pCamera->distance;
     nbCamera_NegoBougai_Wait = 8;
     nbCamera_NegoBougai_Frame = 0;
 }
@@ -752,19 +1113,59 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_NegoTaizi_Calc);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_NegoTarget_Init);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_NegoTarget_Calc);
+void nbCameraState_NegoTarget_Calc(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    nbFormation_t *pForm = effBTLSkillGetTargetFormation(0);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_NegoTarget_Calc2);
+    if ((pForm->stat & 3) == 3 && effBTLModelGetID(pForm) == 0x3E) {
+        effBTLModelGetSphereCenter(pForm);
+        VU0_LOAD_VF11(&D_00324740);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10(pCamera);
+    }
+}
+
+void nbCameraState_NegoTarget_Calc2(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    nbFormation_t *pForm = effBTLSkillGetTargetFormation(0);
+
+    if ((pForm->stat & 3) == 3) {
+        if (effBTLModelGetMarkPosition(pForm, 1) == 0) {
+            effBTLModelGetSphereCenter(pForm);
+        }
+        VU0_STORE_VF10(pCamera);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_NegoHojo_Init);
 
 void nbCameraState_NegoHojo_Calc(void)
 {
     nbCamera_NegoHojo_Rate = nbCamera_NegoHojo_Rate * 0.925f;
-    pNbCamera.unk20 = nbCamera_NegoHojo_Distance * (1.0f - nbCamera_NegoHojo_Rate);
+    pNbCamera.distance = nbCamera_NegoHojo_Distance * (1.0f - nbCamera_NegoHojo_Rate);
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraGetModelAllTable);
+nbCamera_AllTable_t *nbCameraGetModelAllTable(nbFormation_t *pFormation)
+{
+    datUnitWork_t *pWork;
+
+    if (pFormation == NULL) {
+        return &D_00325950;
+    }
+    if ((pFormation->stat & 1) == 0) {
+        return &D_00325950;
+    }
+    pWork = nbGetUnitWorkFromFormindex(pFormation->formindex);
+    if (effBTLDebug_CameraAllTableCheck() == 0) {
+        return &D_00325950;
+    }
+    if ((pWork->flag & 4) != 0) {
+        return nbCameraGetModelAllTable_Dummy;
+    }
+    return &nbCameraGetModelAllTable_Dummy[pWork->id];
+}
 
 f32 nbCameraGetModelRadius(nbFormation_t *pFormation)
 {
@@ -776,9 +1177,41 @@ f32 nbCameraGetModelRadius(nbFormation_t *pFormation)
     return radius;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraGroupGetMaxLength);
+f32 nbCameraGroupGetMaxLength(sdfVector4_t *pCenter, u32 mask)
+{
+    nbFormation_t *pForm = nbGetMainProcessData()->form;
+    f32 max = 0.0f;
+    f32 length;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraGroupGetSphere);
+    for (i = 0x1F; i >= 0; i--) {
+        if ((pForm->stat & mask) != 0 && (pForm->stat & 3) == 3) {
+            effBTLModelGetSphereCenter(pForm);
+            VU0_LOAD_VF11(pCenter);
+            VU0_SUB_VF10_VF11();
+            VU0_LENGTH_VF10(length);
+            length += nbCameraGetModelRadius(pForm);
+            if (length > max) {
+                max = length;
+            }
+        }
+        pForm++;
+    }
+    return max;
+}
+
+f32 nbCameraGroupGetSphere(nbFormation_t *pFormation)
+{
+    sdfVector4_t center;
+
+    f32 length;
+
+    effBTLModelGroupGetCenter(pFormation);
+    VU0_STORE_VF10_TO(center);
+    length = nbCameraGroupGetMaxLength(&center, pFormation);
+    VU0_LOAD_VF10_FROM(center);
+    return length;
+}
 
 
 void nbCameraCommandSetFixPosition(void)
@@ -794,7 +1227,29 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_CommandFixPos_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_AllParty_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_FriendParty_Set);
+void nbCameraShot_FriendParty_Set(nbCamera_t *pCamera)
+{
+    u32 party;
+    f32 radius;
+
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    effBTLModelAllShow();
+    party = effBTLSkillGetInvokeParty();
+    radius = effBTLModelGroupGetSphere(party);
+    VU0_STORE_VF10(pCamera);
+    pCamera->target.x = 0.0f;
+    if (radius < 250.0f) {
+        radius = 250.0f;
+    }
+    pCamera->fovy = 0.69813163f;
+    pCamera->distance = radius / sdfAtan(0.49567342f);
+    effBTLModelGroupGetDirection(party, &pCamera->direction);
+    SetRotateMatrixX(-0.26179934f);
+    VU0_LOAD_VF10(&pCamera->direction);
+    VU0_APPLY_MATRIX_VF10();
+    VU0_STORE_VF10(&pCamera->direction);
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_Summon_Set);
 
@@ -857,7 +1312,7 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Foru_SIMON_Set);
 void nbCameraBoss_Foru_E913_Set(void)
 {
     Foru_E913_Frame = 0;
-    pNbCamera.unk3C = 0;
+    pNbCamera.frame = 0;
 }
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Foru_E913_Run);
@@ -919,7 +1374,31 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARUS_Command_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSSAMA_Command_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Samael_AKUI_Set);
+s32 nbCameraBoss_Samael_AKUI_Set(nbCamera_t *pCamera)
+{
+    effBTLModelAllShow();
+    nbResetAllFormPosRot();
+    if ((dds3GetRandA(dds3EffectBase) & 1) != 0) {
+        pCamera->target.x = 799.62f;
+        pCamera->target.y = -165.55f;
+        pCamera->target.z = 1412.67f;
+        pCamera->direction.x = -0.43f;
+        pCamera->direction.y = -0.08f;
+        pCamera->direction.z = -0.9f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    } else {
+        pCamera->target.x = -818.13f;
+        pCamera->target.y = -95.8f;
+        pCamera->target.z = 1316.26f;
+        pCamera->direction.x = 0.47f;
+        pCamera->direction.y = -0.12f;
+        pCamera->direction.z = -0.87f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    }
+    return 1;
+}
 
 
 s32 nbCameraBoss_Samael_AKUI_Run(nbCamera_t *pCamera)
@@ -929,7 +1408,17 @@ s32 nbCameraBoss_Samael_AKUI_Run(nbCamera_t *pCamera)
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Sukady_DAIJIS_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Baal_BAELNO_Set);
+s32 nbCameraBoss_Baal_BAELNO_Set(nbCamera_t *pCamera)
+{
+    u8 work[0x30];
+
+    if ((dds3GetRandA(dds3EffectBase) & 1) != 0) {
+        nbCameraShot_InvokeTarget_Set2(pCamera, work);
+    } else {
+        nbCameraShot_InvokeTargetReverse_Set2(pCamera, work);
+    }
+    return 1;
+}
 
 
 s32 nbCameraBoss_Baal_BAELNO_Run(nbCamera_t *pCamera)
@@ -937,13 +1426,77 @@ s32 nbCameraBoss_Baal_BAELNO_Run(nbCamera_t *pCamera)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_Attack_Cut1_Set);
+s32 nbCameraBoss_Bsnet_Attack_Cut1_Set(nbCamera_t *pCamera)
+{
+    nbCameraSkillInfo_t work;
+    nbFormation_t *pForm;
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_Attack_Cut1_Run);
+    nbCameraState_SkillAttack_Init(pCamera);
+    pForm = effBTLSkillGetInvokeFormation();
+    nbCameraState_InvokeTarget_SearchSet();
+    work.angleH = 0.26179934f;
+    if ((dds3GetRandA(dds3EffectBase) & 1) != 0) {
+        work.angleW = 0.5235987f;
+    } else {
+        work.angleW = -0.5235987f;
+    }
+    work.heightMin = 0.0f;
+    work.widthMin = 0.0f;
+    nbCameraShot_Invoke_Set2(pCamera, &work);
+    pCamera->target.y -= pForm->h * pForm->scl * 0.25f;
+    nbCameraShot_GroundCollision(pCamera);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_Cut1_Set);
+s32 nbCameraBoss_Bsnet_Attack_Cut1_Run(nbCamera_t *pCamera)
+{
+    s32 id = effBTLModelGetID(effBTLSkillGetInvokeFormation());
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_Cut1_Run);
+    if (id == 0x200) {
+        return 0;
+    }
+    if (pCamera->frame < datModelParamTable[id].part[2].unk18) {
+        pCamera->distance += 12.5f;
+    }
+    nbCameraShot_GroundCollision(pCamera);
+    return 1;
+}
+
+s32 nbCameraBoss_Bsnet_Cut1_Set(nbCamera_t *pCamera)
+{
+    nbCameraSkillInfo_t work;
+    nbFormation_t *pForm;
+
+    nbCameraState_SkillAttack_Init(pCamera);
+    pForm = effBTLSkillGetInvokeFormation();
+    nbCameraState_InvokeTarget_SearchSet();
+    work.angleH = 0.26179934f;
+    if ((dds3GetRandA(dds3EffectBase) & 1) != 0) {
+        work.angleW = 0.5235987f;
+    } else {
+        work.angleW = -0.5235987f;
+    }
+    work.heightMin = 0.0f;
+    work.widthMin = 0.0f;
+    nbCameraShot_Invoke_Set2(pCamera, &work);
+    pCamera->target.y -= pForm->h * pForm->scl * 0.25f;
+    nbCameraShot_GroundCollision(pCamera);
+    return 1;
+}
+
+s32 nbCameraBoss_Bsnet_Cut1_Run(nbCamera_t *pCamera)
+{
+    s32 id = effBTLModelGetID(effBTLSkillGetInvokeFormation());
+
+    if (id == 0x200) {
+        return 0;
+    }
+    if (pCamera->frame < datModelParamTable[id].part[3].unk18) {
+        pCamera->distance -= 15.0f;
+    }
+    nbCameraShot_GroundCollision(pCamera);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_Attack_Set);
 
@@ -953,7 +1506,22 @@ s32 nbCameraBoss_Bsnet_Attack_Run(nbCamera_t *pCamera)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSALBI_E912_Set);
+void nbCameraBoss_BSALBI_E912_Set(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    f32 radius;
+
+    nbCameraSetState(0);
+    radius = effBTLModelGroupGetSphere(0x200);
+    VU0_STORE_VF10(pCamera);
+    effBTLModelGroupGetDirection(0x200, &pCamera->direction);
+    pCamera->direction.z = -pCamera->direction.z;
+    radius /= sdfAtan(0.34906582f);
+    nbCameraBoss_BSALBI_E912_Rate = 1.0f;
+    pCamera->fovy = 0.69813163f;
+    pCamera->distance = radius;
+    nbCameraBoss_BSALBI_E912_Distance = radius;
+}
 
 void nbCameraBoss_BSALBI_E912_Run(void)
 {
@@ -961,10 +1529,40 @@ void nbCameraBoss_BSALBI_E912_Run(void)
     f32 distance = nbCameraBoss_BSALBI_E912_Distance;
 
     nbCameraBoss_BSALBI_E912_Rate = rate * 0.95f;
-    pNbCamera.unk20 = distance * 0.65f + distance * 0.35f * rate;
+    pNbCamera.distance = distance * 0.65f + distance * 0.35f * rate;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSALBI_InvokeTargetParty_Set);
+s32 nbCameraBoss_BSALBI_InvokeTargetParty_Set(nbCamera_t *pCamera)
+{
+    s32 type;
+
+    effBTLModelAllShow();
+    type = dds3GetRandIntA(0, 2);
+    switch (type) {
+    case 0:
+        func_0016E120();
+        pCamera->direction.x = -0.31f;
+        pCamera->direction.y = 0.36f;
+        pCamera->direction.z = -0.88f;
+        pCamera->target.x = 510.01996f;
+        pCamera->target.y = -852.57f;
+        pCamera->target.z = 1895.83f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+        break;
+    case 1:
+        pCamera->direction.x = 0.03f;
+        pCamera->direction.y = 0.17f;
+        pCamera->direction.z = 0.98f;
+        pCamera->target.x = -62.22f;
+        pCamera->target.y = -493.04f;
+        pCamera->target.z = -1677.5599f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+        break;
+    }
+    return 1;
+}
 
 void nbCameraBoss_Bsnet_E907_Set(void)
 {
@@ -975,12 +1573,34 @@ void nbCameraBoss_Bsnet_E907_Set(void)
 
 void nbCameraBoss_Bsnet_E907_Run(void)
 {
-    pNbCamera.unk20 -= 60.0f;
+    pNbCamera.distance -= 60.0f;
 }
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_E907_2_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_E907_2_Run);
+void nbCameraBoss_Bsnet_E907_2_Run(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    f32 rate = Bsnet_E907_2_Rate;
+    f32 step = 1.0f - rate;
+
+    Bsnet_E907_2_Rate = rate * 0.925f;
+    if (step > 0.0f) {
+        if (step > 1.0f) {
+            step = 1.0f;
+        }
+        VU0_LOAD_VF10(&Bsnet_E907_2_EndTarget);
+        VU0_LOAD_VF11(&D_0056B420);
+        VU0_LERP_VF10_VF11(step);
+        VU0_STORE_VF10(pCamera);
+        VU0_LOAD_VF10(&Bsnet_E907_2_EndDirection);
+        VU0_LOAD_VF11(&D_0056B430);
+        VU0_LERP_VF10_VF11(step);
+        VU0_STORE_VF10(&pCamera->direction);
+        pCamera->distance = Bsnet_E907_2_StartDistance +
+                         (Bsnet_E907_2_EndDistance - Bsnet_E907_2_StartDistance) * step;
+    }
+}
 
 void nbCameraBoss_Bsnet_E905_Set(void)
 {
@@ -993,11 +1613,79 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI_Command_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI_Cut1_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI_Cut1_Run);
+s32 nbCameraBoss_BSARI_Cut1_Run(nbCamera_t *pCamera)
+{
+    nbFormation_t *pForm = effBTLSkillGetInvokeFormation();
+    f32 rate = BSARI_Cut1_Rate * 0.9f;
+    f32 blend;
+    f32 length;
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI2_Cut1_Set);
+    BSARI_Cut1_Rate = rate;
+    blend = rate * 0.5f + 0.75f;
+    effBTLModelGetSphereCenter(pForm);
+    VU0_STORE_VF10(pCamera);
+    pCamera->target.y -= pForm->h * pForm->scl * 0.15f;
+    VU0_LOAD_VF10(pCamera);
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(&nbCameraBSARICut1Vec);
+    VU0_LERP_VF10_VF11(blend);
+    VU0_COPY_VF10_TO_VF11();
+    VU0_COPY_VF12_TO_VF10();
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(length);
+    pCamera->distance = length;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10(&pCamera->direction);
+    pCamera->fovy = 0.69813163f;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI2_Cut1_Run);
+s32 nbCameraBoss_BSARI2_Cut1_Set(nbCamera_t *pCamera)
+{
+    s32 type;
+
+    effBTLModelAllHide();
+    effBTLModelInvokeShow();
+    type = dds3GetRandIntA(0, 2);
+    switch (type) {
+    case 0:
+        nbCameraBSARICut1Vec.x = 772.02f;
+        nbCameraBSARICut1Vec.y = -310.88f;
+        nbCameraBSARICut1Vec.z = -535.27f;
+        break;
+    case 1:
+        nbCameraBSARICut1Vec.x = -804.65f;
+        nbCameraBSARICut1Vec.y = -314.06f;
+        nbCameraBSARICut1Vec.z = -799.75f;
+        break;
+    }
+    BSARI_Cut1_Rate = 1.0f;
+    return 1;
+}
+
+s32 nbCameraBoss_BSARI2_Cut1_Run(nbCamera_t *pCamera)
+{
+    nbFormation_t *pForm = effBTLSkillGetInvokeFormation();
+    f32 rate = BSARI_Cut1_Rate * 0.985f;
+    f32 blend;
+    f32 length;
+
+    BSARI_Cut1_Rate = rate;
+    blend = rate * 0.5f + 0.75f;
+    effBTLModelGetMarkPosition2(pForm, 1);
+    VU0_STORE_VF10(pCamera);
+    VU0_COPY_VF10_TO_VF12();
+    VU0_LOAD_VF11(&nbCameraBSARICut1Vec);
+    VU0_LERP_VF10_VF11(blend);
+    VU0_COPY_VF10_TO_VF11();
+    VU0_COPY_VF12_TO_VF10();
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(pCamera->distance);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10(&pCamera->direction);
+    pCamera->fovy = 0.69813163f;
+    return 1;
+}
 
 s32 nbCameraBoss_BSARI_MASEHA_Set(nbCamera_t *pCamera)
 {
@@ -1022,14 +1710,65 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Bsnet_AISHOH_Set);
 
 void nbCameraBoss_Kagu_E909_Set(void)
 {
-    pNbCamera.unk3C = 0;
+    pNbCamera.frame = 0;
 }
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Kagu_E909_Run);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Kagu_Attack_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Kagu_FLEACH_Set);
+s32 nbCameraBoss_Kagu_FLEACH_Set(nbCamera_t *pCamera)
+{
+    effBTLModelAllShow();
+    if (nbCameraBossCutFlag == 1) {
+        switch (dds3GetRandIntA(0, 2)) {
+        case 0:
+            pCamera->direction.x = -0.4f;
+            pCamera->direction.y = 0.22f;
+            pCamera->direction.z = 0.89f;
+            pCamera->target.x = 949.28992f;
+            pCamera->target.y = -1372.0599f;
+            pCamera->target.z = -2017.89f;
+            pCamera->distance = 1.0f;
+            pCamera->fovy = 0.69813163f;
+            break;
+        case 1:
+            pCamera->direction.x = 0.01f;
+            pCamera->direction.y = 0.26f;
+            pCamera->direction.z = 0.97f;
+            pCamera->target.x = -98.7f;
+            pCamera->target.y = -1369.1199f;
+            pCamera->target.z = -2463.0596f;
+            pCamera->distance = 1.0f;
+            pCamera->fovy = 0.69813163f;
+            break;
+        }
+    } else {
+        switch (dds3GetRandIntA(0, 2)) {
+        case 0:
+            pCamera->direction.x = 0.34f;
+            pCamera->direction.y = 0.07f;
+            pCamera->direction.z = 0.94f;
+            pCamera->target.x = -1205.4999f;
+            pCamera->target.y = -669.11994f;
+            pCamera->target.z = -1848.38f;
+            pCamera->distance = 1.0f;
+            pCamera->fovy = 0.69813163f;
+            break;
+        case 1:
+            pCamera->direction.x = 0.01f;
+            pCamera->direction.y = 0.26f;
+            pCamera->direction.z = 0.97f;
+            pCamera->target.x = -98.7f;
+            pCamera->target.y = -1369.1199f;
+            pCamera->target.z = -2463.0596f;
+            pCamera->distance = 1.0f;
+            pCamera->fovy = 0.69813163f;
+            break;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Kagu_MJINKO_Set);
 
@@ -1065,11 +1804,44 @@ s32 nbCameraBoss_Bspish_Cut1_Run(nbCamera_t *pCamera)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSMETA_E914_0_Set);
+void nbCameraBoss_BSMETA_E914_0_Set(void)
+{
+    effBTLModelAllShow();
+    pNbCamera.direction.x = 0.56f;
+    pNbCamera.direction.y = -0.19f;
+    pNbCamera.direction.z = 0.81f;
+    pNbCamera.target.x = -946.41993f;
+    pNbCamera.target.y = -103.86f;
+    pNbCamera.target.z = -904.08991f;
+    pNbCamera.distance = 1.0f;
+    pNbCamera.fovy = 0.69813163f;
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSMETA_E914_1_Set);
+void nbCameraBoss_BSMETA_E914_1_Set(void)
+{
+    effBTLModelAllShow();
+    pNbCamera.direction.x = -0.2f;
+    pNbCamera.direction.y = 0.29f;
+    pNbCamera.direction.z = 0.94f;
+    pNbCamera.target.x = 441.29f;
+    pNbCamera.target.y = -762.66993f;
+    pNbCamera.target.z = -1527.5899f;
+    pNbCamera.distance = 1.0f;
+    pNbCamera.fovy = 0.69813163f;
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Meta_METAT1_0_Set);
+s32 nbCameraBoss_Meta_METAT1_0_Set(nbCamera_t *pCamera)
+{
+    pCamera->direction.x = 0.47f;
+    pCamera->direction.y = -0.28f;
+    pCamera->direction.z = 0.84f;
+    pCamera->target.x = -229.18f;
+    pCamera->target.y = -433.18f;
+    pCamera->target.z = 261.52997f;
+    pCamera->distance = 1.0f;
+    pCamera->fovy = 0.69813163f;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Meta_METAT1_1_Set);
 
@@ -1082,9 +1854,53 @@ void nbCameraBoss_BSBERU_E915_Init(void)
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSBERU_E915_0_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSBERU_E915_1_Set);
+void nbCameraBoss_BSBERU_E915_1_Set(void)
+{
+    pNbCamera.direction.x = -0.27f;
+    pNbCamera.direction.y = 0.37f;
+    pNbCamera.direction.z = 0.89f;
+    pNbCamera.target.x = 361.64997f;
+    pNbCamera.target.y = -627.90992f;
+    pNbCamera.target.z = -651.73993f;
+    pNbCamera.distance = 1.0f;
+    pNbCamera.fovy = 0.69813163f;
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSBERU_E915_2_Set);
+void nbCameraBoss_BSBERU_E915_2_Set(void)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    sdfVector4_t from;
+    sdfVector4_t to;
+    f32 rate = nbCameraBoss_BSBERU_E915_Rate;
+    f32 blend;
+
+    nbCameraBoss_BSBERU_E915_Rate = rate * 0.99f;
+    blend = (s32)nbCameraBoss_BSBERU_E915_Frame / 30.0f;
+    from.x = 361.64997f;
+    from.y = -627.90992f;
+    from.z = -651.73993f;
+    to.x = 511.64f;
+    to.y = -606.7f;
+    to.z = -1581.8299f;
+    blend *= rate;
+    VU0_LOAD_VF10(&from);
+    VU0_LOAD_VF11(&to);
+    VU0_LERP_VF10_VF11(blend);
+    VU0_STORE_VF10(pCamera);
+    from.x = -0.27f;
+    from.y = 0.37f;
+    from.z = 0.89f;
+    to.x = -0.23f;
+    to.y = 0.13f;
+    to.z = 0.96f;
+    VU0_LOAD_VF10(&from);
+    VU0_LOAD_VF11(&to);
+    VU0_LERP_VF10_VF11(blend);
+    VU0_STORE_VF10(&pCamera->direction);
+    pCamera->distance = 1.0f;
+    pCamera->fovy = 0.69813163f;
+    nbCameraBoss_BSBERU_E915_Frame++;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Beru_HAENO1_Set);
 
@@ -1118,17 +1934,117 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_CheckFix);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_Command_Init);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI1_Cut23_EX01_Set);
+s32 nbCameraBoss_BSARI1_Cut23_EX01_Set(nbCamera_t *pCamera)
+{
+    nbFormation_t *pInvoke;
+    nbFormation_t *pTarget;
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI1_Cut23_EX02_Set);
+    effBTLModelAllShow();
+    func_0016E120();
+    pInvoke = effBTLSkillGetInvokeFormation();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    if (pInvoke->orgpos.x < pTarget->orgpos.x) {
+        pCamera->direction.x = -0.26f;
+        pCamera->direction.y = 0.33f;
+        pCamera->direction.z = 0.91f;
+        pCamera->target.x = 746.94f;
+        pCamera->target.y = -1248.2499f;
+        pCamera->target.z = -1527.32f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    } else {
+        pCamera->direction.x = 0.62f;
+        pCamera->direction.y = 0.3f;
+        pCamera->direction.z = 0.73f;
+        pCamera->target.x = -1308.1398f;
+        pCamera->target.y = -960.32f;
+        pCamera->target.z = -1071.01f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    }
+    return 1;
+}
+
+s32 nbCameraBoss_BSARI1_Cut23_EX02_Set(nbCamera_t *pCamera)
+{
+    nbFormation_t *pInvoke;
+    nbFormation_t *pTarget;
+
+    effBTLModelAllShow();
+    func_0016E120();
+    pInvoke = effBTLSkillGetInvokeFormation();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    if (pInvoke->orgpos.x < pTarget->orgpos.x) {
+        pCamera->direction.x = -0.31f;
+        pCamera->direction.y = -0.1f;
+        pCamera->direction.z = 0.95f;
+        pCamera->target.x = 740.91993f;
+        pCamera->target.y = -251.30999f;
+        pCamera->target.z = -1268.8299f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    } else {
+        pCamera->direction.x = 0.45f;
+        pCamera->direction.y = 0.01f;
+        pCamera->direction.z = 0.89f;
+        pCamera->target.x = -865.67f;
+        pCamera->target.y = -294.74f;
+        pCamera->target.z = -1501.93f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI1_Cut23_EX03_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI2_Cut23_EX01_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI2_Cut23_EX02_Set);
+s32 nbCameraBoss_BSARI2_Cut23_EX02_Set(nbCamera_t *pCamera)
+{
+    nbFormation_t *pInvoke;
+    nbFormation_t *pTarget;
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI2_Cut23_EX03_Set);
+    effBTLModelAllShow();
+    func_0016E120();
+    pInvoke = effBTLSkillGetInvokeFormation();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    if (pInvoke->orgpos.x < pTarget->orgpos.x) {
+        pCamera->direction.x = -0.32f;
+        pCamera->direction.y = 0.08f;
+        pCamera->direction.z = 0.95f;
+        pCamera->target.x = 774.63f;
+        pCamera->target.y = -461.97f;
+        pCamera->target.z = -1267.7199f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    } else {
+        pCamera->direction.x = 0.56f;
+        pCamera->direction.y = 0.06f;
+        pCamera->direction.z = 0.82f;
+        pCamera->target.x = -1213.39f;
+        pCamera->target.y = -383.00995f;
+        pCamera->target.z = -1264.4799f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    }
+    return 1;
+}
+
+s32 nbCameraBoss_BSARI2_Cut23_EX03_Set(nbCamera_t *pCamera)
+{
+    effBTLModelAllShow();
+    func_0016E120();
+    pCamera->direction.x = 0.49f;
+    pCamera->direction.y = 0.36f;
+    pCamera->direction.z = 0.8f;
+    pCamera->target.x = -997.73993f;
+    pCamera->target.y = -1100.6099f;
+    pCamera->target.z = -1215.93f;
+    pCamera->distance = 1.0f;
+    pCamera->fovy = 0.69813163f;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSARI1_EP_IT_Set);
 
@@ -1144,7 +2060,36 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSBERU_EP_IT_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSLUSI_EP_IT_Set);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSKAGU_Cut23_EX01_Set);
+s32 nbCameraBoss_BSKAGU_Cut23_EX01_Set(nbCamera_t *pCamera)
+{
+    nbFormation_t *pInvoke;
+    nbFormation_t *pTarget;
+
+    effBTLModelAllShow();
+    func_0016E120();
+    pInvoke = effBTLSkillGetInvokeFormation();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    if (pInvoke->orgpos.x < pTarget->orgpos.x) {
+        pCamera->direction.x = -0.61f;
+        pCamera->direction.y = 0.29f;
+        pCamera->direction.z = 0.74f;
+        pCamera->target.x = 1385.7698f;
+        pCamera->target.y = -1184.8399f;
+        pCamera->target.z = -892.5199f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    } else {
+        pCamera->direction.x = 0.64f;
+        pCamera->direction.y = -0.03f;
+        pCamera->direction.z = 0.77f;
+        pCamera->target.x = -1443.05f;
+        pCamera->target.y = -321.31f;
+        pCamera->target.z = -830.79f;
+        pCamera->distance = 1.0f;
+        pCamera->fovy = 0.69813163f;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraBoss_BSKAGU_Cut23_EX02_Set);
 
@@ -1203,7 +2148,15 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraDANTE_DCOMBO_KAGU_Set);
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperFileLoadPB);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperCreate);
+nbCameraHelper_t *nbCameraHelperCreate(const char *name)
+{
+    nbCameraHelper_t *pHelper = sdfChipAllocDirect(0x3C);
+
+    pHelper->hPart = nbCameraHelperFileLoadPB(name);
+    pHelper->unk30 = 0;
+    pHelper->unk34 = nbCameraHelperLength(pHelper);
+    return pHelper;
+}
 
 void nbCameraHelperDelete(nbCameraHelper_t *pHelper)
 {
@@ -1218,7 +2171,27 @@ u16 nbCameraHelperLength(nbCameraHelper_t *pHelper)
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperRun);
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperModelSetSub);
+void nbCameraHelperModelSetSub(mdlObj_t *hModel, u32 target, u32 eye)
+{
+    nbCamera_t *pCamera = &pNbCamera;
+    f32 length;
+
+    if (sdfModelGetMarkPos(hModel->inner, target) == 0) {
+        printf(D_00535850);
+    }
+    VU0_STORE_VF10(pCamera);
+    if (sdfModelGetMarkPos(hModel->inner, eye) == 0) {
+        printf(D_00535878);
+    }
+    VU0_COPY_VF10_TO_VF11();
+    VU0_LOAD_VF10(pCamera);
+    VU0_SUB_VF10_VF11();
+    VU0_LENGTH_VF10(length);
+    pCamera->distance = length;
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF10(&pCamera->direction);
+    pCamera->fovy = 0.7853981f;
+}
 
 
 void nbCameraHelperModelSet(mdlObj_t *hModel)
@@ -1226,13 +2199,21 @@ void nbCameraHelperModelSet(mdlObj_t *hModel)
     nbCameraHelperModelSetSub(hModel, 0, 1);
 }
 
-INCLUDE_RODATA(const s32, "code_001B0858", D_00535850);
+s32 nbCameraHelperViewer_PB_Init(s32 unused)
+{
+    void *hFileList = dds3EffectFileListCreate(D_005358A8, 0x10);
+    void *pWork;
 
-INCLUDE_RODATA(const s32, "code_001B0858", D_00535878);
-
-INCLUDE_RODATA(const s32, "code_001B0858", D_00535898);
-
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperViewer_PB_Init);
+    nbCameraHelperViewerPBHandle = hFileList;
+    pWork = dds3EffectFileListWindowCreate(hFileList);
+    nbCameraHelperViewerPBWork = pWork;
+    dds3EffectFileListWindowSetPos(pWork, 0xF0, 0xD0);
+    dds3EffectFileListWindowSetOt(nbCameraHelperViewerPBWork, 1);
+    dds3EffectFileListWindowSetPadWait(nbCameraHelperViewerPBWork, 0x53);
+    dds3EffectFileListWindowSetWindowColor(nbCameraHelperViewerPBWork, 0x80806020, 0x80000000);
+    nbCameraHelperViewerMode = NULL;
+    return unused;
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperViewer_PB_Draw);
 
@@ -1242,7 +2223,38 @@ void nbCameraHelperViewer_PB_End(void *pData)
     dds3EffectFileListDelete(nbCameraHelperViewerPBHandle);
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperViewer_Init);
+s32 nbCameraHelperViewer_Init(s32 unused)
+{
+    s32 size;
+
+    if (nbCameraHelperViewerMode != NULL) {
+        if (D_0054F3DC != NULL) {
+            nbCameraHelperDelete(D_0054F3DC);
+            if (D_0054F3E0 != NULL) {
+                sdfMemFreeDirect(D_0054F3E0);
+            }
+            if (D_0054F3E4 != NULL) {
+                sdfMemFreeDirect(D_0054F3E4);
+            }
+        }
+        D_0054F3DC = nbCameraHelperCreate(nbCameraHelperViewerMode);
+        nbCameraHelperViewerMode = NULL;
+        size = nbCameraHelperLength(D_0054F3DC) * 16;
+        D_0054F3E0 = sdfMemAllocDirect(size);
+        nbCameraHelperViewerState = sdfMemLock(D_0054F3E0);
+        D_0054F3E4 = sdfMemAllocDirect(size);
+        nbCameraHelperViewerHandle = sdfMemLock(D_0054F3E4);
+    }
+    return unused;
+}
+
+INCLUDE_RODATA(const s32, "code_001B0858", D_00535850);
+
+INCLUDE_RODATA(const s32, "code_001B0858", D_00535878);
+
+INCLUDE_RODATA(const s32, "code_001B0858", D_00535898);
+
+INCLUDE_RODATA(const s32, "code_001B0858", D_005358A8);
 
 INCLUDE_RODATA(const s32, "code_001B0858", D_005358C0);
 
