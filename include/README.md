@@ -1039,13 +1039,33 @@ C. 1045 of the stubbed functions contain at least one such instruction.
 
 ### The rule the macros follow
 
-No macro parameter reaches the assembler. Not an opcode, not a suffix, not a
-register name. Parameters are only C expressions bound through operand
-constraints (`"r"`, `"f"`, `"m"`) and substituted as `%0`, `%1`; every opcode,
-suffix and `vf`/`vi` register is literal in the macro body. That is why there are
-many near-duplicate macros (`VU0_SCALE_VF10` and `VU0_SCALE_VF11`,
-`VU0_LOAD_VF10` and `VU0_LOAD_VF11`) instead of one parameterised form: a
-register passed as a token is still an assembly literal in C clothing.
+No opcode and no suffix ever reaches the assembler through a macro parameter.
+Those are literal in the macro body, always. Value parameters are C expressions
+bound through operand constraints (`"r"`, `"f"`, `"m"`) and substituted as `%0`,
+`%1`.
+
+A `vf` register or an axis letter may be a parameter, because after
+preprocessing it is still a literal: `VU0_MOVE_VF(vf11, vf10)` stringizes to the
+same text `vmove.xyzw vf11, vf10` that a fixed macro would contain. The
+parameterised forms are the ones to prefer, since one definition then covers
+every register the units use, and a port has one operation to translate instead
+of one per register. The fixed-register forms (`VU0_ADD_VF10_VF11` beside
+`VU0_ADD`) remain where the units already call them.
+
+What is *not* interchangeable is the operand section. Two macros that assemble
+the same instruction but declare different clobbers or constraints produce
+different register allocation, so they are different macros however alike they
+look. Four names are still defined per unit for exactly that reason, each with
+an `#undef` and a comment saying what differs:
+
+| name | why it stays local |
+| --- | --- |
+| `VU0_LOAD_VF10` in `model/mdlManager.c` | the load has to act as a memory barrier |
+| `VU0_SCALE_VF10` in `model/mdlManager.c`, `event/evtUnitManager.c`, `event/evtPolygonMovie.c` | retail carries the bits through `$2`, not a register cc1 picks |
+| `VU0_SCALE_VF11` in `event/evtPolygonMovie.c` | as above |
+| `VU0_SET_VF10_Y` in `basic/dds3PathBasic.c` | declares `$2` clobbered where `event/evtUnitManager.c` does not |
+
+Everything else is defined once, in `ps2asm.h`, and the units include it.
 
 The engine's own convention makes that practical. The VU0 inlines in the retail
 code always use the same registers for the same roles, so the macros fix them:

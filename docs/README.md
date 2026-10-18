@@ -16,6 +16,8 @@ quickstart.
   invented.
 - [IDB corrections](idb-corrections.md): names and layouts in the IDA database
   that the retail code proves wrong, and the proof for each.
+- [VU0 constructs](vu0-constructs.md): the vector and MMI operations the
+  assembly macros cover, and what an equivalent has to preserve.
 - [Reading progress](progress.md): how progress would be measured and what
   counts.
 
