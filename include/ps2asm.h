@@ -660,7 +660,7 @@ typedef struct {
 #define SDF_VU0_SUBVECTOR_A_C() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf10, vf10, vf12\n\t.set reorder")
 
-/* from code_0024C470.c */
+/* from newbattle/nbStageProcess.c */
 #define SDF_VU0_COPYMATRIX_B_TO_A() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
     "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")

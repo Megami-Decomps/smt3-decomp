@@ -337,9 +337,11 @@ sixteen 0xEC-byte digging-party records at +0xA50, 48 field-flag blocks at
 the action helpers' eight 0x1C-byte part records at +0x32 and native 0x310
 stride. `datUnitWork_t` retains the verified byte/halfword name and skill
 storage: `nowcommand` is at +0x64, not the later offset implied by unused
-expanded donor fields. Stock-skill helpers read/write 24 halfwords at +0x86;
-they use `datUnitWork_t.skillSlots` directly rather than appending another
-skill array after the already complete 0xEC-byte unit record.
+expanded donor fields. Inherited-skill helpers read and write 24 halfwords at
++0x86 through `keisyoskill`, rather than appending another skill array after
+the already complete 0xEC record. That field and the `keiattr` byte array at
++0xB6 are named from the IDB, whose field order for the rest of the struct
+does not describe this ELF; see [IDB corrections](../docs/idb-corrections.md).
 
 ### model.h
 

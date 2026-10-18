@@ -217,14 +217,17 @@ typedef struct nbActionProcessData_t
     nbParty_t *party;
     nbFormation_t *form;
     datUnitWork_t *work;
-    u8 unk_30[0xC];
+    s32 partyindex;
+    s32 type;
+    s32 target;
     s32 selectbit;
     u8 unk_40[0x28];
     s32 unk_68;
     u8 unk_6C[0x124];
-    s32 unk_190;
-    u8 unk_194[0xC];
-    s32 unk_1A0;
+    u32 aiselect;
+    s32 aijokentbl;
+    u8 unk_198[0x8];
+    u32 aisummonid;
 } nbActionProcessData_t;
 typedef struct nbNegoProcessData_t
 {
@@ -796,6 +799,11 @@ extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbForm
 extern s32 nbCheckFlowUnit(nbNegoProcessData_t *n);
 extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
 extern char D_00545208[]; /* "pwork hp = %d\n" */
+extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
+extern s32 ChkAiHojoMax(s32 formindex, s32 hojotype);
+extern u32 datGetAisyo(datUnitWork_t *unit, s32 type);
+extern s32 nbGetHojoCounterMax(s32 hojotype);
+extern s32 nbGetHojoCounterMin(s32 hojotype);
 // @@DECLS@@
 extern void datAddMaka(s32 maka);
 extern void datAddItem(s32 item, s32 cnt);
@@ -5466,7 +5474,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitDebugProcess);
 s32 Chk_MYHP(nbActionProcessData_t *a, s32 hp)
 {
     if (a->work->hp * 100 / a->work->maxhp <= hp) {
-        a->unk_190 = 1 << a->form->formindex;
+        a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
@@ -5475,72 +5483,553 @@ s32 Chk_MYHP(nbActionProcessData_t *a, s32 hp)
 s32 Chk_MYMP(nbActionProcessData_t *a, s32 mp)
 {
     if (a->work->mp <= mp) {
-        a->unk_190 = 1 << a->form->formindex;
+        a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRHP);
+s32 Chk_FRHP(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+    s32 one;
+
+    one = 1;
+    for (i = 4; i < 14; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        work = nbGetUnitWorkPointer(a->data, &a->data->party[i]);
+        if (n < work->hp * 100 / work->maxhp) {
+            continue;
+        }
+        a->aiselect |= one << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
 
 s32 Chk_DMGCNT_285578(nbActionProcessData_t *a, s32 n)
 {
     if (nbGetHojoCounter(a->form->formindex, 0) >= n) {
-        a->unk_190 = 1 << a->form->formindex;
+        a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_CHKCNT_2855D8);
+s32 Chk_CHKCNT_2855D8(nbActionProcessData_t *a, s32 n)
+{
+    s32 cnt;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRCNT);
+    cnt = nbGetHojoCounter(a->form->formindex, a->aijokentbl + 1);
+    if (cnt < 127) {
+        cnt++;
+    }
+    nbSetHojoCounter(a->form->formindex, a->aijokentbl + 1, cnt);
+    if (cnt < n) {
+        return 0;
+    }
+    a->aiselect = 1 << a->form->formindex;
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENCNT);
+s32 Chk_FRCNT(nbActionProcessData_t *a, s32 n)
+{
+    nbParty_t *party;
+    s32 i;
+    s32 one;
+
+    one = 1;
+    if (n >= a->data->enemypcnt) {
+        party = &a->data->party[4];
+        for (i = 9; i >= 0; i--, party++) {
+            if (!(party->flag & 1)) {
+                continue;
+            }
+            if (party->flag & 8) {
+                continue;
+            }
+            if (party->flag & 0x10) {
+                continue;
+            }
+            if (party->flag & 0x20) {
+                continue;
+            }
+            a->aiselect |= one << party->formindex;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+s32 Chk_ENCNT(nbActionProcessData_t *a, s32 n)
+{
+    nbParty_t *party;
+    s32 i;
+    s32 one;
+
+    one = 1;
+    if (n >= a->data->playerpcnt) {
+        party = a->data->party;
+        for (i = 3; i >= 0; i--, party++) {
+            if (!(party->flag & 1)) {
+                continue;
+            }
+            if (party->flag & 8) {
+                continue;
+            }
+            if (party->flag & 0x10) {
+                continue;
+            }
+            if (party->flag & 0x20) {
+                continue;
+            }
+            a->aiselect |= one << party->formindex;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 s32 Chk_MYBAD(nbActionProcessData_t *a, s32 badstat)
 {
     if ((a->work->badstatus & 0xFFF) == badstat) {
-        a->unk_190 = 1 << a->form->formindex;
+        a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRBAD);
+s32 Chk_FRBAD(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENBAD);
+    one = 1;
+    for (i = 4; i < 14; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if ((nbGetUnitWorkPointer(a->data, &a->data->party[i])->badstatus & 0xFFF) != n) {
+            continue;
+        }
+        a->aiselect |= one << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENALLBAD);
+s32 Chk_ENBAD(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENID);
+    one = 1;
+    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if ((nbGetUnitWorkPointer(a->data, &a->data->party[i])->badstatus & 0xFFF) != n) {
+            continue;
+        }
+        a->aiselect |= one << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRID);
+s32 Chk_ENALLBAD(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    s32 cnt;
+    u32 bit;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", ChkAiHojo);
+    one = 1;
+    cnt = 0;
+    bit = 0;
+    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if ((nbGetUnitWorkPointer(a->data, &a->data->party[i])->badstatus & 0xFFF) != n) {
+            continue;
+        }
+        cnt++;
+        bit |= one << a->data->party[i].formindex;
+    }
+    if (cnt == a->data->playerpcnt) {
+        a->aiselect = bit;
+        return 1;
+    }
+    return 0;
+}
+
+s32 Chk_ENID(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+    s32 one;
+
+    one = 1;
+    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        work = nbGetUnitWorkPointer(a->data, &a->data->party[i]);
+        if (work->flag & 4) {
+            continue;
+        }
+        if (work->id != n) {
+            continue;
+        }
+        a->aiselect |= one << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
+
+s32 Chk_FRID(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    s32 one;
+
+    one = 1;
+    for (i = 4; i < 14; i++) {
+        if (i == a->partyindex) {
+            continue;
+        }
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if (nbGetUnitWorkPointer(a->data, &a->data->party[i])->id != n) {
+            continue;
+        }
+        a->aiselect |= one << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
+
+s32 ChkAiHojo(s32 formindex, s32 hojotype)
+{
+    switch (hojotype) {
+    case 0:
+        if (nbGetHojoCounter(formindex, 4) > 0) {
+            return 1;
+        }
+        break;
+    case 1:
+        if (nbGetHojoCounter(formindex, 4) < 0) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (nbGetHojoCounter(formindex, 5) > 0) {
+            return 1;
+        }
+        break;
+    case 3:
+        if (nbGetHojoCounter(formindex, 5) < 0) {
+            return 1;
+        }
+        break;
+    case 4:
+        if (nbGetHojoCounter(formindex, 6) > 0) {
+            return 1;
+        }
+        break;
+    case 5:
+        if (nbGetHojoCounter(formindex, 6) < 0) {
+            return 1;
+        }
+        break;
+    case 6:
+        if (nbGetHojoCounter(formindex, 7) > 0) {
+            return 1;
+        }
+        break;
+    case 7:
+        if (nbGetHojoCounter(formindex, 7) < 0) {
+            return 1;
+        }
+        break;
+    case 8:
+        if (nbGetHojoCounter(formindex, 8) > 0) {
+            return 1;
+        }
+        break;
+    case 9:
+        if (nbGetHojoCounter(formindex, 8) < 0) {
+            return 1;
+        }
+        break;
+    case 11:
+        if (nbGetHojoCounter(formindex, 9) > 0) {
+            return 1;
+        }
+        break;
+    case 12:
+        if (nbGetHojoCounter(formindex, 10) > 0) {
+            return 1;
+        }
+        break;
+    case 13:
+        if (nbGetHojoCounter(formindex, 11) > 0) {
+            return 1;
+        }
+        break;
+    case 14:
+        if (nbGetHojoCounter(formindex, 12) > 0) {
+            return 1;
+        }
+        break;
+    case 15:
+        if (nbGetHojoCounter(formindex, 13) > 0) {
+            return 1;
+        }
+        break;
+    case 16:
+        if (nbGetHojoCounter(formindex, 14) > 0) {
+            return 1;
+        }
+        break;
+    case 17:
+        if (nbGetHojoCounter(formindex, 15) > 0) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", ChkAiHojoMax);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENHOJO);
+s32 Chk_ENHOJO(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRHOJO);
+    one = 1;
+    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if (ChkAiHojo(a->data->party[i].formindex, n)) {
+            a->aiselect |= one << a->data->party[i].formindex;
+        }
+    }
+    return a->aiselect != 0;
+}
+
+s32 Chk_FRHOJO(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    s32 one;
+
+    one = 1;
+    for (i = 4; i < 14; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if (ChkAiHojo(a->data->party[i].formindex, n)) {
+            a->aiselect |= one << a->data->party[i].formindex;
+        }
+    }
+    return a->aiselect != 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENHOJOMAX);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_FRHOJOMAX);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_BA_286248);
+s32 Chk_BA_286248(nbActionProcessData_t *a, s32 n)
+{
+    nbParty_t *party;
+    s32 i;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_POW_2862D0);
+    one = 1;
+    if (a->data->stat & 0x10) {
+        party = a->data->party;
+        for (i = 3; i >= 0; i--, party++) {
+            if (!(party->flag & 1)) {
+                continue;
+            }
+            if (party->flag & 8) {
+                continue;
+            }
+            if (party->flag & 0x10) {
+                continue;
+            }
+            if (party->flag & 0x20) {
+                continue;
+            }
+            a->aiselect |= one << party->formindex;
+        }
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENLIGHT);
+s32 Chk_POW_2862D0(nbActionProcessData_t *a, s32 n)
+{
+    nbParty_t *party;
+    s32 i;
+    s32 one;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENDARK);
+    one = 1;
+    if (a->data->stat & 0x80) {
+        party = a->data->party;
+        for (i = 3; i >= 0; i--, party++) {
+            if (!(party->flag & 1)) {
+                continue;
+            }
+            if (party->flag & 8) {
+                continue;
+            }
+            if (party->flag & 0x10) {
+                continue;
+            }
+            if (party->flag & 0x20) {
+                continue;
+            }
+            a->aiselect |= one << party->formindex;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+s32 Chk_ENLIGHT(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    datUnitWork_t *work;    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        work = nbGetUnitWorkPointer(a->data, &a->data->party[i]);
+        if (work->flag & 4) {
+            continue;
+        }
+        if (datGet3Zokusei(work) != 1) {
+            continue;
+        }
+        a->aiselect |= 1 << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
+
+s32 Chk_ENDARK(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    datUnitWork_t *work;    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        work = nbGetUnitWorkPointer(a->data, &a->data->party[i]);
+        if (work->flag & 4) {
+            continue;
+        }
+        if (datGet3Zokusei(work) != -1) {
+            continue;
+        }
+        a->aiselect |= 1 << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
 
 s32 Chk_SENSEI_286530(nbActionProcessData_t *a)
 {
     if (ChkAiHojo(a->form->formindex, 0x11) != 0) {
-        a->unk_190 = 1 << a->form->formindex;
+        a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
@@ -5570,12 +6059,34 @@ s32 Chk_TURN(nbActionProcessData_t *a, s32 turn)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Chk_ENHAMAMHK);
+s32 Chk_ENHAMAMHK(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+    for (i = 0; i < 4; i++) {
+        if (!(a->data->party[i].flag & 1)) {
+            continue;
+        }
+        if (a->data->party[i].flag & 8) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x10) {
+            continue;
+        }
+        if (a->data->party[i].flag & 0x20) {
+            continue;
+        }
+        if (datGetAisyo(nbGetUnitWorkPointer(a->data, &a->data->party[i]), 6) & 0x70000) {
+            continue;
+        }
+        a->aiselect |= 1 << a->data->party[i].formindex;
+    }
+    return a->aiselect != 0;
+}
 
 s32 Chk_SKILLNOMP(nbActionProcessData_t *a, s32 nskill)
 {
     if (nbCheckSkillCost(a->form->formindex, nskill) != 0) {
-        a->unk_190 = 1 << a->form->formindex;
+        a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
@@ -5591,21 +6102,170 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetKoudou);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_AI);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_LIFEMIN);
+void Sel_LIFEMIN(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+    s32 index;
+    s32 min;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_BAARLV);
+    index = -1;
+    min = 10000;
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (work->hp < min) {
+            min = work->hp;
+            index = i;
+        }
+    }
+    if (index >= 0) {
+        a->data->form[index].stat |= 8;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_LVMIN);
+void Sel_BAARLV(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+    s32 index;
+    s32 min;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_BAD);
+    index = -1;
+    min = 10000;
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if ((work->badstatus & 0xFFF) == 0x200) {
+            continue;
+        }
+        if (work->level < min) {
+            min = work->level;
+            index = i;
+        }
+    }
+    if (index >= 0) {
+        a->data->form[index].stat |= 8;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_ID);
+void Sel_LVMIN(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+    s32 index;
+    s32 min;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_LIGHT);
+    index = -1;
+    min = 10000;
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (work->level < min) {
+            min = work->level;
+            index = i;
+        }
+    }
+    if (index >= 0) {
+        a->data->form[index].stat |= 8;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_DARK);
+void Sel_BAD(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Sel_PLAYER);
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        if ((nbGetUnitWorkFromFormindex(i)->badstatus & 0xFFF) != n) {
+            continue;
+        }
+        a->data->form[i].stat |= 8;
+    }
+}
+
+void Sel_ID(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (work->flag & 4) {
+            continue;
+        }
+        if (work->id != n) {
+            continue;
+        }
+        a->data->form[i].stat |= 8;
+    }
+}
+
+void Sel_LIGHT(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (work->flag & 4) {
+            continue;
+        }
+        if (datGet3Zokusei(work) != 1) {
+            continue;
+        }
+        a->data->form[i].stat |= 8;
+    }
+}
+
+void Sel_DARK(nbActionProcessData_t *a, s32 n)
+{
+    datUnitWork_t *work;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        work = nbGetUnitWorkFromFormindex(i);
+        if (work->flag & 4) {
+            continue;
+        }
+        if (datGet3Zokusei(work) != -1) {
+            continue;
+        }
+        a->data->form[i].stat |= 8;
+    }
+}
+
+void Sel_PLAYER(nbActionProcessData_t *a, s32 n)
+{
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        if (!(a->data->form[i].stat & 4)) {
+            continue;
+        }
+        if (!(nbGetUnitWorkFromFormindex(i)->flag & 4)) {
+            continue;
+        }
+        a->data->form[i].stat |= 8;
+    }
+}
 
 void Sel_JOKEN(nbActionProcessData_t *a)
 {
@@ -5616,7 +6276,7 @@ void Sel_JOKEN(nbActionProcessData_t *a)
     form = a->data->form;
     for (i = 0; i < 16; i++) {
         one = 1;
-        if ((form->stat & 4) && (a->unk_190 & (one << i))) {
+        if ((form->stat & 4) && (a->aiselect & (one << i))) {
             form->stat |= 8;
         }
         form++;
@@ -5704,7 +6364,7 @@ s32 nbCommand_AI_ACT_SUMMON(void)
     a->work->nowcommand = 1;
     a->work->nowindex = n;
     no = scrGetIntPara(1);
-    a->unk_1A0 = no;
+    a->aisummonid = no;
     nbSetActionCommand(a->data, no);
     return 1;
 }
@@ -5844,7 +6504,7 @@ static void AiChkJoken(s32 joken)
     nbActionProcessData_t *a;
 
     a = scrGetData();
-    a->unk_190 = 0;
+    a->aiselect = 0;
     if (nbAiChkJoken(a, joken)) {
         scrSetIntReturnValue(1);
     } else {
