@@ -1,8 +1,8 @@
 # Reading progress
 
-Nothing is published anywhere: no decomp.dev page, no badge, no tracker. This
-page records how progress is measured and what the local reports measured last
-time they were run.
+This page records how progress is measured and what the local reports
+measured last time they were run. CI publishes the same reconciled numbers to
+the [progress site](#progress-site).
 
 ## What counts
 
@@ -160,6 +160,37 @@ Excluded from the game-code denominator, and matched nowhere:
 | `vu1` (`.vutext`, `.vudata`) | 2 | 59,312 | 0 |
 | `data` (splat `.data`/`.rodata`/`.bss` segments) | 7 | 0 | n/a |
 
+## Progress site
+
+`tools/progress_site.py` renders `build/smt3/report.json` (the headline and
+units) and `build/smt3/report.all.json` (the categories) as a static site:
+
+```sh
+ninja report
+python tools/progress_site.py smt3          # writes build/site/
+python -m http.server -d build/site         # preview
+```
+
+| File | Contents |
+|---|---|
+| `index.html` | headline, history chart, categories, every unit with its functions |
+| `history.json` | one entry per published commit: matched and total code bytes and functions |
+| `report.json` | the game-scope report the page was rendered from |
+| `badges/code.json`, `badges/functions.json` | [shields.io endpoint](https://shields.io/badges/endpoint-badge) badges the README uses |
+
+On a push to `main` with the retail executable available, the `Build`
+workflow fetches the `history.json` the site currently serves, renders the
+site with the new commit added, and deploys it to GitHub Pages from a separate
+job that holds the only `pages: write` token. Only reconciled credit is
+published, never `.raw` objdiff numbers. Pushes to `main` run one at a time so
+each publish extends the history the previous one served; a fetch that fails
+with anything but 404 stops the publish instead of restarting the history.
+
+One-time setup in the repository settings: **Pages → Build and deployment →
+Source: GitHub Actions**, plus the `ORIG_REPO` and `ORIG_DEPLOY_KEY` secrets
+the build already needs. The site is then at
+<https://megami-decomps.github.io/smt3-decomp/>.
+
 ## Percentages in these reports that are not measurements
 
 A unit with no base object has nothing to compare, and objdiff scores an empty
@@ -188,4 +219,5 @@ whole binary rather than game code, because no SDK unit has been identified
 yet; data is never credited; and a function counts once whatever its size, so
 the function percentage flatters small bodies. The reconciler proves ownership
 of bytes, not that a reconstruction is readable or correct beyond matching.
-Nothing is published anywhere; these numbers come from a local `ninja report`.
+These numbers come from a local `ninja report`; the
+[progress site](#progress-site) tracks them per commit.
