@@ -14,6 +14,19 @@
  *
  * M2CTX/PERMUTER (context and permuter builds) and SKIP_ASM (objdiff progress
  * objects: an asm fallback must not count as matched code) drop the asm.
+ *
+ * A function whose C is close but not exact is kept beside its fallback:
+ *
+ *     #ifdef NON_MATCHING
+ *     void f(void) { ... }
+ *     #else
+ *     INCLUDE_ASM(const s32, "unit/path", f);
+ *     #endif
+ *
+ * The normal build never defines NON_MATCHING, so it takes the asm and stays
+ * byte-identical, and the function still counts as unmatched. The draft is
+ * there for the next person instead of being thrown away, and
+ * tools/check_nonmatching.py compiles it so it cannot rot unnoticed.
  */
 #if !defined(M2CTX) && !defined(PERMUTER) && !defined(SKIP_ASM)
 

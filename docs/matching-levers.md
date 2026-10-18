@@ -143,14 +143,33 @@ a function that matched can stop matching because of an unrelated edit.
 inside the full unit`. Always read the whole unit's result, not the line for
 the function you were working on.
 
-## When to stop
+## When to stop, and keeping the draft
 
-Revert to `INCLUDE_ASM` rather than leave a differing function: a near miss
-earns no credit and hides the fact that the unit is incomplete.
-`python tools/revert_differing.py <unit.c>` puts every function the unit
-check will not credit back to `INCLUDE_ASM`, which is faster and safer than
-doing it by hand. Run `configure.py --force-split` afterwards, since the set
-of `INCLUDE_ASM` lines has changed.
+A differing function must not stay in the build: a near miss earns no credit
+and hides that the unit is incomplete. The draft itself is worth keeping, so
+`python tools/revert_differing.py <unit.c>` wraps every function the unit
+check will not credit as
+
+    #ifdef NON_MATCHING
+    <the draft>
+    #else
+    INCLUDE_ASM(const s32, "unit/path", name);
+    #endif
+
+The normal build never defines `NON_MATCHING`, so it takes the asm and stays
+byte-identical, and the function still counts as unmatched everywhere. Run
+`configure.py --force-split` afterwards, since the set of `INCLUDE_ASM` lines
+has changed, and `python3 tools/check_nonmatching.py` to confirm the draft
+still compiles.
+
+Say in the commit message how far the draft got and what the remaining
+difference is. "682 of 694 words, three spill slots rotated" tells the next
+person whether to continue or start over; "does not match" does not.
+`--discard` deletes a draft not worth keeping.
+
+A draft is never evidence of anything. It is not compiled by the build, so
+`tools/check_nonmatching.py` is what stops it rotting when a struct or a
+signature changes under it.
 
 These have been ruled out repeatedly and are not worth a second attempt:
 

@@ -631,6 +631,27 @@ def owned_rom_range(yaml_text, unit, section):
     return ranges[0] if len(ranges) == 1 else None
 
 
+def drop_nonmatching(text):
+    """Remove the drafts kept behind `#ifdef NON_MATCHING`.
+
+    The normal build takes the `#else` branch, so for every text scan here the
+    draft is not part of the unit: leaving it in makes a kept draft look like a
+    second definition of its own function.
+    """
+    out, skipping = [], False
+    for line in text.split("\n"):
+        head = line.strip()
+        if head == "#ifdef NON_MATCHING":
+            skipping = True
+            continue
+        if skipping and head in ("#else", "#endif"):
+            skipping = False
+            continue
+        if not skipping:
+            out.append(line)
+    return "\n".join(out)
+
+
 def asm_literal_users(source_text, asm_dir, syms, addr):
     """Find remaining ASM consumers in the source being checked."""
     names = set(re.findall(r'^INCLUDE_ASM\([^,]+,\s*"[^"]+",\s*(\w+)\);', source_text, re.M))
@@ -682,7 +703,7 @@ def main():
     args = ap.parse_args()
     unit = args.unit.resolve()
     source = args.source.resolve() if args.source else unit
-    source_text = source.read_text()
+    source_text = drop_nonmatching(source.read_text())
     version = unit.relative_to(ROOT / "src").parts[0]
     unit_name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
     syms = symbols(version)
@@ -1372,7 +1393,7 @@ def main():
                    "(this section has no accepted per-unit source owner)")
         print(f"DATA {name}: 0x{size:X} bytes emitted by the unit; {why}")
     # Constructs that force codegen rather than express the original source.
-    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", unit.read_text(), flags=re.S)
+    source_text = re.sub(r"/\*.*?\*/|//[^\n]*", "", drop_nonmatching(unit.read_text()), flags=re.S)
     for pattern, why in ((r"goto\s*\*", "computed goto (write the switch)"),
                          (r"&&\s*[A-Za-z_]\w*\s*[,}]", "label address table (write the switch)"),
                          (r"\bregister\b[^;]*\basm\s*\(", "register pinned with asm()")):
@@ -1398,7 +1419,7 @@ def main():
     # owner, so their actual object offsets provide the ordering check instead.
     # (an implicit-int K&R definition starts with the function name itself)
     order = re.findall(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);|^(?:[A-Za-z_][^;\n=]*?\b)?([A-Za-z_]\w*)\s*\([^;\n]*\)\s*\{?\s*$',
-                       unit.read_text(), re.M)
+                       drop_nonmatching(unit.read_text()), re.M)
     placed = [(0, address(a or b, syms), a or b) for a, b in order if address(a or b, syms) is not None]
     for (_, a, n), (_, b, m) in zip(placed, placed[1:]):
         if b < a:

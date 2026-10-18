@@ -1,0 +1,18 @@
+# Unit claims, so two people or agents do not decompile the same unit twice.
+#
+# Claim a unit by adding a row before you start, and set done when you stop,
+# whether you finished or not. One claimant per unit. A row is advisory: it
+# records intent, and nothing in the build reads this file.
+#
+# state: open (claimed, in progress) | done (claimant stopped)
+# left:  INCLUDE_ASM functions and retail code bytes when the row was written
+#
+# unit	claimant	state	date	left	note
+src/smt3/code_001FAE80.c	v1	done	2026-10-19	872 / 260124	four passes; see docs/matching-levers.md for its ruled-out list
+src/smt3/newbattle/nbMakePacket.c	v2	done	2026-10-19	332 / 155996	three passes
+src/smt3/field/fldDraw.c	v3	done	2026-10-19	69 / 79840	fldSkyDrawFilter is 12 words off, draft worth keeping
+src/smt3/code_00116AD0.c	v4	done	2026-10-19	46 / 42540	five original source files, see docs/tu-recovery.md
+src/smt3/code_001B0858.c	u4	done	2026-10-18	145 / 74212	remaining bytes concentrated in three functions over 680 instructions
+src/smt3/code_00144798.c	u5	done	2026-10-18	88 / 69728	-
+src/smt3/newbattle/nbStageProcess.c	u8	done	2026-10-18	140 / 64312	interrupted by a gateway error, not finished
+src/smt3/code_002C6F38.c	-	-	-	602 / 119280	newlib; outside the game-code denominator, do not claim

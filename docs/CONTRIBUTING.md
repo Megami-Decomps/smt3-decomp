@@ -96,6 +96,15 @@ than another permutation:
 function is close but not exact, including the shapes that have been ruled out
 and are not worth a second attempt.
 
+Before starting a unit, claim it in `config/smt3/claims.tsv` and set the row
+to `done` when you stop, finished or not. The file is advisory and nothing in
+the build reads it; it exists so two people do not reconstruct the same unit
+twice. Check it before you pick a unit.
+
+A function that comes close but does not match belongs behind
+`#ifdef NON_MATCHING`, which `tools/revert_differing.py` does for you. See
+[when to stop](matching-levers.md#when-to-stop-and-keeping-the-draft).
+
 ## 3. Verify
 
 ```sh

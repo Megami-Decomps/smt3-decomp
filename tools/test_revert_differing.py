@@ -90,5 +90,39 @@ void f(void) {
                                         f"{unit}: recognised fewer than its same-line definitions")
 
 
+
+
+DIFFERING = """#include "common.h"
+
+void fldDrawInit(void) {
+    gDrawReady = 1;
+}
+"""
+
+
+class TestWrap(unittest.TestCase):
+    def test_draft_is_kept_behind_the_fallback(self):
+        body = ["void f(void) {", "    g();", "}"]
+        out = rd.wrap(body, "field/fldDraw", "f")
+        self.assertEqual(out[0], "#ifdef NON_MATCHING")
+        self.assertEqual(out[1:4], body)
+        self.assertEqual(out[4], "#else")
+        self.assertEqual(out[5], 'INCLUDE_ASM(const s32, "field/fldDraw", f);')
+        self.assertEqual(out[6], "#endif")
+
+    def test_the_draft_is_not_a_second_definition(self):
+        """check_unit has to read the wrapped form as asm only."""
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("cu", ROOT / "tools/check_unit.py")
+        cu = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cu)
+        text = "\n".join(["#include \"common.h\""] + rd.wrap(
+            ["void f(void) {", "    g();", "}"], "field/fldDraw", "f"))
+        stripped = cu.drop_nonmatching(text)
+        self.assertNotIn("void f(void)", stripped)
+        self.assertIn('INCLUDE_ASM(const s32, "field/fldDraw", f);', stripped)
+        self.assertNotIn("#ifdef NON_MATCHING", stripped)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=0)

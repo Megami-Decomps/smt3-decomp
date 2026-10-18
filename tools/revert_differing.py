@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
-"""Put every C function check_unit.py reports as not matching back to INCLUDE_ASM.
+"""Put every C function check_unit.py reports as not matching behind its fallback.
 
-    python3 tools/revert_differing.py src/smt3/<unit>.c [...] [--dry-run]
+    python3 tools/revert_differing.py src/smt3/<unit>.c [...] [--dry-run] [--discard]
 
-A unit must contain only C that matches: a near miss earns no credit and hides
-that the unit is incomplete. Structs, prototypes and matching functions are
-left alone. Run configure.py --force-split afterwards, since the set of
-INCLUDE_ASM lines has changed.
+A unit must build from asm for anything that does not match: a near miss earns
+no credit and hides that the unit is incomplete. The draft is kept rather than
+thrown away, wrapped as
+
+    #ifdef NON_MATCHING
+    <the draft>
+    #else
+    INCLUDE_ASM(const s32, "unit/path", name);
+    #endif
+
+so the normal build takes the asm and the next person starts from the draft
+instead of from scratch. --discard deletes it instead, for a draft not worth
+keeping. Structs, prototypes and matching functions are left alone. Run
+configure.py --force-split afterwards, since the set of INCLUDE_ASM lines has
+changed, and tools/check_nonmatching.py to confirm the draft still compiles.
 """
 import re
 import subprocess
@@ -72,7 +83,13 @@ def spans(text):
         i = k + 1
 
 
-def revert(path: Path, dry_run=False) -> list[str]:
+def wrap(body: list[str], unit: str, name: str) -> list[str]:
+    """The draft kept behind its asm fallback."""
+    return (["#ifdef NON_MATCHING"] + body + ["#else",
+            f'INCLUDE_ASM(const s32, "{unit}", {name});', "#endif"])
+
+
+def revert(path: Path, dry_run=False, discard=False) -> list[str]:
     unit = path.resolve().relative_to(ROOT / "src" / "smt3").with_suffix("").as_posix()
     out = subprocess.run([sys.executable, str(ROOT / "tools/check_unit.py"), str(path)],
                          capture_output=True, text=True).stdout
@@ -87,16 +104,23 @@ def revert(path: Path, dry_run=False) -> list[str]:
     if not drop:
         return []
     for start, end, name in reversed(drop):
-        lines[start:end + 1] = [f'INCLUDE_ASM(const s32, "{unit}", {name});']
+        if discard:
+            lines[start:end + 1] = [f'INCLUDE_ASM(const s32, "{unit}", {name});']
+        else:
+            lines[start:end + 1] = wrap(lines[start:end + 1], unit, name)
     if not dry_run:
         path.write_text("\n".join(lines))
     return sorted(n for _, _, n in drop)
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--dry-run"]
+    flags = {"--dry-run", "--discard"}
+    args = [a for a in sys.argv[1:] if a not in flags]
     dry = "--dry-run" in sys.argv
+    discard = "--discard" in sys.argv
+    verb = "would " if dry else ""
+    verb += "discarded" if discard else "kept behind the fallback"
     for arg in args:
-        names = revert(Path(arg), dry)
-        print(f"{arg}: {'would revert' if dry else 'reverted'} {len(names)}"
+        names = revert(Path(arg), dry, discard)
+        print(f"{arg}: {len(names)} {verb}"
               + (f": {' '.join(names)}" if names else ""))
