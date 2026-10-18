@@ -15,11 +15,15 @@ thrown away, wrapped as
 
 so the normal build takes the asm and the next person starts from the draft
 instead of from scratch. One line above it says how close it is and what
-differs, "12 of 694 words, three spill slots rotated"; the shapes already
-ruled out go in the commit message, not the source. --discard deletes it
-instead, for a draft not worth keeping. Structs, prototypes and matching functions are left alone. Run
+differs, "12 of 694 words, three spill slots rotated". The rest goes in
+docs/nonmatching.md: the remaining difference in full and the shapes already
+ruled out, which tools/check_nonmatching.py requires. --discard deletes the
+draft instead, for one not worth keeping.
+
+Structs, prototypes and matching functions are left alone. Run
 configure.py --force-split afterwards, since the set of INCLUDE_ASM lines has
-changed, and tools/check_nonmatching.py to confirm the draft still compiles.
+changed, and tools/check_nonmatching.py to confirm the draft still compiles
+and is written up.
 """
 import re
 import subprocess

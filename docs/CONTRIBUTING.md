@@ -102,7 +102,9 @@ the build reads it; it exists so two people do not reconstruct the same unit
 twice. Check it before you pick a unit.
 
 A function that comes close but does not match belongs behind
-`#ifdef NON_MATCHING`, which `tools/revert_differing.py` does for you. See
+`#ifdef NON_MATCHING`, which `tools/revert_differing.py` does for you, with
+one line in the source and the detail in
+[Non-matching drafts](nonmatching.md). See
 [when to stop](matching-levers.md#when-to-stop-and-keeping-the-draft).
 
 ## 3. Verify

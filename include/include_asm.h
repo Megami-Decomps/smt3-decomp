@@ -29,9 +29,10 @@
  * there for the next person instead of being thrown away, and
  * tools/check_nonmatching.py compiles it so it cannot rot unnoticed.
  *
- * The one-line comment is the point of keeping it: how close, and what
- * differs. The shapes already ruled out belong in the commit message.
- * tools/revert_differing.py writes the measured part.
+ * The one line says how close it is and what differs.
+ * docs/nonmatching.md carries the rest: the remaining difference in full and
+ * the source shapes already ruled out. tools/check_nonmatching.py compiles
+ * every draft and refuses one with no entry there.
  */
 #if !defined(M2CTX) && !defined(PERMUTER) && !defined(SKIP_ASM)
 

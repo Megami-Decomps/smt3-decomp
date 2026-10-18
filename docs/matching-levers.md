@@ -175,9 +175,11 @@ Label the draft with one line saying how close it is and what differs, which
 
     /* NON_MATCHING: 682 of 694 words, exact size; three reload spill slots rotated. */
 
-That one line is why the draft is worth keeping: it tells the next person
-whether to continue, start over, or leave it. The source shapes you ruled out
-go in the commit message, which is where the reasoning for any change belongs.
+Then write the draft up in [Non-matching drafts](nonmatching.md): what the
+remaining difference actually is, and which source shapes you ruled out. The
+one-line label tells the next person whether to look; that page tells them
+where to start and what not to retry. `python3 tools/check_nonmatching.py`
+compiles every draft and refuses one with no entry, so this is not optional.
 `--discard` deletes a draft not worth keeping.
 
 A draft is never evidence of anything. It is not compiled by the build, so

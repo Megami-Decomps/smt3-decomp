@@ -22,6 +22,8 @@ quickstart.
   and global names against the IDB, and the queue of fixes it found.
 - [Matching levers](matching-levers.md): what to change in the source when a
   function is close but not exact, and what has been ruled out.
+- [Non-matching drafts](nonmatching.md): the reconstructions kept behind
+  `#ifdef NON_MATCHING`, how close each is, and what has been ruled out.
 - `config/smt3/claims.tsv`: who is working on which unit, so the same one is
   not reconstructed twice.
 - [Reading progress](progress.md): how progress would be measured and what

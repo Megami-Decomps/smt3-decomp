@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the NON_MATCHING drafts so they cannot rot unnoticed.
+"""Compile the NON_MATCHING drafts and check each one is written up.
 
     python3 tools/check_nonmatching.py [src/smt3/<unit>.c ...]
 
@@ -8,16 +8,26 @@ build, so a struct rename or a changed signature elsewhere can break it
 silently. This compiles every unit that has one with NON_MATCHING and
 SKIP_ASM defined, which selects the drafts and drops the asm fallbacks.
 
+It also checks that each draft has an entry in docs/nonmatching.md. The
+source carries one line; that page carries what the remaining difference is
+and which source shapes are already ruled out. A draft nobody can read is a
+draft the next person redoes from scratch.
+
 A failure means the draft needs updating, not that the repo is broken: the
 real build does not use it. Exit status is non-zero so CI still says so.
 """
 import glob
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 GUARD = "#ifdef NON_MATCHING"
+WRITEUP = ROOT / "docs/nonmatching.md"
+# The INCLUDE_ASM in a draft's #else names the function the draft is for.
+DRAFT = re.compile(
+    r'#ifdef NON_MATCHING\b.*?#else\s*\nINCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)', re.S)
 
 
 def units(args):
@@ -52,15 +62,21 @@ if __name__ == "__main__":
     if not todo:
         print("no NON_MATCHING drafts")
         sys.exit(0)
+    writeup = WRITEUP.read_text() if WRITEUP.exists() else ""
     bad = 0
     for path in todo:
-        n = path.read_text().count(GUARD)
+        text = path.read_text()
+        names = DRAFT.findall(text)
         err = compile_unit(path)
         rel = path.relative_to(ROOT) if path.is_absolute() else path
         if err:
             bad += 1
-            print(f"{rel}: {n} draft(s), DOES NOT COMPILE")
+            print(f"{rel}: {len(names)} draft(s), DOES NOT COMPILE")
             print("\n".join("    " + l for l in err.split("\n")[:12]))
         else:
-            print(f"{rel}: {n} draft(s) compile")
+            print(f"{rel}: {len(names)} draft(s) compile")
+        for name in names:
+            if not re.search(r"^#+ .*\b" + re.escape(name) + r"\b", writeup, re.M):
+                bad += 1
+                print(f"{rel}: {name} has no entry in docs/nonmatching.md")
     sys.exit(1 if bad else 0)
