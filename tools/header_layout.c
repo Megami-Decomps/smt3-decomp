@@ -679,6 +679,8 @@ OFF(p52, fldAreaWork_t, resourceFlag, 0x84);
 OFF(p53, fldAreaWork_t, sequenceCode, 0xA0);
 OFF(p54, fldAreaWork_t, reuseAreaResources, 0xA8);
 OFF(p55, fldAreaWork_t, x, 0x100);
+OFF(p55a, fldAreaWork_t, blockID, 0xC);
+OFF(p55b, fldAreaWork_t, campos, 0x30);
 SZ(p56, dds3PathTransform_t, 0x28);
 OFF(p57, dds3PathTransform_t, position, 0x10);
 OFF(p58, dds3PathTransform_t, scale, 0x1C);

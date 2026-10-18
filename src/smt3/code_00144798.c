@@ -46,20 +46,33 @@ typedef struct
 
 typedef struct
 {
-    u8 unk00[4];
+    s32 unk00;
     s32 id;
     s32 activationState;
     s32 activationRequested;
-    u8 unk10[0x20];
+    u8 unk10[0x14];
+    void *effect;              /* 0x24 */
+    u8 unk28[8];
 } fldTakaraSlot_t;
 
 typedef struct
 {
-    u8 unk00[0x20];
-    dds3Basic_t *object;
-    u8 unk24[0x24];
-    s32 room;
-    u8 unk4C[0x24];
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    u8 unk10[0x10];
+    dds3Basic_t *object;       /* 0x20 */
+    u8 unk24[0xC];
+    void *effect;              /* 0x30 */
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    s32 unk40;
+    s32 unk44;
+    s32 room;                  /* 0x48 */
+    s32 unk4C;
+    u8 unk50[0x20];
 } fldNpcSlot_t;
 
 
@@ -172,7 +185,7 @@ void sdfMcSetSlotIndex(s32 request, s32 selectedSlot);
 s8 sdfMcGetSlotIndex(s32 request);
 u32 sdfMcGetSlotFlags(s32 request, s32 slot);
 extern s32 slChooseData_getCardInfoNext(void);
-extern void mcMakeFileName(void *dst, s32 number);
+extern void mcMakeFileName(char *dst, s32 number);
 extern u32 strlen(const char *s);
 extern void *memcpy(void *, const void *, unsigned int);
 void sdfMcFuncOpen(u32 context, const char *path, s32 openFlags);
@@ -274,7 +287,6 @@ void sdfMcFuncFormat(u32 port);
 extern u32 gSlEndingMode;
 void slVersionConvert_Step1(void);
 s32 slLoadProc_openFile(void);
-extern s32 version_convert_ver;
 s32 slLoadProc_readFile(void);
 s32 slLoadProc_closeFile(void);
 void slVersionConvert_Step3(void);
@@ -392,6 +404,147 @@ extern void fldTitleStart(s32 field, s32 option);
 extern void evtBitOn(s32 bit);
 extern void evtBitOff(s32 bit);
 
+typedef struct
+{
+    f32 x;
+    f32 y;
+    f32 z;
+    s16 flg;
+    u8 spdx;
+    u8 spdy;
+    s16 life;
+    s16 alp;
+} fldSeedWork_t;
+
+extern fldSeedWork_t *gFldSeedBuff;
+extern sdfMemHandle_t *fldSnowSeedBuf;
+extern s32 gFldKyouseiTalk;
+extern void fldFreeNextFile(void);
+extern void sdfMemUnlock(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+extern void fldDoor_WarpEx(s32 index);
+extern char D_00532AA0[];
+
+typedef struct
+{
+    s32 smgId;
+    s8 trans[16];
+} fldBgmEntry_t;
+
+extern fldBgmEntry_t gFldBgmTop[];
+extern fldMapPoint_t fldAutoMapFieldId;
+extern s32 fldAutoMapAreaNo;
+extern s32 fldNpcModelFreeIdx;
+extern dds3Basic_t *fldNpcFreeCount;
+extern s32 fldNpcCamTarget;
+extern void mdlUnRegist(s32 kind, s32 slot);
+extern void dds3DeleteUnitObjectBasic(dds3Basic_t *object);
+extern void *frwGetSmallFontFRQ(s32 x, s32 y, s32 mode, u32 rgba, const char *text, s32 flag);
+extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 mode, u32 rgba, const char *text, s32 flag);
+extern void frDrawFont(void *request);
+extern void frDrawFontEx(void *request, s32 mode);
+extern void frDestroyFontRequestAfter(void *request);
+extern void *slKanjiDraw_handle;
+extern s32 slDDS3To31Flg;
+extern s32 sprintf(char *dst, const char *format, ...);
+extern char D_00532860[];
+extern s8 D_00569743[];
+extern s32 version_convert_ver;
+extern u8 D_00316B00[];
+extern u32 D_0054F06C;
+extern u32 D_0054F070;
+extern void dds3AdminiCallSequence(s32 kind, s32 *argument, s32 mode, s32 flag);
+
+extern void fldAddressResolver(u8 *buffer, void *chunk);
+extern u8 *fldGetInfoHeader(void *chunk);
+extern void fldAutoMapFontInit(s32 field);
+extern void fldAmModelLoadFile(void);
+extern void sdfDrawSync(void);
+extern void fldAutoMapFree(void);
+extern void fldAutoMapSeqClearFlag(s32 flag);
+extern void evtEnableMoonDraw(void);
+extern s32 fldMenuOpenFlag[];
+extern void frSetFontDrawOT(s32 ot);
+extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s32 visible);
+extern char D_00532A88[];
+extern void fldDoor_Warp(const char *entry);
+extern void sdfMcClearSlotFlags(s32 request, s32 slot);
+extern s32 slChooseData_getCardInfo_B(void);
+extern s32 slTopMenuSel[];
+extern s32 fldGetBgmTrack(s32 code);
+extern void p2sdSetBgmTrack(s32 track);
+extern void dds3EffectReset(void *effect);
+extern void dds3EffectSetPosition(void *effect, const sdfVector4_t *position);
+extern void *D_0054EEDC;
+extern sdfTexHandle_t *D_0054EF98;
+extern sdfTexHandle_t *D_0054EF9C;
+extern sdfTexHandle_t *D_0054EFA0;
+extern sdfTexHandle_t *D_0054EFA4;
+
+extern s32 gFldBgmBit;
+extern s16 gFldAreaBgm[];
+extern s32 evtBitCheck(s32 bit);
+extern void fldBgmPlay(void);
+extern void dds3EffectDelete(void *effect);
+extern s32 fldTakaraSlotCount;
+extern s32 fldNpcLoadIdx;
+extern f32 slNextPageDraw_fc;
+extern f32 sdfSin(f32 radians);
+extern void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh,
+                         s32 color, sdfTexHandle_t *texture);
+extern sdfTexHandle_t *slProcPtr;
+extern s32 slErrorWaitMc(void);
+extern void *sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(void *tag);
+extern void sdfDrawTagLink(void *tag, void *packet);
+extern void sdfBillBoardMake1(void *packet, const sdfVector4_t *position, u32 color,
+                              const void *uv, const void *vtx);
+extern sdfGrOt_t sdfGrOtTable[85];
+extern s32 evtGetAgeOfMoon(void);
+extern s32 dds3GetRandIntA(s32 low, s32 high);
+extern s32 D_00316EC8[];
+extern char D_00532AC8[];
+extern char D_00532980[];
+extern void resetCamTgtPlayer(void);
+extern void fldMakeFilePath(char *out, s32 field, s32 area);
+extern char D_00532790[];
+extern char D_005327A0[];
+extern s32 sdfFileOpen(const char *path);
+extern void sdfFileRead(s32 fd, void *buffer, s32 size);
+extern void sdfFileClose(s32 fd);
+
+extern s32 gSlSelCnt;
+extern s32 slSaveProc_CheckCard(void);
+extern u16 gFldSnowLife;
+extern s32 dds3GetRandA(s32 kind);
+
+extern s32 fldSeSmgId;
+extern s32 DNG_MAX[];
+extern s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit);
+extern void frEnableMode(s32 mode);
+extern void frDisableMode(s32 mode);
+extern void *frSetFontString(const char *text, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
+extern void frSetFontSpace(void *request, s32 space);
+extern void frSetDrawPosition(void *request, s32 x, s32 y);
+extern void frSetFontColor(void *request, u32 rgba);
+extern void func_001C7E38(void *request, s32 a1, s32 a2);
+extern void *slKanjiDrawH_handle;
+extern void evtDisableMoonDraw(void);
+extern void evtDisableMoonDraw2(void);
+extern void evtEnableMoonDraw2(void);
+
+typedef struct
+{
+    s32 type;
+    s16 id;
+    s16 num;
+    s32 unk08;
+    s32 unk0C;
+} fldTakaraEntry_t;
+
+extern fldTakaraEntry_t fldTakaraTable[];
+extern char D_00532A58[];
+
 void fldSe_Init(void) {
     fldSe3D_t *entry = fldSe3DTable;
     s32 remaining = 7;
@@ -418,7 +571,18 @@ void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) 
     gFldSe3DNum = i + 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldClearSe3D);
+void fldClearSe3D(void) {
+    s32 i;
+
+    for (i = 0; i < gFldSe3DNum; i++) {
+        s32 flags = fldSe3DTable[i].flags;
+
+        if (flags & 1) {
+            fldSe3DTable[i].flags = flags & ~1;
+            p2sdStopSe(gFldBgmTop[fldGlobalBase.area].smgId + fldSe3DTable[i].soundId);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldPlaySe3D);
 
@@ -449,9 +613,27 @@ void fldBgmFadeOut(void) {
     fldSeLastBgm = 0;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldBgmTransChk);
+s32 fldBgmTransChk(s32 id1, s32 id2) {
+    s8 first = gFldBgmTop[fldGb[0]].trans[id1];
+    s8 second = gFldBgmTop[fldGb[0]].trans[id2];
 
-INCLUDE_ASM(const s32, "code_00144798", fldBgmTrans);
+    if (first != 0 && second != 0) {
+        return 1;
+    }
+    return 0;
+}
+
+void fldBgmTrans(void) {
+    s32 track = fldGetBgmTrack(fldGlobalBase.sequenceCode);
+
+    if (track == -1) {
+        if (fldGlobalBase.area >= 50) {
+            return;
+        }
+        track = gFldBgmTop[fldGlobalBase.area].smgId + fldGlobalBase.sequenceCode;
+    }
+    p2sdSetBgmTrack(track);
+}
 
 void fldBgmStopAll(void) {
     p2sdStopAllBgm();
@@ -464,9 +646,53 @@ void fldBgmStop(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldSePlay);
 
-INCLUDE_ASM(const s32, "code_00144798", fldSeStop);
+void fldSeStop(s32 soundId) {
+    s32 id;
 
-INCLUDE_ASM(const s32, "code_00144798", fldSeVol);
+    if (fldGlobalBase.area >= 50) {
+        return;
+    }
+    if (soundId == 0x100) {
+        p2sdStopSe(0x660060);
+        return;
+    }
+    if (soundId == 0x101) {
+        p2sdStopSe(0x660061);
+        return;
+    }
+    if (soundId == 0x102) {
+        p2sdStopSe(0x660064);
+        return;
+    }
+    id = fldSeSmgId + soundId;
+    if (fldGlobalBase.area == 20) {
+        s32 floor = fldGlobalBase.floor;
+
+        if (floor == 5 || floor == 8 || floor == 13 || floor == 14 || floor == 15 ||
+            floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
+            id = DNG_MAX[0] + soundId;
+        }
+    }
+    p2sdStopSe(id);
+}
+
+void fldSeVol(s32 soundId, s32 volume) {
+    s32 id;
+
+    if (fldGlobalBase.area >= 50) {
+        return;
+    }
+    id = fldSeSmgId + soundId;
+    if (fldGlobalBase.area == 20) {
+        s32 floor = fldGlobalBase.floor;
+
+        if (floor == 5 || floor == 8 || floor == 13 || floor == 14 || floor == 15 ||
+            floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
+            id = DNG_MAX[0] + soundId;
+        }
+    }
+    p2sdPlaySE(id, volume, 0x3F);
+}
 
 void fld_1457F8(s32 mode) {
     switch (mode) {
@@ -522,9 +748,23 @@ s32 fldWaitBgmReload(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldBgmBitChk);
 
-INCLUDE_ASM(const s32, "code_00144798", fldMotionSePlay);
+void fldMotionSePlay(s32 seId, s32 subId) {
+    s32 cmd = 0x9010000;
 
-INCLUDE_ASM(const s32, "code_00144798", fldMotionSeStop);
+    if (seId != 0) {
+        cmd = 0x9000000 + ((seId << 16) + subId);
+    }
+    p2sdPlaySE(cmd, 0x7F, 0x3F);
+}
+
+void fldMotionSeStop(s32 seId, s32 subId) {
+    s32 cmd = 0x9010000;
+
+    if (seId != 0) {
+        cmd = 0x9000000 + ((seId << 16) + subId);
+    }
+    p2sdStopSe(cmd);
+}
 
 s32 fldWaitBgmLoad(void) {
     switch (fldBgmLoadStep) {
@@ -548,9 +788,34 @@ s32 fldWaitBgmLoad(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldBgmIsLoading);
+s32 fldBgmIsLoading(void) {
+    return fldBgmLoadStep != -1;
+}
 
-INCLUDE_ASM(const s32, "code_00144798", fldStartBgmLoad);
+void fldStartBgmLoad(s32 kind) {
+    if (fldBgmLoadStep != -1) {
+        return;
+    }
+    switch (kind) {
+    case 0:
+        fldBgmSmgAddr = 0x310000;
+        break;
+    case 1:
+        fldBgmSmgAddr = 0x390000;
+        break;
+    case 2:
+        return;
+    case 3:
+    case 4:
+        fldBgmSmgAddr = 0x20000;
+        break;
+    case 5:
+        fldBgmSmgAddr = 0x300000;
+        break;
+    }
+    fldBgmLoadStep = 0;
+    fldWaitBgmLoad();
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fld_145DC0);
 
@@ -558,7 +823,25 @@ INCLUDE_ASM(const s32, "code_00144798", fldAutoMapFontInit);
 
 INCLUDE_ASM(const s32, "code_00144798", fldAmModelLoadFile);
 
-INCLUDE_ASM(const s32, "code_00144798", fldAmbLoadFromMem);
+void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *handle) {
+    s32 field = fldGb[0];
+    u32 *info;
+
+    if (field < 200) {
+        if (field >= 10) {
+            fldAutoMapBuf = handle;
+            fldAddressResolver(data, data + 8);
+            info = (u32 *)fldGetInfoHeader(data + 8);
+            {
+                u32 mapHeader = info[1];
+                u32 mapData = info[2];
+
+                fldAutoMapData = mapData;
+                fldAutoMapHeader = (fldMapRoom_t *)mapHeader;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldAutoMapModelLoad);
 
@@ -687,7 +970,18 @@ INCLUDE_ASM(const s32, "code_00144798", fldAutoMapSeqStart);
 
 INCLUDE_ASM(const s32, "code_00144798", fldAutoMapFree);
 
-INCLUDE_ASM(const s32, "code_00144798", fldAutoMapSeqEnd);
+void fldAutoMapSeqEnd(void) {
+    sdfDrawSync();
+    sdfDrawSync();
+    fldAutoMapFree();
+    AutoMapSeq = 0;
+    fldAutoMapSeqClearFlag(1);
+    fldRegistUnitPad();
+    evtEnableMoonDraw();
+    fldMenuOpenFlag[0] = 4;
+    frSetFontDrawOT(0x48);
+    dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
+}
 
 u32 fldAutoMapChkMode(void) {
     return AutoMapSeq;
@@ -695,9 +989,32 @@ u32 fldAutoMapChkMode(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldAutoMapCalc);
 
-INCLUDE_ASM(const s32, "code_00144798", fldAutoMapSetField);
+void fldAutoMapSetField(s32 field, s32 area, s32 block) {
+    f32 x = fldGlobalBase.x;
+    f32 z = fldGlobalBase.z;
 
-INCLUDE_ASM(const s32, "code_00144798", fldAutoMapChkOpen);
+    fldGlobalBase.blockID = block;
+    fldAutoMapFieldId.z = z;
+    fldAutoMapFieldId.x = x;
+    fldGlobalBase.area = field;
+    fldGlobalBase.floor = area;
+    fldAutoMapAreaNo = area;
+    fldAutoMapFieldId.y = 0.0f;
+    fldAutoMapField = field % 100;
+}
+
+s32 fldAutoMapChkOpen(s32 area, s32 room, u32 item) {
+    s32 floor = area % 100;
+
+    if (floor < 10) {
+        return 0;
+    }
+    floor -= 10;
+    if (floor >= 30) {
+        return (*(u64 *)((u8 *)DDS3_GBWK + 0x17F10 + (floor * 32 + room) * 8) >> item) & 1;
+    }
+    return (*(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + room) * 8) >> item) & 1;
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldAutoMapOpenBlock);
 
@@ -859,9 +1176,52 @@ INCLUDE_ASM(const s32, "code_00144798", fldInitBlurEffect);
 
 INCLUDE_ASM(const s32, "code_00144798", fldFreeBlurEffect);
 
-INCLUDE_ASM(const s32, "code_00144798", fldClearModelSlots);
+void fldClearModelSlots(void) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_00144798", fldClearTakaraSlots);
+    for (i = 0; i < 32; i++) {
+        void *effect = fldModelSlotTable[i].effect;
+
+        fldModelSlotTable[i].unk00 = 0;
+        fldModelSlotTable[i].unk04 = 0;
+        fldModelSlotTable[i].unk08 = 0;
+        fldModelSlotTable[i].unk0C = 0;
+        fldModelSlotTable[i].object = NULL;
+        fldModelSlotTable[i].unk34 = 0;
+        fldModelSlotTable[i].unk38 = 0;
+        fldModelSlotTable[i].unk3C = 0;
+        fldModelSlotTable[i].unk40 = 0;
+        fldModelSlotTable[i].unk44 = 0;
+        fldModelSlotTable[i].room = 0;
+        fldModelSlotTable[i].unk4C = 0;
+        if (effect != NULL) {
+            dds3EffectDelete(effect);
+        }
+        fldModelSlotTable[i].effect = NULL;
+    }
+    fldNpcModelTable = 0;
+    fldNpcLoadIdx = 0;
+    fldNpcCamTarget = 0;
+}
+
+void fldClearTakaraSlots(void) {
+    s32 i;
+
+    fldTakaraCount = 0;
+    for (i = 0; i < 32; i++) {
+        void *effect = fldTakaraSlotTable[i].effect;
+
+        fldTakaraSlotTable[i].id = -1;
+        fldTakaraSlotTable[i].unk00 = 0;
+        fldTakaraSlotTable[i].activationState = 0;
+        fldTakaraSlotTable[i].activationRequested = 0;
+        if (effect != NULL) {
+            dds3EffectDelete(effect);
+        }
+        fldTakaraSlotTable[i].effect = NULL;
+    }
+    fldTakaraSlotCount = 0;
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldNpcLightSet);
 
@@ -891,7 +1251,17 @@ INCLUDE_ASM(const s32, "code_00144798", fldFreeModelTable);
 
 INCLUDE_ASM(const s32, "code_00144798", fldItemBoxCalcTask);
 
-INCLUDE_ASM(const s32, "code_00144798", fldTDmgStart);
+void fldTDmgStart(f32 x, f32 y, f32 z) {
+    sdfVector4_t position;
+
+    memset(&position, 0, sizeof(position));
+    position.x = x;
+    position.y = y;
+    position.z = z;
+    position.w = 1.0f;
+    dds3EffectReset(D_0054EEDC);
+    dds3EffectSetPosition(D_0054EEDC, &position);
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldDmgStart);
 
@@ -923,9 +1293,24 @@ INCLUDE_RODATA(const s32, "code_00144798", D_00532770);
 
 INCLUDE_ASM(const s32, "code_00144798", fldNpcModelStart);
 
-INCLUDE_ASM(const s32, "code_00144798", fldDeleteNpcModel);
+void fldDeleteNpcModel(s32 index) {
+    if (fldNpcModelFreeIdx == index && fldNpcFreeCount != NULL) {
+        dds3DeleteUnitObjectBasic(fldNpcFreeCount);
+        mdlUnRegist(2, 10);
+        fldNpcFreeCount = NULL;
+        fldNpcCamTarget = 0;
+        fldNpcModelFreeIdx = -1;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00144798", fldFreeNpcModel);
+void fldFreeNpcModel(void) {
+    if (fldNpcModelFreeIdx != -1 && fldNpcFreeCount != NULL) {
+        mdlUnRegist(2, 10);
+        fldNpcFreeCount = NULL;
+        fldNpcModelFreeIdx = -1;
+        fldNpcCamTarget = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldNpcCalc);
 
@@ -944,7 +1329,23 @@ void fldNpcHojiRefresh(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldNpcLightLoad);
+void fldNpcLightLoad(s32 index) {
+    char path[0x40];
+    char directory[0x20];
+    s32 fd;
+
+    if (index < 100) {
+        fldMakeFilePath(directory, index, 1);
+        if (index == 0x18 && evtBitCheck(0x4F) != 0) {
+            sprintf(path, D_00532790, directory, 0x18);
+        } else {
+            sprintf(path, D_005327A0, directory, index);
+        }
+        fd = sdfFileOpen(path);
+        sdfFileRead(fd, D_003129D0, 0x100);
+        sdfFileClose(fd);
+    }
+}
 
 void fldGetEAEntry(const fldNpcPalette_t *src) {
     memcpy(D_003129D0, src, sizeof(*src));
@@ -956,7 +1357,28 @@ s32 fldTitleChk(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldTitle_Process);
 
-INCLUDE_ASM(const s32, "code_00144798", fldTitle_Shutdown);
+void fldTitle_Shutdown(void) {
+    if (D_0054EF98 != NULL) {
+        sdfTexFreeDelayed(D_0054EF98);
+        D_0054EF98 = NULL;
+    }
+    if (D_0054EF9C != NULL) {
+        sdfTexFreeDelayed(D_0054EF9C);
+        D_0054EF9C = NULL;
+    }
+    if (D_0054EFA0 != NULL) {
+        sdfTexFreeDelayed(D_0054EFA0);
+        D_0054EFA0 = NULL;
+    }
+    if (D_0054EFA4 != NULL) {
+        sdfTexFreeDelayed(D_0054EFA4);
+        D_0054EFA4 = NULL;
+    }
+}
+
+INCLUDE_RODATA(const s32, "code_00144798", D_00532790);
+
+INCLUDE_RODATA(const s32, "code_00144798", D_005327A0);
 
 INCLUDE_RODATA(const s32, "code_00144798", D_005327B0);
 
@@ -991,25 +1413,83 @@ void fldSetSnowActive(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldSnowInit);
 
-INCLUDE_ASM(const s32, "code_00144798", fldFreeSnowSeed);
+void fldFreeSnowSeed(void) {
+    if (gFldSeedBuff != NULL) {
+        sdfMemUnlock(fldSnowSeedBuf);
+        sdfMemFreeDelayedDirect(fldSnowSeedBuf);
+        fldSnowSeedBuf = NULL;
+        gFldSeedBuff = NULL;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldSnowSpriteTex);
 
-INCLUDE_ASM(const s32, "code_00144798", fldSnowSprite3D);
+void fldSnowSprite3D(const sdfVector4_t *work) {
+    void *tag = sdfGrAllocPacketBuff(0x20);
+    void *packet;
+    sdfGrOt_t *ot;
 
-INCLUDE_ASM(const s32, "code_00144798", fldSnowSeedInit);
+    sdfDrawTagInit(tag);
+    packet = sdfGrAllocPacketBuff(0x80);
+    sdfBillBoardMake1(packet, work, *(u32 *)((u8 *)work + 0x40), (u8 *)work + 0x10,
+                      (u8 *)work + 0x20);
+    sdfDrawTagLink(tag, packet);
+    ot = &sdfGrOtTable[44];
+    ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
+}
 
-INCLUDE_ASM(const s32, "code_00144798", fldInitSnowSeed);
+void fldSnowSeedInit(void) {
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_00144798", func_00151018);
+    if (gFldSeedBuff != NULL) {
+        for (i = 0; i < 700; i++) {
+            gFldSeedBuff[i].flg = 0;
+        }
+    }
+}
+
+void fldInitSnowSeed(f32 x, f32 y, f32 z) {
+    s32 i;
+
+    if (gFldSeedBuff == NULL) {
+        return;
+    }
+    for (i = 0; i < 700; i++) {
+        if (gFldSeedBuff[i].flg == 0) {
+            gFldSeedBuff[i].x = x;
+            gFldSeedBuff[i].y = y;
+            gFldSeedBuff[i].z = z;
+            gFldSeedBuff[i].flg = 1;
+            gFldSeedBuff[i].life = gFldSnowLife;
+            gFldSeedBuff[i].alp = 0x80;
+            gFldSeedBuff[i].spdx = dds3GetRandA(0) & 0x1F;
+            gFldSeedBuff[i].spdy = dds3GetRandA(0) & 0xF;
+            return;
+        }
+    }
+}
+
+void func_00151018(s32 index) {
+    if (gFldSeedBuff != NULL) {
+        gFldSeedBuff[index].flg = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldSnowSeedReset);
 
 INCLUDE_ASM(const s32, "code_00144798", fldSnowTask);
 
-INCLUDE_ASM(const s32, "code_00144798", mcMakeFileName);
+void mcMakeFileName(char *dst, s32 number) {
+    if (slDDS3To31Flg != 0) {
+        sprintf(dst, D_00532860, 0xFEDA, number);
+    } else {
+        sprintf(dst, D_00532860, 0x51AF, number);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00144798", slVersionConvert_Step1);
+void slVersionConvert_Step1(void) {
+    version_convert_ver = *(D_00569743 + sdfMcGetSlotIndex(D_005516BC) * 52);
+}
 
 /* Save revisions have different persistent block extents. Keeping this
  * earlier provider in C also exposes the native same-TU call visibility to
@@ -1024,6 +1504,8 @@ u32 slVersionConvert_GetSize(void) {
     return (u32)(version_convert_ver - 3) < 2 ? 0x16DC0 : 0x1A510;
 }
 
+INCLUDE_RODATA(const s32, "code_00144798", D_00532860);
+
 INCLUDE_ASM(const s32, "code_00144798", slVersionConvert_Step3);
 
 u8 slGetPadTrig(s32 condition) {
@@ -1036,13 +1518,41 @@ u8 slGetPadRep(s32 loaded) {
 
 INCLUDE_ASM(const s32, "code_00144798", slCopyNonZero);
 
-INCLUDE_ASM(const s32, "code_00144798", slKanjiDraw);
+void slKanjiDraw(s32 x, s32 y, u32 rgba, const char *text) {
+    slKanjiDraw_handle = frwGetSmallFontFRQ(x << 4, y << 4, 0, rgba, text, 0);
+    frDrawFont(slKanjiDraw_handle);
+    frDestroyFontRequestAfter(slKanjiDraw_handle);
+}
 
-INCLUDE_ASM(const s32, "code_00144798", slKanjiDrawH);
+void slKanjiDrawH(s32 x, s32 y, u32 rgba, const char *text) {
+    frEnableMode(1);
+    slKanjiDrawH_handle = frSetFontString(text, 0, 0, 0, 0, 0);
+    frDisableMode(1);
+    frSetFontSpace(slKanjiDrawH_handle, 3);
+    frSetDrawPosition(slKanjiDrawH_handle, x << 4, y << 4);
+    frSetFontColor(slKanjiDrawH_handle, rgba);
+    func_001C7E38(slKanjiDrawH_handle, 0, 0x4A);
+    frDestroyFontRequestAfter(slKanjiDrawH_handle);
+    frSetFontDrawOT(0x48);
+}
 
-INCLUDE_ASM(const s32, "code_00144798", slKanjiDrawN);
+void slKanjiDrawN(s32 x, s32 y, u32 rgba, const char *text) {
+    void *request = frwGetSmallNumFontFRQ(x << 4, y << 4, 0, rgba, text, 0);
 
-INCLUDE_ASM(const s32, "code_00144798", slNextPageDraw);
+    frDrawFontEx(request, 1);
+    frDestroyFontRequestAfter(request);
+}
+
+void slNextPageDraw(void) {
+    f32 phase;
+
+    rsetOtOfs(0x4A);
+    rsetAlpha(0);
+    phase = slNextPageDraw_fc + 0.4f;
+    slNextPageDraw_fc = phase;
+    DrwSprite2DF(448.0f, sdfSin(phase) + 308.0f, 25.0f, 18.0f, 0xDB, 0x2D, 0x19, 0x12,
+                 0x80808080, slProcPtr);
+}
 
 INCLUDE_ASM(const s32, "code_00144798", slMcAccessDraw);
 
@@ -1181,9 +1691,40 @@ s32 slBootError2(void) {
     return slQueryYesNo(&slExitToTitle, &slBootRetry, 1);
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slNoCard);
+s32 slNoCard(void) {
+    sdfMcSetCardStat(D_005516BC);
+    sdfMcClearSlotFlags(D_005516BC, 0);
+    sdfMcClearSlotFlags(D_005516BC, 1);
+    sdfMcClearSlotFlags(D_005516BC, 2);
+    sdfMcClearSlotFlags(D_005516BC, 3);
+    sdfMcClearSlotFlags(D_005516BC, 4);
+    slSetInfo(0);
+    gslErrorCode = 1;
+    gslErrorKeyFlag = 0;
+    sdfMcRegetInfo(D_005516BC);
+    return (s32)slErrorWaitMc;
+}
 
-INCLUDE_ASM(const s32, "code_00144798", slTop);
+s32 slTop(void) {
+    gSlSelCnt = 0;
+    sdfMcSetCardStat(D_005516BC);
+    sdfMcClearSlotFlags(D_005516BC, 0);
+    sdfMcClearSlotFlags(D_005516BC, 1);
+    sdfMcClearSlotFlags(D_005516BC, 2);
+    sdfMcClearSlotFlags(D_005516BC, 3);
+    sdfMcClearSlotFlags(D_005516BC, 4);
+    slTopMenuSel[0] = 0;
+    slTopMenuSel[1] = 0;
+    slTopMenuSel[2] = 0;
+    slTopMenuSel[3] = 0;
+    slTopMenuSel[4] = 0;
+    sdfMcRegetInfo(0);
+    gslCheckCardWait = 15;
+    gSlNowCardCheck = 1;
+    slSetInfo(1);
+    gslDrawFlagFile = 1;
+    return (s32)slSaveProc_CheckCard;
+}
 
 s32 slExit(void) {
     slSetInfo(0);
@@ -1192,15 +1733,49 @@ s32 slExit(void) {
     return 0xffffffff;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slExitToTitleSub);
+s32 slExitToTitleSub(void) {
+    s32 argument = 0;
+
+    if (dds3SearchProcessName(D_005328C0) != NULL) {
+        return -1;
+    }
+    if (slDDS3To31Flg != 0) {
+        return -1;
+    }
+    dds3AdminiCallSequence(2, &argument, 4, 0);
+    return 0;
+}
 
 s32 slExitToTitle(void) {
     return slExitToTitleSub();
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slExitToTitle2);
+s32 slExitToTitle2(void) {
+    s32 argument = 2;
 
-INCLUDE_ASM(const s32, "code_00144798", slCardChk);
+    gslExitType = 1;
+    if (dds3SearchProcessName(D_005328C0) != NULL) {
+        return -1;
+    }
+    if (slDDS3To31Flg != 0) {
+        return -1;
+    }
+    dds3AdminiCallSequence(2, &argument, 4, 0);
+    return 0;
+}
+
+s32 slCardChk(void) {
+    sdfMcSetCardStat(D_005516BC);
+    sdfMcClearSlotFlags(D_005516BC, 0);
+    sdfMcClearSlotFlags(D_005516BC, 1);
+    sdfMcClearSlotFlags(D_005516BC, 2);
+    sdfMcClearSlotFlags(D_005516BC, 3);
+    sdfMcClearSlotFlags(D_005516BC, 4);
+    slSetInfo(1);
+    gslErrorCode = 0;
+    gslDrawFlagFile = 0;
+    return slTop();
+}
 
 INCLUDE_ASM(const s32, "code_00144798", slFileSel);
 
@@ -1239,7 +1814,24 @@ s32 slBootProc1st(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", slSaveProc_CheckCard);
 
-INCLUDE_ASM(const s32, "code_00144798", sl1Ken);
+s32 sl1Ken(void) {
+    s32 i = 0;
+    s32 count = 0;
+
+    do {
+        u32 flags = sdfMcGetSlotFlags(D_005516BC, i);
+
+        i++;
+        if (flags & SL_SLOT_FLAG_CAN_READ_SAVE) {
+            if (flags & SL_SLOT_FLAG_DIRECTORY_READY) {
+                if (flags & SL_SLOT_FLAG_DELETE_BEFORE_WRITE) {
+                    count++;
+                }
+            }
+        }
+    } while (i < 5);
+    return count;
+}
 
 s32 slSizeChk(void) {
     return sdfMcGetFreeBytes(D_005516BC) > 0x293FF;
@@ -1350,7 +1942,19 @@ s32 slHitAnyKeyNoChk(u32 callback) {
     return (s32)slHitAnyKeyNoChkProc;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slHitAnyKeyNoChkProc);
+s32 slHitAnyKeyNoChkProc(void) {
+    if (slGetPadTrig(dds3PadButtonState[0x21] < 0) ||
+        slGetPadTrig(dds3PadButtonState[0x23] < 0)) {
+        slSetInfo(0);
+        gslErrorCode = 0;
+        gslDrawFlagFile = 0;
+        if (slHitAnyKeyNextFunc == -1) {
+            return slExitWait((void *)-1);
+        }
+        return ((s32 (*)())slHitAnyKeyNextFunc)();
+    }
+    return 0;
+}
 
 s32 slHitAnyKey(u32 callback) {
     slHitAnyKeyNextFunc = callback;
@@ -1486,7 +2090,23 @@ s32 slChooseData_getCardInfoNext_B(void) {
     return slChooseData_getCardInfo_B();
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slChooseData_B);
+s32 slChooseData_B(void) {
+    s32 i = 0;
+    s32 *selection;
+
+    slSetInfo(1);
+    gslDrawFlagFile = 0;
+    slChooseSaveIndex = 0;
+    sdfMcSetCardStat(D_005516BC);
+    selection = slTopMenuSel;
+    do {
+        *selection = 0;
+        selection++;
+        sdfMcClearSlotFlags(D_005516BC, i);
+        i++;
+    } while (i < 5);
+    return slChooseData_getCardInfo_B();
+}
 
 s32 slSaveData(void) {
     u8 name[0x50];
@@ -1575,7 +2195,13 @@ s32 slSaveWriteEnd_iconSys(void) {
     return (s32)slSaveProc_doNothing;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slSaveWriteEnd_baseIcon);
+s32 slSaveWriteEnd_baseIcon(void) {
+    D_00316B00[0xE2] = -0x7E;
+    D_00316B00[0xE3] = slFileSelError + 0x50;
+    D_00316B00[0xE4] = 0;
+    D_00316B00[0xE5] = 0;
+    return slSaveWriteFile(D_005328E0, &D_0054F06C, &D_0054F070, slSaveWriteEnd_iconSys, 0);
+}
 
 s32 slSaveWriteEnd_saveData(void) {
     return slSaveWriteFile(D_005328F0, &D_00551D48, &D_00551D4C,
@@ -1920,7 +2546,21 @@ u32 fldCommand_ENCOUNT_OFF(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_SET_FIX_CAMERA);
+s32 fldCommand_SET_FIX_CAMERA(void) {
+    dds3Basic_t *scene = dds3GetControlScene();
+    dds3Basic_t *basic = dds3SearchSceneBasic(scene, scrGetIntPara(0), 4);
+
+    if (basic == NULL) {
+        printf(D_00532980);
+        return 1;
+    }
+    fldGlobalBase.mode = 1;
+    fldGlobalBase.campos.x = basic->poseset->pos.x;
+    fldGlobalBase.campos.y = basic->poseset->pos.y;
+    fldGlobalBase.campos.z = basic->poseset->pos.z;
+    resetCamTgtPlayer();
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_SET_CHASE_CAMERA);
 
@@ -1987,7 +2627,13 @@ void fldPanelSet(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_SET_CASH_F);
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FREE_CASH_F);
+s32 fldCommand_FREE_CASH_F(void) {
+    if (fldGb[0] < 10) {
+        return 1;
+    }
+    fldFreeNextFile();
+    return 1;
+}
 
 s32 fldCommand_SEARCH_ID(const char *name) {
     dds3Basic_t *entry = dds3SceneBasicSearchName(dds3GetControlScene(), name);
@@ -2209,7 +2855,30 @@ s32 fldCommand_FLD_ATARI_ON(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_ATARI_OFF);
+s32 fldCommand_FLD_ATARI_OFF(void) {
+    s32 world;
+    s32 stage;
+    char *name;
+    s32 i;
+
+    world = scrGetIntPara(0);
+    if (world == 0) {
+        world = fldGb[0];
+    }
+    stage = scrGetIntPara(1);
+    if (stage == 0) {
+        stage = fldArea[0] + 1;
+    }
+    name = scrGetStrPara(2);
+    if (name == NULL) {
+        for (i = 0; i < 16; i++) {
+            fldSetAtariFlag(world, stage, i, 1);
+        }
+    } else {
+        fldSetAtariFlag(world, stage, fldCommand_GetHojiID(name), 1);
+    }
+    return 1;
+}
 
 s32 fldCommand_FLD_MODEL_ON2(void) {
     s32 area = scrGetIntPara(0);
@@ -2346,7 +3015,32 @@ s32 fldCommand_FLD_CHK_EVE(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_GET_TAKARA_TBL);
+INCLUDE_RODATA(const s32, "code_00144798", D_00532A58);
+
+s32 fldCommand_FLD_GET_TAKARA_TBL(void) {
+    s32 index = fldFindEveRngIndex((u32)scrGetScriptHandle()->ProcessID);
+
+    switch (scrGetIntPara(0)) {
+    case 0:
+        printf(D_00532A58, fldTakaraTable[index].type, fldTakaraTable[index].id,
+               fldTakaraTable[index].num);
+        scrSetIntReturnValue(fldTakaraTable[index].type);
+        break;
+    case 1:
+        scrSetIntReturnValue(fldTakaraTable[index].id);
+        break;
+    case 2:
+        scrSetIntReturnValue(fldTakaraTable[index].num);
+        break;
+    case 3:
+        scrSetIntReturnValue(fldTakaraTable[index].unk08);
+        break;
+    case 4:
+        scrSetIntReturnValue(fldTakaraTable[index].unk0C);
+        break;
+    }
+    return 1;
+}
 
 u32 fldCommand_FLD_SET_TAKARA_OPEN(void) {
     scrProcessWork_s *script;
@@ -2367,9 +3061,26 @@ u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_WARP_CALL_FIELD);
+s32 fldCommand_FLD_WARP_CALL_FIELD(void) {
+    const char *entry;
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_CALL_WAPEX);
+    printf(D_00532A88);
+    if (fldDoor_ChkWarp() != 0) {
+        fldDoor_Warp(NULL);
+        return 1;
+    }
+    entry = fldEveHitResName_Find((u32)scrGetScriptHandle()->ProcessID);
+    if (entry != NULL) {
+        fldDoor_Warp(entry);
+    }
+    return 1;
+}
+
+s32 fldCommand_FLD_CALL_WAPEX(void) {
+    printf(D_00532AA0);
+    fldDoor_WarpEx(scrGetIntPara(0));
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_WARP_CASH_F);
 
@@ -2472,6 +3183,10 @@ s32 fldCommand_FLD_BGM_RELOAD_WAIT(void)
 {
     return fldWaitBgmReload() != 0;
 }
+
+INCLUDE_RODATA(const s32, "code_00144798", D_00532A88);
+
+INCLUDE_RODATA(const s32, "code_00144798", D_00532AA0);
 
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_BGM_PLAY);
 
@@ -2600,7 +3315,10 @@ u32 fldCommand_FLD_ANAHORI_DEL(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_NPC_SINEN);
+s32 fldCommand_FLD_NPC_SINEN(void) {
+    gFldKyouseiTalk = scrGetIntPara(0);
+    return 1;
+}
 
 s32 fldCommand_FLD_GET_KIRETA(void) {
     s32 changed = 0;
@@ -2634,7 +3352,18 @@ s32 fldCommand_FLD_GET_KIRETA(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_GET_ITEMBOX_RND);
+s32 fldCommand_FLD_GET_ITEMBOX_RND(void) {
+    s32 threshold = D_00316EC8[evtGetAgeOfMoon()];
+    s32 value = dds3GetRandIntA(0, 100);
+
+    printf(D_00532AC8, value, threshold);
+    if (threshold >= value) {
+        scrSetIntReturnValue(1);
+    } else {
+        scrSetIntReturnValue(0);
+    }
+    return 1;
+}
 
 s32 fldCommand_FLD_MODEL_DANTE(void) {
     if (D_0054EAF0 == NULL) {
@@ -2659,6 +3388,8 @@ s32 fldCommand_FLD_DANTE_STANCE(void) {
     fldRunDanteStanceSet(scrGetIntPara(0));
     return 1;
 }
+INCLUDE_RODATA(const s32, "code_00144798", D_00532AC8);
+
 INCLUDE_SDATA(const s32, "code_00144798", gFldBgmBit);
 
 INCLUDE_SDATA(const s32, "code_00144798", fldSeLastBgm);

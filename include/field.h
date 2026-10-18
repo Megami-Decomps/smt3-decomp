@@ -38,12 +38,14 @@ typedef struct fldAreaWork_t
     u32 flags;                  /* 0x000 */
     s32 area;                   /* 0x004 */
     s32 floor;                  /* 0x008: zero-based */
-    u8 unk0C[8];
+    s32 blockID;                /* 0x00C */
+    u8 unk10[4];
     u32 consumedFlags;          /* 0x014 */
     s32 mode;                   /* 0x018 */
     u8 unk1C[4];
     char requestedSceneName[0x10]; /* 0x020 */
-    u8 unk30[0x54];
+    sdfVector4_t campos;        /* 0x030 */
+    u8 unk40[0x44];
     s32 resourceFlag;           /* 0x084 */
     s32 resourceArea;           /* 0x088 */
     s32 resourceFloor;          /* 0x08C */
