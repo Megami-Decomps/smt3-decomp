@@ -1072,8 +1072,8 @@ with an `#undef` and a comment saying what differs:
 | `VU0_SCALE_VF11` in `event/evtPolygonMovie.c` | as above |
 | `VU0_SET_VF10_Y` in `event/evtUnitManager.c` | declares no `$2` clobber, where the shared one does |
 
-Everything else is defined once, in `ps2asm.h`, and the units include it: 127
-macros there, 239 definitions in total across the tree.
+Everything else is defined once, in `ps2asm.h`, and the units include it: 143
+macros there, 252 definitions in total across the tree.
 
 The engine's own convention makes that practical. The VU0 inlines in the retail
 code always use the same registers for the same roles, so the macros fix them:

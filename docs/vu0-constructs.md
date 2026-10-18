@@ -1,6 +1,6 @@
 # The VU0 and MMI constructs, and what a port has to preserve
 
-`ps2asm.h` and the units define 238 distinct assembly macros. They collapse to
+`ps2asm.h` and the units define 246 distinct assembly macros. They collapse to
 about 40 distinct operations: the same transform, cross product, normalize and
 colour unpack recur under different register pairs. This page lists those
 operations and records the places where the obvious C equivalent is wrong, so a
@@ -17,7 +17,7 @@ Across every macro the state touched is `vf0`-`vf16`, `vf20`-`vf31`, `ACC`, `Q`,
 integer register, no VU0 data memory, no `vcallms`: the game drives COP2 in
 macro mode from the EE and never runs a VU0 microprogram.
 
-`ACC` never stays live past a macro's last instruction, checked across all 238,
+`ACC` never stays live past a macro's last instruction, checked across all 246,
 so it is internal to each operation. `Q` is not: `VU0_CLIP_RATIO_X` in
 `code_002C6F38.c` leaves it pending and the paired
 `VU0_CLIP_SEGMENT_UPDATE_FIRST` consumes it after a `vwaitq`. `vf12` and `vf2`
