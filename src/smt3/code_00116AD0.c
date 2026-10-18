@@ -152,7 +152,73 @@ extern s32 ProcDraw(dds3ProcessID_t *process);
 extern void fclClearTerminalState(void);
 extern void fldMakeFilePath(char *path, s32 area, s32 floor);
 extern s32 sprintf(char *text, const char *format, ...);
-extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, s32 flags);
+extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, void *size);
+extern void fldFreeSnowSeed(void);
+extern void fldAutoMapSeqSetFlag(u32 flag);
+extern void fldFreeInputPanel(void);
+extern void evtDisableMoonDraw(void);
+extern void fldFreeAddressProcess(void);
+extern void dds3EffectDistortionBlurDelete(void *blur);
+extern void campKillProcesses(void);
+extern void scrAllReleaseScript(void);
+extern s32 fldWmapIsEnabled(void);
+extern s32 dds3ConfigChanged(void);
+extern void dds3ConfigSaveBackup(void);
+extern void dds3ConfigRestoreBackup(void);
+extern void dds3SetPosPoseSet(dds3Basic_t *basic, void *position);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, u32 flag);
+extern void mdlSingleMotion(void *model, s32 motion, s32 flag);
+extern void dds3GlobalWorkUserInit2(s32 mode);
+extern s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz);
+extern dds3Basic_t *fldAnaBasic;
+extern void *D_0054EB5C;
+extern u16 fldRunDanteStartX[2];
+extern void fldRunDanteCollision(void);
+extern void fldRunDanteAi(void);
+extern void fldRunDanteSetModel(void);
+extern void fldRunDanteSe(void);
+extern void fldRunEffTask(void);
+extern void fldRunTamaSe(void);
+extern void fldRunDanteStanceSet(s32 stance);
+extern char D_00531940[], D_00531950[];
+extern s32 p2sdLoadCheckMidi(u32 midino);
+extern s32 p2sdLoadSMGFile(u32 midino);
+extern void sdfDrawSync(void);
+extern void dds3GlobalWorkClearFlags(void);
+extern void evtInitGlobalWork(void);
+extern void datInitPlayer(void);
+extern void datInitBossPress(void);
+extern void dds3ClearStockTable(void);
+extern void frInitNameData(void);
+extern void fclEncycInitRecord(s32 mode);
+extern void NewGame2Push(void);
+extern void NewGame2Pop(void);
+extern s32 sdfFileOpen(const char *path);
+extern void sdfFileRead(s32 fd, void *buffer, s32 size);
+extern void sdfFileClose(s32 fd);
+extern void datDelDevil(s32 devilId);
+extern char D_005315D0[];
+extern u8 D_0030A670[], D_00311450[], D_00311850[], D_00314100[], D_002FC1A0[];
+extern u8 fldTakaraTable[], fldAllCnt[];
+extern s32 nbGetEncountOn(void);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32 mode);
+extern void fldSkyDrawFilter(void);
+extern void fldDrawFrameSprite(void);
+extern u32 fldDbg_BlurOn[];
+extern u32 dds3AllocObjectId(void);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 id, void *position, void *rotation);
+extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
+extern void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 kind, s32 arg2);
+extern char D_00531820[];
+extern f32 sdfSin(f32 radians);
+extern f32 sdfCos(f32 radians);
+extern void fldFindDoorEvent(void *event);
+extern void fldFindTakaraSlot(s32 id);
+extern char D_005316B0[];
+extern void *gfldPlayerPtr;
+extern s32 gfldPlayerSizeBk;
 extern s32 slGetExitType(void);
 extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
 extern void fldGbInit_System(s32 mode);
@@ -283,11 +349,16 @@ typedef struct
     u8 unk20[0x18];
     s32 waitCount;
     f32 angleToPlayer;
-    u8 unk40[0xC];
+    f32 speed;
+    u8 unk44[0x8];
     u32 flag;
-    u8 unk50[0x4];
+    s32 unk50;
     s32 unk54;
-    u8 unk58[0x14];
+    f32 unk58;
+    f32 unk5C;
+    f32 unk60;
+    u8 unk64[0x4];
+    char *doorName;
     u16 mapIxOld;
     u16 mapIzOld;
     s32 unk70;
@@ -394,7 +465,33 @@ INCLUDE_ASM(const s32, "code_00116AD0", NewGame2Push);
 
 INCLUDE_ASM(const s32, "code_00116AD0", NewGame2Pop);
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3GlobalWorkUserInit2);
+void dds3GlobalWorkUserInit2(s32 mode)
+{
+    s32 saved;
+
+    if (mode == 1) {
+        NewGame2Push();
+        saved = DDS3_GBWK->unk34;
+        memset(DDS3_GBWK, 0, 0x1A510);
+        DDS3_GBWK->unk34 = saved;
+    }
+    DDS3_GBWK->unk38 = 0;
+    DDS3_GBWK->unk3C = 0;
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
+    DDS3_GBWK->akuma[0].unk00 = 8;
+    datInitPlayer();
+    datInitBossPress();
+    dds3ClearStockTable();
+    DDS3_GBWK->unk1CFA = 0;
+    DDS3_GBWK->unk1D7B = 0;
+    frInitNameData();
+    fldGbInit_System(0);
+    fclEncycInitRecord(0);
+    if (mode == 1) {
+        NewGame2Pop();
+    }
+}
 
 void dds3FontReqListInsert(dds3FontReqList_t *list, void *node, s32 linkofs)
 {
@@ -929,7 +1026,34 @@ s32 dds3NullDrawProc(dds3ProcessID_t *id)
 
 INCLUDE_ASM(const s32, "code_00116AD0", dds3DrawUnitObjectShadow);
 
-INCLUDE_ASM(const s32, "code_00116AD0", ooyTestDrawProc);
+s32 ooyTestDrawProc(dds3ProcessID_t *id)
+{
+    if (nbGetEncountOn() != 0) {
+        return 0;
+    }
+    if (fldProcCampChk() == 1) {
+        return 0;
+    }
+    rsetOtOfs(0x47);
+    rsetTest(1, 0, 0x81, 3, 0, 0, 1, 1);
+    rsetAlpha(0);
+    fldSkyDrawFilter();
+    if (fldDbg_BlurOn[0] != 0) {
+        if (fldAutoMapChkMode() == 0) {
+            rsetOtOfs(0x47);
+        } else {
+            rsetOtOfs(0x51);
+        }
+        fldDrawFrameSprite();
+    }
+    rsetOtOfs(0x27);
+    rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
+    rsetOtOfs(0x2E);
+    rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
+    return 0;
+}
 
 void InitOoyTest(void)
 {
@@ -1218,13 +1342,57 @@ void func_0011C7B8(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteDoin);
+void fldRunDanteDoin(void)
+{
+    void **basic;
+
+    if (fldRun_Dante.waitCount > 0) {
+        fldRun_Dante.waitCount--;
+    }
+    if (fldRun_Dante.waitCount == 0x4E && fldRun_Dante.doorName != NULL) {
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.doorName);
+        fldFindDoorEvent(basic[1]);
+    }
+    if (fldRun_Dante.waitCount >= 0x15) {
+        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
+        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
+    } else if (fldRun_Dante.waitCount == 0x14) {
+        fldRun_Dante.unk50 = 3;
+        fldRun_Dante.flag |= 2;
+    }
+    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.mapIx, &fldRun_Dante.mapIz);
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteMove);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunDantePwak);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteSoba);
+void fldRunDanteSoba(void)
+{
+    f32 dist;
+
+    if (fldRun_Dante.waitCount > 0) {
+        fldRun_Dante.waitCount--;
+    }
+    dist = fldRun_Dante.unk58;
+    fldRun_Dante.angleToPlayer = fldRun_Dante.unk5C;
+    fldRun_Dante.turn =
+        fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.unk5C, 10.0f, 1.0f);
+    if (dist > 100.0f) {
+        fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
+        fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
+    }
+    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.mapIx, &fldRun_Dante.mapIz);
+    if (dist < 3600.0f) {
+        if (fldRun_Dante.unk54 != 1) {
+            fldRun_Dante.unk54 = 1;
+            fldRun_Dante.flag |= 4;
+        }
+    } else if (fldRun_Dante.unk54 != 0) {
+        fldRun_Dante.unk54 = 0;
+        fldRun_Dante.flag |= 4;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunDantePatr);
 
@@ -1244,7 +1412,28 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_00531350);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteAi);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteLoadBgm);
+void fldRunDanteLoadBgm(void)
+{
+    if (p2sdLoadCheckMidi(0x820000) == 0) {
+        p2sdLoadSMGFile(0x820000);
+    }
+    while (p2sdLoadCheckMidi(0x820000) != 1) {
+        sdfDrawSync();
+    }
+    if (p2sdLoadCheckMidi(0x830000) == 0) {
+        p2sdLoadSMGFile(0x830000);
+    }
+    while (p2sdLoadCheckMidi(0x830000) != 1) {
+        sdfDrawSync();
+    }
+    if (p2sdLoadCheckMidi(0x6F0000) == 0) {
+        p2sdLoadSMGFile(0x6F0000);
+    }
+    while (p2sdLoadCheckMidi(0x6F0000) != 1) {
+        sdfDrawSync();
+    }
+    p2sdStopBGM(0x820000);
+}
 
 void fldRunDanteSwapBgm(s32 toDante)
 {
@@ -1315,7 +1504,27 @@ s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z)
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteSe);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunView);
+void fldRunView(void)
+{
+    if (evtBitCheck(0xAF3) == 0) {
+        return;
+    }
+    if (evtBitCheck(0xAF4) == 0) {
+        return;
+    }
+    if (fldEncountTestFlag(0x40) == 0) {
+        return;
+    }
+    fldRunDanteCollision();
+    fldRunDanteAi();
+    fldRunDanteSetModel();
+    fldRunDanteSe();
+    fldRunEffTask();
+    fldRunTamaSe();
+    FroFtoI(fldGlobalBase.x, fldGlobalBase.z, &fldRunDanteStartX[0], &fldRunDanteStartX[1]);
+    fldRun_Dante.mapIxOld = fldRun_Dante.mapIx;
+    fldRun_Dante.mapIzOld = fldRun_Dante.mapIz;
+}
 
 s32 fldRunEncountChk(void)
 {
@@ -1339,7 +1548,22 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_005313E0);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteStanceSet);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldAllTblLoad);
+void fldAllTblLoad(void)
+{
+    s32 fd = sdfFileOpen(D_005315D0);
+
+    sdfFileRead(fd, D_0030A670, 0x4E0);
+    sdfFileRead(fd, fldAreaNameTable, 0x2BC0);
+    sdfFileRead(fd, fldPlaceNameTable, 0x24C0);
+    sdfFileRead(fd, fldFloorNameTable, 0x1880);
+    sdfFileRead(fd, D_00311450, 0x400);
+    sdfFileRead(fd, D_00311850, 0x800);
+    sdfFileRead(fd, D_00314100, 0x2A00);
+    sdfFileRead(fd, fldTakaraTable, 0x1600);
+    sdfFileRead(fd, D_002FC1A0, 0x80);
+    sdfFileRead(fd, fldAllCnt, 0x100);
+    sdfFileClose(fd);
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldGbFlagClear);
 
@@ -1347,11 +1571,67 @@ INCLUDE_ASM(const s32, "code_00116AD0", fldGbInit_System);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldResetSequenceParams);
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3EffectFldCharToType);
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005315D0);
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3EffectFldTypeIsSpecial);
+s32 dds3EffectFldCharToType(s32 charId)
+{
+    if (charId < 0x28) {
+        return charId % 100;
+    }
+    switch (charId) {
+    case 0x28:
+        return 2;
+    case 0x29:
+        return 5;
+    case 0x2A:
+        return 7;
+    case 0x2B:
+        return 9;
+    case 0x2C:
+        return 10;
+    case 0x2D:
+        return 30;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetModelFlag);
+s32 dds3EffectFldTypeIsSpecial(s32 type)
+{
+    switch (type) {
+    case 2:
+    case 5:
+    case 7:
+    case 9:
+    case 10:
+    case 30:
+        return 1;
+    }
+    return 0;
+}
+
+void fldSetModelFlag(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].modelFlag |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].modelFlag &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].modelFlag |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].modelFlag &= ~(1 << bit);
+    }
+}
 
 s32 fldGetModelFlag(s32 charId, s32 idx, s32 bit)
 {
@@ -1368,31 +1648,258 @@ s32 fldGetModelFlag(s32 charId, s32 idx, s32 bit)
     return ((u32)DDS3_GBWK->gb[type].flags[idx].modelFlag >> bit) & 1;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetAnimeFlag);
+void fldSetAnimeFlag(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3ObjectBaseAddModelOt);
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].animeFlag |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].animeFlag &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].animeFlag |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].animeFlag &= ~(1 << bit);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetAtariFlag);
+s32 dds3ObjectBaseAddModelOt(s32 charId, s32 idx, s32 bit)
+{
+    s32 type;
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldGbChkHit);
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return 0;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag >> bit) & 1;
+    }
+    type = dds3EffectFldCharToType(charId);
+    return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag >> bit) & 1;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetModelFlag2);
+void fldSetAtariFlag(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3EffectObjectAddFld);
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].atariFlag |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].atariFlag &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].atariFlag |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].atariFlag &= ~(1 << bit);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetAnimeFlag2);
+s32 fldGbChkHit(s32 charId, s32 idx, s32 bit)
+{
+    s32 type;
 
-INCLUDE_ASM(const s32, "code_00116AD0", fld_120C30);
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return 0;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[idx].atariFlag >> bit) & 1;
+    }
+    type = dds3EffectFldCharToType(charId);
+    return ((u32)DDS3_GBWK->gb[type].flags[idx].atariFlag >> bit) & 1;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldGetAnimeId2);
+void fldSetModelFlag2(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
 
-INCLUDE_ASM(const s32, "code_00116AD0", dds3EffectObjectFindFld);
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].modelFlag2 |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].modelFlag2 &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].modelFlag2 |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].modelFlag2 &= ~(1 << bit);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetNpcFlag);
+s32 dds3EffectObjectAddFld(s32 charId, s32 idx, s32 bit)
+{
+    s32 type;
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldGbChkNpc);
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return 0;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[idx].modelFlag2 >> bit) & 1;
+    }
+    type = dds3EffectFldCharToType(charId);
+    return ((u32)DDS3_GBWK->gb[type].flags[idx].modelFlag2 >> bit) & 1;
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldGbSetGimic);
+void fldSetAnimeFlag2(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].animeFlag2 |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].animeFlag2 &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].animeFlag2 |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].animeFlag2 &= ~(1 << bit);
+    }
+}
+
+s32 fld_120C30(s32 charId, s32 idx, s32 bit)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return 0;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag2 >> bit) & 1;
+    }
+    type = dds3EffectFldCharToType(charId);
+    return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag2 >> bit) & 1;
+}
+
+void fldGetAnimeId2(s32 charId, s32 idx, s32 slot, s32 id)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        DDS3_GBWK->gb[type].flags[idx].animeId2[slot] = id;
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    DDS3_GBWK->gb[type].flags[idx].animeId2[slot] = id;
+}
+
+s32 dds3EffectObjectFindFld(s32 charId, s32 idx, s32 slot)
+{
+    s32 type;
+    u8 id;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return -1;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        id = DDS3_GBWK->gb[type].flags[idx].animeId2[slot];
+    } else {
+        type = dds3EffectFldCharToType(charId);
+        id = DDS3_GBWK->gb[type].flags[idx].animeId2[slot];
+    }
+    return id != 0xFF ? id : -1;
+}
+
+void fldSetNpcFlag(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].npcFlag |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].npcFlag &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].npcFlag |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].npcFlag &= ~(1 << bit);
+    }
+}
+
+s32 fldGbChkNpc(s32 charId, s32 idx, s32 bit)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return 0;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[idx].npcFlag >> bit) & 1;
+    }
+    type = dds3EffectFldCharToType(charId);
+    return ((u32)DDS3_GBWK->gb[type].flags[idx].npcFlag >> bit) & 1;
+}
+
+void fldGbSetGimic(s32 charId, s32 idx, s32 bit, s32 on)
+{
+    s32 type;
+
+    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+        return;
+    }
+    if (fldGb < 0x28) {
+        type = charId % 100;
+        if (on != 0) {
+            DDS3_GBWK->gb[type].flags[idx].hojiFlag |= 1 << bit;
+        } else {
+            DDS3_GBWK->gb[type].flags[idx].hojiFlag &= ~(1 << bit);
+        }
+        return;
+    }
+    type = dds3EffectFldCharToType(charId);
+    if (on != 0) {
+        DDS3_GBWK->gb[type].flags[idx].hojiFlag |= 1 << bit;
+    } else {
+        DDS3_GBWK->gb[type].flags[idx].hojiFlag &= ~(1 << bit);
+    }
+}
 
 s32 fldGetHojiFlag(s32 charId, s32 idx, s32 bit)
 {
@@ -1449,7 +1956,30 @@ s32 fldAutoMapFindFloor(s32 fld, s32 area)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldDbgWmapStart);
+void fldDbgWmapStart(void)
+{
+    s32 field;
+
+    if (DDS3_GBWK->transition != 0) {
+        dds3GlobalWorkUserInit2(1);
+    } else {
+        dds3GlobalWorkUserInit2(0);
+        if (fldWmapIsEnabled() == 0) {
+            evtBitOn(0xAF2);
+        }
+    }
+    if (dds3ConfigChanged() == 0) {
+        dds3ConfigSaveBackup();
+    } else {
+        dds3ConfigRestoreBackup();
+    }
+    evtBitOn(0xC0F);
+    fldRunDanteGunFlag.enabled = 1;
+    field = 0x259;
+    fldRunDanteGunFlag.counter = 0;
+    fldSetNextField(0xB, 0x259);
+    dds3AdminiCallSequence(7, &field, 4, 0);
+}
 
 void fldMainLoadStart(void) {
     fldSceneParam_t record;
@@ -1485,7 +2015,15 @@ void fldFirstInit(void)
     fldAllTblLoad();
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldInitAllValue);
+void fldInitAllValue(void)
+{
+    u8 *p = (u8 *)&fldSceneParam;
+
+    SDF_VU0_STOREVECTOR_ZERO(p);
+    SDF_VU0_STOREVECTOR_ZERO(p + 0x10);
+    memset(fldGetUnitControl(), 0, 0xC);
+    memset(fldGetFollowCameraControl(), 0, 0x7C);
+}
 
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
     if (dds3SearchProcessName(D_00531690) != NULL) {
@@ -1627,11 +2165,12 @@ s32 fldGetRestoreMode(void)
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldReadyScene);
 
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531690);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_005316A0);
-
-INCLUDE_ASM(const s32, "code_00116AD0", fldPlayerALoad);
+void fldPlayerALoad(void)
+{
+    if (fldPlayerAnimData == NULL) {
+        fldPlayerAnimData = sdfDevLoadFileEx(D_005316B0, &gfldPlayerPtr, &gfldPlayerSizeBk);
+    }
+}
 
 void fldPlayerAFree(void)
 {
@@ -1640,6 +2179,12 @@ void fldPlayerAFree(void)
         fldPlayerAnimData = NULL;
     }
 }
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531690);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005316A0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005316B0);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldJDataLoad);
 
@@ -1735,11 +2280,73 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_005317B0);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldSetUnit);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldAnaStart);
+void fldAnaStart(f32 x, f32 y, f32 z)
+{
+    f32 pos[4];
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldWaveInit);
+    memset(pos, 0, sizeof(pos));
+    pos[3] = 1.0f;
+    if (mhfldAnaFile != NULL) {
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        dds3SetPosPoseSet(fldAnaBasic, pos);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldAnaBasic), 0, 0);
+        dds3ObjectBaseOffFlag(fldAnaBasic, 1);
+        fldSePlay(0x26);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldWaveStart);
+void fldWaveInit(void)
+{
+    f32 pos[4];
+    f32 rot[4];
+    s32 i;
+
+    memset(pos, 0, sizeof(pos));
+    pos[3] = 1.0f;
+    memset(rot, 0, sizeof(rot));
+    rot[3] = 1.0f;
+    if (mhfldWaveFile == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x28; i++) {
+        fldWaveBuff[i].active = 0;
+        fldWaveBuff[i].count = 0;
+        fldWaveBuff[i].handle = NULL;
+        fldWaveBuff[i].handle = dds3AddUnitObjectBasic(dds3AllocObjectId(), pos, rot);
+        dds3SetUnitObjectId(fldWaveBuff[i].handle, D_00531820);
+        dds3ObjectBaseMakeUnit(fldWaveBuff[i].handle, 2, 0x1B);
+        dds3ObjectBaseOnFlag(fldWaveBuff[i].handle, 1);
+    }
+}
+
+void fldWaveStart(f32 x, f32 y, f32 z)
+{
+    f32 pos[4];
+    s32 i;
+
+    memset(pos, 0, sizeof(pos));
+    pos[3] = 1.0f;
+    if (mhfldWaveFile == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x28; i++) {
+        if (fldWaveBuff[i].active != 0) {
+            continue;
+        }
+        fldWaveBuff[i].active = 1;
+        fldWaveBuff[i].count = 0;
+        pos[0] = x;
+        pos[1] = y;
+        pos[2] = z;
+        dds3SetPosPoseSet(fldWaveBuff[i].handle, pos);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].handle), 0, 0);
+        dds3ObjectBaseOffFlag(fldWaveBuff[i].handle, 1);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].handle), 0, 0);
+        return;
+    }
+}
 
 void fldWaveTask(void)
 {
@@ -1768,7 +2375,27 @@ s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldChkVortex);
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531820);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531830);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531840);
+
+s32 fldChkVortex(void)
+{
+    s32 list[3] = { 1, 11, 14 };
+    u32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (fldGlobalBase.area == list[i]) {
+            return 0;
+        }
+    }
+    if ((u32)(fldGlobalBase.area - 0x259) < 0x10) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 fldLightMaIdxCalc(void)
 {
@@ -1850,7 +2477,24 @@ s32 fldLightMaChk(void)
     return gFldNowDZone != 0 ? 0 : -1;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldLightMaTask);
+void fldLightMaTask(void)
+{
+    if (gFldNowDZone == 0) {
+        if (fldGlobalBase.lightMaIdx != 0) {
+            fldGlobalBase.lightMaIdx = 0;
+            fldSkySetTblLightMa(0, 0);
+        }
+    } else if (DDS3_GBWK->maFlags & 8) {
+        if (fldGlobalBase.lightMaIdx == 0) {
+            fldGlobalBase.lightMaIdx = fldLightMaIdxCalc();
+            fldSkySetTblLightMa(fldGlobalBase.lightMaIdx, 0x14);
+        }
+    } else if (fldGlobalBase.lightMaIdx != 0) {
+        fldGlobalBase.lightMaIdx = 0;
+        fldSkySetTblLightMa(0, 0x14);
+        fldSePlay(0x2A);
+    }
+}
 
 void fldRifutoMaClearMsg(void)
 {
@@ -1938,7 +2582,39 @@ s32 fldEsutoMaChk(void)
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldAnahoriSelectInit);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldAnahoriSelectGet);
+s32 fldAnahoriSelectGet(void)
+{
+    s32 n = 0;
+    s32 i;
+    u32 flag;
+
+    if (gFldAnahoriAkumaIdxMax == 0) {
+        return 0;
+    }
+    for (i = 0; i < 16; i++) {
+        flag = DDS3_GBWK->akuma[i].flag;
+        if (!(flag & 1)) {
+            continue;
+        }
+        if (flag & 4) {
+            continue;
+        }
+        if (flag & 0x10) {
+            continue;
+        }
+        if (flag & 0x800) {
+            continue;
+        }
+        if (DDS3_GBWK->akuma[i].hp == 0) {
+            continue;
+        }
+        if (gFldAnahoriAkumaIdx == n) {
+            return DDS3_GBWK->akuma[i].devilId;
+        }
+        n++;
+    }
+    return 0;
+}
 
 void fldAnahoriSelectNext(void)
 {
@@ -1950,15 +2626,41 @@ void fldAnahoriSelectNext(void)
     gFldAnahoriAkumaIdx = idx;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldAnahoriSelectDel);
+void fldAnahoriSelectDel(void)
+{
+    s32 n = 0;
+    s32 i;
+    u32 flag;
+
+    for (i = 0; i < 16; i++) {
+        flag = DDS3_GBWK->akuma[i].flag;
+        if (!(flag & 1)) {
+            continue;
+        }
+        if (flag & 4) {
+            continue;
+        }
+        if (flag & 0x10) {
+            continue;
+        }
+        if (flag & 0x800) {
+            continue;
+        }
+        if (DDS3_GBWK->akuma[i].hp == 0) {
+            continue;
+        }
+        if (gFldAnahoriAkumaIdx == n) {
+            if (DDS3_GBWK->akuma[i].level >= 0x15) {
+                evtBitOn(0x504);
+            }
+            datDelDevil(DDS3_GBWK->akuma[i].devilId);
+            return;
+        }
+        n++;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldOtInit);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531830);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531840);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531850);
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531860);
 
@@ -2063,7 +2765,30 @@ void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
     InitOoyTest();
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldProcShutDown);
+void fldProcShutDown(void)
+{
+    if (fldProcShutDownFlg == 0) {
+        return;
+    }
+    fldProcShutDownFlg = 0;
+    fldFreeSnowSeed();
+    fldEncountClearFlag(0x10);
+    fldEncountClearFlag(0x20);
+    fldEncountClearFlag(0x80);
+    fldAutoMapSeqSetFlag(1);
+    fldAutoMapSeqSetFlag(2);
+    dds3KillProcessName(D_00531940, 1);
+    dds3KillProcessName(D_00531950, 1);
+    fldFreeInputPanel();
+    evtDisableMoonDraw();
+    fldFreeAddressProcess();
+    if (D_0054EB5C != NULL) {
+        dds3EffectDistortionBlurDelete(D_0054EB5C);
+        D_0054EB5C = NULL;
+    }
+    campKillProcesses();
+    scrAllReleaseScript();
+}
 
 s32 fldProcShutDown2(void)
 {

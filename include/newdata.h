@@ -9,7 +9,12 @@
 typedef struct
 {
     u16 modelFlag;
-    u8 unk02[0x1A];
+    u16 animeFlag;
+    u16 atariFlag;
+    u16 modelFlag2;
+    u16 animeFlag2;
+    u8 animeId2[0x10];
+    u16 npcFlag;
     u16 hojiFlag;
 } fldGbFlags_t;
 
@@ -20,11 +25,13 @@ typedef struct
 
 typedef struct
 {
-    u8 unk00[4];
+    s32 unk00;
     u32 flag;
-    u8 unk08[2];
+    u16 devilId;
     u16 hp;
-    u8 unk0C[0xE0];
+    u8 unk0C[0xE];
+    s8 level;
+    u8 unk1B[0xD1];
 } fldAnahoriAkuma_t;
 
 /* Shared persistent work, recovered through its consumers. These fields form
@@ -33,7 +40,10 @@ typedef struct
 {
     u8 unk00[0xE];
     s16 transition; /* 0xE: fldMainLoadStart */
-    u8 unk10[0x30];
+    u8 unk10[0x24];
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
     s32 integers[256];
     f32 floats[256];
     u32 eventFlags[128]; /* 0x840: 4096 event bits */
@@ -47,7 +57,10 @@ typedef struct
     u8 unk1910[0x3E4];
     f32 encounterRemainder;        /* 0x1CF4 */
     u16 encounterGauge;            /* 0x1CF8 */
-    u8 unk1CFA[0x495E];
+    u8 unk1CFA;
+    u8 unk1CFB[0x80];
+    u8 unk1D7B;
+    u8 unk1D7C[0x48DC];
     fldGbTypeBlock_t gb[48];       /* 0x6658 */
     u8 takaraOpen[0x20];           /* 0x11A58 */
     s16 previewX;                 /* 0x11A78: slSetTmnlID */

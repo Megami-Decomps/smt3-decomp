@@ -28,6 +28,8 @@ it was measured on DDS and not on this ELF.
 | `slt` then `sltiu` | write `if (a < b) return 0; return 1;` rather than `return a >= b` |
 | explicit branches where you emit `andi` or `sltiu` | gcc folds `(x & 1) ? 1 : 0` and `f() == 0`. Usually unreachable from C |
 | the same field stores duplicated per `switch` case | write the full store list in each case and let gcc merge the tail. Hoisting the values into locals does not match |
+| every arm reaching one shared epilogue at the end | use an `else if` chain. An early `return` per arm gives each arm its own epilogue copy |
+| a jump table | write a `switch`. The jtbl entry order gives case to label, and the label order inside the body gives the source order of the cases, which is often not ascending |
 
 ## Addressing and types
 
@@ -44,6 +46,18 @@ it was measured on DDS and not on this ELF.
   leading call keeps it out of `$16`.
 - Giving a void function an `s32` return type with no `return` statement
   blocks the sibling call where retail uses `jal` and a full epilogue.
+- An ignored return value still reserves `$2` across the call. When retail
+  skips `$2` for the address temp after a `jal`, declare the callee `s32`
+  rather than `void`.
+
+## Function-local constant arrays
+
+A block-scope initializer such as `s32 list[3] = {1, 11, 14};` goes to
+`.rodata` at the function's position in the C file, not where splat put the
+`INCLUDE_RODATA` line for it. Move the `INCLUDE_RODATA` lines for every
+rodata object that precedes it above the function, or the relink reorders the
+pool. `check_unit.py` masks local rodata relocations and still says the
+function matches; only the `ninja` checksum catches this.
 
 ## Float literals
 
@@ -91,6 +105,13 @@ These have been ruled out repeatedly and are not worth a second attempt:
   sibcall.
 - Zero-extending a byte with a `sll 24`, `srl 24` pair. ee-gcc emits
   `andi 0xff` for every source shape tried.
+- `xori reg, reg, 0` in front of a `movn`. No `!= 0` shape (plain `if`,
+  ternary, `> 0`, `>= 1`, explicit `^ 0`, a `continue`, a local of either
+  width) adds it; every one of them emits the `movn` alone.
+- A `jal` plus a shared epilogue in a `switch` default arm whose sibling
+  cases all sibcall. Case order, `return` against `break`, a dead assignment
+  of the result, and a non-void or struct return type on the callee all leave
+  the default arm a sibcall.
 
 A function whose body is mostly inline assembly is refused by the production
 report anyway, at 8 instructions and more than half the body, so writing one

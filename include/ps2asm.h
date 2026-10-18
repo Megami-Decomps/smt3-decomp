@@ -48,6 +48,9 @@ typedef struct {
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 #define SDF_VU0_STOREVECTOR_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, %0\n\t.set reorder" : "=m" (lvalue))
+/* vf0 is the constant (0,0,0,1), so this clears xyz and sets w to one. */
+#define SDF_VU0_STOREVECTOR_ZERO(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf0, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 
 #define SDF_VU0_LOADVECTOR_B(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (src))
