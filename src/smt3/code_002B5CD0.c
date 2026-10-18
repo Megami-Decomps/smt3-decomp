@@ -58,7 +58,6 @@ struct TMX_HEADER_t;
 struct SdfGeneratedLookupTexture;
 struct MovPacStream;
 struct sdfFileCmdHandle_t;
-typedef int s128 __attribute__((mode(TI)));
 /* Write three axis components and twice acos(W), using the native small
  * denominator fallback when sqrt(1-W*W) is near zero. */
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);

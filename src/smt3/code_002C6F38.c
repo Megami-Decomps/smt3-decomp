@@ -30,7 +30,6 @@ struct sdfSortOtNode_tag;
 struct SdfPool;
 struct SdfStreamReadRequest;
 struct SdfStreamState;
-typedef int s128 __attribute__((mode(TI)));
 /* Convert three Euler angle components to the VU0 quaternion output.
  * Providers: DDS1 game/code_002E7C20.c and DDS2 game/code_00340AC8.c. */
 void FromEuler(f32 x, f32 y, f32 z);

@@ -84,7 +84,6 @@ struct SdfPatchableResourcePacket;
 struct sdfPreDrawTag_t;
 struct SdfPacketChain;
 struct sdfFileCmdHandle_t;
-typedef int s128 __attribute__((mode(TI)));
 /* Register selectors carried by GIF A+D writes in the two GS contexts. */
 enum {
     SDF_GS_PRIM = 0x00,
@@ -246,7 +245,7 @@ typedef union MovObjStream {
 typedef struct sdfGrRefPacketHeader_t {
     u64 dmaTag;
     u64 vifCommands;
-    int __attribute__((mode(TI))) nextTag;
+    s128 nextTag;
 } sdfGrRefPacketHeader_t;
 /* Interrupt-synchronized deferred callback owner (0x08). */
 typedef struct sdfDelayedResrcCB_t {
