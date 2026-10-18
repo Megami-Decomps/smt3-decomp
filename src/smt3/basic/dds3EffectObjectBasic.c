@@ -60,7 +60,7 @@ extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 mask);
 extern void ToMatrix(void);
 extern void MultMatrixRevNoArg(void);
-extern void SDF_QUAT_INNERPRODUCT(void);
+extern void Normalize(void);
 extern void dds3EffectSetRotateMatrix(void *effect, const sdfMatrix4_t *matrix);
 extern s32 dds3EffectGetState(void *effect);
 extern s32 dds3BillboardGetAnimState(void *bill);
@@ -414,7 +414,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
         SDF_VU0_STOREVECTOR(&position);
         dds3SetRadiusPoseSet(basic->poseset);
         SDF_VU0_LOADVECTOR(&basic->poseset->rot);
-        SDF_QUAT_INNERPRODUCT();
+        Normalize();
         SDF_VU0_STOREVECTOR(&rotation);
         moved = 1;
     }

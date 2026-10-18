@@ -198,28 +198,18 @@ Three things stay as raw asm because they are not instructions at all: the
 `fptodp = sdfFloatToULong` style assembler symbol aliases, the `__asm__("")`
 scheduling barriers, and `__asm__("nop\nnop\nnop\nnop\n")` delay padding.
 
-## The quaternion functions still have placeholder names
+## The quaternion functions
 
-`code_002BD340.c` holds the engine's quaternion routines. Most already carry
-their own names (`Mult`, `Slerp`, `Lerp`, `ToMatrix`, `FromRotation`,
-`FromRotation_B`, `EulerAngleAxisY`, `SDF_QUAT_INNERPRODUCT`), but three are
-still addresses. The HD build's `sdfQuat` class lists the whole family:
+`code_002BD340.c` holds the engine's quaternion routines, named as the engine
+names them: `Mult`, `Inverse`, `Normalize`, `SDF_QUAT_INNERPRODUCT`, `Slerp`,
+`Lerp`, `ToMatrix`, `FromRotation`, `FromRotation_B`, `EulerAngleAxisY`. Three
+of those were placeholders or wrong until the HD metadata settled them; the
+proof and the call-site trap are in [IDB corrections](idb-corrections.md).
 
-    ToMatrix  FromEuler  FromEulerXYZ  V2Q  Q2V  Mult  Inverse  Normalize
-    Length  InnerProduct  SDF_QUAT_INNERPRODUCT  FromRotation  FromRotation_B
-    LookAt  Slerp  Lerp  EulerAngleAxisY
-
-Matching the three placeholders against what their bodies compute:
-
-| placeholder | what it does | likely name |
-| --- | --- | --- |
-| `sdf_2C0538` | the four-lane dot of A and B, returned as a float | `InnerProduct` |
-| `sdf_2C04B8` | squared norm, `vdiv`, then conjugate | `Inverse` |
-| `sdf_2C0510` | reduces vf10 alone to one float | `Length`, by elimination |
-
-These are function names, not macros, so they are not renamed here: a name the
-retail code proves belongs in the SLUS_209.11 IDB first, with
-`tools/ida_symbols.py` re-run afterwards. `sdf_2C0510` in particular is not
-settled — its reduction is `(x*x)*(y*y) + z*z + w*w`, which is not a length, so
-either the reading or the HD correspondence is wrong and it needs checking
-against a caller before anyone renames it.
+One is still open. `sdf_2C0510` reduces vf10 to a single float, which by
+elimination would be `Length` -- the only scalar reducer left in HD's `sdfQuat`
+list -- except that its accumulator chain starts `vmulay.x ACC, vf2, vf2y`
+where the dot product uses `vadday.x`. It therefore computes
+`(x*x)*(y*y) + z*z + w*w`, which is neither a length nor a dot, and HD's
+`sdfQuat$$Length` is an empty stub. It keeps its address for a name until
+something better than elimination is available.

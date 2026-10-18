@@ -355,7 +355,7 @@ sdfTexHandle_t *sdfTexNew(s32 width, s32 height, s32 format, s32 mipmapCount,
 void sdfTexSetWrapMode(sdfTexHandle_t *texture, s32 mode);
 void sdfTexMakeGIFPacket(sdfTexHandle_t *texture);
 void MultMatrixRev(sdfMatrix4_t *matrix);
-void SDF_QUAT_INNERPRODUCT(void);
+void Normalize(void);
 void dds3RotationArc(void);
 void evtHokanBlur2(s32 enabled, f32 ratio, dds3Blur2Param_t *from, dds3Blur2Param_t *to, dds3Blur2Param_t *out);
 void evtHokanMultBlur(s32 enabled, f32 ratio, dds3MultiBlurParam_t *from, dds3MultiBlurParam_t *to, dds3MultiBlurParam_t *out);
@@ -1377,7 +1377,7 @@ void dds3RotationArc(void)
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_STOREVECTOR(axis);
     SDF_VU0_SETVECTOR_W(dot);
-    SDF_QUAT_INNERPRODUCT();
+    Normalize();
 }
 
 void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);

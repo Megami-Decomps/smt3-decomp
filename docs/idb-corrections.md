@@ -56,6 +56,22 @@ increments and stores them and never dereferences them.
 | --- | --- | --- | --- |
 | 0x0032C420 | `off_32C420`, with `modelFileKindTable` one word further on | `modelFileKindTable` | `mdlGetNumOfMinor` (0x001DDB90) indexes the table at stride 8 and returns the second word of the entry, so the entry starts at 0x0032C420 and the old symbol named its `count` field. `mdlMakeHddFileList` (0x001DE5B8) and `mdlReleaseHddFileList` (0x001DE398) write both words of entry 5, the HDD slot, as `{entries, count}` |
 | 0x0054E854 | `startinglistl_0` | `startinglistl` | the `_0` suffix is an IDA uniquifier with no surviving twin, and the word is the tail of the list whose head and counter are `startinglistf` and `startinglistcnt` |
+| 0x002C04E8 | `SDF_QUAT_INNERPRODUCT` | `Normalize` | the body is `vrsqrt Q, vf0w, vf3w` then `vmulq.xyzw vf10, vf10, Q`, so it scales all four lanes of vf10 by one over their length and returns nothing. An inner product returns a scalar; this cannot be one. `Slerp` and `Lerp` both end with it, which is where a normalize belongs |
+| 0x002C0538 | `sdf_2C0538` | `SDF_QUAT_INNERPRODUCT` | the body reduces `vf10 * vf11` over all four lanes through the accumulator and returns the result as an `f32`. HD's `sdfQuat$$SDF_QUAT_INNERPRODUCT` ends in `UnityEngine_Quaternion__Dot(A, B)`, and its `sdfQuat$$InnerProduct` is only a wrapper around that worker |
+| 0x002C04B8 | `sdf_2C04B8` | `Inverse` | squared norm into vf3.w, `vdiv Q, vf0w, vf3w`, `vsub.xyz vf2, vf0, vf10` to negate xyz while `vmove.w vf2, vf10` keeps w, then `vmulq.xyzw vf10, vf2, Q`: the conjugate over the squared norm. HD's `sdfQuat` has `Inverse` |
+
+The three quaternion rows are one shuffle, not three independent renames: the name
+`SDF_QUAT_INNERPRODUCT` was on the normalize and had to move to the dot product. Six call
+sites across `basic/dds3Basic.c`, `basic/dds3EffectObjectBasic.c`, `kernel/dds3KernelDraw.c`
+and `code_002BD340.c` called it meaning the normalize, and renaming the symbol without them
+re-pointed three `jal` targets from 0x002C04E8 to 0x002C0538. The checksum caught it.
+
+`sdf_2C0510` (0x002C0510) is left alone. It reduces vf10 to one float, which by elimination
+would make it `Length`, the only scalar reducer left in HD's `sdfQuat` list. But its
+accumulator chain starts `vmulay.x ACC, vf2, vf2y` where the dot product uses `vadday.x`, so
+it computes `(x*x)*(y*y) + z*z + w*w`, which is neither a length nor a dot. HD's
+`sdfQuat$$Length` is an empty stub and settles nothing. None of these three functions has a
+single cross-reference in the ELF, so there is no caller to appeal to either.
 
 Entry 0 of `modelFileKindTable` is `{0x0032A858, 2}` and the table runs seven entries to
 0x0032C458, where `mdlResrcMajorList` starts. `modelFileTable` (0x0032A820) has the same

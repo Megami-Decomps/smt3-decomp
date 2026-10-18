@@ -2112,8 +2112,8 @@ void Mult(void)
         : : : "memory");
 }
 
-/* vu0 routine: shared quaternion registers are the input/output interface. */
-void sdf_2C04B8(void)
+/* vu0 routine: the conjugate over the squared norm. */
+void Inverse(void)
 {
     __asm__ volatile (
         ".set noreorder\n"
@@ -2130,8 +2130,9 @@ void sdf_2C04B8(void)
         );
 }
 
-/* vu0 routine: normalize all four components of vf10. */
-void SDF_QUAT_INNERPRODUCT(void)
+/* vu0 routine: normalize all four components of vf10. The IDB called this
+ * SDF_QUAT_INNERPRODUCT, which belongs to the dot product below. */
+void Normalize(void)
 {
     __asm__ volatile (
         ".set noreorder\n"
@@ -2164,8 +2165,8 @@ f32 sdf_2C0510(void)
     return componentMetric;
 }
 
-/* vu0 routine: return the component-wise dot product of vf10 and vf11. */
-f32 sdf_2C0538(void)
+/* vu0 routine: return the four-lane dot product of vf10 and vf11. */
+f32 SDF_QUAT_INNERPRODUCT(void)
 {
     f32 dotProduct;
     VU0_QUAT_DOT_VF10_VF11(dotProduct);
@@ -2345,7 +2346,7 @@ void Slerp(f32 blendAmount) {
     }
     VU0_SET_WEIGHTS_VF2X_VF3X(firstWeight, secondWeight);
     VU0_WEIGHTED_SUM_VF10_VF12();
-    SDF_QUAT_INNERPRODUCT();
+    Normalize();
 }
 
 /* vu0 routine: shared quaternion registers are the input/output interface. */
@@ -2363,7 +2364,7 @@ void Lerp(f32 blendAmount)
         VU0_SET_WEIGHTS_VF2X_VF3X(firstWeight, blendAmount);
         VU0_WEIGHTED_SUM_VF10_VF12();
     }
-    SDF_QUAT_INNERPRODUCT();
+    Normalize();
 }
 
 /* vu0 routine: shared quaternion registers are the input/output interface. */

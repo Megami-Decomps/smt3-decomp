@@ -3,7 +3,7 @@
 #include "ps2asm.h"
 
 extern void *sdfChipAllocDirect(u32 size);
-extern void SDF_QUAT_INNERPRODUCT(void);
+extern void Normalize(void);
 extern void Mult(void);
 extern void ToMatrix(void);
 extern f32 fabsf(f32 value);
@@ -163,7 +163,7 @@ void dds3GetRotPoseSet(dds3Basic_t *basic)
     sdfVector4_t *rotation = &basic->poseset->rot;
 
     VU0_LOAD_VF10_BARRIER(rotation);
-    SDF_QUAT_INNERPRODUCT();
+    Normalize();
 }
 
 /* vu0 routine: return scale in vf10. */
