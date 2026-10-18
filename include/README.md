@@ -3,9 +3,10 @@
 Reconstructed types for the SLUS_209.11 decompilation. `common.h`, `include_asm.h`
 and `macro.inc` belong to the build; the rest are recovered game types.
 
-Nothing in `src/` includes these yet, so adding or editing one cannot change the
-build. They are here so a unit that includes `model.h` or `scr.h` finds the types
-the original source would have given it.
+`ps2asm.h` is included by built units, so editing it changes the image; see its
+section below. The rest are not included anywhere yet, so adding or editing one
+cannot change the build. They are here so a unit that includes `model.h` or
+`scr.h` finds the types the original source would have given it.
 
 ## Where the names and layouts come from
 
@@ -752,6 +753,96 @@ one:
   the frame set's with `sb`. A type copied from the wrong one of the two would
   move every pointer in the frame set.
 
+## ps2asm.h: the EE extension macros
+
+`ps2asm.h` is the one header the build includes. cc1 2.96 never emits COP2 macro
+mode (the `v*` ops, `qmfc2`/`qmtc2`, `cfc2`/`ctc2`, `lqc2`/`sqc2`) or the MMI
+128-bit integer ops (`lq`/`sq`, `pextlw`, `pcpyld`, `ppacb`, `paddw`, `mult1`,
+`div1`, `mfhi1`/`mflo1`), so a function that uses them cannot be written in plain
+C. 1045 of the stubbed functions contain at least one such instruction.
+
+### The rule the macros follow
+
+No macro parameter reaches the assembler. Not an opcode, not a suffix, not a
+register name. Parameters are only C expressions bound through operand
+constraints (`"r"`, `"f"`, `"m"`) and substituted as `%0`, `%1`; every opcode,
+suffix and `vf`/`vi` register is literal in the macro body. That is why there are
+many near-duplicate macros (`VU0_SCALE_VF10` and `VU0_SCALE_VF11`,
+`VU0_LOAD_VF10` and `VU0_LOAD_VF11`) instead of one parameterised form: a
+register passed as a token is still an assembly literal in C clothing.
+
+The engine's own convention makes that practical. The VU0 inlines in the retail
+code always use the same registers for the same roles, so the macros fix them:
+
+| register | role |
+| --- | --- |
+| `vf10` | the working vector, in and out of every routine |
+| `vf11` | the second operand |
+| `vf12` | the spare a caller parks a vector in across a call |
+| `vf2` | broadcast and dot-product scratch |
+| `vf28`-`vf31` | the matrix bank |
+| `vf0` | the hardwired `(0,0,0,1)` |
+| `Q`, `ACC` | divide/sqrt result and the multiply accumulator |
+| `$vi18`, `$vi22` | clip flags, `Q` status read back by `cfc2` |
+| `$2`, `$3` | GPR scratch inside the colour macros, declared as clobbers |
+
+Of the 1045 blocked functions, 773 use only instructions these macros emit and
+728 of those also stay inside this register convention. That bounds what the
+header can reach; it does not promise a match, since each function still has to
+come out of cc1 in retail's order.
+
+### What ee-gcc 2.96 does with them
+
+Measured against this `cc1` and Sony's `ee-as -G8`, not assumed:
+
+- `__asm__ volatile` with no output operands is never deleted or moved across
+  another `volatile` asm, so a chain of them keeps its written order. Blocks with
+  only outputs are reordered freely, which is why every macro is `volatile`.
+- `"=r"` and `"r"` on a `mode(TI)` value work: cc1 allocates one GPR and `ee-as`
+  takes the 128-bit form of the instruction. No `__int128` arithmetic is needed,
+  and none is available.
+- cc1 does not know an asm block touches memory. Every macro that loads or
+  stores through a pointer clobbers `"memory"`, without which loads get hoisted
+  out of a loop that contains the block.
+- `ee-as` fills branch delay slots, and will happily move a COP2 op into one.
+  Every multi-instruction macro is bracketed with `.set noreorder` /
+  `.set reorder`.
+- Register choice inside a macro is not free. `MMI_RGBA_UNPACK` and
+  `MMI_RGBA_PACK` name `$2` and `$3` literally because an `"=&r"` temporary gets
+  `$3`/`$4` here and retail uses `$2`/`$3`.
+- The compiler still schedules the code around a block. The order of the C
+  statements next to one decides which `$f` register a float lands in (first
+  written takes the lowest free one) and which address computation is emitted
+  first. Matching a VU0 routine is mostly getting that order right, not the asm.
+- Address CSE is the usual obstacle: gcc will keep a frame address in `$16`
+  across two calls where retail recomputes `addiu $2, $29, off` each time.
+  `effPCPBlurScreenOffset` is left as `INCLUDE_ASM` for that reason, and because
+  cc1 calls `sqrtf` rather than selecting `sqrt.s` under the build's flags.
+
+### What is proven
+
+Ten functions in three units are byte-identical through these macros:
+`effScreenOffset`, `effColorBlend`, `effMagaCylinderCalcColor` and
+`effLinePointLength` in `effect/effMath.c`;
+`Eff_ModelTrackPolyGetMarkPosition` and `dds3HermitianTrackPolyGetVertex` in
+`effect/effModelTrackPoly.c`; `effDebugPointDraw`, `effDebugPointDraw2`,
+`effDebugLineDraw` and `effDebugLineDraw2` in `code_001AC0A8.c`.
+
+Those exercise `PS2_COPY_QUAD`, `VU0_LOAD_VF10`, `VU0_STORE_VF10`,
+`VU0_STORE_VF10_TO`, `VU0_LOAD_VF11`, `VU0_LOAD_MATRIX`,
+`VU0_COPY_VF10_TO_VF11`, `VU0_ADD_VF10_VF11`, `VU0_SUB_VF10_VF11`,
+`VU0_MUL_VF10_VF11`, `VU0_SCALE_VF10`, `VU0_SCALE_VF11`,
+`VU0_TRANSFORM_POINT_VF10`, `VU0_PERSPECTIVE_DIVIDE_VF10`, `VU0_DOT_VF10_VF11`,
+`VU0_LENGTH_VF10`, `MMI_RGBA_UNPACK` and `MMI_RGBA_PACK`.
+
+The rest assemble and have been read against the retail instructions they are
+named for, but no function has matched through them yet: the MMI lane ops, the
+pipeline-1 family (`EE_MULT1`, `EE_DIV1`, `EE_DIVU1`, `EE_REM1`),
+`VU0_CROSS_VF10_VF11`, `VU0_NORMALIZE_VF10`, the `vf12` copies, the clip-flag
+macros, `MMI_LOAD_VEC3_VF10`, `MMI_STORE_VEC3`, `MMI_PLZCW` and the barriers.
+Treat an unproven macro as a starting point, and check the emitted `.s`
+(`SMT3_KEEP_S=/tmp/x.s tools/cc.sh ...`) rather than trusting the name.
+
 ## What was deliberately left out
 
 The HD set is 272 headers, most of it per-effect particle state
@@ -801,8 +892,8 @@ use until someone decompiles that effect. Also left behind:
 
 ## Checking these headers
 
-The size and offset assertions are not in the headers, since nothing in the build
-includes them yet and a header should not carry a test. They live in
+The size and offset assertions are not in the headers, since no built unit
+includes a type header yet and a header should not carry a test. They live in
 `tools/header_layout.c`, which includes every header and makes one claim per
 number above with the array-sized-by-condition trick, since ee-gcc 2.96 has no
 `_Static_assert`:
