@@ -636,7 +636,7 @@ typedef struct {
     "vmulx.xyzw vf10, vf10, vf2x\n\t" \
     ".set reorder" \
     : : "f" (value) : "$2", "memory")
-#define VU0_LERP_SCALE(value) __asm__ volatile ( \
+#define VU0_SCALEVECTOR_V0(value) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (value))
 
@@ -1247,4 +1247,16 @@ __asm__ volatile ( \
     "ppacb %0, $0, $5\n\t" \
     ".set reorder" \
     : "=r" (out) : "r" (a), "r" (b), "f" (t), "r" (half) : "$4", "$5", "$6", "$7", "$8")
+
+/* The scalar reaches vf2.x through $2 rather than a register cc1 picks,
+ * which is what these callers' retail allocation needs. */
+
+#define VU0_SCALEVECTOR_B_V0(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
+    : : "f" (f))
+#define VU0_SETVECTOR_Y_V0(f) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
+    "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
+    : : "f" (f))
 #endif /* PS2ASM_H */

@@ -3,22 +3,6 @@
 #include "kernel.h"
 #include "ps2asm.h"
 
-/* A C float broadcast through vf2.x, then the one operation that uses it.
- * Kept local: retail carries the bits through $2 here, not through
- * a register cc1 picks. */
-#undef SDF_VU0_SCALEVECTOR
-#define SDF_VU0_SCALEVECTOR(f) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
-    : : "f" (f))
-
-/* Kept local: declares no $2 clobber, where basic/dds3PathBasic.c does. */
-#undef SDF_VU0_SETVECTOR_Y
-#define SDF_VU0_SETVECTOR_Y(f) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
-    : : "f" (f))
-
 
 f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *value);
 
@@ -142,7 +126,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
     SDF_VU0_LOADVECTOR(a);
     SDF_VU0_LOADVECTOR_B(b);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_SETVECTOR_Y(0.0f);
+    VU0_SETVECTOR_Y_V0(0.0f);
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
@@ -156,7 +140,7 @@ void evtGetUnitDirVector(evtUnit_t *unit) {
     v[3] = 1.0f;
     SDF_VU0_LOADVECTOR(v);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_SCALEVECTOR(-1.0f);
+    VU0_SCALEVECTOR_V0(-1.0f);
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
@@ -549,7 +533,7 @@ s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
     VU0_COPY_VF30_TO_VF10();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_SCALEVECTOR(-1.0f);
+    VU0_SCALEVECTOR_V0(-1.0f);
     SDF_VU0_LOADVECTOR_B(&unit->effObj->poseset->pos);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(v);
@@ -573,7 +557,7 @@ s32 evtUnitMoveType0(evtUnit_t *unit) {
         SDF_VU0_NORMALIZE();
     }
     scale = unit->motionParameter * 0.1f;
-    SDF_VU0_SCALEVECTOR(scale);
+    VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;

@@ -4,25 +4,6 @@
 #include "effect.h"
 #include "ps2asm.h"
 
-/* A C float broadcast through vf2.x, then the one operation that uses it.
- * The _COMPONENT and _W forms declare $2 clobbered and the scales do not,
- * which is what each caller's retail register allocation needs.
- * Kept local: retail carries the bits through $2 here, not through
- * a register cc1 picks. */
-#undef SDF_VU0_SCALEVECTOR
-#define SDF_VU0_SCALEVECTOR(f) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
-    : : "f" (f))
-
-/* Kept local: retail carries the bits through $2 here, not through
- * a register cc1 picks. */
-#undef SDF_VU0_SCALEVECTOR_B
-#define SDF_VU0_SCALEVECTOR_B(f) __asm__ volatile ( \
-    ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
-    "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
-    : : "f" (f))
-
 
 void *dds3GetProcessData(dds3ProcessID_t *task);
 
@@ -264,13 +245,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_0032C7F0);
     }
-    SDF_VU0_SCALEVECTOR(1.0f - t);
+    VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C7F0);
     }
-    SDF_VU0_SCALEVECTOR_B(t);
+    VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out);
     if (a != NULL) {
@@ -278,13 +259,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_0032C800);
     }
-    SDF_VU0_SCALEVECTOR(1.0f - t);
+    VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b + 4);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C800);
     }
-    SDF_VU0_SCALEVECTOR_B(t);
+    VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out + 4);
     if (a != NULL) {
@@ -292,13 +273,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_0032C810);
     }
-    SDF_VU0_SCALEVECTOR(1.0f - t);
+    VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b + 8);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C810);
     }
-    SDF_VU0_SCALEVECTOR_B(t);
+    VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR(out + 8);
