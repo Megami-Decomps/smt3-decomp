@@ -32,8 +32,10 @@ IDA database, which carries SMT3HD symbol recovery (9470 of 9571 functions named
 Regenerate it rather than editing the generated block; hand-curated symbols go above
 `// BEGIN ida` and win.
 
-Every `mcp__ida__*` call and `ida.py` invocation needs `instance=13339` (or
-`SLUS_209.11`). Omitting it silently targets a different game's database.
+Every `mcp__ida__*` call and `ida.py` invocation needs `instance=SLUS_209.11`.
+Ports are assigned in open order and move between sessions, so address the IDB by
+module name, never by number. Omitting it, or reusing a port from an earlier
+session, silently targets a different game's database.
 
 The IDB is read-only for ordinary work: never patch, define or save through it. The
 one exception is correcting a name or type the retail code proves wrong, which is

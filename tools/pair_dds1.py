@@ -18,8 +18,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "config" / "smt3" / "tu_candidates.tsv"
 DEFAULT_HD = Path("/home/wsl/projects/smt3hd-reconstructed-sources/symbols.txt")
-DEFAULT_SMT3_INSTANCE = "13339"
-DEFAULT_DDS1_INSTANCE = "13340"
+# Module names, not ports: the port a database answers on moves between sessions.
+DEFAULT_SMT3_INSTANCE = "SLUS_209.11"
+DEFAULT_DDS1_INSTANCE = "SLUS_209.74"
 IDA_SCRIPTS = Path(
     os.environ.get("IDA_SKILL_SCRIPTS", Path.home() / ".claude/skills/ida-instances/scripts")
 )

@@ -2,9 +2,7 @@
 #include "kernel.h"
 
 extern dds3ProcessID_t *startinglistf;
-/* The IDB name clashes with another unit's, so the generated symbol table
- * spells this tail pointer startinglistl_0. */
-extern dds3ProcessID_t *startinglistl_0;
+extern dds3ProcessID_t *startinglistl;
 extern u32 startinglistcnt;
 extern dds3ProcessID_t *endinglistf;
 extern dds3ProcessID_t *endinglistl;
@@ -64,7 +62,7 @@ void DeleteProcessList(dds3ProcessID_t *delp)
     } else {
         switch (delp->flag & 0xF) {
         case 1:
-            startinglistl_0 = delp->prev;
+            startinglistl = delp->prev;
             break;
         case 2:
             runninglistl = delp->prev;
@@ -114,7 +112,7 @@ void AddProcessList(dds3ProcessID_t *addp)
         switch (addp->flag & 0xF) {
         case 1:
             startinglistf = addp;
-            startinglistl_0 = addp;
+            startinglistl = addp;
             break;
         case 2:
             runninglistf = addp;
@@ -158,9 +156,9 @@ void AddProcessList(dds3ProcessID_t *addp)
         if (p == NULL) {
             switch (addp->flag & 0xF) {
             case 1:
-                startinglistl_0->next = addp;
-                addp->prev = startinglistl_0;
-                startinglistl_0 = addp;
+                startinglistl->next = addp;
+                addp->prev = startinglistl;
+                startinglistl = addp;
                 break;
             case 2:
                 runninglistl->next = addp;
@@ -691,7 +689,7 @@ void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type)
 }
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", startinglistf);
 
-INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", startinglistl_0);
+INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", startinglistl);
 
 INCLUDE_SDATA(const s32, "kernel/dds3KernelCore", startinglistcnt);
 

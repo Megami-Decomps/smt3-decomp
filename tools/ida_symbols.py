@@ -17,7 +17,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "config" / "smt3" / "symbol_addrs.txt"
-DEFAULT_INSTANCE = "13339"
+# Address the database by module name: the port it answers on moves between sessions.
+DEFAULT_INSTANCE = "SLUS_209.11"
 IDA_SCRIPTS = Path(
     os.environ.get("IDA_SKILL_SCRIPTS", Path.home() / ".claude/skills/ida-instances/scripts")
 )

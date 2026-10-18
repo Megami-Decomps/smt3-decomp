@@ -1,6 +1,8 @@
 # IDB corrections
 
-The IDA database for `SLUS_209.11` (instance 13339, or by name `SLUS_209.11`) carries SMT3HD
+The IDA database for `SLUS_209.11` is addressed by module name, not by port: the port it
+answers on changes between sessions (13339 one day, 13337 the next, with another game's
+database on the number it vacated). Always pass `SLUS_209.11`. It carries SMT3HD
 symbol recovery. That naming is accurate but lossy: it comes from a later build whose structs
 grew, so a few types describe memory this ELF does not have. Where the retail code proves a
 name or type wrong, the fix belongs in the IDB, because `config/smt3/symbol_addrs.txt` is
@@ -36,12 +38,23 @@ and `tools/ida_symbols.py` emits only splat's own type names (`func`, `asciz`, `
 
 | Address | Name | Old type | New type | Proof |
 | --- | --- | --- | --- | --- |
-| 0x0054E854 | `startinglistl_0` | none | `dds3ProcessID_t *` | `AddProcessList` (0x00100760) stores here the same process pointer it stores to `startinglistf`, then loads it back to write `->next` |
+| 0x0054E854 | `startinglistl` | none | `dds3ProcessID_t *` | `AddProcessList` (0x00100760) stores here the same process pointer it stores to `startinglistf`, then loads it back to write `->next` |
 | 0x0054E860 | `endinglistl` | none | `dds3ProcessID_t *` | same function, same pattern against `endinglistf` |
 | 0x0054E86C | `runninglistl` | none | `dds3ProcessID_t *` | same function; `DeleteProcessList` (0x001005E8) stores `setp->prev` here |
 
 The three `*listcnt` words beside them stay untyped counters: `AddProcessList` loads,
 increments and stores them and never dereferences them.
+
+## Names
+
+| Address | Old | New | Proof |
+| --- | --- | --- | --- |
+| 0x0032C420 | `off_32C420`, with `modelFileKindTable` one word further on | `modelFileKindTable` | `mdlGetNumOfMinor` (0x001DDB90) indexes the table at stride 8 and returns the second word of the entry, so the entry starts at 0x0032C420 and the old symbol named its `count` field. `mdlMakeHddFileList` (0x001DE5B8) and `mdlReleaseHddFileList` (0x001DE398) write both words of entry 5, the HDD slot, as `{entries, count}` |
+| 0x0054E854 | `startinglistl_0` | `startinglistl` | the `_0` suffix is an IDA uniquifier with no surviving twin, and the word is the tail of the list whose head and counter are `startinglistf` and `startinglistcnt` |
+
+Entry 0 of `modelFileKindTable` is `{0x0032A858, 2}` and the table runs seven entries to
+0x0032C458, where `mdlResrcMajorList` starts. `modelFileTable` (0x0032A820) has the same
+`{entries, count}` shape.
 
 ## Examined and left alone
 
@@ -56,7 +69,3 @@ increments and stores them and never dereferences them.
   `dds3ProcessID_t *`.
 - `sdfShape_t` exists as a local type but no function prototype or global in the database refers
   to it, so the retail code says nothing about it either way. Left in place.
-- `startinglistl_0`: the `_0` suffix is an IDA uniquifier with no surviving twin, so the natural
-  name is `startinglistl`. The code does not prove the name, and the rename breaks the link:
-  `src/smt3/kernel/dds3KernelCore.c` declares the extern under the generated spelling, and
-  `tools/include_sdata.py` renames the data include out from under it. Left as is.
