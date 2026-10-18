@@ -5,6 +5,12 @@
 
 typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
 
+typedef struct
+{
+    sdfGifTag_t giftag;
+    sdfGrTagStdReg_t reg[2];
+} pbRegPacket_t;
+
 extern char D_00535BB0[];
 extern char D_00535BC0[];
 extern char *D_00326BC8[];
@@ -13,7 +19,7 @@ extern s32 D_00326BE8[4];
 extern s32 D_00326BF8[4];
 extern u8 scrEmbedded_3267A8[];
 extern sdfGrOt_t sdfGrOtTable[];
-extern s8 dds3PadButtonState[];
+extern u8 dds3PadButtonState[];
 
 extern u32 dds3BackColor;
 extern s32 D_0054F510;
@@ -29,6 +35,7 @@ extern s32 itfDebugPrintMark();
 extern void sdfTexFreeDelayed(void *tex);
 extern void *itfMiscLoadTexture(char *name);
 extern void *sdfGrAllocPacketBuff(u32 size);
+extern void *sdf2DMakeStdPacket(void *buff, u32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *tag);
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 mode, s32 value);
 extern void itfMiscDrawSpritePrim(s32 *rect, s32 *uv, s32 *color, s32 z, void *tex, s32 flag,
@@ -64,7 +71,7 @@ void TestMsgReloadTexture(void)
 
 s32 TestMsgMngC_Process(dds3ProcessID_t *id)
 {
-    if (dds3PadButtonState[0x20] < 0) {
+    if ((s8)dds3PadButtonState[0x20] < 0) {
         TestMsgReloadTexture();
     }
     return 0;
@@ -101,7 +108,80 @@ INCLUDE_ASM(const s32, "code_001D1470", itfDebugPrintMark);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDebugPrintPanel);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbCalcFovDegrees);
+s32 pbCalcFovDegrees(f32 *value, f32 minimum, f32 maximum, f32 coarseStep, f32 fineStep)
+{
+    f32 current = *value;
+    s32 changed = 0;
+
+    if ((s8)dds3PadButtonState[0x35] < 0) {
+        if (current < maximum) {
+            current += coarseStep;
+        } else {
+            current = minimum;
+        }
+        changed = 1;
+    } else if (dds3PadButtonState[0x35] & 2) {
+        if (current < maximum) {
+            current += coarseStep;
+            changed = 1;
+        }
+    } else if ((s8)dds3PadButtonState[0x34] < 0) {
+        if (minimum < current) {
+            current -= coarseStep;
+        } else {
+            current = maximum;
+        }
+        changed = 1;
+    } else if (dds3PadButtonState[0x34] & 2) {
+        if (minimum < current) {
+            current -= coarseStep;
+            changed = 1;
+        }
+    } else if (fineStep != 0.0f) {
+        if ((s8)dds3PadButtonState[0x3A] < 0) {
+            if (current < maximum) {
+                current += fineStep;
+                if (maximum < current) {
+                    current = maximum;
+                }
+            } else {
+                current = minimum;
+            }
+            changed = 1;
+        } else if (dds3PadButtonState[0x3A] & 2) {
+            if (current < maximum) {
+                current += fineStep;
+                if (maximum < current) {
+                    current = maximum;
+                }
+                changed = 1;
+            }
+        } else if ((s8)dds3PadButtonState[0x38] < 0) {
+            if (minimum < current) {
+                current -= fineStep;
+                if (current < minimum) {
+                    current = minimum;
+                }
+            } else {
+                current = maximum;
+            }
+            changed = 1;
+        } else if (dds3PadButtonState[0x38] & 2) {
+            if (minimum < current) {
+                current -= fineStep;
+                if (current < minimum) {
+                    current = minimum;
+                }
+                changed = 1;
+            }
+        }
+    }
+    if (changed != 0) {
+        *value = current;
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDebugPrintPanel2);
 
@@ -109,9 +189,25 @@ INCLUDE_ASM(const s32, "code_001D1470", pbDebugPrintPanel3);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbAllocPrimPacket);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMakeSpritePacket);
+void *pbMakeSpritePacket(u64 data, s32 context)
+{
+    pbRegPacket_t *packet;
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMakePrimPacket);
+    packet = sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
+    packet->reg[1].data = data;
+    packet->reg[1].reg = context ? 0x48 : 0x47;
+    return packet;
+}
+
+void *pbMakePrimPacket(u64 data, s32 context)
+{
+    pbRegPacket_t *packet;
+
+    packet = sdf2DMakeStdPacket(sdfGrAllocPacketBuff(0x30), 0x30);
+    packet->reg[1].data = data;
+    packet->reg[1].reg = context ? 0x43 : 0x42;
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDrawRotatedPrim);
 
