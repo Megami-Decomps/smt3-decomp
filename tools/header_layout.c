@@ -12,11 +12,29 @@
 #include "billboard.h"
 #include "draw.h"
 #include "draw3d.h"
+#include "event.h"
+#include "newdata.h"
+#include "nb.h"
+#include "effect.h"
+#include "field.h"
 
 #define ASSERT_AT(line, cond) typedef char static_assert_##line[(cond) ? 1 : -1]
 #define SZ(line, type, bytes) ASSERT_AT(line, sizeof(type) == (bytes))
 #define OFF(line, type, field, at) \
     ASSERT_AT(line, ((char *)&((type *)0)->field - (char *)(type *)0) == (at))
+
+/* event.h and the shared prefixes used by the event commands. */
+SZ(e01, evtUnit_t, 0x148);
+OFF(e02, evtUnit_t, pathHandle, 0x9C);
+OFF(e03, evtUnit_t, flags, 0xA4);
+OFF(e04, evtUnit_t, motionSetup, 0xBE);
+OFF(e05, evtUnit_t, slotFlags, 0xCC);
+OFF(e06, evtUnit_t, tableValues, 0xD8);
+OFF(e07, evtUnit_t, colorDuration, 0x138);
+OFF(e08, evtUnit_t, transitionElapsed, 0x144);
+OFF(e09, dds3UnitObjectWork_t, unit, 8);
+OFF(e10, dds3ObjectBaseControl_t, control, 0x10);
+OFF(e12, evtWorldSourceTransformPrefix_t, rotation, 0x10);
 
 /* libsdf.h */
 SZ(l01, sdfVector2_t, 8);
@@ -50,6 +68,11 @@ SZ(l26, sdf3DLight_t, 64);
 OFF(l30, sdfDmaTag_t, id, 3);
 OFF(l31, sdfDmaTag_t, addr, 4);
 OFF(l32, sdfGrPacketHeader_t, giftag, 16);
+OFF(l32a, sdfGrPacketHeader_t, dmaWords.tag, 0);
+OFF(l32b, sdfGrPacketHeader_t, dmaWords.vif, 8);
+OFF(l32c, sdfGrTagStdReg_t, data, 0);
+OFF(l32d, sdfGrTagStdReg_t, reg, 8);
+OFF(l32e, sdfGrClearPacket_t, clearColor, 32);
 OFF(l33, sdfChipCB_tag, chipsPerPage, 10);
 OFF(l34, sdfChipPageInfo_tag, alloc, 8);
 OFF(l35, sdfChipPageInfo_tag, owner, 12);
@@ -602,6 +625,87 @@ OFF(va7, corePktCb_t, vertColPtr, 168);
 OFF(va8, corePktCb_t, backfaceSign, 172);
 OFF(va9, corePktCb_t, savedAttrBits, 176);
 OFF(vb0, corePktCb_t, matPacket2, 180);
+
+/* Canonical layouts reconciled across the DDS port units. */
+SZ(p01, dds3ObjectBaseControl_t, 0xAC);
+SZ(p02, dds3UnitObjectWork_t, 0x20);
+OFF(p03, dds3UnitObjectWork_t, control, 0xC);
+OFF(p04, dds3UnitObjectWork_t, lightID, 0x10);
+OFF(p05, dds3UnitObjectWork_t, ot, 0x14);
+SZ(p06, dds3PathKeyframes_t, 0xC);
+SZ(p07, dds3PathBasicControl_t, 0x24);
+OFF(p08, dds3PathBasicControl_t, spline, 0x10);
+OFF(p09, dds3GlobalWork_t, integers, 0x40);
+OFF(p10, dds3GlobalWork_t, floats, 0x440);
+OFF(p11, dds3GlobalWork_t, eventFlags, 0x840);
+OFF(p12, dds3GlobalWork_t, moonFlags, 0xA40);
+OFF(p13, dds3GlobalWork_t, moonTimer, 0xA44);
+OFF(p14, dds3GlobalWork_t, maka, 0xA48);
+OFF(p15, dds3GlobalWork_t, encounterRemainder, 0x1CF4);
+OFF(p16, dds3GlobalWork_t, encounterGauge, 0x1CF8);
+OFF(p17, dds3GlobalWork_t, previewX, 0x11A78);
+OFF(p21, nbMainProcessData_t, camera, 0xFC);
+OFF(p22, nbMainProcessData_t, encounterProcess, 0x114);
+OFF(p23, nbMainProcessData_t, eventPack, 0x138);
+SZ(p24, sdfThCB_t, 8);
+SZ(p25, TMX_HEADER_t, 0x40);
+OFF(p26, TMX_HEADER_t, clampMode, 0x1B);
+OFF(p27, TMX_HEADER_t, resourceKey, 0x1C);
+SZ(p28, effRandState_t, 0x10);
+SZ(p29, effArrHdr_t, 0xC);
+SZ(p30, effCubicBezierSlot_t, 0x38);
+SZ(p31, effBezierCurve_t, 0x60);
+SZ(p32, effBlurQuad_t, 0x28);
+SZ(p33, effBlurScaleParams_t, 0x2C);
+SZ(p34, effBlurScatterParams_t, 0x2C);
+SZ(p35, effBlurTemplateBody_t, 0x2C);
+SZ(p36, effResourceRectParams_t, 0x24);
+SZ(p37, effResourceRectWork_t, 0x28);
+SZ(p38, effSolidRectParams_t, 0x18);
+SZ(p39, billRenderPair_t, 0x1C);
+SZ(p40, billObj_t, 0x64);
+OFF(p41, billObj_t, pair, 0x34);
+OFF(p42, billObj_t, animationActive, 0x50);
+OFF(p43, sdf3DLightParallelPacket_t, normalComponents, 0x10);
+SZ(p44, parCell_t, 0x14);
+SZ(p45, parSystem_t, 0x2C);
+SZ(p46, sifCommand_t, 0x10);
+SZ(p47, fldFileNameEntry_t, 0xC);
+SZ(p48, fldFileResource_t, 0x24);
+OFF(p49, fldAreaWork_t, consumedFlags, 0x14);
+OFF(p50, fldAreaWork_t, mode, 0x18);
+OFF(p51, fldAreaWork_t, requestedSceneName, 0x20);
+OFF(p52, fldAreaWork_t, resourceFlag, 0x84);
+OFF(p53, fldAreaWork_t, sequenceCode, 0xA0);
+OFF(p54, fldAreaWork_t, reuseAreaResources, 0xA8);
+OFF(p55, fldAreaWork_t, x, 0x100);
+SZ(p56, dds3PathTransform_t, 0x28);
+OFF(p57, dds3PathTransform_t, position, 0x10);
+OFF(p58, dds3PathTransform_t, scale, 0x1C);
+OFF(p59, sdfFileCmd_t, path, 0x10);
+OFF(p60, sdfFileCmd_t, stat, 0x16);
+OFF(p61, sdfFileCmd_t, fd, 0x28);
+OFF(p62, sdfFileCmd_t, error, 0x2C);
+SZ(p63, fldGbFlags_t, 0x1E);
+SZ(p64, fldAnahoriAkuma_t, 0xEC);
+OFF(p65, dds3GlobalWork_t, maFlags, 0xA4C);
+OFF(p66, dds3GlobalWork_t, akuma, 0xA50);
+OFF(p67, dds3GlobalWork_t, gb, 0x6658);
+OFF(p68, dds3GlobalWork_t, takaraOpen, 0x11A58);
+OFF(p69, dds3GlobalWork_t, takaraOpenEx, 0x11A80);
+SZ(p70, datUnitVisualPart_t, 0x1C);
+SZ(p71, datUnitVisual_t, 0x310);
+OFF(p72, datUnitVisual_t, part, 0x32);
+OFF(p73, datUnitWork_t, nowcommand, 0x64);
+SZ(p74, nbKoukaProcessData_t, 0x10);
+OFF(p75, nbMainProcessData_t, actionstackp, 0x40);
+OFF(p76, nbFormation_t, hunit, 0x8C);
+OFF(p77, nbFormation_t, damageFrames, 0xB8);
+OFF(p78, nbFormation_t, shakePhase, 0xC4);
+OFF(p79, fldAreaWork_t, lightMaIdx, 0xB8);
+SZ(p80, nbFormation_t, 0xF0);
+OFF(p81, datUnitWork_t, skillSlots, 0x86);
+SZ(p82, datUnitWork_t, 0xEC);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;

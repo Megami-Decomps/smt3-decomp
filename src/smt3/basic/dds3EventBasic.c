@@ -1,5 +1,17 @@
 #include "common.h"
+#include "basic.h"
 
-INCLUDE_ASM(const s32, "basic/dds3EventBasic", dds3AddEventBasic);
+extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
-INCLUDE_ASM(const s32, "basic/dds3EventBasic", dds3EventBasicGetResource);
+dds3Basic_t *dds3AddEventBasic(s32 id, void *resource, char *name) {
+    dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_EVENT);
+
+    basic->workdata = resource;
+    basic->serialID = id;
+    basic->name = name;
+    return basic;
+}
+
+void *dds3EventBasicGetResource(dds3Basic_t *basic) {
+    return basic->workdata;
+}

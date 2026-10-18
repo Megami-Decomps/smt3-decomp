@@ -1,6 +1,14 @@
 #include "common.h"
 #include "kernel.h"
 
+/* Two ports, two sticks per port, and two axes per stick. */
+extern s8 dds3PadButtonPrev[2][2][16];
+extern u8 dds3PadButtonState[2][2][16];
+extern u8 dds3PadStickPrev[2][2][2];
+extern s8 dds3PadStickStatusPrev[2][2];
+extern u8 dds3PadStickState[2][2][2];
+extern u8 dds3PadStickStatusState[2][2];
+
 extern dds3ProcessID_t *startinglistf;
 extern dds3ProcessID_t *startinglistl;
 extern u32 startinglistcnt;
@@ -31,6 +39,15 @@ void ChangeProcessFlagChild(s32 onoff, dds3ProcessID_t *target, u32 flag);
 void *sdfChipAllocDirect(u32 size);
 void sdfChipFreeDirect(void *ptr);
 int printf(const char *fmt, ...);
+
+extern char D_0052DD78[]; /* PAD: starting-list heading */
+extern char D_0052DDA8[]; /* PAD: "<<< %d >>>\n" */
+extern char D_0052DDB8[]; /* PAD: running-list heading */
+extern char D_0052DDE8[]; /* PAD: ending-list heading */
+extern char D_0054E8A8[];
+extern char D_0054E8B0[];
+extern char dds3ProcessTreeDepth[];
+void DebugProcess(dds3ProcessID_t *process, const char *heading);
 
 void DeleteProcessList(dds3ProcessID_t *delp)
 {
@@ -215,7 +232,58 @@ void StartingProcess(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", RunProcess);
+s32 RunProcess(dds3ProcessID_t *task)
+{
+    s32 port;
+    s32 inputIndex;
+    s32 nextUpdate;
+
+    if (task->flag & 0x20) {
+        return 1;
+    }
+    runprocess = task;
+
+    if (task->flag & 0x10) {
+        for (port = 0; port < 2; port++) {
+            for (inputIndex = 0; inputIndex < 16; inputIndex++) {
+                dds3PadButtonState[0][port][inputIndex] = 0;
+                dds3PadButtonState[1][port][inputIndex] = 0;
+            }
+            for (inputIndex = 0; inputIndex < 2; inputIndex++) {
+                dds3PadStickState[port][inputIndex][0] = 0;
+                dds3PadStickStatusState[port][inputIndex] = 0;
+                dds3PadStickState[port][inputIndex][1] = 0;
+            }
+        }
+    } else {
+        for (port = 0; port < 2; port++) {
+            for (inputIndex = 0; inputIndex < 16; inputIndex++) {
+                dds3PadButtonState[0][port][inputIndex] = dds3PadButtonPrev[0][port][inputIndex];
+                dds3PadButtonState[1][port][inputIndex] = dds3PadButtonPrev[1][port][inputIndex];
+            }
+            for (inputIndex = 0; inputIndex < 2; inputIndex++) {
+                dds3PadStickState[port][inputIndex][0] = dds3PadStickPrev[port][inputIndex][0];
+                dds3PadStickState[port][inputIndex][1] = dds3PadStickPrev[port][inputIndex][1];
+                dds3PadStickStatusState[port][inputIndex] = dds3PadStickStatusPrev[port][inputIndex];
+            }
+        }
+    }
+
+    if (task->processfunc != NULL && task->processfunc != (dds3ProcessFunc_t)-1) {
+        nextUpdate = task->processfunc(task);
+        if (nextUpdate != 0) {
+            task->processfunc = (dds3ProcessFunc_t)nextUpdate;
+        }
+        if (nextUpdate == -1 && (task->flag & 0xF) == 2) {
+            EndProcess(task);
+            runprocess = 0;
+            return 0;
+        }
+    }
+    task->runtime++;
+    runprocess = 0;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", RunningProcess);
 
@@ -385,9 +453,49 @@ dds3ProcessID_t *dds3SearchProcessNumber(u32 stat, s32 n)
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", DebugProcess);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3PrintProcessList);
+void dds3PrintProcessList(void)
+{
+    char *countFormat;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", DebugProcessTree);
+    DebugProcess(startinglistf, D_0052DD78);
+    countFormat = D_0052DDA8;
+    printf(countFormat, startinglistcnt);
+    DebugProcess(runninglistf, D_0052DDB8);
+    printf(countFormat, runninglistcnt);
+    DebugProcess(endinglistf, D_0052DDE8);
+    printf(countFormat, endinglistcnt);
+    printf(D_0054E8A8);
+}
+
+void DebugProcessTree(dds3ProcessID_t *process, s32 depth)
+{
+    printf(D_0054E8B0, dds3ProcessTreeDepth, process);
+    if (process->child != NULL) {
+        if (process->parent == NULL) {
+            dds3ProcessTreeDepth[0] = ' ';
+        } else {
+            if (process->sibling == NULL) {
+                dds3ProcessTreeDepth[depth * 4] = ' ';
+            } else {
+                dds3ProcessTreeDepth[depth * 4] = '|';
+            }
+        }
+        dds3ProcessTreeDepth[depth * 4 + 4] = 0;
+        DebugProcessTree(process->child, depth + 1);
+        dds3ProcessTreeDepth[depth * 4] = 0;
+    }
+    if (process->sibling != NULL) {
+        DebugProcessTree(process->sibling, depth);
+    }
+}
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DD78);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DDA8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DDB8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DDE8);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3PrintProcessTree);
 

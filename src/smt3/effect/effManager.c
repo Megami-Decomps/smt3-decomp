@@ -2,6 +2,12 @@
 #include "kernel.h"
 #include "libsdf.h"
 
+extern void dds3ParticleManagerExit(void);
+extern void dds3PolygonManagerExit(void);
+extern void dds3BillboardManagerExit(void);
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+
 /* An effect handle: the type's entry in EffMajorTable plus the instance that
  * entry's create returned. version is stamped from the data revision. */
 typedef struct effNode_t
@@ -86,7 +92,11 @@ void dds3EffectDataRevision(effResourceHeader_t *header);
 
 INCLUDE_ASM(const s32, "effect/effManager", dds3EffectManagerInit);
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectManagerExit);
+void dds3EffectManagerExit(void) {
+    dds3ParticleManagerExit();
+    dds3PolygonManagerExit();
+    dds3BillboardManagerExit();
+}
 
 INCLUDE_ASM(const s32, "effect/effManager", dds3EffectManagerRunF);
 
@@ -104,12 +114,16 @@ s32 dds3EffectManagerRun(dds3ProcessID_t *id)
 void dds3EffectPCFSetLoop(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectPCFGetLoop);
+u32 dds3EffectPCFGetLoop(void) {
+    return 1;
+}
 
 void dds3EffectPCFReset(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectPCFGetState);
+u32 dds3EffectPCFGetState(void) {
+    return 1;
+}
 
 effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param)
 {
@@ -191,7 +205,17 @@ effNode_t *dds3EffectLoad(effResourceHeader_t *header)
     return node;
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectFileLoad);
+effNode_t *dds3EffectFileLoad(const char *resource) {
+    u32 resolvedId;
+    sdfMemHandle_t *resourceHandle;
+    effNode_t *node;
+
+    printf("d3p file read...[%s]\n", resource);
+    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    node = dds3EffectLoad((effResourceHeader_t *)resolvedId);
+    sdfMemFreeDirect(resourceHandle);
+    return node;
+}
 
 effNode_t *dds3EffectCopy(effNode_t *node)
 {
@@ -242,8 +266,6 @@ void dds3EffectDataRevision(effResourceHeader_t *header)
     }
 }
 
-INCLUDE_SDATA(const s32, "effect/effManager", D_0054F0B0);
-
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532B70);
 
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532B88);
@@ -259,4 +281,6 @@ INCLUDE_RODATA(const s32, "effect/effManager", D_00532BE8);
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532C00);
 
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532C18);
+
+INCLUDE_SDATA(const s32, "effect/effManager", D_0054F0B0);
 

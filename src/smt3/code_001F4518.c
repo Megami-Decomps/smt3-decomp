@@ -9,6 +9,8 @@ extern char D_0053C5B8[];
 extern char D_0053C5D0[];
 extern char D_0053C5E8[];
 extern char D_0054FAB0[];
+/* Shared by the float and integer menus after the preceding menu label. */
+extern char D_0053BCC0[]; /* "VALUE CHANGE." */
 
 extern u16 skyanime;
 extern u16 skyanow;
@@ -37,7 +39,9 @@ extern void fldSkySetFilter(s32 r, s32 g, s32 b);
 extern void fldSkyDrawFilter(void);
 extern void fldDrawFrameSprite(void);
 extern void rsetOtOfs(s32 ofs);
-extern s32 sdfDevPrintf(s32 x, s32 y, u32 color, s32 flag, char *font, char *str);
+extern s32 sdfDevPrintf(s32 x, s32 y, u32 color, s32 flag, const char *format, ...);
+extern s32 sceWrite(s32 fd, const void *buffer, s32 size);
+extern void p2sdStopSe(s32 sound);
 extern void sdfDrawTagLink(void *list, u32 tag);
 extern dds3ProcessID_t *dds3SearchProcessName(char *name);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
@@ -137,7 +141,11 @@ void evtInitFrameVar(void)
 
 INCLUDE_ASM(const s32, "code_001F4518", evtMenuDisp);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtFloatChangeHead);
+s32 evtFloatChangeHead(void *list, s32 x, s32 y)
+{
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0053BCC0));
+    return 2;
+}
 
 INCLUDE_RODATA(const s32, "code_001F4518", D_0053BCB0);
 
@@ -147,7 +155,11 @@ INCLUDE_ASM(const s32, "code_001F4518", evtFloatChangeItem);
 
 INCLUDE_ASM(const s32, "code_001F4518", evtFloatChangeMenu);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtIntChangeHead);
+s32 evtIntChangeHead(void *list, s32 x, s32 y)
+{
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0053BCC0));
+    return 2;
+}
 
 INCLUDE_RODATA(const s32, "code_001F4518", D_0053BD10);
 
@@ -159,7 +171,11 @@ INCLUDE_ASM(const s32, "code_001F4518", evtIntChangeItem);
 
 INCLUDE_ASM(const s32, "code_001F4518", evtIntChangeMenu);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtFrameChangeHead);
+s32 evtFrameChangeHead(void *list, s32 x, s32 y)
+{
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    return 2;
+}
 
 INCLUDE_ASM(const s32, "code_001F4518", evtFrameChangeItem);
 
@@ -242,7 +258,10 @@ INCLUDE_ASM(const s32, "code_001F4518", func_001F79A8);
 
 INCLUDE_ASM(const s32, "code_001F4518", evtViewerDispatch);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtWriteRecord);
+s32 evtWriteRecord(s32 fd, const void *buffer, s32 size)
+{
+    return sceWrite(fd, buffer, size);
+}
 
 INCLUDE_ASM(const s32, "code_001F4518", evtCountObjType10);
 
@@ -391,12 +410,28 @@ s32 evtPlaySe(s32 eventId, s32 variation)
     return soundIndex;
 }
 
-INCLUDE_ASM(const s32, "code_001F4518", func_001FA158);
+s32 func_001FA158(s32 eventId, s32 variation)
+{
+    s32 sound;
+
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 0;
+    }
+    sound = evtGetSoundIndex(eventId, variation);
+    p2sdStopSe(sound);
+    return sound;
+}
 
 void evtMakeEventPackName(s32 index, char *buffer)
 {
     sprintf(buffer, D_0054FAB0, index);
 }
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5B8);
+
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5D0);
+
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5E8);
+
 INCLUDE_SDATA(const s32, "code_001F4518", skyanime);
 
 INCLUDE_SDATA(const s32, "code_001F4518", D_0054F902);
@@ -512,10 +547,4 @@ INCLUDE_SDATA(const s32, "code_001F4518", D_0054FAA0);
 INCLUDE_SDATA(const s32, "code_001F4518", D_0054FAA8);
 
 INCLUDE_SDATA(const s32, "code_001F4518", D_0054FAB0);
-
-INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5B8);
-
-INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5D0);
-
-INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5E8);
 

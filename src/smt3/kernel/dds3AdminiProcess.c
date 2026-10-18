@@ -23,6 +23,24 @@ typedef struct dds3AdminiEntry
     s32 (*mainfunc)(void);
 } dds3AdminiEntry_t;
 
+/* Named scheduler slots: retail strides entries by 0x44 bytes. */
+typedef struct
+{
+    s32 kind;
+    char name[32];
+    dds3ProcessID_t *task;
+    dds3ProcessFunc_t update;
+    dds3ProcessFunc_t destroy;
+    void (*setState)(s32);
+    s32 enabled;
+    void *userValue;
+    s32 previous;
+    s32 next;
+} fclNamedSlot_t;
+
+extern fclNamedSlot_t fclEncycTable[32];
+extern s32 fclEncycHead;
+
 extern char D_0054E8C8[];  /* "Admini" */
 
 extern dds3AdminiEntry_t dds3AdminiList[];
@@ -33,6 +51,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 startt
                                          dds3ProcessFunc_t shutdownfunc, void *data);
 extern void *sdfChipAllocDirect(u32 size);
 extern void sdfChipFreeDirect(void *ptr);
+extern void *memcpy(void *dest, const void *source, u32 size);
 
 dds3AdminiWork_t *GetAdminiProcessData(void);
 void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep);
@@ -45,9 +64,52 @@ dds3AdminiWork_t *GetAdminiProcessData(void)
     return dds3GetProcessData(dds3SearchProcessName(D_0054E8C8));
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", dds3_102828);
+u32 dds3_102828(void)
+{
+    dds3AdminiWork_t *work;
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", dds3AdminiCallSequence);
+    work = GetAdminiProcessData();
+    return work->value;
+}
+
+/* Requests retain byte-sized sequence/size storage: 256 bytes records zero.
+ * Release the old payload before copying the new one. */
+void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep)
+{
+    dds3AdminiWork_t *work;
+    void *previousData;
+    u32 flag;
+
+    if (data == NULL || size <= 0x100) {
+        work = GetAdminiProcessData();
+        previousData = work->reqdata;
+        work->nextsequence = sequence;
+        flag = work->flag;
+        flag |= 1;
+        flag &= ~8;
+        flag &= ~0x10000;
+        work->flag = flag;
+        work->waittimer = 2;
+        if (previousData != NULL) {
+            sdfChipFreeDirect(previousData);
+            work->reqdata = NULL;
+            work->reqsize = 0;
+        }
+        if (data != NULL) {
+            work->reqdata = sdfChipAllocDirect(size);
+            memcpy(work->reqdata, data, size);
+            work->reqsize = size;
+        } else {
+            work->reqdata = NULL;
+            work->reqsize = 0;
+        }
+        if (keep != 0) {
+            work->flag |= 4;
+        } else {
+            work->flag &= ~4;
+        }
+    }
+}
 
 void dds3AdminiOverwriteSequence(s32 sequence, void *data, u32 size)
 {
@@ -58,11 +120,23 @@ void dds3AdminiOverwriteSequence(s32 sequence, void *data, u32 size)
     work->flag |= 8;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", dds3AdminiExitSequence);
+void dds3AdminiExitSequence(void)
+{
+    dds3AdminiWork_t *work;
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", dds3AdminiGetActiveSequence);
+    work = GetAdminiProcessData();
+    work->flag |= 2;
+}
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", dds3AdminiGetNextSequence);
+s8 dds3AdminiGetActiveSequence(void)
+{
+    return GetAdminiProcessData()->sequence;
+}
+
+s8 dds3AdminiGetNextSequence(void)
+{
+    return GetAdminiProcessData()->nextsequence;
+}
 
 s8 dds3AdminiGetPrevSequence(void)
 {
@@ -148,7 +222,26 @@ void dds3InitAdmini(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycFindFreeSlot);
 
-INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycFreeEntry);
+s32 fclEncycFreeEntry(const char *name)
+{
+    s32 slotIndex = fclEncycHead;
+    s32 characterIndex;
+
+    while (slotIndex >= 0) {
+        characterIndex = 0;
+        while (fclEncycTable[slotIndex].name[characterIndex] != '\0') {
+            if (name[characterIndex] != fclEncycTable[slotIndex].name[characterIndex]) {
+                break;
+            }
+            characterIndex++;
+        }
+        if (fclEncycTable[slotIndex].name[characterIndex] == '\0' && name[characterIndex] == '\0') {
+            return slotIndex;
+        }
+        slotIndex = fclEncycTable[slotIndex].next;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycFreeEntries);
 
@@ -157,6 +250,8 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103420);
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycAllocEntry);
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103560);
+
+INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF78);
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8C8);
 
@@ -177,6 +272,4 @@ INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycFree);
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8F4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3PadInitDone);
-
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF78);
 

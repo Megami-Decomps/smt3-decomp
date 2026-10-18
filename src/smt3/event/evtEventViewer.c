@@ -1,18 +1,143 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", LinkFrameInfo);
+/* evtAddFrameInfo allocates/clears a 0x20-byte key. Its parameter bytes
+ * depend on the owning track kind; only the list and payload are needed here. */
+typedef struct evtFrameInfo_t {
+    u16 frame;
+    u8 unk02[2];
+    s32 nameIndex;
+    u8 parameters[0xC];
+    void *payload;                 /* 0x14 */
+    struct evtFrameInfo_t *next;   /* 0x18 */
+    struct evtFrameInfo_t *prev;   /* 0x1C */
+} evtFrameInfo_t;
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", UnlinkFrameInfo);
+/* Track prefix consumed by the intrusive-list helpers. */
+typedef struct {
+    s32 type;
+    u8 unk04[0x14];
+    s32 childCount;                /* 0x18 */
+    evtFrameInfo_t *children;      /* 0x1C */
+    evtFrameInfo_t *lastChild;     /* 0x20 */
+} evtFrameTrack_t;
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", SortFrameInfo);
+typedef struct evtViewer_t evtViewer_t;
+extern evtFrameInfo_t *evtAddFrameInfo(evtFrameTrack_t *track, s32 frame, evtViewer_t *viewer);
+extern void sdfChipFreeDirect(void *memory);
+extern void dds3DeleteSceneBasicData(void *basic);
+extern void evtInitViewerInfo(void);
+extern s32 evtEventViewerProcess2(void);
+extern s32 dds3KillProcessName(const char *name, s32 hierarchy);
+extern const char D_0053B9E8[];
+
+
+/* Insert after existing equal keys, keeping ascending order and incrementing count. */
+void LinkFrameInfo(evtFrameTrack_t *list, evtFrameInfo_t *insertedNode) {
+    evtFrameInfo_t *cursor = list->children;
+
+    if (cursor == 0) {
+        list->children = insertedNode;
+        list->lastChild = insertedNode;
+        insertedNode->next = 0;
+        insertedNode->prev = 0;
+    } else {
+        while (cursor != 0) {
+            if (insertedNode->frame < cursor->frame) {
+                if (cursor->prev == 0) {
+                    list->children = insertedNode;
+                    cursor->prev = insertedNode;
+                    insertedNode->next = cursor;
+                    insertedNode->prev = 0;
+                } else {
+                    cursor->prev->next = insertedNode;
+                    insertedNode->prev = cursor->prev;
+                    insertedNode->next = cursor;
+                    cursor->prev = insertedNode;
+                }
+                break;
+            }
+            cursor = cursor->next;
+        }
+        if (cursor == 0) {
+            evtFrameInfo_t *tailNode = list->lastChild;
+            tailNode->next = insertedNode;
+            insertedNode->prev = list->lastChild;
+            insertedNode->next = 0;
+            list->lastChild = insertedNode;
+        }
+    }
+    list->childCount++;
+}
+
+/* Unlink an attached node, clear its links, and decrement the owning list's count. */
+void UnlinkFrameInfo(evtFrameTrack_t *list, evtFrameInfo_t *removedNode) {
+    evtFrameInfo_t *nextNode = removedNode->next;
+    evtFrameInfo_t *previousNode = removedNode->prev;
+    if (previousNode == 0) {
+        list->children = nextNode;
+    } else {
+        previousNode->next = nextNode;
+    }
+    {
+        evtFrameInfo_t *previousNeighbor = removedNode->prev;
+        evtFrameInfo_t *nextNeighbor = removedNode->next;
+        if (nextNeighbor == 0) {
+            list->lastChild = previousNeighbor;
+        } else {
+            nextNeighbor->prev = previousNeighbor;
+        }
+    }
+    {
+        s32 nodeCount = list->childCount;
+        removedNode->prev = 0;
+        removedNode->next = 0;
+        list->childCount = nodeCount - 1;
+    }
+}
+
+/* Walk the linked list and reinsert the first out-of-order successor. */
+void SortFrameInfo(evtFrameTrack_t *list) {
+    if (list != 0) {
+        evtFrameInfo_t *anchorNode = list->children;
+        while (anchorNode != 0) {
+            evtFrameInfo_t *resumeNode = anchorNode->next;
+            evtFrameInfo_t *candidateNode = resumeNode;
+            while (candidateNode != 0) {
+                if (candidateNode->frame < anchorNode->frame) {
+                    UnlinkFrameInfo(list, candidateNode);
+                    LinkFrameInfo(list, candidateNode);
+                    /* Resume from the relocated node's new successor, not its old one. */
+                    resumeNode = candidateNode->next;
+                    break;
+                }
+                candidateNode = candidateNode->next;
+            }
+            anchorNode = resumeNode;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtAddFrameInfo);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", AddFrameInfo2);
+evtFrameInfo_t *AddFrameInfo2(evtFrameTrack_t *group, s32 frame, evtViewer_t *viewer)
+{
+    return evtAddFrameInfo(group, frame, viewer);
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtGetSelectFrameInfo);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", DelFrameInfo);
+/* Release a queued node from its entry, freeing its buffer unless the entry id is 0x12. */
+void DelFrameInfo(evtFrameTrack_t *entry, evtFrameInfo_t *node)
+{
+    UnlinkFrameInfo(entry, node);
+    if (node->payload != NULL) {
+        if (entry->type != 0x12) {
+            sdfChipFreeDirect(node->payload);
+        }
+        node->payload = NULL;
+    }
+    sdfChipFreeDirect(node);
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", DelFrameInfo2);
 
@@ -54,7 +179,13 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", DelEffectTable_evtEventViewer);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", AddBED);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", DelBED);
+void DelBED(evtFrameInfo_t *node)
+{
+    if (node->payload != NULL) {
+        dds3DeleteSceneBasicData(node->payload);
+    }
+    node->payload = NULL;
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", DrawEffect);
 
@@ -86,7 +217,10 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", PushMenu);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", PopMenu);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess5_0);
+u32 evtEventViewerProcess5_0(void)
+{
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B620);
 
@@ -132,13 +266,22 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess3);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess2);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess1);
+s32 evtEventViewerProcess1(void)
+{
+    evtInitViewerInfo();
+    return (s32)evtEventViewerProcess2;
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerShutdown);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtInitEventViewer);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", evtKillEventViewer);
+s32 evtKillEventViewer(void)
+{
+    return dds3KillProcessName(D_0053B9E8, 1);
+}
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B9E8);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", viewerinfo);
 
@@ -197,6 +340,4 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8C0);
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8C8);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8D0);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B9E8);
 

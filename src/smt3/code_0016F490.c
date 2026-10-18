@@ -1,5 +1,9 @@
 #include "common.h"
 #include "motion.h"
+#include "model.h"
+#include "event.h"
+#include "nb.h"
+#include "effBattle.h"
 #include "ps2asm.h"
 
 extern u128 D_0031DF60;
@@ -50,24 +54,12 @@ typedef struct
     void (*setArea)(void *, f32);
 } dds3EffectFunc_t;
 
-typedef struct dds3ModelHandle_t
-{
-    u32 stat;
-    struct dds3ModelHandle_t *next;
-    struct dds3ModelHandle_t *prev;
-    void *resrc;
-    s16 motionMajorNum;
-    s16 motionMinorNum;
-    void *effects;
-    sdfModelRootNode_t *modelRoot;
-    sdfMotionCtrlr_t *motionCtrlr;
-} dds3ModelHandle_t;
 
-void mdlSetPosition(dds3ModelHandle_t *aHandle);
-void mdlSetRotate(dds3ModelHandle_t *aHandle);
-void mdlSetScale(dds3ModelHandle_t *aHandle);
-void mdlSetColor(dds3ModelHandle_t *aHandle, u32 aColor);
-void mdlLoopMotion(dds3ModelHandle_t *aHandle, s32 aGroup, s32 aNumber);
+void mdlSetPosition(mdlObj_t *aHandle);
+void mdlSetRotate(mdlObj_t *aHandle);
+void mdlSetScale(mdlObj_t *aHandle);
+void mdlSetColor(mdlObj_t *aHandle, u32 aColor);
+void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 extern dds3EffectFunc_t dds3EffectFuncTable[7];
 extern void *D_002F69B8[4];
@@ -85,8 +77,8 @@ typedef struct
 
 void *dds3BillboardCreate(s32 kind, u32 data);
 void mdlPackDecode(s32 group, s32 id, s32 mode, const u8 *data, s32 size);
-void mdlLink(dds3ModelHandle_t *hModel, void **surfaces);
-void mdlFree(dds3ModelHandle_t *hModel);
+void mdlLink(mdlObj_t *hModel, void **surfaces);
+void mdlFree(mdlObj_t *hModel);
 void effBTLSkillStart(s32 id, s32 param);
 void effBTLSkillEnd(void);
 extern dds3EffectFunc_t EffectPCPFuncTable[];
@@ -96,47 +88,17 @@ void *sdfChipAllocDirect(s32 aSize);
 void sdfChipFreeDirect(void *aPtr);
 void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 void dds3BillboardSetScale(void *hBillboard, f32 x, f32 y);
-s32 mdlGetMajorNum(dds3ModelHandle_t *aHandle);
-s32 mdlGetMinorNum(dds3ModelHandle_t *aHandle);
-dds3ModelHandle_t *mdlLoad(u32 aMajor, u32 aMinor);
-void dds3EffectPartModelInit(dds3ModelHandle_t *hModel);
+s32 mdlGetMajorNum(mdlObj_t *aHandle);
+s32 mdlGetMinorNum(mdlObj_t *aHandle);
+mdlObj_t *mdlLoad(u32 aMajor, u32 aMinor);
+void dds3EffectPartModelInit(mdlObj_t *hModel);
 effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
 u32 dds3EffectPCPDataGetKateg(dds3EffectPCPData_t *hPCPData);
 u32 dds3EffectPCPDataGetParam(dds3EffectPCPData_t *hPCPData);
 u32 dds3EffectPCPDataGetType(dds3EffectPCPData_t *hPCPData, u32 number);
 void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
 
-typedef struct effBTL_t effBTL_t;
 
-typedef struct
-{
-    u32 unknown00;
-    u8 unknown04[0xC];
-    sdfVector4_t position;
-    u8 unknown20[0x30];
-    u32 unknown50;
-    u8 unknown54[0x38];
-    dds3ModelHandle_t *hModel;
-} evtUnitHandle_t;
-
-typedef struct
-{
-    u8 unknown00[0x20];
-    sdfVector4_t position;
-    u8 unknown30[0x24];
-    f32 unknown54;
-    u8 unknown58[0x4];
-    f32 unknown5C;
-    u8 unknown60[0x18];
-    u32 flags;
-    u8 unknown7C[0x10];
-    evtUnitHandle_t *unit;
-    u8 unknown90[0x2];
-    s16 unknown92;
-    u8 unknown94[0x8];
-    u32 color;
-    u8 unknownA0[0x50];
-} nbFormation_t;
 
 typedef struct
 {
@@ -243,12 +205,10 @@ extern s8 D_0054F134;
 extern u8 D_0031D000[];
 extern void *D_00551DA0;
 extern void *D_00551DA4;
+void dds3EffectFileListWindowDelete(void *window);
+void dds3EffectFileListDelete(void *list);
 extern char D_0054F100[];
 extern char effBedNameBuf[];
-
-#define COPY_QWORD(dst, src) __asm__ volatile ( \
-    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
-    : : "r" (dst), "r" (src) : "memory", "$2")
 
 typedef struct
 {
@@ -307,8 +267,8 @@ void effBTLPointLightStart(void);
 void effBTLPointLightMain(void);
 void effBTLPointLightEnd(void);
 void effBTLModelColorMain(void);
-void evtUnitLightOff(evtUnitHandle_t *hUnit, s32 param);
-void evtSetUnitColorRGB(evtUnitHandle_t *hUnit, s32 param, u32 color);
+void evtUnitLightOff(evtUnit_t *hUnit, s32 param);
+void evtSetUnitColorRGB(evtUnit_t *hUnit, s32 param, u32 color);
 
 /* ps2asm.h stores the matrix bank only as a whole. */
 #define VU0_STORE_VF28(dst) __asm__ volatile ( \
@@ -326,7 +286,6 @@ void dds3EffectFileListWindowSetPadWait(void *hWindow, s32 wait);
 void dds3EffectFileListWindowSetWindowColor(void *hWindow, u32 color, u32 frameColor);
 void func_001750D0(s32 param);
 void *dblurUpdateHandle(void *hBlur);
-void *nbGetMainProcessData(void);
 
 /* A part whose type is this one is an effBTL cut, not a dds3 effect part. */
 #define EFFBTL_PART_TYPE_BTL 0xFFFD
@@ -341,8 +300,8 @@ typedef struct
 
 void sdfMemFreeDirect(sdfMemHandle_t *hMem);
 void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
-void effBTLModelGetMarkPosition3(dds3ModelHandle_t *hModel, s32 mark);
-void mdlSetClutColor(dds3ModelHandle_t *hModel, u32 color, f32 ratio);
+void effBTLModelGetMarkPosition3(mdlObj_t *hModel, s32 mark);
+void mdlSetClutColor(mdlObj_t *hModel, u32 color, f32 ratio);
 void *effBTLBindCreateTrack(void *pParam);
 void effPCPThunderSpherePolyLowDelete(void *hTrack);
 void effPCPThunderSpherePolyLowDraw(void *hTrack);
@@ -372,7 +331,7 @@ typedef struct
     nbFormation_t *pFormation;
     u32 frame;
     effPartHandle_t *hPart;
-    dds3ModelHandle_t *hModel;
+    mdlObj_t *hModel;
 } effBTLSysPoison_t;
 
 /* Effect handle of the families that hold two parts. */
@@ -391,7 +350,7 @@ typedef struct
     u32 frame;
     effPartHandle_t *hPart;
     effPartHandle_t *hPart2;
-    dds3ModelHandle_t *hModel;
+    mdlObj_t *hModel;
 } effBTLSysClose_t;
 
 void dds3SpPoly_RollRingSetEndless(void *hRollRing);
@@ -403,16 +362,6 @@ typedef struct
     u32 frame;
     void *hCut;
 } effBTLSysCut_t;
-
-/* One entry of datSkillTable, 320 skills. */
-typedef struct
-{
-    u16 unknown00;
-    u8 unknown02;
-    u8 unknown03[0x39];
-} datSkill_t;
-
-extern datSkill_t datSkillTable[];
 
 s32 effBTLSkillGetID(void);
 
@@ -479,8 +428,6 @@ typedef struct
     effPartHandle_t *hPart3;
 } effBTLSysPart3_t;
 
-void *effBTLCutCreate(effBTL_t *hBTLEffect, s32 type, nbFormation_t *pFormation, s32 param);
-void effBTLCutDelete(void *hCut);
 void effBTLCutDraw(void *hCut);
 u32 effBTLCutGetCutEndFrame(void *hCut);
 void effBTLModelHide(nbFormation_t *pFormation);
@@ -489,7 +436,7 @@ void effBTLSystem_Part_DataLoad(effBTLSystem_Part_t *pPartList, u32 count);
 void effBTLSystem_Part_DataFree(effBTLSystem_Part_t *pPartList, u32 count);
 void effBTLSystem_Part_HandleCreate(effBTLSystem_Part_t *pPartList, u32 count);
 void effBTLSystem_Part_HandleDelete(effBTLSystem_Part_t *pPartList, u32 count);
-dds3ModelHandle_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
+void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 u16 dds3EffectPartGetType(effPartHandle_t *hEffPart);
 u32 dds3EffectPCPDataGetSize(dds3EffectPCPData_t *hPCPData, u32 number);
 void dds3EffectPartDelete(effPartHandle_t *hEffPart);
@@ -502,9 +449,6 @@ void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 rgb)
 f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation);
 f32 effBTLPartGetScalePtr(nbFormation_t *pFormation);
 f32 effBTLPartCalcScale(nbFormation_t *pFormation);
-effBTL_t *effBTLCreate(void *pData);
-void effBTLDelete(effBTL_t *hBTLEffect);
-void evtSetUnitColorRGB(evtUnitHandle_t *hUnit, s32 frame, u32 rgb);
 
 void effBTLPointLightInit(void)
 {
@@ -534,9 +478,9 @@ void effBTLPointLightCompulsionOFF(void)
 
     pFormation = *(nbFormation_t **)nbGetMainProcessData();
     for (i = 0x1F; i >= 0; i--) {
-        if ((pFormation->flags & 3) == 3 && pFormation->unit != NULL) {
-            evtUnitLightOff(pFormation->unit, 0);
-            evtSetUnitColorRGB(pFormation->unit, 0xC, pFormation->color);
+        if ((pFormation->stat & 3) == 3 && pFormation->hunit != NULL) {
+            evtUnitLightOff(pFormation->hunit, 0);
+            evtSetUnitColorRGB(pFormation->hunit, 0xC, pFormation->modelcol);
         }
         pFormation++;
     }
@@ -548,7 +492,7 @@ void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pF
     effBTLPointLight_t *pLight;
     s32 id;
 
-    pLight = &effBTLPointLight[pFormation->unknown92];
+    pLight = &effBTLPointLight[pFormation->formindex];
     pLight->param = *pParam;
     id = effBTLModelGetID(pFormation);
     if (id == 0x125 || id == 0x108) {
@@ -565,7 +509,7 @@ void effBTLPointLightGroupSet(effBTLPointLightParam_t *pParam, u32 mask)
 
     pFormation = *(nbFormation_t **)nbGetMainProcessData();
     for (i = 0x1F; i >= 0; i--) {
-        if ((pFormation->flags & mask) != 0 && (pFormation->flags & 3) == 3) {
+        if ((pFormation->stat & mask) != 0 && (pFormation->stat & 3) == 3) {
             effBTLPointLightModelSet(pParam, pFormation);
         }
         pFormation++;
@@ -600,7 +544,7 @@ void effBTLModelColorSet(effBTLModelColorParam_t *pParam, nbFormation_t *pFormat
 
     id = effBTLModelGetID(pFormation);
     if (id != 0x125 && id != 0x108) {
-        pLight = &effBTLPointLight[pFormation->unknown92];
+        pLight = &effBTLPointLight[pFormation->formindex];
         pLight->color = *pParam;
         pLight->unknown44 = 0;
     }
@@ -610,19 +554,19 @@ void effBTLPointLightStart(void)
 {
     nbFormation_t *pFormation;
     effBTLPointLightBase_t *pBase;
-    evtUnitHandle_t *hUnit;
+    evtUnit_t *hUnit;
     s32 i;
 
     memset(effBTLPointLight, -1, sizeof(effBTLPointLight));
     pFormation = *(nbFormation_t **)nbGetMainProcessData();
     pBase = effBTLPointLightBase;
     for (i = 0; i < 32; i++) {
-        if ((pFormation->flags & 3) == 3) {
-            hUnit = pFormation->unit;
+        if ((pFormation->stat & 3) == 3) {
+            hUnit = pFormation->hunit;
             if (hUnit != NULL) {
-                COPY_QWORD(pBase, &hUnit->position);
-                pBase->unknown10 = hUnit->unknown00;
-                pBase->unknown14 = hUnit->unknown50;
+                PS2_COPY_QUAD(pBase, &hUnit->vec10);
+                pBase->unknown10 = hUnit->color;
+                pBase->unknown14 = hUnit->color50;
             }
         }
         pFormation++;
@@ -637,9 +581,9 @@ void effBTLPointLightEnd(void)
 
     pFormation = *(nbFormation_t **)nbGetMainProcessData();
     for (i = 0x1F; i >= 0; i--) {
-        if ((pFormation->flags & 3) == 3 && pFormation->unit != NULL) {
-            evtUnitLightOff(pFormation->unit, 0xC);
-            evtSetUnitColorRGB(pFormation->unit, 0xC, pFormation->color);
+        if ((pFormation->stat & 3) == 3 && pFormation->hunit != NULL) {
+            evtUnitLightOff(pFormation->hunit, 0xC);
+            evtSetUnitColorRGB(pFormation->hunit, 0xC, pFormation->modelcol);
         }
         pFormation++;
     }
@@ -671,15 +615,15 @@ void effBTLPointLightRun(void)
 
 void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 rgb)
 {
-    if (pFormation->unit != NULL) {
-        evtSetUnitColorRGB(pFormation->unit, frame, rgb);
-        pFormation->color = (pFormation->color & 0xFF000000) | (rgb & 0xFFFFFF);
+    if (pFormation->hunit != NULL) {
+        evtSetUnitColorRGB(pFormation->hunit, frame, rgb);
+        pFormation->modelcol = (pFormation->modelcol & 0xFF000000) | (rgb & 0xFFFFFF);
     }
 }
 
 f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
 {
-    if (pFormation->unit != NULL) {
+    if (pFormation->hunit != NULL) {
         return effBTLPartGetScalePtr(pFormation);
     } else {
         return effBTLPartCalcScale(pFormation);
@@ -742,7 +686,7 @@ effBTLSysTrack_t *effBTLSys_Shock_Create(nbFormation_t *pFormation)
     hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Shock_ThunderSpherePolyLowParam);
     effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
     pParam = effPCPThunderSpherePolyLowGetParam(hEffect->hTrack);
-    pParam->unknown20 = hEffect->pFormation->unknown54 * hEffect->pFormation->unknown5C * 0.85f;
+    pParam->unknown20 = hEffect->pFormation->h * hEffect->pFormation->scl * 0.85f;
     return hEffect;
 }
 
@@ -817,9 +761,9 @@ effBTLSysPart_t *effBTLSys_Freeze_Create(nbFormation_t *pFormation)
 
 void effBTLSys_Freeze_Delete(effBTLSysPart_t *hEffect)
 {
-    hEffect->pFormation->unit->hModel->stat &= ~2;
+    hEffect->pFormation->hunit->owner->flags &= ~2;
     effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 0, 0x80808080);
-    mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x808080, 0.0f);
+    mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x808080, 0.0f);
     dds3EffectPartDelete(hEffect->hPart);
     sdfChipFreeDirect(hEffect);
 }
@@ -841,8 +785,8 @@ void effBTLSys_Freeze_Draw(effBTLSysPart_t *hEffect)
 
     if (hEffect->frame == 0) {
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 0, 0x80FFF8BC);
-        mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x80FFC39B, 1.0f);
-        hEffect->pFormation->unit->hModel->stat |= 2;
+        mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x80FFC39B, 1.0f);
+        hEffect->pFormation->hunit->owner->flags |= 2;
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
     VU0_STORE_VF10_TO(position);
@@ -1091,8 +1035,8 @@ effBTLSysClose_t *effBTLSys_Close_Create(nbFormation_t *pFormation)
     hEffect = sdfChipAllocDirect(sizeof(effBTLSysClose_t));
     hEffect->pFormation = pFormation;
     hEffect->frame = 0;
-    if (pFormation->unit != NULL) {
-        hEffect->hModel = pFormation->unit->hModel;
+    if (pFormation->hunit != NULL) {
+        hEffect->hModel = pFormation->hunit->owner;
     } else {
         hEffect->hModel = NULL;
     }
@@ -1175,8 +1119,8 @@ effBTLSysPoison_t *effBTLSys_Poison_Create(nbFormation_t *pFormation)
     hEffect = sdfChipAllocDirect(sizeof(effBTLSysPoison_t));
     hEffect->pFormation = pFormation;
     hEffect->frame = 0;
-    if (pFormation->unit != NULL) {
-        hEffect->hModel = pFormation->unit->hModel;
+    if (pFormation->hunit != NULL) {
+        hEffect->hModel = pFormation->hunit->owner;
     } else {
         hEffect->hModel = NULL;
     }
@@ -1331,7 +1275,7 @@ effBTLSysTrack_t *effBTLSys_Paralyze_Create(nbFormation_t *pFormation)
     hEffect->hTrack = effBTLBindCreateTrack(effBTLSystem_Paralyze_ThunderSpherePolyLowParam);
     effPCPThunderSpherePolyLowSetScale(hEffect->hTrack, effBTLSystem_GetScalePtr(hEffect->pFormation));
     pParam = effPCPThunderSpherePolyLowGetParam(hEffect->hTrack);
-    pParam->unknown20 = hEffect->pFormation->unknown54 * hEffect->pFormation->unknown5C * 0.85f;
+    pParam->unknown20 = hEffect->pFormation->h * hEffect->pFormation->scl * 0.85f;
     return hEffect;
 }
 
@@ -1461,9 +1405,9 @@ effBTLSysFrame_t *effBTLSys_Stone_Create(nbFormation_t *pFormation)
 
 void effBTLSys_Stone_Delete(effBTLSysFrame_t *hEffect)
 {
-    dds3ModelHandle_t *hModel = hEffect->pFormation->unit->hModel;
+    mdlObj_t *hModel = hEffect->pFormation->hunit->owner;
 
-    hModel->stat &= ~2;
+    hModel->flags &= ~2;
     mdlSetClutColor(hModel, 0x808080, 0.0f);
     sdfChipFreeDirect(hEffect);
 }
@@ -1479,8 +1423,8 @@ void effBTLSys_Stone_SetColor(void) {
 void effBTLSys_Stone_Draw(effBTLSysFrame_t *hEffect)
 {
     if (hEffect->frame == 0) {
-        mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x80FFEBE1, 1.0f);
-        hEffect->pFormation->unit->hModel->stat |= 2;
+        mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x80FFEBE1, 1.0f);
+        hEffect->pFormation->hunit->owner->flags |= 2;
     }
     hEffect->frame++;
 }
@@ -1541,7 +1485,7 @@ void effBTLSys_Curse_SetColor(effBTLSysPart_t *hEffect, u32 color)
 
 void effBTLSys_Curse_Draw(effBTLSysPart_t *hEffect)
 {
-    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->position);
+    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->pos);
     dds3EffectPartDraw(hEffect->hPart);
     hEffect->frame++;
 }
@@ -1611,10 +1555,10 @@ void effBTLSys_CurseCAMP_Draw(effBTLSysPart2_t *hEffect)
 {
     sdfVector4_t position;
 
-    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->position);
-    position.x = hEffect->pFormation->position.x;
-    position.y = hEffect->pFormation->position.y - 100.0f;
-    position.z = hEffect->pFormation->position.z;
+    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->pos);
+    position.x = hEffect->pFormation->pos.x;
+    position.y = hEffect->pFormation->pos.y - 100.0f;
+    position.z = hEffect->pFormation->pos.z;
     dds3EffectPartSetPosition(hEffect->hPart2, &position);
     dds3EffectPartDraw(hEffect->hPart);
     dds3EffectPartDraw(hEffect->hPart2);
@@ -1667,7 +1611,7 @@ effBTLSysPart3_t *effBTLSys_Stone_Dead_Create(nbFormation_t *pFormation)
 
 void effBTLSys_Stone_Dead_Delete(effBTLSysPart3_t *hEffect)
 {
-    mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x808080, 0.0f);
+    mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x808080, 0.0f);
     dds3EffectPartDelete(hEffect->hPart3);
     dds3EffectPartDelete(hEffect->hPart2);
     dds3EffectPartDelete(hEffect->hPart);
@@ -1691,8 +1635,8 @@ void effBTLSys_Stone_Dead_Draw(effBTLSysPart3_t *hEffect)
 
     if (hEffect->frame == 0) {
         effBTLModelHide(hEffect->pFormation);
-        mdlSetClutColor(hEffect->pFormation->unit->hModel, 0x80FFEBE1, 1.0f);
-        hEffect->pFormation->unit->hModel->stat |= 2;
+        mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x80FFEBE1, 1.0f);
+        hEffect->pFormation->hunit->owner->flags |= 2;
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
     VU0_STORE_VF10_TO(position);
@@ -1742,7 +1686,7 @@ effBTLSysHansya_t *effBTLSys_Hansya_Create(nbFormation_t *pFormation)
     hEffect->frame = 0;
     hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Hansya_PartList[0].hPart);
     mdlLoopMotion(dds3EffectPartGetHandle(hEffect->hPart), 0, 0);
-    if (datSkillTable[effBTLSkillGetID()].unknown02 == 0) {
+    if (datSkillTable.normal[effBTLSkillGetID()].koukatype == 0) {
         hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Hansya_PartList[1].hPart);
     } else {
         hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Hansya_PartList[2].hPart);
@@ -2688,7 +2632,11 @@ char *effMakeBedPath(char *path)
 
 INCLUDE_ASM(const s32, "code_0016F490", eff_174D38);
 
-INCLUDE_ASM(const s32, "code_0016F490", eff_174D98);
+void eff_174D98(void)
+{
+    dds3EffectFileListWindowDelete(D_00551DA4);
+    dds3EffectFileListDelete(D_00551DA0);
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", func_00174DC0);
 
@@ -2810,7 +2758,7 @@ void InitModelCollisionEditorProcess(void)
     dds3AdminiCallSequence(0, 0, 0, 0);
 }
 
-dds3ModelHandle_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart)
+void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart)
 {
     return hEffPart->pHandle;
 }
@@ -2908,7 +2856,7 @@ void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
     dds3BillboardSetScale(hBillboard, scale, scale);
 }
 
-void dds3EffectPartModelInit(dds3ModelHandle_t *hModel)
+void dds3EffectPartModelInit(mdlObj_t *hModel)
 {
     VU0_LOAD_VF10(&D_0031DF60);
     mdlSetPosition(hModel);
@@ -2917,16 +2865,16 @@ void dds3EffectPartModelInit(dds3ModelHandle_t *hModel)
     VU0_LOAD_VF10(&D_0031DF80);
     mdlSetScale(hModel);
     mdlSetColor(hModel, 0x80808080);
-    if (hModel->motionCtrlr != NULL) {
+    if (hModel->first != NULL) {
         mdlLoopMotion(hModel, 0, 0);
-        hModel->motionCtrlr->speed = 1.0f;
+        hModel->first->speed = 1.0f;
     }
-    hModel->stat &= ~1;
+    hModel->flags &= ~1;
 }
 
-dds3ModelHandle_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
+mdlObj_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
 {
-    dds3ModelHandle_t *hModel;
+    mdlObj_t *hModel;
 
     mdlPackDecode(7, D_0054F1E4, 0x101, pData->data, pData->size);
     hModel = mdlLoad(7, D_0054F1E4);
@@ -2935,21 +2883,21 @@ dds3ModelHandle_t *dds3EffectPartModelCreate(dds3EffectPartModelData_t *pData)
     return hModel;
 }
 
-void dds3EffectPartModelDraw(dds3ModelHandle_t *hModel)
+void dds3EffectPartModelDraw(mdlObj_t *hModel)
 {
     mdlLink(hModel, D_002F69B8);
 }
 
-void dds3EffectPartModelDelete(dds3ModelHandle_t *hModel)
+void dds3EffectPartModelDelete(mdlObj_t *hModel)
 {
     mdlFree(hModel);
 }
 
-dds3ModelHandle_t *dds3EffectPartModelCopy(void *hData)
+mdlObj_t *dds3EffectPartModelCopy(void *hData)
 {
     s32 major;
     s32 minor;
-    dds3ModelHandle_t *hModel;
+    mdlObj_t *hModel;
 
     major = mdlGetMajorNum(hData);
     minor = mdlGetMinorNum(hData);
@@ -2958,7 +2906,7 @@ dds3ModelHandle_t *dds3EffectPartModelCopy(void *hData)
     return hModel;
 }
 
-void dds3EffectPartModelSetPosition(dds3ModelHandle_t *hModel, sdfVector4_t *pPosition)
+void dds3EffectPartModelSetPosition(mdlObj_t *hModel, sdfVector4_t *pPosition)
 {
     VU0_LOAD_VF10(pPosition);
     mdlSetPosition(hModel);
@@ -2973,15 +2921,15 @@ void dds3EffectPartModelSetScale(void *hData, f32 scale)
     mdlSetScale(hData);
 }
 
-void dds3EffectPartModelSetRotateMatrix(dds3ModelHandle_t *hModel, sdfMatrix4_t *pMatrix)
+void dds3EffectPartModelSetRotateMatrix(mdlObj_t *hModel, sdfMatrix4_t *pMatrix)
 {
     VU0_LOAD_MATRIX(pMatrix);
-    VU0_STORE_VF28(&hModel->modelRoot->tm.m[0]);
-    VU0_STORE_VF29(&hModel->modelRoot->tm.m[4]);
-    VU0_STORE_VF30(&hModel->modelRoot->tm.m[8]);
+    VU0_STORE_VF28(&hModel->inner->tm.m[0]);
+    VU0_STORE_VF29(&hModel->inner->tm.m[4]);
+    VU0_STORE_VF30(&hModel->inner->tm.m[8]);
 }
 
-void dds3EffectPartModelSetColor(dds3ModelHandle_t *hModel, u32 color)
+void dds3EffectPartModelSetColor(mdlObj_t *hModel, u32 color)
 {
     mdlSetColor(hModel, color);
 }
@@ -3110,6 +3058,8 @@ effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 
     return dds3EffectPartCreate(type, pData);
 }
 
+INCLUDE_RODATA(const s32, "code_0016F490", D_00533C40);
+
 INCLUDE_SDATA(const s32, "code_0016F490", effBTLPointLightProcess);
 
 INCLUDE_SDATA(const s32, "code_0016F490", D_0054F0E4);
@@ -3199,6 +3149,4 @@ INCLUDE_SDATA(const s32, "code_0016F490", D_0054F1D8);
 INCLUDE_SDATA(const s32, "code_0016F490", D_0054F1E0);
 
 INCLUDE_SDATA(const s32, "code_0016F490", D_0054F1E4);
-
-INCLUDE_RODATA(const s32, "code_0016F490", D_00533C40);
 

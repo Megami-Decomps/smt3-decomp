@@ -1,6 +1,7 @@
 #include "common.h"
 #include "libsdf.h"
 #include "ps2asm.h"
+#include "effect.h"
 
 /* Screen pixel pair in the debug overlay's own 1/16 pixel grid. */
 typedef struct
@@ -18,19 +19,195 @@ extern void effScreenOffset(void);
 extern void *dds3PrimFrameRect(s32 x, s32 y, s32 color, s32 width, s32 height, u32 mode0, u32 mode1);
 extern void *dds3PrimLine(s32 x0, s32 y0, s32 color0, u32 mode0, s32 x1, s32 y1, s32 color1, u32 mode1, s32 z);
 
-INCLUDE_ASM(const s32, "code_001AC0A8", dds3_1AC0A8);
 
-INCLUDE_ASM(const s32, "code_001AC0A8", dds3_1AC138);
+sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+void *sdfMemLock(sdfMemHandle_t *allocation);
+void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 color, const char *format);
+/* SDK matrix-bank helpers used by the wire sphere's second pass. */
+typedef struct
+{
+    f32 rows[4][4];
+} effDebugMatrix_t;
+#define VU0_LOAD_MATRIX_B_F32(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src), "m" (*(const effDebugMatrix_t *)(src)))
+#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t.set reorder" \
+    : : "r" (dst))
+/* MMI shuffle builds all four identity rows directly from vf0. */
+#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $5, $vf0\n\t" \
+    "pextuw $4, $0, $5\n\t" \
+    "pextuw $2, $0, $4\n\t" \
+    "pextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\t" \
+    "sq $3, 0x10(%0)\n\t" \
+    "sq $4, 0x20(%0)\n\t" \
+    "sq $5, 0x30(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
 
-INCLUDE_ASM(const s32, "code_001AC0A8", func_001AC150);
+typedef struct
+{
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    const u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    f32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+} effDebugPolyParams_t;
 
-INCLUDE_ASM(const s32, "code_001AC0A8", effPCPBezierEval);
+extern sdfMat_t *D_0054F270;
+extern f32 D_0054F274;
+extern f32 D_0056B050[4][4];
+extern u32 D_003201C0[4];
+f32 sdfCos(f32 angle);
+f32 sdfSin(f32 angle);
+void SetRotateMatrixX(f32 angle);
+void SetRotateMatrixY(f32 angle);
+void MultMatrixNoArg(void);
+void *effDebugDrawWireModel(f32 (*positions)[4], u32 *colors, u32 count, u32 mode);
+sdfMat_t *sdfMatNew(void);
+void sdfMatSetConstant(sdfMat_t *material, f32 value);
+void sdf3DPrimLinkTm(void *tag, void *matrix);
+void sdf3DPrimLinkMat(void *tag, sdfMat_t *material, void *data);
+void *memset(void *destination, s32 value, u32 size);
+void *effPkt3DPrimMakePoly(effDebugPolyParams_t *params);
 
-INCLUDE_ASM(const s32, "code_001AC0A8", func_001AC3D8);
+/* Allocate contiguous slots followed by their count and allocation handle. */
+effArrHdr_t *dds3_1AC0A8(u32 count) {
+    s32 slotBytes = count * 0x60;
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(slotBytes + 0xC);
+    effBezierCurve_t *slot = (effBezierCurve_t *)sdfMemLock(allocation);
+    effArrHdr_t *table = (effArrHdr_t *)((u8 *)slot + slotBytes);
+    u32 index = 0;
+    table->allocation = allocation;
+    table->slots = slot;
+    table->count = count; /* The shared array header's slot count. */
+    if (count != 0) {
+        do {
+            index++;
+            slot->pointIndex = 0;
+            slot->t = 0;
+            slot->parameterStep = 0.05f;
+            slot++;
+        } while (index < count);
+    }
+    return table;
+}
 
-INCLUDE_ASM(const s32, "code_001AC0A8", func_001AC4C8);
+void dds3_1AC138(effArrHdr_t *header) {
+    sdfMemFreeDirect(header->allocation);
+}
 
-INCLUDE_ASM(const s32, "code_001AC0A8", func_001AC4F0);
+/* Point-index sentinel 7 stops evaluation; otherwise sample before clamping t and advancing three controls. */
+s32 func_001AC150(effArrHdr_t *table, s32 index, f32 *out) {
+    effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
+    u32 pointIndex = slot->pointIndex;
+    f32 weights[4];
+    f32 t;
+    f32 u;
+    effBezierPoint_t *controlPoints;
+
+    if (pointIndex == 7) {
+        return 0;
+    }
+    t = slot->t;
+    u = 1.0f - t;
+    controlPoints = &slot->controlPoints[pointIndex];
+    weights[0] = u * u * u;
+    weights[1] = t * (u * u) * 3.0f;
+    weights[2] = t * t * u * 3.0f;
+    weights[3] = t * t * t;
+    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
+    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
+    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
+    out[3] = 1.0f;
+    t += slot->parameterStep;
+    if (t > 1.0f) {
+        t = 1.0f;
+        pointIndex += 3;
+    }
+    slot->t = t;
+    slot->pointIndex = pointIndex;
+    return 1;
+}
+
+/* Carry excess t across the first segment; the second finishes after sampling its entry t. */
+s32 effPCPBezierEval(effBezierCurve_t *slot, f32 *out) {
+    f32 weights[4];
+    u32 pointIndex = slot->pointIndex;
+    f32 t = slot->t;
+    effBezierPoint_t *controlPoints = &slot->controlPoints[pointIndex];
+    f32 u = 1.0f - t;
+
+    weights[0] = u * u * u;
+    weights[1] = t * (u * u) * 3.0f;
+    weights[2] = t * t * u * 3.0f;
+    weights[3] = t * t * t;
+    out[0] = controlPoints[0].x * weights[0] + controlPoints[1].x * weights[1] + controlPoints[2].x * weights[2] + controlPoints[3].x * weights[3];
+    out[1] = controlPoints[0].y * weights[0] + controlPoints[1].y * weights[1] + controlPoints[2].y * weights[2] + controlPoints[3].y * weights[3];
+    out[2] = controlPoints[0].z * weights[0] + controlPoints[1].z * weights[1] + controlPoints[2].z * weights[2] + controlPoints[3].z * weights[3];
+    out[3] = 1.0f;
+    t += slot->parameterStep;
+    if (t > 1.0f) {
+        if (pointIndex < 3) {
+            t -= 1.0f;
+            pointIndex += 3;
+        } else {
+            slot->t = 1.0f;
+            return 0;
+        }
+    }
+    slot->pointIndex = pointIndex;
+    slot->t = t;
+    return 1;
+}
+
+/* Evaluate without changing progress; write homogeneous W = 1. */
+void func_001AC3D8(effBezierCurve_t *slot, f32 *out) {
+    effBezierPoint_t *controlPoints = &slot->controlPoints[slot->pointIndex];
+    f32 t = slot->t;
+    f32 u = 1.0f - t;
+    f32 w[4];
+
+    w[0] = u * u * u;
+    w[1] = t * (u * u) * 3.0f;
+    w[2] = t * t * u * 3.0f;
+    w[3] = t * t * t;
+
+    out[0] = controlPoints[0].x * w[0] + controlPoints[1].x * w[1] + controlPoints[2].x * w[2] + controlPoints[3].x * w[3];
+    out[1] = controlPoints[0].y * w[0] + controlPoints[1].y * w[1] + controlPoints[2].y * w[2] + controlPoints[3].y * w[3];
+    out[2] = controlPoints[0].z * w[0] + controlPoints[1].z * w[1] + controlPoints[2].z * w[2] + controlPoints[3].z * w[3];
+    out[3] = 1.0f;
+}
+
+/* Reset progress and its default step, retaining the control points. */
+void func_001AC4C8(effArrHdr_t *table, s32 index) {
+    effBezierCurve_t *slot = &((effBezierCurve_t *)table->slots)[index];
+
+    slot->parameterStep = 0.05f;
+    slot->pointIndex = slot->t = 0;
+}
+
+effBezierCurve_t *func_001AC4F0(effArrHdr_t *table, s32 index) {
+    return &((effBezierCurve_t *)table->slots)[index];
+}
 
 /* vu0 routine: project a world point and frame it */
 void effDebugPointDraw(QuadF32 *pos)
@@ -130,15 +307,259 @@ void effDebugLineDraw2(QuadF32 *from, QuadF32 *to, u32 mode)
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
 }
 
-INCLUDE_ASM(const s32, "code_001AC0A8", effDebugStringDraw);
+/* Submit formatted text at biased GS coordinates. */
+void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *format) {
+    sdfDrawTag_t *task = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfGrOt_t *scene;
 
-INCLUDE_ASM(const s32, "code_001AC0A8", effDebugWireframeSphereDraw);
+    sdfDrawTagInit(task);
+    sdfDrawTagLink(task, (sdfDevPrintf((x << 4) + 0x7000, (y << 3) + 0x7900, 0xFF0000, commandIndex, format)));
+    scene = &sdfGrOtTable[83];
+    ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, task);
+}
 
-INCLUDE_ASM(const s32, "code_001AC0A8", effDebugSelectCursorDraw);
+/* vu0 routine: build two perpendicular sets of wire rings. */
+void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
+    f32 point[4] __attribute__((aligned(16)));
+    f32 matrix[4][4] __attribute__((aligned(16)));
+    f32 vertices[40][4] __attribute__((aligned(16)));
+    u32 colors[40];
+    sdfDrawTag_t *list;
+    sdfGrOt_t *surface;
+    f32 (*out)[4];
+    f32 latitude;
+    f32 longitude;
+    f32 ringRadius;
+    f32 ringY;
+    u32 pass;
+    u32 ring = 0;
+    u32 segment;
 
-INCLUDE_ASM(const s32, "code_001AC0A8", effDebugWireframeCylinderDraw);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    do {
+        colors[ring++] = color;
+    } while (ring < 40);
 
-INCLUDE_ASM(const s32, "code_001AC0A8", effDebugWindowDraw);
+    EE_MMI_UNIT_MATRIX(matrix);
+    for (pass = 0; pass < 2; pass++) {
+        latitude = 0.0f;
+        for (ring = 0; ring < 14; ring++) {
+            latitude += 0.20943949f;
+            out = vertices;
+            longitude = 0.0f;
+            ringY = radius * sdfCos(latitude);
+            ringRadius = radius * sdfSin(latitude);
+            VU0_LOAD_MATRIX(matrix);
+            VU0_LOAD_VF11( center);
+            point[0] = ringRadius;
+            point[1] = ringY;
+            point[2] = 0.0f;
+            VU0_LOAD_VF10( point);
+            VU0_CLEAR_VF10_W();
+            VU0_APPLY_MATRIX_VF10();
+            VU0_ADD_VF10_VF11();
+
+            for (segment = 0; segment < 20; segment++) {
+                VU0_STORE_VF10( *out);
+                out++;
+                longitude += 0.31415924429893494f;
+                point[0] = sdfCos(longitude) * ringRadius;
+                point[1] = ringY;
+                point[2] = sdfSin(longitude) * ringRadius;
+                VU0_LOAD_VF10( point);
+                VU0_CLEAR_VF10_W();
+                VU0_APPLY_MATRIX_VF10();
+                VU0_ADD_VF10_VF11();
+                VU0_STORE_VF10( *out);
+                out++;
+            }
+            sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
+        }
+        SetRotateMatrixX(1.5707963f);
+        VU0_LOAD_MATRIX_B_F32(matrix);
+        MultMatrixNoArg();
+        VU0_STORE_MATRIX_UNCLOBBERED(matrix);
+    }
+    surface = &sdfGrOtTable[44];
+    ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
+}
+
+/* vu0 routine: build and submit the debug geometry. */
+void effDebugSelectCursorDraw(f32 *position) {
+    sdfMat_t *asset = D_0054F270;
+    sdfDrawTag_t *list;
+    effDebugPolyParams_t packet;
+    sdfGrOt_t *surface;
+
+    if (asset == NULL) {
+        asset = sdfMatNew();
+        D_0054F270 = asset;
+        sdfMatSetConstant(asset, 1.0f);
+    }
+
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    SetRotateMatrixY(D_0054F274);
+    D_0054F274 += 0.10471974313259125f;
+    VU0_LOAD_VF10( position);
+    __asm__ volatile(".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder");
+    sdf3DPrimLinkTm(list, NULL);
+    memset(&packet, 0, 0x2C);
+    packet.primitive = 0x4000;
+    D_0056B050[2][2] = 0.0f;
+    packet.colors = D_003201C0;
+    packet.color = 0x80808080;
+
+    D_0056B050[0][0] = 0.0f;
+    D_0056B050[0][1] = 0.0f;
+    D_0056B050[0][2] = 0.0f;
+    D_0056B050[1][0] = 15.0f;
+    D_0056B050[1][1] = -30.0f;
+    D_0056B050[1][2] = 0.0f;
+    D_0056B050[2][0] = -15.0f;
+    D_0056B050[2][1] = -30.0f;
+
+    packet.parameterCount = 1;
+    packet.vertexCount = 3;
+    packet.positions = (u128 *)D_0056B050;
+    packet.texcoords = NULL;
+    sdf3DPrimLinkMat(list, D_0054F270, NULL);
+    sdfDrawTagLink(list, effPkt3DPrimMakePoly(&packet));
+    surface = &sdfGrOtTable[39];
+    ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
+}
+
+/* vu0 routine: build and submit the debug geometry. */
+void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32 height) {
+    f32 point[4]; /* The line provider consumes xyz; preserve the untouched w lane. */
+    f32 vertices[40][4];
+    u32 colors[40];
+    sdfDrawTag_t *list;
+    f32 (*out)[4];
+    sdfGrOt_t *surface;
+    u32 ring;
+    u32 segment;
+    f32 y;
+    f32 heightStep;
+    f32 angleStep;
+    f32 angle;
+    f32 oppositeAngle;
+
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    for (ring = 0; ring < 40; ring++) {
+        colors[ring] = color;
+    }
+    heightStep = height / 19.0f;
+    angleStep = 0.31415924429893494f;
+    y = -height * 0.5f;
+    for (ring = 0; ring < 20; ring++) {
+        angle = 0.0f;
+        out = vertices;
+        point[0] = radius;
+        point[1] = y;
+        point[2] = 0.0f;
+        VU0_LOAD_VF11( center);
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        for (segment = 0; segment < 20; segment++) {
+            VU0_STORE_VF10( *out);
+            out++;
+            angle += angleStep;
+            point[0] = sdfCos(angle) * radius;
+            point[1] = y;
+            point[2] = sdfSin(angle) * radius;
+            VU0_LOAD_VF10( point);
+            VU0_ADD_VF10_VF11();
+            VU0_STORE_VF10( *out);
+            out++;
+        }
+        sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
+        y += heightStep;
+    }
+
+    out = vertices;
+    VU0_LOAD_VF11( center);
+    angle = 0.0f;
+    for (segment = 0; segment < 20; segment++) {
+        point[0] = sdfCos(angle) * radius;
+        point[1] = -height * 0.5f;
+        point[2] = sdfSin(angle) * radius;
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10( *out);
+        out++;
+        point[0] = sdfCos(angle) * radius;
+        point[1] = height * 0.5f;
+        point[2] = sdfSin(angle) * radius;
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10( *out);
+        out++;
+        angle += angleStep;
+    }
+    sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
+
+    out = vertices;
+    VU0_LOAD_VF11( center);
+    angle = 0.0f;
+    for (segment = 0; segment < 10; segment++) {
+        point[0] = sdfCos(angle) * radius;
+        point[1] = -height * 0.5f;
+        point[2] = sdfSin(angle) * radius;
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10( *out);
+        out++;
+        oppositeAngle = angle + 3.1415926f;
+        point[0] = sdfCos(oppositeAngle) * radius;
+        point[1] = -height * 0.5f;
+        point[2] = sdfSin(oppositeAngle) * radius;
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10( *out);
+        out++;
+        angle += angleStep;
+    }
+    sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 20, 0x80));
+
+    out = vertices;
+    VU0_LOAD_VF11( center);
+    angle = 0.0f;
+    for (segment = 0; segment < 10; segment++) {
+        point[0] = sdfCos(angle) * radius;
+        point[1] = height * 0.5f;
+        point[2] = sdfSin(angle) * radius;
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10( *out);
+        out++;
+        oppositeAngle = angle + 3.1415926f;
+        point[0] = sdfCos(oppositeAngle) * radius;
+        point[1] = height * 0.5f;
+        point[2] = sdfSin(oppositeAngle) * radius;
+        VU0_LOAD_VF10( point);
+        VU0_ADD_VF10_VF11();
+        VU0_STORE_VF10( *out);
+        out++;
+        angle += angleStep;
+    }
+    sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 20, 0x80));
+    surface = &sdfGrOtTable[44];
+    ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);
+}
+
+/* Submit the filled rectangle and border using native horizontal/vertical coordinate scales. */
+void effDebugWindowDraw(s32 x, s32 y, s32 width, s32 height, s32 fillColor, s32 borderColor) {
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfGrOt_t *scene;
+
+    sdfDrawTagInit(list);
+    sdfDrawTagLink(list, (dds3PrimFrameRect(x * 0x10 + 0x7000, y * 8 + 0x7900, 0xFF0000, width * 0x10, height * 8, fillColor, borderColor)));
+    scene = &sdfGrOtTable[83];
+    ((void (*)(sdfGrOt_t *, void *))scene->regFunc)(scene, list);
+}
 
 INCLUDE_SDATA(const s32, "code_001AC0A8", D_0054F270);
 

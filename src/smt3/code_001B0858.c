@@ -1,6 +1,9 @@
 #include "common.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "nb.h"
+#include "model.h"
+#include "motion.h"
 
 /* Cubic spline fitted over a point list; dds3AllocSplineHandle takes 0x2C. */
 typedef struct dds3Spline_t {
@@ -56,44 +59,12 @@ typedef struct nbCamera_t {
     f32 unk54;
 } nbCamera_t;
 
-typedef struct nbMainProcessData_t {
-    u8 unk00[0x60];
-    u32 unk60;
-    u8 unk64[0x50];
-    s32 unkB4;
-    u8 unkB8[0x44];
-    void *camera;
-} nbMainProcessData_t;
-
-typedef struct nbFormation_t {
-    u8 unk00[0x50];
-    f32 unk50;
-    u8 unk54[8];
-    f32 unk5C;
-    u8 unk60[0x18];
-    u32 unk78;
-    u8 unk7C[0x16];
-    s16 id;
-    u8 unk94[0x84];
-} nbFormation_t;
-
-typedef struct dds3ModelData_t {
-    u8 unk00[0x2E];
-    u16 length;
-} dds3ModelData_t;
-
-typedef struct dds3ModelHandle_t {
-    u8 unk00[0x1C];
-    dds3ModelData_t *pData;
-} dds3ModelHandle_t;
-
 typedef struct effPartHandle_t effPartHandle_t;
 
 typedef struct nbCameraHelper_t {
     u8 unk00[0x38];
     effPartHandle_t *hPart;
 } nbCameraHelper_t;
-typedef struct sdfMemHandle_t sdfMemHandle_t;
 
 extern nbCamera_t pNbCamera;
 extern nbCameraStateEntry_t nbCameraStateTable[];
@@ -108,12 +79,11 @@ extern u32 Foru_E913_Frame;
 extern s32 D_00551E08;
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern void effBTLSkillSetFormationInfo(u32 invokeId, u32 targetBits);
 extern void effBTLModelAllPopPosition(void);
 extern void effBTLModelAllPopRotate(void);
 extern void effBTLModelAllShow(void);
-extern void nbCameraHelperModelSetSub(dds3ModelHandle_t *hModel, u32 target, u32 eye);
+extern void nbCameraHelperModelSetSub(mdlObj_t *hModel, u32 target, u32 eye);
 
 extern f32 nbCamera_NegoHojo_Rate;
 extern f32 nbCamera_NegoHojo_Distance;
@@ -128,7 +98,7 @@ extern void func_0016E1F8(void);
 extern void func_0016E120(void);
 extern void nbCameraShot_All_Set(nbCamera_t *pCamera);
 extern void nbCameraShot_All_Set2(nbCamera_t *pCamera, void *pWork);
-extern dds3ModelHandle_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
+extern mdlObj_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 extern void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 extern void sdfChipFreeDirect(void *pChip);
 extern void dds3EffectFileListWindowDelete(void *pWork);
@@ -174,9 +144,49 @@ extern s32 dds3GetActiveCameraSceneBasic(dds3Scene_t *pScene);
 
 void nbCameraSetState(u16 state);
 void nbCameraPressStart(void);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+void dds3AllocSplinePoints(dds3Spline_t *spline, s32 flattenEqualComponents);
+void dds3BuildSplinePoints(f32 *tangents, f32 *points, u32 count);
+void dds3BuildSplineCoefs(dds3Spline_t *spline, f32 *tangents);
+void dds3BuildSplineCoefsSkipDup(dds3Spline_t *spline, f32 *tangents);
+void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 index, f32 t);
 
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3AllocSplineHandle);
+dds3Spline_t *dds3AllocSplineHandle(f32 *points, u32 count, s32 flattenEqualComponents) {
+    sdfMemHandle_t *primaryResource = sdfMemAllocDirect(0x2C);
+    f32 step = 0.05f;
+    dds3Spline_t *primitive = (dds3Spline_t *)sdfMemLock(primaryResource);
+    sdfMemHandle_t *coefficientResource;
+    f32 (*coefficients)[3];
+
+    primitive->handle = primaryResource;
+    primitive->count = count;
+    primitive->points = points;
+    primitive->unk20 = 0;
+    primitive->unk24 = 0;
+    primitive->unk28 = step;
+    if (count < 3) {
+        primitive->coefs = NULL;
+        primitive->single = 1;
+    } else {
+        coefficientResource = sdfMemAllocDirect(count * 36);
+        coefficients = (f32 (*)[3])sdfMemLock(coefficientResource);
+        primitive->handle = primaryResource;
+        primitive->coefHandle = coefficientResource;
+        primitive->single = 0;
+        primitive->count = count;
+        primitive->points = points;
+        primitive->coefs = (f32 *)coefficients;
+        primitive->coefB = (f32 *)(coefficients + count);
+        primitive->coefC = (f32 *)(coefficients + count * 2);
+        primitive->unk20 = 0;
+        primitive->unk24 = 0;
+        primitive->unk28 = step;
+        dds3AllocSplinePoints(primitive, flattenEqualComponents);
+    }
+    return primitive;
+}
 
 void dds3FreeSplineHandle(dds3Spline_t *pSpline)
 {
@@ -191,9 +201,57 @@ void dds3FreeSplineHandle(dds3Spline_t *pSpline)
 
 INCLUDE_ASM(const s32, "code_001B0858", dds3_1B09C0);
 
-INCLUDE_ASM(const s32, "code_001B0858", func_001B0A60);
+void func_001B0A60(sdfVector4_t *vertex, dds3Spline_t *primitive, s32 recordIndex, f32 t) {
+    f32 *a;
+    f32 *b;
+    f32 *c;
+    f32 *d;
 
-INCLUDE_ASM(const s32, "code_001B0858", func_001B0B90);
+    if ((u16)primitive->single == 0) {
+        a = primitive->coefs + recordIndex * 3;
+        b = primitive->coefB + recordIndex * 3;
+        c = primitive->coefC + recordIndex * 3;
+        d = (f32 *)primitive->points + recordIndex * 3;
+        vertex->x = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        vertex->y = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        vertex->z = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        vertex->w = 1.0f;
+    } else {
+        a = (f32 *)primitive->points + recordIndex * 3;
+        b = a + 3;
+        vertex->x = a[0] + (b[0] - a[0]) * t;
+        vertex->y = a[1] + (b[1] - a[1]) * t;
+        vertex->z = a[2] + (b[2] - a[2]) * t;
+    }
+}
+
+/* vu0 routine: sample the curve into vf10. */
+void func_001B0B90(dds3Spline_t *primitive, s32 recordIndex, f32 t)
+{
+    f32 vertex[4];
+    f32 *a;
+    f32 *b;
+    f32 *c;
+    f32 *d;
+
+    if ((u16)primitive->single == 0) {
+        a = primitive->coefs + recordIndex * 3;
+        b = primitive->coefB + recordIndex * 3;
+        c = primitive->coefC + recordIndex * 3;
+        d = (f32 *)primitive->points + recordIndex * 3;
+        vertex[0] = ((a[0] * t + b[0]) * t + c[0]) * t + d[0];
+        vertex[1] = ((a[1] * t + b[1]) * t + c[1]) * t + d[1];
+        vertex[2] = ((a[2] * t + b[2]) * t + c[2]) * t + d[2];
+        vertex[3] = 1.0f;
+    } else {
+        a = (f32 *)primitive->points + recordIndex * 3;
+        b = a + 3;
+        vertex[0] = a[0] + (b[0] - a[0]) * t;
+        vertex[1] = a[1] + (b[1] - a[1]) * t;
+        vertex[2] = a[2] + (b[2] - a[2]) * t;
+    }
+    VU0_LOAD_VF10_FROM(*(u128 *)vertex);
+}
 
 
 void func_001B0CC0(dds3Spline_t *pSpline)
@@ -208,17 +266,125 @@ void func_001B0CD0(dds3Spline_t *pSpline, f32 value)
     pSpline->unk28 = value;
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3AllocSplinePoints);
+void dds3AllocSplinePoints(dds3Spline_t *primitive, s32 flattenEqualComponents) {
+    sdfMemHandle_t *handle = sdfMemAllocDirect(primitive->count * 12);
+    f32 *tangentData = (f32 *)sdfMemLock(handle);
+
+    dds3BuildSplinePoints(tangentData, primitive->points, primitive->count);
+    if (flattenEqualComponents == 0) {
+        dds3BuildSplineCoefs(primitive, tangentData);
+    } else {
+        dds3BuildSplineCoefsSkipDup(primitive, tangentData);
+    }
+    sdfMemFreeDirect(handle);
+}
 
 INCLUDE_ASM(const s32, "code_001B0858", dds3BuildSplinePoints);
 
-INCLUDE_ASM(const s32, "code_001B0858", SolveTridiagonal);
+void SolveTridiagonal(f32 *solution, f32 *rhs, s32 count) {
+    s32 byteCount = count * sizeof(f32);
+    void *handle = sdfMemAllocDirect(byteCount);
+    f32 *upper;
+    s32 i;
+    f32 denominator;
+    f32 *upperEnd;
+    f32 *solutionEnd;
+    f32 *rhsEnd;
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3BuildSplineCoefs);
+    count -= 2;
+    upper = (f32 *)sdfMemLock(handle);
+    denominator = 2.0f;
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3BuildSplineCoefsSkipDup);
+    solution[0] = rhs[0] / denominator;
+    for (i = 1; i <= count; i++) {
+        upper[i] = 1.0f / denominator;
+        denominator = 4.0f - upper[i];
+        solution[i] = (rhs[i] - solution[i - 1]) / denominator;
+    }
+    upperEnd = (f32 *)((u8 *)upper + byteCount);
+    solutionEnd = (f32 *)((u8 *)solution + byteCount);
+    rhsEnd = (f32 *)((u8 *)rhs + byteCount);
+    upperEnd[-1] = 1.0f / denominator;
+    denominator = 2.0f - upperEnd[-1];
+    solutionEnd[-1] = (rhsEnd[-1] - solutionEnd[-2]) / denominator;
+    for (i = count; i >= 0; i--) {
+        solution[i] -= upper[i + 1] * solution[i + 1];
+    }
+    sdfMemFreeDirect(handle);
+}
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3_1B1238);
+void dds3BuildSplineCoefs(dds3Spline_t *primitive, f32 *tangents) {
+    f32 *cubic = primitive->coefs;
+    f32 *quadratic = primitive->coefB;
+    f32 *linear = primitive->coefC;
+    f32 *points = primitive->points;
+    s32 count = primitive->count;
+    s32 segment;
+    for (segment = 0; segment < count - 1; segment++) {
+        s32 component;
+        for (component = 0; component < 3; component++) {
+            f32 endValue = points[segment * 3 + component + 3];
+            f32 startValue = points[segment * 3 + component];
+            f32 startTangent = tangents[component * count + segment];
+            f32 endTangent = tangents[component * count + segment + 1];
+            cubic[segment * 3 + component] = 2.0f * (startValue - endValue) +
+                (startTangent + endTangent);
+            quadratic[segment * 3 + component] = (endValue - startValue) * 3.0f -
+                (2.0f * startTangent + endTangent);
+            linear[segment * 3 + component] = startTangent;
+        }
+    }
+}
+
+void dds3BuildSplineCoefsSkipDup(dds3Spline_t *primitive, f32 *tangents) {
+    f32 *cubic = primitive->coefs;
+    f32 *quadratic = primitive->coefB;
+    f32 *linear = primitive->coefC;
+    f32 *points = primitive->points;
+    s32 count = primitive->count;
+    s32 segment;
+    s32 component;
+
+    for (segment = 0; segment < count - 1; segment++) {
+        for (component = 0; component < 3; component++) {
+            f32 startValue = points[segment * 3 + component];
+            f32 endValue = points[segment * 3 + component + 3];
+
+            if (startValue == endValue) {
+                cubic[segment * 3 + component] = 0.0f;
+                quadratic[segment * 3 + component] = 0.0f;
+                linear[segment * 3 + component] = 0.0f;
+            } else {
+                f32 startTangent = tangents[component * count + segment];
+                f32 endTangent = tangents[component * count + segment + 1];
+
+                cubic[segment * 3 + component] = 2.0f * (startValue - endValue) + (startTangent + endTangent);
+                quadratic[segment * 3 + component] = (endValue - startValue) * 3.0f - (2.0f * startTangent + endTangent);
+                linear[segment * 3 + component] = startTangent;
+            }
+        }
+    }
+}
+
+void *dds3_1B1238(void *rows, u32 count) {
+    void *channel = NULL;
+    sdfMemHandle_t *handle;
+    dds3SplineWalk_t *channelObject;
+
+    if (count < 4) {
+        return channel;
+    }
+    handle = sdfMemAllocDirect(0x18);
+    channel = (void *)sdfMemLock(handle);
+    channelObject = channel;
+    channelObject->handle = handle;
+    channelObject->step = 0.05f;
+    channelObject->count = count;
+    channelObject->points = rows;
+    channelObject->t = 0;
+    channelObject->index = 0;
+    return channel;
+}
 
 
 s32 dds3_1B12B0(dds3SplineWalk_t *pWalk)
@@ -228,9 +394,44 @@ s32 dds3_1B12B0(dds3SplineWalk_t *pWalk)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001B0858", dds3_1B12D0);
+s32 dds3_1B12D0(void *vertex, dds3SplineWalk_t *channel) {
+    s32 continuing = 1;
+    f32 position = channel->t;
+    u32 recordIndex = channel->index;
 
-INCLUDE_ASM(const s32, "code_001B0858", func_001B1370);
+    func_001B1370(vertex, channel, recordIndex, position);
+    position += channel->step;
+    if (position > 1.0f) {
+        position -= 1.0f;
+        recordIndex += 3;
+    }
+    if (recordIndex >= channel->count - 1) {
+        position = 0.0f;
+        recordIndex = 0;
+        continuing = 0;
+    }
+    channel->index = recordIndex;
+    channel->t = position;
+    return continuing;
+}
+
+void func_001B1370(sdfVector4_t *vertex, dds3SplineWalk_t *channel, s32 recordIndex, f32 t) {
+    f32 weights[4];
+    f32 oneMinusT = 1.0f - t;
+    f32 *p0 = channel->points + recordIndex * 3;
+    f32 *p1 = p0 + 3;
+    f32 *p2 = p0 + 6;
+    f32 *p3 = p0 + 9;
+
+    weights[0] = oneMinusT * oneMinusT * oneMinusT;
+    weights[1] = t * (oneMinusT * oneMinusT) * 3.0f;
+    weights[2] = t * t * oneMinusT * 3.0f;
+    weights[3] = t * t * t;
+    vertex->x = p0[0] * weights[0] + p1[0] * weights[1] + p2[0] * weights[2] + p3[0] * weights[3];
+    vertex->y = p0[1] * weights[0] + p1[1] * weights[1] + p2[1] * weights[2] + p3[1] * weights[3];
+    vertex->z = p0[2] * weights[0] + p1[2] * weights[1] + p2[2] * weights[2] + p3[2] * weights[3];
+    vertex->w = 1.0f;
+}
 
 
 void func_001B1478(dds3SplineWalk_t *pWalk)
@@ -295,32 +496,32 @@ void func_001B1770(u16 state)
 
 void nbCameraSetBougai(nbFormation_t *pTargetForm)
 {
-    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->id, 1 << pTargetForm->id);
+    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->formindex, 1 << pTargetForm->formindex);
     nbCameraSetState(13);
 }
 
 
 void nbCameraSetTaizi(nbFormation_t *pInvokeForm, nbFormation_t *pTargetForm)
 {
-    effBTLSkillSetFormationInfo(pInvokeForm->id, 1 << pTargetForm->id);
+    effBTLSkillSetFormationInfo(pInvokeForm->formindex, 1 << pTargetForm->formindex);
     nbCameraSetState(14);
 }
 
 void nbCameraSetTarget(nbFormation_t *pTargetForm)
 {
-    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->id, 1 << pTargetForm->id);
+    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->formindex, 1 << pTargetForm->formindex);
     nbCameraSetState(15);
 }
 
 void nbCameraSetHojo(nbFormation_t *pHojo, nbFormation_t *pTarget1, nbFormation_t *pTarget2)
 {
-    effBTLSkillSetFormationInfo(pHojo->id, (1 << pTarget1->id) | (1 << pTarget2->id));
+    effBTLSkillSetFormationInfo(pHojo->formindex, (1 << pTarget1->formindex) | (1 << pTarget2->formindex));
     nbCameraSetState(16);
 }
 
 void nbCameraEventSetTarget(nbFormation_t *pTargetForm)
 {
-    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->id, 1 << pTargetForm->id);
+    effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->formindex, 1 << pTargetForm->formindex);
     nbCameraSetState(24);
 }
 
@@ -382,7 +583,7 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Start_Init);
 
 void nbCameraState_Start_Calc(void)
 {
-    if ((nbGetMainProcessData()->unk60 & 0x10) != 0) {
+    if ((nbGetMainProcessData()->stat & 0x10) != 0) {
         nbCameraState_Start_BA_Animation(&pNbCamera);
         return;
     }
@@ -570,7 +771,7 @@ f32 nbCameraGetModelRadius(nbFormation_t *pFormation)
     f32 radius = nbCameraGetModelAllTable(pFormation)->radius;
 
     if (radius == 0.0f) {
-        return pFormation->unk50 * pFormation->unk5C;
+        return pFormation->r * pFormation->scl;
     }
     return radius;
 }
@@ -1012,7 +1213,7 @@ void nbCameraHelperDelete(nbCameraHelper_t *pHelper)
 
 u16 nbCameraHelperLength(nbCameraHelper_t *pHelper)
 {
-    return dds3EffectPartGetHandle(pHelper->hPart)->pData->length;
+    return dds3EffectPartGetHandle(pHelper->hPart)->first->frameLength;
 }
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperRun);
@@ -1020,7 +1221,7 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperRun);
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraHelperModelSetSub);
 
 
-void nbCameraHelperModelSet(dds3ModelHandle_t *hModel)
+void nbCameraHelperModelSet(mdlObj_t *hModel)
 {
     nbCameraHelperModelSetSub(hModel, 0, 1);
 }
