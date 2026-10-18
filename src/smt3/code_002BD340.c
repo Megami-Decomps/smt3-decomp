@@ -2176,13 +2176,7 @@ void FromRotation(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSin(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tmfc1 $2, %0\n"
-        "\tqmtc2.ni $2, vf2\n"
-        "\tvmulx.xyzw vf10, vf10, vf2x\n"
-        "\t.set reorder"
-        : : "f" (trigValue));
+    VU0_SCALEVECTOR_V0(trigValue);
     trigValue = sdfCos(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
@@ -2198,13 +2192,7 @@ void FromRotation_B(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSin(halfAngle);
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tmfc1 $2, %0\n"
-        "\tqmtc2.ni $2, vf2\n"
-        "\tvmulx.xyzw vf11, vf11, vf2x\n"
-        "\t.set reorder"
-        : : "f" (trigValue));
+    VU0_SCALEVECTOR_B_V0(trigValue);
     trigValue = sdfCos(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
