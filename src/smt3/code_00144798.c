@@ -350,6 +350,8 @@ void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *node);
 extern void fldSetAnimeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *object, u32 requestedMode);
 extern s32 fldArea[];
+extern void fldSetNpcFlag(s32 world, s32 stage, s32 room, s32 value);
+extern void fldGbSetGimic(s32 world, s32 stage, s32 index, s32 value);
 extern void fldSetAtariFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 extern s32 fldSetModelFlag2(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 extern s32 fldSetAnimeFlag2(s32 area, s32 slotIndex, s32 bit, s32 enabled);
@@ -401,6 +403,15 @@ extern void fldDoorRun_FindStart(s32 scene);
 extern void fldBgmContinue(void);
 extern void fldMotionSeStop(s32 group, s32 sound);
 extern void fldTitleStart(s32 field, s32 option);
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2,
+                      u32 gsWord3);
+extern void sdf3DSetCamera(void *node, void *transformMatrix);
+extern u8 dds3ScreenParam[];
+extern u8 aProjMatrix[];
+extern u8 D_002FA240[];
+extern void InversMatrix(void);
+extern void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z);
+extern f32 D_0054EEA0;
 extern void evtBitOn(s32 bit);
 extern void evtBitOff(s32 bit);
 
@@ -475,6 +486,26 @@ extern s32 fldGetBgmTrack(s32 code);
 extern void p2sdSetBgmTrack(s32 track);
 extern void dds3EffectReset(void *effect);
 extern void dds3EffectSetPosition(void *effect, const sdfVector4_t *position);
+extern void *fldBlurEffectHandle;
+extern void dds3EffectDistortionBlurDelete(void *handle);
+extern sdfTexHandle_t *fldEATexture;
+extern sdfTexHandle_t *fldVLTexture;
+extern sdfTexHandle_t *fldVLBlurHandle;
+extern sdfTexHandle_t *fldSnowBlurHandle;
+extern sdfMemHandle_t *fldBlurEffectTable[];
+extern void *fldBlurEffectId[];
+extern void *D_0054EED0;
+extern u16 D_00567EA0[];
+extern u16 D_00567EF8[];
+extern u16 D_00567F50[];
+extern char D_0030AB54[][28];
+extern char D_0030FBD4[][28];
+extern char D_0030D714[][28];
+extern char D_0030A670[][26];
+extern u16 D_00551CC8;
+extern s32 fldAutoMapFindArea(s32 fld, s32 area);
+extern s32 fldAutoMapFindFloor(s32 fld, s32 area);
+extern s32 fldAutoMapFindPlace(s32 fld, s32 area);
 extern void *D_0054EEDC;
 extern sdfTexHandle_t *D_0054EF98;
 extern sdfTexHandle_t *D_0054EF9C;
@@ -483,6 +514,38 @@ extern sdfTexHandle_t *D_0054EFA4;
 
 extern s32 gFldBgmBit;
 extern s16 gFldAreaBgm[];
+extern void *dds3EffectLoad(void *resource);
+extern void *D_00551D08;
+extern void *D_00551D10;
+extern void *D_00551D18;
+extern void *fldDmgBlurHandle;
+extern void *fldNpcBlurHandle;
+extern sdfTexHandle_t *sdfTexSet(void *resource);
+extern void *D_00551CD0;
+extern void *D_00551CD8;
+extern void *D_00551CE0;
+extern void *D_00551CE8;
+extern void *D_00551CF0;
+extern void *D_00551CF8;
+extern void *D_00568E90[];
+extern void *D_00568F90[];
+
+typedef struct
+{
+    s32 unk00;
+    s32 unk04;
+    f32 unk08;
+    u32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    f32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} fldBlurParam_t;
+
+extern void *dds3EffectDistortionBlurCreate(fldBlurParam_t *param);
 extern s32 evtBitCheck(s32 bit);
 extern void fldBgmPlay(void);
 extern void dds3EffectDelete(void *effect);
@@ -507,6 +570,7 @@ extern char D_00532AC8[];
 extern char D_00532980[];
 extern void resetCamTgtPlayer(void);
 extern void fldMakeFilePath(char *out, s32 field, s32 area);
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, s32 mode);
 extern char D_00532790[];
 extern char D_005327A0[];
 extern s32 sdfFileOpen(const char *path);
@@ -515,12 +579,24 @@ extern void sdfFileClose(s32 fd);
 
 extern s32 gSlSelCnt;
 extern s32 slSaveProc_CheckCard(void);
-extern u16 gFldSnowLife;
+extern s32 slChooseData(void);
+extern s32 slFormatStart(void);
+extern s32 slFormatCancel(void);
+extern s32 gFldSnowLife;
+extern s32 gFldSnowMode;
+extern f32 gFldSnowX;
+extern f32 gFldSnowY;
+extern f32 gFldSnowZ;
+extern f32 gFldSnowYD;
+extern f32 gFldSnowSpd;
+extern f32 gFldSnowW;
+extern void fldSnowSeedReset(void);
 extern s32 dds3GetRandA(s32 kind);
 
 extern s32 fldSeSmgId;
 extern s32 DNG_MAX[];
 extern s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit);
+extern s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *hit);
 extern void frEnableMode(s32 mode);
 extern void frDisableMode(s32 mode);
 extern void *frSetFontString(const char *text, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
@@ -542,7 +618,28 @@ typedef struct
     s32 unk0C;
 } fldTakaraEntry_t;
 
+extern sdfMemHandle_t *fldNpcModelCount;
+extern sdfMemHandle_t *D_0054EF1C;
+extern sdfMemHandle_t *D_0054EF20;
+extern sdfMemHandle_t *D_0054EF24;
+extern sdfTexHandle_t *D_0054EF38;
+extern void *fldItemBoxCount;
+extern void dds3EffectPartDelete(void *effect);
+extern void *D_00312150[];
+extern fldMapPoint_t fldAutoMapModelPos[32];
+extern sdfTexHandle_t *D_00551CC0[2];
+extern sdfTexHandle_t *fldAutoMapWindowTex[];
+extern void sdfModelRootFree(void *model, s32 a, s32 b);
+extern s32 sdfDelayedResrcCheck(void);
 extern fldTakaraEntry_t fldTakaraTable[];
+extern void fldLoadNextFile(s32 a, s32 b);
+extern void fldDoor_WarpCash(const char *name);
+extern u32 sdfTexGetPacket(sdfTexHandle_t *texture);
+extern s32 sdfTexGetPacketLength(sdfTexHandle_t *texture);
+extern void sdf3DMakeDirectRefPacket(void *packet, u32 sourceAddress, s32 payloadBytes);
+extern void sdfDrawTagLinkRef(void *tag, void *packet);
+extern void SetRotateMatrixZ(f32 angle);
+extern void sdfBillBoardMakeTMPacket(void *packet, const f32 *matrix);
 extern char D_00532A58[];
 
 void fldSe_Init(void) {
@@ -588,7 +685,54 @@ INCLUDE_ASM(const s32, "code_00144798", fldPlaySe3D);
 
 INCLUDE_RODATA(const s32, "code_00144798", D_00532110);
 
-INCLUDE_ASM(const s32, "code_00144798", fldGetBgmTrack);
+s32 fldGetBgmTrack(s32 code) {
+    s32 track;
+
+    switch (code) {
+    case 0x80:
+        track = gFldBgmTop[50].smgId + 1;
+        break;
+    case 0x81:
+        track = gFldBgmTop[51].smgId + 1;
+        break;
+    case 0x82:
+        track = gFldBgmTop[52].smgId + 1;
+        break;
+    case 0x83:
+        track = gFldBgmTop[51].smgId + 2;
+        break;
+    case 0x84:
+        track = gFldBgmTop[53].smgId + 1;
+        break;
+    case 0x85:
+        track = gFldBgmTop[53].smgId + 2;
+        break;
+    case 0x86:
+        track = gFldBgmTop[54].smgId + 1;
+        break;
+    case 0x87:
+        track = gFldBgmTop[56].smgId + 1;
+        break;
+    case 0x88:
+        track = gFldBgmTop[56].smgId + 2;
+        break;
+    case 0x89:
+        track = gFldBgmTop[56].smgId + 3;
+        break;
+    case 0x8A:
+        return 0x700001;
+    case 0x8B:
+        return 0x710001;
+    case 0x8C:
+        return 0x6E0000;
+    case 0x8D:
+        return 0x6E0001;
+    default:
+        track = -1;
+        break;
+    }
+    return track;
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldBgmPlay);
 
@@ -644,7 +788,47 @@ void fldBgmStop(void) {
     D_002FC020[0] = 0;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldSePlay);
+void fldSePlay(s32 soundId) {
+    s32 id;
+
+    if (fldGlobalBase.area >= 50) {
+        return;
+    }
+    if (soundId < 0x10) {
+        return;
+    }
+    if (soundId == 0x2D) {
+        if (fldGlobalBase.area < 10) {
+            return;
+        }
+    }
+    if (soundId == 0x80) {
+        p2sdPlaySE(0x660060, 0x7F, 0x3F);
+        return;
+    }
+    if (soundId == 0x81) {
+        p2sdPlaySE(0x660061, 0x7F, 0x3F);
+        return;
+    }
+    if (soundId == 0x82) {
+        p2sdPlaySE(0x660064, 0x7F, 0x3F);
+        return;
+    }
+    if (soundId == 0x83) {
+        p2sdPlaySE(0x6E0001, 0x7F, 0x3F);
+        return;
+    }
+    id = fldSeSmgId + soundId;
+    if (fldGlobalBase.area == 20) {
+        s32 floor = fldGlobalBase.floor;
+
+        if (floor == 5 || floor == 8 || floor == 13 || floor == 14 || floor == 15 ||
+            floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
+            id = DNG_MAX[0] + soundId;
+        }
+    }
+    p2sdPlaySE(id, 0x7F, 0x3F);
+}
 
 void fldSeStop(s32 soundId) {
     s32 id;
@@ -819,9 +1003,66 @@ void fldStartBgmLoad(s32 kind) {
 
 INCLUDE_ASM(const s32, "code_00144798", fld_145DC0);
 
-INCLUDE_ASM(const s32, "code_00144798", fldAutoMapFontInit);
+void fldAutoMapFontInit(s32 fld) {
+    s32 i;
 
+    for (i = 0; i < 0x29; i++) {
+        D_00567EA0[i] = strlen(D_0030AB54[fldAutoMapFindArea(fld, i)]);
+    }
+    for (i = 0; i < 0x29; i++) {
+        D_00567EF8[i] = strlen(D_0030FBD4[fldAutoMapFindFloor(fld, i)]);
+    }
+    for (i = 0; i < 0x18; i++) {
+        D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(fld, i)]);
+    }
+    i = 0;
+    if (fldGb[0] < 50) {
+        i = fldGb[0];
+    }
+    D_00551CC8 = strlen(D_0030A670[i]);
+}
+
+/* NON_MATCHING: 24 of 91 words, two alignment nops short; saved registers are swapped. */
+#ifdef NON_MATCHING
+void fldAmModelLoadFile(void) {
+    fldAreaWork_t *work = &fldGlobalBase;
+    char path[0x80];
+    char dir[0x40];
+    u8 *data;
+    const char *fmt;
+    s32 floor;
+    u32 *info;
+
+    fldMakeFilePath(dir, work->area, 1);
+    if (work->area == 0x19 && work->floor + 1 >= 0x11) {
+        sprintf(path, "%sf%03db.amb", dir, 0x19);
+    } else if (fldGlobalBase.area == 0x22) {
+        floor = fldGlobalBase.floor + 1;
+        if (floor < 4) {
+            fmt = "%sf%03d.amb";
+        } else if (floor < 0xB) {
+            fmt = "%sf%03db.amb";
+        } else if (floor < 0x13) {
+            fmt = "%sf%03dc.amb";
+        } else if (floor < 0x1A) {
+            fmt = "%sf%03dd.amb";
+        } else {
+            goto plain;
+        }
+        sprintf(path, fmt, dir, 0x22);
+    } else {
+    plain:
+        sprintf(path, "%sf%03d.amb", dir, fldGlobalBase.area);
+    }
+    fldAutoMapBuf = sdfDevLoadFileEx(path, &data, 0);
+    fldAddressResolver(data, data + 8);
+    info = (u32 *)fldGetInfoHeader(data + 8);
+    fldAutoMapData = info[2];
+    fldAutoMapHeader = (fldMapRoom_t *)info[1];
+}
+#else
 INCLUDE_ASM(const s32, "code_00144798", fldAmModelLoadFile);
+#endif
 
 void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *handle) {
     s32 field = fldGb[0];
@@ -964,11 +1205,67 @@ s32 fldAutoMapGetFloorMax(void) {
 
 INCLUDE_ASM(const s32, "code_00144798", fldAutoMapDrawOneArea);
 
-INCLUDE_ASM(const s32, "code_00144798", fldAutoMapDrawWindow);
+void fldAutoMapDrawWindow(void) {
+    SDF_VU0_LOADMATRIX(aProjMatrix);
+    InversMatrix();
+    sdf3DSetCamera(dds3ScreenParam, aProjMatrix);
+    rsetOtOfs(0x4A);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(0);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
+    DrwSprite2D(0x1A, 0x52, 0x1CC, 0x154, 0, 0, 0x100, 0x80, 0x80808080,
+                fldAutoMapWindowTex[0]);
+    D_0054EEA0 = D_0054EEA0 - 1.0f;
+    fldAutoMapDrawBgOfsRF(255.0f, 250.0f, D_0054EEA0);
+    sdf3DSetCamera(dds3ScreenParam, D_002FA240);
+    SDF_VU0_LOADMATRIX(D_002FA240);
+    rsetOtOfs(0x51);
+    rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldAutoMapSeqStart);
 
-INCLUDE_ASM(const s32, "code_00144798", fldAutoMapFree);
+void fldAutoMapFree(void) {
+    s32 i;
+
+    for (i = 0; i < fldAutoMapData; i++) {
+        if (D_00312150[i] != NULL) {
+            sdfModelRootFree(D_00312150[i], 1, 1);
+        }
+    }
+    for (i = 0; i < 32; i++) {
+        D_00312150[i] = NULL;
+        fldAutoMapModelPos[i].x = 0.0f;
+        fldAutoMapModelPos[i].y = 0.0f;
+        fldAutoMapModelPos[i].z = 0.0f;
+    }
+    if (D_00551CC0[0] != NULL) {
+        sdfTexFreeDelayed(D_00551CC0[0]);
+    }
+    if (D_00551CC0[1] != NULL) {
+        sdfTexFreeDelayed(D_00551CC0[1]);
+    }
+    if (fldAutoMapWindowTex[0] != NULL) {
+        sdfTexFreeDelayed(fldAutoMapWindowTex[0]);
+    }
+    if (fldAutoMapWindowTex[1] != NULL) {
+        sdfTexFreeDelayed(fldAutoMapWindowTex[1]);
+    }
+    if (fldAutoMapWindowTex[2] != NULL) {
+        sdfTexFreeDelayed(fldAutoMapWindowTex[2]);
+    }
+    D_00551CC0[0] = NULL;
+    D_00551CC0[1] = NULL;
+    fldAutoMapWindowTex[0] = NULL;
+    fldAutoMapWindowTex[1] = NULL;
+    fldAutoMapWindowTex[2] = NULL;
+    while (sdfDelayedResrcCheck()) {
+        sdfDrawSync();
+    }
+    AutoMapSeq = 0;
+    frSetFontDrawOT(0x48);
+}
 
 void fldAutoMapSeqEnd(void) {
     sdfDrawSync();
@@ -1172,9 +1469,106 @@ INCLUDE_ASM(const s32, "code_00144798", fldDrawAreaBlockFont);
 
 INCLUDE_ASM(const s32, "code_00144798", fldInitPacLoader);
 
-INCLUDE_ASM(const s32, "code_00144798", fldInitBlurEffect);
+void fldInitBlurEffect(void) {
+    fldBlurParam_t param;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_00144798", fldFreeBlurEffect);
+    if (fldGlobalBase.area >= 0xC8) {
+        return;
+    }
+    D_0054EEDC = dds3EffectLoad(D_00551D18);
+    if (fldGlobalBase.area >= 0xB) {
+        D_0054EED0 = dds3EffectLoad(D_00551D08);
+        fldDmgBlurHandle = NULL;
+        fldBlurEffectId[0] = dds3EffectLoad(D_00551D10);
+        fldNpcBlurHandle = NULL;
+    }
+    if (fldGlobalBase.area < 0xA) {
+        fldUiTexture = sdfTexSet(D_00551CD0);
+        fldVLTexture = sdfTexSet(D_00551CD8);
+        fldVLBlurHandle = sdfTexSet(D_00551CE0);
+    } else {
+        fldUiTexture = sdfTexSet(D_00551CE8);
+        fldVLTexture = NULL;
+        fldVLBlurHandle = NULL;
+    }
+    fldEATexture = sdfTexSet(D_00551CF0);
+    fldSnowBlurHandle = sdfTexSet(D_00551CF8);
+    /* The casts pin the store order; assigning the array elements directly
+     * swaps the first two stores. */
+    for (i = 0; i < 0x40; i++) {
+        *(void **)&fldBlurEffectTable[i] = NULL;
+        *(void **)&D_00568E90[i] = NULL;
+        *(void **)&D_00568F90[i] = NULL;
+    }
+    fldNpcModelFreeIdx = -1;
+    param.unk00 = 0x3C;
+    param.unk04 = 0xF;
+    param.unk08 = 0.22f;
+    param.unk0C = 0x1E848484;
+    param.unk10 = 0x44;
+    fldNpcFreeCount = NULL;
+    param.unk14 = 0;
+    param.unk18 = 0.13f;
+    param.unk1C = 0;
+    param.unk20 = -0x30;
+    param.unk24 = 0x60;
+    param.unk28 = 0x60;
+    fldBlurEffectHandle = dds3EffectDistortionBlurCreate(&param);
+}
+
+
+
+
+void fldFreeBlurEffect(void) {
+    s32 i;
+
+    dds3EffectDistortionBlurDelete(fldBlurEffectHandle);
+    if (fldUiTexture != NULL) {
+        sdfTexFreeDelayed(fldUiTexture);
+        fldUiTexture = NULL;
+    }
+    if (fldEATexture != NULL) {
+        sdfTexFreeDelayed(fldEATexture);
+        fldEATexture = NULL;
+    }
+    if (fldVLTexture != NULL) {
+        sdfTexFreeDelayed(fldVLTexture);
+        fldVLTexture = NULL;
+    }
+    if (fldVLBlurHandle != NULL) {
+        sdfTexFreeDelayed(fldVLBlurHandle);
+        fldVLBlurHandle = NULL;
+    }
+    if (fldSnowBlurHandle != NULL) {
+        sdfTexFreeDelayed(fldSnowBlurHandle);
+        fldSnowBlurHandle = NULL;
+    }
+    for (i = 0; i < 64; i++) {
+        if (fldBlurEffectTable[i] != NULL) {
+            sdfMemFreeDelayedDirect(fldBlurEffectTable[i]);
+            fldBlurEffectTable[i] = NULL;
+        }
+    }
+    for (i = 0; i < 32; i++) {
+        if (fldModelSlotTable[i].effect != NULL) {
+            dds3EffectDelete(fldModelSlotTable[i].effect);
+            fldModelSlotTable[i].effect = NULL;
+        }
+    }
+    if (D_0054EEDC != NULL) {
+        dds3EffectDelete(D_0054EEDC);
+        D_0054EEDC = NULL;
+    }
+    if (D_0054EED0 != NULL) {
+        dds3EffectDelete(D_0054EED0);
+        D_0054EED0 = NULL;
+    }
+    if (fldBlurEffectId[0] != NULL) {
+        dds3EffectDelete(fldBlurEffectId[0]);
+        fldBlurEffectId[0] = NULL;
+    }
+}
 
 void fldClearModelSlots(void) {
     s32 i;
@@ -1247,7 +1641,51 @@ void fldFindTakaraSlot(s32 id) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldFreeModelTable);
+void fldFreeModelTable(void) {
+    s32 i;
+
+    if (fldNpcModelCount != NULL) {
+        mdlUnRegist(2, 0x1F);
+        sdfMemFreeDelayedDirect(fldNpcModelCount);
+        fldNpcModelCount = NULL;
+    }
+    if (D_0054EF1C != NULL) {
+        mdlUnRegist(2, 0x15);
+        sdfMemFreeDelayedDirect(D_0054EF1C);
+        D_0054EF1C = NULL;
+    }
+    if (D_0054EF20 != NULL) {
+        mdlUnRegist(2, 0x16);
+        sdfMemFreeDelayedDirect(D_0054EF20);
+        D_0054EF20 = NULL;
+    }
+    if (D_0054EF24 != NULL) {
+        mdlUnRegist(2, 0x17);
+        sdfMemFreeDelayedDirect(D_0054EF24);
+        D_0054EF24 = NULL;
+    }
+    for (i = 0; i < 32; i++) {
+        if (fldTakaraSlotTable[i].effect != NULL) {
+            dds3EffectDelete(fldTakaraSlotTable[i].effect);
+            fldTakaraSlotTable[i].effect = NULL;
+        }
+    }
+    if (fldItemBoxCount != NULL) {
+        dds3EffectPartDelete(fldItemBoxCount);
+        fldItemBoxCount = NULL;
+    }
+    if (D_0054EF38 != NULL) {
+        sdfTexFreeDelayed(D_0054EF38);
+        D_0054EF38 = NULL;
+    }
+    fldTakaraCount = 0;
+    for (i = 0; i < 32; i++) {
+        fldTakaraSlotTable[i].id = -1;
+        fldTakaraSlotTable[i].unk00 = 0;
+        fldTakaraSlotTable[i].activationState = 0;
+        fldTakaraSlotTable[i].activationRequested = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00144798", fldItemBoxCalcTask);
 
@@ -1269,9 +1707,37 @@ INCLUDE_ASM(const s32, "code_00144798", fldSibukiStart);
 
 INCLUDE_ASM(const s32, "code_00144798", fldDrawEATexQuad);
 
-INCLUDE_ASM(const s32, "code_00144798", fldDrawAddressPanel);
+void fldDrawAddressPanel(s32 width, s32 x, s32 y) {
+    s32 ofs;
+    s32 left;
+    s32 right;
+    s32 top;
 
-INCLUDE_ASM(const s32, "code_00144798", fldDrawInputPanel);
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    ofs = 0x1BF - width;
+    left = x + ofs;
+    right = 0x210 - ofs;
+    top = y + 0x12;
+    DrwSprite2D(left, top, 0x5B, 0x1F, 1, 1, 0x5B, 0x1F, 0x80808080, fldUiTexture);
+    DrwSprite2D(left + 0x5B, top, right, 0x1F, 0x5B, 1, 1, 0x1F, 0x80808080, fldUiTexture);
+    rsetAlpha(0);
+}
+
+void fldDrawInputPanel(void) {
+    if (fldGb[0] >= 0xC8) {
+        return;
+    }
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    DrwSprite2D(0x87, 0x124, 0x79, 0x18, 1, 0x5D, 0x79, 0x18, 0x80808080, fldUiTexture);
+    DrwSprite2D(0x87, 0x13C, 0x79, 0x18, 1, 0x74, 0x79, -0x18, 0x80808080, fldUiTexture);
+    DrwSprite2D(0x100, 0x124, 0x79, 0x18, 0x79, 0x5D, -0x79, 0x18, 0x80808080, fldUiTexture);
+    DrwSprite2D(0x100, 0x13C, 0x79, 0x18, 0x79, 0x74, -0x79, -0x18, 0x80808080, fldUiTexture);
+    rsetAlpha(0);
+}
 
 void fldDrawInputCursor(s32 x, s32 y) {
     if (fldGb[0] < 200) {
@@ -1411,7 +1877,84 @@ void fldSetSnowActive(void) {
     }
 }
 
+/* NON_MATCHING: 28 of 110 words, two words over; blocks are ordered differently. */
+#ifdef NON_MATCHING
+void fldSnowInit(void) {
+    s32 floor;
+
+    if (gFldSeedBuff != NULL) {
+        return;
+    }
+    if (evtBitCheck(0x16) == 0) {
+        return;
+    }
+    if (evtBitCheck(0x3E) != 0) {
+        return;
+    }
+    if (fldGlobalBase.area == 0x1F) {
+        floor = fldGlobalBase.floor;
+        if (floor == 0xE) {
+            return;
+        }
+        gFldSnowZ = -640.0f;
+        gFldSnowY = -6900.0f;
+        gFldSnowSpd = 4.0f;
+        gFldSnowLife = 0x5DC;
+        gFldSnowW = 5.0f;
+        gFldSnowMode = 0;
+        gFldSnowX = -640.0f;
+        if (floor == 0) {
+            gFldSnowYD = 10.0f;
+        } else {
+            gFldSnowYD = 10000.0f;
+        }
+    } else if (fldGlobalBase.area == 0x18) {
+        f32 width = 25.0f;
+        f32 y;
+        s32 life;
+
+        floor = fldGlobalBase.floor;
+        if (floor == 0x11) {
+            return;
+        }
+        if (floor == 0x18) {
+            return;
+        }
+        gFldSnowYD = 10000.0f;
+        gFldSnowMode = 1;
+        gFldSnowSpd = -3.0f;
+        if (floor == 5) {
+            y = 800.0f;
+            life = 0x1C2;
+        } else {
+            y = 100.0f;
+            life = 0xF0;
+        }
+        gFldSnowY = y;
+        if (floor == 9) {
+            gFldSnowLife = 0x12C;
+            width = 23.0f;
+        } else {
+            gFldSnowLife = life;
+        }
+        if (floor == 0x15) {
+            gFldSnowW = 15.0f;
+        } else {
+            gFldSnowW = width;
+        }
+        gFldSnowZ = -(gFldSnowW * 256.0f * 0.5f);
+        gFldSnowX = gFldSnowZ;
+    } else {
+        return;
+    }
+    fldSnowSeedBuf = sdfMemAllocDirect(0x36B0);
+    gFldSeedBuff = sdfMemLock(fldSnowSeedBuf);
+    fldSnowSeedInit();
+    fldSnowSeedReset();
+}
+#else
 INCLUDE_ASM(const s32, "code_00144798", fldSnowInit);
+#endif
 
 void fldFreeSnowSeed(void) {
     if (gFldSeedBuff != NULL) {
@@ -1422,7 +1965,25 @@ void fldFreeSnowSeed(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldSnowSpriteTex);
+void fldSnowSpriteTex(sdfTexHandle_t *texture) {
+    void *tag = sdfGrAllocPacketBuff(0x20);
+    void *header;
+    void *packet;
+    f32 mat[16];
+    sdfGrOt_t *ot;
+
+    sdfDrawTagInit(tag);
+    header = sdfGrAllocPacketBuff(0x20);
+    sdf3DMakeDirectRefPacket(header, sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
+    sdfDrawTagLinkRef(tag, header);
+    SetRotateMatrixZ(0.0f);
+    SDF_VU0_STOREMATRIX(mat);
+    packet = sdfGrAllocPacketBuff(0x38);
+    sdfBillBoardMakeTMPacket(packet, mat);
+    sdfDrawTagLink(tag, packet);
+    ot = &sdfGrOtTable[44];
+    ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
+}
 
 void fldSnowSprite3D(const sdfVector4_t *work) {
     void *tag = sdfGrAllocPacketBuff(0x20);
@@ -1516,7 +2077,29 @@ u8 slGetPadRep(s32 loaded) {
     return loaded != 0 && slProcShutDownFlg == 1;
 }
 
+/* NON_MATCHING: 14 of 16 words, exact size; the trailing store and src++ are swapped. */
+#ifdef NON_MATCHING
+void slCopyNonZero(u8 *dst, u8 *src, s32 count) {
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        if (*(s8 *)src == 0) {
+            src++;
+        } else {
+            *dst = *src;
+            dst++;
+            src++;
+        }
+        *dst = *src;
+        dst++;
+        src++;
+    }
+    *dst = 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_00144798", slCopyNonZero);
+#endif
+
 
 void slKanjiDraw(s32 x, s32 y, u32 rgba, const char *text) {
     slKanjiDraw_handle = frwGetSmallFontFRQ(x << 4, y << 4, 0, rgba, text, 0);
@@ -1812,7 +2395,53 @@ s32 slBootProc1st(void) {
     return slBootTop();
 }
 
-INCLUDE_ASM(const s32, "code_00144798", slSaveProc_CheckCard);
+s32 slSaveProc_CheckCard(void) {
+    if (sdfMcFuncGetInfo1() == 0) {
+        return 0;
+    }
+    if (gslCheckCardWait > 0) {
+        gslCheckCardWait--;
+        sdfMcRegetInfo(D_005516BC);
+        return 0;
+    }
+    switch (sdfMcGetFileInfoReady(D_005516BC)) {
+    case 0:
+        return slNoCard();
+    case 2:
+        if (gslMode == 0) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+            slSetInfo(0);
+            gslErrorCode = 0;
+            slQueryYesNoMsg = 2;
+            return slQueryYesNo(&slFormatStart, &slFormatCancel, 1);
+        }
+        slSetInfo(0);
+        gslErrorCode = 7;
+        gslErrorKeyFlag = 0;
+        sdfMcRegetInfo(D_005516BC);
+        return (s32)slErrorWaitMc;
+    case 3:
+        sdfMcSetCardStat(D_005516BC);
+        sdfMcClearSlotFlags(D_005516BC, 0);
+        sdfMcClearSlotFlags(D_005516BC, 1);
+        sdfMcClearSlotFlags(D_005516BC, 2);
+        sdfMcClearSlotFlags(D_005516BC, 3);
+        sdfMcClearSlotFlags(D_005516BC, 4);
+        slSetInfo(0);
+        gslErrorCode = 2;
+        gslErrorKeyFlag = 0;
+        sdfMcRegetInfo(D_005516BC);
+        return (s32)slErrorWaitMc;
+    case 1:
+        return slChooseData();
+    }
+    return 0;
+}
 
 s32 sl1Ken(void) {
     s32 i = 0;
@@ -2487,9 +3116,71 @@ void slSetTmnlID(s16 x, s16 y) {
     state->previewY = y;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_ACT_WIN_DSP);
+s32 fldCommand_ACT_WIN_DSP(void) {
+    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *unit = dds3GetActiveUnitSceneBasic(scene);
+    dds3Basic_t *hit;
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_ACT_WIN_DSP2);
+    if (unit == NULL) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    hit = dds3SearchSceneBasic(
+        scene, fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID), 0x11);
+    if (hit == NULL) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    if (fldGb[0] >= 0xB && fldEveHit_ChkDir(unit, hit) == 0) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    fldInputPanelSetMessage(scrGetIntPara(0));
+    fldInputPanelSetDraw(1);
+    switch (fldInputPanelCheckKey()) {
+    case 1:
+        scrSetIntReturnValue(1);
+        return 1;
+    case -1:
+        scrSetIntReturnValue(-1);
+        return 1;
+    }
+    scrSetIntReturnValue(0);
+    return 1;
+}
+
+s32 fldCommand_ACT_WIN_DSP2(void) {
+    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *unit = dds3GetActiveUnitSceneBasic(scene);
+    dds3Basic_t *hit;
+
+    if (unit == NULL) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    hit = dds3SearchSceneBasic(
+        scene, fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID), 0x11);
+    if (hit == NULL) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    if (fldGb[0] >= 0xB && fldEveHit_ChkDir2(unit, hit) == 0) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    fldInputPanelSetMessage(scrGetIntPara(0));
+    fldInputPanelSetDraw(1);
+    switch (fldInputPanelCheckKey()) {
+    case 1:
+        scrSetIntReturnValue(1);
+        return 1;
+    case -1:
+        scrSetIntReturnValue(-1);
+        return 1;
+    }
+    scrSetIntReturnValue(0);
+    return 1;
+}
 
 s32 fldCommand_ACT_WIN_DSP3(void) {
     s32 result;
@@ -2509,7 +3200,39 @@ s32 fldCommand_ACT_WIN_DSP3(void) {
     return 1;
 }
 
+/* NON_MATCHING: 32 of 42 words, exact size; the first exit block is placed last. */
+#ifdef NON_MATCHING
+s32 fldCommand_DIR_HIT_CNTR(void) {
+    dds3Basic_t *scene;
+    dds3Basic_t *unit;
+    dds3Basic_t *hit;
+
+    if (fldGb[0] < 0xA) {
+        scrSetIntReturnValue(1);
+        return 1;
+    }
+    scene = dds3GetActiveScene();
+    unit = dds3GetActiveUnitSceneBasic(scene);
+    if (unit == NULL) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    hit = dds3SearchSceneBasic(
+        scene, fldEveHitResID_Find((u32)scrGetScriptHandle()->ProcessID), 0x11);
+    if (hit == NULL) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    if (fldEveHit_ChkDir(unit, hit) == 0) {
+        scrSetIntReturnValue(0);
+        return 1;
+    }
+    scrSetIntReturnValue(1);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_DIR_HIT_CNTR);
+#endif
 
 s32 fldCommand_PAD_DISABLE(void) {
     dds3Basic_t *object;
@@ -2625,7 +3348,20 @@ INCLUDE_ASM(const s32, "code_00144798", fldCommand_SET_ALLPANEL);
 void fldPanelSet(void) {
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_SET_CASH_F);
+s32 fldCommand_SET_CASH_F(void) {
+    fldAreaWork_t *work = &fldGlobalBase;
+    s32 area;
+
+    if (work->area < 10) {
+        return 1;
+    }
+    area = scrGetIntPara(0);
+    if (area == 0) {
+        area = work->area;
+    }
+    fldLoadNextFile(area, scrGetIntPara(1));
+    return 1;
+}
 
 s32 fldCommand_FREE_CASH_F(void) {
     if (fldGb[0] < 10) {
@@ -2973,11 +3709,103 @@ s32 fldCommand_FLD_MAP_OFF(void) {
     return 1;
 }
 
+/* NON_MATCHING: 74 of 75 words, exact size; retail ends on a bnel, this a bne. */
+#ifdef NON_MATCHING
+s32 fldCommand_FLD_NPC_ON(void) {
+    s32 world;
+    s32 stage;
+    char *name;
+    s32 room;
+
+    printf("CMD NPC_ON(%d,%d,%s)\n", scrGetIntPara(0), scrGetIntPara(1), scrGetStrPara(2));
+    world = scrGetIntPara(0);
+    if (world == 0) {
+        world = fldGlobalBase.area;
+    }
+    stage = scrGetIntPara(1);
+    if (stage == 0) {
+        stage = fldGlobalBase.floor + 1;
+    }
+    name = scrGetStrPara(2);
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            fldSetNpcFlag(world, stage, room, 0);
+        }
+    } else {
+        room = fldCommand_GetHojiID(name);
+        fldSetNpcFlag(world, stage, room, 0);
+    }
+    if (world == fldGlobalBase.area) {
+        if (stage == fldGlobalBase.floor + 1) {
+            fldNpcHojiRefresh();
+        }
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_NPC_ON);
+#endif
 
+/* NON_MATCHING: 74 of 75 words, exact size; retail ends on a bnel, this a bne. */
+#ifdef NON_MATCHING
+s32 fldCommand_FLD_NPC_OFF(void) {
+    s32 world;
+    s32 stage;
+    char *name;
+    s32 room;
+
+    printf("CMD NPC_OFF(%d,%d,%s)\n", scrGetIntPara(0), scrGetIntPara(1), scrGetStrPara(2));
+    world = scrGetIntPara(0);
+    if (world == 0) {
+        world = fldGlobalBase.area;
+    }
+    stage = scrGetIntPara(1);
+    if (stage == 0) {
+        stage = fldGlobalBase.floor + 1;
+    }
+    name = scrGetStrPara(2);
+    if (name == NULL) {
+        for (room = 0; room < 16; room++) {
+            fldSetNpcFlag(world, stage, room, 1);
+        }
+    } else {
+        room = fldCommand_GetHojiID(name);
+        fldSetNpcFlag(world, stage, room, 1);
+    }
+    if (world == fldGlobalBase.area && stage == fldGlobalBase.floor + 1) {
+        fldNpcHojiRefresh();
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_NPC_OFF);
+#endif
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_GIMIC_HOJI);
+s32 fldCommand_FLD_GIMIC_HOJI(void) {
+    s32 world;
+    s32 stage;
+    s32 index;
+
+    printf("CALL GIMIC_HOJI %d %d %d %d\n", scrGetIntPara(0), scrGetIntPara(1),
+           scrGetIntPara(2), scrGetIntPara(3));
+    world = scrGetIntPara(0);
+    if (world == 0) {
+        world = fldGb[0];
+    }
+    stage = scrGetIntPara(1);
+    if (stage == 0) {
+        stage = fldArea[0] + 1;
+    }
+    index = scrGetIntPara(2);
+    if (index == 0) {
+        for (index = 0; index < 16; index++) {
+            fldGbSetGimic(world, stage, index, scrGetIntPara(3));
+        }
+    } else {
+        fldGbSetGimic(world, stage, index, scrGetIntPara(3));
+    }
+    return 1;
+}
 
 s32 fldCommand_FLD_CHK_BTL(void) {
     if (fldGetRestoreMode() == 1) {
@@ -3082,7 +3910,30 @@ s32 fldCommand_FLD_CALL_WAPEX(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_WARP_CASH_F);
+s32 fldCommand_FLD_WARP_CASH_F(void) {
+    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *unit = dds3GetActiveUnitSceneBasic(scene);
+    scrProcessWork_s *command;
+    s32 id;
+    const char *name;
+    dds3Basic_t *hit;
+
+    if (unit == NULL) {
+        return 1;
+    }
+    command = scrGetScriptHandle();
+    id = fldEveHitResID_Find((u32)command->ProcessID);
+    name = fldEveHitResName_Find((u32)command->ProcessID);
+    hit = dds3SearchSceneBasic(scene, id, 0x11);
+    if (hit == NULL) {
+        return 1;
+    }
+    if (fldEveHit_ChkDir(unit, hit) == 0 || name == NULL) {
+        return 1;
+    }
+    fldDoor_WarpCash(name);
+    return 1;
+}
 
 u32 fldCommand_FLD_WARP_HASIGO_GETTBL(void) {
     s32 motionEntry;
@@ -3188,7 +4039,14 @@ INCLUDE_RODATA(const s32, "code_00144798", D_00532A88);
 
 INCLUDE_RODATA(const s32, "code_00144798", D_00532AA0);
 
-INCLUDE_ASM(const s32, "code_00144798", fldCommand_FLD_BGM_PLAY);
+s32 fldCommand_FLD_BGM_PLAY(void) {
+    s32 track = scrGetIntPara(0);
+
+    D_002FC020[0] = track;
+    printf("FLD_BGM_PLAY:%d\n", track);
+    fldBgmPlay();
+    return 1;
+}
 
 s32 fldCommand_FLD_BGM_CONTINUE(void) {
     D_002FC020[0] = scrGetIntPara(0);

@@ -99,7 +99,7 @@ extern void sdfMemFreeDirect(void *handle);
 void FatalError(const char *format, ...) __attribute__((noreturn));
 s32 CreateThreadSimple(void *entryAddress, void *workspace, s32 stackBytes, s32 priority);
 void *sdfAllocAuto(s32 bytes);
-void sdfFreeAuto(void *allocation);
+s32 sdfFreeAuto(void *allocation);
 void sdfAlarmWakeup(s32 unused0, s32 unused1, s32 threadId);
 void sdfWaitVblank(s32 count);
 void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void), void *stack,
@@ -120,24 +120,28 @@ typedef struct tagpipeBasic {
     mdlObj_t *mdl;
     u8 unk08[4];
     s32 unk0C;
-    f32 pos[3];
-    u8 unk1C[4];
-    f32 rot[3];
-    u8 unk2C[4];
-    f32 scl[3];
+    f32 pos[4];
+    f32 rot[4];
+    f32 scl[4];
 } tagpipeBasic;
 
 typedef struct tagPipeLinkData {
-    u8 unk00[4];
+    u16 id;
+    u8 unk02[2];
     struct tagPipeLinkData *next;
     struct tagPipeLinkData *prev;
+    u8 unk0C[4];
 } tagPipeLinkData;
 
 typedef struct tagPipeObject {
-    u8 unk00[0x18];
-    s8 unk18;
+    s32 offset;
+    f32 w;
+    f32 pos[2];
+    f32 vpos[2];
+    s8 id;
     u8 action;
-    u8 unk1A[2];
+    u8 mdl;
+    u8 unk1B;
     s16 count;
     u16 flags;
 } tagPipeObject;
@@ -159,6 +163,194 @@ typedef struct sdfSemaParam_t {
     u32 attr;
     u32 option;
 } sdfSemaParam_t;
+
+typedef struct tagPipeEnemyInfo {
+    u8 chID;
+    f32 w;
+    u8 resv;
+    u16 resv2;
+} tagPipeEnemyInfo;
+
+typedef struct tagPipePartsInfo {
+    u16 partsID;
+    u8 inWay;
+    u8 goWay;
+    s32 type;
+} tagPipePartsInfo;
+
+typedef struct tagMakaObject_t {
+    s32 maka;
+    s8 count;
+    s8 resv[3];
+    s32 pos[2];
+    void *makaObject;
+} tagMakaObject_t;
+
+typedef struct tagPipeLinkInfo {
+    sdfMemHandle_t *aHandle;
+    s32 curNum;
+    s32 maxNum;
+    s32 nextId;
+} tagPipeLinkInfo;
+
+typedef struct tagpipeParts {
+    s32 offset;
+    u8 id;
+    u8 unk05;
+    u8 mdl;
+    s8 resv[5];
+} tagpipeParts;
+
+extern tagpipeParts *PartsWork;
+extern u16 myStatus;
+extern s32 datGetPlayerParam(s32 index);
+extern void eglLinkSprite(s32 x, s32 y, s32 width, s32 height, s32 u, s32 v,
+                          s32 textureWidth, s32 textureHeight, u32 color0, u32 color1,
+                          u32 color2, u32 color3, sdfTexHandle_t *texture);
+extern s32 dds3EffectGetState(void *effect);
+extern void dds3EffectSetPosition(void *effect, f32 *position);
+extern void dds3EffectDraw(void *effect);
+typedef struct pipeBlurParam_t {
+    u32 color;
+    s32 unk04;
+    s32 unk08;
+    f32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 width;
+    s32 height;
+    s32 unk28;
+    s32 unk2C;
+} pipeBlurParam_t;
+
+extern char D_00548DA0[], D_00548DC0[], D_00548DE0[];
+extern char D_00548E18[], D_00548E30[], D_00548E48[], D_00548E60[];
+extern u8 camMode, CameraAction, offsetStep, offsetStepCount;
+extern s32 D_00551738, D_0055173C, D_00551744, D_00551748;
+extern void *pipeObjList, *pipeObjTail;
+extern void makaInit(void);
+extern void partsInit(void);
+extern void Initmymdl(void);
+extern u8 attackCount;
+extern void objInitMyAdd(void);
+extern s32 p2sdPlayBGM(u32 midino);
+extern void dds3FadeIn(s32 kind, s32 r, s32 g, s32 frames);
+extern s32 texLoad(const char *name, tagPipeTexture *texPtr);
+extern void vecRotate2D(f32 *vector, f32 angle);
+extern void dds3EffectBlur(pipeBlurParam_t *param);
+typedef struct PIPE_EFF_t {
+    sdfMemHandle_t *mhFile;
+    void *ptr;
+    s32 size;
+    void *d3p;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 pos2[2];
+    s32 offset;
+    s32 count;
+} PIPE_EFF_t;
+
+extern char D_00548F48[];
+extern s32 SectionIndex, mapIndex, mapPrev;
+extern u8 debugMode, pipeInitDone;
+extern s32 MainPipe(void *process);
+extern s32 pipeInitSection(void);
+extern s32 pipeCheckLevel(s32 level, s32 type);
+extern s32 dds3GetGlobalConfigFlag(s32 index);
+extern void *dds3EffectLoad(void *data);
+extern void pipeFreeLink(tagPipeLinkInfo *pInfo);
+extern void dds3EffectDelete(void *effect);
+extern void dds3PadVibrationSet(s32 port, s32 strength, s32 frames);
+extern s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize);
+typedef struct tagPipePosTable {
+    sdfMemHandle_t *aHandle;
+    s32 tSize;
+    u8 unk08[8];
+} tagPipePosTable_t;
+
+typedef struct tagPipeTable {
+    s32 tabMax;
+    sdfMemHandle_t *aHandle;
+    void *tabPtr;
+    void *data;
+} tagPipeTable_t;
+
+typedef struct fclRagTex_t {
+    u8 unk00[0x20];
+    void (*calcSizes)();
+} fclRagTex_t;
+
+extern tagPipeLinkInfo linkHeader00;
+extern tagPipePosTable_t D_00528F58;
+extern tagPipeTable_t D_00528F68;
+extern s32 offsetCount;
+extern void EmSound(tagPipeObject *objPtr);
+extern void MySound(tagPipeObject *objPtr);
+extern tagPipeEnemyInfo *objInfo(s32 id);
+extern void objMdlMotion(tagPipeObject *objPtr, s32 motion, f32 speed);
+extern s32 dds3AdminiCallSequence(s32 kind, s32 *arg, s32 a, s32 b);
+extern void dds3FreeConfigTexture(void *texture);
+extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
+                          void (*calc)());
+extern void fclRagTexCalcSizes();
+extern void fclSetSprite(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
+extern void fclDrawBG(void *sprite, s32 flags);
+extern char *pStr[];
+extern s32 D_00529240[][10];
+extern s8 pipeMessMax;
+extern char D_00548930[];
+extern u32 dds3BackColor;
+extern tagpipeBasic *basicMy;
+extern tagpipeBasic *PipeLine, *PipeCur, *PipeCur2, *PipeRBOX, *PipeEMS, *PipeEML;
+extern tagpipeBasic *PipeMaka1, *PipeZMaka, *PipeDMaka, *PipeDRBOX;
+extern PIPE_EFF_t *pipe_CELL01_D3P, *pipe_BREAK01_D3P, *pipe_BREAK02_D3P;
+extern PIPE_EFF_t *pipe_DAMAGE01_D3P, *pipe_DAMAGE03_D3P, *pipe_ATTACK01_D3P;
+extern void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize);
+extern void pipeEffDraw2Doffset(PIPE_EFF_t *effect, u8 maxSize);
+extern void pipeFreeEffects(PIPE_EFF_t *effect, u8 maxSize);
+extern void mymdlDelObject(tagpipeBasic *pWork);
+extern void mymdlVisible(tagpipeBasic *pWork, s8 value);
+extern void mymdlVisibleAll(tagpipeBasic *pWork, s16 mdlSize, s8 value);
+extern void mymdlInitObject(tagpipeBasic *pWork, u16 mdlSize);
+extern u8 objMake(tagPipeObject *objPtr, s32 offset, u8 id, u8 way, u8 action, u8 value);
+extern void dds3DeleteScene(dds3Basic_t *scene);
+extern void dds3DeleteUnitObjectBasic(void *basic);
+extern void workRelease(void);
+extern void pipeEndSection(void);
+extern void pipeDataRelease(void);
+extern void pipeEffRelease(void);
+extern s32 PipeTexRelease(void);
+extern void mdlSmoothLoopMotion(void *handle, s32 group, s32 number, f32 beforeLeng, f32 smoothLeng);
+extern s32 dds3ConfigBackup;
+extern char D_00548870[];
+extern char D_00548900[];
+extern void DEBUG_PRINT(const char *fmt, ...);
+extern u32 mdlGetColor(void *handle);
+extern s32 sdfChipCheck(void *ptr);
+extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfMemFreePtrDirect(void *ptr);
+extern void *sdfMemGetHandleByPtr(void *ptr);
+extern void eglSetOt(s32 ot);
+extern void eglLinkAlpha(s32 mode);
+extern void eglLinkTest(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
+extern void ObjectDraw(void);
+extern void pipeBulrLimit(void);
+extern tagPipeEnemyInfo D_00528F78[];
+extern tagPipePartsInfo D_00529030[];
+extern tagPipeObject *ObjWork;
+extern tagPipeTexture *MakaTex;
+extern s32 ZmakaCount;
+extern char D_00548838[];
+extern char D_00548848[];
+extern s32 dds3DrawConfigPanel(s32 id);
+extern void makaDrawNormal(void);
+extern void makaDrawSingle(void);
+extern void makaDrawMulti(void);
+extern s32 pipeInitLink(tagPipeLinkInfo *pInfo);
 
 extern char D_00548858[];
 extern char D_005488B8[];
@@ -200,7 +392,7 @@ extern void sdfTexFree(void *handle);
 extern void mdlSetColor(void *handle, u32 color);
 extern void dds3ObjectBaseOnFlag(void *basic, u32 flag);
 extern void *dds3SearchProcessName(const char *name);
-extern s32 dds3GetConfigFlag(s32 index, s32 *table);
+extern s32 dds3GetConfigFlag(u32 index, s32 *table);
 extern f32 vecDot(f32 *a, f32 *b);
 extern f32 __ieee754_acosf(f32 x);
 extern sdfThCB_t *func_002A87F0(s32 threadId);
@@ -260,7 +452,15 @@ s32 dds3_29B7B0(void)
 void func_0029B7B8(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3ConfigChanged);
+s32 dds3ConfigChanged(void)
+{
+    if (dds3ConfigValue[0] != dds3ConfigValue[1]) {
+        printf(D_00548838);
+        return 1;
+    }
+    printf(D_00548848);
+    return 0;
+}
 
 void dds3ConfigSaveBackup(void)
 {
@@ -268,9 +468,22 @@ void dds3ConfigSaveBackup(void)
     dds3ConfigValue[0] = dds3ConfigValue[1] = *(s32 *)(DDS3_GBWK + 0x11AB8);
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3ConfigRestoreBackup);
+void dds3ConfigRestoreBackup(void)
+{
+    printf(D_00548870);
+    *(s32 *)(DDS3_GBWK + 0x11AB8) = dds3ConfigBackup;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3InitConfigItems);
+void dds3InitConfigItems(u8 *gbwk)
+{
+    fclRagTex_t *tex = (fclRagTex_t *)(gbwk + 0x1058);
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        fclRagTexInit(tex, 0, 0, 0x96, 0, 0x200, 0x20, fclRagTexCalcSizes);
+        tex++;
+    }
+}
 
 s32 dds3UpdateConfigCursor(void)
 {
@@ -304,9 +517,43 @@ void dds3ScrollConfigList(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3ToggleConfigFlag);
+s32 dds3ToggleConfigFlag(u32 index, s32 *table)
+{
+    switch (index) {
+    case 0:
+        *table ^= 2;
+        if (dds3GetGlobalConfigFlag(index)) {
+            dds3PadVibrationSet(0, 1, 0xF);
+            dds3PadVibrationSet(1, 0x80, 0xF);
+        } else {
+            dds3PadVibrationSet(0, 0, 0xF);
+            dds3PadVibrationSet(1, 0, 0xF);
+        }
+        return 1;
+    case 1:
+        *table ^= 4;
+        return 1;
+    case 2:
+        *table ^= 8;
+        return 1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3GetConfigFlag);
+s32 dds3GetConfigFlag(u32 index, s32 *table)
+{
+    switch (index) {
+    case 0:
+        return ((*table >> 1) ^ 1) & 1;
+    case 1:
+        return *table & 4;
+    case 2:
+        return *table & 8;
+    case 5:
+        return 1;
+    }
+    return -1;
+}
 
 s32 dds3GetGlobalConfigFlag(s32 index)
 {
@@ -327,7 +574,19 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigValue);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigText);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBackground);
+s32 dds3DrawConfigBackground(s32 flags)
+{
+    u8 sprite[0x30];
+    s32 ret = 1;
+
+    if (GBWK[0x19] == 0) {
+        GBWK[0x19] = ret;
+        return ret;
+    }
+    fclSetSprite((s32)sprite, 0x200, 0x1C0, 0, 0, 0, 0xFF, 0x7F, 0x80808080,
+                 *(s32 *)(GBWK + 0x10A4));
+    fclDrawBG(sprite, flags);
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigPanel);
 
@@ -345,7 +604,21 @@ void dds3FreeConfigTexture(void *handle)
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3AllocConfigWork);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DestroyConfig);
+void dds3DestroyConfig(void *process)
+{
+    s32 seq = 1;
+
+    if (GBWK != NULL) {
+        dds3ConfigBackup = *(s32 *)(DDS3_GBWK + 0x11AB8);
+        if (GBWK[0x18] == 1) {
+            dds3AdminiCallSequence(2, &seq, 4, 0);
+        }
+        dds3FreeConfigTexture(*(void **)(GBWK + 0x10A4));
+        sdfMemFreeDirect(*(void **)(GBWK + 0x14));
+        GBWK = NULL;
+        dds3ConfigState = 0;
+    }
+}
 
 void dds3ConfigProcessStart(s32 mode) {
     if (GBWK == 0) {
@@ -388,25 +661,50 @@ s32 dds3CalcConfig(void *PID)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfig);
+s32 dds3DrawConfig(void *process)
+{
+    u8 *gbwk = GBWK;
+
+    if (gbwk[0] & 0x10) {
+        cmpUpdateTerminate(gbwk);
+        return -1;
+    }
+    dds3DrawConfigPanel(0x47);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3UpdateConfig);
 
 INCLUDE_ASM(const s32, "code_0029B780", MainPipe);
 
-INCLUDE_ASM(const s32, "code_0029B780", InitPipe);
+void InitPipe(s32 mapIdx, s32 prev)
+{
+    s32 priority = 0x3E8;
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548888);
+    dds3StartProcess(D_005488F0, priority, 0, 0, MainPipe, NULL, NULL);
+    if (mapIdx == 0) {
+        SectionIndex = 0x102;
+        debugMode = 1;
+    } else {
+        debugMode = 0;
+        SectionIndex = 1;
+        mapIndex = mapIdx;
+        mapPrev = prev;
+        pipeInitDone = pipeCheckLevel(mapIdx, prev);
+    }
+    pipeInitSection();
+    priority = 0;
+}
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_005488B8);
+void EndPipe(void)
+{
+    s32 shutdown = 1;
 
-INCLUDE_RODATA(const s32, "code_0029B780", D_005488D0);
-
-INCLUDE_RODATA(const s32, "code_0029B780", D_005488E0);
-
-INCLUDE_RODATA(const s32, "code_0029B780", D_005488F0);
-
-INCLUDE_ASM(const s32, "code_0029B780", EndPipe);
+    pipeEndSection();
+    dds3KillProcessName(D_005488F0, shutdown);
+    DEBUG_PRINT(D_00548900);
+    shutdown = 0;
+}
 
 s32 ChkPipe(void)
 {
@@ -426,19 +724,71 @@ s32 pipe_Section(void)
     return ret;
 }
 
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548870);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548888);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_005488B8);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_005488D0);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_005488E0);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_005488F0);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548900);
+
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548910);
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeInitSection);
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeEndSection);
+void pipeEndSection(void)
+{
+    dds3Basic_t *scene = dds3GetControlScene();
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeDataRelease);
+    dds3DeleteScene(scene);
+    pipeEffRelease();
+    workRelease();
+    PipeTexRelease();
+    pipeDataRelease();
+    dds3BackColor = 0x80000000;
+    DEBUG_PRINT(D_00548930);
+    scene = NULL;
+}
+
+void pipeDataRelease(void)
+{
+    if (linkHeader00.aHandle != NULL) {
+        pipeFreeLink(&linkHeader00);
+        linkHeader00.aHandle = NULL;
+    }
+    if (D_00528F58.aHandle != NULL) {
+        sdfMemFreeDirect(D_00528F58.aHandle);
+        D_00528F58.aHandle = NULL;
+    }
+    if (D_00528F68.aHandle != NULL) {
+        sdfMemFreeDirect(D_00528F68.aHandle);
+        D_00528F68.aHandle = NULL;
+    }
+}
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548930);
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeLoadSection);
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeMainSection);
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeDrawSection);
+void pipeDrawSection(void)
+{
+    s32 ot = 0x27;
+
+    eglSetOt(ot);
+    eglLinkAlpha(0);
+    eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 3);
+    ObjectDraw();
+    pipeBulrLimit();
+    ot = 0;
+}
 
 s32 pipeSoundSection(void)
 {
@@ -447,7 +797,36 @@ s32 pipeSoundSection(void)
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeOffset);
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeStart);
+void pipeStart(void)
+{
+    s32 offset = 10;
+
+    camMode = pipeInitDone;
+    offsetCount = offset;
+    CameraAction = 0;
+    D_00551738 = 0;
+    D_0055173C = 0;
+    offsetStep = 0;
+    offsetStepCount = 0;
+    ZmakaCount = 0;
+    playerDAMAGE = 0;
+    rBoxNum = 0;
+    D_00551748 = 0;
+    D_00551744 = 0;
+    attackCount = 0;
+    pipeObjList = NULL;
+    pipeObjTail = NULL;
+    pipeMyMakaCount = 0;
+    myMaka = 0;
+    makaInit();
+    objInitMyAdd();
+    partsInit();
+    Initmymdl();
+    p2sdPlayBGM(0x670001);
+    dds3FadeIn(0, 0, 0, 0x3C);
+    memset(D_00528F68.data, 0, D_00528F68.tabMax);
+    offset = 0;
+}
 
 void pipeEnd(void)
 {
@@ -498,7 +877,24 @@ INCLUDE_ASM(const s32, "code_0029B780", ObjectDraw);
 void MyDraw(void) {
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", ObjectSound);
+s8 ObjectSound(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
+
+    for (i = 149; i != -1; i--) {
+        s32 kind = (u8)objPtr->id & 0xF0;
+
+        if (kind != 0) {
+            if (kind == 0x80) {
+                MySound(objPtr);
+            }
+        } else {
+            EmSound(objPtr);
+        }
+        objPtr++;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", MySound);
 
@@ -525,7 +921,36 @@ s32 GetDamage(void)
     return playerDAMAGE;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", PlayerStatusSetUp);
+void PlayerStatusSetUp(void)
+{
+    s32 param;
+
+    myStatus = 0;
+    param = datGetPlayerParam(0);
+    if (param >= 0xF) {
+        if (param < 0x19) {
+            myStatus |= 1;
+        } else {
+            myStatus |= 2;
+        }
+    }
+    param = datGetPlayerParam(4);
+    if (param >= 0) {
+        if (param < 0xF) {
+            myStatus |= 0x10;
+        } else {
+            myStatus |= 0x20;
+        }
+    }
+    param = datGetPlayerParam(5);
+    if (param >= 0xA) {
+        if (param < 0x14) {
+            myStatus |= 0x100;
+        } else {
+            myStatus |= 0x200;
+        }
+    }
+}
 
 s32 pipeSelectSection(void)
 {
@@ -545,11 +970,46 @@ void workRelease(void)
 
 INCLUDE_ASM(const s32, "code_0029B780", mymdlStartUp);
 
-INCLUDE_ASM(const s32, "code_0029B780", Initmymdl);
+void Initmymdl(void)
+{
+    s32 mdlSize = 10;
+
+    mymdlInitObject(PipeLine, mdlSize);
+    mymdlInitObject(PipeCur, 10);
+    mymdlInitObject(PipeCur2, 10);
+    mymdlInitObject(PipeRBOX, 10);
+    mymdlInitObject(PipeEMS, 50);
+    mymdlInitObject(PipeEML, 50);
+    mymdlInitObject(PipeMaka1, 50);
+    mymdlInitObject(PipeZMaka, 2);
+    mymdlInitObject(PipeDMaka, 4);
+    mymdlInitObject(PipeDRBOX, 2);
+    mdlSize = 0;
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", getPosTranslate);
 
-INCLUDE_ASM(const s32, "code_0029B780", objMyLoad);
+void objMyLoad(tagPipeObject *objPtr)
+{
+    tagPipeEnemyInfo *pInfo;
+
+    memset(objPtr, 0, 0x20);
+    objPtr->id = -0x80;
+    objPtr->pos[0] = 0.0f;
+    objPtr->offset = offsetCount;
+    objPtr->mdl = 1;
+    objPtr->pos[1] = 0.0f;
+    objPtr->vpos[0] = 0.0f;
+    objPtr->vpos[1] = 0.0f;
+    objPtr->count = 0;
+    objPtr->action = 0;
+    pInfo = objInfo(0x80);
+    if (pInfo != NULL) {
+        objPtr->w = pInfo->w;
+        objMdlMotion(objPtr, 1, 1.0f);
+        pInfo = NULL;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", objLoad);
 
@@ -557,7 +1017,33 @@ INCLUDE_ASM(const s32, "code_0029B780", objMake);
 
 INCLUDE_ASM(const s32, "code_0029B780", objOption);
 
-INCLUDE_ASM(const s32, "code_0029B780", objOptionInc);
+void objOptionInc(tagPipeObject *objPtr, u8 step)
+{
+    f32 pos[3];
+
+    if (step < 0x14) {
+        objPtr->offset += 0x1E;
+        return;
+    }
+    if (step >= 0x64) {
+        return;
+    }
+    objPtr->offset += 0x1E;
+    pos[0] = objPtr->pos[0];
+    pos[1] = objPtr->pos[1];
+    pos[2] = 0.0f;
+    if (step < 0x28) {
+        vecRotate2D(pos, 0.17453293f);
+    } else if (step < 0x3C) {
+        vecRotate2D(pos, -0.17453293f);
+    } else if (step < 0x50) {
+        vecRotate2D(pos, 0.087266461f);
+    } else {
+        vecRotate2D(pos, -0.087266461f);
+    }
+    objPtr->pos[0] = pos[0];
+    objPtr->pos[1] = pos[1];
+}
 
 void objSetAction(tagPipeObject *objPtr, u8 action, s16 count)
 {
@@ -578,25 +1064,88 @@ INCLUDE_ASM(const s32, "code_0029B780", objCopy);
 
 INCLUDE_ASM(const s32, "code_0029B780", objCopy2);
 
-INCLUDE_ASM(const s32, "code_0029B780", objAddDMaka);
+void objAddDMaka(s32 offset, f32 x, f32 y)
+{
+    tagPipeObject obj;
 
-INCLUDE_ASM(const s32, "code_0029B780", objAddDRBOX);
+    objMake(&obj, offset, 0xB, 0, 0, 0);
+    obj.pos[0] = x;
+    obj.pos[1] = y;
+    obj.count = 0x1D;
+    objAdd(&obj);
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", objInit);
+void objAddDRBOX(s32 offset, f32 x, f32 y)
+{
+    tagPipeObject obj;
+
+    objMake(&obj, offset, 0xC, 0, 0, 0);
+    obj.pos[0] = x;
+    obj.pos[1] = y;
+    obj.count = 0x1D;
+    objAdd(&obj);
+}
+
+void objInit(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
+
+    memset(objPtr, 0, 0x12C0);
+    for (i = 149; i != -1; i--) {
+        objPtr->id = -1;
+        objPtr++;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", objAdd);
 
 void objDel(tagPipeObject *objPtr)
 {
     objMdlDel(objPtr);
-    objPtr->unk18 = -1;
+    objPtr->id = -1;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", objDelAll);
+void objDelAll(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_0029B780", objInfo);
+    for (i = 149; i != -1; i--) {
+        if ((u8)objPtr->id != 0xFF) {
+            objDel(objPtr);
+        }
+        objPtr++;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", objMyData);
+tagPipeEnemyInfo *objInfo(s32 id)
+{
+    tagPipeEnemyInfo *pInfo = D_00528F78;
+    s32 i;
+
+    for (i = 10; i != -1; i--) {
+        if (pInfo->chID == id) {
+            return pInfo;
+        }
+        pInfo++;
+    }
+    return NULL;
+}
+
+tagPipeObject *objMyData(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
+
+    for (i = 149; i != -1; i--) {
+        if ((u8)objPtr->id == 0x80) {
+            return objPtr;
+        }
+        objPtr++;
+    }
+    return NULL;
+}
 
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548B50);
 
@@ -612,7 +1161,26 @@ INCLUDE_ASM(const s32, "code_0029B780", objMdlColorSet);
 
 INCLUDE_ASM(const s32, "code_0029B780", objMdlAlphaSet);
 
-INCLUDE_ASM(const s32, "code_0029B780", objMdlMotion);
+void objMdlMotion(tagPipeObject *objPtr, s32 motion, f32 speed)
+{
+    s32 id = (u8)objPtr->id;
+
+    if (id < 7) {
+        return;
+    }
+    if (id < 9) {
+        return;
+    }
+    if (id < 13) {
+        return;
+    }
+    if (id != 0x80) {
+        return;
+    }
+    basicMy->mdl->first->speed = speed;
+    mdlSmoothLoopMotion(basicMy->mdl, 0, motion, 2.0f, 2.0f);
+    objPtr = NULL;
+}
 
 void pipeMyMakaAdd(s32 addMaka)
 {
@@ -632,21 +1200,85 @@ void pipeMyMakaSubRate(f32 subMakaRate)
 
 INCLUDE_ASM(const s32, "code_0029B780", objMyStatusChange);
 
-INCLUDE_ASM(const s32, "code_0029B780", objVisibleAll);
+void objVisibleAll(s8 value)
+{
+    mymdlVisibleAll(PipeMaka1, 50, value);
+    mymdlVisibleAll(PipeZMaka, 2, value);
+    mymdlVisibleAll(PipeCur, 10, value);
+    mymdlVisibleAll(PipeCur2, 10, value);
+    mymdlVisibleAll(PipeLine, 10, value);
+    mymdlVisibleAll(PipeEMS, 50, value);
+    mymdlVisibleAll(PipeEML, 50, value);
+    mymdlVisibleAll(PipeRBOX, 10, value);
+    value = 0;
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", mdlTask);
 
-INCLUDE_ASM(const s32, "code_0029B780", partsInit);
+void partsInit(void)
+{
+    tagpipeParts *pParts = PartsWork;
+    s32 i;
+
+    memset(pParts, 0, 0xF0);
+    for (i = 19; i != -1; i--) {
+        pParts->id = -1;
+        pParts++;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", partsAdd);
 
-INCLUDE_ASM(const s32, "code_0029B780", partsDel);
+void partsDel(tagpipeParts *pParts)
+{
+    if ((u8)pParts->mdl == 0xFF) {
+        return;
+    }
+    switch (pParts->id) {
+    case 1:
+    case 3:
+        mymdlDelObject(&PipeLine[pParts->mdl]);
+        DEBUG_PRINT(D_00548DA0, pParts->mdl);
+        break;
+    case 2:
+        mymdlDelObject(&PipeCur[pParts->mdl]);
+        DEBUG_PRINT(D_00548DC0, pParts->mdl);
+        break;
+    case 4:
+        mymdlDelObject(&PipeCur2[pParts->mdl]);
+        DEBUG_PRINT(D_00548DE0, pParts->mdl);
+        break;
+    }
+    pParts->id = -1;
+}
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548DA0);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548DC0);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548DE0);
 
 INCLUDE_ASM(const s32, "code_0029B780", PipemdlRot);
 
-INCLUDE_ASM(const s32, "code_0029B780", PipeTexLoad);
+s32 PipeTexLoad(void)
+{
+    memset(MakaTex, 0, 0x40);
+    texLoad(D_00548E18, &MakaTex[0]);
+    texLoad(D_00548E30, &MakaTex[1]);
+    texLoad(D_00548E48, &MakaTex[2]);
+    texLoad(D_00548E60, &MakaTex[3]);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", PipeTexRelease);
+s32 PipeTexRelease(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        texRelease(&MakaTex[i]);
+    }
+    return 1;
+}
 
 s32 texLoad(const char *name, tagPipeTexture *record) {
     void *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
@@ -674,11 +1306,51 @@ s32 pipeFileSave(s8 filename, tagPipePosTable *posPtr, s8 index)
     return 1;
 }
 
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548E18);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548E30);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548E48);
+
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548E60);
+
 INCLUDE_ASM(const s32, "code_0029B780", pipeFileLoad);
 
-INCLUDE_ASM(const s32, "code_0029B780", getPartsInfo);
+tagPipePartsInfo *getPartsInfo(s16 partsID)
+{
+    tagPipePartsInfo *pInfo = D_00529030;
+    s32 i;
 
+    for (i = 0; i < 60; i++) {
+        if (pInfo->partsID == partsID) {
+            return pInfo;
+        }
+        pInfo++;
+    }
+    return NULL;
+}
+
+/* NON_MATCHING: 15 of 24 words; retail keeps the result in $2, this needs a move. */
+#ifdef NON_MATCHING
+s32 getPartsType(s32 id)
+{
+    tagPipePartsInfo *pInfo = getPartsInfo(id);
+    s32 ret = (s32)pInfo;
+
+    if (pInfo != NULL) {
+        s32 base = (s8)((id >> 6) << 1);
+
+        if (pInfo->inWay + pInfo->goWay == 7) {
+            ret = base + 1;
+        } else {
+            ret = base + 2;
+        }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", getPartsType);
+#endif
 
 s32 pipe_2A2F38(void)
 {
@@ -738,7 +1410,32 @@ void CalcCamera(void) {
 
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548EB0);
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeCheckLevel);
+s32 pipeCheckLevel(s32 level, s32 type)
+{
+    s32 ret = 0;
+
+    switch (type) {
+    case 40:
+        ret = 0;
+        break;
+    case 41:
+        ret = level == 1;
+        break;
+    case 42:
+        ret = level < 4;
+        break;
+    case 43:
+        ret = level < 6;
+        break;
+    case 44:
+        ret = level < 8;
+        break;
+    case 45:
+        ret = 1;
+        break;
+    }
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeResultSection);
 
@@ -763,7 +1460,15 @@ void pipeSetMessageNum(s32 num)
     fclStartMessage(0);
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeStartRandomMessage);
+void pipeStartRandomMessage(s32 index, s8 value)
+{
+    char buf[32];
+
+    fclSetMessageVar_20743088(0, pStr[index]);
+    sprintf(buf, D_00551808, value);
+    fclSetMessageVar_20743088(1, buf);
+    fclStartMessage(1);
+}
 
 s32 pipeStartMessage(void)
 {
@@ -781,11 +1486,27 @@ s32 pipeMessDraw(void) {
     return finished;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeGetRandomMessage);
+s32 pipeGetRandomMessage(void)
+{
+    return D_00529240[pipeMessMax - 1][dds3GetRandA(NULL) % 10];
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", InitModel);
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlAddObject);
+s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize)
+{
+    s16 i;
+
+    for (i = 0; i < mdlSize; i++) {
+        if (pWork[i].unk0C == 0) {
+            dds3ObjectBaseOffFlag(pWork[i].base, 1);
+            pWork[i].unk0C = 1;
+            return i;
+        }
+    }
+    DEBUG_PRINT(D_00548F48, i);
+    return -1;
+}
 
 void mymdlDelObject(tagpipeBasic *pWork)
 {
@@ -794,7 +1515,15 @@ void mymdlDelObject(tagpipeBasic *pWork)
     pWork = NULL;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlInitObject);
+void mymdlInitObject(tagpipeBasic *pWork, u16 mdlSize)
+{
+    s16 i;
+
+    for (i = 0; i < mdlSize; i++) {
+        mymdlDelObject(pWork);
+        pWork++;
+    }
+}
 
 void mymdlPosSet(tagpipeBasic *pWork, f32 x, f32 y, f32 z)
 {
@@ -805,7 +1534,17 @@ void mymdlPosSet(tagpipeBasic *pWork, f32 x, f32 y, f32 z)
     pWork = NULL;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", SetMdlPosition);
+void SetMdlPosition(tagpipeBasic *pWork, s16 mdlSize)
+{
+    s16 i;
+
+    for (i = 0; i < mdlSize; i++) {
+        if (pWork[i].base != NULL) {
+            dds3DeleteUnitObjectBasic(pWork[i].base);
+            pWork[i].base = NULL;
+        }
+    }
+}
 
 void mymdlRotSet(tagpipeBasic *pWork, f32 x, f32 y, f32 z)
 {
@@ -831,13 +1570,47 @@ void mymdlColorSet(tagpipeBasic *pWork, u32 color)
     pWork = NULL;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlAlphaSet);
+void mymdlAlphaSet(tagpipeBasic *pWork, u8 alpha)
+{
+    mdlSetColor(pWork->mdl, (mdlGetColor(pWork->mdl) & 0xFFFFFF) | (alpha << 24));
+    pWork = NULL;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlInit);
+void mymdlInit(tagpipeBasic *pWork, u16 mdlSize, f32 sx, f32 sy, f32 sz, f32 sw)
+{
+    u16 i;
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlVisible);
+    for (i = 0; i < mdlSize; i++) {
+        memset(pWork, 0, 0x40);
+        pWork->pos[3] = 1.0f;
+        pWork->scl[0] = sx;
+        pWork->scl[1] = sy;
+        pWork->scl[2] = sz;
+        pWork->scl[3] = sw;
+        pWork++;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", mymdlVisibleAll);
+void mymdlVisible(tagpipeBasic *pWork, s8 value)
+{
+    if (value == 1) {
+        dds3ObjectBaseOffFlag(pWork->base, 1);
+    } else {
+        dds3ObjectBaseOnFlag(pWork->base, 1);
+        pWork = NULL;
+    }
+}
+
+void mymdlVisibleAll(tagpipeBasic *pWork, s16 mdlSize, s8 value)
+{
+    s16 i;
+
+    for (i = 0; i < mdlSize; i++) {
+        if (pWork[i].unk0C == 1) {
+            mymdlVisible(&pWork[i], value);
+        }
+    }
+}
 
 void mymdlSetMotion(tagpipeBasic *node, f32 frame) {
     void *motion = mdlGetMotionCtrlr(node->mdl, 0);
@@ -857,21 +1630,142 @@ void pipeBulrSetLimit(s32 frame)
     pipeBulrLimitValue = frame;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeBulrLimit);
+void pipeBulrLimit(void)
+{
+    pipeBlurParam_t blur;
+
+    if (pipeBulrLimitValue != 0) {
+        blur.color = 0x5C8A8A8A;
+        blur.unk04 = 0x48;
+        blur.unk0C = 1.0f;
+        blur.width = 0x200;
+        blur.height = 0x1C0;
+        blur.unk08 = 0;
+        blur.unk10 = 0;
+        blur.unk14 = 0;
+        blur.unk18 = 0;
+        blur.unk1C = 0;
+        dds3EffectBlur(&blur);
+        pipeBulrLimitValue = pipeBulrLimitValue - 1;
+    } else {
+        blur.color = 0x2E8A8A8A;
+        blur.unk04 = 0x48;
+        blur.unk0C = 1.0f;
+        blur.width = 0x200;
+        blur.height = 0x1C0;
+        blur.unk08 = 0;
+        blur.unk10 = 0;
+        blur.unk14 = 0;
+        blur.unk18 = 0;
+        blur.unk1C = 0;
+        dds3EffectBlur(&blur);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeEffCreateLoadFile);
 
+INCLUDE_RODATA(const s32, "code_0029B780", D_00548F48);
+
 INCLUDE_ASM(const s32, "code_0029B780", pipeEffLoad);
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeFreeEffects);
+void pipeFreeEffects(PIPE_EFF_t *effect, u8 maxSize)
+{
+    PIPE_EFF_t *pEff = effect;
+    u8 i;
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeEffRelease);
+    for (i = maxSize - 2; i != 0xFF; i--) {
+        if (pEff->d3p != NULL) {
+            dds3EffectDelete(pEff->d3p);
+            pEff->d3p = NULL;
+        }
+        pEff++;
+    }
+    if (effect->mhFile != NULL) {
+        sdfMemFreeDelayedDirect(effect->mhFile);
+        effect->mhFile = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeEffDraw);
+void pipeEffRelease(void)
+{
+    s32 maxSize = 10;
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeEffCal);
+    pipeFreeEffects(pipe_CELL01_D3P, maxSize);
+    pipeFreeEffects(pipe_BREAK01_D3P, 10);
+    pipeFreeEffects(pipe_BREAK02_D3P, 10);
+    pipeFreeEffects(pipe_DAMAGE01_D3P, 10);
+    pipeFreeEffects(pipe_DAMAGE03_D3P, 10);
+    pipeFreeEffects(pipe_ATTACK01_D3P, 5);
+    maxSize = 0;
+}
 
+void pipeEffDraw(void)
+{
+    s32 maxSize = 10;
+
+    pipeEffDraw2Doffset(pipe_CELL01_D3P, maxSize);
+    pipeEffDraw2Doffset(pipe_BREAK01_D3P, 10);
+    pipeEffDraw2Doffset(pipe_BREAK02_D3P, 10);
+    pipeEffDraw2Doffset(pipe_DAMAGE01_D3P, 10);
+    pipeEffDraw2Doffset(pipe_DAMAGE03_D3P, 10);
+    pipeEffDraw2Doffset(pipe_ATTACK01_D3P, 5);
+    maxSize = 0;
+}
+
+void pipeEffCal(void)
+{
+    s32 maxSize = 4;
+
+    pipeGetObjData(pipe_CELL01_D3P, maxSize);
+    pipeGetObjData(pipe_BREAK01_D3P, 4);
+    pipeGetObjData(pipe_BREAK02_D3P, 4);
+    pipeGetObjData(pipe_DAMAGE01_D3P, 2);
+    pipeGetObjData(pipe_DAMAGE03_D3P, 2);
+    pipeGetObjData(pipe_ATTACK01_D3P, 6);
+    maxSize = 0;
+}
+
+/* NON_MATCHING: 9 of 71 words, exact size; the third arm materialises its
+ * constants in a different order. */
+#ifdef NON_MATCHING
+void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
+{
+    PIPE_EFF_t *pEff = effect;
+    u8 i;
+
+    if ((u8)maxSize == 2) {
+        s32 offset = offsetCount;
+
+        for (i = 9; i != 0xFF; i--) {
+            if (pEff->d3p != NULL) {
+                pEff->offset = offset;
+            }
+            pEff++;
+        }
+    } else if ((u8)maxSize == 4) {
+        for (i = 9; i != 0xFF; i--) {
+            if (pEff->d3p != NULL) {
+                pEff->offset += 6;
+            }
+            pEff++;
+        }
+    } else if ((u8)maxSize == 6) {
+        tagPipeObject *objPtr = objMyData();
+        s32 offset = offsetCount + 4;
+
+        for (i = 4; i != 0xFF; i--) {
+            if (pEff->d3p != NULL) {
+                pEff->offset = offset;
+                pEff->pos2[0] = objPtr->pos[0] - 16.0f;
+                pEff->pos2[1] = objPtr->pos[1] - 48.0f;
+            }
+            pEff++;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", pipeGetObjData);
+#endif
 
 INCLUDE_ASM(const s32, "code_0029B780", pipeEffSet);
 
@@ -901,7 +1795,19 @@ s32 makaGetBarWidth(s32 maka)
     return digits;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", makaGetBarCell);
+s32 makaGetBarCell(s32 maka, s32 digit)
+{
+    s16 scale = 1;
+    s32 i;
+
+    if (digit == 0) {
+        return -1;
+    }
+    for (i = digit - 1; i != 0; i--) {
+        scale = scale * 10;
+    }
+    return (maka / scale) % 10;
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", makaDrawNormal);
 
@@ -909,11 +1815,37 @@ INCLUDE_ASM(const s32, "code_0029B780", makaDrawSingle);
 
 INCLUDE_ASM(const s32, "code_0029B780", makaDrawMulti);
 
-INCLUDE_ASM(const s32, "code_0029B780", makaDraw);
+void makaDraw(tagMakaObject_t *makaPtr)
+{
+    if (makaPtr->maka < 0) {
+        if (ZmakaCount == 1) {
+            makaDrawSingle();
+        } else {
+            makaDrawMulti();
+        }
+    } else {
+        makaDrawNormal();
+        makaPtr = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", makaDrawGauge);
+void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
+{
+    u32 color = ((s32)alpha << 24) | 0x808080;
 
-INCLUDE_ASM(const s32, "code_0029B780", makaDrawMultiGauge);
+    eglLinkSprite((s32)(x - sx * 52.0f), (s32)(y - sy * 30.0f), (s32)(sx * 104.0f),
+                  (s32)(sy * 61.0f), 1, 1, 0x68, 0x3D, color, color, color, color,
+                  MakaTex[2].handle);
+}
+
+void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
+{
+    u32 color = ((s32)alpha << 24) | 0x808080;
+
+    eglLinkSprite((s32)(x - sx * 81.0f), (s32)(y - sy * 13.0f), (s32)(sx * 163.0f),
+                  (s32)(sy * 26.0f), 1, 1, 0xA3, 0x1A, color, color, color, color,
+                  MakaTex[3].handle);
+}
 
 INCLUDE_ASM(const s32, "code_0029B780", makaDrawNormalGauge);
 
@@ -932,11 +1864,64 @@ s32 pipeLinkGetNum(u8 *lPtr, s32 size)
     return num;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeCreateLink);
+s32 pipeCreateLink(tagPipeLinkInfo *pInfo, s32 maxNum)
+{
+    if (pInfo == NULL) {
+        return 0;
+    }
+    pInfo->aHandle = sdfMemAllocDirect(maxNum * 16);
+    pInfo->maxNum = maxNum;
+    pipeInitLink(pInfo);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeInitLink);
+s32 pipeInitLink(tagPipeLinkInfo *pInfo)
+{
+    u16 *pNode;
+    s32 i;
 
+    if (pInfo == NULL) {
+        return 0;
+    }
+    pNode = sdfMemGetPtr(pInfo->aHandle);
+    i = pInfo->maxNum;
+    if (i > 0) {
+        do {
+            i--;
+            *pNode = 0;
+            pNode += 8;
+        } while (i != 0);
+    }
+    pInfo->curNum = 0;
+    pInfo->nextId = 1;
+    return 0;
+}
+
+/* NON_MATCHING: 7 of 32 words, exact size; two registers are swapped. */
+#ifdef NON_MATCHING
+tagPipeLinkData *pipeMakeNodeLink(tagPipeLinkInfo *pInfo)
+{
+    tagPipeLinkData *pNode = sdfMemGetPtr(pInfo->aHandle);
+    s32 i;
+
+    for (i = 0; i < pInfo->maxNum; i++) {
+        if (pNode->id == 0) {
+            s32 *pNextId = &pInfo->nextId;
+            s32 id = *pNextId;
+
+            pNode->next = NULL;
+            pNode->id = id;
+            *pNextId = id + 1;
+            pNode->prev = NULL;
+            return pNode;
+        }
+        pNode++;
+    }
+    return NULL;
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", pipeMakeNodeLink);
+#endif
 
 s32 pipeConnectLink(tagPipeLinkData *pPrev, tagPipeLinkData *pNext)
 {
@@ -967,7 +1952,16 @@ s32 pipeDellLink(tagPipeLinkData *pData)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", pipeFreeLink);
+void pipeFreeLink(tagPipeLinkInfo *pInfo)
+{
+    if (pInfo != NULL) {
+        if (pInfo->aHandle != NULL) {
+            pipeInitLink(pInfo);
+            sdfMemFreeDirect(pInfo->aHandle);
+            pInfo->aHandle = NULL;
+        }
+    }
+}
 
 void pipeCameraLerp(f32 *vector, f32 angle) {
     f32 rotated[4];
@@ -1381,11 +2375,41 @@ void *sdfAllocAuto(s32 size)
     return p;
 }
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfFreeAuto);
+s32 sdfFreeAuto(void *allocation)
+{
+    if (allocation != NULL) {
+        if (sdfChipCheck(allocation)) {
+            sdfChipFreeDirect(allocation);
+        } else {
+            sdfMemFreePtrDirect(allocation);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", sdfFreeAutoDelayed);
+s32 sdfFreeAutoDelayed(void *allocation)
+{
+    if (allocation != NULL) {
+        if (sdfChipCheck(allocation)) {
+            sdfChipFreeDelayedDirect(allocation);
+        } else {
+            sdfMemFreeDelayedDirect(sdfMemGetHandleByPtr(allocation));
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0029B780", sdf_2A8258);
+s32 sdf_2A8258(void **slot)
+{
+    void *allocation = *slot;
+
+    if (allocation != NULL) {
+        *slot = NULL;
+        if (sdfChipCheck(allocation)) {
+            sdfChipFreeDirect(allocation);
+        } else {
+            sdfMemFreePtrDirect(allocation);
+        }
+    }
+}
 
 void FatalError(const char *format, ...) {
     for (;;) {

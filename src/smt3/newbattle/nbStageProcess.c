@@ -2,6 +2,9 @@
 #include "kernel.h"
 #include "nb.h"
 #include "ps2asm.h"
+#include "model.h"
+#include "event.h"
+#include "motion.h"
 
 
 extern f32 aViewEye[];
@@ -9,6 +12,23 @@ extern f32 D_002FA240[];
 extern f32 dds3ScreenParam[];
 extern void ReverseMatrix(void);
 extern void MultMatrixRev(f32 *matrix);
+extern void Mult(void);
+extern f32 D_00543720[];
+extern char D_00543FB8[]; /* "nego result = %d\n" */
+extern char D_00544020[];
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern void nbDrawTargetCursor(s32 type, s32 x, s32 y);
+extern s32 printf(const char *format, ...);
+extern nbFormation_t *nbGetEventForm();
+extern s32 evtGetAgeOfMoon16(void);
+extern void evtSetAgeOfMoon(s32 age);
+extern void nbPanelDraw(s32 flag);
+extern s32 datCheckPlayerDead(void);
+void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu);
+extern s32 dds3ExistProcess(dds3ProcessID_t *id);
+extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 ritu);
+void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
 /* These inherited symbol names identify the soft-double conversion and
  * comparison helpers in this executable, not integer conversion/division. */
 extern f64 sdfFloatToULong(f32 value);
@@ -63,10 +83,11 @@ typedef struct nbActionProcessData_t {
     s32 hitstopframe;
 } nbActionProcessData_t;
 
-/* 128-byte party records; this unit only reads the leading flag word. */
+/* 128-byte party records. */
 struct nbParty_t {
     u16 flag;
-    u8 unk02[0x7E];
+    s16 formindex;
+    u8 unk04[0x7C];
 };
 
 typedef struct pmdProcessWork_t {
@@ -130,6 +151,13 @@ typedef struct nbCommSelProcessData_t {
     s32 openwait;
 } nbCommSelProcessData_t;
 
+/* 38-byte rows; this unit reads only the formation type at +4. */
+typedef struct nbEncountForm_t {
+    u8 unk00[4];
+    u8 formationtype;
+    u8 unk05[0x21];
+} nbEncountForm_t;
+
 extern char D_005441A8[];
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
@@ -152,7 +180,58 @@ extern void evtFreeAllUnit(void);
 extern void evtFreeStage(void);
 extern s32 sdfDelayedResrcCheck(void);
 extern void SetCommCursor2(nbCommSelProcessData_t *s);
+extern void nbMakeUnitFadeOutPacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form,
+                                    u32 col, s32 delay, s32 aframe, s32 colframe);
+extern s32 nbAddReturnKoukaPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party,
+                                  s32 kage);
+extern s32 nbCheckEscape(nbMainProcessData_t *data);
+extern s32 nbMakePressPacket(s32 start, nbActionProcessData_t *a, f32 press);
+extern s32 nbMakeNewPressPacket(s32 start, nbActionProcessData_t *a, s32 presstype,
+                                nbFormation_t *form);
+extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 start, s32 frame,
+                                                       nbActionProcessData_t *a,
+                                                       nbFormation_t *form, s32 type);
+extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 start, nbActionProcessData_t *a,
+                                                    nbFormation_t *form, s32 sw);
+s32 CheckKoketaNego(nbActionProcessData_t *a);
+s32 nbClipEffectNum(s32 screenPosition[4]);
+void nbLoadKoukaPos(nbFormation_t *form);
+extern void *memset(void *dst, s32 c, u32 n);
+extern u32 effBTLSystemGetRGBA(s32 type);
+extern char D_00551118[];
+extern char D_00543768[]; /* "nb_unitdraw" */
+extern char D_00544120[]; /* "nb_action" */
+void *nbUnitProcess2(dds3ProcessID_t *id);
+void *nbUnitShutdown(dds3ProcessID_t *id);
+void *nbUnitDrawProcess1(dds3ProcessID_t *id);
+void *nbActionProcess1(dds3ProcessID_t *id);
+void nbActionShutdown(dds3ProcessID_t *id);
+nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data);
+extern void ToMatrix(void);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, void *processfunc,
+                                         void *shutdownfunc, void *data);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct nbParty_t *my,
+                                               nbActionProcessData_t *a);
+void *nbCommSelProcess1(dds3ProcessID_t *id);
+void nbCommSelShutdown(dds3ProcessID_t *id);
+void nbMakeUnitMatrix(nbFormation_t *form);
+extern void nbMakeDeadVisualPacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form,
+                                   s32 kage, s32 type);
+void SetDeadPacket(nbActionProcessData_t *a, s32 formindex);
 extern void nbSetOrderSide(s32 side);
+extern s32 mdlGetMinorNum(mdlObj_t *obj);
+extern void nbPushAction(s32 type, s32 partyindex, s32 target, s32 script);
+extern void nbSortOrder(void);
+extern f32 dds3GetRandFloatA(s32 stream);
+extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
+extern void sdfChipFreeDirect(void *block);
+extern s32 dds3GetRandIntA(s32 low, s32 high);
+extern nbEncountForm_t nbEncountFormTable[];
+void nbSetOrder(s32 index);
+s32 CheckTimeListDead(nbActionProcessData_t *a, s32 formindex);
+s32 nbCheckDeadScript(nbFormation_t *form);
 
 extern s32 StkSelId;
 extern nbStageState_t nbStageState;
@@ -183,7 +262,7 @@ void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockad
 extern void nbAddAnalyzePacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form);
 extern void nbPanelAnalyzeStart(void);
 extern struct nbParty_t *nbGetPartyFromFormindex(s32 formindex);
-extern void nbMakeReturnPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party);
+extern s32 nbMakeReturnPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party);
 extern void nbDelAllKoukaPacketType(s32 type);
 extern void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
                                  nbActionProcessData_t *a);
@@ -283,7 +362,23 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbStageSp);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", GetDyingBadWaitMotion);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetNegoWaitMotion);
+s32 nbSetNegoWaitMotion(nbFormation_t *form)
+{
+    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
+
+    if (work != NULL) {
+        switch (work->badstatus & 0xFFF) {
+        case 4:
+        case 8:
+        case 0x200:
+            break;
+        default:
+            nbSetWaitMotion(form, 13, 1.0f);
+            nbSetUnitMotion(form, 13, 0, 1.0f);
+            break;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetUnitMotion);
 
@@ -320,7 +415,13 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetMotionNo);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddUnitStock);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSummonUnit);
+void nbSummonUnit(s32 side, s32 stockno, s32 formindex)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    nbAddUnitStock(data, side, stockno, formindex);
+    nbInitUnitEffect(&data->form[formindex], 0, 1);
+}
 
 void func_0024D938(void)
 {
@@ -333,9 +434,35 @@ void func_0024D938(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbReturnUnit);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nb_24DBF0);
+void nb_24DBF0(s32 partyno, s32 noeffect)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nb_24DC80);
+    if ((data->party[partyno].flag & 1) != 0) {
+        if ((data->party[partyno].flag & 8) == 0) {
+            nbFormation_t *form = &data->form[data->party[partyno].formindex];
+
+            if (noeffect == 0) {
+                form->anime = (form->anime | 1) & ~2;
+            }
+        }
+    }
+}
+
+void nb_24DC80(s32 partyno, s32 noeffect)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    if ((data->party[partyno].flag & 1) != 0) {
+        if ((data->party[partyno].flag & 8) == 0) {
+            nbFormation_t *form = &data->form[data->party[partyno].formindex];
+
+            if (noeffect == 0) {
+                form->anime = (form->anime | 2) & ~1;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbRunKoukaType1);
 
@@ -350,7 +477,26 @@ void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
     form->addmovet = power;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetDamage);
+void nbSetDamage(nbFormation_t *form, f32 range, s32 week)
+{
+    datUnitWork_t *work;
+
+    form->damageRange = range;
+    form->type = 1;
+    form->damageFrames = 20;
+    form->time = 0;
+    *(s32 *)&form->addmovet = 0;
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    if ((form->stat & 0x40) != 0) {
+        nbSetUnitMotion(form, 1, 0, 1.0f);
+        if (week == 0) {
+            s32 badframe = nbGetUnitVisual(work)->badframe;
+
+            *(s32 *)&form->addmovet = badframe;
+            form->damageFrames = badframe + 10;
+        }
+    }
+}
 
 void nbSetDamage2(nbFormation_t *form, f32 range)
 {
@@ -361,9 +507,47 @@ void nbSetDamage2(nbFormation_t *form, f32 range)
     form->addmovet = 0.0f;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetBadstatMotion);
+/* NON_MATCHING: 6 of 42 words, exact size; retail holds data in $4 and data->party in $6. */
+#ifdef NON_MATCHING
+void nbSetBadstatMotion(nbFormation_t *form, s32 type, f32 range)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    struct nbParty_t *party = &data->party[form->partyindex];
+    datUnitWork_t *work;
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetBadstatMotion2);
+    form->damageRange = range;
+    form->type = 3;
+    form->time = 0;
+    form->damageFrames = 0;
+    work = nbGetUnitWorkPointer(data, party);
+    if ((form->stat & 0x40) != 0) {
+        s32 badframe;
+
+        nbSetUnitMotion(form, 1, 0, 1.0f);
+        badframe = nbGetUnitVisual(work)->badframe;
+        *(s32 *)&form->addmovet = badframe;
+        form->damageFrames = badframe + 10;
+    }
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetBadstatMotion);
+#endif
+
+void nbSetBadstatMotion2(nbFormation_t *form)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    struct nbParty_t *party = &data->party[form->partyindex];
+
+    form->type = 0;
+    form->time = 0;
+    form->damageFrames = 0;
+    nbGetUnitWorkPointer(data, party);
+    if ((form->stat & 0x40) != 0) {
+        nbSetUnitMotion(form, 1, 0, 1.0f);
+        form->anime |= 0x80;
+        form->hunit->owner->first->speed = 0.0f;
+    }
+}
 
 void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect)
 {
@@ -412,21 +596,96 @@ s32 nbCheckLoad(nbFormation_t *form)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbCheckLoadGroup);
+s32 nbCheckLoadGroup(s32 group)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 start;
+    s32 cnt;
+    s32 i;
+
+    start = 0;
+    cnt = 0;
+    switch (group) {
+    case 0:
+        cnt = 4;
+        break;
+    case 1:
+        start = 4;
+        cnt = 10;
+        break;
+    }
+    for (i = start; i < start + cnt; i++) {
+        nbFormation_t *form = &data->form[i];
+
+        if ((form->stat & 1) != 0) {
+            if ((form->stat & 0x40) != 0) {
+                if ((form->stat & 2) == 0) {
+                    if ((form->flag & 4) == 0) {
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", UpdateFormAnime);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", UpdateFormPosRot);
+void UpdateFormPosRot(nbFormation_t *form)
+{
+    dds3PoseSet_t *pose;
+
+    if (form->basic != NULL) {
+        pose = form->basic->poseset;
+        SDF_VU0_COPYVECTOR(&form->pos, &pose->pos);
+        SDF_VU0_LOADVECTOR(&pose->rot);
+        SDF_VU0_LOADVECTOR_B(D_00543720);
+        Mult();
+        SDF_VU0_STOREVECTOR(&form->rot);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbUnitDrawProcess1);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", RunSake);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", RunBadAction);
+void RunBadAction(nbMainProcessData_t *data, nbFormation_t *form)
+{
+    sdfVector4_t pos;
+    f32 d;
+
+    if (form->basic == NULL) {
+        return;
+    }
+    d = dds3GetRandFloatA(0) * 0.0f + 1.0f;
+    if ((form->time & 1) != 0) {
+        d = -d;
+    }
+    SDF_VU0_COPYVECTOR(&pos, &form->pos);
+    pos.x += d;
+    dds3SetPosPoseSet(form->basic, &pos);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", RunDamage);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbCheckModelLoad);
+s32 nbCheckModelLoad(nbMainProcessData_t *data, s32 major, s32 minor)
+{
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        nbFormation_t *form = &data->form[i];
+
+        if ((form->stat & 1) != 0) {
+            if ((form->stat & 2) != 0) {
+                if (mdlGetMinorNum(form->hunit->owner) == minor) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", RegistUnit);
 
@@ -457,7 +716,16 @@ void *nbUnitShutdown(dds3ProcessID_t *id)
     nbGetMainProcessData()->unitProcess = 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitUnitProcess);
+void nbInitUnitProcess(nbMainProcessData_t *data)
+{
+    dds3ProcessID_t *id = dds3StartProcess(D_00551118, 0x3F9, 1, 1, nbUnitProcess2,
+                                           nbUnitShutdown, NULL);
+
+    dds3LinkProcess(data->unkBC, id);
+    data->unitProcess = id;
+    dds3LinkProcess(id, dds3StartProcess(D_00543768, 0x2B0E, 1, 1, nbUnitDrawProcess1,
+                                         NULL, NULL));
+}
 
 void nbCheckPacketState(nbActionProcessData_t *a, s32 startframe)
 {
@@ -509,7 +777,23 @@ void SetEnemyEscapePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAuroraPacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAddPressPacket);
+void SetAddPressPacket(nbActionProcessData_t *a, s32 nskill)
+{
+    if (datSkillTable.normal[nskill].program != 13) {
+        return;
+    }
+    switch (datSkillTable.normal[nskill].hojopoint) {
+    case 2:
+        a->newaddpresstype = 0xF;
+        break;
+    case 3:
+        a->newaddpresstype = 0x11;
+        break;
+    case 4:
+        a->newaddpresstype = 0x10;
+        break;
+    }
+}
 
 void SetAddFlareChargePacket(nbActionProcessData_t *a, s32 start)
 {
@@ -518,7 +802,14 @@ void SetAddFlareChargePacket(nbActionProcessData_t *a, s32 start)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetMakaPacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetTorafuPacket);
+void SetTorafuPacket(nbActionProcessData_t *a, s32 formindex, s32 start)
+{
+    nbFormation_t *form = &a->data->form[formindex];
+
+    nbMakeUnitFadeOutPacket(start, a, form, 0, 6, 6, 6);
+    nbAddFormOnOffPacket(start + 12, a, form, 0);
+    a->data->endtype = 3;
+}
 
 void SetAnalyzePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
 {
@@ -531,11 +822,20 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetPlayerSummonPacket);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetSakePacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetMissPacket);
+void SetMissPacket(nbActionProcessData_t *a, s32 sformindex, s32 nskill, s32 formindex,
+                   s32 week, s32 start)
+{
+    nbAddMojiEffKoukaPacket(start, 0x2D, a, &a->data->form[formindex], 3);
+    SetTimeList(a, formindex, start, 10, 20);
+    SetPress(a, -2.0f);
+    SetNewPress(a, 4);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetOngShadowPacket);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetOngShadowPacket2);
+
+INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543768);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAllPacket);
 
@@ -552,7 +852,22 @@ void ClearTimeList(nbActionProcessData_t *a)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetHpForTimeList);
+void SetHpForTimeList(nbActionProcessData_t *a)
+{
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        a->timelist[i].hp = 0;
+        if ((a->data->form[i].stat & 1) != 0) {
+            if ((a->data->form[i].stat & 0x40) != 0) {
+                a->timelist[i].hp =
+                    nbGetUnitWorkPointer(a->data,
+                                         &a->data->party[a->data->form[i].partyindex])
+                        ->hp;
+            }
+        }
+    }
+}
 
 s32 GetTimeListHp(nbActionProcessData_t *a, s32 formindex)
 {
@@ -570,7 +885,28 @@ s32 CheckTimeListDead(nbActionProcessData_t *a, s32 formindex)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckTimeListDeadEnemyParty);
+s32 CheckTimeListDeadEnemyParty(nbActionProcessData_t *a, s32 formindex)
+{
+    s32 start;
+    s32 cnt;
+    s32 i;
+
+    if (formindex < 4) {
+        start = 4;
+        cnt = 10;
+    } else {
+        start = 0;
+        cnt = 4;
+    }
+    for (i = start; i < start + cnt; i++) {
+        if ((a->data->form[i].stat & 1) != 0) {
+            if (CheckTimeListDead(a, i) == 0) {
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
 
 s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add)
 {
@@ -672,7 +1008,31 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", GetKoukaList);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetTargetPlayer);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetTargetParty);
+void SetTargetParty(nbActionProcessData_t *a, s32 partyindex)
+{
+    nbFormation_t *form;
+    nbFormation_t *p;
+    s32 i;
+
+    form = a->data->form;
+    for (i = 0; i < 16; i++) {
+        form->stat &= ~4;
+        form->stat &= ~8;
+        form++;
+    }
+    p = a->data->form;
+    for (i = 0; i < 16; i++) {
+        if ((p->stat & 1) != 0) {
+            if ((p->stat & 0x40) != 0) {
+                if (p->partyindex == partyindex) {
+                    p->stat |= 8;
+                    return;
+                }
+            }
+        }
+        p++;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckArrCounter);
 
@@ -694,7 +1054,27 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckInotiNego);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckBinjoNego);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckDeadScript);
+void CheckDeadScript(nbActionProcessData_t *a)
+{
+    s32 i;
+
+    if (a->type == 5) {
+        return;
+    }
+    for (i = 4; i < 14; i++) {
+        nbFormation_t *form = &a->data->form[i];
+
+        if ((form->stat & 1) != 0) {
+            if (CheckTimeListDead(a, i) != 0) {
+                s32 script = nbCheckDeadScript(form);
+
+                if (script != 0) {
+                    nbPushAction(5, form->partyindex, 0, script);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckKoketaNego);
 
@@ -709,7 +1089,25 @@ void KyouseiPress(nbActionProcessData_t *a)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DokodemoPoa);
+void DokodemoPoa(nbActionProcessData_t *a)
+{
+    s32 i;
+
+    for (i = 4; i < 14; i++) {
+        nbFormation_t *form = &a->data->form[i];
+
+        if ((form->stat & 1) != 0) {
+            if ((form->stat & 0x40) != 0) {
+                nbMakeDeadVisualPacket(0, a, form, 0, 1);
+                SetTimeList(a, i, 0, 30, 30);
+                SetDeadPacket(a, i);
+            }
+        }
+    }
+    if (a->data->unkE8 != NULL) {
+        dds3KillProcess(a->data->unkE8, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetNowActionStat);
 
@@ -757,7 +1155,21 @@ void SetAction_AISCR(nbActionProcessData_t *a)
     nbInitAiScript(a, D_003989E0[id].aiscript);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_AISCR);
+s32 CheckAction_AISCR(nbActionProcessData_t *a)
+{
+    if (dds3ExistProcess(a->data->aiScriptProcess) != 0) {
+        return 0;
+    }
+    a->data->aiScriptProcess = NULL;
+    if (a->data->negoresult == 0) {
+        SetNextActionSeq(a, 7);
+    } else {
+        ClearTimeList(a);
+        SetHpForTimeList(a);
+        SetNextActionSeq(a, 10);
+    }
+    return 1;
+}
 
 void SetAction_DEADSCRIPT(nbActionProcessData_t *a)
 {
@@ -766,7 +1178,18 @@ void SetAction_DEADSCRIPT(nbActionProcessData_t *a)
     nbInitAiScript(a, a->adata);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_DEADSCRIPT);
+s32 CheckAction_DEADSCRIPT(nbActionProcessData_t *a)
+{
+    if (dds3ExistProcess(a->data->aiScriptProcess) == 0) {
+        a->data->aiScriptProcess = NULL;
+        nbMakeUnitFadeOutPacket(0, a, a->form, 0, 10, 10, 10);
+        nbAddReturnKoukaPacket(0x19, a, a->party, 1);
+        SetTimeList(a, a->form->formindex, 0, 30, 30);
+        SetNextActionSeq(a, 0x12);
+        return 1;
+    }
+    return 0;
+}
 
 void SetAction_BAD(nbActionProcessData_t *a)
 {
@@ -839,7 +1262,21 @@ INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", jtbl_00543F80);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_NEGO);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_NEGO);
+s32 CheckAction_NEGO(nbActionProcessData_t *a)
+{
+    if (a->data->negoProcess == NULL) {
+        printf(D_00543FB8, a->data->negoresult);
+        SetNextActionSeq(a, 10);
+        nbPanelDraw(1);
+        if (datCheckPlayerDead() != 0) {
+            a->data->negoresult = 8;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543FB8);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_NEGORESULT);
 
@@ -857,11 +1294,33 @@ s32 CheckAction_WAIT(nbActionProcessData_t *a)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_ESCAPE);
+void SetAction_ESCAPE(nbActionProcessData_t *a)
+{
+    if (a->data->esccnt < 255) {
+        a->data->esccnt++;
+    }
+    nbMakePressPacket(0, a, -10.0f);
+    nbMakeNewPressPacket(0, a, 8, a->form);
+    if (nbCheckEscape(a->data) != 0) {
+        a->data->endtype = 3;
+        return;
+    }
+    CheckKoketaNego(a);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_ESCAPE);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_RETURN);
+void SetAction_RETURN(nbActionProcessData_t *a)
+{
+    printf(D_00544020);
+    if ((a->data->stat & 8) != 0) {
+        nbCameraSetState(0x15);
+    }
+    nbMakeReturnPacket(0, a, a->party);
+    SetTimeList(a, a->form->formindex, 0, 40, 40);
+    nbMakePressPacket(10, a, -0.5f);
+    nbMakeNewPressPacket(10, a, 9, a->form);
+}
 
 s32 CheckAction_RETURN(nbActionProcessData_t *a)
 {
@@ -973,19 +1432,78 @@ INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_005440E8);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbActionProcess1);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbActionShutdown);
+void nbActionShutdown(dds3ProcessID_t *id)
+{
+    nbActionProcessData_t *a = dds3GetProcessData(id);
+    dds3ProcessID_t **p = a->data->unkD4;
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        if (*p == id) {
+            *p = NULL;
+        }
+        p++;
+    }
+    if (a->hEffBTL != NULL) {
+        effBTLDelete(a->hEffBTL);
+    }
+    sdfChipFreeDirect(dds3GetProcessData(id));
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", InitActionProcessData);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitActionProcess);
+/* NON_MATCHING: 6 of 40 words, exact size; retail allocates the modulo temps to $9 and $10. */
+#ifdef NON_MATCHING
+void nbInitActionProcess(nbMainProcessData_t *data)
+{
+    nbActionProcessData_t *a;
+    dds3ProcessID_t *id;
 
+    data->unkE4 = (data->unkE4 + 1) % 4;
+    a = InitActionProcessData(data);
+    id = dds3StartProcess(D_00544120, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
+    dds3LinkProcess(data->unkBC, id);
+    data->unkD4[data->unkE4] = id;
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitActionProcess);
+#endif
+
+/* NON_MATCHING: 17 of 37 words, 148 of 156 bytes; retail keeps the start index and the loop counter in separate registers. */
+#ifdef NON_MATCHING
+void nbAddOrder(s32 formindex)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 partyindex;
+    s32 i;
+
+    if ((data->form[formindex].stat & 1) != 0) {
+        if ((data->form[formindex].stat & 0x40) != 0) {
+            partyindex = data->form[formindex].partyindex;
+            i = data->orderindex + 1;
+            for (;;) {
+                if (i >= 12) {
+                    break;
+                }
+                if (data->order[i] < 0) {
+                    data->order[i] = partyindex;
+                    nbSortOrder();
+                    break;
+                }
+                i++;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddOrder);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSortOrder);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetOrderSide);
 
-void nbSetOrder(void)
+void nbSetOrder(s32 index)
 {
     if ((nbGetMainProcessData()->stat & 8) == 0) {
         nbSetOrderSide(0);
@@ -994,7 +1512,33 @@ void nbSetOrder(void)
     nbSetOrderSide(1);
 }
 
+/* NON_MATCHING: 10 of 44 words, 176 of 172 bytes; retail recomputes the order address each iteration instead of an induction pointer. */
+#ifdef NON_MATCHING
+void nbSetNextOrder(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s8 i = data->orderindex;
+
+    if (i < 0) {
+        nbSetOrder(i);
+        return;
+    }
+    for (;;) {
+        i++;
+        data->orderindex = i;
+        if (i >= 12) {
+            nbSetOrder(i);
+            break;
+        }
+        if (data->order[i] >= 0) {
+            break;
+        }
+    }
+    data->activeunit = data->order[data->orderindex];
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetNextOrder);
+#endif
 
 void nbUpdateOrder(void)
 {
@@ -1060,17 +1604,60 @@ s32 nbClipEffectNum(s32 screenPosition[4])
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbLoadKoukaPos);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetKoukaMarkPos);
+void nbGetKoukaMarkPos(nbFormation_t *form)
+{
+    if ((form->stat & 3) == 3) {
+        if (sdfModelGetMarkPos(form->hunit->owner->inner, 2) != 0) {
+            return;
+        }
+    }
+    nbLoadKoukaPos(form);
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbMakeUnitMatrix);
+void nbMakeUnitMatrix(nbFormation_t *form)
+{
+    SDF_VU0_LOADVECTOR(&form->orgrot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&form->center);
+    SDF_VU0_SCALEVECTOR(form->scl);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(form);
+    SDF_VU0_ADDVECTOR();
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbMakeUnitDrawMatrix);
+void nbMakeUnitDrawMatrix(nbFormation_t *form)
+{
+    sdfVector4_t v;
+
+    memset(&v, 0, sizeof(v));
+    v.z = 1.0f;
+    SDF_VU0_LOADVECTOR(&form->rot);
+    ToMatrix();
+    v.z = form->r;
+    SDF_VU0_LOADVECTOR_MEMOPS(v);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR_MEMOPS(v);
+    nbMakeUnitMatrix(form);
+    SDF_VU0_LOADVECTOR_B_MEMOPS(v);
+    SDF_VU0_ADDVECTOR();
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawRotatedModelX);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawRotatedModel);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetUnitMarkPos);
+void nbGetUnitMarkPos(s32 type, nbFormation_t *form)
+{
+    s32 pos[4];
+
+    SDF_VU0_LOADVECTOR(&form->pos);
+    if ((form->stat & 1) != 0) {
+        sdfModelGetMarkPos(form->hunit->owner->inner, 0);
+    }
+    if (nbClipEffectNum(pos) != 0) {
+        nbDrawTargetCursor(type, pos[0] >> 4, pos[1] >> 3);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawPanelSprite);
 
@@ -1110,15 +1697,113 @@ s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes)
     return jyokyomes;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetModelColor);
+u32 nbGetModelColor(nbFormation_t *form)
+{
+    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
+
+    if (work == NULL) {
+        return 0x80808080;
+    }
+    switch (work->badstatus & 0xFFF) {
+    case 0x001:
+        return effBTLSystemGetRGBA(1);
+    case 0x002:
+        return effBTLSystemGetRGBA(2);
+    case 0x004:
+        return effBTLSystemGetRGBA(3);
+    case 0x008:
+        return effBTLSystemGetRGBA(4);
+    case 0x010:
+        return effBTLSystemGetRGBA(5);
+    case 0x020:
+        return effBTLSystemGetRGBA(6);
+    case 0x040:
+        return effBTLSystemGetRGBA(7);
+    case 0x080:
+        return effBTLSystemGetRGBA(8);
+    case 0x100:
+        return effBTLSystemGetRGBA(9);
+    case 0x200:
+        return effBTLSystemGetRGBA(10);
+    case 0x400:
+        return effBTLSystemGetRGBA(11);
+    }
+    return 0x80808080;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAppendEnemyDevilWork);
 
+/* NON_MATCHING: 4 of 44 words, 176 of 180 bytes; retail keeps one offset induction variable and adds the two bases per use. */
+#ifdef NON_MATCHING
+s32 nbGetRandamStock(void)
+{
+    s32 list[16];
+    s32 cnt = 0;
+    s32 i;
+    fldAnahoriAkuma_t *p;
+
+    for (i = 0; i < 16; i++) {
+        if ((DDS3_GBWK->akuma[i].flag & 1) == 0) {
+            continue;
+        }
+        if ((DDS3_GBWK->akuma[i].flag & 2) != 0) {
+            continue;
+        }
+        if ((DDS3_GBWK->akuma[i].flag & 0x10) != 0) {
+            continue;
+        }
+        p = &DDS3_GBWK->akuma[i];
+        if ((p->badstatus & 0xFFF) == 0x800) {
+            continue;
+        }
+        if (p->hp == 0) {
+            continue;
+        }
+        list[cnt] = i;
+        cnt++;
+    }
+    if (cnt == 0) {
+        return -1;
+    }
+    return list[dds3GetRandIntA(0, cnt)];
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetRandamStock);
+#endif
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetMainPhase);
+void nbSetMainPhase(s32 encno)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbCountActiveUnits);
+    data->encno = encno;
+    data->formationtype = nbEncountFormTable[encno].formationtype;
+    data->endtype = 0;
+    data->activeunit = -1;
+    data->orderindex = -1;
+    data->previndex = -1;
+    data->prevcommand = 0;
+    data->prevcommind = 0;
+    data->prevflag = 0;
+    data->turn = 0;
+    data->nextphase = 0;
+    data->esccnt = 0;
+}
+
+void nbCountActiveUnits(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        datUnitWork_t *work = nbGetUnitWorkFromFormindex(i);
+
+        if (work != NULL) {
+            if (*(s16 *)&work->mitamaparam[2] == 2) {
+                *(s16 *)&work->mitamaparam[2] = -1;
+                *(s16 *)&work->mitamaparam[4] = -1;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetupBattleUnits);
 
@@ -1189,7 +1874,23 @@ s32 nbCheckDeadEvent(nbFormation_t *form)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddKagututiMoon);
+void nbAddKagututiMoon(nbMainProcessData_t *data)
+{
+    nbFormation_t *form = nbGetEventForm();
+    datUnitWork_t *work;
+
+    if (form == NULL) {
+        return;
+    }
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    if (work == NULL) {
+        return;
+    }
+    if (work->id != 0x125) {
+        return;
+    }
+    evtSetAgeOfMoon((evtGetAgeOfMoon16() + 2) % 16);
+}
 
 s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid)
 {
@@ -1201,7 +1902,17 @@ s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid)
     return no;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", GetCommListCnt);
+INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00544170);
+
+s32 GetCommListCnt(nbCommSelProcessData_t *s, s32 type)
+{
+    s32 cnt[6] = {4, 4, 4, 3, 4, 4};
+
+    if (type == 3) {
+        return s->cnt;
+    }
+    return cnt[type];
+}
 
 nbCommSelProcessData_t *GetCommSelProcessData(void)
 {
@@ -1209,10 +1920,6 @@ nbCommSelProcessData_t *GetCommSelProcessData(void)
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispPanelCursor);
-
-INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00544170);
-
-INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00544190);
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_005441A8);
 
@@ -1410,7 +2117,16 @@ void nbSetAutoCommSel(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", InitCommSelProcessData);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitCommSelProcess);
+void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
+                          nbActionProcessData_t *a)
+{
+    nbCommSelProcessData_t *s = InitCommSelProcessData(data, my, a);
+    dds3ProcessID_t *id = dds3StartProcess(D_005441A8, 0x2B0E, 1, 1, nbCommSelProcess1,
+                                           nbCommSelShutdown, s);
+
+    dds3LinkProcess(data->unkBC, id);
+    data->unkE8 = id;
+}
 INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", D_00551110);
 
 INCLUDE_SDATA(const s32, "newbattle/nbStageProcess", D_00551114);

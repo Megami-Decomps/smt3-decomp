@@ -39,6 +39,12 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| `beql` on two successive early exits, each with the same `addiu $2, 1` in its delay slot | fuse the two tests into one `||`. As separate `if`s gcc puts the constant in the first delay slot unconditionally and the second exit then reuses it, which costs the branch-likely |
+| one `jal` at the end reached from four or five blocks, each setting only the argument | an early `return` per block with its own call. gcc cross-jumps the identical tails into the one call; a `ret` variable instead spends a saved register and misses by the whole body |
+| a store in a `jal`'s delay slot | write the store before the call. After the call gcc cannot move it up and leaves a `nop`, which is one word and one branch displacement off |
+| one shared tail after a `switch`, with the call's argument loaded in each predecessor | write the tail out in full in every arm and let gcc cross-jump. A shared block placed after the `switch` pulls the argument load inside it and puts the remaining arm on the wrong side of it |
+| the same call duplicated in two arms, each with its own `return` | the opposite of the row above: an early `return` per arm lets gcc cross-jump the two calls into one, so write an `if`/`else` with a single trailing `return`. `CheckAction_AISCR` has two `jal SetNextActionSeq` in retail and one with a `return 1` in each arm |
+| a `beq` on one value, then an `slti` that selects a constant, then a second `beq` | a `switch` over three values, not an `&&` chain of inequalities. gcc splits the three case nodes at the middle one, then folds the two leaves into one compare against a constant chosen by the `slti`. The chain emits three plain `beq`s instead |
 | a flat `beq` chain over four or more contiguous `case` values | make the switch index a `u32` local. With `s32` ee-gcc splits the balanced tree with an `sltiu` range test before the lowest compare; unsigned makes the left subtree bounded below, so `index < 1` folds to the `beqz` retail emits |
 | a call's constant arguments set up above the `if` that guards the call | invert the test into an early `return`, so the call is no longer inside a nested block |
 | more instructions than the C emits, with a 0 or 1 materialised per exit | nest the body inside the guard and give the function one trailing `return`, instead of a chain of early returns. A trailing `if (n <= 0) return 0; return 1;` folds to `slt $0, $2`, and separate `return` constants get cross-jumped into one epilogue; the nested form keeps both. Two functions in `code_001FAE80` went from 0 of 17 and 1 of 17 words to exact on that change alone |
@@ -51,6 +57,17 @@ it was measured on DDS and not on this ELF.
   to force absolute addressing.
 - `div` against `divu`, and `lb` against `lbu`, come from a cast at the use
   site, not from narrowing the field's declared type.
+- A symbol that looks standalone may be one element of a table already
+  declared. `check_unit.py` reporting "retail uses a different address" on a
+  `%lo` that otherwise matches is the tell: `fldGetBgmTrack`'s five track
+  globals are `gFldBgmTop[50]` through `[56]`, and only the `ninja` checksum
+  catches it otherwise.
+- A row stride that is not a power of two comes from subscripting a
+  two-dimensional array. `char names[][28]` gives retail's `sll 3`, `subu`,
+  `sll 2`, and `[][26]` gives `sll 1`, `addu`, `sll 2`, `addu`, `sll 1`.
+- Reuse the loop index variable for a value clamped after the loops. Where
+  retail's `movn` writes a saved register, a fresh local gives `movz` with the
+  value already in `$2`.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -179,6 +196,12 @@ order. The order in which the C uses a constant has to match retail.
 Adjacent constant stores come out in reverse source order, so swapping them
 is the first thing to try on a two-word diff. A short-circuit `||` with one
 store beats an if/else chain that stores in each arm.
+
+- Where retail's last store before a `jal` is a constant store rather than the
+  argument setup, hoist the argument into a local above the stores. The store
+  then falls into the call's delay slot. `nbSetBadstatMotion2` went from six
+  differing words to exact on `party = &data->party[form->partyindex];` moved
+  above three `sw $0` stores, and no order of the stores alone reached it.
 
 Where a handful of constant stores differ only in order, permute them
 mechanically rather than reasoning about it. A loop driving

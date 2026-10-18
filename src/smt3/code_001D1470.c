@@ -26,17 +26,73 @@ typedef union
     s32 channels[4];
     pbColorByte_t channelBytes[4];
 } pbColor_t;
+typedef struct pbPanel_t pbPanel_t;
 typedef struct { s32 value; } pbPanelValue_t;
+typedef struct { s32 code, unk04, timer; } pbErrorWork_t;
 typedef struct pbGroupDB_t pbGroupDB_t;
-/* Common panel work header: its constructor installs process and data links. */
 typedef struct
 {
+    s32 dispStat;
+    s16 cellX, cellY;
+    s32 rot;
+    u8 unk0C[4];
+    sdfVector4_t pos;
+    union { s32 field; mdlObj_t *model; };
+} pbMyCharacter_t;
+typedef struct { s32 format, type, free, result; } pbMCardInfo_t;
+typedef struct { s16 number, label; } pbStageEntry_t;
+typedef struct
+{
+    s32 pcharNum;
+    u8 unk004[0x14];
+    s16 exitX, exitY;
+    u8 unk01C[0x320];
+    s32 charIndex;
+    void *baseTex;
+    void *tex344, *tex348, *tex34C;
+    sdfMemHandle_t *mapData;
+    u8 *giveupScript;
+    s16 level, stage;
+    u8 unk35C[4];
+    s32 menuState;
+    struct pbPanel_t *helpProc;
+} pbMapWork_t;
+typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
+struct pbGroupDB_t { u32 count; pbGroupEntry_t *entry[1]; };
+typedef struct
+{
+    s32 unk00;
+    union { s32 value; struct { s16 unk04, unk06; }; };
+    sdfMat_t *mat;
+} pbMatWork_t;
+typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCamWork_t;
+typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
+typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbBlockObj_t;
+typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+typedef struct { sdfVector4_t v[4]; } pbMatrix_t;
+typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
+typedef struct { s16 x, y; } pbGoalPos_t;
+typedef struct { u8 unk00[8]; pbGoalPos_t pos; } pbGoal_t;
+typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
+typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
+typedef struct
+{
+    s16 clearBit;
+    s16 unk02;
+    pbStageEntry_t stage[1];
+} pbLevel_t;
+/* Common panel work header: its constructor installs process and data links. */
+struct pbPanel_t
+{
     dds3ProcessID_t *process;
-    u32 flags;
+    union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
-    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; } data;
-} pbPanel_t;
-typedef struct { sdfMemHandle_t *allocation; } pbDebugWork_t;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
+            pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
+            pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
+            pbViewCamWork_t *viewCam; } data;
+};
+typedef struct { sdfMemHandle_t *allocation; u16 unk04, unk06, unk08, level, stage; } pbDebugWork_t;
 
 /* The native FOV workspace is an unnamed view at pinst + 0xA34. Bind its
  * assembler address without redefining pinst's message-instance array type
@@ -70,7 +126,124 @@ extern void FromEuler(void);
 extern void sdfChipFreeDelayedDirect(void *ptr);
 extern void sdfChipFreeDirect(void *ptr);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern s32 pbMapIsValid(void);
+extern u32 pbMapIsValid(void);
+extern s32 sceMcGetInfo(s32 port, s32 slot, s32 *type, s32 *free, s32 *format);
+extern pbLevel_t *pbLevelTable[];
+extern u8 keyAct[];
+extern s8 pbLoadState;
+extern pbMapWork_t *D_0054F5C4;
+extern pbGoal_t *goal;
+extern pbPanel_t *record;
+extern void sdfMatFreeDelayed(sdfMat_t *mat);
+extern sdfMat_t *sdfMatNew(void);
+extern void sdfMatSetTex(sdfMat_t *mat, void *tex);
+extern void dds3ResetProcessFlag(dds3ProcessID_t *id, u32 mask, s32 value);
+extern void mdlFree(mdlObj_t *model);
+extern void pbGotoNewStage(void);
+extern void pbBuildMapBaseVerts(pbPanel_t *panel);
+typedef void (*pbCharacterFunc_t)(void);
+extern pbCharacterFunc_t pbCharacterTable[];
+extern pbPanel_t *blockDB;
+extern u32 current_char;
+extern char pbMapPathBuf[];
+extern f32 D_00327370[];
+extern sdfVector4_t D_0056CB30[], D_0056C8F0[], D_00326C70[], D_00326CD0[];
+extern u8 D_00326D50[];
+extern char D_00535E40[], D_00535E68[];
+extern s32 pbPopRecord(pbPanel_t *record, pbPanel_t **chars, pbPanel_t *db);
+extern pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 code, s32 timer);
+extern pbPanel_t *pbWaitLoadMapData(pbPanel_t *parent);
+extern void *sdfChipAllocDirect(u32 size);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
+extern s32 pb_draw_bg_Process(dds3ProcessID_t *id);
+extern void pb_draw_bg_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_load_mapdata_Process(dds3ProcessID_t *id);
+extern void pb_load_mapdata_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_proc_dummy_Process(dds3ProcessID_t *id);
+extern void pb_proc_dummy_Shutdown(dds3ProcessID_t *id);
+extern s32 ClearProc(dds3ProcessID_t *id);
+extern void DeleteClearProc(dds3ProcessID_t *id);
+extern void rsetOtOfs(s32 ofs);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, void *);
+extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
+extern void *memset(void *dst, s32 c, u32 n);
+extern s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id);
+extern void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_draw_error_Process(dds3ProcessID_t *id);
+extern void pb_draw_error_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_proc_record_Process(dds3ProcessID_t *id);
+extern void pb_proc_record_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_draw_help_Process(dds3ProcessID_t *id);
+extern void pb_draw_help_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
+extern void pb_proc_menu_Shutdown(dds3ProcessID_t *id);
+extern char D_005361B0[], D_005361C8[], D_005365D8[], D_00536398[], D_00535EB8[];
+extern char D_00536040[], D_00535CE8[], D_00535CD8[], D_00535FA8[];
+extern s32 pb_proc_block_DB_Process(dds3ProcessID_t *id);
+extern void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_draw_mapbase_Process(dds3ProcessID_t *id);
+extern void pb_draw_mapbase_Shutdown(dds3ProcessID_t *id);
+extern s32 pb_draw_exit_Process(dds3ProcessID_t *id);
+extern void pb_draw_exit_Shutdown(dds3ProcessID_t *id);
+extern s32 viewModeCamera(dds3ProcessID_t *id);
+extern void deleteViewModeCamera(dds3ProcessID_t *id);
+extern void sdfMatSetDiffuse(sdfMat_t *mat, u32 color);
+extern void pbInitMapBaseMat(pbPanel_t *panel);
+extern char D_00535E00[], D_00535E10[], D_00535E20[], D_00535EC8[], D_00535FC8[];
+extern void updateMotion(void);
+extern void dds3FadeOut(s32, s32, s32, s32);
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern void sdfFileCmdReadFile(char *path, void *dest, s32 size, void *done, s32 arg);
+extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
+extern void pbFreeRecord(pbRecordSlot_t *slot);
+extern void pbFreeGroupHandles(pbBlockDB_t *db);
+extern void pbFreeGroupEntry(mdlResrc_t *entry);
+extern s32 pbGetMoveChar(void);
+extern void dds3AdminiCallSequence(s32, s32, s32, s32);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void fclClearFlag(s32 flag);
+extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern void dds3SetProcessFlag(dds3ProcessID_t *id, u32 mask, s32 value);
+extern void setRoundBlockData(pbBlockObj_t *block, s16 index);
+extern s32 pbStartAutoRoundCamera(s32, s32);
+extern void pbSetModelRotate(mdlObj_t *model, f32 x, f32 y, f32 z);
+extern void SetRotateMatrixXYZ(sdfVector4_t *rot);
+extern void StoreMatrix(pbMatrix_t *m);
+extern void LoadMatrix(pbMatrix_t *m);
+extern void sdf3DPrimLinkTm(void *prim, s32 mode);
+extern void func_001D2D00(pbPanel_t *panel, s32 arg);
+extern pbPanel_t *mychar[];
+extern s32 moveB, roundCamera;
+extern f32 D_00326C60[];
+extern char D_00535EF8[];
+extern char D_00535DE0[];
+extern char D_00535E90[];
+extern u32 pbPushRecord(pbPanel_t *panel);
+extern u8 degree_mode;
+extern sdfMemHandle_t *a_key;
+extern void p2sdStopAllSe(void);
+extern void fclEncycFreeEntries(char *name);
+extern void fldProcNextJump(void);
+extern u32 pbMyCharacterDispStat(pbPanel_t *panel);
+extern dds3ProcessID_t *pbStartGiveupConfirm(void);
+extern s8 pbCheckPopRecord(pbPanel_t *panel);
+extern s8 pbCheckPreviousRecord(void);
+extern u8 pbRotLKeyAct(void);
+extern u8 pbRotRKeyAct(void);
+extern void pbClearRecord(pbPanel_t *panel);
+extern s32 moveViewCamera;
+extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
+extern sdfVector4_t pbInitCameraParam, pbCameraVec2;
+extern void pbSetGameCamera1(void);
+extern void pbSetGameCamera2(void);
+extern void sceMcMkdir(s32 port, s32 slot, const char *name);
+extern void sceMcChdir(s32 port, s32 slot, const char *newdir, char *currentdir);
+extern void sceMcGetDir(s32 port, s32 slot, const char *name, u32 mode, s32 maxent, void *table);
+extern void sceMcSync(s32 mode, s32 *cmd, s32 *result);
 extern void pbPreviousRecord(void);
 extern void *pbFindGroupEntry(pbGroupDB_t *db, u32 group);
 extern pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page);
@@ -612,7 +785,13 @@ void pbDrawRotatedPrim(s32 surfaceIndex) {
     ((sdfGrOtRegFunc_t)surface->regFunc)(surface, list);
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D2638);
+void func_001D2638(f32 *delta) {
+    f32 *eye = (f32 *)&aViewEye;
+    u32 i;
+    for (i = 0; i < 3; i++) {
+        eye[i] += delta[i];
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbRotateXCamera);
 
@@ -624,18 +803,30 @@ INCLUDE_ASM(const s32, "code_001D1470", pbSetViewRotation);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_mycharacter_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_mycharacter_Shutdown);
+void pb_draw_mycharacter_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbMyCharacter_t *chara = panel->data.chara;
+    mdlFree(chara->model);
+    sdfChipFreeDelayedDirect(chara);
+    sdfChipFreeDelayedDirect(panel);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D2AD8);
+void pb_1D2AD8(mdlObj_t *model, sdfVector4_t *pos) {
+    mdlGetPosition(model);
+    SDF_VU0_STOREVECTOR(pos);
+}
 
 void pbSetModelPos(mdlObj_t *model, const f32 *position) {
     SDF_VU0_LOADVECTOR(position);
     mdlSetPosition(model);
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_1D2B18);
+void pb_1D2B18(mdlObj_t *model, sdfVector4_t *rot) {
+    mdlGetRotate(model);
+    SDF_VU0_STOREVECTOR(rot);
+}
 
-void pbSetModelRotate(mdlObj_t *model) {
+void pbSetModelRotate(mdlObj_t *model, f32 x, f32 y, f32 z) {
     FromEuler();
     mdlSetRotate(model);
 }
@@ -650,13 +841,32 @@ INCLUDE_RODATA(const s32, "code_001D1470", D_00535C58);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbInitMyCharacterDraw);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetPanelField);
+s32 pbGetPanelField(pbPanel_t *panel) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    s32 ret = 0;
+    if (panel != NULL) {
+        ret = chara->field;
+    }
+    return ret;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMyCharacterDispStat);
+u32 pbMyCharacterDispStat(pbPanel_t *panel) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    u32 ret = 0;
+    if (panel != NULL) {
+        ret = chara->dispStat;
+    }
+    return ret;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetPanelValue);
+void pbSetPanelValue(pbPanel_t *panel, s8 value) {
+    pbPanelValue_t *v = panel->data.value;
+    if (panel != NULL) {
+        v->value = value;
+    }
+}
 
-void func_001D2D00(void) {
+void func_001D2D00(pbPanel_t *panel, s32 arg) {
 }
 
 void pbChangeMotion(void) {
@@ -666,33 +876,118 @@ s32 pb_1D2D10(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMoveMyCharcter);
+void pbMoveMyCharcter(pbPanel_t *panel, f32 dx, f32 dz) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    if (panel != NULL) {
+        chara->pos.x += dx;
+        chara->pos.z += dz;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMoveMyCharcter2);
+void pbMoveMyCharcter2(pbPanel_t *panel, s16 dx, s16 dy) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    if (panel != NULL) {
+        chara->cellX = dx + chara->cellX;
+        chara->cellY = dy + chara->cellY;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetCellY);
+void pbGetCellY(pbPanel_t *panel, s16 cx, s16 cy) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    if (panel != NULL) {
+        chara->cellX = cx;
+        chara->cellY = cy;
+        chara->pos.x = cx * 40 - 380;
+        chara->pos.z = cy * 40 - 380;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetMyCharcterPos);
+void pbGetMyCharcterPos(pbPanel_t *panel, sdfVector4_t *pos) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    if (panel != NULL) {
+        SDF_VU0_COPYVECTOR(pos, &chara->pos);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetMyCharcterPos2);
+void pbGetMyCharcterPos2(pbPanel_t *panel, s16 *x, s16 *y) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    if (panel != NULL) {
+        *x = chara->cellX;
+        *y = chara->cellY;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetMyCharcterRot);
+s32 pbGetMyCharcterRot(pbPanel_t *panel) {
+    pbMyCharacter_t *chara = panel->data.chara;
+    s32 ret = -1;
+    if (panel != NULL) {
+        ret = chara->rot;
+    }
+    return ret;
+}
 
+/* NON_MATCHING: 2 of 23 words; the index and work pseudos swap saved registers. */
+#ifdef NON_MATCHING
+void pbSetPanelModel(pbPanel_t *panel, s32 index) {
+    pbPanelModel_t *work;
+    if (panel != NULL) {
+        work = panel->data.model;
+        pbSetModelRotate((mdlObj_t *)pbGetPanelField(panel), 0.0f, D_00326C60[index], 0.0f);
+        work->modelIndex = index;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001D1470", pbSetPanelModel);
+#endif
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_exit_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_exit_Shutdown);
+void pb_draw_exit_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbMatWork_t *work = panel->data.mat;
+    sdfMatFreeDelayed(work->mat);
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_mapbase_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_mapbase_Shutdown);
+void pb_draw_mapbase_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbMatWork_t *work = panel->data.mat;
+    sdfMatFreeDelayed(work->mat);
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbInitMapBaseMat);
+void pbInitMapBaseMat(pbPanel_t *panel) {
+    pbMatWork_t *work = panel->data.mat;
+    pbBuildMapBaseVerts(panel);
+    work->mat = sdfMatNew();
+    sdfMatSetTex(work->mat, D_0054F5C4->baseTex);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbBuildMapBaseVerts);
+void pbBuildMapBaseVerts(pbPanel_t *panel) {
+    u32 row, col;
+    for (row = 0; row < 6; row++) {
+        for (col = 0; col < 6; col++) {
+            u32 i = col + row * 6;
+            SDF_VU0_COPYVECTOR(&D_0056CB30[i], &D_00326C70[row]);
+            SDF_VU0_COPYVECTOR(&D_0056C8F0[i], &D_00326CD0[D_00326D50[i]]);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetPrimMatrix);
+void pbSetPrimMatrix(sdfVector4_t *rot, f32 *pos, void *prim) {
+    pbMatrix_t m;
+    SetRotateMatrixXYZ(rot);
+    StoreMatrix(&m);
+    m.v[3].x = pos[0];
+    m.v[3].y = pos[1];
+    m.v[3].z = pos[2];
+    LoadMatrix(&m);
+    sdf3DPrimLinkTm(prim, 0);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbFindBlockSlot);
 
@@ -710,17 +1005,32 @@ INCLUDE_ASM(const s32, "code_001D1470", pbDrawMapPolyTransformed);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDrawMapBlock);
 
-INCLUDE_RODATA(const s32, "code_001D1470", D_00535CB8);
+pbPanel_t *pbInitExitDraw(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbMatWork_t *work;
+    panel->process = dds3StartProcess(D_00535CD8, 0x2AFD, 1, 1, pb_draw_exit_Process,
+                                      (dds3ProcessFunc_t)pb_draw_exit_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->x = 10;
+    panel->y = 10;
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(0xC);
+    panel->data.mat = work;
+    memset(work, 0, 0xC);
+    dds3SetProcessData(panel->process, panel);
+    work->unk00 = 0;
+    work->unk06 = 0;
+    work->unk04 = 0;
+    work->mat = sdfMatNew();
+    sdfMatSetDiffuse(work->mat, 0x70FFFFFF);
+    return panel;
+}
 
-INCLUDE_RODATA(const s32, "code_001D1470", D_00535CC0);
-
-INCLUDE_RODATA(const s32, "code_001D1470", D_00535CC8);
-
-INCLUDE_RODATA(const s32, "code_001D1470", D_00535CD0);
-
-INCLUDE_ASM(const s32, "code_001D1470", pbInitExitDraw);
-
-INCLUDE_ASM(const s32, "code_001D1470", pbSetExitDisp);
+void pbSetExitDisp(pbPanel_t *panel, s8 disp) {
+    panel->data.value->value = disp;
+}
 
 s32 pbGetExitDisp(pbPanel_t *panel) {
     return panel->data.value->value;
@@ -731,7 +1041,38 @@ void pbSetExitPos(pbPanel_t *panel, s32 x, s32 y) {
     panel->y = y;
 }
 
+/* NON_MATCHING: 3 of 49 words; the work store and the process load swap delay slots. */
+#ifdef NON_MATCHING
+pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 arg) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    void *work;
+    panel->process = dds3StartProcess(D_00535CE8, 0x2AFD, 1, 1, pb_draw_mapbase_Process,
+                                      (dds3ProcessFunc_t)pb_draw_mapbase_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(0xC);
+    panel->data.mat = work;
+    memset(work, 0, 0xC);
+    panel->data.mat->value = arg;
+    dds3SetProcessData(panel->process, panel);
+    pbInitMapBaseMat(panel);
+    return panel;
+}
+#else
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535CB8);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535CC0);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535CC8);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535CD0);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535CD8);
+
 INCLUDE_ASM(const s32, "code_001D1470", pbInitMapBaseDraw);
+#endif
 
 void func_001D4140(pbPanel_t *panel, s32 value) {
     panel->data.value->value = value;
@@ -741,11 +1082,34 @@ INCLUDE_ASM(const s32, "code_001D1470", pbLoadTextures);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbEditInitProc);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbEditMainExitProc);
+void pbEditMainExitProc(void) {
+    p2sdStopAllSe();
+    sdfTexFreeDelayed(D_0054F5C4->baseTex);
+    sdfTexFreeDelayed(D_0054F5C4->tex344);
+    sdfTexFreeDelayed(D_0054F5C4->tex348);
+    sdfTexFreeDelayed(D_0054F5C4->tex34C);
+    if (D_0054F5C4->giveupScript != NULL) {
+        sdfMemFreeDirect(D_0054F5C4->mapData);
+        D_0054F5C4->giveupScript = NULL;
+    }
+    sdfMemFreeDirect(a_key);
+    fclEncycFreeEntries(D_00535DE0);
+    fldProcNextJump();
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_proc_dummy_Process);
+s32 pb_proc_dummy_Process(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    if (panel != NULL) {
+        panel->flags = 0x20000;
+    }
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_proc_dummy_Shutdown);
+void pb_proc_dummy_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    sdfChipFreeDelayedDirect(panel->data.value);
+    sdfChipFreeDelayedDirect(panel);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_bg_Process);
 
@@ -761,15 +1125,45 @@ s32 pbGetMoveChar(void) {
     return pbMoveChar;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartDummy);
+pbPanel_t *pbStartDummy(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbPanelValue_t *work;
+    panel->process = dds3StartProcess(D_00535E00, 0x3EE, 1, 1, pb_proc_dummy_Process,
+                                      (dds3ProcessFunc_t)pb_proc_dummy_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    work = sdfChipAllocDirect(4);
+    work->value = 0;
+    panel->data.value = work;
+    panel->flags = 0;
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartBackGround);
+pbPanel_t *pbStartBackGround(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    panel->process = dds3StartProcess(D_00535E10, 0x2AFD, 1, 1, pb_draw_bg_Process,
+                                      (dds3ProcessFunc_t)pb_draw_bg_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
 s32 func_001D4B28(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMapIsValid);
+u32 pbMapIsValid(void) {
+    u32 ret = (D_0054F5C4->pcharNum == 0);
+    if ((D_0054F5C4->exitX < 0) || (D_0054F5C4->exitY < 0)) {
+        ret |= 2;
+    }
+    return ret;
+}
 
 s32 pb_1D4B60(void) {
     return 0;
@@ -796,7 +1190,14 @@ s32 pb_1D4B88(void) {
 void func_001D4B90(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbLoadSystemDataDone);
+s32 pbLoadSystemDataDone(s32 handle, s32 status) {
+    if (status == 8) {
+        pbLoadState = 1;
+    } else if (status == 0) {
+        pbLoadState = -1;
+    }
+    return 0;
+}
 
 s32 func_001D4BC0(void) {
     return 1;
@@ -806,11 +1207,40 @@ s32 func_001D4BC8(void) {
     return pbMapIsValid() == 0;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4BE8);
+s8 func_001D4BE8(void) {
+    s8 ret = pbCheckPreviousRecord();
+    return ret;
+}
 
+/* NON_MATCHING: 1 of 37 words; retail annuls the epilogue restore in a beql delay slot. */
+#ifdef NON_MATCHING
+void func_001D4C08(pbPanel_t *panel) {
+    if (pbMapIsValid() == 0) {
+        dds3FadeOut(0, 0, 0, 1);
+        dds3ResetProcessFlag(panel->process, 0x10, 1);
+        if (pbGetMoveChar() != 0) {
+            if (pbGetMoveChar() != 0) {
+                ((pbPanel_t *)pbGetMoveChar())->flags = 0x40000;
+            }
+            ((pbPanel_t *)pbGetMoveChar())->flags |= 1;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001D1470", func_001D4C08);
+#endif
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMakeMapPathHdd);
+void pbMakeMapPathHdd(pbPanel_t *parent) {
+    if (pbMapPathIdx == 1) {
+        dds3FadeOut(0, 0, 0, 1);
+        sprintf(pbMapPathBuf, D_00535E20, pbMenuIndex);
+        sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
+        pbLoadState = 0;
+        pbWaitLoadMapData(parent);
+    } else {
+        pbMapPathIdx = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbMakeMapPath);
 
@@ -820,25 +1250,74 @@ void func_001D4E08(void) {
 void func_001D4E10(void) {
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", exitPB);
+void exitPB(pbPanel_t *panel) {
+    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    if (pbGetMoveChar() != 0) {
+        ((pbPanel_t *)pbGetMoveChar())->flags = 0x60000;
+    }
+    dds3AdminiCallSequence(0, 0, 0, 0);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", func_001D4E70);
+void func_001D4E70(pbPanel_t *panel) {
+    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    pbStartGiveupConfirm();
+    panel->flags = 0x50000;
+}
 
+/* NON_MATCHING: 21 of 22 words; retail annuls the trailing lui in a beql delay slot. */
+#ifdef NON_MATCHING
+void func_001D4EB0(pbPanel_t *panel) {
+    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    if (pbGetMoveChar() != 0) {
+        ((pbPanel_t *)pbGetMoveChar())->flags = 0x10000;
+    }
+    panel->flags = 0x50000;
+}
+#else
 INCLUDE_ASM(const s32, "code_001D1470", func_001D4EB0);
+#endif
 
 void func_001D4F08(void) {
     pbPreviousRecord();
 }
 
+void pbSetDebugOwner(pbPanel_t *panel) {
+    pbPanelValue_t *work = panel->data.value;
+    pbPanel_t *help = pbStartHelp((pbPanel_t *)pbGetMoveChar(), work->value);
+    dds3ProcessID_t *id;
+    D_0054F5C4->helpProc = help;
+    dds3SetProcessFlag(help->process, 0x10, 1);
+    id = dds3SearchProcessName(D_00535E90);
+    if (id != NULL) {
+        dds3ResetProcessFlag(id, 0x10, 2);
+    }
+    if (panel != NULL) {
+        panel->flags = 0x50000;
+    }
+}
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535E00);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535E10);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535E20);
+
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535E40);
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535E68);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetDebugOwner);
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535E90);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_proc_menu_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_proc_menu_Shutdown);
+void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbPanelValue_t *work = panel->data.value;
+    dds3ResetProcessFlag(id, 0x10, 1);
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+    D_0054F5C4->menuState = 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_load_mapdata_Process);
 
@@ -846,17 +1325,80 @@ void pb_load_mapdata_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDirect(id->workdata);
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartMenu);
+pbPanel_t *pbStartMenu(pbPanel_t *parent, s32 mode) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    void *work;
+    panel->process = dds3StartProcess(D_00535EB8, 0x3F8, 1, 1, pb_proc_menu_Process,
+                                      (dds3ProcessFunc_t)pb_proc_menu_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(4);
+    panel->data.value = work;
+    memset(work, 0, 4);
+    panel->data.value->value = mode;
+    dds3SetProcessData(panel->process, panel);
+    pbMenuState = 0;
+    pbMapPathIdx = 0;
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbWaitLoadMapData);
+pbPanel_t *pbWaitLoadMapData(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    panel->process = dds3StartProcess(D_00535EC8, 0x3EE, 1, 1, pb_load_mapdata_Process,
+                                      (dds3ProcessFunc_t)pb_load_mapdata_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbLoadSystemData);
+void pbLoadSystemData(s32 index) {
+    dds3FadeOut(0, 0, 0, 1);
+    if (index < 30) {
+        sprintf(pbMapPathBuf, D_00535E40, index);
+    } else {
+        sprintf(pbMapPathBuf, D_00535E68, index);
+    }
+    sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
+    pbLoadState = 0;
+    pbWaitLoadMapData(NULL);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", getCharacterNum);
+s32 getCharacterNum(void) {
+    s32 count = 0;
+    u32 i;
+    for (i = 0; i < D_0054F5C4->pcharNum; i++) {
+        if (pbMyCharacterDispStat(mychar[i]) != 0) {
+            count++;
+        }
+    }
+    return count;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbNextCharacter);
+void pbNextCharacter(void) {
+    do {
+        current_char = (current_char + D_0054F5C4->pcharNum + 1) % D_0054F5C4->pcharNum;
+    } while (pbMyCharacterDispStat(mychar[current_char]) == 0);
+    updateMotion();
+    if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
+        pbCharacterTable[D_0054F5C4->charIndex]();
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", updateMotion);
+void updateMotion(void) {
+    u32 i;
+    for (i = 0; i < D_0054F5C4->pcharNum; i++) {
+        func_001D2D00(mychar[i], 0);
+    }
+}
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535EB8);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535EC8);
 
 INCLUDE_ASM(const s32, "code_001D1470", hitCheck);
 
@@ -870,13 +1412,26 @@ INCLUDE_ASM(const s32, "code_001D1470", hallCheck);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbFindProcHandle);
 
-INCLUDE_ASM(const s32, "code_001D1470", goalHitCheck);
+s8 goalHitCheck(s16 x, s16 y) {
+    if ((x == goal->pos.x) && (y == goal->pos.y)) {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", gameKey0);
 
 INCLUDE_ASM(const s32, "code_001D1470", gameKey1);
 
-INCLUDE_ASM(const s32, "code_001D1470", RotateBit);
+u32 RotateBit(u32 val, s32 loop) {
+    s32 i;
+    for (i = 0; i < loop; i++) {
+        u32 bit = (val & 1) << 3;
+        val >>= 1;
+        val |= bit;
+    }
+    return val;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", gameKey2);
 
@@ -896,37 +1451,125 @@ INCLUDE_ASM(const s32, "code_001D1470", deleteMoveChar);
 
 INCLUDE_ASM(const s32, "code_001D1470", setMoveBlockData);
 
+/* NON_MATCHING: 30 of 31 words, 124 bytes against retail's 140; retail holds the delta row in three pointer copies and materialises the -1 return late. */
+#ifdef NON_MATCHING
+s32 moveBlock(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbRoundBlock_t *work = panel->data.round;
+    if (work->step >= 4) {
+        return -1;
+    }
+    {
+        f32 *delta = &D_00327370[work->index * 3];
+        pbBlockObj_t *obj = work->block;
+        obj->x = obj->x + delta[0];
+        obj->y = obj->y + delta[1];
+        obj->z = obj->z + delta[2];
+    }
+    work->step = work->step + 1;
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_001D1470", moveBlock);
+#endif
 
 INCLUDE_ASM(const s32, "code_001D1470", deleteMoveBlock);
 
-INCLUDE_ASM(const s32, "code_001D1470", rotXY);
+void rotXY(s16 *x, s16 *y, s32 dir) {
+    s16 ox = *x;
+    if ((ox == 0) && (*y == 0)) {
+        return;
+    }
+    *x = *y;
+    *y = ox;
+    if (dir == -1) {
+        if (ox == 0) {
+            s16 v = *x;
+            *x = -v;
+        }
+    } else if (dir == 1) {
+        if (*x == 0) {
+            *y = -ox;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", setRoundBlockData);
 
 INCLUDE_ASM(const s32, "code_001D1470", roundBlock);
 
-INCLUDE_ASM(const s32, "code_001D1470", deleteRoundBlock);
+void deleteRoundBlock(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbRoundBlock_t *work = panel->data.round;
+    pbPushRecord(record);
+    setRoundBlockData(work->block, work->index);
+    work->block->value = 0;
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+    moveB = 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", roundAutoCamera);
 
-INCLUDE_ASM(const s32, "code_001D1470", deleteRoundAutoCamera);
+void deleteRoundAutoCamera(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbPanelValue_t *work = panel->data.value;
+    if (cameraAngle > 6.28318501f) {
+        cameraAngle = cameraAngle - 6.28318501f;
+    } else if (cameraAngle < 0.0f) {
+        cameraAngle = cameraAngle + 6.28318501f;
+    }
+    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+    roundCamera = 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", viewModeCamera);
 
-INCLUDE_ASM(const s32, "code_001D1470", deleteViewModeCamera);
+void deleteViewModeCamera(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    sdfChipFreeDelayedDirect(panel->data.value);
+    sdfChipFreeDelayedDirect(panel);
+    moveViewCamera = 0;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", ClearProc);
+s32 ClearProc(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbPanelValue_t *work = panel->data.value;
+    rsetOtOfs(0x47);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    DrwSprite2D(0, 0xC3, 0x200, 0x3A, 0, 0x1C4, 0x200, 0x3A, 0x80808080,
+                D_0054F5C4->tex34C);
+    work->value = work->value - 1;
+    if (work->value < 0) {
+        return -1;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", DeleteClearProc);
+void DeleteClearProc(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    sdfChipFreeDelayedDirect(panel->data.value);
+    sdfChipFreeDelayedDirect(panel);
+    D_0054F5C4->stage = (u16)D_0054F5C4->stage + 1;
+    pbGotoNewStage();
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", CalcDegreeMode);
 
-INCLUDE_ASM(const s32, "code_001D1470", GetStageNumber);
+s16 GetStageNumber(void) {
+    return (pbLevelTable[D_0054F5C4->level]->stage + D_0054F5C4->stage)->number;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", GetStageScriptLabel);
+s16 GetStageScriptLabel(void) {
+    return (pbLevelTable[D_0054F5C4->level]->stage + D_0054F5C4->stage)->label;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", GetAllStageClearBit);
+s16 GetAllStageClearBit(void) {
+    return pbLevelTable[D_0054F5C4->level]->clearBit;
+}
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535F40);
 
@@ -944,11 +1587,38 @@ INCLUDE_RODATA(const s32, "code_001D1470", D_00535F78);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbStartAutoRoundCamera);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartViewModeCamera);
+pbPanel_t *pbStartViewModeCamera(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbViewCamWork_t *work;
+    panel->process = dds3StartProcess(D_00535FA8, 0x3EE, 0, 0, viewModeCamera,
+                                      (dds3ProcessFunc_t)deleteViewModeCamera, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    work = sdfChipAllocDirect(0x30);
+    panel->data.viewCam = work;
+    memset(work, 0, 0x30);
+    work->scale = 1.0f;
+    SDF_VU0_COPYVECTOR(&work->eye, &aViewEye);
+    SDF_VU0_COPYVECTOR(&work->target, &aViewTarget);
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbRoundCamera);
+void pbRoundCamera(s32 dir) {
+    roundCamera = pbStartAutoRoundCamera(0, (dir != -1) ? -1 : 1);
+    if (dir == -1) {
+        pbRotLKeyAct();
+    } else {
+        pbRotRKeyAct();
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetGameCamera0);
+void pbSetGameCamera0(void) {
+    SDF_VU0_COPYVECTOR(&aViewEye, &pbGameCameraParam);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbSetGameCamera1);
 
@@ -958,17 +1628,76 @@ INCLUDE_ASM(const s32, "code_001D1470", pbSetGameCamera3);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbSetGameCamera4);
 
+/* NON_MATCHING: 26 of 38 words; gcc range-tests case 0 where retail compares it. */
+#ifdef NON_MATCHING
+void pbInitGameCamera(void) {
+    switch (D_0054F5C4->charIndex) {
+    case 0:
+        pbSetGameCamera0();
+        cameraAngle = 0.0f;
+        break;
+    case 1:
+        SDF_VU0_COPYVECTOR(&aViewEye, &pbInitCameraParam);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec2);
+        pbSetGameCamera1();
+        break;
+    case 2:
+        pbSetGameCamera2();
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001D1470", pbInitGameCamera);
+#endif
 
-INCLUDE_ASM(const s32, "code_001D1470", pbCheckPreviousRecord);
+s8 pbCheckPreviousRecord(void) {
+    s8 ret = pbCheckPopRecord(record);
+    return ret;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbPreviousRecord);
+void pbPreviousRecord(void) {
+    s32 r = pbPopRecord(record, mychar, blockDB);
+    if (r >= 0) {
+        pbStartErrorDraw(0, 9, 30);
+        if (blockDB != NULL) {
+            blockDB->flags = 0x10000;
+        }
+        current_char = r;
+        updateMotion();
+        if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
+            pbCharacterTable[D_0054F5C4->charIndex]();
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartClear);
+pbPanel_t *pbStartClear(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbPanelValue_t *work;
+    panel->process = dds3StartProcess(D_00535FC8, 0x3EE, 1, 1, ClearProc,
+                                      (dds3ProcessFunc_t)DeleteClearProc, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    work = sdfChipAllocDirect(4);
+    work->value = 30;
+    panel->data.value = work;
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartGiveupConfirm);
+dds3ProcessID_t *pbStartGiveupConfirm(void) {
+    fclClearFlag(0);
+    scr_msg = scrStartScript2(0x3EE, D_0054F5C4->giveupScript, 1);
+    dds3SetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+    return scr_msg;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetCameraParam);
+void pbGetCameraParam(f32 *param) {
+    param[0] = cameraAngle;
+    param[1] = cameraRadius;
+    param[2] = cameraDegree;
+}
 
 void func_001D8EA0(f32 angle) {
     cameraAngle = angle;
@@ -990,13 +1719,54 @@ dds3ProcessID_t *pbGetMessageScriptProc(void) {
     return scr_msg;
 }
 
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535FA8);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535FC8);
+
 INCLUDE_ASM(const s32, "code_001D1470", pbGotoNewStage);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbRoundStageNext);
+void pbRoundStageNext(s16 *level, s16 *stage) {
+    pbLevel_t *lv = pbLevelTable[*level];
+    *stage = (u16)*stage + 1;
+    if ((lv->stage + *stage)->number < 0) {
+        *stage = 0;
+        *level = (u16)*level + 1;
+        if (*level >= 3) {
+            *level = 0;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbRoundStagePrev);
+void pbRoundStagePrev(s16 *level, s16 *stage) {
+    pbLevel_t *lv;
+    s32 s = (u16)*stage - 1;
+    *stage = s;
+    if ((s16)s < 0) {
+        s32 l = (u16)*level - 1;
+        *level = l;
+        if ((s16)l < 0) {
+            *level = 2;
+        }
+        lv = pbLevelTable[*level];
+        *stage = 0;
+        while ((lv->stage + *stage + 1)->number >= 0) {
+            *stage = (u16)*stage + 1;
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbFindGroupEntry);
+void *pbFindGroupEntry(pbGroupDB_t *db, u32 group) {
+    pbGroupEntry_t *found = NULL;
+    u32 i;
+    for (i = 0; i < db->count; i++) {
+        pbGroupEntry_t *e = db->entry[i];
+        if (group == e->group) {
+            found = e;
+            break;
+        }
+    }
+    return found;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbAddGroupEntry);
 
@@ -1005,53 +1775,193 @@ void pbFreeGroupEntry(mdlResrc_t *entry) {
     sdfChipFreeDelayedDirect(entry);
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbFreeGroupHandles);
+void pbFreeGroupHandles(pbBlockDB_t *db) {
+    u32 i;
+    for (i = 0; i < db->count; i++) {
+        pbFreeGroupEntry((mdlResrc_t *)db->entry[i]);
+    }
+    db->count = 0;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbGetBlockAt);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_proc_block_DB_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_proc_block_DB_Shutdown);
+void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbBlockDB_t *db = panel->data.blockDB;
+    sdfMatFreeDelayed(db->mat);
+    pbFreeGroupHandles(db);
+    sdfChipFreeDelayedDirect(db);
+    sdfChipFreeDelayedDirect(panel);
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_map_cursor_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_map_cursor_Shutdown);
+void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    sdfChipFreeDelayedDirect(panel->data.value);
+    sdfChipFreeDelayedDirect(panel);
+}
 
-INCLUDE_RODATA(const s32, "code_001D1470", D_00536000);
-
-INCLUDE_ASM(const s32, "code_001D1470", pbStartBlockDataBase);
+pbPanel_t *pbStartBlockDataBase(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    void *work;
+    sdfMat_t *mat;
+    panel->process = dds3StartProcess(D_00536040, 0x2AFD, 1, 1, pb_proc_block_DB_Process,
+                                      (dds3ProcessFunc_t)pb_proc_block_DB_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(0x108);
+    panel->data.blockDB = work;
+    memset(work, 0, 0x108);
+    dds3SetProcessData(panel->process, panel);
+    mat = sdfMatNew();
+    panel->data.blockDB->mat = mat;
+    sdfMatSetTex(mat, D_0054F5C4->baseTex);
+    return panel;
+}
 
 void *pbSearchGroupDB(pbPanel_t *panel, u32 group) {
     return pbFindGroupEntry(panel->data.groupDB, group);
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbDeleteGroupEntry);
+void pbDeleteGroupEntry(pbPanel_t *panel, u32 group) {
+    pbGroupDB_t *db = panel->data.groupDB;
+    s32 removed = 0;
+    u32 i;
+    for (i = 0; i < db->count; i++) {
+        if (removed != 0) {
+            db->entry[i - 1] = db->entry[i];
+        }
+        if (db->entry[i]->group == group) {
+            pbFreeGroupEntry((mdlResrc_t *)db->entry[i]);
+            removed = 1;
+        }
+    }
+    db->count = db->count - 1;
+}
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00536000);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00536040);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDumpBlockData);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbRebuildOutline);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartDrawMapCursor);
+pbPanel_t *pbStartDrawMapCursor(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    void *work;
+    panel->process = dds3StartProcess(D_005361B0, 0x2AFD, 1, 1, pb_draw_map_cursor_Process,
+                                      (dds3ProcessFunc_t)pb_draw_map_cursor_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(4);
+    panel->data.value = work;
+    memset(work, 0, 4);
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbSetMapCursorFlag);
+void pbSetMapCursorFlag(pbPanel_t *panel, s32 flag) {
+    pbPanelValue_t *v = panel->data.value;
+    if (panel != NULL) {
+        v->value = flag;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_proc_record_Process);
+s32 pb_proc_record_Process(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    u32 state = panel->state;
+    switch (state) {
+    case 4:
+    case 5:
+    case 6:
+        return -1;
+    case 1:
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        break;
+    case 0:
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_proc_record_Shutdown);
+void pb_proc_record_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbRecord_t *rec = panel->data.record;
+    pbClearRecord(panel);
+    sdfChipFreeDelayedDirect(rec->slot);
+    sdfChipFreeDelayedDirect(rec);
+    sdfChipFreeDelayedDirect(panel);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbFreeRecord);
+void pbFreeRecord(pbRecordSlot_t *slot) {
+    if (slot->block != NULL) {
+        slot->flag[0] = 0;
+        slot->flag[1] = 0;
+        sdfChipFreeDelayedDirect(slot->block);
+        slot->block = NULL;
+    }
+    if (slot->floor != NULL) {
+        slot->flag[2] = 0;
+        sdfChipFreeDelayedDirect(slot->floor);
+        slot->floor = NULL;
+    }
+    if (slot->chara != NULL) {
+        slot->flag[3] = 0;
+        sdfChipFreeDelayedDirect(slot->chara);
+        slot->chara = NULL;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartRecord);
+pbPanel_t *pbStartRecord(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbRecord_t *work;
+    panel->process = dds3StartProcess(D_005361C8, 0x3EE, 1, 1, pb_proc_record_Process,
+                                      (dds3ProcessFunc_t)pb_proc_record_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(8);
+    panel->data.record = work;
+    work->pos = 0;
+    work->slot = sdfChipAllocDirect(0x1E0);
+    memset(work->slot, 0, 0x1E0);
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbClearRecord);
+void pbClearRecord(pbPanel_t *panel) {
+    pbRecord_t *rec = panel->data.record;
+    u32 i;
+    for (i = 0; i < 30; i++) {
+        pbFreeRecord(&rec->slot[i]);
+    }
+}
 
 s32 pb_1DA400(pbPanel_t *panel) {
     return panel->data.value->value;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbPushRecord);
+u32 pbPushRecord(pbPanel_t *panel) {
+    pbPanelValue_t *rec = panel->data.value;
+    return rec->value = (rec->value + 31) % 30;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbCheckPopRecord);
+s8 pbCheckPopRecord(pbPanel_t *panel) {
+    pbRecord_t *rec = panel->data.record;
+    pbRecordSlot_t *slot = &rec->slot[(rec->pos + 29) % 30];
+    return slot->block != NULL;
+}
 
 INCLUDE_ASM(const s32, "code_001D1470", pbPopRecord);
 
@@ -1061,13 +1971,39 @@ INCLUDE_ASM(const s32, "code_001D1470", pbAddRecord_flor);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbAddRecord_char);
 
+INCLUDE_RODATA(const s32, "code_001D1470", D_005361B0);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_005361C8);
+
 INCLUDE_ASM(const s32, "code_001D1470", pbDumpRecordData);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_help_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_help_Shutdown);
+void pb_draw_help_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    sdfChipFreeDelayedDirect(panel->data.value);
+    sdfChipFreeDelayedDirect(panel);
+    D_0054F5C4->helpProc = NULL;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbStartHelp);
+pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbPanelValue_t *work;
+    panel->process = dds3StartProcess(D_00536398, 0x2AFD, 1, 1, pb_draw_help_Process,
+                                      (dds3ProcessFunc_t)pb_draw_help_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->x = 0;
+    panel->y = 0;
+    panel->flags = 0x10000;
+    work = sdfChipAllocDirect(8);
+    panel->data.value = work;
+    memset(work, 0, 8);
+    work->value = page;
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
 
 pbPanel_t *func_001DB020(pbPanel_t *parent) {
     return pbStartHelp(parent, 0);
@@ -1075,35 +2011,74 @@ pbPanel_t *func_001DB020(pbPanel_t *parent) {
 
 INCLUDE_ASM(const s32, "code_001D1470", pbResetKeyState);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetKeyAction);
+u8 pbGetKeyAction(u8 action) {
+    return keyAct[action + (s8)keyActMode * 5];
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetKeyMode);
+u8 pbGetKeyMode(void) {
+    return keyActMode;
+}
 
 void func_001DB0D8(u8 mode) {
     keyActMode = mode;
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", pbRotRKeyAct);
+u8 pbRotRKeyAct(void) {
+    return keyActMode = ((s8)keyActMode + 5) % 4;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbRotLKeyAct);
+u8 pbRotLKeyAct(void) {
+    return keyActMode = ((s8)keyActMode + 3) % 4;
+}
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00536398);
 
 INCLUDE_ASM(const s32, "code_001D1470", pbInitMCard);
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetFormatStatusMCard);
+s32 pbGetFormatStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
+    return sceMcGetInfo(port, slot, NULL, NULL, &info->format);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetTypeStatusMCard);
+s32 pbGetTypeStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
+    return sceMcGetInfo(port, slot, &info->type, NULL, NULL);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetFreeStatusMCard);
+s32 pbGetFreeStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
+    return sceMcGetInfo(port, slot, NULL, &info->free, NULL);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetStatusMCard);
+void pbGetStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
+    sceMcGetInfo(port, slot, &info->type, &info->free, &info->format);
+    sceMcSync(0, NULL, &info->result);
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetDirMCard);
+s32 pbGetDirMCard(s32 port, s32 slot, const char *fileName, void *tbl) {
+    s32 result;
+    sceMcGetDir(port, slot, fileName, 0, 18, tbl);
+    sceMcSync(0, NULL, &result);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbGetDirMCard2);
+s32 pbGetDirMCard2(s32 port, s32 slot, const char *fileName) {
+    s32 result;
+    sceMcGetDir(port, slot, fileName, 0, -1, NULL);
+    sceMcSync(0, NULL, &result);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbChangeDirectory);
+s32 pbChangeDirectory(s32 port, s32 slot, const char *pathName) {
+    s32 result;
+    sceMcChdir(port, slot, pathName, NULL);
+    sceMcSync(0, NULL, &result);
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_001D1470", pbMkdirMCard);
+s32 pbMkdirMCard(s32 port, s32 slot, const char *dirName) {
+    s32 result;
+    sceMcMkdir(port, slot, dirName);
+    sceMcSync(0, NULL, &result);
+    return result;
+}
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00536498);
 
@@ -1119,9 +2094,34 @@ INCLUDE_ASM(const s32, "code_001D1470", pbWriteMCard);
 
 INCLUDE_ASM(const s32, "code_001D1470", pb_draw_error_Process);
 
-INCLUDE_ASM(const s32, "code_001D1470", pb_draw_error_Shutdown);
+void pb_draw_error_Shutdown(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    sdfChipFreeDelayedDirect(panel->data.value);
+    sdfChipFreeDelayedDirect(panel);
+}
 
+/* NON_MATCHING: 2 of 47 words; the process load and the data store swap delay slots. */
+#ifdef NON_MATCHING
+pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 code, s32 timer) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbErrorWork_t *work;
+    panel->process = dds3StartProcess(D_005365D8, 0x2AFD, 1, 1, pb_draw_error_Process,
+                                      (dds3ProcessFunc_t)pb_draw_error_Shutdown, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    work = sdfChipAllocDirect(0xC);
+    work->code = code;
+    work->timer = timer;
+    work->unk04 = 0;
+    panel->flags = 0x10000;
+    panel->data.error = work;
+    dds3SetProcessData(panel->process, panel);
+    return panel;
+}
+#else
 INCLUDE_ASM(const s32, "code_001D1470", pbStartErrorDraw);
+#endif
 
 INCLUDE_ASM(const s32, "code_001D1470", pbDebugProc);
 
@@ -1129,7 +2129,17 @@ void pbDebugShutdown(void) {
     ReleaseDebug_pbDebugMode();
 }
 
-INCLUDE_ASM(const s32, "code_001D1470", InitializeDebug_pbDebugMode);
+void InitializeDebug_pbDebugMode(void) {
+    sdfMemHandle_t *handle = sdfMemAllocDirect(0x10);
+    pbDebugWork_t *work = sdfMemLock(handle);
+    work->unk04 = 0;
+    work->unk06 = 0;
+    work->unk08 = 0;
+    work->allocation = handle;
+    work->level = D_0054F5C4->level;
+    work->stage = D_0054F5C4->stage;
+    g_pdebug_0 = work;
+}
 
 void ReleaseDebug_pbDebugMode(void) {
     if (g_pdebug_0 != NULL) {
