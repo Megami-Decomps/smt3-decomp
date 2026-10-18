@@ -146,7 +146,7 @@ void dds3GetPosPoseSet(dds3Basic_t *basic)
 {
     sdfVector4_t *position = &basic->poseset->pos;
 
-    VU0_LOAD_VF10_BARRIER(position);
+    SDF_VU0_LOADVECTOR_BARRIER(position);
     SDF_VU0_VECTOR_W_SET_ONE();
 }
 
@@ -154,7 +154,7 @@ void dds3GetRotPoseSet(dds3Basic_t *basic)
 {
     sdfVector4_t *rotation = &basic->poseset->rot;
 
-    VU0_LOAD_VF10_BARRIER(rotation);
+    SDF_VU0_LOADVECTOR_BARRIER(rotation);
     Normalize();
 }
 
@@ -163,7 +163,7 @@ void func_0010DF70(dds3Basic_t *basic)
 {
     sdfVector4_t *scale = &basic->poseset->scl;
 
-    VU0_LOAD_VF10_BARRIER(scale);
+    SDF_VU0_LOADVECTOR_BARRIER(scale);
 }
 
 void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *offset)
@@ -173,7 +173,7 @@ void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *offset)
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
     SDF_VU0_LOADVECTOR(position);
-    VU0_LOAD_VF11_BARRIER(offset);
+    SDF_VU0_LOADVECTOR_B_BARRIER(offset);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(&pose->pos);
 }
@@ -196,7 +196,7 @@ void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale)
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
     SDF_VU0_LOADVECTOR(src);
-    VU0_LOAD_VF11_BARRIER(scale);
+    SDF_VU0_LOADVECTOR_B_BARRIER(scale);
     SDF_VU0_MULVECTOR();
     SDF_VU0_STOREVECTOR(&pose->scl);
 }

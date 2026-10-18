@@ -1687,7 +1687,7 @@ void corePktSetConstColor(VuWork *work, u32 color) {
     node = work->blendList;
     while (node != NULL) {
         VuBlendNode *source = (VuBlendNode *)node->sourceA;
-        PCP_COPY_VECTOR_F32(node->color, source->color);
+        SDF_VU0_COPYVECTOR_MEMOPS(node->color, source->color);
         node = node->next;
     }
 }

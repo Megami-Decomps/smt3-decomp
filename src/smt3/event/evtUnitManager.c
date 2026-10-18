@@ -126,7 +126,7 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
     SDF_VU0_LOADVECTOR(a);
     SDF_VU0_LOADVECTOR_B(b);
     SDF_VU0_SUBVECTOR();
-    VU0_SETVECTOR_Y_V0(0.0f);
+    SDF_VU0_SETVECTOR_Y_V0(0.0f);
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
@@ -135,12 +135,12 @@ void evtGetUnitDirVector(evtUnit_t *unit) {
 
     SDF_VU0_LOADVECTOR(&unit->effObj->poseset->rot);
     ToMatrix();
-    VU0_STORE_VF30(v);
+    SDF_MOT_STORE_VF30(v);
     v[1] = 0.0f;
     v[3] = 1.0f;
     SDF_VU0_LOADVECTOR(v);
     SDF_VU0_NORMALIZE();
-    VU0_SCALEVECTOR_V0(-1.0f);
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
@@ -353,9 +353,9 @@ void evtSetUnitLightDir(evtUnit_t *unit, s32 duration) {
     unit->directionDuration = duration;
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF10_NOMEM(unit->vec30);
+    SDF_VU0_STOREVECTOR_NOMEM(unit->vec30);
     GetBaseLightDir(unit);
-    VU0_STORE_VF10_NOMEM(unit->vec20);
+    SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
     unit->flags = (unit->flags | 0x2400) & ~0x4000;
 }
 
@@ -533,7 +533,7 @@ s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
     VU0_COPY_VF30_TO_VF10();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
-    VU0_SCALEVECTOR_V0(-1.0f);
+    SDF_VU0_SCALEVECTOR_V0(-1.0f);
     SDF_VU0_LOADVECTOR_B(&unit->effObj->poseset->pos);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(v);
@@ -557,7 +557,7 @@ s32 evtUnitMoveType0(evtUnit_t *unit) {
         SDF_VU0_NORMALIZE();
     }
     scale = unit->motionParameter * 0.1f;
-    VU0_SCALEVECTOR_V0(scale);
+    SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;

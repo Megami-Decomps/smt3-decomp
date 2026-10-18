@@ -245,13 +245,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_0032C7F0);
     }
-    VU0_SCALEVECTOR_V0(1.0f - t);
+    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C7F0);
     }
-    VU0_SCALEVECTOR_B_V0(t);
+    SDF_VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out);
     if (a != NULL) {
@@ -259,13 +259,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_0032C800);
     }
-    VU0_SCALEVECTOR_V0(1.0f - t);
+    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b + 4);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C800);
     }
-    VU0_SCALEVECTOR_B_V0(t);
+    SDF_VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(out + 4);
     if (a != NULL) {
@@ -273,13 +273,13 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
     } else {
         SDF_VU0_LOADVECTOR(D_0032C810);
     }
-    VU0_SCALEVECTOR_V0(1.0f - t);
+    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
     if (b != NULL) {
         SDF_VU0_LOADVECTOR_B(b + 8);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C810);
     }
-    VU0_SCALEVECTOR_B_V0(t);
+    SDF_VU0_SCALEVECTOR_B_V0(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_STOREVECTOR(out + 8);

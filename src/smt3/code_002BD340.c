@@ -2176,7 +2176,7 @@ void FromRotation(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSin(halfAngle);
-    VU0_SCALEVECTOR_V0(trigValue);
+    SDF_VU0_SCALEVECTOR_V0(trigValue);
     trigValue = sdfCos(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
@@ -2192,7 +2192,7 @@ void FromRotation_B(f32 angle)
 {
     f32 halfAngle = angle * 0.5f;
     f32 trigValue = sdfSin(halfAngle);
-    VU0_SCALEVECTOR_B_V0(trigValue);
+    SDF_VU0_SCALEVECTOR_B_V0(trigValue);
     trigValue = sdfCos(halfAngle);
     __asm__ volatile (
         ".set noreorder\n"
@@ -2360,7 +2360,7 @@ f32 EulerAngleAxisY(void)
     f32 rotatedX;
     ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
-    VU0_LOAD_VF10_BARRIER(D_00529620);
+    SDF_VU0_LOADVECTOR_BARRIER(D_00529620);
     SDF_VU0_APPLYMATRIX_XYZ();
     __asm__ volatile (
         ".set noreorder\n"

@@ -2916,9 +2916,9 @@ void dds3EffectPartModelSetScale(void *hData, f32 scale)
 void dds3EffectPartModelSetRotateMatrix(mdlObj_t *hModel, sdfMatrix4_t *pMatrix)
 {
     SDF_VU0_LOADMATRIX(pMatrix);
-    VU0_STORE_VF28(&hModel->inner->tm.m[0]);
-    VU0_STORE_VF29(&hModel->inner->tm.m[4]);
-    VU0_STORE_VF30(&hModel->inner->tm.m[8]);
+    SDF_MOT_STORE_VF28(&hModel->inner->tm.m[0]);
+    SDF_MOT_STORE_VF29(&hModel->inner->tm.m[4]);
+    SDF_MOT_STORE_VF30(&hModel->inner->tm.m[8]);
 }
 
 void dds3EffectPartModelSetColor(mdlObj_t *hModel, u32 color)

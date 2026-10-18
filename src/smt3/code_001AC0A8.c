@@ -353,9 +353,9 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
             sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
         }
         SetRotateMatrixX(1.5707963f);
-        VU0_LOAD_MATRIX_B_F32(matrix);
+        SDF_VU0_LOADMATRIX_B_MEMOPS(matrix);
         MultMatrixNoArg();
-        VU0_STORE_MATRIX_NOMEM(matrix);
+        SDF_VU0_STOREMATRIX_NOMEM(matrix);
     }
     surface = &sdfGrOtTable[44];
     ((void (*)(sdfGrOt_t *, void *))surface->regFunc)(surface, list);

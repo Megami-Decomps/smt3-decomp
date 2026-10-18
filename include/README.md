@@ -1066,13 +1066,20 @@ does not name:
 | prefix | what it covers |
 | --- | --- |
 | `SDF_VU0_` | the engine's VU0 helper library, named as the engine names it |
-| `VU0_` | VU0 work the library has no entry for: the matrix banks beyond A/B, the clip-segment and quaternion pieces, the `_EXTENDED` and barrier variants |
+| `VU0_` | VU0 work the library has no entry for: the matrix banks beyond A/B, the clip-segment and quaternion pieces |
 | `EE_` | scalar and pipeline-1 EE instructions (`EE_MULT1`, `EE_SQRT_F32`, the barriers) |
 | `MMI_` | the 128-bit integer ops used on their own |
 | `PS2_` | plain quadword memory moves |
 
 A `VU0_` name is therefore a signal that the operation was reconstructed here
 and may yet turn out to have an engine name.
+
+A variant keeps the engine name. Where two macros hold the same instructions
+and differ only in the operand section, the engine name carries both, with a
+suffix for what differs: `_BARRIER` adds the memory clobber, `_NOMEM` drops it,
+`_MEMOPS` declares the memory operands instead of clobbering, `_EXTENDED` is an
+empty operand list, `_V0` routes a scalar through `$2`. A repo-local prefix on
+one of those would claim an operation the engine does not have.
 
 ### The rule the macros follow
 
@@ -1093,8 +1100,8 @@ use already had an identical fixed macro.
 Two further things are not interchangeable, and both are easy to get wrong.
 
 A **basic** asm (no colons) and an **extended** asm with an empty operand list
-(`: :`) are scheduled differently by cc1 2.96. `VU0_COPY_VF10_TO_VF11_EXTENDED`
-and `VU0_SUB_VF10_VF11_EXTENDED` exist only because `mdlSetBlur` needs the
+(`: :`) are scheduled differently by cc1 2.96. `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`
+and `SDF_VU0_SUBVECTOR_EXTENDED` exist only because `mdlSetBlur` needs the
 extended spelling; substituting the plain form moves the float constants it
 materialises and breaks the match. A macro named `_EXTENDED` means exactly this.
 
@@ -1108,15 +1115,18 @@ names rather than one name and an `#undef`:
 
 | name | what differs |
 | --- | --- |
-| `VU0_LOAD_VF10_BARRIER` | the load clobbers memory; `SDF_VU0_LOADVECTOR` does not |
-| `VU0_SCALEVECTOR_V0`, `VU0_SCALEVECTOR_B_V0`, `VU0_SETVECTOR_Y_V0` | the scalar reaches vf2.x through `$2`, not a register cc1 picks |
+| `SDF_VU0_LOADVECTOR_BARRIER` | the load clobbers memory; `SDF_VU0_LOADVECTOR` does not |
+| `SDF_VU0_SCALEVECTOR_V0`, `SDF_VU0_SCALEVECTOR_B_V0`, `SDF_VU0_SETVECTOR_Y_V0` | the scalar reaches vf2.x through `$2`, not a register cc1 picks |
+| `SDF_VU0_STOREMATRIX_NOMEM`, `SDF_VU0_STOREVECTOR_NOMEM`, `SDF_VU0_STOREVECTOR_B_NOMEM` | the same stores without the `memory` clobber |
+| `SDF_VU0_COPYVECTOR_MEMOPS`, `SDF_VU0_LOADMATRIX_B_MEMOPS` | the memory is a declared `"m"` operand rather than a clobber |
+| `SDF_MOT_STORE_VF28`, `_VF29`, `_VF30` | these clobber memory; the `_NOMEM` forms beside them do not |
 | `EE_SQRT_F32_SCHED` | not `volatile`, so cc1 may hoist the surrounding compares |
-| `VU0_COPY_VF10_TO_VF11_EXTENDED`, `VU0_SUB_VF10_VF11_EXTENDED` | an empty operand list rather than a basic asm |
+| `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
 Every operation is defined once, in `ps2asm.h`: 229 macros there and no asm
 macro left in any unit. The five that used to stay local for a differing operand
-section are now named for what differs -- `VU0_SCALEVECTOR_V0`,
-`VU0_SCALEVECTOR_B_V0` and `VU0_SETVECTOR_Y_V0` carry the scalar through `$2`
+section are now named for what differs -- `SDF_VU0_SCALEVECTOR_V0`,
+`SDF_VU0_SCALEVECTOR_B_V0` and `SDF_VU0_SETVECTOR_Y_V0` carry the scalar through `$2`
 rather than a register cc1 picks -- so nothing needs an `#undef` any more.
 
 The engine's own convention makes that practical. The VU0 inlines in the retail

@@ -205,7 +205,7 @@ void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *basic)
 {
     sdfVector4_t *target = &((dds3CameraObjectBasicWorkData_t *)basic->workdata)->targetPos;
 
-    VU0_LOAD_VF10_BARRIER(target);
+    SDF_VU0_LOADVECTOR_BARRIER(target);
 }
 
 void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy)

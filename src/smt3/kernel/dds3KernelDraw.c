@@ -1395,7 +1395,7 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction)
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
-            VU0_STORE_VF10_NOMEM(D_00557240[lightIndex]);
+            SDF_VU0_STOREVECTOR_NOMEM(D_00557240[lightIndex]);
             dds3RotationArc();
             SDF_VU0_STOREVECTOR(D_00557270[lightIndex]);
         }

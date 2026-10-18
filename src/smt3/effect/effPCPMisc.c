@@ -2750,7 +2750,7 @@ void effPCPHama01PartInit(EffPCPTwinWork *work, s32 slotIndex) {
     u128 mtx[4];
 
     SetRotateMatrixY((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 6.283185f);
-    VU0_STORE_MATRIX_NOMEM(mtx);
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][0], mtx);
     dds3EffectPartSetRotateMatrix(work->pair[slotIndex][1], mtx);
     mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][0]), 0, 0);
@@ -2848,7 +2848,7 @@ void effPCPHama01Draw(EffPCPTwinWork *work) {
         mdlLink(obj[0], D_002F69B8);
         sdfModelGetMarkPos(obj[0]->inner, 1);
         posp = &pos;
-        VU0_STORE_VF10_NOMEM(posp);
+        SDF_VU0_STOREVECTOR_NOMEM(posp);
         mdlSetPosition(obj[1]);
         mdlLink(obj[1], D_002F69B8);
         if (work->frame > 0x18) {
@@ -2875,7 +2875,7 @@ void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
     u128 mtx[4];
 
     SetRotateMatrixY((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 6.283185f);
-    VU0_STORE_MATRIX_NOMEM(mtx);
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2], mtx);
     dds3EffectPartSetRotateMatrix(work->handle[index * 2 + 1], mtx);
     mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
@@ -3180,7 +3180,7 @@ void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
             mdlSetColor(obj[1], work->color);
             mdlLink(obj[0], D_002F69B8);
             sdfModelGetMarkPos(obj[0]->inner, 1);
-            VU0_STORE_VF10_NOMEM(&vec);
+            SDF_VU0_STOREVECTOR_NOMEM(&vec);
             mdlSetPosition(obj[1]);
             mdlLink(obj[1], D_002F69B8);
         }
@@ -5456,7 +5456,7 @@ void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
     MultMatrixNoArg();
-    VU0_STORE_MATRIX_NOMEM(mtx);
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
     dds3EffectPartDraw(handle[0]);
@@ -5531,7 +5531,7 @@ void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
     SetRotateMatrixY(work->angle);
     SDF_VU0_LOADMATRIX_B(work->matrix);
     MultMatrixNoArg();
-    VU0_STORE_MATRIX_NOMEM(mtx);
+    SDF_VU0_STOREMATRIX_NOMEM(mtx);
     dds3EffectPartSetRotateMatrix(handle[0], mtx);
     dds3EffectPartSetRotateMatrix(handle[1], mtx);
     dds3EffectPartDraw(handle[0]);
@@ -6928,7 +6928,7 @@ void effPCPRadiateTBDraw(EffPCPPairedEventWork *work) {
                 SDF_VU0_OUTERPRODUCT();
                 SDF_VU0_NORMALIZE();
                 /* This SDK-produced axis is consumed only by the external builder. */
-                VU0_STORE_VF10_NOMEM(tiltAxis);
+                SDF_VU0_STOREVECTOR_NOMEM(tiltAxis);
                 radius = entry->radius;
                 SetRotateMatrixAxis(entry->tilt, (const struct sdfVector3_t *)tiltAxis);
                 SDF_VU0_LOADVECTOR(direction);
