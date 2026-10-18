@@ -487,7 +487,7 @@ sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
 }
 
 void dds3BillboardSetPosition(void *dst, const void *src) {
-    SDF_VU0__COPYVECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 /* Set the radian rotation applied to the billboard quad corners. */
@@ -713,7 +713,7 @@ EffUnitObject *dds3P2APolygonCreate(s32 entryIndex) {
     instance->billboard = dds3BillboardCreate(1, entryIndex);
     instance->resource = sdfMatNew();
     sdfMatSetConstant(instance->resource, 1.0f);
-    SDF_VU0__STOREIDENTITY(instance->transform);
+    SDF_VU0_STOREIDENTITY(instance->transform);
     return instance;
 }
 
@@ -728,8 +728,8 @@ EffUnitObject *dds3P2APolygonCopy(const EffUnitObject *source) {
     sdfMatSetDiffuse(instance->resource, 0x80808080);
     sdfMatSetAmbient(instance->resource, 0x80808080);
     sdfMatSetSpecular(instance->resource, 0x80808080);
-    SDF_VU0__STOREIDENTITY(instance->transform);
-    SDF_VU0__STOREIDENTITY(instance->localMatrix);
+    SDF_VU0_STOREIDENTITY(instance->transform);
+    SDF_VU0_STOREIDENTITY(instance->localMatrix);
     return instance;
 }
 
@@ -749,8 +749,8 @@ void dds3P2APolygonSetScale(s32 instance, float scale) {
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
 void dds3P2APolygonSetRotateMatrix(EffUnitObject *instance, void *matrix) {
-    SDF_VU0__LOADMATRIX(matrix);
-    SDF_VU0__STOREMATRIX(instance->transform);
+    SDF_VU0_LOADMATRIX(matrix);
+    SDF_VU0_STOREMATRIX(instance->transform);
 }
 
 void dds3P2APolygonSetRGBA(EffUnitObject *instance, u32 value) {

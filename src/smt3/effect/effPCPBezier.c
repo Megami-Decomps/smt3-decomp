@@ -263,7 +263,7 @@ void effPCPBezierBillDelete(effBezierWork_t *group) {
 INCLUDE_ASM(const s32, "effect/effPCPBezier", effPCPBezierBillDraw);
 
 void effPCPBezierBillSetPosition(void *dst, void *src) {
-    SDF_VU0__COPYVECTOR(dst, src);
+    SDF_VU0_COPYVECTOR(dst, src);
 }
 
 void effPCPBezierBillSetColor(effBezierWork_t *work, u32 color)
@@ -356,16 +356,16 @@ void dds3BezierTrackPolySetVC(effBezierTrackPoly_t *history, u128 *source) {
     u128 *points = history->points;
     s32 count;
 
-    SDF_VU0__COPYVECTOR(&points[position], source);
-    SDF_VU0__COPYVECTOR(&points[position + 1], source + 1);
-    SDF_VU0__COPYVECTOR(&points[position + 2], source + 2);
+    SDF_VU0_COPYVECTOR(&points[position], source);
+    SDF_VU0_COPYVECTOR(&points[position + 1], source + 1);
+    SDF_VU0_COPYVECTOR(&points[position + 2], source + 2);
     position += 3;
     count = history->pointCapacity;
     history->nextPointWriteIndex = position;
     if (position == count) {
-        SDF_VU0__COPYVECTOR(&points[0], source);
-        SDF_VU0__COPYVECTOR(&points[1], source + 1);
-        SDF_VU0__COPYVECTOR(&points[2], source + 2);
+        SDF_VU0_COPYVECTOR(&points[0], source);
+        SDF_VU0_COPYVECTOR(&points[1], source + 1);
+        SDF_VU0_COPYVECTOR(&points[2], source + 2);
         history->nextPointWriteIndex = 3;
     }
     if (history->activePointCount < count - 3) {

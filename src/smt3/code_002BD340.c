@@ -2272,7 +2272,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
     f32 t;
     f32 offsetSquared;
     f32 adjustedZ;
-    SDF_VU0__STOREVECTOR(input);
+    SDF_VU0_STOREVECTOR(input);
     t = 0.0f;
     x = -input[0];
     y = input[1];
@@ -2283,9 +2283,9 @@ void LookAt(f32 xOffset, f32 yOffset) {
     horizontalSquared = x * x + z * z;
     if (horizontalSquared < 0.000001f) {
         if (y < t) {
-            SDF_VU0__LOADVECTOR(D_00529B90);
+            SDF_VU0_LOADVECTOR(D_00529B90);
         } else {
-            SDF_VU0__LOADVECTOR(D_00529BA0);
+            SDF_VU0_LOADVECTOR(D_00529BA0);
         }
         return;
     }
@@ -2298,7 +2298,7 @@ void LookAt(f32 xOffset, f32 yOffset) {
     s = frsqrtf(1.0f, t * t + s);
     quaternion[0] = y * s;
     quaternion[3] = t * s;
-    SDF_VU0__LOADVECTOR(quaternion);
+    SDF_VU0_LOADVECTOR(quaternion);
     /* Yaw quaternion from the normalized, offset-adjusted XZ direction. */
     s = 1.0f / horizontalLength;
     x *= s;
@@ -2307,14 +2307,14 @@ void LookAt(f32 xOffset, f32 yOffset) {
     t = x + xOffset;
     offsetSquared = t * t + adjustedZ * adjustedZ;
     if (offsetSquared < 0.000001f) {
-        SDF_VU0__LOADVECTOR_B(D_00529BB0.quaternion);
+        SDF_VU0_LOADVECTOR_B(D_00529BB0.quaternion);
     } else {
         s = frsqrtf(1.0f, offsetSquared);
         quaternion[0] = 0.0f;
         quaternion[1] = t * s;
         quaternion[2] = 0.0f;
         quaternion[3] = adjustedZ * s;
-        SDF_VU0__LOADVECTOR_B(quaternion);
+        SDF_VU0_LOADVECTOR_B(quaternion);
     }
     Mult();
 }
@@ -2332,7 +2332,7 @@ void Slerp(f32 blendAmount) {
         dotProduct = -dotProduct;
         VU0_NEGATE_VF11_TO_VF12();
     } else {
-        SDF_VU0__COPYVECTOR_B_TO_C();
+        SDF_VU0_COPYVECTOR_B_TO_C();
     }
     firstWeight = 1.0f - blendAmount;
     secondWeight = blendAmount;
@@ -2356,7 +2356,7 @@ void Lerp(f32 blendAmount)
     if (dotProduct < 0.0f) {
         VU0_NEGATE_VF11_TO_VF12();
     } else {
-        SDF_VU0__COPYVECTOR_B_TO_C();
+        SDF_VU0_COPYVECTOR_B_TO_C();
     }
     {
         f32 firstWeight = 1.0f - blendAmount;
@@ -2374,7 +2374,7 @@ f32 EulerAngleAxisY(void)
     ToMatrix();
     /* PEXEW exchanges words 0 and 2: output 0 is Z, while output 1 is X. */
     VU0_LOAD_VF10_BARRIER(D_00529620);
-    SDF_VU0__APPLYMATRIX_XYZ();
+    SDF_VU0_APPLYMATRIX_XYZ();
     __asm__ volatile (
         ".set noreorder\n"
         "\tqmfc2.ni $2, vf10\n"

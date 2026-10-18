@@ -1039,11 +1039,22 @@ C. 1045 of the stubbed functions contain at least one such instruction.
 
 ### Where the macro names come from
 
-`SDF_VU0__*` is the engine's own name for the operation, not a reconstruction.
+`SDF_VU0_*` is the engine's own name for the operation, not a reconstruction.
 The names and their register convention come from the HD build, where the same
-helpers survive as functions: `SDF_VU0__LOADVECTOR` writes the first working
-vector, `SDF_VU0__ADDVECTOR` does `A = A + B`, `SDF_VU0__INNERPRODUCT` returns
-`Dot(A, B)` and `SDF_VU0__GETVECTOR_Y` returns `vct_A.y`. That fixes A, B and C
+helpers survive as functions.
+
+The spelling is one underscore, not two. The HD reconstructed sources write
+`SDF_VU0__LOADVECTOR`, but that is their transpiler rendering the `$$` that
+separates a class from its method: the HD metadata has the helper both as
+`libsdf_H.SDF_VU0$$LOADVECTOR`, where `SDF_VU0` became a class, and inlined into
+other classes as `bilDebug$$SDF_VU0_LOADVECTOR` and
+`bilManager$$SDF_VU0_LOADVECTOR`, where the whole name is the method and the
+single underscore shows through. Nineteen helpers appear in that second form and
+every one of them has one underscore.
+
+What the bodies establish: `SDF_VU0_LOADVECTOR` writes the first working
+vector, `SDF_VU0_ADDVECTOR` does `A = A + B`, `SDF_VU0_INNERPRODUCT` returns
+`Dot(A, B)` and `SDF_VU0_GETVECTOR_Y` returns `vct_A.y`. That fixes A, B and C
 onto `vf10`, `vf11` and `vf12`, which is the convention the retail inlines
 already follow. 80 macros carry these names, covering about 2,800 call sites.
 
@@ -1052,7 +1063,7 @@ does not name:
 
 | prefix | what it covers |
 | --- | --- |
-| `SDF_VU0__` | the engine's VU0 helper library, named as the engine names it |
+| `SDF_VU0_` | the engine's VU0 helper library, named as the engine names it |
 | `VU0_` | VU0 work the library has no entry for: the matrix banks beyond A/B, the clip-segment and quaternion pieces, the `_EXTENDED` and barrier variants |
 | `EE_` | scalar and pipeline-1 EE instructions (`EE_MULT1`, `EE_SQRT_F32`, the barriers) |
 | `MMI_` | the 128-bit integer ops used on their own |
@@ -1068,9 +1079,9 @@ register name, not an axis letter. Those are literal in the macro body, always.
 Parameters are only C expressions bound through operand constraints (`"r"`,
 `"f"`, `"m"`) and substituted as `%0`, `%1`.
 
-That is why there are many near-duplicate macros (`SDF_VU0__SCALEVECTOR`
-beside `SDF_VU0__SCALEVECTOR_B`, `SDF_VU0__LOADVECTOR` beside
-`SDF_VU0__LOADVECTOR_B`) instead of one parameterised form: a register passed as
+That is why there are many near-duplicate macros (`SDF_VU0_SCALEVECTOR`
+beside `SDF_VU0_SCALEVECTOR_B`, `SDF_VU0_LOADVECTOR` beside
+`SDF_VU0_LOADVECTOR_B`) instead of one parameterised form: a register passed as
 a token is still an assembly literal in C clothing, and it costs a preprocessor
 paste table to translate. 21 macros did take a register or axis token;
 converting their 229 call sites to the fixed-register names removed 21
@@ -1092,10 +1103,10 @@ with an `#undef` and a comment saying what differs:
 
 | name | why it stays local |
 | --- | --- |
-| `SDF_VU0__LOADVECTOR` in `model/mdlManager.c` | the load has to act as a memory barrier |
-| `SDF_VU0__SCALEVECTOR` in `model/mdlManager.c`, `event/evtUnitManager.c`, `event/evtPolygonMovie.c` | retail carries the bits through `$2`, not a register cc1 picks |
-| `SDF_VU0__SCALEVECTOR_B` in `event/evtPolygonMovie.c` | as above |
-| `SDF_VU0__SETVECTOR_Y` in `event/evtUnitManager.c` | declares no `$2` clobber, where the shared one does |
+| `SDF_VU0_LOADVECTOR` in `model/mdlManager.c` | the load has to act as a memory barrier |
+| `SDF_VU0_SCALEVECTOR` in `model/mdlManager.c`, `event/evtUnitManager.c`, `event/evtPolygonMovie.c` | retail carries the bits through `$2`, not a register cc1 picks |
+| `SDF_VU0_SCALEVECTOR_B` in `event/evtPolygonMovie.c` | as above |
+| `SDF_VU0_SETVECTOR_Y` in `event/evtUnitManager.c` | declares no `$2` clobber, where the shared one does |
 
 Everything else is defined once, in `ps2asm.h`, and the units include it: 143
 macros there, 252 definitions in total across the tree.
@@ -1137,7 +1148,7 @@ Measured against this `cc1` and Sony's `ee-as -G8`, not assumed:
   Every multi-instruction macro is bracketed with `.set noreorder` /
   `.set reorder`.
 - Register choice inside a macro is not free. `MMI_RGBA_UNPACK` and
-  `SDF_VU0__dds3ColorFtoI` name `$2` and `$3` literally because an `"=&r"`
+  `SDF_VU0_dds3ColorFtoI` name `$2` and `$3` literally because an `"=&r"`
   temporary gets `$3`/`$4` here and retail uses `$2`/`$3`.
 - The compiler still schedules the code around a block. The order of the C
   statements next to one decides which `$f` register a float lands in (first
@@ -1161,19 +1172,19 @@ Ten functions in three units are byte-identical through these macros:
 `effect/effModelTrackPoly.c`; `effDebugPointDraw`, `effDebugPointDraw2`,
 `effDebugLineDraw` and `effDebugLineDraw2` in `code_001AC0A8.c`.
 
-Those exercise `SDF_VU0__COPYVECTOR`, `SDF_VU0__LOADVECTOR`,
-`SDF_VU0__STOREVECTOR`,
-`VU0_STORE_VF10_TO`, `SDF_VU0__LOADVECTOR_B`, `SDF_VU0__LOADMATRIX`,
-`SDF_VU0__COPYVECTOR_A_TO_B`, `SDF_VU0__ADDVECTOR`, `SDF_VU0__SUBVECTOR`,
-`SDF_VU0__MULVECTOR`, `SDF_VU0__SCALEVECTOR`, `SDF_VU0__SCALEVECTOR_B`,
-`SDF_VU0__APPLYMATRIX_XYZ1`, `SDF_VU0__PERSVECTOR`, `SDF_VU0__INNERPRODUCT`,
-`SDF_VU0__GETLENGTH`, `MMI_RGBA_UNPACK` and `SDF_VU0__dds3ColorFtoI`.
+Those exercise `SDF_VU0_COPYVECTOR`, `SDF_VU0_LOADVECTOR`,
+`SDF_VU0_STOREVECTOR`,
+`VU0_STORE_VF10_TO`, `SDF_VU0_LOADVECTOR_B`, `SDF_VU0_LOADMATRIX`,
+`SDF_VU0_COPYVECTOR_A_TO_B`, `SDF_VU0_ADDVECTOR`, `SDF_VU0_SUBVECTOR`,
+`SDF_VU0_MULVECTOR`, `SDF_VU0_SCALEVECTOR`, `SDF_VU0_SCALEVECTOR_B`,
+`SDF_VU0_APPLYMATRIX_XYZ1`, `SDF_VU0_PERSVECTOR`, `SDF_VU0_INNERPRODUCT`,
+`SDF_VU0_GETLENGTH`, `MMI_RGBA_UNPACK` and `SDF_VU0_dds3ColorFtoI`.
 
 The rest assemble and have been read against the retail instructions they are
 named for, but no function has matched through them yet: the MMI lane ops, the
 pipeline-1 family (`EE_MULT1`, `EE_DIV1`, `EE_DIVU1`, `EE_REM1`),
-`SDF_VU0__OUTERPRODUCT`, `SDF_VU0__NORMALIZE`, the `vf12` copies, the clip-flag
-macros, `SDF_VU0__LOADVECTOR_UNALIGN`, `MMI_STORE_VEC3`, `MMI_PLZCW` and the
+`SDF_VU0_OUTERPRODUCT`, `SDF_VU0_NORMALIZE`, the `vf12` copies, the clip-flag
+macros, `SDF_VU0_LOADVECTOR_UNALIGN`, `MMI_STORE_VEC3`, `MMI_PLZCW` and the
 barriers.
 Treat an unproven macro as a starting point, and check the emitted `.s`
 (`SMT3_KEEP_S=/tmp/x.s tools/cc.sh ...`) rather than trusting the name.

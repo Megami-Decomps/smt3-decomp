@@ -660,7 +660,7 @@ INCLUDE_ASM(const s32, "code_001B0858", nbCameraShot_All_Set3);
 
 void nbCameraState_Analyze_Set(nbCamera_t *pCamera)
 {
-    SDF_VU0__COPYVECTOR(&nbCameraAnalyzeVec, pCamera);
+    SDF_VU0_COPYVECTOR(&nbCameraAnalyzeVec, pCamera);
     nbCamera_Analyze_Distance = pCamera->unk20;
     nbCamera_Analyze_Rate = 1.0f;
     nbCamera_Analyze_Rate_Add = -0.01f;
@@ -716,7 +716,7 @@ void nbCameraState_NegoBougai_Init(void)
 {
     nbCamera_t *pCamera = &pNbCamera;
 
-    SDF_VU0__COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
+    SDF_VU0_COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
     nbCamera_NegoBougai_Distance = pCamera->unk20;
     nbCamera_NegoBougai_Wait = 15;
@@ -727,7 +727,7 @@ void nbCameraState_NegoBougai_Init2(void)
 {
     nbCamera_t *pCamera = &pNbCamera;
 
-    SDF_VU0__COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
+    SDF_VU0_COPYVECTOR(&nbCameraNegoBougaiVec, pCamera);
     nbCamera_NegoBougai_Rate = 1.0f;
     nbCamera_NegoBougai_Distance = pCamera->unk20;
     nbCamera_NegoBougai_Wait = 8;

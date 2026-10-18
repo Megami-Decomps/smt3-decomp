@@ -732,8 +732,8 @@ void CalcCamera(void) {
     camera = pipe_Camera;
     ((void (*)(dds3Basic_t *))camera->basicfunction->mainprocuder)(camera);
     cameraData = pipe_Camera->workdata;
-    SDF_VU0__COPYVECTOR(&cameraData->vertical, pipeCameraPos);
-    SDF_VU0__COPYVECTOR(&cameraData->upVector, pipeCameraPos);
+    SDF_VU0_COPYVECTOR(&cameraData->vertical, pipeCameraPos);
+    SDF_VU0_COPYVECTOR(&cameraData->upVector, pipeCameraPos);
 }
 
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548EB0);

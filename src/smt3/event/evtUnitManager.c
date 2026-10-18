@@ -6,15 +6,15 @@
 /* A C float broadcast through vf2.x, then the one operation that uses it.
  * Kept local: retail carries the bits through $2 here, not through
  * a register cc1 picks. */
-#undef SDF_VU0__SCALEVECTOR
-#define SDF_VU0__SCALEVECTOR(f) __asm__ volatile ( \
+#undef SDF_VU0_SCALEVECTOR
+#define SDF_VU0_SCALEVECTOR(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
     : : "f" (f))
 
 /* Kept local: declares no $2 clobber, where basic/dds3PathBasic.c does. */
-#undef SDF_VU0__SETVECTOR_Y
-#define SDF_VU0__SETVECTOR_Y(f) __asm__ volatile ( \
+#undef SDF_VU0_SETVECTOR_Y
+#define SDF_VU0_SETVECTOR_Y(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f))
@@ -139,24 +139,24 @@ extern void evtGetUnitDirVector(evtUnit_t *unit);
 
 /* vf10 = (a - b) with y replaced by 0 */
 void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
-    SDF_VU0__LOADVECTOR(a);
-    SDF_VU0__LOADVECTOR_B(b);
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__SETVECTOR_Y(0.0f);
+    SDF_VU0_LOADVECTOR(a);
+    SDF_VU0_LOADVECTOR_B(b);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_SETVECTOR_Y(0.0f);
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
 void evtGetUnitDirVector(evtUnit_t *unit) {
     f32 v[4];
 
-    SDF_VU0__LOADVECTOR(&unit->effObj->poseset->rot);
+    SDF_VU0_LOADVECTOR(&unit->effObj->poseset->rot);
     ToMatrix();
     VU0_STORE_VF30(v);
     v[1] = 0.0f;
     v[3] = 1.0f;
-    SDF_VU0__LOADVECTOR(v);
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__SCALEVECTOR(-1.0f);
+    SDF_VU0_LOADVECTOR(v);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SCALEVECTOR(-1.0f);
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
@@ -168,7 +168,7 @@ s32 evtCheckMoveEnd(evtUnit_t *unit) {
     case 1:
     case 2:
         evtVu0SubVectorXZAxis(unit->targetVector, (f32 *)&unit->effObj->poseset->pos);
-        SDF_VU0__GETLENGTH(value);
+        SDF_VU0_GETLENGTH(value);
         if (value <= 20.0f) {
             return 1;
         }
@@ -217,7 +217,7 @@ s32 evtGetNextMovePos(evtUnit_t *unit) {
         }
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)unit->pathHandle, t);
         dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-        SDF_VU0__STOREVECTOR(unit->targetVector);
+        SDF_VU0_STOREVECTOR(unit->targetVector);
         return 1;
     }
     return 0;
@@ -235,14 +235,14 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
     dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, 0.0f);
     dds3PathBasicControlGetPos(path);
     do {
-        SDF_VU0__COPYVECTOR_A_TO_B();
+        SDF_VU0_COPYVECTOR_A_TO_B();
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, t);
         dds3PathBasicControlGetPos(path);
-        SDF_VU0__COPYVECTOR_A_TO_C();
-        SDF_VU0__SUBVECTOR();
-        SDF_VU0__GETLENGTH(segmentLength);
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_GETLENGTH(segmentLength);
         length += segmentLength;
-        SDF_VU0__COPYVECTOR_C_TO_A();
+        SDF_VU0_COPYVECTOR_C_TO_A();
         t += step;
     } while (t <= 1.0f);
     dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, savedScaleFactor);
@@ -269,9 +269,9 @@ void GetBaseLightRGB(evtUnit_t *unit) {
         color = unit->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-                SDF_VU0__LOADVECTOR(info);
+                SDF_VU0_LOADVECTOR(info);
     } else {
-                SDF_VU0__LOADVECTOR(dds3LightParam.sources[0]);
+                SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
     }
 }
 
@@ -293,9 +293,9 @@ void GetBaseAmbientRGB(evtUnit_t *unit) {
         color = unit->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
-                SDF_VU0__LOADVECTOR(info->secondColor);
+                SDF_VU0_LOADVECTOR(info->secondColor);
     } else {
-                SDF_VU0__LOADVECTOR(dds3LightParam.ambient);
+                SDF_VU0_LOADVECTOR(dds3LightParam.ambient);
     }
 }
 
@@ -309,11 +309,11 @@ void GetBaseLightDir(evtUnit_t *unit) {
         }
     }
     if (unit->flags & 0x400) {
-                SDF_VU0__LOADVECTOR(unit->vec10);
+                SDF_VU0_LOADVECTOR(unit->vec10);
     } else if (ownVector) {
-                SDF_VU0__LOADVECTOR(unit->vec10);
+                SDF_VU0_LOADVECTOR(unit->vec10);
     } else {
-                SDF_VU0__LOADVECTOR(dds3LightParam.sources[0] + 4);
+                SDF_VU0_LOADVECTOR(dds3LightParam.sources[0] + 4);
     }
 }
 
@@ -367,8 +367,8 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitLightAndAmbient);
 /* vu0 routine: normalise the target direction and retain the current source. */
 void evtSetUnitLightDir(evtUnit_t *unit, s32 duration) {
     unit->directionDuration = duration;
-    SDF_VU0__VECTOR_W_SET_ZERO();
-    SDF_VU0__NORMALIZE();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF10_NOMEM(unit->vec30);
     GetBaseLightDir(unit);
     VU0_STORE_VF10_NOMEM(unit->vec20);
@@ -427,7 +427,7 @@ void evtUnitLightOff(evtUnit_t *unit, s32 duration) {
     } else {
         evtSetUnitLightAndAmbient(unit, duration, 0, 0);
         unit->flags = (unit->flags & ~0x800) | 0x1000;
-                SDF_VU0__LOADIDENTITYVECTOR();
+                SDF_VU0_LOADIDENTITYVECTOR();
         evtSetUnitLightDir(unit, duration);
         unit->flags = (unit->flags & ~0x2000) | 0x4000;
     }
@@ -544,15 +544,15 @@ INCLUDE_ASM(const s32, "event/evtUnitManager", evtUnitRotationTarget);
 s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
     f32 v[4];
 
-    SDF_VU0__LOADVECTOR(quat);
+    SDF_VU0_LOADVECTOR(quat);
     ToMatrix();
     VU0_COPY_VF30_TO_VF10();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__SCALEVECTOR(-1.0f);
-    SDF_VU0__LOADVECTOR_B(&unit->effObj->poseset->pos);
-    SDF_VU0__ADDVECTOR();
-    SDF_VU0__STOREVECTOR(v);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SCALEVECTOR(-1.0f);
+    SDF_VU0_LOADVECTOR_B(&unit->effObj->poseset->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(v);
     return evtUnitRotationTarget(unit, v, angle);
 }
 
@@ -566,15 +566,15 @@ s32 evtUnitMoveType0(evtUnit_t *unit) {
         evtGetUnitDirVector(unit);
         obj = unit->effObj;
     } else {
-        SDF_VU0__LOADVECTOR(unit->targetVector);
+        SDF_VU0_LOADVECTOR(unit->targetVector);
         obj = unit->effObj;
-        SDF_VU0__LOADVECTOR_B(&obj->poseset->pos);
-        SDF_VU0__SUBVECTOR();
-        SDF_VU0__NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(&obj->poseset->pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
     }
     scale = unit->motionParameter * 0.1f;
-    SDF_VU0__SCALEVECTOR(scale);
-    SDF_VU0__STOREVECTOR(v);
+    SDF_VU0_SCALEVECTOR(scale);
+    SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;
 }
@@ -584,14 +584,14 @@ s32 evtUnitMoveTypePathTrace(evtUnit_t *unit) {
 
     dds3PathBasicControlIsFinished((dds3PathBasicControl_t *)unit->pathHandle);
     dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-    SDF_VU0__STOREVECTOR(v);
+    SDF_VU0_STOREVECTOR(v);
     dds3SetPosPoseSet(unit->effObj, (u128 *)v);
     if (unit->flags & 0x10) {
         dds3PathBasicControlGetRot((dds3PathBasicControl_t *)unit->pathHandle);
-        SDF_VU0__COPYVECTOR_A_TO_B();
+        SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
-        SDF_VU0__STOREVECTOR(v);
+        SDF_VU0_STOREVECTOR(v);
         dds3SetRotPoseSet(unit->effObj, (u128 *)v);
     }
     return 1;
@@ -690,7 +690,7 @@ void evtSetUnitMove3(evtUnit_t *work, s32 pathObjectKey, s32 frames, s32 directi
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
     work->linkedUnit = pathSource;
     dds3PathBasicControlGetPos(path);
-    SDF_VU0__STOREVECTOR(work->targetVector);
+    SDF_VU0_STOREVECTOR(work->targetVector);
     work->motionParameter = frames;
     work->directionOffset = directionOffset;
     work->motionCallback = 0;

@@ -768,7 +768,7 @@ void effSwordTrackDrawTex(effMagatuhiValueWork_t *work) {
         (u32)sdfTexGetPacket(work->texture),
         sdfTexGetPacketLength((sdfTexHandle_t *)work->texture));
     sdfDrawTagLinkRef(list, packet);
-    SDF_VU0__STOREIDENTITY(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     historyOffset = 0;
     packet = sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket((u8 *)packet, matrix);
@@ -789,7 +789,7 @@ void effSwordTrackDrawTex(effMagatuhiValueWork_t *work) {
         index = *writeIndices++;
         historyOffset += historyCount;
         if (slotColor & 0xFF000000) {
-            SDF_VU0__COPYVECTOR(point, historyPositions[index]);
+            SDF_VU0_COPYVECTOR(point, historyPositions[index]);
             historyIndex = 0;
             if (validCount != 0) {
                 widthScale = baseSize * 4.0f;
@@ -802,15 +802,15 @@ void effSwordTrackDrawTex(effMagatuhiValueWork_t *work) {
                     } else {
                         index--;
                     }
-                    SDF_VU0__LOADVECTOR(point);
-                    SDF_VU0__STOREVECTOR(positions[pendingCount]);
-                    SDF_VU0__LOADVECTOR_B(historyPositions[index]);
-                    SDF_VU0__ADDVECTOR();
-                    SDF_VU0__STOREVECTOR(point);
+                    SDF_VU0_LOADVECTOR(point);
+                    SDF_VU0_STOREVECTOR(positions[pendingCount]);
+                    SDF_VU0_LOADVECTOR_B(historyPositions[index]);
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(point);
                     eeUnpackRGBAWordFloat(slotColor, 0.0078125f);
-                    SDF_VU0__COPYVECTOR_A_TO_B();
+                    SDF_VU0_COPYVECTOR_A_TO_B();
                     eeUnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
-                    SDF_VU0__MULVECTOR();
+                    SDF_VU0_MULVECTOR();
                     packed = packMagatuhiTrailColor();
                     colors[pendingCount] = packed;
                     offsets[pendingCount][0] = -size;
@@ -868,7 +868,7 @@ void effMagaCylinderSetPartPos(effMagatuhiValueWork_t *work, s32 index, const f3
     linearIndex = rowBase + writeIndex;
     newSlot = work->positions + linearIndex;
     scalarOutput = work->historyScalars + linearIndex;
-    SDF_VU0__COPYVECTOR(newSlot, vector);
+    SDF_VU0_COPYVECTOR(newSlot, vector);
     angleRow = work->angleRows[index];
 
     angleRow[2] += 0.21816613f;
@@ -896,35 +896,35 @@ void effMagaCylinderSetPartPos(effMagatuhiValueWork_t *work, s32 index, const f3
             }
         }
 
-        SDF_VU0__LOADVECTOR(aViewEye);
-        SDF_VU0__LOADVECTOR_B(aViewTarget);
-        SDF_VU0__SUBVECTOR();
-        SDF_VU0__COPYVECTOR_A_TO_C();
-        SDF_VU0__LOADVECTOR(vector);
-        SDF_VU0__LOADVECTOR_B(historyPosition);
-        SDF_VU0__SUBVECTOR();
-        SDF_VU0__COPYVECTOR_C_TO_B();
-        SDF_VU0__OUTERPRODUCT();
-        SDF_VU0__NORMALIZE();
-        SDF_VU0__STOREVECTOR(viewDirection);
+        SDF_VU0_LOADVECTOR(aViewEye);
+        SDF_VU0_LOADVECTOR_B(aViewTarget);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR(vector);
+        SDF_VU0_LOADVECTOR_B(historyPosition);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_COPYVECTOR_C_TO_B();
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(viewDirection);
         radial = sdfSin(angleRow[0]) * angleRow[1];
         (*replayPosition)[0] += viewDirection[0] * radial;
         (*replayPosition)[1] += viewDirection[1] * radial;
         (*replayPosition)[2] += viewDirection[2] * radial;
     }
 
-    SDF_VU0__LOADVECTOR_B(vector);
-    SDF_VU0__LOADVECTOR(historyPosition);
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__GETLENGTH(radial);
+    SDF_VU0_LOADVECTOR_B(vector);
+    SDF_VU0_LOADVECTOR(historyPosition);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(radial);
     limit = baseLimit * 3.0f;
     if (limit < radial) {
         VEC3_SPLAT(viewDirection, limit);
-        SDF_VU0__NORMALIZE();
-        SDF_VU0__LOADVECTOR_B(viewDirection);
-        SDF_VU0__MULVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(viewDirection);
+        SDF_VU0_MULVECTOR();
     }
-    SDF_VU0__STOREVECTOR(historyPosition);
+    SDF_VU0_STOREVECTOR(historyPosition);
 
     work->writeIndices[index] = writeIndex;
     validCount++;
@@ -1008,7 +1008,7 @@ void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *work, s32 index) {
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
     VU0_LOAD_VF10_FROM(*(u128 *)direction);
-    SDF_VU0__NORMALIZE();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF10_TO(*(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
@@ -1018,9 +1018,9 @@ void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *work, s32 index) {
     particle->driftState[1] = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[2] = random + random;
-    SDF_VU0__LOADVECTOR(particle->driftState);
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__STOREVECTOR(particle->driftState);
+    SDF_VU0_LOADVECTOR(particle->driftState);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(particle->driftState);
     particle->scale = work->head.baseScale *
         (dds3GetRandFloatA(dds3EffectBase) * work->head.scaleVariation +
          (1.0f - work->head.scaleVariation));
@@ -1060,10 +1060,10 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *work) {
     s32 age;
     u32 i;
 
-    SDF_VU0__LOADVECTOR(aViewEye);
-    SDF_VU0__LOADVECTOR_B(aViewTarget);
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__STOREVECTOR(viewDirection);
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDirection);
     mathResource = work->mathResource;
     valueWork = work->managedResource->valueWork;
     particle = work->particles;
@@ -1076,12 +1076,12 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *work) {
     fadeIn = work->head.fadeInFrames;
     fadeOut = work->head.fadeOutFrames;
     slot = dds3Bezier4PGetPart(mathResource, 0);
-    SDF_VU0__COPYVECTOR(origin, &work->head.originX);
+    SDF_VU0_COPYVECTOR(origin, &work->head.originX);
     captureDistance = work->head.captureDistance;
     pathJitter = work->head.pathJitter;
     pathStep = work->head.pathStep;
     pathAcceleration = work->head.pathAcceleration;
-    SDF_VU0__COPYVECTOR(target, &work->head.targetX);
+    SDF_VU0_COPYVECTOR(target, &work->head.targetX);
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
         if (age == 0) {
@@ -1089,7 +1089,7 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *work) {
         }
         if (age > 0 && age <= life) {
             if (slot->step == 0.0f) {
-                SDF_VU0__COPYVECTOR(basePosition, particle->position);
+                SDF_VU0_COPYVECTOR(basePosition, particle->position);
                 radial = particle->scale * sdfSin(particle->angle);
                 particle->driftState[1] += particle->liftStep;
                 point[0] = origin[0] + particle->position[0] + particle->driftState[0] * radial;
@@ -1097,22 +1097,22 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *work) {
                 point[2] = origin[2] + particle->position[2] + particle->driftState[2] * radial;
                 particle->scale += scaleStep;
                 particle->angle += angleStep;
-                SDF_VU0__LOADVECTOR(target);
-                SDF_VU0__LOADVECTOR_B(point);
-                SDF_VU0__SUBVECTOR();
-                SDF_VU0__GETLENGTH(distance);
+                SDF_VU0_LOADVECTOR(target);
+                SDF_VU0_LOADVECTOR_B(point);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_GETLENGTH(distance);
                 if (distance <= captureDistance) {
-                    SDF_VU0__NORMALIZE();
-                    SDF_VU0__STOREVECTOR(towardTarget);
-                    SDF_VU0__LOADVECTOR_B(viewDirection);
-                    SDF_VU0__OUTERPRODUCT();
-                    SDF_VU0__NORMALIZE();
-                    SDF_VU0__STOREVECTOR(sideAxis);
-                    SDF_VU0__LOADVECTOR(point);
-                    SDF_VU0__LOADVECTOR_B(basePosition);
-                    SDF_VU0__SUBVECTOR();
-                    SDF_VU0__NORMALIZE();
-                    SDF_VU0__STOREVECTOR(startTangent);
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(towardTarget);
+                    SDF_VU0_LOADVECTOR_B(viewDirection);
+                    SDF_VU0_OUTERPRODUCT();
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(sideAxis);
+                    SDF_VU0_LOADVECTOR(point);
+                    SDF_VU0_LOADVECTOR_B(basePosition);
+                    SDF_VU0_SUBVECTOR();
+                    SDF_VU0_NORMALIZE();
+                    SDF_VU0_STOREVECTOR(startTangent);
                     slot->controlPoints[0][0] = point[0];
                     slot->controlPoints[0][1] = point[1];
                     slot->controlPoints[0][2] = point[2];
@@ -1210,10 +1210,10 @@ void effMagaPoint4PartInit(effMagatuhiWideSecond_t *work, s32 index) {
     f32 step;
     f32 random;
 
-    SDF_VU0__LOADVECTOR(aViewEye);
-    SDF_VU0__LOADVECTOR_B(aViewTarget);
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__STOREVECTOR(viewDirection);
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDirection);
     step = 1.0f / (f32)work->head.lifetimeFrames;
     slot = dds3Bezier4PGetPart(work->mathResource, index);
     slot->t = 0;
@@ -1223,17 +1223,17 @@ void effMagaPoint4PartInit(effMagatuhiWideSecond_t *work, s32 index) {
     scale[0] = work->head.jitterScales[0] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0__LOADVECTOR(work->head.controlPoints[0]);
-    SDF_VU0__LOADVECTOR_B(work->head.controlPoints[1]);
-    SDF_VU0__COPYVECTOR_A_TO_C();
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__LOADVECTOR_B(viewDirection);
-    SDF_VU0__OUTERPRODUCT();
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__LOADVECTOR_B(scale);
-    SDF_VU0__MULVECTOR();
-    SDF_VU0__ADDVECTOR_A_C();
-    SDF_VU0__STOREVECTOR(point);
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[0]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[1]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(point);
     slot->controlPoints[0][0] = point[0];
     slot->controlPoints[0][1] = point[1];
     slot->controlPoints[0][2] = point[2];
@@ -1242,17 +1242,17 @@ void effMagaPoint4PartInit(effMagatuhiWideSecond_t *work, s32 index) {
     scale[0] = work->head.jitterScales[1] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0__LOADVECTOR(work->head.controlPoints[1]);
-    SDF_VU0__LOADVECTOR_B(work->head.controlPoints[2]);
-    SDF_VU0__COPYVECTOR_A_TO_C();
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__LOADVECTOR_B(viewDirection);
-    SDF_VU0__OUTERPRODUCT();
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__LOADVECTOR_B(scale);
-    SDF_VU0__MULVECTOR();
-    SDF_VU0__ADDVECTOR_A_C();
-    SDF_VU0__STOREVECTOR(point);
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[1]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[2]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_LOADVECTOR_B(scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(point);
     slot->controlPoints[1][0] = point[0];
     slot->controlPoints[1][1] = point[1];
     slot->controlPoints[1][2] = point[2];
@@ -1261,18 +1261,18 @@ void effMagaPoint4PartInit(effMagatuhiWideSecond_t *work, s32 index) {
     scale[0] = work->head.jitterScales[2] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0__LOADVECTOR(work->head.controlPoints[2]);
-    SDF_VU0__LOADVECTOR_B(work->head.controlPoints[3]);
-    SDF_VU0__COPYVECTOR_A_TO_C();
-    SDF_VU0__SUBVECTOR();
-    SDF_VU0__LOADVECTOR_B(viewDirection);
-    SDF_VU0__OUTERPRODUCT();
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__STOREVECTOR(lastNormal);
-    SDF_VU0__LOADVECTOR_B(scale);
-    SDF_VU0__MULVECTOR();
-    SDF_VU0__ADDVECTOR_A_C();
-    SDF_VU0__STOREVECTOR(point);
+    SDF_VU0_LOADVECTOR(work->head.controlPoints[2]);
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[3]);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(viewDirection);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(lastNormal);
+    SDF_VU0_LOADVECTOR_B(scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_ADDVECTOR_A_C();
+    SDF_VU0_STOREVECTOR(point);
     slot->controlPoints[2][0] = point[0];
     slot->controlPoints[2][1] = point[1];
     slot->controlPoints[2][2] = point[2];
@@ -1282,12 +1282,12 @@ void effMagaPoint4PartInit(effMagatuhiWideSecond_t *work, s32 index) {
     scale[0] = work->head.jitterScales[3] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0__LOADVECTOR(lastNormal);
-    SDF_VU0__LOADVECTOR_B(scale);
-    SDF_VU0__MULVECTOR();
-    SDF_VU0__LOADVECTOR_B(work->head.controlPoints[3]);
-    SDF_VU0__ADDVECTOR();
-    SDF_VU0__STOREVECTOR(point);
+    SDF_VU0_LOADVECTOR(lastNormal);
+    SDF_VU0_LOADVECTOR_B(scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(work->head.controlPoints[3]);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(point);
     slot->controlPoints[3][0] = point[0];
     slot->controlPoints[3][1] = point[1];
     slot->controlPoints[3][2] = point[2];
@@ -1390,10 +1390,10 @@ void effMagaP4Randomize(effMagatuhiCallback_t *callback) {
         dds3Bezier4PPartRun(work->mathResource, particleIndex, endPosition);
         blendStep = 1.0f / (f32)sampleSpan;
         for (sampleIndex = 0; sampleIndex < sampleSpan; sampleIndex++) {
-            SDF_VU0__LOADVECTOR(startPosition);
-            SDF_VU0__LOADVECTOR_B(endPosition);
-            SDF_VU0__INTERPOLATE(blendFraction);
-            SDF_VU0__STOREVECTOR(samplePosition);
+            SDF_VU0_LOADVECTOR(startPosition);
+            SDF_VU0_LOADVECTOR_B(endPosition);
+            SDF_VU0_INTERPOLATE(blendFraction);
+            SDF_VU0_STOREVECTOR(samplePosition);
             effMagaCylinderSetPartPos(valueWork, particleIndex, samplePosition);
             blendFraction += blendStep;
         }
@@ -1415,7 +1415,7 @@ effMagatuhiRingWork_t *effMagaCylinderCreate(effMagatuhiRingParams_t *src) {
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
-    SDF_VU0__STOREIDENTITY(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
@@ -1458,7 +1458,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaCylinderDraw);
 
 /* Copy the ring origin as one quadword, including its fourth component. */
 void effMagaCylinderSetPosition(effMagatuhiRingWork_t *work, void *origin) {
-    SDF_VU0__COPYVECTOR(work->head.origin, origin);
+    SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
 /* The historical symbol names a resource, but this slot is packed color. */
@@ -1499,8 +1499,8 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *callback) {
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
-            SDF_VU0__COPYVECTOR(origin, work->head.origin);
-            SDF_VU0__LOADMATRIX(work->matrix);
+            SDF_VU0_COPYVECTOR(origin, work->head.origin);
+            SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
@@ -1524,11 +1524,11 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *callback) {
                     out[0] = sdfCos(angle) * radius;
                     out[1] = height;
                     out[2] = sdfSin(angle) * radius;
-                    SDF_VU0__LOADVECTOR_B(origin);
-                    SDF_VU0__LOADVECTOR(out);
-                    SDF_VU0__APPLYMATRIX();
-                    SDF_VU0__ADDVECTOR();
-                    SDF_VU0__STOREVECTOR(out);
+                    SDF_VU0_LOADVECTOR_B(origin);
+                    SDF_VU0_LOADVECTOR(out);
+                    SDF_VU0_APPLYMATRIX();
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(out);
                     effMagaCylinderSetPartPos(valueWork, i, out);
                     angle += angleStep;
                     radius += radiusStep;
@@ -1553,7 +1553,7 @@ effMagatuhiOrbitWork_t *effMagaSpiralCreate(effMagatuhiOrbitParams_t *src) {
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
-    SDF_VU0__STOREIDENTITY(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
@@ -1598,7 +1598,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSpiralDraw);
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
 void effMagaSpiralSetPosition(effMagatuhiOrbitWork_t *work, void *origin) {
-    SDF_VU0__COPYVECTOR(work->head.origin, origin);
+    SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
 /* This callback sets the packed orbit color, not an allocation handle. */
@@ -1640,8 +1640,8 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *callback) {
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
-            SDF_VU0__COPYVECTOR(origin, work->head.origin);
-            SDF_VU0__LOADMATRIX(work->matrix);
+            SDF_VU0_COPYVECTOR(origin, work->head.origin);
+            SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
@@ -1666,11 +1666,11 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *callback) {
                     out[0] = sdfCos(angle) * radius;
                     out[1] = height;
                     out[2] = sdfSin(angle) * radius;
-                    SDF_VU0__LOADVECTOR_B(origin);
-                    SDF_VU0__LOADVECTOR(out);
-                    SDF_VU0__APPLYMATRIX();
-                    SDF_VU0__ADDVECTOR();
-                    SDF_VU0__STOREVECTOR(out);
+                    SDF_VU0_LOADVECTOR_B(origin);
+                    SDF_VU0_LOADVECTOR(out);
+                    SDF_VU0_APPLYMATRIX();
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(out);
                     effMagaCylinderSetPartPos(valueWork, i, out);
                     height += heightStep;
                     angle += angleStep;
@@ -1698,7 +1698,7 @@ effMagatuhiDriftWork_t *effMagaSmokeCreate(effMagatuhiDriftParams_t *src) {
     work->particles = particle;
     work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
-    SDF_VU0__STOREIDENTITY(work->matrix);
+    SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
@@ -1732,7 +1732,7 @@ void effMagaSmokePartInit(effMagatuhiDriftWork_t *work, s32 index) {
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
     VU0_LOAD_VF10_FROM(*(u128 *)direction);
-    SDF_VU0__NORMALIZE();
+    SDF_VU0_NORMALIZE();
     VU0_STORE_VF10_TO(*(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
@@ -1742,9 +1742,9 @@ void effMagaSmokePartInit(effMagatuhiDriftWork_t *work, s32 index) {
     particle->driftState[1] = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->driftState[2] = random + random;
-    SDF_VU0__LOADVECTOR(particle->driftState);
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__STOREVECTOR(particle->driftState);
+    SDF_VU0_LOADVECTOR(particle->driftState);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(particle->driftState);
     particle->scale = work->head.initialScale *
         (dds3GetRandFloatA(dds3EffectBase) * work->head.initialScaleRandomness +
          (1.0f - work->head.initialScaleRandomness));
@@ -1760,7 +1760,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSmokeDraw);
 
 /* Copy the drift origin as one quadword, preserving the source w. */
 void effMagaSmokeSetPosition(effMagatuhiDriftWork_t *work, void *origin) {
-    SDF_VU0__COPYVECTOR(work->head.origin, origin);
+    SDF_VU0_COPYVECTOR(work->head.origin, origin);
 }
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
@@ -1802,8 +1802,8 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *callback) {
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
-            SDF_VU0__COPYVECTOR(origin, work->head.origin);
-            SDF_VU0__LOADMATRIX(work->matrix);
+            SDF_VU0_COPYVECTOR(origin, work->head.origin);
+            SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSmokePartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
@@ -1832,11 +1832,11 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *callback) {
                     out[0] = particle->position[0] + particle->driftState[0] * scale;
                     out[1] = particle->position[1] + lift;
                     out[2] = particle->position[2] + particle->driftState[2] * scale;
-                    SDF_VU0__LOADVECTOR_B(origin);
-                    SDF_VU0__LOADVECTOR(out);
-                    SDF_VU0__APPLYMATRIX();
-                    SDF_VU0__ADDVECTOR();
-                    SDF_VU0__STOREVECTOR(out);
+                    SDF_VU0_LOADVECTOR_B(origin);
+                    SDF_VU0_LOADVECTOR(out);
+                    SDF_VU0_APPLYMATRIX();
+                    SDF_VU0_ADDVECTOR();
+                    SDF_VU0_STOREVECTOR(out);
                     effMagaCylinderSetPartPos(valueWork, i, out);
                     scale += scaleStep;
                     angle += angleStep;

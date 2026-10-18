@@ -721,7 +721,7 @@ nbKoukaPacket_t *nbAddTargetMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 pa
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid);
     p->type = 1;
     p->partyno = partyno;
-    SDF_VU0__COPYVECTOR(&p->v, pos);
+    SDF_VU0_COPYVECTOR(&p->v, pos);
     p->data1.f = speed;
     return p;
 }
@@ -745,7 +745,7 @@ nbKoukaPacket_t *nbAddRotKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno, 
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid);
     p->type = 3;
     p->partyno = partyno;
-    SDF_VU0__COPYVECTOR(&p->v, rot);
+    SDF_VU0_COPYVECTOR(&p->v, rot);
     p->data1.i = speed;
     return p;
 }
@@ -4810,7 +4810,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbRestartMotion);
 
 void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos)
 {
-    SDF_VU0__COPYVECTOR(&form->pos, pos);
+    SDF_VU0_COPYVECTOR(&form->pos, pos);
     if ((form->stat & 1) == 0) {
         return;
     }
@@ -4821,7 +4821,7 @@ void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos)
         return;
     }
     dds3SetPosPoseSet(form->basic, pos);
-    SDF_VU0__COPYVECTOR(&form->pos, pos);
+    SDF_VU0_COPYVECTOR(&form->pos, pos);
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetFormRot);
@@ -4853,12 +4853,12 @@ void nbResetAllFormPosRot(void)
 
 void nbLoadUnitPos(nbFormation_t *form)
 {
-    SDF_VU0__LOADVECTOR(&form->pos);
+    SDF_VU0_LOADVECTOR(&form->pos);
 }
 
 void effBTLModelLoadRotate(nbFormation_t *form)
 {
-    SDF_VU0__LOADVECTOR(&form->rot);
+    SDF_VU0_LOADVECTOR(&form->rot);
 }
 
 f32 nbCameraGetBossDistance(void)

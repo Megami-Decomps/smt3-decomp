@@ -59,7 +59,7 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGetCircumferencePtr);
 f32 effBTLModelGetHeight(effBTLModel_t *unit) {
     f32 position[4];
     effBTLModelGetSphereCenter(unit);
-    SDF_VU0__STOREVECTOR(position);
+    SDF_VU0_STOREVECTOR(position);
     return unit->height * unit->scale * 0.5f - position[1];
 }
 
@@ -87,7 +87,7 @@ void effBTLModelGetMarkMatrix2(effBTLModel_t *model, s32 mark) {
     if (effBTLModelGetMarkMatrix(model, mark) != 0) {
         return;
     }
-    SDF_VU0__LOADIDENTITY();
+    SDF_VU0_LOADIDENTITY();
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelGroupGetCenter);
@@ -193,7 +193,7 @@ INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartPtrGetModelCenter);
 /* The selected position provider leaves its vector in vf10. */
 void effBTLPartGetPositionPtr(void *owner, effBTLAimParams_t *request, f32 *out) {
     GetPositionPtrTable[request->scaleKind](owner, request);
-    SDF_VU0__STOREVECTOR(out);
+    SDF_VU0_STOREVECTOR(out);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelPositionPtr);
@@ -236,7 +236,7 @@ void effBTLPartGetRotateMatrixPtr(effBTLAimParams_t *request, sdfMatrix4_t *out)
         SetRotateMatrixY_B(angle);
         MultMatrixRevNoArg();
     }
-    SDF_VU0__STOREMATRIX(out);
+    SDF_VU0_STOREMATRIX(out);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartDebugPositionPtr);

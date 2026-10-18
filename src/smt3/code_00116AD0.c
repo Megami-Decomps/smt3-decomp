@@ -1678,9 +1678,9 @@ void fldShutoff(void)
         if (dds3GetControlScene() != NULL) {
             dds3GetPosPoseSet(handle);
             p = (u8 *)&fldSceneParam;
-            SDF_VU0__STOREVECTOR(p);
+            SDF_VU0_STOREVECTOR(p);
             dds3GetRotPoseSet(handle);
-            SDF_VU0__STOREVECTOR(p + 0x10);
+            SDF_VU0_STOREVECTOR(p + 0x10);
         }
         fldGetUnitControl()->handle = NULL;
         fldGetUnitControl()->handle2 = NULL;

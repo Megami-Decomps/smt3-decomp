@@ -52,7 +52,7 @@ that touches `vf12`.
 them cost less than keeping them: 36 of the 50 register tuples in use already had
 an identical fixed-register macro, so the tree ended up with 21 definitions
 removed and 14 added. Before that conversion `VU0_MOVE_VF(vf11, vf10)` and
-`SDF_VU0__COPYVECTOR_A_TO_B` were both defined and meant the same thing, which is the
+`SDF_VU0_COPYVECTOR_A_TO_B` were both defined and meant the same thing, which is the
 worst of both schemes.
 
 Two distinctions a port must not flatten, both of which cost a match when they
@@ -116,7 +116,7 @@ multiply-adds and round once. The step order is part of the result.
 **Perspective divide leaves w as 1/w, not 1.** `vmove.w vf10, vf0` sets w to one
 *before* `vmulq.xyzw` scales all four lanes by `Q`, so the surviving w is `Q`.
 
-**`SDF_VU0__APPLYMATRIX_XYZ` overwrites w.** Its last instruction is `vmaddz.xyzw`, which
+**`SDF_VU0_APPLYMATRIX_XYZ` overwrites w.** Its last instruction is `vmaddz.xyzw`, which
 writes all four lanes, so w becomes the accumulator chain's w. It is not a 3x3
 rotate that leaves w alone.
 
@@ -125,15 +125,15 @@ rotate that leaves w alone.
 `v / sqrtf(len2)`. The squared length is also accumulated through `ACC.w` using
 `vf0.w` as a multiply by one, a different order from `x*x + y*y + z*z`.
 
-**The scratch clobbers are observable.** `SDF_VU0__INNERPRODUCT`, `SDF_VU0__GETLENGTH`
-and `SDF_VU0__NORMALIZE` destroy `vf2`; `SDF_VU0__INTERPOLATE` destroys `vf3`;
-`SDF_VU0__GETLENGTH` and `VU0_CLIP_RATIO_*` leave `Q` set. `vf2` is a carrier
+**The scratch clobbers are observable.** `SDF_VU0_INNERPRODUCT`, `SDF_VU0_GETLENGTH`
+and `SDF_VU0_NORMALIZE` destroy `vf2`; `SDF_VU0_INTERPOLATE` destroys `vf3`;
+`SDF_VU0_GETLENGTH` and `VU0_CLIP_RATIO_*` leave `Q` set. `vf2` is a carrier
 elsewhere, so an equivalent that does not clobber it diverges.
 
 **The clip register is a shift register, four results deep.** `vclipw` does
 `clip = ((clip << 6) | bits) & 0xFFFFFF`. `code_002C6F38.c` reads the previous
 result as `clipFlags >> 6` while reading the latest as `clipFlags & 0x3F`. The
-`vnop` padding in `SDF_VU0__CLIPTESTWAIT` is hazard management, so no delay
+`vnop` padding in `SDF_VU0_CLIPTESTWAIT` is hazard management, so no delay
 model is needed, but the four-deep history is.
 
 **`VU0_CLIP_TEST_BOX_CORNERS` is two four-corner windows combined with AND.** It
@@ -149,7 +149,7 @@ or `0xFFFFFFFF` according to the sign of z's bit pattern. Not zero, not garbage.
 reinterprets a lane's bits as a signed integer. The RGBA pack path depends on
 this at both the 0 and 255 ends.
 
-**`SDF_VU0__LOADIDENTITYVECTOR` is `vmove.xyzw vf10, vf0`**, so xyz go to zero and w to one.
+**`SDF_VU0_LOADIDENTITYVECTOR` is `vmove.xyzw vf10, vf0`**, so xyz go to zero and w to one.
 
 ## VU0 floats are not IEEE 754
 

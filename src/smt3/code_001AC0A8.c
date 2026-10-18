@@ -203,7 +203,7 @@ void effDebugPointDraw(QuadF32 *pos)
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    SDF_VU0__LOADVECTOR(pos);
+    SDF_VU0_LOADVECTOR(pos);
     effScreenOffset();
     VU0_STORE_VF10_TO(screen);
     point.x = (s32)screen.components[0] - 0x700;
@@ -224,7 +224,7 @@ void effDebugPointDraw2(QuadF32 *pos, u32 mode)
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    SDF_VU0__LOADVECTOR(pos);
+    SDF_VU0_LOADVECTOR(pos);
     effScreenOffset();
     VU0_STORE_VF10_TO(screen);
     point.x = (s32)screen.components[0] - 0x700;
@@ -245,12 +245,12 @@ void effDebugLineDraw(QuadF32 *from, QuadF32 *to)
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    SDF_VU0__LOADVECTOR(from);
+    SDF_VU0_LOADVECTOR(from);
     effScreenOffset();
-    SDF_VU0__STOREVECTOR(&screen[0]);
-    SDF_VU0__LOADVECTOR(to);
+    SDF_VU0_STOREVECTOR(&screen[0]);
+    SDF_VU0_LOADVECTOR(to);
     effScreenOffset();
-    SDF_VU0__STOREVECTOR(&screen[1]);
+    SDF_VU0_STOREVECTOR(&screen[1]);
     point[0].x = (s32)screen[0].components[0] - 0x700;
     point[0].y = ((s32)screen[0].components[1] << 1) - 0xF20;
     point[1].x = (s32)screen[1].components[0] - 0x700;
@@ -273,12 +273,12 @@ void effDebugLineDraw2(QuadF32 *from, QuadF32 *to, u32 mode)
 
     tag = sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    SDF_VU0__LOADVECTOR(from);
+    SDF_VU0_LOADVECTOR(from);
     effScreenOffset();
-    SDF_VU0__STOREVECTOR(&screen[0]);
-    SDF_VU0__LOADVECTOR(to);
+    SDF_VU0_STOREVECTOR(&screen[0]);
+    SDF_VU0_LOADVECTOR(to);
     effScreenOffset();
-    SDF_VU0__STOREVECTOR(&screen[1]);
+    SDF_VU0_STOREVECTOR(&screen[1]);
     point[0].x = (s32)screen[0].components[0] - 0x700;
     point[0].y = ((s32)screen[0].components[1] << 1) - 0xF20;
     point[1].x = (s32)screen[1].components[0] - 0x700;
@@ -325,7 +325,7 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
         colors[ring++] = color;
     } while (ring < 40);
 
-    SDF_VU0__STOREIDENTITY(matrix);
+    SDF_VU0_STOREIDENTITY(matrix);
     for (pass = 0; pass < 2; pass++) {
         latitude = 0.0f;
         for (ring = 0; ring < 14; ring++) {
@@ -334,28 +334,28 @@ void effDebugWireframeSphereDraw(const f32 *center, u32 color, f32 radius) {
             longitude = 0.0f;
             ringY = radius * sdfCos(latitude);
             ringRadius = radius * sdfSin(latitude);
-            SDF_VU0__LOADMATRIX(matrix);
-            SDF_VU0__LOADVECTOR_B( center);
+            SDF_VU0_LOADMATRIX(matrix);
+            SDF_VU0_LOADVECTOR_B( center);
             point[0] = ringRadius;
             point[1] = ringY;
             point[2] = 0.0f;
-            SDF_VU0__LOADVECTOR( point);
-            SDF_VU0__VECTOR_W_SET_ZERO();
-            SDF_VU0__APPLYMATRIX();
-            SDF_VU0__ADDVECTOR();
+            SDF_VU0_LOADVECTOR( point);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_ADDVECTOR();
 
             for (segment = 0; segment < 20; segment++) {
-                SDF_VU0__STOREVECTOR( *out);
+                SDF_VU0_STOREVECTOR( *out);
                 out++;
                 longitude += 0.31415924429893494f;
                 point[0] = sdfCos(longitude) * ringRadius;
                 point[1] = ringY;
                 point[2] = sdfSin(longitude) * ringRadius;
-                SDF_VU0__LOADVECTOR( point);
-                SDF_VU0__VECTOR_W_SET_ZERO();
-                SDF_VU0__APPLYMATRIX();
-                SDF_VU0__ADDVECTOR();
-                SDF_VU0__STOREVECTOR( *out);
+                SDF_VU0_LOADVECTOR( point);
+                SDF_VU0_VECTOR_W_SET_ZERO();
+                SDF_VU0_APPLYMATRIX();
+                SDF_VU0_ADDVECTOR();
+                SDF_VU0_STOREVECTOR( *out);
                 out++;
             }
             sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
@@ -386,7 +386,7 @@ void effDebugSelectCursorDraw(f32 *position) {
     sdfDrawTagInit(list);
     SetRotateMatrixY(D_0054F274);
     D_0054F274 += 0.10471974313259125f;
-    SDF_VU0__LOADVECTOR( position);
+    SDF_VU0_LOADVECTOR( position);
     VU0_ADD_VF31_VF10_XYZ();
     sdf3DPrimLinkTm(list, NULL);
     memset(&packet, 0, 0x2C);
@@ -444,19 +444,19 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
         point[0] = radius;
         point[1] = y;
         point[2] = 0.0f;
-        SDF_VU0__LOADVECTOR_B( center);
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
+        SDF_VU0_LOADVECTOR_B( center);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
         for (segment = 0; segment < 20; segment++) {
-            SDF_VU0__STOREVECTOR( *out);
+            SDF_VU0_STOREVECTOR( *out);
             out++;
             angle += angleStep;
             point[0] = sdfCos(angle) * radius;
             point[1] = y;
             point[2] = sdfSin(angle) * radius;
-            SDF_VU0__LOADVECTOR( point);
-            SDF_VU0__ADDVECTOR();
-            SDF_VU0__STOREVECTOR( *out);
+            SDF_VU0_LOADVECTOR( point);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR( *out);
             out++;
         }
         sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
@@ -464,68 +464,68 @@ void effDebugWireframeCylinderDraw(const f32 *center, u32 color, f32 radius, f32
     }
 
     out = vertices;
-    SDF_VU0__LOADVECTOR_B( center);
+    SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 20; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
-        SDF_VU0__STOREVECTOR( *out);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
-        SDF_VU0__STOREVECTOR( *out);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         angle += angleStep;
     }
     sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 40, 0x80));
 
     out = vertices;
-    SDF_VU0__LOADVECTOR_B( center);
+    SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
-        SDF_VU0__STOREVECTOR( *out);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = -height * 0.5f;
         point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
-        SDF_VU0__STOREVECTOR( *out);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         angle += angleStep;
     }
     sdfDrawTagLink(list, effDebugDrawWireModel(vertices, colors, 20, 0x80));
 
     out = vertices;
-    SDF_VU0__LOADVECTOR_B( center);
+    SDF_VU0_LOADVECTOR_B( center);
     angle = 0.0f;
     for (segment = 0; segment < 10; segment++) {
         point[0] = sdfCos(angle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(angle) * radius;
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
-        SDF_VU0__STOREVECTOR( *out);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         oppositeAngle = angle + 3.1415926f;
         point[0] = sdfCos(oppositeAngle) * radius;
         point[1] = height * 0.5f;
         point[2] = sdfSin(oppositeAngle) * radius;
-        SDF_VU0__LOADVECTOR( point);
-        SDF_VU0__ADDVECTOR();
-        SDF_VU0__STOREVECTOR( *out);
+        SDF_VU0_LOADVECTOR( point);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_STOREVECTOR( *out);
         out++;
         angle += angleStep;
     }

@@ -93,9 +93,9 @@ typedef struct SdfPacket {
 #define VU0_TRANSFORM_POINT_VF11() __asm__ volatile ( \
     ".set noreorder\n\tvmulax.xyzw ACC, vf28, vf11x\n\tvmadday.xyzw ACC, vf29, vf11y\n\t" \
     "vmaddaz.xyzw ACC, vf30, vf11z\n\tvmaddw.xyzw vf11, vf31, vf0w\n\t.set reorder")
-#define SDF_VU0__CLIPTEST_B() __asm__ volatile ( \
+#define SDF_VU0_CLIPTEST_B() __asm__ volatile ( \
     ".set noreorder\n\tvclipw.xyz vf11, vf11w\n\t.set reorder")
-#define SDF_VU0__CLIPTESTWAIT(out) __asm__ volatile ( \
+#define SDF_VU0_CLIPTESTWAIT(out) __asm__ volatile ( \
     ".set noreorder\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
     : "=r" (out))
 #define VU0_STORE_VF8_AT0(dst) __asm__ volatile ( \
@@ -873,15 +873,15 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
     VU0_LOAD_VF15_AT16(viewport);
     emitted = 0;
     for (i = 0; i < vertexCount; i += 2) {
-        SDF_VU0__LOADVECTOR(vertices[i]);
+        SDF_VU0_LOADVECTOR(vertices[i]);
         EE_MMI_RGBA_TO_VF8(colors[i]);
-        SDF_VU0__APPLYMATRIX_XYZ1();
-        SDF_VU0__LOADVECTOR_B(vertices[i + 1]);
+        SDF_VU0_APPLYMATRIX_XYZ1();
+        SDF_VU0_LOADVECTOR_B(vertices[i + 1]);
         EE_MMI_RGBA_TO_VF9(colors[i + 1]);
         VU0_TRANSFORM_POINT_VF11();
-        SDF_VU0__CLIPTEST();
-        SDF_VU0__CLIPTEST_B();
-        SDF_VU0__CLIPTESTWAIT(clipFlags);
+        SDF_VU0_CLIPTEST();
+        SDF_VU0_CLIPTEST_B();
+        SDF_VU0_CLIPTESTWAIT(clipFlags);
         firstClip = (clipFlags >> 6) & 0x3F;
         secondClip = clipFlags & 0x3F;
         if ((firstClip & secondClip) != 0 || (firstClip & 0x20) != 0 || (secondClip & 0x20) != 0) {
@@ -910,7 +910,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
                         break;
                     }
                     VU0_CLIP_SEGMENT_UPDATE_FIRST();
-                    SDF_VU0__CLIPTESTWAIT(firstClip);
+                    SDF_VU0_CLIPTESTWAIT(firstClip);
                     firstClip &= 0x3F;
                     if (firstClip & secondClip) {
                         break;
@@ -937,7 +937,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
                         break;
                     }
                     VU0_CLIP_SEGMENT_UPDATE_SECOND();
-                    SDF_VU0__CLIPTESTWAIT(secondClip);
+                    SDF_VU0_CLIPTESTWAIT(secondClip);
                     secondClip &= 0x3F;
                     if (firstClip & secondClip) {
                         break;
@@ -966,7 +966,7 @@ SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s3
 }
 
 SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
-    SDF_VU0__LOADMATRIX(sdf3DScreenTm);
+    SDF_VU0_LOADMATRIX(sdf3DScreenTm);
     return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
 }
 

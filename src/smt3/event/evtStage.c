@@ -229,14 +229,14 @@ void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
         if (source != NULL) {
             sourceTransform = source->workdata;
             dds3SetPosPoseSet(target, (u128 *)&sourceTransform->position);
-                        SDF_VU0__LOADVECTOR(quaternion);
+                        SDF_VU0_LOADVECTOR(quaternion);
             FromRotation(3.14159265f);
-                        SDF_VU0__LOADVECTOR_B(sourceTransform->rotation);
+                        SDF_VU0_LOADVECTOR_B(sourceTransform->rotation);
             Mult();
-                        SDF_VU0__STOREVECTOR(quaternion);
+                        SDF_VU0_STOREVECTOR(quaternion);
             dds3SetRotPoseSet(target, (u128 *)quaternion);
             dds3GetPosPoseSet(target);
-            SDF_VU0__STOREVECTOR(&target->poseset->pos2);
+            SDF_VU0_STOREVECTOR(&target->poseset->pos2);
         }
     }
 }

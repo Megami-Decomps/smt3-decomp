@@ -81,15 +81,15 @@ s32 MoverBasicMainprocuder(dds3Basic_t *basic)
     if (work->pathcontrol != NULL) {
         if (work->pathcontrol->flags & DDS3_PATHBASIC_FLAG_POS) {
             dds3PathBasicControlGetPos(work->pathcontrol);
-            SDF_VU0__STOREVECTOR(&pathVector);
+            SDF_VU0_STOREVECTOR(&pathVector);
             dds3SetPosPoseSet(object, &pathVector);
             if (object->type >> 24 == BASIC_TYPE_MATTEROBJECT) {
-                SDF_VU0__COPYVECTOR(&((dds3MatterPathPosition_t *)object->workdata)->position, &pathVector);
+                SDF_VU0_COPYVECTOR(&((dds3MatterPathPosition_t *)object->workdata)->position, &pathVector);
             }
         }
         if (work->pathcontrol->flags & DDS3_PATHBASIC_FLAG_ROT) {
             dds3PathBasicControlGetRot(work->pathcontrol);
-            SDF_VU0__STOREVECTOR(&pathVector);
+            SDF_VU0_STOREVECTOR(&pathVector);
             dds3SetRotPoseSet(object, &pathVector);
         }
         if (work->pathcontrol->flags & DDS3_PATHBASIC_FLAG_FOVY) {

@@ -500,11 +500,11 @@ void effPCPCrackInit(effCrackWork_t *work)
                 colors->color[3] = 0;
                 colors->color[4] = 0;
                 VU0_COPY_VF0_TO_VF10();
-                SDF_VU0__STOREVECTOR(vertices);
-                SDF_VU0__STOREVECTOR(vertices + 4);
-                SDF_VU0__STOREVECTOR(vertices + 8);
-                SDF_VU0__STOREVECTOR(vertices + 12);
-                SDF_VU0__STOREVECTOR(vertices + 16);
+                SDF_VU0_STOREVECTOR(vertices);
+                SDF_VU0_STOREVECTOR(vertices + 4);
+                SDF_VU0_STOREVECTOR(vertices + 8);
+                SDF_VU0_STOREVECTOR(vertices + 12);
+                SDF_VU0_STOREVECTOR(vertices + 16);
             }
             dds3FlashPolyListSetBlend(group->drawPool, work->blend);
             group->cells = nextCells;
@@ -548,7 +548,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackDraw);
 
 void effPCPCrackSetPosition(effCrackWork_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work, source);
+    SDF_VU0_COPYVECTOR(work, source);
 }
 
 void effPCPCrackSetColor(effCrackWork_t *work, u32 color)
@@ -593,7 +593,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelDraw);
 
 void effPCPBossBaelSetPosition(effBaelWork_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work->parameterVector, source);
+    SDF_VU0_COPYVECTOR(work->parameterVector, source);
 }
 
 void effPCPBossBaelSetColor(effBaelWork_t *work, u32 color)
@@ -645,7 +645,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltDraw);
 
 void effPCPBossThunderboltSetPosition(effPCPBossThunderbolt_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work, source);
+    SDF_VU0_COPYVECTOR(work, source);
 }
 
 void effPCPBossThunderboltSetColor(effPCPBossThunderbolt_t *work, u32 color)
@@ -724,7 +724,7 @@ void effPCPBossKAGUThunderboltDraw(effPCPBossKAGUThunderbolt_t *work)
 
 void effPCPBossKAGUThunderboltSetPosition(effPCPBossKAGUThunderbolt_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work, source);
+    SDF_VU0_COPYVECTOR(work, source);
 }
 
 void effPCPBossKAGUThunderboltSetColor(effPCPBossKAGUThunderbolt_t *work, u32 color)
@@ -872,7 +872,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamDraw);
 
 void effPCPBossMETATOBeamSetPosition(effPCPBossMETATOBeam_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work, source);
+    SDF_VU0_COPYVECTOR(work, source);
 }
 
 void effPCPBossMETATOBeamSetColor(effPCPBossMETATOBeam_t *work, u32 color)
@@ -937,7 +937,7 @@ void effPCPMuzzleFlashSetColor(effPCPMuzzleFlash_t *work, u32 color)
 
 void effPCPMuzzleFlashSetPosition(effPCPMuzzleFlash_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work->position, source);
+    SDF_VU0_COPYVECTOR(work->position, source);
 }
 
 void effPCPMuzzleFlashSetScale(effPCPMuzzleFlash_t *work, f32 scale)
@@ -948,8 +948,8 @@ void effPCPMuzzleFlashSetScale(effPCPMuzzleFlash_t *work, f32 scale)
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
 void effPCPMuzzleFlashSetRotateMatrix(effPCPMuzzleFlash_t *work, const void *source)
 {
-    SDF_VU0__LOADMATRIX(source);
-    SDF_VU0__STOREMATRIX(work);
+    SDF_VU0_LOADMATRIX(source);
+    SDF_VU0_STOREMATRIX(work);
 }
 
 INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DA0);
@@ -997,14 +997,14 @@ void effPCPDANTE_Thunder_SetColor(effPCPDANTE_Thunder_t *work, u32 color)
 
 void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work, source);
+    SDF_VU0_COPYVECTOR(work, source);
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
 void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *work, const void *source)
 {
-    SDF_VU0__LOADMATRIX(source);
-    SDF_VU0__STOREMATRIX(work->matrix);
+    SDF_VU0_LOADMATRIX(source);
+    SDF_VU0_STOREMATRIX(work->matrix);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
@@ -1059,14 +1059,14 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Run);
 
 void effPCP_PBCamera_SetPosition(effPCP_PBCamera_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work->position, source);
+    SDF_VU0_COPYVECTOR(work->position, source);
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
 void effPCP_PBCamera_SetRotateMatrix(effPCP_PBCamera_t *work, const void *source)
 {
-    SDF_VU0__LOADMATRIX(source);
-    SDF_VU0__STOREMATRIX(work);
+    SDF_VU0_LOADMATRIX(source);
+    SDF_VU0_STOREMATRIX(work);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Create);
@@ -1105,7 +1105,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Draw);
 
 void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work, source);
+    SDF_VU0_COPYVECTOR(work, source);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Create);
@@ -1129,14 +1129,14 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_BED_Draw);
 
 void effPCP_BED_SetPosition(effPCP_BED_t *work, const void *source)
 {
-    SDF_VU0__COPYVECTOR(work->position, source);
+    SDF_VU0_COPYVECTOR(work->position, source);
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
 void effPCP_BED_SetRotateMatrix(effPCP_BED_t *work, const void *source)
 {
-    SDF_VU0__LOADMATRIX(source);
-    SDF_VU0__STOREMATRIX(work);
+    SDF_VU0_LOADMATRIX(source);
+    SDF_VU0_STOREMATRIX(work);
 }
 
 void effPCP_BED_SetColor(effPCP_BED_t *work, u32 color)

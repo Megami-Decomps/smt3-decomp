@@ -54,7 +54,7 @@ typedef struct
 
 /* Concrete SDK register transfers used by the quaternion and projection paths.
  * VF2 is the scalar/swap scratch; C float transfers use the SDK's $2 scratch. */
-#define SDF_VU0__SWAPVECTOR_A_B() __asm__ volatile ( \
+#define SDF_VU0_SWAPVECTOR_A_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf11\n\t" \
     "vmove.xyzw vf11, vf2\n\t.set reorder")
 #define VU0_COPY_MATRIX_TO_B() __asm__ volatile ( \
@@ -647,7 +647,7 @@ void dds3SetScreenFovy(f32 fieldOfView)
 
 void dds3SetAmbient(sdfVector4_t *ambient)
 {
-    SDF_VU0__COPYVECTOR(&dds3LightParam.ambient, ambient);
+    SDF_VU0_COPYVECTOR(&dds3LightParam.ambient, ambient);
 }
 
 void dds3SetFog(s32 *param)
@@ -1334,49 +1334,49 @@ void dds3RotationArc(void)
     memset(identity, 0, sizeof(identity));
     identity[3] = 1.0f;
 
-    SDF_VU0__VECTOR_W_SET_ZERO();
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__SWAPVECTOR_A_B();
-    SDF_VU0__VECTOR_W_SET_ZERO();
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__SWAPVECTOR_A_B();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SWAPVECTOR_A_B();
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_SWAPVECTOR_A_B();
 
-    SDF_VU0__INNERPRODUCT(dot);
+    SDF_VU0_INNERPRODUCT(dot);
     if (dot >= 0.9999f) {
         VU0_LOAD_VF10_FROM(*(u128 *)identity);
         return;
     }
 
     if (dot <= -0.9999f) {
-        SDF_VU0__GETVECTOR_Y(component);
+        SDF_VU0_GETVECTOR_Y(component);
         if (0.9999f <= fabsf(component)) {
-            SDF_VU0__LOADIDENTITYVECTOR();
-            SDF_VU0__VECTOR_W_SET_ZERO();
-            SDF_VU0__SETVECTOR_Z(-1.0f);
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_SETVECTOR_Z(-1.0f);
         } else {
-            SDF_VU0__GETVECTOR_Z(component);
+            SDF_VU0_GETVECTOR_Z(component);
             axis[0] = -component;
             axis[1] = 0.0f;
-            SDF_VU0__GETVECTOR_X(axis[2]);
+            SDF_VU0_GETVECTOR_X(axis[2]);
             axis[3] = 0.0f;
-            SDF_VU0__LOADVECTOR(axis);
-            SDF_VU0__NORMALIZE();
+            SDF_VU0_LOADVECTOR(axis);
+            SDF_VU0_NORMALIZE();
         }
 
-        SDF_VU0__INNERPRODUCT(dot);
-        SDF_VU0__OUTERPRODUCT();
-        SDF_VU0__SETVECTOR_W(dot);
+        SDF_VU0_INNERPRODUCT(dot);
+        SDF_VU0_OUTERPRODUCT();
+        SDF_VU0_SETVECTOR_W(dot);
         return;
     }
 
-    SDF_VU0__COPYVECTOR_A_TO_C();
-    SDF_VU0__ADDVECTOR();
-    SDF_VU0__NORMALIZE();
-    SDF_VU0__COPYVECTOR_C_TO_B();
-    SDF_VU0__INNERPRODUCT(dot);
-    SDF_VU0__OUTERPRODUCT();
-    SDF_VU0__STOREVECTOR(axis);
-    SDF_VU0__SETVECTOR_W(dot);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_INNERPRODUCT(dot);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_STOREVECTOR(axis);
+    SDF_VU0_SETVECTOR_W(dot);
     SDF_QUAT_INNERPRODUCT();
 }
 
@@ -1392,25 +1392,25 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction)
         blendFlag = 8 << (lightIndex * 2);
         if (blendFrames == 0) {
             dds3DrawFlag &= ~blendFlag;
-            SDF_VU0__LOADVECTOR(direction);
-            SDF_VU0__NORMALIZE();
-            SDF_VU0__VECTOR_W_SET_ZERO();
-            SDF_VU0__STOREVECTOR(&dds3LightParam.parallel[lightIndex]->v);
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[lightIndex]->v);
         } else {
             lightdirmax[lightIndex] = blendFrames;
             lightdirnow[lightIndex] = 0;
             dds3DrawFlag |= blendFlag;
-            SDF_VU0__LOADVECTOR(direction);
-            SDF_VU0__VECTOR_W_SET_ZERO();
-            SDF_VU0__NORMALIZE();
-            SDF_VU0__COPYVECTOR_A_TO_B();
-            SDF_VU0__LOADVECTOR(&dds3LightParam.parallel[lightIndex]->v);
-            SDF_VU0__VECTOR_W_SET_ZERO();
-            SDF_VU0__NORMALIZE();
+            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[lightIndex]->v);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
             VU0_STORE_VF10_UNCLOBBERED(D_00557240[lightIndex]);
             dds3RotationArc();
-            SDF_VU0__STOREVECTOR(D_00557270[lightIndex]);
+            SDF_VU0_STOREVECTOR(D_00557270[lightIndex]);
         }
     }
 }
@@ -1425,8 +1425,8 @@ void dds3SetFogColor(s32 blendFrames, f32 *color)
     u32 targetColorWords[4];
     u32 packedTargetColor;
 
-    SDF_VU0__LOADVECTOR(color);
-    SDF_VU0__VECTOR_W_SET_ZERO();
+    SDF_VU0_LOADVECTOR(color);
+    SDF_VU0_VECTOR_W_SET_ZERO();
     MMI_RGBA_PACK_255(packedTargetColor);
     targetColorWords[0] = packedTargetColor;
     if (blendFrames == 0) {
@@ -1809,17 +1809,17 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z)
     point[1] = y;
     point[2] = z;
     point[3] = 1.0f;
-    SDF_VU0__LOADMATRIX(&D_002FA240);
+    SDF_VU0_LOADMATRIX(&D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
     VU0_COPY_MATRIX_TO_B();
-    SDF_VU0__LOADVECTOR(point);
-    SDF_VU0__APPLYMATRIX_XYZ1();
-    SDF_VU0__PERSVECTOR();
-    SDF_VU0__LOADVECTOR_B(&dds3ScreenParam.scale);
-    SDF_VU0__MULVECTOR();
-    SDF_VU0__LOADVECTOR_B(&dds3ScreenParam.trans);
-    SDF_VU0__ADDVECTOR();
-    SDF_VU0__STOREVECTOR(screen);
+    SDF_VU0_LOADVECTOR(point);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR(screen);
     *gridX = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
     *gridY = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
 }

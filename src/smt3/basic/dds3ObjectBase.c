@@ -180,7 +180,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *basic)
     model = dds3ModelBasicMakeModel(modelBasic);
     motion = dds3ModelBasicSetMotion(modelBasic, model);
     dds3GetTMPoseSet(basic);
-    SDF_VU0__STOREMATRIX(&model->tm);
+    SDF_VU0_STOREMATRIX(&model->tm);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
     control->modelType = 1;

@@ -584,8 +584,8 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     pos[2] = z;
     handle = emitter->nodeList->items[0];
     VU0_LOAD_VF10_BARRIER(pos);
-    SDF_VU0__VECTOR_W_SET_ONE();
-    SDF_VU0__STOREVECTOR(&emitter->tm.m[12]);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR(&emitter->tm.m[12]);
     sdfModelMakeLocalTm(handle);
     sdfModelEvalTm(emitter);
     sdfModelLinkOt(&D_002F6A48, emitter);
