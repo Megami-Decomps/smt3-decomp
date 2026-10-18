@@ -211,6 +211,12 @@ class Elf:
     def string(data: bytes, at: int) -> str:
         return data[at:data.index(b"\0", at)].decode()
 
+    def text_align(self) -> int:
+        for name, section in self.sections:
+            if name == ".text":
+                return max(1, section[8])
+        return 1
+
     def text_functions(self) -> dict[str, tuple[int, int]]:
         result = {}
         for name, value, size, index in self.functions:
@@ -336,7 +342,9 @@ class Production:
         assembly = (self.root / assembly_path).read_text()
         c_emitted = compiler_functions(assembly)
         blocked = ineligible_asm_bodies(assembly, (self.root / source).read_text())
-        production = Elf(self.root / obj).text_functions()
+        production_elf = Elf(self.root / obj)
+        production = production_elf.text_functions()
+        align = production_elf.text_align()
         start, text_size = self.map[obj]
         entries = unit.get("functions", [])
         report = {entry["name"]: entry for entry in entries}
@@ -392,7 +400,12 @@ class Production:
                     raise ValueError(f"{name}:{target}: ambiguous production symbol")
                 used.add(emitted)
                 at += owner_size
-            if not owners or at != offset + size or offset < 0 or at > text_size:
+            # A C body one instruction shorter than the retail span leaves the
+            # assembler's alignment fill at the end of it. Those bytes are still
+            # proven against retail by verify_bytes below.
+            pad = offset + size - at
+            padded = 0 < pad < align and (start + offset + size) % align == 0
+            if not owners or (pad and not padded) or offset < 0 or at > text_size:
                 raise ValueError(f"{name}:{target}: production providers do not tile retail span")
             ownership = {emitted in c_emitted for _, _, emitted in owners}
             if len(ownership) != 1:

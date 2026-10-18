@@ -79,6 +79,11 @@ is missing:
 - **Exact bytes.** The linked bytes over the function's span equal the retail
   bytes at the same file offset.
 
+The owning symbols have to tile the retail span. The one gap allowed is a
+trailing alignment fill, where a C body is one instruction shorter than the
+retail function and `.text` alignment supplies the last word; the exact-bytes
+check still covers it.
+
 The `cc` and `ld` rules write `<out>.proof.json` receipts of SHA-256 hashes for
 their inputs, and the reconciler re-hashes the sources, flags and configs those
 receipts name. A source edited after the build, or a receipt that no longer
@@ -128,25 +133,27 @@ verified in the same run.
 
 | Measure | Game code (96 units) | Whole binary (106 units) |
 |---|---|---|
-| Code bytes matched | 160,696 / 1,976,292 (8.131%) | 160,696 / 2,036,072 (7.892%) |
-| Functions matched | 1,374 / 9,694 (14.17%) | 1,374 / 9,699 (14.17%) |
+| Code bytes matched | 227,504 / 1,976,292 (11.512%) | 227,504 / 2,036,072 (11.174%) |
+| Functions matched | 2,708 / 9,694 (27.93%) | 2,708 / 9,699 (27.92%) |
 
-`python tools/progress.py smt3` reports the same 1,374 functions and 160,696
+`python tools/progress.py smt3` reports the same 2,708 functions and 227,504
 bytes from the source inventory alone, which is the cross-check that matters:
 the reconciler credits nothing that is still an `INCLUDE_ASM` line, and the
-source inventory credits nothing the link does not supply from C.
+source inventory credits nothing the link does not supply from C. 6,986
+`INCLUDE_ASM` lines remain in `src/smt3`.
 
-Raw objdiff, before reconciliation, reports 1,316 functions and 145,140 bytes
-for the same tree (`build/smt3/report.json.raw`). The 58-function, 15,556-byte gap
+Raw objdiff, before reconciliation, reports 2,630 functions and 209,968 bytes
+for the same tree (`build/smt3/report.json.raw`). The 78-function, 17,536-byte gap
 is in the other direction from what the caveats below might suggest: those
 functions are exact in the linked image and imperfect in the `-DSKIP_ASM` base
 object, so raw objdiff understates them. Reconciliation moves credit both ways
 and only on evidence from the real link.
 
-129 of the 1,374 are empty-bodied functions that compile to `jr $ra; nop`, 8
-bytes each, 1,032 bytes in total. The function percentage is the measure that
-flatters the work most, since an empty function and a 120-byte one count the
-same; code bytes are the honest headline.
+341 of the 2,708 are two-instruction functions, 8 bytes each, 2,728 bytes in
+total: empty bodies that compile to `jr $ra; nop` and returns of a single
+value. The function percentage is the measure that flatters the work most,
+since an 8-byte function and a 120-byte one count the same; code bytes are the
+honest headline.
 
 No function anywhere is partially credited. A function left as `INCLUDE_ASM` is
 absent from the base object and has no C provider in the link, so it scores 0
