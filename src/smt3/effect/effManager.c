@@ -48,6 +48,8 @@ INCLUDE_ASM(const s32, "effect/effManager", dds3EffectCopy);
 
 INCLUDE_ASM(const s32, "effect/effManager", dds3EffectDataRevision);
 
+INCLUDE_SDATA(const s32, "effect/effManager", D_0054F0B0);
+
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532B70);
 
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532B88);
@@ -63,6 +65,4 @@ INCLUDE_RODATA(const s32, "effect/effManager", D_00532BE8);
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532C00);
 
 INCLUDE_RODATA(const s32, "effect/effManager", D_00532C18);
-
-INCLUDE_SDATA(const s32, "effect/effManager", D_0054F0B0);
 

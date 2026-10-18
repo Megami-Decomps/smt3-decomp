@@ -162,12 +162,6 @@ INCLUDE_ASM(const s32, "interface/frFont", frSetVariableRequest);
 
 INCLUDE_ASM(const s32, "interface/frFont", frDumpFontTexture);
 
-INCLUDE_RODATA(const s32, "interface/frFont", D_00535968);
-
-INCLUDE_RODATA(const s32, "interface/frFont", D_00535978);
-
-INCLUDE_RODATA(const s32, "interface/frFont", D_00535988);
-
 INCLUDE_SDATA(const s32, "interface/frFont", gMessageRequestResult);
 
 INCLUDE_SDATA(const s32, "interface/frFont", gMessageSpaceX);
@@ -197,4 +191,10 @@ INCLUDE_SDATA(const s32, "interface/frFont", D_0054F42C);
 INCLUDE_SDATA(const s32, "interface/frFont", D_0054F430);
 
 INCLUDE_SDATA(const s32, "interface/frFont", D_0054F438);
+
+INCLUDE_RODATA(const s32, "interface/frFont", D_00535968);
+
+INCLUDE_RODATA(const s32, "interface/frFont", D_00535978);
+
+INCLUDE_RODATA(const s32, "interface/frFont", D_00535988);
 

@@ -174,60 +174,6 @@ INCLUDE_ASM(const s32, "effect/effEvent", func_001B0730);
 
 INCLUDE_ASM(const s32, "effect/effEvent", effEveAPP4Randomize);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534420);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534430);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534440);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534450);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534460);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534470);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534480);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534490);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344A0);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344B0);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344C0);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344D0);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344E0);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005344F0);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534500);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534510);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534520);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534530);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534540);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534550);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534560);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534570);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534588);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_00534598);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005345A8);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005345C8);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005345D8);
-
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);
@@ -307,4 +253,58 @@ INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F358);
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F360);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", D_0054F368);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534420);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534430);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534440);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534450);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534460);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534470);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534480);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534490);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005344A0);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005344B0);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005344C0);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005344D0);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005344E0);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005344F0);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534500);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534510);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534520);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534530);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534540);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534550);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534560);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534570);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534588);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_00534598);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005345A8);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005345C8);
+
+INCLUDE_RODATA(const s32, "effect/effEvent", D_005345D8);
 

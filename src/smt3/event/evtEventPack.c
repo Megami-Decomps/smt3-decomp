@@ -40,6 +40,16 @@ INCLUDE_ASM(const s32, "event/evtEventPack", cmbEnableMenuEntry2);
 
 INCLUDE_ASM(const s32, "event/evtEventPack", cmbEnableMenuEntry6);
 
+INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
+
+INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FABC);
+
+INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FAC0);
+
+INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FAC8);
+
+INCLUDE_SDATA(const s32, "event/evtEventPack", CMB_GBWK);
+
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C6A0);
 
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C6C0);
@@ -69,14 +79,4 @@ INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C818);
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C828);
 
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C840);
-
-INCLUDE_SDATA(const s32, "event/evtEventPack", evtMotionSeWork);
-
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FABC);
-
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FAC0);
-
-INCLUDE_SDATA(const s32, "event/evtEventPack", D_0054FAC8);
-
-INCLUDE_SDATA(const s32, "event/evtEventPack", CMB_GBWK);
 

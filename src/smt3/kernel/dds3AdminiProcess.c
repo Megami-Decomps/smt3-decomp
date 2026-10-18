@@ -40,8 +40,6 @@ INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fclEncycAllocEntry);
 
 INCLUDE_ASM(const s32, "kernel/dds3AdminiProcess", fcl_103560);
 
-INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF78);
-
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8C8);
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8D0);
@@ -61,4 +59,6 @@ INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", fclEncycFree);
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", D_0054E8F4);
 
 INCLUDE_SDATA(const s32, "kernel/dds3AdminiProcess", dds3PadInitDone);
+
+INCLUDE_RODATA(const s32, "kernel/dds3AdminiProcess", D_0052DF78);
 

@@ -434,10 +434,6 @@ INCLUDE_ASM(const s32, "code_00116AD0", fldSetNextField);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldProcNextJump);
 
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531940);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531950);
-
 INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EA08);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", slNewGameBit2211);
@@ -621,4 +617,8 @@ INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB8C);
 INCLUDE_SDATA(const s32, "code_00116AD0", fldEncountTimer);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB94);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531940);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531950);
 

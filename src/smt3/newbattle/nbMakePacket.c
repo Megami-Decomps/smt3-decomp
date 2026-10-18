@@ -2128,20 +2128,6 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915_End);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915Process_1);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546860);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546870);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546880);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546898);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468B0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468C8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468D8);
-
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551140);
 
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551148);
@@ -2589,4 +2575,18 @@ INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551638);
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_0055163C);
 
 INCLUDE_SDATA(const s32, "newbattle/nbMakePacket", D_00551640);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546860);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546870);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546880);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546898);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468B0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468C8);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005468D8);
 

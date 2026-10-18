@@ -353,8 +353,6 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPadVibeFadeIN);
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", dds3EffectBlurDrawQuad);
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
-
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", effPCPBossTexHandle);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F1F4);
@@ -366,4 +364,6 @@ INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F1FC);
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F210);
 
 INCLUDE_SDATA(const s32, "effect/effPCPBoss", D_0054F218);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
 

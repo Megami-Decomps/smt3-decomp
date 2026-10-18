@@ -176,6 +176,32 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", dds3EffectDirClose);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", dds3EffectDirRead);
 
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F220);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F221);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F222);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F224);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F228);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F22C);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F230);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F238);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F240);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F248);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F250);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F258);
+
+INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F260);
+
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00534090);
 
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005340A0);
@@ -279,30 +305,4 @@ INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343A0);
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343B0);
 
 INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_005343C0);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F220);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F221);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F222);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F224);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F228);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F22C);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F230);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F238);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F240);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F248);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F250);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F258);
-
-INCLUDE_SDATA(const s32, "effect/effMagatuhi", D_0054F260);
 

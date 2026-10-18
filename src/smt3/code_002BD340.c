@@ -451,8 +451,6 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuInit);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuClose);
 
-INCLUDE_RODATA(const s32, "code_002BD340", D_0054A2D8);
-
 INCLUDE_SDATA(const s32, "code_002BD340", sdfPrintIopFlag);
 
 INCLUDE_SDATA(const s32, "code_002BD340", D_00551901);
@@ -640,4 +638,6 @@ INCLUDE_SDATA(const s32, "code_002BD340", D_00551B30);
 INCLUDE_SDATA(const s32, "code_002BD340", D_00551B38);
 
 INCLUDE_SDATA(const s32, "code_002BD340", D_00551B40);
+
+INCLUDE_RODATA(const s32, "code_002BD340", D_0054A2D8);
 

@@ -885,8 +885,6 @@ INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetType);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataPartCreate);
 
-INCLUDE_RODATA(const s32, "code_0016F490", D_00533C40);
-
 INCLUDE_SDATA(const s32, "code_0016F490", effBTLPointLightProcess);
 
 INCLUDE_SDATA(const s32, "code_0016F490", D_0054F0E4);
@@ -976,4 +974,6 @@ INCLUDE_SDATA(const s32, "code_0016F490", D_0054F1D8);
 INCLUDE_SDATA(const s32, "code_0016F490", D_0054F1E0);
 
 INCLUDE_SDATA(const s32, "code_0016F490", D_0054F1E4);
+
+INCLUDE_RODATA(const s32, "code_0016F490", D_00533C40);
 

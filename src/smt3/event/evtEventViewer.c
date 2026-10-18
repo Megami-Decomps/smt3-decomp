@@ -140,8 +140,6 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtInitEventViewer);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtKillEventViewer);
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B9E8);
-
 INCLUDE_SDATA(const s32, "event/evtEventViewer", viewerinfo);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F824);
@@ -199,4 +197,6 @@ INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8C0);
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8C8);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", D_0054F8D0);
+
+INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B9E8);
 

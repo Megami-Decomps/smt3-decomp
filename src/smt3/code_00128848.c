@@ -478,8 +478,6 @@ INCLUDE_ASM(const s32, "code_00128848", fldDoor_Step);
 void func_00144288(void) {
 }
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00532030);
-
 INCLUDE_SDATA(const s32, "code_00128848", D_0054EC44);
 
 INCLUDE_SDATA(const s32, "code_00128848", fldDrwZBuf);
@@ -705,4 +703,6 @@ INCLUDE_SDATA(const s32, "code_00128848", scriptlabel);
 INCLUDE_SDATA(const s32, "code_00128848", gFldWapPanel);
 
 INCLUDE_SDATA(const s32, "code_00128848", D_0054EE0C);
+
+INCLUDE_RODATA(const s32, "code_00128848", D_00532030);
 
