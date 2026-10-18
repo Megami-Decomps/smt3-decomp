@@ -1,10 +1,2731 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereCreate);
+struct BattleGroupNode;
+struct BattleGroupSlot;
+struct BillAnimationEntry;
+struct BillPacketWork;
+struct BillRecord;
+struct BillRenderPair;
+struct BillTextureQuad;
+struct EffAimParams;
+struct EffBattleEntry;
+struct EffBattleEntryList;
+union EffBattleParameterValue;
+struct EffBillboardSetParams;
+struct EffBillboardSetWork;
+struct EffBlurQuad;
+struct EffBlurScaleParams;
+struct EffBlurScaleSlot;
+struct EffBlurScaleWork;
+struct EffBlurScatterParams;
+struct EffBlurScatterSlot;
+struct EffBlurScatterWork;
+struct EffBlurTemplateBody;
+struct EffNodeDescriptor;
+struct EffPCPBeamLargeHead;
+struct EffPCPBeamLargeWork;
+struct EffPCPBeamNode;
+struct EffPCPBeamParams;
+struct EffPCPBeamWork;
+struct EffPCPBlockSet;
+struct EffPCPBlockSetParams;
+struct EffPCPBlockSetWork;
+struct EffPCPBurstWork;
+struct EffPCPChargeWork;
+struct EffPCPCompactFadeWork;
+struct EffPCPCompactRectParams;
+struct EffPCPCompactScaleParams;
+struct EffPCPCompactScatterParams;
+struct EffPCPCompactTexturedBlurParams;
+struct EffPCPCompactTimelineParams;
+struct EffPCPCompactWork;
+struct EffPCPCrossWork;
+struct EffPCPDelayedPairs;
+struct EffPCPDriftEventParams;
+struct EffPCPDriftEventRow;
+struct EffPCPDriftEventWork;
+struct EffPCPEventParamHead;
+struct EffPCPEventPlace;
+struct EffPCPFadeWork;
+struct EffPCPGroupEntry;
+struct EffPCPGroupHead;
+struct EffPCPGroupSet;
+struct EffPCPGrowWork;
+struct EffPCPMapEventEntry;
+struct EffPCPMapEventWork;
+struct EffPCPPairedEventParams;
+struct EffPCPPairedEventRow;
+struct EffPCPPairedEventWork;
+struct EffPCPRectBounds;
+struct EffPCPRectParams;
+struct EffPCPRingWork;
+struct EffPCPRotateParams;
+struct EffPCPRotateWork;
+struct EffPCPScaledThunderParams;
+struct EffPCPSharedTrail;
+struct EffPCPSharedTrailRef;
+struct EffPCPSpanParams;
+struct EffPCPSpanWork;
+struct EffPCPSpawnOnceWork;
+struct EffPCPSpawnRangeEventRow;
+struct EffPCPSpawnRangeParams;
+struct EffPCPSpawnRangeWork;
+struct EffPCPSpinWork;
+struct EffPCPSprayWork;
+struct EffPCPStaggered;
+struct EffPCPThunderGroup;
+struct EffPCPTrailParams;
+struct EffPCPTrailWork;
+struct EffPCPTripleParams;
+struct EffPCPTripleWork;
+struct EffPCPTwinWork;
+struct EffPacketParams;
+struct EffParamTable;
+struct EffParamTableRecord;
+struct EffRandState;
+struct EffResourceRectBounds;
+struct EffResourceRectDrawParams;
+struct EffSpawnParams;
+struct EffThunderAlphaParams;
+struct EffThunderFragmentParams;
+union EffThunderParameterHead;
+struct EffThunderVectorCell;
+struct EffThunderVectorParams;
+struct EffThunderVectorWork;
+struct EffTrackPolyParams;
+struct IpuDmaState;
+struct MdlDevList;
+struct MdlDevSlot;
+struct MdlObjectAttachment;
+struct MdlRecord;
+struct MdlResourceItem;
+struct MotionEntry;
+struct MovLinearStream;
+union MovObjStream;
+struct ParCell;
+struct RwV3d;
+struct SdfAssetEntry;
+struct SdfCommandNode;
+struct SdfDrawNode;
+union SdfDrawTransform;
+struct SdfGsTextureStateValues;
+struct SdfItem;
+struct SdfItemList;
+struct SdfMotionCommand;
+struct SdfStreamFrameNode;
+struct SdfStreamInputDmaTag;
+struct SdfTexRef;
+struct SdfTexResource;
+struct SoundBank;
+
+typedef struct BillTextureQuad BillTextureQuad;
+typedef struct BillPacketWork BillPacketWork;
+typedef struct SdfListHead SdfListHead;
+typedef struct SdfMemBlock SdfMemBlock;
+typedef struct SdfTexBuf SdfTexBuf;
+typedef struct SdfTexRef SdfTexRef;
+typedef struct SdfTexResource SdfTexResource;
+typedef struct SdfTex SdfTex;
+typedef struct BillChildPayload BillChildPayload;
+typedef struct BillAnimationEntry BillAnimationEntry;
+typedef struct BillData BillData;
+typedef struct BillRecord BillRecord;
+typedef struct BillOut BillOut;
+typedef struct BillRenderPair BillRenderPair;
+typedef struct BillObj BillObj;
+typedef struct SdfPoolNode SdfPoolNode;
+typedef struct EffBillboardSetParams EffBillboardSetParams;
+typedef struct EffBillboardSetWork EffBillboardSetWork;
+typedef struct EffBlurQuad EffBlurQuad;
+typedef struct EffBlurTemplateBody EffBlurTemplateBody;
+typedef struct EffBlurTemplate EffBlurTemplate;
+typedef struct EffNode EffNode;
+typedef struct EffNodeDescriptor EffNodeDescriptor;
+typedef struct EffPCPBeamLargeHead EffPCPBeamLargeHead;
+typedef union SdfDrawTransform SdfDrawTransform;
+typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
+typedef struct SdfAssetEntry SdfAssetEntry;
+typedef union SdfSubParam SdfSubParam;
+typedef struct SdfAsset SdfAsset;
+typedef struct EffPCPBeamNode EffPCPBeamNode;
+typedef struct EffPCPBeamLargeWork EffPCPBeamLargeWork;
+typedef struct EffPCPBeamParams EffPCPBeamParams;
+typedef struct EffPCPBeamWork EffPCPBeamWork;
+typedef struct EffPCPBlockSet EffPCPBlockSet;
+typedef struct EffPCPBlockSetParams EffPCPBlockSetParams;
+typedef struct EffParamWork EffParamWork;
+typedef struct EffPCPBlockSetWork EffPCPBlockSetWork;
+typedef struct EffPCPBurstWork EffPCPBurstWork;
+typedef struct EffPCPChargeWork EffPCPChargeWork;
+typedef struct EffResourceRectBounds EffResourceRectBounds;
+typedef struct EffResourceRectDrawParams EffResourceRectDrawParams;
+typedef struct EffPCPCompactFadeWork EffPCPCompactFadeWork;
+typedef struct EffPCPCompactTimelineParams EffPCPCompactTimelineParams;
+typedef struct EffPCPRectBounds EffPCPRectBounds;
+typedef struct EffPCPRectParams EffPCPRectParams;
+typedef struct EffPCPCompactRectParams EffPCPCompactRectParams;
+typedef struct EffBlurScaleParams EffBlurScaleParams;
+typedef struct EffPCPCompactScaleParams EffPCPCompactScaleParams;
+typedef struct EffBlurScatterParams EffBlurScatterParams;
+typedef struct EffPCPCompactScatterParams EffPCPCompactScatterParams;
+typedef struct EffPCPCompactTexturedBlurParams EffPCPCompactTexturedBlurParams;
+typedef struct EffBlurScaleSlot EffBlurScaleSlot;
+typedef struct EffBlurScaleWork EffBlurScaleWork;
+typedef struct EffBlurScatterSlot EffBlurScatterSlot;
+typedef struct EffBlurScatterWork EffBlurScatterWork;
+typedef struct EffPCPCompactWork EffPCPCompactWork;
+typedef struct EffPCPCrossWork EffPCPCrossWork;
+typedef struct EffPCPDelayedPairs EffPCPDelayedPairs;
+typedef struct EffPCPDriftEventRow EffPCPDriftEventRow;
+typedef struct EffPCPDriftEventParams EffPCPDriftEventParams;
+typedef struct EffAimParams EffAimParams;
+typedef union EffBattleParameterValue EffBattleParameterValue;
+typedef struct EffBattleEntryList EffBattleEntryList;
+typedef struct SoundBank SoundBank;
+typedef struct SoundMixer SoundMixer;
+typedef struct EffPCPDriftEventWork EffPCPDriftEventWork;
+typedef struct EffPCPEventParamHead EffPCPEventParamHead;
+typedef struct EffPCPEventPlace EffPCPEventPlace;
+typedef struct EffThunderAlphaParams EffThunderAlphaParams;
+typedef struct EffThunderVectorParams EffThunderVectorParams;
+typedef union EffThunderParameterHead EffThunderParameterHead;
+typedef struct EffThunderVectorCell EffThunderVectorCell;
+typedef struct ParCell ParCell;
+typedef struct ParSystem ParSystem;
+typedef struct EffThunderVectorWork EffThunderVectorWork;
+typedef struct EffPCPFadeWork EffPCPFadeWork;
+typedef struct EffPCPGroupEntry EffPCPGroupEntry;
+typedef struct EffThunderFragmentParams EffThunderFragmentParams;
+typedef struct EffPCPGroupHead EffPCPGroupHead;
+typedef struct EffPCPGroupSet EffPCPGroupSet;
+typedef struct EffPCPGrowWork EffPCPGrowWork;
+typedef struct EffPCPMapEventEntry EffPCPMapEventEntry;
+typedef struct EffPCPMapEventWork EffPCPMapEventWork;
+typedef struct EffPCPPairedEventRow EffPCPPairedEventRow;
+typedef struct EffPCPPairedEventParams EffPCPPairedEventParams;
+typedef struct EffPCPPairedEventWork EffPCPPairedEventWork;
+typedef struct EffPCPRingWork EffPCPRingWork;
+typedef struct EffPCPRotateParams EffPCPRotateParams;
+typedef struct EffPCPRotateWork EffPCPRotateWork;
+typedef struct EffPCPScaledThunderParams EffPCPScaledThunderParams;
+typedef struct EffPCPSharedTrail EffPCPSharedTrail;
+typedef struct EffPCPSharedTrailRef EffPCPSharedTrailRef;
+typedef struct EffPCPSpanParams EffPCPSpanParams;
+typedef struct EffPCPSpanWork EffPCPSpanWork;
+typedef struct EffPCPSpawnOnceWork EffPCPSpawnOnceWork;
+typedef struct EffPCPSpawnRangeEventRow EffPCPSpawnRangeEventRow;
+typedef struct EffPCPSpawnRangeParams EffPCPSpawnRangeParams;
+typedef struct EffPCPSpawnRangeWork EffPCPSpawnRangeWork;
+typedef struct EffPCPSpinWork EffPCPSpinWork;
+typedef struct EffPCPStaggered EffPCPStaggered;
+typedef struct EffPCPThunderGroup EffPCPThunderGroup;
+typedef struct EffPCPTrailParams EffPCPTrailParams;
+typedef struct EffPCPTrailWork EffPCPTrailWork;
+typedef struct EffPCPTripleParams EffPCPTripleParams;
+typedef struct EffPCPTripleWork EffPCPTripleWork;
+typedef struct EffPCPTwinWork EffPCPTwinWork;
+typedef struct EffRandState EffRandState;
+typedef struct EffSpawnParams EffSpawnParams;
+typedef struct MotionEntry MotionEntry;
+typedef struct SdfMotionCommand SdfMotionCommand;
+typedef struct MotionTable MotionTable;
+typedef struct BattleGroupSlot BattleGroupSlot;
+typedef struct DevRequest DevRequest;
+typedef struct MdlRecord MdlRecord;
+typedef struct SdfChunkHeader SdfChunkHeader;
+typedef struct SdfItem SdfItem;
+typedef struct SdfItemListRef SdfItemListRef;
+typedef struct BattleGroupNode BattleGroupNode;
+typedef struct Motion Motion;
+typedef struct SdfCommandNode SdfCommandNode;
+typedef struct SdfDrawNode SdfDrawNode;
+typedef struct SdfModel SdfModel;
+typedef struct MdlDevSlot MdlDevSlot;
+typedef struct MdlDevList MdlDevList;
+typedef struct EffTrackPolyData EffTrackPolyData;
+typedef struct EffTrackPolyParams EffTrackPolyParams;
+typedef struct EffTrackPolyWork EffTrackPolyWork;
+typedef struct IpuDmaState IpuDmaState;
+typedef struct DevState DevState;
+typedef struct MovLinearStream MovLinearStream;
+typedef struct MovPacStream MovPacStream;
+typedef union MovObjStream MovObjStream;
+typedef struct SdfStreamFrameNode SdfStreamFrameNode;
+typedef struct MovObj MovObj;
+typedef struct SdfStreamInputDmaTag SdfStreamInputDmaTag;
+typedef struct MdlObj MdlObj;
+typedef struct MdlObjectAttachment MdlObjectAttachment;
+typedef struct MdlPartEntry MdlPartEntry;
+typedef struct SdfMapPositionRecord SdfMapPositionRecord;
+typedef struct MdlResourceItem MdlResourceItem;
+typedef struct RwV3d RwV3d;
+typedef struct EffPacketParams EffPacketParams;
+typedef struct EffParamTableRecord EffParamTableRecord;
+typedef struct EffParamTable EffParamTable;
+
+#define EFF_DEG2RAD 0.017453292f
+
+struct BillObj;
+
+struct BillChildPayload;
+
+/* Native billboard UVs are four ordered U/V corners, not a float vector. */
+struct BillTextureQuad {
+    u16 components[8];
+};
+
+/* Fifteen billboard quads precede the child manager in its 0x450 allocation. */
+struct BillPacketWork {
+    f32 positions[15][4]; /* 0x000 */
+    u32 colors[15];       /* 0x0F0 */
+    BillTextureQuad uv[15]; /* 0x12C */
+    f32 offsets[15][8];   /* 0x21C: four X/Y corner offsets per quad */
+    s32 count;           /* 0x3FC */
+};
+
+struct SdfListHead;
+
+struct SdfListHead {
+    struct SdfListHead *nextList; /* CPU link between lists; first/last are DMA addresses. */
+    u32 first;
+    u32 last;
+    u32 unkC;
+    u32 firstReferenceSource; /* Optional first DMA reference prefix. */
+    u32 secondReferenceSource; /* Optional second DMA reference prefix. */
+    u32 unk18;
+    u32 unk1C;
+};
+
+struct SdfMemBlock;
+
+/* Embedded command work at actor +0x20. Neither record is the whole owning
+ * actor. */
+struct SdfMemBlock;
+
+/* General-heap allocation descriptor (0x10); links bound the represented span. */
+struct SdfMemBlock {
+    struct SdfMemBlock *prev; /* 0x00 */
+    struct SdfMemBlock *next; /* 0x04 */
+    s32 address;              /* 0x08: start of represented span */
+    u16 state;                /* 0x0C: free, used, or end sentinel */
+    s16 referenceCount;       /* 0x0E: -1 for sentinels */
+};
+
+struct SdfTex;
+
+struct SdfTexBuf;
+
+struct SdfTexBuf {
+    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
+    u32 gifTagControl; /* High GIFtag control word; one packed register. */
+    u64 gifTagRegisters; /* Packed register list: A+D. */
+    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
+    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
+    u64 textureState; /* GS TEX0 data. */
+    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
+    u64 clampState; /* GS CLAMP data. */
+    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
+};
+
+/* Per-texture reference count and non-owning clone source (0x8). */
+struct SdfTexRef {
+    struct SdfTex *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
+    s32 refCount;
+};
+
+/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
+struct SdfTexResource {
+    struct SdfTexResource *next; /* 0x00 */
+    struct SdfTexResource *prev; /* 0x04 */
+    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
+    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
+    s32 size;                   /* 0x10: range length in 32-bit words */
+    s16 width;                  /* 0x14 */
+    s16 height;                 /* 0x16 */
+    s32 format;                 /* 0x18: GS pixel-storage mode */
+};
+
+/* Serialized byte consumed by the GS texture-state packet builder. */
+typedef u8 SdfTextureClampMode;
+
+struct SdfTex {
+    struct SdfTex *next;
+    struct SdfTex *prev;
+    SdfTexRef *reference;
+    s16 width;
+    s16 height;
+    SdfTexResource *primaryResource;
+    SdfTexResource *secondaryResource;
+    u8 paletteCount;
+    u8 clutFormat;
+    u8 pixelFormat;
+    u8 maxMipLevel;
+    u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
+    u8 unk1E;
+    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
+    s32 resourceKey;
+    s32 battleTextureSlot;
+    SdfTexBuf *primaryBuffer;
+    SdfTexBuf *secondaryBuffer;
+    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
+    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
+    s32 unk38;
+    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
+};
+
+/* Child manager at retained allocation +0x400; shared by resource and draw owners. */
+struct BillChildPayload {
+    SdfTex *texture; /* 0x00: acquired texture reference. */
+    u16 variant; /* Child variant bits; signed inputs narrow on assignment. */
+    u8 pad06[2];
+    s32 refCount;      /* 0x08 */
+    BillTextureQuad uv; /* 0x0C */
+    f32 x;             /* 0x1C */
+    f32 y;             /* 0x20 */
+    f32 halfWidth;  /* 0x24 */
+    f32 halfHeight; /* 0x28 */
+    SdfListHead *pendingLists[5]; /* 0x2C */
+    u16 packetListIndex; /* 0x40 */
+    u8 pad42[2];
+    struct SdfMemBlock *allocation; /* 0x44: allocation descriptor released with this child. */
+    BillPacketWork *work; /* 0x48: retained packet-buffer address */
+    struct BillChildPayload *next; /* 0x4C */
+};
+
+struct BillData;
+
+struct BillAnimationEntry {
+    s32 offset;
+    s32 colorOffset;
+    u32 entryModeFlags; /* 0x08: 0x40/0x80 select two-entry render modes; 0x100 remains unclassified. */
+    u32 frameCount;
+    u32 flags;
+};
+
+/* Runtime header precedes the copied resource bytes; the child table is indirect. */
+struct BillData {
+    struct SdfMemBlock *allocation; /* Retained general-heap descriptor. */
+    u8 *base;
+    BillAnimationEntry *entries;
+    s32 entryCount;
+    s32 childCount;
+    s32 listRefCount;
+    struct BillChildPayload **children;
+};
+
+struct BillOut;
+
+/* Billboard common prefix and animation-list view (max 0x64); child allocations are 0x34 bytes. */
+struct BillOut;
+
+/* Ordinary animation frames contain geometry and texture coordinates. */
+struct BillRecord {
+    s16 width;
+    s16 height;
+    s16 x;
+    s16 y;
+    u16 u0;
+    u16 v0;
+    u16 u1;
+    u16 v1;
+    s16 childIndex;
+    s16 frameDelay; /* 0x12: signed countdown loaded when selecting a frame */
+    f32 rotationAngle; /* 0x14: copied into the runtime quad rotation in radians. */
+};
+
+struct BillOut {
+    s32 unk0;
+    s32 frameIndex;
+    s32 framesRemaining;
+    BillAnimationEntry *entry;
+    BillRecord *record;
+};
+
+/* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
+struct BillRenderPair {
+    struct BillChildPayload *children[2];
+    u16 cameraFacingMode; /* 0x08: value 1 builds a view-facing matrix; other values use identity. */
+    u16 kind;
+    u32 colors[2];
+    SdfListHead *packetList; /* 0x14 */
+    struct BillRenderPair *next; /* 0x18 */
+};
+
+struct BillObj {
+    f32 position[4]; /* 0x00: copied as a four-component position by both render paths. */
+    f32 childScaleX;  /* 0x10: set by dds3BillboardSetScale */
+    f32 childScaleY;  /* 0x14 */
+    f32 unk18;
+    f32 unk1C;
+    f32 rotationAngle;  /* 0x20: radian angle used to rotate the quad corners. */
+    u32 childParam;   /* 0x24: set by dds3BillboardSetRGBA */
+    void (*callback)(); /* 0x28: called by dds3BillboardDraw; set from the
+                          per-index table by dds3BillboardCreate */
+    u16 kind;         /* 0x2C: kind 0/3 child, kind 1 animation list */
+    u16 requestedPacketListIndex; /* 0x2E: selected child packet-list pool */
+    union {
+        void *payload; /* 0x30: kind-discriminated payload when its type is unknown */
+        struct BillChildPayload *child; /* child kinds */
+        struct BillData *animationData; /* kind 1 */
+    };
+    BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
+    u16 animationActive; /* 0x50: cleared by empty or completed nonlooping animation */
+    u8 pad52[2];
+    u32 modeFlags; /* 0x54: bits 0x40/0x80 select billboard entry modes */
+    u32 animationEntryIndex; /* 0x58: selected nonempty animation descriptor */
+    s32 entryCount;
+    struct BillOut *resolvedEntries; /* 0x60: runtime animation state array */
+};
+
+struct SdfPoolNode;
+
+/* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
+struct SdfPoolNode {
+    struct SdfPoolNode *next; /* 0x00 */
+    SdfListHead *first;       /* 0x04 */
+    SdfListHead *last;        /* 0x08 */
+    u32 unkC;
+    void (*append)(struct SdfPoolNode *, SdfListHead *);      /* 0x10 */
+    s32 (*prepend)(struct SdfPoolNode *, s32, SdfListHead *); /* 0x14 */
+    u32 unk18;
+    u32 unk1C;
+};
+
+extern struct SdfPoolNode *D_002F69B8[4];
+
+extern u8 effPCPZiodin01Vec[];
+
+extern s32 BlinkMultiBlurCount;
+
+/*
+ * sceVu0UnitMatrix as libvu0 expands it (scratch registers hard-coded by the
+ * SDK):
+ *     qmfc2.ni $5, vf0            ; (0,0,0,1)
+ *     pextuw   $4, $0, $5         ; (0,0,1,0) row 2
+ *     pextuw   $2, $0, $4         ; (1,0,0,0) row 0
+ *     pextuw   $3, $4, $0         ; (0,1,0,0) row 1
+ *     sq $2,0(dst); sq $3,0x10(dst); sq $4,0x20(dst); sq $5,0x30(dst)
+ * The four `sq` are part of the idiom: retail stores the identity rows from
+ * the registers the shuffle left them in. Tried: sixteen u32 stores of 0/1
+ * (gcc 2.96 emits sw of $0 and a constant, never qmfc2/pextuw or sq).
+ */
+#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $5, $vf0\n\t" \
+    "pextuw $4, $0, $5\n\t" \
+    "pextuw $2, $0, $4\n\t" \
+    "pextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\t" \
+    "sq $3, 0x10(%0)\n\t" \
+    "sq $4, 0x20(%0)\n\t" \
+    "sq $5, 0x30(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+
+/* The two titles register these eight compact table rows at matching indices.
+ * These names describe registrations only; serialized kinds remain u16. */
+enum EffParamWorkKind {
+    EFF_PARAM_WORK_KIND_EFFECT_NODE = 0,
+    EFF_PARAM_WORK_KIND_ANIMATED_BILLBOARD = 1,
+    EFF_PARAM_WORK_KIND_CHILD_BILLBOARD = 2,
+    EFF_PARAM_WORK_KIND_VIEWER_CONTEXT = 3,
+    EFF_PARAM_WORK_KIND_EXTENDED_WORK = 4,
+    EFF_PARAM_WORK_KIND_BILLBOARD_UNIT_OBJECT = 5,
+    EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK = 6,
+    EFF_PARAM_WORK_KIND_FILE_QUEUE = 7
+};
+
+/* Creation reads the requested mode from this parameter record. */
+struct EffBillboardSetParams {
+    s32 mode;
+};
+
+/* The first sixteen bytes of this allocated billboard set remain opaque. */
+struct EffBillboardSetWork {
+    u8 opaque00[0x10];
+    u32 mode;
+    u32 color;
+    f32 scale;
+    struct BillObj *handle;
+};
+
+struct EffBlurTemplate;
+
+/* Shared rectangle and sampling payload; color is packed or read by channel. */
+struct EffBlurQuad {
+    u32 color; /* Byte consumers read the packed word through u8 object access. */
+    s32 blendControl;
+    f32 angle;
+    f32 displacement;
+    /* Native movie blends index the renderer position as a two-element vector. */
+    s32 position[2];
+    /* Native movie blends interpolate these four corners with a 2x2 loop. */
+    s32 corners[2][2];
+};
+
+/* The textured blur allocation stores this copied body followed by a
+ * separately acquired source texture. */
+struct EffBlurTemplateBody {
+    s32 extent;
+    EffBlurQuad source;
+};
+
+struct EffBlurTemplate {
+    EffBlurTemplateBody body;
+    struct SdfTex *texture;
+};
+
+struct EffNode;
+
+/* Live effect node allocated in a 0x10-byte size-class block. */
+struct EffNode {
+    u32 type;       /* 0x00: type-operation row */
+    s32 arg;        /* 0x04 */
+    s32 instance;   /* 0x08: type-specific instance word */
+    f32 unkC;       /* 0x0C */
+};
+
+/* Complete serialized effect-resource header. The payload's size and format
+ * depend on type; this is not the separately allocated live EffNode.
+ * Compatibility conversion examines the complete type and argument words,
+ * while node creation consumes their low halfwords. */
+struct EffNodeDescriptor {
+    u32 type;       /* 0x00 */
+    u32 arg;        /* 0x04 */
+    u32 pad08;      /* 0x08 */
+    f32 version;   /* 0x0C */
+    u8 payload[0]; /* 0x10: variable-length tagged payload */
+};
+
+/* The copied 0x5C input head for the linked/ring beam variant. */
+struct EffPCPBeamLargeHead {
+    f32 pos[4];
+    f32 degreesA;
+    f32 degreesB;
+    f32 stepDegrees;
+    f32 rotationDecay;
+    u8 mode;
+    u8 pad21[3];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 initialRadius;
+    f32 initialRadiusStep;
+    f32 radiusDecay;
+    u32 segments;
+    u32 drawKind;
+    f32 radiusStepA;
+    u32 firstColor;
+    f32 radiusStepB;
+    u32 middleColor;
+    f32 radiusStepC;
+    u32 lastColor;
+};
+
+struct SdfAsset;
+
+/* Draw entries store six transform floats and expose the same bytes as three qwords. */
+union SdfDrawTransform {
+    f32 m[6];
+    u64 words[3];
+};
+
+/* The cached GS TEX1, TEX0 and CLAMP values shared by texture draw records. */
+struct SdfGsTextureStateValues {
+    u64 sampling;
+    u64 texture;
+    u64 clamp;
+};
+
+/* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
+struct SdfAssetEntry {
+    u32 pad00;             /* 0x00 */
+    u32 unk04;             /* 0x04 */
+    u32 unk08;             /* 0x08 */
+    u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
+    u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
+    u32 unk14;             /* 0x14 */
+    u32 pad18;             /* 0x18 */
+    f32 unk1C;             /* 0x1C */
+    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
+    u32 secondaryMode;     /* 0x24: secondary packet mode copied from SdfAsset */
+    f32 y;                 /* 0x28 */
+    f32 x;                 /* 0x2C */
+    u8 pad30[8];           /* 0x30 */
+    SdfGsTextureStateValues primaryTextureState; /* 0x38 */
+    SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
+    SdfDrawTransform transforms[2]; /* 0x68 */
+    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
+    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
+};
+
+union SdfSubParam;
+
+/* Optional packed or five-float state block owned by an SdfAsset. */
+union SdfSubParam {
+    struct {
+        u64 unk0;
+        u64 unk8;
+        u32 unk10;
+        u32 unk14;
+    } packed;
+    struct {
+        f32 values[5];
+        u32 unk14;
+    } scalar;
+    /* Named view of scalar.values; the last word remains opaque. */
+    struct {
+        f32 centerOffsetX;
+        f32 centerOffsetY;
+        f32 basisScaleX;
+        f32 basisScaleY;
+        f32 rotationInput;
+        u32 unk14;
+    } transformInputs;
+};
+
+struct SdfAsset {
+    u32 unk00; /* Word from the serialized asset-parameter header. */
+    u16 unk04; /* Halfword from the serialized asset-parameter header. */
+    u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
+    u8 pad07;
+    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
+    u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
+    u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
+    u32 secondaryColor; /* 0x18 */
+    f32 primaryStateFloat; /* 0x1C: interpolated primary-state float */
+    u32 primaryStateWordThird; /* 0x20 */
+    u32 unk24;
+    u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
+    SdfTex *texture;
+    SdfTex *secondaryTexture; /* 0x30 */
+    u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
+    SdfSubParam *primarySubParam; /* 0x38 */
+    SdfSubParam *secondarySubParam; /* 0x3C */
+    f32 scalarPairFirst; /* 0x40 */
+    f32 scalarPairSecond; /* 0x44 */
+};
+
+/* One beam draw node owns its asset and vertex allocation separately. */
+struct EffPCPBeamNode {
+    f32 matrix[4][4];
+    f32 localMatrix[4][4];
+    u128 position;
+    f32 scale;
+    u32 drawKind; /* Indexes the node draw-dispatch table. */
+    u32 color;
+    u32 vertexCount;
+    f32 *points;
+    u32 *colors;
+    struct SdfAsset *assetHandle;
+    struct SdfMemBlock *allocationHandle;
+};
+
+struct EffPCPBeamLargeWork {
+    EffPCPBeamLargeHead head;
+    s32 frame;
+    u32 color;
+    f32 rotationA;
+    f32 rotationB;
+    f32 rotationStep;
+    u8 pad70[4];
+    f32 radius;
+    f32 radiusStep;
+    EffPCPBeamNode *node;
+};
+
+/* The parameter prefix copied into the standard beam work. */
+struct EffPCPBeamParams {
+    f32 position[4];
+    s32 fadeInFrames;
+    s32 fadeOutFrames;
+    s32 holdFrames;
+    s32 vertexGrowthFrames;
+    u8 pad20[4];
+    s32 radiusGrowthFrames;
+    f32 startRadius;
+    f32 endRadius;
+    u32 segments;
+    u32 drawKind;
+    f32 firstWidth;
+    u32 firstColor;
+    f32 middleWidth;
+    u32 middleColor;
+    f32 lastWidth;
+    u32 lastColor;
+};
+
+struct EffPCPBeamWork {
+    EffPCPBeamParams params;
+    s32 frame;
+    u32 color;
+    u32 vertexCount;
+    EffPCPBeamNode *node;
+};
+
+struct EffPCPBlockSet {
+    void *block1;
+    void *group[5];
+    void *block7;
+    void *block8;
+    void *block9;
+    void *tail[5];
+    void *block15;
+};
+
+/* The serialized parameter block copied into each block-set work record. */
+struct EffPCPBlockSetParams {
+    f32 position[4];
+    s32 fadeInFrames;
+    s32 fadeOutFrames;
+    f32 scale;
+    s32 groupSize[3];
+    f32 groupScale[3];
+    f32 groupRandomScale[3];
+    f32 groupScatter[3];
+    s32 tailStartFrame;
+};
+
+struct EffParamWork;
+
+/* One randomized channel record. */
+struct EffParamWork;
+
+/* Compact effect owner: its halfword kind selects the opaque payload's operations. */
+struct EffParamWork {
+    u16 kind;
+    u8 pad02[2];
+    void *payload;
+};
+
+/* Shared retained work owner used by construction, cloning, drawing and release.
+   A non-NULL source borrows its resources; NULL owns the listed handles. */
+struct EffPCPBlockSetWork {
+    f32 matrix[16];
+    f32 previousPosition[4];
+    f32 currentPosition[4];
+    EffPCPBlockSetParams params;
+    u32 frame;
+    u32 count;
+    u32 color;
+    u32 mode;
+    EffParamWork *headHandle;
+    EffParamWork *handleA[5];
+    EffParamWork **list[3];
+    EffParamWork *handleB[5];
+    EffParamWork *tailHandle;
+    struct SdfMemBlock *alloc[3];
+    struct EffPCPBlockSetWork *source;
+};
+
+struct EffThunderFragmentWork;
+
+typedef struct EffThunderFragmentWork EffThunderFragmentWork;
+
+/* Owner for a muzzle thunder ray and its fragment effect. */
+struct EffPCPBurstWork {
+    f32 position[4];                         /* 0x00 */
+    u32 tintColor;                            /* 0x10 */
+    u8 opaque14[4];
+    f32 startDistance;                       /* 0x18 */
+    f32 length;                               /* 0x1C */
+    EffThunderFragmentWork *fragmentWork;    /* 0x20 */
+};
+
+/* Captured model-point history and its two parameter resources share this
+ * general-heap allocation. Creation and cloning initialize the live tail and
+ * vector words; neither operation copies the sampled arrays. */
+struct EffPCPChargeWork {
+    f32 samplePositions[25][7][4];
+    u32 vectorWords[4];
+    u32 animationFrames[25][7];
+    f32 sampleScales[25][7];
+    u32 sampleAges[25][7];
+    u32 color;
+    f32 scale;
+    u32 historyCount;
+    u32 updateCount;
+    u32 baseColor;
+    EffParamWork *secondaryHandle;
+    EffParamWork *primaryHandle;
+    struct SdfMemBlock *allocationHandle;
+};
+
+struct EffResourceRectBounds {
+    s32 left;
+    s32 top;
+    s32 right;
+    s32 bottom;
+};
+
+/* Passed directly to the quad renderer, independently of the extent/center. */
+struct EffResourceRectDrawParams {
+    /* The movie blender stores packed RGBA; the renderer samples channels. */
+    union { u8 color[4]; u32 rgba; };
+    s32 blendControl;
+    EffResourceRectBounds bounds;
+};
+
+/* Nine copied words; the selected source texture belongs to the owner. */
+typedef struct {
+    s32 extent;
+    /* The native movie blender interpolates both center coordinates in one loop. */
+    s32 center[2];
+    EffResourceRectDrawParams draw;
+} EffResourceRectParams; /* 0x24 */
+
+typedef struct {
+    EffResourceRectParams params;
+    SdfTex *texture;
+} EffResourceRectWork; /* 0x28 */
+
+/* Both compact-fade lifecycles use the same 0x3C chip allocation. The
+ * resource union is selected by the short rectangle or long textured-blur
+ * constructor and each path has its own matching release routine. */
+struct EffPCPCompactFadeWork {
+    f32 position[4];
+    u8 flags;
+    u8 pad11[3];
+    u32 color;
+    u32 baseColor;
+    s32 frame;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 startExtent;
+    s32 endExtent;
+    f32 unk34;
+    union {
+        EffResourceRectWork *rectangle;
+        EffBlurTemplate *blur;
+    } resource;
+};
+
+/* Serialized prefix shared by the compact rectangle/scatter/scale/blur inputs. */
+struct EffPCPCompactTimelineParams {
+    u8 flags;
+    u8 pad01[3];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 startExtent;
+    s32 endExtent;
+};
+
+struct EffPCPRectBounds {
+    u32 left, top, right, bottom;
+};
+
+struct EffPCPRectParams {
+    u32 extent;
+    u32 centerX;
+    u32 centerY;
+    u32 color;
+    u32 blendControl;
+    EffPCPRectBounds bounds;
+};
+
+struct EffPCPCompactRectParams {
+    EffPCPCompactTimelineParams timeline;
+    EffPCPRectParams res;
+};
+
+/* Phase-driven blur parameters and the scale-slot allocation they own. */
+struct EffBlurScaleParams {
+    s32 count;
+    f32 phaseStep;
+    f32 spacing;
+    u32 color;
+    s32 blendControl; /* Copied to the slot quad blend control. */
+    f32 uvDisplacementAngleDegrees; /* Copied to the slot quad angle. */
+    f32 uvDisplacementAmplitude; /* Displacement amplitude used by the native update. */
+    f32 angleStep;
+    /* Native movie blends index the renderer position as a two-element vector. */
+    s32 position[2];
+    s32 size;
+};
+
+struct EffPCPCompactScaleParams {
+    EffPCPCompactTimelineParams timeline;
+    EffBlurScaleParams res;
+};
+
+/* Random-position blur parameters and their allocated slot owner. */
+struct EffBlurScatterParams {
+    s32 count;
+    s32 delaySpread;
+    f32 angleStep;
+    u32 color;
+    s32 blendControl;
+    f32 uvDisplacementAngleDegrees;
+    f32 uvDisplacementAmplitude;
+    /* Native movie blends index the renderer position as a two-element vector. */
+    s32 position[2];
+    s32 positionSpread;
+    s32 size;
+};
+
+struct EffPCPCompactScatterParams {
+    EffPCPCompactTimelineParams timeline;
+    EffBlurScatterParams res;
+};
+
+typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
+
+struct EffPCPCompactTexturedBlurParams {
+    EffPCPCompactTimelineParams timeline;
+    EffPCPTexturedBlurParams res;
+};
+
+struct EffBlurScaleSlot {
+    f32 phase;
+    f32 angle;
+    EffBlurQuad quad;
+};
+
+struct EffBlurScaleWork {
+    EffBlurScaleParams params;
+    struct SdfTex *texture;
+    struct SdfMemBlock *allocation;
+    EffBlurScaleSlot *slots;
+};
+
+struct EffBlurScatterSlot {
+    s32 delay;
+    f32 angle;
+    EffBlurQuad quad;
+};
+
+struct EffBlurScatterWork {
+    EffBlurScatterParams params;
+    struct SdfTex *texture;
+    struct SdfMemBlock *allocation;
+    EffBlurScatterSlot *slots;
+};
+
+struct EffPCPCompactWork {
+    f32 position[4];
+    u8 flags;
+    u8 pad11[3];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 color;
+    u32 baseColor;
+    s32 startExtent;
+    s32 endExtent;
+    s32 frame;
+    union {
+        EffBlurScatterWork *scatter;
+        EffBlurScaleWork *scale;
+    } resource;
+};
+
+struct EffPCPCrossWork {
+    u32 unk00;
+    u32 unk04;
+    u32 unk08;
+    u8 pad0C[4];
+    u32 color;
+    f32 scale;
+    EffParamWork *base; /* Parameter work for the anchor model. */
+    EffParamWork *handle[4][3];
+    u8 pad4C[0x60];
+    u32 remainingDelay[4][3];
+};
+
+/* Six paired parameter handles share this 0x60-byte allocation. The first
+ * three words are initialized by creation and cloning; their meanings remain
+ * unknown. */
+struct EffPCPDelayedPairs {
+    u32 unk00;
+    u32 unk04;
+    u32 unk08;
+    u8 unk0C[4];
+    u32 color;
+    f32 scale;
+    EffParamWork *handle[12];
+    u32 remainingDelay[6];
+};
+
+struct EffEventWork;
+
+typedef struct EffEventWork EffEventWork;
+
+/* Both PCP drift owners allocate count * 0x18 bytes after their 0x11C-byte
+ * work header, initialize these rows, and release each retained event. */
+struct EffPCPDriftEventRow {
+    struct EffEventWork *event;
+    s32 frame;
+    f32 position;
+    f32 positionStep;
+    f32 angle;
+    f32 angleStep;
+};
+
+struct EffPCPDriftEventParams {
+    f32 position[4];
+    u8 pad10[0x44];
+    s32 duration;
+    u32 count;
+    s32 delaySpread;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 startPosition, endPosition, startJitter, endJitter;
+    f32 angleStep;
+    f32 angleDecay;
+    f32 angleJitter;
+    u8 pad84[0x80];
+};
+
+struct SoundMixer;
+
+struct BattleEffect;
+
+typedef struct BattleEffect BattleEffect;
+
+typedef void (*BattleEffectCallback)(BattleEffect *effect);
+
+struct EffAimParams {
+    u8 scaleKind;
+    u8 aimMode;           /* 0x01 */
+    u8 directionMode;     /* 0x02 */
+    u8 pad3;
+    s32 rangeOverride;    /* 0x04: zero uses the source range */
+};
+
+union EffBattleParameterValue {
+    u32 sourceOffset;
+    struct EffParamWork *work;
+};
+
+typedef struct EffBattleEntry {
+    u16 paramKind;                 /* 0x00 */
+    u8 pad02[2];
+    EffBattleParameterValue value; /* 0x04 */
+    EffAimParams aimParams;        /* 0x08 */
+    u32 zeroKindCount;             /* 0x10 */
+    u8 kind;                       /* 0x14 */
+    u8 pad15[3];
+} EffBattleEntry; /* 0x18 */
+
+struct EffBattleEntryList {
+    s32 triggerFrame;              /* 0x00 */
+    u8 pad04[2];
+    u16 shake;                     /* 0x06: screen-shake amount; 31 or more logs and caps at 300 frames */
+    u16 shakeFrame;                /* 0x08: frame at which the shake starts */
+    u16 shakeFade;                 /* 0x0A: fade applied with the shake */
+    u8 colorKeys[0x24];            /* 0x0C: colour keyframes read by the unit colour keyframe routine */
+    u8 rgbKeys[0x18];              /* 0x30: RGB keyframes read by the unit RGB keyframe routine */
+    s32 callbackFrame;             /* 0x48 */
+    u8 pad4C[0x20];
+    u16 count;                     /* 0x6C */
+    u8 pad6E[2];
+    s32 colorRampEndFrame;         /* 0x70 */
+    u8 actorScaleEnabled;          /* 0x74 */
+    u8 pad75[3];
+    EffBattleEntry entries[1];     /* 0x78 */
+};
+
+struct BattleEffect {
+    void *owner; /* 0x00 */
+    SoundMixer *state; /* 0x04 */
+    u32 color; /* 0x08 */
+    u16 flags; /* 0x0C */
+    u8 pad0E[2];
+    u32 currentFrame; /* 0x10 */
+    u32 triggerFrame; /* 0x14 */
+    u32 colorRampEndFrame; /* 0x18 */
+    u16 kind; /* 0x1C */
+    u8 pad1E[2];
+    s32 unk20;
+    struct EffBattleEntryList *list; /* 0x24 */
+    struct EffParamWork *parameterWorks[0x3C]; /* 0x28 */
+    BattleEffectCallback sourceFrameCallback; /* 0x118 */
+    BattleEffectCallback triggerFrameCallback; /* 0x11C */
+    u32 unk120;
+    BattleEffect *next; /* 0x124 */
+};
+
+struct SoundBank {
+    u8 pad00[8];
+    EffBattleEntryList list;       /* 0x08 */
+    u8 pad98[0x580];
+};
+
+struct SoundMixer {
+    SoundBank banks[2];
+    u8 pad0C30[8];
+    struct SdfMemBlock *resource; /* 0xC38: owns the mixer allocation. */
+    u32 active;
+    BattleEffect *voiceList;
+};
+
+struct EffPCPDriftEventWork {
+    EffPCPDriftEventParams params;
+    EffPCPDriftEventRow *entries;
+    SoundMixer *owner;
+    u8 unk10C;
+    u8 pad10D[3];
+    f32 scale;
+    u32 color;
+    struct SdfMemBlock *handle;
+};
+
+/* Serialized model placement and fade parameters copied into the owner. */
+struct EffPCPEventParamHead {
+    f32 position[4];
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 frameStep;
+};
+
+/* Misc clients use payload[0..6] as position and [7..10] as scale values;
+ * Thunder callers retain the same layout with event-specific slots unknown. */
+struct EffPCPEventPlace {
+    f32 payload[11]; /* 0x00 */
+    u32 color;       /* 0x2C */
+};
+
+/* Alpha-system parameters supply three packed words to the particle system. */
+struct EffThunderAlphaParams {
+    f32 origin[4];
+    u16 systemParam;
+    u8 pad12[2];
+    u32 cellCount;
+    u8 pad18[4];
+    f32 radiusScale;
+    f32 heightScale;
+    f32 rotationScale;
+    u32 startDelayRange;
+    u32 activeFrameRange;
+    u16 perCell;
+    u8 pad32[6];
+    u32 centerAlphaWord;
+    u32 reserved3C;
+    u32 middleAlphaWord;
+    u32 reserved44;
+    u32 edgeAlphaWord;
+};
+
+/* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
+struct EffThunderVectorParams {
+    f32 origin[4];
+    u16 systemParam;
+    u8 pad12[2];
+    u32 cellCount;
+    u8 pad18[4];
+    f32 radiusScale;
+    f32 heightScale;
+    f32 rotationScale;
+    u32 startDelayRange;
+    u32 activeFrameRange;
+    u16 perCell;
+    u8 pad32[0xA];
+    f32 bandWidth;
+    void *dispatchArg;
+    f32 edgeWidth;
+    u8 pad48[4];
+};
+
+/* Constructors copy all 0x4C bytes. The vector updater reads the retained
+ * geometry bytes through the vector view for both constructor variants. */
+union EffThunderParameterHead {
+    EffThunderVectorParams vector;
+    EffThunderAlphaParams alpha;
+};
+
+struct EffThunderVectorCell {
+    u32 delayFrames;
+    u32 activeFrames;
+    f32 placementVector[3];
+    f32 rotationAxis[3];
+    f32 rotationScale;
+    f32 radius;
+    u32 color;
+};
+
+struct ParSystem;
+
+struct ParCell {
+    u128 *history;   /* 0x00 */
+    u32 *colors;     /* 0x04: packed per-history-vector colors */
+    s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
+    s32 historyAdvanceCountdown; /* 0x0C: updates until the next history shift */
+    u32 color;       /* 0x10 initialized to grey 0x80808080 */
+};
+
+/* The cell-system allocation ends with this complete 0x2C-byte owner. */
+struct ParSystem {
+    u16 kind;            /* 0x00: ParCellTopology code; native integer storage */
+    u16 bucket;          /* 0x02: packet submission bucket */
+    s32 cellCount;       /* 0x04 */
+    s32 vertexWordCount; /* 0x08 */
+    s32 groupDivisor;   /* 0x0C: cell-system allocator input */
+    struct SdfMemBlock *allocation; /* 0x10: geometry allocation descriptor */
+    ParCell *cells;      /* 0x14 */
+    u128 *vertices;      /* 0x18: backing vector history for all cells */
+    u32 *colors;         /* 0x1C: backing color stream for all cells */
+    struct SdfAsset *asset; /* 0x20: submitted draw asset */
+    struct ParSystem *next; /* 0x24: pending cell-system list */
+    s32 unk28;           /* 0x28 */
+};
+
+/* The complete work is followed by cellCount cells in the same allocation. */
+struct EffThunderVectorWork {
+    EffThunderParameterHead head;
+    EffThunderVectorCell *cells;
+    u32 tintColor;
+    f32 baseRadiusScale;
+    f32 baseHeightScale;
+    struct ParSystem *cellSystem;
+    struct SdfMemBlock *allocationHandle;
+};
+
+struct EffPCPFadeWork {
+    u8 pad00[0x10];
+    f32 unk10; /* Settable input; not read by the observed fade updates. */
+    u32 color;
+    u32 frame;
+    EffThunderVectorWork *handle; /* 0x1C complete vector work owner */
+};
+
+/* One 0x18-byte per-group fragment entry in the owner's trailing allocation. */
+struct EffPCPGroupEntry {
+    EffThunderFragmentWork *handle; /* 0x00 */
+    s32 frame; /* 0x04: negative until the start delay expires */
+    f32 position; /* 0x08: initial interpolated position */
+    f32 positionStep; /* 0x0C: change per frame */
+    f32 angle; /* 0x10: evenly spaced angle in radians */
+    f32 angularStep;
+};
+
+/* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
+struct EffThunderFragmentParams {
+    f32 start[4];
+    f32 end[4];
+    u16 systemParam;         /* 0x20 */
+    u8 pad22[2];
+    u32 fragmentCount;       /* 0x24 */
+    u32 restartFrameLimit;  /* 0x28: zero permits unlimited restarts */
+    f32 waveAmplitude;      /* 0x2C: sinusoidal displacement */
+    u32 startDelayRange;     /* 0x30 modulus of delayFrames */
+    u32 activeFrameRange;    /* 0x34 modulus of activeFrames before adding one */
+    u16 halfLife;            /* 0x38 */
+    u8 pad3A[2];
+    f32 coreWidth;          /* 0x3C: half-width of the primary strip */
+    u32 centerColorWord;     /* 0x40: packed center color used by symmetric cell ramps */
+    f32 bandWidth;          /* 0x44: width of the continued strip */
+    u32 middleColorWord;    /* 0x48: packed middle color used by symmetric cell ramps */
+    f32 edgeWidth;          /* 0x4C: added outer margin */
+    u32 edgeColorWord;      /* 0x50: packed edge color used by symmetric cell ramps */
+};
+
+/* Serialized 0x164-byte group-set input copied into each live owner. */
+struct EffPCPGroupHead {
+    f32 origin[4];
+    u8 pad10[0x40];
+    u8 repeat; /* 0x50: restart after the duration. */
+    u8 pad51[3];
+    s32 framesPerEntry; /* 0x54: interpolation duration */
+    u32 count; /* 0x58: handles per group */
+    s32 delaySpread; /* 0x5C: random initial delay */
+    s32 fadeIn; /* 0x60 */
+    s32 fadeOut; /* 0x64 */
+    f32 startPosition; /* 0x68: interpolated position at frame zero */
+    f32 endPosition; /* 0x6C: interpolated position at final frame */
+    f32 startJitter; /* 0x70: fractional random variation */
+    f32 endJitter; /* 0x74: fractional random variation */
+    f32 angularStep;
+    f32 angularDamping;
+    f32 angularStepJitter;
+    f32 startRadialBlend;
+    f32 endRadialBlend;
+    u8 activeGroups[4];
+    EffThunderFragmentParams spawnParams;
+    u8 padE4[0x80];
+};
+
+/* The general allocation contains this 0x180-byte prefix followed by
+ * count entries. The four duplicate-handle groups use a separate allocation. */
+struct EffPCPGroupSet {
+    EffPCPGroupHead head;
+    EffPCPGroupEntry *entries; /* 0x164: entries at the end of the main allocation */
+    f32 scale; /* 0x168: multiplies start/end positions */
+    f32 fragmentLength; /* Distance along the normalized fragment direction. */
+    u32 color; /* 0x170 */
+    EffParamWork **duplicates; /* 0x174: four groups of parameter work */
+    struct SdfMemBlock *duplicateHandle; /* 0x178 */
+    struct SdfMemBlock *workHandle; /* 0x17C */
+};
+
+struct EffPCPGrowWork {
+    f32 position[4];
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 base;
+    s32 target;
+    u32 color;
+    s32 frame;
+    f32 scale;
+    EffThunderVectorWork *handle;
+};
+
+/* One event per model-map position. Init seeds the entry, then the updater
+ * latches its initial position and advances the event through its frame span. */
+struct EffPCPMapEventEntry {
+    f32 initialPosition[4];
+    u8 hasMoved;
+    u8 pad11[3];
+    s32 age;
+    s32 frameLimit;
+    struct EffEventWork *event;
+};
+
+/* The factory allocates this owner as one 0x40-byte size-class block; the
+ * per-position entries are a separate count * 0x20 allocation. */
+struct EffPCPMapEventWork {
+    EffPCPEventParamHead params;
+    EffPCPMapEventEntry *entries;
+    struct SdfMemBlock *entriesHandle;
+    struct SoundMixer *owner;
+    struct EffParamWork *modelResource;
+    f32 scale;
+    s32 frame;
+    s32 frameLimit;
+    u32 count;
+    u32 color;
+};
+
+/* The paired PCP event owners allocate count * 0x20 bytes after the 0xA4
+ * byte work header and initialize/release two event nodes per row. */
+struct EffPCPPairedEventRow {
+    struct EffThunderFragmentWork *fragment;
+    struct EffEventWork *eventA;
+    struct EffEventWork *eventB;
+    f32 phase;
+    f32 radius;
+    f32 tilt;
+    f32 tiltStep;
+    s32 frame;
+};
+
+struct EffPCPPairedEventParams {
+    f32 origin[4];
+    u8 repeat;
+    u8 pad11[3];
+    s32 duration;
+    u32 count;
+    s32 delaySpread;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 baseRadius, radiusJitter, baseTiltStep, tiltJitter;
+    EffThunderFragmentParams fragmentParams;
+};
+
+struct EffPCPPairedEventWork {
+    EffPCPPairedEventParams params;
+    EffPCPPairedEventRow *entries;
+    SoundMixer *ownerA, *ownerB;
+    u8 unk98;
+    u8 pad99[3];
+    u32 color;
+    struct SdfMemBlock *handle;
+};
+
+struct EffPCPRingWork {
+    f32 pos[4];
+    u32 color10;
+    u32 color14;
+    f32 scale;
+    BillObj *handle;
+};
+
+struct EffPCPRotateParams {
+    s32 startFrame[3];
+    EffPCPBlockSetParams group[3];
+};
+
+struct EffPCPRotateWork {
+    EffPCPRotateParams params;
+    EffPCPBlockSetWork *blockSets[3];
+    s32 frame;
+};
+
+struct EffPCPScaledThunderParams {
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    s32 base;
+    s32 target;
+    EffThunderAlphaParams res;
+};
+
+/* Shared by ref-counted trail tasks; constructors allocate this full record. */
+struct EffPCPSharedTrail {
+    f32 pos[4];
+    u32 flags;
+    u32 color;
+    u32 frame;
+    f32 sizeInput; /* 0x1C: converted to the rendered extent by the camera helper. */
+    u32 limit;
+    u32 baseLimit; /* 0x24: original trail frame limit. */
+    u32 colors[2];
+    f32 scale;
+    s32 minSize;
+    struct EffBlurTemplate *obj;
+};
+
+struct EffPCPSharedTrailRef {
+    u32 frame;
+};
+
+/* Serialized inputs copied in full into the orbiting aim-node work owner. */
+struct EffPCPSpanParams {
+    f32 anchor[4];
+    u32 holdFrames;
+    u32 activeFrames;
+    s32 fadeFrames;
+    f32 sweepDegrees;
+    f32 radius;
+};
+
+/* Constructor allocation is 0x78 bytes and initializes this complete owner. */
+struct EffPCPSpanWork {
+    f32 matrix[16];
+    EffPCPSpanParams params;
+    u32 color;
+    u32 frame;
+    f32 angle;
+    f32 spin;
+    struct EffNode *optionalHandle;
+};
+
+/* Shared spawn-once work record used by the paired effect implementations. */
+struct EffPCPSpawnOnceWork {
+    f32 vector[4]; /* 0x00: loaded together by the spawn callback's VU vector load. */
+    u32 color; /* 0x10 */
+    EffParamWork *primaryHandle; /* 0x14 */
+    EffParamWork *secondaryHandle; /* 0x18 */
+};
+
+/* Spawn-range owners allocate count * 0x20 bytes after their 0xAC-byte header. */
+struct EffPCPSpawnRangeEventRow {
+    struct EffEventWork *event;
+    s32 frame;
+    f32 height;
+    f32 heightStep;
+    f32 angle;
+    f32 angularStep;
+    f32 position;
+    f32 positionStep;
+};
+
+/* The radial event setup reads the typed tail and preserves its opaque prefix. */
+struct EffPCPSpawnRangeParams {
+    f32 origin[4];
+    u8 pad10[0x44];
+    s32 duration;
+    u32 count;
+    s32 delaySpread;
+    s32 fadeIn;
+    s32 fadeOut;
+    f32 initialAngularStep;
+    f32 angularJitter;
+    f32 angularDamping;
+    f32 initialHeightStep;
+    f32 heightJitter;
+    f32 heightDamping;
+    f32 startPosition;
+    f32 endPosition;
+    f32 startJitter;
+    f32 endJitter;
+    f32 startHeightRange;
+};
+
+/* The 0xAC-byte owner precedes its count * 0x20 event rows in one allocation. */
+struct EffPCPSpawnRangeWork {
+    EffPCPSpawnRangeParams params;
+    EffPCPSpawnRangeEventRow *entries;
+    struct SoundMixer *owner;
+    u8 unk9C;
+    u8 pad9D[3];
+    f32 scale;
+    u32 color;
+    struct SdfMemBlock *handle;
+};
+
+/* The pair variants allocate through handle1 at +0x64 (0x68 bytes); the
+ * single variants allocate the 0x64-byte prefix and only use handle0. The EE
+ * ABI rounds sizeof this u128-aligned view up to 0x70. */
+struct EffPCPSpinWork {
+    u8 pad00[0x10];
+    u128 matrix[4];
+    s32 frame;
+    f32 angle;
+    f32 scale;
+    u32 color;
+    EffParamWork *handle0;
+    EffParamWork *handle1;
+};
+
+typedef struct EffPCPSprayWork {
+    f32 pos[4];       /* 0x00 vector loaded by the pulse updater */
+    f32 scale;        /* 0x10 */
+    u32 color;        /* 0x14 */
+    u32 count;        /* 0x18 particle count */
+    s32 frame;        /* 0x1C current update frame */
+    s32 startFrame[10]; /* 0x20 */
+    f32 rotationY[10];  /* 0x48 random start angles */
+    EffParamWork *handle[10];   /* 0x70 */
+} EffPCPSprayWork; /* 0x98 */
+
+/* Eight delayed pairs share this size-class allocation. The input-position
+ * callback copies all four vector lanes; the update uses the first three. */
+struct EffPCPStaggered {
+    f32 position[4];
+    u32 color;
+    f32 scale;
+    f32 verticalOffset[8];
+    EffParamWork *handle[16];
+    u32 remainingDelay[8];
+};
+
+struct EffPCPThunderGroup {
+    f32 pos[4];
+    u32 unk10;
+    f32 unk14; /* Settable, but not read by the observed group updates. */
+    u32 unk18;
+    EffThunderFragmentWork *handles[1];
+};
+
+struct EffPCPTrailParams {
+    u32 count;
+    u32 colors[2];
+    f32 scale;
+    s32 minSize;
+    EffPCPTexturedBlurParams res;
+};
+
+struct EffPCPTrailWork {
+    f32 pos[4];
+    u32 flags;
+    u32 color;
+    u32 frame;
+    f32 sizeInput;
+    u32 count;
+    u32 colors[2];
+    f32 scale; /* multiplies the computed trail size */
+    s32 minSize;
+    EffBlurTemplate *obj;
+};
+
+struct EffPCPTripleParams {
+    f32 origin[4];
+    f32 offset[3][2];
+    s32 groupStartFrame[3];
+    s32 handleDelay[7];
+};
+
+struct EffPCPTripleWork {
+    EffPCPTripleParams head;
+    s32 frame;
+    u32 color;
+    struct EffNode *handles[21];
+};
+
+/* The twin effect owns eight pairs of parameter works, one shared work per
+ * slot, and per-slot state/countdowns. Its constructors allocate 0xBC bytes. */
+struct EffPCPTwinWork {
+    u32 unk00;
+    u32 unk04;
+    u32 unk08;
+    u8 pad0C[4];
+    u32 color;
+    u32 frame;
+    f32 scale;
+    EffParamWork *pair[8][2];
+    EffParamWork *shared[8];
+    u32 state[8];
+    u32 counter[8];
+};
+
+/* Four ordered 32-bit words in the shared effect random-number state. */
+struct EffRandState {
+    u32 words[4];
+};
+
+struct EffSpawnParams {
+    f32 pos[4];
+    f32 vel[4];
+    u8 pad20[0x0C];
+    f32 speed;       /* 0x2C: randomised motion speed */
+    u8 pad30[0x08];
+    s16 lifetime;    /* 0x38: randomised particle lifetime */
+    u8 pad3A[0x0A];
+    f32 bandWidth;
+    u8 pad48[0x04];
+    f32 edgeWidth;   /* 0x4C: EffThunderFragmentParams outer edge width */
+    u8 pad50[0x04];
+};
+
+struct MdlCtx;
+
+typedef struct MdlCtx MdlCtx;
+
+struct MotionTable;
+
+/* Serialized clip duration/reserved remain halfwords (tools/fld.py).
+ * The viewer MAXFRAME diagnostic reads their packed little-endian word. */
+struct MotionEntry {
+    union {
+        struct {
+            u16 frameCount;
+            u16 unk02;
+        };
+        u32 packedHeader;
+    };
+    u32 bindingData[1];
+};
+
+struct SdfMotionCommand {
+    union {
+        u32 packedCommand;
+        struct {
+            /* Runtime dispatch shifts the command word right by 16. */
+            u16 selector;
+            u16 family;
+        } binding;
+    };
+    u32 targetIndex;
+};
+
+/* Resource header followed by the binding commands used to construct a motion. */
+struct MotionTable {
+    u16 entryCount; /* Motion-index upper bound returned by mdlGetNumOfCut. */
+    u16 commandCount;
+    MotionEntry **entries;
+    SdfMotionCommand commands[1];
+};
+
+struct BattleGroupSlot {
+    s32 flags;
+    s16 motionSlotIndex;
+    s16 motionIndex;
+    MotionTable *motionTable;
+    struct SdfMemBlock *resourceHandle;
+};
+
+struct DevRequest;
+
+struct DevRequest {
+    struct SdfMemBlock *backingAllocation;
+    s16 usedCount;
+    u16 capacity;
+    s16 stride;
+    s16 growStep;
+    void *buffer;
+};
+
+/* Relative-linked viewer records share packed payload and parameter words.
+ * Kinds 1/2 use the count and part-index halfwords at 0x0C/0x0E; kind 3
+ * reads the whole parameter word. Kind 4 reads both selector halfwords at 0x08/0x0A. */
+struct MdlRecord {
+    s32 kind;       /* 0x00: 0xFFFF terminates the record chain */
+    s32 nextOffset; /* 0x04: relative byte offset to next record */
+    union {
+        u32 word;               /* 0x08 */
+        struct {
+            u16 selectorA;
+            u16 selectorB;
+        } stream;
+    } payload;
+    union {
+        u32 word;               /* 0x0C */
+        struct {
+            u16 count;
+            u16 partIndex;
+        } part;
+    } parameter;
+    union {
+        u32 word10; /* 0x10: kind-four stream parameter */
+        struct {
+            u16 slotCount; /* Kind 1/2 group records: following entity-slot packets. */
+            u16 unk12;
+        } half;
+    } tail;
+};
+
+struct SdfItemListRef;
+
+struct SdfChunkHeader;
+
+/* Variable-size serialized chunk streams share only this eight-byte header.
+ * The word at +8 belongs to each chunk's payload. */
+struct SdfChunkHeader {
+    u32 id;   /* 0x00: zero terminates the chunk stream */
+    u32 size; /* 0x04: byte extent to the next chunk */
+};
+
+/* Native model constructor reference: AMB roots and the FLD model wrapper's
+ * four-word subrecord. The item list has a variable-length body of SdfItem
+ * records beginning at its firstItem array. */
+typedef struct SdfItemList SdfItemList;
+
+/* Per-item view after packed-resource or scene relocation, applied by
+ * sdfModelNodeBaseSet. Command-list fields hold relocated pointers. */
+struct SdfItem {
+    u16 commandSetupMode; /* 0x00: selects the optional command-list form */
+    u16 reserved02;       /* 0x02 */
+    u32 unk04;            /* 0x04 */
+    s32 nodeId;       /* 0x08 */
+    s32 parentNodeIndex; /* 0x0C: negative means this node has no parent */
+    f32 rotationX;    /* 0x10: Euler angles supplied to the quaternion builder */
+    f32 rotationY;    /* 0x14 */
+    f32 rotationZ;    /* 0x18 */
+    u8 pad1C[4];
+    u128 translation; /* 0x20 */
+    u128 scale;       /* 0x30 */
+    const f32 *boundsCorners; /* 0x40: optional two xyz corners used by clipping */
+    union {
+        u32 *inlineCommandLists[3]; /* SDF_ITEM_COMMAND_SETUP_INLINE_LISTS */
+        struct {
+            u32 **commandLists; /* SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE */
+            u32 unk48;
+            u32 unk4C;
+        } commandList;
+    } commandData; /* 0x44: other modes leave the command tail unused */
+};
+
+/* Variable-length serialized list: a 0x10-byte header, followed by count
+ * complete 0x50-byte items. The array contributes no bytes to the header. */
+struct SdfItemList {
+    s32 count;
+    u8 pad_0x04[0x0C];
+    SdfItem firstItem[0];
+};
+
+struct SdfItemListRef {
+    SdfItemList *items; /* 0x00 */
+    u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
+    s32 slotPairCount; /* 0x08: passed to sdfModelMakeMorphList */
+    struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
+};
+
+/* Group owners allocate 0xB4 bytes and retain eight resource records. */
+struct BattleGroupNode {
+    struct BattleGroupNode *next;
+    struct BattleGroupNode *prev;
+    u16 group;
+    u16 type;
+    u8 ownsResources;
+    u8 pad0D[3];
+    MdlCtx *modelContext;
+    DevRequest *resourceList;
+    struct SdfItemListRef *itemList;
+    struct SdfMemBlock *requestAllocation;
+    BattleGroupSlot slots[8];
+    struct SdfMemBlock *resourceHandle;
+    struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
+    DevRequest *partList;
+    f32 unk_AC;
+    f32 objectRadius; /* Copied into the model context and object radius. */
+};
+
+struct SdfModel;
+
+/* Copy runtime model and draw-node state into an existing model overlay.
+ * Both models and their resource and draw-node lists must be initialized. */
+struct SdfModel;
+
+struct Motion;
+
+/* SDK motions are allocated as 0x34-byte records; model slots retain these nodes. */
+struct Motion {
+    struct Motion *next;
+    SdfModel *owner;
+    MotionTable *motionTable;
+    s32 unkC;
+    DevRequest *request;
+    f32 blendDurationFrames;
+    f32 blendStartFrame;
+    f32 currentFrame;
+    f32 frameStep;
+    s32 unk24;
+    s16 searchId;
+    s16 slotIndex;
+    u16 motionIndex;
+    u16 frameCount;
+    u8 state;
+    u8 previousState;
+    u8 loopEnabled;
+    u8 pad33;
+};
+
+struct SdfDmaTagHeader;
+
+/* DMA tag prefix followed by the two VIF words used by indexed-model writers.
+ * The control byte stays whole, and address is a hardware word rather than a
+ * CPU pointer. */
+typedef struct SdfDmaTagHeader {
+    u16 quadwordCount;
+    u8 reservedByte;
+    u8 control;
+    u32 address;
+    u32 firstVifCode;
+    u32 secondVifCode;
+} QWORD_ALIGNED SdfDmaTagHeader;
+
+/* Command-list node: allocation owns the node and trailing command data.
+ * A null descriptor identifies a separately chip-allocated node. */
+struct SdfCommandNode {
+    struct SdfCommandNode *next;
+    u8 kind;
+    s8 packetSelector;
+    s16 quadwordCount;
+    void *payload; /* Packet bytes for kind 1; serialized commands for kinds 2/3. */
+    struct SdfMemBlock *allocation;
+};
+
+/* Allocated as 0x100-byte nodes; each owns a circular list of child draw nodes. */
+struct SdfDrawNode {
+    struct SdfDrawNode *previous; /* 0x00 */
+    struct SdfDrawNode *next;     /* 0x04 */
+    struct SdfDrawNode *parent;   /* 0x08 */
+    struct SdfDrawNode *children; /* 0x0C */
+    struct SdfModel *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
+    u16 flags;                   /* 0x14 */
+    s16 unk16;                   /* 0x16: constructor sentinel is -1 */
+    s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
+    u32 color;                   /* 0x1C */
+    u8 pad20[8];
+    SdfCommandNode *lists[2];     /* 0x28: command lists for both buffered frames */
+    u8 *workspace; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
+    const f32 *boundsCorners;     /* 0x34: optional two xyz corners used by clipping */
+    void *sourceItem;             /* 0x38: item this node was built from */
+    u8 pad3C[0x14];
+    f32 quaternion[4];           /* 0x50 */
+    f32 translation[4];          /* 0x60 */
+    f32 scale[4];                /* 0x70 */
+    f32 localMatrix[4][4];       /* 0x80: all four local basis/translation rows */
+    f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
+};
+
+/* The buffered-transform constructor allocates and clears all 0x9C bytes. */
+struct SdfModel {
+    DevRequest *list;
+    SdfDrawNode *rootNode;
+    void *assetData;
+    DevRequest *resources;
+    DevRequest *slotPairs;
+    struct Motion *motionList;
+    u8 unk18;
+    u8 flags;
+    u16 drawFlags;
+    u32 color;
+    f32 matrix[4][4];
+    f32 rotationQuaternion[4];
+    f32 scaleVector[4];
+    struct SdfDmaTagHeader *lighting; /* Borrowed first DMA reference prefix. */
+    struct SdfDmaTagHeader *secondaryLighting; /* Borrowed second DMA reference prefix. */
+    f32 scalarOverrideFirst;
+    f32 scalarOverrideSecond;
+    struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
+
+    f32 modelScale;
+    u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
+    u8 pad99[3];
+};
+
+struct MdlDevSlot {
+    struct MdlDevSlot *next;
+    SdfModel *model;
+    s32 remaining;
+};
+
+/* This owner has inline color interpolation data, not a request buffer at +0xC. */
+struct MdlDevList {
+    MdlDevSlot *first;
+    s16 usedCount;
+    u16 capacity;
+    s16 stride;
+    s16 growStep;
+    s32 byteCount;
+    f32 color[4];
+    f32 colorStep[4];
+};
+
+struct EffTrackPolyWork;
+
+struct EffTrackPolyData;
+
+/* Owner record stored after the track's point and gradient buffers. */
+struct EffTrackPolyData {
+    u32 kind;                   /* 0x00: draw-target selector */
+    u32 color;                  /* 0x04 */
+    s32 count;                  /* 0x08: slots, including the reserved pair */
+    s32 activePointCount;       /* 0x0C */
+    s32 position;               /* 0x10 */
+    s32 step;                   /* 0x14 */
+    u128 *points;                /* 0x18 */
+    u32 *colors;                 /* 0x1C: gradient entries after points */
+    SdfAsset *nodeHandle;        /* 0x20: owned draw asset */
+    SdfMemBlock *resourceHandle; /* 0x24: containing allocation */
+};
+
+/* Thirteen copied words, followed by an update counter and owned history. */
+struct EffTrackPolyParams {
+    struct MdlCtx *model;
+    s32 idA;
+    s32 idB;
+    f32 startFrame;
+    f32 endFrame;
+    u32 sampleInterval;
+    s32 historyLength;
+    u32 unk1C;
+    u32 kind;
+    u32 gradientColors[4];
+};
+
+struct EffTrackPolyWork {
+    EffTrackPolyParams params;
+    u32 updateCount;
+    struct EffTrackPolyData *data;
+};
+
+struct MdlObj;
+
+/* IPU register state saved across stream callbacks (0x24 bytes). */
+struct IpuDmaState {
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
+};
+
+struct MovObj;
+
+struct DevState;
+
+/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+typedef u8 SdfDevOperationCode;
+
+typedef s8 SdfDevStateCode;
+
+/* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
+struct DevState {
+    struct DevState *next; /* 0x00 */
+    struct DevState *previous; /* 0x04 */
+    struct DevState *workerNext; /* 0x08 */
+    struct DevState *workerPrev; /* 0x0C */
+    char *resolvedPath; /* 0x10 */
+    u8 workerIndex; /* 0x14 */
+    SdfDevOperationCode operation; /* 0x15 */
+    SdfDevStateCode state; /* 0x16 */
+    u8 pad17; /* 0x17 */
+    s32 operationArg; /* 0x18 */
+    s32 requestExtra; /* 0x1C */
+    void *requestData; /* 0x20 */
+    s32 options; /* 0x24 */
+    s32 resourceId; /* 0x28 */
+    s32 result; /* 0x2C */
+    s32 transferred; /* 0x30 */
+    u8 pad34[4]; /* 0x34 */
+    void (*callback)(struct DevState *, s32, s32, s32, s32); /* 0x38 */
+    s32 callbackContext; /* 0x3C: opaque callback-context word */
+};
+
+/* The +0x1C movie work pointer selects one of two separately allocated records.
+ * isPac at +3 chooses the active arm; the variant payload types live in
+ * sdf_movie_stream.h. */
+struct MovLinearStream;
+
+/* Chip-heap work record for the linear movie stream (0x14 bytes). */
+struct MovLinearStream {
+    struct SdfMemBlock *allocation;
+    u8 *bufferStart;
+    u8 *readCursor;
+    u8 *writeCursor;
+    s32 bufferedBytes;
+};
+
+struct MovPacStream;
+
+/* Chip-heap work record for movie-PAC streaming (0x78 bytes). The
+ * block-mask allocation and the backing ring allocation are separate owners. */
+struct MovPacStream {
+    u8 pad00[0x18];
+    s32 packetBytes;
+    s32 blockBytes;
+    u8 scratchBuffer[0x20];
+    struct SdfMemBlock *payloadAllocation;
+    u8 *blockMask;
+    s32 blockIndex;
+    struct SdfMemBlock *allocation;
+    u8 *pacInputBuffer;
+    u8 *pacBuffer;
+    s32 pacReadOffset;
+    s32 pacBufferedBytes;
+    u8 *ringBuffer;
+    s32 ringOffset;
+    s32 ringLength;
+    s32 unk6C;
+    s32 scratchSize;
+    u8 *scratch;
+};
+
+union MovObjStream {
+    struct MovLinearStream *linear;
+    struct MovPacStream *pac;
+};
+
+struct SdfStreamFrameNode {
+    struct SdfStreamFrameNode *streamPrev;
+    struct SdfStreamFrameNode *streamNext;
+    struct SdfStreamFrameNode *next;
+    u8 active;
+    u8 queued;
+    u8 ipuCycleInitialized; /* First-use IPU setup has run for this playback cycle. */
+    u8 drained;
+    u8 playbackPhase;
+    u8 inputFeedEnabled; /* Restart input feeding after DMA completion while input remains. */
+    u8 inputDmaStartPending;
+    u8 pendingPlaybackSubmissions; /* Queued output submissions not yet retired by a playback update. */
+    u8 audioMode;
+    u8 loopMode;
+    u8 playbackCadenceStep;
+    u8 playbackCadenceRemainder;
+    u8 bufferIndex;
+    u8 transferPacketIndex;
+    u8 completedBufferCount; /* Completed output buffers waiting for playback submission. */
+    u8 pad1B;
+    s32 bufferSize;
+    void *frameBuffers[2];
+    void *transferPacketBuffers[2];
+    u32 transferPacketBytes;
+    s32 resourceWord;
+    SdfTexResource *textureHead;
+    u16 width;
+    u16 height;
+    u32 cycleLength;
+    u32 tickCount;
+    s32 playbackFrameIndex;
+    struct SdfStreamInputDmaTag *inputDmaChain;
+    u8 headerReady;
+    u8 done;
+    u8 filledSlots;
+    u8 firstSlot;
+    u8 *scratchBuffer;
+    u8 pad58[4];
+    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+    struct MovObj *readContext; /* Owner context passed to the read callback. */
+    u8 inputFeedDmaInFlight;
+    u8 unk65;
+    u8 pad66[2];
+    IpuDmaState dma;
+};
+
+struct MovObj {
+    u8 active;
+    u8 state;
+    u8 stopRequested;
+    u8 isPac;
+    u16 unk04;
+    u16 unk06;
+    u32 unk08;
+    u16 unk0C;
+    u16 unk0E;
+    struct DevState *deviceState;
+    s32 totalBytes;
+    s32 remainingBytes;
+    MovObjStream stream;
+    u8 pacEnabled;
+    u8 pad21;
+    u8 packetLimit;
+    u8 pad23;
+    SdfStreamFrameNode soundNode;
+};
+
+/* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
+struct SdfStreamInputDmaTag;
+
+/* One 16-byte tag in the IPU input DMA chain. */
+struct SdfStreamInputDmaTag {
+    u64 control;
+    u64 reserved;
+};
+
+/* The model-object allocation ends with its complete embedded stream node. */
+struct MdlObj {
+    u8 *sourceAddress; /* 0x00: frame data passed to sdfIpuSetDecodeParams */
+    SdfMemBlock *backingAllocation; /* 0x04: released by mdlDeleteEffectResrc_IPU */
+    u8 inUse; /* 0x08: claimed by a model resource item */
+    u8 initialized; /* 0x09: stream-node initialization guard */
+    u8 pad0A[6];
+    s32 sourceSize; /* 0x10 */
+    u8 pad14[0x0C];
+    SdfStreamFrameNode soundNode; /* 0x20: complete 0x8C embedded node */
+};
+
+struct MdlObjectAttachment {
+    MdlCtx *owner;
+    struct MdlObj *object; /* Borrowed from the owner's heterogeneous part list. */
+    struct SdfTex *texture; /* Borrowed texture-list node used for stream creation. */
+    s32 minimumTime;
+    u8 attributes[8];
+};
+
+struct MdlPartEntry;
+
+/* One model-viewer part-list slot; the request buffer uses a 0x10-byte stride. */
+struct MdlPartEntry {
+    u32 kind;       /* 0x00 */
+    s32 state;      /* 0x04 */
+    void *object;   /* 0x08 */
+    u8 opaque0C[4]; /* 0x0C */
+};
+
+struct SdfMapPositionRecord;
+
+struct SdfMapPositionRecord {
+    u32 nodeId;      /* 0x00: draw-node lookup key */
+    s32 id;          /* 0x04: map-position record lookup key */
+    u8 reserved08[8];
+    u128 position;   /* 0x10 */
+    u128 up;         /* 0x20 */
+    u128 direction;  /* 0x30 */
+};
+
+/* The paired viewer allocators clear 0x20 bytes and prepend this tagged item
+ * to MdlCtx's list at +0x14. The part and object payloads share that allocation. */
+struct MdlResourceItem {
+    struct MdlResourceItem *next;
+    u16 type; /* MdlResourceKind value, with native halfword storage. */
+    s16 motionSlotIndex; /* Owning Motion.slotIndex; -1 tags context-wide entries. */
+    union {
+        struct {
+            /* Type 2 stores a track; other part kinds store their created instance. */
+            union {
+                void *instance;
+                struct EffTrackPolyWork *track;
+            };
+            struct MdlPartEntry *slot;
+            struct SdfMapPositionRecord *mapPositionRecord;
+            f32 anchorScale;
+            u8 pad18[8];
+        } part;
+        MdlObjectAttachment object;
+    } payload;
+};
+
+/* Context constructors allocate 0x38 bytes; their SDK model slot lives at +0x18. */
+struct MdlCtx {
+    u32 flags;
+    MdlCtx *next;
+    MdlCtx *previous;
+    BattleGroupNode *sub;
+    union {
+        u32 word;
+        struct {
+            s16 id;
+            s16 motionIndex; /* Entry index passed to sdfMotionChangeBlend. */
+        } h;
+    } current;
+    MdlResourceItem *resourceItems;
+    SdfModel *inner;
+    Motion *first;
+    Motion *slots[4];
+    MdlDevList *devList;
+    f32 objectRadius; /* Propagated to the rebuilt object's inner radius. */
+};
+
+/*
+ * 128-bit vector copy in the style of libvu0's sceVu0CopyVector, which the
+ * Sony SDK implements as an asm statement (`lq` into a scratch register, `sq`
+ * out of it). The PCP effect setters compile to exactly `lq $2,0(src);
+ * sq $2,0(dst); jr $31; nop`: plain C u128 copies give `lq; jr; sq` (the sq
+ * moves into the jr delay slot). `.set noreorder` keeps ee-as from filling
+ * the slot too, as for fsqrtf. The destination is operand 0 so its address is formed first.
+ */
+#define PCP_COPY_VECTOR(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
+    : : "r" (dst), "r" (src) : "$2", "memory")
+
+/* RenderWare XYZ axis used by the native SDF matrix builders. */
+struct RwV3d {
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+#define VU0_ADD(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+
+/* dst.xyz = a.xyz + b.xyz, retaining dst.w. */
+#define VU0_ADD_XYZ(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyz " #dst ", " #a ", " #b "\n\t.set reorder")
+
+/* dst = primary matrix (vf28-vf31) * src: the core of libvu0
+ * sceVu0ApplyMatrix, used with the sdf matrix-bank convention. */
+#define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
+
+/* vf.w = 0 (vmulx.w vf,vf,vf0x) and vf.w = 1 (vmove.w vf,vf0): the w fix-up
+ * retail does before packing a colour or storing a point/direction. */
+#define VU0_CLEAR_W(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvmulx.w " #vf ", " #vf ", vf0x\n\t.set reorder")
+
+/* Load the same four quadwords into vf28-vf31 (no store). */
+#define VU0_LOAD_MATRIX(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%0)\n\t" \
+    "lqc2 vf29, 16(%0)\n\t" \
+    "lqc2 vf30, 32(%0)\n\t" \
+    "lqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src))
+
+/* Load four quadwords into the second matrix bank vf24-vf27 (the right-hand
+ * operand of the sdf matrix-multiply routines). */
+#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src) : "memory")
+
+/* One quadword between memory and a named VU0 register. The load has no
+ * memory clobber; the store does, matching the standalone COP2 asm idiom. */
+#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+
+/* Same load when the source asm also barred compiler memory motion. */
+#define VU0_LOAD_VF_MEMORY(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+
+#define VU0_MUL(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+
+/* vf10 = vf10 / |vf10.xyz| (w untouched):
+ *   vmul.xyz vf2,vf10,vf10; vmulax.w ACC,vf0,vf2x; vmadday.w ACC,vf0,vf2y;
+ *   vmaddz.w vf2,vf0,vf2z; vrsqrt Q,vf0w,vf2w; vwaitq; vmulq.xyz vf10,vf10,Q */
+#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
+
+/* dst = 3x3 of the primary matrix (vf28-vf30) times src.xyz: a rotation, no
+ * translation (the vmaddz form of the apply above). */
+#define VU0_ROTATE_VEC(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddz.xyzw " #dst ", vf30, " #src "z\n\t.set reorder")
+
+/* Store vf28-vf31 to four quadwords (pairs with VU0_LOAD_MATRIX). */
+#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "memory")
+
+/* Same store without a compiler memory clobber, for the effect-allocator sites
+ * where retail keeps the matrix address CSE'd across the store. */
+#define VU0_STORE_MATRIX_NOCLOBBER(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst))
+
+/* Same store for existing asm without a compiler memory clobber (retail keeps
+ * the destination address CSE'd across it). */
+#define VU0_STORE_MATRIX_UNCLOBBERED(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t.set reorder" \
+    : : "r" (dst))
+
+#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+
+#define VU0_STORE_VF_TO_MEMORY(vf, lvalue) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", %0\n\t.set reorder" \
+    : "=m" (lvalue) : : "memory")
+
+/* Legacy SDK input-address-only store, for audited original VU pipelines.
+ * This is NOT a general memory barrier: even EE GCC 2.96 can reuse stale
+ * reads across branches/loops. Prefer VU0_STORE_VF for new code; see
+ * docs/thunder-bezier-matching.md before changing a verified caller. */
+#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+
+/* dst = a - b, dst = a + b, dst = a * b on all four components
+ * (vsub/vadd/vmul.xyzw between calls, e.g. the difference of two positions). */
+#define VU0_SUB(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+
+extern void dds3BillboardDraw(BillObj *effect);
+
+void dds3BillboardSetMode(struct BillObj *billboard, s32 mode);
+
+void dds3BillboardSetRGBA(struct BillObj *billboard, u32 parameter);
+
+void dds3BillboardSetScale(struct BillObj *billboard, f32 x, f32 y);
+
+struct EffPacketParams {
+    s16 parameterCount;
+    s16 vertexCount;
+    u16 primitive;
+    u16 mask;
+    u32 color;
+    const u32 *parameters;
+    u128 *positions;
+    u128 *normals;
+    f32 *texcoords;
+    u32 *extraTexcoords;
+    u32 *colors;
+    void *(*allocate)(s32);
+    f32 depth;
+};
+
+extern EffPacketParams D_0056ADB8;
+
+extern SdfPoolNode *D_0031FEF8[];
+
+extern u8 D_0031FEB0[];
+
+/* Factories accept the serialized parameter prefix used by effect callbacks. */
+EffBlurScatterWork *dds3EffectDistortionBlurCreate(EffBlurScatterParams *params);
+
+extern u8 D_0031FD30[];
+
+extern u8 D_0031FD90[];
+
+EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *body);
+
+EffBlurScaleWork *dds3EffectRippleBlurCreate(EffBlurScaleParams *params);
+
+EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *params);
+
+EffNode *dds3EffectCopy(const EffNode *source);
+
+extern EffSpawnParams effPCPShockWave02Param[];
+
+/* Copy one 128-bit vector from the read-only source to destination storage. */
+void dds3BillboardSetPosition(void *dst, const void *src);
+
+void dds3EffectSetPosition(struct EffNode *node, const void *vector);
+
+struct BillObj *dds3BillboardGeneral(s32 index);
+
+EffThunderVectorWork *effPCPThunderSpherePolyCreate(EffThunderAlphaParams *parameters);
+
+extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
+
+extern u8 D_0031FAF0[];
+
+extern u8 D_0031FB50[];
+
+extern EffRandState dds3EffectBase[];
+
+void dds3EffectDelete(EffNode *node);
+
+void dds3EffectPartDelete(EffParamWork *work);
+
+void dds3EffectPartialMultiBlurDraw(EffBlurTemplate *owner);
+
+/* Clone a mixer owner or release all of its active voices. */
+struct SoundMixer *effEveBEDCreate(struct SoundMixer *source);
+
+/* The event constructor copies a serialized, caller-specific 0x30-byte
+ * parameter record. Its retained work owner is opaque to external users. */
+EffEventWork *effEveBEDCutCreate(struct SoundMixer *owner, u16 kind, const void *params);
+
+void effEveBEDCutDelete(EffEventWork *work);
+
+void effEveBEDDelete(struct SoundMixer *mixer);
+
+extern u8 effPCP_ShockWave01_ThunderSpherePoly_Param[];
+
+extern EffSpawnParams D_0031F708[];
+
+extern u8 effPCP_Houden01_ThunderSpherePoly_Param[];
+
+extern s32 effPCPBlurScreenOffset(f32 value);
+
+/* Advance caller-owned state, returning its next 32-bit value. NULL selects
+ * the shared effect RNG state. */
+u32 dds3GetRandA(EffRandState *state);
+
+/* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
+f32 dds3GetRandFloatA(EffRandState *state);
+
+extern u32 effMagaCylinderCalcColor(u32 flags, u32 color);
+
+extern u8 D_0031FA30[];
+
+extern EffSpawnParams effPCPZiodin02Param[];
+
+extern u8 D_0031FA90[];
+
+extern u8 D_0031FDF0[];
+
+extern u8 D_0031FE50[];
+
+/* The table starts with 0x10 bytes of header, followed by 0x10-byte records.
+ * Each blockOffset is signed and relative to the start of the whole table. */
+struct EffParamTableRecord {
+    u32 word0;
+    s32 blockOffset;
+    u32 kindAndFlags;
+    u32 wordC;
+};
+
+struct EffParamTable {
+    u8 header[0x10];
+    EffParamTableRecord records[1];
+};
+
+EffParamWork *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex);
+
+/* Return a borrowed block at the selected record's signed relative offset. */
+void *dds3EffectPCPDataGetData(const EffParamTable *table, s32 recordIndex);
+
+/* Optional source and matrix operations retain their generic pointer domains. */
+void dds3EffectPartSetPosition(EffParamWork *work, void *source);
+
+void dds3EffectPartSetScale(EffParamWork *work, f32 scale);
+
+void dds3EffectPartSetRotateMatrix(EffParamWork *work, void *matrix);
+
+void dds3EffectPartSetColor(EffParamWork *work, u32 value);
+
+EffParamWork *dds3EffectPartCreate(u16 kind, void *source);
+
+EffParamWork *dds3EffectPartCopy(EffParamWork *source);
+
+void *dds3EffectPartGetHandle(EffParamWork *work);
+
+void dds3EffectPartDraw(EffParamWork *work);
+
+void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color);
+
+extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
+
+void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius);
+
+void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *source);
+
+void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source);
+
+EffPCPBlockSetWork *effPCPAgiFireballCreate(
+    const EffPCPBlockSetParams *params, void **blocks);
+
+extern EffPCPSharedTrail *pBlinkMultiBlurBase;
+
+EffPCPSpanWork *effPCPBreathCreate(void *params, EffNodeDescriptor *handleParams);
+
+void dds3EffectPartialMultiBlurDelete(EffBlurTemplate *owner);
+
+extern u8 effPCP_Megidoraon01_ThunderSpherePoly_Param[];
+
+void dds3EffectSetRGBA(EffNode *node, u32 parameterWord);
+
+extern EffSpawnParams D_0031F590[];
+
+extern u8 effPCP_Megidora01_ThunderSpherePoly_Param[];
+
+extern EffSpawnParams D_0031F7B0[];
+
+EffThunderFragmentWork *effPCP_ThunderPolyCreate(EffThunderFragmentParams *parameters);
+
+/* Borrow the parameter block stored at the beginning of the owner. */
+EffThunderFragmentParams *effPCP_ThunderPolyGetParam(EffThunderFragmentWork *work);
+
+void effPCP_ThunderPolyDelete(EffThunderFragmentWork *work);
+
+void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work);
+
+void dds3EffectDraw(EffNode *node);
+
+extern EffSpawnParams effPCPZiodin03Param[];
+
+extern u8 D_0031FBB0[];
+
+extern u8 D_0031FC10[];
+
+extern EffSpawnParams effPCPZiodin04Param[];
+
+extern u8 D_0031FC70[];
+
+extern u8 D_0031FCD0[];
+
+/* Motion-record selection and lookup. */
+void mdlSingleMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex);
+
+void mdlSetColor(MdlCtx *ctx, u32 value);
+
+void mdlLink(MdlCtx *ctx, struct SdfPoolNode **surfaces);
+
+void mdlSetPosition(MdlCtx *ctx);
+
+extern void *memcpy(void *, const void *, unsigned int);
+
+extern void *memset(void *s, int c, u32 n);
+
+struct SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes);
+
+/* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
+ * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
+s32 sdfGrAllocPacketBuff(s32 size);
+
+void *sdfChipAllocDirect(s32 size);
+
+void sdfDrawTagLink(struct SdfListHead *list, u32 packetAddress);
+
+/* Load axis-angle rotation into VU0 vf28-vf31. */
+void SetRotateMatrixAxis(f32 angle, const RwV3d *axis);
+
+/* Apply the primary VU0 matrix bank vf28-vf31 to basis vectors vf24-vf27,
+ * then replace vf28-vf31 with the four transformed vectors. */
+void MultMatrixNoArg(void);
+
+void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+                              s32 (*allocatePacket)(s32));
+
+void sdf3DPrimLinkTm(SdfListHead *packetList,
+                           s32 (*allocatePacket)(s32));
+
+u32 sdfModelGetMarkPosCount(const struct SdfModel *model);
+
+struct SdfAsset *sdfMatNew(void);
+
+f32 sdfCos(f32 angle);
+
+void sdfDrawTagInit(struct SdfListHead *list);
+
+extern s32 sdfModelGetMarkPos(SdfModel *model, s32 value);
+
+/* Set vf28-vf31 to vf28-vf31 * vf24-vf27 in place. */
+void MultMatrixRevNoArg(void);
+
+void sdfChipFreeDirect(void *memory);
+
+void sdfMemFreeDirect(struct SdfMemBlock *allocation);
+
+u32 sdfMemLock(struct SdfMemBlock *allocation);
+
+void sdfMatSetConstant(struct SdfAsset *asset, f32 value);
+
+f32 sdfSin(f32 angle);
+
+extern u8 aViewTarget[];
+
+extern u8 aViewEye[];
+
+extern u8 aViewDown[];
+
+/* Read vector inputs; VU0 forms first minus second and stores second in vf31. */
+void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
+
+/* Load the X-axis rotation matrix into the primary VU0 matrix registers. */
+void SetRotateMatrixX(f32 angle);
+
+/* Load a Y-axis rotation matrix into the primary VU0 matrix registers. */
+void SetRotateMatrixZ(f32 angle);
+
+extern void SetRotateMatrixY(f32 scale);
+
+extern void SetRotateMatrixX_B(f32 angle);
+
+extern void SetRotateMatrixZ_B(f32 angle);
+
+static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count) {
+    u128 saved[2];
+    u8 *obj;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        obj = (u8 *)effPCP_ThunderPolyGetParam(work->handles[i]);
+        VU0_LOAD_VF($vf10, obj + 0x10);
+        VU0_STORE_VF($vf10, &saved[1]);
+        VU0_LOAD_VF($vf11, work);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF($vf10, obj + 0x10);
+        VU0_LOAD_VF($vf10, obj);
+        VU0_STORE_VF($vf10, &saved[0]);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF($vf10, obj);
+        effPCP_ThunderPolyDraw(work->handles[i]);
+        PCP_COPY_VECTOR(obj, &saved[0]);
+        PCP_COPY_VECTOR(obj + 0x10, &saved[1]);
+    }
+}
+
+EffBillboardSetWork *effPCPSparkleSphereCreate(EffBillboardSetParams *params) {
+    EffBillboardSetWork *billboard = (EffBillboardSetWork *)sdfChipAllocDirect(sizeof(EffBillboardSetWork));
+
+    billboard->mode = params->mode;
+    billboard->handle = dds3BillboardGeneral(2);
+    dds3BillboardSetMode(billboard->handle, 2);
+    billboard->color = 0x80808080;
+    billboard->scale = 100.0f;
+    return billboard;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereDraw);
+void effPCPSparkleSphereDraw(EffPCPRingWork *work) {
+    f32 pos[4];
+    f32 dir[4];
+    f32 size[4];
+    BillObj *handle;
+    f32 scale;
+    u32 color;
+    s32 i;
+
+    VU0_LOAD_VF($vf10, aViewEye);
+    VU0_LOAD_VF($vf11, aViewTarget);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF($vf10, dir);
+    handle = work->handle;
+    size[0] = work->scale;
+    size[1] = work->scale;
+    size[2] = work->scale;
+    VU0_LOAD_VF($vf10, size);
+    VU0_LOAD_VF($vf11, dir);
+    VU0_MUL(vf10, vf10, vf11);
+    VU0_LOAD_VF($vf11, work);
+    VU0_ADD(vf10, vf10, vf11);
+    VU0_STORE_VF($vf10, pos);
+    dds3BillboardSetPosition(handle, pos);
+    scale = work->scale;
+    color = 0x10808080;
+    for (i = 0; i < 10; i++) {
+        dds3BillboardSetScale(handle, scale, scale);
+        scale *= 0.975f;
+        dds3BillboardSetRGBA(handle, effMagaCylinderCalcColor(effMagaCylinderCalcColor(color, work->color14), work->color10));
+        color += 0x05000000;
+        dds3BillboardDraw(handle);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereSetPosition);
 
@@ -12,15 +2733,118 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSparkleSphereSetArea);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01PartInit);
+void effPCPHama01PartInit(EffPCPTwinWork *work, s32 slotIndex) {
+    u128 mtx[4];
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01Create);
+    SetRotateMatrixY((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 6.283185f);
+    VU0_STORE_MATRIX_NOCLOBBER(mtx);
+    dds3EffectPartSetRotateMatrix(work->pair[slotIndex][0], mtx);
+    dds3EffectPartSetRotateMatrix(work->pair[slotIndex][1], mtx);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][0]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->pair[slotIndex][1]), 0, 0);
+    work->counter[slotIndex] = dds3GetRandA((EffRandState *)dds3EffectBase) % 10;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01Delete);
+EffPCPTwinWork *effPCPHama01Create(void *src) {
+    EffPCPTwinWork *work = sdfChipAllocDirect(sizeof(EffPCPTwinWork));
+    s32 slotIndex;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01Copy);
+    for (slotIndex = 0; slotIndex < 8; slotIndex++) {
+        if (slotIndex == 0) {
+            work->pair[0][0] = dds3EffectPCPDataPartCreate(src, 0);
+            work->pair[0][1] = dds3EffectPCPDataPartCreate(src, 2);
+        } else if (slotIndex == 1) {
+            work->pair[1][0] = dds3EffectPCPDataPartCreate(src, 1);
+            work->pair[1][1] = dds3EffectPartCopy(work->pair[0][1]);
+        } else {
+            work->pair[slotIndex][0] = dds3EffectPartCopy(work->pair[slotIndex & 1][0]);
+            work->pair[slotIndex][1] = dds3EffectPartCopy(work->pair[slotIndex & 1][1]);
+        }
+        effPCPHama01PartInit(work, slotIndex);
+    }
+    work->shared[0] = dds3EffectPCPDataPartCreate(src, 3);
+    work->state[0] = 0;
+    for (slotIndex = 1; slotIndex < 8; slotIndex++) {
+        work->shared[slotIndex] = dds3EffectPartCopy(work->shared[0]);
+        work->state[slotIndex] = 0;
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    work->frame = 0;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01Draw);
+void effPCPHama01Delete(EffPCPTwinWork *work) {
+    s32 pairIndex;
+    EffParamWork **pairHandleCursor;
+    EffParamWork **sharedHandleCursor;
+
+    pairHandleCursor = &work->pair[0][0];
+    sharedHandleCursor = work->shared;
+    for (pairIndex = 7; pairIndex >= 0; pairIndex--) {
+        dds3EffectPartDelete(*sharedHandleCursor);
+        sharedHandleCursor++;
+        dds3EffectPartDelete(pairHandleCursor[1]);
+        dds3EffectPartDelete(pairHandleCursor[0]);
+        pairHandleCursor += 2;
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffPCPTwinWork *effPCPHama01Copy(EffPCPTwinWork *src) {
+    EffPCPTwinWork *work = sdfChipAllocDirect(sizeof(EffPCPTwinWork));
+    s32 slotIndex;
+
+    for (slotIndex = 0; slotIndex < 8; slotIndex++) {
+        work->pair[slotIndex][0] = dds3EffectPartCopy(src->pair[slotIndex & 1][0]);
+        work->pair[slotIndex][1] = dds3EffectPartCopy(src->pair[slotIndex & 1][1]);
+        work->shared[slotIndex] = dds3EffectPartCopy(src->shared[0]);
+        work->state[slotIndex] = 0;
+        effPCPHama01PartInit(work, slotIndex);
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    work->frame = 0;
+    return work;
+}
+
+void effPCPHama01Draw(EffPCPTwinWork *work) {
+    MdlCtx *obj[2];
+    u128 pos;
+    u128 *posp;
+    s32 slotIndex;
+
+    for (slotIndex = 0; slotIndex < 8; slotIndex++) {
+        if (work->counter[slotIndex] != 0) {
+            work->counter[slotIndex]--;
+            continue;
+        }
+        obj[0] = dds3EffectPartGetHandle(work->pair[slotIndex][0]);
+        obj[1] = dds3EffectPartGetHandle(work->pair[slotIndex][1]);
+        VU0_LOAD_VF(vf10, work);
+        mdlSetPosition(obj[0]);
+        dds3EffectPartSetScale(work->pair[slotIndex][0], work->scale * 1.5f);
+        dds3EffectPartSetScale(work->pair[slotIndex][1], 1.75f);
+        mdlSetColor(obj[1], work->color);
+        mdlLink(obj[0], D_002F69B8);
+        sdfModelGetMarkPos(obj[0]->inner, 1);
+        posp = &pos;
+        VU0_STORE_VF_UNCLOBBERED(vf10, posp);
+        mdlSetPosition(obj[1]);
+        mdlLink(obj[1], D_002F69B8);
+        if (work->frame > 0x18) {
+            dds3EffectPartSetPosition(work->shared[slotIndex], posp);
+            dds3EffectPartDraw(work->shared[slotIndex]);
+        }
+    }
+    work->frame++;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01SetPosition);
 
@@ -28,15 +2852,101 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02PartInit);
+void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
+    u128 mtx[4];
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02Create);
+    SetRotateMatrixY((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 6.283185f);
+    VU0_STORE_MATRIX_NOCLOBBER(mtx);
+    dds3EffectPartSetRotateMatrix(work->handle[index * 2], mtx);
+    dds3EffectPartSetRotateMatrix(work->handle[index * 2 + 1], mtx);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2 + 1]), 0, 0);
+    work->verticalOffset[index] = dds3GetRandFloatA(dds3EffectBase) * 150.0f;
+    work->remainingDelay[index] = dds3GetRandA((EffRandState *)dds3EffectBase) % 10;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02Delete);
+EffPCPStaggered *effPCPHama02Create(void *args) {
+    EffPCPStaggered *work = sdfChipAllocDirect(sizeof(EffPCPStaggered));
+    EffParamWork **handle = &work->handle[1];
+    s32 i = 0;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02Copy);
+    do {
+        if (i == 0) {
+            work->handle[0] = dds3EffectPCPDataPartCreate(args, 0);
+            work->handle[1] = dds3EffectPCPDataPartCreate(args, 1);
+        } else {
+            handle[-1] = dds3EffectPartCopy(work->handle[0]);
+            handle[0] = dds3EffectPartCopy(work->handle[1]);
+        }
+        handle += 2;
+        effPCPHama02PartInit(work, i++);
+    } while (i < 8);
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->position[0] = 0;
+    work->position[1] = 0;
+    work->position[2] = 0;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02Draw);
+void effPCPHama02Delete(EffPCPStaggered *work) {
+    EffParamWork **handle = &work->handle[1];
+    s32 i;
+
+    for (i = 7; i >= 0; i--) {
+        dds3EffectPartDelete(handle[-1]);
+        dds3EffectPartDelete(handle[0]);
+        handle += 2;
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffPCPStaggered *effPCPHama02Copy(EffPCPStaggered *source) {
+    EffPCPStaggered *work = sdfChipAllocDirect(sizeof(EffPCPStaggered));
+    EffParamWork **handle = &work->handle[1];
+    s32 i = 0;
+
+    do {
+        handle[-1] = dds3EffectPartCopy(source->handle[0]);
+        handle[0] = dds3EffectPartCopy(source->handle[1]);
+        handle += 2;
+        effPCPHama02PartInit(work, i);
+        i++;
+    } while (i < 8);
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->position[0] = 0;
+    work->position[1] = 0;
+    work->position[2] = 0;
+    return work;
+}
+
+void effPCPHama02Draw(EffPCPStaggered *work) {
+    MdlCtx *obj[2];
+    f32 pos[4];
+    s32 i;
+
+    for (i = 0; i < 8; i++) {
+        if (work->remainingDelay[i] != 0) {
+            work->remainingDelay[i]--;
+        } else {
+            obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
+            obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
+            pos[0] = work->position[0];
+            pos[2] = work->position[2];
+            pos[1] = (work->position[1] - work->verticalOffset[i] + 100.0f) * work->scale;
+            VU0_LOAD_VF(vf10, pos);
+            mdlSetPosition(obj[0]);
+            dds3EffectPartSetScale(work->handle[i * 2], work->scale * 1.5f);
+            dds3EffectPartSetScale(work->handle[i * 2 + 1], 1.5f);
+            mdlSetColor(obj[1], work->color);
+            mdlLink(obj[0], D_002F69B8);
+            sdfModelGetMarkPos(obj[0]->inner, 1);
+            mdlSetPosition(obj[1]);
+            mdlLink(obj[1], D_002F69B8);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02SetPosition);
 
@@ -44,15 +2954,114 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHama02SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonPartInit);
+void effPCPHamaonPartInit(EffPCPCrossWork *work, u32 i, u32 j) {
+    u128 mtx[4];
+    f32 angle;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonCreate);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[i][j]), 0, 0);
+    angle = (f32)j * -1.0471974f;
+    if (i == 0) {
+        SetRotateMatrixY(angle);
+    } else if (i == 1) {
+        SetRotateMatrixY(-angle);
+    } else if (i == 2) {
+        SetRotateMatrixZ(-angle);
+    } else {
+        SetRotateMatrixZ(angle);
+    }
+    VU0_STORE_MATRIX(mtx);
+    dds3EffectPartSetRotateMatrix(work->handle[i][j], mtx);
+    if ((j + 1) & 1) {
+        work->remainingDelay[i][j] = 0;
+    } else {
+        work->remainingDelay[i][j] = 5;
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonDelete);
+EffPCPCrossWork *effPCPHamaonCreate(void *src) {
+    EffPCPCrossWork *work = sdfChipAllocDirect(sizeof(EffPCPCrossWork));
+    s32 i;
+    s32 j;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonCopy);
+    work->base = dds3EffectPCPDataPartCreate(src, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->base), 0, 0);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            if (j == 0) {
+                work->handle[i][j] = dds3EffectPCPDataPartCreate(src, i + 1);
+            } else {
+                work->handle[i][j] = dds3EffectPartCopy(work->handle[i][0]);
+            }
+            effPCPHamaonPartInit(work, i, j);
+        }
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonDraw);
+void effPCPHamaonDelete(EffPCPCrossWork *work) {
+    s32 i;
+    s32 j;
+
+    dds3EffectPartDelete(work->base);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            dds3EffectPartDelete(work->handle[i][j]);
+        }
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffPCPCrossWork *effPCPHamaonCopy(EffPCPCrossWork *src) {
+    EffPCPCrossWork *work = sdfChipAllocDirect(sizeof(EffPCPCrossWork));
+    s32 i;
+    s32 j;
+
+    work->base = dds3EffectPartCopy(src->base);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->base), 0, 0);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            work->handle[i][j] = dds3EffectPartCopy(src->handle[i][0]);
+            effPCPHamaonPartInit(work, i, j);
+        }
+    }
+    work->unk00 = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    return work;
+}
+
+void effPCPHamaonDraw(EffPCPCrossWork *work) {
+    MdlCtx *anchor;
+    MdlCtx *obj;
+    s32 i;
+    s32 j;
+
+    anchor = dds3EffectPartGetHandle(work->base);
+    VU0_LOAD_VF(vf10, work);
+    mdlSetPosition(anchor);
+    dds3EffectPartSetScale(work->base, work->scale);
+    mdlLink(anchor, D_002F69B8);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            if (work->remainingDelay[i][j] != 0) {
+                work->remainingDelay[i][j]--;
+                continue;
+            }
+            obj = dds3EffectPartGetHandle(work->handle[i][j]);
+            mdlSetColor(obj, work->color);
+            sdfModelGetMarkPos(anchor->inner, i * 4 + j + 1);
+            mdlSetPosition(obj);
+            mdlLink(obj, D_002F69B8);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonSetPosition);
 
@@ -60,15 +3069,92 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonSetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHamaonSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01PartInit);
+void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index) {
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01Create);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2]), 0, 0);
+    mdlSingleMotion(dds3EffectPartGetHandle(work->handle[index * 2 + 1]), 0, index & 1);
+    work->remainingDelay[index] = dds3GetRandA((EffRandState *)dds3EffectBase) % 10;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01Delete);
+EffPCPDelayedPairs *effPCPMHanma01Create(void *source) {
+    EffPCPDelayedPairs *work = sdfChipAllocDirect(sizeof(EffPCPDelayedPairs));
+    EffParamWork **handle = &work->handle[1];
+    s32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01Copy);
+    for (i = 0; i < 6; i++) {
+        if (i == 0) {
+            work->handle[1] = dds3EffectPCPDataPartCreate(source, 6);
+        }
+        handle[-1] = dds3EffectPCPDataPartCreate(source, i);
+        handle[0] = dds3EffectPartCopy(work->handle[1]);
+        handle += 2;
+        effPCPMHanma01PartInit(work, i);
+    }
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk00 = 0;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01Draw);
+void effPCPMHanma01Delete(EffPCPDelayedPairs *work) {
+    EffParamWork **handle = &work->handle[1];
+    s32 i;
+
+    for (i = 5; i >= 0; i--) {
+        dds3EffectPartDelete(handle[-1]);
+        dds3EffectPartDelete(handle[0]);
+        handle += 2;
+    }
+    sdfChipFreeDirect(work);
+}
+
+EffPCPDelayedPairs *effPCPMHanma01Copy(EffPCPDelayedPairs *source) {
+    EffParamWork **sourceHandle;
+    EffParamWork **workHandle;
+    s32 i;
+    EffPCPDelayedPairs *work = sdfChipAllocDirect(sizeof(EffPCPDelayedPairs));
+    sourceHandle = &source->handle[1];
+    workHandle = &work->handle[1];
+
+    for (i = 0; i < 6; i++) {
+        workHandle[-1] = dds3EffectPartCopy(sourceHandle[-1]);
+        workHandle[0] = dds3EffectPartCopy(sourceHandle[0]);
+        sourceHandle += 2;
+        workHandle += 2;
+        effPCPMHanma01PartInit(work, i);
+    }
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->unk00 = 0;
+    work->unk04 = 0;
+    work->unk08 = 0;
+    return work;
+}
+
+void effPCPMHanma01Draw(EffPCPDelayedPairs *work) {
+    MdlCtx *obj[2];
+    u128 vec;
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        if (work->remainingDelay[i] != 0) {
+            work->remainingDelay[i]--;
+        } else {
+            obj[0] = dds3EffectPartGetHandle(work->handle[i * 2]);
+            obj[1] = dds3EffectPartGetHandle(work->handle[i * 2 + 1]);
+            VU0_LOAD_VF_MEMORY(vf10, work);
+            mdlSetPosition(obj[0]);
+            mdlSetColor(obj[1], work->color);
+            mdlLink(obj[0], D_002F69B8);
+            sdfModelGetMarkPos(obj[0]->inner, 1);
+            VU0_STORE_VF_UNCLOBBERED(vf10, &vec);
+            mdlSetPosition(obj[1]);
+            mdlLink(obj[1], D_002F69B8);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01SetPosition);
 
@@ -76,13 +3162,44 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMHanma01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoPartInit);
+void effPCPMudoPartInit(EffPCPChargeWork *work) {
+    work->historyCount = 0;
+    work->updateCount = 0;
+    work->baseColor = 0x80808080;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoCreate);
+EffPCPChargeWork *effPCPMudoCreate(void *source) {
+    SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
+    EffPCPChargeWork *work = (void *)sdfMemLock(resource);
+    work->allocationHandle = resource;
+    work->primaryHandle = dds3EffectPCPDataPartCreate(source, 0);
+    work->secondaryHandle = dds3EffectPCPDataPartCreate(source, 1);
+    effPCPMudoPartInit(work);
+    work->vectorWords[0] = 0;
+    work->vectorWords[1] = 0;
+    work->vectorWords[2] = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoCopy);
+EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
+    SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
+    EffPCPChargeWork *work = (void *)sdfMemLock(resource);
+    EffParamWork *firstHandle = source->primaryHandle;
+    work->allocationHandle = resource;
+    work->primaryHandle = dds3EffectPartCopy(firstHandle);
+    work->secondaryHandle = dds3EffectPartCopy(source->secondaryHandle);
+    effPCPMudoPartInit(work);
+    work->vectorWords[0] = 0;
+    work->vectorWords[1] = 0;
+    work->vectorWords[2] = 0;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoDraw);
 
@@ -92,27 +3209,138 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoSetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMudoSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01Create);
+EffPCPSpawnOnceWork *effPCPHwave01Create(void *src) {
+    EffPCPSpawnOnceWork *dst;
+    EffParamWork *handle;
+
+    dst = sdfChipAllocDirect(sizeof(EffPCPSpawnOnceWork));
+    dst->primaryHandle = dds3EffectPCPDataPartCreate(src, 0);
+    handle = dds3EffectPCPDataPartCreate(src, 1);
+    dst->vector[0] = 0;
+    dst->secondaryHandle = handle;
+    dst->vector[1] = 0;
+    dst->color = 0x80808080;
+    dst->vector[2] = 0;
+    return dst;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01Copy);
+EffPCPSpawnOnceWork *effPCPHwave01Copy(EffPCPSpawnOnceWork *src) {
+    EffPCPSpawnOnceWork *dst;
+    EffParamWork *handle;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01Draw);
+    dst = sdfChipAllocDirect(sizeof(EffPCPSpawnOnceWork));
+    dst->primaryHandle = dds3EffectPartCopy(src->primaryHandle);
+    handle = dds3EffectPartCopy(src->secondaryHandle);
+    dst->vector[0] = 0;
+    dst->secondaryHandle = handle;
+    dst->vector[1] = 0;
+    dst->color = 0x80808080;
+    dst->vector[2] = 0;
+    return dst;
+}
+
+void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
+    MdlCtx *obj;
+    u128 vec;
+
+    obj = dds3EffectPartGetHandle(work->primaryHandle);
+    VU0_LOAD_VF_MEMORY(vf10, work->vector);
+    mdlSetPosition(obj);
+    dds3EffectPartSetColor(work->secondaryHandle, work->color);
+    mdlLink(obj, D_002F69B8);
+    sdfModelGetMarkPos(obj->inner, 1);
+    VU0_STORE_VF_TO_MEMORY(vf10, vec);
+    dds3EffectPartSetPosition(work->secondaryHandle, &vec);
+    dds3EffectPartDraw(work->secondaryHandle);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01SetPosition);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHwave01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01Init);
+void effPCPZiodin01Init(EffPCPThunderGroup *group) {
+    s32 i;
+    EffThunderFragmentWork **out;
+    f32 angle = 0.0f;
+    f32 cosv = 0.0f;
+    f32 sinv = 0.0f;
+    f32 dir[4];
+    f32 scale[4];
+    f32 spread;
+    f32 radius;
+    f32 reach;
+    f32 speed;
+    s16 life;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01Create);
+    i = 0;
+    out = group->handles;
+    do {
+        if ((i & 1) == 0) {
+            sinv = sdfCos(angle);
+            cosv = sdfSin(angle);
+            angle += 60.0f * EFF_DEG2RAD;
+        }
+        spread = dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f;
+        D_0031F590->bandWidth = spread * 1.25f;
+        D_0031F590->edgeWidth = spread * 12.5f;
+        radius = (dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 100.0f;
+        D_0031F590->vel[1] = 0;
+        D_0031F590->vel[0] = sinv * radius;
+        D_0031F590->vel[2] = cosv * radius;
+        dir[0] = sinv;
+        dir[1] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f + 2.0f;
+        dir[2] = cosv;
+        VU0_LOAD_VF($vf10, dir);
+        VU0_NORMALIZE_VF10();
+        VU0_STORE_VF($vf10, dir);
+        reach = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 350.0f;
+        scale[2] = reach;
+        scale[0] = reach;
+        scale[1] = -reach;
+        VU0_LOAD_VF($vf10, dir);
+        VU0_LOAD_VF($vf11, scale);
+        VU0_MUL(vf10, vf10, vf11);
+        VU0_LOAD_VF($vf11, effPCPZiodin01Vec);
+        VU0_ADD(vf10, vf10, vf11);
+        VU0_STORE_VF($vf10, D_0031F590);
+        if (scale[0] < 250.0f) {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 5 + 5;
+        } else {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 6 + 15;
+        }
+        D_0031F590->lifetime = life;
+        D_0031F590->speed = speed;
+        *out = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031F590);
+        out++;
+        i++;
+    } while (i < 12);
+}
+
+void *effPCPZiodin01Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x4c);
+    effPCPZiodin01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01Copy);
+void *effPCPZiodin01Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01Draw);
+    work = sdfChipAllocDirect(0x4c);
+    effPCPZiodin01Init(work);
+    return work;
+}
+
+void effPCPZiodin01Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01SetPosition);
 
@@ -120,15 +3348,80 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02Init);
+void effPCPZiodin02Init(EffPCPThunderGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 radius;
+    f32 height;
+    f32 speed;
+    s32 life;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02Create);
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = sdfCos(angle);
+            cosv = sdfSin(angle);
+            angle += 60.0f * EFF_DEG2RAD;
+        }
+        spread = dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f;
+        effPCPZiodin02Param->bandWidth = spread * 1.25f;
+        effPCPZiodin02Param->edgeWidth = spread * 12.5f;
+        radius = (dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 100.0f;
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        effPCPZiodin02Param->vel[1] = 0;
+        effPCPZiodin02Param->vel[0] = sinv * radius;
+        effPCPZiodin02Param->vel[2] = cosv * radius;
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        effPCPZiodin02Param->pos[0] = 0;
+        effPCPZiodin02Param->pos[2] = 0;
+        effPCPZiodin02Param->pos[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPZiodin02Param->pos);
+                VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF($vf10, effPCPZiodin02Param->pos);
+        effPCPZiodin02Param->pos[0] += effPCPZiodin02Param->vel[0];
+        effPCPZiodin02Param->pos[2] += effPCPZiodin02Param->vel[2];
+        if (height < 300.0f) {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 5 + 5;
+        } else {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 6 + 15;
+        }
+        effPCPZiodin02Param->lifetime = life;
+        effPCPZiodin02Param->speed = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)effPCPZiodin02Param);
+        i++;
+    } while (i < 12);
+}
+
+void *effPCPZiodin02Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x4c);
+    effPCPZiodin02Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02Copy);
+void *effPCPZiodin02Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02Draw);
+    work = sdfChipAllocDirect(0x4c);
+    effPCPZiodin02Init(work);
+    return work;
+}
+
+void effPCPZiodin02Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02SetPosition);
 
@@ -136,15 +3429,78 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin02SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03Init);
+void effPCPZiodin03Init(EffPCPThunderGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 height;
+    f32 speed;
+    s16 life;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03Create);
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = sdfCos(angle);
+            cosv = sdfSin(angle);
+            angle += 24.0f * EFF_DEG2RAD;
+        }
+        spread = dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f;
+        effPCPZiodin03Param->bandWidth = spread * 1.25f;
+        effPCPZiodin03Param->edgeWidth = spread * 12.5f;
+        effPCPZiodin03Param->vel[1] = 0;
+        effPCPZiodin03Param->vel[0] = sinv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 500.0f);
+        effPCPZiodin03Param->vel[2] = cosv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 250.0f);
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        effPCPZiodin03Param->pos[0] = 0;
+        effPCPZiodin03Param->pos[2] = 0;
+        effPCPZiodin03Param->pos[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPZiodin03Param->pos);
+                VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF($vf10, effPCPZiodin03Param->pos);
+        effPCPZiodin03Param->pos[0] += effPCPZiodin03Param->vel[0];
+        effPCPZiodin03Param->pos[2] += effPCPZiodin03Param->vel[2];
+        if (height < 300.0f) {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 5 + 5;
+        } else {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 6 + 15;
+        }
+        effPCPZiodin03Param->lifetime = life;
+        effPCPZiodin03Param->speed = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)effPCPZiodin03Param);
+        i++;
+    } while (i < 30);
+}
+
+void *effPCPZiodin03Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x94);
+    effPCPZiodin03Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03Copy);
+void *effPCPZiodin03Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03Draw);
+    work = sdfChipAllocDirect(0x94);
+    effPCPZiodin03Init(work);
+    return work;
+}
+
+void effPCPZiodin03Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 30);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03SetPosition);
 
@@ -152,15 +3508,80 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin03SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04Init);
+void effPCPZiodin04Init(EffPCPThunderGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 radius;
+    f32 height;
+    f32 speed;
+    s32 life;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04Create);
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = sdfCos(angle);
+            cosv = sdfSin(angle);
+            angle += 60.0f * EFF_DEG2RAD;
+        }
+        spread = dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f;
+        effPCPZiodin04Param->bandWidth = spread * 1.25f;
+        effPCPZiodin04Param->edgeWidth = spread * 12.5f;
+        radius = (dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 100.0f;
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        effPCPZiodin04Param->vel[1] = 0;
+        effPCPZiodin04Param->vel[0] = sinv * radius;
+        effPCPZiodin04Param->vel[2] = cosv * radius;
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        effPCPZiodin04Param->pos[0] = 0;
+        effPCPZiodin04Param->pos[2] = 0;
+        effPCPZiodin04Param->pos[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPZiodin04Param->pos);
+                VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF($vf10, effPCPZiodin04Param->pos);
+        effPCPZiodin04Param->pos[0] += effPCPZiodin04Param->vel[0];
+        effPCPZiodin04Param->pos[2] += effPCPZiodin04Param->vel[2];
+        if (height < 300.0f) {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 5 + 5;
+        } else {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 6 + 15;
+        }
+        effPCPZiodin04Param->lifetime = life;
+        effPCPZiodin04Param->speed = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)effPCPZiodin04Param);
+        i++;
+    } while (i < 12);
+}
+
+void *effPCPZiodin04Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x4c);
+    effPCPZiodin04Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04Copy);
+void *effPCPZiodin04Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04Draw);
+    work = sdfChipAllocDirect(0x4c);
+    effPCPZiodin04Init(work);
+    return work;
+}
+
+void effPCPZiodin04Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04SetPosition);
 
@@ -168,15 +3589,51 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPZiodin04SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01Init);
+void effPCPMZiodin01Init(EffPCPThunderGroup *group) {
+    s32 i;
+    EffSpawnParams *params;
+    f32 angle;
+    f32 dist;
+    s32 life;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01Create);
+    for (i = 0; i < 12; i++) {
+        params = &D_0031F708[dds3GetRandA((EffRandState *)dds3EffectBase) & 1];
+        params->speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 5.0f + 20.0f;
+        life = dds3GetRandA((EffRandState *)dds3EffectBase) % 6 + 15;
+        params->pos[0] = -150.0f;
+        params->pos[1] = -500.0f;
+        params->pos[2] = 0;
+        params->lifetime = life;
+        angle = dds3GetRandFloatA(dds3EffectBase) * (3.14159265f / 2.0f) + 3.14159265f / 8.0f;
+        dist = (dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 600.0f;
+        params->vel[0] = params->pos[0] + sdfCos(angle) * dist;
+        params->vel[1] = params->pos[1] + sdfSin(angle) * dist;
+        params->vel[2] = 0;
+        group->handles[i] = effPCP_ThunderPolyCreate(params);
+    }
+}
+
+void *effPCPMZiodin01Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x4c);
+    effPCPMZiodin01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01Copy);
+void *effPCPMZiodin01Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01Draw);
+    work = sdfChipAllocDirect(0x4c);
+    effPCPMZiodin01Init(work);
+    return work;
+}
+
+void effPCPMZiodin01Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 12);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01SetPosition);
 
@@ -184,15 +3641,55 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02Init);
+void effPCPMZiodin02Init(EffPCPThunderGroup *group) {
+    s32 i;
+    EffSpawnParams *params;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02Create);
+    for (i = 0; i < 8; i++) {
+        params = &D_0031F7B0[dds3GetRandA((EffRandState *)dds3EffectBase) & 1];
+        if (i & 1) {
+            params->vel[0] = dds3GetRandFloatA(dds3EffectBase) * 500.0f;
+        } else {
+            params->vel[0] = dds3GetRandFloatA(dds3EffectBase) * -500.0f;
+        }
+        params->vel[1] = 0;
+        params->vel[2] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 250.0f;
+        params->pos[0] = 0;
+        params->pos[1] = -600.0f;
+        params->pos[2] = 0;
+        SetRotateMatrixX((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        SetRotateMatrixZ_B((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * (30.0f * EFF_DEG2RAD));
+        MultMatrixRevNoArg();
+        VU0_LOAD_VF($vf10, params->pos);
+                VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF($vf10, params->pos);
+        params->pos[0] += params->vel[0];
+        params->pos[2] += params->vel[2];
+        group->handles[i] = effPCP_ThunderPolyCreate(params);
+    }
+}
+
+void *effPCPMZiodin02Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x3c);
+    effPCPMZiodin02Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02Copy);
+void *effPCPMZiodin02Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02Draw);
+    work = sdfChipAllocDirect(0x3c);
+    effPCPMZiodin02Init(work);
+    return work;
+}
+
+void effPCPMZiodin02Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 8);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02SetPosition);
 
@@ -200,13 +3697,31 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMZiodin02SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Init);
+void effPCPShockWave01Init(EffPCPFadeWork *work) {
+    EffThunderVectorWork *handle;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Create);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_ShockWave01_ThunderSpherePoly_Param);
+    work->frame = 0;
+    work->handle = handle;
+}
+
+void *effPCPShockWave01Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPShockWave01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Copy);
+void *effPCPShockWave01Copy(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPShockWave01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01Draw);
 
@@ -216,15 +3731,78 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02Init);
+void effPCPShockWave02Init(EffPCPThunderGroup *group) {
+    s32 i;
+    f32 angle = 0.0f;
+    f32 sinv = 0.0f;
+    f32 cosv = 0.0f;
+    f32 axis[4];
+    f32 spread;
+    f32 height;
+    f32 speed;
+    s16 life;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02Create);
+    i = 0;
+    do {
+        if ((i & 1) == 0) {
+            sinv = sdfCos(angle);
+            cosv = sdfSin(angle);
+            angle += 24.0f * EFF_DEG2RAD;
+        }
+        spread = dds3GetRandFloatA(dds3EffectBase) * 0.5f + 0.5f;
+        effPCPShockWave02Param->bandWidth = spread * 1.25f;
+        effPCPShockWave02Param->edgeWidth = spread * 12.5f;
+        effPCPShockWave02Param->vel[1] = 0;
+        effPCPShockWave02Param->vel[0] = sinv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 500.0f);
+        effPCPShockWave02Param->vel[2] = cosv * ((dds3GetRandFloatA(dds3EffectBase) * 0.25f + 0.75f) * 250.0f);
+        axis[0] = cosv;
+        axis[1] = 0;
+        axis[2] = -sinv;
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
+        effPCPShockWave02Param->pos[0] = 0;
+        effPCPShockWave02Param->pos[2] = 0;
+        effPCPShockWave02Param->pos[1] = -height;
+        VU0_LOAD_VF($vf10, effPCPShockWave02Param->pos);
+                VU0_ROTATE_VEC(vf10, vf10);
+        VU0_STORE_VF($vf10, effPCPShockWave02Param->pos);
+        effPCPShockWave02Param->pos[0] += effPCPShockWave02Param->vel[0];
+        effPCPShockWave02Param->pos[2] += effPCPShockWave02Param->vel[2];
+        if (height < 300.0f) {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 2.5f + 5.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 5 + 5;
+        } else {
+            speed = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 5.0f + 10.0f;
+            life = dds3GetRandA((EffRandState *)dds3EffectBase) % 6 + 15;
+        }
+        effPCPShockWave02Param->lifetime = life;
+        effPCPShockWave02Param->speed = speed;
+        group->handles[i] = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)effPCPShockWave02Param);
+        i++;
+    } while (i < 30);
+}
+
+void *effPCPShockWave02Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x94);
+    effPCPShockWave02Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02Copy);
+void *effPCPShockWave02Copy(void) {
+    void *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02Draw);
+    work = sdfChipAllocDirect(0x94);
+    effPCPShockWave02Init(work);
+    return work;
+}
+
+void effPCPShockWave02Draw(EffPCPThunderGroup *work) {
+    effPcpShiftThunderHandles(work, 30);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02SetPosition);
 
@@ -232,13 +3810,31 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPShockWave02SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Init);
+void effPCPHouden01Init(EffPCPFadeWork *work) {
+    EffThunderVectorWork *handle;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Create);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_Houden01_ThunderSpherePoly_Param);
+    work->frame = 0;
+    work->handle = handle;
+}
+
+void *effPCPHouden01Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPHouden01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Copy);
+void *effPCPHouden01Copy(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPHouden01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01Draw);
 
@@ -248,9 +3844,40 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHouden01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurCreate);
+EffPCPSharedTrailRef *effPCPBlinkMultiBlurCreate(EffPCPTrailParams *params) {
+    EffPCPSharedTrailRef *ref = sdfChipAllocDirect(sizeof(*ref));
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurDelete);
+    ref->frame = 0;
+    if (BlinkMultiBlurCount == 0) {
+        pBlinkMultiBlurBase = sdfChipAllocDirect(sizeof(EffPCPSharedTrail));
+        pBlinkMultiBlurBase->obj = dds3EffectPartialMultiBlurCreate(&params->res);
+        pBlinkMultiBlurBase->color = params->res.source.color;
+        pBlinkMultiBlurBase->frame = 0;
+        pBlinkMultiBlurBase->flags = 0x80808080;
+        pBlinkMultiBlurBase->pos[0] = 0;
+        pBlinkMultiBlurBase->pos[1] = 0;
+        pBlinkMultiBlurBase->pos[2] = 0;
+        pBlinkMultiBlurBase->sizeInput = 0;
+        pBlinkMultiBlurBase->limit = params->count;
+        pBlinkMultiBlurBase->baseLimit = params->count;
+        pBlinkMultiBlurBase->colors[0] = params->colors[0];
+        pBlinkMultiBlurBase->colors[1] = params->colors[1];
+        pBlinkMultiBlurBase->scale = params->scale;
+        pBlinkMultiBlurBase->minSize = params->minSize;
+    }
+    BlinkMultiBlurCount++;
+    return ref;
+}
+
+void effPCPBlinkMultiBlurDelete(EffPCPSharedTrailRef *work)
+{
+    sdfChipFreeDirect(work);
+    if (--BlinkMultiBlurCount != 0) {
+        return;
+    }
+    dds3EffectPartialMultiBlurDelete(pBlinkMultiBlurBase->obj);
+    sdfChipFreeDirect(pBlinkMultiBlurBase);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurDraw);
 
@@ -260,11 +3887,49 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlinkMultiBlurSetArea);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpCreate);
+EffPCPTrailWork *effPCPMultiBlurExpCreate(EffPCPTrailParams *params) {
+    EffPCPTrailWork *work = sdfChipAllocDirect(sizeof(EffPCPTrailWork));
+
+    work->obj = dds3EffectPartialMultiBlurCreate(&params->res);
+    work->color = params->res.source.color;
+    work->frame = 0;
+    work->flags = 0x80808080;
+    work->pos[0] = 0.0f;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
+    work->sizeInput = 0.0f;
+    work->count = params->count;
+    work->colors[0] = params->colors[0];
+    work->colors[1] = params->colors[1];
+    work->scale = params->scale;
+    work->minSize = params->minSize;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpDraw);
+void effPCPMultiBlurExpDraw(EffPCPTrailWork *work) {
+    EffBlurTemplate *obj;
+    f32 pos[4];
+
+    obj = work->obj;
+    VU0_LOAD_VF($vf10, work->pos);
+    obj->body.extent = (s32)((f32)effPCPBlurScreenOffset(work->sizeInput) * work->scale);
+    VU0_STORE_VF($vf10, pos);
+    obj->body.source.position[0] = (s32)pos[0] - 0x800;
+    obj->body.source.position[1] = ((s32)pos[1] - 0x800) << 1;
+    if (obj->body.extent < work->minSize) {
+        obj->body.extent = work->minSize;
+    }
+    if (work->frame < work->count) {
+        work->color = work->colors[work->frame & 1];
+    } else {
+        work->color = work->colors[0];
+    }
+    work->frame++;
+    obj->body.source.color = effMagaCylinderCalcColor(work->flags, work->color);
+    dds3EffectPartialMultiBlurDraw(obj);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpSetPosition);
 
@@ -272,11 +3937,37 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExpSetArea);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpCreate);
+EffPCPCompactFadeWork *effPCPMultiFilterExpCreate(EffPCPCompactRectParams *params) {
+    EffPCPCompactFadeWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPCompactFadeWork));
+    work->resource.rectangle = dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)&params->res);
+    work->frame = 0;
+    work->color = 0x80808080;
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->baseColor = params->res.color;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpCreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpCopy);
+void effPCPMultiFilterExpCopy(EffPCPCompactFadeWork *work) {
+    EffPCPCompactRectParams params;
+
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
+    effPCPMultiFilterExpCreate(&params);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpDelete);
 
@@ -288,11 +3979,37 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiFilterExpSetArea);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2Create);
+EffPCPCompactFadeWork *effPCPMultiBlurExp2Create(EffPCPCompactTexturedBlurParams *params) {
+    EffPCPCompactFadeWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPCompactFadeWork));
+    work->resource.blur = dds3EffectPartialMultiBlurCreate(&params->res);
+    work->frame = 0;
+    work->color = 0x80808080;
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->baseColor = params->res.source.color;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2CreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2Copy);
+void effPCPMultiBlurExp2Copy(EffPCPCompactFadeWork *work) {
+    EffPCPCompactTexturedBlurParams params;
+
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = work->resource.blur->body;
+    effPCPMultiBlurExp2Create(&params);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMultiBlurExp2Delete);
 
@@ -328,11 +4045,37 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpDraw);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBlurExpSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpCreate);
+EffPCPCompactWork *effPCPDistortionBlurExpCreate(EffPCPCompactScatterParams *params) {
+    EffPCPCompactWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPCompactWork));
+    work->resource.scatter = dds3EffectDistortionBlurCreate(&params->res);
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->baseColor = params->res.color;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpCreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpCopy);
+void effPCPDistortionBlurExpCopy(EffPCPCompactWork *work) {
+    EffPCPCompactScatterParams params;
+
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = work->resource.scatter->params;
+    effPCPDistortionBlurExpCreate(&params);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpDelete);
 
@@ -342,11 +4085,37 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpSetPosition);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPDistortionBlurExpSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpCreate);
+EffPCPCompactWork *effPCPRippleBlurExpCreate(EffPCPCompactScaleParams *params) {
+    EffPCPCompactWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPCompactWork));
+    work->resource.scale = dds3EffectRippleBlurCreate(&params->res);
+    work->flags = params->timeline.flags;
+    work->duration = params->timeline.duration;
+    work->fadeIn = params->timeline.fadeIn;
+    work->fadeOut = params->timeline.fadeOut;
+    work->startExtent = params->timeline.startExtent;
+    work->endExtent = params->timeline.endExtent;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->baseColor = params->res.color;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpCreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpCopy);
+void effPCPRippleBlurExpCopy(EffPCPCompactWork *work) {
+    EffPCPCompactScaleParams params;
+
+    params.timeline.flags = work->flags;
+    params.timeline.duration = work->duration;
+    params.timeline.fadeIn = work->fadeIn;
+    params.timeline.fadeOut = work->fadeOut;
+    params.timeline.startExtent = work->startExtent;
+    params.timeline.endExtent = work->endExtent;
+    params.res = work->resource.scale->params;
+    effPCPRippleBlurExpCreate(&params);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpDelete);
 
@@ -356,13 +4125,31 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpSetPosition);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRippleBlurExpSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Init);
+void effPCPMegidora01Init(EffPCPFadeWork *work) {
+    EffThunderVectorWork *handle;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Create);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_Megidora01_ThunderSpherePoly_Param);
+    work->frame = 0;
+    work->handle = handle;
+}
+
+void *effPCPMegidora01Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPMegidora01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Copy);
+void *effPCPMegidora01Copy(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPMegidora01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01Draw);
 
@@ -372,13 +4159,31 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01SetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidora01SetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Init);
+void effPCPMegidoraon01Init(EffPCPFadeWork *work) {
+    EffThunderVectorWork *handle;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Create);
+    handle = effPCPThunderSpherePolyCreate((EffThunderAlphaParams *)effPCP_Megidoraon01_ThunderSpherePoly_Param);
+    work->frame = 0;
+    work->handle = handle;
+}
+
+void *effPCPMegidoraon01Create(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPMegidoraon01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Delete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Copy);
+void *effPCPMegidoraon01Copy(void) {
+    void *work;
+
+    work = sdfChipAllocDirect(0x20);
+    effPCPMegidoraon01Init(work);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMegidoraon01Draw);
 
@@ -392,7 +4197,15 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathCreate);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathCreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathCopy);
+EffPCPSpanWork *effPCPBreathCopy(EffPCPSpanWork *work) {
+    EffPCPSpanWork *child;
+
+    child = effPCPBreathCreate(&work->params, NULL);
+    if (work->optionalHandle != NULL) {
+        child->optionalHandle = dds3EffectCopy(work->optionalHandle);
+    }
+    return child;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathDelete);
 
@@ -406,13 +4219,74 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathSetRotateMatrix);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireCreatePCF);
+void effPCPAgiraoFireCreatePCF(void *data) {
+    EffPCPTripleParams *params;
+    EffNodeDescriptor *descriptors[7];
+    EffNodeDescriptor **dst;
+    u32 i;
+
+    params = dds3EffectPCPDataGetData(data, 0);
+    dst = descriptors;
+    i = 0;
+    do {
+        i++;
+        *dst = dds3EffectPCPDataGetData(data, i);
+        dst++;
+    } while (i < 7);
+    effPCPAgiraoFireCreate(params, descriptors);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireDelete);
+void effPCPAgiraoFireDelete(EffPCPTripleWork *work) {
+    struct EffNode **handleCursor;
+    u32 slotIndex;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireDraw);
+    handleCursor = work->handles;
+    for (slotIndex = 0; slotIndex < 7; slotIndex++) {
+        dds3EffectDelete(handleCursor[14]);
+        dds3EffectDelete(handleCursor[7]);
+        dds3EffectDelete(handleCursor[0]);
+        handleCursor++;
+    }
+    sdfChipFreeDirect(work);
+}
+
+/* vu0 routine: place three staggered groups in the camera-relative basis. */
+void effPCPAgiraoFireDraw(EffPCPTripleWork *work) {
+    f32 position[4] __attribute__((aligned(16)));
+    f32 basis[4][4] __attribute__((aligned(16)));
+    s32 frame = work->frame;
+    u32 color = work->color;
+    u32 group;
+    u32 handleIndex;
+
+    LookAtMatrix(aViewTarget, aViewEye, aViewDown);
+    VU0_STORE_MATRIX(basis);
+    for (group = 0; group < 3; group++) {
+        s32 start = work->head.groupStartFrame[group];
+        if (frame >= start) {
+            VU0_LOAD_VF(vf11, work->head.origin);
+            VU0_LOAD_MATRIX(basis);
+            position[0] = work->head.offset[group][0];
+            position[1] = work->head.offset[group][1];
+            position[2] = 0;
+            VU0_LOAD_VF_MEMORY(vf10, position);
+            VU0_CLEAR_W(vf10);
+            VU0_APPLY_MATRIX(vf10, vf10);
+            VU0_ADD(vf10, vf10, vf11);
+            VU0_STORE_VF(vf10, position);
+            for (handleIndex = 0; handleIndex < 7; handleIndex++) {
+                if (frame >= (s32)((u32)work->head.handleDelay[handleIndex] + (u32)start)) {
+                    dds3EffectSetRGBA((struct EffNode *)work->handles[group * 7 + handleIndex], color);
+                    dds3EffectSetPosition((struct EffNode *)work->handles[group * 7 + handleIndex], position);
+                    dds3EffectDraw((struct EffNode *)work->handles[group * 7 + handleIndex]);
+                }
+            }
+        }
+    }
+    work->frame = (s32)((u32)work->frame + 1);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireSetPosition);
 
@@ -420,13 +4294,58 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiraoFireSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreate);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreatePCF);
+EffPCPBlockSetWork *effPCPAgiFireballCreatePCF(void *parameterTable) {
+    EffPCPBlockSet set;
+    EffPCPBlockSetParams *first;
+    u32 i;
+
+    first = dds3EffectPCPDataGetData(parameterTable, 0);
+    set.block1 = dds3EffectPCPDataGetData(parameterTable, 1);
+    for (i = 0; i < 5; i++) {
+        set.group[i] = dds3EffectPCPDataGetData(parameterTable, 2 + i);
+    }
+    set.block7 = dds3EffectPCPDataGetData(parameterTable, 7);
+    set.block8 = dds3EffectPCPDataGetData(parameterTable, 8);
+    set.block9 = dds3EffectPCPDataGetData(parameterTable, 9);
+    for (i = 0; i < 5; i++) {
+        set.tail[i] = dds3EffectPCPDataGetData(parameterTable, 10 + i);
+    }
+    set.block15 = dds3EffectPCPDataGetData(parameterTable, 15);
+    return effPCPAgiFireballCreate(first, &set);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCopySub);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballDelete);
+void effPCPAgiFireballDelete(EffPCPBlockSetWork *work) {
+    u32 groupIndex;
+    u32 handleIndex;
+    u32 groupHandleCount;
+
+    if (work->source == NULL) {
+        dds3EffectPartDelete(work->headHandle);
+        for (handleIndex = 0; handleIndex < 5; handleIndex++) {
+            dds3EffectPartDelete(work->handleA[handleIndex]);
+        }
+        for (groupIndex = 0; groupIndex < 3; groupIndex++) {
+            if (work->alloc[groupIndex] != 0) {
+                groupHandleCount = work->count * work->params.groupSize[groupIndex];
+                for (handleIndex = 0; handleIndex < groupHandleCount; handleIndex++) {
+                    if (work->list[groupIndex][handleIndex] != 0) {
+                        dds3EffectPartDelete(work->list[groupIndex][handleIndex]);
+                    }
+                }
+                sdfMemFreeDirect(work->alloc[groupIndex]);
+            }
+        }
+        for (handleIndex = 0; handleIndex < 5; handleIndex++) {
+            dds3EffectPartDelete(work->handleB[handleIndex]);
+        }
+        dds3EffectPartDelete(work->tailHandle);
+    }
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballDraw);
 
@@ -436,13 +4355,49 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSetRotateMatrix);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSpCreatePCF);
+EffPCPBlockSetWork *effPCPAgiFireballSpCreatePCF(void *parameterTable) {
+    EffPCPBlockSetWork *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSpCopy);
+    work = effPCPAgiFireballCreatePCF(parameterTable);
+    work->mode = 1;
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSp2CreatePCF);
+EffPCPBlockSetWork *effPCPAgiFireballSpCopy(EffPCPBlockSetWork *src) {
+    EffPCPBlockSetWork *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballSp2Copy);
+    work = sdfChipAllocDirect(sizeof(EffPCPBlockSetWork));
+    memset(work, 0, 0x10C);
+    work->params = src->params;
+    work->color = 0x80808080;
+    work->mode = 1;
+    work->frame = 0;
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->source = src;
+    return work;
+}
+
+EffPCPBlockSetWork *effPCPAgiFireballSp2CreatePCF(void *parameterTable) {
+    EffPCPBlockSetWork *work;
+
+    work = effPCPAgiFireballCreatePCF(parameterTable);
+    work->mode = 2;
+    return work;
+}
+
+EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *src) {
+    EffPCPBlockSetWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBlockSetWork));
+    memset(work, 0, 0x10C);
+    work->params = src->params;
+    work->color = 0x80808080;
+    work->mode = 2;
+    work->frame = 0;
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->source = src;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2Create);
 
@@ -450,23 +4405,110 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2CreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2Copy);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2Delete);
+void effPCPAgiFireball2Delete(EffPCPRotateWork *work) {
+    u32 i;
+    EffPCPBlockSetWork **blockSets;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2Draw);
+    blockSets = work->blockSets;
+    for (i = 0; i < 3; i++) {
+        effPCPAgiFireballDelete(blockSets[i]);
+    }
+    sdfChipFreeDirect(work);
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2SetPosition);
+void effPCPAgiFireball2Draw(EffPCPRotateWork *work) {
+    s32 frame;
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2SetColor);
+    i = 0;
+    frame = work->frame;
+    do {
+        if (work->params.startFrame[i] <= frame) {
+            effPCPAgiFireballDraw(work->blockSets[i]);
+            frame = work->frame;
+        }
+        i = i + 1;
+    } while (i < 3);
+    work->frame = frame + 1;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireball2SetRotateMatrix);
+void effPCPAgiFireball2SetPosition(EffPCPRotateWork *work, const void *src) {
+    u32 i;
+    EffPCPBlockSetWork **blockSets;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceCreate);
+    blockSets = work->blockSets;
+    for (i = 0; i < 3; i++) {
+        effPCPAgiFireballSetPosition(blockSets[i], src);
+    }
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceCopy);
+void effPCPAgiFireball2SetColor(EffPCPRotateWork *work, u32 val) {
+    u32 i;
+    EffPCPBlockSetWork **blockSets;
+
+    blockSets = work->blockSets;
+    for (i = 0; i < 3; i++) {
+        effPCPAgiFireballSetColor(blockSets[i], val);
+    }
+}
+
+void effPCPAgiFireball2SetRotateMatrix(EffPCPRotateWork *work, const void *src) {
+    u32 i;
+    EffPCPBlockSetWork **blockSets;
+
+    blockSets = work->blockSets;
+    for (i = 0; i < 3; i++) {
+        effPCPAgiFireballSetRotateMatrix(blockSets[i], src);
+    }
+}
+
+EffPCPSpinWork *effPCPBufuIceCreate(void *src) {
+    EffPCPSpinWork *work = sdfChipAllocDirect(0x64);
+
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = dds3EffectPCPDataPartCreate(src, 0);
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->angle = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f;
+    if (dds3GetRandA((EffRandState *)dds3EffectBase) & 1) {
+        work->angle += 3.14159265f;
+    }
+    return work;
+}
+
+EffPCPSpinWork *effPCPBufuIceCopy(EffPCPSpinWork *src) {
+    EffPCPSpinWork *work = sdfChipAllocDirect(0x64);
+
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->angle = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f;
+    if (dds3GetRandA((EffRandState *)dds3EffectBase) & 1) {
+        work->angle += 3.14159265f;
+    }
+    work->handle0 = dds3EffectPartCopy(src->handle0);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceDraw);
+void effPCPBufuIceDraw(EffPCPSpinWork *work) {
+    EffParamWork *handle = work->handle0;
+    u128 mtx[4];
+
+    dds3EffectPartSetPosition(handle, work);
+    dds3EffectPartSetScale(handle, work->scale);
+    dds3EffectPartSetColor(handle, work->color);
+    SetRotateMatrixY(work->angle);
+    VU0_LOAD_MATRIX_B(work->matrix);
+    MultMatrixNoArg();
+    VU0_STORE_MATRIX(mtx);
+    dds3EffectPartSetRotateMatrix(handle, mtx);
+    dds3EffectPartDraw(handle);
+    work->frame++;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetPosition);
 
@@ -476,13 +4518,58 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuIceSetRotateMatrix);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceCreate);
+EffPCPSpinWork *effPCPBufuraIceCreate(void *src) {
+    EffPCPSpinWork *work = sdfChipAllocDirect(0x68);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceCopy);
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = dds3EffectPCPDataPartCreate(src, 0);
+    work->handle1 = dds3EffectPCPDataPartCreate(src, 1);
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->angle = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f;
+    return work;
+}
+
+EffPCPSpinWork *effPCPBufuraIceCopy(EffPCPSpinWork *src) {
+    EffPCPSpinWork *work = sdfChipAllocDirect(0x68);
+
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = dds3EffectPartCopy(src->handle0);
+    work->handle1 = dds3EffectPartCopy(src->handle1);
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->angle = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceDraw);
+void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
+    EffParamWork *handle[2];
+    u128 mtx[4];
+
+    handle[0] = work->handle0;
+    handle[1] = work->handle1;
+    dds3EffectPartSetPosition(handle[0], work);
+    dds3EffectPartSetPosition(handle[1], work);
+    dds3EffectPartSetScale(handle[0], work->scale);
+    dds3EffectPartSetScale(handle[1], work->scale);
+    dds3EffectPartSetColor(handle[0], work->color);
+    dds3EffectPartSetColor(handle[1], work->color);
+    SetRotateMatrixY(work->angle);
+    VU0_LOAD_MATRIX_B(work->matrix);
+    MultMatrixNoArg();
+    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    dds3EffectPartSetRotateMatrix(handle[0], mtx);
+    dds3EffectPartSetRotateMatrix(handle[1], mtx);
+    dds3EffectPartDraw(handle[0]);
+    if (work->frame >= 0x1F) {
+        dds3EffectPartDraw(handle[1]);
+    }
+    work->frame++;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetPosition);
 
@@ -492,13 +4579,58 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuraIceSetRotateMatrix);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceCreate);
+EffPCPSpinWork *effPCPBufudnIceCreate(void *src) {
+    EffPCPSpinWork *work = sdfChipAllocDirect(0x68);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceCopy);
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = dds3EffectPCPDataPartCreate(src, 0);
+    work->handle1 = dds3EffectPCPDataPartCreate(src, 1);
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->angle = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f;
+    return work;
+}
+
+EffPCPSpinWork *effPCPBufudnIceCopy(EffPCPSpinWork *src) {
+    EffPCPSpinWork *work = sdfChipAllocDirect(0x68);
+
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->handle0 = dds3EffectPartCopy(src->handle0);
+    work->handle1 = dds3EffectPartCopy(src->handle1);
+    EE_MMI_UNIT_MATRIX(work->matrix);
+    work->angle = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceDraw);
+void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
+    EffParamWork *handle[2];
+    u128 mtx[4];
+
+    handle[0] = work->handle0;
+    handle[1] = work->handle1;
+    dds3EffectPartSetPosition(handle[0], work);
+    dds3EffectPartSetPosition(handle[1], work);
+    dds3EffectPartSetScale(handle[0], work->scale);
+    dds3EffectPartSetScale(handle[1], work->scale);
+    dds3EffectPartSetColor(handle[0], work->color);
+    dds3EffectPartSetColor(handle[1], work->color);
+    SetRotateMatrixY(work->angle);
+    VU0_LOAD_MATRIX_B(work->matrix);
+    MultMatrixNoArg();
+    VU0_STORE_MATRIX_UNCLOBBERED(mtx);
+    dds3EffectPartSetRotateMatrix(handle[0], mtx);
+    dds3EffectPartSetRotateMatrix(handle[1], mtx);
+    dds3EffectPartDraw(handle[0]);
+    if (work->frame >= 0x1F) {
+        dds3EffectPartDraw(handle[1]);
+    }
+    work->frame++;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufudnIceSetPosition);
 
@@ -517,51 +4649,147 @@ void effPCPBufuLightDelete(void) {
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBufuLightDraw);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate00_0);
+EffPCPBurstWork *effPCPEyeThunderCreate00_0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 0;
+    work->length = 375.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FA30);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy00_0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate00_1);
+EffPCPBurstWork *effPCPEyeThunderCreate00_1(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 325.0f;
+    work->length = 225.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FA90);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy00_1);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate01_0);
+EffPCPBurstWork *effPCPEyeThunderCreate01_0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 0;
+    work->length = 375.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FAF0);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy01_0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate01_1);
+EffPCPBurstWork *effPCPEyeThunderCreate01_1(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 325.0f;
+    work->length = 225.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FB50);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy01_1);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate02_0);
+EffPCPBurstWork *effPCPEyeThunderCreate02_0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 0;
+    work->length = 375.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FBB0);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy02_0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate02_1);
+EffPCPBurstWork *effPCPEyeThunderCreate02_1(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 325.0f;
+    work->length = 225.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FC10);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy02_1);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate03_0);
+EffPCPBurstWork *effPCPEyeThunderCreate03_0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 0;
+    work->length = 375.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FC70);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy03_0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate03_1);
+EffPCPBurstWork *effPCPEyeThunderCreate03_1(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 325.0f;
+    work->length = 225.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FCD0);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy03_1);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate04_0);
+EffPCPBurstWork *effPCPEyeThunderCreate04_0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 0;
+    work->length = 375.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FD30);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy04_0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate04_1);
+EffPCPBurstWork *effPCPEyeThunderCreate04_1(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 325.0f;
+    work->length = 225.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FD90);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy04_1);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate05_0);
+EffPCPBurstWork *effPCPEyeThunderCreate05_0(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 0;
+    work->length = 375.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FDF0);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy05_0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCreate05_1);
+EffPCPBurstWork *effPCPEyeThunderCreate05_1(u32 unused) {
+    EffPCPBurstWork *work;
+
+    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
+    work->startDistance = 325.0f;
+    work->length = 225.0f;
+    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FE50);
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderCopy05_1);
 
@@ -573,7 +4801,27 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderSetPosition);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpCreate);
+EffPCPGrowWork *effPCPThunderSphereExpCreate(EffPCPScaledThunderParams *params) {
+    EffPCPGrowWork *work = sdfChipAllocDirect(sizeof(EffPCPGrowWork));
+    EffThunderVectorWork *handle;
+
+    params->res.radiusScale = (f32)params->base;
+    params->res.heightScale = (f32)params->base;
+    handle = effPCPThunderSpherePolyCreate(&params->res);
+    work->duration = params->duration;
+    work->fadeIn = params->fadeIn;
+    work->fadeOut = params->fadeOut;
+    work->base = params->base;
+    work->target = params->target;
+    work->color = 0x80808080;
+    work->frame = 0;
+    work->scale = 1.0f;
+    work->position[0] = params->res.origin[0];
+    work->position[1] = params->res.origin[1];
+    work->position[2] = params->res.origin[2];
+    work->handle = handle;
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpCreatePCF);
 
@@ -589,15 +4837,82 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPThunderSphereExpSetScale);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", dds3RingPolyExpListCreate);
+/* vu0 routine: initialize both transforms with the libvu0 identity primitive. */
+EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
+    u32 count = segments * 4 + 4;
+    EffPCPBeamNode *node = sdfChipAllocDirect(sizeof(EffPCPBeamNode));
+    SdfMemBlock *allocation = sdfMemAllocDirect(count * 20);
+    f32 *points = (void *)sdfMemLock(allocation);
+
+    memset(points, 0, count * 20);
+    node->points = points;
+    node->drawKind = 2;
+    node->colors = (u32 *)(points + count * 4);
+    node->vertexCount = count;
+    node->color = 0x80808080;
+    node->allocationHandle = allocation;
+    node->scale = 1.0f;
+    node->assetHandle = sdfMatNew();
+    sdfMatSetConstant((struct SdfAsset *)node->assetHandle, 1.0f);
+    EE_MMI_UNIT_MATRIX(node->localMatrix);
+    EE_MMI_UNIT_MATRIX(node->matrix);
+    memset(&D_0056ADB8, 0, sizeof(D_0056ADB8));
+    D_0056ADB8.primitive = 0x4000;
+    return node;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", dds3RingPolyExpListDelete);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", dds3RingPolyExpListDraw);
+/* vu0 routine: compose the beam transform and submit batches of its vertices. */
+void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
+    f32 scaleMatrix[4][4];
+    SdfListHead *list;
+    s32 count;
+    SdfPoolNode *entry;
+
+    if (node->vertexCount == 0) {
+        return;
+    }
+    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    EE_MMI_UNIT_MATRIX(scaleMatrix);
+    scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = node->scale;
+    VU0_LOAD_MATRIX(node->localMatrix);
+    VU0_LOAD_MATRIX_B(node->matrix);
+    MultMatrixNoArg();
+    VU0_LOAD_VF(vf10, &node->position);
+    VU0_ADD_XYZ(vf31, vf31, vf10);
+    VU0_LOAD_MATRIX_B(scaleMatrix);
+    MultMatrixNoArg();
+    sdf3DPrimLinkTm(list, 0);
+    sdf3DPrimLinkMat(list, node->assetHandle, 0);
+    count = node->vertexCount;
+    D_0056ADB8.colors = node->colors;
+    D_0056ADB8.positions = (u128 *)node->points;
+    D_0056ADB8.color = node->color;
+    D_0056ADB8.vertexCount = D_0056ADB8.parameterCount = 12;
+    D_0056ADB8.parameters = (u32 *)D_0031FEB0;
+    while (count >= 12) {
+        count -= 8;
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056ADB8));
+        D_0056ADB8.positions += 8;
+        D_0056ADB8.colors += 8;
+    }
+    if (count >= 8) {
+        D_0056ADB8.parameterCount = 6;
+        D_0056ADB8.vertexCount = 8;
+        sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056ADB8));
+    }
+    entry = D_0031FEF8[node->drawKind];
+    entry->append(entry, list);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetVertex);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpInit);
+void effPCPRingPolyExpInit(EffPCPBeamWork *work) {
+    effPCPRingPolyExpSetVertex(work->params.startRadius, work);
+    work->frame = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpCreate);
 
@@ -617,11 +4932,24 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetColor);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetRotateMatrix);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExpSetDirection);
+void effPCPRingPolyExpSetDirection(EffPCPBeamWork *work, void *src) {
+    VU0_LOAD_MATRIX(src);
+    SetRotateMatrixX_B(1.5707963f);
+    MultMatrixNoArg();
+    VU0_STORE_MATRIX(work->node);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2SetVertex);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2Init);
+void effPCPRingPolyExp2Init(EffPCPBeamLargeWork *work) {
+    work->rotationA = work->head.degreesA * 0.017453291f;
+    work->rotationB = work->head.degreesB * 0.017453291f;
+    work->rotationStep = work->head.stepDegrees * 0.017453291f;
+    work->radius = work->head.initialRadius;
+    work->radiusStep = work->head.initialRadiusStep;
+    effPCPRingPolyExp2SetVertex(work, work->head.initialRadius);
+    work->frame = 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRingPolyExp2Create);
 
@@ -645,9 +4973,75 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderCreate);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderCreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderCopy);
+EffPCPGroupSet *effPCPRadiateThunderCopy(EffPCPGroupSet *work) {
+    EffPCPGroupSet *groupSet = effPCPRadiateThunderCreate(&work->head, 0);
+    u32 groupIndex;
+    u32 groupByteOffset;
+    u32 entryCount;
+    u32 allocationBytes;
+    u32 groupByteWidth;
+    u8 *activeGroupFlags;
+    u32 entryIndex;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderDelete);
+    if (work->duplicates != 0) {
+        entryCount = work->head.count;
+        allocationBytes = entryCount * 16;
+        groupByteWidth = entryCount * 4;
+        groupIndex = 0;
+        activeGroupFlags = work->head.activeGroups;
+        groupByteOffset = 0;
+        groupSet->duplicateHandle = sdfMemAllocDirect(allocationBytes);
+        groupSet->duplicates = (EffParamWork **)sdfMemLock(groupSet->duplicateHandle);
+        memset(groupSet->duplicates, 0, allocationBytes);
+        for (; groupIndex < 4; groupIndex++) {
+            EffParamWork **destinationHandles = (EffParamWork **)((u8 *)groupSet->duplicates + groupByteOffset);
+
+            if (*activeGroupFlags != 0) {
+                EffParamWork *sourceHandle = *(EffParamWork **)(groupByteOffset + (u32)work->duplicates);
+                for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
+                    *destinationHandles++ = dds3EffectPartCopy(sourceHandle);
+                }
+            }
+            activeGroupFlags++;
+            groupByteOffset += groupByteWidth;
+        }
+    }
+    return groupSet;
+}
+
+void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
+    u32 releaseIndex = 0;
+    u32 releaseCount = work->head.count;
+    EffPCPGroupEntry *fragmentEntryCursor = work->entries;
+    EffParamWork **duplicateHandleBase;
+    EffParamWork **duplicateHandleCursor;
+
+    if (releaseCount != 0) {
+        do {
+            EffThunderFragmentWork *currentHandle = fragmentEntryCursor->handle;
+            fragmentEntryCursor++;
+            releaseIndex++;
+            effPCP_ThunderPolyDelete(currentHandle);
+        } while (releaseIndex < releaseCount);
+    }
+    duplicateHandleBase = work->duplicates;
+    releaseCount = releaseCount * 4;
+    if (duplicateHandleBase != NULL) {
+        duplicateHandleCursor = duplicateHandleBase;
+        releaseIndex = 0;
+        if (releaseCount != 0) {
+            do {
+                EffParamWork *currentHandle = *duplicateHandleCursor++;
+                if (currentHandle != 0) {
+                    dds3EffectPartDelete(currentHandle);
+                }
+                releaseIndex++;
+            } while (releaseIndex < releaseCount);
+        }
+        sdfMemFreeDirect(work->duplicateHandle);
+    }
+    sdfMemFreeDirect(work->workHandle);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderPartInit);
 
@@ -659,13 +5053,68 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderSetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaCreat);
+EffPCPSprayWork *effPCPMakkaCreat(void *src) {
+    EffPCPSprayWork *work = sdfChipAllocDirect(sizeof(EffPCPSprayWork));
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaCopy);
+    work->scale = 1.0f;
+    work->color = 0x80808080;
+    work->count = 10;
+    work->frame = 0;
+    for (i = 0; i < work->count; i++) {
+        work->handle[i] = 0;
+        work->startFrame[i] = i;
+        work->rotationY[i] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+    }
+    work->handle[0] = dds3EffectPCPDataPartCreate(src, 0);
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaDelete);
+EffPCPSprayWork *effPCPMakkaCopy(EffPCPSprayWork *src) {
+    EffPCPSprayWork *work = sdfChipAllocDirect(sizeof(EffPCPSprayWork));
+    u32 i;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaUpdateNode);
+    work->frame = 0;
+    work->scale = src->scale;
+    work->count = src->count;
+    work->color = 0x80808080;
+    for (i = 0; i < work->count; i++) {
+        work->handle[i] = 0;
+        work->startFrame[i] = i;
+        work->rotationY[i] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
+    }
+    work->handle[0] = dds3EffectPartCopy(src->handle[0]);
+    return work;
+}
+
+void effPCPMakkaDelete(EffPCPSprayWork *work) {
+    u32 i = 0;
+
+    if (work->count != 0) {
+        EffParamWork **handle = work->handle;
+        do {
+            if (*handle != 0) {
+                dds3EffectPartDelete(*handle);
+            }
+            handle++;
+            i++;
+        } while (i < work->count);
+    }
+    sdfChipFreeDirect(work);
+}
+
+void effPCPMakkaUpdateNode(SdfDrawNode *node) {
+    SdfDrawNode *child;
+
+    VU0_STORE_VF(vf10, node->scale);
+    child = node->children;
+    if (child != NULL) {
+        do {
+            effPCPMakkaUpdateNode(child);
+            child = child->next;
+        } while (child != node->children);
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaDraw);
 
@@ -681,7 +5130,23 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDDelete);
+void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
+    u32 i = 0;
+    u32 count = work->params.count;
+    EffPCPDriftEventRow *entry = work->entries;
+
+    if (count != 0) {
+        do {
+            effEveBEDCutDelete(entry->event);
+            entry++;
+            i++;
+        } while (i < count);
+    }
+    if (work->owner->active == 0) {
+        effEveBEDDelete(work->owner);
+    }
+    sdfMemFreeDirect(work->handle);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateBEDPartInit);
 
@@ -699,7 +5164,28 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBDelete);
+void effPCPRadiateTBDelete(EffPCPPairedEventWork *work) {
+    u32 i = 0;
+    u32 count = work->params.count;
+    EffPCPPairedEventRow *entry = work->entries;
+
+    if (count != 0) {
+        do {
+            effEveBEDCutDelete(entry->eventA);
+            effEveBEDCutDelete(entry->eventB);
+            effPCP_ThunderPolyDelete(entry->fragment);
+            entry++;
+            i++;
+        } while (i < count);
+    }
+    if (work->ownerA->active == 0) {
+        effEveBEDDelete(work->ownerA);
+    }
+    if (work->ownerB->active == 0) {
+        effEveBEDDelete(work->ownerB);
+    }
+    sdfMemFreeDirect(work->handle);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateTBPartInit);
 
@@ -715,9 +5201,43 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDCreatePCF);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDCopy);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDDelete);
+void effPCPSpiralBEDDelete(EffPCPSpawnRangeWork *work) {
+    u32 i = 0;
+    u32 count = work->params.count;
+    EffPCPSpawnRangeEventRow *entry = work->entries;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDPartInit);
+    if (count != 0) {
+        do {
+            effEveBEDCutDelete(entry->event);
+            entry++;
+            i++;
+        } while (i < count);
+    }
+    if (work->owner->active == 0) {
+        effEveBEDDelete(work->owner);
+    }
+    sdfMemFreeDirect(work->handle);
+}
+
+void effPCPSpiralBEDPartInit(EffPCPSpawnRangeWork *work, s32 index) {
+    EffPCPSpawnRangeEventRow *slot;
+    f32 spread;
+    f32 scale;
+
+    slot = &work->entries[index];
+    scale = work->scale;
+    slot->frame = 0;
+    slot->height = -work->params.startHeightRange * dds3GetRandFloatA(dds3EffectBase);
+    spread = work->params.heightJitter;
+    slot->heightStep = work->params.initialHeightStep * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
+    slot->angle = dds3GetRandFloatA(dds3EffectBase) * (3.14159265f * 2.0f);
+    spread = work->params.angularJitter;
+    slot->angularStep = work->params.initialAngularStep * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
+    spread = work->params.startJitter;
+    slot->position = work->params.startPosition * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread)) * scale;
+    spread = work->params.endJitter;
+    slot->positionStep = (work->params.endPosition * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDDraw);
 
@@ -727,15 +5247,97 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDSetScale);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPSpiralBEDSetColor);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperInit);
+void effPCPHelperInit(EffPCPMapEventWork *work) {
+    EffPCPEventPlace place;
+    u32 i = 0;
+    u32 count;
+    MdlCtx *model;
+    EffPCPMapEventEntry *entry;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDCreate);
+    model = dds3EffectPartGetHandle(work->modelResource);
+    model->first->frameStep = work->params.frameStep;
+    mdlSingleMotion(model, 0, 0);
+    work->frameLimit = model->first->frameCount;
+    count = sdfModelGetMarkPosCount(model->inner);
+    work->count = count;
+    work->entriesHandle = sdfMemAllocDirect(count << 5);
+    entry = (void *)sdfMemLock(work->entriesHandle);
+    work->entries = entry;
+    place.payload[0] = 0;
+    place.payload[1] = 0;
+    place.payload[2] = 0;
+    place.payload[3] = 0;
+    place.payload[4] = 0;
+    place.payload[5] = 0;
+    place.payload[6] = 0;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    place.color = 0x80808080;
+    for (; i < count; i++) {
+        entry->hasMoved = 0;
+        entry->age = 0;
+        entry->frameLimit = 0;
+        entry->event = effEveBEDCutCreate(work->owner, 2, &place);
+        entry++;
+    }
+}
+
+EffPCPMapEventWork *effPCPHelperBEDCreate(EffPCPEventParamHead *head, void *resourceParams, void *ownerParams) {
+    EffPCPMapEventWork *work = sdfChipAllocDirect(sizeof(EffPCPMapEventWork));
+
+    work->params = *head;
+    work->color = 0x80808080;
+    work->scale = 1.0f;
+    work->owner = 0;
+    work->entries = 0;
+    work->modelResource = 0;
+    work->frame = 0;
+    if (resourceParams != 0) {
+        work->modelResource = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, resourceParams);
+    }
+    if (ownerParams != 0) {
+        work->owner = effEveBEDCreate(ownerParams);
+    }
+    if (work->owner != 0) {
+        effPCPHelperInit(work);
+    }
+    return work;
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDCreatePCF);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDCopy);
+EffPCPMapEventWork *effPCPHelperBEDCopy(EffPCPMapEventWork *src) {
+    EffPCPMapEventWork *work;
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDDelete);
+    work = effPCPHelperBEDCreate(&src->params, 0, 0);
+    work->modelResource = dds3EffectPartCopy(src->modelResource);
+    work->owner = src->owner;
+    effPCPHelperInit(work);
+    return work;
+}
+
+void effPCPHelperBEDDelete(EffPCPMapEventWork *work) {
+    u32 i;
+    u32 count;
+    EffPCPMapEventEntry *entry;
+
+    dds3EffectPartDelete(work->modelResource);
+    count = work->count;
+    entry = work->entries;
+    for (i = 0; i < count; i++) {
+        if (entry->event != NULL) {
+            effEveBEDCutDelete(entry->event);
+        }
+        entry++;
+    }
+    if (work->owner->active == 0) {
+        effEveBEDDelete(work->owner);
+    }
+    sdfMemFreeDirect(work->entriesHandle);
+    sdfChipFreeDirect(work);
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPHelperBEDDraw);
 
