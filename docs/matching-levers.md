@@ -41,6 +41,8 @@ it was measured on DDS and not on this ELF.
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
 | a flat `beq` chain over four or more contiguous `case` values | make the switch index a `u32` local. With `s32` ee-gcc splits the balanced tree with an `sltiu` range test before the lowest compare; unsigned makes the left subtree bounded below, so `index < 1` folds to the `beqz` retail emits |
 | a call's constant arguments set up above the `if` that guards the call | invert the test into an early `return`, so the call is no longer inside a nested block |
+| more instructions than the C emits, with a 0 or 1 materialised per exit | nest the body inside the guard and give the function one trailing `return`, instead of a chain of early returns. A trailing `if (n <= 0) return 0; return 1;` folds to `slt $0, $2`, and separate `return` constants get cross-jumped into one epilogue; the nested form keeps both. Two functions in `code_001FAE80` went from 0 of 17 and 1 of 17 words to exact on that change alone |
+| a branch straight to the arm you expected to fall through | write that arm last. gcc jumps forward to the block written after the test and falls through to the one written before it, so `if (c) return X; return Y;` and `if (!c) return Y; return X;` differ in which of X and Y the branch reaches |
 
 ## Addressing and types
 
@@ -102,6 +104,24 @@ it was measured on DDS and not on this ELF.
   order. The same expression with the `(s32)(f * 128.0f)` conversions inline
   gives the right registers and `or` chain but a different mul and cvt
   schedule.
+- A `u16` or `u8` parameter adds an `andi` on entry that retail does not
+  have. Where retail copies the argument with `daddu`, declare the parameter
+  `s32` and let the caller narrow: `fclEncycSearch`, `SetRecordToUnit` and
+  `RequestModelLoad` each came down to that one word.
+- A run of adjacent constant stores comes out right-rotated by one, so the
+  source order is retail's list left-rotated: the store retail emits first is
+  the one written last. `InitializeInstance` and `movieViewerFree` both
+  matched on that rotation.
+- Where retail adds the index to the base (`addu rd, index, base`) and leaves
+  the rest of the offset in the load displacement, write
+  `((u8 *)index + (u32)base)[disp]`. The plain `work->field[index]` form costs
+  one register copy.
+- Subscript the array with the loop index rather than walking a pointer when
+  retail computes the pointer after the loop guard. A `*p++` walk makes gcc
+  sink the pointer init into the guard's delay slot; `arr[i]` leaves gcc to
+  create the walk itself, in retail's order.
+- The EABI stack argument slot is eight bytes wide here, not four: the ninth
+  and tenth arguments of a call sit at `0x0` and `0x8` of the outgoing frame.
 - Pick the VU0 load by how retail forms the address:
   `SDF_VU0_LOADVECTOR(ptr)` where it computes the address into a register,
   `SDF_VU0_LOADVECTOR_MEMOPS` where it addresses the frame directly.
@@ -126,6 +146,14 @@ A block-scope initializer such as `s32 list[3] = {1, 11, 14};` goes to
 rodata object that precedes it above the function, or the relink reorders the
 pool. `check_unit.py` masks local rodata relocations and still says the
 function matches; only the `ninja` checksum catches this.
+
+## Arithmetic
+
+ee-gcc 2.96 does not turn a division by a constant into a multiply: it loads
+the divisor into a register and emits `div` plus the divide-by-zero trap, the
+`beql`/`break 0, 7` pair. It does synthesise constant multiplies out of
+shifts and adds, so `n * 100 / 0xB8` is a shift chain followed by a real
+`div`.
 
 ## Float literals
 
