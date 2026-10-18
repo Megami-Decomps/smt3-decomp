@@ -71,7 +71,7 @@ allocation or a different schedule. Those variants carry distinct names rather
 than one name per unit; `include/README.md` tabulates them. A port that
 collapses them into one function will drift on those call sites.
 
-Every operation now has exactly one definition, in `ps2asm.h`: 230 macros, and
+Every operation now has exactly one definition, in `ps2asm.h`: 221 macros, and
 no asm macro left in any unit.
 
 ## The operations

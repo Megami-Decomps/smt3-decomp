@@ -475,14 +475,6 @@ typedef struct {
 #define SDF_VU0_LOAD_ROW3_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
-#define VU0_COPY_VF28_TO_VF24() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf24, vf28\n\t.set reorder")
-#define VU0_COPY_VF29_TO_VF25() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf25, vf29\n\t.set reorder")
-#define VU0_COPY_VF30_TO_VF26() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf26, vf30\n\t.set reorder")
-#define VU0_COPY_VF31_TO_VF27() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
 #define SDF_VU0_RESET_ROW3() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf31, vf0\n\t.set reorder")
 #define SDF_VU0_SCALE_XYZ() __asm__ volatile ( \
@@ -495,16 +487,12 @@ typedef struct {
 #define SDF_VU0_MATRIX_ROW3_W_SET_ONE() __asm__ volatile ( \
     ".set noreorder\n\tvmove.w vf31, vf0\n\t.set reorder")
 
-#define VU0_COPY_VF10_TO_VF2() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " "vf2" ", " "vf10" "\n\t.set reorder")
 #define SDF_VU0_SET_ROW0() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf28, vf10\n\t.set reorder")
 #define SDF_VU0_SET_ROW1() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf29, vf10\n\t.set reorder")
 #define SDF_VU0_SET_ROW2() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf30, vf10\n\t.set reorder")
-#define VU0_COPY_VF2_TO_VF12() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " "vf12" ", " "vf2" "\n\t.set reorder")
 #define SDF_VU0_GET_ROW2() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
 #define SDF_VU0_LOADVECTOR_BARRIER(src) __asm__ volatile ( \
@@ -1081,14 +1069,6 @@ __asm__ volatile ( \
     : "+m" (v) :: "memory")
 
 /* from effect/parManager.c */
-#define VU0_COPY_VF24_TO_VF28() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " "vf28" ", " "vf24" "\n\t.set reorder")
-#define VU0_COPY_VF25_TO_VF29() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " "vf29" ", " "vf25" "\n\t.set reorder")
-#define VU0_COPY_VF26_TO_VF30() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " "vf30" ", " "vf26" "\n\t.set reorder")
-#define VU0_COPY_VF27_TO_VF31() __asm__ volatile ( \
-    ".set noreorder\n\tvmove.xyzw " "vf31" ", " "vf27" "\n\t.set reorder")
 #define SDF_VU0_STOREVECTOR_C(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " "vf12" ", 0(%0)\n\t.set reorder" \
     : : "r" (dst) : "memory")
@@ -1099,6 +1079,9 @@ __asm__ volatile ( \
 #define SDF_VU0_SWAPVECTOR_A_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf11\n\t" \
     "vmove.xyzw vf11, vf2\n\t.set reorder")
+#define SDF_VU0_SWAPVECTOR_A_C() __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw vf2, vf10\n\tvmove.xyzw vf10, vf12\n\t" \
+    "vmove.xyzw vf12, vf2\n\t.set reorder")
 #define MMI_RGBA_PACK_255(out) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %1\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \

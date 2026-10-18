@@ -1058,7 +1058,7 @@ What the bodies establish: `SDF_VU0_LOADVECTOR` writes the first working
 vector, `SDF_VU0_ADDVECTOR` does `A = A + B`, `SDF_VU0_INNERPRODUCT` returns
 `Dot(A, B)` and `SDF_VU0_GETVECTOR_Y` returns `vct_A.y`. That fixes A, B and C
 onto `vf10`, `vf11` and `vf12`, which is the convention the retail inlines
-already follow. 116 macros carry these names, covering about 3,100 call sites.
+already follow. 123 macros carry these names, covering about 3,100 call sites.
 
 The other prefixes are this repository's own, for operations the engine library
 does not name:
@@ -1078,11 +1078,18 @@ The library is larger than the call sites show. `libsdf.c` in the HD sources
 declares 133 of these helpers, and the matrix bank is addressed by row:
 `LOAD_ROW0` through `_ROW3` load `vf28`-`vf31`, with `STORE_ROW`, `SET_ROW`
 (row from the working vector) and `GET_ROW` beside them. Any macro naming one
-of those registers is one of these, so it carries the engine name. Thirty
-engine names are still unclaimed, among them `TRANSLATE`, `SCALE_XYZ` and
-`SCALE_XYZ_REV`: the HD bodies for the matrix side are stubs, so nothing yet
-decides which of our matrix macros is which, and a guess there would assert
-provenance we do not have.
+of those registers is one of these, so it carries the engine name. The HD bodies for the matrix side are stubs, so the names there were settled by
+cross-reference instead: for a function with a body in both trees, the engine
+helper the HD body calls at the position our body calls a macro is that macro's
+name. That is what `TRANSLATE`, `SCALE_XYZ`, `SCALE_XYZ_REV`,
+`STOREIDENTITYVECTOR` and `SETSCALE1VECTOR` rest on, each aligned 1:1 in the
+same function.
+
+The cross-reference also shows where retail called one helper and we had
+written several. Three moves through `vf2` are `SWAPVECTOR_A_C`, and four
+per-row `vmove`s are `COPYMATRIX_A_TO_B`; folding the nine groups back into one
+statement each left the image byte-identical, which is the proof that the
+engine's single macro is what retail compiled.
 
 A variant keeps the engine name. Where two macros hold the same instructions
 and differ only in the operand section, the engine name carries both, with a
@@ -1133,7 +1140,7 @@ names rather than one name and an `#undef`:
 | `EE_SQRT_F32_SCHED` | not `volatile`, so cc1 may hoist the surrounding compares |
 | `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
-Every operation is defined once, in `ps2asm.h`: 230 macros there and no asm
+Every operation is defined once, in `ps2asm.h`: 221 macros there and no asm
 macro left in any unit. The five that used to stay local for a differing operand
 section are now named for what differs -- `SDF_VU0_SCALEVECTOR_V0`,
 `SDF_VU0_SCALEVECTOR_B_V0` and `SDF_VU0_SETVECTOR_Y_V0` carry the scalar through `$2`
