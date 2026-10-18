@@ -1593,8 +1593,8 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrawPoly4);
-INCLUDE_ASM(const s32, "code_00128848", fldDrawTexPoly4);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDrawPoly4);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDrawTexPoly4);
 
 void fldDrawFrameSprite(void) {
     sdfDrawTag_t *list = sdfPrimAllocDrawTag(NULL);
@@ -2150,7 +2150,7 @@ void nbSetEncountMode(s32 mode)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", encDrawProc);
+INCLUDE_ASM(const s32, "field/fldDraw", encDrawProc);
 
 void encFreeBlur(void)
 {
@@ -2162,7 +2162,7 @@ void encFreeBlur(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", encStart);
+INCLUDE_ASM(const s32, "field/fldDraw", encStart);
 
 void encInitProcess(void)
 {
@@ -2200,7 +2200,7 @@ f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
     return (f32)(angle % 360);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamCalcSlopeOffset);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamCalcSlopeOffset);
 
 void fldCamSetLeng(void) {
     f32 dx = D_002FC9C0[0] - fldCamTarget[0];
@@ -2216,13 +2216,13 @@ void fldCamResetNpc(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamCalcSaka);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamCalcSaka);
 
-INCLUDE_ASM(const s32, "code_00128848", resetCamNormal);
+INCLUDE_ASM(const s32, "field/fldDraw", resetCamNormal);
 
-INCLUDE_ASM(const s32, "code_00128848", resetCamNormal2);
+INCLUDE_ASM(const s32, "field/fldDraw", resetCamNormal2);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamGetPhokanParam);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamGetPhokanParam);
 
 void fldCamUpdateFollow(void) {
     union {
@@ -2251,17 +2251,17 @@ void fldCamUpdateFollow(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00128848", calcCamNormal);
+INCLUDE_ASM(const s32, "field/fldDraw", calcCamNormal);
 
-INCLUDE_ASM(const s32, "code_00128848", calcCamDirLock);
+INCLUDE_ASM(const s32, "field/fldDraw", calcCamDirLock);
 
-INCLUDE_ASM(const s32, "code_00128848", calcCamNormalNPC);
+INCLUDE_ASM(const s32, "field/fldDraw", calcCamNormalNPC);
 
-INCLUDE_ASM(const s32, "code_00128848", resetCamTgtPlayer);
+INCLUDE_ASM(const s32, "field/fldDraw", resetCamTgtPlayer);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEventUpdateEx_Unity_2);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEventUpdateEx_Unity_2);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamSetChaseCore);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamSetChaseCore);
 
 void fldCamSetChase(void)
 {
@@ -2275,7 +2275,7 @@ void fldCamUpdateDefault(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamUpdateChase);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamUpdateChase);
 
 dds3Basic_t *fldCamNowEveCamera(void) {
     dds3Basic_t *worldObject = dds3GetActiveScene();
@@ -2287,7 +2287,7 @@ dds3Basic_t *fldCamNowEveCamera(void) {
     return currentEntry;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", calcCamSyukan);
+INCLUDE_ASM(const s32, "field/fldDraw", calcCamSyukan);
 
 void fldSetElvCameraScene(u32 mode) {
     fldElvCameraScene = mode;
@@ -2346,11 +2346,11 @@ void fldClearElvCameraScene(void)
     fldElvCameraScene = 0;
 }
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531BF0);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531BF0);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamMain);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamMain);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamSyukanSuriawase);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamSyukanSuriawase);
 
 s32 fldCamMiwatasiChk(void)
 {
@@ -2358,7 +2358,7 @@ s32 fldCamMiwatasiChk(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamNpcCamChk);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCamNpcCamChk);
 
 f32 R360_LR(f32 fromDegrees, f32 toDegrees) {
     f32 diff;
@@ -2508,11 +2508,11 @@ f32 fldPlayerCalc360_4(f32 angle) {
     return angle;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerMirChk);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMirChk);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerMotion);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMotion);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerMotionSe);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMotionSe);
 
 void fldPlayerCalc_Hit(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
@@ -2548,15 +2548,15 @@ void fldPlayerCalc_Hit(void) {
     SDF_VU0_COPYVECTOR((u8 *)ctl->handle->poseset + 0x70, pos);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_WarpRun);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_WarpRun);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalcHasigo);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalcHasigo);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531C50);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531C50);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531C60);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531C60);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Nml);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_Nml);
 
 void fldPlayerCalc_WarpStart(void)
 {
@@ -2621,21 +2621,21 @@ void fldPlayerCalc_Wm4(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Wm2);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_Wm2);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Nml_syukan);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_Nml_syukan);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531D08);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D08);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531D18);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D18);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531D28);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D28);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531D38);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D38);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531D48);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D48);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc);
 
 s32 fldPlayerChkAna(void)
 {
@@ -2646,7 +2646,7 @@ s32 fldPlayerChkAna(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerOff);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerOff);
 
 void fldPlayerOn(void) {
     fldUnitControl_t *ctl = fldGetUnitControl();
@@ -2706,7 +2706,7 @@ void fldPlayerSdwOff(void) {
     dds3ObjectBaseOffFlag(ctl->handle, 0x200);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerFastSet);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerFastSet);
 
 void fldPlayerMotReset(void) {
     dds3Basic_t *unit;
@@ -2736,11 +2736,11 @@ void fldPlayerMotReset2(void) {
                     9, 0.0f);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerPosRot);
+INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerPosRot);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyDefaultLoad);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSkyDefaultLoad);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyFieldLoad);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSkyFieldLoad);
 
 void fldGetSkyEntry(const void *src) {
     gFilterAlpha = 0x80;
@@ -2777,7 +2777,7 @@ void fldSkyCalcFilter(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyDrawFilter);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSkyDrawFilter);
 
 void fldSkySetFilter(s32 area, s32 value, s32 duration) {
     if (fldSkyEnable == 0 && fldGb < 0x32) {
@@ -2839,11 +2839,11 @@ void fldSkySetTableAnime(s32 anime)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyCalcTable);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSkyCalcTable);
 
-INCLUDE_ASM(const s32, "code_00128848", fld_136800);
+INCLUDE_ASM(const s32, "field/fldDraw", fld_136800);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetPlayer);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSkySetPlayer);
 
 void fldSkySetTbl(s32 idx, s32 durationMode) {
     fldAreaWork_t *state = &fldGlobalBase;
@@ -3154,7 +3154,7 @@ void fld_1374F0(void) {
     displayPointers[1] = (u32)fldSkyPlayerIdx;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkyRefreshTbl);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSkyRefreshTbl);
 
 void fldSkyBattle(void) {
     fldLightSet_t *light = &((fldLightSet_t *)fldSkyDefaultData)[fldSkyTable];
@@ -3313,12 +3313,12 @@ void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldClearMatterFlags);
+INCLUDE_ASM(const s32, "field/fldDraw", fldClearMatterFlags);
 
 void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
                    u32 id, s32 sceneFlag, s32 ownerIndex);
 
-INCLUDE_ASM(const s32, "code_00128848", fldMakePlane);
+INCLUDE_ASM(const s32, "field/fldDraw", fldMakePlane);
 
 s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, fldValueRecord_t *zone) {
     f32 probe[3];
@@ -3376,15 +3376,15 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, fldV
     return inside;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkUnitElvOnly);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitElvOnly);
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkUnitElv);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitElv);
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkUnitDamage);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitDamage);
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkUnit);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnit);
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkUnitVWM);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitVWM);
 
 void func_0013B658(void) {
 }
@@ -3395,7 +3395,7 @@ void func_0013B660(void) {
 void func_0013B668(void) {
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitWM_Mask);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitWM_Mask);
 
 f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, f32 *position, fldValueRecord_t *zone) {
     f32 projectedPosition[3];
@@ -3441,9 +3441,9 @@ f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, f32 *position, 
     return clearance;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkCamera);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkCamera);
 
-INCLUDE_ASM(const s32, "code_00128848", fldHitChkEnemy);
+INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkEnemy);
 
 void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     f32 origin[4] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -3562,11 +3562,11 @@ void fldAddItemBoxObject(s32 id, f32 x, f32 y, f32 z, f32 extent, f32 height) {
     fldItemBoxObjCount++;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldKaifukuTest);
+INCLUDE_ASM(const s32, "field/fldDraw", fldKaifukuTest);
 
-INCLUDE_ASM(const s32, "code_00128848", fldStatusSet);
+INCLUDE_ASM(const s32, "field/fldDraw", fldStatusSet);
 
-INCLUDE_ASM(const s32, "code_00128848", fldClearEveRngTable);
+INCLUDE_ASM(const s32, "field/fldDraw", fldClearEveRngTable);
 
 void fldEveHit_End(void) {
     s32 slotIndex;
@@ -3605,15 +3605,15 @@ u32 fldEveHit_AddEveData(fldEventDataHeader_t *data, dds3Basic_t *object) {
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_AddEveHit);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHit);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_ChkDir);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkDir);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_ChkDir2);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkDir2);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHitTestRect);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHitTestRect);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHitTestPlanes);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHitTestPlanes);
 
 s32 fldEveHit_ScriptStart(char *name, s32 idx) {
     s32 pid;
@@ -3681,9 +3681,9 @@ s32 fldEveHit_ChkOn(const char *name) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531E08);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531E08);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_ChkEveHit);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkEveHit);
 
 void fld_13F6B8(void) {
     s32 count = fldEveRngCount;
@@ -3744,13 +3744,13 @@ const char *fldEveHitResName_Find(u32 task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_AddEveHitItemBox);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitItemBox);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_AddEveHitNpc);
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitNpc);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCheckEveRngN);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCheckEveRngN);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCheckEveRngT);
+INCLUDE_ASM(const s32, "field/fldDraw", fldCheckEveRngT);
 
 s32 fldCheckEveRngEncount(void) {
     s32 slotIndex;
@@ -3846,11 +3846,11 @@ const char *fldInf_FindTypeEveNpc(const char *eventName) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldInfChkFastPanel);
+INCLUDE_ASM(const s32, "field/fldDraw", fldInfChkFastPanel);
 
-INCLUDE_ASM(const s32, "code_00128848", fldInfNext);
+INCLUDE_ASM(const s32, "field/fldDraw", fldInfNext);
 
-INCLUDE_ASM(const s32, "code_00128848", fldInfGet);
+INCLUDE_ASM(const s32, "field/fldDraw", fldInfGet);
 
 void fldInfLoad(s32 field) {
     char path[64];
@@ -3885,9 +3885,9 @@ void fldInfToWAP(void) {
 /* The native format slot includes twelve trailing zero bytes. */
 const char D_00531E98[24] = "%sF%03d.INF";
 
-INCLUDE_ASM(const s32, "code_00128848", fldFindEventEntry);
+INCLUDE_ASM(const s32, "field/fldDraw", fldFindEventEntry);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_Find2);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Find2);
 
 u8 *fldDoor_Find3(void) {
     s32 idx = gFldWap_after_nextidx;
@@ -3909,9 +3909,9 @@ s32 fldDoor_GetWarpEff(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldWapGetDoor);
+INCLUDE_ASM(const s32, "field/fldDraw", fldWapGetDoor);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoorRun_FindStart);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoorRun_FindStart);
 
 void fldDoor_ExitCamera(const char *name) {
     fldActorEntry_t *entry;
@@ -3954,27 +3954,27 @@ s32 fldDoor_ChkWarp(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldWap_SetBgm);
+INCLUDE_ASM(const s32, "field/fldDraw", fldWap_SetBgm);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_Warp);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Warp);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531F18);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531F18);
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00531F28);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00531F28);
 
-INCLUDE_RODATA(const s32, "code_00128848", jtbl_00531F40);
+INCLUDE_RODATA(const s32, "field/fldDraw", jtbl_00531F40);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_WarpEx);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_WarpEx);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSetTerminalState);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSetTerminalState);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSetTerminalIndex);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSetTerminalIndex);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_SiseExit);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_SiseExit);
 
-INCLUDE_ASM(const s32, "code_00128848", fldWap_Load);
+INCLUDE_ASM(const s32, "field/fldDraw", fldWap_Load);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_EveBtlExit);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_EveBtlExit);
 
 void fldDoor_WarpCash(const char *name) {
     fldActorEntry_t *entry;
@@ -4044,7 +4044,7 @@ void fldDoor_WarpCash(const char *name) {
     }
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_GetHasigoTbl);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_GetHasigoTbl);
 
 s32 fldDoor_GetElvTbl(u32 kind) {
     s32 slot = gFld_ElvTakasa;
@@ -4095,7 +4095,7 @@ s32 fldDoor_ElvTakasaToFloor(s32 index) {
     return fldDoorParamTable.headers[slot].body.data[index];
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_ElvExit);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_ElvExit);
 
 void fldClearDoorEvents(void) {
     fldDoorEvent_t *entry = fldDoorEventTable;
@@ -4145,240 +4145,240 @@ void fldGetDoorEntry(const void *source) {
     memcpy(&fldDoorParamTable, source, sizeof(fldDoorParamTable));
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldSetupDoorScenes);
+INCLUDE_ASM(const s32, "field/fldDraw", fldSetupDoorScenes);
 
-INCLUDE_ASM(const s32, "code_00128848", fldFindDoorEvent);
+INCLUDE_ASM(const s32, "field/fldDraw", fldFindDoorEvent);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_Step);
+INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Step);
 
 void func_00144288(void) {
 }
 
-INCLUDE_RODATA(const s32, "code_00128848", D_00532030);
+INCLUDE_RODATA(const s32, "field/fldDraw", D_00532030);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC44);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC44);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldDrwZBuf);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldDrwZBuf);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC4C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC4C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC50);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC50);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC58);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC58);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldDrawEnv);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawEnv);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC60);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC60);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC68);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC68);
 
-INCLUDE_SDATA(const s32, "code_00128848", gencMode);
+INCLUDE_SDATA(const s32, "field/fldDraw", gencMode);
 
-INCLUDE_SDATA(const s32, "code_00128848", gencStageInnAlp);
+INCLUDE_SDATA(const s32, "field/fldDraw", gencStageInnAlp);
 
-INCLUDE_SDATA(const s32, "code_00128848", encDrawState);
+INCLUDE_SDATA(const s32, "field/fldDraw", encDrawState);
 
-INCLUDE_SDATA(const s32, "code_00128848", gencOn);
+INCLUDE_SDATA(const s32, "field/fldDraw", gencOn);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC7C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC7C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC80);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC80);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC88);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC88);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamDist);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamDist);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamMiwatasi);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamMiwatasi);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC94);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC94);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC98);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC98);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EC9C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC9C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECA0);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECA0);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamHeight);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamHeight);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamParamTable2);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamParamTable2);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamResetOn);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamResetOn);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECB0);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECB0);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECB4);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECB4);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECB8);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECB8);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldElvCameraScene);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldElvCameraScene);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamElvState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamElvState);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECC4);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECC4);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldHitChkMatter);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldHitChkMatter);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldHitChkSlope);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldHitChkSlope);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamPhokanState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamPhokanState);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldCamPHokanMode);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldCamPHokanMode);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECD8);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECD8);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECDC);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECDC);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldPlayerWarpState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldPlayerWarpState);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldPlayerFastMode);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldPlayerFastMode);
 
-INCLUDE_SDATA(const s32, "code_00128848", gfldPlayerHasiCnt);
+INCLUDE_SDATA(const s32, "field/fldDraw", gfldPlayerHasiCnt);
 
-INCLUDE_SDATA(const s32, "code_00128848", gfldPlayerDamegeCnt);
+INCLUDE_SDATA(const s32, "field/fldDraw", gfldPlayerDamegeCnt);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldPlayerStepDist);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldPlayerStepDist);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldPlayerMoveState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldPlayerMoveState);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldPlayerSyukanState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldPlayerSyukanState);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ECFC);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ECFC);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED00);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED00);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED04);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED04);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldWmWarpMode);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldWmWarpMode);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldWmapPlayerState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldWmapPlayerState);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldWmFastMove);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldWmFastMove);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSyukanState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSyukanState);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyEnable);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyEnable);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyDefault);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyDefault);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyDefaultData);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyDefaultData);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyDataTable);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyDataTable);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFilterAlpha);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFilterAlpha);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFilterAnime);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFilterAnime);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFilterAnimeCntF);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFilterAnimeCntF);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFilterAnimeOfsA);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFilterAnimeOfsA);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyFilterPrev);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyFilterPrev);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyFilter);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyFilter);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyFilterRate);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyFilterRate);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyFilterTime);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyFilterTime);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyTable);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyTable);
 
-INCLUDE_SDATA(const s32, "code_00128848", gSkyTblAnime);
+INCLUDE_SDATA(const s32, "field/fldDraw", gSkyTblAnime);
 
-INCLUDE_SDATA(const s32, "code_00128848", gSkyTblAnimeCntI);
+INCLUDE_SDATA(const s32, "field/fldDraw", gSkyTblAnimeCntI);
 
-INCLUDE_SDATA(const s32, "code_00128848", gSkyTblBaseIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", gSkyTblBaseIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyTblUpperIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyTblUpperIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED5C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED5C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED60);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED60);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED64);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED64);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED68);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED68);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED6C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED6C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED70);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED70);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED74);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED74);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyTableIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyTableIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED7C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED7C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED80);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED80);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED84);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED84);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldSkyLightMaTbl);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldSkyLightMaTbl);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED8C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED8C);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054ED90);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054ED90);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldItemBoxObjBuf);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldItemBoxObjBuf);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldItemBoxObjCount);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldItemBoxObjCount);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldMatterTable);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldMatterTable);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EDA0);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EDA0);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldPlaneCount);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldPlaneCount);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EDA8);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EDA8);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EDAC);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EDAC);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldEveRngPrevIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldEveRngPrevIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldEveRngHitIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldEveRngHitIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldEveRngCount);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldEveRngCount);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldEveRngIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldEveRngIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldEveRngIdx_N);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldEveRngIdx_N);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldEveRngIdx_T);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldEveRngIdx_T);
 
-INCLUDE_SDATA(const s32, "code_00128848", gEveNum);
+INCLUDE_SDATA(const s32, "field/fldDraw", gEveNum);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldEveHitState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldEveHitState);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldKyouseiTalk);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldKyouseiTalk);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldEveHitCount);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldEveHitCount);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldInfIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldInfIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldInf_HitIdx);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldInf_HitIdx);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldInf_WpExit);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldInf_WpExit);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldDoorExitFlag);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldDoorExitFlag);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EDE5);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EDE5);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldWap_after_nextidx);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldWap_after_nextidx);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFld_ElvTakasa);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFld_ElvTakasa);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldDoorWarpTarget);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldDoorWarpTarget);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EDF4);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EDF4);
 
-INCLUDE_SDATA(const s32, "code_00128848", fldDoorSiseState);
+INCLUDE_SDATA(const s32, "field/fldDraw", fldDoorSiseState);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EDFC);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EDFC);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EE00);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EE00);
 
-INCLUDE_SDATA(const s32, "code_00128848", scriptlabel);
+INCLUDE_SDATA(const s32, "field/fldDraw", scriptlabel);
 
-INCLUDE_SDATA(const s32, "code_00128848", gFldWapPanel);
+INCLUDE_SDATA(const s32, "field/fldDraw", gFldWapPanel);
 
-INCLUDE_SDATA(const s32, "code_00128848", D_0054EE0C);
+INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EE0C);
 
