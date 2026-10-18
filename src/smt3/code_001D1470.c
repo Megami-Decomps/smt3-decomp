@@ -41,8 +41,7 @@ typedef struct { sdfMemHandle_t *allocation; } pbDebugWork_t;
 /* The native FOV workspace is an unnamed view at pinst + 0xA34. Bind its
  * assembler address without redefining pinst's message-instance array type
  * or inventing an overlapping allocation in the generated BSS split. */
-extern pbFovWork_t pbDebugFovWork;
-__asm__("pbDebugFovWork = pinst + 0xA34");
+PS2_SYMBOL_AT(pbFovWork_t, pbDebugFovWork, pinst, 0xA34);
 extern pbPanelEditor_t pbDebugPanel2Pos, pbDebugPanel3X;
 extern pbColorRow_t D_00326C20[6];
 extern pbColor_t D_00326C50;

@@ -31,6 +31,17 @@ typedef unsigned int u128 __attribute__((mode(TI)));
 typedef float f32;
 typedef double f64;
 
+/* Binds NAME as an assembler alias for BASE + OFFSET, for a view into
+ * another object that has no symbol of its own. The assembler does the
+ * arithmetic, so nothing is allocated and the reference stays gp-relative.
+ * A build whose assembler cannot resolve the expression, which is every
+ * target but the EE, defines this differently. */
+#ifndef PS2_SYMBOL_AT
+#define PS2_SYMBOL_AT(type, name, base, offset) \
+    extern type name; \
+    __asm__(#name " = " #base " + " #offset)
+#endif
+
 typedef volatile u8 vu8;
 typedef volatile u16 vu16;
 typedef volatile u32 vu32;

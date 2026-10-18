@@ -83,8 +83,7 @@ typedef struct
 extern dds3LightState_t dds3LightParam;
 /* Native fog setters address the record at +0x20 as a separate base.
  * This typed view allocates no storage; the enclosing light state is unchanged. */
-extern sdf3DFogParam_t dds3FogState;
-__asm__("dds3FogState = dds3LightParam + 0x20");
+PS2_SYMBOL_AT(sdf3DFogParam_t, dds3FogState, dds3LightParam, 0x20);
 extern dds3Filter2Param_t dds3Filter2Buf;
 extern dds3Filter2Param_t filter2target;
 extern u16 filter2now;
@@ -300,8 +299,7 @@ extern dds3DistBlurParam_t D_00556BC0;
 extern dds3RipBlurParam_t dds3BlurState;
 /* The rectangular frame body follows the ripple body in the same storage.
  * Bind its typed view without defining or extending the imported BSS symbol. */
-extern dds3Blur2Param_t dds3Blur2State;
-__asm__("dds3Blur2State = dds3BlurState + 0x30");
+PS2_SYMBOL_AT(dds3Blur2Param_t, dds3Blur2State, dds3BlurState, 0x30);
 extern dds3Filter2Param_t dds3BlurParam;
 extern dds3MFilterParam_t D_00556C70;
 
