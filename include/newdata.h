@@ -29,7 +29,9 @@ typedef struct
     u32 flag;
     u16 devilId;
     u16 hp;
-    u8 unk0C[0xE];
+    u8 unk0C[6];
+    u16 badstatus;
+    u8 unk14[6];
     s8 level;
     u8 unk1B[0xD1];
 } fldAnahoriAkuma_t;

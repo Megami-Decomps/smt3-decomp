@@ -119,6 +119,14 @@ ee-gcc truncates a decimal literal toward zero, so `-946.42f` lands one ULP
 away from retail and `-946.41993f` is exact. Derive the shortest decimal that
 round-trips to the retail word rather than transcribing the rounded value.
 
+To tell whether a `gp`-addressed `D_00XXXXXX` is a pool entry, subtract the
+flat-image delta `0xff000` from its vram and look the file offset up against
+the `.lit4` rows in `config/smt3/SLUS_209.11.yaml`, whose addresses are file
+offsets. `D_0054C2B4` and `D_0054C2B8`, read by `fldCamCalcSlopeOffset`, land
+at `0x44D2B4` and `0x44D2B8` inside `field/fldDraw`'s pool and hold `0.001f`
+and `-0.001f`. The pool is not deduplicated: the same constant appears at
+several offsets, so only the order of use matters.
+
 `ee-as` owns the `.lit4` pool, not `cc1`. `configure.py` rewrites every
 `lwc1 %gp_rel(D_...)` in the split asm into `li.s`, so literal values are
 readable in `build/eeasm/` and the pool is rebuilt per object in emission
@@ -162,9 +170,18 @@ byte-identical, and the function still counts as unmatched everywhere. Run
 has changed, and `python3 tools/check_nonmatching.py` to confirm the draft
 still compiles.
 
-Say in the commit message how far the draft got and what the remaining
-difference is. "682 of 694 words, three spill slots rotated" tells the next
-person whether to continue or start over; "does not match" does not.
+Annotate the draft with what still differs. `revert_differing.py` writes
+check_unit's measurement into a comment above the `#ifdef` and leaves a TODO
+for the rest, which you fill in before committing:
+
+    /* NON_MATCHING: 682 of 694 words, the exact 2776-byte size. Three reload
+     * spill slots are rotated ... Ruled out: a typed local at four scopes,
+     * << for *, nine declaration orders ... */
+
+The comment is why the draft is worth keeping. "682 of 694 words, three spill
+slots rotated, and here is what has been ruled out" tells the next person
+whether to continue, start over, or leave it; "does not match" tells them
+nothing and they repeat the whole search. Say it in the commit message too.
 `--discard` deletes a draft not worth keeping.
 
 A draft is never evidence of anything. It is not compiled by the build, so
@@ -177,6 +194,11 @@ These have been ruled out repeatedly and are not worth a second attempt:
   different order with no semantic difference to steer.
 - Register allocation that needs one register fewer than the C uses, shifting
   every later allocation. Change the source shape or stop.
+- A set of reload spill slots that appear in a rotated order. The slot offsets
+  follow pseudo-register numbers, so the fix would have to change which pass
+  creates a value rather than its source shape. `fldSkyDrawFilter` sits at 682
+  of 694 words on a three-slot rotation that twenty-odd source shapes, nine
+  declaration orders and every pointer form tried leave untouched.
 - An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits
   the plain branch. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
   ordinary C readily, 42 times in `field/fldDraw` and 126 in
@@ -226,8 +248,11 @@ function body:
 Two in `code_001FAE80` are blocked by the machine and the split rather than
 by C:
 
-- `func_00213DF0` uses `mult1`, the EE's second multiply pipe, which no C
-  expression reaches.
+- `func_00213DF0` uses `mult1`, the EE's second multiply pipe, in a way no C
+  expression reaches. `mult1` on its own is not a reason to skip a function:
+  ee-gcc 2.96's scheduler puts independent multiplies on the second pipe from
+  ordinary C, and the `fldSkyDrawFilter` draft reproduces sixteen interleaved
+  `mult`/`mult1` pairs from plain `v * gFilterAlpha / 128` expressions.
 - `fclDrawSpriteEx`'s split assembly holds two symbols, so writing C for one
   would drop the other's bytes. That is a boundary problem, not a matching
   one.

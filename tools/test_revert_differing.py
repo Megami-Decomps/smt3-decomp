@@ -103,12 +103,24 @@ void fldDrawInit(void) {
 class TestWrap(unittest.TestCase):
     def test_draft_is_kept_behind_the_fallback(self):
         body = ["void f(void) {", "    g();", "}"]
-        out = rd.wrap(body, "field/fldDraw", "f")
-        self.assertEqual(out[0], "#ifdef NON_MATCHING")
-        self.assertEqual(out[1:4], body)
-        self.assertEqual(out[4], "#else")
-        self.assertEqual(out[5], 'INCLUDE_ASM(const s32, "field/fldDraw", f);')
-        self.assertEqual(out[6], "#endif")
+        out = rd.wrap(body, "field/fldDraw", "f", "12 of 694 words differ")
+        self.assertTrue(out[0].startswith("/* NON_MATCHING: 12 of 694 words differ"))
+        i = out.index("#ifdef NON_MATCHING")
+        self.assertEqual(out[i + 1:i + 4], body)
+        self.assertEqual(out[i + 4], "#else")
+        self.assertEqual(out[i + 5], 'INCLUDE_ASM(const s32, "field/fldDraw", f);')
+        self.assertEqual(out[i + 6], "#endif")
+
+    def test_the_annotation_asks_for_what_is_left(self):
+        """A draft without the difference described is not worth keeping."""
+        out = rd.wrap(["void f(void) {", "}"], "u", "f", "3 of 9 words differ")
+        head = "\n".join(out[:out.index("#ifdef NON_MATCHING")])
+        self.assertIn("3 of 9 words differ", head)
+        self.assertIn("TODO", head)
+
+    def test_an_unmeasured_draft_says_so(self):
+        out = rd.wrap(["void f(void) {", "}"], "u", "f")
+        self.assertIn("difference not recorded", out[0])
 
     def test_the_draft_is_not_a_second_definition(self):
         """check_unit has to read the wrapped form as asm only."""
@@ -120,6 +132,7 @@ class TestWrap(unittest.TestCase):
             ["void f(void) {", "    g();", "}"], "field/fldDraw", "f"))
         stripped = cu.drop_nonmatching(text)
         self.assertNotIn("void f(void)", stripped)
+        self.assertNotIn("g();", stripped)
         self.assertIn('INCLUDE_ASM(const s32, "field/fldDraw", f);', stripped)
         self.assertNotIn("#ifdef NON_MATCHING", stripped)
 

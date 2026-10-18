@@ -706,6 +706,7 @@ OFF(p66, dds3GlobalWork_t, akuma, 0xA50);
 OFF(p66a, fldAnahoriAkuma_t, devilId, 0x08);
 OFF(p66b, fldAnahoriAkuma_t, hp, 0x0A);
 OFF(p66c, fldAnahoriAkuma_t, level, 0x1A);
+OFF(p66d, fldAnahoriAkuma_t, badstatus, 0x12);
 OFF(p67, dds3GlobalWork_t, gb, 0x6658);
 OFF(p68, dds3GlobalWork_t, takaraOpen, 0x11A58);
 OFF(p69, dds3GlobalWork_t, takaraOpenEx, 0x11A80);
