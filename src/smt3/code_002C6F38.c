@@ -1,48 +1,1297 @@
 #include "common.h"
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfDecomp);
+struct SdfGsPacketHeader;
+struct SdfGsRegisterWrite;
+struct IpuDmaState;
+struct SdfPacket;
+struct SdfKeyTreeItem;
+union MovObjStream;
+struct DevRequest;
+struct PacWork;
+struct SdfThreadNode;
+struct SdfTexRef;
+struct SdfTexBuf;
+struct SdfTexResource;
+struct SdfStreamFrameNode;
+struct MovObj;
+struct SdfGraphObj;
+struct SdfTex;
+struct SdfPacketBuilder;
+struct SdfMemBlock;
+struct SdfTextureFileHeader;
+struct DevState;
+struct SdfPacStreamPacketHeader;
+struct PacBuf;
+struct PacListAllocation;
+struct PacState;
+struct SdfPacDecoder;
+struct SdfKeyPoolNode;
+struct SdfKeyTreeNode;
+struct SdfPool;
+struct SdfStreamReadRequest;
+struct SdfStreamState;
+typedef int s128 __attribute__((mode(TI)));
+/* Convert three Euler angle components to the VU0 quaternion output.
+ * Providers: DDS1 game/code_002E7C20.c and DDS2 game/code_00340AC8.c. */
+void FromEuler(f32 x, f32 y, f32 z);
+/* Load matrix into the VU0 scratch bank and postmultiply the primary bank. */
+void MultMatrixRev(const void *matrix);
+/* Read the raw free-running count from EE timer 0. */
+extern u32 sdfGetRunTimeCountBase(void);
+/* Return the modulo-16-bit elapsed count from the EE timer 0 value. */
+extern u32 sdfGetRunTimeCount(u32 previous);
+/* Appending the packet patches the DMA tag's link; the VIF and GIF words
+ * retain the renderer's original commands and register-list encoding. */
+typedef struct SdfGsPacketHeader {
+    u64 dmaTag;
+    u64 vifCommands;
+    u64 gifTag;
+    u64 gifRegisters;
+} QWORD_ALIGNED SdfGsPacketHeader;
+typedef struct SdfGsRegisterWrite {
+    u64 value;
+    u64 registerId;
+} SdfGsRegisterWrite;
+/* Serialized byte consumed by the GS texture-state packet builder. */
+typedef u8 SdfTextureClampMode;
+/* IPU register state saved across stream callbacks (0x24 bytes). */
+typedef struct IpuDmaState {
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
+} IpuDmaState;
+/* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
+struct SdfStreamInputDmaTag;
+struct SoundFormat;
+/* The +0x1C movie work pointer selects one of two separately allocated records.
+ * isPac at +3 chooses the active arm; the variant payload types live in
+ * sdf_movie_stream.h. */
+struct MovLinearStream;
+struct MovPacStream;
+/* Four-doubleword DMA packet payload (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
+typedef struct SdfPacket {
+    u64 unk0;
+    u64 unk8;
+    u64 unk10;
+    u64 unk18;
+} SdfPacket;
+#define SDF_POOL_FREE_KIND 0xFFFF
+#define VU0_LOAD_MATRIX(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%0)\n\t" \
+    "lqc2 vf29, 16(%0)\n\t" \
+    "lqc2 vf30, 32(%0)\n\t" \
+    "lqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src))
+#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+#define VU0_CLIPW_XYZ(vf) __asm__ volatile ( \
+    ".set noreorder\n\tvclipw.xyz " #vf ", " #vf "w\n\t.set reorder")
+#define VU0_READ_CLIP_FLAGS_WAIT5(out) __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tvnop\n\tcfc2.ni %0, $vi18\n\t.set reorder" \
+    : "=r" (out))
+#define VU0_LOAD_VF_AT(vf, off, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_STORE_VF_AT_UNCLOBBERED(vf, off, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_POSITIVE_CLIP_PLANE(dst) __asm__ volatile ( \
+    ".set noreorder\n\tvaddw.xyz " #dst ", vf0, vf0w\n\t" \
+    "vmulw.w " #dst ", vf0, vf0w\n\t.set reorder")
+#define VU0_NEGATIVE_CLIP_PLANE(dst) __asm__ volatile ( \
+    ".set noreorder\n\tvsubw.xyzw " #dst ", vf0, vf0w\n\t" \
+    "vsubw.w " #dst ", vf0, vf0w\n\t.set reorder")
+#define VU0_CLIP_SEGMENT_PREP(first, second, firstColor, secondColor) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulw.xyzw vf3, vf2, " #first "w\n\t" \
+    "vmulw.xyzw vf4, vf2, " #second "w\n\t" \
+    "vsub.xyzw vf5, " #second ", " #first "\n\t" \
+    "vsub.xyzw vf6, " #secondColor ", " #firstColor "\n\t" \
+    "vsub.xyzw vf3, " #first ", vf3\n\t" \
+    "vsub.xyzw vf4, " #second ", vf4\n\t" \
+    "vsub.xyzw vf4, vf4, vf3\n\t.set reorder")
+#define VU0_CLIP_RATIO(axis) __asm__ volatile ( \
+    ".set noreorder\n\tvnop\n\tvnop\n\t" \
+    "vdiv Q, vf3" #axis ", vf4" #axis "\n\t.set reorder")
+#define VU0_PROJECT_COLORED_SEGMENT(first, second, firstColor, secondColor, scale, offset) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vdiv Q, vf0w, " #first "w\n\t" \
+    "vmul.xyz " #first ", " #first ", " #scale "\n\t" \
+    "vmulaw.xyz ACC, " #offset ", vf0w\n\t" \
+    "vmulx.w " #first ", " #first ", vf0x\n\t" \
+    "vftoi0.xyzw " #firstColor ", " #firstColor "\n\tvwaitq\n\t" \
+    "vmaddq.xyz " #first ", " #first ", Q\n\t" \
+    "vdiv Q, vf0w, " #second "w\n\t" \
+    "vmul.xyz " #second ", " #second ", " #scale "\n\t" \
+    "vmulx.w " #second ", " #second ", vf0x\n\t" \
+    "vftoi4.xyzw " #first ", " #first "\n\t" \
+    "vftoi0.xyzw " #secondColor ", " #secondColor "\n\tvwaitq\n\t" \
+    "vmaddq.xyz " #second ", " #second ", Q\n\t" \
+    "vftoi4.xyzw " #second ", " #second "\n\t.set reorder")
+#define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "lw $2, 0(%1)\n" \
+    "pextlb $2, $0, $2\n" \
+    "pextlh $2, $0, $2\n" \
+    "qmtc2.ni $2, vf10\n" \
+    "vitof0.xyzw vf10, vf10\n" \
+    "qmtc2.ni %0, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    ".set reorder" \
+    : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
+#define EE_MMI_RGBA_TO_VF(vf, rgba) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %0\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, " #vf "\n\t" \
+    "vitof0.xyzw " #vf ", " #vf "\n\t" \
+    ".set reorder" \
+    : : "r" (rgba) : "$2")
+/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+typedef u8 SdfDevOperationCode;
+typedef s8 SdfDevStateCode;
+#define SDF_DEV_EVENT_INACTIVE 0
+#define SDF_DEV_EVENT_OPENED 2
+#define SDF_DEV_EVENT_SIZE_REPLY 4
+#define SDF_DEV_EVENT_READ_REPLY 5
+#define SDF_DEV_EVENT_CLOSED 7
+/* Tree view of a pool node: the link word at +0 becomes the replaced-item
+ * link, +0x4..+0xB stay opaque, and +0xC is compared as a float key. */
+typedef struct SdfKeyTreeItem {
+    struct SdfKeyTreeItem *replaced; /* 0x00 */
+    u8 pad04[8];                     /* 0x04: opaque */
+    f32 key;                         /* 0x0C */
+} SdfKeyTreeItem;
+enum {
+    SDF_TMX_MAGIC = 0x30584D54,
+    SDF_STREAM_CHUNK_BYTES = 0x4000,
+    SDF_STREAM_COMMAND_CREATE_STATE = 32,
+    SDF_STREAM_COMMAND_CONTROL = 33,
+    SDF_STREAM_COMMAND_READ = 34,
+    SDF_STREAM_COMMAND_RELEASE_STATE = 35,
+    SDF_IOP_MODULES_PER_GROUP = 2,
+    SDF_KEY_TREE_PATH_LIMIT = 32,
+    SDF_POOL_REBUILD_CHAIN = 0,
+    SDF_POOL_PUSH_FREE = 1
+};
+/* Read the entry count word, size the list for it and arm the skip handler. */
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfDecompInit);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfDrawModelWithMatrix);
 
-INCLUDE_ASM(const s32, "code_002C6F38", effDebugDrawWireModel);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfDrawRotatedModel);
+enum {
+    SDF_DECODE_READ_COMMAND = 1,
+    SDF_DECODE_READ_COUNT_LOW = 2,
+    SDF_DECODE_READ_COUNT_HIGH = 3,
+    SDF_DECODE_DISPATCH = 4,
+    SDF_DECODE_COPY_LITERAL = 5,
+    SDF_DECODE_FILL_BYTE = 6,
+    SDF_DECODE_COPY_SHORT_BACKREF = 7,
+    SDF_DECODE_READ_BACKREF_LOW = 8,
+    SDF_DECODE_READ_BACKREF_HIGH = 9,
+    SDF_DECODE_EXPAND_BYTES = 10
+};
+/* PAC command high bits choose the decoder operation; low five bits encode length.
+ * Values at or above 0xE0 are reserved except for the 0xFF end marker. */
+enum {
+    SDF_DECODE_COMMAND_CLASS_MASK = 0xE0,
+    SDF_DECODE_COMMAND_LENGTH_MASK = 0x1F,
+    SDF_DECODE_COMMAND_END_MARKER = 0xFF,
+    SDF_DECODE_COMMAND_RESERVED_MIN = 0xE0,
+    SDF_DECODE_COMMAND_COPY_LITERAL = 0x00,
+    SDF_DECODE_COMMAND_ZERO_FILL = 0x20,
+    SDF_DECODE_COMMAND_REPEAT_BYTE = 0x40,
+    SDF_DECODE_COMMAND_COPY_SHORT_BACKREFERENCE = 0x60,
+    SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE = 0x80,
+    SDF_DECODE_COMMAND_EXPAND_BYTES = 0xA0
+};
+extern const u8 *D_00594780[16];
+/* Incrementally decode the PAC byte stream, preserving partial commands when
+ * the caller's input chunk ends. */
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfTmxSetHeader);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfFileRpcContinueRead);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfFileRpcReadCallback);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfFileRpcHandler);
+extern f32 sdfDrawFaceListParam[][4];
+/* vu0 routine: clip homogeneous line pairs and build a coloured GS packet. */
+
+
+extern u8 sdf3DScreenTm[];
+extern u8 D_00594940[];
+/* Load SDFIOPFL, wake the creator, and serve the registered stream RPC commands. */
+
+
+extern void StartThread();
+extern void SleepThread(void);
+/* Start the newly created worker, then record and suspend the calling thread. */
+
+
+extern char *mcModuleNames[];
+extern s32 sceSifLoadModule(const char *, s32, const char *);
+extern char *strcpy(char *, const char *);
+extern char *strcat(char *, const char *);
+extern void sceMcInit(void);
+extern void sdfGrJoinDrawTag(void *left, void *right);
+typedef union MovObjStream {
+    struct MovLinearStream *linear;
+    struct MovPacStream *pac;
+} MovObjStream;
+typedef struct DevRequest {
+    struct SdfMemBlock *backingAllocation;
+    s16 usedCount;
+    u16 capacity;
+    s16 stride;
+    s16 growStep;
+    void *buffer;
+} DevRequest;
+/*
+ * SDK word carriers used by effSampleColorAlphaTracks and the bit-scaled
+ * billboard blends. Each conversion owns its native 16-byte workspace.
+ * Other unpack/pack operand contracts keep their existing macros.
+ * See docs/idioms.md, "SDK RGBA word carriers".
+ */
+static inline void eeUnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+/* Queue node allocated with an inline, variable-length PAC packet. */
+typedef struct PacWork {
+    struct PacWork *next; /* 0x00 */
+    struct PacState *owner; /* 0x04 */
+    void *resourceHandle; /* 0x08: tag-selected allocation or resource-list pointer */
+    u8 *dataCursor; /* 0x0C */
+    u8 packet[0]; /* 0x10: copied packet header, extensions, and data */
+} PacWork;
+#define VU0_CLIP_SEGMENT_UPDATE(position, color) __asm__ volatile ( \
+    ".set noreorder\n\tvwaitq\n\tvaddq.x vf2, vf0, Q\n\tvabs.x vf2, vf2\n\t" \
+    "vmulaw.xyzw ACC, " #position ", vf0w\n\t" \
+    "vmaddx.xyzw " #position ", vf5, vf2x\n\t" \
+    "vmulaw.xyzw ACC, " #color ", vf0w\n\t" \
+    "vmaddx.xyzw " #color ", vf6, vf2x\n\t" \
+    "vclipw.xyz " #position ", " #position "w\n\t.set reorder")
+/* Allocate a workspace sized by stackBytes, pass the thread entry to
+ * CreateThreadSimple, and return that function's result unchanged. */
+s32 sdfCreateThreadWithStack(void (*entryAddress)(), s32 stackBytes, s32 priority);
+/* Linked registry node stored in the title's tracked-thread table (0x8). */
+typedef struct SdfThreadNode {
+    struct SdfThreadNode *next; /* 0x00 */
+    s32 threadId;               /* 0x04 */
+} SdfThreadNode;
+/* Register a thread node, then start its entry function on the supplied stack. */
+void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void),
+                           void *stack, s64 stackSize, s32 priority, s32 arg);
+/* Per-texture reference count and non-owning clone source (0x8). */
+typedef struct SdfTexRef {
+    struct SdfTex *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
+    s32 refCount;
+} SdfTexRef;
+/* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
+typedef struct SdfTexBuf {
+    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
+    u32 gifTagControl; /* High GIFtag control word; one packed register. */
+    u64 gifTagRegisters; /* Packed register list: A+D. */
+    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
+    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
+    u64 textureState; /* GS TEX0 data. */
+    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
+    u64 clampState; /* GS CLAMP data. */
+    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
+} SdfTexBuf;
+/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
+typedef struct SdfTexResource {
+    struct SdfTexResource *next; /* 0x00 */
+    struct SdfTexResource *prev; /* 0x04 */
+    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
+    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
+    s32 size;                   /* 0x10: range length in 32-bit words */
+    s16 width;                  /* 0x14 */
+    s16 height;                 /* 0x16 */
+    s32 format;                 /* 0x18: GS pixel-storage mode */
+} SdfTexResource;
+/* Allocate a low-VRAM image block and record its logical dimensions and format.
+ * The caller owns the returned block and releases it with the masked updater below. */
+SdfTexResource *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
+typedef struct SdfStreamFrameNode {
+    struct SdfStreamFrameNode *streamPrev;
+    struct SdfStreamFrameNode *streamNext;
+    struct SdfStreamFrameNode *next;
+    u8 active;
+    u8 queued;
+    u8 ipuCycleInitialized; /* First-use IPU setup has run for this playback cycle. */
+    u8 drained;
+    u8 playbackPhase;
+    u8 inputFeedEnabled; /* Restart input feeding after DMA completion while input remains. */
+    u8 inputDmaStartPending;
+    u8 pendingPlaybackSubmissions; /* Queued output submissions not yet retired by a playback update. */
+    u8 audioMode;
+    u8 loopMode;
+    u8 playbackCadenceStep;
+    u8 playbackCadenceRemainder;
+    u8 bufferIndex;
+    u8 transferPacketIndex;
+    u8 completedBufferCount; /* Completed output buffers waiting for playback submission. */
+    u8 pad1B;
+    s32 bufferSize;
+    void *frameBuffers[2];
+    void *transferPacketBuffers[2];
+    u32 transferPacketBytes;
+    s32 resourceWord;
+    SdfTexResource *textureHead;
+    u16 width;
+    u16 height;
+    u32 cycleLength;
+    u32 tickCount;
+    s32 playbackFrameIndex;
+    struct SdfStreamInputDmaTag *inputDmaChain;
+    u8 headerReady;
+    u8 done;
+    u8 filledSlots;
+    u8 firstSlot;
+    u8 *scratchBuffer;
+    u8 pad58[4];
+    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+    struct MovObj *readContext; /* Owner context passed to the read callback. */
+    u8 inputFeedDmaInFlight;
+    u8 unk65;
+    u8 pad66[2];
+    IpuDmaState dma;
+} SdfStreamFrameNode;
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
+typedef struct MovObj {
+    u8 active;
+    u8 state;
+    u8 stopRequested;
+    u8 isPac;
+    u16 unk04;
+    u16 unk06;
+    u32 unk08;
+    u16 unk0C;
+    u16 unk0E;
+    struct DevState *deviceState;
+    s32 totalBytes;
+    s32 remainingBytes;
+    MovObjStream stream;
+    u8 pacEnabled;
+    u8 pad21;
+    u8 packetLimit;
+    u8 pad23;
+    SdfStreamFrameNode soundNode;
+} MovObj;
+/* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
+typedef struct SdfGraphObj {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u8 bufferFormat;
+    u8 auxiliaryFormat;
+    SdfTexResource *buffers[3];
+} SdfGraphObj;
+/* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
+typedef struct SdfTex {
+    struct SdfTex *next;
+    struct SdfTex *prev;
+    SdfTexRef *reference;
+    s16 width;
+    s16 height;
+    SdfTexResource *primaryResource;
+    SdfTexResource *secondaryResource;
+    u8 paletteCount;
+    u8 clutFormat;
+    u8 pixelFormat;
+    u8 maxMipLevel;
+    u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
+    u8 unk1E;
+    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
+    s32 resourceKey;
+    s32 battleTextureSlot;
+    SdfTexBuf *primaryBuffer;
+    SdfTexBuf *secondaryBuffer;
+    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
+    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetPaletteByteSize. */
+    s32 unk38;
+    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
+} SdfTex;
+/* Frame/depth builder state: one DMA/GIF header and two A+D register writes. */
+typedef struct SdfPacketBuilder {
+    u8 pad00[4];
+    void (*prepare)(struct SdfPacketBuilder *, s32 bufferIndex);
+    u8 pad08[8];
+    SdfGsPacketHeader packetHeader;
+    SdfGsRegisterWrite frame;
+    SdfGsRegisterWrite zbuf;
+    SdfGraphObj *source;
+    u32 frameMask;
+    s32 region;
+    s32 mode;
+} SdfPacketBuilder;
+void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex);
+void sdfGrSetFramePacket(SdfPacketBuilder *packet, SdfGraphObj *source,
+    u32 frameMask, s32 region, s32 mode);
+/* General-heap allocation descriptor (0x10); links bound the represented span. */
+typedef struct SdfMemBlock {
+    struct SdfMemBlock *prev; /* 0x00 */
+    struct SdfMemBlock *next; /* 0x04 */
+    s32 address;              /* 0x08: start of represented span */
+    u16 state;                /* 0x0C: free, used, or end sentinel */
+    s16 referenceCount;       /* 0x0E: -1 for sentinels */
+} SdfMemBlock;
+DevRequest *sdfItemArrayNew(s32 count, s32 stride, s32 growStep);
+/* Serialized texture-resource header; payload begins after this 0x40-byte prefix. */
+typedef struct SdfTextureFileHeader {
+    u8 unk00;
+    u8 payloadOffsetFlags; /* 0x01: high nibble adds payload offset bytes; low bits stay opaque. */
+    u8 pad02[2];       /* 0x02 */
+    u32 byteCount;     /* 0x04 */
+    u32 magic;         /* 0x08 */
+    u8 pad0C[4];       /* 0x0C */
+    u8 paletteCount;   /* 0x10 */
+    u8 clutFormat;     /* 0x11 */
+    s16 width;         /* 0x12 */
+    s16 height;        /* 0x14 */
+    u8 pixelFormat;    /* 0x16 */
+    u8 maxMipLevel;    /* 0x17 */
+    u16 lodParameters; /* 0x18 */
+    u8 unk1A;          /* 0x1A */
+    SdfTextureClampMode clampMode; /* 0x1B: serialized GS clamp mode */
+    s32 resourceKey;   /* 0x1C */
+    s32 battleTextureSlot; /* 0x20: selects one of two battle-model texture headers */
+    u8 pad24[0x1C];    /* 0x24 */
+} SdfTextureFileHeader;
+/* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
+typedef struct DevState {
+    struct DevState *next; /* 0x00 */
+    struct DevState *previous; /* 0x04 */
+    struct DevState *workerNext; /* 0x08 */
+    struct DevState *workerPrev; /* 0x0C */
+    char *resolvedPath; /* 0x10 */
+    u8 workerIndex; /* 0x14 */
+    SdfDevOperationCode operation; /* 0x15 */
+    SdfDevStateCode state; /* 0x16 */
+    u8 pad17; /* 0x17 */
+    s32 operationArg; /* 0x18 */
+    s32 requestExtra; /* 0x1C */
+    void *requestData; /* 0x20 */
+    s32 options; /* 0x24 */
+    s32 resourceId; /* 0x28 */
+    s32 result; /* 0x2C */
+    s32 transferred; /* 0x30 */
+    u8 pad34[4]; /* 0x34 */
+    void (*callback)(struct DevState *, s32, s32, s32, s32); /* 0x38 */
+    s32 callbackContext; /* 0x3C: opaque callback-context word */
+} DevState;
+s32 sdfFileCmdRead(DevState *state, void *data, s32 byteCount);
+s32 sdfFileCmdFree(DevState *state);
+s32 sdfFileCmdClearError(DevState *state);
+s32 sdfFileCmdClose(DevState *request);
+/* Fixed serialized header shared by the PAC stream reader and dispatcher.
+ * The model packet view names the word at +0x08 as a tag. */
+typedef struct SdfPacStreamPacketHeader {
+    u8 command; /* 0x00 */
+    u8 flags; /* 0x01 */
+    u8 reserved02[2];
+    s32 payloadSize; /* 0x04: serialized packet bytes */
+    u8 reserved08[4];
+    s32 decodedSize; /* 0x0C */
+    u8 payload[0]; /* 0x10: variable packet contents */
+} SdfPacStreamPacketHeader;
+/* Complete 0x10-byte packet buffer: texture is the acquired output, while
+ * resourceSlot owns the optional general-heap allocation descriptor. */
+typedef struct PacBuf {
+    struct SdfTex *texture;
+    struct SdfMemBlock *resourceSlot;
+    u8 *cursor;
+    s32 remainingBytes;
+} PacBuf;
+/* Per-queue allocation-list descriptor selected through PacState.slot. */
+typedef struct PacListAllocation {
+    s32 entryCount; /* 0x00 */
+    s32 entryIndex; /* 0x04 */
+    u8 pad08[8]; /* 0x08 */
+    SdfPacStreamPacketHeader entry; /* 0x10 */
+    PacBuf buffer; /* 0x20 */
+} PacListAllocation;
+/* Complete 0x38-byte PAC decoder state shared by file and model loaders. */
+typedef struct PacState {
+    s8 phase; /* 0x00: -1 complete, 0 boundary, 1 skip, 2 input handler */
+    u8 flags; /* 0x01 */
+    u16 packetCounter; /* 0x02: wraps from the initial 0xFFFF */
+    s32 (*packetCallback)(); /* 0x04: event callbacks have different arities */
+    void (*onInput)(struct PacState *); /* 0x08 */
+    void (*onComplete)(struct PacState *); /* 0x0C */
+    const u8 *inputCursor; /* 0x10 */
+    s32 inputAvailable; /* 0x14 */
+    s32 consumedBytes; /* 0x18 */
+    u8 *outputCursor; /* 0x1C */
+    s32 pendingBytes; /* 0x20 */
+    u8 *decoder; /* 0x24: decoder work block, held as a byte pointer */
+    PacBuf *resourceBuffer; /* 0x28 */
+    union {
+        PacBuf *resource;
+        PacListAllocation *list;
+    } slot; /* 0x2C */
+    PacWork *queueHead; /* 0x30 */
+    PacWork *queueTail; /* 0x34 */
+} PacState;
+s32 sdfPacDecode(PacState *state, const u8 *input, s32 inputByteCount);
+/* Incremental decoder access view shared by both providers. The backing
+ * decoder block is allocated as 0x20 bytes; only this 0x14-byte prefix is
+ * described here, and its trailing allocation bytes remain unknown. */
+typedef struct SdfPacDecoder {
+    u8 state;             /* 0x00 */
+    u8 command;           /* 0x01 */
+    u16 pendingBytes;     /* 0x02 */
+    u8 *output;           /* 0x04 */
+    const u8 *input;      /* 0x08 */
+    s32 inputBytes;       /* 0x0C */
+    u8 backrefLow;        /* 0x10 */
+    u8 pad11[3];          /* 0x11: opaque */
+} SdfPacDecoder;
+/* Pool release logic tests the packet head address and kind at 0xC;
+ * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
+ * same +0xC word through SdfKeyTreeItem. DDS1/2 game/code_002EEA18/003478C0.c. */
+typedef struct SdfKeyPoolNode {
+    struct SdfKeyPoolNode *next; /* 0x00 */
+    s32 packetHeadAddress;       /* 0x04: first DMA packet address. */
+    u8 unk8[4];                  /* 0x08 */
+    s32 kind;                    /* 0x0C */
+} SdfKeyPoolNode;
+typedef struct SdfKeyTreeNode {
+    struct SdfKeyTreeNode *right; /* 0x00 */
+    struct SdfKeyTreeNode *left;  /* 0x04 */
+    struct SdfKeyTreeItem *item;  /* 0x08 */
+    s32 balance;                  /* 0x0C */
+} SdfKeyTreeNode;
+/* A key-sorted draw-surface pool: an SdfPoolNode whose append and prepend
+ * callbacks release a node into the pool and update its free list. */
+typedef struct SdfPool {
+    void *link;                                                /* 0x00: the pool entry's link */
+    SdfKeyPoolNode *head;                                      /* 0x04: first node in the emitted chain */
+    SdfKeyPoolNode *tail;                                      /* 0x08: last node in the emitted chain */
+    SdfKeyPoolNode *freeHead;                                  /* 0x0C */
+    void (*release)(struct SdfPool *, SdfKeyPoolNode *);       /* 0x10: the entry's append */
+    void (*update)(struct SdfPool *, s32, SdfKeyPoolNode *);   /* 0x14: the entry's prepend */
+    SdfKeyTreeNode *keyTree[1];                                /* 0x18: first root; allocation continues */
+} SdfPool;
+/* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
+ * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
+s32 sdfGrAllocPacketBuff(s32 size);
+/* Read the active packet cursor or restore it at a quadword boundary. */
+s32 sdfGrOpenPacketBuff(void);
+void sdfGrClosePacketBuff(s32 cursorAddress);
+typedef struct SdfStreamReadRequest {
+    u8 opaque00[4];
+    s32 destinationAddress; /* Caller-provided address word in the read request. */
+    s32 byteCount;
+} SdfStreamReadRequest;
+typedef struct SdfStreamState {
+    DevState *deviceState;
+    s32 semaphore;
+    s32 readResult;
+    s32 remainingBytes;
+    u8 *destination; /* +0x10: current DMA destination; advanced per completed chunk. */
+    s32 transferredBytes;
+} SdfStreamState;
+extern s32 D_00552170;
+/* vu0 routine: render line pairs using the cached composed matrix. */
+
+
+/* vu0 routine: compose the current matrix with the cached transform, then render line pairs. */
+
+
+/* Initialize a zeroed TMX0 header with the caller's palette metadata. */
+
+
+extern SdfStreamState sdfFileRpcState;
+extern s32 sdfFileRpcBuf[];
+extern DevState *sdfFileCmdReadOpen(const char *path,
+                                          s32 (*callback)(DevState *, s32, s32, s32, s32),
+                                          s32 callbackContext);
+extern s32 sdfFileCmdFileSize();
+extern s32 WaitSema(s32);
+/* Queue at most one staging-buffer-sized read; the completion callback advances the byte counts. */
+
+
+extern void FlushCache(s32);
+extern s32 SignalSema(s32);
+extern s32 sceSifSetDma(void *, s32);
+extern s32 sceSifDmaStat(s32);
+extern s32 GetThreadId(void);
+extern s32 sdfFileRpcThreadId;
+void SdfFileRpcServerThreadProc(void);
+/* One row per administrative mode. The entry receives the restore flag and
+ * mode data; destroy and cleanup return scheduler results. Each row is 12 bytes
+ * on the EE. */
+typedef struct Dds3AdminModeDispatch {
+    void (*entry)(s32 restoring, void *data);
+    s32 (*destroy)(void);
+    s32 (*cleanup)(void);
+} Dds3AdminModeDispatch;
+extern void *memcpy(void *, const void *, unsigned int);
+
+s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes);
+void sdfDecompInit(SdfPacDecoder *decoder, u8 *output);
+SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags);
+void sdfTmxSetHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 paletteCount, s32 clutFormat);
+void sdfFileRpcContinueRead(void);
+s32 sdfFileRpcReadCallback(DevState *deviceState, s32 command, s32 sourceAddress,
+                  s32 byteCount, s32 callbackArg);
+s32 *sdfFileRpcHandler(u32 command, s32 request);
+void sdfStartFileRpcServer(void);
+void LoadMcModules(const char *prefix, s32 moduleGroup);
+SdfKeyTreeNode *sdfSortOtAvlRotateLR(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent);
+SdfKeyTreeNode *sdfSortOtAvlRotateRL(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent);
+void sdfSortOtAvlCheckBalance(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
+                   SdfKeyTreeNode **root);
+void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyTreeItem *item);
+void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node);
+void sdfGrSortOtFixup(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail);
+void sdfGrSortOtTraverse(SdfKeyTreeNode *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail);
+void sdfGrSortOtSetup(SdfPool *pool);
+void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode);
+
+s32 sdfDecomp(SdfPacDecoder *decoder, const u8 *input, s32 inputBytes) {
+    s32 count;
+    s32 offset;
+    u8 *output;
+    u32 sourceAddress;
+
+    if (decoder->state == 0) {
+        return 1;
+    }
+
+    D_00552170 = 0;
+    output = decoder->output;
+    if (inputBytes > 0) {
+        do {
+            switch (decoder->state) {
+                case SDF_DECODE_READ_COMMAND: {
+                    u8 command;
+                    s32 commandBytes;
+                    s32 historyIndex = D_00552170;
+
+                    inputBytes--;
+                    D_00594780[historyIndex] = input;
+                    D_00552170 = (historyIndex + 1) & 0xF;
+                    command = *input++;
+                    if (command >= SDF_DECODE_COMMAND_RESERVED_MIN) {
+                        if (command == SDF_DECODE_COMMAND_END_MARKER) {
+                            decoder->output = output;
+                            decoder->input = input;
+                            decoder->inputBytes = inputBytes;
+                            decoder->state = 0;
+                            return 1;
+                        }
+                    } else {
+                        decoder->command = command & SDF_DECODE_COMMAND_CLASS_MASK;
+                        commandBytes = command & SDF_DECODE_COMMAND_LENGTH_MASK;
+                        if (commandBytes == 0) {
+                            decoder->state = SDF_DECODE_READ_COUNT_LOW;
+                        } else {
+                            decoder->pendingBytes = commandBytes;
+                            decoder->state = SDF_DECODE_DISPATCH;
+                        }
+                    }
+                    break;
+                }
+                case SDF_DECODE_READ_COUNT_LOW:
+                    decoder->pendingBytes = *input++;
+                    inputBytes--;
+                    decoder->state = SDF_DECODE_READ_COUNT_HIGH;
+                    break;
+                case SDF_DECODE_READ_COUNT_HIGH:
+                    decoder->pendingBytes |= *input++ << 8;
+                    inputBytes--;
+                    decoder->state = SDF_DECODE_DISPATCH;
+                    break;
+                case SDF_DECODE_DISPATCH:
+                    switch (decoder->command) {
+                    case SDF_DECODE_COMMAND_COPY_LITERAL:
+                        decoder->state = SDF_DECODE_COPY_LITERAL;
+                        break;
+                    case SDF_DECODE_COMMAND_ZERO_FILL:
+                        count = decoder->pendingBytes;
+                        memset(output, 0, count);
+                        output += count;
+                        decoder->state = SDF_DECODE_READ_COMMAND;
+                        break;
+                    case SDF_DECODE_COMMAND_REPEAT_BYTE:
+                        decoder->state = SDF_DECODE_FILL_BYTE;
+                        break;
+                    case SDF_DECODE_COMMAND_COPY_SHORT_BACKREFERENCE:
+                        decoder->state = SDF_DECODE_COPY_SHORT_BACKREF;
+                        break;
+                    case SDF_DECODE_COMMAND_COPY_LONG_BACKREFERENCE:
+                        decoder->state = SDF_DECODE_READ_BACKREF_LOW;
+                        break;
+                    case SDF_DECODE_COMMAND_EXPAND_BYTES:
+                        decoder->state = SDF_DECODE_EXPAND_BYTES;
+                        break;
+                    }
+                    break;
+                case SDF_DECODE_COPY_LITERAL:
+                    count = decoder->pendingBytes;
+                    if (inputBytes < count) {
+                        count = inputBytes;
+                    }
+                    memcpy(output, input, count);
+                    output += count;
+                    input += count;
+                    inputBytes -= count;
+                    decoder->pendingBytes -= count;
+                    if (decoder->pendingBytes == 0) {
+                        decoder->state = SDF_DECODE_READ_COMMAND;
+                    }
+                    break;
+                case SDF_DECODE_FILL_BYTE:
+                    count = decoder->pendingBytes;
+                    memset(output, *input++, count);
+                    output += count;
+                    inputBytes--;
+                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    break;
+                case SDF_DECODE_COPY_SHORT_BACKREF:
+                    sourceAddress = (u32)(output - *input++);
+                    count = decoder->pendingBytes;
+                    inputBytes--;
+                    do {
+                        *output++ = *(u8 *)sourceAddress++;
+                    } while (--count != 0);
+                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    break;
+                case SDF_DECODE_READ_BACKREF_LOW:
+                    decoder->backrefLow = *input++;
+                    inputBytes--;
+                    if (inputBytes == 0) {
+                        decoder->state = SDF_DECODE_READ_BACKREF_HIGH;
+                        break;
+                    }
+                    /* fallthrough */
+                case SDF_DECODE_READ_BACKREF_HIGH: {
+                    s32 combinedOffset;
+
+                    offset = *input++ << 8;
+                    sourceAddress = decoder->backrefLow;
+                    inputBytes--;
+                    combinedOffset = sourceAddress | offset;
+                    sourceAddress = (u32)(output - combinedOffset);
+                    count = decoder->pendingBytes;
+                    do {
+                        *output++ = *(u8 *)sourceAddress++;
+                    } while (--count != 0);
+                    decoder->state = SDF_DECODE_READ_COMMAND;
+                    break;
+                }
+                case SDF_DECODE_EXPAND_BYTES:
+                    count = decoder->pendingBytes;
+                    if (inputBytes < count) {
+                        count = inputBytes;
+                        inputBytes = 0;
+                        decoder->pendingBytes -= count;
+                    } else {
+                        decoder->pendingBytes = 0;
+                        decoder->state = SDF_DECODE_READ_COMMAND;
+                        inputBytes -= count;
+                    }
+                    do {
+                        *output++ = *input++;
+                        *output++ = 0;
+                    } while (--count != 0);
+                    break;
+            }
+        } while (inputBytes > 0);
+    }
+    decoder->input = input;
+    decoder->inputBytes = inputBytes;
+    decoder->output = output;
+    return 0;
+}
+
+void sdfDecompInit(SdfPacDecoder *decoder, u8 *output) {
+    decoder->output = output;
+    decoder->state = 1;
+}
+
+SdfPacket *sdfDrawModelWithMatrix(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    SdfPacket *packet;
+    f32 (*viewport)[4];
+    u128 *cursor;
+    s32 i;
+    s32 emitted;
+    s32 plane;
+    u32 clipFlags;
+    u32 firstClip;
+    u32 secondClip;
+    u32 quadwordCount;
+
+    packet = (SdfPacket *)sdfGrOpenPacketBuff();
+    cursor = (u128 *)(packet + 1);
+    viewport = sdfDrawFaceListParam;
+    VU0_LOAD_VF_AT(vf14, 0x0, viewport);
+    VU0_LOAD_VF_AT(vf15, 0x10, viewport);
+    emitted = 0;
+    for (i = 0; i < vertexCount; i += 2) {
+        VU0_LOAD_VF(vf10, vertices[i]);
+        EE_MMI_RGBA_TO_VF(vf8, colors[i]);
+        VU0_TRANSFORM_POINT(vf10, vf10);
+        VU0_LOAD_VF(vf11, vertices[i + 1]);
+        EE_MMI_RGBA_TO_VF(vf9, colors[i + 1]);
+        VU0_TRANSFORM_POINT(vf11, vf11);
+        VU0_CLIPW_XYZ(vf10);
+        VU0_CLIPW_XYZ(vf11);
+        VU0_READ_CLIP_FLAGS_WAIT5(clipFlags);
+        firstClip = (clipFlags >> 6) & 0x3F;
+        secondClip = clipFlags & 0x3F;
+        if ((firstClip & secondClip) != 0 || (firstClip & 0x20) != 0 || (secondClip & 0x20) != 0) {
+            continue;
+        }
+        if (firstClip != 0 || secondClip != 0) {
+            for (plane = 4; plane != -1; plane--) {
+                if (firstClip & (1 << plane)) {
+                    if ((plane & 1) == 0) {
+                        VU0_POSITIVE_CLIP_PLANE(vf2);
+                    } else {
+                        VU0_NEGATIVE_CLIP_PLANE(vf2);
+                    }
+                    VU0_CLIP_SEGMENT_PREP(vf10, vf11, vf8, vf9);
+                    switch (plane) {
+                    case 0:
+                    case 1:
+                        VU0_CLIP_RATIO(x);
+                        break;
+                    case 2:
+                    case 3:
+                        VU0_CLIP_RATIO(y);
+                        break;
+                    default:
+                        VU0_CLIP_RATIO(z);
+                        break;
+                    }
+                    VU0_CLIP_SEGMENT_UPDATE(vf10, vf8);
+                    VU0_READ_CLIP_FLAGS_WAIT5(firstClip);
+                    firstClip &= 0x3F;
+                    if (firstClip & secondClip) {
+                        break;
+                    }
+                }
+                if (secondClip & (1 << plane)) {
+                    if ((plane & 1) == 0) {
+                        VU0_POSITIVE_CLIP_PLANE(vf2);
+                    } else {
+                        VU0_NEGATIVE_CLIP_PLANE(vf2);
+                    }
+                    VU0_CLIP_SEGMENT_PREP(vf11, vf10, vf9, vf8);
+                    switch (plane) {
+                    case 0:
+                    case 1:
+                        VU0_CLIP_RATIO(x);
+                        break;
+                    case 2:
+                    case 3:
+                        VU0_CLIP_RATIO(y);
+                        break;
+                    default:
+                        VU0_CLIP_RATIO(z);
+                        break;
+                    }
+                    VU0_CLIP_SEGMENT_UPDATE(vf11, vf9);
+                    VU0_READ_CLIP_FLAGS_WAIT5(secondClip);
+                    secondClip &= 0x3F;
+                    if (firstClip & secondClip) {
+                        break;
+                    }
+                }
+            }
+            if (firstClip & secondClip) {
+                continue;
+            }
+        }
+        VU0_PROJECT_COLORED_SEGMENT(vf10, vf11, vf8, vf9, vf14, vf15);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf8, 0x0, cursor);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf10, 0x10, cursor);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf9, 0x20, cursor);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf11, 0x30, cursor);
+        cursor += 4;
+        emitted += 2;
+    }
+    sdfGrClosePacketBuff((s32)cursor & 0x0FFFFFFF);
+    quadwordCount = emitted * 2 + 1;
+    packet->unk0 = (quadwordCount & 0xFFFF) | 0x20000000;
+    packet->unk8 = ((u64)(quadwordCount | 0x50000000) << 32) | 0x10000000;
+    packet->unk10 = emitted | ((u64)(primitiveFlags | 9) << 47) | 0x2000400000008000ULL;
+    packet->unk18 = 0x41;
+    return packet;
+}
+
+SdfPacket *effDebugDrawWireModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    VU0_LOAD_MATRIX(sdf3DScreenTm);
+    return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
+}
+
+SdfPacket *sdfDrawRotatedModel(const f32 vertices[][4], const u32 *colors, s32 vertexCount, u32 primitiveFlags) {
+    MultMatrixRev(sdf3DScreenTm);
+    return sdfDrawModelWithMatrix(vertices, colors, vertexCount, primitiveFlags);
+}
+
+void sdfTmxSetHeader(SdfTextureFileHeader *header, s32 width, s32 height, s32 depth, s32 paletteCount, s32 clutFormat) {
+    memset(header, 0, sizeof(SdfTextureFileHeader));
+    header->clutFormat = clutFormat;
+    header->width = width;
+    header->height = height;
+    header->pixelFormat = depth;
+    header->paletteCount = paletteCount;
+    header->magic = SDF_TMX_MAGIC;
+    header->unk00 = 2;
+}
+
+void sdfFileRpcContinueRead(void) {
+    s32 chunkBytes = sdfFileRpcState.remainingBytes;
+
+    if (chunkBytes > SDF_STREAM_CHUNK_BYTES) {
+        chunkBytes = SDF_STREAM_CHUNK_BYTES;
+    }
+    sdfFileCmdRead(sdfFileRpcState.deviceState, D_00594940, chunkBytes);
+}
+
+s32 sdfFileRpcReadCallback(DevState *deviceState, s32 command, s32 sourceAddress,
+                  s32 byteCount, s32 callbackArg) {
+    SdfStreamState *stream = &sdfFileRpcState;
+    s32 dmaId;
+    s32 timer;
+
+    switch (command) {
+    case SDF_DEV_EVENT_SIZE_REPLY:
+        stream->readResult = byteCount;
+        SignalSema(stream->semaphore);
+        break;
+    case SDF_DEV_EVENT_READ_REPLY: {
+        struct {
+            s32 source;
+            s32 destination;
+            s32 size;
+            s32 attributes;
+        } transfer;
+
+        FlushCache(0);
+        transfer.source = sourceAddress;
+        transfer.destination = (s32)stream->destination;
+        transfer.size = byteCount;
+        transfer.attributes = 0;
+        dmaId = sceSifSetDma(&transfer, 1);
+        while (sceSifDmaStat(dmaId) >= 0) {
+            timer = sdfGetRunTimeCountBase();
+            while ((s32)sdfGetRunTimeCount(timer) <= 0) {
+            }
+        }
+        timer = sdfGetRunTimeCountBase();
+        while ((s32)sdfGetRunTimeCount(timer) < 0x64) {
+        }
+        stream->destination += byteCount;
+        stream->transferredBytes += byteCount;
+        stream->remainingBytes -= byteCount;
+        if (stream->remainingBytes > 0) {
+            sdfFileRpcContinueRead();
+        } else {
+            SignalSema(stream->semaphore);
+        }
+        break;
+    }
+    case SDF_DEV_EVENT_OPENED:
+    case SDF_DEV_EVENT_CLOSED:
+        SignalSema(stream->semaphore);
+        break;
+    case SDF_DEV_EVENT_INACTIVE:
+        SignalSema(stream->semaphore);
+        break;
+    }
+    return 0;
+}
+
+s32 *sdfFileRpcHandler(u32 command, s32 request) {
+    SdfStreamState *state = &sdfFileRpcState;
+    DevState *deviceState;
+    switch (command) {
+    case SDF_STREAM_COMMAND_CREATE_STATE:
+        state->deviceState = sdfFileCmdReadOpen((const char *)request, sdfFileRpcReadCallback, 0);
+        if (state->deviceState != 0) {
+            WaitSema(state->semaphore);
+            deviceState = state->deviceState;
+            if (deviceState->result != 0) {
+                sdfFileCmdClearError(deviceState);
+                sdfFileCmdFree(state->deviceState);
+                state->deviceState = 0;
+                deviceState = 0;
+            }
+        } else {
+            deviceState = 0;
+        }
+        sdfFileRpcBuf[0] = (s32)deviceState;
+        break;
+    case SDF_STREAM_COMMAND_CONTROL:
+        sdfFileCmdFileSize(state->deviceState, request, request);
+        WaitSema(state->semaphore);
+        sdfFileRpcBuf[0] = state->readResult;
+        break;
+    case SDF_STREAM_COMMAND_READ:
+        state->remainingBytes = ((SdfStreamReadRequest *)request)->byteCount;
+        state->transferredBytes = 0;
+        state->destination = (u8 *)((SdfStreamReadRequest *)request)->destinationAddress;
+        sdfFileRpcContinueRead();
+        WaitSema(state->semaphore);
+        sdfFileRpcBuf[0] = state->transferredBytes;
+        break;
+    case SDF_STREAM_COMMAND_RELEASE_STATE:
+        sdfFileCmdClose(state->deviceState);
+        WaitSema(state->semaphore);
+        sdfFileCmdFree(state->deviceState);
+        state->deviceState = 0;
+        sdfFileRpcBuf[0] = 0;
+        break;
+    }
+    return sdfFileRpcBuf;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", SdfFileRpcServerThreadProc);
 
 INCLUDE_ASM(const s32, "code_002C6F38", sdf_2C7BC4);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfStartFileRpcServer);
+void sdfStartFileRpcServer(void) {
+    s32 workerId = sdfCreateThreadWithStack(SdfFileRpcServerThreadProc, 0x1000, 0x4C);
 
-INCLUDE_ASM(const s32, "code_002C6F38", LoadMcModules);
+    StartThread(workerId, 0);
+    sdfFileRpcThreadId = GetThreadId();
+    SleepThread();
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfSortOtAvlRotateLR);
+void LoadMcModules(const char *prefix, s32 moduleGroup) {
+    char path[0x100];
+    char **moduleNames = &mcModuleNames[moduleGroup * SDF_IOP_MODULES_PER_GROUP];
+    s32 moduleIndex;
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfSortOtAvlRotateRL);
+    for (moduleIndex = 0; moduleIndex != SDF_IOP_MODULES_PER_GROUP; moduleIndex++) {
+        strcpy(path, prefix);
+        strcat(path, moduleNames[moduleIndex]);
+        sceSifLoadModule(path, 0, 0);
+    }
+    sceMcInit();
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfSortOtAvlCheckBalance);
+SdfKeyTreeNode *sdfSortOtAvlRotateLR(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
+    SdfKeyTreeNode *childRoot = heavyChild;
+    SdfKeyTreeNode *pivot;
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfSortOtAvlRegist);
+    if (childRoot->balance < 0) {
+        pivot = childRoot->left;
+        parent->right = pivot->left;
+        childRoot->left = pivot->right;
+        pivot->left = parent;
+        pivot->right = childRoot;
+        if (pivot->balance > 0) {
+            parent->balance = -1;
+            childRoot->balance = 0;
+        } else {
+            parent->balance = 0;
+            childRoot->balance = 1;
+        }
+        pivot->balance = 0;
+    } else {
+        parent->balance = 0;
+        parent->right = childRoot->left;
+        childRoot->balance = 0;
+        childRoot->left = parent;
+        pivot = childRoot;
+    }
+    return pivot;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfGrSortOtReg);
+SdfKeyTreeNode *sdfSortOtAvlRotateRL(SdfKeyTreeNode *heavyChild, SdfKeyTreeNode *parent) {
+    SdfKeyTreeNode *childRoot = heavyChild;
+    SdfKeyTreeNode *pivot;
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfGrSortOtFixup);
+    if (childRoot->balance > 0) {
+        pivot = childRoot->right;
+        parent->left = pivot->right;
+        childRoot->right = pivot->left;
+        pivot->right = parent;
+        pivot->left = childRoot;
+        if (pivot->balance > 0) {
+            parent->balance = -1;
+            childRoot->balance = 0;
+        } else {
+            parent->balance = 0;
+            childRoot->balance = 1;
+        }
+        pivot->balance = 0;
+    } else {
+        parent->balance = 0;
+        parent->left = childRoot->right;
+        childRoot->balance = 0;
+        childRoot->right = parent;
+        pivot = childRoot;
+    }
+    return pivot;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfGrSortOtTraverse);
+void sdfSortOtAvlCheckBalance(SdfKeyTreeNode **path, s32 depth, SdfKeyTreeNode *child,
+                   SdfKeyTreeNode **root) {
+    SdfKeyTreeNode *parent;
+    SdfKeyTreeNode *replacement = NULL;
+    s32 balance;
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfGrSortOtSetup);
+    if (depth > 0) {
+        do {
+            parent = path[--depth];
+            if (child == parent->right) {
+                balance = ++parent->balance;
+            } else {
+                balance = --parent->balance;
+            }
+            if (balance == 0) {
+                return;
+            }
+            if (balance > 1) {
+                replacement = sdfSortOtAvlRotateLR(child, parent);
+                break;
+            }
+            if (balance < -1) {
+                replacement = sdfSortOtAvlRotateRL(child, parent);
+                break;
+            }
+            child = parent;
+        } while (depth > 0);
+    }
+    if (depth > 0) {
+        SdfKeyTreeNode *ancestor = path[--depth];
+        if (ancestor->right == parent) {
+            ancestor->right = replacement;
+        } else {
+            ancestor->left = replacement;
+        }
+    } else if (replacement != NULL) {
+        *root = replacement;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfGrSortOtCallback);
+void sdfSortOtAvlRegist(SdfKeyTreeNode **tree, SdfKeyTreeItem *item) {
+    SdfKeyTreeNode *path[SDF_KEY_TREE_PATH_LIMIT];
+    s32 depth = 0;
+    SdfKeyTreeNode **link = tree;
+    SdfKeyTreeNode *cur = *tree;
+    SdfKeyTreeNode *node;
+    f32 key = item->key;
+
+    while (cur != NULL) {
+        if (key == cur->item->key) {
+            item->replaced = cur->item;
+            cur->item = item;
+            return;
+        }
+        path[depth] = cur;
+        depth++;
+        if (cur->item->key < key) {
+            link = &cur->right;
+        } else {
+            link = &cur->left;
+        }
+        cur = *link;
+    }
+    item->replaced = NULL;
+    node = sdfGrAllocPacketBuff(0x10);
+    node->right = NULL;
+    node->left = NULL;
+    node->item = item;
+    *link = node;
+    node->balance = 0;
+    if (depth != 0) {
+        sdfSortOtAvlCheckBalance(path, depth, node, tree);
+    }
+}
+
+void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node) {
+    if (node->packetHeadAddress != 0) {
+        if (node->kind == SDF_POOL_FREE_KIND) {
+            node->next = pool->freeHead;
+            pool->freeHead = node;
+        } else {
+            /* The key tree views the pool node's +0xC word as its float key. */
+            sdfSortOtAvlRegist(pool->keyTree, (SdfKeyTreeItem *)node);
+        }
+    }
+}
+
+void sdfGrSortOtFixup(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+    SdfKeyPoolNode *current;
+    SdfKeyPoolNode *next;
+
+    if (first != NULL) {
+        if (*tail == NULL) {
+            *head = first;
+        } else {
+            sdfGrJoinDrawTag(*tail, first);
+        }
+        current = first;
+        while ((next = current->next) != NULL) {
+            sdfGrJoinDrawTag(current, next);
+            current = next;
+        }
+        *tail = current;
+    }
+}
+
+void sdfGrSortOtTraverse(SdfKeyTreeNode *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail) {
+    SdfKeyTreeNode *next;
+
+    do {
+        if (node->right != NULL) {
+            sdfGrSortOtTraverse(node->right, head, tail);
+        }
+        sdfGrSortOtFixup(node->item, head, tail);
+        next = node->left;
+        node = next;
+    } while (next != NULL);
+}
+
+void sdfGrSortOtSetup(SdfPool *pool) {
+    SdfKeyPoolNode *head = NULL;
+    SdfKeyPoolNode *tail = NULL;
+
+    sdfGrSortOtFixup(pool->freeHead, &head, &tail);
+    if (pool->keyTree[0] != NULL) {
+        sdfGrSortOtTraverse(pool->keyTree[0], &head, &tail);
+    }
+    pool->head = head;
+    pool->tail = tail;
+}
+
+void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode) {
+    switch (mode) {
+    case SDF_POOL_REBUILD_CHAIN:
+        sdfGrSortOtSetup(pool);
+        break;
+    case SDF_POOL_PUSH_FREE:
+        if (freeNode->packetHeadAddress != 0) {
+            freeNode->next = pool->freeHead;
+            pool->freeHead = freeNode;
+        }
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", sdfModelSetOtCallbacks);
 

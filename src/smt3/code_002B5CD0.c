@@ -1,5 +1,1621 @@
 #include "common.h"
 
+struct RwV3d;
+struct SdfGsPacketHeader;
+struct SdfGsRegisterWrite;
+struct IpuDmaState;
+struct SdfListHead;
+union SdfSubParam;
+union SdfDrawTransform;
+struct SdfGsTextureStateValues;
+struct SdfDmaTagHeader;
+struct SdfObjectRefCommand;
+struct MotionEntry;
+struct SdfMotionKeyTrack;
+struct SdfVuColorTransform;
+struct KwlnDrawVectorParams;
+struct VuLightingPacket;
+struct SdfDrawPacket;
+struct SdfCamera;
+struct VuBlendNode;
+struct SdfPadEntry;
+struct ConsMatrixPacket;
+struct DmaPacketHeader;
+struct ConsFrustumPacket;
+struct SdfChunkHeader;
+struct SoundFormat;
+struct RwMatrix;
+struct SdfAssetEntry;
+struct SdfDmaReferenceChainPacket;
+struct SdfTextureDrawPacket;
+struct SdfProjectionRecord;
+struct SdfThreadNode;
+struct SdfTexRef;
+struct SdfTexBuf;
+struct SdfTexResource;
+struct SdfStreamFrameNode;
+union MovObjStream;
+struct MovObj;
+struct SdfGraphObj;
+struct SdfTex;
+struct SdfPacketBuilder;
+struct SdfAsset;
+struct SdfMemBlock;
+struct DevRequest;
+struct SdfCommandNode;
+struct SdfDrawNode;
+struct SdfModel;
+struct SdfMotionCommand;
+struct MotionTable;
+struct Motion;
+struct SdfMotionBindingDispatch;
+struct SdfMotionBindingHead;
+struct SdfMotionKeyBinding;
+struct SdfMotionIndexedBinding;
+struct SdfPrimitiveRequest;
+struct SdfTextureFileHeader;
+struct SdfGeneratedLookupTexture;
+struct MovPacStream;
+struct DevState;
+typedef int s128 __attribute__((mode(TI)));
+/* RenderWare XYZ axis used by the native SDF matrix builders. */
+typedef struct RwV3d
+{
+    f32 x;
+    f32 y;
+    f32 z;
+} RwV3d;
+/* Write three axis components and twice acos(W), using the native small
+ * denominator fallback when sqrt(1-W*W) is near zero. */
+void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
+#define EE_MMI_UNIT_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $5, $vf0\n\t" \
+    "pextuw $4, $0, $5\n\t" \
+    "pextuw $2, $0, $4\n\t" \
+    "pextuw $3, $4, $0\n\t" \
+    "sq $2, 0(%0)\n\t" \
+    "sq $3, 0x10(%0)\n\t" \
+    "sq $4, 0x20(%0)\n\t" \
+    "sq $5, 0x30(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "$2", "$3", "$4", "$5", "memory")
+#define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "lw $2, 0(%1)\n" \
+    "pextlb $2, $0, $2\n" \
+    "pextlh $2, $0, $2\n" \
+    "qmtc2.ni $2, vf10\n" \
+    "vitof0.xyzw vf10, vf10\n" \
+    "qmtc2.ni %0, vf2\n" \
+    "vmulx.xyzw vf10, vf10, vf2x\n" \
+    ".set reorder" \
+    : : "r"(unit), "r"(src), "m"(*(const u32 *)(src)) : "$2")
+#define EE_MMI_STORE_VEC3_VALUE(dst, value) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pcpyud $2, %1, $0\n\t" \
+    "sdr %1, 0(%0)\n\t" \
+    "sdl %1, 7(%0)\n\t" \
+    "sw $2, 8(%0)\n\t" \
+    ".set reorder" \
+    : : "r"(dst), "r"(value) : "$2", "memory")
+#define PCP_COPY_VECTOR(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%1)\n\tsq $2, 0(%0)\n\t.set reorder" \
+    : : "r" (dst), "r" (src) : "$2", "memory")
+/* The record prevents EE GCC 2.96 from decaying an array asm input. */
+typedef struct {
+    float components[4];
+} PcpVectorCopyF32;
+#define VU0_LOAD_MATRIX(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf28, 0(%0)\n\t" \
+    "lqc2 vf29, 16(%0)\n\t" \
+    "lqc2 vf30, 32(%0)\n\t" \
+    "lqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src))
+#define VU0_STORE_MATRIX(dst) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "sqc2 vf28, 0(%0)\n\t" \
+    "sqc2 vf29, 16(%0)\n\t" \
+    "sqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (dst) : "memory")
+#define VU0_LOAD_MATRIX_B(src) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf24, 0(%0)\n\t" \
+    "lqc2 vf25, 16(%0)\n\t" \
+    "lqc2 vf26, 32(%0)\n\t" \
+    "lqc2 vf27, 48(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_LOAD_VF(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_LOAD_VF_MEMORY(vf, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (src) : "memory")
+#define VU0_STORE_VF(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst) : "memory")
+#define VU0_STORE_VF_UNCLOBBERED(vf, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", 0(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_MATRIX4_MUL_BANK_B_LEFT() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmulax.xyzw ACC, vf24, vf28x\n\tvmadday.xyzw ACC, vf25, vf28y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf28z\n\tvmaddw.xyzw vf28, vf27, vf28w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf29x\n\tvmadday.xyzw ACC, vf25, vf29y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf29z\n\tvmaddw.xyzw vf29, vf27, vf29w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf30x\n\tvmadday.xyzw ACC, vf25, vf30y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf30z\n\tvmaddw.xyzw vf30, vf27, vf30w\n\t" \
+    "vmulax.xyzw ACC, vf24, vf31x\n\tvmadday.xyzw ACC, vf25, vf31y\n\t" \
+    "vmaddaz.xyzw ACC, vf26, vf31z\n\tvmaddw.xyzw vf31, vf27, vf31w\n\t" \
+    ".set reorder" \
+    : : : "memory")
+#define VU0_MATRIX4_TRANSPOSE() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf31\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\tpcpyud $11, $13, $15\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\tqmtc2.ni $11, vf31\n\t" \
+    ".set reorder\n")
+#define VU0_MATRIX4_INVERT_RIGID() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\t" \
+    "vmove.w vf31, vf0\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\t" \
+    "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
+    "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
+    ".set reorder\n")
+#define VU0_MOVE_VF(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmove.xyzw " #dst ", " #src "\n\t.set reorder")
+#define VU0_NORMALIZE_VF10() __asm__ volatile ( \
+    ".set noreorder\n\tvmul.xyz vf2, vf10, vf10\n\tvmulax.w ACC, vf0, vf2x\n\t" \
+    "vmadday.w ACC, vf0, vf2y\n\tvmaddz.w vf2, vf0, vf2z\n\tvrsqrt Q, vf0w, vf2w\n\t" \
+    "vwaitq\n\tvmulq.xyz vf10, vf10, Q\n\t.set reorder")
+#define VU0_LOAD_VF_AT(vf, off, src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
+    : : "r" (src))
+#define VU0_STORE_VF_AT_UNCLOBBERED(vf, off, dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 " #vf ", " #off "(%0)\n\t.set reorder" \
+    : : "r" (dst))
+#define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf5, 0x10(%1)\n\t" \
+    "lqc2 vf6, 0x20(%1)\n\tlqc2 vf7, 0x30(%1)\n\t" \
+    "lqc2 vf3, 0x50(%0)\n\tlqc2 vf4, 0x60(%0)\n\t" \
+    "vmulax.xyz ACC, vf5, vf2x\n\tvmadday.xyz ACC, vf6, vf2y\n\tvmaddz.xyz vf24, vf7, vf2z\n\t" \
+    "vmulax.xyz ACC, vf5, vf3x\n\tvmadday.xyz ACC, vf6, vf3y\n\tvmaddz.xyz vf25, vf7, vf3z\n\t" \
+    "vmulax.xyz ACC, vf5, vf4x\n\tvmadday.xyz ACC, vf6, vf4y\n\tvmaddz.xyz vf26, vf7, vf4z\n\t" \
+    "sqc2 vf2, 0x0(%2)\n\tsqc2 vf3, 0x10(%2)\n\tsqc2 vf4, 0x20(%2)\n\t.set reorder" \
+    : : "r" (vectors), "r" (matrix), "r" (cache) : "memory")
+/* Register selectors carried by GIF A+D writes in the two GS contexts. */
+enum {
+    SDF_GS_PRIM = 0x00,
+    SDF_GS_RGBAQ = 0x01,
+    SDF_GS_XYZ2 = 0x05,
+    SDF_GS_TEX0_1 = 0x06,
+    SDF_GS_TEX0_2 = 0x07,
+    SDF_GS_CLAMP_1 = 0x08,
+    SDF_GS_CLAMP_2 = 0x09,
+    SDF_GIF_REGISTER_AD = 0x0E,
+    SDF_GS_TEX1_1 = 0x14,
+    SDF_GS_TEX1_2 = 0x15,
+    SDF_GS_XYOFFSET_1 = 0x18,
+    SDF_GS_XYOFFSET_2 = 0x19,
+    SDF_GS_PRMODECONT = 0x1A,
+    SDF_GS_TEXA = 0x3B,
+    SDF_GS_TEXFLUSH = 0x3F,
+    SDF_GS_SCISSOR_1 = 0x40,
+    SDF_GS_SCISSOR_2 = 0x41,
+    SDF_GS_ALPHA_1 = 0x42,
+    SDF_GS_ALPHA_2 = 0x43,
+    SDF_GS_DTHE = 0x45,
+    SDF_GS_COLCLAMP = 0x46,
+    SDF_GS_TEST_1 = 0x47,
+    SDF_GS_TEST_2 = 0x48,
+    SDF_GS_FRAME_1 = 0x4C,
+    SDF_GS_FRAME_2 = 0x4D,
+    SDF_GS_ZBUF_1 = 0x4E,
+    SDF_GS_ZBUF_2 = 0x4F,
+    SDF_GS_BITBLTBUF = 0x50,
+    SDF_GS_TRXPOS = 0x51,
+    SDF_GS_TRXREG = 0x52,
+    SDF_GS_TRXDIR = 0x53
+};
+/* Appending the packet patches the DMA tag's link; the VIF and GIF words
+ * retain the renderer's original commands and register-list encoding. */
+typedef struct SdfGsPacketHeader {
+    u64 dmaTag;
+    u64 vifCommands;
+    u64 gifTag;
+    u64 gifRegisters;
+} QWORD_ALIGNED SdfGsPacketHeader;
+typedef struct SdfGsRegisterWrite {
+    u64 value;
+    u64 registerId;
+} SdfGsRegisterWrite;
+/* Serialized byte consumed by the GS texture-state packet builder. */
+typedef u8 SdfTextureClampMode;
+/* IPU register state saved across stream callbacks (0x24 bytes). */
+typedef struct IpuDmaState {
+    u32 inputAddress;
+    u32 inputTagAddress;
+    u32 inputQwords;
+    u32 inputControl;
+    u32 outputAddress;
+    u32 outputQwords;
+    u32 outputControl;
+    u32 bitPointer;
+    u32 ipuControl;
+} IpuDmaState;
+/* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
+struct SdfStreamInputDmaTag;
+/* The +0x1C movie work pointer selects one of two separately allocated records.
+ * isPac at +3 chooses the active arm; the variant payload types live in
+ * sdf_movie_stream.h. */
+struct MovLinearStream;
+/* Semaphore ID and attached work pointers (0x14); DDS1/2 game/code_002D10B0/00329F60.c. */
+
+
+/* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
+typedef struct SdfListHead {
+    struct SdfListHead *nextList; /* CPU link between lists; first/last are DMA addresses. */
+    u32 first;
+    u32 last;
+    u32 unkC;
+    u32 firstReferenceSource; /* Optional first DMA reference prefix. */
+    u32 secondReferenceSource; /* Optional second DMA reference prefix. */
+    u32 unk18;
+    u32 unk1C;
+} SdfListHead;
+/* Optional packed or five-float state block owned by an SdfAsset. */
+typedef union SdfSubParam {
+    struct {
+        u64 unk0;
+        u64 unk8;
+        u32 unk10;
+        u32 unk14;
+    } packed;
+    struct {
+        f32 values[5];
+        u32 unk14;
+    } scalar;
+    /* Named view of scalar.values; the last word remains opaque. */
+    struct {
+        f32 centerOffsetX;
+        f32 centerOffsetY;
+        f32 basisScaleX;
+        f32 basisScaleY;
+        f32 rotationInput;
+        u32 unk14;
+    } transformInputs;
+} SdfSubParam;
+/* Draw entries store six transform floats and expose the same bytes as three qwords. */
+typedef union SdfDrawTransform {
+    f32 m[6];
+    u64 words[3];
+} SdfDrawTransform;
+/* The cached GS TEX1, TEX0 and CLAMP values shared by texture draw records. */
+typedef struct SdfGsTextureStateValues {
+    u64 sampling;
+    u64 texture;
+    u64 clamp;
+} SdfGsTextureStateValues;
+/* DMA tag prefix followed by the two VIF words used by indexed-model writers.
+ * The control byte stays whole, and address is a hardware word rather than a
+ * CPU pointer. */
+typedef struct SdfDmaTagHeader {
+    u16 quadwordCount;
+    u8 reservedByte;
+    u8 control;
+    u32 address;
+    u32 firstVifCode;
+    u32 secondVifCode;
+} QWORD_ALIGNED SdfDmaTagHeader;
+/* Serialized kinds 5/7 name draw nodes by index in the model's buffered list. */
+typedef struct SdfObjectRefCommand {
+    u8 kind;
+    u8 pad01[0x15];
+    u16 flags;
+    u16 count;
+    u16 objectIndices[1];
+} SdfObjectRefCommand;
+/* Serialized clip duration/reserved remain halfwords (tools/fld.py).
+ * The viewer MAXFRAME diagnostic reads their packed little-endian word. */
+typedef struct MotionEntry {
+    union {
+        struct {
+            u16 frameCount;
+            u16 unk02;
+        };
+        u32 packedHeader;
+    };
+    u32 bindingData[1];
+} MotionEntry;
+/* The first word advances to the next binding record; aligned key-frame words
+ * and a variable-length key payload follow the fixed header. */
+typedef struct SdfMotionKeyTrack {
+    u32 nextTrackOffsetBytes;
+    u16 keyCount;
+    u16 keyStride;
+    u16 keyFrames[1];
+} SdfMotionKeyTrack;
+/* VU0 input basis and emitted base/delta color vectors. */
+typedef struct SdfVuColorTransform {
+    u8 opaque00[4]; /* 0x00 */
+    f32 scaledY; /* 0x04 */
+    u8 opaque08[4]; /* 0x08 */
+    f32 scale; /* 0x0C */
+    f32 colorBase[4]; /* 0x10 */
+    f32 colorDelta[4]; /* 0x20 */
+} SdfVuColorTransform;
+/* Shared fog/depth state consumed by sdf3DMakeFogPacket (0x14).
+ * The viewer config serializes fogNear, depthNear, fogFar, depthFar, fogColor;
+ * timeline payloads store fogFar before fogNear instead. */
+typedef struct KwlnDrawVectorParams {
+    f32 fogNear;    /* 0x00: minimum fog range. */
+    f32 fogFar;     /* 0x04: maximum fog range. */
+    f32 depthNear;  /* 0x08: near depth used in the projection coefficients. */
+    f32 depthFar;   /* 0x0C: far depth used in the projection coefficients. */
+    u32 fogColor;   /* 0x10: packed GS FOGCOL value. */
+} KwlnDrawVectorParams;
+/* One frame of transformed matrix rows, normalized lighting rows and VIF codes. */
+typedef struct VuLightingPacket {
+    u128 matrix[4];
+    u128 scaledRows[3];
+    u32 tag[4];
+} VuLightingPacket;
+/* Variable-sized packet header initialized by sdf2DMakePrimPacketHeader. */
+typedef struct SdfDrawPacket {
+    u16 quadwords;
+    u8 pad02[6];
+    u32 pad08;
+    u32 command;
+    u64 gifTag;
+    u64 payloadHeader;
+} SdfDrawPacket;
+/* Native 0x90-byte camera/viewport owner shared by both projection builders. */
+typedef struct SdfCamera {
+    u32 flags;       // 0x00: 1 half-height, 2 field-of-view projection
+    f32 aspect;      // 0x04
+    f32 scale;       // 0x08
+    f32 fov;         // 0x0C
+    f32 offsetX;     // 0x10
+    f32 offsetY;     // 0x14
+    f32 width;       // 0x18
+    f32 height;      // 0x1C
+    f32 top;         // 0x20
+    f32 bottom;      // 0x24
+    f32 nearZ;       // 0x28
+    f32 farZ;        // 0x2C
+    u8 matrix[0x40]; // 0x30
+    f32 halfWidth;   // 0x70
+    f32 halfHeight;  // 0x74
+    f32 centerY;     // 0x78
+    f32 one;         // 0x7C
+    f32 originX;     // 0x80
+    f32 originY;     // 0x84
+    f32 bottomY;     // 0x88
+    u32 zero;        // 0x8C
+} SdfCamera;
+typedef struct VuBlendNode {
+    f32 position[4];            /* 0x00: position vector consumed by VU clipping */
+    u8 opaque10[0x10];          /* 0x10: only the W lane is used by clipping */
+    f32 color[4];               /* 0x20: copied and interpolated as a vector */
+    f32 xy[2];                  /* 0x30: interpolated XY pair */
+    u8 opaque38[8];             /* 0x38: other lanes are unresolved */
+    struct VuBlendNode *next;   /* 0x40 */
+    struct VuBlendNode *sourceA; /* 0x44 */
+    struct VuBlendNode *sourceB; /* 0x48 */
+    f32 weight;                 /* 0x4C */
+    u8 region;                  /* 0x50: bit 0 selects the W = 0 clipping path */
+    u8 clipFlags;               /* 0x51: clip-plane bits used for triangle culling */
+    u8 opaque52[0x0E];          /* 0x52 */
+} VuBlendNode;
+#define HW_READ(reg) (*(reg))
+#define HW_WRITE(reg, value) (*(reg) = (value))
+typedef struct SdfPadEntry {
+    u8 port;                 /* 0x00 */
+    u8 slot;                 /* 0x01 */
+    u8 state;                /* 0x02 */
+    u8 opaque03;
+    u8 mode;                 /* 0x04 */
+    u8 requestedMode;        /* 0x05 */
+    u16 buttons;             /* 0x06 */
+    u16 prevButtons;         /* 0x08 */
+    u8 opaque0A[2];
+    u32 repeatDeadline;      /* 0x0C */
+    u8 stick[4];             /* 0x10 */
+    u8 pressure[12];         /* 0x14 */
+    s16 smallMotor;          /* 0x20 */
+    s16 largeMotor;          /* 0x22 */
+    s16 lastSmallMotor;      /* 0x24 */
+    s16 lastLargeMotor;      /* 0x26 */
+} SdfPadEntry;
+/* Shared 0xD0 VIF packet: two stored matrices, three vector slots, and trailer. */
+typedef struct ConsMatrixPacket {
+    u16 quadwords;        /* 0x00 */
+    u8 unknown02[6];      /* 0x02 */
+    u32 reservedWord;     /* 0x08 */
+    u32 command;          /* 0x0C */
+    u8 matrixA[0x40];     /* 0x10 */
+    u8 matrixB[0x40];     /* 0x50 */
+    u8 vecA[0x10];        /* 0x90 */
+    u8 vecB[0x10];        /* 0xA0 */
+    u8 vecC[0x10];        /* 0xB0 */
+    u32 stmodCommand;     /* 0xC0 */
+    u32 mscalCommand;     /* 0xC4 */
+    u32 unknownC8;        /* 0xC8 */
+    u32 unknownCC;        /* 0xCC */
+} QWORD_ALIGNED ConsMatrixPacket;
+/* Shared 0x20-byte DMA/VIF reference header. Unrecovered bytes stay opaque. */
+typedef struct DmaPacketHeader {
+    u16 quadwords; /* 0x00 */
+    u8 pad02[2]; /* 0x02 */
+    u32 address; /* 0x04 */
+    u32 tag; /* 0x08 */
+    u32 command; /* 0x0C */
+    u16 unknown10; /* 0x10 */
+    u8 opaque12[6]; /* 0x12 */
+    u32 unknown18; /* 0x18 */
+    u32 unknown1C; /* 0x1C */
+} QWORD_ALIGNED DmaPacketHeader;
+/* Bind resource and asset release queues to their matching destruction callbacks. */
+void sdfMatInitSystem(void);
+/* Initialize the buffered object-list release queue with its object destructor. */
+void sdfModelInitSystem(void);
+#define SDF_GIF_PRIM_SHIFT 47
+#define SDF_VU_TEXTURED_FLAG 0x10
+extern u32 corePktCurrLight;
+extern u128 *corePktFaceList[][3];
+extern u16 corePktPrimBase;
+extern u8 corePktSoftenBias;
+extern u16 corePktBackFaceList[];
+/* vu0 routine: native clip facing and ordinary triangle fans. */
+
+
+extern f32 corePktZBias;
+extern f32 sdf3DEyeOffset[4];
+extern u8 sdf3DScreenParam[];
+/* vu0 routine: native clip-plane setup and ordinary triangle fans. */
+
+
+/* Indexed triangle count occupies the two bytes following nodeCount. */
+typedef struct {
+    u8 pad00[0x52];
+    s16 indexedTriangleCount;
+} VuIndexedTriangleCount;
+void corePktEmitTexTris();
+extern u8 corePktWorldLightMtxCache[];
+#define SDF_DMA_ADDRESS_MASK 0x0FFFFFFF
+#define SDF_PAD_ENTRY_COUNT 2
+#define SDF_PAD_REPLY_BUFFER_BYTES 0x20
+#define SDF_PAD_ACTUATOR_BYTES 6
+#define SDF_PAD_REPLY_DIGITAL 0x41
+#define SDF_PAD_REPLY_ANALOG 0x73
+#define SDF_PAD_REPLY_PRESSURE 0x79
+#define SDF_PAD_PRESSURE_COUNT 12
+#define SDF_PAD_STICK_CENTER 0x80
+#define SDF_PAD_PORT_BUFFER_BYTES 0x100
+#define SDF_PAD_BUTTON_STATE_BYTES 0x20
+#define SDF_PAD_STICK_STATE_BYTES 8
+#define SDF_PAD_PRESSURE_STATE_BYTES 0x18
+#define SDF_DMA_QWORD_SHIFT 4
+#define SDF_DMA_CHCR_TTE 0x40
+#define SDF_QWORD_ALIGNMENT_MASK 0xF
+#define SDF_GS_FOGCOL_REGISTER 0x3D
+#define SDF_GIF_NREG_SHIFT 60
+#define SDF_GIF_PRE_EOP_FLAGS 0x400000008000LL
+#define SDF_VIF_DIRECT_COMMAND 0x50000000
+#define SDF_VIF_FLUSHA_COMMAND 0x13000000
+#define SDF_VIF_ITOP_MATRIX 0x04000002
+#define SDF_VIF_ITOP_COMPACT_VERTEX 0x04000002
+#define SDF_VIF_ITOP_WIDE_VERTEX 0x04000008
+#define SDF_VIF_ITOP_LIGHTING 0x04000010
+#define SDF_VIF_MSCAL_COMMAND 0x14000000
+#define SDF_VIF_MSCAL_VERTICES 0x14000008
+extern u32 corePktCurrFog;
+extern u128 corePktFogParm;
+/* Cache the object's vector only when its address changes, not its contents. */
+
+
+
+
+
+
+extern u8 vu0MicroPacket[];
+extern u8 vu1MicroPacket[];
+extern s32 sceDmaSync(void *, s32, s32);
+extern u8 sdf3DScreenTm[];
+extern u8 sdfCameraTm[];
+/* fallback up vector */
+
+/* Pack up to three directional lights and the ambient color for VU1: light
+ * directions as columns (negated, unit length), colors and their sum, and a
+ * basis built from the first light's direction. The axis scratch is volatile:
+ * retail keeps its stores in source order. */
+
+
+/* DMA/VIF prefix, left/right projection terms, then a one-register GIF write
+ * and the VU execution command. */
+typedef struct ConsFrustumPacket {
+    u64 dmaTag;
+    u64 vifUnpackCode;
+    f32 right;
+    f32 left;
+    f32 mid;
+    f32 scale;
+    u64 gifTag;
+    u64 gifRegister;
+    u64 registerValue;
+    u64 fogColorRegister;
+    u32 mscalCommand;
+    u32 reservedA;
+    u32 reservedB;
+    u32 reservedC;
+} ConsFrustumPacket;
+/* Emit projection depth coefficients and a GS FOGCOL A+D write. */
+
+
+/* Round payloadBytes up to quadwords and pair FLUSHA with VIF DIRECT. */
+
+
+extern u8 D_002F5600[];
+/* Acquire a 128x64 grayscale power lookup texture; release its temporary image. */
+
+
+extern u64 sdf3DRefMapParam;
+extern u8 D_002E8ED0[];
+extern u8 D_002ECF10[];
+/* Acquire texture resources, split their TEX0 words, and initialize queues. */
+
+
+extern u8 sdf3DPrimIdentityTm[];
+/* Append the fixed clear block; NULL allocatePacket selects the packet allocator. */
+
+
+/* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
+
+
+/* Append inline matrix/lighting data using allocatePacket or the default allocator. */
+
+
+extern vu8 sdfFrameId;
+/* Apply current-buffer changes and append the asset reference; keep both index reads. */
+
+
+extern f32 sdfFaceDivSoften;
+extern f32 sdfFaceDivBias;
+extern u32 sdf3DPrimDefaultFaceIndex[];
+/* Serialize the requested VIF attribute streams into one aligned DMA packet. */
+
+
+
+
+/* Build a one-vertex textured-quad VIF packet: the position, color, the four
+ * UV corners (copied as unaligned words) and the eight quad corner coordinates. */
+
+
+
+
+/* Build XYZ and attribute VIF streams; return the packet address.
+ * vertexCount must be positive; n retains its native count/byte-size reuse. */
+/* vu0 routine: pack aligned positions into the VIF three-word stream. */
+
+
+/* Build a one-vertex VIF packet for a two-texture quad: the position, both
+ * colors, the interleaved primary/secondary UV corners (copied as unaligned
+ * words) and the eight quad corner coordinates. */
+
+
+
+
+/* Build a quad packet from paired colors and per-corner UV sets. */
+
+
+/* Build a one-vertex textured-quad VIF packet with four corner colors: the
+ * position, colors, UV corners (copied as unaligned words) and the eight quad
+ * corner coordinates. */
+
+
+/* Preserve the native 76-byte-record formula and 16-byte alignment rounding. */
+
+
+/* Build a quad packet with four corner colors, UV pairs and XY offset pairs. */
+
+
+/* Build a one-vertex VIF packet for a two-texture quad with eight colors: the
+ * position, colors, interleaved primary/secondary UV corners (copied as
+ * unaligned words) and the eight quad corner coordinates. */
+
+
+
+
+/* Build the wider attribute VIF stream; return the packet address.
+ * vertexCount must be positive; preserve the native copy lengths and n reuse. */
+/* vu0 routine: pack aligned positions into the VIF three-word stream. */
+
+
+extern u8 sdfPadCb_0[];
+extern u8 D_005518E0[8];
+extern s8 dds3PadBitTable[0x20];
+extern u8 D_005298E8[0x18];
+/* Emit held bit 0, press/repeat trigger bit 1, and new-press bit 7 per button.
+ * Changes arm a 15-tick deadline; repeats set it to current tick + lateness + 4,
+ * retaining the original extra delay when a deadline is missed. */
+
+
+/* Store a mode request for the indexed logical pad; setup applies it later. */
+
+
+/* Store the small-motor request without validating the logical pad index. */
+
+
+/* Store the large-motor request without validating the logical pad index. */
+
+
+/* Despite the legacy console-prefixed name, set both pad motor low bytes. */
+
+
+extern u8 sdfPadPortSlotPairs[4];
+extern u8 D_0058F0C0[];
+extern u8 sdfPadManagerMode;
+/* Variable-size serialized chunk streams share only this eight-byte header.
+ * The word at +8 belongs to each chunk's payload. */
+typedef struct SdfChunkHeader {
+    u32 id;   /* 0x00: zero terminates the chunk stream */
+    u32 size; /* 0x04: byte extent to the next chunk */
+} SdfChunkHeader;
+/* Protocol IDs use distinct byte-sized storage codes in DevState. */
+typedef u8 SdfDevOperationCode;
+typedef s8 SdfDevStateCode;
+/* These four bytes are consumed by the same sound-format initializer. */
+typedef struct SoundFormat {
+    u8 hasAudio;
+    u8 stereo;
+    u8 loopMode;
+    u8 playbackCadenceStep;
+} SoundFormat;
+/* Normalize the supplied axis and write an XYZW quaternion. The native
+ * conversion uses nonnegative square roots for both half-angle components. */
+void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle);
+/* RenderWare-style three-axis plus position matrix consumed by VU0 loaders. */
+typedef struct RwMatrix {
+    RwV3d right; /* 0x00 */
+    u32 flags; /* 0x0C */
+    RwV3d up; /* 0x10 */
+    u32 pad1; /* 0x1C */
+    RwV3d at; /* 0x20 */
+    u32 pad2; /* 0x2C */
+    RwV3d pos; /* 0x30 */
+    u32 pad3; /* 0x3C */
+} RwMatrix;
+/*
+ * SDK word carriers used by effSampleColorAlphaTracks and the bit-scaled
+ * billboard blends. Each conversion owns its native 16-byte workspace.
+ * Other unpack/pack operand contracts keep their existing macros.
+ * See docs/idioms.md, "SDK RGBA word carriers".
+ */
+static inline void eeUnpackRGBAWord(u32 color, u32 unitBits) {
+    u32 rgba[4];
+    rgba[0] = color;
+    EE_MMI_RGBA_UNPACK_READONLY(rgba, unitBits);
+}
+#define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
+    : "=m" (*(PcpVectorCopyF32 *)(dst)) \
+    : "r" (dst), "r" (src), "m" (*(const PcpVectorCopyF32 *)(src)) \
+    : "$2")
+/* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
+typedef struct SdfAssetEntry {
+    u32 pad00;             /* 0x00 */
+    u32 unk04;             /* 0x04 */
+    u32 unk08;             /* 0x08 */
+    u32 secondaryColor;    /* 0x0C: packed color applied by the secondary draw state */
+    u32 primaryStateWordThird; /* 0x10: copied from the owning asset, or forced to zero. */
+    u32 unk14;             /* 0x14 */
+    u32 pad18;             /* 0x18 */
+    f32 unk1C;             /* 0x1C */
+    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
+    u32 secondaryMode;     /* 0x24: secondary packet mode copied from SdfAsset */
+    f32 y;                 /* 0x28 */
+    f32 x;                 /* 0x2C */
+    u8 pad30[8];           /* 0x30 */
+    SdfGsTextureStateValues primaryTextureState; /* 0x38 */
+    SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
+    SdfDrawTransform transforms[2]; /* 0x68 */
+    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
+    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
+} SdfAssetEntry;
+/* GIF tag followed by a REF transfer and the patchable NEXT link. */
+typedef struct SdfDmaReferenceChainPacket {
+    SdfGsPacketHeader header;
+    u64 referenceTag;
+    u64 referenceVifCommands;
+    u64 nextTag;
+    u64 zeroTailWord;
+} SdfDmaReferenceChainPacket;
+void sdfAppendPacketRange(struct SdfListHead *list, u32 packetAddress,
+                          u32 rangeTailAddress);
+/* Fixed-size texture packet; constructor allocation and writes cover 0x50. */
+typedef struct SdfTextureDrawPacket {
+    SdfDrawPacket header;
+    u64 textureWordA;
+    u64 registerAddressA;
+    u64 textureWordB;
+    u64 registerAddressB;
+    u64 textureWordC;
+    u64 registerAddressC;
+} SdfTextureDrawPacket;
+/* Complete static projection record, including the inverse-origin cache. */
+typedef struct SdfProjectionRecord {
+    SdfCamera camera;
+    f32 inverseOrigin[4]; /* 0x90 */
+} SdfProjectionRecord;
+/* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
+
+
+
+
+/* Bind the selected pair of model slot indices and weights. */
+
+
+
+
+/* Sample the supplied frame and interpolate, retaining separate keys when IDs differ. */
+
+
+/* Blend sampled and retained weights, keeping at most two model slots. */
+
+
+/* Preserve the complete current pair for the next weighted transition. */
+
+
+/* Matrix registers: vf28-vf31 are the primary matrix, vf24-vf27 its
+ * alternate bank, and vf20-vf23 a third bank copied between the two. */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* libvu0: sceVu0UnitMatrix */
+
+
+/* Transpose the four VU rows; EE MMI interleave is needed for packed vectors. */
+/* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
+
+
+/* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
+
+
+/* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
+
+
+extern f32 cosf(f32 angle);
+extern f32 sinf(f32 angle);
+extern SdfPadEntry sdfPadCb[];
+/* Convert three Euler angle components to the VU0 quaternion output.
+ * Providers: DDS1 game/code_002E7C20.c and DDS2 game/code_00340AC8.c. */
+void FromEuler(f32 x, f32 y, f32 z);
+#define EE_LOAD_UNALIGNED_WORD(out, src) __asm__ volatile ( \
+    "lwr %0, 0(%1)\n\t" \
+    "lwl %0, 3(%1)" \
+    : "=&r"(out) : "r"(src))
+void sdfDrawTagLink(struct SdfListHead *list, u32 packetAddress);
+void sdfDrawTagLinkRef(struct SdfListHead *list, u32 packetAddress);
+typedef struct {
+    f32 matrix[4][4];      /* 0x00 */
+    u16 param0;            /* 0x40 */
+    s16 param1;            /* 0x42 */
+    u32 selectedFlags;     /* 0x44 */
+    u32 nextParam;         /* 0x48 */
+    u32 flags;             /* 0x4C */
+    s16 nodeCount;         /* 0x50 */
+    s16 selectedTriangleCount; /* 0x52: rejected-triangle index count */
+    SdfAssetEntry *node;   /* 0x54 */
+    u32 packedColor;       /* 0x58: packed RGBA word */
+    f32 offsetX;           /* 0x5C */
+    f32 offsetY;           /* 0x60 */
+    u32 dmaBase;           /* 0x64 */
+    VuBlendNode *dmaAddrA; /* 0x68: next free ring node */
+    VuBlendNode *dmaAddrB; /* 0x6C: ring wrap node */
+    u32 dmaCountA;         /* 0x70 */
+    u32 dmaCountB;         /* 0x74 */
+    VuBlendNode *blendList; /* 0x78 */
+    VuBlendNode **dmaEnd;  /* 0x7C: list tail link */
+    u32 packetStart;       /* 0x80 */
+    u32 header;            /* 0x84: aligned packet cursor + 0x30 */
+    u32 *ringStart;        /* 0x88 */
+    u32 *cursor;           /* 0x8C */
+    u8 *payload;           /* 0x90 */
+    u8 *strip;             /* 0x94 */
+    u8 *positions;         /* 0x98 */
+    u8 *normals;           /* 0x9C */
+    u8 *coordinates;       /* 0xA0 */
+    u8 *secondCoordinates; /* 0xA4 */
+    u8 *vertexColors;      /* 0xA8 */
+    f32 depth;             /* 0xAC */
+} VuWork;
+#define VU0_MATRIX4_INVERT_SCALED() __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vmula.xyz ACC, vf28, vf28\n\tvmadda.xyz ACC, vf29, vf29\n\tvmadd.xyz vf2, vf30, vf30\n\t" \
+    "vaddw.xyz vf3, vf0, vf0w\n\t" \
+    "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf0\n\t" \
+    "vdiv Q, vf0w, vf2x\n\t" \
+    "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
+    "pcpyld $8, $14, $12\n\tpcpyud $9, $12, $14\n\tpcpyld $10, $15, $13\n\t" \
+    "vwaitq\n\tvmulq.x vf3, vf3, Q\n\t" \
+    "vdiv Q, vf0w, vf2y\n\t" \
+    "qmtc2.ni $8, vf28\n\tqmtc2.ni $9, vf29\n\tqmtc2.ni $10, vf30\n\t" \
+    "vwaitq\n\tvmulq.y vf3, vf3, Q\n\t" \
+    "vdiv Q, vf0w, vf2z\n\t" \
+    "vwaitq\n\tvmulq.z vf3, vf3, Q\n\t" \
+    "vmul.xyz vf28, vf28, vf3\n\tvmul.xyz vf29, vf29, vf3\n\tvmul.xyz vf30, vf30, vf3\n\t" \
+    "vmula.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
+    "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
+    ".set reorder\n")
+#define VU0_APPLY_MATRIX(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, " #src "w\n\t.set reorder")
+#define VU0_TRANSFORM_POINT(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tvmulax.xyzw ACC, vf28, " #src "x\n\tvmadday.xyzw ACC, vf29, " #src "y\n\t" \
+    "vmaddaz.xyzw ACC, vf30, " #src "z\n\tvmaddw.xyzw " #dst ", vf31, vf0w\n\t.set reorder")
+#define VU0_SET_CLIP_PLANES(bias, eye, projection) __asm__ volatile ( \
+    ".set noreorder\n\tqmtc2.ni %0, vf2\n\t" \
+    "lqc2 vf21, 0(%1)\n\tlqc2 vf22, 0x70(%2)\n\t" \
+    "lqc2 vf23, 0x80(%2)\n\tvaddz.x vf23, vf23, vf2z\n\t.set reorder" \
+    : : "r" (bias), "r" (eye), "r" (projection))
+#define VU0_STORE_MATRIX_AND_UNIT_ROWS(dst) __asm__ volatile ( \
+    ".set noreorder\n\t.set noat\n\t" \
+    "lui $1, 0x3F80\n\t" \
+    "mtc1 $1, $f0\n\t" \
+    "vmula.xyz ACC, vf28, vf28\n\t" \
+    "vmadda.xyz ACC, vf29, vf29\n\t" \
+    "vmadd.xyz vf2, vf30, vf30\n\t" \
+    "vrsqrt Q, vf0w, vf2y\n\t" \
+    "qmfc2.ni $2, vf2\n\t" \
+    "mtc1 $2, $f2\n\t" \
+    "rsqrt.s $f2, $f0, $f2\n\t" \
+    "sqc2 vf28, 0x0(%0)\n\t" \
+    "sqc2 vf29, 0x10(%0)\n\t" \
+    "sqc2 vf30, 0x20(%0)\n\t" \
+    "sqc2 vf31, 0x30(%0)\n\t" \
+    "vwaitq\n\t" \
+    "vaddq.y vf3, vf0, Q\n\t" \
+    "vrsqrt Q, vf0w, vf2z\n\t" \
+    "mfc1 $2, $f2\n\t" \
+    "qmtc2.ni $2, vf4\n\t" \
+    "vmove.x vf3, vf4\n\t" \
+    "vwaitq\n\t" \
+    "vaddq.z vf3, vf0, Q\n\t" \
+    "vmul.xyz vf4, vf28, vf3\n\t" \
+    "vmul.xyz vf5, vf29, vf3\n\t" \
+    "vmul.xyz vf6, vf30, vf3\n\t" \
+    "sqc2 vf4, 0x40(%0)\n\t" \
+    "sqc2 vf5, 0x50(%0)\n\t" \
+    "sqc2 vf6, 0x60(%0)\n\t" \
+    ".set at\n\t.set reorder" \
+    : : "r" (dst) : "$1", "$2", "$f0", "$f2", "memory")
+/* Finish the selected node's transformed rows and emit its textured geometry. */ void corePktEmitMultiTexPass(VuWork *work);
+#define EE_MMI_RGBA_MULTIPLY_VECTOR(out, a, b, unit) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlb $3, $0, %2\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "pextlh $3, $0, $3\n\t" \
+    "qmtc2.ni $2, vf2\n\t" \
+    "qmtc2.ni $3, vf3\n\t" \
+    "qmtc2.ni %3, vf4\n\t" \
+    "vitof0.xyzw vf2, vf2\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "vmul.xyzw vf2, vf2, vf3\n\t" \
+    "vmulx.xyzw vf2, vf2, vf4x\n\t" \
+    "qmfc2.ni %0, vf2\n\t" \
+    ".set reorder" \
+    : "=r" (out) : "r" (a), "r" (b), "r" (unit) : "$2", "$3")
+#define VU0_ROTATE_BASIS_X(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf29\n\t" \
+    "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmaddx.xyzw $vf29, $vf30, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf30, $vf3x\n\tvmsubx.xyzw $vf30, $vf4, $vf2x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+#define VU0_ROTATE_BASIS_Y(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf28\n\t" \
+    "vmulax.xyzw ACC, $vf28, $vf3x\n\tvmsubx.xyzw $vf28, $vf30, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf4, $vf2x\n\tvmaddx.xyzw $vf30, $vf30, $vf3x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+#define VU0_ROTATE_BASIS_Z(c, s) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "mfc1 $3, %0\n\tmfc1 $2, %1\n\tqmtc2.ni $3, $vf3\n\tqmtc2.ni $2, $vf2\n\t" \
+    "vmove.xyzw $vf4, $vf28\n\t" \
+    "vmulax.xyzw ACC, $vf28, $vf3x\n\tvmaddx.xyzw $vf28, $vf29, $vf2x\n\t" \
+    "vmulax.xyzw ACC, $vf29, $vf3x\n\tvmsubx.xyzw $vf29, $vf4, $vf2x\n\t" \
+    ".set reorder\n" \
+    : : "f" (c), "f" (s) : "$2", "$3")
+#define VU0_SUB(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #dst ", " #a ", " #b "\n\t.set reorder")
+#define VU0_CROSS_XYZ(dst, a, b) __asm__ volatile ( \
+    ".set noreorder\n\tvopmula.xyz ACC, " #a ", " #b "\n\tvopmsub.xyz " #dst ", " #b ", " #a "\n\t.set reorder")
+#define VU0_TRIANGLE_FACING(out, a, b, c) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf2, 0(%1)\n\tlqc2 vf3, 0(%2)\n\tlqc2 vf4, 0(%3)\n\t" \
+    "vsub.xyz vf2, vf2, vf3\n\tvsub.xyz vf4, vf4, vf3\n\tvsub.xyz vf3, vf21, vf3\n\t" \
+    "vopmula.xyz ACC, vf2, vf4\n\tvopmsub.xyz vf2, vf4, vf2\n\t" \
+    "vmul.xyz vf2, vf2, vf3\n\tvadday.x ACC, vf2, vf2y\n\tvmaddz.x vf2, vf1, vf2z\n\t" \
+    "qmfc2.ni $2, vf2\n\tmtc1 $2, %0\n\t.set reorder" \
+    : "=f" (out) : "r" (a), "r" (b), "r" (c) : "$2")
+#define VU0_SET_UNIT_MATRIX(a, b, c, d) __asm__ volatile ( \
+    ".set noreorder\n\tvsub.xyzw " #a ", vf0, vf0\n\tvmr32.xyzw " #c ", vf0\n\t" \
+    "vmove.xyzw " #d ", vf0\n\tvaddw.x " #a ", " #a ", vf0w\n\tvmr32.xyzw " #b ", " #c "\n\t.set reorder")
+#define VU0_BLEND_NODE_VECTORS(node, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "lqc2 vf2, 0x40(%0)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "lqc2 vf10, 0x20(%1)\n\tlqc2 vf11, 0x20(%2)\n\t" \
+    "vmulaw.xy ACC, vf8, vf0w\n\tvmaddaw.xy ACC, vf9, vf2w\n\tvmsubw.xy vf15, vf8, vf2w\n\t" \
+    "vmulaw.xyzw ACC, vf10, vf0w\n\tvmaddaw.xyzw ACC, vf11, vf2w\n\tvmsubw.xyzw vf16, vf10, vf2w\n\t" \
+    "sqc2 vf15, 0x30(%0)\n\tsqc2 vf16, 0x20(%0)\n\t.set reorder" \
+    : : "r" (node), "r" (first), "r" (second) : "memory")
+#define VU0_INTERPOLATE_CLIP_VERTEX(out, first, second) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "vaddx.w vf2, vf0, vf0x\n\tlbu $2, 0x50(%1)\n\tlqc2 vf4, 0x10(%1)\n\tlqc2 vf5, 0x10(%2)\n\t" \
+    "andi $2, $2, 0x1\n\tbne $0, $2, 1f\n\tlqc2 vf6, 0x0(%1)\n\tvsubw.w vf2, vf1, vf0w\n" \
+    "1:\n\tlqc2 vf7, 0x0(%2)\n\tlqc2 vf8, 0x30(%1)\n\tlqc2 vf9, 0x30(%2)\n\t" \
+    "vsubw.w vf12, vf2, vf4w\n\tvsubw.w vf13, vf5, vf4w\n\tvsub.xyzw vf14, vf7, vf6\n\t" \
+    "vdiv Q, vf12w, vf13w\n\tlqc2 vf10, 0x20(%1)\n\tvsub.xyzw vf15, vf9, vf8\n\t" \
+    "vmulaw.xyzw ACC, vf6, vf0w\n\tsqc2 vf10, 0x20(%0)\n\tvwaitq\n\tcfc2.ni $2, $vi22\n\t" \
+    "vmaddq.xyzw vf14, vf14, Q\n\tvmulaw.xyzw ACC, vf8, vf0w\n\tvmaddq.xy vf15, vf15, Q\n\t" \
+    "sqc2 vf14, 0x0(%0)\n\tsw $2, 0x4C(%0)\n\tsqc2 vf15, 0x30(%0)\n\tsqc2 vf2, 0x10(%0)\n\t" \
+    ".set reorder" \
+    : : "r" (out), "r" (first), "r" (second) : "$2", "memory")
+#define VU0_BUILD_PACKED_COLOR_TRANSFORM(dst, reference, packedColor, firstColor, secondColor, blend) \
+__asm__ volatile ( \
+        ".set noreorder\n\t" \
+        "pextlb $2, $0, %3\n\t" \
+        "pextlb $3, $0, %4\n\t" \
+        "pextlb $4, $0, %2\n\t" \
+        "pextlh $2, $0, $2\n\t" \
+        "pextlh $3, $0, $3\n\t" \
+        "pextlh $4, $0, $4\n\t" \
+        "qmtc2.ni $2, vf2\n\t" \
+        "qmtc2.ni $3, vf3\n\t" \
+        "qmtc2.ni $4, vf4\n\t" \
+        "qmtc2.ni %5, vf5\n\t" \
+        "qmtc2.ni %6, vf6\n\t" \
+        "qmtc2.ni %7, vf7\n\t" \
+        "vitof0.xyzw vf2, vf2\n\t" \
+        "vitof0.xyzw vf3, vf3\n\t" \
+        "vitof0.xyzw vf4, vf4\n\t" \
+        "lqc2 vf8, 0x40(%1)\n\t" \
+        "lqc2 vf9, 0x80(%1)\n\t" \
+        "vmulx.xyzw vf2, vf2, vf6x\n\t" \
+        "vmulx.xyzw vf3, vf3, vf6x\n\t" \
+        "vmove.w vf9, vf0\n\t" \
+        "vmulx.w vf8, vf8, vf0x\n\t" \
+        "vmulw.w vf4, vf4, vf2w\n\t" \
+        "vmul.xyz vf9, vf3, vf9\n\t" \
+        "vmul.xyz vf8, vf2, vf8\n\t" \
+        "vmulaw.xyz ACC, vf9, vf0w\n\t" \
+        "vmaddax.xyz ACC, vf8, vf5x\n\t" \
+        "vmsubx.xyz vf9, vf9, vf5x\n\t" \
+        "vmul.xyzw vf8, vf8, vf4\n\t" \
+        "vmul.xyzw vf9, vf9, vf4\n\t" \
+        "vminix.xyzw vf8, vf8, vf7x\n\t" \
+        "vsub.xyz vf8, vf8, vf9\n\t" \
+        "sqc2 vf9, 0x10(%0)\n\t" \
+        "sqc2 vf8, 0x20(%0)\n\t" \
+        ".set reorder" \
+        : : "r"(dst), "r"(reference), "r"(packedColor), \
+            "r"(firstColor), "r"(secondColor), "r"(blend), \
+            "r"(0.0078125f), "r"(0x437F0000) \
+        : "$2", "$3", "$4", "memory")
+void sdfTexSetWrapMode(struct SdfTex *texture, SdfTextureClampMode mode);
+/* Linked registry node stored in the title's tracked-thread table (0x8). */
+typedef struct SdfThreadNode {
+    struct SdfThreadNode *next; /* 0x00 */
+    s32 threadId;               /* 0x04 */
+} SdfThreadNode;
+/* Register a thread node, then start its entry function on the supplied stack. */
+void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void),
+                           void *stack, s64 stackSize, s32 priority, s32 arg);
+/* Per-texture reference count and non-owning clone source (0x8). */
+typedef struct SdfTexRef {
+    struct SdfTex *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
+    s32 refCount;
+} SdfTexRef;
+/* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
+typedef struct SdfTexBuf {
+    s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
+    u32 gifTagControl; /* High GIFtag control word; one packed register. */
+    u64 gifTagRegisters; /* Packed register list: A+D. */
+    u64 samplingState; /* GS TEX1 data, including minification/magnification filters. */
+    u64 samplingRegister; /* GS TEX1_1/TEX1_2 register selector. */
+    u64 textureState; /* GS TEX0 data. */
+    u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
+    u64 clampState; /* GS CLAMP data. */
+    u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
+} SdfTexBuf;
+/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
+typedef struct SdfTexResource {
+    struct SdfTexResource *next; /* 0x00 */
+    struct SdfTexResource *prev; /* 0x04 */
+    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
+    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
+    s32 size;                   /* 0x10: range length in 32-bit words */
+    s16 width;                  /* 0x14 */
+    s16 height;                 /* 0x16 */
+    s32 format;                 /* 0x18: GS pixel-storage mode */
+} SdfTexResource;
+typedef struct SdfStreamFrameNode {
+    struct SdfStreamFrameNode *streamPrev;
+    struct SdfStreamFrameNode *streamNext;
+    struct SdfStreamFrameNode *next;
+    u8 active;
+    u8 queued;
+    u8 ipuCycleInitialized; /* First-use IPU setup has run for this playback cycle. */
+    u8 drained;
+    u8 playbackPhase;
+    u8 inputFeedEnabled; /* Restart input feeding after DMA completion while input remains. */
+    u8 inputDmaStartPending;
+    u8 pendingPlaybackSubmissions; /* Queued output submissions not yet retired by a playback update. */
+    u8 audioMode;
+    u8 loopMode;
+    u8 playbackCadenceStep;
+    u8 playbackCadenceRemainder;
+    u8 bufferIndex;
+    u8 transferPacketIndex;
+    u8 completedBufferCount; /* Completed output buffers waiting for playback submission. */
+    u8 pad1B;
+    s32 bufferSize;
+    void *frameBuffers[2];
+    void *transferPacketBuffers[2];
+    u32 transferPacketBytes;
+    s32 resourceWord;
+    SdfTexResource *textureHead;
+    u16 width;
+    u16 height;
+    u32 cycleLength;
+    u32 tickCount;
+    s32 playbackFrameIndex;
+    struct SdfStreamInputDmaTag *inputDmaChain;
+    u8 headerReady;
+    u8 done;
+    u8 filledSlots;
+    u8 firstSlot;
+    u8 *scratchBuffer;
+    u8 pad58[4];
+    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+    struct MovObj *readContext; /* Owner context passed to the read callback. */
+    u8 inputFeedDmaInFlight;
+    u8 unk65;
+    u8 pad66[2];
+    IpuDmaState dma;
+} SdfStreamFrameNode;
+typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
+void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
+typedef union MovObjStream {
+    struct MovLinearStream *linear;
+    struct MovPacStream *pac;
+} MovObjStream;
+typedef struct MovObj {
+    u8 active;
+    u8 state;
+    u8 stopRequested;
+    u8 isPac;
+    u16 unk04;
+    u16 unk06;
+    u32 unk08;
+    u16 unk0C;
+    u16 unk0E;
+    struct DevState *deviceState;
+    s32 totalBytes;
+    s32 remainingBytes;
+    MovObjStream stream;
+    u8 pacEnabled;
+    u8 pad21;
+    u8 packetLimit;
+    u8 pad23;
+    SdfStreamFrameNode soundNode;
+} MovObj;
+/* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
+typedef struct SdfGraphObj {
+    s16 width;
+    s16 unk2;
+    s16 height;
+    u8 bufferFormat;
+    u8 auxiliaryFormat;
+    SdfTexResource *buffers[3];
+} SdfGraphObj;
+/* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
+typedef struct SdfTex {
+    struct SdfTex *next;
+    struct SdfTex *prev;
+    SdfTexRef *reference;
+    s16 width;
+    s16 height;
+    SdfTexResource *primaryResource;
+    SdfTexResource *secondaryResource;
+    u8 paletteCount;
+    u8 clutFormat;
+    u8 pixelFormat;
+    u8 maxMipLevel;
+    u16 lodParameters; /* Packed GS TEX1 L/K parameters. */
+    u8 unk1E;
+    SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
+    s32 resourceKey;
+    s32 battleTextureSlot;
+    SdfTexBuf *primaryBuffer;
+    SdfTexBuf *secondaryBuffer;
+    u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
+    s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetPaletteByteSize. */
+    s32 unk38;
+    u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
+} SdfTex;
+/* Return packed 64-bit TEX0, TEX1, and CLAMP states from the primary GS packet. */
+u64 sdfTexGetTex0Reg(SdfTex *texture);
+u64 sdfTexGetTex1Reg(SdfTex *texture);
+u64 sdfTexGetClampReg(SdfTex *texture);
+/* Frame/depth builder state: one DMA/GIF header and two A+D register writes. */
+typedef struct SdfPacketBuilder {
+    u8 pad00[4];
+    void (*prepare)(struct SdfPacketBuilder *, s32 bufferIndex);
+    u8 pad08[8];
+    SdfGsPacketHeader packetHeader;
+    SdfGsRegisterWrite frame;
+    SdfGsRegisterWrite zbuf;
+    SdfGraphObj *source;
+    u32 frameMask;
+    s32 region;
+    s32 mode;
+} SdfPacketBuilder;
+void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex);
+void sdfGrSetFramePacket(SdfPacketBuilder *packet, SdfGraphObj *source,
+    u32 frameMask, s32 region, s32 mode);
+/* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
+typedef struct SdfAsset {
+    u32 unk00; /* Word from the serialized asset-parameter header. */
+    u16 unk04; /* Halfword from the serialized asset-parameter header. */
+    u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
+    u8 pad07;
+    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
+    u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
+    u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
+    u32 secondaryColor; /* 0x18 */
+    f32 primaryStateFloat; /* 0x1C: interpolated primary-state float */
+    u32 primaryStateWordThird; /* 0x20 */
+    u32 unk24;
+    u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
+    SdfTex *texture;
+    SdfTex *secondaryTexture; /* 0x30 */
+    u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
+    SdfSubParam *primarySubParam; /* 0x38 */
+    SdfSubParam *secondarySubParam; /* 0x3C */
+    f32 scalarPairFirst; /* 0x40 */
+    f32 scalarPairSecond; /* 0x44 */
+} SdfAsset;
+/* General-heap allocation descriptor (0x10); links bound the represented span. */
+typedef struct SdfMemBlock {
+    struct SdfMemBlock *prev; /* 0x00 */
+    struct SdfMemBlock *next; /* 0x04 */
+    s32 address;              /* 0x08: start of represented span */
+    u16 state;                /* 0x0C: free, used, or end sentinel */
+    s16 referenceCount;       /* 0x0E: -1 for sentinels */
+} SdfMemBlock;
+typedef struct DevRequest {
+    struct SdfMemBlock *backingAllocation;
+    s16 usedCount;
+    u16 capacity;
+    s16 stride;
+    s16 growStep;
+    void *buffer;
+} DevRequest;
+DevRequest *sdfItemArrayNew(s32 count, s32 stride, s32 growStep);
+/* Command-list node: allocation owns the node and trailing command data.
+ * A null descriptor identifies a separately chip-allocated node. */
+typedef struct SdfCommandNode {
+    struct SdfCommandNode *next;
+    u8 kind;
+    s8 packetSelector;
+    s16 quadwordCount;
+    void *payload; /* Packet bytes for kind 1; serialized commands for kinds 2/3. */
+    struct SdfMemBlock *allocation;
+} SdfCommandNode;
+/* Allocated as 0x100-byte nodes; each owns a circular list of child draw nodes. */
+typedef struct SdfDrawNode {
+    struct SdfDrawNode *previous; /* 0x00 */
+    struct SdfDrawNode *next;     /* 0x04 */
+    struct SdfDrawNode *parent;   /* 0x08 */
+    struct SdfDrawNode *children; /* 0x0C */
+    struct SdfModel *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
+    u16 flags;                   /* 0x14 */
+    s16 unk16;                   /* 0x16: constructor sentinel is -1 */
+    s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
+    u32 color;                   /* 0x1C */
+    u8 pad20[8];
+    SdfCommandNode *lists[2];     /* 0x28: command lists for both buffered frames */
+    u8 *workspace; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
+    const f32 *boundsCorners;     /* 0x34: optional two xyz corners used by clipping */
+    void *sourceItem;             /* 0x38: item this node was built from */
+    u8 pad3C[0x14];
+    f32 quaternion[4];           /* 0x50 */
+    f32 translation[4];          /* 0x60 */
+    f32 scale[4];                /* 0x70 */
+    f32 localMatrix[4][4];       /* 0x80: all four local basis/translation rows */
+    f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
+} SdfDrawNode;
+/* The buffered-transform constructor allocates and clears all 0x9C bytes. */
+typedef struct SdfModel {
+    DevRequest *list;
+    SdfDrawNode *rootNode;
+    void *assetData;
+    DevRequest *resources;
+    DevRequest *slotPairs;
+    struct Motion *motionList;
+    u8 unk18;
+    u8 flags;
+    u16 drawFlags;
+    u32 color;
+    f32 matrix[4][4];
+    f32 rotationQuaternion[4];
+    f32 scaleVector[4];
+    struct SdfDmaTagHeader *lighting; /* Borrowed first DMA reference prefix. */
+    struct SdfDmaTagHeader *secondaryLighting; /* Borrowed second DMA reference prefix. */
+    f32 scalarOverrideFirst;
+    f32 scalarOverrideSecond;
+    struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
+    /* Model scale read by sdfVuSetGlobalScale and copied unchanged into the
+     * three-scalar VIF payload (DDS1 0x2D9530). */
+    f32 modelScale;
+    u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
+    u8 pad99[3];
+} SdfModel;
+SdfDrawNode *sdfModelSearchNode(SdfModel *model, s32 nodeIdOrIndex);
+typedef struct SdfMotionCommand {
+    union {
+        u32 packedCommand;
+        struct {
+            /* Runtime dispatch shifts the command word right by 16. */
+            u16 selector;
+            u16 family;
+        } binding;
+    };
+    u32 targetIndex;
+} SdfMotionCommand;
+/* Resource header followed by the binding commands used to construct a motion. */
+typedef struct MotionTable {
+    u16 entryCount; /* Motion-index upper bound returned by mdlGetNumOfCut. */
+    u16 commandCount;
+    MotionEntry **entries;
+    SdfMotionCommand commands[1];
+} MotionTable;
+/* SDK motions are allocated as 0x34-byte records; model slots retain these nodes. */
+typedef struct Motion {
+    struct Motion *next;
+    SdfModel *owner;
+    MotionTable *motionTable;
+    s32 unkC;
+    DevRequest *request;
+    f32 blendDurationFrames;
+    f32 blendStartFrame;
+    f32 currentFrame;
+    f32 frameStep;
+    s32 unk24;
+    s16 searchId;
+    s16 slotIndex;
+    u16 motionIndex;
+    u16 frameCount;
+    u8 state;
+    u8 previousState;
+    u8 loopEnabled;
+    u8 pad33;
+} Motion;
+/* Motion callbacks release storage, bind keys, sample, capture and blend. */
+typedef struct SdfMotionBindingDispatch {
+    void (*releaseStorage)(void *binding);
+    void (*bindKeyTrack)(void *binding, struct SdfMotionKeyTrack *track);
+    void (*sample)(void *binding, f32 frame);
+    void (*capturePrevious)(void *binding);
+    void (*blend)(void *binding, f32 frame, f32 weight);
+    u32 unk14;
+} SdfMotionBindingDispatch;
+/* Common dispatch/motion prefix used by motion-owned bindings. */
+typedef struct SdfMotionBindingHead {
+    SdfMotionBindingDispatch *dispatch;
+    Motion *motion;
+} SdfMotionBindingHead;
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, Motion *motion,
+                             SdfMotionBindingDispatch *dispatch);
+typedef struct SdfMotionKeyBinding {
+    SdfMotionBindingDispatch *dispatch;
+    Motion *motion;
+    SdfMotionKeyTrack *track;
+} SdfMotionKeyBinding;
+/* Indexed asset bindings share the key prefix and retain the selected asset. */
+typedef struct SdfMotionIndexedBinding {
+    SdfMotionKeyBinding keys;
+    SdfAsset *target;
+} SdfMotionIndexedBinding;
+void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, Motion *motion,
+    SdfMotionBindingDispatch *dispatch, s32 options);
+/* DMA/VIF transfer header and packed A+D GIF tag, excluding register payload. */
+void sdfGrSetRegsPacketHeader(SdfGsPacketHeader *header, s32 payloadQwords);
+void sdfBuildDmaReferenceChain(SdfDmaReferenceChainPacket *packet,
+    u32 sourceAddress, s32 qwordCount);
+/* Append the common rectangle used to frame a grid of sprite cells. */
+void dds3ConsPanelTagLink(struct SdfListHead *packetList, s32 column, s32 row,
+                        s32 columnCount, s32 rowCount);
+/* Write the reference header for one buffered asset draw entry and return
+ * the packet payload immediately after the header. */
+struct SdfDmaTagHeader *sdfMatMakePacket(struct SdfAsset *asset,
+                                                           struct SdfDmaTagHeader *tag,
+                                                           s32 frame);
+/* Refresh one of the two draw entries and retain the other entry's dirty bits. */
+void sdfMatUpdatePacket(struct SdfAsset *asset, s32 entryIndex);
+void sdfMatSetTexUvw(struct SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e);
+void sdfMatSetFaceDivParm(struct SdfAsset *asset, f32 first, f32 second);
+u32 sdf2DGetTexPacketSize(SdfTex *texture);
+struct SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes);
+u32 sdfMemLock(struct SdfMemBlock *allocation);
+void sdfMemFreeDirect(struct SdfMemBlock *allocation);
+void sdfMemFreeHandleDirect(s32 *slot);
+/* Native 0x2C VIF primitive request, shared by its quad/triangle producers.
+ * Attribute buffers carry serialized words; coordinate floats retain their bits.
+ * Native callers supply a positive vertex count and aligned 16-byte position/normal rows. */
+typedef struct SdfPrimitiveRequest {
+    s16 stripWordCount;
+    s16 vertexCount;
+    u16 primitiveFlags;
+    u16 clipMask;
+    u32 color;
+    const void *strip;
+    const void *positions;
+    const void *normals;
+    const void *coordinates;
+    const void *secondCoordinates;
+    const void *vertexColors;
+    void *(*allocate)(s32);
+    f32 depth;
+} SdfPrimitiveRequest;
+/* Serialized texture-resource header; payload begins after this 0x40-byte prefix. */
+typedef struct SdfTextureFileHeader {
+    u8 unk00;
+    u8 payloadOffsetFlags; /* 0x01: high nibble adds payload offset bytes; low bits stay opaque. */
+    u8 pad02[2];       /* 0x02 */
+    u32 byteCount;     /* 0x04 */
+    u32 magic;         /* 0x08 */
+    u8 pad0C[4];       /* 0x0C */
+    u8 paletteCount;   /* 0x10 */
+    u8 clutFormat;     /* 0x11 */
+    s16 width;         /* 0x12 */
+    s16 height;        /* 0x14 */
+    u8 pixelFormat;    /* 0x16 */
+    u8 maxMipLevel;    /* 0x17 */
+    u16 lodParameters; /* 0x18 */
+    u8 unk1A;          /* 0x1A */
+    SdfTextureClampMode clampMode; /* 0x1B: serialized GS clamp mode */
+    s32 resourceKey;   /* 0x1C */
+    s32 battleTextureSlot; /* 0x20: selects one of two battle-model texture headers */
+    u8 pad24[0x1C];    /* 0x24 */
+} SdfTextureFileHeader;
+/* Acquire a texture from a serialized texture-file header. */
+struct SdfTex *sdfTexSet(const SdfTextureFileHeader *header);
+struct SdfTex *sdfTexSetDirect(const SdfTextureFileHeader *header);
+/* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
+ * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
+s32 sdfGrAllocPacketBuff(s32 size);
+/* Read the active packet cursor or restore it at a quadword boundary. */
+s32 sdfGrOpenPacketBuff(void);
+/* Store the mode request for a logical pad; setup applies it later. */
+void sdfPadRequestMode(s32 padIndex, u8 mode);
+void sdfDevResizeBufferedRequest(DevRequest *request, s32 count);
+/* The draw node owns the lazily allocated workspace; callers receive a borrowed
+ * pointer to it, and must not release it independently. */
+u8 *sdfModelAllocTmPacket(SdfDrawNode *root);
+/* Generated 128x64 grayscale power lookup texture: a serialized texture
+ * header, 256 RGBA palette words, then the full 64x128 index image. */
+typedef struct SdfGeneratedLookupTexture {
+    SdfTextureFileHeader header; /* 0x0000 */
+    u32 palette[256];            /* 0x0040 */
+    u8 indices[64][128];         /* 0x0440 */
+} SdfGeneratedLookupTexture;
+static inline VuBlendNode *vuAllocNode(VuWork *work) {
+    VuBlendNode *node = work->dmaAddrA;
+
+    if (--work->dmaCountA == 0) {
+        work->dmaAddrA = work->dmaAddrB;
+        work->dmaCountA = work->dmaCountB;
+    } else {
+        work->dmaAddrA = node + 1;
+    }
+    *work->dmaEnd = node;
+    work->dmaEnd = &node->next;
+    return node;
+}
+extern s32 corePktPointBuff;
+extern void corePktRelightBackFaces(u32 base, s32 count);
+extern SdfTex *D_005518B8;
+extern SdfTex *sdf3DSpecularTex;
+extern SdfTex *D_005518C8;
+extern s32 sdfCoreDrawBuffHandle;
+extern void *sceDmaGetChan(s32);
+extern void sceDmaSendN(void *, void *, s32);
+/* Append the second fixed program block as a DMA reference packet. */
+
+
+extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
+extern s32 vu1Tex0Slot0[];
+extern s32 vu1Tex0Slot2[];
+extern s32 vu1Tex0Slot1[];
+extern s32 scePadGetState(s32 port, s32 slot);
+extern s32 scePadRead(s32 port, s32 slot, void *data);
+extern s32 scePadGetReqState(s32 port, s32 slot);
+extern s32 scePadInfoAct(s32 port, s32 slot, s32 actNo, s32 term);
+extern s32 scePadSetActDirect(s32 port, s32 slot, void *actData);
+extern s32 scePadSetMainMode(s32 port, s32 slot, s32 offs, s32 lock);
+extern s32 scePadSetActAlign(s32 port, s32 slot, void *data);
+extern s32 scePadInit(s32);
+extern s32 scePadPortOpen(s32 port, s32 slot, void *buffer);
+/* Chip-heap work record for movie-PAC streaming (0x78 bytes). The
+ * block-mask allocation and the backing ring allocation are separate owners. */
+typedef struct MovPacStream {
+    u8 pad00[0x18];
+    s32 packetBytes;
+    s32 blockBytes;
+    u8 scratchBuffer[0x20];
+    struct SdfMemBlock *payloadAllocation;
+    u8 *blockMask;
+    s32 blockIndex;
+    struct SdfMemBlock *allocation;
+    u8 *pacInputBuffer;
+    u8 *pacBuffer;
+    s32 pacReadOffset;
+    s32 pacBufferedBytes;
+    u8 *ringBuffer;
+    s32 ringOffset;
+    s32 ringLength;
+    s32 unk6C;
+    s32 scratchSize;
+    u8 *scratch;
+} MovPacStream;
+/* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
+typedef struct DevState {
+    struct DevState *next; /* 0x00 */
+    struct DevState *previous; /* 0x04 */
+    struct DevState *workerNext; /* 0x08 */
+    struct DevState *workerPrev; /* 0x0C */
+    char *resolvedPath; /* 0x10 */
+    u8 workerIndex; /* 0x14 */
+    SdfDevOperationCode operation; /* 0x15 */
+    SdfDevStateCode state; /* 0x16 */
+    u8 pad17; /* 0x17 */
+    s32 operationArg; /* 0x18 */
+    s32 requestExtra; /* 0x1C */
+    void *requestData; /* 0x20 */
+    s32 options; /* 0x24 */
+    s32 resourceId; /* 0x28 */
+    s32 result; /* 0x2C */
+    s32 transferred; /* 0x30 */
+    u8 pad34[4]; /* 0x34 */
+    void (*callback)(struct DevState *, s32, s32, s32, s32); /* 0x38 */
+    s32 callbackContext; /* 0x3C: opaque callback-context word */
+} DevState;
+s32 sdfBillBoardGetPacketSize(s32 count);
+extern void *memcpy(void *, const void *, unsigned int);
+/* Copy the selected fixed order into its actor-slot bank. */
+void btlInitializeActorSlotOrder(s32 selector, s32 count);
+
+void LoadIdentity(void);
+void DiagMatrix(void);
+void ReverseMatrix(void);
+void InversMatrix(void);
+void SetRotateMatrixX(f32 angle);
+void SetRotateMatrixY(f32 angle);
+void SetRotateMatrixZ(f32 angle);
+void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix);
+void SetRotateMatrixAxis(f32 angle, const RwV3d* axis);
+void SetRotateMatrixX_B(f32 angle);
+void SetRotateMatrixY_B(f32 angle);
+void SetRotateMatrixZ_B(f32 angle);
+void SetRotateMatrixAxis_B(const RwV3d* axis, f32 angle);
+void RotateMatrixX(f32 angle);
+void RotateMatrixY(f32 angle);
+void RotateMatrixZ(f32 angle);
+void SetRotateMatrixXYZ(const RwV3d *rot);
+void MultMatrixNoArg(void);
+void MultMatrixRevNoArg(void);
+void MultMatrix(void *matrix);
+void MultMatrixRev(const void *matrix);
+void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up);
+void corePktSetupPointBuff(VuWork *work, s32 ringPosition);
+void corePktInitCb(VuWork *work, u16 *parameterWords, u32 selectionMask);
+void corePktLoadWorldLightMtx(void *vectors);
+void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+                   u32 firstColor, u32 secondColor,
+                   f32 blend, f32 scale, f32 y);
+void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY);
+void corePktLerpUVColorChain(VuBlendNode *node);
+void corePktSetConstColor(VuWork *work, u32 color);
+void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second);
+void corePktClipFace(VuWork *work);
+void corePktBuildFaceList(VuWork *work);
+void corePktBuildBackFaceList(VuWork *work);
+void corePktEmitBase(VuWork *work);
+void corePktEmitAllPasses(VuWork *work);
+void corePktOpenAndEmit(VuWork *work);
+void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source);
+void sdfCoreDrawSetFog(u8 *sourceObject);
+void sdfCoreDrawInit(s32 workspaceBytes);
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset);
+s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset);
+u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
+s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+SdfDrawPacket *sdf2DMakePrimPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount);
+SdfDrawPacket *sdf2DAllocSprite(s32 loopCount);
+void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix);
+void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix);
+void sdf3DMakeFogPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams);
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
+void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet);
+void sdf3DInitSpecularTex2(void);
+void sdf3DInit(void);
+void sdf3DPrimLinkResetTm(SdfListHead *packetList,
+                             s32 (*allocatePacket)(s32));
+void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket);
+void sdf3DPrimLinkTm(SdfListHead *packetList,
+                           s32 (*allocatePacket)(s32));
+void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+                              s32 (*allocatePacket)(s32));
+u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request);
+void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
+void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color, const void *uv,
+                                   const f32 *quad);
+u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32));
+void sdfMultiBillBoardMake1(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
+                   const void *primaryUv, const void *secondaryUv, const f32 *quad);
+u32 sdfMultiBillBoardGetPacketSize(s32 count);
+u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32));
+u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
+                  const void *halfAttributes, const void *wordAttributes,
+                  s32 count, void *(*alloc)(s32));
+void sdfMultiBillBoardVcMake1(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
+                   const void *secondaryUv, const void *quad);
+u32 sdfMultiBillBoardVcGetPacketSize(s32 count);
+u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32));
+void sdfPadControl(SdfPadEntry *entry);
+void sdfPadManager(void);
+void sdfPadSetAct0(s32 padIndex, u16 strength);
+void sdfPadSetAct1(s32 padIndex, u8 strength);
+void sdfPadInitManager(void);
+
 INCLUDE_ASM(const s32, "code_002B5CD0", LoadMatrix);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", LoadMatrix_B);
@@ -20,55 +1636,219 @@ INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixCtoA);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", CopyMatrixCtoB);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", LoadIdentity);
+void LoadIdentity(void) {
+    VU0_SET_UNIT_MATRIX(vf28, vf29, vf30, vf31);
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", LoadIdentity_B);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", StoreIdentity);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", DiagMatrix);
+/* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
+void DiagMatrix(void) {
+    VU0_MATRIX4_TRANSPOSE();
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", ReverseMatrix);
+/* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
+void ReverseMatrix(void) {
+    VU0_MATRIX4_INVERT_RIGID();
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", InversMatrix);
+/* vu0 routine: inverse of vf28-vf31 with per-axis scale removed (transpose, rows / |row|^2, translation = -(R^T * t)) */
+void InversMatrix(void) {
+    VU0_MATRIX4_INVERT_SCALED();
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixX);
+void SetRotateMatrixX(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixY);
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[1][1] = c;
+    m[1][2] = s;
+    m[2][1] = -s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX((f32 *)m);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixZ);
+void SetRotateMatrixY(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", StoreRotateMatrixAxis);
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[0][0] = c;
+    m[0][2] = -s;
+    m[2][0] = s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX((f32 *)m);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixAxis);
+void SetRotateMatrixZ(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixX_B);
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[0][0] = c;
+    m[0][1] = s;
+    m[1][0] = -s;
+    m[1][1] = c;
+    VU0_LOAD_MATRIX((f32 *)m);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixY_B);
+void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
+    f32 normalizedAxis[4];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 cosine = cosf(angle);
+    f32 sine = sinf(angle);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixZ_B);
+    VU0_LOAD_VF(vf10, axis);
+    VU0_NORMALIZE_VF10();
+    VU0_STORE_VF(vf10, normalizedAxis);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixAxis_B);
+    x = normalizedAxis[0];
+    y = normalizedAxis[1];
+    z = normalizedAxis[2];
 
-INCLUDE_ASM(const s32, "code_002B5CD0", RotateMatrixX);
+    matrix->right.x = x * x + (1.0f - x * x) * cosine;
+    matrix->right.y = x * y * (1.0f - cosine) + z * sine;
+    matrix->right.z = x * z * (1.0f - cosine) - y * sine;
+    matrix->flags = 0;
+    matrix->up.x = x * y * (1.0f - cosine) - z * sine;
+    matrix->up.y = y * y + (1.0f - y * y) * cosine;
+    matrix->up.z = y * z * (1.0f - cosine) + x * sine;
+    matrix->pad1 = 0;
+    matrix->at.x = x * z * (1.0f - cosine) + y * sine;
+    matrix->at.y = y * z * (1.0f - cosine) - x * sine;
+    matrix->at.z = z * z + (1.0f - z * z) * cosine;
+    matrix->pad2 = 0;
+    VU0_STORE_VF(vf0, &matrix->pos);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", RotateMatrixY);
+void SetRotateMatrixAxis(f32 angle, const RwV3d* axis)
+{
+    RwMatrix matrix;
+    StoreRotateMatrixAxis(angle, axis, &matrix);
+    VU0_LOAD_MATRIX(&matrix);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", RotateMatrixZ);
+void SetRotateMatrixX_B(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", SetRotateMatrixXYZ);
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[1][1] = c;
+    m[1][2] = s;
+    m[2][1] = -s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX_B((f32 *)m);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixNoArg);
+void SetRotateMatrixY_B(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixRevNoArg);
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[0][0] = c;
+    m[0][2] = -s;
+    m[2][0] = s;
+    m[2][2] = c;
+    VU0_LOAD_MATRIX_B((f32 *)m);
+}
+
+void SetRotateMatrixZ_B(f32 angle) {
+    volatile f32 m[4][4] __attribute__((aligned(16)));
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
+
+    EE_MMI_UNIT_MATRIX((f32 *)m);
+    m[0][0] = c;
+    m[0][1] = s;
+    m[1][0] = -s;
+    m[1][1] = c;
+    VU0_LOAD_MATRIX_B((f32 *)m);
+}
+
+void SetRotateMatrixAxis_B(const RwV3d* axis, f32 angle)
+{
+    RwMatrix matrix;
+    StoreRotateMatrixAxis(angle, axis, &matrix);
+    VU0_LOAD_MATRIX_B(&matrix);
+}
+
+/* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
+void RotateMatrixX(f32 angle)
+{
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
+
+    VU0_ROTATE_BASIS_X(c, s);
+}
+
+/* vu0 routine: rotate the vf28/vf30 pair by angle (vf28 = vf30*s - vf28*c, vf30 = vf30*c + vf28*s) */
+void RotateMatrixY(f32 angle)
+{
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
+
+    VU0_ROTATE_BASIS_Y(c, s);
+}
+
+/* vu0 routine: rotate the vf28/vf29 pair by angle (vf28 = vf29*s + vf28*c, vf29 = vf28*s - vf29*c) */
+void RotateMatrixZ(f32 angle)
+{
+    f32 c = cosf(angle);
+    f32 s = sinf(angle);
+
+    VU0_ROTATE_BASIS_Z(c, s);
+}
+
+void SetRotateMatrixXYZ(const RwV3d *rot)
+{
+    SetRotateMatrixX(rot->x);
+    SetRotateMatrixY_B(rot->y);
+    MultMatrixRevNoArg();
+    SetRotateMatrixZ_B(rot->z);
+    MultMatrixRevNoArg();
+}
+
+/* vu0 routine: vf28-vf31 = vf24-vf27 * vf28-vf31 (4x4 product) */
+void MultMatrixNoArg(void)
+{
+    VU0_APPLY_MATRIX(vf2, vf24);
+    VU0_APPLY_MATRIX(vf3, vf25);
+    VU0_APPLY_MATRIX(vf4, vf26);
+    VU0_APPLY_MATRIX(vf31, vf27);
+    VU0_MOVE_VF(vf28, vf2);
+    VU0_MOVE_VF(vf29, vf3);
+    VU0_MOVE_VF(vf30, vf4);
+}
+
+/* vu0 routine: vf28-vf31 = vf28-vf31 * vf24-vf27 (4x4 product) */
+void MultMatrixRevNoArg(void)
+{
+        VU0_MATRIX4_MUL_BANK_B_LEFT();
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixNoArg_C);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixRevNoArg_C);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrix);
+void MultMatrix(void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
+    MultMatrixNoArg();
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", MultMatrixRev);
+void MultMatrixRev(const void *matrix) {
+    VU0_LOAD_MATRIX_B(matrix);
+    MultMatrixRevNoArg();
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", ApplyMatrix);
 
@@ -76,20 +1856,104 @@ INCLUDE_ASM(const s32, "code_002B5CD0", InnerProduct);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", OuterProduct);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", LookAtMatrix);
+/* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
+void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
+    VU0_LOAD_VF(vf10, basisOrigin);
+    VU0_MOVE_VF(vf31, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF(vf10, directionPoint);
+    VU0_SUB(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf30, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_LOAD_VF_MEMORY(vf10, up);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_NORMALIZE_VF10();
+    VU0_MOVE_VF(vf28, vf10);
+    VU0_MOVE_VF(vf11, vf10);
+    VU0_MOVE_VF(vf10, vf30);
+    VU0_CROSS_XYZ(vf10, vf10, vf11);
+    VU0_MOVE_VF(vf29, vf10);
+    ReverseMatrix();
+}
 
 void sdfVu1Init(void) {
 }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktSetupPointBuff);
+void corePktSetupPointBuff(VuWork *work, s32 ringPosition) {
+    void *ringEnd = (u8 *)work + 0x78;
+    if (ringPosition < 0x80) {
+        work->dmaCountA = 0x80 - ringPosition;
+        work->dmaAddrB = corePktPointBuff;
+        work->dmaAddrA = ringPosition * 96 + 0x70001000;
+        work->dmaCountB = 0x2000;
+        work->dmaBase = 0x70001000;
+    } else if (ringPosition == 0x80) {
+        work->dmaBase = 0x70001000;
+        work->dmaAddrA = corePktPointBuff;
+        work->dmaCountA = 0x2000;
+        work->dmaAddrB = 0;
+        work->dmaCountB = 0;
+    } else {
+        work->dmaCountA = 0x80;
+        work->dmaBase = corePktPointBuff;
+        work->dmaAddrA = 0x70001000;
+        work->dmaAddrB = corePktPointBuff + ringPosition * 96;
+        work->dmaCountB = 0x2000 - ringPosition;
+    }
+    work->dmaEnd = ringEnd;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktInitCb);
+void corePktInitCb(VuWork *work, u16 *parameterWords, u32 selectionMask) {
+    u8 *payload = (u8 *)(parameterWords + 4);
+    u16 ringPosition;
+    u16 parameterFlags;
+    u16 nextParameter;
+    u16 selectedFlags;
+    work->param0 = parameterWords[0];
+    ringPosition = parameterWords[1];
+    work->param1 = ringPosition;
+    parameterFlags = parameterWords[2];
+    nextParameter = parameterWords[3];
+    selectedFlags = parameterFlags & selectionMask;
+    work->flags = parameterFlags;
+    work->nextParam = nextParameter;
+    work->selectedFlags = selectedFlags;
+    corePktPrimBase = selectedFlags & 0x78;
+    work->payload = payload;
+    work->packetStart = 0;
+    corePktSetupPointBuff(work, ringPosition);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktLoadWorldLightMtx);
+/* vu0 routine: rotate the basis at vectors+0x40 into vf24-vf26 and cache the original vectors. */
+void corePktLoadWorldLightMtx(void *vectors) {
+    void *m = (void *)corePktCurrLight;
+    VU0_ROTATE_BASIS_AND_CACHE(vectors, m, corePktWorldLightMtxCache);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktMakeFaceDivParm);
+/* vu0 routine: modulate and clamp packed colors against the reference rows. */
+void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference, u32 packedColor,
+                   u32 firstColor, u32 secondColor,
+                   f32 blend, f32 scale, f32 y) {
+    f32 scaledY;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktSetFaceDivParm);
+    if (scale < 1.0f) {
+        scale = 1.0f;
+    }
+    scaledY = y * scale;
+    result->scale = scale;
+    result->scaledY = scaledY;
+    VU0_BUILD_PACKED_COLOR_TRANSFORM(result, reference, packedColor,
+                                     firstColor, secondColor, blend);
+}
+
+void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
+    corePktMakeFaceDivParm(out, corePktCurrLight, packedColor,
+                  work->unk08, work->unk04,
+                  work->unk1C,
+                  work->x + deltaX,
+                  work->y + deltaY);
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktSkinPointsFirst);
 
@@ -123,19 +1987,490 @@ INCLUDE_ASM(const s32, "code_002B5CD0", corePktXfmUV);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktLerpUVChain);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktLerpUVColorChain);
+/* vu0 routine: lerp of two source rows (+0x20, +0x30) by the weight at node + 0x40 */
+void corePktLerpUVColorChain(VuBlendNode *node) {
+    while (node != NULL) {
+        void *firstSourceRow = node->sourceA;
+        void *secondSourceRow = node->sourceB;
+        VU0_BLEND_NODE_VECTORS(node, firstSourceRow, secondSourceRow);
+        node = node->next;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktApplyFaceDivColor);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktSetConstColor);
+void corePktSetConstColor(VuWork *work, u32 color) {
+    f32 colorScale = 1.0f / 128.0f;
+    VuBlendNode *node;
+    s32 remaining;
+    u128 scaledColor;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktMakeEdgePoint);
+    EE_MMI_RGBA_MULTIPLY_VECTOR(scaledColor, work->packedColor, color, colorScale);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktClipFace);
+    remaining = work->param1;
+    node = (VuBlendNode *)work->dmaBase;
+    if (remaining != 0) {
+        do {
+            remaining--;
+            *(u128 *)node->color = scaledColor;
+            node++;
+        } while (remaining != 0);
+    }
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktBuildFaceList);
+    node = work->blendList;
+    while (node != NULL) {
+        VuBlendNode *source = (VuBlendNode *)node->sourceA;
+        PCP_COPY_VECTOR_F32(node->color, source->color);
+        node = node->next;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktBuildBackFaceList);
+/* vu0 routine: interpolate a clip vertex between two source rows, COP2 macro math only */
+void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second) {
+    out->sourceA = first;
+    out->sourceB = second;
+    VU0_INTERPOLATE_CLIP_VERTEX(out, first, second);
+}
+
+/* vu0 routine: native clip facing and ordinary triangle fans. */
+void corePktClipFace(VuWork *work) {
+    s32 triangleCount;
+    s32 i;
+    u16 *triangles;
+    VuBlendNode *nodes;
+    s32 rejected;
+    s32 acceptAll;
+    u128 *(*out)[3];
+    f32 scale;
+
+    out = corePktFaceList;
+    triangleCount = (s16)work->param0;
+    rejected = 0;
+    scale = work->depth;
+    acceptAll = corePktSoftenBias;
+    triangles = (u16 *)work->strip;
+    nodes = (VuBlendNode *)work->dmaBase;
+    for (i = 0; i != triangleCount; i++) {
+        u16 *triangle = triangles;
+        VuBlendNode *a = nodes + triangle[0];
+        VuBlendNode *b = nodes + triangle[1];
+        VuBlendNode *c = nodes + triangle[2];
+        u32 bRegion;
+        u32 aRegion;
+        u32 cRegion;
+        VuBlendNode *d, *e, *f, *g;
+        f32 facing;
+        u32 clipA = a->clipFlags;
+        u32 clipB = b->clipFlags;
+        u32 clipC = c->clipFlags;
+
+        triangles += 3;
+        if ((clipA & clipB & clipC & 0x3F) != 0 ||
+            ((clipA | clipB | clipC) & 0x30) != 0) {
+            continue;
+        }
+        VU0_TRIANGLE_FACING(facing, a->position, b->position, c->position);
+        facing *= scale;
+        if (facing < 0.0f) {
+            corePktBackFaceList[rejected++] = i;
+            continue;
+        }
+        aRegion = a->region;
+        bRegion = b->region;
+        cRegion = c->region;
+
+        if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
+            out[0][0] = (u128 *)a;
+            out[0][1] = (u128 *)b;
+            out[0][2] = (u128 *)c;
+            out++;
+            continue;
+        }
+        for (;;) {
+            VuBlendNode *firstVertex;
+            u32 firstCode;
+
+            if (bRegion == cRegion) {
+                d = vuAllocNode(work);
+                e = vuAllocNode(work);
+                if (aRegion == 0) {
+                    corePktMakeEdgePoint(d, b, a);
+                    corePktMakeEdgePoint(e, c, a);
+                    out[0][0] = (u128 *)a;
+                    out[0][1] = (u128 *)d;
+                    out[0][2] = (u128 *)e;
+                    out[1][0] = (u128 *)e;
+                    out[1][1] = (u128 *)d;
+                    out[1][2] = (u128 *)b;
+                    out[2][0] = (u128 *)e;
+                    out[2][1] = (u128 *)b;
+                    out[2][2] = (u128 *)c;
+                    out += 3;
+                    break;
+                }
+                corePktMakeEdgePoint(d, a, b);
+                corePktMakeEdgePoint(e, a, c);
+                out[0][0] = (u128 *)a;
+                out[0][1] = (u128 *)d;
+                out[0][2] = (u128 *)e;
+                out++;
+                if (bRegion == 0) {
+                    out[0][0] = (u128 *)b;
+                    out[0][1] = (u128 *)e;
+                    out[0][2] = (u128 *)d;
+                    out[1][0] = (u128 *)b;
+                    out[1][1] = (u128 *)c;
+                    out[1][2] = (u128 *)e;
+                    out += 2;
+                } else {
+                    f = vuAllocNode(work);
+                    g = vuAllocNode(work);
+                    corePktMakeEdgePoint(f, b, a);
+                    corePktMakeEdgePoint(g, c, a);
+                    out[0][0] = (u128 *)e;
+                    out[0][1] = (u128 *)d;
+                    out[0][2] = (u128 *)f;
+                    out[1][0] = (u128 *)e;
+                    out[1][1] = (u128 *)f;
+                    out[1][2] = (u128 *)g;
+                    out[2][0] = (u128 *)g;
+                    out[2][1] = (u128 *)f;
+                    out[2][2] = (u128 *)b;
+                    out[3][0] = (u128 *)g;
+                    out[3][1] = (u128 *)b;
+                    out[3][2] = (u128 *)c;
+                    out += 4;
+                }
+                break;
+            }
+            if (aRegion == 0 && (bRegion ^ cRegion) == 3) {
+                d = vuAllocNode(work);
+                e = vuAllocNode(work);
+                f = vuAllocNode(work);
+                g = vuAllocNode(work);
+                corePktMakeEdgePoint(d, b, a);
+                corePktMakeEdgePoint(e, c, a);
+                corePktMakeEdgePoint(f, b, c);
+                corePktMakeEdgePoint(g, c, b);
+                out[0][0] = (u128 *)a;
+                out[0][1] = (u128 *)d;
+                out[0][2] = (u128 *)e;
+                out[1][0] = (u128 *)d;
+                out[1][1] = (u128 *)b;
+                out[1][2] = (u128 *)f;
+                out[2][0] = (u128 *)e;
+                out[2][1] = (u128 *)d;
+                out[2][2] = (u128 *)f;
+                out[3][0] = (u128 *)e;
+                out[3][1] = (u128 *)f;
+                out[3][2] = (u128 *)g;
+                out[4][0] = (u128 *)e;
+                out[4][1] = (u128 *)g;
+                out[4][2] = (u128 *)c;
+                out += 5;
+                break;
+            }
+            firstVertex = a;
+            firstCode = aRegion;
+            a = b;
+            aRegion = bRegion;
+            b = c;
+            bRegion = cRegion;
+            c = firstVertex;
+            cRegion = firstCode;
+        }
+    }
+    work->selectedTriangleCount = rejected;
+    work->nodeCount = out - corePktFaceList;
+    *work->dmaEnd = NULL;
+}
+
+/* vu0 routine: native clip-plane setup and ordinary triangle fans. */
+void corePktBuildFaceList(VuWork *work) {
+    s32 triangleCount;
+    u16 *triangles;
+    VuBlendNode *nodes;
+    s32 acceptAll;
+    u128 *(*out)[3];
+    f32 scale = work->depth;
+    f32 clipBias = corePktZBias;
+    const f32 *clipPlane = sdf3DEyeOffset;
+    const u8 *projection = sdf3DScreenParam;
+
+    VU0_SET_CLIP_PLANES(clipBias, clipPlane, projection);
+    if (work->selectedFlags & 0x4000) {
+        corePktClipFace(work);
+    }
+    triangleCount = (s16)work->param0;
+    acceptAll = corePktSoftenBias;
+    out = corePktFaceList;
+    triangles = (u16 *)work->strip;
+    nodes = (VuBlendNode *)work->dmaBase;
+    for (; triangleCount != 0; triangleCount--) {
+        u16 *triangle = triangles;
+        VuBlendNode *a = nodes + triangle[0];
+        VuBlendNode *b = nodes + triangle[1];
+        VuBlendNode *c = nodes + triangle[2];
+        u32 bRegion;
+        u32 aRegion;
+        u32 cRegion;
+        VuBlendNode *d, *e, *f, *g;
+        f32 facing;
+        u32 clipA = a->clipFlags;
+        u32 clipB = b->clipFlags;
+        u32 clipC = c->clipFlags;
+
+        triangles += 3;
+        if ((clipA & clipB & clipC & 0x3F) != 0 ||
+            ((clipA | clipB | clipC) & 0x30) != 0) {
+            continue;
+        }
+        VU0_TRIANGLE_FACING(facing, a->position, b->position, c->position);
+        facing *= scale;
+        if (facing < 0.0f) {
+            continue;
+        }
+        aRegion = a->region;
+        bRegion = b->region;
+        cRegion = c->region;
+
+        if (acceptAll || (aRegion == bRegion && aRegion == cRegion)) {
+            out[0][0] = (u128 *)a;
+            out[0][1] = (u128 *)b;
+            out[0][2] = (u128 *)c;
+            out++;
+            continue;
+        }
+        for (;;) {
+            VuBlendNode *firstVertex;
+            u32 firstCode;
+
+            if (bRegion == cRegion) {
+                d = vuAllocNode(work);
+                e = vuAllocNode(work);
+                if (aRegion == 0) {
+                    corePktMakeEdgePoint(d, b, a);
+                    corePktMakeEdgePoint(e, c, a);
+                    out[0][0] = (u128 *)a;
+                    out[0][1] = (u128 *)d;
+                    out[0][2] = (u128 *)e;
+                    out[1][0] = (u128 *)e;
+                    out[1][1] = (u128 *)d;
+                    out[1][2] = (u128 *)b;
+                    out[2][0] = (u128 *)e;
+                    out[2][1] = (u128 *)b;
+                    out[2][2] = (u128 *)c;
+                    out += 3;
+                    break;
+                }
+                corePktMakeEdgePoint(d, a, b);
+                corePktMakeEdgePoint(e, a, c);
+                out[0][0] = (u128 *)a;
+                out[0][1] = (u128 *)d;
+                out[0][2] = (u128 *)e;
+                out++;
+                if (bRegion == 0) {
+                    out[0][0] = (u128 *)b;
+                    out[0][1] = (u128 *)e;
+                    out[0][2] = (u128 *)d;
+                    out[1][0] = (u128 *)b;
+                    out[1][1] = (u128 *)c;
+                    out[1][2] = (u128 *)e;
+                    out += 2;
+                } else {
+                    f = vuAllocNode(work);
+                    g = vuAllocNode(work);
+                    corePktMakeEdgePoint(f, b, a);
+                    corePktMakeEdgePoint(g, c, a);
+                    out[0][0] = (u128 *)e;
+                    out[0][1] = (u128 *)d;
+                    out[0][2] = (u128 *)f;
+                    out[1][0] = (u128 *)e;
+                    out[1][1] = (u128 *)f;
+                    out[1][2] = (u128 *)g;
+                    out[2][0] = (u128 *)g;
+                    out[2][1] = (u128 *)f;
+                    out[2][2] = (u128 *)b;
+                    out[3][0] = (u128 *)g;
+                    out[3][1] = (u128 *)b;
+                    out[3][2] = (u128 *)c;
+                    out += 4;
+                }
+                break;
+            }
+            if (aRegion == 0 && (bRegion ^ cRegion) == 3) {
+                d = vuAllocNode(work);
+                e = vuAllocNode(work);
+                f = vuAllocNode(work);
+                g = vuAllocNode(work);
+                corePktMakeEdgePoint(d, b, a);
+                corePktMakeEdgePoint(e, c, a);
+                corePktMakeEdgePoint(f, b, c);
+                corePktMakeEdgePoint(g, c, b);
+                out[0][0] = (u128 *)a;
+                out[0][1] = (u128 *)d;
+                out[0][2] = (u128 *)e;
+                out[1][0] = (u128 *)d;
+                out[1][1] = (u128 *)b;
+                out[1][2] = (u128 *)f;
+                out[2][0] = (u128 *)e;
+                out[2][1] = (u128 *)d;
+                out[2][2] = (u128 *)f;
+                out[3][0] = (u128 *)e;
+                out[3][1] = (u128 *)f;
+                out[3][2] = (u128 *)g;
+                out[4][0] = (u128 *)e;
+                out[4][1] = (u128 *)g;
+                out[4][2] = (u128 *)c;
+                out += 5;
+                break;
+            }
+            firstVertex = a;
+            firstCode = aRegion;
+            a = b;
+            aRegion = bRegion;
+            b = c;
+            bRegion = cRegion;
+            c = firstVertex;
+            cRegion = firstCode;
+        }
+    }
+    work->nodeCount = out - corePktFaceList;
+    *work->dmaEnd = NULL;
+}
+
+void corePktBuildBackFaceList(VuWork *work) {
+    /* DDS1 node region uses the tail byte at +0x50. */
+    f32 scale = corePktZBias;
+    s32 remaining;
+    u16 *triangles;
+    u16 *indices;
+    VuBlendNode *nodes;
+    s32 acceptAll;
+    u128 *(*out)[3];
+    const f32 *clipPlane = sdf3DEyeOffset;
+    const u8 *projection = sdf3DScreenParam;
+
+    VU0_SET_CLIP_PLANES(scale, clipPlane, projection);
+    acceptAll = corePktSoftenBias;
+    remaining = ((VuIndexedTriangleCount *)work)->indexedTriangleCount;
+    indices = corePktBackFaceList;
+    triangles = (u16 *)work->strip;
+    nodes = (VuBlendNode *)work->dmaBase;
+    out = (u128 *(*)[3])corePktFaceList;
+    if (remaining != 0) {
+        do {
+            u16 *triangle = triangles + *indices++ * 3;
+            VuBlendNode *a = nodes + triangle[0];
+            VuBlendNode *b = nodes + triangle[1];
+            VuBlendNode *c = nodes + triangle[2];
+            u32 bRegion = b->region;
+            u32 aRegion = a->region;
+            u32 cRegion = c->region;
+            VuBlendNode *d, *e, *f, *g;
+            if (!acceptAll && (aRegion != bRegion || aRegion != cRegion)) {
+                goto classifyRegions;
+            }
+        out[0][0] = (u128 *)a;
+        out[0][1] = (u128 *)b;
+        out[0][2] = (u128 *)c;
+        out += 1;
+            goto advanceTriangle;
+        appendInsidePair:
+        out[0][0] = (u128 *)b;
+        out[0][1] = (u128 *)e;
+        out[0][2] = (u128 *)d;
+        out[1][0] = (u128 *)b;
+        out[1][1] = (u128 *)c;
+        out[1][2] = (u128 *)e;
+        out += 2;
+            goto advanceTriangle;
+        interpolateOutsideA:
+        corePktMakeEdgePoint(d, a, b);
+        corePktMakeEdgePoint(e, a, c);
+        out[0][0] = (u128 *)a;
+        out[0][1] = (u128 *)d;
+        out[0][2] = (u128 *)e;
+        out += 1;
+            if (bRegion != 0) {
+            f = vuAllocNode(work);
+            g = vuAllocNode(work);
+            corePktMakeEdgePoint(f, b, a);
+            corePktMakeEdgePoint(g, c, a);
+            out[0][0] = (u128 *)e;
+            out[0][1] = (u128 *)d;
+            out[0][2] = (u128 *)f;
+            out[1][0] = (u128 *)e;
+            out[1][1] = (u128 *)f;
+            out[1][2] = (u128 *)g;
+            out[2][0] = (u128 *)g;
+            out[2][1] = (u128 *)f;
+            out[2][2] = (u128 *)b;
+            out[3][0] = (u128 *)g;
+            out[3][1] = (u128 *)b;
+            out[3][2] = (u128 *)c;
+            out += 4;
+
+            } else goto appendInsidePair;
+            goto advanceTriangle;
+        threeDifferentRegions: {
+            if (aRegion != 0 || (bRegion ^ cRegion) != 3) goto rotateTriangle;
+        d = vuAllocNode(work);
+        e = vuAllocNode(work);
+        f = vuAllocNode(work);
+        g = vuAllocNode(work);
+        corePktMakeEdgePoint(d, b, a);
+        corePktMakeEdgePoint(e, c, a);
+        corePktMakeEdgePoint(f, b, c);
+        corePktMakeEdgePoint(g, c, b);
+        out[0][0] = (u128 *)a;
+        out[0][1] = (u128 *)d;
+        out[0][2] = (u128 *)e;
+        out[1][0] = (u128 *)d;
+        out[1][1] = (u128 *)b;
+        out[1][2] = (u128 *)f;
+        out[2][0] = (u128 *)e;
+        out[2][1] = (u128 *)d;
+        out[2][2] = (u128 *)f;
+        out[3][0] = (u128 *)e;
+        out[3][1] = (u128 *)f;
+        out[3][2] = (u128 *)g;
+        out[4][0] = (u128 *)e;
+        out[4][1] = (u128 *)g;
+        out[4][2] = (u128 *)c;
+        out += 5;
+            goto advanceTriangle;
+        }
+        rotateTriangle: {
+            VuBlendNode *oldA = a;
+            u32 oldRegion = aRegion;
+            a = b; b = c; c = oldA;
+            aRegion = bRegion; bRegion = cRegion; cRegion = oldRegion;
+        }
+        classifyRegions:
+            if (bRegion != cRegion) goto threeDifferentRegions;
+        d = vuAllocNode(work);
+        e = vuAllocNode(work);
+            if (aRegion != 0) goto interpolateOutsideA;
+        corePktMakeEdgePoint(d, b, a);
+        corePktMakeEdgePoint(e, c, a);
+        out[0][0] = (u128 *)a;
+        out[0][1] = (u128 *)d;
+        out[0][2] = (u128 *)e;
+        out[1][0] = (u128 *)e;
+        out[1][1] = (u128 *)d;
+        out[1][2] = (u128 *)b;
+        out[2][0] = (u128 *)e;
+        out[2][1] = (u128 *)b;
+        out[2][2] = (u128 *)c;
+        out += 3;
+        advanceTriangle:
+            ;
+        } while (--remaining != 0);
+    }
+    work->nodeCount = out - (u128 *(*)[3])corePktFaceList;
+    *(VuBlendNode **)work->dmaEnd = NULL;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitTexTris);
 
@@ -143,15 +2478,60 @@ INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitTexTrisCtx2);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitTris);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitBase);
+void corePktEmitBase(VuWork *work) {
+    if ((work->selectedFlags & SDF_VU_TEXTURED_FLAG) != 0) {
+        corePktEmitTexTris();
+        return;
+    }
+    corePktEmitTris();
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitMultiTexPass);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitRefMapPass);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktEmitAllPasses);
+void corePktEmitAllPasses(VuWork *work) {
+    u32 selectedFlags;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", corePktOpenAndEmit);
+    corePktEmitBase(work);
+    selectedFlags = work->selectedFlags;
+    if ((selectedFlags & 0x1000) != 0) {
+        corePktEmitMultiTexPass(work);
+        selectedFlags = work->selectedFlags;
+    }
+    if ((selectedFlags & 1) != 0) {
+        corePktEmitRefMapPass((u32)work);
+        return;
+    }
+}
+
+void corePktOpenAndEmit(VuWork *work) {
+    u32 packetStart = sdfGrOpenPacketBuff();
+    u32 alignedStart = (packetStart + 0x3F) & ~0x3F;
+    u32 ringAddress = ((alignedStart + 0x40) & SDF_DMA_ADDRESS_MASK) | 0x30000000;
+    work->packetStart = packetStart;
+    work->header = alignedStart + 0x30;
+    work->ringStart = (u32 *)ringAddress;
+    work->cursor = (u32 *)ringAddress;
+    if ((work->selectedFlags & 0x4000) != 0) {
+        u8 savedVectors[0x30];
+        VU0_STORE_VF_UNCLOBBERED(vf24, savedVectors);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf25, 16, savedVectors);
+        VU0_STORE_VF_AT_UNCLOBBERED(vf26, 32, savedVectors);
+        corePktBuildFaceList(work);
+        corePktEmitAllPasses(work);
+        corePktSetupPointBuff(work, work->param1);
+        VU0_LOAD_VF(vf24, savedVectors);
+        VU0_LOAD_VF_AT(vf25, 16, savedVectors);
+        VU0_LOAD_VF_AT(vf26, 32, savedVectors);
+        corePktRelightBackFaces(work->dmaBase, work->param1);
+        corePktBuildBackFaceList(work);
+        corePktEmitAllPasses(work);
+    } else {
+        corePktBuildFaceList(work);
+        corePktEmitAllPasses(work);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", corePktClosePacket);
 
@@ -159,37 +2539,132 @@ INCLUDE_ASM(const s32, "code_002B5CD0", corePktVu0Run);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfCorePacketGen);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawScanOneSkinNodes);
+void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source) {
+    SdfDrawNode **objects = model->list->buffer;
+    u16 *indices = &source->count;
+    if ((source->flags & 0x800) != 0) {
+        s32 count = *indices;
+        if (count != 0) {
+            indices++;
+            do {
+                sdfModelAllocTmPacket(objects[*indices++]);
+            } while (--count != 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawSetLight);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawSetFog);
+void sdfCoreDrawSetFog(u8 *sourceObject) {
+    if (corePktCurrFog != (u32)sourceObject) {
+        corePktCurrFog = (u32)sourceObject;
+        PCP_COPY_VECTOR(&corePktFogParm, sourceObject + 0x10);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawSetZBias);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawReset);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfCoreDrawInit);
+void sdfCoreDrawInit(s32 workspaceBytes) {
+    u32 *dmaChannel = sceDmaGetChan(0);
+    HW_WRITE(dmaChannel, HW_READ(dmaChannel) & ~SDF_DMA_CHCR_TTE);
+    sceDmaSendN(dmaChannel, vu0MicroPacket, (vu1MicroPacket - vu0MicroPacket) >> SDF_DMA_QWORD_SHIFT);
+    sceDmaSync(dmaChannel, 0, 0);
+    sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
+    sdfCoreDrawBuffHandle = (u32)sdfMemAllocDirect(workspaceBytes);
+    corePktPointBuff = sdfMemLock((struct SdfMemBlock *)(sdfCoreDrawBuffHandle));
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DGetTexPacketSize);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DMakeTexPacket);
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
+    drawPacket->header.quadwords = 4;
+    drawPacket->header.gifTag = 0x1000000000008003ULL;
+    drawPacket->header.command = 0x50000004;
+    drawPacket->header.pad08 = 0;
+    drawPacket->header.payloadHeader = SDF_GIF_REGISTER_AD;
+    drawPacket->textureWordA = sdfTexGetTex1Reg(texture);
+    drawPacket->registerAddressA = contextOffset + 0x14;
+    drawPacket->textureWordB = sdfTexGetTex0Reg(texture);
+    drawPacket->registerAddressB = contextOffset + 6;
+    drawPacket->textureWordC = sdfTexGetClampReg(texture);
+    drawPacket->registerAddressC = contextOffset + 8;
+    return drawPacket;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DLinkTexPacket);
+s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
+    s32 packetBytes = sdf2DGetTexPacketSize(texture);
+    SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfGrAllocPacketBuff(packetBytes);
+    s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, contextOffset);
+    sdfDrawTagLink(packetList, packetAddress);
+    return packetAddress;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DMakeStdPacket);
+u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes) {
+    sdfGrSetRegsPacketHeader((SdfGsPacketHeader *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
+    return packetAddress;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DGetPrimPacketSize);
+s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount) {
+    return (registerCount * loopCount + 2) << SDF_DMA_QWORD_SHIFT;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DGetPrimPtr);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DMakePrimPacketHeader);
+SdfDrawPacket *sdf2DMakePrimPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount) {
+    s32 packetQuadwords = registerCount * loopCount + 1;
+    s64 gifTag = loopCount | ((s64)registerCount << SDF_GIF_NREG_SHIFT);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf2DAllocSprite);
+    gifTag |= (s64)primitiveFlags << SDF_GIF_PRIM_SHIFT;
+    gifTag |= SDF_GIF_PRE_EOP_FLAGS;
+    packet->gifTag = gifTag;
+    packet->command = packetQuadwords | SDF_VIF_DIRECT_COMMAND;
+    packet->payloadHeader = registerList;
+    packet->pad08 = 0;
+    packet->quadwords = packetQuadwords;
+    return packet;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeViewportPacket);
+SdfDrawPacket *sdf2DAllocSprite(s32 loopCount) {
+    SdfDrawPacket *packet = (SdfDrawPacket *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, loopCount));
+    sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x53531, loopCount);
+    return packet;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DSetCamera);
+void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
+    packet->quadwords = 0xC;
+    packet->command = 0x6C0BC000;
+    packet->reservedWord = 0;
+    VU0_LOAD_MATRIX(transformMatrix);
+    VU0_STORE_MATRIX(packet->matrixA);
+    MultMatrixRev(node->camera.matrix);
+    VU0_STORE_MATRIX(packet->matrixB);
+    VU0_LOAD_VF_MEMORY(vf10, &node->camera.halfWidth);
+    VU0_STORE_VF(vf10, packet->vecA);
+    VU0_LOAD_VF_MEMORY(vf10, &node->camera.originX);
+    VU0_STORE_VF(vf10, packet->vecB);
+    VU0_LOAD_MATRIX(transformMatrix);
+    ReverseMatrix();
+    VU0_MOVE_VF(vf10, vf31);
+    VU0_STORE_VF(vf10, packet->vecC);
+    VU0_STORE_VF(vf10, node->inverseOrigin);
+    packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
+    packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
+    packet->unknownC8 = 0;
+    packet->unknownCC = 0;
+}
+
+void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
+    VU0_LOAD_MATRIX(transformMatrix);
+    VU0_STORE_MATRIX(sdfCameraTm);
+    MultMatrixRev(node->camera.matrix);
+    VU0_LOAD_VF_MEMORY(vf10, node->inverseOrigin);
+    VU0_STORE_MATRIX(sdf3DScreenTm);
+    VU0_TRANSFORM_POINT(vf10, vf10);
+    VU0_STORE_VF(vf10, sdf3DEyeOffset);
+    memcpy(sdf3DScreenParam, node, sizeof(*node));
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DSetDefaultLight);
 
@@ -199,67 +2674,836 @@ INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeScreenParam);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeLightParallelPacket);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeFogPacket);
+void sdf3DMakeFogPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams) {
+    f32 rangeMax = projectionParams->fogFar;
+    f32 rangeMin = projectionParams->fogNear;
+    f32 nearZ = projectionParams->depthNear;
+    f32 farZ = projectionParams->depthFar;
+    f32 depthRange = farZ - nearZ;
+    s32 fogColor = projectionParams->fogColor;
+    packet->dmaTag = 0x20000004;
+    packet->vifUnpackCode = 0x6C03C00013000000ULL;
+    packet->gifTag = 0x1000000000008001ULL;
+    packet->gifRegister = SDF_GIF_REGISTER_AD;
+    packet->registerValue = (u32)fogColor;
+    packet->fogColorRegister = SDF_GS_FOGCOL_REGISTER;
+    packet->mscalCommand = 0x14000014;
+    packet->reservedC = 0;
+    packet->right = rangeMax;
+    packet->left = rangeMin;
+    packet->reservedA = 0;
+    packet->reservedB = 0;
+    packet->mid = (((rangeMax - rangeMin) * (farZ + nearZ)) / depthRange + (rangeMax + rangeMin)) * 0.5f;
+    packet->scale = ((farZ * nearZ) * (rangeMin - rangeMax)) / depthRange;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeDirectRefPacket);
+void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes) {
+    s32 quadwordCount = (payloadBytes + 15) >> SDF_DMA_QWORD_SHIFT;
+    packet->quadwords = quadwordCount;
+    packet->address = sourceAddress & SDF_DMA_ADDRESS_MASK;
+    packet->tag = SDF_VIF_FLUSHA_COMMAND;
+    packet->command = quadwordCount | SDF_VIF_DIRECT_COMMAND;
+    packet->unknown10 = 0;
+    packet->unknown18 = 0;
+    packet->unknown1C = 0;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DLinkInitPacket);
+void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet) {
+    packet->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
+    packet->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
+    packet->tag = 0;
+    packet->command = 0;
+    packet->unknown10 = 0;
+    packet->unknown18 = 0;
+    packet->unknown1C = 0;
+    sdfDrawTagLinkRef(packetList, (u32)packet);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DInitSpecularTex2);
+void sdf3DInitSpecularTex2(void) {
+    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x2440);
+    SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfMemLock(allocation);
+    s32 i;
+    s32 j;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DInit);
+    sdfTmxSetHeader(&texture->header, 0x80, 0x40, 0x13, 1, 0);
+    texture->header.byteCount = 0x2440;
+    texture->header.clampMode = 5;
+    /* The physical CLUT slot j decodes to the logical intensity i. */
+    for (j = 0; j != 0x100; j++) {
+        i = ((j & 8) << 1) | ((j & 0x10) >> 1) | (j & ~0x18);
+        texture->palette[j] = i | (i << 16) | (i << 8) | 0x80000000;
+    }
+    memset(&texture->indices[0][1], 0xFF, 0x7F);
+    texture->indices[0][0] = 0;
+    for (i = 0; i != 0x80; i++) {
+        f32 power = i * (1.0f / 127.0f);
+        f32 value = power;
+        for (j = 1; j != 0x40; j++) {
+            texture->indices[j][i] = (u8)(s32)(value * 255.0f + 0.5f);
+            value *= power;
+        }
+    }
+    sdf3DSpecularTex = sdfTexSet(&texture->header);
+    sdfMemFreeDirect(allocation);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DPrimLinkResetTm);
+void sdf3DInit(void) {
+    s64 textureWord;
+    sdf3DInitSpecularTex2();
+    textureWord = sdfTexGetTex0Reg(sdf3DSpecularTex);
+    sdf3DRefMapParam = textureWord;
+    vu1Tex0Slot0[0] = textureWord;
+    vu1Tex0Slot0[1] = textureWord >> 32;
+    D_005518B8 = sdfTexSetDirect((SdfTextureFileHeader *)D_002E8ED0);
+    textureWord = sdfTexGetTex0Reg(D_005518B8);
+    vu1Tex0Slot2[0] = textureWord;
+    vu1Tex0Slot2[1] = textureWord >> 32;
+    D_005518C8 = sdfTexSetDirect((SdfTextureFileHeader *)D_002ECF10);
+    textureWord = sdfTexGetTex0Reg(D_005518C8);
+    vu1Tex0Slot1[0] = textureWord;
+    vu1Tex0Slot1[1] = textureWord >> 32;
+    sdfModelInitSystem();
+    sdfMatInitSystem();
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DPrimSetTmPacket);
+void sdf3DPrimLinkResetTm(SdfListHead *packetList,
+                             s32 (*allocatePacket)(s32)) {
+    u64 *referencePacket;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfGrAllocPacketBuff;
+    }
+    referencePacket = (u64 *)allocatePacket(0x20);
+    referencePacket[0] = ((u64)((u32)sdf3DPrimIdentityTm & SDF_DMA_ADDRESS_MASK) << 32) | 0x30000008;
+    referencePacket[1] = 0x6C07C000ULL << 32;
+    *(u128 *)&referencePacket[2] = 0;
+    sdfDrawTagLinkRef(packetList, (u32)referencePacket);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DPrimLinkTm);
+/* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
+void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket) {
+    VU0_STORE_MATRIX_AND_UNIT_ROWS(lightingPacket);
+    lightingPacket->tag[0] = SDF_VIF_ITOP_LIGHTING;
+    lightingPacket->tag[1] = SDF_VIF_MSCAL_COMMAND;
+    lightingPacket->tag[2] = 0;
+    lightingPacket->tag[3] = 0;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DPrimLinkMat);
+void sdf3DPrimLinkTm(SdfListHead *packetList,
+                           s32 (*allocatePacket)(s32)) {
+    u64 *dmaPacket;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfGrAllocPacketBuff;
+    }
+    dmaPacket = (u64 *)allocatePacket(0x90);
+    dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
+    dmaPacket[1] = 0x6C07C000ULL << 32;
+    sdf3DPrimSetTmPacket((VuLightingPacket *)(dmaPacket + 2));
+    sdfDrawTagLink(packetList, (u32)dmaPacket);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DPrimMakePoly);
+void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+                              s32 (*allocatePacket)(s32)) {
+    u64 *referencePacket;
+    if (allocatePacket == NULL) {
+        allocatePacket = sdfGrAllocPacketBuff;
+    }
+    sdfMatUpdatePacket(asset, (s8)sdfFrameId);
+    referencePacket = (u64 *)allocatePacket(0x20);
+    sdfMatMakePacket(asset, (struct SdfDmaTagHeader *)referencePacket, (s8)sdfFrameId);
+    *(u128 *)&referencePacket[2] = 0;
+    sdfDrawTagLinkRef(packetList, (u32)referencePacket);
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardMakeTMPacket);
+u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request) {
+    s32 stripWords = request->stripWordCount;
+    s32 count = request->vertexCount;
+    s32 headerWords = 18;
+    s32 wordsPerVertex = 3;
+    u32 primitive = request->primitiveFlags | 0x68;
+    u32 format = 0x60;
+    s32 bytes;
+    void *(*allocate)(s32);
+    u32 *packet;
+    u32 *cursor;
+    const u128 *vector;
+    const u32 *coordinates;
+    const u32 *secondCoordinates;
+    s32 i;
+    u32 countCode;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardMake1);
+    if (request->normals != NULL) {
+        format = 0xE0;
+        headerWords = 19;
+        wordsPerVertex = 6;
+    }
+    if (request->coordinates != NULL) {
+        format |= 0x100;
+        primitive |= 0x10;
+        headerWords++;
+        wordsPerVertex += 2;
+        if (request->secondCoordinates != NULL) {
+            primitive |= 0x1000;
+            wordsPerVertex += 2;
+        }
+    }
+    if (request->vertexColors != NULL) {
+        format |= 0x200;
+        primitive |= 0x800;
+        headerWords++;
+        wordsPerVertex++;
+    }
+    bytes = (headerWords + stripWords + wordsPerVertex * count) * 4;
+    bytes = (bytes + 15) & ~15;
+    allocate = request->allocate;
+    if (allocate == NULL) allocate = sdfGrAllocPacketBuff;
+    packet = allocate(bytes);
+    *(u64 *)packet = (u64)(u16)((bytes >> 4) - 1) | 0x20000000ULL;
+    packet[2] = 0x6102C000;
+    packet[3] = (~request->clipMask) & 0xFFFF;
+    packet[4] = 0x6E01C002;
+    packet[5] = request->color;
+    packet[6] = 0x6003C003;
+    cursor = packet + 7;
+    *cursor++ = (u32)request->depth;
+    *cursor++ = (u32)sdfFaceDivSoften;
+    *cursor++ = (u32)sdfFaceDivBias;
+    *cursor++ = 0x04000004;
+    *cursor++ = 0x14000000;
+    *cursor++ = 0x6D01C000;
+    *cursor++ = (u16)stripWords | ((u32)(u16)count << 16);
+    *cursor++ = (primitive & 0xFFFF) | (format << 16);
+    *cursor++ = (stripWords << 16) | 0x6E00C001;
+    if (request->strip == NULL) {
+        memcpy(cursor, sdf3DPrimDefaultFaceIndex, stripWords * 4);
+    } else {
+        memcpy(cursor, request->strip, stripWords * 4);
+    }
+    cursor += stripWords;
+    stripWords++;
+    countCode = count << 16;
+    *cursor++ = countCode | stripWords | 0x6800C000;
+    vector = request->positions;
+    i = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+        cursor += 3;
+        vector++;
+        i++;
+    } while (i != count);
+    stripWords += count;
+    vector = request->normals;
+    if (vector != NULL) {
+        *cursor++ = countCode | stripWords | 0x6800C000;
+        i = 0;
+        do {
+            EE_MMI_STORE_VEC3_VALUE(cursor, *vector);
+            cursor += 3;
+            vector++;
+            i++;
+        } while (i != count);
+        stripWords += count;
+    }
+    coordinates = request->coordinates;
+    if (coordinates != NULL) {
+        secondCoordinates = request->secondCoordinates;
+        if (secondCoordinates == NULL) {
+            *cursor++ = countCode | stripWords | 0x6400C000;
+            memcpy(cursor, coordinates, count * 8);
+            cursor += count * 2;
+        } else {
+            *cursor++ = countCode | stripWords | 0x6C00C000;
+            i = 0;
+            do {
+                *cursor++ = *coordinates++;
+                *cursor++ = *coordinates++;
+                *cursor++ = *secondCoordinates++;
+                *cursor++ = *secondCoordinates++;
+                i++;
+            } while (i != count);
+        }
+        stripWords += count;
+    }
+    if (request->vertexColors != NULL) {
+        *cursor++ = countCode | stripWords | 0x6E00C000;
+        memcpy(cursor, request->vertexColors, count * 4);
+        cursor += count;
+    }
+    *cursor = 0x1400000C;
+    while ((u32)++cursor & 15) {
+        *cursor = 0;
+    }
+    return packet;
+}
+
+void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix) {
+    *(u16 *)packet = 2;
+    *(u32 *)(packet + 8) = 0x6403C000;
+    *(f32 *)(packet + 12) = matrix[0];
+    *(f32 *)(packet + 16) = matrix[1];
+    *(f32 *)(packet + 20) = matrix[4];
+    *(f32 *)(packet + 24) = matrix[5];
+    *(f32 *)(packet + 28) = matrix[12];
+    *(f32 *)(packet + 32) = matrix[13];
+    *(u32 *)(packet + 36) = 0x04000000;
+    *(u32 *)(packet + 40) = 0x14000008;
+    memset(packet + 0x2C, 0, 12);
+}
+
+void sdfBillBoardMake1(u8 *packet, const f32 *position, u32 color, const void *uv,
+                                   const f32 *quad) {
+    *(u16 *)packet = 7;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xA0000000;
+    *(u32 *)(packet + 20) = 0x43434310;
+    *(u32 *)(packet + 24) = 0x43;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E01C003;
+    *(u32 *)(packet + 56) = color;
+    *(u32 *)(packet + 60) = 0x6504C004;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 64), (const u8 *)uv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)uv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)uv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)uv + 12);
+    *(u32 *)(packet + 80) = 0x6404C008;
+    *(f32 *)(packet + 84) = quad[0];
+    *(f32 *)(packet + 88) = quad[1];
+    *(f32 *)(packet + 92) = quad[2];
+    *(f32 *)(packet + 96) = quad[3];
+    *(f32 *)(packet + 100) = quad[4];
+    *(f32 *)(packet + 104) = quad[5];
+    *(f32 *)(packet + 108) = quad[6];
+    *(f32 *)(packet + 112) = quad[7];
+    *(u32 *)(packet + 116) = 0x04000002;
+    *(u32 *)(packet + 120) = 0x14000008;
+    *(u32 *)(packet + 124) = 0;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardGetPacketSize);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardMakeN);
+/* vu0 routine: pack aligned positions into the VIF three-word stream. */
+u32 *sdfBillBoardMakeN(const u128 *positions, const void *byteAttributes, const void *halfAttributes, const void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+    s32 packetBytes;
+    u32 *packet;
+    u32 *cursor;
+    u32 vuAddress;
+    u32 unpackCode;
+    s32 n;
+    s32 vertexIndex;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfMultiBillBoardMake1);
+    packetBytes = sdfBillBoardGetPacketSize(vertexCount);
+    if (allocatePacket == NULL) {
+        cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
+    } else {
+        cursor = allocatePacket(packetBytes);
+    }
+    packet = cursor;
+    packet[0] = (packetBytes >> SDF_DMA_QWORD_SHIFT) - 1;
+    packet[1] = 0;
+    packet[2] = 0x6C01C000;
+    packet[3] = vertexCount;
+    packet[4] = 0xA0000000;
+    packet[5] = 0x43434310;
+    packet[6] = 0x43;
+    packet[7] = 0x6001C001;
+    packet[8] = 0x155;
+    packet[9] = (vertexCount << 16) | 0x6800C002;
+    cursor = packet + 10;
+    vertexIndex = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
+        cursor += 3;
+        vertexIndex++;
+    } while (vertexIndex != vertexCount);
+    n = vertexCount;
+    unpackCode = n << 16;
+    vuAddress = vertexCount + 2;
+    *cursor++ = unpackCode | vuAddress | 0x6E00C000;
+    memcpy(cursor, byteAttributes, n * 4);
+    cursor += n;
+    vuAddress += n;
+    n = vertexCount * 4;
+    unpackCode = n << 16;
+    *cursor++ = unpackCode | vuAddress | 0x6500C000;
+    vuAddress += n;
+    unpackCode |= vuAddress;
+    memcpy(cursor, halfAttributes, n * 4);
+    cursor += n;
+    n *= 8;
+    unpackCode |= 0x6400C000;
+    *cursor++ = unpackCode;
+    memcpy(cursor, wordAttributes, n);
+    cursor = (u32 *)((u8 *)cursor + n);
+    cursor[0] = SDF_VIF_ITOP_COMPACT_VERTEX;
+    cursor[1] = SDF_VIF_MSCAL_VERTICES;
+    cursor += 2;
+    while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
+        *cursor++ = 0;
+    }
+    return packet;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfMultiBillBoardGetPacketSize);
+void sdfMultiBillBoardMake1(u8 *packet, const f32 *position, u32 primaryColor, u32 secondaryColor,
+                   const void *primaryUv, const void *secondaryUv, const f32 *quad) {
+    *(u16 *)packet = 8;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xA0000000;
+    *(u32 *)(packet + 20) = 0x43434310;
+    *(u32 *)(packet + 24) = 0x43;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x155;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E02C003;
+    *(u32 *)(packet + 56) = primaryColor;
+    *(u32 *)(packet + 60) = secondaryColor;
+    *(u32 *)(packet + 64) = 0x6D04C005;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 68), (const u8 *)primaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 72), (const u8 *)secondaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 76), (const u8 *)primaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 80), (const u8 *)secondaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 84), (const u8 *)primaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 88), (const u8 *)secondaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv + 12);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv + 12);
+    *(u32 *)(packet + 100) = 0x6404C009;
+    *(f32 *)(packet + 104) = quad[0];
+    *(f32 *)(packet + 108) = quad[1];
+    *(f32 *)(packet + 112) = quad[2];
+    *(f32 *)(packet + 116) = quad[3];
+    *(f32 *)(packet + 120) = quad[4];
+    *(f32 *)(packet + 124) = quad[5];
+    *(f32 *)(packet + 128) = quad[6];
+    *(f32 *)(packet + 132) = quad[7];
+    *(u32 *)(packet + 136) = 0x04000004;
+    *(u32 *)(packet + 140) = 0x14000008;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfMultiBillBoardMakeN);
+u32 sdfMultiBillBoardGetPacketSize(s32 count) {
+    return (count * 0x54 + 0x4bU) & 0xfffffff0;
+}
+
+u32 *sdfMultiBillBoardMakeN(u128 *positions, void *attributes, void *halfAttributes, void *wordAttributes, s32 count, void *(*alloc)(s32)) {
+    s32 bytes;
+    u32 *packet;
+    u32 *cursor;
+    u32 index;
+    u32 code;
+    s32 n;
+    s32 i;
+
+    bytes = sdfMultiBillBoardGetPacketSize(count);
+    if (alloc == NULL) {
+        cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
+    } else {
+        cursor = alloc(bytes);
+    }
+    packet = cursor;
+    packet[0] = (bytes >> 4) - 1;
+    packet[1] = 0;
+    packet[2] = 0x6C01C000;
+    packet[3] = count;
+    packet[4] = 0xA0000000;
+    packet[5] = 0x43434310;
+    packet[6] = 0x43;
+    packet[7] = 0x6001C001;
+    packet[8] = 0x155;
+    packet[9] = (count << 16) | 0x6800C002;
+    cursor = packet + 10;
+    i = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        cursor += 3;
+        i++;
+    } while (i != count);
+    n = count * 2;
+    index = count + 2;
+    *cursor++ = (n << 16) | index | 0x6E00C000;
+    memcpy(cursor, attributes, n * 4);
+    cursor += n;
+    index += n;
+    n = count * 4;
+    code = n << 16;
+    *cursor++ = code | index | 0x6D00C000;
+    memcpy(cursor, halfAttributes, n * 8);
+    cursor += n * 2;
+    index += n;
+    code |= index;
+    *cursor++ = code | 0x6400C000;
+    memcpy(cursor, wordAttributes, n * 8);
+    cursor += n * 2;
+    cursor[0] = 0x04000004;
+    cursor[1] = 0x14000008;
+    cursor += 2;
+    while (((u32)cursor & 0xF) != 0) {
+        *cursor++ = 0;
+    }
+    return packet;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardVcMake1);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardVcGetPacketSize);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfBillBoardVcMakeN);
+u32 sdfBillBoardVcMakeN(const u128 *positions, const void *attributes,
+                  const void *halfAttributes, const void *wordAttributes,
+                  s32 count, void *(*alloc)(s32)) {
+    s32 bytes;
+    u32 *packet;
+    u32 *cursor;
+    u32 index;
+    u32 code;
+    s32 n;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfMultiBillBoardVcMake1);
+    bytes = sdfBillBoardGetPacketSize(count);
+    if (alloc == NULL) {
+        cursor = (u32 *)sdfGrAllocPacketBuff(bytes);
+    } else {
+        cursor = alloc(bytes);
+    }
+    packet = cursor;
+    packet[0] = (bytes >> 4) - 1;
+    packet[1] = 0;
+    packet[2] = 0x6C01C000;
+    packet[3] = count;
+    packet[4] = 0xD0000000;
+    packet[5] = 0x34134130;
+    packet[6] = 0x41341;
+    packet[7] = 0x6001C001;
+    packet[8] = 0x155;
+    packet[9] = (count << 16) | 0x6800C002;
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfMultiBillBoardVcGetPacketSize);
+    cursor = packet + 10;
+    i = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[i]);
+        cursor += 3;
+        i++;
+    } while (i != count);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfMultiBillBoardVcMakeN);
+    code = count << 18;
+    index = count + 2;
+    n = count * 4;
+    *cursor++ = code | index | 0x6E00C000;
+    memcpy(cursor, attributes, n * 4);
+    cursor += n;
+    index += n;
+    *cursor++ = code | index | 0x6500C000;
+    memcpy(cursor, halfAttributes, n * 4);
+    cursor += n;
+    index += n;
+    n = count * 8;
+    *cursor++ = code | index | 0x6400C000;
+    memcpy(cursor, wordAttributes, n * 4);
+    cursor += n;
+    cursor[0] = 0x04000006;
+    cursor[1] = 0x14000008;
+    cursor += 2;
+    while (((u32)cursor & 0xF) != 0) {
+        *cursor++ = 0;
+    }
+    return (u32)packet;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadControl);
+void sdfMultiBillBoardVcMake1(u8 *packet, const f32 *position, const void *colors, const void *primaryUv,
+                   const void *secondaryUv, const void *quad) {
+    *(u16 *)packet = 10;
+    *(u32 *)(packet + 8) = 0x6C01C000;
+    *(u32 *)(packet + 12) = 1;
+    *(u32 *)(packet + 16) = 0xD0000000;
+    *(u32 *)(packet + 20) = 0x34134130;
+    *(u32 *)(packet + 24) = 0x41341;
+    *(u32 *)(packet + 28) = 0x6001C001;
+    *(u32 *)(packet + 32) = 0x15D;
+    *(u32 *)(packet + 36) = 0x6801C002;
+    *(f32 *)(packet + 40) = position[0];
+    *(f32 *)(packet + 44) = position[1];
+    *(f32 *)(packet + 48) = position[2];
+    *(u32 *)(packet + 52) = 0x6E08C003;
+    memcpy(packet + 56, colors, 32);
+    *(u32 *)(packet + 88) = 0x6D04C00B;
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 92), (const u8 *)primaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 96), (const u8 *)secondaryUv);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 100), (const u8 *)primaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 104), (const u8 *)secondaryUv + 4);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 108), (const u8 *)primaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 112), (const u8 *)secondaryUv + 8);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 116), (const u8 *)primaryUv + 12);
+    EE_LOAD_UNALIGNED_WORD(*(u32 *)(packet + 120), (const u8 *)secondaryUv + 12);
+    *(u32 *)(packet + 124) = 0x6404C00F;
+    memcpy(packet + 128, quad, 32);
+    *(u32 *)(packet + 160) = 0x04000008;
+    *(u32 *)(packet + 164) = 0x14000008;
+    *(u32 *)(packet + 168) = 0;
+    *(u32 *)(packet + 172) = 0;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadManager);
+u32 sdfMultiBillBoardVcGetPacketSize(s32 count) {
+    return (count * 0x6c + 0x4bU) & 0xfffffff0;
+}
+
+/* vu0 routine: pack aligned positions into the VIF three-word stream. */
+u32 sdfMultiBillBoardVcMakeN(u128 *positions, void *byteAttributes, void *halfAttributes, void *wordAttributes, s32 vertexCount, void *(*allocatePacket)(s32)) {
+    s32 packetBytes;
+    u32 *packet;
+    u32 *cursor;
+    u32 vuAddress;
+    u32 unpackCode;
+    s32 n;
+    s32 vertexIndex;
+
+    packetBytes = sdfMultiBillBoardVcGetPacketSize(vertexCount);
+    if (allocatePacket == NULL) {
+        cursor = (u32 *)sdfGrAllocPacketBuff(packetBytes);
+    } else {
+        cursor = allocatePacket(packetBytes);
+    }
+    packet = cursor;
+    packet[0] = (packetBytes >> SDF_DMA_QWORD_SHIFT) - 1;
+    packet[1] = 0;
+    packet[2] = 0x6C01C000;
+    packet[3] = vertexCount;
+    packet[4] = 0xD0000000;
+    packet[5] = 0x34134130;
+    packet[6] = 0x41341;
+    packet[7] = 0x6001C001;
+    packet[8] = 0x15D;
+    packet[9] = (vertexCount << 16) | 0x6800C002;
+    cursor = packet + 10;
+    vertexIndex = 0;
+    do {
+        EE_MMI_STORE_VEC3_VALUE(cursor, positions[vertexIndex]);
+        cursor += 3;
+        vertexIndex++;
+    } while (vertexIndex != vertexCount);
+    n = vertexCount * 8;
+    vuAddress = vertexCount + 2;
+    *cursor++ = (n << 16) | vuAddress | 0x6E00C000;
+    memcpy(cursor, byteAttributes, n * 4);
+    cursor += n;
+    vuAddress += n;
+    n = vertexCount * 4;
+    unpackCode = n << 16;
+    *cursor++ = unpackCode | vuAddress | 0x6D00C000;
+    memcpy(cursor, halfAttributes, n * 8);
+    cursor += n * 2;
+    vuAddress += n;
+    unpackCode |= vuAddress;
+    *cursor++ = unpackCode | 0x6400C000;
+    memcpy(cursor, wordAttributes, n * 8);
+    cursor += n * 2;
+    cursor[0] = SDF_VIF_ITOP_WIDE_VERTEX;
+    cursor[1] = SDF_VIF_MSCAL_VERTICES;
+    cursor += 2;
+    while (((u32)cursor & SDF_QWORD_ALIGNMENT_MASK) != 0) {
+        *cursor++ = 0;
+    }
+    return (u32)packet;
+}
+
+void sdfPadControl(SdfPadEntry *entry) {
+    u8 reply[SDF_PAD_REPLY_BUFFER_BYTES];
+    u8 actuatorData[SDF_PAD_ACTUATOR_BYTES];
+    s32 port = entry->port;
+    s32 slot = entry->slot;
+    s32 padState;
+    s32 hasButtons;
+    s32 hasAnalog;
+    s32 hasPressure;
+    s32 alignmentStatus;
+    s32 requestedMode;
+    s32 smallMotor;
+    s32 largeMotor;
+    reply[0] = -1;
+    padState = scePadGetState(port, slot);
+    switch (entry->state) {
+    case 0:
+        if (padState == 2 || padState == 6) {
+            entry->lastSmallMotor = -1;
+            entry->lastLargeMotor = -1;
+            requestedMode = entry->mode = entry->requestedMode;
+            switch (requestedMode) {
+            case 0:
+                entry->state = 3;
+                break;
+            case 1:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 0, 0) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            case 2:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 0, 3) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            case 3:
+                if (padState == 6) {
+                    if (scePadSetMainMode(port, slot, 1, 3) == 1) {
+                        entry->state = 1;
+                    }
+                } else {
+                    entry->state = 3;
+                }
+                break;
+            }
+        }
+        break;
+    case 1:
+        if (padState == 6) {
+            entry->state = 3;
+        } else if (padState != 5) {
+            entry->state = 0;
+        }
+        break;
+    case 2:
+        break;
+    case 3:
+        if (scePadInfoAct(port, slot, -1, 0) != 0) {
+            if (scePadSetActAlign(port, slot, sdfPadCb_0) != 0) {
+                entry->state = 4;
+            }
+        } else {
+            entry->state = 5;
+        }
+        break;
+    case 4:
+        alignmentStatus = scePadGetReqState(port, slot);
+        if (alignmentStatus != 0) {
+            if (alignmentStatus == 1) {
+                entry->state = 3;
+            }
+        } else {
+            entry->state = 5;
+        }
+        break;
+    case 5:
+        if (padState != 2 && padState != 6) {
+            entry->state = 0;
+        } else if (entry->mode != entry->requestedMode) {
+            entry->state = 0;
+        } else {
+            scePadRead(port, slot, reply);
+            smallMotor = entry->smallMotor;
+            largeMotor = entry->largeMotor;
+            if (smallMotor != entry->lastSmallMotor || largeMotor != entry->lastLargeMotor) {
+                entry->lastSmallMotor = smallMotor;
+                entry->lastLargeMotor = largeMotor;
+                actuatorData[0] = smallMotor;
+                actuatorData[1] = largeMotor;
+                scePadSetActDirect(port, slot, actuatorData);
+            }
+        }
+        break;
+    }
+    /* Pad reply IDs: digital, analog-stick, and pressure-sensitive modes.
+     * Missing channels are normalized before consumers see this port. */
+    hasAnalog = 0;
+    hasPressure = 0;
+    hasButtons = 0;
+    if (reply[0] == 0) {
+        switch (reply[1]) {
+        case SDF_PAD_REPLY_DIGITAL:
+            hasButtons = 1;
+            break;
+        case SDF_PAD_REPLY_ANALOG:
+            hasButtons = 1;
+            hasAnalog = 1;
+            break;
+        case SDF_PAD_REPLY_PRESSURE:
+            hasButtons = 1;
+            hasAnalog = 1;
+            hasPressure = 1;
+            break;
+        }
+    }
+    if (hasButtons) {
+        memset(entry->pressure, 0, SDF_PAD_PRESSURE_COUNT);
+        entry->buttons = ~(reply[3] | (reply[2] << 8));
+    } else {
+        entry->buttons = 0;
+    }
+    if (hasAnalog) {
+        entry->stick[0] = reply[4];
+        entry->stick[1] = reply[5];
+        entry->stick[2] = reply[6];
+        entry->stick[3] = reply[7];
+    } else {
+        entry->stick[0] = SDF_PAD_STICK_CENTER;
+        entry->stick[1] = SDF_PAD_STICK_CENTER;
+        entry->stick[2] = SDF_PAD_STICK_CENTER;
+        entry->stick[3] = SDF_PAD_STICK_CENTER;
+    }
+    if (hasPressure) {
+        memcpy(entry->pressure, &reply[8], SDF_PAD_PRESSURE_COUNT);
+    } else {
+        memset(entry->pressure, 0, SDF_PAD_PRESSURE_COUNT);
+    }
+}
+
+void sdfPadManager(void) {
+    s32 padIndex;
+    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+        sdfPadControl(&sdfPadCb[padIndex]);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadWork);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadChangeMode);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadSetAct0);
+void sdfPadSetAct0(s32 padIndex, u16 strength) {
+    sdfPadCb[padIndex].smallMotor = strength;
+}
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadSetAct1);
+void sdfPadSetAct1(s32 padIndex, u8 strength) {
+    sdfPadCb[padIndex].largeMotor = strength;
+}
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadSetAct);
 
-INCLUDE_ASM(const s32, "code_002B5CD0", sdfPadInitManager);
+void sdfPadInitManager(void) {
+    s32 padIndex;
+
+    scePadInit(0);
+    for (padIndex = 0; padIndex != SDF_PAD_ENTRY_COUNT; padIndex++) {
+        s32 port = sdfPadPortSlotPairs[padIndex * 2];
+        s32 slot = sdfPadPortSlotPairs[padIndex * 2 + 1];
+        SdfPadEntry *entry;
+
+        scePadPortOpen(port, slot, &D_0058F0C0[padIndex * SDF_PAD_PORT_BUFFER_BYTES]);
+        entry = &sdfPadCb[padIndex];
+        entry->port = port;
+        entry->slot = slot;
+        entry->state = 0;
+        entry->mode = 0;
+        entry->requestedMode = 0;
+        entry->buttons = 0;
+        entry->prevButtons = 0;
+        entry->smallMotor = 0;
+        entry->largeMotor = 0;
+    }
+    memset(dds3PadBitTable, 0, SDF_PAD_BUTTON_STATE_BYTES);
+    memset(D_005518E0, SDF_PAD_STICK_CENTER, SDF_PAD_STICK_STATE_BYTES);
+    memset(D_005298E8, 0, SDF_PAD_PRESSURE_STATE_BYTES);
+    sdfPadManagerMode = 0;
+}
 
 INCLUDE_SDATA(const s32, "code_002B5CD0", D_005518B8);
 
@@ -268,6 +3512,8 @@ INCLUDE_SDATA(const s32, "code_002B5CD0", sdf3DSpecularTex);
 INCLUDE_SDATA(const s32, "code_002B5CD0", sdf3DRefMapParam);
 
 INCLUDE_SDATA(const s32, "code_002B5CD0", D_005518C8);
+
+INCLUDE_SDATA(const s32, "code_002B5CD0", sdfPadPortSlotPairs);
 
 INCLUDE_SDATA(const s32, "code_002B5CD0", sdfPadManagerMode);
 

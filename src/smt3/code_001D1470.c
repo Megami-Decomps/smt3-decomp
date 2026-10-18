@@ -1,12 +1,95 @@
 #include "common.h"
+#include "kernel.h"
+#include "libsdf.h"
+#include "scr.h"
 
-INCLUDE_ASM(const s32, "code_001D1470", itfDebugMesMngInitialize);
+typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
 
-INCLUDE_ASM(const s32, "code_001D1470", TestMsgReloadTexture);
+extern char D_00535BB0[];
+extern char D_00535BC0[];
+extern char *D_00326BC8[];
+extern s32 D_00326BD8[4];
+extern s32 D_00326BE8[4];
+extern s32 D_00326BF8[4];
+extern u8 scrEmbedded_3267A8[];
+extern sdfGrOt_t sdfGrOtTable[];
+extern s8 dds3PadButtonState[];
 
-INCLUDE_ASM(const s32, "code_001D1470", TestMsgMngC_Process);
+extern u32 dds3BackColor;
+extern s32 D_0054F510;
+extern void *D_0054F514;
 
-INCLUDE_ASM(const s32, "code_001D1470", TestMsgMngD_Process);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
+                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *scrStartScript2(s32 handle, u8 *script, s32 arg);
+extern void itfMesMngSetKutiCallback(s32 meshandle, void *func);
+extern s32 itfDebugPrintMark();
+extern void sdfTexFreeDelayed(void *tex);
+extern void *itfMiscLoadTexture(char *name);
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 mode, s32 value);
+extern void itfMiscDrawSpritePrim(s32 *rect, s32 *uv, s32 *color, s32 z, void *tex, s32 flag,
+                                  sdfDrawTag_t *tag);
+
+void TestMsgReloadTexture(void);
+s32 TestMsgMngC_Process(dds3ProcessID_t *id);
+s32 TestMsgMngD_Process(dds3ProcessID_t *id);
+
+void itfDebugMesMngInitialize(void)
+{
+    dds3BackColor = 0x80FFFFFF;
+    TestMsgReloadTexture();
+    itfMesMngSetKutiCallback(
+        ((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, scrEmbedded_3267A8, 0)))
+            ->MesHandle,
+        itfDebugPrintMark);
+    dds3StartProcess(D_00535BB0, 0x3EF, 0, 0, TestMsgMngC_Process, NULL, NULL);
+    dds3StartProcess(D_00535BC0, 0x2AFE, 0, 0, TestMsgMngD_Process, NULL, NULL);
+}
+
+void TestMsgReloadTexture(void)
+{
+    if (D_0054F514 != NULL) {
+        sdfTexFreeDelayed(D_0054F514);
+        D_0054F514 = NULL;
+    }
+    D_0054F510 = (D_0054F510 + 1) & 3;
+    if (D_0054F510 != 3) {
+        D_0054F514 = itfMiscLoadTexture(D_00326BC8[D_0054F510]);
+    }
+}
+
+s32 TestMsgMngC_Process(dds3ProcessID_t *id)
+{
+    if (dds3PadButtonState[0x20] < 0) {
+        TestMsgReloadTexture();
+    }
+    return 0;
+}
+
+s32 TestMsgMngD_Process(dds3ProcessID_t *id)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+
+    if ((D_0054F514 != NULL) && (D_0054F510 != 3)) {
+        tag = sdfGrAllocPacketBuff(0x20);
+        sdfDrawTagInit(tag);
+        itfMiscDrawAlphaPrim(tag, 0, 0);
+        itfMiscDrawSpritePrim(D_00326BD8, D_00326BE8, D_00326BF8, 0xFFF, D_0054F514, 0, tag);
+        ot = &sdfGrOtTable[71];
+        ((sdfGrOtRegFunc_t)ot->regFunc)(ot, tag);
+        return 0;
+    }
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535BB0);
+
+INCLUDE_RODATA(const s32, "code_001D1470", D_00535BC0);
 
 INCLUDE_RODATA(const s32, "code_001D1470", D_00535BD0);
 

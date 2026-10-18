@@ -1,4 +1,26 @@
 #include "common.h"
+#include "kernel.h"
+
+/* 0x68-byte picture work block; InitPictureProcessData fills the rest. */
+typedef struct
+{
+    u8 unk00[4];
+    void *texture;
+    u8 unk08[0x60];
+} evtPictureWork_t;
+
+extern char D_0054F8F0[];
+
+extern void *sdfChipAllocDirect(u32 size);
+extern void sdfChipFreeDirect(void *ptr);
+extern void sdfTexFreeDelayed(void *tex);
+extern void *itfMiscLoadTexture(const char *path);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
+                                         dds3ProcessFunc_t processfunc, dds3ProcessFunc_t shutdownfunc,
+                                         void *data);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern evtPictureWork_t *InitPictureProcessData(void);
+extern s32 evtPictureProcess1(dds3ProcessID_t *id);
 
 INCLUDE_ASM(const s32, "event/evtPicture", evtPicturePriClear);
 
@@ -31,15 +53,39 @@ INCLUDE_ASM(const s32, "event/evtPicture", evtPictureStat);
 
 INCLUDE_ASM(const s32, "event/evtPicture", InitPictureProcessData);
 
-INCLUDE_ASM(const s32, "event/evtPicture", LoadTexture);
+void LoadTexture(evtPictureWork_t *work, const char *path)
+{
+    work->texture = itfMiscLoadTexture(path);
+}
 
 INCLUDE_ASM(const s32, "event/evtPicture", evtPictureProcess1);
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtPictureShutdown);
+s32 evtPictureShutdown(dds3ProcessID_t *id)
+{
+    evtPictureWork_t *work = dds3GetProcessData(id);
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtStartPictureProcess2);
+    if (work->texture != NULL) {
+        sdfTexFreeDelayed(work->texture);
+        work->texture = NULL;
+    }
+    sdfChipFreeDirect(work);
+}
 
-INCLUDE_ASM(const s32, "event/evtPicture", evtStartPictureProcess);
+dds3ProcessID_t *evtStartPictureProcess2(u32 priority, const char *path)
+{
+    evtPictureWork_t *work = InitPictureProcessData();
+
+    LoadTexture(work, path);
+    return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
+}
+
+dds3ProcessID_t *evtStartPictureProcess(u32 priority, void *texture)
+{
+    evtPictureWork_t *work = InitPictureProcessData();
+
+    work->texture = texture;
+    return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
+}
 
 INCLUDE_ASM(const s32, "event/evtPicture", picpri_Process);
 

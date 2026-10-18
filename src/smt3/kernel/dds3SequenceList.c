@@ -1,14 +1,65 @@
 #include "common.h"
+#include "kernel.h"
+#include "scr.h"
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallDebug);
+extern char D_0052E210[]; /* "StartSel" */
+extern char D_0052E250[]; /* "battle test" */
+extern char D_0052E260[]; /* "test_font" */
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitDebug);
+extern scrProcessWork_s *scrHandleFirst;
+extern scrProcessWork_s *scrHandleLast;
+extern s32 scrHandleCount;
+
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
+                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
+extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern dds3ProcessID_t *dds3SearchProcessPriority(u32 priority);
+extern s32 dds3StartMenuProcess(dds3ProcessID_t *id);
+extern void func_00157050(void);
+extern void func_00157058(void);
+extern s32 fmShutDown2(void);
+extern void fldMainLoadStart(void);
+extern void fldAllShutDown(void);
+extern s32 fldProcShutDown2(void);
+extern void fldProcNextJump(void);
+extern void evtInitSky(void);
+extern void fclTerminalProcessStart(s32 arg0, s32 arg1);
+extern scrProcessWork_s *scrPrintProcedureStart(scrHeader_t *header, scrTypeTable_t *typetable,
+                                                scrProcTable_t *proctable,
+                                                scrLabelTable_t *labeltable, scrCode_u *code,
+                                                u8 *mesdata, char *strdata, s32 procno);
+
+dds3ProcessID_t *CallDebug(void)
+{
+    return dds3StartProcess(D_0052E210, 0x2AF9, 0, 0, dds3StartMenuProcess, NULL, NULL);
+}
+
+s32 ExitDebug(void)
+{
+    dds3KillProcessName(D_0052E210, 1);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckDebug);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallBootMc);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitBootMc);
+s32 ExitBootMc(void)
+{
+    s32 done;
+    s32 ret;
+
+    func_00157050();
+    func_00157058();
+    done = fmShutDown2();
+    ret = -1;
+    if (done != 0) {
+        ret = 0;
+    }
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckBootMc);
 
@@ -20,7 +71,16 @@ INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckTitle);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallLoad);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitLoad);
+s32 ExitLoad(void)
+{
+    func_00157050();
+    func_00157058();
+    if (fmShutDown2() != 0) {
+        fldMainLoadStart();
+        return 0;
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckLoad_dds3SequenceList);
 
@@ -39,13 +99,36 @@ INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckStaff);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallEndSave);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitEndSave);
+s32 ExitEndSave(void)
+{
+    s32 done;
+    s32 ret;
+
+    func_00157050();
+    func_00157058();
+    done = fmShutDown2();
+    ret = -1;
+    if (done != 0) {
+        ret = 0;
+    }
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckEndSave);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallField);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitField);
+s32 ExitField(void)
+{
+    s32 ret;
+
+    fldAllShutDown();
+    ret = -1;
+    if (fldProcShutDown2() != 0) {
+        ret = 0;
+    }
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckField);
 
@@ -123,7 +206,17 @@ INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallNewBattleTest);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitNewBattleTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckNewBattleTest);
+s32 CheckNewBattleTest(void)
+{
+    if (dds3SearchProcessName(D_0052E250) != NULL) {
+        return 0;
+    }
+    if (dds3SearchProcessPriority(0x3FA) == NULL) {
+        fldProcNextJump();
+        return 1;
+    }
+    return 0;
+}
 
 void CallBattleFieldTest(void) {
 }
@@ -193,7 +286,15 @@ INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitRecoverTest);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckRecoverTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallTerminalTest);
+void CallTerminalTest(dds3ProcessID_t *id, s32 *args)
+{
+    evtInitSky();
+    if (args != NULL) {
+        fclTerminalProcessStart(args[0], args[1]);
+        return;
+    }
+    fclTerminalProcessStart(0, 1);
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitTerminalTest);
 
@@ -236,7 +337,10 @@ INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallFontTest);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitFontTest);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckFontTest);
+s32 CheckFontTest(void)
+{
+    return dds3SearchProcessName(D_0052E260) == NULL;
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallMapEditor);
 
@@ -290,13 +394,87 @@ void func_00109838(void) {
 void func_00109840(void) {
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", scrLinkHandle);
+void scrLinkHandle(scrProcessWork_s *work)
+{
+    scrProcessWork_s *last = scrHandleLast;
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", scrUnlinkHandle);
+    if (last == NULL) {
+        scrHandleFirst = work;
+        scrHandleLast = work;
+        work->prev = NULL;
+        work->next = NULL;
+    } else {
+        work->prev = last;
+        last->next = work;
+        work->next = NULL;
+        scrHandleLast = work;
+    }
+    scrHandleCount++;
+}
+
+void scrUnlinkHandle(scrProcessWork_s *work)
+{
+    if (scrHandleFirst == work) {
+        scrHandleFirst = work->next;
+    } else {
+        work->prev->next = work->next;
+    }
+    if (scrHandleLast == work) {
+        scrHandleLast = work->prev;
+    } else {
+        work->next->prev = work->prev;
+    }
+    work->prev = NULL;
+    work->next = NULL;
+    scrHandleCount--;
+}
+
+INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E250);
+
+INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E260);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", scrPrintProcedureStart);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", fldFlowParse);
+scrProcessWork_s *fldFlowParse(scrHeader_t *header, s32 procno)
+{
+    scrTypeTable_t *typetable;
+    scrProcTable_t *proctable = NULL;
+    scrLabelTable_t *labeltable = NULL;
+    scrCode_u *code = NULL;
+    u8 *mesdata = NULL;
+    char *strdata = NULL;
+    s32 i;
+
+    typetable = (scrTypeTable_t *)&header[1];
+    if (*(s32 *)header->MagicCode != 0x30574C46) {
+        return NULL;
+    }
+    for (i = 0; i < header->TypeTableCount; i++) {
+        switch (typetable[i].Type) {
+        case SCR_DATATYPE_PROCTABLE:
+            proctable = (scrProcTable_t *)((u8 *)header + typetable[i].ItemAddress);
+            break;
+        case SCR_DATATYPE_LABELTABLE:
+            labeltable = (scrLabelTable_t *)((u8 *)header + typetable[i].ItemAddress);
+            break;
+        case SCR_DATATYPE_SCRDATA:
+            code = (scrCode_u *)((u8 *)header + typetable[i].ItemAddress);
+            break;
+        case SCR_DATATYPE_MESSAGE:
+            if (typetable[i].ItemCount != 0) {
+                mesdata = (u8 *)header + typetable[i].ItemAddress;
+            }
+            break;
+        case SCR_DATATYPE_STRINGS:
+            strdata = (char *)header + typetable[i].ItemAddress;
+            break;
+        default:
+            return NULL;
+        }
+    }
+    return scrPrintProcedureStart(header, typetable, proctable, labeltable, code, mesdata, strdata,
+                                  procno);
+}
 
 INCLUDE_SDATA(const s32, "kernel/dds3SequenceList", abcd);
 

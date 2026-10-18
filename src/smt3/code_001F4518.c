@@ -1,24 +1,139 @@
 #include "common.h"
+#include "kernel.h"
 
-INCLUDE_ASM(const s32, "code_001F4518", evtSetBokasi);
+extern char D_0053BC98[];
+extern char D_0053BEF0[];
+extern char D_0054F908[];
+extern char D_0054F9B8[];
+extern char D_0053C5B8[];
+extern char D_0053C5D0[];
+extern char D_0053C5E8[];
+extern char D_0054FAB0[];
 
-INCLUDE_ASM(const s32, "code_001F4518", evtSetSkyAlpha);
+extern u16 skyanime;
+extern u16 skyanow;
+extern u16 skyamax;
+extern s16 skyatarget;
+extern s16 skyabase_par;
+extern s32 fldbokasi;
+extern u16 evt_file_minor;
+extern u16 D_0054F824;
 
-INCLUDE_ASM(const s32, "code_001F4518", evtCheckSkyAlphaAnime);
+extern s32 printf(const char *fmt, ...);
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern s32 p2sdLoadSMGFile(s32 index);
+extern s32 p2sdLoadCheckMidi(s32 index);
+extern void p2sdPlayBGM(s32 index);
+extern void p2sdSetBgmTrack(s32 index);
+extern void p2sdPlayBGMFade(s32 index);
+extern void p2sdStopBGM(s32 index);
+extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtUpdateSkyAlpha);
+extern s16 fldSkyGetAlphaOfs(void);
+extern void fldSkySetAlphaOfs(s32 alpha);
+extern void fldSkySetAlpha(s32 alpha);
+extern void fldSetFilterAnime(s32 anime);
+extern void fldSkySetFilter(s32 r, s32 g, s32 b);
+extern void fldSkyDrawFilter(void);
+extern void fldDrawFrameSprite(void);
+extern void rsetOtOfs(s32 ofs);
+extern s32 sdfDevPrintf(s32 x, s32 y, u32 color, s32 flag, char *font, char *str);
+extern void sdfDrawTagLink(void *list, u32 tag);
+extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
+                                         dds3ProcessFunc_t shutdownfunc, void *data);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtSkyProcess1);
+void evtUpdateSkyAlpha(void);
+s32 evtSkyProcess1(dds3ProcessID_t *id);
+void evtSkyShutdown(dds3ProcessID_t *id);
+s32 FrameVarProcess(dds3ProcessID_t *id);
+s32 evtGetSoundIndex(s32 eventId, s32 variation);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtSkyShutdown);
+void evtSetBokasi(s32 bokasi)
+{
+    fldbokasi = bokasi;
+}
 
-INCLUDE_ASM(const s32, "code_001F4518", evtExitSky);
+void evtSetSkyAlpha(s32 time, s32 alpha)
+{
+    s16 current;
 
-INCLUDE_ASM(const s32, "code_001F4518", evtInitSky);
+    current = fldSkyGetAlphaOfs();
+    if (current != alpha) {
+        if (time == 0) {
+            fldSkySetAlphaOfs(alpha);
+            skyanime = 0;
+        } else {
+            skyamax = time;
+            skyatarget = current;
+            skyabase_par = alpha;
+            skyanime = 1;
+            skyanow = 0;
+        }
+    }
+}
+
+u16 evtCheckSkyAlphaAnime(void)
+{
+    return skyanime;
+}
+
+void evtUpdateSkyAlpha(void)
+{
+    if (skyanime != 0) {
+        skyanow++;
+        fldSkySetAlphaOfs(skyatarget +
+                          (s32)((f32)(skyabase_par - skyatarget) * ((f32)skyanow / (f32)skyamax)));
+        if (skyanow >= skyamax) {
+            skyanime = 0;
+        }
+    }
+}
+
+s32 evtSkyProcess1(dds3ProcessID_t *id)
+{
+    evtUpdateSkyAlpha();
+    fldSkyDrawFilter();
+    if (fldbokasi != 0) {
+        rsetOtOfs(0x47);
+        fldDrawFrameSprite();
+    }
+    return 0;
+}
+
+void evtSkyShutdown(dds3ProcessID_t *id)
+{
+    skyanime = 0;
+    fldbokasi = 0;
+}
+
+void evtExitSky(void)
+{
+    dds3ProcessID_t *id;
+
+    id = dds3SearchProcessName(D_0054F908);
+    if (id != NULL) {
+        dds3KillProcess(id, 1);
+    }
+}
+
+void evtInitSky(void)
+{
+    fldSetFilterAnime(0);
+    fldSkySetAlpha(0x80);
+    fldSkySetAlphaOfs(0);
+    fldSkySetFilter(0, 1, 0);
+    dds3StartProcess(D_0054F908, 0x2B0E, 1, 1, evtSkyProcess1, (dds3ProcessFunc_t)evtSkyShutdown, NULL);
+}
 
 INCLUDE_ASM(const s32, "code_001F4518", FrameVarProcess);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtInitFrameVar);
+void evtInitFrameVar(void)
+{
+    dds3StartProcess(D_0053BC98, 0x2AF9, 1, 1, FrameVarProcess, NULL, NULL);
+}
 
 INCLUDE_ASM(const s32, "code_001F4518", evtMenuDisp);
 
@@ -66,7 +181,16 @@ INCLUDE_ASM(const s32, "code_001F4518", evtFileNameItem);
 
 INCLUDE_ASM(const s32, "code_001F4518", evtFileNameMenu);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtFileName2Head);
+s32 evtFileName2Head(void *list, s32 x, s32 y)
+{
+    char name[32];
+
+    sprintf(name, D_0053BEF0, D_0054F824, evt_file_minor);
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0054F9B8, name));
+    return 2;
+}
+
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053BEF0);
 
 INCLUDE_ASM(const s32, "code_001F4518", evtFileName2Item);
 
@@ -168,25 +292,111 @@ INCLUDE_ASM(const s32, "code_001F4518", evtMakeMotionName);
 
 INCLUDE_ASM(const s32, "code_001F4518", evtViewerShutdown);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtGetSoundIndex);
+s32 evtGetSoundIndex(s32 eventId, s32 variation)
+{
+    s32 index;
 
-INCLUDE_ASM(const s32, "code_001F4518", evtLoadEventBgm);
+    index = 0xC7;
+    if (eventId != 0x31F) {
+        index = eventId - 0x259;
+        if (eventId >= 0x320) {
+            index = (eventId < 0x384) ? (eventId - 0x258) : (eventId - 0x29E);
+        }
+    }
+    return ((index + 0x100) << 16) + variation;
+}
 
-INCLUDE_ASM(const s32, "code_001F4518", evtCheckEventBgmLoaded);
+s32 evtLoadEventBgm(s32 eventId)
+{
+    s32 soundIndex;
 
-INCLUDE_ASM(const s32, "code_001F4518", evtPlayEventBgm);
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 0;
+    }
+    soundIndex = evtGetSoundIndex(eventId, 0);
+    p2sdLoadSMGFile(soundIndex);
+    return soundIndex;
+}
 
-INCLUDE_ASM(const s32, "code_001F4518", evtTransEventBgm);
+s32 evtCheckEventBgmLoaded(s32 eventId)
+{
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 1;
+    }
+    return p2sdLoadCheckMidi(evtGetSoundIndex(eventId, 0)) == 1;
+}
 
-INCLUDE_ASM(const s32, "code_001F4518", evtFadeInEventBgm);
+s32 evtPlayEventBgm(s32 eventId, s32 variation)
+{
+    s32 soundIndex;
 
-INCLUDE_ASM(const s32, "code_001F4518", evtStopEventBgm);
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 0;
+    }
+    soundIndex = evtGetSoundIndex(eventId, variation);
+    printf(D_0053C5B8, soundIndex);
+    p2sdPlayBGM(soundIndex);
+    return soundIndex;
+}
 
-INCLUDE_ASM(const s32, "code_001F4518", evtPlaySe);
+void evtTransEventBgm(s32 eventId, s32 variation)
+{
+    s32 soundIndex;
+
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return;
+    }
+    soundIndex = -1;
+    if (variation >= 0) {
+        soundIndex = evtGetSoundIndex(eventId, variation);
+    }
+    printf(D_0053C5D0, soundIndex);
+    p2sdSetBgmTrack(soundIndex);
+}
+
+s32 evtFadeInEventBgm(s32 eventId, s32 variation)
+{
+    s32 soundIndex;
+
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 0;
+    }
+    soundIndex = evtGetSoundIndex(eventId, variation);
+    printf(D_0053C5E8, soundIndex);
+    p2sdPlayBGMFade(soundIndex);
+    return soundIndex;
+}
+
+s32 evtStopEventBgm(s32 eventId, s32 variation)
+{
+    s32 soundIndex;
+
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 0;
+    }
+    soundIndex = evtGetSoundIndex(eventId, variation);
+    p2sdStopBGM(soundIndex);
+    return soundIndex;
+}
+
+s32 evtPlaySe(s32 eventId, s32 variation)
+{
+    s32 soundIndex;
+
+    if ((u32)(eventId - 0x258) >= 0x100) {
+        return 0;
+    }
+    soundIndex = evtGetSoundIndex(eventId, variation);
+    p2sdPlaySE(soundIndex, 0x7F, 0x3F);
+    return soundIndex;
+}
 
 INCLUDE_ASM(const s32, "code_001F4518", func_001FA158);
 
-INCLUDE_ASM(const s32, "code_001F4518", evtMakeEventPackName);
+void evtMakeEventPackName(s32 index, char *buffer)
+{
+    sprintf(buffer, D_0054FAB0, index);
+}
 INCLUDE_SDATA(const s32, "code_001F4518", skyanime);
 
 INCLUDE_SDATA(const s32, "code_001F4518", D_0054F902);
@@ -302,4 +512,10 @@ INCLUDE_SDATA(const s32, "code_001F4518", D_0054FAA0);
 INCLUDE_SDATA(const s32, "code_001F4518", D_0054FAA8);
 
 INCLUDE_SDATA(const s32, "code_001F4518", D_0054FAB0);
+
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5B8);
+
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5D0);
+
+INCLUDE_RODATA(const s32, "code_001F4518", D_0053C5E8);
 

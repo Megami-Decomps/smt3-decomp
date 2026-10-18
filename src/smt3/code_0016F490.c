@@ -1,4 +1,94 @@
 #include "common.h"
+#include "motion.h"
+
+/* lqc2 into vf10, which the mdlSet* entry points read as their argument. */
+#define VU0_LOAD_VF10_PTR(src) __asm__ volatile(".set noreorder\n\tlqc2 $vf10, 0(%0)\n\t.set reorder" ::"r"(src))
+#define VU0_LOAD_VF10_MEM(src) __asm__ volatile(".set noreorder\n\tlqc2 $vf10, %0\n\t.set reorder" ::"m"(*(src)))
+
+extern u128 D_0031DF60;
+extern u128 D_0031DF70;
+extern u128 D_0031DF80;
+
+typedef struct
+{
+    u16 type;
+    void *pHandle;
+} effPartHandle_t;
+
+typedef struct
+{
+    u32 kateg;
+    u32 param;
+    void *pHandle;
+} dds3EffectPCP_t;
+
+typedef struct
+{
+    u32 size;
+    u32 offset;
+    u32 type;
+    u32 reserve;
+} dds3EffectPCPData_Part_t;
+
+typedef struct
+{
+    u32 kateg;
+    u32 param;
+    u32 part;
+    u32 reserve;
+    dds3EffectPCPData_Part_t pcpData[1];
+} dds3EffectPCPData_t;
+
+typedef struct
+{
+    void *(*create)(void *);
+    void (*draw)(void *);
+    void (*destroy)(void *);
+    void *(*copy)(void *);
+    void (*setPosition)(void *, void *);
+    void (*setScale)(void *, f32);
+    void (*setRotateMatrix)(void *, void *);
+    void (*setColor)(void *, u32);
+    void (*setDirection)(void *, void *);
+    void (*setArea)(void *, f32);
+} dds3EffectFunc_t;
+
+typedef struct dds3ModelHandle_t
+{
+    u32 stat;
+    struct dds3ModelHandle_t *next;
+    struct dds3ModelHandle_t *prev;
+    void *resrc;
+    s16 motionMajorNum;
+    s16 motionMinorNum;
+    void *effects;
+    sdfModelRootNode_t *modelRoot;
+    sdfMotionCtrlr_t *motionCtrlr;
+} dds3ModelHandle_t;
+
+void mdlSetPosition(dds3ModelHandle_t *aHandle);
+void mdlSetRotate(dds3ModelHandle_t *aHandle);
+void mdlSetScale(dds3ModelHandle_t *aHandle);
+void mdlSetColor(dds3ModelHandle_t *aHandle, u32 aColor);
+void mdlLoopMotion(dds3ModelHandle_t *aHandle, s32 aGroup, s32 aNumber);
+
+extern dds3EffectFunc_t dds3EffectFuncTable[7];
+extern dds3EffectFunc_t EffectPCPFuncTable[];
+extern void **D_0031DDD0[];
+
+void *sdfChipAllocDirect(s32 aSize);
+void sdfChipFreeDirect(void *aPtr);
+void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
+void dds3BillboardSetScale(void *hBillboard, f32 x, f32 y);
+s32 mdlGetMajorNum(dds3ModelHandle_t *aHandle);
+s32 mdlGetMinorNum(dds3ModelHandle_t *aHandle);
+dds3ModelHandle_t *mdlLoad(u32 aMajor, u32 aMinor);
+void dds3EffectPartModelInit(dds3ModelHandle_t *hModel);
+effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
+u32 dds3EffectPCPDataGetKateg(dds3EffectPCPData_t *hPCPData);
+u32 dds3EffectPCPDataGetParam(dds3EffectPCPData_t *hPCPData);
+u32 dds3EffectPCPDataGetType(dds3EffectPCPData_t *hPCPData, u32 number);
+void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
 
 INCLUDE_ASM(const s32, "code_0016F490", effBTLPointLightInit);
 
@@ -803,19 +893,42 @@ INCLUDE_ASM(const s32, "code_0016F490", eff_1757D8);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3_175878);
 
-INCLUDE_ASM(const s32, "code_0016F490", InitModelCollisionEditorProcess);
+void InitModelCollisionEditorProcess(void)
+{
+    dds3AdminiCallSequence(0, 0, 0, 0);
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartGetHandle);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartGetType);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartCreate);
+effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData)
+{
+    effPartHandle_t *hEffPart;
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartDelete);
+    hEffPart = sdfChipAllocDirect(sizeof(effPartHandle_t));
+    hEffPart->type = type;
+    hEffPart->pHandle = dds3EffectFuncTable[type].create(pData);
+    return hEffPart;
+}
+
+void dds3EffectPartDelete(effPartHandle_t *hEffPart)
+{
+    dds3EffectFuncTable[hEffPart->type].destroy(hEffPart->pHandle);
+    sdfChipFreeDirect(hEffPart);
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartDraw);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartCopy);
+effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc)
+{
+    effPartHandle_t *hEffPart;
+
+    hEffPart = sdfChipAllocDirect(sizeof(effPartHandle_t));
+    hEffPart->type = hEffPartSrc->type;
+    hEffPart->pHandle = dds3EffectFuncTable[hEffPartSrc->type].copy(hEffPartSrc->pHandle);
+    return hEffPart;
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartSetPosition);
 
@@ -833,9 +946,26 @@ INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartTMXBillboardCreate);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartP2ABillboardCreate);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartBillboardScale);
+void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
+{
+    dds3BillboardSetScale(hBillboard, scale, scale);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelInit);
+void dds3EffectPartModelInit(dds3ModelHandle_t *hModel)
+{
+    VU0_LOAD_VF10_PTR(&D_0031DF60);
+    mdlSetPosition(hModel);
+    VU0_LOAD_VF10_PTR(&D_0031DF70);
+    mdlSetRotate(hModel);
+    VU0_LOAD_VF10_PTR(&D_0031DF80);
+    mdlSetScale(hModel);
+    mdlSetColor(hModel, 0x80808080);
+    if (hModel->motionCtrlr != NULL) {
+        mdlLoopMotion(hModel, 0, 0);
+        hModel->motionCtrlr->speed = 1.0f;
+    }
+    hModel->stat &= ~1;
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelCreate);
 
@@ -843,47 +973,141 @@ INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelDraw);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelDelete);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelCopy);
+dds3ModelHandle_t *dds3EffectPartModelCopy(void *hData)
+{
+    s32 major;
+    s32 minor;
+    dds3ModelHandle_t *hModel;
+
+    major = mdlGetMajorNum(hData);
+    minor = mdlGetMinorNum(hData);
+    hModel = mdlLoad(major, minor);
+    dds3EffectPartModelInit(hModel);
+    return hModel;
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetPosition);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetScale);
+void dds3EffectPartModelSetScale(void *hData, f32 scale)
+{
+    f32 v[3];
+
+    v[0] = v[1] = v[2] = scale;
+    VU0_LOAD_VF10_MEM(v);
+    mdlSetScale(hData);
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetRotateMatrix);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPartModelSetColor);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPCreate);
+dds3EffectPCP_t *dds3EffectPCPCreate(dds3EffectPCPData_t *hPCPData)
+{
+    dds3EffectPCP_t *hPCP;
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDelete);
+    hPCP = sdfChipAllocDirect(sizeof(dds3EffectPCP_t));
+    hPCP->kateg = dds3EffectPCPDataGetKateg(hPCPData);
+    hPCP->param = dds3EffectPCPDataGetParam(hPCPData);
+    if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
+    } else {
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(hPCPData);
+    }
+    return hPCP;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDraw);
+void dds3EffectPCPDelete(dds3EffectPCP_t *hPCP)
+{
+    EffectPCPFuncTable[hPCP->kateg].destroy(hPCP->pHandle);
+    sdfChipFreeDirect(hPCP);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPCopy);
+void dds3EffectPCPDraw(dds3EffectPCP_t *hPCP)
+{
+    EffectPCPFuncTable[hPCP->kateg].draw(hPCP->pHandle);
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPSetPosition);
+dds3EffectPCP_t *dds3EffectPCPCopy(dds3EffectPCP_t *hPCPSrc)
+{
+    dds3EffectPCP_t *hPCP;
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPSetScale);
+    hPCP = sdfChipAllocDirect(sizeof(dds3EffectPCP_t));
+    hPCP->kateg = hPCPSrc->kateg;
+    hPCP->param = hPCPSrc->param;
+    if (EffectPCPFuncTable[hPCP->kateg].copy == NULL) {
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].create(D_0031DDD0[hPCP->kateg][hPCP->param]);
+    } else {
+        hPCP->pHandle = EffectPCPFuncTable[hPCP->kateg].copy(hPCPSrc->pHandle);
+    }
+    return hPCP;
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPSetRotateMatrix);
+void dds3EffectPCPSetPosition(dds3EffectPCP_t *hPCP, void *pPos)
+{
+    if (EffectPCPFuncTable[hPCP->kateg].setPosition != NULL) {
+        EffectPCPFuncTable[hPCP->kateg].setPosition(hPCP->pHandle, pPos);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPSetDirection);
+void dds3EffectPCPSetScale(dds3EffectPCP_t *hPCP, f32 scale)
+{
+    if (EffectPCPFuncTable[hPCP->kateg].setScale != NULL) {
+        EffectPCPFuncTable[hPCP->kateg].setScale(hPCP->pHandle, scale);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPSetColor);
+void dds3EffectPCPSetRotateMatrix(dds3EffectPCP_t *hPCP, void *pMatrix)
+{
+    if (EffectPCPFuncTable[hPCP->kateg].setRotateMatrix != NULL) {
+        EffectPCPFuncTable[hPCP->kateg].setRotateMatrix(hPCP->pHandle, pMatrix);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPSetArea);
+void dds3EffectPCPSetDirection(dds3EffectPCP_t *hPCP, void *pMatrix)
+{
+    if (EffectPCPFuncTable[hPCP->kateg].setDirection != NULL) {
+        EffectPCPFuncTable[hPCP->kateg].setDirection(hPCP->pHandle, pMatrix);
+    }
+}
+
+void dds3EffectPCPSetColor(dds3EffectPCP_t *hPCP, u32 abgr)
+{
+    if (EffectPCPFuncTable[hPCP->kateg].setColor != NULL) {
+        EffectPCPFuncTable[hPCP->kateg].setColor(hPCP->pHandle, abgr);
+    }
+}
+
+void dds3EffectPCPSetArea(dds3EffectPCP_t *hPCP, f32 area)
+{
+    if (EffectPCPFuncTable[hPCP->kateg].setArea != NULL) {
+        EffectPCPFuncTable[hPCP->kateg].setArea(hPCP->pHandle, area);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetKateg);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetParam);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetData);
+void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    dds3EffectPCPData_Part_t *part = &hPCPData->pcpData[number];
+
+    return (u8 *)hPCPData + part->offset;
+}
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetSize);
 
 INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataGetType);
 
-INCLUDE_ASM(const s32, "code_0016F490", dds3EffectPCPDataPartCreate);
+effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 number)
+{
+    u16 type;
+    void *pData;
+
+    type = (u16)dds3EffectPCPDataGetType(hPCPData, number);
+    pData = dds3EffectPCPDataGetData(hPCPData, number);
+    return dds3EffectPartCreate(type, pData);
+}
 
 INCLUDE_SDATA(const s32, "code_0016F490", effBTLPointLightProcess);
 
