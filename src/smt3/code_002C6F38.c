@@ -1093,6 +1093,196 @@ s32 *sdfFileRpcHandler(u32 command, s32 request) {
     return sdfFileRpcBuf;
 }
 
+typedef struct _reent _reent;
+typedef __builtin_va_list va_list;
+typedef struct __sbuf {
+    u8 *_base;
+    s32 _size;
+} __sbuf;
+typedef struct __sFILE {
+    u8 *_p;
+    s32 _r;
+    s32 _w;
+    s16 _flags;
+    s16 _file;
+    __sbuf _bf;
+    s32 _lbfsize;
+    void *_cookie;
+    s32 (*_read)(void *cookie, char *buf, s32 n);
+    s32 (*_write)(void *cookie, const char *buf, s32 n);
+    long (*_seek)(void *cookie, s32 offset, s32 whence);
+    s32 (*_close)(void *cookie);
+    __sbuf _ub;
+    u8 *_up;
+    s32 _ur;
+    u8 _ubuf[3];
+    u8 _nbuf[1];
+    __sbuf _lb;
+    s32 _blksize;
+    s32 _offset;
+    _reent *_data;
+} FILE;
+typedef struct __siov {
+    void *iov_base;
+    u32 iov_len;
+} __siov;
+typedef struct __suio {
+    __siov *uio_iov;
+    s32 uio_iovcnt;
+    s32 uio_resid;
+} __suio;
+typedef struct _Bigint {
+    struct _Bigint *next;
+    s32 k;
+    s32 maxwds;
+    s32 sign;
+    s32 wds;
+    u32 x[1];
+} _Bigint;
+typedef struct _glue {
+    struct _glue *next;
+    s32 niobs;
+    FILE *iobs;
+} _glue;
+typedef struct AtExitEntry {
+    void *unk00;
+    void *unk04;
+    void *fn;
+    void *unk0C;
+    void *unk10;
+    struct AtExitEntry *next;
+} AtExitEntry;
+typedef struct AtExitList {
+    u32 **entries;
+    s32 count;
+} AtExitList;
+typedef struct _atexit {
+    struct _atexit *_next;
+    s32 _ind;
+    void (*_fns[32])(void);
+} _atexit;
+struct _reent {
+    s32 _errno;
+    FILE *_stdin;
+    FILE *_stdout;
+    FILE *_stderr;
+    s32 _inc;
+    char _emergency[25];
+    s32 _current_category;
+    const char *_current_locale;
+    s32 __sdidinit;
+    void (*__cleanup)(struct _reent *r);
+    _Bigint *_result;
+    s32 _result_k;
+    _Bigint *_p5s;
+    _Bigint **_freelist;
+    u8 _unused[0xF8];
+    _atexit *_atexit;
+    _atexit _atexit0;
+    void (**_sig_func)(s32 sig);
+    struct _glue __sglue;
+    FILE __sf[3];
+};
+extern _reent *D_0052BE28 __attribute__((section(".data")));
+extern s32 _puts_r(_reent *r, const char *s);
+extern s32 _raise_r(_reent *r, s32 sig);
+extern void *_signal_r(_reent *r, s32 sig, void *handler);
+extern s32 _setlocale_r(_reent *r, s32 category, const char *locale);
+extern void *func_002DA308(_reent *r);
+extern void _cleanup_r(_reent *r);
+extern s32 fflush(void *fp);
+extern s32 _fwalk(_reent *r, s32 (*func)(void *));
+extern s32 libc_2DC670(void);
+extern long _strtol_r(_reent *r, const char *s, char **end, s32 base);
+extern long strtol(const char *s, char **end, s32 base);
+extern s32 raise(s32 sig);
+extern void func_001001C8(s32 code) __attribute__((noreturn));
+
+extern u8 D_0054B8D8[] __attribute__((section(".data")));
+extern s32 D_00552178 __attribute__((section(".data")));
+extern s32 D_0052C28C __attribute__((section(".data")));
+extern s32 D_0052C288 __attribute__((section(".data")));
+extern s32 D_0052C378 __attribute__((section(".data")));
+extern s32 _init_signal_r(_reent *r);
+extern void gcc2_compiled__2(FILE *fp, s32 flags, s32 file, _reent *data);
+extern _glue *__sfmoreglue(_reent *r, s32 n);
+extern s32 __sigtramp_r(_reent *r, s32 sig);
+extern void *libc_2D2648(void *fn);
+extern void free(void *ptr);
+extern void *malloc(u32 size);
+extern void __malloc_lock(_reent *r);
+extern void __malloc_unlock(_reent *r);
+extern void *_malloc_r(_reent *r, u32 size);
+extern void _free_r(_reent *r, void *ptr);
+extern s32 SignalSema(s32 sema);
+extern void *sbrk(s32 incr);
+extern s32 close(s32 fd);
+extern _Bigint *_Balloc(_reent *r, s32 k);
+extern s32 registerAtExit(void *fn, void *entry);
+extern s32 libc_2D25B0(void *fn, void *entry);
+
+extern s32 write(s32 fd, const void *buf, s32 count);
+extern s32 read(s32 fd, void *buf, s32 count);
+extern long lseek(s32 fd, s32 offset, s32 whence);
+extern s32 fstat(s32 fd, void *buf);
+extern s32 kill(s32 pid, s32 sig);
+extern long _read_r(_reent *r, s32 fd, char *buf, s32 n);
+extern long _write_r(_reent *r, s32 fd, const char *buf, s32 n);
+extern long _lseek_r(_reent *r, s32 fd, s32 offset, s32 whence);
+extern s32 __sfvwrite(FILE *fp, __suio *uio);
+extern s32 __sread(void *cookie, char *buf, s32 n);
+extern s32 __swrite(void *cookie, const char *buf, s32 n);
+extern long __sseek(void *cookie, s32 offset, s32 whence);
+extern s32 __sclose(void *cookie);
+extern s32 GetThreadId(void);
+extern s32 WaitSema(s32 sema);
+extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
+
+extern void *memset(void *s, s32 c, u32 n);
+extern void *_calloc_r(_reent *r, u32 n, u32 size);
+extern const double D_0054B930[];
+
+extern void abort(void);
+extern s32 initAtExit(void);
+extern s32 atexit(void (*fn)(void));
+extern void (**D_0052BB28)(void) __attribute__((section(".data")));
+extern s32 D_0052BB2C __attribute__((section(".data")));
+extern s32 D_0052C37C __attribute__((section(".data")));
+extern u8 D_0052D940[] __attribute__((section(".data")));
+extern void (*D_002F5600[])(void) __attribute__((section(".data")));
+extern s32 D_0059AD58 __attribute__((section(".data")));
+extern AtExitEntry *D_0059AD60 __attribute__((section(".data")));
+extern AtExitEntry D_0059AD40;
+typedef struct SdfUnpacked {
+    s32 kind;
+    s32 sign;
+    s32 exp;
+    u32 mant;
+} SdfUnpacked;
+extern void sdfUnpackFloat(const void *x, SdfUnpacked *u);
+extern f32 sdfPackFloat(const SdfUnpacked *u);
+extern long dptoul(s32 kind, s32 sign, s32 exp, long mant);
+
+#define va_start(ap, last) __builtin_stdarg_start((ap), last)
+#define va_end(ap) ((void)0)
+extern s32 func_002D6678(_reent *r, FILE *fp, const char *fmt, va_list ap);
+typedef union f32_bits {
+    f32 f;
+    u32 u;
+} f32_bits;
+typedef struct SdfUnpackedD {
+    s32 kind;
+    s32 sign;
+    s32 exp;
+    long mant;
+} SdfUnpackedD;
+extern long libc_2D34A0(const SdfUnpackedD *u);
+extern void sdfUnpackDouble(const double *x, SdfUnpackedD *u);
+extern SdfUnpackedD *libc_2D1590(const SdfUnpackedD *a, const SdfUnpackedD *b, SdfUnpackedD *r);
+extern long libc_2D3638(const SdfUnpackedD *a, const SdfUnpackedD *b);
+extern const u8 D_0054B551[];
+#define SDF_TOLOWER(c) ((D_0054B551[(c)] & 1) ? (c) + 0x20 : (c))
+
 INCLUDE_ASM(const s32, "code_002C6F38", SdfFileRpcServerThreadProc);
 
 INCLUDE_ASM(const s32, "code_002C6F38", sdf_2C7BC4);
@@ -1692,59 +1882,230 @@ INCLUDE_ASM(const s32, "code_002C6F38", scalbnf);
 
 INCLUDE_ASM(const s32, "code_002C6F38", copysignf);
 
-INCLUDE_ASM(const s32, "code_002C6F38", runAtExitList);
+void runAtExitList(void) {
+    void (**p)(void);
+
+    while (*D_0052BB28 != NULL) {
+        p = D_0052BB28;
+        D_0052BB28 = p + 1;
+        (*p)();
+    }
+    if (D_0052BB2C == 0) {
+        D_0052BB2C = 1;
+        libc_2D2648(D_0052D940);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", initAtExit);
 
-INCLUDE_ASM(const s32, "code_002C6F38", initFloatOnce);
+void initFloatOnce(void) {
+    if (D_0059AD58 == 0) {
+        D_0059AD58 = 1;
+        initAtExit();
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfFloatToULong);
+long sdfFloatToULong(f32 x) {
+    SdfUnpacked u;
+
+    sdfUnpackFloat(&x, &u);
+    return dptoul(u.kind, u.sign, u.exp, (long)u.mant << 30);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D1590);
 
-INCLUDE_ASM(const s32, "code_002C6F38", dpadd);
+long dpadd(double a, double b) {
+    SdfUnpackedD ua;
+    SdfUnpackedD ub;
+    SdfUnpackedD r;
 
-INCLUDE_ASM(const s32, "code_002C6F38", dpsub);
+    sdfUnpackDouble(&a, &ua);
+    sdfUnpackDouble(&b, &ub);
+    return libc_2D34A0(libc_2D1590(&ua, &ub, &r));
+}
+
+long dpsub(double a, double b) {
+    SdfUnpackedD ua;
+    SdfUnpackedD ub;
+    SdfUnpackedD r;
+
+    sdfUnpackDouble(&a, &ua);
+    sdfUnpackDouble(&b, &ub);
+    ub.sign ^= 1;
+    return libc_2D34A0(libc_2D1590(&ua, &ub, &r));
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", dpmul);
 
-INCLUDE_ASM(const s32, "code_002C6F38", dpdiv);
+long dpdiv(double a, double b) {
+    SdfUnpackedD ua;
+    SdfUnpackedD ub;
+
+    sdfUnpackDouble(&a, &ua);
+    sdfUnpackDouble(&b, &ub);
+    return libc_2D3638(&ua, &ub);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", litodp);
 
 INCLUDE_ASM(const s32, "code_002C6F38", dptoli);
 
-INCLUDE_ASM(const s32, "code_002C6F38", dptoul);
+long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
+    SdfUnpackedD u;
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfDoubleToULong);
+    u.kind = kind;
+    u.sign = sign;
+    u.exp = exp;
+    u.mant = mant;
+    return libc_2D34A0(&u);
+}
+
+u32 sdfDoubleToULong(double x) {
+    SdfUnpackedD u;
+    u32 m;
+
+    sdfUnpackDouble(&x, &u);
+    m = u.mant >> 30;
+    if (u.mant & 0x3FFFFFFF) {
+        m |= 1;
+    }
+    return sdfPackQuad(u.kind, u.sign, u.exp, m);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", sdfDoubleToUInt);
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D1E08);
+u8 *libc_2D1E08(u8 *p, u32 *out) {
+    u32 b;
+    u32 v;
+    s32 shift = 0;
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D1E50);
+    b = *p++;
+    v = b & 0x7F;
+    while (b & 0x80) {
+        b = *p++;
+        shift += 7;
+        v |= (b & 0x7F) << shift;
+    }
+    *out = v;
+    return p;
+}
+
+u8 *libc_2D1E50(u8 *p, s32 *out) {
+    s32 shift = 0;
+    u32 v = 0;
+    u32 b;
+
+    do {
+        b = *p++;
+        v |= (b & 0x7F) << shift;
+        shift += 7;
+    } while (b & 0x80);
+    if ((u32)shift < 32 && (b & 0x40)) {
+        v |= -1 << shift;
+    }
+    *out = v;
+    return p;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D1EA8);
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D1FA0);
 
-INCLUDE_ASM(const s32, "code_002C6F38", registerAtExit);
+s32 registerAtExit(void *fn, void *entry) {
+    AtExitEntry *e = entry;
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2580);
+    e->fn = fn;
+    e->unk04 = NULL;
+    e->unk00 = NULL;
+    e->unk0C = NULL;
+    e->unk10 = NULL;
+    WaitSema(D_0052C37C);
+    e->next = D_0059AD60;
+    D_0059AD60 = e;
+    SignalSema(D_0052C37C);
+    /* Empty asm: keeps the SignalSema call from becoming a sibcall. */
+    __asm__("");
+    return;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D25B0);
+s32 libc_2D2580(void *fn) {
+    return registerAtExit(fn, malloc(0x18));
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2618);
+s32 libc_2D25B0(void *fn, void *entry) {
+    AtExitEntry *e = entry;
+
+    e->fn = fn;
+    e->unk0C = fn;
+    e->unk04 = NULL;
+    e->unk00 = NULL;
+    e->unk10 = NULL;
+    WaitSema(D_0052C37C);
+    e->next = D_0059AD60;
+    D_0059AD60 = e;
+    SignalSema(D_0052C37C);
+    /* Empty asm: keeps the SignalSema call from becoming a sibcall. */
+    __asm__("");
+    return;
+}
+
+s32 libc_2D2618(void *fn) {
+    return libc_2D25B0(fn, malloc(0x18));
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2648);
 
-INCLUDE_ASM(const s32, "code_002C6F38", ctime_4);
+void ctime_4(void *fn) {
+    free(libc_2D2648(fn));
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2728);
+s32 libc_2D2728(u32 *p) {
+    s32 n = 0;
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2768);
+    while (p[0] != 0) {
+        if (p[1] != 0 && p[2] != 0) {
+            n++;
+        }
+        p = (u32 *)((char *)p + p[0] + 4);
+    }
+    return n;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", libc_2D27F8);
+void libc_2D2768(u32 *p, AtExitList *list, u32 *pmin, u32 *pmax) {
+    u32 lo = *pmin;
+    u32 hi = *pmax;
+
+    while (p[0] != 0) {
+        if (p[1] != 0) {
+            u32 a = p[2];
+
+            if (a != 0) {
+                if (list->entries != NULL) {
+                    list->entries[list->count++] = p;
+                }
+                if (a < lo) {
+                    lo = a;
+                }
+                if (hi < a + p[3]) {
+                    hi = a + p[3];
+                }
+            }
+        }
+        p = (u32 *)((char *)p + p[0] + 4);
+    }
+    *pmin = lo;
+    *pmax = hi;
+}
+
+void *libc_2D27F8(u32 *p, u32 addr) {
+    while (p[0] != 0) {
+        if (p[1] != 0 && p[2] != 0 && addr - p[2] < p[3]) {
+            return p;
+        }
+        p = (u32 *)((char *)p + p[0] + 4);
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D2850);
 
@@ -1772,7 +2133,15 @@ INCLUDE_ASM(const s32, "code_002C6F38", libc_2D3398);
 
 INCLUDE_ASM(const s32, "code_002C6F38", sdfUnpackFloat);
 
-INCLUDE_ASM(const s32, "code_002C6F38", sdfPackQuad);
+f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
+    SdfUnpacked u;
+
+    u.kind = kind;
+    u.sign = sign;
+    u.exp = exp;
+    u.mant = mant;
+    return sdfPackFloat(&u);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", libc_2D34A0);
 
@@ -1782,15 +2151,51 @@ INCLUDE_ASM(const s32, "code_002C6F38", libc_2D3638);
 
 INCLUDE_ASM(const s32, "code_002C6F38", sdfPackFloat);
 
-INCLUDE_ASM(const s32, "code_002C6F38", abort);
+void abort(void) {
+    while (1) {
+        raise(6);
+        func_001001C8(1);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", atexit);
+s32 atexit(void (*fn)(void)) {
+    _atexit *p;
 
-INCLUDE_ASM(const s32, "code_002C6F38", atoi);
+    p = D_0052BE28->_atexit;
+    if (p == NULL) {
+        p = &D_0052BE28->_atexit0;
+        D_0052BE28->_atexit = p;
+    }
+    if (p->_ind >= 32) {
+        if ((p = malloc(sizeof(_atexit))) == NULL) {
+            return -1;
+        }
+        p->_ind = 0;
+        p->_next = D_0052BE28->_atexit;
+        D_0052BE28->_atexit = p;
+    }
+    p->_fns[p->_ind++] = fn;
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", malloc);
+s32 atoi(const char *s) {
+    return strtol(s, NULL, 10);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", free);
+void *malloc(u32 size) {
+    void *result;
+
+    __malloc_lock(D_0052BE28);
+    result = _malloc_r(D_0052BE28, size);
+    __malloc_unlock(D_0052BE28);
+    return result;
+}
+
+void free(void *ptr) {
+    __malloc_lock(D_0052BE28);
+    _free_r(D_0052BE28, ptr);
+    __malloc_unlock(D_0052BE28);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", gcc2_compiled_);
 
@@ -1804,13 +2209,41 @@ INCLUDE_ASM(const s32, "code_002C6F38", memmove);
 
 INCLUDE_ASM(const s32, "code_002C6F38", memset);
 
-INCLUDE_ASM(const s32, "code_002C6F38", __malloc_lock);
+void __malloc_lock(_reent *r) {
+    s32 owner = GetThreadId();
 
-INCLUDE_ASM(const s32, "code_002C6F38", __malloc_unlock);
+    if (D_0052C288 == owner) {
+        D_0052C28C++;
+    } else {
+        WaitSema(D_0052C378);
+        D_0052C288 = owner;
+        D_0052C28C++;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _printf_r);
+void __malloc_unlock(_reent *r) {
+    if (--D_0052C28C != 0) {
+        return;
+    }
+    D_0052C288 = -1;
+    SignalSema(D_0052C378);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", printf);
+s32 _printf_r(_reent *r, const char *fmt, ...) {
+    va_list ap;
+
+    va_start(ap, fmt);
+    return func_002D6678(r, r->_stdout, fmt, ap);
+}
+
+s32 printf(const char *fmt, ...) {
+    _reent *r = D_0052BE28;
+    va_list ap;
+
+    va_start(ap, fmt);
+    r->_stdout->_data = r;
+    return vfprintf(r->_stdout, fmt, ap);
+}
 
 INCLUDE_RODATA(const s32, "code_002C6F38", D_0054B550);
 
@@ -1818,35 +2251,139 @@ INCLUDE_RODATA(const s32, "code_002C6F38", D_0054B658);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _puts_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", puts);
+s32 puts(const char *s) {
+    return _puts_r(D_0052BE28, s);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", qsort);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _sbrk_r);
+void *_sbrk_r(_reent *r, s32 incr) {
+    void *result;
 
-INCLUDE_ASM(const s32, "code_002C6F38", _init_signal_r);
+    D_00552178 = 0;
+    result = sbrk(incr);
+    if (result == (void *)-1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _signal_r);
+s32 _init_signal_r(_reent *r) {
+    s32 i;
+
+    if (r->_sig_func == NULL) {
+        r->_sig_func = _malloc_r(r, 32 * sizeof(void *));
+        if (r->_sig_func == NULL) {
+            return -1;
+        }
+        for (i = 0; i < 32; i++) {
+            r->_sig_func[i] = NULL;
+        }
+    }
+    return 0;
+}
+
+void *_signal_r(_reent *r, s32 sig, void *handler) {
+    void *old;
+
+    if ((u32)sig >= 32) {
+        r->_errno = 22;
+        return (void *)-1;
+    }
+    if (r->_sig_func == NULL && _init_signal_r(r) != 0) {
+        return (void *)-1;
+    }
+    old = (void *)r->_sig_func[sig];
+    r->_sig_func[sig] = (void (*)(s32))handler;
+    return old;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _raise_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sigtramp_r);
+s32 __sigtramp_r(_reent *r, s32 sig) {
+    void (*handler)(s32 sig);
 
-INCLUDE_ASM(const s32, "code_002C6F38", raise);
+    if ((u32)sig >= 32) {
+        return -1;
+    }
+    if (r->_sig_func == NULL && _init_signal_r(r) != 0) {
+        return -1;
+    }
+    handler = r->_sig_func[sig];
+    if (handler == NULL) {
+        return 1;
+    }
+    if (handler == (void (*)(s32))-1) {
+        return 2;
+    }
+    if (handler == (void (*)(s32))1) {
+        return 3;
+    }
+    r->_sig_func[sig] = NULL;
+    handler(sig);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", signal);
+s32 raise(s32 sig) {
+    return _raise_r(D_0052BE28, sig);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _init_signal);
+void *signal(s32 sig, void *handler) {
+    return _signal_r(D_0052BE28, sig, handler);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sigtramp);
+s32 _init_signal(void) {
+    return _init_signal_r(D_0052BE28);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _kill_r);
+s32 __sigtramp(s32 sig) {
+    return __sigtramp_r(D_0052BE28, sig);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _getpid_r);
+s32 _kill_r(_reent *r, s32 pid, s32 sig) {
+    s32 result;
 
-INCLUDE_ASM(const s32, "code_002C6F38", _sprintf_r);
+    D_00552178 = 0;
+    result = kill(pid, sig);
+    if (result == -1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", sprintf);
+s32 _getpid_r(_reent *r) {
+    return libc_2DC670();
+}
+
+s32 _sprintf_r(_reent *r, char *str, const char *fmt, ...) {
+    s32 result;
+    FILE f;
+    va_list ap;
+
+    va_start(ap, fmt);
+    f._flags = 0x208;
+    f._bf._base = f._p = (u8 *)str;
+    f._bf._size = f._w = 0x7FFFFFFF;
+    f._data = r;
+    result = vfprintf(&f, fmt, ap);
+    *f._p = '\0';
+    return result;
+}
+
+s32 sprintf(char *str, const char *fmt, ...) {
+    s32 result;
+    FILE f;
+    va_list ap;
+
+    va_start(ap, fmt);
+    f._flags = 0x208;
+    f._bf._base = f._p = (u8 *)str;
+    f._bf._size = f._w = 0x7FFFFFFF;
+    f._data = D_0052BE28;
+    result = vfprintf(&f, fmt, ap);
+    *f._p = '\0';
+    return result;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", strcasecmp);
 
@@ -1864,15 +2401,39 @@ INCLUDE_ASM(const s32, "code_002C6F38", strncmp);
 
 INCLUDE_ASM(const s32, "code_002C6F38", strncpy);
 
-INCLUDE_ASM(const s32, "code_002C6F38", strrchr);
+char *strrchr(const char *s, s32 c) {
+    char ch = c;
+    const char *last = NULL;
+
+    while (*s != '\0') {
+        if (*s == ch) {
+            last = s;
+        }
+        s++;
+    }
+    return (char *)(*s != ch ? last : s);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", strstr);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _strtol_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", strtol);
+long strtol(const char *s, char **end, s32 base) {
+    return _strtol_r(D_0052BE28, s, end, base);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", gcc2_compiled__0);
+s32 gcc2_compiled__0(FILE *fp, __suio *uio) {
+    s32 err;
+
+    if (uio->uio_resid == 0) {
+        uio->uio_iovcnt = 0;
+        return 0;
+    }
+    err = __sfvwrite(fp, uio);
+    uio->uio_resid = 0;
+    uio->uio_iovcnt = 0;
+    return err;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", __sbprintf);
 
@@ -1886,9 +2447,31 @@ INCLUDE_ASM(const s32, "code_002C6F38", cvt);
 
 INCLUDE_ASM(const s32, "code_002C6F38", exponent);
 
-INCLUDE_ASM(const s32, "code_002C6F38", vsprintf);
+s32 vsprintf(char *str, const char *fmt, va_list ap) {
+    s32 result;
+    FILE f;
 
-INCLUDE_ASM(const s32, "code_002C6F38", vsprintf_r);
+    f._flags = 0x208;
+    f._bf._base = f._p = (u8 *)str;
+    f._bf._size = f._w = 0x7FFFFFFF;
+    f._data = D_0052BE28;
+    result = vfprintf(&f, fmt, ap);
+    *f._p = '\0';
+    return result;
+}
+
+s32 vsprintf_r(_reent *r, char *str, const char *fmt, va_list ap) {
+    s32 result;
+    FILE f;
+
+    f._flags = 0x208;
+    f._bf._base = f._p = (u8 *)str;
+    f._bf._size = f._w = 0x7FFFFFFF;
+    f._data = r;
+    result = vfprintf(&f, fmt, ap);
+    *f._p = '\0';
+    return result;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", __swsetup);
 
@@ -1902,17 +2485,59 @@ INCLUDE_ASM(const s32, "code_002C6F38", _dtoa_r);
 
 INCLUDE_ASM(const s32, "code_002C6F38", fflush);
 
-INCLUDE_ASM(const s32, "code_002C6F38", gcc2_compiled__2);
+void gcc2_compiled__2(FILE *fp, s32 flags, s32 file, _reent *data) {
+    fp->_p = NULL;
+    fp->_r = 0;
+    fp->_w = 0;
+    fp->_flags = flags;
+    fp->_file = file;
+    fp->_bf._base = NULL;
+    fp->_bf._size = 0;
+    fp->_lbfsize = 0;
+    fp->_cookie = fp;
+    fp->_read = __sread;
+    fp->_write = __swrite;
+    fp->_seek = __sseek;
+    fp->_close = __sclose;
+    fp->_data = data;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sfmoreglue);
+_glue *__sfmoreglue(_reent *r, s32 n) {
+    _glue *g;
+    FILE *p;
+
+    g = _malloc_r(r, sizeof(_glue) + n * sizeof(FILE));
+    if (g == NULL) {
+        return NULL;
+    }
+    p = (FILE *)(g + 1);
+    g->next = NULL;
+    g->niobs = n;
+    g->iobs = p;
+    memset(p, 0, n * sizeof(FILE));
+    return g;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", __sfp);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _cleanup_r);
+void _cleanup_r(_reent *r) {
+    _fwalk(r, fflush);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _cleanup);
+void _cleanup(void) {
+    _cleanup_r(D_0052BE28);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sinit);
+void __sinit(_reent *r) {
+    r->__cleanup = _cleanup_r;
+    r->__sdidinit = 1;
+    gcc2_compiled__2(&r->__sf[0], 4, 0, r);
+    gcc2_compiled__2(&r->__sf[1], 9, 1, r);
+    gcc2_compiled__2(&r->__sf[2], 0xA, 2, r);
+    r->__sglue.next = NULL;
+    r->__sglue.niobs = 3;
+    r->__sglue.iobs = &r->__sf[0];
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _free_r);
 
@@ -1920,7 +2545,21 @@ INCLUDE_ASM(const s32, "code_002C6F38", _malloc_trim_r);
 
 INCLUDE_ASM(const s32, "code_002C6F38", __sfvwrite);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _fwalk);
+s32 _fwalk(_reent *r, s32 (*func)(void *)) {
+    _glue *g;
+    FILE *fp;
+    s32 n;
+    s32 ret = 0;
+
+    for (g = &r->__sglue; g != NULL; g = g->next) {
+        for (fp = g->iobs, n = g->niobs; --n >= 0; fp++) {
+            if (fp->_flags != 0) {
+                ret |= func(fp);
+            }
+        }
+    }
+    return ret;
+}
 
 INCLUDE_RODATA(const s32, "code_002C6F38", D_0054B8A0);
 
@@ -1938,31 +2577,157 @@ INCLUDE_RODATA(const s32, "code_002C6F38", D_0054B910);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _setlocale_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", func_002DA308);
+void *func_002DA308(_reent *r) {
+    return D_0054B8D8;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", setlocale);
+s32 setlocale(s32 category, const char *locale) {
+    return _setlocale_r(D_0052BE28, category, locale);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", localeconv);
+void *localeconv(void) {
+    return func_002DA308(D_0052BE28);
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", __smakebuf);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _mbtowc_r);
+s32 _mbtowc_r(_reent *r, s32 *pwc, const char *s, u32 n, s32 *state) {
+    s32 dummy;
+    s32 *out = pwc;
+
+    if (pwc == NULL) {
+        out = &dummy;
+    }
+    if (s == NULL) {
+        return 0;
+    }
+    if (n == 0) {
+        return -1;
+    }
+    *out = *(u8 *)s;
+    if (*(u8 *)s == 0) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", memchr);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _Balloc);
+_Bigint *_Balloc(_reent *r, s32 k) {
+    _Bigint *rv;
+    s32 x;
 
-INCLUDE_ASM(const s32, "code_002C6F38", _Bfree);
+    if (r->_freelist == NULL) {
+        r->_freelist = _calloc_r(r, 4, 16);
+        if (r->_freelist == NULL) {
+            return NULL;
+        }
+    }
+    rv = r->_freelist[k];
+    if (rv != NULL) {
+        r->_freelist[k] = rv->next;
+    } else {
+        x = 1 << k;
+        rv = _calloc_r(r, 1, 0x14 + x * sizeof(u32));
+        if (rv == NULL) {
+            return NULL;
+        }
+        rv->k = k;
+        rv->maxwds = x;
+    }
+    rv->sign = rv->wds = 0;
+    return rv;
+}
+
+void _Bfree(_reent *r, _Bigint *v) {
+    if (v != NULL) {
+        v->next = r->_freelist[v->k];
+        r->_freelist[v->k] = v;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _multadd);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _s2b);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _hi0bits);
+s32 _hi0bits(u32 x) {
+    s32 k = 0;
 
-INCLUDE_ASM(const s32, "code_002C6F38", _lo0bits);
+    if ((x & 0xFFFF0000) == 0) {
+        k = 16;
+        x <<= 16;
+    }
+    if ((x & 0xFF000000) == 0) {
+        k += 8;
+        x <<= 8;
+    }
+    if ((x & 0xF0000000) == 0) {
+        k += 4;
+        x <<= 4;
+    }
+    if ((x & 0xC0000000) == 0) {
+        k += 2;
+        x <<= 2;
+    }
+    if ((x & 0x80000000) == 0) {
+        k++;
+        if ((x & 0x40000000) == 0) {
+            return 32;
+        }
+    }
+    return k;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _i2b);
+s32 _lo0bits(u32 *y) {
+    s32 k;
+    u32 x = *y;
+
+    if (x & 7) {
+        if (x & 1) {
+            return 0;
+        }
+        if (x & 2) {
+            *y = x >> 1;
+            return 1;
+        }
+        *y = x >> 2;
+        return 2;
+    }
+    k = 0;
+    if ((x & 0xFFFF) == 0) {
+        k = 16;
+        x >>= 16;
+    }
+    if ((x & 0xFF) == 0) {
+        k += 8;
+        x >>= 8;
+    }
+    if ((x & 0xF) == 0) {
+        k += 4;
+        x >>= 4;
+    }
+    if ((x & 3) == 0) {
+        k += 2;
+        x >>= 2;
+    }
+    if ((x & 1) == 0) {
+        k++;
+        x >>= 1;
+        if (x == 0) {
+            return 32;
+        }
+    }
+    *y = x;
+    return k;
+}
+
+_Bigint *_i2b(_reent *r, s32 i) {
+    _Bigint *b = _Balloc(r, 1);
+
+    b->x[0] = i;
+    b->wds = 1;
+    return b;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _multiply);
 
@@ -1970,7 +2735,29 @@ INCLUDE_ASM(const s32, "code_002C6F38", _pow5mult);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _lshift);
 
-INCLUDE_ASM(const s32, "code_002C6F38", __mcmp);
+s32 __mcmp(_Bigint *a, _Bigint *b) {
+    u32 *xa, *xa0, *xb, *xb0;
+    s32 i, j;
+
+    i = a->wds;
+    j = b->wds;
+    if ((i -= j) != 0) {
+        return i;
+    }
+    xa0 = a->x;
+    xa = xa0 + j;
+    xb0 = b->x;
+    xb = xb0 + j;
+    for (;;) {
+        if (*--xa != *--xb) {
+            return *xa < *xb ? -1 : 1;
+        }
+        if (xa <= xa0) {
+            break;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", __mdiff);
 
@@ -1982,31 +2769,123 @@ INCLUDE_ASM(const s32, "code_002C6F38", _d2b);
 
 INCLUDE_ASM(const s32, "code_002C6F38", _ratio);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _mprec_log10);
+double _mprec_log10(s32 dig) {
+    double v = 1.0;
+
+    if (dig < 24) {
+        return D_0054B930[dig];
+    }
+    while (dig > 0) {
+        v *= 10.0;
+        dig--;
+    }
+    return v;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", isinf);
 
 INCLUDE_ASM(const s32, "code_002C6F38", isnan);
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sread);
+s32 __sread(void *cookie, char *buf, s32 n) {
+    FILE *fp = cookie;
+    s32 result;
 
-INCLUDE_ASM(const s32, "code_002C6F38", __swrite);
+    result = _read_r(fp->_data, fp->_file, buf, n);
+    if (result >= 0) {
+        fp->_offset += result;
+    } else {
+        fp->_flags &= ~0x1000;
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sseek);
+s32 __swrite(void *cookie, const char *buf, s32 n) {
+    FILE *fp = cookie;
 
-INCLUDE_ASM(const s32, "code_002C6F38", __sclose);
+    if (fp->_flags & 0x100) {
+        _lseek_r(fp->_data, fp->_file, 0, 2);
+    }
+    fp->_flags &= ~0x1000;
+    return _write_r(fp->_data, fp->_file, buf, n);
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _write_r);
+long __sseek(void *cookie, s32 offset, s32 whence) {
+    FILE *fp = cookie;
+    long result;
+
+    if ((result = _lseek_r(fp->_data, fp->_file, offset, whence)) == -1) {
+        fp->_flags &= ~0x1000;
+    } else {
+        fp->_flags |= 0x1000;
+        fp->_offset = result;
+    }
+    return result;
+}
+
+s32 __sclose(void *cookie) {
+    FILE *fp = cookie;
+
+    return _close_r(fp->_data, fp->_file);
+}
+
+long _write_r(_reent *r, s32 fd, const char *buf, s32 n) {
+    long result;
+
+    D_00552178 = 0;
+    if ((result = write(fd, buf, n)) == -1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "code_002C6F38", _calloc_r);
 
-INCLUDE_ASM(const s32, "code_002C6F38", _close_r);
+s32 _close_r(_reent *r, s32 fd) {
+    s32 result;
 
-INCLUDE_ASM(const s32, "code_002C6F38", _fstat_r);
+    D_00552178 = 0;
+    result = close(fd);
+    if (result == -1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
 
-INCLUDE_ASM(const s32, "code_002C6F38", _lseek_r);
+s32 _fstat_r(_reent *r, s32 fd, void *buf) {
+    s32 result;
 
-INCLUDE_ASM(const s32, "code_002C6F38", _read_r);
+    D_00552178 = 0;
+    result = fstat(fd, buf);
+    if (result == -1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
+
+long _lseek_r(_reent *r, s32 fd, s32 offset, s32 whence) {
+    long result;
+
+    D_00552178 = 0;
+    result = lseek(fd, offset, whence);
+    if (result == -1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
+
+long _read_r(_reent *r, s32 fd, char *buf, s32 n) {
+    long result;
+
+    D_00552178 = 0;
+    if ((result = read(fd, buf, n)) == -1 && D_00552178 != 0) {
+        r->_errno = D_00552178;
+    }
+    return result;
+}
+
+/* The handwritten syscall stubs below start 16 bytes past the end of the C
+   code, so the padding has to come from here. */
+__asm__("nop\nnop\nnop\nnop\n");
 
 INCLUDE_ASM(const s32, "code_002C6F38", RFU000_FullReset);
 
