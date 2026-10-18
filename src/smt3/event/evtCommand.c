@@ -1296,20 +1296,17 @@ s32 evtCommand_EFFMG1_POS(void)
 
     effect = evtSearchBasic(7, scrGetIntPara(0));
     if (effect == NULL) {
-        datDebugPrintf("EFFMG1_POS mg1 ID error!
-");
+        datDebugPrintf("EFFMG1_POS mg1 ID error!\n");
         return 1;
     }
     point0 = evtSearchBasic(7, scrGetIntPara(1));
     point1 = evtSearchBasic(7, scrGetIntPara(2));
     if (point0 == NULL || point1 == NULL) {
-        datDebugPrintf("EFFMG1_POS point ID not found!
-");
+        datDebugPrintf("EFFMG1_POS point ID not found!\n");
         return 1;
     }
     if (dds3EffectObjectSetMG12Pos(effect, point0, point1, NULL, NULL) == 0) {
-        datDebugPrintf("EFFMG1_POS set error!
-");
+        datDebugPrintf("EFFMG1_POS set error!\n");
         return 1;
     }
     return 1;
@@ -1325,8 +1322,7 @@ s32 evtCommand_EFFMG2_POS(void)
 
     effect = evtSearchBasic(7, scrGetIntPara(0));
     if (effect == NULL) {
-        datDebugPrintf("EFFMG2_POS mg2 ID error!
-");
+        datDebugPrintf("EFFMG2_POS mg2 ID error!\n");
         return 1;
     }
     point0 = evtSearchBasic(7, scrGetIntPara(1));
@@ -1334,13 +1330,11 @@ s32 evtCommand_EFFMG2_POS(void)
     point2 = evtSearchBasic(7, scrGetIntPara(3));
     point3 = evtSearchBasic(7, scrGetIntPara(4));
     if (point0 == NULL || point1 == NULL || point2 == NULL || point3 == NULL) {
-        datDebugPrintf("EFFMG2_POS point ID not found!
-");
+        datDebugPrintf("EFFMG2_POS point ID not found!\n");
         return 1;
     }
     if (dds3EffectObjectSetMG12Pos(effect, point0, point1, point2, point3) == 0) {
-        datDebugPrintf("EFFMG2_POS set error!
-");
+        datDebugPrintf("EFFMG2_POS set error!\n");
         return 1;
     }
     return 1;
@@ -1434,14 +1428,12 @@ s32 evtCommand_EFFECT_PATH_MOVE(void)
 
     effect = evtSearchBasic(7, scrGetIntPara(0));
     if (effect == NULL) {
-        datDebugPrintf("EFFECT_PATH_MOVE not found eff!
-");
+        datDebugPrintf("EFFECT_PATH_MOVE not found eff!\n");
         return 1;
     }
     path = evtSearchBasic(0x10, scrGetIntPara(1));
     if (path == NULL) {
-        datDebugPrintf("EFFECT_PATH_MOVE not found path!
-");
+        datDebugPrintf("EFFECT_PATH_MOVE not found path!\n");
         return 1;
     }
     evtPathLinkAndMake(path, effect);
@@ -1455,8 +1447,7 @@ s32 evtCommand_EFFECT_PATH_WAIT(void)
     s32 stat;
 
     if (basic == NULL) {
-        datDebugPrintf("EFFECT_PATH_WAIT not found eff!
-");
+        datDebugPrintf("EFFECT_PATH_WAIT not found eff!\n");
         return 1;
     }
     stat = evtCheckPathStat(basic);
@@ -1540,8 +1531,7 @@ s32 evtCommand_CALL_NEXT(void)
     s32 para2 = scrGetIntPara(2);
     s32 command;
 
-    printf("CALL_NEXT(%d,%d,%d)
-", para0, para1, para2);
+    printf("CALL_NEXT(%d,%d,%d)\n", para0, para1, para2);
     command = scrGetIntPara(1);
     fldSetNextField(command, scrGetIntPara(2));
     return 1;
@@ -1650,13 +1640,11 @@ s32 evtCommand_FIELD_BE(void)
     s32 event;
     s32 resource;
 
-    sdfPrintf("FIELD_BE start
-");
+    sdfPrintf("FIELD_BE start\n");
     event = scrGetIntPara(0);
     resource = scrGetIntPara(1);
     evtRegistBEField(event, resource);
-    sdfPrintf("FIELD_BE end
-");
+    sdfPrintf("FIELD_BE end\n");
     return 1;
 }
 
@@ -1704,10 +1692,8 @@ s32 evtCommand_FIELD_CLS(void)
     while (sdfDelayedResrcCheck()) {
     }
     dds3DrawFlag |= 0x2000000;
-    printf("event stage shutdown !!
-");
-    datDebugPrintf("field shutdown.
-");
+    printf("event stage shutdown !!\n");
+    datDebugPrintf("field shutdown.\n");
     return 1;
 }
 
@@ -1720,20 +1706,16 @@ s32 evtCommand_FIELD_CLS_STOP(void)
     while (sdfDelayedResrcCheck()) {
     }
     dds3DrawFlag |= 0x2000000;
-    printf("event stage shutdown2 !!
-");
-    datDebugPrintf("field shutdown2.
-");
+    printf("event stage shutdown2 !!\n");
+    datDebugPrintf("field shutdown2.\n");
     return 1;
 }
 
 s32 evtCommand_UNIT_CLS(void)
 {
     evtFreeAllUnit();
-    printf("unit all clear !!
-");
-    datDebugPrintf("unit all clear.
-");
+    printf("unit all clear !!\n");
+    datDebugPrintf("unit all clear.\n");
     return 1;
 }
 
@@ -1742,10 +1724,8 @@ s32 evtCommand_UNIT_CLS_STOP(void)
     evtFreeAllUnit();
     while (sdfDelayedResrcCheck()) {
     }
-    printf("unit all clear2 !!
-");
-    datDebugPrintf("unit all clear2.
-");
+    printf("unit all clear2 !!\n");
+    datDebugPrintf("unit all clear2.\n");
     return 1;
 }
 
@@ -1779,19 +1759,16 @@ s32 evtCommand_CAM_PATH_MOVE(void)
         camera = evtSearchBasic(4, scrGetIntPara(0));
     }
     if (camera == NULL) {
-        printf("CAM_PATH_MOVE error!
-");
+        printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
     path = evtSearchBasic(0x10, scrGetIntPara(1));
     if (path == NULL) {
-        printf("CAM_PATH_MOVE error!
-");
+        printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
     if (evtPathLinkAndMake(path, camera) == 0) {
-        printf("CAM_PATH_MOVE error!
-");
+        printf("CAM_PATH_MOVE error!\n");
         return 1;
     }
     return 1;
