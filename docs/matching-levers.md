@@ -30,6 +30,11 @@ it was measured on DDS and not on this ELF.
 | the same field stores duplicated per `switch` case | write the full store list in each case and let gcc merge the tail. Hoisting the values into locals does not match |
 | every arm reaching one shared epilogue at the end | use an `else if` chain. An early `return` per arm gives each arm its own epilogue copy |
 | a jump table | write a `switch`. The jtbl entry order gives case to label, and the label order inside the body gives the source order of the cases, which is often not ascending |
+| two or three equality tests on one value, bodies placed after the chain | a `switch`, not an `if`/`else if` chain, which inverts the first branch |
+| separate `beqz` and `slti` | separate `if` statements. `x != 0 && x < C` is folded into one range test, an `addiu -1` and an `sltiu` |
+| two `andi`s and two branches on one field | nested `if`s. `(x & 1) && (x & 2)` is folded to `(x & 3) == 3` |
+| a three-case `switch` testing something other than the middle case first | an explicit `goto` dispatch. gcc 2.96's `balance_case_nodes` splits exactly three nodes at the middle one, so a `switch` over 1, 2 and 3 always tests 2 first |
+| `j callee` with the full epilogue in front | make the call the last unconditional statement: invert a trailing `if` into an early `return` so the call is not inside it |
 
 ## Addressing and types
 
@@ -42,13 +47,47 @@ it was measured on DDS and not on this ELF.
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong.
 - Holding a struct address in a local (`nbCamera_t *p = &pNbCamera;`)
-  reproduces retail keeping it in a saved register. Assigning it after a
-  leading call keeps it out of `$16`.
+  reproduces retail keeping it in a saved register. Placement matters:
+  initialising it at the declaration puts an `addiu` in the prologue and
+  spends a saved register, while declaring it and assigning just before the
+  first use does not. Assigning it after a leading call keeps it out of `$16`.
 - Giving a void function an `s32` return type with no `return` statement
-  blocks the sibling call where retail uses `jal` and a full epilogue.
+  blocks the sibling call where retail uses `jal` and a full epilogue. It also
+  collapses a duplicated epilogue: one function went from ten differing words
+  to exact on that change alone.
 - An ignored return value still reserves `$2` across the call. When retail
   skips `$2` for the address temp after a `jal`, declare the callee `s32`
   rather than `void`.
+- Subscript the whole expression instead of caching an element address.
+  `e->data->form[i].stat` matches where `form = &e->data->form[i];` then
+  `form->stat` swaps the `addu` operands and shifts a register. The converse
+  holds inside a loop retail re-reads: go through the outer pointer each
+  iteration, since a cached local gets hoisted out and costs an instruction.
+- `addu` operand order follows the cast order: `(u8 *)ofs + (u32)base` emits
+  `addu rd, ofs, base`, and `(u8 *)base + ofs` emits the reverse.
+- When retail biases a base once and stores at `0(reg)`, the induction
+  variable is a pointer to the field, not to the struct. A struct pointer with
+  a constant displacement gives `sw $0, 0xD0(reg)` instead.
+- An induction pointer can be based one byte past its record: reading the
+  weight at `p[-1]` and the item at `p[0]` matched where walking a
+  `{rate; item}` struct lost 20 words.
+- Split a packed argument into named locals in retail's computation order,
+  `type = joken >> 16; para = joken & 0xFFFF;`, rather than using the
+  expressions at their use sites. The parameter has to be `u32`, not an `s32`
+  cast where it is read.
+- A local assigned before the first call lands in a callee-saved register.
+  Moving `sum = 0;` above a leading `jal` shifts every later allocation into
+  place.
+- A weighted-table scan compares before it accumulates: `if (r < sum + *p)
+  return i; sum += *p;` gives retail's temp, compare, then copy. Accumulating
+  first misses by several words.
+- Pack a colour word through explicit `s32` locals assigned in `r`, `g`, `b`
+  order. The same expression with the `(s32)(f * 128.0f)` conversions inline
+  gives the right registers and `or` chain but a different mul and cvt
+  schedule.
+- Pick the VU0 load by how retail forms the address:
+  `SDF_VU0_LOADVECTOR(ptr)` where it computes the address into a register,
+  `SDF_VU0_LOADVECTOR_MEMOPS` where it addresses the frame directly.
 
 ## Function-local constant arrays
 
@@ -76,6 +115,11 @@ Adjacent constant stores come out in reverse source order, so swapping them
 is the first thing to try on a two-word diff. A short-circuit `||` with one
 store beats an if/else chain that stores in each arm.
 
+Where a handful of constant stores differ only in order, permute them
+mechanically rather than reasoning about it. A loop driving
+`check_unit.py --func <name>` costs about a second per permutation; two
+functions turned on the first of 24 permutations and on a rotation of three.
+
 ## Check the whole unit, not the function you edited
 
 ee-gcc's output for one function can change with code earlier in the file, so
@@ -99,8 +143,11 @@ These have been ruled out repeatedly and are not worth a second attempt:
   different order with no semantic difference to steer.
 - Register allocation that needs one register fewer than the C uses, shifting
   every later allocation. Change the source shape or stop.
-- `bnel` and the other branch-likely forms, which duplicate the epilogue into
-  the delay slot. ee-gcc 2.96 does not emit them from C here.
+- An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits
+  the plain branch. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
+  ordinary C readily, 42 times in `field/fldDraw` and 126 in
+  `newbattle/nbMakePacket`, so a `bnel` in the retail code is not a reason to
+  skip a function. Only this one use of it has resisted.
 - A frameless conditional sibling call. ee-gcc always saves `$ra` for a
   sibcall.
 - Zero-extending a byte with a `sll 24`, `srl 24` pair. ee-gcc emits
@@ -117,10 +164,26 @@ A function whose body is mostly inline assembly is refused by the production
 report anyway, at 8 instructions and more than half the body, so writing one
 to force a match earns nothing. See [Reading progress](progress.md).
 
-## Two functions that cannot be written in C
+## Functions that cannot be written in C
 
 `fldSetTerminalState` branches into `fldSetTerminalIndex` across the symbol
 boundary and computes a value in the delay slot that the second function uses
 without setting. The second has a register live on entry, so no per-function
 compile can produce either. They are one cross-jumping routine the IDB has
 split into two symbols; see [TU recovery](tu-recovery.md).
+
+Four more in `newbattle/nbMakePacket`, each blocked by something outside the
+function body:
+
+- `nbInitPlayer` needs three separate symbols at `test_skilllist`, `+0xF0`
+  and `+0x100`. gcc 2.96 folds anything derived from one symbol into a base
+  plus adds, so this is a data split, not a source change.
+- `nbLoadMotionByIndex` has two byte-identical arms that gcc cross-jumps. The
+  retail source must have differed in a way that still folds to the same
+  instructions.
+- `Hatudo` and `nbE915_Test` call `nbGetEventForm` with no argument, which
+  only an unprototyped declaration produces, and that function is defined
+  with a prototype in the same unit. An unprototyped `extern` does work for
+  callers placed above the definition, which matters if the unit is split.
+- `nbMakaDispOn` needs `GetMakaProcessData` to take an argument, as the HD
+  reconstruction shows, but it is defined `(void)` in this unit.
