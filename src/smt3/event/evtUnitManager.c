@@ -135,7 +135,7 @@ void evtGetUnitDirVector(evtUnit_t *unit) {
 
     SDF_VU0_LOADVECTOR(&unit->effObj->poseset->rot);
     ToMatrix();
-    SDF_MOT_STORE_VF30(v);
+    SDF_VU0_STORE_ROW2(v);
     v[1] = 0.0f;
     v[3] = 1.0f;
     SDF_VU0_LOADVECTOR(v);
@@ -530,7 +530,7 @@ s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
 
     SDF_VU0_LOADVECTOR(quat);
     ToMatrix();
-    VU0_COPY_VF30_TO_VF10();
+    SDF_VU0_GET_ROW2();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR_V0(-1.0f);

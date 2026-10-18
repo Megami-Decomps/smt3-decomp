@@ -1058,7 +1058,7 @@ What the bodies establish: `SDF_VU0_LOADVECTOR` writes the first working
 vector, `SDF_VU0_ADDVECTOR` does `A = A + B`, `SDF_VU0_INNERPRODUCT` returns
 `Dot(A, B)` and `SDF_VU0_GETVECTOR_Y` returns `vct_A.y`. That fixes A, B and C
 onto `vf10`, `vf11` and `vf12`, which is the convention the retail inlines
-already follow. 94 macros carry these names, covering about 3,000 call sites.
+already follow. 116 macros carry these names, covering about 3,100 call sites.
 
 The other prefixes are this repository's own, for operations the engine library
 does not name:
@@ -1073,6 +1073,16 @@ does not name:
 
 A `VU0_` name is therefore a signal that the operation was reconstructed here
 and may yet turn out to have an engine name.
+
+The library is larger than the call sites show. `libsdf.c` in the HD sources
+declares 133 of these helpers, and the matrix bank is addressed by row:
+`LOAD_ROW0` through `_ROW3` load `vf28`-`vf31`, with `STORE_ROW`, `SET_ROW`
+(row from the working vector) and `GET_ROW` beside them. Any macro naming one
+of those registers is one of these, so it carries the engine name. Thirty
+engine names are still unclaimed, among them `TRANSLATE`, `SCALE_XYZ` and
+`SCALE_XYZ_REV`: the HD bodies for the matrix side are stubs, so nothing yet
+decides which of our matrix macros is which, and a guess there would assert
+provenance we do not have.
 
 A variant keeps the engine name. Where two macros hold the same instructions
 and differ only in the operand section, the engine name carries both, with a
@@ -1119,7 +1129,7 @@ names rather than one name and an `#undef`:
 | `SDF_VU0_SCALEVECTOR_V0`, `SDF_VU0_SCALEVECTOR_B_V0`, `SDF_VU0_SETVECTOR_Y_V0` | the scalar reaches vf2.x through `$2`, not a register cc1 picks |
 | `SDF_VU0_STOREMATRIX_NOMEM`, `SDF_VU0_STOREVECTOR_NOMEM`, `SDF_VU0_STOREVECTOR_B_NOMEM` | the same stores without the `memory` clobber |
 | `SDF_VU0_COPYVECTOR_MEMOPS`, `SDF_VU0_LOADMATRIX_B_MEMOPS` | the memory is a declared `"m"` operand rather than a clobber |
-| `SDF_MOT_STORE_VF28`, `_VF29`, `_VF30` | these clobber memory; the `_NOMEM` forms beside them do not |
+| `SDF_VU0_STORE_ROW0`, `_VF29`, `_VF30` | these clobber memory; the `_NOMEM` forms beside them do not |
 | `EE_SQRT_F32_SCHED` | not `volatile`, so cc1 may hoist the surrounding compares |
 | `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
@@ -1192,7 +1202,7 @@ Ten functions in three units are byte-identical through these macros:
 
 Those exercise `SDF_VU0_COPYVECTOR`, `SDF_VU0_LOADVECTOR`,
 `SDF_VU0_STOREVECTOR`,
-`VU0_STORE_VF10_TO`, `SDF_VU0_LOADVECTOR_B`, `SDF_VU0_LOADMATRIX`,
+`SDF_VU0_STOREVECTOR_MEMOPS`, `SDF_VU0_LOADVECTOR_B`, `SDF_VU0_LOADMATRIX`,
 `SDF_VU0_COPYVECTOR_A_TO_B`, `SDF_VU0_ADDVECTOR`, `SDF_VU0_SUBVECTOR`,
 `SDF_VU0_MULVECTOR`, `SDF_VU0_SCALEVECTOR`, `SDF_VU0_SCALEVECTOR_B`,
 `SDF_VU0_APPLYMATRIX_XYZ1`, `SDF_VU0_PERSVECTOR`, `SDF_VU0_INNERPRODUCT`,

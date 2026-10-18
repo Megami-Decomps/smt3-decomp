@@ -973,7 +973,7 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     SDF_VU0_LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
-    VU0_LOAD_VF10_FROM(*(const Quad *)vec);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
@@ -992,7 +992,7 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     SDF_VU0_LOADMATRIX(aProjMatrix);
     MultMatrixRev(&dds3ScreenParam2.TM);
     SDF_VU0_COPYMATRIX_A_TO_B();
-    VU0_LOAD_VF10_FROM(*(const Quad *)vec);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam2.scale);
@@ -1014,7 +1014,7 @@ void fldPoint3To2_B(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_VF10_FROM(*(const Quad *)vec);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)vec);
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);

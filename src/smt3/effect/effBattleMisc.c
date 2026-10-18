@@ -224,7 +224,7 @@ void effBTLPartGetRotateMatrixPtr(effBTLAimParams_t *request, sdfMatrix4_t *out)
     if (request->aimMode == 4 || request->directionMode == 9) {
         LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
-        VU0_COPY_VF0_TO_VF31();
+        SDF_VU0_RESET_ROW3();
     } else {
         if (request->aimMode == 5 || request->aimMode == 3 || request->directionMode == 8 || request->directionMode == 10) {
             tilt = 3.14159265f / 2.0f;

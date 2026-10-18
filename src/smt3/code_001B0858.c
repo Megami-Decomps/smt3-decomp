@@ -398,7 +398,7 @@ void func_001B0B90(dds3Spline_t *primitive, s32 recordIndex, f32 t)
         vertex[1] = a[1] + (b[1] - a[1]) * t;
         vertex[2] = a[2] + (b[2] - a[2]) * t;
     }
-    VU0_LOAD_VF10_FROM(*(u128 *)vertex);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)vertex);
 }
 
 
@@ -833,9 +833,9 @@ void nb_1B2340(u32 mask)
     sdfVector4_t center;
 
     func_001B2158(mask);
-    VU0_STORE_VF10_TO(center);
+    SDF_VU0_STOREVECTOR_MEMOPS(center);
     func_001B2270(&center, mask);
-    VU0_LOAD_VF10_FROM(center);
+    SDF_VU0_LOADVECTOR_MEMOPS(center);
 }
 
 INCLUDE_ASM(const s32, "code_001B0858", nbCameraState_Start_Set);
@@ -1207,9 +1207,9 @@ f32 nbCameraGroupGetSphere(nbFormation_t *pFormation)
     f32 length;
 
     effBTLModelGroupGetCenter(pFormation);
-    VU0_STORE_VF10_TO(center);
+    SDF_VU0_STOREVECTOR_MEMOPS(center);
     length = nbCameraGroupGetMaxLength(&center, pFormation);
-    VU0_LOAD_VF10_FROM(center);
+    SDF_VU0_LOADVECTOR_MEMOPS(center);
     return length;
 }
 

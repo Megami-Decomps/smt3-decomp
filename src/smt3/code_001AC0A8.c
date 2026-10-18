@@ -197,7 +197,7 @@ void effDebugPointDraw(QuadF32 *pos)
     sdfDrawTagInit(tag);
     SDF_VU0_LOADVECTOR(pos);
     effScreenOffset();
-    VU0_STORE_VF10_TO(screen);
+    SDF_VU0_STOREVECTOR_MEMOPS(screen);
     point.x = (s32)screen.components[0] - 0x700;
     point.y = ((s32)screen.components[1] << 1) - 0xF20;
     sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + 0x7000, point.y * 8 + 0x7900,
@@ -218,7 +218,7 @@ void effDebugPointDraw2(QuadF32 *pos, u32 mode)
     sdfDrawTagInit(tag);
     SDF_VU0_LOADVECTOR(pos);
     effScreenOffset();
-    VU0_STORE_VF10_TO(screen);
+    SDF_VU0_STOREVECTOR_MEMOPS(screen);
     point.x = (s32)screen.components[0] - 0x700;
     point.y = ((s32)screen.components[1] << 1) - 0xF20;
     sdfDrawTagLink(tag, dds3PrimFrameRect(point.x * 16 + 0x7000, point.y * 8 + 0x7900,

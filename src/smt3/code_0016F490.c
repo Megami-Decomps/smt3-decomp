@@ -708,7 +708,7 @@ void effBTLSys_Shock_Draw(effBTLSysTrack_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
     effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
     hEffect->frame++;
@@ -781,7 +781,7 @@ void effBTLSys_Freeze_Draw(effBTLSysPart_t *hEffect)
         hEffect->pFormation->hunit->owner->flags |= 2;
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
     dds3EffectPartDraw(hEffect->hPart);
     hEffect->frame++;
@@ -850,7 +850,7 @@ void effBTLSys_Sleep_Draw(effBTLSysPart_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFB97D);
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
     dds3EffectPartDraw(hEffect->hPart);
     hEffect->frame++;
@@ -919,7 +919,7 @@ void effBTLSys_Panic_Draw(effBTLSysPart_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x8058B8FF);
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
     dds3EffectPartDraw(hEffect->hPart);
     hEffect->frame++;
@@ -988,7 +988,7 @@ void effBTLSys_Bind_Draw(effBTLSysTrack_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x8080FFD7);
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
     effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
     hEffect->frame++;
@@ -1069,7 +1069,7 @@ void effBTLSys_Close_Draw(effBTLSysClose_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
     }
     effBTLModelGetMarkPosition3(hEffect->hModel, 2);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
     dds3EffectPartSetPosition(hEffect->hPart2, &position);
     dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hEffect->hPart))->pHandle);
@@ -1147,7 +1147,7 @@ void effBTLSys_Poison_Draw(effBTLSysPoison_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80A53A6C);
     }
     effBTLModelGetMarkPosition3(hEffect->hModel, 2);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
     dds3EffectPartDraw(hEffect->hPart);
     hEffect->frame++;
@@ -1223,7 +1223,7 @@ void effBTLSys_Charm_Draw(effBTLSysPart2_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x808064FF);
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
     dds3EffectPartSetPosition(hEffect->hPart2, &position);
     dds3EffectPartDraw(hEffect->hPart);
@@ -1297,7 +1297,7 @@ void effBTLSys_Paralyze_Draw(effBTLSysTrack_t *hEffect)
         effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80589BFF);
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
     effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
     hEffect->frame++;
@@ -1631,7 +1631,7 @@ void effBTLSys_Stone_Dead_Draw(effBTLSysPart3_t *hEffect)
         hEffect->pFormation->hunit->owner->flags |= 2;
     }
     effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
-    VU0_STORE_VF10_TO(position);
+    SDF_VU0_STOREVECTOR_MEMOPS(position);
     dds3EffectPartSetPosition(hEffect->hPart3, &position);
     dds3EffectPartSetPosition(hEffect->hPart2, &position);
     dds3EffectPartSetPosition(hEffect->hPart, &position);
@@ -2909,16 +2909,16 @@ void dds3EffectPartModelSetScale(void *hData, f32 scale)
     f32 v[3];
 
     v[0] = v[1] = v[2] = scale;
-    VU0_LOAD_VF10_FROM(v[0]);
+    SDF_VU0_LOADVECTOR_MEMOPS(v[0]);
     mdlSetScale(hData);
 }
 
 void dds3EffectPartModelSetRotateMatrix(mdlObj_t *hModel, sdfMatrix4_t *pMatrix)
 {
     SDF_VU0_LOADMATRIX(pMatrix);
-    SDF_MOT_STORE_VF28(&hModel->inner->tm.m[0]);
-    SDF_MOT_STORE_VF29(&hModel->inner->tm.m[4]);
-    SDF_MOT_STORE_VF30(&hModel->inner->tm.m[8]);
+    SDF_VU0_STORE_ROW0(&hModel->inner->tm.m[0]);
+    SDF_VU0_STORE_ROW1(&hModel->inner->tm.m[4]);
+    SDF_VU0_STORE_ROW2(&hModel->inner->tm.m[8]);
 }
 
 void dds3EffectPartModelSetColor(mdlObj_t *hModel, u32 color)

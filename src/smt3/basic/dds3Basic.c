@@ -211,7 +211,7 @@ void dds3MakeMatrix(const sdfVector4_t *scale, const sdfVector4_t *rotation,
     VU0_SCALE_MATRIX_ROWS_VF10();
     SDF_VU0_LOADVECTOR(translation);
     SDF_VU0_VECTOR_W_SET_ONE();
-    VU0_COPY_VF10_TO_VF31();
+    SDF_VU0_SET_ROW3();
 }
 
 /* Load the cached matrix, rebuilding it only when a pose setter invalidated it. */

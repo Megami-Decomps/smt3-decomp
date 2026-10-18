@@ -1330,7 +1330,7 @@ void dds3RotationArc(void)
 
     SDF_VU0_INNERPRODUCT(dot);
     if (dot >= 0.9999f) {
-        VU0_LOAD_VF10_FROM(*(u128 *)identity);
+        SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)identity);
         return;
     }
 

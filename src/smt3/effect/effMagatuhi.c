@@ -1007,9 +1007,9 @@ void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *work, s32 index) {
     direction[1] = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
-    VU0_LOAD_VF10_FROM(*(u128 *)direction);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF10_TO(*(u128 *)direction);
+    SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
@@ -1731,9 +1731,9 @@ void effMagaSmokePartInit(effMagatuhiDriftWork_t *work, s32 index) {
     direction[1] = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[2] = random + random;
-    VU0_LOAD_VF10_FROM(*(u128 *)direction);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
     SDF_VU0_NORMALIZE();
-    VU0_STORE_VF10_TO(*(u128 *)direction);
+    SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)direction);
     particle->position[0] = radius * direction[0];
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];

@@ -304,7 +304,7 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
         SDF_VU0_SETVECTOR_Z(evtHokanFogParam[2]);
         evtSetBlendVecW(evtHokanFogParam[3]);
     }
-    VU0_SCALE_VF10_BITS(1.0f - t);
+    SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
     SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
         SDF_VU0_SETVECTOR_X(b->vec[0]);
@@ -317,7 +317,7 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
         SDF_VU0_SETVECTOR_Z(evtHokanFogParam[2]);
         evtSetBlendVecW(evtHokanFogParam[3]);
     }
-    VU0_SCALE_VF10_BITS(t);
+    SDF_VU0_SCALEVECTOR_BITS(t);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_GETVECTOR_X(out->vec[0]);
     SDF_VU0_GETVECTOR_Y(out->vec[1]);
@@ -328,14 +328,14 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
     } else {
         eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
-    VU0_SCALE_VF10_BITS(1.0f - t);
+    SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
     SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
         eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
     } else {
         eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
-    VU0_SCALE_VF10_BITS(t);
+    SDF_VU0_SCALEVECTOR_BITS(t);
     SDF_VU0_ADDVECTOR();
     out->color = eePackRGBAWord(128.0f);
 }

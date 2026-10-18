@@ -1518,21 +1518,21 @@ void OuterProduct(void *dst, const void *a, const void *b) {
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
     SDF_VU0_LOADVECTOR(basisOrigin);
-    VU0_COPY_VF10_TO_VF31();
+    SDF_VU0_SET_ROW3();
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(directionPoint);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
-    VU0_COPY_VF10_TO_VF30();
+    SDF_VU0_SET_ROW2();
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(up);
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
-    VU0_COPY_VF10_TO_VF28();
+    SDF_VU0_SET_ROW0();
     SDF_VU0_COPYVECTOR_A_TO_B();
-    VU0_COPY_VF30_TO_VF10();
+    SDF_VU0_GET_ROW2();
     SDF_VU0_OUTERPRODUCT();
-    VU0_COPY_VF10_TO_VF29();
+    SDF_VU0_SET_ROW1();
     ReverseMatrix();
 }
 
@@ -2563,7 +2563,7 @@ void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet, sdf3DScreenParam_t *
     SDF_VU0_STOREVECTOR(packet->vecB);
     SDF_VU0_LOADMATRIX(transformMatrix);
     ReverseMatrix();
-    VU0_COPY_VF31_TO_VF10();
+    SDF_VU0_GET_ROW3();
     SDF_VU0_STOREVECTOR(packet->vecC);
     SDF_VU0_STOREVECTOR(node->inverseOrigin);
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;

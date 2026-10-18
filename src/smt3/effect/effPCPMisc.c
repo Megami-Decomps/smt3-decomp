@@ -3362,7 +3362,7 @@ void effPCPHwave01Draw(EffPCPSpawnOnceWork *work) {
     dds3EffectPartSetColor(work->secondaryHandle, work->color);
     mdlLink(obj, D_002F69B8);
     sdfModelGetMarkPos(obj->inner, 1);
-    VU0_STORE_VF10_TO(vec);
+    SDF_VU0_STOREVECTOR_MEMOPS(vec);
     dds3EffectPartSetPosition(work->secondaryHandle, &vec);
     dds3EffectPartDraw(work->secondaryHandle);
 }

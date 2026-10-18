@@ -1034,7 +1034,7 @@ s32 nbClipEffectNum(s32 screenPosition[4])
     SDF_VU0_LOADMATRIX(D_002FA240);
     SDF_VU0_COPYMATRIX_A_TO_B();
     ReverseMatrix();
-    VU0_COPY_VF30_TO_VF10();
+    SDF_VU0_GET_ROW2();
     SDF_VU0_NORMALIZE();
     SDF_VU0_INNERPRODUCT(forwardDot);
     if (forwardDot <= 0.5f)

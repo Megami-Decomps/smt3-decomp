@@ -102,7 +102,7 @@ void Eff_ModelTrackPolyGetMarkPosition(EffModelTrackPoly_t *work)
     EffTrackPolyModelObject_t *object = work->params.object;
 
     sdfModelGetMarkPos(object->model, work->params.mark0);
-    VU0_STORE_VF10_TO(pair[0]);
+    SDF_VU0_STOREVECTOR_MEMOPS(pair[0]);
     sdfModelGetMarkPos(object->model, work->params.mark1);
     SDF_VU0_STOREVECTOR(&pair[1]);
     dds3HermitianTrackPolySetVertex(work->trackPoly, (const u128 *)pair);
@@ -222,11 +222,11 @@ void Eff_HermitianSpline(f32 (*p)[4], f32 t)
     SDF_VU0_LOADVECTOR(h[1]);
     SDF_VU0_LOADVECTOR_B(tan[0]);
     SDF_VU0_MULVECTOR();
-    VU0_ADD_VF12_VF10();
+    SDF_VU0_ADDVECTOR_C_A();
     SDF_VU0_LOADVECTOR(h[2]);
     SDF_VU0_LOADVECTOR_B(tan[1]);
     SDF_VU0_MULVECTOR();
-    VU0_ADD_VF12_VF10();
+    SDF_VU0_ADDVECTOR_C_A();
     SDF_VU0_LOADVECTOR(h[3]);
     SDF_VU0_LOADVECTOR_B(p[2]);
     SDF_VU0_MULVECTOR();
@@ -540,7 +540,7 @@ void effSwordTrackRecord(effSwordTrack_t *work)
     QuadF32 points[2];
 
     sdfModelGetMarkPos(object->model, work->mark0);
-    VU0_STORE_VF10_TO(points[0]);
+    SDF_VU0_STOREVECTOR_MEMOPS(points[0]);
     sdfModelGetMarkPos(object->model, work->mark1);
     SDF_VU0_STOREVECTOR(&points[1]);
     dds3HermitianTrackPolySetVertex(work->trackPoly, (u128 *)points);

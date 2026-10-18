@@ -42,20 +42,20 @@ typedef struct {
  * the plain forms take an address already in a register. */
 #define SDF_VU0_LOADVECTOR(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (src))
-#define VU0_LOAD_VF10_FROM(lvalue) __asm__ volatile ( \
+#define SDF_VU0_LOADVECTOR_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf10, %0\n\t.set reorder" : : "m" (lvalue))
 #define SDF_VU0_STOREVECTOR(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
-#define VU0_STORE_VF10_TO(lvalue) __asm__ volatile ( \
+#define SDF_VU0_STOREVECTOR_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf10, %0\n\t.set reorder" : "=m" (lvalue))
 
 #define SDF_VU0_LOADVECTOR_B(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (src))
-#define VU0_LOAD_VF11_FROM(lvalue) __asm__ volatile ( \
+#define SDF_VU0_LOADVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, %0\n\t.set reorder" : : "m" (lvalue))
 #define SDF_VU0_STOREVECTOR_B(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf11, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
-#define VU0_STORE_VF11_TO(lvalue) __asm__ volatile ( \
+#define SDF_VU0_STOREVECTOR_B_MEMOPS(lvalue) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf11, %0\n\t.set reorder" : "=m" (lvalue))
 
 /* Four quadwords between memory and the matrix bank vf28-vf31. */
@@ -99,10 +99,10 @@ typedef struct {
     "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
     : "=&r" (ps2Bits) : "f" (f)); } while (0)
 /* The same scale from a GPR that already holds the binary32 bits. */
-#define VU0_SCALE_VF10_BITS(r) __asm__ volatile ( \
+#define SDF_VU0_SCALEVECTOR_BITS(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
     : : "r" (r))
-#define VU0_SCALE_VF11_BITS(r) __asm__ volatile ( \
+#define SDF_VU0_SCALEVECTOR_B_BITS(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2.ni %0, vf2\n\tvmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
     : : "r" (r))
 #define VU0_SET_VF2X(r) __asm__ volatile ( \
@@ -307,7 +307,7 @@ typedef struct {
 #define SDF_VU0_ADDVECTOR_A_C() __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyzw vf10, vf10, vf12\n\t.set reorder")
 
-#define VU0_ADD_VF12_VF10() __asm__ volatile ( \
+#define SDF_VU0_ADDVECTOR_C_A() __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyzw vf12, vf12, vf10\n\t.set reorder")
 
 /* SDK input-address-only store: audited VU pipelines only. Unlike the
@@ -432,11 +432,11 @@ typedef struct {
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx.z vf10, vf0, vf2x\n\t.set reorder" : : "f" (value) : "$2")
 
-#define SDF_MOT_STORE_VF28(dst) __asm__ volatile ( \
+#define SDF_VU0_STORE_ROW0(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf28, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
-#define SDF_MOT_STORE_VF29(dst) __asm__ volatile ( \
+#define SDF_VU0_STORE_ROW1(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf29, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
-#define SDF_MOT_STORE_VF30(dst) __asm__ volatile ( \
+#define SDF_VU0_STORE_ROW2(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 vf30, 0(%0)\n\t.set reorder" : : "r" (dst) : "memory")
 
 #define SDF_VU0_SUBVECTOR_B_A() __asm__ volatile ( \
@@ -457,19 +457,19 @@ typedef struct {
     "pextlw $2, $3, $2\n\tpextlw $4, $5, $4\n\t" \
     "pcpyld $2, $4, $2\n\tqmtc2.ni $2, vf10\n\t.set reorder" \
     : : "r" (src) : "$2", "$3", "$4", "$5", "memory")
-#define VU0_LOAD_VF31(src) __asm__ volatile ( \
+#define SDF_VU0_LOAD_ROW3(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \
     : : "r" (src))
-#define VU0_LOAD_VF28_BARRIER(src) __asm__ volatile ( \
+#define SDF_VU0_LOAD_ROW0_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf28, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
-#define VU0_LOAD_VF29_BARRIER(src) __asm__ volatile ( \
+#define SDF_VU0_LOAD_ROW1_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf29, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
-#define VU0_LOAD_VF30_BARRIER(src) __asm__ volatile ( \
+#define SDF_VU0_LOAD_ROW2_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf30, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
-#define VU0_LOAD_VF31_BARRIER(src) __asm__ volatile ( \
+#define SDF_VU0_LOAD_ROW3_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf31, 0(%0)\n\t.set reorder" \
     : : "r" (src) : "memory")
 #define VU0_COPY_VF28_TO_VF24() __asm__ volatile ( \
@@ -480,7 +480,7 @@ typedef struct {
     ".set noreorder\n\tvmove.xyzw vf26, vf30\n\t.set reorder")
 #define VU0_COPY_VF31_TO_VF27() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
-#define VU0_COPY_VF0_TO_VF31() __asm__ volatile ( \
+#define SDF_VU0_RESET_ROW3() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf31, vf0\n\t.set reorder")
 #define VU0_SCALE_MATRIX_ROWS_VF10() __asm__ volatile ( \
     ".set noreorder\n\tvmulx.xyzw vf28, vf28, vf10x\n\tvmuly.xyzw vf29, vf29, vf10y\n\t" \
@@ -489,20 +489,20 @@ typedef struct {
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\tvaddx.y vf10, vf0, vf2x\n\t" \
     "vmulx.w vf10, vf10, vf0x\n\t.set reorder" \
     : : "f" (f))
-#define VU0_SET_VF31_W_ONE() __asm__ volatile ( \
+#define SDF_VU0_MATRIX_ROW3_W_SET_ONE() __asm__ volatile ( \
     ".set noreorder\n\tvmove.w vf31, vf0\n\t.set reorder")
 
 #define VU0_COPY_VF10_TO_VF2() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " "vf2" ", " "vf10" "\n\t.set reorder")
-#define VU0_COPY_VF10_TO_VF28() __asm__ volatile ( \
+#define SDF_VU0_SET_ROW0() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf28, vf10\n\t.set reorder")
-#define VU0_COPY_VF10_TO_VF29() __asm__ volatile ( \
+#define SDF_VU0_SET_ROW1() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf29, vf10\n\t.set reorder")
-#define VU0_COPY_VF10_TO_VF30() __asm__ volatile ( \
+#define SDF_VU0_SET_ROW2() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf30, vf10\n\t.set reorder")
 #define VU0_COPY_VF2_TO_VF12() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw " "vf12" ", " "vf2" "\n\t.set reorder")
-#define VU0_COPY_VF30_TO_VF10() __asm__ volatile ( \
+#define SDF_VU0_GET_ROW2() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf10, vf30\n\t.set reorder")
 #define SDF_VU0_LOADVECTOR_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
@@ -541,7 +541,7 @@ typedef struct {
 
 /* ---- operations that were written out at a call site ---- */
 
-#define VU0_COPY_VF10_TO_VF31() __asm__ volatile ( \
+#define SDF_VU0_SET_ROW3() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf31, vf10\n\t.set reorder")
 #define VU0_ADD_VF31_VF10_XYZ() __asm__ volatile ( \
     ".set noreorder\n\tvadd.xyz vf31, vf31, vf10\n\t.set reorder")
@@ -750,7 +750,7 @@ typedef struct {
     "vsuba.xyz ACC, vf0, vf0\n\tvmsubax.xyz ACC, vf28, vf31x\n\t" \
     "vmsubay.xyz ACC, vf29, vf31y\n\tvmsubz.xyz vf31, vf30, vf31z\n\t" \
     ".set reorder\n")
-#define VU0_COPY_VF31_TO_VF10() __asm__ volatile ( \
+#define SDF_VU0_GET_ROW3() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf10, vf31\n\t.set reorder")
 #define VU0_ROTATE_BASIS_AND_CACHE(vectors, matrix, cache) __asm__ volatile ( \
     ".set noreorder\n\t" \
@@ -1103,13 +1103,13 @@ __asm__ volatile ( \
     : "=r" (out) : "f" (255.0f))
 
 /* from script/scrCommonCommand.c */
-#define VU0_SET_VF10_X_BITS(r) __asm__ volatile ( \
+#define SDF_VU0_SETVECTOR_X_BITS(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.x $vf10, $vf0, $vf2x\n\t.set reorder" \
     : : "r" (r))
-#define VU0_SET_VF10_Y_BITS(r) __asm__ volatile ( \
+#define SDF_VU0_SETVECTOR_Y_BITS(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.y $vf10, $vf0, $vf2x\n\t.set reorder" \
     : : "r" (r))
-#define VU0_SET_VF10_Z_BITS(r) __asm__ volatile ( \
+#define SDF_VU0_SETVECTOR_Z_BITS(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.z $vf10, $vf0, $vf2x\n\t.set reorder" \
     : : "r" (r))
 
@@ -1211,18 +1211,18 @@ __asm__ volatile ( \
     "vitof12.xyzw " "vf11" ", " "vf11" "\n\t" \
     ".set reorder" \
     : : "r"(p) : "$2")
-#define SDF_MOT_STORE_VF28_NOMEM(dst) __asm__ volatile ( \
+#define SDF_VU0_STORE_ROW0_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " "vf28" ", 0(%0)\n\t.set reorder" \
     : : "r" (dst))
-#define SDF_MOT_STORE_VF29_NOMEM(dst) __asm__ volatile ( \
+#define SDF_VU0_STORE_ROW1_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " "vf29" ", 0(%0)\n\t.set reorder" \
     : : "r" (dst))
-#define SDF_MOT_STORE_VF30_NOMEM(dst) __asm__ volatile ( \
+#define SDF_VU0_STORE_ROW2_NOMEM(dst) __asm__ volatile ( \
     ".set noreorder\n\tsqc2 " "vf30" ", 0(%0)\n\t.set reorder" \
     : : "r" (dst))
 /* out = a + (b - a) * t per RGBA byte lane, rounded through vf3x. `half` is
  * 0.5f in a general register. */
-#define SDF_MOT_RGBA_LERP(out, a, b, t, half) __asm__ volatile ( \
+#define VU0_RGBA_LERP(out, a, b, t, half) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "qmtc2.ni %4, vf3\n\t" \
     "mfc1 $8, %3\n\t" \
