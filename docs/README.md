@@ -11,6 +11,11 @@ quickstart.
   for them, and the pinned 32-bit runtime.
 - [Names](names.md): where the function, variable and file names come from, and
   what is not yet recovered.
+- [Type recovery](type-recovery.md): how a repo struct is matched to the
+  recovered type it stands for, what has been renamed, and what is still
+  invented.
+- [IDB corrections](idb-corrections.md): names and layouts in the IDA database
+  that the retail code proves wrong, and the proof for each.
 - [Reading progress](progress.md): how progress would be measured and what
   counts.
 

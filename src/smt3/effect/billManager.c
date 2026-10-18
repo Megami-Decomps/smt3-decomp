@@ -26,18 +26,16 @@ u32 dds3Billboard_P2AColorMul(u32 color, u32 scale);
 void dds3MultiBillboardTagLink(struct BillObj *obj, void *pair);
 
 
-struct SdfMemBlock;
-typedef struct SdfMemBlock SdfMemBlock;
+struct sdfMemHandle_t;
+typedef struct sdfMemHandle_t sdfMemHandle_t;
 struct BillPacketWork;
 typedef struct BillPacketWork BillPacketWork;
-struct SdfListHead;
-typedef struct SdfListHead SdfListHead;
-struct SdfTexBuf;
-typedef struct SdfTexBuf SdfTexBuf;
-struct SdfTexRef;
-typedef struct SdfTexRef SdfTexRef;
-struct SdfTexResource;
-typedef struct SdfTexResource SdfTexResource;
+struct sdfDrawTag_t;
+typedef struct sdfDrawTag_t sdfDrawTag_t;
+struct sdfTexPacket_t;
+typedef struct sdfTexPacket_t sdfTexPacket_t;
+struct sdfGsMemSlice_t;
+typedef struct sdfGsMemSlice_t sdfGsMemSlice_t;
 
 typedef struct BattleEffect BattleEffect;
 
@@ -47,59 +45,34 @@ typedef struct BillTextureQuad {
 
 typedef u8 SdfTextureClampMode;
 
-typedef struct SdfTex {
-    struct SdfTex *next;
-    struct SdfTex *prev;
-    SdfTexRef *reference;
-    s16 width;
-    s16 height;
-    SdfTexResource *primaryResource;
-    SdfTexResource *secondaryResource;
-    u8 paletteCount;
-    u8 clutFormat;
-    u8 pixelFormat;
-    u8 maxMipLevel;
-    u16 lodParameters;  
-    u8 unk1E;
-    SdfTextureClampMode clampMode;  
-    s32 resourceKey;
-    s32 battleTextureSlot;
-    SdfTexBuf *primaryBuffer;
-    SdfTexBuf *secondaryBuffer;
-    u8 *paletteData;  
-    s32 paletteDataSize;  
-    s32 unk38;
-    u8 *intensityMap;  
-} SdfTex;
-
 typedef struct BillChildPayload {
-    SdfTex *texture;  
-    u16 variant;  
+    sdfTexHandle_t *texture;
+    u16 variant;
     u8 pad06[2];
-    s32 refCount;       
-    BillTextureQuad uv;  
-    f32 x;              
-    f32 y;              
-    f32 halfWidth;   
-    f32 halfHeight;  
-    SdfListHead *pendingLists[5];  
-    u16 packetListIndex;  
+    s32 refCount;
+    BillTextureQuad uv;
+    f32 x;
+    f32 y;
+    f32 halfWidth;
+    f32 halfHeight;
+    sdfDrawTag_t *pendingLists[5];
+    u16 packetListIndex;
     u8 pad42[2];
-    struct SdfMemBlock *allocation;  
-    BillPacketWork *work;  
-    struct BillChildPayload *next;  
+    struct sdfMemHandle_t *allocation;
+    BillPacketWork *work;
+    struct BillChildPayload *next;
 } BillChildPayload;
 
 typedef struct BillAnimationEntry {
     s32 offset;
     s32 colorOffset;
-    u32 entryModeFlags;  
+    u32 entryModeFlags;
     u32 frameCount;
     u32 flags;
 } BillAnimationEntry;
 
 typedef struct BillData {
-    struct SdfMemBlock *allocation;  
+    struct sdfMemHandle_t *allocation;
     u8 *base;
     BillAnimationEntry *entries;
     s32 entryCount;
@@ -118,8 +91,8 @@ typedef struct BillRecord {
     u16 u1;
     u16 v1;
     s16 childIndex;
-    s16 frameDelay;  
-    f32 rotationAngle;  
+    s16 frameDelay;
+    f32 rotationAngle;
 } BillRecord;
 
 typedef struct BillOut {
@@ -132,36 +105,36 @@ typedef struct BillOut {
 
 typedef struct BillRenderPair {
     struct BillChildPayload *children[2];
-    u16 cameraFacingMode;  
+    u16 cameraFacingMode;
     u16 kind;
     u32 colors[2];
-    SdfListHead *packetList;  
-    struct BillRenderPair *next;  
+    sdfDrawTag_t *packetList;
+    struct BillRenderPair *next;
 } BillRenderPair;
 
 typedef struct BillObj {
-    f32 position[4];  
-    f32 childScaleX;   
-    f32 childScaleY;   
+    f32 position[4];
+    f32 childScaleX;
+    f32 childScaleY;
     f32 unk18;
     f32 unk1C;
-    f32 rotationAngle;   
-    u32 childParam;    
-    void (*callback)();  
-    u16 kind;          
-    u16 requestedPacketListIndex;  
+    f32 rotationAngle;
+    u32 childParam;
+    void (*callback)();
+    u16 kind;
+    u16 requestedPacketListIndex;
     union {
-        void *payload;  
-        struct BillChildPayload *child;  
-        struct BillData *animationData;  
+        void *payload;
+        struct BillChildPayload *child;
+        struct BillData *animationData;
     } u;
-    BillRenderPair pair;  
-    u16 animationActive;  
+    BillRenderPair pair;
+    u16 animationActive;
     u8 pad52[2];
-    u32 modeFlags;  
-    u32 animationEntryIndex;  
+    u32 modeFlags;
+    u32 animationEntryIndex;
     s32 entryCount;
-    struct BillOut *resolvedEntries;  
+    struct BillOut *resolvedEntries;
 } BillObj;
 
 enum {
@@ -174,10 +147,10 @@ enum {
 };
 
 typedef struct BillPluralRecord {
-    s16 entryIndex;  
-    s16 delay;       
-    s16 x;           
-    s16 y;           
+    s16 entryIndex;
+    s16 delay;
+    s16 x;
+    s16 y;
     u8 unk08[0x10];
 } BillPluralRecord;
 
@@ -416,7 +389,7 @@ INCLUDE_ASM(const s32, "effect/billManager", dds3BillboardGeneral);
 
 INCLUDE_ASM(const s32, "effect/billManager", dds3BillboardGeneralNumber);
 
-SdfTex *dds3BillboardGetGeneralTex(s32 index) {
+sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
     return hGeneralBillboard[index]->u.child->texture;
 }
 

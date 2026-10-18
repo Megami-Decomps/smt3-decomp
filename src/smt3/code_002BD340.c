@@ -18,9 +18,9 @@ typedef struct
 } sdfFileCmd_t;
 
 
-struct MovObj;
+struct movieStream_t;
 struct SoundFormat;
-struct SdfTexResource;
+struct sdfGsMemSlice_t;
 struct SdfStreamInputDmaTag;
 
 typedef struct IpuDmaState
@@ -36,11 +36,11 @@ typedef struct IpuDmaState
     u32 ipuControl;
 } IpuDmaState;
 
-typedef struct SdfStreamFrameNode
+typedef struct sdfIpuDecodeCb_t
 {
-    struct SdfStreamFrameNode *streamPrev;
-    struct SdfStreamFrameNode *streamNext;
-    struct SdfStreamFrameNode *next;
+    struct sdfIpuDecodeCb_t *streamPrev;
+    struct sdfIpuDecodeCb_t *streamNext;
+    struct sdfIpuDecodeCb_t *next;
     u8 active;
     u8 queued;
     u8 ipuCycleInitialized;
@@ -62,7 +62,7 @@ typedef struct SdfStreamFrameNode
     void *transferPacketBuffers[2];
     u32 transferPacketBytes;
     s32 resourceWord;
-    struct SdfTexResource *textureHead;
+    struct sdfGsMemSlice_t *textureHead;
     u16 width;
     u16 height;
     u32 cycleLength;
@@ -75,19 +75,19 @@ typedef struct SdfStreamFrameNode
     u8 firstSlot;
     u8 *scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
-    struct MovObj *readContext;
+    s32 (*read)(struct sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
+    struct movieStream_t *readContext;
     u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
     IpuDmaState dma;
-} SdfStreamFrameNode;
+} sdfIpuDecodeCb_t;
 
-typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
+typedef s32 (*SdfStreamRead)(sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
 
-void sdfIpuStrmDecodeInit(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext);
-void sdfIpuSetDecodeParams(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext);
-void sdfIpuAttachTask(SdfStreamFrameNode *aNode);
+void sdfIpuStrmDecodeInit(sdfIpuDecodeCb_t *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct movieStream_t *aContext);
+void sdfIpuSetDecodeParams(sdfIpuDecodeCb_t *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct movieStream_t *aContext);
+void sdfIpuAttachTask(sdfIpuDecodeCb_t *aNode);
 
 u32 dds3GetRandA(void *aState);
 s32 strlen(const char *aStr);
@@ -158,7 +158,7 @@ typedef struct
     u8 unk18[8];
 } sdfBinaryHeader_t;
 
-extern SdfStreamFrameNode *sdfIpuTaskLink;
+extern sdfIpuDecodeCb_t *sdfIpuTaskLink;
 extern const char D_00549640[];
 
 void FatalError(const char *aMessage) __attribute__((noreturn));
@@ -858,10 +858,10 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuDetachQueue);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuAttachQueue);
 
-void sdfIpuAttachTask(SdfStreamFrameNode *aNode)
+void sdfIpuAttachTask(sdfIpuDecodeCb_t *aNode)
 {
-    SdfStreamFrameNode **link = &sdfIpuTaskLink;
-    SdfStreamFrameNode *cur;
+    sdfIpuDecodeCb_t **link = &sdfIpuTaskLink;
+    sdfIpuDecodeCb_t *cur;
 
     for (cur = *link; cur != NULL; cur = *link) {
         link = &cur->next;
@@ -870,10 +870,10 @@ void sdfIpuAttachTask(SdfStreamFrameNode *aNode)
     aNode->next = NULL;
 }
 
-void sdfIpuDetachTask(SdfStreamFrameNode *aNode)
+void sdfIpuDetachTask(sdfIpuDecodeCb_t *aNode)
 {
-    SdfStreamFrameNode **link = &sdfIpuTaskLink;
-    SdfStreamFrameNode *cur;
+    sdfIpuDecodeCb_t **link = &sdfIpuTaskLink;
+    sdfIpuDecodeCb_t *cur;
 
     for (cur = *link; cur != NULL; cur = *link) {
         if (cur == aNode) {
@@ -918,7 +918,7 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuFromDmacHandler);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuToDmacHandler);
 
-void *sdfIpuGetActivePacket(SdfStreamFrameNode *aNode)
+void *sdfIpuGetActivePacket(sdfIpuDecodeCb_t *aNode)
 {
     void *packet = NULL;
 
@@ -928,7 +928,7 @@ void *sdfIpuGetActivePacket(SdfStreamFrameNode *aNode)
     return packet;
 }
 
-void *sdfIpuGetActiveFrame(SdfStreamFrameNode *aNode)
+void *sdfIpuGetActiveFrame(sdfIpuDecodeCb_t *aNode)
 {
     void *frame = NULL;
 
@@ -944,7 +944,7 @@ INCLUDE_ASM(const s32, "code_002BD340", sdfIpuSetChainTag);
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuRunDecode);
 
-void sdfIpuStartDecodeTask(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext, s32 aResourceWord)
+void sdfIpuStartDecodeTask(sdfIpuDecodeCb_t *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct movieStream_t *aContext, s32 aResourceWord)
 {
     sdfIpuSetDecodeParams(aNode, aFormat, aRead, aContext);
     aNode->resourceWord = aResourceWord;
@@ -953,7 +953,7 @@ void sdfIpuStartDecodeTask(SdfStreamFrameNode *aNode, struct SoundFormat *aForma
 
 INCLUDE_ASM(const s32, "code_002BD340", sdfIpuSetOutputTex);
 
-void movieAttachDecodeTask(SdfStreamFrameNode *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct MovObj *aContext, s32 aResourceWord)
+void movieAttachDecodeTask(sdfIpuDecodeCb_t *aNode, struct SoundFormat *aFormat, SdfStreamRead aRead, struct movieStream_t *aContext, s32 aResourceWord)
 {
     sdfIpuStrmDecodeInit(aNode, aFormat, aRead, aContext);
     aNode->resourceWord = aResourceWord;

@@ -109,8 +109,8 @@ struct MotionEntry;
 struct MovLinearStream;
 union MovObjStream;
 struct ParCell;
-struct RwV3d;
-struct SdfAssetEntry;
+struct sdfVector3_t;
+struct sdfMatPacket_t;
 struct SdfCommandNode;
 struct SdfDrawNode;
 union SdfDrawTransform;
@@ -118,20 +118,18 @@ struct SdfGsTextureStateValues;
 struct SdfItem;
 struct SdfItemList;
 struct SdfMotionCommand;
-struct SdfStreamFrameNode;
+struct sdfIpuDecodeCb_t;
 struct SdfStreamInputDmaTag;
-struct SdfTexRef;
-struct SdfTexResource;
+struct sdfGsMemSlice_t;
 struct SoundBank;
 
 typedef struct BillTextureQuad BillTextureQuad;
 typedef struct BillPacketWork BillPacketWork;
-typedef struct SdfListHead SdfListHead;
-typedef struct SdfMemBlock SdfMemBlock;
-typedef struct SdfTexBuf SdfTexBuf;
-typedef struct SdfTexRef SdfTexRef;
-typedef struct SdfTexResource SdfTexResource;
-typedef struct SdfTex SdfTex;
+typedef struct sdfDrawTag_t sdfDrawTag_t;
+typedef struct sdfMemHandle_t sdfMemHandle_t;
+typedef struct sdfTexPacket_t sdfTexPacket_t;
+typedef struct sdfGsMemSlice_t sdfGsMemSlice_t;
+typedef struct sdfTexHandle_t sdfTexHandle_t;
 typedef struct BillChildPayload BillChildPayload;
 typedef struct BillAnimationEntry BillAnimationEntry;
 typedef struct BillData BillData;
@@ -139,7 +137,7 @@ typedef struct BillRecord BillRecord;
 typedef struct BillOut BillOut;
 typedef struct BillRenderPair BillRenderPair;
 typedef struct BillObj BillObj;
-typedef struct SdfPoolNode SdfPoolNode;
+typedef struct sdfGrOt_t sdfGrOt_t;
 typedef struct EffBillboardSetParams EffBillboardSetParams;
 typedef struct EffBillboardSetWork EffBillboardSetWork;
 typedef struct EffBlurQuad EffBlurQuad;
@@ -150,16 +148,16 @@ typedef struct EffNodeDescriptor EffNodeDescriptor;
 typedef struct EffPCPBeamLargeHead EffPCPBeamLargeHead;
 typedef union SdfDrawTransform SdfDrawTransform;
 typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
-typedef struct SdfAssetEntry SdfAssetEntry;
-typedef union SdfSubParam SdfSubParam;
-typedef struct SdfAsset SdfAsset;
+typedef struct sdfMatPacket_t sdfMatPacket_t;
+typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
+typedef struct sdfMat_t sdfMat_t;
 typedef struct EffPCPBeamNode EffPCPBeamNode;
 typedef struct EffPCPBeamLargeWork EffPCPBeamLargeWork;
 typedef struct EffPCPBeamParams EffPCPBeamParams;
 typedef struct EffPCPBeamWork EffPCPBeamWork;
 typedef struct EffPCPBlockSet EffPCPBlockSet;
 typedef struct EffPCPBlockSetParams EffPCPBlockSetParams;
-typedef struct EffParamWork EffParamWork;
+typedef struct effPartHandle_t effPartHandle_t;
 typedef struct EffPCPBlockSetWork EffPCPBlockSetWork;
 typedef struct EffPCPBurstWork EffPCPBurstWork;
 typedef struct EffPCPChargeWork EffPCPChargeWork;
@@ -249,29 +247,29 @@ typedef struct SdfChunkHeader SdfChunkHeader;
 typedef struct SdfItem SdfItem;
 typedef struct SdfItemListRef SdfItemListRef;
 typedef struct BattleGroupNode BattleGroupNode;
-typedef struct Motion Motion;
+typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
 typedef struct SdfCommandNode SdfCommandNode;
 typedef struct SdfDrawNode SdfDrawNode;
-typedef struct SdfModel SdfModel;
+typedef struct sdfModelRootNode_t sdfModelRootNode_t;
 typedef struct MdlDevSlot MdlDevSlot;
 typedef struct MdlDevList MdlDevList;
 typedef struct EffTrackPolyData EffTrackPolyData;
 typedef struct EffTrackPolyParams EffTrackPolyParams;
 typedef struct EffTrackPolyWork EffTrackPolyWork;
 typedef struct IpuDmaState IpuDmaState;
-typedef struct DevState DevState;
+typedef struct sdfFileCmdHandle_t sdfFileCmdHandle_t;
 typedef struct MovLinearStream MovLinearStream;
 typedef struct MovPacStream MovPacStream;
 typedef union MovObjStream MovObjStream;
-typedef struct SdfStreamFrameNode SdfStreamFrameNode;
-typedef struct MovObj MovObj;
+typedef struct sdfIpuDecodeCb_t sdfIpuDecodeCb_t;
+typedef struct movieStream_t movieStream_t;
 typedef struct SdfStreamInputDmaTag SdfStreamInputDmaTag;
 typedef struct MdlObj MdlObj;
 typedef struct MdlObjectAttachment MdlObjectAttachment;
 typedef struct MdlPartEntry MdlPartEntry;
 typedef struct SdfMapPositionRecord SdfMapPositionRecord;
 typedef struct MdlResourceItem MdlResourceItem;
-typedef struct RwV3d RwV3d;
+typedef struct sdfVector3_t sdfVector3_t;
 typedef struct EffPacketParams EffPacketParams;
 typedef struct EffParamTableRecord EffParamTableRecord;
 typedef struct EffParamTable EffParamTable;
@@ -296,10 +294,10 @@ struct BillPacketWork {
     s32 count;           /* 0x3FC */
 };
 
-struct SdfListHead;
+struct sdfDrawTag_t;
 
-struct SdfListHead {
-    struct SdfListHead *nextList; /* CPU link between lists; first/last are DMA addresses. */
+struct sdfDrawTag_t {
+    struct sdfDrawTag_t *nextList; /* CPU link between lists; first/last are DMA addresses. */
     u32 first;
     u32 last;
     u32 unkC;
@@ -309,26 +307,26 @@ struct SdfListHead {
     u32 unk1C;
 };
 
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* Embedded command work at actor +0x20. Neither record is the whole owning
  * actor. */
-struct SdfMemBlock;
+struct sdfMemHandle_t;
 
 /* General-heap allocation descriptor (0x10); links bound the represented span. */
-struct SdfMemBlock {
-    struct SdfMemBlock *prev; /* 0x00 */
-    struct SdfMemBlock *next; /* 0x04 */
+struct sdfMemHandle_t {
+    struct sdfMemHandle_t *prev; /* 0x00 */
+    struct sdfMemHandle_t *next; /* 0x04 */
     s32 address;              /* 0x08: start of represented span */
     u16 state;                /* 0x0C: free, used, or end sentinel */
     s16 referenceCount;       /* 0x0E: -1 for sentinels */
 };
 
-struct SdfTex;
+struct sdfTexHandle_t;
 
-struct SdfTexBuf;
+struct sdfTexPacket_t;
 
-struct SdfTexBuf {
+struct sdfTexPacket_t {
     s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
     u32 gifTagControl; /* High GIFtag control word; one packed register. */
     u64 gifTagRegisters; /* Packed register list: A+D. */
@@ -341,15 +339,11 @@ struct SdfTexBuf {
 };
 
 /* Per-texture reference count and non-owning clone source (0x8). */
-struct SdfTexRef {
-    struct SdfTex *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
-    s32 refCount;
-};
 
 /* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
-struct SdfTexResource {
-    struct SdfTexResource *next; /* 0x00 */
-    struct SdfTexResource *prev; /* 0x04 */
+struct sdfGsMemSlice_t {
+    struct sdfGsMemSlice_t *prev; /* 0x00 */
+    struct sdfGsMemSlice_t *next; /* 0x04 */
     u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
     u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
@@ -361,14 +355,14 @@ struct SdfTexResource {
 /* Serialized byte consumed by the GS texture-state packet builder. */
 typedef u8 SdfTextureClampMode;
 
-struct SdfTex {
-    struct SdfTex *next;
-    struct SdfTex *prev;
-    SdfTexRef *reference;
+struct sdfTexHandle_t {
+    struct sdfTexHandle_t *prev;
+    struct sdfTexHandle_t *next;
+    struct sdfTexHandle_t *origin;
     s16 width;
     s16 height;
-    SdfTexResource *primaryResource;
-    SdfTexResource *secondaryResource;
+    sdfGsMemSlice_t *primaryResource;
+    sdfGsMemSlice_t *secondaryResource;
     u8 paletteCount;
     u8 clutFormat;
     u8 pixelFormat;
@@ -378,8 +372,8 @@ struct SdfTex {
     SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
     s32 resourceKey;
     s32 battleTextureSlot;
-    SdfTexBuf *primaryBuffer;
-    SdfTexBuf *secondaryBuffer;
+    sdfTexPacket_t *primaryBuffer;
+    sdfTexPacket_t *secondaryBuffer;
     u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
     s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
     s32 unk38;
@@ -388,7 +382,7 @@ struct SdfTex {
 
 /* Child manager at retained allocation +0x400; shared by resource and draw owners. */
 struct BillChildPayload {
-    SdfTex *texture; /* 0x00: acquired texture reference. */
+    sdfTexHandle_t *texture; /* 0x00: acquired texture reference. */
     u16 variant; /* Child variant bits; signed inputs narrow on assignment. */
     u8 pad06[2];
     s32 refCount;      /* 0x08 */
@@ -397,10 +391,10 @@ struct BillChildPayload {
     f32 y;             /* 0x20 */
     f32 halfWidth;  /* 0x24 */
     f32 halfHeight; /* 0x28 */
-    SdfListHead *pendingLists[5]; /* 0x2C */
+    sdfDrawTag_t *pendingLists[5]; /* 0x2C */
     u16 packetListIndex; /* 0x40 */
     u8 pad42[2];
-    struct SdfMemBlock *allocation; /* 0x44: allocation descriptor released with this child. */
+    struct sdfMemHandle_t *allocation; /* 0x44: allocation descriptor released with this child. */
     BillPacketWork *work; /* 0x48: retained packet-buffer address */
     struct BillChildPayload *next; /* 0x4C */
 };
@@ -417,7 +411,7 @@ struct BillAnimationEntry {
 
 /* Runtime header precedes the copied resource bytes; the child table is indirect. */
 struct BillData {
-    struct SdfMemBlock *allocation; /* Retained general-heap descriptor. */
+    struct sdfMemHandle_t *allocation; /* Retained general-heap descriptor. */
     u8 *base;
     BillAnimationEntry *entries;
     s32 entryCount;
@@ -460,7 +454,7 @@ struct BillRenderPair {
     u16 cameraFacingMode; /* 0x08: value 1 builds a view-facing matrix; other values use identity. */
     u16 kind;
     u32 colors[2];
-    SdfListHead *packetList; /* 0x14 */
+    sdfDrawTag_t *packetList; /* 0x14 */
     struct BillRenderPair *next; /* 0x18 */
 };
 
@@ -490,21 +484,21 @@ struct BillObj {
     struct BillOut *resolvedEntries; /* 0x60: runtime animation state array */
 };
 
-struct SdfPoolNode;
+struct sdfGrOt_t;
 
 /* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
-struct SdfPoolNode {
-    struct SdfPoolNode *next; /* 0x00 */
-    SdfListHead *first;       /* 0x04 */
-    SdfListHead *last;        /* 0x08 */
+struct sdfGrOt_t {
+    struct sdfGrOt_t *next; /* 0x00 */
+    sdfDrawTag_t *first;       /* 0x04 */
+    sdfDrawTag_t *last;        /* 0x08 */
     u32 unkC;
-    void (*append)(struct SdfPoolNode *, SdfListHead *);      /* 0x10 */
-    s32 (*prepend)(struct SdfPoolNode *, s32, SdfListHead *); /* 0x14 */
+    void (*append)(struct sdfGrOt_t *, sdfDrawTag_t *);      /* 0x10 */
+    s32 (*prepend)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
     u32 unk18;
     u32 unk1C;
 };
 
-extern struct SdfPoolNode *D_002F69B8[4];
+extern struct sdfGrOt_t *D_002F69B8[4];
 
 extern u8 effPCPZiodin01Vec[];
 
@@ -591,7 +585,7 @@ struct EffBlurTemplateBody {
 
 struct EffBlurTemplate {
     EffBlurTemplateBody body;
-    struct SdfTex *texture;
+    struct sdfTexHandle_t *texture;
 };
 
 struct EffNode;
@@ -641,7 +635,7 @@ struct EffPCPBeamLargeHead {
     u32 lastColor;
 };
 
-struct SdfAsset;
+struct sdfMat_t;
 
 /* Draw entries store six transform floats and expose the same bytes as three qwords. */
 union SdfDrawTransform {
@@ -657,7 +651,7 @@ struct SdfGsTextureStateValues {
 };
 
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
-struct SdfAssetEntry {
+struct sdfMatPacket_t {
     u32 pad00;             /* 0x00 */
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
@@ -678,10 +672,10 @@ struct SdfAssetEntry {
     u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
 };
 
-union SdfSubParam;
+union sdfMatUvwParm_t;
 
 /* Optional packed or five-float state block owned by an SdfAsset. */
-union SdfSubParam {
+union sdfMatUvwParm_t {
     struct {
         u64 unk0;
         u64 unk8;
@@ -703,12 +697,12 @@ union SdfSubParam {
     } transformInputs;
 };
 
-struct SdfAsset {
+struct sdfMat_t {
     u32 unk00; /* Word from the serialized asset-parameter header. */
     u16 unk04; /* Halfword from the serialized asset-parameter header. */
     u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad07;
-    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
+    struct sdfMatPacket_t *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
     u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
     u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
     u32 secondaryColor; /* 0x18 */
@@ -716,11 +710,11 @@ struct SdfAsset {
     u32 primaryStateWordThird; /* 0x20 */
     u32 unk24;
     u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
-    SdfTex *texture;
-    SdfTex *secondaryTexture; /* 0x30 */
+    sdfTexHandle_t *texture;
+    sdfTexHandle_t *secondaryTexture; /* 0x30 */
     u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
-    SdfSubParam *primarySubParam; /* 0x38 */
-    SdfSubParam *secondarySubParam; /* 0x3C */
+    sdfMatUvwParm_t *primarySubParam; /* 0x38 */
+    sdfMatUvwParm_t *secondarySubParam; /* 0x3C */
     f32 scalarPairFirst; /* 0x40 */
     f32 scalarPairSecond; /* 0x44 */
 };
@@ -736,8 +730,8 @@ struct EffPCPBeamNode {
     u32 vertexCount;
     f32 *points;
     u32 *colors;
-    struct SdfAsset *assetHandle;
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMat_t *assetHandle;
+    struct sdfMemHandle_t *allocationHandle;
 };
 
 struct EffPCPBeamLargeWork {
@@ -805,13 +799,13 @@ struct EffPCPBlockSetParams {
     s32 tailStartFrame;
 };
 
-struct EffParamWork;
+struct effPartHandle_t;
 
 /* One randomized channel record. */
-struct EffParamWork;
+struct effPartHandle_t;
 
 /* Compact effect owner: its halfword kind selects the opaque payload's operations. */
-struct EffParamWork {
+struct effPartHandle_t {
     u16 kind;
     u8 pad02[2];
     void *payload;
@@ -828,12 +822,12 @@ struct EffPCPBlockSetWork {
     u32 count;
     u32 color;
     u32 mode;
-    EffParamWork *headHandle;
-    EffParamWork *handleA[5];
-    EffParamWork **list[3];
-    EffParamWork *handleB[5];
-    EffParamWork *tailHandle;
-    struct SdfMemBlock *alloc[3];
+    effPartHandle_t *headHandle;
+    effPartHandle_t *handleA[5];
+    effPartHandle_t **list[3];
+    effPartHandle_t *handleB[5];
+    effPartHandle_t *tailHandle;
+    struct sdfMemHandle_t *alloc[3];
     struct EffPCPBlockSetWork *source;
 };
 
@@ -865,9 +859,9 @@ struct EffPCPChargeWork {
     u32 historyCount;
     u32 updateCount;
     u32 baseColor;
-    EffParamWork *secondaryHandle;
-    EffParamWork *primaryHandle;
-    struct SdfMemBlock *allocationHandle;
+    effPartHandle_t *secondaryHandle;
+    effPartHandle_t *primaryHandle;
+    struct sdfMemHandle_t *allocationHandle;
 };
 
 struct EffResourceRectBounds {
@@ -895,7 +889,7 @@ typedef struct {
 
 typedef struct {
     EffResourceRectParams params;
-    SdfTex *texture;
+    sdfTexHandle_t *texture;
 } EffResourceRectWork; /* 0x28 */
 
 /* Both compact-fade lifecycles use the same 0x3C chip allocation. The
@@ -1057,8 +1051,8 @@ struct EffBlurScaleSlot {
 
 struct EffBlurScaleWork {
     EffBlurScaleParams params;
-    struct SdfTex *texture;
-    struct SdfMemBlock *allocation;
+    struct sdfTexHandle_t *texture;
+    struct sdfMemHandle_t *allocation;
     EffBlurScaleSlot *slots;
 };
 
@@ -1070,8 +1064,8 @@ struct EffBlurScatterSlot {
 
 struct EffBlurScatterWork {
     EffBlurScatterParams params;
-    struct SdfTex *texture;
-    struct SdfMemBlock *allocation;
+    struct sdfTexHandle_t *texture;
+    struct sdfMemHandle_t *allocation;
     EffBlurScatterSlot *slots;
 };
 
@@ -1100,8 +1094,8 @@ struct EffPCPCrossWork {
     u8 pad0C[4];
     u32 color;
     f32 scale;
-    EffParamWork *base; /* Parameter work for the anchor model. */
-    EffParamWork *handle[4][3];
+    effPartHandle_t *base; /* Parameter work for the anchor model. */
+    effPartHandle_t *handle[4][3];
     u8 pad4C[0x60];
     u32 remainingDelay[4][3];
 };
@@ -1116,7 +1110,7 @@ struct EffPCPDelayedPairs {
     u8 unk0C[4];
     u32 color;
     f32 scale;
-    EffParamWork *handle[12];
+    effPartHandle_t *handle[12];
     u32 remainingDelay[6];
 };
 
@@ -1168,7 +1162,7 @@ struct EffAimParams {
 
 union EffBattleParameterValue {
     u32 sourceOffset;
-    struct EffParamWork *work;
+    struct effPartHandle_t *work;
 };
 
 typedef struct EffBattleEntry {
@@ -1212,7 +1206,7 @@ struct BattleEffect {
     u8 pad1E[2];
     s32 unk20;
     struct EffBattleEntryList *list; /* 0x24 */
-    struct EffParamWork *parameterWorks[0x3C]; /* 0x28 */
+    struct effPartHandle_t *parameterWorks[0x3C]; /* 0x28 */
     BattleEffectCallback sourceFrameCallback; /* 0x118 */
     BattleEffectCallback triggerFrameCallback; /* 0x11C */
     u32 unk120;
@@ -1228,7 +1222,7 @@ struct SoundBank {
 struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
-    struct SdfMemBlock *resource; /* 0xC38: owns the mixer allocation. */
+    struct sdfMemHandle_t *resource; /* 0xC38: owns the mixer allocation. */
     u32 active;
     BattleEffect *voiceList;
 };
@@ -1241,7 +1235,7 @@ struct EffPCPDriftEventWork {
     u8 pad10D[3];
     f32 scale;
     u32 color;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
 };
 
 /* Serialized model placement and fade parameters copied into the owner. */
@@ -1334,11 +1328,11 @@ struct ParSystem {
     s32 cellCount;       /* 0x04 */
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
-    struct SdfMemBlock *allocation; /* 0x10: geometry allocation descriptor */
+    struct sdfMemHandle_t *allocation; /* 0x10: geometry allocation descriptor */
     ParCell *cells;      /* 0x14 */
     u128 *vertices;      /* 0x18: backing vector history for all cells */
     u32 *colors;         /* 0x1C: backing color stream for all cells */
-    struct SdfAsset *asset; /* 0x20: submitted draw asset */
+    struct sdfMat_t *asset; /* 0x20: submitted draw asset */
     struct ParSystem *next; /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */
 };
@@ -1351,7 +1345,7 @@ struct EffThunderVectorWork {
     f32 baseRadiusScale;
     f32 baseHeightScale;
     struct ParSystem *cellSystem;
-    struct SdfMemBlock *allocationHandle;
+    struct sdfMemHandle_t *allocationHandle;
 };
 
 struct EffPCPFadeWork {
@@ -1426,9 +1420,9 @@ struct EffPCPGroupSet {
     f32 scale; /* 0x168: multiplies start/end positions */
     f32 fragmentLength; /* Distance along the normalized fragment direction. */
     u32 color; /* 0x170 */
-    EffParamWork **duplicates; /* 0x174: four groups of parameter work */
-    struct SdfMemBlock *duplicateHandle; /* 0x178 */
-    struct SdfMemBlock *workHandle; /* 0x17C */
+    effPartHandle_t **duplicates; /* 0x174: four groups of parameter work */
+    struct sdfMemHandle_t *duplicateHandle; /* 0x178 */
+    struct sdfMemHandle_t *workHandle; /* 0x17C */
 };
 
 struct EffPCPGrowWork {
@@ -1460,9 +1454,9 @@ struct EffPCPMapEventEntry {
 struct EffPCPMapEventWork {
     EffPCPEventParamHead params;
     EffPCPMapEventEntry *entries;
-    struct SdfMemBlock *entriesHandle;
+    struct sdfMemHandle_t *entriesHandle;
     struct SoundMixer *owner;
-    struct EffParamWork *modelResource;
+    struct effPartHandle_t *modelResource;
     f32 scale;
     s32 frame;
     s32 frameLimit;
@@ -1503,7 +1497,7 @@ struct EffPCPPairedEventWork {
     u8 unk98;
     u8 pad99[3];
     u32 color;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
 };
 
 struct EffPCPRingWork {
@@ -1578,8 +1572,8 @@ struct EffPCPSpanWork {
 struct EffPCPSpawnOnceWork {
     f32 vector[4]; /* 0x00: loaded together by the spawn callback's VU vector load. */
     u32 color; /* 0x10 */
-    EffParamWork *primaryHandle; /* 0x14 */
-    EffParamWork *secondaryHandle; /* 0x18 */
+    effPartHandle_t *primaryHandle; /* 0x14 */
+    effPartHandle_t *secondaryHandle; /* 0x18 */
 };
 
 /* Spawn-range owners allocate count * 0x20 bytes after their 0xAC-byte header. */
@@ -1625,7 +1619,7 @@ struct EffPCPSpawnRangeWork {
     u8 pad9D[3];
     f32 scale;
     u32 color;
-    struct SdfMemBlock *handle;
+    struct sdfMemHandle_t *handle;
 };
 
 /* The pair variants allocate through handle1 at +0x64 (0x68 bytes); the
@@ -1638,8 +1632,8 @@ struct EffPCPSpinWork {
     f32 angle;
     f32 scale;
     u32 color;
-    EffParamWork *handle0;
-    EffParamWork *handle1;
+    effPartHandle_t *handle0;
+    effPartHandle_t *handle1;
 };
 
 typedef struct EffPCPSprayWork {
@@ -1650,7 +1644,7 @@ typedef struct EffPCPSprayWork {
     s32 frame;        /* 0x1C current update frame */
     s32 startFrame[10]; /* 0x20 */
     f32 rotationY[10];  /* 0x48 random start angles */
-    EffParamWork *handle[10];   /* 0x70 */
+    effPartHandle_t *handle[10];   /* 0x70 */
 } EffPCPSprayWork; /* 0x98 */
 
 /* Eight delayed pairs share this size-class allocation. The input-position
@@ -1660,7 +1654,7 @@ struct EffPCPStaggered {
     u32 color;
     f32 scale;
     f32 verticalOffset[8];
-    EffParamWork *handle[16];
+    effPartHandle_t *handle[16];
     u32 remainingDelay[8];
 };
 
@@ -1717,8 +1711,8 @@ struct EffPCPTwinWork {
     u32 color;
     u32 frame;
     f32 scale;
-    EffParamWork *pair[8][2];
-    EffParamWork *shared[8];
+    effPartHandle_t *pair[8][2];
+    effPartHandle_t *shared[8];
     u32 state[8];
     u32 counter[8];
 };
@@ -1786,13 +1780,13 @@ struct BattleGroupSlot {
     s16 motionSlotIndex;
     s16 motionIndex;
     MotionTable *motionTable;
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
 };
 
 struct DevRequest;
 
 struct DevRequest {
-    struct SdfMemBlock *backingAllocation;
+    struct sdfMemHandle_t *backingAllocation;
     s16 usedCount;
     u16 capacity;
     s16 stride;
@@ -1896,27 +1890,27 @@ struct BattleGroupNode {
     MdlCtx *modelContext;
     DevRequest *resourceList;
     struct SdfItemListRef *itemList;
-    struct SdfMemBlock *requestAllocation;
+    struct sdfMemHandle_t *requestAllocation;
     BattleGroupSlot slots[8];
-    struct SdfMemBlock *resourceHandle;
+    struct sdfMemHandle_t *resourceHandle;
     struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
     DevRequest *partList;
     f32 unk_AC;
     f32 objectRadius; /* Copied into the model context and object radius. */
 };
 
-struct SdfModel;
+struct sdfModelRootNode_t;
 
 /* Copy runtime model and draw-node state into an existing model overlay.
  * Both models and their resource and draw-node lists must be initialized. */
-struct SdfModel;
+struct sdfModelRootNode_t;
 
-struct Motion;
+struct sdfMotionCtrlr_t;
 
 /* SDK motions are allocated as 0x34-byte records; model slots retain these nodes. */
-struct Motion {
-    struct Motion *next;
-    SdfModel *owner;
+struct sdfMotionCtrlr_t {
+    struct sdfMotionCtrlr_t *next;
+    sdfModelRootNode_t *owner;
     MotionTable *motionTable;
     s32 unkC;
     DevRequest *request;
@@ -1957,7 +1951,7 @@ struct SdfCommandNode {
     s8 packetSelector;
     s16 quadwordCount;
     void *payload; /* Packet bytes for kind 1; serialized commands for kinds 2/3. */
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 };
 
 /* Allocated as 0x100-byte nodes; each owns a circular list of child draw nodes. */
@@ -1966,7 +1960,7 @@ struct SdfDrawNode {
     struct SdfDrawNode *next;     /* 0x04 */
     struct SdfDrawNode *parent;   /* 0x08 */
     struct SdfDrawNode *children; /* 0x0C */
-    struct SdfModel *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
+    struct sdfModelRootNode_t *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
     u16 flags;                   /* 0x14 */
     s16 unk16;                   /* 0x16: constructor sentinel is -1 */
     s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
@@ -1985,13 +1979,13 @@ struct SdfDrawNode {
 };
 
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
-struct SdfModel {
+struct sdfModelRootNode_t {
     DevRequest *list;
     SdfDrawNode *rootNode;
     void *assetData;
     DevRequest *resources;
     DevRequest *slotPairs;
-    struct Motion *motionList;
+    struct sdfMotionCtrlr_t *motionList;
     u8 unk18;
     u8 flags;
     u16 drawFlags;
@@ -2012,7 +2006,7 @@ struct SdfModel {
 
 struct MdlDevSlot {
     struct MdlDevSlot *next;
-    SdfModel *model;
+    sdfModelRootNode_t *model;
     s32 remaining;
 };
 
@@ -2042,8 +2036,8 @@ struct EffTrackPolyData {
     s32 step;                   /* 0x14 */
     u128 *points;                /* 0x18 */
     u32 *colors;                 /* 0x1C: gradient entries after points */
-    SdfAsset *nodeHandle;        /* 0x20: owned draw asset */
-    SdfMemBlock *resourceHandle; /* 0x24: containing allocation */
+    sdfMat_t *nodeHandle;        /* 0x20: owned draw asset */
+    sdfMemHandle_t *resourceHandle; /* 0x24: containing allocation */
 };
 
 /* Thirteen copied words, followed by an update counter and owned history. */
@@ -2081,9 +2075,9 @@ struct IpuDmaState {
     u32 ipuControl;
 };
 
-struct MovObj;
+struct movieStream_t;
 
-struct DevState;
+struct sdfFileCmdHandle_t;
 
 /* Protocol IDs use distinct byte-sized storage codes in DevState. */
 typedef u8 SdfDevOperationCode;
@@ -2091,11 +2085,11 @@ typedef u8 SdfDevOperationCode;
 typedef s8 SdfDevStateCode;
 
 /* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
-struct DevState {
-    struct DevState *next; /* 0x00 */
-    struct DevState *previous; /* 0x04 */
-    struct DevState *workerNext; /* 0x08 */
-    struct DevState *workerPrev; /* 0x0C */
+struct sdfFileCmdHandle_t {
+    struct sdfFileCmdHandle_t *next; /* 0x00 */
+    struct sdfFileCmdHandle_t *previous; /* 0x04 */
+    struct sdfFileCmdHandle_t *workerNext; /* 0x08 */
+    struct sdfFileCmdHandle_t *workerPrev; /* 0x0C */
     char *resolvedPath; /* 0x10 */
     u8 workerIndex; /* 0x14 */
     SdfDevOperationCode operation; /* 0x15 */
@@ -2109,7 +2103,7 @@ struct DevState {
     s32 result; /* 0x2C */
     s32 transferred; /* 0x30 */
     u8 pad34[4]; /* 0x34 */
-    void (*callback)(struct DevState *, s32, s32, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32); /* 0x38 */
     s32 callbackContext; /* 0x3C: opaque callback-context word */
 };
 
@@ -2120,7 +2114,7 @@ struct MovLinearStream;
 
 /* Chip-heap work record for the linear movie stream (0x14 bytes). */
 struct MovLinearStream {
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *bufferStart;
     u8 *readCursor;
     u8 *writeCursor;
@@ -2136,10 +2130,10 @@ struct MovPacStream {
     s32 packetBytes;
     s32 blockBytes;
     u8 scratchBuffer[0x20];
-    struct SdfMemBlock *payloadAllocation;
+    struct sdfMemHandle_t *payloadAllocation;
     u8 *blockMask;
     s32 blockIndex;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *pacInputBuffer;
     u8 *pacBuffer;
     s32 pacReadOffset;
@@ -2157,10 +2151,10 @@ union MovObjStream {
     struct MovPacStream *pac;
 };
 
-struct SdfStreamFrameNode {
-    struct SdfStreamFrameNode *streamPrev;
-    struct SdfStreamFrameNode *streamNext;
-    struct SdfStreamFrameNode *next;
+struct sdfIpuDecodeCb_t {
+    struct sdfIpuDecodeCb_t *streamPrev;
+    struct sdfIpuDecodeCb_t *streamNext;
+    struct sdfIpuDecodeCb_t *next;
     u8 active;
     u8 queued;
     u8 ipuCycleInitialized; /* First-use IPU setup has run for this playback cycle. */
@@ -2182,7 +2176,7 @@ struct SdfStreamFrameNode {
     void *transferPacketBuffers[2];
     u32 transferPacketBytes;
     s32 resourceWord;
-    SdfTexResource *textureHead;
+    sdfGsMemSlice_t *textureHead;
     u16 width;
     u16 height;
     u32 cycleLength;
@@ -2195,15 +2189,15 @@ struct SdfStreamFrameNode {
     u8 firstSlot;
     u8 *scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
-    struct MovObj *readContext; /* Owner context passed to the read callback. */
+    s32 (*read)(struct sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
+    struct movieStream_t *readContext; /* Owner context passed to the read callback. */
     u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
     IpuDmaState dma;
 };
 
-struct MovObj {
+struct movieStream_t {
     u8 active;
     u8 state;
     u8 stopRequested;
@@ -2213,7 +2207,7 @@ struct MovObj {
     u32 unk08;
     u16 unk0C;
     u16 unk0E;
-    struct DevState *deviceState;
+    struct sdfFileCmdHandle_t *deviceState;
     s32 totalBytes;
     s32 remainingBytes;
     MovObjStream stream;
@@ -2221,7 +2215,7 @@ struct MovObj {
     u8 pad21;
     u8 packetLimit;
     u8 pad23;
-    SdfStreamFrameNode soundNode;
+    sdfIpuDecodeCb_t soundNode;
 };
 
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
@@ -2236,19 +2230,19 @@ struct SdfStreamInputDmaTag {
 /* The model-object allocation ends with its complete embedded stream node. */
 struct MdlObj {
     u8 *sourceAddress; /* 0x00: frame data passed to sdfIpuSetDecodeParams */
-    SdfMemBlock *backingAllocation; /* 0x04: released by mdlDeleteEffectResrc_IPU */
+    sdfMemHandle_t *backingAllocation; /* 0x04: released by mdlDeleteEffectResrc_IPU */
     u8 inUse; /* 0x08: claimed by a model resource item */
     u8 initialized; /* 0x09: stream-node initialization guard */
     u8 pad0A[6];
     s32 sourceSize; /* 0x10 */
     u8 pad14[0x0C];
-    SdfStreamFrameNode soundNode; /* 0x20: complete 0x8C embedded node */
+    sdfIpuDecodeCb_t soundNode; /* 0x20: complete 0x8C embedded node */
 };
 
 struct MdlObjectAttachment {
     MdlCtx *owner;
     struct MdlObj *object; /* Borrowed from the owner's heterogeneous part list. */
-    struct SdfTex *texture; /* Borrowed texture-list node used for stream creation. */
+    struct sdfTexHandle_t *texture; /* Borrowed texture-list node used for stream creation. */
     s32 minimumTime;
     u8 attributes[8];
 };
@@ -2310,15 +2304,15 @@ struct MdlCtx {
         } h;
     } current;
     MdlResourceItem *resourceItems;
-    SdfModel *inner;
-    Motion *first;
-    Motion *slots[4];
+    sdfModelRootNode_t *inner;
+    sdfMotionCtrlr_t *first;
+    sdfMotionCtrlr_t *slots[4];
     MdlDevList *devList;
     f32 objectRadius; /* Propagated to the rebuilt object's inner radius. */
 };
 
-/* RenderWare XYZ axis used by the native SDF matrix builders. */
-struct RwV3d {
+/* Three-component vector; the VU0 loaders read it as the xyz of a quadword. */
+struct sdfVector3_t {
     f32 x;
     f32 y;
     f32 z;
@@ -2382,7 +2376,7 @@ struct EffPacketParams {
 
 extern EffPacketParams D_0056ADB8;
 
-extern SdfPoolNode *D_0031FEF8[];
+extern sdfGrOt_t *D_0031FEF8[];
 
 extern u8 D_0031FEB0[];
 
@@ -2440,7 +2434,7 @@ extern EffRandState dds3EffectBase[];
 
 void dds3EffectDelete(EffNode *node);
 
-void dds3EffectPartDelete(EffParamWork *work);
+void dds3EffectPartDelete(effPartHandle_t *work);
 
 void dds3EffectPartialMultiBlurDraw(EffBlurTemplate *owner);
 
@@ -2496,27 +2490,27 @@ struct EffParamTable {
     EffParamTableRecord records[1];
 };
 
-EffParamWork *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex);
+effPartHandle_t *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex);
 
 /* Return a borrowed block at the selected record's signed relative offset. */
 void *dds3EffectPCPDataGetData(const EffParamTable *table, s32 recordIndex);
 
 /* Optional source and matrix operations retain their generic pointer domains. */
-void dds3EffectPartSetPosition(EffParamWork *work, void *source);
+void dds3EffectPartSetPosition(effPartHandle_t *work, void *source);
 
-void dds3EffectPartSetScale(EffParamWork *work, f32 scale);
+void dds3EffectPartSetScale(effPartHandle_t *work, f32 scale);
 
-void dds3EffectPartSetRotateMatrix(EffParamWork *work, void *matrix);
+void dds3EffectPartSetRotateMatrix(effPartHandle_t *work, void *matrix);
 
-void dds3EffectPartSetColor(EffParamWork *work, u32 value);
+void dds3EffectPartSetColor(effPartHandle_t *work, u32 value);
 
-EffParamWork *dds3EffectPartCreate(u16 kind, void *source);
+effPartHandle_t *dds3EffectPartCreate(u16 kind, void *source);
 
-EffParamWork *dds3EffectPartCopy(EffParamWork *source);
+effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *source);
 
-void *dds3EffectPartGetHandle(EffParamWork *work);
+void *dds3EffectPartGetHandle(effPartHandle_t *work);
 
-void dds3EffectPartDraw(EffParamWork *work);
+void dds3EffectPartDraw(effPartHandle_t *work);
 
 void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color);
 
@@ -2596,7 +2590,7 @@ void mdlSingleMotion(MdlCtx *ctx, s32 searchId, s32 motionIndex);
 
 void mdlSetColor(MdlCtx *ctx, u32 value);
 
-void mdlLink(MdlCtx *ctx, struct SdfPoolNode **surfaces);
+void mdlLink(MdlCtx *ctx, struct sdfGrOt_t **surfaces);
 
 void mdlSetPosition(MdlCtx *ctx);
 
@@ -2604,7 +2598,7 @@ extern void *memcpy(void *, const void *, unsigned int);
 
 extern void *memset(void *s, int c, u32 n);
 
-struct SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes);
+struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
 
 /* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
@@ -2612,10 +2606,10 @@ s32 sdfGrAllocPacketBuff(s32 size);
 
 void *sdfChipAllocDirect(s32 size);
 
-void sdfDrawTagLink(struct SdfListHead *list, u32 packetAddress);
+void sdfDrawTagLink(struct sdfDrawTag_t *list, u32 packetAddress);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
-void SetRotateMatrixAxis(f32 angle, const RwV3d *axis);
+void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
 
 /* Apply the primary VU0 matrix bank vf28-vf31 to basis vectors vf24-vf27,
  * then replace vf28-vf31 with the four transformed vectors. */
@@ -2627,32 +2621,32 @@ void effBTLFieldLightAxisSet(const f32 *axis);
 
 void effBTLFieldLightAnimationSet(s32 kind, f32 value);
 
-void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
                               s32 (*allocatePacket)(s32));
 
-void sdf3DPrimLinkTm(SdfListHead *packetList,
+void sdf3DPrimLinkTm(sdfDrawTag_t *packetList,
                            s32 (*allocatePacket)(s32));
 
-u32 sdfModelGetMarkPosCount(const struct SdfModel *model);
+u32 sdfModelGetMarkPosCount(const struct sdfModelRootNode_t *model);
 
-struct SdfAsset *sdfMatNew(void);
+struct sdfMat_t *sdfMatNew(void);
 
 f32 sdfCos(f32 angle);
 
-void sdfDrawTagInit(struct SdfListHead *list);
+void sdfDrawTagInit(struct sdfDrawTag_t *list);
 
-extern s32 sdfModelGetMarkPos(SdfModel *model, s32 value);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *model, s32 value);
 
 /* Set vf28-vf31 to vf28-vf31 * vf24-vf27 in place. */
 void MultMatrixRevNoArg(void);
 
 void sdfChipFreeDirect(void *memory);
 
-void sdfMemFreeDirect(struct SdfMemBlock *allocation);
+void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
 
-u32 sdfMemLock(struct SdfMemBlock *allocation);
+u32 sdfMemLock(struct sdfMemHandle_t *allocation);
 
-void sdfMatSetConstant(struct SdfAsset *asset, f32 value);
+void sdfMatSetConstant(struct sdfMat_t *asset, f32 value);
 
 f32 sdfSin(f32 angle);
 
@@ -2809,8 +2803,8 @@ EffPCPTwinWork *effPCPHama01Create(void *src) {
 
 void effPCPHama01Delete(EffPCPTwinWork *work) {
     s32 pairIndex;
-    EffParamWork **pairHandleCursor;
-    EffParamWork **sharedHandleCursor;
+    effPartHandle_t **pairHandleCursor;
+    effPartHandle_t **sharedHandleCursor;
 
     pairHandleCursor = &work->pair[0][0];
     sharedHandleCursor = work->shared;
@@ -2903,7 +2897,7 @@ void effPCPHama02PartInit(EffPCPStaggered *work, s32 index) {
 
 EffPCPStaggered *effPCPHama02Create(void *args) {
     EffPCPStaggered *work = sdfChipAllocDirect(sizeof(EffPCPStaggered));
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i = 0;
 
     do {
@@ -2926,7 +2920,7 @@ EffPCPStaggered *effPCPHama02Create(void *args) {
 }
 
 void effPCPHama02Delete(EffPCPStaggered *work) {
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i;
 
     for (i = 7; i >= 0; i--) {
@@ -2939,7 +2933,7 @@ void effPCPHama02Delete(EffPCPStaggered *work) {
 
 EffPCPStaggered *effPCPHama02Copy(EffPCPStaggered *source) {
     EffPCPStaggered *work = sdfChipAllocDirect(sizeof(EffPCPStaggered));
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i = 0;
 
     do {
@@ -3126,7 +3120,7 @@ void effPCPMHanma01PartInit(EffPCPDelayedPairs *work, s32 index) {
 
 EffPCPDelayedPairs *effPCPMHanma01Create(void *source) {
     EffPCPDelayedPairs *work = sdfChipAllocDirect(sizeof(EffPCPDelayedPairs));
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i;
 
     for (i = 0; i < 6; i++) {
@@ -3147,7 +3141,7 @@ EffPCPDelayedPairs *effPCPMHanma01Create(void *source) {
 }
 
 void effPCPMHanma01Delete(EffPCPDelayedPairs *work) {
-    EffParamWork **handle = &work->handle[1];
+    effPartHandle_t **handle = &work->handle[1];
     s32 i;
 
     for (i = 5; i >= 0; i--) {
@@ -3159,8 +3153,8 @@ void effPCPMHanma01Delete(EffPCPDelayedPairs *work) {
 }
 
 EffPCPDelayedPairs *effPCPMHanma01Copy(EffPCPDelayedPairs *source) {
-    EffParamWork **sourceHandle;
-    EffParamWork **workHandle;
+    effPartHandle_t **sourceHandle;
+    effPartHandle_t **workHandle;
     s32 i;
     EffPCPDelayedPairs *work = sdfChipAllocDirect(sizeof(EffPCPDelayedPairs));
     sourceHandle = &source->handle[1];
@@ -3223,7 +3217,7 @@ void effPCPMudoPartInit(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effPCPMudoCreate(void *source) {
-    SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
+    sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
     EffPCPChargeWork *work = (void *)sdfMemLock(resource);
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPCPDataPartCreate(source, 0);
@@ -3244,9 +3238,9 @@ void effPCPMudoDelete(EffPCPChargeWork *work) {
 }
 
 EffPCPChargeWork *effPCPMudoCopy(EffPCPChargeWork *source) {
-    SdfMemBlock *resource = sdfMemAllocDirect(0x1354);
+    sdfMemHandle_t *resource = sdfMemAllocDirect(0x1354);
     EffPCPChargeWork *work = (void *)sdfMemLock(resource);
-    EffParamWork *firstHandle = source->primaryHandle;
+    effPartHandle_t *firstHandle = source->primaryHandle;
     work->allocationHandle = resource;
     work->primaryHandle = dds3EffectPartCopy(firstHandle);
     work->secondaryHandle = dds3EffectPartCopy(source->secondaryHandle);
@@ -3275,7 +3269,7 @@ void effPCPMudoSetColor(EffPCPChargeWork *work, u32 color) {
 
 EffPCPSpawnOnceWork *effPCPHwave01Create(void *src) {
     EffPCPSpawnOnceWork *dst;
-    EffParamWork *handle;
+    effPartHandle_t *handle;
 
     dst = sdfChipAllocDirect(sizeof(EffPCPSpawnOnceWork));
     dst->primaryHandle = dds3EffectPCPDataPartCreate(src, 0);
@@ -3296,7 +3290,7 @@ void effPCPHwave01Delete(EffPCPSpawnOnceWork *work) {
 
 EffPCPSpawnOnceWork *effPCPHwave01Copy(EffPCPSpawnOnceWork *src) {
     EffPCPSpawnOnceWork *dst;
-    EffParamWork *handle;
+    effPartHandle_t *handle;
 
     dst = sdfChipAllocDirect(sizeof(EffPCPSpawnOnceWork));
     dst->primaryHandle = dds3EffectPartCopy(src->primaryHandle);
@@ -3463,7 +3457,7 @@ void effPCPZiodin02Init(EffPCPThunderGroup *group) {
         effPCPZiodin02Param->vel[1] = 0;
         effPCPZiodin02Param->vel[0] = sinv * radius;
         effPCPZiodin02Param->vel[2] = cosv * radius;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (50.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPZiodin02Param->pos[0] = 0;
         effPCPZiodin02Param->pos[2] = 0;
@@ -3556,7 +3550,7 @@ void effPCPZiodin03Init(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPZiodin03Param->pos[0] = 0;
         effPCPZiodin03Param->pos[2] = 0;
@@ -3651,7 +3645,7 @@ void effPCPZiodin04Init(EffPCPThunderGroup *group) {
         effPCPZiodin04Param->vel[1] = 0;
         effPCPZiodin04Param->vel[0] = sinv * radius;
         effPCPZiodin04Param->vel[2] = cosv * radius;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPZiodin04Param->pos[0] = 0;
         effPCPZiodin04Param->pos[2] = 0;
@@ -3923,7 +3917,7 @@ void effPCPShockWave02Init(EffPCPThunderGroup *group) {
         axis[0] = cosv;
         axis[1] = 0;
         axis[2] = -sinv;
-        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct RwV3d *)axis);
+        SetRotateMatrixAxis(-(dds3GetRandFloatA(dds3EffectBase) * (55.0f * EFF_DEG2RAD) + 5.0f * EFF_DEG2RAD), (const struct sdfVector3_t *)axis);
         height = (dds3GetRandFloatA(dds3EffectBase) * 0.65f + (1.0f - 0.65f)) * 500.0f;
         effPCPShockWave02Param->pos[0] = 0;
         effPCPShockWave02Param->pos[2] = 0;
@@ -4876,7 +4870,7 @@ void effPCPBufuIceDelete(EffPCPSpinWork *work) {
 }
 
 void effPCPBufuIceDraw(EffPCPSpinWork *work) {
-    EffParamWork *handle = work->handle0;
+    effPartHandle_t *handle = work->handle0;
     u128 mtx[4];
 
     dds3EffectPartSetPosition(handle, work);
@@ -4942,7 +4936,7 @@ void effPCPBufuraIceDelete(EffPCPSpinWork *work) {
 }
 
 void effPCPBufuraIceDraw(EffPCPSpinWork *work) {
-    EffParamWork *handle[2];
+    effPartHandle_t *handle[2];
     u128 mtx[4];
 
     handle[0] = work->handle0;
@@ -5017,7 +5011,7 @@ void effPCPBufudnIceDelete(EffPCPSpinWork *work) {
 }
 
 void effPCPBufudnIceDraw(EffPCPSpinWork *work) {
-    EffParamWork *handle[2];
+    effPartHandle_t *handle[2];
     u128 mtx[4];
 
     handle[0] = work->handle0;
@@ -5326,7 +5320,7 @@ void effPCPThunderSphereExpSetScale(EffPCPGrowWork *work, f32 scale) {
 EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     u32 count = segments * 4 + 4;
     EffPCPBeamNode *node = sdfChipAllocDirect(sizeof(EffPCPBeamNode));
-    SdfMemBlock *allocation = sdfMemAllocDirect(count * 20);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * 20);
     f32 *points = (void *)sdfMemLock(allocation);
 
     memset(points, 0, count * 20);
@@ -5338,7 +5332,7 @@ EffPCPBeamNode *dds3RingPolyExpListCreate(u32 segments) {
     node->allocationHandle = allocation;
     node->scale = 1.0f;
     node->assetHandle = sdfMatNew();
-    sdfMatSetConstant((struct SdfAsset *)node->assetHandle, 1.0f);
+    sdfMatSetConstant((struct sdfMat_t *)node->assetHandle, 1.0f);
     EE_MMI_UNIT_MATRIX(node->localMatrix);
     EE_MMI_UNIT_MATRIX(node->matrix);
     memset(&D_0056ADB8, 0, sizeof(D_0056ADB8));
@@ -5355,14 +5349,14 @@ void dds3RingPolyExpListDelete(EffPCPBeamNode *node) {
 /* vu0 routine: compose the beam transform and submit batches of its vertices. */
 void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     f32 scaleMatrix[4][4];
-    SdfListHead *list;
+    sdfDrawTag_t *list;
     s32 count;
-    SdfPoolNode *entry;
+    sdfGrOt_t *entry;
 
     if (node->vertexCount == 0) {
         return;
     }
-    list = (SdfListHead *)sdfGrAllocPacketBuff(0x20);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     EE_MMI_UNIT_MATRIX(scaleMatrix);
     scaleMatrix[2][2] = scaleMatrix[1][1] = scaleMatrix[0][0] = node->scale;
@@ -5514,13 +5508,13 @@ EffPCPGroupSet *effPCPRadiateThunderCopy(EffPCPGroupSet *work) {
         activeGroupFlags = work->head.activeGroups;
         groupByteOffset = 0;
         groupSet->duplicateHandle = sdfMemAllocDirect(allocationBytes);
-        groupSet->duplicates = (EffParamWork **)sdfMemLock(groupSet->duplicateHandle);
+        groupSet->duplicates = (effPartHandle_t **)sdfMemLock(groupSet->duplicateHandle);
         memset(groupSet->duplicates, 0, allocationBytes);
         for (; groupIndex < 4; groupIndex++) {
-            EffParamWork **destinationHandles = (EffParamWork **)((u8 *)groupSet->duplicates + groupByteOffset);
+            effPartHandle_t **destinationHandles = (effPartHandle_t **)((u8 *)groupSet->duplicates + groupByteOffset);
 
             if (*activeGroupFlags != 0) {
-                EffParamWork *sourceHandle = *(EffParamWork **)(groupByteOffset + (u32)work->duplicates);
+                effPartHandle_t *sourceHandle = *(effPartHandle_t **)(groupByteOffset + (u32)work->duplicates);
                 for (entryIndex = 0; entryIndex < entryCount; entryIndex++) {
                     *destinationHandles++ = dds3EffectPartCopy(sourceHandle);
                 }
@@ -5536,8 +5530,8 @@ void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
     u32 releaseIndex = 0;
     u32 releaseCount = work->head.count;
     EffPCPGroupEntry *fragmentEntryCursor = work->entries;
-    EffParamWork **duplicateHandleBase;
-    EffParamWork **duplicateHandleCursor;
+    effPartHandle_t **duplicateHandleBase;
+    effPartHandle_t **duplicateHandleCursor;
 
     if (releaseCount != 0) {
         do {
@@ -5554,7 +5548,7 @@ void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
         releaseIndex = 0;
         if (releaseCount != 0) {
             do {
-                EffParamWork *currentHandle = *duplicateHandleCursor++;
+                effPartHandle_t *currentHandle = *duplicateHandleCursor++;
                 if (currentHandle != 0) {
                     dds3EffectPartDelete(currentHandle);
                 }
@@ -5620,7 +5614,7 @@ void effPCPMakkaDelete(EffPCPSprayWork *work) {
     u32 i = 0;
 
     if (work->count != 0) {
-        EffParamWork **handle = work->handle;
+        effPartHandle_t **handle = work->handle;
         do {
             if (*handle != 0) {
                 dds3EffectPartDelete(*handle);

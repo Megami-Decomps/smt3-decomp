@@ -1,12 +1,12 @@
 #include "common.h"
 #include "ps2asm.h"
 
-struct RwV3d;
-struct SdfGsPacketHeader;
-struct SdfGsRegisterWrite;
+struct sdfVector3_t;
+struct sdfGrPacketHeader_t;
+struct sdfGrTagStdReg_t;
 struct IpuDmaState;
-struct SdfListHead;
-union SdfSubParam;
+struct sdfDrawTag_t;
+union sdfMatUvwParm_t;
 union SdfDrawTransform;
 struct SdfGsTextureStateValues;
 struct SdfDmaTagHeader;
@@ -14,58 +14,57 @@ struct SdfObjectRefCommand;
 struct MotionEntry;
 struct SdfMotionKeyTrack;
 struct SdfVuColorTransform;
-struct KwlnDrawVectorParams;
-struct VuLightingPacket;
+struct sdf3DFogParam_t;
+struct sdf3DTmPacketData_t;
 struct SdfDrawPacket;
 struct SdfCamera;
 struct VuBlendNode;
 struct SdfPadEntry;
-struct ConsMatrixPacket;
+struct sdf3DViewportPacket_t;
 struct DmaPacketHeader;
-struct ConsFrustumPacket;
+struct sdf3DFogPacket_t;
 struct SdfChunkHeader;
 struct SoundFormat;
-struct RwMatrix;
-struct SdfAssetEntry;
+struct sdfMatrix4_t;
+struct sdfMatPacket_t;
 struct SdfDmaReferenceChainPacket;
 struct SdfTextureDrawPacket;
-struct SdfProjectionRecord;
-struct SdfThreadNode;
-struct SdfTexRef;
-struct SdfTexBuf;
-struct SdfTexResource;
-struct SdfStreamFrameNode;
+struct sdf3DScreenParam_t;
+struct sdfThCB_t;
+struct sdfTexPacket_t;
+struct sdfGsMemSlice_t;
+struct sdfIpuDecodeCb_t;
 union MovObjStream;
-struct MovObj;
-struct SdfGraphObj;
-struct SdfTex;
-struct SdfPacketBuilder;
-struct SdfAsset;
-struct SdfMemBlock;
+struct movieStream_t;
+struct sdfGrFrameSet_t;
+struct sdfTexHandle_t;
+struct sdfGrFramePacket_t;
+struct sdfMat_t;
+struct sdfMemHandle_t;
 struct DevRequest;
 struct SdfCommandNode;
 struct SdfDrawNode;
-struct SdfModel;
+struct sdfModelRootNode_t;
 struct SdfMotionCommand;
 struct MotionTable;
-struct Motion;
+struct sdfMotionCtrlr_t;
 struct SdfMotionBindingDispatch;
 struct SdfMotionBindingHead;
 struct SdfMotionKeyBinding;
 struct SdfMotionIndexedBinding;
 struct SdfPrimitiveRequest;
-struct SdfTextureFileHeader;
+struct TMX_HEADER_t;
 struct SdfGeneratedLookupTexture;
 struct MovPacStream;
-struct DevState;
+struct sdfFileCmdHandle_t;
 typedef int s128 __attribute__((mode(TI)));
-/* RenderWare XYZ axis used by the native SDF matrix builders. */
-typedef struct RwV3d
+/* Three-component vector; the VU0 loaders read it as the xyz of a quadword. */
+typedef struct sdfVector3_t
 {
     f32 x;
     f32 y;
     f32 z;
-} RwV3d;
+} sdfVector3_t;
 /* Write three axis components and twice acos(W), using the native small
  * denominator fallback when sqrt(1-W*W) is near zero. */
 void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
@@ -250,16 +249,16 @@ enum {
 };
 /* Appending the packet patches the DMA tag's link; the VIF and GIF words
  * retain the renderer's original commands and register-list encoding. */
-typedef struct SdfGsPacketHeader {
+typedef struct sdfGrPacketHeader_t {
     u64 dmaTag;
     u64 vifCommands;
     u64 gifTag;
     u64 gifRegisters;
-} QWORD_ALIGNED SdfGsPacketHeader;
-typedef struct SdfGsRegisterWrite {
+} QWORD_ALIGNED sdfGrPacketHeader_t;
+typedef struct sdfGrTagStdReg_t {
     u64 value;
     u64 registerId;
-} SdfGsRegisterWrite;
+} sdfGrTagStdReg_t;
 /* Serialized byte consumed by the GS texture-state packet builder. */
 typedef u8 SdfTextureClampMode;
 /* IPU register state saved across stream callbacks (0x24 bytes). */
@@ -284,8 +283,8 @@ struct MovLinearStream;
 
 
 /* DMA packet list cursors and endpoints (0x20); DDS1/2 game/code_002D33C8/0032C278.c. */
-typedef struct SdfListHead {
-    struct SdfListHead *nextList; /* CPU link between lists; first/last are DMA addresses. */
+typedef struct sdfDrawTag_t {
+    struct sdfDrawTag_t *nextList; /* CPU link between lists; first/last are DMA addresses. */
     u32 first;
     u32 last;
     u32 unkC;
@@ -293,9 +292,9 @@ typedef struct SdfListHead {
     u32 secondReferenceSource; /* Optional second DMA reference prefix. */
     u32 unk18;
     u32 unk1C;
-} SdfListHead;
+} sdfDrawTag_t;
 /* Optional packed or five-float state block owned by an SdfAsset. */
-typedef union SdfSubParam {
+typedef union sdfMatUvwParm_t {
     struct {
         u64 unk0;
         u64 unk8;
@@ -315,7 +314,7 @@ typedef union SdfSubParam {
         f32 rotationInput;
         u32 unk14;
     } transformInputs;
-} SdfSubParam;
+} sdfMatUvwParm_t;
 /* Draw entries store six transform floats and expose the same bytes as three qwords. */
 typedef union SdfDrawTransform {
     f32 m[6];
@@ -378,19 +377,19 @@ typedef struct SdfVuColorTransform {
 /* Shared fog/depth state consumed by sdf3DMakeFogPacket (0x14).
  * The viewer config serializes fogNear, depthNear, fogFar, depthFar, fogColor;
  * timeline payloads store fogFar before fogNear instead. */
-typedef struct KwlnDrawVectorParams {
+typedef struct sdf3DFogParam_t {
     f32 fogNear;    /* 0x00: minimum fog range. */
     f32 fogFar;     /* 0x04: maximum fog range. */
     f32 depthNear;  /* 0x08: near depth used in the projection coefficients. */
     f32 depthFar;   /* 0x0C: far depth used in the projection coefficients. */
     u32 fogColor;   /* 0x10: packed GS FOGCOL value. */
-} KwlnDrawVectorParams;
+} sdf3DFogParam_t;
 /* One frame of transformed matrix rows, normalized lighting rows and VIF codes. */
-typedef struct VuLightingPacket {
+typedef struct sdf3DTmPacketData_t {
     u128 matrix[4];
     u128 scaledRows[3];
     u32 tag[4];
-} VuLightingPacket;
+} sdf3DTmPacketData_t;
 /* Variable-sized packet header initialized by sdf2DMakePrimPacketHeader. */
 typedef struct SdfDrawPacket {
     u16 quadwords;
@@ -459,7 +458,7 @@ typedef struct SdfPadEntry {
     s16 lastLargeMotor;      /* 0x26 */
 } SdfPadEntry;
 /* Shared 0xD0 VIF packet: two stored matrices, three vector slots, and trailer. */
-typedef struct ConsMatrixPacket {
+typedef struct sdf3DViewportPacket_t {
     u16 quadwords;        /* 0x00 */
     u8 unknown02[6];      /* 0x02 */
     u32 reservedWord;     /* 0x08 */
@@ -473,7 +472,7 @@ typedef struct ConsMatrixPacket {
     u32 mscalCommand;     /* 0xC4 */
     u32 unknownC8;        /* 0xC8 */
     u32 unknownCC;        /* 0xCC */
-} QWORD_ALIGNED ConsMatrixPacket;
+} QWORD_ALIGNED sdf3DViewportPacket_t;
 /* Shared 0x20-byte DMA/VIF reference header. Unrecovered bytes stay opaque. */
 typedef struct DmaPacketHeader {
     u16 quadwords; /* 0x00 */
@@ -566,7 +565,7 @@ extern u8 sdfCameraTm[];
 
 /* DMA/VIF prefix, left/right projection terms, then a one-register GIF write
  * and the VU execution command. */
-typedef struct ConsFrustumPacket {
+typedef struct sdf3DFogPacket_t {
     u64 dmaTag;
     u64 vifUnpackCode;
     f32 right;
@@ -581,7 +580,7 @@ typedef struct ConsFrustumPacket {
     u32 reservedA;
     u32 reservedB;
     u32 reservedC;
-} ConsFrustumPacket;
+} sdf3DFogPacket_t;
 /* Emit projection depth coefficients and a GS FOGCOL A+D write. */
 
 
@@ -707,24 +706,24 @@ typedef struct SoundFormat {
 /* Normalize the supplied axis and write an XYZW quaternion. The native
  * conversion uses nonnegative square roots for both half-angle components. */
 void sdfQuatFromAxisAngle(f32 *out, f32 x, f32 y, f32 z, f32 angle);
-/* RenderWare-style three-axis plus position matrix consumed by VU0 loaders. */
-typedef struct RwMatrix {
-    RwV3d right; /* 0x00 */
+/* Row-major 4x4 matrix: three axes plus a position row, loaded by VU0. */
+typedef struct sdfMatrix4_t {
+    sdfVector3_t right; /* 0x00 */
     u32 flags; /* 0x0C */
-    RwV3d up; /* 0x10 */
+    sdfVector3_t up; /* 0x10 */
     u32 pad1; /* 0x1C */
-    RwV3d at; /* 0x20 */
+    sdfVector3_t at; /* 0x20 */
     u32 pad2; /* 0x2C */
-    RwV3d pos; /* 0x30 */
+    sdfVector3_t pos; /* 0x30 */
     u32 pad3; /* 0x3C */
-} RwMatrix;
+} sdfMatrix4_t;
 #define PCP_COPY_VECTOR_F32(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
     : "=m" (*(QuadF32 *)(dst)) \
     : "r" (dst), "r" (src), "m" (*(const QuadF32 *)(src)) \
     : "$2")
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
-typedef struct SdfAssetEntry {
+typedef struct sdfMatPacket_t {
     u32 pad00;             /* 0x00 */
     u32 unk04;             /* 0x04 */
     u32 unk08;             /* 0x08 */
@@ -743,16 +742,16 @@ typedef struct SdfAssetEntry {
     SdfDrawTransform transforms[2]; /* 0x68 */
     u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
     u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
-} SdfAssetEntry;
+} sdfMatPacket_t;
 /* GIF tag followed by a REF transfer and the patchable NEXT link. */
 typedef struct SdfDmaReferenceChainPacket {
-    SdfGsPacketHeader header;
+    sdfGrPacketHeader_t header;
     u64 referenceTag;
     u64 referenceVifCommands;
     u64 nextTag;
     u64 zeroTailWord;
 } SdfDmaReferenceChainPacket;
-void sdfAppendPacketRange(struct SdfListHead *list, u32 packetAddress,
+void sdfAppendPacketRange(struct sdfDrawTag_t *list, u32 packetAddress,
                           u32 rangeTailAddress);
 /* Fixed-size texture packet; constructor allocation and writes cover 0x50. */
 typedef struct SdfTextureDrawPacket {
@@ -765,10 +764,10 @@ typedef struct SdfTextureDrawPacket {
     u64 registerAddressC;
 } SdfTextureDrawPacket;
 /* Complete static projection record, including the inverse-origin cache. */
-typedef struct SdfProjectionRecord {
+typedef struct sdf3DScreenParam_t {
     SdfCamera camera;
     f32 inverseOrigin[4]; /* 0x90 */
-} SdfProjectionRecord;
+} sdf3DScreenParam_t;
 /* Direct secondary-text sampling has an intentionally empty capturePrevious callback. */
 
 
@@ -838,8 +837,8 @@ void FromEuler(f32 x, f32 y, f32 z);
     "lwr %0, 0(%1)\n\t" \
     "lwl %0, 3(%1)" \
     : "=&r"(out) : "r"(src))
-void sdfDrawTagLink(struct SdfListHead *list, u32 packetAddress);
-void sdfDrawTagLinkRef(struct SdfListHead *list, u32 packetAddress);
+void sdfDrawTagLink(struct sdfDrawTag_t *list, u32 packetAddress);
+void sdfDrawTagLinkRef(struct sdfDrawTag_t *list, u32 packetAddress);
 typedef struct {
     f32 matrix[4][4];      /* 0x00 */
     u16 param0;            /* 0x40 */
@@ -849,7 +848,7 @@ typedef struct {
     u32 flags;             /* 0x4C */
     s16 nodeCount;         /* 0x50 */
     s16 selectedTriangleCount; /* 0x52: rejected-triangle index count */
-    SdfAssetEntry *node;   /* 0x54 */
+    sdfMatPacket_t *node;   /* 0x54 */
     u32 packedColor;       /* 0x58: packed RGBA word */
     f32 offsetX;           /* 0x5C */
     f32 offsetY;           /* 0x60 */
@@ -1057,22 +1056,18 @@ __asm__ volatile ( \
             "r"(firstColor), "r"(secondColor), "r"(blend), \
             "r"(0.0078125f), "r"(0x437F0000) \
         : "$2", "$3", "$4", "memory")
-void sdfTexSetWrapMode(struct SdfTex *texture, SdfTextureClampMode mode);
+void sdfTexSetWrapMode(struct sdfTexHandle_t *texture, SdfTextureClampMode mode);
 /* Linked registry node stored in the title's tracked-thread table (0x8). */
-typedef struct SdfThreadNode {
-    struct SdfThreadNode *next; /* 0x00 */
+typedef struct sdfThCB_t {
+    struct sdfThCB_t *next; /* 0x00 */
     s32 threadId;               /* 0x04 */
-} SdfThreadNode;
+} sdfThCB_t;
 /* Register a thread node, then start its entry function on the supplied stack. */
-void sdfStartThreadAndWait(SdfThreadNode *node, void (*entry)(void),
+void sdfStartThreadAndWait(sdfThCB_t *node, void (*entry)(void),
                            void *stack, s64 stackSize, s32 priority, s32 arg);
 /* Per-texture reference count and non-owning clone source (0x8). */
-typedef struct SdfTexRef {
-    struct SdfTex *cloneSource; /* Borrowed source pointer; marks the shared-primary clone path. */
-    s32 refCount;
-} SdfTexRef;
 /* Texture buffer GPU command words (0x40); DDS1/2 game/code_002D10B0/00329F60.c. */
-typedef struct SdfTexBuf {
+typedef struct sdfTexPacket_t {
     s32 gifTagWord; /* Low GIFtag word; NLOOP occupies bits 0-14. */
     u32 gifTagControl; /* High GIFtag control word; one packed register. */
     u64 gifTagRegisters; /* Packed register list: A+D. */
@@ -1082,22 +1077,22 @@ typedef struct SdfTexBuf {
     u64 textureRegister; /* GS TEX0_1/TEX0_2 register selector. */
     u64 clampState; /* GS CLAMP data. */
     u64 clampRegister; /* GS CLAMP_1/CLAMP_2 register selector. */
-} SdfTexBuf;
+} sdfTexPacket_t;
 /* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
-typedef struct SdfTexResource {
-    struct SdfTexResource *next; /* 0x00 */
-    struct SdfTexResource *prev; /* 0x04 */
+typedef struct sdfGsMemSlice_t {
+    struct sdfGsMemSlice_t *prev; /* 0x00 */
+    struct sdfGsMemSlice_t *next; /* 0x04 */
     u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
     u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
     s16 width;                  /* 0x14 */
     s16 height;                 /* 0x16 */
     s32 format;                 /* 0x18: GS pixel-storage mode */
-} SdfTexResource;
-typedef struct SdfStreamFrameNode {
-    struct SdfStreamFrameNode *streamPrev;
-    struct SdfStreamFrameNode *streamNext;
-    struct SdfStreamFrameNode *next;
+} sdfGsMemSlice_t;
+typedef struct sdfIpuDecodeCb_t {
+    struct sdfIpuDecodeCb_t *streamPrev;
+    struct sdfIpuDecodeCb_t *streamNext;
+    struct sdfIpuDecodeCb_t *next;
     u8 active;
     u8 queued;
     u8 ipuCycleInitialized; /* First-use IPU setup has run for this playback cycle. */
@@ -1119,7 +1114,7 @@ typedef struct SdfStreamFrameNode {
     void *transferPacketBuffers[2];
     u32 transferPacketBytes;
     s32 resourceWord;
-    SdfTexResource *textureHead;
+    sdfGsMemSlice_t *textureHead;
     u16 width;
     u16 height;
     u32 cycleLength;
@@ -1132,21 +1127,21 @@ typedef struct SdfStreamFrameNode {
     u8 firstSlot;
     u8 *scratchBuffer;
     u8 pad58[4];
-    s32 (*read)(struct SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
-    struct MovObj *readContext; /* Owner context passed to the read callback. */
+    s32 (*read)(struct sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
+    struct movieStream_t *readContext; /* Owner context passed to the read callback. */
     u8 inputFeedDmaInFlight;
     u8 unk65;
     u8 pad66[2];
     IpuDmaState dma;
-} SdfStreamFrameNode;
-typedef s32 (*SdfStreamRead)(SdfStreamFrameNode *, struct MovObj *, s32, void *, s32);
-void sdfIpuStrmDecodeInit(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext);
-void sdfSoundInitFormattedAndAppendNode(SdfStreamFrameNode *node, struct SoundFormat *format, SdfStreamRead read, struct MovObj *readContext, s32 resource);
+} sdfIpuDecodeCb_t;
+typedef s32 (*SdfStreamRead)(sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
+void sdfIpuStrmDecodeInit(sdfIpuDecodeCb_t *node, struct SoundFormat *format, SdfStreamRead read, struct movieStream_t *readContext);
+void sdfSoundInitFormattedAndAppendNode(sdfIpuDecodeCb_t *node, struct SoundFormat *format, SdfStreamRead read, struct movieStream_t *readContext, s32 resource);
 typedef union MovObjStream {
     struct MovLinearStream *linear;
     struct MovPacStream *pac;
 } MovObjStream;
-typedef struct MovObj {
+typedef struct movieStream_t {
     u8 active;
     u8 state;
     u8 stopRequested;
@@ -1156,7 +1151,7 @@ typedef struct MovObj {
     u32 unk08;
     u16 unk0C;
     u16 unk0E;
-    struct DevState *deviceState;
+    struct sdfFileCmdHandle_t *deviceState;
     s32 totalBytes;
     s32 remainingBytes;
     MovObjStream stream;
@@ -1164,26 +1159,26 @@ typedef struct MovObj {
     u8 pad21;
     u8 packetLimit;
     u8 pad23;
-    SdfStreamFrameNode soundNode;
-} MovObj;
+    sdfIpuDecodeCb_t soundNode;
+} movieStream_t;
 /* Graph target: two color buffers followed by the auxiliary/depth buffer (0x14). */
-typedef struct SdfGraphObj {
+typedef struct sdfGrFrameSet_t {
     s16 width;
     s16 unk2;
     s16 height;
     u8 bufferFormat;
     u8 auxiliaryFormat;
-    SdfTexResource *buffers[3];
-} SdfGraphObj;
+    sdfGsMemSlice_t *buffers[3];
+} sdfGrFrameSet_t;
 /* Linked texture and its two buffers/resources (0x40); DDS1/2 sdf/sdfTex.c and game texture units. */
-typedef struct SdfTex {
-    struct SdfTex *next;
-    struct SdfTex *prev;
-    SdfTexRef *reference;
+typedef struct sdfTexHandle_t {
+    struct sdfTexHandle_t *prev;
+    struct sdfTexHandle_t *next;
+    struct sdfTexHandle_t *origin;
     s16 width;
     s16 height;
-    SdfTexResource *primaryResource;
-    SdfTexResource *secondaryResource;
+    sdfGsMemSlice_t *primaryResource;
+    sdfGsMemSlice_t *secondaryResource;
     u8 paletteCount;
     u8 clutFormat;
     u8 pixelFormat;
@@ -1193,40 +1188,40 @@ typedef struct SdfTex {
     SdfTextureClampMode clampMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
     s32 resourceKey;
     s32 battleTextureSlot;
-    SdfTexBuf *primaryBuffer;
-    SdfTexBuf *secondaryBuffer;
+    sdfTexPacket_t *primaryBuffer;
+    sdfTexPacket_t *secondaryBuffer;
     u8 *paletteData; /* 0x30: retained copy of the texture's palette colors. */
     s32 paletteDataSize; /* 0x34: palette byte count from sdfTexGetPaletteByteSize. */
     s32 unk38;
     u8 *intensityMap; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
-} SdfTex;
+} sdfTexHandle_t;
 /* Return packed 64-bit TEX0, TEX1, and CLAMP states from the primary GS packet. */
-u64 sdfTexGetTex0Reg(SdfTex *texture);
-u64 sdfTexGetTex1Reg(SdfTex *texture);
-u64 sdfTexGetClampReg(SdfTex *texture);
+u64 sdfTexGetTex0Reg(sdfTexHandle_t *texture);
+u64 sdfTexGetTex1Reg(sdfTexHandle_t *texture);
+u64 sdfTexGetClampReg(sdfTexHandle_t *texture);
 /* Frame/depth builder state: one DMA/GIF header and two A+D register writes. */
-typedef struct SdfPacketBuilder {
+typedef struct sdfGrFramePacket_t {
     u8 pad00[4];
-    void (*prepare)(struct SdfPacketBuilder *, s32 bufferIndex);
+    void (*prepare)(struct sdfGrFramePacket_t *, s32 bufferIndex);
     u8 pad08[8];
-    SdfGsPacketHeader packetHeader;
-    SdfGsRegisterWrite frame;
-    SdfGsRegisterWrite zbuf;
-    SdfGraphObj *source;
+    sdfGrPacketHeader_t packetHeader;
+    sdfGrTagStdReg_t frame;
+    sdfGrTagStdReg_t zbuf;
+    sdfGrFrameSet_t *source;
     u32 frameMask;
     s32 region;
     s32 mode;
-} SdfPacketBuilder;
-void sdfGrFramePacketPredraw(SdfPacketBuilder *packet, s32 bufferIndex);
-void sdfGrSetFramePacket(SdfPacketBuilder *packet, SdfGraphObj *source,
+} sdfGrFramePacket_t;
+void sdfGrFramePacketPredraw(sdfGrFramePacket_t *packet, s32 bufferIndex);
+void sdfGrSetFramePacket(sdfGrFramePacket_t *packet, sdfGrFrameSet_t *source,
     u32 frameMask, s32 region, s32 mode);
 /* Asset holding texture and resource entries (0x48); DDS1/2 game/code_002D9748/003325F8.c. */
-typedef struct SdfAsset {
+typedef struct sdfMat_t {
     u32 unk00; /* Word from the serialized asset-parameter header. */
     u16 unk04; /* Halfword from the serialized asset-parameter header. */
     u8 dirtyFlags; /* 0x06: pending state-group changes for the two draw entries */
     u8 pad07;
-    struct SdfAssetEntry *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
+    struct sdfMatPacket_t *drawEntries[2]; /* 0x08: owned 0xA0-byte draw entries */
     u32 primaryStateWordFirst; /* 0x10: first word set by primary-state updates */
     u32 primaryStateWordSecond; /* 0x14: second word set by primary-state updates */
     u32 secondaryColor; /* 0x18 */
@@ -1234,24 +1229,24 @@ typedef struct SdfAsset {
     u32 primaryStateWordThird; /* 0x20 */
     u32 unk24;
     u32 primaryStateWordFourth; /* 0x28: retained as raw bits */
-    SdfTex *texture;
-    SdfTex *secondaryTexture; /* 0x30 */
+    sdfTexHandle_t *texture;
+    sdfTexHandle_t *secondaryTexture; /* 0x30 */
     u32 secondaryMode;       /* 0x34: secondary packet and palette selector */
-    SdfSubParam *primarySubParam; /* 0x38 */
-    SdfSubParam *secondarySubParam; /* 0x3C */
+    sdfMatUvwParm_t *primarySubParam; /* 0x38 */
+    sdfMatUvwParm_t *secondarySubParam; /* 0x3C */
     f32 scalarPairFirst; /* 0x40 */
     f32 scalarPairSecond; /* 0x44 */
-} SdfAsset;
+} sdfMat_t;
 /* General-heap allocation descriptor (0x10); links bound the represented span. */
-typedef struct SdfMemBlock {
-    struct SdfMemBlock *prev; /* 0x00 */
-    struct SdfMemBlock *next; /* 0x04 */
+typedef struct sdfMemHandle_t {
+    struct sdfMemHandle_t *prev; /* 0x00 */
+    struct sdfMemHandle_t *next; /* 0x04 */
     s32 address;              /* 0x08: start of represented span */
     u16 state;                /* 0x0C: free, used, or end sentinel */
     s16 referenceCount;       /* 0x0E: -1 for sentinels */
-} SdfMemBlock;
+} sdfMemHandle_t;
 typedef struct DevRequest {
-    struct SdfMemBlock *backingAllocation;
+    struct sdfMemHandle_t *backingAllocation;
     s16 usedCount;
     u16 capacity;
     s16 stride;
@@ -1267,7 +1262,7 @@ typedef struct SdfCommandNode {
     s8 packetSelector;
     s16 quadwordCount;
     void *payload; /* Packet bytes for kind 1; serialized commands for kinds 2/3. */
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
 } SdfCommandNode;
 /* Allocated as 0x100-byte nodes; each owns a circular list of child draw nodes. */
 typedef struct SdfDrawNode {
@@ -1275,7 +1270,7 @@ typedef struct SdfDrawNode {
     struct SdfDrawNode *next;     /* 0x04 */
     struct SdfDrawNode *parent;   /* 0x08 */
     struct SdfDrawNode *children; /* 0x0C */
-    struct SdfModel *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
+    struct sdfModelRootNode_t *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
     u16 flags;                   /* 0x14 */
     s16 unk16;                   /* 0x16: constructor sentinel is -1 */
     s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
@@ -1293,13 +1288,13 @@ typedef struct SdfDrawNode {
     f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
 } SdfDrawNode;
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
-typedef struct SdfModel {
+typedef struct sdfModelRootNode_t {
     DevRequest *list;
     SdfDrawNode *rootNode;
     void *assetData;
     DevRequest *resources;
     DevRequest *slotPairs;
-    struct Motion *motionList;
+    struct sdfMotionCtrlr_t *motionList;
     u8 unk18;
     u8 flags;
     u16 drawFlags;
@@ -1317,8 +1312,8 @@ typedef struct SdfModel {
     f32 modelScale;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
     u8 pad99[3];
-} SdfModel;
-SdfDrawNode *sdfModelSearchNode(SdfModel *model, s32 nodeIdOrIndex);
+} sdfModelRootNode_t;
+SdfDrawNode *sdfModelSearchNode(sdfModelRootNode_t *model, s32 nodeIdOrIndex);
 typedef struct SdfMotionCommand {
     union {
         u32 packedCommand;
@@ -1338,9 +1333,9 @@ typedef struct MotionTable {
     SdfMotionCommand commands[1];
 } MotionTable;
 /* SDK motions are allocated as 0x34-byte records; model slots retain these nodes. */
-typedef struct Motion {
-    struct Motion *next;
-    SdfModel *owner;
+typedef struct sdfMotionCtrlr_t {
+    struct sdfMotionCtrlr_t *next;
+    sdfModelRootNode_t *owner;
     MotionTable *motionTable;
     s32 unkC;
     DevRequest *request;
@@ -1357,7 +1352,7 @@ typedef struct Motion {
     u8 previousState;
     u8 loopEnabled;
     u8 pad33;
-} Motion;
+} sdfMotionCtrlr_t;
 /* Motion callbacks release storage, bind keys, sample, capture and blend. */
 typedef struct SdfMotionBindingDispatch {
     void (*releaseStorage)(void *binding);
@@ -1370,42 +1365,42 @@ typedef struct SdfMotionBindingDispatch {
 /* Common dispatch/motion prefix used by motion-owned bindings. */
 typedef struct SdfMotionBindingHead {
     SdfMotionBindingDispatch *dispatch;
-    Motion *motion;
+    sdfMotionCtrlr_t *motion;
 } SdfMotionBindingHead;
-void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, Motion *motion,
+void sdfSetMotionPointerPair(SdfMotionBindingHead *binding, sdfMotionCtrlr_t *motion,
                              SdfMotionBindingDispatch *dispatch);
 typedef struct SdfMotionKeyBinding {
     SdfMotionBindingDispatch *dispatch;
-    Motion *motion;
+    sdfMotionCtrlr_t *motion;
     SdfMotionKeyTrack *track;
 } SdfMotionKeyBinding;
 /* Indexed asset bindings share the key prefix and retain the selected asset. */
 typedef struct SdfMotionIndexedBinding {
     SdfMotionKeyBinding keys;
-    SdfAsset *target;
+    sdfMat_t *target;
 } SdfMotionIndexedBinding;
-void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, Motion *motion,
+void sdfMotGenMatInit(SdfMotionIndexedBinding *binding, sdfMotionCtrlr_t *motion,
     SdfMotionBindingDispatch *dispatch, s32 options);
 /* DMA/VIF transfer header and packed A+D GIF tag, excluding register payload. */
-void sdfGrSetRegsPacketHeader(SdfGsPacketHeader *header, s32 payloadQwords);
+void sdfGrSetRegsPacketHeader(sdfGrPacketHeader_t *header, s32 payloadQwords);
 void sdfBuildDmaReferenceChain(SdfDmaReferenceChainPacket *packet,
     u32 sourceAddress, s32 qwordCount);
 /* Append the common rectangle used to frame a grid of sprite cells. */
-void dds3ConsPanelTagLink(struct SdfListHead *packetList, s32 column, s32 row,
+void dds3ConsPanelTagLink(struct sdfDrawTag_t *packetList, s32 column, s32 row,
                         s32 columnCount, s32 rowCount);
 /* Write the reference header for one buffered asset draw entry and return
  * the packet payload immediately after the header. */
-struct SdfDmaTagHeader *sdfMatMakePacket(struct SdfAsset *asset,
+struct SdfDmaTagHeader *sdfMatMakePacket(struct sdfMat_t *asset,
                                                            struct SdfDmaTagHeader *tag,
                                                            s32 frame);
 /* Refresh one of the two draw entries and retain the other entry's dirty bits. */
-void sdfMatUpdatePacket(struct SdfAsset *asset, s32 entryIndex);
-void sdfMatSetTexUvw(struct SdfAsset *asset, f32 a, f32 b, f32 c, f32 d, f32 e);
-void sdfMatSetFaceDivParm(struct SdfAsset *asset, f32 first, f32 second);
-u32 sdf2DGetTexPacketSize(SdfTex *texture);
-struct SdfMemBlock *sdfMemAllocDirect(s32 requestedBytes);
-u32 sdfMemLock(struct SdfMemBlock *allocation);
-void sdfMemFreeDirect(struct SdfMemBlock *allocation);
+void sdfMatUpdatePacket(struct sdfMat_t *asset, s32 entryIndex);
+void sdfMatSetTexUvw(struct sdfMat_t *asset, f32 a, f32 b, f32 c, f32 d, f32 e);
+void sdfMatSetFaceDivParm(struct sdfMat_t *asset, f32 first, f32 second);
+u32 sdf2DGetTexPacketSize(sdfTexHandle_t *texture);
+struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+u32 sdfMemLock(struct sdfMemHandle_t *allocation);
+void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
 void sdfMemFreeHandleDirect(s32 *slot);
 /* Native 0x2C VIF primitive request, shared by its quad/triangle producers.
  * Attribute buffers carry serialized words; coordinate floats retain their bits.
@@ -1426,7 +1421,7 @@ typedef struct SdfPrimitiveRequest {
     f32 depth;
 } SdfPrimitiveRequest;
 /* Serialized texture-resource header; payload begins after this 0x40-byte prefix. */
-typedef struct SdfTextureFileHeader {
+typedef struct TMX_HEADER_t {
     u8 unk00;
     u8 payloadOffsetFlags; /* 0x01: high nibble adds payload offset bytes; low bits stay opaque. */
     u8 pad02[2];       /* 0x02 */
@@ -1445,10 +1440,10 @@ typedef struct SdfTextureFileHeader {
     s32 resourceKey;   /* 0x1C */
     s32 battleTextureSlot; /* 0x20: selects one of two battle-model texture headers */
     u8 pad24[0x1C];    /* 0x24 */
-} SdfTextureFileHeader;
+} TMX_HEADER_t;
 /* Acquire a texture from a serialized texture-file header. */
-struct SdfTex *sdfTexSet(const SdfTextureFileHeader *header);
-struct SdfTex *sdfTexSetDirect(const SdfTextureFileHeader *header);
+struct sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *header);
+struct sdfTexHandle_t *sdfTexSetDirect(const TMX_HEADER_t *header);
 /* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
 s32 sdfGrAllocPacketBuff(s32 size);
@@ -1463,7 +1458,7 @@ u8 *sdfModelAllocTmPacket(SdfDrawNode *root);
 /* Generated 128x64 grayscale power lookup texture: a serialized texture
  * header, 256 RGBA palette words, then the full 64x128 index image. */
 typedef struct SdfGeneratedLookupTexture {
-    SdfTextureFileHeader header; /* 0x0000 */
+    TMX_HEADER_t header; /* 0x0000 */
     u32 palette[256];            /* 0x0040 */
     u8 indices[64][128];         /* 0x0440 */
 } SdfGeneratedLookupTexture;
@@ -1482,16 +1477,16 @@ static inline VuBlendNode *vuAllocNode(VuWork *work) {
 }
 extern s32 corePktPointBuff;
 extern void corePktRelightBackFaces(u32 base, s32 count);
-extern SdfTex *D_005518B8;
-extern SdfTex *sdf3DSpecularTex;
-extern SdfTex *D_005518C8;
+extern sdfTexHandle_t *D_005518B8;
+extern sdfTexHandle_t *sdf3DSpecularTex;
+extern sdfTexHandle_t *D_005518C8;
 extern s32 sdfCoreDrawBuffHandle;
 extern void *sceDmaGetChan(s32);
 extern void sceDmaSendN(void *, void *, s32);
 /* Append the second fixed program block as a DMA reference packet. */
 
 
-extern void sdfTmxSetHeader(SdfTextureFileHeader *, s32, s32, s32, s32, s32);
+extern void sdfTmxSetHeader(TMX_HEADER_t *, s32, s32, s32, s32, s32);
 extern s32 vu1Tex0Slot0[];
 extern s32 vu1Tex0Slot2[];
 extern s32 vu1Tex0Slot1[];
@@ -1511,10 +1506,10 @@ typedef struct MovPacStream {
     s32 packetBytes;
     s32 blockBytes;
     u8 scratchBuffer[0x20];
-    struct SdfMemBlock *payloadAllocation;
+    struct sdfMemHandle_t *payloadAllocation;
     u8 *blockMask;
     s32 blockIndex;
-    struct SdfMemBlock *allocation;
+    struct sdfMemHandle_t *allocation;
     u8 *pacInputBuffer;
     u8 *pacBuffer;
     s32 pacReadOffset;
@@ -1527,11 +1522,11 @@ typedef struct MovPacStream {
     u8 *scratch;
 } MovPacStream;
 /* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
-typedef struct DevState {
-    struct DevState *next; /* 0x00 */
-    struct DevState *previous; /* 0x04 */
-    struct DevState *workerNext; /* 0x08 */
-    struct DevState *workerPrev; /* 0x0C */
+typedef struct sdfFileCmdHandle_t {
+    struct sdfFileCmdHandle_t *next; /* 0x00 */
+    struct sdfFileCmdHandle_t *previous; /* 0x04 */
+    struct sdfFileCmdHandle_t *workerNext; /* 0x08 */
+    struct sdfFileCmdHandle_t *workerPrev; /* 0x0C */
     char *resolvedPath; /* 0x10 */
     u8 workerIndex; /* 0x14 */
     SdfDevOperationCode operation; /* 0x15 */
@@ -1545,9 +1540,9 @@ typedef struct DevState {
     s32 result; /* 0x2C */
     s32 transferred; /* 0x30 */
     u8 pad34[4]; /* 0x34 */
-    void (*callback)(struct DevState *, s32, s32, s32, s32); /* 0x38 */
+    void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32); /* 0x38 */
     s32 callbackContext; /* 0x3C: opaque callback-context word */
-} DevState;
+} sdfFileCmdHandle_t;
 s32 sdfBillBoardGetPacketSize(s32 count);
 extern void *memcpy(void *, const void *, unsigned int);
 /* Copy the selected fixed order into its actor-slot bank. */
@@ -1560,16 +1555,16 @@ void InversMatrix(void);
 void SetRotateMatrixX(f32 angle);
 void SetRotateMatrixY(f32 angle);
 void SetRotateMatrixZ(f32 angle);
-void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix);
-void SetRotateMatrixAxis(f32 angle, const RwV3d* axis);
+void StoreRotateMatrixAxis(f32 angle, const sdfVector3_t *axis, sdfMatrix4_t *matrix);
+void SetRotateMatrixAxis(f32 angle, const sdfVector3_t* axis);
 void SetRotateMatrixX_B(f32 angle);
 void SetRotateMatrixY_B(f32 angle);
 void SetRotateMatrixZ_B(f32 angle);
-void SetRotateMatrixAxis_B(const RwV3d* axis, f32 angle);
+void SetRotateMatrixAxis_B(const sdfVector3_t* axis, f32 angle);
 void RotateMatrixX(f32 angle);
 void RotateMatrixY(f32 angle);
 void RotateMatrixZ(f32 angle);
-void SetRotateMatrixXYZ(const RwV3d *rot);
+void SetRotateMatrixXYZ(const sdfVector3_t *rot);
 void MultMatrixNoArg(void);
 void MultMatrixRevNoArg(void);
 void MultMatrix(void *matrix);
@@ -1581,7 +1576,7 @@ void corePktLoadWorldLightMtx(void *vectors);
 void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference, u32 packedColor,
                    u32 firstColor, u32 secondColor,
                    f32 blend, f32 scale, f32 y);
-void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY);
+void corePktSetFaceDivParm(SdfVuColorTransform *out, sdfMatPacket_t *work, u32 packedColor, f32 deltaX, f32 deltaY);
 void corePktLerpUVColorChain(VuBlendNode *node);
 void corePktSetConstColor(VuWork *work, u32 color);
 void corePktMakeEdgePoint(VuBlendNode *out, VuBlendNode *first, VuBlendNode *second);
@@ -1591,28 +1586,28 @@ void corePktBuildBackFaceList(VuWork *work);
 void corePktEmitBase(VuWork *work);
 void corePktEmitAllPasses(VuWork *work);
 void corePktOpenAndEmit(VuWork *work);
-void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source);
+void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand *source);
 void sdfCoreDrawSetFog(u8 *sourceObject);
 void sdfCoreDrawInit(s32 workspaceBytes);
-SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset);
-s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset);
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, sdfTexHandle_t *texture, s32 contextOffset);
+s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset);
 u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes);
 s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
 SdfDrawPacket *sdf2DMakePrimPacketHeader(SdfDrawPacket *packet, s32 primitiveFlags, s32 registerCount, s64 registerList, s32 loopCount);
 SdfDrawPacket *sdf2DAllocSprite(s32 loopCount);
-void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix);
-void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix);
-void sdf3DMakeFogPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams);
+void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet, sdf3DScreenParam_t *node, void *transformMatrix);
+void sdf3DSetCamera(sdf3DScreenParam_t *node, void *transformMatrix);
+void sdf3DMakeFogPacket(sdf3DFogPacket_t *packet, sdf3DFogParam_t *projectionParams);
 void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 payloadBytes);
-void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet);
+void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet);
 void sdf3DInitSpecularTex2(void);
 void sdf3DInit(void);
-void sdf3DPrimLinkResetTm(SdfListHead *packetList,
+void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
                              s32 (*allocatePacket)(s32));
-void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket);
-void sdf3DPrimLinkTm(SdfListHead *packetList,
+void sdf3DPrimSetTmPacket(sdf3DTmPacketData_t *lightingPacket);
+void sdf3DPrimLinkTm(sdfDrawTag_t *packetList,
                            s32 (*allocatePacket)(s32));
-void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
                               s32 (*allocatePacket)(s32));
 u32 *sdf3DPrimMakePoly(SdfPrimitiveRequest *request);
 void sdfBillBoardMakeTMPacket(u8 *packet, const f32 *matrix);
@@ -1743,7 +1738,7 @@ void SetRotateMatrixZ(f32 angle) {
     VU0_LOAD_MATRIX((f32 *)m);
 }
 
-void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
+void StoreRotateMatrixAxis(f32 angle, const sdfVector3_t *axis, sdfMatrix4_t *matrix) {
     f32 normalizedAxis[4];
     f32 x;
     f32 y;
@@ -1774,9 +1769,9 @@ void StoreRotateMatrixAxis(f32 angle, const RwV3d *axis, RwMatrix *matrix) {
     VU0_STORE_VF0(&matrix->pos);
 }
 
-void SetRotateMatrixAxis(f32 angle, const RwV3d* axis)
+void SetRotateMatrixAxis(f32 angle, const sdfVector3_t* axis)
 {
-    RwMatrix matrix;
+    sdfMatrix4_t matrix;
     StoreRotateMatrixAxis(angle, axis, &matrix);
     VU0_LOAD_MATRIX(&matrix);
 }
@@ -1820,9 +1815,9 @@ void SetRotateMatrixZ_B(f32 angle) {
     VU0_LOAD_MATRIX_B((f32 *)m);
 }
 
-void SetRotateMatrixAxis_B(const RwV3d* axis, f32 angle)
+void SetRotateMatrixAxis_B(const sdfVector3_t* axis, f32 angle)
 {
-    RwMatrix matrix;
+    sdfMatrix4_t matrix;
     StoreRotateMatrixAxis(angle, axis, &matrix);
     VU0_LOAD_MATRIX_B(&matrix);
 }
@@ -1854,7 +1849,7 @@ void RotateMatrixZ(f32 angle)
     VU0_ROTATE_BASIS_Z(c, s);
 }
 
-void SetRotateMatrixXYZ(const RwV3d *rot)
+void SetRotateMatrixXYZ(const sdfVector3_t *rot)
 {
     SetRotateMatrixX(rot->x);
     SetRotateMatrixY_B(rot->y);
@@ -2010,7 +2005,7 @@ void corePktMakeFaceDivParm(SdfVuColorTransform *result, u32 reference, u32 pack
                                      firstColor, secondColor, blend);
 }
 
-void corePktSetFaceDivParm(SdfVuColorTransform *out, SdfAssetEntry *work, u32 packedColor, f32 deltaX, f32 deltaY) {
+void corePktSetFaceDivParm(SdfVuColorTransform *out, sdfMatPacket_t *work, u32 packedColor, f32 deltaX, f32 deltaY) {
     corePktMakeFaceDivParm(out, corePktCurrLight, packedColor,
                   work->unk08, work->unk04,
                   work->unk1C,
@@ -2606,7 +2601,7 @@ INCLUDE_ASM(const s32, "code_002B5CD0", corePktVu0Run);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdfCorePacketGen);
 
-void sdfCoreDrawScanOneSkinNodes(SdfModel *model, SdfObjectRefCommand *source) {
+void sdfCoreDrawScanOneSkinNodes(sdfModelRootNode_t *model, SdfObjectRefCommand *source) {
     SdfDrawNode **objects = model->list->buffer;
     u16 *indices = &source->count;
     if ((source->flags & 0x800) != 0) {
@@ -2647,14 +2642,14 @@ void sdfCoreDrawInit(s32 workspaceBytes) {
     sceDmaSync(dmaChannel, 0, 0);
     sdfMemFreeHandleDirect(&sdfCoreDrawBuffHandle);
     sdfCoreDrawBuffHandle = (u32)sdfMemAllocDirect(workspaceBytes);
-    corePktPointBuff = sdfMemLock((struct SdfMemBlock *)(sdfCoreDrawBuffHandle));
+    corePktPointBuff = sdfMemLock((struct sdfMemHandle_t *)(sdfCoreDrawBuffHandle));
 }
 
-u32 sdf2DGetTexPacketSize(SdfTex *texture) {
+u32 sdf2DGetTexPacketSize(sdfTexHandle_t *texture) {
     return 5 << SDF_DMA_QWORD_SHIFT;
 }
 
-SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTex *texture, s32 contextOffset) {
+SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, sdfTexHandle_t *texture, s32 contextOffset) {
     drawPacket->header.quadwords = 4;
     drawPacket->header.gifTag = 0x1000000000008003ULL;
     drawPacket->header.command = 0x50000004;
@@ -2669,7 +2664,7 @@ SdfTextureDrawPacket *sdf2DMakeTexPacket(SdfTextureDrawPacket *drawPacket, SdfTe
     return drawPacket;
 }
 
-s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffset) {
+s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset) {
     s32 packetBytes = sdf2DGetTexPacketSize(texture);
     SdfTextureDrawPacket *packet = (SdfTextureDrawPacket *)sdfGrAllocPacketBuff(packetBytes);
     s32 packetAddress = (s32)sdf2DMakeTexPacket(packet, texture, contextOffset);
@@ -2678,7 +2673,7 @@ s32 sdf2DLinkTexPacket(SdfListHead *packetList, SdfTex *texture, s32 contextOffs
 }
 
 u32 sdf2DMakeStdPacket(u32 packetAddress, s32 packetBytes) {
-    sdfGrSetRegsPacketHeader((SdfGsPacketHeader *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
+    sdfGrSetRegsPacketHeader((sdfGrPacketHeader_t *)packetAddress, (packetBytes >> SDF_DMA_QWORD_SHIFT) - 2);
     return packetAddress;
 }
 
@@ -2710,7 +2705,7 @@ SdfDrawPacket *sdf2DAllocSprite(s32 loopCount) {
     return packet;
 }
 
-void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node, void *transformMatrix) {
+void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet, sdf3DScreenParam_t *node, void *transformMatrix) {
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
@@ -2733,7 +2728,7 @@ void sdf3DMakeViewportPacket(ConsMatrixPacket *packet, SdfProjectionRecord *node
     packet->unknownCC = 0;
 }
 
-void sdf3DSetCamera(SdfProjectionRecord *node, void *transformMatrix) {
+void sdf3DSetCamera(sdf3DScreenParam_t *node, void *transformMatrix) {
     VU0_LOAD_MATRIX(transformMatrix);
     VU0_STORE_MATRIX(sdfCameraTm);
     MultMatrixRev(node->camera.matrix);
@@ -2756,7 +2751,7 @@ INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeScreenParam);
 
 INCLUDE_ASM(const s32, "code_002B5CD0", sdf3DMakeLightParallelPacket);
 
-void sdf3DMakeFogPacket(ConsFrustumPacket *packet, KwlnDrawVectorParams *projectionParams) {
+void sdf3DMakeFogPacket(sdf3DFogPacket_t *packet, sdf3DFogParam_t *projectionParams) {
     f32 rangeMax = projectionParams->fogFar;
     f32 rangeMin = projectionParams->fogNear;
     f32 nearZ = projectionParams->depthNear;
@@ -2790,7 +2785,7 @@ void sdf3DMakeDirectRefPacket(DmaPacketHeader *packet, u32 sourceAddress, s32 pa
     packet->unknown1C = 0;
 }
 
-void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet) {
+void sdf3DLinkInitPacket(sdfDrawTag_t *packetList, DmaPacketHeader *packet) {
     packet->address = (u32)vu1MicroPacket & SDF_DMA_ADDRESS_MASK;
     packet->quadwords = (D_002F5600 - vu1MicroPacket) >> SDF_DMA_QWORD_SHIFT;
     packet->tag = 0;
@@ -2802,7 +2797,7 @@ void sdf3DLinkInitPacket(SdfListHead *packetList, DmaPacketHeader *packet) {
 }
 
 void sdf3DInitSpecularTex2(void) {
-    struct SdfMemBlock *allocation = sdfMemAllocDirect(0x2440);
+    struct sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2440);
     SdfGeneratedLookupTexture *texture = (SdfGeneratedLookupTexture *)(u32)sdfMemLock(allocation);
     s32 i;
     s32 j;
@@ -2836,11 +2831,11 @@ void sdf3DInit(void) {
     sdf3DRefMapParam = textureWord;
     vu1Tex0Slot0[0] = textureWord;
     vu1Tex0Slot0[1] = textureWord >> 32;
-    D_005518B8 = sdfTexSetDirect((SdfTextureFileHeader *)D_002E8ED0);
+    D_005518B8 = sdfTexSetDirect((TMX_HEADER_t *)D_002E8ED0);
     textureWord = sdfTexGetTex0Reg(D_005518B8);
     vu1Tex0Slot2[0] = textureWord;
     vu1Tex0Slot2[1] = textureWord >> 32;
-    D_005518C8 = sdfTexSetDirect((SdfTextureFileHeader *)D_002ECF10);
+    D_005518C8 = sdfTexSetDirect((TMX_HEADER_t *)D_002ECF10);
     textureWord = sdfTexGetTex0Reg(D_005518C8);
     vu1Tex0Slot1[0] = textureWord;
     vu1Tex0Slot1[1] = textureWord >> 32;
@@ -2848,7 +2843,7 @@ void sdf3DInit(void) {
     sdfMatInitSystem();
 }
 
-void sdf3DPrimLinkResetTm(SdfListHead *packetList,
+void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
                              s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {
@@ -2862,7 +2857,7 @@ void sdf3DPrimLinkResetTm(SdfListHead *packetList,
 }
 
 /* vu0 routine: store the resident matrix and inverse-column-length scaled rows, then VIF ITOP/MSCAL. */
-void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket) {
+void sdf3DPrimSetTmPacket(sdf3DTmPacketData_t *lightingPacket) {
     VU0_STORE_MATRIX_AND_UNIT_ROWS(lightingPacket);
     lightingPacket->tag[0] = SDF_VIF_ITOP_LIGHTING;
     lightingPacket->tag[1] = SDF_VIF_MSCAL_COMMAND;
@@ -2870,7 +2865,7 @@ void sdf3DPrimSetTmPacket(VuLightingPacket *lightingPacket) {
     lightingPacket->tag[3] = 0;
 }
 
-void sdf3DPrimLinkTm(SdfListHead *packetList,
+void sdf3DPrimLinkTm(sdfDrawTag_t *packetList,
                            s32 (*allocatePacket)(s32)) {
     u64 *dmaPacket;
     if (allocatePacket == NULL) {
@@ -2879,11 +2874,11 @@ void sdf3DPrimLinkTm(SdfListHead *packetList,
     dmaPacket = (u64 *)allocatePacket(0x90);
     dmaPacket[0] = ((u64)((u32)(dmaPacket + 2) & SDF_DMA_ADDRESS_MASK) << 32) | 0x20000008;
     dmaPacket[1] = 0x6C07C000ULL << 32;
-    sdf3DPrimSetTmPacket((VuLightingPacket *)(dmaPacket + 2));
+    sdf3DPrimSetTmPacket((sdf3DTmPacketData_t *)(dmaPacket + 2));
     sdfDrawTagLink(packetList, (u32)dmaPacket);
 }
 
-void sdf3DPrimLinkMat(SdfListHead *packetList, SdfAsset *asset,
+void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
                               s32 (*allocatePacket)(s32)) {
     u64 *referencePacket;
     if (allocatePacket == NULL) {

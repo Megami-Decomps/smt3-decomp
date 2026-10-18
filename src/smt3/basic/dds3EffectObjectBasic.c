@@ -66,20 +66,20 @@ struct BillOut;
 typedef struct BillOut BillOut;
 struct EvtUnit;
 typedef struct EvtUnit EvtUnit;
-struct SdfListHead;
-typedef struct SdfListHead SdfListHead;
+struct sdfDrawTag_t;
+typedef struct sdfDrawTag_t sdfDrawTag_t;
 struct DevRequest;
 typedef struct DevRequest DevRequest;
-struct Motion;
-typedef struct Motion Motion;
+struct sdfMotionCtrlr_t;
+typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
 struct SdfChunkHeader;
 typedef struct SdfChunkHeader SdfChunkHeader;
 struct SdfDmaTagHeader;
 typedef struct SdfDmaTagHeader SdfDmaTagHeader;
 struct SdfDrawNode;
 typedef struct SdfDrawNode SdfDrawNode;
-struct EffParamWork;
-typedef struct EffParamWork EffParamWork;
+struct effPartHandle_t;
+typedef struct effPartHandle_t effPartHandle_t;
 
 typedef struct EffEventWork EffEventWork;
 
@@ -99,7 +99,7 @@ typedef struct BillRenderPair {
     u16 cameraFacingMode;
     u16 kind;
     u32 colors[2];
-    SdfListHead *packetList;
+    sdfDrawTag_t *packetList;
     struct BillRenderPair *next;
 } BillRenderPair;
 
@@ -138,7 +138,7 @@ typedef struct EffAimParams {
 
 typedef union EffBattleParameterValue {
     u32 sourceOffset;
-    struct EffParamWork *work;
+    struct effPartHandle_t *work;
 } EffBattleParameterValue;
 
 typedef struct EffBattleEntry {
@@ -178,7 +178,7 @@ typedef struct SoundBank {
 typedef struct SoundMixer {
     SoundBank banks[2];
     u8 pad0C30[8];
-    struct SdfMemBlock *resource;
+    struct sdfMemHandle_t *resource;
     u32 active;
     BattleEffect *voiceList;
 } SoundMixer;
@@ -201,14 +201,6 @@ enum {
     EFF_WORLD_KIND_TRANSFORM_SOURCE = 17,
     EFF_WORLD_KIND_COUNT = 18
 };
-
-typedef struct SdfMemBlock {
-    struct SdfMemBlock *prev;
-    struct SdfMemBlock *next;
-    s32 address;
-    u16 state;
-    s16 referenceCount;
-} SdfMemBlock;
 
 #define EFF_OBJ_STATE_EVENT_NODE 5
 
@@ -261,13 +253,13 @@ typedef struct EffectObjectData {
     f32 limitMax3C;
 } EffectObjectData;
 
-typedef struct SdfModel {
+typedef struct sdfModelRootNode_t {
     DevRequest *list;
     SdfDrawNode *rootNode;
     void *assetData;
     DevRequest *resources;
     DevRequest *slotPairs;
-    struct Motion *motionList;
+    struct sdfMotionCtrlr_t *motionList;
     u8 unk18;
     u8 flags;
     u16 drawFlags;
@@ -284,11 +276,11 @@ typedef struct SdfModel {
     f32 modelScale;
     u8 lodIndex;
     u8 pad99[3];
-} SdfModel;
+} sdfModelRootNode_t;
 
 typedef struct EffOwnerBillParamView {
     u8 pad00[0x18];
-    struct SdfModel *model;
+    struct sdfModelRootNode_t *model;
 } EffOwnerBillParamView;
 
 void dds3EffectDelete(EffNode *node);
@@ -317,7 +309,7 @@ dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra);
 extern BillObj *dds3BillboardFileLoad(s32 kind, const char *path);
 dds3Basic_t *AddTMXEffect(void *bill, void *vec, s32 extra);
 dds3Basic_t *AddBEDEffect();
-void sdfMemFreeDirect(struct SdfMemBlock *allocation);
+void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
 EffEventWork *effEveBEDCutCreate(struct SoundMixer *owner, u16 kind, const void *params);
 u32 dds3AllocObjectId(void);
 dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
@@ -325,7 +317,7 @@ extern dds3Basic_t *dds3AreaBasicGetFastArea(void);
 void dds3AreaBasicRegistItem(dds3Basic_t *indexOwner, dds3Basic_t *node);
 dds3Basic_t *AddMG12Effect();
 extern void effMagaRandomize(void *bill);
-extern s32 sdfModelGetMarkPosMatrix(SdfModel *model, s32 id);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *model, s32 id);
 void dds3BillboardSetXYOffset(struct BillObj *billboard, f32 width, f32 height);
 void dds3BillboardSetDrawType(struct BillObj *billboard, s32 variantValue);
 void dds3BillboardSetMode(struct BillObj *billboard, s32 mode);

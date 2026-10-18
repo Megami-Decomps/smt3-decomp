@@ -26,6 +26,11 @@ After each correction: re-run `tools/ida_symbols.py --instance SLUS_209.11`, re-
 | `sdfModelNodeDef_t` | `f32 bounds` at +0x40 | `sdfModelBounds_t *bounds` at +0x40 | `sdfModelNodeNew` (0x002B11D0) copies def+0x40 into `sdfModelNode_t::bounds`, which `sdfModelCheckBounds` reads as `min[3]`/`max[3]` |
 | `sdfFileCmdHandle_t` | HD layout past +0x10 | 64 bytes: `filename` +0x10, `device` +0x14, `cmd` +0x15, `stat` +0x16, `offset` +0x18, `buffer` +0x1C, `length` +0x20, `cmdParm` +0x24, `errorCode` +0x28, `fd` +0x2C, `currentOffset` +0x30, `remainder` +0x34, `callback` +0x38, `userData` +0x3C | the command allocator at 0x002BF328 takes 64 bytes and writes those offsets |
 
+`sdfModelRootNode_t`'s 152 bytes are not settled: the repo body carries a `lodIndex` byte at
++0x98, past the end of a 152-byte object, commented as a field the native model viewer and the
+`MODEL_LOD_CHG` setters write. Either the allocation size or that field is wrong. See
+[Type recovery](type-recovery.md).
+
 `sdfMatPacket_t`'s two transform blocks are inline, not pointers: `sdfMatSetUvwParm`
 (0x002B3620) writes six floats at the pointer it is handed, `sdfMatUpdatePacket` passes
 packet+0x68 and the multi-texture path passes packet+0x80.

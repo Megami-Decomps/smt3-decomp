@@ -4,6 +4,9 @@
 finds no `__FILE__` paths or any other `.c` filename. Every name in this repo
 therefore comes from another build of the game or from a contributor.
 
+Struct, union and enum types have their own page: see
+[Type recovery](type-recovery.md).
+
 ## Sources
 
 | Source | What it gives | State |
