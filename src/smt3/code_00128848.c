@@ -9,6 +9,8 @@
 #include "scr.h"
 #include "draw3d.h"
 #include "field.h"
+#include "model.h"
+#include "motion.h"
 
 typedef struct fldSpriteCorner_t fldSpriteCorner_t;
 typedef struct fldSpriteVertex_t fldSpriteVertex_t;
@@ -554,6 +556,38 @@ extern f32 fldSkyPlayerIdx[];
 
 extern void *fldSkyDefaultData;
 
+/* fldSkyDataTable stride, 292 bytes; only the filter mode at offset 0 is used here. */
+typedef struct {
+    s32 mode;
+    u8 unk04[0x120];
+} fldSkyData_t;
+
+extern fldSkyData_t *fldSkyDataTable;
+extern void *fldSkyDefault;
+extern s32 fldSkyTblUpperIdx;
+extern s32 D_0054ED5C;
+extern f32 D_0054ED60;
+extern s32 D_0054ED64;
+extern s32 D_0054ED68;
+extern s32 D_0054ED6C;
+extern f32 D_0054ED70;
+extern f32 D_0054ED74;
+extern s32 D_0054ED7C;
+extern f32 D_0054ED80;
+extern s32 D_0054ED84;
+extern s32 D_0054ED8C;
+
+extern void fldSkySetPlayer(s32 duration, f32 colorAX, f32 colorAY, f32 colorAZ,
+                            f32 colorBX, f32 colorBY, f32 colorBZ,
+                            f32 dirX, f32 dirY, f32 dirZ);
+extern s32 fldSkyEnable;
+extern s32 fldSkyFilter;
+extern s32 fldSkyFilterPrev;
+extern f32 fldSkyFilterRate;
+extern f32 fldSkyFilterTime;
+extern s32 fldLightMaState __attribute__((section(".data")));
+extern s32 fldGb __attribute__((section(".data")));
+
 extern void dds3SetFogColor(s32, f32 *);
 
 extern s32 dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
@@ -685,9 +719,16 @@ extern s32 fldDoorWarpTarget;
 
 /* fldDoorTable stride, 100 bytes; only the warp effect id is reached here. */
 typedef struct {
-    u8 unk00[0x12];
+    s8 kind;
+    u8 unk01[3];
+    s16 floor;
+    u8 unk06[0xC];
     s16 warpEff;
-    u8 unk14[0x50];
+    s16 warpEff2;
+    u8 unk16[2];
+    char name18[12];
+    char name24[12];
+    u8 unk30[0x34];
 } fldDoorData_t;
 
 extern fldDoorData_t fldDoorTable[256];
@@ -699,7 +740,7 @@ extern s32 gfldPlayerHasiCnt;
 extern s32 gfldPlayerDamegeCnt;
 extern s32 fldPlayerStepDist;
 extern s32 gSkyTblAnime;
-extern s32 gSkyTblAnimeCntI;
+extern f32 gSkyTblAnimeCntI;
 extern s32 gSkyTblBaseIdx;
 extern s32 D_002FC0EC __attribute__((section(".data")));
 extern char D_0054EC80[];
@@ -730,6 +771,95 @@ extern s32 gFldWapPanel;
 extern s32 fldSkyAlphaOfs __attribute__((section(".data")));
 
 extern void fldCamSetChaseCore(f32 height);
+
+/* fldUnitControl_t as fldGetUnitControl returns it. */
+typedef struct {
+    dds3Basic_t *handle;
+    dds3Basic_t *handle2;
+    s8 moveFlag;
+    s8 rotFlag;
+} fldUnitControl_t;
+
+extern fldUnitControl_t *fldGetUnitControl(void);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *basic, u32 value);
+extern dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene);
+extern dds3ObjectBaseControl_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern void fldPlayerMotion(s32 motion, s32 mode, f32 speed);
+extern void fldPlayerMotReset2(void);
+extern f32 fldCamLength;
+extern s32 gFldKyouseiTalk;
+extern s32 fldArea[];
+extern u8 D_00303020[];
+extern s32 gFldWap_after_nextidx;
+extern s32 fldPlayerFastMode;
+extern s32 l_UseCollision;
+extern void fldHitChkUnitElv(f32 *pos);
+extern void dds3SetSclPoseSet(dds3Basic_t *basic, f32 *scl);
+extern f32 fldWmapPlayerState;
+/* The world-map player scale triple, copied as one word-aligned 16-byte block. */
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} fldScaleVec_t;
+
+extern fldScaleVec_t D_00531D08;
+extern fldScaleVec_t D_00531D18;
+extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *object, s32 mask);
+extern void dds3GetPosPoseSet(dds3Basic_t *object);
+
+/* gFldEveHitOnOffTbl stride, 20 bytes. */
+typedef struct {
+    s16 area;
+    s16 floor;
+    s16 flag;
+    char name[14];
+} fldEveHitSwitch_t;
+
+extern fldEveHitSwitch_t gFldEveHitOnOffTbl[32];
+
+/* fldDoorEventTable stride, 84 bytes; the clear leaves +0x20 alone. */
+typedef struct {
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    s32 unk40;
+    s32 unk44;
+    s32 unk48;
+    s32 unk4C;
+    s32 unk50;
+} fldDoorEvent_t;
+
+extern fldDoorEvent_t fldDoorEventTable[256];
+extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
+
+/* dds3DrawBank_t stride; only the held frame texture block at 0x1300 is used here. */
+typedef struct {
+    u8 unk0000[0x1300];
+    u8 frameTex[0x8E0];
+} fldDrawBank_t;
+
+extern fldDrawBank_t dds3DrawEnv[];
+extern u32 dds3GetFrameID(void);
+extern void sdfGrSetFrameMaskRGB(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *source, void *packet, s32 gsContext);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, void *node);
 
 void fldDrawInit(void) {
     if (D_0054EC44 == 0) {
@@ -888,9 +1018,27 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     *dstY = result[1];
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldPoint3To2_A);
+void fldPoint3To2_A(void) {
+    VU0_LOAD_MATRIX(D_002FA240);
+    MultMatrixRev(&dds3ScreenParam.TM);
+    VU0_COPY_MATRIX_TO_SECONDARY();
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldPoint3To2_B);
+void fldPoint3To2_B(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
+    f32 vec[4] = { x, y, z, 1.0f };
+    f32 result[4];
+
+    VU0_LOAD_VF10_FROM(*(const Quad *)vec);
+    VU0_TRANSFORM_POINT_VF10();
+    VU0_PERSPECTIVE_DIVIDE_VF10();
+    VU0_LOAD_VF11(&dds3ScreenParam.scale);
+    VU0_MUL_VF10_VF11();
+    VU0_LOAD_VF11(&dds3ScreenParam.trans);
+    VU0_ADD_VF10_VF11();
+    VU0_STORE_VF10(result);
+    *dstX = result[0];
+    *dstY = result[1];
+}
 
 void rsetOtOfs(s32 ofs)
 {
@@ -1214,7 +1362,53 @@ void aDrawTriG(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, u32 r0, u32 g0, u
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", aDrawBoxG);
+void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3) {
+    s32 coords[8];
+    sdfDrawTag_t *command;
+    sdfGrPacketHeader_t *packet;
+    u64 *dst;
+    s32 i;
+    s32 *pos;
+    sdfGrOt_t *descriptor;
+
+    coords[0] = x * 16;
+    coords[1] = y * 16;
+    coords[2] = (x + w) * 16;
+    coords[3] = y * 16;
+    coords[4] = (x + w) * 16;
+    coords[5] = (y + h) * 16;
+    coords[6] = x * 16;
+    coords[7] = (y + h) * 16;
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
+    sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
+    for (i = 0, pos = coords; i < 4; i++) {
+        if (i == 0) {
+            dst[0] = (u64)r0 | ((u64)g0 << 32);
+            dst[1] = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            dst[0] = (u64)r1 | ((u64)g1 << 32);
+            dst[1] = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            dst[0] = (u64)r2 | ((u64)g2 << 32);
+            dst[1] = (u64)b2 | ((u64)a2 << 32);
+        } else {
+            dst[0] = (u64)r3 | ((u64)g3 << 32);
+            dst[1] = (u64)b3 | ((u64)a3 << 32);
+        }
+        dst += 2;
+        dst[1] = 0xFFFFFF;
+        dst[0] = (u64)(u32)(pos[0] + 0x7000) |
+            ((u64)(pos[1] + 0x7900) << 32);
+        dst += 2;
+        pos += 2;
+    }
+    sdfDrawTagLink(command, (u32)packet);
+    descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
 
 void aDrawBoxGF(u32 r0, u32 g0, u32 b0, u32 a0, u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2, u32 r3, u32 g3, u32 b3, u32 a3, f32 x, f32 y, f32 w, f32 h) {
     s32 coords[8];
@@ -1330,9 +1524,31 @@ void drawSprite3D(sdfTexHandle_t *texture, Sprite3D_t *sprite) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", rsetFrameMaskRgbOn);
+void rsetFrameMaskRgbOn(void) {
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    void *texture;
+    sdfGrOt_t *descriptor;
 
-INCLUDE_ASM(const s32, "code_00128848", rsetFrameMaskRgbOff);
+    sdfDrawTagInit(command);
+    texture = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, texture, 0);
+    sdfDrawTagLinkRefGif(command, (u32)texture);
+    descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
+
+void rsetFrameMaskRgbOff(void) {
+    sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    void *texture;
+    sdfGrOt_t *descriptor;
+
+    sdfDrawTagInit(command);
+    texture = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, texture, 0);
+    sdfDrawTagLinkRefGif(command, (u32)texture);
+    descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
 
 void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
     sdfDrawTag_t *list;
@@ -1392,14 +1608,166 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
 }
 
 INCLUDE_ASM(const s32, "code_00128848", fldDrawPoly4);
-
 INCLUDE_ASM(const s32, "code_00128848", fldDrawTexPoly4);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrawFrameSprite);
+void fldDrawFrameSprite(void) {
+    sdfDrawTag_t *list = sdfPrimAllocDrawTag(NULL);
+    void *reference = (void *)sdfGrAllocPacketBuff(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    void *sprite;
+    fldSpriteVertex_t *vertex;
+    sdfGrOt_t *surface;
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrawBokasi);
+    sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[dds3GetFrameID()].frameTex, reference);
+    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfDrawTagLink(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x31001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = 0x44;
+    blendPacket[7] = 0x42;
+    sdfDrawTagLink(list, (u32)blendPacket);
+    sprite = sdf2DAllocSprite(1);
+    vertex = (fldSpriteVertex_t *)sdf2DGetPrimPtr((s32)sprite);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = 0x30;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF7;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0x3FFF;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xE00;
+    vertex->corner[1].x = 0x9009;
+    vertex->corner[1].y = 0x8705;
+    vertex->corner[1].mask = 0x3FFF;
+    vertex->corner[1].flag = 0;
+    sdfDrawTagLink(list, (u32)sprite);
+    surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrawFrameSpriteAlpha);
+void fldDrawBokasi(void) {
+    sdfDrawTag_t *list = sdfPrimAllocDrawTag(NULL);
+    void *reference = (void *)sdfGrAllocPacketBuff(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    void *sprite;
+    fldSpriteVertex_t *vertex;
+    sdfGrOt_t *surface;
+
+    sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[dds3GetFrameID()].frameTex, reference);
+    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfDrawTagLink(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x33001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = 0x8000000064ULL;
+    blendPacket[7] = 0x42;
+    sdfDrawTagLink(list, (u32)blendPacket);
+    sprite = sdf2DAllocSprite(1);
+    vertex = (fldSpriteVertex_t *)sdf2DGetPrimPtr((s32)sprite);
+    vertex->r = 0x81;
+    vertex->g = 0x81;
+    vertex->b = 0x81;
+    vertex->a = 0x80;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF8;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xDFF;
+    vertex->corner[1].x = 0x8FF8;
+    vertex->corner[1].y = 0x86FB;
+    vertex->corner[1].mask = 0;
+    vertex->corner[1].flag = 0;
+    sdfDrawTagLink(list, (u32)sprite);
+    surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
+}
+
+void fldDrawFrameSpriteAlpha(s32 alpha) {
+    sdfDrawTag_t *list = sdfPrimAllocDrawTag(NULL);
+    void *reference = (void *)sdfGrAllocPacketBuff(0x20);
+    u64 *texturePacket;
+    u64 *blendPacket;
+    void *sprite;
+    fldSpriteVertex_t *vertex;
+    sdfGrOt_t *surface;
+
+    sdfGrLinkDispFrameTex(list, (u32)dds3DrawEnv[dds3GetFrameID()].frameTex, reference);
+    texturePacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    texturePacket[0] = 3;
+    texturePacket[1] = 0x5000000310000000ULL;
+    texturePacket[2] = 0x1000000000008002ULL;
+    texturePacket[3] = 0xE;
+    texturePacket[4] = 0x8000000080ULL;
+    texturePacket[5] = 0x3B;
+    texturePacket[6] = 0;
+    texturePacket[7] = 0x3F;
+    sdfDrawTagLink(list, (u32)texturePacket);
+    blendPacket = (u64 *)sdfGrAllocPacketBuff(0x40);
+    blendPacket[0] = 3;
+    blendPacket[1] = 0x5000000310000000ULL;
+    blendPacket[2] = 0x1000000000008002ULL;
+    blendPacket[3] = 0xE;
+    blendPacket[4] = 0x33001;
+    blendPacket[5] = 0x47;
+    blendPacket[6] = ((u64)(u32)alpha << 32) | 0x64;
+    blendPacket[7] = 0x42;
+    sdfDrawTagLink(list, (u32)blendPacket);
+    sprite = sdf2DAllocSprite(1);
+    vertex = (fldSpriteVertex_t *)sdf2DGetPrimPtr((s32)sprite);
+    vertex->r = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->a = alpha;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[0].x = 0x6FF8;
+    vertex->corner[0].y = 0x78FB;
+    vertex->corner[0].mask = 0;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].u = 0x2000;
+    vertex->corner[1].v = 0xDFF;
+    vertex->corner[1].x = 0x8FF8;
+    vertex->corner[1].y = 0x86FB;
+    vertex->corner[1].mask = 0;
+    vertex->corner[1].flag = 0;
+    sdfDrawTagLink(list, (u32)sprite);
+    surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
+}
 
 void fldDrawPos(const f32 *pos) {
     Sprite3D_t packet;
@@ -1432,7 +1800,36 @@ void fldDrawPos(const f32 *pos) {
     drawSprite3D(D_0054EC60, &packet);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldDrawPosCol);
+void fldDrawPosCol(const f32 *pos, s32 color) {
+    Sprite3D_t packet;
+    f32 half = 36.0f;
+
+    packet.uv[0].u = 0;
+    packet.uv[0].v = 0;
+    packet.uv[1].u = 0x200;
+    packet.uv[1].v = 0;
+    packet.uv[2].u = 0x200;
+    packet.uv[2].v = 0x200;
+    packet.uv[3].u = 0;
+    packet.uv[3].v = 0x200;
+    packet.vt[0].x = -half;
+    packet.vt[0].y = -half;
+    packet.vt[1].x = half;
+    packet.vt[1].y = -half;
+    packet.vt[2].x = half;
+    packet.vt[2].y = half;
+    packet.vt[3].x = -half;
+    packet.vt[3].y = half;
+    packet.col = color;
+    packet.pos.x = pos[0];
+    packet.pos.y = pos[1];
+    packet.pos.z = pos[2];
+    packet.rot = 0.0f;
+    rsetOtOfs(0x2E);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 2);
+    rsetAlpha(0);
+    drawSprite3D(D_0054EC60, &packet);
+}
 
 void fldDraw2DBar(s32 x, s32 y, s32 width, s32 height) {
     DrwSprite2D(x, y, 0x10, height, 0, 0, 0x10, 0x20, 0x60000040, D_0054EC60);
@@ -1819,7 +2216,13 @@ f32 GetSphericalPosMove(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
 
 INCLUDE_ASM(const s32, "code_00128848", fldCamCalcSlopeOffset);
 
-INCLUDE_ASM(const s32, "code_00128848", fldCamSetLeng);
+void fldCamSetLeng(void) {
+    f32 dx = D_002FC9C0[0] - fldCamTarget[0];
+    f32 dy = D_002FC9C0[1] - fldCamTarget[1];
+    f32 dz = D_002FC9C0[2] - fldCamTarget[2];
+
+    fldCamLength = fsqrtf(dx * dx + dy * dy + dz * dz) - 50.0f;
+}
 
 void fldCamResetNpc(void)
 {
@@ -2125,7 +2528,39 @@ INCLUDE_ASM(const s32, "code_00128848", fldPlayerMotion);
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerMotionSe);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Hit);
+void fldPlayerCalc_Hit(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+    f32 pos[4];
+    f32 probe[4];
+
+    if (ctl == NULL) {
+        return;
+    }
+    if (fldPlayerFastMode == 1) {
+        return;
+    }
+    if (l_UseCollision == 0) {
+        return;
+    }
+    probe[0] = fldGlobalBase.x;
+    probe[1] = fldGlobalBase.y;
+    probe[2] = fldGlobalBase.z;
+    fldHitChkUnitElv(probe);
+    if (fldGlobalBase.hitValid == 0) {
+        return;
+    }
+    fldGlobalBase.x = fldGlobalBase.hitX;
+    fldGlobalBase.y = fldGlobalBase.hitY;
+    fldGlobalBase.z = fldGlobalBase.hitZ;
+    pos[0] = fldGlobalBase.hitX;
+    pos[1] = fldGlobalBase.hitY;
+    pos[2] = fldGlobalBase.hitZ;
+    dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+    fldGlobalBase.hitValid = 0;
+    dds3GetPosPoseSet(ctl->handle);
+    VU0_STORE_VF10(pos);
+    PS2_COPY_QUAD((u8 *)ctl->handle->poseset + 0x70, pos);
+}
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_WarpRun);
 
@@ -2152,9 +2587,53 @@ void fldPlayerCalc_FastStart(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Wm3);
+void fldPlayerCalc_Wm3(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+    mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
+    fldScaleVec_t scale = D_00531D08;
+    f32 next;
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Wm4);
+    if (fldWmWarpMode != 1) {
+        model->first->speed = 0.0f;
+    } else {
+        scale.x *= fldWmapPlayerState;
+        scale.y *= fldWmapPlayerState;
+        scale.z *= fldWmapPlayerState;
+        dds3SetSclPoseSet(ctl->handle, &scale.x);
+        next = fldWmapPlayerState - 0.08f;
+        model->first->speed = 5.0f;
+        if (next <= 0.1f) {
+            fldWmapPlayerState = 0.1f;
+        } else {
+            fldWmapPlayerState = next;
+        }
+    }
+}
+
+void fldPlayerCalc_Wm4(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+    mdlObj_t *model = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
+    fldScaleVec_t scale = D_00531D18;
+    f32 next;
+
+    if (fldWmWarpMode == 2) {
+        fldWmWarpMode = 3;
+        fldWmapPlayerState = 0.1f;
+    } else {
+        scale.x *= fldWmapPlayerState;
+        scale.y *= fldWmapPlayerState;
+        scale.z *= fldWmapPlayerState;
+        dds3SetSclPoseSet(ctl->handle, &scale.x);
+        next = fldWmapPlayerState + 0.04f;
+        model->first->speed = 5.0f;
+        if (1.0f < next) {
+            fldWmapPlayerState = 1.0f;
+            fldWmWarpMode = 0;
+        } else {
+            fldWmapPlayerState = next;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerCalc_Wm2);
 
@@ -2183,25 +2662,93 @@ s32 fldPlayerChkAna(void)
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerOff);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerOn);
+void fldPlayerOn(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerSvsOff);
+    dds3ObjectBaseOffFlag(ctl->handle, 1);
+    if (ctl->handle2 != NULL) {
+        dds3ObjectBaseOffFlag(ctl->handle2, 1);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerSvsOn);
+void fldPlayerSvsOff(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerAlpOff);
+    dds3ObjectBaseSetControlBasicSvs(ctl->handle, 0);
+    dds3ObjectBaseOffFlag(ctl->handle, 0x800);
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerAlpOn);
+void fldPlayerSvsOn(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerSdwOn);
+    dds3ObjectBaseSetControlBasicSvs(ctl->handle, 0x80);
+    dds3ObjectBaseOnFlag(ctl->handle, 0x800);
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerSdwOff);
+void fldPlayerAlpOff(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+
+    ((mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle))->inner->color = 0;
+    if (ctl->handle2 != NULL) {
+        ((mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle2))->inner->color = 0;
+    }
+}
+
+void fldPlayerAlpOn(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+
+    ((mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle))->inner->color = 0x80808080;
+    if (ctl->handle2 != NULL) {
+        ((mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle2))->inner->color = 0x80808080;
+    }
+}
+
+void fldPlayerSdwOn(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+
+    if (ctl->handle2 != NULL) {
+        dds3ObjectBaseOnFlag(ctl->handle, 0x400);
+        return;
+    }
+    dds3ObjectBaseOnFlag(ctl->handle, 0x200);
+}
+
+void fldPlayerSdwOff(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+
+    dds3ObjectBaseOffFlag(ctl->handle, 0x400);
+    dds3ObjectBaseOffFlag(ctl->handle, 0x200);
+}
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerFastSet);
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerMotReset);
+void fldPlayerMotReset(void) {
+    dds3Basic_t *unit;
 
-INCLUDE_ASM(const s32, "code_00128848", fldPlayerMotReset2);
+    if (fldGb < 10) {
+        return;
+    }
+    unit = dds3GetActiveUnitSceneBasic(dds3GetActiveScene());
+    if (unit == NULL) {
+        return;
+    }
+    fldPlayerMotion(((mdlObj_t *)dds3UnitObjectBasicGetControlWorkData(unit)->modelHandle)->current.h.motionIndex,
+                    9, 10.0f);
+}
+
+void fldPlayerMotReset2(void) {
+    dds3Basic_t *unit;
+
+    if (fldGb < 10) {
+        return;
+    }
+    unit = dds3GetActiveUnitSceneBasic(dds3GetActiveScene());
+    if (unit == NULL) {
+        return;
+    }
+    fldPlayerMotion(((mdlObj_t *)dds3UnitObjectBasicGetControlWorkData(unit)->modelHandle)->current.h.motionIndex,
+                    9, 0.0f);
+}
 
 INCLUDE_ASM(const s32, "code_00128848", fldPlayerPosRot);
 
@@ -2209,7 +2756,10 @@ INCLUDE_ASM(const s32, "code_00128848", fldSkyDefaultLoad);
 
 INCLUDE_ASM(const s32, "code_00128848", fldSkyFieldLoad);
 
-INCLUDE_ASM(const s32, "code_00128848", fldGetSkyEntry);
+void fldGetSkyEntry(const void *src) {
+    gFilterAlpha = 0x80;
+    memcpy(fldSkyDefault, src, 0xE000);
+}
 
 void fldSkyCalcFilter(void) {
     gFilterAnimeOfsA = 0;
@@ -2243,7 +2793,22 @@ void fldSkyCalcFilter(void) {
 
 INCLUDE_ASM(const s32, "code_00128848", fldSkyDrawFilter);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetFilter);
+void fldSkySetFilter(s32 area, s32 value, s32 duration) {
+    if (fldSkyEnable == 0 && fldGb < 0x32) {
+        duration = 0;
+    }
+    if (duration == 0) {
+        fldSkyFilter = area;
+        fldSkyFilterRate = 1.0f;
+        fldSkyFilterTime = 1.0f;
+    } else {
+        fldSkyFilterRate = 0.0f;
+        fldSkyFilter = fldSkyFilterPrev;
+        fldSkyFilterTime = (f32)duration;
+    }
+    fldSkyFilterPrev = area;
+    fldSkyDataTable[area].mode = value;
+}
 
 void fldSetFilterAnime(s32 anime)
 {
@@ -2294,11 +2859,203 @@ INCLUDE_ASM(const s32, "code_00128848", fld_136800);
 
 INCLUDE_ASM(const s32, "code_00128848", fldSkySetPlayer);
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetTbl);
+void fldSkySetTbl(s32 idx, s32 durationMode) {
+    fldAreaWork_t *state = &fldGlobalBase;
+    fldLightSet_t *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetTblModosu);
+    if (state->area < 200) {
+        if (fldSkyEnable == 0 && state->area < 0x32) {
+            durationMode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (durationMode != 0) {
+            duration = defaultDuration;
+        }
+        if (durationMode >= 2) {
+            duration = durationMode;
+        }
+        fldSkyTable = idx;
+        fldSkyTableIdx = idx;
+        fldSkyTblUpperIdx = 0;
+        if (state->lightMaIdx == 0) {
+            light = &((fldLightSet_t *)fldSkyDefault)[idx];
+            area = light->fadeArea;
+            fldRunDanteGunFlag[13] = area;
+            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            value = light->fadeMode;
+            fldRunDanteGunFlag[15] = value;
+            fldRunDanteGunFlag[16] = light->swayMode;
+            fldSkySetFilter(area, value, duration);
+            fldSetFilterAnime(fldRunDanteGunFlag[16]);
+            vec[0] = light->drawColorFixedR * 0.00390625f;
+            vec[1] = light->drawColorFixedG * 0.00390625f;
+            vec[2] = light->drawColorFixedB * 0.00390625f;
+            vec[3] = 0;
+            dds3SetFogColor(duration, vec);
+            dds3SetFogPara(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+            dir[0] = light->lightDirectionAX;
+            dir[1] = light->lightDirectionAY;
+            dir[2] = light->lightDirectionAZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 0, dir);
+            vec[0] = light->lightColorAX;
+            vec[1] = light->lightColorAY;
+            vec[2] = light->lightColorAZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 0, vec);
+            dir[0] = light->lightDirectionBX;
+            dir[1] = light->lightDirectionBY;
+            dir[2] = light->lightDirectionBZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 1, dir);
+            vec[0] = light->lightColorBX;
+            vec[1] = light->lightColorBY;
+            vec[2] = light->lightColorBZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 1, vec);
+            dir[0] = light->lightDirectionCX;
+            dir[1] = light->lightDirectionCY;
+            dir[2] = light->lightDirectionCZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 2, dir);
+            vec[0] = light->lightColorCX;
+            vec[1] = light->lightColorCY;
+            vec[2] = light->lightColorCZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 2, vec);
+            vec[0] = light->backgroundColorX;
+            vec[1] = light->backgroundColorY;
+            vec[2] = light->backgroundColorZ;
+            vec[3] = 1.0f;
+            dds3SetAmbientColor(duration, vec);
+            fldSkySetPlayer(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                            light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                            light->unitLightDirection[0], light->unitLightDirection[1],
+                            light->unitLightDirection[2]);
+        }
+    }
+}
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetTblUpper);
+void fldSkySetTblModosu(s32 speed) {
+    if (fldSkyEnable == 0 && fldGb < 0x32) {
+        speed = 0;
+    }
+    if (fldSkyTableIdx != 0 && fldSkyTable != fldSkyTableIdx) {
+        if (fldLightMaState == 0) {
+            D_002FC0EC = fldSkyTableIdx;
+        }
+        fldSkySetTbl(fldSkyTableIdx, speed);
+    }
+}
+
+void fldSkySetTblUpper(s32 idx, s32 mode) {
+    fldAreaWork_t *state = &fldGlobalBase;
+    fldLightSet_t *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
+    u32 previousIndex;
+
+    if (state->area < 200) {
+        if (fldSkyEnable == 0 && state->area < 0x32) {
+            mode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (mode != 0) {
+            duration = defaultDuration;
+        }
+        if (mode >= 2) {
+            duration = mode;
+        }
+        if (fldSkyTable != idx) {
+            previousIndex = fldSkyTableIdx;
+            if (fldSkyTblUpperIdx == 0) {
+                previousIndex = fldSkyTable;
+            }
+            D_0054ED5C = gFilterAnime;
+            D_0054ED60 = gFilterAnimeCntF;
+            D_0054ED64 = gFilterAnimeOfsA;
+            D_0054ED68 = fldSkyFilterPrev;
+            D_0054ED6C = fldSkyFilter;
+            D_0054ED70 = fldSkyFilterRate;
+            D_0054ED74 = fldSkyFilterTime;
+            fldSkyTableIdx = previousIndex;
+            D_0054ED7C = gSkyTblAnime;
+            D_0054ED80 = gSkyTblAnimeCntI;
+            D_0054ED84 = gSkyTblBaseIdx;
+            fldSkyTblUpperIdx = 1;
+            fldSkyTable = idx;
+            if (state->lightMaIdx == 0) {
+                light = &((fldLightSet_t *)fldSkyDefault)[idx];
+                fldRunDanteGunFlag[11] = idx;
+            area = light->fadeArea;
+            fldRunDanteGunFlag[13] = area;
+            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            value = light->fadeMode;
+            fldRunDanteGunFlag[15] = value;
+            fldRunDanteGunFlag[16] = light->swayMode;
+            fldSkySetFilter(area, value, duration);
+            fldSetFilterAnime(fldRunDanteGunFlag[16]);
+            vec[0] = light->drawColorFixedR * 0.00390625f;
+            vec[1] = light->drawColorFixedG * 0.00390625f;
+            vec[2] = light->drawColorFixedB * 0.00390625f;
+            vec[3] = 0;
+            dds3SetFogColor(duration, vec);
+            dds3SetFogPara(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+            dir[0] = light->lightDirectionAX;
+            dir[1] = light->lightDirectionAY;
+            dir[2] = light->lightDirectionAZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 0, dir);
+            vec[0] = light->lightColorAX;
+            vec[1] = light->lightColorAY;
+            vec[2] = light->lightColorAZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 0, vec);
+            dir[0] = light->lightDirectionBX;
+            dir[1] = light->lightDirectionBY;
+            dir[2] = light->lightDirectionBZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 1, dir);
+            vec[0] = light->lightColorBX;
+            vec[1] = light->lightColorBY;
+            vec[2] = light->lightColorBZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 1, vec);
+            dir[0] = light->lightDirectionCX;
+            dir[1] = light->lightDirectionCY;
+            dir[2] = light->lightDirectionCZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 2, dir);
+            vec[0] = light->lightColorCX;
+            vec[1] = light->lightColorCY;
+            vec[2] = light->lightColorCZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 2, vec);
+            vec[0] = light->backgroundColorX;
+            vec[1] = light->backgroundColorY;
+            vec[2] = light->backgroundColorZ;
+            vec[3] = 1.0f;
+            dds3SetAmbientColor(duration, vec);
+            fldSkySetPlayer(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                            light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                            light->unitLightDirection[0], light->unitLightDirection[1],
+                            light->unitLightDirection[2]);
+            }
+        }
+    }
+}
 
 void fldSkySetTblLightMaDZ(s32 enabled) {
     if (enabled == 0) {
@@ -2309,7 +3066,91 @@ void fldSkySetTblLightMaDZ(s32 enabled) {
     dds3UnitObjectBasicEL_LinkFree(D_0054EAE8);
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldSkySetTblLightMa);
+void fldSkySetTblLightMa(s32 idx, s32 durationMode) {
+    fldLightSet_t *light;
+    f32 vec[4];
+    f32 dir[4];
+    s32 duration;
+    s32 defaultDuration;
+    s32 area;
+    s32 value;
+
+    if (fldGb < 200) {
+        if (fldSkyEnable == 0 && fldGb < 0x32) {
+            durationMode = 0;
+        }
+        defaultDuration = 15;
+        duration = 0;
+        if (durationMode != 0) {
+            duration = defaultDuration;
+        }
+        if (durationMode >= 2) {
+            duration = durationMode;
+        }
+        if (fldSkyLightMaTbl != idx) {
+            if (idx == 0) {
+                idx = fldSkyTable;
+            }
+            light = &((fldLightSet_t *)fldSkyDefault)[idx];
+            D_0054ED8C = fldRunDanteGunFlag[11];
+            fldRunDanteGunFlag[11] = idx;
+            fldSkyLightMaTbl = idx;
+            area = light->fadeArea;
+            fldRunDanteGunFlag[13] = area;
+            fldRunDanteGunFlag[14] = light->displayStateSlot14;
+            value = light->fadeMode;
+            fldRunDanteGunFlag[15] = value;
+            fldRunDanteGunFlag[16] = light->swayMode;
+            fldSkySetFilter(area, value, duration);
+            fldSetFilterAnime(fldRunDanteGunFlag[16]);
+            vec[0] = light->drawColorFixedR * 0.00390625f;
+            vec[1] = light->drawColorFixedG * 0.00390625f;
+            vec[2] = light->drawColorFixedB * 0.00390625f;
+            vec[3] = 0;
+            dds3SetFogColor(duration, vec);
+            dds3SetFogPara(duration, light->fogNearValue, light->fogFarValue, light->depthNearValue, light->depthFarValue);
+            dir[0] = light->lightDirectionAX;
+            dir[1] = light->lightDirectionAY;
+            dir[2] = light->lightDirectionAZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 0, dir);
+            vec[0] = light->lightColorAX;
+            vec[1] = light->lightColorAY;
+            vec[2] = light->lightColorAZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 0, vec);
+            dir[0] = light->lightDirectionBX;
+            dir[1] = light->lightDirectionBY;
+            dir[2] = light->lightDirectionBZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 1, dir);
+            vec[0] = light->lightColorBX;
+            vec[1] = light->lightColorBY;
+            vec[2] = light->lightColorBZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 1, vec);
+            dir[0] = light->lightDirectionCX;
+            dir[1] = light->lightDirectionCY;
+            dir[2] = light->lightDirectionCZ;
+            dir[3] = 0;
+            dds3SetLightDir(duration, 2, dir);
+            vec[0] = light->lightColorCX;
+            vec[1] = light->lightColorCY;
+            vec[2] = light->lightColorCZ;
+            vec[3] = 0;
+            dds3SetLightColor(duration, 2, vec);
+            vec[0] = light->backgroundColorX;
+            vec[1] = light->backgroundColorY;
+            vec[2] = light->backgroundColorZ;
+            vec[3] = 1.0f;
+            dds3SetAmbientColor(duration, vec);
+            fldSkySetPlayer(duration, light->unitColorA[0], light->unitColorA[1], light->unitColorA[2],
+                            light->unitColorB[0], light->unitColorB[1], light->unitColorB[2],
+                            light->unitLightDirection[0], light->unitLightDirection[1],
+                            light->unitLightDirection[2]);
+        }
+    }
+}
 
 void fldSetFileResolverIdx(u32 state) {
     fldSkyTable = state;
@@ -2788,7 +3629,21 @@ INCLUDE_ASM(const s32, "code_00128848", fldEveHitTestRect);
 
 INCLUDE_ASM(const s32, "code_00128848", fldEveHitTestPlanes);
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_ScriptStart);
+s32 fldEveHit_ScriptStart(char *name, s32 idx) {
+    s32 pid;
+    s32 mode;
+
+    if (scrSearchScriptName(name) == NULL) {
+        pid = dds3SceneBasicStartScript(dds3GetActiveScene(), name);
+        gEvnRngPid[idx] = pid;
+        gFldEveRngIdx = idx;
+        mode = fldEveHitTable[idx].mode;
+        gFldEveRngIdx_N = (mode == 1) ? idx : -1;
+        gFldEveRngIdx_T = (mode == 2) ? idx : -1;
+        return pid;
+    }
+    return -1;
+}
 
 s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
     gEvnRngPid[slot] = 0;
@@ -2827,7 +3682,18 @@ s32 fldEveHit_ChkEveHitAfter(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_00128848", fldEveHit_ChkOn);
+s32 fldEveHit_ChkOn(const char *name) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        if (gFldEveHitOnOffTbl[i].area == fldGlobalBase.area &&
+            gFldEveHitOnOffTbl[i].floor == fldGlobalBase.floor + 1 &&
+            strcmp(gFldEveHitOnOffTbl[i].name, name) == 0) {
+            return evtBitCheck(gFldEveHitOnOffTbl[i].flag) != 0;
+        }
+    }
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "code_00128848", D_00531E08);
 
@@ -3037,7 +3903,19 @@ INCLUDE_ASM(const s32, "code_00128848", fldFindEventEntry);
 
 INCLUDE_ASM(const s32, "code_00128848", fldDoor_Find2);
 
-INCLUDE_ASM(const s32, "code_00128848", fldDoor_Find3);
+u8 *fldDoor_Find3(void) {
+    s32 idx = gFldWap_after_nextidx;
+    fldDoorData_t *entry = &fldDoorTable[idx];
+
+    if (entry->floor == fldArea[0] + 1) {
+        if (entry->kind == 10) {
+            scriptlabel = idx;
+            gFldWapPanel = 8;
+            return D_00303020;
+        }
+    }
+    return NULL;
+}
 
 s32 fldDoor_GetWarpEff(void)
 {
@@ -3233,7 +4111,34 @@ s32 fldDoor_ElvTakasaToFloor(s32 index) {
 
 INCLUDE_ASM(const s32, "code_00128848", fldDoor_ElvExit);
 
-INCLUDE_ASM(const s32, "code_00128848", fldClearDoorEvents);
+void fldClearDoorEvents(void) {
+    fldDoorEvent_t *entry = fldDoorEventTable;
+    s32 i;
+
+    for (i = 0; i < 256; i++, entry++) {
+        entry->unk00 = 0;
+        entry->unk04 = 0;
+        entry->unk08 = 0;
+        entry->unk0C = -1;
+        entry->unk10 = 0;
+        entry->unk14 = -1;
+        entry->unk18 = 0;
+        entry->unk1C = 0;
+        entry->unk24 = 0;
+        entry->unk28 = 0;
+        entry->unk2C = 0;
+        entry->unk30 = 0;
+        entry->unk34 = 0;
+        entry->unk38 = 0;
+        entry->unk3C = 0;
+        entry->unk40 = 0;
+        entry->unk44 = 0;
+        entry->unk48 = 0;
+        entry->unk4C = 0;
+        entry->unk50 = 0;
+    }
+    scriptlabel = -1;
+}
 
 void fldDoorLoad(s32 field) {
     char path[64];
