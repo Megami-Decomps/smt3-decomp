@@ -308,6 +308,27 @@ Nocturne's; only the DDS projection was in doubt.
 | `0x002A8598` | `sdf/sdfThread` | the thread block (`sdfSystemThreadProc` .. `sdfSetMainThreadPriority`) begins here, right after HD's `sdfSystem.c` run; the DDS1 label at `0x002A87F0` sits inside it |
 | `0x00102FB8` | unknown | a same-unit group of `fclEncyc*` functions inside `kernel/dds3AdminiProcess`, where HD claims `dds3AdminiProcess.c`. One of the two is wrong; worth a look before trusting that unit's interior. |
 
+### `code_00116AD0` is five original files, not one
+
+The HD reconstruction splits this unit's 80 remaining functions cleanly by
+prefix with no interleaving, so naming the file after any one of them would be
+wrong for most of it:
+
+| Original file | Functions | Prefixes |
+|---|---|---|
+| `fldTest.c` | 26 | `fldRun*`, `fldSdw*`, `fldElv*`, `FroFtoI`, `ooyTestDrawProc` |
+| `fldMain.c` | 17 | `fldSet*`, `fldAnahori*`, `fldWave*`, `fldLightMa*`, `fldOtInit`, `fldReadyScene` |
+| `fldProcess.c` | 10 | `Proc*`, `fldProc*` |
+| `fldGlobal.c` | 6 or more | `fldGb*`, the flag accessors, `fldAllTblLoad` |
+| `dds3GlobalWork.c` | 4 | `dds3GlobalWork*`, `NewGame2*` |
+
+Address order suggests the boundaries run `fldTest.c`, `fldGlobal.c`,
+`fldMain.c`, `fldProcess.c`, with a `dds3GlobalWork.c` tail. This is
+`tools/find_tus.py` boundary work rather than a rename, and no reconstruction
+header declares the membership, so the per-file prototype blocks are the only
+oracle. Prefix agreement is weaker evidence than the two-source cuts above:
+one engine module's functions can be spread across several files.
+
 ## Limits
 
 - Zero pairing contradictions is weak evidence, not strong. The monotone cut

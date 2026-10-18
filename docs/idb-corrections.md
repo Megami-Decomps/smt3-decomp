@@ -98,6 +98,29 @@ Entry 0 of `modelFileKindTable` is `{0x0032A858, 2}` and the table runs seven en
 0x0032C458, where `mdlResrcMajorList` starts. `modelFileTable` (0x0032A820) has the same
 `{entries, count}` shape.
 
+## Proposed, with the proof, not yet applied
+
+Five `fldGbFlags_t` accessors in `code_00116AD0` have the same body as
+`fldGetModelFlag` and differ only in the field they touch, which the retail
+code makes plain. Their current names describe something else entirely:
+
+| Address symbol | Reads or writes | Current name is wrong because |
+|---|---|---|
+| `dds3ObjectBaseAddModelOt` | `animeFlag` (+0x02) | it is a flag getter, not an object-base draw call |
+| `dds3EffectObjectAddFld` | `modelFlag2` (+0x06) | same |
+| `fld_120C30` | `animeFlag2` (+0x08) | unnamed, and the field identifies it |
+| `dds3EffectObjectFindFld` | `animeId2[slot]` (+0x0A), returning -1 on 0xFF | same |
+| `fldGetAnimeId2` | writes `animeId2[slot]` | it is a setter, so the `Get` prefix is backwards |
+
+The HD build names the sibling cluster `fldGbSetAnime`, `fldGbSetHit`,
+`fldGbSetNpc` and `fldGbChkTakaraOpen`, so names from that family fit.
+
+These are not applied yet because a rename in the IDB changes
+`config/smt3/symbol_addrs.txt` on the next export, which renames the symbols
+every C reference and every `INCLUDE_ASM` line uses. That has to be done in
+one pass with the source updates and a relink, while no other work is in
+flight, or `check_unit.py` reports `STALE` against the old names.
+
 ## Examined and left alone
 
 - `sdfChipCB` (0x00577EC0) is already `sdfChipCB_tag[7]`, which `sdfChipInit` (0x002A8D38)
