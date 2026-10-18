@@ -565,4 +565,46 @@ typedef struct {
 #define EE_SYNC_EI_BARRIER() __asm__ volatile ( \
     ".set noreorder\n\tsync\n\tei\n\t.set reorder" : : : "memory")
 
+/* ---- quaternion operations shared by the blend routines ---- */
+
+/* vf10 . vf11 over all four lanes, read back as a C float. vf1.xyz is set to
+ * one first because vf0.x is a hardwired zero and cannot carry the y and z
+ * terms. */
+#define VU0_QUAT_DOT_VF10_VF11(out) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvaddw.xyz vf1, vf0, vf0w\n" \
+    "\tvmul.xyzw vf2, vf10, vf11\n" \
+    "\tvadday.x ACC, vf2, vf2y\n" \
+    "\tvmaddaz.x ACC, vf1, vf2z\n" \
+    "\tvmaddw.x vf2, vf1, vf2w\n" \
+    "\tqmfc2.ni $2, vf2\n" \
+    "\tmtc1 $2, %0\n" \
+    "\t.set reorder" \
+    : "=f" (out))
+
+/* vf12 = -vf11, taking the long way: the accumulator is zeroed by vf0.x and
+ * vf11 is then subtracted from it. */
+#define VU0_NEGATE_VF11_TO_VF12() __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvmulax.xyzw ACC, vf0, vf0x\n" \
+    "\tvmsubw.xyzw vf12, vf11, vf0w\n" \
+    "\t.set reorder")
+
+/* The two blend weights into vf2.x and vf3.x. */
+#define VU0_SET_WEIGHTS_VF2X_VF3X(first, second) __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tmfc1 $2, %0\n" \
+    "\tmfc1 $3, %1\n" \
+    "\tqmtc2.ni $2, vf2\n" \
+    "\tqmtc2.ni $3, vf3\n" \
+    "\t.set reorder" \
+    : : "f" (first), "f" (second))
+
+/* vf10 = vf10 * vf2.x + vf12 * vf3.x. */
+#define VU0_WEIGHTED_SUM_VF10_VF12() __asm__ volatile ( \
+    ".set noreorder\n" \
+    "\tvmulax.xyzw ACC, vf10, vf2x\n" \
+    "\tvmaddx.xyzw vf10, vf12, vf3x\n" \
+    "\t.set reorder")
+
 #endif /* PS2ASM_H */

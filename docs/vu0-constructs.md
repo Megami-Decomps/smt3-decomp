@@ -97,6 +97,12 @@ into one function will drift on those call sites.
 | unaligned vec3 load | `ldr; ldl; lw; pcpyld; qmtc2` | 5 |
 | unaligned vec3 store | `lq; pcpyud; sdr; sdl; sw` | 3 |
 | clip test and flag read | `vclipw.xyz`, `cfc2 $vi18` | 6 |
+| quaternion product | `vopmula`/`vopmsub` plus an ACC chain on w | 1 |
+| quaternion dot (4 lanes) | `vaddw.xyz vf1`; `vmul`; ACC chain; `qmfc2` | 3 |
+| quaternion inverse | squared norm, `vdiv`, conjugate | 1 |
+| quaternion normalize | squared norm, `vrsqrt`, `vmulq` | 1 |
+| quaternion to matrix | 26 instructions, writes vf28-vf30 | 1 |
+| weighted sum of two quaternions | `vmulax ACC, vf10, vf2x`; `vmaddx vf10, vf12, vf3x` | 2 |
 
 ## Where the obvious equivalent is wrong
 
@@ -171,3 +177,23 @@ code, and none needs 128-bit arithmetic:
 
 `div1` by zero needs writing out, since the EE answers ±1 and does not trap
 where C has undefined behaviour.
+
+## What is deliberately not a macro
+
+Some operations are a whole function whose body is one asm block: `Mult` (the
+quaternion product), `ToMatrix`, `SDF_QUAT_INNERPRODUCT`, `sdf_2C04B8` (the
+inverse), `sdf_2C0510`, `FromRotation` and `FromRotation_B` in
+`code_002BD340.c`, and the colour lerp in `model/mdlManager.c`. The function
+already names the operation and is called from several places, so wrapping its
+single-use body in a single-use macro would add a layer without adding a name.
+A port translates those at the function boundary.
+
+The macros exist where the same sequence is written out more than once, or
+where it sits inside C control flow. `Slerp` and `Lerp` were the case for both:
+between them they spelled out the same four operations, which is why
+`VU0_QUAT_DOT_VF10_VF11`, `VU0_NEGATE_VF11_TO_VF12`,
+`VU0_SET_WEIGHTS_VF2X_VF3X` and `VU0_WEIGHTED_SUM_VF10_VF12` are named.
+
+Three things stay as raw asm because they are not instructions at all: the
+`fptodp = sdfFloatToULong` style assembler symbol aliases, the `__asm__("")`
+scheduling barriers, and `__asm__("nop\nnop\nnop\nnop\n")` delay padding.

@@ -2168,17 +2168,7 @@ f32 sdf_2C0510(void)
 f32 sdf_2C0538(void)
 {
     f32 dotProduct;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvaddw.xyz vf1, vf0, vf0w\n"
-        "\tvmul.xyzw vf2, vf10, vf11\n"
-        "\tvadday.x ACC, vf2, vf2y\n"
-        "\tvmaddaz.x ACC, vf1, vf2z\n"
-        "\tvmaddw.x vf2, vf1, vf2w\n"
-        "\tqmfc2.ni $2, vf2\n"
-        "\tmtc1 $2, %0\n"
-        "\t.set reorder"
-        : "=f" (dotProduct));
+    VU0_QUAT_DOT_VF10_VF11(dotProduct);
     return dotProduct;
 }
 
@@ -2337,25 +2327,10 @@ void Slerp(f32 blendAmount) {
     f32 secondWeight;
     f32 sineAngle;
     f32 angleBetween;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvaddw.xyz vf1, vf0, vf0w\n"
-        "\tvmul.xyzw vf2, vf10, vf11\n"
-        "\tvadday.x ACC, vf2, vf2y\n"
-        "\tvmaddaz.x ACC, vf1, vf2z\n"
-        "\tvmaddw.x vf2, vf1, vf2w\n"
-        "\tqmfc2.ni $2, vf2\n"
-        "\tmtc1 $2, %0\n"
-        "\t.set reorder"
-        : "=f" (dotProduct));
+    VU0_QUAT_DOT_VF10_VF11(dotProduct);
     if (dotProduct < 0.0f) {
         dotProduct = -dotProduct;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "\tvmulax.xyzw ACC, vf0, vf0x\n"
-            "\tvmsubw.xyzw vf12, vf11, vf0w\n"
-            "\t.set reorder"
-            );
+        VU0_NEGATE_VF11_TO_VF12();
     } else {
         VU0_COPY_VF11_TO_VF12();
     }
@@ -2368,20 +2343,8 @@ void Slerp(f32 blendAmount) {
         firstWeight = sdfSin(firstWeight * angleBetween) / sineAngle;
         secondWeight = sdfSin(secondWeight * angleBetween) / sineAngle;
     }
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tmfc1 $2, %0\n"
-        "\tmfc1 $3, %1\n"
-        "\tqmtc2.ni $2, vf2\n"
-        "\tqmtc2.ni $3, vf3\n"
-        "\t.set reorder"
-        : : "f" (firstWeight), "f" (secondWeight));
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvmulax.xyzw ACC, vf10, vf2x\n"
-        "\tvmaddx.xyzw vf10, vf12, vf3x\n"
-        "\t.set reorder"
-        );
+    VU0_SET_WEIGHTS_VF2X_VF3X(firstWeight, secondWeight);
+    VU0_WEIGHTED_SUM_VF10_VF12();
     SDF_QUAT_INNERPRODUCT();
 }
 
@@ -2389,43 +2352,16 @@ void Slerp(f32 blendAmount) {
 void Lerp(f32 blendAmount)
 {
     f32 dotProduct;
-    __asm__ volatile (
-        ".set noreorder\n"
-        "\tvaddw.xyz vf1, vf0, vf0w\n"
-        "\tvmul.xyzw vf2, vf10, vf11\n"
-        "\tvadday.x ACC, vf2, vf2y\n"
-        "\tvmaddaz.x ACC, vf1, vf2z\n"
-        "\tvmaddw.x vf2, vf1, vf2w\n"
-        "\tqmfc2.ni $2, vf2\n"
-        "\tmtc1 $2, %0\n"
-        "\t.set reorder"
-        : "=f" (dotProduct));
+    VU0_QUAT_DOT_VF10_VF11(dotProduct);
     if (dotProduct < 0.0f) {
-        __asm__ volatile (
-            ".set noreorder\n"
-            "\tvmulax.xyzw ACC, vf0, vf0x\n"
-            "\tvmsubw.xyzw vf12, vf11, vf0w\n"
-            "\t.set reorder"
-            );
+        VU0_NEGATE_VF11_TO_VF12();
     } else {
         VU0_COPY_VF11_TO_VF12();
     }
     {
         f32 firstWeight = 1.0f - blendAmount;
-        __asm__ volatile (
-            ".set noreorder\n"
-            "\tmfc1 $2, %0\n"
-            "\tmfc1 $3, %1\n"
-            "\tqmtc2.ni $2, vf2\n"
-            "\tqmtc2.ni $3, vf3\n"
-            "\t.set reorder"
-            : : "f" (firstWeight), "f" (blendAmount));
-        __asm__ volatile (
-            ".set noreorder\n"
-            "\tvmulax.xyzw ACC, vf10, vf2x\n"
-            "\tvmaddx.xyzw vf10, vf12, vf3x\n"
-            "\t.set reorder"
-            );
+        VU0_SET_WEIGHTS_VF2X_VF3X(firstWeight, blendAmount);
+        VU0_WEIGHTED_SUM_VF10_VF12();
     }
     SDF_QUAT_INNERPRODUCT();
 }
