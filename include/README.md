@@ -1044,8 +1044,8 @@ register name, not an axis letter. Those are literal in the macro body, always.
 Parameters are only C expressions bound through operand constraints (`"r"`,
 `"f"`, `"m"`) and substituted as `%0`, `%1`.
 
-That is why there are many near-duplicate macros (`VU0_SCALE_VF10` beside
-`VU0_SCALE_VF11`, `VU0_LOAD_VF10` beside `VU0_LOAD_VF11`) instead of one
+That is why there are many near-duplicate macros (`SDF_VU0__SCALEVECTOR` beside
+`SDF_VU0__SCALEVECTOR_B`, `SDF_VU0__LOADVECTOR` beside `SDF_VU0__LOADVECTOR_B`) instead of one
 parameterised form: a register passed as a token is still an assembly literal in
 C clothing, and it costs a preprocessor paste table to translate. 21 macros did
 take a register or axis token; converting their 229 call sites to the
@@ -1067,10 +1067,10 @@ with an `#undef` and a comment saying what differs:
 
 | name | why it stays local |
 | --- | --- |
-| `VU0_LOAD_VF10` in `model/mdlManager.c` | the load has to act as a memory barrier |
-| `VU0_SCALE_VF10` in `model/mdlManager.c`, `event/evtUnitManager.c`, `event/evtPolygonMovie.c` | retail carries the bits through `$2`, not a register cc1 picks |
-| `VU0_SCALE_VF11` in `event/evtPolygonMovie.c` | as above |
-| `VU0_SET_VF10_Y` in `event/evtUnitManager.c` | declares no `$2` clobber, where the shared one does |
+| `SDF_VU0__LOADVECTOR` in `model/mdlManager.c` | the load has to act as a memory barrier |
+| `SDF_VU0__SCALEVECTOR` in `model/mdlManager.c`, `event/evtUnitManager.c`, `event/evtPolygonMovie.c` | retail carries the bits through `$2`, not a register cc1 picks |
+| `SDF_VU0__SCALEVECTOR_B` in `event/evtPolygonMovie.c` | as above |
+| `SDF_VU0__SETVECTOR_Y` in `event/evtUnitManager.c` | declares no `$2` clobber, where the shared one does |
 
 Everything else is defined once, in `ps2asm.h`, and the units include it: 143
 macros there, 252 definitions in total across the tree.
@@ -1112,7 +1112,7 @@ Measured against this `cc1` and Sony's `ee-as -G8`, not assumed:
   Every multi-instruction macro is bracketed with `.set noreorder` /
   `.set reorder`.
 - Register choice inside a macro is not free. `MMI_RGBA_UNPACK` and
-  `MMI_RGBA_PACK` name `$2` and `$3` literally because an `"=&r"` temporary gets
+  `SDF_VU0__dds3ColorFtoI` name `$2` and `$3` literally because an `"=&r"` temporary gets
   `$3`/`$4` here and retail uses `$2`/`$3`.
 - The compiler still schedules the code around a block. The order of the C
   statements next to one decides which `$f` register a float lands in (first
@@ -1136,18 +1136,18 @@ Ten functions in three units are byte-identical through these macros:
 `effect/effModelTrackPoly.c`; `effDebugPointDraw`, `effDebugPointDraw2`,
 `effDebugLineDraw` and `effDebugLineDraw2` in `code_001AC0A8.c`.
 
-Those exercise `PS2_COPY_QUAD`, `VU0_LOAD_VF10`, `VU0_STORE_VF10`,
-`VU0_STORE_VF10_TO`, `VU0_LOAD_VF11`, `VU0_LOAD_MATRIX`,
-`VU0_COPY_VF10_TO_VF11`, `VU0_ADD_VF10_VF11`, `VU0_SUB_VF10_VF11`,
-`VU0_MUL_VF10_VF11`, `VU0_SCALE_VF10`, `VU0_SCALE_VF11`,
-`VU0_TRANSFORM_POINT_VF10`, `VU0_PERSPECTIVE_DIVIDE_VF10`, `VU0_DOT_VF10_VF11`,
-`VU0_LENGTH_VF10`, `MMI_RGBA_UNPACK` and `MMI_RGBA_PACK`.
+Those exercise `SDF_VU0__COPYVECTOR`, `SDF_VU0__LOADVECTOR`, `SDF_VU0__STOREVECTOR`,
+`VU0_STORE_VF10_TO`, `SDF_VU0__LOADVECTOR_B`, `SDF_VU0__LOADMATRIX`,
+`SDF_VU0__COPYVECTOR_A_TO_B`, `SDF_VU0__ADDVECTOR`, `SDF_VU0__SUBVECTOR`,
+`SDF_VU0__MULVECTOR`, `SDF_VU0__SCALEVECTOR`, `SDF_VU0__SCALEVECTOR_B`,
+`SDF_VU0__APPLYMATRIX_XYZ1`, `SDF_VU0__PERSVECTOR`, `SDF_VU0__INNERPRODUCT`,
+`SDF_VU0__GETLENGTH`, `MMI_RGBA_UNPACK` and `SDF_VU0__dds3ColorFtoI`.
 
 The rest assemble and have been read against the retail instructions they are
 named for, but no function has matched through them yet: the MMI lane ops, the
 pipeline-1 family (`EE_MULT1`, `EE_DIV1`, `EE_DIVU1`, `EE_REM1`),
-`VU0_CROSS_VF10_VF11`, `VU0_NORMALIZE_VF10`, the `vf12` copies, the clip-flag
-macros, `MMI_LOAD_VEC3_VF10`, `MMI_STORE_VEC3`, `MMI_PLZCW` and the barriers.
+`SDF_VU0__OUTERPRODUCT`, `SDF_VU0__NORMALIZE`, the `vf12` copies, the clip-flag
+macros, `SDF_VU0__LOADVECTOR_UNALIGN`, `MMI_STORE_VEC3`, `MMI_PLZCW` and the barriers.
 Treat an unproven macro as a starting point, and check the emitted `.s`
 (`SMT3_KEEP_S=/tmp/x.s tools/cc.sh ...`) rather than trusting the name.
 

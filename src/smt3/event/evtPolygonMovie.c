@@ -9,16 +9,16 @@
  * which is what each caller's retail register allocation needs.
  * Kept local: retail carries the bits through $2 here, not through
  * a register cc1 picks. */
-#undef VU0_SCALE_VF10
-#define VU0_SCALE_VF10(f) __asm__ volatile ( \
+#undef SDF_VU0__SCALEVECTOR
+#define SDF_VU0__SCALEVECTOR(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
     : : "f" (f))
 
 /* Kept local: retail carries the bits through $2 here, not through
  * a register cc1 picks. */
-#undef VU0_SCALE_VF11
-#define VU0_SCALE_VF11(f) __asm__ volatile ( \
+#undef SDF_VU0__SCALEVECTOR_B
+#define SDF_VU0__SCALEVECTOR_B(f) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf11, vf11, vf2x\n\t.set reorder" \
     : : "f" (f))
@@ -141,7 +141,7 @@ static inline u32 eePackRGBAWord(f32 unit) {
 /* One asm location for every arm's w set, so jump2 can cross-jump them. */
 static inline void evtSetBlendVecW(f32 w)
 {
-    VU0_SET_VF10_W(w);
+    SDF_VU0__SETVECTOR_W(w);
 }
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", UnitFrameFunc);
@@ -260,48 +260,48 @@ void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
         t = 0.0f;
     }
     if (a != NULL) {
-        VU0_LOAD_VF10(a);
+        SDF_VU0__LOADVECTOR(a);
     } else {
-        VU0_LOAD_VF10(D_0032C7F0);
+        SDF_VU0__LOADVECTOR(D_0032C7F0);
     }
-    VU0_SCALE_VF10(1.0f - t);
+    SDF_VU0__SCALEVECTOR(1.0f - t);
     if (b != NULL) {
-        VU0_LOAD_VF11(b);
+        SDF_VU0__LOADVECTOR_B(b);
     } else {
-        VU0_LOAD_VF11(D_0032C7F0);
+        SDF_VU0__LOADVECTOR_B(D_0032C7F0);
     }
-    VU0_SCALE_VF11(t);
-    VU0_ADD_VF10_VF11();
-    VU0_STORE_VF10(out);
+    SDF_VU0__SCALEVECTOR_B(t);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__STOREVECTOR(out);
     if (a != NULL) {
-        VU0_LOAD_VF10(a + 4);
+        SDF_VU0__LOADVECTOR(a + 4);
     } else {
-        VU0_LOAD_VF10(D_0032C800);
+        SDF_VU0__LOADVECTOR(D_0032C800);
     }
-    VU0_SCALE_VF10(1.0f - t);
+    SDF_VU0__SCALEVECTOR(1.0f - t);
     if (b != NULL) {
-        VU0_LOAD_VF11(b + 4);
+        SDF_VU0__LOADVECTOR_B(b + 4);
     } else {
-        VU0_LOAD_VF11(D_0032C800);
+        SDF_VU0__LOADVECTOR_B(D_0032C800);
     }
-    VU0_SCALE_VF11(t);
-    VU0_ADD_VF10_VF11();
-    VU0_STORE_VF10(out + 4);
+    SDF_VU0__SCALEVECTOR_B(t);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__STOREVECTOR(out + 4);
     if (a != NULL) {
-        VU0_LOAD_VF10(a + 8);
+        SDF_VU0__LOADVECTOR(a + 8);
     } else {
-        VU0_LOAD_VF10(D_0032C810);
+        SDF_VU0__LOADVECTOR(D_0032C810);
     }
-    VU0_SCALE_VF10(1.0f - t);
+    SDF_VU0__SCALEVECTOR(1.0f - t);
     if (b != NULL) {
-        VU0_LOAD_VF11(b + 8);
+        SDF_VU0__LOADVECTOR_B(b + 8);
     } else {
-        VU0_LOAD_VF11(D_0032C810);
+        SDF_VU0__LOADVECTOR_B(D_0032C810);
     }
-    VU0_SCALE_VF11(t);
-    VU0_ADD_VF10_VF11();
-    VU0_SET_VF10_W_ONE();
-    VU0_STORE_VF10(out + 8);
+    SDF_VU0__SCALEVECTOR_B(t);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__VECTOR_W_SET_ONE();
+    SDF_VU0__STOREVECTOR(out + 8);
 }
 
 /* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
@@ -313,49 +313,49 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
         t = 0.0f;
     }
     if (a != NULL) {
-        VU0_SET_VF10_X(a->vec[0]);
-        VU0_SET_VF10_Y(a->vec[1]);
-        VU0_SET_VF10_Z(a->vec[2]);
+        SDF_VU0__SETVECTOR_X(a->vec[0]);
+        SDF_VU0__SETVECTOR_Y(a->vec[1]);
+        SDF_VU0__SETVECTOR_Z(a->vec[2]);
         evtSetBlendVecW(a->vec[3]);
     } else {
-        VU0_SET_VF10_X(evtHokanFogParam[1]);
-        VU0_SET_VF10_Y(evtHokanFogParam[0]);
-        VU0_SET_VF10_Z(evtHokanFogParam[2]);
+        SDF_VU0__SETVECTOR_X(evtHokanFogParam[1]);
+        SDF_VU0__SETVECTOR_Y(evtHokanFogParam[0]);
+        SDF_VU0__SETVECTOR_Z(evtHokanFogParam[2]);
         evtSetBlendVecW(evtHokanFogParam[3]);
     }
     VU0_SCALE_VF10_BITS(1.0f - t);
-    VU0_COPY_VF10_TO_VF11();
+    SDF_VU0__COPYVECTOR_A_TO_B();
     if (b != NULL) {
-        VU0_SET_VF10_X(b->vec[0]);
-        VU0_SET_VF10_Y(b->vec[1]);
-        VU0_SET_VF10_Z(b->vec[2]);
+        SDF_VU0__SETVECTOR_X(b->vec[0]);
+        SDF_VU0__SETVECTOR_Y(b->vec[1]);
+        SDF_VU0__SETVECTOR_Z(b->vec[2]);
         evtSetBlendVecW(b->vec[3]);
     } else {
-        VU0_SET_VF10_X(evtHokanFogParam[1]);
-        VU0_SET_VF10_Y(evtHokanFogParam[0]);
-        VU0_SET_VF10_Z(evtHokanFogParam[2]);
+        SDF_VU0__SETVECTOR_X(evtHokanFogParam[1]);
+        SDF_VU0__SETVECTOR_Y(evtHokanFogParam[0]);
+        SDF_VU0__SETVECTOR_Z(evtHokanFogParam[2]);
         evtSetBlendVecW(evtHokanFogParam[3]);
     }
     VU0_SCALE_VF10_BITS(t);
-    VU0_ADD_VF10_VF11();
-    VU0_GET_VF10_X(out->vec[0]);
-    VU0_GET_VF10_Y(out->vec[1]);
-    VU0_GET_VF10_Z(out->vec[2]);
-    VU0_GET_VF10_W(out->vec[3]);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__GETVECTOR_X(out->vec[0]);
+    SDF_VU0__GETVECTOR_Y(out->vec[1]);
+    SDF_VU0__GETVECTOR_Z(out->vec[2]);
+    SDF_VU0__GETVECTOR_W(out->vec[3]);
     if (a != NULL) {
         eeUnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
     } else {
         eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
     VU0_SCALE_VF10_BITS(1.0f - t);
-    VU0_COPY_VF10_TO_VF11();
+    SDF_VU0__COPYVECTOR_A_TO_B();
     if (b != NULL) {
         eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
     } else {
         eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
     VU0_SCALE_VF10_BITS(t);
-    VU0_ADD_VF10_VF11();
+    SDF_VU0__ADDVECTOR();
     out->color = eePackRGBAWord(128.0f);
 }
 

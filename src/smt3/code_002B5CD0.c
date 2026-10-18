@@ -70,7 +70,7 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "sw $2, 8(%0)\n\t" \
     ".set reorder" \
     : : "r"(dst), "r"(value) : "$2", "memory")
-#define VU0_STORE_MATRIX_B(dst) __asm__ volatile ( \
+#define SDF_VU0__STOREMATRIX_B(dst) __asm__ volatile ( \
     ".set noreorder\n\t" \
     "sqc2 vf24, 0(%0)\n\t" \
     "sqc2 vf25, 16(%0)\n\t" \
@@ -79,25 +79,25 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     ".set reorder" \
     : : "r" (dst) : "memory")
 /* The three matrix banks: A is vf28-vf31, B vf24-vf27, C vf20-vf23. */
-#define VU0_COPY_MATRIX_A_TO_B() __asm__ volatile ( \
+#define SDF_VU0__COPYMATRIX_A_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf28\n\tvmove.xyzw vf25, vf29\n\t" \
     "vmove.xyzw vf26, vf30\n\tvmove.xyzw vf27, vf31\n\t.set reorder")
-#define VU0_COPY_MATRIX_A_TO_C() __asm__ volatile ( \
+#define SDF_VU0__COPYMATRIX_A_TO_C() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf20, vf28\n\tvmove.xyzw vf21, vf29\n\t" \
     "vmove.xyzw vf22, vf30\n\tvmove.xyzw vf23, vf31\n\t.set reorder")
-#define VU0_COPY_MATRIX_B_TO_A() __asm__ volatile ( \
+#define SDF_VU0__COPYMATRIX_B_TO_A() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf28, vf24\n\tvmove.xyzw vf29, vf25\n\t" \
     "vmove.xyzw vf30, vf26\n\tvmove.xyzw vf31, vf27\n\t.set reorder")
-#define VU0_COPY_MATRIX_B_TO_C() __asm__ volatile ( \
+#define SDF_VU0__COPYMATRIX_B_TO_C() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf20, vf24\n\tvmove.xyzw vf21, vf25\n\t" \
     "vmove.xyzw vf22, vf26\n\tvmove.xyzw vf23, vf27\n\t.set reorder")
-#define VU0_COPY_MATRIX_C_TO_A() __asm__ volatile ( \
+#define SDF_VU0__COPYMATRIX_C_TO_A() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf28, vf20\n\tvmove.xyzw vf29, vf21\n\t" \
     "vmove.xyzw vf30, vf22\n\tvmove.xyzw vf31, vf23\n\t.set reorder")
-#define VU0_COPY_MATRIX_C_TO_B() __asm__ volatile ( \
+#define SDF_VU0__COPYMATRIX_C_TO_B() __asm__ volatile ( \
     ".set noreorder\n\tvmove.xyzw vf24, vf20\n\tvmove.xyzw vf25, vf21\n\t" \
     "vmove.xyzw vf26, vf22\n\tvmove.xyzw vf27, vf23\n\t.set reorder")
-#define VU0_SET_UNIT_MATRIX_B() __asm__ volatile ( \
+#define SDF_VU0__LOADIDENTITY_B() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf24, vf0, vf0\n\tvmr32.xyzw vf26, vf0\n\t" \
     "vmove.xyzw vf27, vf0\n\tvaddw.x vf24, vf24, vf0w\n\tvmr32.xyzw vf25, vf26\n\t.set reorder")
 /* The three rotated basis rows saved across a nested packet build. */
@@ -144,7 +144,7 @@ void sdfQuatToAxisAngle(f32 *axis, f32 *angle, const f32 *quaternion);
     "vmulax.xyzw ACC, vf20, vf31x\n\tvmadday.xyzw ACC, vf21, vf31y\n\t" \
     "vmaddaz.xyzw ACC, vf22, vf31z\n\tvmaddw.xyzw vf31, vf23, vf31w\n\t" \
     ".set reorder")
-#define VU0_MATRIX4_TRANSPOSE() __asm__ volatile ( \
+#define SDF_VU0__TRANSMATRIX() __asm__ volatile ( \
     ".set noreorder\n\t" \
     "qmfc2.ni $8, vf28\n\tqmfc2.ni $9, vf29\n\tqmfc2.ni $10, vf30\n\tqmfc2.ni $11, vf31\n\t" \
     "pextlw $12, $9, $8\n\tpextuw $13, $9, $8\n\tpextlw $14, $11, $10\n\tpextuw $15, $11, $10\n\t" \
@@ -1533,61 +1533,61 @@ void sdfPadSetAct1(s32 padIndex, u8 strength);
 void sdfPadInitManager(void);
 
 void LoadMatrix(const void *matrix) {
-    VU0_LOAD_MATRIX(matrix);
+    SDF_VU0__LOADMATRIX(matrix);
 }
 
 void LoadMatrix_B(const void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0__LOADMATRIX_B(matrix);
 }
 
 void StoreMatrix(void *matrix) {
-    VU0_STORE_MATRIX(matrix);
+    SDF_VU0__STOREMATRIX(matrix);
 }
 
 void StoreMatrix_B(void *matrix) {
-    VU0_STORE_MATRIX_B(matrix);
+    SDF_VU0__STOREMATRIX_B(matrix);
 }
 
 void CopyMatrixAtoB(void) {
-    VU0_COPY_MATRIX_A_TO_B();
+    SDF_VU0__COPYMATRIX_A_TO_B();
 }
 
 void CopyMatrixAtoC(void) {
-    VU0_COPY_MATRIX_A_TO_C();
+    SDF_VU0__COPYMATRIX_A_TO_C();
 }
 
 void CopyMatrixBtoA(void) {
-    VU0_COPY_MATRIX_B_TO_A();
+    SDF_VU0__COPYMATRIX_B_TO_A();
 }
 
 void CopyMatrixBtoC(void) {
-    VU0_COPY_MATRIX_B_TO_C();
+    SDF_VU0__COPYMATRIX_B_TO_C();
 }
 
 void CopyMatrixCtoA(void) {
-    VU0_COPY_MATRIX_C_TO_A();
+    SDF_VU0__COPYMATRIX_C_TO_A();
 }
 
 void CopyMatrixCtoB(void) {
-    VU0_COPY_MATRIX_C_TO_B();
+    SDF_VU0__COPYMATRIX_C_TO_B();
 }
 
 void LoadIdentity(void) {
-    VU0_SET_UNIT_MATRIX();
+    SDF_VU0__LOADIDENTITY();
 }
 
 void LoadIdentity_B(void) {
-    VU0_SET_UNIT_MATRIX_B();
+    SDF_VU0__LOADIDENTITY_B();
 }
 
 /* vu0 routine: store the unit matrix built from vf0 by MMI lane shuffles */
 void StoreIdentity(f32 *matrix) {
-    EE_MMI_UNIT_MATRIX(matrix);
+    SDF_VU0__STOREIDENTITY(matrix);
 }
 
 /* libvu0: sceVu0TransposeMatrix, register form (vf28-vf31 in and out) */
 void DiagMatrix(void) {
-    VU0_MATRIX4_TRANSPOSE();
+    SDF_VU0__TRANSMATRIX();
 }
 
 /* vu0 routine: rigid inverse of vf28-vf31 (transpose the 3x3, translation = -(R^T * t)) */
@@ -1605,12 +1605,12 @@ void SetRotateMatrixX(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
-    EE_MMI_UNIT_MATRIX((f32 *)m);
+    SDF_VU0__STOREIDENTITY((f32 *)m);
     m[1][1] = c;
     m[1][2] = s;
     m[2][1] = -s;
     m[2][2] = c;
-    VU0_LOAD_MATRIX((f32 *)m);
+    SDF_VU0__LOADMATRIX((f32 *)m);
 }
 
 void SetRotateMatrixY(f32 angle) {
@@ -1618,12 +1618,12 @@ void SetRotateMatrixY(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
-    EE_MMI_UNIT_MATRIX((f32 *)m);
+    SDF_VU0__STOREIDENTITY((f32 *)m);
     m[0][0] = c;
     m[0][2] = -s;
     m[2][0] = s;
     m[2][2] = c;
-    VU0_LOAD_MATRIX((f32 *)m);
+    SDF_VU0__LOADMATRIX((f32 *)m);
 }
 
 void SetRotateMatrixZ(f32 angle) {
@@ -1631,12 +1631,12 @@ void SetRotateMatrixZ(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
-    EE_MMI_UNIT_MATRIX((f32 *)m);
+    SDF_VU0__STOREIDENTITY((f32 *)m);
     m[0][0] = c;
     m[0][1] = s;
     m[1][0] = -s;
     m[1][1] = c;
-    VU0_LOAD_MATRIX((f32 *)m);
+    SDF_VU0__LOADMATRIX((f32 *)m);
 }
 
 void StoreRotateMatrixAxis(f32 angle, const sdfVector3_t *axis, sdfMatrix4_t *matrix) {
@@ -1647,9 +1647,9 @@ void StoreRotateMatrixAxis(f32 angle, const sdfVector3_t *axis, sdfMatrix4_t *ma
     f32 cosine = cosf(angle);
     f32 sine = sinf(angle);
 
-    VU0_LOAD_VF10(axis);
-    VU0_NORMALIZE_VF10();
-    VU0_STORE_VF10(normalizedAxis);
+    SDF_VU0__LOADVECTOR(axis);
+    SDF_VU0__NORMALIZE();
+    SDF_VU0__STOREVECTOR(normalizedAxis);
 
     x = normalizedAxis[0];
     y = normalizedAxis[1];
@@ -1674,7 +1674,7 @@ void SetRotateMatrixAxis(f32 angle, const sdfVector3_t* axis)
 {
     sdfMatrix4_t matrix;
     StoreRotateMatrixAxis(angle, axis, &matrix);
-    VU0_LOAD_MATRIX(&matrix);
+    SDF_VU0__LOADMATRIX(&matrix);
 }
 
 void SetRotateMatrixX_B(f32 angle) {
@@ -1682,12 +1682,12 @@ void SetRotateMatrixX_B(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
-    EE_MMI_UNIT_MATRIX((f32 *)m);
+    SDF_VU0__STOREIDENTITY((f32 *)m);
     m[1][1] = c;
     m[1][2] = s;
     m[2][1] = -s;
     m[2][2] = c;
-    VU0_LOAD_MATRIX_B((f32 *)m);
+    SDF_VU0__LOADMATRIX_B((f32 *)m);
 }
 
 void SetRotateMatrixY_B(f32 angle) {
@@ -1695,12 +1695,12 @@ void SetRotateMatrixY_B(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
-    EE_MMI_UNIT_MATRIX((f32 *)m);
+    SDF_VU0__STOREIDENTITY((f32 *)m);
     m[0][0] = c;
     m[0][2] = -s;
     m[2][0] = s;
     m[2][2] = c;
-    VU0_LOAD_MATRIX_B((f32 *)m);
+    SDF_VU0__LOADMATRIX_B((f32 *)m);
 }
 
 void SetRotateMatrixZ_B(f32 angle) {
@@ -1708,19 +1708,19 @@ void SetRotateMatrixZ_B(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
-    EE_MMI_UNIT_MATRIX((f32 *)m);
+    SDF_VU0__STOREIDENTITY((f32 *)m);
     m[0][0] = c;
     m[0][1] = s;
     m[1][0] = -s;
     m[1][1] = c;
-    VU0_LOAD_MATRIX_B((f32 *)m);
+    SDF_VU0__LOADMATRIX_B((f32 *)m);
 }
 
 void SetRotateMatrixAxis_B(const sdfVector3_t* axis, f32 angle)
 {
     sdfMatrix4_t matrix;
     StoreRotateMatrixAxis(angle, axis, &matrix);
-    VU0_LOAD_MATRIX_B(&matrix);
+    SDF_VU0__LOADMATRIX_B(&matrix);
 }
 
 /* vu0 routine: rotate the vf29/vf30 pair by angle (vf29 = vf29*c + vf30*s, vf30 = vf29*s - vf30*c) */
@@ -1784,54 +1784,54 @@ void MultMatrixRevNoArg_C(void)
 }
 
 void MultMatrix(void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0__LOADMATRIX_B(matrix);
     MultMatrixNoArg();
 }
 
 void MultMatrixRev(const void *matrix) {
-    VU0_LOAD_MATRIX_B(matrix);
+    SDF_VU0__LOADMATRIX_B(matrix);
     MultMatrixRevNoArg();
 }
 
 void ApplyMatrix(void *dst, const void *src) {
-    VU0_LOAD_VF10(src);
-    VU0_APPLY_MATRIX_VF10();
-    VU0_STORE_VF10(dst);
+    SDF_VU0__LOADVECTOR(src);
+    SDF_VU0__APPLYMATRIX();
+    SDF_VU0__STOREVECTOR(dst);
 }
 
 f32 InnerProduct(const void *a, const void *b) {
     f32 product;
 
-    VU0_LOAD_VF10(a);
-    VU0_LOAD_VF11(b);
-    VU0_DOT_VF10_VF11(product);
+    SDF_VU0__LOADVECTOR(a);
+    SDF_VU0__LOADVECTOR_B(b);
+    SDF_VU0__INNERPRODUCT(product);
     return product;
 }
 
 void OuterProduct(void *dst, const void *a, const void *b) {
-    VU0_LOAD_VF10(a);
-    VU0_LOAD_VF11(b);
-    VU0_CROSS_VF10_VF11();
-    VU0_STORE_VF10(dst);
+    SDF_VU0__LOADVECTOR(a);
+    SDF_VU0__LOADVECTOR_B(b);
+    SDF_VU0__OUTERPRODUCT();
+    SDF_VU0__STOREVECTOR(dst);
 }
 
 /* vu0 routine: look-at basis in vf28-vf31 (forward, right, up, eye), then its rigid inverse */
 void LookAtMatrix(const void *directionPoint, const void *basisOrigin, const void *up) {
-    VU0_LOAD_VF10(basisOrigin);
+    SDF_VU0__LOADVECTOR(basisOrigin);
     VU0_COPY_VF10_TO_VF31();
-    VU0_COPY_VF10_TO_VF11();
-    VU0_LOAD_VF10(directionPoint);
-    VU0_SUB_VF10_VF11();
-    VU0_NORMALIZE_VF10();
+    SDF_VU0__COPYVECTOR_A_TO_B();
+    SDF_VU0__LOADVECTOR(directionPoint);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__NORMALIZE();
     VU0_COPY_VF10_TO_VF30();
-    VU0_COPY_VF10_TO_VF11();
-    VU0_LOAD_VF10(up);
-    VU0_CROSS_VF10_VF11();
-    VU0_NORMALIZE_VF10();
+    SDF_VU0__COPYVECTOR_A_TO_B();
+    SDF_VU0__LOADVECTOR(up);
+    SDF_VU0__OUTERPRODUCT();
+    SDF_VU0__NORMALIZE();
     VU0_COPY_VF10_TO_VF28();
-    VU0_COPY_VF10_TO_VF11();
+    SDF_VU0__COPYVECTOR_A_TO_B();
     VU0_COPY_VF30_TO_VF10();
-    VU0_CROSS_VF10_VF11();
+    SDF_VU0__OUTERPRODUCT();
     VU0_COPY_VF10_TO_VF29();
     ReverseMatrix();
 }
@@ -2766,7 +2766,7 @@ void sdfCoreDrawSetLight(u8 *sourceObject) {
 void sdfCoreDrawSetFog(u8 *sourceObject) {
     if (corePktCurrFog != (u32)sourceObject) {
         corePktCurrFog = (u32)sourceObject;
-        PS2_COPY_QUAD(&corePktFogParm, sourceObject + 0x10);
+        SDF_VU0__COPYVECTOR(&corePktFogParm, sourceObject + 0x10);
     }
 }
 
@@ -2853,19 +2853,19 @@ void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet, sdf3DScreenParam_t *
     packet->quadwords = 0xC;
     packet->command = 0x6C0BC000;
     packet->reservedWord = 0;
-    VU0_LOAD_MATRIX(transformMatrix);
-    VU0_STORE_MATRIX(packet->matrixA);
+    SDF_VU0__LOADMATRIX(transformMatrix);
+    SDF_VU0__STOREMATRIX(packet->matrixA);
     MultMatrixRev(node->camera.matrix);
-    VU0_STORE_MATRIX(packet->matrixB);
-    VU0_LOAD_VF10(&node->camera.halfWidth);
-    VU0_STORE_VF10(packet->vecA);
-    VU0_LOAD_VF10(&node->camera.originX);
-    VU0_STORE_VF10(packet->vecB);
-    VU0_LOAD_MATRIX(transformMatrix);
+    SDF_VU0__STOREMATRIX(packet->matrixB);
+    SDF_VU0__LOADVECTOR(&node->camera.halfWidth);
+    SDF_VU0__STOREVECTOR(packet->vecA);
+    SDF_VU0__LOADVECTOR(&node->camera.originX);
+    SDF_VU0__STOREVECTOR(packet->vecB);
+    SDF_VU0__LOADMATRIX(transformMatrix);
     ReverseMatrix();
     VU0_COPY_VF31_TO_VF10();
-    VU0_STORE_VF10(packet->vecC);
-    VU0_STORE_VF10(node->inverseOrigin);
+    SDF_VU0__STOREVECTOR(packet->vecC);
+    SDF_VU0__STOREVECTOR(node->inverseOrigin);
     packet->stmodCommand = SDF_VIF_ITOP_MATRIX;
     packet->mscalCommand = SDF_VIF_MSCAL_COMMAND;
     packet->unknownC8 = 0;
@@ -2873,13 +2873,13 @@ void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet, sdf3DScreenParam_t *
 }
 
 void sdf3DSetCamera(sdf3DScreenParam_t *node, void *transformMatrix) {
-    VU0_LOAD_MATRIX(transformMatrix);
-    VU0_STORE_MATRIX(sdfCameraTm);
+    SDF_VU0__LOADMATRIX(transformMatrix);
+    SDF_VU0__STOREMATRIX(sdfCameraTm);
     MultMatrixRev(node->camera.matrix);
-    VU0_LOAD_VF10(node->inverseOrigin);
-    VU0_STORE_MATRIX(sdf3DScreenTm);
-    VU0_TRANSFORM_POINT_VF10();
-    VU0_STORE_VF10(sdf3DEyeOffset);
+    SDF_VU0__LOADVECTOR(node->inverseOrigin);
+    SDF_VU0__STOREMATRIX(sdf3DScreenTm);
+    SDF_VU0__APPLYMATRIX_XYZ1();
+    SDF_VU0__STOREVECTOR(sdf3DEyeOffset);
     memcpy(sdf3DScreenParam, node, sizeof(*node));
 }
 

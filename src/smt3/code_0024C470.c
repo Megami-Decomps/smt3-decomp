@@ -861,37 +861,37 @@ s32 nbClipEffectNum(s32 screenPosition[4])
     f32 viewDistance, forwardDot;
     f32 *projectionData;
 
-    VU0_COPY_VF10_TO_VF12();
-    VU0_LOAD_VF11(aViewEye);
-    VU0_SUB_VF10_VF11();
-    VU0_LENGTH_VF10(viewDistance);
+    SDF_VU0__COPYVECTOR_A_TO_C();
+    SDF_VU0__LOADVECTOR_B(aViewEye);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__GETLENGTH(viewDistance);
     if (dpdiv(sdfFloatToULong(viewDistance), 16.0) <= 0)
         return 0;
 
-    VU0_NORMALIZE_VF10();
-    VU0_COPY_VF10_TO_VF11();
-    VU0_LOAD_MATRIX(D_002FA240);
+    SDF_VU0__NORMALIZE();
+    SDF_VU0__COPYVECTOR_A_TO_B();
+    SDF_VU0__LOADMATRIX(D_002FA240);
     VU0_COPY_MATRIX_TO_SECONDARY();
     ReverseMatrix();
     NB_VIEW_FORWARD();
-    VU0_NORMALIZE_VF10();
-    VU0_DOT_VF10_VF11(forwardDot);
+    SDF_VU0__NORMALIZE();
+    SDF_VU0__INNERPRODUCT(forwardDot);
     if (forwardDot <= 0.5f)
         return 0;
 
-    VU0_COPY_VF12_TO_VF10();
+    SDF_VU0__COPYVECTOR_C_TO_A();
     NB_RESTORE_MATRIX();
     projectionData = dds3ScreenParam + 12;
     MultMatrixRev(projectionData);
-    VU0_TRANSFORM_POINT_VF10();
-    VU0_PERSPECTIVE_DIVIDE_VF10();
+    SDF_VU0__APPLYMATRIX_XYZ1();
+    SDF_VU0__PERSVECTOR();
     projectionData += 16;
-    VU0_LOAD_VF11(projectionData);
-    VU0_MUL_VF10_VF11();
-    VU0_LOAD_VF11(dds3ScreenParam + 32);
-    VU0_ADD_VF10_VF11();
-    VU0_FTOI4_VF10();
-    VU0_STORE_VF10(screenPosition);
+    SDF_VU0__LOADVECTOR_B(projectionData);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__LOADVECTOR_B(dds3ScreenParam + 32);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__FTOI4();
+    SDF_VU0__STOREVECTOR(screenPosition);
     screenPosition[0] -= 0x7000;
     screenPosition[1] -= 0x7900;
     return 1;

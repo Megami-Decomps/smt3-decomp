@@ -542,10 +542,10 @@ u32 evtCommand_MODEL_ROT_XYZ(void) {
     x = scrGetFloatPara(1) * toRad;
     y = scrGetFloatPara(2) * toRad;
     FromEuler(x, y, 0.0f);
-    VU0_COPY_VF10_TO_VF11();
+    SDF_VU0__COPYVECTOR_A_TO_B();
     FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
     Mult();
-    VU0_STORE_VF10(v);
+    SDF_VU0__STOREVECTOR(v);
     dds3SetRotPoseSet(unit, (u128 *)v);
     return 1;
 }
@@ -1250,10 +1250,10 @@ u32 evtCommand_EFFECT_ROT_XYZ(void) {
         x = scrGetFloatPara(1) * toRad;
         y = scrGetFloatPara(2) * toRad;
         FromEuler(x, y, 0.0f);
-        VU0_COPY_VF10_TO_VF11();
+        SDF_VU0__COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * toRad);
         Mult();
-        VU0_STORE_VF10(v);
+        SDF_VU0__STOREVECTOR(v);
         dds3SetRotPoseSet(obj, (u128 *)v);
     }
     return 1;
@@ -1890,10 +1890,10 @@ s32 evtCommand_CAM_ROT_XYZ(void) {
     degreesToRadians = 0.017453293f;
     pitch = scrGetFloatPara(1) * degreesToRadians;
     FromEuler(pitch, scrGetFloatPara(2) * degreesToRadians, 0.0f);
-    VU0_COPY_VF10_TO_VF11();
+    SDF_VU0__COPYVECTOR_A_TO_B();
     FromEuler(0.0f, 0.0f, scrGetFloatPara(3) * degreesToRadians);
     Mult();
-    VU0_STORE_VF10(quaternion);
+    SDF_VU0__STOREVECTOR(quaternion);
     dds3SetRotPoseSet(effectUnit, (u128 *)quaternion);
     return 1;
 }

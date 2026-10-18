@@ -69,9 +69,9 @@ s32 func_00112410(dds3Basic_t *basic)
         dds3SetRadiusPoseSet(pose);
     }
     if (dds3GetActiveCameraSceneBasic(dds3GetControlScene()) == basic) {
-        PS2_COPY_QUAD(&aViewEye, &pose->pos);
-        PS2_COPY_QUAD(&aViewTarget, &work->targetPos);
-        PS2_COPY_QUAD(&aViewDown, &work->upVector);
+        SDF_VU0__COPYVECTOR(&aViewEye, &pose->pos);
+        SDF_VU0__COPYVECTOR(&aViewTarget, &work->targetPos);
+        SDF_VU0__COPYVECTOR(&aViewDown, &work->upVector);
         if (work->flag & 1) {
             dds3SetScreenFovy(work->fovy);
             work->flag &= ~1;
@@ -91,22 +91,22 @@ void MakeCamera(dds3Basic_t *basic)
     dds3CameraObjectBasicWorkData_t *work = basic->workdata;
     dds3PoseSet_t *pose = basic->poseset;
 
-    VU0_LOAD_VF10(&pose->rot);
+    SDF_VU0__LOADVECTOR(&pose->rot);
     ToMatrix();
-    VU0_LOAD_VF10(&work->vertical);
-    VU0_APPLY_MATRIX_VF10();
-    VU0_SET_VF10_W_ONE();
-    VU0_STORE_VF10(&work->upVector);
+    SDF_VU0__LOADVECTOR(&work->vertical);
+    SDF_VU0__APPLYMATRIX();
+    SDF_VU0__VECTOR_W_SET_ONE();
+    SDF_VU0__STOREVECTOR(&work->upVector);
     if (work->mode == 1) {
-        VU0_LOAD_VF10(&work->eyeVector);
-        VU0_APPLY_MATRIX_VF10();
-        VU0_LOAD_VF11(&pose->pos);
-        VU0_ADD_VF10_VF11();
-        VU0_SET_VF10_W_ONE();
-        VU0_STORE_VF10(&work->targetPos);
+        SDF_VU0__LOADVECTOR(&work->eyeVector);
+        SDF_VU0__APPLYMATRIX();
+        SDF_VU0__LOADVECTOR_B(&pose->pos);
+        SDF_VU0__ADDVECTOR();
+        SDF_VU0__VECTOR_W_SET_ONE();
+        SDF_VU0__STOREVECTOR(&work->targetPos);
     }
     LookAtMatrix(&work->targetPos, &pose->pos, &work->upVector);
-    VU0_STORE_MATRIX(&work->cameraTM);
+    SDF_VU0__STOREMATRIX(&work->cameraTM);
 }
 
 dds3ObjectBaseControl_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic)
@@ -142,8 +142,8 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *
     dds3SetRotPoseSet(basic, rotation);
     dds3SetPosPoseSet(basic, position);
     dds3SetRadiusPoseSet(basic->poseset);
-    PS2_COPY_QUAD(&work->vertical, &initialUp);
-    PS2_COPY_QUAD(&work->eyeVector, &initialEye);
+    SDF_VU0__COPYVECTOR(&work->vertical, &initialUp);
+    SDF_VU0__COPYVECTOR(&work->eyeVector, &initialEye);
     MakeCamera(basic);
     return basic;
 }
@@ -158,8 +158,8 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(u32 serialID, const sdfVector4_t
     work->mode = 0;
     dds3SetPosPoseSet(basic, position);
     dds3SetRadiusPoseSet(basic->poseset);
-    PS2_COPY_QUAD(&work->vertical, up);
-    PS2_COPY_QUAD(&work->targetPos, target);
+    SDF_VU0__COPYVECTOR(&work->vertical, up);
+    SDF_VU0__COPYVECTOR(&work->targetPos, target);
     MakeCamera(basic);
     return basic;
 }
@@ -174,10 +174,10 @@ dds3Basic_t *dds3AddCameraObjectBasic(u32 serialID, f32 fovy, const sdfVector4_t
     work->mode = mode;
     dds3SetPosPoseSet(basic, position);
     dds3SetRadiusPoseSet(basic->poseset);
-    PS2_COPY_QUAD(&work->vertical, up);
-    PS2_COPY_QUAD(&work->eyeVector, eye);
+    SDF_VU0__COPYVECTOR(&work->vertical, up);
+    SDF_VU0__COPYVECTOR(&work->eyeVector, eye);
     if (mode == 0) {
-        PS2_COPY_QUAD(&work->targetPos, eye);
+        SDF_VU0__COPYVECTOR(&work->targetPos, eye);
     }
     MakeCamera(basic);
     return basic;
@@ -191,13 +191,13 @@ void dds3DeleteCameraObjectBasic(dds3Basic_t *basic)
 /* vu0 routine: return the camera matrix in vf28-vf31. */
 void func_00112888(dds3Basic_t *basic)
 {
-    VU0_LOAD_MATRIX(&((dds3CameraObjectBasicWorkData_t *)basic->workdata)->cameraTM);
+    SDF_VU0__LOADMATRIX(&((dds3CameraObjectBasicWorkData_t *)basic->workdata)->cameraTM);
 }
 
 /* The recovered name is misleading: retail stores a target, not a matrix. */
 void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *basic, const sdfVector4_t *target)
 {
-    PS2_COPY_QUAD(&((dds3CameraObjectBasicWorkData_t *)basic->workdata)->targetPos, target);
+    SDF_VU0__COPYVECTOR(&((dds3CameraObjectBasicWorkData_t *)basic->workdata)->targetPos, target);
 }
 
 /* vu0 routine: return the cached world-space target in vf10. */
@@ -236,19 +236,19 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *basic, sdfVector4_t *target, sd
     dds3CameraObjectBasicWorkData_t *work = basic->workdata;
     dds3PoseSet_t *pose = basic->poseset;
 
-    VU0_LOAD_VF10(&pose->rot);
+    SDF_VU0__LOADVECTOR(&pose->rot);
     ToMatrix();
-    VU0_LOAD_VF10(&work->vertical);
-    VU0_APPLY_MATRIX_VF10();
-    VU0_SET_VF10_W_ONE();
-    VU0_STORE_VF10(&work->upVector);
+    SDF_VU0__LOADVECTOR(&work->vertical);
+    SDF_VU0__APPLYMATRIX();
+    SDF_VU0__VECTOR_W_SET_ONE();
+    SDF_VU0__STOREVECTOR(&work->upVector);
     if (work->mode == 1) {
-        VU0_LOAD_VF10(&work->eyeVector);
-        VU0_APPLY_MATRIX_VF10();
-        VU0_LOAD_VF11(&pose->pos);
-        VU0_ADD_VF10_VF11();
-        VU0_SET_VF10_W_ONE();
-        VU0_STORE_VF10(&work->targetPos);
+        SDF_VU0__LOADVECTOR(&work->eyeVector);
+        SDF_VU0__APPLYMATRIX();
+        SDF_VU0__LOADVECTOR_B(&pose->pos);
+        SDF_VU0__ADDVECTOR();
+        SDF_VU0__VECTOR_W_SET_ONE();
+        SDF_VU0__STOREVECTOR(&work->targetPos);
     }
     target->x = work->targetPos.x;
     target->y = work->targetPos.y;

@@ -365,13 +365,13 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
             } else {
                 switch (work->linkbasictype) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    VU0_LOAD_VF10(&work->linkbasic->poseset->rot);
-                    VU0_STORE_VF10(&rotation);
+                    SDF_VU0__LOADVECTOR(&work->linkbasic->poseset->rot);
+                    SDF_VU0__STOREVECTOR(&rotation);
                     ToMatrix();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    VU0_LOAD_VF10(&((dds3EffectOwnerPose_t *)work->linkbasic->workdata)->rotation);
-                    VU0_STORE_VF10(&rotation);
+                    SDF_VU0__LOADVECTOR(&((dds3EffectOwnerPose_t *)work->linkbasic->workdata)->rotation);
+                    SDF_VU0__STOREVECTOR(&rotation);
                     ToMatrix();
                     break;
                 default:
@@ -381,27 +381,27 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
             }
             VU0_SAVE_MATRIX_BANK();
             VU0_IDENTITY_MATRIX();
-            VU0_LOAD_VF10(work->linkpos);
-            VU0_SET_VF10_W_ONE();
+            SDF_VU0__LOADVECTOR(work->linkpos);
+            SDF_VU0__VECTOR_W_SET_ONE();
             VU0_TRANSLATION_FROM_VF10();
             MultMatrixRevNoArg();
             VU0_ORIGIN_VF10();
-            VU0_APPLY_MATRIX_VF10();
+            SDF_VU0__APPLYMATRIX();
             if ((work->stat & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) == 0) {
                 switch (work->linkbasictype) {
                 case 4: case 5: case 6: case 7: case 8: case 9:
-                    VU0_LOAD_VF11(&work->linkbasic->poseset->pos);
-                    VU0_ADD_VF10_VF11();
+                    SDF_VU0__LOADVECTOR_B(&work->linkbasic->poseset->pos);
+                    SDF_VU0__ADDVECTOR();
                     break;
                 case EFF_OBJ_OWNER_KIND_EXTRA:
-                    VU0_LOAD_VF11(&((dds3EffectOwnerPose_t *)work->linkbasic->workdata)->position);
-                    VU0_ADD_VF10_VF11();
+                    SDF_VU0__LOADVECTOR_B(&((dds3EffectOwnerPose_t *)work->linkbasic->workdata)->position);
+                    SDF_VU0__ADDVECTOR();
                     break;
                 }
             }
-            VU0_STORE_VF10(&position);
+            SDF_VU0__STOREVECTOR(&position);
             dds3SetRadiusPoseSet(basic->poseset);
-            VU0_STORE_VF10(&basic->poseset->pos);
+            SDF_VU0__STOREVECTOR(&basic->poseset->pos);
             moved = 1;
             dds3OffPoseSetFlag(basic->poseset, POSESET_FLAG_UPDATEPOSE);
         } else {
@@ -409,13 +409,13 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
         }
     } else {
         dds3OffPoseSetFlag(basic->poseset, POSESET_FLAG_UPDATEPOSE);
-        VU0_LOAD_VF10(&basic->poseset->pos);
-        VU0_SET_VF10_W_ONE();
-        VU0_STORE_VF10(&position);
+        SDF_VU0__LOADVECTOR(&basic->poseset->pos);
+        SDF_VU0__VECTOR_W_SET_ONE();
+        SDF_VU0__STOREVECTOR(&position);
         dds3SetRadiusPoseSet(basic->poseset);
-        VU0_LOAD_VF10(&basic->poseset->rot);
+        SDF_VU0__LOADVECTOR(&basic->poseset->rot);
         SDF_QUAT_INNERPRODUCT();
-        VU0_STORE_VF10(&rotation);
+        SDF_VU0__STOREVECTOR(&rotation);
         moved = 1;
     }
     switch (work->type) {
@@ -423,9 +423,9 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
         effect = work->handle;
         if (effect != NULL && moved) {
             dds3EffectSetPosition(effect, &position);
-            VU0_LOAD_VF10(&rotation);
+            SDF_VU0__LOADVECTOR(&rotation);
             ToMatrix();
-            VU0_STORE_MATRIX(&matrix);
+            SDF_VU0__STOREMATRIX(&matrix);
             dds3EffectSetRotateMatrix(effect, &matrix);
         }
         result = dds3EffectGetState(effect);
@@ -461,8 +461,8 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *basic)
                 dds3EffectEventParameters_t *parameters = work->para;
 
                 if (parameters != NULL) {
-                    PS2_COPY_QUAD(&parameters->position, &position);
-                    PS2_COPY_QUAD(&parameters->rotation, &rotation);
+                    SDF_VU0__COPYVECTOR(&parameters->position, &position);
+                    SDF_VU0__COPYVECTOR(&parameters->rotation, &rotation);
                     effEveBEDCutSetParams(cut, parameters);
                 }
             }
@@ -549,8 +549,8 @@ dds3Basic_t *AddP2AEffect(void *bill, void *position, s32 rotationAddress)
     if (basic == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF10(position);
-    VU0_STORE_VF10(&vector);
+    SDF_VU0__LOADVECTOR(position);
+    SDF_VU0__STOREVECTOR(&vector);
     dds3BillboardSetPosition(bill, &vector);
     work = basic->workdata;
     work->handle = bill;
@@ -608,8 +608,8 @@ dds3Basic_t *AddTMXEffect(void *bill, void *position, s32 rotationAddress)
     if (basic == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF10(position);
-    VU0_STORE_VF10(&vector);
+    SDF_VU0__LOADVECTOR(position);
+    SDF_VU0__STOREVECTOR(&vector);
     dds3BillboardSetPosition(bill, &vector);
     work = basic->workdata;
     work->type = 3;
@@ -658,8 +658,8 @@ dds3Basic_t *AddD3PEffect(void *effect, void *position, void *rotation)
     if (basic == NULL) {
         return NULL;
     }
-    VU0_LOAD_VF10(position);
-    VU0_STORE_VF10(&vector);
+    SDF_VU0__LOADVECTOR(position);
+    SDF_VU0__STOREVECTOR(&vector);
     dds3EffectSetPosition(effect, &vector);
     work = basic->workdata;
     work->type = EFF_OBJ_STATE_BOUND_BILL;
@@ -710,8 +710,8 @@ dds3Basic_t *AddBEDEffect(source, position, rotation)
     if (basic == NULL) {
         return NULL;
     }
-    PS2_COPY_QUAD(&parameters.position, position);
-    PS2_COPY_QUAD(&parameters.rotation, rotation);
+    SDF_VU0__COPYVECTOR(&parameters.position, position);
+    SDF_VU0__COPYVECTOR(&parameters.rotation, rotation);
     mixer = effEveBEDCreate(source);
     work = basic->workdata;
     work->type = EFF_OBJ_STATE_EVENT_NODE;
@@ -906,7 +906,7 @@ s32 GetESPPos(dds3Basic_t *basic)
     if (CheckESP(basic) == NULL) {
         return 0;
     }
-    VU0_LOAD_VF10(&basic->poseset->pos);
+    SDF_VU0__LOADVECTOR(&basic->poseset->pos);
     return 1;
 }
 
@@ -953,11 +953,11 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *basic, dds3Basic_t *first,
     case EFF_OBJ_STATE_MAGATUHI_TWO_ROWS:
         area = work->para;
         if (GetESPPos(first)) {
-            VU0_STORE_VF10(&area->position[0]);
+            SDF_VU0__STOREVECTOR(&area->position[0]);
             area->radius[0] = GetESPR(first);
         }
         if (GetESPPos(second)) {
-            VU0_STORE_VF10(&area->position[1]);
+            SDF_VU0__STOREVECTOR(&area->position[1]);
             area->radius[1] = GetESPR(second);
         }
         effMagaSCSetArea(work->handle, area);
@@ -965,19 +965,19 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *basic, dds3Basic_t *first,
     case EFF_OBJ_STATE_MAGATUHI_FOUR_ROWS:
         points = work->para;
         if (GetESPPos(first)) {
-            VU0_STORE_VF10(&points->position[0]);
+            SDF_VU0__STOREVECTOR(&points->position[0]);
             points->radius[0] = GetESPR(first);
         }
         if (GetESPPos(second)) {
-            VU0_STORE_VF10(&points->position[1]);
+            SDF_VU0__STOREVECTOR(&points->position[1]);
             points->radius[1] = GetESPR(second);
         }
         if (GetESPPos(third)) {
-            VU0_STORE_VF10(&points->position[2]);
+            SDF_VU0__STOREVECTOR(&points->position[2]);
             points->radius[2] = GetESPR(third);
         }
         if (GetESPPos(fourth)) {
-            VU0_STORE_VF10(&points->position[3]);
+            SDF_VU0__STOREVECTOR(&points->position[3]);
             points->radius[3] = GetESPR(fourth);
         }
         effMagaP4SetPoint(work->handle, points);
@@ -1129,9 +1129,9 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
         direction.y = -dy;
         direction.z = -offset;
         direction.w = 1.0f;
-        VU0_LOAD_VF10(&direction);
-        VU0_NORMALIZE_VF10();
-        VU0_STORE_VF10(&normalizedDirection);
+        SDF_VU0__LOADVECTOR(&direction);
+        SDF_VU0__NORMALIZE();
+        SDF_VU0__STOREVECTOR(&normalizedDirection);
         {
             dds3PoseSet_t *pose;
 

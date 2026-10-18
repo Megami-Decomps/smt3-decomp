@@ -854,17 +854,17 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX(D_002FA240);
+    SDF_VU0__LOADMATRIX(D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
     VU0_COPY_MATRIX_TO_SECONDARY();
     VU0_LOAD_VF10_FROM(*(const Quad *)vec);
-    VU0_TRANSFORM_POINT_VF10();
-    VU0_PERSPECTIVE_DIVIDE_VF10();
-    VU0_LOAD_VF11(&dds3ScreenParam.scale);
-    VU0_MUL_VF10_VF11();
-    VU0_LOAD_VF11(&dds3ScreenParam.trans);
-    VU0_ADD_VF10_VF11();
-    VU0_STORE_VF10(result);
+    SDF_VU0__APPLYMATRIX_XYZ1();
+    SDF_VU0__PERSVECTOR();
+    SDF_VU0__LOADVECTOR_B(&dds3ScreenParam.scale);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__LOADVECTOR_B(&dds3ScreenParam.trans);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__STOREVECTOR(result);
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -873,17 +873,17 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     f32 vec[4] = { x, y, z, 1.0f };
     f32 result[4];
 
-    VU0_LOAD_MATRIX(aProjMatrix);
+    SDF_VU0__LOADMATRIX(aProjMatrix);
     MultMatrixRev(&dds3ScreenParam2.TM);
     VU0_COPY_MATRIX_TO_SECONDARY();
     VU0_LOAD_VF10_FROM(*(const Quad *)vec);
-    VU0_TRANSFORM_POINT_VF10();
-    VU0_PERSPECTIVE_DIVIDE_VF10();
-    VU0_LOAD_VF11(&dds3ScreenParam2.scale);
-    VU0_MUL_VF10_VF11();
-    VU0_LOAD_VF11(&dds3ScreenParam2.trans);
-    VU0_ADD_VF10_VF11();
-    VU0_STORE_VF10(result);
+    SDF_VU0__APPLYMATRIX_XYZ1();
+    SDF_VU0__PERSVECTOR();
+    SDF_VU0__LOADVECTOR_B(&dds3ScreenParam2.scale);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__LOADVECTOR_B(&dds3ScreenParam2.trans);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__STOREVECTOR(result);
     *dstX = result[0];
     *dstY = result[1];
 }
@@ -1319,7 +1319,7 @@ void drawSprite3D(sdfTexHandle_t *texture, Sprite3D_t *sprite) {
     sdf3DMakeDirectRefPacket(header, (u32)sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
     sdfDrawTagLinkRef(command, (u32)header);
     SetRotateMatrixZ(sprite->rot);
-    VU0_STORE_MATRIX(mat);
+    SDF_VU0__STOREMATRIX(mat);
     packet = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(packet, mat);
     sdfDrawTagLink(command, (u32)packet);
@@ -1513,7 +1513,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     f32 screenX;
     f32 screenY;
 
-    VU0_LOAD_MATRIX(D_002FA240);
+    SDF_VU0__LOADMATRIX(D_002FA240);
     InversMatrix();
     fldPoint3To2(&screenX, &screenY, x, y, z);
     if (screenX < -4000.0f || screenX > 4000.0f ||
@@ -1851,8 +1851,8 @@ void fldCamUpdateFollow(void) {
     farPoint.f[0] = fldCamPhokanTgtX[0] * ratio + fldCamPhokanTgtX[0] * remaining;
     farPoint.f[1] = fldCamPhokanTgtX[1] * ratio + fldCamPhokanTgtX[1] * remaining;
     farPoint.f[2] = fldCamPhokanTgtX[2] * ratio + fldCamPhokanTgtX[2] * remaining;
-    PS2_COPY_QUAD(D_002FC9C0, &nearPoint);
-    PS2_COPY_QUAD(fldCamTarget, &farPoint);
+    SDF_VU0__COPYVECTOR(D_002FC9C0, &nearPoint);
+    SDF_VU0__COPYVECTOR(fldCamTarget, &farPoint);
     dds3SetPosPoseSet(control->camera, &farPoint.q);
     node = control->camera;
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);

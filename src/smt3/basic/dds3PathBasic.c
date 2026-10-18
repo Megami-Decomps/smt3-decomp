@@ -81,19 +81,19 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work)
         keys = work->positionKeys;
         dds3PathEvalSpline(&segment, &weight, keys, work->time);
         points = keys->data.position;
-        VU0_SET_VF10_X(points[segment + 1][0]);
-        VU0_SET_VF10_Y(points[segment + 1][1]);
-        VU0_SET_VF10_Z(points[segment + 1][2]);
+        SDF_VU0__SETVECTOR_X(points[segment + 1][0]);
+        SDF_VU0__SETVECTOR_Y(points[segment + 1][1]);
+        SDF_VU0__SETVECTOR_Z(points[segment + 1][2]);
         VU0_MUL_VF10_SCALAR(weight);
-        VU0_COPY_VF10_TO_VF11();
-        VU0_SET_VF10_X(points[segment][0]);
-        VU0_SET_VF10_Y(points[segment][1]);
-        VU0_SET_VF10_Z(points[segment][2]);
+        SDF_VU0__COPYVECTOR_A_TO_B();
+        SDF_VU0__SETVECTOR_X(points[segment][0]);
+        SDF_VU0__SETVECTOR_Y(points[segment][1]);
+        SDF_VU0__SETVECTOR_Z(points[segment][2]);
         VU0_MUL_VF10_SCALAR(1.0f - weight);
-        VU0_ADD_VF10_VF11();
-        VU0_CLEAR_VF10_W();
+        SDF_VU0__ADDVECTOR();
+        SDF_VU0__VECTOR_W_SET_ZERO();
     } else {
-        VU0_ZERO_VF10();
+        SDF_VU0__LOADIDENTITYVECTOR();
     }
 }
 
@@ -111,12 +111,12 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *work)
         dds3PathEvalSpline(&segment, &weight, keys, work->time);
         quaternions = keys->data.rotation;
         first = &quaternions[segment];
-        VU0_LOAD_VF10(first);
+        SDF_VU0__LOADVECTOR(first);
         second = &quaternions[segment] + 1;
-        VU0_LOAD_VF11(second);
+        SDF_VU0__LOADVECTOR_B(second);
         Lerp(weight);
     } else {
-        VU0_ZERO_VF10();
+        SDF_VU0__LOADIDENTITYVECTOR();
     }
 }
 
@@ -132,48 +132,48 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLight
         keys = work->transformKeys;
         dds3PathEvalSpline(&segment, &weight, keys, work->time);
         entries = (fldResourceLightPath_t *)keys->data.transform;
-        VU0_SET_VF10_X(entries[segment + 1].InsideR);
-        VU0_SET_VF10_Y(entries[segment + 1].OutsideR);
-        VU0_SET_VF10_Z(entries[segment + 1].Soften);
-        VU0_SET_VF10_W(entries[segment + 1].Bias);
+        SDF_VU0__SETVECTOR_X(entries[segment + 1].InsideR);
+        SDF_VU0__SETVECTOR_Y(entries[segment + 1].OutsideR);
+        SDF_VU0__SETVECTOR_Z(entries[segment + 1].Soften);
+        SDF_VU0__SETVECTOR_W(entries[segment + 1].Bias);
         VU0_LERP_SCALE(weight);
-        VU0_COPY_VF10_TO_VF11();
-        VU0_SET_VF10_X(entries[segment].InsideR);
-        VU0_SET_VF10_Y(entries[segment].OutsideR);
-        VU0_SET_VF10_Z(entries[segment].Soften);
-        VU0_SET_VF10_W(entries[segment].Bias);
+        SDF_VU0__COPYVECTOR_A_TO_B();
+        SDF_VU0__SETVECTOR_X(entries[segment].InsideR);
+        SDF_VU0__SETVECTOR_Y(entries[segment].OutsideR);
+        SDF_VU0__SETVECTOR_Z(entries[segment].Soften);
+        SDF_VU0__SETVECTOR_W(entries[segment].Bias);
         VU0_LERP_SCALE(1.0f - weight);
-        VU0_ADD_VF10_VF11();
-        VU0_GET_VF10_X(output->InsideR);
-        VU0_GET_VF10_Y(output->OutsideR);
-        VU0_GET_VF10_Z(output->Soften);
-        VU0_GET_VF10_W(output->Bias);
-        VU0_SET_VF10_X(entries[segment + 1].DiffuseR);
-        VU0_SET_VF10_Y(entries[segment + 1].DiffuseG);
-        VU0_SET_VF10_Z(entries[segment + 1].DiffuseB);
+        SDF_VU0__ADDVECTOR();
+        SDF_VU0__GETVECTOR_X(output->InsideR);
+        SDF_VU0__GETVECTOR_Y(output->OutsideR);
+        SDF_VU0__GETVECTOR_Z(output->Soften);
+        SDF_VU0__GETVECTOR_W(output->Bias);
+        SDF_VU0__SETVECTOR_X(entries[segment + 1].DiffuseR);
+        SDF_VU0__SETVECTOR_Y(entries[segment + 1].DiffuseG);
+        SDF_VU0__SETVECTOR_Z(entries[segment + 1].DiffuseB);
         VU0_LERP_SCALE(weight);
-        VU0_COPY_VF10_TO_VF11();
-        VU0_SET_VF10_X(entries[segment].DiffuseR);
-        VU0_SET_VF10_Y(entries[segment].DiffuseG);
-        VU0_SET_VF10_Z(entries[segment].DiffuseB);
+        SDF_VU0__COPYVECTOR_A_TO_B();
+        SDF_VU0__SETVECTOR_X(entries[segment].DiffuseR);
+        SDF_VU0__SETVECTOR_Y(entries[segment].DiffuseG);
+        SDF_VU0__SETVECTOR_Z(entries[segment].DiffuseB);
         VU0_LERP_SCALE(1.0f - weight);
-        VU0_ADD_VF10_VF11();
-        VU0_GET_VF10_X(output->DiffuseR);
-        VU0_GET_VF10_Y(output->DiffuseG);
-        VU0_GET_VF10_Z(output->DiffuseB);
-        VU0_SET_VF10_X(entries[segment + 1].AmbientR);
-        VU0_SET_VF10_Y(entries[segment + 1].AmbientG);
-        VU0_SET_VF10_Z(entries[segment + 1].AmbientB);
+        SDF_VU0__ADDVECTOR();
+        SDF_VU0__GETVECTOR_X(output->DiffuseR);
+        SDF_VU0__GETVECTOR_Y(output->DiffuseG);
+        SDF_VU0__GETVECTOR_Z(output->DiffuseB);
+        SDF_VU0__SETVECTOR_X(entries[segment + 1].AmbientR);
+        SDF_VU0__SETVECTOR_Y(entries[segment + 1].AmbientG);
+        SDF_VU0__SETVECTOR_Z(entries[segment + 1].AmbientB);
         VU0_LERP_SCALE(weight);
-        VU0_COPY_VF10_TO_VF11();
-        VU0_SET_VF10_X(entries[segment].AmbientR);
-        VU0_SET_VF10_Y(entries[segment].AmbientG);
-        VU0_SET_VF10_Z(entries[segment].AmbientB);
+        SDF_VU0__COPYVECTOR_A_TO_B();
+        SDF_VU0__SETVECTOR_X(entries[segment].AmbientR);
+        SDF_VU0__SETVECTOR_Y(entries[segment].AmbientG);
+        SDF_VU0__SETVECTOR_Z(entries[segment].AmbientB);
         VU0_LERP_SCALE(1.0f - weight);
-        VU0_ADD_VF10_VF11();
-        VU0_GET_VF10_X(output->AmbientR);
-        VU0_GET_VF10_Y(output->AmbientG);
-        VU0_GET_VF10_Z(output->AmbientB);
+        SDF_VU0__ADDVECTOR();
+        SDF_VU0__GETVECTOR_X(output->AmbientR);
+        SDF_VU0__GETVECTOR_Y(output->AmbientG);
+        SDF_VU0__GETVECTOR_Z(output->AmbientB);
     } else {
         memset(output, 0, sizeof(*output));
     }

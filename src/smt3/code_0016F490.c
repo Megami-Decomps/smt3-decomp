@@ -556,7 +556,7 @@ void effBTLPointLightStart(void)
         if ((pFormation->stat & 3) == 3) {
             hUnit = pFormation->hunit;
             if (hUnit != NULL) {
-                PS2_COPY_QUAD(pBase, &hUnit->vec10);
+                SDF_VU0__COPYVECTOR(pBase, &hUnit->vec10);
                 pBase->unknown10 = hUnit->color;
                 pBase->unknown14 = hUnit->color50;
             }
@@ -2850,11 +2850,11 @@ void dds3EffectPartBillboardScale(void *hBillboard, f32 scale)
 
 void dds3EffectPartModelInit(mdlObj_t *hModel)
 {
-    VU0_LOAD_VF10(&D_0031DF60);
+    SDF_VU0__LOADVECTOR(&D_0031DF60);
     mdlSetPosition(hModel);
-    VU0_LOAD_VF10(&D_0031DF70);
+    SDF_VU0__LOADVECTOR(&D_0031DF70);
     mdlSetRotate(hModel);
-    VU0_LOAD_VF10(&D_0031DF80);
+    SDF_VU0__LOADVECTOR(&D_0031DF80);
     mdlSetScale(hModel);
     mdlSetColor(hModel, 0x80808080);
     if (hModel->first != NULL) {
@@ -2900,7 +2900,7 @@ mdlObj_t *dds3EffectPartModelCopy(void *hData)
 
 void dds3EffectPartModelSetPosition(mdlObj_t *hModel, sdfVector4_t *pPosition)
 {
-    VU0_LOAD_VF10(pPosition);
+    SDF_VU0__LOADVECTOR(pPosition);
     mdlSetPosition(hModel);
 }
 
@@ -2915,7 +2915,7 @@ void dds3EffectPartModelSetScale(void *hData, f32 scale)
 
 void dds3EffectPartModelSetRotateMatrix(mdlObj_t *hModel, sdfMatrix4_t *pMatrix)
 {
-    VU0_LOAD_MATRIX(pMatrix);
+    SDF_VU0__LOADMATRIX(pMatrix);
     VU0_STORE_VF28(&hModel->inner->tm.m[0]);
     VU0_STORE_VF29(&hModel->inner->tm.m[4]);
     VU0_STORE_VF30(&hModel->inner->tm.m[8]);

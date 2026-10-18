@@ -630,7 +630,7 @@ INCLUDE_ASM(const s32, "code_001D1470", pb_draw_mycharacter_Shutdown);
 INCLUDE_ASM(const s32, "code_001D1470", pb_1D2AD8);
 
 void pbSetModelPos(mdlObj_t *model, const f32 *position) {
-    VU0_LOAD_VF10(position);
+    SDF_VU0__LOADVECTOR(position);
     mdlSetPosition(model);
 }
 

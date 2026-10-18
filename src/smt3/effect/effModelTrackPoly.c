@@ -104,7 +104,7 @@ void Eff_ModelTrackPolyGetMarkPosition(EffModelTrackPoly_t *work)
     sdfModelGetMarkPos(object->model, work->params.mark0);
     VU0_STORE_VF10_TO(pair[0]);
     sdfModelGetMarkPos(object->model, work->params.mark1);
-    VU0_STORE_VF10(&pair[1]);
+    SDF_VU0__STOREVECTOR(&pair[1]);
     dds3HermitianTrackPolySetVertex(work->trackPoly, (const u128 *)pair);
 }
 
@@ -181,28 +181,28 @@ void Eff_HermitianSpline(f32 (*p)[4], f32 t)
     half[0] = 0.5f;
     half[1] = 0.5f;
     half[2] = 0.5f;
-    VU0_LOAD_VF10(p[1]);
-    VU0_LOAD_VF11(p[0]);
-    VU0_SUB_VF10_VF11();
-    VU0_COPY_VF10_TO_VF12();
-    VU0_LOAD_VF10(p[2]);
-    VU0_LOAD_VF11(p[1]);
-    VU0_SUB_VF10_VF11();
-    VU0_ADD_VF10_VF12();
-    VU0_LOAD_VF11(half);
-    VU0_MUL_VF10_VF11();
-    VU0_STORE_VF10(tan[0]);
-    VU0_LOAD_VF10(p[2]);
-    VU0_LOAD_VF11(p[1]);
-    VU0_SUB_VF10_VF11();
-    VU0_COPY_VF10_TO_VF12();
-    VU0_LOAD_VF10(p[3]);
-    VU0_LOAD_VF11(p[2]);
-    VU0_SUB_VF10_VF11();
-    VU0_ADD_VF10_VF12();
-    VU0_LOAD_VF11(half);
-    VU0_MUL_VF10_VF11();
-    VU0_STORE_VF10(tan[1]);
+    SDF_VU0__LOADVECTOR(p[1]);
+    SDF_VU0__LOADVECTOR_B(p[0]);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__COPYVECTOR_A_TO_C();
+    SDF_VU0__LOADVECTOR(p[2]);
+    SDF_VU0__LOADVECTOR_B(p[1]);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__ADDVECTOR_A_C();
+    SDF_VU0__LOADVECTOR_B(half);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__STOREVECTOR(tan[0]);
+    SDF_VU0__LOADVECTOR(p[2]);
+    SDF_VU0__LOADVECTOR_B(p[1]);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__COPYVECTOR_A_TO_C();
+    SDF_VU0__LOADVECTOR(p[3]);
+    SDF_VU0__LOADVECTOR_B(p[2]);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__ADDVECTOR_A_C();
+    SDF_VU0__LOADVECTOR_B(half);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__STOREVECTOR(tan[1]);
     h[0][0] = 2.0f * t3 - 3.0f * t2 + 1.0f;
     h[0][1] = 2.0f * t3 - 3.0f * t2 + 1.0f;
     h[0][2] = 2.0f * t3 - 3.0f * t2 + 1.0f;
@@ -215,22 +215,22 @@ void Eff_HermitianSpline(f32 (*p)[4], f32 t)
     h[3][0] = -2.0f * t3 + 3.0f * t2;
     h[3][1] = -2.0f * t3 + 3.0f * t2;
     h[3][2] = -2.0f * t3 + 3.0f * t2;
-    VU0_LOAD_VF10(h[0]);
-    VU0_LOAD_VF11(p[1]);
-    VU0_MUL_VF10_VF11();
-    VU0_COPY_VF10_TO_VF12();
-    VU0_LOAD_VF10(h[1]);
-    VU0_LOAD_VF11(tan[0]);
-    VU0_MUL_VF10_VF11();
+    SDF_VU0__LOADVECTOR(h[0]);
+    SDF_VU0__LOADVECTOR_B(p[1]);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__COPYVECTOR_A_TO_C();
+    SDF_VU0__LOADVECTOR(h[1]);
+    SDF_VU0__LOADVECTOR_B(tan[0]);
+    SDF_VU0__MULVECTOR();
     VU0_ADD_VF12_VF10();
-    VU0_LOAD_VF10(h[2]);
-    VU0_LOAD_VF11(tan[1]);
-    VU0_MUL_VF10_VF11();
+    SDF_VU0__LOADVECTOR(h[2]);
+    SDF_VU0__LOADVECTOR_B(tan[1]);
+    SDF_VU0__MULVECTOR();
     VU0_ADD_VF12_VF10();
-    VU0_LOAD_VF10(h[3]);
-    VU0_LOAD_VF11(p[2]);
-    VU0_MUL_VF10_VF11();
-    VU0_ADD_VF10_VF12();
+    SDF_VU0__LOADVECTOR(h[3]);
+    SDF_VU0__LOADVECTOR_B(p[2]);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__ADDVECTOR_A_C();
 }
 
 Dds3HermitianTrackPoly_t *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps) {
@@ -300,8 +300,8 @@ void dds3HermitianTrackPolyGetVertex(Dds3HermitianTrackPoly_t *poly, void *first
         index += poly->capacity - 2;
     }
     vertex = (u8 *)poly->vertices + index * 16;
-    PS2_COPY_QUAD(first, vertex);
-    PS2_COPY_QUAD(second, vertex + 16);
+    SDF_VU0__COPYVECTOR(first, vertex);
+    SDF_VU0__COPYVECTOR(second, vertex + 16);
 }
 
 void dds3HermitianTrackPolySetCurrent(Dds3HermitianTrackPoly_t *data, s32 amount) {
@@ -318,14 +318,14 @@ void dds3HermitianTrackPolySetVertexSub(Dds3HermitianTrackPoly_t *data, const u1
     u128 *points = data->vertices;
     s32 count;
 
-    PS2_COPY_QUAD(&points[position], src);
-    PS2_COPY_QUAD(&points[position + 1], src + 1);
+    SDF_VU0__COPYVECTOR(&points[position], src);
+    SDF_VU0__COPYVECTOR(&points[position + 1], src + 1);
     position += 2;
     count = data->capacity;
     data->head = position;
     if (position == count) {
-        PS2_COPY_QUAD(&points[0], src);
-        PS2_COPY_QUAD(&points[1], src + 1);
+        SDF_VU0__COPYVECTOR(&points[0], src);
+        SDF_VU0__COPYVECTOR(&points[1], src + 1);
         data->head = 2;
     }
     if (data->count < count - 2) {
@@ -364,8 +364,8 @@ void dds3HermitianTrackPolySetVertex(Dds3HermitianTrackPoly_t *data, const u128 
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 3);
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 2);
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[2], (u128 *)secondHistory[2], 1);
-        PS2_COPY_QUAD(firstHistory[3], src);
-        PS2_COPY_QUAD(secondHistory[3], src + 1);
+        SDF_VU0__COPYVECTOR(firstHistory[3], src);
+        SDF_VU0__COPYVECTOR(secondHistory[3], src + 1);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         dds3HermitianTrackPolySetCurrent(data, 2);
@@ -395,10 +395,10 @@ void dds3HermitianTrackPolySetVertex(Dds3HermitianTrackPoly_t *data, const u128 
 
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[0], (u128 *)secondHistory[0], 2);
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstHistory[1], (u128 *)secondHistory[1], 1);
-        PS2_COPY_QUAD(firstHistory[2], src);
-        PS2_COPY_QUAD(secondHistory[2], src + 1);
-        PS2_COPY_QUAD(firstHistory[3], src);
-        PS2_COPY_QUAD(secondHistory[3], src + 1);
+        SDF_VU0__COPYVECTOR(firstHistory[2], src);
+        SDF_VU0__COPYVECTOR(secondHistory[2], src + 1);
+        SDF_VU0__COPYVECTOR(firstHistory[3], src);
+        SDF_VU0__COPYVECTOR(secondHistory[3], src + 1);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         sampleIndex = 0;
@@ -421,14 +421,14 @@ void dds3HermitianTrackPolySetVertex(Dds3HermitianTrackPoly_t *data, const u128 
         u128 *firstSampleOutput;
 
         dds3HermitianTrackPolyGetVertex(data, (u128 *)firstBasePoint, (u128 *)secondBasePoint, 1);
-        VU0_LOAD_VF10(src);
-        VU0_LOAD_VF11(firstBasePoint);
-        VU0_SUB_VF10_VF11();
-        VU0_STORE_VF10(firstPointDelta);
-        VU0_LOAD_VF10(src + 1);
-        VU0_LOAD_VF11(secondBasePoint);
-        VU0_SUB_VF10_VF11();
-        VU0_STORE_VF10(secondPointDelta);
+        SDF_VU0__LOADVECTOR(src);
+        SDF_VU0__LOADVECTOR_B(firstBasePoint);
+        SDF_VU0__SUBVECTOR();
+        SDF_VU0__STOREVECTOR(firstPointDelta);
+        SDF_VU0__LOADVECTOR(src + 1);
+        SDF_VU0__LOADVECTOR_B(secondBasePoint);
+        SDF_VU0__SUBVECTOR();
+        SDF_VU0__STOREVECTOR(secondPointDelta);
         sampleWeight = 0.0f;
         sampleWeightStep = 1.0f / (f32)sampleCount;
         if (sampleCount > 0) {
@@ -542,7 +542,7 @@ void effSwordTrackRecord(effSwordTrack_t *work)
     sdfModelGetMarkPos(object->model, work->mark0);
     VU0_STORE_VF10_TO(points[0]);
     sdfModelGetMarkPos(object->model, work->mark1);
-    VU0_STORE_VF10(&points[1]);
+    SDF_VU0__STOREVECTOR(&points[1]);
     dds3HermitianTrackPolySetVertex(work->trackPoly, (u128 *)points);
 }
 

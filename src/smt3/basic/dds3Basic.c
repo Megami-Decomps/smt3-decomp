@@ -102,14 +102,14 @@ void dds3BackupPoseSet(dds3PoseSet_t *pose)
     VU0_STORE_ORIGIN(rotation);
     VU0_UNIT_SCALE();
     scale = &pose->scl;
-    VU0_STORE_VF10(scale);
+    SDF_VU0__STOREVECTOR(scale);
 }
 
 void dds3SetRadiusPoseSet(dds3PoseSet_t *pose)
 {
-    PS2_COPY_QUAD(&pose->workscl, &pose->scl);
-    PS2_COPY_QUAD(&pose->workrot, &pose->rot);
-    PS2_COPY_QUAD(&pose->workpos, &pose->pos);
+    SDF_VU0__COPYVECTOR(&pose->workscl, &pose->scl);
+    SDF_VU0__COPYVECTOR(&pose->workrot, &pose->rot);
+    SDF_VU0__COPYVECTOR(&pose->workpos, &pose->pos);
 }
 
 void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 r)
@@ -128,7 +128,7 @@ void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *position)
     sdfVector4_t *dst = &pose->pos;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    PS2_COPY_QUAD(dst, position);
+    SDF_VU0__COPYVECTOR(dst, position);
 }
 
 void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation)
@@ -137,7 +137,7 @@ void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation)
     sdfVector4_t *dst = &pose->rot;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    PS2_COPY_QUAD(dst, rotation);
+    SDF_VU0__COPYVECTOR(dst, rotation);
 }
 
 void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale)
@@ -146,7 +146,7 @@ void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale)
     sdfVector4_t *dst = &pose->scl;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    PS2_COPY_QUAD(dst, scale);
+    SDF_VU0__COPYVECTOR(dst, scale);
 }
 
 /* vu0 routine: return the position in vf10 with homogeneous w = 1. */
@@ -155,7 +155,7 @@ void dds3GetPosPoseSet(dds3Basic_t *basic)
     sdfVector4_t *position = &basic->poseset->pos;
 
     VU0_LOAD_VF10_BARRIER(position);
-    VU0_SET_VF10_W_ONE();
+    SDF_VU0__VECTOR_W_SET_ONE();
 }
 
 void dds3GetRotPoseSet(dds3Basic_t *basic)
@@ -180,10 +180,10 @@ void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *offset)
     sdfVector4_t *position = &pose->pos;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    VU0_LOAD_VF10(position);
+    SDF_VU0__LOADVECTOR(position);
     VU0_LOAD_VF11_BARRIER(offset);
-    VU0_ADD_VF10_VF11();
-    VU0_STORE_VF10(&pose->pos);
+    SDF_VU0__ADDVECTOR();
+    SDF_VU0__STOREVECTOR(&pose->pos);
 }
 
 void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation)
@@ -191,10 +191,10 @@ void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation)
     dds3PoseSet_t *pose = basic->poseset;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    VU0_LOAD_VF10(&pose->rot);
-    VU0_LOAD_VF11(rotation);
+    SDF_VU0__LOADVECTOR(&pose->rot);
+    SDF_VU0__LOADVECTOR_B(rotation);
     Mult();
-    VU0_STORE_VF10(&pose->rot);
+    SDF_VU0__STOREVECTOR(&pose->rot);
 }
 
 void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale)
@@ -203,22 +203,22 @@ void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale)
     sdfVector4_t *src = &pose->scl;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    VU0_LOAD_VF10(src);
+    SDF_VU0__LOADVECTOR(src);
     VU0_LOAD_VF11_BARRIER(scale);
-    VU0_MUL_VF10_VF11();
-    VU0_STORE_VF10(&pose->scl);
+    SDF_VU0__MULVECTOR();
+    SDF_VU0__STOREVECTOR(&pose->scl);
 }
 
 /* vu0 routine: compose scale, quaternion rotation and translation in vf28-31. */
 void dds3MakeMatrix(const sdfVector4_t *scale, const sdfVector4_t *rotation,
                     const sdfVector4_t *translation)
 {
-    VU0_LOAD_VF10(rotation);
+    SDF_VU0__LOADVECTOR(rotation);
     ToMatrix();
-    VU0_LOAD_VF10(scale);
+    SDF_VU0__LOADVECTOR(scale);
     VU0_SCALE_MATRIX_ROWS_VF10();
-    VU0_LOAD_VF10(translation);
-    VU0_SET_VF10_W_ONE();
+    SDF_VU0__LOADVECTOR(translation);
+    SDF_VU0__VECTOR_W_SET_ONE();
     VU0_COPY_VF10_TO_VF31();
 }
 
@@ -229,11 +229,11 @@ void dds3GetTMPoseSet(dds3Basic_t *basic)
     u32 flags = pose->flag;
 
     if (flags & POSESET_FLAG_UPDATETM) {
-        VU0_LOAD_MATRIX(&pose->workTM);
+        SDF_VU0__LOADMATRIX(&pose->workTM);
     } else {
         pose->flag = flags | POSESET_FLAG_UPDATETM;
         dds3MakeMatrix(&pose->scl, &pose->rot, &pose->pos);
-        VU0_STORE_MATRIX(&pose->workTM);
+        SDF_VU0__STOREMATRIX(&pose->workTM);
     }
 }
 
@@ -243,10 +243,10 @@ s32 dds3ComparePosPoseSet(dds3PoseSet_t *left, dds3PoseSet_t *right)
     f32 leftRadius;
     f32 rightRadius;
 
-    VU0_LOAD_VF10(&left->pos);
-    VU0_LOAD_VF11(&right->pos);
-    VU0_SUB_VF10_VF11();
-    VU0_LENGTH_VF10(distance);
+    SDF_VU0__LOADVECTOR(&left->pos);
+    SDF_VU0__LOADVECTOR_B(&right->pos);
+    SDF_VU0__SUBVECTOR();
+    SDF_VU0__GETLENGTH(distance);
     leftRadius = left->r;
     rightRadius = right->r;
     if (fabsf(distance) - (leftRadius + rightRadius) < 0.0f) {
