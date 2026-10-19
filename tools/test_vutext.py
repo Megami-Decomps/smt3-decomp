@@ -10,6 +10,10 @@ spec = importlib.util.spec_from_file_location("vutext", ROOT / "tools/vutext.py"
 vutext = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(vutext)
 
+spec = importlib.util.spec_from_file_location("vu_include", ROOT / "tools/vu_include.py")
+vu_include = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(vu_include)
+
 RETAIL = ROOT / "orig" / "smt3" / "SLUS_209.11"
 
 
@@ -102,6 +106,15 @@ class Retail(unittest.TestCase):
         vu1 = next(i for i in self.imgs if i["vu"] == 1)
         self.assertEqual(len(vu1["micro"]) // 8, 1884)
         self.assertEqual(len(vu1["chunks"]), 8)
+
+    def test_coverage_splits_vutext_into_microcode_and_asset_bytes(self):
+        vu = vu_include.coverage("smt3", RETAIL)
+        self.assertEqual(vu["section_bytes"], self.secs[".vutext"][2])
+        self.assertEqual(vu["microcode_bytes"],
+                         sum(len(i["micro"]) for i in self.imgs))
+        # Both listings are in the tree, so the build assembles every instruction.
+        self.assertEqual(vu["source_bytes"], vu["microcode_bytes"])
+        self.assertEqual(vu["instructions"], vu["source_bytes"] // 8)
 
 
 if __name__ == "__main__":

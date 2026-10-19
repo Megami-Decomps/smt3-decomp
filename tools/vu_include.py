@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Point splat's .vutext unit at the assembled microcode instead of the extracted blob.
 
+    python3 tools/vu_include.py smt3 [--coverage]
+
 Runs after splat, like the other asm fixups. The VIF headers, the debug font texture
 and the data the packet unpacks stay bytes from the asset; every instruction comes
 from src/<version>/sdf/vu, assembled by tools/vuas.py.
@@ -39,6 +41,27 @@ def pieces(elf_path):
     return out
 
 
+def coverage(version, elf_path=vutext.DEFAULT_ELF):
+    """What .vutext holds and how much of its microcode the build assembles from source.
+
+    objdiff cannot measure this unit: splat gives the whole section one label, so
+    the report would score 59,312 bytes of microcode, VIF headers and texture as
+    one unmatched function.
+    """
+    written = {"vu%d" % vu: (ROOT / "src" / version / "sdf" / "vu" / f"{name}.vsm").exists()
+               for vu, name in SOURCES.items()}
+    section = micro = source = 0
+    for what, _, length in pieces(elf_path):
+        section += length
+        if what == "asset":
+            continue
+        micro += length
+        if written[what[0]]:
+            source += length
+    return {"section_bytes": section, "microcode_bytes": micro,
+            "source_bytes": source, "instructions": source // 8}
+
+
 def render(version, pieces_, asset, builds):
     lines = ['.include "macro.inc"', "", '.section .text, "ax"', "",
              "/* Written by tools/vu_include.py: the microcode is assembled from",
@@ -61,7 +84,15 @@ def main(argv=None):
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("version")
     ap.add_argument("--elf", type=Path, default=vutext.DEFAULT_ELF)
+    ap.add_argument("--coverage", action="store_true",
+                    help="report the microcode counters instead of writing the unit")
     args = ap.parse_args(argv)
+
+    if args.coverage:
+        vu = coverage(args.version, args.elf)
+        print("%(instructions)d instructions, %(source_bytes)d of %(microcode_bytes)d "
+              "microcode bytes from source, in a %(section_bytes)d byte section" % vu)
+        return 0
 
     unit = ROOT / "asm" / args.version / "data" / "vutext.s"
     if not unit.exists():
