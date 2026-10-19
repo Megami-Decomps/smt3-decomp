@@ -1348,28 +1348,6 @@ block written y, x, z, which is the draft); `node = control->camera;` as its
 own statement before each of the three uses; and a separate `dds3Basic_t *`
 local for the camera.
 
-## encDrawProc (field/fldDraw, 0x1D8)
-
-116 of 118 words, at the exact 472-byte size. The two differing words are both
-`bne` where retail has `bnel`, at the same displacement and with the same
-instruction in the slot: `addiu $2, $0, 1` before the `gencMode` test, and
-`addiu $3, $3, 1` before the `encDrawState` body. ee-gcc takes the insn from
-the branch's taken thread in both compiles and leaves a second copy at the
-join, so only the annul bit differs.
-
-Confirmed on the way: the box-draw body is written out in full in both arms of
-`if (encDrawState >= 0x29) ... else if (encDrawState >= 0x15) ...`, and ee-gcc
-cross-jumps them at the `jal rsetOtOfs`, which is where retail's duplicated
-`addiu $4, 0x47` and the `nop` in the call's delay slot come from. Writing it
-as `if (state < 0x29) { if (state >= 0x15) ... } else { ... }` inverts the
-first branch and costs 56 words. `D_0054C2A4` is a `.lit4` entry holding
-`0.001f`.
-
-Ruled out: `gencMode != 0` with an empty `then`; `s32` return types on
-`dds3EffectPartialMultiBlurSetParam` and `...Draw` to reserve `$2`; a `result`
-local in place of the three `return 0`s; and an `s32` return type on
-`encFreeBlur`, which the definition below refuses.
-
 ## slDrawWindow (mc/slMain, 0x4EC)
 
 87 of 313 words, two words short of the 1260-byte size.
@@ -2075,6 +2053,120 @@ assigned before the leading calls, a named `3.14f` local, and the
 the parameter-table height and for `y + height`; `node = control->camera;` as
 its own statement before each of the four uses; and `dx`/`dy`/`dz` locals for
 the three deltas, which costs another 19 words.
+
+## fldPlayerCalcHasigo (field/fldDraw, 0xE8)
+
+14 of 58 words, at the exact 232-byte size, and every instruction through the
+second arm's `add.s` is retail's.
+
+The whole tail (the three `prev` saves, the three position stores, the two
+write-backs into `pos` and `dds3SetPosPoseSet`) is written out in both arms, so
+ee-gcc cross-jumps it and leaves the `fldGlobalBase` address, the `&pos`
+argument and the `pos[2]` load duplicated into each arm, which is what retail
+has. The remainder is which float register each value takes in the shared tail:
+retail numbers them `$f1` `fldGlobalBase.x`, `$f5` `pos[0]`, `$f2` `y`, `$f3`
+`z`, `$f4` `pos[2]`, and the draft gives `pos[0]` the lowest of the five and
+pushes `pos[2]` to `$f5`. The scheduler then reads `pos[0]` ahead of
+`fldGlobalBase.x` rather than between it and `y`.
+
+Confirmed on the way: the vector is a 4-float stack local at `0x0` filled with
+`SDF_VU0_STOREVECTOR` after `dds3GetPosPoseSet`; the sign test is
+`if (cnt > 0) ... else if (cnt < 0) ... else return 0;`, which is what retail's
+`blez` plus `bgezl` pair is; `fldAreaWork_t + 0x10C` is the previous position,
+named `prevX`/`prevY`/`prevZ`; and retail writes `pos[1]` and `pos[2]` back out
+of `fldGlobalBase.y` and `.z` after storing them, which is where the two
+otherwise unexplained stack stores in the shared tail come from.
+
+Ruled out: a shared tail after the `if` (54 words, three words short, and the
+address setup stays in the merge); duplicating only the `prev` block, only
+`prev` plus the position stores, or the whole tail including both `Off` calls;
+`y` and `z` locals for the two components, with and without `y = pos[1]; y -=
+2.0f;` split in two; `SDF_VU0_STOREVECTOR_NOMEM`; a `handle` local for
+`ctl->handle` at three positions; and all six orders of the three position
+stores crossed with both orders of the write-back pair and six arrangements of
+the three statement blocks.
+
+## fldCamGetPhokanParam (field/fldDraw, 0x17C)
+
+92 of 95 words, at the exact 380-byte size. Every instruction is retail's; the
+three differing words are `addu` operand order on two of the four
+`fldCamParamTable` row addresses.
+
+Retail forms the row three different ways in one function. The `[0]` column,
+which multiplies the sine and the cosine, comes out `addu rd, index, base`; the
+`[1]` and `[2]` columns come out `addu rd, base, index` with the 4 or 8 left in
+the load displacement. The draft gets `[0]` right and `[1]` wrong, and in the
+target block it computes the row once and copies it (`move v0, v1`) where retail
+computes a second `addu` with the operands the other way round, which is why the
+two were not CSEd together in retail at all.
+
+Confirmed on the way: `D_0054C2D0` is a `.lit4` entry holding `3.14f`; the angle
+is `fldCamPitch * 3.14f / 180.0f`, written inline at both of the eye block's
+calls and assigned to one local for the target block's two, which is retail's
+`$f20` and its two `mov.s $f12, $f20`; the radius is `80.0f`; `[3]` of both
+vectors is `1.0f`; and the eye uses `-sin`/`-cos` while the target uses `+sin`
+/`+cos` scaled by `[0]`.
+
+Ruled out for the operand order: every combination of three spellings of the
+`[1]`/`[2]` access (plain subscript, `*(f32 *)((u8 *)table + i * 16 + 4)`,
+`((f32 *)((u8 *)table + i * 16))[1]`, `((f32 *)table + i * 4)[1]`) with three of
+the `[0]` access (`table[i][0]`, `*table[i]`,
+`*(f32 *)((u8 *)(i * 16) + (u32)table)`); every cast form is four words longer
+rather than closer. A `struct { f32 distance, height, targetHeight, fovy; }`
+declaration is the untried lever, and needs the unit's two later
+`extern f32 fldCamParamTable[][4];` declarations changed with it.
+
+## rsetOtOfs (field/fldDraw, 0x8)
+
+Byte-exact on its own, and parked anyway. Its two instructions set
+`rsetFrameMaskOtOffset`, but having them in the unit as C turns the two `bnel`
+of `encDrawProc` into `bne`: the `gencMode == 0` guard at `+0x18` and the
+`encDrawState` box-draw guard at `+0xE8`, both of whose arms call it. With
+`rsetOtOfs` reduced to the `extern` the file already needs, `encDrawProc`
+(0x1D8, 472 bytes) is exact, so the trade is 8 bytes for 472 and the unit's
+match count is unchanged.
+
+This is the callee-visibility mechanism in `docs/matching-levers.md`, measured
+here: hiding `rsetTest`, `rsetAlpha`, `fldDrawBokasi` or `aDrawBoxF` instead
+leaves `encDrawProc` at the same two words, and hiding `fldDrawFrameSpriteAlpha`
+makes it worse (5 words). Only `rsetOtOfs` moves it.
+
+Five functions still in assembly here call it (`fldSkyDrawFilter`,
+`fldEveHit_ChkEveHit`, `fldHitChkUnit`, `fldHitChkUnitVWM`, `fldHitWM_Mask`), so
+whoever converts one of those should re-measure both ways before restoring the
+definition. The other three drafts in this unit do not call it and are unchanged
+by the parking.
+
+## fldHitChkUnitElv (field/fldDraw, 0x184)
+
+63 of 97 words, at the exact 388-byte size. The first 63 words, the whole
+`fldHitChkUnitElvOnly` guard and the elevator-delta block, are retail's.
+
+Two things differ. The record address: retail computes it once as
+`addu a0, index, base` and copies it (`move v1, a0`), so two registers hold the
+same pointer, and the draft keeps one register and forms it `addu v1, base,
+index`. And in the tail, retail keeps nine float registers live at once -
+`$f0`-`$f2` the three summed components, `$f3`-`$f5` the deltas, `$f6`-`$f8` the
+three `fldHitChkWork` reads - while the draft interleaves the adds with the
+`fldHitChkWork` loads and reuses six, which rotates every register in the
+eighteen stores that follow. The store list itself is retail's.
+
+Confirmed on the way: the frame holds three 4-float vectors, a result at `0x0`
+and a `fldHitChkWork` snapshot at `0x10` that nothing in the function reads,
+plus the delta at `0x20` that `memset` clears and whose `[3]` is `1.0f`; the
+`-1` lives in a callee-saved register because `index` is a local read before
+`fldHitChkUnitElvOnly` and re-read inside the guard (writing
+`fldGlobalBase.hitMatterIndex == -1` twice instead makes gcc compare the second
+load against the first, which it knows is `-1`); and the three components have
+to be `x`/`y`/`z` locals, since `position[0] = fldGlobalBase.hitX;` reloads the
+global and costs twelve words.
+
+Ruled out: `(u8 *)(index * 0xE4) + (u32)fldMatterTable` for the record, and the
+subscript form at the `worldNode` and `sceneFlag` uses (the `sceneFlag` one
+costs 42 words by adding a second `addu`); `delta[0] + position[0]` for the sum;
+all six orders of the three `fldHitChkWork` reads, before and after the sums;
+and hiding `fldHitChkUnitElvOnly`'s definition, which leaves the one `beql` for
+`beq` at `+0x5C` exactly where it is.
 
 ## nbMainProcess1 (newbattle/nbMainProcess, 0x420)
 

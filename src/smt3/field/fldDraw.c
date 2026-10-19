@@ -234,6 +234,33 @@ struct fldRoomState_t {
     s32 shapeKind;
 };
 
+/* The event-range box block at fldRoomState_t + 0x120, reached through its own
+   pointer so the offset folds into the symbol address. */
+typedef struct {
+    s16 unk00;
+    s16 takaraIndex;
+    s16 unk04;
+    s16 hitKind;
+    s16 npcIndex;
+    s16 unk0A;
+    s32 unk0C;
+} fldEveRngBox_t;
+
+/* The plane block of fldRoomState_t, reached through its own pointer so the
+   0x90 offset folds into the symbol address. */
+typedef struct {
+    f32 plane[FIELD_ROOM_PLANE_COUNT][4];
+    f32 limit[FIELD_ROOM_PLANE_COUNT];
+} fldRoomPlanes_t;
+
+/* The same block based at plane[1], the first of the four side planes; the
+   room's own plane[0] and its distance sit before limit[]. */
+typedef struct {
+    f32 plane[FIELD_ROOM_PLANE_COUNT - 1][4];
+    f32 firstLimit;
+    f32 limit[FIELD_ROOM_PLANE_COUNT - 1];
+} fldRoomSidePlanes_t;
+
 struct fldInfHit_t {
     s8 area;
     char eventName[15];
@@ -853,18 +880,18 @@ typedef struct {
     s32 unk18;
     s32 unk1C;
     s32 unk20;
-    s32 unk24;
-    s32 unk28;
-    s32 unk2C;
-    s32 unk30;
-    s32 unk34;
-    s32 unk38;
-    s32 unk3C;
-    s32 unk40;
-    s32 unk44;
-    s32 unk48;
-    s32 unk4C;
-    s32 unk50;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    f32 unk40;
+    f32 unk44;
+    f32 unk48;
+    f32 unk4C;
+    f32 unk50;
 } fldDoorEvent_t;
 
 extern fldDoorEvent_t fldDoorEventTable[256];
@@ -1062,10 +1089,18 @@ void fldPoint3To2_B(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     *dstY = result[1];
 }
 
+extern void rsetOtOfs(s32 ofs);
+
+/* NON_MATCHING: exact on its own; its presence turns two bnel of encDrawProc
+   into bne. */
+#ifdef NON_MATCHING
 void rsetOtOfs(s32 ofs)
 {
     rsetFrameMaskOtOffset = ofs;
 }
+#else
+INCLUDE_ASM(const s32, "field/fldDraw", rsetOtOfs);
+#endif
 
 
 void rsetTexa(s32 lower, s32 bits, u64 upper) {
@@ -2191,8 +2226,6 @@ extern void dds3EffectPartialMultiBlurSetParam(void *blur, effBlurTemplateBody_t
 extern void dds3EffectPartialMultiBlurDraw(void *blur);
 extern void encFreeBlur(void);
 
-/* NON_MATCHING: 2 of 118 words differ (first at +0x18). */
-#ifdef NON_MATCHING
 s32 encDrawProc(dds3ProcessID_t *id) {
     if (gencOn == 0) {
         return 0;
@@ -2236,9 +2269,6 @@ s32 encDrawProc(dds3ProcessID_t *id) {
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldDraw", encDrawProc);
-#endif
 
 void encFreeBlur(void)
 {
@@ -2339,7 +2369,33 @@ INCLUDE_ASM(const s32, "field/fldDraw", resetCamNormal);
 
 INCLUDE_ASM(const s32, "field/fldDraw", resetCamNormal2);
 
+extern f32 fldCamPitch;
+extern f32 fldCamParamTable[][4];
+
+/* NON_MATCHING: 3 of 95 words differ (first at +0x90). */
+#ifdef NON_MATCHING
+void fldCamGetPhokanParam(void) {
+    f32 angle;
+
+    fldCamPhokanEyeX[0] =
+        fldGlobalBase.x - sdfSin(fldCamPitch * 3.14f / 180.0f) * 80.0f;
+    fldCamPhokanEyeX[1] = fldGlobalBase.y +
+        fldCamParamTable[fldGlobalBase.cameraParamIndex][1];
+    fldCamPhokanEyeX[2] =
+        fldGlobalBase.z - sdfCos(fldCamPitch * 3.14f / 180.0f) * 80.0f;
+    fldCamPhokanEyeX[3] = 1.0f;
+    angle = fldCamPitch * 3.14f / 180.0f;
+    fldCamPhokanTgtX[0] = fldGlobalBase.x +
+        sdfSin(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex][0];
+    fldCamPhokanTgtX[1] = fldGlobalBase.y +
+        fldCamParamTable[fldGlobalBase.cameraParamIndex][2];
+    fldCamPhokanTgtX[2] = fldGlobalBase.z +
+        sdfCos(angle) * fldCamParamTable[fldGlobalBase.cameraParamIndex][0];
+    fldCamPhokanTgtX[3] = 1.0f;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldCamGetPhokanParam);
+#endif
 
 void fldCamUpdateFollow(void) {
     union {
@@ -2888,7 +2944,48 @@ void fldPlayerCalc_Hit(void) {
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_WarpRun);
 
+/* NON_MATCHING: 14 of 58 words differ (first at +0x44). */
+#ifdef NON_MATCHING
+s32 fldPlayerCalcHasigo(void) {
+    fldUnitControl_t *ctl = fldGetUnitControl();
+    f32 pos[4];
+
+    if (gfldPlayerDamegeCnt > 0) {
+        dds3GetPosPoseSet(ctl->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        pos[1] -= 2.0f;
+        fldGlobalBase.prevX = fldGlobalBase.x;
+        fldGlobalBase.prevY = fldGlobalBase.y;
+        fldGlobalBase.prevZ = fldGlobalBase.z;
+        fldGlobalBase.x = pos[0];
+        fldGlobalBase.y = pos[1];
+        fldGlobalBase.z = pos[2];
+        pos[1] = fldGlobalBase.y;
+        pos[2] = fldGlobalBase.z;
+        dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+    } else if (gfldPlayerDamegeCnt < 0) {
+        dds3GetPosPoseSet(ctl->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        pos[1] += 2.0f;
+        fldGlobalBase.prevX = fldGlobalBase.x;
+        fldGlobalBase.prevY = fldGlobalBase.y;
+        fldGlobalBase.prevZ = fldGlobalBase.z;
+        fldGlobalBase.x = pos[0];
+        fldGlobalBase.y = pos[1];
+        fldGlobalBase.z = pos[2];
+        pos[1] = fldGlobalBase.y;
+        pos[2] = fldGlobalBase.z;
+        dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+    } else {
+        return 0;
+    }
+    fldPlayerSdwOff();
+    fldPlayerSvsOff();
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalcHasigo);
+#endif
 
 INCLUDE_RODATA(const s32, "field/fldDraw", D_00531C50);
 
@@ -4098,7 +4195,65 @@ void fldHitChkUnitElvOnly(f32 *position) {
     }
 }
 
+/* NON_MATCHING: 34 of 97 words differ (first at +0x48). */
+#ifdef NON_MATCHING
+void fldHitChkUnitElv(f32 *position) {
+    f32 result[4];
+    f32 previous[4];
+    f32 delta[4];
+    fldValueRecord_t *record;
+    s32 index;
+    f32 x;
+    f32 y;
+    f32 z;
+
+    memset(delta, 0, sizeof(delta));
+    delta[3] = 1.0f;
+    fldGlobalBase.hitValid = 0;
+    index = fldGlobalBase.hitMatterIndex;
+    if (index == -1) {
+        fldHitChkUnitElvOnly(position);
+        index = fldGlobalBase.hitMatterIndex;
+    }
+    if (index == -1) {
+        return;
+    }
+    record = &((fldValueRecord_t *)fldMatterTable)[index];
+    if (record->worldNode != NULL) {
+        delta[0] = record->worldNode->poseset->pos.x - record->previousPosition[0];
+        delta[1] = record->worldNode->poseset->pos.y - record->previousPosition[1];
+        delta[2] = record->worldNode->poseset->pos.z - record->previousPosition[2];
+        record->previousPosition[0] = record->worldNode->poseset->pos.x;
+        record->previousPosition[1] = record->worldNode->poseset->pos.y;
+        record->previousPosition[2] = record->worldNode->poseset->pos.z;
+    }
+    if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                    record->sceneFlag) != 0) {
+        return;
+    }
+    x = position[0] + delta[0];
+    y = position[1] + delta[1];
+    z = position[2] + delta[2];
+    previous[0] = fldHitChkWork[0];
+    previous[1] = fldHitChkWork[1];
+    previous[2] = fldHitChkWork[2];
+    fldGlobalBase.hitValid = 1;
+    fldGlobalBase.hitX = x;
+    fldGlobalBase.hitY = y;
+    fldGlobalBase.hitZ = z;
+    position[0] = x;
+    position[1] = y;
+    position[2] = z;
+    fldHitChkWork[0] = x;
+    fldHitChkWork[1] = y;
+    fldHitChkWork[2] = z;
+    result[0] = x;
+    result[1] = y;
+    result[2] = z;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitElv);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitDamage);
 
@@ -4398,9 +4553,49 @@ INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkDir);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkDir2);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldEveHitTestRect);
+s32 fldEveHitTestRect(f32 *pos, s32 idx) {
+    f32 probe[3];
+    f32 planar[2];
+    fldRoomSidePlanes_t *sides;
+    s32 i;
+    f32 zero;
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldEveHitTestPlanes);
+    if (fldEveHitTable[idx].axisMode == 0) {
+        probe[0] = 0.0f;
+        probe[1] = pos[1];
+        probe[2] = pos[2];
+        planar[0] = pos[1];
+        planar[1] = pos[2];
+    } else {
+        probe[0] = pos[0];
+        probe[1] = pos[1];
+        probe[2] = 0.0f;
+        planar[0] = pos[0];
+        planar[1] = pos[1];
+    }
+    zero = 0.0f;
+    sides = (fldRoomSidePlanes_t *)fldEveHitTable[idx].plane[1];
+    for (i = 0; i < FIELD_ROOM_PLANE_COUNT - 2; i++) {
+        if (fldVecDot((sdfVector4_t *)probe, (sdfVector4_t *)sides->plane[i]) -
+                sides->limit[i] < zero) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+s32 fldEveHitTestPlanes(sdfVector4_t *pos, s32 idx) {
+    fldRoomPlanes_t *planes = (fldRoomPlanes_t *)fldEveHitTable[idx].plane;
+    s32 i;
+    f32 zero = 0.0f;
+
+    for (i = 0; i < FIELD_ROOM_PLANE_COUNT; i++) {
+        if (zero < fldVecDot(pos, (sdfVector4_t *)planes->plane[i]) - planes->limit[i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 s32 fldEveHit_ScriptStart(char *name, s32 idx) {
     s32 pid;
@@ -4535,9 +4730,42 @@ INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitItemBox);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitNpc);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldCheckEveRngN);
+s32 fldCheckEveRngN(s32 npcidx) {
+    s32 idx;
+    fldEveRngBox_t *box;
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldCheckEveRngT);
+    idx = gFldEveRngIdx_N;
+    if (gFldKyouseiTalk != 0) {
+        return 1;
+    }
+    if (idx == -1) {
+        return 0;
+    }
+    box = (fldEveRngBox_t *)&fldEveHitTable[idx].unk120;
+    if (box->hitKind == 1) {
+        if (box->npcIndex == npcidx) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+s32 fldCheckEveRngT(s32 takaraidx) {
+    s32 idx;
+    fldEveRngBox_t *box;
+
+    idx = gFldEveRngIdx_T;
+    if (idx == -1) {
+        return 0;
+    }
+    box = (fldEveRngBox_t *)&fldEveHitTable[idx].unk120;
+    if (box->hitKind == 2) {
+        if (box->takaraIndex == takaraidx) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 s32 fldCheckEveRngEncount(void) {
     s32 slotIndex;
@@ -4637,7 +4865,20 @@ INCLUDE_ASM(const s32, "field/fldDraw", fldInfChkFastPanel);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldInfNext);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldInfGet);
+s32 fldInfGet(s32 row, s32 which) {
+    s32 message = row - 10;
+    s32 ret = 0;
+
+    switch (which) {
+    case 0:
+        ret = fldInfTable.sets[gFldInfIdx].messages[message].kind;
+        break;
+    case 1:
+        ret = fldInfTable.sets[gFldInfIdx].messages[message].message;
+        break;
+    }
+    return ret;
+}
 
 void fldInfLoad(s32 field) {
     char path[64];
@@ -4802,7 +5043,22 @@ s32 fldDoor_GetWarpEff(void)
 }
 
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldWapGetDoor);
+s32 fldWapGetDoor(void) {
+    fldActorEntry_t *entry = &fldDoorTable[scriptlabel];
+    s32 motion;
+
+    if (entry->kind == 1) {
+        motion = entry->motion;
+        if (motion == 5 || entry->secondaryMotion == 5 || motion == 6 ||
+        entry->secondaryMotion == 6 || motion == 7 ||
+        entry->secondaryMotion == 7 || motion == 8 ||
+        entry->secondaryMotion == 8) {
+            return 0x28;
+        }
+        return 0x14;
+    }
+    return 0;
+}
 
 extern scrProcessWork_s *scrGetScriptHandle(void);
 extern void fldSePlay(s32 soundId);
@@ -5252,7 +5508,28 @@ void fldDoor_WarpCash(const char *name) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_GetHasigoTbl);
+s32 fldDoor_GetHasigoTbl(s32 kind) {
+    fldActorEntry_t *entry = &fldDoorTable[scriptlabel];
+    dds3Basic_t *node;
+
+    switch (kind) {
+    case 0:
+        return entry->motion;
+    case 1:
+        node = dds3SceneBasicSearchName(dds3GetActiveScene(), entry->motionName);
+        if (node != NULL) {
+            return node->serialID;
+        }
+        /* fallthrough */
+    case 2:
+        node = dds3SceneBasicSearchName(dds3GetActiveScene(), entry->otherName);
+        if (node != NULL) {
+            return node->serialID;
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 fldDoor_GetElvTbl(u32 kind) {
     s32 slot = gFld_ElvTakasa;
@@ -5355,14 +5632,152 @@ void fldGetDoorEntry(const void *source) {
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldSetupDoorScenes);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldFindDoorEvent);
+void fldFindDoorEvent(s32 id) {
+    fldDoorEvent_t *e;
+    fldActorEntry_t *entry;
+    s32 i;
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Step);
+    if (id == 0) {
+        return;
+    }
+    if (id == -1) {
+        return;
+    }
+    e = fldDoorEventTable;
+    entry = fldDoorTable;
+    for (i = 0; i < 256; i++) {
+        if (e->unk00 == 1 && e->unk04 == id) {
+            s32 motion = entry->motion;
+
+            e->unk00 = 2;
+            e->unk18 = 0;
+            e->unk1C = 0;
+            if (motion == 5 || entry->secondaryMotion == 5 || motion == 6 ||
+                entry->secondaryMotion == 6 || motion == 7 ||
+                entry->secondaryMotion == 7 || motion == 8 ||
+                entry->secondaryMotion == 8) {
+                e->unk20 = 0x28;
+            } else {
+                e->unk20 = 0x14;
+            }
+            e->unk24 = 0.0f;
+            e->unk28 = 0.0f;
+            e->unk2C = 0.0f;
+            e->unk3C = 0.0f;
+            e->unk40 = 0.0f;
+            e->unk44 = 0.0f;
+        }
+        e++;
+        entry++;
+    }
+}
+
+s32 fldDoor_Step(s32 id, f32 *px, f32 *py, f32 *pz) {
+    f32 steps[50] = {
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+        0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
+    };
+    fldDoorEvent_t *e;
+    s32 i;
+
+    if (fldGb >= 200) {
+        return 0;
+    }
+    for (i = 0; i < 256; i++) {
+        e = (fldDoorEvent_t *)((u8 *)(i * 0x54) + (u32)fldDoorEventTable);
+        if (e->unk0C == id) {
+            if (e->unk00 == 2) {
+                s32 count = e->unk18;
+                s32 limit = e->unk20;
+                if (count < limit) {
+                    if (limit == 0x28) {
+                        f32 step = steps[count];
+                        e->unk24 += e->unk30 * step;
+                        e->unk28 += e->unk34 * step;
+                        e->unk2C += e->unk38 * step;
+                    } else {
+                        e->unk24 += e->unk30;
+                        e->unk28 += e->unk34;
+                        e->unk2C += e->unk38;
+                        if (evtBitCheck(0xAF3) != 0) {
+                            e->unk24 += e->unk30;
+                            e->unk28 += e->unk34;
+                            e->unk2C += e->unk38;
+                        }
+                    }
+                    e->unk18 = e->unk18 + 1;
+                } else if (evtBitCheck(0xAF3) != 0) {
+                    e->unk00 = 3;
+                    e->unk18 = 0;
+                }
+            } else if (e->unk00 == 3) {
+                if (e->unk18 < 0x14) {
+                    e->unk24 -= e->unk30;
+                    e->unk28 -= e->unk34;
+                    e->unk2C -= e->unk38;
+                    if (evtBitCheck(0xAF3) != 0) {
+                        e->unk24 -= e->unk30;
+                        e->unk28 -= e->unk34;
+                        e->unk2C -= e->unk38;
+                    }
+                    e->unk18 = e->unk18 + 1;
+                } else {
+                    e->unk18 = 0;
+                    e->unk00 = 1;
+                }
+            } else {
+                continue;
+            }
+            *px = e->unk24;
+            *py = e->unk28;
+            *pz = e->unk2C;
+            return 1;
+        }
+        if (e->unk14 == id) {
+            if (e->unk00 == 2) {
+                s32 count = e->unk1C;
+                s32 limit = e->unk20;
+                if (count < limit) {
+                    if (limit == 0x28) {
+                        f32 step = steps[count];
+                        e->unk3C += e->unk48 * step;
+                        e->unk40 += e->unk4C * step;
+                        e->unk44 += e->unk50 * step;
+                    } else {
+                        e->unk3C += e->unk48;
+                        e->unk40 += e->unk4C;
+                        e->unk44 += e->unk50;
+                    }
+                    e->unk1C = count + 1;
+                } else if (evtBitCheck(0xAF3) != 0) {
+                    e->unk1C = 0;
+                }
+            } else if (e->unk00 == 3) {
+                if (e->unk1C < 0x14) {
+                    e->unk3C -= e->unk48;
+                    e->unk40 -= e->unk4C;
+                    e->unk44 -= e->unk50;
+                    e->unk1C = e->unk1C + 1;
+                } else {
+                    e->unk1C = 0;
+                }
+            } else {
+                continue;
+            }
+            *px = e->unk3C;
+            *py = e->unk40;
+            *pz = e->unk44;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void func_00144288(void) {
 }
-
-INCLUDE_RODATA(const s32, "field/fldDraw", D_00532030);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC44);
 
