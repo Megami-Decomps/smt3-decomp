@@ -4047,3 +4047,85 @@ frees the register but addresses the frame directly, so the four `sqc2` and the
 whole tail shift by one word (46 of 118). A `sdfMatrix4_t *mp = &marked;` local
 with either existing macro does not reach it: cse folds the local back into the
 shared pseudo.
+## dds3InitZClearDrawTag (kernel/dds3KernelDraw, 0x15C)
+
+Sixty-six of 87 words match, at the exact 348-byte size, and every
+instruction's opcode and offset is right: all 21 differing words are register
+names. Retail puts the two XYZ2 payloads in the callee-saved pair,
+`$17 = 0x79007000` and `$16 = 0x87009000`, and the TEST_1 and the second
+GIFtag in temporaries, `$25 = 0x32001` and `$24 = 0x1003400000000004`; the
+draft swaps those two pairs. The same swap also puts the address induction
+variable in `$6` and the constant 5 in `$5` where retail has them the other
+way round. Nothing in the loop body, the two counters, the `sll $2, state, 5`
+addressing or the constant materialisation sequences differs.
+
+The shape is settled: a `for (state = 0; state < 3; state++)` over an inner
+`for (buffer = 0; buffer < 2; buffer++)` whose index the body does not use, so
+it becomes retail's `addiu -1` / `bgez` downcounter, with the packet addressed
+as `dds3ZClearDrawTag[state][buffer]` written out at each field. Indexing the
+element inside the inner loop is what gives retail's `sll $2, $5, 5` with the
+outer induction variable stepping 0xB; a row pointer hoisted to the outer loop
+(`packet = dds3ZClearDrawTag[state]` plus `packet++`) makes gcc step a single
+biv by 352 instead and costs two words as well.
+
+Ruled out, all 21 or worse: both orders of `.data` and `.reg` within every
+A+D register entry, independently for the TEST, colour, position and blend
+pairs (16 combinations) - the scheduler normalises the position pair either
+way, so the emitted order is not evidence of source order there; a
+`dds3ZClearPacket_t *packet` local assigned inside the inner loop, assigned as
+its initializer, and as `dds3ZClearDrawTag[state] + buffer`; a row pointer
+with `row[buffer].field`; `(u8 *)dds3ZClearDrawTag + state * 0x160` and the
+same through a `u32 ofs` local; a 32-byte `sdfGrPacketHeader_t *` cast indexed
+`[state * 11]`; `u32` for either loop counter (either one costs a word);
+`while` loops; one combined declaration; an explicit `buffer = 1; buffer >= 0`
+downcounter; and seven orderings of the eleven field groups. Writing the two
+position entries before the colour entries reaches 19 words and fixes the
+saved-register pair, but reorders the stores in the body, so it trades six
+register names for six store offsets. Two `u64` locals holding the position
+payloads, declared before the loop with and without initializers, is 29.
+
+The remaining difference is an allocation tie: every one of these constants is
+hoisted to the preheader, referenced once per iteration and live across the
+whole loop, so `allocno_compare` cannot separate them on refs, frequency or
+live length. Someone attacking this needs to change the order the preheader
+pseudos are created in while leaving the body's store order alone.
+
+## dds3DrawFade (kernel/dds3KernelDraw, 0x2A8)
+
+A hundred and eighteen of 170 words match, at the exact 680-byte size, with
+every instruction's opcode, operand shape and position identical: all 52
+differing words are register names. Retail puts the frame id in `$5`, the
+`0x80 - fadergba[3]` difference in `$3` and the packed colour in `$7`, and
+reuses `$5` for the address temporary each spill is computed in; the draft
+gives the frame id `$7`, the difference `$5`, the colour `$6` and the address
+temporary `$7`. The eight stack spill slots at `0x0` to `0x1C`, the frame, the
+twenty-six packet stores and the three calls all land where retail has them.
+
+Two things had to be found. The packet must be addressed as
+`dds3FadePacket[frameId].field` at every store, not through a
+`dds3FadePacket_t *` local: the pointer form folds the whole body into
+displacements off one base and emits 105 words instead of 170, where retail
+computes `(frameId * 0xB0 + offset) + base` per field and spills eight of those
+addresses. And the colour's or-tree is `((alpha << 24) | r) | ((b << 16) | q)
+| (g << 8)`, which only the flat source order
+`0x3F80000000000000 | (g << 8) | r | (b << 16) | (u64)(alpha << 24)` reproduces;
+the explicitly parenthesised form that spells retail's tree out is 120 words
+out, and the five other flat orders tried are 57 to 120.
+
+The packet is a unit-local `dds3FadePacket_t`: a DMA tag, a GIFtag, four A+D
+registers (`0x42` = 1, `0x49` = 0, `0x4A` = 0, `0x47` = 0x31003), a second
+GIFtag and four more (RGBAQ, XYZ2, RGBAQ, XYZ2), 0xB0 bytes, two entries. The
+alpha byte and the three colour bytes are `fadergba[3]` down to `fadergba[0]`:
+retail addresses all four off one base register holding `&fadergba[3]`, which
+is what reading `fadergba[3]` first produces.
+
+Ruled out, all 52 or worse: nine declaration orders and the `u32`/`s32`
+spellings of the frame id (identical at 52, except `u32 alpha`, which is 149);
+the guard as an early `return`, as `(0x80 - fadergba[3]) < 0x80` with the
+difference recomputed inside, and with the shift written out at its use; and
+computing the difference before the `dds3GetFrameID` call, which costs a word.
+Both orders of `.data` and `.reg` within each A+D entry were measured: `.reg`
+first is the 52, `.data` first is 151.
+
+The draft depends on `dds3FadePacket_t`, defined in the unit beside the
+`fadergba` externs, so a harvest of the body alone loses the type.

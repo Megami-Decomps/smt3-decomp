@@ -1048,6 +1048,40 @@ it was measured on DDS and not on this ELF.
   the count took it from 9 of 262 to 5, and all six orders of the three leading
   reads differ. An `s32` for the `u8` field undoes the slot fix.
 
+- A packet builder whose stores all go to one array element wants the element
+  indexed at every store, `packet_array[frame].field = v;`, not a
+  `T *p = &packet_array[frame];` local. The pointer form folds the whole body
+  into displacements off one base; retail computes `(index * size + offset) +
+  base` per field and spills the ones it cannot keep, which is 65 words more
+  in `dds3DrawFade`. Within an A+D register entry write `.reg` before `.data`:
+  that is the order the scheduler emits, and `.data` first costs a word per
+  pair in both `dds3DrawFade` and `dds3InitZClearDrawTag`.
+- Where retail multiplies a loop index by a struct size with an odd factor and
+  a shift (`sll idx, 5` with the induction variable stepping 0xB for a 0x160
+  row), index the element inside the inner loop, `a[outer][inner]`. Hoisting a
+  row pointer to the outer loop (`p = a[outer];` plus `p++`) makes gcc build a
+  single induction variable stepping the whole row size and costs two words.
+  `dds3InitZClearDrawTag` and `dds3DrawFade` both show the factored form.
+- A loop that reads three arrays, where retail walks two by pointer and
+  subscripts the third by the counter, comes from subscripting *all three* by
+  the counter. gcc then reduces two of them to pointers on its own and leaves
+  the third indexed, which is what keeps the counter an up-counter with an
+  `slti` bound. Incrementing two pointers in the source instead lets gcc
+  reduce the third as well, the counter goes dead, and the loop becomes an
+  `addiu -1` downcounter: `dds3RunQuake` was 126 words that way against
+  retail's 129, and 13 of 129 with every subscript written out.
+- An eight-byte `extern` struct copied by value is addressed `gp`-relative,
+  with the `ldl`/`ldr` pair reading off `$28`. Where retail builds the address
+  in a register first, declare the symbol as an incomplete array and copy its
+  first element, `extern T sym[]; T local = sym[0];`. The unknown extent keeps
+  it out of small data. `dds3RunQuake`'s pair of axis gains needs this.
+- Two references to one symbol with different addends that retail materialises
+  as two independent `lui`/`addiu` pairs are two symbols in the source. Give
+  the second one a `PS2_SYMBOL_AT` name and pass that: `dds3InitDrawEnvSub`
+  hands `sdf3DMakeLightParallelPacket` the light record and its ambient term,
+  and sharing the `%hi` through `&dds3LightParam.ambient` runs a word short per
+  call.
+
 ## Function-local constant arrays
 
 A block-scope initializer such as `s32 list[3] = {1, 11, 14};` goes to
@@ -1070,6 +1104,12 @@ shifts and adds, so `n * 100 / 0xB8` is a shift chain followed by a real
 ee-gcc truncates a decimal literal toward zero, so `-946.42f` lands one ULP
 away from retail and `-946.41993f` is exact. Derive the shortest decimal that
 round-trips to the retail word rather than transcribing the rounded value.
+
+`check_unit.py` says so outright when it hits one: a differing word whose
+retail side is a `gp`-relative `lwc1` is reported as `D_00XXXXXX is a .lit4
+pool constant: write the float literal`. Take it at its word and inline the
+value rather than declaring the symbol `extern f32`; `dds3RunQuake`'s
+`D_0054C188` is `0.01f`.
 
 To tell whether a `gp`-addressed `D_00XXXXXX` is a pool entry, subtract the
 flat-image delta `0xff000` from its vram and look the file offset up against
