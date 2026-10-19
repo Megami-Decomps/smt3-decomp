@@ -153,6 +153,26 @@ it was measured on DDS and not on this ELF.
   as `INCLUDE_RODATA` plus `extern char D_XXXXXXXX[];` than as a literal in
   the body. `include_rodata.py` picks up any rodata symbol named this way,
   including one splat had folded into a nonmatching function's own asm file.
+- Two `addiu` of the same frame address where the C uses `&local` twice means
+  the store before it is `SDF_VU0_STOREVECTOR_NOMEM`, not
+  `SDF_VU0_STOREVECTOR`. The `"memory"` clobber lets cc1 keep the address
+  pseudo across the asm, so a following `SDF_VU0_LOADVECTOR(&local)` reuses
+  the register; without it cc1 rematerialises `$29 + offset` for every asm
+  operand, which is what the `nbCameraShot_*_Set` family does throughout.
+  `nbCameraShot_InvokeTargetNear_Set` went from 73 differing words to 4 on
+  that one macro, and its neighbour from 82 to 11.
+- An accumulate into a saved fp register (`add.s $f20, $f20, $f1`) needs
+  `x += ...; x *= ...;` as separate statements. `x = (x + a) * b` puts the sum
+  in the addend's register and adds a `mov.s` to the variable's register at
+  the end.
+- The alignment of a struct assignment comes from the assigned type, not from
+  the object it sits in, so one set of bytes can need two struct types. In
+  `slSaveData_writeFile` the save header inside the global work copies its
+  20-byte block as `ldl`/`ldr` plus a plain `lw` for the trailing word
+  (alignment 4, from a `struct { s32 w[5]; }` member), while the same 20 bytes
+  in the on-card record copy as `ldl`/`ldr` plus `lwl`/`lwr` (alignment 1,
+  from a `struct { s8 ch[20]; }` member). One struct for both gets one of the
+  two copies wrong whichever way it is declared.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -302,6 +322,20 @@ Where a handful of constant stores differ only in order, permute them
 mechanically rather than reasoning about it. A loop driving
 `check_unit.py --func <name>` costs about a second per permutation; two
 functions turned on the first of 24 permutations and on a rotation of three.
+
+## A caller can need its callee's definition, not just a prototype
+
+Measured in `mc/slMain`: `slDrawInfo` at 183 of 189 words and `slDrawError`
+at 293 of 299 both become exact the moment `slDrawWindow` is a C definition
+above them, and while it is still `INCLUDE_ASM` they each emit six `bnel`
+where retail has `bne`, on exactly the tests whose arms call it. Cracking one
+callee therefore banked 801 words across three functions.
+
+So when a caller sits within a couple of branch-annul words of exact and
+calls something still in assembly, decompile the callee first rather than
+permuting the caller. This is the same mechanism as the CONTEXT row below,
+seen from the other side: what the compiler can see of the rest of the unit
+changes the code it emits for one function.
 
 ## Check the whole unit, not the function you edited
 

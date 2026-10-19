@@ -377,6 +377,210 @@ extern void func_001C7E38(void *request, s32 a1, s32 a2);
 extern void *slKanjiDrawH_handle;
 
 
+extern s32 sdfMcGetStatus(u32 request);
+
+extern void sdfMcClearCardStat(u32 request);
+
+extern s32 gSlFileErroeFlg;
+
+extern s32 slFileSelCalc(void);
+
+extern void *memset(void *dst, s32 value, u32 count);
+
+typedef struct slFileName_t {
+    s8 ch[20];
+} slFileName_t;
+
+typedef struct slFileWork_t {
+    s32 w[5];
+} slFileWork_t;
+
+typedef struct slFileRec_t {
+    s8 verstr[3];
+    s8 ver;
+    s8 tmnlMode;
+    s8 tmnlId;
+    s8 level;
+    s8 mode;
+    s8 playTime[4];
+    s8 endcnt[2];
+    s8 newfile[2];
+    slFileName_t name;
+    s8 mapOpen;
+    s8 unk25[15];
+} slFileRec_t;
+
+typedef struct slFileHead_t {
+    u8 verstr[3];
+    u8 ver;
+    u8 tmnlMode;
+    u8 tmnlId;
+    u8 level;
+    u8 mode;
+    s32 playTime;
+    u16 endcnt;
+    u16 newfile;
+    slFileWork_t work;
+    u8 mapOpen;
+    u8 unk25[15];
+} slFileHead_t;
+
+#define SL_REC ((u8 (*)[52])D_00569740)
+#define SL_FILE_HEAD ((slFileHead_t *)DDS3_GBWK)
+
+extern slFileRec_t D_00569740[];
+
+
+extern sdfTexHandle_t *_saveUI;
+
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, sdfTexHandle_t *);
+
+extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0,
+                      u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
+                      u32 r3, u32 g3, u32 b3, u32 a3);
+
+extern void slFileSelDraw(s32 task);
+
+extern void slDrawInfo(void);
+
+extern void slQueryYesNoDraw(void);
+
+extern void slDrawError(void);
+
+
+extern s32 datGetPlayerLevel(void);
+
+extern s32 evtBitCheck(s32 bit);
+
+extern s32 gSlSaveMode;
+
+extern u32 D_00551D30;
+
+extern u32 D_00551D34;
+
+
+extern char D_00528510[];
+
+extern char D_00528548[];
+
+extern char D_005285A8[];
+
+extern char D_005285F8[];
+
+extern char D_00528608[];
+
+extern char D_00528598[];
+
+extern char D_00528738[];
+
+extern char D_005285B8[];
+
+extern char D_00528748[];
+
+extern char D_005287D8[];
+
+extern char D_005287C0[];
+
+extern char D_00528728[];
+
+extern s32 slDrawWindow(void);
+
+extern void slMcAccessDraw(void);
+
+
+extern s32 slExitToTitle2(void);
+
+
+extern char D_00528280[];
+
+extern char D_005282B8[];
+
+extern char D_005282D0[];
+
+extern char D_00528308[];
+
+extern char D_00528330[];
+
+extern char D_00528340[];
+
+extern char D_005281D8[];
+
+extern char D_00528210[];
+
+extern char D_00528228[];
+
+extern char D_00528260[];
+
+extern char D_00528448[];
+
+extern char D_00528480[];
+
+extern char D_005284B8[];
+
+extern char D_005284E0[];
+
+extern char D_005284F0[];
+
+extern char D_005283B8[];
+
+extern char D_005283F0[];
+
+extern char D_00528428[];
+
+extern char D_005285C8[];
+
+extern char D_005285D8[];
+
+extern char D_00528638[];
+
+extern char D_00528658[];
+
+extern char D_00528678[];
+
+extern char D_00528690[];
+
+extern char D_005285E8[];
+
+extern char D_005288A0[];
+
+extern char D_005288C0[];
+
+extern char D_00528820[];
+
+extern char D_00528850[];
+
+extern char D_00528888[];
+
+extern s32 gslInfoLoadFlg;
+
+extern s32 gslFlushCnt;
+
+extern s32 gSlMcAccessCnt;
+
+extern void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration);
+
+extern sdfTexHandle_t *sdfTexSet(void *data);
+
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **dataOut, s32 flag);
+
+extern void evtBitOn(s32 bit);
+
+extern void dds3StartProcess(const char *name, s32 priority, s32 a2, s32 a3,
+                             s32 (*calc)(dds3ProcessID_t *), s32 (*shutdown)(void), void *work);
+
+extern void *dds3GetActiveScene(void);
+
+extern void dds3VisibleSceneBasic(void *scene, s32 visible);
+
+extern s32 slShutDownProcess(void);
+
+extern char D_00532918[];
+
+extern char D_00532930[];
+
+
 void mcMakeFileName(char *dst, s32 number) {
     if (slDDS3To31Flg != 0) {
         sprintf(dst, D_00532860, 0xFEDA, number);
@@ -484,9 +688,170 @@ s32 slChkWindowOpenDone(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slDrawWindow);
+/* NON_MATCHING: 87 of 313 words, two words short; cnt is not copied before the two multiplies. */
+#ifdef NON_MATCHING
+s32 slDrawWindow(void) {
+    s32 y;
+    s32 h;
+    s32 cnt;
+    s32 a;
+    s32 ofs;
 
+    rsetOtOfs(0x4A);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    cnt = gSlWindowCnt + 1;
+    gSlWindowCnt = cnt;
+    if (cnt < 4) {
+        y = 0xE9 - cnt * 0xB5 / 4;
+        h = cnt * 0x16B / 4;
+    } else {
+        y = 0x34;
+        h = 0x16B;
+    }
+    aDrawBoxG(0, y / 2, 0x200, h / 2, 8, 5, 0x23, 0x66, 8, 5, 0x23, 0x66,
+              8, 5, 0x23, 0x66, 8, 5, 0x23, 0x66);
+    if (gSlWindowCnt >= 2) {
+        if (gSlWindowCnt < 7) {
+            h = (gSlWindowCnt - 2) * 0xE9 / 5;
+            y = 0xE4 - (gSlWindowCnt - 2) * 0x74 / 5;
+        } else {
+            y = 0x70;
+            h = 0xE9;
+        }
+        aDrawBoxG(0, y / 2, 0x200, h / 2, 0, 0, 0, 0x26, 0, 0, 0, 0x26,
+                  0, 0, 0, 0x26, 0, 0, 0, 0x26);
+        if (gSlWindowCnt < 7) {
+            a = (gSlWindowCnt - 2) * 4;
+        } else {
+            a = 0x14;
+        }
+        a = a * 0x80 / 0x64;
+        aDrawBoxG(0, 0x37, 0x100, 0x75, 0x61, 0x72, 0xF7, a, 0x61, 0x72, 0xF7, 0,
+                  0x61, 0x72, 0xF7, 0, 0x61, 0x72, 0xF7, 0);
+        aDrawBoxG(0x100, 0x37, 0x100, 0x75, 0x61, 0x72, 0xF7, 0, 0x61, 0x72, 0xF7, 0,
+                  0x61, 0x72, 0xF7, a, 0x61, 0x72, 0xF7, 0);
+        if (gSlWindowCnt < 7) {
+            ofs = (gSlWindowCnt - 2) * 0x200 / 5 - 0x200;
+        } else {
+            ofs = 0;
+        }
+        aDrawBoxG(ofs + 0x152, 0x36, 0x90, 1, 0x64, 0x76, 0xFF, 0x59,
+                  0x64, 0x76, 0xFF, 0, 0x64, 0x76, 0xFF, 0, 0x64, 0x76, 0xFF, 0x59);
+        aDrawBoxG(ofs, 0x36, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
+                  0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59);
+        if (gSlWindowCnt < 7) {
+            ofs = 0x200 - (gSlWindowCnt - 2) * 0x200 / 5;
+        } else {
+            ofs = 0;
+        }
+        aDrawBoxG(ofs + 0x1E, 0xAC, 0x90, 1, 0x64, 0x76, 0xFF, 0,
+                  0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0);
+        aDrawBoxG(ofs + 0xAE, 0xAC, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
+                  0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59);
+    }
+    rsetOtOfs(0x47);
+    if (gSlWindowCnt < 7) {
+        return 0;
+    }
+    return 1;
+}
+#else
+INCLUDE_ASM(const s32, "mc/slMain", slDrawWindow);
+#endif
+
+/* NON_MATCHING: 293 of 299 words, exact size; six bnel where retail has bne. Exact once slDrawWindow is C. */
+#ifdef NON_MATCHING
+void slDrawError(void) {
+    if (gslErrorCode == 0) {
+        return;
+    }
+    if (gslErrorCode == 1) {
+        slFileSelError = 0;
+        if (slDrawWindow() != 0) {
+            if (slDDS3To31Flg != 0) {
+                slKanjiDrawH(0xA, 0x4C, 0x64618780, D_00528280);
+                slKanjiDrawH(0xA, 0x58, 0x64618780, D_005282B8);
+                slKanjiDrawH(0xA, 0x64, 0x64618780, D_005282D0);
+                slKanjiDrawH(0xA, 0x70, 0x64618780, D_00528308);
+                slKanjiDrawH(0xA, 0x7C, 0x64618780, D_00528330);
+                slKanjiDrawH(0xA, 0x88, 0x64618780, D_00528340);
+            } else {
+                slKanjiDrawH(0xA, 0x4C, 0x64618780, D_005281D8);
+                slKanjiDrawH(0xA, 0x58, 0x64618780, D_00528210);
+                slKanjiDrawH(0xA, 0x64, 0x64618780, D_00528228);
+                slKanjiDrawH(0xA, 0x70, 0x64618780, D_00528260);
+            }
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+    if (gslErrorCode == 2) {
+        if (slDrawWindow() != 0) {
+            if (slDDS3To31Flg != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528448);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528480);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, D_005284B8);
+                slKanjiDrawH(0x28, 0x70, 0x64618780, D_005284E0);
+                slKanjiDrawH(0x28, 0x7C, 0x64618780, D_005284F0);
+            } else {
+                slKanjiDrawH(0x1D, 0x4C, 0x64618780, D_005283B8);
+                slKanjiDrawH(0x1D, 0x58, 0x64618780, D_005283F0);
+                slKanjiDrawH(0x1D, 0x64, 0x64618780, D_00528428);
+            }
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+    if (gslErrorCode == 3) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285C8);
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+    if (gslErrorCode == 4) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285D8);
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+    if (gslErrorCode == 5) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528638);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528658);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528678);
+            slKanjiDrawH(0x28, 0x70, 0x64618780, D_00528690);
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+    if (gslErrorCode == 6) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285E8);
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+    if (gslErrorCode == 7) {
+        if (slDrawWindow() != 0) {
+            if (slDDS3To31Flg != 0) {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005288A0);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_005288C0);
+            } else {
+                slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528820);
+                slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528850);
+                slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528888);
+            }
+            slNextPageDraw();
+            gslDrawFlagFile = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "mc/slMain", slDrawError);
+#endif
 
 void slSetInfo(u32 state) {
     s32 previous;
@@ -498,7 +863,71 @@ void slSetInfo(u32 state) {
     }
 }
 
+/* NON_MATCHING: 183 of 189 words, exact size; six bnel where retail has bne. Exact once slDrawWindow is C. */
+#ifdef NON_MATCHING
+void slDrawInfo(void) {
+    if (gslInfoCode == 0) {
+        return;
+    }
+    if (gslInfoCode == 1) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528510);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, D_00528548);
+        }
+    }
+    if (gslInfoCode == 2) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285A8);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, D_005285F8);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528608);
+            slMcAccessDraw();
+        }
+    }
+    if (gslInfoCode == 3) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528598);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, D_005285F8);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528608);
+        }
+    }
+    if (gslInfoCode == 4) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528738);
+            slNextPageDraw();
+        }
+        gSlExitMode = 1;
+    }
+    if (gslInfoCode == 5) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_005285B8);
+            slKanjiDrawH(0x28, 0x58, 0x64618780, D_005285F8);
+            slKanjiDrawH(0x28, 0x64, 0x64618780, D_00528608);
+            slMcAccessDraw();
+        }
+    }
+    if (gslInfoCode == 6) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528748);
+            slNextPageDraw();
+        }
+    }
+    if (gslInfoCode == 0xB) {
+        slKanjiDraw(0x14, 0x1C, 0x64618780, D_005287D8);
+    }
+    if (gslInfoCode == 0xC) {
+        slKanjiDraw(0x14, 0x1C, 0x64618780, D_005287C0);
+    }
+    if (gslInfoCode == 0xD) {
+        if (slDrawWindow() != 0) {
+            slKanjiDrawH(0x28, 0x4C, 0x64618780, D_00528728);
+            slNextPageDraw();
+        }
+        gSlExitMode = 2;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "mc/slMain", slDrawInfo);
+#endif
 
 s32 slHeadLoad(void) {
     char path[0x50];
@@ -550,7 +979,28 @@ s32 slHeadLoadProc_readFile(void) {
     return slNoCard();
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slHeadLoadProc_closeFile);
+s32 slHeadLoadProc_closeFile(void) {
+    slMcResult_t status = sdfMcFuncClose1();
+    s32 index;
+    slFileRec_t *head;
+
+    if (status == SL_MC_RESULT_PENDING) {
+        return 0;
+    }
+    if (status == SL_MC_RESULT_SUCCESS) {
+        index = slChooseSaveIndex;
+        head = &D_00569740[index];
+        *head = *(slFileRec_t *)slLoadFileHandle;
+        if (head->ver == 1) {
+            memset(&D_00569740[index].name, 0, 0x14);
+            D_00569740[index].mapOpen = 0;
+        }
+        sdfMemFreeDirect(slLoadFileFd);
+        return slChooseData_getCardInfoNext();
+    }
+    sdfMemFreeDirect(slLoadFileFd);
+    return slNoCard();
+}
 
 s32 slExitWait(void *callback) {
     dds3FadeOut(0, 0, 0, 15);
@@ -698,7 +1148,37 @@ s32 slCardChk(void) {
     return slTop();
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slFileSel);
+s32 slFileSel(void) {
+    s32 i;
+
+    if (gslMode == 0) {
+        slSetInfo(0xB);
+    } else {
+        slSetInfo(0xC);
+    }
+    gSlFileErroeFlg = 0;
+    gslDrawFlagFile = 1;
+    for (i = 0; i < 5; i++) {
+        u32 flags = sdfMcGetSlotFlags(D_005516BC, i);
+
+        slTopMenuSel[i] = 0;
+        if (flags & SL_SLOT_FLAG_CAN_READ_SAVE) {
+            if (flags & SL_SLOT_FLAG_DIRECTORY_READY) {
+                if (flags & SL_SLOT_FLAG_DELETE_BEFORE_WRITE) {
+                    slTopMenuSel[i] = 1;
+                }
+            }
+        } else {
+            if (flags & SL_SLOT_FLAG_DIRECTORY_READY) {
+                if (!(flags & SL_SLOT_FLAG_DELETE_BEFORE_WRITE)) {
+                    slTopMenuSel[i] = 2;
+                }
+            }
+        }
+    }
+    sdfMcRegetInfo(D_005516BC);
+    return (s32)slFileSelCalc;
+}
 
 s32 slCancel(void) {
     if (gslMode == 1 && dds3SearchProcessName(D_005328C0) == NULL) {
@@ -855,7 +1335,101 @@ s32 slBootProc_CheckCardR(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slErrorWaitMc);
+s32 slErrorWaitMc(void) {
+    gslDrawFlagFile = 0;
+    if (gslErrorKeyFlag == 0) {
+        if (slGetPadTrig(dds3PadButtonState[0x21] < 0) ||
+            slGetPadTrig(dds3PadButtonState[0x23] < 0)) {
+            p2sdPlaySE(0xA, 0x7F, 0x3F);
+            gslErrorKeyFlag = 1;
+        }
+    }
+    if (sdfMcFuncGetInfo1() == 0) {
+        goto done;
+    }
+    {
+        if (gslErrorKeyFlag == 1) {
+            gslErrorCode = 0;
+            gslDrawFlagFile = 0;
+            if (gSlEndingMode != 0) {
+                return slEndingExit();
+            }
+            if (gslMode == 0) {
+                return slExitWait(slExit);
+            }
+            return slExitToTitle2();
+        }
+        switch (sdfMcGetFileInfoReady(D_005516BC)) {
+        case 1:
+            if (gslErrorCode == 1) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                slSetInfo(1);
+                gslErrorCode = 0;
+                gslDrawFlagFile = 0;
+                return slTop();
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        case 0:
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+            if (gslErrorCode != 1) {
+                gslErrorCode = 1;
+                gslErrorKeyFlag = 0;
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        case 2:
+            if (gslMode == 0) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                gslErrorCode = 0;
+                slQueryYesNoMsg = 2;
+                return slQueryYesNo(slFormatStart, slFormatCancel, 1);
+            }
+            if (gslErrorCode != 7) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                gslErrorCode = 7;
+                gslErrorKeyFlag = 0;
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        case 3:
+            if (gslErrorCode != 2) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                gslErrorCode = 2;
+                gslErrorKeyFlag = 0;
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        }
+    }
+done:
+    return 0;
+}
 
 s32 slErrorWaitToFileMc(void) {
     if (gslErrorKeyFlag == 0) {
@@ -930,7 +1504,90 @@ s32 slHitAnyKey(u32 callback) {
     return (s32)slHitAnyKeyProc;
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slHitAnyKeyProc);
+s32 slHitAnyKeyProc(void) {
+    if (gslErrorKeyFlag == 0) {
+        if (slGetPadTrig(dds3PadButtonState[0x21] < 0) ||
+            slGetPadTrig(dds3PadButtonState[0x23] < 0)) {
+            p2sdPlaySE(8, 0x7F, 0x3F);
+            gslErrorKeyFlag = 1;
+        }
+    }
+    if (sdfMcFuncGetInfo1() == 0) {
+        goto done;
+    }
+    {
+        if (gslErrorKeyFlag == 1) {
+            slSetInfo(0);
+            gslErrorCode = 0;
+            gslDrawFlagFile = 0;
+            if (slHitAnyKeyNextFunc == -1) {
+                return slExitWait((void *)-1);
+            }
+            return ((s32 (*)())slHitAnyKeyNextFunc)();
+        }
+        switch (sdfMcGetFileInfoReady(D_005516BC)) {
+        case 1:
+            if (gslErrorCode == 1) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                slSetInfo(1);
+                gslErrorCode = 0;
+                gslDrawFlagFile = 0;
+                return slTop();
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        case 0:
+            return slNoCard();
+        case 2:
+            if (gslMode == 0) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                slSetInfo(0);
+                gslErrorCode = 0;
+                slQueryYesNoMsg = 2;
+                return slQueryYesNo(slFormatStart, slFormatCancel, 1);
+            }
+            if (gslErrorCode != 7) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                slSetInfo(0);
+                gslErrorCode = 7;
+                gslErrorKeyFlag = 0;
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        case 3:
+            if (gslErrorCode != 2) {
+            sdfMcSetCardStat(D_005516BC);
+            sdfMcClearSlotFlags(D_005516BC, 0);
+            sdfMcClearSlotFlags(D_005516BC, 1);
+            sdfMcClearSlotFlags(D_005516BC, 2);
+            sdfMcClearSlotFlags(D_005516BC, 3);
+            sdfMcClearSlotFlags(D_005516BC, 4);
+                slSetInfo(0);
+                gslErrorCode = 2;
+                gslErrorKeyFlag = 0;
+            }
+            sdfMcRegetInfo(D_005516BC);
+            goto done;
+        }
+    }
+done:
+    return 0;
+}
 
 s32 slChooseData_getCardInfo(void) {
     u8 buf[0x50];
@@ -977,9 +1634,54 @@ s32 slChooseData_getCardInfo3(void) {
     return slHeadLoad();
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slChooseData_getCardInfoNext);
+s32 slChooseData_getCardInfoNext(void) {
+    s32 index = slChooseSaveIndex + 1;
 
-INCLUDE_ASM(const s32, "mc/slMain", slChooseData);
+    slChooseSaveIndex = index;
+    if (index == 5) {
+        sdfMcClearCardStat(D_005516BC);
+        slChooseSaveIndex = 0;
+        gSlNowCardCheck = 0;
+        if (sl1Ken() == 0) {
+            if (gslMode != 0) {
+                gslDrawFlagFile = 0;
+                slSetInfo(0);
+                gslErrorCode = 7;
+                gslErrorKeyFlag = 0;
+                sdfMcRegetInfo(D_005516BC);
+                return (s32)slErrorWaitMc;
+            }
+            if (slSizeChk() == 0) {
+                slSetInfo(0);
+                gslDrawFlagFile = 0;
+                gslErrorCode = 5;
+                gslErrorKeyFlag = 0;
+                sdfMcRegetInfo(D_005516BC);
+                return (s32)slErrorWaitMc;
+            }
+        }
+        slSetInfo(0);
+        return slFileSel();
+    }
+    return slChooseData_getCardInfo();
+}
+
+s32 slChooseData(void) {
+    s32 i;
+
+    if (sdfMcGetStatus(D_005516BC) != 0) {
+        slSetInfo(1);
+        slChooseSaveIndex = 0;
+        for (i = 0; i < 5; i++) {
+            slTopMenuSel[i] = 0;
+            sdfMcClearSlotFlags(D_005516BC, i);
+        }
+        return slChooseData_getCardInfo();
+    }
+    gSlNowCardCheck = 0;
+    slSetInfo(0);
+    return slFileSel();
+}
 
 s32 slChooseData_getCardInfo_B(void) {
     u8 buf[0x50];
@@ -1175,7 +1877,55 @@ s32 slSaveWriteEnd_saveData(void) {
                           slSaveWriteEnd_baseIcon, &baseIconFileHandle);
 }
 
+/* NON_MATCHING: 106 of 142 words, exact size; one register renaming through the record copy. */
+#ifdef NON_MATCHING
+s32 slSaveData_writeFile(void) {
+    char path[0x50];
+    slFileHead_t *hdr;
+    u8 *rec;
+    s32 slot = sdfMcGetSlotIndex(D_005516BC);
+
+    mcMakeFileName(path, slot);
+    SL_FILE_HEAD->verstr[0] = 'V';
+    SL_FILE_HEAD->verstr[1] = 'E';
+    SL_FILE_HEAD->verstr[2] = 'R';
+    SL_FILE_HEAD->ver = 5;
+    SL_FILE_HEAD->tmnlMode = DDS3_GBWK->previewX;
+    SL_FILE_HEAD->tmnlId = DDS3_GBWK->previewY;
+    SL_FILE_HEAD->level = datGetPlayerLevel();
+    SL_FILE_HEAD->playTime = DDS3_GBWK->unk3C;
+    if (evtBitCheck(0xAF2) != 0) {
+        SL_FILE_HEAD->mode = 1;
+    } else {
+        SL_FILE_HEAD->mode = 0;
+    }
+    SL_FILE_HEAD->work = *(slFileWork_t *)((u8 *)DDS3_GBWK + 0x6604);
+    SL_FILE_HEAD->mapOpen = *((u8 *)DDS3_GBWK + 0x6654);
+    hdr = SL_FILE_HEAD;
+    rec = SL_REC[slot];
+    rec[0] = hdr->verstr[0];
+    SL_REC[slot][1] = hdr->verstr[1];
+    SL_REC[slot][2] = hdr->verstr[2];
+    rec[3] = hdr->ver;
+    rec[4] = hdr->tmnlMode;
+    rec[5] = hdr->tmnlId;
+    rec[6] = hdr->level;
+    *(s32 *)&SL_REC[slot][8] = hdr->playTime;
+    *(u16 *)&rec[12] = hdr->endcnt;
+    *(u16 *)&rec[14] = hdr->newfile;
+    rec[7] = hdr->mode;
+    *(slFileName_t *)&SL_REC[slot][0x10] = *(slFileName_t *)&hdr->work;
+    SL_REC[slot][0x24] = hdr->mapOpen;
+    D_00551D30 = (u32)DDS3_GBWK;
+    D_00551D34 = 0x1A510;
+    if (gSlSaveMode == 0 || gSlSaveMode == 2) {
+        return slSaveWriteFile(path, &D_00551D30, &D_00551D34, slSaveWriteEnd_saveData, 0);
+    }
+    return slSaveWriteFile(path, &D_00551D30, &D_00551D34, slSaveWriteEnd_baseIcon, 0);
+}
+#else
 INCLUDE_ASM(const s32, "mc/slMain", slSaveData_writeFile);
+#endif
 
 s32 slSaveData_deleteIconSys(void) {
     u32 entry = D_005516BC;
@@ -1408,9 +2158,110 @@ s32 slCalc(dds3ProcessID_t *task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slDraw);
+s32 slDraw(s32 task) {
+    rsetOtOfs(0x46);
+    rsetAlpha(0);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    if (gslDrawFlagBg != 0) {
+        DrwSprite2D(0, 0, 0x200, 0x1C0, 0, 0, 0x100, 0x80, 0x80808080, _saveUI);
+        aDrawBoxG(0, 0x2F, 0x89, 0x9D, 0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0x73,
+                  0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0x73);
+        aDrawBoxG(0x89, 0x2F, 0x82, 0x9D, 0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0,
+                  0x2B, 0x30, 0x40, 0, 0x2B, 0x30, 0x40, 0x73);
+        aDrawBoxG(0x177, 0x2F, 0x89, 0x9D, 0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0x73,
+                  0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0x73);
+        aDrawBoxG(0xF5, 0x2F, 0x82, 0x9D, 0x2B, 0x30, 0x40, 0, 0x2B, 0x30, 0x40, 0x73,
+                  0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0);
+    }
+    if (gslDrawFlagFile != 0) {
+        slFileSelDraw(task);
+    }
+    slDrawInfo();
+    slQueryYesNoDraw();
+    slDrawError();
+    rsetAlpha(0);
+    rsetTest(1, 5, 0x80, 3, 0, 0, 1, 2);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "mc/slMain", fmProcTrigSequence);
+void fmProcTrigSequence(s32 mode) {
+    sdfMemHandle_t *handle;
+    void *data;
+    slFileHead_t *hdr;
+    void *scene;
+    s32 on = 1;
+
+    dds3SoftResetOff();
+    slDDS3To31Flg = 0;
+    handle = sdfDevLoadFileEx(D_00532918, &data, 0);
+    slProcPtr = sdfTexSet(data);
+    sdfMemFreeDirect(handle);
+    handle = sdfDevLoadFileEx(D_00532930, &data, 0);
+    _saveUI = sdfTexSet(data);
+    sdfMemFreeDirect(handle);
+    if (mode == 0) {
+        gslDrawFlagBg = on;
+        gSlEndingMode = 0;
+        proc_func_ans = (s32 (*)(dds3ProcessID_t *))slSaveProc1st;
+    } else if (mode == 1) {
+        gSlEndingMode = 0;
+        gslDrawFlagBg = on;
+        proc_func_ans = (s32 (*)(dds3ProcessID_t *))slLoadProc1st;
+    } else if (mode == 2) {
+        gslDrawFlagBg = on;
+        gSlEndingMode = on;
+        evtBitOn(0x8A0);
+        hdr = SL_FILE_HEAD;
+        hdr->endcnt++;
+        hdr->newfile = on;
+        proc_func_ans = (s32 (*)(dds3ProcessID_t *))slEndingProc1st;
+    } else {
+        gSlEndingMode = 0;
+        if (mode == 4) {
+            gslDrawFlagBg = on;
+            slDDS3To31Flg = 1;
+            proc_func_ans = (s32 (*)(dds3ProcessID_t *))slLoadProc1st;
+            mode = 1;
+        } else {
+            gslDrawFlagBg = 0;
+            proc_func_ans = (s32 (*)(dds3ProcessID_t *))slBootProc1st;
+        }
+    }
+    dds3StartProcess(D_00532948, 0x2B0A, 0, 0, slCalc, slShutDownProcess, NULL);
+    slProcShutDownFlg = 1;
+    dds3FadeIn(0, 0, 0, 8);
+    slSetInfo(0);
+    gSlExitMode = 0;
+    slQueryYesNoCursor = -1;
+    gslMode = mode;
+    gslInfoLoadFlg = 1;
+    slExitWaitCnt = 0;
+    gslFlushCnt = 0;
+    gslExitType = 0;
+    gslErrorCode = 0;
+    gslErrorKeyFlag = 0;
+    gslDrawFlagFile = 0;
+    gSlSaveMode = 0;
+    gslCheckCardWait = 0;
+    gslAnimCnt = 0;
+    gSlSelCnt = 0;
+    gSlNowCardCheck = 0;
+    gSlFileErroeFlg = 0;
+    slQueryYesNoMsg = 0;
+    slQueryYesNoKeyFlag = 0;
+    gSlMcAccessCnt = 0;
+    gSlWindowCnt = 0;
+    sdfMcSetCardStat(D_005516BC);
+    sdfMcClearSlotFlags(D_005516BC, 0);
+    sdfMcClearSlotFlags(D_005516BC, 1);
+    sdfMcClearSlotFlags(D_005516BC, 2);
+    sdfMcClearSlotFlags(D_005516BC, 3);
+    sdfMcClearSlotFlags(D_005516BC, 4);
+    scene = dds3GetActiveScene();
+    if (scene != NULL) {
+        dds3VisibleSceneBasic(scene, 0);
+    }
+}
 
 INCLUDE_ASM(const s32, "mc/slMain", slShutDownProcess);
 
@@ -1438,6 +2289,10 @@ s32 slQueryYesNo(void *start, void *finish, s32 mode) {
     }
     return (s32)slQueryYesNoProc;
 }
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532918);
+
+INCLUDE_RODATA(const s32, "mc/slMain", D_00532930);
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_00532948);
 

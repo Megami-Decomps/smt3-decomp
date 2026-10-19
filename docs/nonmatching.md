@@ -1049,3 +1049,219 @@ single exit, and restructuring the two flags tests as one `!= 0` call guard
 plus one `== 0` tail guard. `FrameSelect` and `evtViewerStopFrame` are
 defined in this unit, so the `s32`-return lever that blocks the `$2`
 reservation is not available for them.
+
+## nbCameraShot_PullOne_Init (newbattle/nbCameraSkill, 0xE8)
+
+56 of 58 words, at the exact 232-byte size.
+
+One store is scheduled differently. Retail emits `div.s`, then
+`swc1 pCamera->distance`, then the two `sw $0` that zero `angles.x` and
+`angles.z`, then the `lqc2` of `pForm->rot`. The draft emits the two `sw $0`
+first: cc1's second scheduling pass fills the `div.s` latency with them and
+sinks the `swc1` behind, which retail's cc1 run did not do.
+
+All six orders of the three statements give either `sw, sw, swc1` or, once
+the `SDF_VU0_LOADVECTOR` moves above the two zero stores,
+`swc1, lqc2, sw, sw` with the function one word shorter. Also ruled out:
+zeroing `angles.y` as well (dead store, one word longer),
+`angles.x = angles.z = 0.0f` (one word longer), a `volatile sdfVector4_t`
+(longer), `SDF_VU0_LOADVECTOR_BARRIER` in place of the plain load (same
+sinking), and writing the zeros through a `sdfVector4_t *` local so the two
+stores alias `pCamera->distance` (unchanged).
+
+The rest is exact, including `pForm->r > pForm->h` for the load order of the
+compare, the `0.69813163f` and `0.78539807f` pool literals, and the
+`-1.0f`/`0.0f` direction stores in `x, z, y, w` source order.
+
+## nbCameraState_SkillStart_Init (newbattle/nbCameraSkill, 0x78)
+
+29 of 30 words, at the exact 120-byte size.
+
+The one differing word is the `addu` operand order:
+retail `addu $16, $16, $2` (base, index), the draft `addu $16, $2, $16`. Both
+write the same register and keep the `lbu 0x2` displacement, so only the
+commutative operand order inside the address differs.
+
+Retail also keeps `datSkillTable + 0x4388` in the relocation addend, which
+only a local pointer base reproduces: `datSkillTable.visual[id].hatudo`
+written directly folds the whole `0x4388 + 2` into the `lbu` displacement and
+leaves the relocation at addend 0.
+
+Ruled out for the operand order, all giving the identical `addu $16, $2, $16`:
+`pVisual += effBTLSkillGetID()`, `pVisual = pVisual + id`,
+`pVisual += (s32)id`, `pVisual -= -(s32)id`, a `u8 *` base with
+`+= id * 4` and `+= id << 2`, a `u32` base with `+= id * 4`, a separate
+`u32 ofs = id * 4` added to either base type, both casts
+`(u8 *)pVisual + ofs` and `(u32)pVisual + ofs`, and the reversed
+`id * 4 + (u32)pVisual`. Subscripting (`pVisual[id].hatudo`) instead of
+assigning the pointer costs two more words by moving the result into `$3`.
+
+## nbCameraState_SkillAttack_Calc (newbattle/nbCameraSkill, 0x170)
+
+85 of 91 words, at the exact 364-byte size.
+
+Two delay slots that retail fills from in front of the branch and ee-as
+leaves empty here, because cc1 placed the instruction after the branch
+instead.
+
+The first is `nbCameraSkillAttackStep`: retail has a plain
+`bnez` with `addiu $2, $2, -1` in its slot, so the decrement was computed
+before the test; the draft's decrement sits in the `else` arm, so ee-as makes
+the branch a `bnel`. Computing `step - 1` into a second local before the test
+does produce the plain `bnez`, but the subtraction then uses `$3` instead of
+retail's `$2`, which costs two words instead of one, so the plain form is
+kept. `--nbCameraSkillAttackStep == 0` as the `else if` condition changes
+nothing.
+
+The second is the `nbCameraModelMotionCr < 450.0f` test inside the
+`step == 0` arm: retail fills the `bc1t` slot with `daddu $4, $18`, the
+`pCamera` argument of the fall-through call, so cc1 had hoisted that argument
+above the branch; the draft emits it inside the arm and the slot stays a
+`nop`, rotating the five words of that block by one. Inverting the test to
+`>= 450.0f` so the arms swap gives eight differing words instead of six.
+
+Everything else is exact, including both `effBTLSkillGetInvokeParty` and
+`effBTLSkillGetTargetParty` being called before the `stat & 0x200` test
+rather than short-circuited, `effBTLModelGroupPopPosition(targetParty)`
+reusing the `$4` the target-party call left, and the `AttackTuibi_Set` arm
+written last so the two guards branch forward to it.
+
+## nbCameraShot_InvokeTarget_Set2 (newbattle/nbCameraSkill, 0x2C0)
+
+171 of 176 words, at the exact 704-byte size.
+
+The five differing words are where `100.0f` is materialised for the radius
+clamp. Retail emits `mul.s $f21, $f1, $f0` for `width * pInvoke->scl` and then
+`lui`/`mtc1` into `$f0`, reusing the register that held `scl`, so the constant
+cannot be hoisted above the multiply. The draft gets `$f2` for the constant,
+the anti-dependency disappears, and the scheduler moves the `lui`/`mtc1` pair
+in front of the multiply; the compare and the later `div.s` then read `$f2`
+instead of `$f0`.
+
+Ruled out, all giving the same five words: `radius > 100.0f` and
+`100.0f < radius`, `radius *= 100.0f / radius` and
+`radius = radius * (100.0f / radius)`, folding `width` and `radius` into one
+local, and swapping the declaration order of the four `f32` locals.
+
+Everything else is exact, including the `bc1tl` fallback to `pInvoke->r` when
+the all-table radius is zero, `targetPos.x > invokePos.x` for the load order
+of that compare, `1.7f` written out in both arms so it takes two pool slots,
+the two `SDF_VU0_STOREVECTOR_NOMEM` of the same sphere centre into `targetPos`
+and `look`, and `effBTLModelLook2(pTarget, &invokePos, 0.5235987f)`.
+
+## nbCameraShot_InvokeTargetReverse_Set2 (newbattle/nbCameraSkill, 0x2B8)
+
+169 of 174 words, at the exact 696-byte size.
+
+The same five words as `nbCameraShot_InvokeTarget_Set2` above: the `100.0f`
+radius clamp lands in `$f2` rather than retail's `$f0`, so the `lui`/`mtc1`
+pair loses its anti-dependency on `pTarget->scl` and the scheduler moves it in
+front of the multiply. Read that entry for the shapes already ruled out, plus
+`width = 100.0f / radius; radius *= width;` which costs nine words here.
+
+What this function needed beyond its mirror: the `0.69813163f` fovy value has
+to be a named local assigned before the `sdfAtan` call, not a literal in the
+store. Retail keeps it in `$f20` across the call, which only the named local
+reproduces; written as a literal in `pCamera->fovy = 0.69813163f;` the
+constant stays caller-saved, the frame loses the third saved fp slot and
+drops to 0x70, and 160 of 171 words differ. The same literal written directly
+is correct in `nbCameraShot_InvokeTarget_Set2`, where retail materialises it
+after the call into `$f2`.
+
+## slSaveData_writeFile (mc/slMain, 0x238)
+
+106 of 142 words, at the exact 568-byte size.
+
+The 36 remaining words are one register renaming carried through the whole
+record-copy block. The instruction sequence is identical; retail holds the
+byte offset `52 * slot` in `$5` and `%lo(D_00569740)` in `$2`, and the draft
+holds the offset in `$2` and the base in `$7`, so every address temp after it
+shifts by one number. Nothing in the block differs otherwise.
+
+What the shape needed, and is worth keeping:
+
+- The save header lives at offset 0 of the save work, so the stores go through
+  `((slFileHead_t *)DDS3_GBWK)` written out per statement; that reloads
+  `DDS3_GBWK` for every field, which retail does too.
+- Two types for the same 52 bytes. The header in the save work is 4-aligned
+  (its 20-byte block at `+0x10` copies as `ldl`/`ldr` plus a plain `lw` for
+  the trailing word), while the on-card record array is byte-aligned (the same
+  block copies as `ldl`/`ldr` plus `lwl`/`lwr`). One struct for both gives the
+  wrong half either way.
+- The record side is a `u8 (*)[52]` view. Five of the thirteen field stores
+  (`+0x1`, `+0x2`, `+0x8`, `+0x10`, `+0x24`) go through the subscript and the
+  other eight through a cached `u8 *rec`: that mix is what produces retail's
+  two `addu` operand orders and its three copy temps. All thirteen through the
+  pointer is six words short, all thirteen through the subscript is twelve
+  words over.
+- Source order ends `playTime`, `endcnt`, `newfile`, `mode`, `name`,
+  `mapOpen`; putting `mode` back in field order after `level` costs nine
+  words.
+
+Ruled out: the declaration and assignment order of the two pointer locals;
+`rec` as `u8 *` and as `u8 (*)[52]`; a separate `base` local so the symbol
+address is created first; `slot` as `u32`; writing the `+0x8` store
+base-first and the `+0x1`/`+0x2`/`+0x24` stores index-first with explicit
+casts; and five orderings of the last six stores.
+
+## slDrawWindow (mc/slMain, 0x4EC)
+
+87 of 313 words, two words short of the 1260-byte size.
+
+Everything up to the window-height arithmetic is exact, and the arithmetic
+itself is reconstructed: the counter is bumped and stored, the first box's
+`y` and `h` come from `0xE9 - cnt * 0xB5 / 4` and `cnt * 0x16B / 4` clamped to
+`0x34` and `0x16B` from four on, and the four later box pairs divide by 5 and
+by 100 exactly as retail does. The draft's argument lists and the `slti`,
+`sltiu` tail are right.
+
+The two missing words are one register copy and the `nop` that follows from
+it. Retail increments into `$2`, stores and compares that, then copies it to
+`$4` for the two multiplies; the draft increments straight into `$4` and needs
+no copy. Because the block is then one instruction shorter, the scheduler
+hoists the second `li` above the first multiply and puts the second multiply
+on `mult1`, where retail leaves both on pipe 0, and `.L00152408` loses the
+8-byte alignment `nop` in front of it. Every division and both `movn` biases
+are identical. After that point the draft and retail differ only in the order
+of the twelve stack-argument stores of each `aDrawBoxG` call, which is the
+scheduler working from the shifted block.
+
+Ruled out for the copy: `cnt` as a local, `gSlWindowCnt + 1` stored then
+re-read, `gSlWindowCnt++`, `++gSlWindowCnt` as the test expression, a second
+local assigned from the first, the increment split into two statements,
+products hoisted into named locals, `0xB5 * cnt` operand order, decimal
+literals, `h` before `y`, the subtraction split off into its own statement,
+all 120 declaration orders of the five locals, and separate locals per block
+(that one reaches 88).
+
+## slDrawInfo (mc/slMain, 0x2F4)
+
+183 of 189 words, at the exact 756-byte size, and **exact when slDrawWindow is
+compiled as C in the same unit**. That is the finding worth acting on: the
+draft here is complete and correct, and banking it only needs slDrawWindow
+above it to match.
+
+The six remaining words with slDrawWindow still behind `INCLUDE_ASM` are six
+`bnel` where retail has `bne`, on the `gslInfoCode` tests for 1 through 6. The
+delay slot holds the next comparison constant in both, so only the annul bit
+differs; the tests for 0xB, 0xC and 0xD match either way. With slDrawWindow
+defined above it in the unit, ee-gcc drops the annul on all six.
+
+Ruled out while slDrawWindow was still assembly: `gslInfoCode == N &&
+slDrawWindow() != 0` fused into one test, the call's result in a local,
+`== 0` with an empty arm and an `else`, `if (slDrawWindow())` without the
+comparison, `u32 gslInfoCode`, an `s32` return type with `return 0` for the
+early exit, and the whole body nested in `if (gslInfoCode != 0)` instead of an
+early `return`.
+
+## slDrawError (mc/slMain, 0x4AC)
+
+293 of 299 words, at the exact 1196-byte size, and **exact when slDrawWindow
+is compiled as C in the same unit** - measured, not assumed. Same situation as
+slDrawInfo above and the same six-`bnel` difference, on the `gslErrorCode`
+tests for 1, 2 and 7, which are the three arms that branch on `slDDS3To31Flg`
+inside. Nothing else in the draft differs.
+
+slDrawWindow is therefore the one thing standing between this unit and three
+matched functions: itself, slDrawInfo and slDrawError, 801 words of retail
+code between them.
