@@ -39,6 +39,8 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| separate `beq`s on contiguous values inside an `||` chain, where a `switch` would test the middle value first | distribute the shared antecedent instead of nesting the disjunction: `(a == K && f == 8) || (a == K && f == 9) || (a == K && f == 0xA)` keeps three plain `beq`s where `a == K && (f == 8 || f == 9 || f == 0xA)` folds the inner chain to `addiu -8`, `sltiu 3`. gcc still tests the outer value once. `fldOtInit` and `ProcAmCheck` both turned on this |
+| a long flat chain of early `return 0`s where the exits reach a shared block that sets `$2` itself, and the address temps use `$2` and `$3` where you emit `$3` and `$4` | convert only the *last* few early returns to `goto ret0` with one trailing `ret0: return 0;`, and sweep how many. All of them at once is worse: `ProcCampCheck` wants the last two of eight and `ProcAmCheck` the last nine of twelve, and either one converted wholesale loses more than it gains. What the conversion stops is gcc keeping one hoisted zero live in `$2` across the rest of the chain |
 | a `switch` whose arms each need their own temporaries | declare them in the arm's own block. At function scope the arms share one pair of allocnos spanning the whole switch; one function went from 45 of 370 words to exact on that alone |
 | an in-place base adjustment folded into the first use | write it as its own statement, `x = (s32)(...); x -= 2;` rather than `x = (s32)(...) - 2;`, or the unadjusted value stays live and cc1 folds the offset into the first use |
 | a register copy of a field you already loaded, feeding one of two roles | write the field expression again at the second use site rather than passing the local. cse turns the second load into a copy, and the two pseudos then take the two hard registers the uses prefer. `effPCPDANTE_Sprite_Draw` went from 10 of 60 words to exact on `uv->uw` written at the call where a local was already holding it |
@@ -310,6 +312,32 @@ it was measured on DDS and not on this ELF.
   against whatever else is live across it: `fldVLDraw`'s seven sprite arms put
   the alpha value in the register retail gives the coordinates and were 45 of
   370 words out, and went exact with `s32 sx; s32 sy;` declared in each arm.
+- A block-scope aggregate initializer is not the only way to reach a rodata
+  table the unit already carries. Declare the splat symbol with the real type
+  and assign it, `axis = D_00531148;` with `extern sdfVector4_t D_00531148;`,
+  which gives retail's `ldl`/`ldr` plus `sdl`/`sdr` copy from `%hi`/`%lo` of
+  the symbol and leaves the `INCLUDE_RODATA` line and the pool order alone.
+  An initializer at the declaration instead emits the copy in the prologue,
+  before anything else in the body, and moves the data into the compiler's own
+  rodata, which is what the function-local-array section below is about.
+- Where retail forms a symbol's address and then adds a constant in a separate
+  `addiu`, put the bare symbol in a pointer local inside the block that uses
+  it and add the offset at the use: `char *roof = D_002FBD40;` then
+  `roof + 0x30`. Written `&D_002FBD40[0x30]` gcc folds the offset into the
+  `%lo` and is one word short. `fldElvGetFloorDigits` went from 19 differing
+  words to 8 on that alone.
+- A quotient and a remainder of the same division belong in one reused local,
+  not two. `digit = n / 10; ... digit = n % 10;` gives retail's `mflo`/`mfhi`
+  register pair and keeps the second divide-by-zero trap at the `%`
+  statement's position; two named locals rotate four registers, and writing
+  either expression twice adds a third trap.
+- A `sw $0` that sits in the wrong place *among* a run of other `sw $0` stores
+  is the same tell read the other way: the field is `f32`, not `s32`. In
+  `fldClearEveRngTable` the zero store to `fldRoomState_t + 0x114` came out
+  four words early, ahead of the two integer zeros next to it, and no ordering
+  of the thirteen statements in that tail moved it; declaring the field `f32`
+  and writing `0.0f` put it exactly where retail has it and took the function
+  from five differing words to exact.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -481,7 +509,12 @@ callee therefore banked 801 words across three functions.
 
 So when a caller sits within a couple of branch-annul words of exact and
 calls something still in assembly, decompile the callee first rather than
-permuting the caller. This is the same mechanism as the CONTEXT row below,
+permuting the caller.
+
+It is not universal. An agent on `field/fldDraw` tested it directly, reverting
+a converted callee to `INCLUDE_ASM` while changing nothing else, and its
+caller still compiled exact; no near miss in that unit emitted a `bnel` for a
+`bne` that a C callee fixed. Try it, but measure rather than assume. This is the same mechanism as the CONTEXT row below,
 seen from the other side: what the compiler can see of the rest of the unit
 changes the code it emits for one function.
 
@@ -583,6 +616,30 @@ function, and `check_unit` only says `NOASM`, so add an
 
 `check_unit` will not tell you which kind you have. Grep the `.s` for a second
 label before concluding anything.
+
+## `lw $4` against `lw $2` plus `move $4, $2`
+
+`if (p->h != NULL) { f(p->h); p->h = NULL; }` compiles two ways in this tree.
+Retail's shape loads the handle straight into the argument register and tests
+it there, so the copy does not exist and the delay slot goes to the next
+block's load as a `beql`. ee-gcc only does that when `$2` is unavailable
+across the guarded block: `pipeFreeEffects` in `pipe/pipeEffect` gets
+`lw $4, 12($16)` because `$2` there holds the `u8` counter's `i + 255`, and
+the identical shape in `code_00116AD0` gets `lw $2` plus `move $4, $2`
+because nothing else wants `$2`.
+
+So this is not a spelling of the guard. Ruled out on it: a reused local and a
+fresh local per arm (cse propagates both), `while` for the `if`, `s32` and
+unprototyped callee declarations, an `s32` parameter in place of `void *`, a
+cast at the call site, and every loop spelling of the enclosing walk. Two
+functions in `code_00116AD0` sit on it; see
+[Non-matching drafts](nonmatching.md).
+
+So when a caller sits within a couple of branch-annul words of exact and
+calls something still in assembly, decompile the callee first rather than
+permuting the caller. This is the same mechanism as the CONTEXT row below,
+seen from the other side: what the compiler can see of the rest of the unit
+changes the code it emits for one function.
 
 ## Functions that cannot be written in C
 

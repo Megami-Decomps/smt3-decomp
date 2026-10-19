@@ -139,6 +139,8 @@ typedef struct {
     s32 enabled;
     u32 unk48;
     s32 counter;
+    u8 unk50[0x8];
+    u32 unk58;
 } fldDanteGunWork_t;
 
 extern fldDanteGunWork_t fldRunDanteGunFlag;
@@ -257,6 +259,107 @@ extern void p2sdFadeOutBgm(u32 arg);
 extern void p2sdStopBGM(u32 arg);
 
 typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
+
+/* One loadable field effect: the resource handle trio the loader fills, then
+ * the live effect or part handle and the placement the task applies. */
+typedef struct {
+    sdfMemHandle_t *file;
+    void *data;
+    s32 size;
+    void *part;
+    void *eff;
+    s32 life;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 turn;
+} fldEffRes_t;
+
+typedef struct {
+    fldEffRes_t *res;
+    s32 life;
+    s32 mode;
+    s32 rotate;
+    f32 turnMin;
+    f32 turnMax;
+} fldEffEntry_t;
+
+extern fldEffEntry_t *D_002FBEF0[];
+extern char D_002FBD40[];
+extern void FromRotation(f32 angle);
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern dds3Basic_t *D_0054EAB0;
+extern dds3Basic_t *fldRunTama2Basic;
+extern dds3Basic_t *fldRunTama3Basic;
+extern s32 D_0054EABC;
+extern sdfVector4_t D_00531148;
+typedef struct {
+    f32 f[10];
+} fldTamaSeFrame_t;
+
+typedef struct {
+    s16 v[10];
+} fldTamaSeVol_t;
+
+typedef struct {
+    u8 unk00[0x1C];
+    f32 frame;
+} fldMotionCtrl_t;
+
+typedef struct {
+    u8 unk00[0x1C];
+    fldMotionCtrl_t *motion;
+} fldModel_t;
+
+extern fldTamaSeFrame_t D_00531158;
+extern fldTamaSeFrame_t D_00531180;
+extern fldTamaSeFrame_t D_005311A8;
+extern fldTamaSeVol_t D_005311D0;
+extern s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z);
+extern void frSetFontDrawOT(s32 ot);
+extern void fldKanjiDraw(s32 x, s32 y, u32 color, const char *text);
+extern void evtEnableMoonDraw(void);
+extern void fldSkyRefreshTbl(void);
+extern void fldStatusSet(void);
+extern dds3Basic_t *dds3GetActiveScene(void);
+extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s32 flag);
+extern u8 cmpGetLoadState(void);
+extern void dds3FadeOut2(s32 frame);
+extern void evtKillFieldScript(void);
+extern void p2sdStopAllSe(void);
+extern void dds3FadeIn2(s32 frame);
+extern s32 fldPlayerChkAna(void);
+extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
+extern void fldPlayerPosRot(void);
+extern void dds3FadeOut(s32 red, s32 green, s32 blue, s32 frame);
+extern void fldPlayerMotReset(void);
+extern void cmpProcessStart(void);
+extern s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *name);
+extern s32 fldLightMaState __attribute__((section(".data")));
+extern s32 fldChkVortex(void);
+extern s32 fldProcCampChk(void);
+extern s32 fldProcAmChk(void);
+extern s32 fldEncountTestFlag(u32 flag);
+extern s32 fldAutoMapSeqTestFlag(u32 flag);
+extern void fldAutoMapSeqClearFlag(u32 flag);
+extern void fldEncountSetFlag(u32 flag);
+extern void fldReleaseUnitPad(void);
+extern void fldAutoMapSeqStart(void);
+extern sdfGrOt_t *D_002F6A18[4];
+extern void dds3EffectDelete(void *node);
+extern void dds3EffectDraw(void *node);
+extern s32 dds3EffectGetState(void *node);
+extern void *dds3EffectLoad(void *header);
+extern void dds3EffectSetPosition(void *node, sdfVector4_t *pos);
+extern void dds3EffectSetRotateMatrix(void *node, sdfMatrix4_t *matrix);
+extern void *dds3EffectPartCreate(s32 kind, void *params);
+extern void dds3EffectPartDelete(void *part);
+extern void dds3EffectPartDraw(void *part);
+extern void dds3EffectPartSetPosition(void *part, sdfVector4_t *pos);
+extern void dds3EffectPartSetRotateMatrix(void *part, sdfMatrix4_t *matrix);
+extern void SetRotateMatrixY(f32 angle);
+extern void sdfModelOtInit(void *table, sdfGrOt_t *first, sdfGrOt_t *second,
+                           sdfGrOt_t *third, sdfGrOt_t *fourth);
 
 typedef struct fldResourcePoint_t fldResourcePoint_t;
 typedef struct scrProcessWork_s scrProcessWork_s;
@@ -1065,7 +1168,39 @@ void KillOoyTest(void)
     dds3KillProcessName(D_00530F30, 1);
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldElvGetFloorDigits);
+void fldElvGetFloorDigits(s32 x, s32 y, s32 floor)
+{
+    char text[32];
+    s32 i;
+    s32 digit;
+
+    frSetFontDrawOT(0x48);
+    if (floor > 1000) {
+        char *roof = D_002FBD40;
+
+        fldKanjiDraw(x, y / 2, -0x80, roof + 0x30);
+        return;
+    }
+    i = 0;
+    if (floor < 0) {
+        text[0] = 'B';
+        i = 1;
+        floor = -floor;
+    }
+    digit = floor / 10;
+    if (digit >= 1 && digit <= 9) {
+        text[i] = digit + '0';
+        i++;
+    }
+    digit = floor % 10;
+    if (digit < 10) {
+        text[i] = digit + '0';
+        i++;
+    }
+    text[i] = 'F';
+    text[i + 1] = '\0';
+    fldKanjiDraw(x, y / 2, -0x80, text);
+}
 
 void fldElvSetFloor(s32 start, s32 end) {
     s32 first;
@@ -1183,15 +1318,245 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_00531040);
 
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunTamaInit);
 
+/* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
+#ifdef NON_MATCHING
+void fldRunTamaFree(void)
+{
+    fldEffEntry_t *entry;
+    fldEffRes_t *res;
+    void *handle;
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        for (entry = D_002FBEF0[i]; (res = entry->res) != NULL; entry++) {
+            if (entry->mode == 0) {
+                handle = res->eff;
+                if (handle != NULL) {
+                    dds3EffectDelete(handle);
+                    res->eff = NULL;
+                }
+            } else {
+                handle = res->part;
+                if (handle != NULL) {
+                    dds3EffectPartDelete(handle);
+                    res->part = NULL;
+                }
+            }
+            handle = res->file;
+            if (handle != NULL) {
+                sdfMemFreeDelayedDirect(handle);
+                res->file = NULL;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunTamaFree);
+#endif
 
+/* NON_MATCHING: 67 of 73 words differ (first at +0x10). */
+#ifdef NON_MATCHING
+void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 turn)
+{
+    fldRunDante_t *dante = &fldRun_Dante;
+    fldEffEntry_t *entry;
+    fldEffRes_t *res;
+    void *handle;
+
+    for (entry = D_002FBEF0[id]; (res = entry->res) != NULL; entry++) {
+        if (entry->turnMin < dante->unk60 && dante->unk60 < entry->turnMax) {
+            if (entry->mode == 0) {
+                handle = res->eff;
+                if (handle != NULL) {
+                    dds3EffectDelete(handle);
+                    res->eff = NULL;
+                }
+                res->eff = dds3EffectLoad(res->data);
+                res->life = entry->life;
+                res->x = x;
+                res->y = y;
+                res->z = z;
+                res->turn = turn;
+            } else {
+                handle = res->part;
+                if (handle != NULL) {
+                    dds3EffectPartDelete(handle);
+                    res->part = NULL;
+                }
+                res->part = dds3EffectPartCreate(6, res->data);
+                res->life = entry->life;
+                res->x = x;
+                res->y = y;
+                res->z = z;
+                res->turn = turn;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunEffSet);
+#endif
 
+/* NON_MATCHING: 115 of 136 words differ (first at +0x10). */
+#ifdef NON_MATCHING
+void fldRunEffTask(void)
+{
+    sdfVector4_t pos;
+    sdfMatrix4_t matrix;
+    fldEffEntry_t *entry;
+    fldEffRes_t *res;
+    s32 i;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+
+    for (i = 0; i < 2; i++) {
+        for (entry = D_002FBEF0[i]; (res = entry->res) != NULL; entry++) {
+            if (entry->mode == 0) {
+                if (res->eff == NULL) {
+                    continue;
+                }
+                if (dds3EffectGetState(res->eff) == 0) {
+                    dds3EffectDelete(res->eff);
+                    res->eff = NULL;
+                    continue;
+                }
+                pos.x = res->x;
+                pos.y = res->y;
+                pos.z = res->z;
+                dds3EffectSetPosition(res->eff, &pos);
+                if (entry->rotate == 1) {
+                    SetRotateMatrixY((90.0f - res->turn) * 3.14f / 180.0f);
+                    SDF_VU0_STOREMATRIX(&matrix);
+                    dds3EffectSetRotateMatrix(res->eff, &matrix);
+                }
+                dds3EffectDraw(res->eff);
+            } else {
+                if (res->part == NULL) {
+                    continue;
+                }
+                if (res->life < 0) {
+                    dds3EffectPartDelete(res->part);
+                    res->part = NULL;
+                    continue;
+                }
+                res->life = res->life - 1;
+                pos.x = res->x;
+                pos.y = res->y;
+                pos.z = res->z;
+                dds3EffectPartSetPosition(res->part, &pos);
+                if (entry->rotate == 1) {
+                    SetRotateMatrixY((90.0f - res->turn) * 3.14f / 180.0f);
+                    SDF_VU0_STOREMATRIX(&matrix);
+                    dds3EffectPartSetRotateMatrix(res->part, &matrix);
+                }
+                dds3EffectPartDraw(res->part);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunEffTask);
+#endif
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunTamaSet);
+void fldRunTamaSet(f32 x, f32 y, f32 z, f32 turn)
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t axis;
 
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    memset(&rot, 0, sizeof(rot));
+    rot.w = 1.0f;
+    axis = D_00531148;
+    pos.x = x;
+    pos.y = y;
+    pos.z = z;
+    SDF_VU0_LOADVECTOR(&axis);
+    turn = turn * 3.14f;
+    FromRotation(turn / 180.0f);
+    SDF_VU0_STOREVECTOR(&rot);
+    switch (D_0054EABC) {
+    case 0:
+        dds3ObjectBaseOffFlag(D_0054EAB0, 1);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(D_0054EAB0), 0, 0);
+        dds3SetRotPoseSet(D_0054EAB0, &rot);
+        dds3SetPosPoseSet(D_0054EAB0, &pos);
+        break;
+    case 1:
+        dds3ObjectBaseOffFlag(fldRunTama2Basic, 1);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldRunTama2Basic), 0, 0);
+        dds3SetRotPoseSet(fldRunTama2Basic, &rot);
+        dds3SetPosPoseSet(fldRunTama2Basic, &pos);
+        break;
+    case 2:
+        dds3ObjectBaseOffFlag(fldRunTama3Basic, 1);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldRunTama3Basic), 0, 0);
+        dds3SetRotPoseSet(fldRunTama3Basic, &rot);
+        dds3SetPosPoseSet(fldRunTama3Basic, &pos);
+        break;
+    }
+    D_0054EABC = D_0054EABC + 1;
+    D_0054EABC = D_0054EABC % 3;
+}
+
+/* NON_MATCHING: 165 of 230 words differ (first at +0x34). */
+#ifdef NON_MATCHING
+void fldRunTamaSe(void)
+{
+    sdfVector4_t pos;
+    fldTamaSeFrame_t frame1;
+    fldTamaSeFrame_t frame2;
+    fldTamaSeFrame_t frame3;
+    fldTamaSeVol_t vol;
+    fldModel_t *model;
+    f32 now;
+    s32 i;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    frame1 = D_00531158;
+    frame2 = D_00531180;
+    frame3 = D_005311A8;
+    vol = D_005311D0;
+    model = dds3ObjectBaseGetModelHandle(D_0054EAB0);
+    now = model->motion->frame;
+    for (i = 0; i < 10; i++) {
+        if (frame1.f[i] - 0.5f < now && now < frame1.f[i] + 0.5f) {
+            dds3GetPosPoseSet(D_0054EAB0);
+            SDF_VU0_STOREVECTOR_MEMOPS(pos);
+            p2sdPlaySE(0x6F0006,
+                       fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
+            break;
+        }
+    }
+    model = dds3ObjectBaseGetModelHandle(fldRunTama2Basic);
+    now = model->motion->frame;
+    for (i = 0; i < 10; i++) {
+        if (frame2.f[i] - 0.5f < now && now < frame2.f[i] + 0.5f) {
+            dds3GetPosPoseSet(fldRunTama2Basic);
+            SDF_VU0_STOREVECTOR_MEMOPS(pos);
+            p2sdPlaySE(0x6F0006,
+                       fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
+            break;
+        }
+    }
+    model = dds3ObjectBaseGetModelHandle(fldRunTama3Basic);
+    now = model->motion->frame;
+    for (i = 0; i < 10; i++) {
+        if (frame3.f[i] - 0.5f < now && now < frame3.f[i] + 0.5f) {
+            dds3GetPosPoseSet(fldRunTama3Basic);
+            SDF_VU0_STOREVECTOR_MEMOPS(pos);
+            p2sdPlaySE(0x6F0006,
+                       fldRunDanteDistToTarget(pos.x, pos.y, pos.z) * vol.v[i] / 128 / 2, 0x3F);
+            break;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunTamaSe);
+#endif
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531148);
 
@@ -2660,7 +3025,25 @@ void fldAnahoriSelectDel(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldOtInit);
+s32 fldOtInit(void)
+{
+    if ((fldGlobalBase.area == 0x2A && fldGlobalBase.floor == 0xF) ||
+        (fldGlobalBase.area == 0x2B && fldGlobalBase.floor == 0x8) ||
+        (fldGlobalBase.area == 0x2B && fldGlobalBase.floor == 0x9) ||
+        (fldGlobalBase.area == 0x2B && fldGlobalBase.floor == 0xA)) {
+        sdfModelOtInit(D_002F6A18, &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
+                       &sdfGrOtTable[41]);
+        D_002F6A18[1] = &sdfGrOtTable[46];
+    } else if (fldGlobalBase.area == 0x20 || fldGlobalBase.area == 0x24 ||
+               fldGlobalBase.area == 0x25) {
+        sdfModelOtInit(D_002F6A18, &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
+                       &sdfGrOtTable[41]);
+        D_002F6A18[1] = &sdfGrOtTable[35];
+    } else {
+        sdfModelOtInit(D_002F6A18, &sdfGrOtTable[34], &sdfGrOtTable[40], &sdfGrOtTable[42],
+                       &sdfGrOtTable[41]);
+    }
+}
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531860);
 
@@ -2687,7 +3070,86 @@ s32 fldProcCampChk(void)
     return fldEncountTestFlag(0x20) != 0 ? 0 : 3;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", ProcCampCheck);
+s32 ProcCampCheck(void)
+{
+    if (fldChkVortex() == 0) {
+        return 0;
+    }
+    if (fldProcCampWait > 0) {
+        fldProcCampWait = fldProcCampWait - 1;
+        if (fldProcCampWait == 0) {
+            dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
+            dds3FadeIn2(4);
+            cmpProcessStart();
+        }
+        return 0;
+    }
+    if (fldEncountTestFlag(0x20) == 0) {
+        if (fldProcCampChk() == 3) {
+            fldAutoMapSeqClearFlag(1);
+            fldRegistUnitPad();
+            evtEnableMoonDraw();
+            if (fldLightMaState != 0) {
+                fldSkyRefreshTbl();
+            } else {
+                fldSkyRefreshTbl();
+            }
+            fldStatusSet();
+            dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
+            fldEncountSetFlag(0x20);
+            fldEncountClearFlag(0x80);
+            if (cmpGetLoadState() == 1) {
+                dds3FadeOut2(0);
+                fldEveHit_End();
+                fldAutoMapSeqSetFlag(1);
+                fldAutoMapSeqSetFlag(2);
+                fldReleaseUnitPad();
+                evtKillFieldScript();
+                p2sdStopAllSe();
+                dds3AdminiCallSequence(4, NULL, 0, 0);
+                return 0;
+            }
+            dds3FadeOut2(0);
+            dds3FadeIn2(8);
+            return 0;
+        }
+    }
+    if (fldEncountTestFlag(0x20) == 0) {
+        return 0;
+    }
+    if (fldEncountTestFlag(0x40) == 0) {
+        return 0;
+    }
+    if (fldAutoMapSeqTestFlag(1) == 1) {
+        return 0;
+    }
+    if (fldPlayerChkAna() != 0) {
+        return 0;
+    }
+    if (fldAutoMapChkMode() != 0) {
+        return 0;
+    }
+    if (fldGlobalBase.menuOpenFlag != 0) {
+        goto ret0;
+    }
+    if (((s8 *)dds3PadButtonState)[0x20] >= 0) {
+        goto ret0;
+    }
+    p2sdPlaySE(0xE, 0x7F, 0x3F);
+    fldAutoMapSeqSetFlag(1);
+    fldReleaseUnitPad();
+    fldPlayerPosRot();
+    evtDisableMoonDraw();
+    fldGlobalBase.menuOpenFlag = 4;
+    fldGlobalBase.encountState = 5;
+    fldEncountClearFlag(0x20);
+    fldEncountSetFlag(0x80);
+    dds3FadeOut(0, 0, 0, 4);
+    fldProcCampWait = 5;
+    fldPlayerMotReset();
+ret0:
+    return 0;
+}
 
 s32 fldProcAmChk(void)
 {
@@ -2697,7 +3159,88 @@ s32 fldProcAmChk(void)
     return fldAutoMapChkMode() != 0;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", ProcAmCheck);
+s32 ProcAmCheck(void)
+{
+    s32 trigger = 0;
+
+    if (fldGlobalBase.area < 0xA) {
+        return 0;
+    }
+    if (fldProcCampChk() != 0) {
+        return 0;
+    }
+    if (fldProcAmChk() == 0) {
+        if (fldEncountTestFlag(0x40) == 0) {
+            return 0;
+        }
+    }
+    if ((fldRunDanteGunFlag.unk58 & fldEncountTestFlag(0x40)) != 0) {
+        if (((s8 *)dds3PadButtonState)[0x22] != 0) {
+            trigger = 1;
+        }
+    } else {
+        if (((s8 *)dds3PadButtonState)[0x22] < 0) {
+            trigger = 1;
+        } else {
+            trigger = 0;
+        }
+    }
+    if (fldGlobalBase.area == 0x26 ||
+        (fldGlobalBase.area == 0x2C && fldGlobalBase.floor + 1 >= 0xC &&
+         fldGlobalBase.floor + 1 < 0x1C) ||
+        (fldGlobalBase.area == 0x2C && fldGlobalBase.floor == 0x1E) ||
+        (fldGlobalBase.area == 0x2D && fldGlobalBase.floor == 0x1D) ||
+        (fldGlobalBase.area == 0x2D && fldGlobalBase.floor == 0x1E)) {
+        if (fldGlobalBase.menuOpenFlag != 0) {
+            goto ret0;
+        }
+        if (fldEncountTestFlag(0x40) == 0) {
+            goto ret0;
+        }
+        if (trigger != 0) {
+            fldGlobalBase.menuOpenFlag = 4;
+            fldGlobalBase.encountState = 5;
+            fldReleaseUnitPad();
+            dds3SceneBasicStartScript(dds3GetActiveScene(), D_005318E0);
+        }
+        goto ret0;
+    }
+    if (fldProcAmWait > 0) {
+        fldProcAmWait = fldProcAmWait - 1;
+        if (fldProcAmWait == 0) {
+            dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
+            dds3FadeIn2(4);
+            fldAutoMapSeqStart();
+        }
+        goto ret0;
+    }
+    if (fldProcAmChk() != 0) {
+        goto ret0;
+    }
+    if (fldGlobalBase.menuOpenFlag != 0) {
+        goto ret0;
+    }
+    if (fldPlayerChkAna() != 0) {
+        goto ret0;
+    }
+    if (fldEncountTestFlag(0x40) == 0) {
+        goto ret0;
+    }
+    if (trigger != 0) {
+        if (fldRunDanteGunFlag.unk48 != 0) {
+            goto ret0;
+        }
+        fldGlobalBase.menuOpenFlag = 4;
+        fldGlobalBase.encountState = 5;
+        fldReleaseUnitPad();
+        fldPlayerPosRot();
+        dds3FadeOut(0, 0, 0, 4);
+        fldProcAmWait = 5;
+        fldPlayerMotReset();
+    }
+    ret0:
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_00116AD0", RetryMapLoad);
 

@@ -1972,3 +1972,129 @@ Ruled out: `position.w` assigned first, last, and between the coordinates;
 `extern void *volatile fldBlurEffectId[]`; `extern void *fldBlurEffectId[2]`
 (which goes back to `$gp` and 31 words); and a `void **p = fldBlurEffectId`
 local feeding the three calls.
+
+## fldRunTamaFree (code_00116AD0, 0xBC)
+
+27 of 47 words, at the exact 188-byte size. The loop structure, the table
+stride and the two-arm mode test are all retail's; what is left is one
+register choice repeated three times. Retail loads each handle straight into
+the argument register (`lw $4, 0x10($16)` then `beql $4, $0`), so the test and
+the call share one register and the copy disappears; ee-gcc here puts the load
+in `$2` and adds `move $4, $2`, which also costs the branch-likely and moves
+the loop-alignment `nop` ahead of the inner loop head.
+
+The mechanism is visible from the other side: `pipeFreeEffects` in
+`pipe/pipeEffect` has the identical `if (p->h != NULL) { f(p->h); p->h = NULL; }`
+shape and does get `lw $4`, because `$2` there holds the `u8` counter's
+`i + 255` across the if. So the fix is whatever makes `$2` unavailable across
+the guarded block, not a different spelling of the guard.
+
+Ruled out: a reused `void *handle` local for all three arms and a fresh local
+per arm (cse propagates both away); `while` in place of the inner `for`, with
+`entry++` at the end of the body; the counter as `s32`, `u8` and an index
+`tbl[j]` instead of a pointer; `s32` and unprototyped declarations for the
+three callees, and an `s32` parameter in place of `void *`; casting the field
+at the call site; `while` in place of each `if`; and declaring `res` before
+`entry`.
+
+## fldRunEffSet (code_00116AD0, 0x12C)
+
+67 of 73 words, 292 bytes against retail's 300. The loop, the two float range
+tests, the arm split and the five-store tail are retail's: the tail stores
+land in retail's order (`0x14`, `0x24`, `0x18`, `0x1C`, `0x20`) once the
+source writes `x`, `y`, `z`, `turn` after `life`, the left rotation of the
+emitted list.
+
+Two things remain. The same `lw $4` against `lw $2` plus `move $4, $2` as
+`fldRunTamaFree`, twice, so crack that one first. And the prologue order:
+retail forms `&fldRun_Dante` from a `lui` issued third and an `addiu` after
+the `D_002FBEF0[id]` load, where the draft's `fldRunDante_t *dante =
+&fldRun_Dante;` initialiser puts both in front of it.
+
+Ruled out: the float tests written as `>=` (gives `c.le.s` in the other
+encoding); the tail stores in the three other rotations; and `fldRun_Dante.`
+at every use instead of the `dante` local, which loses the saved register
+entirely.
+
+## fldRunEffTask (code_00116AD0, 0x220)
+
+115 of 136 words, 544 bytes against retail's 544 at the same size. The two
+arms, the `dds3EffectGetState` delete path, the `(90.0f - turn) * 3.14f /
+180.0f` rotation and `SDF_VU0_STOREMATRIX` into a 0x40 frame slot are all in
+place, and the handle loads already reach `$4` here because each one is alone
+in its block.
+
+What is left is which saved register each of three values gets. Retail
+allocates `i` to `$19`, the hoisted constant 1 to `$20` and the
+`D_002FBEF0` walk to `$21`; the draft gives 1 to `$19`, the walk to `$20` and
+`i` to `$21`, and every later word shifts. The `3.14f` literal is the unit's
+own `.lit4` entry `D_0054C204` and must stay a literal at this position, so
+any reshaping has to keep one float constant used here and in this order.
+
+Ruled out: nothing yet beyond the declaration order of the five locals.
+
+## fldRunTamaSe (code_00116AD0, 0x3C8)
+
+165 of 230 words, 920 bytes against retail's 968. The skeleton is established
+and is what the draft is for: three near-identical blocks, one per tama
+handle, each reading `dds3ObjectBaseGetModelHandle(g)->motion->frame` (the
+`mdlObj_t` motion pointer at `+0x1C`, then `sdfMotionCtrlr_t.frame` at
+`+0x1C`) and scanning a ten-entry `f32` frame table for the window
+`tbl[i] - 0.5f < now && now < tbl[i] + 0.5f`, then
+`p2sdPlaySE(0x6F0006, fldRunDanteDistToTarget(pos) * vol[i] / 128 / 2, 0x3F)`
+and `break`.
+
+The four tables are the unit's own rodata: `D_00531158`, `D_00531180` and
+`D_005311A8` are `f32[10]` frame windows and `D_005311D0` is `s16[10]`
+volumes (0x7F 0x7F 0x5F 0x5F 0x3F 0x3F 0x1F 0x1F 0x0F 0x0F, 20 bytes). They
+are copied to the frame at `0x10`, `0x40`, `0x70` and `0xA0`, which the draft
+already reproduces, including the `ldl`/`ldr` plus `lwl`/`lwr` tail on the
+20-byte one.
+
+What is left is bigger than a spelling: retail is twelve words longer and the
+copies come out in the order `D_00531158`, `D_00531180`, `D_005311D0`,
+`D_005311A8`, which is neither declaration nor statement order.
+
+Ruled out: all 24 orders of the four copy statements, which move the count
+only between 165 and 170 words, so the copy order is not the lever. Someone
+picking this up should start from the per-block code rather than the
+prologue.
+
+## resetCamTgtPlayer (field/fldDraw, 0x1F8)
+
+90 of 126 words, at the exact 504-byte size, and every instruction in the
+function is the one retail emits. Two things differ and nothing else.
+
+The first is a three-way rotation of the fp registers the eye block uses for
+`fldGlobalBase.y`, `D_002FC9C0[1]` and `D_002FC9C0[2]`: retail numbers them
+`$f3`, `$f4`, `$f5` and the draft gives `$f4`, `$f5`, `$f3`. The second is
+where the scheduler puts `lw $4, 0x78($19)`, the `control->camera` argument of
+each of the three calls: retail fills the `div.s` hazard slot with it and
+leaves the `swc1` to `camAngle` for the `jal` delay slot, while the draft puts
+the `lw` in the delay slot and the `sub.s` for `eye.f[2]` in the hazard slot.
+The whole tail from the second `dds3SetPosPoseSet` to the epilogue, the
+`sqrt.s`, the `GetSphericalPosMove` argument setup and the `fldCamPitch`
+store, is byte-identical.
+
+`-fno-gcse` and `-fno-expensive-optimizations` leave the difference exactly
+where it is; `-fno-schedule-insns` and `-fno-schedule-insns2` make it much
+worse. So this is register allocation plus the list scheduler's tie-break, not
+anything the source states.
+
+Confirmed on the way: `D_0054C2E8` is a `.lit4` entry holding `3.14f`;
+`fldCamParamTable[fldGlobalBase.cameraParamIndex][1]` is the height offset
+added to `fldGlobalBase.y`; the eye and target vectors are both written as the
+degenerate lerp `a + (b - a)` with no factor, which is what retail's bare
+`sub.s`/`add.s` pair per component is; and the two angle fields written here
+are `fldGlobalBase.camAngle` at `0x124` and `camAngle2` at `0x128`, both taking
+`EulerAngleAxisY() * 180.0f / 3.14f`.
+
+Ruled out: six orderings of the three eye components; the `camAngle` stores
+before, after and in either order relative to the eye block; seven spellings
+of the angle expression (inline, three statements, a named `180.0f` local
+assigned before the leading calls, a named `3.14f` local, and the
+`180.0f / 3.14f` constant folded together, which costs the whole function); a
+`f32 *` local for `D_002FC9C0`; a `* 1.0f` factor on each lerp; a local for
+the parameter-table height and for `y + height`; `node = control->camera;` as
+its own statement before each of the four uses; and `dx`/`dy`/`dz` locals for
+the three deltas, which costs another 19 words.

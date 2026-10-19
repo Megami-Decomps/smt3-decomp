@@ -76,7 +76,9 @@ typedef struct fldAreaWork_t
     f32 hitX;                   /* 0x118 */
     f32 hitY;
     f32 hitZ;
-    u8 unk124[0x10];
+    f32 camAngle;               /* 0x124 */
+    f32 camAngle2;              /* 0x128 */
+    u8 unk12C[8];
     s32 hitValid;               /* 0x134 */
 } fldAreaWork_t;
 

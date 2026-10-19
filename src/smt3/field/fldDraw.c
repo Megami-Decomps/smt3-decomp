@@ -222,7 +222,9 @@ struct fldRoomState_t {
     s32 worldObjectKey;
     f32 unk10C;
     s32 unk110;
-    u8 unk114[0xC];
+    f32 unk114;
+    s32 unk118;
+    s32 unk11C;
     s16 unk120;
     s16 roomId;
     s16 unk124;
@@ -2434,7 +2436,60 @@ void calcCamNormalNPC(void) {
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
 }
 
+extern void dds3GetRotPoseSet(dds3Basic_t *object);
+extern f32 EulerAngleAxisY(void);
+extern f32 fldCamPitch;
+extern f32 fldCamParamTable[][4];
+
+/* NON_MATCHING: 36 of 126 words differ (first at +0x5C). */
+#ifdef NON_MATCHING
+void resetCamTgtPlayer(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } eye, target;
+    fldFollowCameraControl_t *control;
+    fldUnitControl_t *unit;
+    dds3Basic_t *node;
+    f32 angle;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+
+    control = fldGetFollowCameraControl();
+    unit = fldGetUnitControl();
+    dds3GetRotPoseSet(unit->handle);
+    angle = EulerAngleAxisY() * 180.0f / 3.14f;
+    fldGlobalBase.camAngle = angle;
+    fldGlobalBase.camAngle2 = angle;
+    eye.f[0] = D_002FC9C0[0] + (fldGlobalBase.x - D_002FC9C0[0]);
+    eye.f[1] = D_002FC9C0[1] +
+               (fldGlobalBase.y + fldCamParamTable[fldGlobalBase.cameraParamIndex][1] - D_002FC9C0[1]);
+    eye.f[2] = D_002FC9C0[2] + (fldGlobalBase.z - D_002FC9C0[2]);
+    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3GetTMPoseSet(unit->handle);
+    target.f[3] = 1.0f;
+    target.f[0] = fldGlobalBase.campos.x;
+    target.f[1] = fldGlobalBase.campos.y;
+    target.f[2] = fldGlobalBase.campos.z;
+    dds3SetPosPoseSet(control->camera, &target.q);
+    target.f[0] = fldCamTarget[0] + (target.f[0] - fldCamTarget[0]);
+    target.f[1] = fldCamTarget[1] + (target.f[1] - fldCamTarget[1]);
+    target.f[2] = fldCamTarget[2] + (target.f[2] - fldCamTarget[2]);
+    dds3SetPosPoseSet(control->camera, &target.q);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &target);
+    node = control->camera;
+    ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
+    dx = eye.f[0] - target.f[0];
+    dy = eye.f[1] - target.f[1];
+    dz = eye.f[2] - target.f[2];
+    fldCamLength = fsqrtf(dx * dx + dy * dy + dz * dz);
+    fldCamPitch = GetSphericalPosMove(target.f[0], target.f[2], eye.f[0], eye.f[2]) + 180.0f;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", resetCamTgtPlayer);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldEventUpdateEx_Unity_2);
 
@@ -4246,7 +4301,59 @@ void fldKaifukuTest(void) {
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldStatusSet);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldClearEveRngTable);
+extern s32 fldEveRngPrevIdx;
+extern s32 fldEveRngHitIdx;
+extern s32 fldEveHitCount;
+void fldClearDoorEvents(void);
+
+void fldClearEveRngTable(void) {
+    s32 i;
+    s32 j;
+
+    fldEveRngCount = 0;
+    gEveNum = 0;
+    fldEveHitState = 0;
+    for (i = 0; i < 0x40; i++) {
+        for (j = 0; j < 8; j++) {
+            fldEveHitTable[i].corner[j][0] = 0.0f;
+            fldEveHitTable[i].corner[j][1] = 0.0f;
+            fldEveHitTable[i].corner[j][2] = 0.0f;
+            fldEveHitTable[i].corner[j][3] = 1.0f;
+        }
+        fldEveHitTable[i].center[0] = 0.0f;
+        fldEveHitTable[i].center[1] = 0.0f;
+        fldEveHitTable[i].center[2] = 0.0f;
+        fldEveHitTable[i].center[3] = 1.0f;
+        for (j = 0; j < 6; j++) {
+            fldEveHitTable[i].plane[j][0] = 0.0f;
+            fldEveHitTable[i].plane[j][1] = 0.0f;
+            fldEveHitTable[i].plane[j][2] = 0.0f;
+            fldEveHitTable[i].plane[j][3] = 1.0f;
+            fldEveHitTable[i].limit[j] = 0.0f;
+        }
+        gEvnRngPid[i] = 0;
+        fldEveHitTable[i].unk10C = 0.0f;
+        fldEveHitTable[i].unk110 = 0;
+        fldEveHitTable[i].worldObjectKey = 0;
+        fldEveHitTable[i].unk114 = 0.0f;
+        fldEveHitTable[i].unk118 = 0;
+        fldEveHitTable[i].unk11C = 0;
+        fldEveHitTable[i].unk120 = 0;
+        fldEveHitTable[i].roomId = -1;
+        fldEveHitTable[i].unk124 = -1;
+        fldEveHitTable[i].mode = 0;
+        fldEveHitTable[i].entryIndex = -1;
+        fldEveHitTable[i].axisMode = 0;
+        fldEveHitTable[i].shapeKind = 0;
+    }
+    fldEveHitCount = 0;
+    fldEveRngPrevIdx = -1;
+    fldEveRngHitIdx = -1;
+    gFldEveRngIdx = -1;
+    gFldEveRngIdx_N = -1;
+    gFldEveRngIdx_T = -1;
+    fldClearDoorEvents();
+}
 
 void fldEveHit_End(void) {
     s32 slotIndex;
@@ -4565,9 +4672,115 @@ void fldInfToWAP(void) {
 /* The native format slot includes twelve trailing zero bytes. */
 const char D_00531E98[24] = "%sF%03d.INF";
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldFindEventEntry);
+extern u8 D_00302FA0[];
+extern u8 D_00302FB0[];
+extern u8 D_00302FC0[];
+extern u8 D_00302FD0[];
+extern u8 D_00302FF0[];
+extern u8 D_00303000[];
+extern u8 D_00303010[];
+extern u8 D_00303030[];
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Find2);
+u8 *fldFindEventEntry(const char *name) {
+    s32 i;
+    fldActorEntry_t *entry;
+
+    if (name == NULL) return NULL;
+    for (i = 0; i < 256; i++) {
+        entry = &fldDoorTable[i];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
+        if (entry->floor != fldGlobalBase.floor + 1) continue;
+        if (strcmp(name, entry->name) != 0) continue;
+        switch (entry->kind) {
+        case 1:
+            if (fldGlobalBase.area < 10) {
+                if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 11) {
+                    return D_00303010;
+                }
+                return D_00303010;
+            }
+            if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 10) {
+                return D_00303000;
+            }
+            return D_00302FA0;
+        case 2:
+            return D_00302FB0;
+        case 3:
+            return D_00302FC0;
+        case 4:
+            if (fldGlobalBase.area >= 40) {
+                return D_00303030;
+            }
+            return D_00302FD0;
+        case 5:
+            return D_00302FF0;
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            break;
+        case 10:
+            return D_00303020;
+        }
+    }
+    return NULL;
+}
+
+u8 *fldDoor_Find2(const char *name) {
+    s32 i;
+    fldActorEntry_t *entry;
+
+    if (name == NULL) return NULL;
+    for (i = 0; i < 256; i++) {
+        entry = &fldDoorTable[i];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
+        if (entry->floor != fldGlobalBase.floor + 1) continue;
+        if (strcmp(name, entry->name) != 0) continue;
+        scriptlabel = i;
+        switch (entry->kind) {
+        case 1:
+            if (fldGlobalBase.area < 10) {
+                if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 11) {
+                    gFldWapPanel = 7;
+                    return D_00303010;
+                }
+                gFldWapPanel = 7;
+                return D_00303010;
+            }
+            if (entry->variantMode == 0 && entry->variant != 0 && entry->variant < 10) {
+                gFldWapPanel = 6;
+                return D_00303000;
+            }
+            gFldWapPanel = 0;
+            return D_00302FA0;
+        case 2:
+            gFldWapPanel = 1;
+            return D_00302FB0;
+        case 3:
+            gFldWapPanel = 2;
+            return D_00302FC0;
+        case 4:
+            if (fldGlobalBase.area >= 40) {
+                gFldWapPanel = 9;
+                return D_00303030;
+            }
+            gFldWapPanel = 3;
+            return D_00302FD0;
+        case 5:
+            gFldWapPanel = 5;
+            return D_00302FF0;
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            break;
+        case 10:
+            gFldWapPanel = 0;
+            return D_00303020;
+        }
+    }
+    return NULL;
+}
 
 u8 *fldDoor_Find3(void) {
     s32 idx = gFldWap_after_nextidx;
@@ -4591,7 +4804,69 @@ s32 fldDoor_GetWarpEff(void)
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldWapGetDoor);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoorRun_FindStart);
+extern scrProcessWork_s *scrGetScriptHandle(void);
+extern void fldSePlay(s32 soundId);
+extern void fldFindDoorEvent(s32 handle);
+extern u32 fldLoadNextGetStatus(void);
+extern void fldStartBgmLoad(s32 kind);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeColorSet(s32 r, s32 g, s32 b);
+extern void fldAnaStart(f32 x, f32 y, f32 z);
+extern f32 fldPlayerWarpState;
+
+void fldDoorRun_FindStart(s32 useScript) {
+    s32 idx;
+    fldActorEntry_t *entry;
+    const char *name;
+
+    if (fldGlobalBase.area < 10) {
+        fldPlayerCalc_WarpStart();
+        return;
+    }
+    if (useScript != 0) {
+        name = fldEveHitResName_Find((u32)scrGetScriptHandle()->ProcessID);
+        if (name == 0) return;
+        if (fldDoor_Find2(name) == 0) return;
+    }
+    idx = scriptlabel;
+    entry = &fldDoorTable[idx];
+    if (entry->kind == 1) {
+        if (entry->floor != fldGlobalBase.floor + 1) return;
+        fldSePlay(entry->sound);
+        fldFindDoorEvent(fldDoorEventTable[idx].unk04);
+        if (entry->variant >= 6) return;
+        if (entry->variant < 0) return;
+        if (fldLoadNextGetStatus() != 0) return;
+        fldStartBgmLoad(entry->variant);
+        return;
+    }
+    if (entry->kind == 2) {
+        if (entry->floor != fldGlobalBase.floor + 1) return;
+        fldPlayerFastMode = 1;
+        fldPlayerWarpState = *(f32 *)&fldDoorEventTable[idx].unk24;
+        if (entry->motion == 1) {
+            fldSePlay(0x38);
+            dds3FadeOut(0xC0, 0xC0, 0xC0, 0xF);
+            return;
+        }
+        dds3FadeOut(0, 0, 0, 0xF);
+        return;
+    }
+    if (entry->kind == 3) {
+        dds3FadeColorSet(0, 0, 0);
+        fldAnaStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
+        return;
+    }
+    if (entry->kind == 5) {
+        if (entry->motion == 0) {
+            gfldPlayerDamegeCnt = 100;
+        } else {
+            gfldPlayerDamegeCnt = -100;
+        }
+    } else if (entry->kind == 10) {
+        fldSePlay(0x38);
+    }
+}
 
 void fldDoor_ExitCamera(const char *name) {
     fldActorEntry_t *entry;
@@ -4761,9 +5036,153 @@ void fldDoor_SiseExit(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldWap_Load);
+extern s16 D_002FC1A0[][2];
+extern s16 fldAllCnt[][2];
+extern void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
+                                 s32 code, s32 link, const char *subname);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_EveBtlExit);
+void fldWap_Load(s32 all, s32 sub, fldSceneParam_t *record) {
+    fldActorEntry_t *entry;
+    s32 i;
+    s32 field;
+    s32 zone;
+    s32 nextKind;
+
+    if (all == 0) {
+        field = D_002FC1A0[sub][0];
+        zone = 3;
+    } else {
+        zone = 4;
+        field = fldAllCnt[sub][0];
+    }
+    if (field == 0) return;
+    fldDoorLoad(field);
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldDoorTable[i];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
+        if (entry->kind != 7) continue;
+        if (zone != entry->motion) continue;
+        if (sub != entry->secondaryMotion) continue;
+        if (entry->variantMode != 0) continue;
+        fldGlobalBase.cameraParamIndex = entry->rowIndex;
+        if (entry->flags54 != 0) {
+            fldDoorExitFlag = entry->flags54;
+            strcpy((char *)fldDoorExitMode, entry->taskName);
+            gFldWap_after_nextidx = i + 1;
+        }
+        if (entry->variant != 0) {
+            field = entry->variant;
+        }
+        if (entry->sequenceKind != 0) {
+            nextKind = entry->sequenceKind;
+        } else {
+            nextKind = 1;
+        }
+        gFldNowDZone = entry->flags31;
+        if (field == 0) return;
+        if (nextKind == 0) return;
+        fldSetSceneParamLoad(record, field, nextKind, entry->sequenceName, entry->sequenceCode,
+                             entry->linkKind, entry->linkName);
+        record->restore = 5;
+        if (fldGlobalBase.sequenceCode != entry->sequenceCode) {
+            if (entry->sequenceCode != 0) {
+                fldGlobalBase.sequenceCode = entry->sequenceCode;
+            }
+        }
+        if (entry->selectedRoom != 0) {
+            fldGlobalBase.playerSeTable = entry->selectedRoom - 1;
+        }
+        return;
+    }
+}
+
+extern s16 D_002FC1A2[][2];
+extern void fldSetNextField(s32 field, s32 parameter);
+extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
+extern void evtBitOn(s32 bit);
+
+void fldDoor_EveBtlExit(s32 field, s32 zone) {
+    fldSceneParam_t record;
+    s32 block[4];
+    s32 param[4];
+    fldActorEntry_t *entry;
+    s32 i;
+    s32 nextArea;
+    s32 nextKind;
+
+    fldDoorLoad(field);
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldDoorTable[i];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
+        if (entry->kind != 8) continue;
+        if (entry->motion != zone) continue;
+        if (entry->variantMode == 2) {
+            fldSetNextField(0, 0);
+            fldBgmFadeOut();
+            fldAutoMapOpenBlock2(fldGlobalBase.area, fldGlobalBase.floor + 1, entry->sequenceValue);
+            D_0054EDF4 = fldGlobalBase.area;
+            fldDoorSiseState = fldGlobalBase.floor + 1;
+            D_0054EDFC = entry->variant;
+            D_0054EE00 = entry->sequenceKind;
+            switch ((u32)entry->variant) {
+            case 0:
+                param[0] = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1C, param, 4, 0);
+                return;
+            case 1:
+                param[0] = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1D, param, 4, 0);
+                return;
+            case 2:
+                param[0] = entry->sequenceKind;
+                dds3AdminiCallSequence(0x1B, param, 4, 0);
+                return;
+            case 3:
+                block[0] = 0;
+                block[1] = entry->sequenceKind;
+                if (D_002FC1A2[block[1]][0] != 0) {
+                    evtBitOn(D_002FC1A2[block[1]][0]);
+                }
+                DDS3_GBWK->previewX = block[0];
+                DDS3_GBWK->previewY = block[1];
+                dds3AdminiCallSequence(0x1F, block, 8, 0);
+                return;
+            case 4:
+                block[0] = 1;
+                block[1] = entry->sequenceKind;
+                DDS3_GBWK->previewX = block[0];
+                DDS3_GBWK->previewY = block[1];
+                dds3AdminiCallSequence(0x1F, block, 8, 0);
+                return;
+            case 5:
+                dds3AdminiCallSequence(0x1E, 0, 0, 0);
+                return;
+            }
+            return;
+        }
+        if (entry->variantMode != 0) continue;
+        nextArea = field;
+        if (entry->variant != 0) {
+            nextArea = entry->variant;
+        }
+        nextKind = entry->sequenceKind;
+        if (fldGb != nextArea) {
+            fldBgmFadeOut();
+        }
+        fldWap_SetBgm(entry);
+        if (entry->flags54 != 0) {
+            fldDoorExitFlag = entry->flags54;
+            strcpy((char *)fldDoorExitMode, entry->taskName);
+            gFldWap_after_nextidx = i + 1;
+        }
+        gFldNowDZone = entry->flags31;
+        fldSetSceneParam4(&record, nextArea, nextKind, entry->sequenceName, entry->sequenceCode,
+                          entry->linkKind, entry->linkName);
+        record.restore = 6;
+        dds3AdminiCallSequence(6, &record, 0xA0, 0);
+        return;
+    }
+}
 
 void fldDoor_WarpCash(const char *name) {
     fldActorEntry_t *entry;
