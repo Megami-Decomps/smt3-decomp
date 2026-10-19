@@ -4,7 +4,6 @@
 #include "basic.h"
 #include "motion.h"
 
-extern char D_00548EB0[]; /* Padded "Pipe_Cam". */
 
 extern f32 pipeCamShakeVec[], pipeCamShake[], pipeCameraPos[];
 
@@ -53,7 +52,7 @@ void AddCamera(void) {
 
     camera = dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), pipeCamShake, eye, pipeCameraPos);
     pipe_Camera = camera;
-    dds3SetUnitObjectId(camera, D_00548EB0);
+    dds3SetUnitObjectId(camera, "Pipe_Cam");
     dds3CameraObjectBasicGetCameraTM(pipe_Camera, eye);
     dds3GetRadiusPoseSet(pipe_Camera, 2.0f);
     scene = dds3GetControlScene();
@@ -73,8 +72,6 @@ void CalcCamera(void) {
     SDF_VU0_COPYVECTOR(&cameraData->vertical, pipeCameraPos);
     SDF_VU0_COPYVECTOR(&cameraData->upVector, pipeCameraPos);
 }
-
-INCLUDE_RODATA(const s32, "pipe/pipeCamera", D_00548EB0);
 
 s32 pipeCheckLevel(s32 level, s32 type)
 {

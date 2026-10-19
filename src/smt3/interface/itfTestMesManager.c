@@ -103,9 +103,7 @@ typedef struct
     sdfGrTagStdReg_t reg[2];
 } pbRegPacket_t;
 
-extern char D_00535BB0[];
 
-extern char D_00535BC0[];
 
 extern char *D_00326BC8[];
 
@@ -170,8 +168,8 @@ void itfDebugMesMngInitialize(void)
         ((scrProcessWork_s *)dds3GetProcessData(scrStartScript2(0x3E8, scrEmbedded_3267A8, 0)))
             ->MesHandle,
         itfDebugPrintMark);
-    dds3StartProcess(D_00535BB0, 0x3EF, 0, 0, TestMsgMngC_Process, NULL, NULL);
-    dds3StartProcess(D_00535BC0, 0x2AFE, 0, 0, TestMsgMngD_Process, NULL, NULL);
+    dds3StartProcess("TestMsgMngC", 0x3EF, 0, 0, TestMsgMngC_Process, NULL, NULL);
+    dds3StartProcess("TestMsgMngD", 0x2AFE, 0, 0, TestMsgMngD_Process, NULL, NULL);
 }
 
 void TestMsgReloadTexture(void)
@@ -210,10 +208,6 @@ s32 TestMsgMngD_Process(dds3ProcessID_t *id)
     }
     return 0;
 }
-
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535BB0);
-
-INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535BC0);
 
 INCLUDE_RODATA(const s32, "interface/itfTestMesManager", D_00535BD0);
 

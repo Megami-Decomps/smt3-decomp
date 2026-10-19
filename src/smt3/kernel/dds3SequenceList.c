@@ -52,9 +52,6 @@ extern void titleExit(void);
 extern void titleStart(u32 mode);
 extern s32 trmCheckProcessStat(void);
 
-extern char D_0052E210[]; /* "StartSel" */
-extern char D_0052E250[]; /* "battle test" */
-extern char D_0052E260[]; /* "test_font" */
 
 extern scrProcessWork_s *scrHandleFirst;
 extern scrProcessWork_s *scrHandleLast;
@@ -83,12 +80,12 @@ extern scrProcessWork_s *scrPrintProcedureStart(scrHeader_t *header, scrTypeTabl
 
 dds3ProcessID_t *CallDebug(void)
 {
-    return dds3StartProcess(D_0052E210, 0x2AF9, 0, 0, dds3StartMenuProcess, NULL, NULL);
+    return dds3StartProcess("StartSel", 0x2AF9, 0, 0, dds3StartMenuProcess, NULL, NULL);
 }
 
 s32 ExitDebug(void)
 {
-    dds3KillProcessName(D_0052E210, 1);
+    dds3KillProcessName("StartSel", 1);
     return 1;
 }
 
@@ -259,8 +256,6 @@ s32 CheckNewBattle(void)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E210);
-
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallEvent);
 
 INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E230);
@@ -405,7 +400,7 @@ s32 ExitNewBattleTest(void)
 
 s32 CheckNewBattleTest(void)
 {
-    if (dds3SearchProcessName(D_0052E250) != NULL) {
+    if (dds3SearchProcessName("battle test") != NULL) {
         return 0;
     }
     if (dds3SearchProcessPriority(0x3FA) == NULL) {
@@ -705,7 +700,7 @@ s32 ExitFontTest(void)
 
 s32 CheckFontTest(void)
 {
-    return dds3SearchProcessName(D_0052E260) == NULL;
+    return dds3SearchProcessName("test_font") == NULL;
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallMapEditor);
@@ -855,10 +850,6 @@ void scrUnlinkHandle(scrProcessWork_s *work)
     work->next = NULL;
     scrHandleCount--;
 }
-
-INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E250);
-
-INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E260);
 
 INCLUDE_ASM(const s32, "kernel/dds3SequenceList", scrPrintProcedureStart);
 

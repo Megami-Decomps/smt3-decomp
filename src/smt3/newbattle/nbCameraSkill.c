@@ -1174,7 +1174,6 @@ extern f32 D_003246D0[];
 extern f32 D_003246F0[];
 extern f32 D_00324710[];
 extern f32 D_00324720[];
-extern char D_005349A0[];
 
 /* NON_MATCHING: 20 of 137 words differ (first at +0x168). */
 #ifdef NON_MATCHING
@@ -1220,7 +1219,8 @@ void nbCameraState_SkillAttack_Init(void)
                 bCameraShot_AttackInvokeTargetPartyNear_Set(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             } else {
-                printf(D_005349A0, sdfFloatToULong(width));
+                printf("nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX
+", sdfFloatToULong(width));
                 nbCameraShot_InvokeTargetReverse_Set2(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             }

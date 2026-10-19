@@ -89,7 +89,6 @@ extern void EmSound(tagPipeObject *objPtr);
 
 extern void MySound(tagPipeObject *objPtr);
 
-extern char D_00548930[];
 
 extern u32 dds3BackColor;
 
@@ -183,7 +182,8 @@ void pipeEndSection(void)
     PipeTexRelease();
     pipeDataRelease();
     dds3BackColor = 0x80000000;
-    DEBUG_PRINT(D_00548930);
+    DEBUG_PRINT("Release OK ....
+");
     scene = NULL;
 }
 
@@ -202,8 +202,6 @@ void pipeDataRelease(void)
         D_00528F68.aHandle = NULL;
     }
 }
-
-INCLUDE_RODATA(const s32, "pipe/pipeSection", D_00548930);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", pipeLoadSection);
 

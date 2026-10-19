@@ -21,11 +21,9 @@ extern s32 pipeCheckLevel(s32 level, s32 type);
 
 extern void pipeEndSection(void);
 
-extern char D_00548900[];
 
 extern void DEBUG_PRINT(const char *fmt, ...);
 
-extern char D_005488F0[];
 
 extern void *dds3SearchProcessName(const char *name);
 
@@ -37,7 +35,7 @@ void InitPipe(s32 mapIdx, s32 prev)
 {
     s32 priority = 0x3E8;
 
-    dds3StartProcess(D_005488F0, priority, 0, 0, MainPipe, NULL, NULL);
+    dds3StartProcess("PipeMain", priority, 0, 0, MainPipe, NULL, NULL);
     if (mapIdx == 0) {
         SectionIndex = 0x102;
         debugMode = 1;
@@ -57,20 +55,17 @@ void EndPipe(void)
     s32 shutdown = 1;
 
     pipeEndSection();
-    dds3KillProcessName(D_005488F0, shutdown);
-    DEBUG_PRINT(D_00548900);
+    dds3KillProcessName("PipeMain", shutdown);
+    DEBUG_PRINT("END PIPE
+");
     shutdown = 0;
 }
 
 s32 ChkPipe(void)
 {
-    return dds3SearchProcessName(D_005488F0) != NULL;
+    return dds3SearchProcessName("PipeMain") != NULL;
 }
 
 void DEBUG_PRINT(const char *fmt, ...) {
 }
-
-INCLUDE_RODATA(const s32, "pipe/pipeMain", D_005488F0);
-
-INCLUDE_RODATA(const s32, "pipe/pipeMain", D_00548900);
 

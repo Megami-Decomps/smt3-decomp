@@ -80,14 +80,13 @@ extern void pb_draw_error_Shutdown(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
                                          s32 shutdowntimer, dds3ProcessFunc_t processfunc,
                                          dds3ProcessFunc_t shutdownfunc, void *data);
-extern char D_005365D8[];
 
 /* NON_MATCHING: 2 of 47 words; the process load and the data store swap delay slots. */
 #ifdef NON_MATCHING
 pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 code, s32 timer) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     pbErrorWork_t *work;
-    panel->process = dds3StartProcess(D_005365D8, 0x2AFD, 1, 1, pb_draw_error_Process,
+    panel->process = dds3StartProcess("pb-draw-error", 0x2AFD, 1, 1, pb_draw_error_Process,
                                       (dds3ProcessFunc_t)pb_draw_error_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);

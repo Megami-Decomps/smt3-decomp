@@ -1158,8 +1158,6 @@ u16 datGetLevelForDraw(datUnitWork_t *work)
     return level < 100 ? level : 99;
 }
 
-extern char D_00543188[];
-extern char D_00543198[];
 
 void datCopyDevilWork(s32 id, datUnitWork_t *work)
 {
@@ -1185,9 +1183,11 @@ void datCopyDevilWork(s32 id, datUnitWork_t *work)
     work->maxmp = datGetMaxMp(work);
     work->mp = work->maxmp;
     work->skillcnt = cnt;
-    printf(D_00543188, work->level);
+    printf("YAMI-B Lv:%d
+", work->level);
     work->exp = datCopyDevilWorkEntry(work, work->level);
-    printf(D_00543198, work->exp);
+    printf("YAMI-B Exp:%d
+", work->exp);
     fclEncycRegist(work, 0);
 }
 
@@ -1245,8 +1245,4 @@ s32 datBossRashChk(s32 eid)
     }
     return 0;
 }
-
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_00543188);
-
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_00543198);
 

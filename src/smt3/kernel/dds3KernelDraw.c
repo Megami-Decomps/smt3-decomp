@@ -280,8 +280,6 @@ extern u16 dds3RenderTexWidth;
 extern u16 dds3RenderTexHeight;
 extern u32 dds3RenderDrawEnv;
 extern u32 dds3DebugSign;
-extern char D_0052E190[]; /* PAD: "DISTBLUR_NUMERR:%d" */
-extern char D_0052E1A8[]; /* PAD: "RIPBLUR_NUMERR :%d" */
 extern s16 lightcolornow[4];
 extern s16 lightcolormax[4];
 extern s16 lightdirnow[4];
@@ -610,10 +608,10 @@ void dds3DrawDistRipOverError(void)
             tag = sdfGrAllocPacketBuff(0x20);
             sdfDrawTagInit(tag);
             if ((s32)distblurovercnt > 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_0052E190, distblurovercnt));
+                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", distblurovercnt));
             }
             if ((s32)ripblurovercnt > 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_0052E1A8, ripblurovercnt));
+                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", ripblurovercnt));
             }
             {
                 sdfGrOt_t *ot = &sdfGrOtTable[81];
@@ -1503,10 +1501,6 @@ void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32
         ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
     }
 }
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0052E190);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0052E1A8);
 
 void eglLinkAlpha(s32 blendMode)
 {

@@ -24,7 +24,6 @@ typedef struct tagpipeBasic {
     f32 scl[4];
 } tagpipeBasic;
 
-extern char D_00548F48[];
 
 extern s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize);
 
@@ -66,7 +65,8 @@ s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize)
             return i;
         }
     }
-    DEBUG_PRINT(D_00548F48, i);
+    DEBUG_PRINT("i %d NO OBJECT
+", i);
     return -1;
 }
 
@@ -186,6 +186,4 @@ void mymdlSetMotion(tagpipeBasic *node, f32 frame) {
      * resetting the consumed frame follows the documented tail-call exception. */
     frame = 0.0f;
 }
-
-INCLUDE_RODATA(const s32, "pipe/pipeModel", D_00548F48);
 

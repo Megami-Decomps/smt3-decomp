@@ -65,9 +65,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 startt
 
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
 
-extern char D_005345C8[];
 
-extern char D_005345D8[];
 
 extern s32 nbCameraProcess_nbCameraProcess(dds3ProcessID_t *id);
 
@@ -295,13 +293,13 @@ void nbCameraShutdown(dds3ProcessID_t *id)
 
 void nbInitCameraProcess(nbMainProcessData_t *pData)
 {
-    dds3ProcessID_t *process = dds3StartProcess(D_005345C8, 0x3FB, 2, 1,
+    dds3ProcessID_t *process = dds3StartProcess("nb_camera", 0x3FB, 2, 1,
                                                 (dds3ProcessFunc_t)nbCameraProcess_nbCameraProcess,
                                                 (dds3ProcessFunc_t)nbCameraShutdown, NULL);
 
     dds3LinkProcess(pData->unkBC, process);
     pData->camera = process;
-    dds3LinkProcess(process, dds3StartProcess(D_005345D8, 0x2B0E, 1, 1,
+    dds3LinkProcess(process, dds3StartProcess("nb_camera_draw", 0x2B0E, 1, 1,
                                               (dds3ProcessFunc_t)nbCameraDraw, NULL, NULL));
     nbCameraInit();
 }
@@ -339,8 +337,4 @@ void nb_1B2340(u32 mask)
     func_001B2270(&center, mask);
     SDF_VU0_LOADVECTOR_MEMOPS(center);
 }
-
-INCLUDE_RODATA(const s32, "newbattle/nbCameraProcess", D_005345C8);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCameraProcess", D_005345D8);
 

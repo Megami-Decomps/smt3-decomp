@@ -19,7 +19,6 @@ extern u8 dds3PadButtonState[];
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern char D_0053B2E8[];
 
 extern void *sdfGrAllocPacketBuff(u32 size);
 
@@ -128,16 +127,14 @@ void EventDebugShutdown(dds3ProcessID_t *id)
 void evtInitEventTest(void)
 {
     dds3BackColor = 0x80000000;
-    dds3StartProcess(D_0053B2E8, 0x2AF9, 1, 1,
+    dds3StartProcess("EventTest", 0x2AF9, 1, 1,
                     (dds3ProcessFunc_t)EventDebugProcess1,
                     (dds3ProcessFunc_t)EventDebugShutdown, NULL);
 }
 
-INCLUDE_RODATA(const s32, "event/evtDebug", D_0053B2E8);
-
 void evtChkEndProcess(void)
 {
-    dds3KillProcessName(D_0053B2E8, 1);
+    dds3KillProcessName("EventTest", 1);
     dds3KillProcessName("PolygonMovie", 0);
     evtFreeStage();
 }

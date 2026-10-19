@@ -116,7 +116,6 @@ extern void sdfChipFreeDirect(void *memory);
 extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
 extern s32 dds3KillProcessName(const char *name, s32 hierarchy);
-extern const char D_0053B9E8[];
 extern evtViewer_t *viewerinfo;
 extern void *memset(void *dst, s32 value, u32 size);
 extern void *sdfChipAllocDirect(u32 size);
@@ -176,15 +175,12 @@ extern void Eve_FilterON(void);
 extern void Eve_FilterOFF(void);
 extern void evtMakeViewerPath(s32 kind);
 extern void evtViewerShutdown(s32 kind);
-extern char D_0053B998[];
 extern u16 evt_file_minor;
 extern u16 D_0054F824;
 extern void evtViewerStopFrame(void);
 extern s32 sprintf(char *buf, const char *fmt, ...);
 extern s32 printf(const char *fmt, ...);
 extern void mdlUnRegist(s32 model, s32 index);
-extern char D_0053B490[];
-extern char D_0053B640[];
 extern s32 D_0032C6E0[];
 extern s32 capwait;
 extern void DrawEffect(void);
@@ -519,7 +515,8 @@ void evtUnRegistUnit(void)
         for (i = 0; i < viewerinfo->movieWork->unitCount; i++) {
             model = viewerinfo->movieWork->units[i].model;
             index = viewerinfo->movieWork->units[i].index;
-            printf(D_0053B490, model, index);
+            printf("unregist %d, %d
+", model, index);
             mdlUnRegist(model, index);
         }
     }
@@ -561,8 +558,6 @@ void *SearchBasicFromNameIndex_evtEventViewer(s32 index)
     }
     return dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 7, viewerinfo->entryName[index]);
 }
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B490);
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B4A8);
 
@@ -897,8 +892,6 @@ u32 evtEventViewerProcess5_0(void)
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B620);
 
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B640);
-
 s32 EnterMain(void)
 {
     evtViewer_t *viewer = viewerinfo;
@@ -921,7 +914,7 @@ s32 EnterMain(void)
     case 4:
         viewer->unk22BC = 0;
         viewer->menuItemCount = 2;
-        viewer->title = D_0053B640;
+        viewer->title = "FRAME SET.OK? ";
         viewer->menuTable = D_0032C6E0;
         PushMenu(2, 0xE4, 0x3C);
         break;
@@ -1078,7 +1071,7 @@ s32 EnterFilename2(void)
 
     if (mode < 3) {
         if (mode >= 0) {
-            sprintf(viewerinfo->filename, D_0053B998, D_0054F824, evt_file_minor);
+            sprintf(viewerinfo->filename, "E%3d_%03d", D_0054F824, evt_file_minor);
             mode = viewerinfo->fileMode;
             if (mode == 0) {
                 evtMakeViewerPath(0);
@@ -1106,8 +1099,6 @@ s32 EnterEventPos(void)
     PushMenu(0xA, 0x9C, 0x54);
     return 0;
 }
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B998);
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", EnterData);
 
@@ -1200,17 +1191,15 @@ void evtInitEventViewer(void)
     memset(viewer, 0, 0x2328);
     viewer->block = block;
     viewerinfo = viewer;
-    process = dds3StartProcess(D_0053B9E8, 0x3E8, 1, 1, evtEventViewerProcess1,
+    process = dds3StartProcess("EventViewer", 0x3E8, 1, 1, evtEventViewerProcess1,
                                evtEventViewerShutdown, viewer);
     dds3LinkProcess(process, evtInitSky());
 }
 
 s32 evtKillEventViewer(void)
 {
-    return dds3KillProcessName(D_0053B9E8, 1);
+    return dds3KillProcessName("EventViewer", 1);
 }
-
-INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B9E8);
 
 INCLUDE_SDATA(const s32, "event/evtEventViewer", viewerinfo);
 

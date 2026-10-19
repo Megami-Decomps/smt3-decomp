@@ -43,7 +43,6 @@ extern s32 nbCameraStartState;
 
 extern u32 D_0054F37C;
 
-extern char D_00534608[];
 
 extern char D_00534630[];
 
@@ -104,7 +103,8 @@ s32 nbCameraStart(void)
 {
     if (D_0054F370 != 0) {
         D_0054F370 = 0;
-        printf(D_00534608, D_0054F374);
+        printf("nbCameraStart:Read Wait = %d ****
+", D_0054F374);
     }
     if (D_0054F378 != 0) {
         if (nbCameraStartState == 5) {
@@ -132,8 +132,6 @@ void nb_1B3490(void)
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", func_001B34B0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbCameraStartEnd", D_00534608);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCameraStartEnd", D_00534630);
 

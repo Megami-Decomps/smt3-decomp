@@ -40,10 +40,6 @@ void *sdfChipAllocDirect(u32 size);
 void sdfChipFreeDirect(void *ptr);
 int printf(const char *fmt, ...);
 
-extern char D_0052DD78[]; /* PAD: starting-list heading */
-extern char D_0052DDA8[]; /* PAD: "<<< %d >>>\n" */
-extern char D_0052DDB8[]; /* PAD: running-list heading */
-extern char D_0052DDE8[]; /* PAD: ending-list heading */
 extern char D_0054E8A8[];
 extern char D_0054E8B0[];
 extern char dds3ProcessTreeDepth[];
@@ -457,12 +453,13 @@ void dds3PrintProcessList(void)
 {
     char *countFormat;
 
-    DebugProcess(startinglistf, D_0052DD78);
-    countFormat = D_0052DDA8;
+    DebugProcess(startinglistf, "*** starting ***************************");
+    countFormat = "<<< %d >>>
+";
     printf(countFormat, startinglistcnt);
-    DebugProcess(runninglistf, D_0052DDB8);
+    DebugProcess(runninglistf, "*** running ****************************");
     printf(countFormat, runninglistcnt);
-    DebugProcess(endinglistf, D_0052DDE8);
+    DebugProcess(endinglistf, "*** ending *****************************");
     printf(countFormat, endinglistcnt);
     printf(D_0054E8A8);
 }
@@ -488,14 +485,6 @@ void DebugProcessTree(dds3ProcessID_t *process, s32 depth)
         DebugProcessTree(process->sibling, depth);
     }
 }
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DD78);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DDA8);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DDB8);
-
-INCLUDE_RODATA(const s32, "kernel/dds3KernelCore", D_0052DDE8);
 
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3PrintProcessTree);
 
