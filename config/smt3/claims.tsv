@@ -186,7 +186,9 @@ src/smt3/event/evtPolygonMovie.c	r2	done	2026-10-19	40 / 11048	fresh unit, never
 src/smt3/interface/frFont.c	r3	done	2026-10-19	26 / 8176	fresh unit, never claimed
 src/smt3/effect/effBattle.c	r4	done	2026-10-19	31 / 5824	fresh unit, never claimed
 src/smt3/effect/effMagatuhi.c	r5	done	2026-10-19	18 / 10000	fresh unit, never claimed
-src/smt3/effect/billManager.c	r6	open	2026-10-19	20 / 8128	fresh unit, never claimed
-src/smt3/interface/itfMesManager.c	r7	open	2026-10-19	23 / 6480	fresh unit, never claimed
+src/smt3/effect/billManager.c	r6	done	2026-10-19	20 / 8128	fresh unit, never claimed
+src/smt3/interface/itfMesManager.c	r7	done	2026-10-19	23 / 6480	fresh unit, never claimed
 src/smt3/effect/polyManager.c	r8	open	2026-10-19	20 / 7104	fresh unit, never claimed
 src/smt3/field/fldFileResolver.c	r9	open	2026-10-19	14 / 8248	fresh unit, never claimed
+src/smt3/event/evtUnitManager.c	s1	open	2026-10-19	10 / 6992	fresh unit, never claimed
+src/smt3/effect/effPCPMisc.c	s2	open	2026-10-19	9 / 7000	fresh unit, never claimed
