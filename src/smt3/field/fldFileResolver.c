@@ -92,9 +92,40 @@ extern s32 strcmp(const char *left, const char *right);
 void fldMakeFilePath(char *path, s32 field, s32 unused);
 
 
-extern void sprintf(char *dst, const char *format, ...);
+extern s32 sprintf(char *dst, const char *format, ...);
 
-void fldMakeObjectBasic3(void);
+s32 fldMakeObjectBasic3(void);
+
+void fldMakeObjectBasic2(void);
+
+typedef struct fldModelData_t {
+    u8 unk00[16]; /* 0x00 */
+    u8 modelDef[16]; /* 0x10: the model definition dds3AddModelBasic2 takes */
+    void *playBook; /* 0x20: motion play book */
+} fldModelData_t;
+
+typedef struct fldResourceAreaRef_t {
+    u32 word00; /* 0x00 */
+    const u8 *name; /* 0x04 */
+} fldResourceAreaRef_t;
+
+extern dds3Basic_t *dds3AddModelBasic2(u32 key, void *modelDef, void *playBook, s32 texList, const char *name);
+
+extern void dds3MatterObjectBasicSetOt(dds3Basic_t *object, s32 index);
+
+extern s32 fldCommand_GetHojiID(const char *name);
+
+extern void dds3MatterObjectBasicSetHojiID(dds3Basic_t *object, s32 hojiId);
+
+extern dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *item);
+
+extern void dds3ObjectBaseMakeMatter(dds3Basic_t *object);
+
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
+
+extern fldFileResource_t *D_00551C8C;
+
+extern u32 D_00551C90;
 
 extern s32 fldGetHojiFlag(s32 mapId, u32 slotIndex, s32 bit);
 
@@ -174,7 +205,17 @@ extern u32 D_0054EBDC, D_0054EBE0, D_0054EBE0, D_0054EBE4;
 
 u8 fldCheckNextFile(void);
 
-extern void fldPreloadNextFile(char *out);
+void fldPreloadNextFile(char *out);
+
+extern s32 evtBitCheck(s32 bit);
+
+extern char D_00531A50[]; /* "%sf%03d_00c.LB" */
+
+extern char D_00531A60[]; /* "%sf%03d_00b.LB" */
+
+extern char D_00531A70[]; /* "%sf%03d_000.LB" */
+
+extern char D_00531A80[]; /* "%sf%03d_00d.LB" */
 
 extern char fldFieldPackFlag[];
 
@@ -206,11 +247,162 @@ extern void fldAutoMapFontInit(s32 mapIndex);
 
 void fldFreePac0(void);
 
+void fldFreeFile(void);
+
+u32 fldLoadFile(const char *name);
+
+extern u32 gFldInf_WpExit;
+
+extern s32 dds3GetMapNo(dds3Basic_t *world);
+
+extern void fldPlayerALoad(void);
+
+extern void fldInitBlurEffect(void);
+
+extern s32 sdfDevLoadTexList(const char *path);
+
+extern s32 sdfDevLoadFileEx(const char *path, void **destination, s32 mode);
+
+extern void fldSetupDoorScenes(void);
+
+extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *world, void *memory);
+
+extern volatile s32 fldSceneParam[];
+
+extern char D_0054EC08[]; /* "%s.TB" */
+
+extern char D_0054EC10[]; /* "%s.f2" */
+
+extern char D_0054EC18[]; /* "%s.f1" */
+
+extern s32 dds3SearchProcessName(const char *name);
+
+extern void fldDrwZFree(void);
+
+extern void fldClearSe3D(void);
+
+extern s32 fldTitleChk(void);
+
+extern s32 fldTitleMiniChk(void);
+
+extern s32 dds3KillProcessName(const char *name, s32 shutdownTimer);
+
+extern void fldFreeModelTable(void);
+
+extern void fldClearTakaraSlots(void);
+
+extern void fldFreeNpcModel(void);
+
+extern void fldAutoMapFree(void);
+
+extern void fldAutoMapFileFree(void);
+
+extern void fldFreeBlurEffect(void);
+
+extern void fldClearMatterFlags(void);
+
+extern void fldClearEveRngTable(void);
+
+extern void fldSe_Init(void);
+
+extern void fldClearModelSlots(void);
+
+extern s32 sdfTexListFree(s32 list, s32 all);
+
+extern sdfMemHandle_t *D_0055DA98[];
+
+extern void *D_0055DAA8[];
+
+extern u32 D_0054EBCC;
+
+extern struct fileRequest_t *fldFileBuf1;
+
+extern char D_00531AA8[]; /* "PipeMain" */
+
+extern char D_00531AB8[]; /* "fldTitle" */
+
+extern char D_00531AC8[]; /* "fldTitleMini" */
+
 extern u8 D_0054EC00[];
 
 void fldFileAddrResetMode(u32 relocateOnRelease);
 
+void fldHojiDebugView(void);
+
+void fldHojiDebugView2(void);
+
+extern s32 dds3ObjectBaseAddModelOt(s32 field, s32 area, s32 block);
+
+extern char D_00531B40[]; /* "VIS-HOJI" */
+
+extern char D_00531B50[]; /* "ANM-HOJI" */
+
+extern void fldDbgPrint2D(s32 x, s32 y, const char *format);
+
+extern s32 fldGbChkHit(s32 field, s32 area, s32 block);
+
+extern char D_00531B08[]; /* "GMC-HOJI" */
+
+extern char D_00531B18[]; /* "HIT-HOJI" */
+
+extern char D_00531B28[]; /* "0123456789ABCDEF" */
+
+extern char D_0054EC20[]; /* "%02d" */
+
+extern char D_0054EC28[]; /* "." */
+
+extern char D_0054EC30[]; /* "%d" */
+
 extern u32 gFldFileResetMode;
+
+extern void fldFileResolverFL1(void *info);
+
+u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer);
+
+extern void fldDrwZAlloc(void);
+
+extern void fldAutoMapSetField(s32 field, s32 area, s32 block);
+
+extern s32 sdfTexSetTB(void *data);
+
+extern u32 D_0054EB98, D_0054EBD0, D_0054EBD4, fldFileBuf2;
+
+extern u8 *FildMaskObj, *mat_black, *mat_white, *mat_line;
+
+extern u32 fldJDataHandle[];
+
+typedef struct fldConstruntAreaFL2_t {
+    u32 word00; /* 0x00 */
+    const char *areaName; /* 0x04 */
+    u32 areaId; /* 0x08 */
+} fldConstruntAreaFL2_t;
+
+extern dds3Basic_t *dds3AddAreaBasic(u32 areaId, const char *areaName);
+
+void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *blockTable, u32 blockCount);
+
+s32 fldLoadNextFile(s32 area, s32 room);
+
+typedef struct fldFileAreaDataFL2_t {
+    u32 word00;
+    s32 label; /* 0x04: the script entry recorded for a field retry. */
+} fldFileAreaDataFL2_t;
+
+typedef struct fldFileInfoHeaderFL2_t {
+    u32 nResourceTypeTable; /* 0x00 */
+    void *pResourceTypeTable; /* 0x04 */
+    fldFileAreaDataFL2_t *pAreaData; /* 0x08 */
+    u32 nArea; /* 0x0C */
+    fldConstruntAreaFL2_t *pAreaTable; /* 0x10 */
+} fldFileInfoHeaderFL2_t;
+
+extern void fldMakeResouceBasicFL2(void *typeTable, u32 typeCount);
+
+extern s32 fldRetryFileId[];
+
+void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info);
+
+s32 fldLoadNextTask(void);
 
 dds3Basic_t *fldMakeDmyMatter(void) {
     f32 position[4];
@@ -286,12 +478,107 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL1);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL2);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeBlockBasicFL2);
+void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *blockTable, u32 blockCount) {
+    u32 i;
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeObjectBasic2);
+    dds3GetControlScene();
+    for (i = 0; i < blockCount; i++) {
+        dds3Basic_t *area = dds3AddAreaBasic(blockTable[i].areaId, blockTable[i].areaName);
+        if (i == 0) {
+            fldGlobalBase.fastArea = area;
+        }
+    }
+}
+
+void fldMakeObjectBasic2(void) {
+    f32 position[4];
+    f32 rotation[4];
+    fldFileResource_t *resource = D_00551C8C;
+    u32 count = D_00551C90;
+
+    if (resource != NULL) {
+        s32 resourceIndex;
+        dds3Basic_t *secondaryWorld = dds3GetControlScene();
+
+        for (resourceIndex = 0; resourceIndex < count; resourceIndex++, resource++) {
+            fldModelData_t *data = (fldModelData_t *)resource->data;
+            dds3Basic_t *matter;
+            u32 hitIndex;
+            fldFileResource_t *hit;
+            fldResourceAreaRef_t *areaRef;
+
+            dds3AddModelBasic2(resource->id, data->modelDef, data->playBook, D_0054EB98, resource->name);
+            if (resource->transform != NULL) {
+                position[0] = resource->transform[0];
+                position[1] = resource->transform[1];
+                position[2] = resource->transform[2];
+                position[3] = 0.0f;
+                rotation[0] = resource->transform[4];
+                rotation[1] = resource->transform[5];
+                rotation[2] = resource->transform[6];
+                rotation[3] = resource->transform[7];
+            } else {
+                position[0] = 0.0f;
+                position[1] = 0.0f;
+                position[2] = 0.0f;
+                position[3] = 0.0f;
+                rotation[0] = 0.0f;
+                rotation[1] = 0.0f;
+                rotation[2] = 0.0f;
+                rotation[3] = 0.0f;
+            }
+            matter = dds3AddMatterObjectBasic(resource->id, position, rotation);
+            dds3SetUnitObjectId(matter, (u32)resource->name);
+            if (fldGlobalBase.area >= 200 && fldGlobalBase.area < 500) {
+                switch (resourceIndex) {
+                case 0:
+                    dds3MatterObjectBasicSetOt(matter, 1);
+                    break;
+                case 1:
+                    dds3MatterObjectBasicSetOt(matter, 2);
+                    break;
+                case 2:
+                    dds3MatterObjectBasicSetOt(matter, 3);
+                    break;
+                case 3:
+                    dds3MatterObjectBasicSetOt(matter, 4);
+                    break;
+                default:
+                    dds3MatterObjectBasicSetOt(matter, 5);
+                    break;
+                }
+            } else {
+                dds3MatterObjectBasicSetOt(matter, 6);
+            }
+            dds3MatterObjectBasicSetHojiID(matter, fldCommand_GetHojiID(resource->name));
+            dds3ObjectBaseSetControlBasic(matter, dds3SearchSceneBasic(secondaryWorld, resource->id, 10));
+            dds3ObjectBaseMakeMatter(matter);
+            hit = g_pHitData;
+            for (hitIndex = 0; hitIndex < g_nHitData; hitIndex++, hit++) {
+                if (hit->names != NULL) {
+                    fldFileNameEntry_t *nameEntry = hit->names->entries;
+                    u32 nameIndex = 0;
+
+                    for (; nameIndex < hit->names->count; nameIndex++, nameEntry++) {
+                        if (strcmp(resource->name, nameEntry->name) == 0) {
+                            fldFindMatterIndexFrom(hit->id, matter);
+                            break;
+                        }
+                    }
+                }
+            }
+            areaRef = (fldResourceAreaRef_t *)resource->word14;
+            if (matter != NULL) {
+                dds3ObjectBaseSetControlBasic(matter,
+                    dds3SceneBasicSearchNameAndType(secondaryWorld, 2, areaRef->name));
+                dds3ObjectBaseRegistArea(matter);
+            }
+        }
+    }
+}
 
 /* Restore the room's named objects and enable their retained path controllers. */
-void fldMakeObjectBasic3(void) {
+s32 fldMakeObjectBasic3(void) {
     char modelName[16];
     char collisionName[16];
     char pathName[16];
@@ -350,7 +637,11 @@ void fldMakeObjectBasic3(void) {
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldFileResolverFL1);
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldFileResolverFL2);
+void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info) {
+    fldMakeBlockBasicFL2(info->pAreaTable, info->nArea);
+    fldMakeResouceBasicFL2(info->pResourceTypeTable, info->nResourceTypeTable);
+    fldRetryFileId[0] = info->pAreaData->label;
+}
 
 u8 *fldGetInfoHeader(fldTransferChunk_t *chunk) {
     return (u8 *)chunk + sizeof(*chunk);
@@ -416,7 +707,32 @@ s32 fldLoadNextFile_BtlRet(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadNextFile);
+s32 fldLoadNextFile(s32 area, s32 room) {
+    char directory[64];
+    char path[80];
+
+    if (area < 10) {
+        return 1;
+    }
+    if (fldGlobalBase.area != area) {
+        return 1;
+    }
+    if (fldGlobalBase.resourceFlag == 1) {
+        return 1;
+    }
+    if (fldGlobalBase.resourceArea == area && fldGlobalBase.resourceFloor == room) {
+        fldGlobalBase.resourceFlag = 2;
+        return 1;
+    }
+    fldFreeNextFile();
+    fldGlobalBase.resourceArea = area;
+    fldGlobalBase.resourceFloor = room;
+    fldMakeFilePath(directory, area, 1);
+    sprintf(path, D_00531A40, directory, area, room);
+    pFldNextFileDataF2 = pacLoad(path);
+    fldGlobalBase.resourceFlag = 1;
+    return 1;
+}
 
 void fldFreeNextFile(void) {
     if (pFldNextFileDataF2 != 0) {
@@ -438,7 +754,16 @@ void fldFreeNextFile(void) {
     fldGlobalBase.resourceFlag = 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadNextTask);
+s32 fldLoadNextTask(void) {
+    if (fldGlobalBase.resourceFlag != 0) {
+        if (fldGlobalBase.resourceFlag == 1) {
+            if (pacCheckEnd(pFldNextFileDataF2) != 0) {
+                fldGlobalBase.resourceFlag = 0;
+            }
+        }
+    }
+    return 0;
+}
 
 u32 fldLoadNextGetStatus(void) {
     return fldLoadNextStatus[0];
@@ -502,9 +827,54 @@ sdfMemHandle_t *fldLoadNextFileF2(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A40);
+void fldPreloadNextFile(char *out) {
+    char directory[32];
+    s32 area = fldGlobalBase.area;
+    s32 floor = fldGlobalBase.floor + 1;
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldPreloadNextFile);
+    fldMakeFilePath(directory, area, 1);
+    if (area == 25) {
+        if (evtBitCheck(0x599) != 0 && evtBitCheck(0x743) == 0) {
+            sprintf(out, D_00531A50, directory, 25);
+            return;
+        }
+    }
+    if (area == 25) {
+        if (floor >= 0x11) {
+            sprintf(out, D_00531A60, directory, 25);
+            return;
+        }
+    }
+    if (area == 24) {
+        if (evtBitCheck(0x4F) != 0) {
+            sprintf(out, D_00531A60, directory, 24);
+            return;
+        }
+        if (evtBitCheck(0x16) != 0 && evtBitCheck(0x3E) == 0) {
+            sprintf(out, D_00531A50, directory, 24);
+            return;
+        }
+    }
+    if (area == 34) {
+        if (floor < 4) {
+            sprintf(out, D_00531A70, directory, 34);
+            return;
+        }
+        if (floor < 0xB) {
+            sprintf(out, D_00531A60, directory, 34);
+            return;
+        }
+        if (floor < 0x13) {
+            sprintf(out, D_00531A50, directory, 34);
+            return;
+        }
+        if (floor < 0x1A) {
+            sprintf(out, D_00531A80, directory, 34);
+            return;
+        }
+    }
+    sprintf(out, D_00531A70, directory, area);
+}
 
 u8 fldCheckNextFile(void) {
     char buf[32];
@@ -512,6 +882,16 @@ u8 fldCheckNextFile(void) {
     fldPreloadNextFile(buf);
     return strcmp(fldFieldPackFlag, buf) != 0;
 }
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A40);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A50);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A60);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A70);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A80);
 
 void fldLoadFieldPack(void) {
     char name[32];
@@ -578,29 +958,385 @@ void fldFreePac0(void) {
     fldFieldPackFlag[0] = D_0054EC00[0];
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadFile);
+u32 fldLoadFile(const char *name) {
+    char path[128];
+    char directory[64];
+    void *textureData;
+    void *fileData;
+    s32 field;
+    s32 area;
+    s32 index;
+    s32 resident;
+    sdfPacWork_t *work;
+    fldTransferChunk_t *chunk;
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldLoadFile_FromMemory);
+    gFldFileResetMode = 0;
+    D_0054EBD4 = 0;
+    fldFileBuf2 = 0;
+    gFldInf_WpExit = 0;
+    field = dds3GetMapNo(dds3GetControlScene()) >> 16;
+    area = dds3GetMapNo(dds3GetControlScene()) & 0xFFFF;
+    fldAutoMapSetField(field, area - 1, 0);
+    if (fldGlobalBase.area < 200) {
+        fldPlayerALoad();
+    }
+    if (!((u32)(fldGlobalBase.area - 200) < 300)) {
+        fldDrwZAlloc();
+    }
+    fldClearMatterFlags();
+    fldClearEveRngTable();
+    fldSe_Init();
+    fldClearModelSlots();
+    fldClearTakaraSlots();
+    if (fldGlobalBase.reuseAreaResources == 0) {
+        fldInitBlurEffect();
+        fldLoadFieldPack();
+    } else if (fldCheckNextFile() != 0) {
+        fldAutoMapFree();
+        fldAutoMapFileFree();
+        fldFreePac0();
+        fldLoadFieldPack();
+    }
+    resident = (u32)(fldGlobalBase.area - 200) < 300;
+    if (fldGlobalBase.area < 100) {
+        resident = 1;
+    }
+    if (resident != 0) {
+        if (fldLoadNextGetStatus3(field, area) != 0) {
+            fldFileBuf1 = pFldNextFileDataF2;
+            pFldNextFileDataF2 = NULL;
+            fldFreeNextFile();
+        } else {
+            fldMakeFilePath(directory, field, 1);
+            sprintf(path, D_00531A40, directory, field, area);
+            fldFileBuf1 = pacLoad(path);
+            pacSync(fldFileBuf1);
+        }
+        D_0054EB98 = 0;
+        D_0054EBD0 = 0;
+        index = 0;
+        work = ((filePacRequest_t *)fldFileBuf1)->packet.head;
+        if (work != NULL) {
+            do {
+                switch (index) {
+                case 0:
+                    D_0054EB98 = sdfTexSetTB(work->data);
+                    sdfMemFreeDelayedDirect((sdfMemHandle_t *)work->resrc);
+                    D_0054EBD0 = 0;
+                    break;
+                case 1:
+                    fldFileBuf2 = 0;
+                    fileData = work->data;
+                    chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
+                    mat_line = fileData;
+                    mat_white = (u8 *)chunk;
+                    fldAddressResolver((u32)fileData, chunk);
+                    fldFileResolverFL2((fldFileInfoHeaderFL2_t *)fldGetInfoHeader(chunk));
+                    break;
+                case 2:
+                    D_0054EBD4 = 0;
+                    fileData = work->data;
+                    chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
+                    mat_black = fileData;
+                    FildMaskObj = (u8 *)chunk;
+                    fldAddressResolver((u32)fileData, chunk);
+                    fldFileResolverFL1(fldGetInfoHeader(chunk));
+                    break;
+                }
+                work = work->next;
+                index++;
+            } while (work != NULL);
+        }
+    }
+    if (resident == 0) {
+        D_0054EBD0 = (u32)fldLoadNextFileTB(&textureData, field, area);
+        if (D_0054EBD0 == 0) {
+            sprintf(path, D_0054EC08, name);
+            D_0054EB98 = sdfDevLoadTexList(path);
+        } else {
+            D_0054EB98 = sdfTexSetTB(textureData);
+            sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EBD0);
+            D_0054EBD0 = 0;
+        }
+    }
+    if (resident == 0) {
+        sprintf(path, D_0054EC10, name);
+        fldFileBuf2 = (u32)fldLoadNextFileF2(&fileData, field, area);
+        if (fldFileBuf2 == 0) {
+            fldFileBuf2 = sdfDevLoadFileEx(path, &fileData, 0);
+        }
+        chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
+        mat_line = fileData;
+        mat_white = (u8 *)chunk;
+        fldAddressResolver((u32)fileData, chunk);
+        fldFileResolverFL2((fldFileInfoHeaderFL2_t *)fldGetInfoHeader(chunk));
+        sprintf(path, D_0054EC18, name);
+        D_0054EBD4 = (u32)fldLoadNextFileF1(&fileData, field, area);
+        if (D_0054EBD4 == 0) {
+            D_0054EBD4 = sdfDevLoadFileEx(path, &fileData, 0);
+        }
+        chunk = (fldTransferChunk_t *)((u8 *)fileData + 8);
+        mat_black = fileData;
+        FildMaskObj = (u8 *)chunk;
+        fldAddressResolver((u32)fileData, chunk);
+        fldFileResolverFL1(fldGetInfoHeader(chunk));
+    }
+    fldMakeObjectBasic2();
+    fldMakeObjectBasic3();
+    if (fldSceneParam[22] != 0 && field < 200 && fldFieldPackData != NULL) {
+        u8 *destination;
+        u8 *source;
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldFreeFile);
+        D_0054EBCC = (u32)sdfMemAllocDirect(sdfMemGetSize(fldFieldPackData));
+        destination = sdfMemGetPtr((sdfMemHandle_t *)D_0054EBCC);
+        source = sdfMemGetPtr(fldFieldPackData);
+        memcpy(destination, source, sdfMemGetSize(fldFieldPackData));
+        dds3SceneBasicLoadScriptFile_FromMem(dds3GetControlScene(), (void *)D_0054EBCC);
+    }
+    fldSetupDoorScenes();
+    fldGlobalBase.reuseAreaResources = 0;
+    return D_0054EBD4;
+}
+
+u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer) {
+    fldTransferChunk_t *chunk;
+
+    gFldFileResetMode = 0;
+    D_0054EBD4 = 0;
+    fldFileBuf2 = 0;
+    D_0054EBD0 = 0;
+    D_0054EB98 = 0;
+    if (field != 800) {
+        fldDrwZAlloc();
+    }
+    fldAutoMapSetField(field, area - 1, 0);
+    if (textureBuffer != NULL) {
+        D_0054EB98 = sdfTexSetTB(textureBuffer);
+    }
+    chunk = (fldTransferChunk_t *)(fl2Buffer + 8);
+    mat_white = (u8 *)chunk;
+    mat_line = fl2Buffer;
+    fldAddressResolver((u32)fl2Buffer, chunk);
+    fldFileResolverFL2((fldFileInfoHeaderFL2_t *)fldGetInfoHeader(chunk));
+    if (fl1Buffer != NULL) {
+        fl2Buffer = fl1Buffer;
+    }
+    chunk = (fldTransferChunk_t *)(fl2Buffer + 8);
+    FildMaskObj = (u8 *)chunk;
+    mat_black = fl2Buffer;
+    fldAddressResolver((u32)fl2Buffer, chunk);
+    fldFileResolverFL1(fldGetInfoHeader(chunk));
+    fldMakeObjectBasic2();
+    fldJDataHandle[0] = 0;
+    return D_0054EBD4;
+}
+
+void fldFreeFile(void) {
+    s32 i;
+    filePacRequest_t *request;
+    sdfPacWork_t *work;
+
+    if (dds3SearchProcessName(D_00531AA8) != 0) {
+        return;
+    }
+    fldDrwZFree();
+    fldClearSe3D();
+    if (fldTitleChk() != 0) {
+        dds3KillProcessName(D_00531AB8, 1);
+    }
+    if (fldTitleMiniChk() != 0) {
+        dds3KillProcessName(D_00531AC8, 1);
+    }
+    fldFreeModelTable();
+    fldClearTakaraSlots();
+    fldFreeNpcModel();
+    if (fldGlobalBase.area < 200) {
+        if (fldGlobalBase.reuseAreaResources == 0) {
+            fldAutoMapFree();
+            fldAutoMapFileFree();
+            fldFreeBlurEffect();
+            fldFreePac0();
+        }
+        fldClearMatterFlags();
+        fldClearEveRngTable();
+        fldSe_Init();
+        fldClearModelSlots();
+    }
+    sdfTexListFree(D_0054EB98, 1);
+    D_0054EB98 = 0;
+    for (i = 0; i < 4; i++) {
+        if (D_0055DA98[i] != NULL) {
+            sdfMemFreeDelayedDirect(D_0055DA98[i]);
+            D_0055DA98[i] = NULL;
+            D_0055DAA8[i] = NULL;
+        }
+    }
+    if (gFldFileResetMode != 0) {
+        if (FildMaskObj != NULL) {
+            fldAddressResolverReset((u32)mat_black, (fldTransferChunk_t *)FildMaskObj);
+            FildMaskObj = NULL;
+            mat_black = NULL;
+        }
+        if (mat_white != NULL) {
+            fldAddressResolverReset((u32)mat_line, (fldTransferChunk_t *)mat_white);
+            mat_white = NULL;
+            mat_line = NULL;
+        }
+    }
+    D_0054EBCC = 0;
+    if (D_0054EBD0 != 0) {
+        sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EBD0);
+        D_0054EBD0 = 0;
+    }
+    if (D_0054EBD4 != 0) {
+        sdfMemFreeDelayedDirect((sdfMemHandle_t *)D_0054EBD4);
+        D_0054EBD4 = 0;
+    }
+    if (fldFileBuf2 != 0) {
+        sdfMemFreeDelayedDirect((sdfMemHandle_t *)fldFileBuf2);
+        fldFileBuf2 = 0;
+    }
+    if (fldGlobalBase.area < 200) {
+        if (fldGlobalBase.word10 != fldGlobalBase.area) {
+            fldGlobalBase.word10 = fldGlobalBase.area;
+        }
+        if (fldGlobalBase.previousFloor != fldGlobalBase.floor) {
+            fldGlobalBase.previousFloor = fldGlobalBase.floor;
+        }
+    }
+    request = (filePacRequest_t *)fldFileBuf1;
+    if (request != NULL) {
+        work = request->packet.head;
+        i = 0;
+        if (work != NULL) {
+            do {
+                if (i > 0) {
+                    sdfMemFreeDelayedDirect((sdfMemHandle_t *)work->resrc);
+                }
+                work = work->next;
+                i++;
+            } while (work != NULL);
+        }
+        pacFileHandleFree_(fldFileBuf1);
+        fldFileBuf1 = NULL;
+    }
+}
 
 /* Select the ordinary field, battle or event resource directory. */
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531AA8);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531AB8);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531AC8);
+
 void fldMakeFilePath(char *path, s32 field, s32 unused) {
     if (field < 200) sprintf(path, "/fld/f/f%03d/", field);
     else if (field < 500) sprintf(path, "/fld/b/f%03d/", field);
     else sprintf(path, "/fld/e/f%03d/", field);
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldHojiDebugView);
+void fldHojiDebugView(void) {
+    char buf[32];
+    s32 i;
+    s32 j;
+    s32 x1;
+    s32 x2;
+    s32 flag;
 
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B28);
+    sprintf(buf, D_00531B08);
+    fldDbgPrint2D(0, -800, buf);
+    sprintf(buf, D_00531B18);
+    fldDbgPrint2D(3520, -800, buf);
+    sprintf(buf, D_00531B28);
+    fldDbgPrint2D(0, -704, buf);
+    fldDbgPrint2D(3520, -704, buf);
+    for (i = 0; i < 31; i++) {
+        sprintf(buf, D_0054EC20, i + 1);
+        fldDbgPrint2D(-512, ((i * 12) - 76) << 3, buf);
+        x2 = 3520;
+        x1 = 0;
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldHojiDebugView2);
+        for (j = 0; j < 16; j++) {
+            flag = fldGetHojiFlag(fldGlobalBase.area, i + 1, j);
+            if (flag == 0) {
+                sprintf(buf, D_0054EC28);
+            } else {
+                sprintf(buf, D_0054EC30, flag);
+            }
+
+            fldDbgPrint2D(x1, ((i * 12) - 76) << 3, buf);
+            x1 += 0xC0;
+            flag = fldGbChkHit(fldGlobalBase.area, i + 1, j);
+            if (flag == 0) {
+                sprintf(buf, D_0054EC28);
+            } else {
+                sprintf(buf, D_0054EC30, flag);
+            }
+
+            fldDbgPrint2D(x2, ((i * 12) - 76) << 3, buf);
+            x2 += 0xC0;
+        }
+    }
+}
+
+void fldHojiDebugView2(void) {
+    char buf[32];
+    s32 i;
+    s32 j;
+    s32 x1;
+    s32 x2;
+    s32 flag;
+
+    sprintf(buf, D_00531B40);
+    fldDbgPrint2D(0, -800, buf);
+    sprintf(buf, D_00531B50);
+    fldDbgPrint2D(3520, -800, buf);
+    sprintf(buf, D_00531B28);
+    fldDbgPrint2D(0, -704, buf);
+    fldDbgPrint2D(3520, -704, buf);
+    for (i = 0; i < 31; i++) {
+        sprintf(buf, D_0054EC20, i + 1);
+        fldDbgPrint2D(-512, ((i * 12) - 76) << 3, buf);
+        x2 = 3520;
+        x1 = 0;
+
+        for (j = 0; j < 16; j++) {
+            flag = fldGetModelFlag(fldGlobalBase.area, i + 1, j);
+            if (flag == 0) {
+                sprintf(buf, D_0054EC28);
+            } else {
+                sprintf(buf, D_0054EC30, flag);
+            }
+
+            fldDbgPrint2D(x1, ((i * 12) - 76) << 3, buf);
+            x1 += 0xC0;
+            flag = dds3ObjectBaseAddModelOt(fldGlobalBase.area, i + 1, j);
+            if (flag == 0) {
+                sprintf(buf, D_0054EC28);
+            } else {
+                sprintf(buf, D_0054EC30, flag);
+            }
+
+            fldDbgPrint2D(x2, ((i * 12) - 76) << 3, buf);
+            x2 += 0xC0;
+        }
+    }
+}
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
 void fldFileAddrResetMode(u32 relocateOnRelease) {
     gFldFileResetMode = relocateOnRelease;
 }
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B08);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B18);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B28);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B40);
+
+INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B50);
+
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EB98);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", FildMaskObj);

@@ -679,6 +679,8 @@ SZ(p48, fldFileResource_t, 0x24);
 OFF(p49, fldAreaWork_t, consumedFlags, 0x14);
 OFF(p50, fldAreaWork_t, mode, 0x18);
 OFF(p51, fldAreaWork_t, requestedSceneName, 0x20);
+OFF(p51f, fldAreaWork_t, fastArea, 0x54);
+OFF(p51g, fldAreaWork_t, previousFloor, 0x7C);
 OFF(p52, fldAreaWork_t, resourceFlag, 0x84);
 OFF(p53, fldAreaWork_t, sequenceCode, 0xA0);
 OFF(p54, fldAreaWork_t, reuseAreaResources, 0xA8);

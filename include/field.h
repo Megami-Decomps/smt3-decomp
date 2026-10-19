@@ -50,7 +50,8 @@ typedef struct fldAreaWork_t
     s32 hitMatterIndex;         /* 0x048 */
     s32 word4C;                 /* 0x04C */
     char *retryScript;          /* 0x050 */
-    u8 unk54[8];
+    struct dds3Basic_t *fastArea;      /* 0x054: the first area object built from the FL2 block table */
+    u8 unk58[4];
     s32 word5C;                 /* 0x05C */
     s32 amSBlock;               /* 0x060 */
     s32 amFloor;                /* 0x064 */
@@ -59,7 +60,7 @@ typedef struct fldAreaWork_t
     s32 menuOpenFlag;           /* 0x070 */
     s32 encountState;           /* 0x074 */
     s32 word78;                 /* 0x078 */
-    u8 unk7C[4];
+    s32 previousFloor;          /* 0x07C: last floor fldFreeFile recorded */
     s32 word80;                 /* 0x080 */
     s32 resourceFlag;           /* 0x084 */
     s32 resourceArea;           /* 0x088 */
