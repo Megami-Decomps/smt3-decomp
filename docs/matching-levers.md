@@ -53,6 +53,14 @@ it was measured on DDS and not on this ELF.
 | a run of sibling `if`s after one guard, where your C emits the guard as an early `return` | nest every later `if` inside the guard. `SyuGo2`'s three frame tests under one `if (e->frame >= 0xB)` swapped `e` and the loop counter back into retail's `$16` and `$17`; declaration order, the loop form and an inverted last test all leave the pair swapped |
 | a call's pointer argument computed before an inner call whose result is the next argument | give it its own local: `form = &e->data->form[list[i] + 4];` ahead of `f(0, 0, g(...), 2, form)`. Written inline at the call gcc orders the inner call first and spends one saved register fewer. `PartsEffect2` turned on that alone |
 | the loop body once, with the exit test at the bottom and the first load in the preheader | a `do`/`while`, not a `for`. A `for` whose body carries a `break` gets the whole body peeled ahead of the test, which is 14 words in `SetAction_NEGO` |
+| a packet-list walk whose backedge is `bnez next` with `daddu p, next` in the delay slot | invert the per-node test and repeat the advance: `next = p->next; if (p->f != x) { p = next; continue; } g(p); p = next;`. The positive form `if (p->f == x) { g(p); } p = next;` tests `p` after the copy instead and runs two words long. `nbDelAllUniqueIDKoukaPacket`, `nbDelAllKoukaPacketType` and `nbDelUnEventKoukaPacket` all turned on it, and in `nbDelUnEventKoukaPacket` the skip arm needs `p = next; continue;` inside the `switch` as well, or the `jal`'s delay slot swallows the advance |
+| two `switch` arms reaching one shared `jal` with the argument loaded in each | a `goto` from one arm into the other arm's `if` body, label and all. Four spellings that look equivalent (`break`, an early `return` per arm, an `if`/`else` chain, a result local plus one trailing call) all leave the tail duplicated, four words long. `RunSummonKouka` turned on `goto add;` jumping into the other arm's guarded block |
+| two `jal`s that converge on one epilogue where every spelling of the chain sibcalls both with `j` | a `goto` per arm to one trailing empty label: `if (!(t < 7)) { if (t < 9) { goto seta; } return; } first(); goto done; seta: second(); done: ;`. `RunUnitColKouka` sat at 10 of 57 words with `if`/`else if`, early returns, an `s32` return type, and a dead store to each of six locals; the two `goto`s took it to exact. Note the inner test has to be the positive `t < 9` with the `goto` inside it, since `if (t >= 9) return; goto seta;` emits the branch-likely the other way round |
+| a loop arm that deletes the current node, reached by a long forward branch from the middle of the body | write it last in the loop body behind a forward `goto`: `if (p->framelength < 0) { goto del; } ... continue; del: f(p); p = next;`. Inline (`if (<0) { f(p); p = next; continue; }`) it costs two extra branches, and nesting the rest inside `if (framelength >= 0)` rearranges both jump tables. `nbKoukaProcess1`, 304 words, closed on that one move |
+| a read-modify-write of a field whose value the C keeps live from the test above it | write the RMW through the outer pointer (`p->form->anime &= ~0x80;`) while a local holds the same pointer for the calls. With the local on both sides gcc keeps one load in a register across the guarded block; the outer spelling restores retail's second load and its branch-likely delay-slot copy. `RunDamageMotionKouka` went from 94 of 204 differing words to 16 on that one expression |
+| one guarded call compiled as `jal` plus a full epilogue, with no `switch` in sight | a dead store to a local holding the tested value: `s32 type = p->type; if (type == 0x23) { f(...); type = 0; }`. The `SetNextSeq` row below is the same trick inside a `switch` arm; it works on a plain `if` too. `RunHelpKouka`, `RunHitStopKouka`, `RunSkillColorKouka`, `RunBossEffectKouka`, `RunFadeKouka`, `RunHitEffectKouka` and `RunMotionKouka` all needed exactly this, and it also fixes the `bne`/`bnel` on the guard in the same move |
+| a counter loop with one exit, the count returned through `daddu $2, $5` | `cnt = 0;` before a `while`, not `if (p == NULL) return 0;` ahead of a `do`/`while`. The early return materialises a second zero and runs two words long. `nbGetUniqueIdKoukaPacketCnt` and `nbCountKoukaByType` both turned on it |
+| three `slti`s on one value where your C folds them to an `addiu`/`sltiu` range test | nest them, `if (x >= A) { if (x < B) { if (x >= C) { ... } } }`, with a `goto` into the innermost body for the singleton case. Written as a run of separate `if`s each ending in `continue` they fold anyway, which is the opposite of what the "separate `if` statements" row above predicts: what keeps them apart is the nesting, not the statement split. `nbCheckSePacket` went from 10 of 48 differing words to exact, and the nesting also fixed which parameter got `$16` |
 | an extra range test (`slti`, `bnez` to the default) in front of a two-case compare chain | an extra `case` with an empty body below the lowest real case value. `nbStageProcess1`'s `switch` over 2 and 3 needed a `case 1: break;` to make gcc emit the bound test; an `s32` or `u32` local for the index does not reach it |
 | `bgez` on a sign test where you emit `bgezl` with the epilogue's `ld` duplicated into its delay slot | spell the test as the mask, `if ((stat & 0x80000000) != 0)`, not `if (stat < 0)`. Both are one instruction, but the relational form lets ee-gcc fill the delay slot from the branch target and pay for it with a second epilogue copy. `CheckSenseiOrBackAttack` went from 8 differing words to exact |
 | separate `beq`s on contiguous values inside an `||` chain, where a `switch` would test the middle value first | distribute the shared antecedent instead of nesting the disjunction: `(a == K && f == 8) || (a == K && f == 9) || (a == K && f == 0xA)` keeps three plain `beq`s where `a == K && (f == 8 || f == 9 || f == 0xA)` folds the inner chain to `addiu -8`, `sltiu 3`. gcc still tests the outer value once. `fldOtInit` and `ProcAmCheck` both turned on this |
@@ -88,6 +96,12 @@ it was measured on DDS and not on this ELF.
 
 ## Addressing and types
 
+- The motion-speed setter is inlined in `newbattle/nbKoukaProcess`: retail writes
+  `form->hunit->owner->first->speed` with no `jal`, which pins `mdlObj_t + 0x1C`
+  as `first` and `sdfMotionCtrlr_t + 0x20` as `speed`. Hoist both hops into
+  locals when a `switch` uses them in more than one arm: `RunMotionStopKouka`
+  needs `evtUnit_t *hunit` *and* `mdlObj_t *obj` assigned before the dispatch,
+  since retail loads `hunit->owner` in the dispatch's delay slot.
 - Externs of 8 bytes or less are addressed through `$gp`. Where retail uses
   `lui`/`%lo`, declare the symbol as an incomplete array (`extern s32 x[];`)
   to force absolute addressing.
@@ -533,6 +547,13 @@ it was measured on DDS and not on this ELF.
   ordinary C readily, 42 times in `field/fldDraw` and 126 in
   `newbattle/nbMakePacket`, so a `bnel` in the retail code is not a reason to
   skip a function. Only this one use of it has resisted.
+- Two arms of an `if` holding the *same* call is a real retail shape, not only a
+  cross-jumping artifact. `RunBadMotKaifukuKouka` has two `jal nbSetUnitMotion`
+  with identical argument setup hoisted above the branch, and an `if`/`else`
+  whose arms are the same statement reproduces it; the condition has to be
+  spelled `== 0` rather than inverted, which is what decides the `bnez`/`beqz`
+  order. The `func_00214FD8` row below is the case where gcc collapses them, so
+  measure rather than assuming either way.
 - Two arms of an `if` that compute the same thing. gcc 2.96 cross-jumps them
   whatever the source does: `func_00214FD8` has the same sign test on
   `dds3PadButtonState[0x22]` in both arms, laid out differently in each, and
