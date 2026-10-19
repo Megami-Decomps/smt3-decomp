@@ -1,7 +1,10 @@
 #include "common.h"
 #include "libsdf.h"
 #include "effBattle.h"
+#include "event.h"
+#include "model.h"
 #include "ps2asm.h"
+
 typedef struct effEveBEDParams_t {
     f32 position[4];
     f32 orientation[4];
@@ -14,7 +17,7 @@ typedef struct effEveBEDParams_t {
 /* The constructor reserves 0x38 bytes; only its init prefix is serialized. */
 typedef struct effEveBEDCut_t {
     effEveBEDParams_t init;
-    void *actor;
+    evtUnit_t *actor;
     effBTLCut_t *effect;
 } effEveBEDCut_t;
 
@@ -88,6 +91,12 @@ extern s8 Eve_FilterShow;
 extern effSolidRectParams_t Eve_Filter;
 extern s8 Eve_PartialMultiFilterShow;
 extern effResourceRectWork_t *hEve_PartialMultiFilter;
+extern void dds3EffectBlur(const effBlurQuad_t *source);
+extern void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work);
+extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
+extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
+extern void dds3EffectFilter(effSolidRectParams_t *params);
+extern void dds3EffectPartialMultiFilterDraw(effResourceRectWork_t *work);
 effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *body);
 extern u8 D_00320228[];
 extern u8 D_003201F8[];
@@ -316,6 +325,14 @@ effCubicBezierSlot_t *dds3Bezier4PGetPart(struct effArrHdr_t *table, s32 slotInd
 void dds3EffectPartSetColor(dds3EffectPart_t *work, u32 value);
 s32 dds3Bezier4PPartRun(struct effArrHdr_t *table, s32 slotIndex, f32 *out);
 /* Optional source and matrix operations retain their generic pointer domains. */
+void dds3EffectPartSetRotateMatrix(dds3EffectPart_t *work, sdfMatrix4_t *matrix);
+extern void Mult(void);
+extern void ToMatrix(void);
+extern void MultMatrixNoArg(void);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *root, s32 mark);
+extern sdfVector4_t D_005343D0;
+void effEveBEDPartGetPositionPtr(effEveBEDParams_t *source, effBTLAimParams_t *params);
 void dds3EffectPartSetPosition(dds3EffectPart_t *work, void *source);
 void dds3EffectPartDraw(dds3EffectPart_t *work);
 extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
@@ -475,7 +492,27 @@ void Eve_EffectInit(void) {
     Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
-INCLUDE_ASM(const s32, "effect/effEvent", Eve_EffectDraw);
+/* Draw every screen effect whose show flag is set; the last one tail calls. */
+void Eve_EffectDraw(void) {
+    if (Eve_BlurShow != 0) {
+        dds3EffectBlur(&Eve_Blur.source);
+    }
+    if (Eve_PartialMultiBlurShow != 0) {
+        dds3EffectPartialMultiBlurDraw(hEve_PartialMultiBlur);
+    }
+    if (Eve_DistortionBlurShow != 0) {
+        dds3EffectDistortionBlurDraw(hEve_DistortionBlur);
+    }
+    if (Eve_RippleBlurShow != 0) {
+        dds3EffectRippleBlurDraw(hEve_RippleBlur);
+    }
+    if (Eve_FilterShow != 0) {
+        dds3EffectFilter(&Eve_Filter);
+    }
+    if (Eve_PartialMultiFilterShow != 0) {
+        dds3EffectPartialMultiFilterDraw(hEve_PartialMultiFilter);
+    }
+}
 
 /* Prepare once per flag cycle, then run the registered operations while ready.
  * A negative control byte clears readiness only after those operations. */
@@ -764,7 +801,73 @@ void effEveBEDCutSetUnitHandle(effEveBEDCut_t *work, void *actor) {
     work->actor = actor;
 }
 
+/* NON_MATCHING: 2 of 119 words differ (first at +0xA8). */
+#ifdef NON_MATCHING
+void effEveBEDCutDraw(effEveBEDCut_t *work) {
+    sdfVector4_t position;
+    sdfMatrix4_t base;
+    sdfMatrix4_t marked;
+    effBTLCut_t *cut = work->effect;
+    u32 frame = cut->currentFrame;
+    effBTLCutData_t *list = cut->list;
+    effBTLPart_t *entry;
+    dds3EffectPart_t **works;
+    sdfModelRootNode_t *root;
+    sdfMatrix4_t *mp;
+    u32 color;
+    s32 remaining;
+    u16 count;
+    u8 kind;
+
+    SDF_VU0_LOADVECTOR(work->init.orientation);
+    SDF_VU0_LOADVECTOR_B(&D_005343D0);
+    Mult();
+    ToMatrix();
+    SDF_VU0_STOREMATRIX(&base);
+    entry = list->entries;
+    count = list->count;
+    color = work->init.color;
+    if (count != 0) {
+        remaining = count;
+        works = cut->parameterWorks;
+        do {
+            if (entry->zeroKindCount < frame) {
+                kind = entry->aimParams.scaleKind;
+                if (works[0] != NULL) {
+                    if (kind != 5 || work->actor == NULL) {
+                        effEveBEDPartGetPositionPtr(&work->init, &entry->aimParams);
+                        SDF_VU0_STOREVECTOR(&position);
+                        dds3EffectPartSetPosition(works[0], &position);
+                        dds3EffectPartSetRotateMatrix(works[0], &base);
+                    } else {
+                        root = work->actor->owner->inner;
+                        sdfModelGetMarkPos(root, entry->aimParams.aimMode);
+                        SDF_VU0_STOREVECTOR(&position);
+                        dds3EffectPartSetPosition(works[0], &position);
+                        sdfModelGetMarkPosMatrix(root, entry->aimParams.aimMode);
+                        SDF_VU0_LOADMATRIX_B(&base);
+                        MultMatrixNoArg();
+                        mp = &marked;
+                        SDF_VU0_STOREMATRIX_RWADDR(mp);
+                        dds3EffectPartSetRotateMatrix(works[0], &marked);
+                    }
+                    dds3EffectPartSetColor(works[0], color);
+                    dds3EffectPartDraw(works[0]);
+                }
+            }
+            remaining--;
+            works++;
+            entry++;
+        } while (remaining != 0);
+    }
+    if (cut->triggerFrame == frame && cut->triggerFrameCallback != NULL) {
+        cut->triggerFrameCallback(cut);
+    }
+    cut->currentFrame++;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effEvent", effEveBEDCutDraw);
+#endif
 
 /* Initialize a holder and its effect record; the teardown flag starts set. */
 effSimpleBED_t *effSimpleBEDCreate(effBTL_t *handle, f32 scale) {
@@ -829,9 +932,84 @@ void effSimpleBEDSetRGBA(effSimpleBED_t *work, u32 color) {
     effEveBEDCutSetParams(work->owner, &work->init);
 }
 
-void effEveBEDPartGetPositionPtr(effEveBEDParams_t *source, effBTLAimParams_t *params);
+/* vu0 routine: place one part relative to the record's position and facing. */
+void effEveBEDPartGetPositionPtr(effEveBEDParams_t *source, effBTLAimParams_t *params) {
+    sdfVector4_t out;
+    sdfVector4_t offset;
+    sdfVector4_t position;
+    s32 range = params->rangeOverride;
+    u8 dir = params->directionMode;
+    u8 mode = params->aimMode;
+    f32 radius;
+    f32 half;
+    f32 y;
+    f32 zero;
 
-INCLUDE_ASM(const s32, "effect/effEvent", effEveBEDPartGetPositionPtr);
+    if (range == 0) {
+        radius = source->range;
+    } else {
+        radius = (f32)range;
+    }
+    half = source->height * 0.5f;
+    SDF_VU0_COPYVECTOR(&position, source);
+    if (mode == 5) {
+        if (dir == 8 || dir == 0xA) {
+            y = -1.0f;
+            if (range != 0) {
+                y = -radius;
+            }
+        } else {
+            y = -1.0f;
+        }
+    } else {
+        y = position.y - D_00320B88[mode] * half;
+        if (dir == 8 || dir == 0xA) {
+            if (range != 0) {
+                y -= radius;
+            }
+        }
+    }
+    if (dir == 9 || mode == 4) {
+        if (half < radius) {
+            offset.z = -radius;
+        } else {
+            offset.z = -half;
+        }
+        zero = 0.0f;
+        offset.y = zero;
+        offset.x = zero;
+        position.y = y;
+        LookAtMatrix(&position, aViewEye, aViewDown);
+        ReverseMatrix();
+        SDF_VU0_LOADVECTOR(&offset);
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_LOADVECTOR_B(&position);
+        SDF_VU0_ADDVECTOR();
+        return;
+    }
+    if (dir == 8 || dir == 0xA) {
+        out.x = position.x;
+        out.y = y;
+        out.z = position.z;
+    } else {
+        offset.x = 0.0f;
+        offset.z = 1.0f;
+        offset.y = 0.0f;
+        SDF_VU0_LOADVECTOR(source->orientation);
+        ToMatrix();
+        SetRotateMatrixY_B(D_00320BA0[dir]);
+        MultMatrixNoArg();
+        SDF_VU0_LOADVECTOR(&offset);
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(&offset);
+        out.x = position.x + radius * offset.x;
+        out.y = y + radius * offset.y;
+        out.z = position.z + radius * offset.z;
+    }
+    SDF_VU0_LOADVECTOR(&out);
+}
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_005343D0);
 
@@ -931,13 +1109,124 @@ void effEVECombParSmokePartInit(effEventBillSet_t *work, s32 index) {
 
 void eff_1AEC58(effEventBillSet_t *work);
 
-INCLUDE_ASM(const s32, "effect/effEvent", eff_1AEC58);
+/* vu0 routine: advance and draw every live particle of one smoke set. */
+void eff_1AEC58(effEventBillSet_t *work) {
+    f32 offset[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 origin[EFF_EVENT_VECTOR_COMPONENTS];
+    f32 side[EFF_EVENT_VECTOR_COMPONENTS];
+    effEventBillParticle_t *particle;
+    u8 repeat;
+    u32 count;
+    s32 duration;
+    s32 fadeIn;
+    s32 fadeOut;
+    u32 color;
+    f32 growth;
+    f32 swayPhaseStep;
+    f32 swayAmplitudeStep;
+    f32 drift;
+    f32 wave;
+    f32 ratio;
+    f32 scaleX;
+    f32 scaleY;
+    u32 rgba;
+    s32 age;
+    s32 remaining;
+    u32 i;
+
+    SDF_VU0_LOADVECTOR(aViewTarget);
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_LOADVECTOR_B(aViewDown);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(side);
+    growth = work->head.accelerationPercent / 100.0f + 1.0f;
+    particle = work->particles;
+    count = work->head.particleCount;
+    repeat = work->head.repeat;
+    duration = work->head.duration;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    color = work->head.color;
+    swayPhaseStep = work->head.swayPhaseStep;
+    swayAmplitudeStep = work->head.swayAmplitudeStep;
+    SDF_VU0_COPYVECTOR(origin, work);
+    i = 0;
+    dds3BillboardSetMode((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, work->head.drawMode);
+    dds3BillboardSetMode((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, 3);
+    for (; i < count; i++, particle++) {
+        age = particle->age;
+        if (age == 0) {
+            effEVECombParSmokePartInit(work, i);
+        }
+        if (age > 0 && age <= duration) {
+            if (particle->motionDelay >= 0) {
+                drift = particle->lateralSpeed;
+                particle->position[0] += side[0] * drift;
+                particle->position[1] += side[1] * drift;
+                particle->position[2] += side[2] * drift;
+                wave = particle->swayAmplitude * sdfSin(particle->swayPhase);
+                particle->motion[1] += particle->verticalSpeed;
+                offset[0] = particle->position[0] + particle->motion[0] * wave;
+                offset[1] = particle->position[1] + particle->motion[1];
+                offset[2] = particle->position[2] + particle->motion[2] * wave;
+                particle->verticalSpeed *= growth;
+                particle->lateralSpeed *= growth;
+                particle->swayAmplitude += swayAmplitudeStep;
+                particle->swayPhase += swayPhaseStep;
+            } else {
+                particle->motionDelay++;
+                offset[0] = particle->position[0];
+                offset[1] = particle->position[1];
+                offset[2] = particle->position[2];
+            }
+            if (age < fadeIn) {
+                ratio = (f32)age / (f32)fadeIn;
+            } else {
+                remaining = duration - age;
+                if (remaining <= fadeOut) {
+                    ratio = (f32)remaining / (f32)fadeOut;
+                } else {
+                    ratio = 1.0f;
+                }
+            }
+            rgba = effColorBlend(color & 0xFFFFFF, color, ratio);
+            scaleY = particle->baseScale;
+            scaleX = scaleY + particle->scaleAmplitudeX * sdfCos(particle->scalePhaseX);
+            scaleY = scaleY + particle->scaleAmplitudeY * sdfCos(particle->scalePhaseY);
+            SDF_VU0_LOADVECTOR_MEMOPS(offset[0]);
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_MEMOPS(offset[0]);
+            dds3BillboardSetPosition((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, offset);
+            dds3BillboardSetScale((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, scaleX, scaleY);
+            dds3BillboardSetRGBA((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, rgba);
+            dds3BillboardSetRotate((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, particle->rotation);
+            dds3BillboardDraw((dds3Billboard_t *)hEffEveCPSmokeBill01Tex);
+            dds3BillboardSetPosition((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, offset);
+            dds3BillboardSetScale((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, scaleX, scaleY);
+            dds3BillboardSetRGBA((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, rgba);
+            dds3BillboardSetRotate((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, particle->rotation);
+            dds3BillboardDraw((dds3Billboard_t *)hEffEveCPSmokeBill02Tex);
+            particle->scalePhaseX += particle->scalePhaseStepX;
+            particle->scalePhaseY += particle->scalePhaseStepY;
+            particle->rotation += particle->angularSpeed;
+        }
+        if (duration == age && repeat != 0) {
+            particle->age = 0;
+        } else {
+            particle->age++;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effEvent", effEVECombParSmokeDraw);
 
-void effEVECombParSmokeSetPosition(void *dst, void *src);
-
-INCLUDE_ASM(const s32, "effect/effEvent", effEVECombParSmokeSetPosition);
+/* vu0 routine: copy one quadword of position between unaligned records. */
+void effEVECombParSmokeSetPosition(void *dst, void *src) {
+    SDF_VU0_COPYVECTOR(dst, src);
+}
 
 /* Set the native byte flag without normalizing it to a boolean. */
 void effEVECombParSmokeSetZtest(effEventBillSet_t *work, u8 flag) {

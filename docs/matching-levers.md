@@ -981,6 +981,50 @@ it was measured on DDS and not on this ELF.
   the `else` the arm addresses the frame directly and the function is 26 of 124
   words out, and the second store has to stay `text[1] = 0` (frame-addressed)
   rather than `p[1]`.
+- A frame address that a VU0 store and a following call argument both use is one
+  pseudo for both, and inside a loop that pseudo is loop invariant: gcc hoists
+  the `addiu rd, $29, N` into the preheader, spends the last callee-saved
+  register on it and spills whatever loses the race (in
+  `effEveBEDCutDraw` a colour word, which also grew the frame by 16 and left it
+  71 of 119 words out). Retail rematerialises the address at each use instead,
+  from two short live ranges that never cross the call. Neither
+  `SDF_VU0_STOREMATRIX` nor `_NOMEM` reaches that, and a
+  `sdfMatrix4_t *mp = &marked;` local is folded straight back into the shared
+  pseudo. `SDF_VU0_STOREMATRIX_RWADDR`, whose address operand is `"+r"` so cc1
+  has to give the asm its own copy, is what reproduces it; the function went to 2
+  of 119 words. `_MEMOPS` frees the register too but addresses the frame
+  directly, so the four `sqc2` and everything after them shift by a word.
+- A clamp whose result is stored straight into a vector field belongs in the
+  field, not in an `f32` local: `if (half < radius) { offset.z = -radius; } else
+  { offset.z = -half; }`. With a `depth` local gcc coalesces it with the compared
+  value and negates in place (`neg.s $f2, $f2`) where retail negates into a fresh
+  register, which also rotates the compared value one register down and moves the
+  store past the call's argument setup. That was the last 12 words of
+  `effEveBEDPartGetPositionPtr`, and no declaration order of its five `f32`
+  locals moved any of them.
+- A constant assigned once above an `if (a == K1 || a == K2)` whose body
+  overwrites it comes out hoisted and shared. Retail's two copies, one between
+  the two tests and one at the top of the body, come from writing the assignment
+  in **both** arms: `if (dir == 8 || dir == 0xA) { y = -1.0f; if (...) { y =
+  -radius; } } else { y = -1.0f; }`. `effEveBEDPartGetPositionPtr` went from 114
+  of 138 words to 84 on that duplication alone, and the `&&` spelling of the
+  inner pair changes nothing.
+- Where retail materialises one zero with `mtc1 $0` and stores it with `swc1`
+  twice, the source assigns an `f32` local as a *statement* positioned after the
+  first non-zero store of the same vector, and stores the local into both fields.
+  `offset.y = offset.x` instead gives `sw $0` plus a `lwc1` of the slot back, and
+  the same function stores its other two zeros as plain `0.0f` (`sw $0`) in the
+  other arm, so the two spellings really do coexist in one body. The four stores
+  around it were swept: `offset.z`, the zero local, `offset.y`, `offset.x`,
+  `position.y` is the only order within two words.
+- Two locals that both spill take their stack slots in **declaration** order,
+  and their load order in the prologue follows the statement order separately.
+  In `eff_1AEC58` retail gives `0x30` to the `u8 repeat` and `0x34` to the `u32`
+  particle count; declaring `repeat` first is exact and declaring it last swaps
+  both slots and their four reloads (5 of 262 words). The statement order is a
+  second, independent lever on the same pair: reading the particle pointer before
+  the count took it from 9 of 262 to 5, and all six orders of the three leading
+  reads differ. An `s32` for the `u8` field undoes the slot fix.
 
 ## Function-local constant arrays
 

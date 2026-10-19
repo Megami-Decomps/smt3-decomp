@@ -380,6 +380,15 @@ typedef struct {
     ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
     "sqc2 vf31, 48(%0)\n\t.set reorder" \
     : : "r" (dst))
+/* Same stores with the address as a read-write operand, so cc1 gives the asm
+ * its own copy of it instead of sharing one pseudo with a later use. Needed
+ * for a frame address whose other use is a call argument in the same loop:
+ * the shared form becomes a loop invariant and takes a callee-saved register,
+ * where this one is rematerialised at each use. */
+#define SDF_VU0_STOREMATRIX_RWADDR(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf28, 0(%0)\n\tsqc2 vf29, 16(%0)\n\tsqc2 vf30, 32(%0)\n\t" \
+    "sqc2 vf31, 48(%0)\n\t.set reorder" \
+    : "+r" (dst))
 /* Memory to memory through the matrix bank, which it leaves loaded. */
 #define VU0_COPY_MATRIX(dst, src) __asm__ volatile ( \
     ".set noreorder\n\t" \
