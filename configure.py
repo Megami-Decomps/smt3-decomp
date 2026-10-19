@@ -560,7 +560,7 @@ def write_objdiff(units: dict[str, list[dict]]) -> None:
     categories = [
         {"id": "game", "name": "Atlus game/engine"},
         {"id": "sdk", "name": "Sony SDK / C runtime"},
-        {"id": "vu1", "name": "VU1 microcode (binary)"},
+        {"id": "vu1", "name": "VU0/VU1 microcode"},
         {"id": "handwritten", "name": "Handwritten assembly (not C)"},
         {"id": "data", "name": "Split data segments (not compared)"},
     ]
