@@ -102,7 +102,15 @@ them matched only on the donor's *literal* statement order, oddities included,
 which is a reason to stop editing a transliteration that is close.
 
 So the useful question is not "does this function have a high-confidence
-pairing" but "does dds-decomp have the file this function came from". A shared
+pairing" but "does dds-decomp have the file this function came from".
+
+**Find that file by its string literals.** On `event/evtEventViewerMenu` the
+donor named from the unit's own name was the wrong one: `evtEventViewer.c` is
+the viewer runtime, while that unit is the viewer menu, whose real donor is
+`dds1/game/code_00235270.c`. Grepping dds-decomp for the menu strings
+`VALUE CHANGE.` and `----- NEW FRAME -----` found it, and it aligns almost
+function for function in the same order. 23 of 29 functions came out of it,
+14 of them matching on the first compile from a literal transliteration. A shared
 donor unit also tends to mean a shared type or helper, which is what makes the
 rest of the family cheap once the first body is out.
 

@@ -417,6 +417,47 @@ it was measured on DDS and not on this ELF.
   pins the order. `nbCameraShot_InvokeTarget_Set2` and
   `nbCameraShot_InvokeTargetReverse_Set2` each went from 5 differing words to
   exact on that one local.
+- A run of locals whose initializers are constants materialised in the prologue
+  takes its registers from the *declaration* order, and that order is a real
+  lever. `fldAutoMapDrawBgOfsRF` passes eight constant texture coordinates to
+  `sdfPrimLinkFt4`, each in its own callee-saved register; declaring them
+  `au, av, du, dv, bu, bv, cu, cv` (the fourth corner's pair moved ahead of the
+  second and third) took it from 10 differing words to exact, where all 24
+  orders of the pairs and all 16 u/v swaps inside them were swept to find it.
+  The same permutation in its sibling `fldAutoMapDrawIconOfsRF` is *not*
+  reachable this way, because there the four values are computed from a table
+  mid-function rather than initialized: declaration order and assignment order
+  both have no effect at all on them.
+- Where a function fills several stack vectors and then transforms each through
+  VU0, two orders are separate levers and both are worth sweeping: the order the
+  vectors are filled in, and the order of the field assignments within each one.
+  `fldAutoMapDrawBgOfsRF` and `fldAutoMapDrawIconOfsRF` both want the four
+  vectors filled `v0`, `v3`, `v1`, `v2` (8 words each over the natural order),
+  and both want `.z` written before `.x` in the *second* vector only and `.x`
+  first in the other three (14 words). Nothing about the asm suggests either;
+  24 and 16 variants are cheap to measure.
+- An inner loop whose counter walks down while its pointer walks up, with the
+  outer base recomputed from the index rather than strength-reduced, comes from
+  a pointer local whose base is formed `(u8 *)(i * stride) + (u32)base` and whose
+  constant offset is then added in a *separate statement*. `fldAutoMapClear`
+  needed `u64 *row = (u64 *)((u8 *)(i * 256) + (u32)gb); row = (u64 *)((u8 *)row
+  + 0xFC58);` exactly: with the constant inside the cast sum, or with the base
+  written `gb + 0xFC58 + i * 256`, ee-gcc strength-reduces the outer base and
+  drops the `sll` retail keeps (two words short); with the address derived from
+  the index at the store it reverses the inner loop instead (two words, the
+  wrong direction). Subscripting the row pointer by the constant
+  (`row[0x1F8B]`) keeps the direction but spends a `lui`/`addu` pair on the
+  displacement.
+- Two subtractions of 1 from two different parameters, where retail evaluates
+  one before a `div` and the other after the divide-by-zero trap, *and* keeps
+  the first one's result out of its own parameter register. The two are coupled
+  and C cannot separate them: the `beql`/`break` trap is one insn pattern
+  rather than a basic-block boundary, so the scheduler emits whichever
+  subtract is evaluated first in RTL ahead of the `div`, and that same first
+  subtract is the one that coalesces with its parameter's register. A comma
+  expression proves the rule is RTL evaluation order and not statement order.
+  `fldAutoMapCloseBlock2` sits two words from exact on it; see
+  [Non-matching drafts](nonmatching.md).
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -695,6 +736,19 @@ These have been ruled out repeatedly and are not worth a second attempt:
 A function whose body is mostly inline assembly is refused by the production
 report anyway, at 8 instructions and more than half the body, so writing one
 to force a match earns nothing. See [Reading progress](progress.md).
+
+## Do not run the rodata and sdata placers standalone
+
+`tools/include_rodata.py` and `tools/include_sdata.py` rewrite every source
+file they can reach, not just the unit you are working on: one standalone run
+touched 21 unrelated files. `configure.py` runs them as part of its normal
+pass and leaves the tree clean, so `configure.py --force-split` is the only
+thing to call.
+
+A string that splat folded into a now-decompiled function's asm file needs no
+manual `INCLUDE_RODATA` either: `configure.py` places the line and emits the
+split file, but `build/eeasm/` only catches up after a `ninja`, so
+`check_unit.py` reports `NOASM` until then.
 
 ## A second label in the split assembly: which kind matters
 

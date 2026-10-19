@@ -14,6 +14,12 @@ A draft is not evidence of anything. It is not compiled by the build, so
 `python3 tools/check_nonmatching.py` compiles every draft and checks that each
 has an entry here.
 
+**Write the measurement as "N of M words match", never "N of M words".** The
+bare form is ambiguous and has already misled: an entry reading "10 of 146"
+was taken for a near miss when it meant ten words matching out of 146, a
+draft 135 words out. Say `match` or `differ` explicitly, and give the emitted
+size against retail's when they differ.
+
 ## fldSkyDrawFilter (field/fldDraw, 0xAD8)
 
 682 of 694 words, at the exact 2776-byte size. Transliterated from
@@ -759,32 +765,6 @@ a word of size).
 `fldAutoMapOpenBlock2` is the same function with `|=` for `&= ~`, and it does
 match, from `room`, `index`, `bit` locals in that order. The extra `nor` in
 the close path is what moves the allocation.
-
-## fldAutoMapClear (field/fldAutoMap, 0x9C)
-
-37 of 39 words, at the exact 156-byte size.
-
-Two loops zero 30 and 8 rows of 32 quadwords in `DDS3_GBWK`. The second loop
-matches exactly from `u64 *row = (u64 *)(gb + 0x19D10 + i * 256);` and
-`*row++ = 0;`, which is what gives retail's ascending inner pointer and its
-strength-reduced outer base. The first loop differs in those two words only:
-retail starts the row at `0xFC58` and bumps the pointer by `+8`, while the
-draft starts at `0xFD50` (`0xFC58 + 31 * 8`) and bumps by `-8`, because
-ee-gcc reverses the inner loop when the address is derived from the index
-rather than walked.
-
-Writing the first loop as a `*row++` walk does fix the direction but then
-ee-gcc strength-reduces its outer base too, dropping the `sll $2, $4, 8`
-recompute retail keeps and landing 34 words out at 148 bytes. Also measured
-for the first loop: `row[j]`, a `u64 (*)[32]` cast, `(u64 *)(gb + C)[i*32+j]`,
-`i * 256 + j * 8`, a `u32` index on either loop variable, `j != 32`,
-`j = 31; j--`, a pointer walked across both loops, and the base cast as
-`(u8 *)ofs + (u32)gb`. None reaches below 2 words, and only the ones that keep
-the derived address keep the 156-byte size.
-
-Caching `DDS3_GBWK` in a `u8 *` local, separately for each loop, is required:
-without it ee-gcc reloads the pointer inside the inner loop, since the `u64`
-store may alias it. That alone took the function from 35 differing words to 6.
 
 ## fldAutoMapDrawIconOfsR (field/fldAutoMap, 0x244)
 
@@ -2409,4 +2389,297 @@ Ruled out for the arm order: inverting the test so the `printf` arm is the
 (47 words out), and a `char *msg = D_005349A0;` local for the format string.
 This is the same delay-slot-placement class as the
 `nbCameraState_SkillAttack_Calc` draft below.
+
+## fldAutoMapDrawIconOfsRF (field/fldAutoMap, 0x33C)
+
+187 of 207 words, at the exact 828-byte size.
+
+The rotated-icon sibling of `fldAutoMapDrawIconOfsR`: it builds the same
+textured quad, but in world space, rotating the four corners through the VU0
+matrix before projecting. Fully recovered apart from register allocation.
+
+The shape, which carried over to the matching `fldAutoMapDrawBgOfsRF`:
+
+- Four `sdfVector4_t` locals get `.x`, `.y = 0.0f`, `.z` in declaration order
+  `v0`, `v3`, `v1`, `v2`, which is what matches retail's store schedule. The
+  natural `v0`..`v3` order is 8 words worse here and 8 worse in the sibling.
+- Each is rotated with `SDF_VU0_LOADVECTOR(&v)`, `SDF_VU0_APPLYMATRIX_XYZ()`,
+  `SDF_VU0_STOREVECTOR_NOMEM(&v)`. The `_NOMEM` store is required: the plain
+  form's `"memory"` clobber lets gcse share the `addiu rd, $29, N` between the
+  load and the store, where retail rematerialises it for each.
+- The screen coordinates are then written back into the same fields,
+  `v.x = v.x + x * 16.0f;` and `v.z = v.z * 0.5f + y * 16.0f;`, x before z for
+  every vector *except* `v1`, where z comes first. That one inversion is worth
+  14 words; every other combination of the four is worse, and inverting all
+  four costs 23.
+- `color` needs the `+ 0x80000000` as its own statement,
+  `color = (s32)(...) << 24; color += 0x80000000;`, or the shift goes to a temp
+  and the add writes the variable, which is 2 words off.
+- `0.2f` and `3.14f` are this unit's first two `.lit4` entries, `D_0054C498`
+  and `D_0054C49C`.
+
+What is left: the four texture-coordinate locals hold the other register of
+each pair. Retail has `u1` in `$16`, `v0` in `$17`, `v1` in `$18` and `u0` in
+`$19`; the draft swaps `$16` with `$17` and `$18` with `$19`, which moves ten
+`lh`/`sll`/`addu`/`sw` words and the two `daddu` argument copies. Nothing
+reached it: all 24 declaration orders and all 24 assignment orders of the four
+locals (no effect at all, gcse normalises them), separate `tw`/`th` locals for
+the widths, `u1 += u0` for `u1 = u0 + u1`, the sums computed before the float
+coordinates, `u1 = t[0] * 16 + t[2] * 16` with the bases written at the call
+sites (135 words), the bases as locals with the sums at the call sites (192),
+`u32` locals (171), the shifts as their own statements (38), and
+`fldAutoMapIconOfsTable[index][k]` at every use (160).
+
+The sibling `fldAutoMapDrawBgOfsRF` had the same permutation in its eight
+constant texture coordinates and *was* fixed by declaration order, because
+there they are initializers materialised in the prologue: declaring them
+`au, av, du, dv, bu, bv, cu, cv` (the `d` pair moved ahead of `b` and `c`) took
+it from 10 differing words to exact. The same lever does not exist here, since
+these four are computed from the table mid-function.
+
+## fldAutoMapProc (field/fldAutoMap, 0x48)
+
+15 of 18 words, at the exact 72-byte size.
+
+Three words, and all three are the branch-annul shape the levers page describes
+from the other side: retail has `beqz` and `bne` with a `nop` in the delay
+slot, the draft `beqzl` and `bnel` with the epilogue's `ld $31, 0x0($29)`
+annulled into it. Both differing tests guard the arm that calls
+`fldAutoMapCalc`, which is still `INCLUDE_ASM`, so this is the `mc/slMain`
+mechanism (a caller needing its callee's definition, not just a prototype):
+decompile `fldAutoMapCalc` and try this again before touching the source.
+
+The body is settled. `fldGb[0]` is the field id, and the two bounds have to be
+separate `if` statements with early returns, which is what gets both `slti`s
+computed before the first branch; `&&` folds them and costs 13 words.
+`fldAutoMapCalc` must stay without a forward prototype, since the implicit
+`int` declaration is what reserves `$2` across the call and stops the sibcall.
+
+## fldDrawAreaBlockFont (field/fldAutoMap, 0x388)
+
+57 of 226 words, 908 bytes against retail's 904.
+
+The area-name panel: it steps the name's fade counter by the panel mode, then
+draws the place name (or the area name) and its backing panel. Fully recovered
+as behaviour; what is left is one saved register and the two fade arms.
+
+What the function reads, since none of it was named before:
+
+- `fldGlobalBase + 0x90` is the panel mode, 0 to 7, which drives the jump
+  table. The HD reconstruction calls it `AllPanelMode`. The draft spells it
+  `*(s32 *)((u8 *)&fldGlobalBase + 0x90)` rather than naming the field, since
+  nothing compiled uses it yet.
+- `D_0054EEA4` is the fade counter, 0.0 to 1.0 (`gFldAreaNameCnt` in the HD
+  source), and `fldAreaFontWork` is its direction, -1, 0 or 1
+  (`fldDrawAreaBlockFont_pm_mode` there).
+- Mode 0 and 1 snap the counter to 0.0 and 1.0; 2 and 3 step it by 0.1 toward
+  0.0 and 1.0, clamping and zeroing the direction at the end; 4 through 7 step
+  it in whichever direction the counter already holds, but only while it is
+  strictly between 0.01 and 0.99.
+- The panel position is an interpolation whose endpoints are all zero except
+  one: `x = (s32)(v * 0.0f + (1.0f - v) * 250.0f)` and
+  `y = (s32)(v * 0.0f + (1.0f - v) * 0.0f)`, which is what shares the one
+  `mul.s` by zero between the two. The HD source has the same expression with
+  a 3.75 and a 2.25 resolution scale added.
+- `fldGlobalBase.nameD` selects the place name, `D_0030D714` with
+  `fldAutoMapFindPlace` and colour `0xF0DC6480`; `-1` there falls back to
+  `nameU`, `D_0030AB54` with `fldAutoMapFindArea` and `0xA09DC380`. Both
+  tables are `char [][28]`, already declared, and both are skipped when the
+  matching `D_00567F50`/`D_00567EA0` length is below 2, read with an `(s16)`
+  cast at the use site for retail's `lh`.
+- The six `.lit4` entries from `D_0054C4D8` to `D_0054C4EC` are this
+  function's, in the order 0.1, 0.1, 0.99, 0.01, 0.1, 0.1.
+
+The `nameD` arm has to be written first (`if (nameD != -1)`), or gcc hoists
+the `nameU` load above the test and emits the two arms in the other order,
+which is 15 words worse. Case 3's clamp has to be written inverted,
+`if (!(v > 1.0f)) { direction = 1; } else { v = 1.0f; direction = 0; }`, so
+that the constant arm is the branch target; case 2 reads better the plain way
+and measures the same.
+
+What is left:
+
+- The frame saves one callee-saved register too many, which is the whole
+  2-word size difference. Retail keeps the font request handle and the string
+  width in one register (`$17`): the handle is copied into the destroy call's
+  argument and the register is immediately rewritten with `width + 8` in that
+  call's delay slot. Two locals cannot reach that, and merging them into one
+  `s32` with casts at the calls undershoots instead, 884 bytes with the width
+  coalesced away entirely.
+- Case 2 lacks retail's second `lwc1` of the counter and the `addiu $2, 0, -1`
+  hoisted into the first `bc1f`'s delay slot. Retail reads the counter once per
+  case and once more on the out-of-range path (in the range check's delay
+  slot), which no placement of the read reproduces: before the switch, gcc
+  common-subexpression-eliminates the per-case reads; after the switch, it
+  replicates the load into all five predecessors instead of using the stored
+  register, 20 bytes long; and an explicit `default: v = D_0054EEA4; break;`
+  gets hoisted back out of the switch, 12 to 28 bytes long.
+
+Measured and rejected: the two clamp arm orders in cases 2 and 3 (4
+combinations), the two `nameD`/`nameU` arm orders, `&&` against nested `if`s
+for the 0.99/0.01 range, three spellings of `x + 0x1EC - w`, the counter read
+before, inside and after the switch, and the handle and width as one local
+with casts.
+
+## nbCameraShot_InvokeTarget_Set2 (newbattle/nbCameraSkill, 0x2C0)
+
+171 of 176 words, at the exact 704-byte size.
+
+The five differing words are where `100.0f` is materialised for the radius
+clamp. Retail emits `mul.s $f21, $f1, $f0` for `width * pInvoke->scl` and then
+`lui`/`mtc1` into `$f0`, reusing the register that held `scl`, so the constant
+cannot be hoisted above the multiply. The draft gets `$f2` for the constant,
+the anti-dependency disappears, and the scheduler moves the `lui`/`mtc1` pair
+in front of the multiply; the compare and the later `div.s` then read `$f2`
+instead of `$f0`.
+
+Ruled out, all giving the same five words: `radius > 100.0f` and
+`100.0f < radius`, `radius *= 100.0f / radius` and
+`radius = radius * (100.0f / radius)`, folding `width` and `radius` into one
+local, and swapping the declaration order of the four `f32` locals.
+
+Everything else is exact, including the `bc1tl` fallback to `pInvoke->r` when
+the all-table radius is zero, `targetPos.x > invokePos.x` for the load order
+of that compare, `1.7f` written out in both arms so it takes two pool slots,
+the two `SDF_VU0_STOREVECTOR_NOMEM` of the same sphere centre into `targetPos`
+and `look`, and `effBTLModelLook2(pTarget, &invokePos, 0.5235987f)`.
+
+## nbCameraShot_InvokeTargetReverse_Set2 (newbattle/nbCameraSkill, 0x2B8)
+
+169 of 174 words, at the exact 696-byte size.
+
+The same five words as `nbCameraShot_InvokeTarget_Set2` above: the `100.0f`
+radius clamp lands in `$f2` rather than retail's `$f0`, so the `lui`/`mtc1`
+pair loses its anti-dependency on `pTarget->scl` and the scheduler moves it in
+front of the multiply. Read that entry for the shapes already ruled out, plus
+`width = 100.0f / radius; radius *= width;` which costs nine words here.
+
+What this function needed beyond its mirror: the `0.69813163f` fovy value has
+to be a named local assigned before the `sdfAtan` call, not a literal in the
+store. Retail keeps it in `$f20` across the call, which only the named local
+reproduces; written as a literal in `pCamera->fovy = 0.69813163f;` the
+constant stays caller-saved, the frame loses the third saved fp slot and
+drops to 0x70, and 160 of 171 words differ. The same literal written directly
+is correct in `nbCameraShot_InvokeTarget_Set2`, where retail materialises it
+after the call into `$f2`.
+
+## fldAutoMapClear (field/fldAutoMap, 0x9C)
+
+37 of 39 words, at the exact 156-byte size.
+
+Two loops zero 30 and 8 rows of 32 quadwords in `DDS3_GBWK`. The second loop
+matches exactly from `u64 *row = (u64 *)(gb + 0x19D10 + i * 256);` and
+`*row++ = 0;`, which is what gives retail's ascending inner pointer and its
+strength-reduced outer base. The first loop differs in those two words only:
+retail starts the row at `0xFC58` and bumps the pointer by `+8`, while the
+draft starts at `0xFD50` (`0xFC58 + 31 * 8`) and bumps by `-8`, because
+ee-gcc reverses the inner loop when the address is derived from the index
+rather than walked.
+
+Writing the first loop as a `*row++` walk does fix the direction but then
+ee-gcc strength-reduces its outer base too, dropping the `sll $2, $4, 8`
+recompute retail keeps and landing 34 words out at 148 bytes. Also measured
+for the first loop: `row[j]`, a `u64 (*)[32]` cast, `(u64 *)(gb + C)[i*32+j]`,
+`i * 256 + j * 8`, a `u32` index on either loop variable, `j != 32`,
+`j = 31; j--`, a pointer walked across both loops, and the base cast as
+`(u8 *)ofs + (u32)gb`. None reaches below 2 words, and only the ones that keep
+the derived address keep the 156-byte size.
+
+Caching `DDS3_GBWK` in a `u8 *` local, separately for each loop, is required:
+without it ee-gcc reloads the pointer inside the inner loop, since the `u64`
+store may alias it. That alone took the function from 35 differing words to 6.
+
+## func_001F79A8 (event/evtEventViewerMenu, 0xE4)
+
+20 of 56 words, exact size. The jump table, its eleven case labels and every
+arm's call match; what differs is which saved register the `busy` flag and the
+`viewerinfo` load take ($4/$5 swapped against retail), and two consequences of
+that: retail materialises the default arm's `pad >= 0` as `slti`/`sltiu` where
+the C gives `nor`/`srl`, and retail cross-jumps the two `return 1` blocks where
+the C emits one epilogue inline.
+
+Ruled out: `busy = 1` as an initializer, as a statement after the declaration,
+and set only in the arms that need it; reading the switch value into a local
+first; the 0x10/0x11 arm written as `if (state == 0) return 1; break;` and as
+`if (state != 0) break; return 1;`. Six spellings of the default arm's compare
+(`>= 0`, `!(< 0)`, `(< 0) == 0`, `(< 0) ^ 1`, `1 - (< 0)`, an `if`/`else`, a
+ternary) all compile to the same `nor`/`srl` pair, so the compare is a byproduct
+of the allocation rather than the lever. The eleven explicit case labels are
+needed: with only the six reachable values the switch falls under
+`case_values_threshold` and becomes a compare tree.
+
+## evtFrameListHead (event/evtEventViewerMenu, 0x138)
+
+39 of 78 words, exact size. The loop, both `D_0032C9E2` reads, the shared
+`type * 10` offset and all four table lookups match. The one difference is which
+loop invariant gets the ninth saved register: retail hoists the `lui`/`addiu`
+pair for `evtFrameList`'s address and rematerialises `D_0054F9B8`'s address
+inside the loop, while the C hoists `%hi(D_0054F9B8)` and rematerialises
+`evtFrameList`. Both use nine saved registers, so this is gcc's choice of
+movable rather than register pressure; the three remaining symbol addresses
+(`D_0032C9E2`, `frameheadstr`, `framelist_xcnt`) stay in the loop on both sides.
+
+Computing the column width into a local before the draw is what brings the size
+to exact (it was one instruction long without it), so keep that statement order.
+Ruled out: `s16 *table = evtFrameList;` as a local, declared first or second
+(gcc then hoists both and the body is two words short); `*(s16 *)((u8 *)evtFrameList
++ type * 10)` for the bound; reading `viewerinfo->frameGroup->type` inline at
+each use instead of a local (74 of 78); caching the `D_0032C9E2` byte in a local
+re-read twice.
+
+## evtSaveViewerHeader (event/evtEventViewerMenu, 0x400)
+
+254 of 256 words, exact size. Every count call, the twelve byteLength products,
+the 21-entry jump table, all fourteen directory arms and the `mtlo`/`madd`/`mflo`
+payload advance match. What is left is two stores in the file header swapped:
+retail writes `byteLength` (0x04) before `count` (0x10), the C writes them the
+other way round, with the same registers holding the same values on both sides.
+
+Two placements are load-bearing and should be kept: `payloadOffset = 0xE0` has to
+be a statement after the `if (mode != 2) return;`, not an initializer (as an
+initializer the function is two words long), and `i` has to be declared before
+`payloadOffset` so the two take retail's spill slots at 0x34 and 0x38 (declared
+the other way every later slot shifts by four and 54 words differ).
+
+A sweep of all 210 orderings of the header's seven value stores (byteLength, the
+four tag bytes in order, count, kind) bottoms out at these two words: the order
+count, tag[0..3], byteLength, kind gives retail's constant-to-register mapping
+and 2 differing words, while retail's emitted store order (byteLength, tag[0..3],
+count, kind) gives the right stores and rotates all six constant registers
+instead. No ordering gives both, so the remaining difference is the scheduler
+interleaving the constant materialisations with the store run. Also ruled out:
+`header.tag[3] = mode + '0'` (13 words; cse does not fold it against the early
+return), `count` through a local assigned beside `payloadOffset` (an extra local
+moves every spill slot, 235 words), moving the six zero stores to the front or
+the back of the block, and computing `byteLength` in one expression or deferring
+its last term.
+
+## evtMenuDisp (event/evtEventViewerMenu, 0x1C0)
+
+63 of 112 words, exact size. The signature is recovered in full: nine arguments
+(list, column, row, colCount, rowCount, scroll, total, head, item), the ninth
+reaching the callee at `0x60($29)`; the panel call takes arguments one to five
+unchanged, the grid origin is `column * 16 + 0x7000` and `row * 8 + 0x7900`, the
+head's return value advances `py` by `used * 0x60`, the item loop is a `for` whose
+index the body does not use, and the scroll arrows sit at
+`(column + colCount * 5) * 16 + 0x7060` with y `row * 8 + 0x78B0` and
+`(row + rowCount * 12) * 8 + 0x78F0`. `evtMenuDisp_cnt++` is the last statement.
+
+The whole difference is which loop-crossing value gets the ninth saved register.
+Retail keeps `row` there and recomputes `row * 8` for the scrollbar; the C keeps
+`row * 8` (gcse finds the expression available, since the only two uses are the
+`py` initialiser and the arrow y) and spills `row` to a fourth stack slot, which
+rotates every allocation from the prologue on. Both sides use the same nine saved
+registers and the same frame size.
+
+Writing both arrow coordinates back into `px` and `py` rather than into fresh
+locals is worth keeping (60 differing words becomes 49). Ruled out: separate
+`barX`/`topY`/`botY` locals in any declaration order; `index = scroll` as a
+statement before the loop; a `while` instead of the `for`; `used = 0` after the
+panel call; `px`/`py` as declaration initialisers; `(rowCount * 12 + row)` for
+the bottom arrow; spelling the arrow y as `row * 8 + 0x78F0 - 0x40`; a shared
+`rowY = row * 8` local; typed function-pointer parameters instead of `void *`
+plus a cast; and `(evtMenuDisp_cnt & 0x10) != 0`. Every spelling of the two
+`row * 8` expressions that folds to the same instructions also unifies under
+gcse, so blocking the share needs a source form that keeps them distinct.
 

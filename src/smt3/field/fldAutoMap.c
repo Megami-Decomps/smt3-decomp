@@ -683,9 +683,158 @@ void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y) {
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
 #endif
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsRF);
+extern f32 sdfSin(f32 radians);
+extern void SetRotateMatrixY(f32 angle);
+extern f32 D_0054EE70;
+extern sdfTexHandle_t *fldAutoMapBgTex[];
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawBgOfsRF);
+/* NON_MATCHING: 187 of 207 words, exact size; the four texture-coordinate
+ * locals hold the other register of each pair ($16 with $17, $18 with $19). */
+#ifdef NON_MATCHING
+void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
+    sdfVector4_t v0;
+    sdfVector4_t v1;
+    sdfVector4_t v2;
+    sdfVector4_t v3;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s16 *t;
+    u32 color;
+    s32 u0;
+    s32 vv0;
+    s32 u1;
+    s32 vv1;
+    f32 x0;
+    f32 z0;
+    f32 x1;
+    f32 z1;
+
+    if (index == 1) {
+        color = (s32)(sdfSin(D_0054EE70) * 64.0f) << 24;
+        color += 0x80000000;
+        D_0054EE70 = D_0054EE70 + 0.2f;
+    } else {
+        color = 0x80000000;
+    }
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf2DLinkTexPacket(tag, fldUiTexture, 0);
+    t = fldAutoMapIconOfsTable[index];
+    u0 = t[0] * 16;
+    vv0 = t[1] * 16;
+    u1 = t[2] * 16;
+    vv1 = t[3] * 16;
+    x0 = (f32)-(t[4] * 16);
+    z0 = (f32)-(t[5] * 16);
+    x1 = x0 + (f32)u1;
+    z1 = z0 + (f32)vv1;
+    u1 = u0 + u1;
+    vv1 = vv0 + vv1;
+    v0.x = x0;
+    v0.y = 0.0f;
+    v0.z = z0;
+    v3.x = x1;
+    v3.y = 0.0f;
+    v3.z = z1;
+    v1.x = x1;
+    v1.y = 0.0f;
+    v1.z = z0;
+    v2.x = x0;
+    v2.y = 0.0f;
+    v2.z = z1;
+    SetRotateMatrixY((z + 180.0f) * 3.14f / 180.0f);
+    SDF_VU0_LOADVECTOR(&v0);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v0);
+    SDF_VU0_LOADVECTOR(&v1);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v1);
+    SDF_VU0_LOADVECTOR(&v2);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v2);
+    SDF_VU0_LOADVECTOR(&v3);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v3);
+    v0.x = v0.x + x * 16.0f;
+    v0.z = v0.z * 0.5f + y * 16.0f;
+    v1.z = v1.z * 0.5f + y * 16.0f;
+    v1.x = v1.x + x * 16.0f;
+    v2.x = v2.x + x * 16.0f;
+    v2.z = v2.z * 0.5f + y * 16.0f;
+    v3.x = v3.x + x * 16.0f;
+    v3.z = v3.z * 0.5f + y * 16.0f;
+    sdfPrimLinkFt4(tag, color | 0x808080, 0x44,
+                   (s32)v0.x, (s32)v0.z, u0, vv0,
+                   (s32)v1.x, (s32)v1.z, u1, vv0,
+                   (s32)v2.x, (s32)v2.z, u0, vv1,
+                   (s32)v3.x, (s32)v3.z, u1, vv1, 0, 0);
+    ot = fldDrawGetOt();
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))fldDrawGetOt()->regFunc)(ot, tag);
+}
+#else
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsRF);
+#endif
+
+void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z) {
+    sdfVector4_t v0;
+    sdfVector4_t v1;
+    sdfVector4_t v2;
+    sdfVector4_t v3;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s32 au = 0;
+    s32 av = 0;
+    s32 du = 0x1000;
+    s32 dv = 0x800;
+    s32 bu = 0x1000;
+    s32 bv = 0;
+    s32 cu = 0;
+    s32 cv = 0x800;
+
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf2DLinkTexPacket(tag, fldAutoMapBgTex[0], 0);
+    v0.x = -4800.0f;
+    v0.y = 0.0f;
+    v0.z = -4800.0f;
+    v3.x = 4800.0f;
+    v3.y = 0.0f;
+    v3.z = 4800.0f;
+    v1.x = 4800.0f;
+    v1.y = 0.0f;
+    v1.z = -4800.0f;
+    v2.x = -4800.0f;
+    v2.y = 0.0f;
+    v2.z = 4800.0f;
+    SetRotateMatrixY((z + 180.0f) * 3.14f / 180.0f);
+    SDF_VU0_LOADVECTOR(&v0);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v0);
+    SDF_VU0_LOADVECTOR(&v1);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v1);
+    SDF_VU0_LOADVECTOR(&v2);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v2);
+    SDF_VU0_LOADVECTOR(&v3);
+    SDF_VU0_APPLYMATRIX_XYZ();
+    SDF_VU0_STOREVECTOR_NOMEM(&v3);
+    v0.x = v0.x + x * 16.0f;
+    v0.z = v0.z * 0.5f + y * 8.0f;
+    v1.z = v1.z * 0.5f + y * 8.0f;
+    v1.x = v1.x + x * 16.0f;
+    v2.x = v2.x + x * 16.0f;
+    v2.z = v2.z * 0.5f + y * 8.0f;
+    v3.x = v3.x + x * 16.0f;
+    v3.z = v3.z * 0.5f + y * 8.0f;
+    sdfPrimLinkFt4(tag, 0x80808080, 0x44,
+                   (s32)(v0.x + 28672.0f), (s32)(v0.z + 30976.0f), au, av,
+                   (s32)(v1.x + 28672.0f), (s32)(v1.z + 30976.0f), bu, bv,
+                   (s32)(v2.x + 28672.0f), (s32)(v2.z + 30976.0f), cu, cv,
+                   (s32)(v3.x + 28672.0f), (s32)(v3.z + 30976.0f), du, dv, 0, 0);
+    ot = fldDrawGetOt();
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))fldDrawGetOt()->regFunc)(ot, tag);
+}
 
 s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     s32 result = 1;
@@ -1207,7 +1356,23 @@ void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     }
 }
 
+/* NON_MATCHING: 15 of 18 words, exact size; two `beql`/`bnel` where retail has
+ * the plain branch, on the tests whose arm calls the still-assembly callee. */
+#ifdef NON_MATCHING
+void fldAutoMapProc(void) {
+    if (fldGb[0] < 10) {
+        return;
+    }
+    if (fldGb[0] >= 200) {
+        return;
+    }
+    if (AutoMapSeq == 1) {
+        fldAutoMapCalc();
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapProc);
+#endif
 
 INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532230);
 
@@ -1247,9 +1412,6 @@ void fldAutoMapDraw(void) {
     }
 }
 
-/* NON_MATCHING: 37 of 39 words, exact size; the first loop's inner pointer
- * descends where retail's ascends. */
-#ifdef NON_MATCHING
 void fldAutoMapClear(void) {
     u8 *gb;
     s32 i;
@@ -1257,8 +1419,11 @@ void fldAutoMapClear(void) {
 
     gb = (u8 *)DDS3_GBWK;
     for (i = 0; i < 30; i++) {
+        u64 *row = (u64 *)((u8 *)(i * 256) + (u32)gb);
+
+        row = (u64 *)((u8 *)row + 0xFC58);
         for (j = 0; j < 32; j++) {
-            *(u64 *)(gb + 0xFC58 + (i * 32 + j) * 8) = 0;
+            *row++ = 0;
         }
     }
     gb = (u8 *)DDS3_GBWK;
@@ -1270,11 +1435,125 @@ void fldAutoMapClear(void) {
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapClear);
-#endif
 
+extern f32 D_0054EEA4;
+extern s32 fldAreaFontWork;
+extern void frPreCalcStrWidth(const char *text, s32 small, s32 mode);
+extern void *frwGetSmallFontFRQ(s32 x, s32 y, s32 mode, u32 rgba, const char *text, s32 flag);
+extern u32 frGetStrWidth2(void *glyphChain);
+extern void frDestroyFontRequestAfter(void *frq);
+extern void fldDrawAddressPanel(s32 width, s32 x, s32 y);
+extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const char *text);
+
+/* NON_MATCHING: 57 of 226 words, 908 bytes against 904; the frame holds one
+ * saved register too many and the fade arms differ in two words. */
+#ifdef NON_MATCHING
+void fldDrawAreaBlockFont(void) {
+    char *str;
+    void *frq;
+    s32 w;
+    s32 x;
+    s32 y;
+    f32 v;
+
+    if (fldGlobalBase.area >= 200) {
+        return;
+    }
+    v = D_0054EEA4;
+    switch (*(s32 *)((u8 *)&fldGlobalBase + 0x90)) {
+    case 0:
+        v = 0.0f;
+        fldAreaFontWork = 0;
+        D_0054EEA4 = v;
+        break;
+    case 1:
+        v = 1.0f;
+        fldAreaFontWork = 0;
+        D_0054EEA4 = v;
+        break;
+    case 2:
+        if (v > 0.0f) {
+            v -= 0.1f;
+            if (v < 0.0f) {
+                v = 0.0f;
+                fldAreaFontWork = 0;
+            } else {
+                fldAreaFontWork = -1;
+            }
+            D_0054EEA4 = v;
+        }
+        break;
+    case 3:
+        if (v < 1.0f) {
+            v += 0.1f;
+            if (!(v > 1.0f)) {
+                fldAreaFontWork = 1;
+            } else {
+                v = 1.0f;
+                fldAreaFontWork = 0;
+            }
+            D_0054EEA4 = v;
+        }
+        break;
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+        if (v < 0.99f) {
+            if (v > 0.01f) {
+                if (fldAreaFontWork == -1) {
+                    v -= 0.1f;
+                    if (v < 0.0f) {
+                        v = 0.0f;
+                        fldAreaFontWork = 0;
+                    }
+                    D_0054EEA4 = v;
+                } else if (fldAreaFontWork == 1) {
+                    v += 0.1f;
+                    if (v > 1.0f) {
+                        v = 1.0f;
+                        fldAreaFontWork = 0;
+                    }
+                    D_0054EEA4 = v;
+                }
+            }
+        }
+        break;
+    }
+    x = (s32)(v * 0.0f + (1.0f - v) * 250.0f);
+    y = (s32)(v * 0.0f + (1.0f - v) * 0.0f);
+    if (fldGlobalBase.nameD != -1) {
+        if ((s16)D_00567F50[fldGlobalBase.nameD] < 2) {
+            return;
+        }
+        str = D_0030D714[fldAutoMapFindPlace(fldGlobalBase.area % 100, fldGlobalBase.nameD)];
+        frPreCalcStrWidth(str, 1, 0);
+        frq = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
+        w = frGetStrWidth2(frq);
+        frDestroyFontRequestAfter(frq);
+        w += 8;
+        fldDrawAddressPanel(w, x, y);
+        fldKanjiDraw(x + 0x1EC - w, (y + 0x18) / 2, 0xF0DC6480, str);
+    } else {
+        if (fldGlobalBase.nameU == -1) {
+            return;
+        }
+        if ((s16)D_00567EA0[fldGlobalBase.nameU] < 2) {
+            return;
+        }
+        str = D_0030AB54[fldAutoMapFindArea(fldGlobalBase.area % 100, fldGlobalBase.nameU)];
+        frPreCalcStrWidth(str, 1, 0);
+        frq = frwGetSmallFontFRQ(0, 0, 0, 0, str, 0);
+        w = frGetStrWidth2(frq);
+        frDestroyFontRequestAfter(frq);
+        w += 8;
+        fldDrawAddressPanel(w, x, y);
+        fldKanjiDraw(x + 0x1EC - w, (y + 0x18) / 2, 0xA09DC380, str);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldDrawAreaBlockFont);
+#endif
 
 void fldInitPacLoader(void) {
     fldPacRequest_t *request;
