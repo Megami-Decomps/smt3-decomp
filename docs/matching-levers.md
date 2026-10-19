@@ -39,6 +39,7 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| explicit branches where two early `return 0`s in the same block fold to `slt` plus `sltiu` | a `goto` to one trailing `return 0;`, which stops the if-conversion. `nbSkillIsInRange`'s two `switch` arms each lose a branch as `if (skill < 0x24) { return 0; } return 1;` and come out exact as `goto zero;` |
 | a `switch` arm's guard failure branching to the same block as the `default`, and a value you expected in `$2` or `$3` sitting one register higher | drop the last arm's own `return 0` and let the arm fall into the `default:` label, writing its tests as `if (...) { callee(x); break; }`. The separate `return 0` makes its zero conflict with the switch value: `nbCameraBoss_Cut1_Run` moved `skill` from `$4` to `$3` and went 59 to 33 differing words on that alone, and `nbCameraBoss_Cut2_Run` 89 to 92 of a longer body. A nested `switch` over the same values frees the register too but runs three words over |
 | `jal callee` then a `b` to one shared epilogue, with nothing writing `$2` in the arm | let the arms only call and the function fall off the end of the `switch`, so the callee's value is what reaches `$2`. `return callee(x);` sibcalls every arm and a `ret` variable spends `$3` and a `daddu` per arm. The returns that do exist (`return 0`, `return 1`) still give the epilogue its `use` of `$2`. `nbCameraBoss_Cut1_Init` and the four `Cut*` dispatchers in `newbattle/nbCameraBoss` are all this shape |
 | a guard whose failure returns a constant, where the constant lands in a second register and the branch is `bne` rather than `bnel` | write the guard positively, `if (skill == n) { callee(x); break; } return 0;`, not inverted with an early `return 0`. The inverted form keeps the compare constant and the return constant live together; `nbCameraBoss_Cut1_Init` went from 2 differing words to exact on that one arm |
@@ -624,6 +625,38 @@ mechanically rather than reasoning about it. A loop driving
 `check_unit.py --func <name>` costs about a second per permutation; two
 functions turned on the first of 24 permutations and on a rotation of three.
 
+## Callee visibility: the cause of most one-word branch-likely misses
+
+This is the single most productive mechanism found so far, and it is one cheap
+test rather than a search. Whether ee-gcc emits `beq` or `beql`, `bne` or
+`bnel`, `bgez` or `bgezl` for a given test is decided by whether the function
+that test's arm **calls** is visible in the unit as a C definition. Nothing
+about the branch's own source shape reaches it.
+
+It runs in both directions, so when a function is one or two words out and the
+difference is an annul bit:
+
+1. Find the callee in the arm whose branch differs.
+2. If it is still `INCLUDE_ASM`, the caller will probably close by itself once
+   the callee is C. Do not permute the caller.
+3. If it is already a C definition, test the reverse: in a scratch copy, rename
+   that definition so only the file's `extern` remains, and recheck the caller.
+
+In `newbattle/nbMakePacket` one callee, `nbFreeEffectSlot`, was costing four
+functions at 1, 1, 1 and 4 differing words. Reducing it to the `extern` the
+file already carried made all four exact. It is byte-exact on its own, so it is
+parked behind a `NON_MATCHING` fallback: a matching function can cost more than
+it earns, and nineteen more of its callers are still in assembly.
+
+Ruled out as causes, measured: every spelling of the caller's own guard, the
+callee's declaration style including K&R and no prototype at all, and cc1 heap
+shift, since twenty unused `extern`s above the callee change nothing. It is the
+definition's identity alone.
+
+A side effect worth noticing: the four callers that discriminate all sit above
+that callee's address, which is evidence for a retail translation-unit boundary
+between them. A callee-visibility result is also a boundary hint.
+
 ## A caller can need its callee's definition, not just a prototype
 
 Measured in `mc/slMain`: `slDrawInfo` at 183 of 189 words and `slDrawError`
@@ -713,10 +746,9 @@ These have been ruled out repeatedly and are not worth a second attempt:
   creates a value rather than its source shape. `fldSkyDrawFilter` sits at 682
   of 694 words on a three-slot rotation that twenty-odd source shapes, nine
   declaration orders and every pointer form tried leave untouched.
-- An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits
-  the plain branch. **Steerable when the branch is a sign test**: spell it
-  `(x & 0x80000000) != 0` rather than `x < 0`, which took one function from 8
-  differing words to exact. Only the non-sign-test cases have resisted. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
+- An epilogue duplicated into a branch-likely delay slot is **no longer in
+  this list**: the cause is known and it is usually fixable. See the section
+  on callee visibility below. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
   ordinary C readily, 42 times in `field/fldDraw` and 126 in
   `newbattle/nbMakePacket`, so a `bnel` in the retail code is not a reason to
   skip a function. Only this one use of it has resisted.

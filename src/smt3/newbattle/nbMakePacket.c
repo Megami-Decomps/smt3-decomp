@@ -850,7 +850,7 @@ extern void nbCameraSetBougai(nbFormation_t *form);
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 extern char D_005450E0[];
 /* 420-byte entries; only the field this unit reads is named. */
-typedef struct { u8 unk_00[0x4]; u16 unk_04; u8 pad[0x1A2]; } nbEncountEntry_t;
+typedef struct { u8 unk_00[0x4]; u16 unk_04; u8 pad[0x19E]; } nbEncountEntry_t;
 extern nbEncountEntry_t nbEncountTable[];
 extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 seid);
 extern void effBTLSkillEnd(void);
@@ -2257,7 +2257,31 @@ s32 nbCheckBadCurse(s32 formindex)
     return bad != 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetAisyoTable);
+s32 nbGetAisyoTable(s32 formindex)
+{
+    datUnitWork_t *w;
+    s32 ret;
+    s32 cnt;
+
+    w = nbGetUnitWorkFromFormindex(formindex);
+    ret = 0;
+    if ((w->flag & 4) == 0) {
+        ret = datDevilTable[w->id].aisyoid;
+    }
+    cnt = nbGetHojoCounter(formindex, 0x13);
+    if (cnt > 0) {
+        ret = cnt;
+    }
+    switch (w->badstatus & 0xFFF) {
+    case 0x400:
+        ret = 0xF6;
+        break;
+    case 0x200:
+        ret = 0xF7;
+        break;
+    }
+    return ret;
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544BF8);
 
@@ -2996,9 +3020,45 @@ s32 nbSelectKureItemB(s32 group)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoRequestType);
+s32 nbGetNegoRequestType(s32 type)
+{
+    u8 *p;
+    s32 i;
+    s32 sum;
+    s32 r;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetNegoTuikaRequestType);
+    r = dds3GetRandIntA(0, 100);
+    sum = 0;
+    p = &datNegoReqTable[type * 5];
+    for (i = 0; i < 5; i++) {
+        if (r < sum + *p) {
+            return i;
+        }
+        sum += *p;
+        p++;
+    }
+    return 0;
+}
+
+s32 nbGetNegoTuikaRequestType(s32 type)
+{
+    u8 *p;
+    s32 i;
+    s32 sum;
+    s32 r;
+
+    r = dds3GetRandIntA(0, 100);
+    sum = 0;
+    p = &datNegoTuikaReqtype[type * 3];
+    for (i = 0; i < 3; i++) {
+        if (r < sum + *p) {
+            return i;
+        }
+        sum += *p;
+        p++;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetAllHojoSkillWork);
 
@@ -3093,7 +3153,25 @@ s32 nbGetNegoYaruStone(datUnitWork_t *w)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetInfoMsg);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckSelectMesJoukenAri);
+s32 nbCheckSelectMesJoukenAri(s32 index)
+{
+    s32 i;
+    s32 ret;
+    s32 jouken;
+
+    ret = 0;
+    for (i = 0; i < 3; i++) {
+        jouken = InfoSelectTable[index].jouken[i];
+        if (jouken == 0) {
+            break;
+        }
+        if (evtBitCheck(jouken) == 0) {
+            return 0;
+        }
+        ret = 1;
+    }
+    return ret;
+}
 
 s32 nbSetNegoNoMotion(nbNegoProcessData_t *n, nbFormation_t *form)
 {
@@ -3407,7 +3485,13 @@ s32 Flow1_15(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_16);
+s32 Flow1_16(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x10011);
+    n->getmakka = *(s32 *)(DDS3_GBWK + 0xA48) / 3;
+    *(u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8) = 0;
+    return 0;
+}
 
 s32 Flow1_17(nbNegoProcessData_t *n)
 {
@@ -4614,7 +4698,29 @@ s32 Flow10_5(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_6);
+s32 Flow10_6(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0007);
+    nbAddNegoIdKouho(n, 0xA0008);
+    nbAddNegoIdKouho(n, 0xA0009);
+    nbCameraSetTarget(n->eform);
+    switch (n->negoreqtype) {
+    case 0:
+        n->nextnegoid = n->nextkouho[1];
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        n->nextnegoid = n->nextkouho[0];
+        break;
+    case 6:
+        n->nextnegoid = n->nextkouho[2];
+        break;
+    }
+    return 0;
+}
 
 s32 Flow10_7(nbNegoProcessData_t *n)
 {
@@ -4669,7 +4775,30 @@ s32 Flow10_9(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_33);
 
+/* NON_MATCHING: 15 of 35 words differ (first at +0x34). */
+#ifdef NON_MATCHING
+s32 Flow10_10(nbNegoProcessData_t *n)
+{
+    s32 mes;
+    s32 type;
+
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x60009;
+    n->cnt6_36 = 0;
+    n->cnt6_37 = 0;
+    if (n->hojoaisyo == 1) {
+        mes = n->aisyomsg[n->ekucyo];
+        type = n->hojoaisyomes;
+    } else {
+        mes = n->flowmsg[n->ekucyo];
+        type = 0xD9;
+    }
+    nbDispNegoMessage(n, mes, type, 0);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_10);
+#endif
 
 s32 Flow10_11(nbNegoProcessData_t *n)
 {
@@ -4678,7 +4807,30 @@ s32 Flow10_11(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_12);
+s32 Flow10_12(nbNegoProcessData_t *n)
+{
+    s32 rate;
+
+    rate = 0x28;
+    nbAddNegoIdKouho(n, 0xA000D);
+    nbAddNegoIdKouho(n, 0xA0015);
+    switch (n->aisyo) {
+    case 1:
+        rate = 0x46;
+        break;
+    case 2:
+        rate = 0;
+        break;
+    }
+    if (n->cnt6_36 == 0) {
+        n->nextnegoid = n->nextkouho[1];
+    } else if (dds3GetRandIntA(0, 100) < rate) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 s32 Flow10_13(nbNegoProcessData_t *n)
 {
@@ -4750,7 +4902,24 @@ s32 Flow10_20(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 11 of 37 words differ (first at +0x5C). */
+#ifdef NON_MATCHING
+s32 Flow10_21(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0018);
+    nbAddNegoIdKouho(n, 0xA001C);
+    if (((n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61) &&
+         evtBitCheck(8) == 0) ||
+        (u32)dds3GetRandIntA(0, 10) < 5) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_21);
+#endif
 
 s32 Flow10_22(nbNegoProcessData_t *n)
 {
@@ -4766,7 +4935,28 @@ s32 Flow10_23(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_24);
+s32 Flow10_24(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0019);
+    nbAddNegoIdKouho(n, 0xA001A);
+    nbAddNegoIdKouho(n, 0xA001B);
+    switch (n->negoreqtype) {
+    case 0:
+        n->nextnegoid = n->nextkouho[1];
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+        n->nextnegoid = n->nextkouho[0];
+        break;
+    case 6:
+        n->nextnegoid = n->nextkouho[2];
+        break;
+    }
+    return 0;
+}
 
 s32 Flow10_25(nbNegoProcessData_t *n)
 {
@@ -5099,7 +5289,27 @@ s32 Flow5_1(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 17 of 35 words differ (first at +0x38). */
+#ifdef NON_MATCHING
+s32 Flow5_2(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x50003);
+    nbAddNegoIdKouho(n, 0x10021);
+    if (datSearchDevilStock(n->ework->id) >= 0) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    if (evtBitCheck(n->innen_id + 0xB00) != 0) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    n->nextnegoid = n->nextkouho[0];
+    evtBitOn(n->innen_id + 0xB00);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_2);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow5_3);
 
@@ -5330,7 +5540,23 @@ s32 Flow8_6(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
+#ifdef NON_MATCHING
+s32 Flow8_7(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA1, 0);
+        return 2;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_7);
+#endif
 
 s32 Flow8_8(nbNegoProcessData_t *n)
 {
@@ -5387,7 +5613,23 @@ s32 Flow8_14(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
+#ifdef NON_MATCHING
+s32 Flow8_15(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA3, 0);
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_15);
+#endif
 
 s32 Flow8_16(nbNegoProcessData_t *n)
 {
@@ -6057,7 +6299,24 @@ s32 Flow15_7(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_8);
+s32 Flow15_8(nbNegoProcessData_t *n)
+{
+    s32 rate;
+
+    nbAddNegoIdKouho(n, 0xF000A);
+    nbAddNegoIdKouho(n, 0xF0014);
+    if (master_text[n->ework->id].unk_09 != 1) {
+        rate = 0x55;
+    } else {
+        rate = 0x28;
+    }
+    if (dds3GetRandIntA(0, 100) < rate) {
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_10);
 
@@ -9128,7 +9387,22 @@ void fclClearTerminalState(void)
     nbEncountMax = 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", func_0028CFC8);
+s32 func_0028CFC8(s32 tableno, s32 encno)
+{
+    s32 v;
+
+    v = 0;
+    if (tableno > 0) {
+        v = nbEncountTable[tableno].unk_04;
+    }
+    if (nbEncountFormTable[encno].unk_24 != 0) {
+        v = nbEncountFormTable[encno].unk_24;
+    }
+    if (v != 0) {
+        return v;
+    }
+    return 1;
+}
 
 s32 nbInitMaeTableDefault(void)
 {
@@ -9215,7 +9489,21 @@ INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BC0);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMemoryLoadMotionSe);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetFormEntry);
+void nbGetFormEntry(s32 id)
+{
+    nbMainProcessData_t *data;
+    s32 index;
+
+    data = nbGetMainProcessData();
+    index = nbFindFormIndex(id);
+    if (index >= 0) {
+        data->statwork[index].refcnt--;
+        if (data->statwork[index].refcnt == 0) {
+            nbFreeFormResources(data, index);
+            data = NULL;
+        }
+    }
+}
 
 nbStatWork_t *nbSetFormEntry(s32 id)
 {
@@ -9515,7 +9803,29 @@ s32 nbBadCurseApplyMove(nbActionProcessData_t *a, s32 mode)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSkillIsInRange);
+s32 nbSkillIsInRange(s32 skill, s32 type)
+{
+    switch (type) {
+    case 2:
+        if (skill >= 0x2A) {
+            goto zero;
+        }
+        if (skill < 0x24) {
+            goto zero;
+        }
+        return 1;
+    case 3:
+        if (skill >= 0x45) {
+            goto zero;
+        }
+        if (skill >= 0x40) {
+            return 1;
+        }
+        goto zero;
+    }
+zero:
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindBadCurseTarget);
 
@@ -9720,7 +10030,17 @@ s32 nbGetBadCurseStep(void)
     return 9;
 }
 
+/* NON_MATCHING: 2 of 11 words differ (first at +0x14). */
+#ifdef NON_MATCHING
+void nbSetBadCurseTimer(s32 step, s32 weight)
+{
+    nbBadCurseTable[nbBadCurseTimer].step = step;
+    nbBadCurseTable[nbBadCurseTimer].weight = weight;
+    nbBadCurseTimer++;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetBadCurseTimer);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitBadCurseState);
 
@@ -9862,9 +10182,30 @@ dds3ProcessID_t *nbInitMakaProcess(dds3ProcessID_t *parent)
     return id;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetEventEntry);
+void nbGetEventEntry(nbMainProcessData_t *data)
+{
+    s32 bgm;
+    s32 v;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeEventEntry);
+    bgm = nbEventEntryTable[data->eventno].unk_0C;
+    v = nbEventEntryTable[data->eventno].unk_10;
+    if (bgm != 0) {
+        p2sdPlayBGM(bgm + v);
+    }
+}
+
+void nbFreeEventEntry(nbMainProcessData_t *data)
+{
+    s32 v;
+    s32 bgm;
+
+    v = nbEventEntryTable[data->eventno].unk_10;
+    bgm = nbEventEntryTable[data->eventno].unk_0C;
+    if (v != 0 && bgm != 0) {
+        p2sdStopBGM(bgm + v);
+        bgm = 0;
+    }
+}
 
 s32 nbCheckEventEntries(nbMainProcessData_t *data)
 {
@@ -9921,6 +10262,10 @@ s32 func_0028FA30(nbEventProcessData_t *e)
     return e->step;
 }
 
+/* NON_MATCHING: exact on its own; its presence turns the bnel of three
+   nbFreeEffectSlot callers (Wait1_nbE901, PartsWait, nbE912_Wait1) and of
+   EffDel into a bne. */
+#ifdef NON_MATCHING
 void nbFreeEffectSlot(nbEventProcessData_t *e)
 {
     if (e != NULL) {
@@ -9928,6 +10273,9 @@ void nbFreeEffectSlot(nbEventProcessData_t *e)
         e->frame = 0;
     }
 }
+#else
+INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeEffectSlot);
+#endif
 
 void func_0028FA68(nbEventProcessData_t *e, s32 step)
 {
@@ -10149,7 +10497,22 @@ s32 nbDispSkillErrorMessage(s32 type)
     }
 }
 
+/* NON_MATCHING: 1 of 18 words differ (first at +0x14). */
+#ifdef NON_MATCHING
+s32 nbCheckBattleSkillError1(s32 id)
+{
+    if (id < 0x33) {
+        if (id >= 0x31) {
+            if (nbFindStockSkillError() == 0) {
+                return 2;
+            }
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckBattleSkillError1);
+#endif
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", nbDigitStringTable);
 
@@ -10276,7 +10639,13 @@ zero:
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", RunUgou);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Wait1_nbE901);
+s32 Wait1_nbE901(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x42) {
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetUp1);
 
@@ -10457,7 +10826,28 @@ s32 nbE902_End(nbEventProcessData_t *e)
     return 0;
 }
 
+/* NON_MATCHING: 2 of 36 words differ (first at +0x50). */
+#ifdef NON_MATCHING
+s32 nbE902Process_1(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+
+    e = dds3GetProcessData(id);
+    if (nbE902Table[e->step](e) != 0) {
+        return -1;
+    }
+    switch (e->unk_08) {
+    case 0x25:
+        dds3PadVibrationSet(0, 1, 4);
+        dds3PadVibrationSet(1, 0xFA, 6);
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE902Process_1);
+#endif
 
 s32 Hatudo(nbEventProcessData_t *e)
 {
@@ -10493,7 +10883,13 @@ s32 Parts1(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", PartsEffect1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", PartsWait);
+s32 PartsWait(nbEventProcessData_t *e)
+{
+    if (e->frame >= 9) {
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005464A8);
 
@@ -10521,8 +10917,6 @@ s32 PartsEffect2(nbEventProcessData_t *e)
     return 0;
 }
 
-/* NON_MATCHING: 4 of 46 words differ (first at +0x40). */
-#ifdef NON_MATCHING
 s32 EffDel(nbEventProcessData_t *e)
 {
     nbKoukaProcessData_t *k;
@@ -10541,9 +10935,6 @@ s32 EffDel(nbEventProcessData_t *e)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", EffDel);
-#endif
 
 s32 nbE903_End(nbEventProcessData_t *e)
 {
@@ -10902,7 +11293,13 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE911Process_1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE912_Hatudo);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE912_Wait1);
+s32 nbE912_Wait1(nbEventProcessData_t *e)
+{
+    if (e->frame >= 0x3D) {
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", MoveSub);
 

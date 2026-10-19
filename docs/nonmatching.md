@@ -121,7 +121,12 @@ scheduler places that one load.
 
 Ruled out: declaring the symbol `extern f32 D_0054F3A0[]`, `extern f32
 D_0054F3A0[4]` and `extern sdfVector4_t D_0054F3A0`, read as `[0]`, `*p` and
-`.x` respectively.
+`.x` respectively. Moving the `direction.x` assignment later in case 0, so the
+load has fewer predecessors to be scheduled against, does not delay it either:
+placed fifth or last among the six it rotates `$f4`-`$f7` to `$f0`-`$f3` and
+goes to 17 differing words, so the draft's source order is the one that gives
+retail's fp registers and only the scheduler's placement of that one load is
+left.
 
 ## func_00213190 (code_001FAE80, 0x50)
 
@@ -1251,29 +1256,41 @@ for `cmpFindKugatatiMsgEntry`, which walks the same table.
 
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
-59 of 117 words, eight words short of retail's 119.
+33 of 117 words, two words short of retail's 119.
 
 The dispatch is a `switch` on `effBTLModelGetID` of the invoke formation whose
-arms each run one `nbCameraBoss_*_Cut1_Run` and return its value. Retail does
-that as `jal callee`, then `b` to one shared epilogue with `ld $16` in the
-delay slot, with the result left in `$2` and never copied; the default arms put
-`daddu $2, $0, $0` in a compare's delay slot.
+arms each run one `nbCameraBoss_*_Cut1_Run`. Retail does that as `jal callee`,
+then `b` to one shared epilogue with `ld $16` in the delay slot, with the result
+left in `$2` and never copied; the default arms put `daddu $2, $0, $0` in a
+compare's delay slot.
 
-Writing the arms as `return callee(pCamera);` makes ee-gcc tail-call every one
-of them (`j callee` with the epilogue inlined ahead of it), which is 30 words
-over. Writing them as `ret = callee(pCamera); break;` with one trailing
-`return ret;` gives retail's shape, including the shared epilogue and the
-`daddu` in the delay slots, but allocates `ret` to `$3`: every arm then pays a
-`daddu $3, $2, $0` and the `ld $16` moves out of the `b` delay slot. The eight
-copies plus the displacement shifts are the whole diff, so the missing source
-fact is whatever keeps the value in `$2`.
+Two facts got the draft from 59 words to 33:
 
-Ruled out: declaring the function `u32` so the callee return types differ
-(ee-gcc 2.96 compares modes, not types, so the tail calls stay); every
-declaration order of `pForm`, `id`, `skill` and `ret`; `ret = 0` before the
-switch instead of in the default arms, which also loses the delay-slot
-`daddu`; dropping the `ret =` so the arms only call and the function returns an
-uninitialised `ret`, which costs a third saved register.
+The arms must only call, not assign. `return callee(pCamera);` tail-calls every
+arm (30 words over) and `ret = callee(pCamera); break;` with one trailing
+`return ret;` allocates `ret` to `$3`, costing a `daddu` per arm. Dropping both
+and letting the function fall off the end of the `switch` leaves the callee's
+value in `$2`, which is what retail returns.
+
+The last arm's failing guard must fall into `default`, not run its own
+`return 0`. With `case 0x158: ... else { return 0; } break; default: return 0;`
+the `skill` local lands in `$4` and every compare against it shifts; writing the
+arm as two `if (...) { call; break; }` tests followed directly by the `default:`
+label puts `skill` in `$3` as retail has it. A nested `switch (skill)` for that
+arm also frees `$3` but runs three words over.
+
+What is left is two branch delay slots. On the tests whose arms call
+`BSARI_MASEHA_Run` and `Lusi_Cut1_Set`, retail leaves a `nop` and uses `bnel`
+where the draft fills the slot with the following `addiu $2, $0, <const>` and
+uses `bne`. Those two callees and `Pish_MUHENK_Run` are the only arms still
+`INCLUDE_ASM`, and this is the branch-annul signature of the "a caller can need
+its callee's definition" row in [matching-levers.md](matching-levers.md): the
+remaining two words should close on their own once those three are C. Permuting
+the caller does not reach it. Ruled out at 33 words: forward prototypes for the
+three assembly callees and removing the two that exist; `return callee(...)`
+with the sibling call blocked by an address-taken dummy local (identical
+output); early-`break` instead of `else if` in the `0x123` and `0x102` arms;
+`switch (skill)` for those two arms (six words worse).
 
 The case bodies are laid out in retail as `{0x103, 0x124}`, `0x123`, `0x102`,
 `0x125`, `0x108`, `0x158`, and that order is what the draft uses. The `0x123`
@@ -2161,28 +2178,6 @@ two y values; a separate local for the depth `-1`; a named local for the
 second quad's right edge; an `x` local copied from `ox`; computing `ox` after
 the `if`; and all declaration orders of the locals, which change nothing.
 
-## EffDel (newbattle/nbMakePacket, 0xB8)
-
-42 of 46 words, at the exact 184-byte size, and with the same instruction
-multiset.
-
-The whole body, both `bnel` field tests and the `effBTLCutGetFrame` block are
-identical. The four differing words are one rotation in the loop preheader:
-retail leaves the `beqz $16` that guards the packet walk with a `nop` in its
-delay slot and then materialises the two compare constants, while ee-gcc moves
-`addiu $19, $0, 1` into the slot and the assembler pads the 8-byte loop
-alignment with the `nop` instead. That is a delay-slot fill, not a source
-difference: the three preheader instructions and their order are the same.
-
-Ruled out: a `for` loop, a `while`, an explicit `if` plus `do`/`while` guard,
-three nested `if`s in place of the `&&` chain, a local for `p->cuteff`, and
-dropping the `nbKoukaProcessData_t *` local so the list head is subscripted
-straight off the call. All six give the identical four-word rotation.
-
-Confirmed on the way: `nbMainProcessData_t` carries the kouka process id at
-`+0xF4`, inside what was `unk_E0`, and `dds3GetProcessData` of it yields the
-same `nbKoukaProcessData_t` whose `first` sits at `+0x08`.
-
 ## Chk_ENHOJOMAX, Chk_FRHOJOMAX (newbattle/nbMakePacket, 0xDC each)
 
 54 of 55 words each, at the exact 220-byte size.
@@ -2682,4 +2677,173 @@ the bottom arrow; spelling the arrow y as `row * 8 + 0x78F0 - 0x40`; a shared
 plus a cast; and `(evtMenuDisp_cnt & 0x10) != 0`. Every spelling of the two
 `row * 8` expressions that folds to the same instructions also unifies under
 gcse, so blocking the share needs a source form that keeps them distinct.
+
+## nbE902Process_1 (newbattle/nbMakePacket, 0x90)
+
+2 of 36 words, at the exact 144-byte size.
+
+The whole body is right: the `nbE902Table[e->step](e)` dispatch, the `return -1`
+arm, the `unk_08 == 0x25` test and both `dds3PadVibrationSet` calls. The two
+words are the argument setup of the first call, which retail orders `addiu $5,
+$0, 1` (in the `bne`'s delay slot) then `daddu $4, $0, $0`, and ee-gcc the
+other way round. Nothing else moves.
+
+Ruled out: a `switch` with and without an explicit `default: break;`, a plain
+`if`, an `s32` local for `unk_08`, and inverting the test so the vibration arm
+is the fall-through with the `nbUpdateEventProcessData` tail duplicated. All
+five give the identical two-word swap, which puts this in the
+instruction-scheduling class.
+
+## Flow5_2 (newbattle/nbMakePacket, 0x98)
+
+17 of 35 words, three words short of retail's 152.
+
+Both `nbAddNegoIdKouho` ids, the `datSearchDevilStock(n->ework->id)` call and
+the `evtBitCheck`/`evtBitOn` pair on `n->innen_id + 0xB00` are confirmed, as
+are the three `nextnegoid` assignments (`nextkouho[1]` on the stock hit and on
+the bit hit, `nextkouho[0]` otherwise).
+
+Two things are still wrong. ee-gcc emits `bgezl` out of the
+`datSearchDevilStock` test where retail has a plain `bltz` with the shared
+`return 0`'s zero annulled into its slot, and it reads `n->innen_id` once where
+retail reads it twice, once into `$4` for each of the two calls. Retail
+materialises the zero three times, once per exit path, so the source has one
+textual `return 0` reached from all three arms.
+
+Ruled out: `>= 0` and `< 0` for the first test, an `if`/`else if`/`else` chain
+and an early `return 0` per arm (both leave the `bgezl`), and nesting the bit
+test inside the `< 0` arm. Two distinct `s32` locals for the two `innen_id`
+reads is the next thing to try, per the two-reads row of
+[matching levers](matching-levers.md).
+
+## Flow10_21 (newbattle/nbMakePacket, 0x98)
+
+11 of 37 words, one word short of retail's 152.
+
+Both `nbAddNegoIdKouho` ids, the three-way `ework->id` chain over `0x5C`,
+`0x3D` and `0x61` (plain `beq`s, since the values are not contiguous), the
+`evtBitCheck(8) == 0` polarity and the `(u32)dds3GetRandIntA(0, 10) < 5`
+unsigned test are all confirmed; the first 26 words are identical. The whole
+condition has to be one `||` of the two disjuncts assigning
+`nextkouho[1]`, with `nextkouho[0]` in the `else`: an early `return 0` after
+the first assignment duplicates the tail and runs eight bytes over.
+
+What is left is the rand test's polarity in the emitted code. Retail puts the
+`sltiu` result in `$3` and branches `bnez $3` to the `nextkouho[1]` block,
+which it places last; ee-gcc puts it in `$2` and emits `beql $2, $0`, keeping
+`nextkouho[1]` as the fall-through, which shifts the two branch offsets. The
+`>= 5` spelling with the arms swapped and an explicit `bit` local for the
+`evtBitCheck` result are both much worse (10 of 38 over size, and 24 of 38).
+
+## Flow10_10 (newbattle/nbMakePacket, 0x90)
+
+15 of 35 words, one word short of retail's 144.
+
+The `nbAddNegoIdKouho(n, 0x6004A)` call, the three stores (`workid[6] =
+0x60009`, `cnt6_36 = 0`, `cnt6_37 = 0`) and both message arms are right, and so
+is the single shared `nbDispNegoMessage` call fed by `mes` and `type` locals
+set in each arm: writing the call out in both arms instead makes ee-gcc
+duplicate the `jal` where retail shares it, which is worse.
+
+What is left is that retail duplicates the fourth argument's `daddu $7, $0, $0`
+into the `else` arm as well as setting it before the dispatch, and materialises
+`0xD9` ahead of the three stores rather than inside the arm. Assigning the
+`else` arm's values as defaults before the test instead reaches only 23 of 32
+words, because the `flowmsg` load then happens before the stores.
+
+## Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
+
+18 of 29 words each, two words short of retail's 124.
+
+The two-case `switch` over `nownegophase`, both arms, the `0xA1`/`0xA3`
+message constants and the `return 2`/`return 1` are all right: the dispatch is
+retail's `beqz 0` then `beq 1` with no bound test, and the arms' bodies are
+word for word identical. The single difference is that ee-gcc makes the second
+dispatch test a `beql` and annuls `case 1`'s `lw $2, 0x184($16)` into its slot,
+where retail keeps a plain `beq` with the default arm's `daddu $2, $0, $0` in
+the slot and gives the default its own `b` to an exit placed after the shared
+`ld $16`. Every later word is that one-instruction shift.
+
+`Flow8_12` next door matches with the identical source shape, because its
+`case 1` body starts with a `jal dds3GetRandIntA` that cannot be annulled, so
+the shape is confirmed and only the annul bit is wrong. This is the same class
+as the `Flow13_8` entry below.
+
+Ruled out: a `default: return 0;` arm, a `ret` local with `break` in each arm,
+a `goto zero` for the shared exit, the two cases in the other order, and an
+extra empty `case 2`, `case 3` or `case 4`. The empty case reaches the exact
+124-byte size and 11 differing words, but it does so by building a three-node
+tree with an `slt 2` bound test that retail does not have, so it is further
+from the retail source rather than nearer.
+
+## nbFreeEffectSlot (newbattle/nbMakePacket, 0x2C)
+
+Byte-exact on its own. It is kept behind the fallback because its presence as a
+C definition costs four other functions in the unit: `Wait1_nbE901`,
+`PartsWait` and `nbE912_Wait1` each go from exact to one differing word, and
+`EffDel` from exact to four. All four then emit a plain `bne`/`beq` where
+retail annuls the epilogue's `ld $31` into a branch-likely delay slot. With
+nbFreeEffectSlot reduced to the `extern` declaration the unit already carries
+at the top of the file, all four match and only nbFreeEffectSlot itself is
+lost, so the fallback is worth three functions and unblocks the other nineteen
+callers still in assembly.
+
+This is the `slDrawWindow` mechanism of
+[matching levers](matching-levers.md) with the sign reversed, and the second
+instance in this unit after `nbMaeCheckDone`: what the compiler can see of the
+rest of the unit changes its delay-slot decisions, and here seeing the callee
+makes them worse.
+
+Ruled out for keeping both: a K&R definition of nbFreeEffectSlot, deleting the
+`extern` prototype above it, and every spelling of the callers' own guard
+(inverted test, `> 0x3C` for `>= 0x3D`, a `goto`, a local for `e->frame`, a
+nested `return 0`, and a `s32 dummy; s32 *p = &dummy;` sibcall blocker). The
+callers' source shape does not reach this bit; only the callee's visibility
+does. Twenty unused `extern` declarations added above the callee leave it
+unchanged too, so it is the decl's identity and not cc1's heap layout.
+
+The four discriminating callers all sit above nbFreeEffectSlot's `0x0028FA48`
+in address order, which is evidence for a retail translation-unit boundary
+between them; see [TU recovery](tu-recovery.md).
+
+## nbCheckBattleSkillError1 (newbattle/nbMakePacket, 0x48)
+
+1 of 18 words, at the exact 72-byte size.
+
+The structure is settled: `if (id < 0x33) { if (id >= 0x31) { if
+(nbFindStockSkillError() == 0) { return 2; } } } return 0;`, with exactly one
+textual `return 0`, which is what gives retail's three separate
+`daddu $2, $0, $0` (two in branch delay slots, one its own block placed after
+the `return 2` tail) and leaves the `id < 0x31` compare in `$2` rather than
+`$3`. Writing any of the exits as its own `return 0` or `goto zero` instead
+hoists one zero into `$2` above the first branch and costs eight bytes.
+
+The one differing word is the `nbFindStockSkillError` test: retail emits a
+plain `bne $2, $0` and ee-gcc a `bnel`. The callee is still `INCLUDE_ASM`, so
+this is the `slDrawWindow` row of [matching levers](matching-levers.md):
+decompile `nbFindStockSkillError` and this should come out. It was attempted
+and set aside at 19 of 21 words, 76 bytes against retail's 88. Retail keeps the
+unit index and the byte offset as two induction variables and recomputes both
+table bases per iteration (`addu $3, $8, $5` off `DDS3_GBWK + 4` for the flag,
+`addu $4, $6, $5` off `DDS3_GBWK` for the badstatus at `0x12`); every shape
+tried (`ofs` as a local, `w[i]`, a biased `0xA50` base, two raw pointer
+expressions, `&&` for the nested tests) lets gcc fold the address into one
+strength-reduced giv with negative displacements instead.
+
+## nbSetBadCurseTimer (newbattle/nbMakePacket, 0x2C)
+
+2 of 11 words, at the exact 44-byte size.
+
+The reads, the increment, both stores and the `gp`-relative write-back are all
+identical. Retail computes the row once, `addu $7, $2, $3` with the index
+first, and reaches the `step` store through a plain copy of it,
+`daddu $2, $7, $0`; ee-gcc computes the row twice instead, once in each operand
+order, so the two words are that second `addu` and the missing copy.
+
+Ruled out: the cast form `(u8 *)(i * 8) + (u32)nbBadCurseTable` for one, the
+other or both accesses (one address and no copy, four bytes short); a
+`&nbBadCurseTable[i]` pointer local; two pointer locals with an explicit copy
+between them; `*(s32 *)p` for the `step` store; `nbBadCurseTimer++` in place of
+the index local; and both store orders, which only swap the registers the
+timer and the table base get.
 
