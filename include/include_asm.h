@@ -30,7 +30,7 @@
  * tools/check_nonmatching.py compiles it so it cannot rot unnoticed.
  *
  * The one line says how close it is and what differs.
- * docs/nonmatching.md carries the rest: the remaining difference in full and
+ * docs/nonmatching/<unit>.md carries the rest: the remaining difference and
  * the source shapes already ruled out. tools/check_nonmatching.py compiles
  * every draft and refuses one with no entry there.
  */

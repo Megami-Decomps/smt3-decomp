@@ -8,7 +8,7 @@ build, so a struct rename or a changed signature elsewhere can break it
 silently. This compiles every unit that has one with NON_MATCHING and
 SKIP_ASM defined, which selects the drafts and drops the asm fallbacks.
 
-It also checks that each draft has an entry in docs/nonmatching.md. The
+It also checks that each draft has an entry under docs/nonmatching/. The
 source carries one line; that page carries what the remaining difference is
 and which source shapes are already ruled out. A draft nobody can read is a
 draft the next person redoes from scratch.
@@ -24,7 +24,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 GUARD = "#ifdef NON_MATCHING"
-WRITEUP = ROOT / "docs/nonmatching.md"
+WRITEUP_DIR = ROOT / "docs/nonmatching"
+WRITEUP_INTRO = ROOT / "docs/nonmatching.md"
 # The INCLUDE_ASM in a draft's #else names the function the draft is for.
 DRAFT = re.compile(
     r'#ifdef NON_MATCHING\b.*?#else\b(?:(?!#endif).)*?'
@@ -77,7 +78,11 @@ if __name__ == "__main__":
     if not todo:
         print("no NON_MATCHING drafts")
         sys.exit(0)
-    writeup = WRITEUP.read_text() if WRITEUP.exists() else ""
+    # One page per unit under docs/nonmatching/, plus the intro page that
+    # carries the conventions; an entry on any of them counts.
+    writeup = "\n".join(
+        [p.read_text() for p in sorted(WRITEUP_DIR.rglob("*.md"))]
+        + ([WRITEUP_INTRO.read_text()] if WRITEUP_INTRO.exists() else []))
     bad = 0
     for path in todo:
         text = path.read_text()
@@ -93,5 +98,5 @@ if __name__ == "__main__":
         for name in names:
             if not re.search(r"^#+ .*\b" + re.escape(name) + r"\b", writeup, re.M):
                 bad += 1
-                print(f"{rel}: {name} has no entry in docs/nonmatching.md")
+                print(f"{rel}: {name} has no entry under docs/nonmatching/")
     sys.exit(1 if bad else 0)

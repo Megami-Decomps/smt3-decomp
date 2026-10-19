@@ -16,7 +16,7 @@ thrown away, wrapped as
 so the normal build takes the asm and the next person starts from the draft
 instead of from scratch. One line above it says how close it is and what
 differs, "12 of 694 words, three spill slots rotated". The rest goes in
-docs/nonmatching.md: the remaining difference in full and the shapes already
+docs/nonmatching/<unit>.md: the remaining difference and the shapes already
 ruled out, which tools/check_nonmatching.py requires. --discard deletes the
 draft instead, for one not worth keeping.
 
