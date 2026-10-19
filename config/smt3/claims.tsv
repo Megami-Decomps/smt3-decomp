@@ -16,15 +16,15 @@ src/smt3/code_001B0858.c	u4	done	2026-10-18	145 / 74212	remaining bytes concentr
 src/smt3/code_00144798.c	u5	done	2026-10-18	88 / 69728	-
 src/smt3/newbattle/nbStageProcess.c	u8	done	2026-10-18	140 / 64312	interrupted by a gateway error, not finished
 src/smt3/code_002C6F38.c	-	-	-	602 / 119280	newlib; outside the game-code denominator, do not claim
-src/smt3/code_001FAE80.c	w1	open	2026-10-19	872 / 260124	-
-src/smt3/newbattle/nbMakePacket.c	w2	open	2026-10-19	332 / 155996	-
+src/smt3/code_001FAE80.c	w1	done	2026-10-19	872 / 260124	-
+src/smt3/newbattle/nbMakePacket.c	w2	done	2026-10-19	332 / 155996	-
 src/smt3/field/fldDraw.c	w3	done	2026-10-19	69 / 79840	two drafts kept: fldSkyDrawFilter at 682 of 694 words, fldStatusSet at 36 of 62
-src/smt3/code_001B0858.c	w4	open	2026-10-19	145 / 74212	-
-src/smt3/code_00144798.c	w5	open	2026-10-19	88 / 69728	-
-src/smt3/newbattle/nbStageProcess.c	w6	open	2026-10-19	140 / 64312	-
-src/smt3/code_0029B780.c	w7	open	2026-10-19	135 / 43052	-
-src/smt3/code_001D1470.c	w8	open	2026-10-19	173 / 37672	-
-src/smt3/code_001F4518.c	w9	open	2026-10-19	57 / 21708	23 of its 57 are high-confidence dds pairings, the densest left
+src/smt3/code_001B0858.c	w4	done	2026-10-19	145 / 74212	-
+src/smt3/code_00144798.c	w5	done	2026-10-19	88 / 69728	-
+src/smt3/newbattle/nbStageProcess.c	w6	done	2026-10-19	140 / 64312	-
+src/smt3/code_0029B780.c	w7	done	2026-10-19	135 / 43052	-
+src/smt3/code_001D1470.c	w8	done	2026-10-19	173 / 37672	-
+src/smt3/code_001F4518.c	w9	done	2026-10-19	57 / 21708	23 of its 57 are high-confidence dds pairings, the densest left
 src/smt3/basic/dds3EventBasic.c	b0	done	2026-10-19	0 / 0	named by the TU split; see docs/tu-recovery.md
 src/smt3/basic/dds3MatterObjectBasic.c	b0	done	2026-10-19	2 / 1116	named by the TU split; see docs/tu-recovery.md
 src/smt3/basic/dds3ModelBasic.c	b0	done	2026-10-19	0 / 0	named by the TU split; see docs/tu-recovery.md
@@ -141,3 +141,12 @@ src/smt3/sdf/sdfVu0.c	b0	done	2026-10-19	0 / 0	named by the TU split; see docs/t
 src/smt3/sdf/sdfVu1.c	b0	done	2026-10-19	18 / 2672	named by the TU split; see docs/tu-recovery.md
 src/smt3/sdf/sdf_Decomp.c	b0	done	2026-10-19	0 / 0	named by the TU split; see docs/tu-recovery.md
 src/smt3/sdf/sdf_PadManager.c	b0	done	2026-10-19	1 / 376	named by the TU split; see docs/tu-recovery.md
+src/smt3/code_001FAE80.c	x1	open	2026-10-19	844 / 257912	-
+src/smt3/newbattle/nbMakePacket.c	x2	open	2026-10-19	309 / 151408	-
+src/smt3/effect/effPCPBoss.c	x3	open	2026-10-19	73 / 34640	-
+src/smt3/newbattle/nbCameraBoss.c	x4	open	2026-10-19	50 / 29892	-
+src/smt3/newbattle/nbCameraSkill.c	x5	open	2026-10-19	34 / 19536	-
+src/smt3/mc/slMain.c	x6	open	2026-10-19	20 / 18236	-
+src/smt3/event/evtEventViewer.c	x7	open	2026-10-19	51 / 16904	-
+src/smt3/field/fldAutoMap.c	x8	open	2026-10-19	17 / 16124	-
+src/smt3/code_002C7CB0.c	-	-	-	600 / 119044	Sony SDK and newlib (sceGs*, _r); outside the game denominator, do not claim
