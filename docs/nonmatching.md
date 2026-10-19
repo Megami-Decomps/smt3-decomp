@@ -3784,29 +3784,33 @@ Also confirmed: the `variant & 1` arm's matrix build is
 `f32 matrix[4][4]` at 0x0 then `f32 viewDir[4]` at 0x40, in that declaration
 order.
 
-## dds3Billboard_P2ADraw (effect/billManager, 0x2B8)
+## dds3Billboard_P2AAnimDraw (effect/billManager, 0x1D0)
 
-173 of 174 words match at the exact 696-byte size. The one differing word is
-the `modeFlags & 0x40` test: retail has `beql $2, $0`, the draft `beq $2, $0`.
+Byte-exact as C. It is kept behind the fallback because its visibility as a
+definition costs `dds3Billboard_P2ADraw` one annul bit: with this function
+compiled, `P2ADraw`'s `modeFlags & 0x40` test emits `beq $2, $0` where retail
+has `beql`. Parked, `P2ADraw` is byte-exact. The trade is 464 bytes here for
+696 there at the same matched-function count, so it is worth +232 bytes.
 
-This is the callee-visibility mechanism, and it was measured both ways rather
-than assumed. Renaming **either** `dds3Billboard_P2AAnimDraw` or
-`dds3Billboard_P2ASetNumber` so only the file's declaration is left makes this
-function byte-exact, and nothing else in the unit changes. So it is the second
-kind of case the levers page describes: a neighbour's definition costs this
-function one annul bit.
+Two earlier readings of this pair were wrong and are corrected here, both by
+direct measurement:
 
-The trade is not worth taking as it stands. `dds3Billboard_P2ASetNumber` is 432
-bytes and this function 696, so parking the smaller one would be +264 bytes at
-the same matched-function count, and **`#ifdef NON_MATCHING` does not actually
-reach it**: the effect needs a compiled function body at that point in the
-unit, not merely the symbol gone. Renaming the definition closes this function;
-removing it with the fallback leaves it at one word. That distinction is new
-and is why the draft is kept rather than traded.
+- The fallback **does** reach callee visibility. An earlier entry said the
+  effect needs a compiled body at that point in the unit rather than merely
+  the symbol gone, and that only renaming the definition would close
+  `P2ADraw`. Parking this function with `#ifdef NON_MATCHING` closes it, same
+  as renaming: 60 match, 0 differ, checksum passing.
+- Only this function is the effective neighbour. Parking
+  `dds3Billboard_P2ASetNumber` instead, which an earlier reading said would
+  work equally and would be the cheaper trade at 432 bytes, leaves `P2ADraw`
+  at 1 of 174 words. The two neighbours are not interchangeable.
 
 Ruled out, each measured: hiding `dds3Billboard_P2AColorMul` the same way (no
 effect); and `dds3BillboardTagLink` present as a C definition or not, which
 changes nothing here either way.
+
+`P2ADraw`'s own four levers are recorded here because the draft they came from
+is now in the build.
 
 The rest of the function needed four separate levers and they are all in the
 draft: the plural loop's `out` pointer has to be the index-cast form

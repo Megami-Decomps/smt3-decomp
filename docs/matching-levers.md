@@ -1004,6 +1004,16 @@ A side effect worth noticing: the four callers that discriminate all sit above
 that callee's address, which is evidence for a retail translation-unit boundary
 between them. A callee-visibility result is also a boundary hint.
 
+Two neighbours that both look responsible are not interchangeable, and the
+fallback is not a weaker form of renaming. In `effect/billManager`,
+`dds3Billboard_P2ADraw` is one annul word out, and parking
+`dds3Billboard_P2AAnimDraw` behind the fallback closes it exactly as renaming
+the definition does. Parking `dds3Billboard_P2ASetNumber` instead leaves it at
+one word, although an earlier reading reported either neighbour would do and
+that the fallback did not reach the effect at all. Both halves of that were
+measured wrong. Identify the neighbour by testing one at a time, and use the
+fallback, which is reversible and keeps the draft.
+
 Confirmed again in `event/evtPolygonMovie`, and this time on a callee that does
 *not* match: `evtHokanFilter` is 71 of 72 words with a single `bnel` for
 retail's `bne`, and compiling the parked `evtHokanColor` draft unguarded makes

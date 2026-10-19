@@ -703,6 +703,8 @@ void dds3Billboard_P2ADelete(billObj_t *obj) {
     sdfChipFreeDirect(obj);
 }
 
+/* NON_MATCHING: parked so dds3Billboard_P2ADraw matches; it is byte-exact as C. */
+#ifdef NON_MATCHING
 BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
     BillData *data = obj->u.animationData;
@@ -766,6 +768,9 @@ BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, BillOut *out) {
     }
     return child;
 }
+#else
+INCLUDE_ASM(const s32, "effect/billManager", dds3Billboard_P2AAnimDraw);
+#endif
 
 /* vu0 routine: unpack two colours, multiply the lanes and pack. */
 u32 dds3Billboard_P2AColorMul(u32 color, u32 scale) {
@@ -783,8 +788,6 @@ u32 dds3Billboard_P2AColorMul(u32 color, u32 scale) {
     return out;
 }
 
-/* NON_MATCHING: 1 of 174 words differ (first at +0x144). */
-#ifdef NON_MATCHING
 void dds3Billboard_P2ADraw(billObj_t *obj) {
     u32 modeFlags;
     u32 savedColor;
@@ -873,9 +876,6 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
         obj->childParam = savedColor;
     }
 }
-#else
-INCLUDE_ASM(const s32, "effect/billManager", dds3Billboard_P2ADraw);
-#endif
 
 void dds3Billboard_P2ASetAnim(BillData *animationData, s32 entryIndex, BillOut *resolvedEntry) {
     u8 *base;
