@@ -1,12 +1,8 @@
 #include "common.h"
+#include "model.h"
+#include "motion.h"
 #include "ps2asm.h"
 #include "draw3d.h"
-
-typedef struct
-{
-    u8 pad00[0x18];
-    void *model;
-} EffTrackPolyModelObject_t;
 
 typedef struct
 {
@@ -24,7 +20,7 @@ typedef struct
 
 typedef struct
 {
-    EffTrackPolyModelObject_t *object;
+    mdlObj_t *object;
     s32 mark0;
     s32 mark1;
     f32 startFrame;
@@ -50,15 +46,26 @@ typedef struct
     sdfMemHandle_t *handle;
 } effModelTrackPolyList_t;
 
+typedef struct
+{
+    mdlObj_t *object;
+    s32 mark0;
+    s32 mark1;
+    u32 startFrame;
+    s32 unk10;
+    s32 historyLength;
+    f32 sampleStep;
+    u32 blend;
+    u32 color;
+    u32 unk24;
+} effSwordTrackParam_t;
+
 /* Sword trails have their history pointer at +0x30 instead of +0x38. */
 typedef struct
 {
-    EffTrackPolyModelObject_t *object;
-    s32 mark0;
-    s32 mark1;
-    u8 unk0C[0x1C];
+    effSwordTrackParam_t params;
     u32 updateCount;
-    u32 unk2C;
+    u32 otIndex;
     Dds3HermitianTrackPoly_t *trackPoly;
 } effSwordTrack_t;
 
@@ -66,6 +73,21 @@ extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern void sdfChipFreeDirect(void *ptr);
+extern void *sdfChipAllocDirect(u32 size);
+extern sdfGrOt_t sdfGrOtTable[];
+extern u32 dds3GetFrameID(void);
+extern void sdfGrSetFrameMaskRGB(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *source, void *packet, s32 gsContext);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *list, u32 packetAddress);
+
+/* dds3DrawBank_t stride; only the held frame texture block at 0x1300 is used here. */
+typedef struct
+{
+    u8 unk0000[0x1300];
+    u8 frameTex[0x8E0];
+} effDrawBank_t;
+
+extern effDrawBank_t dds3DrawEnv[];
 extern sdfMat_t *sdfMatNew(void);
 extern void sdfMatFreeDelayed(sdfMat_t *material);
 extern void sdfMatSetConstant(sdfMat_t *material, f32 constant);
@@ -80,30 +102,99 @@ extern sdf3DPrimPolyParm_t D_0056AF00;
 extern u32 D_0031FFE0[];
 extern sdfGrOt_t *D_00320020[];
 extern sdfGrOt_t D_002F64B8;
-extern EffModelTrackPoly_t *Eff_ModelTrackPolyCreate(effModelTrackPolyParam_t *params);
-extern void Eff_ModelTrackPolyReset(EffModelTrackPoly_t *work);
-extern void Eff_ModelTrackPolyDelete(EffModelTrackPoly_t *work);
 void dds3HermitianTrackPolySetVertex(Dds3HermitianTrackPoly_t *data, const u128 *src);
 void dds3HermitianTrackPolyReset(Dds3HermitianTrackPoly_t *data);
 void dds3HermitianTrackPolyDraw(Dds3HermitianTrackPoly_t *data);
+void Eff_ModelTrackPolyGetMarkPosition(EffModelTrackPoly_t *work);
+void effSwordTrackDraw(effSwordTrack_t *work);
+void effSwordTrackRecord(effSwordTrack_t *work);
+void effSwordTrackPolygonDraw(effSwordTrack_t *work);
+void effSwordTrackPolygon2DDraw(effSwordTrack_t *work);
 
 extern s32 sdfModelGetMarkPos(void *model, s32 mark);
+s32 Eff_ModelTrackPoly_DANTE_Check(mdlObj_t *object);
+effSwordTrack_t *effSwordTrackCreate(effSwordTrackParam_t *params);
+void effSwordTrackDelete(effSwordTrack_t *work);
+void effSwordTrackReset(effSwordTrack_t *work);
 /* Endpoint pairs are sampled into the history ring below. */
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyCreate);
+EffModelTrackPoly_t *Eff_ModelTrackPolyCreate(effModelTrackPolyParam_t *params)
+{
+    EffModelTrackPoly_t *work = sdfChipAllocDirect(sizeof(EffModelTrackPoly_t));
+    effSwordTrackParam_t sword;
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyDelete);
+    work->params = *params;
+    if (Eff_ModelTrackPoly_DANTE_Check(work->params.object)) {
+        sword.object = params->object;
+        sword.mark0 = 0x65;
+        sword.mark1 = 0x64;
+        sword.startFrame = 8;
+        sword.unk10 = 0xC8;
+        switch (mdlGetMotionNum(params->object, 0)) {
+        case 10:
+            sword.historyLength = 6;
+            sword.color = 0x80C8C8C8;
+            break;
+        case 9:
+            sword.historyLength = 5;
+            sword.color = 0xC0C0C0C0;
+            break;
+        case 0x11:
+            sword.historyLength = 5;
+            sword.color = 0xB8A8A8A8;
+            break;
+        case 0x12:
+            sword.historyLength = 7;
+            sword.color = 0xC8C8C8C8;
+            break;
+        default:
+            sword.historyLength = 6;
+            sword.color = 0xB8B8B8B8;
+            break;
+        }
+        sword.sampleStep = 0.025f;
+        sword.blend = 1;
+        work->trackPoly = (Dds3HermitianTrackPoly_t *)effSwordTrackCreate(&sword);
+    } else {
+        work->params.unk1C = 6;
+        work->updateCount = 0;
+        work->trackPoly = dds3HermitianTrackPolyCreate(work->params.historyLength, 6);
+        dds3HermitianTrackPolySetVC(work->trackPoly, params->gradientColors);
+        dds3HermitianTrackPolySetBlend(work->trackPoly, params->blend);
+    }
+    return work;
+}
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyReset);
+void Eff_ModelTrackPolyDelete(EffModelTrackPoly_t *work)
+{
+    if (Eff_ModelTrackPoly_DANTE_Check(work->params.object)) {
+        effSwordTrackDelete((effSwordTrack_t *)work->trackPoly);
+        work->trackPoly = NULL;
+    }
+    if (work->trackPoly != NULL) {
+        pMeshDelete(work->trackPoly);
+    }
+    sdfChipFreeDirect(work);
+}
+
+void Eff_ModelTrackPolyReset(EffModelTrackPoly_t *work)
+{
+    if (Eff_ModelTrackPoly_DANTE_Check(work->params.object)) {
+        effSwordTrackReset((effSwordTrack_t *)work->trackPoly);
+        return;
+    }
+    work->updateCount = 0;
+    dds3HermitianTrackPolyReset(work->trackPoly);
+}
 
 void Eff_ModelTrackPolyGetMarkPosition(EffModelTrackPoly_t *work)
 {
     QuadF32 pair[2];
-    EffTrackPolyModelObject_t *object = work->params.object;
+    mdlObj_t *object = work->params.object;
 
-    sdfModelGetMarkPos(object->model, work->params.mark0);
+    sdfModelGetMarkPos(object->inner, work->params.mark0);
     SDF_VU0_STOREVECTOR_MEMOPS(pair[0]);
-    sdfModelGetMarkPos(object->model, work->params.mark1);
+    sdfModelGetMarkPos(object->inner, work->params.mark1);
     SDF_VU0_STOREVECTOR(&pair[1]);
     dds3HermitianTrackPolySetVertex(work->trackPoly, (const u128 *)pair);
 }
@@ -120,7 +211,101 @@ void Eff_ModelTrackPolyDrawOnly(EffModelTrackPoly_t *work) {
     dds3HermitianTrackPolyDraw(work->trackPoly);
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPolyDraw);
+void Eff_ModelTrackPolyDraw(EffModelTrackPoly_t *work)
+{
+    effSwordTrack_t *sword;
+    s32 minor;
+    u32 saved;
+    f32 frame;
+    Dds3HermitianTrackPoly_t *poly;
+
+    if (Eff_ModelTrackPoly_DANTE_Check(work->params.object)) {
+        minor = mdlGetMinorNum(work->params.object);
+        sword = (effSwordTrack_t *)work->trackPoly;
+        switch (mdlGetMotionNum(work->params.object, 0)) {
+        case 10:
+            if (sword->updateCount < 0x1A) {
+                sword->updateCount++;
+            } else {
+                effSwordTrackDraw(sword);
+            }
+            break;
+        case 9:
+            if (sword->updateCount < 0x15) {
+                sword->updateCount++;
+            } else if (minor >= 0x153 && minor < 0x156) {
+                saved = sword->params.color;
+                if (sword->updateCount >= 0x31) {
+                    sword->params.color = 0;
+                }
+                effSwordTrackDraw(sword);
+                sword->params.color = saved;
+            } else {
+                effSwordTrackDraw(sword);
+            }
+            break;
+        case 0x10:
+            if (sword->updateCount < 0xB) {
+                sword->updateCount++;
+            } else {
+                effSwordTrackDraw(sword);
+            }
+            break;
+        case 0x11:
+            if (minor >= 0x153 && minor < 0x156) {
+                if (sword->updateCount < 0x1C) {
+                    sword->updateCount++;
+                } else {
+                    effSwordTrackDraw(sword);
+                }
+            } else if (sword->updateCount < 0x16) {
+                sword->updateCount++;
+            } else {
+                effSwordTrackDraw(sword);
+            }
+            break;
+        case 0x12:
+            if ((minor >= 0x153 && minor < 0x156) ? (sword->updateCount < 0x11) : (sword->updateCount < 0xB)) {
+                sword->updateCount++;
+            } else {
+                saved = sword->params.color;
+                if (sword->updateCount - 0x48 < 0x35) {
+                    sword->params.color = 0;
+                }
+                effSwordTrackDraw(sword);
+                sword->params.color = saved;
+            }
+            break;
+        default:
+            if (sword->updateCount >= 0xB) {
+                effSwordTrackDraw(sword);
+            } else {
+                sword->updateCount++;
+            }
+            break;
+        }
+    } else {
+        frame = work->params.object->first->frame;
+        if (work->params.startFrame <= frame) {
+            if (frame <= work->params.endFrame) {
+                if (work->updateCount % work->params.sampleInterval == 0) {
+                    Eff_ModelTrackPolyGetMarkPosition(work);
+                }
+                dds3HermitianTrackPolyDraw(work->trackPoly);
+            } else {
+                poly = work->trackPoly;
+                if ((poly->color & 0xFF000000) != 0) {
+                    poly->color += 0xE0000000;
+                }
+                dds3HermitianTrackPolyDraw(poly);
+            }
+            work->updateCount++;
+        } else {
+            Eff_ModelTrackPolyReset(work);
+            work = NULL;
+        }
+    }
+}
 
 effModelTrackPolyList_t *Eff_ModelTrackPolyListCreate(effModelTrackPolyParam_t *params, u32 count) {
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * sizeof(EffModelTrackPoly_t *) + sizeof(effModelTrackPolyList_t));
@@ -524,9 +709,45 @@ void dds3HermitianTrackPolyDraw(Dds3HermitianTrackPoly_t *data) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", Eff_ModelTrackPoly_DANTE_Check);
+s32 Eff_ModelTrackPoly_DANTE_Check(mdlObj_t *object)
+{
+    s32 minor;
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effSwordTrackCreate);
+    if (mdlGetMajorNum(object) != 1) {
+        return 0;
+    }
+    minor = mdlGetMinorNum(object);
+    if (minor != 0xC0) {
+        if (minor < 0xC0) {
+            return 0;
+        }
+        if (minor >= 0x156) {
+            return 0;
+        }
+        if (minor < 0x153) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+effSwordTrack_t *effSwordTrackCreate(effSwordTrackParam_t *params)
+{
+    effSwordTrack_t *work = sdfChipAllocDirect(sizeof(effSwordTrack_t));
+    u32 colors[4];
+
+    work->params = *params;
+    work->updateCount = 0;
+    work->trackPoly = dds3HermitianTrackPolyCreate(params->historyLength,
+                                                   (s32)(1.0f / params->sampleStep));
+    colors[0] = params->color;
+    colors[1] = params->color;
+    colors[2] = params->color;
+    colors[3] = params->color;
+    dds3HermitianTrackPolySetVC(work->trackPoly, colors);
+    dds3HermitianTrackPolySetBlend(work->trackPoly, params->blend);
+    return work;
+}
 
 void effSwordTrackDelete(effSwordTrack_t *work)
 {
@@ -536,21 +757,133 @@ void effSwordTrackDelete(effSwordTrack_t *work)
 
 void effSwordTrackRecord(effSwordTrack_t *work)
 {
-    EffTrackPolyModelObject_t *object = work->object;
+    mdlObj_t *object = work->params.object;
     QuadF32 points[2];
 
-    sdfModelGetMarkPos(object->model, work->mark0);
+    sdfModelGetMarkPos(object->inner, work->params.mark0);
     SDF_VU0_STOREVECTOR_MEMOPS(points[0]);
-    sdfModelGetMarkPos(object->model, work->mark1);
+    sdfModelGetMarkPos(object->inner, work->params.mark1);
     SDF_VU0_STOREVECTOR(&points[1]);
     dds3HermitianTrackPolySetVertex(work->trackPoly, (u128 *)points);
 }
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effSwordTrackPolygonDraw);
+void effSwordTrackPolygonDraw(effSwordTrack_t *work)
+{
+    Dds3HermitianTrackPoly_t *data = work->trackPoly;
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    s32 runStart[4];
+    s32 runPointCount[2];
+    sdf3DPrimPolyParm_t *draw;
+    s32 runIndex;
+    s32 pointsRemaining;
+    s32 activePointCount;
+    sdfGrOt_t *ot;
+
+    sdfDrawTagInit(list);
+    sdf3DPrimLinkResetTm(list, 0);
+    sdf3DPrimLinkMat(list, data->material, 0);
+    activePointCount = data->count;
+    runStart[0] = data->head - activePointCount;
+    if (runStart[0] < 2) {
+        runStart[0] -= 2;
+        runPointCount[0] = -runStart[0];
+        runStart[0] += data->capacity;
+        runPointCount[1] = activePointCount - runPointCount[0] + 2;
+        runStart[1] = 0;
+    } else {
+        runPointCount[0] = activePointCount;
+        runPointCount[1] = 0;
+    }
+    D_0056AF00.color = 0x20808080;
+    D_0056AF00.vertexColor = NULL;
+    for (runIndex = 0; runIndex < 2; runIndex++) {
+        draw = &D_0056AF00;
+        draw->vertex = (sdfVector4_t *)&data->vertices[runStart[runIndex]];
+        draw->faceCount = 0x10;
+        draw->pointCount = 0x12;
+        pointsRemaining = runPointCount[runIndex];
+        while (pointsRemaining >= 0x12) {
+            pointsRemaining -= 0x10;
+            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056AF00));
+            D_0056AF00.vertex += 0x10;
+        }
+        if (pointsRemaining >= 4) {
+            draw->pointCount = pointsRemaining;
+            draw->faceCount = pointsRemaining - 2;
+            sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(draw));
+        }
+    }
+    ot = &sdfGrOtTable[work->otIndex];
+    ot->regFunc(ot, list);
+}
 
 INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effSwordTrackPolygon2DDraw);
 
-INCLUDE_ASM(const s32, "effect/effModelTrackPoly", effSwordTrackDraw);
+void effSwordTrackDraw(effSwordTrack_t *work)
+{
+    sdfDrawTag_t *list;
+    void *mask;
+    u64 *packet;
+    f32 frame;
+
+    frame = work->params.object->first->frame;
+    if (frame < (f32)work->params.startFrame) {
+        return;
+    }
+    effSwordTrackRecord(work);
+    work->otIndex = 0x2E;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfDrawTagLinkRefGif(list, (u32)mask);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+    packet[0] = 3;
+    packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+    packet[2] = ((u64)0x10000000 << 32) | 0x8002;
+    packet[3] = 0xE;
+    packet[4] = 0x717FB;
+    packet[5] = 0x47;
+    packet[6] = 0x44;
+    packet[7] = 0x42;
+    sdfDrawTagLink(list, (u32)packet);
+    {
+        sdfGrOt_t *ot = &sdfGrOtTable[work->otIndex];
+
+        ot->regFunc(ot, list);
+    }
+    effSwordTrackPolygonDraw(work);
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfDrawTagLinkRefGif(list, (u32)mask);
+    {
+        sdfGrOt_t *ot = &sdfGrOtTable[work->otIndex];
+
+        ot->regFunc(ot, list);
+    }
+    work->otIndex = 0x2E;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+    packet[0] = 3;
+    packet[1] = ((u64)0x50000003 << 16 | 0x1000) << 16;
+    packet[2] = ((u64)0x10000000 << 32) | 0x8002;
+    packet[3] = 0xE;
+    packet[4] = 0x717FB;
+    packet[5] = 0x47;
+    packet[6] = 0x44;
+    packet[7] = 0x42;
+    sdfDrawTagLink(list, (u32)packet);
+    {
+        sdfGrOt_t *ot = &sdfGrOtTable[work->otIndex];
+
+        ot->regFunc(ot, list);
+    }
+    effSwordTrackPolygon2DDraw(work);
+    work->updateCount++;
+}
 
 void effSwordTrackReset(effSwordTrack_t *work)
 {

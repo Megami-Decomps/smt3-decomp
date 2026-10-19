@@ -105,6 +105,9 @@ it was measured on DDS and not on this ELF.
 | a `switch` arm that only advances a counter and tests it, where your C reads the field twice | `p->field++; if (p->field >= bound)`. An `s16` local for the incremented value is the obvious shape and is four words out: it sign-extends in place and takes the bound's register. `CalcMessage` turned on that alone |
 | one shared `jal` reached by a `b` from one arm and a fall-through from the other, where the argument comes from two different producers | write the whole call out in each arm and let gcc cross-jump it. A local for the produced value (`name = f(); ... g(x, y, name)`) is 11 words out on the argument-setup order alone; `itfMesMngRequestMessage` went to exact with the two `MessageRequestEx` calls written in full inside the `if` and the `else` |
 | the **same** tail block appearing once per branch of an `if`/`else`, byte-identical apart from the branch displacements | two changes that do nothing on their own and everything together. Cross-jumping runs in `jump2`, after register allocation, so two identical tails merge unless a register differs. First, read the dispatched field directly in both the `switch` head and the following `== N` test (`switch (control->animeMode)` and `if (control->animeMode == 6)`), not through a local: gcse then hoists one load into the branch block and leaves a `daddu rd, rs, $0` copy in one arm, so the two tails test different registers. A local for the value, two locals, a local copied from a local, function-scope locals and six declaration orders all coalesce to one register and change nothing. Second, repeat the call that *follows* the `if`/`else` inside each arm instead of writing it once after it, which is what stops gcc merging the arms from the end inward. `dds3ObjectBaseModelLinkOt` has three such arms; it sat at 130 of 230 differing words, reached 127 on the direct field reads alone, and went to 20 of 242 when the trailing `sdfModelEvalTm` call moved into all three |
+| a `switch` `default` arm whose counter bump shares the block the other arms branch to, where your C gives the default its own copy | write the default's test with the opposite polarity, `if (c >= 0xB) { call(); } else { c++; }`. The five other arms of `Eff_ModelTrackPolyDraw` cross-jump their `c++` into one block with the natural `if (c < 0xB)` and only the default, written last, keeps a copy. 18 of 174 words out, exact once the default alone is inverted |
+| two `sltiu`s against different immediates converging on one branch, where your C emits a `movz` | put the ternary on the comparison, not on the bound: `if (cond ? (c < 0x11) : (c < 0xB))`. Selecting the bound first, as a ternary or as an `if`/`else` that assigns a `limit` local, if-converts to `movz`. `Eff_ModelTrackPolyDraw`'s `case 0x12` went from 29 of 174 words to 18 on that one expression |
+| a dead store of an intermediate into the array slot your C keeps in a temp | update the slot in place, `runStart[0] -= 2; ... runStart[0] += data->capacity;`, and order the statements offset, negate, add capacity, count, zero. `effSwordTrackPolygonDraw` needs that, while its sibling `dds3HermitianTrackPolyDraw` in the same unit matches with a `wrappedStartOffset` temp, so both shapes are live and the extra store in the retail text is what tells them apart |
 
 ## Addressing and types
 
@@ -114,6 +117,25 @@ it was measured on DDS and not on this ELF.
   locals when a `switch` uses them in more than one arm: `RunMotionStopKouka`
   needs `evtUnit_t *hunit` *and* `mdlObj_t *obj` assigned before the dispatch,
   since retail loads `hunit->owner` in the dispatch's delay slot.
+- Three identical call sites through **one** function-scope pointer local give
+  that local nine refs and one pseudo, so the index temp feeding it takes `$2`
+  and the loaded function pointer `$3`. Declaring the pointer per site, in a
+  braced block, gives each site its own pseudo that ties the index into `$4` and
+  matches retail's `lw $4, 0x2C($22)` / `sll` / `addu` / `lw $2, 0x10($4)`.
+  `effSwordTrackDraw` has three `ot = &sdfGrOtTable[work->otIndex];
+  ot->regFunc(ot, list);` sites and sat at 15 of 176 words with the shared local;
+  the per-site declaration took it to exact. Six spellings of the address
+  (`sdfGrOtTable + i`, a `u8 *` cast, a table pointer local, the two-step `+=`,
+  the inline `sdfGrOtTable[i].regFunc(&sdfGrOtTable[i], list)`, a cast on
+  `regFunc`) all leave the shared local at 15.
+- In a comparison between an `f32` field and an integer cast to `f32`, gcc
+  expands the cast first whatever the operand order, because it is the more
+  complex operand. With a `u32` the cast is a branch (`bltz`, then the
+  `srl`/`andi`/`or`/`add.s` pair), and the field load lands inside both arms of
+  it. Reading the field into an `f32` local on its own statement first puts the
+  load above the branch, where retail has it, and leaves the cast in `$f0` with
+  the field in `$f1`. `effSwordTrackDraw` went from 162 of 175 words to 15 on
+  `frame = work->params.object->first->frame;` ahead of the `if`.
 - Externs of 8 bytes or less are addressed through `$gp`. Where retail uses
   `lui`/`%lo`, declare the symbol as an incomplete array (`extern s32 x[];`)
   to force absolute addressing.
