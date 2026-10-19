@@ -40,6 +40,12 @@ void *sdfChipAllocDirect(u32 size);
 void sdfChipFreeDirect(void *ptr);
 int printf(const char *fmt, ...);
 
+extern char D_0054E878[];
+extern char D_0054E880[];
+extern char D_0054E888[];
+extern char D_0054E890[];
+extern char D_0054E898[];
+extern char D_0054E8A0[];
 extern char D_0054E8A8[];
 extern char D_0054E8B0[];
 extern char dds3ProcessTreeDepth[];
@@ -281,7 +287,64 @@ s32 RunProcess(dds3ProcessID_t *task)
     return 1;
 }
 
+/* NON_MATCHING: 40 of 73 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+void RunningProcess(void)
+{
+    dds3ProcessID_t *end = endinglistf;
+    dds3ProcessID_t *run = runninglistf;
+    dds3ProcessID_t *prev;
+
+loop:
+    if (run != NULL) {
+        if (end != NULL) {
+        if (run->priority <= end->priority) {
+            prev = run->prev;
+            if (RunProcess(run) != 0) {
+                run = run->next;
+            } else if (prev != NULL) {
+                run = prev->next;
+            } else {
+                run = runninglistf;
+            }
+        } else {
+            prev = end->prev;
+            if (RunProcess(end) != 0) {
+                end = end->next;
+            } else if (prev != NULL) {
+                end = prev->next;
+            } else {
+                end = endinglistf;
+            }
+        }
+            goto loop;
+        }
+    while (run != NULL) {
+        prev = run->prev;
+        if (RunProcess(run) != 0) {
+            run = run->next;
+        } else if (prev != NULL) {
+            run = prev->next;
+        } else {
+            run = runninglistf;
+        }
+    }
+        return;
+    }
+    while (end != NULL) {
+        prev = end->prev;
+        if (RunProcess(end) != 0) {
+            end = end->next;
+        } else if (prev != NULL) {
+            end = prev->next;
+        } else {
+            end = endinglistf;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", RunningProcess);
+#endif
 
 void KillProcess(dds3ProcessID_t *killp)
 {
@@ -447,7 +510,30 @@ dds3ProcessID_t *dds3SearchProcessNumber(u32 stat, s32 n)
     return p;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", DebugProcess);
+void DebugProcess(dds3ProcessID_t *process, const char *heading)
+{
+    printf(D_0054E878, heading);
+    while (process != NULL) {
+        printf("NAME:(%-24s) ", process->name);
+        printf("PID:(0x%08X) ", process);
+        printf(D_0054E880);
+        if (process->flag & 0x10) {
+            printf(D_0054E888);
+        } else {
+            printf(D_0054E890);
+        }
+        if (process->flag & 0x20) {
+            printf(D_0054E898);
+        } else {
+            printf(D_0054E888);
+        }
+        printf(D_0054E8A0);
+        printf("PRIO:(%5d) ", process->priority);
+        printf("RUNTIME:(%d) ", process->runtime);
+        printf("TIMER:(%d, %d)\n", process->starttimer, process->shutdowntimer);
+        process = process->next;
+    }
+}
 
 void dds3PrintProcessList(void)
 {
@@ -486,7 +572,41 @@ void DebugProcessTree(dds3ProcessID_t *process, s32 depth)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelCore", dds3PrintProcessTree);
+void dds3PrintProcessTree(void)
+{
+    dds3ProcessID_t *p;
+    s32 i;
+
+    printf("<<< process tree >>>\n");
+    for (i = 0; i < 0x40; i++) {
+        dds3ProcessTreeDepth[i] = ' ';
+    }
+    p = startinglistf;
+    while (p != NULL) {
+        if (p->parent == NULL) {
+            dds3ProcessTreeDepth[0] = 0;
+            DebugProcessTree(p, 0);
+        }
+        p = p->next;
+    }
+    p = runninglistf;
+    while (p != NULL) {
+        if (p->parent == NULL) {
+            dds3ProcessTreeDepth[0] = 0;
+            DebugProcessTree(p, 0);
+        }
+        p = p->next;
+    }
+    p = endinglistf;
+    while (p != NULL) {
+        if (p->parent == NULL) {
+            dds3ProcessTreeDepth[0] = 0;
+            DebugProcessTree(p, 0);
+        }
+        p = p->next;
+    }
+    printf(D_0054E8A8);
+}
 
 s32 dds3ProcessMain(void)
 {

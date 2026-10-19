@@ -125,8 +125,39 @@ induction variable cc1 can strength-reduce. Where the same loop also needs the
 next bit, write it as `mask << 1` at each use: retail recomputes that shift
 once per use, and a named local for it computes it once.
 
+A run of equality tests on one field whose arms are branch *targets*, with the
+tests falling through to each other and the arms laid out after them in case
+order, is a `switch`, not an `if`/`else if` chain. The chain puts its first arm
+on the fall-through path, which is two words apart from retail and spoils the
+annulled delay slot that carries the arm's first store.
+`sdfMcFuncGetInfo1`'s three-way on `cb->type` needed the `switch`.
+
+ee-gcc moves a `while`'s exit tests to the bottom of the loop and enters it
+with a `b`, so a loop whose test retail keeps at the top with an unconditional
+back-edge is an explicit label plus `goto`. `while (1)` or `for (;;)` with
+`if (...) break;` spell the same thing and get moved the same way. The
+`goto` costs the loop-alignment `nop` ee-gcc emits only for a loop the front
+end marked, so expect the body to sit one word early.
+
 ## Addressing and types
 
+- A struct pointer local is what keeps two index scalings apart. For
+  `base[port].arr[slot]`, writing it out folds both scalings into one
+  `(port * N + slot) * 4`, and a row pointer (`u32 *f = base[port].arr;`)
+  materialises the whole address into a register and stores at offset 0.
+  `sdfMcControl_t *cb = &base[port];` then `cb->arr[slot]` gives retail's
+  separate `sll` per index, their sum, and the base folded into the
+  reference's `%lo`. All three `sdfMcCb` slot-flag accessors turned on it.
+- A `u8` field compared against a small constant folds to `sltu`, since cc1
+  knows the promoted value is non-negative. Copying the field into an `s32`
+  local first and testing that gives retail's `slti`, and the local is reused
+  for the `+ 1` store as retail does.
+- A clear loop written up-counting, whose index the body uses only as a
+  subscript, is what gcc reverses and strength-reduces into a decrementing
+  address plus a separate `bgez` downcounter.
+  `for (i = 0; i < 0x40; i++) tab[i] = ' ';` is exact in
+  `dds3PrintProcessTree`; writing the same loop down-counting defeats the
+  reduction and leaves an `addu` of base and index in the body.
 - The motion-speed setter is inlined in `newbattle/nbKoukaProcess`: retail writes
   `form->hunit->owner->first->speed` with no `jal`, which pins `mdlObj_t + 0x1C`
   as `first` and `sdfMotionCtrlr_t + 0x20` as `speed`. Hoist both hops into
