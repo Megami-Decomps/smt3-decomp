@@ -314,6 +314,81 @@ extern void evtSetSkyAlpha(s32 no, s32 alpha);
 
 extern s32 dds3ExistProcess(void *id);
 
+extern void *DDS3_GBWK;
+
+extern f32 sdfSin(f32 radians);
+
+extern void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh,
+                         s32 rgba, sdfTexHandle_t *th);
+
+/* Rows of 0x310 bytes; only the three size fields the bed scale reads are
+ * named here. */
+typedef struct {
+    u8 unk00[0x10];
+    f32 formsize;                   /* 0x10 */
+    f32 formheight;                 /* 0x14 */
+    f32 formscale;                  /* 0x18 */
+    u8 unk1C[0x310 - 0x1C];
+} datModelParam_t;
+
+extern datModelParam_t datModelParamTable[];
+
+/* The colour inlines read and write a 16-byte slot, one word of it used. */
+typedef struct {
+    u32 word;
+    u8 pad04[12];
+} evtColorWork_t;
+
+#define EVT_RGBA_SCALE_128 0x43000000
+
+extern void evtPictureSwap(void *id1, void *id2, s32 pat, s32 prm);
+
+extern void evtPictureSetSize(void *id, s32 sw, s32 sh, s32 tw, s32 th);
+
+extern void evtPictureSetPos(void *id, s32 x0, s32 y0, s32 x1, s32 y1, s32 time);
+
+extern void evtPictureSetAlpha(void *id, s32 alp0, s32 alp1, s32 time);
+
+extern void evtPictureSetZoom(void *id, s32 zoom0, s32 zoom1, s32 time);
+
+extern s32 evtPictureStat(void *id);
+
+extern void fldProc_SisetuReturnPoint(s32 fld, s32 area, char *name);
+
+extern void fldBgmStop(void);
+
+extern void fldPauseBgm(void);
+
+extern void p2sdPlaySE(s32 no, s32 volume, s32 pan);
+
+extern void encStart(void);
+
+extern s32 evtNextEventNo;
+
+extern void evtSetPolygonMovieFlag(void *id, s32 flag);
+
+extern void evtResetPolygonMovieFlag(void *id, s32 flag);
+
+extern s32 evtCheckPolygonMovieFlag(void *id, s32 flag);
+
+extern void sdfTexFreeDelayed(void *tex);
+
+extern void evtSetUnitMove2(evtUnit_t *unit, s32 moveType, s32 posId, s32 motion,
+                            s32 para1, s32 para2, void *func, void *data);
+
+extern char D_0053AE10[];
+
+extern char D_0053AE28[];
+
+extern char D_0053AE70[];
+
+extern char D_0053AE88[];
+
+extern char D_0053AE98[];
+
+extern char D_0053AEA8[];
+
+
 extern void evtPictureDrawOn(void *id);
 
 extern void evtPictureDrawOff(void *id);
@@ -726,7 +801,24 @@ u32 evt_1E54B8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_MODEL_MOVE);
+u32 evtCommand_MODEL_MOVE(void)
+{
+    evtUnit_t *unit;
+    s32 posId;
+    s32 moveType;
+    s32 para1;
+
+    unit = evtGetUnitHandle(scrGetIntPara(0));
+    if (unit == NULL) {
+        return 1;
+    }
+    unit->motionTicks = 0;
+    posId = scrGetIntPara(2);
+    moveType = scrGetIntPara(1);
+    para1 = scrGetIntPara(3);
+    evtSetUnitMove2(unit, posId, moveType, -1, para1, scrGetIntPara(4), NULL, NULL);
+    return 1;
+}
 
 u32 evtCommand_MODEL_MOVE2(void) {
     evtUnit_t *unit;
@@ -884,23 +976,101 @@ u32 evtCommand_MODEL_LIGHT_WAIT(void)
 
 u32 evtCommand_MODEL_LIGHT_RGB(void);
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_MODEL_LIGHT_RGB);
+u32 evtCommand_MODEL_LIGHT_RGB(void)
+{
+    evtColorWork_t work[2];
+    evtUnit_t *unit;
+    u32 light;
+    u32 ambient;
+    u32 scale;
+
+    unit = evtGetUnitHandle(scrGetIntPara(0));
+    SDF_VU0_SETVECTOR_X(scrGetFloatPara(2));
+    SDF_VU0_SETVECTOR_Y(scrGetFloatPara(3));
+    SDF_VU0_SETVECTOR_Z(scrGetFloatPara(4));
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    scale = EVT_RGBA_SCALE_128;
+    MMI_RGBA_PACK_UNIT(light, scale);
+    work[0].word = light;
+    SDF_VU0_SETVECTOR_X(scrGetFloatPara(5));
+    SDF_VU0_SETVECTOR_Y(scrGetFloatPara(6));
+    SDF_VU0_SETVECTOR_Z(scrGetFloatPara(7));
+    SDF_VU0_VECTOR_W_SET_ONE();
+    MMI_RGBA_PACK_UNIT(ambient, scale);
+    work[1].word = ambient;
+    evtSetUnitLightAndAmbient(unit, scrGetIntPara(1), light, ambient);
+    return 1;
+}
 
 u32 evtCommand_MODEL_LIGHT_DIR(void);
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A8C8);
+u32 evtCommand_MODEL_LIGHT_DIR(void)
+{
+    f32 dir[4];
+    evtUnit_t *unit;
+    f32 mag;
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A908);
-
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_MODEL_LIGHT_DIR);
+    memset(dir, 0, sizeof(dir));
+    unit = evtGetUnitHandle(scrGetIntPara(0));
+    dir[0] = scrGetFloatPara(2);
+    dir[1] = scrGetFloatPara(3);
+    dir[2] = scrGetFloatPara(4);
+    EE_ABS_F32(mag, dir[0]);
+    if (mag <= 0.01f) {
+        EE_ABS_F32(mag, dir[1]);
+        if (mag <= 0.01f) {
+            EE_ABS_F32(mag, dir[2]);
+            if (mag <= 0.01f) {
+                datDebugPrintf(D_0053A948);
+                return 1;
+            }
+        }
+    }
+    SDF_VU0_LOADVECTOR(dir);
+    evtSetUnitLightDir(unit, scrGetIntPara(1));
+    return 1;
+}
 
 u32 evtCommand_MODEL_RGB(void);
 
+/* NON_MATCHING: 2 of 47 words differ (first at +0x94). */
+#ifdef NON_MATCHING
+u32 evtCommand_MODEL_RGB(void)
+{
+    evtColorWork_t work[1];
+    evtUnit_t *unit;
+    u32 color;
+
+    unit = evtGetUnitHandle(scrGetIntPara(0));
+    SDF_VU0_SETVECTOR_X(scrGetFloatPara(2));
+    SDF_VU0_SETVECTOR_Y(scrGetFloatPara(3));
+    SDF_VU0_SETVECTOR_Z(scrGetFloatPara(4));
+    SDF_VU0_VECTOR_W_SET_ZERO();
+    MMI_RGBA_PACK_128_S2(color);
+    work[0].word = color;
+    evtSetUnitColorRGB(unit, scrGetIntPara(1), color);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_MODEL_RGB);
+#endif
 
 u32 evtCommand_MODEL_A(void);
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_MODEL_A);
+u32 evtCommand_MODEL_A(void)
+{
+    evtColorWork_t work[1];
+    evtUnit_t *unit;
+    u32 color;
+
+    unit = evtGetUnitHandle(scrGetIntPara(0));
+    SDF_VU0_LOADIDENTITYVECTOR();
+    SDF_VU0_SETVECTOR_W(scrGetFloatPara(2));
+    MMI_RGBA_PACK_128_S2(color);
+    work[0].word = color;
+    evtSetUnitColorA(unit, scrGetIntPara(1), color);
+    return 1;
+}
 
 u32 evtCommand_MODEL_LIGHT_LINK(void)
 {
@@ -1002,6 +1172,12 @@ u32 evtCommand_EFFBED_LOAD(void)
     return 1;
 }
 
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A8C8);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A908);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A948);
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A970);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053A990);
@@ -1063,7 +1239,22 @@ u32 evtCommand_EFFBED_START(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCalcEffBedScale);
+f32 evtCalcEffBedScale(s32 uid)
+{
+    f32 formsize;
+    f32 formheight;
+    f32 scale;
+
+    formsize = datModelParamTable[uid].formsize;
+    formheight = datModelParamTable[uid].formheight;
+    scale = (formsize + formheight * 0.5f) * 0.5f * datModelParamTable[uid].formscale * 0.014285714f;
+    if (2.0f < scale) {
+        scale = 2.0f;
+    } else if (scale < 0.8f) {
+        scale = 0.8f;
+    }
+    return scale;
+}
 
 u32 evtCommand_EFFBED_START_EVO(void) {
     void *unit;
@@ -1498,13 +1689,37 @@ s32 evtCommand_CALL_ENDSAVE(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_CALL_COMBINE);
+u32 evtCommand_CALL_COMBINE(void)
+{
+    fldProc_SisetuReturnPoint(fldGlobalBase.area, fldGlobalBase.floor + 1, scrGetStrPara(0));
+    dds3AdminiCallSequence(0x1b, 0, 0, 0);
+    scrSetIntReturnValue(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_CALL_RECOVER);
+u32 evtCommand_CALL_RECOVER(void)
+{
+    fldProc_SisetuReturnPoint(fldGlobalBase.area, fldGlobalBase.floor + 1, scrGetStrPara(0));
+    dds3AdminiCallSequence(0x1e, 0, 0, 0);
+    scrSetIntReturnValue(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_CALL_SHOP);
+u32 evtCommand_CALL_SHOP(void)
+{
+    fldProc_SisetuReturnPoint(fldGlobalBase.area, fldGlobalBase.floor + 1, scrGetStrPara(0));
+    dds3AdminiCallSequence(0x1c, 0, 0, 0);
+    scrSetIntReturnValue(0);
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_CALL_RAG);
+u32 evtCommand_CALL_RAG(void)
+{
+    fldProc_SisetuReturnPoint(fldGlobalBase.area, fldGlobalBase.floor + 1, scrGetStrPara(0));
+    dds3AdminiCallSequence(0x1d, 0, 0, 0);
+    scrSetIntReturnValue(0);
+    return 1;
+}
 
 /* Forward two VM integers as the admin request's two-word payload. */
 s32 evtCommand_CALL_SAVE(void)
@@ -1518,7 +1733,19 @@ s32 evtCommand_CALL_SAVE(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_CALL_PUZZLEBOY);
+u32 evtCommand_CALL_PUZZLEBOY(void)
+{
+    s32 request[1];
+    s32 stage;
+
+    fldBgmFadeOut();
+    stage = scrGetIntPara(0);
+    request[0] = stage;
+    fldSetNextField(fldGb[0], stage + 1000);
+    dds3AdminiCallSequence(0x26, (s32)request, 4, 0);
+    scrAllReleaseScript();
+    return 1;
+}
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AC00);
 
@@ -1554,7 +1781,19 @@ u32 evtCommand_EXIT_EVENT(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", CallBattleSub);
+void CallBattleSub(s32 eventId, s32 mode)
+{
+    s32 request[2];
+
+    fldBgmStop();
+    p2sdPlaySE(0xF, 0x7F, 0x3F);
+    encStart();
+    request[0] = 0;
+    request[1] = eventId;
+    evtNextEventNo = mode;
+    dds3AdminiCallSequence(0x13, (s32)request, 8, mode > 0);
+    scrAllReleaseScript();
+}
 
 s32 evtCommand_CALL_BATTLE(void)
 {
@@ -1565,7 +1804,19 @@ s32 evtCommand_CALL_BATTLE(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", CallBattleSub2);
+void CallBattleSub2(s32 eventId)
+{
+    s32 request[2];
+
+    fldPauseBgm();
+    p2sdPlaySE(0xF, 0x7F, 0x3F);
+    encStart();
+    request[0] = 0;
+    request[1] = eventId;
+    evtNextEventNo = 0;
+    dds3AdminiCallSequence(0x13, (s32)request, 8, 1);
+    scrAllReleaseScript();
+}
 
 s32 evtCommand_CALL_BATTLE2(void)
 {
@@ -1729,7 +1980,22 @@ s32 evtCommand_UNIT_CLS_STOP(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_CAM_SEL);
+u32 evtCommand_CAM_SEL(void)
+{
+    dds3Basic_t *camera;
+
+    if (scrGetIntPara(0) < 0) {
+        camera = fldGetUnitFollowCamera();
+    } else {
+        fldCamSyukanSuriawase();
+        camera = evtSearchBasic(4, scrGetIntPara(0));
+    }
+    if (camera == NULL) {
+        return 1;
+    }
+    dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+    return 1;
+}
 
 u32 evtCommand_CAM_SEL_FOVY(void)
 {
@@ -2086,33 +2352,45 @@ u32 evtCommand_DEL_BE(void)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AD70);
+u32 evtCommand_PMV_LOAD(void)
+{
+    scrProcessWork_s *work;
+    dds3ProcessID_t *movieTask;
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AD80);
+    printf(D_0053AE10, scrGetIntPara(0), scrGetIntPara(1));
+    work = scrGetScriptHandle();
+    if (work == NULL) {
+        return 1;
+    }
+    if (work->ProcessID == NULL) {
+        printf(D_0053AE28);
+        return 1;
+    }
+    movieTask = evtStartPolygonMovie2(work->ProcessID->priority, scrGetIntPara(0), scrGetIntPara(1));
+    datDebugPrintf(D_0053AE70, scrGetIntPara(0), scrGetIntPara(1));
+    dds3LinkProcess(work->ProcessID, movieTask);
+    evtSetPolygonMovieFlag(movieTask, 1);
+    scrSetIntReturnValue((s32)movieTask);
+    printf(D_0053AE88);
+    return 1;
+}
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AD90);
+u32 evtCommand_PMV_RUN2(void)
+{
+    void *id;
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADB0);
+    printf(D_0053AE98);
+    id = (void *)scrGetIntPara(0);
+    evtResetPolygonMovieFlag(id, 1);
+    scrSetIntReturnValue((s32)id);
+    printf(D_0053AEA8);
+    return 1;
+}
 
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADD0);
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADE0);
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADF0);
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE00);
-
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_PMV_LOAD);
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE28);
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE70);
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE88);
-
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_PMV_RUN2);
-
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_PMV_LOAD_END_WAIT);
+u32 evtCommand_PMV_LOAD_END_WAIT(void)
+{
+    return evtCheckPolygonMovieFlag((void *)scrGetIntPara(0), 8) != 0;
+}
 
 /* Create and return an event/scene movie task without setting bit 0.
  * The owning scheduler task supplies the viewer task's priority. */
@@ -2319,6 +2597,34 @@ s32 evtCommand_LIGHT_PATH_WAIT(void)
     }
 }
 
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AD70);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AD80);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AD90);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADB0);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADD0);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADE0);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053ADF0);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE00);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE10);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE28);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE70);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE88);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AE98);
+
+INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AEA8);
+
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AEB8);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AF00);
@@ -2405,7 +2711,24 @@ u32 evtCommand_TEX_CLS(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_TEX_SWAP);
+u32 evtCommand_TEX_SWAP(void)
+{
+    void *id1;
+    void *id2;
+    s32 pat;
+    s32 prm;
+
+    id1 = (void *)scrGetIntPara(0);
+    id2 = (void *)scrGetIntPara(1);
+    pat = scrGetIntPara(2);
+    prm = scrGetIntPara(3);
+    if (dds3ExistProcess(id1) != 0) {
+        if (dds3ExistProcess(id2) != 0) {
+            evtPictureSwap(id1, id2, pat, prm);
+        }
+    }
+    return 1;
+}
 
 u32 evtCommand_TEX_OT(void) {
     u64 id;
@@ -2427,15 +2750,94 @@ u32 evtCommand_TEX_PRI(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_TEX_SIZE);
+u32 evtCommand_TEX_SIZE(void)
+{
+    void *id;
+    s32 sw;
+    s32 sh;
+    s32 tw;
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_TEX_POS);
+    id = (void *)scrGetIntPara(0);
+    sw = scrGetIntPara(1);
+    sh = scrGetIntPara(2);
+    tw = scrGetIntPara(3);
+    evtPictureSetSize(id, sw, sh, tw, scrGetIntPara(4));
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_TEX_ALP);
+u32 evtCommand_TEX_POS(void)
+{
+    void *id;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_TEX_ZOOM);
+    id = (void *)scrGetIntPara(0);
+    x0 = scrGetIntPara(1);
+    y0 = scrGetIntPara(2);
+    x1 = scrGetIntPara(3);
+    y1 = scrGetIntPara(4);
+    evtPictureSetPos(id, x0, y0, x1, y1, scrGetIntPara(5));
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtCommand_TEX_STAT);
+u32 evtCommand_TEX_ALP(void)
+{
+    void *id;
+    s32 alp0;
+    s32 alp1;
+
+    id = (void *)scrGetIntPara(0);
+    alp0 = scrGetIntPara(1);
+    alp1 = scrGetIntPara(2);
+    evtPictureSetAlpha(id, alp0, alp1, scrGetIntPara(3));
+    return 1;
+}
+
+u32 evtCommand_TEX_ZOOM(void)
+{
+    void *id;
+    s32 zoom0;
+    s32 zoom1;
+
+    id = (void *)scrGetIntPara(0);
+    zoom0 = scrGetIntPara(1);
+    zoom1 = scrGetIntPara(2);
+    evtPictureSetZoom(id, zoom0, zoom1, scrGetIntPara(3));
+    return 1;
+}
+
+u32 evtCommand_TEX_STAT(void)
+{
+    s32 stat;
+    s32 mode;
+    s32 ret;
+
+    stat = evtPictureStat((void *)scrGetIntPara(0));
+    mode = scrGetIntPara(1);
+    ret = 0;
+    if (mode == 0) {
+        ret = stat != 0;
+    }
+    if (mode == 1) {
+        if ((stat & 1) != 0) {
+            ret = 1;
+        }
+    }
+    if (mode == 2) {
+        if ((stat & 2) != 0) {
+            ret = 1;
+        }
+    }
+    if (mode == 3) {
+        if ((stat & 4) != 0) {
+            ret = 1;
+        }
+    }
+    scrSetIntReturnValue(ret);
+    return 1;
+}
 
 u32 evtCommand_SET_SKY(void)
 {
@@ -2559,7 +2961,14 @@ u32 evt_1E91A8(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evt_1E91E8);
+u32 evt_1E91E8(void)
+{
+    u8 *gb;
+
+    gb = DDS3_GBWK;
+    scrSetIntReturnValue(((u8 *)scrGetIntPara(0) + (u32)gb)[0x1CEC]);
+    return 1;
+}
 
 s32 evt_1E9220(void)
 {
@@ -2567,9 +2976,17 @@ s32 evt_1E9220(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evt_1E9248);
+s32 evt_1E9248(void)
+{
+    scrSetIntReturnValue(datGetKotowariLank(1));
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "event/evtCommand", evt_1E9270);
+s32 evt_1E9270(void)
+{
+    scrSetIntReturnValue(datGetKotowariLank(2));
+    return 1;
+}
 
 u32 evt_1E9298(void) {
     u64 task;
@@ -2599,7 +3016,30 @@ u32 evt_1E92F8(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", evtDrawDeadMoonSprite);
+void evtDrawDeadMoonSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                           s32 rgb, sdfTexHandle_t *th, s32 ox, s32 oy,
+                           f32 cnt, f32 alpha0, f32 alpha1, f32 scale0, f32 scale1)
+{
+    f32 ratio;
+    f32 width;
+    f32 height;
+    s32 scale;
+    s32 alpha;
+    f32 drawHeight;
+    f32 drawWidth;
+
+    ratio = sdfSin(cnt) * 0.5f + 0.5f;
+    width = w;
+    height = h;
+    alpha = (s32)(alpha0 * ratio + alpha1 * (1.0f - ratio));
+    alpha = (alpha << 7) / 100;
+    scale = (s32)(scale0 * ratio + scale1 * (1.0f - ratio));
+    drawWidth = width * scale / 100.0f;
+    drawHeight = height * scale / 100.0f;
+    DrwSprite2DF((width - drawWidth) * 0.5f + ox + x,
+                 (height - drawHeight) * 0.5f + oy + y,
+                 drawWidth, drawHeight, u, v, uw, vh, rgb | (alpha << 24), th);
+}
 
 /* Acquire the background texture, then release the temporary file allocation. */
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AFA0);
@@ -2616,7 +3056,13 @@ void nbLoadDeadMoonTex(void) {
     sdfMemFreeDirect(fileAllocation);
 }
 
-INCLUDE_ASM(const s32, "event/evtCommand", nbFreeDeadMoonTex);
+void nbFreeDeadMoonTex(void)
+{
+    if (DeadMoonTmx != NULL) {
+        sdfTexFreeDelayed(DeadMoonTmx);
+    }
+    DeadMoonTmx = NULL;
+}
 
 INCLUDE_SDATA(const s32, "event/evtCommand", D_0054F754);
 

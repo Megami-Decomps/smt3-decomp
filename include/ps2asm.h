@@ -1134,6 +1134,13 @@ __asm__ volatile ( \
     "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
     : "=r" (out) : "f" (128.0f))
 
+/* The same pack by 128 through the $2 scratch, as event/evtCommand uses. */
+#define MMI_RGBA_PACK_128_S2(out) __asm__ volatile ( \
+    ".set noreorder\n\tmfc1 $2, %1\n\tqmtc2.ni $2, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\tvftoi0.xyzw vf10, vf10\n\t" \
+    "qmfc2.ni %0, vf10\n\tppach %0, $0, %0\n\tppacb %0, $0, %0\n\t.set reorder" \
+    : "=r" (out) : "f" (128.0f))
+
 /* from script/scrCommonCommand.c */
 #define SDF_VU0_SETVECTOR_X_BITS(r) __asm__ volatile ( \
     ".set noreorder\n\tqmtc2 %0, $vf2\n\tvaddx.x $vf10, $vf0, $vf2x\n\t.set reorder" \

@@ -111,6 +111,7 @@ it was measured on DDS and not on this ELF.
 | 26 arms, each ending in a `b` to one shared exit, with no code after the chain | a plain `if`/`else if` chain. The `goto` funnel and the duplicated-tail rows above apply only where the arms *share* a tail; here each arm carries its own whole loop and there is nothing for `jump2` to cross-jump, so the chain matched with no `goto` at all. `dds3ObjectBaseMakeUnit`'s 26 model probes are this shape |
 | a `for` whose bound is loaded once into a saved register, where your C runs the whole pointer chain again each iteration | read the bound into a local first, `count = obj->inner->nodeList->count;`. Written as the loop condition the two loads and the `lh` repeat in the backedge block, cost five words, and also take the argument register the call in the body wants. `dds3ObjectBaseMakeUnit` went from 94 of 1406 words to 9 on that one local |
 | a loop whose body is guarded by `bnel i, $0` and whose call arguments are all `$0` | `if (i == 0) { ... }` inside the `for`. The index is then known zero in the body, so an `i` passed as an argument materialises as `$0` rather than a copy |
+| a two-sided clamp whose high arm has its own `jr $31` and a `mov.s` from the bound's register | `if (hi < x) { x = hi; } else if (x < lo) { x = lo; } return x;`. `return 2.0f;` in the high arm puts the constant straight in `$f0` and rotates every float temp, 20 of 34 words in `evtCalcEffBedScale`; an early `return x;` after the assignment does the same, and two sibling `if`s instead of the `else if` are 8 words out |
 
 A flag mask that steps by a constant shift per iteration is a source variable,
 not an expression. Retail's `sll $18, $18, 2` in the loop-closing delay slot
@@ -356,7 +357,17 @@ once per use, and a named local for it computes it once.
   its inline asm is a barrier. `dds3BillboardGetDirectionScale`'s
   `1.0f - fabs(dot)` sat at 3 of 26 words with the call and every placement of
   the constant (its own local before or after the `abs`, a reused local, a
-  result local) and went exact with `EE_ABS_F32(dot, dot)`.
+  result local) and went exact with `EE_ABS_F32(dot, dot)`. Confirmed again
+  outside a VU0 body, on a run of magnitude tests: `evtCommand_MODEL_LIGHT_DIR`
+  compares `fabs` of three vector components against one constant, and with
+  `fabsf` the constant and the retained third component take each other's
+  float registers and the constant's `lwc1` lands after the component copy,
+  8 of 53 words out under every shape tried (an `&&` chain, nested `if`s,
+  `goto`s, a named bound local at four positions, an `f32` local per
+  component, `sdfVector4_t` for the array, and `_MEMOPS` for the `lqc2`).
+  `EE_ABS_F32` into **one reused** magnitude local, with the three tests
+  nested, is exact: the barrier is what forces the constant to be materialised
+  before the copy.
 - The same thing happens by accident when a `void` callee defined later in the
   unit has no prototype above the caller: the implicit declaration returns
   `int`, so the load after the `jal` lands in `$3` where retail uses `$2`.
@@ -891,6 +902,22 @@ once per use, and a named local for it computes it once.
   alias is what gives retail's `addiu rd, $18, %lo(sym + 0x580)` with a shared
   `%hi` in a saved register. `dds3MultiBillboardLinkOt` went from 15 of 90
   words to exact on that one declaration.
+- Two float products that share one converted operand take their registers
+  from the source order, and the **second** one written is the one that reuses
+  the shared operand's register. `evtDrawDeadMoonSprite` scales a width and a
+  height by one integer scale factor; retail computes the height product into
+  a fresh `$f15` and the width product back into `$f14`, the scale's own
+  register, so the width statement is written second even though retail emits
+  the height multiply first. Written the other way round the four coordinate
+  conversions rotate as well, 22 of 112 words. An `f32` local for the scale and
+  splitting each product from its divide both leave it unchanged.
+- An integer parameter that retail converts to `f32` early and then multiplies
+  by another converted integer needs its own `f32` local. Written `h * scale`
+  with both `s32`, gcc emits an integer `mult` and one `cvt.s.w` of the
+  product, which is two words over and shifts every saved register;
+  `height = h;` ahead of `height * scale` gives retail's two `cvt.s.w` in the
+  leading call's shadow and one `mul.s`. `evtDrawDeadMoonSprite` went from 56
+  of 112 words and two words long to 22 at the exact size on that one local.
 - A header word a function needs both before its calls and again after them
   belongs at its second use site as the field expression, not in a local. A
   local for it takes a callee-saved register and shifts every later allocation;
