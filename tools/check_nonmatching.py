@@ -27,7 +27,8 @@ GUARD = "#ifdef NON_MATCHING"
 WRITEUP = ROOT / "docs/nonmatching.md"
 # The INCLUDE_ASM in a draft's #else names the function the draft is for.
 DRAFT = re.compile(
-    r'#ifdef NON_MATCHING\b.*?#else\s*\nINCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)', re.S)
+    r'#ifdef NON_MATCHING\b.*?#else\b(?:(?!#endif).)*?'
+    r'INCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)', re.S)
 
 
 def units(args):

@@ -267,6 +267,15 @@ A draft is never evidence of anything. It is not compiled by the build, so
 `tools/check_nonmatching.py` is what stops it rotting when a struct or a
 signature changes under it.
 
+A draft and its `#else` fallback must stay in the same file when a container
+is split, and the fallback may carry an `INCLUDE_RODATA` line before its
+`INCLUDE_ASM`. `tools/split_unit.py` does not know about either: it has
+copied a draft region into every part that inherited any of the container's
+text, parked a part's extern declarations inside the draft branch so the
+region could not simply be deleted, left an orphan `#else`, and emitted empty
+`#ifdef NON_MATCHING` pairs. After a split, run the draft checker before
+believing the result.
+
 These have been ruled out repeatedly and are not worth a second attempt:
 
 - Pure instruction scheduling, where the same instructions appear in a
