@@ -1698,3 +1698,161 @@ this close, the rest run over size); every mix of `break` and `return 0` in
 the arms, all eight of which are worse; `default: return 0;` and a `goto` to
 a trailing label; a `u32` phase, which reshapes the tree; and the ternary
 written against the field or the literal 2 instead of the local.
+
+## datGetPlayerParam (newdata/datCalc, 0x50)
+
+7 of 20 words differ, exact size. The structure is right and the remaining
+difference is which register holds the hearts bonus. Retail puts it in `$2`:
+the `beqz` that skips `cmbGetHeartsParam` carries `daddu $2, $0, $0` in its
+delay slot and falls into a single `subu $2, $16, $2`, so the zero and the
+call result share the return register and the `$gp`-relative `DDS3_GBWK` load
+has to avoid `$2` and lands in `$3`. Every shape tried either puts the bonus
+in `$6` with a copy after the call (12 of 20) or duplicates the `subu` and the
+epilogue into both arms (88 bytes against retail's 80).
+
+Ruled out: `bonus = 0` before the `if`; `if`/`else` in both polarities; a
+ternary at the return and in a local; a `goto` into a shared tail from either
+arm; duplicating `return param - bonus` in both arms to invite cross-jumping;
+`hearts` as `u8`, as `s8` and as an `s32` with the cast at the read; and all
+36 combinations of declaration order and initialisation order of the three
+locals.
+
+## datAddUniqueDevil (newdata/datCalc, 0x6C)
+
+12 of 26 words differ and the draft is one word short. Retail keeps
+`index * 0xEC + DDS3_GBWK` in one register, biases a second to `+ 0xA54` for
+the flag load at displacement 0, and then copies the first with
+`daddu $3, $4, $0` so `$4` can take the flag, storing `uniqueid` at
+displacement 0xA76 off the copy. ee-gcc coalesces that copy away in every
+spelling tried, and also schedules the `sh` above the `lw` where retail has
+the load first.
+
+Ruled out: `unit->uniqueid` off a single pointer (which puts the store at
+displacement 0x22 and loses the second base); a `u8 *base` local with the
+store written as `*(u16 *)(base + 0xA76)`; the same through a `u16 *` local;
+the store through `DDS3_GBWK->akuma[index]`, which forms the right address but
+does not add the copy; both orders of the flag read and the uniqueid store;
+and a `volatile` read of the flag to pin the order.
+
+## datDeadNakama (newdata/datCalc, 0xC4)
+
+28 of 48 words differ and the draft is one word short. The loop body, the
+`fldAnahoriAkuma_t` view at `DDS3_GBWK + ofs + 0xA50` and the `u32` offset
+local that keeps `ofs + 0xA50` in a saved register are all right. Two things
+are not. Retail copies the record address with `daddu $5, $3, $0` in the
+`flag & 1` branch's delay slot so `$3` can be reused, and it forms the second
+read of the same flag as `(DDS3_GBWK + 4) + ofs` with displacement 0 where
+the draft forms `(DDS3_GBWK + ofs) + 4`. The two are the same instruction
+count, so this is an association ee-gcc canonicalises.
+
+Ruled out for the association: explicit parentheses around
+`((u8 *)DDS3_GBWK + 4)`; the same through a `datUnitWork_t *` cast; the
+index-first cast `(u8 *)aofs + ((u32)DDS3_GBWK + 4)`; an address derived from
+`&DDS3_GBWK->akuma[0].flag`; and `s32` instead of `u32` for the offset local.
+Ruled out for the copy: a named `fldAnahoriAkuma_t *` local for the record,
+with the second access written through it, through the global, and through the
+`+ 4` form.
+
+## datPartyDamagePipe (newdata/datCalc, 0x114)
+
+54 of 68 words differ, one word short, and every instruction retail emits is
+present: the guard, the `fldAnahoriAkuma_t` view at `0xA50 + i * 0xEC`, the
+`div`/`div1` pair on the two pipes, the `mult`/`mult1` pair, and all three
+cmov clamps. The whole allocation is rotated by one. Retail puts the two rate
+parameters in `$21` and `$20` and hoists the loop-invariant constants in the
+order 100, 10, 1; the draft puts the parameters in `$22` and `$21` and hoists
+10, 100, 1.
+
+Ruled out: both declaration orders of the offset and index locals crossed with
+three ways of initialising the offset (a statement above the loop, and either
+order inside the `for` init), crossed with both orders of the two terms of the
+damage sum. All twelve produce byte-identical output, so ee-gcc canonicalises
+the sum and the constant-hoisting order is not reachable from the expression.
+
+## datInitPlayer (newdata/datCalc, 0x12C)
+
+7 of 75 words differ, exact size. The `memset`, the 0xEC struct assignment
+from `D_003493C0` with its runtime 8-byte-alignment dispatch, the item clear
+loop and the tail call to `evtBitOn` are all right. What is left is a
+one-register rotation over the two scalar stores: retail puts the constant 1
+in `$4` and the loop index in `$5`, skipping `$2`, while the draft uses `$2`
+and `$4`. Retail also emits `sb 0x1914` before `sw 0x1924` and the draft emits
+them the other way round, and no source order changes that.
+
+Ruled out: both orders of the two stores, written through the `u8 *` local as
+a subscript and as a cast; both declaration orders of the pointer and index
+locals; and four `memset` declarations (the `s32` return meant to reserve
+`$2`, `void *`, unprototyped, and none at all, leaving gcc's builtin). All
+sixteen combinations produce byte-identical output.
+
+## datFindKugatatiEntry (code_001FAE80, 0x74)
+
+28 of 28 words, at the exact 112-byte size. Scans a devil's 24 level-up
+records for ones whose byte at +6 equals the unit's level, returns a pointer
+to the first match and, when the second argument is not NULL, writes the match
+count through it.
+
+Everything in the body is settled: the 0x66 shift chain, the `u8` count with
+the `xor`-against-1 `movz` that stores the first match only, the
+`for (i = 23; i >= 0; i--)` downcounter with the decrement in the `bne` delay
+slot, and the `bnel` guarding the count store. The difference is which
+registers hold the table: retail hoists `%lo(datLevelUpTable)` into `$10`,
+derives `$12 = $10 + 6`, and keeps `0x66 * id + 4 * i` as a byte offset added
+to both, so the load is `lbu 6($6 + $10)` and the stored pointer is
+`$6 + $12`. This folds the row offset into one base pointer and reads at a
+displacement.
+
+Ruled out: the `cmpKugatatiEntry_t *` walk with `entry[1].value`, which is the
+draft and the only form at the exact size; `((u8 *)ofs + (u32)datLevelUpTable)[6]`
+with a `u32 ofs` byte offset, which rematerialises the `lui` inside the loop
+and runs two words long; the same with a `u8 *table` local, which merges the
+two bases into one induction pointer and comes out one word short; and the two
+bases as explicit locals, both as `u8 *`/`s8 *` and as `u32`, which adds a
+third induction variable and runs two words long.
+
+## cmpClearCursorSlots (code_001FAE80, 0x54)
+
+18 of 21 words, 84 against retail's 76 bytes. Clears both cursor slots of 256
+rows at `cursor + 0x3C`: `state` and `param` to 0 and `value` to 0x100.
+
+Retail does not strength-reduce the inner loop. It keeps the row pointer in
+`$6`, recomputes `$7 = $6 + 4` at the top of each outer iteration, and in the
+inner loop forms `i * 8` once and adds it to both bases, so `i` survives as a
+counter with `slti $5, 0x2`. Every shape tried reduces the inner loop into a
+pointer walk with a downcounter, and folds the `+ 4` into the `sw`
+displacement so only one base is left.
+
+Ruled out: a `cmpCursorSlot_t (*)[2]` 2D array with `slot[j][i].field`, which
+is the draft and the closest; a `u8 *` row pointer with `row[i * 8]` and
+`*(s32 *)(row + i * 8 + 4)`; the same with a `u32 ofs = i * 8` local, which
+turns both pointers into induction variables and loses two more words; a
+per-row `s32 *v = (s32 *)(p + 4)` with the value written as
+`*(s32 *)((u8 *)v + i * 8)`, both from a `u8 *` row and from `&slot[j][0].value`;
+and permuting the three stores, which only moves which word lands in the
+`bnez` delay slot.
+
+## mselToggleFlag (code_001FAE80, 0x6C)
+
+13 of 27 words, at the exact 108-byte size. Flips a `u8` toggle, then steps
+the low byte of a packed `s32` by +0x10 or -0x10 depending on the third
+argument and clamps it to 0..0x80.
+
+The structure is settled: the `bnez` on the narrowed `s8` argument with the
+toggle store in its delay slot, the duplicated `lw` in both arms, the
+duplicated `addiu -0x100` mask and the final `and`/`or`/`sw`. Retail carries
+two plain register copies, `daddu $4, $2, $0` in each arm (the packed value
+the tail re-reads) and `daddu $3, $2, $0` at the top of the clamp (the clamped
+value). Writing the arms as `level = *value; v = level; level = (v & 0xFF) +
+0x10;` reproduces the first pair, which is what took this from 20 of 25 words
+and two words short to the exact size. The clamp copy needs the same
+treatment and the two will not coexist: adding a third local for the clamped
+value produces `daddu $3, $2, $0` and loses both arm copies instead, in all
+six declaration orders of the three locals.
+
+Ruled out: `*value` written at every use; an `s32 v` local assigned once above
+the `if`, which hoists the load out of both arms; a separate `raw` temp in the
+arms rather than reusing `level`; `if (dir != 0)` rather than
+`if (dir == 0)`, which inverts the first branch; the clamp as
+`if (level <= 0) ... else if (level > 0x80)`, which emits `bgtz` where retail
+has `blez`; and `~0xFF` against `-0x100` against `0xFFFFFF00` for the mask,
+all of which give the same `addiu $2, $0, -0x100`.

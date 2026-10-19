@@ -3,8 +3,99 @@
 
 extern s32 evtBitCheck(s32 no);
 extern s32 GetButuriAttack(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power);
-extern s32 datGetAisyo(datUnitWork_t *work, s32 element);
+extern u32 datGetAisyo(datUnitWork_t *work, s32 element);
 extern void func_0022E168(u16 devilId);
+typedef struct
+{
+    /* 0x00 */ u16 unk00;
+    /* 0x02 */ u16 skill;
+    /* 0x04 */ u8 unk04[4];
+} datItem_t;
+
+extern datItem_t datItemTable[];
+
+extern s32 datGetItemSlotIndex(s32 id);
+extern void evtBitOff(s32 no);
+typedef struct
+{
+    /* 0x00 */ u8 kind;
+    /* 0x01 */ u8 type;
+    /* 0x02 */ u16 skill;
+} datLevelUpSkill_t;
+
+typedef struct
+{
+    /* 0x00 */ u8 unk00[6];
+    /* 0x06 */ datLevelUpSkill_t skill[24];
+} datLevelUpRecord_t;
+
+extern datLevelUpRecord_t datLevelUpTable[];
+extern datUnitWork_t D_003493C0;
+
+extern s32 memset(void *dst, s32 value, s32 size);
+extern s32 printf(const char *fmt, ...);
+extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
+extern s32 fclEncycRegist(datUnitWork_t *work, s32 overwrite);
+extern s32 datBossRashGetRec(s32 eid, s32 type);
+typedef struct
+{
+    /* 0x00 */ s8 skillattr;
+    /* 0x01 */ s8 type;
+    /* 0x02 */ s16 index;
+    /* 0x04 */ u16 keisyoform;
+    /* 0x06 */ s8 capacity;
+    /* 0x07 */ u8 flag;
+} datSkill_t;
+
+extern datSkill_t attr[];
+
+extern s32 dds3GetRandIntA(s32 low, s32 high);
+extern s32 datCountRegisteredHearts(void);
+extern void datAddHeartsEntry(s32 id, datUnitWork_t *work);
+extern void evtBitOn(s32 no);
+extern void cmbAddHeartsParam(s32 devilId, datUnitWork_t *work);
+extern void rstLoadHeartsSkill(s8 devilId, datUnitWork_t *work);
+extern u32 datAisyoTable[248][16];
+extern void cmbSubHeartsParam(s32 devilId, datUnitWork_t *work);
+extern void rstStoreHeartsSkill(s8 devilId, datUnitWork_t *work);
+extern void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill);
+extern s32 datAddDevil(s32 id, s32 sw);
+extern f32 D_0054E478;
+
+extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
+extern void cmpSetMaxHPMP(datUnitWork_t *work);
+extern s32 datGetPlayerLNDLevel(datUnitWork_t *work);
+
+typedef struct
+{
+    /* 0x00 */ u32 flag;
+    /* 0x04 */ u8 race;
+    /* 0x05 */ u8 level;
+    /* 0x06 */ u16 hp;
+    /* 0x08 */ u16 maxhp;
+    /* 0x0A */ u16 mp;
+    /* 0x0C */ u16 maxmp;
+    /* 0x0E */ s16 aisyoid;
+    /* 0x10 */ s8 param[6];
+    /* 0x16 */ u16 skill[8];
+    /* 0x26 */ s16 keisyotype;
+    /* 0x28 */ u16 keisyoform;
+    /* 0x2A */ u16 dropmakka;
+    /* 0x2C */ u16 dropexp;
+    /* 0x2E */ u8 dropitem[2];
+    /* 0x30 */ u8 droppoint[2];
+    /* 0x32 */ u16 specialbit;
+    /* 0x34 */ u8 specialitem;
+    /* 0x35 */ u8 specialpoint;
+    /* 0x36 */ u8 hougyokupoint;
+    /* 0x37 */ u8 masekipoint;
+    /* 0x38 */ s8 attackattr;
+    /* 0x39 */ u8 attackcnt;
+    /* 0x3A */ u8 attackinterval;
+    /* 0x3B */ u8 reserve1;
+} datDevilFormat_t;
+
+extern datDevilFormat_t datDevilTable[];
 
 s32 datGetBaseMaxHp(datUnitWork_t *work)
 {
@@ -58,9 +149,33 @@ s32 datGetNormalAtkPow(datUnitWork_t *work)
     return atkPow;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetMagicAtkPow);
+s32 datGetMagicAtkPow(datUnitWork_t *work)
+{
+    s32 atkPow;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetNormalHitPow);
+    if (work->flag & 4) {
+        if (work->flag & 0x20) {
+        atkPow = ((datGetParam(work, 2) + work->level) * 2 + datGetParam(work, 2) / 2) * 0.85f;
+        } else {
+        atkPow = ((datGetParam(work, 2) + work->level) * 2 + datGetParam(work, 2) / 2) * 0.85f;
+        }
+    } else {
+    atkPow = ((datGetParam(work, 2) + work->level) * 2 + datGetParam(work, 2) / 2) * 0.85f;
+    }
+    return atkPow;
+}
+
+s32 datGetNormalHitPow(datUnitWork_t *work)
+{
+    s32 sk;
+    s32 lu;
+    s32 hitPow;
+
+    sk = datGetParam(work, 4);
+    lu = datGetParam(work, 5);
+    hitPow = sk * 2 + work->level;
+    return hitPow + (lu + 5) / 2 + 0xF;
+}
 
 s32 datGetMagicHitPow(datUnitWork_t *work)
 {
@@ -79,7 +194,13 @@ s32 datGetDefPow(datUnitWork_t *work)
     return (datGetParam(work, 3) + work->level) * 2;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetSakePow);
+s32 datGetSakePow(datUnitWork_t *work)
+{
+    s32 sk = datGetParam(work, 4);
+    s32 lu = datGetParam(work, 5);
+
+    return (sk + 5) * 1.5 + (lu + 5) + (work->level + 5);
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", GetButuriAttack);
 
@@ -90,11 +211,38 @@ s32 GetButuriKaifuku(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, 
 
 INCLUDE_ASM(const s32, "newdata/datCalc", GetMagicAttack);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", GetMagicKaifuku);
+s32 GetMagicKaifuku(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power)
+{
+    s32 ma = datGetParam(attacker, 2);
+    s32 rnd = dds3GetRandIntA(0, 8);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", GetMaxHpWazaPoint);
+    return (ma * 4 + attacker->level + rnd) / 10.0f * power;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", GetAisyoRitu);
+s32 GetMaxHpWazaPoint(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power)
+{
+    if (attacker->flag & 0x20) {
+        return datGetBaseMaxHp(attacker) / 69.6f * power * 0.6f - 50.0f / (attacker->level + 10);
+    }
+    return attacker->maxhp / 69.6f * power;
+}
+
+f32 GetAisyoRitu(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target)
+{
+    s32 element = attr[skill].skillattr;
+    f32 ritu = 1.0f;
+
+    switch (element) {
+    case -1:
+    case 12:
+    case 13:
+    case 14:
+        break;
+    default:
+        ritu = (datGetAisyo(target, element) & 0xFFFF) * 0.01f;
+    }
+    return ritu;
+}
 
 INCLUDE_RODATA(const s32, "newdata/datCalc", D_005430C0);
 
@@ -104,18 +252,74 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillBadKouka);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datExecSkill);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datOverwriteBadStat);
+void datOverwriteBadStat(datUnitWork_t *work, u32 badstat)
+{
+    if (badstat == 0x8000) {
+        work->badstatus |= 0x8000;
+    } else {
+        work->badstatus = (work->badstatus & 0xF000) | (badstat & 0xFFF);
+    }
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datSetBadStat);
+void datSetBadStat(datUnitWork_t *work, u32 badstat)
+{
+    if (badstat == 0x8000) {
+        work->badstatus |= 0x8000;
+    } else if ((work->badstatus & 0xFFF) < badstat) {
+        work->badstatus = (work->badstatus & 0xF000) | (badstat & 0xFFF);
+    }
+}
 
 void datResetBadStat(datUnitWork_t *work, s32 mask)
 {
     work->badstatus &= ~mask;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetMaxHp);
+u32 datGetMaxHp(datUnitWork_t *work)
+{
+    u32 max;
+    u32 add;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetMaxMp);
+    add = 0;
+    max = datGetBaseMaxHp(work);
+    if (datCheckSyojiSkill(work, 0x122)) {
+        add = max * 10 / 100;
+    }
+    if (datCheckSyojiSkill(work, 0x123)) {
+        add += max * 20 / 100;
+    }
+    if (datCheckSyojiSkill(work, 0x124)) {
+        add += max * 30 / 100;
+    }
+    max += add;
+    if ((work->flag & 0x20) == 0 && max > 999) {
+        max = 999;
+    }
+    return max;
+}
+
+u32 datGetMaxMp(datUnitWork_t *work)
+{
+    u32 max;
+    u32 add;
+
+    add = 0;
+    max = datGetBaseMaxMp(work);
+    if (datCheckSyojiSkill(work, 0x125)) {
+        add = max * 10 / 100;
+    }
+    if (datCheckSyojiSkill(work, 0x126)) {
+        add += max * 20 / 100;
+    }
+    if (datCheckSyojiSkill(work, 0x127)) {
+        add += max * 30 / 100;
+    }
+    max += add;
+    if ((work->flag & 0x20) == 0 && max > 999) {
+        max = 999;
+    }
+    return max;
+}
 
 s32 datAddHp(datUnitWork_t *work, s32 hp)
 {
@@ -178,9 +382,43 @@ s32 datGetParam(datUnitWork_t *work, s32 paratype)
     return param;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckSyojiSkill);
+s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetAisyo);
+    if ((work->flag & 0x20) == 0) {
+        for (i = 0; i < work->skillcnt; i++) {
+            if (work->skill[i] == skill) {
+                return 1;
+            }
+        }
+    } else {
+        for (i = 0; i < 8; i++) {
+            if (datDevilTable[work->id].skill[i] == skill) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+u32 datGetAisyo(datUnitWork_t *work, s32 element)
+{
+    u32 aisyo;
+
+    if (element == -1) {
+        return 0;
+    }
+    if (work->flag & 4) {
+        aisyo = datAisyoTable[0][element];
+    } else {
+        aisyo = datAisyoTable[datDevilTable[work->id].aisyoid][element];
+    }
+    if ((work->badstatus & 0xFFF) == 0x400) {
+        aisyo = datAisyoTable[246][element];
+    }
+    return aisyo;
+}
 
 u32 datGetAisyoValue(datUnitWork_t *work, s32 element)
 {
@@ -192,7 +430,58 @@ u32 datGetAisyoFlag(datUnitWork_t *work, s32 element)
     return datGetAisyo(work, element) & 0xFFFF0000;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetBadStatusAttr);
+s32 datGetBadStatusAttr(s32 bad)
+{
+    s32 element = -1;
+
+    switch (bad) {
+    case 1:
+        element = 3;
+        break;
+    case 2:
+        element = 2;
+        break;
+    case 4:
+        element = 0xA;
+        break;
+    case 8:
+        element = 0xA;
+        break;
+    case 0x10:
+        element = 9;
+        break;
+    case 0x20:
+        element = 8;
+        break;
+    case 0x40:
+        element = 8;
+        break;
+    case 0x80:
+        element = 0xA;
+        break;
+    case 0x100:
+        element = 9;
+        break;
+    case 0x200:
+        element = 5;
+        break;
+    case 0x400:
+        element = 7;
+        break;
+    case 0x800:
+        break;
+    case 0x1000:
+        element = 5;
+        break;
+    case 0x2000:
+        element = 5;
+        break;
+    case 0x4000:
+        element = 5;
+        break;
+    }
+    return element;
+}
 
 s32 datCheckDying(datUnitWork_t *work)
 {
@@ -212,7 +501,32 @@ void datAddMaka(s32 amount)
     DDS3_GBWK->maka = balance;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddMakaPar);
+void datAddMakaPar(s32 percent)
+{
+    s32 maka = DDS3_GBWK->maka;
+    s32 delta;
+    s32 mag;
+
+    if (percent < 0) {
+        mag = -percent;
+    } else {
+        mag = percent;
+    }
+    delta = maka * mag / 100;
+    if (percent < 0) {
+        maka = maka - delta;
+    } else {
+        maka = maka + delta;
+    }
+
+    if (maka < 0) {
+        maka = 0;
+    }
+    if (maka > 9999999) {
+        maka = 9999999;
+    }
+    DDS3_GBWK->maka = maka;
+}
 
 s32 datCheckMaka(s32 amount)
 {
@@ -222,95 +536,620 @@ s32 datCheckMaka(s32 amount)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddItem);
+void datAddItem(s32 id, s32 num)
+{
+    s32 slot = datGetItemSlotIndex((u16)id);
+    s32 count;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckItem);
+    if (slot != 0) {
+        datAddHearts(slot);
+        return;
+    }
+    if (id >= 0x70) {
+        evtBitOn(id + 0x360);
+        if (id != 0x8D) {
+            return;
+        }
+        count = ((u8 *)id + (u32)DDS3_GBWK)[0x1928];
+        if (num > 0) {
+            count += num;
+            if (count >= 0x64) {
+                count = 0x63;
+            }
+        } else if (num < 0) {
+            count += num;
+            if (count <= 0) {
+                count = 0;
+                evtBitOff(0x3ED);
+            }
+        }
+        ((u8 *)id + (u32)DDS3_GBWK)[0x1928] = count;
+    } else {
+        u32 ofs = id + 0x1920;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckItemFull);
+        count = ((u8 *)DDS3_GBWK + ofs)[8];
+        count += num;
+        if (count < 0) {
+            count = 0;
+        }
+        if (id >= 0x60) {
+            if (count >= 0x64) {
+                count = 0x63;
+            }
+        } else {
+            if (count >= 0x64) {
+                count = 0x63;
+            }
+        }
+        ((u8 *)DDS3_GBWK + ofs)[8] = count;
+    }
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetRace);
+s32 datCheckItem(s32 id, s32 num)
+{
+    if (((u8 *)id + (u32)DDS3_GBWK)[0x1928] < num) {
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckTalk);
+s32 datCheckItemFull(s32 id)
+{
+    s32 count = ((u8 *)id + (u32)DDS3_GBWK)[0x1928];
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datSearchDevilStock);
+    if (id >= 0x70) {
+        if (count > 0) {
+            return 1;
+        }
+    } else if (id >= 0x60) {
+        if (count >= 0x63) {
+            return 1;
+        }
+    } else {
+        if (count >= 0x63) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetPlayerLevel);
+s32 datGetRace(datUnitWork_t *work)
+{
+    if (work->flag & 4) {
+        return 0;
+    }
+    return datDevilTable[work->id].race;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckPlayerDead);
+s32 datCheckTalk(datUnitWork_t *work)
+{
+    switch (work->badstatus & 0xFFF) {
+    case 1:
+    case 2:
+    case 4:
+    case 8:
+    case 0x10:
+    case 0x200:
+    case 0x400:
+        return 0;
+    }
+    return 1;
+}
 
+s32 datSearchDevilStock(s32 id)
+{
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        u32 flag = DDS3_GBWK->akuma[i].flag;
+
+        if ((flag & 1) == 0) {
+            continue;
+        }
+        if (flag & 4) {
+            continue;
+        }
+        if (DDS3_GBWK->akuma[i].devilId == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+s32 datGetPlayerLevel(void)
+{
+    return ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->level;
+}
+
+s32 datCheckPlayerDead(void)
+{
+    return (((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->badstatus & 0xFFF) == 0x800;
+}
+
+/* NON_MATCHING: 7 of 20 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+s32 datGetPlayerParam(s32 id)
+{
+    u8 hearts = DDS3_GBWK->unk1CFA;
+    s32 param = ((s8 *)((u8 *)id + (u32)DDS3_GBWK))[0xA6A];
+
+    if (hearts == 0) {
+        return param;
+    }
+    return param - cmbGetHeartsParam(hearts, id);
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetPlayerParam);
+#endif
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddPlayerParam);
+void datAddPlayerParam(s32 id, s32 add)
+{
+    s8 *param = (s8 *)((u8 *)id + (u32)DDS3_GBWK) + 0xA6A;
+    s32 value = *param + add;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetNakamaParam);
+    if (value >= 0x29) {
+        value = 0x28;
+    }
+    *param = value;
+    cmpSetMaxHPMP((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54));
+    ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->hp =
+        ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->maxhp;
+    ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->mp =
+        ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->maxmp;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetPlayerLND);
+s32 datGetNakamaParam(s32 did, s32 id)
+{
+    u16 *devilid = &((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + 1)->id;
+    s8 *param = (s8 *)((u8 *)id + (u32)DDS3_GBWK) + 0xB56;
+    s32 value = 0;
+    s32 i;
 
+    for (i = 0; i < 15; i++) {
+        if (*devilid == did) {
+            value = *param;
+        }
+        devilid = (u16 *)((u8 *)devilid + 0xEC);
+        param += 0xEC;
+    }
+    return value;
+}
+
+s32 datGetPlayerLND(void)
+{
+    s32 level = datGetPlayerLNDLevel((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54));
+
+    if (level == 0) {
+        return 1;
+    }
+    return (level - 1) % 3;
+}
+
+/* NON_MATCHING: 28 of 48 words differ (first at +0x44). */
+#ifdef NON_MATCHING
+void datDeadNakama(s32 did)
+{
+    s32 ofs;
+    s32 i;
+
+    ofs = 0xEC;
+    for (i = 0; i < 15; i++) {
+        u32 aofs = ofs + 0xA50;
+
+        if (((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->flag & 1) {
+            if (((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->devilId == did) {
+                if (((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->hp != 0) {
+                    ((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->hp = 0;
+                    datSetBadStat((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 0x800);
+                }
+                if (((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->flag & 2) {
+                    ((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->flag &= ~2;
+                }
+            }
+        }
+        ofs += 0xEC;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datDeadNakama);
+#endif
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamage);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamageFld);
 
+/* NON_MATCHING: 54 of 68 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+void datPartyDamagePipe(s32 rate1, s32 rate2)
+{
+    s32 aofs;
+    s32 i;
+
+    if (rate1 == 0 && rate2 == 0) {
+        return;
+    }
+    aofs = 0xA50;
+    for (i = 0; i < 16; i++) {
+        if (((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->flag & 2) {
+            s32 hp = ((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->hp;
+
+            if (hp != 0) {
+                s32 damage = hp / 10 * rate1 + hp * 3 / 100 * rate2;
+
+                if (evtBitCheck(0xAF2) == 0) {
+                    damage *= 3;
+                }
+                if (damage == 0) {
+                    damage = 1;
+                }
+                hp -= damage;
+                if (hp <= 0) {
+                    hp = 1;
+                }
+                ((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->hp = hp;
+            }
+        }
+        aofs += 0xEC;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamagePipe);
+#endif
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datPartyKaifuku);
+void datPartyKaifuku(void)
+{
+    s32 ofs;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGet3Zokusei);
+    ofs = 0;
+    for (i = 0; i < 16; i++) {
+        u32 aofs = ofs + 0xA50;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckStockFull);
+        if (((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->flag & 1) {
+            datAddHp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 0x270F);
+            datAddMp((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54), 0x270F);
+            ((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->badstatus = 0;
+        }
+        ofs += 0xEC;
+    }
+}
+
+s32 datGet3Zokusei(datUnitWork_t *work)
+{
+    u32 flag;
+
+    if (work->flag & 4) {
+        return 0;
+    }
+    flag = datDevilTable[work->id].flag;
+    if (flag & 0x40) {
+        return 1;
+    }
+    if (flag & 0x80) {
+        return -1;
+    }
+    return 0;
+}
+
+s32 datCheckStockFull(void)
+{
+    datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + 4;
+    s32 num = 0;
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        num += unit->flag & 1;
+        unit++;
+    }
+    if (num < *(s32 *)((u8 *)DDS3_GBWK + 0xA50)) {
+        return 0;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datSetDevilWork);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddDevil);
 
+/* NON_MATCHING: 12 of 26 words differ (first at +0x34). */
+#ifdef NON_MATCHING
+s32 datAddUniqueDevil(s32 id, s32 sw, s32 uid)
+{
+    s32 index = datAddDevil(id, sw);
+    u8 *base = (u8 *)(index * 0xEC) + (u32)DDS3_GBWK;
+    datUnitWork_t *unit = (datUnitWork_t *)(base + 0xA54);
+    u32 flag = unit->flag;
+
+    *(u16 *)(base + 0xA76) = uid;
+    unit->flag = flag | 0x400;
+    if (uid == 1) {
+        unit->flag = flag | 0x1400;
+    }
+    return index;
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datAddUniqueDevil);
+#endif
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datSearchUniqueDevilStock);
+s32 datSearchUniqueDevilStock(s32 uid)
+{
+    u16 *uidp = &((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->uniqueid;
+    u32 *flagp = &((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->flag;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetUniqueDevilId);
+    for (i = 0; i < 16; i++, flagp = (u32 *)((u8 *)flagp + 0xEC), uidp = (u16 *)((u8 *)uidp + 0xEC)) {
+        u32 flag = *flagp;
+
+        if ((flag & 1) == 0) {
+            continue;
+        }
+        if (flag & 4) {
+            continue;
+        }
+        if ((flag & 0x400) == 0) {
+            continue;
+        }
+        if (*uidp == uid) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+s32 datGetUniqueDevilId(s32 uid)
+{
+    u16 *idp = &((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->id;
+    u32 *flagp = &((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->flag;
+    s32 i;
+
+    for (i = 0; i < 16; i++, flagp = (u32 *)((u8 *)flagp + 0xEC), idp = (u16 *)((u8 *)idp + 0xEC)) {
+        u32 flag = *flagp;
+
+        if ((flag & 1) == 0) {
+            continue;
+        }
+        if (flag & 4) {
+            continue;
+        }
+        if ((flag & 0x400) == 0) {
+            continue;
+        }
+        if (idp[0xF] == uid) {
+            return *idp;
+        }
+    }
+    return -1;
+}
 
 void datAddExp(datUnitWork_t *work, s32 amount)
 {
     work->exp += amount;
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddHearts);
+s32 datAddHearts(s32 id)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datRemoveHearts);
+    for (i = 0; i < DDS3_GBWK->unk1D7B; i++) {
+        if (DDS3_GBWK->unk1CFB[i] == id) {
+            return 0;
+        }
+    }
+    ((u8 *)(u32)DDS3_GBWK->unk1D7B + (u32)DDS3_GBWK)[0x1CFB] = id;
+    DDS3_GBWK->unk1D7B++;
+    ((u8 *)id + (u32)DDS3_GBWK)[0x1D3B] = 0;
+    if (datCountRegisteredHearts() != 0) {
+        evtBitOn(0x860);
+    }
+    datAddHeartsEntry((u8)id, (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54));
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datEquipHearts);
+void datRemoveHearts(void)
+{
+    datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+
+    if (DDS3_GBWK->unk1D7B != 0) {
+        cmbSubHeartsParam(DDS3_GBWK->unk1CFA, player);
+        rstStoreHeartsSkill(DDS3_GBWK->unk1CFA, player);
+        DDS3_GBWK->unk1CFA = 0;
+        cmpSetMaxHPMP(player);
+    }
+}
+
+void datEquipHearts(s32 heartsId)
+{
+    datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+
+    if (DDS3_GBWK->unk1D7B != 0) {
+        if (DDS3_GBWK->unk1CFA != heartsId) {
+            datRemoveHearts();
+            DDS3_GBWK->unk1CFA = heartsId;
+            cmbAddHeartsParam(DDS3_GBWK->unk1CFA, player);
+            rstLoadHeartsSkill(DDS3_GBWK->unk1CFA, player);
+            cmpSetMaxHPMP(player);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datSetAutoKaifukuSkill);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datFieldSkillKaifuku);
+void datFieldSkillKaifuku(void)
+{
+    s32 ofs;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCheckSkillInParty);
+    ofs = 0;
+    for (i = 0; i < 16; i++) {
+        datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54);
+        u32 flag = unit->flag;
+
+        ofs += 0xEC;
+        if (flag & 1) {
+            if (flag & 2) {
+                datSetAutoKaifukuSkill(unit, 0x15D);
+                datSetAutoKaifukuSkill(unit, 0x15E);
+            }
+        }
+    }
+}
+
+s32 datCheckSkillInParty(s32 skill)
+{
+    s32 i;
+    s32 ofs;
+
+    for (i = 0, ofs = 0; i < 16; i++) {
+        datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54);
+        u32 flag = unit->flag;
+
+        ofs += 0xEC;
+        if (flag & 1) {
+            if (flag & 2) {
+                if (datCheckSyojiSkill(unit, skill)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datCheckSkillTakaraSagasi);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datClearCommMemory);
+void datClearCommMemory(datUnitWork_t *work)
+{
+    work->prevcommand = 0;
+    work->previndex = 0;
+    work->prevtarea = -1;
+    work->prevtform = -1;
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAllClearCommMemory);
+void datAllClearCommMemory(void)
+{
+    s32 ofs;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetNakamaNum);
+    ofs = 0;
+    for (i = 0; i < 16; i++) {
+        datClearCommMemory((datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54));
+        ofs += 0xEC;
+    }
+}
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datAddKotowariPoint);
+s32 datGetNakamaNum(void)
+{
+    datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + 4;
+    s32 num = 0;
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        num += unit->flag & 1;
+        unit++;
+    }
+    return num;
+}
+
+void datAddKotowariPoint(s32 type, s32 point)
+{
+    u8 *slot;
+    s32 value;
+
+    if (type != 0) {
+        slot = (u8 *)type + (u32)DDS3_GBWK + 0x1CEC;
+        value = *slot + point;
+        if (value < 0) {
+            value = 0;
+        }
+        if (value > 0x80) {
+            value = 0x80;
+        }
+        *slot = value;
+    }
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetKotowariLank);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillCost);
+s32 datGetSkillCost(datUnitWork_t *work, s32 skill)
+{
+    s32 cost = 0;
 
+    switch (datSkillTable.normal[skill].costtype) {
+    case 1:
+        if ((work->flag & 4) == 0) {
+            if (datDevilTable[work->id].flag & 0x200) {
+                return 0;
+            }
+            if (work->flag & 0x20) {
+                return 0;
+            }
+        }
+        cost = work->maxhp * datSkillTable.normal[skill].cost / 100 +
+               datSkillTable.normal[skill].costbase;
+        if (cost <= 0) {
+            cost = 1;
+        }
+        break;
+    case 2:
+        if ((work->flag & 4) == 0) {
+            if (datDevilTable[work->id].flag & 0x400) {
+                return 0;
+            }
+        }
+        cost = datSkillTable.normal[skill].cost;
+        break;
+    }
+    return cost;
+}
+
+/* NON_MATCHING: 7 of 75 words differ (first at +0xE4). */
+#ifdef NON_MATCHING
+void datInitPlayer(void)
+{
+    u8 *gbwk;
+    s32 i;
+
+    memset((u8 *)DDS3_GBWK + 0xA54, 0, 0xEC0);
+    *(datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) = D_003493C0;
+    gbwk = (u8 *)DDS3_GBWK;
+    *(s32 *)(gbwk + 0x1924) = 1;
+    gbwk[0x1914] = 0;
+    DDS3_GBWK->maka = 0;
+    for (i = 0; i < 0xA0; i++) {
+        ((u8 *)i + (u32)DDS3_GBWK)[0x1928] = 0;
+    }
+    evtBitOn(0xC04);
+}
+#else
 INCLUDE_ASM(const s32, "newdata/datCalc", datInitPlayer);
+#endif
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datInitBossPress);
+void datInitBossPress(void)
+{
+    s16 *rec = (s16 *)((u8 *)DDS3_GBWK + 0x19CA);
+    s32 i;
+
+    for (i = 0; i < 40; i++) {
+        rec[-1] = -1;
+        rec[0] = -1;
+        rec += 2;
+    }
+}
 
 void datDelDevil(u16 devilId)
 {
     func_0022E168(devilId);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datGetItemSkillNo);
+s32 datGetItemSkillNo(s32 itemid)
+{
+    s32 list[6] = { 0xED, 0xEE, 0xEF, 0xF0, 0xF6, 0xF8 };
+
+    if (itemid == 1) {
+        return list[dds3GetRandIntA(0, 6)];
+    }
+    return datItemTable[itemid].skill;
+}
 
 u16 datGetLevelForDraw(datUnitWork_t *work)
 {
@@ -319,13 +1158,76 @@ u16 datGetLevelForDraw(datUnitWork_t *work)
     return level < 100 ? level : 99;
 }
 
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_00543170);
+extern char D_00543188[];
+extern char D_00543198[];
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datCopyDevilWork);
+void datCopyDevilWork(s32 id, datUnitWork_t *work)
+{
+    u16 *skill;
+    s32 cnt;
+    s32 i;
+
+    work->level = datDevilTable[id].level;
+    for (i = 0; i < 6; i++) {
+        work->param[i] = datDevilTable[id].param[i];
+    }
+    cnt = 0;
+    skill = work->skill;
+    for (i = 0; i < 24; i++) {
+        if (datLevelUpTable[id].skill[i].kind == 0 &&
+            datLevelUpTable[id].skill[i].type == 1) {
+            *skill++ = datLevelUpTable[id].skill[i].skill;
+            cnt++;
+        }
+    }
+    work->maxhp = datGetMaxHp(work);
+    work->hp = work->maxhp;
+    work->maxmp = datGetMaxMp(work);
+    work->mp = work->maxmp;
+    work->skillcnt = cnt;
+    printf(D_00543188, work->level);
+    work->exp = datCopyDevilWorkEntry(work, work->level);
+    printf(D_00543198, work->exp);
+    fclEncycRegist(work, 0);
+}
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashGetRec);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashUpdRec);
+void datBossRashUpdRec(s32 eid, s32 press)
+{
+    datBossPress_t *rec;
+    s32 value;
+    s32 best;
+    s32 i;
+
+    if (press != 0) {
+        value = press;
+    } else {
+        value = 1;
+    }
+    if (eid == 0x3E1) {
+        eid = 0x1D8;
+    }
+    if (eid == 0x3E0) {
+        eid = 0x14E;
+    }
+    rec = datBossPress;
+    for (i = 0; i < 40; i++) {
+        if (rec->encid == eid) {
+            if (evtBitCheck(rec->flag) == 0) {
+                return;
+            }
+            *(s16 *)((u8 *)(i * 4) + (u32)DDS3_GBWK + 0x19CA) = value;
+            best = datBossRashGetRec(eid, 0);
+            if (value < best) {
+                *(s16 *)((u8 *)(i * 4) + (u32)DDS3_GBWK + 0x19C8) = value;
+                evtBitOn(rec->flag2);
+            }
+            return;
+        }
+        rec++;
+    }
+}
 
 s32 datBossRashChk(s32 eid)
 {
@@ -343,4 +1245,8 @@ s32 datBossRashChk(s32 eid)
     }
     return 0;
 }
+
+INCLUDE_RODATA(const s32, "newdata/datCalc", D_00543188);
+
+INCLUDE_RODATA(const s32, "newdata/datCalc", D_00543198);
 

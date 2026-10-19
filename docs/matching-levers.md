@@ -277,6 +277,12 @@ it was measured on DDS and not on this ELF.
 - An ignored return value still reserves `$2` across the call. When retail
   skips `$2` for the address temp after a `jal`, declare the callee `s32`
   rather than `void`.
+- An implicit declaration is itself a void against non-void trap. A callee
+  defined further down the unit is implicitly `int` at the call site and
+  reserves `$2`, so a forward prototype alone can fix a near miss: one added
+  prototype took four functions from two words off to exact. When a `$gp`
+  reload lands in the wrong register, check whether the callee is merely
+  implicitly declared before concluding its return type is wrong.
 - Subscript the whole expression instead of caching an element address.
   `e->data->form[i].stat` matches where `form = &e->data->form[i];` then
   `form->stat` swaps the `addu` operands and shifts a register. The converse
@@ -522,10 +528,13 @@ function body:
 - `nbLoadMotionByIndex` has two byte-identical arms that gcc cross-jumps. The
   retail source must have differed in a way that still folds to the same
   instructions.
-- `Hatudo` and `nbE915_Test` call `nbGetEventForm` with no argument, which
-  only an unprototyped declaration produces, and that function is defined
-  with a prototype in the same unit. An unprototyped `extern` does work for
-  callers placed above the definition, which matters if the unit is split.
+- A call with no argument to a function the unit defines with a prototype,
+  as `Hatudo` and `nbE915_Test` do to `nbGetEventForm`. **There is a way out
+  when the definition precedes the bare call**: define the callee old-style,
+  `s32 f(id) s32 id; { ... }`, which accepts any arity and matched both the
+  caller and the callee in `code_001FAE80`'s `shpItemIsUnlocked`. An
+  unprototyped `extern` works instead when the callers sit above the
+  definition. Try both before treating this as impossible.
 - `nbMakaDispOn` needs `GetMakaProcessData` to take an argument, as the HD
   reconstruction shows, but it is defined `(void)` in this unit.
 

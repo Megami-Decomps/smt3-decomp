@@ -2,6 +2,7 @@
 #include "libsdf.h"
 #include "newdata.h"
 #include "ps2asm.h"
+#include "event.h"
 
 typedef struct
 {
@@ -181,7 +182,8 @@ typedef struct
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ u8 unk_0018[0x18];
     /* 0x0030 */ s8 unk_30;
-    /* 0x0031 */ u8 unk_0031[0x112F];
+    /* 0x0031 */ s8 unk_31;
+    /* 0x0032 */ u8 unk_0032[0x112E];
     /* 0x1160 */ s32 unk_1160;
     /* 0x1164 */ s32 unk_1164;
     /* 0x1168 */ s32 unk_1168;
@@ -428,7 +430,9 @@ typedef struct
     /* 0x0005 */ u8 unk_0005[0x13];
     /* 0x0018 */ u8 unk_18;
     /* 0x0019 */ u8 unk_19;
-    /* 0x001A */ u8 unk_1A[8];
+    /* 0x001A */ u8 unk_1A;
+    /* 0x001B */ u8 unk_1B;
+    /* 0x001C */ u8 unk_1C[6];
     /* 0x0022 */ u16 unk_22;
     /* 0x0024 */ u16 unk_24;
     /* 0x0026 */ u8 unk_26[0x52];
@@ -506,7 +510,10 @@ typedef struct
     /* 0x8302 */ u8 unk_8302;
     /* 0x8303 */ s8 unk_8303;
     /* 0x8304 */ u16 itemId[1];
-    /* 0x8306 */ u8 unk_8306[0x19A];
+    /* 0x8306 */ u8 unk_8306[0x142];
+    /* 0x8448 */ u8 crossPanel[0x20];
+    /* 0x8468 */ s32 unk_8468;
+    /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
     /* 0x84A4 */ u8 unk_84A4[0xC];
     /* 0x84B0 */ s32 stockAlpha[1];
@@ -533,7 +540,8 @@ typedef struct
 {
     /* 0x00 */ u8 unk_00[3];
     /* 0x03 */ u8 icon;
-    /* 0x04 */ u8 unk_04[0x1C];
+    /* 0x04 */ u16 cost;
+    /* 0x06 */ u8 unk_06[0x1A];
     /* 0x20 */ datSkillBad_t bad;
 } datSkillEntry_t;
 
@@ -561,7 +569,10 @@ extern void func_00224230(datUnitWork_t *unit);
 extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x30];
+    /* 0x0000 */ u8 unk_00[0x18];
+    /* 0x0018 */ s8 unk_18;
+    /* 0x0019 */ s8 unk_19;
+    /* 0x001A */ u8 unk_1A[0x16];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ u8 levelUpStep;
@@ -710,7 +721,9 @@ typedef struct
     /* 0x0178 */ u8 unk_0178[0x44D0];
     /* 0x4648 */ s32 script;
     /* 0x464C */ s32 scriptArg;
-    /* 0x4650 */ u8 unk_4650[0xF0];
+    /* 0x4650 */ s32 unk_4650;
+    /* 0x4654 */ s32 texHandle[2];
+    /* 0x465C */ u8 unk_465C[0xE4];
     /* 0x4740 */ u8 seqMitama[4];
 } ragUpdateWork_t;
 
@@ -882,6 +895,7 @@ typedef struct
     /* 0x8C */ s32 unk_8C;
     /* 0x90 */ s32 unk_90;
     /* 0x94 */ s32 unk_94[5];
+    /* 0xA8 */ s32 unk_A8;
 } mselGlobalWork_t;
 
 extern mselGlobalWork_t *gGlobal;
@@ -1023,9 +1037,12 @@ typedef struct
     /* 0x0005 */ s8 unk_0005;
     /* 0x0006 */ u8 unk_0006[2];
     /* 0x0008 */ s32 unk_0008;
-    /* 0x000C */ u8 unk_000C[0x20];
+    /* 0x000C */ u8 unk_000C[8];
+    /* 0x0014 */ void *allocation;
+    /* 0x0018 */ u8 unk_0018[0x14];
     /* 0x002C */ cmpCursorWork_t listCursor;
-    /* 0x0064 */ u8 unk_0064[0x2328];
+    /* 0x0064 */ u8 unk_0064[0x2324];
+    /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;
     /* 0x2390 */ s32 scriptArg;
     /* 0x2394 */ s32 texHandle[2];
@@ -1557,7 +1574,20 @@ void cmbFindStockEnd(s8 devilId)
     cmbGlobalWork->stock[cmbGlobalWork->stockCount++] = devilId;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbStoreBirthDevil);
+extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
+extern void cmbApplyEvoUnlock(s8 index);
+
+s32 cmbStoreBirthDevil(u16 devilId, cmbUnit_t *list, u8 count)
+{
+    s8 index = cmbCheckEvoUnlocked(devilId, (datUnitWork_t *)list, count);
+
+    if (index < 0) {
+        return 0;
+    }
+    cmbApplyEvoUnlock(index - count + 0x10);
+    cmbClearStockEntry(&list[index]);
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbAddDevilToStock);
 
@@ -1723,7 +1753,27 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbUpdateStockCursor);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbChangeSequence);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbWaitCancelButton);
+extern void fclRbnRelease(fclRbnWork_t *work);
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 cmpLoadStatusModel(void);
+extern s32 cmpPlayCursorSE(s32 button);
+
+s32 cmbWaitCancelButton(void)
+{
+    s32 button = cmpGetPressedButton(2) & 0xFFFF;
+
+    if (button == 2) {
+        if (cmpLoadStatusModel() == 0) {
+            fclRbnRelease(CMB_GBWK->ribbon);
+            CMB_GBWK->ribbon = NULL;
+            CMB_GBWK->unk_00001 = CMB_GBWK->unk_00003;
+            CMB_GBWK->unk_00004 = button;
+        } else {
+            button = 0x8000;
+        }
+    }
+    return cmpPlayCursorSE(button);
+}
 
 extern void fclRbnSwitchActive(fclRbnWork_t *rbn, s32 index);
 
@@ -2024,7 +2074,32 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053CE38);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbLoadTargetModel);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbFindUnitScene);
+extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
+extern evtUnit_t *evtGetUnitHandle2(void *obj);
+
+s32 cmbFindUnitScene(void *work)
+{
+    void *scene = dds3GetActiveScene();
+    void *basic;
+    evtUnit_t *unit;
+
+    if (scene == NULL) {
+        return 0;
+    }
+    basic = dds3SearchSceneBasic(scene, DDS3_GBWK->integers[15], 5);
+    if (basic == NULL) {
+        return 0;
+    }
+    unit = evtGetUnitHandle2(basic);
+    if (unit == NULL) {
+        return 0;
+    }
+    if (unit->value == 0) {
+        return 0;
+    }
+    *(u32 *)(*(u8 **)((u8 *)work + 0x18) + 0x80) = unit->value;
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbUpdateCameraPos);
 
@@ -2057,7 +2132,16 @@ void func_00205DB8(void)
     func_002043E0(CMB_GBWK->unk_1654C);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmb_205DF0);
+extern void effEVECombParSmokeSetZtest(s32 handle, s32 flag);
+
+void cmb_205DF0(void)
+{
+    effEVECombParSmokeSetZtest(CMB_GBWK->smoke[0], 1);
+    effEVECombParSmokeSetZtest(CMB_GBWK->smoke[1], 1);
+    func_002043E0((u32 **)((u8 *)CMB_GBWK + 0x16524));
+    func_002043E0((u32 **)((u8 *)CMB_GBWK + 0x16538));
+    func_00205DB8();
+}
 
 void cmb_205E68(void)
 {
@@ -2170,7 +2254,7 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053CF70);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclShopTexLoad);
 
-s32 fclShopTexFree(shpUpdateWork_t *work)
+void fclShopTexFree(shpUpdateWork_t *work)
 {
     s32 *tex = work->texHandle;
     s8 i;
@@ -2178,7 +2262,7 @@ s32 fclShopTexFree(shpUpdateWork_t *work)
     for (i = 0; (u8)i < 2; i++) {
         sdfTexFree(*tex++);
     }
-    return printf("SHOP : Tex free.\n");
+    printf("SHOP : Tex free.\n");
 }
 
 
@@ -2197,7 +2281,21 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclShopGetTexPath);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclAllocShopWork);
 
-INCLUDE_ASM(const s32, "code_001FAE80", shop_update_Shutdown);
+void shop_update_Shutdown(void)
+{
+    if (D_0054FB20 == NULL) {
+        return;
+    }
+    fclShopTexFree((shpUpdateWork_t *)D_0054FB20);
+    fclScriptForcedEnd((u8 *)((shpUpdateWork_t *)D_0054FB20)->scriptArg);
+    sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->unk_2388);
+    fclShopEventEnd();
+    sdfMemFreeDirect(((shpUpdateWork_t *)D_0054FB20)->allocation);
+    D_0054FB20 = NULL;
+    shpProcessStat = 2;
+    evtDisableMoonDraw();
+    p2sdStopBGM(0x310000);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclShopProcessStart);
 
@@ -2258,9 +2356,27 @@ u16 shpGetItemPrice(s32 index, s8 sell)
     return price;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", shpItemIsUnlocked);
+typedef struct
+{
+    /* 0x0 */ u16 unk_00;
+    /* 0x2 */ s16 flag;
+    /* 0x4 */ u8 state[2];
+} shpItemEntry_t;
 
-extern s32 shpItemIsUnlocked(void);
+extern shpItemEntry_t D_0032F650[];
+
+s32 shpItemIsUnlocked(id)
+s32 id;
+{
+    s32 on;
+
+    if (D_0032F650[id].flag >= 0) {
+        on = evtBitCheck(D_0032F650[id].flag) != 0;
+    } else {
+        on = 0;
+    }
+    return D_0032F650[id].state[on];
+}
 extern u16 D_0032F682[];
 
 s32 shpCountUnlockedItems(void)
@@ -2530,7 +2646,19 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D140);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclRagLoadTextures);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclRagTexFree);
+extern char D_0053D188[];
+
+void fclRagTexFree(u8 *work)
+{
+    s32 *tex = (s32 *)(work + 0x4654);
+    s8 i;
+
+    for (i = 0; (u8)i < 2; i++) {
+        sdfTexFree(*tex++);
+    }
+    sdfTexFree(*(s32 *)(GBWK_0 + 0x4650));
+    printf(D_0053D188);
+}
 
 void fclRagTexLoad(u8 *work)
 {
@@ -2542,6 +2670,8 @@ void fclRagTexLoad(u8 *work)
         tex++;
     }
 }
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D188);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclRagUpdateInit);
 
@@ -2676,7 +2806,30 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragDrawList3);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqStatus);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqConfirm);
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[3];
+    /* 0x03 */ s8 unk_03;
+} ragDrawWork_t;
+
+extern ragDrawWork_t *ragDrawWork;
+extern void ragDrawSeqStatus(void);
+extern void ragDrawHeartsList(s32 mode);
+
+void ragDrawSeqConfirm(void)
+{
+    switch (ragDrawWork->unk_03) {
+    case 1:
+        ragDrawHeartsList(1);
+        return;
+    case 2:
+        ragDrawSeqStatus();
+        return;
+    case 3:
+        ragDrawSeqStatus();
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqRoot);
 
@@ -2734,7 +2887,23 @@ void ragUpdateSeqMitama(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateSeqRoot);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateSeqTalk);
+void ragUpdateSeqTalk(void)
+{
+    s32 info;
+
+    fclSetWorkValue(2, 0);
+    info = cmpChkSeqInfo((cmbGbWork_t *)ragUpdateWork);
+    if (info == 1) {
+        return;
+    }
+    if (info != 2) {
+        return;
+    }
+    fclSetWorkValue(2, 2);
+    fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
+    ragUpdateWork->unk_0001 = (u8)ragUpdateWork->unk_0002;
+    ragUpdateWork->unk_0004 = -1;
+}
 
 extern s32 ragUpdateCallSeq(s32 seq);
 void ragUpdateSeqErr(void)
@@ -2975,13 +3144,72 @@ INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawRowText);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawPanelAt);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawSeq1);
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x1130];
+    /* 0x1130 */ lstWork_t list;
+    /* 0x12C4 */ u8 unk_12C4[0x3210];
+    /* 0x44D4 */ s32 texHandle[3];
+} rcvDrawWork_t;
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawSeq2);
+extern rcvDrawWork_t *rcvDrawWork;
+void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
+extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
+typedef struct
+{
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s16 unk_0C;
+    /* 0x0E */ s16 unk_0E;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+} fclPanelPos_t;
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawSeq3);
+extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str, s32 arg);
+extern s32 D_003306F0[];
+extern s32 D_003306F4[];
+extern s32 D_003306F8[];
+extern s32 D_003306FC[];
+extern char D_00330800[];
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawSeq4);
+void rcvDrawSeq1(void)
+{
+    fclPanelPos_t panel;
+
+    rcvDrawPanelAt(&rcvDrawWork->list, fclGetFlag(0) == 0, 0x47);
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+    trmDrawListText(&panel, D_003306F0[0], rcvDrawWork->texHandle, D_00330800, 0x47);
+}
+
+void rcvDrawSeq2(void)
+{
+    fclPanelPos_t panel;
+
+    rcvDrawPanelAt(&rcvDrawWork->list, fclGetFlag(0) == 0, 0x47);
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+    trmDrawListText(&panel, D_003306F4[0], rcvDrawWork->texHandle, D_00330800, 0x47);
+}
+
+void rcvDrawSeq3(void)
+{
+    fclPanelPos_t panel;
+
+    rcvDrawPanelAt(&rcvDrawWork->list, fclGetFlag(0) == 0, 0x47);
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+    trmDrawListText(&panel, D_003306F8[0], rcvDrawWork->texHandle, D_00330800, 0x47);
+}
+
+void rcvDrawSeq4(void)
+{
+    fclPanelPos_t panel;
+
+    rcvDrawPanelAt(&rcvDrawWork->list, fclGetFlag(0) == 0, 0x47);
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+    trmDrawListText(&panel, D_003306FC[0], rcvDrawWork->texHandle, D_00330800, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawItemList);
 
@@ -3028,7 +3256,26 @@ INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdatePanelAnim);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqRoot);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqTalk);
+extern s32 rcvUpdateCallSeq(s32 seq);
+
+void rcvUpdateSeqTalk(void)
+{
+    s32 info;
+
+    fclSetWorkValue(2, 0);
+    info = cmpChkSeqInfo((cmbGbWork_t *)rcvUpdateWork);
+    if (info == 1) {
+        return;
+    }
+    if (info != 2) {
+        return;
+    }
+    if (rcvUpdateWork->unk_01 == 6) {
+        fclSetWorkValue(2, 2);
+    }
+    rcvUpdateCallSeq(rcvUpdateWork->unk_02);
+    rcvUpdateWork->unk_0004 = -1;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdate);
 
@@ -3068,9 +3315,26 @@ void trmEndBGM(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", trmStartEvent);
 
-INCLUDE_ASM(const s32, "code_001FAE80", trmEndEvent);
+s32 trmEndEvent(s32 stopbgm)
+{
+    char name[0x20];
 
-extern void trmCreateEventProcessName(s32 mode, char *name);
+    if (stopbgm != 0) {
+        trmEndBGM();
+    }
+    fclScriptForcedEnd(*(u8 **)(GBWK_3 + 0x2220));
+    *(s32 *)(GBWK_3 + 0x2220) = 0;
+    fclSetTerminalMode(0);
+    if (trmCreateEventProcessName(0, name) != 0) {
+        dds3KillProcessName(name, 0);
+        trmCreateEventProcessName(1, name);
+        dds3KillProcessName(name, 0);
+        fclFreeStage();
+    }
+    return 1;
+}
+
+extern s32 trmCreateEventProcessName(s32 mode, char *name);
 
 s32 trmChkEventWait(void)
 {
@@ -3337,7 +3601,6 @@ void trmUpdateSave(void)
     }
 }
 
-extern void trmEndEvent(s32 mode);
 extern void slSetTmnlID(s8 index, u16 id);
 extern void fmProcTrigSequence(s32 mode);
 
@@ -4430,7 +4693,25 @@ INCLUDE_ASM(const s32, "code_001FAE80", CalcPhaseReadStatus);
 
 INCLUDE_ASM(const s32, "code_001FAE80", DrawPhaseReadStatus);
 
-INCLUDE_ASM(const s32, "code_001FAE80", DestPhaseReadStatus);
+void DestPhaseReadStatus(fclEncycWork_t *work)
+{
+    s32 base = work->unk_36C;
+    void *scene;
+
+    ReleaseFontExplain(work, 1);
+    itfMesMngRelease(*(s32 *)(base + 0x8));
+    if (*(void **)(base + 0x84) != NULL) {
+        frDestroyFontRequestAfter(*(void **)(base + 0x84));
+        *(void **)(base + 0x84) = NULL;
+    }
+    fclRbnRelease(*(fclRbnWork_t **)(base + 0x80));
+    cmpResetDrawEnv();
+    scene = dds3GetActiveScene();
+    if (scene != NULL) {
+        dds3VisibleSceneBasic(scene, 1);
+    }
+    ReleaseWork(work);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", CalcPhaseReadSummon);
 
@@ -5047,13 +5328,57 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstInitWorkStock);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstCreateBeforeSkillList);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstChkBeforeSkillOwner);
+typedef struct
+{
+    /* 0x00 */ s8 count;
+    /* 0x01 */ u8 unk_01[0x19];
+    /* 0x1A */ u16 skill[25];
+} rstBeforeSkillList_t;
+
+extern void rstCreateBeforeSkillList(s8 devilId, s32 mode, s8 kind,
+                                     rstBeforeSkillList_t *list);
+
+s32 rstChkBeforeSkillOwner(u16 skill, s8 kind, s32 mode)
+{
+    rstBeforeSkillList_t list;
+    s32 i;
+
+    rstCreateBeforeSkillList(*(s8 *)&DDS3_GBWK->unk1CFA, mode, kind, &list);
+    for (i = 0; i < list.count; i++) {
+        if (skill == list.skill[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstAutoAsignDevilParam);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstCalcEventInfo);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstCalcSeqPlayerLevelUp);
+extern s32 rstSetLevelUpCount(datUnitWork_t *unit);
+extern s32 cmpModelSetup(s32 a, s32 b);
+
+s32 rstCalcSeqPlayerLevelUp(void)
+{
+    datUnitWork_t *unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+
+    EventStart->unit = unit;
+    if (rstSetLevelUpCount(unit) == 0) {
+        return 0;
+    }
+    rstAdvanceLevelUpStep();
+    cmpModelSetup(0, 0);
+    if (rstChkParamLimitAll(EventStart->unit) != 0) {
+        evtStartWork_t *start = EventStart;
+
+        start->unk_19 = 0;
+        start->unk_18 = 0;
+        return 2;
+    }
+    fclStartMessage(0);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstCalcSeqDevilLevelUp);
 
@@ -5165,7 +5490,29 @@ void func_002215B8(void) {
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstFindRegisteredDevil);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstFindDevilSlot);
+s32 rstFindDevilSlot(void)
+{
+    s8 raw = *(s8 *)&DDS3_GBWK->unk1CFA;
+    u8 id;
+    s32 index;
+    s32 state;
+    s32 ret;
+
+    if (raw == 0) {
+        return -1;
+    }
+    id = raw;
+    if (datDevilIsRegistered(id) != 0) {
+        return -1;
+    }
+    index = datGetDevilSlotIndex(id);
+    state = (s16)datGetDevilSlotState(id);
+    ret = -1;
+    if (state >= index) {
+        ret = 0;
+    }
+    return ret;
+}
 
 s32 rstShakePad(void)
 {
@@ -5371,11 +5718,65 @@ s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbCountEvoCandidates);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbChkEvoNeedFlag);
+typedef struct
+{
+    /* 0x0 */ u16 devilId;
+    /* 0x2 */ u16 flag;
+} cmbEvoFlagEntry_t;
+
+extern cmbEvoFlagEntry_t D_00339640[];
+
+s32 cmbChkEvoNeedFlag(u16 devilId)
+{
+    cmbEvoFlagEntry_t *entry = D_00339640;
+    u32 i;
+
+    for (i = 0; i < 6; i++, entry++) {
+        if ((devilId == entry->devilId) && (evtBitCheck(entry->flag) == 0)) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_002229E8);
 
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[2];
+    /* 0x02 */ s8 value;
+    /* 0x03 */ u8 kind;
+} cmpKugatatiEntry_t;
+
+extern u8 datLevelUpTable[];
+
+/* NON_MATCHING: 28 of 28 words differ (first at +0x0). */
+#ifdef NON_MATCHING
+s8 *datFindKugatatiEntry(datUnitWork_t *unit, u8 *outcount)
+{
+    cmpKugatatiEntry_t *entry = (cmpKugatatiEntry_t *)&datLevelUpTable[unit->id * 0x66];
+    u8 level = unit->level;
+    s8 *found = NULL;
+    u8 count = 0;
+    s32 i;
+
+    for (i = 23; i >= 0; i--) {
+        if ((u8)entry[1].value == level) {
+            count++;
+            if (count == 1) {
+                found = &entry[1].value;
+            }
+        }
+        entry++;
+    }
+    if (outcount != NULL) {
+        *outcount = count;
+    }
+    return found;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", datFindKugatatiEntry);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbCopyEvoStats);
 
@@ -5452,15 +5853,6 @@ s32 func_00222DC0(u16 devilId)
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbAddLevelUpParamEx);
-
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[2];
-    /* 0x02 */ s8 value;
-    /* 0x03 */ u8 kind;
-} cmpKugatatiEntry_t;
-
-extern u8 datLevelUpTable[];
 
 s8 rst_223080(datUnitWork_t *unit)
 {
@@ -5636,9 +6028,32 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstDrawStatusRow2);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstDrawStatusPanel);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstFindUnitScene);
+extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
+extern evtUnit_t *evtGetUnitHandle2(void *obj);
 
-extern s32 rstFindUnitScene(s32 work);
+s32 rstFindUnitScene(s32 work)
+{
+    void *scene = dds3GetActiveScene();
+    void *basic;
+    evtUnit_t *unit;
+
+    if (scene == NULL) {
+        return 0;
+    }
+    basic = dds3SearchSceneBasic(scene, DDS3_GBWK->integers[12], 5);
+    if (basic == NULL) {
+        return 0;
+    }
+    unit = evtGetUnitHandle2(basic);
+    if (unit == NULL) {
+        return 0;
+    }
+    if (unit->value == 0) {
+        return 0;
+    }
+    *(u32 *)(*(u8 **)((u8 *)work + 0x18) + 0x80) = unit->value;
+    return 1;
+}
 s32 rstGetEncycPanel(void)
 {
     s32 work;
@@ -5684,7 +6099,28 @@ void rstOverWriteSkill(u16 *slot, u16 skill)
     rstSetMaxHpMp(1, startPos->unk_16C);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstAddSkill);
+extern s32 rstAddSkillToSlot(u16 skill, cmbUnit_t *unit);
+
+void rstAddSkill(void)
+{
+    u16 skill;
+    s8 slot;
+    s32 count;
+
+    if (startPos->unk_16C->id == 0) {
+        skill = startPos->unk_24;
+    } else {
+        skill = startPos->unk_22;
+    }
+    count = startPos->unk_1B;
+    startPos->unk_1B = count - 1;
+    rstAddSkillToSlot(skill, (cmbUnit_t *)startPos->unk_16C);
+    slot = rstFindSkillSlot(skill, (cmbUnit_t *)startPos->unk_16C);
+    if (slot >= 0) {
+        rstClearSkillSlot((cmbUnit_t *)startPos->unk_16C, (u8)slot);
+    }
+    rstSetMaxHpMp(1, startPos->unk_16C);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstBuildDestroyList);
 
@@ -6015,7 +6451,35 @@ INCLUDE_ASM(const s32, "code_001FAE80", mselDrawBackground);
 
 INCLUDE_ASM(const s32, "code_001FAE80", mselDrawTitleAnim2);
 
+/* NON_MATCHING: 13 of 27 words differ (first at +0x14). */
+#ifdef NON_MATCHING
+void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
+{
+    s32 v;
+    s32 level;
+
+    *toggle = (*toggle == 0);
+    if (dir == 0) {
+        level = *value;
+        v = level;
+        level = (v & 0xFF) + 0x10;
+    } else {
+        level = *value;
+        v = level;
+        level = (v & 0xFF) - 0x10;
+    }
+    if (level > 0) {
+        if (level > 0x80) {
+            level = 0x80;
+        }
+    } else {
+        level = 0;
+    }
+    *value = (v & ~0xFF) | level;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", mselToggleFlag);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", mselMakeSaveText);
 
@@ -6128,7 +6592,29 @@ s32 fldWmapIsEnabled(void)
     return fldWmapEnabled;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", mselStartDataSet);
+extern void dds3GlobalWorkUserInit2(s32 mode);
+extern s32 dds3ConfigChanged(void);
+extern void dds3ConfigSaveBackup(void);
+extern void dds3ConfigRestoreBackup(void);
+extern s32 evtBitOn(s32 bit);
+
+s32 mselStartDataSet(void)
+{
+    if (gGlobal->unk_A8 == 0) {
+        dds3CreateGameData(0);
+    }
+    if (DDS3_GBWK->transition != 0) {
+        dds3GlobalWorkUserInit2(1);
+    } else {
+        dds3GlobalWorkUserInit2(0);
+    }
+    if (dds3ConfigChanged() == 0) {
+        dds3ConfigSaveBackup();
+    } else {
+        dds3ConfigRestoreBackup();
+    }
+    return evtBitOn(0xC0F);
+}
 
 extern s32 fldRunDanteGunFlag[];
 extern void fldSetNextField(s32 a, s32 b, s32 c);
@@ -7062,7 +7548,13 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpStartItemMsg);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUseItem);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpGetSelectSkillID);
+s32 cmpGetSelectSkillID(void)
+{
+    datUnitWork_t *unit =
+        &cmbGlobalWork->party[cmpGetStockInfoIndex(campWork->stock, 0, 0)].unit;
+
+    return unit->skill[campWork->itemCursor + campWork->itemScroll];
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUseSkill);
 
@@ -7074,7 +7566,21 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpItemIsUsable);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpApplyStockRecover);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpApplyStockRemove);
+extern void cmpClearStockFlag(datUnitWork_t *unit);
+extern void datClearCommMemory(datUnitWork_t *unit);
+extern void datAllClearCommMemory(void);
+
+void cmpApplyStockRemove(void)
+{
+    s8 index = cmpGetStockInfoIndex(campWork->stock, 0, 0);
+
+    if (index < 0) {
+        return;
+    }
+    cmpClearStockFlag(&cmbGlobalWork->party[index].unit);
+    datClearCommMemory(&cmbGlobalWork->party[index].unit);
+    datAllClearCommMemory();
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpRemoveStockDevilEntry);
 
@@ -7174,9 +7680,29 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpCalcStockControl);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpCalcParty);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpCalcConfig);
+extern void dds3ConfigProcessStart(s32 mode);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpCalcLoad);
+void cmpCalcConfig(void)
+{
+    if (campWork->unk_0004 == 0) {
+        return;
+    }
+    cmpSetStockVisible(0);
+    cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
+    campWork->unk_8468 = 0x200;
+    dds3ConfigProcessStart(0);
+}
+
+void cmpCalcLoad(void)
+{
+    if (campWork->unk_0004 == 0) {
+        return;
+    }
+    cmpSetStockVisible(0);
+    cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, NULL, NULL, 0, 0);
+    campWork->unk_8468 = 0x200;
+    fmProcTrigSequence(1);
+}
 
 extern s32 fclChkMessage(void);
 extern void cmpCreateLocalItem(s32 mode);
@@ -7525,7 +8051,19 @@ s32 cmpHeartsIconIsVisible(s8 id)
 }
 
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpInitHeartsIconTable);
+void cmpInitHeartsIconTable(campInfoWork_t *work)
+{
+    u32 i;
+
+    for (i = 0; i < 0x1B; i++) {
+        cmpGetHeartsIconId((s8)i);
+        if (cmpGetHeartsIconId((s8)i) == DDS3_GBWK->unk1CFA) {
+            work->unk_31 = i;
+            return;
+        }
+    }
+    work->unk_31 = 0;
+}
 
 s8 cmpGetHeartsIconId(s8 index)
 {
@@ -7581,7 +8119,24 @@ s32 cmpLoadDHTextures(cmpDhWork_t *work)
 }
 
 
-INCLUDE_ASM(const s32, "code_001FAE80", campDhFreeTexture);
+extern char D_0053FD60[];
+
+void campDhFreeTexture(campInfoWork_t *work)
+{
+    if (work->unk_1160 != 0) {
+        sdfTexFree(work->unk_1160);
+        work->unk_1160 = 0;
+    }
+    if (work->unk_1164 != 0) {
+        sdfTexFree(work->unk_1164);
+        work->unk_1164 = 0;
+    }
+    if (work->unk_1168 != 0) {
+        sdfTexFree(work->unk_1168);
+        work->unk_1168 = 0;
+    }
+    printf(D_0053FD60);
+}
 
 extern void campDhFreeTexture(campInfoWork_t *work);
 extern void sdfMemFreePtrDirect(void *ptr);
@@ -7638,6 +8193,8 @@ void camp_update_dh_Shutdown(void)
         campInfoWork = NULL;
     }
 }
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_0053FD60);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053FD78);
 
@@ -7781,7 +8338,35 @@ s32 campDhWaitMessageEnd(void)
     return cmpUnloadStatusModel();
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", campDhAdvanceAnim);
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[0x1C];
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ s32 unk_20;
+    /* 0x24 */ s32 unk_24;
+} campDhAnimWork_t;
+
+extern campDhAnimWork_t *campDhAnimWork asm("campDhUpdateWork");
+
+void campDhAdvanceAnim(void)
+{
+    campDhAnimWork->unk_1C++;
+    if (campDhAnimWork->unk_1C >= 0x400) {
+        campDhAnimWork->unk_1C = 0;
+    }
+    campDhAnimWork->unk_20 += 8;
+    if (campDhAnimWork->unk_20 >= 0x200) {
+        campDhAnimWork->unk_20 = 0;
+    }
+    if (campDhAnimWork->unk_24 < 0x200) {
+        campDhAnimWork->unk_24 += 0x20;
+    } else {
+        campDhAnimWork->unk_24 += 0x10;
+    }
+    if (campDhAnimWork->unk_24 >= 0x400) {
+        campDhAnimWork->unk_24 = 0;
+    }
+}
 
 void campDhFadeAlpha(void)
 {
@@ -8681,7 +9266,12 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmp_23F8F0);
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_0023F9F8);
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_0023FA98);
+void func_0023FA98(u16 id, s32 x, s32 y, s32 z)
+{
+    cmpModelParamTable[id].evo[0] += x;
+    cmpModelParamTable[id].evo[1] += y;
+    cmpModelParamTable[id].evo[2] += z;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_0023FB10);
 
@@ -8901,7 +9491,25 @@ u16 cmpChkSkillBad(u16 skill)
     return bad->id;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpGetSkillEntry);
+s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit)
+{
+    datSkillEntry_t *skill = &cmbSkillTable[id];
+    u16 cost = skill->cost;
+
+    switch (skill->icon) {
+    case 1:
+        if (unit->hp < cost) {
+            return 0;
+        }
+        break;
+    case 2:
+        if (unit->mp < cost) {
+            return 0;
+        }
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpAddCost);
 
@@ -8959,7 +9567,25 @@ s32 func_002415D8(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpAllocEffectSlot);
 
+/* NON_MATCHING: 18 of 21 words differ (first at +0x0). */
+#ifdef NON_MATCHING
+void cmpClearCursorSlots(cmpCursorWork_t *cursor)
+{
+    cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cursor + 0x3C);
+    s32 i;
+    s32 j;
+
+    for (j = 0; j < 0x100; j++) {
+        for (i = 0; i < 2; i++) {
+            slot[j][i].state = 0;
+            slot[j][i].param = 0;
+            slot[j][i].value = 0x100;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpClearCursorSlots);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSetCursorSlot);
 
@@ -9031,7 +9657,6 @@ void cmpSetCursorRow(s8 row, cmpCursorWork_t *cursor)
     cursor->unk_24 = row;
 }
 
-extern void cmpClearCursorSlots(cmpCursorWork_t *cursor);
 void cmpResetCursorInfo(cmpCursorWork_t *cursor)
 {
     cursor->unk_08 = cursor->unk_18;
