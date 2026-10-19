@@ -92,6 +92,10 @@ it was measured on DDS and not on this ELF.
 | a call's constant arguments set up above the `if` that guards the call | invert the test into an early `return`, so the call is no longer inside a nested block |
 | more instructions than the C emits, with a 0 or 1 materialised per exit | nest the body inside the guard and give the function one trailing `return`, instead of a chain of early returns. A trailing `if (n <= 0) return 0; return 1;` folds to `slt $0, $2`, and separate `return` constants get cross-jumped into one epilogue; the nested form keeps both. Two functions in `code_001FAE80` went from 0 of 17 and 1 of 17 words to exact on that change alone |
 | a branch straight to the arm you expected to fall through | write that arm last. gcc jumps forward to the block written after the test and falls through to the one written before it, so `if (c) return X; return Y;` and `if (!c) return Y; return X;` differ in which of X and Y the branch reaches |
+| `bnel` on the second of two zero tests, with the first store of the taken block duplicated into the annulled delay slot | invert the pair: `if (a == 0 && b == 0) { flag = 0; } else { store a; store b; flag = 1; }`. The `||` spelling, `if (a != 0 || b != 0) { ... } else { flag = 0; }`, cross-jumps the two true paths into one block and comes out two words short with plain `beq`. `BlurFrameFunc` in `event/evtPolygonMovie` went from 9 of 44 words to exact on that inversion alone, and the store order inside the arm has no effect either way |
+| one call block reached from five different condition chains, each predecessor only setting up the arguments | write the call **once** after the chain and reach it with `goto` labels: every guard becomes `if (...) { goto next; }` and `next:` sits just above the loop's trailing statement. Writing the call out in each arm and trusting cross-jumping does not merge them: `FrameRun` emitted five copies of the `nowcamera[kind]` load and was 97 of 132 words out, and the single `goto` funnel took it to 4 words. The last four needed one arm's successful test spelled as its own `goto run;` with a `goto next;` after it, since `if (!(now < bound)) { goto next; }` branches to the call and falls through to the skip, which is the mirror of what retail does |
+| a guard whose zero default is materialised in the *entry* block, above an unrelated earlier test | initialise the local at its declaration, `char *target = NULL;`, and write the guard as a bare `if (index >= 0) { target = ...; }` with no `else`. The `if (index < 0) { target = NULL; } else { target = ...; }` form emits `bgez` where retail has `bltz` and keeps the zero inside the arm. `BEDFrameFunc` turned on that alone |
+| a byte loaded into `$3` and tested with a plain `beq`, where the return value is already hoisted into `$2` | an early `return` before the call: `if (x == 0) { return i; } f(); return i;`. The trailing `if (x != 0) { f(); } return i;` form coalesces the return value into the tested byte's register and emits `beql` on `$2`. `AddEffectTableMG12` sat at 2 of 85 words on that one statement |
 | one shared exit with the return constant set in each predecessor's delay slot, and one arm falling into it | a `goto` to a single trailing `return 0`. Nesting the bodies inside their guards, an `&&` chain and an `else if` chain all reach within two words but keep one exit too few; the explicit label is what lets gcc put a `$2 = 0` in a delay slot on one path and fall into another on the next. `nbCheckModelPackLoaded` went 13 of 52 differing to exact |
 
 ## Addressing and types
@@ -779,6 +783,47 @@ it was measured on DDS and not on this ELF.
   `typedef struct { s32 words[0xC38 / 4]; } effBTLImage_t;` declared in the
   unit, which avoids reshaping the shared `effBTL_t` header.
 
+- A `jal fptodp` anywhere in the output means a float argument reaches a callee
+  with no prototype in scope: the implicit declaration promotes it to double.
+  This bites hard when a unit's helpers are **defined below** their callers, as
+  splat's INCLUDE_ASM ordering usually leaves them. Seven functions in
+  `event/evtPolygonMovie` were 45 or more words out until the six `evtHokan*`
+  prototypes were added above the first caller, and all seven then came within
+  a couple of words.
+- A static out buffer used three times at different offsets does **not** want
+  the pointer local the `fldElvGetFloorDigits` row above asks for. Where retail
+  keeps the symbol in a saved register and adds the offsets with separate
+  `addiu`s, writing `D_0056CFF0`, `&D_0056CFF0[4]` and `&D_0056CFF0[8]` at the
+  three call sites is exact, while `f32 *out = D_0056CFF0;` plus `out`,
+  `out + 4`, `out + 8` spends the *other* saved register on it and rotates
+  `$20`/`$21`. `SLightFrameFunc` sat at 21 of 102 words on that one local, and
+  no declaration or assignment order of `out` against the `hokan` local moved
+  it. So sweep the local against the bare symbol rather than assuming either.
+- Where a run of sibling callbacks reads a key frame and its successor, which
+  arm of `now >= f->frame` is written first decides the whole body's branch
+  direction. Retail falls through to the `now >= f->frame` arm, so that arm is
+  the `if` and the `now < f->frame` arm is the `else`. Written the other way
+  round all seven key-frame interpolators in `event/evtPolygonMovie`
+  (`SFogFrameFunc`, `Blur2FrameFunc`, `MBlurFrameFunc`, `DBlurFrameFunc`,
+  `RBlurFrameFunc`, `MFilterFrameFunc`, `FilterFrameFunc`) sat at 45 to 51 of
+  65 to 74 words, and all seven went exact together when the arms were swapped.
+- Two values computed by the same expression shape and merged at one exit take
+  their registers from the order of the two assignments, and the computing arm
+  and the default arm have to **agree**. `BlurFrameFunc`'s alpha and scale are
+  assigned alpha-first in both the interpolating arm and the two default arms;
+  alpha-first in one and scale-first in the other is 32 to 34 of 42 words out,
+  and scale-first in both is 16 of 44. The test order in the following `||`
+  chain and the order of the three stores have no effect at all.
+- The `void`-to-`s32` return-type sibcall blocker has to be swept per function,
+  not applied to a family. In `event/evtPolygonMovie` it is what
+  `QuakeFrameFunc`, `BokasiFrameFunc`, `FadeFrameFunc`, `LightFrameFunc` and
+  `BgmFrameFunc` need, while `SeFrameFunc`, `SkyFrameFunc`, `UnitFrameFunc` and
+  `CameraFrameFunc` match as `void` and *break* when given the same `s32`
+  return type, even though all nine sit in the same frame-callback table. For
+  `evtRunUnitMode` the `s32` return type made it worse (26 of 52 words) and a
+  dead store on the switch index in the last arm, `mode = 0;`, took it to
+  exact.
+
 ## Function-local constant arrays
 
 A block-scope initializer such as `s32 list[3] = {1, 11, 14};` goes to
@@ -867,6 +912,13 @@ definition's identity alone.
 A side effect worth noticing: the four callers that discriminate all sit above
 that callee's address, which is evidence for a retail translation-unit boundary
 between them. A callee-visibility result is also a boundary hint.
+
+Confirmed again in `event/evtPolygonMovie`, and this time on a callee that does
+*not* match: `evtHokanFilter` is 71 of 72 words with a single `bnel` for
+retail's `bne`, and compiling the parked `evtHokanColor` draft unguarded makes
+it byte-exact while `evtHokanColor` itself stays 9 words out. So the mechanism
+also tells you which pair to attack: a one-word annul miss next to a parked
+draft is a reason to spend the budget on the draft rather than on the caller.
 
 ## A caller can need its callee's definition, not just a prototype
 
