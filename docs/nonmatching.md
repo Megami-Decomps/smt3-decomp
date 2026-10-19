@@ -1168,6 +1168,12 @@ this loads straight into `$6`. The branch that follows differs with it,
 retail's `beq` with the `lbu` of the count in its delay slot against this
 `beql` with the epilogue restore.
 
+That branch is the callee-visibility class in
+[Matching levers](matching-levers.md): the arm it guards tail-calls
+`cmpUpdateCursorScroll`, which is still `INCLUDE_ASM` here. Decompile that
+first and recheck, rather than permuting the guard again. `cmp_241A88`, which
+calls the same function, is waiting on it too.
+
 Ruled out: testing `cursor->unk_2C` instead of the `flags` local so the load
 is CSEd into a copy; reading the count before and after the null guard;
 moving the `unk_21 = 0` store above the guard; and a `count = i; i--;` while
@@ -1182,9 +1188,13 @@ returns how many steps it took.
 The one differing word is the early-exit branch inside the loop: retail emits
 `bnez $2` and this emits `bnel $2`, with the same `daddu $2, $17, $0` in the
 delay slot and the same displacement. Both keep a second copy of that
-`daddu` at the loop's normal exit, so only the annul bit differs. gcc here
-annulled the delay slot; retail's compile decided the write to `$2` was
-harmless on the fall-through, where the next instructions set up a `jal`.
+`daddu` at the loop's normal exit, so only the annul bit differs.
+
+**Do not permute these.** They are the callee-visibility class in
+[Matching levers](matching-levers.md), and the call in the arm that follows the
+branch is `lstMoveCursor`, which is still `INCLUDE_ASM` in this unit. Both
+functions should close by themselves once `lstMoveCursor` is C, so decompile it
+first and recheck them rather than touching the loop again.
 
 Ruled out: `break` against a `return i` inside the loop against a `goto` to
 the trailing return; a `while` with the increment in the body; an explicit
@@ -1194,23 +1204,38 @@ without the `!= 0`; and declaring `lstMoveCursor` `s32` rather than `void`,
 which costs two more words. `break`, `goto` and the `&&` form all give the
 identical 29 words.
 
-These two and `cmpUpdateList` in the same unit are the same class: one word
-out on a branch-likely that no control-flow shape reaches.
+These two, `cmpUpdateList` and `cmp_241A10` in the same unit are all the
+callee-visibility class, which is why no control-flow shape reaches any of
+them. `cmpUpdateList`'s callee is already C and its entry records the
+measurement; these two and `cmp_241A10` are waiting on a callee.
 
 ## cmpUpdateList (code_001FAE80, 0x6C)
 
-26 of 27 words, exact size. The one differing word is the first branch:
-retail's `beql $3, $0` against this `beq $3, $0`, with the same
-`ld $31, 0x0($29)` in the delay slot and the same displacement. Both
-duplicate the epilogue restore into the slot; only the annul bit differs, so
-gcc decided the restore was harmless on the fall-through where retail's
-compile annulled it.
+One of 27 words differs, at the exact size: the first branch, retail's
+`beql $3, $0` against this `beq $3, $0`, with the same `ld $31, 0x0($29)` in
+the delay slot and the same displacement. Only the annul bit differs.
 
-Ruled out: the early-`return` chain, the nested `if` form, an `||` of the two
-tests, and an `&&` of their inverses. All four compile to the identical
-27 words, so the control-flow shape does not reach the delay-slot filler's
-choice here. Same shape as the branch-likely cases listed under
-[Matching levers](matching-levers.md).
+**The cause is known and measured.** This is the callee-visibility class in
+[Matching levers](matching-levers.md): the arm whose branch differs is the one
+that calls `fclChkMessage`, and that function is a C definition in this unit.
+Renaming the definition in a scratch copy so only the file's `extern` remains
+makes `cmpUpdateList` byte-exact, with every other function in the unit
+unchanged.
+
+The trade has not been taken, because it is one for one: `fclChkMessage` is
+itself byte-exact, so parking it behind a `NON_MATCHING` fallback would buy
+`cmpUpdateList` and lose `fclChkMessage`, leaving the unit at the same 624
+matched functions. Its three other C callers in the unit stay exact either
+way. Revisit it if `fclChkMessage` ever earns the trade, or take it if the
+container is split, which is the better reading of the result: `fclChkMessage`
+is at 0x2140E0 and `cmpUpdateList` at 0x22F3A0, and a caller that wants its
+callee *invisible* is evidence of a retail translation-unit boundary between
+them. See [TU recovery](tu-recovery.md).
+
+Ruled out as spellings of the guard, before the cause was known: the
+early-`return` chain, the nested `if` form, an `||` of the two tests, and an
+`&&` of their inverses. All four compile to the identical 27 words, which is
+what the lever predicts.
 
 ## cmbChkDevilEvo (code_001FAE80, 0x74)
 
@@ -2871,7 +2896,7 @@ same `nbKoukaProcessData_t` whose `first` sits at `+0x08`.
 
 ## cmpSetCursorSlot (code_001FAE80, 0x3C)
 
-8 of 15 words, at the exact 60-byte size. Writes a cursor slot's `param`,
+8 of 15 words differ, at the exact 60-byte size. Writes a cursor slot's `param`,
 `state` and `value` unless its `state` is already 3. Four callers in the same
 unit pass four arguments, so the signature is settled.
 
@@ -2894,7 +2919,7 @@ draft and the closest form.
 
 ## cmp_23A918 (code_001FAE80, 0x40)
 
-4 of 16 words, at the exact 64-byte size. Calls `func_00239C08(0, arg)` and
+4 of 16 words differ, at the exact 64-byte size. Calls `func_00239C08(0, arg)` and
 `cmpAllocRefGifTag(arg)`, then tail-calls `fclDrawPanelSprite(0x5C000, arg)`.
 
 Everything up to and including the `lui $4` of the sprite id matches. The four
@@ -2909,7 +2934,7 @@ same place, so what is left is ee-gcc's second scheduling pass.
 
 ## trmGetJumpTerminalNo (code_001FAE80, 0x44)
 
-8 of 17 words, at the exact 68-byte size. Returns a terminal number from
+8 of 17 words differ, at the exact 68-byte size. Returns a terminal number from
 `fldAllCnt` when the work's `unk_21F1` is set, and otherwise indexes the work's
 own `unk_21F4` table by `unk_11D6 + unk_11D8`.
 
@@ -2939,7 +2964,7 @@ on either field.
 
 ## cmpSkillOrder (code_001FAE80, 0x50)
 
-12 of 20 words, at the exact 80-byte size. A `qsort` comparator over the `u16`
+12 of 20 words differ, at the exact 80-byte size. A `qsort` comparator over the `u16`
 skill list: zeros sort last, otherwise ascending.
 
 Retail copies the first argument into `$3` as its first instruction and reads
@@ -2962,7 +2987,7 @@ test written `*pa != 0` so the arms swap; and `u16 *` parameters in place of
 
 ## cmpItemHasFlag (code_001FAE80, 0x54)
 
-13 of 17 words, 68 against retail's 84 bytes. Tests bit 0 of
+13 of 17 words differ, 68 against retail's 84 bytes. Tests bit 0 of
 `datItemTable[item].flags` when the second argument is zero and bit 1 of
 `flags2` otherwise.
 
@@ -2989,7 +3014,7 @@ which costs another word.
 
 ## cmp_241A88 (code_001FAE80, 0x68)
 
-3 of 26 words, at the exact 104-byte size. Sets bit 1 of a cursor's `unk_2C`
+3 of 26 words differ, at the exact 104-byte size. Sets bit 1 of a cursor's `unk_2C`
 flag byte for one entry, bumps `unk_21` and calls `cmpUpdateCursorScroll`,
 returning whether the bit had to change.
 
@@ -2998,9 +3023,13 @@ which is what puts the `ori` before the branch and lets the `sb` reuse it.
 What differs is two annul bits and the slot they let gcc fill: retail emits
 `beqz` on the range test with the epilogue's `ld $31` in its delay slot and
 `bnez` on the bit test with a `nop`; this emits `beql` and `bnel`, the second
-with the `ld` in its slot. The reload is of an unmodified save, so filling it
-unconditionally is harmless and retail's compile proved that; this one annulled
-both branches instead.
+with the `ld` in its slot.
+
+**Do not permute it.** Both arms fall through to the call of
+`cmpUpdateCursorScroll`, which is still `INCLUDE_ASM` in this unit, so this is
+the callee-visibility class in [Matching levers](matching-levers.md) and should
+close once that function is C. `cmp_241A10` calls the same function and is
+waiting on it as well.
 
 Ruled out: the three guards nested inside each other; the null guard as an
 early `return` with the rest nested; `goto` to a trailing `return 0`; and
@@ -3010,7 +3039,7 @@ the right shape.
 
 ## cmbGetHeartsParamByIndex (code_001FAE80, 0x58)
 
-8 of 22 words, at the exact 88-byte size. Reads one of two byte tables inside
+8 of 22 words differ, at the exact 88-byte size. Reads one of two byte tables inside
 `datRaceEntry_t`, at `+6` and `+0xC` of a 66-byte row.
 
 The two tables have to be flat `extern s8 D_00339E06[]` / `D_00339E0C[]`
@@ -3033,7 +3062,7 @@ orders, which splits the row multiply across the test and loses six more.
 
 ## fclDrawPanel (code_001FAE80, 0x54)
 
-8 of 21 words, at the exact 84-byte size. Draws the panel's background sprite,
+8 of 21 words differ, at the exact 84-byte size. Draws the panel's background sprite,
 calls the panel's own `draw` hook with the panel and the id, and tail-calls the
 foreground sprite.
 
@@ -3055,7 +3084,7 @@ does not compile to retail's `$5` setup.
 
 ## cmbFindCameraPoint (code_001FAE80, 0x64)
 
-9 of 25 words, at the exact 100-byte size. Looks up a type-0x11 scene basic by
+9 of 25 words differ, at the exact 100-byte size. Looks up a type-0x11 scene basic by
 name, and on a hit copies the point resource's quadword to the caller's vector
 and returns 1.
 
