@@ -2437,6 +2437,42 @@ void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work);
 
 void dds3EffectDraw(EffNode *node);
 
+u32 effBTLSkillCheckRun(void);
+
+u8 *effBTLSkillGetTargetFormation(s32 number);
+
+void mdlSetRotate(MdlCtx *ctx);
+
+void sdfMotionNext(sdfMotionCtrlr_t *motion);
+
+void sdfModelEvalTm(sdfModelRootNode_t *model);
+
+void sdfModelLinkOt(struct sdfGrOt_t **surfaces, sdfModelRootNode_t *model);
+
+/* Euler angles into the primary VU0 matrix bank. */
+void FromEuler(f32 x, f32 y, f32 z);
+
+/* vf10 = vf10 * vf11 through the primary matrix bank. */
+void Mult(void);
+
+extern const u8 D_00533CC0[16];
+
+/* The model root's node list, whose item array sits at 0x0C. */
+typedef struct {
+    u8 head[0xC];
+    SdfDrawNode **nodes;
+} EffPCPModelNodeList;
+
+u32 effBTLSkillCheckRun(void);
+
+u8 *effBTLSkillGetTargetFormation(s32 number);
+
+void effBTLModelGetSphereCenter(void *formation);
+
+s32 effBTLModelGetID(void *formation);
+
+void effBTLPartGetPositionPtr(void *formation, EffAimParams *aim, f32 *out);
+
 extern EffSpawnParams effPCPZiodin03Param[];
 
 extern u8 D_0031FBB0[];
@@ -5670,7 +5706,49 @@ void effPCPEyeThunderDelete(EffPCPBurstWork *work) {
     sdfChipFreeDirect(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPEyeThunderDraw);
+void effPCPEyeThunderDraw(EffPCPBurstWork *work) {
+    f32 point[4];
+    f32 dir[4];
+    u8 *params;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 s;
+
+    if (effBTLSkillCheckRun() == 0) {
+        return;
+    }
+    effBTLModelGetSphereCenter(effBTLSkillGetTargetFormation(0));
+    SDF_VU0_LOADVECTOR_B(work);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(dir);
+    params = (u8 *)effPCP_ThunderPolyGetParam(work->fragmentWork);
+    dx = dir[0];
+    dy = dir[1];
+    dz = dir[2];
+    s = work->startDistance;
+    x = work->position[0] + dx * s;
+    y = work->position[1] + dy * s;
+    z = work->position[2] + dz * s;
+    point[0] = x;
+    point[1] = y;
+    point[2] = z;
+    SDF_VU0_COPYVECTOR(params, point);
+    s = work->length;
+    x += dx * s;
+    y += dy * s;
+    z += dz * s;
+    point[0] = x;
+    point[1] = y;
+    point[2] = z;
+    SDF_VU0_COPYVECTOR(params + 0x10, point);
+    effPCP_ThunderPolySetColor(work->fragmentWork, work->tintColor);
+    effPCP_ThunderPolyDraw(work->fragmentWork);
+}
 
 void effPCPEyeThunderSetPosition(EffPCPBurstWork *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
@@ -6433,7 +6511,70 @@ void effPCPMakkaUpdateNode(SdfDrawNode *node) {
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPMakkaDraw);
+void effPCPMakkaDraw(EffPCPSprayWork *work) {
+    f32 scaleVec[4];
+    MdlCtx *model;
+    sdfModelRootNode_t *inner;
+    sdfMotionCtrlr_t **slot;
+    SdfDrawNode *node;
+    u8 *form;
+    u32 count;
+    u32 i;
+    s32 j;
+    f32 s;
+
+    effBTLSkillGetTargetFormation(0);
+    count = work->count;
+    for (i = 0; i < count; i++) {
+        if (work->startFrame[i] == work->frame && work->handle[i] == NULL) {
+            work->handle[i] = dds3EffectPartCopy(work->handle[0]);
+        }
+        if (work->handle[i] != NULL) {
+            model = dds3EffectPartGetHandle(work->handle[i]);
+            FromEuler(0.0f, work->rotationY[i], 0.0f);
+            if (effBTLSkillCheckRun() != 0) {
+                form = effBTLSkillGetTargetFormation(0);
+                if ((*(u32 *)(form + 0x78) & 0x200) != 0) {
+                    SDF_VU0_LOADVECTOR_B(D_00533CC0);
+                    Mult();
+                }
+            }
+            mdlSetRotate(model);
+            s = work->scale * work->scale;
+            scaleVec[3] = 0.0f;
+            scaleVec[0] = s;
+            scaleVec[1] = s;
+            scaleVec[2] = s;
+            SDF_VU0_LOADVECTOR_MEMOPS(scaleVec[0]);
+            mdlSetScale(model);
+            mdlSetColor(model, work->color);
+            SDF_VU0_LOADVECTOR(work);
+            mdlSetPosition(model);
+            slot = model->slots;
+            for (j = 0; j != 4; j++) {
+                if (*slot != NULL) {
+                    if ((*slot)->state != 0) {
+                        sdfMotionNext(*slot);
+                    }
+                }
+                slot++;
+            }
+            if ((model->flags & 1) == 0) {
+                inner = model->inner;
+                s = 1.0f / work->scale;
+                node = (*(EffPCPModelNodeList **)inner)->nodes[0];
+                scaleVec[0] = s;
+                scaleVec[1] = s;
+                scaleVec[2] = s;
+                SDF_VU0_LOADVECTOR_MEMOPS(scaleVec[0]);
+                effPCPMakkaUpdateNode(node);
+                sdfModelEvalTm(inner);
+                sdfModelLinkOt(D_002F69B8, inner);
+            }
+        }
+    }
+    work->frame++;
+}
 
 void effPCPMakkaSetPosition(EffPCPSprayWork *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
@@ -7369,7 +7510,60 @@ void effPCPAnalyzeBEDDelete(EffPCPAnalyzeWork *work) {
 
 INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00533CC0);
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAnalyzeBEDDraw);
+void effPCPAnalyzeBEDDraw(EffPCPAnalyzeWork *work) {
+    EffPCPEventPlace place;
+    EffAimParams aim;
+    f32 position[4];
+    f32 direction[4];
+    u8 *form;
+    f32 scale;
+
+    place.payload[4] = 0.0f;
+    place.payload[5] = 0.0f;
+    place.payload[6] = 0.0f;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 0.0f;
+    place.payload[9] = 0.0f;
+    place.payload[10] = work->scale;
+    if (effBTLSkillCheckRun() != 0) {
+        form = effBTLSkillGetTargetFormation(0);
+        aim.scaleKind = 4;
+        aim.aimMode = 1;
+        aim.directionMode = 0;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(form, &aim, position);
+        SDF_VU0_LOADVECTOR(aViewEye);
+        SDF_VU0_LOADVECTOR_B(aViewTarget);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(direction);
+        switch (effBTLModelGetID(form)) {
+    case 0x102: case 0x103: case 0x108: case 0x123: case 0x124: case 0x125:
+            scale = 0.0f;
+            break;
+    case 0x104: case 0x105: case 0x106: case 0x107: case 0x109: case 0x10A:
+    case 0x10B: case 0x10C: case 0x10D: case 0x10E: case 0x10F: case 0x110:
+    case 0x111: case 0x112: case 0x113: case 0x114: case 0x115: case 0x116:
+    case 0x117: case 0x118: case 0x119: case 0x11A: case 0x11B: case 0x11C:
+    case 0x11D: case 0x11E: case 0x11F: case 0x120: case 0x121: case 0x122:
+        default:
+            scale = *(f32 *)(form + 0x60);
+            break;
+        }
+        place.payload[3] = 0.0f;
+        place.payload[0] = position[0] + direction[0] * scale;
+        place.payload[1] = position[1] + direction[1] * scale;
+        place.payload[2] = position[2] + direction[2] * scale;
+    } else {
+        place.payload[0] = 0.0f;
+        place.payload[1] = -200.0f;
+        place.payload[2] = 0.0f;
+        place.payload[3] = 0.0f;
+    }
+    place.color = work->color;
+    effEveBEDCutSetParams(work->event, &place);
+    effEveBEDCutDraw(work->event);
+}
 
 void effPCPAnalyzeBEDSetScale(EffPCPAnalyzeWork *work, f32 scale) {
     work->scale = scale;
