@@ -5,6 +5,7 @@
 #include "model.h"
 #include "event.h"
 #include "motion.h"
+#include "field.h"
 
 extern char *text1[];
 extern char *text2[];
@@ -338,7 +339,49 @@ void SetDeadPacket(nbActionProcessData_t *a, s32 formindex);
 extern void nbSetOrderSide(s32 side);
 extern s32 mdlGetMinorNum(mdlObj_t *obj);
 extern void nbPushAction(s32 type, s32 partyindex, s32 target, s32 script);
-extern void nbSortOrder(void);
+/* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
+ * the same bytes as part[], six bytes later. */
+typedef struct nbUnitMotion_t {
+    u16 unk00;
+    u16 actframe;
+    u8 unk04[8];
+    f32 r;
+    f32 movey;
+    f32 movez;
+    u8 unk18[4];
+} nbUnitMotion_t;
+
+extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed);
+
+extern void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
+                             s32 *crule, s32 *carea, s32 mode);
+extern void nbSetTargetProcess(nbActionProcessData_t *a, s32 partyindex, s32 ctype, s32 crule,
+                               s32 carea);
+
+extern void SetCommList(nbCommSelProcessData_t *s, struct nbParty_t *my);
+extern s32 datCheckStockFull(void);
+extern s32 datSearchDevilStock(s32 devilid);
+extern s32 fclEncycRegist(datUnitWork_t *work, s32 mode);
+
+extern void nbDispJyokyoHelp(s32 meshandle, s32 mesid, s32 type, s32 value);
+
+extern s32 p2sdGetPcmState(void);
+extern void p2sdSyncSound(void);
+extern char D_005440E8[];
+
+extern sdfVector4_t D_00543628;
+extern sdfVector4_t D_00543648;
+extern char *D_00551110;
+extern char *D_00551114;
+extern f32 D_0054E4C4;
+extern f32 D_0054E4C8;
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 id, sdfVector4_t *pos, f32 *rot);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 r);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *basic);
+extern void dds3ObjectBaseSetPadControl(dds3Basic_t *basic, dds3BasicControlProc_t func);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy);
+
+extern void nbSortOrder(s32 start);
 extern f32 dds3GetRandFloatA(s32 stream);
 extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
 extern s32 GetEndTime(nbActionProcessData_t *a, s32 formindex);
@@ -420,9 +463,53 @@ void SetBattleLight(nbMainProcessData_t *data)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddStageCamera);
+/* NON_MATCHING: 2 of 49 words differ (first at +0xA0). */
+#ifdef NON_MATCHING
+void nbAddStageCamera(nbMainProcessData_t *data)
+{
+    sdfVector4_t pos;
+    f32 rot[4];
+    dds3Basic_t *camera;
 
+    pos = D_00543628;
+    memset(rot, 0, 0x10);
+    rot[3] = 1.0f;
+    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, rot);
+    camera->name = D_00551110;
+    dds3GetRadiusPoseSet(camera, 10.0f);
+    dds3ObjectBaseCreateMover(camera);
+    dds3ObjectBaseSetPadControl(camera, 0);
+    dds3CameraObjectBasicSetFovy(camera, D_0054E4C4);
+    data->unkB4 = (s32)camera;
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddStageCamera);
+#endif
+
+
+/* NON_MATCHING: 2 of 49 words differ (first at +0xA0). */
+#ifdef NON_MATCHING
+void nbAddStageCamera2(nbMainProcessData_t *data)
+{
+    sdfVector4_t pos;
+    f32 rot[4];
+    dds3Basic_t *camera;
+
+    pos = D_00543648;
+    memset(rot, 0, 0x10);
+    rot[3] = 1.0f;
+    camera = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), &pos, rot);
+    camera->name = D_00551114;
+    dds3GetRadiusPoseSet(camera, 10.0f);
+    dds3ObjectBaseCreateMover(camera);
+    dds3ObjectBaseSetPadControl(camera, 0);
+    dds3CameraObjectBasicSetFovy(camera, D_0054E4C8);
+    *(dds3Basic_t **)data->unkB8 = camera;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddStageCamera2);
+#endif
+
 
 void nbSetStageParam(s16 a, s16 b)
 {
@@ -549,7 +636,137 @@ void func_0024CBD0(u32 param)
     nbStageState.param = param;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbStageSp);
+typedef struct nbBlurParam_t {
+    u32 color;
+    s32 unk04;
+    s32 unk08;
+    f32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 width;
+    s32 height;
+    s32 unk28;
+    s32 unk2C;
+} nbBlurParam_t;
+
+extern void dds3EffectBlur(nbBlurParam_t *param);
+
+void nbStageSp(void)
+{
+    nbBlurParam_t blur;
+    s32 n;
+
+    if (fldGlobalBase.area == 0xD7 && fldGlobalBase.floor == 0) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0x648C96;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    } else if (fldGlobalBase.area == 0xDA) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0xC896C8;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    } else if (fldGlobalBase.area == 0xD8) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0x96B4C8;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    } else if ((fldGlobalBase.area == 0xCA || fldGlobalBase.area == 0xF0) && fldGlobalBase.floor == 0) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0x8296B4;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    } else if ((fldGlobalBase.area == 0xE0 && (fldGlobalBase.floor == 2 || fldGlobalBase.floor == 5)) ||
+        (fldGlobalBase.area == 0xE8 && fldGlobalBase.floor == 1)) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0x8296B4;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    } else if (fldGlobalBase.area == 0xEA && fldGlobalBase.floor == 0) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0x96B4C8;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    } else if (fldGlobalBase.area == 0xDF && fldGlobalBase.floor == 2) {
+        n = nbStageState.param * 30 / 128;
+        if (n > 0) {
+            blur.color = (n << 24) | 0x3296B4;
+            blur.unk04 = 0x44;
+            blur.unk0C = 1.0f;
+            blur.width = 0x200;
+            blur.height = 0x1C0;
+            blur.unk08 = 0;
+            blur.unk10 = 0;
+            blur.unk14 = 0;
+            blur.unk18 = 0;
+            blur.unk1C = 0;
+            dds3EffectBlur(&blur);
+        }
+    }
+}
+
 
 s32 GetDyingBadWaitMotion(nbFormation_t *form, s32 motion, datUnitWork_t *work)
 {
@@ -637,7 +854,15 @@ s32 nbCalcUnitVisual2(nbFormation_t *form, s32 part)
     return visual->part[part].unk01;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetMotionActframe);
+s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 ritu)
+{
+    nbUnitMotion_t *mot = (nbUnitMotion_t *)((u8 *)(motion * sizeof(nbUnitMotion_t)) +
+        (u32)nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex)) + 0x2C);
+    s32 frame = mot->actframe;
+
+    return frame / nbGetMotionSpeed(form, motion, ritu);
+}
+
 
 f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed)
 {
@@ -650,7 +875,27 @@ f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed)
     return motspeed;
 }
 
+/* NON_MATCHING: 23 of 46 words differ (first at +0x5C). */
+#ifdef NON_MATCHING
+s32 nbGetMotionNo(nbFormation_t *form, s32 mot)
+{
+    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
+    s32 id = nbGetUnitID(work);
+    datUnitVisual_t *visual = nbGetUnitVisual(work);
+    u32 ofs = mot * sizeof(nbUnitMotion_t) + 0x30;
+
+    form->cr = *(f32 *)((u8 *)(mot * sizeof(nbUnitMotion_t)) + (u32)visual + 0x38) * form->scl;
+    form->movey = *(f32 *)((u8 *)visual + ofs + 0xC);
+    form->movez = *(f32 *)((u8 *)visual + ofs + 0x10);
+    if (id == 0) {
+        return D_003493A0[mot];
+    }
+    return D_0034F1C0[mot];
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetMotionNo);
+#endif
+
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddUnitStock);
 
@@ -1065,7 +1310,23 @@ void nbCheckPacketState(nbActionProcessData_t *a, s32 startframe)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetDeadPacket);
+void SetDeadPacket(nbActionProcessData_t *a, s32 formindex)
+{
+    struct nbParty_t *party = &a->data->party[a->data->form[formindex].partyindex];
+    s32 start;
+    datUnitWork_t *work;
+
+    if ((party->flag & 0x20) != 0) {
+        return;
+    }
+    start = GetEndTime(a, formindex);
+    work = nbGetUnitWorkPointer(a->data, party);
+    if ((work->flag & 0x20) != 0) {
+        nbGetExpMakaItem(work);
+    }
+    nbMakeDeadPacket(start, a, &a->data->form[formindex], 0);
+}
+
 
 void SetPress(nbActionProcessData_t *a, f32 press)
 {
@@ -1254,7 +1515,41 @@ INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543768);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAllPacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetTarget_nbActionProcess);
+void SetTarget_nbActionProcess(nbActionProcessData_t *a)
+{
+    datUnitWork_t *work = a->work;
+    s32 ctype;
+    s32 crule;
+    s32 carea;
+
+    ctype = 0;
+    crule = 0;
+    carea = 0;
+    switch (work->nowcommand) {
+    case 6:
+        *(s32 *)a->data->unk80 = 1;
+        break;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 7:
+    case 8:
+    default:
+        if (a->work->nowcommand == 1 && a->work->nowindex == 0xDF) {
+            *(s32 *)a->data->unk80 = 1;
+        } else {
+            *(s32 *)a->data->unk80 = 0;
+        }
+        break;
+    }
+    a->select = 0;
+    nbSetTargetSkill(a, work, &ctype, &crule, &carea, 0);
+    nbSetTargetProcess(a, a->partyindex, ctype, crule, carea);
+}
+
 
 void ClearTimeList(nbActionProcessData_t *a)
 {
@@ -1747,7 +2042,62 @@ void SetAction_BADWAIT(nbActionProcessData_t *a)
     nbCameraSetState(3);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_BADWAIT);
+s32 CheckAction_BADWAIT(nbActionProcessData_t *a)
+{
+    s32 ret = 0;
+
+    switch (a->work->nowcommand) {
+    case 0:
+    case 1:
+    case 4:
+    case 7:
+        if ((u16)a->seqtime == 5 && a->jyokyomes > 0) {
+            nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
+        }
+        break;
+    case 2:
+    case 3:
+    case 5:
+    case 6:
+    case 8:
+    case 9:
+    case 10:
+    default:
+        if ((u16)a->seqtime == 5 && a->jyokyomes > 0) {
+            nbDispJyokyoHelp(a->data->mesmngid, a->jyokyomes, a->jyo_varid, a->jyo_varind);
+        }
+        break;
+    }
+    switch (a->work->nowcommand) {
+    case 8:
+    case 10:
+        if ((u16)a->seqtime >= 0x1F) {
+            ret = 1;
+        }
+        break;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 9:
+    default:
+        if ((u16)a->seqtime >= 0x29 || a->jyokyomes == 0) {
+            ret = 1;
+        }
+        break;
+    }
+    if (ret != 0) {
+        SetNextActionSeq(a, 7);
+        a->jyokyomes = 0;
+        return 1;
+    }
+    return 0;
+}
+
 
 void SetAction_TARSEL(nbActionProcessData_t *a)
 {
@@ -2089,7 +2439,77 @@ INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_005440D8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_005440E8);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbActionProcess1);
+void *nbActionProcess1(dds3ProcessID_t *id)
+{
+    nbActionProcessData_t *a = dds3GetProcessData(id);
+    s32 ok;
+    u32 prev;
+    s32 seq;
+    s32 t;
+
+    if ((a->stat & 0x400) != 0) {
+        nbPanelStockSelect(a->data, 0);
+    }
+    ok = 1;
+    prev = nbGetPrevActionSeq();
+    if ((a->stat & 2) != 0) {
+        seq = a->nextseq;
+    } else {
+        seq = a->seq;
+    }
+    switch (seq) {
+    case 7:
+        t = prev < 0x13;
+        ok = t == 0;
+        if (p2sdGetPcmState() != 0) {
+            printf(D_005440E8);
+            p2sdSyncSound();
+        }
+        break;
+    case 8:
+        seq = 0;
+        break;
+    case 9:
+        seq = 0;
+        break;
+    case 10:
+        seq = 0;
+        break;
+    case 11:
+        seq = 0;
+        break;
+    case 12:
+        seq = 0;
+        break;
+    case 13:
+        seq = 0;
+        break;
+    case 14:
+        seq = 0;
+        break;
+    }
+    if ((a->stat & 0x40) != 0) {
+        return 0;
+    }
+    if (ok != 0) {
+        if ((a->stat & 2) != 0) {
+            if (a->seq == 0x16) {
+                return (void *)-1;
+            }
+            SetActionSeq(a, a->nextseq);
+            a->stat &= ~2;
+            return 0;
+        }
+        if (ActionFuncTable[a->seq].check(a) != 0) {
+            a->stat |= 2;
+        }
+        if ((u16)a->seqtime <= 0xFFFE) {
+            a->seqtime = a->seqtime + 1;
+        }
+    }
+    return 0;
+}
+
 
 void nbActionShutdown(dds3ProcessID_t *id)
 {
@@ -2142,7 +2562,47 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddOrder);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSortOrder);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetOrderSide);
+void nbSetOrderSide(s32 side)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 cnt;
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        data->order[i] = -1;
+    }
+    cnt = 0;
+    data->orderindex = -1;
+    if (side == 0) {
+        for (i = 0; i < 4; i++) {
+            if ((data->party[i].flag & 1) != 0) {
+                if ((data->party[i].flag & 0x20) == 0) {
+                    data->order[cnt] = i;
+                    cnt++;
+                }
+            }
+        }
+    } else {
+        for (i = 4; i < 14; i++) {
+            if ((data->party[i].flag & 1) != 0) {
+                if ((data->party[i].flag & 0x20) == 0) {
+                    data->order[cnt] = i;
+                    cnt++;
+                }
+            }
+        }
+    }
+    if (cnt > 0) {
+        data->orderindex = 0;
+    } else {
+        data->orderindex = -1;
+        data->activeunit = -1;
+        return;
+    }
+    nbSortOrder(0);
+    data->activeunit = data->order[data->orderindex];
+}
+
 
 void nbSetOrder(s32 index)
 {
@@ -2217,7 +2677,20 @@ s32 nbClipEffectNum(s32 screenPosition[4])
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbLoadKoukaPos);
+/* vu0 routine: the kouka mark position, scaled and lowered by the form radius. */
+void nbLoadKoukaPos(nbFormation_t *form)
+{
+    f32 y;
+
+    SDF_VU0_LOADVECTOR(&form->center);
+    SDF_VU0_SCALEVECTOR_V0(form->scl);
+    SDF_VU0_LOADVECTOR_B(&form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_GETVECTOR_Y(y);
+    y -= form->r * form->scl;
+    SDF_VU0_SETVECTOR_Y(y);
+}
+
 
 void nbGetKoukaMarkPos(nbFormation_t *form)
 {
@@ -2283,7 +2756,41 @@ void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 col)
     nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u, uv.v, 0xC, 0x12, col, th);
 }
 
+/* NON_MATCHING: 24 of 66 words differ (first at +0x74). */
+#ifdef NON_MATCHING
+void nbDrawKoukaSprite(sdfTexHandle_t *th, u32 value, s32 x, s32 y, u32 col, s32 align)
+{
+    u8 digits[12];
+    s32 n = 0;
+
+    if (value != 0) {
+        do {
+            digits[n] = value % 10;
+            n++;
+            value = value / 10;
+        } while (value != 0);
+    }
+    if (n == 0) {
+        digits[0] = 0;
+        n = 1;
+    }
+    if (align != 0) {
+        if (align <= 0) {
+            if (align == -1) {
+                x -= n * 192;
+            }
+        }
+    } else {
+        x -= n * 96;
+    }
+    for (n = n - 1; n >= 0; n--) {
+        nbDrawPanelSprite(th, digits[n], x, y, col);
+        x += 0xC0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawKoukaSprite);
+#endif
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00544130);
 
@@ -2293,7 +2800,29 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetTargetSkill);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetNormalSkill0);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetNakama);
+s32 nbGetNakama(datUnitWork_t *work)
+{
+    datUnitWork_t *stock;
+    s32 i;
+
+    if (datCheckStockFull() != 0) {
+        return 0;
+    }
+    stock = NULL;
+    datSearchDevilStock(work->id);
+    for (i = 4; i < 0x10; i++) {
+        if ((DDS3_GBWK->akuma[i].flag & 1) == 0) {
+            stock = (datUnitWork_t *)&DDS3_GBWK->akuma[i].flag;
+            break;
+        }
+    }
+    datSetDevilWork(work->id, stock);
+    fclEncycRegist(stock, 0);
+    *((u8 *)(*(s32 *)((u8 *)DDS3_GBWK + 0x1924)) + (u32)DDS3_GBWK + 0x1914) = i;
+    *(s32 *)((u8 *)DDS3_GBWK + 0x1924) = *(s32 *)((u8 *)DDS3_GBWK + 0x1924) + 1;
+    return 1;
+}
+
 
 void nbSetDevilNameMes(s32 hmsg, s32 no, datUnitWork_t *work)
 {
@@ -2938,7 +3467,41 @@ void nbSetAutoCommSel(void)
     s->unk14B4 |= 0x10;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", InitCommSelProcessData);
+nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct nbParty_t *my,
+                                               nbActionProcessData_t *a)
+{
+    void *h = sdfMemAllocDirect(0x14D0);
+    nbCommSelProcessData_t *s = sdfMemLock(h);
+    s32 i;
+
+    memset(s, 0, 0x14D0);
+    s->handle = h;
+    s->data = data;
+    s->act = a;
+    if ((a->stat & 0x80) != 0) {
+        s->stat = 2;
+    } else {
+        s->stat = 1;
+    }
+    s->nowtype = 0;
+    for (i = 0; i < 6; i++) {
+        s->nowcursor[i] = 0;
+        s->nowlisty[i] = 0;
+    }
+    s->oz = 0xFF0050;
+    s->unk14B4 = 9;
+    s->ox = -0x1E;
+    s->cnt = 2;
+    s->smritu = 1.0f;
+    s->my = my;
+    s->partytarget = NULL;
+    s->alpha = 0;
+    s->ritu = 0.0f;
+    SetCommList(s, my);
+    SetCommCursor2(s);
+    return s;
+}
+
 
 void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
                           nbActionProcessData_t *a)

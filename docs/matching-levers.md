@@ -257,10 +257,16 @@ it was measured on DDS and not on this ELF.
   `dist = 200.0f;` in place of the literal at its four use sites, and to exact
   once the angle was written as the three statements above.
 
-- `case_values_threshold` is 10 in this build: a `switch` needs at least ten
-  `case` nodes before ee-gcc emits a jump table rather than a compare tree,
-  independently of the range test. Where retail has a jump table and the
-  reconstruction has fewer labels, the missing ones share the `default` body.
+- A jump table needs enough `case` **nodes**, but the threshold is not 10: an
+  eight-entry table and a six-entry one both emit tables here, so the earlier
+  claim of `case_values_threshold == 10` is wrong as stated. The actionable
+  mechanism is that the node count is taken **before** empty arms are merged.
+  Where retail has a table and the reconstruction has a compare tree, give
+  each extra arm a dead store to a local nothing reads after the switch,
+  `case 8: seq = 0; break;`. Flow analysis then deletes every store and those
+  entries land on the shared exit. One function went from 59 of 79 words
+  differing to 1 on that alone, where a live assignment leaves the block in
+  and runs 16 bytes over.
 - `extern f32 fabsf(f32);` and an ordinary call compile to `abs.s` directly,
   verified against this toolchain. `EE_ABS_F32` is what fails to match where
   retail has a plain `abs.s`.
@@ -539,6 +545,13 @@ it was measured on DDS and not on this ELF.
   register restores; `cmp_23A918` and `fclDrawPanel` both sit on it and no
   spelling of the constant (a local, an unsigned literal, dropping the
   `return`) moves it.
+- A negated comparison assigned to a variable needs the comparison in its own
+  local first. `ok = (prev >= 0x13);` and every spelling of it (`!(prev <
+  0x13)`, `== 0`, `!= 1`, `? 0 : 1`, `> 0x12`) gives `sltiu` then
+  `xori rd, rs, 1`, because gcc knows the inner value is 0 or 1. Retail's
+  second `sltiu rd, rs, 1` is the generic `== 0` expansion, which needs
+  `t = prev < 0x13; ok = t == 0;` as two statements. That was the last word of
+  `nbActionProcess1`.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -853,6 +866,16 @@ These have been ruled out repeatedly and are not worth a second attempt:
 A function whose body is mostly inline assembly is refused by the production
 report anyway, at 8 instructions and more than half the body, so writing one
 to force a match earns nothing. See [Reading progress](progress.md).
+
+## Sweep permutations in the real file, not an isolated copy
+
+`check_unit.py --source <file>` compiles an experiment as the unit, which is
+the right tool for a single question but the wrong one for a sweep. One
+agent's natural store order was **exact in the real file and ten words out in
+a `--source` copy** that happened to lack two neighbouring C functions, and a
+720-permutation sweep of the isolated form found nothing better than seven.
+Whatever the sweep is over, run the winner in the real unit before believing
+it, and prefer sweeping in place.
 
 ## Do not run the rodata and sdata placers standalone
 
