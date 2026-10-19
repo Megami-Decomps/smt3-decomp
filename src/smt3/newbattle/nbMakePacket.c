@@ -221,6 +221,9 @@ typedef struct
     u16 badframe;
     u16 autowait;
     void *motion;
+    /* Truncated: include/newdata.h carries the rest (unk30, part[12] and a
+     * 0x18E-byte tail). This unit only holds the type through a pointer and
+     * reads nothing past motion. */
     u32 reserve1;
     u32 reserve2;
     u32 reserve3;

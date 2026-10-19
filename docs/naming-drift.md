@@ -222,7 +222,10 @@ by `->field` and `.field` occurrences, which over-counts common names like
 Steps 1 and 2 are done, along with the loose ends and the three meaning
 corrections; see [What has been applied](#what-has-been-applied). What is left:
 
-1. Ten single-file congruent member types, about 460 sites, each self-contained.
+1. Done. Every type defined both in a shared header and in a `.c` file now has
+   one spelling, bar `datUnitVisual_t`: `nbMakePacket.c` holds a truncated view
+   of it that stops after `motion`, which the header merge should replace with
+   the `include/newdata.h` type rather than a rename.
 2. The narrow shared types: done except `sdfMat_t`, whose only local copy is
    in `sdf3DPrim.c`. `sdfThCB_t`, `sdfMemHandle_t`, `sdfGsMemSlice_t`,
    `sdfDrawTag_t`, `sdfGrOt_t`, `sdfPreDrawTag_t`, `sdfTexHandle_t` and
@@ -301,11 +304,46 @@ Every batch below rebuilt to `5facfbf7916836613449c922e26a4ec412207b32`.
   `battleTextureSlot` at +0x1C and +0x20: the IDB calls that span `userArea`
   and `comment`, and these are what this game puts there.
 
+- **The duplicated local type copies.** Found mechanically rather than from
+  this page's file list, by comparing every type defined both in a shared
+  header and in a `.c` file: `sdfTexHandle_t`, `sdfMat_t` and `TMX_HEADER_t`
+  in the four `effPCP*` units, `sdfPrim.c`'s three packet members
+  (`registers`/`transfer`/`textureFlush` → `elem`/`bitblt`/`texflush`),
+  `sdfDelayedResrc.c`, `sdf3D.c`'s `sdf3DFogParam_t`, `sdfMovie.c`'s
+  `SoundFormat`, `MovLinearStream` and `MovPacStream`, `billManager.c`'s
+  `BillChildPayload`, and `effPCPBoss.c`'s two boss-param records. Where the
+  IDB has a name it won (`effPCPBossBUNSINParam_t` is `pStartForm`/`pEndForm`,
+  `movieStream_t`'s +0x10 is `file`); where it has only placeholders the repo's
+  own names were kept, per the rule at the top of this page.
+
+  `include/libsdf.h` turned out to hold the last drifted `TMX_HEADER_t`, and
+  `sdf3D.c` the last drifted `sdf3DFogParam_t`, so the shared header is not
+  automatically the canonical side. Check which copy the IDB agrees with.
+
 - **The billboard packet writes.** All 133 `*(u32 *)(packet + N)` stores in
   `sdfBillBoard.c` now go through the `sdfBillBoard*Packet_t` types that
   `include/billboard.h` already carried; the offsets agreed field for field.
   `sdfBillBoardMakeN` and the other `*MakeN` builders keep their `packet[i]`
   word walk, which is a variable-length packet rather than a record.
+
+### The rename that still compiles and is still wrong
+
+Three of these types had a member name that appears in **both** the old and the
+new list, at different positions. `MovPacStream` had `scratch` at index 3 going
+in and at index 17 coming out; `sdf3DFogParam_t` had `fogNear` and `fogFar` at
++0/+4 going in and at +8/+12 coming out. Renaming the struct body and then
+fixing whatever the compiler complains about does not work on these: the old
+spelling is still a valid member, so `->scratch` keeps compiling and silently
+moves to a different field. `movieOpenStream` came back 30 of 130 words out
+that way.
+
+Both were redone as a single simultaneous pass over the accesses, resolving each
+object to its declared type before rewriting, so no name is rewritten twice.
+Before renaming any struct body positionally, intersect the two member lists; if
+the intersection is non-empty, the compiler is not going to find the mistakes.
+
+A matching build is the only check that catches this, which is why each of these
+went through `tools/check_unit.py` per unit and not just the final link.
 
 ### The three meaning corrections, applied
 

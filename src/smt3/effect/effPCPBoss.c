@@ -133,7 +133,7 @@ typedef struct effBaelWork_t
 
 typedef struct effPCPBossONGYParam_t
 {
-    s32 unk00;
+    s32 pFormation;
 } effPCPBossONGYParam_t;
 
 typedef struct effPCPBossONGY_t
@@ -156,8 +156,8 @@ typedef struct effPCPBossWork_t
 
 typedef struct effPCPBossBUNSINParam_t
 {
-    s32 unk00;
-    s32 unk04;
+    s32 pStartForm;
+    s32 pEndForm;
 } effPCPBossBUNSINParam_t;
 
 /* The marked node effPCPBossBUNSINCreate reads its two endpoints from. */
@@ -608,7 +608,7 @@ s32 effPCPBossONGYModelTexRenderCheck(void)
 effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unused)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
-    s32 value = param->unk00;
+    s32 value = param->pFormation;
     void *matrix;
 
     work->unk0C = 0;
@@ -641,7 +641,7 @@ s32 effPCPBossONGYGetLength(void)
 effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unused)
 {
     effPCPBossONGY_t *work = sdfChipAllocDirect(0x10);
-    s32 value = param->unk00;
+    s32 value = param->pFormation;
     void *matrix;
 
     work->unk0C = 0;
@@ -679,13 +679,13 @@ effPCPBossBUNSIN_t *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *param)
 
     work->marks = *param;
     work->unk2C = 0;
-    node = (effPCPBossBUNSINNode_t *)work->marks.unk00;
+    node = (effPCPBossBUNSINNode_t *)work->marks.pStartForm;
     work->unk30 = 0;
     work->posA[0] = node->pos[0];
     work->posA[1] = node->pos[1];
     work->posA[2] = node->pos[2];
     work->posA[3] = 0.0f;
-    node = (effPCPBossBUNSINNode_t *)work->marks.unk04;
+    node = (effPCPBossBUNSINNode_t *)work->marks.pEndForm;
     work->posB[0] = node->pos[0];
     work->posB[1] = node->pos[1];
     work->posB[2] = node->pos[2];
@@ -727,14 +727,14 @@ effPCPBossBUNSIN2_t *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2_t *param, void *u
     work->head = param->head;
     work->frame = 0;
     work->state = 0;
-    sub.unk00 = work->head.unk00;
-    sub.unk04 = work->head.unk04;
+    sub.pStartForm = work->head.unk00;
+    sub.pEndForm = work->head.unk04;
     work->parts[0] = effPCPBossBUNSINCreate(&sub);
-    sub.unk00 = work->head.unk00;
-    sub.unk04 = work->head.unk08;
+    sub.pStartForm = work->head.unk00;
+    sub.pEndForm = work->head.unk08;
     work->parts[1] = effPCPBossBUNSINCreate(&sub);
-    sub.unk00 = work->head.unk04;
-    sub.unk04 = work->head.unk0C;
+    sub.pStartForm = work->head.unk04;
+    sub.pEndForm = work->head.unk0C;
     work->parts[2] = effPCPBossBUNSINCreate(&sub);
     return work;
 }

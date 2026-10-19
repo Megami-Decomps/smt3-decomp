@@ -33,7 +33,7 @@ typedef struct BillTextureQuad {
 } BillTextureQuad;
 
 typedef struct billChildPayload_t {
-    sdfTexHandle_t *texture;  
+    sdfTexHandle_t *texHandle;  
     u16 variant;  
     u8 pad06[2];
     s32 refCount;       
@@ -483,7 +483,7 @@ u32 dds3BillboardGeneralNumber(void) {
 }
 
 sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index) {
-    return hGeneralBillboard[index]->u.child->texture;
+    return hGeneralBillboard[index]->u.child->texHandle;
 }
 
 void dds3BillboardSetPosition(void *dst, const void *src) {
@@ -570,7 +570,7 @@ void dds3BillboardSetCondition(billObj_t *effect, s32 variant) {
 
 s32 dds3BillboardGetTex(billObj_t *effect) {
     if (effect->kind == 0) {
-        return (s32)effect->u.child->texture;
+        return (s32)effect->u.child->texHandle;
     }
     return 0;
 }
