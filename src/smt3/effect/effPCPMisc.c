@@ -317,9 +317,9 @@ struct sdfMemHandle_t;
 struct sdfMemHandle_t {
     struct sdfMemHandle_t *prev; /* 0x00 */
     struct sdfMemHandle_t *next; /* 0x04 */
-    s32 address;              /* 0x08: start of represented span */
-    u16 state;                /* 0x0C: free, used, or end sentinel */
-    s16 referenceCount;       /* 0x0E: -1 for sentinels */
+    s32 ptr;                  /* 0x08: start of represented span */
+    u16 stat;                 /* 0x0C: free, used, or end sentinel */
+    s16 mlock;                /* 0x0E: -1 for sentinels */
 };
 
 struct sdfTexHandle_t;
@@ -344,12 +344,12 @@ struct sdfTexPacket_t {
 struct sdfGsMemSlice_t {
     struct sdfGsMemSlice_t *prev; /* 0x00 */
     struct sdfGsMemSlice_t *next; /* 0x04 */
-    u32 allocationMode;         /* 0x08: known categories above; unknown values remain valid */
-    u32 word;                   /* 0x0C: VRAM offset in 32-bit words */
+    u32 type;                   /* 0x08: known categories above; unknown values remain valid */
+    u32 addr;                   /* 0x0C: VRAM offset in 32-bit words */
     s32 size;                   /* 0x10: range length in 32-bit words */
-    s16 width;                  /* 0x14 */
-    s16 height;                 /* 0x16 */
-    s32 format;                 /* 0x18: GS pixel-storage mode */
+    s16 w;                      /* 0x14 */
+    s16 h;                      /* 0x16 */
+    s32 pixelFormat;            /* 0x18: retail loads it with lw, so signed */
 };
 
 /* Serialized byte consumed by the GS texture-state packet builder. */
@@ -489,13 +489,13 @@ struct sdfGrOt_t;
 /* Draw-surface pool entry (0x20); the SDK initializes and flushes this owner. */
 struct sdfGrOt_t {
     struct sdfGrOt_t *next; /* 0x00 */
-    sdfDrawTag_t *first;       /* 0x04 */
-    sdfDrawTag_t *last;        /* 0x08 */
-    u32 unkC;
-    void (*append)(struct sdfGrOt_t *, sdfDrawTag_t *);      /* 0x10 */
-    s32 (*prepend)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
-    u32 unk18;
-    u32 unk1C;
+    sdfDrawTag_t *tagHead;     /* 0x04 */
+    sdfDrawTag_t *tagTail;     /* 0x08 */
+    u32 noSortTag;
+    void (*regFunc)(struct sdfGrOt_t *, sdfDrawTag_t *);          /* 0x10 */
+    s32 (*callbackFunc)(struct sdfGrOt_t *, s32, sdfDrawTag_t *); /* 0x14 */
+    u32 data;
+    u32 pad;
 };
 
 extern struct sdfGrOt_t *D_002F69B8[4];
@@ -5930,7 +5930,7 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
         sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&D_0056ADB8));
     }
     entry = D_0031FEF8[node->drawKind];
-    entry->append(entry, list);
+    entry->regFunc(entry, list);
 }
 
 void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {

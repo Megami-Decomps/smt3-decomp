@@ -83,6 +83,23 @@ The assertions in `tools/header_layout.c` are restored with the proven names,
 plus `skillcnt` at +0x38, `skill` at +0x3A, `nowindex` at +0x6C,
 `mitamaparam` at +0x7A, `levelupparam` at +0x80 and the 0xEC size.
 
+## Member types
+
+| Type | Member | Old | New | Proof |
+| --- | --- | --- | --- | --- |
+| `sdfGsMemSlice_t` | `pixelFormat` (+0x18) | `u32` | `s32` | `sdfSetLoadImage` (0x002AC530) reads it with `lw` at 0x002AC59C, and `sdfGrSetTextureScenePacket` again at 0x002AE900. Declaring it `u32` makes ee-gcc emit `lwu` and turns those two words into `0x9E4B0018`/`0x9E470018` |
+
+Found while renaming the drifted member names onto the IDB's: the name was
+drifted (`format` → `pixelFormat`) but the repo's signedness was right, so the
+rename had to take the name alone. The IDB has been corrected and saved; the
+struct's size is unchanged at 28 bytes and `symbol_addrs.txt` is unaffected,
+since member types are not exported.
+
+`sdfGsMemSlice_t.type` is the mirror case and is **not** corrected: the IDB
+says `s32` where every repo copy says `u32`. No load of it is signedness
+sensitive, so nothing in the retail code decides it, and changing it on the
+IDB's word alone would be a guess dressed as a correction.
+
 ## Globals
 
 | Address | Name | Old type | New type | Proof |
