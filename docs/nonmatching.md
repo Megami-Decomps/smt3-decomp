@@ -1856,3 +1856,32 @@ arms rather than reusing `level`; `if (dir != 0)` rather than
 `if (level <= 0) ... else if (level > 0x80)`, which emits `bgtz` where retail
 has `blez`; and `~0xFF` against `-0x100` against `0xFFFFFF00` for the mask,
 all of which give the same `addiu $2, $0, -0x100`.
+
+## effPCPBossMETATOBeamDraw (effect/effPCPBoss, 0x25C)
+
+7 of 151 words, at the exact 604-byte size.
+
+Where the two interpolation factors finish being built. Retail materialises both
+`0x3EA8F5C2` and `0x3F28F5C2` with `lui`/`ori` pairs before the
+`effColorBlend` argument setup, so the `and $4, $5, $4` lands in the call's
+delay slot; the draft's scheduler sinks `lui $20` and both `ori`s past the
+`jal`, which rotates seven words. Everything else is exact.
+
+Two facts carried this one most of the way, both reusable:
+
+- The lerp factors have to be `u32` locals holding the binary32 bits, assigned
+  just before the `effColorBlend` call. Written as literals inside
+  `SDF_VU0_INTERPOLATE` in the loop body, gcc hoists the materialisation into
+  the loop preheader and the whole saved-register assignment rotates by one
+  (`work` takes `$18` where retail uses `$19`): that costs 30 words rather than
+  7. `PS2_FLOAT_BITS` cannot be the source shape here, since retail has no
+  `mtc1`/`mfc1` pair for either factor.
+- `found` has to be declared after every other local. It is spilled in this
+  function, and with `found` declared next to `model` it takes the lower of the
+  two spill slots (`0x10`) where retail gives that slot to `limit`.
+
+Ruled out for the seven words: both assignment orders of the two factors; the
+assignments before the `frame < limit` guard, before the fade if-chain, between
+the blend and the loop, and split either side of the call (the three early
+positions are far worse, 88 to 96 words, because the factors then occupy
+registers the fade chain needs); and `found` declared first rather than last.

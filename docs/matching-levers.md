@@ -39,6 +39,7 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| a register copy of a field you already loaded, feeding one of two roles | write the field expression again at the second use site rather than passing the local. cse turns the second load into a copy, and the two pseudos then take the two hard registers the uses prefer. `effPCPDANTE_Sprite_Draw` went from 10 of 60 words to exact on `uv->uw` written at the call where a local was already holding it |
 | explicit branches selecting one of two or three constants, the value left in a saved register across calls | a `switch` over the tested values, not an `if`/`else if` chain, which ee-gcc if-converts into a `movn` and drops the saved register. `Flow6_14` and `Flow11_9` in `nbMakePacket` each turned on that alone |
 | `jal` and a fallthrough for one `switch` arm while the other arms sibcall with `j` | a dead store after the call in that arm only, `seq = 0;` on the switch index. Giving the callee an `s32` return type with no `return` does not reach it, since the other arms sibcall the same way. `SetNextSeq` went from 27 of 30 differing words to exact |
 | a `switch` tree split one node later than your case set produces | an extra `case` with an empty body, above every other case value, so the node collapses into the default and only the node count changes. gcc's `balance_case_nodes` splits at the `(n + ranges + 1) / 2`th node, so six singleton cases split at the third and seven at the fourth. `Flow1_9`'s six status bits needed a seventh case above `0x200` to make the tree start at `8` rather than `4` |
@@ -256,6 +257,44 @@ it was measured on DDS and not on this ELF.
   emits `addu rd, base, index` into a fresh temp, which costs the operand
   order and the register. `nbRunKoukaType1` and `nbRunKoukaType2` each went
   from 20 differing words to exact on that one cast.
+- Stack vectors a function stores with `sqc2` and later copies with `lq`/`sq`
+  have to be local *aggregates*, not scalar `u128`s, when retail's frame layout
+  follows the declaration order. gcc gives an aggregate its slot at
+  `expand_decl`, in declaration order, but gives a scalar its slot only when its
+  address is first taken, so a run of `u128` locals comes out in first-use order
+  instead. `effect/effPCPBoss` declares
+  `union effPCPBossVector_t { u128 q; f32 f[4]; }` for this: the `u128` member
+  supplies the 16-byte alignment `sqc2` needs and the union makes it an
+  aggregate. `effPCPBossDengekiDraw`'s ten vectors land at `0x30` through `0xC0`
+  only in that form.
+- A `SDF_VU0_STOREVECTOR` to a local that a later `SDF_VU0_COPYVECTOR` reads as
+  its source has to be `SDF_VU0_STOREVECTOR_NOMEM`. The plain form's `"memory"`
+  clobber lets gcse share the `addiu rd, $29, N` between the store and the copy,
+  which is one instruction fewer than retail and parks the address in a saved
+  register across the intervening call. That took `effPCPBossDengekiDraw` from
+  182 differing words to 16. It is needed even where the C reads the stored
+  vector back by field, against the caution on the macro itself.
+- The `effEveBEDCutSetParams` placement block in the draw routines is written
+  zeros first: `payload[3..6] = 0.0f`, then `payload[7]`, `[8]`, `[9]`, `[10]`,
+  then `payload[0..2]` from the position, then `color`. Every order that follows
+  the field numbers leaves the last `swc1` on the wrong side of the three
+  `sw $0`, and no position for `payload[8]` alone fixes it:
+  `effPCPBossDengekiDraw` and `effPCPBossKAGUThunderboltDrawSub` both sat at 4
+  and 8 differing words until the zeros moved to the front, then went exact.
+- An interpolation factor that retail builds with a bare `lui`/`ori` pair is a
+  `u32` local holding the binary32 bits, assigned just before the call that
+  precedes the loop, and passed to `SDF_VU0_INTERPOLATE`. As a literal inside
+  the loop body gcc hoists the materialisation into the preheader and rotates
+  every saved-register assignment; `PS2_FLOAT_BITS` is wrong here because it
+  adds the `mtc1`/`mfc1` pair retail does not have.
+- A local that gets spilled competes for slot order with the others. Where
+  retail gives the lower spill slot to a value read in the prologue, declare the
+  loop-local one (a `found` pointer, say) after every other local;
+  `effPCPBossMETATOBeamDraw` swaps its two spill slots otherwise.
+- `Hatudo` and `nbE915_Test` call `nbGetEventForm` with no argument, which
+  only an unprototyped declaration produces, and that function is defined
+  with a prototype in the same unit. An unprototyped `extern` does work for
+  callers placed above the definition, which matters if the unit is split.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
