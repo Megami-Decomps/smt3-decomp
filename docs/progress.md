@@ -37,7 +37,7 @@ separately, not folded into the main denominator, since no C can replace them:
 | Sony SDK 2.5.x, newlib, libgcc | prebuilt archives, not Atlus source |
 | `asm/smt3/hand/crt0` | handwritten `_start` and stubs |
 | other handwritten assembly (VU0 loops) | never was C |
-| `.vutext`/`.vudata` VU1 microcode | not EE code |
+| `.vutext`/`.vudata` VU microcode | not EE code |
 | `.DVP.*` overlay tables | generated data |
 
 The split between game code and SDK code depends on signature identification
@@ -165,13 +165,20 @@ No function anywhere is partially credited. A function left as `INCLUDE_ASM` is
 absent from the base object and has no C provider in the link, so it scores 0
 rather than part marks.
 
-Excluded from the game-code denominator, and matched nowhere:
+Excluded from the game-code denominator:
 
 | Category | Units | Code bytes | Matched |
 |---|---|---|---|
 | `handwritten` (`asm/smt3/hand/crt0`) | 1 | 468 | 0 |
-| `vu1` (`.vutext`, `.vudata`) | 2 | 59,312 | 0 |
+| `vu1` (`.vutext`, `.vudata`) | 2 | 59,312 | 16,488 |
 | `data` (splat `.data`/`.rodata`/`.bss` segments) | 7 | 0 | n/a |
+
+The `vu1` figure does not come from objdiff. splat gives all of `.vutext` one
+label, so objdiff scores the section as a single unmatched function; the 16,488
+bytes are what `src/smt3/sdf/vu` assembles, counted by
+`tools/vu_include.py --coverage`. They are every VU0 and VU1 instruction in the
+game, 2,061 of them. The other 42,824 bytes of the section are VIF headers,
+unpack data and the debug font texture, which never were instructions.
 
 ## Progress site
 
@@ -186,7 +193,7 @@ python -m http.server -d build/site         # preview
 
 | File | Contents |
 |---|---|
-| `index.html` | headline, draft counter, history chart, categories, every unit with its functions |
+| `index.html` | headline, draft and VU microcode counters, history chart, categories, every unit with its functions |
 | `history.json` | one entry per published commit: matched and total code bytes and functions |
 | `report.json` | the game-scope report the page was rendered from |
 | `badges/code.json`, `badges/functions.json` | [shields.io endpoint](https://shields.io/badges/endpoint-badge) badges the README uses |

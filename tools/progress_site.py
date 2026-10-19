@@ -10,7 +10,7 @@ build/<v>/report.all.json (whole binary, by category), both written by
 current commit is added to it, replacing an entry for the same commit. A
 missing FILE starts a new history. Writes:
 
-    index.html             headline, history chart, categories, units, functions
+    index.html             headline, VU microcode, history chart, categories, units
     history.json           one entry per published commit, oldest first
     report.json            the game-scope report the page was rendered from
     badges/code.json       shields.io endpoint badge: matched code bytes
@@ -31,6 +31,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import vu_include  # noqa: E402
 from check_nonmatching import draft_functions  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -136,15 +137,28 @@ def source_link(repo: str | None, commit: str, path: str, text: str) -> str:
     return f'<a href="{html.escape(repo)}/blob/{commit}/{html.escape(path)}">{html.escape(text)}</a>'
 
 
+def vu_coverage(version: str) -> dict | None:
+    """The microcode counters, or None when the retail image is not at hand."""
+    try:
+        return vu_include.coverage(version)
+    except FileNotFoundError:
+        return None
+
+
 def render(version: str, report: dict, audit: dict, history: list[dict],
            repo: str | None, commit: str, date: str,
-           drafts: dict[str, set[str]] | None = None) -> str:
+           drafts: dict[str, set[str]] | None = None,
+           vu: dict | None = None) -> str:
     info = VERSIONS[version]
     game = totals(report["measures"])
     commit_text = html.escape(commit[:12])
     if repo:
         commit_text = f'<a href="{html.escape(repo)}/commit/{commit}">{commit_text}</a>'
     docs = source_link(repo, commit, "docs/progress.md", "how progress is measured")
+    vu_note = ("The microcode row counts the bytes the VU listings assemble against all of "
+               f"<code>.vutext</code>; its other {number(vu['section_bytes'] - vu['microcode_bytes'])} "
+               "bytes are VIF headers, unpack data and the debug font texture, never instructions."
+               ) if vu else ""
 
     cards = []
     for title, matched, total, unit in (
@@ -162,16 +176,32 @@ def render(version: str, report: dict, audit: dict, history: list[dict],
         f'<div class="card"><h2>Non-matching drafts</h2>'
         f'<p class="big">{number(drafted)}</p>{bar(drafted, unmatched)}'
         f'<p class="muted">of {number(unmatched)} unmatched functions, credited as none</p></div>')
+    # The microcode is not EE code, so it stays out of the headline; objdiff
+    # cannot measure it either, since splat gives .vutext a single label.
+    if vu:
+        cards.append(
+            f'<div class="card"><h2>VU microcode</h2>'
+            f'<p class="big">{percent(vu["source_bytes"], vu["microcode_bytes"]):.2f}%</p>'
+            f'{bar(vu["source_bytes"], vu["microcode_bytes"])}'
+            f'<p class="muted">{number(vu["instructions"])} instructions assembled from '
+            f'<code>src/{html.escape(version)}/sdf/vu</code>, outside the code denominator</p></div>')
 
     categories = []
     for category in audit["categories"]:
         m = totals(category["measures"])
         units = measure(category["measures"], "total_units")
+        if category["id"] == "vu1" and vu:
+            # objdiff scores .vutext as one unmatched function spanning the whole
+            # section. Count the microcode the build assembles instead.
+            m = {"matched_code": vu["source_bytes"], "total_code": vu["section_bytes"],
+                 "matched_functions": 0, "total_functions": 0}
         if m["total_code"]:
+            function_cell = (f'{number(m["matched_functions"])} / {number(m["total_functions"])}'
+                             if m["total_functions"] else "&ndash;")
             code = (f'{bar(m["matched_code"], m["total_code"])} '
                     f'{percent(m["matched_code"], m["total_code"]):.2f}%</td>'
                     f'<td class="num">{number(m["matched_code"])} / {number(m["total_code"])}</td>'
-                    f'<td class="num">{number(m["matched_functions"])} / {number(m["total_functions"])}')
+                    f'<td class="num">{function_cell}')
         else:
             code = 'not compared</td><td class="num">&ndash;</td><td class="num">&ndash;'
         categories.append(f'<tr><td>{html.escape(category["name"])}</td>'
@@ -216,6 +246,7 @@ def render(version: str, report: dict, audit: dict, history: list[dict],
         cards="".join(cards),
         chart=chart(history),
         categories="".join(categories),
+        vu_note=vu_note,
         units="".join(units),
     )
 
@@ -280,6 +311,7 @@ retail bytes come from C; assembly fallbacks earn nothing. See {docs}.</p>
 <p class="muted"><span class="key-code">&#9632; code bytes</span> &nbsp; <span class="key-functions">&#9632; functions</span></p>
 {chart}
 <h2>Categories</h2>
+<p class="muted">{vu_note}</p>
 <table>
 <thead><tr><th>Category</th><th class="num">Units</th><th>Code bytes</th><th class="num">Matched / total bytes</th>
 <th class="num">Functions</th></tr></thead>
@@ -361,7 +393,8 @@ def main() -> None:
     shutil.copyfile(report_path, out / "report.json")
     drafts = draft_functions(args.version)
     (out / "index.html").write_text(render(args.version, report, audit, history,
-                                           args.repo, commit, date, drafts))
+                                           args.repo, commit, date, drafts,
+                                           vu_coverage(args.version)))
     print(f"wrote {out.relative_to(ROOT) if out.is_relative_to(ROOT) else out}: "
           f"{percent(game['matched_code'], game['total_code']):.3f}% code, "
           f"{percent(game['matched_functions'], game['total_functions']):.3f}% functions, "

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for tools/progress_site.py: history continuity and objdiff's sparse measures."""
+"""Tests for tools/progress_site.py: history, objdiff's sparse measures, VU microcode."""
 
 from __future__ import annotations
 
@@ -87,6 +87,35 @@ class DraftTests(unittest.TestCase):
         page = self.page({"elsewhere/unit": {"otherFunc"}})
         self.assertIn('<p class="big">0</p>', page)
         self.assertNotIn('class="draft"', page)
+
+
+class VuMicrocodeTests(unittest.TestCase):
+    AUDIT = {
+        "measures": SparseMeasureTests.AUDIT["measures"],
+        "categories": SparseMeasureTests.AUDIT["categories"] + [
+            # objdiff sees one unmatched label spanning all of .vutext.
+            {"id": "vu1", "name": "VU0/VU1 microcode",
+             "measures": {"total_code": "59312", "total_functions": 1, "total_units": 2}},
+        ],
+    }
+    COVERAGE = {"section_bytes": 59312, "microcode_bytes": 16488,
+                "source_bytes": 16488, "instructions": 2061}
+
+    def page(self, vu: dict | None) -> str:
+        return progress_site.render("smt3", SparseMeasureTests.REPORT, self.AUDIT, [], None,
+                                    "0" * 40, "2026-10-18T00:00:00+00:00", None, vu)
+
+    def test_assembled_microcode_is_credited_against_the_whole_section(self) -> None:
+        page = self.page(self.COVERAGE)
+        self.assertIn("<h2>VU microcode</h2>", page)
+        self.assertIn("2,061 instructions assembled from", page)
+        self.assertIn('<td class="num">16,488 / 59,312</td><td class="num">&ndash;</td>', page)
+        self.assertIn("other 42,824 bytes are VIF headers", page)
+
+    def test_without_the_retail_image_the_row_stays_objdiff_s(self) -> None:
+        page = self.page(None)
+        self.assertNotIn("<h2>VU microcode</h2>", page)
+        self.assertIn('<td class="num">0 / 59,312</td>', page)
 
 
 if __name__ == "__main__":

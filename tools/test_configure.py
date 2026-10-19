@@ -461,39 +461,41 @@ class ProgressLabelTests(unittest.TestCase):
     # 4 functions and 100 bytes, 2 functions and 25 bytes of them in C, and a
     # draft for one of the two functions that are left.
     STATS = (4, 2, 1, 100, 25, 40)
+    VU = {"section_bytes": 800, "microcode_bytes": 400, "source_bytes": 400, "instructions": 50}
 
-    def test_text_labels_source_coverage_and_drafts(self) -> None:
+    def run_progress(self, *argv, stats=None, vu=...):
         out = io.StringIO()
-        with patch.object(sys, "argv", ["progress.py", VERSION]), \
-                patch.object(progress, "version_stats", return_value=self.STATS), \
+        with patch.object(sys, "argv", ["progress.py", VERSION, *argv]), \
+                patch.object(progress, "version_stats", return_value=stats or self.STATS), \
+                patch.object(progress, "vu_line", return_value=self.VU if vu is ... else vu), \
                 redirect_stdout(out):
             progress.main()
+        return out.getvalue()
+
+    def test_text_labels_source_coverage_and_drafts(self) -> None:
         self.assertEqual(
-            out.getvalue(),
+            self.run_progress(),
             f"{VERSION}: 2/4 functions in C (50.0%), 25/100 code bytes in C (25.0%)\n"
             f"{VERSION}: 1/2 remaining functions have a non-matching draft (50.0%), "
-            "40/75 remaining code bytes (53.3%)\n",
+            "40/75 remaining code bytes (53.3%)\n"
+            f"{VERSION}: VU microcode 50 instructions, 400 / 400 bytes from source\n",
         )
 
     def test_markdown_keeps_source_coverage_labels_and_values(self) -> None:
-        out = io.StringIO()
-        with patch.object(sys, "argv", ["progress.py", VERSION, "--markdown"]), \
-                patch.object(progress, "version_stats", return_value=self.STATS), \
-                redirect_stdout(out):
-            progress.main()
         self.assertEqual(
-            out.getvalue(),
-            "| Version | Functions in C | Code bytes in C | Non-matching drafts |\n|---|---|---|---|\n"
-            f"| `{VERSION}` | 2 / 4 (50.0%) | 25 / 100 (25.0%) | 1 / 2 (50.0%) |\n",
+            self.run_progress("--markdown"),
+            "| Version | Functions in C | Code bytes in C | Non-matching drafts | VU microcode |"
+            "\n|---|---|---|---|---|\n"
+            f"| `{VERSION}` | 2 / 4 (50.0%) | 25 / 100 (25.0%) | 1 / 2 (50.0%) "
+            "| 50 instructions, 400 / 400 bytes from source |\n",
         )
 
+    def test_without_the_retail_image_the_microcode_counters_say_so(self) -> None:
+        self.assertIn(f"{VERSION}: VU microcode retail image missing", self.run_progress(vu=None))
+
     def test_a_finished_version_reports_no_remaining_share(self) -> None:
-        out = io.StringIO()
-        with patch.object(sys, "argv", ["progress.py", VERSION]), \
-                patch.object(progress, "version_stats", return_value=(4, 4, 0, 100, 100, 0)), \
-                redirect_stdout(out):
-            progress.main()
-        self.assertIn("0/0 remaining functions have a non-matching draft (0.0%)", out.getvalue())
+        self.assertIn("0/0 remaining functions have a non-matching draft (0.0%)",
+                      self.run_progress(stats=(4, 4, 0, 100, 100, 0)))
 
 
 if __name__ == "__main__":
