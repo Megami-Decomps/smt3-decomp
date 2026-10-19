@@ -364,7 +364,6 @@ extern void fldFreeNextFile(void);
 
 extern void fldDoor_WarpEx(s32 index);
 
-extern char D_00532AA0[];
 
 extern s32 fldNpcModelFreeIdx;
 
@@ -380,7 +379,6 @@ extern u32 D_0054F06C;
 
 extern u32 D_0054F070;
 
-extern char D_00532A88[];
 
 extern void fldDoor_Warp(const char *entry);
 
@@ -426,7 +424,6 @@ extern s32 dds3GetRandIntA(s32 low, s32 high);
 
 extern s32 D_00316EC8[];
 
-extern char D_00532AC8[];
 
 extern char D_00532980[];
 
@@ -483,7 +480,6 @@ extern void fldLoadNextFile(s32 a, s32 b);
 
 extern void fldDoor_WarpCash(const char *name);
 
-extern char D_00532A58[];
 
 
 void fldBgmFadeOut(void);
@@ -1228,14 +1224,13 @@ s32 fldCommand_FLD_CHK_EVE(void) {
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "field/fldCommand", D_00532A58);
-
 s32 fldCommand_FLD_GET_TAKARA_TBL(void) {
     s32 index = fldFindEveRngIndex((u32)scrGetScriptHandle()->ProcessID);
 
     switch (scrGetIntPara(0)) {
     case 0:
-        printf(D_00532A58, fldTakaraTable[index].type, fldTakaraTable[index].id,
+        printf("Type:%d ID:%x Num:%d
+", fldTakaraTable[index].type, fldTakaraTable[index].id,
                fldTakaraTable[index].num);
         scrSetIntReturnValue(fldTakaraTable[index].type);
         break;
@@ -1277,7 +1272,8 @@ u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
 s32 fldCommand_FLD_WARP_CALL_FIELD(void) {
     const char *entry;
 
-    printf(D_00532A88);
+    printf("FLD_WARP_CALL_FIELD
+");
     if (fldDoor_ChkWarp() != 0) {
         fldDoor_Warp(NULL);
         return 1;
@@ -1290,7 +1286,8 @@ s32 fldCommand_FLD_WARP_CALL_FIELD(void) {
 }
 
 s32 fldCommand_FLD_CALL_WAPEX(void) {
-    printf(D_00532AA0);
+    printf("FLD_CALL_WAPEX
+");
     fldDoor_WarpEx(scrGetIntPara(0));
     return 1;
 }
@@ -1419,10 +1416,6 @@ s32 fldCommand_FLD_BGM_RELOAD_WAIT(void)
 {
     return fldWaitBgmReload() != 0;
 }
-
-INCLUDE_RODATA(const s32, "field/fldCommand", D_00532A88);
-
-INCLUDE_RODATA(const s32, "field/fldCommand", D_00532AA0);
 
 s32 fldCommand_FLD_BGM_PLAY(void) {
     s32 track = scrGetIntPara(0);
@@ -1599,7 +1592,8 @@ s32 fldCommand_FLD_GET_ITEMBOX_RND(void) {
     s32 threshold = D_00316EC8[evtGetAgeOfMoon()];
     s32 value = dds3GetRandIntA(0, 100);
 
-    printf(D_00532AC8, value, threshold);
+    printf("ITEMBOX_RND %d / %d
+", value, threshold);
     if (threshold >= value) {
         scrSetIntReturnValue(1);
     } else {
@@ -1631,6 +1625,4 @@ s32 fldCommand_FLD_DANTE_STANCE(void) {
     fldRunDanteStanceSet(scrGetIntPara(0));
     return 1;
 }
-
-INCLUDE_RODATA(const s32, "field/fldCommand", D_00532AC8);
 

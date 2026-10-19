@@ -29,9 +29,7 @@ extern s32 dds3ConfigBackup;
 
 extern s32 dds3DrawConfigPanel(s32 id);
 
-extern char D_005488D0[];
 
-extern char D_005488E0[];
 
 extern char D_00551700[];
 
@@ -65,8 +63,8 @@ void dds3ConfigProcessStart(s32 mode) {
     if (GBWK == 0) {
         GBWK = dds3AllocConfigWork(mode);
         dds3StartProcess(D_00551700, 0x3F2, 1, 1, dds3CalcConfig, NULL, GBWK);
-        dds3StartProcess(D_005488D0, 0x2B07, 1, 1, dds3DrawConfig, NULL, GBWK);
-        dds3StartProcess(D_005488E0, 0x520B, 1, 1, dds3UpdateConfig, dds3DestroyConfig, GBWK);
+        dds3StartProcess("config_draw", 0x2B07, 1, 1, dds3DrawConfig, NULL, GBWK);
+        dds3StartProcess("config_update", 0x520B, 1, 1, dds3UpdateConfig, dds3DestroyConfig, GBWK);
         dds3ConfigState = 1;
     }
 }
@@ -74,8 +72,8 @@ void dds3ConfigProcessStart(s32 mode) {
 void dds3ConfigProcessEnd(void)
 {
     dds3KillProcessName(D_00551700, 1);
-    dds3KillProcessName(D_005488D0, 1);
-    dds3KillProcessName(D_005488E0, 1);
+    dds3KillProcessName("config_draw", 1);
+    dds3KillProcessName("config_update", 1);
 }
 
 s32 checkConfigState(void)
@@ -115,8 +113,4 @@ s32 dds3DrawConfig(void *process)
 }
 
 INCLUDE_ASM(const s32, "kernel/dds3ConfigMain", dds3UpdateConfig);
-
-INCLUDE_RODATA(const s32, "kernel/dds3ConfigMain", D_005488D0);
-
-INCLUDE_RODATA(const s32, "kernel/dds3ConfigMain", D_005488E0);
 

@@ -5,11 +5,8 @@ extern char D_0054F908[];
 
 extern char D_0054F9B8[];
 
-extern char D_0053C5B8[];
 
-extern char D_0053C5D0[];
 
-extern char D_0053C5E8[];
 
 extern char D_0054FAB0[];
 
@@ -81,7 +78,8 @@ s32 evtPlayEventBgm(s32 eventId, s32 variation)
         return 0;
     }
     soundIndex = evtGetSoundIndex(eventId, variation);
-    printf(D_0053C5B8, soundIndex);
+    printf("Event BGM play :%08X
+", soundIndex);
     p2sdPlayBGM(soundIndex);
     return soundIndex;
 }
@@ -97,7 +95,8 @@ void evtTransEventBgm(s32 eventId, s32 variation)
     if (variation >= 0) {
         soundIndex = evtGetSoundIndex(eventId, variation);
     }
-    printf(D_0053C5D0, soundIndex);
+    printf("Event BGM trans :%08X
+", soundIndex);
     p2sdSetBgmTrack(soundIndex);
 }
 
@@ -109,7 +108,8 @@ s32 evtFadeInEventBgm(s32 eventId, s32 variation)
         return 0;
     }
     soundIndex = evtGetSoundIndex(eventId, variation);
-    printf(D_0053C5E8, soundIndex);
+    printf("Event BGM fade in play :%08X
+", soundIndex);
     p2sdPlayBGMFade(soundIndex);
     return soundIndex;
 }
@@ -154,10 +154,4 @@ void evtMakeEventPackName(s32 index, char *buffer)
 {
     sprintf(buffer, D_0054FAB0, index);
 }
-
-INCLUDE_RODATA(const s32, "event/evtSound", D_0053C5B8);
-
-INCLUDE_RODATA(const s32, "event/evtSound", D_0053C5D0);
-
-INCLUDE_RODATA(const s32, "event/evtSound", D_0053C5E8);
 

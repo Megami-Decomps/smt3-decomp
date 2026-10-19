@@ -85,17 +85,14 @@ typedef struct {
 } evtViewer_t;
 extern evtViewer_t *viewerinfo;
 extern s32 (*D_0032CB48[])(s32, s32);
-extern char D_0053C3A8[]; /* "----- NEW FRAME -----" */
 void evtFrameListItemSub(void *list, s32 x, s32 y, s32 color, evtViewerKey_t *key);
 extern s32 mfilterRun(void);
 extern s32 evtViewerCheckDirty(void);
 
-extern char D_0053BEF0[];
 
 extern char D_0054F9B8[];
 
 /* Shared by the float and integer menus after the preceding menu label. */
-extern char D_0053BCC0[]; /* "VALUE CHANGE." */
 
 extern u16 evt_file_minor;
 
@@ -145,9 +142,7 @@ extern char D_0054F9D0[];
 
 extern s8 D_0032CAD0[][12];
 
-extern char D_0053C3C0[];
 
-extern char D_0053C3E0[];
 
 extern char D_0054FA90[];
 
@@ -210,17 +205,11 @@ extern s32 sceClose(s32 fd);
 
 extern s32 sceSync(const char *device, s32 flag);
 
-extern char D_0053C488[];
 
-extern char D_0053C4A8[];
 
-extern char D_0053C4C0[];
 
-extern char D_0053C4F8[];
 
-extern char D_0053C528[];
 
-extern char D_0053C538[];
 
 extern char D_0054FAA0[];
 
@@ -286,11 +275,9 @@ INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtMenuDisp);
 
 s32 evtFloatChangeHead(void *list, s32 x, s32 y)
 {
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0053BCC0));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053BCC0);
 
 void evtFloatChangeItem(void *list, s32 x, s32 y, u32 index)
 {
@@ -354,7 +341,7 @@ s32 evtFloatChangeMenu(s32 x, s32 y)
 
 s32 evtIntChangeHead(void *list, s32 x, s32 y)
 {
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0053BCC0));
+    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
@@ -662,12 +649,10 @@ s32 evtFileName2Head(void *list, s32 x, s32 y)
 {
     char name[32];
 
-    sprintf(name, D_0053BEF0, D_0054F824, evt_file_minor);
+    sprintf(name, "[E%3d_%03d.PM1+2]", D_0054F824, evt_file_minor);
     sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0054F9B8, name));
     return 2;
 }
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053BEF0);
 
 void evtFileName2Item(void *list, s32 x, s32 y, u32 index)
 {
@@ -933,7 +918,7 @@ s32 evtFrameListItem(void *list, s32 x, s32 y, s32 index)
         if (key != NULL) {
             evtFrameListItemSub(list, x, y, color, key);
         } else {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color ? color : 8, D_0053C3A8));
+            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
     }
 }
@@ -996,7 +981,7 @@ void evtBasicListItem(void *list, s32 x, s32 y, s32 index)
         color = 0;
     }
     if (index == 0) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0053C3C0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " -----------------------"));
         return;
     }
     count = 0;
@@ -1068,7 +1053,7 @@ void evtEventPosItem(void *list, s32 x, s32 y, s32 index)
     if (basic != NULL) {
         sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0054FA98, basic->name));
     } else {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0053C3E0));
+        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "   -----------------------"));
     }
 }
 
@@ -1156,12 +1141,6 @@ s32 func_001F79A8(void)
     return 1;
 }
 #else
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C3A8);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C3C0);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C3E0);
-
 INCLUDE_ASM(const s32, "event/evtEventViewerMenu", func_001F79A8);
 #endif
 
@@ -1691,18 +1670,6 @@ void evtSaveObjType17(s32 fd)
         }
     }
 }
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C488);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C4A8);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C4C0);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C4F8);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C528);
-
-INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C538);
-
 s32 evtMakeViewerPath(s32 kind)
 {
     char path[0x40];
@@ -1714,24 +1681,26 @@ s32 evtMakeViewerPath(s32 kind)
     }
     if (kind == 0) {
         if (sdfHddValid) {
-            sprintf(path, D_0053C488, viewerinfo->filename);
+            sprintf(path, "pfs0:/event/pmvtool/%s.PM2", viewerinfo->filename);
         } else {
-            sprintf(path, D_0053C4A8, sdfFileGetHostRoot(), viewerinfo->filename);
+            sprintf(path, "%sevent/pmvtool/%s.PM2", sdfFileGetHostRoot(), viewerinfo->filename);
         }
     } else {
         if (sdfHddValid) {
-            sprintf(path, D_0053C4C0, D_0054F824 / 10 * 10, D_0054F824, D_0054F824,
+            sprintf(path, "pfs0:/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", D_0054F824 / 10 * 10, D_0054F824, D_0054F824,
                     evt_file_minor, D_0054F824, evt_file_minor);
         } else {
-            sprintf(path, D_0053C4F8, sdfFileGetHostRoot(), D_0054F824 / 10 * 10,
+            sprintf(path, "%sevent/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", sdfFileGetHostRoot(), D_0054F824 / 10 * 10,
                     D_0054F824, D_0054F824, evt_file_minor, D_0054F824, evt_file_minor);
         }
     }
     if (sdfHddValid) {
-        printf(D_0053C528, path);
+        printf("hdd -> %s
+", path);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
-        printf(D_0053C538, path);
+        printf("pc -> %s
+", path);
         fd = sceOpen(path, 0x602);
     }
     if (fd < 0) {
