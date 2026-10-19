@@ -56,10 +56,145 @@ extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
 extern void *dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 width, s32 height, u32 fill, u32 border);
 extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 flags, const char *format, ...);
 extern void dds3AdminiCallSequence(s32 sequence, s32 data, s32 bytes, s32 flags);
+extern u8 sdfHddValid;
+extern u32 strlen(const char *s);
+extern char *strcpy(char *dst, const char *src);
+extern s32 dds3EffectDirOpen(void *name);
+extern void dds3EffectDirClose(s32 directory);
+extern void *sdf2DAllocSprite(s32 loopCount);
+extern void *sdf2DGetPrimPtr(void *packet);
+extern void sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 gsContext);
+
+/* One textureless sprite as sdf2D lays it out: the colour, then two corners
+ * of 0x20 bytes each. */
+typedef struct
+{
+    s32 u;
+    s32 v;
+    u8 pad08[8];
+    s32 x;
+    s32 y;
+    s32 mask;
+    s16 flag;
+    u8 pad1E[2];
+} dds3EffectSpriteCorner_t;
+
+typedef struct
+{
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 a;
+    dds3EffectSpriteCorner_t corner[2];
+} dds3EffectSpriteVertex_t;
 void dds3EffectListSetTexture(dds3EffectFileWindow_t *work, char *resource);
 void dds3EffectFileListWindowDrawSprite(dds3EffectFileWindow_t *work);
 
+/* SDK directory entry filled by the directory-read provider. */
+typedef struct
+{
+    u32 flags;
+    u8 opaque04[0x3C];
+    char name[0x100];
+    void *privateData;
+} dds3EffectDirEnt_t;
+
+/* One node per file whose extension matches a requested type bit. The 0x10
+ * types use a two-character extension, so the dot sits one byte later. */
+/* NON_MATCHING: 6 of 270 words differ (first at +0xE4). */
+#ifdef NON_MATCHING
+dds3EffectFileList_t *dds3EffectFileListCreate(char *path, s32 typeMask)
+{
+    dds3EffectDirEnt_t entry;
+    dds3EffectFileList_t *root;
+    dds3EffectFileNode_t *previous;
+    dds3EffectFileNode_t *node;
+    s32 directory;
+    s32 length;
+    s32 type;
+    char dot;
+    char period;
+
+    directory = dds3EffectDirOpen(path);
+    root = (dds3EffectFileList_t *)sdfChipAllocDirect(0xC);
+    if (sdfHddValid != 0) {
+        root->directoryPath = (char *)sdfChipAllocDirect(strlen(path) + 1);
+        strcpy(root->directoryPath, path);
+    } else {
+        root->directoryPath = (char *)sdfChipAllocDirect(strlen(path) + 1);
+        strcpy(root->directoryPath, path);
+    }
+    previous = NULL;
+    root->head = NULL;
+    root->resourceCount = 0;
+    while ((length = dds3EffectDirRead(directory, &entry)) > 0) {
+        if ((entry.flags & 0xF000) == 0x1000) {
+            continue;
+        }
+        if (length < 5) {
+            continue;
+        }
+        if (length >= 0x2F) {
+            continue;
+        }
+        if (typeMask & 0x10) {
+            period = '.';
+            dot = entry.name[length - 3];
+        } else {
+            period = '.';
+            dot = entry.name[length - 4];
+        }
+        if (dot != period) {
+            continue;
+        }
+        type = 0;
+        if ((typeMask & 1) &&
+            ((entry.name[length - 3] == 't' && entry.name[length - 2] == 'm' && entry.name[length - 1] == 'x') ||
+             (entry.name[length - 3] == 'T' && entry.name[length - 2] == 'M' && entry.name[length - 1] == 'X'))) {
+            type = 1;
+        } else if ((typeMask & 2) &&
+            ((entry.name[length - 3] == 'p' && entry.name[length - 2] == '2' && entry.name[length - 1] == 'a') ||
+             (entry.name[length - 3] == 'P' && entry.name[length - 2] == '2' && entry.name[length - 1] == 'A'))) {
+            type = 2;
+        } else if ((typeMask & 4) &&
+            ((entry.name[length - 3] == 'd' && entry.name[length - 2] == '3' && entry.name[length - 1] == 'p') ||
+             (entry.name[length - 3] == 'D' && entry.name[length - 2] == '3' && entry.name[length - 1] == 'P'))) {
+            type = 4;
+        } else if ((typeMask & 8) &&
+            ((entry.name[length - 3] == 'b' && entry.name[length - 2] == 'e' && entry.name[length - 1] == 'd') ||
+             (entry.name[length - 3] == 'B' && entry.name[length - 2] == 'E' && entry.name[length - 1] == 'D'))) {
+            type = 8;
+        } else if ((typeMask & 0x10) &&
+            ((entry.name[length - 2] == 'p' && entry.name[length - 1] == 'b') ||
+             (entry.name[length - 2] == 'P' && entry.name[length - 1] == 'B'))) {
+            type = 0x10;
+        } else if ((typeMask & 0x20) &&
+            ((entry.name[length - 3] == 'p' && entry.name[length - 2] == 'c' && entry.name[length - 1] == 'f') ||
+             (entry.name[length - 3] == 'P' && entry.name[length - 2] == 'C' && entry.name[length - 1] == 'F'))) {
+            type = 0x20;
+        }
+        if (type == 0) {
+            continue;
+        }
+        node = (dds3EffectFileNode_t *)sdfChipAllocDirect(0x3C);
+        node->type = type;
+        strcpy(node->name, entry.name);
+        if (previous != NULL) {
+            previous->next = node;
+        } else {
+            root->head = node;
+        }
+        node->next = NULL;
+        node->previous = previous;
+        root->resourceCount++;
+        previous = node;
+    }
+    dds3EffectDirClose(directory);
+    return root;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraHelper", dds3EffectFileListCreate);
+#endif
 
 void dds3EffectFileListDelete(dds3EffectFileList_t *root) {
     dds3EffectFileNode_t *node = root->head;
@@ -307,7 +442,53 @@ void dds3EffectListSetTexture(dds3EffectFileWindow_t *work, char *textureResourc
     sdfMemFreeDirect(loadedResource);
 }
 
+/* NON_MATCHING: 2 of 70 words differ (first at +0x7C). */
+#ifdef NON_MATCHING
+void dds3EffectFileListWindowDrawSprite(dds3EffectFileWindow_t *work)
+{
+    sdfDrawTag_t *list;
+    void *sprite;
+    dds3EffectSpriteVertex_t *vertex;
+    s32 left;
+    s32 top;
+
+    if (work->textureHandle == NULL) {
+        return;
+    }
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    sprite = sdf2DAllocSprite(1);
+    vertex = (dds3EffectSpriteVertex_t *)sdf2DGetPrimPtr(sprite);
+    vertex->a = 0x80;
+    vertex->g = 0x80;
+    vertex->b = 0x80;
+    vertex->r = 0x80;
+    vertex->corner[0].u = 0;
+    vertex->corner[0].v = 0;
+    vertex->corner[1].u = work->textureHandle->width << 4;
+    vertex->corner[1].v = work->textureHandle->height << 4;
+    left = 0x8000 - (work->x << 4);
+    vertex->corner[0].x = left;
+    left += 0x800;
+    top = 0x8000 - ((work->y - 0xC4) << 3);
+    vertex->corner[0].y = top;
+    vertex->corner[0].mask = 0xFF0000;
+    vertex->corner[0].flag = 0;
+    vertex->corner[1].x = left;
+    vertex->corner[1].y = top + 0x400;
+    vertex->corner[1].mask = 0xFF0000;
+    vertex->corner[1].flag = 0;
+    sdf2DLinkTexPacket(list, work->textureHandle, 0);
+    sdfDrawTagLink(list, (u32)sprite);
+    {
+        sdfGrOt_t *ot = &sdfGrOtTable[71];
+
+        ot->regFunc(ot, list);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraHelper", dds3EffectFileListWindowDrawSprite);
+#endif
 
 void InitParticleEditorProcess(void) {
     dds3AdminiCallSequence(0, 0, 0, 0);

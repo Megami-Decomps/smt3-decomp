@@ -445,6 +445,49 @@ end marked, so expect the body to sit one word early.
   while `dds3ObjectBaseMatterAnimeSpeed`'s cases 0 to 6, with two stores in
   every arm and no empty arm at all, emits a compare tree and matches that way.
   So read which one retail has rather than predicting it from the arm count.
+- A float argument read from a global that the same body also stores: with
+  **any** other use of the loaded value, cse rewrites the argument setup into
+  `mov.s $f12, pseudo` and no source shape removes that word. Where retail has
+  a bare `lwc1 $f12, 0(reg)` feeding both the argument and a run of `swc1`
+  stores of the same value, the source writes **every store as the literal and
+  the argument as the literal too**. `dds3CrossfadeStart` zeroes six floats
+  across two vectors and passes the aspect to `dds3AllocRenderTexture`: the
+  natural `D_002F5C20[0] = 0.0f;` then `D_002F5C20[1] = D_002F5C20[0];` run was
+  46 of 58 words out and two words long, and all six written `= 0.0f` with the
+  argument `0.0f` is exact. The first store stays `sw $0` (the constant class
+  holds no float register yet) and cse then feeds the remaining five from the
+  argument's own load. Ruled out on the copy: all 120 store orders, an `f32`
+  local for the value, separate locals for the stores and the argument, a
+  `(f32)` cast and a `*(f32 *)&` deref at the argument, an `f32`/`void`/
+  four-argument callee declaration, the aspect as the first parameter, an
+  `*(s32 *)` cast on the first store (42 words), and reading the argument from
+  the last slot stored. One use of the loaded value is the only case that keeps
+  the direct load.
+- Two callback sites through `sdfGrOtTable` want a `sdfGrOt_t *ot` declared in
+  each site's own braced block. One function-scope local for both leaves gcc
+  holding `%hi` in one register and adding `%lo + offset` into another
+  (`lui $2` then `addiu $4, $2, 0x40`), where retail's single `la` pair writes
+  one register; `PS2_SYMBOL_AT` on the element does not reach it, since the
+  assembler folds the alias back into the table symbol anyway. That was the
+  last four words of `dds3CrossfadeRun`, and it is the two-site reading of the
+  `effSwordTrackDraw` row above.
+- A `u32` global store placed among a run of float stores decides the register
+  the constant takes and whether its own store lands before or after the first
+  `swc1`. `dds3CrossfadeStart` wants `dds3RenderDrawEnv = 0x80808080;` written
+  after the six float zeros and before the call; the same statement anywhere
+  earlier rotates the two symbol-address registers against the constant's.
+- The "constant assigned in both arms" row reaches a **compare operand**, not
+  only an assigned value. Where an `if`/`else` selects which byte to compare
+  and retail materialises the compared character twice, give it a named local
+  and assign it in each arm: `period = '.';` alongside the byte read in both
+  arms of `dds3EffectFileListCreate`'s extension-dot test took it from ten
+  differing words to six, where the whole `if (... != '.') { continue; }`
+  written in each arm instead runs four words long.
+- Two **byte-identical** `if`/`else` arms are a reachable retail shape here.
+  `dds3EffectFileListCreate` allocates `strlen(path) + 1` and `strcpy`s into it
+  in both arms of `if (sdfHddValid != 0)`, and ee-gcc 2.96 keeps both copies
+  from an `if`/`else` whose arms are the same statements. That is the opposite
+  of the `func_00214FD8` row below, so measure rather than assuming either.
 - `extern f32 fabsf(f32);` and an ordinary call compile to `abs.s` directly,
   verified against this toolchain. `EE_ABS_F32` is what fails to match where
   retail has a plain `abs.s`. **But the choice is also a scheduling lever, and
@@ -464,7 +507,14 @@ end marked, so expect the body to sit one word early.
   component, `sdfVector4_t` for the array, and `_MEMOPS` for the `lqc2`).
   `EE_ABS_F32` into **one reused** magnitude local, with the three tests
   nested, is exact: the barrier is what forces the constant to be materialised
-  before the copy.
+  before the copy. Confirmed a third time on a plain scalar body with no VU0 in
+  it: `effPCPHamaCardScatterDraw` compares `tiltHalfAngle * 0.5f` against the
+  magnitude of the new tilt angle, and retail materialises the `0.5f` with
+  `lui`/`mtc1` *before* every load in the block. `fabsf` is 12 of 343 words
+  there, with the constant hoisted into the load shadow and the abs result and
+  the height sum in each other's registers; `EE_ABS_F32` into its own `f32`
+  local is exact. So read which side of the `abs.s` the other operand's
+  constant sits on and pick the macro from that.
 - The same thing happens by accident when a `void` callee defined later in the
   unit has no prototype above the caller: the implicit declaration returns
   `int`, so the load after the `jal` lands in `$3` where retail uses `$2`.
