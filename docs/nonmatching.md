@@ -628,3 +628,128 @@ Also measured here and worth knowing for the neighbouring effect functions:
 loops are u8 downcounters from `maxSize - 2` to `0xFF`. `pipeEffDraw2Doffset`
 was attempted and discarded at 63 of 64 words: it needs 0x30 of locals where a
 `f32[4]` plus a 0x10 struct gives 0x20, so one local there is still missing.
+
+## nbEventProcess1 (newbattle/nbMakePacket, 0x7C)
+
+23 of 31 words, at the exact 124-byte size and with the same instruction
+multiset.
+
+Retail schedules `addiu $2, $2, %lo(nbEventProcess3)` into the load-delay
+slot after `lw $4, 0x88($17)`, four words after its `lui`. ee-gcc leaves the
+`lui` in the same place but emits the `addiu` last, where the return value is
+used, so the eight words from there on sit one slot late. Nothing else
+differs.
+
+Ruled out: a `void *` local holding the return value, which costs a saved
+register and adds four words; an early `return nbEventProcess3;` for the
+`rid <= 0` case, which duplicates the `lui`/`addiu` pair; and swapping the
+two `rid` stores, which only moves the stores.
+
+Confirmed on the way: `nbEventEntry_t` +0x00 is an `s32` resource id, not a
+pointer. Retail stores it into `data->eventrid` after a signed `blez`, and
+`nbStartEventPacks` still matches with the field as an `s32` and
+`evtLoadEventPack` taking one. A local for the field is needed because the
+store to `data->eventrid` otherwise aliases the table and forces a reload.
+
+## Flow6_36 (newbattle/nbMakePacket, 0xA8)
+
+24 of 41 words, one word short of retail's 168.
+
+ee-gcc allocates the `nextkouho` temp to `$2`, which forces it to materialise
+the `return 0` once at the tail. Retail keeps that temp in `$3` and emits
+`daddu $2, $0, $0` only on the else path, reusing the zero that
+`evtBitCheck`'s tested return already left in `$2` on the taken path. Every
+differing word is that register number or a branch offset shifted by the
+missing instruction.
+
+Ruled out: a ternary for the select; `s32` and `u32` for the temp; a store in
+each arm instead of one at the tail; `!evtBitCheck(8)` and `!n->negoreqtype`
+instead of `== 0`; and `n->cnt6_36 > 2` for `>= 3`. All five give the same
+allocation.
+
+## Flow2_13 (newbattle/nbMakePacket, 0xC8)
+
+44 of 50 words, at the exact 200-byte size.
+
+The inner dispatch is a `switch` over `qtype` with cases 1-3 written before
+case 0, which is what gives retail's `beql`, `bltz`, `slti` tree instead of a
+folded `sltiu` range test. What is left is cross-jumping: ee-gcc merges the
+two `movn` tails of the `qindex` arms into one shared instruction, where
+retail duplicates the `movn` into the branch delay slot of the first arm's
+`b`. The two delay-slot fills around the `mes = 0xA` arm are also swapped.
+
+Ruled out: nested `if`s in place of both ternaries; the `qindex` test
+inverted so the other arm falls through; and a pre-set `mes` overwritten in
+the second arm. The `== 0 ? low : high` form of the ternary is required, as
+`!= 0 ? high : low` gives `movz` with the constants swapped.
+
+## Flow2_2 (newbattle/nbMakePacket, 0xCC)
+
+22 of 48 words, one word short of retail's 204.
+
+The structure, case order and constants are right. Two allocation
+differences remain: ee-gcc keeps `n->ework` in `$2` and the id in `$5`, where
+retail loads the id over the pointer in `$3`; and it emits a plain `bne` out
+of the `id` range test, where retail uses `bnel` with `dds3GetRandIntA`'s
+first argument annulled into the delay slot.
+
+The `(u16)` arithmetic is confirmed right: retail's `ori 0xFFDC`, `addu`,
+`andi 0xFFFF`, `sltiu 4` is what the natural `id >= 0x24 && id < 0x28` range
+test on the `u16` field produces, and the later `andi $3, 0xFFFF` on the id
+itself comes from the same narrowing.
+
+## nbGetVirtualAisyo (newbattle/nbMakePacket, 0xAC)
+
+39 of 43 words, at the exact 172-byte size.
+
+The `switch` over `-1` and `0xC..0xE` gives retail's dispatch tree exactly:
+`beq -1`, `slti -1`, `slti 0xF`, `slti 0xC`. The two remaining words are
+branch delay slots: retail leaves a `nop` after the first two tests, and
+ee-gcc fills both with the following `slti`, which shifts the two branch
+offsets. The instruction order is otherwise identical.
+
+`nbBadCurseApplyMove` in the same unit matches with the same switch shape
+over `0` and `1..2`, and there retail's nops come out, so the shape itself is
+not the problem.
+
+Ruled out: direct `return` per arm instead of `break` to a shared tail; a
+separate `== -1` test in front of a `switch` over `0xC..0xE` only; the
+`skillattr == -1 || (u32)(skillattr - 0xC) < 3` range chain, which folds to
+one `sltiu`; and an explicit `goto` dispatch, which compiles to the same
+words as the switch.
+
+## Flow1_11 (newbattle/nbMakePacket, 0xC8)
+
+19 of 48 words, at the exact 192-byte size.
+
+Same bodies, same case order, same constants. ee-gcc fills the branch delay
+slot in front of the last `nbDispNegoMessage` block where retail leaves a
+`nop`, so every word from there on is one slot early. Retail has three such
+nops after unconditional branches in this function and the draft reproduces
+the first two.
+
+The `stagemajor` range test needs an `s32` local: used directly, the `u16`
+field gives `ori 0xFF10`, `addu`, `andi 0xFFFF`, `sltiu 7` instead of
+retail's `addiu -0xF0`, `sltiu 7`.
+
+## nbFreeFormResources (newbattle/nbMakePacket, 0xD8)
+
+51 of 54 words, at the exact 216-byte size.
+
+The three remaining words are one rotation inside the loop. Retail emits
+`lw w->file[i]`, then `w->buf[i] = NULL`, then the `buf` pointer bump; the
+draft emits the store and the bump before the load. Every other word,
+including both induction pointers and the four tail stores, is identical.
+
+The four tail stores have to be written `motfile`, `unk_02`, `id`, `refcnt`
+to come out in retail's `refcnt`, `motfile`, `unk_02`, `id` order; that was
+found by walking all 24 permutations, and only that one reaches three words.
+
+Ruled out for the loop: `w->buf[i] = NULL` moved into both arms of the
+`w->file[i]` test; both stores moved after the `file` test; and a
+`w->buf[i] = NULL` duplicated into each arm of the `buf` test.
+
+Confirmed on the way: `nbStatWork_t` carries `void *file[26]` at `+0x08`,
+`void *buf[26]` at `+0x70`, `motfile` at `+0xD8` and `motbuf` at `+0xDC`,
+which fills the former `pad[0xD8]` exactly and keeps the 224-byte stride that
+`&data->statwork[index]` needs.

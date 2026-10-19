@@ -39,6 +39,10 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| an `lq` and `sq` pair for a struct copy | `SDF_VU0_COPYVECTOR(dst, src)`. `QWORD_ALIGNED` is empty in this build, so a plain `sdfVector4_t` assignment gives `ldl`/`ldr`/`sdl`/`sdr`, and a `u128` assignment gives `sq` with a displacement where retail biases the base and uses `0(reg)`. Took one function from 300 bytes to 220 |
+| two `slti`s and a `bltz`, the last test if-converted to an `sltiu` | a `switch` whose cases are one singleton and one small range, `{0}` and `{1,2}` |
+| `bnel` against a materialised `-1` in a table scan | `for (i = n; i != -1; i--)`, not `i >= 0`, which gives `bgez` instead |
+| which of two cases gcc tests first | make the switch index a `u32` local; `s32` adds an `slti` and reshapes the tree over the same case set |
 | `beql` on two successive early exits, each with the same `addiu $2, 1` in its delay slot | fuse the two tests into one `||`. As separate `if`s gcc puts the constant in the first delay slot unconditionally and the second exit then reuses it, which costs the branch-likely |
 | one `jal` at the end reached from four or five blocks, each setting only the argument | an early `return` per block with its own call. gcc cross-jumps the identical tails into the one call; a `ret` variable instead spends a saved register and misses by the whole body |
 | a store in a `jal`'s delay slot | write the store before the call. After the call gcc cannot move it up and leaves a `nop`, which is one word and one branch displacement off |
@@ -68,6 +72,15 @@ it was measured on DDS and not on this ELF.
 - Reuse the loop index variable for a value clamped after the loops. Where
   retail's `movn` writes a saved register, a fresh local gives `movz` with the
   value already in `$2`.
+- A store to a struct field aliases a global table of the same type, so
+  reading `tbl[i].f` after the store forces a reload. A local holding the
+  field is what matches.
+- `for (i = 0, ofs = 0; ...)` against `ofs = 0;` above the loop decides which
+  of the two variables is zeroed first.
+- A row offset of `n - 1` folds into the load displacement on a two
+  dimensional array but not on a flat index: `tbl[max - 1][r]` with
+  `extern s32 tbl[][10]` gives retail's `lw -0x28(reg)`, where the same
+  arithmetic as a single index keeps an `addiu -10`.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -79,10 +92,13 @@ it was measured on DDS and not on this ELF.
   initialising it at the declaration puts an `addiu` in the prologue and
   spends a saved register, while declaring it and assigning just before the
   first use does not. Assigning it after a leading call keeps it out of `$16`.
-- Giving a void function an `s32` return type with no `return` statement
-  blocks the sibling call where retail uses `jal` and a full epilogue. It also
-  collapses a duplicated epilogue: one function went from ten differing words
-  to exact on that change alone.
+- Blocking the sibling call where retail uses `jal` and a full epilogue has
+  two forms, and which one works varies by unit. Giving a void function an
+  `s32` return type with no `return` statement collapses a duplicated epilogue
+  too, and took one function from ten differing words to exact. It failed for
+  all seven functions tried in `code_0029B780`, where the answer was a dead
+  store instead: introduce a local for one of an earlier call's constant
+  arguments and assign 0 to it after the last call. Try both.
 - An ignored return value still reserves `$2` across the call. When retail
   skips `$2` for the address temp after a `jal`, declare the callee `s32`
   rather than `void`.
