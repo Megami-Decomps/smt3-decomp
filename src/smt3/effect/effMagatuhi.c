@@ -364,6 +364,25 @@ typedef struct {
 } effMagatuhiWideSecond_t;
 
 /* Effect subrecord with byte fields at +0x20/+0x40/+0x50 (0x51); DDS1/2 game/code_0018CAC8/00194700.c. */
+/* Debug viewer record: the destroy hook with its handle slot, the create hook
+   with its parameter, and the record that supersedes this one. */
+/* Debug blur work: only the flag the pad toggle flips is known. */
+typedef struct effDblurWork_t {
+    u8 unk00[0x28]; /* 0x00 */
+    s32 toggle; /* 0x28 */
+} effDblurWork_t;
+
+typedef struct effDebugViewer_t {
+    u8 unk00[0x18]; /* 0x00 */
+    struct effDebugViewer_t *replacement; /* 0x18 */
+    void *createParam; /* 0x1C */
+    u8 unk20[0xC]; /* 0x20 */
+    s32 (*create)(void *); /* 0x2C */
+    u8 unk30[4]; /* 0x30 */
+    void (*destroy)(void *); /* 0x34 */
+    s32 *handle; /* 0x38 */
+} effDebugViewer_t;
+
 typedef struct effSub_t {
     u8 unk0[0x20];
     u8 type0SubSlot;
@@ -418,6 +437,48 @@ f32 dds3GetRandFloatA(u8 *state);
 /* vu0 routine: multiply RGBA channels normalized by 128, then pack at the same scale.
    Native integer conversion/byte packing remains unclamped; quadword storage is unchanged. */
 u32 effMagaCylinderCalcColor(u32 colorA, u32 colorB);
+
+extern s8 D_0054F221;
+
+extern s8 D_0054F222;
+
+extern s8 dds3PadBitTable[];
+
+extern f32 aViewDown[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+
+extern f32 D_0056B020[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+
+extern f32 D_0056B030[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+
+extern f32 D_0056B040[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+
+extern s32 D_002F56C0[2][2][16];
+
+extern s32 D_002F57C0[2][2];
+
+extern u8 dds3PadButtonPrev[2][2][16];
+
+extern u8 dds3PadButtonState[2][2][16];
+
+extern s8 dds3PadStickPrev[2][2][2];
+
+extern s8 dds3PadStickState[2][2][2];
+
+extern s8 dds3PadStickStatusPrev[2][2];
+
+extern s8 dds3PadStickStatusState[2][2];
+
+extern effDblurWork_t *D_0054F224;
+
+extern sdfGrOt_t D_002F6978;
+
+extern struct sdfDrawTag_t *effDebugDrawTag;
+
+extern void *dds3PrimFrameRect(s32 x, s32 y, u32 z, s32 width, s32 height, u32 fillColor, u32 frameColor);
+
+extern void *dds3PrimLine(s32 x0, s32 y0, u32 z0, u32 color0, s32 x1, s32 y1, u32 z1, u32 color1, s32 mode);
+
+extern void *sdfDevPrintf(s32 x, s32 y, u32 z, u32 attributes, const char *text);
 
 extern s32 effDebugPosX;
 
@@ -614,6 +675,36 @@ u32 func_001A8DF8(effWork_t *work, s32 unusedSlotValue);
    Other types still dispatch with a zero argument; no type bounds check is added. */
 void dds3MagatuhiParCopy(effWork_t *work);
 void InitMagatuhiEditorProcess(void);
+void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross);
+
+effDebugViewer_t *func_001AA310(effDebugViewer_t *viewer);
+
+s32 func_001AA5A0(void);
+
+effDblurWork_t *dblurUpdateHandle(effDblurWork_t *work);
+
+void effDebugDrawMenu(effDblurWork_t *work);
+
+void func_001AA6D0(void);
+
+s32 eff_1AA3B0(void);
+
+void effDebugAllocDrawTag(void);
+
+void effDebugLinkDrawTag(void);
+
+void effDebugDrawRect3(s32 x, s32 y, u32 fillColor);
+
+void effDebugDrawRect2(s32 x, s32 y);
+
+void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height);
+
+void effDebugDrawRectFull(void);
+
+void effDebugPrintf(const char *text);
+
+s32 eff_1AA550(void);
+
 void effDebugSetPos(s32 x, s32 y);
 void effDebugSetAttr(u32 attributes);
 s32 dds3_1AACF8(void);
@@ -1454,7 +1545,72 @@ void effMagaCylinderPartInit(effMagatuhiRingWork_t *work, s32 index) {
     effMagaCylinderSetPart(work->managedResource->valueWork, index, 0);
 }
 
+/* NON_MATCHING: 40 of 172 words differ (first at +0x3C). */
+#ifdef NON_MATCHING
+void effMagaCylinderDraw(effMagatuhiRingWork_t *work) {
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    effMagatuhiValueWork_t *valueWork;
+    effMagatuhiRingParticle_t *particle;
+    u8 respawn;
+    u32 count;
+    u32 tintColor;
+    s32 life, spread, fadeIn, fadeOut;
+    f32 angle, radius, fade;
+    s32 age;
+    u32 i;
+
+    count = work->head.particleCount;
+    valueWork = work->managedResource->valueWork;
+    particle = work->particles;
+    respawn = work->head.respawn;
+    tintColor = work->tintColor;
+    life = work->head.lifetimeFrames;
+    spread = work->head.delaySpread;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    SDF_VU0_COPYVECTOR(origin, work->head.origin);
+    SDF_VU0_LOADMATRIX(work->matrix);
+    for (i = 0; i < count; i++, particle++) {
+        age = particle->age;
+        if (age == 0) {
+            effMagaCylinderPartInit(work, i);
+        }
+        if (age > 0 && age <= life) {
+            angle = particle->angle;
+            radius = particle->radius;
+            out[0] = sdfCos(angle) * radius;
+            out[1] = particle->height;
+            out[2] = sdfSin(angle) * radius;
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR(out);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(out);
+            particle->angle += particle->angleStep;
+            particle->radius += particle->radiusStep;
+            if (age < fadeIn) {
+                fade = (f32)age / (f32)fadeIn;
+            } else if (life - age <= fadeOut) {
+                fade = (f32)(life - age) / (f32)fadeOut;
+            } else {
+                fade = 1.0f;
+            }
+            effMagaCylinderSetPart(valueWork, i,
+                                   effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
+            effMagaCylinderSetPartPos(valueWork, i, out);
+        }
+        if (age >= life && respawn) {
+            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        } else {
+            particle->age++;
+        }
+    }
+    effMagaCylinderDrawTrack(work->managedResource);
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaCylinderDraw);
+#endif
 
 /* Copy the ring origin as one quadword, including its fourth component. */
 void effMagaCylinderSetPosition(effMagatuhiRingWork_t *work, void *origin) {
@@ -1594,7 +1750,73 @@ void effMagaSpiralPartInit(effMagatuhiOrbitWork_t *work, s32 index) {
     effMagaCylinderSetPart(work->managedResource->valueWork, index, 0);
 }
 
+/* NON_MATCHING: 40 of 176 words differ (first at +0x3C). */
+#ifdef NON_MATCHING
+void effMagaSpiralDraw(effMagatuhiOrbitWork_t *work) {
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    effMagatuhiValueWork_t *valueWork;
+    effMagatuhiOrbitParticle_t *particle;
+    u8 respawn;
+    u32 count;
+    u32 tintColor;
+    s32 life, spread, fadeIn, fadeOut;
+    f32 angle, radius, fade;
+    s32 age;
+    u32 i;
+
+    count = work->head.particleCount;
+    valueWork = work->managedResource->valueWork;
+    particle = work->particles;
+    respawn = work->head.respawn;
+    tintColor = work->tintColor;
+    life = work->head.lifetimeFrames;
+    spread = work->head.delaySpread;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    SDF_VU0_COPYVECTOR(origin, work->head.origin);
+    SDF_VU0_LOADMATRIX(work->matrix);
+    for (i = 0; i < count; i++, particle++) {
+        age = particle->age;
+        if (age == 0) {
+            effMagaSpiralPartInit(work, i);
+        }
+        if (age > 0 && age <= life) {
+            angle = particle->angle;
+            radius = particle->radius;
+            out[0] = sdfCos(angle) * radius;
+            out[1] = particle->height;
+            out[2] = sdfSin(angle) * radius;
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR(out);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(out);
+            particle->height += particle->heightStep;
+            particle->angle += particle->angleStep;
+            particle->radius += particle->radiusStep;
+            if (age < fadeIn) {
+                fade = (f32)age / (f32)fadeIn;
+            } else if (life - age <= fadeOut) {
+                fade = (f32)(life - age) / (f32)fadeOut;
+            } else {
+                fade = 1.0f;
+            }
+            effMagaCylinderSetPart(valueWork, i,
+                                   effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
+            effMagaCylinderSetPartPos(valueWork, i, out);
+        }
+        if (age >= life && respawn) {
+            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        } else {
+            particle->age++;
+        }
+    }
+    effMagaCylinderDrawTrack(work->managedResource);
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSpiralDraw);
+#endif
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
 void effMagaSpiralSetPosition(effMagatuhiOrbitWork_t *work, void *origin) {
@@ -1756,7 +1978,74 @@ void effMagaSmokePartInit(effMagatuhiDriftWork_t *work, s32 index) {
     effMagaCylinderSetPart(work->managedResource->valueWork, index, 0);
 }
 
+/* NON_MATCHING: 42 of 182 words differ (first at +0x3C). */
+#ifdef NON_MATCHING
+void effMagaSmokeDraw(effMagatuhiDriftWork_t *work) {
+    f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
+    effMagatuhiValueWork_t *valueWork;
+    effMagatuhiDriftParticle_t *particle;
+    u8 respawn;
+    u32 count;
+    u32 tintColor;
+    s32 life, spread, fadeIn, fadeOut;
+    f32 angleStep, scaleStep, radial, fade;
+    s32 age;
+    u32 i;
+
+    count = work->head.particleCount;
+    valueWork = work->managedResource->valueWork;
+    particle = work->particles;
+    respawn = work->head.respawn;
+    tintColor = work->tintColor;
+    life = work->head.lifetimeFrames;
+    spread = work->head.delaySpread;
+    angleStep = work->head.angleStep;
+    scaleStep = work->head.scaleStep;
+    fadeIn = work->head.fadeIn;
+    fadeOut = work->head.fadeOut;
+    SDF_VU0_COPYVECTOR(origin, work->head.origin);
+    SDF_VU0_LOADMATRIX(work->matrix);
+    for (i = 0; i < count; i++, particle++) {
+        age = particle->age;
+        if (age == 0) {
+            effMagaSmokePartInit(work, i);
+        }
+        if (age > 0 && age <= life) {
+            radial = particle->scale * sdfSin(particle->angle);
+            particle->driftState[1] += particle->liftStep;
+            out[0] = particle->position[0] + particle->driftState[0] * radial;
+            out[1] = particle->position[1] + particle->driftState[1];
+            out[2] = particle->position[2] + particle->driftState[2] * radial;
+            SDF_VU0_LOADVECTOR_B(origin);
+            SDF_VU0_LOADVECTOR(out);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR(out);
+            particle->scale += scaleStep;
+            particle->angle += angleStep;
+            if (age < fadeIn) {
+                fade = (f32)age / (f32)fadeIn;
+            } else if (life - age <= fadeOut) {
+                fade = (f32)(life - age) / (f32)fadeOut;
+            } else {
+                fade = 1.0f;
+            }
+            effMagaCylinderSetPart(valueWork, i,
+                                   effMagaCylinderCalcColor(((u32)(fade * EFF_MAGATUHI_FADE_ALPHA_SCALE) << EFF_MAGATUHI_ALPHA_SHIFT) | EFF_MAGATUHI_NEUTRAL_RGB, tintColor));
+            effMagaCylinderSetPartPos(valueWork, i, out);
+        }
+        if (age >= life && respawn) {
+            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        } else {
+            particle->age++;
+        }
+    }
+    effMagaCylinderDrawTrack(work->managedResource);
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSmokeDraw);
+#endif
 
 /* Copy the drift origin as one quadword, preserving the source w. */
 void effMagaSmokeSetPosition(effMagatuhiDriftWork_t *work, void *origin) {
@@ -2025,17 +2314,54 @@ INCLUDE_RODATA(const s32, "effect/effMagatuhi", D_00533EF0);
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", dblurUpdateHandle);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRect3);
+void effDebugDrawRect3(s32 x, s32 y, u32 fillColor) {
+    sdfDrawTagLink(effDebugDrawTag,
+                   (u32)dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, 0xFF0000, 0x200, 0x100, fillColor, 0x80000000));
+}
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRect2);
+void effDebugDrawRect2(s32 x, s32 y) {
+    sdfDrawTagLink(effDebugDrawTag,
+                   (u32)dds3PrimFrameRect(x * 16 + 0x8000, y * 8 + 0x8000, 0xFF0000, 0x60, 0x30, 0x80008080, 0x80000000));
+}
 
+/* NON_MATCHING: 13 of 85 words differ (first at +0x84). */
+#ifdef NON_MATCHING
+void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross) {
+    s32 left = x - radius + 0x100;
+    s32 top = y - radius + 0xE0;
+    s32 x0 = left * 16 + 0x7000;
+    s32 y0 = top * 8 + 0x7900;
+    s32 x1;
+    s32 y1;
+
+    sdfDrawTagLink(effDebugDrawTag,
+                   (u32)dds3PrimFrameRect(x0, y0, 0xFF0000, radius * 32, radius * 16, 0, 0x60008080));
+    radius *= 2;
+    left += radius;
+    top += radius;
+    x1 = left * 16 + 0x7000;
+    y1 = top * 8 + 0x7900;
+    if (drawCross != 0) {
+        sdfDrawTagLink(effDebugDrawTag,
+                       (u32)dds3PrimLine(x0, y0, 0xFF0000, 0x60008080, x1, y1, 0xFF0000, 0x60008080, 0));
+        sdfDrawTagLink(effDebugDrawTag,
+                       (u32)dds3PrimLine(x1, y0, 0xFF0000, 0x60008080, x0, y1, 0xFF0000, 0x60008080, 0));
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRectLine);
+#endif
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawMenu);
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugAllocDrawTag);
+void effDebugAllocDrawTag(void) {
+    effDebugDrawTag = (struct sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(effDebugDrawTag);
+}
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugLinkDrawTag);
+void effDebugLinkDrawTag(void) {
+    D_002F6978.regFunc(&D_002F6978, (sdfDrawTag_t *)effDebugDrawTag);
+}
 
 void effDebugSetPos(s32 x, s32 y) {
     effDebugPosX = x;
@@ -2046,25 +2372,136 @@ void effDebugSetAttr(u32 attributes) {
     D_00551DDC = attributes;
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugPrintf);
+void effDebugPrintf(const char *text) {
+    sdfDrawTagLink(effDebugDrawTag,
+                   (u32)sdfDevPrintf(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7900, 0xFF0000, D_00551DDC, text));
+    effDebugPosY += 0xC;
+}
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRectFull);
+void effDebugDrawRectFull(void) {
+    sdfDrawTagLink(effDebugDrawTag,
+                   (u32)dds3PrimFrameRect(effDebugPosX * 16 + 0x7000, effDebugPosY * 8 + 0x7930, 0xFF0000, 0xBE0, 0,
+                                          0x80806020, 0x80806020));
+    effDebugPosY += 0xC;
+}
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", effDebugDrawRect4);
+void effDebugDrawRect4(s32 x, s32 y, s32 width, s32 height) {
+    sdfDrawTagLink(effDebugDrawTag,
+                   (u32)dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, 0xFEFFFF, width * 16, height * 8, 0x80000000,
+                                          0x80806020));
+}
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001AA310);
+effDebugViewer_t *func_001AA310(effDebugViewer_t *viewer) {
+    void (*destroy)(void *);
+    s32 (*create)(void *);
+
+    destroy = viewer->destroy;
+    if (destroy != NULL) {
+        if (viewer->handle != NULL) {
+            destroy(*(void **)viewer->handle);
+        } else {
+            destroy(NULL);
+        }
+    }
+    if (viewer->replacement != NULL) {
+        viewer = viewer->replacement;
+    }
+    create = viewer->create;
+    if (create != NULL) {
+        if (viewer->createParam != NULL) {
+            *viewer->handle = create(viewer->createParam);
+        } else {
+            create(NULL);
+        }
+    }
+    return viewer;
+}
 
 void effDebugInit(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", eff_1AA3B0);
+s32 eff_1AA3B0(void) {
+    if (dds3PadBitTable[0xF] < 0) {
+        if ((u8)D_0054F220 != 0 && D_0054F221 == 0) {
+            D_0054F221 = 1;
+        } else {
+            D_0054F220 = (u8)D_0054F220 ^ 1;
+        }
+    }
+    if ((u8)D_0054F220 != 0) {
+        if (dds3PadBitTable[0xE] < 0) {
+            D_0054F221 ^= 1;
+        }
+        if (D_0054F221 != 0) {
+            D_0054F224 = dblurUpdateHandle(D_0054F224);
+        }
+        if (dds3PadBitTable[2] < 0) {
+            if (D_0054F224 != NULL) {
+                D_0054F224->toggle ^= 1;
+            }
+        }
+        if (D_0054F221 != 0) {
+            SDF_VU0_COPYVECTOR(aViewTarget, D_0056B020);
+            SDF_VU0_COPYVECTOR(aViewEye, D_0056B030);
+            SDF_VU0_COPYVECTOR(aViewDown, D_0056B040);
+            if (D_0054F222 == 1) {
+                func_001AA6D0();
+            }
+        }
+    }
+    SDF_VU0_COPYVECTOR(D_0056B040, aViewDown);
+    SDF_VU0_COPYVECTOR(D_0056B030, aViewEye);
+    SDF_VU0_COPYVECTOR(D_0056B020, aViewTarget);
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", eff_1AA550);
+s32 eff_1AA550(void) {
+    if (D_0054F220 == 0) {
+        return 0;
+    }
+    if (D_0054F224 == 0) {
+        return 0;
+    }
+    effDebugAllocDrawTag();
+    effDebugDrawMenu(D_0054F224);
+    effDebugLinkDrawTag();
+    return 0;
+}
 
 void func_001AA598(void) {
 }
 
-INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001AA5A0);
+s32 func_001AA5A0(void) {
+    s32 i;
+    s32 j;
+    s32 k;
+
+    if (D_0054F220 == 0) {
+        return 0;
+    }
+    if (D_0054F221 == 0) {
+        return 0;
+    }
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            for (k = 0; k < 16; k++) {
+                D_002F56C0[j][i][k] = 0;
+                dds3PadButtonPrev[j][i][k] = 0;
+                dds3PadButtonState[j][i][k] = 0;
+            }
+        }
+        for (k = 0; k < 2; k++) {
+            D_002F57C0[i][k] = 0;
+            dds3PadStickPrev[i][k][0] = -0x80;
+            dds3PadStickPrev[i][k][1] = -0x80;
+            dds3PadStickStatusPrev[i][k] = 0;
+            dds3PadStickState[i][k][0] = -0x80;
+            dds3PadStickState[i][k][1] = -0x80;
+            dds3PadStickStatusState[i][k] = 0;
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "effect/effMagatuhi", func_001AA6D0);
 

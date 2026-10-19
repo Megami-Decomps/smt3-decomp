@@ -96,6 +96,8 @@ it was measured on DDS and not on this ELF.
 | one call block reached from five different condition chains, each predecessor only setting up the arguments | write the call **once** after the chain and reach it with `goto` labels: every guard becomes `if (...) { goto next; }` and `next:` sits just above the loop's trailing statement. Writing the call out in each arm and trusting cross-jumping does not merge them: `FrameRun` emitted five copies of the `nowcamera[kind]` load and was 97 of 132 words out, and the single `goto` funnel took it to 4 words. The last four needed one arm's successful test spelled as its own `goto run;` with a `goto next;` after it, since `if (!(now < bound)) { goto next; }` branches to the call and falls through to the skip, which is the mirror of what retail does |
 | a guard whose zero default is materialised in the *entry* block, above an unrelated earlier test | initialise the local at its declaration, `char *target = NULL;`, and write the guard as a bare `if (index >= 0) { target = ...; }` with no `else`. The `if (index < 0) { target = NULL; } else { target = ...; }` form emits `bgez` where retail has `bltz` and keeps the zero inside the arm. `BEDFrameFunc` turned on that alone |
 | a byte loaded into `$3` and tested with a plain `beq`, where the return value is already hoisted into `$2` | an early `return` before the call: `if (x == 0) { return i; } f(); return i;`. The trailing `if (x != 0) { f(); } return i;` form coalesces the return value into the tested byte's register and emits `beql` on `$2`. `AddEffectTableMG12` sat at 2 of 85 words on that one statement |
+| a value whose register retail gives to a coordinate while a flag parameter sits one register higher | give the second, unrelated role its own local instead of reusing the first one. `effDebugDrawRectLine` updates `left`/`top` in place and then scales them into the second corner, which is the natural reading of retail's `$17`/`$18`; written that way the flag takes `$17` and `left`/`top` shift up, 27 of 85 words out. Separate `x1`/`y1` locals shorten `left`/`top`'s live ranges enough to rotate the allocation back and took it to 13 |
+| a sibling loop after an inner loop, whose downcounter sits in the *inner* loop's index register | reuse the inner loop's index variable as the second loop's counter. In `func_001AA5A0` retail's second loop counts down in `$7`, the first loop's `k`; a fresh local and the middle loop's `j` both give the middle loop's doubled induction variable instead, and `j` alone costs nine more words. That plus the store order took the function from 12 differing words to exact |
 | one shared exit with the return constant set in each predecessor's delay slot, and one arm falling into it | a `goto` to a single trailing `return 0`. Nesting the bodies inside their guards, an `&&` chain and an `else if` chain all reach within two words but keep one exit too few; the explicit label is what lets gcc put a `$2 = 0` in a delay slot on one path and fall into another on the next. `nbCheckModelPackLoaded` went 13 of 52 differing to exact |
 
 ## Addressing and types
@@ -823,6 +825,40 @@ it was measured on DDS and not on this ELF.
   `evtRunUnitMode` the `s32` return type made it worse (26 of 52 words) and a
   dead store on the switch index in the last arm, `mode = 0;`, took it to
   exact.
+- A run of stores inside a loop whose addresses are hoisted base pointers has
+  **two** orders to get right, and they run opposite ways. The stores themselves
+  follow the right-rotation rule (`func_001AA5A0` writes the word array, then
+  `dds3PadButtonPrev`, then `dds3PadButtonState`, and retail emits Prev, State,
+  word), while the order of the three hoisted `%hi`/`%lo` base pairs in the
+  preheader follows the source order directly. Both fall out of one statement
+  order, so sweep the permutations rather than reasoning about either rule alone:
+  all six were measured and only one is exact.
+- A single-statement guard arm belongs in the `else` even when the statement is a
+  *store*, not just an index computation. `eff_1AA3B0`'s pad toggle written
+  `if (a == 0 || b != 0) { a ^= 1; } else { b = 1; }` is 15 of 104 words out and
+  one word long; inverted to `if (a != 0 && b == 0) { b = 1; } else { a ^= 1; }`
+  it is exact. In the same function a cached `u8` local for the toggled global is
+  far worse than reading the global at each of its three uses (85 of 100 words
+  against 15 of 104), and the `lbu` retail uses for a symbol other callers read
+  with `lb` comes from a `(u8)` cast at the use site, not from the declaration.
+- A two-load chain `work->owner->field` whose base is also a later call's
+  argument can leave the base in `$4` across the whole function, so that a path
+  which bypasses the loop reaches the call with it already there and the `jal`'s
+  delay slot stays a `nop`. Nothing in the source reaches this: an owner local
+  (one assignment, reassigned after the loop, or mixed with the inline
+  expression), every ordering of the prologue loads and every declaration order
+  leave ee-gcc loading the base into `$2` and letting the delay-slot filler take
+  the reload for both paths. Retail itself goes both ways on it inside one unit,
+  so it is a gcse availability accident rather than a source fact: the three
+  `effMaga*Draw` drafts in `effect/effMagatuhi` sit on it at 77 percent of their
+  words while their sibling `effMagaSmokeConvDraw`, with the identical tail,
+  matches with the load in the delay slot.
+- A function whose body is more than half inline assembly is only refused by the
+  production report when it carries no exemption comment. `check_unit.py`'s
+  `inline_asm_share` skips any function whose definition is preceded within three
+  lines by a `vu0 routine:` or `libvu0:` comment, which is why the VU0-dense
+  setters in `effect/effMagatuhi` count. `func_001AA6D0` there is 223 VU0
+  instructions of 394 and needs that comment to earn anything.
 
 ## Function-local constant arrays
 
