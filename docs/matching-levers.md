@@ -39,6 +39,7 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| `c.lt.s a, b` then `bc1t` on a float test you wrote as `a >= b` | negate the `<` instead: `if (!(a < b))`. ee-gcc turns `a >= b` into `c.le.s b, a` plus `bc1f`, which is the same test in the other encoding and two words off |
 | an `ldl`/`ldr` and `sdl`/`sdr` run | one struct assignment of a 4-aligned type, the trailing word included. Splitting that word off as its own field is what breaks it; `effPCPCrackCreate`'s 0x8C copy is why it carries an 8-byte-alignment runtime dispatch |
 | `sw $0` to a float field, not clustered with the integer zero stores | write it `0.0f` into an `f32` field. A float-typed zero store sits in the float store chain; one function went from 15 differing words to 2 on that alone |
 | every compared field loaded before the first branch | read them all into locals at the top. One function went from 65 of 69 differing words to 42 |
@@ -173,6 +174,40 @@ it was measured on DDS and not on this ELF.
   in the on-card record copy as `ldl`/`ldr` plus `lwl`/`lwr` (alignment 1,
   from a `struct { s8 ch[20]; }` member). One struct for both gets one of the
   two copies wrong whichever way it is declared.
+- A `$gp` reload landing in `$3` where retail uses `$2`, immediately after a
+  call whose result is ignored, means that callee is `void` in retail's
+  compile: a non-void declaration keeps the result pseudo alive and gcc skips
+  `$2` for the reload. If turning the callee `void` then makes its own body
+  sibcall its last call, block that with a dead store to the parameter rather
+  than the `s32`-with-no-`return` form, which is what forced the callers to
+  skip `$2` in the first place. `fclDestroyRag` and `fclDestroyRecover` went
+  from two and four differing words to exact when `fclScriptForcedEnd` and
+  `fclRecoverFreeTextures` became `void` with a `script = NULL;` dead store.
+- A constant offset that retail leaves in the load displacement while
+  hoisting only the bare symbol comes from a pointer local:
+  `info = &tbl[i]; info->field`. Written as `tbl[i].field` gcc hoists
+  `tbl + offsetof(field)` out of the loop and loads at `0(reg)`.
+- Where retail shifts a run of parameters in argument order but stores the
+  shifted values in some other order, the shifts are their own statements:
+  `u0 <<= 4; v0 <<= 4; u1 <<= 4; v1 <<= 4;` above the stores. Written inline
+  at the stores the shifts follow the store order instead. `fclSetSprite`
+  came down to that plus the store list in retail's emitted order.
+- Where retail recomputes the same `addiu rd, $29, N` or `addiu rd, base, N`
+  for every VU0 access to one local, and the C holds it in a saved register
+  instead, use `SDF_VU0_STOREVECTOR_NOMEM` for the store. The `"memory"`
+  clobber on the plain store is what lets gcse share the address expression
+  across the next call, and dropping it makes gcc rematerialise it the way
+  retail does. Volatile asms keep their order either way, so a following
+  `SDF_VU0_COPYVECTOR` or `_LOADVECTOR` of the same local still reads it.
+  `nbCameraBoss_Sp_JAREIH_Run` lost a saved register and
+  `nbCameraBoss_BS{KAGU,LUSI}_Command_Calc` each lost an `addiu` on that one
+  change. Only use it where the C does not read the stored vector back by
+  field, since gcc is then free to treat the local as unwritten.
+- Two successive divides into the same destination come from reusing one
+  float local, not from two named locals. `nbCameraShot_BossEX02_Set` writes
+  `d = half / angle; pCamera->distance = d; d = f(party) / angle;`, which
+  keeps both quotients in `$f0`; a second local moves the first one into a
+  callee-saved register and rotates six words.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

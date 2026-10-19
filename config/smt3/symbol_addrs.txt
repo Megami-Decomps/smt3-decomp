@@ -21,6 +21,12 @@ pNbCamera = 0x00320E40;
 // only stores the byte in sdfFileCmdDefaultDevice: a separate static function.
 sdfFileCmdSetDefaultDevice = 0x002BE5B0; // type:func size:0x8
 
+// nbCameraBoss_Sp_MURET2_Run indexes two 0x38-byte bezier parts here, the
+// target curve then the eye curve. The IDB splits them into interior fields:
+// nbCameraMuret2Timer is [0].step, and nbCamera_MURET2_B4P and
+// nbCameraMuret2State are [1].weight and [1].step.
+D_0056B350 = 0x0056B350;
+
 // effPadVibeFadeUpdate indexes the two per-controller frame counters.
 D_0054F200 = 0x0054F200; // type:s32 size:0x8
 D_0054F208 = 0x0054F208; // type:s32 size:0x8

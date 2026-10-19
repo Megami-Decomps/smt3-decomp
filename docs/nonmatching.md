@@ -1265,3 +1265,169 @@ inside. Nothing else in the draft differs.
 slDrawWindow is therefore the one thing standing between this unit and three
 matched functions: itself, slDrawInfo and slDrawError, 801 words of retail
 code between them.
+
+## cmp_241A10 (code_001FAE80, 0x74)
+
+19 of 28 words, 112 against retail's 116 bytes. Recounts how many of a
+cursor's `unk_20` entries have bit 1 set in the `unk_2C` flag array, stores
+the count in `unk_21`, and tail-calls `cmpUpdateCursorScroll(cursor, 1)`.
+
+The loop is settled: it is a post-decrement `do`/`while` behind a `count > 0`
+guard, `i = count - 1; do { ... } while (i-- > 0);`, which is what gives
+retail's `daddu $2, $5, $0` copy before each test and the `blez`/`bgtz` pair
+on the pre-decrement value. A plain `for (i = count - 1; i >= 0; i--)` tests
+`bltz` on the decremented index instead and loses six words; `i = count;
+while (i-- > 0)` lets gcc prove the `lbu`-loaded count non-negative and
+rewrite the test as `i != 0`, which loses the guard entirely.
+
+What is left is the missing word: retail loads the flag pointer into `$3`,
+copies it to `$6` for the loop and reuses `$3` as the in-loop temp, where
+this loads straight into `$6`. The branch that follows differs with it,
+retail's `beq` with the `lbu` of the count in its delay slot against this
+`beql` with the epilogue restore.
+
+Ruled out: testing `cursor->unk_2C` instead of the `flags` local so the load
+is CSEd into a copy; reading the count before and after the null guard;
+moving the `unk_21 = 0` store above the guard; and a `count = i; i--;` while
+loop. All of those either plateau at the same nine words or lose more.
+
+## lstPageUp, lstPageDown (code_001FAE80, 0x74 each)
+
+28 of 29 words each, at the exact size. Each steps the list cursor up or down
+by a page, stopping early when the cursor's `unk_04` says it cannot move, and
+returns how many steps it took.
+
+The one differing word is the early-exit branch inside the loop: retail emits
+`bnez $2` and this emits `bnel $2`, with the same `daddu $2, $17, $0` in the
+delay slot and the same displacement. Both keep a second copy of that
+`daddu` at the loop's normal exit, so only the annul bit differs. gcc here
+annulled the delay slot; retail's compile decided the write to `$2` was
+harmless on the fall-through, where the next instructions set up a `jal`.
+
+Ruled out: `break` against a `return i` inside the loop against a `goto` to
+the trailing return; a `while` with the increment in the body; an explicit
+`do`/`while` behind a zero-trip guard; folding the test into the `for`
+condition as `i < count && cursor->unk_04 == 0`; `cursor->unk_04` written
+without the `!= 0`; and declaring `lstMoveCursor` `s32` rather than `void`,
+which costs two more words. `break`, `goto` and the `&&` form all give the
+identical 29 words.
+
+These two and `cmpUpdateList` in the same unit are the same class: one word
+out on a branch-likely that no control-flow shape reaches.
+
+## cmpUpdateList (code_001FAE80, 0x6C)
+
+26 of 27 words, exact size. The one differing word is the first branch:
+retail's `beql $3, $0` against this `beq $3, $0`, with the same
+`ld $31, 0x0($29)` in the delay slot and the same displacement. Both
+duplicate the epilogue restore into the slot; only the annul bit differs, so
+gcc decided the restore was harmless on the fall-through where retail's
+compile annulled it.
+
+Ruled out: the early-`return` chain, the nested `if` form, an `||` of the two
+tests, and an `&&` of their inverses. All four compile to the identical
+27 words, so the control-flow shape does not reach the delay-slot filler's
+choice here. Same shape as the branch-likely cases listed under
+[Matching levers](matching-levers.md).
+
+## cmbChkDevilEvo (code_001FAE80, 0x74)
+
+25 of 29 words, at the exact size. Walks the same 24 level-up records as
+`rstFindEvoEntryType5`, and on the first record of kind 5 returns that
+record's devil's `datDevilTable` entry byte at +5.
+
+The four differing words are the same `* 0x66` register exchange recorded for
+`rstFindEvoEntryType5` below, plus the one scheduling slot it drags with it:
+retail emits the first `sll` before the hoisted `addiu $7, $2,
+%lo(datDevilTable)` and this emits it after.
+
+Settled on the way: the `+5` has to come off a pointer local,
+`info = &datDevilTable[id]; info->unk_05`. Written as
+`datDevilTable[id].unk_05` gcc hoists `datDevilTable + 5` out of the loop and
+loads at `0(reg)`, where retail hoists the bare symbol and loads at `5(reg)`.
+That was one of the five differing words.
+
+Ruled out for the register exchange: `(u8 *)datLevelUpTable + id * 0x66 + 8`
+against `&datLevelUpTable[id * 0x66 + 8]`, a `u16` local for the id, and
+declaring the `datDevilInfo_t *` at function scope instead of inside the
+`if`. All three give the same four words.
+
+## rstFindEvoEntryType5, rstFindEvoEntryType7 (code_001FAE80, 0x6C each)
+
+24 of 27 words each, at the exact size. Both scan a devil's 24 level-up
+records for a record of kind 5 (or 7) whose level field is below (or at or
+below) the unit's level, and return that record's index as an `s8`, or -1.
+
+The three differing words are the `* 0x66` row multiply: retail puts `3 * id`
+in `$3` and `48 * id` in `$2`, this puts them the other way round. The
+accumulate (`addu $2, $2, $3`) and the final `sll 1` are identical either
+way, so it is which register the first temporary of the synthesised multiply
+lands in, nothing in the source.
+
+Ruled out: `datLevelUpTable + id * 0x66` against `&datLevelUpTable[...]`,
+a separate `s32` offset local, `0x66 * id`, a `u16` and a `u32` local for the
+id, declaring the level before and after the entry pointer, assignments split
+out of the declarations, a `u8 *` walk reading `p[6]`/`p[7]` instead of a
+typed `entry[1]`, and nested `if`s instead of the `&&`. All nine compile to
+the same three-word swap. This is the same register exchange recorded above
+for `cmpFindKugatatiMsgEntry`, which walks the same table.
+
+## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
+
+59 of 117 words, eight words short of retail's 119.
+
+The dispatch is a `switch` on `effBTLModelGetID` of the invoke formation whose
+arms each run one `nbCameraBoss_*_Cut1_Run` and return its value. Retail does
+that as `jal callee`, then `b` to one shared epilogue with `ld $16` in the
+delay slot, with the result left in `$2` and never copied; the default arms put
+`daddu $2, $0, $0` in a compare's delay slot.
+
+Writing the arms as `return callee(pCamera);` makes ee-gcc tail-call every one
+of them (`j callee` with the epilogue inlined ahead of it), which is 30 words
+over. Writing them as `ret = callee(pCamera); break;` with one trailing
+`return ret;` gives retail's shape, including the shared epilogue and the
+`daddu` in the delay slots, but allocates `ret` to `$3`: every arm then pays a
+`daddu $3, $2, $0` and the `ld $16` moves out of the `b` delay slot. The eight
+copies plus the displacement shifts are the whole diff, so the missing source
+fact is whatever keeps the value in `$2`.
+
+Ruled out: declaring the function `u32` so the callee return types differ
+(ee-gcc 2.96 compares modes, not types, so the tail calls stay); every
+declaration order of `pForm`, `id`, `skill` and `ret`; `ret = 0` before the
+switch instead of in the default arms, which also loses the delay-slot
+`daddu`; dropping the `ret =` so the arms only call and the function returns an
+uninitialised `ret`, which costs a third saved register.
+
+The case bodies are laid out in retail as `{0x103, 0x124}`, `0x123`, `0x102`,
+`0x125`, `0x108`, `0x158`, and that order is what the draft uses. The `0x123`
+and `0x102` arms share their `BSARI_MASEHA_Run` and `BSARI_SIMANO_Run` calls by
+cross-jumping, which the draft reproduces.
+
+## nbCameraBoss_Lusi_Cut1_Set (newbattle/nbCameraBoss, 0x1F4)
+
+21 of 125 words, at the exact 500-byte size.
+
+Two independent differences remain, and nothing in the rest of the function
+differs:
+
+The blend factor's bits are allocated to `$3` where retail uses `$4`, and the
+switch value to `$2` where retail uses `$3`, so the whole allocation is shifted
+down by one. That also shows up as `qmtc2.ni $3` instead of `$4` in all four
+`SDF_VU0_INTERPOLATE` sites. Retail also duplicates the `mfc1` into both arms
+of the clamp (`mfc1 $4, $f1` before the `bc1f`, `mfc1 $4, $f2` on the
+fallthrough) where the draft's `if (rate > 1.0f) rate = 1.0f;` gives one
+`mov.s` and one `mfc1`. Writing the clamp over the bits instead
+(`PS2_FLOAT_BITS(bits, rate); if (rate > 1.0f) PS2_FLOAT_BITS(bits, 1.0f);`, or
+the same as an `if`/`else`) does produce the two `mfc1`s but reorders the
+divide and the 1.0 materialisation ahead of them, which is worse: 106 to 114
+words differing instead of 21.
+
+In the first of case 0's two lerps ee-gcc rotates two fp registers, emitting
+two `lwc1` and two `swc1` at a time where retail loads all six constants and
+then stores all six. Case 1's identical block comes out with retail's six and
+six, and so do the same blocks in `nbCameraDANTE_DCOMBO_Set` and
+`nbCameraDANTE_DCOMBO_KAGU_Set`, so this is pressure local to that one arm.
+
+Ruled out: reading `nbCameraBoss_BSLUSI_Type` before the divide, between the
+clamp and the `PS2_FLOAT_BITS`, and after it; declaring `type` before `bits`;
+and a named `one` local for the 1.0 comparand.

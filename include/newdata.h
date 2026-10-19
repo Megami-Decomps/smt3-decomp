@@ -125,8 +125,8 @@ typedef struct datUnitWork_t
 } datUnitWork_t;
 
 /* Model-visual records have a 0x310-byte native stride. The upstream packet
- * helpers use the scalar prefix; the action helpers index eight 0x1C-byte
- * visual-part records starting at +0x32. */
+ * helpers use the scalar prefix; the action helpers index 0x1C-byte
+ * visual-part records starting at +0x32, up to index 11. */
 typedef struct
 {
     u8 unk00;
@@ -150,8 +150,8 @@ typedef struct datUnitVisual_t
     u16 autowait;
     void *motion;
     u16 unk30;
-    datUnitVisualPart_t part[8];
-    u8 unk112[0x1FE];
+    datUnitVisualPart_t part[12];
+    u8 unk182[0x18E];
 } datUnitVisual_t;
 
 typedef struct

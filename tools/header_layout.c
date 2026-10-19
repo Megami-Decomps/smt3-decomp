@@ -718,6 +718,7 @@ OFF(p69, dds3GlobalWork_t, takaraOpenEx, 0x11A80);
 SZ(p70, datUnitVisualPart_t, 0x1C);
 SZ(p71, datUnitVisual_t, 0x310);
 OFF(p72, datUnitVisual_t, part, 0x32);
+OFF(p103, datUnitVisual_t, unk182, 0x182);
 OFF(p73, datUnitWork_t, nowcommand, 0x64);
 SZ(p74, nbKoukaProcessData_t, 0x10);
 OFF(p75, nbMainProcessData_t, actionstackp, 0x40);
