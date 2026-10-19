@@ -427,3 +427,208 @@ straight off the call. All six give the identical four-word rotation.
 Confirmed on the way: `nbMainProcessData_t` carries the kouka process id at
 `+0xF4`, inside what was `unk_E0`, and `dds3GetProcessData` of it yields the
 same `nbKoukaProcessData_t` whose `first` sits at `+0x08`.
+
+## Flow1_23 (newbattle/nbMakePacket, 0xD8)
+
+24 of 54 words match, at the exact 216-byte size.
+
+The structure is settled: `nbGetUnitWorkPointer(n->data,
+&n->data->party[n->boupartyindex])` before a two-case `switch` over
+`nownegophase`, with `case 0` setting `waitframe` from `nbSetNegoNoMotion` and
+`case 1` reading the `master_text` row for the returned unit's id. Every
+instruction is present in retail's order.
+
+What differs is one register. Retail keeps the work pointer in `$6`, reached
+through an explicit `daddu $6, $2, $0` copy of the call's result, and spends
+`$2` on the dispatch's compare constant and the default arm's zero. ee-gcc
+coalesces the work pointer into `$2` instead, which also makes `case 1`'s
+first instruction read `$2`, so the `$2 = 0` of the default arm is no longer
+safe in the second dispatch test's delay slot and the branch comes out `beql`
+with `case 1`'s load annulled where retail has a plain `beq`. The annul bit
+and the register are therefore one fact, not two.
+
+Ruled out: an `s32 phase` local for the switch value, used in the `!= phase`
+test as well; a separate `id` local for `work->id`; a `nbMainProcessData_t *`
+local for `n->data`; assigning `phase` before the call rather than after; an
+`if`/`if` chain in place of the `switch` (39 of 52); `return 0` against
+`break` in `case 0` (one word better, kept); and a `nbMasterTextEntry_t *`
+row pointer against the subscript written twice (identical).
+
+Confirmed on the way: `nbMasterTextEntry_t` carries an `s32` message index at
+`+0x00` and a `u8` negotiation phase at `+0x08`, inside what was
+`unk_00[0x9]`; retail reads the first as a `flowmsg` subscript and compares
+the second against `nownegophase`.
+
+## Flow5_6, Flow5_18 (newbattle/nbMakePacket, 0xD8 each)
+
+23 of 52 words match each, two words short of retail's 216.
+
+Both are the same body with a different `nbAddNegoIdKouho` id (`0x50009` and
+`0x50015`): a `for (i = 0; i < 6; i++)` over `D_003E3158[n->innen_id].phase[i]`
+that stops at the first zero `item`, stores it into `n->getitem` and passes it
+with the neighbouring `cnt` to `datAddItem`. ee-gcc peels the first test into
+the preheader exactly as retail does, hoists `&D_003E3158[0].phase[0]` as the
+one loop invariant, and re-reads `n->innen_id` at the loop bottom.
+
+The `cnt` argument has to be written
+`((nbInnenPhase_t *)&D_003E3158[n->innen_id].phase[i])->cnt`. Written as the
+plain `.cnt` field the `+2` folds into the hoisted base, so gcc keeps a second
+loop invariant at `symbol + 0xA`, spends a fourth saved register on it and
+grows the frame by 16 (9 of 54 words). The cast keeps the association
+`(base + index * 4) + 2`, which is retail's `lhu $5, 2(reg)`.
+
+The two remaining words are both register copies ee-gcc coalesces away:
+retail computes the element address into `$3`, copies it to `$2`
+(`daddu $2, $3, $0`) for the `cnt` load, and at the loop bottom loads
+`n->innen_id` into `$2` and copies it to `$4`. The draft loads straight into
+the register it uses in both places. That is the ruled-out
+register-allocation class, and every word that differs after `+0x3C` is one of
+those two copies or an offset shifted by them.
+
+Ruled out: an `item` local for the value stored and passed; `n->getitem` read
+back as the first argument; an `nbInnenPhase_t *` element pointer assigned in
+the loop, which lets gcc strength-reduce the whole address and comes out 180
+bytes against retail's 216; a `u16 *` cast plus `+2` arithmetic; a `while`
+loop with the `i >= 6` break at the bottom; and an `id` local for
+`n->innen_id`.
+
+Confirmed on the way: `nbInnenRec_t`'s `phase[13]` entries are
+`{u16 item; u16 cnt;}`, not `{u16 item; u16 pad;}`: retail passes the second
+halfword as `datAddItem`'s count argument.
+
+## Flow6_32 (newbattle/nbMakePacket, 0x118)
+
+63 of 70 words match, at the exact 280-byte size.
+
+The body is settled. The `(u32)dds3GetRandIntA(0, 0xA) < 2` arm has to be
+written **last**, with the whole `hojoskillid` chain nested inside
+`if (!(... < 2))`, which is what gives retail's `bnel` to a block placed after
+the chain; written as an early `return 0` at the top the arm stays inline and
+the function is 54 of 69 words out. The six `hojoskillid` arms are an
+`if`/`else if` chain with the whole `nbDispNegoMessage` call written out in
+each, not a `mes` local: retail duplicates `lw $2, 0x184` and
+`daddu $4, $16, $0` per arm and cross-jumps only the suffix from
+`daddu $7, $0, $0` onwards, which is what the duplicated call produces.
+
+The seven remaining words are the shared store block at the end. Retail
+annuls `lw $2, nextkouho[n]` into both branch delay slots and reaches
+`sw $2, 0x1C($16)` with the zero materialised **after** the store; ee-gcc
+loads into `$3`, materialises the zero first and pays a `nop` for it. That is
+the register-allocation residual class.
+
+Ruled out: an `if`/`else` for the rand test with one trailing `return 0`
+(13 of 70 and over size), and the natural early-`return 0` form of the rand
+arm (54 of 69).
+
+## Flow6_37 (newbattle/nbMakePacket, 0x10C)
+
+58 of 67 words match, at the exact 268-byte size.
+
+Settled: two `nbAddNegoIdKouho` calls, a four-way `||` on `n->ework->id` over
+`0x5C`, `0x3D`, `0x61` and `0x5B`, then
+`evtBitCheck(8) == 0 && n->negoreqtype == 0 && n->cnt6_36 >= 3` with its own
+`return 0` (retail reuses `evtBitCheck`'s zero result as that path's return
+value, so the function has only two textual `daddu $2, $0, $0`), then
+`n->nextnegoid = n->nextkouho[0];` followed by the two level reads and the
+`n->cnt6_36 == 3` block. The level test has to be written
+`if (evtBitCheck(8) != 0) { if (!(plevel - 0x11 < elevel)) { ... return 0; } }`
+with `n->nextnegoid = n->nextkouho[0];` after the inner nest: the `&&`
+spelling with an `else` is 22 words out, the nested form with its own
+`return 0` is 9.
+
+The nine remaining words are a rotation of three block-local temps: retail
+gives `$4` to the `nextkouho[0]` value, `$3` to the compare constant `3` and
+`$2` to the `pwork` pointer, and ee-gcc gives them `$2`, `$4`, `$3`. All six
+orders of the three statements between the guard and the `cnt6_36 == 3` test
+were measured (9, 10, 10, 10, 12, 12), so the order the draft uses is the
+best of them and the rotation is below the source.
+
+Confirmed on the way: `nbNegoProcessData_t + 0x8C` is `cnt6_36`, not
+`cnt6_58`; the three counters at `0x8C`, `0x90` and `0x94` are `cnt6_36`,
+`cnt6_37` and `cnt6_58`.
+
+## Flow6_43 (newbattle/nbMakePacket, 0x10C)
+
+45 of 68 words match, one word over retail's 268.
+
+The two-case `switch` on `nownegophase`, both `nbDispNegoMessage` message
+numbers (`0x4E`, `0x61`, `0x62`), the two `nbAddNegoIdKouho` ids and the
+`n->data->enemypcnt == 1 && n->cnt6_36 >= 4 && (u32)dds3GetRandIntA(0, 0xA) < 6`
+chain are all confirmed, as is the `enemypcnt` test reusing the phase
+register that `case 1` already knows holds 1.
+
+The extra word is the `flowmsg[ekucyo]` load in the `0x62` arm. Retail emits
+that load three times, twice annulled into the two `bnel` delay slots and once
+in the plain `beqz`'s slot, and the `0x62` block then reads `$2` straight from
+whichever predecessor's slot set it; ee-gcc keeps all three slot copies and
+re-emits the load at the top of the block as well. That is the delay-slot
+filler's redundant-insn elimination, not a source shape, and it shifts every
+branch offset after it.
+
+Ruled out: nested `if`s in place of the `&&` chain (identical), and the two
+`nbDispNegoMessage` calls shared through a `mes` local, which hoists the
+argument setup above the test.
+
+## Flow12_3, Flow12_4 (newbattle/nbMakePacket, 0x194 each)
+
+24 of 97 words match each, four words short of retail's 404.
+
+The two are the same body with different `nbAddNegoIdKouho` ids and message
+numbers. The whole `case 2` arm, from the four `nbAddNegoIdKouho` calls through
+the two `datGetParam` results, the 2x2 rate table and the two
+`dds3GetRandIntA(0, 0x64)` tests, reproduces retail word for word but **one
+word early**, so the positional count understates it badly: the real difference
+is the switch's default arms plus the `plevel`/`elevel` register pair.
+
+Retail's three-case dispatch over `nownegophase` reaches its default from two
+compare-tree edges, and each edge carries its own `ld $16` (in the preceding
+branch's delay slot), `b` and `daddu $2, $0, $0`, two words per edge that the
+draft does not emit: ee-gcc instead makes the `beqz` a `beql`, annuls `case 0`'s
+`lw $2, 0x184($18)` into it, and sends both default edges to the shared zero at
+the tail. That is the same annul-selection residual as the `Flow8_7` and
+`Flow13_8` entries.
+
+The rate table is `pparam < eparam` crossed with `plevel < elevel`, giving
+`0x14`, `0x28`, `0x3C` and `0x50`; retail if-converts the two
+`pparam < eparam` arms into one `movn $16, $2, $17` selecting `0x14` over
+`0x28`. Seven spellings were measured: `plevel` outer written `<` or `>=`,
+with nested `if`s or a ternary on `pparam`, all give 73 of 97 with `n` correctly
+in `$18`; `pparam` outer, either polarity, nested or ternary, gives 63 of 99 but
+moves `n` into `$17` and rewrites the prologue, so the `plevel`-outer form is
+the one kept.
+
+Also ruled out on the dispatch: `default: return 0;`, `return 0` in place of
+`break` in every arm, an extra `case 3:` with a dead store, and an explicit
+`default: break;`. All four leave the `beql` and three of them reshape the
+compare tree.
+
+Confirmed on the way: `datGetParam(work, 1)` is what the rate test compares,
+`datUnitWork_t + 0x14` is the level both sides read, and the four
+`nextkouho` slots are selected `[0]`/`[1]` when `nowselect` is zero and
+`[2]`/`[3]` when it is not, against `rate` and `0x64 - rate`.
+
+## Flow7_20 (newbattle/nbMakePacket, 0x130)
+
+49 of 76 words match, three words over retail's 304.
+
+The table read is confirmed: `D_003E2540` is a `[][7]` array of
+`{u16 type; u8 lo; u8 hi;}`, indexed `[n->ekucyo][n->qindex]`, and the three
+fields are read `type`, `hi`, `lo` with `hi` and `lo` in callee-saved
+registers. `type` dispatches a `switch` with `case 0` comparing
+`datGetParam(n->pwork, 1)` against `datGetParam(n->ework, 1)`, `case 1`
+comparing the two `level` fields with `sltu`, and `default: rate = 0x32;`.
+The tail is `dds3GetRandIntA(0, 0x64) < rate` selecting `nextkouho[0]` over
+`nextkouho[1]`.
+
+Both comparisons have to be written inverted, `if (!(a < b)) { lo arm } else
+{ hi arm }`, so the `hi` arm is the branch target, and each `nowselect`
+selection written `if (n->nowselect != 0) { rate = 0x64 - x; } else { rate =
+x; }` so the one-instruction arm lands in the branch delay slot.
+
+What is left is that retail reaches **one** shared pair of selection blocks
+from both `switch` arms: `jump2` cross-jumps the two arms' identical tails
+down to the `bnez`, so `case 0` ends in a bare `b` to the shared `lo` block
+and `case 1` falls into it. The draft keeps a `nop` and an extra `b` instead,
+three words. Writing the selection out in both arms is what should produce the
+merge and does not here; a `use_hi` flag local and a `goto` funnel were not
+tried and are the next things to measure.

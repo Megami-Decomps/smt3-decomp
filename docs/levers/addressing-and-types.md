@@ -1415,3 +1415,74 @@
   pair. `itfPnlRegist2` assigns `allocation` twice, once for the panel record
   and once for the kind's payload; two named locals store the second call's
   result straight out of `$2` and lose the copy.
+- **A callee with no prototype in scope drops every argument conversion**, so
+  on a unit that leaves most callees implicit, a caller sitting above its
+  callee's definition needs a forward prototype before anything else is worth
+  trying. `cmbGetParamBase` in `code_001FAE80` calls `cmbGetHeartsParam(s8,
+  s8)`, which the unit defines 200 lines below it: with no declaration in
+  scope ee-gcc passed both arguments as they stood, so the two `sll 24`/
+  `sra 24` pairs were absent, one argument needed no instruction at all
+  because the parameter was already in `$5`, and the function sat at 4 of 26
+  words. One `extern s32 cmbGetHeartsParam(s8 devilId, s8 index);` above it
+  made it exact. This is the companion to the `fptodp` row: the tell for a
+  missing float prototype is `jal fptodp`, and the tell for a missing integer
+  one is a narrowing conversion the retail text has and the draft does not.
+- **A narrow parameter forwarded to a narrow parameter inside a loop wants to
+  be declared `s32`**, with the prototype doing the conversion. With the
+  parameter declared `s8`, cc1 materialises the whole `(s8)` value once into a
+  callee-saved register and copies it into the argument register per
+  iteration; declared `s32`, the conversion is expanded as part of the
+  argument setup, so loop-invariant motion hoists only the `sll 24` into the
+  saved register and leaves the `sra 24` writing the argument register inside
+  the loop, which is what retail has. `cmbAddHeartsParam` and
+  `cmbSubHeartsParam` went from 1 of 26 words to exact on that one declaration,
+  and `fclTerminalSetMode`'s `(s8 mode, u16 id, work *)` had to become
+  `(s32, s32, work *)` for the same reason: retail stores the raw byte and
+  halfword and normalises at each call, where the narrow declarations normalise
+  once up front.
+- Where a loop both loads from a table and stores into a slot, retail usually
+  **walks the store pointer and indexes the load**, and the source has to say
+  so: `*tex = f(table[i]); tex++;` gives retail's `sll`/`addu`/`lw` on the
+  table against `sw 0(ptr)` plus `addiu ptr, 4`. Indexing both makes gcc share
+  one `i * 4` across the call and spend a fourth callee-saved register on it;
+  walking both loses the indexed load. `fclTerminalLoadTextures` and
+  `cmbAddHeartsParam` are both this shape.
+- **A signed byte loop counter is a biv ee-gcc's strength reduction
+  recognises; an unsigned one is not.** `s8 i` is set by
+  `(sign_extend (plus i 1))`, which `basic_induction_variable` accepts, so
+  every array subscript on `i` in the body is reduced to its own walking
+  pointer; `u8 i` is set by `(and (plus i 1) 0xff)`, which it does not, so the
+  subscripts stay as `sll`/`addu`/load. Read which one the retail body has
+  before choosing the counter's type: `fclTerminalLoadTextures` needs the
+  unsigned form to keep its indexed table load and is one word short because
+  of it, since retail's counter normalises with `sll 24`/`sra 24`.
+- **Two address bases in one loop come from two pointer locals computed before
+  the guard, and which one lands in the guard's delay slot is decided by which
+  is assigned after it.** `func_0023ED18` walks a 0x2E4-byte list testing two
+  bytes and one word per entry; one struct pointer gives one base with
+  displacements 0x18, 0x1B and 0x38, where retail has a base at `+0x10` with
+  displacements 8 and 0xB and a second at `+0x38` with displacement 0. A
+  `s32 *` local for the word field plus a cast to a view struct based at
+  `+0x10` for the bytes reproduces both, and moving the view pointer's
+  assignment below the `if (list == NULL)` guard is what puts its `addiu` in
+  the `bnez` delay slot where retail has it. 22 of 25 words to exact; the
+  declaration order of the two locals changes nothing, as the declaration-order
+  row says.
+- An argument that is a cast of another argument belongs **at the call**, not
+  in a local: `cmpDrawScrollBar(..., (cmpCursorWork_t *)((u8 *)work + 0x15C),
+  ...)` is exact in `lstDrawListWindowCursor` where the same expression in a
+  local ahead of the call rotates three of the field loads and is 23 of 26.
+- The mirror of the pointer-local rows: where retail computes the **same
+  address twice into two registers plus a copy**, write the subscript out at
+  every use. `rstSetMotionReqFromTbl` passes three fields of one table entry to
+  one callee and is exact with `D_00332458[i].unk_00`, `[i].unk_01` and
+  `[i].unk_02` written three times; a `*entry` pointer local for two of the
+  three collapses it to one address and makes ee-as materialise the symbol
+  through `$1`, 22 of 26 words.
+- A guard on a call's result whose failure returns zero wants
+  `flag = f(); if (flag == 0) { return flag; }`, not `if (f() == 0) { return
+  0; }`. The first lets the epilogue's `ld $31` fill the `beqz` delay slot and
+  returns the callee's own `$2`; the second materialises a second zero into the
+  annulled slot of a `beqzl`. `fclCombineUpdate` went from 2 of 31 words to
+  exact on that. This is the `func_001C61B8` row read on a call result rather
+  than on a local.
