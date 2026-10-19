@@ -5002,7 +5002,7 @@ s32 rstChkAddSkill(u16 skillId)
     if (cmbChkSkillOwner(skillId, EventStart->unit) >= 0) {
         return 0;
     }
-    return (EventStart->unit->skill[2] >= 8) ? 2 : 1;
+    return (EventStart->unit->skillcnt >= 8) ? 2 : 1;
 }
 
 s16 rstGetEquipHeartsAisyo(void)

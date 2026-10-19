@@ -153,7 +153,7 @@ s32 datGetBaseParam(datUnitWork_t *work, s32 paratype)
     if (work->flag & 4) {
         param = work->param[paratype] + work->skillparam[paratype];
     } else {
-        param = work->param[paratype] + work->skillparam[paratype] + work->levelupparam[paratype];
+        param = work->param[paratype] + work->skillparam[paratype] + work->mitamaparam[paratype];
     }
 
     if (param < 1) {

@@ -719,7 +719,7 @@ SZ(p70, datUnitVisualPart_t, 0x1C);
 SZ(p71, datUnitVisual_t, 0x310);
 OFF(p72, datUnitVisual_t, part, 0x32);
 OFF(p103, datUnitVisual_t, unk182, 0x182);
-OFF(p73, datUnitWork_t, nowcommand, 0x64);
+OFF(p73, datUnitWork_t, nowcommand, 0x6A);
 SZ(p74, nbKoukaProcessData_t, 0x10);
 OFF(p75, nbMainProcessData_t, actionstackp, 0x40);
 OFF(p76, nbFormation_t, hunit, 0x8C);
@@ -729,10 +729,12 @@ OFF(p79, fldAreaWork_t, lightMaIdx, 0xB8);
 SZ(p80, nbFormation_t, 0xF0);
 OFF(p81, datUnitWork_t, keisyoskill, 0x86);
 OFF(p83, datUnitWork_t, keiattr, 0xB6);
-/* Retail proves these three offsets are loaded, and the HD bodies name them
-   nowcommand, mitamaparam and skillcnt. include/newdata.h still carries the
-   wrong names there, so the assertions are suspended rather than asserting a
-   name this ELF contradicts. See docs/idb-corrections.md. */
+OFF(p84, datUnitWork_t, skillcnt, 0x38);
+OFF(p85, datUnitWork_t, mitamaparam, 0x7A);
+OFF(p86, datUnitWork_t, skill, 0x3A);
+OFF(p87, datUnitWork_t, nowindex, 0x6C);
+OFF(p88, datUnitWork_t, levelupparam, 0x80);
+SZ(p89, datUnitWork_t, 0xEC);
 SZ(p82, datUnitWork_t, 0xEC);
 
 OFF(p83, nbMainProcessData_t, activeunit, 0x1C);

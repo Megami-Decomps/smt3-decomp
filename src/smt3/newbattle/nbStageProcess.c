@@ -1110,8 +1110,8 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_COMM);
 
 void SetAction_AI(nbActionProcessData_t *a)
 {
-    a->work->nowtform = -1;
-    a->work->prevcommand = 0;
+    a->work->nowcommand = -1;
+    a->work->nowindex = 0;
     nbRunAi(a);
 }
 
@@ -1126,8 +1126,8 @@ void SetAction_AISCR(nbActionProcessData_t *a)
     datUnitWork_t *work = a->work;
     u16 id = work->id;
 
-    work->nowtform = -1;
-    work->prevcommand = 0;
+    work->nowcommand = -1;
+    work->nowindex = 0;
     nbInitAiScript(a, D_003989E0[id].aiscript);
 }
 
@@ -1668,9 +1668,9 @@ void nbCountActiveUnits(void)
         datUnitWork_t *work = nbGetUnitWorkFromFormindex(i);
 
         if (work != NULL) {
-            if (*(s16 *)&work->mitamaparam[2] == 2) {
-                *(s16 *)&work->mitamaparam[2] = -1;
-                *(s16 *)&work->mitamaparam[4] = -1;
+            if (work->prevtarea == 2) {
+                work->prevtarea = -1;
+                work->prevtform = -1;
             }
         }
     }
@@ -1857,43 +1857,43 @@ void MemoryCommand(nbCommSelProcessData_t *s)
     case 5:
         switch (d) {
         case 0x8000:
-            work->nowtform = 0;
-            work->prevcommand = 0;
+            work->nowcommand = 0;
+            work->nowindex = 0;
             break;
         case 0x8001:
-            work->prevcommand = 0;
-            work->nowtform = 2;
+            work->nowindex = 0;
+            work->nowcommand = 2;
             break;
         case 0x8002:
-            work->prevcommand = 0;
-            work->nowtform = 3;
+            work->nowindex = 0;
+            work->nowcommand = 3;
             break;
         case 0x8003:
-            work->prevcommand = 0;
-            work->nowtform = 7;
+            work->nowindex = 0;
+            work->nowcommand = 7;
             break;
         default:
-            work->prevcommand = d;
-            work->nowtform = 1;
+            work->nowindex = d;
+            work->nowcommand = 1;
             break;
         }
         break;
     case 1:
         if (d == 0x8004) {
-            work->nowtform = 4;
-            work->prevcommand = 0x180;
+            work->nowcommand = 4;
+            work->nowindex = 0x180;
             break;
         }
-        work->prevcommand = d;
-        work->nowtform = 4;
+        work->nowindex = d;
+        work->nowcommand = 4;
         break;
     case 2:
-        work->prevcommand = d;
-        work->nowtform = 5;
+        work->nowindex = d;
+        work->nowcommand = 5;
         break;
     case 3:
-        work->prevcommand = d;
-        work->nowtform = 6;
+        work->nowindex = d;
+        work->nowcommand = 6;
         break;
     }
 }

@@ -81,11 +81,12 @@ typedef struct
     /* 0x0C */ s32 dbest;
 } datBossPress_t;
 
-/* datCalc pins the parameters through levelupparam. cmbCountSkills,
- * rstClearSkillSlot and cmbClearSkillSlots pin 24 halfword inherited-skill
- * slots at +0x86. cmbClearStockEntry clears the complete native 0xEC record.
- * The IDB's field order differs: it has no field at +0x80 and widens namecode,
- * skillcnt and skill, which retail contradicts here. See docs/idb-corrections.md. */
+/* The IDB's field order at PS2 widths: narrowing its 0x120-byte record, where
+ * skillcnt is s32 and skill is s32[24], gives this 0xEC record with no gap.
+ * Three HD bodies pin the names against retail: rstChkAddSkill tests
+ * skillcnt at +0x38, SetAction_AI stores nowcommand and nowindex at +0x6A and
+ * +0x6C, and datGetBaseParam sums param, skillparam and mitamaparam.
+ * See docs/idb-corrections.md. */
 typedef struct datUnitWork_t
 {
     /* 0x00 */ u32 flag;
@@ -102,20 +103,19 @@ typedef struct datUnitWork_t
     /* 0x22 */ u16 uniqueid;
     /* 0x24 */ u16 reserve1;
     /* 0x26 */ u16 reserve2;
-    /* 0x28 */ char namecode[8];
-    /* 0x30 */ s32 skillcnt;
-    /* 0x34 */ u16 skill[24];
-    /* 0x64 */ s16 nowcommand;
-    /* 0x66 */ u16 nowindex;
-    /* 0x68 */ s16 nowtarea;
-    /* 0x6A */ s16 nowtform;
-    /* 0x6C */ s16 prevcommand;
-    /* 0x6E */ u16 previndex;
-    /* 0x70 */ s16 prevtarea;
-    /* 0x72 */ s16 prevtform;
-    /* 0x74 */ s8 mitamaparam[6];
-    /* 0x7A */ s8 levelupparam[6];
-    /* 0x80 */ u8 unk80[6];
+    /* 0x28 */ u16 namecode[8];
+    /* 0x38 */ u16 skillcnt;
+    /* 0x3A */ u16 skill[24];
+    /* 0x6A */ s16 nowcommand;
+    /* 0x6C */ u16 nowindex;
+    /* 0x6E */ s16 nowtarea;
+    /* 0x70 */ s16 nowtform;
+    /* 0x72 */ s16 prevcommand;
+    /* 0x74 */ u16 previndex;
+    /* 0x76 */ s16 prevtarea;
+    /* 0x78 */ s16 prevtform;
+    /* 0x7A */ s8 mitamaparam[6];
+    /* 0x80 */ s8 levelupparam[6];
     /* 0x86 */ u16 keisyoskill[24];
     /* 0xB6 */ u8 keiattr[24];
     /* 0xCE */ u16 hensinmae;

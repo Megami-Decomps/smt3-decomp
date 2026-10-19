@@ -59,11 +59,29 @@ spanning +0x28 to +0x38, `skillcnt` is a `u16` at +0x38, `skill[24]` runs
 with no gap, which removes the invented `unk80[6]`, and 0xEC is the stride the
 party records at `DDS3_GBWK + 0xA54` are walked with.
 
-Applying it needs `include/newdata.h` plus field renames in
-`newbattle/nbStageProcess.c`, `newdata/datCalc.c` and `code_001FAE80.c` in one
-pass with nothing else in flight. Both layouts agree on every offset those
-files load, so it is a pure rename with no codegen change, and the build and
-every unit check must be re-verified afterwards.
+**Applied.** `include/newdata.h` carries the corrected layout, and the
+references in `newbattle/nbStageProcess.c`, `newdata/datCalc.c` and
+`code_001FAE80.c` are remapped to whichever field now occupies the offset they
+load. `nbMakePacket.c` needed nothing: its local copy was already right.
+
+The build was the oracle rather than the argument. Both layouts total 0xEC, so
+relaying out the header and rebuilding named exactly the six functions whose
+references had to move: `rstChkAddSkill`, `datGetBaseParam`, `SetAction_AI`,
+`SetAction_AISCR`, `nbCountActiveUnits` and `MemoryCommand`. The first three
+are the HD witnesses above, which is the cross-check that the layout and the
+names agree.
+
+Two traps in the remap worth knowing if another struct is ever relaid out this
+way. `nbMainProcessData_t` has its own `prevcommand` and `previndex`, so a
+rename by field name alone silently hit the wrong struct; the references have
+to be selected by the variable's type. And `nbStageProcess` was already
+reading two of them as `*(s16 *)&work->mitamaparam[2]`, a cast that says the
+author knew a halfword lived there: those are `prevtarea` and `prevtform`, now
+read directly.
+
+The assertions in `tools/header_layout.c` are restored with the proven names,
+plus `skillcnt` at +0x38, `skill` at +0x3A, `nowindex` at +0x6C,
+`mitamaparam` at +0x7A, `levelupparam` at +0x80 and the 0xEC size.
 
 ## Globals
 

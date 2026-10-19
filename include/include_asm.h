@@ -17,7 +17,7 @@
  *
  * A function whose C is close but not exact is kept beside its fallback:
  *
- *     \/* NON_MATCHING: 12 of 694 words; three spill slots rotated. *\/
+ *     NON_MATCHING comment: 12 of 694 words; three spill slots rotated.
  *     #ifdef NON_MATCHING
  *     void f(void) { ... }
  *     #else
