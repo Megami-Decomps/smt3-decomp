@@ -212,19 +212,97 @@ Member renames total about 4,065 sites across 134 (type, variant) sets, counted
 by `->field` and `.field` occurrences, which over-counts common names like
 `.next` and `.state`. Treat it as an upper bound.
 
-1. The four single-field header renames, about 10 sites. Free, and proves the
-   no-codegen claim.
-2. The ten unreferenced enum renames. Two agreeing sources, zero risk.
-3. Ten single-file congruent member types, about 460 sites, each self-contained.
-4. The narrow shared types (`sdfMemHandle_t`, `sdfGsMemSlice_t`, `sdfThCB_t`,
+Steps 1 and 2 are done, along with the loose ends and the three meaning
+corrections; see [What has been applied](#what-has-been-applied). What is left:
+
+1. Ten single-file congruent member types, about 460 sites, each self-contained.
+2. The narrow shared types (`sdfMemHandle_t`, `sdfGsMemSlice_t`,
    `sdfGrTagStdReg_t`, `sdfDrawTag_t`, `sdfGrOt_t`, `sdfPreDrawTag_t`,
-   `sdfTexHandle_t`, `sdfMat_t`), about 450 sites. This unlocks the header merge.
-5. The enums used in live switches, then the wide records
+   `sdfTexHandle_t`, `sdfMat_t`), about 450 sites. This unlocks the header
+   merge. `sdfThCB_t` is done.
+3. The enums used in live switches, then the wide records
    (`sdfFileCmdHandle_t`, `sdfIpuDecodeCb_t`, `movieStream_t`,
    `sdfMotionCtrlr_t`, `sdfModelRootNode_t`).
-6. The layout-shifted packets, per type, each checked against IDB offsets rather
+4. The layout-shifted packets, per type, each checked against IDB offsets rather
    than member index.
-7. The magic constants, one literal at a time with a build check each.
+5. The remaining magic constants, one literal at a time with a build check
+   each. The `PIB0`, `P2A` and `D3P` fourCCs in `mdlManager.c` are still bare.
+6. Offsets off a `u8 *` where a struct member exists. `sdfBillBoard.c`'s 133
+   sites are done; `code_001FAE80.c` (44) and `nbMakePacket.c` (13) are the
+   next largest, and each needs the owning type recovered first rather than a
+   field name invented for it.
 
-Record the three meaning corrections when they are applied: the repo's reading
-was replaced, which is a different claim from a rename.
+## What has been applied
+
+Every batch below rebuilt to `5facfbf7916836613449c922e26a4ec412207b32`.
+
+- **The four single-field header renames.** `sdfMatPacket_t.multiTexTm` →
+  `mtexTexTm`, `sdfDelayedResrcCB_t.freeFunc` → `freeFuncPtr`,
+  `sdfThCB_t.threadId` → `thId`, `sdfPrimTexflushPacket_t.elem` → `texflush`.
+- **The ten enum renames**, each taken from the IDB member-for-member, with the
+  members the repo was missing added: `SDF_ATTRBIT_e`, `SDF_PACKETBIT_e`,
+  `SDF_MODEL_FLAG_e`, `SDF_MODEL_NODE_FLAG_e`, `PACKET_TYPE_e`,
+  `MODEL_PACKET_HEADER_TYPE_e`, `PIB_CHUNK_TYPE`, `dds3ModelEffectType`,
+  `SdfImageSetMem`, `BILL_DRAW`.
+- **The file-I/O and pac enums**: `sdf_dev_operation` → `SdfFileIOCmd`,
+  `sdf_dev_state` → `SdfFileIOCmdStat`, the `SDF_DEV_EVENT_*` defines in
+  `sdfTmx.c` → the `SdfFileIOCmdClbk` enum, `sdf_pac_command` →
+  `DDS3_FILE_TYPE`, and the decoder trio → `sdfDecomp_enum{,2,3}`. The two
+  masks the IDB has no member for keep repo names under their own anonymous
+  enum.
+- **The static inline helpers** now follow the TitleCase-no-prefix rule for
+  private functions, which also removes the two `effPcp` spellings. `fsqrtf`,
+  `frsqrtf` and `ffabsf` are left alone: those spell the standard math names,
+  not a module prefix.
+- **`sdfPacDecode.c`'s parameter drift.** Seven functions declared the
+  parameter `aState` and then defined it as `state`; the file is otherwise
+  `aState`/`aWork` throughout, so the stragglers were brought in line. The IDB
+  spells these `cb` and `resrc`, against the repo's `sdfPacState_t` and
+  `sdfPacWork_t`; that rename belongs with the type rename, not before it.
+- **Eight IDB-named globals** that `tools/ida_symbols.py` drops, curated into
+  `symbol_addrs.txt` above the generated block: `mccb`, `MidiNo`,
+  `pointResName`, `hEffPart`, `hDistortionBlur`, `hPartialMultiBlur`,
+  `hCAMPBadEffect`, `shutdownfunc`. 190 `D_<addr>` references became names,
+  `mccb` alone covering 147 of them. The cause is the exporter's
+  `has_user_name` filter: IDA set these names itself, so the flag is false even
+  though they are not dummy names. Loosening the filter is not the fix, because
+  most of the 40 it drops are IDA propagating a parameter name (`b`, `c`,
+  `size`, `pos`) onto a global. `FoceScript` is the ninth candidate and was
+  rejected: the bytes at `0x00531F28` are the string `"elvstart_label"`.
+- **The explicit asm in `code_002C7CB0.c`.** The two `__asm__("")` sibcall
+  barriers in `registerAtExit` and `libc_2D25B0` became the dead store to a
+  parameter that [matching levers](matching-levers.md) prescribes, and the four
+  `nop`s standing in for the gap before the handwritten syscall stubs became
+  `.space 16`, which is what those 16 bytes are in retail. Neither is a lever
+  the image depends on any more.
+- **The `fptodp` equate**, which five units each spelled out with its own
+  comment, is now one `EQUATE_FPTODP()` in `include/ps2asm.h`. It cannot be
+  shared through `.globl`: the equate aliases an extern, so every unit that
+  passes a float to a varargs call needs its own.
+- **The billboard packet writes.** All 133 `*(u32 *)(packet + N)` stores in
+  `sdfBillBoard.c` now go through the `sdfBillBoard*Packet_t` types that
+  `include/billboard.h` already carried; the offsets agreed field for field.
+  `sdfBillBoardMakeN` and the other `*MakeN` builders keep their `packet[i]`
+  word walk, which is a variable-length packet rather than a record.
+
+### The three meaning corrections, applied
+
+- **`SDF_ATTRBIT_e` bits 0 and 1 were swapped.** 0x1 is specular and 0x2 the
+  refmap pass, per the IDB and `dds3_model.bt`, not the reverse.
+- **`DDS3_FILE_TYPE` member 1 is `EFFECT`, not `MEM`.** `mdlManager.c:1437`
+  switches the chunk tag on `0x413250`, `0x503344` and `0x555049`, the P2A, D3P
+  and IPU chunks, which is where `command == 1` leads.
+- **`SdfFileIOCmdStat` 7 and 9 are suspend and error**, not active and
+  inactive, and the IDB's 0, 1 and 10 (init, dormant, cancel) were missing.
+
+### Two claims on this page that the tree had already outrun
+
+- The six invented function names said to be declared and never defined are
+  gone; nothing in the tree declares them.
+- `sdf_model_root_flag` was listed among the unreferenced enums. It is not:
+  `sdfModel.c` and `fldAutoMap.c` use four of its members. That turned out to
+  help rather than hurt, because `sdfModel.c:600` sets bit 4 inside
+  `sdfModelMakeEarly`, which is what settles the IDB's `EARLY_SETUP` against
+  the repo's invented `TEMPPACKET`. `SDF_MODEL_NODE_FLAG_MOTION_HIDE` is
+  corroborated the same way: its only writers are the two
+  `sdfMotCLBK_modelVisible*` callbacks.
