@@ -19,6 +19,13 @@ extern u32 D_0054F414;
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(sdfMemHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern u16 D_00325B10[];
+extern u16 D_00325E50[];
+extern s8 D_00326061[];
+extern u16 frMessageCode;
+extern s32 frDefaultFontHandle;
+extern s32 strlen(const char *s);
+extern void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst);
 s32 fmDestroyFontMemControl(void);
 
 fmFontControl_t *fmGetInternalFGC(void) {
@@ -124,19 +131,113 @@ void fmRetFontMem(fmFontNode_t *node) {
     nextNode->prev = node;
 }
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", frFindTagCode);
+s32 frFindTagCode(u16 code) {
+    s32 i = 0;
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", frFindTagCode2);
+    do {
+        if (D_00325B10[i] == code) {
+            return i;
+        }
+        i++;
+    } while (i < 0x1A0);
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", frGetMessageCode);
+s32 frFindTagCode2(u16 code) {
+    s32 i = 0;
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", cmpSetSkillListRows);
+    do {
+        if (D_00325E50[i] == code) {
+            return i;
+        }
+        i++;
+    } while (i < 0x108);
+    return -1;
+}
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", cmp_1C6180);
+void frGetMessageCode(u16 code) {
+    if (code == 0x85EC) {
+        return;
+    }
+    if (code < 0x2F) {
+        return;
+    }
+    if ((u16)(code - 0x3A) < 7) {
+        return;
+    }
+    frMessageCode = code;
+}
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", func_001C61B8);
+void cmpSetSkillListRows(s32 rows) {
+    if (rows <= 0) {
+        rows = 20;
+    }
+    frDefaultFontHandle = rows;
+    D_00326061[0] = rows - 5;
+}
 
-INCLUDE_ASM(const s32, "interface/fmGslCont", fr_1C6270);
+s32 cmp_1C6180(const char *text, s32 width) {
+    s32 length = strlen(text);
+
+    if (length < 0x10) {
+        return width;
+    }
+    return width - length + 0x10;
+}
+
+s32 func_001C61B8(frFontHandle_t *chain, s32 limit) {
+    frTextHandle_t *glyph = chain->firstChild;
+    frTextHandle_t *first = glyph;
+    s32 total = 0;
+    s32 count = 0;
+    s32 step;
+
+    if (glyph != NULL) {
+        do {
+            total += glyph->advance;
+            count++;
+            glyph = glyph->next;
+            total += chain->glyphCodeOrContext.byteRoles.spacing;
+        } while (glyph != NULL);
+    }
+    if (!(limit < total)) {
+        return total;
+    }
+    step = (total - limit + count - 1) / count;
+    total = 0;
+    glyph = first;
+    if (glyph != NULL) {
+        do {
+            glyph->advance -= step;
+            glyph->cellDimensions.cellWidth -= step;
+            total += glyph->advance;
+            glyph = glyph->next;
+            total += chain->glyphCodeOrContext.byteRoles.spacing;
+        } while (glyph != NULL);
+    }
+    chain->advance = total;
+    return total;
+}
+
+void fr_1C6270(frFontHandle_t *chain) {
+    frTextHandle_t *glyph = chain->firstChild;
+    s32 shiftIndex;
+
+    if (glyph != NULL) {
+        do {
+            if (glyph->glyphCodeOrContext.glyphCode < 0x20) {
+                shiftIndex = 0;
+            } else if (glyph->glyphCodeOrContext.glyphCode < 0x80) {
+                shiftIndex = glyph->glyphCodeOrContext.glyphCode - 0x20;
+            } else {
+                shiftIndex = ((glyph->glyphCodeOrContext.glyphCode - 0x8080) & 0xFF00) / 2 +
+                             ((glyph->glyphCodeOrContext.glyphCode - 0x8080) & 0x7F);
+            }
+            frGetXShiftLev(glyph, shiftIndex, 0);
+            glyph = glyph->next;
+        } while (glyph != NULL);
+    }
+}
 
 void func_001C62F8(u32 messageCode) {
     D_0054F414 = messageCode;

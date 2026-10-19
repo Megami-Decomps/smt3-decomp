@@ -115,6 +115,7 @@ it was measured on DDS and not on this ELF.
 | a `for` whose bound is loaded once into a saved register, where your C runs the whole pointer chain again each iteration | read the bound into a local first, `count = obj->inner->nodeList->count;`. Written as the loop condition the two loads and the `lh` repeat in the backedge block, cost five words, and also take the argument register the call in the body wants. `dds3ObjectBaseMakeUnit` went from 94 of 1406 words to 9 on that one local |
 | a loop whose body is guarded by `bnel i, $0` and whose call arguments are all `$0` | `if (i == 0) { ... }` inside the `for`. The index is then known zero in the body, so an `i` passed as an argument materialises as `$0` rather than a copy |
 | a two-sided clamp whose high arm has its own `jr $31` and a `mov.s` from the bound's register | `if (hi < x) { x = hi; } else if (x < lo) { x = lo; } return x;`. `return 2.0f;` in the high arm puts the constant straight in `$f0` and rotates every float temp, 20 of 34 words in `evtCalcEffBedScale`; an early `return x;` after the assignment does the same, and two sibling `if`s instead of the `else if` are 8 words out |
+| a guard whose failure returns the **same variable** the function's tail returns, with two `daddu $2, rs, $0` copies and an empty `jr` delay slot | an early `return total;` inside the guard plus a second `return total;` at the end, not an `if` wrapping the body around one trailing `return`. The wrapped form coalesces the copy into the `jr`'s delay slot and is one word short; the two returns keep one copy in the guard's delay slot and one at the join, which `jump2` merges only down to the shared `jr`. `func_001C61B8` in `interface/fmGslCont` went from 5 of 44 words to exact. This is the opposite reading of the `rstUpdateEvoBgFade` row above, where the failure arm returns a *constant*, so check which one the arm returns before choosing |
 
 A flag mask that steps by a constant shift per iteration is a source variable,
 not an expression. Retail's `sll $18, $18, 2` in the loop-closing delay slot
@@ -1565,6 +1566,19 @@ store beats an if/else chain that stores in each arm.
   then falls into the call's delay slot. `nbSetBadstatMotion2` went from six
   differing words to exact on `party = &data->party[form->partyindex];` moved
   above three `sw $0` stores, and no order of the stores alone reached it.
+
+- Two adjacent struct stores only reverse when neither value is a reload. A
+  value an output parameter left in an **address-taken** stack local is killed
+  by the first store through the struct pointer, so gcc reloads it for the
+  second store and the pair then comes out in source order instead. Copy it
+  into a plain local first and test *that* local: in
+  `dds3SceneBasicLoadScriptFile`, `resolved = address;` ahead of
+  `if (resolved == 0)` lets `work->scriptHandle = handle;
+  work->script = (void *)resolved;` emit as retail's `sw 0x1C` then `sw 0x18`,
+  one word shorter. Four spellings were measured: without the local, either
+  store order is 2 or 11 words out (the 11 being the reload and a branch
+  displacement), a `void *` local for the same value does not reach it, and a
+  `(u32 *)` cast on either store's lvalue does not either.
 
 Where a handful of constant stores differ only in order, permute them
 mechanically rather than reasoning about it. A loop driving

@@ -73,7 +73,36 @@ extern void Eve_EffectDraw(void);
 effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectManagerInit);
+extern u8 dds3EffectBase[];
+extern char D_00532AE0[];
+extern char D_0054F0B0[];
+extern sdfGrOt_t sdfGrOtTable[];
+extern void sdfRandomizeByTime(void *state);
+extern void dds3BillboardManagerInit(void);
+extern void dds3PolygonManagerInit(void);
+extern void dds3ParticleManagerInit(void);
+extern void effDebugInit(void);
+extern void Eve_EffectInit(void);
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
+                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+s32 dds3EffectManagerRunF(dds3ProcessID_t *id);
+s32 dds3EffectManagerRun(dds3ProcessID_t *id);
+void dds3EffectManagerExit(void);
+
+void dds3EffectManagerInit(void) {
+    sdfRandomizeByTime(dds3EffectBase);
+    dds3BillboardManagerInit();
+    dds3PolygonManagerInit();
+    dds3ParticleManagerInit();
+    dds3StartProcess(D_00532AE0, 0x2B04, 0, 0, dds3EffectManagerRunF, NULL, NULL);
+    dds3StartProcess(D_0054F0B0, 0x2B18, 0, 0, dds3EffectManagerRun, (dds3ProcessFunc_t)dds3EffectManagerExit, NULL);
+    effDebugInit();
+    Eve_EffectInit();
+}
 
 void dds3EffectManagerExit(void) {
     dds3ParticleManagerExit();
@@ -81,7 +110,29 @@ void dds3EffectManagerExit(void) {
     dds3BillboardManagerExit();
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectManagerRunF);
+s32 dds3EffectManagerRunF(dds3ProcessID_t *id)
+{
+    sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfGrOt_t *ot;
+
+    sdfDrawTagInit(list);
+    {
+        u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x40);
+
+        packet[0] = 3;
+        packet[1] = 0x5000000310000000ULL;
+        packet[2] = 0x1000000000008002ULL;
+        packet[3] = 0xE;
+        packet[4] = 0x51801;
+        packet[5] = 0x47;
+        packet[6] = 0x44;
+        packet[7] = 0x42;
+        sdfDrawTagLink(list, (u32)packet);
+    }
+    ot = &sdfGrOtTable[43];
+    ot->regFunc(ot, list);
+    return 0;
+}
 
 s32 dds3EffectManagerRun(dds3ProcessID_t *id)
 {
@@ -140,7 +191,10 @@ void dds3EffectSetScale(effNode_t *node, f32 scale)
     EffMajorTable[node->type].setscale(node->instance, scale);
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectGetState);
+s32 dds3EffectGetState(effNode_t *node)
+{
+    return EffMajorTable[node->type].getstate(node->instance);
+}
 
 void dds3EffectSetPosition(effNode_t *node, sdfVector4_t *pos)
 {
@@ -157,9 +211,17 @@ void dds3EffectSetRGBA(effNode_t *node, u32 rgba)
     EffMajorTable[node->type].setrgba(node->instance, rgba);
 }
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectSetLoop);
+void dds3EffectSetLoop(effNode_t *node, u8 loop)
+{
+    EffMajorTable[node->type].setloop(node->instance, loop);
+}
 
-INCLUDE_ASM(const s32, "effect/effManager", dds3EffectGetLoop);
+s32 dds3EffectGetLoop(effNode_t *node)
+{
+    return EffMajorTable[node->type].getloop(node->instance);
+}
+
+INCLUDE_RODATA(const s32, "effect/effManager", D_00532AE0);
 
 effNode_t *dds3EffectLoad(effResourceHeader_t *header)
 {
