@@ -112,6 +112,15 @@ it was measured on DDS and not on this ELF.
 | a `for` whose bound is loaded once into a saved register, where your C runs the whole pointer chain again each iteration | read the bound into a local first, `count = obj->inner->nodeList->count;`. Written as the loop condition the two loads and the `lh` repeat in the backedge block, cost five words, and also take the argument register the call in the body wants. `dds3ObjectBaseMakeUnit` went from 94 of 1406 words to 9 on that one local |
 | a loop whose body is guarded by `bnel i, $0` and whose call arguments are all `$0` | `if (i == 0) { ... }` inside the `for`. The index is then known zero in the body, so an `i` passed as an argument materialises as `$0` rather than a copy |
 
+A flag mask that steps by a constant shift per iteration is a source variable,
+not an expression. Retail's `sll $18, $18, 2` in the loop-closing delay slot
+comes from `for (i = 0, mask = 4; i < 3; i++, mask <<= 2)`; writing
+`4 << (i * 2)` keeps `i * 2` as the induction variable and emits `sllv` from a
+constant held in a register, since a variable shift of a constant is not an
+induction variable cc1 can strength-reduce. Where the same loop also needs the
+next bit, write it as `mask << 1` at each use: retail recomputes that shift
+once per use, and a named local for it computes it once.
+
 ## Addressing and types
 
 - The motion-speed setter is inlined in `newbattle/nbKoukaProcess`: retail writes
@@ -489,6 +498,16 @@ it was measured on DDS and not on this ELF.
   `_NOMEM` so that a later store of the same vector rematerialises
   `addiu $2, $29, N` instead of reusing the saved register the load got: the
   plain form there was 47 of 177 words out and `_NOMEM` took it to 2. In
+- Where a global's value lives in one register across a whole loop and is
+  reloaded only after a call, nothing else in the loop may clobber memory.
+  `dds3SceneLightUpdateFirst` keeps `dds3DrawFlag` in `$7` for three
+  iterations and reloads it only after `Lerp` and `ToMatrix`, so both of its
+  colour unpacks are `MMI_RGBA_UNPACK_NOMEM` and both vector stores are
+  `SDF_VU0_STOREVECTOR_NOMEM`; a `"memory"` clobber on any one of them adds a
+  `lw` reload at every flag clear and at the loop top, and took the function
+  from 145 of 383 matching words to 21. Read whether retail reloads the global
+  after each asm block before choosing the macro, since that reload is the
+  clobber's visible signature.
   `nbCameraShot_AttackTuibiReverse_Set` the plain form's `"memory"` clobber on
   the second of two stores let cse keep a `0.5f` in a callee-saved register
   across the intervening call, collapsing retail's two `lui`/`mtc1` pairs into
@@ -1174,6 +1193,19 @@ offsets. `D_0054C2B4` and `D_0054C2B8`, read by `fldCamCalcSlopeOffset`, land
 at `0x44D2B4` and `0x44D2B8` inside `field/fldDraw`'s pool and hold `0.001f`
 and `-0.001f`. The pool is not deduplicated: the same constant appears at
 several offsets, so only the order of use matters.
+
+A float literal passed to an asm `"r"` operand folds to one `lui`, because
+cc1's `movsf` can load a constant straight into a GPR and `regclass` prefers
+`GENERAL_REGS` when the operand's only other reference is that `"r"` use.
+Where retail instead shows `lui` + `mtc1` + `mfc1`, the constant is sitting in
+an FP register and cc1 is moving it out, which also means those three
+instructions are ordinary insns the scheduler may interleave with the
+surrounding code. `PS2_FLOAT_BITS(out, f)` emits the same three but as a
+volatile asm, so they become a scheduling barrier: use it only where retail
+keeps them together. `dds3SceneLightUpdateFirst` needs the schedulable form
+four times and has not been written yet; adding a dummy `"f"` input beside the
+`"r"` one does flip the class, but cc1 then commons the two constant loads in
+the same block.
 
 `ee-as` owns the `.lit4` pool, not `cc1`. `configure.py` rewrites every
 `lwc1 %gp_rel(D_...)` in the split asm into `li.s`, so literal values are

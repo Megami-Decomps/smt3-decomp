@@ -334,10 +334,10 @@ extern u16 dds3RenderTexWidth;
 extern u16 dds3RenderTexHeight;
 extern u32 dds3RenderDrawEnv;
 extern u32 dds3DebugSign;
-extern s16 lightcolornow[4];
-extern s16 lightcolormax[4];
-extern s16 lightdirnow[4];
-extern s16 lightdirmax[3];
+extern u16 lightcolornow[4];
+extern u16 lightcolormax[4];
+extern u16 lightdirnow[4];
+extern u16 lightdirmax[3];
 extern u32 dds3LightColor[];
 extern u32 D_00557230[];
 extern f32 D_00557240[][4];
@@ -394,6 +394,8 @@ void sdfTexMakeGIFPacket(sdfTexHandle_t *texture);
 void MultMatrixRev(sdfMatrix4_t *matrix);
 void Normalize(void);
 void dds3RotationArc(void);
+void Lerp(f32 blendAmount);
+void ToMatrix(void);
 void evtHokanBlur2(s32 enabled, f32 ratio, dds3Blur2Param_t *from, dds3Blur2Param_t *to, dds3Blur2Param_t *out);
 void evtHokanMultBlur(s32 enabled, f32 ratio, dds3MultiBlurParam_t *from, dds3MultiBlurParam_t *to, dds3MultiBlurParam_t *out);
 void evtHokanDistBlur(s32 enabled, f32 ratio, dds3DistBlurParam_t *from, dds3DistBlurParam_t *to, dds3DistBlurParam_t *out);
@@ -1721,7 +1723,127 @@ void dds3SetFogPara(s32 blendFrames, f32 fogMax, f32 fogMin, f32 fogNear, f32 fo
     }
 }
 
+/* vu0 routine: advance every staged light, ambient, fog and face divide blend. */
+/* NON_MATCHING: 238 of 383 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+void dds3SceneLightUpdateFirst(void)
+{
+    u32 colorBaseWords[4];
+    u32 colorTargetWords[4];
+    u32 ambientBaseWords[4];
+    u32 ambientTargetWords[4];
+    u32 fogBaseWords[4];
+    u32 fogTargetWords[4];
+    u32 fogResultWords[4];
+    u32 packedFogColor;
+    u32 colorFlag;
+    u32 unit;
+    f32 ratio;
+    s32 i;
+
+    for (i = 0, colorFlag = 4; i < 3; i++, colorFlag <<= 2) {
+        if (dds3LightParam.parallel[i] == NULL) {
+            dds3DrawFlag &= ~(colorFlag | (colorFlag << 1));
+            continue;
+        }
+        if (dds3DrawFlag & colorFlag) {
+            ratio = (f32)(u16)++lightcolornow[i] / (f32)lightcolormax[i];
+            colorBaseWords[0] = dds3LightColor[i];
+            MMI_RGBA_UNPACK_NOMEM(colorBaseWords, 0x3C000000);
+            SDF_VU0_SCALEVECTOR(1.0f - ratio);
+            SDF_VU0_COPYVECTOR_A_TO_B();
+            colorTargetWords[0] = D_00557230[i];
+            MMI_RGBA_UNPACK_NOMEM(colorTargetWords, 0x3C000000);
+            SDF_VU0_SCALEVECTOR(ratio);
+            SDF_VU0_ADDVECTOR();
+            SDF_VU0_STOREVECTOR_NOMEM(&dds3LightParam.parallel[i]->color);
+            if (lightcolornow[i] >= lightcolormax[i]) {
+                dds3DrawFlag &= ~colorFlag;
+            }
+        }
+        if (dds3DrawFlag & (colorFlag << 1)) {
+            ratio = (f32)(u16)++lightdirnow[i] / (f32)lightdirmax[i];
+            SDF_VU0_LOADIDENTITYVECTOR();
+            SDF_VU0_VECTOR_W_SET_ONE();
+            SDF_VU0_LOADVECTOR_B(D_00557270[i]);
+            Lerp(ratio);
+            ToMatrix();
+            SDF_VU0_LOADVECTOR(D_00557240[i]);
+            SDF_VU0_APPLYMATRIX();
+            SDF_VU0_STOREVECTOR_NOMEM(&dds3LightParam.parallel[i]->v);
+            if (lightdirnow[i] >= lightdirmax[i]) {
+                dds3DrawFlag &= ~(colorFlag << 1);
+            }
+        }
+    }
+
+    if (dds3DrawFlag & 0x100) {
+        ratio = (f32)(u16)++ambientnow / (f32)ambientmax;
+        ambientBaseWords[0] = ambientbase;
+        PS2_FLOAT_BITS(unit, 1.0f / 128.0f);
+        MMI_RGBA_UNPACK(ambientBaseWords, unit);
+        SDF_VU0_SCALEVECTOR(1.0f - ratio);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        ambientTargetWords[0] = ambienttarget;
+        PS2_FLOAT_BITS(unit, 1.0f / 128.0f);
+        MMI_RGBA_UNPACK(ambientTargetWords, unit);
+        SDF_VU0_SCALEVECTOR(ratio);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(&dds3AmbientColor);
+        if (ambientnow >= ambientmax) {
+            dds3DrawFlag &= ~0x100;
+        }
+    }
+
+    if (dds3DrawFlag & 0x200) {
+        ratio = (f32)(u16)++fogrgbnow / (f32)fogrgbmax;
+        fogBaseWords[0] = fogrgbbase;
+        PS2_FLOAT_BITS(unit, 1.0f / 128.0f);
+        MMI_RGBA_UNPACK(fogBaseWords, unit);
+        SDF_VU0_SCALEVECTOR(1.0f - ratio);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        fogTargetWords[0] = fogrgbtarget;
+        PS2_FLOAT_BITS(unit, 1.0f / 128.0f);
+        MMI_RGBA_UNPACK(fogTargetWords, unit);
+        SDF_VU0_SCALEVECTOR(ratio);
+        SDF_VU0_ADDVECTOR();
+        MMI_RGBA_PACK_128(packedFogColor);
+        dds3LightParam.fog.color = packedFogColor;
+        fogResultWords[0] = packedFogColor;
+        if (fogrgbnow >= fogrgbmax) {
+            dds3DrawFlag &= ~0x200;
+        }
+    }
+
+    if (dds3DrawFlag & 0x400) {
+        ratio = (f32)(u16)++fogparanow / (f32)fogparamax;
+        SDF_VU0_LOADVECTOR(&dds3FogParam);
+        SDF_VU0_LOADVECTOR_B(&dds3FogColor);
+        SDF_VU0_SCALEVECTOR(1.0f - ratio);
+        SDF_VU0_SCALEVECTOR_B(ratio);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_GETVECTOR_X(dds3FogState.fogMax);
+        SDF_VU0_GETVECTOR_Y(dds3FogState.fogMin);
+        SDF_VU0_GETVECTOR_Z(dds3FogState.fogNear);
+        SDF_VU0_GETVECTOR_W(dds3FogState.fogFar);
+        if (fogparanow >= fogparamax) {
+            dds3DrawFlag &= ~0x400;
+        }
+    }
+
+    if (dds3DrawFlag & 0x4000) {
+        ratio = (f32)(u16)++sbnow / (f32)sbmax;
+        sdfFaceDivSoften = softenbase * (1.0f - ratio) + softentarget * ratio;
+        sdfFaceDivBias = biasbase * (1.0f - ratio) + biastarget * ratio;
+        if (sbnow >= sbmax) {
+            dds3DrawFlag &= ~0x4000;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3SceneLightUpdateFirst);
+#endif
 
 void dds3SetSoftenBias(s32 frame, f32 soften, f32 bias)
 {
