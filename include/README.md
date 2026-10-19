@@ -173,6 +173,32 @@ reached through `dds3BasicFuncTablePtr[type]`, a pointer array, so nothing fixes
 its stride: `reserve1`, `reserve2` and the 24-byte size are HD's and
 **unconfirmed**.
 
+### sdf_resource.h
+
+One layer above `sdf_types.h` and on the same principle: the engine resource
+records a packet builder needs, without the queue, file and motion owners that
+come with `libsdf.h`. It holds `sdfMemHandle_t`, `sdfGsMemSlice_t`,
+`sdfTexHandle_t`, `sdfMat_t`, `sdfDrawTag_t` and `TMX_HEADER_t`. `libsdf.h`
+includes it, so each of these has exactly one definition in the tree; before
+this existed, those six were copied into seventeen units by hand, and the
+copies had drifted apart in both names and signedness.
+
+Two declarations here are the local units' rather than the IDB's, because the
+retail code decides and the IDB does not:
+
+- `sdfDrawTag_t`'s `head`, `tail`, `z` and the three reference slots are `u32`,
+  not typed pointers and an `f32`. `sdfDrawTagInit` writes `z = 0xFFFF` as an
+  integer, which an `f32` member does not reproduce, and nothing in the tree
+  reads them as pointers.
+- `sdfGsMemSlice_t`'s `pixelFormat` is `s32`: `sdfSetLoadImage` loads it with
+  `lw`. See [IDB corrections](../docs/idb-corrections.md).
+
+`sdfMat_t`'s two uvw slots are `void *` on purpose. `libsdf.h` and the IDB
+spell the pointee `struct sdfMatUvwParm_t`; `sdf3DPrim.c` and `effPCPMisc.c`
+spell the same 24 bytes a union of three views. Nothing dereferences them
+through a material, so the shared record stays agnostic and the two readings
+can be reconciled separately.
+
 ### libsdf.h
 
 The vector, matrix, DMA and GIF packet definitions live in the common-only

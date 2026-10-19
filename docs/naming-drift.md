@@ -64,9 +64,32 @@ members, ~38). The narrow ones are the ones to do first: `sdfMemHandle_t`
 (`word`→`addr`), `sdfDrawTag_t` (`first`/`last`→`head`/`tail`) and `sdfGrOt_t`
 (`first`/`last`→`tagHead`/`tagTail`).
 
-The prize is not the names. Merging the eight local copies onto the shared
-headers deletes about 1,400 lines of duplicated type definitions, and the
-renames are what make the merge possible.
+The prize is not the names. Merging the local copies onto the shared headers
+deletes the duplicated type definitions, and the renames are what make the
+merge possible.
+
+**Done.** `include/sdf_resource.h` now owns the six engine resource records
+(`sdfMemHandle_t`, `sdfGsMemSlice_t`, `sdfTexHandle_t`, `sdfMat_t`,
+`sdfDrawTag_t`, `TMX_HEADER_t`), `libsdf.h` includes it, and the seventeen
+units that carried their own copies include it instead. `nbMakePacket.c` takes
+its five `datUnit*`/`datSkill*` records from `newdata.h`, and three `effPCP*`
+units take `sdfVector3_t` from `sdf_types.h`. That removed 52 of the 66
+duplicate definitions, 763 of 837 lines.
+
+Fourteen definitions, 74 lines, are deliberately left:
+
+- `sdfPrim.c`, `sdfDraw.c` and `sdfGsMemIO.c` keep nine `draw.h` packet types.
+  `draw.h` cannot be included: it brings `libsdf.h`, whose `sdf3DFogPacket_t`
+  and `sdf3DViewportPacket_t` conflict with these units' own readings.
+- `sdf3D.c` keeps `sdf3DFogParam_t` for the same reason.
+- `sdfDelayedResrc.c` keeps `sdfDelayedResrcCB_t`: `libsdf.h` types `chunk` as
+  `void *` where the unit walks it, and taking the header's version left two of
+  seven functions differing.
+- `nbMakePacket.c` keeps `nbKoukaProcessData_t`; `nb.h` would pull `kernel.h`.
+- `sdfPreDrawTag_t` was not moved at all. Its pointee is spelled
+  `SdfPacketPatchLink` (8 bytes) in three units and `sdfPreDrawHook_t` in
+  `libsdf.h`, which the IDB confirms is 16; that is a truncated reading to
+  recover, not a name to merge.
 
 ### Four single-field drifts in the shared headers
 
