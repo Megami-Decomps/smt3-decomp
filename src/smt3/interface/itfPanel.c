@@ -214,7 +214,40 @@ static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
     vec[3] = alpha;
 }
 
-INCLUDE_ASM(const s32, "interface/itfPanel", itfPnlRegist2);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern s32 D_003264E0[];
+
+/* Allocate the common record and the kind's payload; kinds 6 to 8 take the
+ * caller's value as the first payload word. */
+itfPanel_t *itfPnlRegist2(s32 kind, s32 value) {
+    sdfMemHandle_t *allocation;
+    itfPanel_t *panel;
+    u32 *payload;
+
+    allocation = sdfMemAllocDirect(sizeof(itfPanel_t));
+    panel = (itfPanel_t *)sdfMemLock(allocation);
+    panel->kind = kind;
+    panel->allocation = allocation;
+    allocation = sdfMemAllocDirect(D_003264E0[kind]);
+    panel->payloadAllocation = allocation;
+    payload = (u32 *)sdfMemLock(allocation);
+    panel->payload = payload;
+    if (value != 0) {
+        switch (kind) {
+        case 6:
+            payload[0] = value;
+            break;
+        case 7:
+            payload[0] = value;
+            break;
+        case 8:
+            payload[0] = value;
+            break;
+        }
+    }
+    return panel;
+}
 
 /* A sprite with a retained payload owns a secondary allocation. Release that
  * before its primary allocation; NULL is a no-op. */
@@ -605,7 +638,14 @@ void DrawPlain(itfPanel_t *panel, sdfDrawTag_t *command) {
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-INCLUDE_ASM(const s32, "interface/itfPanel", DrawPera1);
+void DrawPera1(itfPanel_t *panel, sdfDrawTag_t *command) {
+    itfPanelPlainData_t *data = (itfPanelPlainData_t *)panel->payload;
+    itfPanelVertex_t *drawBuffer = data->vertices;
+    itfPanelColor_t *colors = data->colors;
+
+    colors[0].rgba.alpha = panel->alpha;
+    itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, panel->renderValue, command);
+}
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
 void DrawLeftFade(itfPanel_t *panel, sdfDrawTag_t *command) {
@@ -619,7 +659,38 @@ void DrawLeftFade(itfPanel_t *panel, sdfDrawTag_t *command) {
     itfMiscDrawAlphaPrim(command, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "interface/itfPanel", DrawMesWin2);
+/* Split a tall texture into top, stretch and bottom bands; the short path
+ * submits the live rectangle in the panel. */
+void DrawMesWin2(itfPanel_t *panel, sdfDrawTag_t *command) {
+    itfDrawVertex_t rect[2];
+    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)panel->payload;
+    s32 top = panel->top;
+    s32 bottom = panel->bottom;
+
+    if (bottom - top >= 0x8B1) {
+        s32 topEnd = top + 0x458;
+        s32 bottomStart = bottom - 0x458;
+
+        rect[0].x = panel->left;
+        rect[0].y = top;
+        rect[1].x = panel->right;
+        rect[1].y = topEnd;
+        itfMiscDrawSpritePrim(rect, &D_003264A0, (itfDrawColor_t *)&panel->red, panel->renderValue,
+                                      payload->texture, 0, command);
+        rect[0].y = topEnd;
+        rect[1].y = bottomStart;
+        itfMiscDrawSpritePrim(rect, &D_003264B0, (itfDrawColor_t *)&panel->red, panel->renderValue,
+                                      payload->texture, 0, command);
+        rect[0].y = bottomStart;
+        rect[1].y = panel->bottom;
+        itfMiscDrawSpritePrim(rect, &D_003264C0, (itfDrawColor_t *)&panel->red, panel->renderValue,
+                                      payload->texture, 0, command);
+    } else {
+        itfMiscDrawSpritePrim(&panel->left, &D_003264D0,
+                                      &panel->red, panel->renderValue,
+                                      payload->texture, 0, command);
+    }
+}
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */

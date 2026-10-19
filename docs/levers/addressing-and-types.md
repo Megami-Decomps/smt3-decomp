@@ -1402,3 +1402,16 @@
   it was not the address spelling but the store order: five of the field
   copies' 120 store permutations get the shared register and the rest emit
   `lui`/`addiu` into a second register.
+- `PS2_SYMBOL_AT` for `dds3LightParam + 0x10` confirmed a third time, and the
+  two halves of one unit disagree. In `basic/dds3LightObjectBasic`,
+  `lightmainprocedure` shares the `%hi(dds3LightParam)` it already formed for
+  the parallel-light pointer and derives the ambient with an `addiu +0x10`,
+  four words short, until the member gets its own alias; its neighbour
+  `dds3LinkSceneLight` has the identical pair of accesses and is exact with the
+  plain `&dds3LightParam.ambient`. So read whether retail's `%hi` is shared
+  rather than applying the alias to every access of the member.
+- One reused handle local for two successive allocate-and-lock pairs is what
+  gives retail's single callee-saved register and its `daddu rd, $2, $0` per
+  pair. `itfPnlRegist2` assigns `allocation` twice, once for the panel record
+  and once for the kind's payload; two named locals store the second call's
+  result straight out of `$2` and lose the copy.

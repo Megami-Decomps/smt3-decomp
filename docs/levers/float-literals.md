@@ -51,3 +51,26 @@ order. The order in which the C uses a constant has to match retail.
   the load into the `mtc1`-to-`abs.s` latency the way retail does and is exact. Its
   matching sibling `dds3ComparePosPoseSet`, which adds two radii, needs `fabsf`, so
   the two live side by side in one unit.
+- The reverse of the `$gp` row above, on a symbol retail *does* reach through
+  `$gp`: an incomplete array extern forces absolute addressing, so where retail
+  has `addiu rd, $28, %gp_rel(sym)` the extern needs a **size**.
+  `extern u8 cmbMenuEntryTable[]` emitted a `lui`/`addiu %lo` pair and
+  `extern u8 cmbMenuEntryTable[8]` restored the `$gp` form; both
+  `cmbEnableMenuEntry2` and `cmbEnableMenuEntry6` turned on that alone. The
+  same row read on a float: a plain `extern f32 D_003494C0;` is `$gp`-addressed
+  and four bytes short of retail's `lui %hi` plus `lwc1 %lo`, which
+  `extern f32 D_003494C0[];` and `D_003494C0[0]` at the use give.
+  `check_unit.py` does **not** report a .lit4 pool constant in that case, so a
+  `$gp`-relative `lwc1` of a `D_` symbol is not by itself evidence of the pool.
+- A **repeated subexpression written out again** is what decides a commutative
+  `add.s`'s operand order when no spelling of the statement reaches it. In
+  `dds3NeedleModelVNCListCreate` the half step and the mid angle share one `f32`
+  local (`mid = step * 0.5f;` at the top of the loop body, which is also what
+  stops loop-invariant motion hoisting the multiply out); retail's
+  `add.s $f20, $f22, $f20` takes `angle` first, and `mid = angle + mid;`,
+  `mid = mid + angle;`, `mid += angle;`, a block-local copy of `angle` and
+  `angle - -mid` all emit the operands the other way round. Writing the
+  multiply again at the add, `mid = angle + step * 0.5f;`, is exact: cse folds
+  the second multiply away and the add is expanded with `angle` as operand 0.
+  All six declaration orders of the three float locals are inert, as the
+  declaration-order row predicts.

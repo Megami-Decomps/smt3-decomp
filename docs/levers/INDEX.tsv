@@ -1,22 +1,22 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
-docs/levers/README.md	9		| 200 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-docs/levers/README.md	10		| 99 | [control-flow.md](control-flow.md) | Control flow |
-docs/levers/README.md	11		| 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
-docs/levers/README.md	12		| 7 | [stores.md](stores.md) | Stores |
+docs/levers/README.md	9		| 202 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+docs/levers/README.md	10		| 102 | [control-flow.md](control-flow.md) | Control flow |
+docs/levers/README.md	11		| 9 | [stores.md](stores.md) | Stores |
+docs/levers/README.md	12		| 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 6 | [impossible.md](impossible.md) | Functions that cannot be written in C |
-docs/levers/README.md	14		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
-docs/levers/README.md	15		| 1 | [float-literals.md](float-literals.md) | Float literals |
-docs/levers/README.md	16		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
-docs/levers/README.md	17		| 0 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
-docs/levers/README.md	18		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
-docs/levers/README.md	19		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
-docs/levers/README.md	20		| 0 | [rodata-placers.md](rodata-placers.md) | Do not run the rodata and sdata placers standalone |
-docs/levers/README.md	21		| 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated;
-docs/levers/README.md	22		| 0 | [local-vectors.md](local-vectors.md) | Two local vectors:
-docs/levers/README.md	23		| 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
-docs/levers/README.md	24	$2 $4 lw move	| 0 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
-docs/levers/README.md	25		| 0 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
+docs/levers/README.md	14		| 3 | [float-literals.md](float-literals.md) | Float literals |
+docs/levers/README.md	15		| 2 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
+docs/levers/README.md	16		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
+docs/levers/README.md	17		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
+docs/levers/README.md	18		| 0 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
+docs/levers/README.md	19		| 0 | [swapped-globals.md](swapped-globals.md) | Two global addresses in callee-saved registers can come out swapped |
+docs/levers/README.md	20		| 0 | [second-label.md](second-label.md) | A second label in the split assembly:
+docs/levers/README.md	21		| 0 | [rodata-placers.md](rodata-placers.md) | Do not run the rodata and sdata placers standalone |
+docs/levers/README.md	22		| 0 | [loop-rotation.md](loop-rotation.md) | A loop whose exit test is written first gets rotated;
+docs/levers/README.md	23		| 0 | [local-vectors.md](local-vectors.md) | Two local vectors:
+docs/levers/README.md	24		| 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
+docs/levers/README.md	25	$2 $4 lw move	| 0 | [handle-registers.md](handle-registers.md) | lw $4 against lw $2 plus move $4, $2 |
 docs/levers/README.md	26		| 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
 docs/levers/README.md	27		| 0 | [callee-visibility.md](callee-visibility.md) | Callee visibility:
 docs/levers/README.md	28		| 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
@@ -222,6 +222,8 @@ docs/levers/addressing-and-types.md	1377		A .lit4 constant whose decimal is obvi
 docs/levers/addressing-and-types.md	1383	addiu lbu	A byte counter decremented in place gives addiu rd, rs, 0xFF when the global is u8 and addiu rd, rs, -1 when it is s8, since the unsigned form stays in QImode.
 docs/levers/addressing-and-types.md	1390	andi dsll32 dsra32 sltiu xori	!x on a value that reached s32 through a 64-bit truncation emits sltiu rd, rs, 1, because the dsll32/dsra32 pair hides the andi 1's range from the expander.
 docs/levers/addressing-and-types.md	1396	$1 $2 $at addiu addu lui	A row pointer that shares the scaled index's own register is visible in the assembly as the %hi/%lo pair landing in $1:
+docs/levers/addressing-and-types.md	1405	addiu	PS2_SYMBOL_AT for dds3LightParam + 0x10 confirmed a third time, and the two halves of one unit disagree.
+docs/levers/addressing-and-types.md	1413	$0 $2 daddu	One reused handle local for two successive allocate-and-lock pairs is what gives retail's single callee-saved register and its daddu rd, $2, $0 per pair.
 docs/levers/control-flow.md	6	beqz bnez	| the opposite arm falls through (bnez where you emit beqz) | invert the if condition |
 docs/levers/control-flow.md	7		| one exit, default set before the branch | replace an early return 0 with s32 ret = f();
 docs/levers/control-flow.md	8	jal	| jal and a full epilogue | assign the call's result to a variable instead of return f();, which ee-gcc 2.96 sibcalls |
@@ -320,10 +322,17 @@ docs/levers/control-flow.md	100	$2 $3 beq beql	| a last guard whose beql tests t
 docs/levers/control-flow.md	101		| a guarded block whose exit is a forward goto where your break-style early return rotates the registers | goto ret0;
 docs/levers/control-flow.md	102	$31 $f0 jr mov.s	| a two-sided clamp whose high arm has its own jr $31 and a mov.s from the bound's register | if (hi < x) { x = hi;
 docs/levers/control-flow.md	103	$0 $2 daddu jr	| a guard whose failure returns the **same variable** the function's tail returns, with two daddu $2, rs, $0 copies and an empty jr delay slot | an early…
-docs/levers/control-flow.md	104	$18 jal nop sll sllv	| a nop in a call's delay slot, where your C fills it with the last argument's load | declare the local those arguments are read from volatile.
+docs/levers/control-flow.md	104	jal nop	| a nop in a call's delay slot, where your C fills it with the last argument's load | declare the local those arguments are read from volatile.
+docs/levers/control-flow.md	105	bne bnel li nop sh	| a guard arm's first store duplicated into a bnel delay slot, with the value it stores computed *above* the branch, where retail has a plain bne, a nop and…
+docs/levers/control-flow.md	106	slti	| three case labels sharing one body, where retail has a three-node compare tree and your C emits one slti range test | write the body out in **each** arm,…
+docs/levers/control-flow.md	107	$18 $2 $3 nop sll sllv	| two early exits each returning a different call's result, where your C reuses one variable and spends a saved register on it | two locals and return res;
 docs/levers/cross-jumping.md	8	lui ori	Where retail computes a value in both arms of an if but converts or stores it once at the join, the source most likely duplicates the whole tail in both arms…
 docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one register differs, which is why retail can keep two of three float-to-int conversions inside the arms and share only the third.
 docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
+docs/levers/float-literals.md	54	$28 $gp addiu lui lwc1	The reverse of the $gp row above, on a symbol retail *does* reach through $gp:
+docs/levers/float-literals.md	65	$f20 $f22 add	A **repeated subexpression written out again** is what decides a commutative add.s's operand order when no spelling of the statement reaches it.
+docs/levers/float-registers.md	13	$2 $3 lui mfc1 mtc1	SDF_VU0_SCALEVECTOR against SDF_VU0_SCALEVECTOR_BITS with the float expression passed straight to the "r" operand is a scheduling lever, not only a spelling.
+docs/levers/float-registers.md	24		A word the **next** block needs, read right after a volatile asm and before the stores of the previous block's result, belongs in its own local.
 docs/levers/impossible.md	13		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.
 docs/levers/impossible.md	16		nbLoadMotionByIndex has two byte-identical arms that gcc cross-jumps.
 docs/levers/impossible.md	19		A call with no argument to a function the unit defines with a prototype, as Hatudo and nbE915_Test do to nbGetEventForm.
@@ -337,6 +346,8 @@ docs/levers/stores.md	54	$0 $4 $5 $6 andi daddu	Where a block needs three consta
 docs/levers/stores.md	64	beqz lb lbu sll	A bounded string copy that retail writes as one lbu, a sll rd, rs, 24, the branch and the store in its delay slot is while ((dst[i] = src[i]) != '\0'), the…
 docs/levers/stores.md	75		In a function whose body is a run of stores into one table row, the store order decides which address-base temp gcc creates first, and that decides which…
 docs/levers/stores.md	86	beqz blezl slti	An && of two tests on the same field compiles to the same two branches as nested ifs, so the branch shape is no evidence either way, but it can decide the…
+docs/levers/stores.md	96	sll	Field stores placed **after** the pointer arithmetic that reads the same count keep the count in its own register.
+docs/levers/stores.md	104	jal	A vertex writer's three component stores are written in **field order**, x, y, z, even where retail emits the z store between the other two.
 docs/levers/when-to-stop.md	48		Pure instruction scheduling, where the same instructions appear in a different order with no semantic difference to steer.
 docs/levers/when-to-stop.md	50		Register allocation that needs one register fewer than the C uses, shifting every later allocation.
 docs/levers/when-to-stop.md	52		A set of reload spill slots that appear in a rotated order.

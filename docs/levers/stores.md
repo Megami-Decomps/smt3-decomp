@@ -93,3 +93,17 @@ to precede `control->modelHandle = obj;`.
   the nested form. Reading the field into a local first changes nothing. So
   when a function is far out but every instruction is present in retail's
   order, try nesting each `&&` before anything else.
+- Field stores placed **after** the pointer arithmetic that reads the same count
+  keep the count in its own register. `dds3NeedleModelVNCListCreate` computes
+  `normal = position + vertexCount; color = (u32 *)(normal + vertexCount);` and
+  then stores the four header fields in ascending offset order: that keeps `n`
+  live across the `sll`, so the scaled offset takes a caller-saved register of
+  its own where storing `work->vertexCount` first lets the shift reuse `n`'s
+  register in place. The scheduler still hoists the count store back to retail's
+  position, so the source order is not visible in the output. 4 of 142 words.
+- A vertex writer's three component stores are written in **field order**, `x`,
+  `y`, `z`, even where retail emits the `z` store between the other two.
+  `dds3NeedleModelVNCListCreate` writes nine such triples; with the `0.0f` `z`
+  store placed between the `sdfCos` and `sdfSin` calls, as the asm's emitted
+  order suggests, the schedule moves it ahead of the `jal` and the function is
+  40 of 142 words out, and 17 with only the position triples still reordered.
