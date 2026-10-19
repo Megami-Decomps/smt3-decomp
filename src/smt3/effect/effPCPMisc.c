@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
+#include "sdf_types.h"
 
 struct BattleGroupNode;
 struct BattleGroupSlot;
@@ -265,7 +266,6 @@ typedef struct MdlObjectAttachment MdlObjectAttachment;
 typedef struct MdlPartEntry MdlPartEntry;
 typedef struct SdfMapPositionRecord SdfMapPositionRecord;
 typedef struct MdlResourceItem MdlResourceItem;
-typedef struct sdfVector3_t sdfVector3_t;
 typedef struct EffPacketParams EffPacketParams;
 typedef struct EffParamTableRecord EffParamTableRecord;
 typedef struct EffParamTable EffParamTable;
@@ -2209,12 +2209,6 @@ struct MdlCtx {
     f32 objectRadius; /* Propagated to the rebuilt object's inner radius. */
 };
 
-/* Three-component vector; the VU0 loaders read it as the xyz of a quadword. */
-struct sdfVector3_t {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 /* vf31.xyz += vf10.xyz, keeping vf31.w: the translation row of the matrix
  * bank being accumulated in place. */

@@ -3,6 +3,7 @@
 #include "basic.h"
 #include "scr.h"
 #include "ps2asm.h"
+#include "newdata.h"
 
 typedef struct evtUnitHandle_t
 {
@@ -58,42 +59,6 @@ typedef struct
     sdfVector4_t tarpos;
     sdfVector4_t startpos;
 } nbFormation_t;
-typedef struct datUnitWork_t
-{
-    u32 flag;
-    u16 id;
-    u16 hp;
-    u16 maxhp;
-    u16 mp;
-    u16 maxmp;
-    u16 badstatus;
-    u32 exp;
-    u16 level;
-    s8 param[6];
-    s8 skillparam[6];
-    u16 uniqueid;
-    u16 reserve1;
-    u16 reserve2;
-    u16 namecode[8];
-    u16 skillcnt;
-    u16 skill[24];
-    s16 nowcommand;
-    u16 nowindex;
-    s16 nowtarea;
-    s16 nowtform;
-    s16 prevcommand;
-    u16 previndex;
-    s16 prevtarea;
-    s16 prevtform;
-    s8 mitamaparam[6];
-    s8 levelupparam[6];
-    u16 keisyoskill[24];
-    u8 keiattr[24];
-    u16 hensinmae;
-    u16 getdevilhearts[4];
-    u32 hensinmaeexp;
-    u16 fullnamecode[8];
-} datUnitWork_t;
 typedef struct nbParty_t
 {
     u16 flag;
@@ -208,26 +173,6 @@ typedef struct
     u8 attackinterval;
     u8 reserve1;
 } datDevilFormat_t;
-typedef struct
-{
-    sdfVector4_t center;
-    f32 formsize;
-    f32 formheight;
-    f32 formscale;
-    f32 oneshotr;
-    f32 allshotr;
-    u16 modelsize;
-    u16 shadowsize;
-    u16 badframe;
-    u16 autowait;
-    void *motion;
-    /* Truncated: include/newdata.h carries the rest (unk30, part[12] and a
-     * 0x18E-byte tail). This unit only holds the type through a pointer and
-     * reads nothing past motion. */
-    u32 reserve1;
-    u32 reserve2;
-    u32 reserve3;
-} datUnitVisual_t;
 typedef struct _FRQ _FRQ;
 /* Only the fields this unit reads are named; x and y are in 1/16 pixels. */
 struct _FRQ
@@ -439,45 +384,6 @@ typedef struct effPCPBossONGY2Param_t
 
 typedef struct
 {
-    u8 flag;
-    u8 use;
-    u8 koukatype;
-    u8 costtype;
-    u16 cost;
-    u16 costbase;
-    u8 targettype;
-    u8 targetarea;
-    u8 targetrule;
-    u8 targetrandom;
-    u16 untargetbadstat;
-    u16 targetprog;
-    u8 hittype;
-    u8 hitlevel;
-    u16 hitprog;
-    u8 targetcntmin;
-    u8 targetcntmax;
-    u16 hptype;
-    s16 hpn;
-    u16 mptype;
-    s16 mpn;
-    s16 hpbase;
-    s16 mpbase;
-    u16 minus;
-    u8 badtype;
-    u8 badlevel;
-    u16 basstatus;
-    u32 hojotype;
-    s8 hojopoint;
-    u8 deadtype;
-    u32 program;
-    s16 criticalpoint;
-    s16 failpoint;
-    s16 magicbase;
-    s16 magiclimit;
-} datNormalSkill_t;
-
-typedef struct
-{
     s8 skillattr;
     s8 type;
     s16 index;
@@ -496,21 +402,6 @@ typedef struct
     u8 unk_1C[0x8];
     u16 unk_24;
 } nbEncountForm_t;
-
-typedef struct
-{
-    u8 motion;
-    u8 animetype;
-    u8 hatudo;
-    u8 bedno;
-} datNormalSkillVisual_t;
-
-typedef struct
-{
-    datNormalSkill_t normal[288];
-    u8 reserve[8];
-    datNormalSkillVisual_t visual[288];
-} datSkillTable_t;
 
 extern char D_00544890[]; /* "カット長 = %d\n" */
 extern char D_00544900[]; /* "length = %d\n" */
@@ -688,7 +579,6 @@ extern void nbPnl_rsetAlpha(s32 mode);
 extern char D_00545728[];
 extern void *nbDebugProcess1(dds3ProcessID_t *id);
 extern s32 datGetPlayerLNDLevel(void *work);
-extern u8 *DDS3_GBWK;
 extern char *datExplainTable[];
 extern char *text1[];
 extern char *text2[];
@@ -2506,7 +2396,7 @@ s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 mode)
     sum = 0;
     cnt = 0;
     if (mode == 0) {
-        w = (datUnitWork_t *)(DDS3_GBWK + 0xA54);
+        w = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
         for (i = 0; i < 16; i++) {
             if ((w->flag & 1) != 0) {
                 if ((w->flag & 2) != 0) {
@@ -2573,7 +2463,7 @@ s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 mode, s32 param)
     sum = 0;
     if (mode == 0) {
         for (i = 0, ofs = 0; i < 16; i++) {
-            w = (datUnitWork_t *)(DDS3_GBWK + ofs + 0xA54);
+            w = (datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54);
             ofs += 0xEC;
             if ((w->flag & 1) != 0) {
                 if ((w->flag & 2) != 0) {
@@ -3491,7 +3381,7 @@ s32 Flow1_15(nbNegoProcessData_t *n)
 s32 Flow1_16(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x10011);
-    n->getmakka = *(s32 *)(DDS3_GBWK + 0xA48) / 3;
+    n->getmakka = *(s32 *)((u8 *)DDS3_GBWK + 0xA48) / 3;
     *(u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8) = 0;
     return 0;
 }
@@ -8794,7 +8684,7 @@ void nbDispDevilName(s32 formindex)
     nbGetMainProcessData();
     if (formindex == 0) {
         lndtext = &datExplainTable[0x40];
-        nbDispText(lndtext[datGetPlayerLNDLevel(DDS3_GBWK + 0xA54)], NULL, 2, 2,
+        nbDispText(lndtext[datGetPlayerLNDLevel((u8 *)DDS3_GBWK + 0xA54)], NULL, 2, 2,
                    0xA09DC380);
     } else {
         nbDispText(datExplainTable[datDevilTable[formindex].race], text2[formindex],
@@ -9342,7 +9232,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetEncountMax);
 
 u16 nbGetEncountCnt(void)
 {
-    return *(u16 *)(DDS3_GBWK + 0x1CF8);
+    return *(u16 *)((u8 *)DDS3_GBWK + 0x1CF8);
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncountCalc);
@@ -9384,7 +9274,7 @@ void fclClearTerminalState(void)
 {
     u8 *gb;
 
-    gb = DDS3_GBWK;
+    gb = (u8 *)DDS3_GBWK;
     *(s32 *)(gb + 0x1CF4) = 0;
     *(u16 *)(gb + 0x1CF8) = 0;
     nbEncountMax = 0;
@@ -9906,7 +9796,7 @@ s32 nbBadCurseStep1(nbActionProcessData_t *a)
 s32 nbBadCurseStep4(nbActionProcessData_t *a)
 {
     if (nbCheckFormationPlayerSide(a->form->formindex) != 0 &&
-        *(s32 *)(DDS3_GBWK + 0xA48) == 0) {
+        *(s32 *)((u8 *)DDS3_GBWK + 0xA48) == 0) {
         return 1;
     }
     if ((a->work->flag & 0x20) != 0 && (a->party->flag & 0x800) != 0) {
@@ -10075,7 +9965,7 @@ void nbMakaDispOn(s32 no)
         w->unk_0C = 0x112;
         w->unk_10 = 0x10D;
     }
-    w->maka = *(s32 *)(DDS3_GBWK + 0xA48);
+    w->maka = *(s32 *)((u8 *)DDS3_GBWK + 0xA48);
     w->unk_1C = no;
     w->unk_00 = 1;
 }
@@ -10169,7 +10059,7 @@ nbMakaWork_t *nbAllocMakaWork(void)
 
     w = sdfChipAllocDirect(sizeof(nbMakaWork_t));
     memset(w, 0, sizeof(nbMakaWork_t));
-    w->maka = *(s32 *)(DDS3_GBWK + 0xA48);
+    w->maka = *(s32 *)((u8 *)DDS3_GBWK + 0xA48);
     return w;
 }
 

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "ps2asm.h"
 #include "sdf_resource.h"
+#include "sdf_types.h"
 
 struct EffRandState;
 struct EffThunderAlphaParams;
@@ -47,7 +48,6 @@ typedef struct EffThunderAlphaParams EffThunderAlphaParams;
 typedef struct EffThunderVectorParams EffThunderVectorParams;
 typedef union EffThunderParameterHead EffThunderParameterHead;
 typedef struct EffThunderVectorWork EffThunderVectorWork;
-typedef struct sdfVector3_t sdfVector3_t;
 
 #define EFF_THUNDER_VECTOR_COMPONENTS 4
 
@@ -419,12 +419,6 @@ struct EffThunderVectorWork {
     struct sdfMemHandle_t *allocationHandle;
 };
 
-/* Three-component vector; the VU0 loaders read it as the xyz of a quadword. */
-struct sdfVector3_t {
-    f32 x;
-    f32 y;
-    f32 z;
-};
 
 /*
  * Fill the x, y and z components of a float vector with one value (plain C;
