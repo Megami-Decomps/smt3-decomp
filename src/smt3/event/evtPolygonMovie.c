@@ -111,7 +111,6 @@ extern void fileHandleFree(void *handle);
 extern void sdfMemFreeDirect(void *handle);
 extern void FrameRun(evtPolygonMovieWork_t *work);
 extern s32 printf(const char *fmt, ...);
-extern char D_0053BAD8[];
 extern f32 D_0056CFF0[12];
 extern s32 strcmp(const char *a, const char *b);
 extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *resource, f32 *position, f32 *scale);
@@ -129,8 +128,6 @@ extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *own
 extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *owner, s32 index);
 extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *target);
 extern dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
-extern char D_0053BA00[];
-extern char D_0053BC88[];
 extern void evtPlayEventBgm(s32 eventNo, s32 bgm);
 extern void evtFadeInEventBgm(s32 eventNo, s32 bgm);
 extern void evtStopEventBgm(s32 eventNo, s32 bgm);
@@ -164,8 +161,6 @@ extern void *evtGetUnitHandle2(dds3Basic_t *unit);
 extern void evtLinkLightObjectBasic(void *handle, dds3Basic_t *light, s32 frames);
 extern void evtUnlinkLightObjectBasic(void *handle, s32 frames);
 extern s32 sprintf(char *buffer, const char *format, ...);
-extern char D_0053BC28[];
-extern char D_0053BC58[];
 void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out);
 f32 evtHokanFloat(s32 enable, f32 t, f32 a, f32 b);
 extern s16 dds3ScreenBlurAlpha;
@@ -396,8 +391,6 @@ void SeFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_
     }
 }
 
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BA00);
-
 s32 BgmFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     s32 eventNo;
@@ -406,7 +399,8 @@ s32 BgmFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_
     if (f->frame == now) {
         eventNo = work->eventNo;
         bgm = f->data.h[1];
-        printf(D_0053BA00, eventNo, bgm);
+        printf("bgm_frame e%03d, bgm %d
+", eventNo, bgm);
         switch (f->data.h[0]) {
         case 0:
             evtPlayEventBgm(eventNo, bgm);
@@ -1125,7 +1119,8 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *task)
     work->nowFrame++;
     ret = 0;
     if (work->nowFrame >= work->cutInfo->lastFrame) {
-        printf(D_0053BAD8, work->nowFrame);
+        printf("end polygon movie! frame:%d
+", work->nowFrame);
         return -1;
     }
     return ret;
@@ -1180,8 +1175,6 @@ s32 evtCheckPolygonMovieRun(dds3ProcessID_t *task)
     }
     return set;
 }
-
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAD8);
 
 INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BAF8);
 
@@ -1639,8 +1632,8 @@ sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out)
 
 void SetPMFileName(s32 eventNo, s32 cutNo, char *pm1file, char *pm2file)
 {
-    sprintf(pm1file, D_0053BC28, eventNo / 10 * 10, eventNo, eventNo, cutNo, eventNo, cutNo);
-    sprintf(pm2file, D_0053BC58, eventNo / 10 * 10, eventNo, eventNo, cutNo, eventNo, cutNo);
+    sprintf(pm1file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1", eventNo / 10 * 10, eventNo, eventNo, cutNo, eventNo, cutNo);
+    sprintf(pm2file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", eventNo / 10 * 10, eventNo, eventNo, cutNo, eventNo, cutNo);
 }
 
 /* NON_MATCHING: 2 of 60 words differ (first at +0x5C). */
@@ -1695,16 +1688,10 @@ void evtStartPolygonMovie2(s32 priority, s32 eventNo, s32 cutNo)
     work->movieFlags |= 2;
     work->file4C = fileLoad(pm2file);
     work->movieFlags |= 4;
-    work->processId = dds3StartProcess(D_0053BC88, priority, 1, 1,
+    work->processId = dds3StartProcess("PolygonMovie", priority, 1, 1,
                                        (dds3ProcessFunc_t)evtPolygonMovieProcess1,
                                        (dds3ProcessFunc_t)evtPolygonMovieShutdown, work);
 }
-
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BC28);
-
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BC58);
-
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BC88);
 
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraFrameState);
 

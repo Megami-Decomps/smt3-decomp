@@ -49,9 +49,7 @@ extern void sdfMemFreeDirect(void *handle);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern void *sdfChipAllocDirect(s32 size);
 extern f32 effBTLPartGetScalePtr(nbFormation_t *formation);
-extern char D_00532E50[];
 extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern char D_00532E20[];
 
 typedef struct effBTLImage_t {
     s32 words[0xC38 / 4];
@@ -73,19 +71,8 @@ extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
 extern u16 D_0031B8C0[];
 extern sdfVector4_t D_00319FA0[];
 extern sdfVector4_t D_0031B8F0[];
-extern char D_00532E38[];
-extern char D_00532F38[];
-extern char D_00532F68[];
-extern char D_00533028[];
-extern char D_00533058[];
-extern char D_00533068[];
 extern s32 fldSkyGetAlpha(void);
 extern void *memset(void *dst, s32 value, u32 count);
-extern char D_00532F08[];
-extern char D_00532F20[];
-extern char D_00532F50[];
-extern char D_00532F90[];
-extern char D_00532FB8[];
 
 typedef struct effBTLSkillInfo_t {
     nbFormation_t *invokeForm;
@@ -111,21 +98,21 @@ typedef struct effBTLLightParams_t {
     f32 ambient[4];
 } effBTLLightParams_t;
 
-typedef struct effBTLLightResource_t {
+typedef struct fldResourceLight_t {
     u32 resv;
-    u32 flag;
-    u32 animeType;
-    f32 insideR;
-    f32 outsideR;
-    f32 soften;
-    f32 bias;
-    f32 diffuseR;
-    f32 diffuseG;
-    f32 diffuseB;
-    f32 ambientR;
-    f32 ambientG;
-    f32 ambientB;
-} effBTLLightResource_t;
+    u32 Flag;
+    u32 AnimeType;
+    f32 InsideR;
+    f32 OutsideR;
+    f32 Soften;
+    f32 Bias;
+    f32 DiffuseR;
+    f32 DiffuseG;
+    f32 DiffuseB;
+    f32 AmbientR;
+    f32 AmbientG;
+    f32 AmbientB;
+} fldResourceLight_t;
 
 typedef struct effBTLLightWork_t {
     u8 unk00[0x70];
@@ -136,8 +123,8 @@ extern f32 D_00569970[4];
 extern f32 D_00569980[4];
 extern f32 D_00569990[4];
 extern f32 D_005699A0[4];
-extern effBTLLightResource_t D_005699B0;
-extern u32 D_00551D88;
+extern fldResourceLight_t D_005699B0;
+extern u32 abgr;
 extern u32 D_00551D84;
 extern u32 D_0054F18C;
 extern u32 D_0054F190;
@@ -160,8 +147,6 @@ typedef struct effBTLColorRow_t {
 } effBTLColorRow_t;
 
 extern effBTLColorRow_t D_00317750[];
-extern char D_00532FE8[];
-extern char D_00532ED0[];
 extern f32 D_00532EA0[4];
 extern f32 D_00532EB0[4];
 extern f32 D_00532EC0[4];
@@ -183,7 +168,7 @@ extern void Mult(void);
 extern void ToMatrix(void);
 extern void MultMatrixNoArg(void);
 extern void SetRotateMatrixAxis(f32 angle, const f32 *axis);
-extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, effBTLLightResource_t *resource);
+extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
 extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frames);
 extern void dds3UnlinkSceneLight(dds3Basic_t *basic);
 
@@ -204,7 +189,8 @@ effBTL_t *effBTLCreate(void *data) {
     effBTLPartCreate(work, data);
     work->active = 0;
     work->cutList = NULL;
-    printf(D_00532E20);
+    printf("effBTL:handle create
+");
     return work;
 }
 
@@ -220,7 +206,8 @@ void effBTLDelete(effBTL_t *work) {
     }
     effBTLPartDelete(work);
     sdfMemFreeDirect(work->resource);
-    printf(D_00532E38);
+    printf("effBTL:handle delete
+");
 }
 
 s32 effBTLGetMotionChangeFrame(effBTL_t *handle, u16 kind) {
@@ -304,19 +291,14 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 fla
         } while (remaining != 0);
     }
     cut->currentFrame = 0;
-    printf(D_00532E50, cut->kind, cut->state, cut->state->active);
+    printf("effBTL:cut %d handle create(%p)[%d]
+", cut->kind, cut->state, cut->state->active);
     cut->state->active++;
     return cut;
 }
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532E20);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532E38);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532E50);
-
 void effBTLCutDelete(effBTLCut_t *owner) {
     s32 workIndex;
 
@@ -478,7 +460,7 @@ void effBTLCutDraw(effBTLCut_t *cut) {
         if (list->shake < 0x1F) {
             dds3SetQuake(list->shakeFade, list->shake * 10);
         } else {
-            printf(D_00532ED0, list->shake);
+            printf("effBattle : shake over[%d]\n", list->shake);
             dds3SetQuake(list->shakeFade, 0x12C);
         }
     }
@@ -651,7 +633,8 @@ void effBTLSkillInit(void) {
     memset(&D_005698E0, 0, sizeof(D_005698E0));
     effBTLSkillRun = 0;
     effBTLSkillState = 0;
-    printf(D_00532F08);
+    printf("effBTLSkillInit 
+");
 }
 
 void effBTLSkillStart(u32 id, u32 stat) {
@@ -669,8 +652,10 @@ void effBTLSkillStart(u32 id, u32 stat) {
     effBTLSkillSetActive();
     effBTLCutReset();
     effBTLSkillRun = 1;
-    printf(D_00532F20, stat);
-    printf(D_00532F38, id);
+    printf("effBTL:Set Stat[%X]
+", stat);
+    printf("effBTL:Skill Start[%X]
+", id);
 }
 
 void effBTLSkillEnd(void) {
@@ -682,7 +667,8 @@ void effBTLSkillEnd(void) {
     effBTLSkillClearActive();
     effBTLPartPtrResetAllModelCenterOffset();
     effBTLSkillRun = 0;
-    printf(D_00532F50);
+    printf("effBTL:Skill End
+");
 }
 
 void effBTLSkillSetFormationInfo(s32 formIndex, u32 targetBit) {
@@ -707,7 +693,8 @@ void effBTLSkillSetFormationInfo(s32 formIndex, u32 targetBit) {
         form++;
     }
     D_005698E0.targetNumber = count;
-    printf(D_00532F68);
+    printf("effBTL:Skill Set Formation Info
+");
 }
 
 nbFormation_t *effBTLSkillGetInvokeFormation(void) {
@@ -715,7 +702,8 @@ nbFormation_t *effBTLSkillGetInvokeFormation(void) {
 
     if (D_005698E0.invokeForm == NULL) {
         data = nbGetMainProcessData();
-        printf(D_00532F90);
+        printf("effBTL:InvokeForm == NULL ****** !!
+");
         return data->form;
     }
     return D_005698E0.invokeForm;
@@ -732,7 +720,8 @@ u32 effBTLSkillGetInvokeParty(void) {
 
 nbFormation_t *effBTLSkillGetTargetFormation(s32 number) {
     if (D_005698E0.targetNumber == 0) {
-        printf(D_00532FB8);
+        printf("error: effBTLSkillInfo.target_number == 0
+");
         return D_005698E0.invokeForm;
     }
     return D_005698E0.targetForm[number];
@@ -761,7 +750,8 @@ s32 effBTLSkillCheckRun(void) {
 
 void effBTLSkillSetState(s32 state) {
     effBTLSkillState = state;
-    printf(D_00532F20, state);
+    printf("effBTL:Set Stat[%X]
+", state);
 }
 
 s32 effBTLSkillGetState(void) {
@@ -800,7 +790,8 @@ void effBTLFieldColorON(u32 id) {
         SDF_VU0_LOADVECTOR_B_MEMOPS(work);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR_MEMOPS(work);
-        format = D_00532FE8;
+        format = "FieldColor:%f,%f,%f(%f,%f,%f)
+";
         ar = sdfFloatToULong(work.r);
         ag = sdfFloatToULong(work.g);
         ab = sdfFloatToULong(work.b);
@@ -811,7 +802,7 @@ void effBTLFieldColorON(u32 id) {
         D_00569970[1] = work.r;
         D_00569970[2] = work.g;
         D_00569970[3] = work.b;
-        D_00551D88 = D_00317750[id].word;
+        abgr = D_00317750[id].word;
         effBTLFieldColorStart();
     } else if (effBTLFieldColorIsOn() != 0 && id != 0) {
         color = D_0054F190;
@@ -829,7 +820,7 @@ void effBTLFieldColorON(u32 id) {
         D_00569970[1] = work.r;
         D_00569970[2] = work.g;
         D_00569970[3] = work.b;
-        D_00551D88 = D_0031CA90[0];
+        abgr = D_0031CA90[0];
         effBTLFieldColorStart();
     }
     effBTLFieldLightAnimFrame = 0;
@@ -837,20 +828,6 @@ void effBTLFieldColorON(u32 id) {
     effBTLFieldLightAnimRotate = 0.0f;
 }
 #else
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532F08);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532F20);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532F38);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532F50);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532F68);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532F90);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00532FB8);
-
 INCLUDE_ASM(const s32, "effect/effBattle", effBTLFieldColorON);
 #endif
 
@@ -970,26 +947,26 @@ void effBTLFieldColorRun(void) {
         /* fallthrough */
     case 2:
         data = nbGetMainProcessData();
-        D_005699B0.diffuseR = D_00569970[1];
-        D_005699B0.diffuseG = D_00569970[2];
-        D_005699B0.diffuseB = D_00569970[3];
-        D_005699B0.ambientR = D_00569970[1];
-        D_005699B0.ambientG = D_00569970[2];
-        D_005699B0.ambientB = D_00569970[3];
-        D_005699B0.insideR = 0.0f;
-        D_005699B0.outsideR = 0.0f;
-        D_005699B0.soften = 0.0f;
-        D_005699B0.bias = 0.0f;
+        D_005699B0.DiffuseR = D_00569970[1];
+        D_005699B0.DiffuseG = D_00569970[2];
+        D_005699B0.DiffuseB = D_00569970[3];
+        D_005699B0.AmbientR = D_00569970[1];
+        D_005699B0.AmbientG = D_00569970[2];
+        D_005699B0.AmbientB = D_00569970[3];
+        D_005699B0.InsideR = 0.0f;
+        D_005699B0.OutsideR = 0.0f;
+        D_005699B0.Soften = 0.0f;
+        D_005699B0.Bias = 0.0f;
         D_005699B0.resv = 0;
-        D_005699B0.flag = 0;
-        D_005699B0.animeType = 0;
+        D_005699B0.Flag = 0;
+        D_005699B0.AnimeType = 0;
         dds3SetLightObjectResoruce(data->light[1], &D_005699B0);
         dds3LinkSceneLight(data->light[1], 0xC);
         dds3LightParam.sources[0][4] = -0.73f;
         dds3LightParam.sources[0][5] = 1.55f;
         dds3LightParam.sources[0][6] = 0.24f;
         effBTLSkyFilterON(0x40, 0xC);
-        effBTLFieldFilterON(D_00551D88, 0xC);
+        effBTLFieldFilterON(abgr, 0xC);
         effBTLFieldColorProcess = 3;
         break;
     case 3:
@@ -1004,12 +981,12 @@ void effBTLFieldColorRun(void) {
         break;
     case 4:
         data = nbGetMainProcessData();
-        D_005699B0.diffuseR = D_00569990[0];
-        D_005699B0.diffuseG = D_00569990[1];
-        D_005699B0.diffuseB = D_00569990[2];
-        D_005699B0.ambientR = D_005699A0[0];
-        D_005699B0.ambientG = D_005699A0[1];
-        D_005699B0.ambientB = D_005699A0[2];
+        D_005699B0.DiffuseR = D_00569990[0];
+        D_005699B0.DiffuseG = D_00569990[1];
+        D_005699B0.DiffuseB = D_00569990[2];
+        D_005699B0.AmbientR = D_005699A0[0];
+        D_005699B0.AmbientG = D_005699A0[1];
+        D_005699B0.AmbientB = D_005699A0[2];
         dds3SetLightObjectResoruce(data->light[1], &D_005699B0);
         dds3LinkSceneLight(data->light[1], 0xC);
         SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, D_00569980);
@@ -1049,7 +1026,8 @@ void effBTLFieldColorGetBaseColor(void) {
     major = data->unk7C - 0xC8;
     minor = data->unk7E;
     if ((u16)major >= 0x28 || minor <= 0 || minor >= 0xB) {
-        printf(D_00533028);
+        printf("effBTLFieldColorGetBaseColor:DummyColorLoad
+");
         SDF_VU0_LOADVECTOR(D_0031B8F0);
         return;
     }
@@ -1078,10 +1056,10 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
     dds3ProcessID_t *process;
     dds3ProcessID_t *draw;
 
-    process = dds3StartProcess(D_00533058, 0x3F9, 2, 1, nbEffectProcess, nbEffectShutdown, NULL);
+    process = dds3StartProcess("nb_effect", 0x3F9, 2, 1, nbEffectProcess, nbEffectShutdown, NULL);
     dds3LinkProcess(data->unkBC, process);
     data->effectProcess = process;
-    draw = dds3StartProcess(D_00533068, 0x2B0E, 1, 1, nbEffectDraw, NULL, NULL);
+    draw = dds3StartProcess("nb_effect_draw", 0x2B0E, 1, 1, nbEffectDraw, NULL, NULL);
     dds3LinkProcess(process, draw);
     effBTLSkillInit();
     effBTLFieldColorInit();
@@ -1089,12 +1067,6 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
     effBTLModelShowInit();
     effBTLSystemPartHandleCreate();
 }
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00533028);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00533058);
-
-INCLUDE_RODATA(const s32, "effect/effBattle", D_00533068);
-
 INCLUDE_SDATA(const s32, "effect/effBattle", effBTLSkillRun);
 
 INCLUDE_SDATA(const s32, "effect/effBattle", D_0054F0CD);

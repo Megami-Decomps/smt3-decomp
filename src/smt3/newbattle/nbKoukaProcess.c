@@ -51,7 +51,6 @@ extern void *sdfChipAllocDirect(u32 size);
 extern void sdfChipFreeDirect(void *ptr);
 extern void nbPanelStockFadeOUT(void);
 extern void nbPanelStockEnd(void);
-extern char D_00544350[];
 
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
 extern void dds3SlowOn(u32 interval, u32 duration);
@@ -110,14 +109,10 @@ extern s32 p2sdLoadCheckMidi(s32 midino);
 extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
 extern void p2sdStopSe(s32 sound);
 extern void datDebugPrintf(const char *fmt, ...);
-extern char D_00544668[];
-extern char D_00544680[];
 extern s32 p2sdGetPcmState(void);
 extern s32 p2sdLoadPcmFile(char *name, s32 channel);
 extern s32 sprintf(char *buf, char *fmt, ...);
 extern s32 printf(char *fmt, ...);
-extern char D_00544518[];
-extern char D_00544698[];
 extern char D_00551138[];
 extern void dds3FadeIn2(s32 frame);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
@@ -148,7 +143,7 @@ extern s32 nbKoukaShutdown(dds3ProcessID_t *id);
 
 nbKoukaProcessData_t *nbGetKoukaProcessData(void)
 {
-    return dds3GetProcessData(dds3SearchProcessName(D_00544350));
+    return dds3GetProcessData(dds3SearchProcessName("nb_kouka"));
 }
 
 s32 nbGetKoukaPacketCnt(void)
@@ -243,8 +238,6 @@ nbKoukaPacket_t *nbAddKoukaPacket(nbKoukaProcessData_t *k, s32 startframe, s32 f
     nbLinkPacket(k, p);
     return p;
 }
-
-INCLUDE_RODATA(const s32, "newbattle/nbKoukaProcess", D_00544350);
 
 void DelKoukaPacket(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
@@ -512,7 +505,8 @@ void RunHatudoEffectEndKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 void RunSkillEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     if (p->cuteff == NULL) {
-        printf(D_00544518);
+        printf("cutcreate 3
+");
         p->cuteff = effBTLCutCreate(p->data1.p, p->data2.us[0], p->form, p->data2.s[1]);
         return;
     }
@@ -797,8 +791,6 @@ void RunBadEffKaifukuKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     }
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbKoukaProcess", D_00544518);
-
 void RunHitEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     s32 hit = p->data1.i;
@@ -923,10 +915,12 @@ void RunSeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         break;
     case 0x1C:
         if (ok != 0) {
-            datDebugPrintf(D_00544668, se);
+            datDebugPrintf("se2 [%08X] play!
+", se);
             p2sdPlaySE(se, 0x7F, 0x3F);
         } else {
-            datDebugPrintf(D_00544680, se);
+            datDebugPrintf("se2 [%08X] chk err
+", se);
         }
         break;
     case 0x1D:
@@ -952,7 +946,7 @@ void RunPcmKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     if (p->type != 0x24) {
         return;
     }
-    sprintf(name, D_00544698, p->data1.i);
+    sprintf(name, "MDD_%03X.ADB", p->data1.i);
     printf(D_00551138, name);
     p2sdLoadPcmFile(name, 0x34);
     k->data->flag |= 1;
@@ -1105,12 +1099,6 @@ void RunStockPanelEndKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     nbPanelStockEnd();
 }
-
-INCLUDE_RODATA(const s32, "newbattle/nbKoukaProcess", D_00544668);
-
-INCLUDE_RODATA(const s32, "newbattle/nbKoukaProcess", D_00544680);
-
-INCLUDE_RODATA(const s32, "newbattle/nbKoukaProcess", D_00544698);
 
 s32 nbKoukaProcess1(dds3ProcessID_t *id)
 {
@@ -1340,7 +1328,7 @@ void nbInitKoukaProcess(nbMainProcessData_t *data)
     nbKoukaProcessData_t *work = InitKoukaProcessData(data);
     dds3ProcessID_t *id;
 
-    id = dds3StartProcess(D_00544350, 0x2B08, 1, 1, nbKoukaProcess1, nbKoukaShutdown, work);
+    id = dds3StartProcess("nb_kouka", 0x2B08, 1, 1, nbKoukaProcess1, nbKoukaShutdown, work);
     dds3LinkProcess(data->unkBC, id);
     data->koukaProcess = id;
 }
