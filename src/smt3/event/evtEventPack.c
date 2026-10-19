@@ -249,7 +249,44 @@ void func_001FA310(s32 taskId, s32 key) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventPack", evt_1FA398);
+extern f32 D_003494C0[];
+
+/* Rows of 0x310 bytes; only the size field the bed scale reads is named. */
+typedef struct evtBedModelParam_t {
+    u8 pad00[0x10];
+    f32 formsize;
+    u8 pad14[0x310 - 0x14];
+} evtBedModelParam_t;
+
+extern evtBedModelParam_t datModelParamTable[];
+
+extern void *dds3AddBEDEffectObjectBasic2(void *resource, void *position, void *scale);
+extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
+extern void effEveBEDCutSetScale(void *work, f32 scale);
+
+void *evt_1FA398(s32 taskId, s32 key, s32 modelId) {
+    f32 position[4];
+    f32 scale[4];
+    void *resource;
+    void *object;
+
+    memset(position, 0, sizeof(position));
+    memset(scale, 0, sizeof(scale));
+    resource = evtGetResorceData(taskId, key);
+    if (resource == NULL) {
+        return resource;
+    }
+    object = dds3AddBEDEffectObjectBasic2(resource, position, scale);
+    if (object == NULL) {
+        return object;
+    }
+    dds3EffectObjectBasicStatOn(object, 1);
+    if (modelId >= 0) {
+        effEveBEDCutSetScale(*(void **)(*(u8 **)((u8 *)object + 0x18) + 0x2C),
+                             datModelParamTable[modelId].formsize / D_003494C0[0]);
+    }
+    return object;
+}
 
 /* Decode one retained unit payload and return its new viewer-object key. */
 s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
@@ -558,9 +595,41 @@ void evt_1FAD40(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventPack", cmbEnableMenuEntry2);
+typedef struct evtCmbMenuCursor_t {
+    u8 pad00[0x21];
+    u8 openCount;
+    u8 pad22[0x16];
+} evtCmbMenuCursor_t;
 
-INCLUDE_ASM(const s32, "event/evtEventPack", cmbEnableMenuEntry6);
+typedef struct evtCmbWork_t {
+    u8 pad00[0x17640];
+    evtCmbMenuCursor_t menuCursor;
+} evtCmbWork_t;
+
+extern evtCmbWork_t *CMB_GBWK;
+extern u8 cmbMenuEntryTable[8];
+extern s32 evtBitCheck(s32 flag);
+extern void cmpSetCursorFlag(void *cursor, s32 flag);
+
+void cmbEnableMenuEntry2(void) {
+    if (evtBitCheck(0x25) == 0) {
+        cmpSetCursorFlag(&CMB_GBWK->menuCursor, (s32)cmbMenuEntryTable);
+        if ((cmbMenuEntryTable[2] & 2) == 0) {
+            cmbMenuEntryTable[2] |= 2;
+            CMB_GBWK->menuCursor.openCount++;
+        }
+    }
+}
+
+void cmbEnableMenuEntry6(void) {
+    if (evtBitCheck(0xA3) != 0) {
+        cmpSetCursorFlag(&CMB_GBWK->menuCursor, (s32)cmbMenuEntryTable);
+        if ((cmbMenuEntryTable[6] & 2) == 0) {
+            cmbMenuEntryTable[6] |= 2;
+            CMB_GBWK->menuCursor.openCount++;
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "event/evtEventPack", D_0053C6A0);
 

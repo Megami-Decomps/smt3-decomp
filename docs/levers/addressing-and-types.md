@@ -1380,3 +1380,38 @@
   `0.45f`, `0.6f`, `0.14f` through `0.84f` and `0.333333333f`. The float-literal
   section's warning is about transcribing a *rounded value read out of a
   disassembly*, not about ordinary decimals.
+- A byte counter decremented in place gives `addiu rd, rs, 0xFF` when the
+  global is `u8` and `addiu rd, rs, -1` when it is `s8`, since the unsigned
+  form stays in QImode. `sdfDispThread` in `sdf/sdfGraph` needed
+  `extern volatile u8 sdfReqDrawDelayCount;` for its `sdfReqDrawDelayCount--`,
+  where `sdf/sdfDraw` declares the same symbol `volatile s8` and matches with
+  it. `volatile` is what gives retail's second `lbu`, the test and the
+  decrement reading the byte twice.
+- `!x` on a value that reached `s32` through a 64-bit truncation emits
+  `sltiu rd, rs, 1`, because the `dsll32`/`dsra32` pair hides the `andi 1`'s
+  range from the expander. Where retail has `xori rd, rs, 1`, write the
+  exclusive or: `sdfDispThread`'s `sdfFrameEvenOdd = field ^ 1;` on
+  `field = (~HW_READ(GS_CSR) >> 13) & 1;` is exact, and `!field` and
+  `field == 0` are both one word out.
+- A row pointer that shares the scaled index's own register is visible in the
+  assembly as the `%hi`/`%lo` pair landing in `$1`: ee-as spends `$at` on
+  `la $2, sym($2)` because it cannot clobber the index before the add, and
+  emits the pair into the destination register for any other destination. So
+  `lui $1`/`addiu $1`/`addu rd, $1, rd` is the tell that the pointer and the
+  index are one pseudo, and in `sdfGrSetFrameSetMode` the thing that reached
+  it was not the address spelling but the store order: five of the field
+  copies' 120 store permutations get the shared register and the rest emit
+  `lui`/`addiu` into a second register.
+- `PS2_SYMBOL_AT` for `dds3LightParam + 0x10` confirmed a third time, and the
+  two halves of one unit disagree. In `basic/dds3LightObjectBasic`,
+  `lightmainprocedure` shares the `%hi(dds3LightParam)` it already formed for
+  the parallel-light pointer and derives the ambient with an `addiu +0x10`,
+  four words short, until the member gets its own alias; its neighbour
+  `dds3LinkSceneLight` has the identical pair of accesses and is exact with the
+  plain `&dds3LightParam.ambient`. So read whether retail's `%hi` is shared
+  rather than applying the alias to every access of the member.
+- One reused handle local for two successive allocate-and-lock pairs is what
+  gives retail's single callee-saved register and its `daddu rd, $2, $0` per
+  pair. `itfPnlRegist2` assigns `allocation` twice, once for the panel record
+  and once for the kind's payload; two named locals store the second call's
+  result straight out of `$2` and lose the copy.

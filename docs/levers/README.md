@@ -6,11 +6,13 @@ open the page and line it names.
 
 | Levers | Page | Section |
 |---|---|---|
-| 197 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-| 98 | [control-flow.md](control-flow.md) | Control flow |
+| 202 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+| 102 | [control-flow.md](control-flow.md) | Control flow |
+| 9 | [stores.md](stores.md) | Stores |
 | 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
-| 7 | [stores.md](stores.md) | Stores |
 | 6 | [impossible.md](impossible.md) | Functions that cannot be written in C |
+| 3 | [float-literals.md](float-literals.md) | Float literals |
+| 2 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 | 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 | 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
 | 0 | [sweeping.md](sweeping.md) | Sweep permutations in the real file, not an isolated copy |
@@ -21,8 +23,6 @@ open the page and line it names.
 | 0 | [local-vectors.md](local-vectors.md) | Two local vectors: declaration order fixes the stack offsets |
 | 0 | [local-const-arrays.md](local-const-arrays.md) | Function-local constant arrays |
 | 0 | [handle-registers.md](handle-registers.md) | `lw $4` against `lw $2` plus `move $4, $2` |
-| 0 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
-| 0 | [float-literals.md](float-literals.md) | Float literals |
 | 0 | [cross-block-locals.md](cross-block-locals.md) | Two cross-block locals whose registers come out swapped |
 | 0 | [callee-visibility.md](callee-visibility.md) | Callee visibility: the cause of most one-word branch-likely misses |
 | 0 | [callee-definition.md](callee-definition.md) | A caller can need its callee's definition, not just a prototype |
