@@ -152,6 +152,13 @@ state enums each exist twice under different names, and track topology exists
 twice **with conflicting values**. There are 7 names for `0x80808080`, 4 for π
 and 3 float spellings of 2π.
 
+**The three 2π spellings are not one constant, and merging them breaks the
+image.** `6.2831853f` is `0x40C90FDB`; `6.2831850051879883f` and `6.2831852f`
+are both `0x40C90FDA`. Retail carries both values, one ULP apart, so only the
+second pair can share a name. The four π spellings (`3.14159265f` and friends)
+do all round to `0x40490FDB` and are genuinely one constant. Check the bit
+pattern, not the digits, before merging any float constant.
+
 ### Magic constants worth naming
 
 The `PIB0`, `P2A` and `D3P` fourCCs sit bare in `mdlManager.c`; GS register

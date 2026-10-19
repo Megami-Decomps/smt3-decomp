@@ -79,8 +79,6 @@ typedef struct sdfVector3_t sdfVector3_t;
 #define EFF_THUNDER_MIN_ACTIVE_FRAMES 1
 
 /* Mid-grey fragment colour (0x80 in each channel). */
-#define EFF_THUNDER_FRAGMENT_GREY 0x80808080
-
 /* Four ordered 32-bit words in the shared effect random-number state. */
 struct EffRandState {
     u32 words[4];
@@ -122,7 +120,7 @@ struct ParCell {
     u32 *colors;     /* 0x04: packed per-history-vector colors */
     s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
     s32 historyAdvanceCountdown; /* 0x0C: updates until the next history shift */
-    u32 color;       /* 0x10 initialized to grey 0x80808080 */
+    u32 color;       /* 0x10 initialized to EFF_THUNDER_NEUTRAL_COLOR */
 };
 
 struct sdfMat_t;
@@ -592,7 +590,7 @@ EffThunderVectorWork *effPCPThunderSpherePolyCreate(EffThunderAlphaParams *sourc
         work->cells[cellIndex].activeFrames = 0;
         work->cells[cellIndex].color = 0;
     }
-    work->tintColor = 0x80808080;
+    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
     return work;
 }
 
@@ -1442,7 +1440,7 @@ void effPCP_ThunderPolyDrawOff(EffThunderFragmentWork *work, s32 index) {
 
     fragment->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
     fragment->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
-    fragment->color = EFF_THUNDER_FRAGMENT_GREY;
+    fragment->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
 void effPCP_ThunderPolyPartRefresh(EffThunderFragmentWork *work, s32 index) {
@@ -1726,7 +1724,7 @@ void effPCP_ThunderPolyLowDrawOff(EffThunderFragmentWork *work, s32 index) {
 
     fragment->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
     fragment->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
-    fragment->color = EFF_THUNDER_FRAGMENT_GREY;
+    fragment->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
 void effPCP_ThunderPolyLowPartRefresh(EffThunderFragmentWork *work, s32 index) {
@@ -2202,7 +2200,7 @@ EffThunderGroup *effPCP_ThunderPolyListCreate(EffThunderGroupParams *src) {
     }
     group->handles[i] = effPCP_ThunderPolyCreate(&group->head.params);
     effPCP_ThunderPolySetVCAcute(group->handles[i]);
-    group->color = 0x80808080;
+    group->color = EFF_THUNDER_NEUTRAL_COLOR;
     return group;
 }
 

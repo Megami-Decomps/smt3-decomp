@@ -650,7 +650,7 @@ void effMagaCylinderSetPartPtrs(effMagatuhiValueWork_t *work, s32 slotIndex) {
 
     work->writeIndices[slotIndex] = 0;
     work->validCounts[slotIndex] = 0;
-    work->slotColors[slotIndex] = 0x80808080;
+    work->slotColors[slotIndex] = EFF_MAGATUHI_NEUTRAL_COLOR;
     angleRow = work->angleRows[slotIndex];
     angleRow[0] = 6.2831853f;
     angleRow[1] = 0.0f;
