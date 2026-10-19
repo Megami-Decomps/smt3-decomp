@@ -223,10 +223,12 @@ Steps 1 and 2 are done, along with the loose ends and the three meaning
 corrections; see [What has been applied](#what-has-been-applied). What is left:
 
 1. Ten single-file congruent member types, about 460 sites, each self-contained.
-2. The narrow shared types (`sdfMemHandle_t`, `sdfGsMemSlice_t`,
-   `sdfGrTagStdReg_t`, `sdfDrawTag_t`, `sdfGrOt_t`, `sdfPreDrawTag_t`,
-   `sdfTexHandle_t`, `sdfMat_t`), about 450 sites. This unlocks the header
-   merge. `sdfThCB_t` is done.
+2. The narrow shared types: done except `sdfMat_t`, whose only local copy is
+   in `sdf3DPrim.c`. `sdfThCB_t`, `sdfMemHandle_t`, `sdfGsMemSlice_t`,
+   `sdfDrawTag_t`, `sdfGrOt_t`, `sdfPreDrawTag_t`, `sdfTexHandle_t` and
+   `TMX_HEADER_t` now match the shared headers member for member, which is what
+   the header merge was waiting on. `sdfGrTagStdReg_t` needed nothing: its only
+   definition is in `include/sdf_types.h` and already agrees.
 3. The enums used in live switches, then the wide records
    (`sdfFileCmdHandle_t`, `sdfIpuDecodeCb_t`, `movieStream_t`,
    `sdfMotionCtrlr_t`, `sdfModelRootNode_t`).
@@ -286,6 +288,19 @@ Every batch below rebuilt to `5facfbf7916836613449c922e26a4ec412207b32`.
   comment, is now one `EQUATE_FPTODP()` in `include/ps2asm.h`. It cannot be
   shared through `.globl`: the equate aliases an extern, so every unit that
   passes a float to a varargs call needs its own.
+- **The narrow shared types.** The local copies of `sdfMemHandle_t` (8
+  files), `sdfGsMemSlice_t` (12), `sdfDrawTag_t` (6), `sdfGrOt_t` (4),
+  `sdfPreDrawTag_t` (3), `sdfTexHandle_t` (5) and `TMX_HEADER_t` (5) now carry
+  the shared headers' names, which were already the IDB's. Only names moved:
+  every declared type was left as the matching build had it, which is what
+  caught the `pixelFormat` signedness. The member accesses were found by
+  renaming the struct body and letting ee-gcc name the lines, then resolving
+  each line's object through its nearest declaration, because `first`, `last`
+  and `unkC` mean different members on `sdfDrawTag_t`, `sdfGrOt_t` and
+  `sdfPreDrawTag_t`. `TMX_HEADER_t` keeps `resourceKey` and
+  `battleTextureSlot` at +0x1C and +0x20: the IDB calls that span `userArea`
+  and `comment`, and these are what this game puts there.
+
 - **The billboard packet writes.** All 133 `*(u32 *)(packet + N)` stores in
   `sdfBillBoard.c` now go through the `sdfBillBoard*Packet_t` types that
   `include/billboard.h` already carried; the offsets agreed field for field.
