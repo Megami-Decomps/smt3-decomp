@@ -2041,9 +2041,9 @@ void fldGbInit_System(s32 mode)
     fldGlobalBase.x = 0.0f;
     fldGlobalBase.y = 0.0f;
     fldGlobalBase.z = 0.0f;
-    fldGlobalBase.float10C = 0.0f;
-    fldGlobalBase.float110 = 0.0f;
-    fldGlobalBase.float114 = 0.0f;
+    fldGlobalBase.prevX = 0.0f;
+    fldGlobalBase.prevY = 0.0f;
+    fldGlobalBase.prevZ = 0.0f;
     fldGlobalBase.hitX = 0.0f;
     fldGlobalBase.hitY = 0.0f;
     fldGlobalBase.hitZ = 0.0f;

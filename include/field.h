@@ -86,9 +86,9 @@ typedef struct fldAreaWork_t
     f32 x;                      /* 0x100 */
     f32 y;                      /* 0x104 */
     f32 z;                      /* 0x108 */
-    f32 float10C;               /* 0x10C */
-    f32 float110;               /* 0x110 */
-    f32 float114;               /* 0x114 */
+    f32 prevX;                  /* 0x10C: the position before this step */
+    f32 prevY;                  /* 0x110 */
+    f32 prevZ;                  /* 0x114 */
     f32 hitX;                   /* 0x118 */
     f32 hitY;
     f32 hitZ;

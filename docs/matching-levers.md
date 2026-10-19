@@ -101,6 +101,9 @@ it was measured on DDS and not on this ELF.
 | a call's argument setup duplicated in both arms of a loop guard, where your C computes it once above the branch | drop the explicit `if (count > 0)` and let the `for` emit its own guard. With the `if` written out gcc hoists the shared address and the call's pointer argument above the branch and runs one word long; without it the preheader and the skip arm each get their own copy, which is what retail has. `dds3MultiBillboardPktLink` went from 84 of 88 words differing to exact on dropping that one `if`, and six loop-body forms left it unchanged |
 | three constants selected into one struct field, with a single store the arms branch to | assign the field itself in all three arms and let gcc cross-jump the stores into one. A local for the value is if-converted into a `movz` pair whichever way the chain is written, `goto`s included, and a `switch` over the masked value gets the size right but reshapes the compare chain. `dds3Billboard_P2ADraw` went from 23 of 174 words to 1 on the three direct stores |
 | one shared exit with the return constant set in each predecessor's delay slot, and one arm falling into it | a `goto` to a single trailing `return 0`. Nesting the bodies inside their guards, an `&&` chain and an `else if` chain all reach within two words but keep one exit too few; the explicit label is what lets gcc put a `$2 = 0` in a delay slot on one path and fall into another on the next. `nbCheckModelPackLoaded` went 13 of 52 differing to exact |
+| the `default` arm's body as the fall-through after the compare chain, with two `case` bodies behind forward branches | write `default:` **first** in the source, before the `case` labels. This is the row above read on a default arm: gcc lays the arms out in source order, so `default`, `case 1`, `case 2` is what puts the default body where retail has it and lets it share the tail with the last case. `ResetWindowPara` was 31 of 49 words out with `default` written last and exact with it written first, over all six arm orders |
+| a `switch` arm that only advances a counter and tests it, where your C reads the field twice | `p->field++; if (p->field >= bound)`. An `s16` local for the incremented value is the obvious shape and is four words out: it sign-extends in place and takes the bound's register. `CalcMessage` turned on that alone |
+| one shared `jal` reached by a `b` from one arm and a fall-through from the other, where the argument comes from two different producers | write the whole call out in each arm and let gcc cross-jump it. A local for the produced value (`name = f(); ... g(x, y, name)`) is 11 words out on the argument-setup order alone; `itfMesMngRequestMessage` went to exact with the two `MessageRequestEx` calls written in full inside the `if` and the `else` |
 
 ## Addressing and types
 
@@ -914,6 +917,44 @@ it was measured on DDS and not on this ELF.
   lines by a `vu0 routine:` or `libvu0:` comment, which is why the VU0-dense
   setters in `effect/effMagatuhi` count. `func_001AA6D0` there is 223 VU0
   instructions of 394 and needs that comment to earn anything.
+
+- A `(s16)` cast on a `u16` struct field compiles to a bare `lh`, not to `lhu`
+  plus `sll`/`sra`: ee-gcc 2.96 folds the sign extension into the load.
+  `GetFontHandleUnit` needed `(s16)chain->...cellHeight` where retail has
+  `lh`, and the cast cost nothing. Reading it through an `s16 *` cast of the
+  field's address gives the same thing, so prefer the plain cast.
+- One extra *statement* on a value raises its register-allocation priority,
+  which is a cheaper lever than any declaration order. `GetFontHandleUnit`
+  held four values across its loop and gcc gave them `$16` to `$19` one place
+  rotated from retail; splitting `y += h * 8 + 0xA;` into
+  `y += h * 8; y += 0xA;` added a reference to `y`, moved it from `$19` to
+  `$16`, and took the function from 22 differing words to exact. Same
+  instruction count either way. gcc's `allocno_compare` sorts on
+  `floor_log2(n_refs) * freq / live_length`, so one more reference can cross a
+  threshold.
+- A named local for a *divisor* decides which register the constant takes, and
+  its declaration position among the other locals decides the prologue order.
+  `ConvertZenkakuNumber` divides by ten in a loop; `s32 radix = 10;` declared
+  between the digit counter and the digit pointer is exact, where the literal
+  leaves the 10 in `$4` and the loop bound's `slti` in `$6` (retail has them
+  the other way round), and the same local declared first or last, or assigned
+  as a statement, is 2 to 7 words out.
+- One `u32` local for the switched value, **reused** across two successive
+  `switch`es in the same function, is what gives both their registers.
+  `CalcWindow` dispatches on `panel->flags & 0x300` and then on
+  `panel->flags & 0x3000`; `mode = panel->flags & 0x300; switch (mode)` and
+  `mode = panel->flags & 0x3000; switch (mode)` is exact, where the
+  expressions written in the `switch` heads leave the value one register low
+  and rotate the two panel pointers (16 of 81 words), and so do a `flags`
+  local and a second re-read of it.
+- A `switch` arm that writes one byte of a stack array in each of two paths
+  wants a pointer local assigned *before* the `if`, with the stores written
+  `*p = c;`. In `itfMesMngSetVar` the `p = text;` assignment above the
+  `value >= 0x3E9` test is what puts `text`'s address in a saved register and
+  turns both `text[0]` stores into `sb rd, 0(reg)`; with the assignment inside
+  the `else` the arm addresses the frame directly and the function is 26 of 124
+  words out, and the second store has to stay `text[1] = 0` (frame-addressed)
+  rather than `p[1]`.
 
 ## Function-local constant arrays
 

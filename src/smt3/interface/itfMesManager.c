@@ -456,6 +456,10 @@ void ChangeFontAlpha(frFontHandle_t *glyph, u32 color);
 
 void OpenCheckSpeakerWindow(itfMesWork_t *panel);
 
+void OpenMessageWindow(itfMesWork_t *panel);
+
+void ReadytoMessage(itfMesWork_t *panel);
+
 extern itfPanel_t *itfPnlRegist2(s32 kind, u32 payload);
 
 void itfPnlSetPosition(itfPanel_t *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue);
@@ -486,6 +490,12 @@ extern u32 dds3NullDrawProc(void);
 
 void DrawMesFlow(itfMesWork_t *panel);
 
+void DrawWindow(itfMesWork_t *panel);
+
+void DrawRetPageCursor(itfMesWork_t *panel);
+
+void DrawSelectCursor(itfMesWork_t *panel);
+
 extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
 
 void DebugDrawWindowLine(itfPanel_t *sprite);
@@ -495,6 +505,28 @@ extern s32 sdfGrAllocPacketBuff(s32 size);
 extern void sdfDrawTagInit(sdfDrawTag_t *list);
 
 extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
+
+extern s32 D_00326728[8];
+
+extern u8 D_00326748[];
+
+extern u8 D_00326768[];
+
+extern u8 D_00326770[];
+
+extern void itfMiscDrawSpritePlanePrim(void *vertices, void *colors, s32 tail, s32 flag, sdfDrawTag_t *command);
+
+extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 tail, sdfDrawTag_t *command);
+
+extern void itfMiscDrawSpritePrim2(void *vertices, void *uv, void *colors, s32 tail, s32 flag, sdfDrawTag_t *command);
+
+extern s32 D_00326778[4];
+
+extern s32 D_00326788[4];
+
+extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *command);
+
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag);
 
 extern s32 D_00326798[];
 
@@ -537,7 +569,10 @@ s32 itfMesMngMessage(void) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngSetOffsetY1);
+void itfMesMngSetOffsetY1(s32 window, s32 y1)
+{
+    itfPnlSetPositionOffset(pinst[window].mes->window.sprite, 0, y1, 0, 0, 0);
+}
 
 s8 itfMesMngGetPhase(s32 window)
 {
@@ -816,7 +851,69 @@ void itfMesMngRelease(s32 window) {
     }
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngRequestMessage);
+extern char D_00535A80[];
+
+s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
+    itfMesWork_t *panel = pinst[window].mes;
+    itfMesMessage_t *mes = &panel->message;
+    itfMesSpeaker_t *spk;
+    itfMesTable_t *table;
+    u32 flags;
+    u32 mode;
+
+    table = GetTypeHeader(panel, entryIndex)->table;
+    mes->itemIndex = itemIndex;
+    mes->table = table;
+    mes->tableCount = table->count;
+    if (table->count == 0) {
+        printf(D_00535A80);
+        return 0;
+    }
+    CommitVarTable((s32 *)panel->variables.addresses);
+    if (panel->temporaryFontEntry != NULL) {
+        frSetExtDic(panel->temporaryFontEntry);
+    }
+    ReadytoMessage(panel);
+    spk = &panel->speaker;
+    if (spk->selectedIndex != (u16)table->bitCount) {
+        u16 nameId = table->bitCount;
+
+        if (spk->glyphChain != NULL) {
+            frDestroyFontRequestAfter(spk->glyphChain);
+            spk->glyphChain = NULL;
+        }
+        spk->selectedIndex = nameId;
+        if (nameId != 0xFFFF) {
+            if (panel->window.frame != NULL) {
+                itfPnlRelease(panel->window.frame);
+                panel->window.frame = NULL;
+            }
+            if (nameId & 0x8000) {
+                spk->glyphChain = MessageRequestEx(spk->x, spk->y, 0, 3, 0, 8, itfMesMngGetVar(window, nameId & 0x7FFF), NULL);
+            } else {
+                spk->glyphChain = MessageRequestEx(spk->x, spk->y, 0, 3, 0, 8, GetSpeakerName(panel), NULL);
+            }
+            frSetDrawPosition(spk->glyphChain, spk->x, spk->y);
+            frSetDrawSpeed(spk->glyphChain, 0xA);
+            ChangeZBuffer(spk->glyphChain, panel->renderValue);
+        }
+    }
+    OpenCheckSpeakerWindow(panel);
+    flags = panel->flags;
+    if (flags & 0x200000) {
+        mode = flags & 0x300;
+        if (mode == 0 || mode == 0x300) {
+            OpenMessageWindow(panel);
+            panel->flags = (panel->flags & ~7) | 2;
+        } else {
+            panel->flags = (flags & ~7) | 3;
+        }
+    } else {
+        panel->flags = (flags & ~7) | 3;
+    }
+    mes->textState = 1;
+    return 1;
+}
 
 /* Release/reset selected-entry glyphs and their status; optionally do the same
  * for primary text. Negative window is a no-op; no other slot validation. */
@@ -848,7 +945,41 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
     InitializeSpeaker(primaryTextBlock, 0);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngRequestSelect);
+extern s32 printf(const char *format, ...);
+
+extern char D_00535AA8[];
+
+void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
+    itfMesWork_t *panel = pinst[window].mes;
+    itfMesSelect_t *sel = &panel->selection;
+    itfMesEntry_t *entry;
+    itfMesTable_t *table;
+    s32 count;
+    s32 y;
+    frFontHandle_t *chain;
+
+    entry = GetTypeHeader(panel, entryIndex);
+    if (entry->itemList != (u32 *)1) {
+        printf(D_00535AA8, entry->itemList);
+    }
+    if (sel->glyphChain != NULL) {
+        frDestroyFontRequestAfter(sel->glyphChain);
+        sel->glyphChain = NULL;
+    }
+    table = entry->table;
+    count = GetNumSelectItem(table->bitCount, sel->panelValue);
+    y = sel->y - count * 160;
+    y += 0xB4;
+    CommitVarTable((s32 *)panel->variables.addresses);
+    if (panel->temporaryFontEntry != NULL) {
+        frSetExtDic(panel->temporaryFontEntry);
+    }
+    chain = GetFontHandleUnit(&table->items[1], table->bitCount, sel->panelValue, sel->x, y, panel->renderValue);
+    sel->selectionState = 1;
+    sel->rowCount = count;
+    sel->glyphChain = chain;
+    panel->flags = (panel->flags & ~0x38) | 0x10;
+}
 
 /* Release option glyphs, clear option selection/state and invalidate its rank.
  * Other content and the window allocation remain installed. */
@@ -1027,9 +1158,128 @@ u8 *itfMesMngGetVar(s32 window, s32 slotIndex) {
     return (u8 *)pinst[window].mes->variables.addresses[slotIndex];
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngGetVarLocalize);
+extern u8 *DDS3_GBWK;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngSetVar);
+/* NON_MATCHING: 1 of 34 words, 136 bytes against 172; gcc shares the three address inductions retail keeps apart. */
+#ifdef NON_MATCHING
+void itfMesMngGetVarLocalize(s32 id)
+{
+    char *out = (char *)((u8 *)pinst + 0x9F4);
+    s32 lead = id * 20 + 0x6600;
+    s32 tail = id * 20 + 0x6601;
+    s32 count = id + 0x6650;
+    s32 k = 0;
+
+    if (((u8 *)DDS3_GBWK + 4)[count] != 0) {
+        do {
+            u8 code = ((u8 *)DDS3_GBWK + 4)[lead];
+
+            if (code & 0x80) {
+                *out = code;
+                out++;
+                *out = ((u8 *)DDS3_GBWK + 4)[tail];
+            } else {
+                *out = ((u8 *)DDS3_GBWK + 4)[tail];
+            }
+            out++;
+            lead += 2;
+            tail += 2;
+            k++;
+        } while (k < ((u8 *)DDS3_GBWK + 4)[count]);
+    }
+    *out = 0;
+}
+#else
+INCLUDE_ASM(const s32, "interface/itfMesManager", itfMesMngGetVarLocalize);
+#endif
+
+
+
+
+extern s32 sprintf(char *buffer, const char *format, ...);
+
+extern char D_0054F4C0[];
+
+extern char *text1[];
+
+extern char *text2[];
+
+extern char *pStr[];
+
+extern char *pstr[];
+
+extern char *datExplainTable[];
+
+extern char D_00311450[];
+
+extern char D_00311850[];
+
+void itfMesMngGetVarLocalize(s32 id);
+
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535A80);
+
+INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535AA8);
+
+void itfMesMngSetVar(s32 window, s32 slot, s32 value, s32 selector) {
+    switch (selector) {
+    case 0: {
+        char buf[16];
+
+        sprintf(buf, D_0054F4C0, value);
+        itfMesMngSetVarImmediate(window, slot, buf);
+        break;
+    }
+    case 1:
+        itfMesMngSetVarImmediate(window, slot, text2[value]);
+        break;
+    case 8:
+        itfMesMngSetVarImmediate(window, slot, datExplainTable[value]);
+        break;
+    case 3:
+        itfMesMngSetVarImmediate(window, slot, pStr[value]);
+        break;
+    case 4: {
+        char text[0x40];
+        char *p;
+
+        p = text;
+        if (value >= 0x3E9) {
+            *p = 0x52;
+            text[1] = 0;
+        } else {
+            if (value < 0) {
+                value = -value;
+                *p = 0x42;
+                p = &text[1];
+            }
+            p = ConvertZenkakuNumber(value, p);
+            p[0] = 0x46;
+            p[1] = 0;
+        }
+        itfMesMngSetVarImmediate(window, slot, text);
+        break;
+    }
+    case 5:
+        itfMesMngSetVarImmediate(window, slot, text1[value]);
+        break;
+    case 6:
+        itfMesMngSetVarImmediate(window, slot, &D_00311450[value * 32]);
+        break;
+    case 7:
+        itfMesMngSetVarImmediate(window, slot, &D_00311850[value * 32]);
+        break;
+    case 9:
+        itfMesMngSetVarImmediate(window, slot, pstr[value]);
+        break;
+    case 10: {
+        char *buffer = (char *)((u8 *)pinst + 0x9F4);
+
+        itfMesMngGetVarLocalize(value);
+        itfMesMngSetVarImmediate2(window, slot, buffer, strlen(buffer));
+        break;
+    }
+    }
+}
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
 void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const char *sourceText) {
@@ -1373,7 +1623,39 @@ u8 *GetMessagePagePtr(itfMesTable_t *table, s32 index)
     return (u8 *)table->items[index];
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", ReadytoMessage);
+void ReadytoMessage(itfMesWork_t *panel) {
+    itfMesMessage_t *mes = &panel->message;
+    frFontHandle_t *chain;
+    u32 result;
+
+    if (mes->glyphChain != NULL) {
+        frDestroyFontRequestAfter(mes->glyphChain);
+        mes->glyphChain = NULL;
+    }
+    chain = MessageRequestEx(mes->x, mes->y, mes->color[0], mes->color[1], mes->color[2], mes->color[3],
+                             GetMessagePagePtr(mes->table, mes->itemIndex), NULL);
+    if (!(panel->flags & 0x400000)) {
+        if ((itfMesMngManager.flags & 1) != 0) {
+            RaiseMessageSpeedMax(chain);
+        }
+    }
+    GetLastMessagePara(chain, mes);
+    result = frGetMessageResult(3);
+    mes->textInterfaceMask = result;
+    if ((result & 2) != 0) {
+        panel->flags |= 0x10000;
+    } else {
+        panel->flags &= 0xFFFEFFFF;
+    }
+    if (frGetMessageResult(4) != 0) {
+        if (panel->callbackAddress != 0) {
+            ((void (*)(void))panel->callbackAddress)();
+        }
+    }
+    ChangeZBuffer(chain, panel->renderValue);
+    mes->lineCount = CountLineMessage(GetLastLinkFontHandle(chain), chain);
+    mes->glyphChain = chain;
+}
 
 /* Replace a retained text-slot allocation. Nonpositive byteCount copies the
  * padded string span; positive counts copy that many bytes into a zeroed block.
@@ -1439,7 +1721,27 @@ s32 GetNumSelectItem(s32 count, u32 mask)
     return n;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", GetFontHandleUnit);
+frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, s32 depth)
+{
+    frFontHandle_t *chain = NULL;
+    s32 i;
+
+    for (i = 0; i < count; i++, list++) {
+        if ((mask & 1) != 0) {
+            mask >>= 1;
+            continue;
+        }
+        chain = MessageRequestEx(x, y, 0, 0, 0, 0x80, (u8 *)*list, chain);
+        y += (s16)chain->parentDimensionsOrRenderWord.parentDimensions.cellHeight * 8;
+        y += 0xA;
+        mask >>= 1;
+    }
+    if (chain != NULL) {
+        ChangeZBuffer(chain, depth);
+        ChangeFontAlpha(chain, 0x80);
+    }
+    return chain;
+}
 
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
@@ -1620,11 +1922,40 @@ s32 GetMaskedIndex(s32 skip, u32 mask)
     return i;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", RaiseMessageSpeedMax);
+void RaiseMessageSpeedMax(frFontHandle_t *chain)
+{
+    while (chain != NULL) {
+        if (chain->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
+            frSetDrawSpeed(chain, 0x80);
+        }
+        chain = chain->previous;
+    }
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", RaiseMessageSpeedMaxAll);
+void RaiseMessageSpeedMaxAll(frFontHandle_t *chain)
+{
+    while (chain != NULL) {
+        frSetDrawSpeed(chain, 0x80);
+        chain = chain->previous;
+    }
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", OpenMessageWindow);
+void OpenMessageWindow(itfMesWork_t *panel) {
+    itfMesWindow_t *place = &panel->window;
+    itfMesMessage_t *mes = &panel->message;
+
+    if (place->sprite == NULL) {
+        if (panel->panelMode != 2) {
+            place->sprite = itfPnlRegist2(6, (u32)itfMesMngManager.windowTexture);
+        } else {
+            place->sprite = itfPnlRegist2(8, (u32)itfMesMngManager.windowTexture);
+        }
+    }
+    itfPnlSetPosition(place->sprite, mes->x + place->bounds[0], mes->y + place->bounds[1],
+                      mes->x + place->bounds[2], mes->y + place->bounds[3], panel->renderValue);
+    itfPnlSetColor(place->sprite, place->red, place->green, place->blue, 0);
+    panel->flags = (panel->flags & ~0x300) | 0x100;
+}
 
 void OpenCheckSpeakerWindow(itfMesWork_t *panel) {
     itfMesSpeaker_t *origin = &panel->speaker;
@@ -1669,9 +2000,26 @@ void InitializeMessage(itfMesMessage_t *cur, s32 resetPos) {
     cur->table = NULL;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", InitializeSelect);
+void InitializeSelect(itfMesSelect_t *sel)
+{
+    sel->x = 0x560;
+    sel->y = 0xBC8;
+    sel->glyphChain = NULL;
+    sel->panelValue = 0;
+    sel->selectionState = 0;
+    sel->selectedIndex = -1;
+    sel->savedIndex = -1;
+    sel->rowCount = 0;
+    sel->glyphColorIntensity = 0;
+    sel->optionCount = 0;
+}
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", InitializeWindow);
+void InitializeWindow(itfMesWindow_t *block)
+{
+    block->frame = NULL;
+    block->sprite = NULL;
+    ResetWindowPara(block, 0, 0);
+}
 
 void InitializeVariable(itfMesVariable_t *slots)
 {
@@ -1703,7 +2051,19 @@ void ForceSetCurCtr(itfMesCursor_t *c, s16 phase, s16 alpha, s16 timer)
     c->timer = timer;
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", ReleaseAllWindow);
+void ReleaseAllWindow(itfMesWork_t *panel) {
+    itfMesWindow_t *place = &panel->window;
+
+    if (place->frame != NULL) {
+        itfPnlRelease(place->frame);
+        place->frame = NULL;
+    }
+    if (place->sprite != NULL) {
+        itfPnlRelease(place->sprite);
+        place->sprite = NULL;
+    }
+    panel->flags &= ~0xF00;
+}
 
 void ReleaseAllVariable(itfMesVariable_t *slots)
 {
@@ -1720,9 +2080,63 @@ void ReleaseAllVariable(itfMesVariable_t *slots)
     } while (remaining >= 0);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", ConvertZenkakuNumber);
+char *ConvertZenkakuNumber(s32 value, char *buf) {
+    s32 digits[10];
+    s32 count = 0;
+    s32 radix = 10;
+    s32 *p = digits;
+    s32 i;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", ResetWindowPara);
+    do {
+        *p = value % radix;
+        value = value / radix;
+        count++;
+        p++;
+    } while (value > 0 && count < 10);
+
+    for (i = count - 1; i >= 0; i--) {
+        *buf = (u8)digits[i] + 0x30;
+        buf++;
+    }
+    *buf = 0;
+    return buf;
+}
+
+void ResetWindowPara(itfMesWindow_t *block, s32 panelMode, s32 fadeLimit)
+{
+    switch (panelMode) {
+    default:
+        block->bounds[0] = -0x1390;
+        block->bounds[1] = -0x3D8;
+        block->bounds[2] = 0x2A30;
+        block->bounds[3] = 0x590;
+        block->red = 0x7F;
+        block->green = 0x7F;
+        block->blue = 0x7F;
+        block->fadeLimit = (fadeLimit > 0) ? fadeLimit : 0x66;
+        break;
+    case 1:
+        block->bounds[0] = -0x1DB0;
+        block->bounds[1] = -0x2F8;
+        block->bounds[2] = 0x2C30;
+        block->bounds[3] = 0x548;
+        block->red = 0x7F;
+        block->green = 0x7F;
+        block->blue = 0x7F;
+        block->fadeLimit = (fadeLimit > 0) ? fadeLimit : 0x57;
+        break;
+    case 2:
+        block->bounds[0] = -0x1390;
+        block->bounds[1] = -0x208;
+        block->bounds[2] = 0x2A30;
+        block->bounds[3] = 0x410;
+        block->red = 0x7F;
+        block->green = 0x7F;
+        block->blue = 0x7F;
+        block->fadeLimit = (fadeLimit > 0) ? fadeLimit : 0x87;
+        break;
+    }
+}
 
 void CalcMesFlow(itfMesWork_t *object) {
     CalcWindow(object);
@@ -1731,9 +2145,100 @@ void CalcMesFlow(itfMesWork_t *object) {
     CalcCurCtr(object);
 }
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", CalcWindow);
+void CalcWindow(itfMesWork_t *panel) {
+    itfMesWindow_t *place = &panel->window;
+    itfPanel_t *sprite = place->sprite;
+    itfPanel_t *frame;
+    u32 mode;
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", CalcMessage);
+    mode = panel->flags & 0x300;
+    switch (mode) {
+    case 0x100:
+        sprite->alpha += 0x18;
+        if (sprite->alpha >= place->fadeLimit) {
+            sprite->alpha = place->fadeLimit;
+            panel->flags = (panel->flags & ~0x307) | 0x203;
+        }
+        break;
+    case 0x300:
+        sprite->alpha -= 8;
+        if (sprite->alpha <= 0) {
+            sprite->alpha = 0;
+            panel->flags &= ~0x300;
+        }
+        break;
+    }
+    frame = place->frame;
+    mode = panel->flags & 0x3000;
+    switch (mode) {
+    case 0x1000:
+        frame->alpha += 0x20;
+        if (frame->alpha >= 0xC8) {
+            frame->alpha = 0xC8;
+            panel->flags = (panel->flags & ~0x3000) | 0x2000;
+        }
+        break;
+    case 0x3000:
+        frame->alpha -= 0x20;
+        if (frame->alpha <= 0) {
+            frame->alpha = 0;
+            panel->flags &= ~0x3000;
+            itfPnlRelease(frame);
+            place->frame = NULL;
+        }
+        break;
+    }
+}
+
+void CalcMessage(itfMesWork_t *panel) {
+    itfMesMessage_t *mes = &panel->message;
+    u32 flags;
+
+    if (mes->textState != 1) {
+        return;
+    }
+    flags = panel->flags;
+    if ((flags & 7) == 4) {
+        panel->fade.frames++;
+        if (flags & 0x800000) {
+            mes->textState = -1;
+            return;
+        }
+        if ((flags & 0x100000) == 0) {
+            panel->fade.kind = 1;
+        }
+        if (dds3PadButtonState.confirm >= 0 && dds3PadButtonState.primaryCancel >= 0 &&
+            (dds3PadButtonState.primaryTriangle == 0 || panel->fade.frames < 5)) {
+            if (mes->textInterfaceMask != 0) {
+                return;
+            }
+        }
+        if (mes->textInterfaceMask != 0) {
+            p2sdPlaySE(9, 0x7F, 0x3F);
+        }
+        InitializeCurCtr(&panel->fade, 0);
+        mes->itemIndex++;
+        if (mes->itemIndex >= mes->tableCount) {
+            mes->textState = -1;
+            return;
+        }
+        CommitVarTable((s32 *)panel->variables.addresses);
+        if (panel->temporaryFontEntry != NULL) {
+            frSetExtDic(panel->temporaryFontEntry);
+        }
+        ReadytoMessage(panel);
+        OpenCheckSpeakerWindow(panel);
+        panel->flags = (panel->flags & ~7) | 3;
+    } else if (dds3PadButtonState.confirm < 0 || dds3PadButtonState.primaryCancel < 0 ||
+               dds3PadButtonState.primaryTriangle != 0) {
+        if (!(flags & 0x400000)) {
+            RaiseMessageSpeedMaxAll(mes->glyphChain);
+            if (panel->speaker.glyphChain != NULL) {
+                frSetDrawSpeed(panel->speaker.glyphChain, 0x80);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", CalcSelect);
 
@@ -1852,13 +2357,192 @@ void CalcCurCtr(itfMesWork_t *panel) {
     }
 }
 
+/* NON_MATCHING: 37 of 99 words, exact size; two guards emit bnel where retail has bnez and everything after shifts. */
+#ifdef NON_MATCHING
+void DrawMesFlow(itfMesWork_t *panel) {
+    u32 flags = panel->flags;
+    itfMesSelect_t *sel;
+    s16 index;
+
+    itfMesMngManager.flags &= ~2;
+    DrawWindow(panel);
+    if (!(flags & 0x10000)) {
+        if (panel->speaker.glyphChain != NULL) {
+            frDrawFont(panel->speaker.glyphChain);
+        }
+    }
+    if (!(flags & 0x20000)) {
+        if ((flags & 7) >= 3) {
+            if (frDrawFont(panel->message.glyphChain) > 0) {
+                if ((panel->flags & 7) != 4) {
+                    panel->fade.frames = 0;
+                    panel->flags = (panel->flags & ~7) | 4;
+                }
+            }
+        }
+    }
+    if (!(flags & 0x40000)) {
+        if ((flags & 0x38) >= 0x18) {
+            if (frDrawFontEx(panel->selection.glyphChain, 1) > 0) {
+                if ((flags & 0x38) == 0x18) {
+                    sel = &panel->selection;
+                    index = sel->selectedIndex;
+                    if (sel->selectedIndex == -1) {
+                        sel->selectedIndex = 0;
+                        sel->savedIndex = 0;
+                        index = 0;
+                    }
+                    ChangeFontColor(sel->glyphChain, index, sel->rowCount, 1);
+                    panel->fade.kind = 2;
+                    panel->flags = (panel->flags & ~0x38) | 0x20;
+                }
+            }
+        }
+    }
+    if ((panel->fade.kind & 1) != 0) {
+        DrawRetPageCursor(panel);
+    }
+    if ((panel->fade.kind & 2) != 0) {
+        DrawSelectCursor(panel);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "interface/itfMesManager", DrawMesFlow);
+#endif
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", DrawWindow);
 
+void DrawWindow(itfMesWork_t *panel) {
+    itfMesWindow_t *place = &panel->window;
+    u32 flags = panel->flags;
+
+    if (flags & 0x80000) {
+        return;
+    }
+    if ((flags & 0x300) >= 0x100) {
+        itfPnlDraw(place->sprite, &sdfGrOtTable[panel->drawSurfaceIndex]);
+        itfMesMngManager.flags |= 2;
+        if (place->frame != NULL) {
+            itfPnlDraw(place->frame, &sdfGrOtTable[panel->drawSurfaceIndex]);
+        }
+    }
+    if (D_00326700.window != NULL && D_00326700.window->state == panel && place != NULL) {
+        DebugDrawWindowLine(place->sprite);
+    }
+}
+
+/* NON_MATCHING: 128 of 191 words, exact size; the three stack arrays' store and constant order is scheduled differently. */
+#ifdef NON_MATCHING
+void DrawSelectCursor(itfMesWork_t *panel) {
+    s32 uv[4];
+    s32 color[4];
+    s32 rect[4];
+    itfMesCursor_t *fade = &panel->fade;
+    itfMesSelect_t *sel = &panel->selection;
+    sdfDrawTag_t *list;
+    sdfGrOt_t *packetOwner;
+    s32 x;
+    s32 y;
+    s32 timer;
+    s32 d;
+    s32 index;
+    s32 rowOfs;
+
+    index = sel->savedIndex;
+    if (index == -1) {
+        return;
+    }
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    x = sel->x;
+    rowOfs = sel->rowCount * 160 - 0xC0;
+    y = sel->y - rowOfs;
+    y += index * 168;
+    color[0] = 0x57;
+    color[1] = 0;
+    color[2] = 0x10;
+    color[3] = 0x26;
+    rect[1] = y - 8;
+    rect[0] = x - 0xF0;
+    rect[2] = D_00326728[0];
+    rect[3] = y + 0xA8;
+    itfMiscDrawSpritePlanePrim(rect, color, panel->renderValue, 0, list);
+    D_00326728[1] = y - 8;
+    D_00326728[3] = y - 8;
+    D_00326728[5] = y + 0xA8;
+    D_00326728[7] = y + 0xA8;
+    itfMiscDrawRectanglePrim(D_00326728, D_00326748, D_00326768, D_00326770, panel->renderValue, list);
+    uv[0] = 0x150;
+    uv[1] = 0x2F0;
+    uv[2] = 0x1B0;
+    uv[3] = 0x3F0;
+    color[0] = 0x80;
+    color[1] = 0x80;
+    color[2] = 0x80;
+    color[3] = 0x26;
+    rect[0] = x - 0x150;
+    rect[2] = x - 0xF0;
+    rect[3] = y + 0x88;
+    rect[1] = y + 8;
+    itfMiscDrawSpritePrim(rect, uv, color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+    uv[0] = 0x260;
+    uv[1] = 0x2F0;
+    uv[3] = 0x3F0;
+    uv[2] = 0x360;
+    color[3] = fade->alpha;
+    rect[2] = rect[0] + 0x100;
+    rect[3] = rect[1] + 0x80;
+    itfMiscDrawSpritePrim2(rect, uv, color, panel->renderValue, 0, list);
+    timer = fade->timer;
+    if (timer > 0) {
+        d = 0x80 - timer;
+        rect[0] -= d;
+        rect[1] -= d >> 1;
+        rect[2] += d * 2;
+        rect[3] += d >> 1;
+        color[3] = timer;
+        itfMiscDrawAlphaPrim(list, 1, 0);
+        itfMiscDrawSpritePrim2(rect, uv, color, panel->renderValue, 0, list);
+        itfMiscDrawAlphaPrim(list, 0, 0);
+    }
+    packetOwner = &sdfGrOtTable[panel->drawSurfaceIndex];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
+}
+#else
 INCLUDE_ASM(const s32, "interface/itfMesManager", DrawSelectCursor);
+#endif
 
-INCLUDE_ASM(const s32, "interface/itfMesManager", DrawRetPageCursor);
+
+void DrawRetPageCursor(itfMesWork_t *panel) {
+    s32 rect[4];
+    itfMesCursor_t *fade = &panel->fade;
+    sdfDrawTag_t *list;
+    sdfGrOt_t *packetOwner;
+    s32 timer;
+    s32 d;
+
+    rect[0] = 0x1A50;
+    rect[1] = 0xCA0;
+    rect[2] = 0x1B60;
+    rect[3] = 0xD28;
+    D_00326788[3] = fade->alpha;
+    list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+    timer = fade->timer;
+    if (timer > 0) {
+        d = 0x80 - timer;
+        rect[0] -= d * 2;
+        rect[1] -= d;
+        rect[2] += d * 2;
+        rect[3] += d;
+        D_00326788[3] = timer;
+        itfMiscDrawAlphaPrim(list, 1, 0);
+        itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+        itfMiscDrawAlphaPrim(list, 0, 0);
+    }
+    packetOwner = &sdfGrOtTable[panel->drawSurfaceIndex];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
+}
 
 s32 CalcMsgMng_Process(void) {
     itfMesLink_t *node = itfMesMngManager.pool.activeHead;
@@ -1869,7 +2553,26 @@ s32 CalcMsgMng_Process(void) {
     return 0;
 }
 
+/* NON_MATCHING: 24 of 28 words, exact size; bnel against retail's bne on the DrawMesFlow loop, waiting on that callee. */
+#ifdef NON_MATCHING
+s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
+    itfMesLink_t *node;
+
+    if (dds3NullDrawProc() != 0) {
+        return 0;
+    }
+    node = itfMesMngManager.pool.activeHead;
+    while (node != 0) {
+        itfMesLink_t *next = node->next;
+        DrawMesFlow(node->state);
+        node = next;
+    }
+    itfMesMngManager.unk8++;
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "interface/itfMesManager", DrawMsgMng_Process);
+#endif
 
 void DrawMsgMng_Shutdown(void) {
     itfMesLink_t *node = itfMesMngManager.pool.activeHead;
