@@ -731,3 +731,271 @@ Confirmed on the way: `nbStatWork_t` carries `void *file[26]` at `+0x08`,
 `void *buf[26]` at `+0x70`, `motfile` at `+0xD8` and `motbuf` at `+0xDC`,
 which fills the former `pad[0xD8]` exactly and keeps the 224-byte stride that
 `&data->statwork[index]` needs.
+
+## fldAutoMapCloseBlock2 (field/fldAutoMap, 0xA8)
+
+40 of 42 words, at the exact 168-byte size.
+
+Retail computes `floor - 1` into `$7` in the instruction before the `div` and
+`flagNumber - 1` into `$6` in the `beql` delay slot of the divide-by-zero
+check. The draft emits the same two `addiu`s with the same registers, in the
+other order: `flagNumber - 1` before the `div` and `floor - 1` in the delay
+slot. Every other word, both arms included, is identical.
+
+ee-gcc sinks whichever of the two locals is written later in the source into
+the delay slot, so retail's order asks for `floor - 1` first. Declaring it
+first does produce that order, but then the index lands in `$5` instead of
+`$7` and the whole `>= 30` arm reallocates, which costs 18 words. All 6
+declaration orders and all 36 declaration-order/assignment-order splits were
+measured: the three with `bit` declared ahead of `index` reach 2 words and
+nothing reaches 0.
+
+Also ruled out: `floor - 1` or `flagNumber - 1` written inline at the use
+sites instead of as locals (23 and 29 words), both inline (35), and the
+`u32 ofs` local in the `0xFC58` arm as well as the `0x17F10` one (which costs
+a word of size).
+
+`fldAutoMapOpenBlock2` is the same function with `|=` for `&= ~`, and it does
+match, from `room`, `index`, `bit` locals in that order. The extra `nor` in
+the close path is what moves the allocation.
+
+## fldAutoMapClear (field/fldAutoMap, 0x9C)
+
+37 of 39 words, at the exact 156-byte size.
+
+Two loops zero 30 and 8 rows of 32 quadwords in `DDS3_GBWK`. The second loop
+matches exactly from `u64 *row = (u64 *)(gb + 0x19D10 + i * 256);` and
+`*row++ = 0;`, which is what gives retail's ascending inner pointer and its
+strength-reduced outer base. The first loop differs in those two words only:
+retail starts the row at `0xFC58` and bumps the pointer by `+8`, while the
+draft starts at `0xFD50` (`0xFC58 + 31 * 8`) and bumps by `-8`, because
+ee-gcc reverses the inner loop when the address is derived from the index
+rather than walked.
+
+Writing the first loop as a `*row++` walk does fix the direction but then
+ee-gcc strength-reduces its outer base too, dropping the `sll $2, $4, 8`
+recompute retail keeps and landing 34 words out at 148 bytes. Also measured
+for the first loop: `row[j]`, a `u64 (*)[32]` cast, `(u64 *)(gb + C)[i*32+j]`,
+`i * 256 + j * 8`, a `u32` index on either loop variable, `j != 32`,
+`j = 31; j--`, a pointer walked across both loops, and the base cast as
+`(u8 *)ofs + (u32)gb`. None reaches below 2 words, and only the ones that keep
+the derived address keep the 156-byte size.
+
+Caching `DDS3_GBWK` in a `u8 *` local, separately for each loop, is required:
+without it ee-gcc reloads the pointer inside the inner loop, since the `u64`
+store may alias it. That alone took the function from 35 differing words to 6.
+
+## fldAutoMapDrawIconOfsR (field/fldAutoMap, 0x244)
+
+10 of 146 words, at the exact 584-byte size.
+
+The function builds one textured quad for an icon. What it does is fully
+recovered; what is left is register allocation.
+
+`fldAutoMapIconOfsTable` is `s16 [][8]`: `[0]` and `[1]` are the texture
+origin, `[2]` and `[3]` the size, `[4]` and `[5]` the anchor offset. The u
+coordinates and the x coordinates scale by 16, the v and y coordinates by 8.
+`sdfPrimLinkFt4` takes 21 arguments, the last 13 in the outgoing frame at
+`0x0` through `0x60` in 8-byte EABI slots:
+
+    sdfPrimLinkFt4(tag, color, mode,
+                   x0, y0, u0, v0,  x1, y1, u1, v1,
+                   x2, y2, u2, v2,  x3, y3, u3, v3,  mask, next)
+
+`mode` selects the quad's winding: the default lays the four corners out
+top-left, top-right, bottom-left, bottom-right; `mode == 8` flips the rows;
+`mode == 4` transposes, taking the anchor from `[4]`/`[5]` the other way
+round and the extent from `[3]`/`[2]`. The tail is two separate
+`fldDrawGetOt` calls, the first supplying the argument and the second the
+`regFunc` to call through, so the source reads
+`((...)fldDrawGetOt()->regFunc)(ot, tag)` with `ot` from an earlier call.
+
+What is needed to get the three `lh` loads and their shifts right: `s32`
+locals for `t[0]`..`t[3]`. Read as `s16` at each use, ee-gcc loads `lhu` for
+the `* 16` use and then sign-extends with `sll 16`, `sra 13` for the `* 8`
+one, which adds two instructions per arm. `s16 *t = fldAutoMapIconOfsTable
+[index];` as an initializer at the declaration is what gives retail's four
+saved registers and the 0xB0 frame; assigning it after the three leading
+calls spends one fewer and lands at 564 bytes.
+
+The remaining difference: retail copies `x` into `$f21` and `y` into `$f20`,
+the draft the other way round, so every `mul.s` and the two `cvt.w.s`/`mfc1`
+pairs in each of the three arms name the other register. Both compute `y`
+first, in the same statement order, and swapping the statement order does not
+move the assignment. Retail also keeps `index * 16` in `$16` and rebuilds the
+table address into a temp after the calls, while the draft keeps the whole
+pointer in `$16`; recomputing `fldAutoMapIconOfsTable[index]` inside the
+default arm does reproduce that, but costs size elsewhere.
+
+Measured and rejected: the row addressed as `fldAutoMapIconOfsTable[index][k]`
+at every use (ee-gcc builds a chain of pointer copies, 620 bytes), `x0` before
+`y0` in each arm, and the four combinations of those with the pointer either
+initialized or assigned.
+
+## fldAutoMapSeqStart (field/fldAutoMap, 0x30C)
+
+148 of 195 words, at the exact 780-byte size. Everything up to `+0x1A4` is
+identical; the rest is the closing block that fills three vectors.
+
+Recovered along the way, and used by the matching `fldInitPacLoader`:
+`fldAreaWork_t.pacRes[10]` at `+0xD0` is the pac loader's handle and mapped
+pointer per entry, and this function reads the mapped pointers `pacRes[7]`,
+`[9]`, `[1]`, `[3]`, `[5]` straight into `sdfTexSet`. It also reads
+`amFloor` at `+0x64`.
+
+`D_00532230` is the `{0, 0, -1, 1}` up vector, assigned to a local
+`sdfVector4_t` (which gives the `ldl`/`ldr`/`sdl`/`sdr` run), and the three
+locals go out through `SDF_VU0_COPYVECTOR` to `D_002F5E00`, `fldAutoMapRect`
+and `D_002F5E10`. `D_0054C4C4` and `D_0054C4C8` are this unit's `.lit4`
+entries at file offsets `0x44D4C4` and `0x44D4C8`, holding `-24000.0f` and
+`20000.0f`; the other four constants in the block (200.0, 255.0, 1000.0,
+2048.0) have zero low halves and come out as `lui`/`mtc1`, so they add
+nothing to the pool.
+
+Two things were needed to reach the exact size. `fldAreaWork_t`'s light block
+has to be addressed through a local pointer to `&dds3LightParam2[0x20]`, which
+is what folds the `0x20` into the `%hi`/`%lo` pair instead of leaving it in
+the store displacements. And the three `0.0f` stores have to go through one
+`f32` local: written as literals ee-gcc emits three `sw $0`, where retail
+materialises the zero once with `mtc1 $0` and stores it with `swc1`, which is
+one word more. Assigning `target.y` and then copying it into the other two
+works equally well (49 words out instead of 50 before the rest was ordered).
+
+What is left: retail holds the two world coordinates in `$f3` and `$f0` and
+the zero in `$f1`, the draft in `$f2`, `$f1` and `$f0`, and retail does the
+up-vector copy before the float arithmetic rather than after. All 720
+orderings of the six statement groups in that block were measured (the best
+six tie at 47 words), as were all 24 orderings of the four `D_00551CAC`
+through `D_00551CB8` stores. Nothing moves the register choice.
+
+A forward prototype for `fldAllIconDel` is required: the unit defines it below
+this function, and the implicit declaration makes ee-gcc treat it as returning
+`int`.
+
+## effPCPBossBaelCopy (effect/effPCPBoss, 128 bytes)
+
+21 of 32 words, at the exact 128-byte size.
+
+Pure scheduling. Retail splits the `lui`/`ori` pair that builds `0x80808080`
+around the eight-instruction `ldl`/`ldr`/`sdl`/`sdr` block that copies the
+16-byte parameter vector: `lui` right after the allocation, the copy, then
+`ori` and the colour store. The draft keeps `lui` and `ori` adjacent and emits
+them before the copy, which rotates the eight copy words by two and also swaps
+which instruction fills the first `dds3EffectPartCopy` delay slot: retail takes
+`sw $0, 0x20` (the frame reset), the draft takes `lw $4, 0x28`.
+
+The sibling `effPCPBossBaelCreate` matches with the same statement order, so
+the trigger is the one-argument `dds3EffectPartCopy` rather than the stores.
+
+Ruled out: all six orderings of the vector copy, the colour store and the frame
+store, each with the copy written both as `memcpy` and as a struct assignment
+(twelve compiles, every one 11 or 12 words off); the colour in a `u32` local
+initialised at its declaration; the two `dds3EffectPartCopy` results through
+named locals; `sizeof` instead of a literal allocation size. Caching
+`src->modelResource` and `src->auxResource` in locals first is far worse, 31 of
+32.
+
+## effPCPBossKAGUThunderboltCopy (effect/effPCPBoss, 176 bytes)
+
+21 of 44 words, at the exact 176-byte size.
+
+Register allocation. Retail keeps the source work in `$17` and the new work in
+`$16`; the draft has them the other way round, which touches every instruction
+that names either. The three sibling copies in the same unit
+(`effPCPBossDengekiCopy`, `effPCPBossKAGUAttackCopy`,
+`effPCPBossKAGU2AttackCopy`) match with the identical statement shape and the
+opposite assignment, so the trigger is the extra `effPCPCrackCopy` call rather
+than the body. The leftover two words are a rotation of the `src->bed` load
+against the `1.0f` materialisation.
+
+Ruled out: the `effPCPCrackCopy` result stored directly against held in a
+named local; reading `src->bed` before the crack copy instead of after;
+storing `work->crack` before `work->bed` instead of after.
+
+## effPCP_BED_Create (effect/effPCPBoss, 248 bytes)
+
+21 of 62 words, at the exact 248-byte size.
+
+One source fact is missing. Retail materialises `0x80808080` twice: once as
+`lui`/`ori` before the parameter copy for `work->color`, and again inside the
+`bedParams` arm for `place.color`, with the second `ori` filling the guard's
+delay slot. Every C shape tried lets ee-gcc common the two constants into one
+register that stays live across the guard, which costs a register and rotates
+the whole arm. The structure around it is right: the 12-byte parameter copy as
+one struct assignment (one `ldl`/`ldr` pair plus an `lw`/`sw`), the two VU0
+identity macros, and the placement block written `payload[0..10]` then `color`,
+which is the shape that matched for the five sibling copy routines.
+
+Ruled out for the duplicated constant: the `work->color` store in all four
+positions around the parameter copy and the two VU0 macros; `place.color`
+written before the payload instead of after; an early `return work` in place of
+the `if`; the literal as `0x80808080u`, `-2139062144` and `0x80808080 | 0`;
+`place` and `bed` declared in the guarded block instead of the function body
+(every combination). All land on 41 or more differing words except the four
+listed positions, which land on 41, 41, 42 and 51.
+
+Worth knowing before retrying the bigger `Create` routines in this unit: they
+set a work colour and a placement colour the same way, so whatever defeats the
+common subexpression here should carry several of them.
+
+## effPCPCrackCopy (effect/effPCPBoss, 292 bytes)
+
+63 of 73 words, at the exact 292-byte size.
+
+Scheduling of the `0x80808080` materialisation. `effPCPCrackCreate` next to it
+matches with the identical body, so the 0x8C-byte head copy as one struct
+assignment and the store order are right. In the copy, ee-gcc builds the colour
+into `$2` before the tail of the block copy, so the tail's two temporaries land
+in `$5` and `$6`; retail uses `$2` and `$5` and builds the colour after the tail
+stores. The other six words follow from that: the `src->part` load and the
+colour store swap sides of the `dds3EffectPartCopy` delay slot, the same way
+`effPCPBossBaelCopy` does, and both are one-argument calls.
+
+Ruled out: all six orderings of the head copy, the colour store and the
+`unk9C` store (four of them are far worse, two land on 10); `unk9C` as an `f32`
+written `0.0f`, which reaches 11.
+
+## effPCPDANTE_Thunder_ProcessDraw (effect/effPCPBoss, 172 bytes)
+
+28 of 43 words, one word short of retail's 44.
+
+Retail computes `$sp + 0x40` twice: once into `$2` for the `sqc2` that stores
+the mark position, and again into `$5` in the `effPCPDANTE_Thunder_SetPosition`
+delay slot. Every C shape tried lets ee-gcc common the two into one register,
+which it then allocates straight to `$5`, so the draft is one instruction
+shorter and everything after the `sqc2` shifts. The matrix half is already
+exact, including `SDF_VU0_STOREMATRIX_MEMOPS` for the four frame-addressed
+`sqc2`s against `SDF_VU0_STOREVECTOR` for the register-addressed one.
+
+Ruled out for the duplicated address: the position as a bare `u128`, as a
+one-element array, and as the fifth element of the matrix array (so the two
+locals are one `u128 buf[5]`); a `u128 *` local assigned just before the macro
+and `&position` at the call.
+
+The same obstacle blocks `effPCPBossKAGU2MUHENKDraw`, which is otherwise
+straightforward: retail computes the mark index `i + 0x14` separately for its
+`effBTLModelGetMarkPosition2` and `sdfModelGetMarkPosMatrix` calls, and ee-gcc
+commons the two into one saved register, leaving the draft a word short. Its
+structure is known: the shared invoke-model search that
+`effPCPBossThunderboltDraw` now carries (with a `u32` index and ids 0x125 and
+0x108), then a seven-iteration loop that stores the mark position, calls
+`effDebugPointDraw`, loads `(0, -1, 0)` through `SDF_VU0_APPLYMATRIX` and draws
+a 200-unit line with `effDebugLineDraw`.
+
+## effPCPDANTE_ShowTime_Draw (effect/effPCPBoss, 300 bytes)
+
+71 of 75 words, at the exact 300-byte size.
+
+One instruction's schedule slot. Retail places the `mov.s $f12, $f20` that
+passes 0.45f to the first `nbPanelFlashInit` directly after the two `lui`s for
+its colour arguments; the draft emits it three slots later, right before the
+`jal`, which rotates four words. Everything else is exact, including the three
+`.lit4` constants as literals: `D_0054C9D0`, `D_0054C9D4` and `D_0054C9D8` sit
+in this unit's pool at file offsets 0x44D9D0, 0x44D9D4 and 0x44D9D8 and hold
+0.45f, 0.35f and 0.55f, with 0.45f shared by the first two calls, so ee-gcc
+keeps it in `$f20` and the pool gets one entry for it.
+
+Ruled out: 0.45f through a named `f32` local, declared before `frame`, after it,
+and at the top of the guarded block. The first two are far worse (67 words),
+because the load then happens outside the guard; only the block-scoped one stays
+at four.

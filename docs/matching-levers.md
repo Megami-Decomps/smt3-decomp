@@ -39,6 +39,9 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| an `ldl`/`ldr` and `sdl`/`sdr` run | one struct assignment of a 4-aligned type, the trailing word included. Splitting that word off as its own field is what breaks it; `effPCPCrackCreate`'s 0x8C copy is why it carries an 8-byte-alignment runtime dispatch |
+| `sw $0` to a float field, not clustered with the integer zero stores | write it `0.0f` into an `f32` field. A float-typed zero store sits in the float store chain; one function went from 15 differing words to 2 on that alone |
+| every compared field loaded before the first branch | read them all into locals at the top. One function went from 65 of 69 differing words to 42 |
 | an `lq` and `sq` pair for a struct copy | `SDF_VU0_COPYVECTOR(dst, src)`. `QWORD_ALIGNED` is empty in this build, so a plain `sdfVector4_t` assignment gives `ldl`/`ldr`/`sdl`/`sdr`, and a `u128` assignment gives `sq` with a displacement where retail biases the base and uses `0(reg)`. Took one function from 300 bytes to 220 |
 | two `slti`s and a `bltz`, the last test if-converted to an `sltiu` | a `switch` whose cases are one singleton and one small range, `{0}` and `{1,2}` |
 | `bnel` against a materialised `-1` in a table scan | `for (i = n; i != -1; i--)`, not `i >= 0`, which gives `bgez` instead |
@@ -82,6 +85,54 @@ it was measured on DDS and not on this ELF.
   dimensional array but not on a flat index: `tbl[max - 1][r]` with
   `extern s32 tbl[][10]` gives retail's `lw -0x28(reg)`, where the same
   arithmetic as a single index keeps an `addiu -10`.
+- Two `if`/`else` arms that read-modify-write the same kind of address get
+  cross-jumped into one `ld`/`or`/`sd` tail, where retail has the tail twice.
+  Put the byte offset of one arm in a `u32` local, `u32 ofs = 0x17F10 +
+  (floor * 32 + room) * 8;`, and dereference `(u8 *)GLOBAL + ofs`. That is
+  what changes gcc's association of the three-term sum from
+  `(index + base) + const` to `(index + const) + base`, so the two arms end up
+  with the pointer in different registers and the tail is no longer
+  cross-jumpable. Parenthesising the constant with the index in the expression
+  does not work: gcc reassociates every form tried.
+  `fldAutoMapOpenBlock` went from 137 of 168 words to exact, and
+  `fldAutoMapOpenBlock2` from 28 of 40, with the local in the `>= 30` arm
+  only.
+- A store through a cast pointer may alias a `gp`-addressed pointer global, so
+  gcc reloads the global inside the inner loop. Cache it in a local `u8 *`
+  first, once per loop where retail reloads it once per loop. That took
+  `fldAutoMapClear` from 35 differing words to 6.
+- An inner loop that walks up (`addiu ptr, 8`) while its counter walks down
+  comes from `*p++` on a row pointer. An address derived from the index
+  instead, `base + (i * 32 + j) * 8`, makes gcc reverse the loop, so the
+  pointer descends from the last element and the row constant is the last
+  element's offset.
+- Where retail folds a constant offset into a symbol's `%hi`/`%lo` pair and
+  then uses small displacements, the source holds a pointer to the sub-object:
+  `p = (T *)&dds3LightParam2[0x20];`. Indexing the array at each use leaves the
+  `0x20` in the store displacements instead.
+- Storing `0.0f` to several float fields gives `sw $0` per store. Where retail
+  materialises the zero once with `mtc1 $0` and stores it with `swc1`, which is
+  one word more in total, assign it to an `f32` local first and store the local.
+  Copying one field into the others works as well.
+- An `s16` table field used once at `* 16` and once at `* 8` comes out as a
+  second `lhu` plus `sll 16`, `sra 13` for the narrower scale. Read the field
+  into an `s32` local and scale the local, which is what gives retail's single
+  `lh` and two `sll`s.
+- `s16 *t = table[index];` as an initializer at the declaration and
+  `t = table[index];` as a statement after the function's leading calls differ
+  by one saved register and by whether `index * 16` or the whole pointer is the
+  value kept across the calls.
+- Do not cache a value a call consumes in each arm. Written at the call site,
+  `effColorBlend(work->color & 0xFFFFFF, work->color, blend)` is exact; the
+  same value in a local spends a saved register and copies it into `$5`. That
+  took one function from 42 differing words to 0.
+- An uninitialised local passed as an argument is a real retail shape:
+  `Create(work, NULL)` with `work` not yet assigned is how one register serves
+  as both the argument and the result.
+- A `Create` that reads its parameter block at offset 0 needs the parameter to
+  have its own type, not the work type. Where the parameter store is not the
+  first store, read it into a local first so the `lw` lands ahead of the
+  stores.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

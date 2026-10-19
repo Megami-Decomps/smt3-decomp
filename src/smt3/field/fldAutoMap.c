@@ -131,8 +131,6 @@ extern void fldRegistUnitPad(void);
 
 extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
 
-extern void fldAutoMapCloseBlock2(s32 area, s32 floor, s32 flagNumber);
-
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
 extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2,
@@ -154,7 +152,9 @@ extern f32 D_0054EEA0;
 
 extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
 
-extern fldMapPoint_t fldAutoMapFieldId;
+extern sdfVector4_t fldAutoMapFieldId;
+
+extern sdfVector4_t fldAutoMapPosX;
 
 extern s32 fldAutoMapAreaNo;
 
@@ -285,7 +285,7 @@ extern s32 fldNpcLoadIdx;
 
 extern void fldMakeFilePath(char *out, s32 field, s32 area);
 
-extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, s32 mode);
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, u32 *size);
 
 extern void *D_00312150[];
 
@@ -298,6 +298,157 @@ extern sdfTexHandle_t *fldAutoMapWindowTex[];
 extern void sdfModelRootFree(void *model, s32 a, s32 b);
 
 extern s32 sdfDelayedResrcCheck(void);
+
+extern s32 fldDrawFlag[];
+
+extern s8 dds3PadButtonState[64];
+
+extern void fldDbgPrint2D(s32 x, s32 y, const char *format);
+
+extern void fldAutoMapDrawOneArea(void);
+
+extern s32 fldEncountTestFlag(s32 flag);
+
+void fldAllIconDel(s32 index, f32 *x, f32 *z);
+
+extern s32 fldAutoMapSeqTestFlag(s32 flag);
+
+extern void fldAutoMapSeqSetFlag(s32 flag);
+
+extern void fldReleaseUnitPad(void);
+
+extern void evtDisableMoonDraw(void);
+
+extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
+
+extern void *sdfModelMakeEarly(s32 mode, void *resource);
+
+extern s32 fldAutoMapSeqState;
+
+extern s32 fldAutoMapSeqStep;
+
+extern s32 fldAutoMapDrawArea;
+
+extern s32 D_0054EE58;
+
+extern s32 D_00551CAC;
+
+extern s32 D_00551CB0;
+
+extern s32 D_00551CB4;
+
+extern s32 D_00551CB8;
+
+extern sdfVector4_t D_00532230;
+
+extern sdfVector4_t D_002F5E00;
+
+extern sdfVector4_t D_002F5E10;
+
+extern sdfVector4_t fldAutoMapRect;
+
+extern u8 dds3LightParam2[];
+
+extern f32 dds3ScreenParam2[];
+
+typedef struct
+{
+    f32 near;
+    f32 far;
+    f32 scale;
+    f32 bias;
+    u32 mode;
+} fldAmLightParam_t;
+
+
+typedef struct
+{
+    u8 pad0[0x60];
+    sdfPacWork_t *queueHead;
+} fldPacRequest_t;
+
+extern fldPacRequest_t *pacLoad(const char *path);
+
+extern void pacSync(fldPacRequest_t *request);
+
+extern void pacFileHandleFree_(fldPacRequest_t *request);
+
+extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
+
+extern sdfMemHandle_t *fldTakara1File;
+
+extern u8 *fldTakara1Data;
+
+extern u32 fldTakara1Size;
+
+extern sdfMemHandle_t *fldTakara2File;
+
+extern u8 *fldTakara2Data;
+
+extern u32 fldTakara2Size;
+
+extern sdfMemHandle_t *fldTakara3File;
+
+extern u8 *fldTakara3Data;
+
+extern u32 fldTakara3Size;
+
+extern void *fldPacFileHandle;
+
+extern void *fldNpcPacData;
+
+extern void *fldTakaraPacData;
+
+extern void *D_00551CCC;
+
+extern void *D_00551CD4;
+
+extern void *D_00551CDC;
+
+extern void *D_00551CE4;
+
+extern void *D_00551CEC;
+
+extern void *D_00551CF4;
+
+extern void *D_00551D04;
+
+extern void *D_00551D0C;
+
+extern void *D_00551D14;
+
+extern void *D_00551D1C;
+
+extern void *D_0054EF1C;
+
+extern void *D_0054EF20;
+
+extern void *D_0054EF24;
+
+extern void *D_0054EF28;
+
+extern void *D_0054EF2C;
+
+extern s32 D_0054EF30;
+
+extern void *D_0054EF3C;
+
+extern void *D_0054EF40;
+
+
+extern s16 fldAutoMapIconOfsTable[][8];
+
+extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 contextOffset);
+
+extern sdfGrOt_t *fldDrawGetOt(void);
+
+extern void sdfPrimLinkFt4(sdfDrawTag_t *tag, u32 color, s32 mode, s32 x0, s32 y0, s32 u0,
+                           s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2,
+                           s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 mask, void *next);
 
 void fldAutoMapFontInit(s32 fld) {
     s32 i;
@@ -393,7 +544,34 @@ void fldAutoMapFileFree(void) {
     fldAutoMapData = 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapLoad);
+void fldAutoMapLoad(void) {
+    s32 i;
+
+    fldGlobalBase.nameU = -1;
+    fldGlobalBase.nameD = -1;
+    fldAutoMapFieldId.x = 0.0f;
+    fldAutoMapFieldId.y = 0.0f;
+    fldAutoMapFieldId.z = 0.0f;
+    fldAutoMapFieldId.w = 1.0f;
+    fldAutoMapPosX.x = 0.0f;
+    fldAutoMapPosX.y = 0.0f;
+    fldAutoMapPosX.z = 0.0f;
+    fldAutoMapPosX.w = 1.0f;
+    fldAutoMapBuf = NULL;
+    fldAutoMapHeader = NULL;
+    fldAutoMapData = 0;
+    D_00551CC0[0] = NULL;
+    D_00551CC0[1] = NULL;
+    fldAutoMapWindowTex[0] = NULL;
+    fldAutoMapWindowTex[1] = NULL;
+    fldAutoMapWindowTex[2] = NULL;
+    for (i = 0; i < 32; i++) {
+        D_00312150[i] = NULL;
+        fldAutoMapModelPos[i].x = 0.0f;
+        fldAutoMapModelPos[i].y = 0.0f;
+        fldAutoMapModelPos[i].z = 0.0f;
+    }
+}
 
 void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     f32 pos[4];
@@ -413,7 +591,97 @@ void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
     sdfModelLinkOt(&D_002F6A48, emitter);
 }
 
+/* NON_MATCHING: 10 of 146 words, exact size; the two saved fp registers hold x
+ * and y the other way round, which rotates all three arms. */
+#ifdef NON_MATCHING
+void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y) {
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+    s16 *t = fldAutoMapIconOfsTable[index];
+    s32 tu;
+    s32 tv;
+    s32 tw;
+    s32 th;
+    s32 u0;
+    s32 v0;
+    s32 u1;
+    s32 v1;
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 ax;
+    s32 ay;
+    s32 bx;
+    s32 by;
+    s32 cx;
+    s32 cy;
+    s32 dx;
+    s32 dy;
+
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf2DLinkTexPacket(tag, D_00551CC0[0], 0);
+    tu = t[0];
+    tv = t[1];
+    tw = t[2];
+    th = t[3];
+    u0 = tu * 16;
+    v0 = tv * 16;
+    u1 = u0 + tw * 16;
+    v1 = v0 + th * 16;
+    switch (mode) {
+    case 4:
+        y0 = (s32)(y * 16.0f) - t[4] * 8;
+        x0 = (s32)(x * 16.0f) - t[5] * 16;
+        y1 = y0 + tw * 8;
+        x1 = x0 + th * 16;
+        ax = x1;
+        ay = y0;
+        bx = x1;
+        by = y1;
+        cx = x0;
+        cy = y0;
+        dx = x0;
+        dy = y1;
+        break;
+    case 8:
+        y0 = (s32)(y * 16.0f) - t[5] * 8;
+        x0 = (s32)(x * 16.0f) - t[4] * 16;
+        y1 = y0 + th * 8;
+        x1 = x0 + tw * 16;
+        ax = x0;
+        ay = y1;
+        bx = x1;
+        by = y1;
+        cx = x0;
+        cy = y0;
+        dx = x1;
+        dy = y0;
+        break;
+    default:
+        y0 = (s32)(y * 16.0f) - t[5] * 8;
+        x0 = (s32)(x * 16.0f) - t[4] * 16;
+        y1 = y0 + th * 8;
+        x1 = x0 + tw * 16;
+        ax = x0;
+        ay = y0;
+        bx = x1;
+        by = y0;
+        cx = x0;
+        cy = y1;
+        dx = x1;
+        dy = y1;
+        break;
+    }
+    sdfPrimLinkFt4(tag, 0x80808080, 0x44, ax, ay, u0, v0, bx, by, u1, v0, cx, cy, u0, v1,
+                   dx, dy, u1, v1, 0, 0);
+    ot = fldDrawGetOt();
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))fldDrawGetOt()->regFunc)(ot, tag);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsRF);
 
@@ -522,7 +790,90 @@ void fldAutoMapDrawWindow(void) {
     rsetAlpha(0);
 }
 
+/* NON_MATCHING: 148 of 195 words, exact size; the closing vector block is
+ * scheduled differently and holds the two coordinates in other fp registers. */
+#ifdef NON_MATCHING
+void fldAutoMapSeqStart(void) {
+    sdfVector4_t target;
+    sdfVector4_t camera;
+    sdfVector4_t up;
+    f32 px;
+    f32 pz;
+    fldAmLightParam_t *light;
+    fldMapRoom_t *rec;
+    s32 i;
+    f32 wx;
+    f32 wz;
+    f32 zero;
+
+    if (fldAutoMapSeqTestFlag(1) == 1) {
+        return;
+    }
+    if (fldGlobalBase.area < 10) {
+        return;
+    }
+    dds3VisibleSceneBasic(dds3GetActiveScene(), 0);
+    p2sdPlaySE(0xE, 0x7F, 0x3F);
+    rec = fldAutoMapHeader;
+    for (i = 0; i < fldAutoMapData; i++, rec++) {
+        fldMapPoint_t *pos;
+
+        D_00312150[i] = sdfModelMakeEarly(0, rec->model);
+        pos = rec->pos;
+        fldAutoMapModelPos[i].x = pos->x;
+        fldAutoMapModelPos[i].y = pos->y;
+        fldAutoMapModelPos[i].z = pos->z;
+    }
+    D_00551CC0[0] = sdfTexSet(fldGlobalBase.pacRes[7]);
+    D_00551CC0[1] = sdfTexSet(fldGlobalBase.pacRes[9]);
+    fldAutoMapWindowTex[0] = sdfTexSet(fldGlobalBase.pacRes[1]);
+    fldAutoMapWindowTex[1] = sdfTexSet(fldGlobalBase.pacRes[3]);
+    fldAutoMapWindowTex[2] = sdfTexSet(fldGlobalBase.pacRes[5]);
+    fldAutoMapSeqState = 0;
+    fldAutoMapDrawArea = fldGlobalBase.amFloor;
+    D_0054EE58 = fldGlobalBase.amFloor;
+    fldAutoMapAreaNo = fldGlobalBase.floor;
+    AutoMapSeq = 1;
+    fldAllIconDel(fldGlobalBase.floor, &px, &pz);
+    fldAutoMapSeqStep = 0;
+    D_00551CB4 = (s32)((f32)(s32)fldGlobalBase.x + px);
+    D_00551CB8 = (s32)((f32)(s32)fldGlobalBase.z + pz);
+    D_00551CB0 = D_00551CB8;
+    D_00551CAC = D_00551CB4;
+    fldAutoMapSeqSetFlag(1);
+    fldReleaseUnitPad();
+    evtDisableMoonDraw();
+    zero = 0.0f;
+    wz = fldGlobalBase.z + pz + 200.0f;
+    wx = fldGlobalBase.x + px;
+    fldAutoMapFieldId.x = wx;
+    fldAutoMapFieldId.y = zero;
+    fldAutoMapFieldId.z = wz;
+    fldAutoMapPosX.x = wx;
+    fldAutoMapPosX.y = zero;
+    fldAutoMapPosX.z = wz;
+    up = D_00532230;
+    target.x = (f32)D_00551CAC;
+    target.y = zero;
+    target.z = (f32)D_00551CB0;
+    camera.x = (f32)D_00551CAC;
+    camera.y = -24000.0f;
+    camera.z = (f32)D_00551CB0;
+    SDF_VU0_COPYVECTOR(&D_002F5E00, &camera);
+    SDF_VU0_COPYVECTOR(&fldAutoMapRect, &target);
+    SDF_VU0_COPYVECTOR(&D_002F5E10, &up);
+    light = (fldAmLightParam_t *)&dds3LightParam2[0x20];
+    light->near = 255.0f;
+    light->far = 255.0f;
+    light->scale = 1000.0f;
+    light->bias = 20000.0f;
+    light->mode = 0x108010;
+    dds3ScreenParam2[4] = 2048.0f;
+    dds3ScreenParam2[5] = 2048.0f;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapSeqStart);
+#endif
 
 void fldAutoMapFree(void) {
     s32 i;
@@ -611,11 +962,114 @@ s32 fldAutoMapChkOpen(s32 area, s32 room, u32 item) {
     return (*(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + room) * 8) >> item) & 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapOpenBlock);
+void fldAutoMapOpenBlock(s32 flagNumber) {
+    s32 floor;
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapOpenBlock2);
+    if (flagNumber <= 0) {
+        return;
+    }
+    if (fldEncountTestFlag(0x80) != 0) {
+        return;
+    }
+    floor = fldAutoMapField % 100;
+    if (floor < 10) {
+        return;
+    }
+    floor -= 10;
+    fldGlobalBase.blockID = flagNumber - 1;
+    if (floor >= 30) {
+        u32 ofs = 0x17F10 + (floor * 32 + fldGlobalBase.floor) * 8;
 
+        *(u64 *)((u8 *)DDS3_GBWK + ofs) |= (u64)1 << (flagNumber - 1);
+    } else {
+        *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + fldGlobalBase.floor) * 8) |=
+            (u64)1 << (flagNumber - 1);
+    }
+    fldGlobalBase.amSBlock = flagNumber;
+    fldGlobalBase.amFloor = fldAutoMap_GetFloor(fldGlobalBase.floor, fldGlobalBase.blockID);
+    if (fldAutoMapField == 25) {
+        if (fldGlobalBase.floor == 0) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 17, flagNumber);
+        }
+        if (fldGlobalBase.floor == 16) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 1, flagNumber);
+        }
+        if (fldGlobalBase.floor == 1) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 18, flagNumber);
+        }
+        if (fldGlobalBase.floor == 17) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 2, flagNumber);
+        }
+        if (fldGlobalBase.floor == 2) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 19, flagNumber);
+        }
+        if (fldGlobalBase.floor == 18) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 3, flagNumber);
+        }
+        if (fldGlobalBase.floor == 3) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 20, flagNumber);
+        }
+        if (fldGlobalBase.floor == 19) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 4, flagNumber);
+        }
+        if (fldGlobalBase.floor == 4) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 21, flagNumber);
+        }
+        if (fldGlobalBase.floor == 20) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 5, flagNumber);
+        }
+    }
+    if (fldAutoMapField == 34) {
+        if (fldGlobalBase.floor == 1) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 3, flagNumber);
+        }
+        if (fldGlobalBase.floor == 2) {
+            fldAutoMapOpenBlock2(fldAutoMapField, 2, flagNumber);
+        }
+    }
+}
+
+void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber) {
+    s32 room = area % 100;
+    s32 index = floor - 1;
+    s32 bit = flagNumber - 1;
+
+    if (room < 10) {
+        return;
+    }
+    room -= 10;
+    if (room >= 30) {
+        u32 ofs = 0x17F10 + (room * 32 + index) * 8;
+
+        *(u64 *)((u8 *)DDS3_GBWK + ofs) |= (u64)1 << bit;
+    } else {
+        *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (room * 32 + index) * 8) |= (u64)1 << bit;
+    }
+}
+
+/* NON_MATCHING: 40 of 42 words, exact size; the two `addiu -1` setups are swapped
+ * between the slot before `div` and the `beql` delay slot. */
+#ifdef NON_MATCHING
+void fldAutoMapCloseBlock2(s32 area, s32 floor, s32 flagNumber) {
+    s32 bit = flagNumber - 1;
+    s32 room = area % 100;
+    s32 index = floor - 1;
+
+    if (room < 10) {
+        return;
+    }
+    room -= 10;
+    if (room >= 30) {
+        u32 ofs = 0x17F10 + (room * 32 + index) * 8;
+
+        *(u64 *)((u8 *)DDS3_GBWK + ofs) &= ~((u64)1 << bit);
+    } else {
+        *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (room * 32 + index) * 8) &= ~((u64)1 << bit);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCloseBlock2);
+#endif
 
 void fldAutoMapNameU(s32 labelIndex) {
     if (labelIndex >= 0x40) {
@@ -759,13 +1213,182 @@ INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532230);
 
 INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532240);
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDraw);
+void fldAutoMapDraw(void) {
+    char buf[0x20];
+    s32 i;
 
+    if (AutoMapSeq != 1) {
+        return;
+    }
+    fldAutoMapDrawWindow();
+    fldAutoMapDrawOneArea();
+    if (fldDrawFlag[0] == 0) {
+        return;
+    }
+    if (dds3PadButtonState[0x2B] == 0) {
+        return;
+    }
+    sprintf(buf, "BIT DEBUG %d", fldAutoMapField);
+    fldDbgPrint2D(0xC80, -0x2E0, buf);
+    if (fldAutoMapField - 10 > 0 && fldAutoMapField - 10 < 30) {
+        for (i = 0; i < 32; i++) {
+            sprintf(buf, "%2d %016lx", i,
+                    *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 +
+                             ((fldAutoMapField - 10) * 32 + i) * 8));
+            fldDbgPrint2D(0xC80, i * 96 - 640, buf);
+        }
+    } else {
+        for (i = 0; i < 32; i++) {
+            sprintf(buf, "%2d %016lx", i,
+                    *(u64 *)((u8 *)DDS3_GBWK + 0x17F10 +
+                             ((fldAutoMapField - 10) * 32 + i) * 8));
+            fldDbgPrint2D(0xC80, i * 96 - 640, buf);
+        }
+    }
+}
+
+/* NON_MATCHING: 37 of 39 words, exact size; the first loop's inner pointer
+ * descends where retail's ascends. */
+#ifdef NON_MATCHING
+void fldAutoMapClear(void) {
+    u8 *gb;
+    s32 i;
+    s32 j;
+
+    gb = (u8 *)DDS3_GBWK;
+    for (i = 0; i < 30; i++) {
+        for (j = 0; j < 32; j++) {
+            *(u64 *)(gb + 0xFC58 + (i * 32 + j) * 8) = 0;
+        }
+    }
+    gb = (u8 *)DDS3_GBWK;
+    for (i = 0; i < 8; i++) {
+        u64 *row = (u64 *)(gb + 0x19D10 + i * 256);
+
+        for (j = 0; j < 32; j++) {
+            *row++ = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapClear);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldDrawAreaBlockFont);
 
-INCLUDE_ASM(const s32, "field/fldAutoMap", fldInitPacLoader);
+void fldInitPacLoader(void) {
+    fldPacRequest_t *request;
+    sdfPacWork_t *work;
+    sdfMemHandle_t *handle;
+    u32 i;
+
+    D_0054EF1C = NULL;
+    D_0054EF20 = NULL;
+    D_0054EF24 = NULL;
+    fldTakara1File = sdfDevLoadFileEx("/fld/f/bin/takara1.PB", &fldTakara1Data, &fldTakara1Size);
+    fldTakara3File = sdfDevLoadFileEx("/fld/f/bin/takara3.PB", &fldTakara3Data, &fldTakara3Size);
+    fldTakara2File = sdfDevLoadFileEx("/fld/f/bin/takara2.PB", &fldTakara2Data, &fldTakara2Size);
+    request = pacLoad("/fld/f/bin/fldmix.LB");
+    pacSync(request);
+    work = request->queueHead;
+    for (i = 0; work != NULL; i++) {
+        switch (i) {
+    case 0:
+        handle = work->resrc;
+        D_00551D04 = handle;
+        D_00551D08 = sdfMemGetPtr(handle);
+        break;
+    case 1:
+        handle = work->resrc;
+        fldPacFileHandle = handle;
+        fldNpcPacData = sdfMemGetPtr(handle);
+        break;
+    case 2:
+        handle = work->resrc;
+        D_00551D1C = handle;
+        fldTakaraPacData = sdfMemGetPtr(handle);
+        break;
+    case 3:
+        handle = work->resrc;
+        D_00551D0C = handle;
+        D_00551D10 = sdfMemGetPtr(handle);
+        break;
+    case 4:
+        handle = work->resrc;
+        D_00551CCC = handle;
+        D_00551CD0 = sdfMemGetPtr(handle);
+        break;
+    case 5:
+        handle = work->resrc;
+        D_00551CD4 = handle;
+        D_00551CD8 = sdfMemGetPtr(handle);
+        break;
+    case 6:
+        handle = work->resrc;
+        D_00551CDC = handle;
+        D_00551CE0 = sdfMemGetPtr(handle);
+        break;
+    case 7:
+        handle = work->resrc;
+        D_00551CE4 = handle;
+        D_00551CE8 = sdfMemGetPtr(handle);
+        break;
+    case 8:
+        handle = work->resrc;
+        D_00551CEC = handle;
+        D_00551CF0 = sdfMemGetPtr(handle);
+        break;
+    case 9:
+        handle = work->resrc;
+        D_00551CF4 = handle;
+        D_00551CF8 = sdfMemGetPtr(handle);
+        break;
+    case 10:
+        handle = work->resrc;
+        D_00551D14 = handle;
+        D_00551D18 = sdfMemGetPtr(handle);
+        break;
+    case 11:
+        handle = work->resrc;
+        D_0054EF28 = handle;
+        D_0054EF2C = sdfMemGetPtr(handle);
+        D_0054EF30 = 4;
+        break;
+    case 12:
+        handle = work->resrc;
+        D_0054EF3C = handle;
+        D_0054EF40 = sdfMemGetPtr(handle);
+        break;
+    case 13:
+        handle = work->resrc;
+        fldGlobalBase.pacRes[6] = handle;
+        fldGlobalBase.pacRes[7] = sdfMemGetPtr(handle);
+        break;
+    case 14:
+        handle = work->resrc;
+        fldGlobalBase.pacRes[8] = handle;
+        fldGlobalBase.pacRes[9] = sdfMemGetPtr(handle);
+        break;
+    case 15:
+        handle = work->resrc;
+        fldGlobalBase.pacRes[0] = handle;
+        fldGlobalBase.pacRes[1] = sdfMemGetPtr(handle);
+        break;
+    case 16:
+        handle = work->resrc;
+        fldGlobalBase.pacRes[2] = handle;
+        fldGlobalBase.pacRes[3] = sdfMemGetPtr(handle);
+        break;
+    case 17:
+        handle = work->resrc;
+        fldGlobalBase.pacRes[4] = handle;
+        fldGlobalBase.pacRes[5] = sdfMemGetPtr(handle);
+        break;
+        }
+        work = work->next;
+    }
+    pacFileHandleFree_(request);
+}
 
 void fldInitBlurEffect(void) {
     fldBlurParam_t param;

@@ -45,7 +45,12 @@ typedef struct fldAreaWork_t
     u8 unk1C[4];
     char requestedSceneName[0x10]; /* 0x020 */
     sdfVector4_t campos;        /* 0x030 */
-    u8 unk40[0x44];
+    u8 unk40[0x20];
+    s32 amSBlock;               /* 0x060 */
+    s32 amFloor;                /* 0x064 */
+    s32 nameU;                  /* 0x068 */
+    s32 nameD;                  /* 0x06C */
+    u8 unk70[0x14];
     s32 resourceFlag;           /* 0x084 */
     s32 resourceArea;           /* 0x088 */
     s32 resourceFloor;          /* 0x08C */
@@ -56,7 +61,9 @@ typedef struct fldAreaWork_t
     s32 reuseAreaResources;     /* 0x0A8 */
     u8 unkAC[0xC];
     s32 lightMaIdx;             /* 0x0B8 */
-    u8 unkBC[0x44];
+    u8 unkBC[0x14];
+    void *pacRes[10];           /* 0x0D0: handle and mapped pointer per pac entry */
+    u8 unkF8[8];
     f32 x;                      /* 0x100 */
     f32 y;                      /* 0x104 */
     f32 z;                      /* 0x108 */
