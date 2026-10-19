@@ -36,3 +36,18 @@ the same block.
 `lwc1 %gp_rel(D_...)` in the split asm into `li.s`, so literal values are
 readable in `build/eeasm/` and the pool is rebuilt per object in emission
 order. The order in which the C uses a constant has to match retail.
+- Where retail loads every field of one struct before storing any of them into
+  another, and the two pointed-to types are different alias sets so the
+  scheduler is free to interleave, read the fields into locals of the source
+  field's own declared width. `s16` and `u16` locals also keep retail's `lh`
+  against `lhu` per field, which a direct `dst->f = src->f` copy does not:
+  assigning `s16` to `s16` lets cc1 use `lhu`.
+  Confirmed a third time, and this time the barrier buys a *load*:
+  `dds3ComparePosPoseSet2` in `basic/dds3Basic` compares `fabs(length) - right->r`
+  against zero, and with `fabsf` the radius `lwc1` lands after the `abs.s` and the
+  zero and the radius take each other's float registers, 5 of 22 words under eleven
+  spellings (the comparison reversed, a zero local, a radius local or none, the
+  `abs` as its own statement, `else`, a `goto`, a ternary). `EE_ABS_F32` schedules
+  the load into the `mtc1`-to-`abs.s` latency the way retail does and is exact. Its
+  matching sibling `dds3ComparePosPoseSet`, which adds two radii, needs `fabsf`, so
+  the two live side by side in one unit.

@@ -192,7 +192,25 @@ void evtSetTestCamera(void) {
     dds3ObjectBaseSetPadControl(object, 0);
 }
 
-INCLUDE_ASM(const s32, "event/evtStage", evtSetRegistUnit);
+s32 evtSetRegistUnit(s32 slotKind, s32 resource) {
+    f32 position[4];
+    f32 rotation[4];
+    s32 counter;
+    dds3Basic_t *object;
+
+    memset(position, 0, 0x10);
+    position[3] = 1.0f;
+    memset(rotation, 0, 0x10);
+    rotation[3] = 1.0f;
+    counter = dds3AllocObjectId();
+    object = dds3AddUnitObjectBasic(counter, position, rotation);
+    dds3ObjectBaseOnFlag(object, 0x20);
+    dds3GetRadiusPoseSet(object, 10.0f);
+    dds3ObjectBaseMakeUnit(object, slotKind, resource);
+    mdlLoopMotion((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
+    dds3ObjectBaseSetPadControl(object, 0);
+    return counter;
+}
 
 s32 evtLoadUnit(s32 slotKind, s32 resource) {
     f32 position[4];

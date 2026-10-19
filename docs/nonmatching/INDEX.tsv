@@ -180,6 +180,7 @@ deleteMoveBlock	pb/pbGame	0x144	46 of 77 words	docs/nonmatching/pb/pbGame.md	34
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words	docs/nonmatching/pb/pbGame.md	59
 roundBlock	pb/pbGame	0x8C	12 of 34 words	docs/nonmatching/pb/pbGame.md	79
 DispBaseData	script/scrParameterCommand	764 bytes	seventy of 190 words differ	docs/nonmatching/script/scrParameterCommand.md	5
+sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/nonmatching/sdf/sdfModel.md	5
 sdfModelLinkDrawPacket	sdf/sdfModel	0x208	Eighteen of 122 words match	docs/nonmatching/sdf/sdfModel.md	42
 sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Fifty of 150 words match	docs/nonmatching/sdf/sdfModel.md	77
