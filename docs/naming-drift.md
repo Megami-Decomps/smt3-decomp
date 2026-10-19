@@ -403,7 +403,36 @@ So an offset cast is not automatically worse than a member access. Where it
 encodes an integer add or a cached base that retail's codegen depends on, it is
 the honest spelling, and the comment should say which field it lands on.
 
-### String placeholders are worth converting; sdata ones are not
+### String placeholders: the rule, and what still blocks 173 of them
+
+A format string or process name referenced as `extern char D_<addr>[]` plus an
+`INCLUDE_RODATA` line is worth becoming the literal it spells. 89 of 262 are,
+across 25 units. ee-gcc pools each literal back to the address the split had
+given it, so the image does not move.
+
+Two things block the rest, and both are reported rather than guessed:
+
+1. **The rodata is shared with a function still in assembly.**
+   `tools/check_unit.py` says so outright: *SHARED rodata of
+   `sdfDumpDmaChain` (retail 0x00549B70) is also used by asm
+   `sdfGrFlushOtChain`: keep the extern `D_` symbol until they are C.* While
+   any `INCLUDE_ASM` sibling references the string, the symbol has to stay.
+   This is the dominant cause, and it clears itself as those units finish.
+2. **The string is not in `.rodata`.** `.sdata` starts at vram `0x54E800`
+   (`config/smt3/SLUS_209.11.yaml`). gcc emits a literal into `.rodata`, so
+   inlining one that lives in `.sdata` moves its bytes between sections;
+   `check_unit` reports *this section has no accepted per-unit source owner*.
+   An `INCLUDE_SDATA` line is the obvious signal but not a reliable one: an
+   `.sdata` string can simply be an extern into a blob another unit owns, so
+   the test is the address, not the directive.
+
+The procedure that works is per unit, not per string: convert the whole file,
+run `tools/check_unit.py` on it, and revert the file unless its match count is
+unchanged. `check_unit` catches both blockers even though it masks local rodata
+relocations, because the difference lands in the `.text` relocation against the
+symbol. The final link is still the proof.
+
+### Inlining an sdata string: do not
 
 `effBattle.c`, `evtPolygonMovie.c` and `nbKoukaProcess.c` referenced 24 of
 their own format strings and process names as `extern char D_<addr>[]` plus an
