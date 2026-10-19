@@ -39,6 +39,8 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| three `beql`/`beqz` annul bits and a `%hi` materialised in the wrong delay slots, on a function whose paths all `return 1` or `return 0` | a `goto` to one trailing `return 0` placed after the last `return 1`. `RetryMapLoad` went from 6 of 53 words to exact on that alone: the separate `$2 = 0` block is what the delay-slot filler then annuls into each test, and it also moved the duplicated half of the `lui`/`addiu %lo` pair from the `addiu` to the `lui`. This is the row above read on a function with two exit constants rather than one |
+| two arms whose index and bit expressions differ only by a constant offset, each recomputing one of the pair while the other is hoisted above the branch | give the pair named locals and assign both in each arm: `idx = (id - 0x100) >> 3; bit = (id - 0x100) & 7;`. gcc then hoists one computation of each pair into the entry block and leaves the other in the arm, which is retail's four-instruction split. `fldGetTakaraOpen` went from 24 of 24 words to exact; the same expressions written inline at the subscript hoist all four and run one instruction long |
 | two explicit branches selecting 0 and 1 from a call's result, where you emit one `sltiu` | a one-case `switch` over the call, `switch (f()) { case 0: return 1; }`, or a `goto` to a trailing `return 0;`. Both reach it; every `if` spelling of `f() != 0`, an `s8`/`s16`/`u8` local for the result and an explicit `else` all fold to `sltiu $2, $2, 1`. `cmpItemIsStockFull` went from 7 of 14 words to exact. The same trick does not work on a *mask* test: see `cmpItemHasFlag` in the drafts |
 | a clamp whose bound is both a compare operand and the stored value, compared with `sltu` against a register | a named local for the bound. As a literal the compare becomes an `sltiu` immediate against `bound + 1` and the stored constant is materialised separately. `rstUpdateEvoBgFade` needed `u32 max = 0x32;` for the second of its two tests, with the first left as the literal |
 | one guard whose failure block sits at the end of the function | an `if`/`else`, not an early `return` inside the guard. The early return places the failure block first and reaches it with the inverted branch; the `else` form puts it last, which is what retail's `bne` to the tail does. `rstUpdateEvoBgFade` turned on that plus the bound local |
@@ -552,6 +554,10 @@ it was measured on DDS and not on this ELF.
   second `sltiu rd, rs, 1` is the generic `== 0` expansion, which needs
   `t = prev < 0x13; ok = t == 0;` as two statements. That was the last word of
   `nbActionProcess1`.
+- `case_values_threshold` is 10 in this build: a `switch` needs at least ten
+  `case` nodes before ee-gcc emits a jump table rather than a compare tree,
+  independently of the range test. Where retail has a jump table and the
+  reconstruction has fewer labels, the missing ones share the `default` body.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

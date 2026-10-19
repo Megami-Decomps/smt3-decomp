@@ -244,10 +244,6 @@ separate `start` local with `data->order[start + (i - start)]`; a `while (i <
 12)` head test; a `u32` counter; and the plain `for (i = ...; i < 12; i++)`
 form, which gcc rotates and which costs a duplicated test.
 
-Retest this one when `nbSortOrder` becomes C: the loop's own arm calls it, and
-callee visibility decides the delay-slot and branch-annul choices around such
-a call.
-
 ## nbSetNextOrder (newbattle/nbStageProcess, 0xAC)
 
 10 of 44 words, 176 bytes against the native 172.
@@ -297,9 +293,6 @@ local assigned just before the call rather than at its declaration; and all
 `nbSetBadstatMotion2`, which is the same shape without the float argument and
 the `work` local, matches with the argument hoisted into a local above the
 stores, so the difference is register pressure from `$17` holding `work`.
-
-Retest it when `nbSetUnitMotion` becomes C; it is the one call in the block
-whose registers differ, and it is still `INCLUDE_ASM`.
 
 ## nbInitActionProcess (newbattle/nbStageProcess, 0xA0)
 
@@ -1943,22 +1936,41 @@ stride and the two-arm mode test are all retail's; what is left is one
 register choice repeated three times. Retail loads each handle straight into
 the argument register (`lw $4, 0x10($16)` then `beql $4, $0`), so the test and
 the call share one register and the copy disappears; ee-gcc here puts the load
-in `$2` and adds `move $4, $2`, which also costs the branch-likely and moves
-the loop-alignment `nop` ahead of the inner loop head.
+in `$2` and adds `move $4, $2`.
+
+Everything else follows from that one choice, so count the registers rather
+than the branches: with the handle in `$2` the three `beql`/`beqz` annul bits
+change too, and the `entry++` lands in the mode branch's delay slot instead of
+the loop's back-edge slot, which is where the rest of the 27 words come from.
+Callee visibility is not the lever here: all three callees (`dds3EffectDelete`,
+`dds3EffectPartDelete`, `sdfMemFreeDelayedDirect`) live in other units and are
+`extern` in both compiles, so there is no definition to add or remove.
 
 The mechanism is visible from the other side: `pipeFreeEffects` in
 `pipe/pipeEffect` has the identical `if (p->h != NULL) { f(p->h); p->h = NULL; }`
-shape and does get `lw $4`, because `$2` there holds the `u8` counter's
-`i + 255` across the if. So the fix is whatever makes `$2` unavailable across
-the guarded block, not a different spelling of the guard.
+shape, written with the field at both the test and the call, and does get
+`lw $4`. In its loop `$2` holds the `u8` counter's `i + 255` across the guarded
+block, which is the usual explanation. But its *second* such block, the
+`effect->mhFile` free after the loop, also gets `lw $4` with `$2` dead, so the
+rule is not simply "`$2` is occupied at this block": once one handle allocno in
+the function is forced off `$2`, every handle allocno in it takes `$4`. Whatever
+is needed here has to make that true for one of the three blocks.
 
-Ruled out: a reused `void *handle` local for all three arms and a fresh local
-per arm (cse propagates both away); `while` in place of the inner `for`, with
-`entry++` at the end of the body; the counter as `s32`, `u8` and an index
-`tbl[j]` instead of a pointer; `s32` and unprototyped declarations for the
-three callees, and an `s32` parameter in place of `void *`; casting the field
-at the call site; `while` in place of each `if`; and declaring `res` before
-`entry`.
+Ruled out, all at 27 of 47 words unless noted: the field written at both the
+test and the call with no local (`pipeFreeEffects`'s own spelling); a reused
+`void *handle` local for all three arms; a fresh local per arm and a local
+declared inside each arm's own block; the store moved ahead of the call;
+`(void *)` casts at the call sites; the two arms swapped so the `mode != 0`
+side falls through; a `mode` local for the test; `goto` out of each arm to a
+shared tail label; `continue` for the tail test; `for (;;)` with an explicit
+`break` and `entry++` as the last statement; `while ((res = entry->res) != NULL)`
+with the same; `++entry` for `entry++`; the table address in a local
+`fldEffEntry_t **tbl` ahead of the loops; `entry->res->eff` at every use
+instead of the `res` local (46 of 48, one word long); the outer loop counting
+down (36 of 47); and keeping the mode live past the arms with an extra
+`mode >= 0 &&` in the tail test (44 of 48). `s32` and unprototyped declarations
+for the three callees, an `s32` parameter in place of `void *`, and `while` in
+place of each `if` were ruled out in an earlier pass.
 
 ## fldRunEffSet (code_00116AD0, 0x12C)
 
@@ -1977,7 +1989,9 @@ the `D_002FBEF0[id]` load, where the draft's `fldRunDante_t *dante =
 Ruled out: the float tests written as `>=` (gives `c.le.s` in the other
 encoding); the tail stores in the three other rotations; and `fldRun_Dante.`
 at every use instead of the `dante` local, which loses the saved register
-entirely.
+entirely. Callee visibility does not apply: the arms call `dds3EffectDelete`,
+`dds3EffectLoad`, `dds3EffectPartDelete` and `dds3EffectPartCreate`, all of
+them in other units and `extern` in both compiles.
 
 ## fldRunEffTask (code_00116AD0, 0x220)
 
@@ -3157,4 +3171,63 @@ the `lwc1` lands in the slot instead: the same two instructions, swapped.
 Ruled out: an `f32` local holding the fovy, assigned either just before the
 preceding call or at the top of the body (both run over size), and dropping the
 `extern f32` declaration so the load goes through an implicit `int`.
+
+## fldGbFlagClear (code_00116AD0, 0x124)
+
+23 of 73 words at the exact 292-byte size, and every instruction is the one
+retail emits: the two flat `takaraOpen` clears, the 40-by-32 walk over
+`dds3GlobalWork_t.gb` with its `sll 6` row stride and `0x1E` flag stride, the
+five `sh $0` stores through the chain of `daddu` base copies, the sixteen
+`sb $24` stores of `-1` into `animeId2`, the `lw %gp_rel(DDS3_GBWK)` reload
+before every access group, the three `nop`s inside the inner loop and the
+`j fldAutoMapClear` sibcall at the end.
+
+What differs is only which hard register each temporary gets. Retail's numbering
+sits one or two above the draft's throughout: the first loop's counter is `$11`
+where the draft uses `$9`, the row index `$14` where the draft uses `$13`, and
+so on, so retail's compile had one or two more pseudos live before each region.
+Two displacement choices move with it: retail biases the second clear's base to
+`0x11A70` and stores at `0x10(reg)` where the draft forms `0x11A80` and stores
+at `0(reg)`.
+
+Ruled out: five distinct `s32` counters, one per loop, in use order and in
+reverse declaration order (26 of 73); a `u32` first counter (38); reusing the
+outer `i` for the sixteen-byte inner loop (24); the second clear written as
+`takaraOpen[0x28 + i]`, which is the single-base form `fldSetTakaraOpen` needs
+(64 of 74, one word long); and the same with the loop bounds shifted to
+`0x28..0x30` (23, with the base constant wrong the other way).
+
+## fldAnahoriSelectInit (code_00116AD0, 0x7C)
+
+One missing instruction, 30 words against retail's 31. Everything else is
+exact: the sixteen-entry downcounter, the four flag tests with their three
+`bnel`s, the biased `addu $9, $8, 4` base for the flag load and the plain base
+for the halfword, and the `movn` that does the counting. What is missing is the
+`xori $3, $3, 0` retail puts between `lhu $3, 0xA($2)` and
+`movn $6, $4, $3`; without it every later branch displacement is one short.
+
+The xori is gen_conditional_move's compare-operand xor surviving into the
+output, and it survives only when the compared value's defining insn cannot be
+folded into it. Two matched functions show that side: `func_0023AA90` in
+`code_001FAE80` compares a `jal` result (`xori $2, $2, 0` then
+`movn $3, $0, $2`) and `nbGetJyokyoMes` in `newbattle/nbStageProcess` compares
+an `andi` of a struct word. Here the compared value is a plain `lhu`, which
+combine folds straight into the cmov, so the xor disappears.
+
+What pins the blocker to the immediate rather than the structure:
+`hp != <an uninitialised s32 local>` compiles to 31 words with only
+`xor $3, $3, $10` against retail's `xori $3, $3, 0` differing, so the xor
+belongs in the instruction stream and the open question is only how retail's
+source gets a literal 0 into it.
+
+Ruled out: `!= 0`, `!= 0U`, `!= (u16)0`, `!= 0 + 0`, `hp ^ 0`, `!(hp == 0)`,
+`(u16)hp != 0`, `(s32)(u16)hp != 0`, `0 != hp`, `hp - 0 != 0`, `hp | hp`, the
+mask spellings `& 0xFFFF`, `& 0xFFFFFFFF` and `% 0x10000`, the same test
+written twice under `&&`, `n += 1` and `n = n + 1` for the increment, the
+ternary `n = (hp != 0) ? n + 1 : n`, an `if (hp == 0) continue;` inversion,
+reading the field into a `u16` local first, and a `u16 *` local pointing at it.
+Comparing against a zero-valued local or global (`s32 zero = 0`,
+`gFldAnahoriAkumaIdx`, `gFldAnahoriAkumaIdxMax`) either folds the xor away
+entirely or costs an extra `daddu rd, $0, $0` to materialise the zero (4 words
+out, same 31-word size).
 

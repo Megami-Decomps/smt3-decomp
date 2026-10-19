@@ -135,17 +135,36 @@ typedef struct {
 } fldSequenceController_t;
 
 typedef struct {
-    u8 unk00[0x44];
-    s32 enabled;
+    s32 gunFlag;                /* 0x00 */
+    s32 word04;
+    s32 word08;
+    s32 word0C;
+    s32 word10;
+    s32 word14;
+    s32 word18;
+    s32 word1C;
+    s32 word20;
+    s32 word24;
+    s32 word28;
+    s32 skyTable;               /* 0x2C */
+    s32 word30;
+    s32 filter;                 /* 0x34 */
+    s32 word38;
+    s32 word3C;
+    s32 word40;
+    s32 enabled;                /* 0x44 */
     u32 unk48;
-    s32 counter;
-    u8 unk50[0x8];
+    s32 counter;                /* 0x4C */
+    s32 word50;
+    s32 word54;
     u32 unk58;
+    s32 word5C;
 } fldDanteGunWork_t;
 
 extern fldDanteGunWork_t fldRunDanteGunFlag;
+extern s32 fldPlayerStepDist;
 extern u8 fldDoorExitFlag;
-extern u8 fldDoorExitMode[];
+extern s8 fldDoorExitMode[];
 extern char D_0054EB30[];
 extern char D_00531690[], D_00531940[], D_00531950[];
 extern s32 fldProcShutDownFlg;
@@ -224,6 +243,7 @@ extern s32 gfldPlayerSizeBk;
 extern s32 slGetExitType(void);
 extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
 extern void fldGbInit_System(s32 mode);
+extern void fldGbFlagClear(void);
 extern void evtBitOn(s32 flag);
 extern void fldSetNextField(s32 field, s32 parameter);
 void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
@@ -252,7 +272,7 @@ extern void fldSkyDefaultLoad(void);
 extern void fldAutoMapLoad(void);
 extern void fldAllTblLoad(void);
 extern s32 campCheckExitState(void);
-extern void dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, s32 flag);
+extern void dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, s32 (*func)(dds3PoseSet_t *, dds3Basic_t *));
 extern void fldRunTamaFree(void);
 extern void fldEncountClearFlag(u32 flag);
 extern void p2sdFadeOutBgm(u32 arg);
@@ -320,6 +340,16 @@ extern void frSetFontDrawOT(s32 ot);
 extern void fldKanjiDraw(s32 x, s32 y, u32 color, const char *text);
 extern void evtEnableMoonDraw(void);
 extern void fldSkyRefreshTbl(void);
+extern char D_0054EB40[];
+extern s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic);
+extern void fldPlayerCalc_Hit(void);
+extern void fldHitChkUnit(sdfVector4_t *pos);
+extern sdfVector4_t D_00531830;
+extern sdfVector4_t D_00531840;
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeLookAt(u32 id, sdfVector4_t *campos, sdfVector4_t *tm, sdfVector4_t *lookat);
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *basic, sdfVector4_t *tm);
+extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 radius);
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
 extern void fldStatusSet(void);
 extern dds3Basic_t *dds3GetActiveScene(void);
 extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s32 flag);
@@ -1930,11 +1960,177 @@ void fldAllTblLoad(void)
     sdfFileClose(fd);
 }
 
+/* NON_MATCHING: 23 of 73 words differ (first at +0xC). */
+#ifdef NON_MATCHING
+void fldGbFlagClear(void)
+{
+    s32 i;
+    s32 j;
+    s32 k;
+
+    for (i = 0; i < 0x20; i++) {
+        DDS3_GBWK->takaraOpen[i] = 0;
+    }
+    for (i = 0; i < 8; i++) {
+        DDS3_GBWK->takaraOpenEx[i] = 0;
+    }
+    for (k = 0; k < 0x28; k++) {
+        for (j = 0; j < 0x20; j++) {
+            DDS3_GBWK->gb[k].flags[j].modelFlag = 0;
+            DDS3_GBWK->gb[k].flags[j].animeFlag = 0;
+            DDS3_GBWK->gb[k].flags[j].atariFlag = 0;
+            DDS3_GBWK->gb[k].flags[j].modelFlag2 = 0;
+            DDS3_GBWK->gb[k].flags[j].animeFlag2 = 0;
+            for (i = 0; i < 0x10; i++) {
+                DDS3_GBWK->gb[k].flags[j].animeId2[i] = -1;
+            }
+            DDS3_GBWK->gb[k].flags[j].npcFlag = 0;
+            DDS3_GBWK->gb[k].flags[j].hojiFlag = 0;
+        }
+    }
+    fldAutoMapClear();
+}
+#else
 INCLUDE_ASM(const s32, "code_00116AD0", fldGbFlagClear);
+#endif
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldGbInit_System);
+void fldGbInit_System(s32 mode)
+{
+    s32 *p;
+    s32 i;
+    f32 dist;
+    f32 ang;
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldResetSequenceParams);
+    fldGlobalBase.area = 0;
+    dist = 100.0f;
+    ang = 180.0f;
+    fldGlobalBase.wordA4 = 0x10;
+    fldGlobalBase.floor = 0;
+    fldGlobalBase.blockID = 0;
+    fldGlobalBase.word10 = 0;
+    fldGlobalBase.consumedFlags = 0;
+    fldGlobalBase.mode = 0;
+    fldGlobalBase.word1C = 0;
+    fldGlobalBase.word5C = 0;
+    fldGlobalBase.menuOpenFlag = 0;
+    fldGlobalBase.encountState = 0;
+    fldGlobalBase.playerSeTable = 0;
+    fldGlobalBase.word44 = 0;
+    fldGlobalBase.hitMatterIndex = -1;
+    fldGlobalBase.word4C = -1;
+    fldGlobalBase.nameU = -1;
+    fldGlobalBase.nameD = -1;
+    fldGlobalBase.word98 = -1;
+    fldGlobalBase.floatB4 = dist;
+    fldGlobalBase.word90 = 1;
+    fldGlobalBase.word94 = 0;
+    fldGlobalBase.cameraParamIndex = 0;
+    fldGlobalBase.sequenceCode = 1;
+    fldGlobalBase.reuseAreaResources = 0;
+    fldGlobalBase.wordAC = 0;
+    fldGlobalBase.wordB0 = 0;
+    fldGlobalBase.word78 = 0;
+    fldGlobalBase.word80 = 0;
+    fldGlobalBase.lightMaIdx = 0;
+    fldGlobalBase.wordBC = 0;
+    fldGlobalBase.wordC0 = 0;
+    fldGlobalBase.wordC8 = 0;
+    fldGlobalBase.wordCC = 0;
+    fldGlobalBase.wordF8 = 0;
+    fldGlobalBase.camAngle2 = ang;
+    fldGlobalBase.x = 0.0f;
+    fldGlobalBase.y = 0.0f;
+    fldGlobalBase.z = 0.0f;
+    fldGlobalBase.float10C = 0.0f;
+    fldGlobalBase.float110 = 0.0f;
+    fldGlobalBase.float114 = 0.0f;
+    fldGlobalBase.hitX = 0.0f;
+    fldGlobalBase.hitY = 0.0f;
+    fldGlobalBase.hitZ = 0.0f;
+    fldGlobalBase.camAngle = 0.0f;
+    fldGlobalBase.float12C = 0.0f;
+    fldGlobalBase.float130 = 0.0f;
+    fldGlobalBase.hitValid = 0;
+    fldRunDanteGunFlag.gunFlag = 0;
+    fldRunDanteGunFlag.word04 = 0;
+    fldRunDanteGunFlag.word08 = 0;
+    fldRunDanteGunFlag.word0C = 0;
+    fldRunDanteGunFlag.word10 = 0;
+    fldRunDanteGunFlag.word14 = 0;
+    fldRunDanteGunFlag.word18 = 0;
+    fldRunDanteGunFlag.word1C = 0;
+    fldRunDanteGunFlag.word20 = 0;
+    fldRunDanteGunFlag.word24 = 1;
+    fldRunDanteGunFlag.word28 = 1;
+    fldRunDanteGunFlag.skyTable = 0;
+    fldRunDanteGunFlag.word30 = 0;
+    fldRunDanteGunFlag.filter = 0;
+    fldRunDanteGunFlag.word38 = 0;
+    fldRunDanteGunFlag.word3C = 0;
+    fldRunDanteGunFlag.word40 = 0;
+    fldRunDanteGunFlag.counter = 1;
+    fldRunDanteGunFlag.unk48 = 0;
+    fldRunDanteGunFlag.word50 = 0;
+    fldRunDanteGunFlag.word5C = 1;
+    fldRunDanteGunFlag.unk58 = 0;
+    fldRunDanteGunFlag.word54 = 0;
+    if (mode == 0) {
+        fldGbFlagClear();
+        DDS3_GBWK->previewX = 0;
+        DDS3_GBWK->previewY = 0;
+        p = (s32 *)((u8 *)DDS3_GBWK + 0x11A8C);
+        for (i = 14; i >= 0; i--) {
+            *p = 0;
+            p++;
+        }
+        DDS3_GBWK->ver[0] = 0x56;
+        DDS3_GBWK->ver[1] = 0x45;
+        DDS3_GBWK->ver[2] = 0x52;
+        DDS3_GBWK->ver[3] = 1;
+        DDS3_GBWK->ver[4] = 0;
+        DDS3_GBWK->ver[5] = 0;
+        DDS3_GBWK->ver[6] = 0;
+        DDS3_GBWK->ver[7] = 0;
+        DDS3_GBWK->word08 = 0;
+        DDS3_GBWK->half0C = 0;
+        DDS3_GBWK->transition = 0;
+    }
+    fldRunDanteClear();
+}
+
+void fldResetSequenceParams(void)
+{
+    f32 dist;
+
+    fldGlobalBase.consumedFlags = 0;
+    dist = 100.0f;
+    fldGlobalBase.word1C = 0;
+    fldGlobalBase.word44 = 0;
+    fldGlobalBase.hitMatterIndex = -1;
+    fldGlobalBase.word4C = -1;
+    fldGlobalBase.word94 = 0;
+    fldGlobalBase.wordB0 = 0;
+    fldGlobalBase.word78 = 0;
+    fldPlayerStepDist = 0;
+    fldGlobalBase.word80 = 0;
+    fldGlobalBase.wordF8 = 0;
+    fldRunDanteGunFlag.gunFlag = 0;
+    fldRunDanteGunFlag.word04 = 0;
+    fldRunDanteGunFlag.word08 = 0;
+    fldRunDanteGunFlag.word0C = 0;
+    fldRunDanteGunFlag.word10 = 0;
+    fldRunDanteGunFlag.word14 = 0;
+    fldRunDanteGunFlag.skyTable = 0;
+    fldRunDanteGunFlag.word30 = 0;
+    fldRunDanteGunFlag.filter = 0;
+    fldRunDanteGunFlag.word38 = 0;
+    fldGlobalBase.word90 = 1;
+    fldGlobalBase.word98 = -1;
+    fldGlobalBase.wordA4 = 0x10;
+    fldGlobalBase.floatB4 = dist;
+    fldRunDanteGunFlag.word40 = 0;
+    fldGlobalBase.wordC8 = 0;
+}
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_005315D0);
 
@@ -2281,9 +2477,41 @@ s32 fldGetHojiFlag(s32 charId, s32 idx, s32 bit)
     return ((u32)DDS3_GBWK->gb[type].flags[idx].hojiFlag >> bit) & 1;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetTakaraOpen);
+void fldSetTakaraOpen(s32 id)
+{
+    s32 idx;
+    s32 bit;
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldGetTakaraOpen);
+    if (id >= 0x100) {
+        idx = (id - 0x100) >> 3;
+        bit = (id - 0x100) & 7;
+        DDS3_GBWK->takaraOpen[idx + 0x28] |= 1 << bit;
+        fldFindTakaraSlot(id);
+        return;
+    }
+    idx = id >> 3;
+    bit = id & 7;
+    DDS3_GBWK->takaraOpen[idx] |= 1 << bit;
+    fldFindTakaraSlot(id);
+    if (id >= 0xF0 && id < 0x100) {
+        evtBitOn(id + 0x610);
+    }
+}
+
+s32 fldGetTakaraOpen(s32 id)
+{
+    s32 idx;
+    s32 bit;
+
+    if (id >= 0x100) {
+        idx = (id - 0x100) >> 3;
+        bit = (id - 0x100) & 7;
+        return ((u32)DDS3_GBWK->takaraOpenEx[idx] >> bit) & 1;
+    }
+    idx = id >> 3;
+    bit = id & 7;
+    return ((u32)DDS3_GBWK->takaraOpen[idx] >> bit) & 1;
+}
 
 s32 fldAutoMapFindArea(s32 fld, s32 area)
 {
@@ -2349,13 +2577,14 @@ void fldDbgWmapStart(void)
 void fldMainLoadStart(void) {
     fldSceneParam_t record;
     u32 mode;
+    u32 *modep = &mode;
 
     if (slGetExitType() == 1) {
         return;
     }
     if (DDS3_GBWK->transition != 0) {
         mode = 1;
-        dds3AdminiCallSequence(0x29, &mode, 4, 0);
+        dds3AdminiCallSequence(0x29, modep, 4, 0);
         return;
     }
     fldGbInit_System(1);
@@ -2620,7 +2849,35 @@ dds3Basic_t *fldGetUnitFollowCamera(void)
     return fldGetFollowCameraControl()->handle;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRegistUnitPad);
+void fldRegistUnitPad(void)
+{
+    sdfVector4_t pos;
+    fldUnitControl_t *ctrl;
+
+    ctrl = fldGetUnitControl();
+    if (ctrl->handle != NULL) {
+        fldEncountSetFlag(0x40);
+        dds3ObjectBaseSetPrimaryControl(ctrl->handle, fldUnitPad);
+    }
+    fldGlobalBase.word5C = 4;
+    if (fldGlobalBase.menuOpenFlag < 4) {
+        fldGlobalBase.menuOpenFlag = 4;
+    }
+    if (fldGlobalBase.encountState < 5) {
+        fldGlobalBase.encountState = 5;
+    }
+    fldStatusSet();
+    fldGlobalBase.hitMatterIndex = -1;
+    fldPlayerCalc_Hit();
+    dds3GetPosPoseSet(ctrl->handle);
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    if (fldGlobalBase.area < 0xA) {
+        pos.y = pos.y + 20.0f;
+    } else {
+        pos.y = pos.y + 10.0f;
+    }
+    fldHitChkUnit(&pos);
+}
 
 void fldReleaseUnitPad(void)
 {
@@ -2733,7 +2990,25 @@ void fldWaveTask(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldSetUnitFollowCamera);
+void fldSetUnitFollowCamera(void)
+{
+    sdfVector4_t lookat;
+    sdfVector4_t campos;
+    sdfVector4_t tm;
+    fldFollowCameraControl_t *ctrl;
+
+    lookat = D_00531830;
+    memset(&campos, 0, sizeof(campos));
+    campos.w = 1.0f;
+    tm = D_00531840;
+    ctrl = &fldFollowCameraControl;
+    ctrl->handle =
+        dds3AddCameraObjectBasicTypeLookAt(dds3AllocObjectId(), &campos, &tm, &lookat);
+    dds3SetUnitObjectId(ctrl->handle, D_0054EB40);
+    dds3CameraObjectBasicGetCameraTM(ctrl->handle, &tm);
+    dds3GetRadiusPoseSet(ctrl->handle, 2.0f);
+    dds3SetActiveCameraSceneBasic(dds3GetControlScene(), ctrl->handle);
+}
 
 s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic)
 {
@@ -2945,7 +3220,39 @@ s32 fldEsutoMaChk(void)
     return 0;
 }
 
+/* NON_MATCHING: 10 of 30 words differ (first at +0x2C). */
+#ifdef NON_MATCHING
+void fldAnahoriSelectInit(void)
+{
+    s32 n = 0;
+    s32 i;
+    u32 flag;
+
+    gFldAnahoriAkumaIdx = 0;
+    gFldAnahoriAkumaIdxMax = 0;
+    for (i = 0; i < 16; i++) {
+        flag = DDS3_GBWK->akuma[i].flag;
+        if (!(flag & 1)) {
+            continue;
+        }
+        if (flag & 4) {
+            continue;
+        }
+        if (flag & 0x10) {
+            continue;
+        }
+        if (flag & 0x800) {
+            continue;
+        }
+        if (DDS3_GBWK->akuma[i].hp != 0) {
+            n++;
+        }
+    }
+    gFldAnahoriAkumaIdxMax = n;
+}
+#else
 INCLUDE_ASM(const s32, "code_00116AD0", fldAnahoriSelectInit);
+#endif
 
 s32 fldAnahoriSelectGet(void)
 {
@@ -3242,7 +3549,32 @@ s32 ProcAmCheck(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", RetryMapLoad);
+s32 RetryMapLoad(void)
+{
+    fldSceneParam_t *param = &fldSceneParam;
+    s32 flag;
+
+    if ((fldDoorExitFlag & 2) && (s8)fldDoorExitMode[0] != 0) {
+        dds3SceneBasicStartScript(dds3GetControlScene(), (const char *)fldDoorExitMode);
+        flag = fldDoorExitFlag;
+        if ((flag & 1) == 0) {
+            fldDoorExitMode[0] = 0;
+            fldDoorExitFlag = flag & 0xFD;
+        }
+        return 1;
+    }
+    if (param->mode == 0 && param->note[0] != 0) {
+        dds3SceneBasicStartScript(dds3GetControlScene(), param->note);
+        return 1;
+    }
+    if (fldGlobalBase.retryScript == NULL) {
+        goto ret0;
+    }
+    dds3SceneBasicStartScript(dds3GetControlScene(), fldGlobalBase.retryScript);
+    return 1;
+ret0:
+    return 0;
+}
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_005318E0);
 

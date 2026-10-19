@@ -40,7 +40,9 @@ typedef struct
  * a partial view, not a claim about the complete save-work allocation. */
 typedef struct
 {
-    u8 unk00[0xE];
+    u8 ver[8];      /* 0x0: "VER" plus a version byte, then four zeroed bytes */
+    s32 word08;
+    s16 half0C;
     s16 transition; /* 0xE: fldMainLoadStart */
     u8 unk10[0x24];
     s32 unk34;
