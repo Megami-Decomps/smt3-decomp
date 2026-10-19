@@ -2847,3 +2847,232 @@ between them; `*(s32 *)p` for the `step` store; `nbBadCurseTimer++` in place of
 the index local; and both store orders, which only swap the registers the
 timer and the table base get.
 
+## EffDel (newbattle/nbMakePacket, 0xB8)
+
+42 of 46 words, at the exact 184-byte size, and with the same instruction
+multiset.
+
+The whole body, both `bnel` field tests and the `effBTLCutGetFrame` block are
+identical. The four differing words are one rotation in the loop preheader:
+retail leaves the `beqz $16` that guards the packet walk with a `nop` in its
+delay slot and then materialises the two compare constants, while ee-gcc moves
+`addiu $19, $0, 1` into the slot and the assembler pads the 8-byte loop
+alignment with the `nop` instead. That is a delay-slot fill, not a source
+difference: the three preheader instructions and their order are the same.
+
+Ruled out: a `for` loop, a `while`, an explicit `if` plus `do`/`while` guard,
+three nested `if`s in place of the `&&` chain, a local for `p->cuteff`, and
+dropping the `nbKoukaProcessData_t *` local so the list head is subscripted
+straight off the call. All six give the identical four-word rotation.
+
+Confirmed on the way: `nbMainProcessData_t` carries the kouka process id at
+`+0xF4`, inside what was `unk_E0`, and `dds3GetProcessData` of it yields the
+same `nbKoukaProcessData_t` whose `first` sits at `+0x08`.
+
+## cmpSetCursorSlot (code_001FAE80, 0x3C)
+
+8 of 15 words, at the exact 60-byte size. Writes a cursor slot's `param`,
+`state` and `value` unless its `state` is already 3. Four callers in the same
+unit pass four arguments, so the signature is settled.
+
+Retail computes the row address into `$8` (`addu $8, $7, $4`) and copies it
+back into the parameter register (`daddu $7, $8, $0`), then reads and writes
+the two bytes through `$7` and stores the zero through `$8`. Every shape tried
+computes the row once into the parameter's own register, so the copy and one
+of the two bases are missing and the rest of the body shifts with them. The
+draft reaches the right size by giving the `value` store its own `s32 *`
+local, which is what adds the second address instruction, but gcc still
+addresses the bytes off the same register.
+
+Ruled out: `slot += index` on the parameter; a single `cmpCursorSlot_t *`
+local; two locals assigned the same address (coalesced); the two addresses
+written with opposite cast order, `(u8 *)(index * 8) + (u32)slot` against
+`&slot[index]`, which only swaps the `addu` operands; a `u32 ofs = index * 8`
+byte offset shared by both; `slot[index].field` written out at all four use
+sites; and moving the `value` store ahead of the two byte stores, which is the
+draft and the closest form.
+
+## cmp_23A918 (code_001FAE80, 0x40)
+
+4 of 16 words, at the exact 64-byte size. Calls `func_00239C08(0, arg)` and
+`cmpAllocRefGifTag(arg)`, then tail-calls `fclDrawPanelSprite(0x5C000, arg)`.
+
+Everything up to and including the `lui $4` of the sprite id matches. The four
+differing words are a rotation of the tail: retail emits the `ori $4, $4,
+0xC000` immediately after the `lui`, then the `daddu $5, $16, $0` argument
+copy and the two `ld` restores, while this emits the copy and both restores
+first and the `ori` last. Same instructions, same count, same registers.
+
+Ruled out: the id in an `s32` local; an unsigned literal; dropping the
+`return` so the tail call is a statement. All three leave the `ori` in the
+same place, so what is left is ee-gcc's second scheduling pass.
+
+## trmGetJumpTerminalNo (code_001FAE80, 0x44)
+
+8 of 17 words, at the exact 68-byte size. Returns a terminal number from
+`fldAllCnt` when the work's `unk_21F1` is set, and otherwise indexes the work's
+own `unk_21F4` table by `unk_11D6 + unk_11D8`.
+
+Both arms are structurally right, the `beql` with the other arm's `lh` in its
+delay slot included. What differs is one hard register: retail keeps the whole
+`unk_21F1 != 0` arm in `$2` (`lhu`, `sll`, then `lh $2, fldAllCnt+2($2)`), and
+because the load's destination is also its index register `ee-as` has to
+expand the macro through `$at`. This puts the index in `$3`, so the assembler
+uses `$2` itself as the temp and the `lui`/`addu`/`lh` triple differs in all
+three words. The sum in the other arm accumulates into `$3` rather than `$2`
+for the same reason.
+
+The two halves cannot be had at once. Writing the sum `unk_11D8 + unk_11D6`
+puts retail's `lh unk_11D6` in the delay slot but makes the `addu`'s first
+operand `unk_11D8`; writing it `unk_11D6 + unk_11D8` gets the operand order
+right and puts `lbu unk_11D8` in the delay slot instead. gcc emits the two
+loads in the reverse of the source order here and takes the `addu`'s first
+operand from the source order, so no spelling satisfies both.
+
+Ruled out: both sum orders; the two values in named locals in either
+assignment order, with `+=` and with one expression; `fldAllCnt` as
+`s16 [][2]`, as a flat `s16 []` indexed `[i * 2 + 1]`, as a 4-byte struct
+array, and as a cast pointer, all four of which make cc1 emit the same
+`lh $2, fldAllCnt+2($3)`; a `trmUpdateWork_t *` local for the global; the
+guard inverted so the `fldAllCnt` arm is the fall-through; and an `(s32)` cast
+on either field.
+
+## cmpSkillOrder (code_001FAE80, 0x50)
+
+12 of 20 words, at the exact 80-byte size. A `qsort` comparator over the `u16`
+skill list: zeros sort last, otherwise ascending.
+
+Retail copies the first argument into `$3` as its first instruction and reads
+`*a` through the copy both at the top and again in the tail compare. Every
+shape tried loads straight through `$4`, so the copy is missing and the rest of
+the registers shift with it. This is the same missing pointer copy recorded for
+`func_00213190` above, which walks the same list; both comparators are one
+word short on it.
+
+The rest is settled: `*b` belongs in the `bnez`'s delay slot, the tail
+re-reads `*a` rather than reusing the halfword from the zero test, and the
+final three-way result is `if (b < a) return 1; if (a < b) return -1;
+return 0;`, which gives retail's `sltu` pair and the `movz` against `$0`.
+
+Ruled out: `u16 sa` and `u16 sb` locals for both values; a `u16 *` local for
+`a` with `*pa` written at every use; the same with a second `u16 sa2` local for
+the reload; two `u16 *` locals, which is the draft and the closest; the first
+test written `*pa != 0` so the arms swap; and `u16 *` parameters in place of
+`const void *`, which the compile rejects against the `qsort` signature.
+
+## cmpItemHasFlag (code_001FAE80, 0x54)
+
+13 of 17 words, 68 against retail's 84 bytes. Tests bit 0 of
+`datItemTable[item].flags` when the second argument is zero and bit 1 of
+`flags2` otherwise.
+
+The index arithmetic and the entry stride are settled: `item * 8` is computed
+once above the branch and reused in both arms, which is what the shared
+`sll $2, $4, 3` and the `daddu $4, $2, $0` copy give.
+
+What is left is that ee-gcc folds both single-bit tests and retail's compile
+does not. Retail's first arm is `andi 1`, a redundant `andi 0xFF`, then a
+`beqz` selecting 0 or 1 through a shared exit; every source shape tried folds
+that to `andi $2, $2, 1` as the return value. Retail's second arm is
+`andi 2` plus `sltiu $2, $2, 1`; this emits `srl $2, $2, 1` plus `xori
+$2, $2, 1`, the bit-extract form of the same test. The redundant `andi 0xFF`
+says cc1 did not know the masked value was already 0 or 1, which no C spelling
+of the mask reaches here.
+
+Ruled out: a `u8` local for the masked value, declared and assigned in one
+statement and in two; an explicit `(u8)` cast on the mask result; a one-case
+`switch` over the mask, which worked for `cmpItemIsStockFull`'s call result but
+not for a mask; `== 1` instead of `!= 0`; an `s32` local for the whole field
+read before the mask; the arms swapped so the `which != 0` arm is the
+fall-through; and writing the second arm as an explicit `if`/`return` pair,
+which costs another word.
+
+## cmp_241A88 (code_001FAE80, 0x68)
+
+3 of 26 words, at the exact 104-byte size. Sets bit 1 of a cursor's `unk_2C`
+flag byte for one entry, bumps `unk_21` and calls `cmpUpdateCursorScroll`,
+returning whether the bit had to change.
+
+The body is settled, the `value | 2` computed above the bit test included,
+which is what puts the `ori` before the branch and lets the `sb` reuse it.
+What differs is two annul bits and the slot they let gcc fill: retail emits
+`beqz` on the range test with the epilogue's `ld $31` in its delay slot and
+`bnez` on the bit test with a `nop`; this emits `beql` and `bnel`, the second
+with the `ld` in its slot. The reload is of an unmodified save, so filling it
+unconditionally is harmless and retail's compile proved that; this one annulled
+both branches instead.
+
+Ruled out: the three guards nested inside each other; the null guard as an
+early `return` with the rest nested; `goto` to a trailing `return 0`; and
+`index < count` against `index >= count`. All three restructurings move the
+pointer out of `$6` and lose thirteen more words, so the early-return chain is
+the right shape.
+
+## cmbGetHeartsParamByIndex (code_001FAE80, 0x58)
+
+8 of 22 words, at the exact 88-byte size. Reads one of two byte tables inside
+`datRaceEntry_t`, at `+6` and `+0xC` of a 66-byte row.
+
+The two tables have to be flat `extern s8 D_00339E06[]` / `D_00339E0C[]`
+indexed by `race * 66 + index`: that is what folds the `+6` and `+0xC` into the
+symbol's `%hi`/`%lo` pair the way retail does. Reached through
+`D_00339E00[race].field[index]` with the row struct split instead, cc1 keeps
+the constant in the load displacement and the function is 12 words out.
+
+What is left is one register. Retail puts each arm's `index + row` sum in `$2`,
+the register the sign-extended index already occupies, so `ee-as` has to expand
+`lb $2, D_00339E0C($2)` through `$at`; this puts the sum in `$3` and the
+assembler then uses `$2` itself as the macro's temp, which changes all three
+words of each arm's load.
+
+Ruled out: `index + race * 66` instead of `race * 66 + index`, which fixes the
+`addu` operand order but moves the `sll`/`sra` pair and costs four more words;
+an `s32 ofs` local inside each arm's own block, which gives the identical eight
+words; and an `s32 row = race * 66;` local above the branch, in both summation
+orders, which splits the row multiply across the test and loses six more.
+
+## fclDrawPanel (code_001FAE80, 0x54)
+
+8 of 21 words, at the exact 84-byte size. Draws the panel's background sprite,
+calls the panel's own `draw` hook with the panel and the id, and tail-calls the
+foreground sprite.
+
+Four of the eight words are the same `ori` rotation recorded for `cmp_23A918`
+above: retail emits each sprite id's `ori` immediately after its `lui`, and
+ee-gcc's second scheduling pass moves it past the `sd`/`ld` of a saved register.
+
+The other four are the function-pointer load and its `jalr`: retail uses `$2`,
+immediately after a `jal fclDrawPanelSprite` whose result is ignored, and this
+uses `$3` because the ignored `s32` result still reserves `$2`. The fix by the
+levers page is a `void` declaration of `fclDrawPanelSprite`, but it is defined
+in this unit as `s32` with `return cmpDrawSprite(...)` and matches that way, and
+three other callers ignore its result as well, so turning it `void` would have
+to be measured across all of them at once.
+
+Also settled: the `draw` field at `+0x38` takes two parameters, the panel and
+the id, which is why `fclPanel_t` declares it that way; `panel->draw(panel)`
+does not compile to retail's `$5` setup.
+
+## cmbFindCameraPoint (code_001FAE80, 0x64)
+
+9 of 25 words, at the exact 100-byte size. Looks up a type-0x11 scene basic by
+name, and on a hit copies the point resource's quadword to the caller's vector
+and returns 1.
+
+The quadword copy is `SDF_VU0_COPYVECTOR(out, basic)`, and the result variable
+has to be the search result itself so that the failure path returns the `$2`
+the call already left at zero.
+
+Retail copies that result into `$3` before the null test and passes the copy to
+`dds3PointBasicGetResource`, so the pointer and the return value are two live
+pseudos from the first call onwards. Written as `void *basic = (void *)found;`
+gcc coalesces the copy away, because the two hold the same value until `found`
+is set to 1; moving `found = 1;` above the second call does keep both live and
+reaches the exact size, but then gcc parks the pointer in `$16` and hoists the
+constant, which is the draft's nine words.
+
+Ruled out: a separate local for the resource pointer instead of reusing
+`basic`; the pointer declared first with `found` cast from it; both as separate
+declarations with the assignments split out; and the test written on `found`
+rather than on the pointer. All four coalesce the copy and run one word short.
+

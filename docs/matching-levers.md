@@ -39,6 +39,9 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| two explicit branches selecting 0 and 1 from a call's result, where you emit one `sltiu` | a one-case `switch` over the call, `switch (f()) { case 0: return 1; }`, or a `goto` to a trailing `return 0;`. Both reach it; every `if` spelling of `f() != 0`, an `s8`/`s16`/`u8` local for the result and an explicit `else` all fold to `sltiu $2, $2, 1`. `cmpItemIsStockFull` went from 7 of 14 words to exact. The same trick does not work on a *mask* test: see `cmpItemHasFlag` in the drafts |
+| a clamp whose bound is both a compare operand and the stored value, compared with `sltu` against a register | a named local for the bound. As a literal the compare becomes an `sltiu` immediate against `bound + 1` and the stored constant is materialised separately. `rstUpdateEvoBgFade` needed `u32 max = 0x32;` for the second of its two tests, with the first left as the literal |
+| one guard whose failure block sits at the end of the function | an `if`/`else`, not an early `return` inside the guard. The early return places the failure block first and reaches it with the inverted branch; the `else` form puts it last, which is what retail's `bne` to the tail does. `rstUpdateEvoBgFade` turned on that plus the bound local |
 | explicit branches where two early `return 0`s in the same block fold to `slt` plus `sltiu` | a `goto` to one trailing `return 0;`, which stops the if-conversion. `nbSkillIsInRange`'s two `switch` arms each lose a branch as `if (skill < 0x24) { return 0; } return 1;` and come out exact as `goto zero;` |
 | a `switch` arm's guard failure branching to the same block as the `default`, and a value you expected in `$2` or `$3` sitting one register higher | drop the last arm's own `return 0` and let the arm fall into the `default:` label, writing its tests as `if (...) { callee(x); break; }`. The separate `return 0` makes its zero conflict with the switch value: `nbCameraBoss_Cut1_Run` moved `skill` from `$4` to `$3` and went 59 to 33 differing words on that alone, and `nbCameraBoss_Cut2_Run` 89 to 92 of a longer body. A nested `switch` over the same values frees the register too but runs three words over |
 | `jal callee` then a `b` to one shared epilogue, with nothing writing `$2` in the arm | let the arms only call and the function fall off the end of the `switch`, so the callee's value is what reaches `$2`. `return callee(x);` sibcalls every arm and a `ret` variable spends `$3` and a `daddu` per arm. The returns that do exist (`return 0`, `return 1`) still give the epilogue its `use` of `$2`. `nbCameraBoss_Cut1_Init` and the four `Cut*` dispatchers in `newbattle/nbCameraBoss` are all this shape |
@@ -459,6 +462,83 @@ it was measured on DDS and not on this ELF.
   expression proves the rule is RTL evaluation order and not statement order.
   `fldAutoMapCloseBlock2` sits two words from exact on it; see
   [Non-matching drafts](nonmatching.md).
+- A constant that retail adds to the *scaled index* rather than to the base
+  (`addiu rd, index, 0xC0` and then one `addu`) comes from an integer offset
+  local: `s32 ofs = index * stride + 0xC0;` and a cast pointer off the work
+  base. `&work->arr[index]` associates the other way, `(work + index*stride) +
+  0xC0`, and leaves the `0xC0` in the load displacements.
+  `cmpStockHasRoom` went from 17 of 21 words to exact on that alone. Its work
+  type is two arrays indexed by one parameter, `cmpLocalStock_t stock[2]` of
+  stride 0x56 at 0 and a 0x103C-byte record at 0xC0, which is the same pair
+  `cmpGetStockInfoIndex` reads.
+- A constant byte offset into a global table folds into the symbol's
+  `%hi`/`%lo` pair only when the source names a flat array at that address.
+  `extern s8 D_00339E06[]` indexed `race * 66 + index` gives retail's
+  `lb $2, %lo(D_00339E06)($1)`; the same bytes reached as
+  `D_00339E00[race].field[index]` with the row struct split keep the `+6` in
+  the load displacement and cost four words per access.
+  `cmbGetHeartsParamByIndex` went from 12 of 22 words to 8 on that.
+- A `lui`/`addu`/load triple using `$at` is `ee-as` expanding `lw rd, sym(rx)`,
+  not cc1 splitting the address. The assembler uses `rd` itself as the temp
+  whenever `rd != rx`, so a triple through `$at` means retail's index and load
+  destination are the *same* register. Read it as a register-allocation tell,
+  not an addressing one: `trmGetJumpTerminalNo` and
+  `cmbGetHeartsParamByIndex` both sit on it.
+- An index whose stride is 4 on what the struct declares as a byte array means
+  the record is four bytes wide. Read it with a cast at the use site,
+  `*(s8 *)((u8 *)WORK + sel * 4 + 0x4110)`, rather than reshaping a field other
+  functions already use: `cmbGetBirthDevilPanel` was 19 of 19 words out with
+  `slotIndex[sel]` and exact with the cast.
+- A `u8` parameter used as a loop counter has to be copied into an `s32` local.
+  Decrementing the `u8` itself emits `addiu rd, rs, 0xFF` plus `andi 0xFF` in
+  every arm where retail has one `addiu -1`; the entry `andi 0xFF` the `u8`
+  parameter gives is still correct. `cmbCountEvoCandidates` turned on that.
+- Where retail copies a loop bound into a second register (`daddu $3, $2, $0`)
+  before the loop, the source has a separate counter local initialised from the
+  bound and decrements the local, leaving the bound untouched. Reusing the one
+  variable gives no copy. `func_00242710` turned on that plus a `u8 *` cast for
+  the `lbu` of an `s8` field.
+- A `gp`-addressed work pointer that retail holds in two registers comes from a
+  local assigned from the global plus the global written at the other uses, and
+  which half gets the local matters: `rstUpdateEvoBgFade` wants the local for
+  the first test and the store, and `startPos->` for the clamp.
+- An `f32` field that retail keeps in `$f0` across a read-modify-write is
+  written in place, `work->ofs -= 16.0f;`, not through a named `f32` local. The
+  local takes `$f1` and leaves `$f0` to the literal, and no declaration order
+  of the value, the step and the bound swaps them back.
+  `MoveScreenOffset` went from 9 of 22 words to exact. A local declared inside
+  each arm works too.
+- `fsqrtf` from `include/fpu.h` is what produces a bare `sqrt.s $f0, $f0`, and
+  ee-gcc does not fold it even on a constant: `fclRagCalcTexSize` really does
+  compute `sqrtf((f32)(size * 16))` at run time, and
+  `campGetCursorColorAlt` computes `(s32)fsqrtf(512.0f)` and squares it.
+  A `mult`/`mult1` pair falls out of the two multiplies with no help.
+- A global pointer read inside a loop beats caching it. `g_pinst->texHandle[i]
+  = src[i]` gives retail's one `lw` in the preheader, the `addiu 0x38`, two
+  walking pointers and an `slti` up-counter; an `s32 *dst` local for the
+  destination makes gcc reverse the loop into a downcounter, and `dst[i] =
+  src[i]` with the local adds a third induction variable.
+- An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits
+  the plain branch. **Steerable when the branch is a sign test**: spell it
+  `(x & 0x80000000) != 0` rather than `x < 0`, which took one function from 8
+  differing words to exact. Only the non-sign-test cases have resisted. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
+  ordinary C readily, 42 times in `field/fldDraw` and 126 in
+  `newbattle/nbMakePacket`, so a `bnel` in the retail code is not a reason to
+  skip a function. Only this one use of it has resisted.
+- Two arms of an `if` that compute the same thing. gcc 2.96 cross-jumps them
+  whatever the source does: `func_00214FD8` has the same sign test on
+  `dds3PadButtonState[0x22]` in both arms, laid out differently in each, and
+  every spelling (duplicated test, `>= 0` against `< 0`, the mask form, a
+  ternary, an explicit `else`, and even *two different symbols* that resolve to
+  the same address) collapses to one arm and 36 of retail's 56 bytes.
+- A single-bit mask test ee-gcc folds. Retail's `andi 1` followed by a
+  redundant `andi 0xFF` and an explicit branch is not reachable: see
+  `cmpItemHasFlag` in the drafts.
+- Where in a tail call's argument setup the second half of a `lui`/`ori`
+  constant lands. ee-gcc's second scheduling pass moves the `ori` past the
+  register restores; `cmp_23A918` and `fclDrawPanel` both sit on it and no
+  spelling of the constant (a local, an unsigned literal, dropping the
+  `return`) moves it.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -485,6 +565,11 @@ it was measured on DDS and not on this ELF.
 - An ignored return value still reserves `$2` across the call. When retail
   skips `$2` for the address temp after a `jal`, declare the callee `s32`
   rather than `void`.
+- The `void`-callee remedy for an unused result reserving `$2` is not always
+  available. In `code_001FAE80`, `fclDrawPanelSprite` is defined `s32` in the
+  same unit, matches that way with `return cmpDrawSprite(...)`, and three other
+  callers ignore its result, so changing it has to be measured across all of
+  them at once rather than for the one caller in hand.
 - An implicit declaration is itself a void against non-void trap. A callee
   defined further down the unit is implicitly `int` at the call site and
   reserves `$2`, so a forward prototype alone can fix a near miss: one added
