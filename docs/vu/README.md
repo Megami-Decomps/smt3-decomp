@@ -40,14 +40,14 @@ banners come from the transcription's declared ranges, and the pseudo-C comes fr
 ```bash
 tools/vudis.py --vu 1 -o src/smt3/sdf/vu/vu1_micro.vsm
 tools/vudis.py --vu 0 -o src/smt3/sdf/vu/vu0_micro.vsm
-tools/vudis.py --vu 1 --verify        # assemble it with dvp-as and diff against the ELF
+DVP_AS=/path/to/dvp-as tools/vudis.py --vu 1 --verify   # diff dvp-as's bytes against the ELF
 ```
 
 `tools/vuas.py` is the assembler the build uses. It takes dvp-as syntax for the forms this game
 uses, in Python, so a matching build needs no toolchain beyond the one `download_tools.py` already
 fetches. The syntax is not invented: `dvp-as` itself, the assembler the `.DVP` overlay tables in
 the ELF show the microcode was built with, assembles these same files to the same bytes, and
-`tools/test_vuas.py` checks that whenever dvp-as is installed.
+`tools/test_vuas.py` checks that whenever dvp-as is on `PATH` or named by `$DVP_AS`.
 
 `tools/vu_include.py` runs after splat and rewrites `asm/smt3/data/vutext.s` so the unit includes
 the assembled payloads and takes only the VIF headers, the debug font texture and the packet's data

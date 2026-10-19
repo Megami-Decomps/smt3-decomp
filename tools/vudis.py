@@ -7,6 +7,7 @@
 
 import argparse
 import importlib.util
+import os
 import re
 import struct
 import subprocess
@@ -27,7 +28,8 @@ def load(name):
 vu2c = load("vu2c")
 vutext = load("vutext")
 
-DVP_AS = "/home/wsl/projects/ps2dev/ps2dev/dvp/bin/dvp-as"
+# The original assembler, for --verify. Not needed to build: tools/vuas.py is.
+DVP_AS = os.environ.get("DVP_AS", "dvp-as")
 
 # Upper instructions whose destination is the accumulator rather than a register. The table name
 # carries the broadcast letter, so the base name is what decides the shape.
