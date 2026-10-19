@@ -1,6 +1,8 @@
 #include "common.h"
 #include "event.h"
 #include "kernel.h"
+#include "draw3d.h"
+#include "libsdf.h"
 #include "ps2asm.h"
 void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
 
@@ -104,13 +106,13 @@ extern void dds3SetFog(void *source);
 
 extern void dds3SetAmbient(u128 *source);
 
-extern const char D_0053A7F8[0x10];
+/* Three parallel lights, 0x40 each, which is what the IDB types here and what
+ * the +0x40 steps below were spelling as byte arithmetic. */
+extern sdf3DLight_t D_0032C5F0[3];
 
-extern char D_0032C5F0[];
+extern sdf3DFogParam_t D_0032C6B0;
 
-extern char D_0032C6B0[];
-
-extern char D_0032C6D0[];
+extern u128 D_0032C6D0;
 
 extern void sprintf(char *, const char *, ...);
 
@@ -282,6 +284,9 @@ void evtFreeAllUnit(void) {
     }
 }
 
+/* Sized explicitly: retail pads this to 16 bytes and an inline literal would
+ * emit 13 plus whatever gcc aligns to, which shortens .rodata and shifts the
+ * link. The same padding is why the strings around it stay placeholders. */
 const char D_0053A7F8[0x10] = "%sf%03d_%03d";
 
 
@@ -306,11 +311,11 @@ s32 evtLoadArea(s32 area, s32 room)
     } else {
         dds3SetScreenFovy(0.75398216f);
     }
-    dds3SetLight(D_0032C5F0, 0);
-    dds3SetLight(D_0032C5F0 + 0x40, 1);
-    dds3SetLight(D_0032C5F0 + 0x80, 2);
-    dds3SetFog(D_0032C6B0);
-    dds3SetAmbient((u128 *)D_0032C6D0);
+    dds3SetLight(&D_0032C5F0[0], 0);
+    dds3SetLight(&D_0032C5F0[1], 1);
+    dds3SetLight(&D_0032C5F0[2], 2);
+    dds3SetFog(&D_0032C6B0);
+    dds3SetAmbient(&D_0032C6D0);
     return 1;
 }
 
@@ -330,11 +335,11 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1D
     dds3SceneBasicMakeScene_FromMemory(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
     evtSetTestCamera();
     dds3SetScreenFovy(0.75398216f);
-    dds3SetLight(D_0032C5F0, 0);
-    dds3SetLight(D_0032C5F0 + 0x40, 1);
-    dds3SetLight(D_0032C5F0 + 0x80, 2);
-    dds3SetFog(D_0032C6B0);
-    dds3SetAmbient((u128 *)D_0032C6D0);
+    dds3SetLight(&D_0032C5F0[0], 0);
+    dds3SetLight(&D_0032C5F0[1], 1);
+    dds3SetLight(&D_0032C5F0[2], 2);
+    dds3SetFog(&D_0032C6B0);
+    dds3SetAmbient(&D_0032C6D0);
     while (sdfDelayedResrcCheck() != 0) {
     }
     return 1;
