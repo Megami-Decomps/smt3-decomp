@@ -418,12 +418,18 @@ source. They are the character model names `hij_b`, `isam_f`, `aradia`,
 `yuuko_p`, `chiaki` and `tiaki_a`, recorded here instead. Anything that wants
 to annotate generated directive lines has to teach the generator first.
 
-### String placeholders: the rule, and what still blocks 173 of them
+### String placeholders: the rule, and what still blocks 61 of them
 
 A format string or process name referenced as `extern char D_<addr>[]` plus an
-`INCLUDE_RODATA` line is worth becoming the literal it spells. 89 of 262 are,
-across 25 units. ee-gcc pools each literal back to the address the split had
-given it, so the image does not move.
+`INCLUDE_RODATA` line is worth becoming the literal it spells. ee-gcc pools each
+literal back to the address the split had given it, so the image does not move.
+`tools/inline_strings.py` finds and converts them.
+
+The counts on this page were wrong for two sweeps, both times because the scan
+was wrong rather than the tree. It read only `asm/smt3/data/*.s`, and most
+strings live in the per-symbol and per-unit files beside them, so "262" was
+really 1023 references. 128 are now literals across 32 units; 61 are left in 15
+files.
 
 Two things block the rest, and both are reported rather than guessed:
 
@@ -441,11 +447,42 @@ Two things block the rest, and both are reported rather than guessed:
    `.sdata` string can simply be an extern into a blob another unit owns, so
    the test is the address, not the directive.
 
-The procedure that works is per unit, not per string: convert the whole file,
-run `tools/check_unit.py` on it, and revert the file unless its match count is
-unchanged. `check_unit` catches both blockers even though it masks local rodata
-relocations, because the difference lands in the `.text` relocation against the
-symbol. The final link is still the proof.
+A third thing blocks two files, and it is the one `check_unit.py` cannot see:
+**the padding**. Retail pads `D_0052DD00` ("cdrom0:\\SLPS_999.99;1", which
+really does have a backslash byte) to 24 bytes; gcc emits 22 and aligns to its
+own taste. `dds3AdminiProcess.c` lost 16 bytes that way and
+`evtPolygonMovie.c` gained 8, and because those nearly cancelled, every unit
+passed `check_unit.py` and the image still came out 8 bytes short with 112,514
+bytes differing. Masking a unit's local rodata relocations is exactly what
+hides a size change. **Run the full relink, every time.** The same padding is
+why `evtStage.c` spells its format string `const char D_0053A7F8[0x10] =
+"%sf%03d_%03d";` rather than inlining it: the explicit size is the padding.
+
+The procedure is per string, not per unit. Converting a whole file and reverting
+it on failure was the earlier advice and it throws away most of the yield, since
+only some of a unit's strings share rodata with an asm sibling: going one at a
+time turned 8 whole-file failures into 10 partial wins, 31 strings. Convert,
+run `tools/check_unit.py`, revert that one string unless the match count is
+unchanged, and relink at the end.
+
+### Three ways a string scan lies
+
+Each of these cost a wrong count or a broken file, and each is now a test in
+`tools/test_inline_strings.py`.
+
+- **A leading `.asciz` does not make the symbol a string.** A record that opens
+  with a name field disassembles the same way: `dds3UnitPartTable_t` starts with
+  `.asciz "hijri"` and is 360 bytes of table. Inlining 14 of those turned
+  `hijriParts = D_0052F850;` into `hijriParts = "hijri";`. A symbol qualifies
+  only if one `.asciz` is its whole body, between `dlabel` and `enddlabel`.
+- **That structural test is still not enough.** `effEvent.c`'s `D_00320598` is
+  an `effBlurScatterParams_t` whose first bytes are `3C 00` and whose rest is
+  zero, so the splitter emits it as a single `.asciz "<"`. Nothing in the
+  assembly distinguishes it. The tree's own declaration does, so the rule is:
+  only a `char` object is a string.
+- **Printable bytes are not text.** `evtStage.c`'s `D_0032C5F0` disassembles as
+  `.asciz "333?333?333?"`, which is `33 33 33 3F` repeated, three `0.7f` floats.
+  Requiring a NUL terminator rejects it; it is in fact `sdf3DLight_t light[3]`.
 
 ### Inlining an sdata string: do not
 

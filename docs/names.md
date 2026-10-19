@@ -98,6 +98,7 @@ verify.
 python3 tools/ida_symbols.py              # IDB names -> config/smt3/symbol_addrs.txt
 python3 tools/ida_types.py                # IDB types -> config/smt3/ida_types.txt
 python3 tools/check_names.py              # tree type names vs that file
+python3 tools/inline_strings.py --list    # string placeholders still convertible
 python3 tools/names.py apply smt3 names.tsv
 python3 tools/find_tus.py smt3            # TU evidence from the split assembly
 ```
