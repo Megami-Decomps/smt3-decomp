@@ -53,6 +53,7 @@ it was measured on DDS and not on this ELF.
 | a call's constant arguments set up above the `if` that guards the call | invert the test into an early `return`, so the call is no longer inside a nested block |
 | more instructions than the C emits, with a 0 or 1 materialised per exit | nest the body inside the guard and give the function one trailing `return`, instead of a chain of early returns. A trailing `if (n <= 0) return 0; return 1;` folds to `slt $0, $2`, and separate `return` constants get cross-jumped into one epilogue; the nested form keeps both. Two functions in `code_001FAE80` went from 0 of 17 and 1 of 17 words to exact on that change alone |
 | a branch straight to the arm you expected to fall through | write that arm last. gcc jumps forward to the block written after the test and falls through to the one written before it, so `if (c) return X; return Y;` and `if (!c) return Y; return X;` differ in which of X and Y the branch reaches |
+| one shared exit with the return constant set in each predecessor's delay slot, and one arm falling into it | a `goto` to a single trailing `return 0`. Nesting the bodies inside their guards, an `&&` chain and an `else if` chain all reach within two words but keep one exit too few; the explicit label is what lets gcc put a `$2 = 0` in a delay slot on one path and fall into another on the next. `nbCheckModelPackLoaded` went 13 of 52 differing to exact |
 
 ## Addressing and types
 
@@ -170,6 +171,13 @@ it was measured on DDS and not on this ELF.
 - `sltiu` on a function result comes from a `u32` at the use site, either an
   unsigned return type or a cast. `effBTLModelGetGroupNumber(mask) < 2` with
   an `s32` declaration gives `slti`.
+- Where retail forms a global's address twice, once into a temp for an `sqc2`
+  and again as the following call's argument, use
+  `SDF_VU0_STOREVECTOR_NOMEM(g)` rather than `SDF_VU0_STOREVECTOR(g)`. The
+  `"memory"` clobber on the plain form does not block CSE of the address, so
+  cc1 keeps one register and feeds both the store and the argument from it,
+  two words short. Without the clobber it rematerialises. `nbSetFormRot` went
+  from 16 differing words to exact on that one change.
 
 ## Function-local constant arrays
 

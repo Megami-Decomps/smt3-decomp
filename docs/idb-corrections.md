@@ -31,34 +31,39 @@ After each correction: re-run `tools/ida_symbols.py --instance SLUS_209.11`, re-
 `MODEL_LOD_CHG` setters write. Either the allocation size or that field is wrong. See
 [Type recovery](type-recovery.md).
 
-`datUnitWork_t` is the one case so far where the IDB's field *order* does not
-describe this ELF. The IDB has a 0x120-byte record: `namecode` as `u16[8]`,
-`skillcnt` as `s32`, `skill` as `s32[24]`, and no field between `levelupparam`
-and `keisyoskill`. Narrowing those three to the PS2 widths produces a 0xEC
-record, which is the right size, with every field from `namecode` onward six
-bytes earlier than retail puts it. Three functions contradict that layout and
-pin the repo's instead: `datGetBaseParam` (0x00243E78) reads `levelupparam` at
-+0x7A, `SetAction_AI` (0x00253BF8) stores `nowtform` at +0x6A, and
-`rstChkAddSkill` (0x0021FFB8) reads `skill[2]` at +0x38. The PS2 record keeps
-`namecode` at 8 bytes, `skillcnt` as `s32`, `skill` as `u16[24]`, and carries
-six bytes at +0x80 that the HD build does not have.
+`datUnitWork_t` was recorded here as the one case where the IDB's field
+*order* does not describe this ELF. **That was wrong, and the record is
+corrected below.** The IDB's order is right; `include/newdata.h` is what is
+six bytes out.
 
-What the IDB does settle is the tail, which the repo had as `skillSlots`,
-`skillOrder` and `unkCE[0x1E]` at offsets that were already right: they are
-`keisyoskill[24]`, `keiattr[24]`, then `hensinmae`, `getdevilhearts[4]`,
-`hensinmaeexp` and `fullnamecode[8]`, which tile +0xCE to +0xEC exactly.
+The mistake is worth keeping because the method failed, not just the answer.
+Three functions do load +0x38, +0x6A, +0x6C and +0x7A, which is what was
+measured. Changing the struct layout without changing the field *references*
+in the source then broke the build, and that was read as retail vindicating
+the header's names. It only ever proved the offsets. A matching build says
+nothing about which name sits at an offset, which is the same trap recorded
+under [Type recovery](type-recovery.md): a type built to make bytes match
+proves the offsets and never the names.
 
-A matching build does not confirm a field name. Both layouts total 0xEC and
-both matched every function that does not touch the disputed range, which is
-why this was only caught by changing the layout and rebuilding.
+What the HD bodies actually say at those offsets:
 
-`sdfMatPacket_t`'s two transform blocks are inline, not pointers: `sdfMatSetUvwParm`
-(0x002B3620) writes six floats at the pointer it is handed, `sdfMatUpdatePacket` passes
-packet+0x68 and the multi-texture path passes packet+0x80.
+| Offset | `newdata.h` says | HD body says | Evidence |
+| --- | --- | --- | --- |
+| +0x38 | `skill[2]` | `skillcnt` | `rstChkAddSkill` is `if (pCurrentStock->skillcnt <= 7) return 1; else return 2;`, and retail reads a halfword there and tests `sltiu 8` |
+| +0x6A | `nowtform` | `nowcommand` | `SetAction_AI` is `work->nowcommand = -1; work->nowindex = 0; nbRunAi(a);`, and retail stores -1 and 0 at +0x6A and +0x6C |
+| +0x7A | `levelupparam` | `mitamaparam` | `datGetBaseParam` sums `param`, `skillparam` and `mitamaparam` |
 
-These five changed no row of `symbol_addrs.txt`: every global using them is a 4-byte pointer,
-and `tools/ida_symbols.py` emits only splat's own type names (`func`, `asciz`, `u8`, `u16`,
-`u32`) plus `size:`. A project type name in a `type:` field makes splat exit 2.
+So the PS2 record is the IDB's order at PS2 widths: `namecode` is `u16[8]`
+spanning +0x28 to +0x38, `skillcnt` is a `u16` at +0x38, `skill[24]` runs
++0x3A to +0x6A, and the now/prev block starts at +0x6A. That tiles to 0xEC
+with no gap, which removes the invented `unk80[6]`, and 0xEC is the stride the
+party records at `DDS3_GBWK + 0xA54` are walked with.
+
+Applying it needs `include/newdata.h` plus field renames in
+`newbattle/nbStageProcess.c`, `newdata/datCalc.c` and `code_001FAE80.c` in one
+pass with nothing else in flight. Both layouts agree on every offset those
+files load, so it is a pure rename with no codegen change, and the build and
+every unit check must be re-verified afterwards.
 
 ## Globals
 
@@ -99,6 +104,33 @@ Entry 0 of `modelFileKindTable` is `{0x0032A858, 2}` and the table runs seven en
 `{entries, count}` shape.
 
 ## Proposed, with the proof, not yet applied
+
+`include/newdata.h`'s `datUnitWork_t` is six bytes out from +0x28 on, and the
+local copy in `newbattle/nbMakePacket.c` is the correct one. The retail code
+and the HD bodies agree against the header in three places:
+
+| Offset | Header calls it | It is | Proof |
+|---|---|---|---|
+| +0x38 | `skill[2]` (`skill` at +0x34) | `skillcnt`, a `u16` | `rstChkAddSkill` (0x0021FFB8) reads the halfword and tests `sltiu 8`; the HD body is `if (GBWK->pCurrentStock->skillcnt <= 7) return 1; else return 2;`, which is also what the function's name says |
+| +0x6A, +0x6C | `nowtform`, `prevcommand` | `nowcommand`, `nowindex` | `SetAction_AI` (0x00253BF8) stores `-1` and `0` there and calls `nbRunAi`; the HD body is `work->nowcommand = -1; work->nowindex = 0;`. Ten AI and bad-status setters in `nbMakePacket` write the same pair as a command plus its skill index |
+| +0x7A | `levelupparam` | `mitamaparam` | `datGetBaseParam` (0x00243E78) reads `param[i]` at +0x16, `skillparam[i]` at +0x1C and this array; the HD body sums `param`, `skillparam` and `mitamaparam` |
+
+So the PS2 record is `namecode` as `u16[8]` at +0x28, `skillcnt` as `u16` at
++0x38, `skill` as `u16[24]` at +0x3A, then the eight `now*`/`prev*`
+halfwords from +0x6A, `mitamaparam` at +0x7A, `levelupparam` at +0x80 and
+`keisyoskill` at +0x86. Every field tiles to 0xEC with no gap, which also
+removes the header's invented `unk80[6]`, and 0xEC is the stride
+`nbGetParamAvg2` and `nbGetLvAvg2` walk the party records at
+`DDS3_GBWK + 0xA54` with.
+
+This is not applied because the header's names are already used by matched
+code in three units this pass may not touch: `nowtform`/`prevcommand` in
+`newbattle/nbStageProcess.c`, `levelupparam` in `newdata/datCalc.c`, and
+`skill[2]` in `code_001FAE80.c`. Both layouts agree on every offset any of
+them loads, so the rename is a one-pass edit of the header plus those three
+files with no codegen change, and it has to be done with nothing else in
+flight. `tools/header_layout.c`'s `OFF` rows for `nowcommand`, `nowtform` and
+`levelupparam` move with it.
 
 Five `fldGbFlags_t` accessors in `code_00116AD0` have the same body as
 `fldGetModelFlag` and differ only in the field they touch, which the retail

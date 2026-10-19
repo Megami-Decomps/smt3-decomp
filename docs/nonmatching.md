@@ -629,28 +629,6 @@ loops are u8 downcounters from `maxSize - 2` to `0xFF`. `pipeEffDraw2Doffset`
 was attempted and discarded at 63 of 64 words: it needs 0x30 of locals where a
 `f32[4]` plus a 0x10 struct gives 0x20, so one local there is still missing.
 
-## nbEventProcess1 (newbattle/nbMakePacket, 0x7C)
-
-23 of 31 words, at the exact 124-byte size and with the same instruction
-multiset.
-
-Retail schedules `addiu $2, $2, %lo(nbEventProcess3)` into the load-delay
-slot after `lw $4, 0x88($17)`, four words after its `lui`. ee-gcc leaves the
-`lui` in the same place but emits the `addiu` last, where the return value is
-used, so the eight words from there on sit one slot late. Nothing else
-differs.
-
-Ruled out: a `void *` local holding the return value, which costs a saved
-register and adds four words; an early `return nbEventProcess3;` for the
-`rid <= 0` case, which duplicates the `lui`/`addiu` pair; and swapping the
-two `rid` stores, which only moves the stores.
-
-Confirmed on the way: `nbEventEntry_t` +0x00 is an `s32` resource id, not a
-pointer. Retail stores it into `data->eventrid` after a signed `blez`, and
-`nbStartEventPacks` still matches with the field as an `s32` and
-`evtLoadEventPack` taking one. A local for the field is needed because the
-store to `data->eventrid` otherwise aliases the table and forces a reload.
-
 ## Flow6_36 (newbattle/nbMakePacket, 0xA8)
 
 24 of 41 words, one word short of retail's 168.
