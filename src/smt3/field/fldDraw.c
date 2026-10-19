@@ -833,7 +833,7 @@ extern fldUnitControl_t *fldGetUnitControl(void);
 extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
 extern void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *basic, u32 value);
 extern dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene);
-extern dds3ObjectBaseControl_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
 extern void fldPlayerMotion(s32 motion, s32 mode, f32 speed);
 extern void fldPlayerMotReset2(void);
 extern f32 fldCamLength;

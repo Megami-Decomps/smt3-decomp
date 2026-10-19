@@ -33,7 +33,7 @@ void MakeCamera(dds3Basic_t *basic);
 s32 func_00112370(dds3Basic_t *basic)
 {
     dds3CameraObjectBasicWorkData_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     dds3InitPoseSet(basic);
     work = sdfChipAllocDirect(sizeof(dds3CameraObjectBasicWorkData_t));
@@ -109,7 +109,7 @@ void MakeCamera(dds3Basic_t *basic)
     SDF_VU0_STOREMATRIX(&work->cameraTM);
 }
 
-dds3ObjectBaseControl_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic)
 {
     dds3CameraObjectBasicWorkData_t *work = basic->workdata;
 

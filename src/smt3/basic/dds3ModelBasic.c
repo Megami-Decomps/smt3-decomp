@@ -9,7 +9,7 @@ typedef struct {
     /* 0x08 */ sdfMotionPlayBook_t *motionTable;
     /* 0x0C */ void *modelResource;
     /* 0x10 */ u8 unk10[8];
-} dds3ModelBasicWork_t;
+} dds3ModelBasicWorkData_t;
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
@@ -21,7 +21,7 @@ extern void sdfMotionChange(sdfMotionCtrlr_t *motion, s32 cut, s32 mode);
 
 dds3Basic_t *dds3AddModelBasic(s32 id, sdfItemArray_t *items, sdfMotionPlayBook_t *motionTable, dds3Basic_t *fallbackModel, char *name) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_STATICMODEL);
-    dds3ModelBasicWork_t *work = basic->workdata;
+    dds3ModelBasicWorkData_t *work = basic->workdata;
 
     work->motionTable = motionTable;
     basic->serialID = id;
@@ -34,7 +34,7 @@ dds3Basic_t *dds3AddModelBasic(s32 id, sdfItemArray_t *items, sdfMotionPlayBook_
 
 dds3Basic_t *dds3AddModelBasic2(s32 id, sdfItemArray_t *items, sdfMotionPlayBook_t *motionTable, void *modelResource, char *name) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_STATICMODEL);
-    dds3ModelBasicWork_t *work = basic->workdata;
+    dds3ModelBasicWorkData_t *work = basic->workdata;
 
     basic->serialID = id;
     work->modelResource = modelResource;
@@ -45,7 +45,7 @@ dds3Basic_t *dds3AddModelBasic2(s32 id, sdfItemArray_t *items, sdfMotionPlayBook
 }
 
 sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic) {
-    dds3ModelBasicWork_t *work = basic->workdata;
+    dds3ModelBasicWorkData_t *work = basic->workdata;
     sdfModelRootNode_t *model;
 
     if (work->modelResource != NULL) {
@@ -58,7 +58,7 @@ sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic) {
 
 sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *basic, sdfModelRootNode_t *model) {
     sdfMotionCtrlr_t *motion = NULL;
-    dds3ModelBasicWork_t *work;
+    dds3ModelBasicWorkData_t *work;
 
     if (model == NULL) {
         return NULL;

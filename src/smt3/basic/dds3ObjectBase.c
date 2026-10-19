@@ -6,10 +6,10 @@
 #include "field.h"
 #include "ps2asm.h"
 
-extern dds3ObjectBaseControl_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic);
-extern dds3ObjectBaseControl_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *basic);
-extern dds3ObjectBaseControl_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *basic);
-extern dds3ObjectBaseControl_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *basic);
 extern void dds3AreaBasicGetItemArray(dds3Basic_t *area, dds3Basic_t *basic);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 extern void sdfModelRootFree(sdfModelRootNode_t *model, s32 freeTextures, s32 freeMaterials);
@@ -78,7 +78,7 @@ extern s32 printf(const char *fmt, ...);
 
 typedef struct
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     s32 hojiID;
 } dds3ObjectBaseMatterWork_t;
 
@@ -103,9 +103,9 @@ dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *basic, dds3Basic_t *cont
 dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *basic, dds3Basic_t *control, s32 type);
 
 
-dds3ObjectBaseControl_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     s32 index;
 
     control = sdfChipAllocDirect(0xAC);
@@ -119,7 +119,7 @@ dds3ObjectBaseControl_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic)
     return control;
 }
 
-void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControl_t *control)
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *control)
 {
     dds3Basic_t *owner;
     dds3Basic_t *area;
@@ -149,7 +149,7 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControl_t *control)
 
 void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     control = dds3GetBaseControlWorkData(basic);
     control->flag |= mask;
@@ -157,7 +157,7 @@ void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask)
 
 void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 mask)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     control = dds3GetBaseControlWorkData(basic);
     control->flag &= ~mask;
@@ -165,7 +165,7 @@ void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 mask)
 
 u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 mask)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     control = dds3GetBaseControlWorkData(basic);
     return (control->flag & mask) != 0;
@@ -173,7 +173,7 @@ u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 mask)
 
 void dds3ObjectBaseSetUserValue(dds3Basic_t *basic, void *userValue)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     control = dds3GetBaseControlWorkData(basic);
     dds3ObjectBaseGetUserValue(basic);
@@ -221,8 +221,8 @@ void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic)
 /* modelType selects the model-context or raw model/motion ownership path. */
 void dds3ObjectBaseFreeModelHandle(dds3Basic_t *basic)
 {
-    dds3ObjectBaseControl_t *control;
-    dds3UnitObjectWork_t *work;
+    dds3ObjectBaseControlWorkData_t *control;
+    dds3UnitObjectBasicWorkData_t *work;
 
     control = dds3GetBaseControlWorkData(basic);
     if (control->modelHandle != NULL) {
@@ -303,8 +303,8 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor)
     dds3UnitPartTable_t tiakiBParts;
     dds3UnitPartTable_t majyoParts;
     dds3UnitPartTable_t hutomimiParts;
-    dds3ObjectBaseControl_t *control;
-    dds3UnitObjectWork_t *work;
+    dds3ObjectBaseControlWorkData_t *control;
+    dds3UnitObjectBasicWorkData_t *work;
     mdlObj_t *obj;
     char *nodeName;
     s32 index;
@@ -568,7 +568,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor)
 
 void dds3ObjectBaseMakeMatter(dds3Basic_t *basic)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *modelBasic;
     sdfMotionCtrlr_t *motion;
     sdfModelRootNode_t *model;
@@ -592,7 +592,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *basic)
 /* Modes 0, 4 and 5 play at unit speed; the remaining modes start stopped. */
 void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *basic, u32 mode)
 {
-    dds3ObjectBaseControl_t *control = dds3GetBaseControlWorkData(basic);
+    dds3ObjectBaseControlWorkData_t *control = dds3GetBaseControlWorkData(basic);
 
     switch (mode) {
     case 0:
@@ -642,7 +642,7 @@ s32 dds3ObjectBaseRegistArea(dds3Basic_t *basic)
  * second only while event bit 0xAF0 is clear. */
 void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *ot, dds3Basic_t *basic)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     s32 tag = 0xEFFFFFF;
 
     control = dds3GetBaseControlWorkData(basic);
@@ -676,7 +676,7 @@ void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *ot, dds3Basic_t *basic)
  * anime flag is set, then seeks to the last frame in mode 6. */
 void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     void *light;
     s32 hojiID;
 
@@ -695,7 +695,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic)
             dds3ObjectBaseModelLinkOtSvs(ot, basic);
             return;
         }
-        light = (void *)((dds3UnitObjectWork_t *)basic->workdata)->unit->value;
+        light = (void *)((dds3UnitObjectBasicWorkData_t *)basic->workdata)->unit->value;
         if (light != NULL) {
             *(void **)&((mdlObj_t *)control->modelHandle)->inner->light = light;
         } else {
@@ -873,9 +873,9 @@ dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *basic)
     return dds3MoverBasicGetPathControl(dds3ObjectBaseGetControlBasic(basic, 1));
 }
 
-dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     control = NULL;
     switch ((basic->type >> 24) - BASIC_TYPE_CAMERAOBJECT) {
@@ -891,7 +891,7 @@ dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic)
 
 void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *basic, u32 value)
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     control = dds3GetBaseControlWorkData(basic);
     control->controlSvs = value;

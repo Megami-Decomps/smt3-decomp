@@ -2164,7 +2164,7 @@ s32 evtCommand_CAM_ROT_Q(void) {
 s32 evtCommand_OBJ_PATH_MOVE(void) {
     void *unit;
     dds3Basic_t *target;
-    dds3ObjectBaseControl_t *data;
+    dds3ObjectBaseControlWorkData_t *data;
     dds3Basic_t *slotNode;
     dds3PathBasicControl_t *path;
     dds3SlotResource_t *resource;

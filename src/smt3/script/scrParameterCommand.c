@@ -388,7 +388,7 @@ INCLUDE_ASM(const s32, "script/scrParameterCommand", DispBaseData);
 #endif
 
 u32 DispObjectBaseData(dds3Basic_t *worldNode, s32 x, s32 y, sdfDrawTag_t *list) {
-    dds3ObjectBaseControl_t *handle;
+    dds3ObjectBaseControlWorkData_t *handle;
     void *command;
 
     handle = dds3GetBaseControlWorkData(worldNode);

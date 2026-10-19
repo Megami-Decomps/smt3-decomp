@@ -54,13 +54,13 @@ extern s32 dds3ComparePosPoseSet2(dds3PoseSet_t *first, dds3PoseSet_t *second);
 
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *basic);
 
-dds3ObjectBaseControl_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic) {
-    return ((dds3UnitObjectWork_t *)basic->workdata)->control;
+dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic) {
+    return ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->control;
 }
 
 dds3Basic_t *dds3AddUnitObjectBasic(s32 id, void *position, void *rotation) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_UNITOBJECT);
-    dds3UnitObjectWork_t *work;
+    dds3UnitObjectBasicWorkData_t *work;
 
     if (basic != NULL) {
         basic->serialID = id;
@@ -83,21 +83,21 @@ void dds3DeleteUnitObjectBasic(dds3Basic_t *basic) {
 }
 
 s32 dds3GetStatusUnitObjectBasic(dds3Basic_t *basic) {
-    return ((dds3UnitObjectWork_t *)basic->workdata)->status;
+    return ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->status;
 }
 
 struct evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic) {
-    return ((dds3UnitObjectWork_t *)basic->workdata)->unit;
+    return ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->unit;
 }
 
 void dds3UnitObjectBasicSetOt(dds3Basic_t *basic, s32 ot) {
-    ((dds3UnitObjectWork_t *)basic->workdata)->ot = ot;
+    ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->ot = ot;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicConstructor);
 
 void dds3UnitObjectBasicDestructor(dds3Basic_t *basic) {
-    dds3UnitObjectWork_t *work;
+    dds3UnitObjectBasicWorkData_t *work;
 
     dds3UnitObjectBasicEL_LinkFree(basic);
     dds3FreePoseSet(basic);
@@ -119,7 +119,7 @@ INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicMainProce
 INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicDrawProcedure);
 
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *basic) {
-    dds3UnitObjectWork_t *work;
+    dds3UnitObjectBasicWorkData_t *work;
 
     work = basic->workdata;
     if (work->lightID != -1) {
@@ -130,7 +130,7 @@ void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *basic) {
 
 /* Detach a light when leaving its radius, then select the first eligible light. */
 void dds3UnitObjectBasicEL_Link(dds3Basic_t *basic) {
-    dds3UnitObjectWork_t *work = basic->workdata;
+    dds3UnitObjectBasicWorkData_t *work = basic->workdata;
     dds3Basic_t *scene = dds3GetControlScene();
     dds3BasicArrayHandle_t *list;
     dds3Basic_t *light;

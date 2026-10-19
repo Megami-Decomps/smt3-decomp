@@ -82,7 +82,7 @@ typedef struct
 
 typedef struct
 {
-    dds3ObjectBaseControl_t *pObjectBaseControlWorkData;
+    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     u32 stat;
     s32 type;
     void *handle;
@@ -191,10 +191,10 @@ typedef struct EffOwnerBillPayloadView {
 #define EFF_OBJ_OWNER_BILL_KIND 5
 
 typedef struct EffectObjectData {
-    dds3ObjectBaseControl_t *handle;
+    dds3ObjectBaseControlWorkData_t *handle;
     s32 word04;
     struct EvtUnit *transitionWork;
-    dds3ObjectBaseControl_t *modelHolder;
+    dds3ObjectBaseControlWorkData_t *modelHolder;
     s32 activeId;
     u32 followParameterIndex;
     u32 word18;
@@ -241,7 +241,7 @@ dds3Basic_t *AddBEDEffect();
 void sdfMemFreeDirect( sdfMemHandle_t *allocation);
 EffEventWork *effEveBEDCutCreate( effBTL_t *owner, u16 kind, const void *params);
 u32 dds3AllocObjectId(void);
-dds3ObjectBaseControl_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
+dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
 extern dds3Basic_t *dds3AreaBasicGetFastArea(void);
 void dds3AreaBasicRegistItem(dds3Basic_t *indexOwner, dds3Basic_t *node);
 dds3Basic_t *AddMG12Effect();
@@ -494,7 +494,7 @@ s32 dds3EffectObjectBasicDrawProcedure(dds3Basic_t *obj) {
     return 1;
 }
 
-dds3ObjectBaseControl_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object)
+dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object)
 {
     return ((dds3EffectObjectBasicWorkData_t *)object->workdata)->pObjectBaseControlWorkData;
 }
@@ -527,7 +527,7 @@ dds3Basic_t *AddP2AEffect(void *bill, void *position, s32 rotationAddress)
     sdfVector4_t vector;
     dds3Basic_t *basic;
     dds3EffectObjectBasicWorkData_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
@@ -586,7 +586,7 @@ dds3Basic_t *AddTMXEffect(void *bill, void *position, s32 rotationAddress)
     sdfVector4_t vector;
     dds3Basic_t *basic;
     dds3EffectObjectBasicWorkData_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
@@ -636,7 +636,7 @@ dds3Basic_t *AddD3PEffect(void *effect, void *position, void *rotation)
     sdfVector4_t vector;
     dds3Basic_t *basic;
     dds3EffectObjectBasicWorkData_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *area;
 
     memset(&vector, 0, sizeof(vector));
@@ -689,7 +689,7 @@ dds3Basic_t *AddBEDEffect(source, position, rotation)
     dds3Basic_t *basic;
     effBTL_t *mixer;
     dds3EffectObjectBasicWorkData_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *area;
 
     basic = dds3AddEffectObjectBasic(dds3AllocObjectId(), (void *)position, (void *)rotation);
@@ -759,7 +759,7 @@ void dds3StartBEDEffectObjectBasic(dds3Basic_t *obj, u32 entryId) {
 dds3Basic_t *AddESPEffect(const char *name, void *firstVector, void *secondVector, f32 scale) {
     dds3Basic_t *obj;
     dds3EffectObjectBasicWorkData_t *data;
-    dds3ObjectBaseControl_t *objectHandle;
+    dds3ObjectBaseControlWorkData_t *objectHandle;
     dds3Basic_t *worldNode;
 
     obj = dds3AddEffectObjectBasic(dds3AllocObjectId(), firstVector, secondVector);
@@ -805,7 +805,7 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     EffNode *effect;
     dds3Basic_t *basic;
     dds3EffectObjectBasicWorkData_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *area;
 
     memset(&position, 0, sizeof(position));

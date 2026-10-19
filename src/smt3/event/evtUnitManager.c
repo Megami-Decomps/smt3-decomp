@@ -499,7 +499,7 @@ evtUnit_t *evtGetUnitHandle(s32 worldObjectKey) {
     dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
-        return ((dds3UnitObjectWork_t *)obj->workdata)->unit;
+        return ((dds3UnitObjectBasicWorkData_t *)obj->workdata)->unit;
     }
     return NULL;
 }
@@ -508,7 +508,7 @@ evtUnit_t *evtGetUnitHandle2(dds3Basic_t *obj) {
     if (obj == NULL) {
         return NULL;
     }
-    return ((dds3UnitObjectWork_t *)obj->workdata)->unit;
+    return ((dds3UnitObjectBasicWorkData_t *)obj->workdata)->unit;
 }
 
 void *sdfChipAllocDirect(u32 size);

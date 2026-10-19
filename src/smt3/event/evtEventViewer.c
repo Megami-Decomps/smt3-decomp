@@ -129,7 +129,7 @@ extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *nam
 extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *owner);
 extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *owner, s32 index);
 extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *target);
-extern dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
 extern s32 evtStopMover(void *mover, s32 undo, s32 startFrame, s32 endFrame);
 extern char D_0053B4A8[];
 extern s8 D_0032C9E2[];

@@ -4,9 +4,9 @@
 /* The event constructor allocates a complete 16-byte payload. */
 typedef struct
 {
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     u8 unk04[12];
-} dds3EventObjectWork_t;
+} dds3EventObjectBasicWorkData_t;
 
 extern s32 dds3InitPoseSet(dds3Basic_t *basic);
 extern void dds3FreePoseSet(dds3Basic_t *basic);
@@ -21,11 +21,11 @@ extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
 
 u32 EventObjectBasicConstructor(dds3Basic_t *basic)
 {
-    dds3EventObjectWork_t *work;
-    dds3ObjectBaseControl_t *control;
+    dds3EventObjectBasicWorkData_t *work;
+    dds3ObjectBaseControlWorkData_t *control;
 
     dds3InitPoseSet(basic);
-    work = sdfChipAllocDirect(sizeof(dds3EventObjectWork_t));
+    work = sdfChipAllocDirect(sizeof(dds3EventObjectBasicWorkData_t));
     basic->workdata = work;
     control = dds3ObjectBaseInitControlWorkData(basic);
     work->control = control;
@@ -34,7 +34,7 @@ u32 EventObjectBasicConstructor(dds3Basic_t *basic)
 
 void EventObjectBasicDestructor(dds3Basic_t *basic)
 {
-    dds3EventObjectWork_t *work;
+    dds3EventObjectBasicWorkData_t *work;
 
     dds3FreePoseSet(basic);
     work = basic->workdata;
@@ -66,9 +66,9 @@ dds3Basic_t *dds3AddEventObjectBasic(s32 serialID, const sdfVector4_t *position,
     return basic;
 }
 
-dds3ObjectBaseControl_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *basic)
 {
-    const dds3EventObjectWork_t *work = basic->workdata;
+    const dds3EventObjectBasicWorkData_t *work = basic->workdata;
 
     return work->control;
 }

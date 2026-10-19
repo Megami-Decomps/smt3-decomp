@@ -29,7 +29,7 @@ typedef struct dds3LightObjectBasicWorkData_t
     u32 BaseAmbientRGB;
     u16 SwitchFrame;
     u16 Reserve1;
-    dds3ObjectBaseControl_t *ObjectBaseControlWorkData;
+    dds3ObjectBaseControlWorkData_t *ObjectBaseControlWorkData;
     struct sdf3DLightParallelPacket_t *LightPacket;
 } dds3LightObjectBasicWorkData_t;
 
@@ -112,7 +112,7 @@ s32 lightdrawprocedure(dds3Basic_t *basic)
     return 1;
 }
 
-dds3ObjectBaseControl_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *basic)
 {
     dds3LightObjectBasicWorkData_t *work = basic->workdata;
 
@@ -146,14 +146,14 @@ void dds3UnlinkSceneLight(dds3Basic_t *basic)
 
 void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 frames)
 {
-    dds3UnitObjectWork_t *work = unit->workdata;
+    dds3UnitObjectBasicWorkData_t *work = unit->workdata;
 
     evtLinkLightObjectBasic(work->unit, light, frames);
 }
 
 void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *unit, s32 frames)
 {
-    dds3UnitObjectWork_t *work = unit->workdata;
+    dds3UnitObjectBasicWorkData_t *work = unit->workdata;
 
     evtUnlinkLightObjectBasic(work->unit, frames);
 }

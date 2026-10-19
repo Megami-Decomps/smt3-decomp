@@ -127,7 +127,7 @@ extern void dds3EffectObjectPresetMG12(dds3Basic_t *basic);
 extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *owner);
 extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *owner, s32 index);
 extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *target);
-extern dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
 extern void evtPlayEventBgm(s32 eventNo, s32 bgm);
 extern void evtFadeInEventBgm(s32 eventNo, s32 bgm);
 extern void evtStopEventBgm(s32 eventNo, s32 bgm);
@@ -504,7 +504,7 @@ s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f, cha
     s32 i;
     dds3Basic_t *basic;
     dds3Basic_t *target;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
 
     for (i = 0; i < 0x7F; i++) {
         if (work->effectBasicTable[i] == NULL) {

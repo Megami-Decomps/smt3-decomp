@@ -9,14 +9,14 @@ typedef struct {
     /* 0x08 */ sdfMotionPlayBook_t *motionTable;
     /* 0x0C */ void *modelResource;
     /* 0x10 */ u8 unk10[8];
-} dds3ModelBasicWork_t;
+} dds3ModelBasicWorkData_t;
 
 typedef struct {
     u32 unk00;
     void *resourceData;
     u8 unk08[8];
     s32 controlValue;
-} dds3ModelRangeWork_t;
+} dds3ModelRangeBasicWorkData_t;
 
 
 extern void *sdfChipAllocDirect(u32 size);
@@ -29,13 +29,13 @@ extern sdfMemHandle_t *sdfMemGetHandleByPtr(void *resource);
 extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *handle);
 
 s32 dds3AllocModelBasicWorkData(dds3Basic_t *basic) {
-    basic->workdata = sdfChipAllocDirect(sizeof(dds3ModelBasicWork_t));
-    memset(basic->workdata, 0, sizeof(dds3ModelBasicWork_t));
+    basic->workdata = sdfChipAllocDirect(sizeof(dds3ModelBasicWorkData_t));
+    memset(basic->workdata, 0, sizeof(dds3ModelBasicWorkData_t));
     return 1;
 }
 
 void dds3ModelBasicFreeModel(dds3Basic_t *basic) {
-    dds3ModelRangeWork_t *work;
+    dds3ModelRangeBasicWorkData_t *work;
     void *resource;
 
     work = basic->workdata;
@@ -50,7 +50,7 @@ dds3Basic_t *dds3AddModelRangeBasicNew(s32 id, s32 unused1, s32 unused2, char *n
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_MODELRANGE);
 
     basic->name = name;
-    ((dds3ModelRangeWork_t *)basic->workdata)->controlValue = 0;
+    ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->controlValue = 0;
     basic->serialID = id;
     return basic;
 }
@@ -65,5 +65,5 @@ s32 dds3SearchSceneBasicWorkData(u32 id) {
 
     scene = dds3GetControlScene();
     basic = dds3SearchSceneBasic(scene, id, BASIC_TYPE_MATTEROBJECT);
-    return ((dds3ModelRangeWork_t *)basic->workdata)->controlValue;
+    return ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->controlValue;
 }

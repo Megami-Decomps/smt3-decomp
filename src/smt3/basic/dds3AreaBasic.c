@@ -3,10 +3,10 @@
 
 typedef s32 (*dds3BasicProc_t)(dds3Basic_t *basic);
 
-typedef struct dds3AreaBasicWork_t
+typedef struct dds3AreaBasicWorkData_t
 {
     dds3BasicArrayHandle_t *items[2];
-} dds3AreaBasicWork_t;
+} dds3AreaBasicWorkData_t;
 
 extern char D_0052F7C0[]; /* "エリアリストが見つかりません...\n" */
 extern char D_0052F7E8[]; /* "not exist a area  エリアが見つかりません...\n" */
@@ -37,10 +37,10 @@ dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *area, u32 itemType
 
 s32 AreaBasicConstructor(dds3Basic_t *basic)
 {
-    dds3AreaBasicWork_t *work;
+    dds3AreaBasicWorkData_t *work;
     u32 i;
 
-    work = sdfChipAllocDirect(sizeof(dds3AreaBasicWork_t));
+    work = sdfChipAllocDirect(sizeof(dds3AreaBasicWorkData_t));
     basic->workdata = work;
     for (i = 0; i < 2; i++) {
         work->items[i] = dds3GetBasicArrayHandle(0);
@@ -50,7 +50,7 @@ s32 AreaBasicConstructor(dds3Basic_t *basic)
 
 void AreaBasicDestructor(dds3Basic_t *basic)
 {
-    dds3AreaBasicWork_t *work;
+    dds3AreaBasicWorkData_t *work;
     u32 i;
 
     work = basic->workdata;
@@ -69,7 +69,7 @@ s32 AreaBasicMainprocuder(dds3Basic_t *basic)
 
 s32 AreaBasicDrawprocuder(dds3Basic_t *basic)
 {
-    dds3AreaBasicWork_t *work = basic->workdata;
+    dds3AreaBasicWorkData_t *work = basic->workdata;
 
     dds3ForEachBasicArray(work->items[0], CB_BasicDrawProcuder);
     return 1;
@@ -136,7 +136,7 @@ void dds3AreaBasicGetItemArray(dds3Basic_t *area, dds3Basic_t *item)
 
 dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *area, u32 itemType)
 {
-    dds3AreaBasicWork_t *work = area->workdata;
+    dds3AreaBasicWorkData_t *work = area->workdata;
 
     return work->items[itemType];
 }

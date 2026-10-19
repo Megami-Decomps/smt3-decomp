@@ -577,7 +577,7 @@ s32 fldMakeObjectBasic3(void) {
             s32 modelKey, collisionKey;
             dds3Basic_t *object;
             dds3Basic_t *path;
-            dds3ObjectBaseControl_t *data;
+            dds3ObjectBaseControlWorkData_t *data;
             dds3Basic_t *slot;
             fldMoverWork_t *resource;
 

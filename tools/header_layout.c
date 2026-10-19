@@ -32,8 +32,8 @@ OFF(e05, evtUnit_t, slotFlags, 0xCC);
 OFF(e06, evtUnit_t, tableValues, 0xD8);
 OFF(e07, evtUnit_t, colorDuration, 0x138);
 OFF(e08, evtUnit_t, transitionElapsed, 0x144);
-OFF(e09, dds3UnitObjectWork_t, unit, 8);
-OFF(e10, dds3ObjectBaseControl_t, control, 0x10);
+OFF(e09, dds3UnitObjectBasicWorkData_t, unit, 8);
+OFF(e10, dds3ObjectBaseControlWorkData_t, control, 0x10);
 OFF(e12, evtWorldSourceTransformPrefix_t, rotation, 0x10);
 
 /* libsdf.h */
@@ -627,11 +627,11 @@ OFF(va9, corePktCb_t, savedAttrBits, 176);
 OFF(vb0, corePktCb_t, matPacket2, 180);
 
 /* Canonical layouts reconciled across the DDS port units. */
-SZ(p01, dds3ObjectBaseControl_t, 0xAC);
-SZ(p02, dds3UnitObjectWork_t, 0x20);
-OFF(p03, dds3UnitObjectWork_t, control, 0xC);
-OFF(p04, dds3UnitObjectWork_t, lightID, 0x10);
-OFF(p05, dds3UnitObjectWork_t, ot, 0x14);
+SZ(p01, dds3ObjectBaseControlWorkData_t, 0xAC);
+SZ(p02, dds3UnitObjectBasicWorkData_t, 0x20);
+OFF(p03, dds3UnitObjectBasicWorkData_t, control, 0xC);
+OFF(p04, dds3UnitObjectBasicWorkData_t, lightID, 0x10);
+OFF(p05, dds3UnitObjectBasicWorkData_t, ot, 0x14);
 SZ(p06, dds3PathKeyframes_t, 0xC);
 SZ(p07, dds3PathBasicControl_t, 0x24);
 OFF(p08, dds3PathBasicControl_t, spline, 0x10);

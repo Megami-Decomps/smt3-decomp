@@ -396,7 +396,7 @@ void evtPathDir(dds3Basic_t *worldNode, u32 direction) {
 
 /* Attach object to the node referenced by owner's owned handle. */
 s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner) {
-    dds3ObjectBaseControl_t *ref;
+    dds3ObjectBaseControlWorkData_t *ref;
     dds3Basic_t *slotNode;
 
     if (object == NULL) {

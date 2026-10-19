@@ -156,7 +156,7 @@ typedef struct
     u32 controlSvs;
     s32 modelPartCount;
     s32 modelParts[24];
-} dds3ObjectBaseControl_t;
+} dds3ObjectBaseControlWorkData_t;
 
 /* dds3UnitObjectBasicConstructor clears the entire 0x20-byte payload.
  * Accessors and light linking pin the status, event unit and render fields. */
@@ -165,11 +165,11 @@ typedef struct
     s32 status;
     s32 unk04;
     struct evtUnit_t *unit;
-    dds3ObjectBaseControl_t *control;
+    dds3ObjectBaseControlWorkData_t *control;
     s32 lightID;
     s32 ot;
     u8 unk18[8];
-} dds3UnitObjectWork_t;
+} dds3UnitObjectBasicWorkData_t;
 
 /* Camera payload, 0x90 bytes: local eye/up vectors, their world-space
  * counterparts and the look-at matrix cached by MakeCamera. */
@@ -180,7 +180,7 @@ typedef struct
     sdfVector4_t vertical;
     sdfVector4_t targetPos;
     sdfVector4_t upVector;
-    dds3ObjectBaseControl_t *pObjectBaseControlWorkData;
+    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     u32 mode;
     u32 flag;
     f32 fovy;
@@ -248,11 +248,11 @@ struct dds3PathBasicControl_t
 };
 
 /* Shared object-base and path-control entry points. */
-dds3ObjectBaseControl_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic);
-void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControl_t *control);
-dds3ObjectBaseControl_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
-dds3ObjectBaseControl_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
-dds3ObjectBaseControl_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *basic);
+dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic);
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *control);
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
+dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
+dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *basic);
 void dds3PathBasicControlAlterMode(dds3PathBasicControl_t *work, s32 direction);
 s32 dds3PathBasicControlGetMode(dds3PathBasicControl_t *work);
 
