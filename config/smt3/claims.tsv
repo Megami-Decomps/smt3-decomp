@@ -218,9 +218,9 @@ src/smt3/kernel/dds3KernelCore.c	u13	done	2026-10-19	3 / 904	three near-finished
 src/smt3/interface/fmGslCont.c	u14	done	2026-10-19	7 / 608	three near-finished units, one agent
 src/smt3/effect/effManager.c	u14	done	2026-10-19	5 / 512	three near-finished units, one agent
 src/smt3/basic/dds3SceneBasic.c	u14	done	2026-10-19	4 / 736	three near-finished units, one agent
-src/smt3/kernel/dds3KernelMain.c	u15	open	2026-10-19	2 / 832	three near-finished units, one agent
+src/smt3/kernel/dds3KernelMain.c	u15	done	2026-10-19	2 / 832	three near-finished units, one agent
 src/smt3/sdf/sdfMovie.c	u15	open	2026-10-19	2 / 816	three near-finished units, one agent
-src/smt3/field/fldPanel.c	u15	open	2026-10-19	3 / 688	three near-finished units, one agent
+src/smt3/field/fldPanel.c	u15	done	2026-10-19	3 / 688	three near-finished units, one agent
 src/smt3/basic/dds3LightObjectBasic.c	u16	open	2026-10-19	2 / 696	four near-finished units, one agent
 src/smt3/effect/effPCPNeedle.c	u16	open	2026-10-19	2 / 648	four near-finished units, one agent
 src/smt3/interface/itfPanel.c	u16	open	2026-10-19	3 / 576	four near-finished units, one agent
@@ -233,3 +233,4 @@ src/smt3/basic/dds3EffectObjectBasic.c	u17	open	2026-10-19	1 / 96	the last seven
 src/smt3/basic/dds3Basic.c	u17	open	2026-10-19	1 / 88	the last seven unclaimed units, one agent
 src/smt3/model/mdlManager.c	u17	open	2026-10-19	1 / 72	the last seven unclaimed units, one agent
 src/smt3/code_001FAE80.c	u18	open	2026-10-19	774 / 260032	the largest unit left, 19 drafts already parked
+src/smt3/newbattle/nbMakePacket.c	u19	open	2026-10-20	250 / 146544	the second largest unit, 18 drafts already parked
