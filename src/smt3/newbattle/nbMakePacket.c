@@ -871,6 +871,21 @@ extern void nbSetNegoWaitMotion(nbFormation_t *form);
 extern void nbSetAllHojoSkillWork(nbNegoProcessData_t *n);
 extern void p2sdBgmVolDown(void);
 extern void *nbNegoProcess1(dds3ProcessID_t *id);
+extern void nbNegoDebugPrint(nbNegoProcessData_t *n);
+extern s32 nbCheckNegoMessage(nbNegoProcessData_t *n);
+extern char D_00544F10[];
+extern u32 hnbPnlFile1;
+extern u32 hnbPnlFile2;
+extern u32 hnbPnlFile3;
+extern u32 hnbPnlFile4;
+extern char D_00545230[];
+extern char D_00545250[];
+extern char D_00545270[];
+extern char D_00545290[];
+extern u32 sdfDevLoadFileEx(char *path, void *dest, void *size);
+extern char D_00545DC8[];
+extern void *nbEventProcess1(dds3ProcessID_t *id);
+extern void nbEventShutdown(dds3ProcessID_t *id);
 extern void nbNegoShutdown(dds3ProcessID_t *id);
 extern char D_00551160[];
 extern void *nbEncProcess2_5(dds3ProcessID_t *id);
@@ -916,6 +931,7 @@ typedef struct {
     s32 mp;
     u32 bad;
 } nbDebugWork_t;
+extern void SetDvlChange(nbDebugWork_t *d);
 extern char D_005464A8[];
 extern char D_005464C0[];
 extern s32 nbCheckLoadGroup(s32 group);
@@ -2415,7 +2431,7 @@ s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type)
 
 s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 mode)
 {
-    u8 *w;
+    datUnitWork_t *w;
     s32 i;
     s32 id;
     s32 cnt;
@@ -2424,15 +2440,15 @@ s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 mode)
     sum = 0;
     cnt = 0;
     if (mode == 0) {
-        w = DDS3_GBWK + 0xA54;
+        w = (datUnitWork_t *)(DDS3_GBWK + 0xA54);
         for (i = 0; i < 16; i++) {
-            if ((*(s32 *)w & 1) != 0) {
-                if ((*(s32 *)w & 2) != 0) {
+            if ((w->flag & 1) != 0) {
+                if ((w->flag & 2) != 0) {
                     cnt++;
-                    sum += *(u16 *)(w + 0x14);
+                    sum += w->level;
                 }
             }
-            w += 0xEC;
+            w++;
         }
     } else {
         for (i = 0; i < 11; i++) {
@@ -2480,7 +2496,7 @@ s32 nbGetParamAvg(nbMainProcessData_t *data, s32 type, s32 param)
 
 s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 mode, s32 param)
 {
-    u8 *w;
+    datUnitWork_t *w;
     s32 i;
     s32 ofs;
     s32 id;
@@ -2491,12 +2507,12 @@ s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 mode, s32 param)
     sum = 0;
     if (mode == 0) {
         for (i = 0, ofs = 0; i < 16; i++) {
-            w = DDS3_GBWK + ofs + 0xA54;
+            w = (datUnitWork_t *)(DDS3_GBWK + ofs + 0xA54);
             ofs += 0xEC;
-            if ((*(s32 *)w & 1) != 0) {
-                if ((*(s32 *)w & 2) != 0) {
+            if ((w->flag & 1) != 0) {
+                if ((w->flag & 2) != 0) {
                     cnt++;
-                    sum += datGetParam((datUnitWork_t *)w, param);
+                    sum += datGetParam(w, param);
                 }
             }
         }
@@ -3052,7 +3068,20 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoDebugPrint2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", NegoDebug);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoProcessMessageChk);
+void *nbNegoProcessMessageChk(dds3ProcessID_t *id)
+{
+    nbNegoProcessData_t *n;
+
+    n = dds3GetProcessData(id);
+    if (n->data->stat & 0x400000) {
+        nbNegoDebugPrint(n);
+    }
+    if (nbCheckNegoMessage(n) != 0) {
+        printf(D_00544F10);
+        return nbNegoProcess1;
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoProcessMessage);
 
@@ -3068,6 +3097,8 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoProcess1);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbNegoShutdown);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544F10);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", InitNegoProcessData);
 
@@ -3129,7 +3160,36 @@ s32 Flow1_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_9);
+s32 Flow1_9(nbNegoProcessData_t *n)
+{
+    s32 mes;
+
+    mes = 8;
+    switch (n->ework->badstatus & 0xFFF) {
+    case 1:
+        mes = 0xA;
+        break;
+    case 0x200:
+        mes = 9;
+        break;
+    case 4:
+        mes = 0xB;
+        break;
+    case 8:
+        mes = 0xD;
+        break;
+    case 0x10:
+        mes = 0xC;
+        break;
+    case 2:
+        mes = 0xE;
+        break;
+    case 0x400:
+        break;
+    }
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+    return 1;
+}
 
 s32 Flow1_10(nbNegoProcessData_t *n)
 {
@@ -3342,7 +3402,34 @@ s32 Flow1_36(nbNegoProcessData_t *n)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_37);
+s32 Flow1_37(nbNegoProcessData_t *n)
+{
+    s32 mes;
+    s32 found;
+
+    found = 0;
+    mes = 0;
+    switch (datDevilTable[n->ework->id].race) {
+    case 0x21:
+        found = 1;
+        mes = 0x37;
+        break;
+    case 7:
+        found = 1;
+        mes = 0x65;
+        break;
+    case 8:
+        found = 1;
+        mes = 0x66;
+        break;
+    }
+    if (found == 1) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+        return 1;
+    }
+    nbAddNegoIdKouho(n, 0x60001);
+    return 0;
+}
 
 s32 Flow1_38(nbNegoProcessData_t *n)
 {
@@ -3539,7 +3626,32 @@ s32 Flow6_13(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_14);
+s32 Flow6_14(nbNegoProcessData_t *n)
+{
+    s32 mes;
+    u32 prev;
+
+    mes = 0;
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x6000F);
+        prev = nbGetPrevNegoId(n);
+        switch (prev) {
+        case 0x6000C:
+            mes = 0x44;
+            break;
+        case 0x6000D:
+            mes = 0x45;
+            break;
+        }
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+        break;
+    }
+    return 0;
+}
 
 s32 Flow6_15(nbNegoProcessData_t *n)
 {
@@ -3599,7 +3711,34 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_70);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_22);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_23);
+s32 Flow6_23(nbNegoProcessData_t *n)
+{
+    s32 mes;
+
+    mes = 0;
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x60041);
+        n->workid[2] = 0x60045;
+        switch (n->requesttype) {
+        case 0:
+            mes = 0x51;
+            break;
+        case 1:
+            mes = 0x50;
+            break;
+        case 5:
+            mes = 0x50;
+            break;
+        }
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_24);
 
@@ -3703,7 +3842,28 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_36);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_37);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_38);
+s32 Flow6_38(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x6004A);
+    n->workid[6] = 0x60027;
+    if (n->cnt6_36 == 1) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x5D, 0);
+        return 0;
+    }
+    if (n->cnt6_36 == 2) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x5E, 0);
+        return 0;
+    }
+    if (n->cnt6_36 == 3) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x5F, 0);
+        return 0;
+    }
+    if (n->cnt6_36 >= 4) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x60, 0);
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_39);
 
@@ -4085,9 +4245,47 @@ s32 Flow9_10(nbNegoProcessData_t *n)
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005450E0);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_11);
+s32 Flow9_11(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x9000D);
+    nbAddNegoIdKouho(n, 0x90010);
+    switch (n->negoreqtype) {
+    case 1:
+    case 5:
+        n->nextnegoid = n->nextkouho[0];
+        break;
+    case 2:
+        n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+        break;
+    case 3:
+    case 4:
+        n->nextnegoid = n->nextkouho[1];
+        break;
+    default:
+        n->negoreqtype = 1;
+        break;
+    }
+    return 0;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_13);
+s32 Flow9_13(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x9000E);
+        n->getmakka = nbGetNegoYaruMakkaA(n, n->pwork, n->ework);
+        if (n->negoskillid == 0x191) {
+            n->getmakka = n->getmakka * 3 / 2;
+        }
+        nbSetMesMakka(n->flowmsg[n->ekucyo], n->getmakka);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA8, 0);
+        break;
+    }
+    return 0;
+}
 
 s32 Flow9_14(nbNegoProcessData_t *n)
 {
@@ -4145,7 +4343,30 @@ s32 Flow9_19(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 8 of 43 words differ (first at +0x24). */
+#ifdef NON_MATCHING
+s32 Flow9_20(nbNegoProcessData_t *n)
+{
+    s32 phase;
+
+    phase = n->nownegophase;
+    switch (phase) {
+    case 0:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x112, 0);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x113, 1);
+        break;
+    case 2:
+        n->getinfotype = n->nowselect != 0 ? phase : 0;
+        nbAddNegoIdKouho(n, 0x90015);
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_20);
+#endif
 
 s32 Flow9_21(nbNegoProcessData_t *n)
 {
@@ -4295,7 +4516,24 @@ s32 Flow10_15(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_16);
+s32 Flow10_16(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0013);
+    nbAddNegoIdKouho(n, 0xA0011);
+    n->getitem = nbGetNegoYaruItemB(n->ework);
+    if (n->getitem == 0) {
+        n->getitem = 0x24;
+    }
+    if (datCheckItemFull(n->getitem) != 0) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    n->nextnegoid = n->nextkouho[0];
+    nbCameraSetTarget(n->eform);
+    nbSetMesItem(n->flowmsg[n->ekucyo], n->getitem);
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xE1, 0);
+    return 0;
+}
 
 s32 Flow10_17(nbNegoProcessData_t *n)
 {
@@ -5039,7 +5277,33 @@ s32 Flow11_8(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_9);
+s32 Flow11_9(nbNegoProcessData_t *n)
+{
+    u32 prev;
+    s32 mes;
+
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xA0001);
+        nbAddNegoIdKouho(n, 0xA0018);
+        mes = n->requesthpmp == 0 ? 0x9D : 0x9E;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+        prev = nbGetPrevNegoId(n);
+        switch (prev) {
+        case 0xB0005:
+            n->nextnegoid = n->nextkouho[1];
+            break;
+        case 0xB0007:
+            n->nextnegoid = n->nextkouho[0];
+            break;
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 nbNegoFlowDrain(nbNegoProcessData_t *n)
 {
@@ -5337,7 +5601,25 @@ s32 Flow12_42(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_43);
+s32 Flow12_43(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC002C);
+    nbAddNegoIdKouho(n, 0xC0028);
+    n->getitem = nbGetNegoYaruItemB(n->ework);
+    if (n->getitem == 0) {
+        n->getitem = 1;
+    }
+    if (datCheckItemFull(n->getitem) != 0) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    if (n->negotype != 2) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xF8, 0);
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x104, 0);
+    }
+    return 0;
+}
 
 s32 Flow12_44(nbNegoProcessData_t *n)
 {
@@ -5472,7 +5754,28 @@ s32 Flow13_12(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 4 of 46 words differ (first at +0x18). */
+#ifdef NON_MATCHING
+s32 Flow13_8(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 2:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12B, 0);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x51, 0);
+        break;
+    case 3:
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow13_8);
+#endif
 
 s32 Flow13_9(nbNegoProcessData_t *n)
 {
@@ -5662,7 +5965,13 @@ s32 nbNegoFlowKoketa(nbNegoProcessData_t *n)
     return D_004EFAC0[(u16)n->nownegoid](n);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnlLoad);
+void nbPnlLoad(void)
+{
+    hnbPnlFile1 = sdfDevLoadFileEx(D_00545230, &pnbPnlFile1, 0);
+    hnbPnlFile2 = sdfDevLoadFileEx(D_00545250, &pnbPnlFile2, 0);
+    hnbPnlFile3 = sdfDevLoadFileEx(D_00545270, &pnbPnlFile3, 0);
+    hnbPnlFile4 = sdfDevLoadFileEx(D_00545290, &pnbPnlFile4, 0);
+}
 
 void nbPnlTexSet(nbMainProcessData_t *data)
 {
@@ -5708,6 +6017,14 @@ void nbPnl_rsetTex1(s32 tex, s32 ctx)
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_rsetTest);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545230);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545250);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545270);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545290);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_rsetAlpha);
 
@@ -6243,7 +6560,33 @@ void BackUpHpMpBad(nbDebugWork_t *d)
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545698);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetNextSeq);
+void SetNextSeq(nbDebugWork_t *d)
+{
+    s32 seq;
+
+    seq = d->unk_08;
+    d->unk_08 = -1;
+    d->unk_04 = seq;
+    switch (seq) {
+    case 1:
+        SetSelect();
+        break;
+    case 3:
+        SetDvlChange(d);
+        break;
+    case 2:
+    case 4:
+    case 8:
+    case 9:
+        break;
+    case 5:
+    case 6:
+    case 7:
+        BackUpHpMpBad(d);
+        seq = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbDebugProcess1);
 
@@ -9230,11 +9573,20 @@ void nbEventShutdown(dds3ProcessID_t *id)
     sdfChipFreeDirect(e);
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", nbDigitStringTable);
+void nbInitEventProcess(nbMainProcessData_t *data)
+{
+    nbEventProcessData_t *e;
+    dds3ProcessID_t *id;
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545DB0);
-
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitEventProcess);
+    e = sdfChipAllocDirect(sizeof(nbEventProcessData_t));
+    memset(e, 0, sizeof(nbEventProcessData_t));
+    e->data = data;
+    data->stat |= 0x1000;
+    data->endtype = 0;
+    id = dds3StartProcess(D_00545DC8, 0x3F9, 1, 1, nbEventProcess1, nbEventShutdown, e);
+    dds3LinkProcess(data->mainproc, id);
+    data->eventproc = id;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindStockSkillError);
 
@@ -9308,6 +9660,12 @@ s32 nbDispSkillErrorMessage(s32 type)
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckBattleSkillError1);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", nbDigitStringTable);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545DB0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545DC8);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckBattleSkillError2);
 

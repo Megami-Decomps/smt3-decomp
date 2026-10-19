@@ -761,6 +761,8 @@ OFF(p99, nbMainProcessData_t, negoProcess, 0xF8);
 OFF(p100, nbMainProcessData_t, debugProcess, 0x100);
 OFF(p101, nbMainProcessData_t, aiScriptProcess, 0x104);
 OFF(p102, nbMainProcessData_t, autoCommProcess, 0x110);
+OFF(p103, nbMainProcessData_t, pnltex, 0x120);
+OFF(p104, nbMainProcessData_t, enemyunit, 0x8);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;

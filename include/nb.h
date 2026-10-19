@@ -79,7 +79,9 @@ typedef struct nbFormation_t
 typedef struct nbMainProcessData_t
 {
     nbFormation_t *form;                    /* 0x000 */
-    u8 unk_04[0xC];
+    u8 unk_04[4];
+    datUnitWork_t *enemyunit;               /* 0x008 */
+    u8 unk_0C[4];
     struct nbParty_t *party;                /* 0x010 */
     u8 unk_14[4];
     s16 playerpcnt;
@@ -148,7 +150,8 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *encounterProcess;      /* 0x114 */
     u8 unk118[4];
     struct effBTL_t *residentEffect;         /* 0x11C */
-    u8 unk120[0x18];
+    void *pnltex[4];                       /* 0x120 */
+    u8 unk130[8];
     void *eventPack;                       /* 0x138 */
     sdfMemHandle_t *eventMemory;
 } nbMainProcessData_t;

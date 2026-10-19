@@ -23,6 +23,14 @@ extern nbFormation_t *nbGetEventForm();
 extern s32 evtGetAgeOfMoon16(void);
 extern void evtSetAgeOfMoon(s32 age);
 extern void nbPanelDraw(s32 flag);
+extern void *sdfChipAllocDirect(u32 size);
+extern void datSetDevilWork(s32 devilid, datUnitWork_t *work);
+extern u8 D_003493A0[];
+extern u8 D_0034F1C0[];
+extern void DispCommCursor(s32 ox, s32 oy, s32 a);
+extern void DispSummonCursor(s32 ox, s32 oy, s32 a);
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
+                        sdfTexHandle_t *th);
 extern s32 datCheckPlayerDead(void);
 void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu);
 extern s32 dds3ExistProcess(dds3ProcessID_t *id);
@@ -89,6 +97,27 @@ struct nbParty_t {
     s16 formindex;
     u8 unk04[0x7C];
 };
+
+/* 60-byte rows; this unit reads only the base hp and mp pairs. */
+typedef struct nbDevilInfo_t {
+    u32 flag;
+    u8 race;
+    u8 unk05;
+    u16 hp;
+    u16 maxhp;
+    u16 mp;
+    u16 maxmp;
+    u8 unk0E[0x2E];
+} nbDevilInfo_t;
+
+extern nbDevilInfo_t datDevilTable[];
+
+typedef struct nbPanelUV_t {
+    s32 u;
+    s32 v;
+    s32 uw;
+    s32 vh;
+} nbPanelUV_t;
 
 typedef struct pmdProcessWork_t {
     nbFormation_t *form;
@@ -206,7 +235,8 @@ void *nbUnitShutdown(dds3ProcessID_t *id);
 void *nbUnitDrawProcess1(dds3ProcessID_t *id);
 void *nbActionProcess1(dds3ProcessID_t *id);
 void nbActionShutdown(dds3ProcessID_t *id);
-nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data);
+nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type,
+                                            s32 partyindex, s32 target, s32 adata);
 extern void ToMatrix(void);
 extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
                                          s32 shutdowntimer, void *processfunc,
@@ -226,6 +256,10 @@ extern void nbPushAction(s32 type, s32 partyindex, s32 target, s32 script);
 extern void nbSortOrder(void);
 extern f32 dds3GetRandFloatA(s32 stream);
 extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
+extern s32 GetEndTime(nbActionProcessData_t *a, s32 formindex);
+extern s32 nbGetExpMakaItem(datUnitWork_t *work);
+extern s32 nbMakeDeadPacket(datUnitWork_t *work, nbActionProcessData_t *a, nbFormation_t *form,
+                            s32 deadchk);
 extern void sdfChipFreeDirect(void *block);
 extern s32 dds3GetRandIntA(s32 low, s32 high);
 extern nbEncountForm_t nbEncountFormTable[];
@@ -262,6 +296,12 @@ void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockad
 extern void nbAddAnalyzePacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form);
 extern void nbPanelAnalyzeStart(void);
 extern struct nbParty_t *nbGetPartyFromFormindex(s32 formindex);
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind);
+extern s32 nbGetMakaBaramaki(datUnitWork_t *work);
+extern s32 nbCheckFormationPlayerSide(s32 formindex);
+extern void datAddMaka(s32 maka);
+extern s32 nbGetHojoCounter(s32 formindex, s32 hojotype);
+extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
 extern s32 nbMakeReturnPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party);
 extern void nbDelAllKoukaPacketType(s32 type);
 extern void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
@@ -464,9 +504,70 @@ void nb_24DC80(s32 partyno, s32 noeffect)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbRunKoukaType1);
+void nbRunKoukaType1(s32 partyindex, sdfVector4_t *pos, f32 time)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    struct nbParty_t *party =
+        (struct nbParty_t *)((u8 *)(partyindex * 0x80) + (u32)data->party);
+    nbFormation_t *form;
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbRunKoukaType2);
+    if ((party->flag & 1) == 0) {
+        return;
+    }
+    if ((party->flag & 8) != 0) {
+        return;
+    }
+    form = &data->form[party->formindex];
+    if (time == 1.0f) {
+        form->anime &= ~0x20;
+        form->stat |= 0x10;
+        form->anime &= ~0x40;
+        SDF_VU0_COPYVECTOR(&form->pos, pos);
+        if (form->basic != NULL) {
+            dds3SetPosPoseSet(form->basic, pos);
+        }
+        return;
+    }
+    form->anime |= 0x20;
+    form->stat |= 0x10;
+    form->anime &= ~0x40;
+    SDF_VU0_COPYVECTOR(&form->startpos, &form->pos);
+    SDF_VU0_COPYVECTOR(&form->tarpos, pos);
+    form->shakePower = time;
+    form->shakePhase = 0;
+}
+
+void nbRunKoukaType2(s32 partyindex, f32 time)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    struct nbParty_t *party =
+        (struct nbParty_t *)((u8 *)(partyindex * 0x80) + (u32)data->party);
+    nbFormation_t *form;
+
+    if ((party->flag & 1) == 0) {
+        return;
+    }
+    if ((party->flag & 8) != 0) {
+        return;
+    }
+    form = &data->form[party->formindex];
+    if (time == 1.0f) {
+        form->anime &= ~0x20;
+        form->stat &= ~0x10;
+        form->anime &= ~0x40;
+        SDF_VU0_COPYVECTOR(&form->pos, &form->orgpos);
+        if (form->basic != NULL) {
+            dds3SetPosPoseSet(form->basic, &form->orgpos);
+        }
+        return;
+    }
+    form->anime |= 0x40;
+    form->anime &= ~0x20;
+    SDF_VU0_COPYVECTOR(&form->startpos, &form->pos);
+    SDF_VU0_COPYVECTOR(&form->tarpos, &form->orgpos);
+    form->shakePower = time;
+    form->shakePhase = 0;
+}
 
 void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power)
 {
@@ -551,7 +652,26 @@ void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbLoadUnitGroup);
+void nbLoadUnitGroup(s32 side, s32 kage, s32 noeffect)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 start = 0;
+    s32 cnt = 0;
+    s32 i;
+
+    switch (side) {
+    case 0:
+        cnt = 4;
+        break;
+    case 1:
+        start = 4;
+        cnt = 0xA;
+        break;
+    }
+    for (i = start; i < start + cnt; i++) {
+        nbInitUnitEffect(&data->form[i], kage, noeffect);
+    }
+}
 
 s32 nbCheckLoad(nbFormation_t *form)
 {
@@ -751,7 +871,32 @@ void SetEnemyEscapePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
     SetTimeList(a, formindex, start, 0x1E, 0x1E);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAuroraPacket);
+void SetAuroraPacket(nbActionProcessData_t *a, s32 formindex)
+{
+    s32 counter;
+
+    nbGetPartyFromFormindex(formindex);
+    counter = nbGetHojoCounter(formindex, 0x13);
+    switch (counter) {
+    case 0:
+        counter = 0xF8;
+        break;
+    case 0xF8:
+        counter = 0xF9;
+        break;
+    case 0xF9:
+        counter = 0xFA;
+        break;
+    case 0xFA:
+        counter = 0xFB;
+        break;
+    case 0xFB:
+        counter = 0xF8;
+        break;
+    }
+    nbSetHojoCounter(formindex, 0x13, counter);
+    nbSetJyokyoMes(a, 0x5A, 1, nbGetUnitWorkFromFormindex(formindex)->id);
+}
 
 void SetAddPressPacket(nbActionProcessData_t *a, s32 nskill)
 {
@@ -776,7 +921,25 @@ void SetAddFlareChargePacket(nbActionProcessData_t *a, s32 start)
     nbAddFlareChargePacket(start, a, 2);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetMakaPacket);
+void SetMakaPacket(nbActionProcessData_t *a, s32 unused, s32 time)
+{
+    s32 maka = nbGetMakaBaramaki(a->work);
+
+    if (nbCheckFormationPlayerSide(a->form->formindex) != 0) {
+        s32 limit = DDS3_GBWK->maka;
+
+        if (limit < maka) {
+            maka = limit;
+        }
+    }
+    SetTimeList(a, a->form->formindex, time, 0x1E, 0x1E);
+    nbSetJyokyoMes(a, 0x2C, 0, maka);
+    if (nbCheckFormationPlayerSide(a->form->formindex) != 0) {
+        datAddMaka(-maka);
+    } else {
+        datAddMaka(maka);
+    }
+}
 
 void SetTorafuPacket(nbActionProcessData_t *a, s32 formindex, s32 start)
 {
@@ -982,7 +1145,28 @@ INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_005437F8);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", GetKoukaList);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetTargetPlayer);
+void SetTargetPlayer(nbActionProcessData_t *a)
+{
+    nbFormation_t *form = a->data->form;
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        form[i].stat &= ~4;
+        form[i].stat &= ~8;
+    }
+    for (i = 0; i < 16; i++) {
+        if ((a->data->form[i].stat & 1) != 0) {
+            if ((a->data->form[i].stat & 0x40) != 0) {
+                if ((a->data->form[i].stat & 0x100) != 0) {
+                    if ((nbGetUnitWorkFromFormindex(i)->flag & 4) != 0) {
+                        a->data->form[i].stat |= 8;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
 
 void SetTargetParty(nbActionProcessData_t *a, s32 partyindex)
 {
@@ -1426,7 +1610,32 @@ void nbActionShutdown(dds3ProcessID_t *id)
     sdfChipFreeDirect(dds3GetProcessData(id));
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", InitActionProcessData);
+nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type, s32 partyindex,
+                                            s32 target, s32 adata)
+{
+    nbActionProcessData_t *a = sdfChipAllocDirect(0x1A4);
+    struct nbParty_t *party;
+
+    memset(a, 0, 0x1A4);
+    a->seq = 0;
+    a->data = data;
+    party = &data->party[partyindex];
+    a->party = party;
+    if ((party->flag & 8) != 0) {
+        a->form = NULL;
+    } else {
+        a->form = &data->form[party->formindex];
+    }
+    a->work = nbGetUnitWorkPointer(data, a->party);
+    a->partyindex = partyindex;
+    a->type = type;
+    a->target = target;
+    a->adata = adata;
+    a->press = -1.0f;
+    a->newpresstype = 0;
+    ClearTimeList(a);
+    return a;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitActionProcess);
 
@@ -1566,7 +1775,14 @@ void nbGetUnitMarkPos(s32 type, nbFormation_t *form)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawPanelSprite);
+void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 col)
+{
+    nbPanelUV_t uv;
+
+    uv.u = no * 13 + 1;
+    uv.v = 1;
+    nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u, uv.v, 0xC, 0x12, col, th);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawKoukaSprite);
 
@@ -1638,7 +1854,31 @@ u32 nbGetModelColor(nbFormation_t *form)
     return 0x80808080;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAppendEnemyDevilWork);
+s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 devilid, s32 formindex)
+{
+    datUnitWork_t *unit = data->enemyunit;
+    nbDevilInfo_t *info;
+    datUnitWork_t *work;
+    s32 i;
+
+    for (i = 0; i < 10; i++) {
+        if ((unit[i].flag & 1) == 0) {
+            break;
+        }
+    }
+    if (i == 10) {
+        return -1;
+    }
+    work = &unit[i];
+    datSetDevilWork(devilid, work);
+    info = &datDevilTable[devilid];
+    work->flag |= 2;
+    work->maxhp = info->maxhp;
+    work->hp = info->hp;
+    work->maxmp = info->maxmp;
+    work->mp = info->mp;
+    return i;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetRandamStock);
 
@@ -1798,16 +2038,73 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispPanelLabel);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispPanelSitaji);
 
+/* NON_MATCHING: 3 of 56 words differ (first at +0x28). */
+#ifdef NON_MATCHING
+void DispComm1PanelComm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
+{
+    s32 no = d;
+
+    if (no <= 0x8003) {
+        if (no >= 0x8000) {
+            return;
+        }
+    }
+    switch (datSkillTable.normal[no].costtype) {
+    case 1:
+        nbPnlSprite(ox + 0x9B, oy + 5, 0x14, 0xB, 0xC, 0x4E, 0x14, 0xB, col,
+                    s->data->pnltex[0]);
+        break;
+    case 2:
+        nbPnlSprite(ox + 0x9B, oy + 5, 0x14, 0xB, 0x21, 0x4E, 0x14, 0xB, col,
+                    s->data->pnltex[0]);
+        break;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1PanelComm);
+#endif
 
 void DispComm1PanelTalk(void) {
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1PanelItem);
+void DispComm1PanelItem(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col)
+{
+    nbPnlSprite(ox + 0x8C, oy + 6, 9, 9, 1, 0x4E, 9, 9, col, s->data->pnltex[0]);
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispHpPanel);
+void DispHpPanel(sdfTexHandle_t *th, datUnitWork_t *w, s32 ox, s32 oy, s32 oz, u32 col)
+{
+    s32 bar;
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispMpPanel);
+    nbPnlSprite(ox, oy, 0x14, 0xB, 0xC, 0x4E, 0x14, 0xB, col, th);
+    oy += 0xC;
+    nbPnlSprite(ox, oy, 0x32, 6, 1, 0x14, 0x31, 5, col, th);
+    if (w->maxhp == 0) {
+        return;
+    }
+    bar = w->hp * 49 / w->maxhp;
+    if (bar == 0) {
+        return;
+    }
+    nbPnlSprite(ox, oy, bar, 6, 1, 0xD, bar, 5, col, th);
+}
+
+void DispMpPanel(sdfTexHandle_t *th, datUnitWork_t *w, s32 ox, s32 oy, s32 oz, u32 col)
+{
+    s32 bar;
+
+    nbPnlSprite(ox, oy, 0x14, 0xB, 0x21, 0x4E, 0x14, 0xB, col, th);
+    oy += 0xC;
+    nbPnlSprite(ox, oy, 0x32, 6, 1, 0x14, 0x31, 5, col, th);
+    if (w->maxmp == 0) {
+        return;
+    }
+    bar = w->mp * 49 / w->maxmp;
+    if (bar == 0) {
+        return;
+    }
+    nbPnlSprite(ox, oy, bar, 6, 1, 0x1B, bar, 5, col, th);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1PanelSummon);
 
@@ -1815,7 +2112,24 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispCommCursor);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispSummonCursor);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1PanelCursor);
+void DispComm1PanelCursor(nbCommSelProcessData_t *s, s32 type, s32 ox, s32 oy, s32 oz, u32 col)
+{
+    s32 a = col >> 24;
+
+    switch (type) {
+    case 0:
+    case 1:
+    case 2:
+    case 4:
+    case 5:
+        DispCommCursor(ox - 5, oy, a);
+        break;
+    case 3:
+        DispSummonCursor(ox - 0xB, oy - 1, a);
+        a = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispHelpPanel);
 

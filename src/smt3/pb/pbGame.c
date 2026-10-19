@@ -26,12 +26,15 @@ typedef struct
 
 typedef struct { s16 number, label; } pbStageEntry_t;
 
+typedef struct { u16 blk[20][20]; } pbMapBlock_t;
+
+typedef struct { u8 unk00[0x10]; pbMapBlock_t map; } pbMapArea_t;
+
 typedef struct
 {
     s32 pcharNum;
-    u8 unk004[0x14];
-    s16 exitX, exitY;
-    u8 unk01C[0x320];
+    u8 unk004[8];
+    pbMapArea_t area;
     s32 charIndex;
     void *baseTex;
     void *tex344, *tex348, *tex34C;
@@ -58,9 +61,28 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbBlockObj_t;
+typedef struct { u16 kind; s16 x, y; u8 unk06[0x8A]; } pbBlockEntry_t;
+
+typedef struct
+{
+    s32 value;
+    u16 grpID;
+    u16 num;
+    u8 unk08[0xA];
+    s16 cellX, cellY;
+    u8 unk16[0x9A];
+    pbBlockEntry_t *blk;
+    u8 unkB4[4];
+    f32 rot;
+    u8 unkBC[8];
+    f32 x, y, z;
+} pbBlockObj_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+
+typedef struct { s16 dir; u16 step; f32 speed; s32 unk08; } pbMoveCharWork_t;
+
+typedef struct { s32 dir; f32 angle; } pbRoundCamWork_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
@@ -88,7 +110,8 @@ struct pbPanel_t
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
             pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
-            pbViewCamWork_t *viewCam; } data;
+            pbViewCamWork_t *viewCam; pbMoveCharWork_t *moveChar;
+            pbRoundCamWork_t *roundCam; } data;
 };
 
 extern f32 cameraAngle, cameraRadius, cameraDegree, cameraDegreeInit;
@@ -161,6 +184,96 @@ extern void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id);
 
 extern s32 viewModeCamera(dds3ProcessID_t *id);
 
+extern s32 moveChar(dds3ProcessID_t *id);
+
+extern void deleteMoveChar(dds3ProcessID_t *id);
+
+extern char D_00535F60[], D_00535F78[], D_00535F50[], D_00535F90[];
+
+extern s32 roundBlock(dds3ProcessID_t *id);
+
+extern u8 degree_mode;
+
+extern s8 dds3PadButtonState[];
+
+extern u8 pbGameKeyState;
+
+extern u32 RotateBit(u32 val, s32 loop);
+
+extern void pbRoundCamera(s32 dir);
+
+typedef struct { s16 x, y; } pbCursorPos_t;
+
+extern pbCursorPos_t D_00551EC4;
+
+extern sdfVector4_t D_0056CDD0[2];
+
+extern void pbSetMapCursorFlag(pbPanel_t *panel, s32 flag);
+
+extern void pbSetGameCamera4(s16 x, s16 y);
+
+extern void pbRotateXCamera(f32 angle);
+
+extern void pbRotateYCamera(f32 angle);
+
+extern u8 pbGetKeyAction(s32 act);
+
+extern void dds3SetQuake(s32 frame, s32 range);
+
+extern void pbDeleteGroupEntry(pbPanel_t *db, u32 grpID);
+
+extern void pbRebuildOutline(pbBlockObj_t *block);
+
+extern pbPanel_t *pbStartMoveBlock(pbPanel_t *parent, pbBlockObj_t *block, s32 dir);
+
+typedef struct { s16 x, y; } pbKeyEntry_t;
+
+extern s16 pbKeyTable[][2];
+
+extern void pbGetMyCharcterPos2(pbPanel_t *panel, s16 *x, s16 *y);
+
+extern void pbMoveMyCharcter(pbPanel_t *panel, f32 x, f32 y);
+
+extern s32 game(dds3ProcessID_t *id);
+
+extern s32 roundAutoCamera(dds3ProcessID_t *id);
+
+extern s32 pbGetKeyMode(void);
+
+extern char D_00535F08[];
+
+extern void deleteGame(dds3ProcessID_t *id);
+
+extern void pbLoadSystemData(s32 num);
+
+extern pbPanel_t *pbStartBlockDataBase(pbPanel_t *parent);
+
+extern pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 sw);
+
+extern pbPanel_t *pbInitExitDraw(pbPanel_t *parent);
+
+extern pbPanel_t *pbStartRecord(pbPanel_t *parent);
+
+extern pbPanel_t *pbStartDrawMapCursor(pbPanel_t *parent);
+
+extern pbPanel_t *bmap, *mapCursor;
+
+extern s32 D_0054F5F0;
+
+extern pbMapBlock_t D_00327458;
+
+extern s32 moveBlock(dds3ProcessID_t *id);
+
+extern void deleteMoveBlock(dds3ProcessID_t *id);
+
+extern s32 p2sdPlaySE(s32 id, s32 vol, s32 pan);
+
+extern u32 pbAddRecord_flor(pbPanel_t *record, pbBlockObj_t *block);
+
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
+
+extern u32 pbAddRecord_blk(pbPanel_t *record, pbBlockObj_t *block);
+
 extern void deleteViewModeCamera(dds3ProcessID_t *id);
 
 extern char D_00535E00[], D_00535E10[], D_00535E20[], D_00535EC8[], D_00535FC8[];
@@ -177,15 +290,15 @@ extern dds3ProcessID_t *dds3SearchProcessName(char *name);
 
 extern void dds3SetProcessFlag(dds3ProcessID_t *id, u32 mask, s32 value);
 
-extern void setRoundBlockData(pbBlockObj_t *block, s16 index);
-
-extern s32 pbStartAutoRoundCamera(s32, s32);
+extern void setRoundBlockData(pbBlockObj_t *block, s32 dir);
 
 extern void func_001D2D00(pbPanel_t *panel, s32 arg);
 
 extern pbPanel_t *mychar[];
 
-extern s32 moveB, roundCamera;
+extern pbPanel_t *moveB;
+
+extern pbPanel_t *roundCamera;
 
 extern char D_00535EF8[];
 
@@ -203,7 +316,7 @@ extern u8 pbRotLKeyAct(void);
 
 extern u8 pbRotRKeyAct(void);
 
-extern s32 moveViewCamera;
+extern pbPanel_t *moveViewCamera;
 
 extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
 
@@ -260,9 +373,40 @@ INCLUDE_ASM(const s32, "pb/pbGame", roundCheck);
 
 INCLUDE_ASM(const s32, "pb/pbGame", roundDirCheck);
 
-INCLUDE_ASM(const s32, "pb/pbGame", hallCheck);
+s8 hallCheck(pbBlockObj_t *block) {
+    u32 i;
+    s32 cx = block->cellX;
+    s32 cy = block->cellY;
+    for (i = 0; i < block->num; i++) {
+        if ((D_0054F5C4->area.map.blk[cy + block->blk[i].y][cx + block->blk[i].x] & 0x800) == 0) {
+            break;
+        }
+    }
+    if (i < block->num) {
+        return 0;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbFindProcHandle);
+s32 pbFindProcHandle(s16 px, s16 py) {
+    s16 i;
+    s32 found = 0;
+    s16 x, y;
+    for (i = 0; (u32)i < D_0054F5C4->pcharNum; i++) {
+        if (i == current_char) {
+            continue;
+        }
+        if (pbMyCharacterDispStat(mychar[i]) == 0) {
+            continue;
+        }
+        pbGetMyCharcterPos2(mychar[i], &x, &y);
+        if (px == x && py == y) {
+            found = 1;
+            break;
+        }
+    }
+    return found;
+}
 
 s8 goalHitCheck(s16 x, s16 y) {
     if ((x == goal->pos.x) && (y == goal->pos.y)) {
@@ -271,9 +415,107 @@ s8 goalHitCheck(s16 x, s16 y) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", gameKey0);
+s32 gameKey0(void) {
+    s32 rot;
+    s32 ret = -1;
+    if ((dds3PadButtonState[0x28] != 0) && (dds3PadButtonState[0x2A] != 0)) {
+        rot = 1;
+    } else {
+        rot = 0;
+    }
+    if (dds3PadButtonState[0x26] & 2) {
+        if (rot != 0) {
+            pbRotateXCamera(0.2f);
+        } else {
+            ret = pbGetKeyAction(0);
+        }
+    } else if (dds3PadButtonState[0x27] & 2) {
+        if (rot != 0) {
+            pbRotateXCamera(-0.2f);
+        } else {
+            ret = pbGetKeyAction(2);
+        }
+    } else if (dds3PadButtonState[0x24] & 2) {
+        ret = pbGetKeyAction(3);
+    } else if (dds3PadButtonState[0x25] & 2) {
+        ret = pbGetKeyAction(1);
+    }
+    if ((dds3PadButtonState[0x28] != 0) && (rot == 0)) {
+        pbRoundCamera(-1);
+    } else if ((dds3PadButtonState[0x2A] != 0) && (rot == 0)) {
+        pbRoundCamera(1);
+    }
+    return ret;
+}
 
+/* NON_MATCHING: 150 of 168 words, 672 bytes against retail's 680; the cursor pair is one splat symbol where retail has two gp-addressed globals. */
+#ifdef NON_MATCHING
+s32 gameKey1(void) {
+    s32 ret = -1;
+    if (dds3PadButtonState[0x22] < 0) {
+        p2sdPlaySE(0x340009, 0x7F, 0x3F);
+        if (pbGameKeyState == 0) {
+            pbGetMyCharcterPos2(mychar[current_char], &D_00551EC4.x, &D_00551EC4.y);
+            SDF_VU0_COPYVECTOR(&D_0056CDD0[0], &aViewEye);
+            SDF_VU0_COPYVECTOR(&D_0056CDD0[1], &aViewTarget);
+            pbGameKeyState = 1;
+        } else {
+            pbSetMapCursorFlag(mapCursor, 0);
+            SDF_VU0_COPYVECTOR(&aViewEye, &D_0056CDD0[0]);
+            SDF_VU0_COPYVECTOR(&aViewTarget, &D_0056CDD0[1]);
+            pbGameKeyState = 0;
+            if (moveViewCamera != NULL) {
+                moveViewCamera->flags = 0x50000;
+            }
+        }
+    }
+    if (dds3PadButtonState[0x23] < 0) {
+        p2sdPlaySE(0x340009, 0x7F, 0x3F);
+        degree_mode = (degree_mode ^ 2) | 1;
+    }
+    if (dds3PadButtonState[0x26] != 0) {
+        ret = pbGetKeyAction(0);
+    } else if (dds3PadButtonState[0x27] != 0) {
+        ret = pbGetKeyAction(2);
+    } else if (dds3PadButtonState[0x24] != 0) {
+        ret = pbGetKeyAction(3);
+    } else if (dds3PadButtonState[0x25] != 0) {
+        ret = pbGetKeyAction(1);
+    }
+    if (pbGameKeyState != 0) {
+        u32 flags;
+        if ((u32)(D_00551EC4.x + pbKeyTable[ret][0]) < 20) {
+            D_00551EC4.x += pbKeyTable[ret][0];
+        }
+        if ((u32)(D_00551EC4.y + pbKeyTable[ret][1]) < 20) {
+            D_00551EC4.y += pbKeyTable[ret][1];
+        }
+        pbSetGameCamera4(D_00551EC4.x, D_00551EC4.y);
+        flags = D_00551EC4.y < 0x13;
+        if (D_00551EC4.x > 0) {
+            flags |= 2;
+        }
+        if (D_00551EC4.y > 0) {
+            flags |= 4;
+        }
+        if (D_00551EC4.x < 0x13) {
+            flags |= 8;
+        }
+        ret = -1;
+        pbSetMapCursorFlag(mapCursor, RotateBit(flags, pbGetKeyMode()));
+    }
+    if (dds3PadButtonState[0x28] < 0) {
+        p2sdPlaySE(0x340009, 0x7F, 0x3F);
+        pbRoundCamera(-1);
+    } else if (dds3PadButtonState[0x2A] < 0) {
+        p2sdPlaySE(0x340009, 0x7F, 0x3F);
+        pbRoundCamera(1);
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", gameKey1);
+#endif
 
 u32 RotateBit(u32 val, s32 loop) {
     s32 i;
@@ -285,7 +527,38 @@ u32 RotateBit(u32 val, s32 loop) {
     return val;
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", gameKey2);
+s32 gameKey2(void) {
+    s32 rot;
+    s32 ret = -1;
+    if ((dds3PadButtonState[0x28] != 0) && (dds3PadButtonState[0x2A] != 0)) {
+        rot = 1;
+    } else {
+        rot = 0;
+    }
+    if (dds3PadButtonState[0x26] & 2) {
+        if (rot != 0) {
+            pbRotateXCamera(0.2f);
+        } else {
+            ret = pbGetKeyAction(0);
+        }
+    } else if (dds3PadButtonState[0x27] & 2) {
+        if (rot != 0) {
+            pbRotateXCamera(-0.2f);
+        } else {
+            ret = pbGetKeyAction(2);
+        }
+    } else if (dds3PadButtonState[0x24] & 2) {
+        ret = pbGetKeyAction(3);
+    } else if (dds3PadButtonState[0x25] & 2) {
+        ret = pbGetKeyAction(1);
+    }
+    if ((dds3PadButtonState[0x28] != 0) && (rot == 0)) {
+        pbRotateYCamera(0.2f);
+    } else if ((dds3PadButtonState[0x2A] != 0) && (rot == 0)) {
+        pbRotateYCamera(-0.2f);
+    }
+    return ret;
+}
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535EF8);
 
@@ -293,15 +566,49 @@ INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F08);
 
 INCLUDE_ASM(const s32, "pb/pbGame", game);
 
-INCLUDE_ASM(const s32, "pb/pbGame", deleteGame);
+void deleteGame(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    D_0054F5C4->area.map = D_00327458;
+    sdfChipFreeDelayedDirect(panel);
+}
 
 INCLUDE_ASM(const s32, "pb/pbGame", pbInitGame);
 
-INCLUDE_ASM(const s32, "pb/pbGame", moveChar);
+s32 moveChar(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbMoveCharWork_t *work = panel->data.moveChar;
+    u32 step;
+    if (work->step < 4) {
+        s32 dir = work->dir;
+        pbMoveMyCharcter(mychar[current_char], D_00327370[dir * 3] * work->speed,
+                         D_00327370[dir * 3 + 2] * work->speed);
+    }
+    if (pbCharacterTable[D_0054F5C4->charIndex] != NULL) {
+        pbCharacterTable[D_0054F5C4->charIndex]();
+    }
+    step = work->step + 1;
+    work->step = step;
+    return ((u16)step < 4) ? 0 : -1;
+}
 
 INCLUDE_ASM(const s32, "pb/pbGame", deleteMoveChar);
 
-INCLUDE_ASM(const s32, "pb/pbGame", setMoveBlockData);
+void setMoveBlockData(pbBlockObj_t *block, s32 dir) {
+    u32 i = 0;
+    block->cellX += pbKeyTable[dir][0];
+    block->cellY += pbKeyTable[dir][1];
+    if (block->num != 0) {
+        pbMapArea_t *a = &D_0054F5C4->area;
+        do {
+            s16 y = block->cellY + block->blk[i].y;
+            s16 x = block->cellX + block->blk[i].x;
+            a->map.blk[y][x] &= 0xF800;
+            a->map.blk[y][x] = (a->map.blk[y][x] | (block->grpID & 0x7FF)) & 0x1FFF;
+            a->map.blk[y][x] |= block->blk[i].kind << 13;
+            i++;
+        } while (i < block->num);
+    }
+}
 
 
 /* NON_MATCHING: 30 of 31 words, 124 bytes against retail's 140; retail holds the delta row in three pointer copies and materialises the -1 return late. */
@@ -327,7 +634,45 @@ INCLUDE_ASM(const s32, "pb/pbGame", moveBlock);
 #endif
 
 
+/* NON_MATCHING: 46 of 77 words, 308 bytes against retail's 324; the entry array is hoisted out of the loop retail reloads it in. */
+#ifdef NON_MATCHING
+void deleteMoveBlock(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbRoundBlock_t *work = panel->data.round;
+    work->block->value = 0;
+    if (work->index != 4) {
+        setMoveBlockData(work->block, work->index);
+        if (hallCheck(work->block) == 1) {
+            moveB = pbStartMoveBlock(NULL, work->block, 4);
+        } else {
+            pbPushRecord(record);
+            moveB = NULL;
+        }
+    } else {
+        pbBlockObj_t *block;
+        u32 i;
+        dds3SetQuake(0x1E, 0x50);
+        pbPushRecord(record);
+        block = work->block;
+        i = 0;
+        if (block->num != 0) {
+            pbMapArea_t *a = &D_0054F5C4->area;
+            do {
+                s16 y = block->cellY + (block->blk + i)->y;
+                s16 x = block->cellX + (block->blk + i)->x;
+                a->map.blk[y][x] &= 0xF7FF;
+                i++;
+            } while (i < block->num);
+        }
+        pbDeleteGroupEntry(blockDB, block->grpID);
+        moveB = NULL;
+    }
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", deleteMoveBlock);
+#endif
 
 void rotXY(s16 *x, s16 *y, s32 dir) {
     s16 ox = *x;
@@ -348,9 +693,47 @@ void rotXY(s16 *x, s16 *y, s32 dir) {
     }
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", setRoundBlockData);
+void setRoundBlockData(pbBlockObj_t *block, s32 dir) {
+    u32 i = 0;
+    block->rot = 0.0f;
+    if (block->num != 0) {
+        do {
+            s16 y, x;
+            rotXY(&block->blk[i].x, &block->blk[i].y, dir);
+            y = block->cellY + block->blk[i].y;
+            x = block->cellX + block->blk[i].x;
+            D_0054F5C4->area.map.blk[y][x] &= 0xF800;
+            D_0054F5C4->area.map.blk[y][x] =
+                (D_0054F5C4->area.map.blk[y][x] | (block->grpID & 0x7FF)) & 0x1FFF;
+            D_0054F5C4->area.map.blk[y][x] |= block->blk[i].kind << 13;
+            i++;
+        } while (i < block->num);
+    }
+    pbRebuildOutline(block);
+}
 
+/* NON_MATCHING: 12 of 34 words, 136 bytes against retail's 140; the two clamp stores cross-jump and the guard exit lands last. */
+#ifdef NON_MATCHING
+s32 roundBlock(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbRoundBlock_t *work = panel->data.round;
+    u32 step = work->step;
+    if (step < 4) {
+        pbBlockObj_t *block = work->block;
+        block->rot += work->index * 0.39269909f;
+        if (block->rot > 6.28318501f) {
+            block->rot -= 6.28318501f;
+        } else if (block->rot < -6.28318501f) {
+            block->rot += 6.28318501f;
+        }
+        work->step = step + 1;
+        return 0;
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", roundBlock);
+#endif
 
 void deleteRoundBlock(dds3ProcessID_t *id) {
     pbPanel_t *panel = id->workdata;
@@ -360,10 +743,32 @@ void deleteRoundBlock(dds3ProcessID_t *id) {
     work->block->value = 0;
     sdfChipFreeDelayedDirect(work);
     sdfChipFreeDelayedDirect(panel);
-    moveB = 0;
+    moveB = NULL;
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", roundAutoCamera);
+s32 roundAutoCamera(dds3ProcessID_t *id) {
+    pbPanel_t *panel = id->workdata;
+    pbRoundCamWork_t *work = panel->data.roundCam;
+    s32 ret = 0;
+    if (work->dir > 0) {
+        cameraAngle += 0.2f;
+        if (cameraAngle >= work->angle) {
+            if (work->angle >= 6.28318501f) {
+                cameraAngle = 0.0f;
+            } else {
+                cameraAngle = work->angle;
+            }
+            ret = -1;
+        }
+    } else {
+        cameraAngle -= 0.2f;
+        if (cameraAngle <= work->angle) {
+            cameraAngle = work->angle;
+            ret = -1;
+        }
+    }
+    return ret;
+}
 
 void deleteRoundAutoCamera(dds3ProcessID_t *id) {
     pbPanel_t *panel = id->workdata;
@@ -376,7 +781,7 @@ void deleteRoundAutoCamera(dds3ProcessID_t *id) {
     dds3ResetProcessFlag(panel->process, 0x10, 1);
     sdfChipFreeDelayedDirect(work);
     sdfChipFreeDelayedDirect(panel);
-    roundCamera = 0;
+    roundCamera = NULL;
 }
 
 INCLUDE_ASM(const s32, "pb/pbGame", viewModeCamera);
@@ -385,7 +790,7 @@ void deleteViewModeCamera(dds3ProcessID_t *id) {
     pbPanel_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
-    moveViewCamera = 0;
+    moveViewCamera = NULL;
 }
 
 s32 ClearProc(dds3ProcessID_t *id) {
@@ -411,7 +816,25 @@ void DeleteClearProc(dds3ProcessID_t *id) {
     pbGotoNewStage();
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", CalcDegreeMode);
+void CalcDegreeMode(void) {
+    f32 d;
+    if (degree_mode & 2) {
+        d = cameraDegree + 0.15f;
+        if (d > 1.560796142f) {
+            cameraDegree = 1.560796142f;
+            degree_mode = degree_mode & 0xFE;
+            return;
+        }
+    } else {
+        d = cameraDegree - 0.15f;
+        if (d < cameraDegreeInit) {
+            cameraDegree = cameraDegreeInit;
+            degree_mode = degree_mode & 0xFE;
+            return;
+        }
+    }
+    cameraDegree = d;
+}
 
 s16 GetStageNumber(void) {
     return (pbLevelTable[D_0054F5C4->level]->stage + D_0054F5C4->stage)->number;
@@ -425,21 +848,185 @@ s16 GetAllStageClearBit(void) {
     return pbLevelTable[D_0054F5C4->level]->clearBit;
 }
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F40);
+pbPanel_t *pbStartGame(pbPanel_t *parent) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    u32 i;
+    pbLoadSystemData(GetStageNumber());
+    panel->process = dds3StartProcess(D_00535F50, 0x3EE, 1, 1, game,
+                                      (dds3ProcessFunc_t)deleteGame, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0x10000;
+    dds3SetProcessData(panel->process, panel);
+    blockDB = NULL;
+    bmap = NULL;
+    goal = NULL;
+    record = NULL;
+    mapCursor = NULL;
+    roundCamera = NULL;
+    moveViewCamera = NULL;
+    D_0054F5F0 = 0;
+    scr_msg = NULL;
+    for (i = 0; i < 4; i++) {
+        mychar[i] = NULL;
+    }
+    blockDB = pbStartBlockDataBase(panel);
+    bmap = pbInitMapBaseDraw(panel, 1);
+    goal = (pbGoal_t *)pbInitExitDraw(panel);
+    record = pbStartRecord(panel);
+    mapCursor = pbStartDrawMapCursor(panel);
+    D_00327458 = D_0054F5C4->area.map;
+    cameraDegree = 1.1f;
+    cameraRadius = 700.0f;
+    cameraDegreeInit = 1.1f;
+    cameraAngle = 0.0f;
+    pbInitGameCamera();
+    return panel;
+}
 
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F48);
+pbPanel_t *pbStartMoveChar(pbPanel_t *parent, s32 dir, u32 scl) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbMoveCharWork_t *work;
+    panel->process = dds3StartProcess(D_00535F60, 0x3EE, 0, 0, moveChar,
+                                      (dds3ProcessFunc_t)deleteMoveChar, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    work = sdfChipAllocDirect(0xC);
+    panel->data.moveChar = work;
+    memset(work, 0, 0xC);
+    work->dir = dir;
+    work->step = 0;
+    work->speed = scl;
+    dds3SetProcessData(panel->process, panel);
+    func_001D2D00(mychar[current_char], 1);
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbStartGame);
+pbPanel_t *pbStartMoveBlock(pbPanel_t *parent, pbBlockObj_t *block, s32 dir) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbRoundBlock_t *work;
+    u32 i;
+    panel->process = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, moveBlock,
+                                      (dds3ProcessFunc_t)deleteMoveBlock, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    work = sdfChipAllocDirect(0xC);
+    panel->data.round = work;
+    memset(work, 0, 0xC);
+    work->step = 0;
+    work->index = dir;
+    work->block = block;
+    dds3SetProcessData(panel->process, panel);
+    if (dir == 4) {
+        p2sdPlaySE(0x340004, 0x7F, 0x3F);
+        pbAddRecord_flor(record, work->block);
+        dds3PadVibrationSet(1, 0x6E, 0xC);
+    } else {
+        pbAddRecord_blk(record, work->block);
+    }
+    block->value = 1;
+    i = 0;
+    if (block->num != 0) {
+        do {
+            s16 x = block->cellX + block->blk[i].x;
+            s16 y = block->cellY + block->blk[i].y;
+            i++;
+            D_0054F5C4->area.map.blk[y][x] &= 0x1800;
+        } while (i < block->num);
+    }
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbStartMoveChar);
+pbPanel_t *pbStartRoundBlock(pbPanel_t *parent, pbBlockObj_t *block, s32 dir) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbRoundBlock_t *work;
+    u32 i;
+    panel->process = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, roundBlock,
+                                      (dds3ProcessFunc_t)deleteRoundBlock, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    work = sdfChipAllocDirect(0xC);
+    panel->data.round = work;
+    memset(work, 0, 0xC);
+    work->step = 0;
+    work->index = dir;
+    work->block = block;
+    dds3SetProcessData(panel->process, panel);
+    pbAddRecord_blk(record, block);
+    block->value = 1;
+    i = 0;
+    if (block->num != 0) {
+        do {
+            s16 x = block->cellX + block->blk[i].x;
+            s16 y = block->cellY + block->blk[i].y;
+            i++;
+            D_0054F5C4->area.map.blk[y][x] &= 0x1800;
+        } while (i < block->num);
+    }
+    return panel;
+}
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbStartMoveBlock);
-
-INCLUDE_ASM(const s32, "pb/pbGame", pbStartRoundBlock);
-
-INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F78);
-
-INCLUDE_ASM(const s32, "pb/pbGame", pbStartAutoRoundCamera);
+pbPanel_t *pbStartAutoRoundCamera(pbPanel_t *parent, s32 dir) {
+    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+    pbRoundCamWork_t *work;
+    dds3ProcessID_t *id;
+    panel->process = dds3StartProcess(D_00535F90, 0x3EE, 0, 0, roundAutoCamera,
+                                      (dds3ProcessFunc_t)deleteRoundAutoCamera, NULL);
+    if (parent != NULL) {
+        dds3LinkProcess(parent->process, panel->process);
+    }
+    panel->flags = 0;
+    work = sdfChipAllocDirect(8);
+    panel->data.roundCam = work;
+    memset(work, 0, 8);
+    work->dir = dir;
+    work->angle = 0.0f;
+    switch (pbGetKeyMode()) {
+    case 0:
+        if (dir == 1) {
+            work->angle = 1.5707963f;
+        } else {
+            cameraAngle = 6.28318501f;
+            work->angle = 4.71238852f;
+        }
+        break;
+    case 1:
+        if (dir == 1) {
+            work->angle = 6.28318501f;
+        } else {
+            work->angle = 3.1415927f;
+        }
+        break;
+    case 2:
+        if (dir == 1) {
+            work->angle = 4.71238852f;
+        } else {
+            work->angle = 1.5707963f;
+        }
+        break;
+    case 3:
+        if (dir == 1) {
+            work->angle = 3.1415927f;
+        } else {
+            work->angle = 0.0f;
+        }
+        break;
+    }
+    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessFlag(panel->process, 0x10, 1);
+    id = dds3SearchProcessName(D_00535F08);
+    if (id != NULL) {
+        dds3ResetProcessFlag(id, 0x10, 2);
+    }
+    return panel;
+}
 
 pbPanel_t *pbStartViewModeCamera(pbPanel_t *parent) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
@@ -461,7 +1048,7 @@ pbPanel_t *pbStartViewModeCamera(pbPanel_t *parent) {
 }
 
 void pbRoundCamera(s32 dir) {
-    roundCamera = pbStartAutoRoundCamera(0, (dir != -1) ? -1 : 1);
+    roundCamera = pbStartAutoRoundCamera(NULL, (dir != -1) ? -1 : 1);
     if (dir == -1) {
         pbRotLKeyAct();
     } else {
@@ -575,6 +1162,18 @@ dds3ProcessID_t *pbGetMessageScriptProc(void) {
     return scr_msg;
 }
 
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F40);
+
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F48);
+
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F50);
+
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F60);
+
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F78);
+
+INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F90);
+
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FA8);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FC8);
@@ -639,7 +1238,27 @@ void pbFreeGroupHandles(pbBlockDB_t *db) {
     db->count = 0;
 }
 
+/* NON_MATCHING: 60 of 68 words, 272 bytes against retail's 288; the first test is not if-converted and x and y land in the wrong registers. */
+#ifdef NON_MATCHING
+u8 pbGetBlockAt(s16 x, s16 y, s16 grp) {
+    u8 ret = 0;
+    if ((x + 1 >= 20) || ((D_0054F5C4->area.map.blk[y][x + 1] & 0x7FF) != grp)) {
+        ret = 4;
+    }
+    if ((x - 1 < 0) || ((D_0054F5C4->area.map.blk[y][x - 1] & 0x7FF) != grp)) {
+        ret |= 8;
+    }
+    if ((y + 1 >= 20) || ((D_0054F5C4->area.map.blk[y + 1][x] & 0x7FF) != grp)) {
+        ret |= 1;
+    }
+    if ((y - 1 < 0) || ((D_0054F5C4->area.map.blk[y - 1][x] & 0x7FF) != grp)) {
+        ret |= 2;
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "pb/pbGame", pbGetBlockAt);
+#endif
 
 INCLUDE_ASM(const s32, "pb/pbGame", pb_proc_block_DB_Process);
 

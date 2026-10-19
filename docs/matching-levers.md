@@ -39,6 +39,9 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| explicit branches selecting one of two or three constants, the value left in a saved register across calls | a `switch` over the tested values, not an `if`/`else if` chain, which ee-gcc if-converts into a `movn` and drops the saved register. `Flow6_14` and `Flow11_9` in `nbMakePacket` each turned on that alone |
+| `jal` and a fallthrough for one `switch` arm while the other arms sibcall with `j` | a dead store after the call in that arm only, `seq = 0;` on the switch index. Giving the callee an `s32` return type with no `return` does not reach it, since the other arms sibcall the same way. `SetNextSeq` went from 27 of 30 differing words to exact |
+| a `switch` tree split one node later than your case set produces | an extra `case` with an empty body, above every other case value, so the node collapses into the default and only the node count changes. gcc's `balance_case_nodes` splits at the `(n + ranges + 1) / 2`th node, so six singleton cases split at the third and seven at the fourth. `Flow1_9`'s six status bits needed a seventh case above `0x200` to make the tree start at `8` rather than `4` |
 | two early `return <same constant>`s | write them as separate `if`s, which gets the returns cross-jumped and the constant hoisted into `$2` above the first branch. `&&`, `||` and a `goto` all cost four bytes and a register copy |
 | a clamp that leaves the bound in the value's own register | assign the bound rather than returning it: `if (2.0f < s) { s = 2.0f; } else if (s < 0.8f) { s = 0.8f; } return s;`. `return 2.0f;` puts the constant straight in `$f0`, costing four bytes and rotating every fp register |
 | a `switch` whose arms share one exit | set a result local before the dispatch, `break` in each arm, and one trailing `return`. One function went from 21 of 54 words and 12 bytes long to exact |
@@ -242,6 +245,17 @@ it was measured on DDS and not on this ELF.
 - `extern f32 fabsf(f32);` and an ordinary call compile to `abs.s` directly,
   verified against this toolchain. `EE_ABS_F32` is what fails to match where
   retail has a plain `abs.s`.
+- The same thing happens by accident when a `void` callee defined later in the
+  unit has no prototype above the caller: the implicit declaration returns
+  `int`, so the load after the `jal` lands in `$3` where retail uses `$2`.
+  Adding the `void` prototype above the caller is the fix. `SetMakaPacket`
+  came down to that one word, on `nbSetJyokyoMes`.
+- Where retail computes a table row as `addu rd, index, base` *into the
+  register the index already occupies*, the index has to reach the add as a
+  pointer: `(T *)((u8 *)(i * sizeof(T)) + (u32)base)`. Written `base[i]` gcc
+  emits `addu rd, base, index` into a fresh temp, which costs the operand
+  order and the register. `nbRunKoukaType1` and `nbRunKoukaType2` each went
+  from 20 differing words to exact on that one cast.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
