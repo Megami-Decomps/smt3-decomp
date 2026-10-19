@@ -25,16 +25,35 @@ typedef struct
     u32 color;
 } dds3PrintControl_t;
 
-/* Only the held-texture portion is interpreted here. The native bank stride is
- * 0x1BE0, with its render tag at 0x16D0 (dds3InitRenderDrawEnv). */
+/* sdfGrSetStdDrawEnv and sdfGrLinkStdDrawEnv are handed the DMA tag that
+ * prefixes the draw env, so the env's own packet header sits 0x10 in. */
 typedef struct
 {
-    u8 unk0000[0x16D0];
+    sdfDmaTag_t dma;
+    sdfGrDrawEnv_t env;
+    u8 unk180[0xA0];
+} dds3StdDrawEnv_t;
+
+/* One frame buffer's draw bank, stride 0x1BE0. Three draw tags: the VU1 init
+ * chain at 0x0, the scene chain at 0x12D0, and the second-screen chain at
+ * 0x1A10. */
+typedef struct
+{
+    sdfDrawTag_t initTag;
+    sdf3DInitPacket_t initPacket;
+    u8 unk0040[0x1290];
+    sdfDrawTag_t drawTag;
+    sdfPreDrawTag_t preDrawTag;
+    dds3StdDrawEnv_t stdEnv;
+    sdf3DViewportPacket_t viewport;
+    sdf3DLightParallelPacket_t light;
     sdfDrawTag_t renderTag;
     sdfGrDrawEnv_t renderEnv;
     sdf3DViewportPacket_t renderViewport;
     sdf3DLightParallelPacket_t renderLight;
-    u8 unk1A10[0x1D0];
+    sdfDrawTag_t subTag;
+    sdf3DViewportPacket_t subViewport;
+    sdf3DLightParallelPacket_t subLight;
 } dds3DrawBank_t;
 
 /* Two-context Z-clear packets are 0xB0 bytes, two buffers per state. */
@@ -55,6 +74,18 @@ typedef struct
 
 extern u32 dds3DrawFlag;
 extern u8 fadergba[4];
+/* The fade sprite packet: a four-register state block then a textureless
+ * sprite, 0xB0 bytes, one per frame buffer. */
+typedef struct
+{
+    sdfDmaTag_t dma;
+    sdfGifTag_t stateGif;
+    sdfGrTagStdReg_t state[4];
+    sdfGifTag_t spriteGif;
+    sdfGrTagStdReg_t sprite[4];
+} dds3FadePacket_t;
+
+extern dds3FadePacket_t dds3FadePacket[2];
 extern u16 fadenow;
 extern u16 fademax;
 
@@ -257,10 +288,33 @@ extern s16 dds3QuakeFrame;
 extern u16 dds3QuakeXRange;
 extern u16 dds3QuakeYRange;
 extern u32 egl_OT_Offset;
+extern f32 dds3QuakeOffset[4];
+
+/* The quake's two axis gains are copied in by value, which is the unaligned
+ * eight-byte block move at the entry. */
+typedef struct
+{
+    f32 axis[2];
+} dds3QuakeGain_t;
+
+extern dds3QuakeGain_t D_0054E988[];
+f32 dds3GetRandFloatA(s32 kind);
 void sdfGrSetScreen(s32 screen);
 void sdf3DMakeScreenParam(sdf3DScreenParam_t *param);
 void dds3InitDrawEnvSub(s32 buffer);
 void dds3InitZClearDrawTag(void);
+void sdf3DLinkInitPacket(sdfDrawTag_t *tag, sdf3DInitPacket_t *packet);
+void sdfPreDrawTagInit(sdfPreDrawTag_t *tag);
+void sdfGrSetStdDrawEnv(dds3StdDrawEnv_t *env, sdfGrFrameSet_t *frameSet);
+void sdfGrLinkStdDrawEnv(sdfDrawTag_t *tag, sdfPreDrawTag_t *preTag, dds3StdDrawEnv_t *env);
+extern sdfGrFrameSet_t D_00529388;
+extern sdfMatrix4_t aProjMatrix;
+extern dds3LightState_t dds3LightParam2;
+/* Retail addresses each light record's ambient term as its own symbol, so the
+ * parallel array and the ambient reach sdf3DMakeLightParallelPacket apart. */
+PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor, dds3LightParam, 0x10);
+PS2_SYMBOL_AT(sdfVector4_t, dds3AmbientColor2, dds3LightParam2, 0x10);
+extern u32 dds3BackColor;
 void eglInit(void);
 
 extern sdfGrOt_t sdfGrOtTable[];
@@ -347,7 +401,31 @@ void evtHokanRipBlur(s32 enabled, f32 ratio, dds3RipBlurBody_t *from, dds3RipBlu
 void evtHokanFilter(s32 enabled, f32 ratio, dds3Filter2Param_t *from, dds3Filter2Param_t *to, dds3Filter2Param_t *out);
 void evtHokanMultFilter(s32 enabled, f32 ratio, dds3MFilterParam_t *from, dds3MFilterParam_t *to, dds3MFilterParam_t *out);
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3InitDrawEnvSub);
+void dds3InitDrawEnvSub(s32 buffer)
+{
+    sdfDrawTagInit(&dds3DrawEnv[buffer].initTag);
+    sdf3DLinkInitPacket(&dds3DrawEnv[buffer].initTag, &dds3DrawEnv[buffer].initPacket);
+    sdfDrawTagInit(&dds3DrawEnv[buffer].drawTag);
+    sdfPreDrawTagInit(&dds3DrawEnv[buffer].preDrawTag);
+    sdfGrSetStdDrawEnv(&dds3DrawEnv[buffer].stdEnv, &D_00529388);
+    /* The byte offset is what associates the sum as base plus index; the
+     * member path reaches stdEnv.env.clear.clearColor and associates it the
+     * other way round. */
+    *(u32 *)((u8 *)&dds3DrawEnv[buffer] + 0x1410) = dds3BackColor;
+    sdfGrLinkStdDrawEnv(&dds3DrawEnv[buffer].drawTag, &dds3DrawEnv[buffer].preDrawTag,
+        &dds3DrawEnv[buffer].stdEnv);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[buffer].viewport, &dds3ScreenParam, &D_002FA240);
+    sdfDrawTagLink(&dds3DrawEnv[buffer].drawTag, &dds3DrawEnv[buffer].viewport);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[buffer].light, dds3LightParam.parallel,
+        &dds3AmbientColor);
+    sdfDrawTagLink(&dds3DrawEnv[buffer].drawTag, &dds3DrawEnv[buffer].light);
+    sdfDrawTagInit(&dds3DrawEnv[buffer].subTag);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[buffer].subViewport, &dds3ScreenParam2, &aProjMatrix);
+    sdfDrawTagLink(&dds3DrawEnv[buffer].subTag, &dds3DrawEnv[buffer].subViewport);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[buffer].subLight, dds3LightParam2.parallel,
+        &dds3AmbientColor2);
+    sdfDrawTagLink(&dds3DrawEnv[buffer].subTag, &dds3DrawEnv[buffer].subLight);
+}
 
 void dds3InitDrawEnv(void)
 {
@@ -452,7 +530,54 @@ void *dds3GetRenderTexture(void)
     return dds3RenderTexture;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3RunQuake);
+void dds3RunQuake(void)
+{
+    f32 range[4];
+    dds3QuakeGain_t gain = D_0054E988[0];
+    f32 amplitude;
+    f32 kick;
+    s32 i;
+
+    if (dds3QuakeFlag == 0) {
+        SDF_VU0_LOADIDENTITYVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR(dds3QuakeOffset);
+        return;
+    }
+    if (dds3QuakeFrame == 0) {
+        dds3QuakeFlag = 0;
+        return;
+    }
+    range[0] = dds3QuakeXRange * 0.01f;
+    range[1] = dds3QuakeYRange * 0.01f;
+    for (i = 0; i < 2; i++) {
+        if (range[i] != 0.0f) {
+            amplitude = dds3GetRandFloatA(0) * range[i] * 0.5f + range[i] * 0.5f;
+            if (range[i] * gain.axis[i] <= fabsf(dds3QuakeOffset[i])) {
+                if (dds3QuakeOffset[i] <= 0.0f) {
+                    dds3QuakeOffset[i] = dds3QuakeOffset[i] + amplitude;
+                } else {
+                    dds3QuakeOffset[i] = dds3QuakeOffset[i] - amplitude;
+                }
+            } else {
+                kick = amplitude * (dds3GetRandFloatA(0) - 0.5f);
+                dds3QuakeOffset[i] = dds3QuakeOffset[i] + (kick + kick);
+            }
+            if (dds3QuakeOffset[i] < -range[i]) {
+                dds3QuakeOffset[i] = -range[i];
+            }
+            if (range[i] < dds3QuakeOffset[i]) {
+                dds3QuakeOffset[i] = range[i];
+            }
+        }
+    }
+    if (dds3QuakeFrame > 0) {
+        s32 divisor = dds3QuakeFrame + 5;
+        dds3QuakeXRange -= dds3QuakeXRange / divisor;
+        dds3QuakeYRange -= dds3QuakeYRange / divisor;
+        dds3QuakeFrame--;
+    }
+}
 
 /* Zero amplitude stops the quake; zero duration leaves it running indefinitely. */
 void dds3SetQuake(s32 duration, s32 amplitude)
@@ -476,7 +601,47 @@ void dds3StopQuake(void)
     dds3QuakeFlag = 0;
 }
 
+/* NON_MATCHING: 21 of 87 words differ (first at +0x14). */
+#ifdef NON_MATCHING
+void dds3InitZClearDrawTag(void)
+{
+    s32 state;
+    s32 buffer;
+
+    for (state = 0; state < 3; state++) {
+        for (buffer = 0; buffer < 2; buffer++) {
+            dds3ZClearDrawTag[state][buffer].dma.qwc = 0xA;
+            dds3ZClearDrawTag[state][buffer].dma.pad = 0;
+            dds3ZClearDrawTag[state][buffer].dma.id = 0x70;
+            dds3ZClearDrawTag[state][buffer].dma.addr = NULL;
+            dds3ZClearDrawTag[state][buffer].dma.dat0 = 0;
+            dds3ZClearDrawTag[state][buffer].dma.dat1 = 0x5000000A;
+            dds3ZClearDrawTag[state][buffer].testGif.parm = 0x1000000000000001;
+            dds3ZClearDrawTag[state][buffer].testGif.regs = 0xE;
+            dds3ZClearDrawTag[state][buffer].test.reg = 0x47;
+            dds3ZClearDrawTag[state][buffer].test.data = 0x32001;
+            dds3ZClearDrawTag[state][buffer].clearGif.parm = 0x1003400000000004;
+            dds3ZClearDrawTag[state][buffer].clearGif.regs = 0xE;
+            dds3ZClearDrawTag[state][buffer].colorA.reg = 1;
+            dds3ZClearDrawTag[state][buffer].colorA.data = 0x3F80000000000000;
+            dds3ZClearDrawTag[state][buffer].positionA.reg = 5;
+            dds3ZClearDrawTag[state][buffer].positionA.data = 0x79007000;
+            dds3ZClearDrawTag[state][buffer].colorB.reg = 1;
+            dds3ZClearDrawTag[state][buffer].colorB.data = 0x3F80000000000000;
+            dds3ZClearDrawTag[state][buffer].positionB.reg = 5;
+            dds3ZClearDrawTag[state][buffer].positionB.data = 0x87009000;
+            dds3ZClearDrawTag[state][buffer].blendGif.parm = 0x1000000000008002;
+            dds3ZClearDrawTag[state][buffer].blendGif.regs = 0xE;
+            dds3ZClearDrawTag[state][buffer].blend[0].reg = 0x47;
+            dds3ZClearDrawTag[state][buffer].blend[0].data = 0x5101B;
+            dds3ZClearDrawTag[state][buffer].blend[1].reg = 0x42;
+            dds3ZClearDrawTag[state][buffer].blend[1].data = 0x44;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3InitZClearDrawTag);
+#endif
 
 sdfDrawTag_t *dds3LinkZClearDrawTag(s32 state)
 {
@@ -621,7 +786,55 @@ void dds3DrawDistRipOverError(void)
     }
 }
 
+/* NON_MATCHING: 52 of 170 words differ (first at +0x38). */
+#ifdef NON_MATCHING
+void dds3DrawFade(void)
+{
+    sdfDrawTag_t *list;
+    sdfGrOt_t *descriptor;
+    u32 frameId;
+    s32 alpha;
+    u64 color;
+
+    frameId = dds3GetFrameID();
+    alpha = 0x80 - fadergba[3];
+    if (alpha < 0x80) {
+        color = 0x3F80000000000000 | ((u64)fadergba[1] << 8) | fadergba[0] | ((u64)fadergba[2] << 16) | (u64)(alpha << 24);
+        dds3FadePacket[frameId].dma.qwc = 0xA;
+        dds3FadePacket[frameId].dma.pad = 0;
+        dds3FadePacket[frameId].dma.id = 0x70;
+        dds3FadePacket[frameId].dma.addr = NULL;
+        dds3FadePacket[frameId].dma.dat0 = 0;
+        dds3FadePacket[frameId].dma.dat1 = 0x5000000A;
+        dds3FadePacket[frameId].stateGif.parm = 0x1000000000000004;
+        dds3FadePacket[frameId].stateGif.regs = 0xE;
+        dds3FadePacket[frameId].state[0].reg = 0x42;
+        dds3FadePacket[frameId].state[0].data = 1;
+        dds3FadePacket[frameId].state[1].reg = 0x49;
+        dds3FadePacket[frameId].state[1].data = 0;
+        dds3FadePacket[frameId].state[2].reg = 0x4A;
+        dds3FadePacket[frameId].state[2].data = 0;
+        dds3FadePacket[frameId].state[3].reg = 0x47;
+        dds3FadePacket[frameId].state[3].data = 0x31003;
+        dds3FadePacket[frameId].spriteGif.parm = 0x1023400000008004;
+        dds3FadePacket[frameId].spriteGif.regs = 0xE;
+        dds3FadePacket[frameId].sprite[0].reg = 1;
+        dds3FadePacket[frameId].sprite[0].data = color;
+        dds3FadePacket[frameId].sprite[1].reg = 5;
+        dds3FadePacket[frameId].sprite[1].data = 0xFEFFFF79007000;
+        dds3FadePacket[frameId].sprite[2].reg = 1;
+        dds3FadePacket[frameId].sprite[2].data = color;
+        dds3FadePacket[frameId].sprite[3].reg = 5;
+        dds3FadePacket[frameId].sprite[3].data = 0xFEFFFF87009000;
+        list = dds3FontReqAllocDrawTag();
+        sdfDrawTagLink(list, &dds3FadePacket[frameId]);
+        descriptor = &sdfGrOtTable[79];
+        ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, list);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3DrawFade);
+#endif
 
 void dds3SetScreenFovy(f32 fieldOfView)
 {
@@ -1363,9 +1576,39 @@ void dds3RotationArc(void)
     Normalize();
 }
 
-void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+/* vu0 routine: stage an immediate or interpolated parallel light color. */
+void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color)
+{
+    sdf3DLight_t *light = dds3LightParam.parallel[lightIndex];
+    u32 baseColorWords[4];
+    u32 targetColorWords[4];
+    u32 packedBaseColor;
+    u32 packedTargetColor;
+    u32 blendFlag;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3SetLightColor);
+    if (light != NULL) {
+        blendFlag = 4 << (lightIndex * 2);
+        if (blendFrames == 0) {
+            dds3DrawFlag &= ~blendFlag;
+            SDF_VU0_LOADVECTOR(color);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[lightIndex]->color);
+        } else {
+            lightcolormax[lightIndex] = blendFrames;
+            lightcolornow[lightIndex] = 0;
+            dds3DrawFlag |= blendFlag;
+            SDF_VU0_LOADVECTOR(light);
+            MMI_RGBA_PACK_128(packedBaseColor);
+            baseColorWords[0] = packedBaseColor;
+            dds3LightColor[lightIndex] = packedBaseColor;
+            SDF_VU0_LOADVECTOR(color);
+            SDF_VU0_VECTOR_W_SET_ZERO();
+            MMI_RGBA_PACK_128(packedTargetColor);
+            D_00557230[lightIndex] = packedTargetColor;
+            targetColorWords[0] = packedTargetColor;
+        }
+    }
+}
 
 void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction)
 {
@@ -1398,9 +1641,33 @@ void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction)
     }
 }
 
-void dds3SetAmbientColor(s32 blendFrames, f32 *color);
+/* vu0 routine: stage an immediate or interpolated ambient color. */
+void dds3SetAmbientColor(s32 blendFrames, f32 *color)
+{
+    u32 baseColorWords[4];
+    u32 targetColorWords[4];
+    u32 packedColor;
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3SetAmbientColor);
+    if (blendFrames == 0) {
+        dds3DrawFlag &= ~0x100;
+        SDF_VU0_LOADVECTOR(color);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        SDF_VU0_STOREVECTOR(&dds3LightParam.ambient);
+    } else {
+        ambientmax = blendFrames;
+        ambientnow = 0;
+        dds3DrawFlag |= 0x100;
+        SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
+        MMI_RGBA_PACK_128(packedColor);
+        baseColorWords[0] = packedColor;
+        ambientbase = packedColor;
+        SDF_VU0_LOADVECTOR(color);
+        SDF_VU0_VECTOR_W_SET_ONE();
+        MMI_RGBA_PACK_128(packedColor);
+        targetColorWords[0] = packedColor;
+        ambienttarget = packedColor;
+    }
+}
 
 /* vu0 routine: stage an immediate or interpolated packed color. */
 void dds3SetFogColor(s32 blendFrames, f32 *color)
@@ -1578,7 +1845,69 @@ void eglLinkSprite(s32 x, s32 y, s32 width, s32 height,
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", eglLinkBox);
+void eglLinkBox(s32 x, s32 y, s32 width, s32 height,
+                s32 color0, s32 color1, s32 color2, s32 color3)
+{
+    s32 coords[4][2];
+    sdfDrawTag_t *command;
+    sdfGrPacketHeader_t *packet;
+    dds3GouraudRegister_t *registers;
+    s32 i;
+    sdfGrOt_t *descriptor;
+
+    u32 r0 = color0 & 0xFF;
+    u32 g0 = (color0 >> 8) & 0xFF;
+    u32 b0 = (color0 >> 16) & 0xFF;
+    u32 a0 = (u32)color0 >> 24;
+    u32 r1 = color1 & 0xFF;
+    u32 g1 = (color1 >> 8) & 0xFF;
+    u32 b1 = (color1 >> 16) & 0xFF;
+    u32 a1 = (u32)color1 >> 24;
+    u32 r2 = color2 & 0xFF;
+    u32 g2 = (color2 >> 8) & 0xFF;
+    u32 b2 = (color2 >> 16) & 0xFF;
+    u32 a2 = (u32)color2 >> 24;
+    u32 r3 = color3 & 0xFF;
+    u32 g3 = (color3 >> 8) & 0xFF;
+    u32 b3 = (color3 >> 16) & 0xFF;
+    u32 a3 = (u32)color3 >> 24;
+    coords[0][0] = x * 16;
+    coords[0][1] = y * 8;
+    coords[1][0] = (x + width) * 16;
+    coords[1][1] = y * 8;
+    coords[2][0] = (x + width) * 16;
+    coords[2][1] = (y + height) * 8;
+    coords[3][0] = x * 16;
+    coords[3][1] = (y + height) * 8;
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
+    sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
+    registers = (dds3GouraudRegister_t *)sdf2DGetPrimPtr(packet);
+    for (i = 0; i < 4; i++) {
+        if (i == 0) {
+            registers->low = (u64)r0 | ((u64)g0 << 32);
+            registers->high = (u64)b0 | ((u64)a0 << 32);
+        } else if (i == 1) {
+            registers->low = (u64)r1 | ((u64)g1 << 32);
+            registers->high = (u64)b1 | ((u64)a1 << 32);
+        } else if (i == 2) {
+            registers->low = (u64)r2 | ((u64)g2 << 32);
+            registers->high = (u64)b2 | ((u64)a2 << 32);
+        } else {
+            registers->low = (u64)r3 | ((u64)g3 << 32);
+            registers->high = (u64)b3 | ((u64)a3 << 32);
+        }
+        registers++;
+        registers->high = 0xFFFFFF;
+        registers->low = (u64)(u32)(coords[i][0] + 0x7000) |
+            ((u64)(coords[i][1] + 0x7900) << 32);
+        registers++;
+    }
+    sdfDrawTagLink(command, packet);
+    descriptor = &sdfGrOtTable[egl_OT_Offset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
 
 void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2)
 {

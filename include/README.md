@@ -1211,6 +1211,13 @@ Measured against this `cc1` and Sony's `ee-as -G8`, not assumed:
 - Register choice inside a macro is not free. `MMI_RGBA_UNPACK` and
   `SDF_VU0_dds3ColorFtoI` name `$2` and `$3` literally because an `"=&r"`
   temporary gets `$3`/`$4` here and retail uses `$2`/`$3`.
+  The same holds for the two scales of the colour pack: `MMI_RGBA_PACK_255`
+  multiplies by 255 through `$2`, and `MMI_RGBA_PACK_128` by 128 through `$3`.
+  Which one a function wants is visible in the retail word loaded by the
+  `lui`: `0x437F` is 255, `0x4300` is 128. The 128 form must leave `$3` out of
+  its clobber list, or the result moves to `$4`: `dds3SetAmbientColor` and
+  `dds3SetLightColor` both need the undeclared form, and the latter also needs
+  one result local per pack rather than one reused across both.
 - The compiler still schedules the code around a block. The order of the C
   statements next to one decides which `$f` register a float lands in (first
   written takes the lowest free one) and which address computation is emitted

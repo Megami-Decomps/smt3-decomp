@@ -3,6 +3,72 @@
 #include "nb.h"
 #include "event.h"
 
+
+/* nbKoukaPacket_t.type, as the kouka dispatchers switch on it. Names and
+ * values from the IDB; the code corroborates them, with 39 and 40 calling
+ * effPCPBossBUNSIN* and 41 and 42 calling effPCPBossONGY*. */
+typedef enum NB_KOUKA_TYPE {
+    SKILLEFF = 0,
+    TARMOVE = 1,
+    HOMEMOVE = 2,
+    ROT = 3,
+    HOMEROT = 4,
+    UNITCOL = 5,
+    UNITHOMECOL = 6,
+    UNITA = 7,
+    UNITHOMEA = 8,
+    DMGMOT = 9,
+    BADDMGMOT = 10,
+    NB_KOUKA_TYPE_RETURN = 11,
+    NB_KOUKA_TYPE_SUMMON = 12,
+    SAKE = 13,
+    SKILLCOLOFF = 14,
+    HITEFF = 15,
+    NUMEFF = 16,
+    HPMP = 17,
+    PRESS = 18,
+    BADSTAT = 19,
+    BADMOTKAIFUKU = 20,
+    SKILLEFF2 = 21,
+    MOJIEFF = 22,
+    BADEFF = 23,
+    BADEFFKAIFUKU = 24,
+    SE = 25,
+    SKILLEFF1 = 26,
+    MOTION = 27,
+    SE2 = 28,
+    SELOCK = 29,
+    HITSTOP = 30,
+    NEWPRESS = 31,
+    MOTIONSTOP = 32,
+    MOTIONSTOPCLS = 33,
+    ANALYZE = 34,
+    JYOKYOHELP = 35,
+    DEADPCM = 36,
+    BADMOT = 37,
+    FORMONOFF = 38,
+    BOSSONGBUN = 39,
+    BOSSONGBUN2 = 40,
+    BOSSONGOUT = 41,
+    BOSSONGOUT2 = 42,
+    SKILLEFF3 = 43,
+    FORMFLAGONOFF = 44,
+    NB_KOUKA_TYPE_FLY = 45,
+    DEADEVENT = 46,
+    FADEOUT = 47,
+    FADEIN = 48,
+    SKILLNAME = 49,
+    HOJO = 50,
+    FLARECHARGE = 51,
+    PADSHOCK = 52,
+    EASYDMGMOT = 53,
+    SKILLCOLON = 54,
+    SKILLMOTION = 55,
+    STKPNL_FOUT = 56,
+    STKPNL_END = 57,
+    HATUDOEFF_END = 58
+} NB_KOUKA_TYPE;
+
 typedef union
 {
     s8 c[4];
@@ -242,54 +308,54 @@ nbKoukaPacket_t *nbAddKoukaPacket(nbKoukaProcessData_t *k, s32 startframe, s32 f
 void DelKoukaPacket(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     switch (p->type) {
-    case 0x27:
+    case BOSSONGBUN:
         effPCPBossBUNSINDelete(p->data1.p);
         break;
-    case 0x28:
+    case BOSSONGBUN2:
         effPCPBossBUNSIN2Delete(p->data1.p);
         break;
-    case 0x29:
+    case BOSSONGOUT:
         effPCPBossONGYDelete(p->data1.p);
         break;
-    case 0x2A:
+    case BOSSONGOUT2:
         effPCPBossONGY2Delete(p->data1.p);
         break;
-    case 0:
-    case 0x15:
-    case 0x2B:
+    case SKILLEFF:
+    case SKILLEFF2:
+    case SKILLEFF3:
         if (p->cuteff != NULL) {
             effBTLCutDelete(p->cuteff);
             p->cuteff = NULL;
         }
-        if (p->type == 0x2B) {
+        if (p->type == SKILLEFF3) {
             effBTLDelete(p->data1.p);
         }
         break;
-    case 0x1A:
+    case SKILLEFF1:
         if (p->cuteff != NULL) {
             effBTLSystemCut1Delete(p->cuteff);
             p->cuteff = NULL;
         }
         break;
-    case 0xF:
+    case HITEFF:
         switch (p->data1.i) {
-        case 0:
-        case 1:
-        case 2:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
+        case SKILLEFF:
+        case TARMOVE:
+        case HOMEMOVE:
+        case HOMEROT:
+        case UNITCOL:
+        case UNITHOMECOL:
+        case UNITA:
+        case UNITHOMEA:
+        case DMGMOT:
+        case BADDMGMOT:
             effBTLSystemDelete2(p->data2.p);
             break;
-        case 3:
+        case ROT:
             break;
         }
         break;
-    case 0x3A:
+    case HATUDOEFF_END:
         break;
     }
     nbDelKoukaEntry(k, p);
@@ -361,7 +427,7 @@ void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form, s32 motno)
     p = work->first;
     while (p != NULL) {
         next = p->next;
-        if (p->type != 0x10 && p->type != 0x16) {
+        if (p->type != NUMEFF && p->type != MOJIEFF) {
             p = next;
             continue;
         }
@@ -392,17 +458,17 @@ void nbDelUnEventKoukaPacket(void)
     do {
         next = p->next;
         switch (p->type) {
-        case 0xE:
+        case SKILLCOLOFF:
             effBTLSkillEnd();
-        case 0x19:
-        case 0x1C:
-        case 0x1D:
-        case 0x24:
-        case 0x2F:
-        case 0x30:
+        case SE:
+        case SE2:
+        case SELOCK:
+        case DEADPCM:
+        case FADEOUT:
+        case FADEIN:
             p = next;
             continue;
-        case 0xB:
+        case NB_KOUKA_TYPE_RETURN:
             nbReturnKoukaUnit(work, p);
         default:
             nbDelKoukaPacket(p);
@@ -446,7 +512,7 @@ s32 nbCheckSePacket(s32 start, s32 se, s32 frame)
 
     while (p != NULL) {
         if (start >= p->startframe && start - frame < p->startframe) {
-            if (p->type == 0x19) {
+            if (p->type == SE) {
                 goto check;
             }
             if (p->type >= 0x19) {
@@ -470,16 +536,16 @@ void RunBossEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     s32 type = p->type;
 
     switch (type) {
-    case 0x27:
+    case BOSSONGBUN:
         effPCPBossBUNSINDraw(p->data1.p);
         break;
-    case 0x28:
+    case BOSSONGBUN2:
         effPCPBossBUNSIN2Draw(p->data1.p);
         break;
-    case 0x29:
+    case BOSSONGOUT:
         effPCPBossONGYDraw(p->data1.p);
         break;
-    case 0x2A:
+    case BOSSONGOUT2:
         effPCPBossONGY2Draw(p->data1.p);
         type = 0;
         break;
@@ -491,7 +557,7 @@ void RunHatudoEffectEndKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     nbKoukaPacket_t *cur = k->first;
 
     while (cur != NULL) {
-        if (cur->uniqueid == p->uniqueid && cur->type == 0x1A && cur->framelength >= 0xD) {
+        if (cur->uniqueid == p->uniqueid && cur->type == SKILLEFF1 && cur->framelength >= 0xD) {
             u32 frame;
 
             cur->framelength = 0xC;
@@ -511,12 +577,12 @@ void RunSkillEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         return;
     }
     switch (p->type) {
-    case 0:
-    case 0x15:
-    case 0x2B:
+    case SKILLEFF:
+    case SKILLEFF2:
+    case SKILLEFF3:
         effBTLCutDraw(p->cuteff);
         break;
-    case 0x1A:
+    case SKILLEFF1:
         effBTLSystemCut1Draw(p->cuteff);
         break;
     }
@@ -531,10 +597,10 @@ void nbRunKoukaCase1(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         return;
     }
     switch (p->type) {
-    case 1:
+    case TARMOVE:
         nbRunKoukaType1(partyno, &p->v, p->data1.f);
         break;
-    case 2:
+    case HOMEMOVE:
         nbRunKoukaType2(partyno, p->data1.f);
         break;
     }
@@ -557,13 +623,13 @@ void RunUnitColKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         return;
     }
     switch (p->type) {
-    case 5:
-    case 7:
+    case UNITCOL:
+    case UNITA:
         color = p->data2.i;
         frame = p->data1.i;
         break;
-    case 6:
-    case 8:
+    case UNITHOMECOL:
+    case UNITHOMEA:
         color = form->modelcol;
         frame = p->data1.i;
         break;
@@ -602,11 +668,11 @@ void RunMotionStopKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     hunit = form->hunit;
     obj = hunit->owner;
     switch (p->type) {
-    case 0x20:
+    case MOTIONSTOP:
         obj->first->speed = 0.0f;
         hunit->flags |= 0x400000;
         break;
-    case 0x21:
+    case MOTIONSTOPCLS:
         obj->first->speed = form->motspeed;
         hunit->flags &= ~0x400000;
         hunit->flags &= ~0x40;
@@ -620,24 +686,24 @@ void RunMotionKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     s32 mot;
 
     switch (p->type) {
-    case 0x1B:
+    case MOTION:
         if (p->data1.i == 0x17) {
             nbSetUnitMotion(p->form, 0x17, 2, 1.0f);
         } else {
             nbSetUnitMotion(p->form, p->data1.i, 0, 1.0f);
         }
         break;
-    case 0x37:
+    case SKILLMOTION:
         mot = p->data1.s[1];
         switch (mot) {
-        case 0:
+        case SKILLEFF:
             nbSetUnitMotion(p->form, p->data1.s[0], 0, p->data2.f);
             break;
-        case 1:
+        case TARMOVE:
             nbSetUnitMotion(p->form, p->data1.s[0], 3, p->data2.f);
             break;
-        case 2:
-        case 3:
+        case HOMEMOVE:
+        case ROT:
             nbSetUnitMotion(p->form, p->data1.s[0], 3, p->data2.f);
             evtSetWaitHokanFrame(p->form->hunit, 0, 0);
             mot = 0;
@@ -650,36 +716,36 @@ void RunMotionKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 void RunDamageMotionKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     switch (p->type) {
-    case 9:
+    case DMGMOT:
         nbSetDamage(p->form, p->data1.f, p->data2.i);
         break;
-    case 0x35:
+    case EASYDMGMOT:
         nbSetDamage2(p->form, p->data1.f);
         break;
-    case 0xA:
-    case 0x25: {
+    case BADDMGMOT:
+    case BADMOT: {
         s32 bit = p->data2.i;
 
         switch (bit) {
-        case 1:
-        case 2:
-        case 0x10:
+        case TARMOVE:
+        case HOMEMOVE:
+        case NUMEFF:
         case 0x400:
-            if (p->type == 0xA) {
+            if (p->type == BADDMGMOT) {
                 nbSetBadstatMotion(p->form, p->data2.i, p->data1.f);
             } else {
                 nbSetBadstatMotion2(p->form);
             }
             break;
-        case 4:
-        case 8:
-        case 0x20:
+        case HOMEROT:
+        case UNITHOMEA:
+        case MOTIONSTOP:
         case 0x40:
         case 0x80:
         case 0x200: {
             nbFormation_t *form;
 
-            if (p->type == 0xA) {
+            if (p->type == BADDMGMOT) {
                 nbSetDamage(p->form, p->data1.f, 1);
                 form = p->form;
                 if ((form->anime & 0x80) != 0) {
@@ -695,7 +761,7 @@ void RunDamageMotionKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         case 0x100: {
             nbFormation_t *form;
 
-            if (p->type == 0xA) {
+            if (p->type == BADDMGMOT) {
                 nbSetDamage(p->form, p->data1.f, 1);
                 form = p->form;
                 if ((form->anime & 0x80) != 0) {
@@ -837,7 +903,7 @@ void nbRunKoukaCase12(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         return;
     }
     switch (p->type) {
-    case 0x12: {
+    case PRESS: {
         f32 v = data->press3 + p->data1.f;
 
         if (v < 0.0f) {
@@ -849,7 +915,7 @@ void nbRunKoukaCase12(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         data->press3 = v;
         break;
     }
-    case 0x1F: {
+    case NEWPRESS: {
         s32 v;
         s16 cur;
 
@@ -910,10 +976,10 @@ void RunSeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         p2sdStopSe(0x1C740000);
     }
     switch (p->type) {
-    case 0x19:
+    case SE:
         p2sdPlaySE(se, 0x7F, 0x3F);
         break;
-    case 0x1C:
+    case SE2:
         if (ok != 0) {
             datDebugPrintf("se2 [%08X] play!
 ", se);
@@ -923,7 +989,7 @@ void RunSeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 ", se);
         }
         break;
-    case 0x1D:
+    case SELOCK:
         if (ok != 0) {
             p2sdPlaySE(se, 0x7F, 0x3F);
         } else {
@@ -943,7 +1009,7 @@ void RunPcmKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     if ((k->data->flag & 1) != 0) {
         return;
     }
-    if (p->type != 0x24) {
+    if (p->type != DEADPCM) {
         return;
     }
     sprintf(name, "MDD_%03X.ADB", p->data1.i);
@@ -1036,17 +1102,17 @@ void RunFadeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     s32 type = p->type;
 
     switch (type) {
-    case 0x2F:
+    case FADEOUT:
         switch (p->data2.i) {
-        case 0:
+        case SKILLEFF:
             dds3FadeOut(0, 0, 0, p->data1.i);
             break;
-        case 1:
+        case TARMOVE:
             dds3FadeOut(0xFF, 0xFF, 0xFF, p->data1.i);
             break;
         }
         break;
-    case 0x30:
+    case FADEIN:
         dds3FadeIn2(p->data1.i);
         type = 0;
         break;
@@ -1080,10 +1146,10 @@ void RunSkillColorKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     s32 type = p->type;
 
     switch (type) {
-    case 0x36:
+    case SKILLCOLON:
         effBTLSkillStart(p->data1.i, p->data2.i);
         break;
-    case 0xE:
+    case SKILLCOLOFF:
         effBTLSkillEnd();
         type = 0;
         break;
@@ -1109,34 +1175,34 @@ s32 nbKoukaProcess1(dds3ProcessID_t *id)
     while (p != NULL) {
         next = p->next;
         switch (p->type) {
-        case 0:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 12:
-        case 13:
-        case 20:
-        case 21:
-        case 26:
-        case 27:
-        case 32:
-        case 33:
-        case 37:
-        case 38:
-        case 43:
-        case 45:
-        case 50:
-        case 53:
-        case 55:
+        case SKILLEFF:
+        case UNITCOL:
+        case UNITHOMECOL:
+        case UNITA:
+        case UNITHOMEA:
+        case DMGMOT:
+        case BADDMGMOT:
+        case NB_KOUKA_TYPE_SUMMON:
+        case SAKE:
+        case BADMOTKAIFUKU:
+        case SKILLEFF2:
+        case SKILLEFF1:
+        case MOTION:
+        case MOTIONSTOP:
+        case MOTIONSTOPCLS:
+        case BADMOT:
+        case FORMONOFF:
+        case SKILLEFF3:
+        case NB_KOUKA_TYPE_FLY:
+        case HOJO:
+        case EASYDMGMOT:
+        case SKILLMOTION:
             if (p->form != NULL && (p->form->flag & 7) != 0) {
                 p = next;
                 continue;
             }
             break;
-        case 58:
+        case HATUDOEFF_END:
             break;
         }
         if (p->startframe > 0) {
@@ -1152,139 +1218,139 @@ s32 nbKoukaProcess1(dds3ProcessID_t *id)
             continue;
         }
         switch (p->type) {
-        case 39:
-        case 40:
-        case 41:
-        case 42:
+        case BOSSONGBUN:
+        case BOSSONGBUN2:
+        case BOSSONGOUT:
+        case BOSSONGOUT2:
             RunBossEffectKouka(work, p);
             break;
-        case 0:
-        case 21:
-        case 26:
-        case 43:
+        case SKILLEFF:
+        case SKILLEFF2:
+        case SKILLEFF1:
+        case SKILLEFF3:
             RunSkillEffectKouka(work, p);
             break;
-        case 58:
+        case HATUDOEFF_END:
             RunHatudoEffectEndKouka(work, p);
             break;
-        case 1:
-        case 2:
+        case TARMOVE:
+        case HOMEMOVE:
             nbRunKoukaCase1(work, p);
             break;
-        case 3:
-        case 4:
+        case ROT:
+        case HOMEROT:
             RunNumEffectKouka(work, p);
             break;
-        case 5:
-        case 6:
-        case 7:
-        case 8:
+        case UNITCOL:
+        case UNITHOMECOL:
+        case UNITA:
+        case UNITHOMEA:
             RunUnitColKouka(work, p);
             break;
-        case 27:
-        case 55:
+        case MOTION:
+        case SKILLMOTION:
             RunMotionKouka(work, p);
             break;
-        case 32:
-        case 33:
+        case MOTIONSTOP:
+        case MOTIONSTOPCLS:
             RunMotionStopKouka(work, p);
             break;
-        case 9:
-        case 10:
-        case 37:
-        case 53:
+        case DMGMOT:
+        case BADDMGMOT:
+        case BADMOT:
+        case EASYDMGMOT:
             RunDamageMotionKouka(work, p);
             break;
-        case 11:
+        case NB_KOUKA_TYPE_RETURN:
             nbReturnKoukaUnit(work, p);
             break;
-        case 12:
+        case NB_KOUKA_TYPE_SUMMON:
             RunSummonKouka(work, p);
             break;
-        case 13:
+        case SAKE:
             RunSakeKouka(work, p);
             break;
-        case 14:
-        case 54:
+        case SKILLCOLOFF:
+        case SKILLCOLON:
             RunSkillColorKouka(work, p);
             break;
-        case 15:
+        case HITEFF:
             RunHitEffectKouka(work, p);
             break;
-        case 16:
+        case NUMEFF:
             nbClipKoukaNum(work, p);
             break;
-        case 22:
+        case MOJIEFF:
             nbDrawKoukaNum(work, p);
             break;
-        case 17:
+        case HPMP:
             nbApplyHpMp(work, p);
             break;
-        case 18:
-        case 31:
+        case PRESS:
+        case NEWPRESS:
             nbRunKoukaCase12(work, p);
             break;
-        case 19:
+        case BADSTAT:
             nbApplyBadStat(work, p);
             break;
-        case 20:
+        case BADMOTKAIFUKU:
             RunBadMotKaifukuKouka(work, p);
             break;
-        case 23:
+        case BADEFF:
             RunBadEffKouka(work, p);
             break;
-        case 24:
+        case BADEFFKAIFUKU:
             RunBadEffKaifukuKouka(work, p);
             break;
-        case 25:
-        case 28:
-        case 29:
+        case SE:
+        case SE2:
+        case SELOCK:
             RunSeKouka(work, p);
             break;
-        case 36:
+        case DEADPCM:
             RunPcmKouka(work, p);
             break;
-        case 30:
+        case HITSTOP:
             RunHitStopKouka(work, p);
             break;
-        case 34:
+        case ANALYZE:
             RunAnalyzeKouka(work, p);
             break;
-        case 35:
+        case JYOKYOHELP:
             RunHelpKouka(work, p);
             break;
-        case 38:
+        case FORMONOFF:
             RunFormOnOffKouka(work, p);
             break;
-        case 44:
+        case FORMFLAGONOFF:
             RunFormFlagOnOffKouka(work, p);
             break;
-        case 45:
+        case NB_KOUKA_TYPE_FLY:
             RunFlyKouka(work, p);
             break;
-        case 46:
+        case DEADEVENT:
             RunDeadEventKouka(work, p);
             break;
-        case 47:
-        case 48:
+        case FADEOUT:
+        case FADEIN:
             RunFadeKouka(work, p);
             break;
-        case 49:
+        case SKILLNAME:
             RunSkillNameKouka(work, p);
             break;
-        case 50:
+        case HOJO:
             RunHojoKouka(work, p);
             break;
-        case 51:
+        case FLARECHARGE:
             RunFlareChargeKouka(work, p);
             break;
-        case 52:
+        case PADSHOCK:
             RunPadShockKouka(work, p);
             break;
-        case 56:
+        case STKPNL_FOUT:
             RunStockPanelFadeOutKouka(work, p);
             break;
-        case 57:
+        case STKPNL_END:
             RunStockPanelEndKouka(work, p);
             break;
         }
