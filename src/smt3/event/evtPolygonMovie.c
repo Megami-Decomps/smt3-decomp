@@ -561,8 +561,6 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData2);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtStartPolygonMovie2);
 
-INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BC98);
-
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", evtCameraFrameState);
 
 INCLUDE_SDATA(const s32, "event/evtPolygonMovie", nowfovy);

@@ -3333,27 +3333,7 @@ s32 func_00213148(const void *a, const void *b)
     return 0;
 }
 
-/* NON_MATCHING: 8 of 18 words; gcc reuses *a instead of reloading it. */
-#ifdef NON_MATCHING
-s32 func_00213190(const void *a, const void *b)
-{
-    u16 bv = *(const u16 *)b;
-
-    if (*(const u16 *)a == 0) {
-        if (bv != 0) {
-            return 1;
-        }
-    } else if (bv == 0) {
-        return -1;
-    }
-    if (bv < *(const u16 *)a) {
-        return 1;
-    }
-    return (*(const u16 *)a < bv) ? -1 : 0;
-}
-#else
 INCLUDE_ASM(const s32, "code_001FAE80", func_00213190);
-#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSkillOrder);
 
@@ -5020,7 +5000,6 @@ s32 cmbChkGetHearts(s8 id)
 }
 
 
-
 s32 datFindCommentEntry(u16 devilId)
 {
     datCommentEntry_t *entry = D_00339DF8;
@@ -5287,25 +5266,7 @@ typedef struct
 
 extern u8 datLevelUpTable[];
 
-/* NON_MATCHING: 12 of 24 words, exact size; two register pairs swapped. */
-#ifdef NON_MATCHING
-s8 cmpFindKugatatiMsgEntry(datUnitWork_t *unit)
-{
-    cmpKugatatiEntry_t *entry =
-        (cmpKugatatiEntry_t *)(datLevelUpTable + unit->id * 0x66);
-    s32 i;
-
-    for (i = 0; i < 0x18; i++) {
-        if (entry[1].kind == 5) {
-            return entry[1].value;
-        }
-        entry++;
-    }
-    return -1;
-}
-#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpFindKugatatiMsgEntry);
-#endif
 
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbCalcEvoEvent);
@@ -5406,16 +5367,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbGetLevelUpCount);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstDrawGetCursorRow);
 
-/* NON_MATCHING: 21 of 23 words, exact size; two sra instructions swapped. */
-#ifdef NON_MATCHING
-void rstDrawStatusRow(s8 a, s8 b, s8 c)
-{
-    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4, -1, 0,
-                       (s32)rstDrawWork->unk_129F, a, 0xA09DC380, 2, b, c);
-}
-#else
 INCLUDE_ASM(const s32, "code_001FAE80", rstDrawStatusRow);
-#endif
 
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstDrawStatusRow2);
@@ -7487,25 +7439,7 @@ typedef struct
 } campDhEntry_t;
 
 extern s32 campDhRollRatio(void);
-/* NON_MATCHING: 11 of 24 words, exact size; the work pointer stays in $4. */
-#ifdef NON_MATCHING
-void campDhGetEntryRatio(campDhEntry_t *entry)
-{
-    if (entry->unk_14 > 0) {
-        entry->unk_14--;
-        return;
-    }
-    if (entry->unk_28 == 0) {
-        campDhRollRatio();
-        entry = NULL;
-        return;
-    }
-    entry->unk_28--;
-    entry->unk_18 += entry->unk_20;
-}
-#else
 INCLUDE_ASM(const s32, "code_001FAE80", campDhGetEntryRatio);
-#endif
 
 
 INCLUDE_ASM(const s32, "code_001FAE80", campDhScanEntries);
@@ -8819,21 +8753,7 @@ typedef struct
 
 extern cmbSkillAttr_t attr[];
 
-/* NON_MATCHING: 19 of 21 words, exact size; the giv constant split differs. */
-#ifdef NON_MATCHING
-s32 func_002429C0(void)
-{
-    s32 sum = 0;
-    s32 i;
-
-    for (i = 0; i < ((cmbUnitSkills_t *)cmbGlobalWork->party)->skillCount; i++) {
-        sum += attr[((cmbUnitSkills_t *)cmbGlobalWork->party)->skill[i]].capacity;
-    }
-    return sum;
-}
-#else
 INCLUDE_ASM(const s32, "code_001FAE80", func_002429C0);
-#endif
 
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpItemHasFlag);

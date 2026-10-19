@@ -1313,12 +1313,6 @@ INCLUDE_RODATA(const s32, "effect/effEvent", D_00534588);
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_00534598);
 
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005345A8);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005345C8);
-
-INCLUDE_RODATA(const s32, "effect/effEvent", D_005345D8);
-
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_BlurShow);
 
 INCLUDE_SDATA(const s32, "effect/effEvent", Eve_PartialMultiBlurShow);

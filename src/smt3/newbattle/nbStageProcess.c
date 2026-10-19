@@ -507,31 +507,7 @@ void nbSetDamage2(nbFormation_t *form, f32 range)
     form->addmovet = 0.0f;
 }
 
-/* NON_MATCHING: 6 of 42 words, exact size; retail holds data in $4 and data->party in $6. */
-#ifdef NON_MATCHING
-void nbSetBadstatMotion(nbFormation_t *form, s32 type, f32 range)
-{
-    nbMainProcessData_t *data = nbGetMainProcessData();
-    struct nbParty_t *party = &data->party[form->partyindex];
-    datUnitWork_t *work;
-
-    form->damageRange = range;
-    form->type = 3;
-    form->time = 0;
-    form->damageFrames = 0;
-    work = nbGetUnitWorkPointer(data, party);
-    if ((form->stat & 0x40) != 0) {
-        s32 badframe;
-
-        nbSetUnitMotion(form, 1, 0, 1.0f);
-        badframe = nbGetUnitVisual(work)->badframe;
-        *(s32 *)&form->addmovet = badframe;
-        form->damageFrames = badframe + 10;
-    }
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetBadstatMotion);
-#endif
 
 void nbSetBadstatMotion2(nbFormation_t *form)
 {
@@ -1452,52 +1428,9 @@ void nbActionShutdown(dds3ProcessID_t *id)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", InitActionProcessData);
 
-/* NON_MATCHING: 6 of 40 words, exact size; retail allocates the modulo temps to $9 and $10. */
-#ifdef NON_MATCHING
-void nbInitActionProcess(nbMainProcessData_t *data)
-{
-    nbActionProcessData_t *a;
-    dds3ProcessID_t *id;
-
-    data->unkE4 = (data->unkE4 + 1) % 4;
-    a = InitActionProcessData(data);
-    id = dds3StartProcess(D_00544120, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
-    dds3LinkProcess(data->unkBC, id);
-    data->unkD4[data->unkE4] = id;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitActionProcess);
-#endif
 
-/* NON_MATCHING: 17 of 37 words, 148 of 156 bytes; retail keeps the start index and the loop counter in separate registers. */
-#ifdef NON_MATCHING
-void nbAddOrder(s32 formindex)
-{
-    nbMainProcessData_t *data = nbGetMainProcessData();
-    s32 partyindex;
-    s32 i;
-
-    if ((data->form[formindex].stat & 1) != 0) {
-        if ((data->form[formindex].stat & 0x40) != 0) {
-            partyindex = data->form[formindex].partyindex;
-            i = data->orderindex + 1;
-            for (;;) {
-                if (i >= 12) {
-                    break;
-                }
-                if (data->order[i] < 0) {
-                    data->order[i] = partyindex;
-                    nbSortOrder();
-                    break;
-                }
-                i++;
-            }
-        }
-    }
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddOrder);
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSortOrder);
 
@@ -1512,33 +1445,7 @@ void nbSetOrder(s32 index)
     nbSetOrderSide(1);
 }
 
-/* NON_MATCHING: 10 of 44 words, 176 of 172 bytes; retail recomputes the order address each iteration instead of an induction pointer. */
-#ifdef NON_MATCHING
-void nbSetNextOrder(void)
-{
-    nbMainProcessData_t *data = nbGetMainProcessData();
-    s8 i = data->orderindex;
-
-    if (i < 0) {
-        nbSetOrder(i);
-        return;
-    }
-    for (;;) {
-        i++;
-        data->orderindex = i;
-        if (i >= 12) {
-            nbSetOrder(i);
-            break;
-        }
-        if (data->order[i] >= 0) {
-            break;
-        }
-    }
-    data->activeunit = data->order[data->orderindex];
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetNextOrder);
-#endif
 
 void nbUpdateOrder(void)
 {
@@ -1733,43 +1640,7 @@ u32 nbGetModelColor(nbFormation_t *form)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAppendEnemyDevilWork);
 
-/* NON_MATCHING: 4 of 44 words, 176 of 180 bytes; retail keeps one offset induction variable and adds the two bases per use. */
-#ifdef NON_MATCHING
-s32 nbGetRandamStock(void)
-{
-    s32 list[16];
-    s32 cnt = 0;
-    s32 i;
-    fldAnahoriAkuma_t *p;
-
-    for (i = 0; i < 16; i++) {
-        if ((DDS3_GBWK->akuma[i].flag & 1) == 0) {
-            continue;
-        }
-        if ((DDS3_GBWK->akuma[i].flag & 2) != 0) {
-            continue;
-        }
-        if ((DDS3_GBWK->akuma[i].flag & 0x10) != 0) {
-            continue;
-        }
-        p = &DDS3_GBWK->akuma[i];
-        if ((p->badstatus & 0xFFF) == 0x800) {
-            continue;
-        }
-        if (p->hp == 0) {
-            continue;
-        }
-        list[cnt] = i;
-        cnt++;
-    }
-    if (cnt == 0) {
-        return -1;
-    }
-    return list[dds3GetRandIntA(0, cnt)];
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbGetRandamStock);
-#endif
 
 void nbSetMainPhase(s32 encno)
 {

@@ -1,0 +1,486 @@
+#include "fpu.h"
+#include "common.h"
+#include "ps2asm.h"
+#include "basic.h"
+#include "motion.h"
+
+struct pipeTextureFile_t;
+
+extern void (*D_00551828)(void);
+
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *data, s32 mode);
+
+extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *data);
+
+extern void *memset(void *destination, s32 value, u32 bytes);
+
+typedef struct tagpipeBasic {
+    void *base;
+    mdlObj_t *mdl;
+    u8 unk08[4];
+    s32 unk0C;
+    f32 pos[4];
+    f32 rot[4];
+    f32 scl[4];
+} tagpipeBasic;
+
+typedef struct tagPipeObject {
+    s32 offset;
+    f32 w;
+    f32 pos[2];
+    f32 vpos[2];
+    s8 id;
+    u8 action;
+    u8 mdl;
+    u8 unk1B;
+    s16 count;
+    u16 flags;
+} tagPipeObject;
+
+typedef struct tagPipeTexture {
+    sdfTexHandle_t *handle;
+    sdfMemHandle_t *allocation;
+    struct pipeTextureFile_t *resourceData;
+    u32 unk0C;
+} tagPipeTexture;
+
+typedef struct tagPipeEnemyInfo {
+    u8 chID;
+    f32 w;
+    u8 resv;
+    u16 resv2;
+} tagPipeEnemyInfo;
+
+typedef struct tagpipeParts {
+    s32 offset;
+    u8 id;
+    u8 unk05;
+    u8 mdl;
+    s8 resv[5];
+} tagpipeParts;
+
+extern tagpipeParts *PartsWork;
+
+extern char D_00548DA0[], D_00548DC0[], D_00548DE0[];
+
+extern char D_00548E18[], D_00548E30[], D_00548E48[], D_00548E60[];
+
+extern void partsInit(void);
+
+extern void Initmymdl(void);
+
+extern void objInitMyAdd(void);
+
+extern s32 texLoad(const char *name, tagPipeTexture *texPtr);
+
+extern void vecRotate2D(f32 *vector, f32 angle);
+
+extern s32 offsetCount;
+
+extern tagPipeEnemyInfo *objInfo(s32 id);
+
+extern void objMdlMotion(tagPipeObject *objPtr, s32 motion, f32 speed);
+
+extern tagpipeBasic *basicMy;
+
+extern tagpipeBasic *PipeLine, *PipeCur, *PipeCur2, *PipeRBOX, *PipeEMS, *PipeEML;
+
+extern tagpipeBasic *PipeMaka1, *PipeZMaka, *PipeDMaka, *PipeDRBOX;
+
+extern void mymdlDelObject(tagpipeBasic *pWork);
+
+extern void mymdlVisibleAll(tagpipeBasic *pWork, s16 mdlSize, s8 value);
+
+extern void mymdlInitObject(tagpipeBasic *pWork, u16 mdlSize);
+
+extern u8 objMake(tagPipeObject *objPtr, s32 offset, u8 id, u8 way, u8 action, u8 value);
+
+extern void workRelease(void);
+
+extern s32 PipeTexRelease(void);
+
+extern void mdlSmoothLoopMotion(void *handle, s32 group, s32 number, f32 beforeLeng, f32 smoothLeng);
+
+extern void DEBUG_PRINT(const char *fmt, ...);
+
+extern tagPipeEnemyInfo D_00528F78[];
+
+extern tagPipeObject *ObjWork;
+
+extern tagPipeTexture *MakaTex;
+
+extern void *hWorkArea;
+
+extern s32 myMaka;
+
+extern s32 pipeMyMakaCount;
+
+extern void sdfMemFreeDelayedDirect(void *handle);
+
+extern void objMdlDel(tagPipeObject *objPtr);
+
+extern void objInit(void);
+
+extern void objMyLoad(tagPipeObject *objPtr);
+
+extern s32 objAdd(tagPipeObject *objPtr);
+
+extern tagPipeObject *objMyData(void);
+
+extern void objDel(tagPipeObject *objPtr);
+
+extern void objDelAll(void);
+
+extern void objVisibleAll(s8 value);
+
+extern void sdfTexFreeDelayed(void *handle);
+
+void workRelease(void)
+{
+    if (hWorkArea != NULL) {
+        sdfMemFreeDelayedDirect(hWorkArea);
+        hWorkArea = NULL;
+    }
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", mymdlStartUp);
+
+void Initmymdl(void)
+{
+    s32 mdlSize = 10;
+
+    mymdlInitObject(PipeLine, mdlSize);
+    mymdlInitObject(PipeCur, 10);
+    mymdlInitObject(PipeCur2, 10);
+    mymdlInitObject(PipeRBOX, 10);
+    mymdlInitObject(PipeEMS, 50);
+    mymdlInitObject(PipeEML, 50);
+    mymdlInitObject(PipeMaka1, 50);
+    mymdlInitObject(PipeZMaka, 2);
+    mymdlInitObject(PipeDMaka, 4);
+    mymdlInitObject(PipeDRBOX, 2);
+    mdlSize = 0;
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", getPosTranslate);
+
+void objMyLoad(tagPipeObject *objPtr)
+{
+    tagPipeEnemyInfo *pInfo;
+
+    memset(objPtr, 0, 0x20);
+    objPtr->id = -0x80;
+    objPtr->pos[0] = 0.0f;
+    objPtr->offset = offsetCount;
+    objPtr->mdl = 1;
+    objPtr->pos[1] = 0.0f;
+    objPtr->vpos[0] = 0.0f;
+    objPtr->vpos[1] = 0.0f;
+    objPtr->count = 0;
+    objPtr->action = 0;
+    pInfo = objInfo(0x80);
+    if (pInfo != NULL) {
+        objPtr->w = pInfo->w;
+        objMdlMotion(objPtr, 1, 1.0f);
+        pInfo = NULL;
+    }
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objLoad);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMake);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objOption);
+
+void objOptionInc(tagPipeObject *objPtr, u8 step)
+{
+    f32 pos[3];
+
+    if (step < 0x14) {
+        objPtr->offset += 0x1E;
+        return;
+    }
+    if (step >= 0x64) {
+        return;
+    }
+    objPtr->offset += 0x1E;
+    pos[0] = objPtr->pos[0];
+    pos[1] = objPtr->pos[1];
+    pos[2] = 0.0f;
+    if (step < 0x28) {
+        vecRotate2D(pos, 0.17453293f);
+    } else if (step < 0x3C) {
+        vecRotate2D(pos, -0.17453293f);
+    } else if (step < 0x50) {
+        vecRotate2D(pos, 0.087266461f);
+    } else {
+        vecRotate2D(pos, -0.087266461f);
+    }
+    objPtr->pos[0] = pos[0];
+    objPtr->pos[1] = pos[1];
+}
+
+void objSetAction(tagPipeObject *objPtr, u8 action, s16 count)
+{
+    objPtr->action = action;
+    objPtr->count = count;
+}
+
+void objInitMyAdd(void)
+{
+    tagPipeObject obj;
+
+    objInit();
+    objMyLoad(&obj);
+    objAdd(&obj);
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objCopy);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objCopy2);
+
+void objAddDMaka(s32 offset, f32 x, f32 y)
+{
+    tagPipeObject obj;
+
+    objMake(&obj, offset, 0xB, 0, 0, 0);
+    obj.pos[0] = x;
+    obj.pos[1] = y;
+    obj.count = 0x1D;
+    objAdd(&obj);
+}
+
+void objAddDRBOX(s32 offset, f32 x, f32 y)
+{
+    tagPipeObject obj;
+
+    objMake(&obj, offset, 0xC, 0, 0, 0);
+    obj.pos[0] = x;
+    obj.pos[1] = y;
+    obj.count = 0x1D;
+    objAdd(&obj);
+}
+
+void objInit(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
+
+    memset(objPtr, 0, 0x12C0);
+    for (i = 149; i != -1; i--) {
+        objPtr->id = -1;
+        objPtr++;
+    }
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objAdd);
+
+void objDel(tagPipeObject *objPtr)
+{
+    objMdlDel(objPtr);
+    objPtr->id = -1;
+}
+
+void objDelAll(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
+
+    for (i = 149; i != -1; i--) {
+        if ((u8)objPtr->id != 0xFF) {
+            objDel(objPtr);
+        }
+        objPtr++;
+    }
+}
+
+tagPipeEnemyInfo *objInfo(s32 id)
+{
+    tagPipeEnemyInfo *pInfo = D_00528F78;
+    s32 i;
+
+    for (i = 10; i != -1; i--) {
+        if (pInfo->chID == id) {
+            return pInfo;
+        }
+        pInfo++;
+    }
+    return NULL;
+}
+
+tagPipeObject *objMyData(void)
+{
+    tagPipeObject *objPtr = ObjWork;
+    s32 i;
+
+    for (i = 149; i != -1; i--) {
+        if ((u8)objPtr->id == 0x80) {
+            return objPtr;
+        }
+        objPtr++;
+    }
+    return NULL;
+}
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548B50);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlAdd);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlDel);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlPosSet);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlSclSet);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlColorSet);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlAlphaSet);
+
+void objMdlMotion(tagPipeObject *objPtr, s32 motion, f32 speed)
+{
+    s32 id = (u8)objPtr->id;
+
+    if (id < 7) {
+        return;
+    }
+    if (id < 9) {
+        return;
+    }
+    if (id < 13) {
+        return;
+    }
+    if (id != 0x80) {
+        return;
+    }
+    basicMy->mdl->first->speed = speed;
+    mdlSmoothLoopMotion(basicMy->mdl, 0, motion, 2.0f, 2.0f);
+    objPtr = NULL;
+}
+
+void pipeMyMakaAdd(s32 addMaka)
+{
+    myMaka += addMaka;
+    pipeMyMakaCount += addMaka;
+}
+
+void pipeMyMakaSub(s32 subMaka)
+{
+    myMaka -= subMaka;
+}
+
+void pipeMyMakaSubRate(f32 subMakaRate)
+{
+    myMaka = myMaka - myMaka * subMakaRate;
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", objMyStatusChange);
+
+void objVisibleAll(s8 value)
+{
+    mymdlVisibleAll(PipeMaka1, 50, value);
+    mymdlVisibleAll(PipeZMaka, 2, value);
+    mymdlVisibleAll(PipeCur, 10, value);
+    mymdlVisibleAll(PipeCur2, 10, value);
+    mymdlVisibleAll(PipeLine, 10, value);
+    mymdlVisibleAll(PipeEMS, 50, value);
+    mymdlVisibleAll(PipeEML, 50, value);
+    mymdlVisibleAll(PipeRBOX, 10, value);
+    value = 0;
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", mdlTask);
+
+void partsInit(void)
+{
+    tagpipeParts *pParts = PartsWork;
+    s32 i;
+
+    memset(pParts, 0, 0xF0);
+    for (i = 19; i != -1; i--) {
+        pParts->id = -1;
+        pParts++;
+    }
+}
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", partsAdd);
+
+void partsDel(tagpipeParts *pParts)
+{
+    if ((u8)pParts->mdl == 0xFF) {
+        return;
+    }
+    switch (pParts->id) {
+    case 1:
+    case 3:
+        mymdlDelObject(&PipeLine[pParts->mdl]);
+        DEBUG_PRINT(D_00548DA0, pParts->mdl);
+        break;
+    case 2:
+        mymdlDelObject(&PipeCur[pParts->mdl]);
+        DEBUG_PRINT(D_00548DC0, pParts->mdl);
+        break;
+    case 4:
+        mymdlDelObject(&PipeCur2[pParts->mdl]);
+        DEBUG_PRINT(D_00548DE0, pParts->mdl);
+        break;
+    }
+    pParts->id = -1;
+}
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548DA0);
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548DC0);
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548DE0);
+
+INCLUDE_ASM(const s32, "pipe/pipeObject", PipemdlRot);
+
+s32 PipeTexLoad(void)
+{
+    memset(MakaTex, 0, 0x40);
+    texLoad(D_00548E18, &MakaTex[0]);
+    texLoad(D_00548E30, &MakaTex[1]);
+    texLoad(D_00548E48, &MakaTex[2]);
+    texLoad(D_00548E60, &MakaTex[3]);
+    return 1;
+}
+
+s32 PipeTexRelease(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        texRelease(&MakaTex[i]);
+    }
+    return 1;
+}
+
+s32 texLoad(const char *name, tagPipeTexture *record) {
+    void *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
+    record->allocation = allocation;
+    record->handle = sdfTexSet(record->resourceData);
+    if (record->allocation != NULL) {
+        sdfMemFreeDelayedDirect(record->allocation);
+        record->allocation = NULL;
+        record->resourceData = NULL;
+    }
+    return 1;
+}
+
+s32 texRelease(tagPipeTexture *texPtr)
+{
+    if (texPtr->handle != NULL) {
+        sdfTexFreeDelayed(texPtr->handle);
+        texPtr->handle = NULL;
+    }
+    return 1;
+}
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E18);
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E30);
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E48);
+
+INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E60);
+

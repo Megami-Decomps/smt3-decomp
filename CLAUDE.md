@@ -45,7 +45,7 @@ it in the IDB, re-run `tools/ida_symbols.py`, and verify the build still matches
 Rename only what the code proves: an allocation site, an init function, a stride, a
 caller. Confirmed cases so far are recorded in `docs/idb-corrections.md`.
 
-`.text` is split into 96 units, 69 under recovered names and the rest still called
+`.text` is split into 192 units, 183 under recovered names and the rest still called
 `code_<vram>`. Moving a boundary or naming a unit needs evidence from
 `tools/find_tus.py`, the IDB or an HD source run, not a guess, and the relinked image
 must stay byte-identical afterwards: see `docs/tu-recovery.md`.

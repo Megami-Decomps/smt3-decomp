@@ -214,9 +214,11 @@ Nothing else in the applied set is contradicted by any source.
 
 ## Boundaries worth adding next
 
-The code between the applied units is still in `code_<vram>` fillers, and
-244 HD source-run boundaries fall inside them. Ranked by how many independent
-sources back each one.
+The tier lists below were the plan. They have since been worked through: the
+split now has 183 named `c` subsegments and 9 `code_<vram>` fillers, up from 74
+and 24. The state of each filler, and why it is still one, is in "What is left"
+at the end of this page. The tier lists are kept because the evidence rows in
+them are what each cut was judged against.
 
 ### Tier 1: applied
 
@@ -233,8 +235,41 @@ same way, which needs no cut and no data split:
 | `code_0025D690` | `newbattle/nbTarSelProcess` | 2 | HD run; a same-unit group starts here and the previous one ends |
 | `code_00128848` | `field/fldDraw` | 143 | HD run of 51 named functions, and the edge was already applied |
 
-`tools/compare_boundaries.py` scores all three as `supported`. 74 of the 98 `c`
-subsegments are now named, leaving 24 `code_<vram>` fillers.
+`tools/compare_boundaries.py` scores all three as `supported`.
+
+### Applied: code_002AC138 split into its five files
+
+The first container taken apart rather than renamed. Its 108 functions are
+five HD files with nothing left over, so each cut's end is the next cut's start
+and the last one ends where the container already did. All five relink
+byte-identical and `check_unit` reports no `CONTEXT` line in any of them.
+
+| Unit | Start | Functions | `compare_boundaries` | Evidence |
+|---|---|---|---|---|
+| `sdf/sdfGsMemIO` | `0x002AC138` | 6 | `name+start+end` | HD run; the six are the `sdfSetStoreImage`/`sdfLinkLoadImage` family |
+| `sdf/sdfDelayedResrc` | `0x002AC760` | 7 | `name+start` | HD run of 6; the seventh, `sdfDelayedResrcCheckFunc`, is unnamed by HD but carries the family prefix |
+| `sdf/sdfPacketBuff` | `0x002ACAB0` | 6 | `name+start+end` | HD run; all six are `sdfGr*PacketBuff*` |
+| `sdf/sdfDraw` | `0x002ACB90` | 40 | `none` | HD's run starts at `0x002ACBF0`, two functions later; see below |
+| `sdf/sdfPrim` | `0x002AE090` | 49 | `name+start+end` | HD run, and the IDB switches from `sdfGr*`/`sdfDraw*` to `sdfPrim*` here |
+
+`sdfDraw` is the one cut placed off the HD run start, and it scores `none`
+because the function it starts at has no HD witness at all. The HD run is a
+lower bound: `sdfDrawTagInit` and `sdfDrawTagLink` sit in the two-function gap
+above it, and HD names `sdfDrawTagLink2`, `sdfDrawTagLinkRef` and
+`sdfDrawTagLinkCall` as `sdfDraw.c`. A file boundary between `sdfDrawTagLink`
+and `sdfDrawTagLink2` is not credible, and no same-unit group or duplicate
+literal falls anywhere in that range, so the binary permits either placement
+and only the naming decides. This is the same correction already recorded for
+`sdf/sdfMovie` under "What to change in the applied set".
+
+79 of the 102 `c` subsegments are now named, leaving 23 `code_<vram>` fillers.
+
+Two things this container established for the cuts that follow. A gap between
+two HD runs is the boundary's uncertainty window, and every gap function here
+carried its neighbours' prefix, so the convention of giving the gap to the
+earlier file held each time. And `split_unit.py` carries named types but not
+anonymous ones: both halves of the first cut lost the file's GS register enum
+and failed to compile until each got back the one its code names.
 
 ### Tier 2: new cut, two independent sources
 
@@ -285,7 +320,7 @@ runs over 40 functions.
 | `0x002853D8` | `nbAi.c` | 51 | `code_002460B0` |
 | `0x00128848` | `fldDraw.c` | 51 | `code_00128848`, already an edge |
 | `0x00118CA0` | `fldTest.c` | 50 | `code_00116AD0` |
-| `0x002AE090` | `sdfPrim.c` | 49 | `code_002AC138` |
+| `0x002AE090` | `sdfPrim.c` | 49 | applied, with the rest of `code_002AC138` |
 | `0x0026A8A0` | `nbNegoProcess.c` | 45 | `code_002460B0` |
 | `0x00246998` | `nbMainProcess.c` | 45 | `code_002460B0` |
 | `0x0029FBF8` | `pipeObject.c` | 42 | `code_0029B780` |
@@ -307,6 +342,83 @@ Nocturne's; only the DDS projection was in doubt.
 | `0x00115F68` | `basic/dds3ModelRangeBasic` | one function; HD corrects the DDS1 start of `0x00115F28`, which is `dds3ModelBasicFreeModel` |
 | `0x002A8598` | `sdf/sdfThread` | the thread block (`sdfSystemThreadProc` .. `sdfSetMainThreadPriority`) begins here, right after HD's `sdfSystem.c` run; the DDS1 label at `0x002A87F0` sits inside it |
 | `0x00102FB8` | unknown | a same-unit group of `fclEncyc*` functions inside `kernel/dds3AdminiProcess`, where HD claims `dds3AdminiProcess.c`. One of the two is wrong; worth a look before trusting that unit's interior. |
+
+## What is left
+
+183 of the 192 `c` subsegments are named. Every cut relinked byte-identically
+and `check_unit` reports no `CONTEXT` line in any unit.
+
+| Verdict against the binary-only rules | Units |
+|---|---|
+| `supported`, a rule the binary proves | 12 |
+| `echo`, the HD map agreeing with itself | 102 |
+| `silent`, no evidence row at the address | 69 |
+| `contradicted` | 0 |
+
+The twelve supported starts are the only ones the binary itself backs:
+`kernel/dds3SequenceList`, `field/fldTitle` (the one `strong` row, carrying both
+a core edge and a duplicate literal), `field/fldSnow`, `interface/frTestFont`,
+`pb/pbMenu`, `pb/pbGame`, `event/evtPolygonMovie`, `newbattle/nbStageProcess`,
+`newbattle/nbTarSelProcess`, `newbattle/nbKoukaProcess`,
+`newbattle/nbMakePacket` and `sdf/sdfAddrResolve`.
+
+### How the cuts were placed
+
+An HD run start is a lower bound, not the boundary. Where the IDB's name family
+changed before the run began, the cut moved up to the family's first function;
+24 of the cuts are placed that way, and `field/fldSnow` is the case where the
+binary's own core-edge rule independently landed on the address the names had
+already chosen. Where a gap's functions carried the preceding file's prefix,
+they stayed with it.
+
+One cut was placed wrong and the tooling caught it. `pb/pbMenu` started inside
+the 15-function group at `0x001D4D40-0x001D58E0`, which the binary proves is one
+unit, so `compare_boundaries` scored it `contradicted`; moving the start to the
+group's first function made it `supported`.
+
+### What `split_unit.py` drops
+
+It carries the declarations and named types a part uses. Five other things it
+does not, each of which broke a build rather than the checksum:
+
+- anonymous enums, which have no name to match on. Both halves of the first cut
+  lost the file's GS register enum.
+- a multi-declarator `extern` carrying a section attribute
+  (`extern u16 A[], B[4] __attribute__((section(".data")));`).
+- `__asm__("fptodp = sdfFloatToULong")`. Without it every float reaching a
+  variadic call fails to link, and the error names `fptodp` rather than the
+  file that lost the alias.
+- a `PS2_SYMBOL_AT` binding, and the type it names.
+- `.lit4` and `.sdata` ownership. The row stays with whichever part inherited
+  the container name, and the linker then discards the section for every other
+  part that emits one. Measure each object (`objdump -h`) and split the row in
+  link order: the sizes must total the row's span exactly, which is what shows
+  the division is the one retail had. This happened in six of the containers.
+
+### The nine remaining fillers
+
+| Filler | Functions | Why |
+|---|---|---|
+| `code_00116AD0` | 192 | being decompiled in parallel; its five files are listed below |
+| `code_001FAE80` | 1398 | being decompiled in parallel; 35 HD runs cover 36 percent of it, with a 299-function tail |
+| `code_002C7CB0` | 682 | 8 percent HD coverage, and windows of 71, 116 and 322 functions |
+| `code_0029B780` | 26 | the head above `dds3ConfigMain`'s run, with no HD row of its own |
+| `code_001AC0A8` | 16 | its one HD row names `effDebug.c`, which also appears at `0x00117CC8`; one of the two is a mis-attribution |
+| `code_001C55F8` | 13 | HD says `nbCameraHelper.c`, but that unit is applied at `0x001AAE28` |
+| `code_002C0BA8` | 3 | HD says `dds3KernelCore.c`, applied at `0x001015E8` |
+| `code_00115D38` | 1 | HD says `dds3PathBasic.c`, applied at `0x00116058` |
+| `code_002A99B0` | - | no HD row falls inside it at all |
+
+The four small ones share one shape: HD attributes them to a file that is
+already applied somewhere else, and a `.c` cannot hold two non-contiguous
+ranges. Each needs that contradiction settled, not another cut. Two more names
+collided the same way and were left unused inside containers that were
+otherwise split: `nbCameraCommand.c` at `0x00175320` and, in `code_002C7CB0`,
+`pbMCard.c` and `tgsMain.c`, the latter claimed twice over.
+
+One case points the other way and is worth checking: `nbLoadStageSky`, the last
+function of `newbattle/nbResultProcess`, carries the prefix of
+`newbattle/nbStageProcess`, which begins immediately after it.
 
 ### `code_00116AD0` is five original files, not one
 

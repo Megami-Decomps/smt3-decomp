@@ -2301,38 +2301,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMagicKaifuku);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMaxHpWazaPoint);
 
-/* NON_MATCHING: 39 of 43 words, exact size; two branch delay slots filled where retail nops. */
-#ifdef NON_MATCHING
-s32 nbGetVirtualAisyo(s32 nskill, s32 sformindex, s32 dformindex)
-{
-    s32 skillattr;
-    u32 aisyo;
-
-    skillattr = nbGetNormalSkillAttr(nskill);
-    switch (skillattr) {
-    case -1:
-    case 0xC:
-    case 0xD:
-    case 0xE:
-        break;
-    default:
-        aisyo = nbGetAisyo(nskill, dformindex, skillattr);
-        if ((aisyo & 0x20000) != 0) {
-            return 0x20000;
-        }
-        if ((aisyo & 0x40000) != 0) {
-            return 0x40000;
-        }
-        if ((aisyo & 0x10000) == 0) {
-            break;
-        }
-        return 0x10000;
-    }
-    return 0;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetVirtualAisyo);
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetVirtualKoukaPoint);
 
@@ -3134,34 +3103,7 @@ s32 Flow1_10(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 19 of 48 words, exact size; one branch delay slot filled where retail nops. */
-#ifdef NON_MATCHING
-s32 Flow1_11(nbNegoProcessData_t *n)
-{
-    s32 major;
-
-    switch (n->nownegophase) {
-    case 0:
-        n->waitframe = 0x1E;
-        break;
-    case 1:
-        major = n->data->stagemajor;
-        if (major >= 0xF0 && major < 0xF7) {
-            nbDispNegoMessage(n, n->bossmsg, 0x80, 0);
-            return 1;
-        }
-        if (n->ework->id >= 0x100) {
-            nbDispNegoMessage(n, n->bossmsg, n->ework->id - 0x100, 0);
-            return 1;
-        }
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12A, 0);
-        return 1;
-    }
-    return 0;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_11);
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_33);
 
@@ -3705,27 +3647,7 @@ s32 Flow6_35(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 24 of 41 words, one word short; the nextkouho temp lands in $2, not $3. */
-#ifdef NON_MATCHING
-s32 Flow6_36(nbNegoProcessData_t *n)
-{
-    u32 id;
-
-    nbAddNegoIdKouho(n, 0x60026);
-    nbAddNegoIdKouho(n, 0x90001);
-    if ((n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61 ||
-         n->ework->id == 0x5B) &&
-        evtBitCheck(8) == 0 && n->negoreqtype == 0 && n->cnt6_36 >= 3) {
-        id = n->nextkouho[1];
-    } else {
-        id = n->nextkouho[0];
-    }
-    n->nextnegoid = id;
-    return 0;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_36);
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_37);
 
@@ -4447,29 +4369,7 @@ s32 nbNegoFlowNg(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_1);
 
-/* NON_MATCHING: 22 of 48 words, one word short; the ework id lands in $5, and bne for bnel. */
-#ifdef NON_MATCHING
-s32 Flow2_2(nbNegoProcessData_t *n)
-{
-    switch (n->nownegophase) {
-    case 0:
-        if (!(n->ework->id >= 0x24 && n->ework->id < 0x28) && n->ework->id != 0x6E &&
-            n->ework->id != 0x90 && n->ework->id != 0x9A) {
-            n->waitframe = nbSetNegoNoMotion(n, n->eform);
-            return 0;
-        }
-        break;
-    case 1:
-        break;
-    default:
-        return 0;
-    }
-    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], dds3GetRandIntA(0, 2) + 0x1A, 0);
-    return 1;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_2);
-#endif
 
 s32 Flow2_3(nbNegoProcessData_t *n)
 {
@@ -4530,41 +4430,7 @@ s32 Flow2_12(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 44 of 50 words, exact size; the two qindex movn tails are cross-jumped. */
-#ifdef NON_MATCHING
-s32 Flow2_13(nbNegoProcessData_t *n)
-{
-    s32 mes;
-
-    mes = 0;
-    switch (n->nownegophase) {
-    case 0:
-        n->waitframe = nbSetNegoNoMotion(n, n->eform);
-        break;
-    case 1:
-        nbAddNegoIdKouho(n, 0x2000E);
-        switch (n->qtype) {
-        case 1:
-        case 2:
-        case 3:
-            mes = 0xA;
-            break;
-        case 0:
-            if (n->qindex == 0) {
-                mes = n->nowselect == 0 ? 0xE : 0x10;
-            } else {
-                mes = n->nowselect == 0 ? 0x14 : 0x16;
-            }
-            break;
-        }
-        nbDispNegoMessage(n, n->questionmsg, mes, 0);
-        break;
-    }
-    return 0;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_13);
-#endif
 
 s32 Flow2_14(nbNegoProcessData_t *n)
 {
@@ -8477,42 +8343,7 @@ s32 nbFindFormIndex(s32 id)
     return -1;
 }
 
-/* NON_MATCHING: 51 of 54 words, exact size; three loop words rotated. */
-#ifdef NON_MATCHING
-void nbFreeFormResources(nbMainProcessData_t *data, s32 index)
-{
-    nbStatWork_t *w;
-    s32 i;
-
-    w = &data->statwork[index];
-    if (w->id == 0) {
-        return;
-    }
-    for (i = 0; i < 26; i++) {
-        if (w->buf[i] != NULL) {
-            sdfMemFreeDirect(w->buf[i]);
-        }
-        w->buf[i] = NULL;
-        if (w->file[i] != NULL) {
-            fileHandleFree(w->file[i]);
-        }
-        w->file[i] = NULL;
-    }
-    if (w->motbuf != NULL) {
-        sdfMemFreeDirect(w->motbuf);
-    }
-    w->motbuf = NULL;
-    if (w->motfile != NULL) {
-        fileHandleFree(w->motfile);
-    }
-    w->motfile = NULL;
-    w->unk_02 = 0;
-    w->id = 0;
-    w->refcnt = 0;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFreeFormResources);
-#endif
 
 void nbFreeAllFormResources(nbMainProcessData_t *data)
 {
@@ -9168,27 +8999,7 @@ s32 nbGetDeadEventFadeStopFrame(s32 eventno)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEventProcess3);
 
-/* NON_MATCHING: 23 of 31 words, exact size; the returned pointer's addiu %lo comes last. */
-#ifdef NON_MATCHING
-void *nbEventProcess1(dds3ProcessID_t *id)
-{
-    nbMainProcessData_t *data;
-    nbEventProcessData_t *e;
-    s32 rid;
-
-    data = nbGetMainProcessData();
-    e = dds3GetProcessData(id);
-    printf(D_00545DB0, data->eventno);
-    rid = nbEventEntryTable[data->eventno].rid;
-    if (rid > 0) {
-        data->eventrid = rid;
-        e->unk_04 = rid;
-    }
-    return nbEventProcess3;
-}
-#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEventProcess1);
-#endif
 
 void nbEventShutdown(dds3ProcessID_t *id)
 {

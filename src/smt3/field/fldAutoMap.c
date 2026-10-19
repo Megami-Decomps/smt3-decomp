@@ -1,0 +1,924 @@
+#include "common.h"
+#include "basic.h"
+#include "model.h"
+#include "newdata.h"
+#include "scr.h"
+#include "field.h"
+#include "ps2asm.h"
+
+typedef struct
+{
+    f32 x;
+    f32 y;
+    f32 z;
+} fldMapPoint_t;
+
+typedef struct
+{
+    char *name;
+    u32 nodeIndex;
+    void *icons;
+    u32 iconCount;
+    s32 floor;
+    fldMapPoint_t *pointA;
+    fldMapPoint_t *pointB;
+} fldMapItem_t;
+
+typedef struct
+{
+    char *name;
+    fldMapItem_t *items;
+    u32 count;
+    void *model;
+    fldMapPoint_t *pos;
+} fldMapRoom_t;
+
+typedef struct
+{
+    s32 unk00;
+    s32 id;
+    s32 activationState;
+    s32 activationRequested;
+    u8 unk10[0x14];
+    void *effect;              /* 0x24 */
+    u8 unk28[8];
+} fldTakaraSlot_t;
+
+typedef struct
+{
+    s32 unk00;
+    s32 unk04;
+    s32 unk08;
+    s32 unk0C;
+    u8 unk10[0x10];
+    dds3Basic_t *object;       /* 0x20 */
+    u8 unk24[0xC];
+    void *effect;              /* 0x30 */
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    s32 unk40;
+    s32 unk44;
+    s32 room;                  /* 0x48 */
+    s32 unk4C;
+    u8 unk50[0x20];
+} fldNpcSlot_t;
+
+enum sl_slot_flag
+{
+    SL_SLOT_FLAG_CAN_READ_SAVE = 1,
+    SL_SLOT_FLAG_DIRECTORY_READY = 2,
+    SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
+};
+
+extern sdfMemHandle_t *fldAutoMapBuf;
+
+void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+
+extern fldMapRoom_t *fldAutoMapHeader;
+
+extern s32 fldAutoMapData;
+
+extern void *memset(void *dst, s32 value, u32 size);
+
+extern void sdfModelMakeLocalTm(sdfModelNode_t *node);
+
+extern void sdfModelEvalTm(sdfModelRootNode_t *model);
+
+extern sdfModelOt_t D_002F6A48;
+
+extern void sdfModelLinkOt(sdfModelOt_t *ot, sdfModelRootNode_t *model);
+
+extern u32 AutoMapSeq;
+
+extern s32 fldAreaNameUpper[];
+
+extern s32 fldAreaNameLower[];
+
+extern s32 fldAutoMapField;
+
+extern s32 fldAutoMapChkOpen(s32 area, s32 room, u32 item);
+
+extern s32 fldAutoMapBBox;
+
+extern s32 fldTakaraCount;
+
+extern fldTakaraSlot_t fldTakaraSlotTable[32];
+
+extern s32 fldGb[];
+
+extern void rsetOtOfs(u32);
+
+extern void rsetAlpha(s32);
+
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+
+extern sdfTexHandle_t *fldUiTexture;
+
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, s32, sdfTexHandle_t *);
+
+extern s32 fldNpcModelTable;
+
+extern fldNpcSlot_t fldModelSlotTable[];
+
+extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
+
+extern u32 strlen(const char *s);
+
+dds3Basic_t *dds3GetActiveScene(void);
+
+extern void fldRegistUnitPad(void);
+
+extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
+
+extern void fldAutoMapCloseBlock2(s32 area, s32 floor, s32 flagNumber);
+
+extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
+
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2,
+                      u32 gsWord3);
+
+extern void sdf3DSetCamera(void *node, void *transformMatrix);
+
+extern u8 dds3ScreenParam[];
+
+extern u8 aProjMatrix[];
+
+extern u8 D_002FA240[];
+
+extern void InversMatrix(void);
+
+extern void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z);
+
+extern f32 D_0054EEA0;
+
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+
+extern fldMapPoint_t fldAutoMapFieldId;
+
+extern s32 fldAutoMapAreaNo;
+
+extern s32 fldNpcModelFreeIdx;
+
+extern dds3Basic_t *fldNpcFreeCount;
+
+extern s32 fldNpcCamTarget;
+
+extern s32 sprintf(char *dst, const char *format, ...);
+
+extern void fldAddressResolver(u8 *buffer, void *chunk);
+
+extern u8 *fldGetInfoHeader(void *chunk);
+
+extern void fldAutoMapFontInit(s32 field);
+
+extern void fldAmModelLoadFile(void);
+
+extern void sdfDrawSync(void);
+
+extern void fldAutoMapFree(void);
+
+extern void fldAutoMapSeqClearFlag(s32 flag);
+
+extern void evtEnableMoonDraw(void);
+
+extern s32 fldMenuOpenFlag[];
+
+extern void frSetFontDrawOT(s32 ot);
+
+extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s32 visible);
+
+extern void *fldBlurEffectHandle;
+
+extern void dds3EffectDistortionBlurDelete(void *handle);
+
+extern sdfTexHandle_t *fldEATexture;
+
+extern sdfTexHandle_t *fldVLTexture;
+
+extern sdfTexHandle_t *fldVLBlurHandle;
+
+extern sdfTexHandle_t *fldSnowBlurHandle;
+
+extern sdfMemHandle_t *fldBlurEffectTable[];
+
+extern void *fldBlurEffectId[];
+
+extern void *D_0054EED0;
+
+extern u16 D_00567EA0[];
+
+extern u16 D_00567EF8[];
+
+extern u16 D_00567F50[];
+
+extern char D_0030AB54[][28];
+
+extern char D_0030FBD4[][28];
+
+extern char D_0030D714[][28];
+
+extern char D_0030A670[][26];
+
+extern u16 D_00551CC8;
+
+extern s32 fldAutoMapFindArea(s32 fld, s32 area);
+
+extern s32 fldAutoMapFindFloor(s32 fld, s32 area);
+
+extern s32 fldAutoMapFindPlace(s32 fld, s32 area);
+
+extern void *D_0054EEDC;
+
+extern void *dds3EffectLoad(void *resource);
+
+extern void *D_00551D08;
+
+extern void *D_00551D10;
+
+extern void *D_00551D18;
+
+extern void *fldDmgBlurHandle;
+
+extern void *fldNpcBlurHandle;
+
+extern sdfTexHandle_t *sdfTexSet(void *resource);
+
+extern void *D_00551CD0;
+
+extern void *D_00551CD8;
+
+extern void *D_00551CE0;
+
+extern void *D_00551CE8;
+
+extern void *D_00551CF0;
+
+extern void *D_00551CF8;
+
+extern void *D_00568E90[];
+
+extern void *D_00568F90[];
+
+typedef struct
+{
+    s32 unk00;
+    s32 unk04;
+    f32 unk08;
+    u32 unk0C;
+    s32 unk10;
+    s32 unk14;
+    f32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+} fldBlurParam_t;
+
+extern void *dds3EffectDistortionBlurCreate(fldBlurParam_t *param);
+
+extern void dds3EffectDelete(void *effect);
+
+extern s32 fldTakaraSlotCount;
+
+extern s32 fldNpcLoadIdx;
+
+extern void fldMakeFilePath(char *out, s32 field, s32 area);
+
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, s32 mode);
+
+extern void *D_00312150[];
+
+extern fldMapPoint_t fldAutoMapModelPos[32];
+
+extern sdfTexHandle_t *D_00551CC0[2];
+
+extern sdfTexHandle_t *fldAutoMapWindowTex[];
+
+extern void sdfModelRootFree(void *model, s32 a, s32 b);
+
+extern s32 sdfDelayedResrcCheck(void);
+
+void fldAutoMapFontInit(s32 fld) {
+    s32 i;
+
+    for (i = 0; i < 0x29; i++) {
+        D_00567EA0[i] = strlen(D_0030AB54[fldAutoMapFindArea(fld, i)]);
+    }
+    for (i = 0; i < 0x29; i++) {
+        D_00567EF8[i] = strlen(D_0030FBD4[fldAutoMapFindFloor(fld, i)]);
+    }
+    for (i = 0; i < 0x18; i++) {
+        D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(fld, i)]);
+    }
+    i = 0;
+    if (fldGb[0] < 50) {
+        i = fldGb[0];
+    }
+    D_00551CC8 = strlen(D_0030A670[i]);
+}
+
+
+/* NON_MATCHING: 24 of 91 words, two alignment nops short; saved registers are swapped. */
+#ifdef NON_MATCHING
+void fldAmModelLoadFile(void) {
+    fldAreaWork_t *work = &fldGlobalBase;
+    char path[0x80];
+    char dir[0x40];
+    u8 *data;
+    const char *fmt;
+    s32 floor;
+    u32 *info;
+
+    fldMakeFilePath(dir, work->area, 1);
+    if (work->area == 0x19 && work->floor + 1 >= 0x11) {
+        sprintf(path, "%sf%03db.amb", dir, 0x19);
+    } else if (fldGlobalBase.area == 0x22) {
+        floor = fldGlobalBase.floor + 1;
+        if (floor < 4) {
+            fmt = "%sf%03d.amb";
+        } else if (floor < 0xB) {
+            fmt = "%sf%03db.amb";
+        } else if (floor < 0x13) {
+            fmt = "%sf%03dc.amb";
+        } else if (floor < 0x1A) {
+            fmt = "%sf%03dd.amb";
+        } else {
+            goto plain;
+        }
+        sprintf(path, fmt, dir, 0x22);
+    } else {
+    plain:
+        sprintf(path, "%sf%03d.amb", dir, fldGlobalBase.area);
+    }
+    fldAutoMapBuf = sdfDevLoadFileEx(path, &data, 0);
+    fldAddressResolver(data, data + 8);
+    info = (u32 *)fldGetInfoHeader(data + 8);
+    fldAutoMapData = info[2];
+    fldAutoMapHeader = (fldMapRoom_t *)info[1];
+}
+#else
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAmModelLoadFile);
+#endif
+
+
+void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *handle) {
+    s32 field = fldGb[0];
+    u32 *info;
+
+    if (field < 200) {
+        if (field >= 10) {
+            fldAutoMapBuf = handle;
+            fldAddressResolver(data, data + 8);
+            info = (u32 *)fldGetInfoHeader(data + 8);
+            {
+                u32 mapHeader = info[1];
+                u32 mapData = info[2];
+
+                fldAutoMapData = mapData;
+                fldAutoMapHeader = (fldMapRoom_t *)mapHeader;
+            }
+        }
+    }
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapModelLoad);
+
+void fldAutoMapFileFree(void) {
+    if (fldAutoMapBuf != 0) {
+        sdfMemFreeDirect(fldAutoMapBuf);
+    }
+    fldAutoMapBuf = 0;
+    fldAutoMapHeader = 0;
+    fldAutoMapData = 0;
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapLoad);
+
+void fldAutoMapDrawMdl1(sdfModelRootNode_t *emitter, f32 x, f32 y, f32 z) {
+    f32 pos[4];
+    sdfModelNode_t *handle;
+
+    memset(pos, 0, sizeof(pos));
+    pos[3] = 1.0f;
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    handle = emitter->nodeList->items[0];
+    SDF_VU0_LOADVECTOR_BARRIER(pos);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    SDF_VU0_STOREVECTOR(&emitter->tm.m[12]);
+    sdfModelMakeLocalTm(handle);
+    sdfModelEvalTm(emitter);
+    sdfModelLinkOt(&D_002F6A48, emitter);
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsRF);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawBgOfsRF);
+
+s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
+    s32 result = 1;
+    fldMapRoom_t *rec = fldAutoMapHeader;
+    s32 i;
+    u32 j;
+    fldMapItem_t *item;
+
+    for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
+        item = rec->items;
+        for (j = 0; j < rec->count; j++, item++) {
+            if (i == scene && j == index) {
+                result = item->floor + 1;
+            }
+        }
+    }
+    return result;
+}
+
+void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
+    sdfModelNode_t *parent = model->nodeList->items[index + 1];
+    sdfModelNode_t *first;
+    sdfModelNode_t *node;
+    sdfModelNode_t *next;
+    sdfModelNode_t *headNext;
+    u16 flags;
+
+    if (parent->children == NULL) {
+        return;
+    }
+    parent->children->flags &= ~SDF_MODEL_NODE_FLAG_HIDDEN;
+    if (clearFlag == 0) {
+        parent->children->flags |= SDF_MODEL_NODE_FLAG_HIDDEN;
+    }
+
+    first = parent->children;
+    headNext = first->next;
+    if (headNext == NULL) {
+        return;
+    }
+    node = headNext;
+    if (parent != node->parent || first == node) {
+        return;
+    }
+    for (;;) {
+        flags = node->flags & ~SDF_MODEL_NODE_FLAG_HIDDEN;
+        node->flags = flags;
+        if (clearFlag == 0) {
+            node->flags = flags | SDF_MODEL_NODE_FLAG_HIDDEN;
+        }
+        next = node->next;
+        if (next == NULL) {
+            return;
+        }
+        node = next;
+        if (parent != node->parent) {
+            return;
+        }
+        if (first != node) {
+            continue;
+        }
+        return;
+    }
+}
+
+s32 fldAutoMapGetFloorMax(void) {
+    s32 max = 0;
+    fldMapRoom_t *rec = fldAutoMapHeader;
+    s32 i;
+    u32 j;
+    fldMapItem_t *item;
+
+    for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
+        item = rec->items;
+        for (j = 0; j < rec->count; j++, item++) {
+            if (max < item->floor) {
+                max = item->floor;
+            }
+        }
+    }
+    return max + 1;
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawOneArea);
+
+void fldAutoMapDrawWindow(void) {
+    SDF_VU0_LOADMATRIX(aProjMatrix);
+    InversMatrix();
+    sdf3DSetCamera(dds3ScreenParam, aProjMatrix);
+    rsetOtOfs(0x4A);
+    rsetTest(1, 0, 0x80, 1, 0, 0, 1, 1);
+    rsetAlpha(0);
+    aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 0x80);
+    DrwSprite2D(0x1A, 0x52, 0x1CC, 0x154, 0, 0, 0x100, 0x80, 0x80808080,
+                fldAutoMapWindowTex[0]);
+    D_0054EEA0 = D_0054EEA0 - 1.0f;
+    fldAutoMapDrawBgOfsRF(255.0f, 250.0f, D_0054EEA0);
+    sdf3DSetCamera(dds3ScreenParam, D_002FA240);
+    SDF_VU0_LOADMATRIX(D_002FA240);
+    rsetOtOfs(0x51);
+    rsetTest(1, 5, 0x81, 1, 0, 0, 1, 2);
+    rsetAlpha(0);
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapSeqStart);
+
+void fldAutoMapFree(void) {
+    s32 i;
+
+    for (i = 0; i < fldAutoMapData; i++) {
+        if (D_00312150[i] != NULL) {
+            sdfModelRootFree(D_00312150[i], 1, 1);
+        }
+    }
+    for (i = 0; i < 32; i++) {
+        D_00312150[i] = NULL;
+        fldAutoMapModelPos[i].x = 0.0f;
+        fldAutoMapModelPos[i].y = 0.0f;
+        fldAutoMapModelPos[i].z = 0.0f;
+    }
+    if (D_00551CC0[0] != NULL) {
+        sdfTexFreeDelayed(D_00551CC0[0]);
+    }
+    if (D_00551CC0[1] != NULL) {
+        sdfTexFreeDelayed(D_00551CC0[1]);
+    }
+    if (fldAutoMapWindowTex[0] != NULL) {
+        sdfTexFreeDelayed(fldAutoMapWindowTex[0]);
+    }
+    if (fldAutoMapWindowTex[1] != NULL) {
+        sdfTexFreeDelayed(fldAutoMapWindowTex[1]);
+    }
+    if (fldAutoMapWindowTex[2] != NULL) {
+        sdfTexFreeDelayed(fldAutoMapWindowTex[2]);
+    }
+    D_00551CC0[0] = NULL;
+    D_00551CC0[1] = NULL;
+    fldAutoMapWindowTex[0] = NULL;
+    fldAutoMapWindowTex[1] = NULL;
+    fldAutoMapWindowTex[2] = NULL;
+    while (sdfDelayedResrcCheck()) {
+        sdfDrawSync();
+    }
+    AutoMapSeq = 0;
+    frSetFontDrawOT(0x48);
+}
+
+void fldAutoMapSeqEnd(void) {
+    sdfDrawSync();
+    sdfDrawSync();
+    fldAutoMapFree();
+    AutoMapSeq = 0;
+    fldAutoMapSeqClearFlag(1);
+    fldRegistUnitPad();
+    evtEnableMoonDraw();
+    fldMenuOpenFlag[0] = 4;
+    frSetFontDrawOT(0x48);
+    dds3VisibleSceneBasic(dds3GetActiveScene(), 1);
+}
+
+u32 fldAutoMapChkMode(void) {
+    return AutoMapSeq;
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCalc);
+
+void fldAutoMapSetField(s32 field, s32 area, s32 block) {
+    f32 x = fldGlobalBase.x;
+    f32 z = fldGlobalBase.z;
+
+    fldGlobalBase.blockID = block;
+    fldAutoMapFieldId.z = z;
+    fldAutoMapFieldId.x = x;
+    fldGlobalBase.area = field;
+    fldGlobalBase.floor = area;
+    fldAutoMapAreaNo = area;
+    fldAutoMapFieldId.y = 0.0f;
+    fldAutoMapField = field % 100;
+}
+
+s32 fldAutoMapChkOpen(s32 area, s32 room, u32 item) {
+    s32 floor = area % 100;
+
+    if (floor < 10) {
+        return 0;
+    }
+    floor -= 10;
+    if (floor >= 30) {
+        return (*(u64 *)((u8 *)DDS3_GBWK + 0x17F10 + (floor * 32 + room) * 8) >> item) & 1;
+    }
+    return (*(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + room) * 8) >> item) & 1;
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapOpenBlock);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapOpenBlock2);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCloseBlock2);
+
+void fldAutoMapNameU(s32 labelIndex) {
+    if (labelIndex >= 0x40) {
+        fldAreaNameUpper[0] = -1;
+    } else {
+        fldAreaNameUpper[0] = labelIndex;
+    }
+}
+
+void fldAutoMapNameD(s32 labelIndex) {
+    if (labelIndex >= 0x40) {
+        fldAreaNameLower[0] = -1;
+    } else {
+        fldAreaNameLower[0] = labelIndex;
+    }
+}
+
+s32 fldAutoMapGetFloorPrev(s32 limit) {
+    s32 i;
+    u32 j;
+    s32 item;
+    s32 best = -1;
+    fldMapRoom_t *entry = fldAutoMapHeader;
+
+    for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
+        for (j = 0; j < entry->count; j++) {
+            if (fldAutoMapChkOpen(fldAutoMapField, i, j) != 0) {
+                item = fldAutoMap_GetFloor(i, j);
+                if (item < limit && best < item) {
+                    best = item;
+                }
+            }
+        }
+    }
+    if (best == -1) {
+        return limit;
+    }
+    return best;
+}
+
+s32 fldAutoMapGetFloorNext(s32 limit) {
+    s32 i;
+    u32 j;
+    s32 item;
+    s32 best = 999;
+    fldMapRoom_t *entry = fldAutoMapHeader;
+
+    for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
+        for (j = 0; j < entry->count; j++) {
+            if (fldAutoMapChkOpen(fldAutoMapField, i, j) != 0) {
+                item = fldAutoMap_GetFloor(i, j);
+                if (limit < item && item < best) {
+                    best = item;
+                }
+            }
+        }
+    }
+    if (best == 999) {
+        return limit;
+    }
+    return best;
+}
+
+void fldAllIconDel(s32 index, f32 *x, f32 *z) {
+    s32 i;
+    fldMapRoom_t *entry = fldAutoMapHeader;
+    for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
+        if (i == index) {
+            fldMapPoint_t *position = entry->pos;
+            *x = position->x;
+            *z = position->z;
+            return;
+        }
+    }
+    *x = 0.0f;
+    *z = 0.0f;
+}
+
+void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
+    s32 room;
+    u32 i;
+    fldMapRoom_t *rec;
+    fldMapItem_t *item;
+    fldMapPoint_t *a;
+    s32 visible;
+    fldMapPoint_t *b;
+
+    room = 0;
+    *minX = 0.0f;
+    *maxZ = 0.0f;
+    *maxX = 0.0f;
+    *minZ = 0.0f;
+    rec = fldAutoMapHeader;
+    for (; room < fldAutoMapData; room++, rec++) {
+        item = rec->items;
+        for (i = 0; i < rec->count; i++, item++) {
+            visible = 0;
+            if (fldAutoMapChkOpen(fldAutoMapField, room, i) != 0) {
+                visible = 1;
+            }
+            if (fldAutoMapBBox != 0) {
+                visible = 1;
+            }
+            if (visible != 0) {
+                a = item->pointA;
+                if (a != NULL) {
+                    if (*minX > a->x) {
+                        *minX = a->x;
+                    }
+                    b = item->pointB;
+                    if (*minX > b->x) {
+                        *minX = b->x;
+                    }
+                    if (*maxX < a->x) {
+                        *maxX = a->x;
+                    }
+                    if (*maxX < b->x) {
+                        *maxX = b->x;
+                    }
+                    if (*maxZ < a->z) {
+                        *maxZ = a->z;
+                    }
+                    if (*maxZ < b->z) {
+                        *maxZ = b->z;
+                    }
+                    if (a->z < *minZ) {
+                        *minZ = a->z;
+                    }
+                    if (b->z < *minZ) {
+                        *minZ = b->z;
+                    }
+                }
+            }
+        }
+    }
+}
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapProc);
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532230);
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532240);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDraw);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapClear);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldDrawAreaBlockFont);
+
+INCLUDE_ASM(const s32, "field/fldAutoMap", fldInitPacLoader);
+
+void fldInitBlurEffect(void) {
+    fldBlurParam_t param;
+    s32 i;
+
+    if (fldGlobalBase.area >= 0xC8) {
+        return;
+    }
+    D_0054EEDC = dds3EffectLoad(D_00551D18);
+    if (fldGlobalBase.area >= 0xB) {
+        D_0054EED0 = dds3EffectLoad(D_00551D08);
+        fldDmgBlurHandle = NULL;
+        fldBlurEffectId[0] = dds3EffectLoad(D_00551D10);
+        fldNpcBlurHandle = NULL;
+    }
+    if (fldGlobalBase.area < 0xA) {
+        fldUiTexture = sdfTexSet(D_00551CD0);
+        fldVLTexture = sdfTexSet(D_00551CD8);
+        fldVLBlurHandle = sdfTexSet(D_00551CE0);
+    } else {
+        fldUiTexture = sdfTexSet(D_00551CE8);
+        fldVLTexture = NULL;
+        fldVLBlurHandle = NULL;
+    }
+    fldEATexture = sdfTexSet(D_00551CF0);
+    fldSnowBlurHandle = sdfTexSet(D_00551CF8);
+    /* The casts pin the store order; assigning the array elements directly
+     * swaps the first two stores. */
+    for (i = 0; i < 0x40; i++) {
+        *(void **)&fldBlurEffectTable[i] = NULL;
+        *(void **)&D_00568E90[i] = NULL;
+        *(void **)&D_00568F90[i] = NULL;
+    }
+    fldNpcModelFreeIdx = -1;
+    param.unk00 = 0x3C;
+    param.unk04 = 0xF;
+    param.unk08 = 0.22f;
+    param.unk0C = 0x1E848484;
+    param.unk10 = 0x44;
+    fldNpcFreeCount = NULL;
+    param.unk14 = 0;
+    param.unk18 = 0.13f;
+    param.unk1C = 0;
+    param.unk20 = -0x30;
+    param.unk24 = 0x60;
+    param.unk28 = 0x60;
+    fldBlurEffectHandle = dds3EffectDistortionBlurCreate(&param);
+}
+
+void fldFreeBlurEffect(void) {
+    s32 i;
+
+    dds3EffectDistortionBlurDelete(fldBlurEffectHandle);
+    if (fldUiTexture != NULL) {
+        sdfTexFreeDelayed(fldUiTexture);
+        fldUiTexture = NULL;
+    }
+    if (fldEATexture != NULL) {
+        sdfTexFreeDelayed(fldEATexture);
+        fldEATexture = NULL;
+    }
+    if (fldVLTexture != NULL) {
+        sdfTexFreeDelayed(fldVLTexture);
+        fldVLTexture = NULL;
+    }
+    if (fldVLBlurHandle != NULL) {
+        sdfTexFreeDelayed(fldVLBlurHandle);
+        fldVLBlurHandle = NULL;
+    }
+    if (fldSnowBlurHandle != NULL) {
+        sdfTexFreeDelayed(fldSnowBlurHandle);
+        fldSnowBlurHandle = NULL;
+    }
+    for (i = 0; i < 64; i++) {
+        if (fldBlurEffectTable[i] != NULL) {
+            sdfMemFreeDelayedDirect(fldBlurEffectTable[i]);
+            fldBlurEffectTable[i] = NULL;
+        }
+    }
+    for (i = 0; i < 32; i++) {
+        if (fldModelSlotTable[i].effect != NULL) {
+            dds3EffectDelete(fldModelSlotTable[i].effect);
+            fldModelSlotTable[i].effect = NULL;
+        }
+    }
+    if (D_0054EEDC != NULL) {
+        dds3EffectDelete(D_0054EEDC);
+        D_0054EEDC = NULL;
+    }
+    if (D_0054EED0 != NULL) {
+        dds3EffectDelete(D_0054EED0);
+        D_0054EED0 = NULL;
+    }
+    if (fldBlurEffectId[0] != NULL) {
+        dds3EffectDelete(fldBlurEffectId[0]);
+        fldBlurEffectId[0] = NULL;
+    }
+}
+
+void fldClearModelSlots(void) {
+    s32 i;
+
+    for (i = 0; i < 32; i++) {
+        void *effect = fldModelSlotTable[i].effect;
+
+        fldModelSlotTable[i].unk00 = 0;
+        fldModelSlotTable[i].unk04 = 0;
+        fldModelSlotTable[i].unk08 = 0;
+        fldModelSlotTable[i].unk0C = 0;
+        fldModelSlotTable[i].object = NULL;
+        fldModelSlotTable[i].unk34 = 0;
+        fldModelSlotTable[i].unk38 = 0;
+        fldModelSlotTable[i].unk3C = 0;
+        fldModelSlotTable[i].unk40 = 0;
+        fldModelSlotTable[i].unk44 = 0;
+        fldModelSlotTable[i].room = 0;
+        fldModelSlotTable[i].unk4C = 0;
+        if (effect != NULL) {
+            dds3EffectDelete(effect);
+        }
+        fldModelSlotTable[i].effect = NULL;
+    }
+    fldNpcModelTable = 0;
+    fldNpcLoadIdx = 0;
+    fldNpcCamTarget = 0;
+}
+
+void fldClearTakaraSlots(void) {
+    s32 i;
+
+    fldTakaraCount = 0;
+    for (i = 0; i < 32; i++) {
+        void *effect = fldTakaraSlotTable[i].effect;
+
+        fldTakaraSlotTable[i].id = -1;
+        fldTakaraSlotTable[i].unk00 = 0;
+        fldTakaraSlotTable[i].activationState = 0;
+        fldTakaraSlotTable[i].activationRequested = 0;
+        if (effect != NULL) {
+            dds3EffectDelete(effect);
+        }
+        fldTakaraSlotTable[i].effect = NULL;
+    }
+    fldTakaraSlotCount = 0;
+}
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532338);
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532348);
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532358);
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_00532478);
+
+INCLUDE_RODATA(const s32, "field/fldAutoMap", D_005326B8);
+

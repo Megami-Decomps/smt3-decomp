@@ -344,9 +344,3 @@ s32 datBossRashChk(s32 eid)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_005431A8);
-
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_005431B8);
-
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_005431C8);
-
