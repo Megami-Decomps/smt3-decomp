@@ -166,11 +166,12 @@ src/smt3/newbattle/nbMakePacket.c	z5	done	2026-10-19	284 / 147044	-
 src/smt3/field/fldDraw.c	z6	done	2026-10-19	65 / 77696	-
 src/smt3/newbattle/nbStageProcess.c	z7	done	2026-10-19	92 / 56544	-
 src/smt3/newbattle/nbCameraBoss.c	z8	done	2026-10-19	28 / 22860	-
-src/smt3/event/evtEventViewerMenu.c	z9	open	2026-10-19	29 / 16316	-
-src/smt3/newbattle/nbCameraSkill.c	w1b	open	2026-10-19	22 / 15608	-
+src/smt3/event/evtEventViewerMenu.c	z9	done	2026-10-19	29 / 16316	-
+src/smt3/newbattle/nbCameraSkill.c	w1b	done	2026-10-19	22 / 15608	-
 src/smt3/field/fldAutoMap.c	w2b	open	2026-10-19	12 / 14044	-
 src/smt3/code_001FAE80.c	v1b	open	2026-10-19	794 / 252312	-
 src/smt3/newbattle/nbMakePacket.c	v2b	open	2026-10-19	267 / 143904	-
 src/smt3/field/fldDraw.c	v3b	open	2026-10-19	59 / 74520	-
 src/smt3/newbattle/nbStageProcess.c	v4b	open	2026-10-19	78 / 52380	-
 src/smt3/code_00116AD0.c	v5b	open	2026-10-19	41 / 40252	-
+src/smt3/effect/effPCPBoss.c	v6b	open	2026-10-19	37 / 26348	-
