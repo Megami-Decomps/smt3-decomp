@@ -12,9 +12,9 @@ Order of proof, strictest first: an allocation site that gives a size, an init f
 writes a field, a stride in an indexed access, a caller passing a known argument. A name that
 only looks odd is not proof.
 
-After each correction: re-run `tools/ida_symbols.py --instance SLUS_209.11`, re-run
-`configure.py`, build, and confirm the image still hashes to
-`5facfbf7916836613449c922e26a4ec412207b32`.
+After each correction: re-run `tools/ida_symbols.py --instance SLUS_209.11` and
+`tools/ida_types.py --instance SLUS_209.11`, re-run `configure.py`, build, and confirm
+the image still hashes to `5facfbf7916836613449c922e26a4ec412207b32`.
 
 ## Struct layouts
 

@@ -517,3 +517,88 @@ went through `tools/check_unit.py` per unit and not just the final link.
   the repo's invented `TEMPPACKET`. `SDF_MODEL_NODE_FLAG_MOTION_HIDE` is
   corroborated the same way: its only writers are the two
   `sdfMotCLBK_modelVisible*` callbacks.
+
+## Checking this periodically
+
+The audits behind this page were one-off scans. They went stale within two
+sweeps, because every newly decompiled unit arrives with its own type names and
+its own local copies of shared records. The check is now a tool:
+
+```sh
+python3 tools/ida_types.py    # IDB types -> config/smt3/ida_types.txt (needs IDA open)
+python3 tools/check_names.py  # compare the tree against that file
+```
+
+`ida_types.txt` is tracked, so `check_names.py` runs without IDA. Re-export it
+after any IDB correction, the same as `symbol_addrs.txt`. The report is a
+report, not a test: it always prints findings and always exits 0, because most
+of what it lists is legitimate and only a layout check can tell which is which.
+
+It sorts every typedef in the tree into six buckets. The counts below are from
+the run at 74.3% of functions in C.
+
+| Bucket | Count | What to do |
+|---|---|---|
+| matches an IDB name exactly | 238 | nothing |
+| matches but for the suffix | 18 | nothing: `_t` for IDA's `_tag` is the convention |
+| external name | 8 | nothing: newlib and the Sony SDK own these spellings |
+| close to an IDB name | 97 | a lead; confirm the layout, then rename |
+| off-convention, no counterpart | 83 | invented; recover the type, do not rename blind |
+| conforms, IDB never typed it | 545 | nothing to check it against |
+
+The two middle buckets are the queue. The last one is the honest residue: the
+IDB recovered 1778 names and the tree has 989 typedefs, and the overlap is
+smaller than either, so most names cannot be checked at all.
+
+### Why the convention is a weak filter
+
+The convention catches a name spelled `SdfPacket` or `BillOut`. It cannot catch
+one spelled `dds3ModelBasicWork_t`, which conforms perfectly and is still not
+what the IDB calls that record. 83 names break the convention; 97 more conform
+and disagree with the IDB anyway. Running the stem comparison matters more than
+reading the suffixes.
+
+### Three systematic drifts, one of them not a drift
+
+**The dds3 basic work records, fixed.** The tree dropped words the IDB keeps:
+`dds3ObjectBaseControl_t` is `dds3ObjectBaseControlWorkData_t`, and the seven
+per-object records are `dds3<Kind>BasicWorkData_t`, not `dds3<Kind>Work_t`.
+Sizes and offsets corroborate each one, and the control record is 0xAC in both.
+134 occurrences across 22 files, no codegen change.
+
+Worth noting what the rename exposed rather than fixed: the tree's
+`dds3UnitObjectWork_t` is 0x20 where the IDB's is 0x24, so the tree's view is
+one member short of `IsBattle` at +0x20. The three offsets the two readings
+share do agree (+0xC, +0x10, +0x14), which is what justified the rename. The
+truncation is left alone, because widening a struct can change codegen wherever
+something takes its size.
+
+**`camp*` should be `cmp*`.** `campInfoWork_t` is the IDB's `cmpInfoWork_t`
+exactly, and the IDB uses `cmp` for all 39 types in that module. The other four
+(`campWork_t`, `campDhEntry_t`, `campDhAnimWork_t`, `campStatusPanel_t`) need
+per-type evidence before moving, since a module-wide prefix change is not
+itself proof about any one record.
+
+**`dds3SpPoly*` is not a drift, and the report's suggestion is wrong.**
+`check_names.py` offers `dds3SpPolyRing_t` -> `dds3SpPoly_Ring_t3` and two
+siblings. Do not take them. The IDB types `dds3SpPoly_Ring_t3` as a 0x44 record
+whose first member is a *pointer* to a 0xC4 `dds3SpPoly_Basic_t`. The retail
+code says otherwise: `dds3SpPoly_RingCreate` makes one allocation of
+`sizeof(dds3SpPolyRing_t)` plus the trailing per-entry records, copies the
+template head to offset 0, copies the parameters to `&band->spawnDelayStep`,
+and sets `records = band + 1`. The head is inline and the block is contiguous.
+It also writes `templateSize = sizeof(dds3SpPolyHead_t)`, which is 0xC0 in the
+tree against the IDB's 0xC4, so the four bytes at +0xC0 that the IDB calls
+`pRollRing` are the ring's own first parameter.
+
+That is the general shape of the risk. A close name is evidence about naming,
+never about layout, and the IDB's struct can describe a different build of the
+same engine. Confirm against an allocation site before any rename that the
+report only guessed at.
+
+### What the report cannot see
+
+Duplicate definitions are counted separately, because the same name in twelve
+files is not a naming problem. That count moves the other way as the tree
+grows: it was 14 after the header merge and is 85 now, the widest being
+`pbMyCharacter_t` and `pbMatWork_t` at 12 copies each.
