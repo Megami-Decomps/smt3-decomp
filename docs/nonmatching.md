@@ -4751,3 +4751,98 @@ body> } else { slot->delay = delay - 1; }`: the single-statement arm in the
 `else` is what gives retail's `bnel` with the `addiu $2, $2, -1` in the
 annulled slot, where the natural polarity emits a `beqz` and a `b` over the
 long arm.
+## sdfModelTempPacketLinkOt (sdf/sdfModel, 0x468)
+
+Two hundred twenty-seven of 282 words differ positionally, at 281 emitted
+words against 279 native; aligned on the instruction stream the distance is
+one hundred twenty-four of 279, of which fifty-nine are the same instruction
+with one register renamed. The draft's body is believed right: the node walk,
+the format-1 shape list, the screen transform, the bounds reject, the four
+draw-tag slots, the 0xC0 temp packet and the ordering-table flush all appear
+in retail's order with retail's operands.
+
+The function shares almost its whole skeleton with `sdfModelLinkOt` below,
+which is at 61 words: the prologue (frame id, `sdfMatListUpdatePacket`, the
+light and fog defaults, the face-division terms), the per-node transform and
+`sdfModelCheckBounds`, the local-colour select, the `drawAttr` mask, the
+four-slot clear loop, `sdfCoreDrawSetZBias`, the `movz` on a zero
+ordering-table index, the draw-parameter packet and the flush loop are one
+source template in both. Everything learned on one carried to the other, so
+fix them together.
+
+What is not established, and is the whole residual here:
+
+- Retail holds nine values in saved registers across the node loop: `aRoot`
+  in `$23`, the node, the matrix pointer `node + 0xC0` in `$30`, the shape
+  list cursor, the header cursor, the draw tag, `attr`, the packet and the
+  `0x0FFFFFFF` mask. The draft needs ten, so `aRoot` takes `$30`, the matrix
+  pointer spills to the frame instead, and every saved register after it is
+  renamed. Which tenth value the draft is carrying is not identified.
+- `otIndex` comes from `lw` of the header's first word plus `srl 16`, where
+  the draft emits `lhu` at +2. gcc narrows a word load whose only use is
+  `>> 16`. Eight spellings ruled out here: `*(u32 *)header >> 16`, through a
+  `u32` local, `((u32 *)header)[0] >> 16`, a `u32 info` struct member,
+  `*cursor++ >> 16`, `/ 0x10000`, `(u32)*(s32 *)header >> 16` and
+  `(x << 0) >> 16`. In a small test function `(w & 0xFFFF0000) >> 16` does
+  keep the word load, but in this function it is narrowed anyway; a second
+  live use of the low half is the only form that held.
+- The sign test on the colour is `slti`, not `srl 31`; see the shared
+  dead end in the `sdfModelLinkOt` entry.
+
+Also corrected while drafting: `sdfDrawTagLink2` takes three arguments
+(tag, packet, range tail), not two. The unit's old two-argument `extern` is
+replaced and `sdfModelLinkShapedDrawPacket`'s draft call above now passes
+the final tag as the third argument; that draft's own word count is
+unchanged.
+
+## sdfModelLinkOt (sdf/sdfModel, 0x480)
+
+Sixty-nine of 288 words differ, at the exact 288-word size and the exact
+0xB0 frame; normalising the relocated fields the positional count is
+sixty-seven and the aligned count sixty-one, of which **fifty are the same
+instruction with one register renamed** and only eighteen are structural.
+The slot layout is retail's exactly: `tags[4]` at 0x00, the `aOt` spill at
+0x10, then `i`, `rootColor`, `drawAttr`, `attr`, `light`, `drew`, the
+shifted soften bias and the 8-byte draw-parameter word at 0x14 through 0x37,
+the colour sign flag at 0x38 and the hoisted `frame * 4` at 0x3C.
+
+The three-way `switch` on `sdfModelPacketHeader_t.type`, the `jump2`
+cross-jumped arm tails, the `sdfCorePacketGen` argument build, the
+`QUAD_ZERO`-first order in the type-1 arm and both loop guards are exact.
+
+What is not established:
+
+- The register assignment. Retail is `$16` for the slot index, the loop
+  counter and `&tags[i]`, `$17` for the packet header, `$18` for the draw
+  tag, `$19` node, `$20` aRoot, `$21` colour, `$22` frame, `$23` reverse
+  face, `$30` fog. The draft swaps the header and the tag (`$18`/`$17`) and
+  the counter and the slot pointer (`$17`/`$16`), which is where almost all
+  fifty renames come from. Declaring the tag once per node and sharing it
+  with the flush loop makes it worse (289 words); declaring it inside the
+  packet loop is the better of the two.
+- `semiTrans = (s32)color < 0` compiles to `srl 31`, where retail has
+  `slti r, color, 0`. Seventeen spellings ruled out across two test shapes:
+  `(s32)c < 0`, `<= -1`, `c >= 0x80000000u`, `0 > (s32)c`, `? 1 : 0`, a
+  signed parameter, `!((s32)c >= 0)`, `((s32)c >> 31) & 1`,
+  `(c & 0x80000000) != 0`, `c >> 31`, `*(s32 *)p < 0`, and the same with the
+  flag declared `u8`, `s16`, `u32` and `s64`. gcc 2.96's `do_store_flag`
+  passes `normalizep = 1` and always takes the sign-bit shortcut, so no
+  store-flag spelling can reach `slti`. In this tree `slti r, x, 0` only
+  appears as a conditional-move condition: `sdfChipFreeDirect`'s signed
+  divide by 0x1000 emits `slti`/`movn`. Whatever retail wrote here, the
+  comparison reaches `emit_conditional_move`, and the draft has not found a
+  C shape that does so while leaving the flag itself in a register.
+- Four words of scheduling in the draw-parameter block, where retail
+  interleaves the `ld` of the parameter word and the `sd` of it between the
+  two `swc1`s of the face-division terms and the draft keeps the two `swc1`s
+  together.
+- The soften-bias shift: retail computes `corePktSoftenBias` before the
+  face-division branch and the `<< 16` in the node loop's preheader. Written
+  before the loop the shift lands before the loop guard, two words early
+  (what the draft does, and what keeps the declared slot); written inside the
+  loop it is hoisted to the right place but loses the declared slot, which
+  costs the frame size. Both halves have not been had at once.
+
+Declaration order is decisive for both functions, against the earlier note on
+this unit that it was inert; see the spill-slot row in
+[matching-levers](matching-levers.md).

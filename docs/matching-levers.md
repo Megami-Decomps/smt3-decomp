@@ -1228,6 +1228,50 @@ once per use, and a named local for it computes it once.
   second, independent lever on the same pair: reading the particle pointer before
   the count took it from 9 of 262 to 5, and all six orders of the three leading
   reads differ. An `s32` for the `u8` field undoes the slot fix.
+- The whole spill-slot sequence is readable, not just a pair, and it gives the
+  declaration list back. gcc assigns frame slots in this order: addressed
+  locals (an array) at `expand_decl` time, then every spilled pseudo in pseudo
+  number order, which is the parameters first, then the declared scalars in
+  declaration order, then the temps the statements create, then the pseudos
+  the loop optimizer creates. So retail's slots name the locals in order.
+  `sdfModelLinkOt`'s eight spilled locals read off its frame as `i`,
+  `rootColor`, `drawAttr`, `attr`, `light`, `drew`, the shifted soften bias
+  and the 64-bit draw-parameter word, with the colour sign flag and the
+  hoisted `frame * 4` as the two trailing temps; declaring them in that order
+  took it from 134 to 112 differing words and fixed the frame size, and the
+  same list explains `sdfModelTempPacketLinkOt`'s frame, which spills three
+  more of the same variables.
+- A local assigned **inside** a loop and then hoisted out loses its place in
+  that sequence: gcc's loop invariant motion gives the moved value a fresh
+  high-numbered pseudo, so it lands after the loop-created temps and the frame
+  grows. Assigning it before the loop keeps the declared slot but leaves the
+  computation before the loop guard instead of in the preheader. In
+  `sdfModelLinkOt` the two halves could not be had together for
+  `corePktSoftenBias << 16`.
+- `(flags & bit) != 0` stored as a flag folds to `srl`/`andi`. Where retail
+  has `andi` then `sltu rd, $0, rs`, assign the masked value to its own local
+  and test *that* local: gcc's `fold_single_bit_test` only fires when the
+  comparison's operand is the `BIT_AND_EXPR` itself, so one extra local
+  blocks it.
+- `x < 0` stored as a 0/1 flag is **always** `srl rd, x, 31` from C. gcc
+  2.96's `do_store_flag` passes `normalizep = 1` to `emit_store_flag`, which
+  takes the sign-bit shortcut before trying `slt`. Seventeen spellings and
+  four flag types were measured for `sdfModelLinkOt` and every one gives the
+  shift. `slti rd, x, 0` in this tree only ever comes out of
+  `emit_conditional_move`: `sdfChipFreeDirect`'s signed divide by 0x1000
+  emits `slti`/`movn` for the rounding adjust. Treat a bare `slti r, x, 0`
+  whose result is then stored as an unsolved shape, not a spelling to sweep.
+- A word load whose only use is `>> 16` is narrowed to `lhu` at +2. Eight
+  spellings were ruled out on `sdfModelTempPacketLinkOt`'s shape-header read,
+  including a `u32` struct member, `*cursor++ >> 16` and `/ 0x10000`. Only a
+  second live use of the low half keeps the `lw`/`srl` pair;
+  `(w & 0xFFFF0000) >> 16` keeps it in a small function but is narrowed again
+  once the value feeds an index, so the pattern in
+  `sdfModelSetNormalDrawPacket` works because `qwc` is used too, not because
+  of the cast.
+- The three `nop`s between the `sw $0` and the `bne` of retail's four-slot
+  draw-tag clear loops are ee-as's short-loop padding, not source. A plain
+  `for (j = 0; j != 4; j++) tags[j] = NULL;` reproduces them word for word.
 
 - A packet builder whose stores all go to one array element wants the element
   indexed at every store, `packet_array[frame].field = v;`, not a
