@@ -552,7 +552,10 @@ typedef struct {
 #define PS2_STORE_ZERO_QUAD_AT48(dst) __asm__ volatile ( \
     "sq $0, 0x30(%0)" : : "r" (dst) : "memory")
 
-/* COP1 absolute value; cc1 2.96 calls fabsf instead of emitting it. Not
+/* COP1 absolute value. Prefer `extern f32 fabsf(f32);` and an ordinary call:
+ * cc1 2.96 emits abs.s for it directly, verified against this toolchain, so
+ * this macro is what fails to match where retail has a plain abs.s. It is
+ * kept only for a body that already needs inline asm around it. Not
  * volatile, like the fpu.h helpers: it has an output and no side effect. */
 #define EE_ABS_F32(out, in) __asm__ ( \
     ".set noreorder\n\tabs.s %0, %1\n\t.set reorder" \

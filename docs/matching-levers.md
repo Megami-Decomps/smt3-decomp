@@ -39,6 +39,9 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| two early `return <same constant>`s | write them as separate `if`s, which gets the returns cross-jumped and the constant hoisted into `$2` above the first branch. `&&`, `||` and a `goto` all cost four bytes and a register copy |
+| a clamp that leaves the bound in the value's own register | assign the bound rather than returning it: `if (2.0f < s) { s = 2.0f; } else if (s < 0.8f) { s = 0.8f; } return s;`. `return 2.0f;` puts the constant straight in `$f0`, costing four bytes and rotating every fp register |
+| a `switch` whose arms share one exit | set a result local before the dispatch, `break` in each arm, and one trailing `return`. One function went from 21 of 54 words and 12 bytes long to exact |
 | `c.lt.s a, b` then `bc1t` on a float test you wrote as `a >= b` | negate the `<` instead: `if (!(a < b))`. ee-gcc turns `a >= b` into `c.le.s b, a` plus `bc1f`, which is the same test in the other encoding and two words off |
 | an `ldl`/`ldr` and `sdl`/`sdr` run | one struct assignment of a 4-aligned type, the trailing word included. Splitting that word off as its own field is what breaks it; `effPCPCrackCreate`'s 0x8C copy is why it carries an 8-byte-alignment runtime dispatch |
 | `sw $0` to a float field, not clustered with the integer zero stores | write it `0.0f` into an `f32` field. A float-typed zero store sits in the float store chain; one function went from 15 differing words to 2 on that alone |
@@ -231,6 +234,14 @@ it was measured on DDS and not on this ELF.
   saved register. `calcCamNormalNPC` went from 16 differing words to 6 on
   `dist = 200.0f;` in place of the literal at its four use sites, and to exact
   once the angle was written as the three statements above.
+
+- `case_values_threshold` is 10 in this build: a `switch` needs at least ten
+  `case` nodes before ee-gcc emits a jump table rather than a compare tree,
+  independently of the range test. Where retail has a jump table and the
+  reconstruction has fewer labels, the missing ones share the `default` body.
+- `extern f32 fabsf(f32);` and an ordinary call compile to `abs.s` directly,
+  verified against this toolchain. `EE_ABS_F32` is what fails to match where
+  retail has a plain `abs.s`.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

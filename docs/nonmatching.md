@@ -1414,3 +1414,127 @@ Ruled out: `gencMode != 0` with an empty `then`; `s32` return types on
 local in place of the three `return 0`s; and an `s32` return type on
 `encFreeBlur`, which the definition below refuses.
 
+## slDrawWindow (mc/slMain, 0x4EC)
+
+87 of 313 words, two words short of the 1260-byte size.
+
+Everything up to the window-height arithmetic is exact, and the arithmetic
+itself is reconstructed: the counter is bumped and stored, the first box's
+`y` and `h` come from `0xE9 - cnt * 0xB5 / 4` and `cnt * 0x16B / 4` clamped to
+`0x34` and `0x16B` from four on, and the four later box pairs divide by 5 and
+by 100 exactly as retail does. The draft's argument lists and the `slti`,
+`sltiu` tail are right.
+
+The two missing words are one register copy and the `nop` that follows from
+it. Retail increments into `$2`, stores and compares that, then copies it to
+`$4` for the two multiplies; the draft increments straight into `$4` and needs
+no copy. Because the block is then one instruction shorter, the scheduler
+hoists the second `li` above the first multiply and puts the second multiply
+on `mult1`, where retail leaves both on pipe 0, and `.L00152408` loses the
+8-byte alignment `nop` in front of it. Every division and both `movn` biases
+are identical. After that point the draft and retail differ only in the order
+of the twelve stack-argument stores of each `aDrawBoxG` call, which is the
+scheduler working from the shifted block.
+
+Ruled out for the copy: `cnt` as a local, `gSlWindowCnt + 1` stored then
+re-read, `gSlWindowCnt++`, `++gSlWindowCnt` as the test expression, a second
+local assigned from the first, the increment split into two statements,
+products hoisted into named locals, `0xB5 * cnt` operand order, decimal
+literals, `h` before `y`, the subtraction split off into its own statement,
+all 120 declaration orders of the five locals, and separate locals per block
+(that one reaches 88).
+
+## slDrawInfo (mc/slMain, 0x2F4)
+
+183 of 189 words, at the exact 756-byte size, and **exact when slDrawWindow is
+compiled as C in the same unit**. That is the finding worth acting on: the
+draft here is complete and correct, and banking it only needs slDrawWindow
+above it to match.
+
+The six remaining words with slDrawWindow still behind `INCLUDE_ASM` are six
+`bnel` where retail has `bne`, on the `gslInfoCode` tests for 1 through 6. The
+delay slot holds the next comparison constant in both, so only the annul bit
+differs; the tests for 0xB, 0xC and 0xD match either way. With slDrawWindow
+defined above it in the unit, ee-gcc drops the annul on all six.
+
+Ruled out while slDrawWindow was still assembly: `gslInfoCode == N &&
+slDrawWindow() != 0` fused into one test, the call's result in a local,
+`== 0` with an empty arm and an `else`, `if (slDrawWindow())` without the
+comparison, `u32 gslInfoCode`, an `s32` return type with `return 0` for the
+early exit, and the whole body nested in `if (gslInfoCode != 0)` instead of an
+early `return`.
+
+## slDrawError (mc/slMain, 0x4AC)
+
+293 of 299 words, at the exact 1196-byte size, and **exact when slDrawWindow
+is compiled as C in the same unit** - measured, not assumed. Same situation as
+slDrawInfo above and the same six-`bnel` difference, on the `gslErrorCode`
+tests for 1, 2 and 7, which are the three arms that branch on `slDDS3To31Flg`
+inside. Nothing else in the draft differs.
+
+slDrawWindow is therefore the one thing standing between this unit and three
+matched functions: itself, slDrawInfo and slDrawError, 801 words of retail
+code between them.
+
+## effBTLModelLook2 (effect/effBattleMisc, 0x110)
+
+2 of 68 words, at the exact 272-byte size, and the two words are each other's:
+retail emits `abs.s $f1, $f2` then `mov.s $f13, $f0`, the draft the same pair
+in the other order. Both are independent single-cycle moves off the two
+`lwc1`s that precede them and that the draft already matches, so there is no
+dependence to steer: `$f1` is `fabsf(direction.x)` for the compare and `$f13`
+is `sdfAtan2`'s second argument copied out of `$f0` before `abs.s` clobbers
+it.
+
+Everything else in the function matches, including the `sdfSin`/`sdfCos`
+divide into one register, the three-way clamp and the `$f20`/`$f21`/`$f22`
+saved-register layout. Two source facts were needed to get there and are worth
+keeping:
+
+- The clamped value and the half-width are one variable, not two. Retail's
+  `mul.s $f12, $f20, $f0` writes the register that later carries
+  `sdfAtan2`'s first argument, so `x = tangent * direction.z;` followed by
+  `x = direction.x;` / `x = fabsf(x);` / `x = -fabsf(x);` in the three arms is
+  what matches. A separate `width` local coalesces into the tangent's register
+  instead and costs seven words.
+- `fabsf` declared as a plain `extern f32 fabsf(f32);` compiles to `abs.s`;
+  `EE_ABS_F32` does not match here (29 to 31 words differing, and the function
+  runs long).
+
+Ruled out: `direction.z * tangent` instead of `tangent * direction.z` (four
+words); a named `tangent` local, a named `absx` local, and `absx` computed
+before the multiply; `fabsf(x) > fabsf(direction.x)` for the compare;
+`!(fabsf(x) <= fabsf(direction.x))`; a `z` local for `direction.z`; and
+declaring `x` before or after the other locals.
+
+## effBTLPartPtrModelGroupGetCenterAndHeight (effect/effBattleMisc, 0x248)
+
+4 of 146 words, at the exact 584-byte size. One instruction is wrong and the
+three stores after it are scheduled one slot early as a consequence: retail
+rematerialises the zero it stores into the accumulator vector
+(`mtc1 $0, $f0`), the draft copies it out of the saved register that already
+holds `front` (`mov.s $f0, $f21`). The copy has the same cost but a
+dependency, so ee-gcc's scheduler fills the next three slots with the two
+`addiu`s and the first `swc1` in the other order.
+
+cc1's copy propagation is what does it: `front = 0.0f;` leaves 0.0 available
+in a pseudo that lives across the `nbGetMainProcessData` call, and the later
+`zero = 0.0f;` becomes a copy of it. Nothing tried stops that. Ruled out:
+spelling the second zero `0.0`, `0`, `-0.0f` (two words, worse), a chained
+`sum.x = sum.y = sum.z = 0.0f`, a literal at each of the three stores (which
+reverts to the shared register and costs 114 words), `sum.* = front`, and all
+120 orderings of the four initialiser groups (`count`/`back`, `front`/`total`,
+the `nbGetMainProcessData` call, the `top` select, the `sum` zeros) — six of
+them tie at this same 4-word result and the rest are worse.
+
+The rest of the function matches, and four source facts were needed:
+
+- The tail is `if (count != 0) { ... } else { ... }`, not an early return for
+  the empty case. Retail branches forward to the empty arm, so the populated
+  arm has to be written first; the early-return form differs in 85 words.
+- The `sum` zeros come from a named `f32 zero` local that the empty arm also
+  stores through. Giving the empty arm its own local costs 114 words.
+- `sum.x`, `sum.y`, `sum.z` in that source order; `z, y, x` costs one more
+  word.
+- `group & 0x100` is a `u32` local, read twice (once for the `top` select,
+  once inside the loop), which is what keeps it in a saved register.
