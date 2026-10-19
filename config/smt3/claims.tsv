@@ -205,13 +205,19 @@ src/smt3/effect/parManager.c	t4	done	2026-10-19	5 / 4936	fresh unit, never claim
 src/smt3/effect/effBlur_Filter.c	t5	done	2026-10-19	12 / 3464	fresh unit, never claimed
 src/smt3/sdf/sdfModel.c	t6	done	2026-10-19	5 / 3820	the two LinkOt functions, t1 read both and they share most of their body
 src/smt3/script/scrParameterCommand.c	t7	done	2026-10-19	14 / 2208	fresh unit, never claimed, 14 small functions
-src/smt3/kernel/dds3AdminiProcess.c	t8	open	2026-10-19	7 / 2392	fresh unit, never claimed
+src/smt3/kernel/dds3AdminiProcess.c	t8	done	2026-10-19	7 / 2392	fresh unit, never claimed
 src/smt3/event/evtPicture.c	t9	done	2026-10-19	11 / 2112	fresh unit, never claimed
 src/smt3/kernel/dds3SequenceList.c	u10	done	2026-10-19	13 / 1336	fresh unit, never claimed, 13 small functions
-src/smt3/effect/effPCPBezier.c	u11	open	2026-10-19	1 / 6016	one 6016-byte function, the largest single target left outside the giants
+src/smt3/effect/effPCPBezier.c	u11	done	2026-10-19	1 / 6016	one 6016-byte function, the largest single target left outside the giants
 src/smt3/effect/effPCPScatter.c	u12	open	2026-10-19	1 / 1376 plus effPacket 2 / 1152 and nbCameraHelper 2 / 1360	three small near-finished units, one agent
 src/smt3/effect/effPacket.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
 src/smt3/newbattle/nbCameraHelper.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
 src/smt3/mc/mcManager.c	u13	open	2026-10-19	12 / 696	three near-finished units, one agent
 src/smt3/sdf/sdfTex.c	u13	open	2026-10-19	3 / 1136	three near-finished units, one agent
 src/smt3/kernel/dds3KernelCore.c	u13	open	2026-10-19	3 / 904	three near-finished units, one agent
+src/smt3/interface/fmGslCont.c	u14	open	2026-10-19	7 / 608	three near-finished units, one agent
+src/smt3/effect/effManager.c	u14	open	2026-10-19	5 / 512	three near-finished units, one agent
+src/smt3/basic/dds3SceneBasic.c	u14	open	2026-10-19	4 / 736	three near-finished units, one agent
+src/smt3/kernel/dds3KernelMain.c	u15	open	2026-10-19	2 / 832	three near-finished units, one agent
+src/smt3/sdf/sdfMovie.c	u15	open	2026-10-19	2 / 816	three near-finished units, one agent
+src/smt3/field/fldPanel.c	u15	open	2026-10-19	3 / 688	three near-finished units, one agent
