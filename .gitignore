@@ -14,9 +14,9 @@ orig/*
 /asm/
 /assets/
 /build/
-/tools/bin/
-/tools/compilers/
-/tools/glibc32/
+/tools/bin
+/tools/compilers
+/tools/glibc32
 /build.ninja
 /.ninja_*
 /objdiff.json

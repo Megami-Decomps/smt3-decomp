@@ -6,18 +6,54 @@ uploads 177 instructions to VU0 micro memory, and `sdf3DLinkInitPacket` links th
 draw chain as a REF tag, so VIF1 uploads 1884 instructions to VU1 and then unpacks the data memory
 they start from. Everything the game draws in 3D runs through the VU1 image.
 
-The microcode stays a binary blob in the build. These are listings for reading, generated from the
-retail bytes, plus one transcription written by hand.
+**The build assembles it from source.** `src/smt3/sdf/vu/vu1_micro.vsm` and `vu0_micro.vsm` are
+annotated assembler listings, one line per instruction pair, and `tools/vuas.py` turns them into
+the bytes `.vutext` holds. Change a mnemonic and the linked image stops matching the retail SHA-1,
+so the listings are the microcode rather than a description of it. Everything in this directory is
+for reading.
 
 | file | what it is |
 |---|---|
+| [`../../src/smt3/sdf/vu/vu1_micro.vsm`](../../src/smt3/sdf/vu/vu1_micro.vsm) | the VU1 image as assembler source, what the build assembles |
+| [`../../src/smt3/sdf/vu/vu0_micro.vsm`](../../src/smt3/sdf/vu/vu0_micro.vsm) | the VU0 image, likewise |
 | [`vu1_image.c`](vu1_image.c) | the VU1 image as pseudo-C, one statement per instruction, generated |
 | [`vu1_annotated.c`](vu1_annotated.c) | the same 1884 instructions written out by hand, in 77 routines with no gaps |
 | [`vu0_micro.c`](vu0_micro.c) | the VU0 micro-mode image as pseudo-C, generated |
 | [`vu1_names.txt`](vu1_names.txt) | the names `vu2c.py --names` prints for fixed addresses and routines |
 | [`memory-map.md`](memory-map.md) | what each named VU1 address holds, with the instruction that proves it |
 
-## Regenerating
+## The source the build assembles
+
+Each line is one instruction pair as dvp-as writes it, the upper half then the lower, and the
+comment after it carries the micro address, both instruction words and what the pair does:
+
+```
+; ---- lightVertex, 0x0132..0x0172: the three-light sum, two vertices an iteration
+lightVertex:
+	MULAx.xyzw ACC, vf20, vf05  LQ.xyzw vf07, 800(vi04)  ; 0132 01E0A1BC 01E72320  ACC.xyzw = ...
+```
+
+Labels are the routine names from `vu1_names.txt` and the entry symbols the IDB carries, the
+banners come from the transcription's declared ranges, and the pseudo-C comes from the same decode
+`vu1_image.c` uses. `tools/vudis.py` writes the whole file:
+
+```bash
+tools/vudis.py --vu 1 -o src/smt3/sdf/vu/vu1_micro.vsm
+tools/vudis.py --vu 0 -o src/smt3/sdf/vu/vu0_micro.vsm
+tools/vudis.py --vu 1 --verify        # assemble it with dvp-as and diff against the ELF
+```
+
+`tools/vuas.py` is the assembler the build uses. It takes dvp-as syntax for the forms this game
+uses, in Python, so a matching build needs no toolchain beyond the one `download_tools.py` already
+fetches. The syntax is not invented: `dvp-as` itself, the assembler the `.DVP` overlay tables in
+the ELF show the microcode was built with, assembles these same files to the same bytes, and
+`tools/test_vuas.py` checks that whenever dvp-as is installed.
+
+`tools/vu_include.py` runs after splat and rewrites `asm/smt3/data/vutext.s` so the unit includes
+the assembled payloads and takes only the VIF headers, the debug font texture and the packet's data
+from the extracted asset. `tools/vutext.py --packets` prints the walk those offsets come from.
+
+## Regenerating the reading material
 
 ```bash
 tools/vutext.py --jsonl build/vu/images.jsonl
@@ -38,6 +74,9 @@ each fold replaced.
 
 ## What is checked
 
+- `ninja` is the main check: the linked image has to match the retail SHA-1, and every instruction
+  in both listings is in it. `tools/test_vuas.py` is the same check without a build, and adds the
+  dvp-as cross-check and the error cases.
 - `tools/vutext.py --check` walks both packets code by code and fails if a payload runs past the
   packet, if an MPG lands anywhere but where the already-filled micro memory ends, or if the
   reconstructed image does not match its recorded sha1. It also checks every upload against
@@ -52,11 +91,11 @@ each fold replaced.
   `gcc -fsyntax-only` on the transcription, which warns only about values it sets and never reads.
   That is a real check; it has caught a helper with the wrong return type and an unclosed comment.
 
-What is not checked: the decode of the VU0 image against an independent disassembler. `vu2c.py
---check` re-derives every mnemonic from the words and diffs it against PCSX2's own disassembly, but
-that needs a dump taken from PCSX2. The VU1 image has one (see below) and came out at 0 mismatches
-over 1884 instructions; nothing has traced VU0 micro mode here. A round trip through `dvp-as`,
-assembling a listing back to the retail bytes, would check both and is not implemented.
+What is not checked: the pseudo-C the comments carry, beyond the mnemonic it was derived from.
+`vu2c.py --check` re-derives every mnemonic from the words and diffs it against PCSX2's own
+disassembly; that needs a dump taken from PCSX2, which the VU1 image has (see below, 0 mismatches
+over 1884 instructions) and VU0 does not. What covers VU0 instead is the round trip: both
+assemblers turn its listing back into the retail bytes, which no wrong mnemonic survives.
 
 ## The VU1 image is the image a trace of the retail game captures
 

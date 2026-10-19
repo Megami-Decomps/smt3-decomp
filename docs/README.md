@@ -18,9 +18,10 @@ quickstart.
   that the retail code proves wrong, and the proof for each.
 - [VU0 constructs](vu0-constructs.md): the vector and MMI operations the
   assembly macros cover, and what an equivalent has to preserve.
-- [VU microcode](vu/README.md): annotated listings of the VU1 and VU0 images in
-  `.vutext`, generated from the retail bytes, with the hand transcription of all
-  1884 VU1 instructions and the data memory the upload packet seeds.
+- [VU microcode](vu/README.md): the VU1 and VU0 microcode, assembled from the
+  annotated listings in `src/smt3/sdf/vu/` rather than included as a blob, plus
+  the pseudo-C listing, the hand transcription of all 1884 VU1 instructions, and
+  the data memory the upload packet seeds.
 - [Naming drift](naming-drift.md): the audit of member, enum, define, function
   and global names against the IDB, and the queue of fixes it found.
 - [Matching levers](matching-levers.md): what to change in the source when a

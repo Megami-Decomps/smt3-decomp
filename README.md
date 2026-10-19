@@ -42,7 +42,9 @@ the `.DVP.*` VU overlay tables and the section-header region byte for byte.
 The build is verified: `ninja` relinks the split objects and `objcopy`s the
 result into a file byte-identical to the retail executable, reproduced from a
 clean tree. `.text` is split into 98 translation units, 71 of them under their
-recovered names. 4,331 of the 9,694 functions are still `INCLUDE_ASM`
+recovered names. The VU1 and VU0 microcode in `.vutext` is not a blob either:
+all 2,061 instructions are assembled from the annotated listings in
+`src/smt3/sdf/vu/` (see [VU microcode](docs/vu/README.md)). 4,331 of the 9,694 functions are still `INCLUDE_ASM`
 fallbacks; 5,363 are in C, which is 593,740 of 1,976,292 code bytes, verified
 against the linked image rather than against objdiff's base objects. 588 of
 those 5,363 are two-instruction functions of 8 bytes each, 4,704 bytes in

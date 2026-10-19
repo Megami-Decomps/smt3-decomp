@@ -184,6 +184,7 @@ def run_splat(version: str, yaml: Path, force: bool) -> None:
     subprocess.run([sys.executable, "tools/resolve_jtbl_targets.py", f"asm/{version}"], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/include_rodata.py", version], cwd=ROOT, check=True)
     subprocess.run([sys.executable, "tools/include_sdata.py", version], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, "tools/vu_include.py", version], cwd=ROOT, check=True)
     align_bss(ROOT / "build" / version / f"{VERSIONS[version]['serial']}.ld")
     provide_data_symbols(version)
     restore_unchanged_timestamps(snapshot)
@@ -320,6 +321,24 @@ def include_directives(
     return [match.groups() for match in matches]
 
 
+# The microcode listings the build assembles, and the unit that includes their bytes.
+VU_SOURCES = ("vu0_micro", "vu1_micro")
+VU_UNIT = {version: Path("asm") / version / "data" / "vutext.s" for version in VERSIONS}
+
+
+def vu_binaries(n, version: str) -> list[str]:
+    """Assemble each VU listing in src/<version>/sdf/vu, and name what it wrote."""
+    out = []
+    for name in VU_SOURCES:
+        src = Path("src") / version / "sdf" / "vu" / f"{name}.vsm"
+        if not (ROOT / src).exists():
+            continue
+        binary = Path("build") / version / "vu" / f"{name}.bin"
+        n.build(str(binary), "vuas", str(src), implicit=["tools/vuas.py", "tools/vu2c.py"])
+        out.append(str(binary))
+    return out
+
+
 def source_for(obj: Path, version: str) -> tuple[str, Path]:
     """Map a linker-script object back to the input splat or the tree provides."""
     rel = obj.relative_to(Path("build") / version)
@@ -426,6 +445,7 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
     n.rule("as", f"{AS} {AS_FLAGS} -o $out $in", description="as $in")
     n.rule("bin", f"{OBJCOPY} -I binary -O elf32-littlemips -B mips:5900 $in $out", description="bin $in")
     n.rule("eeasm", f"{sys.executable} tools/eeas_compat.py $in $out", description="ee-as compat $in")
+    n.rule("vuas", f"{sys.executable} tools/vuas.py $in -o $out", description="vuas $in")
     n.rule(
         "cc",
         f"cpp -MM -MG -MF $out.d -MT $out -nostdinc {INCLUDES} $cdefs $in && "
@@ -464,7 +484,9 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
         for obj in objects:
             kind, src = source_for(obj, version)
             if kind == "s":
-                n.build(str(obj), "as", str(src), implicit=["include/macro.inc"])
+                # The .vutext unit assembles the VU listings and incbins what they produce.
+                extra = vu_binaries(n, version) if src == VU_UNIT.get(version) else []
+                n.build(str(obj), "as", str(src), implicit=["include/macro.inc"] + extra)
                 units[version].append({"name": str(src.with_suffix("")), "target": str(obj), "base": None})
             elif kind == "bin":
                 n.build(str(obj), "bin", str(src))

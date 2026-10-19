@@ -105,6 +105,7 @@ None of these are committed. `.gitignore` covers them.
 | `build.ninja`, `.ninja_*` | `configure.py` |
 | `objdiff.json` | `configure.py` |
 | `build/smt3/` (objects, linked ELF, map) | `ninja` |
+| `build/smt3/vu/*.bin` | `tools/vuas.py`, from the listings in `src/smt3/sdf/vu/` |
 | `build/smt3/SLUS_209.11.ld`, `config/smt3/undefined_*_auto.txt` | splat |
 | `config/smt3/checksum.sha1` | `configure.py` |
 | `tools/bin/`, `tools/compilers/`, `tools/glibc32/` | `tools/download_tools.py` |
