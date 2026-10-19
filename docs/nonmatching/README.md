@@ -15,7 +15,6 @@ page and line to open. Conventions are in
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 7 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
-| 6 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
@@ -26,6 +25,7 @@ page and line to open. Conventions are in
 | 4 | event/evtPolygonMovie | [event/evtPolygonMovie.md](event/evtPolygonMovie.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
 | 4 | effect/effBlur_Filter | [effect/effBlur_Filter.md](effect/effBlur_Filter.md) |
+| 4 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 3 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |

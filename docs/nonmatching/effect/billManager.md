@@ -101,7 +101,7 @@ direct measurement:
 - Only this function is the effective neighbour. Parking
   `dds3Billboard_P2ASetNumber` instead, which an earlier reading said would
   work equally and would be the cheaper trade at 432 bytes, leaves `P2ADraw`
-  at 1 of 174 words. The two neighbours are not interchangeable.
+  at 1 of 174 words differing. The two neighbours are not interchangeable.
 
 Ruled out, each measured: hiding `dds3Billboard_P2AColorMul` the same way (no
 effect); and `dds3BillboardTagLink` present as a C definition or not, which

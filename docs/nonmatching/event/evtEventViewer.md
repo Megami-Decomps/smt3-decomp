@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## evtEventViewerProcess3 (event/evtEventViewer, 0x16C)
 
-88 of 91 words, at the exact 364-byte size.
+88 of 91 words match, at the exact 364-byte size.
 
 Three consecutive words, the second `viewerinfo->flags & 1` test after
 `FrameSelect`: retail loads the field into `$2`, masks it there and branches

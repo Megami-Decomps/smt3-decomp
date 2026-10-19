@@ -55,7 +55,7 @@ words.
 
 ## effBTLCutDraw (effect/effBattle, 0x420)
 
-Eighty-eight of 263 words, one word short of retail's 264, and the jump table
+Eighty-eight of 263 words differ, one word short of retail's 264, and the jump table
 has one of six entries wrong. The draft is kept for the decode rather than for
 its distance: the body is semantically complete and everything awkward about
 the function is pinned down.

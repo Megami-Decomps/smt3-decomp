@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## slSaveData_writeFile (mc/slMain, 0x238)
 
-106 of 142 words, at the exact 568-byte size.
+106 of 142 words match, at the exact 568-byte size.
 
 The 36 remaining words are one register renaming carried through the whole
 record-copy block. The instruction sequence is identical; retail holds the
@@ -40,7 +40,7 @@ casts; and five orderings of the last six stores.
 
 ## slDrawWindow (mc/slMain, 0x4EC)
 
-87 of 313 words, two words short of the 1260-byte size.
+87 of 313 words match, two words short of the 1260-byte size.
 
 Everything up to the window-height arithmetic is exact, and the arithmetic
 itself is reconstructed: the counter is bumped and stored, the first box's
@@ -70,7 +70,7 @@ all 120 declaration orders of the five locals, and separate locals per block
 
 ## slDrawInfo (mc/slMain, 0x2F4)
 
-183 of 189 words, at the exact 756-byte size, and **exact when slDrawWindow is
+183 of 189 words match, at the exact 756-byte size, and **exact when slDrawWindow is
 compiled as C in the same unit**. That is the finding worth acting on: the
 draft here is complete and correct, and banking it only needs slDrawWindow
 above it to match.
@@ -90,7 +90,7 @@ early `return`.
 
 ## slDrawError (mc/slMain, 0x4AC)
 
-293 of 299 words, at the exact 1196-byte size, and **exact when slDrawWindow
+293 of 299 words match, at the exact 1196-byte size, and **exact when slDrawWindow
 is compiled as C in the same unit** - measured, not assumed. Same situation as
 slDrawInfo above and the same six-`bnel` difference, on the `gslErrorCode`
 tests for 1, 2 and 7, which are the three arms that branch on `slDDS3To31Flg`

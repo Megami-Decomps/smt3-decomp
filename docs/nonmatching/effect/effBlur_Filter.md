@@ -109,7 +109,7 @@ of the trailing call, which duplicates it and is 97.
 
 Eight of a hundred and thirty words differ **inside the full unit**, which is
 the number that matters; compiled alone the function is eight bytes shorter
-and 60 of 128 words out, and `check_unit` reports both. The eight are the same
+and 60 of 128 words differ, and `check_unit` reports both. The eight are the same
 loop-guard delay slot as `dds3EffectRippleBlurDraw` above: retail's `blez`
 carries `lw $17, 0x34($19)` and the draft's carries the hoisted
 `daddu $4, $21, $0` for the trailing tail call. Read that entry for what was

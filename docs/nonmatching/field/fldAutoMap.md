@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## fldAutoMapCloseBlock2 (field/fldAutoMap, 0xA8)
 
-40 of 42 words, at the exact 168-byte size.
+40 of 42 words match, at the exact 168-byte size.
 
 Retail computes `floor - 1` into `$7` in the instruction before the `div` and
 `flagNumber - 1` into `$6` in the `beql` delay slot of the divide-by-zero
@@ -31,7 +31,7 @@ the close path is what moves the allocation.
 
 ## fldAutoMapDrawIconOfsR (field/fldAutoMap, 0x244)
 
-10 of 146 words, at the exact 584-byte size.
+10 of 146 words match, at the exact 584-byte size.
 
 The function builds one textured quad for an icon. What it does is fully
 recovered; what is left is register allocation.
@@ -78,7 +78,7 @@ initialized or assigned.
 
 ## fldAutoMapSeqStart (field/fldAutoMap, 0x30C)
 
-148 of 195 words, at the exact 780-byte size. Everything up to `+0x1A4` is
+148 of 195 words match, at the exact 780-byte size. Everything up to `+0x1A4` is
 identical; the rest is the closing block that fills three vectors.
 
 Recovered along the way, and used by the matching `fldInitPacLoader`:
@@ -118,7 +118,7 @@ this function, and the implicit declaration makes ee-gcc treat it as returning
 
 ## fldAutoMapDrawIconOfsRF (field/fldAutoMap, 0x33C)
 
-187 of 207 words, at the exact 828-byte size.
+187 of 207 words match, at the exact 828-byte size.
 
 The rotated-icon sibling of `fldAutoMapDrawIconOfsR`: it builds the same
 textured quad, but in world space, rotating the four corners through the VU0
@@ -165,7 +165,7 @@ these four are computed from the table mid-function.
 
 ## fldAutoMapProc (field/fldAutoMap, 0x48)
 
-15 of 18 words, at the exact 72-byte size.
+15 of 18 words match, at the exact 72-byte size.
 
 Three words, and all three are the branch-annul shape the levers page describes
 from the other side: retail has `beqz` and `bne` with a `nop` in the delay
@@ -183,7 +183,7 @@ computed before the first branch; `&&` folds them and costs 13 words.
 
 ## fldDrawAreaBlockFont (field/fldAutoMap, 0x388)
 
-57 of 226 words, 908 bytes against retail's 904.
+57 of 226 words match, 908 bytes against retail's 904.
 
 The area-name panel: it steps the name's fade counter by the panel mode, then
 draws the place name (or the area name) and its backing panel. Fully recovered
@@ -249,7 +249,7 @@ with casts.
 
 ## fldAutoMapClear (field/fldAutoMap, 0x9C)
 
-37 of 39 words, at the exact 156-byte size.
+37 of 39 words match, at the exact 156-byte size.
 
 Two loops zero 30 and 8 rows of 32 quadwords in `DDS3_GBWK`. The second loop
 matches exactly from `u64 *row = (u64 *)(gb + 0x19D10 + i * 256);` and

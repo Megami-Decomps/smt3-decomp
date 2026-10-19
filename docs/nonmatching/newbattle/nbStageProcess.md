@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## nbAddOrder (newbattle/nbStageProcess, 0x9C)
 
-17 of 37 words, 148 bytes against the native 156.
+17 of 37 words match, 148 bytes against the native 156.
 
 Retail keeps the start index and the loop counter in two registers with a
 copy between them: `$4` holds `orderindex + 1` and is used only to form the
@@ -20,7 +20,7 @@ form, which gcc rotates and which costs a duplicated test.
 
 ## nbSetNextOrder (newbattle/nbStageProcess, 0xAC)
 
-10 of 44 words, 176 bytes against the native 172.
+10 of 44 words match, 176 bytes against the native 172.
 
 Retail recomputes `data + 8 + (s8)orderindex` with an `addu` on every
 iteration and reads the order byte at `0x40` of it. The draft strength-reduces
@@ -35,7 +35,7 @@ a `do`/`while` on `data->order[data->orderindex] < 0`.
 
 ## nbGetRandamStock (newbattle/nbStageProcess, 0xB4)
 
-4 of 44 words, 176 bytes against the native 180.
+4 of 44 words match, 176 bytes against the native 180.
 
 The same mechanism as `fldStatusSet` above, over the same records. Retail
 keeps one induction variable holding the byte offset into `dds3GlobalWork_t`,
@@ -51,7 +51,7 @@ through a local, which is the split retail's two bases suggest; and a
 
 ## nbSetBadstatMotion (newbattle/nbStageProcess, 0xA8)
 
-6 of 42 words, at the exact 168-byte size.
+6 of 42 words differ, at the exact 168-byte size.
 
 Retail holds `data` in `$4` and `data->party` in `$6`, computing the party
 address as `addu $5, $6, $5` with the two `nbGetUnitWorkPointer` arguments in
@@ -70,7 +70,7 @@ stores, so the difference is register pressure from `$17` holding `work`.
 
 ## nbInitActionProcess (newbattle/nbStageProcess, 0xA0)
 
-6 of 40 words, at the exact 160-byte size.
+6 of 40 words differ, at the exact 160-byte size.
 
 Every instruction matches; the six differing words are the two temporaries
 of the `(data->unkE4 + 1) % 4` sequence, which retail puts in `$9` and `$10`
@@ -84,7 +84,7 @@ and computing the modulo after the `InitActionProcessData` call (24 words).
 
 ## DispComm1PanelComm (newbattle/nbStageProcess, 0xE0)
 
-53 of 56 words, at the exact 224-byte size.
+53 of 56 words match, at the exact 224-byte size.
 
 The guard is `if (no <= 0x8003) { if (no >= 0x8000) return; }` over an `s32`
 local holding the `u16` parameter, which is what gives retail's two separate
@@ -108,7 +108,7 @@ encoding.
 
 ## nbSetWaitMotion (newbattle/nbStageProcess, 0xD8)
 
-8 of 54 words, at the exact 216-byte size, with the same instruction multiset.
+8 of 54 words differ, at the exact 216-byte size, with the same instruction multiset.
 
 Retail reads the visual's motion speed and multiplies it by `ritu` before it
 loads `form->hunit` for the first call, so the `jal evtSetWaitMotion` delay
@@ -123,7 +123,7 @@ the two calls.
 
 ## CheckSenseiNego (newbattle/nbStageProcess, 0x130)
 
-57 of 74 words, 296 bytes against the native 300.
+57 of 74 words differ, 296 bytes against the native 300.
 
 The guards are right: the stage-major range test folds to retail's
 `addiu -0xF0`/`sltiu 7`, the four `data->stat` bit tests come out in retail's
@@ -142,7 +142,7 @@ an intermediate local for the `21 / enemypcnt` quotient.
 
 ## CheckAction_STKSEL (newbattle/nbStageProcess, 0xE8)
 
-9 of 58 words, at the exact 232-byte size.
+9 of 58 words differ, at the exact 232-byte size.
 
 A `switch (StkSelId)` written `default:`, `case -1:`, `case -2:` gives
 retail's two forward `beq`s and the body order (the normal arm first, then the
@@ -159,7 +159,7 @@ Ruled out: `do`/`while` and a pre-loop `i` init for the stat-clearing loop;
 
 ## CheckAction_ESCAPE (newbattle/nbStageProcess, 0xE4)
 
-9 of 57 words, at the exact 228-byte size.
+9 of 57 words differ, at the exact 228-byte size.
 
 A `switch ((u16)((u16)a->seqtime / 15))` over cases 1 and 2 with a `goto` to
 one trailing `return 0` gives retail's divide trap, dispatch and both arms.
@@ -175,7 +175,7 @@ case bodies' source order.
 
 ## DispCommCursor (newbattle/nbStageProcess, 0x184)
 
-29 of 97 words, at the exact 388-byte size and with the same instruction
+29 of 97 words differ, at the exact 388-byte size and with the same instruction
 sequence.
 
 Two register copies retail keeps are what the structure hinges on, and both
@@ -200,7 +200,7 @@ the `if`; and all declaration orders of the locals, which change nothing.
 
 ## nbGetMotionNo (newbattle/nbStageProcess, 0xC0)
 
-23 of 46 words, 184 bytes against the native 192, and every differing word is
+23 of 46 words differ, 184 bytes against the native 192, and every differing word is
 the shift caused by one missing register copy.
 
 Retail builds three address pseudos for the three reads out of the motion
@@ -224,7 +224,7 @@ unit-local `nbUnitMotion_t`, since the shared header splits the same bytes as
 
 ## nbDrawKoukaSprite (newbattle/nbStageProcess, 0x108)
 
-24 of 66 words, at the exact 264-byte size and with the same instruction
+24 of 66 words differ, at the exact 264-byte size and with the same instruction
 multiset.
 
 The digit loop, the `n == 0` fixup and the draw loop are all exact. What is

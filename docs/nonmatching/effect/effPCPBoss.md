@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## effPCPBossBaelCopy (effect/effPCPBoss, 128 bytes)
 
-21 of 32 words, at the exact 128-byte size.
+21 of 32 words match, at the exact 128-byte size.
 
 Pure scheduling. Retail splits the `lui`/`ori` pair that builds `0x80808080`
 around the eight-instruction `ldl`/`ldr`/`sdl`/`sdr` block that copies the
@@ -27,7 +27,7 @@ named locals; `sizeof` instead of a literal allocation size. Caching
 
 ## effPCPBossKAGUThunderboltCopy (effect/effPCPBoss, 176 bytes)
 
-21 of 44 words, at the exact 176-byte size.
+21 of 44 words match, at the exact 176-byte size.
 
 Register allocation. Retail keeps the source work in `$17` and the new work in
 `$16`; the draft has them the other way round, which touches every instruction
@@ -44,7 +44,7 @@ storing `work->crack` before `work->bed` instead of after.
 
 ## effPCP_BED_Create (effect/effPCPBoss, 248 bytes)
 
-21 of 62 words, at the exact 248-byte size.
+21 of 62 words match, at the exact 248-byte size.
 
 One source fact is missing. Retail materialises `0x80808080` twice: once as
 `lui`/`ori` before the parameter copy for `work->color`, and again inside the
@@ -70,7 +70,7 @@ common subexpression here should carry several of them.
 
 ## effPCPCrackCopy (effect/effPCPBoss, 292 bytes)
 
-63 of 73 words, at the exact 292-byte size.
+63 of 73 words match, at the exact 292-byte size.
 
 Scheduling of the `0x80808080` materialisation. `effPCPCrackCreate` next to it
 matches with the identical body, so the 0x8C-byte head copy as one struct
@@ -87,7 +87,7 @@ written `0.0f`, which reaches 11.
 
 ## effPCPDANTE_Thunder_ProcessDraw (effect/effPCPBoss, 172 bytes)
 
-28 of 43 words, one word short of retail's 44.
+28 of 43 words match, one word short of retail's 44.
 
 Retail computes `$sp + 0x40` twice: once into `$2` for the `sqc2` that stores
 the mark position, and again into `$5` in the `effPCPDANTE_Thunder_SetPosition`
@@ -114,7 +114,7 @@ a 200-unit line with `effDebugLineDraw`.
 
 ## effPCPDANTE_ShowTime_Draw (effect/effPCPBoss, 300 bytes)
 
-71 of 75 words, at the exact 300-byte size.
+71 of 75 words match, at the exact 300-byte size.
 
 One instruction's schedule slot. Retail places the `mov.s $f12, $f20` that
 passes 0.45f to the first `nbPanelFlashInit` directly after the two `lui`s for
@@ -132,7 +132,7 @@ at four.
 
 ## effPCPBossMETATOBeamDraw (effect/effPCPBoss, 0x25C)
 
-7 of 151 words, at the exact 604-byte size.
+7 of 151 words differ, at the exact 604-byte size.
 
 Where the two interpolation factors finish being built. Retail materialises both
 `0x3EA8F5C2` and `0x3F28F5C2` with `lui`/`ori` pairs before the

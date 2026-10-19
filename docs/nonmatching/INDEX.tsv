@@ -1,44 +1,42 @@
 function	unit	size	distance	page	line
-fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words	docs/nonmatching/code_00116AD0.md	5
-fldRunEffSet	code_00116AD0	0x12C	67 of 73 words	docs/nonmatching/code_00116AD0.md	48
-fldRunEffTask	code_00116AD0	0x220	115 of 136 words	docs/nonmatching/code_00116AD0.md	69
-fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words	docs/nonmatching/code_00116AD0.md	86
-fldGbFlagClear	code_00116AD0	0x124	23 of 73 words	docs/nonmatching/code_00116AD0.md	113
+fldRunTamaFree	code_00116AD0	0xBC	27 of 47 words differ	docs/nonmatching/code_00116AD0.md	5
+fldRunEffSet	code_00116AD0	0x12C	67 of 73 words differ	docs/nonmatching/code_00116AD0.md	48
+fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/nonmatching/code_00116AD0.md	69
+fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/nonmatching/code_00116AD0.md	86
+fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/nonmatching/code_00116AD0.md	113
 fldAnahoriSelectInit	code_00116AD0	0x7C		docs/nonmatching/code_00116AD0.md	138
-slCopyNonZero	code_00144798	0x40	14 of 16 words	docs/nonmatching/code_00144798.md	5
-fldCommand_FLD_NPC_ON	code_00144798	0x12C	74 of 75 words	docs/nonmatching/code_00144798.md	26
-fldCommand_FLD_NPC_OFF	code_00144798	0x12C	74 of 75 words	docs/nonmatching/code_00144798.md	45
-fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words	docs/nonmatching/code_00144798.md	51
-fldSnowInit	code_00144798	0x1B4	28 of 110 words	docs/nonmatching/code_00144798.md	80
-fldAmModelLoadFile	code_00144798	0x174	24 of 91 words	docs/nonmatching/code_00144798.md	107
+slCopyNonZero	code_00144798	0x40	14 of 16 words match	docs/nonmatching/code_00144798.md	5
+fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/nonmatching/code_00144798.md	26
+fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/nonmatching/code_00144798.md	55
+fldAmModelLoadFile	code_00144798	0x174	24 of 91 words match	docs/nonmatching/code_00144798.md	82
 nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the first difference	docs/nonmatching/code_001B0858.md	5
 nbCameraBoss_BSSAMA_Command_Set	code_001B0858	0x1CC	25 of 115 words before the first difference	docs/nonmatching/code_001B0858.md	25
-nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words	docs/nonmatching/code_001B0858.md	45
-pbSetPanelModel	code_001D1470	0x60	2 of 23 words	docs/nonmatching/code_001D1470.md	5
-moveBlock	code_001D1470	0x8C	30 of 31 words	docs/nonmatching/code_001D1470.md	25
-pbInitGameCamera	code_001D1470	0x94	26 of 38 words	docs/nonmatching/code_001D1470.md	48
-pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words	docs/nonmatching/code_001D1470.md	68
-pbInitMapBaseDraw	code_001D1470	0xC4	3 of 49 words	docs/nonmatching/code_001D1470.md	99
-func_00213190	code_001FAE80	0x50	8 of 18 words	docs/nonmatching/code_001FAE80.md	5
-func_002429C0	code_001FAE80	0x54	19 of 21 words	docs/nonmatching/code_001FAE80.md	25
-rstDrawStatusRow	code_001FAE80	0x5C	21 of 23 words	docs/nonmatching/code_001FAE80.md	45
-campDhGetEntryRatio	code_001FAE80	0x60	11 of 24 words	docs/nonmatching/code_001FAE80.md	63
-cmpFindKugatatiMsgEntry	code_001FAE80	0x60	12 of 24 words	docs/nonmatching/code_001FAE80.md	83
-cmp_241A10	code_001FAE80	0x74	19 of 28 words	docs/nonmatching/code_001FAE80.md	105
-cmpUpdateList	code_001FAE80	0x6C	26 of 27 words	docs/nonmatching/code_001FAE80.md	130
-cmbChkDevilEvo	code_001FAE80	0x74	25 of 29 words	docs/nonmatching/code_001FAE80.md	145
-datFindKugatatiEntry	code_001FAE80	0x74	28 of 28 words	docs/nonmatching/code_001FAE80.md	167
-cmpClearCursorSlots	code_001FAE80	0x54	18 of 21 words	docs/nonmatching/code_001FAE80.md	192
-mselToggleFlag	code_001FAE80	0x6C	13 of 27 words	docs/nonmatching/code_001FAE80.md	213
-cmpSetCursorSlot	code_001FAE80	0x3C	8 of 15 words	docs/nonmatching/code_001FAE80.md	239
-cmp_23A918	code_001FAE80	0x40	4 of 16 words	docs/nonmatching/code_001FAE80.md	262
-trmGetJumpTerminalNo	code_001FAE80	0x44	8 of 17 words	docs/nonmatching/code_001FAE80.md	277
-cmpSkillOrder	code_001FAE80	0x50	12 of 20 words	docs/nonmatching/code_001FAE80.md	307
-cmpItemHasFlag	code_001FAE80	0x54	13 of 17 words	docs/nonmatching/code_001FAE80.md	330
-cmp_241A88	code_001FAE80	0x68	3 of 26 words	docs/nonmatching/code_001FAE80.md	357
-cmbGetHeartsParamByIndex	code_001FAE80	0x58	8 of 22 words	docs/nonmatching/code_001FAE80.md	378
-fclDrawPanel	code_001FAE80	0x54	8 of 21 words	docs/nonmatching/code_001FAE80.md	401
-cmbFindCameraPoint	code_001FAE80	0x64	9 of 25 words	docs/nonmatching/code_001FAE80.md	423
+nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/nonmatching/code_001B0858.md	45
+pbSetPanelModel	code_001D1470	0x60	2 of 23 words match	docs/nonmatching/code_001D1470.md	5
+moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/nonmatching/code_001D1470.md	25
+pbInitGameCamera	code_001D1470	0x94	26 of 38 words differ	docs/nonmatching/code_001D1470.md	48
+pbStartErrorDraw	code_001D1470	0xBC	2 of 47 words differ	docs/nonmatching/code_001D1470.md	68
+pbInitMapBaseDraw	code_001D1470	0xC4	3 of 49 words differ	docs/nonmatching/code_001D1470.md	99
+func_00213190	code_001FAE80	0x50	8 of 18 words match	docs/nonmatching/code_001FAE80.md	5
+func_002429C0	code_001FAE80	0x54	19 of 21 words match	docs/nonmatching/code_001FAE80.md	25
+rstDrawStatusRow	code_001FAE80	0x5C	21 of 23 words match	docs/nonmatching/code_001FAE80.md	45
+campDhGetEntryRatio	code_001FAE80	0x60	11 of 24 words match	docs/nonmatching/code_001FAE80.md	63
+cmpFindKugatatiMsgEntry	code_001FAE80	0x60	12 of 24 words differ	docs/nonmatching/code_001FAE80.md	83
+cmp_241A10	code_001FAE80	0x74	19 of 28 words match	docs/nonmatching/code_001FAE80.md	105
+cmpUpdateList	code_001FAE80	0x6C	26 of 27 words match	docs/nonmatching/code_001FAE80.md	130
+cmbChkDevilEvo	code_001FAE80	0x74	25 of 29 words match	docs/nonmatching/code_001FAE80.md	145
+datFindKugatatiEntry	code_001FAE80	0x74	28 of 28 words differ	docs/nonmatching/code_001FAE80.md	167
+cmpClearCursorSlots	code_001FAE80	0x54	18 of 21 words differ	docs/nonmatching/code_001FAE80.md	192
+mselToggleFlag	code_001FAE80	0x6C	13 of 27 words differ	docs/nonmatching/code_001FAE80.md	213
+cmpSetCursorSlot	code_001FAE80	0x3C	8 of 15 words differ	docs/nonmatching/code_001FAE80.md	239
+cmp_23A918	code_001FAE80	0x40	4 of 16 words differ	docs/nonmatching/code_001FAE80.md	262
+trmGetJumpTerminalNo	code_001FAE80	0x44	8 of 17 words differ	docs/nonmatching/code_001FAE80.md	277
+cmpSkillOrder	code_001FAE80	0x50	12 of 20 words differ	docs/nonmatching/code_001FAE80.md	307
+cmpItemHasFlag	code_001FAE80	0x54	13 of 17 words differ	docs/nonmatching/code_001FAE80.md	330
+cmp_241A88	code_001FAE80	0x68	3 of 26 words differ	docs/nonmatching/code_001FAE80.md	357
+cmbGetHeartsParamByIndex	code_001FAE80	0x58	8 of 22 words differ	docs/nonmatching/code_001FAE80.md	378
+fclDrawPanel	code_001FAE80	0x54	8 of 21 words differ	docs/nonmatching/code_001FAE80.md	401
+cmbFindCameraPoint	code_001FAE80	0x64	9 of 25 words differ	docs/nonmatching/code_001FAE80.md	423
 movieViewerStep	code_001FAE80	0x4C	6 of 14 words match	docs/nonmatching/code_001FAE80.md	446
 cmpClearStatusFlags	code_001FAE80	0x30	1 of 10 words match	docs/nonmatching/code_001FAE80.md	476
 cmbDrawFullScreenPanel	code_001FAE80	0x68	20 of 26 words match	docs/nonmatching/code_001FAE80.md	503
@@ -46,64 +44,64 @@ fclTerminalLoadTextures	code_001FAE80	0x70	16 of 27 words match	docs/nonmatching
 rstBuildDestroyList	code_001FAE80	0x64	1 of 24 words matches	docs/nonmatching/code_001FAE80.md	554
 cmbDrawResultFooter	code_001FAE80	0x74	25 of 29 words match	docs/nonmatching/code_001FAE80.md	586
 ragCheckHeartsChoice	code_001FAE80	0x80	22 of 29 words match	docs/nonmatching/code_001FAE80.md	607
-getPartsType	code_0029B780	0x5C	15 of 24 words	docs/nonmatching/code_0029B780.md	5
-pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words	docs/nonmatching/code_0029B780.md	23
-pipeGetObjData	code_0029B780	0x120	9 of 71 words	docs/nonmatching/code_0029B780.md	49
+getPartsType	code_0029B780	0x5C	15 of 24 words differ	docs/nonmatching/code_0029B780.md	5
+pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0029B780.md	23
+pipeGetObjData	code_0029B780	0x120	9 of 71 words differ	docs/nonmatching/code_0029B780.md	49
 dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/nonmatching/effect/billManager.md	5
 dds3BillboardTagLink	effect/billManager	0x49C	16 of 271 words match	docs/nonmatching/effect/billManager.md	38
-dds3Billboard_P2AAnimDraw	effect/billManager	0x1D0	1 of 174 words	docs/nonmatching/effect/billManager.md	85
+dds3Billboard_P2AAnimDraw	effect/billManager	0x1D0	1 of 174 words differing	docs/nonmatching/effect/billManager.md	85
 effBTLFieldColorON	effect/effBattle	0x3C4	Thirteen of 241 words differ	docs/nonmatching/effect/effBattle.md	5
-effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words	docs/nonmatching/effect/effBattle.md	56
-effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words	docs/nonmatching/effect/effBattleMisc.md	5
-effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words	docs/nonmatching/effect/effBattleMisc.md	36
+effBTLCutDraw	effect/effBattle	0x420	Eighty-eight of 263 words differ	docs/nonmatching/effect/effBattle.md	56
+effBTLModelLook2	effect/effBattleMisc	0x110	2 of 68 words differ	docs/nonmatching/effect/effBattleMisc.md	5
+effBTLPartPtrModelGroupGetCenterAndHeight	effect/effBattleMisc	0x248	4 of 146 words differ	docs/nonmatching/effect/effBattleMisc.md	36
 dds3EffectBlur_AlphaMultiParmSet	effect/effBlur_Filter	0xB4	Twenty-six of forty-five words differ	docs/nonmatching/effect/effBlur_Filter.md	5
 dds3EffectFilterDrawTexQuad	effect/effBlur_Filter	0x1B8		docs/nonmatching/effect/effBlur_Filter.md	39
 dds3EffectRippleBlurDraw	effect/effBlur_Filter	0x1E8		docs/nonmatching/effect/effBlur_Filter.md	74
-dds3EffectDistortionBlurDraw	effect/effBlur_Filter	0x208	60 of 128 words	docs/nonmatching/effect/effBlur_Filter.md	108
+dds3EffectDistortionBlurDraw	effect/effBlur_Filter	0x208	60 of 128 words differ	docs/nonmatching/effect/effBlur_Filter.md	108
 effEveBEDCutDraw	effect/effEvent	0x1DC	117 of 119 words match	docs/nonmatching/effect/effEvent.md	5
 effEVECombParSmokeDraw	effect/effEvent	0xB34	493 of 711 words differ	docs/nonmatching/effect/effEvent.md	66
 effDebugDrawRectLine	effect/effMagatuhi	0x154	72 of 85 words match	docs/nonmatching/effect/effMagatuhi.md	5
 effPCPBezierBillDraw	effect/effPCPBezier	0x1764	1482 of 1497 words match	docs/nonmatching/effect/effPCPBezier.md	5
-effPCPBossBaelCopy	effect/effPCPBoss	128 bytes	21 of 32 words	docs/nonmatching/effect/effPCPBoss.md	5
-effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words	docs/nonmatching/effect/effPCPBoss.md	28
-effPCP_BED_Create	effect/effPCPBoss	248 bytes	21 of 62 words	docs/nonmatching/effect/effPCPBoss.md	45
-effPCPCrackCopy	effect/effPCPBoss	292 bytes	63 of 73 words	docs/nonmatching/effect/effPCPBoss.md	71
-effPCPDANTE_Thunder_ProcessDraw	effect/effPCPBoss	172 bytes	28 of 43 words	docs/nonmatching/effect/effPCPBoss.md	88
-effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words	docs/nonmatching/effect/effPCPBoss.md	115
-effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words	docs/nonmatching/effect/effPCPBoss.md	133
+effPCPBossBaelCopy	effect/effPCPBoss	128 bytes	21 of 32 words match	docs/nonmatching/effect/effPCPBoss.md	5
+effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/nonmatching/effect/effPCPBoss.md	28
+effPCP_BED_Create	effect/effPCPBoss	248 bytes	21 of 62 words match	docs/nonmatching/effect/effPCPBoss.md	45
+effPCPCrackCopy	effect/effPCPBoss	292 bytes	63 of 73 words match	docs/nonmatching/effect/effPCPBoss.md	71
+effPCPDANTE_Thunder_ProcessDraw	effect/effPCPBoss	172 bytes	28 of 43 words match	docs/nonmatching/effect/effPCPBoss.md	88
+effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/nonmatching/effect/effPCPBoss.md	115
+effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/nonmatching/effect/effPCPBoss.md	133
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/nonmatching/effect/parManager.md	5
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/nonmatching/effect/parManager.md	35
 dds3ParticleColorAnim	effect/parManager	0x14C	64 of 83 words match	docs/nonmatching/effect/parManager.md	91
 evtCommand_MODEL_RGB	event/evtCommand	188 bytes	Two of forty-seven words differ	docs/nonmatching/event/evtCommand.md	5
-evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words	docs/nonmatching/event/evtEventViewer.md	5
-func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words	docs/nonmatching/event/evtEventViewerMenu.md	5
-evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words	docs/nonmatching/event/evtEventViewerMenu.md	24
-evtSaveViewerHeader	event/evtEventViewerMenu	0x400	254 of 256 words	docs/nonmatching/event/evtEventViewerMenu.md	43
-evtMenuDisp	event/evtEventViewerMenu	0x1C0	63 of 112 words	docs/nonmatching/event/evtEventViewerMenu.md	70
+evtEventViewerProcess3	event/evtEventViewer	0x16C	88 of 91 words match	docs/nonmatching/event/evtEventViewer.md	5
+func_001F79A8	event/evtEventViewerMenu	0xE4	20 of 56 words differ	docs/nonmatching/event/evtEventViewerMenu.md	5
+evtFrameListHead	event/evtEventViewerMenu	0x138	39 of 78 words differ	docs/nonmatching/event/evtEventViewerMenu.md	24
+evtSaveViewerHeader	event/evtEventViewerMenu	0x400	254 of 256 words match	docs/nonmatching/event/evtEventViewerMenu.md	43
+evtMenuDisp	event/evtEventViewerMenu	0x1C0	63 of 112 words match	docs/nonmatching/event/evtEventViewerMenu.md	70
 evtPictureProcess1	event/evtPicture	0x228		docs/nonmatching/event/evtPicture.md	5
 evtHokanColor	event/evtPolygonMovie	0xC8	40 of 49 words match	docs/nonmatching/event/evtPolygonMovie.md	5
 evtHokanFilter	event/evtPolygonMovie	0x120	71 of 72 words match	docs/nonmatching/event/evtPolygonMovie.md	28
 evtGetPolygonMovieWorkData2	event/evtPolygonMovie	0xF0	58 of 60 words match	docs/nonmatching/event/evtPolygonMovie.md	46
 CheckLoad_evtPolygonMovie	event/evtPolygonMovie	0x110	36 of 68 words match	docs/nonmatching/event/evtPolygonMovie.md	66
 evtSetUnitLightAndAmbient	event/evtUnitManager	0x94	34 of 37 words match	docs/nonmatching/event/evtUnitManager.md	5
-fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words	docs/nonmatching/field/fldAutoMap.md	5
-fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words	docs/nonmatching/field/fldAutoMap.md	32
-fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words	docs/nonmatching/field/fldAutoMap.md	79
-fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words	docs/nonmatching/field/fldAutoMap.md	119
-fldAutoMapProc	field/fldAutoMap	0x48	15 of 18 words	docs/nonmatching/field/fldAutoMap.md	166
-fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words	docs/nonmatching/field/fldAutoMap.md	184
-fldAutoMapClear	field/fldAutoMap	0x9C	37 of 39 words	docs/nonmatching/field/fldAutoMap.md	250
-fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words	docs/nonmatching/field/fldDraw.md	5
-fldStatusSet	field/fldDraw	0xF8	36 of 62 words	docs/nonmatching/field/fldDraw.md	32
-fldCamUpdateChase	field/fldDraw	0x250	120 of 148 words	docs/nonmatching/field/fldDraw.md	52
-resetCamTgtPlayer	field/fldDraw	0x1F8	90 of 126 words	docs/nonmatching/field/fldDraw.md	74
-fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words	docs/nonmatching/field/fldDraw.md	113
-fldCamGetPhokanParam	field/fldDraw	0x17C	92 of 95 words	docs/nonmatching/field/fldDraw.md	145
+fldAutoMapCloseBlock2	field/fldAutoMap	0xA8	40 of 42 words match	docs/nonmatching/field/fldAutoMap.md	5
+fldAutoMapDrawIconOfsR	field/fldAutoMap	0x244	10 of 146 words match	docs/nonmatching/field/fldAutoMap.md	32
+fldAutoMapSeqStart	field/fldAutoMap	0x30C	148 of 195 words match	docs/nonmatching/field/fldAutoMap.md	79
+fldAutoMapDrawIconOfsRF	field/fldAutoMap	0x33C	187 of 207 words match	docs/nonmatching/field/fldAutoMap.md	119
+fldAutoMapProc	field/fldAutoMap	0x48	15 of 18 words match	docs/nonmatching/field/fldAutoMap.md	166
+fldDrawAreaBlockFont	field/fldAutoMap	0x388	57 of 226 words match	docs/nonmatching/field/fldAutoMap.md	184
+fldAutoMapClear	field/fldAutoMap	0x9C	37 of 39 words match	docs/nonmatching/field/fldAutoMap.md	250
+fldSkyDrawFilter	field/fldDraw	0xAD8	682 of 694 words match	docs/nonmatching/field/fldDraw.md	5
+fldStatusSet	field/fldDraw	0xF8	36 of 62 words match	docs/nonmatching/field/fldDraw.md	32
+fldCamUpdateChase	field/fldDraw	0x250	120 of 148 words match	docs/nonmatching/field/fldDraw.md	52
+resetCamTgtPlayer	field/fldDraw	0x1F8	90 of 126 words match	docs/nonmatching/field/fldDraw.md	74
+fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/nonmatching/field/fldDraw.md	113
+fldCamGetPhokanParam	field/fldDraw	0x17C	92 of 95 words match	docs/nonmatching/field/fldDraw.md	145
 rsetOtOfs	field/fldDraw	0x8		docs/nonmatching/field/fldDraw.md	175
-fldHitChkUnitElv	field/fldDraw	0x184	63 of 97 words	docs/nonmatching/field/fldDraw.md	196
-fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words	docs/nonmatching/field/fld_Npc.md	5
-fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words	docs/nonmatching/field/fld_Npc.md	37
-fldSibukiStart	field/fld_Npc	0x98	28 of 38 words	docs/nonmatching/field/fld_Npc.md	71
+fldHitChkUnitElv	field/fldDraw	0x184	63 of 97 words match	docs/nonmatching/field/fldDraw.md	196
+fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words match	docs/nonmatching/field/fld_Npc.md	5
+fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/nonmatching/field/fld_Npc.md	37
+fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fld_Npc.md	71
 frPreCalcStrWidth	interface/frFont	0xF8	Fifty-four of sixty-two words match	docs/nonmatching/interface/frFont.md	5
 frAnalyzeTag	interface/frFont	0x518		docs/nonmatching/interface/frFont.md	48
 frAnalyzeMessage	interface/frFont	0x200		docs/nonmatching/interface/frFont.md	100
@@ -117,53 +115,53 @@ RunningProcess	kernel/dds3KernelCore	0x124	33 of 73 words match	docs/nonmatching
 dds3InitZClearDrawTag	kernel/dds3KernelDraw	0x15C	Sixty-six of 87 words match	docs/nonmatching/kernel/dds3KernelDraw.md	5
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/nonmatching/kernel/dds3KernelDraw.md	48
 dds3SceneLightUpdateFirst	kernel/dds3KernelDraw	0x5FC	forty-five of 383 words match	docs/nonmatching/kernel/dds3KernelDraw.md	88
-slSaveData_writeFile	mc/slMain	0x238	106 of 142 words	docs/nonmatching/mc/slMain.md	5
-slDrawWindow	mc/slMain	0x4EC	87 of 313 words	docs/nonmatching/mc/slMain.md	41
-slDrawInfo	mc/slMain	0x2F4	183 of 189 words	docs/nonmatching/mc/slMain.md	71
-slDrawError	mc/slMain	0x4AC	293 of 299 words	docs/nonmatching/mc/slMain.md	91
-func_001D4EB0,			36 of 37 words	docs/nonmatching/misc.md	5
+slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/slMain.md	5
+slDrawWindow	mc/slMain	0x4EC	87 of 313 words match	docs/nonmatching/mc/slMain.md	41
+slDrawInfo	mc/slMain	0x2F4	183 of 189 words match	docs/nonmatching/mc/slMain.md	71
+slDrawError	mc/slMain	0x4AC	293 of 299 words match	docs/nonmatching/mc/slMain.md	91
+func_001D4EB0,			36 of 37 words match	docs/nonmatching/misc.md	5
 effMagaCylinderDraw,			140 of 182 words match	docs/nonmatching/misc.md	28
-lstPageUp,			28 of 29 words	docs/nonmatching/misc.md	73
-rstFindEvoEntryType5,			24 of 27 words	docs/nonmatching/misc.md	97
-Chk_ENHOJOMAX,			54 of 55 words	docs/nonmatching/misc.md	117
-Flow8_7,			18 of 29 words	docs/nonmatching/misc.md	135
-nbAddStageCamera,			2 of 49 words	docs/nonmatching/misc.md	160
+lstPageUp,			28 of 29 words each match	docs/nonmatching/misc.md	73
+rstFindEvoEntryType5,			24 of 27 words each match	docs/nonmatching/misc.md	97
+Chk_ENHOJOMAX,			54 of 55 words each match	docs/nonmatching/misc.md	117
+Flow8_7,			18 of 29 words each differ	docs/nonmatching/misc.md	135
+nbAddStageCamera,			2 of 49 words each differ	docs/nonmatching/misc.md	160
 fcl_103420,			32 of 43 words match	docs/nonmatching/misc.md	184
-nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words	docs/nonmatching/newbattle/nbCameraBoss.md	5
-nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words	docs/nonmatching/newbattle/nbCameraBoss.md	48
-nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words	docs/nonmatching/newbattle/nbCameraBoss.md	77
+nbCameraBoss_Cut1_Run	newbattle/nbCameraBoss	0x1DC	33 of 117 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	5
+nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	48
+nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
 dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	Six of 270 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	5
 dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	44
-nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words	docs/nonmatching/newbattle/nbCameraSkill.md	5
-nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words	docs/nonmatching/newbattle/nbCameraSkill.md	28
-nbCameraState_SkillAttack_Calc	newbattle/nbCameraSkill	0x170	85 of 91 words	docs/nonmatching/newbattle/nbCameraSkill.md	51
-nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words	docs/nonmatching/newbattle/nbCameraSkill.md	81
-nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words	docs/nonmatching/newbattle/nbCameraSkill.md	118
-nbCameraShot_InvokeTarget_Set2	newbattle/nbCameraSkill	0x2C0	171 of 176 words	docs/nonmatching/newbattle/nbCameraSkill.md	145
+nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/nonmatching/newbattle/nbCameraSkill.md	5
+nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
+nbCameraState_SkillAttack_Calc	newbattle/nbCameraSkill	0x170	85 of 91 words match	docs/nonmatching/newbattle/nbCameraSkill.md	51
+nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/nonmatching/newbattle/nbCameraSkill.md	81
+nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/nonmatching/newbattle/nbCameraSkill.md	118
+nbCameraShot_InvokeTarget_Set2	newbattle/nbCameraSkill	0x2C0	171 of 176 words match	docs/nonmatching/newbattle/nbCameraSkill.md	145
 nbCameraShot_InvokeTargetReverse_Set2	newbattle/nbCameraSkill	0x2B8	160 of 171 words differ	docs/nonmatching/newbattle/nbCameraSkill.md	168
-nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words	docs/nonmatching/newbattle/nbMainProcess.md	5
-Flow6_36	newbattle/nbMakePacket	0xA8	24 of 41 words	docs/nonmatching/newbattle/nbMakePacket.md	5
-Flow2_13	newbattle/nbMakePacket	0xC8	44 of 50 words	docs/nonmatching/newbattle/nbMakePacket.md	21
-Flow2_2	newbattle/nbMakePacket	0xCC	22 of 48 words	docs/nonmatching/newbattle/nbMakePacket.md	37
-nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words	docs/nonmatching/newbattle/nbMakePacket.md	52
-Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words	docs/nonmatching/newbattle/nbMakePacket.md	72
-nbFreeFormResources	newbattle/nbMakePacket	0xD8	51 of 54 words	docs/nonmatching/newbattle/nbMakePacket.md	86
-nbEventProcess1	newbattle/nbMakePacket	0x7C	23 of 31 words	docs/nonmatching/newbattle/nbMakePacket.md	108
-Flow13_8	newbattle/nbMakePacket	0xB8	42 of 46 words	docs/nonmatching/newbattle/nbMakePacket.md	130
-Flow9_20	newbattle/nbMakePacket	0xAC	35 of 43 words	docs/nonmatching/newbattle/nbMakePacket.md	149
-nbGetAiEntry	newbattle/nbMakePacket	0xE0	43 of 54 words	docs/nonmatching/newbattle/nbMakePacket.md	167
-nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words	docs/nonmatching/newbattle/nbMakePacket.md	187
-nbE901Process_1	newbattle/nbMakePacket	0xCC	50 of 51 words	docs/nonmatching/newbattle/nbMakePacket.md	208
-nbRunAi	newbattle/nbMakePacket	0xBC	46 of 47 words	docs/nonmatching/newbattle/nbMakePacket.md	225
+nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/nonmatching/newbattle/nbMainProcess.md	5
+Flow6_36	newbattle/nbMakePacket	0xA8	24 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	5
+Flow2_13	newbattle/nbMakePacket	0xC8	44 of 50 words match	docs/nonmatching/newbattle/nbMakePacket.md	21
+Flow2_2	newbattle/nbMakePacket	0xCC	22 of 48 words match	docs/nonmatching/newbattle/nbMakePacket.md	37
+nbGetVirtualAisyo	newbattle/nbMakePacket	0xAC	39 of 43 words match	docs/nonmatching/newbattle/nbMakePacket.md	52
+Flow1_11	newbattle/nbMakePacket	0xC8	19 of 48 words match	docs/nonmatching/newbattle/nbMakePacket.md	72
+nbFreeFormResources	newbattle/nbMakePacket	0xD8	51 of 54 words match	docs/nonmatching/newbattle/nbMakePacket.md	86
+nbEventProcess1	newbattle/nbMakePacket	0x7C	23 of 31 words match	docs/nonmatching/newbattle/nbMakePacket.md	108
+Flow13_8	newbattle/nbMakePacket	0xB8	42 of 46 words match	docs/nonmatching/newbattle/nbMakePacket.md	130
+Flow9_20	newbattle/nbMakePacket	0xAC	35 of 43 words match	docs/nonmatching/newbattle/nbMakePacket.md	149
+nbGetAiEntry	newbattle/nbMakePacket	0xE0	43 of 54 words match	docs/nonmatching/newbattle/nbMakePacket.md	167
+nbClearActionFlags	newbattle/nbMakePacket	0xE0	18 of 56 words match	docs/nonmatching/newbattle/nbMakePacket.md	187
+nbE901Process_1	newbattle/nbMakePacket	0xCC	50 of 51 words match	docs/nonmatching/newbattle/nbMakePacket.md	208
+nbRunAi	newbattle/nbMakePacket	0xBC	46 of 47 words match	docs/nonmatching/newbattle/nbMakePacket.md	225
 nbMaeCheckDone	newbattle/nbMakePacket	0xC8		docs/nonmatching/newbattle/nbMakePacket.md	242
-nbE902Process_1	newbattle/nbMakePacket	0x90	2 of 36 words	docs/nonmatching/newbattle/nbMakePacket.md	265
-Flow5_2	newbattle/nbMakePacket	0x98	17 of 35 words	docs/nonmatching/newbattle/nbMakePacket.md	281
-Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words	docs/nonmatching/newbattle/nbMakePacket.md	303
-Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words	docs/nonmatching/newbattle/nbMakePacket.md	322
+nbE902Process_1	newbattle/nbMakePacket	0x90	2 of 36 words differ	docs/nonmatching/newbattle/nbMakePacket.md	265
+Flow5_2	newbattle/nbMakePacket	0x98	17 of 35 words differ	docs/nonmatching/newbattle/nbMakePacket.md	281
+Flow10_21	newbattle/nbMakePacket	0x98	11 of 37 words differ	docs/nonmatching/newbattle/nbMakePacket.md	303
+Flow10_10	newbattle/nbMakePacket	0x90	15 of 35 words differ	docs/nonmatching/newbattle/nbMakePacket.md	322
 nbFreeEffectSlot	newbattle/nbMakePacket	0x2C		docs/nonmatching/newbattle/nbMakePacket.md	338
-nbCheckBattleSkillError1	newbattle/nbMakePacket	0x48	1 of 18 words	docs/nonmatching/newbattle/nbMakePacket.md	368
-nbSetBadCurseTimer	newbattle/nbMakePacket	0x2C	2 of 11 words	docs/nonmatching/newbattle/nbMakePacket.md	392
-EffDel	newbattle/nbMakePacket	0xB8	42 of 46 words	docs/nonmatching/newbattle/nbMakePacket.md	409
+nbCheckBattleSkillError1	newbattle/nbMakePacket	0x48	1 of 18 words differ	docs/nonmatching/newbattle/nbMakePacket.md	368
+nbSetBadCurseTimer	newbattle/nbMakePacket	0x2C	2 of 11 words differ	docs/nonmatching/newbattle/nbMakePacket.md	392
+EffDel	newbattle/nbMakePacket	0xB8	42 of 46 words match	docs/nonmatching/newbattle/nbMakePacket.md	409
 Flow1_23	newbattle/nbMakePacket	0xD8	24 of 54 words match	docs/nonmatching/newbattle/nbMakePacket.md	431
 Flow5_6,			23 of 52 words match	docs/nonmatching/newbattle/nbMakePacket.md	462
 Flow6_32	newbattle/nbMakePacket	0x118	63 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	499
@@ -171,28 +169,28 @@ Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/nonmatching/newb
 Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/nonmatching/newbattle/nbMakePacket.md	550
 Flow12_3,			24 of 97 words match	docs/nonmatching/newbattle/nbMakePacket.md	572
 Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/nonmatching/newbattle/nbMakePacket.md	610
-nbAddOrder	newbattle/nbStageProcess	0x9C	17 of 37 words	docs/nonmatching/newbattle/nbStageProcess.md	5
-nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words	docs/nonmatching/newbattle/nbStageProcess.md	21
-nbGetRandamStock	newbattle/nbStageProcess	0xB4	4 of 44 words	docs/nonmatching/newbattle/nbStageProcess.md	36
-nbSetBadstatMotion	newbattle/nbStageProcess	0xA8	6 of 42 words	docs/nonmatching/newbattle/nbStageProcess.md	52
-nbInitActionProcess	newbattle/nbStageProcess	0xA0	6 of 40 words	docs/nonmatching/newbattle/nbStageProcess.md	71
-DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words	docs/nonmatching/newbattle/nbStageProcess.md	85
-nbSetWaitMotion	newbattle/nbStageProcess	0xD8	8 of 54 words	docs/nonmatching/newbattle/nbStageProcess.md	109
-CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words	docs/nonmatching/newbattle/nbStageProcess.md	124
-CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words	docs/nonmatching/newbattle/nbStageProcess.md	143
-CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words	docs/nonmatching/newbattle/nbStageProcess.md	160
-DispCommCursor	newbattle/nbStageProcess	0x184	29 of 97 words	docs/nonmatching/newbattle/nbStageProcess.md	176
-nbGetMotionNo	newbattle/nbStageProcess	0xC0	23 of 46 words	docs/nonmatching/newbattle/nbStageProcess.md	201
-nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words	docs/nonmatching/newbattle/nbStageProcess.md	225
+nbAddOrder	newbattle/nbStageProcess	0x9C	17 of 37 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
+nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	21
+nbGetRandamStock	newbattle/nbStageProcess	0xB4	4 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	36
+nbSetBadstatMotion	newbattle/nbStageProcess	0xA8	6 of 42 words differ	docs/nonmatching/newbattle/nbStageProcess.md	52
+nbInitActionProcess	newbattle/nbStageProcess	0xA0	6 of 40 words differ	docs/nonmatching/newbattle/nbStageProcess.md	71
+DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	85
+nbSetWaitMotion	newbattle/nbStageProcess	0xD8	8 of 54 words differ	docs/nonmatching/newbattle/nbStageProcess.md	109
+CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	124
+CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/nonmatching/newbattle/nbStageProcess.md	143
+CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/nonmatching/newbattle/nbStageProcess.md	160
+DispCommCursor	newbattle/nbStageProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbStageProcess.md	176
+nbGetMotionNo	newbattle/nbStageProcess	0xC0	23 of 46 words differ	docs/nonmatching/newbattle/nbStageProcess.md	201
+nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/nonmatching/newbattle/nbStageProcess.md	225
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 datAddUniqueDevil	newdata/datCalc	0x6C	12 of 26 words differ	docs/nonmatching/newdata/datCalc.md	23
 datDeadNakama	newdata/datCalc	0xC4	28 of 48 words differ	docs/nonmatching/newdata/datCalc.md	40
 datPartyDamagePipe	newdata/datCalc	0x114	54 of 68 words differ	docs/nonmatching/newdata/datCalc.md	59
 datInitPlayer	newdata/datCalc	0x12C	7 of 75 words differ	docs/nonmatching/newdata/datCalc.md	75
-gameKey1	pb/pbGame	0x2A8	150 of 168 words	docs/nonmatching/pb/pbGame.md	5
-deleteMoveBlock	pb/pbGame	0x144	46 of 77 words	docs/nonmatching/pb/pbGame.md	34
-pbGetBlockAt	pb/pbGame	0x120	60 of 68 words	docs/nonmatching/pb/pbGame.md	59
-roundBlock	pb/pbGame	0x8C	12 of 34 words	docs/nonmatching/pb/pbGame.md	79
+gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
+deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
+pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59
+roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
 DispBaseData	script/scrParameterCommand	764 bytes	seventy of 190 words differ	docs/nonmatching/script/scrParameterCommand.md	5
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
 sdfModelSetOneSkinDrawPacket	sdf/sdfModel	0x180	Three of ninety words match	docs/nonmatching/sdf/sdfModel.md	5

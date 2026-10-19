@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## effBTLModelLook2 (effect/effBattleMisc, 0x110)
 
-2 of 68 words, at the exact 272-byte size, and the two words are each other's:
+2 of 68 words differ, at the exact 272-byte size, and the two words are each other's:
 retail emits `abs.s $f1, $f2` then `mov.s $f13, $f0`, the draft the same pair
 in the other order. Both are independent single-cycle moves off the two
 `lwc1`s that precede them and that the draft already matches, so there is no
@@ -35,7 +35,7 @@ declaring `x` before or after the other locals.
 
 ## effBTLPartPtrModelGroupGetCenterAndHeight (effect/effBattleMisc, 0x248)
 
-4 of 146 words, at the exact 584-byte size. One instruction is wrong and the
+4 of 146 words differ, at the exact 584-byte size. One instruction is wrong and the
 three stores after it are scheduled one slot early as a consequence: retail
 rematerialises the zero it stores into the accumulator vector
 (`mtc1 $0, $f0`), the draft copies it out of the saved register that already

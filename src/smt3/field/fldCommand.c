@@ -1088,8 +1088,6 @@ s32 fldCommand_FLD_MAP_OFF(void) {
 }
 
 
-/* NON_MATCHING: 74 of 75 words, exact size; retail ends on a bnel, this a bne. */
-#ifdef NON_MATCHING
 s32 fldCommand_FLD_NPC_ON(void) {
     s32 world;
     s32 stage;
@@ -1121,13 +1119,8 @@ s32 fldCommand_FLD_NPC_ON(void) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_FLD_NPC_ON);
-#endif
 
 
-/* NON_MATCHING: 74 of 75 words, exact size; retail ends on a bnel, this a bne. */
-#ifdef NON_MATCHING
 s32 fldCommand_FLD_NPC_OFF(void) {
     s32 world;
     s32 stage;
@@ -1157,9 +1150,6 @@ s32 fldCommand_FLD_NPC_OFF(void) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_FLD_NPC_OFF);
-#endif
 
 
 s32 fldCommand_FLD_GIMIC_HOJI(void) {

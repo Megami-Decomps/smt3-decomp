@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## fldSkyDrawFilter (field/fldDraw, 0xAD8)
 
-682 of 694 words, at the exact 2776-byte size. Transliterated from
+682 of 694 words match, at the exact 2776-byte size. Transliterated from
 dds-decomp's `fldDrawSkyGradient`, the same function at the same size, which
 is the one dds pairing that has held exactly.
 
@@ -31,7 +31,7 @@ not `[16]`; and the clamp list is three alphas with `a3` unclamped.
 
 ## fldStatusSet (field/fldDraw, 0xF8)
 
-36 of 62 words, at the exact 248-byte size.
+36 of 62 words match, at the exact 248-byte size.
 
 Retail carries two induction variables where the draft has one: an integer
 offset added to `DDS3_GBWK` serving `hp` and the first `badstatus` read, and
@@ -51,7 +51,7 @@ puts `badstatus` at `0x0E + 4`.
 
 ## fldCamUpdateChase (field/fldDraw, 0x250)
 
-120 of 148 words, at the exact 592-byte size. The first 119 words are exact;
+120 of 148 words match, at the exact 592-byte size. The first 119 words are exact;
 everything from `+0x16C` is one word rotated because retail schedules the
 `lw $4, 0x78($20)` that fetches `control->camera` for
 `dds3CameraObjectBasicGetCameraTM` to the top of the smoothing block, while
@@ -73,7 +73,7 @@ local for the camera.
 
 ## resetCamTgtPlayer (field/fldDraw, 0x1F8)
 
-90 of 126 words, at the exact 504-byte size, and every instruction in the
+90 of 126 words match, at the exact 504-byte size, and every instruction in the
 function is the one retail emits. Two things differ and nothing else.
 
 The first is a three-way rotation of the fp registers the eye block uses for
@@ -112,7 +112,7 @@ the three deltas, which costs another 19 words.
 
 ## fldPlayerCalcHasigo (field/fldDraw, 0xE8)
 
-14 of 58 words, at the exact 232-byte size, and every instruction through the
+14 of 58 words differ, at the exact 232-byte size, and every instruction through the
 second arm's `add.s` is retail's.
 
 The whole tail (the three `prev` saves, the three position stores, the two
@@ -144,7 +144,7 @@ the three statement blocks.
 
 ## fldCamGetPhokanParam (field/fldDraw, 0x17C)
 
-92 of 95 words, at the exact 380-byte size. Every instruction is retail's; the
+92 of 95 words match, at the exact 380-byte size. Every instruction is retail's; the
 three differing words are `addu` operand order on two of the four
 `fldCamParamTable` row addresses.
 
@@ -195,7 +195,7 @@ by the parking.
 
 ## fldHitChkUnitElv (field/fldDraw, 0x184)
 
-63 of 97 words, at the exact 388-byte size. The first 63 words, the whole
+63 of 97 words match, at the exact 388-byte size. The first 63 words, the whole
 `fldHitChkUnitElvOnly` guard and the elevator-delta block, are retail's.
 
 Two things differ. The record address: retail computes it once as

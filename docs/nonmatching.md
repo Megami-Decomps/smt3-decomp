@@ -19,7 +19,7 @@ shows the same count and marks the drafted functions in each unit.
 **Write the measurement as "N of M words match", never "N of M words".** The
 bare form is ambiguous and has already misled: an entry reading "10 of 146"
 was taken for a near miss when it meant ten words matching out of 146, a
-draft 135 words out. Say `match` or `differ` explicitly, and give the emitted
+draft 136 words out. Say `match` or `differ` explicitly, and give the emitted
 size against retail's when they differ.
 
 ## Where the entries are

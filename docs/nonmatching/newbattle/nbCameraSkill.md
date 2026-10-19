@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## nbCameraShot_PullOne_Init (newbattle/nbCameraSkill, 0xE8)
 
-56 of 58 words, at the exact 232-byte size.
+56 of 58 words match, at the exact 232-byte size.
 
 One store is scheduled differently. Retail emits `div.s`, then
 `swc1 pCamera->distance`, then the two `sw $0` that zero `angles.x` and
@@ -27,7 +27,7 @@ compare, the `0.69813163f` and `0.78539807f` pool literals, and the
 
 ## nbCameraState_SkillStart_Init (newbattle/nbCameraSkill, 0x78)
 
-29 of 30 words, at the exact 120-byte size.
+29 of 30 words match, at the exact 120-byte size.
 
 The one differing word is the `addu` operand order:
 retail `addu $16, $16, $2` (base, index), the draft `addu $16, $2, $16`. Both
@@ -50,7 +50,7 @@ assigning the pointer costs two more words by moving the result into `$3`.
 
 ## nbCameraState_SkillAttack_Calc (newbattle/nbCameraSkill, 0x170)
 
-85 of 91 words, at the exact 364-byte size.
+85 of 91 words match, at the exact 364-byte size.
 
 Two delay slots that retail fills from in front of the branch and ee-as
 leaves empty here, because cc1 placed the instruction after the branch
@@ -80,7 +80,7 @@ written last so the two guards branch forward to it.
 
 ## nbCameraShot_All_Set2 (newbattle/nbCameraSkill, 0x248)
 
-16 of 125 words, 500 bytes against retail's 584.
+16 of 125 words match, 500 bytes against retail's 584.
 
 The structure is mapped and believed correct; what the draft cannot reproduce
 is one instruction, and losing it costs the 84 bytes that feed it. After the
@@ -117,7 +117,7 @@ is why all three land in `$f20`; and `maxEnemyHeight` reused for the
 
 ## nbCameraState_SkillAttack_Init (newbattle/nbCameraSkill, 0x224)
 
-117 of 137 words, at the exact 548-byte size.
+117 of 137 words match, at the exact 548-byte size.
 
 Everything up to the width test matches, including the frame: `sdfVector4_t
 look` at `0x0`, an eight-word `u32 ptr[8]` whose members 2 to 5 take the two
@@ -144,7 +144,7 @@ This is the same delay-slot-placement class as the
 
 ## nbCameraShot_InvokeTarget_Set2 (newbattle/nbCameraSkill, 0x2C0)
 
-171 of 176 words, at the exact 704-byte size.
+171 of 176 words match, at the exact 704-byte size.
 
 The five differing words are where `100.0f` is materialised for the radius
 clamp. Retail emits `mul.s $f21, $f1, $f0` for `width * pInvoke->scl` and then

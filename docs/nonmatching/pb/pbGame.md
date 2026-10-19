@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## gameKey1 (pb/pbGame, 0x2A8)
 
-150 of 168 words, 672 bytes against retail's 680. The whole body shape is
+150 of 168 words differ, 672 bytes against retail's 680. The whole body shape is
 there: the two `bgezl` pad tests, the map-cursor save and restore pair of
 `SDF_VU0_COPYVECTOR`s, the `(degree_mode ^ 2) | 1` toggle, the four-way key
 chain, the `movn` flag chain and the `else if` pair of `pbRoundCamera` calls.
@@ -33,7 +33,7 @@ order, and `ret` is reset to -1 inside the cursor block.
 
 ## deleteMoveBlock (pb/pbGame, 0x144)
 
-46 of 77 words, 308 bytes against retail's 324. The first 31 words, both
+46 of 77 words differ, 308 bytes against retail's 324. The first 31 words, both
 record arms and the `pbStartMoveBlock` call are exact.
 
 What is left is the `index == 4` arm. Retail reads `work->block` once, keeps a
@@ -58,7 +58,7 @@ retail branches to the `== 4` arm; `moveB` holds a `pbPanel_t *`, not an
 
 ## pbGetBlockAt (pb/pbGame, 0x120)
 
-60 of 68 words, 272 bytes against retail's 288. Only the three `sll`/`slti`
+60 of 68 words differ, 272 bytes against retail's 288. Only the three `sll`/`slti`
 words at the top match.
 
 The four neighbour tests are each `if (out of range || (cell & 0x7FF) != grp)
@@ -78,7 +78,7 @@ reach the `movn`, and none of the four changes the register numbering.
 
 ## roundBlock (pb/pbGame, 0x8C)
 
-12 of 34 words, 136 bytes against retail's 140.
+12 of 34 words differ, 136 bytes against retail's 140.
 
 The body and every register match. What differs is block placement at the
 end: retail gives each clamp arm its own `swc1 $f0, 0xB8(block)` followed by

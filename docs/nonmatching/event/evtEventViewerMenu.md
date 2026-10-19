@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## func_001F79A8 (event/evtEventViewerMenu, 0xE4)
 
-20 of 56 words, exact size. The jump table, its eleven case labels and every
+20 of 56 words differ, exact size. The jump table, its eleven case labels and every
 arm's call match; what differs is which saved register the `busy` flag and the
 `viewerinfo` load take ($4/$5 swapped against retail), and two consequences of
 that: retail materialises the default arm's `pad >= 0` as `slti`/`sltiu` where
@@ -23,7 +23,7 @@ needed: with only the six reachable values the switch falls under
 
 ## evtFrameListHead (event/evtEventViewerMenu, 0x138)
 
-39 of 78 words, exact size. The loop, both `D_0032C9E2` reads, the shared
+39 of 78 words differ, exact size. The loop, both `D_0032C9E2` reads, the shared
 `type * 10` offset and all four table lookups match. The one difference is which
 loop invariant gets the ninth saved register: retail hoists the `lui`/`addiu`
 pair for `evtFrameList`'s address and rematerialises `D_0054F9B8`'s address
@@ -42,7 +42,7 @@ re-read twice.
 
 ## evtSaveViewerHeader (event/evtEventViewerMenu, 0x400)
 
-254 of 256 words, exact size. Every count call, the twelve byteLength products,
+254 of 256 words match, exact size. Every count call, the twelve byteLength products,
 the 21-entry jump table, all fourteen directory arms and the `mtlo`/`madd`/`mflo`
 payload advance match. What is left is two stores in the file header swapped:
 retail writes `byteLength` (0x04) before `count` (0x10), the C writes them the
@@ -69,7 +69,7 @@ its last term.
 
 ## evtMenuDisp (event/evtEventViewerMenu, 0x1C0)
 
-63 of 112 words, exact size. The signature is recovered in full: nine arguments
+63 of 112 words match, exact size. The signature is recovered in full: nine arguments
 (list, column, row, colCount, rowCount, scroll, total, head, item), the ninth
 reaching the callee at `0x60($29)`; the panel call takes arguments one to five
 unchanged, the grid origin is `column * 16 + 0x7000` and `row * 8 + 0x7900`, the

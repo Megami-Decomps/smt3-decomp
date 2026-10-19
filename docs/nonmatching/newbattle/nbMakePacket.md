@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## Flow6_36 (newbattle/nbMakePacket, 0xA8)
 
-24 of 41 words, one word short of retail's 168.
+24 of 41 words match, one word short of retail's 168.
 
 ee-gcc allocates the `nextkouho` temp to `$2`, which forces it to materialise
 the `return 0` once at the tail. Retail keeps that temp in `$3` and emits
@@ -20,7 +20,7 @@ allocation.
 
 ## Flow2_13 (newbattle/nbMakePacket, 0xC8)
 
-44 of 50 words, at the exact 200-byte size.
+44 of 50 words match, at the exact 200-byte size.
 
 The inner dispatch is a `switch` over `qtype` with cases 1-3 written before
 case 0, which is what gives retail's `beql`, `bltz`, `slti` tree instead of a
@@ -36,7 +36,7 @@ the second arm. The `== 0 ? low : high` form of the ternary is required, as
 
 ## Flow2_2 (newbattle/nbMakePacket, 0xCC)
 
-22 of 48 words, one word short of retail's 204.
+22 of 48 words match, one word short of retail's 204.
 
 The structure, case order and constants are right. Two allocation
 differences remain: ee-gcc keeps `n->ework` in `$2` and the id in `$5`, where
@@ -51,7 +51,7 @@ itself comes from the same narrowing.
 
 ## nbGetVirtualAisyo (newbattle/nbMakePacket, 0xAC)
 
-39 of 43 words, at the exact 172-byte size.
+39 of 43 words match, at the exact 172-byte size.
 
 The `switch` over `-1` and `0xC..0xE` gives retail's dispatch tree exactly:
 `beq -1`, `slti -1`, `slti 0xF`, `slti 0xC`. The two remaining words are
@@ -71,7 +71,7 @@ words as the switch.
 
 ## Flow1_11 (newbattle/nbMakePacket, 0xC8)
 
-19 of 48 words, at the exact 192-byte size.
+19 of 48 words match, at the exact 192-byte size.
 
 Same bodies, same case order, same constants. ee-gcc fills the branch delay
 slot in front of the last `nbDispNegoMessage` block where retail leaves a
@@ -85,7 +85,7 @@ retail's `addiu -0xF0`, `sltiu 7`.
 
 ## nbFreeFormResources (newbattle/nbMakePacket, 0xD8)
 
-51 of 54 words, at the exact 216-byte size.
+51 of 54 words match, at the exact 216-byte size.
 
 The three remaining words are one rotation inside the loop. Retail emits
 `lw w->file[i]`, then `w->buf[i] = NULL`, then the `buf` pointer bump; the
@@ -107,7 +107,7 @@ which fills the former `pad[0xD8]` exactly and keeps the 224-byte stride that
 
 ## nbEventProcess1 (newbattle/nbMakePacket, 0x7C)
 
-23 of 31 words, at the exact 124-byte size and with the same instruction
+23 of 31 words match, at the exact 124-byte size and with the same instruction
 multiset.
 
 Retail schedules `addiu $2, $2, %lo(nbEventProcess3)` into the load-delay
@@ -129,7 +129,7 @@ store to `data->eventrid` otherwise aliases the table and forces a reload.
 
 ## Flow13_8 (newbattle/nbMakePacket, 0xB8)
 
-42 of 46 words, at the exact 184-byte size.
+42 of 46 words match, at the exact 184-byte size.
 
 Four cases over 0 to 3, with `case 3` a bare `return 1`, give retail's
 dispatch tree and both `nbDispNegoMessage` blocks. What the source cannot
@@ -148,7 +148,7 @@ after it.
 
 ## Flow9_20 (newbattle/nbMakePacket, 0xAC)
 
-35 of 43 words, at the exact 172-byte size.
+35 of 43 words match, at the exact 172-byte size.
 
 The `switch` over 0, 1 and 2 gives retail's dispatch tree exactly, `beq 1`,
 `slti 2`, `beqz`, `beq 2`, and the `movn` in the `case 2` arm needs the phase
@@ -166,7 +166,7 @@ written against the field or the literal 2 instead of the local.
 
 ## nbGetAiEntry (newbattle/nbMakePacket, 0xE0)
 
-43 of 54 words, two words short of retail's 216.
+43 of 54 words match, two words short of retail's 216.
 
 The table address, both `nbAiChkJoken` calls, the two `>> 16` tests and the
 `nbSetHojoCounter` call are identical. Retail places the cross-jumped
@@ -186,7 +186,7 @@ entries at `+0x04`, each `{u32 joken[2]; s32 no;}`. `D_003989EC`, which
 
 ## nbClearActionFlags (newbattle/nbMakePacket, 0xE0)
 
-18 of 56 words, at the exact 224-byte size and with the same instruction
+18 of 56 words match, at the exact 224-byte size and with the same instruction
 multiset.
 
 The structure is settled: a `mask = ~0x800;` local above the first loop so the
@@ -207,7 +207,7 @@ decode.
 
 ## nbE901Process_1 (newbattle/nbMakePacket, 0xCC)
 
-50 of 51 words, at the exact 204-byte size.
+50 of 51 words match, at the exact 204-byte size.
 
 The dispatch, both vibration arms and the `D_00527420[e->step](e)` call are
 identical. The one differing word is the second equality test: retail emits
@@ -224,7 +224,7 @@ one word.
 
 ## nbRunAi (newbattle/nbMakePacket, 0xBC)
 
-46 of 47 words, at the exact 188-byte size.
+46 of 47 words match, at the exact 188-byte size.
 
 The one differing word is the loop-exit branch: retail emits a plain
 `beqz $2, .L00287D40` with `lui $4, %hi(D_00545840)` in its delay slot, and
@@ -264,7 +264,7 @@ a five-node compare tree instead of the table. `nbMaeFlag`, `nbMaeState`,
 
 ## nbE902Process_1 (newbattle/nbMakePacket, 0x90)
 
-2 of 36 words, at the exact 144-byte size.
+2 of 36 words differ, at the exact 144-byte size.
 
 The whole body is right: the `nbE902Table[e->step](e)` dispatch, the `return -1`
 arm, the `unk_08 == 0x25` test and both `dds3PadVibrationSet` calls. The two
@@ -280,7 +280,7 @@ instruction-scheduling class.
 
 ## Flow5_2 (newbattle/nbMakePacket, 0x98)
 
-17 of 35 words, three words short of retail's 152.
+17 of 35 words differ, three words short of retail's 152.
 
 Both `nbAddNegoIdKouho` ids, the `datSearchDevilStock(n->ework->id)` call and
 the `evtBitCheck`/`evtBitOn` pair on `n->innen_id + 0xB00` are confirmed, as
@@ -302,7 +302,7 @@ reads is the next thing to try, per the two-reads row of
 
 ## Flow10_21 (newbattle/nbMakePacket, 0x98)
 
-11 of 37 words, one word short of retail's 152.
+11 of 37 words differ, one word short of retail's 152.
 
 Both `nbAddNegoIdKouho` ids, the three-way `ework->id` chain over `0x5C`,
 `0x3D` and `0x61` (plain `beq`s, since the values are not contiguous), the
@@ -321,7 +321,7 @@ which it places last; ee-gcc puts it in `$2` and emits `beql $2, $0`, keeping
 
 ## Flow10_10 (newbattle/nbMakePacket, 0x90)
 
-15 of 35 words, one word short of retail's 144.
+15 of 35 words differ, one word short of retail's 144.
 
 The `nbAddNegoIdKouho(n, 0x6004A)` call, the three stores (`workid[6] =
 0x60009`, `cnt6_36 = 0`, `cnt6_37 = 0`) and both message arms are right, and so
@@ -367,7 +367,7 @@ between them; see [TU recovery](tu-recovery.md).
 
 ## nbCheckBattleSkillError1 (newbattle/nbMakePacket, 0x48)
 
-1 of 18 words, at the exact 72-byte size.
+1 of 18 words differ, at the exact 72-byte size.
 
 The structure is settled: `if (id < 0x33) { if (id >= 0x31) { if
 (nbFindStockSkillError() == 0) { return 2; } } } return 0;`, with exactly one
@@ -391,7 +391,7 @@ strength-reduced giv with negative displacements instead.
 
 ## nbSetBadCurseTimer (newbattle/nbMakePacket, 0x2C)
 
-2 of 11 words, at the exact 44-byte size.
+2 of 11 words differ, at the exact 44-byte size.
 
 The reads, the increment, both stores and the `gp`-relative write-back are all
 identical. Retail computes the row once, `addu $7, $2, $3` with the index
@@ -408,7 +408,7 @@ timer and the table base get.
 
 ## EffDel (newbattle/nbMakePacket, 0xB8)
 
-42 of 46 words, at the exact 184-byte size, and with the same instruction
+42 of 46 words match, at the exact 184-byte size, and with the same instruction
 multiset.
 
 The whole body, both `bnel` field tests and the `effBTLCutGetFrame` block are

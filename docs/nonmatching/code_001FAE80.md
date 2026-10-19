@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## func_00213190 (code_001FAE80, 0x50)
 
-8 of 18 words, 72 against retail's 80 bytes. A `qsort` comparator over the
+8 of 18 words match, 72 against retail's 80 bytes. A `qsort` comparator over the
 `u16` inherited-skill list: zeros sort last, otherwise ascending.
 
 Retail copies the first argument into `$3` and reloads `*a` in the tail where
@@ -24,7 +24,7 @@ tail inside an `else` so the two compares sit in one block.
 
 ## func_002429C0 (code_001FAE80, 0x54)
 
-19 of 21 words, at the exact 84-byte size. Sums `attr[].capacity` over the
+19 of 21 words match, at the exact 84-byte size. Sums `attr[].capacity` over the
 leader's inherited-skill list.
 
 The two differing words are one constant split inside loop strength
@@ -44,7 +44,7 @@ produce a downcounter instead of re-reading it.
 
 ## rstDrawStatusRow (code_001FAE80, 0x5C)
 
-21 of 23 words, at the exact 92-byte size. A pure call wrapper around
+21 of 23 words match, at the exact 92-byte size. A pure call wrapper around
 `cmpDrawStatusComEx`.
 
 The two differing words are the `sra` halves of the two `s8` arguments that
@@ -62,7 +62,7 @@ already matches.
 
 ## campDhGetEntryRatio (code_001FAE80, 0x60)
 
-11 of 24 words, at the exact 96-byte size. Decrements a delay, then either
+11 of 24 words match, at the exact 96-byte size. Decrements a delay, then either
 rolls a new ratio or advances the current one.
 
 Retail copies the work pointer out of `$4` into `$3` as its first
@@ -82,7 +82,7 @@ value instead of `--` on the field.
 
 ## cmpFindKugatatiMsgEntry (code_001FAE80, 0x60)
 
-12 of 24 words, at the exact 96-byte size. Scans a devil's 24 level-up
+12 of 24 words differ, at the exact 96-byte size. Scans a devil's 24 level-up
 records for kind 5 and returns that record's value, or -1.
 
 Every instruction matches; the twelve differing words are two register pairs
@@ -104,7 +104,7 @@ instead of a walking pointer; and a typed `datLevelUpTable` array with an
 
 ## cmp_241A10 (code_001FAE80, 0x74)
 
-19 of 28 words, 112 against retail's 116 bytes. Recounts how many of a
+19 of 28 words match, 112 against retail's 116 bytes. Recounts how many of a
 cursor's `unk_20` entries have bit 1 set in the `unk_2C` flag array, stores
 the count in `unk_21`, and tail-calls `cmpUpdateCursorScroll(cursor, 1)`.
 
@@ -129,7 +129,7 @@ loop. All of those either plateau at the same nine words or lose more.
 
 ## cmpUpdateList (code_001FAE80, 0x6C)
 
-26 of 27 words, exact size. The one differing word is the first branch:
+26 of 27 words match, exact size. The one differing word is the first branch:
 retail's `beql $3, $0` against this `beq $3, $0`, with the same
 `ld $31, 0x0($29)` in the delay slot and the same displacement. Both
 duplicate the epilogue restore into the slot; only the annul bit differs, so
@@ -144,7 +144,7 @@ choice here. Same shape as the branch-likely cases listed under
 
 ## cmbChkDevilEvo (code_001FAE80, 0x74)
 
-25 of 29 words, at the exact size. Walks the same 24 level-up records as
+25 of 29 words match, at the exact size. Walks the same 24 level-up records as
 `rstFindEvoEntryType5`, and on the first record of kind 5 returns that
 record's devil's `datDevilTable` entry byte at +5.
 
@@ -166,7 +166,7 @@ declaring the `datDevilInfo_t *` at function scope instead of inside the
 
 ## datFindKugatatiEntry (code_001FAE80, 0x74)
 
-28 of 28 words, at the exact 112-byte size. Scans a devil's 24 level-up
+28 of 28 words differ, at the exact 112-byte size. Scans a devil's 24 level-up
 records for ones whose byte at +6 equals the unit's level, returns a pointer
 to the first match and, when the second argument is not NULL, writes the match
 count through it.
@@ -191,7 +191,7 @@ third induction variable and runs two words long.
 
 ## cmpClearCursorSlots (code_001FAE80, 0x54)
 
-18 of 21 words, 84 against retail's 76 bytes. Clears both cursor slots of 256
+18 of 21 words differ, 84 against retail's 76 bytes. Clears both cursor slots of 256
 rows at `cursor + 0x3C`: `state` and `param` to 0 and `value` to 0x100.
 
 Retail does not strength-reduce the inner loop. It keeps the row pointer in
@@ -212,7 +212,7 @@ and permuting the three stores, which only moves which word lands in the
 
 ## mselToggleFlag (code_001FAE80, 0x6C)
 
-13 of 27 words, at the exact 108-byte size. Flips a `u8` toggle, then steps
+13 of 27 words differ, at the exact 108-byte size. Flips a `u8` toggle, then steps
 the low byte of a packed `s32` by +0x10 or -0x10 depending on the third
 argument and clamps it to 0..0x80.
 
@@ -238,7 +238,7 @@ all of which give the same `addiu $2, $0, -0x100`.
 
 ## cmpSetCursorSlot (code_001FAE80, 0x3C)
 
-8 of 15 words, at the exact 60-byte size. Writes a cursor slot's `param`,
+8 of 15 words differ, at the exact 60-byte size. Writes a cursor slot's `param`,
 `state` and `value` unless its `state` is already 3. Four callers in the same
 unit pass four arguments, so the signature is settled.
 
@@ -261,7 +261,7 @@ draft and the closest form.
 
 ## cmp_23A918 (code_001FAE80, 0x40)
 
-4 of 16 words, at the exact 64-byte size. Calls `func_00239C08(0, arg)` and
+4 of 16 words differ, at the exact 64-byte size. Calls `func_00239C08(0, arg)` and
 `cmpAllocRefGifTag(arg)`, then tail-calls `fclDrawPanelSprite(0x5C000, arg)`.
 
 Everything up to and including the `lui $4` of the sprite id matches. The four
@@ -276,7 +276,7 @@ same place, so what is left is ee-gcc's second scheduling pass.
 
 ## trmGetJumpTerminalNo (code_001FAE80, 0x44)
 
-8 of 17 words, at the exact 68-byte size. Returns a terminal number from
+8 of 17 words differ, at the exact 68-byte size. Returns a terminal number from
 `fldAllCnt` when the work's `unk_21F1` is set, and otherwise indexes the work's
 own `unk_21F4` table by `unk_11D6 + unk_11D8`.
 
@@ -306,7 +306,7 @@ on either field.
 
 ## cmpSkillOrder (code_001FAE80, 0x50)
 
-12 of 20 words, at the exact 80-byte size. A `qsort` comparator over the `u16`
+12 of 20 words differ, at the exact 80-byte size. A `qsort` comparator over the `u16`
 skill list: zeros sort last, otherwise ascending.
 
 Retail copies the first argument into `$3` as its first instruction and reads
@@ -329,7 +329,7 @@ test written `*pa != 0` so the arms swap; and `u16 *` parameters in place of
 
 ## cmpItemHasFlag (code_001FAE80, 0x54)
 
-13 of 17 words, 68 against retail's 84 bytes. Tests bit 0 of
+13 of 17 words differ, 68 against retail's 84 bytes. Tests bit 0 of
 `datItemTable[item].flags` when the second argument is zero and bit 1 of
 `flags2` otherwise.
 
@@ -356,7 +356,7 @@ which costs another word.
 
 ## cmp_241A88 (code_001FAE80, 0x68)
 
-3 of 26 words, at the exact 104-byte size. Sets bit 1 of a cursor's `unk_2C`
+3 of 26 words differ, at the exact 104-byte size. Sets bit 1 of a cursor's `unk_2C`
 flag byte for one entry, bumps `unk_21` and calls `cmpUpdateCursorScroll`,
 returning whether the bit had to change.
 
@@ -377,7 +377,7 @@ the right shape.
 
 ## cmbGetHeartsParamByIndex (code_001FAE80, 0x58)
 
-8 of 22 words, at the exact 88-byte size. Reads one of two byte tables inside
+8 of 22 words differ, at the exact 88-byte size. Reads one of two byte tables inside
 `datRaceEntry_t`, at `+6` and `+0xC` of a 66-byte row.
 
 The two tables have to be flat `extern s8 D_00339E06[]` / `D_00339E0C[]`
@@ -400,7 +400,7 @@ orders, which splits the row multiply across the test and loses six more.
 
 ## fclDrawPanel (code_001FAE80, 0x54)
 
-8 of 21 words, at the exact 84-byte size. Draws the panel's background sprite,
+8 of 21 words differ, at the exact 84-byte size. Draws the panel's background sprite,
 calls the panel's own `draw` hook with the panel and the id, and tail-calls the
 foreground sprite.
 
@@ -422,7 +422,7 @@ does not compile to retail's `$5` setup.
 
 ## cmbFindCameraPoint (code_001FAE80, 0x64)
 
-9 of 25 words, at the exact 100-byte size. Looks up a type-0x11 scene basic by
+9 of 25 words differ, at the exact 100-byte size. Looks up a type-0x11 scene basic by
 name, and on a hit copies the point resource's quadword to the caller's vector
 and returns 1.
 

@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## fldNpcLightSet (field/fld_Npc, 0x28C)
 
-125 of 163 words, at the exact 652-byte size. Everything the source can say
+125 of 163 words match, at the exact 652-byte size. Everything the source can say
 is said: the light row is `D_003129D0 + (fldArea[0] + 1) * 8` with the
 direction mode in byte 7 and the face-division nibbles in byte 6, the
 `if (m == 0) ... else if (m == 3) ... else` chain with the last arm repeating
@@ -36,7 +36,7 @@ seven declaration-order permutations of the nine locals, all 38.
 
 ## fldDrawEATexQuad (field/fld_Npc, 0x340)
 
-143 of 208 words, at the exact 832-byte size. The structure is settled: ten
+143 of 208 words match, at the exact 832-byte size. The structure is settled: ten
 `s32` parameters plus one `f32`, the ninth and tenth integers read from
 `0x120` and `0x128` because this EABI pads each outgoing stack argument to
 eight bytes (which is also why `sdfPrimLinkFt4`'s thirteen stack arguments
@@ -70,7 +70,7 @@ words when before); `ev` computed before `eu`; and `uw * 16 + su` instead of
 
 ## fldSibukiStart (field/fld_Npc, 0x98)
 
-28 of 38 words, at the exact 152-byte size. `fldBlurEffectId` has to be an
+28 of 38 words match, at the exact 152-byte size. `fldBlurEffectId` has to be an
 incomplete array so the three handle reads go through one `lui`/`addiu` pair
 in `$16` rather than `$gp`; with a plain `extern void *` the function is
 136 bytes and 31 words out.

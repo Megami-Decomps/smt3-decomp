@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## nbMainProcess1 (newbattle/nbMainProcess, 0x420)
 
-113 of 263 words, at the exact 1052-byte size.
+113 of 263 words match, at the exact 1052-byte size.
 
 The 16-arm jump table over `data->phase` (`s8` at +0x69, `sltiu 0x10`, every
 index 0 through 15 a real case) reproduces exactly, and so do cases 0, 1 and

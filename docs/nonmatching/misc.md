@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## func_001D4EB0, func_001D4C08 (code_001D1470, 0x58 and 0x94)
 
-21 of 22 and 36 of 37 words, both at the exact retail size.
+21 of 22 and 36 of 37 words match, both at the exact retail size.
 
 One word each, and the same word in both: retail takes the `beqz` after a
 `pbGetMoveChar` call as `beql` and puts the next instruction in the annulled
@@ -72,7 +72,7 @@ the `s32 dummy; s32 *p = &dummy;` sibling-call blocker. An explicit
 
 ## lstPageUp, lstPageDown (code_001FAE80, 0x74 each)
 
-28 of 29 words each, at the exact size. Each steps the list cursor up or down
+28 of 29 words each match, at the exact size. Each steps the list cursor up or down
 by a page, stopping early when the cursor's `unk_04` says it cannot move, and
 returns how many steps it took.
 
@@ -96,7 +96,7 @@ out on a branch-likely that no control-flow shape reaches.
 
 ## rstFindEvoEntryType5, rstFindEvoEntryType7 (code_001FAE80, 0x6C each)
 
-24 of 27 words each, at the exact size. Both scan a devil's 24 level-up
+24 of 27 words each match, at the exact size. Both scan a devil's 24 level-up
 records for a record of kind 5 (or 7) whose level field is below (or at or
 below) the unit's level, and return that record's index as an `s8`, or -1.
 
@@ -116,7 +116,7 @@ for `cmpFindKugatatiMsgEntry`, which walks the same table.
 
 ## Chk_ENHOJOMAX, Chk_FRHOJOMAX (newbattle/nbMakePacket, 0xDC each)
 
-54 of 55 words each, at the exact 220-byte size.
+54 of 55 words each match, at the exact 220-byte size.
 
 Both are the established `Chk_*` shape of this unit: a `one = 1;` local above
 the loop, `a->data->party[i]` subscripted at every use so the base reloads
@@ -134,7 +134,7 @@ match exactly).
 
 ## Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
 
-18 of 29 words each, two words short of retail's 124.
+18 of 29 words each differ, two words short of retail's 124.
 
 The two-case `switch` over `nownegophase`, both arms, the `0xA1`/`0xA3`
 message constants and the `return 2`/`return 1` are all right: the dispatch is
@@ -159,7 +159,7 @@ from the retail source rather than nearer.
 
 ## nbAddStageCamera, nbAddStageCamera2 (newbattle/nbStageProcess, 0xC4 each)
 
-2 of 49 words each, at the exact 196-byte size.
+2 of 49 words each differ, at the exact 196-byte size.
 
 **There is no config blocker here**, against an earlier reading of these two.
 The 16-byte `f32[4]` template each one copies off the stack lives at

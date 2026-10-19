@@ -4,7 +4,7 @@ Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md
 
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
-33 of 117 words, two words short of retail's 119.
+33 of 117 words differ, two words short of retail's 119.
 
 The dispatch is a `switch` on `effBTLModelGetID` of the invoke formation whose
 arms each run one `nbCameraBoss_*_Cut1_Run`. Retail does that as `jal callee`,
@@ -47,7 +47,7 @@ cross-jumping, which the draft reproduces.
 
 ## nbCameraBoss_Lusi_Cut1_Set (newbattle/nbCameraBoss, 0x1F4)
 
-21 of 125 words, at the exact 500-byte size.
+21 of 125 words differ, at the exact 500-byte size.
 
 Two independent differences remain, and nothing in the rest of the function
 differs:
@@ -76,7 +76,7 @@ and a named `one` local for the 1.0 comparand.
 
 ## nbCameraBoss_Cut2_Run (newbattle/nbCameraBoss, 0x230)
 
-92 of 138 words, two words short of retail's 140.
+92 of 138 words differ, two words short of retail's 140.
 
 The same jump-table dispatcher as `nbCameraBoss_Cut1_Init`, on `id - 0x101`
 over 0x58 entries, and written the same way: each arm is one or two
