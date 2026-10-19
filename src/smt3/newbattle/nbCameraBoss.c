@@ -2026,17 +2026,81 @@ s32 nbCameraShot_BossEX02_Set(nbCamera_t *pCamera)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut1_Init);
+s32 nbCameraBoss_Cut1_Init(nbCamera_t *pCamera)
+{
+    nbFormation_t *pForm;
+    u32 id;
+    u32 skill;
 
-/* NON_MATCHING: 59 of 117 words, 8 short; the ret local lands in $3, not $2. */
+    pForm = effBTLSkillGetInvokeFormation();
+    id = effBTLModelGetID(pForm);
+    skill = effBTLSkillGetID();
+    switch (id) {
+    case 0x101:
+    case 0x111:
+    case 0x113:
+    case 0x126:
+    case 0x127:
+    case 0x128:
+        if (skill == 0x99) {
+            nbCameraBoss_Sp_JAREIH_Cut1_Set(pCamera);
+            break;
+        }
+        return 0;
+    case 0x103:
+    case 0x124:
+        if (skill == 0xA9 || skill == 0xAA) {
+            nbCameraBoss_Bsnet_Attack_Cut1_Set(pCamera);
+        } else {
+            nbCameraBoss_Bsnet_Cut1_Set(pCamera);
+        }
+        break;
+    case 0x123:
+        if (skill == 0xFD) {
+            nbCameraBoss_BSARI_MASEHA_Set(pCamera);
+        } else if (skill == 0xA8) {
+            nbCameraBoss_BSARI_SIMANO_Set(pCamera);
+        } else {
+            nbCameraBoss_BSARI_Cut1_Set(pCamera);
+        }
+        break;
+    case 0x102:
+        if (skill == 0xFD) {
+            nbCameraBoss_BSARI_MASEHA_Set(pCamera);
+        } else if (skill == 0xA8) {
+            nbCameraBoss_BSARI_SIMANO_Set(pCamera);
+        } else {
+            nbCameraBoss_BSARI2_Cut1_Set(pCamera);
+        }
+        break;
+    case 0x125:
+        nbCameraBoss_Bskagu_Cut1_Set(pCamera);
+        break;
+    case 0x108:
+        if (skill == 0xDD) {
+            nbCameraBoss_Pish_MUHENK_Set(pCamera);
+        } else {
+            nbCameraBoss_Bspish_Cut1_Set(pCamera);
+        }
+        break;
+    case 0x158:
+        if (skill == 0x111 || skill == 0x10E) {
+            nbCameraBoss_BSLUSI_Type = dds3GetRandIntA(0, 2);
+            return 1;
+        }
+    default:
+        return 0;
+    }
+}
+
+/* NON_MATCHING: 33 of 117 words, 2 short; three arms call callees still in
+ * assembly, so ee-gcc leaves a plain branch where retail annuls. */
 #ifdef NON_MATCHING
 s32 nbCameraBoss_Cut1_Run(nbCamera_t *pCamera)
 {
     nbFormation_t *pForm;
     u32 id;
     u32 skill;
-    s32 ret;
-
     pForm = effBTLSkillGetInvokeFormation();
     id = effBTLModelGetID(pForm);
     skill = effBTLSkillGetID();
@@ -2044,53 +2108,51 @@ s32 nbCameraBoss_Cut1_Run(nbCamera_t *pCamera)
     case 0x103:
     case 0x124:
         if (skill == 0xA9 || skill == 0xAA) {
-            ret = nbCameraBoss_Bsnet_Attack_Cut1_Run(pCamera);
+            nbCameraBoss_Bsnet_Attack_Cut1_Run(pCamera);
         } else {
-            ret = nbCameraBoss_Bsnet_Cut1_Run(pCamera);
+            nbCameraBoss_Bsnet_Cut1_Run(pCamera);
         }
         break;
     case 0x123:
         if (skill == 0xFD) {
-            ret = nbCameraBoss_BSARI_MASEHA_Run(pCamera);
+            nbCameraBoss_BSARI_MASEHA_Run(pCamera);
         } else if (skill == 0xA8) {
-            ret = nbCameraBoss_BSARI_SIMANO_Run(pCamera);
+            nbCameraBoss_BSARI_SIMANO_Run(pCamera);
         } else {
-            ret = nbCameraBoss_BSARI_Cut1_Run(pCamera);
+            nbCameraBoss_BSARI_Cut1_Run(pCamera);
         }
         break;
     case 0x102:
         if (skill == 0xFD) {
-            ret = nbCameraBoss_BSARI_MASEHA_Run(pCamera);
+            nbCameraBoss_BSARI_MASEHA_Run(pCamera);
         } else if (skill == 0xA8) {
-            ret = nbCameraBoss_BSARI_SIMANO_Run(pCamera);
+            nbCameraBoss_BSARI_SIMANO_Run(pCamera);
         } else {
-            ret = nbCameraBoss_BSARI2_Cut1_Run(pCamera);
+            nbCameraBoss_BSARI2_Cut1_Run(pCamera);
         }
         break;
     case 0x125:
-        ret = nbCameraBoss_Bskagu_Cut1_Run(pCamera);
+        nbCameraBoss_Bskagu_Cut1_Run(pCamera);
         break;
     case 0x108:
         if (skill == 0xDD) {
-            ret = nbCameraBoss_Pish_MUHENK_Run(pCamera);
+            nbCameraBoss_Pish_MUHENK_Run(pCamera);
         } else {
-            ret = nbCameraBoss_Bspish_Cut1_Run(pCamera);
+            nbCameraBoss_Bspish_Cut1_Run(pCamera);
         }
         break;
     case 0x158:
         if (skill == 0x10F) {
-            ret = nbCameraBoss_Lusi_ASIKIK_Set(pCamera);
-        } else if (skill == 0x111 || skill == 0x10E) {
-            ret = nbCameraBoss_Lusi_Cut1_Set(pCamera);
-        } else {
-            ret = 0;
+            nbCameraBoss_Lusi_ASIKIK_Set(pCamera);
+            break;
         }
-        break;
+        if (skill == 0x111 || skill == 0x10E) {
+            nbCameraBoss_Lusi_Cut1_Set(pCamera);
+            break;
+        }
     default:
-        ret = 0;
-        break;
+        return 0;
     }
-    return ret;
 }
 #else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut1_Run);
@@ -2098,7 +2160,116 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut1_Run);
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Init);
 
+/* NON_MATCHING: 92 of 138 words, 2 short; the 0x11F arm's first `return 1`
+ * becomes a local block instead of a delay-slot constant. */
+#ifdef NON_MATCHING
+s32 nbCameraBoss_Cut2_Run(nbCamera_t *pCamera)
+{
+    nbFormation_t *pForm;
+    u32 id;
+    u32 skill;
+
+    pForm = effBTLSkillGetInvokeFormation();
+    id = effBTLModelGetID(pForm);
+    skill = effBTLSkillGetID();
+    switch (id) {
+    case 0x101:
+    case 0x111:
+    case 0x113:
+    case 0x126:
+    case 0x127:
+    case 0x128:
+        if (skill == 0xFC) {
+            nbCameraBoss_Sp_MURET2_Run(pCamera);
+            break;
+        }
+        if (skill == 0x99) {
+            nbCameraBoss_Sp_JAREIH_Run(pCamera);
+            break;
+        }
+        return 0;
+    case 0x10D:
+        if (skill == 0xE9) {
+            nbCameraBoss_Ongy_BUNSIN_Run(pCamera);
+            break;
+        }
+        return 0;
+    case 0x11F:
+        if (skill == 0xF2) {
+            nbCameraBoss_Samael_AKUI_Run(pCamera);
+            break;
+        }
+        if (skill != 0 && skill != 0xA5) {
+            return 0;
+        }
+        return 1;
+    case 0x120:
+        if (skill == 0xC9) {
+            nbCameraBoss_Baal_BAELNO_Run(pCamera);
+            break;
+        }
+        return 0;
+    case 0x146:
+    case 0x147:
+    case 0x148:
+        if (skill != 0) {
+            return 0;
+        }
+        return 1;
+    case 0x103:
+    case 0x124:
+        if (skill == 0xA9 || skill == 0xAA) {
+            nbCameraBoss_Bsnet_Attack_Run(pCamera);
+            break;
+        }
+        return 1;
+    case 0x102:
+    case 0x123:
+        if (skill == 0xFD) {
+            nbCameraBoss_BSARI_MASEHA_Run(pCamera);
+            break;
+        }
+        if (skill == 0xA8) {
+            nbCameraBoss_BSARI_SIMANO_Run(pCamera);
+            break;
+        }
+        return 1;
+    case 0x125:
+        if (skill == 0xF1) {
+            nbCameraBoss_Kagu_MJINKO_Set(pCamera);
+            break;
+        }
+        return 0;
+    case 0x108:
+        if (skill == 0xDD) {
+            nbCameraBoss_Pish_MUHENK_Run(pCamera);
+            break;
+        }
+        return 0;
+    case 0x156:
+        if (skill == 0xEB) {
+            nbCameraBoss_Meta_METAT1_1_Set(pCamera);
+            break;
+        }
+        return 0;
+    case 0x157:
+        if (skill == 0x103) {
+            nbCameraBoss_Beru_HAENO1_Set(pCamera);
+            break;
+        }
+        return 0;
+    case 0x158:
+        if (skill == 0x110) {
+            nbCameraBoss_Lusi_TWORLD_Set(pCamera);
+            break;
+        }
+    default:
+        return 0;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Cut2_Run);
+#endif
 
 s32 nbCameraBoss_CheckRotate(nbFormation_t *pForm)
 {

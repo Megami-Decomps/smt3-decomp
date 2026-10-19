@@ -39,6 +39,9 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| a `switch` arm's guard failure branching to the same block as the `default`, and a value you expected in `$2` or `$3` sitting one register higher | drop the last arm's own `return 0` and let the arm fall into the `default:` label, writing its tests as `if (...) { callee(x); break; }`. The separate `return 0` makes its zero conflict with the switch value: `nbCameraBoss_Cut1_Run` moved `skill` from `$4` to `$3` and went 59 to 33 differing words on that alone, and `nbCameraBoss_Cut2_Run` 89 to 92 of a longer body. A nested `switch` over the same values frees the register too but runs three words over |
+| `jal callee` then a `b` to one shared epilogue, with nothing writing `$2` in the arm | let the arms only call and the function fall off the end of the `switch`, so the callee's value is what reaches `$2`. `return callee(x);` sibcalls every arm and a `ret` variable spends `$3` and a `daddu` per arm. The returns that do exist (`return 0`, `return 1`) still give the epilogue its `use` of `$2`. `nbCameraBoss_Cut1_Init` and the four `Cut*` dispatchers in `newbattle/nbCameraBoss` are all this shape |
+| a guard whose failure returns a constant, where the constant lands in a second register and the branch is `bne` rather than `bnel` | write the guard positively, `if (skill == n) { callee(x); break; } return 0;`, not inverted with an early `return 0`. The inverted form keeps the compare constant and the return constant live together; `nbCameraBoss_Cut1_Init` went from 2 differing words to exact on that one arm |
 | a `switch` with fewer than ten `case` nodes still reaching a jump table | add the missing low `case` label with an empty body. `case_values_threshold` is not the whole story: `nbMaeCheckDone`'s six-entry table needs an explicit empty `case 0:` alongside 1 to 5, and without it ee-gcc builds a five-node compare tree instead |
 | each arm of an `if`/`else` recomputing the same shift or scale that your C shares at the merge, and the taken-equal arm reusing the compare's constant as its return value | write the tail out in each arm with its own `return`, so `if (f() == 1) { store; return 1; }` lets gcc reuse the `1` already in `$2` and cross-jump only the store's tail. `NegoDebug` went from 21 of 46 words to exact on that plus a `< 0` arm written as `if (x < 0) { body; return 1; } return 0;` |
 | a run of sibling `if`s after one guard, where your C emits the guard as an early `return` | nest every later `if` inside the guard. `SyuGo2`'s three frame tests under one `if (e->frame >= 0xB)` swapped `e` and the loop counter back into retail's `$16` and `$17`; declaration order, the loop form and an inverted last test all leave the pair swapped |
@@ -393,8 +396,13 @@ it was measured on DDS and not on this ELF.
   initialising it at the declaration puts an `addiu` in the prologue and
   spends a saved register, while declaring it and assigning just before the
   first use does not. Assigning it after a leading call keeps it out of `$16`.
+- The cheapest sibling-call blocker measured is `s32 dummy; s32 *p = &dummy;`,
+  which costs nothing at all: the frame still reports `vars= 0` and no extra
+  instruction is emitted. `volatile`, an array and a store each grow the frame
+  by 16, while an old-style declaration, a varargs callee and a mismatched
+  return signedness do not block it at all.
 - Blocking the sibling call where retail uses `jal` and a full epilogue has
-  two forms, and which one works varies by unit. Giving a void function an
+  two other forms, and which one works varies by unit. Giving a void function an
   `s32` return type with no `return` statement collapses a duplicated epilogue
   too, and took one function from ten differing words to exact. It failed for
   all seven functions tried in `code_0029B780`, where the answer was a dead

@@ -115,7 +115,13 @@ scheduler places that one load.
 
 Ruled out: declaring the symbol `extern f32 D_0054F3A0[]`, `extern f32
 D_0054F3A0[4]` and `extern sdfVector4_t D_0054F3A0`, read as `[0]`, `*p` and
-`.x` respectively.
+`.x` respectively. Moving the `direction.x` assignment later in case 0, so the
+load has fewer predecessors to be scheduled against, does not delay it either:
+placed fifth or last among the six it rotates `$f4`-`$f7` to `$f0`-`$f3` and
+goes to 17 differing words, so the draft's source order is the one that gives
+retail's fp registers and only the scheduler's placement of that one load is
+left.
+
 ## func_00213190 (code_001FAE80, 0x50)
 
 8 of 18 words, 72 against retail's 80 bytes. A `qsort` comparator over the
@@ -1312,29 +1318,41 @@ for `cmpFindKugatatiMsgEntry`, which walks the same table.
 
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
-59 of 117 words, eight words short of retail's 119.
+33 of 117 words, two words short of retail's 119.
 
 The dispatch is a `switch` on `effBTLModelGetID` of the invoke formation whose
-arms each run one `nbCameraBoss_*_Cut1_Run` and return its value. Retail does
-that as `jal callee`, then `b` to one shared epilogue with `ld $16` in the
-delay slot, with the result left in `$2` and never copied; the default arms put
-`daddu $2, $0, $0` in a compare's delay slot.
+arms each run one `nbCameraBoss_*_Cut1_Run`. Retail does that as `jal callee`,
+then `b` to one shared epilogue with `ld $16` in the delay slot, with the result
+left in `$2` and never copied; the default arms put `daddu $2, $0, $0` in a
+compare's delay slot.
 
-Writing the arms as `return callee(pCamera);` makes ee-gcc tail-call every one
-of them (`j callee` with the epilogue inlined ahead of it), which is 30 words
-over. Writing them as `ret = callee(pCamera); break;` with one trailing
-`return ret;` gives retail's shape, including the shared epilogue and the
-`daddu` in the delay slots, but allocates `ret` to `$3`: every arm then pays a
-`daddu $3, $2, $0` and the `ld $16` moves out of the `b` delay slot. The eight
-copies plus the displacement shifts are the whole diff, so the missing source
-fact is whatever keeps the value in `$2`.
+Two facts got the draft from 59 words to 33:
 
-Ruled out: declaring the function `u32` so the callee return types differ
-(ee-gcc 2.96 compares modes, not types, so the tail calls stay); every
-declaration order of `pForm`, `id`, `skill` and `ret`; `ret = 0` before the
-switch instead of in the default arms, which also loses the delay-slot
-`daddu`; dropping the `ret =` so the arms only call and the function returns an
-uninitialised `ret`, which costs a third saved register.
+The arms must only call, not assign. `return callee(pCamera);` tail-calls every
+arm (30 words over) and `ret = callee(pCamera); break;` with one trailing
+`return ret;` allocates `ret` to `$3`, costing a `daddu` per arm. Dropping both
+and letting the function fall off the end of the `switch` leaves the callee's
+value in `$2`, which is what retail returns.
+
+The last arm's failing guard must fall into `default`, not run its own
+`return 0`. With `case 0x158: ... else { return 0; } break; default: return 0;`
+the `skill` local lands in `$4` and every compare against it shifts; writing the
+arm as two `if (...) { call; break; }` tests followed directly by the `default:`
+label puts `skill` in `$3` as retail has it. A nested `switch (skill)` for that
+arm also frees `$3` but runs three words over.
+
+What is left is two branch delay slots. On the tests whose arms call
+`BSARI_MASEHA_Run` and `Lusi_Cut1_Set`, retail leaves a `nop` and uses `bnel`
+where the draft fills the slot with the following `addiu $2, $0, <const>` and
+uses `bne`. Those two callees and `Pish_MUHENK_Run` are the only arms still
+`INCLUDE_ASM`, and this is the branch-annul signature of the "a caller can need
+its callee's definition" row in [matching-levers.md](matching-levers.md): the
+remaining two words should close on their own once those three are C. Permuting
+the caller does not reach it. Ruled out at 33 words: forward prototypes for the
+three assembly callees and removing the two that exist; `return callee(...)`
+with the sibling call blocked by an address-taken dummy local (identical
+output); early-`break` instead of `else if` in the `0x123` and `0x102` arms;
+`switch (skill)` for those two arms (six words worse).
 
 The case bodies are laid out in retail as `{0x103, 0x124}`, `0x123`, `0x102`,
 `0x125`, `0x108`, `0x158`, and that order is what the draft uses. The `0x123`
@@ -2359,3 +2377,31 @@ labels here, so `case_values_threshold` is not 10 for this shape. The switch
 needs an explicit empty `case 0:` alongside 1 to 5; without it ee-gcc builds
 a five-node compare tree instead of the table. `nbMaeFlag`, `nbMaeState`,
 `nbMaeCounter` and `D_00551540` are all `s32` sdata.
+
+## nbCameraBoss_Cut2_Run (newbattle/nbCameraBoss, 0x230)
+
+92 of 138 words, two words short of retail's 140.
+
+The same jump-table dispatcher as `nbCameraBoss_Cut1_Init`, on `id - 0x101`
+over 0x58 entries, and written the same way: each arm is one or two
+`if (skill == <n>) { callee(pCamera); break; }` tests followed by a `return 0`
+or `return 1`, the arms only call, the function falls off the end of the
+`switch`, and the `0x158` arm's failing guard falls into `default`. Every
+difference is a displacement shift from one block.
+
+The `0x11F` arm is the one block that is wrong. Retail reaches the shared exit
+from both of its `return 1` paths with `addiu $2, $0, 1` in a branch delay slot
+(`beqz $4, exit` for `skill == 0`, then `bnel $4, $2, exit` annulling a
+`daddu $2, $0, $0` for `skill != 0xA5`, then `b exit` with the 1 again).
+`if (skill == 0) return 1; if (skill == 0xA5) return 1; return 0;` and
+`if (skill == 0) return 1; if (skill != 0xA5) return 0; return 1;` both let
+ee-gcc if-convert the pair into `xori`/`sltiu`, four words short.
+`if (skill != 0 && skill != 0xA5) { return 0; } return 1;` and a two-case
+`switch (skill)` returning 1 both keep the branches but merge the first
+`return 1` into a local block that the `beqz` jumps to, leaving its delay slot
+empty and the `0xA5` constant in `$3`: two words short. The missing fact is
+whatever makes that first `return 1` a bare jump to the shared exit.
+
+The jump table differs as a consequence; the case set itself is confirmed by
+the default entries, which all resolve to the one default block.
+
