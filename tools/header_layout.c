@@ -766,6 +766,15 @@ OFF(p101, nbMainProcessData_t, aiScriptProcess, 0x104);
 OFF(p102, nbMainProcessData_t, autoCommProcess, 0x110);
 OFF(p103, nbMainProcessData_t, pnltex, 0x120);
 OFF(p104, nbMainProcessData_t, enemyunit, 0x8);
+OFF(p104a, nbMainProcessData_t, form_hndl, 0x4);
+OFF(p104b, nbMainProcessData_t, enemyunit_hndl, 0xC);
+OFF(p104c, nbMainProcessData_t, party_hndl, 0x14);
+OFF(p104d, nbMainProcessData_t, actionstack, 0x3C);
+OFF(p104e, nbMainProcessData_t, mesmngid, 0x130);
+OFF(p104g, nbMainProcessData_t, encpackno, 0x28);
+OFF(p104h, nbMainProcessData_t, packno, 0x2C);
+OFF(p104i, nbMainProcessData_t, packindex, 0x30);
+SZ(p104f, nbMainProcessData_t, 0x150);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;

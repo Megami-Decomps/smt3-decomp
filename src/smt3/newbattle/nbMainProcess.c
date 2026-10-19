@@ -10,7 +10,280 @@ extern void nbKillMainProcess(void);
 
 extern void nbCameraPressProcessInit(void);
 
-void SetDummy(void) {
+extern void evtBitOff(s32 no);
+
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
+
+extern void evtDisableMoonDraw(void);
+
+extern void nbFreeDeadMoonTex(void);
+
+extern void nbInitEventProcess(nbMainProcessData_t *data);
+
+extern void nbDelUnEventKoukaPacket(void);
+
+/* The player party's unit records in the global work. */
+#define NB_PLAYERUNIT ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))
+
+/* The 38-byte encounter row; only the flag word this unit reads is named. */
+typedef struct {
+    u8 unk_00[0x4];
+    u8 formtype;
+    u8 unk_05[0x1B];
+    u16 flag;
+    u8 unk_22[0x4];
+} nbEncountForm_t;
+
+typedef struct nbParty_t
+{
+    u16 flag;
+    s16 formindex;
+    s16 statindex;
+    u16 partyindex;
+    s16 count[20];
+    u32 aisyo[16];
+    u16 hojoskill[8];
+} nbParty_t;
+
+typedef struct nbActionStack_t {
+    s32 type;
+    s32 from;
+    s32 to;
+    s32 d;
+} nbActionStack_t;
+
+extern nbEncountForm_t nbEncountFormTable[];
+
+extern void nbClearActionStack(void);
+
+extern void nbSetupBattleUnits(nbMainProcessData_t *data, s32 encno);
+
+extern void nbCameraSetState(s32 state);
+
+extern void nbGroupFormDispOff(s32 group);
+
+extern void nbInitEncProcess(nbMainProcessData_t *data);
+
+extern void nbPanelPressGaugeStart(void);
+
+extern s32 nbCheckActionStack(void);
+
+extern void nbPushAction(s32 type, s32 from, s32 to, s32 d);
+
+extern s32 nbPopAction(nbActionStack_t *act);
+
+extern void nbUpdateFormation(nbMainProcessData_t *data);
+
+extern void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to, s32 d);
+
+extern void nbCameraCRSetPlayerFormRequest(void);
+
+extern void nbInitDebugProcess(nbMainProcessData_t *data);
+
+extern s32 D_0054F0F4;
+
+extern sdfMemHandle_t *sdfDevLoadFileEx(s32 path, void *destination, void *size);
+
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+
+extern s32 printf(const char *format, ...);
+
+extern char D_00543448[];
+
+extern s32 CheckErrorActionStack(nbMainProcessData_t *data, s32 index);
+
+extern void CheckSenseiOrBackAttack(nbMainProcessData_t *data);
+
+extern void nbSetPlayerStartData(nbMainProcessData_t *data);
+
+extern void nbInitUnitProcess(nbMainProcessData_t *data);
+
+extern void nbInitKoukaProcess(nbMainProcessData_t *data);
+
+extern void nbInitTarSelProcess(nbMainProcessData_t *data);
+
+extern void nbInitMaeProcess(nbMainProcessData_t *data);
+
+extern void nbInitEffectProcess(nbMainProcessData_t *data);
+
+extern void nbInitCameraProcess(nbMainProcessData_t *data);
+
+extern void nbInitPanelProcess(nbMainProcessData_t *data);
+
+extern void nbInitHelpProcess(nbMainProcessData_t *data);
+
+extern void nbInitAutoCommProcess(nbMainProcessData_t *data);
+
+extern dds3ProcessID_t *nbInitMakaProcess(dds3ProcessID_t *parent);
+
+extern void nbInitStageProcess(nbMainProcessData_t *data);
+
+extern void nbPanelPressGaugeEncountHide(void);
+
+extern void fileSyncAll(void);
+
+extern void sdfChipFreeDirect(void *block);
+
+extern void *sdfChipAllocDirect(u32 size);
+
+extern void *sdfMemAllocDirect(s32 size);
+
+extern void *memset(void *destination, s32 value, u32 bytes);
+
+extern void nbFreeAllFormResources(nbMainProcessData_t *data);
+
+extern void nbFreeEventPack(nbMainProcessData_t *data);
+
+extern void itfMesMngRelease(s32 msg);
+
+extern s32 itfMesMngInitialize(void *resource);
+
+extern u8 itfMesEmbedded_3F8228[];
+
+extern void nbFormatFormation(nbMainProcessData_t *data, s32 index);
+
+extern void nbAllocMainProcessData(nbMainProcessData_t *data);
+
+extern void SetDebugFlag(nbMainProcessData_t *data);
+
+extern s32 nbCheckSensei(nbMainProcessData_t *data);
+
+extern s32 nbCheckBackAttack(nbMainProcessData_t *data);
+
+extern s32 evtBitCheck(s32 no);
+
+extern char D_00543438[]; /* "backattack!!\n" */
+
+extern char D_00543510[]; /* "encpackno = %d\n" */
+
+extern char D_00543520[]; /* "packno = %d\n" */
+
+extern char D_00543530[]; /* "packindex = %d\n" */
+
+extern char D_00543540[]; /* "encno = %d\n" */
+
+extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hsys);
+
+extern void nbGetEncountTableItem(nbMainProcessData_t *data);
+
+extern void nbInitResultProcess(nbMainProcessData_t *data);
+
+extern void nbBgmFadeOut(void);
+
+extern char D_00543550[]; /* "formationtype = %d\n" */
+
+extern char D_00543468[]; /* "game over !!\n" */
+
+extern char D_00543478[]; /* "level up !!\n" */
+
+extern char D_005510B8[]; /* "nb_main" */
+
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+
+extern s32 rstChkResultEntry(void);
+
+extern void evtSetAgeOfMoon(s32 age);
+
+extern void evtEnableMoonDraw(void);
+
+extern void nbLoadDeadMoonTex(void);
+
+extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
+                                         s32 shutdowntimer, void *processfunc,
+                                         void *shutdownfunc, void *data);
+
+extern s32 nbMainProcess1(dds3ProcessID_t *id);
+
+extern s32 nbCheckBadKaifuku(datUnitWork_t *unit, s32 type);
+
+extern u32 datGetMaxHp(datUnitWork_t *unit);
+
+extern u32 datGetMaxMp(datUnitWork_t *unit);
+
+extern void datSetAutoKaifukuSkill(datUnitWork_t *unit, s32 skill);
+
+extern void nbInitAtoProcess(nbMainProcessData_t *data);
+
+extern void nbSetChkEndPhase(nbMainProcessData_t *data);
+
+extern void nbSetChkTurnPhase(nbMainProcessData_t *data);
+
+extern void nbSetPressMaePhase(nbMainProcessData_t *data);
+
+extern s8 dds3PadButtonState[64];
+
+extern s32 dds3GetRandIntA(s32 min, s32 max);
+
+extern struct nbKoukaPacket_t *nbAddDeadPcmPacket(s32 startframe, s32 uniqueid,
+                                                  nbFormation_t *form);
+
+extern struct nbKoukaPacket_t *nbAddPadShockPacket(s32 startframe, s32 uniqueid, s32 mode, s32 pow,
+                                                   s32 time);
+
+extern s32 nbCheckBadStatusGameOver(nbMainProcessData_t *data);
+
+extern s32 nbCheckRenzokuEncount(nbMainProcessData_t *data);
+
+extern char D_00543458[];
+
+extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
+
+extern void nbSetOrder(void);
+
+/* The 60-byte devil record; only the flag word this unit reads is named. */
+typedef struct {
+    u32 flag;
+    u8 unk_04[0x38];
+} datDevilFormat_t;
+
+extern datDevilFormat_t datDevilTable[];
+
+extern void nbSetNextOrder(void);
+
+extern void nbSetNextPhase(s32 phase);
+
+extern s32 nbMakeBadKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form);
+
+extern void nbAddKagututiMoon(nbMainProcessData_t *data);
+
+extern u32 dds3DebugSign;
+
+extern void nbCheckPackLoad(nbMainProcessData_t *data);
+
+extern s32 nbGetStageData(void);
+
+extern void nbCameraPressProcessThrough(void);
+
+extern void nbPanelPressTurnOmit(void);
+
+extern void nbPanelPressTurnStart(void);
+
+extern s32 nbCameraPressProcessGetFrame(void);
+
+extern s32 nbCameraPressProcessCheckRun(void);
+
+extern s32 nbCountKoukaByType(s32 type);
+
+extern s32 nbGetActionSeq(dds3ProcessID_t *id);
+
+extern s32 p2sdGetPcmState(void);
+
+extern s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes);
+
+extern void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype);
+
+extern void nbCountActiveUnits(nbMainProcessData_t *data);
+
+extern void nbDebugMainProcess(nbMainProcessData_t *data);
+
+extern void nbDebugCamera(nbMainProcessData_t *data);
+
+extern void DebugDisp2(nbMainProcessData_t *data);
+
+void SetDummy(nbMainProcessData_t *data)
+{
 }
 
 nbMainProcessData_t *nbGetMainProcessData(void)
@@ -18,17 +291,111 @@ nbMainProcessData_t *nbGetMainProcessData(void)
     return dds3GetProcessData(dds3SearchProcessPriority(0x3FA));
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbGetUnitWorkPointer);
+datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party)
+{
+    u16 flag;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbGetPartyFromFormindex);
+    flag = party->flag;
+    if ((flag & 1) == 0) {
+        return 0;
+    }
+    if (flag & 2) {
+        return &data->enemyunit[party->statindex];
+    }
+    if (flag & 4) {
+        return 0;
+    }
+    return (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + party->statindex;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbGetUnitWorkFromFormindex);
+nbParty_t *nbGetPartyFromFormindex(s32 formindex)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbGetSelectBit);
+    if (formindex >= 16) {
+        return 0;
+    }
+    data = nbGetMainProcessData();
+    form = &data->form[formindex];
+    if ((form->stat & 1) == 0) {
+        return 0;
+    }
+    if ((form->stat & 0x40) == 0) {
+        return 0;
+    }
+    return &data->party[form->partyindex];
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetFormationSideFlag);
+datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex)
+{
+    nbMainProcessData_t *data;
+    nbParty_t *party;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbDebugSelect);
+    if (formindex >= 16) {
+        s32 index = formindex - 16;
+        return NB_PLAYERUNIT + index;
+    }
+    data = nbGetMainProcessData();
+    party = nbGetPartyFromFormindex(formindex);
+    if (party == 0) {
+        return 0;
+    }
+    if ((party->flag & 1) == 0) {
+        return 0;
+    }
+    return nbGetUnitWorkPointer(data, party);
+}
+
+u32 nbGetSelectBit(nbMainProcessData_t *data)
+{
+    nbFormation_t *form;
+    u32 bits;
+    s32 i;
+
+    form = data->form;
+    bits = 0;
+    for (i = 0; i < 16; i++) {
+        if (form[i].stat & 8) {
+            bits |= 1 << i;
+        }
+    }
+    return bits;
+}
+
+void nbSetFormationSideFlag(nbFormation_t *form, s32 index)
+{
+    form->formindex = index;
+    if (index < 4) {
+        form->stat |= 0x100;
+    } else if (index < 14) {
+        form->stat |= 0x200;
+    } else {
+        form->stat |= 0x400;
+    }
+}
+
+void nbDebugSelect(nbMainProcessData_t *data)
+{
+    if (dds3PadButtonState[0x28] < 0) {
+        data->stat ^= 0x100000;
+    }
+    if (dds3PadButtonState[0x33] < 0) {
+        data->debug = (data->debug + 1) % 2;
+    }
+    if (data->stat & 8) {
+        if (evtBitCheck(0xC11)) {
+            if (dds3GetRandIntA(0, 5) == 0) {
+                nbAddDeadPcmPacket(0, 0, &data->form[2]);
+                nbAddPadShockPacket(0, 0, 1, 0x96, 0x14);
+            }
+            if (dds3GetRandIntA(0, 5) == 0) {
+                nbAddDeadPcmPacket(0, 0, &data->form[2]);
+                nbAddPadShockPacket(0, 0, 1, 0x96, 0x14);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbDebugCamera);
 
@@ -36,67 +403,750 @@ INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbDebugMainProcess);
 
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", DebugDisp2);
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", CheckActionProcessEnd);
+s32 CheckActionProcessEnd(nbMainProcessData_t *data)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", CheckSenseiOrBackAttack);
+    for (i = 0; i < 4; i++) {
+        if (data->unkD4[i] != 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", CheckActionRun);
+void CheckSenseiOrBackAttack(nbMainProcessData_t *data)
+{
+    s32 stat;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", SetBattleFlag);
+    if (nbCheckSensei(data) && evtBitCheck(0xC0A) == 0) {
+        data->stat |= 0x80;
+        if (nbCheckBackAttack(data)) {
+            data->stat |= 0x10;
+            printf(D_00543438);
+        }
+        data->stat |= 8;
+    }
+    stat = data->stat;
+    if (stat & 0x8000) {
+        data->stat = ((stat | 0x80) & ~0x10) | 8;
+        stat = data->stat;
+    }
+    if ((stat & 0x80000000) != 0) {
+        data->stat = stat | 0x98;
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbPushAction);
+s32 CheckActionRun(nbMainProcessData_t *data)
+{
+    nbFormation_t *form;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", CheckErrorActionStack);
+    form = data->form;
+    for (i = 0; i < 16; i++) {
+        if ((form->stat & 1) && (form->flag & 7)) {
+            return 0;
+        }
+        form++;
+    }
+    return 1;
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbPopAction);
+void SetBattleFlag(nbMainProcessData_t *data)
+{
+    s32 flag;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbCheckActionStack);
+    flag = nbEncountFormTable[data->encno].flag;
+    if (flag & 1) {
+        data->stat |= 1;
+    }
+}
+
+void nbPushAction(s32 type, s32 from, s32 to, s32 d)
+{
+    nbMainProcessData_t *data;
+
+    data = nbGetMainProcessData();
+    data->actionstack[data->actionstackp].type = type;
+    data->actionstack[data->actionstackp].from = from;
+    data->actionstack[data->actionstackp].to = to;
+    data->actionstack[data->actionstackp].d = d;
+    data->actionstackp++;
+}
+
+s32 CheckErrorActionStack(nbMainProcessData_t *data, s32 index)
+{
+    nbActionStack_t *act;
+    nbParty_t *party;
+    datUnitWork_t *unit;
+    s32 type;
+
+    act = (nbActionStack_t *)((u8 *)(index * sizeof(nbActionStack_t)) + (u32)data->actionstack);
+    party = (nbParty_t *)((u8 *)(act->to * sizeof(nbParty_t)) + (u32)data->party);
+    if ((party->flag & 1) == 0) {
+        return 1;
+    }
+    if (party->flag & 0x20) {
+        return 1;
+    }
+    if (data->endtype != 0 && act->type != 5) {
+        return 1;
+    }
+    type = data->actionstack[index].type;
+    if (type == 4) {
+        unit = nbGetUnitWorkPointer(data, &data->party[data->actionstack[index].from]);
+        switch (unit->badstatus & 0xFFF) {
+        case 1:
+        case 2:
+        case 4:
+        case 0x10:
+        case 0x80:
+        case 0x100:
+        case 0x400:
+            return 1;
+        }
+    }
+    return 0;
+}
+
+s32 nbPopAction(nbActionStack_t *act)
+{
+    nbMainProcessData_t *data;
+    s32 p;
+
+    data = nbGetMainProcessData();
+    while (1) {
+        if (data->actionstackp <= 0) {
+            goto fail;
+        }
+        p = data->actionstackp - 1;
+        data->actionstackp = p;
+        if (CheckErrorActionStack(data, p) == 0) {
+            act->type = data->actionstack[data->actionstackp].type;
+            act->from = data->actionstack[data->actionstackp].from;
+            act->to = data->actionstack[data->actionstackp].to;
+            act->d = data->actionstack[data->actionstackp].d;
+            return 1;
+        }
+    }
+fail:
+    return 0;
+}
+
+s32 nbCheckActionStack(void)
+{
+    nbMainProcessData_t *data;
+    s32 i;
+
+    data = nbGetMainProcessData();
+    if (data->actionstackp <= 0) {
+        return 0;
+    }
+    for (i = 0; i < data->actionstackp; i++) {
+        if (CheckErrorActionStack(data, i) == 0) {
+            printf(D_00543448);
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void nbClearActionStack(void)
 {
     nbGetMainProcessData()->actionstackp = 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetMaePhase);
+void nbSetMaePhase(nbMainProcessData_t *data)
+{
+    SetBattleFlag(data);
+    CheckSenseiOrBackAttack(data);
+    nbSetPlayerStartData(data);
+    nbInitUnitProcess(data);
+    nbInitKoukaProcess(data);
+    nbInitTarSelProcess(data);
+    nbInitMaeProcess(data);
+    nbInitEffectProcess(data);
+    nbInitCameraProcess(data);
+    nbInitPanelProcess(data);
+    nbInitHelpProcess(data);
+    nbInitAutoCommProcess(data);
+    nbInitMakaProcess(data->unkBC);
+    nbInitStageProcess(data);
+    nbPanelPressGaugeEncountHide();
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbStartBattlePhase);
+void nbStartBattlePhase(nbMainProcessData_t *data)
+{
+    nbClearActionStack();
+    nbSetupBattleUnits(data, data->encno);
+    nbCameraSetState(1);
+    nbGroupFormDispOff(0);
+    nbInitEncProcess(data);
+    nbPanelPressGaugeStart();
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetEventPhase);
+void nbSetEventPhase(nbMainProcessData_t *data)
+{
+    if (data->eventno > 0) {
+        nbInitEventProcess(data);
+        nbDelUnEventKoukaPacket();
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetAtoPhase);
+void nbSetAtoPhase(nbMainProcessData_t *data)
+{
+    datUnitWork_t *unit;
+    s32 bad;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetPressMaePhase);
+    for (i = 0; i < 16; i++) {
+        unit = &NB_PLAYERUNIT[i];
+        bad = unit->badstatus;
+        if (nbCheckBadKaifuku(unit, 3)) {
+            if ((bad & 0xFFF) == 0x200) {
+                unit->badstatus &= 0xFDFF;
+                unit->maxhp = datGetMaxHp(unit);
+                unit->maxmp = datGetMaxMp(unit);
+            }
+            unit->badstatus &= 0xF000;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        unit = nbGetUnitWorkFromFormindex(i);
+        if (unit == 0) {
+            continue;
+        }
+        if ((unit->badstatus & 0xFFF) == 0x800) {
+            continue;
+        }
+        if (unit->hp == 0) {
+            continue;
+        }
+        datSetAutoKaifukuSkill(unit, 0x15A);
+        datSetAutoKaifukuSkill(unit, 0x15B);
+        datSetAutoKaifukuSkill(unit, 0x15C);
+    }
+    nbInitAtoProcess(data);
+}
 
-void nbSetPressNiidaPhase(void)
+void nbSetPressMaePhase(nbMainProcessData_t *data)
+{
+    datUnitWork_t *unit;
+    s32 start;
+    s32 cnt;
+    s32 i;
+
+    data->press3 = 1.0f;
+    if (data->stat & 8) {
+        start = 4;
+        cnt = 10;
+    } else {
+        start = 0;
+        cnt = 4;
+    }
+    data->unk78 = 0;
+    for (i = start; i < start + cnt; i++) {
+        if (data->party[i].flag & 1) {
+            if ((data->party[i].flag & 0x20) == 0) {
+                unit = nbGetUnitWorkPointer(data, &data->party[i]);
+                if (unit != 0) {
+                    if ((unit->flag & 4) == 0 && (datDevilTable[unit->id].flag & 0x10)) {
+                        data->unk78 = data->unk78 + 2;
+                    } else {
+                        data->unk78 = data->unk78 + 1;
+                    }
+                }
+            }
+        }
+    }
+    if (evtBitCheck(0x8C0) && (data->stat & 8) == 0) {
+        data->unk78 = data->unk78 + 1;
+    }
+    data->unk7A = data->unk78;
+    if (data->stat & 8) {
+        start = 4;
+        cnt = 10;
+    } else {
+        start = 0;
+        cnt = 4;
+    }
+    for (i = start; i < start + cnt; i++) {
+        nbSetHojoCounter(i, 0xE, 0);
+        nbSetHojoCounter(i, 0xD, 0);
+    }
+    data->endtype = 0;
+    nbSetOrder();
+}
+
+void nbSetPressNiidaPhase(nbMainProcessData_t *data)
 {
     nbCameraPressProcessInit();
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetActionMaePhase);
+void nbSetActionMaePhase(nbMainProcessData_t *data)
+{
+    if (nbCheckActionStack() == 0) {
+        nbPushAction(0, data->order[data->orderindex], 0, 0);
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetActionPhase);
+void nbSetActionPhase(nbMainProcessData_t *data)
+{
+    nbActionStack_t act;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetChkEndPhase);
+    nbPopAction(&act);
+    nbUpdateFormation(data);
+    nbInitActionProcess(data, act.type, act.from, act.to, act.d);
+    nbCameraCRSetPlayerFormRequest();
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetChkTurnPhase);
+void nbSetChkEndPhase(nbMainProcessData_t *data)
+{
+    nbParty_t *party;
+    nbParty_t *pparty;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetResultPhase);
+    if (data->endtype == 0) {
+        if (data->enemypcnt == 0) {
+            data->endtype = 1;
+        }
+        party = data->party;
+        for (i = 4; i < 14; i++) {
+            if (party[i].flag & 1) {
+                if ((party[i].flag & 0x20) == 0) {
+                    break;
+                }
+            }
+        }
+        if (i == 14) {
+            data->endtype = 1;
+        }
+        if (nbCheckBadStatusGameOver(data)) {
+            printf(D_00543458);
+            data->endtype = 6;
+        }
+        if (NB_PLAYERUNIT->hp == 0) {
+            data->endtype = 2;
+        }
+        pparty = data->party;
+        if ((pparty->flag & 1) == 0) {
+            data->endtype = 2;
+        } else if (pparty->flag & 0x20) {
+            data->endtype = 2;
+        }
+    }
+    if (nbCheckActionStack() == 0) {
+        if (data->endtype == 1) {
+            if (nbCheckRenzokuEncount(data)) {
+                data->endtype = 5;
+            }
+        }
+    }
+}
+
+void nbSetChkTurnPhase(nbMainProcessData_t *data)
+{
+    datUnitWork_t *unit;
+    s32 i;
+
+    if (nbCheckActionStack()) {
+        nbSetNextPhase(6);
+        return;
+    }
+    nbClearActionStack();
+    if (data->eventno > 0) {
+        nbSetNextPhase(3);
+        return;
+    }
+    if (data->unk78 > 0 || data->unk7A > 0) {
+        if ((data->stat & 0x40000) == 0) {
+            nbSetNextOrder();
+        }
+        nbSetNextPhase(6);
+        return;
+    }
+    for (i = 0; i < 16; i++) {
+        unit = nbGetUnitWorkFromFormindex(i);
+        if (nbCheckBadKaifuku(unit, 0) == 0) {
+            continue;
+        }
+        switch (unit->badstatus & 0xFFF) {
+        case 4:
+        case 8:
+        case 0x10:
+        case 0x80:
+            if (data->stat & 8) {
+                if ((unit->flag & 0x20) == 0) {
+                    continue;
+                }
+            } else {
+                if (unit->flag & 0x20) {
+                    continue;
+                }
+            }
+            break;
+        }
+        if (data->party[data->form[i].partyindex].flag & 0x20) {
+            continue;
+        }
+        nbMakeBadKaifukuPacket(dds3GetRandIntA(0, 7), 0, &data->form[i]);
+    }
+    for (i = 0; i < 16; i++) {
+        nbSetHojoCounter(i, 0x12, 0);
+    }
+    data->stat &= ~0x10;
+    data->stat &= ~0x80;
+    if ((data->stat & 8) == 0) {
+        data->stat |= 8;
+        nbSetNextPhase(3);
+    } else {
+        data->stat &= ~8;
+        data->turn = data->turn + 1;
+        if (data->turn >= 100) {
+            data->turn = 99;
+        }
+        nbSetNextPhase(3);
+        nbAddKagututiMoon(data);
+    }
+}
+
+void nbSetResultPhase(nbMainProcessData_t *data)
+{
+    s32 i;
+
+    evtDisableMoonDraw();
+    for (i = 0; i < 16; i++) {
+        if (data->form[i].stat & 1) {
+            if (data->form[i].badeff != 0) {
+                effBTLSystemDelete2(data->form[i].badeff);
+                data->form[i].badeff = 0;
+            }
+        }
+    }
+    if (data->endtype == 1 || data->endtype == 9) {
+        nbGetEncountTableItem(data);
+    }
+    switch (data->endtype) {
+    case 4:
+    case 1:
+    case 9:
+        nbInitResultProcess(data);
+        break;
+    default:
+        nbBgmFadeOut();
+        i = 0;
+        break;
+    }
+}
+
+void nbSetEndPhase(nbMainProcessData_t *data)
+{
+    s32 seq;
+    s32 maxhp;
+    s32 maxmp;
+
+    seq = 0x31F;
+    DDS3_GBWK->encounterGauge = 0;
+    DDS3_GBWK->encounterRemainder = 0.0f;
+    if (NB_PLAYERUNIT->hp == 0 || NB_PLAYERUNIT->badstatus == 0x800) {
+        maxhp = NB_PLAYERUNIT->maxhp;
+        maxmp = NB_PLAYERUNIT->maxmp;
+        NB_PLAYERUNIT->flag = 7;
+        NB_PLAYERUNIT->mp = maxmp;
+        NB_PLAYERUNIT->hp = maxhp;
+        NB_PLAYERUNIT->badstatus = 0;
+    }
+    if (data->endtype == 2 || data->endtype == 6) {
+        if (evtBitCheck(0xC0C) == 0) {
+            printf(D_00543468);
+            dds3AdminiCallSequence(7, &seq, 4, 0);
+        }
+    } else if (rstChkResultEntry() != 0) {
+        printf(D_00543478);
+        dds3AdminiCallSequence(0xE, 0, 0, 1);
+    }
+}
+
+void nbSetDebugPhase(nbMainProcessData_t *data)
+{
+    if (data->unkE8 != 0) {
+        dds3KillProcess(data->unkE8, 1);
+    }
+    if (data->unkD4[data->unkE4] != 0) {
+        dds3KillProcess(data->unkD4[data->unkE4], 1);
+    }
+    data->unkE4 = 0;
+    nbInitDebugProcess(data);
+}
+
+void nbSetNextPhase(s32 phase)
+{
+    nbGetMainProcessData()->nextphase = phase;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543438);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543448);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543458);
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetEndPhase);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543468);
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetDebugPhase);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543478);
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetNextPhase);
+void nbSetPhase(s32 phase)
+{
+    nbMainProcessData_t *data;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbSetPhase);
+    data = nbGetMainProcessData();
+    data->nextphase = -1;
+    data->phase = phase;
+    data->phasetime = 0;
+    switch (data->phase) {
+    case 0:
+    case 4:
+    case 8:
+    case 15:
+        break;
+    case 1:
+        nbSetMaePhase(data);
+        break;
+    case 2:
+        nbStartBattlePhase(data);
+        break;
+    case 3:
+        nbSetEventPhase(data);
+        break;
+    case 5:
+        nbSetPressMaePhase(data);
+        nbSetPressNiidaPhase(data);
+        break;
+    case 6:
+        nbSetActionMaePhase(data);
+        break;
+    case 7:
+        nbSetActionPhase(data);
+        break;
+    case 9:
+        nbSetChkEndPhase(data);
+        break;
+    case 10:
+        nbSetChkTurnPhase(data);
+        break;
+    case 11:
+        nbSetAtoPhase(data);
+        break;
+    case 12:
+        nbSetResultPhase(data);
+        break;
+    case 13:
+        nbSetEndPhase(data);
+        break;
+    case 14:
+        nbSetDebugPhase(data);
+        phase = 0;
+        break;
+    }
+}
 
+/* NON_MATCHING: 150 of 263 words differ (first at +0xBC). */
+#ifdef NON_MATCHING
+s32 nbMainProcess1(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data;
+    s32 next;
+    s32 seq;
+    s32 limit;
+
+    next = 0;
+    data = dds3GetProcessData(id);
+    data->flag = 0;
+    nbCheckPackLoad(data);
+    switch (data->phase) {
+    case 0:
+        nbSetNextPhase(1);
+        next = 1;
+        break;
+    case 1:
+        if (nbGetStageData() == 1) {
+            nbSetNextPhase(2);
+            next = 1;
+        }
+        break;
+    case 2:
+        if (data->encounterProcess == 0) {
+            nbCameraPressProcessThrough();
+            nbPanelPressTurnOmit();
+            nbSetNextPhase(3);
+            next = 1;
+        }
+        break;
+    case 3:
+        if (*(s32 *)data->unk118 == 0) {
+            if (data->endtype == 1 || data->endtype == 8) {
+                nbSetNextPhase(0xB);
+            } else {
+                nbSetNextPhase(5);
+            }
+            next = 1;
+        }
+        break;
+    case 5:
+        if (data->phasetime == 0) {
+            nbPanelPressTurnStart();
+        }
+        if (nbCameraPressProcessGetFrame() >= 10) {
+            nbSetNextPhase(4);
+            next = 1;
+        }
+        break;
+    case 4:
+        if (nbCameraPressProcessCheckRun() == 0) {
+            nbSetNextPhase(6);
+            next = 1;
+        }
+        break;
+    case 6:
+        if (CheckActionRun(data)) {
+            nbSetNextPhase(7);
+            next = 1;
+        }
+        break;
+    case 7:
+        if (data->endtype == 7) {
+            if (nbCountKoukaByType(0x2E) == 0) {
+                if (NB_PLAYERUNIT->hp != 0) {
+                    nbSetNextPhase(3);
+                    next = 1;
+                } else {
+                    data->endtype = 0;
+                }
+            }
+        } else if (data->unkD4[data->unkE4] == 0) {
+            nbSetNextPhase(8);
+            next = 1;
+        } else {
+            seq = nbGetActionSeq(data->unkD4[data->unkE4]);
+            if (seq >= 0x14) {
+                nbSetNextPhase(8);
+                next = 1;
+            } else if (seq == 1) {
+                if ((data->stat & 0x40) == 0) {
+                    if (dds3PadButtonState[0x2A] < 0) {
+                        if (data->stat & 0x1000000) {
+                            if (dds3DebugSign != 0) {
+                                nbSetNextPhase(0xE);
+                                next = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        break;
+    case 8:
+        nbSetNextPhase(9);
+        next = 1;
+        break;
+    case 9:
+        if (data->stat & 0x40) {
+            if (nbCheckActionStack() != 0) {
+                limit = 8;
+            } else {
+                limit = 0;
+            }
+        } else {
+            limit = 8;
+        }
+        if (data->phasetime >= limit) {
+            if (nbCheckActionStack()) {
+                nbSetNextPhase(0xA);
+                next = 1;
+            } else {
+                switch (data->endtype) {
+                case 0:
+                    nbSetNextPhase(0xA);
+                    next = 1;
+                    break;
+                case 5:
+                    nbSetNextPhase(0xF);
+                    next = 1;
+                    break;
+                case 7:
+                    next = 1;
+                    break;
+                default:
+                    nbSetNextPhase(0xB);
+                    next = 1;
+                    break;
+                }
+            }
+        }
+        break;
+    case 10:
+        next = 1;
+        break;
+    case 15:
+        if (CheckActionProcessEnd(data)) {
+            nbDispMsgHelp(data->mesmngid, nbGetJyokyoMes(data, 0x48), 1);
+            data->stat &= ~0x80;
+            data->stat &= ~8;
+            data->stat &= ~0x10;
+            next = 1;
+            nbCountActiveUnits(data);
+            nbSetNextPhase(2);
+        }
+        break;
+    case 11:
+        if (CheckActionProcessEnd(data) && data->atoProcess == 0 && p2sdGetPcmState() == 0) {
+            nbSetNextPhase(0xC);
+            next = 1;
+        }
+        break;
+    case 12:
+        if (*(s32 *)data->unkC8 == 0) {
+            nbSetNextPhase(0xD);
+            next = 1;
+        }
+        break;
+    case 13:
+        return -1;
+    case 14:
+        if (data->debugProcess == 0) {
+            nbSetNextPhase(6);
+            next = 1;
+        }
+        break;
+    }
+    if (data->phasetime < 0xFFFF) {
+        data->phasetime = data->phasetime + 1;
+    }
+    data->battletime = data->battletime + 1;
+    if (next) {
+        nbSetPhase(data->nextphase);
+    }
+    if ((data->stat & 0x200000) == 0 && dds3DebugSign != 0) {
+        nbDebugSelect(data);
+        nbDebugMainProcess(data);
+        if (data->debug == 1) {
+            DebugDisp2(data);
+        }
+        nbDebugCamera(data);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbMainProcess1);
+#endif
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", SetJyocyuData);
+void SetJyocyuData(nbMainProcessData_t *data)
+{
+    sdfMemHandle_t *handle;
+
+    handle = sdfDevLoadFileEx(D_0054F0F4, 0, 0);
+    data->residentEffect = effBTLCreate(sdfMemLock(handle));
+    sdfMemFreeDirect(handle);
+}
 
 void FreeJyocyuData(nbMainProcessData_t *work)
 {
@@ -104,15 +1154,201 @@ void FreeJyocyuData(nbMainProcessData_t *work)
     work->residentEffect = 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", ClearLocalBit);
+void ClearLocalBit(void)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbMainShutdown);
+    for (i = 0; i < 16; i++) {
+        evtBitOff(0xBF0 + i);
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", SetDebugFlag);
+void nbMainShutdown(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data;
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbInitMainProcessData);
+    data = dds3GetProcessData(id);
+    fileSyncAll();
+    if (data != 0) {
+        sdfMemFreeDirect(data->form_hndl);
+        sdfMemFreeDirect(data->enemyunit_hndl);
+        sdfMemFreeDirect(data->party_hndl);
+        sdfChipFreeDirect(data->actionstack);
+        nbFreeAllFormResources(data);
+        FreeJyocyuData(data);
+        itfMesMngRelease(data->mesmngid);
+        nbFreeEventPack(data);
+        sdfChipFreeDirect(data);
+    }
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", SetFlag);
+void SetDebugFlag(nbMainProcessData_t *data)
+{
+    if (evtBitCheck(0xC04)) {
+        data->stat |= 0x800000;
+    } else {
+        data->stat &= ~0x800000;
+    }
+    if (dds3DebugSign == 0) {
+        return;
+    }
+    data->stat |= 0x1000000;
+    if (evtBitCheck(0xC00)) {
+        data->stat |= 0x20000;
+    } else {
+        data->stat &= ~0x20000;
+    }
+    if (evtBitCheck(0xC01)) {
+        data->stat |= 0x10000;
+    } else {
+        data->stat &= ~0x10000;
+    }
+    if (evtBitCheck(0xC02)) {
+        data->stat |= 0x40000;
+    } else {
+        data->stat &= ~0x40000;
+    }
+    if (evtBitCheck(0xC03)) {
+        data->stat |= 0x400000;
+    } else {
+        data->stat &= ~0x400000;
+    }
+    if (evtBitCheck(0xC05)) {
+        data->stat |= 0x2000000;
+    } else {
+        data->stat &= ~0x2000000;
+    }
+    if (evtBitCheck(0xC06)) {
+        data->stat |= 0x4000000;
+    } else {
+        data->stat &= ~0x4000000;
+    }
+    if (evtBitCheck(0xC07)) {
+        data->stat |= 0x8000000;
+    } else {
+        data->stat &= ~0x8000000;
+    }
+    if (evtBitCheck(0xC0D)) {
+        data->stat |= 0x40000000;
+    } else {
+        data->stat &= ~0x40000000;
+    }
+    if (evtBitCheck(0xC10)) {
+        data->stat |= 0x80000000;
+    } else {
+        data->stat &= ~0x80000000;
+    }
+    if (evtBitCheck(0xC12)) {
+        data->stat |= 0x8000;
+    } else {
+        data->stat &= ~0x8000;
+    }
+}
+
+void *nbInitMainProcessData(void)
+{
+    nbMainProcessData_t *data;
+    nbParty_t *party;
+    s32 i;
+
+    data = sdfChipAllocDirect(0x150);
+    memset(data, 0, 0x150);
+    data->form_hndl = sdfMemAllocDirect(0x1E00);
+    data->form = sdfMemLock(data->form_hndl);
+    for (i = 0; i < 32; i++) {
+        nbFormatFormation(data, i);
+    }
+    data->enemyunit_hndl = sdfMemAllocDirect(0x938);
+    data->enemyunit = sdfMemLock(data->enemyunit_hndl);
+    memset(data->enemyunit, 0, 0x938);
+    data->party_hndl = sdfMemAllocDirect(0x700);
+    data->party = sdfMemLock(data->party_hndl);
+    party = data->party;
+    for (i = 0; i < 14; i++) {
+        party->partyindex = i;
+        party->flag = 0;
+        party++;
+    }
+    data->actionstack = sdfChipAllocDirect(0x80);
+    memset(data->actionstack, 0, 0x80);
+    data->actionstackp = 0;
+    nbAllocMainProcessData(data);
+    data->playerpcnt = 0;
+    data->enemypcnt = 0;
+    data->activeunit = -1;
+    data->orderindex = -1;
+    data->previndex = -1;
+    data->phase = 0;
+    data->press3 = 1.0f;
+    data->unk140 = 0;
+    data->battletime = 0;
+    data->unk144 = 0;
+    data->stat = 0;
+    SetDebugFlag(data);
+    data->mesmngid = itfMesMngInitialize(itfMesEmbedded_3F8228);
+    return data;
+}
+
+void SetFlag(nbMainProcessData_t *data)
+{
+    s32 encno;
+    s32 flag;
+
+    printf(D_00543510, data->encpackno);
+    printf(D_00543520, data->packno);
+    printf(D_00543530, data->packindex);
+    printf(D_00543540, data->encno);
+    encno = data->encno;
+    if (encno == 0xC7) {
+        data->stat |= 0x400;
+    }
+    flag = nbEncountFormTable[encno].flag;
+    if (flag & 8) {
+        data->stat |= 0x800;
+    }
+}
+
+void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 stagemajor,
+                       s32 stageminor)
+{
+    nbMainProcessData_t *data;
+
+    data = nbInitMainProcessData();
+    data->encpackno = encpackno;
+    data->packno = packno;
+    data->packindex = packindex;
+    data->encno = encno;
+    data->formationtype = nbEncountFormTable[encno].formtype;
+    printf(D_00543510, data->encpackno);
+    printf(D_00543520, data->packno);
+    printf(D_00543530, data->packindex);
+    printf(D_00543540, data->encno);
+    printf(D_00543550, data->formationtype);
+    data->unk7C = stagemajor;
+    data->unk7E = stageminor;
+    if (data->encno == 0x1D9) {
+        evtSetAgeOfMoon(0);
+    }
+    SetDummy(data);
+    SetJyocyuData(data);
+    SetFlag(data);
+    ClearLocalBit();
+    data->unkBC = dds3StartProcess(D_005510B8, 0x3FA, 1, 1, nbMainProcess1, nbMainShutdown, data);
+    evtEnableMoonDraw();
+    if (data->encno == 0x1C3) {
+        nbLoadDeadMoonTex();
+        evtSetAgeOfMoon(1);
+    }
+}
+
+void nbKillMainProcess(void)
+{
+    if (dds3SearchProcessPriority(0x3FA) != 0) {
+        dds3KillProcess(nbGetMainProcessData()->unkBC, 1);
+    }
+    evtDisableMoonDraw();
+    nbFreeDeadMoonTex();
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543510);
 
@@ -122,6 +1358,5 @@ INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543530);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543540);
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbInitMainProcess);
+INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543550);
 
-INCLUDE_ASM(const s32, "newbattle/nbMainProcess", nbKillMainProcess);

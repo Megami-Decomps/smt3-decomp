@@ -13,6 +13,7 @@ struct effBTL_t;
 struct NB_FILEHANDLE_T;
 struct nbParty_t;
 struct nbKoukaPacket_t;
+struct nbActionStack_t;
 
 typedef struct nbFormation_t
 {
@@ -79,18 +80,21 @@ typedef struct nbFormation_t
 typedef struct nbMainProcessData_t
 {
     nbFormation_t *form;                    /* 0x000 */
-    u8 unk_04[4];
+    sdfMemHandle_t *form_hndl;              /* 0x004 */
     datUnitWork_t *enemyunit;               /* 0x008 */
-    u8 unk_0C[4];
+    sdfMemHandle_t *enemyunit_hndl;         /* 0x00C */
     struct nbParty_t *party;                /* 0x010 */
-    u8 unk_14[4];
+    sdfMemHandle_t *party_hndl;             /* 0x014 */
     s16 playerpcnt;
     s16 enemypcnt;
     s16 activeunit;                        /* 0x01C */
-    u8 unk_1E[0x16];
+    u8 unk_1E[0xA];
+    s32 encpackno;                         /* 0x028 */
+    s32 packno;                            /* 0x02C */
+    s32 packindex;                         /* 0x030 */
     s32 encno;                             /* 0x034 */
     s32 formationtype;                     /* 0x038 */
-    u8 unk_3C[4];
+    struct nbActionStack_t *actionstack;   /* 0x03C */
     s32 actionstackp;                      /* 0x040 */
     u32 endtype;
     s8 order[12];                          /* 0x048 */
@@ -113,8 +117,8 @@ typedef struct nbMainProcessData_t
     f32 press3;
     s16 unk78;
     s16 unk7A;
-    s16 unk7C;
-    s16 unk7E;
+    s16 unk7C;                             /* 0x07C: stagemajor */
+    s16 unk7E;                             /* 0x07E: stageminor */
     u8 unk80[8];
     s32 eventno;                           /* 0x088 */
     s32 eventrid;
@@ -151,9 +155,13 @@ typedef struct nbMainProcessData_t
     u8 unk118[4];
     struct effBTL_t *residentEffect;         /* 0x11C */
     void *pnltex[4];                       /* 0x120 */
-    u8 unk130[8];
+    s32 mesmngid;                          /* 0x130 */
+    u8 unk134[4];
     void *eventPack;                       /* 0x138 */
     sdfMemHandle_t *eventMemory;
+    u32 unk140;
+    u32 unk144;
+    u8 unk148[8];
 } nbMainProcessData_t;
 
 typedef struct nbKoukaProcessData_t

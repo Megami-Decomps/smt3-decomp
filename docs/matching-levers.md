@@ -39,6 +39,7 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| `bgez` on a sign test where you emit `bgezl` with the epilogue's `ld` duplicated into its delay slot | spell the test as the mask, `if ((stat & 0x80000000) != 0)`, not `if (stat < 0)`. Both are one instruction, but the relational form lets ee-gcc fill the delay slot from the branch target and pay for it with a second epilogue copy. `CheckSenseiOrBackAttack` went from 8 differing words to exact |
 | separate `beq`s on contiguous values inside an `||` chain, where a `switch` would test the middle value first | distribute the shared antecedent instead of nesting the disjunction: `(a == K && f == 8) || (a == K && f == 9) || (a == K && f == 0xA)` keeps three plain `beq`s where `a == K && (f == 8 || f == 9 || f == 0xA)` folds the inner chain to `addiu -8`, `sltiu 3`. gcc still tests the outer value once. `fldOtInit` and `ProcAmCheck` both turned on this |
 | a long flat chain of early `return 0`s where the exits reach a shared block that sets `$2` itself, and the address temps use `$2` and `$3` where you emit `$3` and `$4` | convert only the *last* few early returns to `goto ret0` with one trailing `ret0: return 0;`, and sweep how many. All of them at once is worse: `ProcCampCheck` wants the last two of eight and `ProcAmCheck` the last nine of twelve, and either one converted wholesale loses more than it gains. What the conversion stops is gcc keeping one hoisted zero live in `$2` across the rest of the chain |
 | a `switch` whose arms each need their own temporaries | declare them in the arm's own block. At function scope the arms share one pair of allocnos spanning the whole switch; one function went from 45 of 370 words to exact on that alone |
@@ -338,6 +339,23 @@ it was measured on DDS and not on this ELF.
   of the thirteen statements in that tail moved it; declaring the field `f32`
   and writing `0.0f` put it exactly where retail has it and took the function
   from five differing words to exact.
+- An `andi 0xffff` after the `andi` of a bit test comes from reading a `u16`
+  struct field directly in the condition. Read it into an `s32` local first
+  and the truncation goes away; `SetBattleFlag` turned on that alone. Retail
+  does emit the pair where the field really is tested in place
+  (`nbGetUnitWorkPointer` and `CheckErrorActionStack` both have it), so the
+  tell is which side has the extra word, not the shape.
+- Two bits cleared in one mask come out as one `addiu`/`and`; retail's two
+  `addiu`/`and` pairs with a single store come from two separate statements,
+  `x &= ~0x10; x &= ~0x80;`. gcc merges the dead store but not the masks. One
+  function in `newbattle/nbMainProcess` turned on that alone.
+- Two reads of the same pointer field in one function, where retail puts them
+  in different registers, need two distinct locals. Reassigning one local for
+  the second read keeps retail's reload but not its register.
+- A placeholder field declared `u8 unk_NN[4]` in a shared header decays to its
+  own address, so `if (data->unk118 == 0)` compiles to a compare against a
+  constant and silently tests nothing. Read it through `*(s32 *)data->unk118`
+  until the field has a type.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -582,7 +600,9 @@ These have been ruled out repeatedly and are not worth a second attempt:
   of 694 words on a three-slot rotation that twenty-odd source shapes, nine
   declaration orders and every pointer form tried leave untouched.
 - An epilogue duplicated into a branch-likely delay slot, where ee-gcc emits
-  the plain branch. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
+  the plain branch. **Steerable when the branch is a sign test**: spell it
+  `(x & 0x80000000) != 0` rather than `x < 0`, which took one function from 8
+  differing words to exact. Only the non-sign-test cases have resisted. Note the narrow scope: ee-gcc 2.96 emits `bnel` from
   ordinary C readily, 42 times in `field/fldDraw` and 126 in
   `newbattle/nbMakePacket`, so a `bnel` in the retail code is not a reason to
   skip a function. Only this one use of it has resisted.
