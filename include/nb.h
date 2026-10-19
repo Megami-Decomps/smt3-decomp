@@ -129,7 +129,8 @@ typedef struct nbMainProcessData_t
     u8 itemcnt[4];
     u32 maka;
     u32 exp;
-    u8 unkA8[0xC];
+    struct dds3Basic_t *light[2];          /* 0x0A8 */
+    u8 unkB0[4];
     s32 unkB4;
     u8 unkB8[4];
     dds3ProcessID_t *unkBC;

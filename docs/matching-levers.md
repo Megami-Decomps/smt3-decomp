@@ -39,6 +39,8 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| the loop body once, with the exit test at the bottom and the first load in the preheader | a `do`/`while`, not a `for`. A `for` whose body carries a `break` gets the whole body peeled ahead of the test, which is 14 words in `SetAction_NEGO` |
+| an extra range test (`slti`, `bnez` to the default) in front of a two-case compare chain | an extra `case` with an empty body below the lowest real case value. `nbStageProcess1`'s `switch` over 2 and 3 needed a `case 1: break;` to make gcc emit the bound test; an `s32` or `u32` local for the index does not reach it |
 | `bgez` on a sign test where you emit `bgezl` with the epilogue's `ld` duplicated into its delay slot | spell the test as the mask, `if ((stat & 0x80000000) != 0)`, not `if (stat < 0)`. Both are one instruction, but the relational form lets ee-gcc fill the delay slot from the branch target and pay for it with a second epilogue copy. `CheckSenseiOrBackAttack` went from 8 differing words to exact |
 | separate `beq`s on contiguous values inside an `||` chain, where a `switch` would test the middle value first | distribute the shared antecedent instead of nesting the disjunction: `(a == K && f == 8) || (a == K && f == 9) || (a == K && f == 0xA)` keeps three plain `beq`s where `a == K && (f == 8 || f == 9 || f == 0xA)` folds the inner chain to `addiu -8`, `sltiu 3`. gcc still tests the outer value once. `fldOtInit` and `ProcAmCheck` both turned on this |
 | a long flat chain of early `return 0`s where the exits reach a shared block that sets `$2` itself, and the address temps use `$2` and `$3` where you emit `$3` and `$4` | convert only the *last* few early returns to `goto ret0` with one trailing `ret0: return 0;`, and sweep how many. All of them at once is worse: `ProcCampCheck` wants the last two of eight and `ProcAmCheck` the last nine of twelve, and either one converted wholesale loses more than it gains. What the conversion stops is gcc keeping one hoisted zero live in `$2` across the rest of the chain |
@@ -356,6 +358,18 @@ it was measured on DDS and not on this ELF.
   own address, so `if (data->unk118 == 0)` compiles to a compare against a
   constant and silently tests nothing. Read it through `*(s32 *)data->unk118`
   until the field has a type.
+- Where retail loads two function pointers out of the same kind of struct and
+  calls each, into the *same* register, put the pointer in one local and reuse
+  it: `reg = ot->regFunc; reg(ot, tag); ot = ...; reg = ot->regFunc;
+  reg(ot, tag2);`. Calling `ot->regFunc(ot, tag)` directly puts the second
+  load in `$3`, since `$2` is still the first call's result register.
+  `nbUnitDrawProcess1` went from two differing words to exact. This is the
+  reused-destination form of the plain-copy rule above.
+- A callee defined in the same unit can take a parameter it never reads, and
+  still match: `nbGetUnitMarkPos` has to be declared with three parameters
+  because `nbUnitDrawProcess1` passes a draw tag it ignores. An unused
+  parameter costs no instructions, so adding one is free on the callee and is
+  what lets the caller compile at all.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

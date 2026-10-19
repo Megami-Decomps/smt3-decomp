@@ -6,6 +6,18 @@
 #include "event.h"
 #include "motion.h"
 
+extern char *text1[];
+extern char *text2[];
+extern char *pStr[];
+extern char D_00551130[];
+extern void cmpSetSkillListRows(s32 rows);
+extern void *frwGetSmallFontFRQ(s32 x, s32 y, u32 col1, u32 col2, char *str, void *parent);
+extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, u32 col1, u32 col2, char *str, void *parent);
+extern s32 frDrawFontEx(void *frq, s8 mode);
+extern s32 frDestroyFontRequestAfter(void *frq);
+extern s32 sprintf(char *buf, const char *fmt, ...);
+extern s32 datGetSkillCost(datUnitWork_t *work, s32 no);
+
 
 extern f32 aViewEye[];
 extern f32 D_002FA240[];
@@ -189,6 +201,79 @@ typedef struct nbEncountForm_t {
 
 extern char D_005441A8[];
 
+typedef struct nbMasterTextEntry_t {
+    u8 unk00[0xF];
+    u8 talkflag;
+    u8 unk10[0x20];
+} nbMasterTextEntry_t;
+extern nbMasterTextEntry_t master_text[];
+extern char D_00543880[];
+extern s32 evtBitCheck(s32 bit);
+extern sdfGrOt_t sdfGrOtTable[];
+extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
+extern void sdfPrimLinkG4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, u32 color0, s32 x1,
+                          s32 y1, u32 color1, s32 x2, s32 y2, u32 color2, s32 x3, s32 y3,
+                          u32 color3, s32 depth, void *alloc);
+void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void effBTLSystemDraw(struct effBTLSysHandle_t *handle);
+extern s32 datCheckTalk(datUnitWork_t *work);
+extern s32 evtGetAgeOfMoon(void);
+void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
+                        sdfVector4_t *center, f32 r, f32 scl, f32 h);
+
+extern char D_00543FA8[]; /* "NEGO p:%d e:%d\n" */
+extern void nbInitNegoProcess(nbActionProcessData_t *a, s32 pformindex, s32 eformindex,
+                              u32 negotype, s32 nowindex);
+extern struct nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, nbActionProcessData_t *a,
+                                                     nbFormation_t *form, s32 type, s32 mode);
+extern s32 effPCPBossONGY2GetLength(void);
+extern struct nbKoukaPacket_t *nbAddOngOut2Packet(s32 startframe, nbActionProcessData_t *a,
+                                                  nbFormation_t *form);
+
+extern s32 datCheckDying(datUnitWork_t *work);
+extern s32 mdlGetNumOfCut(struct mdlObj_t *ctx, s32 searchId);
+extern s32 nbCheckSingleTargetSkill(s32 skillid);
+extern struct nbKoukaPacket_t *nbAddSakeKoukaPacket(s32 startframe, nbActionProcessData_t *a,
+                                                    nbFormation_t *form);
+
+extern char D_00544070[];
+extern char D_00544088[];
+extern char D_005440A0[];
+extern char D_005440B0[];
+extern char D_005440C0[];
+extern char D_005440D8[];
+extern void evtSetWaitMotion(struct evtUnit_t *hunit, s32 motion);
+extern void evtSetWaitMotionSpeed(struct evtUnit_t *hunit, f32 speed);
+extern void nbPlaySe(s32 no);
+extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, void *uniqueid, s32 seid);
+extern void nbPanelStockEnd(void);
+extern s32 GetDyingBadWaitMotion(nbFormation_t *form, s32 motion, datUnitWork_t *work);
+
+extern char D_00543618[];
+extern char D_00543688[];
+extern char D_00543698[];
+extern u8 D_003FA760[];
+extern void *memset(void *dst, s32 c, u32 n);
+extern struct dds3Basic_t *dds3GetControlScene(void);
+extern struct dds3Basic_t *dds3SceneBasicSearchNameAndType(struct dds3Basic_t *scene, u32 type,
+                                                           char *name);
+extern s32 dds3AllocObjectId(void);
+extern struct dds3Basic_t *dds3AddLightObjectBasic(s32 serial);
+extern void dds3SetLightObjectResoruce(struct dds3Basic_t *basic, u8 *resource);
+extern void dds3SetUnitObjectId(struct dds3Basic_t *basic, char *name);
+extern void dds3FadeOut(u32 r, u32 g, u32 b, u32 frame);
+void *nbStageProcess1(dds3ProcessID_t *id);
+void nbStageShutdown(dds3ProcessID_t *id);
+void *nbStageDrawProcess1(dds3ProcessID_t *id);
+
+extern void dds3FadeColorSet(u32 r, u32 g, u32 b);
+extern void dds3FadeIn2(u32 frame);
+extern s32 nbGetEncountOn(void);
+extern void nbSetEncountMode(s32 mode);
+void StageLoad(void);
+
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 extern dds3ProcessID_t *dds3SearchProcessName(const char *name);
 extern void SetTarget_nbActionProcess(nbActionProcessData_t *a);
@@ -258,7 +343,7 @@ extern f32 dds3GetRandFloatA(s32 stream);
 extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
 extern s32 GetEndTime(nbActionProcessData_t *a, s32 formindex);
 extern s32 nbGetExpMakaItem(datUnitWork_t *work);
-extern s32 nbMakeDeadPacket(datUnitWork_t *work, nbActionProcessData_t *a, nbFormation_t *form,
+extern s32 nbMakeDeadPacket(s32 startframe, nbActionProcessData_t *a, nbFormation_t *form,
                             s32 deadchk);
 extern void sdfChipFreeDirect(void *block);
 extern s32 dds3GetRandIntA(s32 low, s32 high);
@@ -313,7 +398,27 @@ nbCommSelProcessData_t *GetCommSelProcessData(void);
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 s32 nbGetUnitID(datUnitWork_t *work);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetBattleLight);
+void SetBattleLight(nbMainProcessData_t *data)
+{
+    sdfVector4_t pos;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.x = -1000.0f;
+    if (dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 9, D_00543618) == NULL) {
+        struct dds3Basic_t *light = dds3AddLightObjectBasic(dds3AllocObjectId());
+
+        data->light[0] = light;
+        dds3SetLightObjectResoruce(light, D_003FA760);
+        dds3SetPosPoseSet(data->light[0], &pos);
+        dds3SetUnitObjectId(data->light[0], D_00543618);
+    }
+    {
+        struct dds3Basic_t *light = dds3AddLightObjectBasic(dds3AllocObjectId());
+
+        data->light[1] = light;
+        dds3SetLightObjectResoruce(light, D_003FA760);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddStageCamera);
 
@@ -366,7 +471,35 @@ void StageFree(void)
     nbStageState.data = 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbStageProcess1);
+void *nbStageProcess1(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    switch (nbStageState.data) {
+    case 1:
+        break;
+    case 2:
+        StageLoad();
+        dds3FadeColorSet(0, 0, 0);
+        if (nbStageState.unk00 == 3) {
+            nbStageState.data = 1;
+            if ((data->stat & 0x800) != 0) {
+                break;
+            }
+            dds3FadeIn2(0xF);
+        }
+        if ((data->stat & 0x800) == 0) {
+            if (nbGetEncountOn() != 0) {
+                nbSetEncountMode(1);
+            }
+        }
+        break;
+    case 3:
+        StageFree();
+        break;
+    }
+    return NULL;
+}
 
 void nbStageShutdown(dds3ProcessID_t *id)
 {
@@ -386,7 +519,25 @@ void *nbStageDrawProcess1(dds3ProcessID_t *id)
     return NULL;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitStageProcess);
+void nbInitStageProcess(nbMainProcessData_t *data)
+{
+    dds3ProcessID_t *id;
+    dds3ProcessID_t *draw;
+
+    nbStageState.unk00 = 0;
+    nbStageState.data = 0;
+    nbStageState.pad02[0] = 0;
+    nbStageState.unk04 = 0;
+    nbStageState.unk06 = 0;
+    id = dds3StartProcess(D_00543688, 0x3F9, 1, 1, nbStageProcess1, nbStageShutdown, NULL);
+    dds3LinkProcess(data->unkBC, id);
+    data->stageProcess = id;
+    draw = dds3StartProcess(D_00543698, 0x2B0E, 1, 1, nbStageDrawProcess1, NULL, NULL);
+    dds3LinkProcess(id, draw);
+    if (nbGetEncountOn() == 0) {
+        dds3FadeOut(0, 0, 0, 0);
+    }
+}
 
 void nbStageFilterAlp(s32 alp)
 {
@@ -400,7 +551,34 @@ void func_0024CBD0(u32 param)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbStageSp);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", GetDyingBadWaitMotion);
+s32 GetDyingBadWaitMotion(nbFormation_t *form, s32 motion, datUnitWork_t *work)
+{
+    if ((nbGetMainProcessData()->stat & 0x1000) != 0) {
+        return motion;
+    }
+    if (datCheckDying(work) != 0) {
+        if (motion != 0) {
+            return motion;
+        }
+        if (mdlGetNumOfCut(form->hunit->owner, 0) >= 0x17) {
+            motion = 0x16;
+        }
+    }
+    if (motion != 0) {
+        return motion;
+    }
+    switch (work->badstatus & 0xFFF) {
+    case 4:
+    case 8:
+    case 0x20:
+    case 0x40:
+    case 0x80:
+    case 0x100:
+        motion = 2;
+        break;
+    }
+    return motion;
+}
 
 s32 nbSetNegoWaitMotion(nbFormation_t *form)
 {
@@ -422,7 +600,28 @@ s32 nbSetNegoWaitMotion(nbFormation_t *form)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetUnitMotion);
 
+/* NON_MATCHING: 8 of 54 words differ (first at +0x8C). */
+#ifdef NON_MATCHING
+void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu)
+{
+    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
+    s32 mot = GetDyingBadWaitMotion(form, motion, work);
+    s32 no;
+    f32 speed;
+
+    if (nbGetUnitID(work) == 0) {
+        no = D_003493A0[mot];
+    } else {
+        no = D_0034F1C0[mot];
+    }
+    speed = *(f32 *)nbGetUnitVisual(work)->part[mot].unk02 * ritu;
+    evtSetWaitMotion(form->hunit, no);
+    evtSetWaitMotionSpeed(form->hunit, speed);
+    form->waitmot = mot;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetWaitMotion);
+#endif
 
 s32 nbCalcUnitVisual(nbFormation_t *form, s32 part)
 {
@@ -742,7 +941,42 @@ void UpdateFormPosRot(nbFormation_t *form)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbUnitDrawProcess1);
+void *nbUnitDrawProcess1(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTag_t *tag2;
+    sdfGrOt_t *ot;
+    void (*reg)(sdfGrOt_t *, sdfDrawTag_t *);
+    s32 i;
+
+    sdfDrawTagInit(tag);
+    tag2 = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag2);
+    for (i = 0; i < 0x10; i++) {
+        nbFormation_t *form = &data->form[i];
+
+        if ((form->anime & 0x1C) != 0) {
+            nbGetUnitMarkPos(data, form, tag);
+        }
+        if ((form->anime & 0x100) != 0) {
+            if (form->badeff != NULL) {
+                effBTLSystemDraw(form->badeff);
+            }
+        }
+        if ((data->stat & 0x100000) != 0) {
+            nbDrawRotatedModel(tag2, &form->pos, &form->rot, &form->center, form->r, form->scl,
+                               form->h);
+        }
+    }
+    ot = &sdfGrOtTable[71];
+    reg = ot->regFunc;
+    reg(ot, tag);
+    ot = &sdfGrOtTable[44];
+    reg = ot->regFunc;
+    reg(ot, tag2);
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", RunSake);
 
@@ -959,7 +1193,22 @@ void SetAnalyzePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetPlayerSummonPacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetSakePacket);
+void SetSakePacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dformindex,
+                   s32 cnt, s32 frame)
+{
+    nbAddSakeKoukaPacket(frame, a, &a->data->form[dformindex]);
+    SetHitStopFrame(a, frame);
+    SetTimeList(a, dformindex, frame, 0xA, 0x14);
+    if (nbCheckSingleTargetSkill(nskill) != 0) {
+        if (nbCheckFormationPlayerSide(dformindex) != 0) {
+            nbSetJyokyoMes(a, 2, -1, 0);
+        } else {
+            nbSetJyokyoMes(a, 4, -1, 0);
+        }
+    }
+    SetPress(a, -2.0f);
+    SetNewPress(a, 4);
+}
 
 void SetMissPacket(nbActionProcessData_t *a, s32 sformindex, s32 nskill, s32 formindex,
                    s32 week, s32 start)
@@ -972,7 +1221,34 @@ void SetMissPacket(nbActionProcessData_t *a, s32 sformindex, s32 nskill, s32 for
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetOngShadowPacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetOngShadowPacket2);
+void SetOngShadowPacket2(nbActionProcessData_t *a, s32 skipindex, s32 frame)
+{
+    s32 cnt = 0;
+    s32 i;
+
+    for (i = 4; i < 0xE; i++) {
+        nbFormation_t *form;
+        u32 stat;
+
+        if (i == skipindex) {
+            continue;
+        }
+        form = &a->data->form[i];
+        stat = form->stat;
+        if ((stat & 1) != 0) {
+            if ((stat & 2) != 0) {
+                nbAddUnitAKoukaPacket(frame + 1, a, form, 0, 0);
+                cnt++;
+                nbMakeDeadPacket(frame + effPCPBossONGY2GetLength() + 1, a, form, 1);
+                nbAddOngOut2Packet(frame, a, form);
+                SetTimeList(a, i, frame, 0x1E, 0x1E);
+            }
+        }
+    }
+    if (cnt > 0) {
+        a->data->stat |= 0x4000;
+    }
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543768);
 
@@ -1194,13 +1470,115 @@ void SetTargetParty(nbActionProcessData_t *a, s32 partyindex)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckArrCounter);
+s32 CheckArrCounter(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    s32 hit;
+
+    if (a->partyindex >= 4) {
+        return 0;
+    }
+    form = nbGetEventForm();
+    if (CheckTimeListDead(a, form->formindex) != 0) {
+        return 0;
+    }
+    if (nbGetUnitWorkFromFormindex(form->formindex)->id != 0x123) {
+        return 0;
+    }
+    hit = 0;
+    if (evtBitCheck(0x851) != 0) {
+        if ((a->stat & 0x10000) != 0) {
+            hit = 1;
+        }
+    }
+    if (evtBitCheck(0x852) != 0) {
+        if ((a->stat & 0x20000) != 0) {
+            hit = 1;
+        }
+    }
+    if (evtBitCheck(0x853) != 0) {
+        if ((a->stat & 0x40000) != 0) {
+            hit = 1;
+        }
+    }
+    if (evtBitCheck(0x854) != 0) {
+        if ((a->stat & 0x80000) != 0) {
+            hit = 1;
+        }
+    }
+    if (evtBitCheck(0x855) != 0) {
+        if ((a->stat & 0x100000) != 0) {
+            hit = 1;
+        }
+    }
+    if (evtBitCheck(0x856) != 0) {
+        if ((a->stat & 0x200000) != 0) {
+            hit = 1;
+        }
+    }
+    if (hit == 0) {
+        return 0;
+    }
+    nbPushAction(4, form->partyindex, a->partyindex, 0xF3);
+    printf(D_00543880);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckCounter);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckMukanNego);
 
+/* NON_MATCHING: 57 of 74 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+s32 CheckSenseiNego(nbActionProcessData_t *a)
+{
+    u32 stat;
+    datUnitWork_t *work;
+    s32 rate;
+
+    if ((u16)a->data->unk7C >= 0xF0 && (u16)a->data->unk7C <= 0xF6) {
+        return 0;
+    }
+    stat = a->data->stat;
+    if ((stat & 1) != 0) {
+        return 0;
+    }
+    if ((stat & 0x80) == 0) {
+        return 0;
+    }
+    if ((stat & 0x10) != 0) {
+        return 0;
+    }
+    if ((stat & 0x100) != 0) {
+        return 0;
+    }
+    if (evtGetAgeOfMoon() == 8) {
+        return 0;
+    }
+    work = a->work;
+    if (master_text[work->id].talkflag == 0) {
+        return 0;
+    }
+    if (datCheckTalk(work) == 0) {
+        return 0;
+    }
+    if (datCheckTalk((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54)) == 0) {
+        return 0;
+    }
+    if ((a->data->stat & 0x2000000) != 0) {
+        rate = 0x64;
+    } else {
+        rate = 21 / a->data->enemypcnt;
+    }
+    if (dds3GetRandIntA(0, 0x64) < rate) {
+        a->data->stat |= 0x100;
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckSenseiNego);
+#endif
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543880);
 
@@ -1386,7 +1764,42 @@ void SetAction_STKSEL(nbActionProcessData_t *a)
     StkSelId = -1;
 }
 
+/* NON_MATCHING: 9 of 58 words differ (first at +0x38). */
+#ifdef NON_MATCHING
+s32 CheckAction_STKSEL(nbActionProcessData_t *a)
+{
+    nbFormation_t *form;
+    s32 i;
+
+    switch (StkSelId) {
+    default:
+        nbPanelStockSelect(a->data, 0);
+        nbCloseCommSel();
+        a->select = 1 << (StkSelId + 0x10);
+        SetNextActionSeq(a, 7);
+        a->stat |= 0x400;
+        nbPlaySe(8);
+        return 1;
+    case -1:
+        StkSelId = nbPanelStockSelect(a->data, 1);
+        break;
+    case -2:
+        form = a->data->form;
+        for (i = 0xF; i >= 0; i--) {
+            form->stat &= ~8;
+            form++;
+        }
+        nbSetCommSelStat(2);
+        a->seq = 1;
+        nbPlaySe(0xA);
+        nbPanelStockEnd();
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_STKSEL);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_READY);
 
@@ -1398,6 +1811,56 @@ s32 CheckAction_SKILL(nbActionProcessData_t *a)
 {
     SetNextActionSeq(a, 0x12);
     return 1;
+}
+
+void SetAction_NEGO(nbActionProcessData_t *a)
+{
+    s32 p = -1;
+    s32 e = -1;
+    s32 i = 0;
+    nbFormation_t *form = a->data->form;
+
+    do {
+        u32 stat = form[i].stat;
+
+        if ((stat & 1) != 0) {
+            if ((stat & 8) != 0) {
+                if ((stat & 0x100) != 0) {
+                    p = i;
+                    break;
+                }
+                if ((stat & 0x200) != 0) {
+                    e = i;
+                    break;
+                }
+            }
+        }
+        i++;
+    } while (i < 0x10);
+    if ((a->form->stat & 0x100) != 0) {
+        p = a->form->formindex;
+    } else if ((a->form->stat & 0x200) != 0) {
+        e = a->form->formindex;
+    }
+    printf(D_00543FA8, p, e);
+    nbPanelDraw(0);
+    a->data->negopformindex = p;
+    a->data->negoeformindex = e;
+    nbInitNegoProcess(a, p, e, a->negotype, a->work->nowindex);
+}
+
+s32 CheckAction_NEGO(nbActionProcessData_t *a)
+{
+    if (a->data->negoProcess == NULL) {
+        printf(D_00543FB8, a->data->negoresult);
+        SetNextActionSeq(a, 10);
+        nbPanelDraw(1);
+        if (datCheckPlayerDead() != 0) {
+            a->data->negoresult = 8;
+        }
+        return 1;
+    }
+    return 0;
 }
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543E20);
@@ -1420,21 +1883,7 @@ INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", jtbl_00543F40);
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", jtbl_00543F80);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_NEGO);
-
-s32 CheckAction_NEGO(nbActionProcessData_t *a)
-{
-    if (a->data->negoProcess == NULL) {
-        printf(D_00543FB8, a->data->negoresult);
-        SetNextActionSeq(a, 10);
-        nbPanelDraw(1);
-        if (datCheckPlayerDead() != 0) {
-            a->data->negoresult = 8;
-        }
-        return 1;
-    }
-    return 0;
-}
+INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543FA8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbStageProcess", D_00543FB8);
 
@@ -1468,7 +1917,37 @@ void SetAction_ESCAPE(nbActionProcessData_t *a)
     CheckKoketaNego(a);
 }
 
+/* NON_MATCHING: 9 of 57 words differ (first at +0x1C). */
+#ifdef NON_MATCHING
+s32 CheckAction_ESCAPE(nbActionProcessData_t *a)
+{
+    switch ((u16)((u16)a->seqtime / 15)) {
+    case 1:
+        if (a->data->endtype == 3) {
+            goto out;
+        }
+        a->packettime = 0;
+        break;
+    case 2:
+        if (a->data->endtype != 3) {
+            goto out;
+        }
+        a->packettime = 0x1E;
+        dds3FadeOut(0xFF, 0xFF, 0xFF, 0x14);
+        nbAddSePacket(0, a, 0x10000);
+        SetTimeList(a, a->form->formindex, 0, 0x11, 0x11);
+        break;
+    default:
+        goto out;
+    }
+    SetNextActionSeq(a, 0x12);
+    return 1;
+out:
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_ESCAPE);
+#endif
 
 void SetAction_RETURN(nbActionProcessData_t *a)
 {
@@ -1528,7 +2007,27 @@ s32 CheckAction_ATO(nbActionProcessData_t *a)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_END);
+void SetAction_END(nbActionProcessData_t *a)
+{
+    if ((a->stat & 0x10000) != 0) {
+        printf(D_00544070);
+    }
+    if ((a->stat & 0x20000) != 0) {
+        printf(D_00544088);
+    }
+    if ((a->stat & 0x40000) != 0) {
+        printf(D_005440A0);
+    }
+    if ((a->stat & 0x80000) != 0) {
+        printf(D_005440B0);
+    }
+    if ((a->stat & 0x100000) != 0) {
+        printf(D_005440C0);
+    }
+    if ((a->stat & 0x200000) != 0) {
+        printf(D_005440D8);
+    }
+}
 
 s32 CheckAction_END(nbActionProcessData_t *a)
 {
@@ -1762,7 +2261,7 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawRotatedModelX);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbDrawRotatedModel);
 
-void nbGetUnitMarkPos(s32 type, nbFormation_t *form)
+void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
 {
     s32 pos[4];
 
@@ -2108,7 +2607,39 @@ void DispMpPanel(sdfTexHandle_t *th, datUnitWork_t *w, s32 ox, s32 oy, s32 oz, u
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1PanelSummon);
 
+/* NON_MATCHING: 29 of 97 words differ (first at +0x8). */
+#ifdef NON_MATCHING
+void DispCommCursor(s32 ox, s32 oy, s32 a)
+{
+    sdfDrawTag_t *list;
+    sdfGrOt_t *ot;
+    s32 xb;
+    s32 x1;
+    s32 alpha = 0x46;
+    s32 y0, y1;
+    u32 c0, c1;
+
+    if (a != 0x80) {
+        alpha = a * 0.0078125f * 70.0f;
+    }
+    xb = ox << 4;
+    x1 = xb + 0x7630;
+    ox = xb + 0x7000;
+    list = dds3FontReqAllocDrawTag();
+    y0 = (oy << 3) + 0x7900;
+    y1 = (oy << 3) + 0x7998;
+    c0 = (alpha << 24) | 0x8CBE1B;
+    c1 = (alpha << 24) | 0x9B4400;
+    sdfPrimLinkG4(list, 0x14C, ox, y0, c0, x1, y0, c1, ox, y1, c0, x1, y1, c1, -1, NULL);
+    ox = x1;
+    sdfPrimLinkG4(list, 0x14C, ox, y0, c1, xb + 0x7C60, y0, 0xBF0013, ox, y1, c1, xb + 0x7C60, y1,
+                  0xBF0013, -1, NULL);
+    ot = &sdfGrOtTable[71];
+    ot->regFunc(ot, list);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispCommCursor);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispSummonCursor);
 
@@ -2137,13 +2668,120 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispCommandPanel);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", AnimeCommandList);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1Summon);
+void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
+                     s32 listidx, s32 col2)
+{
+    char buf[16];
+    datUnitWork_t *w = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + d;
+    void *frq;
+    void *frq2;
+    u32 c;
+    s32 per;
+    u32 a;
+    s32 id = w->id;
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1Item);
+    cmpSetSkillListRows(0x13);
+    frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text2[id], NULL);
+    if (w->level < 0x64) {
+        sprintf(buf, D_00551130, w->level);
+    } else {
+        sprintf(buf, D_00551130, 0x63);
+    }
+    frq = frwGetSmallNumFontFRQ((ox + 0x8C) << 4, (oy + 4) << 3, 0xFF0051, col, buf, frq);
+    c = 0x754B3D80;
+    per = w->hp * 100 / w->maxhp;
+    if (per >= 0x19) {
+        if (per < 0x32) {
+            c = 0xB4A06480;
+        } else {
+            c = 0xA09DC380;
+        }
+    }
+    a = col & 0xFF;
+    c = (c & 0xFFFFFF00) | a;
+    sprintf(buf, D_00551130, w->hp);
+    frq2 = frwGetSmallNumFontFRQ((ox + 0x17) << 4, (oy + 0x13) << 3, 0xFF0051, c, buf, NULL);
+    frDrawFontEx(frq2, 1);
+    frDestroyFontRequestAfter(frq2);
+    c = a | (0xA09DC380 & 0xFFFFFF00);
+    sprintf(buf, D_00551130, w->mp);
+    frq2 = frwGetSmallNumFontFRQ((ox + 0x52) << 4, (oy + 0x13) << 3, 0xFF0051, c, buf, NULL);
+    frDrawFontEx(frq2, 1);
+    frDestroyFontRequestAfter(frq2);
+    frDrawFontEx(frq, 1);
+    frDestroyFontRequestAfter(frq);
+    cmpSetSkillListRows(-1);
+}
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1Talk);
+void DispComm1Item(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
+                   s32 listidx, s32 col2)
+{
+    char buf[16];
+    void *frq;
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispComm1Comm);
+    cmpSetSkillListRows(0x13);
+    frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, pStr[d], NULL);
+    sprintf(buf, D_00551130, ((u8 *)(u32)d + (u32)DDS3_GBWK)[0x1928]);
+    frq = frwGetSmallNumFontFRQ((ox + 0x8E) << 4, (oy + 4) << 3, 0xFF0051, col, buf, frq);
+    frDrawFontEx(frq, 1);
+    frDestroyFontRequestAfter(frq);
+    cmpSetSkillListRows(-1);
+}
+
+void DispComm1Talk(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
+                   s32 listidx, s32 col2)
+{
+    void *frq;
+
+    cmpSetSkillListRows(0x13);
+    if (d == 0x8004) {
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[0x205], NULL);
+    } else {
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[d], NULL);
+    }
+    frDrawFontEx(frq, 1);
+    frDestroyFontRequestAfter(frq);
+    cmpSetSkillListRows(-1);
+}
+
+void DispComm1Comm(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
+                   s32 listidx, s32 col2)
+{
+    char buf[16];
+    datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
+    void *frq;
+    s32 costtype;
+
+    cmpSetSkillListRows(0x13);
+    switch (d) {
+    case 0x8000:
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[0x200], NULL);
+        break;
+    case 0x8001:
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[0x201], NULL);
+        break;
+    case 0x8002:
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[0x202], NULL);
+        break;
+    case 0x8003:
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[0x204], NULL);
+        break;
+    default:
+        frq = frwGetSmallFontFRQ(ox << 4, oy << 3, 0xFF0051, col, text1[d], NULL);
+        costtype = datSkillTable.normal[d].costtype;
+        if (costtype < 3) {
+            if (costtype != 0) {
+                sprintf(buf, D_00551130, datGetSkillCost(work, d));
+                frq = frwGetSmallNumFontFRQ((ox + 0x78) << 4, (oy + 4) << 3, 0xFF0051, col, buf,
+                                            frq);
+            }
+        }
+        break;
+    }
+    frDrawFontEx(frq, 1);
+    frDestroyFontRequestAfter(frq);
+    cmpSetSkillListRows(-1);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispHelp1);
 

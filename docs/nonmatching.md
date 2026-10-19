@@ -2129,3 +2129,95 @@ worse. `limit` in `case 9` has to be assigned in both arms of an explicit
 takes a third saved register. `data->unk118` and `data->unkC8` are `u8[4]`
 in `nb.h`, so they have to be read through `*(s32 *)`, not compared
 directly.
+
+## nbSetWaitMotion (newbattle/nbStageProcess, 0xD8)
+
+8 of 54 words, at the exact 216-byte size, with the same instruction multiset.
+
+Retail reads the visual's motion speed and multiplies it by `ritu` before it
+loads `form->hunit` for the first call, so the `jal evtSetWaitMotion` delay
+slot carries the motion-number argument. The draft schedules the `lwc1` into
+that delay slot and leaves the `mul.s` after the call, which rotates the four
+words either side of it.
+
+Ruled out: the multiply split into `speed = *(f32 *)...; speed *= ritu;`; a
+`datUnitVisual_t *visual` local; reusing `ritu` as the destination (which
+loses the saved fp register entirely); and moving `form->waitmot = mot;` above
+the two calls.
+
+## CheckSenseiNego (newbattle/nbStageProcess, 0x130)
+
+57 of 74 words, 296 bytes against the native 300.
+
+The guards are right: the stage-major range test folds to retail's
+`addiu -0xF0`/`sltiu 7`, the four `data->stat` bit tests come out in retail's
+order, and the age-of-moon test is `== 8` returning 0, not `!= 8`.
+
+The missing word is the empty delay slot after `jal evtGetAgeOfMoon`: retail
+leaves a `nop` there and materialises the 8 afterwards, while the draft fills
+the slot with `li $3, 8`. Retail then tests with `bnel` and annuls the
+`work = a->work` load into the branch's own slot. With one word fewer the
+draft's `a` lands in `$16` and `rate` in `$17`, where retail has them the
+other way round, which is what most of the 57 words are.
+
+Ruled out: `goto` to one trailing `return 0` (69 words, worse); both
+polarities of the `0x2000000` test; `rate` preset to 0x64 before the test; and
+an intermediate local for the `21 / enemypcnt` quotient.
+
+## CheckAction_STKSEL (newbattle/nbStageProcess, 0xE8)
+
+9 of 58 words, at the exact 232-byte size.
+
+A `switch (StkSelId)` written `default:`, `case -1:`, `case -2:` gives
+retail's two forward `beq`s and the body order (the normal arm first, then the
+-1 arm, then the -2 arm); the ascending order runs over size.
+
+What is left is two `$2`/`$3` swaps and one pair of adjacent constant inits.
+Retail materialises the loop's `~8` mask before the `0xF` counter and the
+draft does the reverse, and retail holds `StkSelId` in `$2` with the shifted 1
+in `$3` where the draft has them swapped.
+
+Ruled out: `do`/`while` and a pre-loop `i` init for the stat-clearing loop;
+`form->stat = form->stat & ~8` written out; a named local for
+`StkSelId + 0x10`; and a `(u32)1` shift base.
+
+## CheckAction_ESCAPE (newbattle/nbStageProcess, 0xE4)
+
+9 of 57 words, at the exact 228-byte size.
+
+A `switch ((u16)((u16)a->seqtime / 15))` over cases 1 and 2 with a `goto` to
+one trailing `return 0` gives retail's divide trap, dispatch and both arms.
+
+The remaining words are which register holds the compared constants: retail
+uses `$5` for the 1 and the 3, the draft uses `$4`. That also moves
+`daddu $4, $16, $0` out of the `jal SetTimeList` delay slot, where retail puts
+it, and shifts the default arm's branch by one word.
+
+Ruled out: early `return 0` per arm instead of the `goto`; no `default` arm;
+an `s32`, `u16` and `u32` local for the switch value; and swapping the two
+case bodies' source order.
+
+## DispCommCursor (newbattle/nbStageProcess, 0x184)
+
+29 of 97 words, at the exact 388-byte size and with the same instruction
+sequence.
+
+Two register copies retail keeps are what the structure hinges on, and both
+are reproduced: the alpha `if` has to come first in the source, which makes
+`ox` a global pseudo and emits `daddu $20, $4, $0` in the entry block, and
+`ox` has to be reused for the left edge of both quads (`ox = xb + 0x7000;`
+then `ox = x1;` between the calls), which is where the second
+`daddu $20, $21, $0` comes from.
+
+What is left is a three-way register rotation: retail has `ox` in `$20`, `x1`
+in `$21` and `oy` in `$22` with `y0` sharing `oy`'s register, while the draft
+has `oy` in `$17` with `y1` sharing it, `ox` in `$21` and `x1` in `$22`. Both
+spend nine saved registers.
+
+Ruled out: every spelling that makes `y0` reuse `oy` (`yb = oy << 3;
+oy = yb + 0x7900; yb += 0x7998;` and three variants), all of which make gcse
+hoist the whole y chain into the entry block ahead of
+`dds3FontReqAllocDrawTag` and cost 27 more words; both source orders of the
+two y values; a separate local for the depth `-1`; a named local for the
+second quad's right edge; an `x` local copied from `ox`; computing `ox` after
+the `if`; and all declaration orders of the locals, which change nothing.

@@ -775,6 +775,7 @@ OFF(p104g, nbMainProcessData_t, encpackno, 0x28);
 OFF(p104h, nbMainProcessData_t, packno, 0x2C);
 OFF(p104i, nbMainProcessData_t, packindex, 0x30);
 SZ(p104f, nbMainProcessData_t, 0x150);
+OFF(p105, nbMainProcessData_t, light, 0xA8);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;
