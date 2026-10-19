@@ -404,7 +404,6 @@ typedef struct
 } nbEncountForm_t;
 
 extern char D_00544890[]; /* "カット長 = %d\n" */
-extern char D_00544900[]; /* "length = %d\n" */
 
 extern nbKoukaProcessData_t *nbGetKoukaProcessData(void);
 extern nbKoukaPacket_t *nbAddKoukaPacket(nbKoukaProcessData_t *k, s32 startframe, s32 framelength,
@@ -495,7 +494,6 @@ extern f32 nbPanelPT_3_Rate;
 extern s32 nbPanelPTP_0_Frame;
 extern s32 nbPanelPTP_0_Process;
 extern s32 nbPanelPTP_1_Frame;
-extern char D_005453B8[];
 extern s8 nbPanelPTOmit;
 extern s32 nbPanelStockShiftX;
 extern s32 nbPanelStockFrame;
@@ -668,7 +666,6 @@ extern void nbPanelPressTurnGaugeAnimStart2(void);
 extern void nbPanelPressTurnOmit(void);
 extern char D_00546820[];
 extern char D_00546880[];
-extern char D_00545380[];
 extern char D_00545CE0[];
 extern char D_00551560[];
 /* 28-byte entries; only the fields this unit reads are named. */
@@ -865,7 +862,6 @@ extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbForm
                                             s32 type, s32 hp, s32 mp, s32 bad);
 extern s32 nbCheckFlowUnit(nbNegoProcessData_t *n);
 extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
-extern char D_00545208[]; /* "pwork hp = %d\n" */
 extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
 extern s32 ChkAiHojoMax(s32 formindex, s32 hojotype);
 extern u32 datGetAisyo(datUnitWork_t *unit, s32 type);
@@ -1303,7 +1299,6 @@ nbKoukaPacket_t *nbAddSkillColorOffPacket(s32 startframe, s32 uniqueid)
     return p;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00544900);
 
 nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type)
 {
@@ -1365,7 +1360,8 @@ nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormatio
     }
     p->data2.p = effBTLSystemCreate(form, sysid);
     p->framelength = effBTLSystemGetLength(p->data2.p);
-    printf(D_00544900, p->framelength);
+    printf("length = %d
+", p->framelength);
     if (seid != 0) {
         nbAddSePacket(startframe, uniqueid, seid);
     }
@@ -5568,7 +5564,8 @@ s32 Flow11_4(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0xB0006);
     nbAddNegoIdKouho(n, 0xB0005);
     nbPanelPartyHide();
-    printf(D_00545208, n->pwork->hp);
+    printf("pwork hp = %d
+", n->pwork->hp);
     if (n->pwork->hp == 0) {
         n->nextnegoid = n->nextkouho[1];
     } else {
@@ -5833,7 +5830,6 @@ s32 Flow12_26(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545208);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_27);
 
@@ -6549,13 +6545,13 @@ void nbPanelPressGaugeStart(void)
 
 void nbPanelPressGaugeReset(void)
 {
-    printf(D_00545380);
+    printf("nbPanelPressGaugeReset
+");
     nbPanelPressGaugeStart();
     nbPanelPressTurnGaugeAnimStart2();
     nbPanelPressTurnOmit();
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545380);
 
 void nbPanelPressGaugeShow(void)
 {
@@ -6621,7 +6617,8 @@ void nbPanelPressTurnOmit(void)
 
 void nbPanelPressTurnStart(void)
 {
-    printf(D_005453B8);
+    printf("nbPanelPressTurnStart
+");
     nbGetMainProcessData();
     if (nbPanelPTOmit == 0) {
         nbPanelPT_1_Process = 1;
@@ -6669,7 +6666,6 @@ void nbPanelPressTurnGaugeAnimStart2(void)
     nbPanelPTAOnly = 1;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005453B8);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelPressTurn);
 

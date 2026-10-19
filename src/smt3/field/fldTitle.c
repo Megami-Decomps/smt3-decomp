@@ -37,7 +37,6 @@ extern sdfTexHandle_t *D_0054EFA0;
 
 extern sdfTexHandle_t *D_0054EFA4;
 
-extern char D_00532790[];
 
 extern char D_005327A0[];
 

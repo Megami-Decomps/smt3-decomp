@@ -25,7 +25,6 @@ typedef struct
     /* 0x3A */ u16 skill[12];
 } cmbUnitSkills_t;
 
-extern char D_0053C928[];
 extern char D_0053C938[];
 extern char D_0054FB00[];
 extern cmbUnlockEntry_t D_0032DCC0[];
@@ -760,7 +759,6 @@ extern u8 *GBWK_1;
 extern u8 *GBWK_3;
 extern s32 printf(const char *fmt, ...);
 extern char D_0053DA28[];
-extern char D_0053C878[];
 extern u8 D_0032D1F0[];
 extern s16 datGetDevilParam(u8 devilId);
 extern void sdfTexFree(s32 handle);
@@ -1146,7 +1144,8 @@ void fclCombineTexFree(void)
     for (i = 0; i < 7U; i++) {
         sdfTexFree(CMB_GBWK->texHandle[i]);
     }
-    printf(D_0053C878);
+    printf("COMBINE : Tex free.
+");
 }
 
 void fclCombineSetTable(void)
@@ -1180,7 +1179,6 @@ void fclCombineInitRagTex(u8 *work)
     }
 }
 
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053C878);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclUpdateInit);
 
@@ -1202,7 +1200,7 @@ void fclCombineProcessStart(void)
 {
     fclUpdateInit();
     dds3StartProcess(D_0054FB00, 0x400, 1, 1, fclCombineCalc, NULL, NULL);
-    dds3StartProcess(D_0053C928, 0x2B10, 1, 1, fclCombineDraw, NULL, NULL);
+    dds3StartProcess("combine_draw", 0x2B10, 1, 1, fclCombineDraw, NULL, NULL);
     dds3StartProcess(D_0053C938, 0x520C, 1, 1, fclCombineUpdate, fclCombineDestroy, NULL);
     gProcessStat_0 = 1;
 }
@@ -1210,7 +1208,7 @@ void fclCombineProcessStart(void)
 void fclCombineProcessEnd(void)
 {
     dds3KillProcessName(D_0054FB00, 1);
-    dds3KillProcessName(D_0053C928, 1);
+    dds3KillProcessName("combine_draw", 1);
     dds3KillProcessName(D_0053C938, 1);
 }
 
@@ -1275,8 +1273,6 @@ s32 cmbSeqStartScript(void)
 
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbRunBirthDevilStep);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053C928);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053C938);
 
@@ -9574,14 +9570,13 @@ void camp_update_paneleff_Shutdown(void)
 }
 
 extern cmpPanelEff_t *cmpAllocPanelEffWork(void);
-extern char D_0053FFD0[];
 
 void *cmpStartProcessPanelEff(void)
 {
     cmpPanelEff_t *work = cmpAllocPanelEffWork();
 
     cmpPanelEffList = work;
-    return dds3StartProcess(D_0053FFD0, 0x520B, 1, 1, camp_update_paneleff_Process,
+    return dds3StartProcess("camp_update_paneleff", 0x520B, 1, 1, camp_update_paneleff_Process,
                             camp_update_paneleff_Shutdown, work);
 }
 
@@ -9686,8 +9681,6 @@ void cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpCreateBadEffect);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053FFD0);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053FFE8);
 

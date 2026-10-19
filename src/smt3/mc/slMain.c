@@ -576,9 +576,7 @@ extern void dds3VisibleSceneBasic(void *scene, s32 visible);
 
 extern s32 slShutDownProcess(void);
 
-extern char D_00532918[];
 
-extern char D_00532930[];
 
 
 void mcMakeFileName(char *dst, s32 number) {
@@ -2181,10 +2179,10 @@ void fmProcTrigSequence(s32 mode) {
 
     dds3SoftResetOff();
     slDDS3To31Flg = 0;
-    handle = sdfDevLoadFileEx(D_00532918, &data, 0);
+    handle = sdfDevLoadFileEx("/fld/f/pnl/save_01.tmx", &data, 0);
     slProcPtr = sdfTexSet(data);
     sdfMemFreeDirect(handle);
-    handle = sdfDevLoadFileEx(D_00532930, &data, 0);
+    handle = sdfDevLoadFileEx("/fld/f/pnl/save_02.tmx", &data, 0);
     _saveUI = sdfTexSet(data);
     sdfMemFreeDirect(handle);
     if (mode == 0) {
@@ -2277,10 +2275,6 @@ s32 slQueryYesNo(void *start, void *finish, s32 mode) {
     }
     return (s32)slQueryYesNoProc;
 }
-
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532918);
-
-INCLUDE_RODATA(const s32, "mc/slMain", D_00532930);
 
 INCLUDE_RODATA(const s32, "mc/slMain", D_00532948);
 

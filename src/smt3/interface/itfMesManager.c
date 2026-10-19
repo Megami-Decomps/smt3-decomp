@@ -508,7 +508,6 @@ extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDr
 
 extern s32 D_00326728[8];
 
-extern u8 D_00326748[];
 
 extern u8 D_00326768[];
 
@@ -2468,7 +2467,7 @@ void DrawSelectCursor(itfMesWork_t *panel) {
     D_00326728[3] = y - 8;
     D_00326728[5] = y + 0xA8;
     D_00326728[7] = y + 0xA8;
-    itfMiscDrawRectanglePrim(D_00326728, D_00326748, D_00326768, D_00326770, panel->renderValue, list);
+    itfMiscDrawRectanglePrim(D_00326728, "W", D_00326768, D_00326770, panel->renderValue, list);
     uv[0] = 0x150;
     uv[1] = 0x2F0;
     uv[2] = 0x1B0;

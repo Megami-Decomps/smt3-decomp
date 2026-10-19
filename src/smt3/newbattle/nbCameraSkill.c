@@ -55,7 +55,6 @@ typedef struct nbCameraSkillInfo_t {
     u8 pad24[0xC];
 } nbCameraSkillInfo_t;
 
-extern char D_00534608[];
 
 extern char D_00534630[];
 

@@ -115,13 +115,12 @@ extern void pbClearRecord(pbPanel_t *panel);
 extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
                                          s32 shutdowntimer, dds3ProcessFunc_t processfunc,
                                          dds3ProcessFunc_t shutdownfunc, void *data);
-extern char D_005361B0[], D_005361C8[], D_005365D8[], D_00536398[], D_00535EB8[];
 
 
 pbPanel_t *pbStartRecord(pbPanel_t *parent) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     pbRecord_t *work;
-    panel->process = dds3StartProcess(D_005361C8, 0x3EE, 1, 1, pb_proc_record_Process,
+    panel->process = dds3StartProcess("pb-proc-record", 0x3EE, 1, 1, pb_proc_record_Process,
                                       (dds3ProcessFunc_t)pb_proc_record_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);
@@ -167,7 +166,6 @@ INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_flor);
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
 
-INCLUDE_RODATA(const s32, "pb/pbRecord", D_005361C8);
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbDumpRecordData);
 

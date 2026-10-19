@@ -236,7 +236,6 @@ void dds3SetRotPoseSet(dds3Basic_t *object, const sdfVector4_t *vector);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 dds3Basic_t *AddP2AEffect(void *bill, void *vec, s32 extra);
 extern billObj_t *dds3BillboardFileLoad(s32 kind, const char *path);
-extern char D_00530E10[];
 dds3Basic_t *AddTMXEffect(void *bill, void *vec, s32 extra);
 dds3Basic_t *AddBEDEffect();
 void sdfMemFreeDirect( sdfMemHandle_t *allocation);
@@ -634,7 +633,8 @@ dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, s3
 {
     void *bill;
 
-    printf(D_00530E10, path);
+    printf("LoadFile:%s
+", path);
     bill = dds3BillboardFileLoad(0, path);
     return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
@@ -1182,8 +1182,6 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
         break;
     }
 }
-
-INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00530E10);
 
 INCLUDE_RODATA(const s32, "basic/dds3EffectObjectBasic", D_00530E20);
 

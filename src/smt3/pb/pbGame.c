@@ -174,9 +174,9 @@ extern s32 pb_draw_map_cursor_Process(dds3ProcessID_t *id);
 
 extern void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id);
 
-extern char D_005361B0[], D_005361C8[], D_005365D8[], D_00536398[], D_00535EB8[];
+extern char D_005361B0[];
 
-extern char D_00536040[], D_00535CE8[], D_00535CD8[], D_00535FA8[];
+extern char D_00536040[], D_00535CE8[], D_00535FA8[];
 
 extern s32 pb_proc_block_DB_Process(dds3ProcessID_t *id);
 
@@ -276,7 +276,7 @@ extern u32 pbAddRecord_blk(pbPanel_t *record, pbBlockObj_t *block);
 
 extern void deleteViewModeCamera(dds3ProcessID_t *id);
 
-extern char D_00535E00[], D_00535E10[], D_00535E20[], D_00535EC8[], D_00535FC8[];
+extern char D_00535E10[], D_00535EC8[], D_00535FC8[];
 
 extern void updateMotion(void);
 

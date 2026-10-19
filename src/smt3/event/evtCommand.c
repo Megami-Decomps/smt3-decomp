@@ -85,7 +85,6 @@ void effEveBEDCutSetScale(effEventWork_t *work, f32 scale);
 
 extern void dds3StartBEDEffectObjectBasic(void *effectObject, u32 entryId);
 
-extern char D_0053AA10[];
 
 extern f32 evtCalcEffBedScale(s32);
 
@@ -268,7 +267,6 @@ extern s32 sdfDelayedResrcCheck(void);
 
 extern char D_0053A9D8[];
 
-extern char D_0053AA10[];
 
 extern char D_0053AA38[];
 
@@ -1230,7 +1228,8 @@ u32 evtCommand_EFFBED_START(void)
     if (basic != NULL) {
         entry = scrGetIntPara(1);
         if (entry >= 3U) {
-            datDebugPrintf(D_0053AA10, entry);
+            datDebugPrintf("error EFFBED_START cut no over = %d
+", entry);
             return 1;
         } else {
             dds3StartBEDEffectObjectBasic(basic, entry);
@@ -1264,7 +1263,8 @@ u32 evtCommand_EFFBED_START_EVO(void) {
         s32 entryId = scrGetIntPara(1);
         s32 modelRecordIndex;
         if ((u32)entryId >= 3) {
-            datDebugPrintf(D_0053AA10, entryId);
+            datDebugPrintf("error EFFBED_START cut no over = %d
+", entryId);
             return 1;
         }
         dds3StartBEDEffectObjectBasic(unit, entryId);
@@ -1295,8 +1295,6 @@ u32 evtCommand_EFFMG1_LOAD(void)
     }
     return 1;
 }
-
-INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AA10);
 
 INCLUDE_RODATA(const s32, "event/evtCommand", D_0053AA38);
 

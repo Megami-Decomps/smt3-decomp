@@ -154,13 +154,9 @@ extern s32 nbCheckBackAttack(nbMainProcessData_t *data);
 
 extern s32 evtBitCheck(s32 no);
 
-extern char D_00543438[]; /* "backattack!!\n" */
 
-extern char D_00543510[]; /* "encpackno = %d\n" */
 
-extern char D_00543520[]; /* "packno = %d\n" */
 
-extern char D_00543530[]; /* "packindex = %d\n" */
 
 extern char D_00543540[]; /* "encno = %d\n" */
 
@@ -423,7 +419,8 @@ void CheckSenseiOrBackAttack(nbMainProcessData_t *data)
         data->stat |= 0x80;
         if (nbCheckBackAttack(data)) {
             data->stat |= 0x10;
-            printf(D_00543438);
+            printf("backattack!!
+");
         }
         data->stat |= 8;
     }
@@ -884,8 +881,6 @@ void nbSetNextPhase(s32 phase)
     nbGetMainProcessData()->nextphase = phase;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543438);
-
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543448);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543458);
@@ -1294,9 +1289,12 @@ void SetFlag(nbMainProcessData_t *data)
     s32 encno;
     s32 flag;
 
-    printf(D_00543510, data->encpackno);
-    printf(D_00543520, data->packno);
-    printf(D_00543530, data->packindex);
+    printf("encpackno = %d
+", data->encpackno);
+    printf("packno = %d
+", data->packno);
+    printf("packindex = %d
+", data->packindex);
     printf(D_00543540, data->encno);
     encno = data->encno;
     if (encno == 0xC7) {
@@ -1319,9 +1317,12 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     data->packindex = packindex;
     data->encno = encno;
     data->formationtype = nbEncountFormTable[encno].formtype;
-    printf(D_00543510, data->encpackno);
-    printf(D_00543520, data->packno);
-    printf(D_00543530, data->packindex);
+    printf("encpackno = %d
+", data->encpackno);
+    printf("packno = %d
+", data->packno);
+    printf("packindex = %d
+", data->packindex);
     printf(D_00543540, data->encno);
     printf(D_00543550, data->formationtype);
     data->unk7C = stagemajor;
@@ -1349,12 +1350,6 @@ void nbKillMainProcess(void)
     evtDisableMoonDraw();
     nbFreeDeadMoonTex();
 }
-
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543510);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543520);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543530);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMainProcess", D_00543540);
 

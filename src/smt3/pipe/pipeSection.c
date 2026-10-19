@@ -104,7 +104,6 @@ extern void pipeEffRelease(void);
 
 extern s32 PipeTexRelease(void);
 
-extern char D_00548900[];
 
 extern void DEBUG_PRINT(const char *fmt, ...);
 
@@ -122,11 +121,8 @@ extern tagPipeObject *ObjWork;
 
 extern s32 ZmakaCount;
 
-extern char D_005488D0[];
 
-extern char D_005488E0[];
 
-extern char D_005488F0[];
 
 extern s32 playerDAMAGE;
 

@@ -61,9 +61,7 @@ typedef struct tagpipeParts {
 
 extern tagpipeParts *PartsWork;
 
-extern char D_00548DA0[], D_00548DC0[], D_00548DE0[];
 
-extern char D_00548E18[], D_00548E30[], D_00548E48[], D_00548E60[];
 
 extern void partsInit(void);
 
@@ -413,35 +411,35 @@ void partsDel(tagpipeParts *pParts)
     case 1:
     case 3:
         mymdlDelObject(&PipeLine[pParts->mdl]);
-        DEBUG_PRINT(D_00548DA0, pParts->mdl);
+        DEBUG_PRINT("-----PipeLine %d DEL OBJECT
+", pParts->mdl);
         break;
     case 2:
         mymdlDelObject(&PipeCur[pParts->mdl]);
-        DEBUG_PRINT(D_00548DC0, pParts->mdl);
+        DEBUG_PRINT("-----PipeCur %d DEL OBJECT
+", pParts->mdl);
         break;
     case 4:
         mymdlDelObject(&PipeCur2[pParts->mdl]);
-        DEBUG_PRINT(D_00548DE0, pParts->mdl);
+        DEBUG_PRINT("-----PipeCur2 %d DEL OBJECT
+", pParts->mdl);
         break;
     }
     pParts->id = -1;
 }
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548DA0);
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548DC0);
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548DE0);
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", PipemdlRot);
 
 s32 PipeTexLoad(void)
 {
     memset(MakaTex, 0, 0x40);
-    texLoad(D_00548E18, &MakaTex[0]);
-    texLoad(D_00548E30, &MakaTex[1]);
-    texLoad(D_00548E48, &MakaTex[2]);
-    texLoad(D_00548E60, &MakaTex[3]);
+    texLoad("/pipe/kek_no01.tmx", &MakaTex[0]);
+    texLoad("/pipe/kek_no02.tmx", &MakaTex[1]);
+    texLoad("/pipe/kek_no03.tmx", &MakaTex[2]);
+    texLoad("/pipe/kek_no04.tmx", &MakaTex[3]);
     return 1;
 }
 
@@ -476,11 +474,7 @@ s32 texRelease(tagPipeTexture *texPtr)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E18);
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E30);
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E48);
 
-INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548E60);
 

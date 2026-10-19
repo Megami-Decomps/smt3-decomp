@@ -82,13 +82,12 @@ extern pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page);
 extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
                                          s32 shutdowntimer, dds3ProcessFunc_t processfunc,
                                          dds3ProcessFunc_t shutdownfunc, void *data);
-extern char D_005361B0[], D_005361C8[], D_005365D8[], D_00536398[], D_00535EB8[];
 
 
 pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
-    panel->process = dds3StartProcess(D_00536398, 0x2AFD, 1, 1, pb_draw_help_Process,
+    panel->process = dds3StartProcess("pb-draw-help", 0x2AFD, 1, 1, pb_draw_help_Process,
                                       (dds3ProcessFunc_t)pb_draw_help_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);
@@ -110,5 +109,4 @@ pbPanel_t *func_001DB020(pbPanel_t *parent) {
 
 INCLUDE_ASM(const s32, "pb/pbHelp", pbResetKeyState);
 
-INCLUDE_RODATA(const s32, "pb/pbHelp", D_00536398);
 

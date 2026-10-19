@@ -116,7 +116,7 @@ extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
 
 extern void pb_proc_menu_Shutdown(dds3ProcessID_t *id);
 
-extern char D_005361B0[], D_005361C8[], D_005365D8[], D_00536398[], D_00535EB8[];
+extern char D_005361B0[];
 
 extern void dds3FadeOut(s32, s32, s32, s32);
 
@@ -145,7 +145,7 @@ extern pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page);
 extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
                                          s32 shutdowntimer, dds3ProcessFunc_t processfunc,
                                          dds3ProcessFunc_t shutdownfunc, void *data);
-extern char D_00535E00[], D_00535E10[], D_00535E20[], D_00535EC8[], D_00535FC8[];
+extern char D_00535E10[], D_00535EC8[];
 
 
 INCLUDE_ASM(const s32, "pb/pbMenu", pbMakeMapPath);
@@ -230,7 +230,7 @@ void pb_load_mapdata_Shutdown(dds3ProcessID_t *id) {
 pbPanel_t *pbStartMenu(pbPanel_t *parent, s32 mode) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     void *work;
-    panel->process = dds3StartProcess(D_00535EB8, 0x3F8, 1, 1, pb_proc_menu_Process,
+    panel->process = dds3StartProcess("pb-proc-menu", 0x3F8, 1, 1, pb_proc_menu_Process,
                                       (dds3ProcessFunc_t)pb_proc_menu_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);
@@ -269,8 +269,6 @@ void pbLoadSystemData(s32 index) {
     pbLoadState = 0;
     pbWaitLoadMapData(NULL);
 }
-
-INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535EB8);
 
 INCLUDE_RODATA(const s32, "pb/pbMenu", D_00535EC8);
 

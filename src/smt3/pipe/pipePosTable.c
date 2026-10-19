@@ -15,7 +15,6 @@ typedef struct tagPipePartsInfo {
     s32 type;
 } tagPipePartsInfo;
 
-extern char D_00548E18[], D_00548E30[], D_00548E48[], D_00548E60[];
 
 extern tagPipePartsInfo D_00529030[];
 

@@ -90,13 +90,12 @@ extern void pbInitMapBaseMat(pbPanel_t *panel);
 extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
                                          s32 shutdowntimer, dds3ProcessFunc_t processfunc,
                                          dds3ProcessFunc_t shutdownfunc, void *data);
-extern char D_00536040[], D_00535CE8[], D_00535CD8[], D_00535FA8[];
 
 
 pbPanel_t *pbInitExitDraw(pbPanel_t *parent) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     pbMatWork_t *work;
-    panel->process = dds3StartProcess(D_00535CD8, 0x2AFD, 1, 1, pb_draw_exit_Process,
+    panel->process = dds3StartProcess("pb-draw-exit", 0x2AFD, 1, 1, pb_draw_exit_Process,
                                       (dds3ProcessFunc_t)pb_draw_exit_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);
@@ -135,7 +134,7 @@ void pbSetExitPos(pbPanel_t *panel, s32 x, s32 y) {
 pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 arg) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     void *work;
-    panel->process = dds3StartProcess(D_00535CE8, 0x2AFD, 1, 1, pb_draw_mapbase_Process,
+    panel->process = dds3StartProcess("pb-draw-mapbase", 0x2AFD, 1, 1, pb_draw_mapbase_Process,
                                       (dds3ProcessFunc_t)pb_draw_mapbase_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);
@@ -150,7 +149,6 @@ pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 arg) {
     return panel;
 }
 #else
-INCLUDE_RODATA(const s32, "pb/pbDraw", D_00535CD8);
 
 INCLUDE_ASM(const s32, "pb/pbDraw", pbInitMapBaseDraw);
 #endif

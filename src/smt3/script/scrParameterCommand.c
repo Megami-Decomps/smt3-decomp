@@ -48,11 +48,6 @@ extern void *sdfChipAllocDirect(u32 size);
 extern void dds3DeleteBasic(dds3Basic_t *basic);
 extern dds3BasicFunction_t *dds3BasicFuncTablePtr[];
 extern s32 sdfFloatToULong(f32 value);
-extern char D_0052F6B8[];
-extern char D_0052F6C8[];
-extern char D_0052F6D8[];
-extern char D_0052F6F0[];
-extern char D_0052F708[];
 extern char D_0054E9A8[];
 extern char D_0054E9B0[];
 extern char D_0054E9B8[];
@@ -343,10 +338,10 @@ s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *list)
     s32 v1;
     s32 v2;
 
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0052F6B8, basic->serialID);
+    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, "ID    : 0x%05X", basic->serialID);
     sdfDrawTagLink(list, (u32)command);
     y++;
-    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0052F6C8, basic->name);
+    command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, "NAME  : %s", basic->name);
     sdfDrawTagLink(list, (u32)command);
     y++;
     pose = basic->poseset;
@@ -356,7 +351,7 @@ s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *list)
     y++;
     command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0054E9A8);
     sdfDrawTagLink(list, (u32)command);
-    format = D_0052F6D8;
+    format = "%3.2f %3.2f %3.2f";
     v0 = sdfFloatToULong(pose->pos.x);
     v1 = sdfFloatToULong(pose->pos.y);
     v2 = sdfFloatToULong(pose->pos.z);
@@ -365,7 +360,7 @@ s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *list)
     y += 2;
     command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0054E9B0);
     sdfDrawTagLink(list, (u32)command);
-    format = D_0052F6F0;
+    format = "%3.2f %3.2f %3.2f %3.2f";
     v0 = sdfFloatToULong(pose->rot.x);
     v1 = sdfFloatToULong(pose->rot.y);
     v2 = sdfFloatToULong(pose->rot.z);
@@ -375,7 +370,7 @@ s32 DispBaseData(dds3Basic_t *basic, s32 x, s32 y, sdfDrawTag_t *list)
     y += 2;
     command = sdfDevPrintf(labelX, (y * 3 << 5) + 0x7900, 0xFEFFFF, 0, D_0054E9B8);
     sdfDrawTagLink(list, (u32)command);
-    format = D_0052F708;
+    format = "%3.1f %3.1f %3.1f";
     v0 = sdfFloatToULong(pose->scl.x);
     v1 = sdfFloatToULong(pose->scl.y);
     v2 = sdfFloatToULong(pose->scl.z);

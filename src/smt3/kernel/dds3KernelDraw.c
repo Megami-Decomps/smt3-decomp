@@ -766,8 +766,6 @@ void dds3FadeUpdate(void)
     }
 }
 
-extern char D_0052E190[]; /* "DISTBLUR_NUMERR:%d" */
-extern char D_0052E1A8[]; /* "RIPBLUR_NUMERR :%d" */
 
 void dds3DrawDistRipOverError(void)
 {
@@ -778,10 +776,10 @@ void dds3DrawDistRipOverError(void)
             tag = sdfGrAllocPacketBuff(0x20);
             sdfDrawTagInit(tag);
             if ((s32)distblurovercnt > 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, D_0052E190, distblurovercnt));
+                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7AE0, 0xFEFFFF, 0xE, "DISTBLUR_NUMERR:%d", distblurovercnt));
             }
             if ((s32)ripblurovercnt > 0) {
-                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, D_0052E1A8, ripblurovercnt));
+                sdfDrawTagLink(tag, sdfDevPrintf(0x73C0, 0x7B40, 0xFEFFFF, 4, "RIPBLUR_NUMERR :%d", ripblurovercnt));
             }
             {
                 sdfGrOt_t *ot = &sdfGrOtTable[81];
@@ -1894,9 +1892,7 @@ void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32
     }
 }
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0052E190);
 
-INCLUDE_RODATA(const s32, "kernel/dds3KernelDraw", D_0052E1A8);
 
 void eglLinkAlpha(s32 blendMode)
 {

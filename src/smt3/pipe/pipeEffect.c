@@ -49,7 +49,6 @@ typedef struct PIPE_EFF_t {
     s32 count;
 } PIPE_EFF_t;
 
-extern char D_00548F48[];
 
 extern void dds3EffectDelete(void *effect);
 

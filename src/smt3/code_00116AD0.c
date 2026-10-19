@@ -166,7 +166,7 @@ extern s32 fldPlayerStepDist;
 extern u8 fldDoorExitFlag;
 extern s8 fldDoorExitMode[];
 extern char pointResName[];
-extern char D_00531690[], D_00531940[], D_00531950[];
+extern char D_00531690[], D_00531950[];
 extern s32 fldProcShutDownFlg;
 extern s32 ProcSequence(dds3ProcessID_t *process);
 extern s32 ProcDraw(dds3ProcessID_t *process);
@@ -202,7 +202,7 @@ extern void fldRunDanteSe(void);
 extern void fldRunEffTask(void);
 extern void fldRunTamaSe(void);
 extern void fldRunDanteStanceSet(s32 stance);
-extern char D_00531940[], D_00531950[];
+extern char D_00531950[];
 extern s32 p2sdLoadCheckMidi(u32 midino);
 extern s32 p2sdLoadSMGFile(u32 midino);
 extern void sdfDrawSync(void);
@@ -506,7 +506,6 @@ extern u8 dds3PadButtonState[];
 
 extern char D_00530F30[];
 extern char D_00531860[];
-extern char D_005318E0[];
 
 extern fldUnitControl_t fldUnitControl;
 extern fldFollowCameraControl_t fldFollowCameraControl;
@@ -3363,7 +3362,7 @@ s32 fldProcKiretaChk(void)
 
 s32 fldProcHirakenaiChk(void)
 {
-    return scrSearchScriptName(D_005318E0) != NULL;
+    return scrSearchScriptName("hirakenai_label") != NULL;
 }
 
 s32 fldProcCampChk(void)
@@ -3508,7 +3507,7 @@ s32 ProcAmCheck(void)
             fldGlobalBase.menuOpenFlag = 4;
             fldGlobalBase.encountState = 5;
             fldReleaseUnitPad();
-            dds3SceneBasicStartScript(dds3GetActiveScene(), D_005318E0);
+            dds3SceneBasicStartScript(dds3GetActiveScene(), "hirakenai_label");
         }
         goto ret0;
     }
@@ -3576,7 +3575,6 @@ ret0:
     return 0;
 }
 
-INCLUDE_RODATA(const s32, "code_00116AD0", D_005318E0);
 
 INCLUDE_ASM(const s32, "code_00116AD0", ProcSequence);
 
@@ -3634,7 +3632,7 @@ void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
         strcpy(scene->note, record->note);
         scene->options = record->options;
     }
-    dds3StartProcess(D_00531940, 0x3F7, 0, 0, ProcSequence, 0, 0);
+    dds3StartProcess("fldProcSequence", 0x3F7, 0, 0, ProcSequence, 0, 0);
     dds3StartProcess(D_00531950, 0x2B0A, 0, 0, ProcDraw, 0, 0);
     fldProcShutDownFlg = 1;
     InitOoyTest();
@@ -3652,7 +3650,7 @@ void fldProcShutDown(void)
     fldEncountClearFlag(0x80);
     fldAutoMapSeqSetFlag(1);
     fldAutoMapSeqSetFlag(2);
-    dds3KillProcessName(D_00531940, 1);
+    dds3KillProcessName("fldProcSequence", 1);
     dds3KillProcessName(D_00531950, 1);
     fldFreeInputPanel();
     evtDisableMoonDraw();
@@ -3727,8 +3725,6 @@ void fldProcNextJump(void)
         fldNext_fld = 0;
     }
 }
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531940);
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531950);
 

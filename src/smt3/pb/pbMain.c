@@ -142,7 +142,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 startt
 
 extern void sdfTexFreeDelayed(void *tex);
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
-extern char D_00535E00[], D_00535E10[], D_00535E20[], D_00535EC8[], D_00535FC8[];
+extern char D_00535E10[], D_00535E20[], D_00535EC8[];
 
 
 INCLUDE_ASM(const s32, "pb/pbMain", pbEditInitProc);
@@ -193,7 +193,7 @@ s32 pbGetMoveChar(void) {
 pbPanel_t *pbStartDummy(pbPanel_t *parent) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
-    panel->process = dds3StartProcess(D_00535E00, 0x3EE, 1, 1, pb_proc_dummy_Process,
+    panel->process = dds3StartProcess("pb-proc-dummy", 0x3EE, 1, 1, pb_proc_dummy_Process,
                                       (dds3ProcessFunc_t)pb_proc_dummy_Shutdown, NULL);
     if (parent != NULL) {
         dds3LinkProcess(parent->process, panel->process);
@@ -308,8 +308,6 @@ void pbMakeMapPathHdd(pbPanel_t *parent) {
         pbMapPathIdx = 1;
     }
 }
-
-INCLUDE_RODATA(const s32, "pb/pbMain", D_00535E00);
 
 INCLUDE_RODATA(const s32, "pb/pbMain", D_00535E10);
 

@@ -74,7 +74,6 @@ effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param);
 void dds3EffectDataRevision(effResourceHeader_t *header);
 
 extern u8 dds3EffectBase[];
-extern char D_00532AE0[];
 extern char D_0054F0B0[];
 extern sdfGrOt_t sdfGrOtTable[];
 extern void sdfRandomizeByTime(void *state);
@@ -98,7 +97,7 @@ void dds3EffectManagerInit(void) {
     dds3BillboardManagerInit();
     dds3PolygonManagerInit();
     dds3ParticleManagerInit();
-    dds3StartProcess(D_00532AE0, 0x2B04, 0, 0, dds3EffectManagerRunF, NULL, NULL);
+    dds3StartProcess("effect_f", 0x2B04, 0, 0, dds3EffectManagerRunF, NULL, NULL);
     dds3StartProcess(D_0054F0B0, 0x2B18, 0, 0, dds3EffectManagerRun, (dds3ProcessFunc_t)dds3EffectManagerExit, NULL);
     effDebugInit();
     Eve_EffectInit();
@@ -221,7 +220,6 @@ s32 dds3EffectGetLoop(effNode_t *node)
     return EffMajorTable[node->type].getloop(node->instance);
 }
 
-INCLUDE_RODATA(const s32, "effect/effManager", D_00532AE0);
 
 effNode_t *dds3EffectLoad(effResourceHeader_t *header)
 {

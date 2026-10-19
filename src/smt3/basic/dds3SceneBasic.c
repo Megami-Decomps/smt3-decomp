@@ -31,12 +31,6 @@ extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
 extern s32 scrSearchProcedureName(void *scrdata, char *procName);
 extern void scrStartScript2(s32 priority, void *data, s32 messageHandle);
-extern char D_0052F730[];
-extern char D_0052F748[];
-extern char D_0052F760[];
-extern char D_0052F770[];
-extern char D_0052F788[];
-extern char D_0052F7A0[];
 int printf(const char *fmt, ...);
 
 s32 sceneconstructor(dds3Basic_t *scene)
@@ -71,7 +65,8 @@ s32 sceneconstructor(dds3Basic_t *scene)
         list++;
     }
     scene->workdata = work;
-    printf(D_0052F730);
+    printf("Scene constructor!
+");
     return 1;
 }
 
@@ -93,7 +88,8 @@ void scenedestructor(dds3Basic_t *scene)
         dds3SceneBasicReleaseScriptFile(scene);
         sdfChipFreeDirect(work);
     }
-    printf(D_0052F748);
+    printf("Scene destructor!
+");
 }
 
 /* Preserve the next link across callbacks that can delete their own basic. */
@@ -318,7 +314,8 @@ s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
     if (name == NULL) {
         return 0;
     }
-    printf(D_0052F760, name);
+    printf("script %s
+", name);
     if (work->scriptHandle != NULL) {
         dds3SceneBasicReleaseScriptFile(scene);
     }
@@ -371,16 +368,19 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *name)
     s32 procedure;
 
     if (script == NULL) {
-        printf(D_0052F770);
+        printf("script data invalid!!
+");
         return 0;
     }
     if (name == NULL) {
-        printf(D_0052F788, name);
+        printf("script null name %s
+", name);
         return 0;
     }
     procedure = scrSearchProcedureName(script, name);
     if (procedure < 0) {
-        printf(D_0052F7A0, name);
+        printf("script procname invalid [%s]
+", name);
         return 0;
     }
     if (dds3SearchProcessName(name) != NULL) {
@@ -511,15 +511,9 @@ dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name)
     return NULL;
 }
 
-INCLUDE_RODATA(const s32, "basic/dds3SceneBasic", D_0052F730);
 
-INCLUDE_RODATA(const s32, "basic/dds3SceneBasic", D_0052F748);
 
-INCLUDE_RODATA(const s32, "basic/dds3SceneBasic", D_0052F760);
 
-INCLUDE_RODATA(const s32, "basic/dds3SceneBasic", D_0052F770);
 
-INCLUDE_RODATA(const s32, "basic/dds3SceneBasic", D_0052F788);
 
-INCLUDE_RODATA(const s32, "basic/dds3SceneBasic", D_0052F7A0);
 

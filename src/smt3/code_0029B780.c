@@ -34,9 +34,7 @@ extern s32 dds3ConfigBackup;
 
 extern char D_00548870[];
 
-extern char D_00548838[];
 
-extern char D_00548848[];
 
 extern s32 dds3DrawConfigPanel(s32 id);
 
@@ -99,10 +97,12 @@ void func_0029B7B8(void) {
 s32 dds3ConfigChanged(void)
 {
     if (dds3ConfigValue[0] != dds3ConfigValue[1]) {
-        printf(D_00548838);
+        printf("Cfg change!
+");
         return 1;
     }
-    printf(D_00548848);
+    printf("Cfg no change!
+");
     return 0;
 }
 
@@ -247,10 +247,6 @@ void dds3FreeConfigTexture(void *handle)
 }
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3AllocConfigWork);
-
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548838);
-
-INCLUDE_RODATA(const s32, "code_0029B780", D_00548848);
 
 INCLUDE_RODATA(const s32, "code_0029B780", D_00548858);
 
