@@ -327,6 +327,9 @@ typedef struct {
 #define SDF_VU0_SUBVECTOR_B_C() __asm__ volatile ( \
     ".set noreorder\n\tvsub.xyzw vf11, vf11, vf12\n\t.set reorder")
 
+#define SDF_VU0_ADDVECTOR_B_C() __asm__ volatile ( \
+    ".set noreorder\n\tvadd.xyzw vf11, vf11, vf12\n\t.set reorder")
+
 
 #define SDF_VU0_LOADVECTOR_C(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf12, 0(%0)\n\t.set reorder" \
@@ -1020,6 +1023,15 @@ __asm__ volatile ( \
     "vftoi0.xyzw vf9, vf9\n\tvwaitq\n\t" \
     "vmaddq.xyz vf11, vf11, Q\n\t" \
     "vftoi4.xyzw vf11, vf11\n\t.set reorder")
+/* The unpack with the colour word read through an input operand instead of a
+ * memory clobber, so a surrounding loop can still hoist unrelated loads, and
+ * with the source operand first: the hoisted address and the hoisted unit
+ * constant come out in operand order. */
+#define MMI_RGBA_UNPACK_NOMEM(src, unit) __asm__ volatile ( \
+    ".set noreorder\n\tlw $2, 0(%0)\n\tpextlb $2, $0, $2\n\tpextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf10\n\tvitof0.xyzw vf10, vf10\n\tqmtc2.ni %1, vf2\n\t" \
+    "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" \
+    : : "r" (src), "r" (unit), "m" (*(const u32 *)(src)) : "$2")
 #define EE_MMI_RGBA_UNPACK_READONLY(src, unit) __asm__ volatile ( \
     ".set noreorder\n" \
     "lw $2, 0(%1)\n" \
