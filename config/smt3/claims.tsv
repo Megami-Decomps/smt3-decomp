@@ -151,10 +151,14 @@ src/smt3/event/evtEventViewer.c	x7	done	2026-10-19	51 / 16904	-
 src/smt3/field/fldAutoMap.c	x8	done	2026-10-19	17 / 16124	-
 src/smt3/code_002C7CB0.c	-	-	-	600 / 119044	Sony SDK and newlib (sceGs*, _r); outside the game denominator, do not claim
 src/smt3/code_001FAE80.c	y1	open	2026-10-19	826 / 256048	-
-src/smt3/newbattle/nbMakePacket.c	y2	open	2026-10-19	298 / 149528	-
-src/smt3/field/fldDraw.c	y3	open	2026-10-19	69 / 79840	-
-src/smt3/newbattle/nbStageProcess.c	y4	open	2026-10-19	105 / 59240	-
+src/smt3/newbattle/nbMakePacket.c	y2	done	2026-10-19	298 / 149528	-
+src/smt3/field/fldDraw.c	y3	done	2026-10-19	69 / 79840	-
+src/smt3/newbattle/nbStageProcess.c	y4	done	2026-10-19	105 / 59240	-
 src/smt3/newdata/datCalc.c	y5	open	2026-10-19	62 / 12556	-
-src/smt3/effect/effBattleMisc.c	y6	open	2026-10-19	59 / 11092	-
-src/smt3/mc/slMain.c	y7	open	2026-10-19	12 / 14556	-
-src/smt3/pb/pbGame.c	y8	open	2026-10-19	37 / 14296	-
+src/smt3/effect/effBattleMisc.c	y6	done	2026-10-19	59 / 11092	-
+src/smt3/mc/slMain.c	y7	done	2026-10-19	12 / 14556	-
+src/smt3/pb/pbGame.c	y8	done	2026-10-19	37 / 14296	-
+src/smt3/code_00116AD0.c	z1	open	2026-10-19	46 / 42540	-
+src/smt3/effect/effPCPBoss.c	z2	open	2026-10-19	42 / 29644	-
+src/smt3/field/fld_Npc.c	z3	open	2026-10-19	12 / 15184	-
+src/smt3/newbattle/nbMainProcess.c	z4	open	2026-10-19	40 / 12216	-
