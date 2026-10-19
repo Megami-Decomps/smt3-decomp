@@ -209,9 +209,9 @@ src/smt3/kernel/dds3AdminiProcess.c	t8	done	2026-10-19	7 / 2392	fresh unit, neve
 src/smt3/event/evtPicture.c	t9	done	2026-10-19	11 / 2112	fresh unit, never claimed
 src/smt3/kernel/dds3SequenceList.c	u10	done	2026-10-19	13 / 1336	fresh unit, never claimed, 13 small functions
 src/smt3/effect/effPCPBezier.c	u11	done	2026-10-19	1 / 6016	one 6016-byte function, the largest single target left outside the giants
-src/smt3/effect/effPCPScatter.c	u12	open	2026-10-19	1 / 1376 plus effPacket 2 / 1152 and nbCameraHelper 2 / 1360	three small near-finished units, one agent
-src/smt3/effect/effPacket.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
-src/smt3/newbattle/nbCameraHelper.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
+src/smt3/effect/effPCPScatter.c	u12	done	2026-10-19	1 / 1376 plus effPacket 2 / 1152 and nbCameraHelper 2 / 1360	three small near-finished units, one agent
+src/smt3/effect/effPacket.c	u12	done	2026-10-19	see effPCPScatter row	batched with effPCPScatter
+src/smt3/newbattle/nbCameraHelper.c	u12	done	2026-10-19	see effPCPScatter row	batched with effPCPScatter
 src/smt3/mc/mcManager.c	u13	done	2026-10-19	12 / 696	three near-finished units, one agent
 src/smt3/sdf/sdfTex.c	u13	done	2026-10-19	3 / 1136	three near-finished units, one agent
 src/smt3/kernel/dds3KernelCore.c	u13	done	2026-10-19	3 / 904	three near-finished units, one agent
@@ -232,3 +232,4 @@ src/smt3/event/evtStage.c	u17	open	2026-10-19	1 / 232	the last seven unclaimed u
 src/smt3/basic/dds3EffectObjectBasic.c	u17	open	2026-10-19	1 / 96	the last seven unclaimed units, one agent
 src/smt3/basic/dds3Basic.c	u17	open	2026-10-19	1 / 88	the last seven unclaimed units, one agent
 src/smt3/model/mdlManager.c	u17	open	2026-10-19	1 / 72	the last seven unclaimed units, one agent
+src/smt3/code_001FAE80.c	u18	open	2026-10-19	774 / 260032	the largest unit left, 19 drafts already parked
