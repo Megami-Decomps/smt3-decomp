@@ -153,6 +153,16 @@ once per use, and a named local for it computes it once.
 - Externs of 8 bytes or less are addressed through `$gp`. Where retail uses
   `lui`/`%lo`, declare the symbol as an incomplete array (`extern s32 x[];`)
   to force absolute addressing.
+  **The incomplete array goes too far for a constant read inside a loop.**
+  `extern f64 D_00533E30[]` with `D_00533E30[0]` at the use makes cc1 treat
+  the array base as loop invariant: it hoists the `%hi`/`%lo` pair of both
+  doubles into callee-saved registers ahead of the loop and grows the frame by
+  16. Retail materialises `lui %hi` plus `ld %lo` fresh at each use, which is
+  what a plain scalar `extern f64 D_00533E30;` gives, since the symbol lives in
+  `.rodata` and is never `$gp`-addressed anyway. That was 11 of the 119
+  differing words in `dds3EffectDistortionBlurDraw`, the frame size and two
+  saved registers. So reach for the array form only where the symbol really is
+  small-data, and read the frame size before and after.
 - `div` against `divu`, and `lb` against `lbu`, come from a cast at the use
   site, not from narrowing the field's declared type.
 - A symbol that looks standalone may be one element of a table already
@@ -169,6 +179,58 @@ once per use, and a named local for it computes it once.
 - A store to a struct field aliases a global table of the same type, so
   reading `tbl[i].f` after the store forces a reload. A local holding the
   field is what matches.
+- **A `u8` read is alias set 0 and serialises every store around it**, which
+  is a scheduling fact before it is an addressing one. ee-gcc 2.96 gives
+  character types the universal alias set, so one `source->color[0]` read
+  conflicts with every store through an unrelated packet pointer, and a run of
+  `lbu`/`sw` colour pairs can then no longer have anything scheduled into each
+  load's latency: the pairs come out back to back with the float stores parked
+  on one side of them. Retail interleaves one coordinate store into every
+  load's latency and reuses one register for all four bytes, which is exactly
+  what the same body emits when those four reads are `s32` fields instead, so
+  the tell is reproducible: swap the byte reads for same-sized integer reads
+  and see whether the schedule falls into place. A `u32 r : 8` bitfield does
+  give `lbu` and does break the false dependence, but it swings past the
+  target, since a bitfield read conflicts with neither the integer nor the
+  float stores and cc1 then hoists all four loads into four registers ahead of
+  every store. `dds3EffectFilterDrawTexQuad` sits on this at 22 of 110 words;
+  see [Non-matching drafts](nonmatching.md).
+- A colour read-modify-write whose new value comes out of a float-to-unsigned
+  conversion needs the converted value in its own `u32` local. Written as one
+  expression, `p->color = (p->color & 0xFFFFFF) | ((u32)(...) << 24)`, cc1
+  hoists the `lw` of the old colour above the conversion's select and loses the
+  branch-likely with it; `level = (u32)(...); p->color = (p->color & 0xFFFFFF)
+  | (level << 24);` keeps the load inside the two arms where retail has it.
+  `dds3EffectRippleBlurDraw` went from 43 differing words to 19 on that one
+  local, where the reversed `or` operands and a `* 0x1000000` in place of the
+  shift are 21 and 43.
+- A float expression needed both before and after a call, where retail copies
+  it with `mov.s`, is the **expression written twice**, not a named `f32`
+  local. The local is live across the call, takes a second callee-saved float
+  register and grows the frame by 16; written at both use sites, cse turns the
+  second one into the copy. `dds3EffectRippleBlurDraw`'s `1.0f - slot->phase`
+  feeds the displacement multiply and the alpha scale and needs this.
+- A run of packet builders that each allocate a buffer, fill it and link it
+  takes **one function-scope pointer for some of them and a block-scope
+  pointer for the rest**, and which is which is worth sweeping mechanically.
+  A shared local gets its own pseudo and a `daddu rd, $2, $0` copy; a
+  block-scope one coalesces with `$2` and stores straight through it. Retail
+  does both inside one function: `dds3EffectBlurDrawFrameMask` copies the first
+  two packets into `$7` and stores the last two through `$2`, and all sixteen
+  combinations of its four blocks were measured, with the right one exact and
+  the next best 45 of 146 words. `dds3EffectBlur`, with three packet blocks,
+  wants block scope for all three.
+- The argument setup for a tail call that follows a counted loop gets hoisted
+  above the loop's guard and lands in its `blez` delay slot, where retail fills
+  that slot with the first load from inside the guarded block. Nothing in the
+  source reaches it: eight loop spellings (`do`/`while` with the decrement
+  before or inside the test, a `for` inside the guard, a bare `for`, a `for`
+  with a `> 0` bound, a `while`, the induction pointer initialised in the `for`
+  init, and separate bound and counter locals in both orders), and an early
+  `return` in the skip arm carrying its own copy of the call, all leave it or
+  make it far worse. `dds3EffectRippleBlurDraw` and
+  `dds3EffectDistortionBlurDraw` are both capped by exactly this, at 18 of 122
+  and 8 of 130 words.
 - Where retail **reloads** a `void *` handle after a store made through a
   pointer derived from it, cast the store's lvalue to `void **`. ee-gcc 2.96
   gives each pointed-to type its own alias set, so a store to a
