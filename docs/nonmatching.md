@@ -2221,3 +2221,141 @@ hoist the whole y chain into the entry block ahead of
 two y values; a separate local for the depth `-1`; a named local for the
 second quad's right edge; an `x` local copied from `ox`; computing `ox` after
 the `if`; and all declaration orders of the locals, which change nothing.
+
+## EffDel (newbattle/nbMakePacket, 0xB8)
+
+42 of 46 words, at the exact 184-byte size, and with the same instruction
+multiset.
+
+The whole body, both `bnel` field tests and the `effBTLCutGetFrame` block are
+identical. The four differing words are one rotation in the loop preheader:
+retail leaves the `beqz $16` that guards the packet walk with a `nop` in its
+delay slot and then materialises the two compare constants, while ee-gcc moves
+`addiu $19, $0, 1` into the slot and the assembler pads the 8-byte loop
+alignment with the `nop` instead. That is a delay-slot fill, not a source
+difference: the three preheader instructions and their order are the same.
+
+Ruled out: a `for` loop, a `while`, an explicit `if` plus `do`/`while` guard,
+three nested `if`s in place of the `&&` chain, a local for `p->cuteff`, and
+dropping the `nbKoukaProcessData_t *` local so the list head is subscripted
+straight off the call. All six give the identical four-word rotation.
+
+Confirmed on the way: `nbMainProcessData_t` carries the kouka process id at
+`+0xF4`, inside what was `unk_E0`, and `dds3GetProcessData` of it yields the
+same `nbKoukaProcessData_t` whose `first` sits at `+0x08`.
+
+## Chk_ENHOJOMAX, Chk_FRHOJOMAX (newbattle/nbMakePacket, 0xDC each)
+
+54 of 55 words each, at the exact 220-byte size.
+
+Both are the established `Chk_*` shape of this unit: a `one = 1;` local above
+the loop, `a->data->party[i]` subscripted at every use so the base reloads
+after the call, and a `continue` per flag test. The one differing word is the
+third flag test: retail emits a plain `bnez $2, .L00286134` and duplicates
+`slti $2, $18, 4` into all four predecessors of the loop-continue block, while
+ee-gcc makes that one branch `bnel` and annuls the `slti` instead. The other
+two flag tests come out plain in both.
+
+Ruled out: `!= 0` written explicitly on the `0x20` test, fusing it with the
+`ChkAiHojoMax` call into one `||`, and nesting the last two tests instead of
+`continue`. All three give the identical one-word diff, as do the matching
+siblings' shapes (`Chk_ENCNT` and `Chk_FRCNT`, which have no call in the loop,
+match exactly).
+
+## nbGetAiEntry (newbattle/nbMakePacket, 0xE0)
+
+43 of 54 words, two words short of retail's 216.
+
+The table address, both `nbAiChkJoken` calls, the two `>> 16` tests and the
+`nbSetHojoCounter` call are identical. Retail places the cross-jumped
+`return 0` block *after* the `nbSetHojoCounter` arm, so its tail reads
+`b .L0028686C` with `addiu $2, $0, 1` annulled, then `daddu $2, $0, $0`, then
+the epilogue. ee-gcc puts the `1` immediately before the epilogue and reaches
+the zero from earlier, which costs the `b` and the zero block and shifts
+three branch offsets.
+
+Ruled out: a `goto fail;` with a trailing `fail: return 0;` label (runs over
+size), `return 1` duplicated into the `nbSetHojoCounter` arm, and the two
+`>> 16` tests as nested `if`s instead of `||`.
+
+Confirmed on the way: `datDevilAI_t`'s 164-byte row holds thirteen 12-byte AI
+entries at `+0x04`, each `{u32 joken[2]; s32 no;}`. `D_003989EC`, which
+`nbRunAi` reads with a `[41]` stride, is the `no` of the same rows.
+
+## nbClearActionFlags (newbattle/nbMakePacket, 0xE0)
+
+18 of 56 words, at the exact 224-byte size and with the same instruction
+multiset.
+
+The structure is settled: a `mask = ~0x800;` local above the first loop so the
+constant is materialised before the counter, `for (i = 3; i >= 0; i--)` over
+four formations clearing `stat`, then a second loop that remembers the last
+index whose `stat & 1` was set and, at the first formation without it, copies
+that formation's `orgpos` and `orgrot` with four `SDF_VU0_COPYVECTOR`s,
+adds `form[src].r + 100.0f + 50.0f` to `orgpos.x`, sets `stat |= 0x800` and
+returns. Both float constants are `lui`/`mtc1` pairs, not `.lit4` entries.
+
+What is left is which call-clobbered register each of the four locals gets:
+retail has `mask` in `$6`, the counter in `$5` and the pointer in `$3`, and
+ee-gcc permutes all three, which rewrites every word that names them. There
+are no calls in the function, so this is local-alloc ordering; four
+declaration orders leave it unchanged. This is the ruled-out
+register-permutation class, kept only so the next reader does not redo the
+decode.
+
+## nbE901Process_1 (newbattle/nbMakePacket, 0xCC)
+
+50 of 51 words, at the exact 204-byte size.
+
+The dispatch, both vibration arms and the `D_00527420[e->step](e)` call are
+identical. The one differing word is the second equality test: retail emits
+`beql $4, $2, .L002919A0` with the `0xDE` arm's `daddu $4, $0, $0` annulled
+into the slot, and ee-gcc emits a plain `beq` with the same instruction
+unconditional. `$4` is dead on the fall-through path either way, so both are
+correct; only the annul bit differs.
+
+Ruled out: the two `case` labels in the other order and as an `if`/`else if`
+chain (both reshape the dispatch and are much worse), an explicit
+`default: break;`, a `u32` switch index, and an early `return 0` per arm with
+the `nbUpdateEventProcessData` tail duplicated. The last three reach this same
+one word.
+
+## nbRunAi (newbattle/nbMakePacket, 0xBC)
+
+46 of 47 words, at the exact 188-byte size.
+
+The one differing word is the loop-exit branch: retail emits a plain
+`beqz $2, .L00287D40` with `lui $4, %hi(D_00545840)` in its delay slot, and
+ee-gcc emits `beql` with the same instruction annulled. Every other word,
+including the `$18` induction pointer, the `id * 164` shift chain and the
+`j nbRunAiSub` sibcall, is identical.
+
+Ruled out: a `while` loop, a `continue` in place of the `if` body, a `u32`
+index, a `goto` out of the loop, a `do`/`while (1)` with two `break`s, the
+format string in a local, and `i = 3` instead of `break`. Duplicating the
+`printf`/`nbRunAiSub` tail into the found and not-found paths runs over size.
+Varying `nbGetAiEntry`'s declaration (absent, K&R, `u32`) changes nothing,
+unlike the `nbMaeCheckDone` case below.
+
+## nbMaeCheckDone (newbattle/nbMakePacket, 0xC8)
+
+Byte-exact on its own. It is kept behind the fallback because compiling it
+turns `nbE905_End`, the only caller, from retail's `bnel $2, $0` into a plain
+`bne`: its `return 0` stops being annulled into the branch delay slot the
+moment the callee is a C definition in the unit rather than an `INCLUDE_ASM`
+declaration. That is the mirror image of the `slDrawWindow` finding in
+[matching levers](matching-levers.md): what the compiler can see of the rest
+of the unit changes the delay-slot decisions it makes for one function, and
+here seeing more makes it worse. The two cannot both match, and
+`nbE905_End` was already banked.
+
+Ruled out for keeping both: a K&R `s32 nbMaeCheckDone()` definition, which is
+what the implicit declaration gave the caller, and four shapes of
+`nbE905_End` itself (an `&&` chain, two early returns, a `ret` local, and a
+`return 0` inside the outer guard), none of which recover the `bnel`.
+
+Confirmed on the way: a six-entry jump table does come out of six `case`
+labels here, so `case_values_threshold` is not 10 for this shape. The switch
+needs an explicit empty `case 0:` alongside 1 to 5; without it ee-gcc builds
+a five-node compare tree instead of the table. `nbMaeFlag`, `nbMaeState`,
+`nbMaeCounter` and `D_00551540` are all `s32` sdata.

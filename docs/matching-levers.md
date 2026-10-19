@@ -39,6 +39,10 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| a `switch` with fewer than ten `case` nodes still reaching a jump table | add the missing low `case` label with an empty body. `case_values_threshold` is not the whole story: `nbMaeCheckDone`'s six-entry table needs an explicit empty `case 0:` alongside 1 to 5, and without it ee-gcc builds a five-node compare tree instead |
+| each arm of an `if`/`else` recomputing the same shift or scale that your C shares at the merge, and the taken-equal arm reusing the compare's constant as its return value | write the tail out in each arm with its own `return`, so `if (f() == 1) { store; return 1; }` lets gcc reuse the `1` already in `$2` and cross-jump only the store's tail. `NegoDebug` went from 21 of 46 words to exact on that plus a `< 0` arm written as `if (x < 0) { body; return 1; } return 0;` |
+| a run of sibling `if`s after one guard, where your C emits the guard as an early `return` | nest every later `if` inside the guard. `SyuGo2`'s three frame tests under one `if (e->frame >= 0xB)` swapped `e` and the loop counter back into retail's `$16` and `$17`; declaration order, the loop form and an inverted last test all leave the pair swapped |
+| a call's pointer argument computed before an inner call whose result is the next argument | give it its own local: `form = &e->data->form[list[i] + 4];` ahead of `f(0, 0, g(...), 2, form)`. Written inline at the call gcc orders the inner call first and spends one saved register fewer. `PartsEffect2` turned on that alone |
 | the loop body once, with the exit test at the bottom and the first load in the preheader | a `do`/`while`, not a `for`. A `for` whose body carries a `break` gets the whole body peeled ahead of the test, which is 14 words in `SetAction_NEGO` |
 | an extra range test (`slti`, `bnez` to the default) in front of a two-case compare chain | an extra `case` with an empty body below the lowest real case value. `nbStageProcess1`'s `switch` over 2 and 3 needed a `case 1: break;` to make gcc emit the bound test; an `s32` or `u32` local for the index does not reach it |
 | `bgez` on a sign test where you emit `bgezl` with the epilogue's `ld` duplicated into its delay slot | spell the test as the mask, `if ((stat & 0x80000000) != 0)`, not `if (stat < 0)`. Both are one instruction, but the relational form lets ee-gcc fill the delay slot from the branch target and pay for it with a second epilogue copy. `CheckSenseiOrBackAttack` went from 8 differing words to exact |
@@ -370,6 +374,14 @@ it was measured on DDS and not on this ELF.
   because `nbUnitDrawProcess1` passes a draw tag it ignores. An unused
   parameter costs no instructions, so adding one is free on the callee and is
   what lets the caller compile at all.
+- Which of `beq`/`beql`, `bne`/`bnel` and `bgez`/`bgezl` ee-gcc picks is the
+  delay-slot filler deciding whether the slot's instruction is safe on the
+  untaken path, and it is not reachable from the branch's own source shape.
+  Three functions here (`nbRunAi`, `nbE901Process_1`, `nbE905_End`) sit one
+  word from exact on that bit alone after every spelling of the branch,
+  the loop and the callee's declaration. Restructuring the block the slot
+  instruction belongs to is what moves it, as in the `NegoDebug` row above;
+  varying the branch does not.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -546,7 +558,14 @@ permuting the caller.
 It is not universal. An agent on `field/fldDraw` tested it directly, reverting
 a converted callee to `INCLUDE_ASM` while changing nothing else, and its
 caller still compiled exact; no near miss in that unit emitted a `bnel` for a
-`bne` that a C callee fixed. Try it, but measure rather than assume. This is the same mechanism as the CONTEXT row below,
+`bne` that a C callee fixed. Try it, but measure rather than assume.
+
+It also runs the other way, which is worth knowing before you convert
+something. `nbMaeCheckDone` in `newbattle/nbMakePacket` is **byte-exact on its
+own** and is parked behind a `NON_MATCHING` fallback anyway, because compiling
+it turns a neighbouring function's `bnel` into a `bne`. A matching function
+can cost more than it earns, so check the whole unit's result after adding
+one, not just the function you wrote. This is the same mechanism as the CONTEXT row below,
 seen from the other side: what the compiler can see of the rest of the unit
 changes the code it emits for one function.
 
