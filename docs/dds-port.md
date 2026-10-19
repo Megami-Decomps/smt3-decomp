@@ -80,13 +80,35 @@ reconstruction have since consumed almost all of it: the high tier is now 154
 functions and 4.2%. What is left is overwhelmingly SMT3's own game code, with no
 counterpart to port from.
 
-Treat the tiers with the same suspicion the method section describes. On one unit
-10 of 13 high-confidence pairings held; on another all 5 were different functions
-at a similar donor size, and a third unit's 5 were likewise unusable. One pairing
-has held exactly: `fldDrawSkyGradient` against `fldSkyDrawFilter`, the same
-function at the same 0xAD8 size, which transliterated to 682 of 694 words on the
-first compile. Two agents independently reported the HD reconstruction
-([Names](names.md)) as more useful than the pairings.
+## Pair units, not functions
+
+Five units' worth of experience says the per-function tiers are the weak part
+of this tool and the donor *unit* identification is the strong part.
+
+The tiers, as they have actually performed: on one unit 10 of 13
+high-confidence pairings held; on another all 5 were different functions at a
+similar donor size; a third unit's 5 were likewise unusable; and on
+`event/evtEventViewer` both of its 2 high rows were different functions at a
+similar size. One pairing has held exactly, `fldDrawSkyGradient` against
+`fldSkyDrawFilter`, the same function at the same 0xAD8 size, which
+transliterated to 682 of 694 words on the first compile.
+
+What paid off instead, on the same unit where both named pairings failed:
+dds-decomp's `dds1/event/evtEventViewer.c` is the same original file, so
+fourteen bodies were lifted from its control flow and twelve of them matched,
+37 functions in the unit overall. Every field offset, global and call name was
+wrong and re-derived against retail, which is the standing caveat. Three of
+them matched only on the donor's *literal* statement order, oddities included,
+which is a reason to stop editing a transliteration that is close.
+
+So the useful question is not "does this function have a high-confidence
+pairing" but "does dds-decomp have the file this function came from". A shared
+donor unit also tends to mean a shared type or helper, which is what makes the
+rest of the family cheap once the first body is out.
+
+Two agents independently reported the HD reconstruction ([Names](names.md)) as
+more useful than the per-function pairings, and it is what names the original
+translation unit in the first place.
 
 `build/dds_reuse.tsv` carries a row per function, not per fallback. Filter on
 `smt3_state == "asm"` before counting anything: a tally over every row counts work

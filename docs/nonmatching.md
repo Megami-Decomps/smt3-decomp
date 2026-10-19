@@ -999,3 +999,53 @@ Ruled out: 0.45f through a named `f32` local, declared before `frame`, after it,
 and at the top of the guarded block. The first two are far worse (67 words),
 because the load then happens outside the guard; only the block-scoped one stays
 at four.
+
+## nbEventProcess1 (newbattle/nbMakePacket, 0x7C)
+
+23 of 31 words, at the exact 124-byte size and with the same instruction
+multiset.
+
+Retail schedules `addiu $2, $2, %lo(nbEventProcess3)` into the load-delay
+slot after `lw $4, 0x88($17)`, four words after its `lui`. ee-gcc leaves the
+`lui` in the same place but emits the `addiu` last, where the return value is
+used, so the eight words from there on sit one slot late. Nothing else
+differs.
+
+Ruled out: a `void *` local holding the return value, which costs a saved
+register and adds four words; an early `return nbEventProcess3;` for the
+`rid <= 0` case, which duplicates the `lui`/`addiu` pair; and swapping the
+two `rid` stores, which only moves the stores.
+
+Confirmed on the way: `nbEventEntry_t` +0x00 is an `s32` resource id, not a
+pointer. Retail stores it into `data->eventrid` after a signed `blez`, and
+`nbStartEventPacks` still matches with the field as an `s32` and
+`evtLoadEventPack` taking one. A local for the field is needed because the
+store to `data->eventrid` otherwise aliases the table and forces a reload.
+
+## evtEventViewerProcess3 (event/evtEventViewer, 0x16C)
+
+88 of 91 words, at the exact 364-byte size.
+
+Three consecutive words, the second `viewerinfo->flags & 1` test after
+`FrameSelect`: retail loads the field into `$2`, masks it there and branches
+on it, letting the `return 0` in the branch's delay slot overwrite the same
+register. The draft puts the temp in `$3` because it treats `$2` as taken by
+the return value. Every other word, including both jump targets, the three
+`evtViewerStopFrame` sites and the shared flags load under the pad `0x2C`
+test, is identical.
+
+The whole function body had to go through `viewerinfo->` directly: a local
+`evtViewer_t *viewer` reassigned after each call costs a saved register and
+misses by 58 words.
+
+The frame advance at the end reads `if (frameCurrent >= frameLast)` with the
+`evtViewerStopFrame` arm first; written as `frameCurrent < frameLast` with
+the increment first, gcc places the arms the other way round and the whole
+tail shifts.
+
+Ruled out for the three words: `& 1` with and without `!= 0`, `== 1`, an
+early `return 0` per arm in the frame advance, a `ret` variable for the
+single exit, and restructuring the two flags tests as one `!= 0` call guard
+plus one `== 0` tail guard. `FrameSelect` and `evtViewerStopFrame` are
+defined in this unit, so the `s32`-return lever that blocks the `$2`
+reservation is not available for them.

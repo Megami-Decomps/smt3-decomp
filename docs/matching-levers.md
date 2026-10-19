@@ -133,6 +133,26 @@ it was measured on DDS and not on this ELF.
   have its own type, not the work type. Where the parameter store is not the
   first store, read it into a local first so the `lw` lands ahead of the
   stores.
+- A local caching a `gp`-addressed global pointer (`evtViewer_t *viewer =
+  viewerinfo;`) held across the whole body costs one pseudo and shifts every
+  later allocation. Where retail re-reads the global, write `viewerinfo->`
+  at every use and let gcc keep the one load: stores through the pointer
+  invalidate the cached load by themselves, so retail's reload pattern falls
+  out. Four functions in `event/evtEventViewer` turned on that alone, one of
+  them from 58 differing words to exact.
+- A loop bound used once belongs in the `for` condition, not in a named local.
+  `for (i = 0; i < a->x + a->y; i++)` gives retail's `addu` into `$2` and a
+  copy into the compare register; `bound = a->x + a->y;` coalesces the add
+  into the compare register and loses two words.
+- Where retail has `movn rd, rs, rs`, the cmov whose value and condition are
+  the same register, write an explicit `if (x != 0) y = x; else y = <default>;`.
+  The `y = <default>; if (x != 0) y = x;` form reads better but gcc sinks the
+  default into the test and emits a branch pair; no ternary spelling of it
+  reaches the cmov either.
+- A string the retail pool keeps next to padding or an empty string is safer
+  as `INCLUDE_RODATA` plus `extern char D_XXXXXXXX[];` than as a literal in
+  the body. `include_rodata.py` picks up any rodata symbol named this way,
+  including one splat had folded into a nonmatching function's own asm file.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
