@@ -675,6 +675,63 @@ it was measured on DDS and not on this ELF.
   cc1 keeps one register and feeds both the store and the argument from it,
   two words short. Without the clobber it rematerialises. `nbSetFormRot` went
   from 16 differing words to exact on that one change.
+- Where retail materialises `%hi`/`%lo` of `symbol + offset` fresh while the
+  C holds the bare symbol's address in a register, declare the sub-object with
+  `PS2_SYMBOL_AT`. In `effBTLFieldColorRun` a `SDF_VU0_COPYVECTOR` from
+  `dds3LightParam.ambient` shared its base with the `dds3LightParam.sources[0]`
+  load two statements earlier, so gcc kept the full address in a register,
+  derived the ambient address with an `addiu +0x10`, and ran one word short.
+  `PS2_SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10)`
+  gives the member its own relocation, which also lets the `%lo` of the
+  pointer load fold back into the `lw`. That took the function from 13
+  differing words to exact.
+- A `u16` struct field used both as a loop bound test and as the loop counter's
+  initial value needs **two** locals, and the bound one has to be `u16`. In
+  `effBTLCutCreate` writing `if (cut->list->count != 0) { remaining =
+  cut->list->count;` puts the count in `$2` and the reloaded `cut->list` in
+  `$3` where retail has them the other way round; `u16 count = cut->list->count;`
+  read before the pointer's other two members, with `remaining = count;` inside
+  the guard, swaps the pair back and took the function from 9 differing words
+  to 3.
+- A `movz` selecting between two member addresses takes its two temporaries in
+  the order the statement appears relative to its neighbours, not from how the
+  selection is written. `effBTLCutCreate`'s `list = (kind < 2) ?
+  &owner->banks[0].list : &owner->banks[1].list;` was 3 words out as the second
+  statement of the function and exact once moved below the two `cutList`
+  linkage stores; eleven spellings of the selection (an `if` either way round,
+  both ternary polarities, an index expression, a byte-offset ternary and an
+  explicit flag local) all give the same 3 or 4, so sweep the statement's
+  position rather than its form.
+- A varargs format string that retail keeps in a callee-saved register across
+  the calls that compute the arguments is a named local assigned before them,
+  and the arguments then have to be locals too. `effBTLFieldColorON` went from
+  205 of 238 differing words to 41 with `format = D_00532FE8;` placed after the
+  last VU0 macro and the six `sdfFloatToULong` results in their own `s32`
+  locals; with the literal at the call site gcc builds the address in `$4`
+  immediately before the `jal`. Anywhere from "after the last statement before
+  the first argument" through "before the fourth argument" gives the same
+  result; later than the fifth loses 40 words.
+- The `(T *)((u8 *)(i * sizeof(T)) + (u32)base)` cast for retail's
+  `addu rd, index, base` **can make things much worse**, so measure it rather
+  than applying it on the operand order alone. It also stops gcc sharing the
+  scaled index, so in a function that recomputes the row in two places
+  (`effBTLFieldColorON` computes `id * 0x14` once for the colour reads and
+  again for the printf arguments) the cast costs more than the operand order
+  earns: 13 differing words became 221 with the cast on three accesses and 230
+  with it on all of them. `effBTLCutDraw` shows the same thing for a loop row,
+  88 of 263 words with plain subscripts against 149 of 260 with the cast.
+- A dead `sw` to the frame after a colour-pack macro is a dead store to a
+  stack aggregate's element, not a compiler artefact. `effBTLCutGetAllPartColor`
+  ends `SDF_VU0_dds3ColorFtoI(color, 128.0f); work[0].word = color; return
+  color;` with `work` a one-element 16-byte struct array, which is the same
+  idiom `effColorBlend` in `effect/effMath` already carries.
+- A copy of a struct's whole leading image, where retail emits a runtime
+  8-byte-alignment dispatch over an `ld`/`sd` loop and an `ldl`/`ldr` loop plus
+  an unconditional `ldl`/`ldr` tail, is one struct assignment of a 4-aligned
+  type of exactly that size. `effBTLCreate`'s 0xC38-byte copy matched first try
+  as `*(effBTLImage_t *)work = *(effBTLImage_t *)data;` with
+  `typedef struct { s32 words[0xC38 / 4]; } effBTLImage_t;` declared in the
+  unit, which avoids reshaping the shared `effBTL_t` header.
 
 ## Function-local constant arrays
 
