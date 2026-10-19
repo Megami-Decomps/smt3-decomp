@@ -865,9 +865,9 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
     if (parent->children == NULL) {
         return;
     }
-    parent->children->flags &= ~SDF_MODEL_NODE_FLAG_HIDDEN;
+    parent->children->flags &= ~SDF_MODEL_NODE_FLAG_HIDE;
     if (clearFlag == 0) {
-        parent->children->flags |= SDF_MODEL_NODE_FLAG_HIDDEN;
+        parent->children->flags |= SDF_MODEL_NODE_FLAG_HIDE;
     }
 
     first = parent->children;
@@ -880,10 +880,10 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
         return;
     }
     for (;;) {
-        flags = node->flags & ~SDF_MODEL_NODE_FLAG_HIDDEN;
+        flags = node->flags & ~SDF_MODEL_NODE_FLAG_HIDE;
         node->flags = flags;
         if (clearFlag == 0) {
-            node->flags = flags | SDF_MODEL_NODE_FLAG_HIDDEN;
+            node->flags = flags | SDF_MODEL_NODE_FLAG_HIDE;
         }
         next = node->next;
         if (next == NULL) {

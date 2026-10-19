@@ -2248,7 +2248,7 @@ struct SdfMapPositionRecord {
  * to MdlCtx's list at +0x14. The part and object payloads share that allocation. */
 struct MdlResourceItem {
     struct MdlResourceItem *next;
-    u16 type; /* MdlResourceKind value, with native halfword storage. */
+    u16 type; /* dds3ModelEffectType value, with native halfword storage. */
     s16 motionSlotIndex; /* Owning Motion.slotIndex; -1 tags context-wide entries. */
     union {
         struct {

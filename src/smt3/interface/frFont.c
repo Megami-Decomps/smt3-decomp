@@ -162,10 +162,12 @@ typedef struct sdfImageRequest_t {
     u16 height;
 } sdfImageRequest_t;
 
-enum sdfImageOwnership
+/* sdfImageSetRelease_t.freeMode: which heap owns the uploaded pixels. */
+enum SdfImageSetMem
 {
-    SDF_UPLOAD_BORROWED = 0,
-    SDF_UPLOAD_CHIP_HEAP = 2
+    SDF_IMAGESET_MEM_IGNORE = 0,
+    SDF_IMAGESET_MEM_HANDLE = 1,
+    SDF_IMAGESET_MEM_CHIP = 2
 };
 
 void frSetWhiteSpaceW(s32 slotId, s32 entryFlag);
@@ -801,9 +803,9 @@ frFontRecord_t *frTranslateUserData(s32 width, s32 height, void *pixels, s8 owns
     cachedItem->refs = 1;
     cachedItem->list = atlasNode;
     if (ownsPixels == 0) {
-        uploadRequest.allocationMode = SDF_UPLOAD_BORROWED;
+        uploadRequest.allocationMode = SDF_IMAGESET_MEM_IGNORE;
     } else {
-        uploadRequest.allocationMode = SDF_UPLOAD_CHIP_HEAP;
+        uploadRequest.allocationMode = SDF_IMAGESET_MEM_CHIP;
     }
     uploadRequest.pixels = pixels;
     uploadRequest.format = FR_FONT_PIXEL_FORMAT;
