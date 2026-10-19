@@ -108,6 +108,9 @@ it was measured on DDS and not on this ELF.
 | a `switch` `default` arm whose counter bump shares the block the other arms branch to, where your C gives the default its own copy | write the default's test with the opposite polarity, `if (c >= 0xB) { call(); } else { c++; }`. The five other arms of `Eff_ModelTrackPolyDraw` cross-jump their `c++` into one block with the natural `if (c < 0xB)` and only the default, written last, keeps a copy. 18 of 174 words out, exact once the default alone is inverted |
 | two `sltiu`s against different immediates converging on one branch, where your C emits a `movz` | put the ternary on the comparison, not on the bound: `if (cond ? (c < 0x11) : (c < 0xB))`. Selecting the bound first, as a ternary or as an `if`/`else` that assigns a `limit` local, if-converts to `movz`. `Eff_ModelTrackPolyDraw`'s `case 0x12` went from 29 of 174 words to 18 on that one expression |
 | a dead store of an intermediate into the array slot your C keeps in a temp | update the slot in place, `runStart[0] -= 2; ... runStart[0] += data->capacity;`, and order the statements offset, negate, add capacity, count, zero. `effSwordTrackPolygonDraw` needs that, while its sibling `dds3HermitianTrackPolyDraw` in the same unit matches with a `wrappedStartOffset` temp, so both shapes are live and the extra store in the retail text is what tells them apart |
+| 26 arms, each ending in a `b` to one shared exit, with no code after the chain | a plain `if`/`else if` chain. The `goto` funnel and the duplicated-tail rows above apply only where the arms *share* a tail; here each arm carries its own whole loop and there is nothing for `jump2` to cross-jump, so the chain matched with no `goto` at all. `dds3ObjectBaseMakeUnit`'s 26 model probes are this shape |
+| a `for` whose bound is loaded once into a saved register, where your C runs the whole pointer chain again each iteration | read the bound into a local first, `count = obj->inner->nodeList->count;`. Written as the loop condition the two loads and the `lh` repeat in the backedge block, cost five words, and also take the argument register the call in the body wants. `dds3ObjectBaseMakeUnit` went from 94 of 1406 words to 9 on that one local |
+| a loop whose body is guarded by `bnel i, $0` and whose call arguments are all `$0` | `if (i == 0) { ... }` inside the `for`. The index is then known zero in the body, so an `i` passed as an argument materialises as `$0` rather than a copy |
 
 ## Addressing and types
 
@@ -1081,6 +1084,17 @@ it was measured on DDS and not on this ELF.
   hands `sdf3DMakeLightParallelPacket` the light record and its ambient term,
   and sharing the `%hi` through `&dds3LightParam.ambient` runs a word short per
   call.
+- Row 78's `ldl`/`ldr` plus 8-byte-alignment dispatch is reproduced exactly by
+  `extern const T g; T local = g;` on a struct of plain `char` arrays, as long as
+  the size is a multiple of 8: `DATA_ALIGNMENT` lifts a global aggregate to four
+  bytes, so cc1 knows it can use doublewords but still has to test the source
+  address's low three bits at run time. `dds3ObjectBaseMakeUnit` has fourteen
+  copies of a 360-byte `{char name[20]; char parts[17][20];}` and every one
+  matched first try. The locals take 16-byte-aligned frame slots in declaration
+  order, so a 0x168 type gets a 0x170 stride and the declaration order is
+  readable straight off the stack offsets. Declaration initializers against plain
+  assignments decide only where the copies land relative to the function's
+  leading calls; retail has them after `mdlLoad`, which is the assignment form.
 
 ## Function-local constant arrays
 
@@ -1144,6 +1158,13 @@ Where a handful of constant stores differ only in order, permute them
 mechanically rather than reasoning about it. A loop driving
 `check_unit.py --func <name>` costs about a second per permutation; two
 functions turned on the first of 24 permutations and on a rotation of three.
+
+The sweep is worth reaching for past pure constant stores. `dds3ObjectBaseMakeUnit`'s
+last eight differing words were a five-statement tail (two `sw $0` constants, a
+field store, a pointer load and a float field store) whose order no reading of the
+schedule predicted. All 120 permutations of the five run in five seconds and the
+second one was exact: the float store `basic->poseset->r = obj->objectRadius;` has
+to precede `control->modelHandle = obj;`.
 
 ## Callee visibility: the cause of most one-word branch-likely misses
 

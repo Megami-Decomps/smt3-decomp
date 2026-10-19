@@ -40,6 +40,44 @@ extern void sdfModelLinkOt(sdfModelOt_t *ot, sdfModelRootNode_t *model);
 
 typedef struct
 {
+    char name[20];
+    char parts[17][20];
+} dds3UnitPartTable_t;
+
+extern const dds3UnitPartTable_t D_0052F850;
+extern const dds3UnitPartTable_t D_0052F9B8;
+extern const dds3UnitPartTable_t D_0052FB20;
+extern const dds3UnitPartTable_t D_0052FC88;
+extern const dds3UnitPartTable_t D_0052FDF0;
+extern const dds3UnitPartTable_t D_0052FF58;
+extern const dds3UnitPartTable_t D_005300C0;
+extern const dds3UnitPartTable_t D_00530228;
+extern const dds3UnitPartTable_t D_00530390;
+extern const dds3UnitPartTable_t D_005304F8;
+extern const dds3UnitPartTable_t D_00530660;
+extern const dds3UnitPartTable_t D_005307C8;
+extern const dds3UnitPartTable_t D_00530930;
+extern const dds3UnitPartTable_t D_00530A98;
+extern char D_0054E9D0[];
+extern char D_0054E9D8[];
+extern char D_0054E9E0[];
+extern char D_0054E9E8[];
+extern char D_0054E9F0[];
+extern char D_0054E9F8[];
+extern mdlObj_t *mdlLoad(s32 major, s32 minor);
+extern void mdlGetScale(mdlObj_t *obj);
+extern void mdlSetRotate(mdlObj_t *obj);
+extern void mdlSetPosition(mdlObj_t *obj);
+extern void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale);
+extern void Normalize(void);
+extern struct evtUnit_t *evtCreateUnitHandle(dds3Basic_t *basic, mdlObj_t *obj);
+extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name);
+extern char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 index);
+extern s32 strcmp(const char *a, const char *b);
+extern s32 printf(const char *fmt, ...);
+
+typedef struct
+{
     dds3ObjectBaseControl_t *control;
     s32 hojiID;
 } dds3ObjectBaseMatterWork_t;
@@ -206,7 +244,327 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *basic)
     }
 }
 
-INCLUDE_ASM(const s32, "basic/dds3ObjectBase", dds3ObjectBaseMakeUnit);
+/* The loaded model is identified by its root node name, and the matching table
+ * supplies the 17 part names whose node indices the control keeps. */
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052F850);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052F9B8);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FB20);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FC88);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FDF0);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0052FF58);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530000);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_0053001C);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530020);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530040);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530054);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530068);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_005300C0);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530228);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530390);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_005304F8);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530660);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_005307C8);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530930);
+
+INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530A98);
+
+void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor)
+{
+    sdfVector4_t scale;
+    dds3UnitPartTable_t hijriParts;
+    dds3UnitPartTable_t hijBParts;
+    dds3UnitPartTable_t playerAParts;
+    dds3UnitPartTable_t playerBParts;
+    dds3UnitPartTable_t tiakiParts;
+    dds3UnitPartTable_t yuukoParts;
+    dds3UnitPartTable_t isamuParts;
+    dds3UnitPartTable_t isamuFParts;
+    dds3UnitPartTable_t isamuFzParts;
+    dds3UnitPartTable_t hikawaParts;
+    dds3UnitPartTable_t model113Parts;
+    dds3UnitPartTable_t tiakiBParts;
+    dds3UnitPartTable_t majyoParts;
+    dds3UnitPartTable_t hutomimiParts;
+    dds3ObjectBaseControl_t *control;
+    dds3UnitObjectWork_t *work;
+    mdlObj_t *obj;
+    char *nodeName;
+    s32 index;
+    s32 count;
+    s32 i;
+
+    control = dds3GetBaseControlWorkData(basic);
+    if (control->modelHandle != NULL) {
+        mdlFree(control->modelHandle);
+    }
+    obj = mdlLoad(major, minor);
+    hijriParts = D_0052F850;
+    hijBParts = D_0052F9B8;
+    playerAParts = D_0052FB20;
+    playerBParts = D_0052FC88;
+    tiakiParts = D_0052FDF0;
+    yuukoParts = D_0052FF58;
+    isamuParts = D_005300C0;
+    isamuFParts = D_00530228;
+    isamuFzParts = D_00530390;
+    hikawaParts = D_005304F8;
+    model113Parts = D_00530660;
+    tiakiBParts = D_005307C8;
+    majyoParts = D_00530930;
+    hutomimiParts = D_00530A98;
+    nodeName = sdfModelGetNodeName(obj->inner, 0);
+    if (sdfModelGetNodeIndexByName(obj->inner, D_0054E9D0) > 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, hijBParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (sdfModelGetNodeIndexByName(obj->inner, "isam_f_b") > 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, isamuFParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, hutomimiParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, hutomimiParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, majyoParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, majyoParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, model113Parts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, model113Parts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, hikawaParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, hikawaParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "hikawa_j") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, hikawaParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, isamuParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, isamuParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, D_0054E9D8) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, isamuParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, isamuFzParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, isamuFzParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, yuukoParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, D_0054E9E0) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, D_0054E9E8) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 4;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, tiakiParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 3;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, D_0054E9F0) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 3;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, D_0054E9F8) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 3;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, tiakiBParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, tiakiBParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 3;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, hijriParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, hijriParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 2;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, playerAParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 0;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "player_j") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 0;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "player_aj") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 0;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "player84") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 0;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "player86") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 0;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "player88") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 0;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, playerBParts.name) == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerBParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 1;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (strcmp(nodeName, "player_z") == 0) {
+        for (i = 0; i < 17; i++) {
+            index = sdfModelGetNodeIndexByName(obj->inner, playerBParts.parts[i]);
+            if (index > 0) {
+                control->modelPartCount = 1;
+                control->modelParts[i] = index;
+            }
+        }
+    } else if (major == 3 && minor == 1) {
+        count = obj->inner->nodeList->count;
+        for (i = 0; i < count; i++) {
+            if (i == 0) {
+                printf("%02d:pName:[%s]\n", i, sdfModelGetNodeName(obj->inner, i));
+            }
+        }
+    }
+    mdlGetScale(obj);
+    SDF_VU0_STOREVECTOR(&scale);
+    dds3SetSclPoseSet(basic, &scale);
+    SDF_VU0_LOADVECTOR(&basic->poseset->rot);
+    Normalize();
+    mdlSetRotate(obj);
+    SDF_VU0_LOADVECTOR(&basic->poseset->pos);
+    SDF_VU0_VECTOR_W_SET_ONE();
+    mdlSetPosition(obj);
+    basic->poseset->r = obj->objectRadius;
+    control->modelHandle = obj;
+    work = basic->workdata;
+    control->modelType = 0;
+    control->controlSvs = 0;
+    if (work->unit == NULL) {
+        work->unit = evtCreateUnitHandle(basic, obj);
+    }
+}
 
 void dds3ObjectBaseMakeMatter(dds3Basic_t *basic)
 {
