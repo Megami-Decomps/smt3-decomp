@@ -403,6 +403,21 @@ So an offset cast is not automatically worse than a member access. Where it
 encodes an integer add or a cached base that retail's codegen depends on, it is
 the honest spelling, and the comment should say which field it lands on.
 
+### INCLUDE_SDATA lines cannot carry a comment
+
+`tools/include_sdata.py` owns those lines: its `LINE` regex matches
+`INCLUDE_SDATA(...);` through the newline and re-places the directives on every
+`configure.py` run. A trailing comment stops the regex matching, so the tool
+decides the line is missing and adds a second one, and ninja then reports
+*multiple rules generate .../D_0054E9D0.s*. Moving the comment to the line
+above does not work either: the directives get re-placed and the comments are
+left behind, stacked above the first one.
+
+So the six `.sdata` strings in `dds3ObjectBase.c` stay undocumented in the
+source. They are the character model names `hij_b`, `isam_f`, `aradia`,
+`yuuko_p`, `chiaki` and `tiaki_a`, recorded here instead. Anything that wants
+to annotate generated directive lines has to teach the generator first.
+
 ### String placeholders: the rule, and what still blocks 173 of them
 
 A format string or process name referenced as `extern char D_<addr>[]` plus an
