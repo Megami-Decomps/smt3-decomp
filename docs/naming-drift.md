@@ -566,12 +566,33 @@ per-object records are `dds3<Kind>BasicWorkData_t`, not `dds3<Kind>Work_t`.
 Sizes and offsets corroborate each one, and the control record is 0xAC in both.
 134 occurrences across 22 files, no codegen change.
 
+What makes these names canonical is not the layout match but the recovered
+*function* names, which the repo already relies on and which were not touched:
+`dds3AllocModelBasicWorkData`, `dds3ObjectBaseInitControlWorkData`,
+`dds3ObjectBaseFreeControlWorkData`, `dds3GetBaseControlWorkData`,
+`dds3SearchSceneBasicWorkData` and the four
+`dds3<Kind>ObjectBasicGetControlWorkData` accessors. 17 functions carry the
+word, every one is in `symbol_addrs.txt`, and the field they fill is
+`dds3Basic_t.workdata`, the IDB's own member name. `dds3ModelRangeBasic.c:31`
+closes it: the function named `dds3AllocModelBasicWorkData` allocates
+`sizeof(dds3ModelBasicWorkData_t)` into `basic->workdata`. The IDB carries no
+`*BasicWork_t` spelling for any of the eight, so the tree's shorter names were
+not a competing recovered reading. No retail string spells `WorkData`, so this
+rests on recovered names rather than on the binary's own text.
+
 Worth noting what the rename exposed rather than fixed: the tree's
 `dds3UnitObjectWork_t` is 0x20 where the IDB's is 0x24, so the tree's view is
 one member short of `IsBattle` at +0x20. The three offsets the two readings
 share do agree (+0xC, +0x10, +0x14), which is what justified the rename. The
 truncation is left alone, because widening a struct can change codegen wherever
 something takes its size.
+
+Only two of the eight can be asserted in `tools/header_layout.c`: the other six
+are defined in the `.c` file that uses them, so the header test cannot see them.
+Their IDB sizes are 0x1C model, 0x10 mover, 0x10 area, 0x10 event object, 0x30
+matter object, 0x24 model range. Moving them into `include/basic.h` would both
+remove a duplicate definition and let the size claims be checked on every build,
+which makes them a good first candidate for the next header merge.
 
 **`camp*` should be `cmp*`.** `campInfoWork_t` is the IDB's `cmpInfoWork_t`
 exactly, and the IDB uses `cmp` for all 39 types in that module. The other four
