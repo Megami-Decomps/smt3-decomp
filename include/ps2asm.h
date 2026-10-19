@@ -319,6 +319,21 @@ typedef struct {
     ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
     : : "r" (dst))
 
+/* The load, the store and the quadword copy with the address as a read-write
+ * operand, so cc1 gives each asm its own copy of it instead of sharing one
+ * pseudo. Needed where several VU0 accesses to one frame vector sit inside a
+ * loop: the shared pseudo becomes a loop invariant in a callee-saved register,
+ * where retail rematerialises `addiu rd, $29, N` at every access. */
+#define SDF_VU0_LOADVECTOR_RWADDR(src) __asm__ volatile ( \
+    ".set noreorder\n\tlqc2 vf10, 0(%0)\n\t.set reorder" \
+    : "+r" (src))
+#define SDF_VU0_STOREVECTOR_RWADDR(dst) __asm__ volatile ( \
+    ".set noreorder\n\tsqc2 vf10, 0(%0)\n\t.set reorder" \
+    : "+r" (dst))
+#define SDF_VU0_COPYVECTOR_RWSRC(dst, src) __asm__ volatile ( \
+    ".set noreorder\n\tlq $2, 0(%0)\n\tsq $2, 0(%1)\n\t.set reorder" \
+    : "+r" (src) : "r" (dst) : "$2", "memory")
+
 /* Cell gradient vector operations. */
 #define SDF_VU0_LOADVECTOR_B_BARRIER(src) __asm__ volatile ( \
     ".set noreorder\n\tlqc2 vf11, 0(%0)\n\t.set reorder" \

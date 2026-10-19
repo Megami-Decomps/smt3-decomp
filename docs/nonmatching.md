@@ -4129,3 +4129,107 @@ first is the 52, `.data` first is 151.
 
 The draft depends on `dds3FadePacket_t`, defined in the unit beside the
 `fadergba` externs, so a harvest of the body alone loses the type.
+
+## effEVECombParSmokeDraw (effect/effEvent, 0xB34)
+
+493 of 711 words differ at 2844 of retail's 2868 bytes, so the draft is six
+words short. That positional count overstates the distance: aligned against the
+retail listing instruction by instruction, 258 of 718 instructions differ, and
+about 100 of those are the same instruction with one register name changed. The
+whole prologue, the packet and transform setup, the particle update, the spill
+slot assignment and the frame size are exact; what is left is one float
+register rotation, the instruction order inside the two vertex blocks, and four
+branch annul bits.
+
+This is the batched sibling of `eff_1AEC58`, which matches. Everything from the
+`aViewTarget`/`aViewEye`/`aViewDown` cross product down to the age and repeat
+tail is the same code, and that half of the function transferred unchanged from
+`eff_1AEC58`'s source, including the growth factor, the three leading reads and
+the spill slots `repeat` at `0x880` and the particle count at `0x888`. The new
+half writes two 0x400-byte `sdfBillBoardBatch_t`-shaped stack batches instead
+of calling the `dds3Billboard*` setters, and links them through
+`sdfGrOtTable[48]` and `[49]`.
+
+What the draft establishes:
+
+- The two batches are stack aggregates at `0x0` and `0x400` with the layout
+  `include/billboard.h` already declares for `sdfBillBoardBatch_t`: centres at
+  `+0x0`, colours at `+0xF0`, texture coordinates at `+0x12C`, corner offsets
+  at `+0x21C`, count at `+0x3FC`. The frame follows declaration order: the two
+  batches, the identity matrix at `0x800`, then `offset`, `origin` and `side`
+  at `0x840`, `0x850` and `0x860`, then thirteen four-byte reload spill slots
+  packed from `0x870`.
+- `effEventBillParams_t + 0x74` and `+ 0x78` (`colorStartAge`,
+  `colorTransitionFrames`) are only read here. They select the primary
+  texture's colour in three arms: below `colorStartAge` the blend base is
+  `color & 0xFF000000`, within the next `colorTransitionFrames` it is
+  `effColorBlend(color & 0xFF000000, color, rise)` with `rise` the clamped
+  fraction, and after that it is `color` itself. Retail's `daddu $4, $0, $0` in
+  the first arm is `(color & 0xFF000000) & 0xFFFFFF` constant-folded, which is
+  what proves all three arms end in the same
+  `effColorBlend(base & 0xFFFFFF, base, ratio)` written out in full.
+- The texture coordinates come from the handle's `width` and `height` through
+  the same idiom `BillboardLoadTex` in `effect/billManager` uses,
+  `(s16)((u16)tex->width << 4)`, and the half extent is
+  `(uvWidth >> 5) * 0.0625f` scaled by the quad's own scale. Retail's shared
+  `sll 20` with an `sra 21` and an `sra 16` off it is that pair of expressions
+  and nothing else.
+- The GS packet written after the loop is eight `sd` of a 0x40-byte buffer: a
+  DMA tag carrying two VIF codes, a GIF tag with `NLOOP` 2 and one `A+D`
+  register, then `TEST_1` (0x51801 or 0x31801 on `work->flag`) and `ALPHA_1`,
+  0x44 for the first ordering table and 0x42 for the second.
+
+Two levers found here, both already added to
+[Matching levers](matching-levers.md):
+
+- A run of stores that each repeat the whole subscript needs the row to be one
+  flat array, not an array of two-field structs. Written
+  `batch.uv[n][k].u`/`.v` with `UV_t`, gcc builds two base pseudos, `$29 + 0xC`
+  for the `.u` stores and `$29 + 0xE` for the `.v` stores, cannot share either,
+  and materialises a full address per store with a zero displacement. Declared
+  `s16 uv[15][8]` and written `batch.uv[n][k]`, it builds the single
+  `$29 + 0xC` base retail has, with the `0x120` to `0x12E` displacements and
+  the seven `daddu rd, rs, $0` copies that give each `sh` its own register.
+  That one change was worth 30 words and both base registers.
+- The index of such a run belongs in a local read once, `n = batch.count;`, not
+  in the subscript. `batch.uv[batch.count][k]` re-reads the counter at every
+  one of the three scaled forms (`sll 2`, `sll 4`, `sll 5`) where retail reads
+  it once into `$19` and shifts that; the increment afterwards still re-reads
+  the field. One local reused for both batches is what gives retail's `$19`.
+
+Ruled out:
+
+- The float register rotation is the largest single residual and nothing
+  reached it. Retail gives `$f20` to the fade ratio and `$f21`/`$f22` to the
+  two scales; the draft gives `$f20`/`$f21` to the scales and `$f22` to the
+  ratio, and every later float register is already correct. All six
+  declaration orders of `ratio`, `scaleX` and `scaleY` emit byte-identical
+  code, as does making the ratio local do double duty as the cosine (the
+  registers rotate together and it costs one word). Four spellings of the
+  scale pair (the base scale read twice, the two assignments swapped, a `+=`
+  for the second) are identical as well.
+- Two pointer arrays, `sdfDrawTag_t *tag[2]` and `sdfTexHandle_t *tex[2]`, for
+  the four pointers retail holds in the adjacent slots `0x870` to `0x87C`.
+  gcc rounds each stack aggregate up to 16 bytes, so they land at `0x870` and
+  `0x880` with an eight-byte hole and the frame grows by 16. They are ordinary
+  reload spill slots: four plain locals give the packed layout once the rest of
+  the register pressure is right.
+- Deriving the lower ordering table entry from the upper one, `(&ot2)[-1]`,
+  for retail's `addiu $4, $16, -0x20`. Two `PS2_SYMBOL_AT` aliases and that
+  spelling emit the same code; gcc shares one `%hi` across both entries either
+  way, where retail materialises the first entry's address on its own and
+  derives it from the second only at the end.
+
+The draft depends on three macros added to `include/ps2asm.h` for it,
+`SDF_VU0_LOADVECTOR_RWADDR`, `SDF_VU0_STOREVECTOR_RWADDR` and
+`SDF_VU0_COPYVECTOR_RWSRC`, and on the `effEveBillBatch_t` type declared in the
+unit above the function. The four VU0 accesses to the `offset` vector inside
+the loop share one address pseudo under the plain and `_NOMEM` forms; that
+pseudo is loop invariant, is hoisted into the preheader as
+`addiu $22, $29, 0x840`, takes a callee-saved register and pushes the second
+draw tag out of its spill slot, which is 524 of 706 words and a 16-byte larger
+frame. With the address as a read-write asm operand, passed through a pointer
+local as `effEveBEDCutDraw` does for `SDF_VU0_STOREMATRIX_RWADDR`, cc1 gives
+each asm its own copy, retail's four separate `addiu rd, $29, 0x840` come back,
+and the frame size, every saved register and all thirteen spill slots fall into
+place.

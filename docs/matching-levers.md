@@ -1042,6 +1042,48 @@ it was measured on DDS and not on this ELF.
   other arm, so the two spellings really do coexist in one body. The four stores
   around it were swept: `offset.z`, the zero local, `offset.y`, `offset.x`,
   `position.y` is the only order within two words.
+- A run of stores that each repeat the whole subscript needs the row to be one
+  flat array, not an array of two-field structs. `effEVECombParSmokeDraw` writes
+  eight texture coordinates per quad; spelled `batch.uv[n][k].u` and `.v` on an
+  `UV_t uv[15][4]`, cc1 builds two base pseudos, `$29 + 0xC` for the `.u` stores
+  and `$29 + 0xE` for the `.v` stores, shares neither, and materialises a whole
+  address per store with a zero displacement. Declared `s16 uv[15][8]` and
+  written `batch.uv[n][k]`, it builds the one `$29 + 0xC` base retail has, with
+  the `0x120` to `0x12E` displacements and the seven `daddu rd, rs, $0` copies
+  that give each `sh` its own register. Worth 30 words and both base registers.
+  The index of such a run belongs in a local read once, `n = batch.count;`:
+  written `batch.uv[batch.count][k]` the counter is re-read for each of the
+  three scaled forms (`sll 2`, `sll 4`, `sll 5`) where retail reads it once and
+  shifts that, and the increment after the run still re-reads the field. One
+  local reused across two such batches is what gives retail's single register.
+- Four corner offsets that each rotate a signed half extent come from **two**
+  float locals reassigned between the pairs, not from the expressions written
+  out: `x = cx - hw; y = cy - hh;` for the first corner, `x = cx + hw;` for the
+  second, `y = cy + hh;` for the third and `x = cx - hw;` again for the fourth.
+  `effEVECombParSmokeDraw` reuses one register for each of the pair and
+  recomputes the repeated value, which is six words more than the expressions
+  written at the eight stores; that one change also took the body to within six
+  words of retail's size. `cx` and `cy` are both `0.0f` there and share one
+  `mtc1 $0` pseudo, and assigning them as statements above the half extents is
+  what puts that pseudo in `$f25` rather than behind the `0.0625f`.
+- The read-write address operand generalises past the matrix store. Where
+  several VU0 accesses to one frame vector sit inside a loop, the plain and
+  `_NOMEM` forms share one address pseudo, which is loop invariant, gets
+  hoisted into the preheader and spends a callee-saved register, so whatever
+  loses the race moves out of its spill slot and the frame grows.
+  `SDF_VU0_LOADVECTOR_RWADDR`, `SDF_VU0_STOREVECTOR_RWADDR` and
+  `SDF_VU0_COPYVECTOR_RWSRC` take the address through a pointer local as an
+  `"+r"` operand, so cc1 gives each asm its own copy and retail's separate
+  `addiu rd, $29, N` per access come back. That took
+  `effEVECombParSmokeDraw` from 524 of 706 words and a 16-byte larger frame to
+  the exact frame size, every saved register and all thirteen spill slots.
+- Two pointer pairs retail holds in adjacent four-byte slots are **not**
+  necessarily a local array. gcc rounds every stack aggregate up to 16 bytes, so
+  `sdfDrawTag_t *tag[2]` followed by `sdfTexHandle_t *tex[2]` lands at `0x870`
+  and `0x880` with an eight-byte hole and a 16-byte larger frame, where retail
+  packs all four at `0x870` to `0x87C` as ordinary reload spill slots. Read the
+  gap between the slots before reaching for the `dds3MultiBillboardPktLink`
+  array row above: contiguous four-byte slots mean plain locals that spill.
 - Two locals that both spill take their stack slots in **declaration** order,
   and their load order in the prologue follows the statement order separately.
   In `eff_1AEC58` retail gives `0x30` to the `u8 repeat` and `0x34` to the `u32`
