@@ -34,9 +34,6 @@ typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
 typedef struct sdfMatPacket_t sdfMatPacket_t;
 typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
-typedef struct sdfGsMemSlice_t sdfGsMemSlice_t;
-typedef struct sdfTexHandle_t sdfTexHandle_t;
-typedef struct sdfMemHandle_t sdfMemHandle_t;
 typedef struct ParSystem ParSystem;
 typedef struct EffThunderCellWork EffThunderCellWork;
 typedef struct EffThunderFrag EffThunderFrag;
@@ -203,45 +200,10 @@ struct sdfTexPacket_t {
 
 /* Per-texture reference count and non-owning clone source (0x8). */
 
-/* Native VRAM range descriptor (0x1C), shared by textures, graph buffers and streams. */
-struct sdfGsMemSlice_t {
-    struct sdfGsMemSlice_t *prev; /* 0x00 */
-    struct sdfGsMemSlice_t *next; /* 0x04 */
-    u32 type;                   /* 0x08: known categories above; unknown values remain valid */
-    u32 addr;                   /* 0x0C: VRAM offset in 32-bit words */
-    s32 size;                   /* 0x10: range length in 32-bit words */
-    s16 w;                      /* 0x14 */
-    s16 h;                      /* 0x16 */
-    s32 pixelFormat;            /* 0x18: retail loads it with lw, so signed */
-};
 
 /* Serialized byte consumed by the GS texture-state packet builder. */
 typedef u8 SdfTextureClampMode;
 
-struct sdfTexHandle_t {
-    struct sdfTexHandle_t *prev;
-    struct sdfTexHandle_t *next;
-    struct sdfTexHandle_t *origin;
-    s16 width;
-    s16 height;
-    sdfGsMemSlice_t *pixelGsHandle;
-    sdfGsMemSlice_t *clutGsHandle;
-    u8 numOfCLUT;
-    u8 CLUTFormat;
-    u8 pixelFormat;
-    u8 numOfMipmap;
-    u16 mipmapParam; /* Packed GS TEX1 L/K parameters. */
-    u8 flags;
-    SdfTextureClampMode texWrapMode; /* 0x1F: 0xFF leaves GS CLAMP state zero; otherwise low nibble is copied. */
-    s32 texId;
-    s32 clutId;
-    sdfTexPacket_t *packet;
-    sdfTexPacket_t *packetCtx2;
-    u8 *clutData; /* 0x30: retained copy of the texture's palette colors. */
-    s32 clutDataSize; /* 0x34: palette byte count from sdfTexGetClutDataSize. */
-    s32 clutColor;
-    u8 *monoClutData; /* 0x3C: lazily generated weighted-RGB intensity bytes. */
-};
 
 
 struct sdfMemHandle_t;
@@ -250,14 +212,6 @@ struct sdfMemHandle_t;
  * actor. */
 struct sdfMemHandle_t;
 
-/* General-heap allocation descriptor (0x10); links bound the represented span. */
-struct sdfMemHandle_t {
-    struct sdfMemHandle_t *prev; /* 0x00 */
-    struct sdfMemHandle_t *next; /* 0x04 */
-    s32 ptr;                  /* 0x08: start of represented span */
-    u16 stat;                 /* 0x0C: free, used, or end sentinel */
-    s16 mlock;                /* 0x0E: -1 for sentinels */
-};
 
 /* The cell-system allocation ends with this complete 0x2C-byte owner. */
 struct ParSystem {
