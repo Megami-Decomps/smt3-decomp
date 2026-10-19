@@ -39,6 +39,8 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue where the call is the last statement | a dead store after it, `cursor = NULL;`. It reads oddly but is an idiom this tree already carries: `mymdlColorSet` and its neighbour in `code_0029B780` end the same way, from separate earlier work |
 | the body of a later case falling through after the compare chain | keep the dispatch ascending but place the bodies in source order. The case written first is the fallthrough, so cases written 3, 2, default gives a `beq 2`, `bne 3` chain |
 | separate `slti`s rather than a subtract and one unsigned compare | a `switch` with several `case` labels, not an `&&`/`||` range chain, which folds |
+| a `switch` whose arms each need their own temporaries | declare them in the arm's own block. At function scope the arms share one pair of allocnos spanning the whole switch; one function went from 45 of 370 words to exact on that alone |
+| an in-place base adjustment folded into the first use | write it as its own statement, `x = (s32)(...); x -= 2;` rather than `x = (s32)(...) - 2;`, or the unadjusted value stays live and cc1 folds the offset into the first use |
 | a register copy of a field you already loaded, feeding one of two roles | write the field expression again at the second use site rather than passing the local. cse turns the second load into a copy, and the two pseudos then take the two hard registers the uses prefer. `effPCPDANTE_Sprite_Draw` went from 10 of 60 words to exact on `uv->uw` written at the call where a local was already holding it |
 | explicit branches selecting one of two or three constants, the value left in a saved register across calls | a `switch` over the tested values, not an `if`/`else if` chain, which ee-gcc if-converts into a `movn` and drops the saved register. `Flow6_14` and `Flow11_9` in `nbMakePacket` each turned on that alone |
 | `jal` and a fallthrough for one `switch` arm while the other arms sibcall with `j` | a dead store after the call in that arm only, `seq = 0;` on the switch index. Giving the callee an `s32` return type with no `return` does not reach it, since the other arms sibcall the same way. `SetNextSeq` went from 27 of 30 differing words to exact |
@@ -295,6 +297,19 @@ it was measured on DDS and not on this ELF.
   only an unprototyped declaration produces, and that function is defined
   with a prototype in the same unit. An unprototyped `extern` does work for
   callers placed above the definition, which matters if the unit is split.
+- Where retail updates a base coordinate in place, `addiu $19, $19, -2`, and
+  you fold the constant into every use instead, write the adjustment as its
+  own statement on the same variable: `x = (s32)(...); x -= 2;`, not
+  `x = (s32)(...) - 2;`. In the one-expression form the unadjusted value stays
+  live and cc1 folds the offset into the first use, so the base is
+  materialised and bypassed at once. That fixed the whole prologue of
+  `fldVLDraw`.
+- Locals that each `switch` arm assigns and uses for itself belong inside the
+  arm's own block, not at function scope. At function scope the arms share one
+  pair of allocnos whose live range spans the switch, which rotates them
+  against whatever else is live across it: `fldVLDraw`'s seven sprite arms put
+  the alpha value in the register retail gives the coordinates and were 45 of
+  370 words out, and went exact with `s32 sx; s32 sy;` declared in each arm.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a
@@ -378,6 +393,11 @@ it was measured on DDS and not on this ELF.
 - Pick the VU0 load by how retail forms the address:
   `SDF_VU0_LOADVECTOR(ptr)` where it computes the address into a register,
   `SDF_VU0_LOADVECTOR_MEMOPS` where it addresses the frame directly.
+- `SDF_VU0_STOREVECTOR_NOMEM` is not only for globals and frame addresses
+  shared across a call. It applies to a stack local inside a loop too, where
+  the plain form's `"memory"` clobber makes the shared address a loop
+  invariant and spends a callee-saved register on it. That took one function
+  from 61 of 171 differing words to exact.
 - Copy a vector quadword with `SDF_VU0_COPYVECTOR(dst, src)`, not a struct or
   `u128` assignment. The macro is one asm block, so the `lq`/`sq` pair stays
   together and the delay slot goes to the next call's argument; a `u128`
@@ -549,6 +569,20 @@ These have been ruled out repeatedly and are not worth a second attempt:
 A function whose body is mostly inline assembly is refused by the production
 report anyway, at 8 instructions and more than half the body, so writing one
 to force a match earns nothing. See [Reading progress](progress.md).
+
+## A second label in the split assembly: which kind matters
+
+A `.s` file holding a second **code** symbol (`glabel` or `alabel`) is a
+boundary problem, not a matching one: writing C for the named function drops
+the other's bytes, so leave it and record it. A `.s` holding a second **data**
+symbol (`dlabel`) is ordinary. The data does disappear when the C replaces the
+function, and `check_unit` only says `NOASM`, so add an
+`INCLUDE_RODATA(const s32, "<unit>", D_XXXXXXXX);` in address order and run
+`configure.py --force-split` again. A `jtbl_` label needs nothing: the C
+`switch` emits its own table.
+
+`check_unit` will not tell you which kind you have. Grep the `.s` for a second
+label before concluding anything.
 
 ## Functions that cannot be written in C
 
