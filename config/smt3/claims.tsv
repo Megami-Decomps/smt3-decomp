@@ -159,9 +159,11 @@ src/smt3/effect/effBattleMisc.c	y6	done	2026-10-19	59 / 11092	-
 src/smt3/mc/slMain.c	y7	done	2026-10-19	12 / 14556	-
 src/smt3/pb/pbGame.c	y8	done	2026-10-19	37 / 14296	-
 src/smt3/code_00116AD0.c	z1	open	2026-10-19	46 / 42540	-
-src/smt3/effect/effPCPBoss.c	z2	open	2026-10-19	42 / 29644	-
+src/smt3/effect/effPCPBoss.c	z2	done	2026-10-19	42 / 29644	-
 src/smt3/field/fld_Npc.c	z3	open	2026-10-19	12 / 15184	-
 src/smt3/newbattle/nbMainProcess.c	z4	open	2026-10-19	40 / 12216	-
 src/smt3/newbattle/nbMakePacket.c	z5	open	2026-10-19	284 / 147044	-
 src/smt3/field/fldDraw.c	z6	open	2026-10-19	65 / 77696	-
 src/smt3/newbattle/nbStageProcess.c	z7	open	2026-10-19	92 / 56544	-
+src/smt3/newbattle/nbCameraBoss.c	z8	open	2026-10-19	28 / 22860	-
+src/smt3/event/evtEventViewerMenu.c	z9	open	2026-10-19	29 / 16316	-
