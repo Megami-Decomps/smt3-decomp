@@ -539,16 +539,22 @@ void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *basic, u32 value)
     control->controlSvs = value;
 }
 
+/* "hij_b" */
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D0);
 
+/* "isam_f" */
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D8);
 
+/* "aradia" */
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9E0);
 
+/* "yuuko_p" */
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9E8);
 
+/* "chiaki" */
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9F0);
 
+/* "tiaki_a" */
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9F8);
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", frMessageCode);
