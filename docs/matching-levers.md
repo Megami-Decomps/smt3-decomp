@@ -595,6 +595,31 @@ it was measured on DDS and not on this ELF.
   prototype took four functions from two words off to exact. When a `$gp`
   reload lands in the wrong register, check whether the callee is merely
   implicitly declared before concluding its return type is wrong.
+- A local whose only initializer is a constant gets that constant materialised
+  in the *prologue*, which costs a prologue instruction and rotates every
+  saved register. Where retail sets it next to the code that first needs it,
+  declare the local bare and assign it as a statement there.
+  `frSetFontString` went from 72 of 115 words to exact on moving
+  `glyph = NULL;` out of the declaration and down beside `i = 0;` and
+  `previous = chain->lastChild;`, in that order. Declaration order is *not*
+  the lever here: all 24 permutations of its four locals emit byte-identical
+  code, and only the statement's position moves anything.
+- An index read and then advanced reaches `addu base, i` plus `addiu i, 1`
+  into one register only as a post-increment in a single expression,
+  `text[(*offset)++]`. Written as two statements, the read and
+  `(*offset)++`, gcc keeps the old and the new value in two registers.
+  `frAnalyzeMessage` went from 20 differing words to 10 and `frAnalyzeTag`
+  gained its whole prologue on that one change.
+- One variable whose comparisons are signed (`slti`, `slt`) but whose byte
+  extraction is `srl` needs the cast at that one use, `(u32)code >> 8`. An
+  unsigned declaration fixes the shift and breaks both compares.
+- A guard arm that is a single instruction belongs in the `else`, not the
+  `then`: the delay-slot filler then absorbs it into the branch and the `b`
+  over it disappears. `frPreCalcStrWidth` went from 32 differing words and one
+  word long to 8 at the exact size by inverting
+  `if (code >= 0x80) { <long> } else { index = code - 0x20; }` to
+  `if (code < 0x80) { index = code - 0x20; } else { <long> }`, and
+  `frCopyTagArgs` turned on the same inversion twice, once per nested test.
 - Subscript the whole expression instead of caching an element address.
   `e->data->form[i].stat` matches where `form = &e->data->form[i];` then
   `form->stat` swaps the `addu` operands and shifts a register. The converse
@@ -772,7 +797,11 @@ order. The order in which the C uses a constant has to match retail.
 ## Stores
 
 Adjacent constant stores come out in reverse source order, so swapping them
-is the first thing to try on a two-word diff. A short-circuit `||` with one
+is the first thing to try on a two-word diff. For a longer run the rule is a
+right rotation by one, and it holds for a run of twelve: `frInitFontHandle`
+writes `glyph->chainHead = glyph;` last and retail emits that store second,
+so take retail's emitted list and left-rotate it by one to get the source
+order. Mixed `sb` and `sw` stores rotate together. A short-circuit `||` with one
 store beats an if/else chain that stores in each arm.
 
 - Where retail's last store before a `jal` is a constant store rather than the
@@ -917,7 +946,10 @@ These have been ruled out repeatedly and are not worth a second attempt:
   sibcall.
 - Zero-extending a byte with a `sll 24`, `srl 24` pair. ee-gcc emits
   `andi 0xff` for every source shape tried.
-- `xori reg, reg, 0` in front of a `movn`. No `!= 0` shape (plain `if`,
+- `xori reg, reg, 0` in front of a `movn`. `frGetXShiftLev` in
+  `interface/frFont` has one, on `(fontIndex < 2)` feeding
+  `movn $18, $6, $3`, so that function is capped by this row and not worth a
+  long attack. No `!= 0` shape (plain `if`,
   ternary, `> 0`, `>= 1`, explicit `^ 0`, a `continue`, a local of either
   width) adds it; every one of them emits the `movn` alone.
 - A `jal` plus a shared epilogue in a `switch` default arm, where `return`
@@ -1016,7 +1048,14 @@ function body:
   unprototyped `extern` works instead when the callers sit above the
   definition. Try both before treating this as impossible.
 - `nbMakaDispOn` needs `GetMakaProcessData` to take an argument, as the HD
-  reconstruction shows, but it is defined `(void)` in this unit.
+  reconstruction shows, but it is defined `(void)` in this unit. This is
+  *not* in general a blocker: adding the parameter to the definition costs
+  nothing, since an unused parameter emits no instructions.
+  `interface/frFont`'s `frGetYShiftLev` is defined `s32 frGetYShiftLev(void)`
+  and matches, and giving it the two parameters `frSetFont` passes and it
+  ignores left it byte-exact while letting `frSetFont` compile at all. Check
+  that the callee still matches with the parameters added before concluding
+  anything.
 
 Two in `code_001FAE80` are blocked by the machine and the split rather than
 by C:
