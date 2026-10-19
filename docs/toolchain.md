@@ -56,11 +56,19 @@ that can run 32-bit i386 programs.
 
 ## VU and overlay sections
 
-`.vutext` (`0x002e6e50`, 0xe7b0 bytes) and `.vudata` are VU1 microcode and its
-data. They stay binary; no C can replace them. The `.DVP.ovlytab`,
-`.DVP.ovlystrtab` and `.DVP.overlay.*` sections that follow `.bss` in the file
-are the DVP overlay tables for that microcode, and the build reproduces them as
-data.
+`.vutext` (`0x002e6e50`, 0xe7b0 bytes) holds two VIF packets, the VU0 and VU1
+microcode and the data they are uploaded with. No C can replace it, but it is
+not a blob either: all 2,061 instructions are assembled from the listings in
+`src/smt3/sdf/vu/`, and only the VIF headers, the debug font texture and the
+unpacked data come from the extracted asset. See [VU microcode](vu/README.md).
+
+The microcode was built with dvp-as, Sony's VU assembler, which the
+`.DVP.ovlytab`, `.DVP.ovlystrtab` and `.DVP.overlay.*` sections after `.bss`
+record one entry per MPG upload for. Those tables are reproduced as data: their
+names carry generated ids that no source recovers. The listings are written in
+that assembler's syntax, and `tools/download_tools.py` fetches a 2003 dvp-as to
+check them against; the build itself assembles them with `tools/vuas.py`, so it
+needs no VU toolchain. `.vudata` stays binary.
 
 See [Building](building.md) for setup and build targets, and the
 [matching rules](CONTRIBUTING.md#matching-rules) for source requirements.

@@ -6,8 +6,9 @@
 
 Compilers come from the decomp.me compiler archive; binutils are the decompals
 MIPS/PS2 build (R5900-aware objdump/ld); objdiff-cli is used for diffing and
-the decomp.dev progress report; a pinned 32-bit glibc (tools/glibc32) runs the
-i386 compiler binaries identically on every machine.
+the decomp.dev progress report; dvp-as checks the VU microcode listings against
+the original assembler; a pinned 32-bit glibc (tools/glibc32) runs the i386
+compiler binaries identically on every machine.
 """
 from __future__ import annotations
 
@@ -33,6 +34,13 @@ OBJDIFF_URL = "https://github.com/encounter/objdiff/releases/download/v3.8.1/obj
 # The 32-bit glibc cc1 and ee-as run under. ee-gcc 2.96's code selection
 # depends on heap addresses (CSE hashes symbol-name pointers), so a different
 # libc can compile some functions differently: every build uses this one.
+# dvp-as, the VU assembler, for the cross-check in tools/test_vuas.py: it reads the microcode
+# listings in src/*/sdf/vu and has to write the retail bytes. ps2dev ships no DVP-only artifact,
+# so this takes the one binary out of its smallest bundle, which carries the 2003 assembler rather
+# than a modern rebuild of it. Nothing in the build needs it; tools/vuas.py assembles the listings.
+DVP_URL = "https://github.com/ps2dev/ps2dev/releases/download/v1.2.0/ps2dev-ubuntu-latest.tar.gz"
+DVP_MEMBER = "ps2dev/dvp/bin/dvp-as"
+DVP_SHA256 = "7664934cd4cbd91f2a4734d1a989bc9fe1a16ca2b820746eee2aa92907f2abb1"
 GLIBC_URL = "https://kojipkgs.fedoraproject.org/packages/glibc/2.43/8.fc44/i686/glibc-2.43-8.fc44.i686.rpm"
 GLIBC_SHA256 = "e77eb7b8eef4851653dc50836ad949e769220a74ebbea0bdc6c647aba90faaf7"
 GLIBC_FILES = ("usr/lib/ld-linux.so.2", "usr/lib/libc.so.6")
@@ -89,6 +97,27 @@ def get_objdiff(force: bool) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(fetch(OBJDIFF_URL))
     make_executable(dest)
+
+
+def get_dvp_as(force: bool) -> None:
+    """Take dvp-as out of the ps2dev bundle, reading only as far as that member."""
+    import hashlib
+    dest = TOOLS / "bin" / "dvp-as"
+    if dest.exists() and not force:
+        return
+    print(f"fetch {DVP_URL} (streamed, for {DVP_MEMBER})")
+    with urllib.request.urlopen(DVP_URL) as resp, tarfile.open(fileobj=resp, mode="r|gz") as tar:
+        for member in tar:
+            if member.name != DVP_MEMBER:
+                continue
+            body = tar.extractfile(member).read()
+            if hashlib.sha256(body).hexdigest() != DVP_SHA256:
+                raise SystemExit("dvp-as checksum mismatch")
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(body)
+            make_executable(dest)
+            return
+    raise SystemExit(f"{DVP_MEMBER} is not in {DVP_URL}")
 
 
 def rpm_payload(data: bytes) -> bytes:
@@ -170,6 +199,7 @@ def main() -> None:
     get_binutils(args.force)
     get_objdiff(args.force)
     get_glibc(args.force)
+    get_dvp_as(args.force)
 
 
 if __name__ == "__main__":

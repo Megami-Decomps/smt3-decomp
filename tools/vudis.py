@@ -28,8 +28,9 @@ def load(name):
 vu2c = load("vu2c")
 vutext = load("vutext")
 
-# The original assembler, for --verify. Not needed to build: tools/vuas.py is.
-DVP_AS = os.environ.get("DVP_AS", "dvp-as")
+# The original assembler, for --verify, where tools/download_tools.py puts it. Not needed to
+# build: tools/vuas.py is what the build uses.
+DVP_AS = os.environ.get("DVP_AS") or str(ROOT / "tools" / "bin" / "dvp-as")
 
 # Upper instructions whose destination is the accumulator rather than a register. The table name
 # carries the broadcast letter, so the base name is what decides the shape.

@@ -14,7 +14,7 @@ repository root.
   rabbitizer, pyelftools, pycdlib, pyyaml, ninja, ninja_syntax, and m2c as an
   optional helper).
 - `python tools/download_tools.py` for ee-gcc 2.96, ee-as, the decompals
-  MIPS/PS2 binutils, objdiff-cli and the 32-bit glibc. Everything it writes
+  MIPS/PS2 binutils, objdiff-cli, dvp-as and the 32-bit glibc. Everything it writes
   lands under `tools/` and is ignored by git.
 - Your own copy of the game. The retail executable is never distributed here:
   `orig/` is git-ignored except for its placeholder, and no disc image, ELF or
