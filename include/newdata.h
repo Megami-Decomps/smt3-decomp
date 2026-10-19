@@ -45,12 +45,14 @@ typedef struct
     s16 half0C;
     s16 transition; /* 0xE: fldMainLoadStart */
     u8 unk10[0x24];
-    s32 unk34;
+    /* The IDB types this sdfMemHandle_t *; this unit only ever moves the word,
+     * so the declared type is left as the matching build has it. */
+    s32 memHandle;
     s32 unk38;
     s32 unk3C;
     s32 integers[256];
     f32 floats[256];
-    u32 eventFlags[128]; /* 0x840: 4096 event bits */
+    u32 EventBit[128]; /* 0x840: 4096 event bits */
     u8 moonFlags;       /* 0xA40 */
     u8 moonPhase;       /* 0xA41 */
     u8 unkA42[2];
@@ -58,13 +60,23 @@ typedef struct
     s32 maka;
     u32 maFlags;                  /* 0xA4C */
     fldAnahoriAkuma_t akuma[16];   /* 0xA50 */
-    u8 unk1910[0x3E4];
-    f32 encounterRemainder;        /* 0x1CF4 */
-    u16 encounterGauge;            /* 0x1CF8 */
+    /* 0x1910..0x1CF4, split on the IDB's names for the span. */
+    u8 unk1910[4];
+    u8 unk1914[0x10];
+    u8 stocklist[65];              /* 0x1924 */
+    u8 unk1965[80];
+    u8 unk19B5[19];
+    u8 boss_press[160];            /* 0x19C8 */
+    u8 unk1A68[640];
+    u8 negoques[3];                /* 0x1CE8 */
+    u8 kotowari[9];                /* 0x1CEB */
+    f32 encountkyori;              /* 0x1CF4 */
+    u16 encountCount;              /* 0x1CF8 */
     u8 unk1CFA;
-    u8 unk1CFB[0x80];
-    u8 unk1D7B;
-    u8 unk1D7C[0x48DC];
+    u8 hearts[0x80];               /* 0x1CFB */
+    u8 heartscnt;                  /* 0x1D7B */
+    u8 nameData[0x4800];           /* 0x1D7C */
+    u8 unk657C[0xDC];
     fldGbTypeBlock_t gb[48];       /* 0x6658 */
     u8 takaraOpen[0x20];           /* 0x11A58 */
     s16 previewX;                 /* 0x11A78: slSetTmnlID */

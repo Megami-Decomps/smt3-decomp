@@ -930,13 +930,13 @@ s32 datAddHearts(s32 id)
 {
     s32 i;
 
-    for (i = 0; i < DDS3_GBWK->unk1D7B; i++) {
-        if (DDS3_GBWK->unk1CFB[i] == id) {
+    for (i = 0; i < DDS3_GBWK->heartscnt; i++) {
+        if (DDS3_GBWK->hearts[i] == id) {
             return 0;
         }
     }
-    ((u8 *)(u32)DDS3_GBWK->unk1D7B + (u32)DDS3_GBWK)[0x1CFB] = id;
-    DDS3_GBWK->unk1D7B++;
+    ((u8 *)(u32)DDS3_GBWK->heartscnt + (u32)DDS3_GBWK)[0x1CFB] = id;
+    DDS3_GBWK->heartscnt++;
     ((u8 *)id + (u32)DDS3_GBWK)[0x1D3B] = 0;
     if (datCountRegisteredHearts() != 0) {
         evtBitOn(0x860);
@@ -949,7 +949,7 @@ void datRemoveHearts(void)
 {
     datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
 
-    if (DDS3_GBWK->unk1D7B != 0) {
+    if (DDS3_GBWK->heartscnt != 0) {
         cmbSubHeartsParam(DDS3_GBWK->unk1CFA, player);
         rstStoreHeartsSkill(DDS3_GBWK->unk1CFA, player);
         DDS3_GBWK->unk1CFA = 0;
@@ -961,7 +961,7 @@ void datEquipHearts(s32 heartsId)
 {
     datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
 
-    if (DDS3_GBWK->unk1D7B != 0) {
+    if (DDS3_GBWK->heartscnt != 0) {
         if (DDS3_GBWK->unk1CFA != heartsId) {
             datRemoveHearts();
             DDS3_GBWK->unk1CFA = heartsId;

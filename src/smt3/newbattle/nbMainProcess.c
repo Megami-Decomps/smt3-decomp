@@ -846,8 +846,8 @@ void nbSetEndPhase(nbMainProcessData_t *data)
     s32 maxmp;
 
     seq = 0x31F;
-    DDS3_GBWK->encounterGauge = 0;
-    DDS3_GBWK->encounterRemainder = 0.0f;
+    DDS3_GBWK->encountCount = 0;
+    DDS3_GBWK->encountkyori = 0.0f;
     if (NB_PLAYERUNIT->hp == 0 || NB_PLAYERUNIT->badstatus == 0x800) {
         maxhp = NB_PLAYERUNIT->maxhp;
         maxmp = NB_PLAYERUNIT->maxmp;

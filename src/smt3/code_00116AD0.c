@@ -604,9 +604,9 @@ void dds3GlobalWorkUserInit2(s32 mode)
 
     if (mode == 1) {
         NewGame2Push();
-        saved = DDS3_GBWK->unk34;
+        saved = DDS3_GBWK->memHandle;
         memset(DDS3_GBWK, 0, 0x1A510);
-        DDS3_GBWK->unk34 = saved;
+        DDS3_GBWK->memHandle = saved;
     }
     DDS3_GBWK->unk38 = 0;
     DDS3_GBWK->unk3C = 0;
@@ -617,7 +617,7 @@ void dds3GlobalWorkUserInit2(s32 mode)
     datInitBossPress();
     dds3ClearStockTable();
     DDS3_GBWK->unk1CFA = 0;
-    DDS3_GBWK->unk1D7B = 0;
+    DDS3_GBWK->heartscnt = 0;
     frInitNameData();
     fldGbInit_System(0);
     fclEncycInitRecord(0);
