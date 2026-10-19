@@ -207,5 +207,8 @@ src/smt3/sdf/sdfModel.c	t6	done	2026-10-19	5 / 3820	the two LinkOt functions, t1
 src/smt3/script/scrParameterCommand.c	t7	done	2026-10-19	14 / 2208	fresh unit, never claimed, 14 small functions
 src/smt3/kernel/dds3AdminiProcess.c	t8	open	2026-10-19	7 / 2392	fresh unit, never claimed
 src/smt3/event/evtPicture.c	t9	open	2026-10-19	11 / 2112	fresh unit, never claimed
-src/smt3/kernel/dds3SequenceList.c	u10	open	2026-10-19	13 / 1336	fresh unit, never claimed, 13 small functions
+src/smt3/kernel/dds3SequenceList.c	u10	done	2026-10-19	13 / 1336	fresh unit, never claimed, 13 small functions
 src/smt3/effect/effPCPBezier.c	u11	open	2026-10-19	1 / 6016	one 6016-byte function, the largest single target left outside the giants
+src/smt3/effect/effPCPScatter.c	u12	open	2026-10-19	1 / 1376 plus effPacket 2 / 1152 and nbCameraHelper 2 / 1360	three small near-finished units, one agent
+src/smt3/effect/effPacket.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
+src/smt3/newbattle/nbCameraHelper.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
