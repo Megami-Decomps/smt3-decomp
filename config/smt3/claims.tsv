@@ -192,7 +192,8 @@ src/smt3/effect/polyManager.c	r8	done	2026-10-19	20 / 7104	fresh unit, never cla
 src/smt3/field/fldFileResolver.c	r9	done	2026-10-19	14 / 8248	fresh unit, never claimed
 src/smt3/event/evtUnitManager.c	s1	done	2026-10-19	10 / 6992	fresh unit, never claimed
 src/smt3/effect/effPCPMisc.c	s2	done	2026-10-19	9 / 7000	fresh unit, never claimed
-src/smt3/basic/dds3ObjectBase.c	s3	open	2026-10-19	4 / 11540	fresh unit, never claimed
+src/smt3/basic/dds3ObjectBase.c	s3	done	2026-10-19	4 / 11540	fresh unit, never claimed
 src/smt3/effect/effModelTrackPoly.c	s4	open	2026-10-19	9 / 5264	fresh unit, never claimed
 src/smt3/effect/effEvent.c	s5	open	2026-10-19	6 / 5136	fresh unit, never claimed
 src/smt3/kernel/dds3KernelDraw.c	s6	open	2026-10-19	8 / 4600	fresh unit, never claimed
+src/smt3/basic/dds3ObjectBase.c	s7	open	2026-10-19	1 / 6740	dds3ObjectBaseMakeUnit only, s3 left a full reading
