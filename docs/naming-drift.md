@@ -349,6 +349,33 @@ Every batch below rebuilt to `5facfbf7916836613449c922e26a4ec412207b32`.
   `sdfBillBoardMakeN` and the other `*MakeN` builders keep their `packet[i]`
   word walk, which is a variable-length packet rather than a record.
 
+### A drifted copy can hide behind a header the unit cannot include
+
+`effPCPMisc.c`'s local `sdfMatPacket_t` named twelve of its scalars
+`pad00`, `unk04`, `unk08`, `specular`, `unk14`, `pad18`, `unk1C`,
+`alphaState`, `multiTexMethod`, `y` and `x`, against the IDB's `vifcode0`,
+`ambient`, `diffuse`, `specularColor`, `refmapColor`, `vifcode1`, `constant`,
+`mtexAlpha`, `mtexAlgo`, `fdBias` and `fdSoften`, all at the same offsets.
+The duplicate-type scan never flagged it, because the scan only compares copies
+of a type a unit could already see, and this one differs from `libsdf.h`'s in
+granularity as well as names: three of its members are composites covering
+pad+vifcode2, the two three-register texture blocks and the two transforms.
+The names are now the IDB's and the composites are kept, each commented with
+the canonical members it spans.
+
+It surfaced only from trying to `#include "nb.h"` in that unit, which reported
+three redefinitions. That is worth remembering as a probe: a failed include
+names the types a unit duplicates at a different granularity than the scan can
+see. The include itself was backed out, because `sdfTexPacket_t` and
+`sdfGrOt_t` there are coarser readings that are not obviously worse (the local
+`sdfGrOt_t` pins `callbackFunc`'s signature where `libsdf.h` has `void *`).
+
+Backing it out leaves two casts in `effPCPMisc.c` that cannot become member
+reads: `effBTLSkillGetTargetFormation` returns `nbFormation_t *` per the IDB,
+but the unit holds it as `u8 *`. They now say which field they land on
+(`+0x60` is `oneshotr`, `+0x78` is `stat`), which is the most the unit can
+carry until it can see `nb.h`.
+
 ### The global work record, and what a cast is doing that a member is not
 
 `include/newdata.h`'s `dds3GlobalWork_t` is a partial view of the save work.
