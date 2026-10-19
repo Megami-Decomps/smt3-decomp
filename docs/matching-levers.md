@@ -28,6 +28,8 @@ it was measured on DDS and not on this ELF.
 | `blez n` then a `bnez` downcounter | a `for` to a variable bound whose index the body does not use. With a constant bound the same shape counts `n-1` down to 0 and tests `bgez` instead |
 | no zero-trip guard at all, and an up-counter kept as `addiu i, i, 1` plus `slt` against the bound | a `do`/`while`, not a `for`. The guard is only half of it: given a `for` whose index the body does not use, gcc also flips the counter to `addiu i, i, -1`, so the `blez` and the counter direction go together. Both `dds3Particle_SparkBuffInit` and `dds3Particle_SparkOffsetBuffInit` turned on this one change, 164 differing words down to 48 |
 | `slt` then `sltiu` | write `if (a < b) return 0; return 1;` rather than `return a >= b` |
+| a `break` where the hit arm of a search loop ends the function | write `return` instead. `evtPicturePriAdd` searches eight slots for a free one, copies the row in and stops: with `break` it is 36 of 48 words out and with `return` it is exact, because the `break` adds a `b` out of the loop and loses the `bnel` that carries the index increment |
+| `sltu rd, $0, x` then a chain of `ori` plus `movn` into `$2` | a bit-flag accumulator written as parallel `if` statements with the **first** one spelled `stat = 1`, not as an initialiser. `s32 stat = 0; if (a) stat = 1; if (b) stat |= 2; if (c) stat |= 4;` is exact, where `s32 stat = a != 0;` puts the `ori` result in `$2` and emits `movz` against retail's `movn`, 11 of 15 words in `evtPictureStat`. The ternary spelling, the bare conditions, `u32`, and the declaration split from the assignment all give the `movz` form |
 | explicit branches where you emit `andi` or `sltiu` | gcc folds `(x & 1) ? 1 : 0` and `f() == 0`. Usually unreachable from C |
 | the same field stores duplicated per `switch` case | write the full store list in each case and let gcc merge the tail. Hoisting the values into locals does not match |
 | every arm reaching one shared epilogue at the end | use an `else if` chain. An early `return` per arm gives each arm its own epilogue copy |
@@ -1387,6 +1389,22 @@ A block-scope initializer such as `s32 list[3] = {1, 11, 14};` goes to
 rodata object that precedes it above the function, or the relink reorders the
 pool. `check_unit.py` masks local rodata relocations and still says the
 function matches; only the `ninja` checksum catches this.
+
+## A block-local whose live range reaches the end of the block costs a register
+
+Local allocation is per basic block and runs before global allocation, so one
+extra value live across a block pushes every function-wide pseudo up one hard
+register. `evtPictureProcess1` interpolates a position with
+`s32 cnt = work->pos_cnt - 1;` and stores it back to `work->pos_cnt` as the
+last statement of the block: that keeps seven integer temps live at once,
+local allocation reaches `$8`, and the `work` pointer lands in retail's `$9`
+with the texture behind it in `$10`. Writing `work->pos_cnt--;` instead, or
+storing `cnt` back first or in the middle, leaves six temps live, gives `work`
+`$8`, and shifts the whole function's register names by one, which is 119 of
+140 differing words against 103 for the long-lived spelling. Where a draft
+differs from retail by a uniform `+1` or `-1` on the register numbers, look for
+a block temp that retail keeps alive and the draft does not, rather than at the
+function's own locals.
 
 ## Arithmetic
 
