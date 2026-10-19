@@ -442,3 +442,189 @@ Ruled out: a separate local for the resource pointer instead of reusing
 `basic`; the pointer declared first with `found` cast from it; both as separate
 declarations with the assignments split out; and the test written on `found`
 rather than on the pointer. All four coalesce the copy and run one word short.
+
+## movieViewerStep (code_001FAE80, 0x4C)
+
+6 of 14 words match, 56 emitted bytes against retail's 80. Walks the movie
+viewer's chip list forward by the list's own count and returns the node it
+lands on, or NULL if the chain runs out first.
+
+The entry sequence and the single shared exit are settled: the head load into
+`$3`, the count `lh` in the `beqz` delay slot, `blez` on the count, the
+peeled first `chip = *chip`, and `jr $31` / `daddu $2, $3, $0` all match.
+What is left is the loop's closing branch. Retail ends the loop with
+`bgtzl $2` and the next `lw $3, 0($3)` in its annulled delay slot, which is
+also why retail's loop carries five `nop`s and one trailing `nop` that the
+draft does not: the pad is the R5900 short-loop fix the assembler applies to
+a loop closed by a branch-likely, so getting the `bgtzl` back should bring
+the padding with it. Every spelling that writes the preheader advance
+explicitly has it folded away again: gcc threads
+`n--; if (n > 0) { chip = *chip; goto loop; }` into an unconditional `b` back
+to the entry `blez`, which reuses the guard as the loop test and leaves one
+`lw` instead of two.
+
+Ruled out: a test-at-top `while (n > 0)` with the null test as a `break` (8
+of 13 words match); the same with `--n`; a `for` with the count read in the
+init (2 of 13); `chip != NULL && n > 0` as the guard and a `do`/`while` on
+`--n > 0` (6 of 15); `while (1)` with two `goto`s out (6 of 15); the null
+test as a `while (chip != NULL)` condition with the advance in the `for`
+increment (6 of 15); an early `return NULL` per exit instead of the shared
+one, which runs past the next function; and both `goto` forms of the
+rotated loop, with the bottom test written `if (n > 0)` and `if (--n <= 0)`,
+which are the draft at 6 of 14.
+
+## cmpClearStatusFlags (code_001FAE80, 0x30)
+
+1 of 10 words match, 40 emitted bytes against retail's 48. Clears every bit
+but bit 1 of the camp status panel's flag byte and returns the result, or 0
+when the panel is not allocated.
+
+The instruction sequence is otherwise retail's: `lw` of `campStatusPanel`,
+`beqz` to a `jr $31` / `daddu $2, $0, $0` arm written last, then
+`lbu`/`andi 2`/`sb`. The two missing words are a zero-extension of the
+returned byte that retail spells `sll $2, $3, 24` then `srl $2, $2, 24`, with
+the `sll` scheduled ahead of the `sb`. No source shape reaches that pair:
+every form that keeps the value in a register lets gcc see it is already
+`& 2` and drops the extension entirely, and the one form that does emit an
+extension gives `andi $2, $2, 0xFF`, which is this port's `zero_extendqisi2`
+for a register operand. The register map follows from it, since retail needs
+`$2` for the extension and puts the pointer in `$4` and the byte in `$3`,
+where the draft uses `$3` and `$2`.
+
+Ruled out: `return panel->flags &= 2;` and
+`return panel->flags = panel->flags & 2;`; the `&=` as its own statement with
+the value re-read on the next line, through a local pointer (`andi 0xFF`) and
+through the global (which reloads `campStatusPanel` and re-reads the byte, the
+right 12 words but the wrong two); a `u8`, `char` and `volatile u8` local for
+the masked value; `u8`, `u16`, `u32` and `s32` return types; `(u8)(s8)` and an
+explicit `(x << 24) >> 24` at the return; declaring the struct field `s8`; and
+`u8 flags : 8` and `u32 flags : 8` bitfields reached through a cast.
+
+## cmbDrawFullScreenPanel (code_001FAE80, 0x68)
+
+20 of 26 words match, at the exact 104-byte size. Calls `cmpDisableRGB`, draws
+sprite 0x34000, fills the screen with `cmpDrawBoxF`, allocates a ref GIF tag
+and tail-calls the same sprite draw again.
+
+Every instruction is retail's, in retail's registers. The six differing words
+are the delay slots of the two `fclDrawPanelSprite` calls and the epilogue
+they shift. Retail schedules `lui $4` then `ori $4, $4, 0x4000` and fills the
+`jal` delay slot with `daddu $5, $16, $0`; this schedules `lui`, the flags
+copy, and then fills the delay slot with the `ori`. Same instructions, same
+count, so what is left is ee-gcc's second scheduling pass, as in `cmp_23A918`
+above.
+
+Ruled out: an `extern s32 fclDrawPanelSprite(s32 id, s32 arg);` prototype above
+the function, which the unit otherwise leaves implicit; an `s32 id = 0x34000;`
+local for the sprite id, which the `cmp_23A918` entry also rules out; and
+passing `flags` to `cmpDisableRGB`, which the unit's other caller does not.
+
+## fclTerminalLoadTextures (code_001FAE80, 0x70)
+
+16 of 27 words match, 108 emitted bytes against retail's 112. Loads the
+terminal's one texture from the name table at `D_00330808` and prints
+`D_0053D5E8`.
+
+Everything through the store matches: the three saved registers, the counter
+in `$16`, the texture slot pointer walking `$17` by 4, the table base in
+`$18`, the indexed `sll`/`addu`/`lw` of the name and the `sw` of the handle.
+The one missing word is the counter's own normalization. Retail writes
+`addiu $3, $16, 1`, `sll $3, $3, 24`, `sra $16, $3, 24`, so the counter is a
+signed byte; a `u8 i` gives `andi $16, $3, 0xFF`, one word short.
+
+The two halves pull against each other, which is the finding worth keeping: a
+**signed** byte counter is a biv ee-gcc's strength reduction recognises, so it
+also reduces `D_00330808[i]` into a second walking pointer and the whole body
+goes to 8 of 27 words match with the registers rotated. A `u8` counter is set
+by an `and`, which is not a biv form, so the table stays indexed exactly as
+retail has it. Every signed spelling tried reduces the table and every
+unsigned one gets the `andi`.
+
+Ruled out, all 19 of 27 words differing with the table reduced: `s8` and plain
+`char` counters with the bound written `i < 1U`, `i < 1`, `i == 0` and
+`(u8)i < 1U`; the name read as `*(char **)((u8 *)D_00330808 + i * 4)`, as
+`D_00330808[(u32)i]` and through a `char **name = D_00330808;` local; the slot
+advance written `tex++` as its own statement, in the `for` increment, and as
+`*tex++ =`; and an `extern s32 fclLoadTexture(char *name);` prototype above the
+function. Also ruled out: both sides indexed (`tex[i] = ...D_00330808[i]`),
+which spends a fourth saved register on the shared `i * 4`; and
+`D_00330808[(u8)i]` with a signed counter, which is 10 of 28 words match and
+one word long.
+
+## rstBuildDestroyList (code_001FAE80, 0x64)
+
+1 of 24 words matches positionally, 23 of 24 with the register names ignored;
+96 emitted bytes against retail's 100. Compacts the destroy unit's inherited
+skill list, moving every non-zero entry to the front and storing the new count
+back over `skillcnt`.
+
+Every instruction is retail's, in retail's order: the `lhu` of `skillcnt` in
+the preheader with its `beqz` skip, the source pointer walking from
+`unit + 0x3A`, the destination pointer biased to `unit + 0x38` and advanced by
+2 *before* both stores, the `sh $0` then `sh value` pair, the `sll 24`/`sra 24`
+on the `s8` count, the reload of `skillcnt` inside the taken arm, and the
+`slt`/`bnez` at the bottom. The destination's bias is what
+`unit->skill[count - 1] = skill;` after `count++;` gives; the natural
+`unit->skill[count] = skill; count++;` bases it at `unit + 0x3A` instead and is
+no closer.
+
+The one missing word is a `daddu $3, $2, $0` copy of the loaded skill. Retail
+loads the halfword into `$2`, copies it into `$3` (where the loop bound is dead
+at that point) and reuses `$2` for `count + 1`; the draft computes `count + 1`
+in the `beqz` delay slot, which keeps `$2` busy, loads the skill into `$3`
+directly and needs no copy. That one value shifts every register in the
+function up by one, which is why the positional count looks so much worse than
+the body is.
+
+Ruled out: `skill` as a block-scope and a function-scope local, and as `u16`
+and `s32`; `count` as `s8` and `s32` (the `s32` form is 22 words, two short);
+`count++` written before the stores, between them and after them;
+`unit->skill[count]` with a post-increment; a `u16 *dst = &unit->skillcnt;`
+local advanced in the arm; and a `while` loop with `i++` hoisted above the test,
+which runs one word long.
+
+## cmbDrawResultFooter (code_001FAE80, 0x74)
+
+25 of 29 words match, at the exact 116-byte size. Draws the combine result
+footer: two panel sprites around a `cmpDrawBoxGDefault` whose four corner
+colours come from a stack array.
+
+The instruction stream, the store order into the array (`corner[2]`,
+`corner[0]`, `corner[3]`, `corner[1]`, the last in the call's delay slot) and
+every other register match. The four differing words are one register name:
+retail builds `color & ~0xFF` in `$2` (`addiu $2, $0, -0x100` then
+`and $2, $16, $2`) and stores it from there, while this builds it in `$3`. The
+`$2`/`$3` row in the levers page blames a non-void callee whose result is
+ignored, but it does not apply here: making `fclDrawPanelSprite2` `void`, which
+keeps its own body's `j cmpDrawSprite2` and leaves it byte-exact, changes
+nothing in this function.
+
+Ruled out: the mask written `color & 0xFFFFFF00`; an `s32 dark` local for it,
+which hoists the `and` above the first call and runs one word long;
+`corner[2] = corner[0]; corner[3] = corner[1];` in place of re-reading `color`;
+and the `void` callee above.
+
+## ragCheckHeartsChoice (code_001FAE80, 0x80)
+
+22 of 29 words match, 116 emitted bytes against retail's 128. Returns a hearts
+choice: a table entry for index 1, the rag work's `+0x54` halfword for 2 and 3,
+and 0 otherwise.
+
+The body is settled. `ragGetHeartsFlag`'s result has to land in `$4`, the
+`index == 1` test has to be written as `if (index != 1) { ... }` with the table
+arm after it so the `beq` reaches the table arm as retail's forward branch
+does, and the two range tests have to be **nested** `if (index > 0) { if (index
+< 4) ... } return 0;` rather than two sibling early returns: as siblings
+ee-gcc folds them into an `addiu -1`/`sltiu 3` range test and loses retail's
+`blez` and `slti 4` pair, which is 8 of 30 words match.
+
+The seven remaining words are the exit layout. Retail restores `$16` twice,
+once in the delay slot of the `b` that leaves the table arm and once at the
+shared `L830`, and lets `jump2` merge only from the `ld $31` on; this draft
+gets one `ld $16` and three words fewer, so every branch displacement in the
+function is off by three.
+
+Ruled out: `index == 1` with a `goto` to a trailing table arm (8 of 30 match);
+a `u16 ret` local assigned in each arm with one trailing `return` (8 of 30);
+the same with explicit `goto done;` out of each arm (15 of 29); and
+`(flag * 7) * 2` in place of `flag * 14` at the subscript.

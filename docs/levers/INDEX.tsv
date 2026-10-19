@@ -1,11 +1,11 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
-docs/levers/README.md	9		| 202 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+docs/levers/README.md	9		| 210 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
 docs/levers/README.md	10		| 102 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 9 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	12		| 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 6 | [impossible.md](impossible.md) | Functions that cannot be written in C |
-docs/levers/README.md	14		| 3 | [float-literals.md](float-literals.md) | Float literals |
+docs/levers/README.md	14		| 4 | [float-literals.md](float-literals.md) | Float literals |
 docs/levers/README.md	15		| 2 | [float-registers.md](float-registers.md) | A value held in a callee-saved float register shares a local with the tail |
 docs/levers/README.md	16		| 2 | [cross-jumping.md](cross-jumping.md) | Duplicated tails and post-reload cross-jumping |
 docs/levers/README.md	17		| 0 | [whole-unit.md](whole-unit.md) | Check the whole unit, not the function you edited |
@@ -224,6 +224,14 @@ docs/levers/addressing-and-types.md	1390	andi dsll32 dsra32 sltiu xori	!x on a v
 docs/levers/addressing-and-types.md	1396	$1 $2 $at addiu addu lui	A row pointer that shares the scaled index's own register is visible in the assembly as the %hi/%lo pair landing in $1:
 docs/levers/addressing-and-types.md	1405	addiu	PS2_SYMBOL_AT for dds3LightParam + 0x10 confirmed a third time, and the two halves of one unit disagree.
 docs/levers/addressing-and-types.md	1413	$0 $2 daddu	One reused handle local for two successive allocate-and-lock pairs is what gives retail's single callee-saved register and its daddu rd, $2, $0 per pair.
+docs/levers/addressing-and-types.md	1418	$5 jal sll sra	**A callee with no prototype in scope drops every argument conversion**, so on a unit that leaves most callees implicit, a caller sitting above its callee's…
+docs/levers/addressing-and-types.md	1430	sll sra	**A narrow parameter forwarded to a narrow parameter inside a loop wants to be declared s32**, with the prototype doing the conversion.
+docs/levers/addressing-and-types.md	1443	addiu addu lw sll sw	Where a loop both loads from a table and stores into a slot, retail usually **walks the store pointer and indexes the load**, and the source has to say so:
+docs/levers/addressing-and-types.md	1450	addu and sll sra	**A signed byte loop counter is a biv ee-gcc's strength reduction recognises;
+docs/levers/addressing-and-types.md	1459	addiu bnez	**Two address bases in one loop come from two pointer locals computed before the guard, and which one lands in the guard's delay slot is decided by which is…
+docs/levers/addressing-and-types.md	1471		An argument that is a cast of another argument belongs **at the call**, not in a local:
+docs/levers/addressing-and-types.md	1475	$1	The mirror of the pointer-local rows:
+docs/levers/addressing-and-types.md	1482	$2 $31 beqz beqzl ld	A guard on a call's result whose failure returns zero wants flag = f();
 docs/levers/control-flow.md	6	beqz bnez	| the opposite arm falls through (bnez where you emit beqz) | invert the if condition |
 docs/levers/control-flow.md	7		| one exit, default set before the branch | replace an early return 0 with s32 ret = f();
 docs/levers/control-flow.md	8	jal	| jal and a full epilogue | assign the call's result to a variable instead of return f();, which ee-gcc 2.96 sibcalls |
@@ -331,6 +339,7 @@ docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one regis
 docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
 docs/levers/float-literals.md	54	$28 $gp addiu lui lwc1	The reverse of the $gp row above, on a symbol retail *does* reach through $gp:
 docs/levers/float-literals.md	65	$f20 $f22 add	A **repeated subexpression written out again** is what decides a commutative add.s's operand order when no spelling of the statement reaches it.
+docs/levers/float-literals.md	77		ee-gcc does not constant-fold fsqrtf of a literal, so a sqrt.s on a constant in the retail text is just fsqrtf(4096.0f) in the source.
 docs/levers/float-registers.md	13	$2 $3 lui mfc1 mtc1	SDF_VU0_SCALEVECTOR against SDF_VU0_SCALEVECTOR_BITS with the float expression passed straight to the "r" operand is a scheduling lever, not only a spelling.
 docs/levers/float-registers.md	24		A word the **next** block needs, read right after a volatile asm and before the stores of the previous block's result, belongs in its own local.
 docs/levers/impossible.md	13		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.

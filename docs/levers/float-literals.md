@@ -74,3 +74,9 @@ order. The order in which the C uses a constant has to match retail.
   the second multiply away and the add is expanded with `angle` as operand 0.
   All six declaration orders of the three float locals are inert, as the
   declaration-order row predicts.
+- ee-gcc does not constant-fold `fsqrtf` of a literal, so a `sqrt.s` on a
+  constant in the retail text is just `fsqrtf(4096.0f)` in the source.
+  `campCalcStockScale` and `fclRagCalcTexSize` in `code_001FAE80` are the same
+  shape, and the call whose result the expression scales has to be evaluated
+  into its own local first or the square root is computed before it and spends
+  a callee-saved float register across the call.

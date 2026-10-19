@@ -596,7 +596,7 @@ typedef struct
     /* 0x001A */ u8 unk_1A[0x16];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
-    /* 0x0071 */ u8 levelUpStep;
+    /* 0x0071 */ s8 levelUpStep;
     /* 0x0072 */ u8 unk_72[0xFA];
     /* 0x016C */ datUnitWork_t *unit;
     /* 0x0170 */ u8 unk_170[0x2175];
@@ -739,7 +739,9 @@ typedef struct
     /* 0x0005 */ s8 unk_0005;
     /* 0x0006 */ u8 unk_0006[2];
     /* 0x0008 */ s32 unk_0008;
-    /* 0x000C */ u8 unk_000C[0x134];
+    /* 0x000C */ u8 unk_000C[0x48];
+    /* 0x0054 */ u16 unk_0054;
+    /* 0x0056 */ u8 unk_0056[0xEA];
     /* 0x0140 */ cmpCursorWork_t listCursor;
     /* 0x0178 */ u8 unk_0178[0x44D0];
     /* 0x4648 */ s32 script;
@@ -1196,7 +1198,29 @@ s32 fclCombineDraw(void)
     return cmbDrawSequence();
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclCombineUpdate);
+extern s32 cmbUpdateSequence(void);
+
+s32 fclCombineUpdate(void)
+{
+    s32 ret;
+    s32 flag;
+
+    if ((CMB_GBWK->unk_00000 & 0x40) != 0) {
+        ret = -1;
+        if (cmpLoadStatusModel() != 0) {
+            ret = 0;
+        }
+        return ret;
+    }
+    flag = fclGetFlag(1);
+    if (flag == 0) {
+        return flag;
+    }
+    if (cmbUpdateSequence() == -1) {
+        CMB_GBWK->unk_00000 |= 0x10;
+    }
+    return 0;
+}
 
 void fclCombineProcessStart(void)
 {
@@ -1736,7 +1760,24 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawStockRow);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawStockScrollBar);
 
+/* NON_MATCHING: 25 of 29 words match, exact size; the `color & ~0xFF` value
+ * takes $3 where retail uses $2. */
+#ifdef NON_MATCHING
+void cmbDrawResultFooter(s32 color)
+{
+    s32 corner[4];
+
+    fclDrawPanelSprite2(0x48, 0x47);
+    corner[0] = color;
+    corner[1] = color & ~0xFF;
+    corner[2] = color;
+    corner[3] = color & ~0xFF;
+    cmpDrawBoxGDefault(0, 0x148, 0xFFFFF, 0xC8, 0x3A, corner, 0x47);
+    fclDrawPanelSprite2(0x44, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawResultFooter);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawResultPanel);
 
@@ -1890,7 +1931,16 @@ void cmbSeqReturnToPrev(void)
     CMB_GBWK->unk_00004 = -1;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbFreeIntroduceModels);
+extern void cmbFreeActionModel(void *model);
+
+void cmbFreeIntroduceModels(void)
+{
+    u32 i;
+
+    for (i = 0; i < 5; i++) {
+        cmbFreeActionModel((u8 *)CMB_GBWK + 0x16524 + i * 0x14);
+    }
+}
 
 extern void effEVECombParSmokeDelete(s32 handle);
 void cmbFreeSmokeEffect(void)
@@ -2130,7 +2180,21 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawActionModel);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbGetModelMarkPos);
 
+/* NON_MATCHING: 20 of 26 words match, exact size; the two `fclDrawPanelSprite`
+ * calls put the `ori` of the sprite id in the delay slot where retail puts the
+ * flags copy. */
+#ifdef NON_MATCHING
+void cmbDrawFullScreenPanel(s32 flags)
+{
+    cmpDisableRGB();
+    fclDrawPanelSprite(0x34000, flags);
+    cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0, flags);
+    cmpAllocRefGifTag(flags);
+    fclDrawPanelSprite(0x34000, flags);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawFullScreenPanel);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawModelPanel);
 
@@ -2330,7 +2394,12 @@ s32 func_00206BA8(void)
     return D_0054FB20->unk_1C;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclShopInitItemList);
+void fclShopInitItemList(void *list)
+{
+    lstInitListWindow(0xC0, 0x388, 0xFFFFF, 0x12B, 0xB8, 0x19191E59, 0, list);
+    cmpInitCursorLayout((u8 *)list + 0x15C, 0x21, 0x10, 0xFF, 0x16, 0x1A);
+    cmpInitCursorRange((u8 *)list + 0x15C, 6, 6, 0);
+}
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053CF10);
 
@@ -2954,7 +3023,28 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragSetSeqPhase);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragGetHeartsFlag);
 
+extern s32 ragGetHeartsFlag(s8 index);
+
+/* NON_MATCHING: 22 of 29 words match, 116 bytes against retail's 128; retail
+ * restores $16 twice, once in a `b`'s delay slot, and merges only the `jr`. */
+#ifdef NON_MATCHING
+u16 ragCheckHeartsChoice(s8 index)
+{
+    s32 flag = ragGetHeartsFlag(index);
+
+    if (index != 1) {
+        if (index > 0) {
+            if (index < 4) {
+                return ragUpdateWork->unk_0054;
+            }
+        }
+        return 0;
+    }
+    return *(u16 *)(ragHeartsTable + flag * 14);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", ragCheckHeartsChoice);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateCallSeq);
 
@@ -3455,6 +3545,32 @@ void trmSetProcessTerm(void)
     }
 }
 
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000;
+    /* 0x0001 */ s8 unk_0001;
+    /* 0x0002 */ u8 unk_0002[2];
+    /* 0x0004 */ s8 unk_0004;
+    /* 0x0005 */ u8 unk_0005[0x38];
+    /* 0x003D */ s8 unk_003D;
+    /* 0x003E */ u8 unk_003E[0x1198];
+    /* 0x11D6 */ s16 unk_11D6;
+    /* 0x11D8 */ u8 unk_11D8;
+    /* 0x11D9 */ u8 unk_11D9[0x1018];
+    /* 0x21F1 */ s8 unk_21F1;
+    /* 0x21F2 */ u16 unk_21F2;
+    /* 0x21F4 */ s8 unk_21F4[0x21];
+    /* 0x2215 */ s8 unk_2215;
+    /* 0x2216 */ u8 unk_2216[0xA];
+    /* 0x2220 */ s32 unk_2220;
+    /* 0x2224 */ u8 unk_2224[0xC];
+    /* 0x2230 */ s32 saveProcess;
+    /* 0x2234 */ u8 unk_2234[4];
+    /* 0x2238 */ s32 texHandle[1];
+} trmUpdateWork_t;
+
+extern trmUpdateWork_t *trmUpdateWork;
+
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalScanCommands);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalInitList);
@@ -3465,15 +3581,54 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalDumpJump);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalResetCommands);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalLoadTextures);
+extern char *D_00330808[];
+extern char D_0053D5E8[];
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalFreeTextures);
+/* NON_MATCHING: 16 of 27 words match, 108 bytes against retail's 112; the `u8`
+ * counter normalizes with `andi 0xff` where retail has sll 24 / sra 24. */
+#ifdef NON_MATCHING
+void fclTerminalLoadTextures(void *work)
+{
+    u8 i;
+    s32 *tex = (s32 *)((u8 *)work + 0x2238);
+
+    for (i = 0; i < 1U; i++) {
+        *tex = fclLoadTexture(D_00330808[i]);
+        tex++;
+    }
+    printf(D_0053D5E8);
+}
+#else
+INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalLoadTextures);
+#endif
+
+extern char D_0053D600[];
+
+void fclTerminalFreeTextures(void *work)
+{
+    s32 *tex = (s32 *)((u8 *)work + 0x2238);
+    s8 i;
+
+    for (i = 0; i < 1U; i++) {
+        sdfTexFree(tex[i]);
+    }
+    printf(D_0053D600);
+}
 
 extern void fclTerminalScanCommands(void *work);
 extern void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work);
 extern void fclTerminalInitList(void *list, s8 count, s32 handle);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalSetMode);
+void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work)
+{
+    work->unk_21F1 = mode;
+    work->unk_21F2 = id;
+    fclTerminalScanCommands(work);
+    fclTerminalResetCommands(mode, id, (u8 *)work + 0x18, work);
+    fclTerminalInitList((u8 *)work + 0x1058, work->unk_2215, work->texHandle[0]);
+}
+
+INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D600);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclAllocTerminalWork);
 
@@ -3604,31 +3759,6 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D670);
 
 INCLUDE_ASM(const s32, "code_001FAE80", trmDraw);
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000;
-    /* 0x0001 */ s8 unk_0001;
-    /* 0x0002 */ u8 unk_0002[2];
-    /* 0x0004 */ s8 unk_0004;
-    /* 0x0005 */ u8 unk_0005[0x38];
-    /* 0x003D */ s8 unk_003D;
-    /* 0x003E */ u8 unk_003E[0x1198];
-    /* 0x11D6 */ s16 unk_11D6;
-    /* 0x11D8 */ u8 unk_11D8;
-    /* 0x11D9 */ u8 unk_11D9[0x1018];
-    /* 0x21F1 */ s8 unk_21F1;
-    /* 0x21F2 */ u16 unk_21F2;
-    /* 0x21F4 */ s8 unk_21F4[0x21];
-    /* 0x2215 */ s8 unk_2215;
-    /* 0x2216 */ u8 unk_2216[0xA];
-    /* 0x2220 */ s32 unk_2220;
-    /* 0x2224 */ u8 unk_2224[0xC];
-    /* 0x2230 */ s32 saveProcess;
-    /* 0x2234 */ u8 unk_2234[4];
-    /* 0x2238 */ s32 texHandle[1];
-} trmUpdateWork_t;
-
-extern trmUpdateWork_t *trmUpdateWork;
 extern s16 fldAllCnt[][2];
 
 s32 trmGetSaveResult(void)
@@ -3710,9 +3840,28 @@ void trmUpdateSave(void)
 extern void slSetTmnlID(s8 index, u16 id);
 extern void fmProcTrigSequence(s32 mode);
 
-INCLUDE_ASM(const s32, "code_001FAE80", trmUpdateSaveActIn);
+void trmUpdateSaveActIn(void)
+{
+    if (dds3FadeCheck() == 0) {
+        fclScriptForcedEnd((u8 *)trmUpdateWork->unk_2220);
+        trmUpdateWork->unk_2220 = 0;
+        trmEndEvent(0);
+        slSetTmnlID(trmUpdateWork->unk_21F1, trmUpdateWork->unk_21F2);
+        fmProcTrigSequence(0);
+        trmUpdateWork->unk_0001 = 2;
+        trmUpdateWork->unk_0004 = 1;
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", trmUpdateSaveActOut);
+void trmUpdateSaveActOut(void)
+{
+    if (trmCheckSaveAct() == 0) {
+        trmUpdateWork->unk_003D = 1;
+        trmStartEvent();
+        trmUpdateWork->unk_0001 = 0;
+        trmUpdateWork->unk_0004 = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", trmUpdate);
 
@@ -3945,7 +4094,24 @@ void lstDrawUpDownCursor(lstWork_t *work)
 
 INCLUDE_ASM(const s32, "code_001FAE80", lstDrawListWindow);
 
-INCLUDE_ASM(const s32, "code_001FAE80", lstDrawListWindowCursor);
+typedef struct
+{
+    /* 0x0000 */ s32 x;
+    /* 0x0004 */ s32 y;
+    /* 0x0008 */ s32 unk_08;
+    /* 0x000C */ u8 unk_0C[0x158];
+    /* 0x0164 */ s32 unk_164;
+    /* 0x0168 */ s32 unk_168;
+    /* 0x016C */ s32 unk_16C;
+    /* 0x0170 */ s32 unk_170;
+} lstWindowWork_t;
+
+void lstDrawListWindowCursor(lstWindowWork_t *work, s32 arg)
+{
+    cmpDrawScrollBar(work->x + work->unk_164 * 16, work->y + work->unk_168 * 8,
+                     work->unk_08, work->unk_16C, work->unk_170, 0x80808080, 0x100, 0,
+                     (cmpCursorWork_t *)((u8 *)work + 0x15C), 0, arg);
+}
 
 extern void lstMoveCursor(lstWork_t *work, s32 dir);
 
@@ -3989,9 +4155,22 @@ s32 lstPageDown(lstWork_t *work)
 INCLUDE_ASM(const s32, "code_001FAE80", lstPageDown);
 #endif
 
+extern s32 datGetItemSlotIndex(s32 id);
+extern void datAddHearts(s32 id);
+
 INCLUDE_ASM(const s32, "code_001FAE80", datGetItemSlotIndex);
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclAddItem);
+s32 fclAddItem(u16 id, s32 count)
+{
+    s32 slot = datGetItemSlotIndex(id);
+
+    if (slot != 0) {
+        datAddHearts(slot);
+    } else {
+        datAddItem(id, count);
+    }
+    return 1;
+}
 
 typedef struct
 {
@@ -4011,7 +4190,18 @@ s32 fcl_213998(char *name, fclSceneObj_t *dst)
 }
 
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclLoadStage);
+extern s32 dds3GetMapNo(void *scene);
+extern void evtLoadArea(s32 area, s32 map);
+
+void fclLoadStage(s32 area, s32 map)
+{
+    s32 id = (area << 16) + map;
+
+    if (dds3GetMapNo(dds3GetControlScene()) == id) {
+        return;
+    }
+    evtLoadArea(area, map);
+}
 
 extern void dds3SetBlur(s32 a, s32 b, s32 c);
 extern void dds3MultiBlurOff(s32 a);
@@ -5009,7 +5199,15 @@ INCLUDE_ASM(const s32, "code_001FAE80", SetRecordToUnitCore);
 
 INCLUDE_ASM(const s32, "code_001FAE80", CompareUnitToRecord);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ExecSummon);
+extern s32 datAddDevil(u16 id, s32 mode);
+
+void ExecSummon(s32 index)
+{
+    u16 *record = (u16 *)((u8 *)DDS3_GBWK + index * 0xB0 + 0x11E90);
+    s32 slot = datAddDevil(*record, 0);
+
+    SetRecordToUnitCore(&cmbGlobalWork->party[slot], record);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", drawRegistList);
 
@@ -5485,7 +5683,21 @@ void rstAddExp(s32 amount, datUnitWork_t *work)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstAdvanceLevelUpStep);
+void rstAdvanceLevelUpStep(void)
+{
+    evtStartWork_t *work = EventStart;
+    s8 step;
+
+    if (work->levelUpCount == 0) {
+        return;
+    }
+    step = work->levelUpStep;
+    if (step >= work->levelUpCount) {
+        return;
+    }
+    work->levelUpStep++;
+    rstPrepareStatusModel(6, work->levelUpUnit[step]->id, 0);
+}
 
 s32 func_0021FE18(void)
 {
@@ -5507,7 +5719,22 @@ void rstSetEvoState(void)
     EventStart->unk_22E6 = 2;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", rstSetMotionReqFromTbl);
+typedef struct
+{
+    /* 0x00 */ s8 unk_00;
+    /* 0x01 */ u8 unk_01;
+    /* 0x02 */ u8 unk_02;
+} rstMotionReq_t;
+
+extern rstMotionReq_t D_00332458[];
+
+void rstSetMotionReqFromTbl(s8 index)
+{
+    s32 i = EventStart->unit->id * 7 + index;
+
+    func_0021FE30(D_00332458[i].unk_00, 0, (f32)D_00332458[i].unk_01,
+                  (f32)D_00332458[i].unk_02);
+}
 
 extern s8 cmbChkSkillOwner(u16 skillId, datUnitWork_t *unit);
 s32 rstChkAddSkill(u16 skillId)
@@ -5753,7 +5980,22 @@ s32 rstShakePad(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstCalc);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbGetParamBase);
+extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
+
+s32 cmbGetParamBase(datUnitWork_t *unit, s32 index)
+{
+    s32 value;
+
+    if (unit->id == 0) {
+        value = unit->param[index];
+        if (cmbGlobalWork->equipHearts != 0) {
+            value -= cmbGetHeartsParam(cmbGlobalWork->equipHearts, index);
+        }
+    } else {
+        value = datGetParam(unit, index);
+    }
+    return value;
+}
 
 extern s32 datGetParam(datUnitWork_t *unit, s32 index);
 s32 cmbGetParam(datUnitWork_t *unit, s32 index)
@@ -5926,9 +6168,27 @@ s32 cmbGetHeartsParam(s8 devilId, s8 index)
     return param;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbAddHeartsParam);
+void cmbAddHeartsParam(s32 devilId, datUnitWork_t *unit)
+{
+    s8 *param = unit->param;
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbSubHeartsParam);
+    for (i = 0; i < 6; i++) {
+        *param += cmbGetHeartsParam(devilId, i);
+        param++;
+    }
+}
+
+void cmbSubHeartsParam(s32 devilId, datUnitWork_t *unit)
+{
+    s8 *param = unit->param;
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        *param -= cmbGetHeartsParam(devilId, i);
+        param++;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", datAddHeartsSlot);
 
@@ -6384,7 +6644,31 @@ void rstAddSkill(void)
     rstSetMaxHpMp(1, startPos->unk_16C);
 }
 
+/* NON_MATCHING: 1 of 24 words matches positionally, 23 of 24 with the register
+ * names ignored; 96 bytes against retail's 100. */
+#ifdef NON_MATCHING
+s32 rstBuildDestroyList(void)
+{
+    datUnitWork_t *unit = startPos->unk_16C;
+    s32 i;
+    s8 count = 0;
+    u16 skill;
+
+    for (i = 0; i < unit->skillcnt; i++) {
+        skill = unit->skill[i];
+
+        if (skill != 0) {
+            count++;
+            unit->skill[i] = 0;
+            unit->skill[count - 1] = skill;
+        }
+    }
+    unit->skillcnt = count;
+    return count;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", rstBuildDestroyList);
+#endif
 
 typedef struct
 {
@@ -7518,7 +7802,7 @@ typedef struct
     /* 0x00 */ u8 unk_00[4];
     /* 0x04 */ void *chip;
     /* 0x08 */ u16 unk_08;
-    /* 0x0A */ u16 unk_0A;
+    /* 0x0A */ s16 unk_0A;
     /* 0x0C */ u16 unk_0C;
 } movieViewerChipList_t;
 
@@ -7600,7 +7884,36 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053F3D8);
 
 INCLUDE_ASM(const s32, "code_001FAE80", movieViewerScanDir);
 
+/* NON_MATCHING: 6 of 14 words match, 56 bytes against retail's 80; the
+ * loop closes with a plain `b` where retail has `bgtzl` and five pad nops. */
+#ifdef NON_MATCHING
+void *movieViewerStep(void)
+{
+    void **chip = (void **)movieViewerChips.chip;
+    s32 n = movieViewerChips.unk_0A;
+
+    if (chip == NULL) {
+        goto out;
+    }
+    if (n <= 0) {
+        goto out;
+    }
+    chip = *chip;
+loop:
+    if (chip == NULL) {
+        goto out;
+    }
+    n--;
+    if (n > 0) {
+        chip = *chip;
+        goto loop;
+    }
+out:
+    return chip;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", movieViewerStep);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", movieDebugDrawInfo);
 
@@ -7722,7 +8035,21 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpInitStockTable);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpinit);
 
-INCLUDE_ASM(const s32, "code_001FAE80", camp_update_Shutdown);
+extern void rstSetPanelEffFlag(void);
+
+void camp_update_Shutdown(void)
+{
+    if (campWork != NULL) {
+        fclDestroyMessage();
+        campHideStatusWindow();
+        cmpSetStatusWindowHidden();
+        campHideStatusWindow();
+        rstSetPanelEffFlag();
+        sdfMemFreeDirect(campWork->allocation);
+        campWork = NULL;
+        campExitState = 2;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpProcessStart);
 
@@ -8293,7 +8620,22 @@ void cmpSetStockVisible(s8 visible)
     }
 }
 
+/* NON_MATCHING: 1 of 10 words match, 40 bytes against retail's 48; retail
+ * zero-extends the returned byte with sll 24 / srl 24. */
+#ifdef NON_MATCHING
+u8 cmpClearStatusFlags(void)
+{
+    campStatusPanel_t *panel = campStatusPanel;
+
+    if (panel != NULL) {
+        panel->flags &= 2;
+        return panel->flags;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpClearStatusFlags);
+#endif
 
 extern cmpInfoWindow_t *D_00551F9C;
 s32 camp_calc_stock_Process(s32 id)
@@ -9391,7 +9733,13 @@ s32 campGetStockAlpha(s8 index, s8 row)
     return campWork->stockAlpha[index + row * 4];
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", campCalcStockScale);
+s32 campCalcStockScale(s8 index, s8 row)
+{
+    s32 v = 0x100 - campGetStockAlpha(index, row);
+    s32 n = (s32)(fsqrtf(4096.0f) * (f32)v * 0.00390625f);
+
+    return n * n;
+}
 
 s32 campDrawStockCell(s32 color, s8 index, s8 row)
 {
@@ -9495,7 +9843,34 @@ s32 func_0023ECF0(s32 index)
     return cmpPanelEffList[index].unk_34;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_0023ED18);
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[8];
+    /* 0x0008 */ u8 state;
+    /* 0x0009 */ u8 unk_0009[2];
+    /* 0x000B */ u8 kind;
+    /* 0x000C */ u8 unk_000C[0x2D8];
+} cmpPanelEffView_t;
+
+s32 func_0023ED18(s8 kind, s32 value)
+{
+    cmpPanelEff_t *list = cmpPanelEffList;
+    s32 *slot = (s32 *)((u8 *)list + 0x38);
+    cmpPanelEffView_t *eff;
+    s32 i;
+
+    if (list == NULL) {
+        return -1;
+    }
+    eff = (cmpPanelEffView_t *)((u8 *)list + 0x10);
+    for (i = 0; i < 0x20; i++) {
+        if (eff[i].state != 0 && eff[i].kind == kind && *slot == value) {
+            return i;
+        }
+        slot = (s32 *)((u8 *)slot + 0x2E4);
+    }
+    return -1;
+}
 
 s32 cmpSetPanelEffParam(s32 index, s32 value)
 {

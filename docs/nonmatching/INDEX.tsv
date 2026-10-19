@@ -39,6 +39,13 @@ cmp_241A88	code_001FAE80	0x68	3 of 26 words	docs/nonmatching/code_001FAE80.md	35
 cmbGetHeartsParamByIndex	code_001FAE80	0x58	8 of 22 words	docs/nonmatching/code_001FAE80.md	378
 fclDrawPanel	code_001FAE80	0x54	8 of 21 words	docs/nonmatching/code_001FAE80.md	401
 cmbFindCameraPoint	code_001FAE80	0x64	9 of 25 words	docs/nonmatching/code_001FAE80.md	423
+movieViewerStep	code_001FAE80	0x4C	6 of 14 words match	docs/nonmatching/code_001FAE80.md	446
+cmpClearStatusFlags	code_001FAE80	0x30	1 of 10 words match	docs/nonmatching/code_001FAE80.md	476
+cmbDrawFullScreenPanel	code_001FAE80	0x68	20 of 26 words match	docs/nonmatching/code_001FAE80.md	503
+fclTerminalLoadTextures	code_001FAE80	0x70	16 of 27 words match	docs/nonmatching/code_001FAE80.md	522
+rstBuildDestroyList	code_001FAE80	0x64	1 of 24 words matches	docs/nonmatching/code_001FAE80.md	554
+cmbDrawResultFooter	code_001FAE80	0x74	25 of 29 words match	docs/nonmatching/code_001FAE80.md	586
+ragCheckHeartsChoice	code_001FAE80	0x80	22 of 29 words match	docs/nonmatching/code_001FAE80.md	607
 getPartsType	code_0029B780	0x5C	15 of 24 words	docs/nonmatching/code_0029B780.md	5
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words	docs/nonmatching/code_0029B780.md	23
 pipeGetObjData	code_0029B780	0x120	9 of 71 words	docs/nonmatching/code_0029B780.md	49
