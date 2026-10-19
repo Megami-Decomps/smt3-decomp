@@ -26,6 +26,7 @@ it was measured on DDS and not on this ELF.
 | `jal` and a full epilogue | assign the call's result to a variable instead of `return f();`, which ee-gcc 2.96 sibcalls |
 | `sltiu i, N` counting up | make the loop index `u32`, or subscript with it, instead of post-incrementing a pointer. A `for` whose index is unused in the body becomes a downcounter |
 | `blez n` then a `bnez` downcounter | a `for` to a variable bound whose index the body does not use. With a constant bound the same shape counts `n-1` down to 0 and tests `bgez` instead |
+| no zero-trip guard at all, and an up-counter kept as `addiu i, i, 1` plus `slt` against the bound | a `do`/`while`, not a `for`. The guard is only half of it: given a `for` whose index the body does not use, gcc also flips the counter to `addiu i, i, -1`, so the `blez` and the counter direction go together. Both `dds3Particle_SparkBuffInit` and `dds3Particle_SparkOffsetBuffInit` turned on this one change, 164 differing words down to 48 |
 | `slt` then `sltiu` | write `if (a < b) return 0; return 1;` rather than `return a >= b` |
 | explicit branches where you emit `andi` or `sltiu` | gcc folds `(x & 1) ? 1 : 0` and `f() == 0`. Usually unreachable from C |
 | the same field stores duplicated per `switch` case | write the full store list in each case and let gcc merge the tail. Hoisting the values into locals does not match |
@@ -1211,6 +1212,29 @@ once per use, and a named local for it computes it once.
   assignments decide only where the copies land relative to the function's
   leading calls; retail has them after `mdlLoad`, which is the assignment form.
 
+## Two local vectors: declaration order fixes the stack offsets
+
+Local aggregates are laid out in declaration order from offset 0, each rounded
+to 16 bytes, so which of two `f32 v[4]` locals lands at `0($29)` decides
+whether a VU0 macro taking the address as a register operand gets a bare
+`$29` or retail's `addiu $2, $29, 0x10`. One wrong order shifts the whole body
+by a word: `dds3Particle_SparkBuffInit` sat at 55 matching words and 2008
+bytes until `position[4]` was declared before `direction[4]`, and went to 335
+matching words at the exact size on that line alone. Read the offsets in the
+retail `lqc2`/`sqc2` address setups before writing the declarations.
+
+## A value held in a callee-saved float register shares a local with the tail
+
+A local that is set and used inside one arm gets a call-clobbered register,
+because its allocno crosses no call; one given its own name per arm is
+block-local and lands in `$f0`. Where retail holds such a value in `$f20` or
+another callee-saved register, the source is reusing **one** local that is
+also live across a call somewhere else in the function. In both Spark
+`BuffInit` functions the per-arm jitter scale is the same local as the tail's
+`head.speedJitter`/`head.spinJitter`, and only that sharing puts it in `$f20`;
+its own local gives `$f5`, three per-arm locals give `$f0`, and either one
+costs the three `mul.s` registers and the schedule around them.
+
 ## Function-local constant arrays
 
 A block-scope initializer such as `s32 list[3] = {1, 11, 14};` goes to
@@ -1294,6 +1318,33 @@ schedule predicted. All 120 permutations of the five run in five seconds and the
 second one was exact: the float store `basic->poseset->r = obj->objectRadius;` has
 to precede `control->modelHandle = obj;`.
 
+## Duplicated tails and post-reload cross-jumping
+
+gcc 2.96 runs cross-jumping after reload, in `jump2`, so it compares
+instructions by their **allocated hard registers**. Two consequences, both
+measured on `dds3ParticleColorAnim`:
+
+- Where retail computes a value in both arms of an `if` but converts or
+  stores it once at the join, the source most likely duplicates the whole
+  tail in both arms and gcc merged the common suffix. Writing one shared tail
+  after the `if` instead loses the duplicated constant materialization that
+  the merge leaves behind: a `lui`/`ori` pair scheduled earlier in each arm
+  than the merged suffix stays in both arms, which is exactly what retail
+  shows. The draft went from 45 of 83 words to 64 on that change alone.
+- The merge stops as soon as one register differs, which is why retail can
+  keep two of three float-to-int conversions inside the arms and share only
+  the third. Do not read that asymmetry as asymmetric source.
+
+Beware the inverse trap: making the two arms' last instructions *identical*
+invites a merge retail does not have. Two arms that each end
+`alpha = product; alpha &= 0xFF000000;` get the `and` cross-jumped into the
+join and come out two words short, where the same two statements with the
+mask folded into the first expression in one arm only do not.
+
+Also: `objdump` collapses a run of identical instructions to `...`, so a pair
+of `nop`s that ee-gcc emitted before a `div.s` can look absent when you
+compare a disassembly by hand. Pass `-z`.
+
 ## Callee visibility: the cause of most one-word branch-likely misses
 
 This is the single most productive mechanism found so far, and it is one cheap
@@ -1342,6 +1393,30 @@ retail's `bne`, and compiling the parked `evtHokanColor` draft unguarded makes
 it byte-exact while `evtHokanColor` itself stays 9 words out. So the mechanism
 also tells you which pair to attack: a one-word annul miss next to a parked
 draft is a reason to spend the budget on the draft rather than on the caller.
+
+## Two global addresses in callee-saved registers can come out swapped
+
+A function that calls through two different global state pointers often keeps
+both addresses in callee-saved registers, rematerializing the `lui %hi` in
+each block and spending an `addiu %lo` per call. Which symbol gets which
+register is gcc's global-allocation priority tie-break
+(`floor_log2(n_refs) * freq / live_length`, then allocno number, which is
+pseudo creation order), and no source change found so far reaches it.
+
+Both large functions in `effect/parManager` stop on exactly this: with
+everything else identical, `dds3Particle_SparkBuffInit` is 490 of 512 words
+and `dds3Particle_SparkOffsetBuffInit` 462 of 484, at their exact sizes, with
+retail holding `dds3EffectBase` in `$21` and `ParRand` in `$20` and the
+drafts the other way round. The two pseudos have the same reference counts and
+the same first-reference order in both compiles, so the difference is below
+the source. Measured and rejected: `&ParRand` for `ParRand`; reordering the
+two tail statements that are each symbol's only tail use; all five non-retail
+orderings of the `switch` cases that hold the other uses; three forms of
+sharing or splitting the float local that sits in the same arms.
+
+Treat a diff that is only this swap as finished work: write the draft, say so,
+and spend the budget elsewhere. It is the same class of residual as the spill
+slot rotation in `fldSkyDrawFilter`.
 
 ## A caller can need its callee's definition, not just a prototype
 
