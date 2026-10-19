@@ -1387,4 +1387,11 @@ __asm__ volatile ( \
     : "=&r"(rgba[0]) \
     : "r"(age), "r"(unit))
 
+/* ee-gcc 2.96 promotes a float argument through its own runtime helper, which
+ * it calls fptodp; retail resolved that name to the routine the IDB calls
+ * sdfFloatToULong. The equate is an assembler alias to an extern, so .globl
+ * cannot share it: every unit that passes a float to a varargs call needs its
+ * own, after declaring sdfFloatToULong. */
+#define EQUATE_FPTODP() __asm__("fptodp = sdfFloatToULong")
+
 #endif /* PS2ASM_H */

@@ -61,11 +61,7 @@ typedef struct effLegacyInstance_t
 extern void *sdfChipAllocDirect(u32 size);
 extern void sdfChipFreeDirect(void *ptr);
 int printf(const char *fmt, ...);
-/* A float passed to printf is promoted by ee-gcc through its own helper call,
- * named fptodp; retail resolved that name to the routine the IDB calls
- * sdfFloatToULong. Equated here until one of the two names is central. */
-__asm__(".globl fptodp\n"
-        "fptodp = sdfFloatToULong\n");
+EQUATE_FPTODP();
 
 extern void dds3PolygonLinkOt(void);
 extern void dds3TrackPolyLinkOt(void);

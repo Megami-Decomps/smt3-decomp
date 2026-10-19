@@ -6,8 +6,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-/* EE GCC's software float-to-double promotion helper, named by the SMT3 IDB. */
-__asm__("fptodp = sdfFloatToULong");
+EQUATE_FPTODP();
 
 typedef struct { u8 unk00[8]; f32 degrees; u8 unk0C[4]; } pbFovWork_t;
 

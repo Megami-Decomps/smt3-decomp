@@ -1,9 +1,9 @@
 #include "common.h"
 #include "basic.h"
 #include "kernel.h"
+#include "ps2asm.h"
 
-/* EE GCC promotes %f arguments through SMT3's software conversion helper. */
-__asm__("fptodp = sdfFloatToULong");
+EQUATE_FPTODP();
 extern char D_0054F9D8[];
 extern char D_0054F9E0[];
 extern char D_0054F9E8[];

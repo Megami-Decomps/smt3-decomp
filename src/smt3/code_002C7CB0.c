@@ -1097,8 +1097,8 @@ s32 registerAtExit(void *fn, void *entry) {
     e->next = D_0059AD60;
     D_0059AD60 = e;
     SignalSema(D_0052C37C);
-    /* Empty asm: keeps the SignalSema call from becoming a sibcall. */
-    __asm__("");
+    /* Dead store: blocks the SignalSema sibcall. */
+    entry = NULL;
     return;
 }
 
@@ -1118,8 +1118,8 @@ s32 libc_2D25B0(void *fn, void *entry) {
     e->next = D_0059AD60;
     D_0059AD60 = e;
     SignalSema(D_0052C37C);
-    /* Empty asm: keeps the SignalSema call from becoming a sibcall. */
-    __asm__("");
+    /* Dead store: blocks the SignalSema sibcall. */
+    entry = NULL;
     return;
 }
 
@@ -1957,9 +1957,10 @@ long _read_r(_reent *r, s32 fd, char *buf, s32 n) {
     return result;
 }
 
-/* The handwritten syscall stubs below start 16 bytes past the end of the C
-   code, so the padding has to come from here. */
-__asm__("nop\nnop\nnop\nnop\n");
+/* Retail puts 16 zero bytes between the end of this unit's C code and the
+   handwritten syscall stubs below. Nothing in either side emits them, so the
+   padding has to be stated here. */
+__asm__(".space 16");
 
 INCLUDE_ASM(const s32, "code_002C7CB0", RFU000_FullReset);
 
