@@ -913,6 +913,33 @@ once per use, and a named local for it computes it once.
   both use the quartet this way.
 
 
+- A run of field copies between two objects of the same struct type gets its
+  loads and stores regrouped by the scheduler, and the alias set is the lever,
+  not the statement order. In `sdfModelCopyStat` retail copies `light`
+  (a `sdf3DLightParallelPacket_t *`), `faceDivSoften`, `fog`
+  (a `sdf3DFogPacket_t *`) and `faceDivBias` as two load/store pairs, while the
+  plain field assignments hoist both pointer loads together and spend a second
+  register: ee-gcc 2.96 gives each pointed-to type its own alias set, so a store
+  to `light` does not block a load of `fog` and the scheduler interleaves them.
+  Copying both through **one** set, `*(u32 *)&dst->light = *(u32 *)&src->light;`
+  and the same for `fog`, restores retail's grouping and took the function from
+  12 of 154 words to 4. `void **` on both reaches it too; `u32` on only one of
+  them, or on all four fields including the two `f32`s, does not. The last four
+  words were the fog and bias pair written above the `nodeList` reads rather
+  than below them, and all 120 permutations of the eight statements in that
+  tail were swept to find it: twelve of them sit at 2 words and exactly one is
+  exact, so sweep rather than reason.
+- An index into an array that is a **struct member** associates as
+  `(base + index * scale) + offsetof`, which is what leaves retail's constant in
+  the store displacement. A pointer local for the member
+  (`f32 *w = (f32 *)(tag + 1);` then `w[k]`) associates the other way,
+  `(base + offsetof) + index * scale`, and folds the constant into the base.
+  `sdfModelLinkShapedDrawPacket`'s two blend weights need a unit-local
+  `struct { sdfDmaTag_t dmatag; f32 weight[2]; u32 code0; u32 code1; }` with the
+  running `sdfDmaTag_t *` cast to it at each access, and advancing that one
+  pointer by `tag += 2` rather than keeping a second header pointer is what
+  gives retail's `addiu rd, rd, 32` in place.
+
 - A `jal fptodp` anywhere in the output means a float argument reaches a callee
   with no prototype in scope: the implicit declaration promotes it to double.
   This bites hard when a unit's helpers are **defined below** their callers, as
@@ -1394,6 +1421,17 @@ These have been ruled out repeatedly and are not worth a second attempt:
   long attack. No `!= 0` shape (plain `if`,
   ternary, `> 0`, `>= 1`, explicit `^ 0`, a `continue`, a local of either
   width) adds it; every one of them emits the `movn` alone.
+  `sdfModelLinkDrawPacket` in `sdf/sdfModel` is a second instance, on
+  `if (aMode != 0) { aOtIndex = packed >> 16; }`, and twenty-three spellings
+  were compiled and dumped in isolation against it: both ternary polarities,
+  an `if`/`else`, `== 0` with the arms swapped, `!!`, `-0`, `> 0` unsigned, a
+  one-case `switch`, a 0/1 condition local, three shapes of a zero local that
+  constant-folds, and `u8`/`u16`/`s8`/`s16`/`s64`/`u64`/pointer condition
+  types. The only thing that produces an `xori` at all is comparing against a
+  **non-zero** constant, so the zero case is not reachable. The missing
+  reference also costs the allocation: retail gives `aMode` a saved register
+  ahead of the next parameter, and without the `xori` the whole body's
+  registers rotate.
 - A `jal` plus a shared epilogue in a `switch` default arm, where `return`
   against `break`, a non-void or struct return type on the callee, and a dead
   assignment of the call's *result* all leave the arm a sibcall. A dead store
