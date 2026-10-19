@@ -52,7 +52,7 @@ extern s32 fldBgmReloadStep;
 
 extern s32 p2sdLoadCheckMidi(s32);
 
-extern s32 D_0054EE40;
+extern s32 MidiNo;
 
 extern void p2sdLoadSMGFile(s32);
 
@@ -367,15 +367,15 @@ INCLUDE_ASM(const s32, "field/fldSe", fldBgmLoad);
 s32 fldWaitBgmReload(void) {
     switch (fldBgmReloadStep) {
     case 0:
-        if (p2sdLoadCheckMidi(D_0054EE40) == 0) {
-            p2sdLoadSMGFile(D_0054EE40);
+        if (p2sdLoadCheckMidi(MidiNo) == 0) {
+            p2sdLoadSMGFile(MidiNo);
             fldBgmReloadStep = fldBgmReloadStep + 1;
         } else {
             fldBgmReloadStep = fldBgmReloadStep + 2;
         }
         break;
     case 1:
-        if (p2sdLoadCheckMidi(D_0054EE40) == 1) {
+        if (p2sdLoadCheckMidi(MidiNo) == 1) {
             fldBgmReloadStep = fldBgmReloadStep + 1;
         }
         break;
@@ -474,7 +474,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE38);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE3C);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EE40);
+INCLUDE_SDATA(const s32, "field/fldSe", MidiNo);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldBgmReloadStep);
 
@@ -598,7 +598,7 @@ INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF30);
 
 INCLUDE_SDATA(const s32, "field/fldSe", fldItemBoxCount);
 
-INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF38);
+INCLUDE_SDATA(const s32, "field/fldSe", hEffPart);
 
 INCLUDE_SDATA(const s32, "field/fldSe", D_0054EF3C);
 

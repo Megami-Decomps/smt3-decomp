@@ -784,7 +784,7 @@ void fldDoorLoad(s32 field);
 extern s32 scriptlabel;
 extern void *fldDrwZBuf;
 extern f32 fldWmFastMove;
-extern void *D_0054EC68;
+extern void *hPartialMultiBlur;
 extern s32 gfldPlayerHasiCnt;
 extern s32 gfldPlayerDamegeCnt;
 extern s32 fldPlayerStepDist;
@@ -2240,8 +2240,8 @@ s32 encDrawProc(dds3ProcessID_t *id) {
         if (encDrawState >= 13) {
             D_0055DAD8.source.displacement = D_0055DAD8.source.displacement + 0.001f;
             D_0055DAD8.extent = D_0055DAD8.extent - 2;
-            dds3EffectPartialMultiBlurSetParam(D_0054EC68, &D_0055DAD8);
-            dds3EffectPartialMultiBlurDraw(D_0054EC68);
+            dds3EffectPartialMultiBlurSetParam(hPartialMultiBlur, &D_0055DAD8);
+            dds3EffectPartialMultiBlurDraw(hPartialMultiBlur);
         }
         if (encDrawState >= 0x29) {
             rsetOtOfs(0x47);
@@ -2273,9 +2273,9 @@ s32 encDrawProc(dds3ProcessID_t *id) {
 void encFreeBlur(void)
 {
     gencOn = 0;
-    if (D_0054EC68 != NULL) {
-        dds3EffectPartialMultiBlurDelete(D_0054EC68);
-        D_0054EC68 = NULL;
+    if (hPartialMultiBlur != NULL) {
+        dds3EffectPartialMultiBlurDelete(hPartialMultiBlur);
+        hPartialMultiBlur = NULL;
     }
 }
 
@@ -2302,7 +2302,7 @@ void encStart(void) {
     D_0055DAD8.source.corners[0][1] = 0;
     D_0055DAD8.source.corners[1][0] = 0;
     D_0055DAD8.source.corners[1][1] = 0;
-    D_0054EC68 = dds3EffectPartialMultiBlurCreate(&D_0055DAD8);
+    hPartialMultiBlur = dds3EffectPartialMultiBlurCreate(&D_0055DAD8);
     gencOn = 1;
     if (dds3GetActiveScene() == NULL) {
         return;
@@ -5793,7 +5793,7 @@ INCLUDE_SDATA(const s32, "field/fldDraw", fldDrawEnv);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC60);
 
-INCLUDE_SDATA(const s32, "field/fldDraw", D_0054EC68);
+INCLUDE_SDATA(const s32, "field/fldDraw", hPartialMultiBlur);
 
 INCLUDE_SDATA(const s32, "field/fldDraw", gencMode);
 

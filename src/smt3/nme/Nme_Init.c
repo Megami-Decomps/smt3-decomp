@@ -122,5 +122,5 @@ INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516B0);
 
 INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516B8);
 
-INCLUDE_SDATA(const s32, "nme/Nme_Init", D_005516BC);
+INCLUDE_SDATA(const s32, "nme/Nme_Init", mccb);
 

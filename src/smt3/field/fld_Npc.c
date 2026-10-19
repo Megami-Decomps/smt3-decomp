@@ -136,7 +136,7 @@ extern sdfMemHandle_t *D_0054EF20;
 
 extern sdfMemHandle_t *D_0054EF24;
 
-extern sdfTexHandle_t *D_0054EF38;
+extern sdfTexHandle_t *hEffPart;
 
 extern void *fldItemBoxCount;
 
@@ -352,9 +352,9 @@ void fldFreeModelTable(void) {
         dds3EffectPartDelete(fldItemBoxCount);
         fldItemBoxCount = NULL;
     }
-    if (D_0054EF38 != NULL) {
-        sdfTexFreeDelayed(D_0054EF38);
-        D_0054EF38 = NULL;
+    if (hEffPart != NULL) {
+        sdfTexFreeDelayed(hEffPart);
+        hEffPart = NULL;
     }
     fldTakaraCount = 0;
     for (i = 0; i < 32; i++) {

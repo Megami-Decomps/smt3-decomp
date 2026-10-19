@@ -254,7 +254,7 @@ typedef struct
 } cmbSmokeParam_t;
 
 extern cmbSmokeParam_t D_0032DE20[];
-extern rcvWork_t *D_0054FBB0;
+extern rcvWork_t *shutdownfunc;
 extern char D_0053CF10[];
 extern void sortSkillList(cmbUnit_t *unit);
 extern void p2sdStopBGM(s32 id);
@@ -3088,15 +3088,15 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclRecoverUpdateInit);
 
 void fclDestroyRecover(void)
 {
-    if (D_0054FBB0 == NULL) {
+    if (shutdownfunc == NULL) {
         return;
     }
-    fclRecoverFreeTextures((fclRecoverWork_t *)D_0054FBB0);
-    fclScriptForcedEnd(D_0054FBB0->unk_44D0);
-    sdfMemFreeDirect(D_0054FBB0->unk_44C8);
+    fclRecoverFreeTextures((fclRecoverWork_t *)shutdownfunc);
+    fclScriptForcedEnd(shutdownfunc->unk_44D0);
+    sdfMemFreeDirect(shutdownfunc->unk_44C8);
     fclRecoverEventEnd();
-    sdfMemFreeDirect(D_0054FBB0->allocation);
-    D_0054FBB0 = NULL;
+    sdfMemFreeDirect(shutdownfunc->allocation);
+    shutdownfunc = NULL;
     gProcessStat_2 = 2;
     evtDisableMoonDraw();
     p2sdStopBGM(0x300000);
@@ -3128,8 +3128,8 @@ s32 rcvCheckProcessStat(void)
 
 void func_0020DBC8(void)
 {
-    if (D_0054FBB0 != NULL) {
-        D_0054FBB0->flags |= 0x10;
+    if (shutdownfunc != NULL) {
+        shutdownfunc->flags |= 0x10;
     }
 }
 
@@ -9707,16 +9707,16 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_00540030);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpBadEffSetup);
 
-extern void *D_0054FEE8;
+extern void *hCAMPBadEffect;
 extern void effCAMPBadDelete(void *eff);
 extern char D_00540058[];
 
 void cmpFreeBadEffect(void)
 {
-    if (D_0054FEE8 != NULL)
+    if (hCAMPBadEffect != NULL)
     {
-        effCAMPBadDelete(D_0054FEE8);
-        D_0054FEE8 = NULL;
+        effCAMPBadDelete(hCAMPBadEffect);
+        hCAMPBadEffect = NULL;
         printf(D_00540058);
     }
 }
@@ -11569,7 +11569,7 @@ INCLUDE_SDATA(const s32, "code_001FAE80", D_0054FBA0);
 
 INCLUDE_SDATA(const s32, "code_001FAE80", D_0054FBA8);
 
-INCLUDE_SDATA(const s32, "code_001FAE80", D_0054FBB0);
+INCLUDE_SDATA(const s32, "code_001FAE80", shutdownfunc);
 
 INCLUDE_SDATA(const s32, "code_001FAE80", gProcessStat_2);
 
@@ -11841,7 +11841,7 @@ INCLUDE_SDATA(const s32, "code_001FAE80", D_0054FEE0);
 
 INCLUDE_SDATA(const s32, "code_001FAE80", cmpEncycWork);
 
-INCLUDE_SDATA(const s32, "code_001FAE80", D_0054FEE8);
+INCLUDE_SDATA(const s32, "code_001FAE80", hCAMPBadEffect);
 
 INCLUDE_SDATA(const s32, "code_001FAE80", cmpStatusModelReady);
 

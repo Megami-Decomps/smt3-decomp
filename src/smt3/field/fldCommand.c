@@ -75,7 +75,7 @@ extern s32 D_0054EE3C;
 
 extern s32 fldBgmReloadStep;
 
-extern s32 D_0054EE40;
+extern s32 MidiNo;
 
 extern s32 fldBgmLoadStep;
 
@@ -473,7 +473,7 @@ extern sdfMemHandle_t *D_0054EF20;
 
 extern sdfMemHandle_t *D_0054EF24;
 
-extern sdfTexHandle_t *D_0054EF38;
+extern sdfTexHandle_t *hEffPart;
 
 extern void *fldItemBoxCount;
 

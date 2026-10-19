@@ -165,7 +165,7 @@ extern fldDanteGunWork_t fldRunDanteGunFlag;
 extern s32 fldPlayerStepDist;
 extern u8 fldDoorExitFlag;
 extern s8 fldDoorExitMode[];
-extern char D_0054EB30[];
+extern char pointResName[];
 extern char D_00531690[], D_00531940[], D_00531950[];
 extern s32 fldProcShutDownFlg;
 extern s32 ProcSequence(dds3ProcessID_t *process);
@@ -193,7 +193,7 @@ extern void mdlSingleMotion(void *model, s32 motion, s32 flag);
 extern void dds3GlobalWorkUserInit2(s32 mode);
 extern s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz);
 extern dds3Basic_t *fldAnaBasic;
-extern void *D_0054EB5C;
+extern void *hDistortionBlur;
 extern u16 fldRunDanteStartX[2];
 extern void fldRunDanteCollision(void);
 extern void fldRunDanteAi(void);
@@ -2592,7 +2592,7 @@ void fldMainLoadStart(void) {
     fldRunDanteGunFlag.enabled = 1;
     evtBitOn(0xC0F);
     fldSetNextField(0, 0);
-    fldSetSceneParam2(&record, 1, 1, D_0054EB30);
+    fldSetSceneParam2(&record, 1, 1, pointResName);
     record.options = 1;
     dds3AdminiCallSequence(6, &record, 0xA0, 0);
 }
@@ -3657,9 +3657,9 @@ void fldProcShutDown(void)
     fldFreeInputPanel();
     evtDisableMoonDraw();
     fldFreeAddressProcess();
-    if (D_0054EB5C != NULL) {
-        dds3EffectDistortionBlurDelete(D_0054EB5C);
-        D_0054EB5C = NULL;
+    if (hDistortionBlur != NULL) {
+        dds3EffectDistortionBlurDelete(hDistortionBlur);
+        hDistortionBlur = NULL;
     }
     campKillProcesses();
     scrAllReleaseScript();
@@ -3870,7 +3870,7 @@ INCLUDE_SDATA(const s32, "code_00116AD0", gfldWavePtr);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", gfldWaveSize);
 
-INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB30);
+INCLUDE_SDATA(const s32, "code_00116AD0", pointResName);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB38);
 
@@ -3886,7 +3886,7 @@ INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB54);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", fldEncountSagasiFlag);
 
-INCLUDE_SDATA(const s32, "code_00116AD0", D_0054EB5C);
+INCLUDE_SDATA(const s32, "code_00116AD0", hDistortionBlur);
 
 INCLUDE_SDATA(const s32, "code_00116AD0", gFldRndEncBtl);
 

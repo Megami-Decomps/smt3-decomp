@@ -41,7 +41,7 @@ extern s32 gslInfoCode;
 
 extern s32 slChooseSaveIndex;
 
-extern u32 D_005516BC;
+extern u32 mccb;
 
 void sdfMcSetSlotIndex(s32 request, s32 selectedSlot);
 
@@ -590,7 +590,7 @@ void mcMakeFileName(char *dst, s32 number) {
 }
 
 void slVersionConvert_Step1(void) {
-    version_convert_ver = *(D_00569743 + sdfMcGetSlotIndex(D_005516BC) * 52);
+    version_convert_ver = *(D_00569743 + sdfMcGetSlotIndex(mccb) * 52);
 }
 
 /* Save revisions have different persistent block extents. Keeping this
@@ -923,8 +923,8 @@ s32 slHeadLoad(void) {
     s32 slot;
     s32 len;
 
-    sdfMcSetSlotIndex(D_005516BC, slChooseSaveIndex);
-    ctx = D_005516BC;
+    sdfMcSetSlotIndex(mccb, slChooseSaveIndex);
+    ctx = mccb;
     slot = sdfMcGetSlotIndex(ctx);
     if ((sdfMcGetSlotFlags(ctx, slot) & SL_SLOT_FLAG_CAN_READ_SAVE) == 0) {
         return slChooseData_getCardInfoNext();
@@ -1051,27 +1051,27 @@ s32 slBootError2(void) {
 }
 
 s32 slNoCard(void) {
-    sdfMcSetCardStat(D_005516BC);
-    sdfMcClearSlotFlags(D_005516BC, 0);
-    sdfMcClearSlotFlags(D_005516BC, 1);
-    sdfMcClearSlotFlags(D_005516BC, 2);
-    sdfMcClearSlotFlags(D_005516BC, 3);
-    sdfMcClearSlotFlags(D_005516BC, 4);
+    sdfMcSetCardStat(mccb);
+    sdfMcClearSlotFlags(mccb, 0);
+    sdfMcClearSlotFlags(mccb, 1);
+    sdfMcClearSlotFlags(mccb, 2);
+    sdfMcClearSlotFlags(mccb, 3);
+    sdfMcClearSlotFlags(mccb, 4);
     slSetInfo(0);
     gslErrorCode = 1;
     gslErrorKeyFlag = 0;
-    sdfMcRegetInfo(D_005516BC);
+    sdfMcRegetInfo(mccb);
     return (s32)slErrorWaitMc;
 }
 
 s32 slTop(void) {
     gSlSelCnt = 0;
-    sdfMcSetCardStat(D_005516BC);
-    sdfMcClearSlotFlags(D_005516BC, 0);
-    sdfMcClearSlotFlags(D_005516BC, 1);
-    sdfMcClearSlotFlags(D_005516BC, 2);
-    sdfMcClearSlotFlags(D_005516BC, 3);
-    sdfMcClearSlotFlags(D_005516BC, 4);
+    sdfMcSetCardStat(mccb);
+    sdfMcClearSlotFlags(mccb, 0);
+    sdfMcClearSlotFlags(mccb, 1);
+    sdfMcClearSlotFlags(mccb, 2);
+    sdfMcClearSlotFlags(mccb, 3);
+    sdfMcClearSlotFlags(mccb, 4);
     slTopMenuSel[0] = 0;
     slTopMenuSel[1] = 0;
     slTopMenuSel[2] = 0;
@@ -1124,12 +1124,12 @@ s32 slExitToTitle2(void) {
 }
 
 s32 slCardChk(void) {
-    sdfMcSetCardStat(D_005516BC);
-    sdfMcClearSlotFlags(D_005516BC, 0);
-    sdfMcClearSlotFlags(D_005516BC, 1);
-    sdfMcClearSlotFlags(D_005516BC, 2);
-    sdfMcClearSlotFlags(D_005516BC, 3);
-    sdfMcClearSlotFlags(D_005516BC, 4);
+    sdfMcSetCardStat(mccb);
+    sdfMcClearSlotFlags(mccb, 0);
+    sdfMcClearSlotFlags(mccb, 1);
+    sdfMcClearSlotFlags(mccb, 2);
+    sdfMcClearSlotFlags(mccb, 3);
+    sdfMcClearSlotFlags(mccb, 4);
     slSetInfo(1);
     gslErrorCode = 0;
     gslDrawFlagFile = 0;
@@ -1147,7 +1147,7 @@ s32 slFileSel(void) {
     gSlFileErroeFlg = 0;
     gslDrawFlagFile = 1;
     for (i = 0; i < 5; i++) {
-        u32 flags = sdfMcGetSlotFlags(D_005516BC, i);
+        u32 flags = sdfMcGetSlotFlags(mccb, i);
 
         slTopMenuSel[i] = 0;
         if (flags & SL_SLOT_FLAG_CAN_READ_SAVE) {
@@ -1164,7 +1164,7 @@ s32 slFileSel(void) {
             }
         }
     }
-    sdfMcRegetInfo(D_005516BC);
+    sdfMcRegetInfo(mccb);
     return (s32)slFileSelCalc;
 }
 
@@ -1207,20 +1207,20 @@ s32 slSaveProc_CheckCard(void) {
     }
     if (gslCheckCardWait > 0) {
         gslCheckCardWait--;
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
         return 0;
     }
-    switch (sdfMcGetFileInfoReady(D_005516BC)) {
+    switch (sdfMcGetFileInfoReady(mccb)) {
     case 0:
         return slNoCard();
     case 2:
         if (gslMode == 0) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
             slSetInfo(0);
             gslErrorCode = 0;
             slQueryYesNoMsg = 2;
@@ -1229,19 +1229,19 @@ s32 slSaveProc_CheckCard(void) {
         slSetInfo(0);
         gslErrorCode = 7;
         gslErrorKeyFlag = 0;
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
         return (s32)slErrorWaitMc;
     case 3:
-        sdfMcSetCardStat(D_005516BC);
-        sdfMcClearSlotFlags(D_005516BC, 0);
-        sdfMcClearSlotFlags(D_005516BC, 1);
-        sdfMcClearSlotFlags(D_005516BC, 2);
-        sdfMcClearSlotFlags(D_005516BC, 3);
-        sdfMcClearSlotFlags(D_005516BC, 4);
+        sdfMcSetCardStat(mccb);
+        sdfMcClearSlotFlags(mccb, 0);
+        sdfMcClearSlotFlags(mccb, 1);
+        sdfMcClearSlotFlags(mccb, 2);
+        sdfMcClearSlotFlags(mccb, 3);
+        sdfMcClearSlotFlags(mccb, 4);
         slSetInfo(0);
         gslErrorCode = 2;
         gslErrorKeyFlag = 0;
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
         return (s32)slErrorWaitMc;
     case 1:
         return slChooseData();
@@ -1254,7 +1254,7 @@ s32 sl1Ken(void) {
     s32 count = 0;
 
     do {
-        u32 flags = sdfMcGetSlotFlags(D_005516BC, i);
+        u32 flags = sdfMcGetSlotFlags(mccb, i);
 
         i++;
         if (flags & SL_SLOT_FLAG_CAN_READ_SAVE) {
@@ -1269,7 +1269,7 @@ s32 sl1Ken(void) {
 }
 
 s32 slSizeChk(void) {
-    return sdfMcGetFreeBytes(D_005516BC) > 0x293FF;
+    return sdfMcGetFreeBytes(mccb) > 0x293FF;
 }
 
 s32 slBootProc_CheckCard(void) {
@@ -1279,10 +1279,10 @@ s32 slBootProc_CheckCard(void) {
     }
     if (gslCheckCardWait > 0) {
         gslCheckCardWait--;
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
         return 0;
     }
-    switch (sdfMcGetFileInfoReady(D_005516BC)) {
+    switch (sdfMcGetFileInfoReady(mccb)) {
     case 0:
     case 3:
         return slBootError();
@@ -1304,10 +1304,10 @@ s32 slBootProc_CheckCardR(void) {
     }
     if (gslCheckCardWait > 0) {
         gslCheckCardWait--;
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
         return 0;
     }
-    switch (sdfMcGetFileInfoReady(D_005516BC)) {
+    switch (sdfMcGetFileInfoReady(mccb)) {
     case 0:
     case 3:
         return slBootError();
@@ -1347,71 +1347,71 @@ s32 slErrorWaitMc(void) {
             }
             return slExitToTitle2();
         }
-        switch (sdfMcGetFileInfoReady(D_005516BC)) {
+        switch (sdfMcGetFileInfoReady(mccb)) {
         case 1:
             if (gslErrorCode == 1) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 slSetInfo(1);
                 gslErrorCode = 0;
                 gslDrawFlagFile = 0;
                 return slTop();
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         case 0:
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
             if (gslErrorCode != 1) {
                 gslErrorCode = 1;
                 gslErrorKeyFlag = 0;
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         case 2:
             if (gslMode == 0) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 gslErrorCode = 0;
                 slQueryYesNoMsg = 2;
                 return slQueryYesNo(slFormatStart, slFormatCancel, 1);
             }
             if (gslErrorCode != 7) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 gslErrorCode = 7;
                 gslErrorKeyFlag = 0;
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         case 3:
             if (gslErrorCode != 2) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 gslErrorCode = 2;
                 gslErrorKeyFlag = 0;
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         }
     }
@@ -1432,12 +1432,12 @@ s32 slErrorWaitToFileMc(void) {
             gslErrorCode = 0;
             return slFileSel();
         }
-        if (sdfMcGetFileInfoReady(D_005516BC) != 1) {
+        if (sdfMcGetFileInfoReady(mccb) != 1) {
             gslErrorCode = 0;
             gslDrawFlagFile = 0;
             return slTop();
         }
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
     }
     return 0;
 }
@@ -1488,7 +1488,7 @@ s32 slHitAnyKeyNoChkProc(void) {
 s32 slHitAnyKey(u32 callback) {
     slHitAnyKeyNextFunc = callback;
     gslErrorKeyFlag = 0;
-    sdfMcRegetInfo(D_005516BC);
+    sdfMcRegetInfo(mccb);
     return (s32)slHitAnyKeyProc;
 }
 
@@ -1513,63 +1513,63 @@ s32 slHitAnyKeyProc(void) {
             }
             return ((s32 (*)())slHitAnyKeyNextFunc)();
         }
-        switch (sdfMcGetFileInfoReady(D_005516BC)) {
+        switch (sdfMcGetFileInfoReady(mccb)) {
         case 1:
             if (gslErrorCode == 1) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 slSetInfo(1);
                 gslErrorCode = 0;
                 gslDrawFlagFile = 0;
                 return slTop();
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         case 0:
             return slNoCard();
         case 2:
             if (gslMode == 0) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 slSetInfo(0);
                 gslErrorCode = 0;
                 slQueryYesNoMsg = 2;
                 return slQueryYesNo(slFormatStart, slFormatCancel, 1);
             }
             if (gslErrorCode != 7) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 slSetInfo(0);
                 gslErrorCode = 7;
                 gslErrorKeyFlag = 0;
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         case 3:
             if (gslErrorCode != 2) {
-            sdfMcSetCardStat(D_005516BC);
-            sdfMcClearSlotFlags(D_005516BC, 0);
-            sdfMcClearSlotFlags(D_005516BC, 1);
-            sdfMcClearSlotFlags(D_005516BC, 2);
-            sdfMcClearSlotFlags(D_005516BC, 3);
-            sdfMcClearSlotFlags(D_005516BC, 4);
+            sdfMcSetCardStat(mccb);
+            sdfMcClearSlotFlags(mccb, 0);
+            sdfMcClearSlotFlags(mccb, 1);
+            sdfMcClearSlotFlags(mccb, 2);
+            sdfMcClearSlotFlags(mccb, 3);
+            sdfMcClearSlotFlags(mccb, 4);
                 slSetInfo(0);
                 gslErrorCode = 2;
                 gslErrorKeyFlag = 0;
             }
-            sdfMcRegetInfo(D_005516BC);
+            sdfMcRegetInfo(mccb);
             goto done;
         }
     }
@@ -1582,7 +1582,7 @@ s32 slChooseData_getCardInfo(void) {
 
     buf[0] = 0x2F;
     mcMakeFileName(&buf[1], slChooseSaveIndex);
-    sdfMcFuncChdir(D_005516BC, (const char *)buf);
+    sdfMcFuncChdir(mccb, (const char *)buf);
     return (s32)slChooseData_getCardInfo2;
 }
 
@@ -1593,8 +1593,8 @@ s32 slChooseData_getCardInfo2(void) {
         return 0;
     }
     if (t == SL_MC_RESULT_SUCCESS) {
-        sdfMcSetSlotFlags(D_005516BC, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
-        sdfMcFuncGetDir(D_005516BC, D_005328E0, D_005696C0, 1);
+        sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
+        sdfMcFuncGetDir(mccb, D_005328E0, D_005696C0, 1);
         return (s32)slChooseData_getCardInfo3;
     }
     if (t == SL_MC_RESULT_ERROR) {
@@ -1611,7 +1611,7 @@ s32 slChooseData_getCardInfo3(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         if (value == 1) {
-            sdfMcSetSlotFlags(D_005516BC, slChooseSaveIndex,
+            sdfMcSetSlotFlags(mccb, slChooseSaveIndex,
                                 SL_SLOT_FLAG_CAN_READ_SAVE | SL_SLOT_FLAG_DELETE_BEFORE_WRITE);
         }
         return slHeadLoad();
@@ -1627,7 +1627,7 @@ s32 slChooseData_getCardInfoNext(void) {
 
     slChooseSaveIndex = index;
     if (index == 5) {
-        sdfMcClearCardStat(D_005516BC);
+        sdfMcClearCardStat(mccb);
         slChooseSaveIndex = 0;
         gSlNowCardCheck = 0;
         if (sl1Ken() == 0) {
@@ -1636,7 +1636,7 @@ s32 slChooseData_getCardInfoNext(void) {
                 slSetInfo(0);
                 gslErrorCode = 7;
                 gslErrorKeyFlag = 0;
-                sdfMcRegetInfo(D_005516BC);
+                sdfMcRegetInfo(mccb);
                 return (s32)slErrorWaitMc;
             }
             if (slSizeChk() == 0) {
@@ -1644,7 +1644,7 @@ s32 slChooseData_getCardInfoNext(void) {
                 gslDrawFlagFile = 0;
                 gslErrorCode = 5;
                 gslErrorKeyFlag = 0;
-                sdfMcRegetInfo(D_005516BC);
+                sdfMcRegetInfo(mccb);
                 return (s32)slErrorWaitMc;
             }
         }
@@ -1657,12 +1657,12 @@ s32 slChooseData_getCardInfoNext(void) {
 s32 slChooseData(void) {
     s32 i;
 
-    if (sdfMcGetStatus(D_005516BC) != 0) {
+    if (sdfMcGetStatus(mccb) != 0) {
         slSetInfo(1);
         slChooseSaveIndex = 0;
         for (i = 0; i < 5; i++) {
             slTopMenuSel[i] = 0;
-            sdfMcClearSlotFlags(D_005516BC, i);
+            sdfMcClearSlotFlags(mccb, i);
         }
         return slChooseData_getCardInfo();
     }
@@ -1676,7 +1676,7 @@ s32 slChooseData_getCardInfo_B(void) {
 
     buf[0] = 0x2F;
     mcMakeFileName(&buf[1], slChooseSaveIndex);
-    sdfMcFuncChdir(D_005516BC, (const char *)buf);
+    sdfMcFuncChdir(mccb, (const char *)buf);
     return (s32)slChooseData_getCardInfo2_B;
 }
 
@@ -1687,8 +1687,8 @@ s32 slChooseData_getCardInfo2_B(void) {
         return 0;
     }
     if (t == SL_MC_RESULT_SUCCESS) {
-        sdfMcSetSlotFlags(D_005516BC, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
-        sdfMcFuncGetDir(D_005516BC, D_005328E0, D_005696C0, 1);
+        sdfMcSetSlotFlags(mccb, slChooseSaveIndex, SL_SLOT_FLAG_DIRECTORY_READY);
+        sdfMcFuncGetDir(mccb, D_005328E0, D_005696C0, 1);
         return (s32)slChooseData_getCardInfo3_B;
     }
     if (t == SL_MC_RESULT_ERROR) {
@@ -1708,7 +1708,7 @@ s32 slChooseData_getCardInfo3_B(void) {
     }
     if (status == SL_MC_RESULT_SUCCESS) {
         if (value == 1) {
-            sdfMcSetSlotFlags(D_005516BC, slChooseSaveIndex,
+            sdfMcSetSlotFlags(mccb, slChooseSaveIndex,
                                 SL_SLOT_FLAG_CAN_READ_SAVE | SL_SLOT_FLAG_DELETE_BEFORE_WRITE);
         }
         return slChooseData_getCardInfoNext_B();
@@ -1724,7 +1724,7 @@ s32 slChooseData_getCardInfo3_B(void) {
 
 s32 slChooseData_getCardInfoNext_B(void) {
     s32 slot = slChooseSaveIndex;
-    s32 buttons = sdfMcGetSlotFlags(D_005516BC, slot);
+    s32 buttons = sdfMcGetSlotFlags(mccb, slot);
 
     slot++;
     if (buttons & SL_SLOT_FLAG_CAN_READ_SAVE) {
@@ -1754,12 +1754,12 @@ s32 slChooseData_B(void) {
     slSetInfo(1);
     gslDrawFlagFile = 0;
     slChooseSaveIndex = 0;
-    sdfMcSetCardStat(D_005516BC);
+    sdfMcSetCardStat(mccb);
     selection = slTopMenuSel;
     do {
         *selection = 0;
         selection++;
-        sdfMcClearSlotFlags(D_005516BC, i);
+        sdfMcClearSlotFlags(mccb, i);
         i++;
     } while (i < 5);
     return slChooseData_getCardInfo_B();
@@ -1767,7 +1767,7 @@ s32 slChooseData_B(void) {
 
 s32 slSaveData(void) {
     u8 name[0x50];
-    u32 entry = D_005516BC;
+    u32 entry = mccb;
     s32 slot = sdfMcGetSlotIndex(entry);
     sdfMcGetSlotFlags(entry, slot);
     slSetInfo(2);
@@ -1783,7 +1783,7 @@ s32 slSaveData(void) {
 
 s32 slSaveData_chdir(void) {
     u8 buf[0x50];
-    u32 entry = D_005516BC;
+    u32 entry = mccb;
     s32 slot = sdfMcGetSlotIndex(entry);
 
     buf[0] = 0x2F;
@@ -1798,7 +1798,7 @@ s32 slSaveProc_Write_mkdir(void) {
         return 0;
     }
     if (status == SL_MC_RESULT_SUCCESS) {
-        sdfMcSetSlotFlags(D_005516BC, slFileSelError, SL_SLOT_FLAG_DIRECTORY_READY);
+        sdfMcSetSlotFlags(mccb, slFileSelError, SL_SLOT_FLAG_DIRECTORY_READY);
         return slSaveData_chdir();
     }
     slSetInfo(0);
@@ -1841,8 +1841,8 @@ s32 slSaveProc_Write_deleteIconSys(void) {
 }
 
 s32 slSaveProc_doNothing(void) {
-    sdfMcSetSlotFlags(D_005516BC, slFileSelError, SL_SLOT_FLAG_CAN_READ_SAVE);
-    sdfMcSetSlotFlags(D_005516BC, slFileSelError, SL_SLOT_FLAG_DELETE_BEFORE_WRITE);
+    sdfMcSetSlotFlags(mccb, slFileSelError, SL_SLOT_FLAG_CAN_READ_SAVE);
+    sdfMcSetSlotFlags(mccb, slFileSelError, SL_SLOT_FLAG_DELETE_BEFORE_WRITE);
     slSetInfo(4);
     return slHitAnyKey((u32)slFileSel);
 }
@@ -1871,7 +1871,7 @@ s32 slSaveData_writeFile(void) {
     char path[0x50];
     slFileHead_t *hdr;
     u8 *rec;
-    s32 slot = sdfMcGetSlotIndex(D_005516BC);
+    s32 slot = sdfMcGetSlotIndex(mccb);
 
     mcMakeFileName(path, slot);
     SL_FILE_HEAD->verstr[0] = 'V';
@@ -1916,7 +1916,7 @@ INCLUDE_ASM(const s32, "mc/slMain", slSaveData_writeFile);
 #endif
 
 s32 slSaveData_deleteIconSys(void) {
-    u32 entry = D_005516BC;
+    u32 entry = mccb;
     s32 slot = sdfMcGetSlotIndex(entry);
     u32 flags = sdfMcGetSlotFlags(entry, slot);
     if (!(flags & SL_SLOT_FLAG_DELETE_BEFORE_WRITE)) {
@@ -1931,7 +1931,7 @@ s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlo
     slSaveWriteFile_size = dataSizeSlot;
     slSaveWriteFile_endFunc = continuation;
     slSaveWriteFile_dataWaitPtr = pendingRequestStatus;
-    sdfMcFuncOpen(D_005516BC, fileName, 0x203);
+    sdfMcFuncOpen(mccb, fileName, 0x203);
     return (s32)slSaveProc_openFile;
 }
 
@@ -2015,7 +2015,7 @@ s32 slProc_Format(void) {
 s32 slFormatStart(void) {
     slSetInfo(5);
     dds3SoftResetOff();
-    sdfMcFuncFormat(D_005516BC);
+    sdfMcFuncFormat(mccb);
     return (s32)slProc_Format;
 }
 
@@ -2030,7 +2030,7 @@ s32 slFormatCancel(void) {
 
 s32 slLoadData(void) {
     char path[0x50];
-    u32 ctx = D_005516BC;
+    u32 ctx = mccb;
     s32 slot = sdfMcGetSlotIndex(ctx);
     u32 attr = sdfMcGetSlotFlags(ctx, slot);
     u32 len;
@@ -2239,12 +2239,12 @@ void fmProcTrigSequence(s32 mode) {
     slQueryYesNoKeyFlag = 0;
     gSlMcAccessCnt = 0;
     gSlWindowCnt = 0;
-    sdfMcSetCardStat(D_005516BC);
-    sdfMcClearSlotFlags(D_005516BC, 0);
-    sdfMcClearSlotFlags(D_005516BC, 1);
-    sdfMcClearSlotFlags(D_005516BC, 2);
-    sdfMcClearSlotFlags(D_005516BC, 3);
-    sdfMcClearSlotFlags(D_005516BC, 4);
+    sdfMcSetCardStat(mccb);
+    sdfMcClearSlotFlags(mccb, 0);
+    sdfMcClearSlotFlags(mccb, 1);
+    sdfMcClearSlotFlags(mccb, 2);
+    sdfMcClearSlotFlags(mccb, 3);
+    sdfMcClearSlotFlags(mccb, 4);
     scene = dds3GetActiveScene();
     if (scene != NULL) {
         dds3VisibleSceneBasic(scene, 0);
@@ -2273,7 +2273,7 @@ s32 slQueryYesNo(void *start, void *finish, s32 mode) {
     slQueryYesNoCursor = mode;
     slQueryYesNoKeyFlag = 0;
     if (slQueryYesNoMsg != 4 && slQueryYesNoMsg != 8) {
-        sdfMcRegetInfo(D_005516BC);
+        sdfMcRegetInfo(mccb);
     }
     return (s32)slQueryYesNoProc;
 }
