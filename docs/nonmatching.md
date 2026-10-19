@@ -12,7 +12,9 @@ picking a draft up, or you will repeat the search.
 
 A draft is not evidence of anything. It is not compiled by the build, so
 `python3 tools/check_nonmatching.py` compiles every draft and checks that each
-has an entry here.
+has an entry here. `python3 tools/progress.py` counts the drafts as their own
+measure, apart from the matched functions and bytes, and the progress site
+shows the same count and marks the drafted functions in each unit.
 
 **Write the measurement as "N of M words match", never "N of M words".** The
 bare form is ambiguous and has already misled: an entry reading "10 of 146"

@@ -7,7 +7,7 @@ the [progress site](#progress-site).
 ## What counts
 
 A function counts only when the normal build proves that C supplies the exact
-retail bytes for it. Two things that look like progress do not count:
+retail bytes for it. Three things that look like progress do not count:
 
 - **A matching build.** The ELF is byte-identical from the first configure,
   because every function that has no C is assembled from the retail code. A
@@ -17,6 +17,11 @@ retail bytes for it. Two things that look like progress do not count:
   functions and retail code bytes no longer named by an `INCLUDE_ASM`
   directive. That is source coverage. It does not compile or compare anything,
   so it is an upper bound on what is actually matched.
+- **A non-matching draft.** A reconstruction kept behind `#ifdef NON_MATCHING`
+  is never compiled by the build, which takes the assembly fallback instead.
+  Drafts are counted on their own, against what is still assembled rather than
+  against the game, and are never added to matched functions or bytes. See
+  [Non-matching drafts](nonmatching.md).
 
 Unfinished functions stay in the denominator. Function counts and code bytes
 are reported separately: a short and a large function each count once in the
@@ -140,7 +145,8 @@ verified in the same run.
 bytes from the source inventory alone, which is the cross-check that matters:
 the reconciler credits nothing that is still an `INCLUDE_ASM` line, and the
 source inventory credits nothing the link does not supply from C. 4,331
-`INCLUDE_ASM` lines remain in `src/smt3`.
+`INCLUDE_ASM` lines remain in `src/smt3`. Its second line counts the
+non-matching drafts among those, which earn nothing in either measure.
 
 Raw objdiff, before reconciliation, reports 5,153 functions and 512,244 bytes
 for the same tree (`build/smt3/report.json.raw`). The 210-function, 81,496-byte gap
@@ -180,7 +186,7 @@ python -m http.server -d build/site         # preview
 
 | File | Contents |
 |---|---|
-| `index.html` | headline, history chart, categories, every unit with its functions |
+| `index.html` | headline, draft counter, history chart, categories, every unit with its functions |
 | `history.json` | one entry per published commit: matched and total code bytes and functions |
 | `report.json` | the game-scope report the page was rendered from |
 | `badges/code.json`, `badges/functions.json` | [shields.io endpoint](https://shields.io/badges/endpoint-badge) badges the README uses |

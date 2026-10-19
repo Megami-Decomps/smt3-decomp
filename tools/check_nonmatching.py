@@ -38,6 +38,17 @@ def units(args):
             if GUARD in Path(p).read_text()]
 
 
+def draft_functions(version: str = "smt3") -> dict[str, set[str]]:
+    """Map each unit, relative to src/<version> and without .c, to its drafts."""
+    src = ROOT / "src" / version
+    drafts = {}
+    for path in sorted(src.rglob("*.c")):
+        names = set(DRAFT.findall(path.read_text()))
+        if names:
+            drafts[path.relative_to(src).with_suffix("").as_posix()] = names
+    return drafts
+
+
 def compile_unit(path: Path) -> str:
     """Return cc1's diagnostics, empty when the draft compiles."""
     cc1 = ROOT / "tools/compilers/ee-gcc2.96/lib/gcc-lib/ee/2.96-ee-001003-1/cc1"

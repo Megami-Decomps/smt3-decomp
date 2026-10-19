@@ -69,5 +69,25 @@ class SparseMeasureTests(unittest.TestCase):
         self.assertIn("500 / 2,000 bytes", page)
 
 
+class DraftTests(unittest.TestCase):
+    REPORT = SparseMeasureTests.REPORT
+
+    def page(self, drafts: dict) -> str:
+        return progress_site.render("smt3", self.REPORT, SparseMeasureTests.AUDIT, [], None,
+                                    "0" * 40, "2026-10-18T00:00:00+00:00", drafts)
+
+    def test_a_draft_is_counted_apart_from_matched_functions(self) -> None:
+        page = self.page({"code_00100000": {"todoFunc"}})
+        self.assertIn("<h2>Non-matching drafts</h2>", page)
+        self.assertIn('<p class="big">1</p>', page)
+        self.assertIn("of 3 unmatched functions", page)
+        self.assertIn('<li class="draft"><span>todoFunc</span>', page)
+
+    def test_drafts_outside_the_published_scope_are_not_counted(self) -> None:
+        page = self.page({"elsewhere/unit": {"otherFunc"}})
+        self.assertIn('<p class="big">0</p>', page)
+        self.assertNotIn('class="draft"', page)
+
+
 if __name__ == "__main__":
     unittest.main()

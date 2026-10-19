@@ -56,8 +56,10 @@ names yet. The Sony SDK libraries are prebuilt archives and stay assembly.
 python tools/progress.py
 ```
 
-reports how many functions and retail code bytes no longer use `INCLUDE_ASM`.
-It does not verify matching; see [Reading progress](progress.md).
+reports how many functions and retail code bytes no longer use `INCLUDE_ASM`,
+and, on a second line, how many of the functions that are left have a
+non-matching draft. It does not verify matching; see
+[Reading progress](progress.md).
 
 ## 2. Decompile
 

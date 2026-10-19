@@ -30,6 +30,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_nonmatching import draft_functions  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 VERSIONS = json.loads((ROOT / "config/versions.json").read_text())
 MEASURES = ("matched_code", "total_code", "matched_functions", "total_functions")
@@ -79,6 +82,18 @@ def bar(matched: int, total: int) -> str:
     return f'<span class="bar"><span style="width:{width:.3f}%"></span></span>'
 
 
+def state(function: dict, drafted: set[str]) -> str:
+    if function.get("fuzzy_match_percent") == 100.0:
+        return "ok"
+    return "draft" if function["name"] in drafted else "todo"
+
+
+def count_drafts(report: dict, drafts: dict[str, set[str]] | None) -> int:
+    """Drafts in the published units: work in hand, never credit."""
+    reported = {unit["name"] for unit in report["units"]}
+    return sum(len(names) for name, names in (drafts or {}).items() if name in reported)
+
+
 def chart(history: list[dict]) -> str:
     """Inline SVG of both percentages over time; no script, no external assets."""
     if len(history) < 2:
@@ -122,7 +137,8 @@ def source_link(repo: str | None, commit: str, path: str, text: str) -> str:
 
 
 def render(version: str, report: dict, audit: dict, history: list[dict],
-           repo: str | None, commit: str, date: str) -> str:
+           repo: str | None, commit: str, date: str,
+           drafts: dict[str, set[str]] | None = None) -> str:
     info = VERSIONS[version]
     game = totals(report["measures"])
     commit_text = html.escape(commit[:12])
@@ -138,6 +154,14 @@ def render(version: str, report: dict, audit: dict, history: list[dict],
             f'<div class="card"><h2>{title}</h2>'
             f'<p class="big">{percent(matched, total):.2f}%</p>{bar(matched, total)}'
             f'<p class="muted">{number(matched)} / {number(total)} {unit}</p></div>')
+    # A draft earns no credit, so the card counts drafts against what is
+    # still assembled rather than against the game.
+    drafted = count_drafts(report, drafts)
+    unmatched = game["total_functions"] - game["matched_functions"]
+    cards.append(
+        f'<div class="card"><h2>Non-matching drafts</h2>'
+        f'<p class="big">{number(drafted)}</p>{bar(drafted, unmatched)}'
+        f'<p class="muted">of {number(unmatched)} unmatched functions, credited as none</p></div>')
 
     categories = []
     for category in audit["categories"]:
@@ -166,8 +190,9 @@ def render(version: str, report: dict, audit: dict, history: list[dict],
         m = totals(unit["measures"])
         share = percent(m["matched_code"], m["total_code"])
         functions = sorted(unit.get("functions", []), key=lambda f: int(f.get("address", 0)))
+        drafted_here = set((drafts or {}).get(unit["name"], ()))
         rows = "".join(
-            f'<li class="{"ok" if f.get("fuzzy_match_percent") == 100.0 else "todo"}">'
+            f'<li class="{state(f, drafted_here)}">'
             f'<span>{html.escape(f["name"])}</span><span class="num">{number(int(f.get("size", 0)))}</span></li>'
             for f in functions)
         path = f"src/{version}/{unit['name']}.c"
@@ -241,6 +266,7 @@ input, select {{ font: inherit; color: inherit; background: var(--surface); bord
   font: 13px/1.6 ui-monospace, monospace; }}
 .functions li {{ display: flex; justify-content: space-between; gap: 8px; break-inside: avoid; padding-right: 16px; }}
 .functions .ok {{ color: var(--ok); }}
+.functions .draft {{ color: var(--functions); }}
 .functions .todo {{ color: var(--muted); }}
 </style>
 </head>
@@ -260,6 +286,9 @@ retail bytes come from C; assembly fallbacks earn nothing. See {docs}.</p>
 <tbody>{categories}</tbody>
 </table>
 <h2>Units</h2>
+<p class="muted"><span class="key-functions">&#9632;</span> A non-matching draft is a close
+reconstruction kept in the source behind <code>#ifdef NON_MATCHING</code>. The build takes the
+assembly instead, so it counts as unmatched.</p>
 <div class="controls">
 <input id="filter" type="search" placeholder="Filter units" aria-label="Filter units">
 <select id="sort" aria-label="Sort units">
@@ -330,11 +359,13 @@ def main() -> None:
         badge("functions", game["matched_functions"], game["total_functions"])) + "\n")
     (out / "history.json").write_text(json.dumps(history, indent=1) + "\n")
     shutil.copyfile(report_path, out / "report.json")
+    drafts = draft_functions(args.version)
     (out / "index.html").write_text(render(args.version, report, audit, history,
-                                           args.repo, commit, date))
+                                           args.repo, commit, date, drafts))
     print(f"wrote {out.relative_to(ROOT) if out.is_relative_to(ROOT) else out}: "
           f"{percent(game['matched_code'], game['total_code']):.3f}% code, "
           f"{percent(game['matched_functions'], game['total_functions']):.3f}% functions, "
+          f"{count_drafts(report, drafts)} non-matching drafts, "
           f"{len(history)} history entries")
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Source coverage per version: functions and code bytes in C.
+"""Source coverage per version: functions and code bytes in C, and drafts.
 
     python3 tools/progress.py [smt3] [--markdown]
 
@@ -8,10 +8,17 @@ INCLUDE_ASM line. Sizes come from the split assembly (asm/<v>/, so run
 configure.py first). Library code outside src/ and binary VU1 microcode are
 not counted. This source inventory does not compile or verify matching;
 use check_unit.py and the retail checksum build for that.
+
+Functions still assembled are counted again on their own: a NON_MATCHING
+draft is a near reconstruction the build never uses, so it earns no coverage
+credit and is reported as a separate counter.
 """
 import re
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_nonmatching import draft_functions  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 INCLUDE = re.compile(r'^INCLUDE_ASM\([^\n]*\b(\w+)\);', re.M)
@@ -20,13 +27,15 @@ INSN = re.compile(r"^\s*/\* [0-9A-F]+ [0-9A-F]{8} [0-9A-F]{8} \*/", re.M)
 
 
 def version_stats(version):
-    funcs = c_funcs = size = c_size = 0
+    funcs = c_funcs = draft_funcs = size = c_size = draft_size = 0
+    drafts = draft_functions(version)
     for unit in (ROOT / "src" / version).rglob("*.c"):
         name = unit.relative_to(ROOT / "src" / version).with_suffix("").as_posix()
         full = ROOT / "asm" / version / f"{name}.s"
         if not full.exists():
             continue
         asm_funcs = set(INCLUDE.findall(unit.read_text()))
+        unit_drafts = drafts.get(name, set())
         for fname, body in GLABEL.findall(full.read_text()):
             n = 4 * len(INSN.findall(body))
             funcs += 1
@@ -34,24 +43,35 @@ def version_stats(version):
             if fname not in asm_funcs:
                 c_funcs += 1
                 c_size += n
-    return funcs, c_funcs, size, c_size
+            elif fname in unit_drafts:
+                draft_funcs += 1
+                draft_size += n
+    return funcs, c_funcs, draft_funcs, size, c_size, draft_size
 
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     md = "--markdown" in sys.argv
     if md:
-        print("| Version | Functions in C | Code bytes in C |\n|---|---|---|")
+        print("| Version | Functions in C | Code bytes in C | Non-matching drafts |\n|---|---|---|---|")
     for v in args or ["smt3"]:
-        f, cf, s, cs = version_stats(v)
+        f, cf, df, s, cs, ds = version_stats(v)
         if not f:
             print(f"{v}: no split assembly (run configure.py)", file=sys.stderr)
             continue
+        # Only a function that is still assembled can have a draft, so the
+        # drafts are a share of what is left rather than of the whole game.
+        left, left_size = f - cf, s - cs
         if md:
-            print(f"| `{v}` | {cf:,} / {f:,} ({100 * cf / f:.1f}%) | {cs:,} / {s:,} ({100 * cs / s:.1f}%) |")
+            print(f"| `{v}` | {cf:,} / {f:,} ({100 * cf / f:.1f}%) | {cs:,} / {s:,} ({100 * cs / s:.1f}%) "
+                  f"| {df:,} / {left:,} ({100 * df / left if left else 0:.1f}%) |")
         else:
             print(f"{v}: {cf}/{f} functions in C ({100 * cf / f:.1f}%), "
                   f"{cs}/{s} code bytes in C ({100 * cs / s:.1f}%)")
+            print(f"{v}: {df}/{left} remaining functions have a non-matching draft "
+                  f"({100 * df / left if left else 0:.1f}%), "
+                  f"{ds}/{left_size} remaining code bytes "
+                  f"({100 * ds / left_size if left_size else 0:.1f}%)")
 
 
 if __name__ == "__main__":
