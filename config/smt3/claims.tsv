@@ -212,12 +212,16 @@ src/smt3/effect/effPCPBezier.c	u11	done	2026-10-19	1 / 6016	one 6016-byte functi
 src/smt3/effect/effPCPScatter.c	u12	open	2026-10-19	1 / 1376 plus effPacket 2 / 1152 and nbCameraHelper 2 / 1360	three small near-finished units, one agent
 src/smt3/effect/effPacket.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
 src/smt3/newbattle/nbCameraHelper.c	u12	open	2026-10-19	see effPCPScatter row	batched with effPCPScatter
-src/smt3/mc/mcManager.c	u13	open	2026-10-19	12 / 696	three near-finished units, one agent
-src/smt3/sdf/sdfTex.c	u13	open	2026-10-19	3 / 1136	three near-finished units, one agent
-src/smt3/kernel/dds3KernelCore.c	u13	open	2026-10-19	3 / 904	three near-finished units, one agent
+src/smt3/mc/mcManager.c	u13	done	2026-10-19	12 / 696	three near-finished units, one agent
+src/smt3/sdf/sdfTex.c	u13	done	2026-10-19	3 / 1136	three near-finished units, one agent
+src/smt3/kernel/dds3KernelCore.c	u13	done	2026-10-19	3 / 904	three near-finished units, one agent
 src/smt3/interface/fmGslCont.c	u14	open	2026-10-19	7 / 608	three near-finished units, one agent
 src/smt3/effect/effManager.c	u14	open	2026-10-19	5 / 512	three near-finished units, one agent
 src/smt3/basic/dds3SceneBasic.c	u14	open	2026-10-19	4 / 736	three near-finished units, one agent
 src/smt3/kernel/dds3KernelMain.c	u15	open	2026-10-19	2 / 832	three near-finished units, one agent
 src/smt3/sdf/sdfMovie.c	u15	open	2026-10-19	2 / 816	three near-finished units, one agent
 src/smt3/field/fldPanel.c	u15	open	2026-10-19	3 / 688	three near-finished units, one agent
+src/smt3/basic/dds3LightObjectBasic.c	u16	open	2026-10-19	2 / 696	four near-finished units, one agent
+src/smt3/effect/effPCPNeedle.c	u16	open	2026-10-19	2 / 648	four near-finished units, one agent
+src/smt3/interface/itfPanel.c	u16	open	2026-10-19	3 / 576	four near-finished units, one agent
+src/smt3/event/evtEventPack.c	u16	open	2026-10-19	3 / 504	four near-finished units, one agent
