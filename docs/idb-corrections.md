@@ -100,6 +100,12 @@ says `s32` where every repo copy says `u32`. No load of it is signedness
 sensitive, so nothing in the retail code decides it, and changing it on the
 IDB's word alone would be a guess dressed as a correction.
 
+## Type names
+
+| Repo name | IDB name | Evidence |
+| --- | --- | --- |
+| `effBTLLightResource_t` (`effBattle.c`) | `fldResourceLight_t` | identical member for member, 13 members, 52 bytes, same order and types; the repo name was invented. Its members were lowercase against the IDB's `Flag`, `AnimeType`, `InsideR`, `DiffuseR` and the rest |
+
 ## Globals
 
 | Address | Name | Old type | New type | Proof |

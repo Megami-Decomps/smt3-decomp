@@ -349,6 +349,36 @@ Every batch below rebuilt to `5facfbf7916836613449c922e26a4ec412207b32`.
   `sdfBillBoardMakeN` and the other `*MakeN` builders keep their `packet[i]`
   word walk, which is a variable-length packet rather than a record.
 
+### String placeholders are worth converting; sdata ones are not
+
+`effBattle.c`, `evtPolygonMovie.c` and `nbKoukaProcess.c` referenced 24 of
+their own format strings and process names as `extern char D_<addr>[]` plus an
+`INCLUDE_RODATA` line. Those are now the literals they spell
+(`printf("effBTL:Set Stat[%X]\n", ...)`), and the image is unchanged: ee-gcc
+pools each literal back to the address the split had given it.
+
+One in the same set must stay as it was. `D_00551138` ("%s\n") is defined
+through `INCLUDE_SDATA`, and a C literal goes to `.rodata`, so inlining it
+moves the bytes out of `.sdata` and the link shifts. The rule is per symbol:
+`INCLUDE_RODATA` converts, `INCLUDE_SDATA` does not.
+
+### What the IDB will not name
+
+Of 78 `D_<addr>` references in the four units added since the last sweep, 52
+stay. The IDB has a name for all of them, and every one is a dummy
+(`unk_32C840`, `xmmword_31B8A0`, `flt_317750`, `stru_31CA90`) — no better than
+the address. Three are real, unique IDB names, and only one was adopted:
+
+| Address | IDB name | Taken? |
+|---|---|---|
+| 0x00551D88 | `abgr` | yes, and it says what the word is |
+| 0x005699B0 | `resource` | no: `effBattle.c` already has three locals by that name |
+| 0x0031B8C0 | `state` | no: eleven locals, and the object is a per-kind camera lookup table |
+
+`frFont.c`'s thirteen `0xF2xx` message markup codes are left bare on purpose.
+They sit in a live switch and would read far better named, but the IDB has no
+enum for them and this page's own rule forbids inventing one to satisfy that.
+
 ### The rename that still compiles and is still wrong
 
 Three of these types had a member name that appears in **both** the old and the
