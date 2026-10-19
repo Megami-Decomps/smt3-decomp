@@ -107,20 +107,20 @@ sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out);
 
 extern void *memcpy(void *dst, const void *src, u32 size);
 
-static inline void eeUnpackRGBAWordFloat(u32 color, f32 unit) {
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
     u32 rgba[4];
     rgba[0] = color;
     EE_MMI_RGBA_UNPACK(rgba, unit);
 }
 
-static inline u32 eePackRGBAWord(f32 unit) {
+static inline u32 PackRGBAWord(f32 unit) {
     u32 rgba[4];
     MMI_RGBA_PACK_UNIT(rgba[0], unit);
     return rgba[0];
 }
 
 /* One asm location for every arm's w set, so jump2 can cross-jump them. */
-static inline void evtSetBlendVecW(f32 w)
+static inline void SetBlendVecW(f32 w)
 {
     SDF_VU0_SETVECTOR_W(w);
 }
@@ -297,12 +297,12 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
         SDF_VU0_SETVECTOR_X(a->vec[0]);
         SDF_VU0_SETVECTOR_Y(a->vec[1]);
         SDF_VU0_SETVECTOR_Z(a->vec[2]);
-        evtSetBlendVecW(a->vec[3]);
+        SetBlendVecW(a->vec[3]);
     } else {
         SDF_VU0_SETVECTOR_X(evtHokanFogParam[1]);
         SDF_VU0_SETVECTOR_Y(evtHokanFogParam[0]);
         SDF_VU0_SETVECTOR_Z(evtHokanFogParam[2]);
-        evtSetBlendVecW(evtHokanFogParam[3]);
+        SetBlendVecW(evtHokanFogParam[3]);
     }
     SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
     SDF_VU0_COPYVECTOR_A_TO_B();
@@ -310,12 +310,12 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
         SDF_VU0_SETVECTOR_X(b->vec[0]);
         SDF_VU0_SETVECTOR_Y(b->vec[1]);
         SDF_VU0_SETVECTOR_Z(b->vec[2]);
-        evtSetBlendVecW(b->vec[3]);
+        SetBlendVecW(b->vec[3]);
     } else {
         SDF_VU0_SETVECTOR_X(evtHokanFogParam[1]);
         SDF_VU0_SETVECTOR_Y(evtHokanFogParam[0]);
         SDF_VU0_SETVECTOR_Z(evtHokanFogParam[2]);
-        evtSetBlendVecW(evtHokanFogParam[3]);
+        SetBlendVecW(evtHokanFogParam[3]);
     }
     SDF_VU0_SCALEVECTOR_BITS(t);
     SDF_VU0_ADDVECTOR();
@@ -324,20 +324,20 @@ void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor
     SDF_VU0_GETVECTOR_Z(out->vec[2]);
     SDF_VU0_GETVECTOR_W(out->vec[3]);
     if (a != NULL) {
-        eeUnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
+        UnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
     } else {
-        eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
+        UnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
     SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
     SDF_VU0_COPYVECTOR_A_TO_B();
     if (b != NULL) {
-        eeUnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
+        UnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
     } else {
-        eeUnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
+        UnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
     SDF_VU0_SCALEVECTOR_BITS(t);
     SDF_VU0_ADDVECTOR();
-    out->color = eePackRGBAWord(128.0f);
+    out->color = PackRGBAWord(128.0f);
 }
 
 void evtHokanBlur2(s32 enable, f32 t, effBlurQuad_t *a, effBlurQuad_t *b, effBlurQuad_t *out)

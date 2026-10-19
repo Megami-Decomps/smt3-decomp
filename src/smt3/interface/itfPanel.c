@@ -207,7 +207,7 @@ extern void (*D_00326428[])();
 extern void (*CreateColorTable[])();
 extern void (*DrawTable[])(itfPanel_t *, sdfDrawTag_t *);
 
-static inline void panelSetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
+static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
     vec[0] = red;
     vec[1] = green;
     vec[2] = blue;
@@ -458,18 +458,18 @@ void CreateVertexFacility(itfPanelFacilityData_t *base, s32 x0, s32 y0, s32 x1, 
 void CreateColorNormal(itfPanelNormalData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = data->colors[0].components;
 
-    panelSetVec4(colorRow, red, green, blue, 0);
+    SetVec4(colorRow, red, green, blue, 0);
     colorRow = data->colors[1].components;
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    SetVec4(colorRow, red, green, blue, alpha);
 }
 
 /* Write the two color rows, then scale six template rows; the first fourth component is one. */
 void CreateColorMesWin(itfPanelMesWinData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = data->colors[0].components;
 
-    panelSetVec4(colorRow, red, green, blue, 1);
+    SetVec4(colorRow, red, green, blue, 1);
     colorRow = data->colors[1].components;
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    SetVec4(colorRow, red, green, blue, alpha);
     itfMiscSetRatioRGB((s32 *)data->colors[2].components, red, green, blue, alpha, D_00326518, 6);
 }
 
@@ -477,9 +477,9 @@ void CreateColorMesWin(itfPanelMesWinData_t *data, u32 red, u32 green, u32 blue,
 void CreateColorSelWin(itfPanelSelWinData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = data->colors[0].components;
 
-    panelSetVec4(colorRow, red, green, blue, 1);
+    SetVec4(colorRow, red, green, blue, 1);
     colorRow = data->colors[1].components;
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    SetVec4(colorRow, red, green, blue, alpha);
     itfMiscSetRatioRGB((s32 *)data->colors[2].components, red, green, blue, alpha, D_00326578, 4);
 }
 
@@ -487,7 +487,7 @@ void CreateColorSelWin(itfPanelSelWinData_t *data, u32 red, u32 green, u32 blue,
 void CreateColorPlain(itfPanelPlainData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = data->colors[0].components;
 
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    SetVec4(colorRow, red, green, blue, alpha);
     itfMiscSetRatioRGB((s32 *)data->colors[1].components, red, green, blue, alpha, D_003265B8, 1);
     itfMiscSetRatioRGB((s32 *)data->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, D_003265C8, 2);
 }
@@ -506,18 +506,18 @@ void CreateColorPera1(itfPanelPlainData_t *data, s32 red, s32 green, s32 blue, s
 void CreateColorLeftFade(itfPanelLeftFadeData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
     u32 *colorRow = data->colors[0].components;
 
-    panelSetVec4(colorRow, red, green, blue, 0);
+    SetVec4(colorRow, red, green, blue, 0);
     colorRow = data->colors[1].components;
-    panelSetVec4(colorRow, red, green, blue, alpha);
+    SetVec4(colorRow, red, green, blue, alpha);
 }
 
 /* Set both panel colors to the same blue tint with zero alpha. */
 void CreateColorFacility(itfPanelFacilityData_t *base) {
     u32 *colorRow = base->colors[0].components;
 
-    panelSetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
+    SetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
     colorRow = base->colors[1].components;
-    panelSetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
+    SetVec4(colorRow, 0x73, 0x87, 0xFF, 0);
 }
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */

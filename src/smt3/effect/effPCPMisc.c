@@ -2619,7 +2619,7 @@ extern void SetRotateMatrixX_B(f32 angle);
 
 extern void SetRotateMatrixZ_B(f32 angle);
 
-static inline void effPcpShiftThunderHandles(EffPCPThunderGroup *work, s32 count) {
+static inline void ShiftThunderHandles(EffPCPThunderGroup *work, s32 count) {
     u128 saved[2];
     u8 *obj;
     s32 i;
@@ -2674,7 +2674,7 @@ void effEveBEDCutDraw(EffEventWork *work);
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 /* Both compact fade renderers interpolate their extent with integer truncation. */
-static inline s32 effPcpInterpolateCompactExtent(s32 from, s32 to,
+static inline s32 InterpolateCompactExtent(s32 from, s32 to,
     s32 frame, s32 duration) {
     to -= from;
     to = (s32)((f32)to * (f32)frame / (f32)duration);
@@ -3462,7 +3462,7 @@ void *effPCPZiodin01Copy(void) {
 }
 
 void effPCPZiodin01Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 12);
+    ShiftThunderHandles(work, 12);
 }
 
 void effPCPZiodin01SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -3557,7 +3557,7 @@ void *effPCPZiodin02Copy(void) {
 }
 
 void effPCPZiodin02Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 12);
+    ShiftThunderHandles(work, 12);
 }
 
 void effPCPZiodin02SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -3650,7 +3650,7 @@ void *effPCPZiodin03Copy(void) {
 }
 
 void effPCPZiodin03Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 30);
+    ShiftThunderHandles(work, 30);
 }
 
 void effPCPZiodin03SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -3745,7 +3745,7 @@ void *effPCPZiodin04Copy(void) {
 }
 
 void effPCPZiodin04Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 12);
+    ShiftThunderHandles(work, 12);
 }
 
 void effPCPZiodin04SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -3811,7 +3811,7 @@ void *effPCPMZiodin01Copy(void) {
 }
 
 void effPCPMZiodin01Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 12);
+    ShiftThunderHandles(work, 12);
 }
 
 void effPCPMZiodin01SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -3881,7 +3881,7 @@ void *effPCPMZiodin02Copy(void) {
 }
 
 void effPCPMZiodin02Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 8);
+    ShiftThunderHandles(work, 8);
 }
 
 void effPCPMZiodin02SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -4041,7 +4041,7 @@ void *effPCPShockWave02Copy(void) {
 }
 
 void effPCPShockWave02Draw(EffPCPThunderGroup *work) {
-    effPcpShiftThunderHandles(work, 30);
+    ShiftThunderHandles(work, 30);
 }
 
 void effPCPShockWave02SetPosition(EffPCPThunderGroup *work, const void *source) {
@@ -4332,7 +4332,7 @@ void effPCPMultiFilterExpDraw(EffPCPCompactFadeWork *work) {
             rect->params.center[0] = 0;
             rect->params.center[1] = 0;
         }
-        rect->params.extent = effPcpInterpolateCompactExtent(
+        rect->params.extent = InterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -4423,7 +4423,7 @@ void effPCPMultiBlurExp2Draw(EffPCPCompactFadeWork *work) {
             rect->body.source.position[0] = 0;
             rect->body.source.position[1] = 0;
         }
-        rect->body.extent = effPcpInterpolateCompactExtent(
+        rect->body.extent = InterpolateCompactExtent(
             work->startExtent, work->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;

@@ -383,7 +383,7 @@ extern void dds3AdminiCallSequence(s32, void *, u32, s32);
  * the binary32 scale to the unpack's GPR operand. The exact surface-grid
  * gradient uses four such 16-byte carriers (DDS1 002A7288, DDS2 002E9840).
  * This is distinct from the integer-bit, read-only form above. */
-static inline void eeUnpackRGBAWordFloat(u32 color, f32 unit) {
+static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
     u32 rgba[4];
     rgba[0] = color;
     MMI_RGBA_UNPACK(rgba, unit);
@@ -426,7 +426,7 @@ extern u32 effDebugPosY;
 extern void *memcpy(void *dest, const void *src, u32 n);
 
 /* Fixed-scale form of the SDK's four-word RGBA packing scratch buffer. */
-static inline u32 packMagatuhiTrailColor(void) {
+static inline u32 PackMagatuhiTrailColor(void) {
     u32 rgba[4];
     MMI_RGBA_PACK_UNIT(rgba[0], 128.0f);
     return rgba[0];
@@ -807,11 +807,11 @@ void effSwordTrackDrawTex(effMagatuhiValueWork_t *work) {
                     SDF_VU0_LOADVECTOR_B(historyPositions[index]);
                     SDF_VU0_ADDVECTOR();
                     SDF_VU0_STOREVECTOR(point);
-                    eeUnpackRGBAWordFloat(slotColor, 0.0078125f);
+                    UnpackRGBAWordFloat(slotColor, 0.0078125f);
                     SDF_VU0_COPYVECTOR_A_TO_B();
-                    eeUnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
+                    UnpackRGBAWordFloat(palette[historyIndex], 0.0078125f);
                     SDF_VU0_MULVECTOR();
-                    packed = packMagatuhiTrailColor();
+                    packed = PackMagatuhiTrailColor();
                     colors[pendingCount] = packed;
                     offsets[pendingCount][0] = -size;
                     offsets[pendingCount][1] = -size;
