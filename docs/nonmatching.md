@@ -1204,68 +1204,6 @@ address is created first; `slot` as `u32`; writing the `+0x8` store
 base-first and the `+0x1`/`+0x2`/`+0x24` stores index-first with explicit
 casts; and five orderings of the last six stores.
 
-## slDrawWindow (mc/slMain, 0x4EC)
-
-87 of 313 words, two words short of the 1260-byte size.
-
-Everything up to the window-height arithmetic is exact, and the arithmetic
-itself is reconstructed: the counter is bumped and stored, the first box's
-`y` and `h` come from `0xE9 - cnt * 0xB5 / 4` and `cnt * 0x16B / 4` clamped to
-`0x34` and `0x16B` from four on, and the four later box pairs divide by 5 and
-by 100 exactly as retail does. The draft's argument lists and the `slti`,
-`sltiu` tail are right.
-
-The two missing words are one register copy and the `nop` that follows from
-it. Retail increments into `$2`, stores and compares that, then copies it to
-`$4` for the two multiplies; the draft increments straight into `$4` and needs
-no copy. Because the block is then one instruction shorter, the scheduler
-hoists the second `li` above the first multiply and puts the second multiply
-on `mult1`, where retail leaves both on pipe 0, and `.L00152408` loses the
-8-byte alignment `nop` in front of it. Every division and both `movn` biases
-are identical. After that point the draft and retail differ only in the order
-of the twelve stack-argument stores of each `aDrawBoxG` call, which is the
-scheduler working from the shifted block.
-
-Ruled out for the copy: `cnt` as a local, `gSlWindowCnt + 1` stored then
-re-read, `gSlWindowCnt++`, `++gSlWindowCnt` as the test expression, a second
-local assigned from the first, the increment split into two statements,
-products hoisted into named locals, `0xB5 * cnt` operand order, decimal
-literals, `h` before `y`, the subtraction split off into its own statement,
-all 120 declaration orders of the five locals, and separate locals per block
-(that one reaches 88).
-
-## slDrawInfo (mc/slMain, 0x2F4)
-
-183 of 189 words, at the exact 756-byte size, and **exact when slDrawWindow is
-compiled as C in the same unit**. That is the finding worth acting on: the
-draft here is complete and correct, and banking it only needs slDrawWindow
-above it to match.
-
-The six remaining words with slDrawWindow still behind `INCLUDE_ASM` are six
-`bnel` where retail has `bne`, on the `gslInfoCode` tests for 1 through 6. The
-delay slot holds the next comparison constant in both, so only the annul bit
-differs; the tests for 0xB, 0xC and 0xD match either way. With slDrawWindow
-defined above it in the unit, ee-gcc drops the annul on all six.
-
-Ruled out while slDrawWindow was still assembly: `gslInfoCode == N &&
-slDrawWindow() != 0` fused into one test, the call's result in a local,
-`== 0` with an empty arm and an `else`, `if (slDrawWindow())` without the
-comparison, `u32 gslInfoCode`, an `s32` return type with `return 0` for the
-early exit, and the whole body nested in `if (gslInfoCode != 0)` instead of an
-early `return`.
-
-## slDrawError (mc/slMain, 0x4AC)
-
-293 of 299 words, at the exact 1196-byte size, and **exact when slDrawWindow
-is compiled as C in the same unit** - measured, not assumed. Same situation as
-slDrawInfo above and the same six-`bnel` difference, on the `gslErrorCode`
-tests for 1, 2 and 7, which are the three arms that branch on `slDDS3To31Flg`
-inside. Nothing else in the draft differs.
-
-slDrawWindow is therefore the one thing standing between this unit and three
-matched functions: itself, slDrawInfo and slDrawError, 801 words of retail
-code between them.
-
 ## cmp_241A10 (code_001FAE80, 0x74)
 
 19 of 28 words, 112 against retail's 116 bytes. Recounts how many of a
@@ -1431,3 +1369,48 @@ six, and so do the same blocks in `nbCameraDANTE_DCOMBO_Set` and
 Ruled out: reading `nbCameraBoss_BSLUSI_Type` before the divide, between the
 clamp and the `PS2_FLOAT_BITS`, and after it; declaring `type` before `bits`;
 and a named `one` local for the 1.0 comparand.
+
+## fldCamUpdateChase (field/fldDraw, 0x250)
+
+120 of 148 words, at the exact 592-byte size. The first 119 words are exact;
+everything from `+0x16C` is one word rotated because retail schedules the
+`lw $4, 0x78($20)` that fetches `control->camera` for
+`dds3CameraObjectBasicGetCameraTM` to the top of the smoothing block, while
+ee-gcc puts it last. The rotation then drags a handful of `$f2`/`$f3`
+allocations with it.
+
+Confirmed on the way: `D_0054C380` and `D_0054C384` are `.lit4` entries
+holding `0.7f` and `3.14f`; the stick is read as the plain subscripts
+`dds3PadStickState[0][0][0]` and `[0][0][1]`, not through a `u8 *` local,
+which costs a word by making gcc form the gp-relative address in a register;
+and both vectors are zeroed with `memset` and then given a `1.0f` in `[3]`.
+
+Ruled out: a `u8 *` stick local in four spellings (plain, `&...[0][0][0]`, a
+cast of the array, `volatile`); an incomplete array declaration; all 36
+orderings of the two three-component smoothing blocks (the best is the target
+block written y, x, z, which is the draft); `node = control->camera;` as its
+own statement before each of the three uses; and a separate `dds3Basic_t *`
+local for the camera.
+
+## encDrawProc (field/fldDraw, 0x1D8)
+
+116 of 118 words, at the exact 472-byte size. The two differing words are both
+`bne` where retail has `bnel`, at the same displacement and with the same
+instruction in the slot: `addiu $2, $0, 1` before the `gencMode` test, and
+`addiu $3, $3, 1` before the `encDrawState` body. ee-gcc takes the insn from
+the branch's taken thread in both compiles and leaves a second copy at the
+join, so only the annul bit differs.
+
+Confirmed on the way: the box-draw body is written out in full in both arms of
+`if (encDrawState >= 0x29) ... else if (encDrawState >= 0x15) ...`, and ee-gcc
+cross-jumps them at the `jal rsetOtOfs`, which is where retail's duplicated
+`addiu $4, 0x47` and the `nop` in the call's delay slot come from. Writing it
+as `if (state < 0x29) { if (state >= 0x15) ... } else { ... }` inverts the
+first branch and costs 56 words. `D_0054C2A4` is a `.lit4` entry holding
+`0.001f`.
+
+Ruled out: `gencMode != 0` with an empty `then`; `s32` return types on
+`dds3EffectPartialMultiBlurSetParam` and `...Draw` to reserve `$2`; a `result`
+local in place of the three `return 0`s; and an `s32` return type on
+`encFreeBlur`, which the definition below refuses.
+

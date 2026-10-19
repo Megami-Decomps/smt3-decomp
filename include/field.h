@@ -45,12 +45,17 @@ typedef struct fldAreaWork_t
     u8 unk1C[4];
     char requestedSceneName[0x10]; /* 0x020 */
     sdfVector4_t campos;        /* 0x030 */
-    u8 unk40[0x20];
+    s32 playerSeTable;          /* 0x040 */
+    u8 unk44[4];
+    s32 hitMatterIndex;         /* 0x048 */
+    u8 unk4C[0x14];
     s32 amSBlock;               /* 0x060 */
     s32 amFloor;                /* 0x064 */
     s32 nameU;                  /* 0x068 */
     s32 nameD;                  /* 0x06C */
-    u8 unk70[0x14];
+    s32 menuOpenFlag;           /* 0x070 */
+    s32 encountState;           /* 0x074 */
+    u8 unk78[0xC];
     s32 resourceFlag;           /* 0x084 */
     s32 resourceArea;           /* 0x088 */
     s32 resourceFloor;          /* 0x08C */

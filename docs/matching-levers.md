@@ -208,6 +208,29 @@ it was measured on DDS and not on this ELF.
   `d = half / angle; pCamera->distance = d; d = f(party) / angle;`, which
   keeps both quotients in `$f0`; a second local moves the first one into a
   callee-saved register and rotates six words.
+- Writing the derived value at its uses, `(gSlWindowCnt - 2) * 0xE9`, lets
+  gcc distribute the multiply (`gSlWindowCnt * 0xE9 - 466`), two words more
+  than retail's subtract and multiply. A local blocks that.
+- The register the reused local gets follows its neighbours. gcc's
+  `expand_preferences` unions the hard-register preferences of any two global
+  pseudos joined by a single set whose source dies in it, so a counter
+  multiplied into a value that is copied into an argument register is pulled
+  into that argument register itself. Keeping the value that reaches the call
+  out of the chain (here the scaled alpha is its own expression at the call,
+  and the unscaled one shares the offset local that retail copies into `$4`)
+  is what leaves the counter in `$4`.
+- Where retail folds a float constant's register into the result of the
+  expression that consumes it (`lwc1 $f20, 3.14f`, then
+  `mul.s $f20, $f0, $f20`, then `div.s $f20, $f20, $f1`), the source assigns
+  the constant to the destination variable first and then rewrites it in
+  separate statements: `angle = 3.14f; angle = -x * angle;
+  angle = angle / 180.0f;`. Any one-expression spelling gives the constant a
+  temp and the quotient a different saved register.
+- A second loop-invariant float constant used across the same calls needs its
+  own named local, assigned right after the first one, or it takes the lower
+  saved register. `calcCamNormalNPC` went from 16 differing words to 6 on
+  `dist = 200.0f;` in place of the literal at its four use sites, and to exact
+  once the angle was written as the three statements above.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

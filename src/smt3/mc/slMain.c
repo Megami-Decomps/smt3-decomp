@@ -688,21 +688,18 @@ s32 slChkWindowOpenDone(void) {
     return 1;
 }
 
-/* NON_MATCHING: 87 of 313 words, two words short; cnt is not copied before the two multiplies. */
-#ifdef NON_MATCHING
 s32 slDrawWindow(void) {
     s32 y;
     s32 h;
     s32 cnt;
-    s32 a;
-    s32 ofs;
+    s32 val;
 
     rsetOtOfs(0x4A);
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
-    cnt = gSlWindowCnt + 1;
-    gSlWindowCnt = cnt;
-    if (cnt < 4) {
+    gSlWindowCnt++;
+    if (gSlWindowCnt < 4) {
+        cnt = gSlWindowCnt;
         y = 0xE9 - cnt * 0xB5 / 4;
         h = cnt * 0x16B / 4;
     } else {
@@ -713,8 +710,9 @@ s32 slDrawWindow(void) {
               8, 5, 0x23, 0x66, 8, 5, 0x23, 0x66);
     if (gSlWindowCnt >= 2) {
         if (gSlWindowCnt < 7) {
-            h = (gSlWindowCnt - 2) * 0xE9 / 5;
-            y = 0xE4 - (gSlWindowCnt - 2) * 0x74 / 5;
+            cnt = gSlWindowCnt - 2;
+            y = 0xE4 - cnt * 0x74 / 5;
+            h = cnt * 0xE9 / 5;
         } else {
             y = 0x70;
             h = 0xE9;
@@ -722,32 +720,34 @@ s32 slDrawWindow(void) {
         aDrawBoxG(0, y / 2, 0x200, h / 2, 0, 0, 0, 0x26, 0, 0, 0, 0x26,
                   0, 0, 0, 0x26, 0, 0, 0, 0x26);
         if (gSlWindowCnt < 7) {
-            a = (gSlWindowCnt - 2) * 4;
+            cnt = gSlWindowCnt - 2;
+            val = cnt * 4;
         } else {
-            a = 0x14;
+            val = 0x14;
         }
-        a = a * 0x80 / 0x64;
-        aDrawBoxG(0, 0x37, 0x100, 0x75, 0x61, 0x72, 0xF7, a, 0x61, 0x72, 0xF7, 0,
+        aDrawBoxG(0, 0x37, 0x100, 0x75, 0x61, 0x72, 0xF7, val * 0x80 / 0x64, 0x61, 0x72, 0xF7, 0,
                   0x61, 0x72, 0xF7, 0, 0x61, 0x72, 0xF7, 0);
         aDrawBoxG(0x100, 0x37, 0x100, 0x75, 0x61, 0x72, 0xF7, 0, 0x61, 0x72, 0xF7, 0,
-                  0x61, 0x72, 0xF7, a, 0x61, 0x72, 0xF7, 0);
+                  0x61, 0x72, 0xF7, val * 0x80 / 0x64, 0x61, 0x72, 0xF7, 0);
         if (gSlWindowCnt < 7) {
-            ofs = (gSlWindowCnt - 2) * 0x200 / 5 - 0x200;
+            cnt = gSlWindowCnt - 2;
+            val = cnt * 0x200 / 5 - 0x200;
         } else {
-            ofs = 0;
+            val = 0;
         }
-        aDrawBoxG(ofs + 0x152, 0x36, 0x90, 1, 0x64, 0x76, 0xFF, 0x59,
+        aDrawBoxG(val + 0x152, 0x36, 0x90, 1, 0x64, 0x76, 0xFF, 0x59,
                   0x64, 0x76, 0xFF, 0, 0x64, 0x76, 0xFF, 0, 0x64, 0x76, 0xFF, 0x59);
-        aDrawBoxG(ofs, 0x36, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
+        aDrawBoxG(val, 0x36, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
                   0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59);
         if (gSlWindowCnt < 7) {
-            ofs = 0x200 - (gSlWindowCnt - 2) * 0x200 / 5;
+            cnt = gSlWindowCnt - 2;
+            val = 0x200 - cnt * 0x200 / 5;
         } else {
-            ofs = 0;
+            val = 0;
         }
-        aDrawBoxG(ofs + 0x1E, 0xAC, 0x90, 1, 0x64, 0x76, 0xFF, 0,
+        aDrawBoxG(val + 0x1E, 0xAC, 0x90, 1, 0x64, 0x76, 0xFF, 0,
                   0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0);
-        aDrawBoxG(ofs + 0xAE, 0xAC, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
+        aDrawBoxG(val + 0xAE, 0xAC, 0x152, 1, 0x64, 0x76, 0xFF, 0x59,
                   0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59, 0x64, 0x76, 0xFF, 0x59);
     }
     rsetOtOfs(0x47);
@@ -756,12 +756,8 @@ s32 slDrawWindow(void) {
     }
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slDrawWindow);
-#endif
 
-/* NON_MATCHING: 293 of 299 words, exact size; six bnel where retail has bne. Exact once slDrawWindow is C. */
-#ifdef NON_MATCHING
+
 void slDrawError(void) {
     if (gslErrorCode == 0) {
         return;
@@ -849,9 +845,6 @@ void slDrawError(void) {
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slDrawError);
-#endif
 
 void slSetInfo(u32 state) {
     s32 previous;
@@ -863,8 +856,6 @@ void slSetInfo(u32 state) {
     }
 }
 
-/* NON_MATCHING: 183 of 189 words, exact size; six bnel where retail has bne. Exact once slDrawWindow is C. */
-#ifdef NON_MATCHING
 void slDrawInfo(void) {
     if (gslInfoCode == 0) {
         return;
@@ -925,9 +916,6 @@ void slDrawInfo(void) {
         gSlExitMode = 2;
     }
 }
-#else
-INCLUDE_ASM(const s32, "mc/slMain", slDrawInfo);
-#endif
 
 s32 slHeadLoad(void) {
     char path[0x50];

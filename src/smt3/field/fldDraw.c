@@ -717,21 +717,41 @@ extern u32 gFld_ElvTakasa;
 extern s32 fldDoorWarpTarget;
 
 
-/* fldDoorTable stride, 100 bytes; only the warp effect id is reached here. */
-typedef struct {
-    s8 kind;
-    u8 unk01[3];
-    s16 floor;
-    u8 unk06[0xC];
-    s16 warpEff;
-    s16 warpEff2;
-    u8 unk16[2];
-    char name18[12];
-    char name24[12];
-    u8 unk30[0x34];
-} fldDoorData_t;
+/* fldDoorTable is fldDoorParamTable.actors: the same 100-byte waypoint record,
+   reached through its own symbol at fldDoorParamTable + 0xA0. */
+extern fldActorEntry_t fldDoorTable[256];
 
-extern fldDoorData_t fldDoorTable[256];
+/* The 0xA0 scene request block dds3AdminiCallSequence(6, ...) takes. */
+typedef struct {
+    u8 unk00[0x30];
+    u32 unk30;
+    s32 mode;
+    u32 sequenceWord38;
+    u32 sequenceWord3C;
+    char name[16];
+    s32 stage;
+    s32 kind;
+    s32 enabled;
+    s32 restore;
+    u16 code;
+    u16 sequenceMode;
+    s32 link;
+    u8 unk68[8];
+    char detail[16];
+    char note[16];
+    u32 options;
+    u8 unk94[12];
+} fldSceneParam_t;
+
+extern void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
+                              s32 code, s32 link, const char *subname);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern s32 D_0054EDF4;
+extern s32 fldDoorSiseState;
+extern s32 D_0054EDFC;
+extern s32 D_0054EE00;
+extern s32 gFldNowDZone;
+void fldDoorLoad(s32 field);
 extern s32 scriptlabel;
 extern void *fldDrwZBuf;
 extern f32 fldWmFastMove;
@@ -2164,7 +2184,59 @@ void nbSetEncountMode(s32 mode)
 }
 
 
+extern effBlurTemplateBody_t D_0055DAD8;
+extern void dds3EffectPartialMultiBlurSetParam(void *blur, effBlurTemplateBody_t *body);
+extern void dds3EffectPartialMultiBlurDraw(void *blur);
+extern void encFreeBlur(void);
+
+/* NON_MATCHING: 2 of 118 words differ (first at +0x18). */
+#ifdef NON_MATCHING
+s32 encDrawProc(dds3ProcessID_t *id) {
+    if (gencOn == 0) {
+        return 0;
+    }
+    if (gencMode == 0) {
+        rsetOtOfs(0x43);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        rsetAlpha(0);
+        fldDrawBokasi();
+        aDrawBoxF(0, 0xDF, 0x200, 2, 0, 0, 0, 0x80);
+        rsetAlpha(0);
+        if (encDrawState >= 13) {
+            D_0055DAD8.source.displacement = D_0055DAD8.source.displacement + 0.001f;
+            D_0055DAD8.extent = D_0055DAD8.extent - 2;
+            dds3EffectPartialMultiBlurSetParam(D_0054EC68, &D_0055DAD8);
+            dds3EffectPartialMultiBlurDraw(D_0054EC68);
+        }
+        if (encDrawState >= 0x29) {
+            rsetOtOfs(0x47);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            rsetAlpha(0);
+            aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 2);
+        } else if (encDrawState >= 0x15) {
+            rsetOtOfs(0x47);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            rsetAlpha(0);
+            aDrawBoxF(0, 0, 0x200, 0xE0, 0, 0, 0, 2);
+        }
+        encDrawState = encDrawState + 1;
+    }
+    if (gencMode == 1) {
+        if (gencStageInnAlp > 0) {
+            rsetOtOfs(0x51);
+            rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+            rsetAlpha(0);
+            fldDrawFrameSpriteAlpha(gencStageInnAlp);
+            gencStageInnAlp = gencStageInnAlp - 2;
+        } else {
+            encFreeBlur();
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", encDrawProc);
+#endif
 
 void encFreeBlur(void)
 {
@@ -2218,6 +2290,7 @@ f32 fldCalcAngleBetween(f32 fromX, f32 fromZ, f32 toX, f32 toZ) {
     f32 result;
     f32 absZ;
     f32 angle;
+    f32 dist;
 
     if (fromX == toX && fromZ == toZ) return 0.0f;
     result = fromX - toX;
@@ -2297,7 +2370,69 @@ INCLUDE_ASM(const s32, "field/fldDraw", calcCamNormal);
 
 INCLUDE_ASM(const s32, "field/fldDraw", calcCamDirLock);
 
-INCLUDE_ASM(const s32, "field/fldDraw", calcCamNormalNPC);
+extern s32 fldNpcCamTarget;
+extern f32 fldCamNpcTarget;
+extern f32 fldCamNpcTarget2;
+extern f32 D_0054EF6C;
+extern f32 D_0054EF70;
+extern f32 D_0054EF74;
+extern f32 D_0054EF78;
+extern f32 D_0054EF80;
+extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, void *out);
+extern void dds3GetTMPoseSet(dds3Basic_t *object);
+
+void calcCamNormalNPC(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } eye, target;
+    fldFollowCameraControl_t *control;
+    fldUnitControl_t *unit;
+    dds3Basic_t *node;
+    f32 angle;
+    f32 dist;
+
+    control = fldGetFollowCameraControl();
+    unit = fldGetUnitControl();
+    dds3GetPosPoseSet(unit->handle);
+    eye.f[3] = 1.0f;
+    fldGlobalBase.menuOpenFlag = 4;
+    fldGlobalBase.encountState = 5;
+    if (fldNpcCamTarget == 2) {
+        fldCamResetOn = 2;
+        eye.f[0] = D_0054EF6C;
+        eye.f[2] = D_0054EF74;
+        eye.f[1] = D_0054EF70 + fldCamNpcTarget + 60.0f;
+    } else {
+        fldCamResetOn = 1;
+        eye.f[0] = D_0054EF6C;
+        eye.f[2] = D_0054EF74;
+        eye.f[1] = D_0054EF70 + fldCamNpcTarget;
+    }
+    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    dds3GetTMPoseSet(unit->handle);
+    target.f[3] = 1.0f;
+    if (fldNpcCamTarget == 2) {
+        angle = 3.14f;
+        angle = -D_0054EF78 * angle;
+        angle = angle / 180.0f;
+        dist = 200.0f;
+        target.f[0] = eye.f[0] + sdfSin(angle) * dist;
+        target.f[1] = D_0054EF70 + fldCamNpcTarget;
+        target.f[2] = eye.f[2] + sdfCos(angle) * dist;
+    } else {
+        angle = 3.14f;
+        angle = -D_0054EF78 * angle;
+        angle = angle / 180.0f;
+        dist = 200.0f;
+        target.f[0] = eye.f[0] + sdfSin(angle) * (fldCamNpcTarget2 + dist);
+        target.f[1] = D_0054EF70 + D_0054EF80;
+        target.f[2] = eye.f[2] + sdfCos(angle) * (fldCamNpcTarget2 + dist);
+    }
+    dds3SetPosPoseSet(control->camera, &target.q);
+    node = control->camera;
+    ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
+}
 
 INCLUDE_ASM(const s32, "field/fldDraw", resetCamTgtPlayer);
 
@@ -2317,7 +2452,47 @@ void fldCamUpdateDefault(void)
 }
 
 
+extern u8 dds3PadStickState[2][2][2];
+extern f32 fldCamPitch;
+extern f32 D_0054ECB4;
+extern f32 D_0054ECB8;
+
+/* NON_MATCHING: 28 of 148 words differ (first at +0x16C). */
+#ifdef NON_MATCHING
+void fldCamUpdateChase(void) {
+    union {
+        u128 q;
+        f32 f[4];
+    } eye, target;
+    fldFollowCameraControl_t *control;
+    dds3Basic_t *node;
+
+    control = fldGetFollowCameraControl();
+    memset(&eye, 0, sizeof(eye));
+    eye.f[3] = 1.0f;
+    memset(&target, 0, sizeof(target));
+    target.f[3] = 1.0f;
+    D_0054ECB4 = (f32)(dds3PadStickState[0][0][0] - 0x80) * 0.7f + fldCamPitch;
+    D_0054ECB8 = -((f32)(dds3PadStickState[0][0][1] - 0x80) * 2.5f);
+    eye.f[0] = fldGlobalBase.x - sdfSin(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
+    eye.f[1] = fldGlobalBase.y - 200.0f + D_0054ECB8;
+    eye.f[2] = fldGlobalBase.z - sdfCos(D_0054ECB4 * 3.14f / 180.0f) * 256.0f;
+    eye.f[0] = D_002FC9C0[0] + (eye.f[0] - D_002FC9C0[0]) * 0.0625f;
+    eye.f[1] = D_002FC9C0[1] + (eye.f[1] - D_002FC9C0[1]) * 0.0625f;
+    eye.f[2] = D_002FC9C0[2] + (eye.f[2] - D_002FC9C0[2]) * 0.0625f;
+    dds3CameraObjectBasicGetCameraTM(control->camera, &eye);
+    target.f[1] = fldCamTarget[1] + (fldGlobalBase.y - 200.0f - fldCamTarget[1]) * 0.0625f;
+    target.f[0] = fldCamTarget[0] + (fldGlobalBase.x - fldCamTarget[0]) * 0.0625f;
+    target.f[2] = fldCamTarget[2] + (fldGlobalBase.z - fldCamTarget[2]) * 0.0625f;
+    dds3SetPosPoseSet(control->camera, &target.q);
+    node = control->camera;
+    ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
+    SDF_VU0_COPYVECTOR(D_002FC9C0, &eye);
+    SDF_VU0_COPYVECTOR(fldCamTarget, &target);
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldCamUpdateChase);
+#endif
 
 dds3Basic_t *fldCamNowEveCamera(void) {
     dds3Basic_t *worldObject = dds3GetActiveScene();
@@ -3714,14 +3889,14 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldMakePlane);
 
-s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, fldValueRecord_t *zone) {
+s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 *pos, fldValueRecord_t *zone, f32 margin) {
     f32 probe[3];
     f32 planar[2];
-    f32 best = margin;
     f32 dist;
     f32 slack;
     s32 inside = 0;
     s32 planeIndex;
+    f32 best = margin;
 
     if (mode == 0) {
         probe[0] = 0.0f;
@@ -3770,7 +3945,103 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 margin, f32 *pos, fldV
     return inside;
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitElvOnly);
+extern f32 fldHitChkWork[];
+extern s32 fldGbChkHit(s32 area, s32 floor, s32 bit);
+extern s32 fldGbChkNpc(s32 area, s32 floor, s32 bit);
+
+void fldHitChkUnitElvOnly(f32 *position) {
+    f32 current[4];
+    f32 previous[4];
+    f32 currentSave[4];
+    f32 previousSave[4];
+    f32 travel[4];
+    f32 clearance;
+    f32 radius;
+    f32 distance;
+    s32 index;
+    s32 moved;
+    s32 inside;
+
+    current[0] = position[0];
+    current[1] = position[1];
+    current[2] = position[2];
+    previous[0] = fldHitChkWork[0];
+    previous[1] = fldHitChkWork[1];
+    previous[2] = fldHitChkWork[2];
+    if (fldGlobalBase.area == 1) {
+        radius = 25.0f;
+        current[1] = position[1] - 35.0f;
+    } else if (fldGlobalBase.area < 10) {
+        radius = 30.0f;
+        current[1] = position[1] - 35.0f;
+    } else {
+        radius = 45.0f;
+        current[1] = position[1] - 35.0f;
+    }
+    EE_ABS_F32(travel[0], current[0] - previous[0]);
+    EE_ABS_F32(travel[2], current[2] - previous[2]);
+    for (index = 0; index < D_0054EDA0; index++) {
+        if (!(((fldValueRecord_t *)fldMatterTable)[index].face->attributes & 0x80)) {
+            continue;
+        }
+        if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                        ((fldValueRecord_t *)fldMatterTable)[index].sceneFlag) != 0) {
+            continue;
+        }
+        if (((fldValueRecord_t *)fldMatterTable)[index].ownerIndex > 0 &&
+            fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
+                        ((fldValueRecord_t *)fldMatterTable)[index].ownerIndex) != 0) {
+            continue;
+        }
+        currentSave[0] = current[0];
+        currentSave[1] = current[1];
+        currentSave[2] = current[2];
+        previousSave[0] = previous[0];
+        previousSave[1] = previous[1];
+        previousSave[2] = previous[2];
+        if (((fldValueRecord_t *)fldMatterTable)[index].worldNode != NULL) {
+            moved = 1;
+            current[0] = currentSave[0] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
+            current[1] = currentSave[1] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
+            current[2] = currentSave[2] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+            previous[0] = previousSave[0] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
+            previous[1] = previousSave[1] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
+            previous[2] = previousSave[2] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+        } else {
+            moved = 0;
+        }
+        EE_ABS_F32(distance, fldVecDot((sdfVector4_t *)current,
+                                       (sdfVector4_t *)((fldValueRecord_t *)fldMatterTable)[index].normal) -
+                                 ((fldValueRecord_t *)fldMatterTable)[index].planeConstant);
+        if (distance < radius) {
+            HitPositionInside2(&clearance, ((fldValueRecord_t *)fldMatterTable)[index].mode,
+                               ((fldValueRecord_t *)fldMatterTable)[index].count, current,
+                               &((fldValueRecord_t *)fldMatterTable)[index], radius);
+            if (clearance < 0.0f) {
+                inside = 0;
+            } else {
+                inside = 1;
+            }
+            if (inside == 1 && ((fldValueRecord_t *)fldMatterTable)[index].worldNode != NULL) {
+                fldGlobalBase.hitMatterIndex = index;
+                ((fldValueRecord_t *)fldMatterTable)[index].previousPosition[0] =
+                    ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
+                ((fldValueRecord_t *)fldMatterTable)[index].previousPosition[1] =
+                    ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
+                ((fldValueRecord_t *)fldMatterTable)[index].previousPosition[2] =
+                    ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+            }
+        }
+        if (moved != 0) {
+            current[0] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
+            current[1] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
+            current[2] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+            previous[0] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
+            previous[1] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
+            previous[2] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldHitChkUnitElv);
 
@@ -4300,7 +4571,7 @@ INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Find2);
 
 u8 *fldDoor_Find3(void) {
     s32 idx = gFldWap_after_nextidx;
-    fldDoorData_t *entry = &fldDoorTable[idx];
+    fldActorEntry_t *entry = &fldDoorTable[idx];
 
     if (entry->floor == fldArea[0] + 1) {
         if (entry->kind == 10) {
@@ -4314,7 +4585,7 @@ u8 *fldDoor_Find3(void) {
 
 s32 fldDoor_GetWarpEff(void)
 {
-    return fldDoorTable[scriptlabel].warpEff;
+    return fldDoorTable[scriptlabel].motion;
 }
 
 
@@ -4363,7 +4634,43 @@ s32 fldDoor_ChkWarp(void)
 }
 
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldWap_SetBgm);
+extern s32 gFldSndTransSrc;
+extern s32 fldBgmTransChk(s32 id1, s32 id2);
+extern void fldBgmFadeOut(void);
+extern void fldBgmTrans(void);
+
+s32 fldWap_SetBgm(fldActorEntry_t *entry) {
+    s32 result = 0;
+
+    if (fldGlobalBase.area != 0x22 && fldGlobalBase.area != 0x20 && fldGlobalBase.area != 0x25 &&
+        fldGlobalBase.area != 0x24 && fldGlobalBase.area != 0x29 && fldGlobalBase.area != 0x2A &&
+        fldGlobalBase.area != 0x2B && fldGlobalBase.area != 0x2C && fldGlobalBase.area != 0x2D) {
+        if (fldGlobalBase.sequenceCode != entry->sequenceCode) {
+            result = fldBgmTransChk(fldGlobalBase.sequenceCode, entry->sequenceCode);
+            if (entry->sequenceCode != 0) {
+                if (result == 0) {
+                    fldBgmFadeOut();
+                }
+                if (result == 1) {
+                    gFldSndTransSrc = fldGlobalBase.sequenceCode;
+                }
+                fldGlobalBase.sequenceCode = entry->sequenceCode;
+                if (result == 1) {
+                    fldBgmTrans();
+                }
+            } else if (result == 1) {
+                gFldSndTransSrc = fldGlobalBase.sequenceCode;
+                fldGlobalBase.sequenceCode = result;
+                fldBgmTrans();
+            }
+        }
+    }
+    if (entry->selectedRoom != 0) {
+        fldGlobalBase.playerSeTable = entry->selectedRoom - 1;
+    }
+    fldGlobalBase.cameraParamIndex = entry->rowIndex;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_Warp);
 
@@ -4379,7 +4686,80 @@ INCLUDE_ASM(const s32, "field/fldDraw", fldSetTerminalState);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldSetTerminalIndex);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_SiseExit);
+void fldDoor_SiseExit(void) {
+    fldSceneParam_t record;
+    fldActorEntry_t *entry;
+    s32 index;
+    s32 state;
+    s32 zone;
+    s32 sub;
+    s32 nextArea;
+    s32 nextKind;
+    s32 shortcut;
+
+    if (D_0054EDF4 == 0) {
+        return;
+    }
+    state = fldDoorSiseState;
+    zone = D_0054EDFC;
+    sub = D_0054EE00;
+    fldDoorLoad(D_0054EDF4);
+    for (index = 0; index < 0x100; index++) {
+        entry = &fldDoorTable[index];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind != 7) {
+            continue;
+        }
+        shortcut = (zone == 3 || zone == 4);
+        if (shortcut == 0) {
+            if (state != entry->floor) {
+                continue;
+            }
+        }
+        if (zone != entry->motion) {
+            continue;
+        }
+        if (sub != entry->secondaryMotion) {
+            continue;
+        }
+        if (entry->variantMode != 0) {
+            continue;
+        }
+        nextArea = entry->variant;
+        if (nextArea == 0) {
+            nextArea = D_0054EDF4;
+        }
+        nextKind = entry->sequenceKind;
+        if (nextKind == 0) {
+            nextKind = fldDoorSiseState;
+        }
+        if (fldGlobalBase.area != nextArea) {
+            fldBgmFadeOut();
+        }
+        fldWap_SetBgm(entry);
+        if (entry->flags54 != 0) {
+            fldDoorExitFlag = entry->flags54;
+            strcpy((char *)fldDoorExitMode, entry->taskName);
+            gFldWap_after_nextidx = index + 1;
+        }
+        gFldNowDZone = entry->flags31;
+        fldSetSceneParam4(&record, nextArea, nextKind, entry->sequenceName, entry->sequenceCode,
+                          entry->linkKind, entry->linkName);
+        if (shortcut != 0) {
+            record.restore = 5;
+        } else {
+            record.restore = 4;
+        }
+        D_0054EDF4 = 0;
+        fldDoorSiseState = 0;
+        D_0054EDFC = 0;
+        D_0054EE00 = 0;
+        dds3AdminiCallSequence(6, &record, 0xA0, 0);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldWap_Load);
 
