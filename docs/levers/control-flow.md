@@ -128,3 +128,36 @@ back-edge is an explicit label plus `goto`. `while (1)` or `for (;;)` with
 `if (...) break;` spell the same thing and get moved the same way. The
 `goto` costs the loop-alignment `nop` ee-gcc emits only for a loop the front
 end marked, so expect the body to sit one word early.
+
+- A message or result local that retail holds in a **callee-saved** register,
+  where the C gets a caller-saved one or coalesces it into the argument
+  register, is initialised **before** the function's leading call, not after
+  it. `Flow2_9` in `newbattle/nbMakePacket` sets `mes = 0;` above
+  `nbAddNegoIdKouho` and retail still emits the `daddu $17, $0, $0` after the
+  `jal`, because the scheduler sinks it; with the assignment written after the
+  call the local coalesces into `$6` and the frame loses `$17` entirely,
+  32 of 36 words. The same placement is what gives `Flow6_40`, `Flow7_23` and
+  `Flow7_24` their `$16`/`$17`.
+- A two-constant `movn` from a ternary needs the **`== 0 ? low : high`**
+  spelling. `cond != 0 ? high : low` reads as the direct translation of
+  `movn rd, high, cond` and is what gives `movz` with the constants swapped,
+  which is the `Flow2_13` row below read from the matching side:
+  `n->nowselect == 0 ? 0xD : 0xF` is exact where `!= 0 ? 0xF : 0xD` is not.
+  Four functions in `newbattle/nbMakePacket` turned on it.
+- The **source order of a `switch`'s arms** is a lever in its own right and is
+  cheap to sweep: `Flow6_40`'s three arms over `requesttype` 0, 1 and 3 are
+  exact written 1, 3, 0 and 3, 1, 0, two words over written 0, 1, 3 or 1, 0, 3,
+  and 36 of 55 words out written 0, 3, 1 or 3, 0, 1. gcc lays the arm bodies
+  out in source order while the compare tree stays balanced over the case
+  values, so the arm order decides which body the dispatch falls into. Read the
+  arm bodies' address order in retail and write them in that order first, then
+  sweep all permutations: six compiles take a few seconds.
+- A `jal` with a bare `nop` in its delay slot and no argument setup is **not**
+  evidence of an unprototyped call. It also happens when the argument register
+  already holds the value from the surrounding code: `Flow1_18` calls
+  `datGetRace(n->ework)` right after a twelve-way `||` chain on
+  `n->ework->id`, so `$4` is already `n->ework` and gcc emits nothing.
+  Reading that as `datGetRace()` and weakening the unit's prototype to
+  `extern s32 datGetRace();` leaves the function 13 words out; the prototyped
+  call with the argument is exact. Check whether the live value in the argument
+  register is the argument before changing a declaration.

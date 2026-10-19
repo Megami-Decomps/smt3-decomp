@@ -1,7 +1,7 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
 docs/levers/README.md	9		| 210 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-docs/levers/README.md	10		| 102 | [control-flow.md](control-flow.md) | Control flow |
+docs/levers/README.md	10		| 106 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 9 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	12		| 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 6 | [impossible.md](impossible.md) | Functions that cannot be written in C |
@@ -334,6 +334,10 @@ docs/levers/control-flow.md	104	jal nop	| a nop in a call's delay slot, where yo
 docs/levers/control-flow.md	105	bne bnel li nop sh	| a guard arm's first store duplicated into a bnel delay slot, with the value it stores computed *above* the branch, where retail has a plain bne, a nop and…
 docs/levers/control-flow.md	106	slti	| three case labels sharing one body, where retail has a three-node compare tree and your C emits one slti range test | write the body out in **each** arm,…
 docs/levers/control-flow.md	107	$18 $2 $3 nop sll sllv	| two early exits each returning a different call's result, where your C reuses one variable and spends a saved register on it | two locals and return res;
+docs/levers/control-flow.md	132	$0 $16 $17 $6 daddu jal	A message or result local that retail holds in a **callee-saved** register, where the C gets a caller-saved one or coalesces it into the argument register, is…
+docs/levers/control-flow.md	141	movn movz	A two-constant movn from a ternary needs the **== 0 ? low :
+docs/levers/control-flow.md	147		The **source order of a switch's arms** is a lever in its own right and is cheap to sweep:
+docs/levers/control-flow.md	155	$4 jal nop	A jal with a bare nop in its delay slot and no argument setup is **not** evidence of an unprototyped call.
 docs/levers/cross-jumping.md	8	lui ori	Where retail computes a value in both arms of an if but converts or stores it once at the join, the source most likely duplicates the whole tail in both arms…
 docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one register differs, which is why retail can keep two of three float-to-int conversions inside the arms and share only the third.
 docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
