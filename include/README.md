@@ -332,7 +332,8 @@ what put its field order eight bytes out.
 `scrHeader_t`: `MagicCode` +8 is the four bytes `fldFlowParse` compares against
 `0x30574C46` ("FLW0"), `TypeTableCount` +16 is its loop bound, and
 `LocalIntCount` +20 and `LocalFloatCount` +22 are the two `lh` reads
-`scrPrintProcedureStart` sizes the local arrays from. The remaining fields are HD
+`scrPrintProcedureStart` sizes the local arrays from, so both are signed: the
+`blez` guard in front of each allocation only comes out of an `s16`. The remaining fields are HD
 names in HD order, bracketed by those three anchors and the 32-byte size.
 
 `scrCommandFunc_t` takes no arguments and returns `s32`: `CodeFunc_Comm` calls the

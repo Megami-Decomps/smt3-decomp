@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 #include "scr.h"
+#include "event.h"
 
 extern u32 abcd;
 extern u32 dds3KernelDebugSign;
@@ -51,6 +52,31 @@ extern void stfInit(void);
 extern void titleExit(void);
 extern void titleStart(u32 mode);
 extern s32 trmCheckProcessStat(void);
+
+extern int printf(const char *fmt, ...);
+extern const char D_0052E230[];
+extern void fldProcTrigSequence(void *record, u32 mode);
+extern void nmeStartProcesses(s32 arg0, s32 arg1, s32 arg2);
+extern void fclRagProcessStart(s32 mode);
+extern void pbStartMapEditor(s32 mode, s32 stage);
+extern void evtKillEventViewer(void);
+
+extern s32 cmbCheckProcessStat(void);
+extern void InitPipe(s32 mapIdx, s32 prev);
+extern void dds3AdminiExitSequence(void);
+extern void nbInitBattleTest(void);
+extern void nbCallNewBattle(s32 packno, void *enc);
+extern s32 evtLoadArea(s32 area, s32 room);
+extern s32 evtLoadUnit(s32 slotKind, s32 resource);
+extern evtUnit_t *evtGetUnitHandle(s32 worldObjectKey);
+extern void evtSetUnitMotion(evtUnit_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
+extern void mdlSmoothLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
+                                f32 blendDurationFrames);
+extern void evtStartEvent(s32 eventId);
+extern s32 evtNextEventNo;
+extern s32 fldGb __attribute__((section(".data")));
+extern void *sdfChipAllocDirect(u32 size);
+extern s32 itfMesMngInitialize(void *sub);
 
 
 extern scrProcessWork_s *scrHandleFirst;
@@ -224,7 +250,10 @@ s32 CheckEndSave(void)
     return operationResult == 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallField);
+void CallField(u32 flg, void *data)
+{
+    fldProcTrigSequence(data, flg);
+}
 
 s32 ExitField(void)
 {
@@ -256,11 +285,35 @@ s32 CheckNewBattle(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallEvent);
+void CallEvent(u32 flg, s32 *data)
+{
+    s32 eventNo = 0;
+
+    switch (flg) {
+    case 0:
+        printf("start event!\n");
+        eventNo = *data;
+        break;
+    case 1:
+        printf(D_0052E230);
+        eventNo = evtNextEventNo;
+        break;
+    }
+    if (eventNo > 0) {
+        evtInitSky();
+        evtStartEvent(eventNo);
+    }
+}
 
 INCLUDE_RODATA(const s32, "kernel/dds3SequenceList", D_0052E230);
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitEvent);
+s32 ExitEvent(void)
+{
+    printf("ExitEvent\n");
+    evtExitSky();
+    fldProcNextJump();
+    return 0;
+}
 
 s32 CheckEvent(void)
 {
@@ -390,7 +443,19 @@ s32 CheckConfig(void)
     return taskResult == 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallNewBattleTest);
+void CallNewBattleTest(u32 flg, s32 *data)
+{
+    if (flg == 0) {
+        if (data == NULL) {
+            nbInitBattleTest();
+            return;
+        }
+        nbCallNewBattle(data[0], (void *)data[1]);
+        return;
+    }
+    dds3AdminiExitSequence();
+    fldProcNextJump();
+}
 
 s32 ExitNewBattleTest(void)
 {
@@ -423,7 +488,15 @@ s32 CheckBattleFieldTest(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallKernelTest);
+void CallKernelTest(void)
+{
+    evtUnit_t *unit;
+
+    evtLoadArea(0x6C, 1);
+    unit = evtGetUnitHandle(evtLoadUnit(3, 3));
+    evtSetUnitMotion(unit, 1, 0, 0x5A, 0);
+    mdlSmoothLoopMotion(unit->owner, 1, 0, 0.0f, 0.0f);
+}
 
 s32 ExitKernelTest(void)
 {
@@ -461,7 +534,12 @@ void CallEventViewer(void)
     evtInitEventViewer();
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", ExitEventViewer);
+s32 ExitEventViewer(void)
+{
+    evtKillEventViewer();
+    dds3KernelDebugSign = 1;
+    return 0;
+}
 
 s32 CheckEventViewer(void)
 {
@@ -528,7 +606,14 @@ s32 ExitCombineTest(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CheckCombineTest);
+s32 CheckCombineTest(void)
+{
+    if (!cmbCheckProcessStat()) {
+        fldProc_CallSisetuReturn();
+        return 1;
+    }
+    return 0;
+}
 
 void CallShopTest(s32 unused, void *requestData)
 {
@@ -550,7 +635,11 @@ s32 CheckShopTest(void)
     return taskExists == 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallRagTest);
+void CallRagTest(void)
+{
+    evtInitSky();
+    fclRagProcessStart(0);
+}
 
 s32 ExitRagTest(void)
 {
@@ -633,7 +722,10 @@ s32 CheckResult2Test(void)
     return taskResult == 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallNameTest);
+void CallNameTest(void)
+{
+    nmeStartProcesses(0, 0, 1);
+}
 
 s32 ExitNameTest(void)
 {
@@ -703,7 +795,10 @@ s32 CheckFontTest(void)
     return dds3SearchProcessName("test_font") == NULL;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallMapEditor);
+void CallMapEditor(void)
+{
+    pbStartMapEditor(0, 0);
+}
 
 s32 ExitMapEditor(void)
 {
@@ -715,7 +810,15 @@ s32 CheckMapEditor(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallPuzzleBoy);
+void CallPuzzleBoy(u32 flg, s32 *data)
+{
+    s32 stage = -1;
+
+    if (data != NULL) {
+        stage = *data;
+    }
+    pbStartMapEditor(1, stage);
+}
 
 s32 ExitPuzzleBoy(void)
 {
@@ -743,7 +846,15 @@ s32 CheckMovieViewerTest(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", CallPipe);
+void CallPipe(u32 flg, s32 *data)
+{
+    if (data == NULL) {
+        InitPipe(0, 0);
+        return;
+    }
+    InitPipe(data[0], data[1]);
+    fldGb = 0x3E7;
+}
 
 s32 ExitPipe(void)
 {
@@ -851,7 +962,75 @@ void scrUnlinkHandle(scrProcessWork_s *work)
     scrHandleCount--;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3SequenceList", scrPrintProcedureStart);
+scrProcessWork_s *scrPrintProcedureStart(scrHeader_t *header, scrTypeTable_t *typetable,
+                                         scrProcTable_t *proctable, scrLabelTable_t *labeltable,
+                                         scrCode_u *code, u8 *mesdata, char *strdata, s32 procno)
+{
+    scrProcessWork_s *work;
+    s32 i;
+
+    if (header == NULL || typetable == NULL || proctable == NULL || code == NULL || procno < 0 ||
+        procno >= typetable->ItemCount) {
+        return NULL;
+    }
+    work = sdfChipAllocDirect(sizeof(scrProcessWork_s));
+    if (work == NULL) {
+        return NULL;
+    }
+    for (i = 0; (((char *)work->Name)[i] = proctable[procno].Name[i]) != 0; i++) {
+    }
+    work->CP = proctable[procno].CodeAddress;
+    work->SP = 0;
+    {
+        scrStackData_u *stackValue = work->StackData;
+        u8 *stackType = work->StackType;
+
+        for (i = 27; i >= 0; i--) {
+            *stackType++ = 0;
+            stackValue++->i = 0;
+        }
+    }
+    work->Header = header;
+    work->TypeTable = typetable;
+    work->ProcTable = proctable;
+    work->LabelTable = labeltable;
+    work->Code = code;
+    work->MessageData = mesdata;
+    work->StringData = (u8 *)strdata;
+    work->StartProc = procno;
+    work->MesHandle = -1;
+    work->ScriptTimer = 0;
+    work->CommandTimer = 0;
+    work->MemHandle = NULL;
+    work->LocalInt = NULL;
+    work->LocalFloat = NULL;
+    work->ProcessID = NULL;
+    work->prev = NULL;
+    work->next = NULL;
+    if (header->LocalIntCount > 0) {
+        work->LocalInt = sdfChipAllocDirect(header->LocalIntCount * 4);
+        for (i = 0; i < header->LocalIntCount; i++) {
+            work->LocalInt[i] = 0;
+        }
+    } else {
+        work->LocalInt = NULL;
+    }
+    if (header->LocalFloatCount > 0) {
+        work->LocalFloat = sdfChipAllocDirect(header->LocalFloatCount * 4);
+        for (i = 0; i < header->LocalFloatCount; i++) {
+            work->LocalFloat[i] = 0.0f;
+        }
+    } else {
+        work->LocalFloat = NULL;
+    }
+    if (mesdata != NULL) {
+        work->MesHandle = itfMesMngInitialize(mesdata);
+    }
+    scrLinkHandle(work);
+    printf("procedure start <%s>\n", proctable[procno].Name);
+    datDebugPrintf("start <%s>\n", proctable[procno].Name);
+    return work;
+}
 
 scrProcessWork_s *fldFlowParse(scrHeader_t *header, s32 procno)
 {

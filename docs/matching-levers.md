@@ -1135,6 +1135,19 @@ once per use, and a named local for it computes it once.
   `GetFontHandleUnit` needed `(s16)chain->...cellHeight` where retail has
   `lh`, and the cast cost nothing. Reading it through an `s16 *` cast of the
   field's address gives the same thing, so prefer the plain cast.
+- Where every retail read of a `u16` field is `lh`, retype the field `s16` in
+  the header rather than casting at each use. A `> 0` guard is the cheap tell:
+  on a `u16` it compiles to a plain nonzero test (`beq`/`bne`), on an `s16` to
+  `blez`. `scrHeader_t.LocalIntCount` and `LocalFloatCount` were `u16` and cost
+  `scrPrintProcedureStart` an `lhu` plus a `beq` per array; retyping both `s16`
+  (same offset, same size) was the last change before it matched, and no other
+  unit shifted.
+- A `base[index].field` expression used several times keeps `index * sizeof` in
+  a register and re-adds `base` at each use. Hoisting it into a pointer local
+  (`row = &base[index];`) instead keeps the whole address in a callee-saved
+  register and renumbers everything around it. `scrPrintProcedureStart` reads
+  `proctable[procno]` four times and wanted the subscript spelled out each
+  time; the `proc` local moved 123 of 154 words.
 - One extra *statement* on a value raises its register-allocation priority,
   which is a cheaper lever than any declaration order. `GetFontHandleUnit`
   held four values across its loop and gcc gave them `$16` to `$19` one place
