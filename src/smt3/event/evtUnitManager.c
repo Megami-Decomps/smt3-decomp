@@ -301,7 +301,61 @@ void GetBaseLightDir(evtUnit_t *unit) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", MakeLightPacket);
+/* The colour inlines read and write a 16-byte slot, one word of it used. */
+typedef struct {
+    u32 word;
+    u8 pad04[12];
+} evtColorWork_t;
+
+/* The light source block sdf3DMakeLightParallelPacket reads: colour then
+ * direction, each a quadword. */
+typedef struct {
+    sdfVector4_t color;
+    sdfVector4_t direction;
+    u8 pad20[0x20];
+} evtLightSource_t;
+
+void sdf3DMakeLightParallelPacket(void *packet, evtLightSource_t **lights, sdfVector4_t *ambient);
+
+/* vu0 routine: unpack the unit's colours into a parallel light packet. */
+void MakeLightPacket(evtUnit_t *unit) {
+    evtLightSource_t source;
+    sdfVector4_t ambient;
+    evtLightSource_t *lights[3] = { &source, NULL, NULL };
+    evtColorWork_t work[2];
+    u32 flags;
+    f32 *channel;
+    s32 i;
+
+    flags = unit->flags;
+    if (flags & 0x20000) {
+        return;
+    }
+    unit->value = 0;
+    if ((flags & 0x40000) == 0) {
+        if ((flags & 0x700) == 0) {
+            return;
+        }
+    }
+    work[0].word = unit->color;
+    EE_MMI_RGBA_UNPACK(&work[0], 0.0078125f);
+    SDF_VU0_STOREVECTOR_MEMOPS(source.color);
+    SDF_VU0_LOADVECTOR(unit->vec10);
+    SDF_VU0_STOREVECTOR(&source.direction);
+    work[1].word = unit->color50;
+    EE_MMI_RGBA_UNPACK(&work[1], 0.0078125f);
+    SDF_VU0_STOREVECTOR(&ambient);
+    ambient.w = 1.0f;
+    channel = &ambient.x;
+    for (i = 2; i >= 0; i--) {
+        if (1.0f < *channel) {
+            *channel = 1.0f;
+        }
+        channel++;
+    }
+    sdf3DMakeLightParallelPacket(unit->endpointWork, lights, &ambient);
+    unit->value = (u32)unit->endpointWork;
+}
 
 void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *target, s32 duration) {
     unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
@@ -346,7 +400,31 @@ void evtUnlinkExternalLightPacket(evtUnit_t *unit) {
     MakeLightPacket(unit);
 }
 
+/* vu0 routine: pack the base light and ambient vectors into the unit's colours. */
+/* NON_MATCHING: 3 of 37 words differ (first at +0x10). */
+#ifdef NON_MATCHING
+void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 duration, u32 firstColor, u32 secondColor) {
+    evtColorWork_t work[2];
+    u32 scale;
+    s32 light;
+    s32 ambient;
+
+    scale = 0x43000000;
+    unit->color08 = firstColor;
+    unit->colorDuration = duration;
+    unit->color58 = secondColor;
+    GetBaseLightRGB(unit);
+    MMI_RGBA_PACK_UNIT(light, scale);
+    unit->firstCurrent = light;
+    work[0].word = light;
+    GetBaseAmbientRGB(unit);
+    MMI_RGBA_PACK_UNIT(ambient, scale);
+    unit->color54 = ambient;
+    unit->flags = (unit->flags | 0x800) & ~0x1000;
+}
+#else
 INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitLightAndAmbient);
+#endif
 
 /* vu0 routine: normalise the target direction and retain the current source. */
 void evtSetUnitLightDir(evtUnit_t *unit, s32 duration) {
@@ -433,7 +511,38 @@ evtUnit_t *evtGetUnitHandle2(dds3Basic_t *obj) {
     return ((dds3UnitObjectWork_t *)obj->workdata)->unit;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtCreateUnitHandle);
+void *sdfChipAllocDirect(u32 size);
+
+extern sdfVector4_t D_0053A850;
+
+evtUnit_t *evtCreateUnitHandle(dds3Basic_t *effObj, mdlObj_t *owner) {
+    evtUnit_t *work;
+    sdfVector4_t axis;
+
+    axis = D_0053A850;
+    work = sdfChipAllocDirect(0x148);
+    memset(work, 0, 0x148);
+    work->motionState = EVT_UNIT_MOTION_STATE_IDLE;
+    work->waitBlendEnd = 10;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
+    work->transitionMotionScale = 1.0f;
+    work->effObj = effObj;
+    work->owner = owner;
+    work->motionSetup.endFrame = 10;
+    work->waitBlendStart = 0;
+    work->motionSetup.startFrame = 0;
+    SDF_VU0_LOADVECTOR_MEMOPS(axis);
+    SDF_VU0_STOREVECTOR(work->vec10);
+    SDF_VU0_STOREVECTOR(work->vec40);
+    work->color0C = 0xB2B2B2;
+    work->color = 0xB2B2B2;
+    work->color5C = 0x80303030;
+    work->color50 = 0x80303030;
+    work->endpointWork = sdfChipAllocDirect(0xE0);
+    memset(work->endpointWork, 0, 0xE0);
+    work->value = 0;
+    return work;
+}
 
 s32 evtDeleteUnitHandle(evtUnit_t *transitionWork) {
     void *endpointWork;
@@ -522,7 +631,57 @@ void evtSetUnitMotion(evtUnit_t *unit, s32 motionId, s32 startFrame, s32 endFram
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtUnitRotationTarget);
+extern f32 __ieee754_acosf(f32 x);
+
+extern void FromRotation(f32 angle);
+
+void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+
+extern sdfVector4_t D_0053A860;
+
+/* vu0 routine: turn the unit toward dir, at most a tenth of a radian a frame. */
+s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale) {
+    sdfVector4_t axis;
+    sdfVector4_t rotation;
+    sdfVector4_t flat;
+    f32 cross;
+    f32 angle;
+
+    axis = D_0053A860;
+    evtGetUnitDirVector(unit);
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    evtVu0SubVectorXZAxis(dir, (f32 *)&unit->effObj->poseset->pos);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&flat);
+    SDF_VU0_LOADVECTOR_B_MEMOPS(axis);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    SDF_VU0_INNERPRODUCT(cross);
+    SDF_VU0_LOADVECTOR(&flat);
+    SDF_VU0_INNERPRODUCT(angle);
+    if (0.9998f <= angle) {
+        return 1;
+    }
+    angle = __ieee754_acosf(angle);
+    if (0.0f < cross) {
+        angle = -angle;
+    }
+    angle = angle * scale;
+    if ((unit->flags & 0x200000) == 0) {
+        if (angle < -0.15707963f) {
+            angle = -0.15707963f;
+        }
+        if (0.15707963f < angle) {
+            angle = 0.15707963f;
+        }
+    }
+    SDF_VU0_LOADVECTOR_MEMOPS(axis);
+    FromRotation(angle);
+    SDF_VU0_STOREVECTOR_NOMEM(&rotation);
+    dds3AddRotPoseSet(unit->effObj, &rotation);
+    return 0;
+}
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
 s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
@@ -581,13 +740,21 @@ s32 evtUnitMoveTypePathTrace(evtUnit_t *unit) {
     return 1;
 }
 
-void func_001E4108(evtUnit_t *work, void *src);
+void func_001E4108(evtUnit_t *work, void *src) {
+    SDF_VU0_COPYVECTOR(work->targetVector, src);
+}
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", func_001E4108);
-
-void evtSetUnitRot1(evtUnit_t *work, s128 *vector, s32 frames);
-
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitRot1);
+void evtSetUnitRot1(evtUnit_t *work, s128 *vector, s32 frames) {
+    if (frames > 0 && frames <= 100) {
+        work->linkedUnit = NULL;
+        work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
+        SDF_VU0_COPYVECTOR(work->targetVector, vector);
+        work->motionParameter = frames;
+        work->directionOffset = 0;
+        work->motionCallback = 0;
+        work->motionTicks = 0;
+    }
+}
 
 void evtSetUnitRot2(evtUnit_t *work, s32 worldObjectKey, s32 frames) {
     dds3Basic_t *worldUnit;
@@ -601,7 +768,17 @@ void evtSetUnitRot2(evtUnit_t *work, s32 worldObjectKey, s32 frames) {
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitMove1);
+void evtSetUnitMove1(evtUnit_t *work, s32 motionSubmode, s128 *vector, s32 unused, s32 frames, s32 directionOffset, s32 (*callback)(evtUnit_t *, s32), s32 unusedLast) {
+    work->motionSubmode = motionSubmode;
+    work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
+    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR;
+    work->linkedUnit = NULL;
+    SDF_VU0_COPYVECTOR(work->targetVector, vector);
+    work->motionParameter = frames;
+    work->directionOffset = directionOffset;
+    work->motionCallback = callback;
+    work->motionTicks = 0;
+}
 
 void evtSetUnitMove2(evtUnit_t *work, s32 motionSubmode, s32 worldObjectKey, s32 unused, s32 frames, s32 directionOffset, s32 (*callback)(evtUnit_t *, s32), s32 unusedLast) {
     dds3Basic_t *worldUnit;
