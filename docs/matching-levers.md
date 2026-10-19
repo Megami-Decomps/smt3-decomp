@@ -114,6 +114,9 @@ it was measured on DDS and not on this ELF.
 | 26 arms, each ending in a `b` to one shared exit, with no code after the chain | a plain `if`/`else if` chain. The `goto` funnel and the duplicated-tail rows above apply only where the arms *share* a tail; here each arm carries its own whole loop and there is nothing for `jump2` to cross-jump, so the chain matched with no `goto` at all. `dds3ObjectBaseMakeUnit`'s 26 model probes are this shape |
 | a `for` whose bound is loaded once into a saved register, where your C runs the whole pointer chain again each iteration | read the bound into a local first, `count = obj->inner->nodeList->count;`. Written as the loop condition the two loads and the `lh` repeat in the backedge block, cost five words, and also take the argument register the call in the body wants. `dds3ObjectBaseMakeUnit` went from 94 of 1406 words to 9 on that one local |
 | a loop whose body is guarded by `bnel i, $0` and whose call arguments are all `$0` | `if (i == 0) { ... }` inside the `for`. The index is then known zero in the body, so an `i` passed as an argument materialises as `$0` rather than a copy |
+| a long flat chain of early `return 0` guards where one guard's `bnel` comes out as a `beq` over a hoisted `lui %hi(sym)`, one word long | convert **any one** of the guards to `goto ret0;` with a trailing `ret0: return 0;`. The shared zero's extra reference is what stops gcse hoisting the `%hi` of a symbol first used below the chain into the guard's own block. `fldInputPanelCheckKey` went from 44 of 68 words and one word long to 7 of 67 at the exact size, and `fldInputPanelProcess2` from 51 to 6, with the mask of which guards convert swept over all 128 and 256 combinations: every mask with at least one `goto` reaches the floor and the choice of guard does not matter. This is the row above on `ProcCampCheck` read the other way: there the point was how many to convert, here one is enough |
+| a last guard whose `beql` tests the field in `$2` while your `beq` tests it in `$3`, with the return constant in the delay slot either way | write that guard positively, `if (x != 0) { body } return 1;`, not inverted with an early `return 1`. The inverted form fills the slot unconditionally so the load cannot have `$2`, and the whole tail's registers shift. That was the last 7 words of `fldInputPanelCheckKey` |
+| a guarded block whose exit is a forward `goto` where your `break`-style early `return` rotates the registers | `goto ret0;` out of the guard with the body falling into `ret0: return 0;`. `fldInputPanelProcess2`'s `work->draw` test needed it; seven shapes of the tail (nesting the body, an early `return` per arm, a trailing `return 0` above the label) were swept against all 128 guard masks and only this one is exact |
 | a two-sided clamp whose high arm has its own `jr $31` and a `mov.s` from the bound's register | `if (hi < x) { x = hi; } else if (x < lo) { x = lo; } return x;`. `return 2.0f;` in the high arm puts the constant straight in `$f0` and rotates every float temp, 20 of 34 words in `evtCalcEffBedScale`; an early `return x;` after the assignment does the same, and two sibling `if`s instead of the `else if` are 8 words out |
 | a guard whose failure returns the **same variable** the function's tail returns, with two `daddu $2, rs, $0` copies and an empty `jr` delay slot | an early `return total;` inside the guard plus a second `return total;` at the end, not an `if` wrapping the body around one trailing `return`. The wrapped form coalesces the copy into the `jr`'s delay slot and is one word short; the two returns keep one copy in the guard's delay slot and one at the join, which `jump2` merges only down to the shared `jr`. `func_001C61B8` in `interface/fmGslCont` went from 5 of 44 words to exact. This is the opposite reading of the `rstUpdateEvoBgFade` row above, where the failure arm returns a *constant*, so check which one the arm returns before choosing |
 
@@ -560,6 +563,13 @@ end marked, so expect the body to sit one word early.
   retail gives the lower spill slot to a value read in the prologue, declare the
   loop-local one (a `found` pointer, say) after every other local;
   `effPCPBossMETATOBeamDraw` swaps its two spill slots otherwise.
+- A call that sets only `$4` where the callee really takes three parameters is
+  an unprototyped declaration in the caller's unit, not a wrong signature on the
+  callee. `fldAddressProcess2` calls `fldDrawAddressPanel(0x80)` and
+  `fldDrawAreaBlockFont(0)`, which `field/fld_Npc` defines as
+  `(s32, s32, s32)` and `field/fldAutoMap` as `(void)`; `extern void
+  fldDrawAddressPanel();` plus the one-argument call in `field/fldPanel` is
+  exact and leaves both definitions alone.
 - `Hatudo` and `nbE915_Test` call `nbGetEventForm` with no argument, which
   only an unprototyped declaration produces, and that function is defined
   with a prototype in the same unit. An unprototyped `extern` does work for
@@ -799,6 +809,14 @@ end marked, so expect the body to sit one word early.
   every spelling (duplicated test, `>= 0` against `< 0`, the mask form, a
   ternary, an explicit `else`, and even *two different symbols* that resolve to
   the same address) collapses to one arm and 36 of retail's 56 bytes.
+- A conditional move whose two arms are the same value. Retail's
+  `daddu rd, rs, $0` / `xor` / `movn rd, rt, rs` selecting between a field and
+  the old value of the global it is stored into is not reachable: combine's
+  `simplify_if_then_else` rewrites `(ne A B) ? A : B` to `A`, and cse reaches it
+  through an explicit `xor` too, so every spelling folds to one `sw`. A `u64`
+  local keeps the cmov but pays `lwu` and two `dsll32`/`dsra32` pairs for it.
+  `movieWaitSema` in `sdf/sdfMovie` sits on this; see
+  [Non-matching drafts](nonmatching.md).
 - A single-bit mask test ee-gcc folds. Retail's `andi 1` followed by a
   redundant `andi 0xFF` and an explicit branch is not reachable: see
   `cmpItemHasFlag` in the drafts.
@@ -1554,6 +1572,36 @@ storing `cnt` back first or in the middle, leaves six temps live, gives `work`
 differs from retail by a uniform `+1` or `-1` on the register numbers, look for
 a block temp that retail keeps alive and the draft does not, rather than at the
 function's own locals.
+
+## A loop whose exit test is written first gets rotated; plain `goto`s do not
+
+`for (;;) { if (flag != 0) break; <body> }` is not laid out the way it reads.
+ee-gcc moves the test block to the end of the loop as the latch and jumps to it
+from the preheader, so the body comes out first and the test last. Retail keeps
+the test at the head of its block with the body falling through behind it.
+Writing the whole loop as labels and `goto`s, with no loop construct at all,
+keeps the source order: `dds3KernelMain` has a rotated loop whose backedge runs
+from the frame-end test to the bookkeeping block, and
+`goto top; frame: ... goto runcount; pause: ... runcount: ... top: if (flag)
+goto done; ... if (f()) goto frame; done:` reproduces the layout exactly, where
+the same structure inside a `for (;;)` with `break` is 64 of 71 words out. A
+`do`/`while` or a `for` with `goto done` in place of the `break` both work as
+well, so it is the `break` reaching the loop's own exit machinery that rotates
+it.
+
+## Two cross-block locals whose registers come out swapped
+
+Where a value is tested in one block and updated in another, read **both** of
+the values the second block needs at the second block's label, and test the
+global directly at the first. `dds3KernelMain` tests `dds3PauseSign` and then
+decrements `dds3PauseTime`; with `sign = dds3PauseSign;` at the test and
+`time = dds3PauseTime;` at the `goto`, the two land in `$2` and `$3` the wrong
+way round and the `movz`, both stores and the two delay-slot loads differ, 10 of
+72 words. Reading `dds3PauseSign != 0` as the global and assigning both locals
+at the `pause:` label is exact. Declaration order, the store order, `u32` for
+the counter, `>= 1` for `> 0`, `time = time - 1`, and swapping which global is
+read first in the test block all leave the pair swapped, so move the reads
+rather than permuting around them.
 
 ## Arithmetic
 
