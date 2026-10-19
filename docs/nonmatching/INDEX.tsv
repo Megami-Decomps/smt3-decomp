@@ -44,6 +44,13 @@ fclTerminalLoadTextures	code_001FAE80	0x70	16 of 27 words match	docs/nonmatching
 rstBuildDestroyList	code_001FAE80	0x64	1 of 24 words matches	docs/nonmatching/code_001FAE80.md	554
 cmbDrawResultFooter	code_001FAE80	0x74	25 of 29 words match	docs/nonmatching/code_001FAE80.md	586
 ragCheckHeartsChoice	code_001FAE80	0x80	22 of 29 words match	docs/nonmatching/code_001FAE80.md	607
+cmpGetStockInfoIndex	code_001FAE80	0x80	26 of 32 words match	docs/nonmatching/code_001FAE80.md	632
+cmpDisablePadBitStop	code_001FAE80	0x80	17 of 32 words match	docs/nonmatching/code_001FAE80.md	654
+cmpReCalcStockCursorPos	code_001FAE80	0x84	27 of 33 words match	docs/nonmatching/code_001FAE80.md	675
+cmpSetIniStockRecoverEff	code_001FAE80	0x84	20 of 32 words match	docs/nonmatching/code_001FAE80.md	692
+cmpUpdateCursorSlots	code_001FAE80	0x84	1 of 31 words matches	docs/nonmatching/code_001FAE80.md	713
+ragGetListItem2	code_001FAE80	0xCC	29 of 51 words match	docs/nonmatching/code_001FAE80.md	730
+ragGetListItem3	code_001FAE80	0xCC	29 of 51 words match	docs/nonmatching/code_001FAE80.md	757
 getPartsType	code_0029B780	0x5C	15 of 24 words differ	docs/nonmatching/code_0029B780.md	5
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0029B780.md	23
 pipeGetObjData	code_0029B780	0x120	9 of 71 words differ	docs/nonmatching/code_0029B780.md	49

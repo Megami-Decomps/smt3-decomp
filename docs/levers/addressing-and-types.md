@@ -1268,6 +1268,12 @@
 - The three `nop`s between the `sw $0` and the `bne` of retail's four-slot
   draw-tag clear loops are ee-as's short-loop padding, not source. A plain
   `for (j = 0; j != 4; j++) tags[j] = NULL;` reproduces them word for word.
+  The padding is not limited to branch-likely closers: `ragGetListItem2` in
+  `code_001FAE80` carries one `nop` after the `mfhi` and one between the
+  `slti` and the plain `bnez` that closes a seven-iteration weight scan, and
+  a draft whose register allocation differs from retail in 22 of 51 words
+  still lands both `nop`s on the exact retail words. So a `nop` run inside a
+  short loop is never the thing to chase; look at the registers around it.
 
 - A packet builder whose stores all go to one array element wants the element
   indexed at every store, `packet_array[frame].field = v;`, not a

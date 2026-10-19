@@ -628,3 +628,134 @@ Ruled out: `index == 1` with a `goto` to a trailing table arm (8 of 30 match);
 a `u16 ret` local assigned in each arm with one trailing `return` (8 of 30);
 the same with explicit `goto done;` out of each arm (15 of 29); and
 `(flag * 7) * 2` in place of `flag * 14` at the subscript.
+
+## cmpGetStockInfoIndex (code_001FAE80, 0x80)
+
+26 of 32 words match, at the exact size, with zero instruction differences.
+Reads the two counts in `cmpStockWork_t::info[index]` and uses their `s8` sum
+to subscript one of the two `s8` tables inside `stock[index]`, picked by the
+third argument.
+
+Every remaining word is a register name. Retail accumulates
+`slot + index * 0x56` in place in the register that already holds `slot`
+($2) and this allocates a fresh one ($3), which also commutes the two
+`addu` operands and renames the base register in the two `lb`s. The shapes,
+the branch sense, the `0x103C` and `0x56` multiply chains and the
+`sll 24`/`sra 24` on the sum are all identical.
+
+Ruled out: `slot` as `s32` with the `(s8)` cast written out; the row offset in
+its own `s32` local, declared both before and after `slot`; the subscript as
+`stock[index].unk_05[slot]` and as a `s8 *row` local, both of which fold the
+base pointer into the row multiply and come out 12 bytes short; and dropping
+the `base` and `info` locals. Writing the `info` offset as its own `s32 ofs`
+local, which `cmpStockHasRoom` above it already does, is what fixed the two
+adjacent words at +0x38.
+
+## cmpDisablePadBitStop (code_001FAE80, 0x80)
+
+17 of 32 words match, at the exact size. Negates the cursor's `s8` at +0x38
+when it is not negative, otherwise divides the timer at +0x30 by
+`D_0054E474`, clamps it at zero and clears the byte when the timer reached
+zero; then masks the pad bits when `unk_04` is 2.
+
+One delay-slot decision accounts for all fifteen. Retail closes the first
+timer test with `bltzl` and the shared `sw $0, 0x30` annulled in its slot,
+retargeted past the store; this emits a plain `bltz` to the store itself and
+fills the slot with the `lwc1` of the divisor from the fall-through. Every
+instruction after that is the same, one word earlier. The two hazard `nop`s
+move with the `lwc1`.
+
+Ruled out: the two tests written as `if (v < 0) ... else ...` with a store in
+each arm, which runs long; reloading `work->cursor.unk_30` for the second test
+instead of keeping `next`; `> -1` and `<= -1` for the two comparisons; a
+`f32` local for the converted value, which does not reorder the divisor load;
+and a `s32 *` local for the timer, which materialises the pointer and is 11
+words out instead.
+
+## cmpReCalcStockCursorPos (code_001FAE80, 0x84)
+
+27 of 33 words match, at the exact size. Re-counts one or both stock cursors
+from `stock[i].unk_02 + stock[i].unk_03[0]`.
+
+The six differing words are the two loads and the `addu` in each half: retail
+puts `unk_02` in $3 and `unk_03[0]` in $4 and adds `$4 = $3 + $4`, this
+puts them the other way round. Same instructions, same count, same order.
+
+Settled on the way: the `u8` narrowing has to be written `(... ) & 0xFF` with
+an `s32` prototype parameter. Written `(u8)(...)` gcc pushes the mask back
+into the first load and emits `lbu` where retail has `lb`; declaring
+`cmpChangeCursorListNums` with a `u8` first parameter drops the `andi`
+altogether and runs two words short.
+
+Ruled out: both source orders of the sum, and `(u8)((s32)a + (s32)b)`.
+
+## cmpSetIniStockRecoverEff (code_001FAE80, 0x84)
+
+20 of 32 words match, at the exact size. Picks the stock cursor slot for the
+recover effect from `cmpFindFreeStockSlot`, offset by 0x1078 or 0x3C
+depending on whether the stock has room.
+
+The twelve differing words are one if-conversion: gcc turns the choice of
+offset into `movz` where retail keeps the `beqz` with the `addiu $7, $7,
+0x1078` in its delay slot and re-derives the base in the fall-through arm.
+
+Settled on the way: the pointer must be the reassigned parameter
+(`work += 0xAC`), not a separate `base` local. With a separate local the
+parameter and the base are live at once, work lands in $17 instead of $16 and
+the whole prologue shifts.
+
+Ruled out for the `movz`: `if/else` assigning the pointer in both arms, which
+emits two branches and runs long; the common `base + slot * 16` in its own
+local with `+=` in each arm; the condition reversed; and two separate
+`cmpSetCursorSlot` calls in the two arms, which are not cross-jumped and run
+36 bytes long.
+
+## cmpUpdateCursorSlots (code_001FAE80, 0x84)
+
+1 of 31 words matches, 124 bytes against retail's 132. Ages the two cursor
+slots of each of 256 rows: adds `param` to `value` while it is under 0x100,
+clears `state` once it is not, and clamps `value` at 0x100.
+
+The body is right but the inner loop is not. Retail keeps the inner index
+live, recomputing `$8 << 3` each iteration and testing `slti $9, $8, 2`
+ahead of the body, so `check_dbra_loop` cannot reverse it. Every shape tried
+reduces the inner subscript to a pointer, which frees the index and lets gcc
+run the inner loop down from 1 with `bgez`. Retail also carries a loop
+alignment `nop` ahead of the outer loop that none of these emit.
+
+Ruled out: `cmpCursorSlot_t (*)[2]` with `slot[j][i]`, which is the form
+`cmpClearCursorSlots` above it uses, and a `cmpCursorSlot_t *` advanced by 2
+per outer iteration with `slot[i]` inside.
+
+## ragGetListItem2 (code_001FAE80, 0xCC)
+
+29 of 51 words match, at the exact size. Rolls `dds3GetRandA` modulo the
+count byte at +6 of a 35-byte row of `D_0032FC98`, then walks the row's seven
+weights and returns the matching byte out of the seven-entry table the second
+argument selects.
+
+The loop, the `divu` with its divide-by-zero `break`, the `mfhi`, the
+`weight++` hoisted into the `bnez` delay slot and the two `nop`s are all
+identical. What differs is one register more in flight: retail holds the row
+offset in $17 and the count in $16, carries `pick` in $6 and the counter in
+$5, and re-derives the item pointer as `(7 * kind + table) + row` then `+ 7`
+after the divide; every shape tried allocates the pair the other way round,
+runs `pick` and the counter one register lower, and folds the `+ 7` in before
+the divide.
+
+Settled on the way: the division has to be unsigned (`(u32)dds3GetRandA(0) %
+limit` with `u32 limit`), otherwise it is `div` where retail has `divu`; and
+the row has to be an `s32` byte offset into the array rather than a `u8 *`
+row pointer, which otherwise merges the table base into one pointer and runs
+20 bytes short.
+
+Ruled out: `row` as a variable and as `index * 35` repeated inline, both of
+which give the same 22 words; `weight` declared before `pick`; `pick`
+assigned in a statement after the declarations, which adds a register; `item`
+declared before `weight`; and `item = weight + kind * 7 + 7`.
+
+## ragGetListItem3 (code_001FAE80, 0xCC)
+
+29 of 51 words match, at the exact size. Byte-identical to
+`ragGetListItem2` above except for the table, `D_0032FCE0`, and it differs
+in the same 22 words for the same reason. Fix one and the other follows.

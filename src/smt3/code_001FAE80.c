@@ -169,7 +169,9 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ void *allocation;
-    /* 0x04 */ u8 unk_04[0x2C];
+    /* 0x04 */ u8 unk_04[0x18];
+    /* 0x1C */ s32 cursor;
+    /* 0x20 */ u8 unk_20[0x10];
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
 } dds3TitleWork_t;
@@ -271,7 +273,7 @@ extern cmpInfoWindow_t *cmpInfoWindow;
 extern cmbWork_t *D_0054FB20;
 
 extern s32 mdlPrepare(s32 group, s32 id, s32 blocking);
-extern s32 shopDrawPanelMode0(s32 mode);
+extern s32 shopDrawPanelMode0(s8 mode);
 extern s32 shopUpdateItemList(s32 mode);
 extern void p2sdStopAllSe(void);
 extern s32 GetValidUnitIndex(s32 index);
@@ -455,7 +457,10 @@ typedef struct
 {
     /* 0x00 */ u16 count;
     /* 0x02 */ s8 unk_02;
-    /* 0x03 */ u8 unk_03[0x53];
+    /* 0x03 */ u8 unk_03[2];
+    /* 0x05 */ s8 unk_05[0x10];
+    /* 0x15 */ s8 unk_15[0x10];
+    /* 0x25 */ u8 unk_25[0x31];
 } cmpLocalStock_t;
 
 /* The stock work the cursor helpers take: two 0x56-byte rows at the top and a
@@ -499,6 +504,12 @@ typedef struct
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
 } cmpCursorWork_t;
+
+typedef struct
+{
+    /* 0x00 */ cmpCursorWork_t cursor;
+    /* 0x38 */ s8 unk_38;
+} cmpPadStopWork_t;
 
 typedef struct
 {
@@ -767,6 +778,13 @@ extern void sdfTexFree(s32 handle);
 
 typedef struct
 {
+    /* 0x00 */ s8 index;
+    /* 0x01 */ u8 unk_01;
+    /* 0x02 */ u16 id;
+} cmbStockSlot_t;
+
+typedef struct
+{
     /* 0x00000 */ u8 unk_00000;
     /* 0x00001 */ s8 unk_00001;
     /* 0x00002 */ u8 unk_00002;
@@ -778,10 +796,7 @@ typedef struct
     /* 0x0000C */ u8 unk_0000C[0x10];
     /* 0x0001C */ cmpCursorWork_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x40BC];
-    /* 0x04110 */ s8 slotIndex[4];
-    /* 0x04114 */ u8 unk_04114[4];
-    /* 0x04118 */ s8 unk_4118;
-    /* 0x04119 */ u8 unk_04119[3];
+    /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x123EE];
     /* 0x1650A */ s8 unk_1650A;
     /* 0x1650B */ u8 unk_1650B[5];
@@ -807,7 +822,7 @@ extern cmbGbWork_t *CMB_GBWK;
 
 extern u8 fclTerminalCommandCount[1];
 extern s32 datAddItem(s32 itemId, s32 count);
-extern s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s32 mode, s32 flag);
+extern s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 mode, s8 flag);
 
 extern void MoveActive(fclRbnWork_t *work);
 extern void MoveDeactive(fclRbnWork_t *work);
@@ -817,7 +832,7 @@ extern void rstSetDestroySkillMaxHpMp(void);
 extern sdfGrOt_t sdfGrOtTable[85];
 
 extern void release_movieobj2(void *movie, sdfGrOt_t *ot);
-extern void cmpReCalcStockCursorPos(s32 index);
+extern void cmpReCalcStockCursorPos(s8 index);
 
 typedef struct
 {
@@ -907,7 +922,8 @@ typedef struct
     /* 0x40 */ s32 unk_40;
     /* 0x44 */ s32 unk_44;
     /* 0x48 */ s32 unk_48;
-    /* 0x4C */ u8 unk_4C[0xC];
+    /* 0x4C */ u8 unk_4C[8];
+    /* 0x54 */ s32 cursor;
     /* 0x58 */ void *unk_58;
     /* 0x5C */ u8 unk_5C[4];
     /* 0x60 */ s32 unk_60;
@@ -1097,7 +1113,7 @@ extern void fclRagTexCalcSizes();
 extern u8 ragHeartsTable[];
 extern campStatusPanel_t *campDhUpdateWork;
 extern s8 cmpGetHeartsIconId(s8 index);
-extern void cmpInitCursorRange(void *cursor, s32 index, s32 rows, s32 flag);
+extern void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag);
 extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
 extern void cmpModelFreeResource(void);
 extern void cmpResetDrawEnv(void);
@@ -1777,11 +1793,47 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawResultFooter);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawResultPanel);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawStockPanel1);
+void cmbDrawStockPanel1(void)
+{
+    s8 count = *((u8 *)CMB_GBWK + 0x107A) + *((u8 *)CMB_GBWK + 0x107C);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawStockPanel2);
+    cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 0, 0x47);
+    cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
+                      (u8 *)CMB_GBWK + 0x1058, 0, 0x47);
+    if (*(s8 *)((u8 *)CMB_GBWK + 0x43E4) >= *(s8 *)((u8 *)CMB_GBWK + 0x165ED)) {
+        cmbDrawStockScrollBar(0, 0xFFFFF, 0x50807080, (u8 *)CMB_GBWK + 0x1058,
+                              0x47);
+    }
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawStockPanel3);
+extern void cmbDrawStockList(s32 x, s32 y, s32 color, s32 a, s8 count, s32 b,
+                             s32 flags);
+extern void cmbDrawStockEntry(s32 x, s32 y, s32 color, s8 count, s32 color2,
+                              u8 *rows, s32 mode, s32 flags);
+extern void cmbDrawStockScrollBar(s32 mode, s32 color, s32 color2, u8 *rows,
+                                  s32 flags);
+
+void cmbDrawStockPanel2(void)
+{
+    s8 count = *((u8 *)CMB_GBWK + 0x20b6) + *((u8 *)CMB_GBWK + 0x20b8);
+
+    cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 1, 0x47);
+    cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
+                      (u8 *)CMB_GBWK + 0x2094, 1, 0x47);
+    cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, (u8 *)CMB_GBWK + 0x2094,
+                          0x47);
+}
+
+void cmbDrawStockPanel3(void)
+{
+    s8 count = *((u8 *)CMB_GBWK + 0x30f2) + *((u8 *)CMB_GBWK + 0x30f4);
+
+    cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 1, 0x47);
+    cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
+                      (u8 *)CMB_GBWK + 0x30d0, 2, 0x47);
+    cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, (u8 *)CMB_GBWK + 0x30d0,
+                          0x47);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawStatus);
 
@@ -1860,7 +1912,7 @@ void cmbSwitchRibbon(void)
 {
     s32 index = CMB_GBWK->unk_1650A;
 
-    if (CMB_GBWK->unk_4118 == -1) {
+    if (CMB_GBWK->stockSlot[2].index == -1) {
         s32 prev = index - 1;
 
         if (index == 3) {
@@ -1875,7 +1927,7 @@ s32 cmbChkIkenieEnable(void)
     if (evtGetAgeOfMoon() != 8) {
         return 0;
     }
-    if (CMB_GBWK->unk_4118 != -1) {
+    if (CMB_GBWK->stockSlot[2].index != -1) {
         return 0;
     }
     return evtBitCheck(0x25) != 0;
@@ -1883,7 +1935,18 @@ s32 cmbChkIkenieEnable(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbUpdateBirthDevil);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbSetAction);
+extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, s32 count);
+
+void cmbSetAction(void)
+{
+    CMB_GBWK->stockSlot[0].id =
+        cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit.id;
+    CMB_GBWK->stockSlot[1].id =
+        cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit.id;
+    CMB_GBWK->stockSlot[2].id =
+        cmbGlobalWork->party[CMB_GBWK->stockSlot[2].index].unit.id;
+    cmbAddBirthDevilToStock(&cmbGlobalWork->party[4].unit, 0xC);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbUpdateDecideDevil);
 
@@ -1901,7 +1964,7 @@ void cmbSeqAfterBirth(void)
     if (info != 2) {
         return;
     }
-    if (CMB_GBWK->unk_4118 == -1) {
+    if (CMB_GBWK->stockSlot[2].index == -1) {
         CMB_GBWK->unk_00001 = 6;
     } else {
         CMB_GBWK->unk_00001 = 8;
@@ -2276,7 +2339,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmb_205CE8);
 
 void func_00205DB8(void)
 {
-    if (CMB_GBWK->unk_4118 < 0) {
+    if (CMB_GBWK->stockSlot[2].index < 0) {
         return;
     }
     func_002043E0(CMB_GBWK->unk_1654C);
@@ -2306,7 +2369,7 @@ void cmbFreeActionModels(void)
 {
     cmbFreeActionModel((u8 *)CMB_GBWK + 0x16524);
     cmbFreeActionModel((u8 *)CMB_GBWK + 0x16538);
-    if ((s8)CMB_GBWK->unk_4118 >= 0)
+    if ((s8)CMB_GBWK->stockSlot[2].index >= 0)
     {
         cmbFreeActionModel((u8 *)CMB_GBWK + 0x1654C);
     }
@@ -2561,6 +2624,33 @@ INCLUDE_ASM(const s32, "code_001FAE80", shpChkChoiceMax);
 
 INCLUDE_ASM(const s32, "code_001FAE80", shop_Process);
 
+void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
+
+typedef struct
+{
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s16 unk_0C;
+    /* 0x0E */ s16 unk_0E;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+} fclPanelPos_t;
+
+extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
+                            s32 arg);
+
+extern u8 *shopDrawWork;
+extern char shopSpriteTable[];
+extern s32 D_0032FA90[];
+extern s32 D_0032FA94[];
+extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
+extern void shopDrawBuyRow(s32 row, u8 *work, s8 mode, s32 id);
+extern void shopDrawSellRow(s32 row, u8 *work, s8 mode, s32 id);
+extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 id);
+
 INCLUDE_ASM(const s32, "code_001FAE80", shopDrawPanelRow);
 
 INCLUDE_ASM(const s32, "code_001FAE80", shopDrawPrice);
@@ -2573,11 +2663,58 @@ INCLUDE_ASM(const s32, "code_001FAE80", shopDrawBuyRow);
 
 INCLUDE_ASM(const s32, "code_001FAE80", shopDrawSellRow);
 
-INCLUDE_ASM(const s32, "code_001FAE80", shopUpdateItemList);
+extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
+                                  s32 mode, s32 b, s32 id);
 
-INCLUDE_ASM(const s32, "code_001FAE80", shopDrawPanelMode0);
+s32 shopUpdateItemList(s32 active)
+{
+    fclPanelPos_t pos;
+    s32 mode = 1;
 
-INCLUDE_ASM(const s32, "code_001FAE80", shopDrawPanelMode1);
+    if (active != 0) {
+        mode = 0;
+        if (fclGetFlag(0) == 0) {
+            mode = 2;
+            if (*(s8 *)(shopDrawWork + 3) == 3) {
+                mode = 1;
+            }
+        }
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&pos);
+    shopDrawItemCount(&pos, 0x80808080, 0x47);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&pos);
+    cmpUpdateListSelection(&pos, shopDrawWork + 0x2c, 0, mode, 0x100, 0x47);
+}
+
+s32 shopDrawPanelMode0(s8 mode)
+{
+    fclPanelPos_t pos;
+
+    fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x23DC), 0x47);
+    fclUpdatePanel((fclPanel_t *)(shopDrawWork + 0x23DC));
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    trmDrawListText(&pos, D_0032FA90[0], (s32 *)(shopDrawWork + 0x2394),
+                    shopSpriteTable, 0x47);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    shopDrawItemCount(&pos, 0x80808080, 0x47);
+    shopDrawBuyRow(0, shopDrawWork + 0x1068, mode, 0x47);
+    fclDrawPhaseHeader(shopDrawWork + 0x1068, 0x80808080, 0, 0x47);
+}
+
+s32 shopDrawPanelMode1(s8 mode)
+{
+    fclPanelPos_t pos;
+
+    fclDrawPanel((fclPanel_t *)(shopDrawWork + 0x23DC), 0x47);
+    fclUpdatePanel((fclPanel_t *)(shopDrawWork + 0x23DC));
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    trmDrawListText(&pos, D_0032FA94[0], (s32 *)(shopDrawWork + 0x2394),
+                    shopSpriteTable, 0x47);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    shopDrawItemCount(&pos, 0x80808080, 0x47);
+    shopDrawSellRow(0, shopDrawWork + 0x1068, mode, 0x47);
+    fclDrawPhaseHeader(shopDrawWork + 0x1068, 0x80808080, 0, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", shopDrawChoiceCount);
 
@@ -2769,15 +2906,75 @@ s32 func_00209E18(u16 id)
     return 0;
 }
 
+extern u8 D_0032FC98[];
+extern u8 D_0032FCE0[];
+
+/* NON_MATCHING: 22 of 51 words differ (first at +0x8). */
+#ifdef NON_MATCHING
+u8 ragGetListItem2(u8 index, s8 kind)
+{
+    u32 limit = D_0032FC98[index * 35 + 6] + 1;
+    s32 pick = (u32)dds3GetRandA(0) % limit;
+    u8 *weight = &D_0032FC98[index * 35];
+    u8 *item = &D_0032FC98[kind * 7] + index * 35 + 7;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (*weight >= pick) {
+            return *item;
+        }
+        weight++;
+        item++;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", ragGetListItem2);
+#endif
 
+/* NON_MATCHING: 22 of 51 words differ (first at +0x8). */
+#ifdef NON_MATCHING
+u8 ragGetListItem3(u8 index, s8 kind)
+{
+    u32 limit = D_0032FCE0[index * 35 + 6] + 1;
+    s32 pick = (u32)dds3GetRandA(0) % limit;
+    u8 *weight = &D_0032FCE0[index * 35];
+    u8 *item = &D_0032FCE0[kind * 7] + index * 35 + 7;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (*weight >= pick) {
+            return *item;
+        }
+        weight++;
+        item++;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", ragGetListItem3);
+#endif
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragInitHeartsList);
+void ragInitHeartsList(s32 count, lstWork_t *work)
+{
+    lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x23, 0x16, 0x8F, 0x16, 0x1A);
+    cmpInitCursorRange(&work->listCursor, count, 7, 0);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragInitList2);
+void ragInitList2(s32 count, lstWork_t *work)
+{
+    lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x23, 0x16, 0x8F, 0x16, 0x1A);
+    cmpInitCursorRange(&work->listCursor, count, 7, 0);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragInitList3);
+void ragInitList3(s32 count, lstWork_t *work)
+{
+    lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x23, 0x16, 0x8F, 0x16, 0x1A);
+    cmpInitCursorRange(&work->listCursor, count, 7, 0);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragBuildHeartsList);
 
@@ -2945,9 +3142,37 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragDrawFrameEdge);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawListFrame);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragDrawHeartsFooter);
+typedef struct
+{
+    /* 0x0000 */ u8 unk_00[3];
+    /* 0x0003 */ s8 unk_03;
+    /* 0x0004 */ u8 unk_0004[0x4650];
+    /* 0x4654 */ s32 texHandle[1];
+} ragDrawWork_t;
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragDrawListFooter);
+extern ragDrawWork_t *ragDrawWork;
+
+extern u8 D_003306B8[];
+
+void ragDrawHeartsFooter(fclPanel_t *panel, s32 id)
+{
+    cmpDrawBoxF(0x520, 0x200, panel->unk_08, 0x7b, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 3,
+                     ragDrawWork->texHandle, D_003306B8, id);
+    cmpDrawBoxF(0xf60, 0x200, panel->unk_08, 0xe5, 9, 0x161e276e, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 4,
+                     ragDrawWork->texHandle, D_003306B8, id);
+}
+
+void ragDrawListFooter(fclPanel_t *panel, s32 id)
+{
+    cmpDrawBoxF(0x490, 0x200, panel->unk_08, 0x6a, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 7,
+                     ragDrawWork->texHandle, D_003306B8, id);
+    cmpDrawBoxF(0xbb0, 0x200, panel->unk_08, 0x20, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 8,
+                     ragDrawWork->texHandle, D_003306B8, id);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawHeartsRows);
 
@@ -2961,13 +3186,6 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragDrawList3);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqStatus);
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[3];
-    /* 0x03 */ s8 unk_03;
-} ragDrawWork_t;
-
-extern ragDrawWork_t *ragDrawWork;
 extern void ragDrawSeqStatus(void);
 extern void ragDrawHeartsList(s32 mode);
 
@@ -3329,22 +3547,7 @@ typedef struct
 } rcvDrawWork_t;
 
 extern rcvDrawWork_t *rcvDrawWork;
-void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
 extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
-typedef struct
-{
-    /* 0x00 */ s32 unk_00;
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s16 unk_0C;
-    /* 0x0E */ s16 unk_0E;
-    /* 0x10 */ s32 unk_10;
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-} fclPanelPos_t;
-
-extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str, s32 arg);
 extern s32 D_003306F0[];
 extern s32 D_003306F4[];
 extern s32 D_003306F8[];
@@ -3389,7 +3592,25 @@ void rcvDrawSeq4(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawItemList);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateItemList);
+void rcvUpdateItemList(s32 active)
+{
+    fclPanelPos_t pos;
+    s32 mode = 1;
+
+    if (active != 0) {
+        mode = 0;
+        if (fclGetFlag(0) == 0) {
+            mode = 2;
+            if (*(s8 *)((u8 *)rcvDrawWork + 3) == 6) {
+                mode = 1;
+            }
+        }
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&pos);
+    shopDrawItemCount(&pos, 0x80808080, 0x47);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&pos);
+    cmpUpdateListSelection(&pos, (u8 *)rcvDrawWork + 0x20, 0, mode, 0x100, 0x47);
+}
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D460);
 
@@ -3410,11 +3631,106 @@ INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateCallSeq);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqAllRecover);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqRecover);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void lstMoveCursor2(lstWork_t *list, s32 dir);
+extern s32 rcvUpdateData(void);
+extern s32 rcvUpdateCallSeq(s32 seq);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqStatusRecover);
+void rcvUpdateSeqRecover(void)
+{
+    u32 button = cmpGetPressedButton(0x33);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqRevive);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (rcvUpdateData() == 0) {
+            button = 0x8000;
+        } else {
+            rcvUpdateCallSeq(2);
+            rcvUpdateWork->unk_0004 = button;
+        }
+        break;
+    case 2:
+        rcvUpdateCallSeq(0);
+        rcvUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), -1);
+        break;
+    case 0x20:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 1);
+        break;
+    }
+    lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 0);
+    cmpPlayCursorSE(cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)((u8 *)rcvUpdateWork + 0x128C), button, 0x30));
+}
+
+void rcvUpdateSeqStatusRecover(void)
+{
+    u32 button = cmpGetPressedButton(0x33);
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (rcvUpdateData() == 0) {
+            button = 0x8000;
+        } else {
+            rcvUpdateCallSeq(3);
+            rcvUpdateWork->unk_0004 = button;
+        }
+        break;
+    case 2:
+        rcvUpdateCallSeq(0);
+        rcvUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), -1);
+        break;
+    case 0x20:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 1);
+        break;
+    }
+    lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 0);
+    cmpPlayCursorSE(cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)((u8 *)rcvUpdateWork + 0x128C), button, 0x30));
+}
+
+void rcvUpdateSeqRevive(void)
+{
+    u32 button = cmpGetPressedButton(0x33);
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (rcvUpdateData() == 0) {
+            button = 0x8000;
+        } else {
+            rcvUpdateCallSeq(4);
+            rcvUpdateWork->unk_0004 = button;
+        }
+        break;
+    case 2:
+        rcvUpdateCallSeq(0);
+        rcvUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), -1);
+        break;
+    case 0x20:
+        lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 1);
+        break;
+    }
+    lstMoveCursor2((lstWork_t *)((u8 *)rcvUpdateWork + 0x1130), 0);
+    cmpPlayCursorSE(cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)((u8 *)rcvUpdateWork + 0x128C), button, 0x30));
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqDispel);
 
@@ -6186,7 +6502,14 @@ void cmbSubHeartsParam(s32 devilId, datUnitWork_t *unit)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", datAddHeartsSlot);
+void datAddHeartsSlot(s8 id, u16 value)
+{
+    s32 state = datGetDevilSlotState(id);
+    u8 *gbwk = (u8 *)DDS3_GBWK;
+
+    *(u16 *)(gbwk + (id * 12 + state) * 2 + 0x11AC0) = value;
+    (*(u8 *)(id + (s32)gbwk + 0x1D3B))++;
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", datAddHeartsEntry);
 
@@ -6909,7 +7232,23 @@ s32 dds3_2263E8(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", dds3TitleUpdateCursor);
+void dds3TitleUpdateCursor(void)
+{
+    if ((dds3PadButtonState[0x26] & 2) != 0) {
+        titleWork->cursor--;
+        p2sdPlaySE(0, 0x7F, 0x3F);
+    }
+    if ((dds3PadButtonState[0x27] & 2) != 0) {
+        titleWork->cursor++;
+        p2sdPlaySE(0, 0x7F, 0x3F);
+    }
+    if (titleWork->cursor < 0) {
+        titleWork->cursor = 3;
+    }
+    if (titleWork->cursor >= 4) {
+        titleWork->cursor = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", dds3TitleDrawMenu);
 
@@ -7003,7 +7342,23 @@ void mselDrawSaveNum(s32 x, s32 y, s32 text, s32 arg)
     frDestroyFontRequestAfter(frq);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", mselUpdateCursor);
+void mselUpdateCursor(void)
+{
+    if ((dds3PadButtonState[0x26] & 2) != 0) {
+        gGlobal->cursor--;
+        p2sdPlaySE(0, 0x7F, 0x3F);
+    }
+    if ((dds3PadButtonState[0x27] & 2) != 0) {
+        gGlobal->cursor++;
+        p2sdPlaySE(0, 0x7F, 0x3F);
+    }
+    if (gGlobal->cursor < 0) {
+        gGlobal->cursor = 1;
+    }
+    if (gGlobal->cursor >= 2) {
+        gGlobal->cursor = 0;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", mselDrawTitleAnim);
 
@@ -8086,7 +8441,28 @@ u8 cmpGetLoadState(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSetStockRemoveEff);
 
+extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
+
+/* NON_MATCHING: 12 of 32 words differ (first at +0x50). */
+#ifdef NON_MATCHING
+void cmpSetIniStockRecoverEff(u8 *work)
+{
+    s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
+    s32 room = cmpStockHasRoom((cmpStockWork_t *)work, 0);
+    s32 slot;
+    u8 *target;
+
+    work += 0xAC;
+    slot = cmpFindFreeStockSlot(index, room);
+    target = work + slot * 16 + 0x1078;
+    if (room != 0) {
+        target = work + slot * 16 + 0x3C;
+    }
+    cmpSetCursorSlot(0, 4, 0x10, (cmpCursorSlot_t *)target);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSetIniStockRecoverEff);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpSetStockRecoverEff);
 
@@ -8232,7 +8608,24 @@ void cmpInitStockCursorPos(void)
     cmpInitCursorRange((u8 *)campWork + 0x726C, (u8)rows, (u8)rows, 0);
 }
 
+/* NON_MATCHING: 6 of 33 words differ (first at +0x28). */
+#ifdef NON_MATCHING
+void cmpReCalcStockCursorPos(s8 index)
+{
+    if (index == 0 || index == 2) {
+        cmpChangeCursorListNums(
+            (campWork->stock[0].unk_02 + campWork->stock[0].unk_03[0]) & 0xFF,
+            &campWork->unk_6230[0]);
+    }
+    if (index == 1 || index == 2) {
+        cmpChangeCursorListNums(
+            (campWork->stock[1].unk_02 + campWork->stock[1].unk_03[0]) & 0xFF,
+            &campWork->unk_6230[0x103C]);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpReCalcStockCursorPos);
+#endif
 
 void cmpInitRootCursorPos(void)
 {
@@ -8536,7 +8929,6 @@ void campCloseInfoWindow(void)
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUpdateDestroyItemConfirm);
 
 extern s32 checkConfigState(void);
-extern s32 cmpUpdateListSelection(void);
 
 void campShowStock(void)
 {
@@ -9034,7 +9426,27 @@ void campDhFadeAlpha(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", campDhUpdateIcons);
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x1178];
+    /* 0x1178 */ s32 iconTimer[64];
+} campDhIconWork_t;
+
+extern campDhIconWork_t *campDhIconWork asm("campDhUpdateWork");
+
+void campDhUpdateIcons(void)
+{
+    s32 i;
+
+    for (i = 0; i < 64; i++) {
+        if (campDhIconWork->iconTimer[i] > 0) {
+            campDhIconWork->iconTimer[i] -= 0x10;
+        }
+        if (campDhIconWork->iconTimer[i] < 0) {
+            campDhIconWork->iconTimer[i] = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", campDhRollRatio);
 
@@ -9992,7 +10404,12 @@ void func_0023FA98(u16 id, s32 x, s32 y, s32 z)
     cmpModelParamTable[id].evo[2] += z;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_0023FB10);
+void func_0023FB10(u16 id, s32 x, s32 y, s32 z)
+{
+    cmpModelParamTable[id].pos[0] += x;
+    cmpModelParamTable[id].pos[1] += y;
+    cmpModelParamTable[id].pos[2] += z;
+}
 
 u8 cmpGetModelMotionId(u16 id)
 {
@@ -10351,7 +10768,32 @@ s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot)
     return slot->state;
 }
 
+/* NON_MATCHING: 30 of 31 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+void cmpUpdateCursorSlots(cmpCursorWork_t *cursor)
+{
+    cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cursor + 0x3C);
+    s32 i;
+    s32 j;
+
+    for (j = 0; j < 0x100; j++) {
+        for (i = 0; i < 2; i++) {
+            if (slot[j][i].state != 0) {
+                if (slot[j][i].value < 0x100) {
+                    slot[j][i].value += slot[j][i].param;
+                } else {
+                    slot[j][i].state = 0;
+                }
+                if (slot[j][i].value >= 0x100) {
+                    slot[j][i].value = 0x100;
+                }
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUpdateCursorSlots);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpInitCursorLayout);
 
@@ -10526,7 +10968,40 @@ void cmpMoveCursorListEnd(cmpCursorWork_t *cursor)
     cursor->unk_24 = end;
 }
 
+extern f32 D_0054E474;
+
+/* NON_MATCHING: 15 of 32 words differ (first at +0x10). */
+#ifdef NON_MATCHING
+s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
+{
+    s8 delay = work->unk_38;
+
+    if (delay < 0) {
+        s32 next = work->cursor.unk_30;
+
+        if (next >= 0) {
+            f32 scaled = next;
+
+            next = (s32)(scaled / D_0054E474);
+            work->cursor.unk_30 = next;
+        }
+        if (next < 0) {
+            work->cursor.unk_30 = 0;
+        }
+        if (work->cursor.unk_30 == 0) {
+            work->unk_38 = 0;
+        }
+    } else {
+        work->unk_38 = -delay;
+    }
+    if (work->cursor.unk_04 == 2) {
+        return bits & ~stop;
+    }
+    return bits;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpDisablePadBitStop);
+#endif
 
 s8 cmpGetCursorRow(cmpCursorWork_t *cursor)
 {
@@ -10547,7 +11022,23 @@ void func_00242320(s8 value, u8 *work)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpCursorSlotIsSelectable);
 
+/* NON_MATCHING: 6 of 32 words differ (first at +0x5C). */
+#ifdef NON_MATCHING
+s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
+{
+    s32 ofs = index * 0x103C + 0xC0;
+    cmpStockInfo_t *info = (cmpStockInfo_t *)((u8 *)stock + ofs);
+    s8 slot = *(u8 *)&info->unk_0E + info->unk_10;
+
+    if (flag == 0) {
+        return ((s8 *)stock)[slot + index * 0x56 + 5];
+    } else {
+        return ((s8 *)stock)[slot + index * 0x56 + 0x15];
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmpGetStockInfoIndex);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpBuildStockNameList);
 
