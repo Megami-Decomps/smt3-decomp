@@ -349,6 +349,33 @@ Every batch below rebuilt to `5facfbf7916836613449c922e26a4ec412207b32`.
   `sdfBillBoardMakeN` and the other `*MakeN` builders keep their `packet[i]`
   word walk, which is a variable-length packet rather than a record.
 
+### The global work record, and what a cast is doing that a member is not
+
+`include/newdata.h`'s `dds3GlobalWork_t` is a partial view of the save work.
+Five of its members disagreed with the IDB and are now its names: `eventFlags`
+-> `EventBit`, `encounterRemainder` -> `encountkyori`, `encounterGauge` ->
+`encountCount`, `unk1CFB` -> `hearts`, `unk1D7B` -> `heartscnt`, plus `unk34`
+-> `memHandle` (name only: the IDB types it `sdfMemHandle_t *` and the code
+only moves the word). Its 0x3E4-byte padding run at 0x1910 is split on the
+IDB's names for the span, which exposes `stocklist`, `boss_press`, `negoques`
+and `kotowari`.
+
+That let three `nbMakePacket.c` casts become member reads (`DDS3_GBWK->maka`
+four times, `DDS3_GBWK->encountCount`). Three more were tried and reverted,
+and the reasons are the useful part:
+
+- `(u8 *)(q + (s32)DDS3_GBWK + 0x1CE8)` is not `&DDS3_GBWK->negoques[q]`.
+  Retail adds the index to the base as an integer; the array form reorders the
+  add against the store and moves the result register. `Flow2_4` and `Flow7_3`
+  went 4 and 2 words out.
+- `fclClearTerminalState`'s `u8 *gb` local is load-bearing. It caches the base
+  so ee-gcc emits one `$gp` load for both stores; reaching through `DDS3_GBWK->`
+  per statement reloads `$gp` and swaps the two stores.
+
+So an offset cast is not automatically worse than a member access. Where it
+encodes an integer add or a cached base that retail's codegen depends on, it is
+the honest spelling, and the comment should say which field it lands on.
+
 ### String placeholders are worth converting; sdata ones are not
 
 `effBattle.c`, `evtPolygonMovie.c` and `nbKoukaProcess.c` referenced 24 of
