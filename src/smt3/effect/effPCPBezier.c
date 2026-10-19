@@ -260,7 +260,493 @@ void effPCPBezierBillDelete(effBezierWork_t *group) {
     sdfMemFreeDirect(group->allocation);
 }
 
+extern effRandState_t dds3EffectBase[];
+extern sdfVector4_t aViewEye, aViewTarget;
+extern u32 effBTLSkillCheckRun(void);
+extern s32 effBTLSkillGetTargetFormation(s32 index);
+extern s32 effBTLSkillGetInvokeFormation(void);
+extern void effBTLModelGetSphereCenter(s32 formation);
+extern f32 dds3GetRandFloatA(effRandState_t *state);
+extern u32 dds3GetRandA(effRandState_t *state);
+extern void SetRotateMatrixAxis(f32 angle, const f32 *axis);
+extern s32 effPCPBezierEval(effBezierCurve_t *curve, f32 *out);
+extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);
+extern f32 sdfAtan2(f32 x, f32 z);
+extern void FromEuler(f32 x, f32 y, f32 z);
+extern void effEveBEDCutSetParams(effBezierCut_t *cut, const effBezierPlacement_t *place);
+extern void effEveBEDCutDraw(effBezierCut_t *cut);
+
+void dds3BezierTrackPolyReset(effBezierTrackPoly_t *history);
+void dds3BezierTrackPolySetVC(effBezierTrackPoly_t *history, u128 *source);
+void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *history);
+
+/* vu0 routine: respawns each ribbon's bezier controls and walks its history. */
+/* NON_MATCHING: 15 of 1497 words differ (first at +0x1188). */
+#ifdef NON_MATCHING
+void effPCPBezierBillDraw(effBezierWork_t *work)
+{
+    effBezierPlacement_t place;
+    f32 center[4];
+    f32 axis[4];
+    f32 spin[4];
+    f32 spawn[4];
+    f32 point[4];
+    f32 origin[4];
+    f32 prev[4];
+    f32 viewDir[4];
+    f32 half[4];
+    f32 facing[4];
+    f32 tri[3][4];
+    f32 side[4];
+    f32 sideBack[4];
+    f32 tangent[4];
+    s32 delayRange;
+    u32 i;
+    u32 count;
+    u32 segments;
+    u32 mode;
+    u32 tint;
+    effBezierSlot_t *slot;
+    u128 *endPoints;
+    f32 fadeStep;
+    f32 frames;
+    f32 drop;
+    f32 drift;
+    f32 radius;
+    f32 scale;
+    f32 bend;
+    f32 reach;
+    f32 bias;
+    f32 fade;
+    u32 blend;
+    u32 j;
+
+    count = work->params.groupCount;
+    fadeStep = 1.0f / (f32)work->params.fadeFrames;
+    segments = work->params.subdivisions - 1;
+    frames = work->params.curveFrames;
+    delayRange = work->params.startDelayRange;
+    mode = work->params.mode;
+    tint = work->tintColor;
+    slot = work->slots;
+    SDF_VU0_COPYVECTOR(origin, work->params.origin);
+    place.payload[4] = 0.0f;
+    place.payload[5] = 0.0f;
+    place.payload[6] = 0.0f;
+    place.payload[7] = 1.0f;
+    place.payload[8] = 100.0f;
+    place.payload[9] = 100.0f;
+    place.payload[10] = 1.0f;
+    if (effBTLSkillCheckRun() != 0) {
+        s32 formation;
+
+        if (mode == 3) {
+            formation = effBTLSkillGetTargetFormation(0);
+        } else {
+            formation = effBTLSkillGetInvokeFormation();
+        }
+        effBTLModelGetSphereCenter(formation);
+        SDF_VU0_STOREVECTOR(center);
+    } else {
+        center[0] = 0.0f;
+        center[1] = -80.0f;
+        center[2] = -400.0f;
+    }
+    SDF_VU0_LOADVECTOR(&aViewTarget);
+    SDF_VU0_LOADVECTOR_B(&aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_STOREVECTOR(viewDir);
+    half[0] = work->params.width * 0.5f;
+    half[1] = work->params.width * 0.5f;
+    half[2] = work->params.width * 0.5f;
+    i = 0;
+    if (count != 0) {
+        do {
+        if (slot->curve.parameterStep == 0.0f) {
+            bias = 0.5f;
+            drop = -work->params.height * dds3GetRandFloatA(dds3EffectBase);
+            drift = work->params.spreadZ * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
+            spawn[0] = origin[0] + work->params.spreadX * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
+            spawn[1] = origin[1] - drop;
+            spawn[2] = origin[2] + drift;
+            SDF_VU0_LOADVECTOR(spawn);
+            SDF_VU0_LOADVECTOR_B(center);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_GETLENGTH(radius);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_STOREVECTOR(axis);
+            switch (mode) {
+            case 0:
+                spin[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                spin[1] = -dds3GetRandFloatA(dds3EffectBase);
+                spin[2] = 0.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                SetRotateMatrixAxis((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.5235987f, axis);
+                scale = 50.0f;
+                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                if (-50.0f < slot->curve.controlPoints[0].y) {
+                    slot->curve.controlPoints[0].y = -50.0f;
+                }
+                scale = 200.0f;
+                bend = 150.0f;
+                slot->curve.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
+                slot->curve.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
+                slot->curve.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
+                if (-30.0f < slot->curve.controlPoints[1].y) {
+                    slot->curve.controlPoints[1].y = -30.0f;
+                }
+                scale = 300.0f;
+                slot->curve.controlPoints[2].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[2].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[2].z = spin[2] * scale + center[2];
+                if (-20.0f < slot->curve.controlPoints[2].y) {
+                    slot->curve.controlPoints[2].y = -20.0f;
+                }
+                reach = radius * 0.25f;
+                scale = 200.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                slot->curve.controlPoints[3].x = scale * spin[0] + reach * axis[0] + center[0];
+                slot->curve.controlPoints[3].y = scale * spin[1] + reach * axis[1] + center[1];
+                slot->curve.controlPoints[3].z = scale * spin[2] + reach * axis[2] + center[2];
+                if (-10.0f < slot->curve.controlPoints[3].y) {
+                    slot->curve.controlPoints[3].y = -10.0f;
+                }
+                reach = radius * 0.5f;
+                scale = 150.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                slot->curve.controlPoints[4].x = scale * spin[0] + reach * axis[0] + center[0];
+                slot->curve.controlPoints[4].y = scale * spin[1] + reach * axis[1] + center[1];
+                slot->curve.controlPoints[4].z = scale * spin[2] + reach * axis[2] + center[2];
+                if (-10.0f < slot->curve.controlPoints[4].y) {
+                    slot->curve.controlPoints[4].y = -10.0f;
+                }
+                reach = radius * 0.75f;
+                scale = 65.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_APPLYMATRIX_XYZ();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                slot->curve.controlPoints[5].x = scale * spin[0] + reach * axis[0] + center[0];
+                slot->curve.controlPoints[5].y = scale * spin[1] + reach * axis[1] + center[1];
+                slot->curve.controlPoints[5].z = scale * spin[2] + reach * axis[2] + center[2];
+                if (-10.0f < slot->curve.controlPoints[5].y) {
+                    slot->curve.controlPoints[5].y = -10.0f;
+                }
+                reach = radius;
+                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                if (-10.0f < slot->curve.controlPoints[6].y) {
+                    slot->curve.controlPoints[6].y = -10.0f;
+                }
+                break;
+            case 1:
+                spin[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.5f;
+                spin[1] = -dds3GetRandFloatA(dds3EffectBase);
+                spin[2] = 0.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                scale = 25.0f;
+                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                scale = 100.0f;
+                bend = 150.0f;
+                slot->curve.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
+                slot->curve.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
+                slot->curve.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
+                scale = 400.0f;
+                slot->curve.controlPoints[2].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[2].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[2].z = spin[2] * scale + center[2];
+                reach = radius * 0.25f;
+                scale = 450.0f;
+                slot->curve.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.5f;
+                scale = 500.0f;
+                slot->curve.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.75f;
+                scale = 300.0f;
+                slot->curve.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius;
+                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                break;
+            case 2:
+                spin[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                spin[1] = -dds3GetRandFloatA(dds3EffectBase);
+                spin[2] = 0.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                scale = 20.0f;
+                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                reach = radius * 0.15f;
+                scale = 50.0f;
+                slot->curve.controlPoints[1].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[1].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[1].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.3f;
+                scale = 80.0f;
+                slot->curve.controlPoints[2].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[2].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[2].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.45f;
+                scale = 60.0f;
+                slot->curve.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.6f;
+                scale = 40.0f;
+                slot->curve.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.75f;
+                scale = 20.0f;
+                slot->curve.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius;
+                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                break;
+            case 3:
+                spin[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
+                spin[1] = -(dds3GetRandFloatA(dds3EffectBase) * 0.3f + 0.7f);
+                spin[2] = 0.0f;
+                SDF_VU0_LOADVECTOR(spin);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR_NOMEM(spin);
+                scale = 25.0f;
+                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                scale = 100.0f;
+                bend = 150.0f;
+                slot->curve.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
+                slot->curve.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
+                slot->curve.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
+                scale = 400.0f;
+                slot->curve.controlPoints[2].x = spin[0] * scale + center[0];
+                slot->curve.controlPoints[2].y = spin[1] * scale + center[1];
+                slot->curve.controlPoints[2].z = spin[2] * scale + center[2];
+                reach = radius * 0.25f;
+                scale = 450.0f;
+                slot->curve.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.5f;
+                scale = 500.0f;
+                slot->curve.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius * 0.75f;
+                scale = 300.0f;
+                slot->curve.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->curve.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->curve.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
+                reach = radius;
+                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                break;
+            case 4:
+                reach = radius * 0.14f;
+                slot->curve.controlPoints[0].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[0].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[0].z = reach * axis[2] + center[2];
+                reach = radius * 0.28f;
+                slot->curve.controlPoints[1].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[1].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[1].z = reach * axis[2] + center[2];
+                reach = radius * 0.42f;
+                slot->curve.controlPoints[2].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[2].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[2].z = reach * axis[2] + center[2];
+                reach = radius * 0.56f;
+                slot->curve.controlPoints[3].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[3].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[3].z = reach * axis[2] + center[2];
+                reach = radius * 0.7f;
+                slot->curve.controlPoints[4].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[4].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[4].z = reach * axis[2] + center[2];
+                reach = radius * 0.84f;
+                slot->curve.controlPoints[5].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[5].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[5].z = reach * axis[2] + center[2];
+                reach = radius;
+                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                break;
+            }
+            slot->curve.pointIndex = 0;
+            slot->curve.t = 0.0f;
+            slot->curve.parameterStep = 3.0f / (frames * (f32)(segments + 1));
+            effPCPBezierEval(&slot->curve, point);
+            slot->position[0] = point[0];
+            slot->position[1] = point[1];
+            slot->position[2] = point[2];
+            slot->age = -(s32)(dds3GetRandA(dds3EffectBase) % delayRange);
+            dds3BezierTrackPolyReset(slot->fragment);
+        } else if (slot->age++ >= 0) {
+            if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
+                if (fadeStep < slot->fadeScale) {
+                    fade = slot->fadeScale - fadeStep;
+                    slot->fadeScale = fade;
+                    slot->fragment->color = ((u32)(fade * 128.0f) << 24) | 0x808080;
+                    slot->fragment->color = effMagaCylinderCalcColor(tint, slot->fragment->color);
+                } else {
+                    dds3BezierTrackPolyReset(slot->fragment);
+                }
+            } else {
+                j = 0;
+                prev[0] = slot->position[0];
+                prev[1] = slot->position[1];
+                prev[2] = slot->position[2];
+                if (segments != 0) {
+                    do {
+                        effPCPBezierEval(&slot->curve, point);
+                        SDF_VU0_LOADVECTOR(point);
+                        SDF_VU0_COPYVECTOR_A_TO_C();
+                        SDF_VU0_LOADVECTOR_B(prev);
+                        SDF_VU0_SUBVECTOR();
+                        SDF_VU0_LOADVECTOR_B(viewDir);
+                        SDF_VU0_OUTERPRODUCT();
+                        SDF_VU0_NORMALIZE();
+                        SDF_VU0_LOADVECTOR_B(half);
+                        SDF_VU0_MULVECTOR();
+                        SDF_VU0_SWAPVECTOR_A_C();
+                        SDF_VU0_STOREVECTOR_NOMEM(tri[1]);
+                        SDF_VU0_COPYVECTOR_A_TO_B();
+                        SDF_VU0_ADDVECTOR_A_C();
+                        SDF_VU0_STOREVECTOR_NOMEM(tri[0]);
+                        SDF_VU0_COPYVECTOR_C_TO_A();
+                        SDF_VU0_SUBVECTOR_B_A();
+                        SDF_VU0_STOREVECTOR_B_NOMEM(tri[2]);
+                        SDF_VU0_COPYVECTOR(prev, point);
+                        dds3BezierTrackPolySetVC(slot->fragment, (u128 *)tri);
+                        j++;
+                    } while (j < segments);
+                }
+                effPCPBezierEval(&slot->curve, point);
+                SDF_VU0_LOADVECTOR(point);
+                SDF_VU0_COPYVECTOR_A_TO_C();
+                SDF_VU0_LOADVECTOR_B(prev);
+                SDF_VU0_SUBVECTOR();
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR(tangent);
+                SDF_VU0_LOADVECTOR_B(viewDir);
+                SDF_VU0_OUTERPRODUCT();
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_STOREVECTOR(side);
+                SDF_VU0_LOADVECTOR_B(half);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_SWAPVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(tri[1]);
+                SDF_VU0_COPYVECTOR_A_TO_B();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(tri[0]);
+                SDF_VU0_COPYVECTOR_C_TO_A();
+                SDF_VU0_SUBVECTOR_B_A();
+                SDF_VU0_STOREVECTOR_B_NOMEM(tri[2]);
+                dds3BezierTrackPolySetVC(slot->fragment, (u128 *)tri);
+                endPoints = slot->fragment->endPoints;
+                slot->position[0] = point[0];
+                slot->position[1] = point[1];
+                slot->position[2] = point[2];
+                SDF_VU0_COPYVECTOR(&endPoints[0], tri[1]);
+                SDF_VU0_COPYVECTOR(&endPoints[1], tri[0]);
+                SDF_VU0_COPYVECTOR(&endPoints[7], tri[2]);
+                sideBack[0] = -side[0];
+                sideBack[1] = -side[1];
+                sideBack[2] = -side[2];
+                sideBack[3] = -side[3];
+                SDF_VU0_LOADVECTOR_C(tri[1]);
+                SDF_VU0_LOADVECTOR(side);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                PS2_FLOAT_BITS(blend, 0.333333333f);
+                SDF_VU0_INTERPOLATE(blend);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(half);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(&endPoints[2]);
+                SDF_VU0_LOADVECTOR(side);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                PS2_FLOAT_BITS(blend, 0.666666666f);
+                SDF_VU0_INTERPOLATE(blend);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(half);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(&endPoints[3]);
+                SDF_VU0_LOADVECTOR(tangent);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(&endPoints[4]);
+                SDF_VU0_LOADVECTOR(sideBack);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                PS2_FLOAT_BITS(blend, 0.666666666f);
+                SDF_VU0_INTERPOLATE(blend);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(half);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(&endPoints[5]);
+                SDF_VU0_LOADVECTOR(sideBack);
+                SDF_VU0_LOADVECTOR_B(tangent);
+                PS2_FLOAT_BITS(blend, 0.333333333f);
+                SDF_VU0_INTERPOLATE(blend);
+                SDF_VU0_NORMALIZE();
+                SDF_VU0_LOADVECTOR_B(half);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_ADDVECTOR_A_C();
+                SDF_VU0_STOREVECTOR(&endPoints[6]);
+            }
+            if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
+                place.payload[0] = slot->position[0];
+                place.payload[1] = slot->position[1];
+                place.payload[2] = slot->position[2];
+                place.payload[3] = 0.0f;
+                place.color = tint;
+                facing[0] = center[0] - place.payload[0];
+                facing[2] = center[2] - place.payload[2];
+                FromEuler(0.0f, sdfAtan2(facing[0], facing[2]), 0.0f);
+                SDF_VU0_STOREVECTOR(&place.payload[4]);
+                effEveBEDCutSetParams(slot->eventNode, &place);
+                effEveBEDCutDraw(slot->eventNode);
+            }
+            dds3BezierTrackPolyDraw(slot->fragment);
+        }
+            i++;
+            slot++;
+        } while (i < count);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBezier", effPCPBezierBillDraw);
+#endif
+
 
 void effPCPBezierBillSetPosition(void *dst, void *src) {
     SDF_VU0_COPYVECTOR(dst, src);

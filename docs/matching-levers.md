@@ -1358,6 +1358,73 @@ once per use, and a named local for it computes it once.
   assignments decide only where the copies land relative to the function's
   leading calls; retail has them after `mdlLoad`, which is the assignment form.
 
+- **Every repeated scale factor in a run of coordinate expressions is a reused
+  `f32` local, not a literal at the use site**, and this is the largest single
+  lever measured on a long float body. `effPCPBezierBillDraw` builds 35 bezier
+  control points as `spin[k] * K1 + axis[k] * K2 + center[k]`; with the
+  constants written as literals each point's factor takes a fresh float
+  register, every temp in all five `switch` arms rotates, and the function sits
+  at 936 of 1497 words. With `scale`, `bend` and `reach` declared once and
+  **reassigned before each point**, retail's single `$f7`, `$f5` and `$f8` fall
+  out and it goes to 1276. The tell for the local rather than the literal is a
+  bare `mov.s $f8, $f20` where the factor is the unscaled value: that copy comes
+  from `reach = radius;` and not from `axis[k] * radius` written out. Read which
+  float register retail reuses across a repetitive block before writing one of
+  these out.
+- The operand order of a commutative `mul.s` follows the **source** order, so
+  `reach * axis[k]` and `axis[k] * reach` are one word apart at every use. In
+  `effPCPBezierBillDraw` that was 90 words over 95 multiplies. The order is not
+  uniform within a function: the same expression wants the variable first where
+  its load is scheduled before the constant's `lui`/`mtc1` and the constant
+  first where a `SDF_VU0_APPLYMATRIX_XYZ` between two points puts the constant
+  in a register ahead of the load, so read each block rather than applying one
+  rule.
+- Where several VU0 accesses to one frame vector sit in a loop *or* in a
+  straight run punctuated by calls, the plain `SDF_VU0_STOREVECTOR` is what
+  costs the frame. `effPCPBezierBillDraw` keeps three stack quadwords and one
+  spin vector this way: with the plain form the shared `addiu rd, $29, N`
+  becomes a loop invariant in a callee-saved register, one more pointer spills,
+  a third quadword spill slot appears at `0x170` and the frame grows from
+  `0x1F0` to `0x200`. `_NOMEM` on those four stores was worth 46 words, the
+  spill slot and the whole frame, **even though the C reads the stored vectors
+  back by field** immediately afterwards, against the caution on the macro.
+- A second read of a field that a store to an addressable local sits between is
+  a reload, and the cheap fix is to read the local back instead of the field.
+  `effPCPBezierBillDraw` writes `place.payload[0..2]` from `slot->position[]`
+  and then needs two of those components again for an atan2; written
+  `center[0] - slot->position[0]` the store to `place` kills the load and gcc
+  reloads, 15 words out, while `center[0] - place.payload[0]` is
+  store-to-load forwarded into exactly the register retail uses. Reading the
+  three components into `f32` locals first is the obvious alternative and is
+  worse, because all three are then live at once where retail reuses one
+  register for the second and the third.
+- A colour word built by a float-to-unsigned conversion and stored through a
+  pointer field wants **no intermediate local at all** when retail loads that
+  pointer in the block head.
+  `slot->fragment->color = ((u32)(fade * 128.0f) << 24) | 0x808080;` as one
+  statement lets gcc hoist the `lw` of `slot->fragment` above the unrelated
+  `slot->fadeScale` store into the entry block; with a `u32 color` local the
+  load cannot move and the whole 19-word block shifts by one instruction.
+  That was 18 words in `effPCPBezierBillDraw`, and a `u32` local for just the
+  conversion (the `dds3EffectRippleBlurDraw` row above) does not reach it, so
+  the two shapes are opposites and which one applies depends on whether retail
+  loads the pointer early.
+- A float local reused for two values with **disjoint** live ranges is how
+  retail gets the long-lived one into the lowest callee-saved register, and
+  splitting it is what fixes a rotation of three. In `effPCPBezierBillDraw` the
+  `-height * rand()` term dies at its one use and the `SDF_VU0_GETLENGTH`
+  result lives across the whole `switch`; two locals give the short one `$f20`
+  on priority and let the long one reuse `$f20` after it dies, which is
+  retail's assignment, while one local for both leaves `$f20`, `$f21` and
+  `$f22` rotated by one. This is the inverse of the one-local rows above: read
+  whether the two values overlap before choosing.
+- A `.lit4` constant whose decimal is obvious needs no reverse engineering:
+  write the natural literal and let ee-gcc truncate it. `0.15f` in the source
+  gives retail's `1.499999911e-01` word, and the same holds for `0.3f`,
+  `0.45f`, `0.6f`, `0.14f` through `0.84f` and `0.333333333f`. The float-literal
+  section's warning is about transcribing a *rounded value read out of a
+  disassembly*, not about ordinary decimals.
+
 ## Two local vectors: declaration order fixes the stack offsets
 
 Local aggregates are laid out in declaration order from offset 0, each rounded
