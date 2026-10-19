@@ -385,6 +385,38 @@ it was measured on DDS and not on this ELF.
   the loop and the callee's declaration. Restructuring the block the slot
   instruction belongs to is what moves it, as in the `NegoDebug` row above;
   varying the branch does not.
+- One float local reused for two unrelated values is how retail gets both into
+  one register, and it is the commonest residual in the `nbCameraShot_*_Set2`
+  family. Where retail's atan result and a later negated distance share `$f3`,
+  or the `0.5f` and the quotient that replaces it share `$f21`, the source has
+  one local doing both jobs: `scale = sdfAtan(...); radius /= scale; ...
+  scale = -radius; neg.x = scale;`. Two named locals leave the second value one
+  register higher and every later assignment rotates.
+  `nbCameraShot_Target_Set2` sat at 2 of 178 words on exactly that and went
+  exact; `nbCameraShot_All_Set2`'s accumulator, its `0.5f` and its
+  `SDF_VU0_GETLENGTH` output are all one local for the same reason.
+- `SDF_VU0_STOREVECTOR` against `_NOMEM` cuts both ways within one function,
+  so sweep the pair mechanically rather than reasoning about it. In
+  `nbCameraShot_Target_Set2` the *first* store of a stack vector has to be
+  `_NOMEM` so that a later store of the same vector rematerialises
+  `addiu $2, $29, N` instead of reusing the saved register the load got: the
+  plain form there was 47 of 177 words out and `_NOMEM` took it to 2. In
+  `nbCameraShot_AttackTuibiReverse_Set` the plain form's `"memory"` clobber on
+  the second of two stores let cse keep a `0.5f` in a callee-saved register
+  across the intervening call, collapsing retail's two `lui`/`mtc1` pairs into
+  one; `_NOMEM` on that store restored them and the function went from 48 of
+  151 words to exact. Nine combinations of the two macros took a second to
+  measure.
+- A float constant that retail materialises with `lui`/`mtc1` *after* the
+  multiply whose operand register it reuses comes from one reused float local
+  holding both values: `t = p->scl; radius = width * t; t = 100.0f;
+  if (t < radius) { t = t / radius; radius *= t; }`. As a literal the constant
+  is its own pseudo, sched1 fills the operand load's latency with the
+  `lui`/`mtc1` ahead of the multiply, and the overlapping live range then
+  costs it the multiply's register. The write to the shared local is what
+  pins the order. `nbCameraShot_InvokeTarget_Set2` and
+  `nbCameraShot_InvokeTargetReverse_Set2` each went from 5 differing words to
+  exact on that one local.
 - An address that looks like a global may be a `.lit4` pool entry holding a
   float constant, and must be written as a literal.
   `tools/check_unit.py` says so when you get it wrong. This also empties a

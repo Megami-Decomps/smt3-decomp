@@ -115,12 +115,7 @@ scheduler places that one load.
 
 Ruled out: declaring the symbol `extern f32 D_0054F3A0[]`, `extern f32
 D_0054F3A0[4]` and `extern sdfVector4_t D_0054F3A0`, read as `[0]`, `*p` and
-`.x` respectively. Moving the `direction.x` assignment later in case 0, so the
-load has fewer predecessors to be scheduled against, does not delay it either:
-placed fifth or last among the six it rotates `$f4`-`$f7` to `$f0`-`$f3` and
-goes to 17 differing words, so the draft's source order is the one that gives
-retail's fp registers and only the scheduler's placement of that one load is
-left.
+`.x` respectively.
 
 ## func_00213190 (code_001FAE80, 0x50)
 
@@ -1132,48 +1127,6 @@ rather than short-circuited, `effBTLModelGroupPopPosition(targetParty)`
 reusing the `$4` the target-party call left, and the `AttackTuibi_Set` arm
 written last so the two guards branch forward to it.
 
-## nbCameraShot_InvokeTarget_Set2 (newbattle/nbCameraSkill, 0x2C0)
-
-171 of 176 words, at the exact 704-byte size.
-
-The five differing words are where `100.0f` is materialised for the radius
-clamp. Retail emits `mul.s $f21, $f1, $f0` for `width * pInvoke->scl` and then
-`lui`/`mtc1` into `$f0`, reusing the register that held `scl`, so the constant
-cannot be hoisted above the multiply. The draft gets `$f2` for the constant,
-the anti-dependency disappears, and the scheduler moves the `lui`/`mtc1` pair
-in front of the multiply; the compare and the later `div.s` then read `$f2`
-instead of `$f0`.
-
-Ruled out, all giving the same five words: `radius > 100.0f` and
-`100.0f < radius`, `radius *= 100.0f / radius` and
-`radius = radius * (100.0f / radius)`, folding `width` and `radius` into one
-local, and swapping the declaration order of the four `f32` locals.
-
-Everything else is exact, including the `bc1tl` fallback to `pInvoke->r` when
-the all-table radius is zero, `targetPos.x > invokePos.x` for the load order
-of that compare, `1.7f` written out in both arms so it takes two pool slots,
-the two `SDF_VU0_STOREVECTOR_NOMEM` of the same sphere centre into `targetPos`
-and `look`, and `effBTLModelLook2(pTarget, &invokePos, 0.5235987f)`.
-
-## nbCameraShot_InvokeTargetReverse_Set2 (newbattle/nbCameraSkill, 0x2B8)
-
-169 of 174 words, at the exact 696-byte size.
-
-The same five words as `nbCameraShot_InvokeTarget_Set2` above: the `100.0f`
-radius clamp lands in `$f2` rather than retail's `$f0`, so the `lui`/`mtc1`
-pair loses its anti-dependency on `pTarget->scl` and the scheduler moves it in
-front of the multiply. Read that entry for the shapes already ruled out, plus
-`width = 100.0f / radius; radius *= width;` which costs nine words here.
-
-What this function needed beyond its mirror: the `0.69813163f` fovy value has
-to be a named local assigned before the `sdfAtan` call, not a literal in the
-store. Retail keeps it in `$f20` across the call, which only the named local
-reproduces; written as a literal in `pCamera->fovy = 0.69813163f;` the
-constant stays caller-saved, the frame loses the third saved fp slot and
-drops to 0x70, and 160 of 171 words differ. The same literal written directly
-is correct in `nbCameraShot_InvokeTarget_Set2`, where retail materialises it
-after the call into `$f2`.
-
 ## slSaveData_writeFile (mc/slMain, 0x238)
 
 106 of 142 words, at the exact 568-byte size.
@@ -1318,41 +1271,29 @@ for `cmpFindKugatatiMsgEntry`, which walks the same table.
 
 ## nbCameraBoss_Cut1_Run (newbattle/nbCameraBoss, 0x1DC)
 
-33 of 117 words, two words short of retail's 119.
+59 of 117 words, eight words short of retail's 119.
 
 The dispatch is a `switch` on `effBTLModelGetID` of the invoke formation whose
-arms each run one `nbCameraBoss_*_Cut1_Run`. Retail does that as `jal callee`,
-then `b` to one shared epilogue with `ld $16` in the delay slot, with the result
-left in `$2` and never copied; the default arms put `daddu $2, $0, $0` in a
-compare's delay slot.
+arms each run one `nbCameraBoss_*_Cut1_Run` and return its value. Retail does
+that as `jal callee`, then `b` to one shared epilogue with `ld $16` in the
+delay slot, with the result left in `$2` and never copied; the default arms put
+`daddu $2, $0, $0` in a compare's delay slot.
 
-Two facts got the draft from 59 words to 33:
+Writing the arms as `return callee(pCamera);` makes ee-gcc tail-call every one
+of them (`j callee` with the epilogue inlined ahead of it), which is 30 words
+over. Writing them as `ret = callee(pCamera); break;` with one trailing
+`return ret;` gives retail's shape, including the shared epilogue and the
+`daddu` in the delay slots, but allocates `ret` to `$3`: every arm then pays a
+`daddu $3, $2, $0` and the `ld $16` moves out of the `b` delay slot. The eight
+copies plus the displacement shifts are the whole diff, so the missing source
+fact is whatever keeps the value in `$2`.
 
-The arms must only call, not assign. `return callee(pCamera);` tail-calls every
-arm (30 words over) and `ret = callee(pCamera); break;` with one trailing
-`return ret;` allocates `ret` to `$3`, costing a `daddu` per arm. Dropping both
-and letting the function fall off the end of the `switch` leaves the callee's
-value in `$2`, which is what retail returns.
-
-The last arm's failing guard must fall into `default`, not run its own
-`return 0`. With `case 0x158: ... else { return 0; } break; default: return 0;`
-the `skill` local lands in `$4` and every compare against it shifts; writing the
-arm as two `if (...) { call; break; }` tests followed directly by the `default:`
-label puts `skill` in `$3` as retail has it. A nested `switch (skill)` for that
-arm also frees `$3` but runs three words over.
-
-What is left is two branch delay slots. On the tests whose arms call
-`BSARI_MASEHA_Run` and `Lusi_Cut1_Set`, retail leaves a `nop` and uses `bnel`
-where the draft fills the slot with the following `addiu $2, $0, <const>` and
-uses `bne`. Those two callees and `Pish_MUHENK_Run` are the only arms still
-`INCLUDE_ASM`, and this is the branch-annul signature of the "a caller can need
-its callee's definition" row in [matching-levers.md](matching-levers.md): the
-remaining two words should close on their own once those three are C. Permuting
-the caller does not reach it. Ruled out at 33 words: forward prototypes for the
-three assembly callees and removing the two that exist; `return callee(...)`
-with the sibling call blocked by an address-taken dummy local (identical
-output); early-`break` instead of `else if` in the `0x123` and `0x102` arms;
-`switch (skill)` for those two arms (six words worse).
+Ruled out: declaring the function `u32` so the callee return types differ
+(ee-gcc 2.96 compares modes, not types, so the tail calls stay); every
+declaration order of `pForm`, `id`, `skill` and `ret`; `ret = 0` before the
+switch instead of in the default arms, which also loses the delay-slot
+`daddu`; dropping the `ret =` so the arms only call and the function returns an
+uninitialised `ret`, which costs a third saved register.
 
 The case bodies are laid out in retail as `{0x103, 0x124}`, `0x123`, `0x102`,
 `0x125`, `0x108`, `0x158`, and that order is what the draft uses. The `0x123`
@@ -2404,4 +2345,68 @@ whatever makes that first `return 1` a bare jump to the shared exit.
 
 The jump table differs as a consequence; the case set itself is confirmed by
 the default entries, which all resolve to the one default block.
+
+## nbCameraShot_All_Set2 (newbattle/nbCameraSkill, 0x248)
+
+16 of 125 words, 500 bytes against retail's 584.
+
+The structure is mapped and believed correct; what the draft cannot reproduce
+is one instruction, and losing it costs the 84 bytes that feed it. After the
+formation loop retail emits a bare `c.lt.s $f20, $f23` (the enemy-height
+clamp) with no branch after it and no later reader of the condition: the
+compare is dead, and `$f20` (the accumulated width) is overwritten with
+`0.5f` five instructions later. `nbCameraShot_All_Set3` is the same function
+over a caller-supplied target vector and has the identical dead compare, so it
+is not a one-off.
+
+Written the obvious way, `if (total < maxEnemyHeight) { total = maxEnemyHeight; }`,
+ee-gcc sees `total`'s only consumer is that compare, deletes the assignment,
+the compare and then the whole accumulation: the `r * scl` sum in the loop,
+the `nbGetEnemyInterval()` multiply and the unsigned-to-float conversion all
+go, which is exactly the 84 missing bytes. Retail kept the compare, so in its
+compile the branch must have survived to a pass after the last dead-code
+elimination.
+
+Ruled out: an empty `if` body (drops even more), `total = (total <
+maxEnemyHeight) ? maxEnemyHeight : total`, `!(total >= maxEnemyHeight)`,
+`maxEnemyHeight > total`, and assigning to a third dead local in the arm. The
+one shape that keeps the accumulation is `else { maxEnemyHeight = total; }`,
+which reaches 68 of 146 words at 588 bytes (four over) and changes the
+meaning, so it is not the draft.
+
+What the draft does have right, and is worth keeping: the four zeroed `f32`
+accumulators as `maxPlayerHeight = 0.0f;` plus three copies from it, which
+gives retail's one `mtc1 $0` and three `mov.s`; `width = r * scl; width +=
+width; total += width;` for the in-place double; `(u32)(enemies - 1)` for the
+`bltz`/`srl`/`andi`/`or` unsigned-to-float conversion; the single local reused
+for the accumulator, then `0.5f`, then the `SDF_VU0_GETLENGTH` output, which
+is why all three land in `$f20`; and `maxEnemyHeight` reused for the
+`sdfAtan(0.5235987f)` result so the quotient divisor stays in `$f21`.
+
+## nbCameraState_SkillAttack_Init (newbattle/nbCameraSkill, 0x224)
+
+117 of 137 words, at the exact 548-byte size.
+
+Everything up to the width test matches, including the frame: `sdfVector4_t
+look` at `0x0`, an eight-word `u32 ptr[8]` whose members 2 to 5 take the two
+`dds3GetRandA` remainders and two zeros at `0x18` through `0x24`, and
+`nbCameraSkillInfo_t work` at `0x30`. Reading the first remainder back out of
+the aggregate, `D_003246D0[ptr[2]]`, is what gives retail's `sw`/`lw` pair
+around the second `dds3GetRandA` and the `addu $1, $1, $2` table rows.
+
+The 20 remaining words are the two arms of `if (width < 1500.0f)`. Retail
+emits `bc1f` to the `printf` arm with an empty delay slot and falls through to
+`bCameraShot_AttackInvokeTargetPartyNear_Set`; both arms then set `$2 = 0xB`
+and cross-jump to one shared `sw $2, nbCameraSkillAttackStep`. The draft gets
+the arms the other way round, with `daddu $4, $17` hoisted into a `bc1tl`
+delay slot, and the two `nbCameraSkillAttackStep = 0xB;` stores are not
+cross-jumped because the constant lands in `$2` in one arm and `$3` in the
+other. Retail also keeps `D_005349A0` in `$16` across the `sdfFloatToULong`
+call, where the draft materialises it after.
+
+Ruled out for the arm order: inverting the test so the `printf` arm is the
+`if` body, hoisting `nbCameraSkillAttackStep = 0xB;` below the `if`/`else`
+(47 words out), and a `char *msg = D_005349A0;` local for the format string.
+This is the same delay-slot-placement class as the
+`nbCameraState_SkillAttack_Calc` draft below.
 

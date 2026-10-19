@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 #include "ps2asm.h"
+#include "fpu.h"
 #include "nb.h"
 #include "model.h"
 #include "motion.h"
@@ -27,6 +28,7 @@ typedef struct nbCamera_t {
     s32 frame;
     u32 type;
     f32 angle;
+    f32 half;
     nbCameraAnim_t anim;
 } nbCamera_t;
 
@@ -189,7 +191,100 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCamera_SkillInfo_Set);
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_GroundCollision);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_TargetParty_Set2);
+extern f32 effBTLModelGroupGetSphere(u32 group);
+extern void effBTLModelGroupGetDirection(u32 group, sdfVector4_t *pDirection);
+
+void nbCameraShot_TargetParty_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
+{
+    sdfVector4_t direction;
+    sdfVector4_t angles;
+    sdfVector4_t pos;
+    sdfVector4_t neg;
+    u32 group;
+    f32 radius;
+    f32 fov;
+    f32 half;
+    f32 scale;
+    f32 length;
+
+    effBTLModelAllHide();
+    effBTLModelTargetPartyShow();
+    group = effBTLSkillGetTargetParty();
+    pCamera->fovy = 0.69813163f;
+    radius = effBTLModelGroupGetSphere(group);
+    SDF_VU0_STOREVECTOR(pCamera);
+    fov = pCamera->fovy;
+    if (effBTLSkillGetTargetNumber() >= 2) {
+        fov *= 1.35f;
+    } else {
+        fov *= 1.2f;
+    }
+    half = 0.5f;
+    scale = sdfAtan(fov * half);
+    if (pInfo->heightMin != 0.0f) {
+        pCamera->target.y = -pInfo->heightMin * half;
+    }
+    if (radius + radius < pInfo->heightMin) {
+        radius = pInfo->heightMin * half;
+    }
+    if (radius + radius < pInfo->widthMin) {
+        radius = pInfo->widthMin * half;
+    }
+    radius /= scale;
+    effBTLModelGroupGetDirection(group, &direction);
+    if (direction.z > 0.0f) {
+        angles.x = -pInfo->angleH;
+        angles.y = -pInfo->angleW;
+    } else {
+        angles.x = pInfo->angleH;
+        angles.y = pInfo->angleW;
+    }
+    angles.z = 0.0f;
+    SetRotateMatrixXYZ(&angles);
+    SDF_VU0_LOADVECTOR(&direction);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&direction);
+    pCamera->distance = radius;
+    pCamera->direction.x = -direction.x;
+    pCamera->direction.y = -direction.y;
+    pCamera->direction.z = -direction.z;
+    scale = -radius;
+    neg.x = scale;
+    neg.y = scale;
+    neg.z = scale;
+    SDF_VU0_LOADVECTOR(&pCamera->direction);
+    SDF_VU0_LOADVECTOR_B(&neg);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(pCamera);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    if (pos.y > 0.0f) {
+        radius *= 1.15f;
+        fov = pCamera->target.y;
+        fov *= fov;
+        fov += radius * radius;
+        fov = fsqrtf(fov);
+        effBTLModelGroupGetDirection(group, &direction);
+        pos.x = direction.x * fov;
+        pos.y = direction.y * fov;
+        pos.z = direction.z * fov;
+        SetRotateMatrixY(pInfo->angleW);
+        SDF_VU0_LOADVECTOR(&pos);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        pos.x += pCamera->target.x;
+        pos.z += pCamera->target.z;
+        SDF_VU0_LOADVECTOR(pCamera);
+        SDF_VU0_LOADVECTOR_B(&pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_GETLENGTH(length);
+        pCamera->distance = length * 0.85f;
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&pCamera->direction);
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetParty_Set2);
 
@@ -238,9 +333,172 @@ void nbCameraShot_Invoke_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
     pCamera->direction.z = -direction.z;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_Target_Set2);
+void nbCameraShot_Target_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
+{
+    sdfVector4_t direction;
+    sdfVector4_t angles;
+    sdfVector4_t pos;
+    sdfVector4_t neg;
+    nbFormation_t *pForm;
+    f32 radius;
+    f32 scale;
+    f32 half;
+    f32 length;
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_One_Init);
+    effBTLModelAllHide();
+    effBTLModelTargetPartyShow();
+    pForm = effBTLSkillGetTargetFormation(0);
+    pCamera->fovy = 0.69813163f;
+    effBTLModelGetSphereCenter(pForm);
+    SDF_VU0_STOREVECTOR(pCamera);
+    half = 0.5f;
+    radius = effBTLModelGetRadius(pForm);
+    scale = sdfAtan(pCamera->fovy * 1.35f * half);
+    if (pInfo->heightMin != 0.0f) {
+        pCamera->target.y = -pInfo->heightMin * half;
+    }
+    if (radius + radius < pInfo->heightMin) {
+        radius = pInfo->heightMin * half;
+    }
+    if (radius + radius < pInfo->widthMin) {
+        radius = pInfo->widthMin * half;
+    }
+    half = radius / scale;
+    effBTLModelGetDirection(pForm, &direction);
+    if (direction.z > 0.0f) {
+        angles.x = -pInfo->angleH;
+        angles.y = -pInfo->angleW;
+    } else {
+        angles.x = pInfo->angleH;
+        angles.y = pInfo->angleW;
+    }
+    angles.z = 0.0f;
+    SetRotateMatrixXYZ(&angles);
+    SDF_VU0_LOADVECTOR(&direction);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&direction);
+    pCamera->distance = half;
+    pCamera->direction.x = -direction.x;
+    pCamera->direction.y = -direction.y;
+    pCamera->direction.z = -direction.z;
+    scale = -half;
+    neg.x = scale;
+    neg.y = scale;
+    neg.z = scale;
+    SDF_VU0_LOADVECTOR(&pCamera->direction);
+    SDF_VU0_LOADVECTOR_B(&neg);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(pCamera);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    if (pos.y > 0.0f) {
+        half *= 1.15f;
+        radius = pCamera->target.y;
+        radius *= radius;
+        radius += half * half;
+        radius = fsqrtf(radius);
+        effBTLModelGetDirection(pForm, &direction);
+        pos.x = direction.x * radius;
+        pos.y = direction.y * radius;
+        pos.z = direction.z * radius;
+        SetRotateMatrixY(pInfo->angleW);
+        SDF_VU0_LOADVECTOR(&pos);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        pos.x += pCamera->target.x;
+        pos.z += pCamera->target.z;
+        SDF_VU0_LOADVECTOR(pCamera);
+        SDF_VU0_LOADVECTOR_B(&pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_GETLENGTH(length);
+        pCamera->distance = length * 0.85f;
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&pCamera->direction);
+    }
+}
+
+extern f32 sdfAtan2(f32 x, f32 z);
+extern void nbCameraClearState(nbCamera_t *pCamera);
+extern void nbCameraAnim_RotateSet(nbCamera_t *pCamera, s32 frames, s32 total, f32 frame);
+
+void nbCameraShot_One_Init(nbCamera_t *pCamera, nbFormation_t *pForm)
+{
+    sdfVector4_t targetPos;
+    sdfVector4_t formPos;
+    sdfVector4_t delta;
+    sdfVector4_t angles;
+    nbCamera_t *pBoss;
+    nbFormation_t *pTarget;
+    u32 invokeParty;
+    u32 targetParty;
+    f32 scale;
+
+    effBTLModelAllHide();
+    func_0016E120();
+    invokeParty = effBTLSkillGetInvokeParty();
+    targetParty = effBTLSkillGetTargetParty();
+    pCamera->fovy = 0.69813163f;
+    scale = sdfAtan(0.34906582f);
+    angles.x = 0.0f;
+    angles.y = 0.0f;
+    angles.z = 0.0f;
+    pCamera->distance = pForm->oneshotr * pForm->scl / scale;
+    if (effBTLSkillGetTargetNumber() == 1 && invokeParty != targetParty) {
+        pTarget = effBTLSkillGetTargetFormation(0);
+        effBTLModelGetSphereCenter(pTarget);
+        SDF_VU0_STOREVECTOR_NOMEM(&targetPos);
+        effBTLModelGetSphereCenter(pForm);
+        SDF_VU0_STOREVECTOR_NOMEM(&formPos);
+        delta.x = targetPos.x - formPos.x;
+        delta.z = targetPos.z - formPos.z;
+        angles.y = sdfAtan2(delta.x, delta.z);
+    } else {
+        SDF_VU0_LOADVECTOR(&pForm->rot);
+        angles.y = EulerAngleAxisY();
+    }
+    switch (dds3GetRandA(dds3EffectBase) & 3) {
+    case 0:
+        angles.x = 0.26179934f;
+        break;
+    case 1:
+        angles.x = -0.26179934f;
+        break;
+    case 2:
+        angles.x = 0.08726646f;
+        break;
+    case 3:
+        angles.x = -0.08726646f;
+        break;
+    }
+    pBoss = &pNbCamera;
+    nbCameraClearState(pBoss);
+    switch (dds3GetRandA(dds3EffectBase) & 3) {
+    case 0:
+        nbCameraAnim_RotateSet(pBoss, 60, -20, 1.0471974f);
+        break;
+    case 1:
+        nbCameraAnim_RotateSet(pBoss, 60, -20, -1.0471974f);
+        break;
+    case 2:
+        nbCameraAnim_RotateSet(pBoss, 60, 0, -0.26179934f);
+        angles.y += 0.34906582f;
+        break;
+    case 3:
+        nbCameraAnim_RotateSet(pBoss, 60, 0, 0.26179934f);
+        angles.y -= 0.34906582f;
+        break;
+    }
+    SetRotateMatrixXYZ(&angles);
+    pCamera->direction.x = 0.0f;
+    pCamera->direction.y = 0.0f;
+    pCamera->direction.z = -1.0f;
+    pCamera->direction.w = 0.0f;
+    SDF_VU0_LOADVECTOR(&pCamera->direction);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR_NOMEM(&pCamera->direction);
+}
 
 void nbCameraShot_One_Calc(nbCamera_t *pCamera, nbFormation_t *pForm)
 {
@@ -304,8 +562,6 @@ void nbCameraShot_PullOne_Calc(nbCamera_t *pCamera, f32 rate)
     nbCameraShot_GroundCollision(pCamera);
 }
 
-/* NON_MATCHING: 5 of 176 words differ (first at +0x6C). */
-#ifdef NON_MATCHING
 void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
 {
     sdfVector4_t invokePos;
@@ -318,6 +574,8 @@ void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pI
     f32 radius;
     f32 length;
     f32 angle;
+    f32 half;
+    f32 clamp;
 
     effBTLModelTargetPartyShow();
     func_0016E120();
@@ -327,9 +585,12 @@ void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pI
     if (width == 0.0f) {
         width = pInvoke->r;
     }
-    radius = width * pInvoke->scl;
-    if (100.0f < radius) {
-        radius *= 100.0f / radius;
+    clamp = pInvoke->scl;
+    radius = width * clamp;
+    clamp = 100.0f;
+    if (clamp < radius) {
+        clamp = clamp / radius;
+        radius *= clamp;
     }
     effBTLModelGetSphereCenter(pInvoke);
     SDF_VU0_STOREVECTOR_NOMEM(&invokePos);
@@ -377,12 +638,7 @@ void nbCameraShot_InvokeTarget_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pI
         effBTLModelLook2(pTarget, &invokePos, 0.5235987f);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTarget_Set2);
-#endif
 
-/* NON_MATCHING: 5 of 174 words differ (first at +0x6C). */
-#ifdef NON_MATCHING
 void nbCameraShot_InvokeTargetReverse_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
 {
     sdfVector4_t targetPos;
@@ -394,7 +650,9 @@ void nbCameraShot_InvokeTargetReverse_Set2(nbCamera_t *pCamera, nbCameraSkillInf
     f32 radius;
     f32 length;
     f32 angle;
+    f32 half;
     f32 fovy;
+    f32 clamp;
 
     effBTLModelAllShow();
     func_0016E1F8();
@@ -404,9 +662,12 @@ void nbCameraShot_InvokeTargetReverse_Set2(nbCamera_t *pCamera, nbCameraSkillInf
     if (width == 0.0f) {
         width = pTarget->r;
     }
-    radius = width * pTarget->scl;
-    if (100.0f < radius) {
-        radius *= 100.0f / radius;
+    clamp = pTarget->scl;
+    radius = width * clamp;
+    clamp = 100.0f;
+    if (clamp < radius) {
+        clamp = clamp / radius;
+        radius *= clamp;
     }
     effBTLModelGetSphereCenter(pTarget);
     SDF_VU0_STOREVECTOR_NOMEM(&targetPos);
@@ -454,9 +715,6 @@ void nbCameraShot_InvokeTargetReverse_Set2(nbCamera_t *pCamera, nbCameraSkillInf
         effBTLModelLook(pInvoke, &targetPos);
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetReverse_Set2);
-#endif
 
 void nbCameraShot_InvokeTargetNear_Set(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
 {
@@ -581,9 +839,165 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetParty
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeTargetPartyTop2_Set);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_InvokeParty_Set2);
+extern void func_0016E2A0(void);
 
+void nbCameraShot_InvokeParty_Set2(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInfo)
+{
+    sdfVector4_t pos;
+    sdfVector4_t direction;
+    sdfVector4_t angles;
+    u32 group;
+    f32 radius;
+    f32 half;
+    f32 scale;
+    f32 zero;
+    f32 length;
+
+    effBTLModelAllHide();
+    func_0016E2A0();
+    group = effBTLSkillGetInvokeParty();
+    pCamera->fovy = 0.69813163f;
+    radius = effBTLModelGroupGetSphere(group);
+    SDF_VU0_STOREVECTOR(pCamera);
+    half = 0.5f;
+    zero = 0.0f;
+    scale = sdfAtan(pCamera->fovy * 1.35f * half);
+    if (pInfo->heightMin != zero) {
+        pCamera->target.y = -pInfo->heightMin * half;
+    }
+    if (radius + radius < pInfo->heightMin) {
+        radius = pInfo->heightMin * half;
+    }
+    if (radius + radius < pInfo->widthMin) {
+        radius = pInfo->widthMin * half;
+    }
+    half = radius / scale;
+    if (pInfo->angleH > zero) {
+        half *= 1.15f;
+        radius = pCamera->target.y;
+        radius *= radius;
+        radius += half * half;
+        radius = fsqrtf(radius);
+        effBTLModelGroupGetDirection(group, &direction);
+        pos.x = direction.x * radius;
+        pos.y = direction.y * radius;
+        pos.z = direction.z * radius;
+        SetRotateMatrixY(pInfo->angleW);
+        SDF_VU0_LOADVECTOR(&pos);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&pos);
+        pos.x += pCamera->target.x;
+        pos.z += pCamera->target.z;
+        SDF_VU0_LOADVECTOR(pCamera);
+        SDF_VU0_LOADVECTOR_B(&pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_GETLENGTH(length);
+        pCamera->distance = length * 0.85f;
+        SDF_VU0_COPYVECTOR_C_TO_A();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_STOREVECTOR(&pCamera->direction);
+    } else {
+        effBTLModelGroupGetDirection(group, &direction);
+        if (direction.z > zero) {
+            angles.x = -0.056723193f;
+        } else {
+            angles.x = 0.056723193f;
+        }
+        angles.y = pInfo->angleW;
+        angles.z = 0.0f;
+        SetRotateMatrixXYZ(&angles);
+        SDF_VU0_LOADVECTOR(&direction);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR_NOMEM(&direction);
+        pCamera->distance = half;
+        pCamera->direction.x = -direction.x;
+        pCamera->direction.y = -direction.y;
+        pCamera->direction.z = -direction.z;
+    }
+}
+
+extern f32 nbGetEnemyInterval(void);
+extern f32 nbCameraGetBossDistance(void);
+extern f32 effBTLModelGetHeight(nbFormation_t *pForm);
+
+/* NON_MATCHING: 109 of 125 words differ (first at +0x2C). */
+#ifdef NON_MATCHING
+void nbCameraShot_All_Set2(nbCamera_t *pCamera, void *pWork)
+{
+    sdfVector4_t pos;
+    nbFormation_t *pForm;
+    f32 maxPlayerHeight;
+    f32 maxEnemyHeight;
+    f32 maxPlayerRadius;
+    f32 total;
+    f32 value;
+    f32 interval;
+    f32 height;
+    f32 width;
+    f32 radius;
+    u32 i = 0;
+    u32 enemies = 0;
+
+    effBTLModelAllShow();
+    pForm = nbGetMainProcessData()->form;
+    maxPlayerHeight = 0.0f;
+    maxEnemyHeight = maxPlayerHeight;
+    maxPlayerRadius = maxPlayerHeight;
+    total = maxPlayerHeight;
+    for (; i < 32; i++) {
+        if ((pForm->stat & 0x201) == 0x201) {
+            width = pForm->r * pForm->scl;
+            total += width + width;
+            height = effBTLModelGetHeight(pForm);
+            if (maxEnemyHeight < height) {
+                maxEnemyHeight = height;
+            }
+            enemies++;
+        } else if ((pForm->stat & 0x101) == 0x101) {
+            height = effBTLModelGetHeight(pForm);
+            if (maxPlayerHeight < height) {
+                maxPlayerHeight = height;
+            }
+            width = pForm->r * pForm->scl;
+            if (maxPlayerRadius < width) {
+                maxPlayerRadius = width;
+            }
+        }
+        pForm++;
+    }
+    interval = nbGetEnemyInterval();
+    if (enemies >= 2) {
+        total += interval * (enemies - 1);
+    }
+    if (total < maxEnemyHeight) {
+        total = maxEnemyHeight;
+    }
+    pCamera->target.x = 0.0f;
+    pCamera->target.y = -(maxEnemyHeight * 0.25f);
+    value = 0.5f;
+    pCamera->target.z = nbCameraGetBossDistance() * value;
+    maxEnemyHeight = sdfAtan(0.5235987f);
+    pCamera->fovy = 0.69813163f;
+    pos.x = 0.0f;
+    pos.y = -maxPlayerHeight;
+    pos.z = -nbCameraGetBossDistance() * value;
+    SDF_VU0_LOADVECTOR(pCamera);
+    SDF_VU0_LOADVECTOR_B(&pos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(value);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    radius = effBTLModelGroupGetSphere(0x100);
+    if (radius < 250.0f) {
+        radius = 250.0f;
+    }
+    pCamera->distance = value + radius / maxEnemyHeight;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_All_Set2);
+#endif
+
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_All_Set3);
 
@@ -616,11 +1030,217 @@ void nbCameraShot_All_Set(nbCamera_t *pCamera)
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", bCameraShot_AttackInvokeTargetPartyNear_Set);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_AttackTuibi_Set);
+extern f32 sdfSin(f32 x);
+extern f32 fabsf(f32 x);
+extern void func_0016E050(void);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraShot_AttackTuibiReverse_Set);
+void nbCameraShot_AttackTuibi_Set(nbCamera_t *pCamera)
+{
+    sdfVector4_t targetPos;
+    sdfVector4_t invokePos;
+    nbFormation_t *pTarget;
+    nbFormation_t *pInvoke;
+    f32 angle;
+    f32 half;
+    f32 length;
+    f32 dist;
+    f32 height;
+    u32 invokeParty;
 
+    invokeParty = effBTLSkillGetInvokeParty();
+    if (invokeParty != effBTLSkillGetTargetParty()) {
+        effBTLModelAllShow();
+        func_0016E120();
+    } else {
+        effBTLModelAllHide();
+        effBTLModelInvokeShow();
+        func_0016E050();
+    }
+    pTarget = effBTLSkillGetTargetFormation(0);
+    pInvoke = effBTLSkillGetInvokeFormation();
+    pCamera->fovy = 0.69813163f;
+    effBTLModelGetSphereCenter(pInvoke);
+    SDF_VU0_STOREVECTOR_NOMEM(&invokePos);
+    invokePos.y -= pInvoke->r * pInvoke->scl * 0.5f;
+    effBTLModelGetSphereCenter(pTarget);
+    SDF_VU0_STOREVECTOR(&targetPos);
+    SDF_VU0_LOADVECTOR(&targetPos);
+    SDF_VU0_LOADVECTOR_B(&invokePos);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(pCamera);
+    if (pCamera->frame == 0) {
+        if (invokePos.x > targetPos.x) {
+            pCamera->angle = 0.5235987f;
+        } else {
+            pCamera->angle = -0.5235987f;
+        }
+    }
+    angle = pCamera->angle;
+    SDF_VU0_LOADVECTOR(&invokePos);
+    SDF_VU0_LOADVECTOR_B(&targetPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    length += pInvoke->r * pInvoke->scl;
+    dist = length + pTarget->r * pTarget->scl;
+    SetRotateMatrixY(angle);
+    SDF_VU0_LOADVECTOR(&targetPos);
+    SDF_VU0_LOADVECTOR_B(&invokePos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    dist *= sdfSin(fabsf(angle));
+    half = 0.5f;
+    dist *= 1.15f;
+    height = effBTLModelGetHeight(pInvoke) - pInvoke->r * pInvoke->scl * half;
+    if (dist < height) {
+        dist = height;
+    }
+    height = effBTLModelGetHeight(pTarget) - pTarget->r * pInvoke->scl * half;
+    if (dist < height) {
+        dist = height;
+    }
+    pCamera->distance = dist * half / sdfAtan(pCamera->fovy * half);
+}
+
+void nbCameraShot_AttackTuibiReverse_Set(nbCamera_t *pCamera)
+{
+    sdfVector4_t invokePos;
+    sdfVector4_t targetPos;
+    nbFormation_t *pTarget;
+    nbFormation_t *pInvoke;
+    f32 angle;
+    f32 half;
+    f32 length;
+    f32 dist;
+    f32 height;
+
+    effBTLModelAllShow();
+    func_0016E1F8();
+    effBTLSkillGetInvokeParty();
+    pTarget = effBTLSkillGetTargetFormation(0);
+    pInvoke = effBTLSkillGetInvokeFormation();
+    if (pCamera->frame == 0) {
+        if (pTarget->pos.x > pInvoke->pos.x) {
+            pCamera->angle = 0.5235987f;
+        } else {
+            pCamera->angle = -0.5235987f;
+        }
+    }
+    pCamera->fovy = 0.69813163f;
+    angle = pCamera->angle;
+    effBTLModelGetSphereCenter(pTarget);
+    SDF_VU0_STOREVECTOR_NOMEM(&targetPos);
+    targetPos.y -= pTarget->r * pTarget->scl * 0.5f;
+    effBTLModelGetSphereCenter(pInvoke);
+    SDF_VU0_STOREVECTOR_NOMEM(&invokePos);
+    invokePos.y -= pInvoke->r * pInvoke->scl * 0.5f;
+    SDF_VU0_LOADVECTOR(&invokePos);
+    SDF_VU0_LOADVECTOR_B(&targetPos);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(pCamera);
+    SDF_VU0_LOADVECTOR(&targetPos);
+    SDF_VU0_LOADVECTOR_B(&invokePos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    length += pTarget->r * pTarget->scl;
+    dist = length + pInvoke->r * pInvoke->scl;
+    SetRotateMatrixY(angle);
+    SDF_VU0_LOADVECTOR(&invokePos);
+    SDF_VU0_LOADVECTOR_B(&targetPos);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    dist *= sdfSin(fabsf(angle));
+    half = 0.5f;
+    dist *= 1.15f;
+    height = effBTLModelGetHeight(pTarget) - pTarget->r * pTarget->scl * half;
+    if (dist < height) {
+        dist = height;
+    }
+    height = effBTLModelGetHeight(pInvoke) - pInvoke->r * pTarget->scl * half;
+    if (dist < height) {
+        dist = height;
+    }
+    pCamera->distance = dist * half / sdfAtan(pCamera->fovy * half);
+}
+
+extern s32 nbCameraBoss_Cut2_Init(nbCamera_t *pCamera);
+extern void nbCameraState_InvokeTarget_SearchSet(void);
+extern s32 sdfFloatToULong(f32 value);
+extern s32 printf(const char *format, ...);
+extern f32 D_003246D0[];
+extern f32 D_003246F0[];
+extern f32 D_00324710[];
+extern f32 D_00324720[];
+extern char D_005349A0[];
+
+/* NON_MATCHING: 20 of 137 words differ (first at +0x168). */
+#ifdef NON_MATCHING
+void nbCameraState_SkillAttack_Init(void)
+{
+    sdfVector4_t look;
+    u32 ptr[8];
+    nbCameraSkillInfo_t work;
+    nbCamera_t *pCamera = &pNbCamera;
+    nbFormation_t *pInvoke;
+    nbFormation_t *pTarget;
+    u32 invokeParty;
+    u32 targetParty;
+    f32 width;
+
+    if (pCamera->frame == 0) {
+        dds3DrawFlag |= 0x2000000;
+    }
+    if (effBTLModelCheckBossID(effBTLSkillGetInvokeFormation()) != 0) {
+        if (nbCameraBoss_Cut2_Init(pCamera) != 0) {
+            return;
+        }
+    }
+    effBTLModelAllPopPosition();
+    if (effBTLSkillGetTargetNumber() == 1) {
+        pInvoke = effBTLSkillGetInvokeFormation();
+        pTarget = effBTLSkillGetTargetFormation(0);
+        invokeParty = effBTLSkillGetInvokeParty();
+        targetParty = effBTLSkillGetTargetParty();
+        if ((pInvoke->stat & 0x200) != 0 && invokeParty != targetParty) {
+            ptr[2] = dds3GetRandA(dds3EffectBase) % 18;
+            ptr[3] = dds3GetRandA(dds3EffectBase) % 14;
+            work.angleH = D_003246D0[ptr[2]];
+            work.angleW = D_003246F0[ptr[2]];
+            work.heightMin = D_00324710[0];
+            work.widthMin = D_00324720[0];
+            ptr[4] = 0;
+            ptr[5] = 0;
+            nbCameraState_InvokeTarget_SearchSet();
+            width = effBTLModelGroupGetSphere(0x200);
+            width += width;
+            if (width < 1500.0f) {
+                bCameraShot_AttackInvokeTargetPartyNear_Set(pCamera, &work);
+                nbCameraSkillAttackStep = 0xB;
+            } else {
+                printf(D_005349A0, sdfFloatToULong(width));
+                nbCameraShot_InvokeTargetReverse_Set2(pCamera, &work);
+                nbCameraSkillAttackStep = 0xB;
+            }
+        } else {
+            nbCameraSkillAttackStep = 0;
+        }
+        if (invokeParty != targetParty) {
+            if (nbCameraBoss_CheckRotate(pTarget) != 0) {
+                effBTLModelGetSphereCenter(pInvoke);
+                SDF_VU0_STOREVECTOR(&look);
+                effBTLModelLook(pTarget, &look);
+            }
+        }
+    } else {
+        effBTLModelAllPopPosition();
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbCameraSkill", nbCameraState_SkillAttack_Init);
+#endif
 
 /* NON_MATCHING: 6 of 91 words differ (first at +0xB8). */
 #ifdef NON_MATCHING
@@ -694,6 +1314,7 @@ void nbCameraState_Cut1Enemy_Init(nbCamera_t *pCamera, nbCameraSkillInfo_t *pInf
 {
     nbCameraSkillInfo_t work;
     f32 angle;
+    f32 half;
 
     work.heightMin = 0.0f;
     work.widthMin = 600.0f;
@@ -894,6 +1515,7 @@ void nbCameraState_PlayerSide_Init(void)
     u32 invoke = 0;
     u32 bits = 0;
     f32 angle;
+    f32 half;
 
     for (; i < 32; i++) {
         if ((pForm->stat & 0x103) == 0x103) {
@@ -934,6 +1556,7 @@ void nbCameraState_EnemySide_Init(void)
     u32 invoke = 0;
     u32 bits = 0;
     f32 angle;
+    f32 half;
 
     for (; i < 32; i++) {
         if ((pForm->stat & 0x203) == 0x203) {
