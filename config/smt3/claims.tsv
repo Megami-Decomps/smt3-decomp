@@ -200,7 +200,8 @@ src/smt3/basic/dds3ObjectBase.c	s7	done	2026-10-19	1 / 6740	dds3ObjectBaseMakeUn
 src/smt3/effect/effEvent.c	s8	done	2026-10-19	1 / 2868	effEVECombParSmokeDraw only, s5 left a full reading
 src/smt3/sdf/sdfModel.c	t1	done	2026-10-19	7 / 4576	fresh unit, never claimed
 src/smt3/kernel/dds3KernelDraw.c	t2	done	2026-10-19	1 / 1532	dds3SceneLightUpdateFirst only, s6 left a reading
-src/smt3/event/evtCommand.c	t3	open	2026-10-19	28 / 3792	fresh unit, never claimed, 28 small functions
+src/smt3/event/evtCommand.c	t3	done	2026-10-19	28 / 3792	fresh unit, never claimed, 28 small functions
 src/smt3/effect/parManager.c	t4	open	2026-10-19	5 / 4936	fresh unit, never claimed
 src/smt3/effect/effBlur_Filter.c	t5	open	2026-10-19	12 / 3464	fresh unit, never claimed
 src/smt3/sdf/sdfModel.c	t6	open	2026-10-19	5 / 3820	the two LinkOt functions, t1 read both and they share most of their body
+src/smt3/script/scrParameterCommand.c	t7	open	2026-10-19	14 / 2208	fresh unit, never claimed, 14 small functions
