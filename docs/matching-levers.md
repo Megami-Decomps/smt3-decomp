@@ -98,6 +98,8 @@ it was measured on DDS and not on this ELF.
 | a byte loaded into `$3` and tested with a plain `beq`, where the return value is already hoisted into `$2` | an early `return` before the call: `if (x == 0) { return i; } f(); return i;`. The trailing `if (x != 0) { f(); } return i;` form coalesces the return value into the tested byte's register and emits `beql` on `$2`. `AddEffectTableMG12` sat at 2 of 85 words on that one statement |
 | a value whose register retail gives to a coordinate while a flag parameter sits one register higher | give the second, unrelated role its own local instead of reusing the first one. `effDebugDrawRectLine` updates `left`/`top` in place and then scales them into the second corner, which is the natural reading of retail's `$17`/`$18`; written that way the flag takes `$17` and `left`/`top` shift up, 27 of 85 words out. Separate `x1`/`y1` locals shorten `left`/`top`'s live ranges enough to rotate the allocation back and took it to 13 |
 | a sibling loop after an inner loop, whose downcounter sits in the *inner* loop's index register | reuse the inner loop's index variable as the second loop's counter. In `func_001AA5A0` retail's second loop counts down in `$7`, the first loop's `k`; a fresh local and the middle loop's `j` both give the middle loop's doubled induction variable instead, and `j` alone costs nine more words. That plus the store order took the function from 12 differing words to exact |
+| a call's argument setup duplicated in both arms of a loop guard, where your C computes it once above the branch | drop the explicit `if (count > 0)` and let the `for` emit its own guard. With the `if` written out gcc hoists the shared address and the call's pointer argument above the branch and runs one word long; without it the preheader and the skip arm each get their own copy, which is what retail has. `dds3MultiBillboardPktLink` went from 84 of 88 words differing to exact on dropping that one `if`, and six loop-body forms left it unchanged |
+| three constants selected into one struct field, with a single store the arms branch to | assign the field itself in all three arms and let gcc cross-jump the stores into one. A local for the value is if-converted into a `movz` pair whichever way the chain is written, `goto`s included, and a `switch` over the masked value gets the size right but reshapes the compare chain. `dds3Billboard_P2ADraw` went from 23 of 174 words to 1 on the three direct stores |
 | one shared exit with the return constant set in each predecessor's delay slot, and one arm falling into it | a `goto` to a single trailing `return 0`. Nesting the bodies inside their guards, an `&&` chain and an `else if` chain all reach within two words but keep one exit too few; the explicit label is what lets gcc put a `$2 = 0` in a delay slot on one path and fall into another on the next. `nbCheckModelPackLoaded` went 13 of 52 differing to exact |
 
 ## Addressing and types
@@ -291,7 +293,14 @@ it was measured on DDS and not on this ELF.
   and runs 16 bytes over.
 - `extern f32 fabsf(f32);` and an ordinary call compile to `abs.s` directly,
   verified against this toolchain. `EE_ABS_F32` is what fails to match where
-  retail has a plain `abs.s`.
+  retail has a plain `abs.s`. **But the choice is also a scheduling lever, and
+  it runs the other way in a VU0 body**: where retail materialises the other
+  operand's constant *after* the `abs.s`, `fabsf` lets sched1 hoist the
+  `li.s` into the `mtc1`-to-`abs.s` latency and `EE_ABS_F32` does not, because
+  its inline asm is a barrier. `dds3BillboardGetDirectionScale`'s
+  `1.0f - fabs(dot)` sat at 3 of 26 words with the call and every placement of
+  the constant (its own local before or after the `abs`, a reused local, a
+  result local) and went exact with `EE_ABS_F32(dot, dot)`.
 - The same thing happens by accident when a `void` callee defined later in the
   unit has no prototype above the caller: the implicit declaration returns
   `int`, so the load after the `jal` lands in `$3` where retail uses `$2`.
@@ -784,6 +793,52 @@ it was measured on DDS and not on this ELF.
   as `*(effBTLImage_t *)work = *(effBTLImage_t *)data;` with
   `typedef struct { s32 words[0xC38 / 4]; } effBTLImage_t;` declared in the
   unit, which avoids reshaping the shared `effBTL_t` header.
+- Two pointer locals that walk in step through one loop, each initialised from
+  a different global inside the same guard, couple their register assignment to
+  their `lui` emission order and pull opposite ways. The saved registers follow
+  statement order, so assigning the one retail gives the lower register first
+  gets the registers right and the two `lui` the wrong way round; assigning the
+  other first gets the `lui` order right and swaps the registers.
+  `dds3BillboardManagerInit` sits two words from exact on that, and neither
+  declaration order nor any loop-body or guard spelling separates them.
+- Two pointers of the same type that a function needs again after its calls,
+  where retail spills them to two adjacent 4-byte stack slots instead of using
+  callee-saved registers, are **elements of a local array**, `T *batch[2]`, not
+  two scalar locals. gcc gives the array a stack slot and reloads from it, and
+  copies the two values into caller-saved registers for the loop, which is
+  exactly retail's `sw`/`lw` pair plus two `daddu`. With two scalars it keeps
+  them in `$17`/`$18` and the prologue grows. That took
+  `dds3MultiBillboardPktLink` from 85 of 88 words differing to 4.
+- Where retail folds a constant element offset into a symbol's `%lo` and then
+  loads a member at a small displacement, `&table[n]` is not enough: both
+  `&sdfGrOtTable[44]` and `sdfGrOtTable[44].regFunc` leave gcc holding the bare
+  symbol and spending the `0x580` in the displacements, and a
+  `(T *)((u8 *)table + 0x580)` pointer local is worse. `PS2_SYMBOL_AT(sdfGrOt_t,
+  dds3MultiBillboardOt, sdfGrOtTable, 0x580)` and the member read through the
+  alias is what gives retail's `addiu rd, $18, %lo(sym + 0x580)` with a shared
+  `%hi` in a saved register. `dds3MultiBillboardLinkOt` went from 15 of 90
+  words to exact on that one declaration.
+- A header word a function needs both before its calls and again after them
+  belongs at its second use site as the field expression, not in a local. A
+  local for it takes a callee-saved register and shifts every later allocation;
+  `dds3BillAnimLoadP2A` wants `*(s32 *)resourceData` written again as `memcpy`'s
+  length while the same read feeds the allocation size above it, and that moved
+  10 of its 118 words.
+- `SDF_VU0_LOADVECTOR_MEMOPS` and `SDF_VU0_STOREVECTOR_MEMOPS` take an
+  **lvalue**, and an array's name is not one. `SDF_VU0_LOADVECTOR_MEMOPS(delta)`
+  on `f32 delta[4]` makes cc1 write the decayed pointer to a fresh stack slot
+  and then read *that slot* as the quadword, which also grows the frame by 16
+  and moves every other local; `delta[0]` is the correct spelling and gives
+  retail's bare `lqc2 vf10, 0($29)`. `dds3BillboardGetDirectionRotate` went from
+  23 of 94 words to exact on that alone.
+- The double-precision helpers are explicit calls in this engine's source, not
+  compiler soft float. `sdfFloatToULong(x)` widens an `f32`, `dpdiv(a, b)` is
+  the **comparison** (its result's sign is what `bgez` tests, despite the name),
+  `dpsub(a, b)` subtracts, and `sdfDoubleToULong` returns the narrowed value in
+  `$f0`, so declare it `f32`. A `1.0` double is retail's `ori rd, $0, 0xFFC0`
+  plus `dsll32 rd, rd, 14`. `dds3BillboardTagLink` and `script/scrTraceCode`
+  both use the quartet this way.
+
 
 - A `jal fptodp` anywhere in the output means a float argument reaches a callee
   with no prototype in scope: the implicit declaration promotes it to double.
