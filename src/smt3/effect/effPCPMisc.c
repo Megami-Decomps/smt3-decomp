@@ -570,25 +570,28 @@ struct SdfGsTextureStateValues {
 };
 
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
+/* Names from the IDB, which include/libsdf.h also carries. The three
+ * composites keep this unit's coarser reading: they cover pad+vifcode2, the
+ * two three-register texture blocks and the two 24-byte transforms. */
 struct sdfMatPacket_t {
-    u32 pad00;             /* 0x00 */
-    u32 unk04;             /* 0x04 */
-    u32 unk08;             /* 0x08 */
-    u32 multiTexDiffuse;    /* 0x0C: packed color applied by the secondary draw state */
-    u32 specular; /* 0x10: copied from the owning asset, or forced to zero. */
-    u32 unk14;             /* 0x14 */
-    u32 pad18;             /* 0x18 */
-    f32 unk1C;             /* 0x1C */
-    u32 alphaState;        /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
-    u32 multiTexMethod;     /* 0x24: secondary packet mode copied from SdfAsset */
-    f32 y;                 /* 0x28 */
-    f32 x;                 /* 0x2C */
-    u8 pad30[8];           /* 0x30 */
-    SdfGsTextureStateValues primaryTextureState; /* 0x38 */
-    SdfGsTextureStateValues secondaryTextureState; /* 0x50 */
-    SdfDrawTransform transforms[2]; /* 0x68 */
-    u32 vifItopCommand;    /* 0x98: VIF ITOP with immediate 0xC */
-    u32 vifMscalCommand;   /* 0x9C: VIF MSCAL with microprogram index zero */
+    u32 vifcode0;          /* 0x00 */
+    u32 ambient;           /* 0x04 */
+    u32 diffuse;           /* 0x08 */
+    u32 mtexDiffuse;       /* 0x0C: packed color applied by the secondary draw state */
+    u32 specularColor;     /* 0x10: copied from the owning asset, or forced to zero. */
+    u32 refmapColor;       /* 0x14 */
+    u32 vifcode1;          /* 0x18 */
+    f32 constant;          /* 0x1C */
+    u32 mtexAlpha;         /* 0x20: packed GS ALPHA_2 state emitted by the VU transfer builder */
+    u32 mtexAlgo;          /* 0x24: secondary packet mode copied from SdfAsset */
+    f32 fdBias;            /* 0x28 */
+    f32 fdSoften;          /* 0x2C */
+    u8 pad30[8];           /* 0x30: pad and vifcode2 */
+    SdfGsTextureStateValues primaryTextureState; /* 0x38: tex1Data, tex0Data, clampData */
+    SdfGsTextureStateValues secondaryTextureState; /* 0x50: the mtex trio */
+    SdfDrawTransform transforms[2]; /* 0x68: texTm and mtexTexTm */
+    u32 vifcode3;          /* 0x98: VIF ITOP with immediate 0xC */
+    u32 vifcode4;          /* 0x9C: VIF MSCAL with microprogram index zero */
 };
 
 union sdfMatUvwParm_t;
@@ -6534,7 +6537,7 @@ void effPCPMakkaDraw(EffPCPSprayWork *work) {
             FromEuler(0.0f, work->rotationY[i], 0.0f);
             if (effBTLSkillCheckRun() != 0) {
                 form = effBTLSkillGetTargetFormation(0);
-                if ((*(u32 *)(form + 0x78) & 0x200) != 0) {
+                if ((*(u32 *)(form + 0x78) & 0x200) != 0) { /* nbFormation_t.stat */
                     SDF_VU0_LOADVECTOR_B(D_00533CC0);
                     Mult();
                 }
@@ -7547,7 +7550,7 @@ void effPCPAnalyzeBEDDraw(EffPCPAnalyzeWork *work) {
     case 0x117: case 0x118: case 0x119: case 0x11A: case 0x11B: case 0x11C:
     case 0x11D: case 0x11E: case 0x11F: case 0x120: case 0x121: case 0x122:
         default:
-            scale = *(f32 *)(form + 0x60);
+            scale = *(f32 *)(form + 0x60); /* nbFormation_t.oneshotr */
             break;
         }
         place.payload[3] = 0.0f;

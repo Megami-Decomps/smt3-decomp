@@ -1300,6 +1300,8 @@ itfMesResource_t *itfMesMngSetResourcePtr(s32 window, itfMesResource_t *sub) {
     entry = GetTypeHeader2(sub);
     temporaryFontEntry = 0;
     if (sub->magic == ITF_MES_MAGIC_MSG1) {
+        /* itfMesEntry_t is an invented type and the IDB has no counterpart,
+         * so +8 past its two known words has no name to take. */
         temporaryFontEntry = *(u8 **)((u8 *)entry + 8);
     }
     mes->temporaryFontEntry = temporaryFontEntry;
