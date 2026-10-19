@@ -104,6 +104,7 @@ it was measured on DDS and not on this ELF.
 | the `default` arm's body as the fall-through after the compare chain, with two `case` bodies behind forward branches | write `default:` **first** in the source, before the `case` labels. This is the row above read on a default arm: gcc lays the arms out in source order, so `default`, `case 1`, `case 2` is what puts the default body where retail has it and lets it share the tail with the last case. `ResetWindowPara` was 31 of 49 words out with `default` written last and exact with it written first, over all six arm orders |
 | a `switch` arm that only advances a counter and tests it, where your C reads the field twice | `p->field++; if (p->field >= bound)`. An `s16` local for the incremented value is the obvious shape and is four words out: it sign-extends in place and takes the bound's register. `CalcMessage` turned on that alone |
 | one shared `jal` reached by a `b` from one arm and a fall-through from the other, where the argument comes from two different producers | write the whole call out in each arm and let gcc cross-jump it. A local for the produced value (`name = f(); ... g(x, y, name)`) is 11 words out on the argument-setup order alone; `itfMesMngRequestMessage` went to exact with the two `MessageRequestEx` calls written in full inside the `if` and the `else` |
+| the **same** tail block appearing once per branch of an `if`/`else`, byte-identical apart from the branch displacements | two changes that do nothing on their own and everything together. Cross-jumping runs in `jump2`, after register allocation, so two identical tails merge unless a register differs. First, read the dispatched field directly in both the `switch` head and the following `== N` test (`switch (control->animeMode)` and `if (control->animeMode == 6)`), not through a local: gcse then hoists one load into the branch block and leaves a `daddu rd, rs, $0` copy in one arm, so the two tails test different registers. A local for the value, two locals, a local copied from a local, function-scope locals and six declaration orders all coalesce to one register and change nothing. Second, repeat the call that *follows* the `if`/`else` inside each arm instead of writing it once after it, which is what stops gcc merging the arms from the end inward. `dds3ObjectBaseModelLinkOt` has three such arms; it sat at 130 of 230 differing words, reached 127 on the direct field reads alone, and went to 20 of 242 when the trailing `sdfModelEvalTm` call moved into all three |
 
 ## Addressing and types
 
@@ -132,6 +133,18 @@ it was measured on DDS and not on this ELF.
 - A store to a struct field aliases a global table of the same type, so
   reading `tbl[i].f` after the store forces a reload. A local holding the
   field is what matches.
+- Where retail **reloads** a `void *` handle after a store made through a
+  pointer derived from it, cast the store's lvalue to `void **`. ee-gcc 2.96
+  gives each pointed-to type its own alias set, so a store to a
+  `struct sdf3DLightParallelPacket_t *` field does not kill an available load
+  of a `void *` field and cc1 keeps the handle in a register across it, one
+  word short and in the wrong register. `*(void **)&obj->inner->light = light;`
+  puts the store in the same alias set as the load and restores the reload.
+  That was the last 6 words of `dds3ObjectBaseModelLinkOt`. The cast at the
+  dereference is what matters, not the stored value's declared type: a `u32`
+  local and a `u32 *` store do not reach it, while `(void **)` on the field's
+  address, a `(void **)` subscript of the base and a `(void **)` cast of a
+  `u8 *` sum are all exact.
 - `for (i = 0, ofs = 0; ...)` against `ofs = 0;` above the loop decides which
   of the two variables is zeroed first.
 - A row offset of `n - 1` folds into the load displacement on a two
@@ -293,7 +306,13 @@ it was measured on DDS and not on this ELF.
   `case 8: seq = 0; break;`. Flow analysis then deletes every store and those
   entries land on the shared exit. One function went from 59 of 79 words
   differing to 1 on that alone, where a live assignment leaves the block in
-  and runs 16 bytes over.
+  and runs 16 bytes over. Confirmed again at seven entries and at six, and the
+  node count is still not the whole story: `basic/dds3ObjectBase` has four
+  `switch`es over the same `u32` field with the same case values, and the three
+  in `dds3ObjectBaseModelLinkOt` (cases 0 to 6 twice, 0 to 5 once) emit tables
+  while `dds3ObjectBaseMatterAnimeSpeed`'s cases 0 to 6, with two stores in
+  every arm and no empty arm at all, emits a compare tree and matches that way.
+  So read which one retail has rather than predicting it from the arm count.
 - `extern f32 fabsf(f32);` and an ordinary call compile to `abs.s` directly,
   verified against this toolchain. `EE_ABS_F32` is what fails to match where
   retail has a plain `abs.s`. **But the choice is also a scheduling lever, and
@@ -612,7 +631,14 @@ it was measured on DDS and not on this ELF.
   which costs nothing at all: the frame still reports `vars= 0` and no extra
   instruction is emitted. `volatile`, an array and a store each grow the frame
   by 16, while an old-style declaration, a varargs callee and a mismatched
-  return signedness do not block it at all.
+  return signedness do not block it at all. It blocks **every** sibling call in
+  the function, so it is the wrong tool where retail sibcalls some calls and not
+  others: `dds3ObjectBaseModelLinkOt` has two `j callee` tail calls on early
+  return paths and a `jal` plus epilogue on the last one, and the dummy pointer
+  took it from 20 of 242 differing words to 207 of 236. A dead store after the
+  one call that must not sibcall (`ot = NULL;` on an unused parameter) blocks
+  only that one and took it to 6. Any dead store reaches it; three different
+  variables gave the same result.
 - Blocking the sibling call where retail uses `jal` and a full epilogue has
   two other forms, and which one works varies by unit. Giving a void function an
   `s32` return type with no `return` statement collapses a duplicated epilogue
