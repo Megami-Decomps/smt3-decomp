@@ -3381,7 +3381,7 @@ s32 Flow1_15(nbNegoProcessData_t *n)
 s32 Flow1_16(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x10011);
-    n->getmakka = *(s32 *)((u8 *)DDS3_GBWK + 0xA48) / 3;
+    n->getmakka = DDS3_GBWK->maka / 3;
     *(u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8) = 0;
     return 0;
 }
@@ -4968,7 +4968,7 @@ s32 Flow2_4(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x20005);
     q = nbGetQuestionType(n->ework);
     n->qtype = q;
-    p = (u8 *)(q + (s32)DDS3_GBWK + 0x1CE8);
+    p = (u8 *)(q + (s32)DDS3_GBWK + 0x1CE8); /* &negoques[q]; retail adds as an integer */
     if (*p < 0xFF) {
         *p = *p + 1;
     }
@@ -5331,7 +5331,7 @@ s32 Flow7_3(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x7000F);
     nbAddNegoIdKouho(n, 0x7000B);
     n->qtype = nbGetQuestionType(n->ework);
-    p = (u8 *)(n->qtype + (s32)DDS3_GBWK + 0x1CE8);
+    p = (u8 *)(n->qtype + (s32)DDS3_GBWK + 0x1CE8); /* &negoques[n->qtype] */
     if (*p < 0xFF) {
         *p = *p + 1;
     }
@@ -9232,7 +9232,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetEncountMax);
 
 u16 nbGetEncountCnt(void)
 {
-    return *(u16 *)((u8 *)DDS3_GBWK + 0x1CF8);
+    return DDS3_GBWK->encountCount;
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncountCalc);
@@ -9272,6 +9272,10 @@ s32 nbCheckEncountLevel(s32 encno)
 
 void fclClearTerminalState(void)
 {
+    /* The u8 * local is load-bearing: it caches the base so ee-gcc emits one
+     * $gp load for both stores. Reaching through DDS3_GBWK-> per statement
+     * reloads $gp and reorders them. +0x1CF4 is encountkyori (an f32 retail
+     * stores an integer zero into) and +0x1CF8 is encountCount. */
     u8 *gb;
 
     gb = (u8 *)DDS3_GBWK;
@@ -9796,7 +9800,7 @@ s32 nbBadCurseStep1(nbActionProcessData_t *a)
 s32 nbBadCurseStep4(nbActionProcessData_t *a)
 {
     if (nbCheckFormationPlayerSide(a->form->formindex) != 0 &&
-        *(s32 *)((u8 *)DDS3_GBWK + 0xA48) == 0) {
+        DDS3_GBWK->maka == 0) {
         return 1;
     }
     if ((a->work->flag & 0x20) != 0 && (a->party->flag & 0x800) != 0) {
@@ -9965,7 +9969,7 @@ void nbMakaDispOn(s32 no)
         w->unk_0C = 0x112;
         w->unk_10 = 0x10D;
     }
-    w->maka = *(s32 *)((u8 *)DDS3_GBWK + 0xA48);
+    w->maka = DDS3_GBWK->maka;
     w->unk_1C = no;
     w->unk_00 = 1;
 }
@@ -10059,7 +10063,7 @@ nbMakaWork_t *nbAllocMakaWork(void)
 
     w = sdfChipAllocDirect(sizeof(nbMakaWork_t));
     memset(w, 0, sizeof(nbMakaWork_t));
-    w->maka = *(s32 *)((u8 *)DDS3_GBWK + 0xA48);
+    w->maka = DDS3_GBWK->maka;
     return w;
 }
 
