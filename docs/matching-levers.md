@@ -1019,6 +1019,31 @@ once per use, and a named local for it computes it once.
   than below them, and all 120 permutations of the eight statements in that
   tail were swept to find it: twelve of them sit at 2 words and exactly one is
   exact, so sweep rather than reason.
+- The alias-set lever reaches a run of **zero stores**, not only a run of field
+  copies, and the type to share is `u32` rather than a pointer type. The
+  allocation initializer in `dds3AllocBasic` writes fourteen fields of a fresh
+  `dds3Basic_t`; retail emits them in source order, while the plain field
+  assignments come out rotated by whole pairs (gcc groups the stores by alias
+  set and emits the last pair first), and no permutation of the six statements
+  in the affected group reaches retail's order, all 1440 of them with the
+  vtable read at either position. Writing just the two `void *` fields as
+  `*(u32 *)&basic->staticdata = 0;` puts them in the same set as the two `u32`
+  fields next to them and the natural source order is then exact. `void **` on
+  the pointer fields instead is not equivalent and leaves six words out, so
+  reach for `u32` first, and the `char *` and vtable fields between them do not
+  need the cast at all.
+- A table read whose index retail keeps in `$4` wants the read placed **after**
+  the first store of the object it initialises, not before it.
+  `dds3AllocBasic` reads `dds3BasicFuncTablePtr[type]` between
+  `basic->type = type << 24;` and the rest of the initializer; read before the
+  first store, the scaled index lands in `$6` and costs the `addu`'s operand
+  register as well.
+- A function whose early exits all return 0 does **not** want the
+  `s32 ret = 0; ... return ret;` form just because retail materialises the zero
+  in the prologue. `dds3AllocBasic` has `daddu $2, $0, $0` as its second
+  instruction and two plain `if (...) return NULL;` guards reach it, because
+  the guard's delay slot is already full; the result local instead runs eight
+  bytes long and leaves the whole body shifted.
 - An index into an array that is a **struct member** associates as
   `(base + index * scale) + offsetof`, which is what leaves retail's constant in
   the store displacement. A pointer local for the member
