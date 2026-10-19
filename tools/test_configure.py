@@ -291,6 +291,32 @@ const char *text = "INCLUDE_SDATA(hidden)";
                     configure.write_ninja([VERSION], args)
 
 
+    def test_a_failed_configure_leaves_build_ninja_untouched(self) -> None:
+        """A partial graph is worse than none: ninja reads a truncated file as complete."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / f"src/{VERSION}").mkdir(parents=True)
+            (root / f"src/{VERSION}/unit.c").write_text(
+                'INCLUDE_ASM + (const s32, "unit", fallback);\n'
+            )
+            build = root / f"build/{VERSION}"
+            build.mkdir(parents=True)
+            (root / f"config/{VERSION}").mkdir(parents=True)
+            (build / f"{SERIAL}.ld").write_text(
+                f"    build/{VERSION}/src/{VERSION}/unit.o(.text)\n"
+            )
+            (root / "build.ninja").write_text("the previous graph\n")
+            args = types.SimpleNamespace(no_split=True, force_split=False)
+            version_info = {"serial": SERIAL, "title": "Nocturne", "elf_sha1": "0" * 40}
+            with patch.object(configure, "ROOT", root), \
+                    patch.dict(configure.VERSIONS, {VERSION: version_info}), \
+                    patch.object(configure, "i386_prefix", return_value=""), \
+                    patch("ninja_syntax.Writer", Mock(), create=True):
+                with self.assertRaises(SystemExit):
+                    configure.write_ninja([VERSION], args)
+            self.assertEqual((root / "build.ninja").read_text(), "the previous graph\n")
+
+
 class ObjdiffProgressTests(unittest.TestCase):
     def setUp(self) -> None:
         self.units = {
