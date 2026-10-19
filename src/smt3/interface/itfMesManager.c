@@ -851,7 +851,6 @@ void itfMesMngRelease(s32 window) {
     }
 }
 
-extern char D_00535A80[];
 
 s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     itfMesWork_t *panel = pinst[window].mes;
@@ -866,7 +865,8 @@ s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     mes->table = table;
     mes->tableCount = table->count;
     if (table->count == 0) {
-        printf(D_00535A80);
+        printf("itfMesMngRequestMessage() escape 1
+");
         return 0;
     }
     CommitVarTable((s32 *)panel->variables.addresses);
@@ -947,7 +947,6 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
 
 extern s32 printf(const char *format, ...);
 
-extern char D_00535AA8[];
 
 void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
     itfMesWork_t *panel = pinst[window].mes;
@@ -960,7 +959,8 @@ void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
 
     entry = GetTypeHeader(panel, entryIndex);
     if (entry->itemList != (u32 *)1) {
-        printf(D_00535AA8, entry->itemList);
+        printf("itfMesMngRequestSelect() - Invalid Type : %d
+", entry->itemList);
     }
     if (sel->glyphChain != NULL) {
         frDestroyFontRequestAfter(sel->glyphChain);
@@ -1215,10 +1215,6 @@ extern char D_00311450[];
 extern char D_00311850[];
 
 void itfMesMngGetVarLocalize(s32 id);
-
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535A80);
-
-INCLUDE_RODATA(const s32, "interface/itfMesManager", D_00535AA8);
 
 void itfMesMngSetVar(s32 window, s32 slot, s32 value, s32 selector) {
     switch (selector) {

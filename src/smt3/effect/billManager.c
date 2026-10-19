@@ -43,12 +43,6 @@ typedef struct BillPacRequest {
 extern BillGeneralEntry BillboardTable[];
 extern BillGeneralRow D_00316FF0[];
 extern struct billChildPayload_t *dds3BillboardTag;
-extern char D_00532C28[];
-extern char D_00532C40[];
-extern char D_00532D30[];
-extern char D_00532CB8[];
-extern char D_00532CD8[];
-extern char D_00532CF8[];
 
 extern void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
@@ -315,7 +309,7 @@ void dds3BillboardManagerInit(void) {
     billObj_t **slot;
 
     dds3BillboardTag = NULL;
-    request = pacLoad(D_00532C28);
+    request = pacLoad("/bill/billtmx.LB");
     pacSync(request);
     work = request->queueHead;
     if (work != NULL) {
@@ -331,7 +325,8 @@ void dds3BillboardManagerInit(void) {
         } while (work != NULL);
     }
     pacFileHandleFree_(request);
-    printf(D_00532C40, D_00532C28);
+    printf("billManager:[%s]
+", "/bill/billtmx.LB");
 }
 #else
 INCLUDE_ASM(const s32, "effect/billManager", dds3BillboardManagerInit);
@@ -970,23 +965,20 @@ BillData *dds3BillAnimLoadP2A(void *resourceData) {
             u32 frameCount = entry->frameCount;
 
             block->entryCount = frameCount;
-            printf(D_00532CB8, i, frameCount);
+            printf("billAnim no[%d][%d]...PLURAL
+", i, frameCount);
         } else if (entry->entryModeFlags & 0x40) {
             block->entryCount = 2;
-            printf(D_00532CD8, i, 2);
+            printf("billAnim no[%d][%d]...MTEX
+", i, 2);
         } else if (entry->entryModeFlags & 0x80) {
             block->entryCount = 2;
-            printf(D_00532CF8, i, 2);
+            printf("billAnim no[%d][%d]...AMTEX
+", i, 2);
         }
     }
     return block;
 }
-
-INCLUDE_RODATA(const s32, "effect/billManager", D_00532CB8);
-
-INCLUDE_RODATA(const s32, "effect/billManager", D_00532CD8);
-
-INCLUDE_RODATA(const s32, "effect/billManager", D_00532CF8);
 
 void dds3BillAnimFreeP2A(BillData *block) {
     s32 listRefCount = block->listRefCount - 1;
@@ -1028,7 +1020,8 @@ billObj_t *dds3BillboardFileLoad(s32 index, const char *name) {
     u32 data;
     billObj_t *obj;
 
-    printf(D_00532D30, name);
+    printf("BillManager Load...[%s]
+", name);
     allocation = sdfDevLoadFileEx(name, &data, 0);
     obj = dds3BillboardCreate(index, data);
     sdfMemFreeDirect(allocation);
@@ -1436,6 +1429,4 @@ void dds3P2APolygonGetResource(EffUnitObject *instance, s32 *modeValues) {
 }
 
 INCLUDE_ASM(const s32, "effect/billManager", dds3P2APolygonDraw);
-
-INCLUDE_RODATA(const s32, "effect/billManager", D_00532D30);
 

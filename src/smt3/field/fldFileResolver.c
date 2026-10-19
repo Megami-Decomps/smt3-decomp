@@ -171,7 +171,6 @@ s32 fldLoadNextFile_BtlRet(void);
 
 void fldFreeNextFile(void);
 
-extern char D_00531A40[]; /* "%sf%03d_%03d.LB" */
 
 extern struct fileRequest_t *pFldNextFileDataF2;
 
@@ -209,13 +208,9 @@ void fldPreloadNextFile(char *out);
 
 extern s32 evtBitCheck(s32 bit);
 
-extern char D_00531A50[]; /* "%sf%03d_00c.LB" */
 
-extern char D_00531A60[]; /* "%sf%03d_00b.LB" */
 
-extern char D_00531A70[]; /* "%sf%03d_000.LB" */
 
-extern char D_00531A80[]; /* "%sf%03d_00d.LB" */
 
 extern char fldFieldPackFlag[];
 
@@ -317,11 +312,8 @@ extern u32 D_0054EBCC;
 
 extern struct fileRequest_t *fldFileBuf1;
 
-extern char D_00531AA8[]; /* "PipeMain" */
 
-extern char D_00531AB8[]; /* "fldTitle" */
 
-extern char D_00531AC8[]; /* "fldTitleMini" */
 
 extern u8 D_0054EC00[];
 
@@ -333,19 +325,14 @@ void fldHojiDebugView2(void);
 
 extern s32 dds3ObjectBaseAddModelOt(s32 field, s32 area, s32 block);
 
-extern char D_00531B40[]; /* "VIS-HOJI" */
 
-extern char D_00531B50[]; /* "ANM-HOJI" */
 
 extern void fldDbgPrint2D(s32 x, s32 y, const char *format);
 
 extern s32 fldGbChkHit(s32 field, s32 area, s32 block);
 
-extern char D_00531B08[]; /* "GMC-HOJI" */
 
-extern char D_00531B18[]; /* "HIT-HOJI" */
 
-extern char D_00531B28[]; /* "0123456789ABCDEF" */
 
 extern char D_0054EC20[]; /* "%02d" */
 
@@ -699,7 +686,7 @@ s32 fldLoadNextFile_BtlRet(void) {
         fldGlobalBase.resourceArea = area;
         fldGlobalBase.resourceFloor = floor;
         fldMakeFilePath(directory, area, 1);
-        sprintf(path, D_00531A40, directory, area, floor);
+        sprintf(path, "%sf%03d_%03d.LB", directory, area, floor);
         pFldNextFileDataF2 = pacLoad(path);
         fldGlobalBase.resourceFlag = 1;
         return 1;
@@ -728,7 +715,7 @@ s32 fldLoadNextFile(s32 area, s32 room) {
     fldGlobalBase.resourceArea = area;
     fldGlobalBase.resourceFloor = room;
     fldMakeFilePath(directory, area, 1);
-    sprintf(path, D_00531A40, directory, area, room);
+    sprintf(path, "%sf%03d_%03d.LB", directory, area, room);
     pFldNextFileDataF2 = pacLoad(path);
     fldGlobalBase.resourceFlag = 1;
     return 1;
@@ -835,45 +822,45 @@ void fldPreloadNextFile(char *out) {
     fldMakeFilePath(directory, area, 1);
     if (area == 25) {
         if (evtBitCheck(0x599) != 0 && evtBitCheck(0x743) == 0) {
-            sprintf(out, D_00531A50, directory, 25);
+            sprintf(out, "%sf%03d_00c.LB", directory, 25);
             return;
         }
     }
     if (area == 25) {
         if (floor >= 0x11) {
-            sprintf(out, D_00531A60, directory, 25);
+            sprintf(out, "%sf%03d_00b.LB", directory, 25);
             return;
         }
     }
     if (area == 24) {
         if (evtBitCheck(0x4F) != 0) {
-            sprintf(out, D_00531A60, directory, 24);
+            sprintf(out, "%sf%03d_00b.LB", directory, 24);
             return;
         }
         if (evtBitCheck(0x16) != 0 && evtBitCheck(0x3E) == 0) {
-            sprintf(out, D_00531A50, directory, 24);
+            sprintf(out, "%sf%03d_00c.LB", directory, 24);
             return;
         }
     }
     if (area == 34) {
         if (floor < 4) {
-            sprintf(out, D_00531A70, directory, 34);
+            sprintf(out, "%sf%03d_000.LB", directory, 34);
             return;
         }
         if (floor < 0xB) {
-            sprintf(out, D_00531A60, directory, 34);
+            sprintf(out, "%sf%03d_00b.LB", directory, 34);
             return;
         }
         if (floor < 0x13) {
-            sprintf(out, D_00531A50, directory, 34);
+            sprintf(out, "%sf%03d_00c.LB", directory, 34);
             return;
         }
         if (floor < 0x1A) {
-            sprintf(out, D_00531A80, directory, 34);
+            sprintf(out, "%sf%03d_00d.LB", directory, 34);
             return;
         }
     }
-    sprintf(out, D_00531A70, directory, area);
+    sprintf(out, "%sf%03d_000.LB", directory, area);
 }
 
 u8 fldCheckNextFile(void) {
@@ -882,16 +869,6 @@ u8 fldCheckNextFile(void) {
     fldPreloadNextFile(buf);
     return strcmp(fldFieldPackFlag, buf) != 0;
 }
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A40);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A50);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A60);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A70);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531A80);
 
 void fldLoadFieldPack(void) {
     char name[32];
@@ -1008,7 +985,7 @@ u32 fldLoadFile(const char *name) {
             fldFreeNextFile();
         } else {
             fldMakeFilePath(directory, field, 1);
-            sprintf(path, D_00531A40, directory, field, area);
+            sprintf(path, "%sf%03d_%03d.LB", directory, field, area);
             fldFileBuf1 = pacLoad(path);
             pacSync(fldFileBuf1);
         }
@@ -1136,16 +1113,16 @@ void fldFreeFile(void) {
     filePacRequest_t *request;
     sdfPacWork_t *work;
 
-    if (dds3SearchProcessName(D_00531AA8) != 0) {
+    if (dds3SearchProcessName("PipeMain") != 0) {
         return;
     }
     fldDrwZFree();
     fldClearSe3D();
     if (fldTitleChk() != 0) {
-        dds3KillProcessName(D_00531AB8, 1);
+        dds3KillProcessName("fldTitle", 1);
     }
     if (fldTitleMiniChk() != 0) {
-        dds3KillProcessName(D_00531AC8, 1);
+        dds3KillProcessName("fldTitleMini", 1);
     }
     fldFreeModelTable();
     fldClearTakaraSlots();
@@ -1223,12 +1200,6 @@ void fldFreeFile(void) {
 }
 
 /* Select the ordinary field, battle or event resource directory. */
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531AA8);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531AB8);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531AC8);
-
 void fldMakeFilePath(char *path, s32 field, s32 unused) {
     if (field < 200) sprintf(path, "/fld/f/f%03d/", field);
     else if (field < 500) sprintf(path, "/fld/b/f%03d/", field);
@@ -1243,11 +1214,11 @@ void fldHojiDebugView(void) {
     s32 x2;
     s32 flag;
 
-    sprintf(buf, D_00531B08);
+    sprintf(buf, "GMC-HOJI");
     fldDbgPrint2D(0, -800, buf);
-    sprintf(buf, D_00531B18);
+    sprintf(buf, "HIT-HOJI");
     fldDbgPrint2D(3520, -800, buf);
-    sprintf(buf, D_00531B28);
+    sprintf(buf, "0123456789ABCDEF");
     fldDbgPrint2D(0, -704, buf);
     fldDbgPrint2D(3520, -704, buf);
     for (i = 0; i < 31; i++) {
@@ -1287,11 +1258,11 @@ void fldHojiDebugView2(void) {
     s32 x2;
     s32 flag;
 
-    sprintf(buf, D_00531B40);
+    sprintf(buf, "VIS-HOJI");
     fldDbgPrint2D(0, -800, buf);
-    sprintf(buf, D_00531B50);
+    sprintf(buf, "ANM-HOJI");
     fldDbgPrint2D(3520, -800, buf);
-    sprintf(buf, D_00531B28);
+    sprintf(buf, "0123456789ABCDEF");
     fldDbgPrint2D(0, -704, buf);
     fldDbgPrint2D(3520, -704, buf);
     for (i = 0; i < 31; i++) {
@@ -1327,16 +1298,6 @@ void fldHojiDebugView2(void) {
 void fldFileAddrResetMode(u32 relocateOnRelease) {
     gFldFileResetMode = relocateOnRelease;
 }
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B08);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B18);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B28);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B40);
-
-INCLUDE_RODATA(const s32, "field/fldFileResolver", D_00531B50);
-
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EB98);
 
 INCLUDE_SDATA(const s32, "field/fldFileResolver", FildMaskObj);
