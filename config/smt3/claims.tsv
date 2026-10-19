@@ -141,12 +141,20 @@ src/smt3/sdf/sdfVu0.c	b0	done	2026-10-19	0 / 0	named by the TU split; see docs/t
 src/smt3/sdf/sdfVu1.c	b0	done	2026-10-19	18 / 2672	named by the TU split; see docs/tu-recovery.md
 src/smt3/sdf/sdf_Decomp.c	b0	done	2026-10-19	0 / 0	named by the TU split; see docs/tu-recovery.md
 src/smt3/sdf/sdf_PadManager.c	b0	done	2026-10-19	1 / 376	named by the TU split; see docs/tu-recovery.md
-src/smt3/code_001FAE80.c	x1	open	2026-10-19	844 / 257912	-
-src/smt3/newbattle/nbMakePacket.c	x2	open	2026-10-19	309 / 151408	-
-src/smt3/effect/effPCPBoss.c	x3	open	2026-10-19	73 / 34640	-
-src/smt3/newbattle/nbCameraBoss.c	x4	open	2026-10-19	50 / 29892	-
-src/smt3/newbattle/nbCameraSkill.c	x5	open	2026-10-19	34 / 19536	-
-src/smt3/mc/slMain.c	x6	open	2026-10-19	20 / 18236	-
-src/smt3/event/evtEventViewer.c	x7	open	2026-10-19	51 / 16904	-
-src/smt3/field/fldAutoMap.c	x8	open	2026-10-19	17 / 16124	-
+src/smt3/code_001FAE80.c	x1	done	2026-10-19	844 / 257912	-
+src/smt3/newbattle/nbMakePacket.c	x2	done	2026-10-19	309 / 151408	-
+src/smt3/effect/effPCPBoss.c	x3	done	2026-10-19	73 / 34640	-
+src/smt3/newbattle/nbCameraBoss.c	x4	done	2026-10-19	50 / 29892	-
+src/smt3/newbattle/nbCameraSkill.c	x5	done	2026-10-19	34 / 19536	-
+src/smt3/mc/slMain.c	x6	done	2026-10-19	20 / 18236	-
+src/smt3/event/evtEventViewer.c	x7	done	2026-10-19	51 / 16904	-
+src/smt3/field/fldAutoMap.c	x8	done	2026-10-19	17 / 16124	-
 src/smt3/code_002C7CB0.c	-	-	-	600 / 119044	Sony SDK and newlib (sceGs*, _r); outside the game denominator, do not claim
+src/smt3/code_001FAE80.c	y1	open	2026-10-19	826 / 256048	-
+src/smt3/newbattle/nbMakePacket.c	y2	open	2026-10-19	298 / 149528	-
+src/smt3/field/fldDraw.c	y3	open	2026-10-19	69 / 79840	-
+src/smt3/newbattle/nbStageProcess.c	y4	open	2026-10-19	105 / 59240	-
+src/smt3/newdata/datCalc.c	y5	open	2026-10-19	62 / 12556	-
+src/smt3/effect/effBattleMisc.c	y6	open	2026-10-19	59 / 11092	-
+src/smt3/mc/slMain.c	y7	open	2026-10-19	12 / 14556	-
+src/smt3/pb/pbGame.c	y8	open	2026-10-19	37 / 14296	-
