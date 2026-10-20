@@ -965,3 +965,146 @@ extra empty `case 2`, `case 3` or `case 4`. The empty case reaches the exact
 124-byte size and 11 differing words, but it does so by building a three-node
 tree with an `slt 2` bound test that retail does not have, so it is further
 from the retail source rather than nearer.
+
+## nbSetActionCommand (newbattle/nbMakePacket, 0x100)
+
+38 of 62 words match, two words short of retail's 256.
+
+Every instruction is retail's except one. Retail keeps `command * 784 + 0x10`
+as a single index and adds it to two symbol bases, `datModelParamTable` and
+`datModelParamTable + 8`, so the pair of `f32` reads are both at offset 0 of a
+computed address. ee-gcc reassociates the same expression the other way,
+folding the `+0x10` into the symbol (`datModelParamTable + 0x10`) and dropping
+retail's `addiu $2, $2, 0x10`. That one missing instruction also removes
+retail's loop-alignment `nop`, and every word from the first guard branch on is
+the same instruction with its offset shifted by two.
+
+The rest is confirmed: the 10-iteration `stat &= ~0x800` sweep over
+`form[4..13]`, the `data->unk_84` and `nbEncountFormTable[encno].unk_22` guards
+in that order with the table byte loaded before both, and the second loop
+written as `for (i = 4; i < cnt + 4; i++)`, which is what gives retail's hoisted
+`slt $2, $6, $2` guard against `cnt + 4` and the count-down trip register.
+
+Ruled out for the fold: an `ofs = command * 784 + 0x10` local, which stops
+ee-gcc hoisting the addresses out of the loop at all (45 words differ);
+`&datModelParamTable[...]` array syntax; `(u32)` and `(s32)` casts on the
+symbol; writing the second read as `+ 8 + command * 784 + 0x10`; the constant
+before the product; and the word-indexed forms
+`((f32 *)datModelParamTable)[command * 196 + 4]` and
+`(command * 196 + 4) * 4`. All seven give the identical 24-word diff, so the
+fold is not reachable from the address expression.
+
+## nbInitPlayer (newbattle/nbMakePacket, 0x40)
+
+1 of 14 words match, two words short of retail's 64.
+
+The body is settled: `nbSetBattleDummy(D_00551500, &test_skilllist[0xF0],
+&test_skilllist[0x100], test_pskill, test_skilllist)` followed by
+`evtBitOn(0xC04)`, which retail reaches as a sibling call.
+
+What blocks it is a data boundary, not a source shape. Retail materialises four
+independent `lui`/`addiu` pairs, one per argument, and ee-gcc emits a single
+`lui %hi(test_skilllist)` and reaches the other two addresses as
+`addiu $5, $5, 0xF0` and `addiu $6, $5, 0x10` off that base. Two separate
+objects are the only thing that stops ee-gcc sharing the high half, so
+`test_skilllist` (0x00526440, the IDB's size 0x120) is at least three objects:
+the 0xE0 `datUnitWork_t` that `nbSetBattleDummy` copies to
+`DDS3_GBWK + 0xA54`, and two lists at 0x00526530 and 0x00526540. Naming those
+two means a hand-curated boundary in `config/smt3/symbol_addrs.txt` above
+`// BEGIN ida`, which also unblocks `TestProcess3` and `TestProcess4`: both
+pass the same three addresses, `TestProcess4` against the parallel
+`test2_pdummy` (0x005266E0, +0xF0, +0x100) with `test2_dvllist` already its own
+symbol.
+
+Ruled out inside one object: `&test_skilllist[0xF0]` and
+`test_skilllist + 0xF0`, which compile identically; a `(u16 *)` cast on each
+argument; and `(void *)` on the base. Literal addresses
+(`(void *)0x526530`) do give four independent pairs and get to 8 of 14 words
+differing, which is the evidence for the split, but are not a usable source
+form.
+
+## nbE915Process_1 (newbattle/nbMakePacket, 0x118)
+
+56 of 69 words match, one word short of retail's 280.
+
+The whole body is retail's, including the `e->unk_08` chain
+(`< 0x6E` with a nested `== 0`, then `== 0x6E`, then `>= 0xFA` with a nested
+`== 0xFA`) and the three `e->unk_08` reloads it forces. The single difference is
+the branch in front of `effBTLSkillStart(0x203, 0)`: retail leaves its delay
+slot a `nop` and ee-gcc fills it with the `addiu $4, $0, 0x203` from the
+fall-through. Every later word is that same instruction one slot early, and the
+two branch offsets at +0x38 and +0xE4 are off by one as a result.
+
+`$4` is dead on the taken path in both, since the shared tail sets it for
+`nbUpdateEventProcessData`, so nothing in the function blocks the fill.
+
+Ruled out: `!e->unk_08`; `!= 0` with an empty arm and the call in the `else`;
+a `switch` over `e->unk_08` with only `case 0`; and duplicating the
+`nbUpdateEventProcessData` tail into an early-return arm so the two tails
+cross-jump. All five give the identical 13-word diff.
+
+## nbMakeNegoBackPacket (newbattle/nbMakePacket, 0x104)
+
+63 of 65 words match, at the exact 260-byte size.
+
+Every instruction is retail's. The two differing words are the GPR that
+`SDF_VU0_SCALEVECTOR` moves the binary32 bits through: retail uses `$2` for
+both the `mfc1` and the `qmtc2.ni`, and also for the `addiu $2, $16, 0x20` that
+follows it, where ee-gcc takes `$3` for the bits and leaves `$2` for the
+address. The macro deliberately lets cc1 choose that register, and nothing in
+this function steers it.
+
+Its sibling `nbMakeNegoForwardPacket` matches with the same macro getting `$2`,
+so the shape is right and only the allocation differs. The difference between
+them is that Forward feeds `nbMakeUnitMoveGetCyDist`'s `f32` return into the
+scale through two named locals, which is what gives Forward one more pseudo at
+that point.
+
+Three source facts were pinned here and carried over to the matching sibling:
+`extern void ToMatrix(void)` and an `f32` return on
+`nbMakeUnitMoveGetCyDist` are both needed, or cc1 treats `$2` as holding a call
+result and avoids it for the `&dir` address as well;
+`SDF_VU0_STOREVECTOR_NOMEM(&pos)` is required, because the plain store's
+`memory` clobber lets cc1 share one `addiu $29, 0x10` pseudo in a callee-saved
+register where retail rematerialises the address for the store and again for
+the packet argument; and the three frame vectors must be declared `v`, `pos`,
+`dir` so they land at `0x00`, `0x10` and `0x20`.
+
+Ruled out for the scratch register: a `f32` local for the product, for the whole
+scale, and an assignment inside the macro argument; `SDF_VU0_STOREVECTOR`,
+`_MEMOPS` and `_RWADDR` for the `pos` store; a `nbFormation_t *` local aliasing
+`form`; hoisting `&form->pos` into a local before the scale;
+`SDF_VU0_LOADVECTOR_B_RWADDR`; and `void`, `s32` and `f32` returns on
+`nbMakeUnitMoveGetCyDist`. All give the identical two-word diff.
+
+## nbPickAiAction (newbattle/nbMakePacket, 0x118)
+
+68 of 70 words match, at the exact 280-byte size.
+
+Both differing words are `daddu rD, $0, $0`: retail zeroes the loop index
+first and puts `acc = 0` in the `blez $16` zero-trip guard's delay slot, and
+ee-gcc zeroes `acc` first and puts the index in that slot. The instruction
+sequence is otherwise retail's.
+
+Two things were pinned getting here. The weighted pick has to test before it
+accumulates, `if (r < acc + row[list[i]].ritu) { return list[i]; }` then
+`acc += row[list[i]].ritu;`: ee-gcc then CSEs the sum into a temp and leaves
+retail's `addu $3, $6, $3` plus `daddu $6, $3, $0` copy, where
+`acc += ...; if (r < acc)` adds in place and is 23 words out. And the row base
+is `D_00398A08 + work->id * 164 + tbl * 40` over 8-byte entries, so the
+`datDevilAITbl_t` added for it is `{ u16 ritu; u16 skill; u32 target; }`, the
+same record the HD sources carry.
+
+Worth recording about the data: the AI table region is 40-byte strided with
+5 entries of 8 bytes, which the unit's existing `datDevilAI_t` overlay models
+as `entry[13]` of 12 bytes over the same 0x04..0xA0 span. The two views cannot
+both be right, and `D_00398A08` (`D_003989E0 + 0x28`) is where the 40-byte
+tables start, so the 164-byte record is most likely a 0x28-byte header
+(including three 12-byte check rows) followed by three 40-byte action tables
+and a trailing word. Nothing here needed the overlay changed, and it was left
+alone.
+
+Ruled out for the two zeros: `i = 0;` before the `dds3GetRandIntA` call, after
+it, and in a `for (i = 0, acc = 0; ...)` or `for (acc = 0, i = 0; ...)` init;
+a `while` with the increment written out; and an explicit `s32 *` cursor over
+`list` in place of the subscript, which costs two more words.

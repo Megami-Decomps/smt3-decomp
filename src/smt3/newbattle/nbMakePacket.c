@@ -113,7 +113,8 @@ typedef struct nbMainProcessData_t
     s16 press4_p;
     s16 pressturn;
     u16 stagemajor;
-    u8 unk_7E[0xA];
+    u8 unk_7E[0x6];
+    s32 unk_84;
     s32 eventno;
     s32 eventrid;
     s16 negopformindex;
@@ -401,7 +402,9 @@ typedef struct
     s8 esc;
     u8 unk_02[0x4];
     u16 id[11];
-    u8 unk_1C[0x8];
+    u8 unk_1C[0x6];
+    u8 unk_22;
+    u8 unk_23;
     u16 unk_24;
 } nbEncountForm_t;
 
@@ -521,7 +524,7 @@ extern nbActionProcessData_t *scrGetData(void);
 extern s32 scrGetIntPara(s32 no);
 extern void scrSetIntReturnValue(s32 value);
 extern void nbSetNormalSkill0(datUnitWork_t *work);
-extern void nbSetActionCommand(nbMainProcessData_t *data, s32 command);
+extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
 extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 type, s32 para);
 extern s32 nbGetSelectBit(nbMainProcessData_t *data);
 extern s32 nbAiChkJoken(nbActionProcessData_t *a, u32 joken);
@@ -586,6 +589,36 @@ extern char *pStr[];
 extern char *D_005263F8[];
 extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
 extern void nbDispMsgHelp(s32 meshandle, s32 mesid, s32 type);
+extern s32 D_00551500;
+extern u32 f;
+extern u8 D_005269D0[];
+extern u8 D_00526AC0[];
+extern u8 D_00526AD0[];
+extern u8 D_00526B48[];
+extern s32 rstCalcExpFromLevel(s32 kind, s32 level);
+extern void effBTLSetFieldColor(u32 color);
+/* One devil AI action: its weight, the skill it picks and the target rule. */
+typedef struct { u16 ritu; u16 skill; u32 target; } datDevilAITbl_t;
+extern u8 D_00398A08[];
+extern void ToMatrix(void);
+extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *form, nbFormation_t *target);
+extern u16 D_00575520[];
+extern u16 D_00575588[];
+extern u16 D_005755F0[];
+extern char D_005754E0[];
+extern char D_00575548[];
+extern char D_005755B0[];
+extern char D_005467C0[];
+extern char D_00546800[];
+extern char D_00546840[];
+extern f32 nbGetHojoRitu(s32 formindex, s32 type);
+extern char D_00544D30[];
+extern s32 sdfFloatToULong(f32 value);
+extern dds3Basic_t *D_005515B4;
+extern u8 test_skilllist[];
+extern u16 test_pskill[];
+extern void effBTLSkillSetFormationInfo(s32 invokeIndex, u32 targetBits);
+extern void effBTLSkillStart(s32 id, s32 param);
 extern void *sdfChipAllocDirect(u32 size);
 extern void sdfChipFreeDirect(void *ptr);
 extern void itfMesMngRequestMessageRelease(s32 handle, s32 mode);
@@ -611,7 +644,7 @@ extern f32 D_005514F8;
 extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
 extern void nbResetFormPosRot(nbFormation_t *form);
-extern void nbSetPartyFormation(s32 party, s32 flag);
+extern void nbSetPartyFormation(nbMainProcessData_t *data, s32 flag);
 extern void nbCopyFormation(void *data, s32 from, s32 to);
 extern void nbFormatFormation(nbMainProcessData_t *data, s32 index);
 extern void SetBossDummy(void);
@@ -729,7 +762,7 @@ extern s32 nbFindStockSkillError(void);
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                                s32 motion);
 extern void nbSetTargetProcess(s32 a, s32 b, s32 c, s32 d, s32 e);
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(s32 a, s32 b, s32 c, s32 d);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *source, void *position, void *rotation);
 extern void dds3EffectObjectBasicStatOn(dds3Basic_t *basic, u32 stat);
 extern u8 datModelParamTable[];
 extern u8 D_003494B0[];
@@ -907,6 +940,8 @@ extern void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *h, u32 endframe);
 extern void p2sdSetPcmBuffer(void *buf, u32 size);
 extern void datDebugPrintf(const char *format);
 extern char D_00545BC0[];
+extern char D_00545BD0[];
+extern char D_00545BE0[];
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 extern sdfVector4_t D_00527490;
 extern void *nbEncProcess3(dds3ProcessID_t *id);
@@ -936,6 +971,7 @@ extern s32 nbFindFreeFormSlot(void);
 extern u16 D_003E7028[];
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 extern s32 (*D_00527688[])(nbEventProcessData_t *e);
+extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 extern void nbCameraSetState(s32 state);
 extern void nbCameraBoss_Foru_E913_Set(void);
 extern void nbCameraBoss_Foru_E913_Run(void);
@@ -1994,9 +2030,63 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeUnitMovePacket);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoWorkPosPacket);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoBackPacket);
+/* NON_MATCHING: 2 of 65 words differ (first at +0x8C). */
+#ifdef NON_MATCHING
+s32 nbMakeNegoBackPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                         nbFormation_t *target)
+{
+    sdfVector4_t v;
+    sdfVector4_t pos;
+    sdfVector4_t dir;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoForwardPacket);
+    memset(&dir, 0, sizeof(dir));
+    dir.z = 1.0f;
+    SDF_VU0_LOADVECTOR(&target->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&dir);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&v);
+    nbMakeUnitMoveGetCyDist(form, target);
+    SDF_VU0_LOADVECTOR(&v);
+    SDF_VU0_SCALEVECTOR(form->r * form->scl);
+    SDF_VU0_LOADVECTOR_B(&form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    nbAddTargetMoveKoukaPacket(startframe, uniqueid, form->partyindex, &pos, 0.05f);
+    nbMakeUnitFadeOutPacket(startframe, uniqueid, form, 0, 4, 5, 5);
+    return 1;
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMakeNegoBackPacket);
+#endif
+
+s32 nbMakeNegoForwardPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                            nbFormation_t *target)
+{
+    sdfVector4_t v;
+    sdfVector4_t pos;
+    sdfVector4_t dir;
+    f32 dist;
+    f32 scale;
+
+    memset(&dir, 0, sizeof(dir));
+    dir.z = 1.0f;
+    SDF_VU0_LOADVECTOR(&target->rot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&dir);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&v);
+    dist = nbMakeUnitMoveGetCyDist(form, target);
+    SDF_VU0_LOADVECTOR(&v);
+    scale = target->r * target->scl + 100.0f + dist;
+    SDF_VU0_SCALEVECTOR(scale);
+    SDF_VU0_LOADVECTOR_B(&target->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_STOREVECTOR_NOMEM(&pos);
+    nbAddTargetMoveKoukaPacket(startframe, uniqueid, form->partyindex, &pos, 0.05f);
+    nbMakeUnitFadeInPacket(startframe, uniqueid, form, 0, 4, 5, 5);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetHitType);
 
@@ -2331,7 +2421,25 @@ s32 nbGetButuriKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMagicAttack);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMagicKaifuku);
+s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
+{
+    datUnitWork_t *swork;
+    datUnitWork_t *dwork;
+    char *fmt;
+    f32 ritu;
+    f32 v;
+    s32 base;
+    s32 ret;
+
+    swork = nbGetUnitWorkFromFormindex(sformindex);
+    dwork = nbGetUnitWorkFromFormindex(dformindex);
+    ritu = nbGetHojoRitu(sformindex, 5);
+    base = datGetParam(swork, 2) * 4 + swork->level + dds3GetRandIntA(0, 8);
+    v = (f32)base / 10.0f * (f32)waza;
+    fmt = D_00544D30;
+    printf(fmt, waza, sdfFloatToULong(ritu), ret = v * ritu);
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetMaxHpWazaPoint);
 
@@ -2339,7 +2447,35 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetVirtualAisyo);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetVirtualKoukaPoint);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckSkillCost);
+s32 nbCheckSkillCost(s32 formindex, s32 nskill)
+{
+    datUnitWork_t *work;
+    s32 costtype;
+    s32 ret;
+
+    ret = 0;
+    work = nbGetUnitWorkFromFormindex(formindex);
+    if (datSkillTable.normal[nskill].koukatype == 1 && (work->badstatus & 0xFFF) == 0x20) {
+        return 3;
+    }
+    if (datSkillTable.normal[nskill].flag & 4) {
+        return 0;
+    }
+    costtype = datSkillTable.normal[nskill].costtype;
+    switch (costtype) {
+    case 1:
+        if (datGetSkillCost(work, nskill) >= work->hp) {
+            ret = 1;
+        }
+        break;
+    case 2:
+        if (datGetSkillCost(work, nskill) > work->mp) {
+            ret = costtype;
+        }
+        break;
+    }
+    return ret;
+}
 
 s32 nbCheckSkillUse(s32 formindex, s32 nskill)
 {
@@ -7896,7 +8032,24 @@ void nbPnl_rsetTex1(s32 tex, s32 ctx)
     ot->regFunc(ot, list);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPnl_rsetTest);
+void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst)
+{
+    sdfDrawTag_t *list;
+    u64 *buff;
+    u64 *packet;
+    sdfGrOt_t *ot;
+
+    list = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    buff = sdfGrAllocPacketBuff(0x30);
+    packet = sdf2DMakeStdPacket(buff, 0x30);
+    packet[4] = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) |
+                (aref << 4) | (atst << 1) | ate;
+    packet[5] = 0x47;
+    sdfDrawTagLink(list, buff);
+    ot = &sdfGrOtTable[gnbPnlOtOfs];
+    ot->regFunc(ot, list);
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545230);
 
@@ -8409,7 +8562,58 @@ void DispHpMpBad(nbDebugWork_t *d)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SelectMenu);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SelectHpMp);
+s32 SelectHpMp(nbDebugWork_t *d)
+{
+    datUnitWork_t *work;
+    s32 delta;
+    s32 v;
+
+    work = nbGetUnitWorkFromFormindex(d->form->formindex);
+    delta = 0;
+    if (dds3PadButtonState[4] & 2) {
+        delta = -100;
+    }
+    if (dds3PadButtonState[5] & 2) {
+        delta = 100;
+    }
+    if (dds3PadButtonState[6] & 2) {
+        delta = -10;
+    }
+    if (dds3PadButtonState[7] & 2) {
+        delta = 10;
+    }
+    if ((s8)dds3PadButtonState[1] < 0) {
+        return 1;
+    }
+    if ((s8)dds3PadButtonState[3] < 0) {
+        return -1;
+    }
+    switch (d->unk_04) {
+    case 5:
+        v = work->hp;
+        v += delta;
+        if (v <= 0) {
+            v = 1;
+        }
+        if (v > work->maxhp) {
+            v = work->maxhp;
+        }
+        work->hp = v;
+        break;
+    case 6:
+        v = work->mp;
+        v += delta;
+        if (v < 0) {
+            v = 0;
+        }
+        if (v > work->maxmp) {
+            v = work->maxmp;
+        }
+        work->mp = v;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SelectBad);
 
@@ -9260,7 +9464,46 @@ s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbGetAiEntry);
 #endif
 
+/* NON_MATCHING: 2 of 70 words differ (first at +0xB8). */
+#ifdef NON_MATCHING
+s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
+{
+    s32 list[8];
+    datDevilAITbl_t *row;
+    s32 cnt;
+    s32 total;
+    s32 acc;
+    s32 r;
+    s32 i;
+
+    cnt = 0;
+    total = 0;
+    row = (datDevilAITbl_t *)(D_00398A08 + a->work->id * 164 + tbl * 40);
+    for (i = 0; i < 5; i++) {
+        if ((s8)a->unk_198[i] <= 0) {
+            list[cnt++] = i;
+            total += row[i].ritu;
+        }
+    }
+    if (cnt == 0) {
+        return -1;
+    }
+    if (total == 0) {
+        return -1;
+    }
+    r = dds3GetRandIntA(0, total);
+    acc = 0;
+    for (i = 0; i < cnt; i++) {
+        if (r < acc + row[list[i]].ritu) {
+            return list[i];
+        }
+        acc += row[list[i]].ritu;
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPickAiAction);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetKoudou);
 
@@ -9463,7 +9706,52 @@ void Sel_RND(nbActionProcessData_t *a)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetSingleTarget2);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetGroupTarget2);
+s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
+{
+    nbFormation_t *form;
+    s32 i;
+    s32 ret;
+
+    ret = 0;
+    switch (code) {
+    case 0:
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+        form = a->data->form;
+        for (i = 0; i < 16; i++) {
+            if (form->stat & 4) {
+                form->stat |= 8;
+            }
+            form++;
+        }
+        break;
+    default:
+        code = 0;
+        break;
+    }
+    for (i = 0; i < 16; i++) {
+        if (a->data->form[i].stat & 8) {
+            break;
+        }
+    }
+    if (i == 16) {
+        code = 0;
+        n = 0;
+    }
+    if (code == 0) {
+        ret = Sel_AI(a, n, 1);
+    }
+    return ret;
+}
 
 /* NON_MATCHING: 15 of 49 words differ (first at +0x3C). */
 #ifdef NON_MATCHING
@@ -10645,9 +10933,9 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetPartyFormation);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetEnemyFormation);
 
-void nbSetPlayerFormation(s32 party)
+void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group)
 {
-    nbSetPartyFormation(party, 0x100);
+    nbSetPartyFormation(data, 0x100);
 }
 
 void nbFormatFormation(nbMainProcessData_t *data, s32 index)
@@ -10737,13 +11025,58 @@ void nbClearActionFlags(nbMainProcessData_t *data)
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbClearActionFlags);
 #endif
 
+/* NON_MATCHING: 24 of 62 words differ (first at +0x5C). */
+#ifdef NON_MATCHING
+s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command)
+{
+    nbFormation_t *form;
+    s32 cnt;
+    s32 i;
+    s32 ret;
+
+    form = data->form;
+    ret = 0;
+    for (i = 4; i < 14; i++) {
+        form[i].stat &= ~0x800;
+    }
+    cnt = nbEncountFormTable[data->encno].unk_22;
+    if (data->unk_84 == 0) {
+        return 0;
+    }
+    if (cnt == 0) {
+        return 0;
+    }
+    for (i = 4; i < cnt + 4; i++) {
+        if ((form[i].stat & 1) == 0) {
+            form[i].stat |= 0x800;
+            if (command > 0) {
+                form[i].r = *(f32 *)(datModelParamTable + command * 784 + 0x10) *
+                            *(f32 *)(datModelParamTable + command * 784 + 0x18);
+            }
+            ret = 1;
+        }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetActionCommand);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetBossDummy);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetBattleDummy);
 
+/* NON_MATCHING: 13 of 14 words differ (first at +0x0). */
+#ifdef NON_MATCHING
+void nbInitPlayer(void)
+{
+    nbSetBattleDummy(D_00551500, &test_skilllist[0xF0], &test_skilllist[0x100], test_pskill,
+                     test_skilllist);
+    evtBitOn(0xC04);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitPlayer);
+#endif
 
 void DrawTest(void) {
 }
@@ -10752,7 +11085,39 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess5);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess4);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess8);
+void *TestProcess8(void)
+{
+    s32 i;
+    u8 *ai;
+
+    evtBitOn(0xC00);
+    evtBitOn(0xC01);
+    evtBitOff(0xC02);
+    evtBitOff(0xC03);
+    evtBitOff(0xC04);
+    evtBitOff(0xC05);
+    evtBitOn(0xC06);
+    evtBitOff(0xC07);
+    evtBitOn(0xC0A);
+    evtBitOn(0xC0C);
+    effBTLSetFieldColor(0);
+    evtBitOff(0xC0D);
+    evtBitOff(0xC10);
+    evtBitOff(0xC12);
+    evtBitOn(0xC0F);
+    evtBitOn(0xC11);
+    nbSetBattleDummy(D_00551500, D_00526AC0, D_00526AD0, D_00526B48, D_005269D0);
+    ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
+    ai = (u8 *)D_003989E0;
+    f = 0xC;
+    *(s16 *)(ai + 0x3C38) = 0;
+    *(s16 *)(ai + 0x3C62) = 0x62;
+    *(s16 *)(ai + 0x3C6A) = 0x62;
+    for (i = 0; i < 0xA0; i++) {
+        DDS3_GBWK->stocklist[i + 4] = 9;
+    }
+    return TestProcess1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess3);
 
@@ -10952,13 +11317,40 @@ s32 nbMemoryLoadNegoSe(nbFormation_t *form)
     return 1;
 }
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545B90);
+s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 index)
+{
+    nbMainProcessData_t *data;
+    s32 unitid;
+    s32 formindex;
+    void *buf;
+    u32 size;
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BA0);
-
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BC0);
-
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbMemoryLoadMotionSe);
+    data = nbGetMainProcessData();
+    if (index < 0) {
+        return 0;
+    }
+    unitid = nbGetUnitFromAction(form, index);
+    if (unitid == 0) {
+        return 0;
+    }
+    printf(D_00545BD0, unitid);
+    if (p2sdLoadCheckMidi(unitid) != 0) {
+        datDebugPrintf(D_00545BE0);
+        return 1;
+    }
+    formindex = nbFindFormIndex(nbGetUnitWorkFromAction(form));
+    if (formindex < 0) {
+        return 0;
+    }
+    buf = data->statwork[formindex].buf[index];
+    if (buf == NULL) {
+        return 0;
+    }
+    size = sdfMemGetSize(buf);
+    p2sdSetPcmBuffer(sdfMemLock(buf), size);
+    data->stat |= 0x200;
+    return 1;
+}
 
 void nbGetFormEntry(s32 id)
 {
@@ -10994,6 +11386,16 @@ nbStatWork_t *nbSetFormEntry(s32 id)
     stat->refcnt = 1;
     return stat;
 }
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545B90);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BA0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BC0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BD0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545BE0);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMidiFile);
 
@@ -11859,11 +12261,11 @@ nbEventProcessData_t *e;
     return NULL;
 }
 
-dds3Basic_t *nbCreateBasicEffect(s32 a, s32 b, s32 c, s32 d)
+dds3Basic_t *nbCreateBasicEffect(void *source, void *position, void *rotation)
 {
     dds3Basic_t *basic;
 
-    basic = dds3AddBEDEffectObjectBasic2(a, b, c, d);
+    basic = dds3AddBEDEffectObjectBasic2(source, position, rotation);
     dds3EffectObjectBasicStatOn(basic, 1);
     return basic;
 }
@@ -12155,7 +12557,32 @@ void nbDecodeModelPack(void *data, s32 size, s32 group, s32 id)
     mdlPackDecode(group, id, 0x101, data, size);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMotionData);
+void nbLoadMotionData(nbStatWork_t *stat, void *src, u32 size, s32 motion, s32 unitid)
+{
+    void **dst;
+    void *p;
+    s32 id;
+    s32 i;
+    s32 kind;
+
+    if (stat != NULL) {
+        if (evtBitCheck(0xC0F)) {
+            id = D_003E7028[unitid];
+        } else {
+            id = unitid;
+        }
+        dst = stat->buf;
+        for (i = 0; i < 26; i++) {
+            kind = nbGetMotionTable(id, i);
+            if (kind >= 0 && kind == motion) {
+                p = sdfMemAllocDirect(size);
+                memcpy(sdfMemLock(p), src, size);
+                *dst = p;
+            }
+            dst++;
+        }
+    }
+}
 
 void nbCopyPackData(nbMainProcessData_t *data, void *src, u32 size)
 {
@@ -12205,7 +12632,29 @@ s32 Wait1_nbE901(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetUp1);
+s32 SetUp1(nbEventProcessData_t *e)
+{
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    void *h;
+    dds3Basic_t *basic;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.y = -600.0f;
+    memset(&rot, 0, sizeof(rot));
+    rot.w = 1.0f;
+    h = evtInitMotionSeProcess(e->unk_04, 1);
+    basic = dds3SearchSceneBasic(dds3GetActiveScene(), h, 5);
+    D_005515B4 = basic;
+    pos.x = 0.0f;
+    pos.y = 85.0f;
+    pos.z = 0.0f;
+    dds3SetPosPoseSet(basic, &pos);
+    evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515B4), 0, 0, 0, 2);
+    bedbasic = nbCreateBasicEffect(evtGetResorceData(0x385, 2), &pos, &rot);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SyuGo);
 
@@ -12321,7 +12770,29 @@ s32 nbE901Process_1(dds3ProcessID_t *id)
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE901Process_1);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Pos1);
+s32 Pos1(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    nbFormation_t *p;
+    s32 i;
+
+    nbMoveFormation(e->data, nbGetEventForm(e)->formindex, 5);
+    nbSetActionCommand(e->data, 0x10D);
+    p = e->data->form + 4;
+    for (i = 0; i < 10; i++) {
+        if (p->stat & 0x800) {
+            p->stat |= 8;
+        }
+        p++;
+    }
+    form = nbGetEventForm();
+    nbAddMotionKoukaPacket(0, 0, form, 4);
+    effBTLSkillSetFormationInfo(form->formindex, 0);
+    effBTLSkillStart(0xE9, 0);
+    nbDispText(text1[0xE9], NULL, 0, 0x5A, 0x89FEFF80);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 s32 SetForm(nbEventProcessData_t *e)
 {
@@ -12369,7 +12840,26 @@ s32 Wait2(nbEventProcessData_t *e)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Hontai);
+s32 Hontai(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
+
+    for (i = 4; i < 8; i++) {
+        e->data->form[i].stat |= 0x1000;
+        dds3ObjectBaseOffFlag(e->data->form[i].basic, 0x400);
+    }
+    form = &e->data->form[dds3GetRandIntA(0, 4) + 4];
+    form->stat &= ~0x1000;
+    if (evtGetAgeOfMoon() == 8) {
+        dds3ObjectBaseOnFlag(form->basic, 0x400);
+        form->basic->poseset->r = 200.0f;
+    }
+    nbSetEnemyFormation(e->data);
+    nbGroupFormDispOn(1);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 s32 nbE902_End(nbEventProcessData_t *e)
 {
@@ -12539,9 +13029,52 @@ INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546570);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE904Process_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Model1Start);
+s32 Model1Start(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Model1Wait);
+    nbPanelAllHide();
+    form = nbGetEventForm();
+    evtSetUnitMotion(form->hunit, 0x10, 0xA, 0, 2);
+    for (i = 4; i < 9; i++) {
+        D_00575520[i] = e->data->party[form->partyindex].count[i];
+    }
+    nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x389, 1), 2, form);
+    if (evtBitCheck(0xC0F)) {
+        e->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x102);
+    } else {
+        sprintf(D_005754E0, D_005467C0, 0x102);
+        e->unk_1C = fileLoad(D_005754E0);
+    }
+    nbFreeEffectSlot(e);
+    return 0;
+}
+
+s32 Model1Wait(nbEventProcessData_t *e)
+{
+    switch (e->frame) {
+    case 1:
+        nbBgmFadeOut();
+        break;
+    case 0xAC:
+        dds3SetQuake(0x1E, 0x1F4);
+        break;
+    case 0xB9:
+        dds3SetQuake(0x1E, 0x1F4);
+        break;
+    }
+    if (e->frame >= 0xF0 && pacCheckEnd(e->unk_20) != 0) {
+        if (evtBitCheck(0xC0F) == 0) {
+            e->unk_24 = fileGetMemHandle(e->unk_1C);
+            fileHandleFree(e->unk_1C);
+            e->unk_1C = NULL;
+        }
+        nbAddFadeOutKoukaPacket(0, 0, 0xF, 1);
+        nbFreeEffectSlot(e);
+    }
+    return 0;
+}
 
 s32 Model1Wait_2(nbEventProcessData_t *e)
 {
@@ -12613,11 +13146,28 @@ s32 nbE906_End(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE906Process_1);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005467E0);
+s32 nbE907_Model1Start(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005467F0);
-
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE907_Model1Start);
+    nbPanelAllHide();
+    form = nbGetEventForm();
+    evtSetUnitMotion(form->hunit, 0x11, 0xA, 0, 2);
+    for (i = 4; i < 9; i++) {
+        D_00575588[i] = e->data->party[form->partyindex].count[i];
+    }
+    nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x38B, 1), 2, form);
+    if (evtBitCheck(0xC0F)) {
+        e->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x103);
+    } else {
+        sprintf(D_00575548, D_00546800, 0x103);
+        e->unk_1C = fileLoad(D_00575548);
+    }
+    nbBgmFadeOut();
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 s32 nbE907_Model1Wait(nbEventProcessData_t *e)
 {
@@ -12719,11 +13269,29 @@ s32 nbE908_End(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE908Process_1);
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546820);
+s32 nbE909_Model1Start(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
 
-INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546830);
-
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE909_Model1Start);
+    nbPanelAllHide();
+    nbSetOrderSide(0);
+    form = nbGetEventForm();
+    evtSetUnitMotion(form->hunit, 0x11, 0, 0, 2);
+    for (i = 4; i < 9; i++) {
+        D_005755F0[i] = e->data->party[form->partyindex].count[i];
+    }
+    nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x38D, 1), 2, form);
+    if (evtBitCheck(0xC0F)) {
+        e->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x108);
+    } else {
+        sprintf(D_005755B0, D_00546840, 0x108);
+        e->unk_1C = fileLoad(D_005755B0);
+    }
+    nbBgmFadeOut();
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 s32 nbE909_Model1Wait(nbEventProcessData_t *e)
 {
@@ -12823,7 +13391,25 @@ s32 nbE910Process_1(dds3ProcessID_t *id)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Effect1);
+s32 Effect1(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    nbFormation_t *p;
+
+    nbPanelAllShow();
+    form = nbGetEventForm();
+    evtSetUnitMotion(form->hunit, 0x10, 0, 0, 2);
+    p = e->data->form + 4;
+    nbAddUnitStock(e->data, 1, nbAppendEnemyDevilWork(e->data, 0x122, p->formindex), p->formindex);
+    nbInitUnitEffect(p, 0, 0);
+    p = e->data->form + 6;
+    nbAddUnitStock(e->data, 1, nbAppendEnemyDevilWork(e->data, 0x121, p->formindex), p->formindex);
+    nbInitUnitEffect(p, 0, 0);
+    nbAddSkillEffectKoukaPacket3(0, 1, evtGetResorceData(0x38F, 1), 2, form);
+    nbDispText(text1[0xE6], NULL, 0, 0x5A, 0x89FEFF80);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 s32 Wait1(nbEventProcessData_t *e)
 {
@@ -12980,7 +13566,58 @@ s32 nbE915_End(nbEventProcessData_t *e)
     return 0;
 }
 
+/* NON_MATCHING: 13 of 69 words differ (first at +0x38). */
+#ifdef NON_MATCHING
+s32 nbE915Process_1(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+
+    e = dds3GetProcessData(id);
+    if (D_00527698[e->step](e) != 0) {
+        return -1;
+    }
+    if (e->unk_08 == 0) {
+        nbCameraSetState(0x17);
+        nbSetEnemyFormation(e->data);
+        nbSetPlayerFormation(e->data, 0);
+    }
+    if (e->unk_08 < 0x6E) {
+        if (e->unk_08 == 0) {
+            nbCameraBoss_BSBERU_E915_Init();
+        }
+        nbCameraBoss_BSBERU_E915_0_Set();
+    } else if (e->unk_08 == 0x6E) {
+        nbCameraBoss_BSBERU_E915_1_Set();
+    } else if (e->unk_08 >= 0xFA) {
+        if (e->unk_08 == 0xFA) {
+            nbFormDispOff2(nbGetEventForm());
+            nbCameraBoss_BSBERU_E915_Init();
+        }
+        nbCameraBoss_BSBERU_E915_2_Set();
+    }
+    if (e->unk_08 == 0) {
+        effBTLSkillStart(0x203, 0);
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbE915Process_1);
+#endif
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005467C0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005467E0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_005467F0);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546800);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546820);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546830);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546840);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00546860);
 

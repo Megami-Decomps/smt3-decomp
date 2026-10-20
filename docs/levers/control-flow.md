@@ -199,3 +199,5 @@ end marked, so expect the body to sit one word early.
   call(); return 0;` is retail's, worth 49 words here. The same inversion did
   not work on the three-way `mode` dispatch in the same function, where a
   `switch` is what places both arms out of line.
+| `beq` against zero, then `bltz`, then `slti` on one value, where your `if` chain folds to a single `sltiu` | a `switch` with an **empty `case 0:`**, the real range as contiguous `case` labels, and the out-of-range work in `default:`. `SetGroupTarget2` guards its marking loop on `1 <= code <= 10` and zeroes `code` otherwise: as `if (code == 0) {} else if (code < 0) { code = 0; } else if (code >= 11) { code = 0; } else { loop }` it is 29 of 56 words out, and as `case 0: break;` plus `case 1:`..`case 10:` plus `default: code = 0;` it is exact. The empty zero case is what keeps the `beq` separate; the value `0` needing no work and the default needing some is exactly what the switch expresses and the chain does not |
+

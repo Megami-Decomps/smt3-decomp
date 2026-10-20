@@ -1618,6 +1618,26 @@
   is gcc re-truncating the CSE'd load, and `*pa`/`*pb` at every use is exact
   where any `sb` local is 12 of 20 words out. Both were parked on this for
   longer than they needed to be.
+- Operand order in an `addu` that sums a reloaded base with a scaled index
+  follows whether the row is a named pointer or written out at every use. In a
+  loop whose body calls, so the base is reloaded each iteration, retail's
+  `addu $3, $17, $3` puts the offset induction variable first;
+  `p = &e->data->form[i];` with `p->` uses gives `addu $3, $3, $17` with the
+  operands the other way round, and so do `e->data->form + i`,
+  `i + e->data->form` and `&(e->data->form)[i]`. Writing the deref out twice,
+  `e->data->form[i].stat |= 0x1000;` then
+  `f(e->data->form[i].basic, ...)`, is what gives retail's order. `Hontai`
+  went from 1 of 61 differing words to exact on that one line, and the same
+  rewrite as a `while` or `do`/`while` keeps the wrong order.
+- A format string reaching `printf` as a local gets its own callee-saved
+  register and a copy, where the array name written at the call is
+  materialised straight into `$4`. Retail's `lui $17, %hi(fmt)` hoisted above
+  three calls, its `addiu $17, $17, %lo(fmt)` far below, and
+  `daddu $4, $17, $0` at the call is the tell. `nbGetMagicKaifuku` needed
+  `fmt = D_00544D30;` as its own statement right before the call; the array
+  name inline, `&D_00544D30[0]`, and a `char *fmt = D_00544D30;` initialiser
+  at the top of the function (which hoists the whole address, not just the
+  `lui`) are each one word out or worse.
 
 - **A 4-byte tail on an inline block copy is `lw`/`sw` only when both pointer
   expressions are known 4-byte aligned, so a `void *` parameter is what forces
