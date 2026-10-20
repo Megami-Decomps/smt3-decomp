@@ -59,6 +59,11 @@
             "\t.include \"" ASM_ROOT FOLDER "/" #NAME ".s\"\n" \
             ".section .text\n")
 
+/* Raise this unit's .text alignment to 2^N, for a unit whose original object
+ * was aligned more strictly than its own code needs. The retail link pads up
+ * to it, so dropping the request moves everything after the unit. */
+#define TEXT_ALIGN(N) __asm__(".section .text\n\t.align " #N "\n")
+
 __asm__(".include \"macro.inc\"\n");
 
 #else
@@ -66,6 +71,7 @@ __asm__(".include \"macro.inc\"\n");
 #define INCLUDE_ASM(TYPE, FOLDER, NAME)
 #define INCLUDE_RODATA(TYPE, FOLDER, NAME)
 #define INCLUDE_SDATA(TYPE, FOLDER, NAME)
+#define TEXT_ALIGN(N)
 
 #endif
 
