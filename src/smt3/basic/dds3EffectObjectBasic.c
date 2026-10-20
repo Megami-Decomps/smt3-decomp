@@ -633,8 +633,7 @@ dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, s3
 {
     void *bill;
 
-    printf("LoadFile:%s
-", path);
+    printf("LoadFile:%s\n", path);
     bill = dds3BillboardFileLoad(0, path);
     return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }

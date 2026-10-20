@@ -411,18 +411,15 @@ void partsDel(tagpipeParts *pParts)
     case 1:
     case 3:
         mymdlDelObject(&PipeLine[pParts->mdl]);
-        DEBUG_PRINT("-----PipeLine %d DEL OBJECT
-", pParts->mdl);
+        DEBUG_PRINT("-----PipeLine %d DEL OBJECT\n", pParts->mdl);
         break;
     case 2:
         mymdlDelObject(&PipeCur[pParts->mdl]);
-        DEBUG_PRINT("-----PipeCur %d DEL OBJECT
-", pParts->mdl);
+        DEBUG_PRINT("-----PipeCur %d DEL OBJECT\n", pParts->mdl);
         break;
     case 4:
         mymdlDelObject(&PipeCur2[pParts->mdl]);
-        DEBUG_PRINT("-----PipeCur2 %d DEL OBJECT
-", pParts->mdl);
+        DEBUG_PRINT("-----PipeCur2 %d DEL OBJECT\n", pParts->mdl);
         break;
     }
     pParts->id = -1;
@@ -473,8 +470,4 @@ s32 texRelease(tagPipeTexture *texPtr)
     }
     return 1;
 }
-
-
-
-
 

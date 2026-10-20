@@ -325,8 +325,7 @@ void dds3BillboardManagerInit(void) {
         } while (work != NULL);
     }
     pacFileHandleFree_(request);
-    printf("billManager:[%s]
-", "/bill/billtmx.LB");
+    printf("billManager:[%s]\n", "/bill/billtmx.LB");
 }
 #else
 INCLUDE_ASM(const s32, "effect/billManager", dds3BillboardManagerInit);
@@ -965,16 +964,13 @@ BillData *dds3BillAnimLoadP2A(void *resourceData) {
             u32 frameCount = entry->frameCount;
 
             block->entryCount = frameCount;
-            printf("billAnim no[%d][%d]...PLURAL
-", i, frameCount);
+            printf("billAnim no[%d][%d]...PLURAL\n", i, frameCount);
         } else if (entry->entryModeFlags & 0x40) {
             block->entryCount = 2;
-            printf("billAnim no[%d][%d]...MTEX
-", i, 2);
+            printf("billAnim no[%d][%d]...MTEX\n", i, 2);
         } else if (entry->entryModeFlags & 0x80) {
             block->entryCount = 2;
-            printf("billAnim no[%d][%d]...AMTEX
-", i, 2);
+            printf("billAnim no[%d][%d]...AMTEX\n", i, 2);
         }
     }
     return block;
@@ -1020,8 +1016,7 @@ billObj_t *dds3BillboardFileLoad(s32 index, const char *name) {
     u32 data;
     billObj_t *obj;
 
-    printf("BillManager Load...[%s]
-", name);
+    printf("BillManager Load...[%s]\n", name);
     allocation = sdfDevLoadFileEx(name, &data, 0);
     obj = dds3BillboardCreate(index, data);
     sdfMemFreeDirect(allocation);

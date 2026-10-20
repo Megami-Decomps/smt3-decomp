@@ -1227,8 +1227,7 @@ void fclCombineTexFree(void)
     for (i = 0; i < 7U; i++) {
         sdfTexFree(CMB_GBWK->texHandle[i]);
     }
-    printf("COMBINE : Tex free.
-");
+    printf("COMBINE : Tex free.\n");
 }
 
 void fclCombineSetTable(void)
@@ -2232,6 +2231,9 @@ extern void mdlGetFilebase(s32 kind, u16 id, char *out, s32 size);
 extern s32 sprintf(char *out, const char *fmt, ...);
 extern char D_0053CD68[];
 
+/* Called above its definition, where ee-gcc assumed int. */
+void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
+
 s32 cmbMakeModelPath(u16 id, s32 *size)
 {
     char path[0x80];
@@ -2393,6 +2395,9 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbLoadTargetModel);
 
 extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
 extern evtUnit_t *evtGetUnitHandle2(void *obj);
+
+/* Called above its definition, where ee-gcc assumed int. */
+void *dds3GetActiveScene(void);
 
 s32 cmbFindUnitScene(void *work)
 {
@@ -4440,8 +4445,7 @@ void fclTerminalLoadTextures(void *work)
         *tex = fclLoadTexture(D_00330808[i]);
         tex++;
     }
-    printf("TERMINAL : Tex load.
-");
+    printf("TERMINAL : Tex load.\n");
 }
 #else
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalLoadTextures);
@@ -4456,8 +4460,7 @@ void fclTerminalFreeTextures(void *work)
     for (i = 0; i < 1U; i++) {
         sdfTexFree(tex[i]);
     }
-    printf("TERMINAL : Tex free.
-");
+    printf("TERMINAL : Tex free.\n");
 }
 
 extern void fclTerminalScanCommands(void *work);
@@ -5016,6 +5019,9 @@ void func_002134F8(u8 *base, u8 mask, s32 index)
     base[index + 0x59] &= ~mask;
 }
 
+/* Called above its definition, where ee-gcc assumed int. */
+s32 cmpMoveCursor(cmpCursorWork_t *cursor, s8 dir);
+
 void lstMoveCursor(lstWork_t *work, s8 dir)
 {
     s32 first;
@@ -5036,6 +5042,9 @@ void lstMoveCursor(lstWork_t *work, s8 dir)
         }
     }
 }
+
+/* Called above its definition, where ee-gcc assumed int. */
+s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
 
 void lstMoveCursor2(lstWork_t *work, s8 dir)
 {
@@ -6132,10 +6141,8 @@ s32 fclEncycRegist2(fclencyceelem_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
-            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
             return -1;
         }
         known = 0;
@@ -6167,10 +6174,8 @@ s32 fclEncycRegist(fclencyceelem_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
-            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
             return -1;
         }
         known = 0;
@@ -6663,6 +6668,9 @@ s32 CalcFadeAlpha(s16 *alpha, s32 up, s32 limit, s32 step)
 
 
 INCLUDE_ASM(const s32, "code_001FAE80", CalcListElemColor);
+
+/* Called above its definition, where ee-gcc assumed int. */
+u16 cmpGetStatusModelId(void);
 
 void RequestModelLoad(fclEncyc_instance_t *work, s32 id)
 {
@@ -7301,6 +7309,15 @@ void func_002215B8(void) {
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstFindRegisteredDevil);
+
+/* Called above its definition, where ee-gcc assumed int. */
+s32 datGetDevilSlotState(u8 devilId);
+
+/* Called above its definition, where ee-gcc assumed int. */
+/* Called above its definition, where ee-gcc assumed int. */
+s32 datDevilIsRegistered(u8 devilId);
+
+s8 datGetDevilSlotIndex(u8 devilId);
 
 s32 rstFindDevilSlot(void)
 {
@@ -9587,6 +9604,9 @@ extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 
 /* NON_MATCHING: 12 of 32 words differ (first at +0x50). */
 #ifdef NON_MATCHING
+/* Called above its definition, where ee-gcc assumed int. */
+s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
+
 void cmpSetIniStockRecoverEff(u8 *work)
 {
     s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
@@ -9698,6 +9718,9 @@ s32 cmpGetSelectSkillID(void)
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUseSkill);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpChkDoNotUseSkill);
+
+/* Called above its definition, where ee-gcc assumed int. */
+s8 cmpStartStockMsg(s8 flag);
 
 s32 cmpItemIsStockFull(u16 id)
 {
@@ -12359,7 +12382,7 @@ s8 cmpGetCursorRow(cmpCursorWork_t *cursor)
     return cursor->unk_04;
 }
 
-extern void cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
+extern s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
 
 void cmpMoveStockCursor(s8 index, s8 dir, u8 *base)
 {

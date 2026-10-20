@@ -56,8 +56,7 @@ void EndPipe(void)
 
     pipeEndSection();
     dds3KillProcessName("PipeMain", shutdown);
-    DEBUG_PRINT("END PIPE
-");
+    DEBUG_PRINT("END PIPE\n");
     shutdown = 0;
 }
 

@@ -97,12 +97,10 @@ void func_0029B7B8(void) {
 s32 dds3ConfigChanged(void)
 {
     if (dds3ConfigValue[0] != dds3ConfigValue[1]) {
-        printf("Cfg change!
-");
+        printf("Cfg change!\n");
         return 1;
     }
-    printf("Cfg no change!
-");
+    printf("Cfg no change!\n");
     return 0;
 }
 

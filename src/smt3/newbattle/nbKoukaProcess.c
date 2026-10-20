@@ -571,8 +571,7 @@ void RunHatudoEffectEndKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 void RunSkillEffectKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
 {
     if (p->cuteff == NULL) {
-        printf("cutcreate 3
-");
+        printf("cutcreate 3\n");
         p->cuteff = effBTLCutCreate(p->data1.p, p->data2.us[0], p->form, p->data2.s[1]);
         return;
     }
@@ -981,12 +980,10 @@ void RunSeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         break;
     case SE2:
         if (ok != 0) {
-            datDebugPrintf("se2 [%08X] play!
-", se);
+            datDebugPrintf("se2 [%08X] play!\n", se);
             p2sdPlaySE(se, 0x7F, 0x3F);
         } else {
-            datDebugPrintf("se2 [%08X] chk err
-", se);
+            datDebugPrintf("se2 [%08X] chk err\n", se);
         }
         break;
     case SELOCK:

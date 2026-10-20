@@ -65,8 +65,7 @@ s32 sceneconstructor(dds3Basic_t *scene)
         list++;
     }
     scene->workdata = work;
-    printf("Scene constructor!
-");
+    printf("Scene constructor!\n");
     return 1;
 }
 
@@ -88,8 +87,7 @@ void scenedestructor(dds3Basic_t *scene)
         dds3SceneBasicReleaseScriptFile(scene);
         sdfChipFreeDirect(work);
     }
-    printf("Scene destructor!
-");
+    printf("Scene destructor!\n");
 }
 
 /* Preserve the next link across callbacks that can delete their own basic. */
@@ -314,8 +312,7 @@ s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
     if (name == NULL) {
         return 0;
     }
-    printf("script %s
-", name);
+    printf("script %s\n", name);
     if (work->scriptHandle != NULL) {
         dds3SceneBasicReleaseScriptFile(scene);
     }
@@ -368,19 +365,16 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *name)
     s32 procedure;
 
     if (script == NULL) {
-        printf("script data invalid!!
-");
+        printf("script data invalid!!\n");
         return 0;
     }
     if (name == NULL) {
-        printf("script null name %s
-", name);
+        printf("script null name %s\n", name);
         return 0;
     }
     procedure = scrSearchProcedureName(script, name);
     if (procedure < 0) {
-        printf("script procname invalid [%s]
-", name);
+        printf("script procname invalid [%s]\n", name);
         return 0;
     }
     if (dds3SearchProcessName(name) != NULL) {
