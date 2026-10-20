@@ -1695,12 +1695,10 @@ s32 evtMakeViewerPath(s32 kind)
         }
     }
     if (sdfHddValid) {
-        printf("hdd -> %s
-", path);
+        printf("hdd -> %s\n", path);
         fd = sceOpen(path, 0x602, 0x1B6);
     } else {
-        printf("pc -> %s
-", path);
+        printf("pc -> %s\n", path);
         fd = sceOpen(path, 0x602);
     }
     if (fd < 0) {

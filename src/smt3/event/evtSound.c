@@ -78,8 +78,7 @@ s32 evtPlayEventBgm(s32 eventId, s32 variation)
         return 0;
     }
     soundIndex = evtGetSoundIndex(eventId, variation);
-    printf("Event BGM play :%08X
-", soundIndex);
+    printf("Event BGM play :%08X\n", soundIndex);
     p2sdPlayBGM(soundIndex);
     return soundIndex;
 }
@@ -95,8 +94,7 @@ void evtTransEventBgm(s32 eventId, s32 variation)
     if (variation >= 0) {
         soundIndex = evtGetSoundIndex(eventId, variation);
     }
-    printf("Event BGM trans :%08X
-", soundIndex);
+    printf("Event BGM trans :%08X\n", soundIndex);
     p2sdSetBgmTrack(soundIndex);
 }
 
@@ -108,8 +106,7 @@ s32 evtFadeInEventBgm(s32 eventId, s32 variation)
         return 0;
     }
     soundIndex = evtGetSoundIndex(eventId, variation);
-    printf("Event BGM fade in play :%08X
-", soundIndex);
+    printf("Event BGM fade in play :%08X\n", soundIndex);
     p2sdPlayBGMFade(soundIndex);
     return soundIndex;
 }

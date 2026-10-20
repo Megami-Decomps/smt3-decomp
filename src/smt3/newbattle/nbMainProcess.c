@@ -419,8 +419,7 @@ void CheckSenseiOrBackAttack(nbMainProcessData_t *data)
         data->stat |= 0x80;
         if (nbCheckBackAttack(data)) {
             data->stat |= 0x10;
-            printf("backattack!!
-");
+            printf("backattack!!\n");
         }
         data->stat |= 8;
     }
@@ -1289,12 +1288,9 @@ void SetFlag(nbMainProcessData_t *data)
     s32 encno;
     s32 flag;
 
-    printf("encpackno = %d
-", data->encpackno);
-    printf("packno = %d
-", data->packno);
-    printf("packindex = %d
-", data->packindex);
+    printf("encpackno = %d\n", data->encpackno);
+    printf("packno = %d\n", data->packno);
+    printf("packindex = %d\n", data->packindex);
     printf(D_00543540, data->encno);
     encno = data->encno;
     if (encno == 0xC7) {
@@ -1317,12 +1313,9 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     data->packindex = packindex;
     data->encno = encno;
     data->formationtype = nbEncountFormTable[encno].formtype;
-    printf("encpackno = %d
-", data->encpackno);
-    printf("packno = %d
-", data->packno);
-    printf("packindex = %d
-", data->packindex);
+    printf("encpackno = %d\n", data->encpackno);
+    printf("packno = %d\n", data->packno);
+    printf("packindex = %d\n", data->packindex);
     printf(D_00543540, data->encno);
     printf(D_00543550, data->formationtype);
     data->unk7C = stagemajor;

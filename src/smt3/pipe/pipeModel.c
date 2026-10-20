@@ -65,8 +65,7 @@ s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize)
             return i;
         }
     }
-    DEBUG_PRINT("i %d NO OBJECT
-", i);
+    DEBUG_PRINT("i %d NO OBJECT\n", i);
     return -1;
 }
 

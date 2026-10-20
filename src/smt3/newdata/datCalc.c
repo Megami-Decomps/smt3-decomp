@@ -1183,11 +1183,9 @@ void datCopyDevilWork(s32 id, datUnitWork_t *work)
     work->maxmp = datGetMaxMp(work);
     work->mp = work->maxmp;
     work->skillcnt = cnt;
-    printf("YAMI-B Lv:%d
-", work->level);
+    printf("YAMI-B Lv:%d\n", work->level);
     work->exp = datCopyDevilWorkEntry(work, work->level);
-    printf("YAMI-B Exp:%d
-", work->exp);
+    printf("YAMI-B Exp:%d\n", work->exp);
     fclEncycRegist(work, 0);
 }
 

@@ -189,8 +189,7 @@ effBTL_t *effBTLCreate(void *data) {
     effBTLPartCreate(work, data);
     work->active = 0;
     work->cutList = NULL;
-    printf("effBTL:handle create
-");
+    printf("effBTL:handle create\n");
     return work;
 }
 
@@ -206,8 +205,7 @@ void effBTLDelete(effBTL_t *work) {
     }
     effBTLPartDelete(work);
     sdfMemFreeDirect(work->resource);
-    printf("effBTL:handle delete
-");
+    printf("effBTL:handle delete\n");
 }
 
 s32 effBTLGetMotionChangeFrame(effBTL_t *handle, u16 kind) {
@@ -291,8 +289,7 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 fla
         } while (remaining != 0);
     }
     cut->currentFrame = 0;
-    printf("effBTL:cut %d handle create(%p)[%d]
-", cut->kind, cut->state, cut->state->active);
+    printf("effBTL:cut %d handle create(%p)[%d]\n", cut->kind, cut->state, cut->state->active);
     cut->state->active++;
     return cut;
 }
@@ -633,8 +630,7 @@ void effBTLSkillInit(void) {
     memset(&D_005698E0, 0, sizeof(D_005698E0));
     effBTLSkillRun = 0;
     effBTLSkillState = 0;
-    printf("effBTLSkillInit 
-");
+    printf("effBTLSkillInit \n");
 }
 
 void effBTLSkillStart(u32 id, u32 stat) {
@@ -652,10 +648,8 @@ void effBTLSkillStart(u32 id, u32 stat) {
     effBTLSkillSetActive();
     effBTLCutReset();
     effBTLSkillRun = 1;
-    printf("effBTL:Set Stat[%X]
-", stat);
-    printf("effBTL:Skill Start[%X]
-", id);
+    printf("effBTL:Set Stat[%X]\n", stat);
+    printf("effBTL:Skill Start[%X]\n", id);
 }
 
 void effBTLSkillEnd(void) {
@@ -667,8 +661,7 @@ void effBTLSkillEnd(void) {
     effBTLSkillClearActive();
     effBTLPartPtrResetAllModelCenterOffset();
     effBTLSkillRun = 0;
-    printf("effBTL:Skill End
-");
+    printf("effBTL:Skill End\n");
 }
 
 void effBTLSkillSetFormationInfo(s32 formIndex, u32 targetBit) {
@@ -693,8 +686,7 @@ void effBTLSkillSetFormationInfo(s32 formIndex, u32 targetBit) {
         form++;
     }
     D_005698E0.targetNumber = count;
-    printf("effBTL:Skill Set Formation Info
-");
+    printf("effBTL:Skill Set Formation Info\n");
 }
 
 nbFormation_t *effBTLSkillGetInvokeFormation(void) {
@@ -702,8 +694,7 @@ nbFormation_t *effBTLSkillGetInvokeFormation(void) {
 
     if (D_005698E0.invokeForm == NULL) {
         data = nbGetMainProcessData();
-        printf("effBTL:InvokeForm == NULL ****** !!
-");
+        printf("effBTL:InvokeForm == NULL ****** !!\n");
         return data->form;
     }
     return D_005698E0.invokeForm;
@@ -720,8 +711,7 @@ u32 effBTLSkillGetInvokeParty(void) {
 
 nbFormation_t *effBTLSkillGetTargetFormation(s32 number) {
     if (D_005698E0.targetNumber == 0) {
-        printf("error: effBTLSkillInfo.target_number == 0
-");
+        printf("error: effBTLSkillInfo.target_number == 0\n");
         return D_005698E0.invokeForm;
     }
     return D_005698E0.targetForm[number];
@@ -750,8 +740,7 @@ s32 effBTLSkillCheckRun(void) {
 
 void effBTLSkillSetState(s32 state) {
     effBTLSkillState = state;
-    printf("effBTL:Set Stat[%X]
-", state);
+    printf("effBTL:Set Stat[%X]\n", state);
 }
 
 s32 effBTLSkillGetState(void) {
@@ -790,8 +779,7 @@ void effBTLFieldColorON(u32 id) {
         SDF_VU0_LOADVECTOR_B_MEMOPS(work);
         SDF_VU0_MULVECTOR();
         SDF_VU0_STOREVECTOR_MEMOPS(work);
-        format = "FieldColor:%f,%f,%f(%f,%f,%f)
-";
+        format = "FieldColor:%f,%f,%f(%f,%f,%f)\n";
         ar = sdfFloatToULong(work.r);
         ag = sdfFloatToULong(work.g);
         ab = sdfFloatToULong(work.b);
@@ -1026,8 +1014,7 @@ void effBTLFieldColorGetBaseColor(void) {
     major = data->unk7C - 0xC8;
     minor = data->unk7E;
     if ((u16)major >= 0x28 || minor <= 0 || minor >= 0xB) {
-        printf("effBTLFieldColorGetBaseColor:DummyColorLoad
-");
+        printf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
         SDF_VU0_LOADVECTOR(D_0031B8F0);
         return;
     }

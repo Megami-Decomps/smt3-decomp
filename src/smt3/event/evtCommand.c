@@ -1228,8 +1228,7 @@ u32 evtCommand_EFFBED_START(void)
     if (basic != NULL) {
         entry = scrGetIntPara(1);
         if (entry >= 3U) {
-            datDebugPrintf("error EFFBED_START cut no over = %d
-", entry);
+            datDebugPrintf("error EFFBED_START cut no over = %d\n", entry);
             return 1;
         } else {
             dds3StartBEDEffectObjectBasic(basic, entry);
@@ -1263,8 +1262,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
         s32 entryId = scrGetIntPara(1);
         s32 modelRecordIndex;
         if ((u32)entryId >= 3) {
-            datDebugPrintf("error EFFBED_START cut no over = %d
-", entryId);
+            datDebugPrintf("error EFFBED_START cut no over = %d\n", entryId);
             return 1;
         }
         dds3StartBEDEffectObjectBasic(unit, entryId);

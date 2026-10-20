@@ -1227,8 +1227,7 @@ void fclCombineTexFree(void)
     for (i = 0; i < 7U; i++) {
         sdfTexFree(CMB_GBWK->texHandle[i]);
     }
-    printf("COMBINE : Tex free.
-");
+    printf("COMBINE : Tex free.\n");
 }
 
 void fclCombineSetTable(void)
@@ -4440,8 +4439,7 @@ void fclTerminalLoadTextures(void *work)
         *tex = fclLoadTexture(D_00330808[i]);
         tex++;
     }
-    printf("TERMINAL : Tex load.
-");
+    printf("TERMINAL : Tex load.\n");
 }
 #else
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalLoadTextures);
@@ -4456,8 +4454,7 @@ void fclTerminalFreeTextures(void *work)
     for (i = 0; i < 1U; i++) {
         sdfTexFree(tex[i]);
     }
-    printf("TERMINAL : Tex free.
-");
+    printf("TERMINAL : Tex free.\n");
 }
 
 extern void fclTerminalScanCommands(void *work);
@@ -6132,10 +6129,8 @@ s32 fclEncycRegist2(fclencyceelem_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
-            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
             return -1;
         }
         known = 0;
@@ -6167,10 +6162,8 @@ s32 fclEncycRegist(fclencyceelem_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
-            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
             return -1;
         }
         known = 0;

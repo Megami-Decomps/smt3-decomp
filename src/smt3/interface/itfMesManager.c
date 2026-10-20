@@ -864,8 +864,7 @@ s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     mes->table = table;
     mes->tableCount = table->count;
     if (table->count == 0) {
-        printf("itfMesMngRequestMessage() escape 1
-");
+        printf("itfMesMngRequestMessage() escape 1\n");
         return 0;
     }
     CommitVarTable((s32 *)panel->variables.addresses);
@@ -958,8 +957,7 @@ void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
 
     entry = GetTypeHeader(panel, entryIndex);
     if (entry->itemList != (u32 *)1) {
-        printf("itfMesMngRequestSelect() - Invalid Type : %d
-", entry->itemList);
+        printf("itfMesMngRequestSelect() - Invalid Type : %d\n", entry->itemList);
     }
     if (sel->glyphChain != NULL) {
         frDestroyFontRequestAfter(sel->glyphChain);

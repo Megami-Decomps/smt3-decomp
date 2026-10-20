@@ -1425,8 +1425,7 @@ nbKoukaPacket_t *nbAddHitEffKoukaPacket(s32 startframe, s32 uniqueid, nbFormatio
     }
     p->data2.p = effBTLSystemCreate(form, sysid);
     p->framelength = effBTLSystemGetLength(p->data2.p);
-    printf("length = %d
-", p->framelength);
+    printf("length = %d\n", p->framelength);
     if (seid != 0) {
         nbAddSePacket(startframe, uniqueid, seid);
     }
@@ -6998,8 +6997,7 @@ s32 Flow11_4(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0xB0006);
     nbAddNegoIdKouho(n, 0xB0005);
     nbPanelPartyHide();
-    printf("pwork hp = %d
-", n->pwork->hp);
+    printf("pwork hp = %d\n", n->pwork->hp);
     if (n->pwork->hp == 0) {
         n->nextnegoid = n->nextkouho[1];
     } else {
@@ -8271,8 +8269,7 @@ void nbPanelPressGaugeStart(void)
 
 void nbPanelPressGaugeReset(void)
 {
-    printf("nbPanelPressGaugeReset
-");
+    printf("nbPanelPressGaugeReset\n");
     nbPanelPressGaugeStart();
     nbPanelPressTurnGaugeAnimStart2();
     nbPanelPressTurnOmit();
@@ -8343,8 +8340,7 @@ void nbPanelPressTurnOmit(void)
 
 void nbPanelPressTurnStart(void)
 {
-    printf("nbPanelPressTurnStart
-");
+    printf("nbPanelPressTurnStart\n");
     nbGetMainProcessData();
     if (nbPanelPTOmit == 0) {
         nbPanelPT_1_Process = 1;
