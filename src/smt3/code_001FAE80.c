@@ -4320,7 +4320,6 @@ INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalDumpJump);
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalResetCommands);
 
 extern char *D_00330808[];
-extern char D_0053D5E8[];
 
 /* NON_MATCHING: 16 of 27 words match, 108 bytes against retail's 112; the `u8`
  * counter normalizes with `andi 0xff` where retail has sll 24 / sra 24. */
@@ -4334,13 +4333,13 @@ void fclTerminalLoadTextures(void *work)
         *tex = fclLoadTexture(D_00330808[i]);
         tex++;
     }
-    printf(D_0053D5E8);
+    printf("TERMINAL : Tex load.
+");
 }
 #else
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalLoadTextures);
 #endif
 
-extern char D_0053D600[];
 
 void fclTerminalFreeTextures(void *work)
 {
@@ -4350,7 +4349,8 @@ void fclTerminalFreeTextures(void *work)
     for (i = 0; i < 1U; i++) {
         sdfTexFree(tex[i]);
     }
-    printf(D_0053D600);
+    printf("TERMINAL : Tex free.
+");
 }
 
 extern void fclTerminalScanCommands(void *work);
@@ -4366,7 +4366,6 @@ void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work)
     fclTerminalInitList((u8 *)work + 0x1058, work->unk_2215, work->texHandle[0]);
 }
 
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D600);
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclAllocTerminalWork);
 
@@ -5994,7 +5993,6 @@ extern void SetElem2(fclEncycEntry_t *dst, fclEncycEntry_t *src);
 extern s32 datDebugPrintf(const char *fmt, ...);
 extern s32 evtBitOn(s32 bit);
 extern s32 evtBitOff(s32 bit);
-extern char D_0053D7E8[];
 
 s32 fclEncycRegist2(fclEncycEntry_t *entry, s32 store)
 {
@@ -6007,8 +6005,10 @@ s32 fclEncycRegist2(fclEncycEntry_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf(D_0053D7E8);
-            datDebugPrintf(D_0053D7E8);
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
+");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
+");
             return -1;
         }
         known = 0;
@@ -6040,8 +6040,10 @@ s32 fclEncycRegist(fclEncycEntry_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf(D_0053D7E8);
-            datDebugPrintf(D_0053D7E8);
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
+");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
+");
             return -1;
         }
         known = 0;
@@ -6659,8 +6661,6 @@ void ReleaseDebug_fclEncyc(void)
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", DebugProcMenu_fclEncyc);
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D7E8);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D828);
 
@@ -9285,6 +9285,10 @@ void dds3ClearStockTable(void)
     for (i = 0xF; i >= 0; i--, stock++) {
         stock->flag = 0;
     }
+    /* The u8 * base is load-bearing: it gets one $gp load for both stores,
+     * where DDS3_GBWK-> per statement reloads it. +0x1924 is stocklist, whose
+     * first four bytes this clears as a word; the IDB has only unk2644 for
+     * +0xA54. */
     gbwk = (u8 *)DDS3_GBWK;
     *(s32 *)(gbwk + 0x1924) = 1;
     *(u32 *)(gbwk + 0xA54) |= 7;

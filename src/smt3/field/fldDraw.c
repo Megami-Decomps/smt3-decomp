@@ -4900,7 +4900,6 @@ typedef struct {
 extern fldEveHitSource_t D_002FCFA0[];
 extern char D_002FCD70[];
 extern char D_002FCD80[];
-extern char D_002FCD90[];
 extern u32 dds3AllocObjectId(void);
 extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, char *name);
 extern dds3Basic_t *dds3AddEventBasic(s32 id, void *resource, char *name);
@@ -5240,7 +5239,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
     dds3Basic_t *point;
 
     id = dds3AllocObjectId();
-    event = dds3AddEventBasic(id, D_002FCD90, D_002FCD70);
+    event = dds3AddEventBasic(id, "itembox_label", D_002FCD70);
     D_002FCFA0[i].event.resourceID = id;
     D_002FCFA0[i].put.eveIndex =
         fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
