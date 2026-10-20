@@ -70,8 +70,11 @@ measured, not inferred:
   32-byte frame with the three saved registers 8 bytes apart. Retail uses a
   48-byte frame with them 16 bytes apart, which is what 2.9 emits: it reserves
   16 bytes per saved register and reports them as `regs= 6/0`.
-- 2.9 has no sibling-call optimisation. Retail's `sceGsGetIMR` keeps a frame
-  and calls `GsGetIMR` with `jal`; 2.96 turns the same C into a `j` sibcall.
+- 2.9 sibcalls only when the value is discarded. Retail's `sceGsGetIMR`
+  returns what `GsGetIMR` gave it and keeps a frame with `jal`, where 2.96
+  turns the same C into a `j` sibcall. Measured on a two-line probe: 2.9 gives
+  `jal`/`jr` for `return f()` and `j` for a bare `f();`, 2.96 gives `j` for
+  both.
 - The flags come from SDK 3.0.3's own library makefile
   (`ee/src/lib/dma/Makefile`): `CFLAGS = -c -Wa,-al -fno-common -O2 -G0`, no
   `-g`. The ICO decompilation records the same `-G 0` without `-g` for the Sony
@@ -85,8 +88,13 @@ shipped in SDK 2.0.4, so nothing from the SDK has to be run.
 flags, and every Sony library unit is on it. Three of its traits decide how the
 C has to be written:
 
-- No sibling-call optimisation. A tail call is `jal` plus a real frame, never
-  `j func`, so C that 2.96 turns into a sibcall is right here and wrong there.
+- Sibling calls only where the result is discarded. 2.9 emits `j func` for a
+  tail call whose value the caller throws away, and `jal` plus `jr $31` as soon
+  as the value is returned; 2.96 emits `j func` for both. So a `j` to another
+  function at the end of a 2.9 unit says the original returned `void`, which is
+  how `setD4_CHCR` was recovered: Hex-Rays reads its tail call to `EIntr` as
+  `return EIntr()`, and that shape cannot assemble to a `j` under this
+  compiler.
 - 16 bytes reserved per callee-saved register, so three saved registers mean a
   48-byte frame with `sd` at 0x00, 0x10 and 0x20.
 - A `volatile` access is never moved into a delay slot. Where retail returns
@@ -124,7 +132,7 @@ relink is the final check once a body lands in its unit.
 | `libgraph.a` | 13 | 4,744 | 10 | `graph001.o` through `graph029.o` |
 | `libdma.a` | 19 | 2,120 | 1 | one object |
 | `libmrpc.a` | 7 | 1,832 | 1 | the multi-threaded RPC variant |
-| `libipu.a` | 4 | 1,344 | 2 | |
+| `libipu.a` | 4 | 1,344 | 2 | `setD4_CHCR` matches; the three others spin on `IPU_CTRL` in wait loops that carry hazard `nop`s no plain C loop reproduces |
 | unidentified | 66 | 10,532 | | mostly placeholder-named functions inside a known library |
 
 Sony numbered the members of `libcdvd.a` and `libgraph.a`, so those names say

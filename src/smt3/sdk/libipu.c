@@ -1,8 +1,39 @@
 #include "common.h"
 
+#define IPU_CMD  (*(volatile u32 *)0x10002000)
+#define IPU_CTRL (*(volatile u32 *)0x10002010)
+#define IPU_BP   (*(volatile u32 *)0x10002020)
+
+#define D3_CHCR (*(volatile u32 *)0x1000B000)
+#define D3_MADR (*(volatile u32 *)0x1000B010)
+#define D3_QWC  (*(volatile u32 *)0x1000B020)
+
+#define D4_CHCR (*(volatile u32 *)0x1000B400)
+#define D4_MADR (*(volatile u32 *)0x1000B410)
+#define D4_QWC  (*(volatile u32 *)0x1000B420)
+#define D4_TADR (*(volatile u32 *)0x1000B430)
+
+#define D_ENABLER (*(volatile u32 *)0x1000F520)
+#define D_ENABLEW (*(volatile u32 *)0x1000F590)
+
+extern s32 DIntr(void);
+extern s32 EIntr(void);
+
+/* The sibling that drives channel 3; the IDB still carries the object's
+ * gcc2_compiled label as its name. */
+extern void gcc2_compiled__7(u32 chcr);
+
+
 INCLUDE_ASM(const s32, "sdk/libipu", gcc2_compiled__7);
 
-INCLUDE_ASM(const s32, "sdk/libipu", setD4_CHCR);
+void setD4_CHCR(u32 chcr)
+{
+    DIntr();
+    D_ENABLEW = D_ENABLER | 0x10000;
+    D4_CHCR = chcr;
+    D_ENABLEW = D_ENABLER & ~0x10000;
+    EIntr();
+}
 
 INCLUDE_ASM(const s32, "sdk/libipu", sceIpuStopDMA);
 
