@@ -244,6 +244,9 @@ movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	doc
 What cracked the scmd family				docs/nonmatching/sdk/libcdvd.md	3
 The scmd template, for the next pass				docs/nonmatching/sdk/libcdvd.md	24
 sceDmaPutEnv			21 of 118 words differ	docs/nonmatching/sdk/libdma.md	3
+The IPU hazard wait				docs/nonmatching/sdk/libipu.md	3
+sceIpuSync				docs/nonmatching/sdk/libipu.md	36
+sceIpuStopDMA and sceIpuRestartDMA				docs/nonmatching/sdk/libipu.md	45
 sceMcWrite				docs/nonmatching/sdk/libmc.md	30
 sceMcSync				docs/nonmatching/sdk/libmc.md	49
 sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
