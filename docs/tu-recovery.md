@@ -507,10 +507,10 @@ The rest sit in six containers:
 | `code_00116AD0` | 8 | 6 | done |
 | `newbattle/nbStageProcess` | 4 | - | done |
 | `script/scrParameterCommand` | 1 | - | done |
-| `code_001FAE80` | 35 | 43 | 8 bytes of rodata away, see below |
+| `code_001FAE80` | 35 | 43 | done |
 | `code_002C7CB0` | 2 | 0 | contradicted, see below |
 
-70 of the 108 are placed. Each container relinked byte-identically and
+106 of the 108 are placed. Each container relinked byte-identically and
 `check_unit` reports no `CONTEXT` line in any part.
 
 A named unit can hide a container. `newbattle/nbMakePacket` holds 48 HD files
@@ -545,7 +545,7 @@ found by a sweep failing to build rather than by reading the list:
 `.lit4`/`.sdata` ownership remains the one item on that list the tool does not
 compute; `split_rodata.py` does, and the measurement below is how to check it.
 
-### `code_001FAE80` is 8 bytes of rodata away
+### `code_001FAE80`, and the three things its last 40 bytes taught
 
 Its 34 cuts apply and every part compiles. Two things were settled along the
 way and one is left.
@@ -563,14 +563,33 @@ attribution at all, so it is cut off as its own filler rather than left to
 inflate `MovieViewer`. A sweep must not assume the last run reaches the
 container's end.
 
-What is left is 8 bytes. The relinked image is 8 bytes long and the tail filler
-emits `0x3c50` of `.rodata` into a `0x3c48` row. Two of the three culprits are
-already found and fixed: the tail's row had to start at `0x440478` rather than
-`0x440490`, because `/camp/tmx/camp_01.tmx` at `0x0053F478` is emitted as a C
-literal by the tail *and* was being included as `D_0053F478` by `MovieViewer`,
-counted twice. `check_unit` now puts the remaining divergence at `0x0053F510`,
-the pointer table after `camp_draw` and `camp_update`. That is one placement
-question among the tail's 630 `INCLUDE_RODATA` lines, not a tool gap.
+**A 16-byte alignment rule decides which object owns a string.** The tail
+emitted 32 bytes of `.rodata` too many. `/camp/tmx/camp_01.tmx` at `0x0053F478`
+is not 16-aligned, and the tail has a jump table, so its object begins
+16-aligned and cannot start there: by the rule `split_rodata.py` already
+applies, that string is the previous object's last symbol and the tail
+references it as an extern. Emitting it as a C literal instead cost 24 bytes
+for the string and 8 more for the padding gcc then inserted to realign the
+jump table. The fix is in the C, not the yaml; moving the row instead gets the
+size right and the contents wrong.
+
+**A declaration has to precede its use, and a stale object hides that.** The
+first attempt put that extern after the function using it, and the build kept
+passing on a cached `.o` while the real compile had failed. `rm` the object and
+build it alone when a diagnosis stops making sense.
+
+**The last two bytes were a callee-visibility miss, and it moved a boundary.**
+`lstPageUp` and `lstPageDown` each emitted one `bnel` where retail has `bne`.
+`docs/levers/callee-visibility.md` names the cause: the branch depends on
+whether the function the arm calls is a C definition in the same unit. They
+call `lstMoveCursor` at `0x00213518`, which is one of the 353 HD names shared
+between two files (`lstListWindow.c` and `fclShare.c`) and so dropped from the
+map, which left it in `fclDraw`. The IDB settles it: `lstInitListWindow`,
+`lstMoveCursor`, `lstMoveCursor2`, `lstDrawUpDownCursor`, `lstDrawListWindow`,
+`lstDrawListWindowCursor`, `lstPageUp`, `lstPageDown` are one `lst*` family
+from `0x002133F8` to `0x002138C0`, so `lstListWindow.c` starts at `0x002133F8`
+and HD's `0x002136A8` was the lower bound this page keeps warning about. That
+page's closing note holds: a callee-visibility result is a boundary hint.
 
 ### `code_002C7CB0` is contradicted too
 
