@@ -483,3 +483,72 @@ A reviewer must confirm, per range:
    ready.
 4. The unit relinks byte-identically. That is a necessary check and not an
    argument for the boundary: any cut relinks.
+
+## The remaining homes, and what blocks them
+
+288 HD source files have code in this ELF. 175 already carry their name as a
+unit and 5 more are the same file spelled differently, which the normalising
+comparison had to learn: HD's `file_Manager` is `file/fileManager`, `sdf_PacDecode`
+is `sdf/sdfPacDecode`, `ScrTraceCode` is `script/scrTraceCode`, and so on. That
+leaves **108 HD files with no unit of their own**.
+
+Two of those are not missing homes either, by this page's own rule. HD's
+`EventPack` and `sdfMc` are the only HD files in `event/evtEventPack` and
+`mc/mcManager` respectively, so each is Nocturne's own name for the HD file
+rather than a second file hiding inside one; `sdfMc` losing to `mc/mcManager`
+is the precedent set above.
+
+The rest sit in six containers:
+
+| Host | Homes | `NON_MATCHING` drafts | State |
+|---|---|---|---|
+| `newbattle/nbMakePacket` | 47 | 48 | blocked |
+| `code_001FAE80` | 35 | 43 | blocked |
+| `field/fldDraw` | 9 | 12 | blocked |
+| `code_00116AD0` | 8 | 6 | blocked |
+| `code_002C7CB0` | 2 | 0 | contradicted, see below |
+| `newbattle/nbStageProcess` | 4 | - | done |
+| `script/scrParameterCommand` | 1 | - | done |
+
+A named unit can hide a container. `newbattle/nbMakePacket` holds 48 HD files
+in strictly ascending order, among them `nbE901` through `nbE915` and sixteen
+`NbNegoFlow*` files, and keeps only 77 functions of its own. Nothing flagged it,
+because the audit above only ever looked at the `code_<vram>` fillers. The runs
+are the cleanest in the tree: 0 to 4 unnamed functions between consecutive runs.
+
+### What blocks the four large ones
+
+`split_unit.py` and `NON_MATCHING` drafts. The tool treats `#else` as a block it
+may copy into every part, so a 48-cut sweep over `nbMakePacket` left 16 of the
+48 parts with orphaned directives, some carrying 47 bare `#else` lines and no
+`#ifdef`. "What `split_unit.py` drops" above records the same flaw from
+`a20e507`, which repaired it by hand at a much smaller scale. At 48 drafts per
+container that is not a hand repair.
+
+The fix is to teach the tool, or to strip each draft region to a keyed
+placeholder before cutting and restore it to the part its function landed in
+afterwards. Until then these four cannot be swept, and the draft count is the
+thing to check before trying: `grep -c '^#ifdef NON_MATCHING'`.
+
+### `code_002C7CB0` is contradicted, not blocked
+
+Its seven runs name `pbMCard` and `tgsMain` twice each at non-contiguous
+addresses, and `pbMenu`, which is applied at `0x001D4D40`. A `.c` cannot hold
+two non-contiguous ranges, so this is the contradiction shape already described
+for the four small fillers: it needs settling rather than cutting.
+
+### What a clean sweep costs
+
+Two things that are not obvious from the tool's own docstring, both found by
+doing it:
+
+- **Each cut needs its end, and the tail can expose an older error.** Cutting
+  `script/scrParameterCommand` at `dds3DbgBasic.c`'s run gave the new unit a
+  fourth function, `dds3AllocBasic`, which calls `dds3DeleteBasic`, the first
+  function of `basic/dds3Basic`: one file split across two units. Moving that
+  unit's start back absorbed it, so the cut left no new filler.
+- **`split_rodata.py --write` regenerates a whole section.** On a tree whose
+  rows have been hand-corrected it replaces them with its own inference; doing
+  that for one cut rewrote rows in `kernel/`, `field/` and `effect/` and came
+  out 8 bytes short. Compute with it, then splice only the rows falling inside
+  the container's own span.
