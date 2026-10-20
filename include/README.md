@@ -1164,11 +1164,28 @@ was the plain form added because the volatile one pinned the schedule in
 `code_00116AD0`. A statement expression is not volatile, so one `sdfSqrt` covers
 both, and all 21 call sites across 9 units still match.
 
-Check the HD symbols before inventing a macro name. `grep` the function in
-`symbols.txt`; the `file$$name` column is the engine's own spelling. This does
-not apply to the `SDF_VU0_` family, whose names already agree with the HD
-sources, nor to `EE_SYNC*`, the MMI ops or the pipeline-1 divide helpers, which
-are instructions rather than inlined engine functions.
+Check the HD sources before inventing a macro name, and check them by
+instruction, not by name. `EE_SQRT_F32` does not resemble `sdfSqrt`: finding it
+meant knowing that `sqrt.s` is what the one-line body `return sqrtf(aValue);`
+compiles to. A name-similarity scan reports the eleven `SDF_VU0_COPYMATRIX_*`
+macros against the `CopyMatrixAtoB` wrappers in `sdfVu0.c`, which are the
+functions that *call* the macro rather than its own name, and misses the sqrt
+case entirely. So the check is manual: take the instruction the macro emits and
+grep the HD `src/` tree for the libc call it implements.
+
+| instruction | HD body | engine name |
+| --- | --- | --- |
+| `sqrt.s` | `return sqrtf(aValue);` | `sdfSqrt`, `sdfMath.c` |
+| `abs.s` | `return fabsf(c);` | `sdfFabs`, `sdfMath.c` |
+| `div.s` after `sqrt.s` | `return aBase / sqrtf(aValue);` | `sdfDivSqrt`, `sdfMath.c` |
+
+This does not apply to the `SDF_VU0_` family: eighteen of those macro names are
+listed in `symbols.txt` as functions outright, because the Unity port compiled
+the macro bodies as functions, so the repo's spelling is already the engine's.
+Nor to `EE_SYNC*`, the MMI ops or the pipeline-1 divide helpers, which are
+instructions and not inlined engine functions. The HD sources add nothing for
+type names either: they resolve none of the 83 invented type names and none of
+the 567 the IDB never typed, because the IDB's recovery already subsumes them.
 
 **The operand section is part of the macro**, and so is `volatile`. Two macros
 that assemble the same instruction but declare different clobbers, different
