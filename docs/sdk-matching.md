@@ -93,8 +93,9 @@ C has to be written:
   with a store in the delay slot of `jr $31`, the original wrote the access
   through a plain pointer.
 
-The first four functions matched under it are `sceGsGetIMR`, `sceGsPutIMR`,
-`sceDmaGetChan` and `sceDmaPutStallAddr`.
+The first functions matched under it were `sceGsGetIMR`, `sceGsPutIMR`,
+`sceDmaGetChan` and `sceDmaPutStallAddr`; libdma, libgraph and libpad have
+since been worked through the probe loop.
 
 ### The probe loop
 
@@ -233,17 +234,34 @@ matches.
 
 ## Where it stands
 
-`sdk` is 6,016 of 125,024 bytes matched (4.81%), and game code is now measured
+`sdk` is 12,872 of 125,024 bytes matched (10.30%), and game code is now measured
 without it: 951,108 of 1,851,268 bytes (51.38%).
 
 Done: the second compiler, selected per unit; the 12-unit split; the probe
-loop; the first four Sony functions.
+loop; and three libraries worked clean room against it, 51 functions in all.
+
+| Unit | Matched | Left |
+|---|---|---|
+| `libdma` | 18 of 19 | `sceDmaPutEnv`, where the register allocation around the SQWC and PCR stores still differs |
+| `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `_GetGsDxDyOffset`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
+| `libpad` | 27 of 29 | `scePadPortOpen` and `_send_to_iop`, both off by one register pair in the IOP address arithmetic |
+
+Two traps the probe cannot see, both found by relinking:
+
+- **The probe masks the low half of every immediate**, so it cannot tell two
+  globals in the same region apart. `libpad`'s RPC packet and its sceSif client
+  data were swapped through 11 functions and every one still read as a match.
+  `tools/check_funcs.py` against the linked image is what catches that.
+- **A store order the source chose is visible.** `scePadInit2` clears each
+  entry at +0x10, +0x18, +0x14; written in field order it is one instruction
+  shorter and every offset shifts by 4.
 
 Next:
 
 1. **The Sony libraries, clean room.** Work from the disassembly with the probe
-   loop. libdma, libgraph and libpad are small enough to finish; libkernl is
-   the largest at 38,592 bytes with 32,612 of them reachable.
+   loop. libkernl is the largest at 38,592 bytes with 32,612 of them reachable;
+   libmc, libcdvd and libmrpc are untouched, and the three above have 10
+   functions left between them.
 2. **newlib, fdlibm and libgcc (50,296 bytes).** Compile the upstream file each
    member names against the 2.96 archive, which is on disk, then confirm
    against retail. No recovery involved, and the highest byte yield left.
