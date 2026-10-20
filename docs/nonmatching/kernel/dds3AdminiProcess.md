@@ -50,3 +50,26 @@ order, the two-sided unlink, `previous`/`next` to -1,
 `fclEncycCount--`. A `previous` local read before the first unlink arm is
 required; testing `table[slot].previous` in the `if` runs the function over
 its size.
+
+## fcl_103420, fclEncycAllocEntry and fcl_103560 (kernel/dds3AdminiProcess, 0x94, 0xA8, 0xAC)
+
+The three slot-registration wrappers, each at the exact retail size: 30 of 37,
+31 of 42 and 32 of 43 words match. All three are the same function with a
+different `kind` constant (3, 1, 2), and all three differ from retail the same
+way: two address temps for the row are exchanged, which swaps the order of the
+`destroy` and `userValue` stores. In `fclEncycAllocEntry` and `fcl_103560` the
+three incoming function-pointer arguments are also rotated between `$16`,
+`$17` and `$18`: retail takes them in parameter order, the drafts one place
+around.
+
+Store order is the lever that got them here and does not finish them.
+Ascending field offset, `kind`, `task`, `update`, `destroy`, `setState`,
+`enabled`, `userValue`, is what the drafts use; the obvious order (`kind` then
+the argument store, then the zeroes) is 23 of 37 and 29 of 42 words.
+`fclEncycAllocEntry` was swept exhaustively over all 5040 orderings of its
+seven stores and caps at 11; `fcl_103420` was swept over 5040 and caps at 7.
+
+Ruled out: splitting the declaration from the `fclEncycFindFreeSlot` call, a
+`ret` local with `if (slot >= 0)` in place of the early `return 0`, a dead
+self-store to raise a reference count, and parking
+`fclEncycFindFreeSlot`'s draft so the callee is only an `extern`.

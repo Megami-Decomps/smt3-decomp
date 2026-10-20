@@ -7,18 +7,17 @@ page and line to open. Conventions are in
 
 | Drafts | Unit | Page |
 |---|---|---|
-| 43 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 33 | code_001FAE80 | [code_001FAE80.md](code_001FAE80.md) |
+| 45 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
+| 34 | code_001FAE80 | [code_001FAE80.md](code_001FAE80.md) |
 | 16 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 9 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
-| 7 |  | [misc.md](misc.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 7 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
+| 6 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
-| 5 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
@@ -28,6 +27,7 @@ page and line to open. Conventions are in
 | 4 | code_00144798 | [code_00144798.md](code_00144798.md) |
 | 3 | newbattle/nbCameraBoss | [newbattle/nbCameraBoss.md](newbattle/nbCameraBoss.md) |
 | 3 | kernel/dds3KernelDraw | [kernel/dds3KernelDraw.md](kernel/dds3KernelDraw.md) |
+| 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fld_Npc | [field/fld_Npc.md](field/fld_Npc.md) |
 | 3 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
@@ -35,7 +35,7 @@ page and line to open. Conventions are in
 | 3 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 3 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
-| 2 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
+| 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
@@ -49,4 +49,3 @@ page and line to open. Conventions are in
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
 | 1 | event/evtCommand | [event/evtCommand.md](event/evtCommand.md) |
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
-| 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |

@@ -91,7 +91,10 @@ def draft_rows() -> list[tuple[str, ...]]:
         heads = [i for i, l in enumerate(lines) if l.startswith("## ")]
         for n, i in enumerate(heads):
             end = heads[n + 1] if n + 1 < len(heads) else len(lines)
-            m = re.match(r"^## (\S+)(?: \(([^,]+), ([^)]+)\))?", lines[i])
+            # One entry may name several siblings sharing a residual:
+            # "## a, b and c (unit, 0x10 each)". The unit is the first field of
+            # the parenthetical, however many names precede it.
+            m = re.match(r"^## (.+?)(?: \(([^,]+), ([^)]+)\))?$", lines[i])
             if not m:
                 continue
             body = "\n".join(lines[i + 1:end])

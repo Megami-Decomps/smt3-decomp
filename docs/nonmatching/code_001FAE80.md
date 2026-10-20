@@ -758,3 +758,22 @@ without `!= 0`; and the `sdfGrOtTable[ot]` call written through a hoisted
 `sdfGrOt_t *` local, which the three `cmp` packet builders in this unit need but
 which changes nothing here.
 
+## rstFindEvoEntryType5, rstFindEvoEntryType7 (code_001FAE80, 0x6C each)
+
+24 of 27 words each match, at the exact size. Both scan a devil's 24 level-up
+records for a record of kind 5 (or 7) whose level field is below (or at or
+below) the unit's level, and return that record's index as an `s8`, or -1.
+
+The three differing words are the `* 0x66` row multiply: retail puts `3 * id`
+in `$3` and `48 * id` in `$2`, this puts them the other way round. The
+accumulate (`addu $2, $2, $3`) and the final `sll 1` are identical either
+way, so it is which register the first temporary of the synthesised multiply
+lands in, nothing in the source.
+
+Ruled out: `datLevelUpTable + id * 0x66` against `&datLevelUpTable[...]`,
+a separate `s32` offset local, `0x66 * id`, a `u16` and a `u32` local for the
+id, declaring the level before and after the entry pointer, assignments split
+out of the declarations, a `u8 *` walk reading `p[6]`/`p[7]` instead of a
+typed `entry[1]`, and nested `if`s instead of the `&&`. All nine compile to
+the same three-word swap. This is the same register exchange recorded above
+for `cmpFindKugatatiMsgEntry`, which walks the same table.

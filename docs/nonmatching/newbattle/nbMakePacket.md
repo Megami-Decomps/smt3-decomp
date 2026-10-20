@@ -922,3 +922,46 @@ Ruled out: a `void *h` local for `fileGetMemHandle`'s result stored after
 the free, which costs 58 more words; the same local stored before the free;
 a local holding `file[j]` for both calls, equally bad; the two `if`s folded
 into one `&&`; and `file[j] = NULL` moved in front of the free.
+
+## Chk_ENHOJOMAX, Chk_FRHOJOMAX (newbattle/nbMakePacket, 0xDC each)
+
+54 of 55 words each match, at the exact 220-byte size.
+
+Both are the established `Chk_*` shape of this unit: a `one = 1;` local above
+the loop, `a->data->party[i]` subscripted at every use so the base reloads
+after the call, and a `continue` per flag test. The one differing word is the
+third flag test: retail emits a plain `bnez $2, .L00286134` and duplicates
+`slti $2, $18, 4` into all four predecessors of the loop-continue block, while
+ee-gcc makes that one branch `bnel` and annuls the `slti` instead. The other
+two flag tests come out plain in both.
+
+Ruled out: `!= 0` written explicitly on the `0x20` test, fusing it with the
+`ChkAiHojoMax` call into one `||`, and nesting the last two tests instead of
+`continue`. All three give the identical one-word diff, as do the matching
+siblings' shapes (`Chk_ENCNT` and `Chk_FRCNT`, which have no call in the loop,
+match exactly).
+
+## Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
+
+18 of 29 words each differ, two words short of retail's 124.
+
+The two-case `switch` over `nownegophase`, both arms, the `0xA1`/`0xA3`
+message constants and the `return 2`/`return 1` are all right: the dispatch is
+retail's `beqz 0` then `beq 1` with no bound test, and the arms' bodies are
+word for word identical. The single difference is that ee-gcc makes the second
+dispatch test a `beql` and annuls `case 1`'s `lw $2, 0x184($16)` into its slot,
+where retail keeps a plain `beq` with the default arm's `daddu $2, $0, $0` in
+the slot and gives the default its own `b` to an exit placed after the shared
+`ld $16`. Every later word is that one-instruction shift.
+
+`Flow8_12` next door matches with the identical source shape, because its
+`case 1` body starts with a `jal dds3GetRandIntA` that cannot be annulled, so
+the shape is confirmed and only the annul bit is wrong. This is the same class
+as the `Flow13_8` entry below.
+
+Ruled out: a `default: return 0;` arm, a `ret` local with `break` in each arm,
+a `goto zero` for the shared exit, the two cases in the other order, and an
+extra empty `case 2`, `case 3` or `case 4`. The empty case reaches the exact
+124-byte size and 11 differing words, but it does so by building a three-node
+tree with an `slt 2` bound test that retail does not have, so it is further
+from the retail source rather than nearer.
