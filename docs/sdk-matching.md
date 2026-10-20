@@ -242,11 +242,11 @@ matches.
 
 ## Where it stands
 
-`sdk` is 17,176 of 125,024 bytes matched (13.74%), and game code is measured
+`sdk` is 17,772 of 125,024 bytes matched (14.21%), and game code is measured
 without it: 951,108 of 1,851,268 bytes (51.38%).
 
 Done: the second compiler, selected per unit; the 12-unit split; the probe
-loop; and five libraries worked, 71 functions in all.
+loop; and six libraries worked, 81 functions in all.
 
 | Unit | Matched | Left |
 |---|---|---|
@@ -256,7 +256,8 @@ loop; and five libraries worked, 71 functions in all.
 | `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
 | `libipu` | 1 of 4 | `sceIpuStopDMA`, `sceIpuRestartDMA`, `sceIpuSync` |
 | `libmrpc` | 2 of 7 | the five that touch the packet queue |
-| `libcdvd`, `libkernl`, `libc`, `libm`, `libgcc` | none | untouched |
+| `libcdvd` | 10 of 30 | the scmd and ncmd wrappers, whose template is drafted in [its page](nonmatching/sdk/libcdvd.md) |
+| `libkernl`, `libc`, `libm`, `libgcc` | none | untouched |
 
 Three things the IDB's decompiler gets wrong here, each of which cost a pass
 before it was understood:
@@ -283,9 +284,10 @@ Next, in the order the bytes are worth having:
    retail image.
 2. **`libkernl` (37,012 bytes, 31,032 of them reachable).** 182 of its
    functions are `syscall` stubs that were never C.
-3. **`libcdvd` (6,976 bytes).** Untouched, and the only Sony library left of
-   any size.
-4. **The six parked drafts.** Each is one register-allocation decision away;
+3. **The rest of `libcdvd`.** Ten of its thirty functions are done and the
+   scmd template is written down, so the remaining wrappers are transcription
+   plus one scheduling fight each.
+4. **The seven parked drafts.** Each is one register-allocation decision away;
    [the per-unit pages](nonmatching/) say which.
 5. **Per-object units.** The 12 library units can become ~116 member units
    using the member column of `config/smt3/sdk_objects.tsv`.
