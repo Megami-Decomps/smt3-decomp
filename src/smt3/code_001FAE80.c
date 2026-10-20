@@ -12352,7 +12352,7 @@ s8 cmpGetCursorRow(cmpCursorWork_t *cursor)
     return cursor->unk_04;
 }
 
-extern void cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
+extern s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
 
 void cmpMoveStockCursor(s8 index, s8 dir, u8 *base)
 {
