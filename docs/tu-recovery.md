@@ -441,6 +441,27 @@ header declares the membership, so the per-file prototype blocks are the only
 oracle. Prefix agreement is weaker evidence than the two-source cuts above:
 one engine module's functions can be spread across several files.
 
+## The six fillers that are left
+
+Four of the ten were named from the HD map, and `code_002C7CB0` gave up its
+`sdfSortOt` head; the table in "The nine remaining fillers" above is superseded
+by this one.
+
+| Filler | Functions | Why it has no name |
+|---|---|---|
+| `code_002C81A8` | 672 | Sony SDK and newlib: `sce*` 217, `libc*` 35, `_sce*` 24, `RFU*` 22. CLAUDE.md keeps these as prebuilt archives, so the name is honest. |
+| `code_0022C578` | 421 | The camp module, `cmp*` 275 and `camp*` 106. No source names it: the HD map has only the `fclPanel` mis-attribution, and no DDS1 candidate range covers it. |
+| `code_0029B780` | 25 | 21 of 25 are `dds3*` and the last is `dds3AllocConfigWork`, immediately before `kernel/dds3ConfigMain`. It looks like that unit's head, which would be a boundary move rather than a name, and no HD row falls inside it. |
+| `code_001C55F8` | 13 | All 13 are named `nbCameraHelper*` and HD agrees, but `newbattle/nbCameraHelper` is applied at `0x001AAE28` and a `.c` cannot hold two ranges. HD's `nbCameraHelper.c` has 30 functions spanning both, among them the `dds3EffectFileListWindow*` family that fills the applied unit. The name fits this range better than the one that holds it, so settling it means renaming an applied unit, on evidence this does not supply. |
+| `code_002C0BA8` | 3 | `dds3GetRandA`, `dds3GetRandFloatA`, `dds3GetRandIntA`, immediately before `sdf/sdfRand`. HD puts them in `dds3KernelCore.c`, which is applied at `0x001015E8` and 1.7 MB away, so that is a mis-attribution of the SDK kind. With HD discredited here, nothing else names them; merging them into `sdfRand` would cross a `dds3`/`sdf` prefix change. |
+| `code_00115D38` | 1 | `dds3PathBasicFreeControl`. HD says `dds3PathBasic.c`, applied at `0x00116058`, and `basic/dds3ModelBasic` sits between the two, so one of the three placements is wrong. One function is not enough to say which. |
+
+The shape worth noticing is that four of the six are the same shape: HD names a
+file that is already applied elsewhere. Two of those, `dds3KernelCore` here and
+the six in `code_002C7CB0`, are settled as il2cpp naming a caller's file for a
+library function. The other two, `nbCameraHelper` and `dds3PathBasic`, would
+need an applied unit renamed, which is a separate piece of evidence work.
+
 ## Limits
 
 - Zero pairing contradictions is weak evidence, not strong. The monotone cut
