@@ -40,10 +40,10 @@ separately, not folded into the main denominator, since no C can replace them:
 | `.vutext`/`.vudata` VU microcode | not EE code |
 | `.DVP.*` overlay tables | generated data |
 
-The split between game code and SDK code depends on signature identification
-of the SDK archives, which has not been done for this binary yet. Until it is,
-any percentage over the whole `.text` understates the game-code share, and
-should be labelled as whole-binary rather than game-code progress.
+The split between game code and SDK code is made: the SDK archives were
+signature-identified against this binary, and the 126,120 bytes they account
+for are 12 units under `src/smt3/sdk/`. The game-code figures below are
+therefore game code, not whole-binary. See [SDK and C runtime](sdk-matching.md).
 
 ## Reports
 
@@ -102,9 +102,8 @@ With one version key the first two reports hold the same numbers. `configure.py`
 assigns each unit a category from its path (`game`, `sdk`, `handwritten`,
 `vu1`, `data`) and omits categories that no unit is in: objdiff measures an
 empty category as 100% matched, which reads as a finished component rather than
-an absent one. No SDK unit has been identified yet, so there is no `sdk`
-category and the SDK's code sits inside the `game` denominator; every
-percentage below is therefore a whole-binary figure, not game-code coverage.
+an absent one. The `sdk` category holds the Sony libraries, newlib and libgcc,
+and the game denominator excludes them.
 
 For a single unit in the GUI or one-shot, use the root config, the only one
 whose relative paths resolve from the directory `ninja` runs in:
@@ -234,9 +233,8 @@ the linked build demonstrably takes from C, which is the same question
 `tools/check_unit.py` and the retail checksum answer per unit, as in
 [Contributing](CONTRIBUTING.md#3-verify).
 
-What is still not a measurement, after reconciliation: the denominator is the
-whole binary rather than game code, because no SDK unit has been identified
-yet; data is never credited; and a function counts once whatever its size, so
+What is still not a measurement, after reconciliation: data is never credited;
+and a function counts once whatever its size, so
 the function percentage flatters small bodies. The reconciler proves ownership
 of bytes, not that a reconstruction is readable or correct beyond matching.
 These numbers come from a local `ninja report`; the
