@@ -94,6 +94,19 @@ than another permutation:
   `INCLUDE_ASM` functions; [the port notes](dds-port.md) cover how far the
   pairing can be trusted.
 
+### The levers and drafts indexes are generated, and must be committed
+
+`docs/levers/INDEX.tsv`, `docs/nonmatching/INDEX.tsv` and the `README.md` beside
+each are built by `python3 tools/docs_index.py` from the pages themselves. Run it
+after adding a lever or a draft entry and **commit what it writes**:
+`tools/test_docs_index.py` asserts the committed tables are current, so a branch
+that edits a page without regenerating fails the suite.
+
+Two agents adding entries in the same round will conflict on those four files,
+since both regenerate them. That is expected and costs nothing to resolve: take
+either side, or neither, and run `tools/docs_index.py` again. Never hand-merge
+them.
+
 [Matching levers](matching-levers.md) is the list to work through when a
 function is close but not exact, including the shapes that have been ruled out
 and are not worth a second attempt.

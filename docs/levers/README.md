@@ -6,8 +6,8 @@ open the page and line it names.
 
 | Levers | Page | Section |
 |---|---|---|
-| 226 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-| 109 | [control-flow.md](control-flow.md) | Control flow |
+| 231 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+| 112 | [control-flow.md](control-flow.md) | Control flow |
 | 10 | [stores.md](stores.md) | Stores |
 | 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 | 6 | [impossible.md](impossible.md) | Functions that cannot be written in C |

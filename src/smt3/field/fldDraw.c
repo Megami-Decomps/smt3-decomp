@@ -844,6 +844,8 @@ extern s32 gFldWap_after_nextidx;
 extern s32 fldPlayerFastMode;
 extern s32 l_UseCollision;
 extern void fldHitChkUnitElv(f32 *pos);
+extern void fldHitChkUnit(f32 *pos);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
 extern void dds3SetSclPoseSet(dds3Basic_t *basic, f32 *scl);
 extern f32 fldWmapPlayerState;
 /* The world-map player scale triple, copied as one word-aligned 16-byte block. */
@@ -3194,6 +3196,109 @@ INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_Wm2);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc_Nml_syukan);
 
+extern s32 printf(const char *format, ...);
+extern char D_00531D58[];
+extern char D_00531D70[];
+extern s32 fldEncountTestFlag(s32 mask);
+extern void fldEncountSetFlag(s32 mask);
+extern void mdlSingleMotion(mdlObj_t *obj, s32 mode, s32 motion);
+extern void fldDmgStart(f32 x, f32 y, f32 z);
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frames);
+extern void fldStatusSet(void);
+extern void fldPlayerCalc_WarpRun(void);
+extern void fldPlayerMotionSe(s32 motion, s32 motion2);
+extern s32 fldPlayerCalc_Wm2(void);
+extern void fldPlayerCalc_Nml(void);
+extern void fldPlayerCalc_Nml_syukan(void);
+
+/* NON_MATCHING: 17 of 169 words differ (first at +0x64). */
+#ifdef NON_MATCHING
+s32 fldPlayerCalc(void)
+{
+    fldUnitControl_t *ctl;
+    mdlObj_t *mdl;
+    s32 mode;
+
+    if (fldRunDanteGunFlag[0] != 0) {
+        return 0;
+    }
+    if (fldAutoMapChkMode() != 0) {
+        return 0;
+    }
+    if (fldEncountTestFlag(0x40) == 0 && fldGlobalBase.word80 > 0) {
+        ctl = fldGetUnitControl();
+        mdl = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
+        if (mdl->current.h.motionIndex != 0xA) {
+            printf(D_00531D58);
+            mdl->first->speed = 1.0f;
+            mdlSingleMotion(mdl, 0, 0xA);
+            fldDmgStart(fldGlobalBase.x, fldGlobalBase.y, fldGlobalBase.z);
+            fldSePlay(0x22);
+            dds3PadVibrationSet(0, 1, 0x1E);
+            dds3PadVibrationSet(1, 0x96, 0x1E);
+            fldStatusSet();
+        }
+        if (mdl->first->stat == 5) {
+            printf(D_00531D70);
+            fldGlobalBase.word80 = 0;
+            fldEncountSetFlag(0x40);
+        } else {
+            return 0;
+        }
+    }
+    if (fldEncountTestFlag(0x40) == 0) {
+        if (fldGlobalBase.area < 0xA) {
+            if (fldWmWarpMode != 1) {
+                ctl = fldGetUnitControl();
+                mdl = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
+                mdl->first->speed = 0.0f;
+                if (evtBitCheck(0x75B) != 0) {
+                    dds3ObjectBaseOnFlag(ctl->handle, 1);
+                    return 0;
+                }
+                dds3ObjectBaseOffFlag(ctl->handle, 1);
+                return 0;
+            }
+            fldPlayerCalc_Wm3();
+            return 0;
+        }
+        mode = fldGlobalBase.mode;
+        if (mode == 1 || mode == 3) {
+            fldPlayerSvsOff();
+        }
+        fldPlayerCalcHasigo();
+        fldPlayerCalc_Hit();
+        fldPlayerCalc_WarpRun();
+        ctl = fldGetUnitControl();
+        mdl = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle);
+        fldPlayerMotionSe(mdl->current.h.motionIndex, mdl->current.h.motionIndex);
+        fldPlayerMirChk();
+        return 0;
+    }
+    if (fldGlobalBase.area < 0xA) {
+        return fldPlayerCalc_Wm2();
+    }
+    mode = fldGlobalBase.mode;
+    fldWmWarpMode = 0;
+    if (mode == 1) {
+        fldPlayerSvsOff();
+        goto nml;
+    }
+    if (mode == 3) {
+    nml:
+        fldPlayerCalc_Nml();
+        fldPlayerMirChk();
+        return 0;
+    }
+    if (evtBitCheck(0xAF0) != 0) {
+        fldPlayerCalc_Nml_syukan();
+    } else {
+        fldPlayerCalc_Nml();
+    }
+    fldPlayerMirChk();
+    return 0;
+}
+#else
 INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D08);
 
 INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D18);
@@ -3205,6 +3310,7 @@ INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D38);
 INCLUDE_RODATA(const s32, "field/fldDraw", D_00531D48);
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerCalc);
+#endif
 
 s32 fldPlayerChkAna(void)
 {
@@ -3283,7 +3389,85 @@ void fldPlayerSdwOff(void) {
     dds3ObjectBaseOffFlag(ctl->handle, 0x200);
 }
 
+/* NON_MATCHING: 121 of 144 words differ (first at +0x28). */
+#ifdef NON_MATCHING
+s32 fldPlayerFastSet(void)
+{
+    fldUnitControl_t *ctl = fldGetUnitControl();
+    f32 pos[4];
+    f32 probe[3];
+    dds3PoseSet_t *pose;
+
+    fldPlayerFastMode = 0;
+    if (l_UseCollision == 0) {
+        return 0;
+    }
+    if (fldGlobalBase.area < 0xA) {
+        dds3GetPosPoseSet(ctl->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        fldGlobalBase.prevX = fldGlobalBase.x;
+        fldGlobalBase.prevY = fldGlobalBase.y;
+        fldGlobalBase.prevZ = fldGlobalBase.z;
+        probe[0] = pos[0];
+        probe[1] = pos[1] + 20.0f;
+        probe[2] = pos[2];
+        fldGlobalBase.x = pos[0];
+        fldGlobalBase.y = pos[1] + 20.0f;
+        fldGlobalBase.z = pos[2];
+        fldHitChkUnit(probe);
+        if (fldGlobalBase.hitValid != 0) {
+            fldGlobalBase.x = fldGlobalBase.hitX;
+            if (fldGlobalBase.area == 1) {
+                fldGlobalBase.y = fldGlobalBase.hitY + 44.0f - 11.0f;
+            } else {
+                fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
+            }
+            pos[0] = fldGlobalBase.x;
+            pos[1] = fldGlobalBase.y;
+            pos[2] = fldGlobalBase.hitZ;
+            fldGlobalBase.z = fldGlobalBase.hitZ;
+            dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+            fldGlobalBase.hitValid = 0;
+        }
+        dds3GetPosPoseSet(ctl->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        pose = ctl->handle->poseset;
+        SDF_VU0_COPYVECTOR((u8 *)pose + 0x70, pos);
+        dds3OffPoseSetFlag(pose, POSESET_FLAG_POS2);
+    } else {
+        dds3GetPosPoseSet(ctl->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        fldGlobalBase.prevX = fldGlobalBase.x;
+        fldGlobalBase.prevY = fldGlobalBase.y;
+        fldGlobalBase.prevZ = fldGlobalBase.z;
+        probe[0] = pos[0];
+        probe[1] = pos[1] + 10.0f;
+        probe[2] = pos[2];
+        fldGlobalBase.x = pos[0];
+        fldGlobalBase.y = pos[1] + 10.0f;
+        fldGlobalBase.z = pos[2];
+        fldHitChkUnit(probe);
+        if (fldGlobalBase.hitValid != 0) {
+            fldGlobalBase.x = fldGlobalBase.hitX;
+            fldGlobalBase.y = fldGlobalBase.hitY + 44.0f;
+            fldGlobalBase.z = fldGlobalBase.hitZ;
+            pos[0] = fldGlobalBase.x;
+            pos[1] = fldGlobalBase.y;
+            pos[2] = fldGlobalBase.z;
+            dds3SetPosPoseSet(ctl->handle, (u128 *)pos);
+            fldGlobalBase.hitValid = 0;
+        }
+        dds3GetPosPoseSet(ctl->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        pose = ctl->handle->poseset;
+        SDF_VU0_COPYVECTOR((u8 *)pose + 0x70, pos);
+        dds3OffPoseSetFlag(pose, POSESET_FLAG_POS2);
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerFastSet);
+#endif
 
 void fldPlayerMotReset(void) {
     dds3Basic_t *unit;
@@ -4672,6 +4856,56 @@ void fldEveHit_End(void) {
     }
 }
 
+/* The event-hit source records at D_002FCFA0: a sphere, the put record that
+   names it, the transform dds3AddPointBasic consumes, and the two resource
+   headers the hit and the event are registered under. */
+typedef struct {
+    u32 type;
+    f32 r;
+} fldResPutEveBall_t;
+
+typedef struct {
+    u32 type;
+    s32 eveIndex;
+    s32 visible;
+    fldResPutEveBall_t *ball;
+} fldResPut_t;
+
+typedef struct {
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t scl;
+} fldResourcePoint_t;
+
+typedef struct {
+    u32 resourceID;
+    u32 resourceType;
+    char *resourceName;
+    u32 flag;
+    fldResourcePoint_t *sisei;
+    void *areaName;
+    void *resourceLink;
+    char *blockName;
+    fldResPut_t *put;
+} fldResHead_t;
+
+typedef struct {
+    fldResPutEveBall_t ball;  /* 0x00 */
+    fldResPut_t put;          /* 0x08 */
+    fldResourcePoint_t sisei; /* 0x18 */
+    fldResHead_t hit;         /* 0x48 */
+    fldResHead_t event;       /* 0x6C */
+} fldEveHitSource_t;
+
+extern fldEveHitSource_t D_002FCFA0[];
+extern char D_002FCD70[];
+extern char D_002FCD80[];
+extern char D_002FCD90[];
+extern u32 dds3AllocObjectId(void);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, char *name);
+extern dds3Basic_t *dds3AddEventBasic(s32 id, void *resource, char *name);
+extern s32 fldEveHit_AddEveHit(fldResHead_t *head, dds3Basic_t *basic);
+
 u32 fldEveHit_AddEveData(fldEventDataHeader_t *data, dds3Basic_t *object) {
     u32 index = gEveNum;
 
@@ -4683,9 +4917,141 @@ u32 fldEveHit_AddEveData(fldEventDataHeader_t *data, dds3Basic_t *object) {
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHit);
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkDir);
+extern void ToMatrix(void);
 
+s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit)
+{
+    f32 dir[4];
+    f32 pos[4];
+    s32 i;
+    fldTaskInfo_t *info;
+    f32 *target;
+    f32 length;
+    f32 dot;
+
+    memset(pos, 0, 0x10);
+    pos[3] = 1.0f;
+    for (i = 0; i < fldEveRngCount; i++) {
+        if (fldEveHitTable[i].worldObjectKey != hit->serialID) {
+            continue;
+        }
+        info = (fldTaskInfo_t *)gEvnRng[i]->data;
+        switch (info->shape->kind) {
+        case 0:
+            target = (f32 *)hit->workdata;
+            pos[0] = target[0];
+            pos[1] = target[1];
+            pos[2] = target[2];
+            SDF_VU0_LOADVECTOR(&unit->poseset->rot);
+            ToMatrix();
+            SDF_VU0_STORE_ROW2(dir);
+            dir[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_SCALEVECTOR(-1.0f);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_LOADVECTOR(pos);
+            SDF_VU0_LOADVECTOR_B(&unit->poseset->pos);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(dir);
+            dir[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_GETLENGTH(length);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_INNERPRODUCT(dot);
+            if (dot * 180.0f / 3.14f < 0.0f) {
+                return 0;
+            }
+            if (200.0f < length) {
+                return 0;
+            }
+            return 1;
+        case 1:
+            return fldEveHitTable[i].shapeKind == info->shape->kind;
+        case 2:
+            SDF_VU0_LOADVECTOR(&unit->poseset->rot);
+            ToMatrix();
+            SDF_VU0_STORE_ROW2(dir);
+            dir[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_STOREVECTOR(dir);
+            if (fldVecDot((sdfVector4_t *)dir, (sdfVector4_t *)fldEveHitTable[i].center) < 0.01f) {
+                return 0;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* NON_MATCHING: 32 of 153 words differ (first at +0x8). */
+#ifdef NON_MATCHING
+s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *hit)
+{
+    f32 dir[4];
+    f32 pos[4];
+    s32 i;
+    fldTaskInfo_t *info;
+    f32 *probe;
+    f32 length;
+    f32 dot;
+
+    memset(pos, 0, 0x10);
+    pos[3] = 1.0f;
+    for (i = 0; i < fldEveRngCount; i++) {
+        if (fldEveHitTable[i].worldObjectKey != hit->serialID) {
+            continue;
+        }
+        info = (fldTaskInfo_t *)gEvnRng[i]->data;
+        switch (info->shape->kind) {
+        case 0:
+            probe = pos;
+            *(u128 *)pos = *(u128 *)hit->workdata;
+            SDF_VU0_LOADVECTOR(&unit->poseset->rot);
+            ToMatrix();
+            SDF_VU0_STORE_ROW2(dir);
+            dir[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_SCALEVECTOR(-1.0f);
+            SDF_VU0_COPYVECTOR_A_TO_C();
+            SDF_VU0_LOADVECTOR_RWADDR(probe);
+            SDF_VU0_LOADVECTOR_B(&unit->poseset->pos);
+            SDF_VU0_SUBVECTOR();
+            SDF_VU0_STOREVECTOR(dir);
+            dir[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_GETLENGTH(length);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_COPYVECTOR_C_TO_B();
+            SDF_VU0_INNERPRODUCT(dot);
+            if (dot * 180.0f / 3.14f < 0.0f) {
+                return 0;
+            }
+            return 1;
+        case 1:
+            return fldEveHitTable[i].shapeKind == info->shape->kind;
+        case 2:
+            SDF_VU0_LOADVECTOR(&unit->poseset->rot);
+            ToMatrix();
+            SDF_VU0_STORE_ROW2(dir);
+            dir[1] = 0.0f;
+            SDF_VU0_LOADVECTOR(dir);
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_STOREVECTOR(dir);
+            if (fldVecDot((sdfVector4_t *)dir, (sdfVector4_t *)fldEveHitTable[i].center) < 0.0f) {
+                return 0;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_ChkDir2);
+#endif
 
 s32 fldEveHitTestRect(f32 *pos, s32 idx) {
     f32 probe[3];
@@ -4860,9 +5226,105 @@ const char *fldEveHitResName_Find(u32 task) {
     return 0;
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitItemBox);
+/* NON_MATCHING: 25 of 126 words differ (first at +0xC8). */
+#ifdef NON_MATCHING
+void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
+{
+    u32 id;
+    u32 pointId;
+    s32 slot;
+    s32 i = fldEveHitCount;
+    fldResourcePoint_t *sisei;
+    fldEveRngBox_t *box;
+    dds3Basic_t *event;
+    dds3Basic_t *point;
 
+    id = dds3AllocObjectId();
+    event = dds3AddEventBasic(id, D_002FCD90, D_002FCD70);
+    D_002FCFA0[i].event.resourceID = id;
+    D_002FCFA0[i].put.eveIndex =
+        fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
+    D_002FCFA0[i].put.visible = 1;
+    D_002FCFA0[i].hit.put = &D_002FCFA0[i].put;
+    D_002FCFA0[i].ball.type = 0;
+    D_002FCFA0[i].ball.r = r;
+    D_002FCFA0[i].put.type = 1;
+    D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
+    sisei = &D_002FCFA0[i].sisei;
+    sisei->pos.x = x;
+    sisei->pos.y = y;
+    sisei->pos.z = z;
+    sisei->pos.w = 1.0f;
+    sisei->rot.x = 0.0f;
+    sisei->rot.y = 0.0f;
+    sisei->rot.z = 0.0f;
+    sisei->rot.w = 0.0f;
+    sisei->scl.x = 1.0f;
+    sisei->scl.y = 1.0f;
+    sisei->scl.z = 1.0f;
+    sisei->scl.w = 1.0f;
+    D_002FCFA0[i].hit.sisei = sisei;
+    pointId = dds3AllocObjectId();
+    D_002FCFA0[i].hit.resourceID = pointId;
+    D_002FCFA0[i].hit.resourceName = D_002FCD70;
+    point = dds3AddPointBasic(pointId, D_002FCFA0[i].hit.sisei, D_002FCD80);
+    slot = fldEveHit_AddEveHit(&D_002FCFA0[i].hit, point);
+    fldEveHitCount++;
+    box = (fldEveRngBox_t *)&fldEveHitTable[slot].unk120;
+    box->takaraIndex = idx;
+    box->hitKind = 2;
+    box->npcIndex = -1;
+}
+#else
+INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitItemBox);
+#endif
+
+/* NON_MATCHING: 11 of 97 words differ (first at +0x2C). */
+#ifdef NON_MATCHING
+void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 r, s32 hojiID,
+                           s32 npcidx)
+{
+    u32 id;
+    s32 slot;
+    s32 i = fldEveHitCount;
+    fldEveRngBox_t *box;
+    dds3Basic_t *point;
+    fldResourcePoint_t *sisei;
+    D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
+    D_002FCFA0[i].ball.type = 0;
+    D_002FCFA0[i].hit.put = &D_002FCFA0[i].put;
+    D_002FCFA0[i].ball.r = r;
+    D_002FCFA0[i].put.eveIndex = eveidx;
+    D_002FCFA0[i].put.type = 1;
+    D_002FCFA0[i].put.visible = 1;
+    sisei = &D_002FCFA0[i].sisei;
+    sisei->pos.x = x;
+    sisei->pos.y = y;
+    sisei->pos.z = z;
+    sisei->pos.w = 1.0f;
+    sisei->rot.x = 0.0f;
+    sisei->rot.y = 0.0f;
+    sisei->rot.z = 0.0f;
+    sisei->rot.w = 0.0f;
+    sisei->scl.x = 1.0f;
+    sisei->scl.y = 1.0f;
+    sisei->scl.z = 1.0f;
+    sisei->scl.w = 1.0f;
+    D_002FCFA0[i].hit.sisei = sisei;
+    id = dds3AllocObjectId();
+    D_002FCFA0[i].hit.resourceID = id;
+    D_002FCFA0[i].hit.resourceName = resname;
+    point = dds3AddPointBasic(id, D_002FCFA0[i].hit.sisei, D_002FCD80);
+    slot = fldEveHit_AddEveHit(&D_002FCFA0[i].hit, point);
+    fldEveHitCount++;
+    box = (fldEveRngBox_t *)&fldEveHitTable[slot].unk120;
+    box->unk04 = hojiID;
+    box->hitKind = 1;
+    box->npcIndex = npcidx;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldEveHit_AddEveHitNpc);
+#endif
 
 s32 fldCheckEveRngN(s32 npcidx) {
     s32 idx;

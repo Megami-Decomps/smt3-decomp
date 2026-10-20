@@ -175,3 +175,27 @@ end marked, so expect the body to sit one word early.
   else. The same rule names which arm order to use: write the arms in the
   address order of their bodies in retail (`SetAction_WAIT` is 10, 8, 3, 9,
   with the empty `case 9:` last), then sweep.
+- **Three cases over 0, 1 and 2 come out tested 1, 0, 2, and the arms are laid
+  out in source order.** `balance_case_nodes` splits three singleton cases at
+  the middle one, so a `switch` written `case 0:`, `case 1:`, `case 2:` emits
+  `beq k, 1` then `beq k, 0` then `beq k, 2` with the bodies in the order the
+  source lists them. `fldEveHit_ChkDir` in `field/fldDraw` went 102 differing
+  words to 27 on the arm order alone, with the dispatch already right: read the
+  first tested value for the middle case and the first *body* for the first
+  case, and do not take the test order for the source order.
+- **A guard whose early return is the `else` of the real body gets retail's
+  branch-likely.** `if (x != K) { return 0; } body;` emits `bne` with the
+  return value computed before the branch, while
+  `if (x == K) { body; } else { return 0; }` emits `bnel` with the
+  `daddu $2, $0, $0` stolen from the target, which is what retail has.
+  `fldPlayerCalc` in `field/fldDraw` went 21 differing words to 17 on that one
+  guard, and a `goto ret0` on the same test instead costs 16 bytes. Read the
+  `l` on the branch before choosing which way round to write the guard.
+- **Where retail branches *to* an `if`'s body, the test is inverted and the
+  body is last.** `fldPlayerCalc`'s world-map guard is `beq fldWmWarpMode, 1`
+  into a one-call arm placed after everything else: written
+  `if (fldWmWarpMode == 1) { call(); return 0; } rest;` ee-gcc puts the call
+  inline behind a `bne`, and `if (fldWmWarpMode != 1) { rest; return 0; }
+  call(); return 0;` is retail's, worth 49 words here. The same inversion did
+  not work on the three-way `mode` dispatch in the same function, where a
+  `switch` is what places both arms out of line.

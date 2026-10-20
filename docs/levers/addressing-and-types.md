@@ -1650,3 +1650,58 @@
   stores, not in the prologue. Using the parameter directly in the loop puts
   the copy first and rotates 45 words; `point = out;` as its own statement at
   that position is exact.
+- **Two results of the same allocator call in one function need two locals.**
+  Reusing one `u32 id` for two `dds3AllocObjectId()` calls makes gcc keep the
+  second result in the callee-saved register the first one earned, which costs
+  a `daddu rd, $2, $0` and, where the function is already at nine callee-saved
+  registers, spills a parameter to the frame.
+  `fldEveHit_AddEveHitItemBox` in `field/fldDraw` is 512 of 504 bytes with one
+  `id` and the frame 16 bytes too large; two locals give retail's 0x70 frame
+  and 93 of 126 words straight away. This is the mirror of the
+  `itfPnlRegist2` row above, where the reuse is what retail has, so read which
+  shape retail is in before choosing: the tell for two locals is the second
+  result being used out of `$2` with no copy.
+- **A record-array field fill is per-field subscripts for the small blocks and
+  one pointer local for the big one.** Where retail forms the scaled index once
+  and then a separate `addiu rd, symbol, K`/`addu` pair per group of fields,
+  `D_002FCFA0[i].ball.type = 0;` style subscripts give exactly that for a
+  group of one or two words, but a run of twelve floats written the same way
+  materialises `symbol + offset` for every field: `fldEveHit_AddEveHitNpc` in
+  `field/fldDraw` is 136 excess bytes with all subscripts and 84 bytes *short*
+  with a single `fldEveHitSource_t *rec` for the whole record, because then one
+  base register serves everything. A pointer local for the 0x30-byte transform
+  block and subscripts for the rest is the exact size. The pointer's assignment
+  position inside the block is inert; which group it anchors is not, and the
+  first address pseudo gcc forms becomes the anchor every other one is derived
+  from, so a pointer taken before the first subscript moves the whole set.
+- **A function whose result the caller ignores wants `void`, because `$2` is
+  then free for an index chain.** `fldEveHit_AddEveHitNpc` ends by scaling
+  `fldEveHit_AddEveHit`'s return by `0x130` to index `fldEveHitTable`; retail
+  does that in `$3` and leaves the value in `$2`, which only happens when
+  nothing has to be returned. Declared `s32` with a `return`, gcc copies the
+  value out of `$2` first and the function is one instruction long. This is the
+  companion to the `jalr $2` row: there the cast return frees `$2`, here the
+  `void` does.
+- **Where retail emits the same address twice, once long-lived and once
+  rematerialised, the second one is not a second C pointer.** Three functions
+  in `field/fldDraw` show the shape: `fldEveHit_ChkDir2` keeps the frame
+  vector's address in `$18` for the `memset` and the `sq` and rematerialises
+  `addiu $3, $29, 0x10` for the `lqc2`; `fldPlayerFastSet` keeps `lui $18,
+  %hi(fldGlobalBase)` for the whole function and emits a fresh `addiu rd, $18,
+  %lo(fldGlobalBase)` in each basic block. A second pointer local assigned from
+  the first gives a `move` instead of the fresh computation, which is the right
+  instruction *count* in the same place but the wrong instruction, and
+  initialising that pointer at its declaration instead lets gcse fold it back
+  into the first and loses the instruction altogether. For the asm-macro case
+  `SDF_VU0_LOADVECTOR_RWADDR` on a pointer assigned at the use site is what
+  gets the count right. `-fno-cse-follow-jumps` restores the per-block `%lo` in
+  `fldPlayerFastSet`, which puts the mechanism in cse extending its block
+  through the conditional branch, not in anything the source can state: the
+  pseudo is separate in retail only because it is dead before the first `jal`
+  and so lands in a caller-saved register.
+- **A quadword copy out of a `f32 *` into a stack vector is `*(u128 *)`, not
+  `*(Quad *)`.** `Quad` is four `u32` at alignment 4, so gcc copies it with
+  `lq 7`/`sq` style unaligned pairs and six extra words; the `u128` cast gives
+  retail's single `lq`/`sq`. `fldEveHit_ChkDir2` copies `hit->workdata` this
+  way. The `SDF_VU0_COPYVECTOR` row above still applies where retail wants an
+  `addiu` address temp; use `u128` where the store is at a plain frame offset.
