@@ -817,3 +817,108 @@ inside the `if`, and declared in the other order; and the second arm
 written as a braced `else` block rather than a flattened `else if`. The
 documented rule that declaration order is inert for register allocation
 holds here.
+
+## Flow4_1 (newbattle/nbMakePacket, 0x348)
+
+1 of 210 words differ, at the exact 840-byte size.
+
+Thirteen `n->ework->id == <id> && n->pwork->id == n->ework->id` arms in
+retail's order, each setting `waitframe` to 0xF, displaying
+`n->flowmsg[n->ekucyo]` with its own message id and returning 2, then a
+shared 0x31 arm returning 0. Every word matches except a single annul bit:
+the second test of the first arm is `beql` where retail has `bne`. Both
+branches carry the same delay slot, `addiu $2, $0, 0x38`, which is the
+second arm's compare constant; retail leaves it unannulled in the first arm
+and annuls it in all the later ones.
+
+Ruled out: the chain written as twelve plain `if`s instead of `else if`; the
+first arm alone written plain, or nested as two `if`s, or with
+`n->pwork->id == <id>` against the constant instead of against
+`n->ework->id`; and `n->ework->id == n->pwork->id` with the operands
+exchanged, in the first arm and throughout.
+
+## Flow1_32 (newbattle/nbMakePacket, 0x400)
+
+231 of 252 words match, four words short of retail's 256.
+
+Twelve `id`-pair arms in the Flow4_1 shape returning 2, then a twelve-term
+`||` chain over `n->ework->id` in retail's unsorted order giving the flat
+`beq` ladder and message 0x80, then the `datGetRace(n->ework) == 0x13 ||
+== 0x12 || n->ework->id == 0x9A` test against `negoreqtype` from
+`Flow1_33` giving message 0x127, then message 0x20. Every word up to
++0x2CC matches.
+
+What is left is which pair of the three message blocks cross-jumps. All
+three end in the same `addu`, `daddu $7`, `jal nbDispNegoMessage`,
+`lw $5, 0x1B0($3)`, `addiu $2, 0x1` tail. Retail merges the 0x80 block into
+the 0x127 block's tail and leaves the 0x20 block its own full copy; ee-gcc
+merges the 0x127 block into the 0x20 block's and leaves 0x80 its own, which
+is one tail fewer overall.
+
+Ruled out: the three blocks as separate `if`s with a `return` in each; as an
+`if`/`else if`/`else` with one `return` at the end, and with a `return` in
+each arm; the 0x20 block hoisted in front of the 0x127 one by inverting the
+race test; the race test split into two nested `if`s; and the 0x20 block as
+the `else` of the race `if`. The `||` chain must stay a chain: making the
+0x80 block an `else if` arm instead turns the ladder's `beq`s into `beql`s
+with `lw $3, 0x184($16)` hoisted into each slot, which costs 50 more words.
+
+## nbCollectBadCurseUnits (newbattle/nbMakePacket, 0xA4)
+
+30 of 41 words match, at the exact 164-byte size, and every differing word
+is a register name.
+
+The 0x20-byte `s8 list[32]` gives retail's frame, the
+`ofs + (s32)a->data->form` integer form gives its `addu` operand order, and
+`dds3GetRandIntA(0, cnt)` indexing `list` gives the tail exactly. The
+allocator puts `i` in `$4` and `ofs` in `$6`, which is retail's pair
+swapped, and the three post-loop temporaries follow that choice.
+
+Ruled out for the register pair: `ofs = 0, i = 0` in the other order in the
+`for` init; the increment moved to the `for`'s third clause; `i * 0xF0`
+left for the strength reducer instead of an explicit `ofs`; plain
+`a->data->form[i]` indexing; `list[cnt] = i; cnt++;` split in two; an
+inverted test with `continue`; and `(s8)i` cast at the store.
+
+## ChkCost (newbattle/nbMakePacket, 0xC8)
+
+34 of 49 words match, one word short of retail's 50.
+
+The `nowcommand` dispatch is right with `case 0` written before the shared
+`case 1`/`case 5`: that order gives retail's `beq 1`, `slti 2`, `beqz`,
+`beq 5` tree, where `case 1` first costs 29 words. `skill` is
+`a->work->nowindex` for 1 and 5 and 0 for case 0, the guard is
+`nbCheckSkillCost(a->form->formindex, skill)`, and the table read is
+`D_003989E0[a->work->id].ailevel` at the already-named 164-byte stride.
+
+Retail emits `slti $3, $4, 0x3`, `sltu $4, $0, $4`, `xori $3, $3, 0`,
+`movn $17, $4, $3` for the tail. ee-gcc emits the `sltu` first and no
+`xori`, which is the missing word, and the swapped order gives the table
+address a different register.
+
+Ruled out for the `xori`: `ailevel < 3`, `!(ailevel >= 3)`,
+`!(ailevel > 2)`, an empty `if (ailevel >= 3)` with the work in its `else`,
+and `(ailevel >= 3) ? ret : (ailevel != 0)` as a ternary. All five give the
+same two-instruction form.
+
+## nbCheckPackLoad (newbattle/nbMakePacket, 0x100)
+
+62 of 64 words match, at the exact 256-byte size.
+
+The outer loop counts `i` from 9 down to 0 with a separate `ofs` stepped by
+`sizeof(nbStatWork_t)`, and `(nbStatWork_t *)((s32)data->statwork + ofs)`
+gives retail's `addu` operand order and its reload of `statwork` per
+iteration. The inner loop over `file[0..0x19]` and the `motfile` block that
+follows it are the same three calls.
+
+The two differing words are a delay-slot swap in the array block only:
+retail loads `fileHandleFree`'s argument before the `jal` and fills the slot
+with the `buf[j]` store, where ee-gcc fills the slot with the argument load
+and stores `buf[j]` ahead of the call. The identical `motfile` block comes
+out with retail's order, so the difference is the inner loop's two pointer
+induction variables, not the statement order.
+
+Ruled out: a `void *h` local for `fileGetMemHandle`'s result stored after
+the free, which costs 58 more words; the same local stored before the free;
+a local holding `file[j]` for both calls, equally bad; the two `if`s folded
+into one `&&`; and `file[j] = NULL` moved in front of the free.

@@ -687,7 +687,11 @@
   `xori rd, rs, 1`, because gcc knows the inner value is 0 or 1. Retail's
   second `sltiu rd, rs, 1` is the generic `== 0` expansion, which needs
   `t = prev < 0x13; ok = t == 0;` as two statements. That was the last word of
-  `nbActionProcess1`.
+  `nbActionProcess1`. It holds across a call too: in `Flow11_3` retail keeps
+  the `slt` in `$16` over a `jal` and applies the `sltiu` after it, which
+  needs `alive = drain < hp;` before the call and `dead = !alive;` after it.
+  The two locals coalesce into one callee-saved register, so the second name
+  costs nothing.
 - `case_values_threshold` is 10 in this build: a `switch` needs at least ten
   `case` nodes before ee-gcc emits a jump table rather than a compare tree,
   independently of the range test. Where retail has a jump table and the

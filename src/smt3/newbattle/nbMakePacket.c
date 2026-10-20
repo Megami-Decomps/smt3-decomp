@@ -9,6 +9,8 @@ typedef struct evtUnitHandle_t
 {
     u8 unk_00[0x8C];
     dds3Basic_t *basic;
+    u8 unk_90[0x14];
+    u32 flags;
 } evtUnitHandle_t;
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 typedef struct NB_FILEHANDLE_T NB_FILEHANDLE_T;
@@ -867,6 +869,10 @@ extern void nbMakaDispOn(s32 no);
 extern s32 datCheckDying(datUnitWork_t *unit);
 extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                             s32 type, s32 hp, s32 mp, s32 bad);
+extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
+                              s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
+                              s32 animeoff);
+extern s32 nbAddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add);
 extern s32 nbCheckFlowUnit(nbNegoProcessData_t *n);
 extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
 extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
@@ -944,6 +950,7 @@ extern s32 pacCheckEnd(nbPacHandle_t *h);
 extern void nbAddFormEntry(void *buf, s32 group, s32 id);
 extern dds3ProcessID_t *evtLoadEventPack(s32 rid);
 extern s32 nbFlowGetUnitEntry(datUnitWork_t *a, datUnitWork_t *b, s32 c, s32 d);
+extern s32 pacFileCheckEnd(void *h);
 extern void *fileGetMemHandle(void *h);
 extern void fileHandleFree(void *h);
 typedef struct { s16 jouken[3]; u8 pad[0xC6]; } nbInfoSelectEntry_t;
@@ -2790,7 +2797,18 @@ s32 nbCheckNegoMessage(nbNegoProcessData_t *n)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetNegoMesVar);
+void nbSetNegoMesVar(s32 msgid, datUnitWork_t *p, datUnitWork_t *e)
+{
+    itfMesMngSetVar(msgid, 0, e->id, 1);
+    itfMesMngSetVar(msgid, 4, datDevilTable[e->id].race, 8);
+    if (p->flag & 4) {
+        itfMesMngSetVar(msgid, 1, 0, 0xA);
+        itfMesMngSetVar(msgid, 5, datDevilTable[0].race, 8);
+    } else {
+        itfMesMngSetVar(msgid, 1, p->id, 1);
+        itfMesMngSetVar(msgid, 5, datDevilTable[p->id].race, 8);
+    }
+}
 
 s32 nbGetNegoYaruMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
@@ -3391,9 +3409,111 @@ s32 Flow1_33(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 21 of 252 words differ (first at +0x2CC). */
+#ifdef NON_MATCHING
+s32 Flow1_32(nbNegoProcessData_t *n)
+{
+    if (n->ework->id == 0x3 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x74, 0);
+        return 2;
+    } else if (n->ework->id == 0x4 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x75, 0);
+        return 2;
+    } else if (n->ework->id == 0x5 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x76, 0);
+        return 2;
+    } else if (n->ework->id == 0x8 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x77, 0);
+        return 2;
+    } else if (n->ework->id == 0xA && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x78, 0);
+        return 2;
+    } else if (n->ework->id == 0xD && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x79, 0);
+        return 2;
+    } else if (n->ework->id == 0x10 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7A, 0);
+        return 2;
+    } else if (n->ework->id == 0x18 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7B, 0);
+        return 2;
+    } else if (n->ework->id == 0x1D && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7C, 0);
+        return 2;
+    } else if (n->ework->id == 0x1E && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7D, 0);
+        return 2;
+    } else if (n->ework->id == 0x96 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7E, 0);
+        return 2;
+    } else if (n->ework->id == 0x99 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x7F, 0);
+        return 2;
+    }
+    if (n->ework->id == 0x96 ||
+        n->ework->id == 0x1D ||
+        n->ework->id == 0x3 ||
+        n->ework->id == 0x8 ||
+        n->ework->id == 0xD ||
+        n->ework->id == 0xA ||
+        n->ework->id == 0x5 ||
+        n->ework->id == 0x4 ||
+        n->ework->id == 0x10 ||
+        n->ework->id == 0x18 ||
+        n->ework->id == 0x1E ||
+        n->ework->id == 0x99) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x80, 0);
+        return 1;
+    }
+    if ((datGetRace(n->ework) == 0x13 || datGetRace(n->ework) == 0x12 ||
+         n->ework->id == 0x9A) && n->negoreqtype == 0) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x127, 0);
+        return 1;
+    }
+    n->waitframe = 0xF;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x20, 0);
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_32);
+#endif
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_12);
+s32 Flow1_12(nbNegoProcessData_t *n)
+{
+    s32 cnt;
+    s32 rate;
+
+    nbAddNegoIdKouho(n, 0x1001F);
+    nbAddNegoIdKouho(n, 0x10027);
+    n->workid[3] = 0x1000F;
+    n->nextnegoid = n->nextkouho[1];
+    cnt = *(u8 *)(datDevilTable[n->ework->id].race + (s32)DDS3_GBWK + 0x1CA8);
+    if (cnt >= 3 && DDS3_GBWK->maka >= 0x1F4) {
+        if ((u32)(cnt - 3) < 3) {
+            rate = 0x1E;
+        } else {
+            rate = ((u32)(cnt - 6) < 5) ? 0x32 : 0x46;
+        }
+        if (dds3GetRandIntA(0, 0x64) < rate) {
+            n->nextnegoid = n->nextkouho[0];
+        }
+    }
+    return 0;
+}
 
 s32 Flow1_13(nbNegoProcessData_t *n)
 {
@@ -3527,7 +3647,7 @@ s32 Flow1_23(nbNegoProcessData_t *n)
             return 4;
         }
         msg = &n->flowmsg[mt->mesno];
-        nbSetNegoMesVar(*msg, n->pwork);
+        nbSetNegoMesVar(*msg, n->pwork, n->ework);
         nbDispNegoMessage(n, *msg, 0x10, 0);
         return 4;
     }
@@ -5781,7 +5901,71 @@ s32 nbNegoFlowStock(nbNegoProcessData_t *n)
     return D_004EF7C8[(u16)n->nownegoid](n);
 }
 
+/* NON_MATCHING: 1 of 210 words differ (first at +0x38). */
+#ifdef NON_MATCHING
+s32 Flow4_1(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x40002);
+    if (n->ework->id == 0x59 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x8C, 0);
+        return 2;
+    } else if (n->ework->id == 0x38 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x8D, 0);
+        return 2;
+    } else if (n->ework->id == 0x68 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x81, 0);
+        return 2;
+    } else if (n->ework->id == 0x69 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x82, 0);
+        return 2;
+    } else if (n->ework->id == 0x6A && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x83, 0);
+        return 2;
+    } else if (n->ework->id == 0x6B && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x84, 0);
+        return 2;
+    } else if (n->ework->id == 0x6C && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x85, 0);
+        return 2;
+    } else if (n->ework->id == 0x6D && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x86, 0);
+        return 2;
+    } else if (n->ework->id == 0x6E && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x87, 0);
+        return 2;
+    } else if (n->ework->id == 0x6F && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x88, 0);
+        return 2;
+    } else if (n->ework->id == 0x70 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x89, 0);
+        return 2;
+    } else if (n->ework->id == 0x71 && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x8A, 0);
+        return 2;
+    } else if (n->ework->id == 0x9A && n->pwork->id == n->ework->id) {
+        n->waitframe = 0xF;
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x8B, 0);
+        return 2;
+    }
+    n->waitframe = 0xF;
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x31, 0);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow4_1);
+#endif
 
 s32 Flow4_2(nbNegoProcessData_t *n)
 {
@@ -6592,7 +6776,58 @@ s32 Flow11_2(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_3);
+s32 Flow11_3(nbNegoProcessData_t *n)
+{
+    s32 drain;
+    s32 alive;
+    s32 dead;
+
+    nbAddNegoIdKouho(n, 0xB0004);
+    nbClsNegoMessage(n);
+    nbPanelPartyShow();
+    printf("drain = %d\n", n->requestdata);
+    if (n->requesthpmp == 0) {
+        nbAddTimeListHp(n->actdata, n->eformindex,
+                        (n->ework->maxhp < n->ework->hp + n->requestdata)
+                            ? n->ework->maxhp - n->ework->hp
+                            : n->requestdata);
+        nbMakeKaifukuPacket(0, 0, n->eform, 0, n->requestdata, -1, 0);
+        nbAddHitEffKoukaPacket(0, 0, n->eform, 9);
+        drain = n->requestdata;
+        if (nbCheckKuisibariSkill(n->pformindex) != 0) {
+            if (drain > 0 && drain >= n->pwork->hp) {
+                drain = n->pwork->hp - 1;
+                nbAddSkillNamePacket(0x2D, (s32)n->actdata, 0x159);
+                nbSetKuisibariStop(n->pformindex);
+            }
+        } else if (nbCheckKuisibari2Skill(n->pformindex) != 0) {
+            if (drain > 0 && drain >= n->pwork->hp) {
+                drain = n->pwork->hp - 1;
+                nbAddSkillNamePacket(0x2D, (s32)n->actdata, 0x168);
+                nbSetKuisibariStop(n->pformindex);
+            }
+        }
+        alive = drain < n->pwork->hp;
+        nbAddTimeListHp(n->actdata, n->pformindex,
+                        -(n->pwork->hp < drain ? n->pwork->hp : drain));
+        dead = !alive;
+        nbMakeDamagePacket(0x2D, (s32)n->actdata, n->pform, 3, drain, -1, 0, 0, dead, 0, 1, 0);
+        if (dead != 0) {
+            nbMakeDeadPacket(0x4B, (s32)n->actdata, n->pform, 0);
+        }
+    } else {
+        nbMakeKaifukuPacket(0xF, (s32)n->actdata, n->eform, 0, -1, n->requestdata, 0);
+        nbMakeDamagePacket(0x2D, (s32)n->actdata, n->pform, 3, -1, n->requestdata, 0, 0, 0, 0, 1,
+                           0);
+        if (n->requestdata > 0) {
+            n->requestdata = n->pwork->mp * 100 / n->requestdata;
+        } else {
+            n->requestdata = 100;
+        }
+    }
+    n->waitframe = 0x14;
+    return 0;
+}
 
 s32 Flow11_4(nbNegoProcessData_t *n)
 {
@@ -8191,7 +8426,33 @@ void SetSelect(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetDvlChange);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetTarget_nbDebugProcess);
+void SetTarget_nbDebugProcess(nbDebugWork_t *d)
+{
+    nbFormation_t *form;
+    nbParty_t *party;
+    s32 i;
+
+    d->form = NULL;
+    d->unk_14 = 0;
+    for (i = 0; i < 0x10; i++) {
+        form = (nbFormation_t *)(i * sizeof(nbFormation_t) + (s32)d->data->form);
+        if (form->stat & 8) {
+            d->unk_14 = i;
+            d->form = form;
+            d->partyindex = form->partyindex;
+            party = &d->data->party[form->partyindex];
+            d->party = party;
+            if (party->flag & 2) {
+                d->unk_0C = 1;
+                d->unk_10 = party->statindex;
+                return;
+            }
+            d->unk_0C = 0;
+            d->unk_10 = party->statindex;
+            return;
+        }
+    }
+}
 
 void BackUpHpMpBad(nbDebugWork_t *d)
 {
@@ -9204,7 +9465,37 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetSingleTarget2);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetGroupTarget2);
 
+/* NON_MATCHING: 15 of 49 words differ (first at +0x3C). */
+#ifdef NON_MATCHING
+s32 ChkCost(nbActionProcessData_t *a)
+{
+    s32 skill;
+    s32 ret;
+    s32 ailevel;
+
+    ret = 0;
+    switch (a->work->nowcommand) {
+    case 0:
+        skill = 0;
+        break;
+    case 1:
+    case 5:
+        skill = a->work->nowindex;
+        break;
+    default:
+        return 0;
+    }
+    if (nbCheckSkillCost(a->form->formindex, skill) != 0) {
+        ailevel = D_003989E0[a->work->id].ailevel;
+        if (ailevel < 3) {
+            ret = ailevel != 0;
+        }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", ChkCost);
+#endif
 
 s32 ChkClose(nbActionProcessData_t *a)
 {
@@ -10706,7 +10997,42 @@ nbStatWork_t *nbSetFormEntry(s32 id)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbLoadMidiFile);
 
+/* NON_MATCHING: 2 of 64 words differ (first at +0x74). */
+#ifdef NON_MATCHING
+void nbCheckPackLoad(nbMainProcessData_t *data)
+{
+    nbStatWork_t *stat;
+    s32 i;
+    s32 j;
+    s32 ofs;
+
+    ofs = 0;
+    for (i = 9; i >= 0; i--) {
+        stat = (nbStatWork_t *)((s32)data->statwork + ofs);
+        if (stat->id != 0) {
+            for (j = 0; j < 0x1A; j++) {
+                if (stat->file[j] != NULL) {
+                    if (pacFileCheckEnd(stat->file[j]) != 0) {
+                        stat->buf[j] = fileGetMemHandle(stat->file[j]);
+                        fileHandleFree(stat->file[j]);
+                        stat->file[j] = NULL;
+                    }
+                }
+            }
+            if (stat->motfile != NULL) {
+                if (pacFileCheckEnd(stat->motfile) != 0) {
+                    stat->motbuf = fileGetMemHandle(stat->motfile);
+                    fileHandleFree(stat->motfile);
+                    stat->motfile = NULL;
+                }
+            }
+        }
+        ofs += sizeof(nbStatWork_t);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCheckPackLoad);
+#endif
 
 s32 nbFindFreeFormSlot(void)
 {
@@ -10858,7 +11184,35 @@ void nb_28DE28(void)
     func_002C1E70(0);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbEncProcess3);
+void *nbEncProcess3(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    u32 i;
+
+    data = nbGetMainProcessData();
+    form = data->form;
+    for (i = 0; i < 0x20; i++) {
+        if (form->stat & 1) {
+            if (!(form->stat & 2)) {
+                return NULL;
+            }
+            if (form->hunit == NULL) {
+                return NULL;
+            }
+            if (form->hunit->flags & 0x10000) {
+                return NULL;
+            }
+        }
+        form++;
+    }
+    if (nbCameraStart() == 0) {
+        return NULL;
+    }
+    effBTLEncountEnd();
+    nbGetMainProcessData()->stat &= ~0x800;
+    return (void *)-1;
+}
 
 void *nbEncProcess2_6(dds3ProcessID_t *id)
 {
@@ -10941,7 +11295,31 @@ void nbInitEncProcess(nbMainProcessData_t *data)
     data->encproc = id;
 }
 
+/* NON_MATCHING: 11 of 41 words differ (first at +0x28). */
+#ifdef NON_MATCHING
+void nbCollectBadCurseUnits(nbActionProcessData_t *a)
+{
+    s8 list[32];
+    nbFormation_t *form;
+    s32 i;
+    s32 cnt;
+    s32 ofs;
+
+    cnt = 0;
+    for (i = 0, ofs = 0; i < 0x10; i++) {
+        form = (nbFormation_t *)(ofs + (s32)a->data->form);
+        ofs += sizeof(nbFormation_t);
+        if (form->stat & 4) {
+            list[cnt++] = i;
+        }
+    }
+    if (cnt > 0) {
+        a->data->form[list[dds3GetRandIntA(0, cnt)]].stat |= 8;
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbCollectBadCurseUnits);
+#endif
 
 void nbMarkBadCurseUnits(nbActionProcessData_t *a)
 {

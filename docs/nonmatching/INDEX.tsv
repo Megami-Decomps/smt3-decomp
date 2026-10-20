@@ -186,6 +186,11 @@ Flow7_11,			1 of 84 words differing	docs/nonmatching/newbattle/nbMakePacket.md	7
 Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/nonmatching/newbattle/nbMakePacket.md	768
 Flow12_4	newbattle/nbMakePacket	0x194	73 of 97 words differ	docs/nonmatching/newbattle/nbMakePacket.md	781
 Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/nonmatching/newbattle/nbMakePacket.md	800
+Flow4_1	newbattle/nbMakePacket	0x348	1 of 210 words differ	docs/nonmatching/newbattle/nbMakePacket.md	821
+Flow1_32	newbattle/nbMakePacket	0x400	231 of 252 words match	docs/nonmatching/newbattle/nbMakePacket.md	840
+nbCollectBadCurseUnits	newbattle/nbMakePacket	0xA4	30 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	866
+ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbattle/nbMakePacket.md	883
+nbCheckPackLoad	newbattle/nbMakePacket	0x100	62 of 64 words match	docs/nonmatching/newbattle/nbMakePacket.md	904
 nbAddOrder	newbattle/nbStageProcess	0x9C	17 of 37 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	21
 nbGetRandamStock	newbattle/nbStageProcess	0xB4	4 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	36

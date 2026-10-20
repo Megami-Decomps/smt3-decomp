@@ -9,6 +9,14 @@ so take retail's emitted list and left-rotate it by one to get the source
 order. Mixed `sb` and `sw` stores rotate together. A short-circuit `||` with one
 store beats an if/else chain that stores in each arm.
 
+- Two unrelated member stores in front of an expression that loads a `gp`
+  global decide the whole block's schedule, and the winning order is not the
+  one the stores come out in. `Flow1_12` writes `n->workid[3] = 0x1000F;`
+  first, `n->nextnegoid = n->nextkouho[1];` second and the loaded expression
+  third, yet retail emits the `sw 0x1C` before the `sw 0x68`; the other five
+  orders are 10 to 45 words out. Three statements is six compiles, so sweep
+  them rather than reading the emitted order back into the source.
+
 - Where retail's last store before a `jal` is a constant store rather than the
   argument setup, hoist the argument into a local above the stores. The store
   then falls into the call's delay slot. `nbSetBadstatMotion2` went from six
