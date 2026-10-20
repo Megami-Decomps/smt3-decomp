@@ -242,42 +242,53 @@ matches.
 
 ## Where it stands
 
-`sdk` is 12,872 of 125,024 bytes matched (10.30%), and game code is now measured
+`sdk` is 17,176 of 125,024 bytes matched (13.74%), and game code is measured
 without it: 951,108 of 1,851,268 bytes (51.38%).
 
 Done: the second compiler, selected per unit; the 12-unit split; the probe
-loop; and three libraries worked clean room against it, 51 functions in all.
+loop; and five libraries worked, 71 functions in all.
 
 | Unit | Matched | Left |
 |---|---|---|
-| `libdma` | 18 of 19 | `sceDmaPutEnv`, where the register allocation around the SQWC and PCR stores still differs |
-| `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `_GetGsDxDyOffset`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
-| `libpad` | 27 of 29 | `scePadPortOpen` and `_send_to_iop`, both off by one register pair in the IOP address arithmetic |
+| `libpad` | 27 of 29 | `scePadPortOpen`, `_send_to_iop`, both drafted |
+| `libmc` | 18 of 21 | `sceMcWrite`, `sceMcSync`, `sceMcSetFileInfo`, all drafted; seven internal helpers untouched |
+| `libdma` | 18 of 19 | `sceDmaPutEnv`, drafted one instruction out |
+| `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
+| `libipu` | 1 of 4 | `sceIpuStopDMA`, `sceIpuRestartDMA`, `sceIpuSync` |
+| `libmrpc` | 2 of 7 | the five that touch the packet queue |
+| `libcdvd`, `libkernl`, `libc`, `libm`, `libgcc` | none | untouched |
 
-Two traps the probe cannot see, both found by relinking:
+Three things the IDB's decompiler gets wrong here, each of which cost a pass
+before it was understood:
 
-- **The probe masks the low half of every immediate**, so it cannot tell two
-  globals in the same region apart. `libpad`'s RPC packet and its sceSif client
-  data were swapped through 11 functions and every one still read as a match.
-  `tools/check_funcs.py` against the linked image is what catches that.
-- **A store order the source chose is visible.** `scePadInit2` clears each
-  entry at +0x10, +0x18, +0x14; written in field order it is one instruction
-  shorter and every offset shifts by 4.
+- **It invents a return value for a void tail call.** `setD4_CHCR` ends in
+  `j EIntr`, which Hex-Rays reads as `return EIntr()`. Under this compiler that
+  shape cannot produce a `j` (see the sibcall rule above), so the `j` is itself
+  the proof the function returns nothing. `sceSifMExitRpc` and
+  `_sceRpcFreePacket` are the same story, where the "returned" value is just
+  whatever was left in `$v0`.
+- **A label that is not a function.** `libipu` calls `gcc2_compiled__7`, which
+  is the `gcc2_compiled.` label at the head of the object that defines the
+  channel-3 setter. The call is real; the name is a boundary artefact.
+- **A placeholder name on a real symbol.** `_GetGsDxDyOffset` is a two
+  instruction `syscall` stub, not C, so it belongs with the handwritten code
+  rather than in any C denominator.
 
-Next:
+Next, in the order the bytes are worth having:
 
-1. **The Sony libraries, clean room.** Work from the disassembly with the probe
-   loop. libkernl is the largest at 38,592 bytes with 32,612 of them reachable;
-   libmc, libcdvd and libmrpc are untouched, and the three above have 10
-   functions left between them.
-2. **newlib, fdlibm and libgcc (50,296 bytes).** Compile the upstream file each
-   member names against the 2.96 archive, which is on disk, then confirm
-   against retail. No recovery involved, and the highest byte yield left.
-3. **Per-object units.** The 12 library units can become ~116 member units as
-   each library is worked, using the member column of
-   `config/smt3/sdk_objects.tsv`. The three rules above are what a finer split
-   has to respect.
-
+1. **`libc`, `libm` and `libgcc` (50,296 bytes).** The upstream file each
+   archive member names, compiled with the pinned `cc1`. The flag archaeology
+   above (`-O3`-level inlining for newlib, a different fdlibm for libm) is
+   where this starts, and the archives let a candidate be checked without the
+   retail image.
+2. **`libkernl` (37,012 bytes, 31,032 of them reachable).** 182 of its
+   functions are `syscall` stubs that were never C.
+3. **`libcdvd` (6,976 bytes).** Untouched, and the only Sony library left of
+   any size.
+4. **The six parked drafts.** Each is one register-allocation decision away;
+   [the per-unit pages](nonmatching/) say which.
+5. **Per-object units.** The 12 library units can become ~116 member units
+   using the member column of `config/smt3/sdk_objects.tsv`.
 ## What the region says about the recovered names
 
 Several names in this region are the IDB's placeholders or are wrong, and the
