@@ -23,6 +23,22 @@ typedef struct effPCPBossPlace_t
 
 /* One crack segment: the extents effPCPCrackSizeInit randomizes plus the
  * negative age that delays its start. */
+/* The fragment parameter head effPCP_ThunderPolyListCreate copies out of a
+ * work; only the fragment count is set by hand here. */
+typedef struct effPCPBossThunderHead_t
+{
+    u8 unk00[0x24];
+    s32 fragmentCount;
+    u8 unk28[0x2C];
+} effPCPBossThunderHead_t;
+
+typedef struct effPCPBossThunderParam_t
+{
+    f32 points[10][4];
+    s32 count;
+    effPCPBossThunderHead_t head;
+} effPCPBossThunderParam_t;
+
 typedef struct effCrackCell_t
 {
     f32 offsetDistance;
@@ -144,14 +160,21 @@ typedef struct effPCPBossONGY_t
     s32 unk0C;
 } effPCPBossONGY_t;
 
+/* The argument block effPkt3DPrimMakePoly reads. */
 typedef struct effPCPBossWork_t
 {
-    u8 unk00[4];
+    u16 primCount;
+    u16 vertexCount;
     u16 unk04;
     u8 unk06[2];
-    u32 unk08;
+    u32 color;
     const void *unk0C;
-    u8 unk10[0x1C];
+    effPCPBossVector_t *positions;
+    u8 unk14[4];
+    f32 *uvs;
+    u8 unk1C[4];
+    u32 *colors;
+    u8 unk24[8];
 } effPCPBossWork_t;
 
 typedef struct effPCPBossBUNSINParam_t
@@ -204,12 +227,28 @@ typedef struct effPCPBossDengeki_t
     u32 color;
 } effPCPBossDengeki_t;
 
+/* The model node a formation's helper unit owns, down to the root the mark
+ * lookups take. */
+typedef struct effPCPBossOwner_t
+{
+    u8 unk00[0x18];
+    void *inner;
+} effPCPBossOwner_t;
+
+typedef struct effPCPBossHUnit_t
+{
+    u8 unk00[0x8C];
+    effPCPBossOwner_t *owner;
+} effPCPBossHUnit_t;
+
 /* One battle formation slot: the main process data holds 32 of them. */
 typedef struct effPCPBossUnit_t
 {
     u8 unk00[0x78];
     s32 flags;
-    u8 unk7C[0x74];
+    u8 unk7C[0x10];
+    effPCPBossHUnit_t *hunit;
+    u8 unk90[0x60];
 } effPCPBossUnit_t;
 
 typedef struct effPCPBossThunderbolt_t
@@ -225,7 +264,8 @@ typedef struct effPCPBossKAGUInvoke_t
 {
     u8 unk000[0x3C0];
     s32 groupCount;
-    void *polyLists[27];
+    void *polyLists[26];
+    s32 frame;
     u32 color;
     void *handle;
 } effPCPBossKAGUInvoke_t;
@@ -240,7 +280,7 @@ typedef struct effPCPBossKAGUAttack_t
     void *polyLists[32];
     effPCPBossBED_t *bed;
     void *cut;
-    u8 unkF4[4];
+    s32 unkF4;
     u32 color;
 } effPCPBossKAGUAttack_t;
 
@@ -270,7 +310,7 @@ typedef struct effPCPBossKAGU2Attack_t
     void *polyLists[16];
     effPCPBossBED_t *bed;
     void *cut;
-    u8 unkB4[4];
+    s32 unkB4;
     u32 color;
 } effPCPBossKAGU2Attack_t;
 
@@ -316,15 +356,21 @@ typedef struct effPCPMuzzleFlash_t
     f32 scale;
 } effPCPMuzzleFlash_t;
 
-typedef struct effPCPDANTE_Thunder_t
+/* The block effPCPDANTE_Thunder_Copy hands straight back to Create. */
+typedef struct effPCPDANTE_Thunder_Param_t
 {
-    u8 position[0x10];
-    u8 matrix[0x40];
-    u8 params[0x54];
+    u8 head[0x54];
     s32 mark;
     s32 limit;
     s32 fadeIn;
     s32 fadeOut;
+} effPCPDANTE_Thunder_Param_t;
+
+typedef struct effPCPDANTE_Thunder_t
+{
+    u8 position[0x10];
+    u8 matrix[0x40];
+    effPCPDANTE_Thunder_Param_t params;
     f32 scale;
     u32 color;
     void *poly;
@@ -342,10 +388,19 @@ typedef struct effPCPDANTE_UV_t
     u32 vh;
 } effPCPDANTE_UV_t;
 
+/* The 16-byte block effPCPDANTE_Damage_Create copies into the work head; the
+ * last word is the per-target delay step. */
+typedef struct effPCPDANTE_DamageParam_t
+{
+    u8 unk00[0xC];
+    s32 delayStep;
+} effPCPDANTE_DamageParam_t;
+
 typedef struct effPCPDANTE_Damage_t
 {
     u8 position[0x10];
-    u8 unk010[0x24];
+    u8 unk010[0x20];
+    s32 unk030;
     u8 unk034;
     u8 unk035[3];
     effPCPBossBED_t *bed;
@@ -438,9 +493,14 @@ extern void effEveBEDCutDraw(void *cut);
 extern u32 effColorBlend(u32 firstColor, u32 secondColor, f32 blend);
 extern void *dds3GetProcessData(void);
 extern u32 effBTLSkillCheckRun(void);
+extern u32 effBTLSkillGetTargetBit(void);
+extern u32 dds3GetRandIntA(void *state, u32 range);
 extern void *effBTLSkillGetInvokeFormation(void);
 extern void effBTLModelGetMarkMatrix2(void *model, s32 mark);
 extern void effBTLModelGetMarkPosition2(void *model, s32 mark);
+extern void effDebugPointDraw(const void *position);
+extern void effDebugLineDraw(const void *from, const void *to);
+extern s32 sdfModelGetMarkPosMatrix(void *root, s32 mark);
 extern void effPCPCrackInit(effCrackWork_t *work);
 extern void dds3PadVibrationSet(s32 port, u8 power, s32 frames);
 extern effPCPBossUnit_t **nbGetMainProcessData(void);
@@ -454,11 +514,17 @@ extern void effBTLModelGetSphereCenter(void *model);
 extern void *effBTLSkillGetTargetFormation(s32 index);
 extern void LookAtMatrix(const void *target, const void *eye, const void *up);
 extern void ReverseMatrix(void);
+extern void sdf3DPrimLinkTm(void *tag, s32 arg);
+extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *param);
+extern void sdfDrawTagLink(void *tag, u32 packet);
+extern u8 D_002F5C20[], D_002F5C30[];
+extern u8 effPCPBossTexRect[];
 extern u8 D_0031FF80[];
 extern void dds3EffectPartSetRotateMatrix(s32 part, const void *matrix);
 extern void dds3EffectPartSetPosition(s32 part, const void *position);
 extern void dds3EffectPartSetColor(s32 part, u32 color);
 extern void dds3EffectPartDraw(s32 part);
+s32 effPCPDANTE_Thunder_ProcessDraw(void);
 void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_t *work, const void *source);
 void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *work, const void *source);
 extern void *effPCPHelperBEDCopy(void *helper);
@@ -504,15 +570,16 @@ extern s32 printf(const char *format, ...);
 
 extern void sdfMatFreeDelayed(void *asset);
 extern void effPCP_ThunderPolyListDelete(void *list);
+extern void *effPCP_ThunderPolyListCreate(const effPCPBossThunderParam_t *param);
 extern void *dds3EffectPCPDataGetData(void *data, u32 number, ...);
-extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(void *params);
+extern effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *params);
 
 extern f32 effPCPBossKAGUDrawParam[4];
 extern f32 effPCPBossKAGU2DrawParam[4];
 
 extern void dds3BillboardDelete(void *billboard);
 extern void dds3BillboardSetRGBA(void *billboard, u32 color);
-extern effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(void *params);
+extern effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *params);
 extern effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreate(void *params);
 extern void effPCPBossKAGUThunderboltDrawSub(effPCPBossKAGUThunderbolt_t *work, const f32 *param);
 extern void effPCPCrackDraw(effCrackWork_t *work);
@@ -528,7 +595,7 @@ extern void effPCPHelperBEDDraw(void *helper);
 extern void effPCPHelperBEDSetPosition(void *helper, const void *source);
 extern void effPCPHelperBEDSetColor(void *helper, u32 color);
 extern void effPCPHelperBEDSetScale(void *helper, f32 scale);
-extern effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(void *params);
+extern effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *params);
 extern effPCPDANTE_Damage_t *effPCPDANTE_Damage_Create(void *params, void *bedParams);
 extern u8 D_00533E10[];
 extern u8 D_00533DD0[];
@@ -546,6 +613,13 @@ extern void dds3BillboardSetPosition(void *bill, const void *position);
 extern void dds3BillboardDraw(void *bill);
 extern s32 sdfModelGetMarkPos(void *root, s32 mark);
 extern void SetRotateMatrixY_B(f32 angle);
+extern void SetRotateMatrixAxis(f32 angle, const void *axis);
+extern void SetRotateMatrixZ(f32 angle);
+extern void *effPCP_ThunderPolyCreate(const void *params);
+extern s32 dds3StartProcess(const char *name, s32 priority, s32 startDelay, s32 endDelay,
+                            void *entry, void *a5, void *a6);
+extern void dds3SetProcessData(s32 process, void *data);
+extern const char D_00533DF0[];
 extern u128 *effPCP_ThunderPolyGetParam(void *poly);
 extern void effPCP_ThunderPolySetColor(void *poly, u32 color);
 extern void effPCP_ThunderPolyDraw(void *poly);
@@ -697,7 +771,7 @@ effPCPBossBUNSIN_t *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *param)
     memset(&effPCPBossWork, 0, sizeof(effPCPBossWork_t));
     effPCPBossWork.unk04 = 0x4000;
     effPCPBossWork.unk0C = D_0031FF20;
-    effPCPBossWork.unk08 = 0x80808080;
+    effPCPBossWork.color = 0x80808080;
     return work;
 }
 
@@ -710,7 +784,70 @@ void effPCPBossBUNSINDelete(effPCPBossBUNSIN_t *work)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly);
 
+/* vu0 routine: the BUNSIN billboard quad. */
+/* NON_MATCHING: 9 of 117 words differ (first at +0x90). */
+#ifdef NON_MATCHING
+void effPCPBossBUNSINDrawPoly2(void *tag, void *asset, const u128 *center, u32 color, f32 width,
+                               f32 height)
+{
+    effPCPBossVector_t points[4];
+    f32 uv[8];
+
+    SDF_VU0_LOADIDENTITY();
+    SDF_VU0_LOADVECTOR(center);
+    VU0_ADD_VF31_VF10_XYZ();
+    sdf3DPrimLinkTm(tag, 0);
+    LookAtMatrix(D_002F5C20, D_002F5C30, effPCPBossTexRect);
+    ReverseMatrix();
+    width = width * 0.5f;
+    height = height * 0.5f;
+    effPCPBossWork.color = color;
+    effPCPBossWork.vertexCount = 4;
+    effPCPBossWork.uvs = uv;
+    effPCPBossWork.primCount = 2;
+    uv[7] = 1.0f;
+    effPCPBossWork.positions = points;
+    points[0].f[1] = -height;
+    points[0].f[0] = -width;
+    effPCPBossWork.colors = NULL;
+    uv[2] = 1.0f;
+    uv[5] = 1.0f;
+    uv[6] = 1.0f;
+    uv[0] = 0.0f;
+    uv[1] = 0.0f;
+    uv[3] = 0.0f;
+    uv[4] = 0.0f;
+    points[0].f[2] = 0.0f;
+    points[0].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&points[0]);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&points[0]);
+    points[1].f[0] = width;
+    points[1].f[1] = -height;
+    points[1].f[2] = 0.0f;
+    points[1].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&points[1]);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&points[1]);
+    points[2].f[0] = -width;
+    points[2].f[1] = height;
+    points[2].f[2] = 0.0f;
+    points[2].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&points[2]);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&points[2]);
+    points[3].f[0] = width;
+    points[3].f[1] = height;
+    points[3].f[2] = 0.0f;
+    points[3].f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR(&points[3]);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR(&points[3]);
+    sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork));
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDrawPoly2);
+#endif
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBUNSINDraw);
 
@@ -1010,7 +1147,42 @@ void effPCPBossBaelSetColor(effBaelWork_t *work, u32 color)
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossDengekiCreate);
+effPCPBossDengeki_t *effPCPBossDengekiCreate(effPCPBossDengeki_t *param, void *bedParams)
+{
+    effPCPBossThunderParam_t thunder;
+    effPCPBossPlace_t place;
+    effPCPBossDengeki_t *work = sdfChipAllocDirect(sizeof(effPCPBossDengeki_t));
+    s32 i;
+
+    memcpy(work, param, 0x58);
+    work->frame = 0;
+    work->color = 0x80808080;
+    if (bedParams != NULL) {
+        effPCPBossBED_t *bed;
+
+        place.payload[0] = 0.0f;
+        place.payload[1] = 0.0f;
+        place.payload[2] = 0.0f;
+        place.payload[3] = 0.0f;
+        place.payload[4] = 0.0f;
+        place.payload[5] = 0.0f;
+        place.payload[6] = 0.0f;
+        place.payload[7] = 1.0f;
+        place.payload[8] = 100.0f;
+        place.payload[9] = 100.0f;
+        place.payload[10] = work->scale;
+        place.color = 0x80808080;
+        bed = effEveBEDCreate(bedParams);
+        work->bed = bed;
+        work->cut = effEveBEDCutCreate(bed, 2, &place);
+    }
+    memcpy(&thunder.head, work, 0x54);
+    thunder.count = 4;
+    for (i = 0; i < 4; i++) {
+        work->polyLists[i] = effPCP_ThunderPolyListCreate(&thunder);
+    }
+    return work;
+}
 
 void effPCPBossDengekiCreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -1232,7 +1404,19 @@ void effPCPBossDengekiSetColor(effPCPBossDengeki_t *work, u32 color)
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossThunderboltCreate);
+effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *params)
+{
+    effPCPBossThunderParam_t thunder;
+    effPCPBossThunderbolt_t *work = sdfChipAllocDirect(sizeof(effPCPBossThunderbolt_t));
+
+    memcpy(work, params, 0x64);
+    work->color = 0x80808080;
+    work->frame = 0;
+    memcpy(&thunder.head, work->unk10, 0x54);
+    thunder.count = 4;
+    work->polyList = effPCP_ThunderPolyListCreate(&thunder);
+    return work;
+}
 
 effPCPBossThunderbolt_t *effPCPBossThunderboltCreatePCF(void *data, s32 index, s32 type)
 {
@@ -1309,7 +1493,33 @@ void effPCPBossThunderboltSetColor(effPCPBossThunderbolt_t *work, u32 color)
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUInvokeCreate);
+effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *params)
+{
+    effPCPBossThunderParam_t thunder;
+    void *handle = sdfMemAllocDirect(sizeof(effPCPBossKAGUInvoke_t));
+    effPCPBossKAGUInvoke_t *work = sdfMemLock(handle);
+    void **list;
+    s32 count;
+    s32 i;
+
+    work->handle = handle;
+    memcpy(work, params, 0x3C4);
+    work->color = 0x80808080;
+    work->frame = 0;
+    memcpy(&thunder.head, &work->unk000[0x360], 0x54);
+    thunder.head.fragmentCount = 1;
+    thunder.count = 9;
+    count = work->groupCount * 6;
+    if (count > 0) {
+        i = count;
+        list = work->polyLists;
+        do {
+            *list++ = effPCP_ThunderPolyListCreate(&thunder);
+            i--;
+        } while (i != 0);
+    }
+    return work;
+}
 
 effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreatePCF(void *data, s32 index, s32 type)
 {
@@ -1346,7 +1556,45 @@ void effPCPBossKAGUInvokeSetColor(effPCPBossKAGUInvoke_t *work, u32 color)
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackCreate);
+effPCPBossKAGUAttack_t *effPCPBossKAGUAttackCreate(effPCPBossKAGUAttack_t *param, void *bedParams)
+{
+    effPCPBossThunderParam_t thunder;
+    effPCPBossPlace_t place;
+    effPCPBossKAGUAttack_t *work = sdfChipAllocDirect(sizeof(effPCPBossKAGUAttack_t));
+    u32 count;
+    u32 i;
+
+    memcpy(work, param, 0x6C);
+    work->unkF4 = 0;
+    work->color = 0x80808080;
+    if (bedParams != NULL) {
+        effPCPBossBED_t *bed;
+
+        place.payload[0] = 0.0f;
+        place.payload[1] = 0.0f;
+        place.payload[2] = 0.0f;
+        place.payload[3] = 0.0f;
+        place.payload[4] = 0.0f;
+        place.payload[5] = 0.0f;
+        place.payload[6] = 0.0f;
+        place.payload[7] = 1.0f;
+        place.payload[8] = 100.0f;
+        place.payload[9] = 100.0f;
+        place.payload[10] = work->scale;
+        place.color = 0x80808080;
+        bed = effEveBEDCreate(bedParams);
+        work->bed = bed;
+        work->cut = effEveBEDCutCreate(bed, 2, &place);
+    }
+    memcpy(&thunder.head, work, 0x54);
+    thunder.head.fragmentCount = 1;
+    thunder.count = 5;
+    count = work->groupCount * 8;
+    for (i = 0; i < count; i++) {
+        work->polyLists[i] = effPCP_ThunderPolyListCreate(&thunder);
+    }
+    return work;
+}
 
 void effPCPBossKAGUAttackCreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -1396,7 +1644,60 @@ void effPCPBossKAGUAttackDelete(effPCPBossKAGUAttack_t *work)
     sdfChipFreeDirect(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackGetSplitPoint);
+/* vu0 routine: the five split points of the KAGU arc. */
+void effPCPBossKAGUAttackGetSplitPoint(u128 *out, const u128 *start, const u128 *end,
+                                       const u128 *origin)
+{
+    effPCPBossVector_t startDir;
+    effPCPBossVector_t endDir;
+    effPCPBossVector_t radius;
+    effPCPBossVector_t radiusStep;
+    f32 startLength;
+    f32 endLength;
+    f32 delta;
+    f32 blend;
+    f32 step;
+    u32 i;
+
+    SDF_VU0_LOADVECTOR_B(origin);
+    SDF_VU0_LOADVECTOR(start);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(startLength);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&startDir);
+    SDF_VU0_LOADVECTOR(end);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(endLength);
+    delta = endLength - startLength;
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(&endDir);
+    SDF_VU0_COPYVECTOR_B_TO_C();
+    blend = 0.0f;
+    step = 0.25f;
+    radius.f[0] = startLength;
+    radius.f[1] = startLength;
+    radius.f[2] = startLength;
+    radius.f[3] = 0.0f;
+    radiusStep.f[0] = delta * step;
+    radiusStep.f[1] = radiusStep.f[0];
+    radiusStep.f[2] = radiusStep.f[0];
+    radiusStep.f[3] = 0.0f;
+    for (i = 0; i < 5; i++) {
+        SDF_VU0_LOADVECTOR(&startDir);
+        SDF_VU0_LOADVECTOR_B(&endDir);
+        VU0_LERP_VF10_VF11(blend);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_LOADVECTOR_B(&radius);
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_ADDVECTOR_A_C();
+        SDF_VU0_STOREVECTOR(out);
+        SDF_VU0_LOADVECTOR(&radiusStep);
+        SDF_VU0_ADDVECTOR_B_A();
+        SDF_VU0_STOREVECTOR_B(&radius);
+        blend += step;
+        out++;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUAttackDraw);
 
@@ -1405,7 +1706,43 @@ void effPCPBossKAGUAttackSetColor(effPCPBossKAGUAttack_t *work, u32 color)
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGUThunderboltCreate);
+effPCPBossKAGUThunderbolt_t *effPCPBossKAGUThunderboltCreate(effPCPBossKAGUThunderbolt_t *param,
+                                                              void *crackParams, void *bedParams)
+{
+    effPCPBossThunderParam_t thunder;
+    effPCPBossPlace_t place;
+    effPCPBossKAGUThunderbolt_t *work = sdfChipAllocDirect(sizeof(effPCPBossKAGUThunderbolt_t));
+
+    memcpy(work, param, 0x100);
+    work->color = 0x80808080;
+    work->frame = 0;
+    memcpy(&thunder.head, work->unk010, 0x54);
+    thunder.count = 4;
+    work->polyList = effPCP_ThunderPolyListCreate(&thunder);
+    if (crackParams != NULL) {
+        work->crack = effPCPCrackCreate((effCrackParam_t *)&work->unk010[0x54], crackParams);
+    }
+    if (bedParams != NULL) {
+        effPCPBossBED_t *bed;
+
+        place.payload[0] = 0.0f;
+        place.payload[1] = 0.0f;
+        place.payload[2] = 0.0f;
+        place.payload[3] = 0.0f;
+        place.payload[4] = 0.0f;
+        place.payload[5] = 0.0f;
+        place.payload[6] = 0.0f;
+        place.payload[7] = 1.0f;
+        place.payload[8] = 100.0f;
+        place.payload[9] = 100.0f;
+        place.payload[10] = work->scale;
+        place.color = 0x80808080;
+        bed = effEveBEDCreate(bedParams);
+        work->bed = bed;
+        work->cut = effEveBEDCutCreate(bed, 2, &place);
+    }
+    return work;
+}
 
 void effPCPBossKAGUThunderboltCreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -1572,7 +1909,45 @@ void effPCPBossKAGUThunderboltSetColor(effPCPBossKAGUThunderbolt_t *work, u32 co
     work->color = color;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackCreate);
+effPCPBossKAGU2Attack_t *effPCPBossKAGU2AttackCreate(effPCPBossKAGU2Attack_t *param, void *bedParams)
+{
+    effPCPBossThunderParam_t thunder;
+    effPCPBossPlace_t place;
+    effPCPBossKAGU2Attack_t *work = sdfChipAllocDirect(sizeof(effPCPBossKAGU2Attack_t));
+    u32 count;
+    u32 i;
+
+    memcpy(work, param, 0x6C);
+    work->unkB4 = 0;
+    work->color = 0x80808080;
+    if (bedParams != NULL) {
+        effPCPBossBED_t *bed;
+
+        place.payload[0] = 0.0f;
+        place.payload[1] = 0.0f;
+        place.payload[2] = 0.0f;
+        place.payload[3] = 0.0f;
+        place.payload[4] = 0.0f;
+        place.payload[5] = 0.0f;
+        place.payload[6] = 0.0f;
+        place.payload[7] = 1.0f;
+        place.payload[8] = 100.0f;
+        place.payload[9] = 100.0f;
+        place.payload[10] = work->scale;
+        place.color = 0x80808080;
+        bed = effEveBEDCreate(bedParams);
+        work->bed = bed;
+        work->cut = effEveBEDCutCreate(bed, 2, &place);
+    }
+    memcpy(&thunder.head, work, 0x54);
+    thunder.head.fragmentCount = 1;
+    thunder.count = 5;
+    count = work->groupCount * 4;
+    for (i = 0; i < count; i++) {
+        work->polyLists[i] = effPCP_ThunderPolyListCreate(&thunder);
+    }
+    return work;
+}
 
 void effPCPBossKAGU2AttackCreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -1623,7 +1998,82 @@ void effPCPBossKAGU2AttackDelete(effPCPBossKAGU2Attack_t *work)
     sdfChipFreeDirect(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackGetSplitPoint);
+/* vu0 routine: the five split points of the KAGU2 arc. */
+void effPCPBossKAGU2AttackGetSplitPoint(u128 *out, const u128 *start, const effPCPBossVector_t *end,
+                                        const u128 *origin, f32 spread, f32 angle)
+{
+    effPCPBossVector_t startDir;
+    effPCPBossVector_t endDir;
+    effPCPBossVector_t radius;
+    effPCPBossVector_t radiusStep;
+    effPCPBossVector_t axis;
+    u128 *point;
+    f32 endLength;
+    f32 baseRadius;
+    f32 delta;
+    f32 blend;
+    f32 step;
+    f32 r;
+    u32 narrowBits;
+    u32 i;
+
+    SDF_VU0_LOADVECTOR_B(origin);
+    SDF_VU0_LOADVECTOR(start);
+    SDF_VU0_SUBVECTOR();
+    baseRadius = 800.0f;
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(&startDir);
+    SDF_VU0_LOADVECTOR(end);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(endLength);
+    delta = endLength - baseRadius;
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(&endDir);
+    SDF_VU0_COPYVECTOR_B_TO_C();
+    blend = 0.0f;
+    step = 0.25f;
+    point = out;
+    radius.f[0] = baseRadius;
+    radius.f[1] = baseRadius;
+    radius.f[2] = baseRadius;
+    radius.f[3] = 0.0f;
+    radiusStep.f[0] = delta * step;
+    radiusStep.f[1] = radiusStep.f[0];
+    radiusStep.f[2] = radiusStep.f[0];
+    radiusStep.f[3] = 0.0f;
+    SDF_VU0_LOADVECTOR_B(end);
+    SDF_VU0_LOADVECTOR(start);
+    SDF_VU0_SETVECTOR_X(end->f[0]);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR_NOMEM(&axis);
+    r = dds3GetRandFloatA(dds3EffectBase);
+    angle += (1.0f - (r * spread + (1.0f - spread))) * 0.61086511611938477f;
+    SetRotateMatrixAxis(angle, &axis);
+    i = 0;
+    narrowBits = 0x3F400000;
+    while (i < 5) {
+        SDF_VU0_LOADVECTOR(&startDir);
+        SDF_VU0_LOADVECTOR_B(&endDir);
+        VU0_LERP_VF10_VF11(blend);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_LOADVECTOR_B(&radius);
+        if (i == 2 && angle != 0.0f) {
+            SDF_VU0_SCALEVECTOR_B_BITS(narrowBits);
+        }
+        SDF_VU0_MULVECTOR();
+        SDF_VU0_ADDVECTOR_A_C();
+        SDF_VU0_STOREVECTOR(point);
+        SDF_VU0_LOADVECTOR_B(&radius);
+        SDF_VU0_LOADVECTOR(&radiusStep);
+        SDF_VU0_ADDVECTOR_B_A();
+        SDF_VU0_STOREVECTOR_B(&radius);
+        blend += step;
+        point++;
+        i++;
+    }
+}
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2AttackDraw);
 
@@ -1661,7 +2111,54 @@ void effPCPBossKAGU2MUHENKDelete(effPCPBossKAGU2MUHENK_t *work)
     sdfChipFreeDirect(work);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossKAGU2MUHENKDraw);
+/* vu0 routine: the seven MUHENK mark gizmos. */
+void effPCPBossKAGU2MUHENKDraw(effPCPBossKAGU2MUHENK_t *work)
+{
+    effPCPBossVector_t pos;
+    effPCPBossVector_t lineEnd;
+    effPCPBossVector_t down;
+    effPCPBossUnit_t *model;
+    s32 id;
+    u32 i;
+    effPCPBossUnit_t *found;
+
+    if (effBTLSkillCheckRun() != 0) {
+        model = effBTLSkillGetInvokeFormation();
+    } else {
+        found = NULL;
+        model = *nbGetMainProcessData();
+        for (i = 0; i < 0x20; i++) {
+            if ((model->flags & 3) == 3) {
+                id = effBTLModelGetID(model);
+                if (id == 0x125 || id == 0x108) {
+                    found = model;
+                    break;
+                }
+            }
+            model++;
+        }
+        if (found == NULL) {
+            return;
+        }
+    }
+    for (i = 0; i < 7; i++) {
+        effBTLModelGetMarkPosition2(model, i + 0x14);
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        effDebugPointDraw(&pos);
+        sdfModelGetMarkPosMatrix(model->hunit->owner->inner, i + 0x14);
+        down.f[0] = 0.0f;
+        down.f[1] = -1.0f;
+        down.f[2] = 0.0f;
+        SDF_VU0_LOADVECTOR(&down);
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&down);
+        lineEnd.f[0] = pos.f[0] + down.f[0] * 200.0f;
+        lineEnd.f[1] = pos.f[1] + down.f[1] * 200.0f;
+        lineEnd.f[2] = pos.f[2] + down.f[2] * 200.0f;
+        effDebugLineDraw(&pos, &lineEnd);
+    }
+    work->unk00++;
+}
 
 void effPCPBossKAGU2MUHENKSetColor(effPCPBossKAGU2MUHENK_t *work, u32 color)
 {
@@ -1725,7 +2222,20 @@ void effPCPCrack2SetColor(effCrackWork_t *work, u32 color)
     effPCPCrackSetColor(work, color);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossMETATOBeamCreate);
+effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreate(void *params)
+{
+    effPCPBossThunderParam_t thunder;
+    effPCPBossMETATOBeam_t *work = sdfChipAllocDirect(sizeof(effPCPBossMETATOBeam_t));
+
+    memcpy(work, params, 0x70);
+    work->color = 0x80808080;
+    work->frame = 0;
+    memcpy(&thunder.head, work->unk10, 0x54);
+    thunder.count = 4;
+    work->polyLists[0] = effPCP_ThunderPolyListCreate(&thunder);
+    work->polyLists[1] = effPCP_ThunderPolyListCreate(&thunder);
+    return work;
+}
 
 effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreatePCF(void *data, s32 index, s32 type)
 {
@@ -1988,20 +2498,33 @@ void effPCPMuzzleFlashSetRotateMatrix(effPCPMuzzleFlash_t *work, const void *sou
     SDF_VU0_STOREMATRIX(work);
 }
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DA0);
+/* vu0 routine: the DANTE lightning bolt's work and its draw process. */
+effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *params)
+{
+    effPCPDANTE_Thunder_t *work = sdfChipAllocDirect(sizeof(effPCPDANTE_Thunder_t));
+    u128 *param;
+    s32 process;
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DB0);
+    memcpy(&work->params, params, sizeof(work->params));
+    work->color = 0x80808080;
+    SetRotateMatrixZ(-1.5707963f);
+    SDF_VU0_STOREMATRIX(work->matrix);
+    SDF_VU0_STOREIDENTITYVECTOR(work);
+    work->poly = effPCP_ThunderPolyCreate(&work->params);
+    param = effPCP_ThunderPolyGetParam(work->poly);
+    SDF_VU0_LOADVECTOR(param);
+    param++;
+    SDF_VU0_LOADVECTOR_B(param);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(work->scale);
+    work->drawRequest = 0;
+    work->frame = 0;
+    process = dds3StartProcess(D_00533DF0, 0x2B0A, 0, 0, effPCPDANTE_Thunder_ProcessDraw, 0, 0);
+    work->process = process;
+    dds3SetProcessData(process, work);
+    return work;
+}
 
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DC0);
-
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DD0);
-
-INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DE0);
-
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_Create);
-
-/* NON_MATCHING: 15 of 43 words differ (first at +0x20). */
-#ifdef NON_MATCHING
 s32 effPCPDANTE_Thunder_ProcessDraw(void)
 {
     effPCPDANTE_Thunder_t *work = dds3GetProcessData();
@@ -2012,11 +2535,11 @@ s32 effPCPDANTE_Thunder_ProcessDraw(void)
     if (work->drawRequest != 0) {
         if (effBTLSkillCheckRun() != 0) {
             model = effBTLSkillGetInvokeFormation();
-            effBTLModelGetMarkMatrix2(model, work->mark);
+            effBTLModelGetMarkMatrix2(model, work->params.mark);
             SDF_VU0_STOREMATRIX_MEMOPS(matrix[0], matrix[1], matrix[2], matrix[3]);
             effPCPDANTE_Thunder_SetRotateMatrix(work, matrix);
-            effBTLModelGetMarkPosition2(model, work->mark);
-            SDF_VU0_STOREVECTOR(&position);
+            effBTLModelGetMarkPosition2(model, work->params.mark);
+            SDF_VU0_STOREVECTOR_NOMEM(&position);
             effPCPDANTE_Thunder_SetPosition(work, &position);
         }
         effPCPDANTE_Thunder_Draw(work);
@@ -2024,9 +2547,6 @@ s32 effPCPDANTE_Thunder_ProcessDraw(void)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Thunder_ProcessDraw);
-#endif
 
 effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_CreatePCF(void *data, s32 index, s32 type)
 {
@@ -2042,7 +2562,7 @@ void effPCPDANTE_Thunder_Delete(effPCPDANTE_Thunder_t *work)
 
 effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Copy(effPCPDANTE_Thunder_t *src, s32 index, s32 type)
 {
-    return effPCPDANTE_Thunder_Create(src->params);
+    return effPCPDANTE_Thunder_Create(&src->params);
 }
 
 void effPCPDANTE_Thunder_DrawSub(effPCPDANTE_Thunder_t *work)
@@ -2052,7 +2572,7 @@ void effPCPDANTE_Thunder_DrawSub(effPCPDANTE_Thunder_t *work)
 
 void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_t *work)
 {
-    s32 limit = work->limit;
+    s32 limit = work->params.limit;
     s32 frame = work->frame;
     s32 fadeIn;
     s32 fadeOut;
@@ -2062,8 +2582,8 @@ void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_t *work)
     u32 color;
 
     if (frame < limit) {
-        fadeIn = work->fadeIn;
-        fadeOut = work->fadeOut;
+        fadeIn = work->params.fadeIn;
+        fadeOut = work->params.fadeOut;
         param = effPCP_ThunderPolyGetParam(work->poly);
         SDF_VU0_LOADMATRIX(work->matrix);
         SDF_VU0_LOADVECTOR_B(D_00533E10);
@@ -2105,7 +2625,55 @@ void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *work, const void
     SDF_VU0_STOREMATRIX(work->matrix);
 }
 
+/* NON_MATCHING: 19 of 90 words differ (first at +0x4). */
+#ifdef NON_MATCHING
+effPCPDANTE_Damage_t *effPCPDANTE_Damage_Create(void *params, void *bedParams)
+{
+    const effPCPDANTE_DamageParam_t *param = params;
+    effPCPDANTE_Damage_t *work = sdfChipAllocZeroDirect(sizeof(effPCPDANTE_Damage_t));
+    effPCPBossUnit_t *unit;
+    u32 bits;
+    s32 delay;
+    u8 *slot;
+    u32 count;
+    u32 i;
+    u32 swaps;
+
+    memcpy(work, params, 0x10);
+    work->unk030 = 0;
+    work->color = 0x80808080;
+    if (bedParams != NULL) {
+        work->unk034 = 1;
+        work->bed = effEveBEDCreate(bedParams);
+    }
+    delay = 1;
+    unit = *nbGetMainProcessData();
+    bits = effBTLSkillGetTargetBit();
+    count = 0;
+    slot = work->unk010;
+    for (i = 0; i < 32; i++, unit++) {
+        if (unit->flags & 1) {
+            if (bits & (1 << i)) {
+                *slot++ = delay;
+                count++;
+                delay += param->delayStep;
+            }
+        }
+    }
+    swaps = count * 2;
+    for (i = 0; i < swaps; i++) {
+        u32 a = dds3GetRandIntA(NULL, count);
+        u32 b = dds3GetRandIntA(NULL, count);
+        u8 held = work->unk010[a];
+
+        work->unk010[a] = work->unk010[b];
+        work->unk010[b] = held;
+    }
+    return work;
+}
+#else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Create);
+#endif
 
 void effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
     void *firstBlock;
@@ -2308,7 +2876,7 @@ void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_t *work, const void *
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-/* NON_MATCHING: 41 of 62 words differ (first at +0x24). */
+/* NON_MATCHING: 30 of 63 words differ (first at +0x80). */
 #ifdef NON_MATCHING
 effPCP_BED_t *effPCP_BED_Create(effPCP_BED_Param_t *param, void *bedParams)
 {
@@ -2333,7 +2901,7 @@ effPCP_BED_t *effPCP_BED_Create(effPCP_BED_Param_t *param, void *bedParams)
         place.payload[8] = 100.0f;
         place.payload[9] = 100.0f;
         place.payload[10] = 1.0f;
-        place.color = 0x80808080;
+        place.color = work->color;
         bed = effEveBEDCreate(bedParams);
         work->bed = bed;
         work->cut = effEveBEDCutCreate(bed, 2, &place);
@@ -2549,6 +3117,18 @@ void effPadVibeFadeIN(u32 port, u8 intensity, s32 frames)
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", dds3EffectBlurDrawQuad);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DA0);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DB0);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DC0);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DD0);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DE0);
+
+INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533DF0);
 
 INCLUDE_RODATA(const s32, "effect/effPCPBoss", D_00533E10);
 

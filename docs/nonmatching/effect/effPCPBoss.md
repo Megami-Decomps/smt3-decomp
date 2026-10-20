@@ -44,29 +44,36 @@ storing `work->crack` before `work->bed` instead of after.
 
 ## effPCP_BED_Create (effect/effPCPBoss, 248 bytes)
 
-21 of 62 words match, at the exact 248-byte size.
+33 of 63 words match, one word short of retail's 62.
 
-One source fact is missing. Retail materialises `0x80808080` twice: once as
-`lui`/`ori` before the parameter copy for `work->color`, and again inside the
-`bedParams` arm for `place.color`, with the second `ori` filling the guard's
-delay slot. Every C shape tried lets ee-gcc common the two constants into one
-register that stays live across the guard, which costs a register and rotates
-the whole arm. The structure around it is right: the 12-byte parameter copy as
-one struct assignment (one `ldl`/`ldr` pair plus an `lw`/`sw`), the two VU0
-identity macros, and the placement block written `payload[0..10]` then `color`,
-which is the shape that matched for the five sibling copy routines.
+Retail materialises `0x80808080` twice: once as `lui`/`ori` before the parameter
+copy for `work->color`, and again for `place.color`, with the second `ori`
+filling the guard's delay slot. ee-gcc commons the two into one pseudo in every
+shape tried, and the shared pseudo then survives the two VU0 identity macros in
+a register the head does not use, which rotates the whole function.
 
-Ruled out for the duplicated constant: the `work->color` store in all four
-positions around the parameter copy and the two VU0 macros; `place.color`
-written before the payload instead of after; an early `return work` in place of
-the `if`; the literal as `0x80808080u`, `-2139062144` and `0x80808080 | 0`;
-`place` and `bed` declared in the guarded block instead of the function body
-(every combination). All land on 41 or more differing words except the four
-listed positions, which land on 41, 41, 42 and 51.
+`place.color = work->color` is what pins down the rest: it kills the colour
+pseudo at the `work->color` store, and the head then comes out exact, including
+retail's `$2`/`$3`/`$4` in the 12-byte parameter copy and the `addiu $6, $18,
+0x40` ahead of the colour store. Only the guarded arm is left, where retail's
+`lui`/`ori` pair is one `lw` in the draft and everything after it shifts by a
+word. So the structure is settled and the one remaining question is how retail
+gets a second constant.
 
-Worth knowing before retrying the bigger `Create` routines in this unit: they
-set a work colour and a placement colour the same way, so whatever defeats the
-common subexpression here should carry several of them.
+Ruled out for the duplicated constant: the literal in a `u32` local, assigned
+at the top of the function, before the two VU0 macros, between them, before the
+`if`, at the end of the payload block, inside the guarded block, and on the
+declaration (all eight land back on 41 of 62, so the local is CSE'd into the
+same pseudo); the `work->color` store in all four positions around the copy and
+the macros; the two identity macros in both orders; `place` and `bed` declared
+in the guarded block; an early `return work` in place of the `if`;
+`SDF_VU0_STOREIDENTITY(work->matrix)` instead of `SDF_VU0_STOREIDENTITY(work)`;
+`sizeof` for the allocation size; and the parameter copy as `memcpy`.
+
+Worth knowing: the five sibling `Create` routines in this unit that set both a
+work colour and a placement colour all match with one shared constant, so
+whatever forces the second materialisation here is local to this function, not
+the family.
 
 ## effPCPCrackCopy (effect/effPCPBoss, 292 bytes)
 
@@ -84,33 +91,6 @@ colour store swap sides of the `dds3EffectPartCopy` delay slot, the same way
 Ruled out: all six orderings of the head copy, the colour store and the
 `unk9C` store (four of them are far worse, two land on 10); `unk9C` as an `f32`
 written `0.0f`, which reaches 11.
-
-## effPCPDANTE_Thunder_ProcessDraw (effect/effPCPBoss, 172 bytes)
-
-28 of 43 words match, one word short of retail's 44.
-
-Retail computes `$sp + 0x40` twice: once into `$2` for the `sqc2` that stores
-the mark position, and again into `$5` in the `effPCPDANTE_Thunder_SetPosition`
-delay slot. Every C shape tried lets ee-gcc common the two into one register,
-which it then allocates straight to `$5`, so the draft is one instruction
-shorter and everything after the `sqc2` shifts. The matrix half is already
-exact, including `SDF_VU0_STOREMATRIX_MEMOPS` for the four frame-addressed
-`sqc2`s against `SDF_VU0_STOREVECTOR` for the register-addressed one.
-
-Ruled out for the duplicated address: the position as a bare `u128`, as a
-one-element array, and as the fifth element of the matrix array (so the two
-locals are one `u128 buf[5]`); a `u128 *` local assigned just before the macro
-and `&position` at the call.
-
-The same obstacle blocks `effPCPBossKAGU2MUHENKDraw`, which is otherwise
-straightforward: retail computes the mark index `i + 0x14` separately for its
-`effBTLModelGetMarkPosition2` and `sdfModelGetMarkPosMatrix` calls, and ee-gcc
-commons the two into one saved register, leaving the draft a word short. Its
-structure is known: the shared invoke-model search that
-`effPCPBossThunderboltDraw` now carries (with a `u32` index and ids 0x125 and
-0x108), then a seven-iteration loop that stores the mark position, calls
-`effDebugPointDraw`, loads `(0, -1, 0)` through `SDF_VU0_APPLYMATRIX` and draws
-a 200-unit line with `effDebugLineDraw`.
 
 ## effPCPDANTE_ShowTime_Draw (effect/effPCPBoss, 300 bytes)
 
@@ -158,3 +138,67 @@ assignments before the `frame < limit` guard, before the fade if-chain, between
 the blend and the loop, and split either side of the call (the three early
 positions are far worse, 88 to 96 words, because the factors then occupy
 registers the fade chain needs); and `found` declared first rather than last.
+
+## effPCPDANTE_Damage_Create (effect/effPCPBoss, 360 bytes)
+
+71 of 90 words match, at the exact 360-byte size.
+
+Two callee-saved registers swapped. Retail keeps the parameter pointer in `$20`
+and the accepted-target count in `$21`; the draft has them the other way round,
+so every instruction that names either differs, and the swap pulls `swaps =
+count * 2` into the other dead register and the byte-swap temporary out of
+`$19` into `$5`. Everything else is exact, including the two 32-iteration
+conditions, the branch-likely forms and the shuffle loop.
+
+Two source facts carried it most of the way, both reusable:
+
+- `delay = 1` has to be assigned before the `nbGetMainProcessData` and
+  `effBTLSkillGetTargetBit` calls. With the assignment after them the value
+  lands in `$4` instead of a callee-saved register, the frame shrinks by 16
+  bytes and 54 words differ; retail fills the first call's delay slot with
+  `addiu $19, $0, 0x1`.
+- The formation walk is a pointer increment, not `unit[i]`. Retail reads
+  `lw $2, 0x78($16)` with `$16` advancing by `0xF0`; the subscript form biases
+  the pointer by `0x78` and adds a word of setup.
+
+Ruled out for the register swap: `count` declared first, last and in the
+middle (declaration order is inert here, as elsewhere); `count` as `s32`;
+`swaps` as `count + count`, inlined into the loop condition, and through a
+separate index variable for the second loop; the parameter typed and the
+`memcpy` taking it directly or through a `void *` cast; the array index form in
+the first loop; `slot` initialised before the calls; a `range` local for the
+two `dds3GetRandIntA` arguments; `held` as `s32`; `a`/`b` as `s32` and declared
+at the top; `NULL` against `0` for the random stream; the second loop as a
+`while`; the two conditions merged with `&&` and spelled `!= 0`. Hoisting
+`param->delayStep` into a local and deriving `count` from the slot pointer are
+both far worse (78 and 80 words), which confirms the loop body is right.
+
+## effPCPBossBUNSINDrawPoly2 (effect/effPCPBoss, 468 bytes)
+
+108 of 117 words match, at the exact 468-byte size.
+
+Scheduling inside one basic block. Retail emits the eight stores that set up
+the primitive block and the first quad vertex in source order: `uv[7]`,
+`positions`, the two negated half-extents, `colors`, then `uv[2]`, `uv[5]`,
+`uv[6]`. The draft pulls `colors` and `uv[6]` to the front of that run and
+pushes `uv[7]` and `positions` behind the two vertex stores, which also rotates
+the three small constants (`&uv`, `2`, `4`) that feed them.
+
+The rest is exact, including `SDF_VU0_LOADIDENTITY` followed by
+`VU0_ADD_VF31_VF10_XYZ` for the translation, the four `SDF_VU0_APPLYMATRIX`
+vertices each with its own address computation for the load and the store, and
+`sdfDrawTagLink(tag, (u32)effPkt3DPrimMakePoly(&effPCPBossWork))`.
+
+One fact got it to nine words and is worth keeping: the two half-extent
+multiplies have to be written second argument first (`width = width * 0.5f`
+before `height = height * 0.5f` reads backwards but is what puts retail's
+`mul.s $f21` ahead of `mul.s $f20`). The other order is six words worse and
+flips which negation reaches `x`.
+
+Ruled out: `colors` moved to the front and the back of the run; `uv[6]` beside
+`uv[7]`; the four zero `uv` stores hoisted to the front; `vertexCount` and
+`primCount` in both orders against `uvs`; the vertex `z`/`w` stores before
+`x`/`y`; `uv` as `f32[4][2]`; the points as `f32[4][4]`; `uv` declared before
+the points (73 words, it takes `0($29)`); and the whole primitive block written
+through a local `effPCPBossWork_t *`, which is far worse because the pointer
+then comes from a pseudo rather than a `%hi`/`%lo` pair.

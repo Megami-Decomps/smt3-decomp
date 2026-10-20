@@ -1619,3 +1619,34 @@
   where any `sb` local is 12 of 20 words out. Both were parked on this for
   longer than they needed to be.
 
+- **A 4-byte tail on an inline block copy is `lw`/`sw` only when both pointer
+  expressions are known 4-byte aligned, so a `void *` parameter is what forces
+  `lwl`/`lwr` there.** The `Create` family in `effect/effPCPBoss` copies a
+  parameter head whose size is `0x64`, `0x6C` or `0x3C4`; with the parameter
+  declared `void *` the residue came out as an unaligned pair and the function
+  ran 8 bytes long, and typing it as a pointer to the work struct (align 4)
+  fixed `effPCPBossThunderboltCreate` and `effPCPBossKAGUInvokeCreate` on that
+  line alone. The 8-byte residue is `ldl`/`ldr` either way, which is why
+  `effPCPBossMETATOBeamCreate` (0x70) and `effPCPBossDengekiCreate` (0x58)
+  matched with `void *`. A `u8` array field of an align-4 struct counts as
+  aligned, so `memcpy(&dst.head, work->unk10, 0x54)` needs no cast.
+- **`SDF_VU0_STOREVECTOR_NOMEM` is also how retail recomputes a frame address
+  that the plain form makes gcc share.** Where retail has `addiu $2, $29, N`
+  for the store and a second `addiu` of the same address for a later call
+  argument or loop load, the `"memory"` clobber is what collapses the two into
+  one pseudo, which then needs a callee-saved register. `_NOMEM` on the store
+  took `effPCPBossKAGU2AttackGetSplitPoint` from 49 differing words and one
+  extra saved register to 2, promoted the parked
+  `effPCPDANTE_Thunder_ProcessDraw` draft outright, and removed the commoned
+  `i + 0x14` that had `effPCPBossKAGU2MUHENKDraw` a word long. Try it before
+  any of the address-shape rewrites: all three had been read as a duplicated
+  address needing a `u128 *` local or an array form, and none of those reach
+  it.
+- **An argument that has to leave `$4`-`$7` before a call is copied where the
+  source assigns it, so a late `addiu rd, $4, $0` is a named local.** In
+  `effPCPBossKAGU2AttackGetSplitPoint` the output pointer arrives in `$4`,
+  which the `SetRotateMatrixAxis` call needs for its own argument, and retail's
+  `daddu $17, $4, $0` sits between the `0.25f` materialisation and the radius
+  stores, not in the prologue. Using the parameter directly in the loop puts
+  the copy first and rotates 45 words; `point = out;` as its own statement at
+  that position is exact.

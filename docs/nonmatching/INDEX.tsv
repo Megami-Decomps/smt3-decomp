@@ -73,11 +73,12 @@ effMagaCylinderDraw, effMagaSpiralDraw and effMagaSmokeDraw	effect/effMagatuhi	0
 effPCPBezierBillDraw	effect/effPCPBezier	0x1764	1482 of 1497 words match	docs/nonmatching/effect/effPCPBezier.md	5
 effPCPBossBaelCopy	effect/effPCPBoss	128 bytes	21 of 32 words match	docs/nonmatching/effect/effPCPBoss.md	5
 effPCPBossKAGUThunderboltCopy	effect/effPCPBoss	176 bytes	21 of 44 words match	docs/nonmatching/effect/effPCPBoss.md	28
-effPCP_BED_Create	effect/effPCPBoss	248 bytes	21 of 62 words match	docs/nonmatching/effect/effPCPBoss.md	45
-effPCPCrackCopy	effect/effPCPBoss	292 bytes	63 of 73 words match	docs/nonmatching/effect/effPCPBoss.md	71
-effPCPDANTE_Thunder_ProcessDraw	effect/effPCPBoss	172 bytes	28 of 43 words match	docs/nonmatching/effect/effPCPBoss.md	88
-effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/nonmatching/effect/effPCPBoss.md	115
-effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/nonmatching/effect/effPCPBoss.md	133
+effPCP_BED_Create	effect/effPCPBoss	248 bytes	33 of 63 words match	docs/nonmatching/effect/effPCPBoss.md	45
+effPCPCrackCopy	effect/effPCPBoss	292 bytes	63 of 73 words match	docs/nonmatching/effect/effPCPBoss.md	78
+effPCPDANTE_ShowTime_Draw	effect/effPCPBoss	300 bytes	71 of 75 words match	docs/nonmatching/effect/effPCPBoss.md	95
+effPCPBossMETATOBeamDraw	effect/effPCPBoss	0x25C	7 of 151 words differ	docs/nonmatching/effect/effPCPBoss.md	113
+effPCPDANTE_Damage_Create	effect/effPCPBoss	360 bytes	71 of 90 words match	docs/nonmatching/effect/effPCPBoss.md	142
+effPCPBossBUNSINDrawPoly2	effect/effPCPBoss	468 bytes	108 of 117 words match	docs/nonmatching/effect/effPCPBoss.md	176
 dds3Particle_SparkOffsetBuffInit	effect/parManager	0x790	462 of 484 words match	docs/nonmatching/effect/parManager.md	5
 dds3Particle_SparkBuffInit	effect/parManager	0x800	490 of 512 words match	docs/nonmatching/effect/parManager.md	35
 dds3ParticleColorAnim	effect/parManager	0x14C	64 of 83 words match	docs/nonmatching/effect/parManager.md	91
