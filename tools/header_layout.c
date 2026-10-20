@@ -648,6 +648,7 @@ OFF(p17a, dds3GlobalWork_t, memHandle, 0x34);
 OFF(p17b, dds3GlobalWork_t, unk3C, 0x3C);
 OFF(p17c, dds3GlobalWork_t, unk1CFA, 0x1CFA);
 OFF(p17d, dds3GlobalWork_t, heartscnt, 0x1D7B);
+OFF(p20a, nbMainProcessData_t, nakamayobi, 0x84);
 OFF(p21, nbMainProcessData_t, camera, 0xFC);
 OFF(p22, nbMainProcessData_t, encounterProcess, 0x114);
 OFF(p23, nbMainProcessData_t, eventPack, 0x138);

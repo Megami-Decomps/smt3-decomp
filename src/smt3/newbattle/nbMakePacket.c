@@ -595,6 +595,21 @@ extern u8 D_005269D0[];
 extern u8 D_00526AC0[];
 extern u8 D_00526AD0[];
 extern u8 D_00526B48[];
+extern u8 D_00526530[];
+extern u8 D_00526540[];
+extern u8 D_005267D0[];
+extern u8 D_005267E0[];
+extern u8 test2_pdummy[];
+extern u16 test2_dvllist[];
+extern s32 test_phearts;
+extern char D_00545B78[];
+extern void datAddHearts(s32 id);
+extern void datEquipHearts(s32 id);
+extern void datRemoveHearts(void);
+extern char D_00545488[];
+extern char D_00545498[];
+extern s32 nbPanelLayoutTable2[4][6];
+extern s32 nbPanelDrawProcess(void);
 extern s32 rstCalcExpFromLevel(s32 kind, s32 level);
 extern void effBTLSetFieldColor(u32 color);
 /* One devil AI action: its weight, the skill it picks and the target rule. */
@@ -4542,7 +4557,20 @@ s32 Flow6_35(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_36);
+s32 Flow6_36(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x60026);
+    nbAddNegoIdKouho(n, 0x90001);
+    if (n->ework->id == 0x5C || n->ework->id == 0x3D ||
+        n->ework->id == 0x61 || n->ework->id == 0x5B) {
+        if (evtBitCheck(8) == 0 && n->negoreqtype == 0 && n->cnt6_36 >= 3) {
+            n->nextnegoid = n->nextkouho[1];
+            return 0;
+        }
+    }
+    n->nextnegoid = n->nextkouho[0];
+    return 0;
+}
 
 /* NON_MATCHING: 9 of 67 words differ (first at +0x9C). */
 #ifdef NON_MATCHING
@@ -8128,7 +8156,30 @@ void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u3
     nbPnlSprite(px + x, py + y, sw, sh, uv->u, uv->v, uv->uw, uv->vh, col, th);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelSpriteBlendDraw);
+void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u32 abgr,
+                            nbPanelXYZ_t *area, f32 scale, sdfTexHandle_t *th)
+{
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 px;
+    s32 py;
+    s32 sw;
+    s32 sh;
+    u32 col;
+
+    x0 = (p->x - area->x) * scale;
+    y0 = (p->y - area->y) * scale;
+    x1 = (p->x + p->w - area->x) * scale;
+    y1 = (p->y + p->h - area->y) * scale;
+    px = area->x + x0;
+    py = area->y + y0;
+    sw = x1 - x0;
+    sh = y1 - y0;
+    col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
+    nbPnlSprite(px + x, py + y, sw, sh, uv->u, uv->v, uv->uw, uv->vh, col, th);
+}
 
 void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelXYZ_t *p, u32 abgr, char **str)
 {
@@ -8468,7 +8519,36 @@ void nbPanelShutdown(dds3ProcessID_t *id)
     data->pnlproc = NULL;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitPanelProcess);
+void nbInitPanelProcess(nbMainProcessData_t *data)
+{
+    dds3ProcessID_t *id;
+    s32 i;
+
+    id = dds3StartProcess(D_00545488, 0x3F9, 1, 1, nbPanelRunProcess, nbPanelShutdown, NULL);
+    dds3LinkProcess(data->mainproc, id);
+    data->pnlproc = id;
+    dds3LinkProcess(id, dds3StartProcess(D_00545498, 0x2B0E, 1, 1, nbPanelDrawProcess, NULL,
+                                         NULL));
+    nbPnlTexSet(data);
+    nbPnlDrawFlag = 1;
+    nbPnlCnt = 0.0f;
+    for (i = 0; i < 4; i++) {
+        nbPanelLayoutTable2[i][0] = 0;
+        nbPanelLayoutTable2[i][1] = 0;
+        nbPanelLayoutTable2[i][2] = -1;
+        nbPanelLayoutTable2[i][3] = -1;
+        nbPanelLayoutTable2[i][4] = 0;
+        nbPanelLayoutTable2[i][5] = 0;
+    }
+    nbPanelPressTurnInit();
+    nbPanelPressGaugeInit();
+    nbPanelStockInit();
+    nbPanelAnalyzeInit();
+    nbPanelAutoInit();
+    nbPanelAllShow();
+    nbPanelBaseABGR = 0x80808080;
+    nbPanelBaseRGBA = 0x80808080;
+}
 
 void nbPanelFlashInit(nbPanelFlash_t *p, s32 a, s32 b, s32 c, f32 x, f32 y, s32 d)
 {
@@ -8504,6 +8584,10 @@ u32 nbPanelFlashRGBAMulti(u32 a, u32 b)
     SDF_VU0_dds3ColorFtoI(out, 128.0f);
     return out;
 }
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545488);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545498);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbPanelFlashDraw);
 
@@ -11066,24 +11150,44 @@ INCLUDE_ASM(const s32, "newbattle/nbMakePacket", SetBossDummy);
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbSetBattleDummy);
 
-/* NON_MATCHING: 13 of 14 words differ (first at +0x0). */
-#ifdef NON_MATCHING
 void nbInitPlayer(void)
 {
-    nbSetBattleDummy(D_00551500, &test_skilllist[0xF0], &test_skilllist[0x100], test_pskill,
-                     test_skilllist);
+    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, test_skilllist);
     evtBitOn(0xC04);
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbInitPlayer);
-#endif
 
 void DrawTest(void) {
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess5);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess4);
+void *TestProcess4(void)
+{
+    s32 i;
+
+    evtBitOn(0xC00);
+    evtBitOn(0xC01);
+    evtBitOff(0xC02);
+    evtBitOff(0xC03);
+    evtBitOff(0xC04);
+    evtBitOff(0xC05);
+    evtBitOn(0xC06);
+    evtBitOn(0xC07);
+    evtBitOn(0xC0A);
+    effBTLSetFieldColor(0);
+    evtBitOff(0xC0D);
+    evtBitOff(0xC10);
+    evtBitOff(0xC12);
+    nbSetBattleDummy(D_00551500, D_005267D0, D_005267E0, test2_dvllist, test2_pdummy);
+    ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->exp = rstCalcExpFromLevel(0, 0x32);
+    DDS3_GBWK->maka = 0x15F90;
+    DDS3_GBWK->akuma[7].badstatus = 0x800;
+    DDS3_GBWK->akuma[7].hp = 0;
+    for (i = 0; i < 0xA0; i++) {
+        DDS3_GBWK->stocklist[i + 4] = 9;
+    }
+    return TestProcess1;
+}
 
 void *TestProcess8(void)
 {
@@ -11119,7 +11223,32 @@ void *TestProcess8(void)
     return TestProcess1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", TestProcess3);
+void *TestProcess3(void)
+{
+    evtBitOff(0xC00);
+    evtBitOff(0xC01);
+    evtBitOff(0xC02);
+    evtBitOff(0xC03);
+    evtBitOn(0xC04);
+    evtBitOff(0xC05);
+    evtBitOff(0xC06);
+    evtBitOff(0xC07);
+    evtBitOff(0xC0A);
+    evtBitOn(0xC0C);
+    effBTLSetFieldColor(0);
+    evtBitOff(0xC0D);
+    evtBitOff(0xC10);
+    evtBitOff(0xC12);
+    nbSetBattleDummy(D_00551500, D_00526530, D_00526540, test_pskill, test_skilllist);
+    if (test_phearts > 0) {
+        printf(D_00545B78);
+        datAddHearts(test_phearts);
+        datEquipHearts(test_phearts);
+    } else {
+        datRemoveHearts();
+    }
+    return TestProcess1;
+}
 
 void *TestProcess7(void)
 {
@@ -11386,6 +11515,8 @@ nbStatWork_t *nbSetFormEntry(s32 id)
     stat->refcnt = 1;
     return stat;
 }
+
+INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545B78);
 
 INCLUDE_RODATA(const s32, "newbattle/nbMakePacket", D_00545B90);
 
@@ -12386,7 +12517,26 @@ void nbInitEventProcess(nbMainProcessData_t *data)
     data->eventproc = id;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", nbFindStockSkillError);
+s32 nbFindStockSkillError(void)
+{
+    datUnitWork_t *w;
+    fldAnahoriAkuma_t *a;
+    s32 i;
+    s32 ofs;
+
+    /* akuma[i].flag starts a datUnitWork_t, so the table has two views. */
+    w = (datUnitWork_t *)((u8 *)DDS3_GBWK + 4);
+    a = (fldAnahoriAkuma_t *)DDS3_GBWK;
+    for (i = 0; i < 16; i++) {
+        ofs = 0xA50 + i * 0xEC;
+        if ((((datUnitWork_t *)((u8 *)w + ofs))->flag & 1) != 0) {
+            if ((((fldAnahoriAkuma_t *)((u8 *)a + ofs))->badstatus & 0xFFF) == 0x800) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 s32 cmpAnyButtonGuideActive(datUnitWork_t **list, s32 cnt)
 {

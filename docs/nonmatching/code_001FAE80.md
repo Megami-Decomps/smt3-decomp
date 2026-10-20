@@ -980,3 +980,64 @@ out of the declarations, a `u8 *` walk reading `p[6]`/`p[7]` instead of a
 typed `entry[1]`, and nested `if`s instead of the `&&`. All nine compile to
 the same three-word swap. This is the same register exchange recorded above
 for `cmpFindKugatatiMsgEntry`, which walks the same table.
+
+## campDhDrawIcon (code_001FAE80, 0x70)
+
+26 of 28 words match, at the exact 112-byte size, with zero instruction
+differences. Draws the box sprite, and when the hearts icon is loaded the
+panel and the hearts icon, then tail-calls `campDhDrawBox`.
+
+The two differing words are the second `campDhDrawWork` load and the `lb` that
+feeds off it: retail reloads the pointer into `$2` and reads `0x31($2)`, this
+reloads it into `$3` and reads `0x31($3)`. Both remaining words are a register
+name.
+
+The call site is what pins two signatures. `campDhDrawHeartsIcon` is passed
+five arguments here, so its fifth parameter exists and is unused in its body;
+and the work pointer is read at `+0x1C` with `lw`, where `campStatusPanel_t`
+has `u16 slot[10]`, so the devil-hearts work is a different record and gets its
+own `campDhWork_t`.
+
+Ruled out: an `s8` local for the icon id; a `campDhWork_t *` local for the
+second read; and an early return for the not-ready case, which costs 24 bytes.
+The first two give the same two words.
+
+## fclTerminalInitMenu (code_001FAE80, 0x7C)
+
+27 of 31 words match, at the exact 124-byte size, with zero instruction
+differences. Picks the terminal menu's text table, with the second group of
+four entries when the current event is 0x296, hands it to the cursor window,
+and sets the command bit and the work's enable byte.
+
+The four differing words are the two registers of the `fclTerminalCommandCount`
+read-modify-write: retail holds the `$28`-relative address in `$2` and the byte
+in `$3`, this holds the address in `$3` and the byte in `$2`. All four remaining
+words are a register name.
+
+Ruled out: writing the work's `+0x25` byte before the command bit, which costs
+four more words; the command bit spelled `x = x | 2` instead of `x |= 2`; a `u8
+*` work parameter with `work[0x25]`; an `s8 *` local for the work byte, which
+adds 12 bytes; and testing `!= 0x296` with the arms exchanged, which reaches
+only 24 matching.
+
+## cmbActionBGM (code_001FAE80, 0x68)
+
+22 of 25 words match and every instruction up to the last call is identical,
+but the draft is one word short of the 104-byte size. Stops or starts the
+combine BGM and prints which it did.
+
+The three remaining words are the final `printf`. Retail calls it with `jal`
+and then runs the epilogue, where this turns it into the tail call
+`ld $31` / `j printf` / `addiu $29` and so saves a word. The first branch's
+`printf` is a tail call in retail too and reproduces exactly, so the shape is
+right for one of the two and wrong for the other.
+
+The parameter is `s32`, not `s8`: retail tests the incoming register raw with
+`bnez` and sign-extends separately for `fclCombineBGM`, which needs a prototype
+with an `s8` parameter ahead of this function. That half is settled.
+
+Ruled out: `void` with `printf(...); return;` in the first branch; `s32` with
+`return printf(...)` in the first branch and a plain `printf(...)` at the end;
+`return printf(...)` in both; an `if`/`else` instead of an early return; and a
+`switch (mode)` with `case 0` and `default`. All five tail-call the last
+`printf`, so nothing in the statement shape reaches the choice.

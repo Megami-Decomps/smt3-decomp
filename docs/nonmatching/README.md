@@ -7,9 +7,9 @@ page and line to open. Conventions are in
 
 | Drafts | Unit | Page |
 |---|---|---|
-| 50 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 40 | code_001FAE80 | [code_001FAE80.md](code_001FAE80.md) |
-| 16 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
+| 49 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
+| 43 | code_001FAE80 | [code_001FAE80.md](code_001FAE80.md) |
+| 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 14 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |

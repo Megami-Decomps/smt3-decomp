@@ -119,7 +119,8 @@ typedef struct nbMainProcessData_t
     s16 unk7A;
     s16 unk7C;                             /* 0x07C: stagemajor */
     s16 unk7E;                             /* 0x07E: stageminor */
-    u8 unk80[8];
+    u8 unk80[4];
+    s32 nakamayobi;                        /* 0x084 */
     s32 eventno;                           /* 0x088 */
     s32 eventrid;
     s16 negopformindex;

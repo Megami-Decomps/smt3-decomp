@@ -994,35 +994,6 @@ before the product; and the word-indexed forms
 `(command * 196 + 4) * 4`. All seven give the identical 24-word diff, so the
 fold is not reachable from the address expression.
 
-## nbInitPlayer (newbattle/nbMakePacket, 0x40)
-
-1 of 14 words match, two words short of retail's 64.
-
-The body is settled: `nbSetBattleDummy(D_00551500, &test_skilllist[0xF0],
-&test_skilllist[0x100], test_pskill, test_skilllist)` followed by
-`evtBitOn(0xC04)`, which retail reaches as a sibling call.
-
-What blocks it is a data boundary, not a source shape. Retail materialises four
-independent `lui`/`addiu` pairs, one per argument, and ee-gcc emits a single
-`lui %hi(test_skilllist)` and reaches the other two addresses as
-`addiu $5, $5, 0xF0` and `addiu $6, $5, 0x10` off that base. Two separate
-objects are the only thing that stops ee-gcc sharing the high half, so
-`test_skilllist` (0x00526440, the IDB's size 0x120) is at least three objects:
-the 0xE0 `datUnitWork_t` that `nbSetBattleDummy` copies to
-`DDS3_GBWK + 0xA54`, and two lists at 0x00526530 and 0x00526540. Naming those
-two means a hand-curated boundary in `config/smt3/symbol_addrs.txt` above
-`// BEGIN ida`, which also unblocks `TestProcess3` and `TestProcess4`: both
-pass the same three addresses, `TestProcess4` against the parallel
-`test2_pdummy` (0x005266E0, +0xF0, +0x100) with `test2_dvllist` already its own
-symbol.
-
-Ruled out inside one object: `&test_skilllist[0xF0]` and
-`test_skilllist + 0xF0`, which compile identically; a `(u16 *)` cast on each
-argument; and `(void *)` on the base. Literal addresses
-(`(void *)0x526530`) do give four independent pairs and get to 8 of 14 words
-differing, which is the evidence for the split, but are not a usable source
-form.
-
 ## nbE915Process_1 (newbattle/nbMakePacket, 0x118)
 
 56 of 69 words match, one word short of retail's 280.

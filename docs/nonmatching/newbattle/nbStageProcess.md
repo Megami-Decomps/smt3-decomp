@@ -68,20 +68,6 @@ local assigned just before the call rather than at its declaration; and all
 the `work` local, matches with the argument hoisted into a local above the
 stores, so the difference is register pressure from `$17` holding `work`.
 
-## nbInitActionProcess (newbattle/nbStageProcess, 0xA0)
-
-6 of 40 words differ, at the exact 160-byte size.
-
-Every instruction matches; the six differing words are the two temporaries
-of the `(data->unkE4 + 1) % 4` sequence, which retail puts in `$9` and `$10`
-and the draft puts in `$5` and `$6`. Nothing in the source says which, so
-this needs whatever makes gcc pass over `$5` through `$8` at that point, not
-a different expression.
-
-Ruled out: `data->unkE4++; data->unkE4 %= 4;`, an `s32` local holding the new
-index, `& 3` in place of `% 4` (which drops the `movn` retail has, 31 words),
-and computing the modulo after the `InitActionProcessData` call (24 words).
-
 ## DispComm1PanelComm (newbattle/nbStageProcess, 0xE0)
 
 53 of 56 words match, at the exact 224-byte size.
@@ -324,3 +310,70 @@ and the `case 2` arm, each of which rearranges the whole epilogue; `u32 ret`; a
 separate `ret = 0;` statement after the declaration; `if (err != 4) {} else`;
 and both source orders of `nbSetCommSelStat(2)` against `a->seq = 1` and
 against `a->stat |= 0x80`.
+
+## SetDamagePacket (newbattle/nbStageProcess, 0x1E0)
+
+116 of 120 words match, at the exact 480-byte size and with zero instruction
+differences in the multiset.
+
+Both kuisibari guards are exact, including the two separate `GetTimeListHp`
+calls (one for the `hp >= ` compare, one for the `- 1` assignment), the
+`else if` chain between the two skills, and the dead arm written first with
+the live arm as the branched-to block, both ending in a `j SetTimeList`
+sibling call.
+
+What is left is where the `moji` argument's `1` is materialised. Retail emits
+`addiu $3, $0, 1` before the `lw $6, 0x28($17)` that fetches `a->form`, so
+`$2` still holds the `CheckTimeListDead` return and the constant lands in
+`$3`; every source shape tried emits the load and the `sltu` first and then
+puts the constant in `$2`, which is free by then. The four differing words are
+those three rotated and the one `sw` that names the register. ee-gcc 2.96 runs
+only sched1 (before reload) at -O2, so the register choice follows the
+schedule and nothing in the source reaches it.
+
+Ruled out: `dead` as the raw return with `!= 0` inlined at the call (which
+moves the `sltu` into the argument block and costs 52 words), `!!`, `== 0 ? 0
+: 1`, `> 0`, a `u32` and an `s16` `dead`, `if (dead)` against `if (dead != 0)`,
+a named `moji = 1` local, `1u`, a `nbFormation_t *form` local for the third
+argument, both declaration orders of `start` and `dead`, `start` assigned
+rather than initialised, an extra live local to shift the pseudo numbering,
+and dropping the `nbMakeDamagePacket` and `nbAddSkillNamePacket` prototypes so
+the callees are implicitly declared.
+
+## StageLoad (newbattle/nbStageProcess, 0x1B4)
+
+97 of 109 words match, at the exact 436-byte size and with zero instruction
+differences in the multiset.
+
+The shape is settled. The three stack vectors are `pos`, `rot` and `q`
+declared in that order, which puts them at the frame's 0x00, 0x10 and 0x20;
+both constant vectors arrive by `memcpy` from `extern char D_00543668[]` and
+`D_00543678[]`, whose alignment of 1 is what gives retail's unaligned
+`ldl`/`ldr` and `sdl`/`sdr` block moves rather than an `lq`/`sq` pair; `q` is
+zeroed by a real `jal memset` and then gets `q.w = 1.0f`; and the dispatch is
+`s32 state = nbStageState.unk00; switch (state)` with `case 0:` and a shared
+`case 1: case 2:`, the `s32` local being what stops gcc dropping the `bltz`
+low-bound test that an `unsigned char` index would make dead.
+
+What is left is that `&rot` and `&q` swap between `$18` and `$19`. Retail
+holds `&rot` in `$18` with three references of its own (the four `sdl`/`sdr`
+words and the `lqc2`) and `&q` in `$19` with two (the `memset` argument and
+the `sqc2`), rematerialising the `dds3SetRotPoseSet` argument as
+`addiu $5, $29, 0x20`. Every source shape tried lets cse share that argument
+with the `&q` pseudo, which raises `&q`'s reference count to the same
+`floor_log2` bucket as `&rot`'s and flips the two registers.
+
+Also measured: `-0.34906585f` and `0.69813165f` are the spellings that give
+retail's `0xbeb2b8c2` and `0x3f32b8c1`, since cc1 truncates rather than rounds
+and the nearest-decimal forms land one ulp low.
+
+Ruled out: `SDF_VU0_STOREVECTOR_MEMOPS(q)`, which does assign the two
+registers retail's way but spells the store `sqc2 $vf10, 0x20($29)` and still
+copies the call argument from `$19` (two words); `SDF_VU0_LOADVECTOR_MEMOPS`;
+`(u8 *)` casts on either macro operand; `&q.x`, a `(u128 *)` cast and a
+`(void *)` cast at the call; a `sdfVector4_t *qp` local used for the memset,
+the store, or the call; an `f32 q[4]`; all 24 orders of the four
+initialisation statements; all six declaration orders of the three vectors
+(which only move the frame slots); moving either initialisation into the
+`case 0` arm; and `void *`, `u128 *`, `f32 *` and absent prototypes for
+`dds3SetRotPoseSet`.

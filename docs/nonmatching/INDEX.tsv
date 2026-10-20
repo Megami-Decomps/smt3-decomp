@@ -58,6 +58,9 @@ cmbCountEvoReady	code_001FAE80	0x84	9 of 34 words match	docs/nonmatching/code_00
 cmbGetLevelUpCount	code_001FAE80	0x84	22 of 32 words match	docs/nonmatching/code_001FAE80.md	894
 fclDrawSpriteCore	code_001FAE80	0x2D8	69 of 180 words match	docs/nonmatching/code_001FAE80.md	923
 rstFindEvoEntryType5, rstFindEvoEntryType7	code_001FAE80	0x6C each	24 of 27 words each match	docs/nonmatching/code_001FAE80.md	964
+campDhDrawIcon	code_001FAE80	0x70	26 of 28 words match	docs/nonmatching/code_001FAE80.md	984
+fclTerminalInitMenu	code_001FAE80	0x7C	27 of 31 words match	docs/nonmatching/code_001FAE80.md	1005
+cmbActionBGM	code_001FAE80	0x68	22 of 25 words match	docs/nonmatching/code_001FAE80.md	1023
 getPartsType	code_0029B780	0x5C	15 of 24 words differ	docs/nonmatching/code_0029B780.md	5
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0029B780.md	23
 pipeGetObjData	code_0029B780	0x120	9 of 71 words differ	docs/nonmatching/code_0029B780.md	49
@@ -201,26 +204,26 @@ nbCheckPackLoad	newbattle/nbMakePacket	0x100	62 of 64 words match	docs/nonmatchi
 Chk_ENHOJOMAX, Chk_FRHOJOMAX	newbattle/nbMakePacket	0xDC each	54 of 55 words each match	docs/nonmatching/newbattle/nbMakePacket.md	926
 Flow8_7, Flow8_15	newbattle/nbMakePacket	0x7C each	18 of 29 words each differ	docs/nonmatching/newbattle/nbMakePacket.md	944
 nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	969
-nbInitPlayer	newbattle/nbMakePacket	0x40	1 of 14 words match	docs/nonmatching/newbattle/nbMakePacket.md	997
-nbE915Process_1	newbattle/nbMakePacket	0x118	56 of 69 words match	docs/nonmatching/newbattle/nbMakePacket.md	1026
-nbMakeNegoBackPacket	newbattle/nbMakePacket	0x104	63 of 65 words match	docs/nonmatching/newbattle/nbMakePacket.md	1046
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	1080
+nbE915Process_1	newbattle/nbMakePacket	0x118	56 of 69 words match	docs/nonmatching/newbattle/nbMakePacket.md	997
+nbMakeNegoBackPacket	newbattle/nbMakePacket	0x104	63 of 65 words match	docs/nonmatching/newbattle/nbMakePacket.md	1017
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	1051
 nbAddOrder	newbattle/nbStageProcess	0x9C	17 of 37 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	21
 nbGetRandamStock	newbattle/nbStageProcess	0xB4	4 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	36
 nbSetBadstatMotion	newbattle/nbStageProcess	0xA8	6 of 42 words differ	docs/nonmatching/newbattle/nbStageProcess.md	52
-nbInitActionProcess	newbattle/nbStageProcess	0xA0	6 of 40 words differ	docs/nonmatching/newbattle/nbStageProcess.md	71
-DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	85
-nbSetWaitMotion	newbattle/nbStageProcess	0xD8	8 of 54 words differ	docs/nonmatching/newbattle/nbStageProcess.md	109
-CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	124
-CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/nonmatching/newbattle/nbStageProcess.md	143
-CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/nonmatching/newbattle/nbStageProcess.md	160
-DispCommCursor	newbattle/nbStageProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbStageProcess.md	176
-nbGetMotionNo	newbattle/nbStageProcess	0xC0	23 of 46 words differ	docs/nonmatching/newbattle/nbStageProcess.md	201
-nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/nonmatching/newbattle/nbStageProcess.md	225
-AnimeCommandList	newbattle/nbStageProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbStageProcess.md	252
-RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/nonmatching/newbattle/nbStageProcess.md	275
-CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/nonmatching/newbattle/nbStageProcess.md	304
+DispComm1PanelComm	newbattle/nbStageProcess	0xE0	53 of 56 words match	docs/nonmatching/newbattle/nbStageProcess.md	71
+nbSetWaitMotion	newbattle/nbStageProcess	0xD8	8 of 54 words differ	docs/nonmatching/newbattle/nbStageProcess.md	95
+CheckSenseiNego	newbattle/nbStageProcess	0x130	57 of 74 words differ	docs/nonmatching/newbattle/nbStageProcess.md	110
+CheckAction_STKSEL	newbattle/nbStageProcess	0xE8	9 of 58 words differ	docs/nonmatching/newbattle/nbStageProcess.md	129
+CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/nonmatching/newbattle/nbStageProcess.md	146
+DispCommCursor	newbattle/nbStageProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbStageProcess.md	162
+nbGetMotionNo	newbattle/nbStageProcess	0xC0	23 of 46 words differ	docs/nonmatching/newbattle/nbStageProcess.md	187
+nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/nonmatching/newbattle/nbStageProcess.md	211
+AnimeCommandList	newbattle/nbStageProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbStageProcess.md	238
+RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/nonmatching/newbattle/nbStageProcess.md	261
+CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/nonmatching/newbattle/nbStageProcess.md	290
+SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/nonmatching/newbattle/nbStageProcess.md	314
+StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/newbattle/nbStageProcess.md	343
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 datAddUniqueDevil	newdata/datCalc	0x6C	12 of 26 words differ	docs/nonmatching/newdata/datCalc.md	23
 datDeadNakama	newdata/datCalc	0xC4	28 of 48 words differ	docs/nonmatching/newdata/datCalc.md	40
