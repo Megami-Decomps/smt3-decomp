@@ -1498,3 +1498,42 @@
   annulled slot of a `beqzl`. `fclCombineUpdate` went from 2 of 31 words to
   exact on that. This is the `func_001C61B8` row read on a call result rather
   than on a local.
+- Four same-typed parameters copied into a local array in order, all with the
+  same live range, do not take consecutive callee-saved registers: which one
+  lands in the *highest* one is set by their pseudo numbering, so where they sit
+  in the parameter list matters even though the ABI puts them in the same
+  argument registers either way. `fldDrawPoly4` and `fldDrawTexPoly4` are
+  `(s32 color0, f32 x0, f32 y0, f32 z0, s32 color1, f32 x1, ...)`, one colour per
+  vertex; grouped as `(s32 color0, s32 color1, s32 color2, s32 color3, f32 x0,
+  ...)` they are exact apart from `$21` and `$22` swapped on `color0` and
+  `color3`, and all 24 orders of the `colors[i] = colorN;` statements only trade
+  that swap for a wrong store order. Floats first and interleaved both give
+  retail.
+- A 0x40-byte inline block move (eight `ld` then eight `sd`) whose temporaries
+  retail draws partly from the callee-saved file wants the copy statement
+  *above* the element-by-element fills of the other locals, not after them.
+  `fldDrawPoly4` copies a face-index table into a stack local and fills four
+  vertices and four colours; with the copy written last gcc splits it into a
+  six-register and a two-register chunk, loses two callee-saved registers and
+  16 bytes of frame, and is 126 of 131 words out. Written before the vertices it
+  is one eight-register chunk and the function is 6 of 135 words out. Eight
+  separate `u64` assignments and a `memcpy` of the whole array give byte-identical
+  code, so the spelling of the copy is free and only its position is not.
+- A symbol-plus-index load in three instructions (`lui %hi(sym)`, `addu`,
+  `lh %lo(sym)(rd)`) where your C emits four, with the symbol's address
+  materialised into its own register first: the base must not be reused
+  elsewhere in the function. `fldDoor_ElvExit` reads a floor count and an
+  elevator block out of the same table; written as
+  `fldDoorParamTable.headers[i].floorCount` and
+  `...headers[i].body.elevator.blocks[target]` the symbol is common to both and
+  gcc materialises it once, and reading the second through `gFld_ElvId`, the
+  IDB's own symbol four bytes into the same table, keeps the two apart and folds
+  the first one's `%lo` into its load. The matched `fldDoor_ElvTakasaToFloor` in
+  the same unit shows the four-instruction form, where the base genuinely is
+  reused.
+- `lb` on a field a header declares `u8` means the field is signed. On MIPS
+  ee-gcc plain `char` is signed, so the original headers spell these `char`;
+  `fldInfChkFastPanel` reads `fldInfSet_t.eventHit`,
+  `fldInfFlagSelector_t.offTarget` and `.onTarget` and
+  `fldInfMessageRow_t.targets[0]` with `lb`, and nothing else in `field/fldDraw`
+  reads any of the four, so all four declarations become `s8`.

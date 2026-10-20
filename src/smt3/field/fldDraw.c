@@ -288,14 +288,14 @@ struct fldInfExtraAction_t {
 
 struct fldInfFlagSelector_t {
     s16 flag;
-    u8 offTarget;
-    u8 onTarget;
+    s8 offTarget;
+    s8 onTarget;
 };
 
 struct fldInfMessageRow_t {
     s16 kind;
     s16 message;
-    u8 targets[4];
+    s8 targets[4];
     s16 flags[2];
     u8 view;
     u8 extraAction;
@@ -310,7 +310,7 @@ struct fldInfSet_t {
         } bytes;
     } kindArea;
     s8 action;
-    u8 eventHit;
+    s8 eventHit;
     char eventName[12];
     fldInfFlagSelector_t flags[4];
     fldInfMessageRow_t messages[20];
@@ -1664,8 +1664,110 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDrawPoly4);
-INCLUDE_ASM(const s32, "field/fldDraw", fldDrawTexPoly4);
+extern u64 D_002FC750[];
+
+void fldDrawPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
+                  s32 color1, f32 x1, f32 y1, f32 z1,
+                  s32 color2, f32 x2, f32 y2, f32 z2,
+                  s32 color3, f32 x3, f32 y3, f32 z3) {
+    sdf3DPrimPolyParm_t desc;
+    sdfVector4_t vertices[4];
+    u32 colors[4];
+    u64 strip[8];
+    sdfDrawTag_t *command;
+    sdfGrOt_t *descriptor;
+
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    sdf3DPrimLinkResetTm(command, 0);
+    sdf3DPrimLinkMat(command, (sdfMat_t *)fldDrawEnv, 0);
+    memset(&desc, 0, 0x2C);
+    desc.color = 0x80808080;
+    desc.faceCount = 2;
+    desc.pointCount = 4;
+    desc.vertex = vertices;
+    desc.vertexColor = colors;
+    desc.faceIndex = (u32 *)strip;
+    memcpy(strip, D_002FC750, sizeof(strip));
+    vertices[0].x = x0;
+    vertices[0].y = y0;
+    vertices[0].z = z0;
+    vertices[1].x = x1;
+    vertices[1].y = y1;
+    vertices[1].z = z1;
+    vertices[2].x = x2;
+    vertices[2].y = y2;
+    vertices[2].z = z2;
+    vertices[3].x = x3;
+    vertices[3].y = y3;
+    vertices[3].z = z3;
+    colors[0] = color0;
+    colors[1] = color1;
+    colors[2] = color2;
+    colors[3] = color3;
+    sdfDrawTagLink(command, (u32)sdf3DPrimMakePoly(&desc));
+    descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+}
+
+void fldDrawTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
+                     s32 color1, f32 x1, f32 y1, f32 z1,
+                     s32 color2, f32 x2, f32 y2, f32 z2,
+                     s32 color3, f32 x3, f32 y3, f32 z3,
+                     sdfTexHandle_t *texture, f32 u0, f32 v0, f32 u1, f32 v1) {
+    sdf3DPrimPolyParm_t desc;
+    sdfVector4_t vertices[4];
+    u32 colors[4];
+    u64 strip[8];
+    sdfVector2_t uvs[4];
+    sdfMat_t *asset;
+    sdfDrawTag_t *command;
+    sdfGrOt_t *descriptor;
+
+    asset = sdfMatNew();
+    sdfMatSetTex(asset, texture);
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    sdf3DPrimLinkResetTm(command, 0);
+    sdf3DPrimLinkMat(command, asset, 0);
+    memset(&desc, 0, 0x2C);
+    desc.color = 0x80808080;
+    desc.faceCount = 2;
+    desc.pointCount = 4;
+    desc.vertex = vertices;
+    desc.vertexColor = colors;
+    desc.faceIndex = (u32 *)strip;
+    desc.uv = uvs;
+    memcpy(strip, D_002FC750, sizeof(strip));
+    vertices[0].x = x0;
+    vertices[0].y = y0;
+    vertices[0].z = z0;
+    vertices[1].x = x2;
+    vertices[1].y = y2;
+    vertices[1].z = z2;
+    vertices[2].x = x3;
+    vertices[2].y = y3;
+    vertices[2].z = z3;
+    vertices[3].x = x1;
+    vertices[3].y = y1;
+    vertices[3].z = z1;
+    colors[0] = color0;
+    colors[1] = color2;
+    colors[2] = color3;
+    colors[3] = color1;
+    uvs[0].x = u0;
+    uvs[0].y = v0;
+    uvs[1].x = u0;
+    uvs[1].y = v1;
+    uvs[2].x = u1;
+    uvs[2].y = v1;
+    uvs[3].x = u1;
+    uvs[3].y = v0;
+    sdfDrawTagLink(command, (u32)sdf3DPrimMakePoly(&desc));
+    descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
+    sdfMatFreeDelayed(asset);
+}
 
 void fldDrawFrameSprite(void) {
     sdfDrawTag_t *list = sdfPrimAllocDrawTag(NULL);
@@ -2869,7 +2971,39 @@ f32 fldPlayerCalc360_4(f32 angle) {
     return angle;
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldPlayerMirChk);
+s32 fldPlayerMirChk(void) {
+    fldUnitControl_t *control = fldGetUnitControl();
+    f32 pos[4];
+
+    if (control == NULL) {
+        return 0;
+    }
+    if (control->handle2 == NULL) {
+        return 0;
+    }
+    if (dds3ObjectBaseCheckFlag(control->handle, 1)) {
+        dds3ObjectBaseOnFlag(control->handle2, 1);
+        return 0;
+    }
+    if (fldGlobalBase.area == 0x12 || fldGlobalBase.area == 0x1C ||
+        fldGlobalBase.area == 0x1E ||
+        (fldGlobalBase.area == 0x21 && fldGlobalBase.floor == 0) ||
+        (fldGlobalBase.area == 0x11 && fldGlobalBase.floor == 1) ||
+        (fldGlobalBase.area == 0x11 && fldGlobalBase.floor == 2) ||
+        (fldGlobalBase.area == 0x11 && fldGlobalBase.floor == 3) ||
+        (fldGlobalBase.area == 0xE && fldGlobalBase.floor == 0x10) ||
+        (fldGlobalBase.area == 0xF &&
+            (fldGlobalBase.floor == 0x10 || fldGlobalBase.floor == 9))) {
+        dds3GetPosPoseSet(control->handle);
+        SDF_VU0_STOREVECTOR(pos);
+        if (pos[1] > -2.5f && pos[1] < 2.5f) {
+            dds3ObjectBaseOffFlag(control->handle2, 1);
+        } else {
+            dds3ObjectBaseOnFlag(control->handle2, 1);
+        }
+    }
+    return 0;
+}
 
 extern s32 fldPlayerStatus[];
 extern s32 fldChkVortex(void);
@@ -4861,7 +4995,92 @@ const char *fldInf_FindTypeEveNpc(const char *eventName) {
     return 0;
 }
 
+/* NON_MATCHING: 183 of 184 words differ (first at +0x0). */
+#ifdef NON_MATCHING
+s32 fldInfChkFastPanel(s32 row) {
+    s32 value;
+    s32 slot;
+    s32 index;
+
+    if (row < 0xA) {
+        index = row - 1;
+        if (fldInfTable.sets[gFldInfIdx].flags[index].flag == 0) {
+            value = fldInfTable.sets[gFldInfIdx].flags[index].offTarget;
+        } else if (evtBitCheck(fldInfTable.sets[gFldInfIdx].flags[index].flag) != 0) {
+            value = fldInfTable.sets[gFldInfIdx].flags[index].onTarget;
+        } else {
+            value = fldInfTable.sets[gFldInfIdx].flags[index].offTarget;
+        }
+    } else {
+        index = row - 0xA;
+        value = fldInfTable.sets[gFldInfIdx].messages[index].targets[0];
+    }
+    switch (value) {
+    case 0x64:
+        slot = gFldInf_HitIdx;
+        fldInf_FindTypeEveNpc(gEvnRng[slot]->name);
+        if (fldInfTable.sets[gFldInfIdx].eventHit == 0) {
+            return 0xC7;
+        }
+        slot = gFldInf_HitIdx;
+        fldDoor_Find2(gEvnRng[slot]->name);
+        switch (gFldWapPanel) {
+        case 3:
+            return 0x66;
+        case 5:
+            if (fldDoor_GetHasigoTbl(0) == 0) {
+                return 0x68;
+            }
+            return 0x69;
+        case 6:
+            return 0x6A;
+        case 7:
+            return 0x6B;
+        case 0:
+        case 1:
+        case 2:
+        case 4:
+        default:
+            return 0x64;
+        }
+    case 0:
+        return value;
+    case 0x65:
+        return value;
+    case 0x66:
+        return value;
+    case 0x67:
+        return value;
+    case 0x68:
+        return value;
+    case 0x69:
+        return value;
+    }
+    if (value < 0xA) {
+        return fldInfChkFastPanel(value);
+    }
+    index = value - 0xA;
+    if (fldInfTable.sets[gFldInfIdx].messages[index].kind == -1) {
+        return fldInfChkFastPanel(row);
+    }
+    if ((u16)fldInfTable.sets[gFldInfIdx].messages[index].kind >= 2) {
+        return 0;
+    }
+    switch (fldInfTable.sets[gFldInfIdx].eventHit) {
+    case 0:
+        return 0xC7;
+    case 1:
+        return 2;
+    case 2:
+        return 0x64;
+    case 3:
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "field/fldDraw", fldInfChkFastPanel);
+#endif
 
 INCLUDE_ASM(const s32, "field/fldDraw", fldInfNext);
 
@@ -5580,7 +5799,74 @@ s32 fldDoor_ElvTakasaToFloor(s32 index) {
     return fldDoorParamTable.headers[slot].body.data[index];
 }
 
-INCLUDE_ASM(const s32, "field/fldDraw", fldDoor_ElvExit);
+extern s16 gFld_ElvId[];
+
+void fldDoor_ElvExit(s32 index) {
+    fldSceneParam_t record;
+    s32 param[4];
+    fldActorEntry_t *entry;
+    s32 i;
+    s32 count;
+    s32 target;
+    s32 nextArea;
+    s32 nextKind;
+
+    count = gFld_ElvId[gFld_ElvTakasa * 16 + 1];
+    if (index >= count) {
+        target = fldDoorWarpTarget;
+    } else {
+        target = count - index - 1;
+    }
+    for (i = 0; i < 0x100; i++) {
+        entry = &fldDoorTable[i];
+        if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) {
+            continue;
+        }
+        if (entry->kind != 6) {
+            continue;
+        }
+        if (entry->motion - 1 == gFld_ElvTakasa && entry->secondaryMotion == target &&
+            entry->variantMode == 0) {
+            if (entry->variant == 0) {
+                nextArea = fldGlobalBase.area;
+            } else {
+                nextArea = entry->variant;
+            }
+            if (entry->sequenceKind == 0) {
+                nextKind = fldGlobalBase.floor + 1;
+            } else {
+                nextKind = entry->sequenceKind;
+            }
+            if (fldGlobalBase.area != nextArea) {
+                fldBgmFadeOut();
+            }
+            fldWap_SetBgm(entry);
+            if (entry->flags54 != 0) {
+                fldDoorExitFlag = entry->flags54;
+                strcpy((char *)fldDoorExitMode, entry->taskName);
+                gFldWap_after_nextidx = i + 1;
+            }
+            gFldNowDZone = entry->flags31;
+            fldAutoMapOpenBlock2(nextArea, nextKind,
+                                 gFld_ElvId[gFld_ElvTakasa * 16 + target + 8]);
+            fldSetSceneParam4(&record, nextArea, nextKind, entry->sequenceName,
+                              entry->sequenceCode, entry->linkKind, entry->linkName);
+            dds3AdminiCallSequence(6, &record, 0xA0, 0);
+            return;
+        }
+        if (entry->kind == 6 && entry->motion - 1 == gFld_ElvTakasa &&
+            entry->secondaryMotion == target && entry->variantMode == 3) {
+            param[0] = entry->variant;
+            fldSetNextField(fldGlobalBase.area, entry->variant);
+            fldBgmFadeOut();
+            if (entry->sequenceKind == 0 && entry->sequenceValue != 0) {
+                fldSetNextField(entry->sequenceValue, param[0]);
+            }
+            dds3AdminiCallSequence(7, param, 4, 0);
+            return;
+        }
+    }
+}
 
 void fldClearDoorEvents(void) {
     fldDoorEvent_t *entry = fldDoorEventTable;

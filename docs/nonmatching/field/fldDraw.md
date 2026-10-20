@@ -223,3 +223,49 @@ costs 42 words by adding a second `addu`); `delta[0] + position[0]` for the sum;
 all six orders of the three `fldHitChkWork` reads, before and after the sums;
 and hiding `fldHitChkUnitElvOnly`'s definition, which leaves the one `beql` for
 `beq` at `+0x5C` exactly where it is.
+
+## fldInfChkFastPanel (field/fldDraw, 0x2E0)
+
+183 of 184 words differ positionally and the draft is 8 instructions (32 bytes)
+long. Aligned on the instruction sequence instead, 178 of retail's 184
+instructions line up by opcode in order, with 14 extra in the draft, 6 of
+retail's missing, and every register one or two higher than retail's because of
+the two extra callee-saved registers.
+
+What is left is one hoisted value. `-fno-gcse` takes the draft to 157 of 184
+words with the frame size right, so gcse is keeping the loop test's result live;
+nothing the source says moves it. Both `goto ret0` rewrites of the two trailing
+`return 0`s and both polarities of the `value < 0xA` back edge are inert.
+
+Confirmed on the way: the whole control flow is retail's. `fldInfSet_t` is 312
+bytes and `fldInfTable.sets` starts at `+0xAC0`, so `+0xAD0` is
+`sets[gFldInfIdx].flags[row - 1]` and `+0xAE4` is
+`sets[gFldInfIdx].messages[row - 0xA].targets[0]`; both index expressions have
+to be their own `s32` local, since written inline gcc folds the `- 1` and the
+`- 0xA` into the load displacement where retail keeps a register. The outer
+dispatch is a `switch` over `0`, `0x64` and `0x65` through `0x69`, not an
+`if` chain: gcc's `balance_case_nodes` splits seven singleton cases at the
+fourth, which is what makes `0x66` the first value tested, and every arm but
+`0x64` is `return value;` with cse substituting the constant in the arms a
+plain `beq` proved equal and leaving `daddu $2, $5, $0` in the two reached
+through an `slti`. The inner dispatch on `gFldWapPanel` needs `case 0:`,
+`case 1:`, `case 2:` and `case 4:` written out alongside the `default:` to get
+the `sltiu $2, $3, 0x8` bound test and the eight-entry `jtbl_00531E40`; with
+only 3, 5, 6, 7 and a default gcc emits a compare chain. The back edge is a
+self tail call, `return fldInfChkFastPanel(value);`, which is the row now in
+`docs/levers/control-flow.md`.
+
+This draft depends on four fields of the unit's own `fldInfTable_t` changing
+from `u8` to `s8` (`fldInfSet_t.eventHit`, `fldInfFlagSelector_t.offTarget` and
+`.onTarget`, `fldInfMessageRow_t.targets`), which retail's four `lb` prove and
+which no compiled function in the unit reads. The size and offset of each is
+unchanged and the unit still matches, but a harvest that takes the body without
+the declarations will see `lbu` on all four.
+
+Ruled out: `row - 1` and `row - 0xA` written inline at each use; a `for (;;)`
+with `continue` and with a `goto` for the back edge; the final block written as
+the branched-to arm rather than the fall-through, which costs another 8 bytes;
+`if (fldDoor_GetHasigoTbl(0) != 0) { return 0x69; }` for the `case 5` select,
+which gives `movz` against retail's `movn`; and `goto ret0` on either of the
+two trailing `return 0`s.
+
