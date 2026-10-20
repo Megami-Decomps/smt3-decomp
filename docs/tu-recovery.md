@@ -502,13 +502,16 @@ The rest sit in six containers:
 
 | Host | Homes | `NON_MATCHING` drafts | State |
 |---|---|---|---|
-| `newbattle/nbMakePacket` | 47 | 48 | blocked |
-| `code_001FAE80` | 35 | 43 | blocked |
-| `field/fldDraw` | 9 | 12 | blocked |
-| `code_00116AD0` | 8 | 6 | blocked |
-| `code_002C7CB0` | 2 | 0 | contradicted, see below |
+| `newbattle/nbMakePacket` | 47 | 48 | done |
+| `field/fldDraw` | 9 | 12 | done |
+| `code_00116AD0` | 8 | 6 | done |
 | `newbattle/nbStageProcess` | 4 | - | done |
 | `script/scrParameterCommand` | 1 | - | done |
+| `code_001FAE80` | 35 | 43 | contradicted, see below |
+| `code_002C7CB0` | 2 | 0 | contradicted, see below |
+
+70 of the 108 are placed. Each container relinked byte-identically and
+`check_unit` reports no `CONTEXT` line in any part.
 
 A named unit can hide a container. `newbattle/nbMakePacket` holds 48 HD files
 in strictly ascending order, among them `nbE901` through `nbE915` and sixteen
@@ -516,21 +519,47 @@ in strictly ascending order, among them `nbE901` through `nbE915` and sixteen
 because the audit above only ever looked at the `code_<vram>` fillers. The runs
 are the cleanest in the tree: 0 to 4 unnamed functions between consecutive runs.
 
-### What blocks the four large ones
+### The tool was taught instead
 
-`split_unit.py` and `NON_MATCHING` drafts. The tool treats `#else` as a block it
-may copy into every part, so a 48-cut sweep over `nbMakePacket` left 16 of the
-48 parts with orphaned directives, some carrying 47 bare `#else` lines and no
-`#ifdef`. "What `split_unit.py` drops" above records the same flaw from
-`a20e507`, which repaired it by hand at a much smaller scale. At 48 drafts per
-container that is not a hand repair.
+All five things "What `split_unit.py` drops" lists are now carried, and each was
+found by a sweep failing to build rather than by reading the list:
 
-The fix is to teach the tool, or to strip each draft region to a keyed
-placeholder before cutting and restore it to the part its function landed in
-afterwards. Until then these four cannot be swept, and the draft count is the
-thing to check before trying: `grep -c '^#ifdef NON_MATCHING'`.
+- **A conditional region is one block.** `cparse.blocks` emitted every top-level
+  `#` line separately, so a `NON_MATCHING` draft became three items and the
+  declaration-copying rule duplicated the `#else` into every part: 16 of 48
+  parts came out with bare `#else` lines and no `#ifdef`. A
+  `#if`/`#else`/`#endif` region now moves whole, addressed by the function
+  inside it, comment included.
+- **An attributed or aliased declarator.** `declared_name` split at the first
+  `(`, so `extern s32 fldGb __attribute__((section(".data")));` declared
+  `__attribute__` and `extern T *cmbGlobalWork asm("DDS3_GBWK");` declared
+  `asm`. Both suffixes are stripped with matched parens now.
+- **An anonymous enum**, which introduces no name at all. `declared_names`
+  returns an enum's member names, so the part using `FIELD_ROOM_PLANE_COUNT`
+  gets the definition.
+- **A multi-declarator extern**, found by any declarator rather than only the
+  last, from the same `declared_names`.
+- **A bare `__asm__("x = y")` alias**, which declares nothing and now reaches
+  every part like an orphan type.
 
-### `code_002C7CB0` is contradicted, not blocked
+`.lit4`/`.sdata` ownership remains the one item on that list the tool does not
+compute; `split_rodata.py` does, and the measurement below is how to check it.
+
+### `code_001FAE80` needs its fclPanel contradiction settled
+
+Its 36 runs cut and compile cleanly, and the image came out 32 bytes long. The
+measurement says why: `MovieViewer`, the last part, emits `0x3c50` of `.rodata`
+into a `0x3c30` row. HD names `fclPanel.c` twice, at `0x2155B8` and again for a
+single function at `0x234010`, and merging the second into `MovieViewer` is what
+overflows: that function's rodata sits back with the first `fclPanel` run, and a
+symbol referenced from a later unit than its owner stays with the earlier one by
+`split_rodata.py`'s link-order rule. So the rodata cannot follow the function.
+
+Cutting at `0x234010` instead would give two units named `fclPanel`, which a
+`.c` cannot be. One of the two attributions is wrong and settling which is
+evidence work, not another cut. The other 34 runs are ready behind it.
+
+### `code_002C7CB0` is contradicted too
 
 Its seven runs name `pbMCard` and `tgsMain` twice each at non-contiguous
 addresses, and `pbMenu`, which is applied at `0x001D4D40`. A `.c` cannot hold
@@ -552,3 +581,7 @@ doing it:
   that for one cut rewrote rows in `kernel/`, `field/` and `effect/` and came
   out 8 bytes short. Compute with it, then splice only the rows falling inside
   the container's own span.
+- **Measure the sections when the image changes length.** For each row, compare
+  its span with what the owning object emits (`objdump -h`). A part emitting
+  more than its span is the whole story: that is how `MovieViewer`'s 32 bytes
+  were found, after `.lit4` and `.sdata` both came back with zero overflow.
