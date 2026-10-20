@@ -42,6 +42,7 @@ page and line to open. Conventions are in
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
+| 1 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | script/scrParameterCommand | [script/scrParameterCommand.md](script/scrParameterCommand.md) |
