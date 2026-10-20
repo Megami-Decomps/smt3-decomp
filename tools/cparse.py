@@ -21,11 +21,19 @@ def first_code_line(lines):
     return ""
 
 
+COND_OPEN = re.compile(r"^#\s*(if|ifdef|ifndef)\b")
+COND_CLOSE = re.compile(r"^#\s*endif\b")
+
+
 def blocks(text):
     """Top-level items: each declaration, definition, INCLUDE_ASM or preprocessor line,
     with any comment lines directly above it. Several declarations on consecutive lines
-    are separate items, so porting picks only the ones a function uses."""
-    out, cur, depth, in_comment = [], [], 0, False
+    are separate items, so porting picks only the ones a function uses.
+
+    A `#if`/`#else`/`#endif` region is one item, body and all. Splitting it would
+    hand a part an `#else` with no `#ifdef`, and a NON_MATCHING draft has to move
+    to whichever part its function lands in."""
+    out, cur, depth, in_comment, cond = [], [], 0, False, 0
 
     def flush():
         if cur:
@@ -34,6 +42,22 @@ def blocks(text):
 
     for line in text.split("\n"):
         stripped = line.strip()
+        if cond:
+            # Inside a conditional region nothing ends the item but its own #endif,
+            # so blank lines and the brace rules below are skipped.
+            cur.append(line)
+            if COND_OPEN.match(stripped):
+                cond += 1
+            elif COND_CLOSE.match(stripped):
+                cond -= 1
+                if not cond:
+                    flush()
+            continue
+        if depth == 0 and not in_comment and COND_OPEN.match(stripped):
+            # Keep any comment already gathered: it introduces the region.
+            cur.append(line)
+            cond = 1
+            continue
         if depth == 0 and not in_comment and not stripped:
             flush()
             continue
