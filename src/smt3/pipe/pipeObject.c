@@ -471,7 +471,3 @@ s32 texRelease(tagPipeTexture *texPtr)
     return 1;
 }
 
-
-
-
-

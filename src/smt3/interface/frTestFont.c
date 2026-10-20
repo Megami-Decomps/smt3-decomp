@@ -42,3 +42,4 @@ INCLUDE_ASM(const s32, "interface/frTestFont", test_font_1CAD88);
 s32 test_font_Process(void) {
     return 0;
 }
+

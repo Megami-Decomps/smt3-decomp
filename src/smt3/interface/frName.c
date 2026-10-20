@@ -19,6 +19,7 @@ INCLUDE_ASM(const s32, "interface/frName", frGetName2NFRQ);
 INCLUDE_ASM(const s32, "interface/frName", frGetNameFRQ);
 
 INCLUDE_ASM(const s32, "interface/frName", frGetCNameFRQ);
+
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F440);
 
 INCLUDE_SDATA(const s32, "interface/frName", D_0054F448);

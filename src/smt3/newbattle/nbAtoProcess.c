@@ -20,3 +20,4 @@ void nbAtoShutdown(void)
 INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbInitAtoProcess);
 
 INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", dds3LoadBootFile);
+
