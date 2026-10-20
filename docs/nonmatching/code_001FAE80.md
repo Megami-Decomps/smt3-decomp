@@ -2,26 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## func_00213190 (code_001FAE80, 0x50)
-
-8 of 18 words match, 72 against retail's 80 bytes. A `qsort` comparator over the
-`u16` inherited-skill list: zeros sort last, otherwise ascending.
-
-Retail copies the first argument into `$3` and reloads `*a` in the tail where
-the draft reuses the halfword already loaded for the zero test, so the
-pointer copy and the reload are the two missing words and every later
-register is shifted by one. The two compares, the `movz` and the whole middle
-block are already identical. GCSE sees the second load as available, and no
-source shape tried stops it; the retail source must have made the two reads
-different RTL, or the function was compiled with the pointer live for another
-reason.
-
-Ruled out: a `const u16 *` local at two scopes and declared both before and
-after the `bv` local; `bv` as `u16`, `u32` and `s32`; the dereference written
-as `*pa`, `pa[0]` and `*(const u16 *)a`; `u16 *` parameters instead of
-`const void *` (the `qsort` call site fixes the signature); and nesting the
-tail inside an `else` so the two compares sit in one block.
-
 ## func_002429C0 (code_001FAE80, 0x54)
 
 19 of 21 words match, at the exact 84-byte size. Sums `attr[].capacity` over the
@@ -303,29 +283,6 @@ array, and as a cast pointer, all four of which make cc1 emit the same
 `lh $2, fldAllCnt+2($3)`; a `trmUpdateWork_t *` local for the global; the
 guard inverted so the `fldAllCnt` arm is the fall-through; and an `(s32)` cast
 on either field.
-
-## cmpSkillOrder (code_001FAE80, 0x50)
-
-12 of 20 words differ, at the exact 80-byte size. A `qsort` comparator over the `u16`
-skill list: zeros sort last, otherwise ascending.
-
-Retail copies the first argument into `$3` as its first instruction and reads
-`*a` through the copy both at the top and again in the tail compare. Every
-shape tried loads straight through `$4`, so the copy is missing and the rest of
-the registers shift with it. This is the same missing pointer copy recorded for
-`func_00213190` above, which walks the same list; both comparators are one
-word short on it.
-
-The rest is settled: `*b` belongs in the `bnez`'s delay slot, the tail
-re-reads `*a` rather than reusing the halfword from the zero test, and the
-final three-way result is `if (b < a) return 1; if (a < b) return -1;
-return 0;`, which gives retail's `sltu` pair and the `movz` against `$0`.
-
-Ruled out: `u16 sa` and `u16 sb` locals for both values; a `u16 *` local for
-`a` with `*pa` written at every use; the same with a second `u16 sa2` local for
-the reload; two `u16 *` locals, which is the draft and the closest; the first
-test written `*pa != 0` so the arms swap; and `u16 *` parameters in place of
-`const void *`, which the compile rejects against the `qsort` signature.
 
 ## cmpItemHasFlag (code_001FAE80, 0x54)
 
@@ -759,3 +716,45 @@ declared before `weight`; and `item = weight + kind * 7 + 7`.
 29 of 51 words match, at the exact size. Byte-identical to
 `ragGetListItem2` above except for the table, `D_0032FCE0`, and it differs
 in the same 22 words for the same reason. Fix one and the other follows.
+
+## fclDrawSpriteCore (code_001FAE80, 0x2D8)
+
+69 of 180 words match positionally, 111 of 180 words differ, 720 against retail's
+728 bytes. Builds the five-vertex 2D sprite packet: sets the texture filter, allocates
+the prim buffer, writes the colour quadword, the two UV pairs and the two screen
+corners, picks a `fclDrawPanelSprite2` code from `mode`, then links a draw tag into
+`sdfGrOtTable[ot]`.
+
+Everything about the body is settled. The 12-word prologue, the whole filter
+`if`/`else` including the three dead `addiu $5, $0, 1` that only appear once
+`sdf2DGetPrimPacketSize` is given a second argument, both colour arms (the
+`color != NULL` arm's fourth byte really does come out as `lbu` from a single
+`lw` plus `c & 0xFF`), every `dsll32`/`dsrl32`/`or` pair of the six quadword
+stores, the three-way `switch` with its two call sites, and the whole tail from
+`sdfGrAllocPacketBuff(0x20)` to the second `fclDrawPanelSprite2(0x44, ot)` are
+word-for-word.
+
+The one unresolved difference is a register-allocation swap in the prologue:
+retail puts `x` in `$19` and `flags` in `$20`, this puts `flags` in `$19` and
+`x` in `$20`, and every later allocation shifts with it. The first differing
+word is the prologue copy at +0x20, and the 111 differing words are that one
+swap plus the load and store order it drags behind it.
+
+Two facts that are load-bearing and should not be re-derived: the four
+`u0/v0/u1/v1` values live in an addressable `u32 uv[4]`, not four scalars,
+which is what produces retail's four `sw` into `sp+0x0..0xC` and the four `lwu`
+reloads; and `sdf2DGetPrimPacketSize` takes two arguments, `(5, 1)`, which is
+worth 8 bytes and three instructions.
+
+Ruled out: all six orderings of the UV, screen-corner and colour blocks; three
+declaration orders for the locals (array first, scalars first, pointers last);
+`u32` against `s32` for `x0`/`y0`/`x1`/`y1` with the cast moved to the store;
+the corner swap written as a three-statement temp swap against an `if`/`else`
+that assigns both arms (the `if`/`else` is 139 words, far worse); `x + 0x6FF8`
+spelled twice so `x` has two references, which fixes the size to 182 words and
+reaches 97 matching but computes the constant twice and so is not the original;
+a `u8 f = flags` local both before and after the UV block; `flags & 1` with and
+without `!= 0`; and the `sdfGrOtTable[ot]` call written through a hoisted
+`sdfGrOt_t *` local, which the three `cmp` packet builders in this unit need but
+which changes nothing here.
+

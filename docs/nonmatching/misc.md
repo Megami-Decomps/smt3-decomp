@@ -70,30 +70,6 @@ the `s32 dummy; s32 *p = &dummy;` sibling-call blocker. An explicit
 `if (count != 0)` wrapper round the loop is far worse (153 of 174), and
 `if (respawn && age >= life)` in place of `if (age >= life && respawn)` is 46.
 
-## lstPageUp, lstPageDown (code_001FAE80, 0x74 each)
-
-28 of 29 words each match, at the exact size. Each steps the list cursor up or down
-by a page, stopping early when the cursor's `unk_04` says it cannot move, and
-returns how many steps it took.
-
-The one differing word is the early-exit branch inside the loop: retail emits
-`bnez $2` and this emits `bnel $2`, with the same `daddu $2, $17, $0` in the
-delay slot and the same displacement. Both keep a second copy of that
-`daddu` at the loop's normal exit, so only the annul bit differs. gcc here
-annulled the delay slot; retail's compile decided the write to `$2` was
-harmless on the fall-through, where the next instructions set up a `jal`.
-
-Ruled out: `break` against a `return i` inside the loop against a `goto` to
-the trailing return; a `while` with the increment in the body; an explicit
-`do`/`while` behind a zero-trip guard; folding the test into the `for`
-condition as `i < count && cursor->unk_04 == 0`; `cursor->unk_04` written
-without the `!= 0`; and declaring `lstMoveCursor` `s32` rather than `void`,
-which costs two more words. `break`, `goto` and the `&&` form all give the
-identical 29 words.
-
-These two and `cmpUpdateList` in the same unit are the same class: one word
-out on a branch-likely that no control-flow shape reaches.
-
 ## rstFindEvoEntryType5, rstFindEvoEntryType7 (code_001FAE80, 0x6C each)
 
 24 of 27 words each match, at the exact size. Both scan a devil's 24 level-up

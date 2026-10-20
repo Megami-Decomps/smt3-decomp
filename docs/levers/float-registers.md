@@ -28,3 +28,13 @@ costs the three `mul.s` registers and the schedule around them.
   the two stores of the packed light colour: that is exact, where the field read
   written at its use site is 13 of 130 words out and the six orders of the three
   statements around it range from 9 to 17.
+- A float argument's **position in the argument list** is a pure scheduling
+  lever and nothing else. Under this ABI float arguments take `$f12` upward
+  independently of the integer registers, so moving one through the list does
+  not disturb which integer argument lands where or which arguments go on the
+  stack; what it does move is where cc1 schedules the `mov.s $f12, $f20` among
+  the integer argument setup. `fclDrawSpriteSizeAlphaFilter` is 3 of 51 words
+  out with the angle anywhere else and exact with it fifth in
+  `fclDrawSpriteAngleCore`'s list, so sweep all the positions rather than
+  reasoning about the call.
+

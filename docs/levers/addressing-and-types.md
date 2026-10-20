@@ -1561,3 +1561,61 @@
   here is `DImode`, and a `u128 *` pointer local is propagated into the load.
   `RunSake` in `newbattle/nbStageProcess` copies `form->pos` twice, in two
   blocks neither of which dominates the other, and gets one `addiu` per site.
+- **A 12-byte struct whose members are all `short` is the unaligned copy.**
+  `*dst = *src` between two `struct { short a, b, c, d, e, f; }` pointers is
+  exactly retail's `ldl 7`/`ldr 0` plus `lwl 11`/`lwr 8` on the source and
+  `sdl`/`sdr` plus `swl`/`swr` on the destination: 12 bytes at alignment 2 take
+  the same path as alignment 1, where alignment 4 gives `ldl`/`ldr` plus a
+  plain `lw`. `fclSetSpriteEx` in `code_001FAE80` copies a 12-byte UV rect out
+  of a 14-byte record this way. The destination there is reached through a
+  separate pointer local (`r = (fclSpriteRect_t *)&sprite->unk_04;`), which is
+  what gives retail's `addiu $3, $17, 4` and the `7($3)`/`0($3)` offsets; a
+  member reference on the containing struct keeps the base register and biases
+  the displacements instead.
+- **A loop-invariant address base plus a load displacement reads off the real
+  field offset.** Where retail hoists `addiu $18, base, C1` and loads at
+  `C2($18)`, the array field is at offset `C1` in the struct and the subscript
+  carries `C2`, not some other split summing to `C1 + C2`. `lstMoveCursor` and
+  `lstMoveCursor2` sit at `addiu $18, $16, 9` with `lbu 0x50($2)`: declaring
+  the array at 0x09 and writing `work->unk_0009[pos + 0x50]` is exact, where
+  the same byte reached as `work->unk_0024[pos + 0x35]` gives `addiu 4` with
+  `lbu 0x55` and is two words out, and every `u8 *` cast spelling loses the
+  hoist altogether and costs a callee-saved register.
+- **A narrow parameter masked at function entry is narrow in the signature.**
+  The companion to the `s32`-forwarding row above, read in the other
+  direction: an `andi 0xff` of an argument register in the prologue, with the
+  masked value then passed through unchanged, means the parameter is `u8`.
+  Declared `s32` the mask moves to the call site instead and costs a word plus
+  whatever the register shuffle drags with it. `fclDrawSpriteAlpha`,
+  `fclDrawSpriteFilter`, `fclDrawSpriteFull` and `fclDrawSpriteSizeFilter` all
+  closed on exactly that one change, the last two from 30 and 42 differing
+  words. The `id` and `idx` parameters of the same functions are masked at the
+  call site and so stay `s32`, and an incoming stack argument read with `lhu`
+  rather than `lw` plus `andi` is `u16` for the same reason.
+- **An indirect call whose loaded pointer retail puts in `$2`, in a function
+  that cannot be `void`, is the function's return value.** Where the `void`
+  lever above is blocked because a caller uses the result,
+  `return ((s32 (*)(args))p->fn)(args);` frees `$2` the same way:
+  `lw $2, 0x10($4)` then `jalr $2`, against `lw $3` plus `jalr $3` for a
+  statement call followed by a bare fall-through. `cmpDrawSprite` and
+  `cmpDrawSprite2` in `code_001FAE80` are two words out as statements and
+  exact with the cast return, and `cmpDrawSpriteIndexed`/`...Indexed2`, whose
+  callers ignore the result, take the plain `void` form instead.
+- **Where a table's `%hi`/`%lo` pair lands among a run of calls is the
+  statement position of the pointer local that holds it.** Retail computes
+  `&sdfGrOtTable[ot]` at a definite point in `code_001FAE80`'s packet
+  builders, and sweeping the one assignment through the statement list finds
+  it: `cmpDisableRGB` and `cmpAllocRefGifTag` want it immediately before the
+  use, with the subscript form written out twice instead placing the pair too
+  late (26 of 43 words) and an initialiser on the declaration too early (40 of
+  42); `cmpDrawSpriteIndexed` wants it after the last statement, and
+  `fclDrawSpriteCore` is indifferent. Sweep the position rather than choosing
+  between the local and the subscript.
+- A `qsort` comparator that re-reads one operand and caches the other is
+  reading both through pointers with no local at all. `cmpSkillOrder` and
+  `func_00213190` in `code_001FAE80` have `lhu` of `*a` twice and one `andi
+  0xffff` on `*b`, which looks like a cached `u16` local for `b`; the `andi`
+  is gcc re-truncating the CSE'd load, and `*pa`/`*pb` at every use is exact
+  where any `sb` local is 12 of 20 words out. Both were parked on this for
+  longer than they needed to be.
+

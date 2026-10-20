@@ -313,6 +313,19 @@ typedef struct fclPanel
     /* 0x3C */ void (*update)(struct fclPanel *panel);
 } fclPanel_t;
 
+typedef struct
+{
+    /* 0x00 */ s32 unk_00;
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s16 unk_0C;
+    /* 0x0E */ s16 unk_0E;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+} fclPanelPos_t;
+
 extern s32 gMsgID;
 extern s32 gSelMsgNo;
 extern s8 fclEndMessageEx(s8 flag);
@@ -376,18 +389,53 @@ extern s32 cmpDrawBoxSolid(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, 
 extern s32 cmpDrawBoxG(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *colors, s32 g, s32 h);
 typedef struct
 {
+    /* 0x00 */ u16 x;
+    /* 0x02 */ u16 y;
+    /* 0x04 */ u16 u0;
+    /* 0x06 */ u16 v0;
+    /* 0x08 */ u16 u1;
+    /* 0x0A */ u16 v1;
+} fclSpriteRect_t;
+typedef struct
+{
     /* 0x00 */ s32 tex;
     /* 0x04 */ u16 unk_04;
     /* 0x06 */ u16 unk_06;
-    /* 0x08 */ s16 unk_08;
-    /* 0x0A */ s16 unk_0A;
-    /* 0x0C */ s16 unk_0C;
-    /* 0x0E */ s16 unk_0E;
+    /* 0x08 */ u16 unk_08;
+    /* 0x0A */ u16 unk_0A;
+    /* 0x0C */ u16 unk_0C;
+    /* 0x0E */ u16 unk_0E;
     /* 0x10 */ s32 unk_10;
     /* 0x14 */ s32 unk_14;
     /* 0x18 */ s32 unk_18;
     /* 0x1C */ u8 color[4];
+    /* 0x20 */ u8 unk_20;
 } fclSprite_t;
+
+typedef struct
+{
+    /* 0x00 */ s16 x;
+    /* 0x02 */ s16 y;
+    /* 0x04 */ u8 unk_04;
+    /* 0x06 */ u16 res;
+} fclSpriteEntry_t;
+
+typedef struct
+{
+    /* 0x00 */ s8 tex;
+    /* 0x02 */ fclSpriteRect_t rect;
+} fclSpriteRes_t;
+
+typedef struct
+{
+    /* 0x00 */ fclSpriteRes_t *res;
+    /* 0x04 */ fclSpriteEntry_t *entries;
+} fclSpriteTbl_t;
+
+extern void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *sprite,
+                              u8 flags, u8 mode, u8 filter, s32 ot);
+extern void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
+                                   fclSprite_t *sprite, u8 flags, u8 mode, u8 filter, s32 ot);
 
 extern void qsort(void *base, s32 count, s32 size, s32 (*cmp)(const void *a, const void *b));
 extern s32 func_00213148(const void *a, const void *b);
@@ -831,6 +879,18 @@ extern void rstSetDestroySkillMaxHpMp(void);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x1300];
+    /* 0x1300 */ u8 frameTex[0x8E0];
+} cmpDrawBank_t;
+
+extern cmpDrawBank_t dds3DrawEnv[];
+extern u32 dds3GetFrameID(void);
+extern void sdfGrSetFrameMaskRGB(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *source, void *packet, s32 gsContext);
+extern void sdfDrawTagLinkRefGif(void *tag, u32 packet);
+
 extern void release_movieobj2(void *movie, sdfGrOt_t *ot);
 extern void cmpReCalcStockCursorPos(s8 index);
 
@@ -1013,7 +1073,8 @@ extern void cmpUpdatePanelEffSlots(void);
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_0000[0x20];
+    /* 0x0000 */ u8 unk_0000[9];
+    /* 0x0009 */ u8 unk_0009[0x17];
     /* 0x0020 */ s32 flags;
     /* 0x0024 */ u8 unk_0024[0x138];
     /* 0x015C */ cmpCursorWork_t listCursor;
@@ -1754,13 +1815,29 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawResultIcon);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawResultHeader);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawPhaseDefault);
+s32 cmbDrawPhaseDefault(s32 active)
+{
+    fclPanelPos_t pos;
+    s32 mode = 1;
+
+    if (active != 0) {
+        mode = 0;
+        if (fclGetFlag(0) == 0) {
+            mode = 2;
+            if (*(s8 *)((u8 *)CMB_GBWK + 3) == 0x10) {
+                mode = 1;
+            }
+        }
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x64, 0, 0, (fclPanel_t *)&pos);
+    cmpUpdateListSelection(&pos, (u8 *)CMB_GBWK + 0x1C, 0, mode, 0x100, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbDrawInfoSprite);
 
-extern u8 cmbSpriteTable[];
-extern void fclDrawSpriteRes(s32 a, s32 b, s32 color, s32 d, s32 e, s32 f, s32 *handles,
-                             u8 *table, s32 id);
+extern fclSpriteTbl_t cmbSpriteTable[];
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 d, s32 *color, s32 id, s32 idx, s32 *texs,
+                             fclSpriteTbl_t *tbl, s32 ot);
 void cmbDrawTopSprite(void)
 {
     fclDrawSpriteRes(0, 0, 0xFFFFF0, 0, 0, 0x23, CMB_GBWK->texHandle, cmbSpriteTable, 0x47);
@@ -2245,7 +2322,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbGetModelMarkPos);
 #ifdef NON_MATCHING
 void cmbDrawFullScreenPanel(s32 flags)
 {
-    cmpDisableRGB();
+    cmpDisableRGB(flags);
     fclDrawPanelSprite(0x34000, flags);
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0, flags);
     cmpAllocRefGifTag(flags);
@@ -2625,19 +2702,6 @@ INCLUDE_ASM(const s32, "code_001FAE80", shpChkChoiceMax);
 INCLUDE_ASM(const s32, "code_001FAE80", shop_Process);
 
 void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
-
-typedef struct
-{
-    /* 0x00 */ s32 unk_00;
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s16 unk_0C;
-    /* 0x0E */ s16 unk_0E;
-    /* 0x10 */ s32 unk_10;
-    /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-} fclPanelPos_t;
 
 extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
                             s32 arg);
@@ -3152,7 +3216,7 @@ typedef struct
 
 extern ragDrawWork_t *ragDrawWork;
 
-extern u8 D_003306B8[];
+extern fclSpriteTbl_t D_003306B8[];
 
 void ragDrawHeartsFooter(fclPanel_t *panel, s32 id)
 {
@@ -3204,7 +3268,23 @@ void ragDrawSeqConfirm(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqRoot);
+s32 ragDrawSeqRoot(s32 active)
+{
+    fclPanelPos_t pos;
+    s32 mode = 1;
+
+    if (active != 0) {
+        mode = 0;
+        if (fclGetFlag(0) == 0) {
+            mode = 2;
+            if (*(s8 *)((u8 *)ragDrawWork + 3) == 4) {
+                mode = 1;
+            }
+        }
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&pos);
+    cmpUpdateListSelection(&pos, (u8 *)ragDrawWork + 0x140, 0, mode, 0x100, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqErr);
 
@@ -3632,7 +3712,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateCallSeq);
 INCLUDE_ASM(const s32, "code_001FAE80", rcvUpdateSeqAllRecover);
 
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
-extern void lstMoveCursor2(lstWork_t *list, s32 dir);
+extern void lstMoveCursor2(lstWork_t *list, s8 dir);
 extern s32 rcvUpdateData(void);
 extern s32 rcvUpdateCallSeq(s32 seq);
 
@@ -4193,23 +4273,108 @@ void fclDrawBG(fclSprite_t *sprite, s32 flags)
     }
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclSetupSprite);
+void fclSetupSprite(s32 d, fclSprite_t *sprite, u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl)
+{
+    fclSpriteEntry_t *e;
+    fclSpriteRes_t *res;
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteRect);
+    e = &tbl[id].entries[idx];
+    res = &tbl[id].res[e->res];
+    fclSetSpriteEx(sprite, &res->rect, e->x, e->y, d, 0x80808080, e->unk_04, texs[res->tex]);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteAlpha);
+void fclDrawSpriteRect(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx,
+                       s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+{
+    fclSprite_t sprite;
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteFilter);
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    sprite.unk_0C = sprite.unk_08 + (sprite.unk_0C - sprite.unk_08) * w / 1000;
+    sprite.unk_0E = sprite.unk_0A + (sprite.unk_0E - sprite.unk_0A) * h / 1000;
+    sprite.unk_04 = sprite.unk_04 * w / 1000;
+    sprite.unk_06 = sprite.unk_06 * h / 1000;
+    if ((w != 0) && (sprite.unk_04 < 4)) {
+        sprite.unk_0C = sprite.unk_08 + 0x40;
+        sprite.unk_04 = 4;
+    }
+    if ((h != 0) && (sprite.unk_06 < 4)) {
+        sprite.unk_06 = 4;
+        sprite.unk_0E = sprite.unk_0A + 0x40;
+    }
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
+                      &sprite, sprite.unk_20, 0, 1, ot);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteSize);
+void fclDrawSpriteAlpha(s32 x, s32 y, s32 d, u8 mode, s32 *color, s32 id, s32 idx, s32 *texs,
+                        fclSpriteTbl_t *tbl, s32 ot)
+{
+    fclSprite_t sprite;
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteFull);
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
+                      &sprite, sprite.unk_20, mode, 1, ot);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteSizeFilter);
+void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 id, s32 idx,
+                         s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+{
+    fclSprite_t sprite;
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteSizeAlphaFilter);
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
+                      &sprite, sprite.unk_20, 0, filter, ot);
+}
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteRes);
+void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx,
+                       s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+{
+    fclSprite_t sprite;
+
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, w, h, color, &sprite, sprite.unk_20, 0,
+                      1, ot);
+}
+
+void fclDrawSpriteFull(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s32 *color, s32 id,
+                       u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+{
+    fclSprite_t sprite;
+
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, w, h, color, &sprite, sprite.unk_20,
+                      mode, 1, ot);
+}
+
+void fclDrawSpriteSizeFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 filter, s32 *color, s32 id,
+                             u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+{
+    fclSprite_t sprite;
+
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, w, h, color, &sprite, sprite.unk_20, 0,
+                      filter, ot);
+}
+
+void fclDrawSpriteSizeAlphaFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s32 *color,
+                                  s32 id, f32 angle, u16 idx, s32 *texs, fclSpriteTbl_t *tbl,
+                                  s32 ot)
+{
+    fclSprite_t sprite;
+
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteAngleCore(x + sprite.unk_10, y + sprite.unk_14, w, h, angle, color, &sprite,
+                           sprite.unk_20, mode, 1, ot);
+}
+
+void fclDrawSpriteRes(s32 x, s32 y, s32 d, s32 *color, s32 id, s32 idx, s32 *texs, fclSpriteTbl_t *tbl,
+                      s32 ot)
+{
+    fclSprite_t sprite;
+
+    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
+                      &sprite, sprite.unk_20, 0, 1, ot);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", fcl_212910);
 
@@ -4260,15 +4425,10 @@ s32 func_00213148(const void *a, const void *b)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00213190);
-
-/* NON_MATCHING: 12 of 20 words differ (first at +0x0). */
-#ifdef NON_MATCHING
-s32 cmpSkillOrder(const void *a, const void *b)
+s32 func_00213190(const void *a, const void *b)
 {
     u16 *pa = (u16 *)a;
     u16 *pb = (u16 *)b;
-    u16 sb;
 
     if (*pa == 0) {
         if (*pb != 0) {
@@ -4277,18 +4437,35 @@ s32 cmpSkillOrder(const void *a, const void *b)
     } else if (*pb == 0) {
         return -1;
     }
-    sb = *pb;
-    if (sb < *pa) {
+    if (*pb < *pa) {
         return 1;
     }
-    if (*pa < sb) {
+    if (*pa < *pb) {
         return -1;
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "code_001FAE80", cmpSkillOrder);
-#endif
+
+s32 cmpSkillOrder(const void *a, const void *b)
+{
+    u16 *pa = (u16 *)a;
+    u16 *pb = (u16 *)b;
+
+    if (*pa == 0) {
+        if (*pb != 0) {
+            return 1;
+        }
+    } else if (*pb == 0) {
+        return -1;
+    }
+    if (*pb < *pa) {
+        return 1;
+    }
+    if (*pa < *pb) {
+        return -1;
+    }
+    return 0;
+}
 
 
 s32 cmbSetEvoResult(const void *a, const void *b)
@@ -4387,9 +4564,47 @@ void func_002134F8(u8 *base, u8 mask, s32 index)
     base[index + 0x59] &= ~mask;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", lstMoveCursor);
+void lstMoveCursor(lstWork_t *work, s8 dir)
+{
+    s32 first;
+    s32 pos;
 
-INCLUDE_ASM(const s32, "code_001FAE80", lstMoveCursor2);
+    first = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
+    if (dir == 0) {
+        cmpMoveCursor(&work->listCursor, 0);
+        return;
+    }
+    while (cmpMoveCursor(&work->listCursor, dir) != 0) {
+        pos = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
+        if (pos == first) {
+            break;
+        }
+        if ((work->unk_0009[pos + 0x50] & 1) != 0) {
+            break;
+        }
+    }
+}
+
+void lstMoveCursor2(lstWork_t *work, s8 dir)
+{
+    s32 first;
+    s32 pos;
+
+    first = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
+    if (dir == 0) {
+        cmpMoveCursor2(&work->listCursor, 0);
+        return;
+    }
+    while (cmpMoveCursor2(&work->listCursor, dir) != 0) {
+        pos = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
+        if (pos == first) {
+            break;
+        }
+        if ((work->unk_0009[pos + 0x50] & 1) != 0) {
+            break;
+        }
+    }
+}
 
 void lstDrawUpDownCursor(lstWork_t *work)
 {
@@ -4425,10 +4640,8 @@ void lstDrawListWindowCursor(lstWindowWork_t *work, s32 arg)
                      (cmpCursorWork_t *)((u8 *)work + 0x15C), 0, arg);
 }
 
-extern void lstMoveCursor(lstWork_t *work, s32 dir);
+extern void lstMoveCursor(lstWork_t *work, s8 dir);
 
-/* NON_MATCHING: 1 of 29 words differ (first at +0x30). */
-#ifdef NON_MATCHING
 s32 lstPageUp(lstWork_t *work)
 {
     cmpCursorWork_t *cursor = &work->listCursor;
@@ -4443,12 +4656,7 @@ s32 lstPageUp(lstWork_t *work)
     }
     return i;
 }
-#else
-INCLUDE_ASM(const s32, "code_001FAE80", lstPageUp);
-#endif
 
-/* NON_MATCHING: 1 of 29 words differ (first at +0x30). */
-#ifdef NON_MATCHING
 s32 lstPageDown(lstWork_t *work)
 {
     cmpCursorWork_t *cursor = &work->listCursor;
@@ -4461,11 +4669,8 @@ s32 lstPageDown(lstWork_t *work)
         }
         lstMoveCursor(work, 1);
     }
-    return (s32)i;
+    return i;
 }
-#else
-INCLUDE_ASM(const s32, "code_001FAE80", lstPageDown);
-#endif
 
 extern s32 datGetItemSlotIndex(s32 id);
 extern void datAddHearts(s32 id);
@@ -4904,7 +5109,36 @@ void fclSetSpriteColor(u8 *sprite, u32 color)
     sprite[0x1F] = color;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclSetSpriteEx);
+void fclSetSpriteEx(fclSprite_t *sprite, fclSpriteRect_t *rect, s32 a, s32 b, s32 d, s32 color,
+                    s32 e, s32 tex)
+{
+    fclSpriteRect_t *r;
+    s32 u0;
+    s32 v0;
+    s32 u1;
+
+    sprite->unk_10 = a << 4;
+    sprite->tex = tex;
+    sprite->unk_14 = b << 3;
+    sprite->unk_18 = d;
+    sprite->unk_20 = e;
+    fclSetSpriteColor((u8 *)sprite, color);
+    r = (fclSpriteRect_t *)&sprite->unk_04;
+    *r = *rect;
+    if (r->x == 0) {
+        r->x = sprite->unk_0C;
+    }
+    if (sprite->unk_06 == 0) {
+        sprite->unk_06 = sprite->unk_0E;
+    }
+    u0 = sprite->unk_08;
+    v0 = sprite->unk_0A;
+    u1 = sprite->unk_0C;
+    sprite->unk_08 = u0 << 4;
+    sprite->unk_0A = v0 << 4;
+    sprite->unk_0C = (u1 + u0) << 4;
+    sprite->unk_0E = (sprite->unk_0E + v0) << 4;
+}
 
 void fclSetSprite(fclSprite_t *sprite, s32 x, s32 y, s32 d, s32 u0, s32 v0, s32 u1, s32 v1,
                   s32 color, s32 tex)
@@ -4938,7 +5172,85 @@ void fclDrawSprite(s32 a, s32 b, fclSprite_t *sprite)
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteEx);
 
+/* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
+#ifdef NON_MATCHING
+void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *sprite, u8 flags,
+                       u8 mode, u8 filter, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
+    u32 uv[4];
+    u32 x0;
+    u32 y0;
+    u32 x1;
+    u32 y1;
+    u32 t;
+    u32 c;
+
+    if (filter == 0) {
+        sdfTexSetFilter(sprite->tex, 0, 1);
+    } else {
+        sdfTexSetFilter(sprite->tex, 1, 1);
+    }
+    packet = (void *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
+    sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x43431, 1);
+    prim = (u64 *)sdf2DGetPrimPtr(packet);
+    uv[0] = sprite->unk_08 + 8;
+    uv[1] = sprite->unk_0A + 8;
+    uv[2] = sprite->unk_0C + 8;
+    uv[3] = sprite->unk_0E + 8;
+    x0 = x + 0x6FF8;
+    y0 = y + 0x78FC;
+    x1 = x0 + (w << 4);
+    y1 = y0 + (h << 3);
+    if ((flags & 1) != 0) {
+        t = x0;
+        x0 = x1;
+        x1 = t;
+    }
+    if ((flags & 2) != 0) {
+        t = y0;
+        y0 = y1;
+        y1 = t;
+    }
+    if (color == NULL) {
+        prim[0] = sprite->color[0] | ((u64)sprite->color[1] << 32);
+        prim[1] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+    } else {
+        c = *(u32 *)color;
+        prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+        prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
+    }
+    prim[2] = uv[0] | ((u64)uv[1] << 32);
+    prim[4] = x1 | ((u64)y1 << 32);
+    prim[5] = sprite->unk_18;
+    prim[6] = uv[2] | ((u64)uv[3] << 32);
+    prim[8] = x0 | ((u64)y0 << 32);
+    prim[9] = sprite->unk_18;
+    switch (mode) {
+    case 1:
+        fclDrawPanelSprite2(0x48, ot);
+        break;
+    case 2:
+        fclDrawPanelSprite2(0x42, ot);
+        break;
+    default:
+        fclDrawPanelSprite2(0x44, ot);
+        break;
+    }
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf2DLinkTexPacket(tag, sprite->tex, 0);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+    fclDrawPanelSprite2(0x44, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteCore);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", fclCalcRotPos);
 
@@ -9683,23 +9995,99 @@ s32 func_00239C08(u8 id, s32 arg)
     return cmpDrawSpriteFlag(id, 0, arg);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSprite);
+s32 cmpDrawSprite(s32 id, s32 flag, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
+
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    prim[0] = id;
+    if (flag == 0) {
+        prim[1] = 0x47;
+    } else {
+        prim[1] = 0x48;
+    }
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+}
 
 s32 fclDrawPanelSprite(s32 id, s32 arg)
 {
     return cmpDrawSprite(id, 0, arg);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSprite2);
+s32 cmpDrawSprite2(s32 id, s32 flag, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
+
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    prim[0] = id;
+    if (flag == 0) {
+        prim[1] = 0x42;
+    } else {
+        prim[1] = 0x43;
+    }
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+}
 
 s32 fclDrawPanelSprite2(s32 id, s32 arg)
 {
     return cmpDrawSprite2(id, 0, arg);
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSpriteIndexed);
+void cmpDrawSpriteIndexed(s32 id, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSpriteIndexed2);
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    prim[1] = 0x49;
+    prim[0] = id;
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+}
+
+void cmpDrawSpriteIndexed2(s32 id, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
+
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    prim[1] = 0x14;
+    prim[0] = id;
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+}
 
 void func_00239F88(s32 *work, s32 value)
 {
@@ -9759,13 +10147,39 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawBoxLine);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpDraw3DPoly);
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpDisableRGB);
+void cmpDisableRGB(s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *tag;
+    void *mask;
 
-INCLUDE_ASM(const s32, "code_001FAE80", cmpAllocRefGifTag);
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskRGB(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfDrawTagLinkRefGif(tag, (u32)mask);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+}
+
+void cmpAllocRefGifTag(s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *tag;
+    void *mask;
+
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    mask = (void *)sdfGrAllocPacketBuff(0x40);
+    sdfGrSetFrameMaskReset(dds3DrawEnv[dds3GetFrameID()].frameTex, mask, 0);
+    sdfDrawTagLinkRefGif(tag, (u32)mask);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+}
 
 void cmp_23A8B0(s32 arg)
 {
-    cmpDisableRGB();
+    cmpDisableRGB(arg);
     fclDrawPanelSprite(0x1001, arg);
     cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0, arg);
     fclDrawPanelSprite(0x50000, arg);
