@@ -137,6 +137,24 @@ The pairing is only credible if the address delta is piecewise constant, steppin
 insertions and deletions, so the tool writes the delta runs and they should be checked.
 USA to Maniax produced 129 runs over 9,433 pairs with zero non-monotone adjacent pairs.
 
+Masking is also the tool's one dangerous edge, and it bit once. A syscall stub is
+`addiu $v1, <service>; syscall; jr $ra; nop`, so masking the immediate erases the
+service number, the only thing that distinguishes one stub from the next. The engine
+then placed 96 names in the stub table at `[0x002DAC00, 0x002DBA80)` by position alone
+and got them shifted: Maniax 0x002DB170 is byte-identical to USA `_ExecPS2` but was
+named `SetGsVParam`. Match that table on exact bytes instead. The stubs are identical
+to their USA counterparts at a fixed offset, 0x980 in Maniax and 0x780 in Chronicle,
+so exact bytes settle all 96 with no ambiguity.
+
+The general guard against that class of error is an audit on unmasked bytes: a function
+byte-identical to exactly one function on the other side, and vice versa, is a forced
+pair no relocation difference can explain away, so the name it carries must match. Over
+960 forced pairs of 16 bytes or more this now reports **945 agreeing, 0 wrong** for
+Maniax and for Chronicle. Keep the 16-byte floor. Below it the test produces false
+positives, because 391 USA functions share an 8-byte body and two unrelated accessors
+can coincide: Chronicle `scrGetScriptHandle` is byte-identical to USA
+`sdfGrOpenPacketBuff` and is still `scrGetScriptHandle`, as its callers show.
+
 Three independent checks agreed:
 
 - Against 757 anchors derived from shared strings, switch tables and `.rodata` blobs
@@ -153,9 +171,15 @@ excluded:
 | | functions | named | share |
 |---|---|---|---|
 | `SLPM_654.62` before | 9,037 | 2 | |
-| `SLPM_654.62` after | 9,508 | 9,080 | 95.5% |
+| `SLPM_654.62` after | 9,510 | 9,304 | 97.8% |
 | `SLPM_666.81` before | 9,039 | 1 | |
-| `SLPM_666.81` after | 9,252 | 8,839 | 95.5% |
+| `SLPM_666.81` after | 9,293 | 8,967 | 96.5% |
+
+The last percent came from reading the residue by hand rather than from the automation.
+Of 228 pairs the tiers left unproven, 226 survived inspection and 2 did not, so the
+weak tiers were mostly right and still worth checking one at a time. Fixing the
+boundaries first also fed back into the pairing: once the missing starts existed, the
+high tier rose from 9,003 pairs to 9,247 and the unpaired count fell from 488 to 248.
 
 The function counts rose because both Japanese databases were missing function starts,
 not because the builds differ. IDA's auto-analysis creates a function at every direct
@@ -208,7 +232,20 @@ Not:
 - The 534-function gap between the USA and Maniax IDBs was never a difference between
   the builds. It was IDA auto-analysis against years of curation, and it closes exactly:
   248 unmarked-region matches plus a 286 net unpaired difference.
-- 43 name collisions remain unadjudicated, where the code-shape pairing and the
-  independent byte search disagree about which Japanese function should take a USA
-  name. 41 are sixteen-byte newlib and RFU stubs whose bodies are too short to be
-  unique. They are deliberately left unnamed.
+- 44 name collisions, where the code-shape pairing and the independent byte search
+  disagreed about which Japanese function takes a USA name, were adjudicated in favour
+  of the byte search in all 44 cases, and the 96 shifted stub names were corrected in
+  both Japanese builds. The masking that caused it is described in section 5.
+- `itfMesMngSetSelPosition` and `cmpSkillOrder` were each one function off. The family
+  around the first runs at delta -3104 and the engine's -3360 was the only outlier;
+  Maniax 0x001CD570 is `itfMesMngSetMesPosition`, distinguished by using fields +36,
+  +40 and +48 where the other uses +64, +68 and +72.
+- Three Japanese function boundaries were wrong, not just missing, and were split:
+  `dds3CrossfadeEnd` at 0x0016A760 was inside a 968-byte run, `SetRecordToUnitCore` at
+  0x002193F8 was inside its own wrapper, and `cmbDrawDevilNameLevel` really starts at
+  0x00200088 because 0x00200080 holds the previous function's delay slot and padding.
+- Two pairs were rejected outright. USA `frGetName1NFRQ` has no Maniax counterpart: the
+  Japanese build reads a 2-byte code and thresholds it where USA loops
+  `frCreateNameHandle`. USA `nmeGetMaxNameLen` has none either; the address it was
+  paired to is the shared return-2 tail of `nmeGetInputMode`, reached by two local
+  branches, so defining a function there would be wrong.
