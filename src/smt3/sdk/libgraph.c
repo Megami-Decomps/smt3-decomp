@@ -1,5 +1,9 @@
 #include "common.h"
 
+/* The GS interrupt mask register, through the kernel's syscall stubs. */
+extern u64 GsGetIMR(void);
+extern u64 GsPutIMR(u64 imr);
+
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsResetGraph);
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsGetGParam);
@@ -24,6 +28,15 @@ INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecLoadImage);
 
 INCLUDE_ASM(const s32, "sdk/libgraph", sceGsExecStoreImage);
 
-INCLUDE_ASM(const s32, "sdk/libgraph", sceGsPutIMR);
+u64 sceGsPutIMR(u64 imr)
+{
+    u64 old = GsGetIMR();
 
-INCLUDE_ASM(const s32, "sdk/libgraph", sceGsGetIMR);
+    GsPutIMR(imr);
+    return old;
+}
+
+u64 sceGsGetIMR(void)
+{
+    return GsGetIMR();
+}

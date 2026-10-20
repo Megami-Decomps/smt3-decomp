@@ -79,6 +79,12 @@ def main() -> None:
         if want == got:
             print(f"{name:24} match  {size} bytes")
             continue
+        # A C body one or more instructions shorter than the retail span matches
+        # when the remainder is the alignment fill .text supplies, as the
+        # production report also allows.
+        if bsize < size and got == want[:bsize] and set(want[bsize:]) <= {0}:
+            print(f"{name:24} match  {bsize} bytes + {size - bsize} alignment fill")
+            continue
         bad += 1
         print(f"{name:24} DIFF   retail {size} bytes, built {bsize}")
         shown = 0

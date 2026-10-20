@@ -1,5 +1,14 @@
 #include "common.h"
 
+/* D_STADR, the stall address the DMAC compares source-chain transfers against. */
+#define D_STADR ((u32 *)0x1000E060)
+
+/* A channel's register block. Fields are added as the functions that reach
+ * them are recovered; sceDmaGetChan only hands the address back. */
+typedef struct sceDmaChan sceDmaChan;
+
+extern sceDmaChan *sceDmaChanRegs[10];
+
 INCLUDE_ASM(const s32, "sdk/libdma", WaitDma);
 
 INCLUDE_ASM(const s32, "sdk/libdma", WatchDma);
@@ -8,7 +17,13 @@ INCLUDE_ASM(const s32, "sdk/libdma", CheckAddress);
 
 INCLUDE_ASM(const s32, "sdk/libdma", memclr);
 
-INCLUDE_ASM(const s32, "sdk/libdma", sceDmaGetChan);
+sceDmaChan *sceDmaGetChan(u32 channel)
+{
+    if (channel < 10) {
+        return sceDmaChanRegs[channel];
+    }
+    return NULL;
+}
 
 INCLUDE_ASM(const s32, "sdk/libdma", sceDmaReset);
 
@@ -16,7 +31,14 @@ INCLUDE_ASM(const s32, "sdk/libdma", sceDmaPutEnv);
 
 INCLUDE_ASM(const s32, "sdk/libdma", sceDmaGetEnv);
 
-INCLUDE_ASM(const s32, "sdk/libdma", sceDmaPutStallAddr);
+u32 sceDmaPutStallAddr(u32 addr)
+{
+    u32 *reg = D_STADR;
+    u32 old = *reg;
+
+    *reg = addr;
+    return old;
+}
 
 INCLUDE_ASM(const s32, "sdk/libdma", sceDmaSend);
 

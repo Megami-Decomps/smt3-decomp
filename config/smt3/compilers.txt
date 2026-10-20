@@ -1,0 +1,4 @@
+# Per-unit compiler: <dir>/<unit>  <id>  # evidence (default is ee-gcc2.96)
+# Why the Sony libraries need an older ee-gcc: docs/sdk-matching.md.
+sdk/libgraph         ee-gcc2.9-991111-01  # graph020.o == retail sceGsPutIMR
+sdk/libdma           ee-gcc2.9-991111-01  # same frame layout, no sibcalls
