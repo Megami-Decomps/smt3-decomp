@@ -42,8 +42,8 @@ extern void effMagaSCSetArea(void *effect, const void *parameters);
 extern void effMagaP4SetPoint(void *effect, const void *parameters);
 
 extern sdfVector4_t aViewEye;
-extern s32 dds3EffectObjectAddFld(s32 map, u32 floor, s32 group);
-extern s32 dds3EffectObjectFindFld(s32 map, u32 floor, s32 group);
+extern s32 fldGetModelFlag2(s32 map, u32 floor, s32 group);
+extern s32 fldGetAnimeId2(s32 map, u32 floor, s32 group);
 extern void dds3BillboardSetRGBA(void *bill, u32 color);
 
 typedef struct
@@ -1104,7 +1104,7 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
         s32 map = fldGlobalBase.area;
         u32 floor = fldGlobalBase.floor + 1;
 
-        if (dds3EffectObjectAddFld(map, floor, config->groupID)) {
+        if (fldGetModelFlag2(map, floor, config->groupID)) {
             work->stat &= ~1;
         } else {
             work->stat |= 1;
@@ -1169,7 +1169,7 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
         break;
     case 1:
         if (config->groupID != 0) {
-            s32 entry = dds3EffectObjectFindFld(fldGlobalBase.area,
+            s32 entry = fldGetAnimeId2(fldGlobalBase.area,
                                                 fldGlobalBase.floor + 1,
                                                 config->groupID);
 

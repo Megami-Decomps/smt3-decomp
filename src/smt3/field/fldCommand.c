@@ -240,7 +240,7 @@ extern s32 fldSetModelFlag2(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern s32 fldSetAnimeFlag2(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-extern void fldGetAnimeId2(s32 area, s32 slotIndex, s32 valueIndex, s32 value);
+extern void fldSetAnimeId2(s32 area, s32 slotIndex, s32 valueIndex, s32 value);
 
 extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
 
@@ -1059,7 +1059,7 @@ s32 fldCommand_FLD_ANIME_ID2(void) {
     if (slot == 0) {
         return 1;
     }
-    fldGetAnimeId2(world, stage, slot, scrGetIntPara(3));
+    fldSetAnimeId2(world, stage, slot, scrGetIntPara(3));
     return 1;
 }
 

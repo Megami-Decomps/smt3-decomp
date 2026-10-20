@@ -323,7 +323,7 @@ void fldHojiDebugView(void);
 
 void fldHojiDebugView2(void);
 
-extern s32 dds3ObjectBaseAddModelOt(s32 field, s32 area, s32 block);
+extern s32 fldGetAnimeFlag(s32 field, s32 area, s32 block);
 
 
 
@@ -1281,7 +1281,7 @@ void fldHojiDebugView2(void) {
 
             fldDbgPrint2D(x1, ((i * 12) - 76) << 3, buf);
             x1 += 0xC0;
-            flag = dds3ObjectBaseAddModelOt(fldGlobalBase.area, i + 1, j);
+            flag = fldGetAnimeFlag(fldGlobalBase.area, i + 1, j);
             if (flag == 0) {
                 sprintf(buf, D_0054EC28);
             } else {

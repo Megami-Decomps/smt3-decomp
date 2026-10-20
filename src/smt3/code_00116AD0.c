@@ -2232,7 +2232,7 @@ void fldSetAnimeFlag(s32 charId, s32 idx, s32 bit, s32 on)
     }
 }
 
-s32 dds3ObjectBaseAddModelOt(s32 charId, s32 idx, s32 bit)
+s32 fldGetAnimeFlag(s32 charId, s32 idx, s32 bit)
 {
     s32 type;
 
@@ -2310,7 +2310,7 @@ void fldSetModelFlag2(s32 charId, s32 idx, s32 bit, s32 on)
     }
 }
 
-s32 dds3EffectObjectAddFld(s32 charId, s32 idx, s32 bit)
+s32 fldGetModelFlag2(s32 charId, s32 idx, s32 bit)
 {
     s32 type;
 
@@ -2349,7 +2349,7 @@ void fldSetAnimeFlag2(s32 charId, s32 idx, s32 bit, s32 on)
     }
 }
 
-s32 fld_120C30(s32 charId, s32 idx, s32 bit)
+s32 fldGetAnimeFlag2(s32 charId, s32 idx, s32 bit)
 {
     s32 type;
 
@@ -2364,7 +2364,7 @@ s32 fld_120C30(s32 charId, s32 idx, s32 bit)
     return ((u32)DDS3_GBWK->gb[type].flags[idx].animeFlag2 >> bit) & 1;
 }
 
-void fldGetAnimeId2(s32 charId, s32 idx, s32 slot, s32 id)
+void fldSetAnimeId2(s32 charId, s32 idx, s32 slot, s32 id)
 {
     s32 type;
 
@@ -2380,7 +2380,7 @@ void fldGetAnimeId2(s32 charId, s32 idx, s32 slot, s32 id)
     DDS3_GBWK->gb[type].flags[idx].animeId2[slot] = id;
 }
 
-s32 dds3EffectObjectFindFld(s32 charId, s32 idx, s32 slot)
+s32 fldGetAnimeId2(s32 charId, s32 idx, s32 slot)
 {
     s32 type;
     u8 id;

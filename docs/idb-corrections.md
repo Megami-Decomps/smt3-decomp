@@ -144,55 +144,44 @@ Entry 0 of `modelFileKindTable` is `{0x0032A858, 2}` and the table runs seven en
 0x0032C458, where `mdlResrcMajorList` starts. `modelFileTable` (0x0032A820) has the same
 `{entries, count}` shape.
 
-## Proposed, with the proof, not yet applied
+## Applied on 2026-10-20: datUnitWork_t and five fldGbFlags_t accessors
 
-`include/newdata.h`'s `datUnitWork_t` is six bytes out from +0x28 on, and the
-local copy in `newbattle/nbMakePacket.c` is the correct one. The retail code
-and the HD bodies agree against the header in three places:
+`include/newdata.h`'s `datUnitWork_t` now carries the corrected layout, which
+the retail code and the HD bodies agree on against the old one: `namecode` as
+`u16[8]` at +0x28, `skillcnt` as `u16` at +0x38, `skill` as `u16[24]` at +0x3A,
+the eight `now*`/`prev*` halfwords from +0x6A, `mitamaparam` at +0x7A,
+`levelupparam` at +0x80 and `keisyoskill` at +0x86. It tiles to 0xEC with no
+gap, which removed the invented `unk80[6]`, and 0xEC is the stride
+`nbGetParamAvg2` and `nbGetLvAvg2` walk the party records with.
+`tools/header_layout.c` asserts the size and the moved offsets.
 
-| Offset | Header calls it | It is | Proof |
-|---|---|---|---|
-| +0x38 | `skill[2]` (`skill` at +0x34) | `skillcnt`, a `u16` | `rstChkAddSkill` (0x0021FFB8) reads the halfword and tests `sltiu 8`; the HD body is `if (GBWK->pCurrentStock->skillcnt <= 7) return 1; else return 2;`, which is also what the function's name says |
-| +0x6A, +0x6C | `nowtform`, `prevcommand` | `nowcommand`, `nowindex` | `SetAction_AI` (0x00253BF8) stores `-1` and `0` there and calls `nbRunAi`; the HD body is `work->nowcommand = -1; work->nowindex = 0;`. Ten AI and bad-status setters in `nbMakePacket` write the same pair as a command plus its skill index |
-| +0x7A | `levelupparam` | `mitamaparam` | `datGetBaseParam` (0x00243E78) reads `param[i]` at +0x16, `skillparam[i]` at +0x1C and this array; the HD body sums `param`, `skillparam` and `mitamaparam` |
+The proofs were `rstChkAddSkill` at 0x0021FFB8 reading the +0x38 halfword and
+testing `sltiu 8` against the HD body's `skillcnt <= 7`; `SetAction_AI` at
+0x00253BF8 storing -1 and 0 at +0x6A and +0x6C before `nbRunAi`, against the HD
+body's `nowcommand = -1; nowindex = 0;`; and `datGetBaseParam` at 0x00243E78
+summing `param`, `skillparam` and the +0x7A array, which is `mitamaparam`.
 
-So the PS2 record is `namecode` as `u16[8]` at +0x28, `skillcnt` as `u16` at
-+0x38, `skill` as `u16[24]` at +0x3A, then the eight `now*`/`prev*`
-halfwords from +0x6A, `mitamaparam` at +0x7A, `levelupparam` at +0x80 and
-`keisyoskill` at +0x86. Every field tiles to 0xEC with no gap, which also
-removes the header's invented `unk80[6]`, and 0xEC is the stride
-`nbGetParamAvg2` and `nbGetLvAvg2` walk the party records at
-`DDS3_GBWK + 0xA54` with.
+Five `fldGbFlags_t` accessors in `code_00116AD0` were renamed in the IDB, which
+`tools/ida_symbols.py` then exported, and every C reference was updated in the
+same pass. Each body is `fldGetModelFlag`'s with one field changed, which is
+what identifies it, and the old names described something else:
 
-This is not applied because the header's names are already used by matched
-code in three units this pass may not touch: `nowtform`/`prevcommand` in
-`newbattle/nbStageProcess.c`, `levelupparam` in `newdata/datCalc.c`, and
-`skill[2]` in `code_001FAE80.c`. Both layouts agree on every offset any of
-them loads, so the rename is a one-pass edit of the header plus those three
-files with no codegen change, and it has to be done with nothing else in
-flight. `tools/header_layout.c`'s `OFF` rows for `nowcommand`, `nowtform` and
-`levelupparam` move with it.
-
-Five `fldGbFlags_t` accessors in `code_00116AD0` have the same body as
-`fldGetModelFlag` and differ only in the field they touch, which the retail
-code makes plain. Their current names describe something else entirely:
-
-| Address symbol | Reads or writes | Current name is wrong because |
+| Was | Now | Body |
 |---|---|---|
-| `dds3ObjectBaseAddModelOt` | `animeFlag` (+0x02) | it is a flag getter, not an object-base draw call |
-| `dds3EffectObjectAddFld` | `modelFlag2` (+0x06) | same |
-| `fld_120C30` | `animeFlag2` (+0x08) | unnamed, and the field identifies it |
-| `dds3EffectObjectFindFld` | `animeId2[slot]` (+0x0A), returning -1 on 0xFF | same |
-| `fldGetAnimeId2` | writes `animeId2[slot]` | it is a setter, so the `Get` prefix is backwards |
+| `dds3ObjectBaseAddModelOt` | `fldGetAnimeFlag` | returns bit `b` of `animeFlag` (+0x02) |
+| `dds3EffectObjectAddFld` | `fldGetModelFlag2` | returns bit `b` of `modelFlag2` (+0x06) |
+| `fld_120C30` | `fldGetAnimeFlag2` | returns bit `b` of `animeFlag2` (+0x08) |
+| `dds3EffectObjectFindFld` | `fldGetAnimeId2` | reads `animeId2[slot]` (+0x0A), -1 on 0xFF |
+| `fldGetAnimeId2` | `fldSetAnimeId2` | writes `animeId2[slot]`, so `Get` was backwards |
 
-The HD build names the sibling cluster `fldGbSetAnime`, `fldGbSetHit`,
-`fldGbSetNpc` and `fldGbChkTakaraOpen`, so names from that family fit.
-
-These are not applied yet because a rename in the IDB changes
-`config/smt3/symbol_addrs.txt` on the next export, which renames the symbols
-every C reference and every `INCLUDE_ASM` line uses. That has to be done in
-one pass with the source updates and a relink, while no other work is in
-flight, or `check_unit.py` reports `STALE` against the old names.
+The names follow the setters the unit already carries (`fldSetAnimeFlag`,
+`fldSetAnimeFlag2`, `fldSetModelFlag2`) and the getter `fldGetModelFlag`. The
+setter was renamed before the getter took its name, to avoid a collision. The
+two callers outside the unit, in `basic/dds3ObjectBase.c` and
+`field/fldFileResolver.c`, already used the function as a flag getter
+(`flag = ...(area, floor + 1, bit)`), which is further evidence the old name
+was wrong. The image is byte-identical afterwards and all five affected units
+report `0 differ`.
 
 ## Examined and left alone
 

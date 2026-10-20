@@ -32,7 +32,7 @@ extern void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u
                        u32 gsWord2, u32 gsWord3);
 extern void mdlLink(void *model, sdfModelOt_t *ot);
 extern sdfModelOt_t D_002F6A38;
-extern s32 dds3ObjectBaseAddModelOt(s32 area, s32 floor, s32 bit);
+extern s32 fldGetAnimeFlag(s32 area, s32 floor, s32 bit);
 extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
 extern void sdfMotionNext(sdfMotionCtrlr_t *motion);
 extern void sdfModelEvalTm(sdfModelRootNode_t *model);
@@ -710,7 +710,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic)
     if (control->motion != NULL) {
         hojiID = ((dds3ObjectBaseMatterWork_t *)basic->workdata)->hojiID;
         if (hojiID > 0) {
-            if (dds3ObjectBaseAddModelOt(fldGlobalBase.area, fldGlobalBase.floor + 1, hojiID) ==
+            if (fldGetAnimeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, hojiID) ==
                 0) {
                 switch (control->animeMode) {
                 case 0:
