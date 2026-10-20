@@ -469,6 +469,10 @@ long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
     return libc_2D34A0(&u);
 }
 
+#ifdef FIX_BUGS
+f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant);
+#endif
+
 u32 sdfDoubleToULong(double x) {
     SdfUnpackedD u;
     u32 m;
@@ -478,6 +482,11 @@ u32 sdfDoubleToULong(double x) {
     if (u.mant & 0x3FFFFFFF) {
         m |= 1;
     }
+    /* BUG: sdfPackQuad returns f32, which this target returns in $f0, but
+     * with nothing in scope ee-gcc assumes int and the result is read from
+     * $v0. So what comes back is not the packed value at all. Retail does
+     * this, and declaring the function moves the image, so the behaviour is
+     * kept and the declaration sits behind FIX_BUGS. */
     return sdfPackQuad(u.kind, u.sign, u.exp, m);
 }
 

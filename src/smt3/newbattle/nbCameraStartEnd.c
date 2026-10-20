@@ -103,8 +103,7 @@ s32 nbCameraStart(void)
 {
     if (D_0054F370 != 0) {
         D_0054F370 = 0;
-        printf("nbCameraStart:Read Wait = %d ****
-", D_0054F374);
+        printf("nbCameraStart:Read Wait = %d ****\n", D_0054F374);
     }
     if (D_0054F378 != 0) {
         if (nbCameraStartState == 5) {

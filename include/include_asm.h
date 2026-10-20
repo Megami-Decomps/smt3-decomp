@@ -29,6 +29,20 @@
  * there for the next person instead of being thrown away, and
  * tools/check_nonmatching.py compiles it so it cannot rot unnoticed.
  *
+ * A bug the original has, which the image therefore depends on, keeps the
+ * behaviour and carries the correction behind FIX_BUGS:
+ *
+ *     // BUG: what is wrong and why it cannot be fixed in place
+ *     #ifdef FIX_BUGS
+ *     <the correction>
+ *     #endif
+ *
+ * The normal build never defines FIX_BUGS, so it keeps the bug and stays
+ * byte-identical. Anything built from this source that is not trying to match,
+ * a port for instance, defines it and gets code that does what was meant. A
+ * bug that can be corrected without moving the image is simply corrected; the
+ * guard is only for the ones the image depends on.
+ *
  * The one line says how close it is and what differs.
  * docs/nonmatching/<unit>.md carries the rest: the remaining difference and
  * the source shapes already ruled out. tools/check_nonmatching.py compiles

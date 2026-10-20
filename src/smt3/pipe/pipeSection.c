@@ -178,8 +178,7 @@ void pipeEndSection(void)
     PipeTexRelease();
     pipeDataRelease();
     dds3BackColor = 0x80000000;
-    DEBUG_PRINT("Release OK ....
-");
+    DEBUG_PRINT("Release OK ....\n");
     scene = NULL;
 }
 

@@ -296,10 +296,20 @@ typedef struct {
 
 /* ---- COP1 square root ---- */
 
-/* sqrt.s exists on the EE, but cc1 2.96 expands a sqrtf call into one only
- * with -fno-math-errno, which the build does not pass. */
-#define EE_SQRT_F32(out, in) __asm__ volatile ( \
-    ".set noreorder\n\tsqrt.s %0, %1\n\t.set reorder" : "=f" (out) : "f" (in))
+/* The engine's own names. The HD sources keep both as real functions in
+ * sdfMath.c, sdfSqrt as `return sqrtf(aValue);` and sdfFabs as
+ * `return fabsf(c);`, so a call site here reads the way the original did.
+ * Value forms, and not volatile: they have an output and no side effect. */
+#define sdfSqrt(in) ({ \
+    f32 _sqrtOut; \
+    __asm__ (".set noreorder\n\tsqrt.s %0, %1\n\t.set reorder" \
+        : "=f" (_sqrtOut) : "f" (in)); \
+    _sqrtOut; })
+#define sdfFabs(in) ({ \
+    f32 _fabsOut; \
+    __asm__ (".set noreorder\n\tabs.s %0, %1\n\t.set reorder" \
+        : "=f" (_fabsOut) : "f" (in)); \
+    _fabsOut; })
 
 /* ---- barriers ---- */
 
@@ -579,15 +589,6 @@ typedef struct {
 #define PS2_STORE_ZERO_QUAD_AT48(dst) __asm__ volatile ( \
     "sq $0, 0x30(%0)" : : "r" (dst) : "memory")
 
-/* COP1 absolute value. Prefer `extern f32 fabsf(f32);` and an ordinary call:
- * cc1 2.96 emits abs.s for it directly, verified against this toolchain, so
- * this macro is what fails to match where retail has a plain abs.s. It is
- * kept only for a body that already needs inline asm around it. Not
- * volatile, like the fpu.h helpers: it has an output and no side effect. */
-#define EE_ABS_F32(out, in) __asm__ ( \
-    ".set noreorder\n\tabs.s %0, %1\n\t.set reorder" \
-    : "=f" (out) : "f" (in))
-
 /* Pack an RGBA8888 word down to RGBA5551. */
 #define MMI_PEXT5(out, in) __asm__ volatile ("pext5 %0, %1" : "=r" (out) : "r" (in))
 
@@ -660,12 +661,6 @@ typedef struct {
 #define SDF_VU0_SCALEVECTOR_V0(value) __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vmulx.xyzw vf10, vf10, vf2x\n\t.set reorder" : : "f" (value))
-
-/* from code_00116AD0.c */
-/* ps2asm.h's EE_SQRT_F32 is volatile, which pins the surrounding schedule.
-   This form lets cc1 hoist the compare constants above the sqrt. */
-#define EE_SQRT_F32_SCHED(out, in) __asm__ ( \
-    ".set noreorder\n\tsqrt.s %0, %1\n\t.set reorder" : "=f" (out) : "f" (in))
 
 /* from code_001AC0A8.c */
 #define SDF_VU0_LOADMATRIX_B_MEMOPS(src) __asm__ volatile ( \

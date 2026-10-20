@@ -257,7 +257,7 @@ s32 dds3ComparePosPoseSet2(dds3PoseSet_t *left, dds3PoseSet_t *right)
     SDF_VU0_LOADVECTOR_B(&right->pos);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
-    EE_ABS_F32(distance, distance);
+    distance = sdfFabs(distance);
     rightRadius = right->r;
     if (distance - rightRadius < 0.0f) {
         return 1;

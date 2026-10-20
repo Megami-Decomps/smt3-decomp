@@ -146,6 +146,9 @@ extern void *sdfMemLock(sdfMemHandle_t *handle);
 
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperFileLoadPB);
 
+/* Called above its definition, where ee-gcc assumed int. */
+u16 nbCameraHelperLength(nbCameraHelper_t *pHelper);
+
 nbCameraHelper_t *nbCameraHelperCreate(const char *name)
 {
     nbCameraHelper_t *pHelper = sdfChipAllocDirect(0x3C);

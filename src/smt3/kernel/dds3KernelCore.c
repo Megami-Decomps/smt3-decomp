@@ -540,8 +540,7 @@ void dds3PrintProcessList(void)
     char *countFormat;
 
     DebugProcess(startinglistf, "*** starting ***************************");
-    countFormat = "<<< %d >>>
-";
+    countFormat = "<<< %d >>>\n";
     printf(countFormat, startinglistcnt);
     DebugProcess(runninglistf, "*** running ****************************");
     printf(countFormat, runninglistcnt);

@@ -118,6 +118,9 @@ void effSwordTrackDelete(effSwordTrack_t *work);
 void effSwordTrackReset(effSwordTrack_t *work);
 /* Endpoint pairs are sampled into the history ring below. */
 
+/* Called above its definition, where ee-gcc assumed int. */
+dds3HermitianTrackPoly_t *dds3HermitianTrackPolyCreate(s32 historyLength, s32 steps);
+
 effModelTrackPoly_t *Eff_ModelTrackPolyCreate(effModelTrackPolyParam_t *params)
 {
     effModelTrackPoly_t *work = sdfChipAllocDirect(sizeof(effModelTrackPoly_t));

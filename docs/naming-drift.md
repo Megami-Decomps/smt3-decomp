@@ -654,6 +654,35 @@ never about layout, and the IDB's struct can describe a different build of the
 same engine. Confirm against an allocation site before any rename that the
 report only guessed at.
 
+### Finding an enum for a bare switch: per switch, exact only
+
+Two enums have been recovered this way, `NB_KOUKA_TYPE` for
+`nbKoukaProcess.c`'s dispatch and `NB_PHASE` for `nbMainProcess.c`'s battle
+phases. Both came out of matching a switch's set of bare case values against
+the IDB's enums, and the method only works with two constraints.
+
+**Per switch, not per file.** A file's case values span every switch in it and
+match nothing: `nbMakePacket.c` has 69 distinct values across its switches and
+no enum has that set. That is why an earlier sweep wrote the scan off as
+useless. Cutting each `switch` at its matching brace, and dropping nested
+switches so their values do not leak in, gives 120 sets worth testing in this
+tree.
+
+**Exact set equality, never a subset.** A subset match is worthless because a
+0..N run is a subset of dozens of enums, and so is a power-of-two run: the
+scan happily offers `SDF_MAT_PARMBIT_e` for `nbStageProcess.c`'s
+`work->badstatus & 0xFFF` and `SDF_ATTRBIT_e` for `datCalc.c`'s `bad`, both
+pure bitmask coincidences in the wrong module.
+
+Even an exact match needs corroboration, because a sequential set is still
+ambiguous: `n->negoreqtype`'s seven values match twenty different enums. What
+settles a case is the code agreeing by itself. For `NB_PHASE` the dispatcher's
+own per-case setters name the phases (`case 1` calls `nbSetMaePhase`, and
+member 1 is `MAE`), twelve of sixteen; for `NB_KOUKA_TYPE` it was the effect
+functions each case calls. Check the member names for collisions before
+applying: of `NB_PHASE`'s sixteen, only `EVENT` and `DEBUG` appear elsewhere in
+the tree, and both inside string literals.
+
 ### What the report cannot see
 
 Duplicate definitions are counted separately, because the same name in twelve

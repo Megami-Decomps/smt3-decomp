@@ -633,8 +633,7 @@ dds3Basic_t *dds3AddTMXEffectObjectBasic(const char *path, void *firstVector, s3
 {
     void *bill;
 
-    printf("LoadFile:%s
-", path);
+    printf("LoadFile:%s\n", path);
     bill = dds3BillboardFileLoad(0, path);
     return AddTMXEffect(bill, firstVector, secondVectorAddress);
 }
@@ -1116,7 +1115,7 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
     projectionDistance = config->offsetZ;
     {
         f32 squaredDistance = dx * dx + dy * dy + offset * offset;
-        EE_SQRT_F32(distance, squaredDistance);
+        distance = sdfSqrt(squaredDistance);
     }
     if (projectionDistance != 0) {
         direction.x = -dx;

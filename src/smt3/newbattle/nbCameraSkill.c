@@ -1218,8 +1218,7 @@ void nbCameraState_SkillAttack_Init(void)
                 bCameraShot_AttackInvokeTargetPartyNear_Set(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             } else {
-                printf("nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX
-", sdfFloatToULong(width));
+                printf("nbCameraState_SkillAttack : %f < NBCAMERA_ATTACK_MOVE_WIDTH_MAX\n", sdfFloatToULong(width));
                 nbCameraShot_InvokeTargetReverse_Set2(pCamera, &work);
                 nbCameraSkillAttackStep = 0xB;
             }

@@ -515,8 +515,7 @@ void evtUnRegistUnit(void)
         for (i = 0; i < viewerinfo->movieWork->unitCount; i++) {
             model = viewerinfo->movieWork->units[i].model;
             index = viewerinfo->movieWork->units[i].index;
-            printf("unregist %d, %d
-", model, index);
+            printf("unregist %d, %d\n", model, index);
             mdlUnRegist(model, index);
         }
     }

@@ -164,7 +164,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncycWork_t;
+} fclEncyc_instance_t;
 
 typedef struct
 {
@@ -195,7 +195,7 @@ typedef struct
     /* 0x1174 */ s32 unk_1174;
 } campInfoWork_t;
 
-extern fclEncycWork_t *g_pinst;
+extern fclEncyc_instance_t *g_pinst;
 extern dds3TitleWork_t *titleWork;
 extern campInfoWork_t *campInfoWork;
 extern s8 D_00551F80[8];
@@ -1227,8 +1227,7 @@ void fclCombineTexFree(void)
     for (i = 0; i < 7U; i++) {
         sdfTexFree(CMB_GBWK->texHandle[i]);
     }
-    printf("COMBINE : Tex free.
-");
+    printf("COMBINE : Tex free.\n");
 }
 
 void fclCombineSetTable(void)
@@ -2232,6 +2231,9 @@ extern void mdlGetFilebase(s32 kind, u16 id, char *out, s32 size);
 extern s32 sprintf(char *out, const char *fmt, ...);
 extern char D_0053CD68[];
 
+/* Called above its definition, where ee-gcc assumed int. */
+void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
+
 s32 cmbMakeModelPath(u16 id, s32 *size)
 {
     char path[0x80];
@@ -2393,6 +2395,9 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmbLoadTargetModel);
 
 extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
 extern evtUnit_t *evtGetUnitHandle2(void *obj);
+
+/* Called above its definition, where ee-gcc assumed int. */
+void *dds3GetActiveScene(void);
 
 s32 cmbFindUnitScene(void *work)
 {
@@ -2679,7 +2684,6 @@ void fclShopInitRagTex(u8 *work)
     }
 }
 
-extern char D_0053CFB0[]; /* "/facility/scr/shop/message.bf" */
 extern char D_0053CFD0[]; /* "/facility/scr/shop/mes_f.bf" */
 extern char D_0053CFF0[]; /* "/facility/scr/shop/mes_g.bf" */
 void fclShopGetTexPath(void *work, s32 mode)
@@ -2689,12 +2693,12 @@ void fclShopGetTexPath(void *work, s32 mode)
     if (mode != 1) {
         path = D_0053CFF0;
         if (mode != 5) {
-            path = D_0053CFB0;
+            path = "/facility/scr/shop/message.bf";
         }
     } else if (evtBitCheck(0x931) == 0) {
         path = D_0053CFD0;
     } else {
-        path = D_0053CFB0;
+        path = "/facility/scr/shop/message.bf";
     }
     *(s32 *)((u8 *)work + 0x2388) = (s32)sdfDevLoadFileEx(path, (u8 *)work + 0x238C, 0);
 }
@@ -2716,8 +2720,6 @@ void shop_update_Shutdown(void)
     evtDisableMoonDraw();
     p2sdStopBGM(0x310000);
 }
-
-INCLUDE_RODATA(const s32, "code_001FAE80", D_0053CFB0);
 
 INCLUDE_RODATA(const s32, "code_001FAE80", D_0053CFD0);
 
@@ -4443,8 +4445,7 @@ void fclTerminalLoadTextures(void *work)
         *tex = fclLoadTexture(D_00330808[i]);
         tex++;
     }
-    printf("TERMINAL : Tex load.
-");
+    printf("TERMINAL : Tex load.\n");
 }
 #else
 INCLUDE_ASM(const s32, "code_001FAE80", fclTerminalLoadTextures);
@@ -4459,8 +4460,7 @@ void fclTerminalFreeTextures(void *work)
     for (i = 0; i < 1U; i++) {
         sdfTexFree(tex[i]);
     }
-    printf("TERMINAL : Tex free.
-");
+    printf("TERMINAL : Tex free.\n");
 }
 
 extern void fclTerminalScanCommands(void *work);
@@ -5019,6 +5019,9 @@ void func_002134F8(u8 *base, u8 mask, s32 index)
     base[index + 0x59] &= ~mask;
 }
 
+/* Called above its definition, where ee-gcc assumed int. */
+s32 cmpMoveCursor(cmpCursorWork_t *cursor, s8 dir);
+
 void lstMoveCursor(lstWork_t *work, s8 dir)
 {
     s32 first;
@@ -5039,6 +5042,9 @@ void lstMoveCursor(lstWork_t *work, s8 dir)
         }
     }
 }
+
+/* Called above its definition, where ee-gcc assumed int. */
+s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
 
 void lstMoveCursor2(lstWork_t *work, s8 dir)
 {
@@ -6090,24 +6096,44 @@ void fclEncycSetExplainData(void *data)
     g_pinst->explainData = data;
 }
 
+/* One encyclopaedia record. Member names from the IDB, which the two local
+ * views this replaces already agreed with where they overlapped: one was a
+ * 0xB0 blob reading only id, the other a 0x52 prefix reading the param rows. */
 typedef struct
 {
-    /* 0x00 */ u16 devilId;
-    /* 0x02 */ u8 unk_02[0xAE];
-} fclEncycEntry_t;
+    /* 0x00 */ u16 id;
+    /* 0x02 */ u16 reserved0;
+    /* 0x04 */ u16 maxhp;
+    /* 0x06 */ u16 maxmp;
+    /* 0x08 */ u32 exp;
+    /* 0x0C */ u16 level;
+    /* 0x0E */ s8 param[6];
+    /* 0x14 */ s8 skillparam[6];
+    /* 0x1A */ u16 skillcnt;
+    /* 0x1C */ u16 skill[24];
+    /* 0x4C */ s8 mitamaparam[6];
+    /* 0x52 */ s8 levelupparam[6];
+    /* 0x58 */ u16 keisyoskill[24];
+    /* 0x88 */ u8 keiattr[24];
+    /* 0xA0 */ u16 hensinmae;
+    /* 0xA2 */ u16 reserved1;
+    /* 0xA4 */ u32 flag;
+    /* 0xA8 */ u32 reserved2;
+    /* 0xAC */ u32 hensinmaeexp;
+} fclencyceelem_t;
 
 extern s32 fclEncycSearch(s32 devilId);
 extern s32 fclEncycGetRatio(void);
-extern void SetElem(fclEncycEntry_t *dst, fclEncycEntry_t *src);
-extern void SetElem2(fclEncycEntry_t *dst, fclEncycEntry_t *src);
+extern void SetElem(fclencyceelem_t *dst, fclencyceelem_t *src);
+extern void SetElem2(fclencyceelem_t *dst, fclencyceelem_t *src);
 extern s32 datDebugPrintf(const char *fmt, ...);
 extern s32 evtBitOn(s32 bit);
 extern s32 evtBitOff(s32 bit);
 
-s32 fclEncycRegist2(fclEncycEntry_t *entry, s32 store)
+s32 fclEncycRegist2(fclencyceelem_t *entry, s32 store)
 {
     s32 *num = &cmbGlobalWork->encycNum;
-    fclEncycEntry_t *table = (fclEncycEntry_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)cmbGlobalWork + 0x11E90);
     s32 index = fclEncycSearch(*(u16 *)((u8 *)entry + 0x0));
     s32 known = 1;
     s32 count;
@@ -6115,10 +6141,8 @@ s32 fclEncycRegist2(fclEncycEntry_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
-            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
             return -1;
         }
         known = 0;
@@ -6139,10 +6163,10 @@ s32 fclEncycRegist2(fclEncycEntry_t *entry, s32 store)
     return known;
 }
 
-s32 fclEncycRegist(fclEncycEntry_t *entry, s32 store)
+s32 fclEncycRegist(fclencyceelem_t *entry, s32 store)
 {
     s32 *num = &cmbGlobalWork->encycNum;
-    fclEncycEntry_t *table = (fclEncycEntry_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)cmbGlobalWork + 0x11E90);
     s32 index = fclEncycSearch(*(u16 *)((u8 *)entry + 0x4));
     s32 known = 1;
     s32 count;
@@ -6150,10 +6174,8 @@ s32 fclEncycRegist(fclEncycEntry_t *entry, s32 store)
     if (index < 0) {
         count = *num;
         if (count >= 0xB8) {
-            printf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
-            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!
-");
+            printf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
+            datDebugPrintf("****** FATAL!! The encyclopedia record is bound to burst!!!\n");
             return -1;
         }
         known = 0;
@@ -6176,12 +6198,12 @@ s32 fclEncycRegist(fclEncycEntry_t *entry, s32 store)
 
 s32 fclEncycSearch(s32 devilId)
 {
-    fclEncycEntry_t *entry = (fclEncycEntry_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    fclencyceelem_t *entry = (fclencyceelem_t *)((u8 *)cmbGlobalWork + 0x11E90);
     s32 count = cmbGlobalWork->encycNum;
     s32 i;
 
     for (i = 0; i < count; i++) {
-        if (devilId == entry->devilId) {
+        if (devilId == entry->id) {
             return i;
         }
         entry++;
@@ -6223,7 +6245,7 @@ void fclEncycDebugShutdown(void)
     ReleaseDebug_fclEncyc();
 }
 
-void InitializeInstance(fclEncycWork_t *work)
+void InitializeInstance(fclEncyc_instance_t *work)
 {
     work->unk_6D = 1;
     work->modelId = -1;
@@ -6249,7 +6271,7 @@ extern s32 sdfMemLock(void *ptr);
 extern void *sdfMemAllocDirect(s32 size);
 extern s32 sdfMemLock(void *ptr);
 
-void allocPhaseBuffer(fclEncycWork_t *work, s32 size)
+void allocPhaseBuffer(fclEncyc_instance_t *work, s32 size)
 {
     void *buf = sdfMemAllocDirect(size);
     s32 lock = sdfMemLock(buf);
@@ -6258,7 +6280,7 @@ void allocPhaseBuffer(fclEncycWork_t *work, s32 size)
     work->unk_36C = lock;
 }
 
-void ReleaseWork(fclEncycWork_t *work)
+void ReleaseWork(fclEncyc_instance_t *work)
 {
     if (work->unk_36C != 0) {
         sdfMemFreeDirect(work->allocation);
@@ -6268,13 +6290,13 @@ void ReleaseWork(fclEncycWork_t *work)
 
 INCLUDE_ASM(const s32, "code_001FAE80", CALC_ENCYC_Process);
 
-extern void SetCameraLightParam(fclEncycWork_t *work);
-extern void (*DrawPhaseTable[])(fclEncycWork_t *work);
+extern void SetCameraLightParam(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
 s32 DRAW_ENCYC_Process(void)
 {
-    fclEncycWork_t *work = g_pinst;
-    void (*phase)(fclEncycWork_t *work);
+    fclEncyc_instance_t *work = g_pinst;
+    void (*phase)(fclEncyc_instance_t *work);
 
     if (work == NULL) {
         return 0;
@@ -6300,7 +6322,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", DrawPhaseRegistTop);
 
 extern void ReleaseFontList(void **list, s32 count);
 
-void DestPhaseRegistTop(fclEncycWork_t *work)
+void DestPhaseRegistTop(fclEncyc_instance_t *work)
 {
     s32 base = work->unk_36C;
 
@@ -6325,7 +6347,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", DrawPhaseRegistConfirm);
 
 extern void fclRbnRelease(fclRbnWork_t *work);
 
-void DestPhaseRegistConfirm(fclEncycWork_t *work)
+void DestPhaseRegistConfirm(fclEncyc_instance_t *work)
 {
     void *scene;
 
@@ -6353,7 +6375,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", InitPhaseReadStatus);
 
 INCLUDE_ASM(const s32, "code_001FAE80", CalcPhaseReadStatus);
 
-void DrawPhaseReadStatus(fclEncycWork_t *work)
+void DrawPhaseReadStatus(fclEncyc_instance_t *work)
 {
     s32 base = work->unk_36C;
 
@@ -6371,7 +6393,7 @@ void DrawPhaseReadStatus(fclEncycWork_t *work)
     DrawReadMainHelp(work);
 }
 
-void DestPhaseReadStatus(fclEncycWork_t *work)
+void DestPhaseReadStatus(fclEncyc_instance_t *work)
 {
     s32 base = work->unk_36C;
     void *scene;
@@ -6393,7 +6415,7 @@ void DestPhaseReadStatus(fclEncycWork_t *work)
 
 INCLUDE_ASM(const s32, "code_001FAE80", CalcPhaseReadSummon);
 
-void DrawPhaseReadSummon(fclEncycWork_t *work)
+void DrawPhaseReadSummon(fclEncyc_instance_t *work)
 {
     s32 base = work->unk_36C;
 
@@ -6429,7 +6451,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", RegistAll);
 
 INCLUDE_ASM(const s32, "code_001FAE80", InitListWindow);
 
-void PushListwinCursor(fclEncycWork_t *pinst, lstListWindow_t *plistwin, s32 stack)
+void PushListwinCursor(fclEncyc_instance_t *pinst, lstListWindow_t *plistwin, s32 stack)
 {
     cmpCursorPos_t *cur = &plistwin->cursorPos;
 
@@ -6562,7 +6584,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", CreateFontExplain);
 
 extern void itfMesMngRequestMessageRelease(s32 msg, s32 flag);
 
-void ReleaseFontExplain(fclEncycWork_t *work, s32 release)
+void ReleaseFontExplain(fclEncyc_instance_t *work, s32 release)
 {
     s32 base = work->unk_36C;
 
@@ -6578,14 +6600,6 @@ void ReleaseFontExplain(fclEncycWork_t *work, s32 release)
     }
 }
 
-typedef struct
-{
-    /* 0x00 */ u8 unk_00[0xE];
-    /* 0x0E */ s8 param[6];
-    /* 0x14 */ s8 skillparam[6];
-    /* 0x1A */ u8 unk_1A[0x32];
-    /* 0x4C */ s8 mitamaparam[6];
-} fclEncycElem_t;
 
 void FadeOutRibbon(fclReadRibbon_t *rbn)
 {
@@ -6611,7 +6625,7 @@ void FadeInRibbon(fclReadRibbon_t *rbn)
     rbn->unk_14 += rbn->unk_24;
 }
 
-s32 GetDevilParam(fclEncycElem_t *elem, s32 type)
+s32 GetDevilParam(fclencyceelem_t *elem, s32 type)
 {
     s32 sum = elem->param[type] + elem->skillparam[type] + elem->mitamaparam[type];
 
@@ -6655,7 +6669,10 @@ s32 CalcFadeAlpha(s16 *alpha, s32 up, s32 limit, s32 step)
 
 INCLUDE_ASM(const s32, "code_001FAE80", CalcListElemColor);
 
-void RequestModelLoad(fclEncycWork_t *work, s32 id)
+/* Called above its definition, where ee-gcc assumed int. */
+u16 cmpGetStatusModelId(void);
+
+void RequestModelLoad(fclEncyc_instance_t *work, s32 id)
 {
     if (cmpGetEncycWork() != 0) {
         if (id == cmpGetStatusModelId()) {
@@ -6667,7 +6684,7 @@ void RequestModelLoad(fclEncycWork_t *work, s32 id)
 }
 
 
-void SetScreenOffset(fclEncycWork_t *work, s32 flag)
+void SetScreenOffset(fclEncyc_instance_t *work, s32 flag)
 {
     if (flag != 0)
     {
@@ -6681,7 +6698,7 @@ void SetScreenOffset(fclEncycWork_t *work, s32 flag)
     }
 }
 
-void MoveScreenOffset(fclEncycWork_t *work)
+void MoveScreenOffset(fclEncyc_instance_t *work)
 {
     if ((work->flags & 8) != 0) {
         work->screenOfsX -= 16.0f;
@@ -6734,9 +6751,9 @@ INCLUDE_ASM(const s32, "code_001FAE80", CirculateDevilObject);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ChangeDevilObjectRegistConfirm);
 
-extern void RequestModelLoad(fclEncycWork_t *work, s32 id);
+extern void RequestModelLoad(fclEncyc_instance_t *work, s32 id);
 
-void ChangeDevilObjectReadMain(s32 index, fclEncycWork_t *work)
+void ChangeDevilObjectReadMain(s32 index, fclEncyc_instance_t *work)
 {
     s32 base = work->unk_36C;
     u16 *record = (u16 *)((u8 *)DDS3_GBWK + index * 0xB0 + 0x11E90);
@@ -7292,6 +7309,15 @@ void func_002215B8(void) {
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstFindRegisteredDevil);
+
+/* Called above its definition, where ee-gcc assumed int. */
+s32 datGetDevilSlotState(u8 devilId);
+
+/* Called above its definition, where ee-gcc assumed int. */
+/* Called above its definition, where ee-gcc assumed int. */
+s32 datDevilIsRegistered(u8 devilId);
+
+s8 datGetDevilSlotIndex(u8 devilId);
 
 s32 rstFindDevilSlot(void)
 {
@@ -9578,6 +9604,9 @@ extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 
 /* NON_MATCHING: 12 of 32 words differ (first at +0x50). */
 #ifdef NON_MATCHING
+/* Called above its definition, where ee-gcc assumed int. */
+s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index);
+
 void cmpSetIniStockRecoverEff(u8 *work)
 {
     s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
@@ -9689,6 +9718,9 @@ s32 cmpGetSelectSkillID(void)
 INCLUDE_ASM(const s32, "code_001FAE80", cmpUseSkill);
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpChkDoNotUseSkill);
+
+/* Called above its definition, where ee-gcc assumed int. */
+s8 cmpStartStockMsg(s8 flag);
 
 s32 cmpItemIsStockFull(u16 id)
 {
@@ -12350,7 +12382,7 @@ s8 cmpGetCursorRow(cmpCursorWork_t *cursor)
     return cursor->unk_04;
 }
 
-extern void cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
+extern s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
 
 void cmpMoveStockCursor(s8 index, s8 dir, u8 *base)
 {

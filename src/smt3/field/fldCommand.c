@@ -1219,8 +1219,7 @@ s32 fldCommand_FLD_GET_TAKARA_TBL(void) {
 
     switch (scrGetIntPara(0)) {
     case 0:
-        printf("Type:%d ID:%x Num:%d
-", fldTakaraTable[index].type, fldTakaraTable[index].id,
+        printf("Type:%d ID:%x Num:%d\n", fldTakaraTable[index].type, fldTakaraTable[index].id,
                fldTakaraTable[index].num);
         scrSetIntReturnValue(fldTakaraTable[index].type);
         break;
@@ -1262,8 +1261,7 @@ u32 fldCommand_FLD_CHK_TAKARA_OPEN(void) {
 s32 fldCommand_FLD_WARP_CALL_FIELD(void) {
     const char *entry;
 
-    printf("FLD_WARP_CALL_FIELD
-");
+    printf("FLD_WARP_CALL_FIELD\n");
     if (fldDoor_ChkWarp() != 0) {
         fldDoor_Warp(NULL);
         return 1;
@@ -1276,8 +1274,7 @@ s32 fldCommand_FLD_WARP_CALL_FIELD(void) {
 }
 
 s32 fldCommand_FLD_CALL_WAPEX(void) {
-    printf("FLD_CALL_WAPEX
-");
+    printf("FLD_CALL_WAPEX\n");
     fldDoor_WarpEx(scrGetIntPara(0));
     return 1;
 }
@@ -1582,8 +1579,7 @@ s32 fldCommand_FLD_GET_ITEMBOX_RND(void) {
     s32 threshold = D_00316EC8[evtGetAgeOfMoon()];
     s32 value = dds3GetRandIntA(0, 100);
 
-    printf("ITEMBOX_RND %d / %d
-", value, threshold);
+    printf("ITEMBOX_RND %d / %d\n", value, threshold);
     if (threshold >= value) {
         scrSetIntReturnValue(1);
     } else {

@@ -399,8 +399,7 @@ s32 BgmFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_
     if (f->frame == now) {
         eventNo = work->eventNo;
         bgm = f->data.h[1];
-        printf("bgm_frame e%03d, bgm %d
-", eventNo, bgm);
+        printf("bgm_frame e%03d, bgm %d\n", eventNo, bgm);
         switch (f->data.h[0]) {
         case 0:
             evtPlayEventBgm(eventNo, bgm);
@@ -1119,8 +1118,7 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *task)
     work->nowFrame++;
     ret = 0;
     if (work->nowFrame >= work->cutInfo->lastFrame) {
-        printf("end polygon movie! frame:%d
-", work->nowFrame);
+        printf("end polygon movie! frame:%d\n", work->nowFrame);
         return -1;
     }
     return ret;

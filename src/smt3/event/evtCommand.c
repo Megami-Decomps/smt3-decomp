@@ -1013,11 +1013,11 @@ u32 evtCommand_MODEL_LIGHT_DIR(void)
     dir[0] = scrGetFloatPara(2);
     dir[1] = scrGetFloatPara(3);
     dir[2] = scrGetFloatPara(4);
-    EE_ABS_F32(mag, dir[0]);
+    mag = sdfFabs(dir[0]);
     if (mag <= 0.01f) {
-        EE_ABS_F32(mag, dir[1]);
+        mag = sdfFabs(dir[1]);
         if (mag <= 0.01f) {
-            EE_ABS_F32(mag, dir[2]);
+            mag = sdfFabs(dir[2]);
             if (mag <= 0.01f) {
                 datDebugPrintf(D_0053A948);
                 return 1;
@@ -1228,8 +1228,7 @@ u32 evtCommand_EFFBED_START(void)
     if (basic != NULL) {
         entry = scrGetIntPara(1);
         if (entry >= 3U) {
-            datDebugPrintf("error EFFBED_START cut no over = %d
-", entry);
+            datDebugPrintf("error EFFBED_START cut no over = %d\n", entry);
             return 1;
         } else {
             dds3StartBEDEffectObjectBasic(basic, entry);
@@ -1263,8 +1262,7 @@ u32 evtCommand_EFFBED_START_EVO(void) {
         s32 entryId = scrGetIntPara(1);
         s32 modelRecordIndex;
         if ((u32)entryId >= 3) {
-            datDebugPrintf("error EFFBED_START cut no over = %d
-", entryId);
+            datDebugPrintf("error EFFBED_START cut no over = %d\n", entryId);
             return 1;
         }
         dds3StartBEDEffectObjectBasic(unit, entryId);

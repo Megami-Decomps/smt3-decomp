@@ -419,8 +419,7 @@ void CheckSenseiOrBackAttack(nbMainProcessData_t *data)
         data->stat |= 0x80;
         if (nbCheckBackAttack(data)) {
             data->stat |= 0x10;
-            printf("backattack!!
-");
+            printf("backattack!!\n");
         }
         data->stat |= 8;
     }
@@ -747,19 +746,19 @@ void nbSetChkTurnPhase(nbMainProcessData_t *data)
     s32 i;
 
     if (nbCheckActionStack()) {
-        nbSetNextPhase(6);
+        nbSetNextPhase(ACTIONMAE);
         return;
     }
     nbClearActionStack();
     if (data->eventno > 0) {
-        nbSetNextPhase(3);
+        nbSetNextPhase(EVENT);
         return;
     }
     if (data->unk78 > 0 || data->unk7A > 0) {
         if ((data->stat & 0x40000) == 0) {
             nbSetNextOrder();
         }
-        nbSetNextPhase(6);
+        nbSetNextPhase(ACTIONMAE);
         return;
     }
     for (i = 0; i < 16; i++) {
@@ -795,14 +794,14 @@ void nbSetChkTurnPhase(nbMainProcessData_t *data)
     data->stat &= ~0x80;
     if ((data->stat & 8) == 0) {
         data->stat |= 8;
-        nbSetNextPhase(3);
+        nbSetNextPhase(EVENT);
     } else {
         data->stat &= ~8;
         data->turn = data->turn + 1;
         if (data->turn >= 100) {
             data->turn = 99;
         }
-        nbSetNextPhase(3);
+        nbSetNextPhase(EVENT);
         nbAddKagututiMoon(data);
     }
 }
@@ -898,46 +897,46 @@ void nbSetPhase(s32 phase)
     data->phase = phase;
     data->phasetime = 0;
     switch (data->phase) {
-    case 0:
-    case 4:
-    case 8:
-    case 15:
+    case NB_PHASE_NON:
+    case PRESSMAE:
+    case NPC:
+    case RENZOKU:
         break;
-    case 1:
+    case MAE:
         nbSetMaePhase(data);
         break;
-    case 2:
+    case NB_PHASE_ENCOUNT:
         nbStartBattlePhase(data);
         break;
-    case 3:
+    case EVENT:
         nbSetEventPhase(data);
         break;
-    case 5:
+    case PRESSNIIDA:
         nbSetPressMaePhase(data);
         nbSetPressNiidaPhase(data);
         break;
-    case 6:
+    case ACTIONMAE:
         nbSetActionMaePhase(data);
         break;
-    case 7:
+    case ACTION:
         nbSetActionPhase(data);
         break;
-    case 9:
+    case CHKEND:
         nbSetChkEndPhase(data);
         break;
-    case 10:
+    case CHKTURN:
         nbSetChkTurnPhase(data);
         break;
-    case 11:
+    case ATO:
         nbSetAtoPhase(data);
         break;
-    case 12:
+    case RESULT:
         nbSetResultPhase(data);
         break;
-    case 13:
+    case NB_PHASE_END:
         nbSetEndPhase(data);
         break;
-    case 14:
+    case DEBUG:
         nbSetDebugPhase(data);
         phase = 0;
         break;
@@ -958,79 +957,79 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
     data->flag = 0;
     nbCheckPackLoad(data);
     switch (data->phase) {
-    case 0:
-        nbSetNextPhase(1);
+    case NB_PHASE_NON:
+        nbSetNextPhase(MAE);
         next = 1;
         break;
-    case 1:
+    case MAE:
         if (nbGetStageData() == 1) {
-            nbSetNextPhase(2);
+            nbSetNextPhase(NB_PHASE_ENCOUNT);
             next = 1;
         }
         break;
-    case 2:
+    case NB_PHASE_ENCOUNT:
         if (data->encounterProcess == 0) {
             nbCameraPressProcessThrough();
             nbPanelPressTurnOmit();
-            nbSetNextPhase(3);
+            nbSetNextPhase(EVENT);
             next = 1;
         }
         break;
-    case 3:
+    case EVENT:
         if (*(s32 *)data->unk118 == 0) {
             if (data->endtype == 1 || data->endtype == 8) {
-                nbSetNextPhase(0xB);
+                nbSetNextPhase(ATO);
             } else {
-                nbSetNextPhase(5);
+                nbSetNextPhase(PRESSNIIDA);
             }
             next = 1;
         }
         break;
-    case 5:
+    case PRESSNIIDA:
         if (data->phasetime == 0) {
             nbPanelPressTurnStart();
         }
         if (nbCameraPressProcessGetFrame() >= 10) {
-            nbSetNextPhase(4);
+            nbSetNextPhase(PRESSMAE);
             next = 1;
         }
         break;
-    case 4:
+    case PRESSMAE:
         if (nbCameraPressProcessCheckRun() == 0) {
-            nbSetNextPhase(6);
+            nbSetNextPhase(ACTIONMAE);
             next = 1;
         }
         break;
-    case 6:
+    case ACTIONMAE:
         if (CheckActionRun(data)) {
-            nbSetNextPhase(7);
+            nbSetNextPhase(ACTION);
             next = 1;
         }
         break;
-    case 7:
+    case ACTION:
         if (data->endtype == 7) {
             if (nbCountKoukaByType(0x2E) == 0) {
                 if (NB_PLAYERUNIT->hp != 0) {
-                    nbSetNextPhase(3);
+                    nbSetNextPhase(EVENT);
                     next = 1;
                 } else {
                     data->endtype = 0;
                 }
             }
         } else if (data->unkD4[data->unkE4] == 0) {
-            nbSetNextPhase(8);
+            nbSetNextPhase(NPC);
             next = 1;
         } else {
             seq = nbGetActionSeq(data->unkD4[data->unkE4]);
             if (seq >= 0x14) {
-                nbSetNextPhase(8);
+                nbSetNextPhase(NPC);
                 next = 1;
             } else if (seq == 1) {
                 if ((data->stat & 0x40) == 0) {
                     if (dds3PadButtonState[0x2A] < 0) {
                         if (data->stat & 0x1000000) {
                             if (dds3DebugSign != 0) {
-                                nbSetNextPhase(0xE);
+                                nbSetNextPhase(DEBUG);
                                 next = 1;
                             }
                         }
@@ -1039,11 +1038,11 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
             }
         }
         break;
-    case 8:
-        nbSetNextPhase(9);
+    case NPC:
+        nbSetNextPhase(CHKEND);
         next = 1;
         break;
-    case 9:
+    case CHKEND:
         if (data->stat & 0x40) {
             if (nbCheckActionStack() != 0) {
                 limit = 8;
@@ -1055,33 +1054,33 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         }
         if (data->phasetime >= limit) {
             if (nbCheckActionStack()) {
-                nbSetNextPhase(0xA);
+                nbSetNextPhase(CHKTURN);
                 next = 1;
             } else {
                 switch (data->endtype) {
-                case 0:
-                    nbSetNextPhase(0xA);
+                case NB_PHASE_NON:
+                    nbSetNextPhase(CHKTURN);
                     next = 1;
                     break;
-                case 5:
-                    nbSetNextPhase(0xF);
+                case PRESSNIIDA:
+                    nbSetNextPhase(RENZOKU);
                     next = 1;
                     break;
-                case 7:
+                case ACTION:
                     next = 1;
                     break;
                 default:
-                    nbSetNextPhase(0xB);
+                    nbSetNextPhase(ATO);
                     next = 1;
                     break;
                 }
             }
         }
         break;
-    case 10:
+    case CHKTURN:
         next = 1;
         break;
-    case 15:
+    case RENZOKU:
         if (CheckActionProcessEnd(data)) {
             nbDispMsgHelp(data->mesmngid, nbGetJyokyoMes(data, 0x48), 1);
             data->stat &= ~0x80;
@@ -1089,26 +1088,26 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
             data->stat &= ~0x10;
             next = 1;
             nbCountActiveUnits(data);
-            nbSetNextPhase(2);
+            nbSetNextPhase(NB_PHASE_ENCOUNT);
         }
         break;
-    case 11:
+    case ATO:
         if (CheckActionProcessEnd(data) && data->atoProcess == 0 && p2sdGetPcmState() == 0) {
-            nbSetNextPhase(0xC);
+            nbSetNextPhase(RESULT);
             next = 1;
         }
         break;
-    case 12:
+    case RESULT:
         if (*(s32 *)data->unkC8 == 0) {
-            nbSetNextPhase(0xD);
+            nbSetNextPhase(NB_PHASE_END);
             next = 1;
         }
         break;
-    case 13:
+    case NB_PHASE_END:
         return -1;
-    case 14:
+    case DEBUG:
         if (data->debugProcess == 0) {
-            nbSetNextPhase(6);
+            nbSetNextPhase(ACTIONMAE);
             next = 1;
         }
         break;
@@ -1273,7 +1272,7 @@ void *nbInitMainProcessData(void)
     data->activeunit = -1;
     data->orderindex = -1;
     data->previndex = -1;
-    data->phase = 0;
+    data->phase = NB_PHASE_NON;
     data->press3 = 1.0f;
     data->unk140 = 0;
     data->battletime = 0;
@@ -1289,12 +1288,9 @@ void SetFlag(nbMainProcessData_t *data)
     s32 encno;
     s32 flag;
 
-    printf("encpackno = %d
-", data->encpackno);
-    printf("packno = %d
-", data->packno);
-    printf("packindex = %d
-", data->packindex);
+    printf("encpackno = %d\n", data->encpackno);
+    printf("packno = %d\n", data->packno);
+    printf("packindex = %d\n", data->packindex);
     printf(D_00543540, data->encno);
     encno = data->encno;
     if (encno == 0xC7) {
@@ -1317,12 +1313,9 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     data->packindex = packindex;
     data->encno = encno;
     data->formationtype = nbEncountFormTable[encno].formtype;
-    printf("encpackno = %d
-", data->encpackno);
-    printf("packno = %d
-", data->packno);
-    printf("packindex = %d
-", data->packindex);
+    printf("encpackno = %d\n", data->encpackno);
+    printf("packno = %d\n", data->packno);
+    printf("packindex = %d\n", data->packindex);
     printf(D_00543540, data->encno);
     printf(D_00543550, data->formationtype);
     data->unk7C = stagemajor;
