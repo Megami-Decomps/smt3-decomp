@@ -27,7 +27,9 @@ ROOT = Path(__file__).resolve().parent.parent
 TOOLS = ROOT / "tools"
 COMPILER_URL = "https://github.com/decompme/compilers/releases/download/compilers/{name}{ext}"
 COMPILER_EXTS = (".tar.xz", ".tar.gz")
-DEFAULT_COMPILERS = ["ee-gcc2.96"]
+# ee-gcc 2.96 built the game code; 2.9 built the Sony EE libraries, and its cc1
+# output matches the one in SDK 2.0.4 (docs/sdk-matching.md).
+DEFAULT_COMPILERS = ["ee-gcc2.96", "ee-gcc2.9-991111-01"]
 BINUTILS_URL = ("https://github.com/decompals/binutils-mips-ps2-decompals/releases/download/"
                 "v0.10/binutils-mips-ps2-decompals-linux-x86-64.tar.gz")
 OBJDIFF_URL = "https://github.com/encounter/objdiff/releases/download/v3.8.1/objdiff-cli-linux-x86_64"

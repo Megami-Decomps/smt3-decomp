@@ -21,6 +21,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_unit import address, inline_asm_share  # noqa: E402
 from retail_elf import ROOT, load_segments  # noqa: E402
 
+sys.path.insert(0, str(ROOT))
+from configure import objdiff_progress_category  # noqa: E402
+
 VERSIONS = json.loads((ROOT / "config/versions.json").read_text())
 VERSION_PATTERN = "|".join(re.escape(version) for version in VERSIONS) or r"(?!)"
 # build/<version>/[base/]src/<version>/<unit>.o, the objects a C unit compiles to.
@@ -466,6 +469,13 @@ def reconcile(report: dict, scope: str, root: Path = ROOT, *,
     proofs = {}
     proven = set()
     evidence = {"schema": 1, "metric": "production_exact_source", "units": []}
+    # Units the report puts in another category (SDK, handwritten, VU, data) are
+    # not game code, so they are not expected in the game inventory below.
+    outside = set()
+    for unit in report["units"]:
+        if "game" not in unit.get("metadata", {}).get("progress_categories", []):
+            name = unit["name"].split("/", 1)[1] if scope == "all" else unit["name"]
+            outside.add(name)
     for unit in report["units"]:
         if "game" not in unit.get("metadata", {}).get("progress_categories", []):
             continue
@@ -495,7 +505,12 @@ def reconcile(report: dict, scope: str, root: Path = ROOT, *,
         raise ValueError("report contains no game-code production evidence")
     for version, production in proofs.items():
         prefix = f"build/{version}/src/{version}/"
-        expected = {path[len(prefix):-2] for path in production.map if path.startswith(prefix)}
+        expected = {path[len(prefix):-2] for path in production.map
+                    if path.startswith(prefix)} - outside
+        # A game-scope report leaves non-game units out of its unit list
+        # altogether, so they are never in `outside` either.
+        expected = {name for name in expected
+                    if objdiff_progress_category(version, f"{version}/{name}") == "game"}
         actual = {unit["unit"] for unit in evidence["units"] if unit["version"] == version}
         if actual != expected:
             missing = ", ".join(sorted(expected - actual))

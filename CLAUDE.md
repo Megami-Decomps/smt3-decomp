@@ -51,8 +51,10 @@ it in the IDB, re-run `tools/ida_symbols.py`, and verify the build still matches
 Rename only what the code proves: an allocation site, an init function, a stride, a
 caller. Confirmed cases so far are recorded in `docs/idb-corrections.md`.
 
-`.text` is split into 192 units, 183 under recovered names and the rest still called
-`code_<vram>`. Moving a boundary or naming a unit needs evidence from
+`.text` is split into 204 units, 195 under recovered names and the rest still called
+`code_<vram>`. Twelve of them are the Sony SDK and C runtime under `src/smt3/sdk/`,
+which `config/smt3/compilers.txt` builds with ee-gcc 2.9 rather than 2.96; see
+`docs/sdk-matching.md`. Moving a boundary or naming a unit needs evidence from
 `tools/find_tus.py`, the IDB or an HD source run, not a guess, and the relinked image
 must stay byte-identical afterwards: see `docs/tu-recovery.md`.
 

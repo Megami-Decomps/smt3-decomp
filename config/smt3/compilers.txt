@@ -1,0 +1,10 @@
+# Per-unit compiler: <dir>/<unit>  <id>  # evidence (default is ee-gcc2.96)
+# Why the Sony libraries need an older ee-gcc: docs/sdk-matching.md.
+sdk/libgraph         ee-gcc2.9-991111-01  # graph020.o == retail sceGsPutIMR
+sdk/libdma           ee-gcc2.9-991111-01  # same frame layout, no sibcalls
+sdk/libpad           ee-gcc2.9-991111-01  # 2,400 bytes byte-exact in SDK 2.0.4
+sdk/libcdvd          ee-gcc2.9-991111-01  # 4,376 bytes byte-exact in SDK 2.0.4
+sdk/libmrpc          ee-gcc2.9-991111-01  # 264 bytes byte-exact in SDK 2.0.4
+sdk/libipu           ee-gcc2.9-991111-01  # 1,008 bytes byte-exact in SDK 2.0.4
+sdk/libmc            ee-gcc2.9-991111-01  # 480 bytes byte-exact in SDK 2.0.4
+sdk/libkernl         ee-gcc2.9-991111-01  # 16,536 bytes byte-exact in SDK 2.0.4

@@ -241,3 +241,14 @@ sdfModelLinkShapedDrawPacket	sdf/sdfModel	0x258	Fifty of 150 words match	docs/no
 sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	docs/nonmatching/sdf/sdfModel.md	135
 sdfModelLinkOt	sdf/sdfModel	0x480	Sixty-nine of 288 words differ	docs/nonmatching/sdf/sdfModel.md	179
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/nonmatching/sdf/sdfMovie.md	5
+What cracked the scmd family				docs/nonmatching/sdk/libcdvd.md	3
+The scmd template, for the next pass				docs/nonmatching/sdk/libcdvd.md	24
+sceDmaPutEnv			21 of 118 words differ	docs/nonmatching/sdk/libdma.md	3
+The IPU hazard wait				docs/nonmatching/sdk/libipu.md	3
+sceIpuSync				docs/nonmatching/sdk/libipu.md	36
+sceIpuStopDMA and sceIpuRestartDMA				docs/nonmatching/sdk/libipu.md	45
+sceMcWrite				docs/nonmatching/sdk/libmc.md	30
+sceMcSync				docs/nonmatching/sdk/libmc.md	49
+sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
+_send_to_iop			28 of 69 words differ	docs/nonmatching/sdk/libpad.md	15
+scePadPortOpen				docs/nonmatching/sdk/libpad.md	30

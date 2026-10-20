@@ -27,6 +27,9 @@ quickstart.
   the data memory the upload packet seeds.
 - [Naming drift](naming-drift.md): the audit of member, enum, define, function
   and global names against the IDB, and the queue of fixes it found.
+- [SDK and C runtime](sdk-matching.md): the 126,120 bytes of Sony library,
+  newlib and libgcc code at the end of `.text`, which archive object each
+  function came from, and the compiler that built them.
 - [Matching levers](matching-levers.md): what to change in the source when a
   function is close but not exact, and what has been ruled out.
 - [Non-matching drafts](nonmatching.md): the reconstructions kept behind
