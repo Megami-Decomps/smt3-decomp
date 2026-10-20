@@ -140,7 +140,54 @@ int sceDmaReset(int enable)
     return dmae;
 }
 
+/* NON_MATCHING: 21 of 118 words differ, one instruction long; the return move
+ * does not sink into the jr delay slot because the struct copy leaves $v0
+ * free, where retail uses it as the copy's scratch. */
+#ifdef NON_MATCHING
+int sceDmaPutEnv(sceDmaEnv *env)
+{
+    u32 ctrl = *VD_CTRL;
+    u32 pcr = *VD_PCR;
+    u32 sqwc = *VD_SQWC;
+    u32 rbor = *VD_RBOR;
+    u32 rbsr = *VD_RBSR;
+
+    if (env->relative >= 10) {
+        return -1;
+    }
+    if (env->mfifo >= 10) {
+        return -2;
+    }
+    if (env->stall >= 10) {
+        return -3;
+    }
+    if (env->cycle >= 7) {
+        return -4;
+    }
+    ctrl = (ctrl & ~0x30) | (D_0054A930[env->relative] << 4);
+    ctrl = (ctrl & ~0xC0) | (D_0054A940[env->mfifo] << 6);
+    ctrl = (ctrl & ~0xC) | (D_0054A950[env->stall] << 2);
+    if (env->cycle != 0) {
+        ctrl |= 2;
+        ctrl = (ctrl & ~0x300) | ((env->cycle - 1) << 8);
+    } else {
+        ctrl &= ~2;
+    }
+    pcr = (env->pcr_hi << 16) | env->pcr_lo;
+    sqwc = (env->sqwc_hi << 16) | env->sqwc_lo;
+    rbsr = env->rbsr;
+    *VD_CTRL = ctrl;
+    *VD_PCR = pcr;
+    *VD_SQWC = sqwc;
+    rbor = env->rbor;
+    *VD_RBOR = rbor;
+    *VD_RBSR = rbsr;
+    D_00598940 = *env;
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libdma", sceDmaPutEnv);
+#endif
 
 sceDmaEnv *sceDmaGetEnv(sceDmaEnv *env)
 {
