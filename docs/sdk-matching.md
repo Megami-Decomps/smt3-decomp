@@ -242,11 +242,11 @@ matches.
 
 ## Where it stands
 
-`sdk` is 17,772 of 125,024 bytes matched (14.21%), and game code is measured
+`sdk` is 18,412 of 125,024 bytes matched (14.73%), and game code is measured
 without it: 951,108 of 1,851,268 bytes (51.38%).
 
 Done: the second compiler, selected per unit; the 12-unit split; the probe
-loop; and six libraries worked, 81 functions in all.
+loop; and six libraries worked, 85 functions in all.
 
 | Unit | Matched | Left |
 |---|---|---|
@@ -256,7 +256,7 @@ loop; and six libraries worked, 81 functions in all.
 | `libgraph` | 6 of 13 | `sceGsResetGraph`, `sceGsResetPath`, `sceGsSetDefDispEnv`, `sceGsSyncPath`, `sceGsExecStoreImage` |
 | `libipu` | 1 of 4 | `sceIpuStopDMA`, `sceIpuRestartDMA`, `sceIpuSync` |
 | `libmrpc` | 2 of 7 | the five that touch the packet queue |
-| `libcdvd` | 10 of 30 | the scmd and ncmd wrappers, whose template is drafted in [its page](nonmatching/sdk/libcdvd.md) |
+| `libcdvd` | 14 of 30 | `sceCdPowerOff` and `sceCdReadClock` read a second reply word; `sceCdSync` and the bind-loop functions are untouched |
 | `libkernl`, `libc`, `libm`, `libgcc` | none | untouched |
 
 Three things the IDB's decompiler gets wrong here, each of which cost a pass
@@ -275,6 +275,27 @@ before it was understood:
   instruction `syscall` stub, not C, so it belongs with the handwritten code
   rather than in any C denominator.
 
+### How the near misses were closed
+
+Five rules came out of taking `sceCdSyncS`, `sceCdMmode`, `sceCdGetDiskType`
+and `sceCdStatus` from one instruction out to exact, and they apply to every
+unit in this region:
+
+1. **An access that must land in a delay slot cannot be `volatile`.** 2.9 never
+   moves a volatile access into one, so where retail reads a word in the delay
+   slot of a call, the original used a plain pointer. This was the whole of the
+   recurring "one instruction long, `nop` in the delay slot" difference.
+2. **A `volatile` access cannot fill a hazard pad either**, which is why
+   libipu's `IPU_CTRL` polls carry four explicit slots between the load and the
+   branch; see [its page](nonmatching/sdk/libipu.md).
+3. **An sceSif client data symbol is the structure, not a pointer to it.**
+   Retail passes `&D_0052BA48` with `addiu`; declaring it `void *` loads a word
+   and costs a register.
+4. **The fall-through arm is the one written first.** Branch polarity is
+   evidence about source order, and inverting a test is a one-line experiment.
+5. **One local pointer holds an address passed to two calls**, where naming the
+   global twice recomputes it; the store through it still goes to the global.
+
 Next, in the order the bytes are worth having:
 
 1. **`libc`, `libm` and `libgcc` (50,296 bytes).** The upstream file each
@@ -284,10 +305,11 @@ Next, in the order the bytes are worth having:
    retail image.
 2. **`libkernl` (37,012 bytes, 31,032 of them reachable).** 182 of its
    functions are `syscall` stubs that were never C.
-3. **The rest of `libcdvd`.** Ten of its thirty functions are done and the
-   scmd template is written down, so the remaining wrappers are transcription
-   plus one scheduling fight each.
-4. **The seven parked drafts.** Each is one register-allocation decision away;
+3. **The rest of `libcdvd`.** Fourteen of thirty are done and the scmd
+   template plus the five rules above are written down, so the remaining
+   wrappers are mostly transcription. `_sceCd_scmd_prechk` and
+   `sceCdDiskReady` carry the bind-retry loops and are the real work.
+4. **The nine parked drafts.** Each is one register-allocation decision away;
    [the per-unit pages](nonmatching/) say which.
 5. **Per-object units.** The 12 library units can become ~116 member units
    using the member column of `config/smt3/sdk_objects.tsv`.
