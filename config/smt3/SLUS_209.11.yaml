@@ -361,7 +361,7 @@ segments:
       - [0x1C7030, c, sdf/sdfPacDecode]
       - [0x1C7F38, c, sdf/sdf_Decomp]
       - [0x1C8798, c, sdf/sdfTmx]
-      - [0x1C8CB0, c, code_002C7CB0]
+      - [0x1C8CB0, c, sdf/sdfSortOt]
       # The SDK and C runtime at the end of .text, one unit per archive, with
       # boundaries from config/smt3/sdk_objects.tsv (docs/sdk-matching.md).
       # Their .rodata stays in code_002C7CB0: it is the last .rodata block, so

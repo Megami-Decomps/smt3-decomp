@@ -371,16 +371,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", sceDmaPause);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sceDmaRestart);
 
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054A8F0);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054A908);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054A930);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054A940);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054A950);
-
 INCLUDE_ASM(const s32, "code_002C81A8", _send_to_iop);
 
 INCLUDE_ASM(const s32, "code_002C81A8", scePadInit);
@@ -448,24 +438,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", sceCdDelayThread);
 INCLUDE_ASM(const s32, "code_002C81A8", sceCdCallback);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _sceCd_cd_callback);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA58);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA60);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA68);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA70);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA80);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA88);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AA98);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AAA0);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AAA8);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _Cdvd_cbLoop);
 
@@ -546,8 +518,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", sceSifMBindRpc);
 INCLUDE_ASM(const s32, "code_002C81A8", sceSifMBindRpcParam);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sceSifMUnBindRpc);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054ADD8);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sceSifMCallRpc);
 
@@ -642,18 +612,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", __kernel_rem_pio2f);
 INCLUDE_ASM(const s32, "code_002C81A8", __kernel_sinf);
 
 INCLUDE_ASM(const s32, "code_002C81A8", __kernel_tanf);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054AF60);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B274);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B348);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B358);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B3C0);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B3F8);
 
 INCLUDE_ASM(const s32, "code_002C81A8", atanf);
 
@@ -903,16 +861,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", libc_2D2850);
 
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2D29B8);
 
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B408);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B414);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B418);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B460);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B480);
-
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2D2B60);
 
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2D2C70);
@@ -1036,10 +984,6 @@ s32 printf(const char *fmt, ...) {
     r->_stdout->_data = r;
     return vfprintf(r->_stdout, fmt, ap);
 }
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B550);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B658);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _puts_r);
 
@@ -1229,10 +1173,6 @@ s32 gcc2_compiled__0(FILE *fp, __suio *uio) {
 
 INCLUDE_ASM(const s32, "code_002C81A8", __sbprintf);
 
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B670);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B680);
-
 INCLUDE_ASM(const s32, "code_002C81A8", vfprintf);
 
 INCLUDE_ASM(const s32, "code_002C81A8", cvt);
@@ -1268,10 +1208,6 @@ s32 vsprintf_r(_reent *r, char *str, const char *fmt, va_list ap) {
 INCLUDE_ASM(const s32, "code_002C81A8", __swsetup);
 
 INCLUDE_ASM(const s32, "code_002C81A8", gcc2_compiled__1);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B880);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B890);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _dtoa_r);
 
@@ -1352,20 +1288,6 @@ s32 _fwalk(_reent *r, s32 (*func)(void *)) {
     }
     return ret;
 }
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B8A0);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B8A8);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B8B0);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", jtbl_0054B8C0);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B8D8);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B908);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B910);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _setlocale_r);
 
@@ -2018,16 +1940,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", iEnableDmac);
 
 INCLUDE_ASM(const s32, "code_002C81A8", iDisableDmac);
 
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B91C);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B928);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B930);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054B9F8);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BA18);
-
 INCLUDE_ASM(const s32, "code_002C81A8", topThread);
 
 INCLUDE_ASM(const s32, "code_002C81A8", InitThread);
@@ -2061,12 +1973,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", serialPutchar);
 INCLUDE_ASM(const s32, "code_002C81A8", ftoi);
 
 INCLUDE_ASM(const s32, "code_002C81A8", printfloat);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BAF8);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BB00);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BB08);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _printf);
 
@@ -2284,10 +2190,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", _sceSifLoadElfPart);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sceSifLoadElfPart);
 
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BCA8);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BCB0);
-
 INCLUDE_ASM(const s32, "code_002C81A8", sceSifLoadElf);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sceSifGetIopAddr);
@@ -2420,8 +2322,6 @@ INCLUDE_ASM(const s32, "code_002C81A8", ExpandScratchPad);
 
 INCLUDE_ASM(const s32, "code_002C81A8", InitTLB);
 
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BCF0);
-
 INCLUDE_ASM(const s32, "code_002C81A8", InitTLB32MB);
 
 INCLUDE_ASM(const s32, "code_002C81A8", _kTLBException);
@@ -2447,12 +2347,4 @@ INCLUDE_ASM(const s32, "code_002C81A8", libc_2E6C48);
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2E6D88);
 
 INCLUDE_ASM(const s32, "code_002C81A8", __errno_8);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BD78);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BE78);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054BF78);
-
-INCLUDE_RODATA(const s32, "code_002C81A8", D_0054C078);
 

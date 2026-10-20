@@ -441,15 +441,16 @@ header declares the membership, so the per-file prototype blocks are the only
 oracle. Prefix agreement is weaker evidence than the two-source cuts above:
 one engine module's functions can be spread across several files.
 
-## The six fillers that are left
+## The five fillers that are left
 
-Four of the ten were named from the HD map, and `code_002C7CB0` gave up its
-`sdfSortOt` head; the table in "The nine remaining fillers" above is superseded
-by this one.
+Four of the ten were named from the HD map, and `code_002C7CB0` is gone: a
+parallel pass split its Sony SDK region into one unit per archive
+(`docs/sdk-matching.md`), and its first 10 functions are the `sdfSortOt` family
+HD names, so they became `sdf/sdfSortOt`. The table in "The nine remaining
+fillers" above is superseded by this one.
 
 | Filler | Functions | Why it has no name |
 |---|---|---|
-| `code_002C81A8` | 672 | Sony SDK and newlib: `sce*` 217, `libc*` 35, `_sce*` 24, `RFU*` 22. CLAUDE.md keeps these as prebuilt archives, so the name is honest. |
 | `code_0022C578` | 421 | The camp module, `cmp*` 275 and `camp*` 106. No source names it: the HD map has only the `fclPanel` mis-attribution, and no DDS1 candidate range covers it. |
 | `code_0029B780` | 25 | 21 of 25 are `dds3*` and the last is `dds3AllocConfigWork`, immediately before `kernel/dds3ConfigMain`. It looks like that unit's head, which would be a boundary move rather than a name, and no HD row falls inside it. |
 | `code_001C55F8` | 13 | All 13 are named `nbCameraHelper*` and HD agrees, but `newbattle/nbCameraHelper` is applied at `0x001AAE28` and a `.c` cannot hold two ranges. HD's `nbCameraHelper.c` has 30 functions spanning both, among them the `dds3EffectFileListWindow*` family that fills the applied unit. The name fits this range better than the one that holds it, so settling it means renaming an applied unit, on evidence this does not supply. |
