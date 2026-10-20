@@ -145,7 +145,10 @@ def declared_names(decl):
     if "enum" in code and "{" in code:
         name = declared_name(decl)
         return enum_members(code) | ({name} if name else set())
-    if code.startswith(("typedef", "struct", "union", "enum")) or "{" in code or "(" in code:
+    # A #define has no declarator list, and its value's own characters can look
+    # like one: `#define X 0xFFFF` otherwise ends up naming `xFFFF`.
+    if code.startswith("#") or code.startswith(("typedef", "struct", "union", "enum")) \
+            or "{" in code or "(" in code:
         name = declared_name(decl)
         return {name} if name else set()
     out = set()

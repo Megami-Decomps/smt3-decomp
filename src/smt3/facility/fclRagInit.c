@@ -1,0 +1,524 @@
+#include "common.h"
+#include "fpu.h"
+#include "libsdf.h"
+#include "newdata.h"
+#include "ps2asm.h"
+#include "event.h"
+
+extern void dds3KillProcessName(char *namestr, s32 flag);
+
+void fclFreeStage(void);
+
+extern s32 dds3GetRandA(s32 seed);
+
+extern s32 evtStartEvent(s32 event);
+
+extern s32 fclSetWorkValue(s8 index, s32 value);
+
+void fclClearFlag(s8 index);
+
+extern void p2sdStopBGM(s32 id);
+
+extern void sdfMemFreeDirect(void *ptr);
+
+typedef struct
+{
+    /* 0x00 */ u8 flags;
+    /* 0x01 */ u8 unk_01[3];
+    /* 0x04 */ s8 unk_04;
+    /* 0x05 */ u8 unk_05[0xF];
+    /* 0x14 */ void *allocation;
+    /* 0x18 */ u16 slot[10];
+    /* 0x2C */ s32 fadeAlpha;
+    /* 0x30 */ s8 unk_30;
+    /* 0x31 */ s8 unk_31;
+    /* 0x32 */ u8 unk_32[7];
+    /* 0x39 */ s8 slotCursor;
+} campStatusPanel_t;
+
+extern void qsort(void *base, s32 count, s32 size, s32 (*cmp)(const void *a, const void *b));
+
+typedef struct
+{
+    /* 0x00 */ u8 unk_00[4];
+    /* 0x04 */ s8 unk_04;
+    /* 0x05 */ u8 unk_05[3];
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ u16 unk_10;
+    /* 0x12 */ u16 unk_12;
+    /* 0x14 */ u16 unk_14;
+    /* 0x16 */ u16 unk_16;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ u8 unk_20;
+    /* 0x21 */ u8 unk_21;
+    /* 0x22 */ s16 unk_22;
+    /* 0x24 */ s8 unk_24;
+    /* 0x25 */ s8 unk_25;
+    /* 0x26 */ u8 unk_26;
+    /* 0x27 */ u8 unk_27[5];
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ s32 unk_30;
+    /* 0x34 */ s32 unk_34;
+} cmpCursorWork_t;
+
+extern s8 gProcessStat_1;
+
+extern char D_0053D140[];
+
+typedef struct
+{
+    /* 0x00 */ datUnitWork_t unit;
+} dds3PartyUnit_t;
+
+typedef struct
+{
+    /* 0x00000 */ u8 unk_00000[0xA54];
+    /* 0x00A54 */ dds3PartyUnit_t party[16];
+    /* 0x01914 */ s8 stock[0x10];
+    /* 0x01924 */ s32 stockCount;
+    /* 0x01928 */ u8 unk_01928[0x3D];
+    /* 0x01965 */ u8 unk_1965;
+    /* 0x01966 */ u8 unk_01966[0x394];
+    /* 0x01CFA */ u8 equipHearts;
+    /* 0x01CFB */ u8 unk_01CFB[0x40];
+    /* 0x01D3B */ u8 devilSlot[0x100];
+    /* 0x01E3B */ u8 unk_01E3B[0x10045];
+    /* 0x11E80 */ s32 encycNum;
+} cmbGlobalWork_t;
+
+/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
+ * unit reads it through a different member set at the same offsets. Both are
+ * partial views; the alias holds them apart until one covers the object. */
+extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+
+extern u8 *GBWK_0;
+
+extern s32 printf(const char *fmt, ...);
+
+extern void sdfTexFree(s32 handle);
+
+extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
+
+extern char D_0054FB98[];
+
+extern char D_0053D1F0[];
+
+extern char D_0053D200[];
+
+extern void fclScriptForcedEnd(u8 *script);
+
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[9];
+    /* 0x0009 */ u8 unk_0009[0x17];
+    /* 0x0020 */ s32 flags;
+    /* 0x0024 */ u8 unk_0024[0x138];
+    /* 0x015C */ cmpCursorWork_t listCursor;
+} lstWork_t;
+
+typedef struct
+{
+    /* 0x00 */ u8 unk_00;
+    /* 0x01 */ u8 unk_01[3];
+    /* 0x04 */ s32 unk_04;
+    /* 0x08 */ s32 unk_08;
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ s32 unk_10;
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ void (*calcSizes)();
+} fclRagTex_t;
+
+extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s32 f,
+                          void (*calc)());
+
+extern void fclRagTexCalcSizes();
+
+extern u8 ragHeartsTable[];
+
+extern void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag);
+
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
+
+/* Called above its definition, where ee-gcc assumed int. */
+void *dds3GetActiveScene(void);
+
+void fclRagEventStart(s8 value)
+{
+    fclSetWorkValue(1, value);
+    fclClearFlag(1);
+    evtStartEvent(0x323);
+    p2sdPlaySE(0x390001, 0x7F, 0x3F);
+}
+
+void fclRagEventEnd(void)
+{
+    dds3KillProcessName(D_0053D140, 1);
+    fclFreeStage();
+}
+
+s32 func_00209D88(u16 id)
+{
+    u16 *entry = (u16 *)(ragHeartsTable + 0x160);
+    u32 i;
+
+    for (i = 0; i < 0x15; i++) {
+        if (id == *entry) {
+            return (u8)i;
+        }
+        entry = (u16 *)((u8 *)entry + 0x2C);
+    }
+    return 0;
+}
+
+s32 func_00209DD0(u16 id)
+{
+    u16 *entry = (u16 *)(ragHeartsTable + 0x500);
+    u32 i;
+
+    for (i = 0; i < 0x15; i++) {
+        if (id == *entry) {
+            return (u8)i;
+        }
+        entry = (u16 *)((u8 *)entry + 0x2C);
+    }
+    return 0;
+}
+
+s32 func_00209E18(u16 id)
+{
+    u16 *entry = (u16 *)ragHeartsTable;
+    u32 i;
+
+    for (i = 0; i < 0x19; i++) {
+        if (id == *entry) {
+            return (u8)i;
+        }
+        entry = (u16 *)((u8 *)entry + 0xE);
+    }
+    return 0;
+}
+
+extern u8 D_0032FC98[];
+
+extern u8 D_0032FCE0[];
+
+/* NON_MATCHING: 22 of 51 words differ (first at +0x8). */
+#ifdef NON_MATCHING
+u8 ragGetListItem2(u8 index, s8 kind)
+{
+    u32 limit = D_0032FC98[index * 35 + 6] + 1;
+    s32 pick = (u32)dds3GetRandA(0) % limit;
+    u8 *weight = &D_0032FC98[index * 35];
+    u8 *item = &D_0032FC98[kind * 7] + index * 35 + 7;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (*weight >= pick) {
+            return *item;
+        }
+        weight++;
+        item++;
+    }
+    return 0;
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetListItem2);
+#endif
+
+/* NON_MATCHING: 22 of 51 words differ (first at +0x8). */
+#ifdef NON_MATCHING
+u8 ragGetListItem3(u8 index, s8 kind)
+{
+    u32 limit = D_0032FCE0[index * 35 + 6] + 1;
+    s32 pick = (u32)dds3GetRandA(0) % limit;
+    u8 *weight = &D_0032FCE0[index * 35];
+    u8 *item = &D_0032FCE0[kind * 7] + index * 35 + 7;
+    s32 i;
+
+    for (i = 0; i < 7; i++) {
+        if (*weight >= pick) {
+            return *item;
+        }
+        weight++;
+        item++;
+    }
+    return 0;
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetListItem3);
+#endif
+
+void ragInitHeartsList(s32 count, lstWork_t *work)
+{
+    lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x23, 0x16, 0x8F, 0x16, 0x1A);
+    cmpInitCursorRange(&work->listCursor, count, 7, 0);
+}
+
+void ragInitList2(s32 count, lstWork_t *work)
+{
+    lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x23, 0x16, 0x8F, 0x16, 0x1A);
+    cmpInitCursorRange(&work->listCursor, count, 7, 0);
+}
+
+void ragInitList3(s32 count, lstWork_t *work)
+{
+    lstInitListWindow(0x250, 0x280, 0xFFFFF, 0xBF, 0xDD, 0x19191E59, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x23, 0x16, 0x8F, 0x16, 0x1A);
+    cmpInitCursorRange(&work->listCursor, count, 7, 0);
+}
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildHeartsList);
+
+extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
+
+extern s32 cmpItemOrder(u8 *a, u8 *b);
+
+extern u8 D_0032FC48[];
+
+extern u8 D_0032FC50[];
+
+/* NON_MATCHING: 22 of 93 words differ, a real divide where retail folded the
+ * VLA size into an andi, and the register cascade that follows. */
+#ifdef NON_MATCHING
+s8 ragBuildList2(u8 index, u8 *work)
+{
+    u8 *dst = work + 0x3B;
+    s8 k = 0;
+    s32 roll = dds3GetRandA(0);
+    u32 n = 4;
+    s8 pick[n];
+    s32 extra = (u32)roll % sizeof(pick);
+    u8 *src;
+    s8 *p;
+    u8 count;
+    s32 i;
+
+    p = &pick[n - 1];
+    for (i = n - 1; i >= 0; i--) {
+        *p-- = i;
+    }
+    shuffleIndices(pick, n, 0x10);
+    src = D_0032FC48;
+    for (i = n - 1; i >= 0; i--) {
+        dst[k++] = *src;
+        src += 2;
+    }
+    count = n;
+    for (i = 0; i < extra; i++) {
+        dst[k++] = ragGetListItem2(index, pick[i]);
+    }
+    count += extra;
+    qsort(dst, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    return count;
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList2);
+#endif
+
+/* NON_MATCHING: 22 of 93 words differ, the same residual as ragBuildList2. */
+#ifdef NON_MATCHING
+s8 ragBuildList3(u8 index, u8 *work)
+{
+    u8 *dst = work + 0x44;
+    s8 k = 0;
+    s32 roll = dds3GetRandA(0);
+    u32 n = 4;
+    s8 pick[n];
+    s32 extra = (u32)roll % sizeof(pick);
+    u8 *src;
+    s8 *p;
+    u8 count;
+    s32 i;
+
+    p = &pick[n - 1];
+    for (i = n - 1; i >= 0; i--) {
+        *p-- = i;
+    }
+    shuffleIndices(pick, n, 0x10);
+    src = D_0032FC50;
+    for (i = n - 1; i >= 0; i--) {
+        dst[k++] = *src;
+        src += 2;
+    }
+    count = n;
+    for (i = 0; i < extra; i++) {
+        dst[k++] = ragGetListItem3(index, pick[i]);
+    }
+    count += extra;
+    qsort(dst, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    return count;
+}
+#else
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragBuildList3);
+#endif
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragCreateAllList);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D140);
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagLoadTextures);
+
+extern char D_0053D188[];
+
+void fclRagTexFree(u8 *work)
+{
+    s32 *tex = (s32 *)(work + 0x4654);
+    s8 i;
+
+    for (i = 0; (u8)i < 2; i++) {
+        sdfTexFree(*tex++);
+    }
+    sdfTexFree(*(s32 *)(GBWK_0 + 0x4650));
+    printf(D_0053D188);
+}
+
+void fclRagTexLoad(u8 *work)
+{
+    fclRagTex_t *tex = (fclRagTex_t *)(work + 0x4740);
+    u32 i;
+
+    for (i = 0; i < 2; i++) {
+        fclRagTexInit(tex, 0, 0, 0x32, 0, 0x200, 0x20, fclRagTexCalcSizes);
+        tex++;
+    }
+}
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagUpdateInit);
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", fclAllocRagWork);
+
+typedef struct
+{
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ u8 unk_0001[0x13];
+    /* 0x0014 */ void *allocation;
+    /* 0x0018 */ u8 unk_0018[0x462C];
+    /* 0x4644 */ void *unk_4644;
+    /* 0x4648 */ s32 unk_4648;
+    /* 0x464C */ s32 unk_464C;
+} fclRagWork_t;
+
+extern void fclRagTexFree(u8 *work);
+
+extern void evtDisableMoonDraw(void);
+
+void fclDestroyRag(void)
+{
+    if (GBWK_0 == NULL) {
+        return;
+    }
+    fclRagTexFree(GBWK_0);
+    fclScriptForcedEnd(((fclRagWork_t *)GBWK_0)->unk_464C);
+    sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->unk_4644);
+    fclRagEventEnd();
+    sdfMemFreeDirect(((fclRagWork_t *)GBWK_0)->allocation);
+    GBWK_0 = NULL;
+    gProcessStat_1 = 2;
+    evtDisableMoonDraw();
+    p2sdStopBGM(0x390000);
+}
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagProcessStart);
+
+void fclRagProcessEnd(void)
+{
+    dds3KillProcessName(D_0054FB98, 1);
+    dds3KillProcessName(D_0053D1F0, 1);
+    dds3KillProcessName(D_0053D200, 1);
+}
+
+s32 ragCheckProcessStat(void)
+{
+    s8 stat = gProcessStat_1;
+
+    if (stat == 1) {
+        return 1;
+    }
+    if (stat >= 2) {
+        if (stat == 2) {
+            gProcessStat_1 = 0;
+        }
+    }
+    return 0;
+}
+
+void func_0020ADE0(void)
+{
+    if (GBWK_0 != NULL) {
+        *GBWK_0 |= 0x10;
+    }
+}
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetConfirmEntry);
+
+typedef struct
+{
+    /* 0x00 */ u16 item;
+    /* 0x02 */ s8 count;
+    /* 0x03 */ u8 unk_03;
+} ragItemReq_t;
+
+s32 ragFindItemSlot(ragItemReq_t *req)
+{
+    u8 *base = (u8 *)cmbGlobalWork + 8;
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        u32 item = req->item;
+
+        if (item != 0 && ((u8 *)item + (u32)base)[0x1920] < req->count) {
+            return 0;
+        }
+        req++;
+    }
+    return 1;
+}
+
+INCLUDE_ASM(const s32, "facility/fclRagInit", ragSetSeqPhase2);
+
+extern campStatusPanel_t *ragCalcWork;
+
+extern void *dds3GetActiveScene(void);
+
+extern void dds3VisibleSceneBasic(void *scene, s32 flag);
+
+void ragUpdateScene(void)
+{
+    void *scene;
+
+    if (ragCalcWork->unk_04 != 0) {
+        scene = dds3GetActiveScene();
+        if (scene != NULL) {
+            dds3VisibleSceneBasic(scene, 0);
+        }
+    }
+}
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1F0);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D200);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", GBWK_0);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", gProcessStat_1);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB75);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB78);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB80);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB88);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB90);
+
+INCLUDE_SDATA(const s32, "facility/fclRagInit", D_0054FB98);
+

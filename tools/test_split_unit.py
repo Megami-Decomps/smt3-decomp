@@ -175,5 +175,32 @@ class DraftTests(unittest.TestCase):
         self.assertNotIn("NON_MATCHING: 3 of 9 words differ", parts["head"])
 
 
+class DeclaredNamesTests(unittest.TestCase):
+    """What a declaration introduces, for the chooser that copies declarations."""
+
+    def names(self, decl):
+        from cparse import declared_names
+        return declared_names(decl)
+
+    def test_a_define_is_named_by_its_macro_not_its_value(self) -> None:
+        """`#define X 0xFFFF` must not read as declaring `xFFFF`."""
+        self.assertEqual(self.names("#define SDF_POOL_FREE_KIND 0xFFFF"),
+                         {"SDF_POOL_FREE_KIND"})
+
+    def test_every_declarator_of_a_multi_declarator_extern(self) -> None:
+        self.assertEqual(self.names("extern u16 A[], B[4];"), {"A", "B"})
+
+    def test_an_attributed_declarator(self) -> None:
+        self.assertEqual(self.names('extern s32 fldGb __attribute__((section(".data")));'),
+                         {"fldGb"})
+
+    def test_an_asm_aliased_declarator(self) -> None:
+        self.assertEqual(self.names('extern T *cmbGlobalWork asm("DDS3_GBWK");'),
+                         {"cmbGlobalWork"})
+
+    def test_an_anonymous_enum_by_its_members(self) -> None:
+        self.assertEqual(self.names("enum { A = 1, B = 2 };"), {"A", "B"})
+
+
 if __name__ == "__main__":
     unittest.main()
