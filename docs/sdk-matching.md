@@ -57,6 +57,38 @@ The Sony libraries are closest to 2.0.4 and identical to none of the three,
 which fits a 2.5 or 2.6 release that is not on hand. Each library has to be
 matched against the retail bytes, not against an archive.
 
+## The Sony libraries were built by a different compiler
+
+They were not compiled by the 2.96 the rest of the build uses. They were
+compiled by **ee-gcc 2.9-991111-01** at `-O2 -G0 -fno-common`, and that is
+measured, not inferred:
+
+- SDK 2.0.4's `libgraph.a` member `graph020.o` holds `sceGsPutIMR` and is byte
+  identical to the retail function. Only the two unrelocated `jal` targets
+  differ, so retail's libgraph is that build of that object.
+- 2.96 cannot produce it. Given the obvious C body, 2.96 and 2.95.3 both emit a
+  32-byte frame with the three saved registers 8 bytes apart. Retail uses a
+  48-byte frame with them 16 bytes apart, which is what 2.9 emits: it reserves
+  16 bytes per saved register and reports them as `regs= 6/0`.
+- 2.9 has no sibling-call optimisation. Retail's `sceGsGetIMR` keeps a frame
+  and calls `GsGetIMR` with `jal`; 2.96 turns the same C into a `j` sibcall.
+- The flags come from SDK 3.0.3's own library makefile
+  (`ee/src/lib/dma/Makefile`): `CFLAGS = -c -Wa,-al -fno-common -O2 -G0`, no
+  `-g`. The ICO decompilation records the same `-G 0` without `-g` for the Sony
+  libraries, against `-g -G 8 -fno-common` for game code.
+
+`tools/download_tools.py --compiler ee-gcc2.9-991111-01` fetches that compiler
+from the decomp.me archive, and its `cc1` output is identical to the 2.9 `cc1`
+shipped in SDK 2.0.4, so nothing from the SDK has to be run.
+
+Four functions are already solved against retail under it, and are the test
+cases for wiring the second compiler in: `sceGsGetIMR` and `sceGsPutIMR`
+(straight wrappers over the `GsGetIMR`/`GsPutIMR` syscall stubs),
+`sceDmaGetChan` (a bounds-checked load from `sceDmaChanRegs`) and
+`sceDmaPutStallAddr` (read `0x1000E060`, write it, return the old value,
+through a non-volatile pointer so the store falls into the delay slot). None of
+them can be committed as C while every unit is compiled with 2.96.
+
 ## What is in the region
 
 | Library | Funcs | Bytes | Members | Note |
@@ -99,10 +131,10 @@ debug paths in each member name the upstream file, down to
 `src/newlib/libc/stdlib/mallocr.c` for `_malloc_r` and `src/gcc/libgcc2.c` for
 the rest of libgcc.
 
-Flags are the one unknown. The ICO decompilation, which reproduces the same
-archives, records `-G 0` without `-g` for the Sony libraries and adds
-`-fno-builtin` for newlib and libgcc, against `-g -G 8 -fno-common` for game
-code. That is a starting point to test, not a measurement on this archive.
+Flags are the one unknown. ICO adds `-fno-builtin` for newlib and libgcc on top
+of the Sony-library flags. Which compiler built that newlib is also still open:
+it ships with the 2.96 package, so 2.96 is the first thing to try, unlike the
+Sony libraries above.
 
 **The Sony libraries (65,292 bytes).** No public source. SDK 3.0.3 ships
 sources for `libdma` and `libgraph` only (`ee/src/lib/dma/libdma.c`,
@@ -131,17 +163,24 @@ and complete reproduces the SDK as assembly, which this repo already does.
 
 ## Plan
 
-1. **Split the region into units.** One unit per identified archive member,
+1. **Teach the build a second compiler.** Every Sony library unit needs
+   ee-gcc 2.9-991111-01 with `-O2 -G0 -fno-common`, so `configure.py` has to
+   select a compiler per unit the way `config/smt3/cflags.txt` already selects
+   flags. Nothing in the region can be matched before this lands. The four
+   functions above are the test cases; `tools/check_funcs.py` compares named
+   functions in the linked image against their own retail spans, which is what
+   a changed function length needs.
+2. **Split the region into units.** One unit per identified archive member,
    under `src/smt3/sdk/<library>/<member>`, with unattributed runs in their own
    address-named units. `configure.py` already gives any path under `sdk/` the
    `sdk` progress category, so the game-code denominator stops counting this
    code as soon as the split lands. The relinked image has to stay byte
    identical.
-2. **newlib, fdlibm and libgcc.** Settle the build flags against one small
+3. **newlib, fdlibm and libgcc.** Settle the build flags against one small
    member, then work outward. Highest byte yield and no recovery involved.
-3. **`libdma` and `libgraph`.** Clean room, with the semantics settled from the
+4. **`libdma` and `libgraph`.** Clean room, with the semantics settled from the
    3.0.3 sources by someone other than the implementer.
-4. **The rest of the Sony libraries.** Clean room from the disassembly, public
+5. **The rest of the Sony libraries.** Clean room from the disassembly, public
    headers and ps2sdk. `libkernl` is the largest at 37,012 bytes and most of it
    is thin syscall and sif wrappers.
 
