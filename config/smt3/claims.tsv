@@ -237,7 +237,11 @@ src/smt3/newbattle/nbMakePacket.c	u19	done	2026-10-20	250 / 146544	the second la
 src/smt3/code_001FAE80.c	v10	done	2026-10-20	755 / 258072	second pass, u18 left a ruled-out list and two new levers
 docs/nonmatching/	v11	done	2026-10-20	131 ambiguous entries	docs only, no source change
 src/smt3/newbattle/nbMakePacket.c	v12	done	2026-10-20	238 / 143752	the Flow family, about 55 functions over one named struct with 170 matched siblings
-src/smt3/code_001FAE80.c	w10	open	2026-10-20	701 real / 33 drafts	the fclDrawSprite cluster first, flagged as highest value
-src/smt3/newbattle/nbMakePacket.c	w11	open	2026-10-20	190 real / 39 drafts	the Flow family, third pass
-src/smt3/newbattle/nbStageProcess.c	w12	open	2026-10-20	58 real / 10 drafts	worked twice before, substantial work left
-src/smt3/field/fldDraw.c	w13	open	2026-10-20	44 real / 6 drafts	worked twice before, substantial work left
+src/smt3/code_001FAE80.c	w10	done	2026-10-20	701 real / 33 drafts	the fclDrawSprite cluster first, flagged as highest value
+src/smt3/newbattle/nbMakePacket.c	w11	done	2026-10-20	190 real / 39 drafts	the Flow family, third pass
+src/smt3/newbattle/nbStageProcess.c	w12	done	2026-10-20	58 real / 10 drafts	worked twice before, substantial work left
+src/smt3/field/fldDraw.c	w13	done	2026-10-20	44 real / 6 drafts	worked twice before, substantial work left
+src/smt3/code_001FAE80.c	x10	open	2026-10-20	679 real / 31 drafts	the named unstarted sibling clusters
+src/smt3/newbattle/nbMakePacket.c	x11	open	2026-10-20	180 real / 44 drafts	Flow family, fourth pass
+src/smt3/field/fldDraw.c	x12	open	2026-10-20	39 real / 7 drafts	third pass
+src/smt3/effect/effPCPBoss.c	x13	open	2026-10-20	30 real / 7 drafts	worked once long ago
