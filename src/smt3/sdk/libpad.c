@@ -81,7 +81,60 @@ extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
                          void *recv, s32 rsize, void *endfunc, void *endpara);
 extern int _send_to_iop(int port, int slot);
 
+/* D_00598AC0 is the command-block array the IOP DMAs from, D_00529FAC the
+ * debug-print flag. Only the two parked drafts below reach them. */
+typedef struct sceSifDmaData {
+    void *src;
+    void *dest;
+    s32 size;
+    s32 attr;
+} sceSifDmaData;
+
+extern padCmd D_00598AC0[2][4] __attribute__((section(".data")));
+extern s32 D_00529FAC __attribute__((section(".data")));
+extern void *memset(void *dst, int c, u32 len);
+extern int scePrintf(const char *fmt, ...);
+extern s32 sceSifDmaStat(u32 id);
+extern u32 sceSifSetDma(sceSifDmaData *data, s32 count);
+
+/* NON_MATCHING: 28 of 69 words differ; retail keeps the slot index in $s0 and
+ * the command pointer in $s1, and this draft swaps the pair. */
+#ifdef NON_MATCHING
+int _send_to_iop(int port, int slot)
+{
+    padCmd *c = D_005989D0[port][slot].cmd;
+    sceSifDmaData dma[16];
+    int id;
+    u32 seq;
+
+    if (D_005989D0[port][slot].dmaId != 0) {
+        if (sceSifDmaStat(D_005989D0[port][slot].dmaId) >= 0) {
+            if (D_00529FAC != 0) {
+                scePrintf("libpad: sceSifSetDma faild\n");
+            }
+            return 0;
+        }
+    }
+    seq = c->seq + 1;
+    c->seq = seq;
+    dma[0].src = c;
+    dma[0].dest = (void *)(((seq & 1) << 5) + D_005989D0[port][slot].iopAddr);
+    dma[0].size = 0x20;
+    dma[0].attr = 0;
+    SyncDCache(c, (u8 *)c + 0x20);
+    id = sceSifSetDma(dma, 1);
+    if (id == 0) {
+        if (D_00529FAC != 0) {
+            scePrintf("libpad: sceSifSetDma faild\n");
+        }
+        return 0;
+    }
+    D_005989D0[port][slot].dmaId = id;
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libpad", _send_to_iop);
+#endif
 
 INCLUDE_ASM(const s32, "sdk/libpad", scePadInit);
 
@@ -117,7 +170,57 @@ int scePadEnd(void)
     return D_00598BC0.a.w[0];
 }
 
+/* NON_MATCHING: 120 words against retail's 122; the saved-register pair is
+ * swapped as in _send_to_iop, and the double-buffer loop runs one register
+ * short. */
+#ifdef NON_MATCHING
+int scePadPortOpen(int port, int slot, void *addr)
+{
+    padDma *d;
+    padCmd *c;
+    int i;
+
+    if (((u32)addr & 0x3F) != 0) {
+        if (D_00529FAC != 0) {
+            scePrintf("libpad: buffer addr is not 64 byte align. %08x\n", addr);
+        }
+        return 0;
+    }
+    if (D_005989D0[port][slot].open == 1) {
+        if (D_00529FAC != 0) {
+            scePrintf("libpad: pad port is already open [%d][%d]\n", port, slot);
+        }
+        return 0;
+    }
+    d = (padDma *)addr;
+    for (i = 0; i < 2; i++) {
+        d->frame = 0;
+        d->state = 5;
+        d->reqState = 2;
+        d->f67 = 0;
+        memset(d, 0xFF, 0x20);
+        d->length = 0;
+        d++;
+    }
+    D_00598BC0.cmd = 1;
+    D_00598BC0.port = port;
+    D_00598BC0.slot = slot;
+    D_00598BC0.a.w[1] = (s32)addr;
+    if (sceSifCallRpc(D_00598980, 1, 0, &D_00598BC0, 0x80, &D_00598BC0, 0x80, 0, 0) < 0) {
+        return 0;
+    }
+    c = &D_00598AC0[port][slot];
+    D_005989D0[port][slot].open = 1;
+    c->seq = 0;
+    D_005989D0[port][slot].dmaId = 0;
+    D_005989D0[port][slot].iopAddr = D_00598BC0.a.w[2];
+    D_005989D0[port][slot].dma = (padDma *)addr;
+    D_005989D0[port][slot].cmd = c;
+    return D_00598BC0.a.w[0];
+}
+#else
 INCLUDE_ASM(const s32, "sdk/libpad", scePadPortOpen);
+#endif
 
 int scePadPortClose(int port, int slot)
 {

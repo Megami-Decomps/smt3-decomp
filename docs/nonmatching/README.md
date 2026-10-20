@@ -34,6 +34,7 @@ page and line to open. Conventions are in
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
 | 3 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
+| 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
