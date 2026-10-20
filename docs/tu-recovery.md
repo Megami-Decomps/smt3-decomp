@@ -507,7 +507,7 @@ The rest sit in six containers:
 | `code_00116AD0` | 8 | 6 | done |
 | `newbattle/nbStageProcess` | 4 | - | done |
 | `script/scrParameterCommand` | 1 | - | done |
-| `code_001FAE80` | 35 | 43 | contradicted, see below |
+| `code_001FAE80` | 35 | 43 | 8 bytes of rodata away, see below |
 | `code_002C7CB0` | 2 | 0 | contradicted, see below |
 
 70 of the 108 are placed. Each container relinked byte-identically and
@@ -545,19 +545,32 @@ found by a sweep failing to build rather than by reading the list:
 `.lit4`/`.sdata` ownership remains the one item on that list the tool does not
 compute; `split_rodata.py` does, and the measurement below is how to check it.
 
-### `code_001FAE80` needs its fclPanel contradiction settled
+### `code_001FAE80` is 8 bytes of rodata away
 
-Its 36 runs cut and compile cleanly, and the image came out 32 bytes long. The
-measurement says why: `MovieViewer`, the last part, emits `0x3c50` of `.rodata`
-into a `0x3c30` row. HD names `fclPanel.c` twice, at `0x2155B8` and again for a
-single function at `0x234010`, and merging the second into `MovieViewer` is what
-overflows: that function's rodata sits back with the first `fclPanel` run, and a
-symbol referenced from a later unit than its owner stays with the earlier one by
-`split_rodata.py`'s link-order rule. So the rodata cannot follow the function.
+Its 34 cuts apply and every part compiles. Two things were settled along the
+way and one is left.
 
-Cutting at `0x234010` instead would give two units named `fclPanel`, which a
-`.c` cannot be. One of the two attributions is wrong and settling which is
-evidence work, not another cut. The other 34 runs are ready behind it.
+**The `fclPanel` contradiction is settled.** HD names `fclPanel.c` twice, at
+`0x2155B8` and again for one function at `0x234010`. The second is the
+mis-attribution: `0x234010` sits inside a 420-function run of `cmp*` and `camp*`
+names, the camp UI, nowhere near `fclPanel.c`'s own run.
+
+**The container does not end with a named run.** `MovieViewer`'s HD run stops at
+`0x22C048`, but `movieViewerSetFlags` through `movieViewerDebugDraw` follow it
+and carry the prefix, so the file runs to `0x22C578` where `rst*` and then the
+`cmp*` block begin. Everything from there to the container end has no HD
+attribution at all, so it is cut off as its own filler rather than left to
+inflate `MovieViewer`. A sweep must not assume the last run reaches the
+container's end.
+
+What is left is 8 bytes. The relinked image is 8 bytes long and the tail filler
+emits `0x3c50` of `.rodata` into a `0x3c48` row. Two of the three culprits are
+already found and fixed: the tail's row had to start at `0x440478` rather than
+`0x440490`, because `/camp/tmx/camp_01.tmx` at `0x0053F478` is emitted as a C
+literal by the tail *and* was being included as `D_0053F478` by `MovieViewer`,
+counted twice. `check_unit` now puts the remaining divergence at `0x0053F510`,
+the pointer table after `camp_draw` and `camp_update`. That is one placement
+question among the tail's 630 `INCLUDE_RODATA` lines, not a tool gap.
 
 ### `code_002C7CB0` is contradicted too
 
