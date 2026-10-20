@@ -9,7 +9,7 @@ typedef struct
 {
     s32 x;
     s32 y;
-} EffDebugPoint_t;
+} effDebugPoint_t;
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
@@ -189,7 +189,7 @@ effBezierCurve_t *func_001AC4F0(effArrHdr_t *table, s32 index) {
 void effDebugPointDraw(QuadF32 *pos)
 {
     QuadF32 screen;
-    EffDebugPoint_t point;
+    effDebugPoint_t point;
     void *tag;
     sdfGrOt_t *ot;
 
@@ -210,7 +210,7 @@ void effDebugPointDraw(QuadF32 *pos)
 void effDebugPointDraw2(QuadF32 *pos, u32 mode)
 {
     QuadF32 screen;
-    EffDebugPoint_t point;
+    effDebugPoint_t point;
     void *tag;
     sdfGrOt_t *ot;
 
@@ -231,7 +231,7 @@ void effDebugPointDraw2(QuadF32 *pos, u32 mode)
 void effDebugLineDraw(QuadF32 *from, QuadF32 *to)
 {
     QuadF32 screen[2];
-    EffDebugPoint_t point[2];
+    effDebugPoint_t point[2];
     void *tag;
     sdfGrOt_t *ot;
 
@@ -259,7 +259,7 @@ void effDebugLineDraw(QuadF32 *from, QuadF32 *to)
 void effDebugLineDraw2(QuadF32 *from, QuadF32 *to, u32 mode)
 {
     QuadF32 screen[2];
-    EffDebugPoint_t point[2];
+    effDebugPoint_t point[2];
     void *tag;
     sdfGrOt_t *ot;
 
