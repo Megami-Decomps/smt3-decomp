@@ -77,6 +77,27 @@ typedef struct nbFormation_t
 
 /* The upstream packet prefix and the independently recovered process slots
  * describe one battle work area, not separately allocated partial views. */
+/* nbMainProcessData_t.phase, as nbSetPhase dispatches on it. Names and values
+ * from the IDB; nbSetPhase's own per-case setters corroborate twelve of them. */
+typedef enum NB_PHASE {
+    NB_PHASE_NON = 0,
+    MAE = 1,
+    NB_PHASE_ENCOUNT = 2,
+    EVENT = 3,
+    PRESSMAE = 4,
+    PRESSNIIDA = 5,
+    ACTIONMAE = 6,
+    ACTION = 7,
+    NPC = 8,
+    CHKEND = 9,
+    CHKTURN = 10,
+    ATO = 11,
+    RESULT = 12,
+    NB_PHASE_END = 13,
+    DEBUG = 14,
+    RENZOKU = 15,
+} NB_PHASE;
+
 typedef struct nbMainProcessData_t
 {
     nbFormation_t *form;                    /* 0x000 */
