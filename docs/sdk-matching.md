@@ -190,10 +190,17 @@ compiled at `-O2 -G0 -fno-common -fno-builtin` give 1,340 bytes with `med3` and
 `swapfunc` as separate functions, where retail is one 2,544-byte function with
 both inlined. At `-O3` both versions give one function of 2,676 bytes, the
 right shape and 132 bytes over. So Sony built this newlib with `-O3`-level
-inlining, the version between 1.8.2 and 1.9.0 makes no difference to this file,
-and something smaller is still missing. Settling that one flag is what opens
-the 50,296 bytes; until it is settled these units are ordinary matching work,
-with upstream source as a strong hint rather than an answer.
+inlining, and the version between 1.8.2 and 1.9.0 makes no difference to this
+file.
+
+libm is further off: fdlibm 1.9.0's `sf_floor.c` gives 232 bytes against
+retail's 216 and differs from the first instruction at both `-O2` and `-O3`,
+building the mantissa mask with `lui`/`ori`/`and` where upstream shifts and
+masks. That is a different source, not a different flag.
+
+So these units are ordinary matching work after all, with upstream source as a
+strong hint rather than an answer. The archives still help: a member's bytes
+say when a candidate is right without needing the retail image.
 
 **The Sony libraries (65,292 bytes).** No public source. SDK 3.0.3 ships
 sources for `libdma` and `libgraph` only (`ee/src/lib/dma/libdma.c`,
