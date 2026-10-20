@@ -427,6 +427,9 @@ void effBTLCutSetCameraState(effBTLCut_t *cut) {
 
 /* NON_MATCHING: 88 of 263 words differ (first at +0x34). */
 #ifdef NON_MATCHING
+/* Called above its definition, where ee-gcc assumed int. */
+u32 effBTLSkillGetInvokeParty(void);
+
 void effBTLCutDraw(effBTLCut_t *cut) {
     sdfVector4_t position;
     sdfMatrix4_t base;
