@@ -96,23 +96,27 @@ def blocks(text):
     return out
 
 
-def strip_attributes(code):
-    """Drop every __attribute__((...)), matching its parentheses.
+SUFFIXED = re.compile(r"(?:__attribute__|__asm__|asm)\s*\(")
 
-    Its parens otherwise read as a prototype's, so `extern s32 fldGb
-    __attribute__((section(".data")));` looks like it declares `__attribute__`.
+
+def strip_attributes(code):
+    """Drop a declarator's __attribute__((...)) and asm("...") suffixes.
+
+    Their parentheses otherwise read as a prototype's parameter list, so
+    `extern s32 fldGb __attribute__((section(".data")));` looks like it declares
+    `__attribute__` and `extern T *cmbGlobalWork asm("DDS3_GBWK");` like `asm`.
+    A bare `__asm__(...)` statement has nothing before it and is left alone.
     """
-    while (i := code.find("__attribute__")) >= 0:
-        j = code.find("(", i)
-        if j < 0:
-            return code[:i]
-        depth, k = 0, j
+    while (m := SUFFIXED.search(code)) is not None:
+        if not code[: m.start()].strip():
+            break
+        depth, k = 0, m.end() - 1
         while k < len(code):
             depth += (code[k] == "(") - (code[k] == ")")
             k += 1
             if not depth:
                 break
-        code = code[:i] + code[k:]
+        code = code[: m.start()] + code[k:]
     return code
 
 

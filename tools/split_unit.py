@@ -130,10 +130,17 @@ def split_source(text, names, start, end, unit, refs=None):
     def is_type(d):
         return "{" in d and re.match(r"\s*(?:/\*.*?\*/\s*)*(?:typedef|struct|union|enum)\b", d, re.S) is not None
 
+    # A bare `__asm__("x = y")` is an assembler alias the whole unit relies on and
+    # declares no name, so every part needs it: without it a float reaching a
+    # variadic call fails to link and the error names the alias, not the file.
+    def is_asm_alias(d):
+        return re.match(r"\s*(?:__asm__|asm)\s*\(", d) is not None
+
     unit_tokens = TOKENS.findall(text)
     orphan_types = [d for d in head + [d for p in pieces for d in p[2]]
-                    if is_type(d) and declared_name(d)
-                    and unit_tokens.count(declared_name(d)) == TOKENS.findall(d).count(declared_name(d))]
+                    if is_asm_alias(d)
+                    or (is_type(d) and declared_name(d)
+                        and unit_tokens.count(declared_name(d)) == TOKENS.findall(d).count(declared_name(d)))]
 
     def write(key):
         indices = groups[key]
