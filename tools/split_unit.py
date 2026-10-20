@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cparse import DEF, TOKENS, blocks, declared_name  # noqa: E402
+from cparse import DEF, TOKENS, blocks, declared_name, declared_names  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 INCLUDE = re.compile(r'INCLUDE_(ASM|RODATA)\(const s32, "([^"]+)", (\w+)\);')
@@ -160,12 +160,14 @@ def split_source(text, names, start, end, unit, refs=None):
             while changed:
                 changed = False
                 for i, d in enumerate(pool):
-                    if i not in chosen and (declared_name(d) in used or d in orphan_types):
+                    if i not in chosen and (declared_names(d) & used or d in orphan_types):
                         chosen.add(i)
                         used |= set(TOKENS.findall(d))
                         changed = True
             decls = [pool[i] for i in sorted(chosen)]
-            declared = {declared_name(d) for d in decls} | {declared_name(b) for b in body if "{" not in b}
+            declared = set().union(*(declared_names(d) for d in decls)) if decls else set()
+            declared |= set().union(*(declared_names(b) for b in body if "{" not in b)) \
+                if any("{" not in b for b in body) else set()
             extra = [protos[n] for n in sorted(used & set(protos)) if n not in defined and n not in declared]
             grown = set().union(*(set(TOKENS.findall(p)) for p in extra)) - used if extra else set()
             if not grown:

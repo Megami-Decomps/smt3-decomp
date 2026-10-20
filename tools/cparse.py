@@ -96,11 +96,68 @@ def blocks(text):
     return out
 
 
+def strip_attributes(code):
+    """Drop every __attribute__((...)), matching its parentheses.
+
+    Its parens otherwise read as a prototype's, so `extern s32 fldGb
+    __attribute__((section(".data")));` looks like it declares `__attribute__`.
+    """
+    while (i := code.find("__attribute__")) >= 0:
+        j = code.find("(", i)
+        if j < 0:
+            return code[:i]
+        depth, k = 0, j
+        while k < len(code):
+            depth += (code[k] == "(") - (code[k] == ")")
+            k += 1
+            if not depth:
+                break
+        code = code[:i] + code[k:]
+    return code
+
+
+def enum_members(code):
+    """Member names of an enum definition, which are what its users name.
+
+    An anonymous enum introduces no type name at all, so without these the
+    definition cannot be matched to the part that uses a member."""
+    m = re.search(r"\benum\b[^{]*\{(.*)\}", code, re.S)
+    if not m:
+        return set()
+    out = set()
+    for item in m.group(1).split(","):
+        item = item.split("=")[0]
+        names = re.findall(r"[A-Za-z_]\w*", item)
+        if names:
+            out.add(names[0])
+    return out
+
+
+def declared_names(decl):
+    """Every identifier a declaration introduces, so a multi-declarator extern is
+    found by any of its declarators rather than only the last, and an anonymous
+    enum by any of its members."""
+    code = strip_attributes(re.sub(r"/\*.*?\*/|//[^\n]*", "", decl, flags=re.S)).strip()
+    if "enum" in code and "{" in code:
+        name = declared_name(decl)
+        return enum_members(code) | ({name} if name else set())
+    if code.startswith(("typedef", "struct", "union", "enum")) or "{" in code or "(" in code:
+        name = declared_name(decl)
+        return {name} if name else set()
+    out = set()
+    for part in code.rsplit(";", 1)[0].split(","):
+        part = re.sub(r"\[[^\]]*\]|=.*", "", part, flags=re.S)
+        names = re.findall(r"[A-Za-z_]\w*", part)
+        if names:
+            out.add(names[-1])
+    return out
+
+
 def declared_name(decl):
     """Identifier a top-level declaration introduces: the typedef/struct name for type
     definitions (whose bodies may hold function-pointer members), the name before '('
     for prototypes, else the last identifier before ';'."""
-    code = re.sub(r"/\*.*?\*/|//[^\n]*", "", decl, flags=re.S).strip()
+    code = strip_attributes(re.sub(r"/\*.*?\*/|//[^\n]*", "", decl, flags=re.S)).strip()
     if m := re.match(r"#define\s+(\w+)", code):
         return m.group(1)
     if code.startswith(("typedef", "struct", "union", "enum")):
