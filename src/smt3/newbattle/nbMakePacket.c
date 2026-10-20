@@ -3209,7 +3209,31 @@ s32 Flow1_3(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 46 of 72 words differ (first at +0x28); at the exact size. */
+#ifdef NON_MATCHING
+s32 Flow1_4(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = 0x1E;
+        break;
+    case 1:
+        if (n->ework->id != 0x96 && n->ework->id != 0x1D && n->ework->id != 3 &&
+            n->ework->id != 8 && n->ework->id != 0xD && n->ework->id != 0xA &&
+            n->ework->id != 5 && n->ework->id != 4 && n->ework->id != 0x10 &&
+            n->ework->id != 0x18 && n->ework->id != 0x1E && n->ework->id != 0x99 &&
+            evtGetAgeOfMoon() == 8) {
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x98, 0);
+        } else {
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x111, 0);
+        }
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_4);
+#endif
 
 s32 Flow1_5(nbNegoProcessData_t *n)
 {
@@ -3347,7 +3371,25 @@ s32 Flow1_10(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_11);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_33);
+s32 Flow1_33(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x1000C);
+    nbAddNegoIdKouho(n, 0x1001F);
+    n->workid[3] = 0x10020;
+    if (n->pwork->id == n->ework->id) {
+        n->nextnegoid = n->nextkouho[0];
+        return 0;
+    }
+    if ((datGetRace(n->ework) == 0x13 || datGetRace(n->ework) == 0x12 ||
+         n->ework->id == 0x9A) && n->negoreqtype == 0) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    n->nextnegoid = (datGet3Zokusei(n->ework) < 0 && n->negoskillid != 0x1A5)
+                        ? n->nextkouho[1]
+                        : n->nextkouho[0];
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_32);
 
@@ -3551,7 +3593,23 @@ s32 Flow1_28(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
+#ifdef NON_MATCHING
+s32 Flow1_29(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12, 0);
+        return 4;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow1_29);
+#endif
 
 s32 Flow1_30(nbNegoProcessData_t *n)
 {
@@ -3835,7 +3893,42 @@ s32 Flow6_11(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_12);
+s32 Flow6_12(nbNegoProcessData_t *n)
+{
+    s32 plv;
+    s32 elv;
+    s32 ritu;
+
+    if (n->requesttype != 5) {
+        n->requesttype = 5;
+        n->prevreqtype = 5;
+    }
+    n->requestdata = nbGetNegoYaruMakkaA(n, n->pwork, n->ework);
+    nbAddNegoIdKouho(n, 0x6000D);
+    nbAddNegoIdKouho(n, 0x6000E);
+    plv = n->pwork->level;
+    elv = n->ework->level;
+    if (plv - 5 >= elv && plv - 9 < elv) {
+        ritu = 0x14;
+    } else if (plv - 0xA >= elv && plv - 0xE < elv) {
+        ritu = 0x28;
+    } else if (plv - 0xF >= elv && plv - 0x13 < elv) {
+        ritu = 0x3C;
+    } else if (plv - 0x14 >= elv && plv - 0x18 < elv) {
+        ritu = 0x50;
+    } else {
+        ritu = 0x61;
+        if (plv - 0x19 < elv) {
+            ritu = 0;
+        }
+    }
+    if (dds3GetRandIntA(0, 0x64) < ritu) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
 s32 Flow6_13(nbNegoProcessData_t *n)
 {
@@ -3967,7 +4060,50 @@ s32 Flow6_21(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_70);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_22);
+s32 Flow6_22(nbNegoProcessData_t *n)
+{
+    switch (n->requesttype) {
+    case 5:
+        nbAddNegoIdKouho(n, 0x80001);
+        nbAddNegoIdKouho(n, 0x60017);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0x60018);
+        nbAddNegoIdKouho(n, 0x60017);
+        break;
+    case 0:
+        nbAddNegoIdKouho(n, 0x60018);
+        nbAddNegoIdKouho(n, 0x60017);
+        break;
+    }
+    switch (n->requesttype) {
+    case 1:
+        if (datCheckMaka(n->requestdata) != 0) {
+            n->nextnegoid = n->nextkouho[0];
+            datAddMaka(-n->requestdata);
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+        break;
+    case 5:
+        if (datCheckMaka(n->requestdata) != 0) {
+            n->nextnegoid = n->nextkouho[0];
+            datAddMaka(-n->requestdata);
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+        break;
+    case 0:
+        if (datCheckItem(n->requestdata, 1) != 0) {
+            n->nextnegoid = n->nextkouho[0];
+            datAddItem(n->requestdata, -1);
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 Flow6_23(nbNegoProcessData_t *n)
 {
@@ -4110,7 +4246,30 @@ s32 Flow6_32(nbNegoProcessData_t *n)
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_32);
 #endif
 
+/* NON_MATCHING: 35 of 56 words differ (first at +0x44); six words long. */
+#ifdef NON_MATCHING
+s32 Flow6_33(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0x90001);
+    nbAddNegoIdKouho(n, 0x60022);
+    nbAddNegoIdKouho(n, 0x60026);
+    if (n->hojoskillid == 0x19D &&
+        (n->ework->id == 0x3A || n->ework->id == 0x3C || n->ework->id == 0x3D ||
+         n->ework->id == 0x5B || n->ework->id == 0x5A || n->ework->id == 0x5C)) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x8E, 0);
+        n->nextnegoid = n->nextkouho[2];
+        return 0;
+    }
+    if ((u32)dds3GetRandIntA(0, 0xA) < 5) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_33);
+#endif
 
 s32 Flow6_34(nbNegoProcessData_t *n)
 {
@@ -4426,7 +4585,39 @@ s32 Flow6_55(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_56);
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_57);
+s32 Flow6_57(nbNegoProcessData_t *n)
+{
+    s32 ritu;
+    s32 elv;
+    s32 plv;
+
+    ritu = 0x46;
+    nbAddNegoIdKouho(n, n->workid[0]);
+    nbAddNegoIdKouho(n, n->workid[1]);
+    if (n->hojoskillid == 0x1A2) {
+        ritu = 0x55;
+    }
+    elv = datGetParam(n->ework, 1);
+    plv = datGetParam(n->pwork, 1);
+    if (elv + 5 < plv) {
+        ritu += 0xA;
+    } else if (plv < elv - 5) {
+        ritu -= 0xA;
+    }
+    if (n->hojoskillid == 0x19D &&
+        (n->ework->id == 0x3A || n->ework->id == 0x3C || n->ework->id == 0x3D ||
+         n->ework->id == 0x5A || n->ework->id == 0x5B || n->ework->id == 0x5C)) {
+        ritu = 0;
+    }
+    if (dds3GetRandIntA(0, 0x64) < ritu) {
+        n->hojoseikou = 1;
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        n->hojoseikou = 0;
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 s32 Flow6_58(nbNegoProcessData_t *n)
 {
@@ -4524,7 +4715,57 @@ s32 Flow6_64(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 79 of 100 words differ (first at +0x10); four words long. */
+#ifdef NON_MATCHING
+s32 Flow6_65(nbNegoProcessData_t *n)
+{
+    s32 ritu;
+    s32 ppar;
+    s32 epar;
+
+    ritu = 0x32;
+    nbAddNegoIdKouho(n, 0xA0001);
+    nbAddNegoIdKouho(n, 0x60042);
+    nbAddNegoIdKouho(n, 0x90001);
+    if (datGetRace(n->ework) != 0x13) {
+        if (n->aisyo == 1) {
+            ritu = 0x1E;
+        } else if (n->aisyo == 2) {
+            ritu = 0x46;
+        }
+    } else if (n->aisyo == 1) {
+        ritu = 0x28;
+    } else if (n->aisyo == 2) {
+        ritu = 0x46;
+    }
+    if (datGetRace(n->ework) != 0x13) {
+        ppar = datGetParam(n->pwork, 1);
+        epar = datGetParam(n->ework, 1);
+        if (epar + 5 < ppar) {
+            ritu -= 5;
+        } else if (ppar < epar - 5) {
+            ritu += 5;
+        }
+    }
+    if (n->cnt6_37 != 0) {
+        n->nextnegoid = n->nextkouho[0];
+        return 0;
+    }
+    if (n->cnt6_36 >= 4) {
+        if ((u32)dds3GetRandIntA(0, 0xA) >= 3) {
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x129, 0);
+            n->nextnegoid = n->nextkouho[2];
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+    } else {
+        n->nextnegoid = dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow6_65);
+#endif
 
 s32 Flow6_66(nbNegoProcessData_t *n)
 {
@@ -4706,7 +4947,44 @@ s32 Flow9_15(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 45 of 89 words differ (first at +0x28); one word short. */
+#ifdef NON_MATCHING
+s32 Flow9_16(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        if (n->negoreqtype == 3) {
+            n->getitem = nbGetNegoYaruStone(n->ework);
+            if (n->getitem == 0) {
+                n->getitem = 0x6A;
+            }
+        } else {
+            n->getitem = nbGetNegoYaruItemA(n->ework);
+            if (n->getitem == 0) {
+                n->getitem = 6;
+            }
+        }
+        if (datCheckItemFull(n->getitem) != 0) {
+            nbSetMesItem(n->flowmsg[n->ekucyo], n->getitem);
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x97, 0);
+            n->getmakka = nbGetNegoYaruMakkaA(n, n->pwork, n->ework);
+            nbAddNegoIdKouho(n, 0x9000E);
+        }
+        break;
+    case 1:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 2:
+        nbAddNegoIdKouho(n, 0x90011);
+        nbSetMesItem(n->flowmsg[n->ekucyo], n->getitem);
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA9, 0);
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow9_16);
+#endif
 
 s32 Flow9_17(nbNegoProcessData_t *n)
 {
@@ -4791,7 +5069,36 @@ s32 nbCheckFlowUnit(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 15 of 63 words differ (first at +0x7C); one word short. */
+#ifdef NON_MATCHING
+s32 Flow10_1(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xA0002);
+    nbAddNegoIdKouho(n, 0xA000B);
+    nbAddNegoIdKouho(n, 0x6002B);
+    if ((n->ework->id == 0x5C || n->ework->id == 0x3D || n->ework->id == 0x61) &&
+        evtBitCheck(8) == 0 && n->negoreqtype == 0) {
+        n->nextnegoid = n->nextkouho[1];
+        return 0;
+    }
+    if (n->cnt6_37 != 0) {
+        if ((u32)dds3GetRandIntA(0, 0xA) < 6) {
+            n->nextnegoid = n->nextkouho[2];
+        } else {
+            n->nextnegoid = n->nextkouho[1];
+        }
+        return 0;
+    }
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 2)];
+    if (datGetRace(n->ework) != 0x21) {
+        return 0;
+    }
+    n->nextnegoid = n->nextkouho[1];
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_1);
+#endif
 
 s32 Flow10_2(nbNegoProcessData_t *n)
 {
@@ -4928,7 +5235,39 @@ s32 Flow10_9(nbNegoProcessData_t *n)
     return 4;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow10_33);
+s32 Flow10_33(nbNegoProcessData_t *n)
+{
+    u32 flag;
+
+    switch (n->nownegophase) {
+    case 0:
+        nbCameraSetTaizi(n->pform, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x122, 0);
+        break;
+    case 2:
+        flag = datGetAisyoFlag(n->ework, 7);
+        if ((flag & 0x20000) != 0) {
+            nbAddHitEffKoukaPacket(0, 0, n->eform, 1);
+        } else if ((flag & 0x40000) != 0) {
+            nbAddHitEffKoukaPacket(0, 0, n->eform, 2);
+        } else if ((flag & 0x110000) != 0) {
+            nbAddHitEffKoukaPacket(0, 0, n->eform, 3);
+            nbAddMojiEffKoukaPacket(0, 0x2D, 0, n->eform, 4);
+        } else {
+            nbMakeBadDamagePacket(0, 0, n->eform, 0x400);
+            nbAddHitEffKoukaPacket(0, 0, n->eform, 0xA);
+        }
+        break;
+    case 3:
+        n->waitframe = 0x2D;
+        break;
+    case 4:
+        return n->temp_param[0];
+    }
+    return 0;
+}
 
 /* NON_MATCHING: 15 of 35 words differ (first at +0x34). */
 #ifdef NON_MATCHING
@@ -5237,7 +5576,57 @@ s32 Flow2_4(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 2 of 84 words differ (first at +0x44); the annul bit of two branches. */
+#ifdef NON_MATCHING
+s32 Flow2_5(nbNegoProcessData_t *n)
+{
+    s32 mes;
+
+    mes = 0;
+    switch (n->nownegophase) {
+    case 0:
+        n->qindex = 0;
+        switch (n->qtype) {
+        case 0:
+            n->qindex = dds3GetRandIntA(0, 2);
+            mes = n->qindex == 0 ? 0xB : 0x11;
+            break;
+        case 1:
+            mes = 5;
+            break;
+        case 2:
+            mes = 7;
+            break;
+        case 3:
+            mes = 3;
+            break;
+        }
+        nbDispNegoMessage(n, n->questionmsg, mes, 0);
+        break;
+    case 1:
+        switch (n->qtype) {
+        case 0:
+            mes = n->qindex == 0 ? 0xC : 0x12;
+            break;
+        case 1:
+            mes = 6;
+            break;
+        case 2:
+            mes = 8;
+            break;
+        case 3:
+            mes = 4;
+            break;
+        }
+        nbDispNegoMessage(n, n->questionmsg, mes, 1);
+        nbAddNegoIdKouho(n, 0x20006);
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_5);
+#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_6);
 
@@ -5278,7 +5667,42 @@ s32 Flow2_9(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow2_10);
+s32 Flow2_10(nbNegoProcessData_t *n)
+{
+    s32 ritu;
+    s32 lv;
+
+    ritu = 0x46;
+    nbAddNegoIdKouho(n, 0x2000B);
+    nbAddNegoIdKouho(n, 0x2000C);
+    if (datGetRace(n->ework) == 0x15 || datGetRace(n->ework) == 0x16 ||
+        datGetRace(n->ework) == 0x17) {
+        ritu = 0;
+    }
+    if (datSearchDevilStock(n->ework->id) >= 0) {
+        ritu = 0x64;
+    }
+    if (datCheckStockFull() != 0) {
+        ritu = 0x64;
+    }
+    lv = n->ework->level;
+    if (datGetPlayerLevel() < lv) {
+        ritu = 0x64;
+    }
+    if (datGetRace(n->ework) == 0x13 || datGetRace(n->ework) == 0x12) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x29, 0);
+        n->nextnegoid = n->nextkouho[0];
+        return 0;
+    }
+    if (dds3GetRandIntA(0, 0x64) < ritu) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x29, 0);
+        n->nextnegoid = n->nextkouho[0];
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x2A, 0);
+        n->nextnegoid = n->nextkouho[1];
+    }
+    return 0;
+}
 
 s32 Flow2_11(nbNegoProcessData_t *n)
 {
@@ -5686,7 +6110,49 @@ s32 Flow7_3(nbNegoProcessData_t *n)
     return 0;
 }
 
+/* NON_MATCHING: 1 of 84 words differs (first at +0xC8); the annul bit of one branch. */
+#ifdef NON_MATCHING
+s32 Flow7_11(nbNegoProcessData_t *n)
+{
+    s32 mes;
+
+    mes = 0;
+    switch (n->nownegophase) {
+    case 0:
+        switch (n->qtype) {
+        case 1:
+            mes = n->qindex == 0 ? 0x1F : 0x21;
+            break;
+        case 2:
+            mes = n->qindex == 0 ? 0x23 : 0x25;
+            break;
+        case 3:
+            mes = n->qindex == 0 ? 0x1B : 0x1D;
+            break;
+        }
+        nbDispNegoMessage(n, n->questionmsg, mes, 0);
+        break;
+    case 1:
+        switch (n->qtype) {
+        case 1:
+            mes = n->qindex == 0 ? 0x20 : 0x22;
+            break;
+        case 2:
+            mes = n->qindex == 0 ? 0x24 : 0x26;
+            break;
+        case 3:
+            mes = n->qindex == 0 ? 0x1C : 0x1E;
+            break;
+        }
+        nbDispNegoMessage(n, n->questionmsg, mes, 1);
+        nbAddNegoIdKouho(n, 0x70016);
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow7_11);
+#endif
 
 s32 Flow7_15(nbNegoProcessData_t *n)
 {
@@ -5959,7 +6425,23 @@ s32 Flow8_7(nbNegoProcessData_t *n)
     return 0;
 }
 #else
+/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
+#ifdef NON_MATCHING
+s32 Flow8_7(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA1, 0);
+        return 2;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_7);
+#endif
 #endif
 
 s32 Flow8_8(nbNegoProcessData_t *n)
@@ -6032,7 +6514,23 @@ s32 Flow8_15(nbNegoProcessData_t *n)
     return 0;
 }
 #else
+/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
+#ifdef NON_MATCHING
+s32 Flow8_15(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoNoMotion(n, n->eform);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA3, 0);
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow8_15);
+#endif
 #endif
 
 s32 Flow8_16(nbNegoProcessData_t *n)
@@ -6070,7 +6568,29 @@ s32 Flow11_1(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_2);
+s32 Flow11_2(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xB0003);
+    if (dds3GetRandIntA(0, 1) == 0) {
+        n->requesthpmp = 0;
+        if (nbGetBackNoNegoId(n, 2) == 0x6002A) {
+            n->requestdata = nbGetNegoKureHpB(n, n->pwork, n->ework);
+        } else {
+            n->requestdata = nbGetNegoKureHpA(n, n->pwork, n->ework);
+        }
+    } else {
+        n->requesthpmp = 1;
+        if (nbGetBackNoNegoId(n, 2) == 0x6002A) {
+            n->requestdata = nbGetNegoKureMpB(n, n->pwork, n->ework);
+        } else {
+            n->requestdata = nbGetNegoKureMpA(n, n->pwork, n->ework);
+        }
+    }
+    if ((n->data->stat & 0x20000) != 0) {
+        n->requestdata = 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow11_3);
 
@@ -6344,7 +6864,51 @@ s32 Flow12_4(nbNegoProcessData_t *n)
     return 0;
 }
 #else
+/* NON_MATCHING: 73 of 97 words differ (first at +0x34); four words short. */
+#ifdef NON_MATCHING
+s32 Flow12_4(nbNegoProcessData_t *n)
+{
+    s32 plv;
+    s32 elv;
+    s32 ppar;
+    s32 epar;
+    s32 ritu;
+
+    switch (n->nownegophase) {
+    case 0:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xEC, 0);
+        break;
+    case 1:
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xD6, 1);
+        break;
+    case 2:
+        nbAddNegoIdKouho(n, 0xC0014);
+        nbAddNegoIdKouho(n, 0xC0015);
+        nbAddNegoIdKouho(n, 0xC0016);
+        nbAddNegoIdKouho(n, 0xC0017);
+        plv = n->pwork->level;
+        ppar = datGetParam(n->pwork, 1);
+        elv = n->ework->level;
+        epar = datGetParam(n->ework, 1);
+        if (plv < elv) {
+            ritu = ppar < epar ? 0x14 : 0x3C;
+        } else {
+            ritu = ppar < epar ? 0x28 : 0x50;
+        }
+        if (n->nowselect == 0) {
+            n->nextnegoid =
+                dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
+        } else {
+            n->nextnegoid = dds3GetRandIntA(0, 0x64) < 0x64 - ritu ? n->nextkouho[2]
+                                                                   : n->nextkouho[3];
+        }
+        break;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_4);
+#endif
 #endif
 
 s32 Flow12_24(nbNegoProcessData_t *n)
@@ -6515,7 +7079,31 @@ s32 Flow12_29(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow12_30);
+s32 Flow12_30(nbNegoProcessData_t *n)
+{
+    switch (n->nownegophase) {
+    case 0:
+        n->waitframe = nbSetNegoYesMotion(n, n->eform);
+        break;
+    case 1:
+        nbAddNegoIdKouho(n, 0xC001F);
+        if (n->negotype != 2) {
+            if (dds3GetRandIntA(0, 2) == 0) {
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xFA, 0);
+            } else {
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xFB, 0);
+            }
+        } else {
+            if (dds3GetRandIntA(0, 2) == 0) {
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x106, 0);
+            } else {
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x107, 0);
+            }
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 Flow12_31(nbNegoProcessData_t *n)
 {
@@ -6823,7 +7411,38 @@ s32 Flow15_1(nbNegoProcessData_t *n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_5);
 
+/* NON_MATCHING: 19 of 62 words differ (first at +0x3C); two words short. */
+#ifdef NON_MATCHING
+s32 Flow15_6(nbNegoProcessData_t *n)
+{
+    s32 mes;
+
+    mes = 0;
+    nbAddNegoIdKouho(n, 0xF0007);
+    switch (n->requesttype) {
+    case 0:
+        mes = 0x10A;
+        break;
+    case 1:
+        mes = 0x10B;
+        nbSetMesMakka(n->flowmsg[n->ekucyo], n->requestdata);
+        nbSetMesMakka(n->helpmsg, n->requestdata);
+        break;
+    case 3:
+        mes = 0x10D;
+        break;
+    case 2:
+        mes = 0x10C;
+        nbSetMesItem(n->flowmsg[n->ekucyo], n->requestdata);
+        nbSetMesItem(n->helpmsg, n->requestdata);
+        break;
+    }
+    nbDispNegoMessage(n, n->flowmsg[n->ekucyo], mes, 0);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow15_6);
+#endif
 
 s32 Flow15_7(nbNegoProcessData_t *n)
 {
@@ -6966,7 +7585,19 @@ s32 Flow16_1(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbMakePacket", Flow16_2);
+s32 Flow16_2(nbNegoProcessData_t *n)
+{
+    if (n->ework->id != 0x96 && n->ework->id != 0x1D && n->ework->id != 3 &&
+        n->ework->id != 8 && n->ework->id != 0xD && n->ework->id != 0xA &&
+        n->ework->id != 5 && n->ework->id != 4 && n->ework->id != 0x10 &&
+        n->ework->id != 0x18 && n->ework->id != 0x1E && n->ework->id != 0x99 &&
+        evtGetAgeOfMoon() == 8) {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x128, 0);
+    } else {
+        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x12C, 0);
+    }
+    return 4;
+}
 
 s32 Flow16_3(nbNegoProcessData_t *n)
 {

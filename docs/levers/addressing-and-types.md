@@ -789,6 +789,12 @@
 - A local assigned before the first call lands in a callee-saved register.
   Moving `sum = 0;` above a leading `jal` shifts every later allocation into
   place.
+- A struct field read whose live range crosses a `jal` is a **named local
+  assigned in front of that call**, not the field expression at its use site.
+  `lv = n->ework->level; if (datGetPlayerLevel() < lv)` is what gives retail
+  the extra callee-saved register; the inline form loads the field after the
+  call, leaves the frame one register short and shifts every callee-saved
+  number down by one.
 - A weighted-table scan compares before it accumulates: `if (r < sum + *p)
   return i; sum += *p;` gives retail's temp, compare, then copy. Accumulating
   first misses by several words.

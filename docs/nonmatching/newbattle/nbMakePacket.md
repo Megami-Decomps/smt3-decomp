@@ -632,3 +632,188 @@ and `case 1` falls into it. The draft keeps a `nop` and an extra `b` instead,
 three words. Writing the selection out in both arms is what should produce the
 merge and does not here; a `use_hi` flag local and a `goto` funnel were not
 tried and are the next things to measure.
+
+## Flow1_29, Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
+
+11 of 29 words match, two words short of retail's 31.
+
+The three are the same function with different message ids and return
+values: a `switch` over `nownegophase` whose case 0 calls
+`nbSetNegoNoMotion` and whose case 1 displays a message and returns a
+non-zero code. Because case 1 returns a different value from the default,
+retail materialises `return 0` twice: once in the second dispatch test's
+delay slot and once at a shared tail. ee-gcc instead annuls the case 1
+arm's `lw ekucyo` into that slot (`beql` where retail has `beq`), which
+leaves the default's `return 0` for the following `b` and collapses
+retail's three exit labels into two, so the whole epilogue shifts.
+
+The same `switch` shape over phases 0 and 1 matches in `Flow1_15` and
+`Flow12_30`, where every arm returns 0 and the shared tail needs no second
+zero, so the shape itself is fine; the differing return value is what
+exposes the delay-slot choice.
+
+Ruled out: case 1 written first; an explicit `default: return 0;`; a
+`ret` local assigned in each arm and returned once; `if`/`else if` in
+place of the `switch`; a phase local; and `return 0;` per arm instead of
+`break`. Adding an empty `case 2:` reaches retail's three-label exit and
+31 words with 11 differing, but it also turns the dispatch into
+`beq 1`/`slti 2`/`bnezl`, which retail does not have.
+
+## Flow6_33 (newbattle/nbMakePacket, 0xE0)
+
+35 of 56 words differ positionally; aligned, every instruction matches and
+only the six dispatch delay slots and the branch offsets are wrong. The
+draft is six words long at 62.
+
+The dead `sltiu $2, $2, 0x5` after `dds3GetRandIntA(0, 0xA)` is reproduced
+by writing both arms of `if ((u32)dds3GetRandIntA(0, 0xA) < 5)` with the
+identical body `n->nextnegoid = n->nextkouho[1];`: ee-gcc cross-jumps the
+two blocks, deletes the now-pointless branch and leaves the comparison
+dead. The cast is required, since the signed form gives `slti`. The
+message arm needs its own `return 0` so the `nextkouho[2]` value lands in
+`$3` and the store does not cross-jump with the random arm's.
+
+What is left is the six-term `||` chain over `n->ework->id`. Retail fills
+each `beq` delay slot from the fall-through with the next comparison's
+constant; ee-gcc annuls the target arm's `lw 0x184` instead, giving six
+`beql` and six duplicated loads.
+
+Ruled out: storing before the call in the message arm; a `u16` id local;
+an `ekucyo` local; the `hojoskillid` test as a nested `if`; and a `switch`
+over the id, which sorts the cases and so cannot give retail's
+0x3A, 0x3C, 0x3D, 0x5B, 0x5A, 0x5C order. Inverting the whole condition so
+the random arm is written first does give plain `beq` with retail's
+fall-through slots (28 of 56 differ), but it also mirrors the block
+layout, which cannot reach zero.
+
+## Flow15_6 (newbattle/nbMakePacket, 0x100)
+
+19 of 62 words differ, two words short of retail's 64. Every instruction
+matches in order; all nineteen differing words are branch offsets shifted
+by the two missing words.
+
+Case order is the lever here: with `case 2` last (any order of 0, 1 and 3
+before it) the second dispatch test comes out as retail's plain
+`beq $3, $2` with `addiu $2, $0, 3` in the slot. With `case 2` anywhere
+else that test becomes `beql` with the arm's `lw 0x184` annulled, costing
+four words.
+
+The two missing words are retail's `b` out of the last arm plus a
+duplicated `lw 0x184`: retail jumps the `case 2` arm over the
+cases-0-and-3 join block, where ee-gcc lets the arm fall into it and
+reuses the load.
+
+Ruled out: `default: break;` after `case 2`; `default: mes = 0;` in place
+of the leading `mes = 0`; and an empty `case 4:` after `case 2`.
+
+## Flow10_1 (newbattle/nbMakePacket, 0x100)
+
+15 of 63 words differ, one word short of retail's 64.
+
+Three arms each need their own `return 0`, and the last test is written
+inverted (`if (datGetRace(n->ework) != 0x21) return 0;`) to get retail's
+`bne` with the zero in its delay slot. The `dds3GetRandIntA(0, 0xA)`
+comparison is unsigned, as the `sltiu` shows.
+
+What is left is where the `nextnegoid` store goes. Retail keeps the first
+arm's and the ternary's values in `$3` with `daddu $2, $0, $0` scheduled
+in front of each store, so neither store cross-jumps with the last arm's;
+ee-gcc puts every value in `$2` and merges the first arm's store into the
+shared tail. Retail's first arm also returns the zero that
+`evtBitCheck(8) == 0` left in `$2` through an annulled `bnel` slot rather
+than materialising it.
+
+Ruled out: the ternary as an `if`/`else` pair of stores; no early return
+in the first two arms (33 of 60 differ); and the ternary without an early
+return.
+
+## Flow1_4 (newbattle/nbMakePacket, 0x120)
+
+46 of 72 words differ, at the exact size.
+
+The outer `switch` over `nownegophase` comes out exactly, retail's
+three-label exit included, and so does `case 0`. What fails is the
+twelve-term `&&` chain over `n->ework->id` ending in
+`evtGetAgeOfMoon() == 8`: ee-gcc annuls the target arm's `lw 0x184` into
+every `beq` slot, where retail fills each from the fall-through with the
+next comparison's constant.
+
+The identical chain in `Flow16_2` matches, so the chain itself is right;
+there it is the whole function body and here it is a `switch` arm that
+returns 1. Nothing in the source reaches the difference.
+
+Ruled out: `case 1` written first; `return 0;` instead of `break` in
+`case 0`; and `if`/`else if` in place of the `switch`.
+
+## Flow7_11, Flow2_5 (newbattle/nbMakePacket, 0x150 each)
+
+Flow7_11 is 1 of 84 words differing, Flow2_5 is 2 of 84, both at the exact
+size and with every instruction in place.
+
+Each differing word is the annul bit of the inner `switch`'s range test:
+retail emits `beql $2, $0` where the reconstruction emits `beq $2, $0` with
+the identical `addiu $2, $0, <next case>` in the slot. gcc only annuls when
+the slot insn sets a register the fall-through thread still needs, and here
+`$2` is dead on that path, so nothing in the source reaches the bit.
+Flow2_5 hits it once in each of its two phase arms.
+
+Case order is otherwise decisive and is already right: 1, 2, 3 in both of
+Flow7_11's inner switches, 0, 1, 2, 3 in Flow2_5's. Any other order costs
+seven words or more.
+
+Ruled out: a separate `mes` local per phase arm; `default: break;` in the
+inner switches; a `qtype` local; and `if`/`else if` for the outer phase
+test.
+
+## Flow9_16 (newbattle/nbMakePacket, 0x168)
+
+45 of 89 words differ, one word short of retail's 90.
+
+Same residual as Flow1_29: retail materialises `return 0` in both of the
+dispatch delay slots and keeps three exit labels, because `case 0` reaches
+the epilogue with `$2` already zero from `datCheckItemFull`'s test.
+ee-gcc annuls each arm's first instruction into those slots instead
+(`beqzl`/`beql` for retail's `beqz`/`beq`), which leaves the `b` to take
+`ld $16` and shifts everything after the dispatch by one word.
+
+Ruled out: all six orders of the three case arms.
+
+## Flow12_4 (newbattle/nbMakePacket, 0x194)
+
+73 of 97 words differ, four words short.
+
+The `case 2` body is right: the four `nbAddNegoIdKouho` calls, `plv` and
+`elv` as named locals assigned in front of the two `datGetParam` calls so
+they get callee-saved registers, the nested ternaries giving retail's
+`movn $16, $2, $17`, and the two `dds3GetRandIntA` ternaries over
+`nowselect`.
+
+Two residuals remain. The `nownegophase` dispatch is the Flow1_29 shape
+again: retail pulls `ld $16, 0x0($29)` into both dispatch delay slots and
+leaves `daddu $2, $0, $0` for the following `b`, where ee-gcc annuls each
+arm's first instruction instead. And the allocator puts `plv` in `$16` and
+`elv` in `$17`, which is retail's pair swapped.
+
+Ruled out for the register pair: `elv` declared before `plv`; the test
+written `elv > plv`; and the two names exchanged throughout.
+
+## Flow6_65 (newbattle/nbMakePacket, 0x190)
+
+79 of 100 words differ, four words long.
+
+The `datGetRace(n->ework) != 0x13` arm is written first so the `== 0x13`
+arm is the branched-to one, which is retail's polarity. Two residuals
+remain and neither moved under the source forms tried.
+
+ee-gcc if-converts the `== 0x13` arm's `aisyo` ladder into two `movz`,
+where retail keeps it branchy and cross-jumps its `aisyo == 2` test with
+the other arm's. And the allocator gives `ritu` `$17` and the
+`datGetParam` result `$18`, which is retail's pair swapped; `ritu` is
+already assigned in front of the leading call, so it does get a
+callee-saved register, just the wrong one.
+
+Ruled out: `ppar`/`epar` declared before `ritu`, declared as block locals
+inside the `if`, and declared in the other order; and the second arm
+written as a braced `else` block rather than a flattened `else if`. The
+documented rule that declaration order is inert for register allocation
+holds here.

@@ -176,6 +176,15 @@ Flow6_37	newbattle/nbMakePacket	0x10C	58 of 67 words match	docs/nonmatching/newb
 Flow6_43	newbattle/nbMakePacket	0x10C	45 of 68 words match	docs/nonmatching/newbattle/nbMakePacket.md	550
 Flow12_3,			24 of 97 words match	docs/nonmatching/newbattle/nbMakePacket.md	572
 Flow7_20	newbattle/nbMakePacket	0x130	49 of 76 words match	docs/nonmatching/newbattle/nbMakePacket.md	610
+Flow1_29,			11 of 29 words match	docs/nonmatching/newbattle/nbMakePacket.md	636
+Flow6_33	newbattle/nbMakePacket	0xE0	35 of 56 words differ	docs/nonmatching/newbattle/nbMakePacket.md	662
+Flow15_6	newbattle/nbMakePacket	0x100	19 of 62 words differ	docs/nonmatching/newbattle/nbMakePacket.md	689
+Flow10_1	newbattle/nbMakePacket	0x100	15 of 63 words differ	docs/nonmatching/newbattle/nbMakePacket.md	709
+Flow1_4	newbattle/nbMakePacket	0x120	46 of 72 words differ	docs/nonmatching/newbattle/nbMakePacket.md	730
+Flow7_11,			1 of 84 words differing	docs/nonmatching/newbattle/nbMakePacket.md	748
+Flow9_16	newbattle/nbMakePacket	0x168	45 of 89 words differ	docs/nonmatching/newbattle/nbMakePacket.md	768
+Flow12_4	newbattle/nbMakePacket	0x194	73 of 97 words differ	docs/nonmatching/newbattle/nbMakePacket.md	781
+Flow6_65	newbattle/nbMakePacket	0x190	79 of 100 words differ	docs/nonmatching/newbattle/nbMakePacket.md	800
 nbAddOrder	newbattle/nbStageProcess	0x9C	17 of 37 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	21
 nbGetRandamStock	newbattle/nbStageProcess	0xB4	4 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	36
