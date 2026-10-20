@@ -1094,7 +1094,8 @@ does not name:
 | --- | --- |
 | `SDF_VU0_` | the engine's VU0 helper library, named as the engine names it |
 | `VU0_` | VU0 work the library has no entry for: the matrix banks beyond A/B, the clip-segment and quaternion pieces |
-| `EE_` | scalar and pipeline-1 EE instructions (`EE_MULT1`, `EE_SQRT_F32`, the barriers) |
+| `EE_` | scalar and pipeline-1 EE instructions (`EE_MULT1`, `EE_LOAD_UNALIGNED_WORD`, the barriers) |
+| none | an operation the engine has its own function name for: `sdfSqrt`, `sdfFabs` |
 | `MMI_` | the 128-bit integer ops used on their own |
 | `PS2_` | plain quadword memory moves |
 
@@ -1149,12 +1150,47 @@ and `SDF_VU0_SUBVECTOR_EXTENDED` exist only because `mdlSetBlur` needs the
 extended spelling; substituting the plain form moves the float constants it
 materialises and breaks the match. A macro named `_EXTENDED` means exactly this.
 
+### Name it for the function, not the instruction
+
+`EE_SQRT_F32` and `EE_ABS_F32` were named for the instruction they emit. The
+engine has its own names: the HD reconstruction's `symbols.txt` places `sdfSqrt`
+and `sdfFabs` in `sdfMath.c`, with bodies that are just `sqrtf` and `fabsf`, and
+Nocturne inlines them. They are now `sdfSqrt(x)` and `sdfFabs(x)`, value forms,
+so a call site reads `dist = sdfSqrt(dx * dx + dz * dz);` the way the original
+source did rather than passing an out parameter.
+
+That also removed a macro. `EE_SQRT_F32` was `volatile` and `EE_SQRT_F32_SCHED`
+was the plain form added because the volatile one pinned the schedule in
+`code_00116AD0`. A statement expression is not volatile, so one `sdfSqrt` covers
+both, and all 21 call sites across 9 units still match.
+
+Check the HD sources before inventing a macro name, and check them by
+instruction, not by name. `EE_SQRT_F32` does not resemble `sdfSqrt`: finding it
+meant knowing that `sqrt.s` is what the one-line body `return sqrtf(aValue);`
+compiles to. A name-similarity scan reports the eleven `SDF_VU0_COPYMATRIX_*`
+macros against the `CopyMatrixAtoB` wrappers in `sdfVu0.c`, which are the
+functions that *call* the macro rather than its own name, and misses the sqrt
+case entirely. So the check is manual: take the instruction the macro emits and
+grep the HD `src/` tree for the libc call it implements.
+
+| instruction | HD body | engine name |
+| --- | --- | --- |
+| `sqrt.s` | `return sqrtf(aValue);` | `sdfSqrt`, `sdfMath.c` |
+| `abs.s` | `return fabsf(c);` | `sdfFabs`, `sdfMath.c` |
+| `div.s` after `sqrt.s` | `return aBase / sqrtf(aValue);` | `sdfDivSqrt`, `sdfMath.c` |
+
+This does not apply to the `SDF_VU0_` family: eighteen of those macro names are
+listed in `symbols.txt` as functions outright, because the Unity port compiled
+the macro bodies as functions, so the repo's spelling is already the engine's.
+Nor to `EE_SYNC*`, the MMI ops or the pipeline-1 divide helpers, which are
+instructions and not inlined engine functions. The HD sources add nothing for
+type names either: they resolve none of the 83 invented type names and none of
+the 567 the IDB never typed, because the IDB's recovery already subsumes them.
+
 **The operand section is part of the macro**, and so is `volatile`. Two macros
 that assemble the same instruction but declare different clobbers, different
 constraints, or drop `volatile` produce different register allocation or let cc1
-move the block. `EE_SQRT_F32_SCHED` is the plain form of `EE_SQRT_F32` for
-exactly that reason: folding it into the volatile one moved three functions in
-`code_00116AD0`. Where two macros differ only in this way they get different
+move the block. Where two macros differ only in this way they get different
 names rather than one name and an `#undef`:
 
 | name | what differs |
@@ -1164,7 +1200,6 @@ names rather than one name and an `#undef`:
 | `SDF_VU0_STOREMATRIX_NOMEM`, `SDF_VU0_STOREVECTOR_NOMEM`, `SDF_VU0_STOREVECTOR_B_NOMEM` | the same stores without the `memory` clobber |
 | `SDF_VU0_COPYVECTOR_MEMOPS`, `SDF_VU0_LOADMATRIX_B_MEMOPS` | the memory is a declared `"m"` operand rather than a clobber |
 | `SDF_VU0_STORE_ROW0`, `_VF29`, `_VF30` | these clobber memory; the `_NOMEM` forms beside them do not |
-| `EE_SQRT_F32_SCHED` | not `volatile`, so cc1 may hoist the surrounding compares |
 | `SDF_VU0_COPYVECTOR_A_TO_B_EXTENDED`, `SDF_VU0_SUBVECTOR_EXTENDED` | an empty operand list rather than a basic asm |
 
 Every operation is defined once, in `ps2asm.h`: 221 macros there and no asm
