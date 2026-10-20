@@ -184,10 +184,16 @@ debug paths in each member name the upstream file, down to
 `src/newlib/libc/stdlib/mallocr.c` for `_malloc_r` and `src/gcc/libgcc2.c` for
 the rest of libgcc.
 
-Flags are the one unknown. ICO adds `-fno-builtin` for newlib and libgcc on top
-of the Sony-library flags. Which compiler built that newlib is also still open:
-it ships with the 2.96 package, so 2.96 is the first thing to try, unlike the
-Sony libraries above.
+Flags are the open question, and not a small one. Measured on `qsort`, whose
+archive object is byte identical to retail: upstream newlib 1.8.2 and 1.9.0
+compiled at `-O2 -G0 -fno-common -fno-builtin` give 1,340 bytes with `med3` and
+`swapfunc` as separate functions, where retail is one 2,544-byte function with
+both inlined. At `-O3` both versions give one function of 2,676 bytes, the
+right shape and 132 bytes over. So Sony built this newlib with `-O3`-level
+inlining, the version between 1.8.2 and 1.9.0 makes no difference to this file,
+and something smaller is still missing. Settling that one flag is what opens
+the 50,296 bytes; until it is settled these units are ordinary matching work,
+with upstream source as a strong hint rather than an answer.
 
 **The Sony libraries (65,292 bytes).** No public source. SDK 3.0.3 ships
 sources for `libdma` and `libgraph` only (`ee/src/lib/dma/libdma.c`,
