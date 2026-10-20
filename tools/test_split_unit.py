@@ -106,5 +106,74 @@ class SplitUnitTests(unittest.TestCase):
         self.assertIsNone(new["tail"])
 
 
+# A unit carrying NON_MATCHING drafts, the shape that broke the nbMakePacket sweep.
+DRAFTS = """\
+#include "common.h"
+
+extern s32 helper(s32);
+
+void func_00100000(void) {
+    helper(1);
+}
+
+/* NON_MATCHING: 3 of 9 words differ (first at +0x18). */
+#ifdef NON_MATCHING
+void func_00100100(void)
+{
+    if (helper(2)) {
+        helper(3);
+    }
+}
+#else
+INCLUDE_ASM(const s32, "main/code_00100000", func_00100100);
+#endif
+
+void func_00100200(void) {
+    helper(4);
+}
+"""
+
+
+class DraftTests(unittest.TestCase):
+    """A #ifdef/#else/#endif region moves whole, to the part its function lands in."""
+
+    def split(self, start, end=None):
+        parts, counts, _ = split_unit.split_source(DRAFTS, {}, start, end, UNIT, {})
+        return parts, counts
+
+    def test_a_draft_region_is_not_broken_across_parts(self) -> None:
+        parts, _ = self.split(0x100100)
+        for key, text in parts.items():
+            if text is None:
+                continue
+            self.assertEqual(
+                text.count("#ifdef NON_MATCHING"), text.count("#endif"),
+                f"{key} has an unbalanced conditional",
+            )
+            self.assertLessEqual(text.count("#else"), text.count("#ifdef NON_MATCHING"))
+
+    def test_the_draft_follows_its_own_function(self) -> None:
+        parts, _ = self.split(0x100100)
+        self.assertNotIn("#ifdef NON_MATCHING", parts["head"])
+        self.assertIn("#ifdef NON_MATCHING", parts["mid"])
+        self.assertIn("INCLUDE_ASM", parts["mid"])
+
+    def test_the_draft_is_not_copied_into_a_part_that_does_not_own_it(self) -> None:
+        """It was treated as a declaration, so every part got the #else alone."""
+        parts, _ = self.split(0x100200)
+        self.assertEqual(parts["mid"].count("#else"), 0)
+        self.assertEqual(parts["head"].count("#else"), 1)
+
+    def test_the_drafted_function_counts_once(self) -> None:
+        _, counts = self.split(0x100100)
+        self.assertEqual(counts["head"], 1)
+        self.assertEqual(counts["mid"], 2)
+
+    def test_the_introducing_comment_stays_with_the_region(self) -> None:
+        parts, _ = self.split(0x100100)
+        self.assertIn("NON_MATCHING: 3 of 9 words differ", parts["mid"])
+        self.assertNotIn("NON_MATCHING: 3 of 9 words differ", parts["head"])
+
+
 if __name__ == "__main__":
     unittest.main()

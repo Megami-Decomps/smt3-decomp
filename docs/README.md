@@ -16,6 +16,9 @@ quickstart.
   invented.
 - [IDB corrections](idb-corrections.md): names and layouts in the IDA database
   that the retail code proves wrong, and the proof for each.
+- [The Japanese builds](maniax-build.md): how `SLPM_654.62` and `SLPM_666.81`
+  compare to retail, how the USA names were carried onto them, and what the two
+  builds are and are not worth.
 - [VU0 constructs](vu0-constructs.md): the vector and MMI operations the
   assembly macros cover, and what an equivalent has to preserve.
 - [VU microcode](vu/README.md): the VU1 and VU0 microcode, assembled from the

@@ -16,6 +16,54 @@ extern u32 dds3ObjectIdCounter;
 void sdfChipFreeDirect(void *ptr);
 
 
+extern void dds3DeleteBasic(dds3Basic_t *basic);
+
+extern dds3BasicFunction_t *dds3BasicFuncTablePtr[];
+
+extern char D_0054E9A8[];
+
+extern char D_0054E9B0[];
+
+extern char D_0054E9B8[];
+
+dds3Basic_t *dds3AllocBasic(u32 type)
+{
+    dds3Basic_t *basic;
+    dds3BasicFunction_t *funcs;
+
+    if (type >= 0x12) {
+        return NULL;
+    }
+    basic = sdfChipAllocDirect(sizeof(dds3Basic_t));
+    if (basic == NULL) {
+        return NULL;
+    }
+    basic->type = type << 24;
+    funcs = dds3BasicFuncTablePtr[type];
+    basic->color = 0x80808080;
+    basic->flag = 0;
+    basic->serialID = 0;
+    basic->name = NULL;
+    basic->basicfunction = funcs;
+    *(u32 *)&basic->staticdata = 0;
+    *(u32 *)&basic->workdata = 0;
+    basic->poseset = NULL;
+    basic->next = NULL;
+    basic->prev = NULL;
+    basic->worknext = NULL;
+    basic->workprev = NULL;
+    basic->workpointer = NULL;
+    if (funcs != NULL) {
+        if (funcs->constructor != NULL) {
+            if (((s32 (*)(dds3Basic_t *))funcs->constructor)(basic) != 1) {
+                dds3DeleteBasic(basic);
+                return NULL;
+            }
+        }
+    }
+    return basic;
+}
+
 void dds3DeleteBasic(dds3Basic_t *basic)
 {
     dds3BasicFunction_t *function;

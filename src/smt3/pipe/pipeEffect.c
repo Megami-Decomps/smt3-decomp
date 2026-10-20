@@ -223,3 +223,4 @@ INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffSet);
 INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeLoadEffect);
 
 INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffDraw2Doffset);
+

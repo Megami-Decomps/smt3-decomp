@@ -1,0 +1,821 @@
+#include "common.h"
+#include "kernel.h"
+#include "nb.h"
+#include "ps2asm.h"
+#include "model.h"
+#include "event.h"
+#include "motion.h"
+#include "field.h"
+
+extern f32 aViewEye[];
+
+extern f32 D_002FA240[];
+
+extern f32 dds3ScreenParam[];
+
+extern void ReverseMatrix(void);
+
+extern void MultMatrixRev(f32 *matrix);
+
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+
+extern void nbDrawTargetCursor(s32 type, s32 x, s32 y);
+
+extern nbFormation_t *nbGetEventForm();
+
+extern s32 evtGetAgeOfMoon16(void);
+
+extern void evtSetAgeOfMoon(s32 age);
+
+extern void datSetDevilWork(s32 devilid, datUnitWork_t *work);
+
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
+                        sdfTexHandle_t *th);
+
+extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+
+/* These inherited symbol names identify the soft-double conversion and
+ * comparison helpers in this executable, not integer conversion/division. */
+extern f64 sdfFloatToULong(f32 value);
+
+extern s32 dpdiv(f64 left, f64 right);
+
+/* The selection block at +0x70 of an akuma record, which nbSetPlayerStartData
+ * clears before the devil enters the stock. */
+typedef struct nbAkumaSelect_t {
+    u8 unk00[0xA];
+    s16 unk0A;
+    s16 unk0C;
+} nbAkumaSelect_t;
+
+/* The quadword copy of a formation position: 16-byte aligned, so ee-gcc moves
+ * it with one lq/sq pair. */
+typedef struct nbQuadVector_t {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} __attribute__((aligned(16))) nbQuadVector_t;
+
+/* 8-byte rows at +0x88 indexed by formation slot. */
+typedef struct nbTimeList_t {
+    u16 unlock;
+    u16 end;
+    u16 hp;
+    u16 pad06;
+} nbTimeList_t;
+
+typedef struct nbActionProcessData_t {
+    nbMainProcessData_t *data;
+    u32 stat;
+    s8 seq;
+    s8 nextseq;
+    s16 seqtime;
+    s32 seqcnt;
+    s32 skilltime;
+    f32 press;
+    s32 newpresstype;
+    s16 newpress_p;
+    s16 newpress_ten;
+    s32 newaddpresstype;
+    struct nbParty_t *party;
+    nbFormation_t *form;
+    datUnitWork_t *work;
+    s32 partyindex;
+    s32 type;
+    s32 target;
+    u32 select;
+    u32 timer;
+    s32 runerr;
+    s32 jyokyomes;
+    s32 jyo_varid;
+    s32 jyo_varind;
+    s32 adata;
+    s32 autoskill;
+    s32 allhpdamage;
+    s32 allmpdamage;
+    s32 massuruid;
+    u32 negotype;
+    s32 motion;
+    s32 motse;
+    void *hEffBTL;
+    u8 unk78[0x10];
+    nbTimeList_t timelist[32];
+    u32 packettime;
+    s32 hitstopframe;
+    u8 unk190[0x10];
+    u32 aisummonid;
+} nbActionProcessData_t;
+
+/* 128-byte party records. */
+struct nbParty_t {
+    u16 flag;
+    s16 formindex;
+    u8 unk04[0x7C];
+};
+
+/* 60-byte rows; this unit reads only the base hp and mp pairs. */
+typedef struct nbDevilInfo_t {
+    u32 flag;
+    u8 race;
+    u8 unk05;
+    u16 hp;
+    u16 maxhp;
+    u16 mp;
+    u16 maxmp;
+    u8 unk0E[0x2E];
+} nbDevilInfo_t;
+
+extern nbDevilInfo_t datDevilTable[];
+
+typedef struct nbPanelUV_t {
+    s32 u;
+    s32 v;
+    s32 uw;
+    s32 vh;
+} nbPanelUV_t;
+
+/* Rows of the same 164-byte stride, a separate object from D_003989E0. */
+typedef struct nbDeadEvent_t {
+    u16 script;
+    u16 event;
+    u8 unk04[0xA0];
+} nbDeadEvent_t;
+
+/* 38-byte rows; this unit reads only the formation type at +4. */
+typedef struct nbEncountForm_t {
+    u8 unk00[4];
+    u8 formationtype;
+    u8 unk05[0x21];
+} nbEncountForm_t;
+
+void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
+
+void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
+                        sdfVector4_t *center, f32 r, f32 scl, f32 h);
+
+extern void *memset(void *dst, s32 c, u32 n);
+
+s32 nbClipEffectNum(s32 screenPosition[4]);
+
+void nbLoadKoukaPos(nbFormation_t *form);
+
+extern void *memset(void *dst, s32 c, u32 n);
+
+extern u32 effBTLSystemGetRGBA(s32 type);
+
+extern char D_00544120[]; /* "nb_action" */
+
+extern void ToMatrix(void);
+
+void nbMakeUnitMatrix(nbFormation_t *form);
+
+extern void nbSetOrderSide(s32 side);
+
+extern void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
+                             s32 *crule, s32 *carea, s32 mode);
+
+extern s32 datCheckStockFull(void);
+
+extern s32 datSearchDevilStock(s32 devilid);
+
+extern s32 fclEncycRegist(datUnitWork_t *work, s32 mode);
+
+extern void nbSortOrder(s32 start);
+
+extern s32 datGetParam(datUnitWork_t *unit, s32 param);
+
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group);
+
+extern nbEncountForm_t nbEncountFormTable[];
+
+void nbSetOrder(s32 index);
+
+s32 nbCheckDeadScript(nbFormation_t *form);
+
+extern s32 datGetItemSkillNo(s32 itemid);
+
+extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
+
+extern s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes);
+
+extern datUnitVisual_t datModelParamTable[];
+
+extern datUnitVisual_t D_003494B0;
+
+extern nbDeadEvent_t D_00398A80[];
+
+extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
+
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind);
+
+extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
+
+datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
+
+s32 nbGetUnitID(datUnitWork_t *work);
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+#ifdef NON_MATCHING
+
+#else
+
+#endif
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbAddOrder);
+
+void nbSortOrder(s32 start)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 i;
+    s32 j;
+
+    for (i = start; i < 11; i++) {
+        if (data->order[i] < 0) {
+            continue;
+        }
+        for (j = i + 1; j < 12; j++) {
+            datUnitWork_t *wi;
+            datUnitWork_t *wj;
+            s32 pi;
+            s32 pj;
+
+            if (data->order[j] < 0) {
+                continue;
+            }
+            wi = nbGetUnitWorkPointer(data, &data->party[data->order[i]]);
+            wj = nbGetUnitWorkPointer(data, &data->party[data->order[j]]);
+            pi = datGetParam(wi, 4);
+            pj = datGetParam(wj, 4);
+            if (pi < pj) {
+                s8 t = data->order[i];
+
+                data->order[i] = data->order[j];
+                data->order[j] = t;
+            } else if (pi == pj) {
+                if (data->party[data->order[i]].formindex >
+                    data->party[data->order[j]].formindex) {
+                    s8 t = data->order[i];
+
+                    data->order[i] = data->order[j];
+                    data->order[j] = t;
+                }
+            }
+        }
+    }
+}
+
+void nbSetOrderSide(s32 side)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 cnt;
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        data->order[i] = -1;
+    }
+    cnt = 0;
+    data->orderindex = -1;
+    if (side == 0) {
+        for (i = 0; i < 4; i++) {
+            if ((data->party[i].flag & 1) != 0) {
+                if ((data->party[i].flag & 0x20) == 0) {
+                    data->order[cnt] = i;
+                    cnt++;
+                }
+            }
+        }
+    } else {
+        for (i = 4; i < 14; i++) {
+            if ((data->party[i].flag & 1) != 0) {
+                if ((data->party[i].flag & 0x20) == 0) {
+                    data->order[cnt] = i;
+                    cnt++;
+                }
+            }
+        }
+    }
+    if (cnt > 0) {
+        data->orderindex = 0;
+    } else {
+        data->orderindex = -1;
+        data->activeunit = -1;
+        return;
+    }
+    nbSortOrder(0);
+    data->activeunit = data->order[data->orderindex];
+}
+
+void nbSetOrder(s32 index)
+{
+    if ((nbGetMainProcessData()->stat & 8) == 0) {
+        nbSetOrderSide(0);
+        return;
+    }
+    nbSetOrderSide(1);
+}
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNextOrder);
+
+void nbUpdateOrder(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s8 *order = data->order;
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        if (*order >= 0) {
+            u16 flag = data->party[*order].flag;
+
+            if ((flag & 1) == 0) {
+                *order = -1;
+            } else if ((flag & 0x20) != 0) {
+                *order = -1;
+            }
+        }
+        order++;
+    }
+}
+
+/* vu0 routine: project vf10 only when it lies in the forward view cone. */
+s32 nbClipEffectNum(s32 screenPosition[4])
+{
+    f32 viewDistance, forwardDot;
+    f32 *projectionData;
+
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(aViewEye);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(viewDistance);
+    if (dpdiv(sdfFloatToULong(viewDistance), 16.0) <= 0)
+        return 0;
+
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_A_TO_B();
+    SDF_VU0_LOADMATRIX(D_002FA240);
+    SDF_VU0_COPYMATRIX_A_TO_B();
+    ReverseMatrix();
+    SDF_VU0_GET_ROW2();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_INNERPRODUCT(forwardDot);
+    if (forwardDot <= 0.5f)
+        return 0;
+
+    SDF_VU0_COPYVECTOR_C_TO_A();
+    SDF_VU0_COPYMATRIX_B_TO_A();
+    projectionData = dds3ScreenParam + 12;
+    MultMatrixRev(projectionData);
+    SDF_VU0_APPLYMATRIX_XYZ1();
+    SDF_VU0_PERSVECTOR();
+    projectionData += 16;
+    SDF_VU0_LOADVECTOR_B(projectionData);
+    SDF_VU0_MULVECTOR();
+    SDF_VU0_LOADVECTOR_B(dds3ScreenParam + 32);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_FTOI4();
+    SDF_VU0_STOREVECTOR(screenPosition);
+    screenPosition[0] -= 0x7000;
+    screenPosition[1] -= 0x7900;
+    return 1;
+}
+
+/* vu0 routine: the kouka mark position, scaled and lowered by the form radius. */
+void nbLoadKoukaPos(nbFormation_t *form)
+{
+    f32 y;
+
+    SDF_VU0_LOADVECTOR(&form->center);
+    SDF_VU0_SCALEVECTOR_V0(form->scl);
+    SDF_VU0_LOADVECTOR_B(&form->pos);
+    SDF_VU0_ADDVECTOR();
+    SDF_VU0_GETVECTOR_Y(y);
+    y -= form->r * form->scl;
+    SDF_VU0_SETVECTOR_Y(y);
+}
+
+void nbGetKoukaMarkPos(nbFormation_t *form)
+{
+    if ((form->stat & 3) == 3) {
+        if (sdfModelGetMarkPos(form->hunit->owner->inner, 2) != 0) {
+            return;
+        }
+    }
+    nbLoadKoukaPos(form);
+}
+
+void nbMakeUnitMatrix(nbFormation_t *form)
+{
+    SDF_VU0_LOADVECTOR(&form->orgrot);
+    ToMatrix();
+    SDF_VU0_LOADVECTOR(&form->center);
+    SDF_VU0_SCALEVECTOR(form->scl);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_LOADVECTOR_B(form);
+    SDF_VU0_ADDVECTOR();
+}
+
+void nbMakeUnitDrawMatrix(nbFormation_t *form)
+{
+    sdfVector4_t v;
+
+    memset(&v, 0, sizeof(v));
+    v.z = 1.0f;
+    SDF_VU0_LOADVECTOR(&form->rot);
+    ToMatrix();
+    v.z = form->r;
+    SDF_VU0_LOADVECTOR_MEMOPS(v);
+    SDF_VU0_APPLYMATRIX();
+    SDF_VU0_STOREVECTOR_MEMOPS(v);
+    nbMakeUnitMatrix(form);
+    SDF_VU0_LOADVECTOR_B_MEMOPS(v);
+    SDF_VU0_ADDVECTOR();
+}
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModelX);
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawRotatedModel);
+
+void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
+{
+    s32 pos[4];
+
+    SDF_VU0_LOADVECTOR(&form->pos);
+    if ((form->stat & 1) != 0) {
+        sdfModelGetMarkPos(form->hunit->owner->inner, 0);
+    }
+    if (nbClipEffectNum(pos) != 0) {
+        nbDrawTargetCursor(type, pos[0] >> 4, pos[1] >> 3);
+    }
+}
+
+void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 col)
+{
+    nbPanelUV_t uv;
+
+    uv.u = no * 13 + 1;
+    uv.v = 1;
+    nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u, uv.v, 0xC, 0x12, col, th);
+}
+
+/* NON_MATCHING: 24 of 66 words differ (first at +0x74). */
+
+#ifdef NON_MATCHING
+
+void nbDrawKoukaSprite(sdfTexHandle_t *th, u32 value, s32 x, s32 y, u32 col, s32 align)
+{
+    u8 digits[12];
+    s32 n = 0;
+
+    if (value != 0) {
+        do {
+            digits[n] = value % 10;
+            n++;
+            value = value / 10;
+        } while (value != 0);
+    }
+    if (n == 0) {
+        digits[0] = 0;
+        n = 1;
+    }
+    if (align != 0) {
+        if (align <= 0) {
+            if (align == -1) {
+                x -= n * 192;
+            }
+        }
+    } else {
+        x -= n * 96;
+    }
+    for (n = n - 1; n >= 0; n--) {
+        nbDrawPanelSprite(th, digits[n], x, y, col);
+        x += 0xC0;
+    }
+}
+
+#else
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbDrawKoukaSprite);
+
+#endif
+
+INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544130);
+
+INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544140);
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNormalSkill0);
+
+s32 nbGetNakama(datUnitWork_t *work)
+{
+    datUnitWork_t *stock;
+    s32 i;
+
+    if (datCheckStockFull() != 0) {
+        return 0;
+    }
+    stock = NULL;
+    datSearchDevilStock(work->id);
+    for (i = 4; i < 0x10; i++) {
+        if ((DDS3_GBWK->akuma[i].flag & 1) == 0) {
+            stock = (datUnitWork_t *)&DDS3_GBWK->akuma[i].flag;
+            break;
+        }
+    }
+    datSetDevilWork(work->id, stock);
+    fclEncycRegist(stock, 0);
+    *((u8 *)(*(s32 *)((u8 *)DDS3_GBWK + 0x1924)) + (u32)DDS3_GBWK + 0x1914) = i;
+    *(s32 *)((u8 *)DDS3_GBWK + 0x1924) = *(s32 *)((u8 *)DDS3_GBWK + 0x1924) + 1;
+    return 1;
+}
+
+void nbSetDevilNameMes(s32 hmsg, s32 no, datUnitWork_t *work)
+{
+    if (work->id == 0) {
+        itfMesMngSetVar(hmsg, 0, 0, 10);
+        return;
+    }
+    itfMesMngSetVar(hmsg, no, work->id, 1);
+}
+
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind)
+{
+    a->jyokyomes = nbGetJyokyoMes(a->data, jyokyomes);
+    a->jyo_varid = varid;
+    a->jyo_varind = varind;
+}
+
+s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes)
+{
+    if ((data->stat & 8) != 0) {
+        return jyokyomes + 1;
+    }
+    return jyokyomes;
+}
+
+u32 nbGetModelColor(nbFormation_t *form)
+{
+    datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
+
+    if (work == NULL) {
+        return 0x80808080;
+    }
+    switch (work->badstatus & 0xFFF) {
+    case 0x001:
+        return effBTLSystemGetRGBA(1);
+    case 0x002:
+        return effBTLSystemGetRGBA(2);
+    case 0x004:
+        return effBTLSystemGetRGBA(3);
+    case 0x008:
+        return effBTLSystemGetRGBA(4);
+    case 0x010:
+        return effBTLSystemGetRGBA(5);
+    case 0x020:
+        return effBTLSystemGetRGBA(6);
+    case 0x040:
+        return effBTLSystemGetRGBA(7);
+    case 0x080:
+        return effBTLSystemGetRGBA(8);
+    case 0x100:
+        return effBTLSystemGetRGBA(9);
+    case 0x200:
+        return effBTLSystemGetRGBA(10);
+    case 0x400:
+        return effBTLSystemGetRGBA(11);
+    }
+    return 0x80808080;
+}
+
+s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 devilid, s32 formindex)
+{
+    datUnitWork_t *unit = data->enemyunit;
+    nbDevilInfo_t *info;
+    datUnitWork_t *work;
+    s32 i;
+
+    for (i = 0; i < 10; i++) {
+        if ((unit[i].flag & 1) == 0) {
+            break;
+        }
+    }
+    if (i == 10) {
+        return -1;
+    }
+    work = &unit[i];
+    datSetDevilWork(devilid, work);
+    info = &datDevilTable[devilid];
+    work->flag |= 2;
+    work->maxhp = info->maxhp;
+    work->hp = info->hp;
+    work->maxmp = info->maxmp;
+    work->mp = info->mp;
+    return i;
+}
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbGetRandamStock);
+
+void nbSetMainPhase(s32 encno)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    data->encno = encno;
+    data->formationtype = nbEncountFormTable[encno].formationtype;
+    data->endtype = 0;
+    data->activeunit = -1;
+    data->orderindex = -1;
+    data->previndex = -1;
+    data->prevcommand = 0;
+    data->prevcommind = 0;
+    data->prevflag = 0;
+    data->turn = 0;
+    data->nextphase = 0;
+    data->esccnt = 0;
+}
+
+void nbCountActiveUnits(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        datUnitWork_t *work = nbGetUnitWorkFromFormindex(i);
+
+        if (work != NULL) {
+            if (work->prevtarea == 2) {
+                work->prevtarea = -1;
+                work->prevtform = -1;
+            }
+        }
+    }
+}
+
+INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetupBattleUnits);
+
+void nbSetPlayerStartData(nbMainProcessData_t *data)
+{
+    s32 i;
+    s32 cnt = 0;
+
+    for (i = 0; i < *(s32 *)DDS3_GBWK->stocklist && cnt < 4; i++) {
+        s32 id = DDS3_GBWK->unk1914[i];
+        s32 off = id * sizeof(fldAnahoriAkuma_t) + 0xAC0;
+        nbAkumaSelect_t *sel = (nbAkumaSelect_t *)((u8 *)DDS3_GBWK + off);
+        u32 flag = DDS3_GBWK->akuma[id].flag;
+
+        if (flag & 1) {
+            sel->unk0A = -1;
+            sel->unk0C = -1;
+            if (flag & 2) {
+                nbAddUnitStock(data, 0, id, cnt);
+                if (data->stat & 0x10) {
+                    data->form[cnt].stat |= 0x2000;
+                }
+                cnt++;
+            }
+        }
+    }
+    nbSetPlayerFormation(data, 0);
+}
+
+s32 nbGetUnitID(datUnitWork_t *work)
+{
+    s32 id = 0;
+
+    if ((work->flag & 4) == 0) {
+        id = work->id;
+    }
+    return (work->badstatus & 0xFFF) != 0x200 ? id : 0xFF;
+}
+
+datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work)
+{
+    s32 id = nbGetUnitID(work);
+
+    if (id == 0) {
+        return &D_003494B0;
+    }
+    return &datModelParamTable[id];
+}
+
+s32 nbCheckEventDead(nbFormation_t *form)
+{
+    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
+    nbDeadEvent_t *p;
+
+    if (id == 0) {
+        return 0;
+    }
+    p = &D_00398A80[id];
+    if (p->script != 0) {
+        return 1;
+    }
+    return p->event != 0;
+}
+
+s32 nbCheckDeadScript(nbFormation_t *form)
+{
+    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
+    nbDeadEvent_t *p;
+
+    if (id == 0) {
+        return 0;
+    }
+    p = &D_00398A80[id];
+    if (p->script != 0) {
+        return p->script;
+    }
+    return 0;
+}
+
+s32 nbCheckDeadEvent(nbFormation_t *form)
+{
+    s32 id = nbGetUnitID(nbGetUnitWorkFromFormindex(form->formindex));
+    nbDeadEvent_t *p;
+
+    if (id == 0) {
+        return 0;
+    }
+    p = &D_00398A80[id];
+    if (p->event != 0) {
+        return p->event;
+    }
+    return 0;
+}
+
+void nbAddKagututiMoon(nbMainProcessData_t *data)
+{
+    nbFormation_t *form = nbGetEventForm();
+    datUnitWork_t *work;
+
+    if (form == NULL) {
+        return;
+    }
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    if (work == NULL) {
+        return;
+    }
+    if (work->id != 0x125) {
+        return;
+    }
+    evtSetAgeOfMoon((evtGetAgeOfMoon16() + 2) % 16);
+}
+
+s32 nbGetItemSkillNo(nbActionProcessData_t *a, s32 itemid)
+{
+    s32 no = datGetItemSkillNo(itemid);
+
+    if (itemid == 1) {
+        no = a->massuruid;
+    }
+    return no;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbMisc", D_00544170);
+

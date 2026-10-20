@@ -37,6 +37,12 @@ Ports are assigned in open order and move between sessions, so address the IDB b
 module name, never by number. Omitting it, or reusing a port from an earlier
 session, silently targets a different game's database.
 
+Three other Nocturne builds are often open: `SLPM_652.42` (Dec 2002 JP debug),
+`SLPM_654.62` (Maniax) and `SLPM_666.81` (Maniax Chronicle). The last two now carry
+the USA names, carried over by `tools/pair_build.py`, so a call that lands on the
+wrong one answers with plausible names at the wrong addresses. Name the build you
+mean. What those builds are good for: `docs/maniax-build.md`.
+
 The IDB is read-only for ordinary work: never patch, define or save through it. The
 one exception is correcting a name or type the retail code proves wrong, which is
 expected rather than optional, because `symbol_addrs.txt` is generated from the IDB

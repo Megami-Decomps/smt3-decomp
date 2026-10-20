@@ -483,3 +483,161 @@ A reviewer must confirm, per range:
    ready.
 4. The unit relinks byte-identically. That is a necessary check and not an
    argument for the boundary: any cut relinks.
+
+## The remaining homes, and what blocks them
+
+288 HD source files have code in this ELF. 175 already carry their name as a
+unit and 5 more are the same file spelled differently, which the normalising
+comparison had to learn: HD's `file_Manager` is `file/fileManager`, `sdf_PacDecode`
+is `sdf/sdfPacDecode`, `ScrTraceCode` is `script/scrTraceCode`, and so on. That
+leaves **108 HD files with no unit of their own**.
+
+Two of those are not missing homes either, by this page's own rule. HD's
+`EventPack` and `sdfMc` are the only HD files in `event/evtEventPack` and
+`mc/mcManager` respectively, so each is Nocturne's own name for the HD file
+rather than a second file hiding inside one; `sdfMc` losing to `mc/mcManager`
+is the precedent set above.
+
+The rest sit in six containers:
+
+| Host | Homes | `NON_MATCHING` drafts | State |
+|---|---|---|---|
+| `newbattle/nbMakePacket` | 47 | 48 | done |
+| `field/fldDraw` | 9 | 12 | done |
+| `code_00116AD0` | 8 | 6 | done |
+| `newbattle/nbStageProcess` | 4 | - | done |
+| `script/scrParameterCommand` | 1 | - | done |
+| `code_001FAE80` | 35 | 43 | done |
+| `code_002C7CB0` | 2 | 0 | not homes: SDK mis-attributions, see below |
+
+All 108 are resolved: 104 placed, and 4 shown not to be homes at all, the two
+Sony SDK pairs below plus `EventPack` and `sdfMc`. Each container relinked
+byte-identically and `check_unit` reports no `CONTEXT` line in any part.
+
+A named unit can hide a container. `newbattle/nbMakePacket` holds 48 HD files
+in strictly ascending order, among them `nbE901` through `nbE915` and sixteen
+`NbNegoFlow*` files, and keeps only 77 functions of its own. Nothing flagged it,
+because the audit above only ever looked at the `code_<vram>` fillers. The runs
+are the cleanest in the tree: 0 to 4 unnamed functions between consecutive runs.
+
+### The tool was taught instead
+
+All five things "What `split_unit.py` drops" lists are now carried, and each was
+found by a sweep failing to build rather than by reading the list:
+
+- **A conditional region is one block.** `cparse.blocks` emitted every top-level
+  `#` line separately, so a `NON_MATCHING` draft became three items and the
+  declaration-copying rule duplicated the `#else` into every part: 16 of 48
+  parts came out with bare `#else` lines and no `#ifdef`. A
+  `#if`/`#else`/`#endif` region now moves whole, addressed by the function
+  inside it, comment included.
+- **An attributed or aliased declarator.** `declared_name` split at the first
+  `(`, so `extern s32 fldGb __attribute__((section(".data")));` declared
+  `__attribute__` and `extern T *cmbGlobalWork asm("DDS3_GBWK");` declared
+  `asm`. Both suffixes are stripped with matched parens now.
+- **An anonymous enum**, which introduces no name at all. `declared_names`
+  returns an enum's member names, so the part using `FIELD_ROOM_PLANE_COUNT`
+  gets the definition.
+- **A multi-declarator extern**, found by any declarator rather than only the
+  last, from the same `declared_names`.
+- **A bare `__asm__("x = y")` alias**, which declares nothing and now reaches
+  every part like an orphan type.
+
+`.lit4`/`.sdata` ownership remains the one item on that list the tool does not
+compute; `split_rodata.py` does, and the measurement below is how to check it.
+
+### `code_001FAE80`, and the three things its last 40 bytes taught
+
+Its 34 cuts apply and every part compiles. Two things were settled along the
+way and one is left.
+
+**The `fclPanel` contradiction is settled.** HD names `fclPanel.c` twice, at
+`0x2155B8` and again for one function at `0x234010`. The second is the
+mis-attribution: `0x234010` sits inside a 420-function run of `cmp*` and `camp*`
+names, the camp UI, nowhere near `fclPanel.c`'s own run.
+
+**The container does not end with a named run.** `MovieViewer`'s HD run stops at
+`0x22C048`, but `movieViewerSetFlags` through `movieViewerDebugDraw` follow it
+and carry the prefix, so the file runs to `0x22C578` where `rst*` and then the
+`cmp*` block begin. Everything from there to the container end has no HD
+attribution at all, so it is cut off as its own filler rather than left to
+inflate `MovieViewer`. A sweep must not assume the last run reaches the
+container's end.
+
+**A 16-byte alignment rule decides which object owns a string.** The tail
+emitted 32 bytes of `.rodata` too many. `/camp/tmx/camp_01.tmx` at `0x0053F478`
+is not 16-aligned, and the tail has a jump table, so its object begins
+16-aligned and cannot start there: by the rule `split_rodata.py` already
+applies, that string is the previous object's last symbol and the tail
+references it as an extern. Emitting it as a C literal instead cost 24 bytes
+for the string and 8 more for the padding gcc then inserted to realign the
+jump table. The fix is in the C, not the yaml; moving the row instead gets the
+size right and the contents wrong.
+
+**A declaration has to precede its use, and a stale object hides that.** The
+first attempt put that extern after the function using it, and the build kept
+passing on a cached `.o` while the real compile had failed. `rm` the object and
+build it alone when a diagnosis stops making sense.
+
+**The last two bytes were a callee-visibility miss, and it moved a boundary.**
+`lstPageUp` and `lstPageDown` each emitted one `bnel` where retail has `bne`.
+`docs/levers/callee-visibility.md` names the cause: the branch depends on
+whether the function the arm calls is a C definition in the same unit. They
+call `lstMoveCursor` at `0x00213518`, which is one of the 353 HD names shared
+between two files (`lstListWindow.c` and `fclShare.c`) and so dropped from the
+map, which left it in `fclDraw`. The IDB settles it: `lstInitListWindow`,
+`lstMoveCursor`, `lstMoveCursor2`, `lstDrawUpDownCursor`, `lstDrawListWindow`,
+`lstDrawListWindowCursor`, `lstPageUp`, `lstPageDown` are one `lst*` family
+from `0x002133F8` to `0x002138C0`, so `lstListWindow.c` starts at `0x002133F8`
+and HD's `0x002136A8` was the lower bound this page keeps warning about. That
+page's closing note holds: a callee-visibility result is a boundary hint.
+
+### `code_002C7CB0` holds no homes at all
+
+Its six HD attributions were read as contradictions, `pbMCard` and `tgsMain`
+each claimed twice and `pbMenu` already applied at `0x001D4D40`. Resolving what
+is actually at those addresses settles all of them at once:
+
+| HD file | Address | The function there |
+|---|---|---|
+| `pbMCard.c` | `0x002CDC90` | `sceMcInit` |
+| `fclShare.c` | `0x002D43A4` | `memcpy` |
+| `tgsMain.c` | `0x002DFD70` | `sceOpen` |
+| `pbMenu.c` | `0x002E0FD8` | `sceMkdir` |
+| `tgsMain.c` | `0x002E1ED0` | `sceSync` |
+| `pbMCard.c` | `0x002E3A60` | `sceSifLoadModule` |
+
+Every one is Sony SDK or libc. The container's name families say the same from
+the other side: of 679 functions it is `sce*`, `__ieee754_*`, `__kernel_*`,
+`libc*` and `RFU*` almost throughout. These are HD mis-attributions of the kind
+il2cpp metadata produces, naming the caller's file for a library function, and
+CLAUDE.md's rule applies: the Sony SDK libraries are prebuilt archives and stay
+assembly. `pbMCard`, `pbMenu`, `tgsMain` and `fclShare` keep the homes they
+already have, and this container is not a container.
+
+### Two more that are not homes either
+
+Its seven runs name `pbMCard` and `tgsMain` twice each at non-contiguous
+addresses, and `pbMenu`, which is applied at `0x001D4D40`. A `.c` cannot hold
+two non-contiguous ranges, so this is the contradiction shape already described
+for the four small fillers: it needs settling rather than cutting.
+
+### What a clean sweep costs
+
+Two things that are not obvious from the tool's own docstring, both found by
+doing it:
+
+- **Each cut needs its end, and the tail can expose an older error.** Cutting
+  `script/scrParameterCommand` at `dds3DbgBasic.c`'s run gave the new unit a
+  fourth function, `dds3AllocBasic`, which calls `dds3DeleteBasic`, the first
+  function of `basic/dds3Basic`: one file split across two units. Moving that
+  unit's start back absorbed it, so the cut left no new filler.
+- **`split_rodata.py --write` regenerates a whole section.** On a tree whose
+  rows have been hand-corrected it replaces them with its own inference; doing
+  that for one cut rewrote rows in `kernel/`, `field/` and `effect/` and came
+  out 8 bytes short. Compute with it, then splice only the rows falling inside
+  the container's own span.
+- **Measure the sections when the image changes length.** For each row, compare
+  its span with what the owning object emits (`objdump -h`). A part emitting
+  more than its span is the whole story: that is how `MovieViewer`'s 32 bytes
+  were found, after `.lit4` and `.sdata` both came back with zero overflow.

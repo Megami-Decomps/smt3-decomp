@@ -28,3 +28,4 @@ void nbMaeShutdown(void)
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbMaeProcess", nbInitMaeProcess);
+
