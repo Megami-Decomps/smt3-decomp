@@ -604,6 +604,10 @@ typedef struct
     /* 0x04 */ u8 unk_04[4];
 } datItemEntry_t;
 
+/* datSkillTable viewed from +0x20, which is where retail folds the base for
+ * cmpChkSkillBad: it forms datSkillTable + 0x20 and indexes from there, so
+ * &entry->badtype off the newdata.h declaration emits a different address.
+ * kind and id are the IDB's badtype (+0x24) and basstatus (+0x26). */
 typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
@@ -611,22 +615,18 @@ typedef struct
     /* 0x05 */ u8 unk_05;
     /* 0x06 */ u16 id;
     /* 0x08 */ u8 unk_08[0x14];
-} datSkillBad_t;
+} datSkillBadWindow_t;
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[3];
-    /* 0x03 */ u8 icon;
-    /* 0x04 */ u16 cost;
-    /* 0x06 */ u8 unk_06[2];
-    /* 0x08 */ u8 area;
-    /* 0x09 */ u8 unk_09[0x17];
-    /* 0x20 */ datSkillBad_t bad;
-} datSkillEntry_t;
+    /* 0x00 */ u8 unk_00[0x20];
+    /* 0x20 */ datSkillBadWindow_t bad;
+} datSkillBadEntry_t;
+
+extern datSkillBadEntry_t datSkillBadEntries[] asm("datSkillTable");
 
 extern campWork_t *campWork;
 extern datItemEntry_t datItemTable[];
-extern datSkillEntry_t cmbSkillTable[] asm("datSkillTable");
 extern f32 aViewEye[4];
 extern f32 aViewTarget[4];
 extern void rstSetMaxHpMp(s32 mode, s32 arg);
@@ -810,6 +810,9 @@ typedef struct
     /* 0x4740 */ u8 seqMitama[4];
 } ragUpdateWork_t;
 
+/* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
+ * unit reads it through a different member set at the same offsets. Both are
+ * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 extern trmCalcWork_t *trmCalcWork;
 extern ragUpdateWork_t *ragUpdateWork;
@@ -9072,6 +9075,9 @@ typedef struct
     /* 0x0C */ u16 unk_0C;
 } movieViewerChipList_t;
 
+/* Also declared above as void *movieViewerWork[], which is how the loader
+ * paths use it; this is the chip list the viewer walks. One object, two
+ * readings, so the alias stays. */
 extern movieViewerChipList_t movieViewerChips asm("movieViewerWork");
 
 void movieViewerFree(void)
@@ -10291,33 +10297,40 @@ s32 campDhWaitMessageEnd(void)
     return cmpUnloadStatusModel();
 }
 
+/* campDhUpdateWork, as this unit's animation and icon code reads it. The two
+ * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
+ * A third view, campStatusPanel_t *campDhUpdateWork, is declared above: the
+ * alias is what lets both spellings of the one object coexist, and unifying
+ * them is type recovery on the real allocation, not a rename. */
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0x1C];
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ s32 unk_20;
-    /* 0x24 */ s32 unk_24;
-} campDhAnimWork_t;
+    /* 0x0000 */ u8 unk_0000[0x1C];
+    /* 0x001C */ s32 unk_1C;
+    /* 0x0020 */ s32 unk_20;
+    /* 0x0024 */ s32 unk_24;
+    /* 0x0028 */ u8 unk_0028[0x1150];
+    /* 0x1178 */ s32 iconTimer[64];
+} campDhTimerWork_t;
 
-extern campDhAnimWork_t *campDhAnimWork asm("campDhUpdateWork");
+extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
 
 void campDhAdvanceAnim(void)
 {
-    campDhAnimWork->unk_1C++;
-    if (campDhAnimWork->unk_1C >= 0x400) {
-        campDhAnimWork->unk_1C = 0;
+    campDhTimerWork->unk_1C++;
+    if (campDhTimerWork->unk_1C >= 0x400) {
+        campDhTimerWork->unk_1C = 0;
     }
-    campDhAnimWork->unk_20 += 8;
-    if (campDhAnimWork->unk_20 >= 0x200) {
-        campDhAnimWork->unk_20 = 0;
+    campDhTimerWork->unk_20 += 8;
+    if (campDhTimerWork->unk_20 >= 0x200) {
+        campDhTimerWork->unk_20 = 0;
     }
-    if (campDhAnimWork->unk_24 < 0x200) {
-        campDhAnimWork->unk_24 += 0x20;
+    if (campDhTimerWork->unk_24 < 0x200) {
+        campDhTimerWork->unk_24 += 0x20;
     } else {
-        campDhAnimWork->unk_24 += 0x10;
+        campDhTimerWork->unk_24 += 0x10;
     }
-    if (campDhAnimWork->unk_24 >= 0x400) {
-        campDhAnimWork->unk_24 = 0;
+    if (campDhTimerWork->unk_24 >= 0x400) {
+        campDhTimerWork->unk_24 = 0;
     }
 }
 
@@ -10341,24 +10354,17 @@ void campDhFadeAlpha(void)
     }
 }
 
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[0x1178];
-    /* 0x1178 */ s32 iconTimer[64];
-} campDhIconWork_t;
-
-extern campDhIconWork_t *campDhIconWork asm("campDhUpdateWork");
 
 void campDhUpdateIcons(void)
 {
     s32 i;
 
     for (i = 0; i < 64; i++) {
-        if (campDhIconWork->iconTimer[i] > 0) {
-            campDhIconWork->iconTimer[i] -= 0x10;
+        if (campDhTimerWork->iconTimer[i] > 0) {
+            campDhTimerWork->iconTimer[i] -= 0x10;
         }
-        if (campDhIconWork->iconTimer[i] < 0) {
-            campDhIconWork->iconTimer[i] = 0;
+        if (campDhTimerWork->iconTimer[i] < 0) {
+            campDhTimerWork->iconTimer[i] = 0;
         }
     }
 }
@@ -10564,7 +10570,7 @@ INCLUDE_ASM(const s32, "code_001FAE80", cmpDrawSkillListHeader);
 
 u8 cmpGetSkillIcon(u16 skill)
 {
-    return cmbSkillTable[skill].icon;
+    return datSkillTable.normal[skill].costtype;
 }
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmpGetSkillCost);
@@ -11634,7 +11640,7 @@ s32 cmp_240C10(void)
 
 u16 cmpChkSkillBad(u16 skill)
 {
-    datSkillBad_t *bad = &cmbSkillTable[skill].bad;
+    datSkillBadWindow_t *bad = &datSkillBadEntries[skill].bad;
 
     if (bad->kind != 2) {
         return 0;
@@ -11644,10 +11650,10 @@ u16 cmpChkSkillBad(u16 skill)
 
 s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit)
 {
-    datSkillEntry_t *skill = &cmbSkillTable[id];
+    datNormalSkill_t *skill = &datSkillTable.normal[id];
     u16 cost = skill->cost;
 
-    switch (skill->icon) {
+    switch (skill->costtype) {
     case 1:
         if (unit->hp < cost) {
             return 0;
@@ -11671,7 +11677,7 @@ s32 cmpGetSkillTargetArea(u16 skillId)
     if (skillId == 0) {
         return 1;
     }
-    area = cmbSkillTable[skillId].area;
+    area = datSkillTable.normal[skillId].targettype;
     switch (area) {
     case 0:
         return 1;
