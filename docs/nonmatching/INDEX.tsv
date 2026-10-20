@@ -242,5 +242,8 @@ sdfModelTempPacketLinkOt	sdf/sdfModel	0x468	twenty-seven of 282 words differ	doc
 sdfModelLinkOt	sdf/sdfModel	0x480	Sixty-nine of 288 words differ	docs/nonmatching/sdf/sdfModel.md	179
 movieWaitSema	sdf/sdfMovie	212 bytes	Thirty-nine of fifty-three words differ	docs/nonmatching/sdf/sdfMovie.md	5
 sceDmaPutEnv			21 of 118 words differ	docs/nonmatching/sdk/libdma.md	3
+sceMcWrite				docs/nonmatching/sdk/libmc.md	30
+sceMcSync				docs/nonmatching/sdk/libmc.md	49
+sceMcSetFileInfo				docs/nonmatching/sdk/libmc.md	60
 _send_to_iop			28 of 69 words differ	docs/nonmatching/sdk/libpad.md	15
 scePadPortOpen				docs/nonmatching/sdk/libpad.md	30
