@@ -2065,7 +2065,7 @@ s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz)
             if (((u8 *)fldRunMapScale)[offset] != 0) {
                 dx = x - (ox + (f32)fldRun_MAP_BX * (f32)i);
                 dz = z - (oz + (f32)-fldRun_MAP_BZ * (f32)j);
-                EE_SQRT_F32_SCHED(d, dx * dx + dz * dz);
+                d = sdfSqrt(dx * dx + dz * dz);
                 if (d < best) {
                     best = d;
                     bestZ = j;
@@ -2113,7 +2113,7 @@ void fldRunDanteGetDistAngle(f32 *pDist, f32 *pAngle)
 
     dx = fldGlobalBase.x - fldRun_Dante.x;
     dz = fldGlobalBase.z - fldRun_Dante.z;
-    EE_SQRT_F32_SCHED(dist, dx * dx + dz * dz);
+    dist = sdfSqrt(dx * dx + dz * dz);
     if (dist < 1.0f) {
         angle = 0.0f;
     } else {
@@ -2132,7 +2132,7 @@ void fldGetDistAngleTo(f32 *pDist, f32 *pAngle, f32 x, f32 z)
 
     dx = x - fldRun_Dante.x;
     dz = z - fldRun_Dante.z;
-    EE_SQRT_F32_SCHED(dist, dx * dx + dz * dz);
+    dist = sdfSqrt(dx * dx + dz * dz);
     if (dist < 1.0f) {
         angle = 0.0f;
     } else {
@@ -2456,7 +2456,7 @@ s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z)
     dx = fldCamTarget.x - x;
     dy = fldCamTarget.y - y;
     dz = fldCamTarget.z - z;
-    EE_SQRT_F32_SCHED(dist, dx * dx + dy * dy + dz * dz);
+    dist = sdfSqrt(dx * dx + dy * dy + dz * dz);
     dist -= 500.0f;
     if (dist > 5400.0f) {
         dist = 5400.0f;

@@ -1347,7 +1347,7 @@ f32 dds3BillboardGetDirectionScale(void *self, f32 *axis) {
     SDF_VU0_COPYVECTOR_A_TO_B();
     SDF_VU0_LOADVECTOR(axis);
     SDF_VU0_INNERPRODUCT(dot);
-    EE_ABS_F32(dot, dot);
+    dot = sdfFabs(dot);
     return 1.0f - dot;
 }
 

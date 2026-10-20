@@ -284,7 +284,7 @@ f32 vecLength(f32 *v)
 {
     f32 len;
 
-    EE_SQRT_F32(len, v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    len = sdfSqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     return len;
 }
 

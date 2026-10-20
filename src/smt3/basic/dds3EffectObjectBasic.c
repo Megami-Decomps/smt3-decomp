@@ -1116,7 +1116,7 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic)
     projectionDistance = config->offsetZ;
     {
         f32 squaredDistance = dx * dx + dy * dy + offset * offset;
-        EE_SQRT_F32(distance, squaredDistance);
+        distance = sdfSqrt(squaredDistance);
     }
     if (projectionDistance != 0) {
         direction.x = -dx;

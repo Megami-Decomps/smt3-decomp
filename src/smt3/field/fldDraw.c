@@ -4265,7 +4265,7 @@ f32 MATH_VectorLength(sdfVector4_t *v)
 {
     f32 len;
 
-    EE_SQRT_F32(len, v->x * v->x + v->y * v->y + v->z * v->z);
+    len = sdfSqrt(v->x * v->x + v->y * v->y + v->z * v->z);
     return len;
 }
 
@@ -4448,8 +4448,8 @@ void fldHitChkUnitElvOnly(f32 *position) {
         radius = 45.0f;
         current[1] = position[1] - 35.0f;
     }
-    EE_ABS_F32(travel[0], current[0] - previous[0]);
-    EE_ABS_F32(travel[2], current[2] - previous[2]);
+    travel[0] = sdfFabs(current[0] - previous[0]);
+    travel[2] = sdfFabs(current[2] - previous[2]);
     for (index = 0; index < D_0054EDA0; index++) {
         if (!(((fldValueRecord_t *)fldMatterTable)[index].face->attributes & 0x80)) {
             continue;
@@ -4480,7 +4480,7 @@ void fldHitChkUnitElvOnly(f32 *position) {
         } else {
             moved = 0;
         }
-        EE_ABS_F32(distance, fldVecDot((sdfVector4_t *)current,
+        distance = sdfFabs(fldVecDot((sdfVector4_t *)current,
                                        (sdfVector4_t *)((fldValueRecord_t *)fldMatterTable)[index].normal) -
                                  ((fldValueRecord_t *)fldMatterTable)[index].planeConstant);
         if (distance < radius) {

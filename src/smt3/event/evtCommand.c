@@ -1013,11 +1013,11 @@ u32 evtCommand_MODEL_LIGHT_DIR(void)
     dir[0] = scrGetFloatPara(2);
     dir[1] = scrGetFloatPara(3);
     dir[2] = scrGetFloatPara(4);
-    EE_ABS_F32(mag, dir[0]);
+    mag = sdfFabs(dir[0]);
     if (mag <= 0.01f) {
-        EE_ABS_F32(mag, dir[1]);
+        mag = sdfFabs(dir[1]);
         if (mag <= 0.01f) {
-            EE_ABS_F32(mag, dir[2]);
+            mag = sdfFabs(dir[2]);
             if (mag <= 0.01f) {
                 datDebugPrintf(D_0053A948);
                 return 1;
