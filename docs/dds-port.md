@@ -58,27 +58,36 @@ Confidence is then assigned per smt3 fallback:
 
 ## Numbers
 
-Measured on 2026-10-19 against 3646 remaining smt3 fallbacks totalling 0x140124
-bytes of `.text`. The fallback count drops as work lands, so rerun the tool rather
-than quoting these.
+Measured on 2026-10-20 against 2371 remaining smt3 fallbacks totalling 0x100DB4
+bytes of `.text`. The fallback count drops as work lands, so rerun the tool
+rather than quoting these:
+
+    python tools/dds_reuse.py --dds-decomp <checkout>
 
 | confidence | functions | bytes    | share of fallback bytes |
 | ---------- | --------- | -------- | ----------------------- |
-| high       | 154       | 0x011F7C | 4.2%                    |
-| medium     | 28        | 0x0013D8 | 0.8%                    |
-| low        | 323       | 0x0171B0 | 8.9%                    |
-| none       | 3141      | 0x115C20 | 86.1%                   |
+| high       | 63        | 0x00BF24 | 4.7%                    |
+| medium     | 9         | 0x000C18 | 0.3%                    |
+| low        | 155       | 0x010530 | 6.4%                    |
+| none       | 2144      | 0x0E3D48 | 88.7%                   |
 
-Served by C that already exists: 505 functions, 0x2A504 bytes, 13.9% of the
-remaining work by size. Of the 3141 "none" rows, 3072 have no DDS1 counterpart at
-all and 69 pair to code dds-decomp has not decompiled either.
+Served by C that already exists: 227 functions, 0x1D06C bytes, 11.3% of the
+remaining work by size. Of the 2144 "none" rows, 2078 have no DDS1 counterpart
+at all and 38 pair to code dds-decomp has not decompiled either.
 
 The reuse tiers are nearly spent, and that is the headline rather than a caveat.
-When this was first measured, on 2026-10-18 against 6930 fallbacks, the high tier
-alone was 1779 functions and 25.7% of the remaining bytes. Porting and ordinary
-reconstruction have since consumed almost all of it: the high tier is now 154
-functions and 4.2%. What is left is overwhelmingly SMT3's own game code, with no
-counterpart to port from.
+When this was first measured, on 2026-10-18 against 6930 fallbacks, the high
+tier alone was 1779 functions and 25.7% of the remaining bytes. Porting and
+ordinary reconstruction have since consumed almost all of it: 63 functions and
+4.7%. The share has not fallen because the tier is holding up, but because the
+denominator shrank faster than the tier did; in absolute terms the high tier has
+gone 1779, then 154, then 63. What is left is overwhelmingly SMT3's own game
+code, with no counterpart to port from.
+
+Every count here is over functions whose `smt3_state` is `asm`, which is the set
+of `INCLUDE_ASM` lines still in `src/`, not the set of `.s` files under `asm/`.
+Those diverge: the split carries a file per function whether or not the function
+is in C, so counting the split overstates the work left by thousands.
 
 ## Pair units, not functions
 
