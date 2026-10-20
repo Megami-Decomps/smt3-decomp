@@ -508,10 +508,11 @@ The rest sit in six containers:
 | `newbattle/nbStageProcess` | 4 | - | done |
 | `script/scrParameterCommand` | 1 | - | done |
 | `code_001FAE80` | 35 | 43 | done |
-| `code_002C7CB0` | 2 | 0 | contradicted, see below |
+| `code_002C7CB0` | 2 | 0 | not homes: SDK mis-attributions, see below |
 
-106 of the 108 are placed. Each container relinked byte-identically and
-`check_unit` reports no `CONTEXT` line in any part.
+All 108 are resolved: 104 placed, and 4 shown not to be homes at all, the two
+Sony SDK pairs below plus `EventPack` and `sdfMc`. Each container relinked
+byte-identically and `check_unit` reports no `CONTEXT` line in any part.
 
 A named unit can hide a container. `newbattle/nbMakePacket` holds 48 HD files
 in strictly ascending order, among them `nbE901` through `nbE915` and sixteen
@@ -591,7 +592,30 @@ from `0x002133F8` to `0x002138C0`, so `lstListWindow.c` starts at `0x002133F8`
 and HD's `0x002136A8` was the lower bound this page keeps warning about. That
 page's closing note holds: a callee-visibility result is a boundary hint.
 
-### `code_002C7CB0` is contradicted too
+### `code_002C7CB0` holds no homes at all
+
+Its six HD attributions were read as contradictions, `pbMCard` and `tgsMain`
+each claimed twice and `pbMenu` already applied at `0x001D4D40`. Resolving what
+is actually at those addresses settles all of them at once:
+
+| HD file | Address | The function there |
+|---|---|---|
+| `pbMCard.c` | `0x002CDC90` | `sceMcInit` |
+| `fclShare.c` | `0x002D43A4` | `memcpy` |
+| `tgsMain.c` | `0x002DFD70` | `sceOpen` |
+| `pbMenu.c` | `0x002E0FD8` | `sceMkdir` |
+| `tgsMain.c` | `0x002E1ED0` | `sceSync` |
+| `pbMCard.c` | `0x002E3A60` | `sceSifLoadModule` |
+
+Every one is Sony SDK or libc. The container's name families say the same from
+the other side: of 679 functions it is `sce*`, `__ieee754_*`, `__kernel_*`,
+`libc*` and `RFU*` almost throughout. These are HD mis-attributions of the kind
+il2cpp metadata produces, naming the caller's file for a library function, and
+CLAUDE.md's rule applies: the Sony SDK libraries are prebuilt archives and stay
+assembly. `pbMCard`, `pbMenu`, `tgsMain` and `fclShare` keep the homes they
+already have, and this container is not a container.
+
+### Two more that are not homes either
 
 Its seven runs name `pbMCard` and `tgsMain` twice each at non-contiguous
 addresses, and `pbMenu`, which is applied at `0x001D4D40`. A `.c` cannot hold
