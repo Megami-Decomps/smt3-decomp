@@ -5,9 +5,24 @@ extern s32 D_00598C40 __attribute__((section(".data")));
 extern u8 D_00598ED8[] __attribute__((section(".data")));
 
 extern s32 D_0052A010 __attribute__((section(".data")));
-extern void *D_0052BA48 __attribute__((section(".data")));
+extern u8 D_0052BA48[0x40] __attribute__((section(".data")));
+
+extern s32 D_0052A030 __attribute__((section(".data")));
+extern s32 D_0052A02C __attribute__((section(".data")));
+extern u8 D_0052B1D0[0x40] __attribute__((section(".data")));
+extern s32 D_0052B640 __attribute__((section(".data")));
+extern s32 D_0052B200[4] __attribute__((section(".data")));
+
+/* The reply word is read back through the uncached mirror, since the IOP
+ * wrote it behind the data cache. */
+#define UNCACHED(a) ((s32 *)((u32)(a) | 0x20000000))
 
 extern s32 DIntr(void);
+extern s32 SignalSema(s32 sema);
+extern void sceSifWriteBackDCache(void *addr, s32 size);
+extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
+                         void *recv, s32 rsize, void *endfunc, void *endpara);
+extern s32 _sceCd_scmd_prechk(s32 cmd);
 extern int scePrintf(const char *fmt, ...);
 extern s32 sceSifCheckStatRpc(void *cd);
 extern void sceCdDelayThread(u16 ticks);
@@ -68,28 +83,22 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdNcmdDiskReady);
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdSync);
 
-/* NON_MATCHING: 112 bytes, retail's size; the wait loop's zero return is
- * materialised a scheduling slot away from where retail puts it. */
-#ifdef NON_MATCHING
 s32 sceCdSyncS(s32 mode)
 {
-    if (mode) {
-        return sceSifCheckStatRpc(D_0052BA48);
-    }
-    if (D_0052A010 > 0) {
-        scePrintf("S cmd wait\n");
-    }
-    while (1) {
-        if (sceSifCheckStatRpc(D_0052BA48) == 0) {
-            break;
+    if (mode == 0) {
+        if (D_0052A010 > 0) {
+            scePrintf("S cmd wait\n");
         }
-        sceCdDelayThread(60);
+        while (1) {
+            if (sceSifCheckStatRpc(D_0052BA48) == 0) {
+                break;
+            }
+            sceCdDelayThread(60);
+        }
+        return 0;
     }
-    return 0;
+    return sceSifCheckStatRpc(D_0052BA48);
 }
-#else
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdSyncS);
-#endif
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", _sceCd_scmd_prechk);
 
@@ -97,11 +106,59 @@ INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdInit);
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdDiskReady);
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdMmode);
+s32 sceCdMmode(s32 media)
+{
+    s32 *arg = &D_0052B640;
+    s32 ret;
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdGetDiskType);
+    if (!_sceCd_scmd_prechk(34)) {
+        return 0;
+    }
+    D_0052B640 = media;
+    sceSifWriteBackDCache(arg, 4);
+    if (sceSifCallRpc(D_0052BA48, 34, 0, arg, 4, D_0052B200, 4, 0, 0) < 0) {
+        SignalSema(D_0052A02C);
+        return 0;
+    }
+    ret = UNCACHED(D_0052B200)[0];
+    SignalSema(D_0052A02C);
+    return ret;
+}
 
-INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdStatus);
+s32 sceCdGetDiskType(void)
+{
+    s32 ret;
+
+    if (!_sceCd_scmd_prechk(1)) {
+        return 0;
+    }
+    if (sceSifCallRpc(D_0052BA48, 3, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
+        SignalSema(D_0052A02C);
+        return 0;
+    }
+    ret = UNCACHED(D_0052B200)[0];
+    SignalSema(D_0052A02C);
+    return ret;
+}
+
+s32 sceCdStatus(void)
+{
+    s32 ret;
+
+    if (!_sceCd_scmd_prechk(2)) {
+        return -1;
+    }
+    if (sceSifCallRpc(D_0052BA48, 12, 0, 0, 0, D_0052B200, 4, 0, 0) < 0) {
+        SignalSema(D_0052A02C);
+        return -1;
+    }
+    ret = UNCACHED(D_0052B200)[0];
+    SignalSema(D_0052A02C);
+    if (D_0052A010 >= 2) {
+        scePrintf("status called\n");
+    }
+    return ret;
+}
 
 INCLUDE_ASM(const s32, "sdk/libcdvd", sceCdPowerOff);
 
