@@ -9,7 +9,7 @@ page and line to open. Conventions are in
 |---|---|---|
 | 43 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 34 | code_001FAE80 | [code_001FAE80.md](code_001FAE80.md) |
-| 13 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
+| 16 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 9 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 |  | [misc.md](misc.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |

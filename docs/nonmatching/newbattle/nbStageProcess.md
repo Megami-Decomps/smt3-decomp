@@ -248,3 +248,79 @@ fused into one condition; and four spellings of the draw loop (`for (n = n - 1;
 ...)`, `for (n--; ...)`, `while (--n >= 0)`, a separate index local, and an
 `if (n > 0)` wrapping a `do`/`while`), none of which keep the decrement out of
 the delay slots.
+
+## AnimeCommandList (newbattle/nbStageProcess, 0x18C)
+
+97 of 99 words match, at the exact 396-byte size and with the same instruction
+multiset.
+
+The four flag arms (`0x20` on `helpa`, `1` and `2` on `alpha`, `8` on `ox`) are
+exact, including the `movn`/`movz` clamps and the `(s32)(ox * 0.5f)` step with
+its `d == 0 ? -1 : d` fixup.
+
+The two remaining words are the order of the two loads that open the `0x4` arm.
+Retail loads the `0.01f` literal first and `smritu` second; every source form
+tried loads `smritu` first, because gcc expands the compare's left operand
+first and then rematerialises the constant at the compare.
+
+Ruled out: `0.01f > fabsf(...)` and `!(fabsf(...) >= lim)`, both of which
+`fold` rewrites back; a block-local and a function-local `f32 lim = 0.01f`,
+which gcc rematerialises (the function-local form also hoists the load into the
+entry block and costs 95 words); `f32 a = fabsf(s->smritu)` as a separate
+statement; an `f32 ritu` local for the field; both source orders of the
+then-arm's two stores; and `extern f32 D_0054E500`/`D_0054E504` globals in
+place of the literals, which are MEMs rather than constants and get hoisted
+into the `beqz`'s delay slot, where retail has a `nop` (19 words).
+
+## RunSake (newbattle/nbStageProcess, 0x104)
+
+45 of 65 words match, at the exact 260-byte size and with the same instruction
+multiset.
+
+Three facts are settled. The quadword position copy is
+`SDF_VU0_COPYVECTOR(&pos, &form->pos)`: the macro's two `"r"` operands are what
+give retail's `addiu $3, $5, 0x20` address temp per copy site, where a `u128`
+cast folds the offset into the `lq` and a struct assignment of a 16-byte
+aligned type drops to `ld`/`sd` pairs. `form->basic` is a local read once at
+the top, which keeps `form` in `$5` with no copy. And `form->range` is read
+inline inside each arm rather than through a shared local, which is what leaves
+the `bc1f`'s delay slot empty for the else arm's `neg.s` and gives retail's
+`bc1fl`.
+
+What is left is the float register assignment: retail has `phase` in `$f1`,
+`1.0f` in `$f2` and `-power` sharing `$f4` with the `0.99f` constant, while the
+draft pairs `1.0f` and `-power` in `$f1` and puts `phase` in `$f2`. The
+schedule shifts with it, and in both arms retail's literal load comes one word
+before the `form->damageRange` load where the draft has them the other way
+round.
+
+Ruled out: all six statement orders in the two arms, in each of three spellings
+of the `form->range` update (`+=`, the written-out form, and the multiply
+commuted) and both operand orders of `form->damageRange * form->range`, which
+all produce the identical object; an `f32 q = -power` local for the negation;
+and `f32 phase`/`f32 power` locals shared by both arms, which reload nothing
+and cost 2 words.
+
+## CheckAction_TARSEL (newbattle/nbStageProcess, 0x1CC)
+
+111 of 115 words match, at the exact 460-byte size and with zero instruction
+differences: every remaining word is a register name.
+
+The whole dispatch and all three arms are exact. Two source facts carry it: the
+`nowcommand` test is written `if (work->nowcommand != 1) { if (... == 5) ... }
+else { no = work->nowindex; }` with `no = -1` above it, so the `== 1` arm is the
+branched-to block retail places last and the `-1` lands in the `beq`'s delay
+slot (the `== 1`/`else if` spelling costs 14 words); and the sixteen
+`form[i].stat &= ~8` clears are a plain ascending `for`, which ee-gcc turns
+into retail's countdown.
+
+What is left is that retail holds two short-lived constants in `$2` where the
+draft holds them in `$3`: the `4` the `err` test compares against, and the `1`
+stored to `a->seq` in the `case 2` arm. Both are dead immediately and `$2` is
+reused for the return value one word later in retail.
+
+Ruled out: `return ret;` in place of `break;` in the error arm, the select arm
+and the `case 2` arm, each of which rearranges the whole epilogue; `u32 ret`; a
+separate `ret = 0;` statement after the declaration; `if (err != 4) {} else`;
+and both source orders of `nbSetCommSelStat(2)` against `a->seq = 1` and
+against `a->stat |= 0x80`.

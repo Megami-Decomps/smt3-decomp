@@ -204,6 +204,9 @@ CheckAction_ESCAPE	newbattle/nbStageProcess	0xE4	9 of 57 words differ	docs/nonma
 DispCommCursor	newbattle/nbStageProcess	0x184	29 of 97 words differ	docs/nonmatching/newbattle/nbStageProcess.md	176
 nbGetMotionNo	newbattle/nbStageProcess	0xC0	23 of 46 words differ	docs/nonmatching/newbattle/nbStageProcess.md	201
 nbDrawKoukaSprite	newbattle/nbStageProcess	0x108	24 of 66 words differ	docs/nonmatching/newbattle/nbStageProcess.md	225
+AnimeCommandList	newbattle/nbStageProcess	0x18C	97 of 99 words match	docs/nonmatching/newbattle/nbStageProcess.md	252
+RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/nonmatching/newbattle/nbStageProcess.md	275
+CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/nonmatching/newbattle/nbStageProcess.md	304
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 datAddUniqueDevil	newdata/datCalc	0x6C	12 of 26 words differ	docs/nonmatching/newdata/datCalc.md	23
 datDeadNakama	newdata/datCalc	0xC4	28 of 48 words differ	docs/nonmatching/newdata/datCalc.md	40

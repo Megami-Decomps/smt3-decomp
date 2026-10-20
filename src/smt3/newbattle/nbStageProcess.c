@@ -44,6 +44,7 @@ extern void DispCommCursor(s32 ox, s32 oy, s32 a);
 extern void DispSummonCursor(s32 ox, s32 oy, s32 a);
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
                         sdfTexHandle_t *th);
+extern f32 fabsf(f32 value);
 extern s32 datCheckPlayerDead(void);
 void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu);
 extern s32 dds3ExistProcess(dds3ProcessID_t *id);
@@ -55,6 +56,24 @@ void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
 extern f64 sdfFloatToULong(f32 value);
 extern s32 dpdiv(f64 left, f64 right);
 
+
+
+/* The selection block at +0x70 of an akuma record, which nbSetPlayerStartData
+ * clears before the devil enters the stock. */
+typedef struct nbAkumaSelect_t {
+    u8 unk00[0xA];
+    s16 unk0A;
+    s16 unk0C;
+} nbAkumaSelect_t;
+
+/* The quadword copy of a formation position: 16-byte aligned, so ee-gcc moves
+ * it with one lq/sq pair. */
+typedef struct nbQuadVector_t {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
+} __attribute__((aligned(16))) nbQuadVector_t;
 
 /* 8-byte rows at +0x88 indexed by formation slot. */
 typedef struct nbTimeList_t {
@@ -374,6 +393,8 @@ extern sdfVector4_t D_00543648;
 extern char *D_00551110;
 extern char *D_00551114;
 extern f32 D_0054E4C4;
+extern f32 D_0054E500;
+extern f32 D_0054E504;
 extern f32 D_0054E4C8;
 extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 id, sdfVector4_t *pos, f32 *rot);
 extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 r);
@@ -382,6 +403,14 @@ extern void dds3ObjectBaseSetPadControl(dds3Basic_t *basic, dds3BasicControlProc
 extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy);
 
 extern void nbSortOrder(s32 start);
+extern s32 datGetParam(datUnitWork_t *unit, s32 param);
+extern s32 nbGetTarSelStat(void);
+extern void nbSetTarSelStat(s32 stat);
+extern s32 nbCheckBattleSkillError2(s32 nskill, u32 select);
+extern u32 nbGetSelectBit(nbMainProcessData_t *data);
+extern s32 nbDispSkillErrorMessage(s32 type);
+extern void nbSetTarSelJyokyoTime(s32 time);
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group);
 extern f32 dds3GetRandFloatA(s32 stream);
 extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
 extern s32 GetEndTime(nbActionProcessData_t *a, s32 formindex);
@@ -420,6 +449,7 @@ extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 extern void nbAddFlareChargePacket(s32 start, nbActionProcessData_t *a, s32 type);
 
 void SetNextActionSeq(nbActionProcessData_t *a, s32 nextseq);
+void SetDamagePacket(nbActionProcessData_t *a, s32 hp);
 void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd);
 extern void nbAddAnalyzePacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form);
 extern void nbPanelAnalyzeStart(void);
@@ -463,8 +493,6 @@ void SetBattleLight(nbMainProcessData_t *data)
     }
 }
 
-/* NON_MATCHING: 2 of 49 words differ (first at +0xA0). */
-#ifdef NON_MATCHING
 void nbAddStageCamera(nbMainProcessData_t *data)
 {
     sdfVector4_t pos;
@@ -479,16 +507,11 @@ void nbAddStageCamera(nbMainProcessData_t *data)
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
-    dds3CameraObjectBasicSetFovy(camera, D_0054E4C4);
+    dds3CameraObjectBasicSetFovy(camera, 0.8726646f);
     data->unkB4 = (s32)camera;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddStageCamera);
-#endif
 
 
-/* NON_MATCHING: 2 of 49 words differ (first at +0xA0). */
-#ifdef NON_MATCHING
 void nbAddStageCamera2(nbMainProcessData_t *data)
 {
     sdfVector4_t pos;
@@ -503,12 +526,9 @@ void nbAddStageCamera2(nbMainProcessData_t *data)
     dds3GetRadiusPoseSet(camera, 10.0f);
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
-    dds3CameraObjectBasicSetFovy(camera, D_0054E4C8);
+    dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
     *(dds3Basic_t **)data->unkB8 = camera;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddStageCamera2);
-#endif
 
 
 void nbSetStageParam(s16 a, s16 b)
@@ -1223,7 +1243,46 @@ void *nbUnitDrawProcess1(dds3ProcessID_t *id)
     return NULL;
 }
 
+/* NON_MATCHING: 20 of 65 words differ (first at +0x2C). */
+#ifdef NON_MATCHING
+void RunSake(nbMainProcessData_t *data, nbFormation_t *form)
+{
+    sdfVector4_t pos;
+    struct dds3Basic_t *basic = form->basic;
+    f32 power;
+    f32 x;
+
+    if (basic == NULL) {
+        form->type = 0;
+        form->time = 0;
+        return;
+    }
+    power = form->shakePower;
+    if (power >= 0.0f) {
+        x = form->damageRange * form->range;
+        form->shakePower = power + 0.02f;
+        form->range += (1.0f - form->range) * power;
+        if (form->range >= 0.99f) {
+            form->shakePower = -form->addmovet * 0.6f;
+        }
+    } else {
+        x = form->damageRange * form->range;
+        form->shakePower = power - 0.01f;
+        form->range -= form->range * -power;
+        if (form->range <= 0.01f) {
+            form->type = 0;
+            SDF_VU0_COPYVECTOR(&pos, &form->pos);
+            dds3SetPosPoseSet(basic, &pos);
+            return;
+        }
+    }
+    SDF_VU0_COPYVECTOR(&pos, &form->pos);
+    pos.x += x;
+    dds3SetPosPoseSet(basic, &pos);
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", RunSake);
+#endif
 
 void RunBadAction(nbMainProcessData_t *data, nbFormation_t *form)
 {
@@ -2104,7 +2163,73 @@ void SetAction_TARSEL(nbActionProcessData_t *a)
     SetTarget_nbActionProcess(a);
 }
 
+/* NON_MATCHING: 4 of 115 words differ (first at +0x120). */
+#ifdef NON_MATCHING
+s32 CheckAction_TARSEL(nbActionProcessData_t *a)
+{
+    s32 ret = 0;
+
+    if ((a->data->stat & 0x40) != 0 && (a->stat & 0x80) == 0) {
+        a->stat |= 0x80;
+        nbSetCommSelStat(2);
+        nbSetAutoCommSel();
+        a->seq = 1;
+        return 0;
+    }
+    switch (nbGetTarSelStat()) {
+    case 0: {
+        u32 sel = nbGetSelectBit(a->data);
+
+        if ((a->stat & 0x80) == 0) {
+            datUnitWork_t *work = a->work;
+            s32 no;
+
+            no = -1;
+            if (work->nowcommand != 1) {
+                if (work->nowcommand == 5) {
+                    no = nbGetItemSkillNo(a, work->nowindex);
+                }
+            } else {
+                no = work->nowindex;
+            }
+            if (no >= 0) {
+                s32 err = nbCheckBattleSkillError2(no, sel);
+
+                if (err != 0) {
+                    nbDispSkillErrorMessage(err);
+                    if (err == 4) {
+                        nbSetTarSelJyokyoTime(0x1D);
+                    }
+                    nbSetTarSelStat(1);
+                    break;
+                }
+            }
+            nbPlaySe(8);
+        }
+        nbCloseCommSel();
+        ret = 1;
+        a->select = sel;
+        SetNextActionSeq(a, 7);
+        break;
+    }
+    case 1:
+        break;
+    case 2: {
+        s32 i;
+
+        for (i = 0; i < 16; i++) {
+            a->data->form[i].stat &= ~8;
+        }
+        nbSetCommSelStat(2);
+        a->seq = 1;
+        break;
+    }
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", CheckAction_TARSEL);
+#endif
 
 void SetAction_STKSEL(nbActionProcessData_t *a)
 {
@@ -2245,7 +2370,28 @@ s32 CheckAction_NEGORESULT(nbActionProcessData_t *a)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", SetAction_WAIT);
+void SetAction_WAIT(nbActionProcessData_t *a)
+{
+    switch (a->work->nowcommand) {
+    case 10:
+        SetDamagePacket(a, a->work->maxhp * 15 / 100);
+        nbMakePressPacket(0, a, -1.0f);
+        nbMakeNewPressPacket(0, a, 0, a->form);
+        return;
+    case 8:
+        nbMakePressPacket(0, a, -1.0f);
+        nbMakeNewPressPacket(0, a, 0, a->form);
+        SetTimeList(a, a->form->formindex, 0, 5, 5);
+        return;
+    case 3:
+        nbMakePressPacket(0, a, -0.5f);
+        nbMakeNewPressPacket(0, a, 1, a->form);
+        SetTimeList(a, a->form->formindex, 0, 5, 5);
+        break;
+    case 9:
+        break;
+    }
+}
 
 s32 CheckAction_WAIT(nbActionProcessData_t *a)
 {
@@ -2560,7 +2706,46 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbInitActionProcess);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbAddOrder);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSortOrder);
+void nbSortOrder(s32 start)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    s32 i;
+    s32 j;
+
+    for (i = start; i < 11; i++) {
+        if (data->order[i] < 0) {
+            continue;
+        }
+        for (j = i + 1; j < 12; j++) {
+            datUnitWork_t *wi;
+            datUnitWork_t *wj;
+            s32 pi;
+            s32 pj;
+
+            if (data->order[j] < 0) {
+                continue;
+            }
+            wi = nbGetUnitWorkPointer(data, &data->party[data->order[i]]);
+            wj = nbGetUnitWorkPointer(data, &data->party[data->order[j]]);
+            pi = datGetParam(wi, 4);
+            pj = datGetParam(wj, 4);
+            if (pi < pj) {
+                s8 t = data->order[i];
+
+                data->order[i] = data->order[j];
+                data->order[j] = t;
+            } else if (pi == pj) {
+                if (data->party[data->order[i]].formindex >
+                    data->party[data->order[j]].formindex) {
+                    s8 t = data->order[i];
+
+                    data->order[i] = data->order[j];
+                    data->order[j] = t;
+                }
+            }
+        }
+    }
+}
 
 void nbSetOrderSide(s32 side)
 {
@@ -2946,7 +3131,31 @@ void nbCountActiveUnits(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetupBattleUnits);
 
-INCLUDE_ASM(const s32, "newbattle/nbStageProcess", nbSetPlayerStartData);
+void nbSetPlayerStartData(nbMainProcessData_t *data)
+{
+    s32 i;
+    s32 cnt = 0;
+
+    for (i = 0; i < *(s32 *)DDS3_GBWK->stocklist && cnt < 4; i++) {
+        s32 id = DDS3_GBWK->unk1914[i];
+        s32 off = id * sizeof(fldAnahoriAkuma_t) + 0xAC0;
+        nbAkumaSelect_t *sel = (nbAkumaSelect_t *)((u8 *)DDS3_GBWK + off);
+        u32 flag = DDS3_GBWK->akuma[id].flag;
+
+        if (flag & 1) {
+            sel->unk0A = -1;
+            sel->unk0C = -1;
+            if (flag & 2) {
+                nbAddUnitStock(data, 0, id, cnt);
+                if (data->stat & 0x10) {
+                    data->form[cnt].stat |= 0x2000;
+                }
+                cnt++;
+            }
+        }
+    }
+    nbSetPlayerFormation(data, 0);
+}
 
 s32 nbGetUnitID(datUnitWork_t *work)
 {
@@ -3195,7 +3404,77 @@ INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispHelpPanel);
 
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", DispCommandPanel);
 
+/* NON_MATCHING: 2 of 99 words differ (first at +0x12C). */
+#ifdef NON_MATCHING
+void AnimeCommandList(nbCommSelProcessData_t *s)
+{
+    if (s->unk14B4 & 0x20) {
+        if (s->helpa < 128) {
+            s->helpa += 32;
+            if (s->helpa > 128) {
+                s->helpa = 128;
+            }
+        }
+    } else {
+        if (s->helpa > 0) {
+            s->helpa -= 21;
+            if (s->helpa < 0) {
+                s->helpa = 0;
+            }
+        }
+    }
+    if (s->unk14B4 & 1) {
+        if (s->alpha == 128) {
+            s->unk14B4 &= ~1;
+        } else {
+            s->alpha += 20;
+            if (s->alpha > 128) {
+                s->alpha = 128;
+            }
+        }
+    }
+    if (s->unk14B4 & 2) {
+        if (s->alpha == 0) {
+            s->unk14B4 &= ~2;
+        } else {
+            s->alpha -= 12;
+            if (s->alpha < 0) {
+                s->alpha = 0;
+            }
+        }
+    }
+    if (s->unk14B4 & 8) {
+        if (s->ox == 0) {
+            s->unk14B4 &= ~8;
+        } else {
+            s32 d = (s32)(s->ox * 0.5f);
+
+            if (d == 0) {
+                d = -1;
+            }
+            s->ox -= d;
+        }
+    }
+    if (s->unk14B4 & 4) {
+        if (fabsf(s->smritu) < 0.01f) {
+            s->smritu = 0.0f;
+            s->unk14B4 &= ~4;
+        } else {
+            f32 d = s->smritu * 0.6f;
+
+            if (d < 0.01f) {
+                d = 0.01f;
+            }
+            s->smritu -= d;
+            if (s->smritu < 0.0f) {
+                s->smritu = 0.0f;
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbStageProcess", AnimeCommandList);
+#endif
 
 void DispComm1Summon(nbCommSelProcessData_t *s, u16 d, s32 ox, s32 oy, s32 oz, u32 col,
                      s32 listidx, s32 col2)

@@ -1541,3 +1541,23 @@
   `fldInfFlagSelector_t.offTarget` and `.onTarget` and
   `fldInfMessageRow_t.targets[0]` with `lb`, and nothing else in `field/fldDraw`
   reads any of the four, so all four declarations become `s8`.
+- Where retail computes a scaled index plus a constant **before** adding the
+  base (`addiu rd, rd, C` then `addu rd, base, rd`), and every pointer
+  spelling gives the other association (`addu` then `addiu`), the fix is an
+  **explicit integer offset local**. `nbSetPlayerStartData` in
+  `newbattle/nbStageProcess` reaches retail's two separate bases only as
+  `s32 off = id * sizeof(fldAnahoriAkuma_t) + 0xAC0;` followed by
+  `(u8 *)DDS3_GBWK + off`; `(u8 *)&DDS3_GBWK->akuma[id] + 0x70`,
+  `(u8 *)DDS3_GBWK + id * sizeof(...) + 0xAC0`, the same with the sum
+  parenthesised, and the `&((u8 *)DDS3_GBWK)[...]` form all compile to the
+  identical object, 15 of 73 words out. Splitting the constant off the local
+  (`off = id * sizeof(...)` then `+ (off + 0xAC0)` at the use) is reassociated
+  back. `u32` and `s32` for the offset are interchangeable.
+- A quadword structure copy with retail's `addiu` address temp plus `lq`/`sq`
+  is **`SDF_VU0_COPYVECTOR(dst, src)`**, whose two `"r"` operands are where the
+  temp comes from. A `*(u128 *)` cast assignment folds the offset into the
+  `lq`'s displacement and emits no temp, a struct assignment of a type marked
+  `aligned(16)` drops to `ld`/`sd` pairs because the block mover's widest mode
+  here is `DImode`, and a `u128 *` pointer local is propagated into the load.
+  `RunSake` in `newbattle/nbStageProcess` copies `form->pos` twice, in two
+  blocks neither of which dominates the other, and gets one `addiu` per site.

@@ -80,3 +80,15 @@ order. The order in which the C uses a constant has to match retail.
   shape, and the call whose result the expression scales has to be evaluated
   into its own local first or the square root is computed before it and spends
   a callee-saved float register across the call.
+A float constant **passed as an argument** that `lui` alone cannot materialise
+is precomputed into a pseudo before the integer argument moves, so retail's
+`lwc1 $f12, %gp_rel(...)` sits *before* the `jal` and the pointer argument's
+`daddu` fills the delay slot. Reading the constant out of an `extern f32
+D_00XXXXXX` instead gives the reverse order, because a MEM is not a constant
+and is loaded by `load_register_parameters` in argument order. Both
+`nbAddStageCamera` and `nbAddStageCamera2` in `newbattle/nbStageProcess` turn
+on this alone: `dds3CameraObjectBasicSetFovy(camera, 0.8726646f)` and
+`0.6981317f` are exact where the `extern f32` spelling is two words out. The
+truncation row above is what picks the decimal: `0.87266457f` rounds to
+`0x3F5F66F1` and retail holds `0x3F5F66F2`, so the literal has to be at or
+above the target value, and `0.8726646f` is exact.

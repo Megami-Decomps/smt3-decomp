@@ -163,3 +163,15 @@ end marked, so expect the body to sit one word early.
   `extern s32 datGetRace();` leaves the function 13 words out; the prototyped
   call with the argument is exact. Check whether the live value in the argument
   register is the argument before changing a declaration.
+- An explicit **`return;` after the last call in a `switch` arm turns that call
+  into a sibling call** (`j callee`, callee-saved registers restored first),
+  where `break;` leaves `jal` plus the shared epilogue. `SetAction_WAIT` in
+  `newbattle/nbStageProcess` has three arms whose last statement is a call; it
+  is exact only with `return;` on the `case 10` and `case 8` arms and `break;`
+  on the `case 3` arm, and the branch-likely form of the dispatch's second
+  compare comes with it. All eight combinations compile in seconds, and the
+  wrong ones are 14 to 51 words out at the same arm order, so sweep
+  `return`-against-`break` on every arm that ends in a call before anything
+  else. The same rule names which arm order to use: write the arms in the
+  address order of their bodies in retail (`SetAction_WAIT` is 10, 8, 3, 9,
+  with the empty `case 9:` last), then sweep.

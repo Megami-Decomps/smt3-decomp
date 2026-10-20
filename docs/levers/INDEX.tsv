@@ -1,7 +1,7 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
-docs/levers/README.md	9		| 215 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-docs/levers/README.md	10		| 108 | [control-flow.md](control-flow.md) | Control flow |
+docs/levers/README.md	9		| 217 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
+docs/levers/README.md	10		| 109 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 10 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	12		| 8 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	13		| 6 | [impossible.md](impossible.md) | Functions that cannot be written in C |
@@ -237,6 +237,8 @@ docs/levers/addressing-and-types.md	1505	$21 $22	Four same-typed parameters copi
 docs/levers/addressing-and-types.md	1516	ld sd	A 0x40-byte inline block move (eight ld then eight sd) whose temporaries retail draws partly from the callee-saved file wants the copy statement *above* the…
 docs/levers/addressing-and-types.md	1526	addu lh lui	A symbol-plus-index load in three instructions (lui %hi(sym), addu, lh %lo(sym)(rd)) where your C emits four, with the symbol's address materialised into its…
 docs/levers/addressing-and-types.md	1538	lb	lb on a field a header declares u8 means the field is signed.
+docs/levers/addressing-and-types.md	1544	addiu addu	Where retail computes a scaled index plus a constant **before** adding the base (addiu rd, rd, C then addu rd, base, rd), and every pointer spelling gives the…
+docs/levers/addressing-and-types.md	1556	addiu ld sd	A quadword structure copy with retail's addiu address temp plus lq/sq is **SDF_VU0_COPYVECTOR(dst, src)**, whose two "r" operands are where the temp comes from.
 docs/levers/control-flow.md	6	beqz bnez	| the opposite arm falls through (bnez where you emit beqz) | invert the if condition |
 docs/levers/control-flow.md	7		| one exit, default set before the branch | replace an early return 0 with s32 ret = f();
 docs/levers/control-flow.md	8	jal	| jal and a full epilogue | assign the call's result to a variable instead of return f();, which ee-gcc 2.96 sibcalls |
@@ -345,12 +347,13 @@ docs/levers/control-flow.md	134	$0 $16 $17 $6 daddu jal	A message or result loca
 docs/levers/control-flow.md	143	movn movz	A two-constant movn from a ternary needs the **== 0 ? low :
 docs/levers/control-flow.md	149		The **source order of a switch's arms** is a lever in its own right and is cheap to sweep:
 docs/levers/control-flow.md	157	$4 jal nop	A jal with a bare nop in its delay slot and no argument setup is **not** evidence of an unprototyped call.
+docs/levers/control-flow.md	166	j jal	An explicit **return;
 docs/levers/cross-jumping.md	8	lui ori	Where retail computes a value in both arms of an if but converts or stores it once at the join, the source most likely duplicates the whole tail in both arms…
 docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one register differs, which is why retail can keep two of three float-to-int conversions inside the arms and share only the third.
 docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…
 docs/levers/float-literals.md	54	$28 $gp addiu lui lwc1	The reverse of the $gp row above, on a symbol retail *does* reach through $gp:
 docs/levers/float-literals.md	65	$f20 $f22 add	A **repeated subexpression written out again** is what decides a commutative add.s's operand order when no spelling of the statement reaches it.
-docs/levers/float-literals.md	77		ee-gcc does not constant-fold fsqrtf of a literal, so a sqrt.s on a constant in the retail text is just fsqrtf(4096.0f) in the source.
+docs/levers/float-literals.md	77	$f12 daddu jal lui lwc1	ee-gcc does not constant-fold fsqrtf of a literal, so a sqrt.s on a constant in the retail text is just fsqrtf(4096.0f) in the source.
 docs/levers/float-registers.md	13	$2 $3 lui mfc1 mtc1	SDF_VU0_SCALEVECTOR against SDF_VU0_SCALEVECTOR_BITS with the float expression passed straight to the "r" operand is a scheduling lever, not only a spelling.
 docs/levers/float-registers.md	24		A word the **next** block needs, read right after a volatile asm and before the stores of the previous block's result, belongs in its own local.
 docs/levers/impossible.md	13		nbInitPlayer needs three separate symbols at test_skilllist, +0xF0 and +0x100.
