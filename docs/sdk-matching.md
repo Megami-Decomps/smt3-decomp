@@ -2,12 +2,12 @@
 
 `.text` ends with 126,120 bytes of code that is not Atlus source: the Sony EE
 libraries, newlib, and libgcc. It runs from `0x002C81A8` (`sceGsResetGraph`) to
-the start of `.vutext` at `0x002E6E50`, holds 669 functions, and today sits
-inside the single unit `code_002C7CB0` as `INCLUDE_ASM` fallbacks.
+the start of `.vutext` at `0x002E6E50` and holds 671 functions.
 
-[Reading progress](progress.md) counts this region in the `game` denominator
-because no unit had been identified as SDK. It is not game code, and this page
-is the account of what it is, function by function.
+It is now 12 units under `src/smt3/sdk/`, one per archive, so
+[reading progress](progress.md) measures it as its own `sdk` category instead
+of inside the game-code denominator. This page is the account of what it is,
+function by function, and of the two toolchains it takes to rebuild.
 
 ## Where the names and the boundaries come from
 
@@ -81,13 +81,33 @@ measured, not inferred:
 from the decomp.me archive, and its `cc1` output is identical to the 2.9 `cc1`
 shipped in SDK 2.0.4, so nothing from the SDK has to be run.
 
-Four functions are already solved against retail under it, and are the test
-cases for wiring the second compiler in: `sceGsGetIMR` and `sceGsPutIMR`
-(straight wrappers over the `GsGetIMR`/`GsPutIMR` syscall stubs),
-`sceDmaGetChan` (a bounds-checked load from `sceDmaChanRegs`) and
-`sceDmaPutStallAddr` (read `0x1000E060`, write it, return the old value,
-through a non-volatile pointer so the store falls into the delay slot). None of
-them can be committed as C while every unit is compiled with 2.96.
+`config/smt3/compilers.txt` assigns it per unit, the way `cflags.txt` assigns
+flags, and every Sony library unit is on it. Three of its traits decide how the
+C has to be written:
+
+- No sibling-call optimisation. A tail call is `jal` plus a real frame, never
+  `j func`, so C that 2.96 turns into a sibcall is right here and wrong there.
+- 16 bytes reserved per callee-saved register, so three saved registers mean a
+  48-byte frame with `sd` at 0x00, 0x10 and 0x20.
+- A `volatile` access is never moved into a delay slot. Where retail returns
+  with a store in the delay slot of `jr $31`, the original wrote the access
+  through a plain pointer.
+
+The first four functions matched under it are `sceGsGetIMR`, `sceGsPutIMR`,
+`sceDmaGetChan` and `sceDmaPutStallAddr`.
+
+### The probe loop
+
+`tools/sdk_probe.py` compiles one candidate file with a unit's toolchain and
+compares every function it defines against the retail bytes, without linking:
+
+```sh
+python tools/sdk_probe.py smt3 probe.c
+```
+
+It reports each function as a match or prints the differing words. Several can
+run at once, which a full relink cannot, so this is the loop to work in; the
+relink is the final check once a body lands in its unit.
 
 ## What is in the region
 
@@ -109,7 +129,40 @@ them can be committed as C while every unit is compiled with 2.96.
 Sony numbered the members of `libcdvd.a` and `libgraph.a`, so those names say
 which object without saying what it was called in source.
 
-### 3,508 bytes that were never C
+## The split, and what it cost
+
+The 12 units follow the library boundaries above. Three things had to be true
+for the relinked image to stay byte identical, and each is a rule for the next
+split in this region:
+
+- **Each unit's `.rodata` needs its own subsegment.** A jump table refers to
+  local labels in its own function, so it has to be assembled into the same
+  object. The boundaries are the first rodata symbol each unit references,
+  which came out monotone in text order with one shared constant.
+- **A rodata block whose unit contains a 16-byte-aligned jump table must start
+  16-byte aligned.** spimdisasm emits `.align 4` before such a table, and that
+  directive aligns the offset within the section, so a section starting 8 bytes
+  off puts the table 8 bytes wrong. libkernl's block starts at its first jump
+  table for this reason, and the strings before it sit in libc's object.
+- **An object aligned more strictly than its code needs has to say so.**
+  libkernl's first object, `klib.o`, aligns `.text` to 64, and the retail link
+  pads 16 bytes after libc's last function to reach it. `TEXT_ALIGN(6)` in the
+  unit asks for that alignment; without it everything after libkernl moves 16
+  bytes and the image is 1.5 MB different.
+
+The already-matched C moved with the split: 72 functions (53 newlib, 19 libgcc)
+that were sitting in `code_002C7CB0.c` are now in `sdk/libc.c` and
+`sdk/libgcc.c`, and still match, which is a second witness that the C runtime
+belongs to 2.96.
+
+### 6,068 bytes of handwritten stubs
+
+182 of libkernl's functions are `syscall` stubs of two or three instructions
+and were never C: 5,980 bytes, plus one each in libcdvd, libgraph and libmc. A
+sixth of libkernl's bytes can only ever be assembly, so the library's ceiling
+is 32,612 of 38,592 bytes.
+
+### 3,508 bytes that were never C either
 
 Twelve newlib functions are hand-written R5900 assembly in newlib itself, which
 the archive's debug paths name: `memchr`, `memcmp`, `memcpy`, `memmove`,
@@ -153,36 +206,38 @@ the IDB.
 | Project | Compiler | What it has | Usable here |
 |---|---|---|---|
 | [nathanialf/ico](https://github.com/nathanialf/ico) | ee-gcc 2.9-991111-01 | MIT licensed. Reproduces the whole `sce/` tree plus newlib, libm, libgcc and `crt0.s`, and records per-library build flags. Fully matching on three targets. | the flag evidence above; its SDK objects are reproduced from assembly, not C |
-| [OpenRAC/rac5-sm-decomp](https://github.com/OpenRAC/rac5-sm-decomp) | pinned Sony compiler, version not stated | Nine SDK bodies matched in C, including `sceGsResetGraph`, `sceDmaSend`, `sceDmaReset`, `sceDmaPause`, `InitAlarm` | no license file and the upstream provenance of the bodies is not established, so do not copy from it |
-| [denzi-gh/crashwoc-decomp-ps2](https://github.com/denzi-gh/crashwoc-decomp-ps2) | ee-gcc | `sdk/sce/graphdev`, `sdk/gcc/libgcc2` and newlib `mallocr` decompiled, `sceGsResetGraph` at 97% | same questions to settle before any reuse |
+| [OpenRAC/rac5-sm-decomp](https://github.com/OpenRAC/rac5-sm-decomp) | pinned Sony compiler, version not stated | GPL-3.0. Nine SDK bodies matched in C, including `sceGsResetGraph`, `sceDmaSend`, `sceDmaReset`, `sceDmaPause`, `InitAlarm` | copying from it makes this repo's derived files GPL-3.0, which is a project decision, not a technical one |
+| [denzi-gh/crashwoc-decomp-ps2](https://github.com/denzi-gh/crashwoc-decomp-ps2) | ee-gcc | GPL-3.0. `sdk/sce/graphdev`, `sdk/gcc/libgcc2` and newlib `mallocr` decompiled, `sceGsResetGraph` at 97% | same |
 | [entriphy/kl2_lv_decomp](https://github.com/entriphy/kl2_lv_decomp) | ee-gcc 2.9-991111-01 | the nearest compiler to ours among active PS2 projects | comparison, not code |
 | [oohweee/sh2-proto-decomp](https://github.com/oohweee/sh2-proto-decomp) | PS2 era | SDK headers in tree | reference |
 
-None of them removes work here: the only one that is both licensed for reuse
-and complete reproduces the SDK as assembly, which this repo already does.
+Neither of the two with matched C is a free import: both are GPL-3.0, and this
+repo carries no license file, so taking their bodies is a licensing decision
+about the whole tree rather than a shortcut. The one that is permissively
+licensed reproduces the SDK as assembly, which this repo already does. Nothing
+here is blocked on them: the clean-room loop above is what is producing
+matches.
 
-## Plan
+## Where it stands
 
-1. **Teach the build a second compiler.** Every Sony library unit needs
-   ee-gcc 2.9-991111-01 with `-O2 -G0 -fno-common`, so `configure.py` has to
-   select a compiler per unit the way `config/smt3/cflags.txt` already selects
-   flags. Nothing in the region can be matched before this lands. The four
-   functions above are the test cases; `tools/check_funcs.py` compares named
-   functions in the linked image against their own retail spans, which is what
-   a changed function length needs.
-2. **Split the region into units.** One unit per identified archive member,
-   under `src/smt3/sdk/<library>/<member>`, with unattributed runs in their own
-   address-named units. `configure.py` already gives any path under `sdk/` the
-   `sdk` progress category, so the game-code denominator stops counting this
-   code as soon as the split lands. The relinked image has to stay byte
-   identical.
-3. **newlib, fdlibm and libgcc.** Settle the build flags against one small
-   member, then work outward. Highest byte yield and no recovery involved.
-4. **`libdma` and `libgraph`.** Clean room, with the semantics settled from the
-   3.0.3 sources by someone other than the implementer.
-5. **The rest of the Sony libraries.** Clean room from the disassembly, public
-   headers and ps2sdk. `libkernl` is the largest at 37,012 bytes and most of it
-   is thin syscall and sif wrappers.
+`sdk` is 6,016 of 125,024 bytes matched (4.81%), and game code is now measured
+without it: 951,108 of 1,851,268 bytes (51.38%).
+
+Done: the second compiler, selected per unit; the 12-unit split; the probe
+loop; the first four Sony functions.
+
+Next:
+
+1. **The Sony libraries, clean room.** Work from the disassembly with the probe
+   loop. libdma, libgraph and libpad are small enough to finish; libkernl is
+   the largest at 38,592 bytes with 32,612 of them reachable.
+2. **newlib, fdlibm and libgcc (50,296 bytes).** Compile the upstream file each
+   member names against the 2.96 archive, which is on disk, then confirm
+   against retail. No recovery involved, and the highest byte yield left.
+3. **Per-object units.** The 12 library units can become ~116 member units as
+   each library is worked, using the member column of
+   `config/smt3/sdk_objects.tsv`. The three rules above are what a finer split
+   has to respect.
 
 ## What the region says about the recovered names
 
