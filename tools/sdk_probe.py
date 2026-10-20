@@ -9,6 +9,7 @@ can run at once. docs/sdk-matching.md has the method.
 from __future__ import annotations
 
 import argparse
+import shlex
 import struct
 import subprocess
 import sys
@@ -29,11 +30,11 @@ def compile_probe(source: Path, toolchain: str, out: Path, extra: list[str]) -> 
     chain = TOOLCHAINS[toolchain]
     prefix = i386_prefix().split()
     asm = out.with_suffix(".s")
-    run = prefix + [str(ROOT / chain["cc1"]), *chain["defines"].replace("'", "").split(),
-                    "-Iinclude", "-Isrc", *chain["flags"].split(), *extra,
+    run = prefix + [str(ROOT / chain["cc1"]), *shlex.split(chain["defines"]),
+                    "-Iinclude", "-Isrc", *shlex.split(chain["flags"]), *extra,
                     str(source), "-o", str(asm)]
     subprocess.run(run, cwd=ROOT, check=True)
-    subprocess.run(prefix + [str(ROOT / chain["as"]), *chain["as_flags"].split(),
+    subprocess.run(prefix + [str(ROOT / chain["as"]), *shlex.split(chain["as_flags"]),
                              "-o", str(out), str(asm)], cwd=ROOT, check=True)
 
 
