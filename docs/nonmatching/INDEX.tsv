@@ -4,7 +4,7 @@ fldRunEffSet	code_00116AD0	0x12C	67 of 73 words differ	docs/nonmatching/code_001
 fldRunEffTask	code_00116AD0	0x220	115 of 136 words differ	docs/nonmatching/code_00116AD0.md	69
 fldRunTamaSe	code_00116AD0	0x3C8	165 of 230 words differ	docs/nonmatching/code_00116AD0.md	86
 fldGbFlagClear	code_00116AD0	0x124	23 of 73 words differ	docs/nonmatching/code_00116AD0.md	113
-fldAnahoriSelectInit	code_00116AD0	0x7C		docs/nonmatching/code_00116AD0.md	138
+fldAnahoriSelectInit	code_00116AD0	0x7C	10 of 30 words differ	docs/nonmatching/code_00116AD0.md	138
 slCopyNonZero	code_00144798	0x40	14 of 16 words match	docs/nonmatching/code_00144798.md	5
 fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/nonmatching/code_00144798.md	26
 fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/nonmatching/code_00144798.md	55

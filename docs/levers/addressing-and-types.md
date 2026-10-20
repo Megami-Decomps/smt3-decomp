@@ -1725,3 +1725,41 @@
   retail's single `lq`/`sq`. `fldEveHit_ChkDir2` copies `hit->workdata` this
   way. The `SDF_VU0_COPYVECTOR` row above still applies where retail wants an
   `addiu` address temp; use `u128` where the store is at a plain frame offset.
+- **`addu base, off` against `addu off, base` in a byte index is the offset's
+  own local.** Every spelling of the index expression gives the offset first:
+  `p[(sz * j + i) * 2]`, `*((u8 *)p + ...)`, `*(u8 *)((u32)p + ...)`,
+  `2 * (...)`, `(i + sz * j) * 2`, and a two-byte struct array indexed by the
+  unscaled value all emit `addu rd, off, base`. Assigning the byte offset to a
+  named `s32` first, `offset = (sz * j + i) * 2; p[offset]`, gives retail's
+  `addu rd, base, off`; a `u8 *` local holding the whole address does too.
+  `FroFtoI` was one word out on this alone.
+- **A global pointer read inside a loop beats caching it, second case.**
+  `FroFtoI` writes `((fldRunMapGrid_t *)pFroMapHead)->sizeX` at all three uses
+  (the inner bound, the row multiply and nothing else) and
+  `(u8 *)fldRunMapScale` at the one use, and comes out frameless with the two
+  counts reloaded every iteration the way retail has them. A `grid` local plus
+  a `cells` local, both initialised at their declarations, makes gcc hoist both
+  counts into registers, which costs one callee-saved register and a 16-byte
+  frame: 79 of 80 differing words against 1. Converting the two loop-invariant
+  `s16` globals to `f32` at the top as named locals is the other half of it:
+  `f32 ox = fldRun_MAP_OX;` gives retail's `lh` plus `mtc1`/`cvt.s.w` in the
+  prologue, while leaving them inline keeps them integers and spends the
+  registers on `lhu` plus `sll`/`sra` pairs instead.
+- **An `s32` cast has to sit inside the unsigned shift, not around the sum.**
+  Where retail has `srl` for a shift and a signed `%` on the enclosing sum,
+  write `(s32)(((u32)f() >> 4) & 1)`. Without the inner `(u32)` the shift is
+  `sra`; without the outer `(s32)` the whole sum is unsigned and `% 4` collapses
+  to `andi 3`. `fldRunDanteSe` needed both, on an implicitly declared
+  `dds3GetRandA`; giving that callee its real `u32` prototype loses the signed
+  modulo and is 60 of 169 words out.
+- **Where one frame vector is both a VU0 store target and a later call
+  argument, the store is `SDF_VU0_STOREVECTOR_NOMEM`.** The plain
+  memory-clobbering store lets cse coalesce its address pseudo with the
+  long-lived one the calls use, so the `addiu rd, $29, N` is emitted once;
+  retail emits it twice, once dead into a caller-saved register for the `sqc2`
+  and once into the callee-saved register the calls read. `fldRunTamaInit`
+  stores the rotation quaternion and then passes `&rot` to three
+  `dds3AddUnitObjectBasic` calls, and went from 210 of 248 differing words to
+  exact on the macro alone. A second `sdfVector4_t *` local for the calls does
+  not reach it, and neither does splitting the `dds3AllocObjectId` call out of
+  the argument list.

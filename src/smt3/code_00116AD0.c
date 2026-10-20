@@ -125,7 +125,8 @@ typedef struct {
     u8 unk94[12];
 } fldSceneParam_t;
 typedef struct {
-    u32 unk00;
+    u16 sizeX;
+    u16 sizeZ;
     u32 cellsOffset;
 } fldRunMapGrid_t;
 
@@ -238,6 +239,15 @@ extern f32 sdfCos(f32 radians);
 extern void fldFindDoorEvent(void *event);
 extern void fldFindTakaraSlot(s32 id);
 extern char D_005316B0[];
+extern char D_005316D0[], D_005316F0[], D_00531710[], D_00531728[], D_00531740[], D_00531758[];
+extern s32 gfldPlayerSize;
+extern void *gfldAnaPtr;
+extern s32 gfldAnaSize;
+extern void *gfldWavePtr;
+extern s32 gfldWaveSize;
+extern void mdlPackDecode(s32 group, s32 id, s32 mode, void *data, s32 size);
+extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
 extern void *gfldPlayerPtr;
 extern s32 gfldPlayerSizeBk;
 extern s32 slGetExitType(void);
@@ -313,6 +323,19 @@ extern dds3Basic_t *fldRunTama2Basic;
 extern dds3Basic_t *fldRunTama3Basic;
 extern s32 D_0054EABC;
 extern sdfVector4_t D_00531148;
+extern sdfVector4_t D_00531040;
+extern char D_00531050[], D_00531060[], D_00531070[];
+extern char D_00531080[], D_00531098[], D_005310B0[], D_005310C8[];
+extern char D_005310E0[], D_005310F8[], D_00531118[], D_00531130[];
+extern fldEffRes_t fldDspark01File;
+extern fldEffRes_t fldDsmoke2File;
+extern fldEffRes_t fldDspark02File;
+extern fldEffRes_t fldGun02aFile;
+extern fldEffRes_t fldGun01a0File;
+extern fldEffRes_t fldMuzzleB010File;
+extern fldEffRes_t fldDsmoke1File;
+extern fldEffRes_t fldDflash1File;
+extern void Mult(void);
 typedef struct {
     f32 f[10];
 } fldTamaSeFrame_t;
@@ -476,21 +499,29 @@ typedef struct
     f32 y;
     f32 z;
     f32 turn;
-    u8 unk14[0x8];
-    u16 mapIx;
-    u16 mapIz;
-    u8 unk20[0x18];
+    f32 unk14;
+    f32 unk18;
+    s16 mapIx;
+    s16 mapIz;
+    u8 unk20[0x4];
+    u16 unk24;
+    u16 unk26;
+    s32 unk28;
+    void *unk2C;
+    s32 unk30;
+    s32 unk34;
     s32 waitCount;
     f32 angleToPlayer;
     f32 speed;
-    u8 unk44[0x8];
+    s32 unk44;
+    s32 unk48;
     u32 flag;
     s32 unk50;
     s32 unk54;
     f32 unk58;
     f32 unk5C;
     f32 unk60;
-    u8 unk64[0x4];
+    s32 unk64;
     char *doorName;
     u16 mapIxOld;
     u16 mapIzOld;
@@ -516,6 +547,14 @@ extern fldFollowCameraControl_t *fldGetFollowCameraControl(void);
 extern fldSequenceController_t fldAutoMapSeqFlags;
 extern u32 fldEncountFlags;
 extern s32 fldRunDanteHandle __attribute__((section(".bss")));
+extern s32 fldRunDanteSe_asise;
+extern s8 slNewGameBit2208, slNewGameBit2209, slNewGameBit2210, slNewGameBit2211;
+extern s8 slNewGameBit2212, slNewGameBit2213, slNewGameBit2323, slNewGameBit162;
+extern s8 slNewGameBit2561[0x18];
+extern u16 D_0054EA16;
+extern s32 D_0054EA18;
+extern sdfMemHandle_t *D_0054EA1C;
+extern sdfMemHandle_t *D_00551C7C;
 extern s32 gFldAnahoriAkumaIdx;
 extern s32 gFldAnahoriAkumaIdxMax;
 extern s32 fldProcAmWait;
@@ -593,9 +632,235 @@ INCLUDE_ASM(const s32, "code_00116AD0", dds3GlobalWorkInit);
 void dds3GlobalWorkUserInit(void) {
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", NewGame2Push);
+void NewGame2Push(void)
+{
+    s32 i;
 
-INCLUDE_ASM(const s32, "code_00116AD0", NewGame2Pop);
+    slNewGameBit2208 = 0;
+    slNewGameBit2209 = 0;
+    slNewGameBit2210 = 0;
+    slNewGameBit2211 = 0;
+    slNewGameBit2212 = 0;
+    slNewGameBit2213 = 0;
+    slNewGameBit2323 = 0;
+    slNewGameBit162 = 0;
+    D_0054EA16 = 0;
+    D_0054EA18 = 0;
+    if (evtBitCheck(0x8A0) != 0) {
+        slNewGameBit2208 = 1;
+    }
+    if (evtBitCheck(0x8A1) != 0) {
+        slNewGameBit2209 = 1;
+    }
+    if (evtBitCheck(0x8A2) != 0) {
+        slNewGameBit2210 = 1;
+    }
+    if (evtBitCheck(0x8A3) != 0) {
+        slNewGameBit2211 = 1;
+    }
+    if (evtBitCheck(0x8A4) != 0) {
+        slNewGameBit2212 = 1;
+    }
+    if (evtBitCheck(0x8A5) != 0) {
+        slNewGameBit2213 = 1;
+    }
+    if (evtBitCheck(0x913) != 0) {
+        slNewGameBit2323 = 1;
+    }
+    if (evtBitCheck(0xA2) != 0) {
+        slNewGameBit162 = 1;
+    }
+    D_0054EA16 = DDS3_GBWK->half0C;
+    D_0054EA18 = DDS3_GBWK->unk3C;
+    D_0054EA1C = sdfMemAllocDirect(0x7E90);
+    memcpy(sdfMemGetPtr(D_0054EA1C), (u8 *)DDS3_GBWK + 0x11E80, 0x7E90);
+    D_00551C7C = sdfMemAllocDirect(0xA0);
+    memcpy(sdfMemGetPtr(D_00551C7C), DDS3_GBWK->boss_press, 0xA0);
+    for (i = 0; i < 0x18; i++) {
+        slNewGameBit2561[i] = 0;
+    }
+    if (evtBitCheck(0xA01) != 0) {
+        slNewGameBit2561[0] = 1;
+    }
+    if (evtBitCheck(0xA03) != 0) {
+        slNewGameBit2561[1] = 1;
+    }
+    if (evtBitCheck(0xA05) != 0) {
+        slNewGameBit2561[2] = 1;
+    }
+    if (evtBitCheck(0xA07) != 0) {
+        slNewGameBit2561[3] = 1;
+    }
+    if (evtBitCheck(0xA09) != 0) {
+        slNewGameBit2561[4] = 1;
+    }
+    if (evtBitCheck(0xA0B) != 0) {
+        slNewGameBit2561[5] = 1;
+    }
+    if (evtBitCheck(0xA0D) != 0) {
+        slNewGameBit2561[6] = 1;
+    }
+    if (evtBitCheck(0xA0F) != 0) {
+        slNewGameBit2561[7] = 1;
+    }
+    if (evtBitCheck(0xA11) != 0) {
+        slNewGameBit2561[8] = 1;
+    }
+    if (evtBitCheck(0xA13) != 0) {
+        slNewGameBit2561[9] = 1;
+    }
+    if (evtBitCheck(0xA15) != 0) {
+        slNewGameBit2561[10] = 1;
+    }
+    if (evtBitCheck(0xA17) != 0) {
+        slNewGameBit2561[11] = 1;
+    }
+    if (evtBitCheck(0xA19) != 0) {
+        slNewGameBit2561[12] = 1;
+    }
+    if (evtBitCheck(0xA1B) != 0) {
+        slNewGameBit2561[13] = 1;
+    }
+    if (evtBitCheck(0xA1D) != 0) {
+        slNewGameBit2561[14] = 1;
+    }
+    if (evtBitCheck(0xA1F) != 0) {
+        slNewGameBit2561[15] = 1;
+    }
+    if (evtBitCheck(0xA21) != 0) {
+        slNewGameBit2561[16] = 1;
+    }
+    if (evtBitCheck(0xA23) != 0) {
+        slNewGameBit2561[17] = 1;
+    }
+    if (evtBitCheck(0xA25) != 0) {
+        slNewGameBit2561[18] = 1;
+    }
+    if (evtBitCheck(0xA27) != 0) {
+        slNewGameBit2561[19] = 1;
+    }
+    if (evtBitCheck(0xA29) != 0) {
+        slNewGameBit2561[20] = 1;
+    }
+    if (evtBitCheck(0xA2B) != 0) {
+        slNewGameBit2561[21] = 1;
+    }
+    if (evtBitCheck(0xA2D) != 0) {
+        slNewGameBit2561[22] = 1;
+    }
+    if (evtBitCheck(0xA2F) != 0) {
+        slNewGameBit2561[23] = 1;
+    }
+}
+
+void NewGame2Pop(void)
+{
+    s32 i;
+
+    if (slNewGameBit2208 != 0) {
+        evtBitOn(0x8A0);
+    }
+    if (slNewGameBit2209 != 0) {
+        evtBitOn(0x8A1);
+    }
+    if (slNewGameBit2210 != 0) {
+        evtBitOn(0x8A2);
+    }
+    if (slNewGameBit2211 != 0) {
+        evtBitOn(0x8A3);
+    }
+    if (slNewGameBit2212 != 0) {
+        evtBitOn(0x8A4);
+    }
+    if (slNewGameBit2213 != 0) {
+        evtBitOn(0x8A5);
+    }
+    if (slNewGameBit2323 != 0) {
+        evtBitOn(0x913);
+    }
+    if (slNewGameBit162 != 0) {
+        evtBitOn(0xA2);
+    }
+    DDS3_GBWK->unk3C = D_0054EA18;
+    DDS3_GBWK->word08 = D_0054EA18;
+    DDS3_GBWK->half0C = D_0054EA16;
+    memcpy((u8 *)DDS3_GBWK + 0x11E80, sdfMemGetPtr(D_0054EA1C), 0x7E90);
+    sdfMemFreeDirect(D_0054EA1C);
+    memcpy(DDS3_GBWK->boss_press, sdfMemGetPtr(D_00551C7C), 0xA0);
+    sdfMemFreeDirect(D_00551C7C);
+    if (slNewGameBit2561[0] != 0) {
+        evtBitOn(0xA01);
+    }
+    if (slNewGameBit2561[1] != 0) {
+        evtBitOn(0xA03);
+    }
+    if (slNewGameBit2561[2] != 0) {
+        evtBitOn(0xA05);
+    }
+    if (slNewGameBit2561[3] != 0) {
+        evtBitOn(0xA07);
+    }
+    if (slNewGameBit2561[4] != 0) {
+        evtBitOn(0xA09);
+    }
+    if (slNewGameBit2561[5] != 0) {
+        evtBitOn(0xA0B);
+    }
+    if (slNewGameBit2561[6] != 0) {
+        evtBitOn(0xA0D);
+    }
+    if (slNewGameBit2561[7] != 0) {
+        evtBitOn(0xA0F);
+    }
+    if (slNewGameBit2561[8] != 0) {
+        evtBitOn(0xA11);
+    }
+    if (slNewGameBit2561[9] != 0) {
+        evtBitOn(0xA13);
+    }
+    if (slNewGameBit2561[10] != 0) {
+        evtBitOn(0xA15);
+    }
+    if (slNewGameBit2561[11] != 0) {
+        evtBitOn(0xA17);
+    }
+    if (slNewGameBit2561[12] != 0) {
+        evtBitOn(0xA19);
+    }
+    if (slNewGameBit2561[13] != 0) {
+        evtBitOn(0xA1B);
+    }
+    if (slNewGameBit2561[14] != 0) {
+        evtBitOn(0xA1D);
+    }
+    if (slNewGameBit2561[15] != 0) {
+        evtBitOn(0xA1F);
+    }
+    if (slNewGameBit2561[16] != 0) {
+        evtBitOn(0xA21);
+    }
+    if (slNewGameBit2561[17] != 0) {
+        evtBitOn(0xA23);
+    }
+    if (slNewGameBit2561[18] != 0) {
+        evtBitOn(0xA25);
+    }
+    if (slNewGameBit2561[19] != 0) {
+        evtBitOn(0xA27);
+    }
+    if (slNewGameBit2561[20] != 0) {
+        evtBitOn(0xA29);
+    }
+    if (slNewGameBit2561[21] != 0) {
+        evtBitOn(0xA2B);
+    }
+    if (slNewGameBit2561[22] != 0) {
+        evtBitOn(0xA2D);
+    }
+    if (slNewGameBit2561[23] != 0) {
+        evtBitOn(0xA2F);
+    }
+}
 
 void dds3GlobalWorkUserInit2(s32 mode)
 {
@@ -1343,9 +1608,134 @@ void fldRunDanteClear(void)
     fldRunDanteHandle = -1;
 }
 
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531040);
+void fldRunTamaInit(void)
+{
+    fldEffRes_t *res;
+    sdfVector4_t pos;
+    sdfVector4_t rot;
+    sdfVector4_t axis;
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunTamaInit);
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    memset(&rot, 0, sizeof(rot));
+    rot.w = 1.0f;
+    axis = D_00531040;
+    SDF_VU0_LOADVECTOR(&axis);
+    FromRotation(3.1415926f);
+    SDF_VU0_LOADVECTOR_B(&rot);
+    Mult();
+    SDF_VU0_STOREVECTOR_NOMEM(&rot);
+    D_0054EAB0 = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
+    dds3SetUnitObjectId(D_0054EAB0, D_00531050);
+    dds3ObjectBaseMakeUnit(D_0054EAB0, 2, 0x11);
+    dds3ObjectBaseOnFlag(D_0054EAB0, 1);
+    dds3ObjectBaseOnFlag(D_0054EAB0, 0x100);
+    fldRunTama2Basic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
+    dds3SetUnitObjectId(fldRunTama2Basic, D_00531060);
+    dds3ObjectBaseMakeUnit(fldRunTama2Basic, 2, 0x12);
+    dds3ObjectBaseOnFlag(fldRunTama2Basic, 1);
+    dds3ObjectBaseOnFlag(fldRunTama2Basic, 0x100);
+    fldRunTama3Basic = dds3AddUnitObjectBasic(dds3AllocObjectId(), &pos, &rot);
+    dds3SetUnitObjectId(fldRunTama3Basic, D_00531070);
+    dds3ObjectBaseMakeUnit(fldRunTama3Basic, 2, 0x13);
+    dds3ObjectBaseOnFlag(fldRunTama3Basic, 1);
+    dds3ObjectBaseOnFlag(fldRunTama3Basic, 0x100);
+    res = &fldDspark01File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->file = sdfDevLoadFileEx(D_00531080, &res->data, &res->size);
+    res = &fldDsmoke2File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_00531098, &res->data, &res->size);
+    res = &fldDspark02File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_005310B0, &res->data, &res->size);
+    res = &fldGun02aFile;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_005310C8, &res->data, &res->size);
+    res = &fldGun01a0File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_005310E0, &res->data, &res->size);
+    res = &fldMuzzleB010File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_005310F8, &res->data, &res->size);
+    res = &fldDsmoke1File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_00531118, &res->data, &res->size);
+    res = &fldDflash1File;
+    res->file = NULL;
+    res->data = NULL;
+    res->size = 0;
+    res->part = NULL;
+    res->eff = NULL;
+    res->life = 0;
+    res->x = 0.0f;
+    res->y = 0.0f;
+    res->z = 0.0f;
+    res->turn = 0.0f;
+    res->file = sdfDevLoadFileEx(D_00531130, &res->data, &res->size);
+}
 
 /* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
 #ifdef NON_MATCHING
@@ -1587,6 +1977,30 @@ void fldRunTamaSe(void)
 INCLUDE_ASM(const s32, "code_00116AD0", fldRunTamaSe);
 #endif
 
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531040);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531050);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531060);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531070);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531080);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531098);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005310B0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005310C8);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005310E0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005310F8);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531118);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531130);
+
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531148);
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531158);
@@ -1631,7 +2045,42 @@ void fldFreeRunMapData(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", FroFtoI);
+s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz)
+{
+    f32 ox = fldRun_MAP_OX;
+    f32 oz = fldRun_MAP_OZ;
+    f32 best = 10000.0f;
+    s16 bestX = 0;
+    s16 bestZ = 0;
+    s16 i;
+    s16 j;
+    s32 offset;
+    f32 dx;
+    f32 dz;
+    f32 d;
+
+    for (j = 0; j < ((fldRunMapGrid_t *)pFroMapHead)->sizeZ; j++) {
+        for (i = 0; i < ((fldRunMapGrid_t *)pFroMapHead)->sizeX; i++) {
+            offset = (((fldRunMapGrid_t *)pFroMapHead)->sizeX * j + i) * 2;
+            if (((u8 *)fldRunMapScale)[offset] != 0) {
+                dx = x - (ox + (f32)fldRun_MAP_BX * (f32)i);
+                dz = z - (oz + (f32)-fldRun_MAP_BZ * (f32)j);
+                EE_SQRT_F32_SCHED(d, dx * dx + dz * dz);
+                if (d < best) {
+                    best = d;
+                    bestZ = j;
+                    bestX = i;
+                }
+            }
+        }
+    }
+    *ix = bestX;
+    *iz = bestZ;
+    if (bestX == 0 && bestZ == 0) {
+        return -1;
+    }
+    return 0;
+}
 
 void fldMapIndexToPos(s16 ix, s16 iz, f32 *px, f32 *pz)
 {
@@ -1804,7 +2253,43 @@ INCLUDE_RODATA(const s32, "code_00116AD0", D_00531338);
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531350);
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteAi);
+void fldRunDanteAi(void)
+{
+    switch (fldRun_Dante.unk00) {
+    case 0:
+        func_0011C790();
+        return;
+    case 1:
+        func_0011C798();
+        return;
+    case 2:
+        func_0011C7B8();
+        return;
+    case 9:
+        fldRunDanteDoin();
+        return;
+    case 5:
+        fldRunDantePwak();
+        return;
+    case 3:
+        fldRunDanteSoba();
+        return;
+    case 4:
+        fldRunDantePatr();
+        return;
+    case 7:
+        fldRunDanteGun1();
+        return;
+    case 8:
+        fldRunDanteGun2();
+        return;
+    default:
+        do {
+            fldRunDanteMove();
+        } while (0);
+        break;
+    }
+}
 
 void fldRunDanteLoadBgm(void)
 {
@@ -1840,7 +2325,100 @@ void fldRunDanteSwapBgm(s32 toDante)
     }
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteInit);
+void fldRunDanteInit(void)
+{
+    fldMakeFroFileName();
+    fldRunDanteLoadBgm();
+    fldRunTamaInit();
+    fldRun_MAP_BX = 600;
+    fldRun_MAP_BZ = 600;
+    switch (fldGlobalBase.floor) {
+    case 3:
+        fldRun_MAP_OX = 0xF6E;
+        fldRun_MAP_OZ = 0xC1C;
+        fldRun_Dante.mapIx = 3;
+        fldRun_Dante.mapIz = 10;
+        break;
+    case 4:
+        fldRun_MAP_OX = 0xC8;
+        fldRun_MAP_OZ = 0x64;
+        fldRun_Dante.mapIx = 7;
+        fldRun_Dante.mapIz = 0;
+        fldRunDanteStartX[0] = 3;
+        fldRunDanteStartX[1] = 2;
+        break;
+    case 5:
+        fldRun_MAP_OX = 0xCE4;
+        fldRun_MAP_OZ = -0x834;
+        fldRun_Dante.mapIx = 0;
+        fldRun_Dante.mapIz = 0;
+        break;
+    case 7:
+        fldRun_MAP_OX = -0x1482;
+        fldRun_MAP_OZ = 0xFD2;
+        fldRun_Dante.mapIx = 0;
+        fldRun_Dante.mapIz = 0;
+        break;
+    case 8:
+        fldRun_MAP_OX = -0xDAC;
+        fldRun_MAP_OZ = -0xB54;
+        fldRun_Dante.mapIx = 0;
+        fldRun_Dante.mapIz = 0;
+        break;
+    case 9:
+        fldRun_MAP_OX = 0x12C;
+        fldRun_MAP_OZ = 0x834;
+        fldRun_Dante.mapIx = 0;
+        fldRun_Dante.mapIz = 0;
+        break;
+    case 10:
+        fldRun_MAP_OX = -0xA8C;
+        fldRun_MAP_OZ = -0xA8C;
+        fldRun_Dante.mapIx = 0;
+        fldRun_Dante.mapIz = 0;
+        break;
+    }
+    fldRun_Dante.waitCount = -20;
+    fldRun_Dante.unk26 = 0;
+    fldRun_Dante.unk30 = 0;
+    fldRun_Dante.unk34 = 0;
+    fldRun_Dante.y = 0.0f;
+    fldRun_Dante.angleToPlayer = 0.0f;
+    fldRun_Dante.speed = 0.0f;
+    fldRun_Dante.unk48 = 0;
+    fldRun_Dante.flag = 0;
+    fldRun_Dante.unk54 = 0;
+    fldRun_Dante.unk64 = 0;
+    fldRun_Dante.unk60 = 0.0f;
+    fldRun_Dante.x = fldRun_MAP_OX + (f32)fldRun_MAP_BX * (f32)fldRun_Dante.mapIx;
+    fldRun_Dante.z = fldRun_MAP_OZ + (f32)-fldRun_MAP_BZ * (f32)fldRun_Dante.mapIz;
+    switch (fldGlobalBase.floor) {
+    case 3:
+        fldRunDanteStanceSet(6);
+        evtBitOn(0xAF4);
+        break;
+    case 4:
+        fldRunDanteStanceSet(2);
+        evtBitOn(0xAF4);
+        break;
+    case 5:
+        fldRunDanteStanceSet(3);
+        evtBitOn(0xAF4);
+        break;
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+        fldRunAiCng(0);
+        evtBitOff(0xAF4);
+        break;
+    default:
+        fldRunAiCng(2);
+        evtBitOff(0xAF4);
+        break;
+    }
+    fldRunDanteSetModel();
+}
 
 void fldRunDanteShutdown(void)
 {
@@ -1896,7 +2474,66 @@ s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z)
     return v;
 }
 
-INCLUDE_ASM(const s32, "code_00116AD0", fldRunDanteSe);
+void fldRunDanteSe(void)
+{
+    s32 seFlag = 0;
+    s32 walkFlag = 0;
+    s32 vol;
+    f32 prev;
+    f32 now;
+
+    now = fldRun_Dante.unk18;
+    prev = fldRun_Dante.unk14;
+    vol = fldRunDanteDistToTarget(fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z);
+    switch (fldRun_Dante.unk50) {
+    case 0:
+        if (prev < 5.0f && 5.0f <= now) {
+            seFlag = 1;
+        }
+        if (prev < 15.0f && 15.0f <= now) {
+            seFlag = 1;
+        }
+        break;
+    case 2:
+        if (prev < 5.0f && 5.0f <= now) {
+            seFlag = 1;
+        }
+        if (prev < 24.0f && 24.0f <= now) {
+            seFlag = 1;
+        }
+        break;
+    case 1:
+        if (prev < 3.0f && 3.0f <= now) {
+            seFlag = 1;
+        }
+        if (prev < 18.0f && 18.0f <= now) {
+            seFlag = 1;
+        }
+        if (fldRun_Dante.flag & 2) {
+            walkFlag = 1;
+        }
+        break;
+    case 4:
+        if (prev < 17.0f && 17.0f <= now) {
+            walkFlag = 1;
+        }
+        break;
+    }
+    if (seFlag != 0) {
+        p2sdPlaySE(0x6F0001 + fldRunDanteSe_asise, vol, 0x3F);
+        fldRunDanteSe_asise =
+            (fldRunDanteSe_asise + (s32)(((u32)dds3GetRandA(0) >> 4) & 1) + 1) % 4;
+    }
+    if (walkFlag != 0) {
+        p2sdPlaySE(0x6F000A, vol * 30 / 100, 0x3F);
+    }
+    if (fldRun_Dante.flag & 8) {
+        p2sdPlaySE(0x6F0005, vol * 30 / 100, 0x3F);
+    }
+    if (fldRun_Dante.flag & 4) {
+        fldRunDanteSwapBgm(fldRun_Dante.unk54);
+    }
+}
 
 void fldRunView(void)
 {
@@ -2773,13 +3410,45 @@ void fldPlayerAFree(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "code_00116AD0", D_00531690);
+void fldJDataLoad(void)
+{
+    void *src;
+    void *dst;
 
-INCLUDE_RODATA(const s32, "code_00116AD0", D_005316A0);
-
-INCLUDE_RODATA(const s32, "code_00116AD0", D_005316B0);
-
-INCLUDE_ASM(const s32, "code_00116AD0", fldJDataLoad);
+    if (fldGlobalBase.area == 11 || fldGlobalBase.area == 14) {
+        if (evtBitCheck(0x8B0) != 0) {
+            mhfldPlayerFile = sdfDevLoadFileEx(D_005316D0, &gfldPlayerPtr, &gfldPlayerSize);
+        } else {
+            mhfldPlayerFile = sdfDevLoadFileEx(D_005316F0, &gfldPlayerPtr, &gfldPlayerSize);
+        }
+        mdlPackDecode(2, 0, 0x101, gfldPlayerPtr, gfldPlayerSize);
+    } else if (fldGlobalBase.area < 10) {
+        mhfldPlayerFile = sdfDevLoadFileEx(D_00531710, &gfldPlayerPtr, &gfldPlayerSize);
+        mdlPackDecode(2, 4, 0x101, gfldPlayerPtr, gfldPlayerSize);
+    } else {
+        fldPlayerALoad();
+        gfldPlayerSize = gfldPlayerSizeBk;
+        mhfldPlayerFile = sdfMemAllocDirect(gfldPlayerSize);
+        src = sdfMemGetPtr(fldPlayerAnimData);
+        dst = sdfMemGetPtr(mhfldPlayerFile);
+        memcpy(dst, src, gfldPlayerSize);
+        gfldPlayerPtr = dst;
+        mdlPackDecode(2, 0, 0x101, dst, gfldPlayerSize);
+        sdfMemFreeDelayedDirect(mhfldPlayerFile);
+        mhfldPlayerFile = NULL;
+    }
+    if (fldGlobalBase.area == 21 || fldGlobalBase.area == 26 || fldGlobalBase.area >= 36) {
+        mhfldAnaFile = sdfDevLoadFileEx(D_00531728, &gfldAnaPtr, &gfldAnaSize);
+        mdlPackDecode(2, 5, 0x101, gfldAnaPtr, gfldAnaSize);
+    }
+    if (fldGlobalBase.area == 22) {
+        mhfldWaveFile = sdfDevLoadFileEx(D_00531740, &gfldWavePtr, &gfldWaveSize);
+        mdlPackDecode(2, 0x1B, 0x101, gfldWavePtr, gfldWaveSize);
+    } else if (fldGlobalBase.area == 45) {
+        mhfldWaveFile = sdfDevLoadFileEx(D_00531758, &gfldWavePtr, &gfldWaveSize);
+        mdlPackDecode(2, 0x1B, 0x101, gfldWavePtr, gfldWaveSize);
+    }
+}
 
 void fldJDataClear(void)
 {
@@ -2888,6 +3557,24 @@ void fldReleaseUnitPad(void)
     }
     fldEncountCheckCount = 4;
 }
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531690);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005316A0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005316B0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005316D0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_005316F0);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531710);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531728);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531740);
+
+INCLUDE_RODATA(const s32, "code_00116AD0", D_00531758);
 
 INCLUDE_RODATA(const s32, "code_00116AD0", D_00531770);
 

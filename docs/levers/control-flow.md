@@ -107,6 +107,7 @@
 | two early exits each returning a different call's result, where your C reuses one variable and spends a saved register on it | two locals and `return res;` then `return object;`. The single variable spans both calls, so its copy lands in a callee-saved register; retail copies the first result into `$3` for the test and leaves `$2` holding it as the return value. `evt_1FA398` went from 26 of 58 differing words to 21 |
 | `slt index, count` then `xori rd, rd, 0` and a `movn`, where your C emits `slt count - 1, index` and a `movz` | write the guard relationally the way retail reads it, `if (index >= count) { x = a; } else { x = b; }`, not `if (count - 1 < index)`. Both are one `slt` and both if-convert, but the spelling decides the `slt` operand order and with it whether the select comes out `movn` or `movz`. The initialiser form, `x = a; if (index < count) { x = b; }`, does not if-convert here at all: it costs a branch, a second block and 16 bytes of frame. `fldDoor_ElvExit` went from 151 of 156 words and four words short to exact, with `count <= index` and `!(index < count)` equally good |
 | a loop whose back edge assigns the one parameter and jumps to a label just past the prologue | a self tail call, `return f(value);`, not a `for (;;)` with `continue`. ee-gcc 2.96 eliminates self tail recursion into exactly that jump, while the `for` form gets jump-threaded: gcc proves the loop test true on the back edge and keeps its result in a callee-saved register, which costs the flag's register, its save and restore, and a duplicated loop header. `fldInfChkFastPanel` dropped from 56 to 32 excess bytes on the rewrite alone and is still open on the rest |
+| `jal` and a full epilogue for **one** call where every other call in the function must keep its `j` | wrap that one call in a loop: `do { f(); } while (0);`. `expand_call` drops the sibling call whenever `stmt_loop_nest_empty()` is false, so any loop nesting around the call blocks it, only there, at no instruction and no register cost. Cheaper and more local than the whole-function `s32 dummy; s32 *p = &dummy;` and than a dead store, and it is the one form that works when the other arms of the same `switch` have to sibcall. `fldRunDanteAi` has nine `switch` arms that `j` and a default that `jal`s `fldRunDanteMove`, and went from 3 of 51 differing words to exact; `for (;;) { f(); break; }` and `while (1) { f(); break; }` are identical, while `(void)f();`, `if (1) { f(); }`, a prototype for the callee, a `goto` to a label just above the call, and the arm written with `break` or `return` all still sibcall |
 
 A flag mask that steps by a constant shift per iteration is a source variable,
 not an expression. Retail's `sll $18, $18, 2` in the loop-closing delay slot
@@ -201,3 +202,22 @@ end marked, so expect the body to sit one word early.
   `switch` is what places both arms out of line.
 | `beq` against zero, then `bltz`, then `slti` on one value, where your `if` chain folds to a single `sltiu` | a `switch` with an **empty `case 0:`**, the real range as contiguous `case` labels, and the out-of-range work in `default:`. `SetGroupTarget2` guards its marking loop on `1 <= code <= 10` and zeroes `code` otherwise: as `if (code == 0) {} else if (code < 0) { code = 0; } else if (code >= 11) { code = 0; } else { loop }` it is 29 of 56 words out, and as `case 0: break;` plus `case 1:`..`case 10:` plus `default: code = 0;` it is exact. The empty zero case is what keeps the `beq` separate; the value `0` needing no work and the default needing some is exactly what the switch expresses and the chain does not |
 
+An ascending `for` over a byte array is what produces retail's **descending**
+walking pointer. `for (i = 0; i < 0x18; i++) { arr[i] = 0; }` gives
+`addiu p, base, 0x17`, a `bgez` downcounter and `sb $0, 0($p)` with the pointer
+decremented in the branch's delay slot. All four descending spellings,
+`for (i = 0x17; i >= 0; i--)`, the same as a `while`, a `do`/`while (--i >= 0)`
+and `i = 0x18; while (--i >= 0)`, leave the address as `addu rd, base, i`
+recomputed inside the loop and come out two words short, and `memset` of the
+array is wrong from the first word. `NewGame2Push`'s 24-byte clear went from
+154 of 328 differing words to exact. This is the store side of the "global
+pointer read inside a loop" row: there a destination local makes gcc reverse an
+ascending loop, here the ascending loop is already what retail wrote.
+
+Where a `switch` arm's stores come out in an order you did not write, sweep
+**one** arm's permutations and transfer the winner. `fldRunDanteInit`'s seven
+arms each store two gp-relative `sh`s and two struct `sh`s, gcc permuted each
+arm differently, and retail's source order is the same in all seven: the two
+globals first, then the two struct fields. Sweeping the first arm's 24 orders
+found it in 24 compiles and the other six arms, including the six-statement one
+with two more array stores appended, then matched with no further search.
