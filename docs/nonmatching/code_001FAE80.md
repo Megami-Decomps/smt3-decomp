@@ -2,6 +2,109 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
+## ragDrawList2, ragDrawList3 (code_001FAE80, 0x150 each)
+
+10 of 84 words differ, at the exact 336-byte size, for each of the pair. They
+differ only in the scroll and cursor offsets, the row stride, the list offset,
+the caption word, the kind constant and the header colour, so one analysis
+covers both.
+
+Every instruction matches. The ten differing words are the `ragDrawWork`
+pointer landing in the other caller-saved register in each of the two blocks
+that load it: retail holds it in `$3` for the first block and `$2` for the
+second, this holds it in `$2` and then `$3`. Everything the pointer feeds moves
+with it, which is the whole difference; the `lh`/`lbu` of the scroll and cursor,
+the row pointer, the `lb` of the selected item in the first `fclDrawPanel`
+delay slot, and the three `lw`s of the second panel's position are otherwise
+identical.
+
+Ruled out: the work pointer as a local against `(u8 *)ragDrawWork` written out
+at every use; declaring the local before and after the scroll read; a separate
+local for the cursor byte; and `s16` against `s32` for the scroll. All five give
+the same ten words, so nothing in the source reaches the choice.
+
+## ragBuildList2, ragBuildList3 (code_001FAE80, 0x174 each)
+
+22 of 93 words differ, at the exact 372-byte size, for each of the pair. They
+differ only in the destination offset (`+0x3B` against `+0x44`), the weight
+table and which `ragGetListItem` they call, so one analysis covers both.
+
+The function is settled apart from one instruction. It builds a list of four
+fixed items plus `rand % 4` random ones, sorts it with `qsort` and returns the
+count. The shape that reproduces retail's frame, its `break 0, 7` trap, both
+`bgez` downcounting loops, the `s8` write cursor with its `sll`/`sra`
+re-truncation, the `slt` guarded third loop and the `(s8)` return is
+
+    s32 roll = dds3GetRandA(0);
+    u32 n = 4;
+    s8 pick[n];
+    s32 extra = (u32)roll % sizeof(pick);
+
+The variable-length array is what puts the trap there: ee-gcc expands a
+division by a VLA's size as a divide-by-zero check against the saved size
+plus the division, then folds the division itself. `count` has to be a `u8`
+set in two steps, `count = n;` before the random loop and `count += extra;`
+after, which is what keeps retail's `addiu $20, $0, 0x4` in the loop preheader
+and the `andi $20, $2, 0xFF` after it; written as one `count = n + extra;`
+ee-gcc proves the result fits a byte, drops both the `andi` and the `sll`/`sra`
+of the return, and the function comes out seven words short.
+
+What is left is the modulo. Retail emits `andi $19, $2, 0x3` with no divide,
+this emits `divu`/`mfhi`. The fold happens only when the VLA's size variable is
+dead after the array declaration; here `n` is also read by `count = n;`, which
+keeps it live in a callee-saved register, so the divisor is a register and the
+divide stays. The two cost the same number of words, so the size still matches,
+and the rest of the difference is the register renaming that follows.
+
+Ruled out: `% n` and `% (u32)n` instead of `% sizeof(pick)`, both of which
+divide for real whatever else changes; every combination of `n`, `4` and
+`sizeof(pick)` for the loop bounds, the `shuffleIndices` count and `count`'s
+initial value, nine of which plateau at 22 and three of which fold `count` away
+and lose seven words; a second `u32 m = 4;` for `count`, which ee-gcc merges
+with `n`; declaring the array's size variable separately from `n` so the fold
+does happen, which then loses the parameter copy and both loop-alignment `nop`s
+and measures 86 of 91; and `&work[0x3B]`, `(u8 *)((u32)work + 0x3B)` and a
+`u8 *list = work;` local, none of which reproduce retail's `daddu $16, $5, $0`
+copy of the second parameter.
+
+## func_00206308, func_002065C8 (code_001FAE80, 0x2C0 each)
+
+35 of 176 words differ, at the exact 704-byte size, for each of the pair. They
+are the same copy in opposite directions: `func_00206308` moves the fields of
+one work struct down into a smaller one, `func_002065C8` moves them back, with
+every source and destination displacement exchanged. One analysis covers both.
+
+Every instruction matches. The whole function is twelve copies between the two
+pointers, and both big ones are 576-byte block moves that ee-gcc expands with a
+runtime alignment test, `or` of the two pointers against 7, then an unaligned
+`ldl`/`ldr` loop and an aligned `ld`/`sd` loop. That shape, the twelve copies,
+their order, the two 36-byte and one 32-byte straight-line `ldl`/`ldr` blocks,
+the loop bounds and the branch delay slots all reproduce from
+
+    *(s32 *)(dst + 0x00) = *(s32 *)(src + 0x10);
+    *(u16 *)(dst + 0x04) = *(u16 *)(src + 0x14);
+    *(cmbCopy36_t *)(dst + 0x06) = *(cmbCopy36_t *)(src + 0x16);
+    ...
+
+with `cmbCopy36_t`, `cmbCopy32_t` and `cmbCopy576_t` as all-`s16` structs, whose
+alignment of 2 is what selects the unaligned path.
+
+What is left is one register pair and the scheduling it drags with it. Retail
+reuses the incoming `$4` for the first loaded word and for the second chunk of
+the 36-byte block, and keeps `$3` for the alignment test; this uses `$3` for the
+loaded word and `$4` for the test. Retail also emits the test's `andi`
+immediately after its `or`, nine words in, where this emits it after the
+36-byte block, 37 words in. The second group of copies allocates and schedules
+identically in both.
+
+Ruled out: statement order, searched over the twelve copies including every
+swap of the two scalar pairs and moving the block copies ahead of them, which
+plateaus at 35 or loses 100 words; `s32` against `u32` for the 4-byte copies;
+`u8 *`, `s8 *` and `void *` parameters; explicit `u8 *` locals for the big
+copy's two pointers; and the first six bytes as a single block move, which
+ee-gcc compiles with `lh` rather than retail's `lhu` whether the alignment
+comes from the type or from an `aligned(4)` field, so it cannot be one.
+
 ## func_002429C0 (code_001FAE80, 0x54)
 
 19 of 21 words match, at the exact 84-byte size. Sums `attr[].capacity` over the
@@ -716,6 +819,106 @@ declared before `weight`; and `item = weight + kind * 7 + 7`.
 29 of 51 words match, at the exact size. Byte-identical to
 `ragGetListItem2` above except for the table, `D_0032FCE0`, and it differs
 in the same 22 words for the same reason. Fix one and the other follows.
+
+## fclDrawSpriteAngleCore (code_001FAE80, 0x4A8)
+
+212 of 298 words match, 86 of 298 differ, at the exact 1192-byte size. Builds the
+four-vertex rotated sprite packet: sets the texture filter, allocates the prim
+buffer, turns the rectangle into a centre plus half extents, calls
+`fclCalcRotPos` once per corner, writes the four colour pairs, then the UV,
+screen and depth quadwords, picks a `fclDrawPanelSprite2` code from `mode` and
+links the draw tag into `sdfGrOtTable[ot]`.
+
+The first 70 words are exact, and so is the whole tail from the `mode` switch
+on. Three facts are load-bearing and should not be re-derived:
+
+- `sdf2DGetPrimPacketSize(3, 4)` and `sdf2DMakePrimPacketHeader(packet, 0x15C,
+  3, 0x531, 4)`, the four-vertex counterpart of the five-vertex numbers in
+  `fclDrawSpriteCore`.
+- The four corners live in an addressable array of a two-`u32` struct at
+  `sp+0x10`, and the UVs in a `u32 uv[4]` at `sp+0x0`, which is what gives the
+  `sw`/`lwu` round trips through the frame. The corner members have to be `u32`,
+  not `s32`: retail reloads them with `lwu`, and `s32` members give `lw` with the
+  same instruction count. The `fclCalcRotPos` calls then need `(s32 *)` casts.
+- In the `color != NULL` arm, the two assignments have to be written low pair
+  first, `prim[1]` before `prim[0]` and so on for all four vertices. Written the
+  other way round ee-gcc folds both of `prim[0]`'s shifts into `lbu 0x2` and
+  `lbu 0x3` byte loads, the function comes out two words short, and the
+  difference is 136 words instead of 86.
+
+Three differences are left. The angle reload `mov.s $f12, $f20` sits in the
+`jal` delay slot of the second, third and fourth `fclCalcRotPos` call in retail
+and one instruction earlier here, with `daddu $9, $19, $0` taking the slot
+instead, which accounts for 21 words. One byte of the non-NULL colour comes out
+as `lbu 0x1($30)` here where retail reads `lbu 0x0($30)`: whichever byte
+extraction ee-gcc meets first gets folded into a byte load, and in retail that
+is `c & 0xFF` rather than `(c >> 8) & 0xFF`. And the twelve quadword stores are
+scheduled as six `lwu`s hoisted to the top followed by a chain of `or`s, where
+retail interleaves load, `or` and `sd` per vertex.
+
+Ruled out: four orders for the UV assignments, of which `uv[0]`, `uv[2]`,
+`uv[1]`, `uv[3]` is the best and the only one that reaches 136 before the
+colour fix; swapping the `|` operands in either colour expression, which adds
+two words; the low byte written as `*(u8 *)color` or through a `u8 *cb` local,
+both of which run eight words long; `c = color[0]` against
+`c = *(u32 *)color`; `flags & 1` against `(flags & 1) != 0`; and three orders
+for the quadword block, grouping the UVs in pairs, all four UVs first, and
+depth before UV, all of which give the same 86 words.
+
+## cmbCountEvoReady (code_001FAE80, 0x84)
+
+9 of 34 words match, 25 of 34 differ, 136 against retail's 132 bytes. Counts
+how many of `count` consecutive `datUnitWork_t` entries are alive, not already
+evolved, and have an entry in the evolution table.
+
+The body is settled: the single `lw` of `flag` masked twice, the `beql`/`bnel`
+pair that carries the `count--` into both delay slots, the `(u8)(ready + 1)`
+with its `andi`, the `unit++` by `0xEC` in the loop-back delay slot and the
+`(s8)` return. Written with three nested `if`s rather than one `&&` chain,
+which is worth three words.
+
+What is left is one register. Retail narrows the count parameter in place,
+`andi $5, $5, 0xFF`, and then copies it into `$17`; this narrows straight into
+`$17`, which is one word shorter and leaves a spare callee-saved register that
+shifts the rest of the allocation. Nothing in the source reaches that copy: a
+separate `u8 n = count;` local, a separate `datUnitWork_t *p = unit;` local and
+a `for (; count != 0; count--, unit++)` head all coalesce it away exactly as
+the plain `while` does. See the row on un-coalesced copies in
+[When to stop](../levers/when-to-stop.md).
+
+Ruled out: `ready++` against `ready = ready + 1` against an `s32 ready` with an
+explicit `(u8)` cast, all three identical; the `&&` chain against nested `if`s,
+where nested is three words better and is the draft; and the two loop forms
+above.
+
+## cmbGetLevelUpCount (code_001FAE80, 0x84)
+
+22 of 32 words match, 10 of 32 differ, 128 against retail's 132 bytes. Copies a
+devil into a scratch `datUnitWork_t`, adds the experience, and counts how many
+levels that buys by stepping `datAdvanceDevilLevel` until the experience no
+longer reaches the next threshold or the level hits 0xFF.
+
+Settled: the `b` into the loop test, the `sltu` of the stored experience against
+the call's return, the 0x110 frame for the 0xEC scratch struct, and the level
+step written so that the `sh` of `level + 1` lands unconditionally in the
+`bnez` delay slot, which is what the store-before-test order gives:
+
+    level = work.level;
+    work.level = level + 1;
+    if (level >= 0xFF) {
+        break;
+    }
+    count++;
+
+What is left is the copy. Retail emits `daddu $3, $2, $0` so the 0xFF compare
+reads the copy while the increment overwrites the original; every shape tried
+compares and increments out of the one register and comes out a word short.
+
+Ruled out: `u16`, `u32` and `s32` for the level local, all identical; the test
+before the store, which is one word shorter again; `work.level++`; a positive
+`if (work.level < 0xFF) { ... } else break;`, which reaches the right size but
+13 of 33 words; and `level = work.level + 1;` with the old value re-read for the
+compare, also the right size at 13 of 33.
 
 ## fclDrawSpriteCore (code_001FAE80, 0x2D8)
 

@@ -2476,9 +2476,63 @@ s32 cmbChkPolygonMovie(void)
 
 INCLUDE_ASM(const s32, "code_001FAE80", cmbUpdateAction);
 
-INCLUDE_ASM(const s32, "code_001FAE80", func_00206308);
+typedef struct
+{
+    s16 h[18];
+} cmbCopy36_t;
 
+typedef struct
+{
+    s16 h[16];
+} cmbCopy32_t;
+
+typedef struct
+{
+    s16 h[288];
+} cmbCopy576_t;
+
+/* NON_MATCHING: 35 of 176 words differ, two registers exchanged and two
+ * instructions scheduled elsewhere. */
+#ifdef NON_MATCHING
+void func_00206308(u8 *dst, u8 *src)
+{
+    *(s32 *)(dst + 0x00) = *(s32 *)(src + 0x10);
+    *(u16 *)(dst + 0x04) = *(u16 *)(src + 0x14);
+    *(cmbCopy36_t *)(dst + 0x06) = *(cmbCopy36_t *)(src + 0x16);
+    *(cmbCopy32_t *)(dst + 0x0C) = *(cmbCopy32_t *)(src + 0x1C);
+    *(u16 *)(dst + 0x12) = *(u16 *)(src + 0x38);
+    *(s32 *)(dst + 0x2C) = *(s32 *)(src + 0x3C);
+    *(cmbCopy576_t *)(dst + 0x14) = *(cmbCopy576_t *)(src + 0x3A);
+    *(cmbCopy36_t *)(dst + 0x44) = *(cmbCopy36_t *)(src + 0x7A);
+    *(cmbCopy36_t *)(dst + 0x4A) = *(cmbCopy36_t *)(src + 0x80);
+    *(cmbCopy576_t *)(dst + 0x50) = *(cmbCopy576_t *)(src + 0x86);
+    *(u16 *)(dst + 0x80) = *(u16 *)(src + 0xCE);
+    *(s32 *)(dst + 0x84) = *(s32 *)(src + 0xD8);
+}
+#else
+INCLUDE_ASM(const s32, "code_001FAE80", func_00206308);
+#endif
+
+/* NON_MATCHING: 35 of 176 words differ, the same residual as func_00206308. */
+#ifdef NON_MATCHING
+void func_002065C8(u8 *dst, u8 *src)
+{
+    *(s32 *)(dst + 0x10) = *(s32 *)(src + 0x00);
+    *(u16 *)(dst + 0x14) = *(u16 *)(src + 0x04);
+    *(cmbCopy36_t *)(dst + 0x16) = *(cmbCopy36_t *)(src + 0x06);
+    *(cmbCopy32_t *)(dst + 0x1C) = *(cmbCopy32_t *)(src + 0x0C);
+    *(u16 *)(dst + 0x38) = *(u16 *)(src + 0x12);
+    *(s32 *)(dst + 0x3C) = *(s32 *)(src + 0x2C);
+    *(cmbCopy576_t *)(dst + 0x3A) = *(cmbCopy576_t *)(src + 0x14);
+    *(cmbCopy36_t *)(dst + 0x7A) = *(cmbCopy36_t *)(src + 0x44);
+    *(cmbCopy36_t *)(dst + 0x80) = *(cmbCopy36_t *)(src + 0x4A);
+    *(cmbCopy576_t *)(dst + 0x86) = *(cmbCopy576_t *)(src + 0x50);
+    *(u16 *)(dst + 0xCE) = *(u16 *)(src + 0x80);
+    *(s32 *)(dst + 0xD8) = *(s32 *)(src + 0x84);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", func_002065C8);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_00206888);
 
@@ -2715,7 +2769,46 @@ extern void shopDrawBuyRow(s32 row, u8 *work, s8 mode, s32 id);
 extern void shopDrawSellRow(s32 row, u8 *work, s8 mode, s32 id);
 extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 id);
 
-INCLUDE_ASM(const s32, "code_001FAE80", shopDrawPanelRow);
+extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
+extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 id, s32 idx,
+                                s32 *texs, fclSpriteTbl_t *tbl, s32 ot);
+extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 d, s32 color, char *str, s32 f);
+extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern fclSpriteTbl_t fclSpriteTable[];
+extern s32 D_00345D88[];
+extern char D_0054FB60[];
+
+void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
+{
+    s32 colors[4];
+    char buf[16];
+    void *frq;
+    s32 target;
+    s32 alpha;
+
+    target = fclGetPanelAnimTarget((fclPanelAnim_t *)(shopDrawWork + 0x241C));
+    alpha = (0x200 - fclGetPanelAnimPhase((fclPanelAnim_t *)(shopDrawWork + 0x241C))) / 4;
+    color = (color & ~0xFF) | (alpha & 0xFF);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
+                        colors, 0, 1, (s32 *)(shopDrawWork + 0x2394),
+                        (fclSpriteTbl_t *)shopSpriteTable, ot);
+    fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
+                        colors, 0, 0xA, (s32 *)(shopDrawWork + 0x2394),
+                        (fclSpriteTbl_t *)shopSpriteTable, ot);
+    fclDrawSpriteFilter(pos->unk_00 + target + 0x1E40, pos->unk_04 + 0x1A0, pos->unk_08 << 4, 1,
+                        colors, 0xA, 1, D_00345D88, fclSpriteTable, ot);
+    color = (color & 0xFF) | 0xA09DC300;
+    sprintf(buf, D_0054FB60, num);
+    frq = frwGetNumFontFRQ(pos->unk_00 + target + 0x1840, pos->unk_04 + 0x1A0, pos->unk_08, color,
+                           buf, 0);
+    func_001C7E38(frq, 1, ot);
+    frDestroyFontRequestAfter(frq);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", shopDrawPrice);
 
@@ -3042,9 +3135,85 @@ void ragInitList3(s32 count, lstWork_t *work)
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragBuildHeartsList);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragBuildList2);
+extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
+extern s32 cmpItemOrder(u8 *a, u8 *b);
+extern u8 D_0032FC48[];
+extern u8 D_0032FC50[];
 
+/* NON_MATCHING: 22 of 93 words differ, a real divide where retail folded the
+ * VLA size into an andi, and the register cascade that follows. */
+#ifdef NON_MATCHING
+s8 ragBuildList2(u8 index, u8 *work)
+{
+    u8 *dst = work + 0x3B;
+    s8 k = 0;
+    s32 roll = dds3GetRandA(0);
+    u32 n = 4;
+    s8 pick[n];
+    s32 extra = (u32)roll % sizeof(pick);
+    u8 *src;
+    s8 *p;
+    u8 count;
+    s32 i;
+
+    p = &pick[n - 1];
+    for (i = n - 1; i >= 0; i--) {
+        *p-- = i;
+    }
+    shuffleIndices(pick, n, 0x10);
+    src = D_0032FC48;
+    for (i = n - 1; i >= 0; i--) {
+        dst[k++] = *src;
+        src += 2;
+    }
+    count = n;
+    for (i = 0; i < extra; i++) {
+        dst[k++] = ragGetListItem2(index, pick[i]);
+    }
+    count += extra;
+    qsort(dst, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    return count;
+}
+#else
+INCLUDE_ASM(const s32, "code_001FAE80", ragBuildList2);
+#endif
+
+/* NON_MATCHING: 22 of 93 words differ, the same residual as ragBuildList2. */
+#ifdef NON_MATCHING
+s8 ragBuildList3(u8 index, u8 *work)
+{
+    u8 *dst = work + 0x44;
+    s8 k = 0;
+    s32 roll = dds3GetRandA(0);
+    u32 n = 4;
+    s8 pick[n];
+    s32 extra = (u32)roll % sizeof(pick);
+    u8 *src;
+    s8 *p;
+    u8 count;
+    s32 i;
+
+    p = &pick[n - 1];
+    for (i = n - 1; i >= 0; i--) {
+        *p-- = i;
+    }
+    shuffleIndices(pick, n, 0x10);
+    src = D_0032FC50;
+    for (i = n - 1; i >= 0; i--) {
+        dst[k++] = *src;
+        src += 2;
+    }
+    count = n;
+    for (i = 0; i < extra; i++) {
+        dst[k++] = ragGetListItem3(index, pick[i]);
+    }
+    count += extra;
+    qsort(dst, count, 1, (s32 (*)(const void *, const void *))cmpItemOrder);
+    return count;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", ragBuildList3);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragCreateAllList);
 
@@ -3244,9 +3413,62 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragDrawListRows);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawHeartsList);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragDrawList2);
+extern void ragDrawListRows(lstWork_t *list, s32 kind, u8 *rows, s32 mode, s32 ot);
+extern void ragDrawListFrame(fclPanelPos_t *pos, s32 kind, u8 item, s32 ot);
+extern s32 D_003305E8[];
 
+/* NON_MATCHING: 10 of 84 words differ, the work pointer in the other
+ * caller-saved register in each of the two blocks that load it. */
+#ifdef NON_MATCHING
+void ragDrawList2(s8 mode)
+{
+    fclPanelPos_t pos;
+    u8 *work = (u8 *)ragDrawWork;
+    s32 top = *(s16 *)(work + 0x2492);
+    u8 *rows = work + top + 0x3B;
+    s8 item = *(s8 *)(work + top + *(u8 *)(work + 0x2494) + 0x3B);
+
+    fclDrawPanel((fclPanel_t *)(work + 0x4700), 0x47);
+    fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    trmDrawListText(&pos, *(s32 *)(ragHeartsTable + 0x8BC), ragDrawWork->texHandle, (char *)D_003306B8, 0x47);
+    ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x2314), 1, rows, mode, 0x47);
+    fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
+    fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
+                    *(s32 *)((u8 *)ragDrawWork + 0x46C8), 0, 0, 0, (fclPanel_t *)&pos);
+    ragDrawListFrame(&pos, 1, item, 0x47);
+    fclDrawPhaseHeader((u8 *)ragDrawWork + 0x46C0, 0x1121D33, 1, 0x47);
+    fclDrawPhaseHeader((u8 *)ragDrawWork + 0x2314, 0x80808080, 0, 0x47);
+}
+#else
+INCLUDE_ASM(const s32, "code_001FAE80", ragDrawList2);
+#endif
+
+/* NON_MATCHING: 10 of 84 words differ, the same residual as ragDrawList2. */
+#ifdef NON_MATCHING
+void ragDrawList3(s8 mode)
+{
+    fclPanelPos_t pos;
+    u8 *work = (u8 *)ragDrawWork;
+    s32 top = *(s16 *)(work + 0x362A);
+    u8 *rows = work + top + 0x44;
+    s8 item = *(s8 *)(work + top + *(u8 *)(work + 0x362C) + 0x44);
+
+    fclDrawPanel((fclPanel_t *)(work + 0x4700), 0x47);
+    fclUpdatePanel((fclPanel_t *)((u8 *)ragDrawWork + 0x4700));
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    trmDrawListText(&pos, D_003305E8[0], ragDrawWork->texHandle, (char *)D_003306B8, 0x47);
+    ragDrawListRows((lstWork_t *)((u8 *)ragDrawWork + 0x34AC), 2, rows, mode, 0x47);
+    fclDrawPanel((fclPanel_t *)((u8 *)ragDrawWork + 0x46C0), 0x47);
+    fclInitPanelPos(*(s32 *)((u8 *)ragDrawWork + 0x46C0), *(s32 *)((u8 *)ragDrawWork + 0x46C4),
+                    *(s32 *)((u8 *)ragDrawWork + 0x46C8), 0, 0, 0, (fclPanel_t *)&pos);
+    ragDrawListFrame(&pos, 2, item, 0x47);
+    fclDrawPhaseHeader((u8 *)ragDrawWork + 0x46C0, 0x14132D33, 1, 0x47);
+    fclDrawPhaseHeader((u8 *)ragDrawWork + 0x34AC, 0x80808080, 0, 0x47);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawList3);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragDrawSeqStatus);
 
@@ -3344,9 +3566,101 @@ INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateCallSeq);
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateSeqItem);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateSeq2);
+extern ragItemReq_t *ragGetConfirmEntry(s32 kind, u8 flag);
+extern void ragSetSeqPhase(s32 phase);
+extern s32 ragCheckItemUse(s32 item);
+extern s32 cmpModelSetup(s32 a, s32 b);
+extern void lstMoveCursor(lstWork_t *list, s8 dir);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateSeq3);
+void ragUpdateSeq2(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    ragItemReq_t *entry = ragGetConfirmEntry(1, ragGetHeartsFlag(2));
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (ragFindItemSlot(entry) == 0) {
+            button = 0x8000;
+            break;
+        }
+        ragSetSeqPhase(2);
+        if (ragCheckItemUse(ragUpdateWork->unk_0054) != 0) {
+            break;
+        }
+        fclScriptForcedEnd((u8 *)ragUpdateWork->scriptArg);
+        cmpModelSetup(ragUpdateWork->unk_0054, 0);
+        ragUpdateWork->unk_0001 = 7;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    case 2:
+        fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
+        cmpResetCursorInfo((cmpCursorWork_t *)((u8 *)ragUpdateWork + 0x2470));
+        ragUpdateWork->unk_0001 = 0;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor((lstWork_t *)((u8 *)ragUpdateWork + 0x2314), -1);
+        break;
+    case 0x20:
+        lstMoveCursor((lstWork_t *)((u8 *)ragUpdateWork + 0x2314), 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        lstMoveCursor((lstWork_t *)((u8 *)ragUpdateWork + 0x2314), 0);
+    }
+    cmpPlayCursorSE(
+        cmpDisablePadBitStop((cmpPadStopWork_t *)((u8 *)ragUpdateWork + 0x2470), button, 0x30) &
+        0xFFFF);
+}
+
+void ragUpdateSeq3(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    ragItemReq_t *entry = ragGetConfirmEntry(2, ragGetHeartsFlag(3));
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (ragFindItemSlot(entry) == 0) {
+            button = 0x8000;
+            break;
+        }
+        ragSetSeqPhase(3);
+        if (ragCheckItemUse(ragUpdateWork->unk_0054) != 0) {
+            break;
+        }
+        fclScriptForcedEnd((u8 *)ragUpdateWork->scriptArg);
+        cmpModelSetup(ragUpdateWork->unk_0054, 0);
+        ragUpdateWork->unk_0001 = 7;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    case 2:
+        fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
+        cmpResetCursorInfo((cmpCursorWork_t *)((u8 *)ragUpdateWork + 0x3608));
+        ragUpdateWork->unk_0001 = 0;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor((lstWork_t *)((u8 *)ragUpdateWork + 0x34AC), -1);
+        break;
+    case 0x20:
+        lstMoveCursor((lstWork_t *)((u8 *)ragUpdateWork + 0x34AC), 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        lstMoveCursor((lstWork_t *)((u8 *)ragUpdateWork + 0x34AC), 0);
+    }
+    cmpPlayCursorSE(
+        cmpDisablePadBitStop((cmpPadStopWork_t *)((u8 *)ragUpdateWork + 0x3608), button, 0x30) &
+        0xFFFF);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", ragUpdateReturn);
 
@@ -3600,7 +3914,52 @@ INCLUDE_ASM(const s32, "code_001FAE80", rcvCreateLocalStock);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvCalc);
 
-INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawPanelRow);
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x1130];
+    /* 0x1130 */ lstWork_t list;
+    /* 0x12C4 */ u8 unk_12C4[0x3210];
+    /* 0x44D4 */ s32 texHandle[3];
+} rcvDrawWork_t;
+
+extern rcvDrawWork_t *rcvDrawWork;
+extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
+extern s32 D_003306F0[];
+extern s32 D_003306F4[];
+extern s32 D_003306F8[];
+extern s32 D_003306FC[];
+extern char D_00330800[];
+
+extern char D_0054FBF0[];
+
+void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
+{
+    s32 colors[4];
+    char buf[16];
+    void *frq;
+    s32 target;
+    s32 alpha;
+
+    target = fclGetPanelAnimTarget((fclPanelAnim_t *)((u8 *)rcvDrawWork + 0x4520));
+    alpha = (0x200 - fclGetPanelAnimPhase((fclPanelAnim_t *)((u8 *)rcvDrawWork + 0x4520))) / 4;
+    color = (color & ~0xFF) | (alpha & 0xFF);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
+                        colors, 0, 1, rcvDrawWork->texHandle, (fclSpriteTbl_t *)D_00330800, ot);
+    fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
+                        colors, 0, 0xA, rcvDrawWork->texHandle, (fclSpriteTbl_t *)D_00330800, ot);
+    fclDrawSpriteFilter(pos->unk_00 + target + 0x1E40, pos->unk_04 + 0x1A0, pos->unk_08 << 4, 1,
+                        colors, 0xA, 1, D_00345D88, fclSpriteTable, ot);
+    color = (color & 0xFF) | 0xA09DC300;
+    sprintf(buf, D_0054FBF0, num);
+    frq = frwGetNumFontFRQ(pos->unk_00 + target + 0x1840, pos->unk_04 + 0x1A0, pos->unk_08, color,
+                           buf, 0);
+    func_001C7E38(frq, 1, ot);
+    frDestroyFontRequestAfter(frq);
+}
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawRowBox);
 
@@ -3617,22 +3976,6 @@ INCLUDE_RODATA(const s32, "code_001FAE80", D_0053D440);
 INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawRowText);
 
 INCLUDE_ASM(const s32, "code_001FAE80", rcvDrawPanelAt);
-
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[0x1130];
-    /* 0x1130 */ lstWork_t list;
-    /* 0x12C4 */ u8 unk_12C4[0x3210];
-    /* 0x44D4 */ s32 texHandle[3];
-} rcvDrawWork_t;
-
-extern rcvDrawWork_t *rcvDrawWork;
-extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
-extern s32 D_003306F0[];
-extern s32 D_003306F4[];
-extern s32 D_003306F8[];
-extern s32 D_003306FC[];
-extern char D_00330800[];
 
 void rcvDrawSeq1(void)
 {
@@ -5220,8 +5563,8 @@ void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *spri
         prim[1] = sprite->color[2] | ((u64)sprite->color[3] << 32);
     } else {
         c = *(u32 *)color;
-        prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
         prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
+        prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = x1 | ((u64)y1 << 32);
@@ -5252,9 +5595,151 @@ void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *spri
 INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteCore);
 #endif
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclCalcRotPos);
+extern f32 sdfSin(f32 angle);
+extern f32 sdfCos(f32 angle);
 
+void fclCalcRotPos(s32 *x, s32 *y, f32 angle, s32 w, s32 h, s32 ox, s32 oy)
+{
+    f32 rad = angle * 0.0174532925f;
+    f32 hh = h * 0.875f;
+    f32 hw = w / 2;
+
+    *x = sdfCos(rad) * hw - sdfSin(rad) * hh;
+    *y = sdfSin(rad) * hw + sdfCos(rad) * hh;
+    *x = *x * 2 + ox;
+    *y = *y / 0.875f + oy;
+}
+
+typedef struct
+{
+    /* 0x0 */ s32 x;
+    /* 0x4 */ s32 y;
+} fclRotPoint_t;
+
+extern void fclCalcRotPos(s32 *x, s32 *y, f32 angle, s32 w, s32 h, s32 ox, s32 oy);
+
+/* NON_MATCHING: 86 of 298 words differ at the exact size: the angle `mov.s`
+ * scheduled out of three call delay slots, one byte of the colour read as a
+ * shift rather than a load, and the quadword block hoisted. */
+#ifdef NON_MATCHING
+void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
+                            fclSprite_t *sprite, u8 flags, u8 mode, u8 filter, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
+    u32 uv[4];
+    fclRotPoint_t pt[4];
+    s32 x0;
+    s32 y0;
+    s32 x1;
+    s32 y1;
+    s32 hw;
+    s32 hh;
+    s32 cx;
+    s32 cy;
+    s32 t;
+    u32 c;
+
+    if (filter == 0) {
+        sdfTexSetFilter(sprite->tex, 0, 1);
+    } else {
+        sdfTexSetFilter(sprite->tex, 1, 1);
+    }
+    packet = (void *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4));
+    sdf2DMakePrimPacketHeader(packet, 0x15C, 3, 0x531, 4);
+    prim = (u64 *)sdf2DGetPrimPtr(packet);
+    x0 = x + 0x7000;
+    y0 = y + 0x7900;
+    x1 = x0 + (w << 4);
+    y1 = y0 + (h << 3);
+    hw = (x1 - x0) / 2;
+    hh = (y1 - y0) / 2;
+    cx = x0 + hw;
+    cy = y0 + hh;
+    pt[0].x = x0;
+    pt[0].y = y0;
+    pt[3].x = x1;
+    pt[3].y = y1;
+    fclCalcRotPos(&pt[0].x, &pt[0].y, angle, -hw, -hh, cx, cy);
+    fclCalcRotPos(&pt[1].x, &pt[1].y, angle, hw, -hh, cx, cy);
+    fclCalcRotPos(&pt[2].x, &pt[2].y, angle, -hw, hh, cx, cy);
+    fclCalcRotPos(&pt[3].x, &pt[3].y, angle, hw, hh, cx, cy);
+    uv[0] = sprite->unk_08;
+    uv[2] = sprite->unk_0C;
+    uv[1] = sprite->unk_0A;
+    uv[3] = sprite->unk_0E;
+    if ((flags & 1) != 0) {
+        t = pt[0].x;
+        pt[0].x = pt[1].x;
+        pt[1].x = t;
+        t = pt[2].x;
+        pt[2].x = pt[3].x;
+        pt[3].x = t;
+    }
+    if ((flags & 2) != 0) {
+        t = pt[0].y;
+        pt[0].y = pt[1].y;
+        pt[1].y = t;
+        t = pt[2].y;
+        pt[2].y = pt[3].y;
+        pt[3].y = t;
+    }
+    if (color == NULL) {
+        prim[0] = sprite->color[0] | ((u64)sprite->color[1] << 32);
+        prim[1] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+        prim[6] = sprite->color[0] | ((u64)sprite->color[1] << 32);
+        prim[7] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+        prim[12] = sprite->color[0] | ((u64)sprite->color[1] << 32);
+        prim[13] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+        prim[18] = sprite->color[0] | ((u64)sprite->color[1] << 32);
+        prim[19] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+    } else {
+        c = *(u32 *)color;
+        prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
+        prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+        prim[7] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
+        prim[6] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+        prim[13] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
+        prim[12] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+        prim[19] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
+        prim[18] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
+    }
+    prim[2] = uv[0] | ((u64)uv[1] << 32);
+    prim[4] = pt[0].x | ((u64)pt[0].y << 32);
+    prim[5] = (u32)(sprite->unk_18 >> 4);
+    prim[8] = uv[2] | ((u64)uv[1] << 32);
+    prim[10] = pt[1].x | ((u64)pt[1].y << 32);
+    prim[11] = (u32)(sprite->unk_18 >> 4);
+    prim[14] = uv[0] | ((u64)uv[3] << 32);
+    prim[16] = pt[2].x | ((u64)pt[2].y << 32);
+    prim[17] = (u32)(sprite->unk_18 >> 4);
+    prim[20] = uv[2] | ((u64)uv[3] << 32);
+    prim[22] = pt[3].x | ((u64)pt[3].y << 32);
+    prim[23] = (u32)(sprite->unk_18 >> 4);
+    switch (mode) {
+    case 1:
+        fclDrawPanelSprite2(0x48, ot);
+        break;
+    case 2:
+        fclDrawPanelSprite2(0x42, ot);
+        break;
+    default:
+        fclDrawPanelSprite2(0x44, ot);
+        break;
+    }
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdf2DLinkTexPacket(tag, sprite->tex, 0);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    otp->regFunc(otp, tag);
+    fclDrawPanelSprite2(0x44, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", fclDrawSpriteAngleCore);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_00214FD8);
 
@@ -5493,15 +5978,86 @@ void fclEncycSetExplainData(void *data)
     g_pinst->explainData = data;
 }
 
-INCLUDE_ASM(const s32, "code_001FAE80", fclEncycRegist2);
-
-INCLUDE_ASM(const s32, "code_001FAE80", fclEncycRegist);
-
 typedef struct
 {
     /* 0x00 */ u16 devilId;
     /* 0x02 */ u8 unk_02[0xAE];
 } fclEncycEntry_t;
+
+extern s32 fclEncycSearch(s32 devilId);
+extern s32 fclEncycGetRatio(void);
+extern void SetElem(fclEncycEntry_t *dst, fclEncycEntry_t *src);
+extern void SetElem2(fclEncycEntry_t *dst, fclEncycEntry_t *src);
+extern s32 datDebugPrintf(const char *fmt, ...);
+extern s32 evtBitOn(s32 bit);
+extern s32 evtBitOff(s32 bit);
+extern char D_0053D7E8[];
+
+s32 fclEncycRegist2(fclEncycEntry_t *entry, s32 store)
+{
+    s32 *num = &cmbGlobalWork->encycNum;
+    fclEncycEntry_t *table = (fclEncycEntry_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    s32 index = fclEncycSearch(*(u16 *)((u8 *)entry + 0x0));
+    s32 known = 1;
+    s32 count;
+
+    if (index < 0) {
+        count = *num;
+        if (count >= 0xB8) {
+            printf(D_0053D7E8);
+            datDebugPrintf(D_0053D7E8);
+            return -1;
+        }
+        known = 0;
+        index = count;
+        *num = index + 1;
+    } else {
+        if (store == 0) {
+            return -1;
+        }
+        known = 1;
+    }
+    SetElem2(&table[index], entry);
+    if (fclEncycGetRatio() >= 0x64) {
+        evtBitOn(0x913);
+    } else {
+        evtBitOff(0x913);
+    }
+    return known;
+}
+
+s32 fclEncycRegist(fclEncycEntry_t *entry, s32 store)
+{
+    s32 *num = &cmbGlobalWork->encycNum;
+    fclEncycEntry_t *table = (fclEncycEntry_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    s32 index = fclEncycSearch(*(u16 *)((u8 *)entry + 0x4));
+    s32 known = 1;
+    s32 count;
+
+    if (index < 0) {
+        count = *num;
+        if (count >= 0xB8) {
+            printf(D_0053D7E8);
+            datDebugPrintf(D_0053D7E8);
+            return -1;
+        }
+        known = 0;
+        index = count;
+        *num = index + 1;
+    } else {
+        if (store == 0) {
+            return -1;
+        }
+        known = 1;
+    }
+    SetElem(&table[index], entry);
+    if (fclEncycGetRatio() >= 0x64) {
+        evtBitOn(0x913);
+    } else {
+        evtBitOff(0x913);
+    }
+    return known;
+}
 
 s32 fclEncycSearch(s32 devilId)
 {
@@ -6982,7 +7538,29 @@ s32 cmbEvoEntryExists(u16 devilId)
     return 0;
 }
 
+/* NON_MATCHING: 25 of 34 words differ, 136 against retail's 132 bytes; the
+ * narrowed count parameter copied into its own register in retail. */
+#ifdef NON_MATCHING
+s8 cmbCountEvoReady(datUnitWork_t *unit, u8 count)
+{
+    u8 ready = 0;
+
+    while (count != 0) {
+        if ((unit->flag & 1) != 0) {
+            if ((unit->flag & 4) == 0) {
+                if (cmbEvoEntryExists(unit->id) != 0) {
+                    ready++;
+                }
+            }
+        }
+        unit++;
+        count--;
+    }
+    return ready;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmbCountEvoReady);
+#endif
 
 typedef struct
 {
@@ -7170,7 +7748,32 @@ INCLUDE_ASM(const s32, "code_001FAE80", rstRollComment);
 
 INCLUDE_ASM(const s32, "code_001FAE80", func_00223890);
 
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
+
+/* NON_MATCHING: 10 of 32 words differ, 128 against retail's 132 bytes; the
+ * level read copied into its own register in retail. */
+#ifdef NON_MATCHING
+s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
+{
+    datUnitWork_t work;
+    s32 count = 0;
+    u32 level;
+
+    cmbCopyCustomDevilToStock(&work, unit);
+    work.exp += exp;
+    while (work.exp >= datAdvanceDevilLevel(&work)) {
+        level = work.level;
+        work.level = level + 1;
+        if (level >= 0xFF) {
+            break;
+        }
+        count++;
+    }
+    return count;
+}
+#else
 INCLUDE_ASM(const s32, "code_001FAE80", cmbGetLevelUpCount);
+#endif
 
 INCLUDE_ASM(const s32, "code_001FAE80", rstDrawGetCursorRow);
 

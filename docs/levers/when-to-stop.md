@@ -49,6 +49,18 @@ These have been ruled out repeatedly and are not worth a second attempt:
   different order with no semantic difference to steer.
 - Register allocation that needs one register fewer than the C uses, shifting
   every later allocation. Change the source shape or stop.
+- A plain register-to-register copy retail keeps and the C coalesces away,
+  normally of a parameter or of a value read once and used twice. It costs a
+  word, so the function comes out short and every later allocation shifts.
+  Four in `code_001FAE80`: `ragBuildList2`/`3` copy the second parameter with
+  `daddu $16, $5, $0` before adding the row offset, `cmbCountEvoReady` narrows
+  its count parameter in place and then copies it to `$17`, and
+  `cmbGetLevelUpCount` copies the level read so the compare and the increment
+  use different registers. A separate local initialised from the parameter, a
+  second local for the second use, `&a[k]` against `a + k`, a `(u32)` cast
+  through the arithmetic and a `for` head that moves the update all coalesce
+  the same way. The copy is the register allocator declining to coalesce, not
+  a source shape, so measure it and move on.
 - A set of reload spill slots that appear in a rotated order. The slot offsets
   follow pseudo-register numbers, so the fix would have to change which pass
   creates a value rather than its source shape. `fldSkyDrawFilter` sits at 682
