@@ -4031,7 +4031,24 @@ s32 cmpGetSkillTargetArea(u16 skillId)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemKou);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemTokusyu);
+s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user)
+{
+    if (cmpUseItemKou(item, user) >= 0)
+    {
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
+        return 3;
+    }
+    if (item == 0x3A)
+    {
+        p2sdPlaySE(0x11, 0x7F, 0x3F);
+        return 5;
+    }
+    /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+    do
+    {
+        return cmpUseSkillTokusyu(datItemTable[item].skill, target, user);
+    } while (0);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkillTokusyu);
 
