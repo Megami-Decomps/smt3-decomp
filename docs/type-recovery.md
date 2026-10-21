@@ -362,6 +362,70 @@ where one side is the renamed type and the other kept its own spelling:
 `work->life = params->duration`. The compiler flags those, and the accessed
 variable's type says which side to put back.
 
+### Scope is what makes a layout mean something
+
+Tree-wide layout matching fails, and the reason is scope rather than method. 280 of
+our 300 units carry an HD source file's name, and one file mentions only a few dozen
+types, so `tools/hd_unit_types.py` matches a struct's layout against that pool
+instead of all 1341. Twelve types came back that way, the strongest being
+`EffPCPBeamParams` onto `effPCPRingPolyExpParam_t`: 17 members, every offset and
+extent equal, and the meanings agreeing throughout (`startRadius`/`radius_s`,
+`fadeInFrames`/`fade_in`, `firstColor`/`color_e_in`). `SoundFormat` turned out to be
+`sdfIpuInitParm_t`, its `loopMode` agreeing by name, the old name a misreading of a
+video-decode parameter block.
+
+Two refusals are built in. A target two of our types both claim is dropped, since
+they cannot both be right and renaming both would declare one name twice. And
+widening the match is counterproductive: accepting our struct as a prefix of a longer
+IDB type takes the forced set from twelve to zero, because the evidence is uniqueness
+inside the unit and a looser test makes every match ambiguous. `--prefix` keeps that
+result reproducible.
+
+This method and the signature vote barely overlap, which is useful rather than
+disappointing: the signatures find work structs, since those are what functions take,
+and the unit scope finds the param and part structs beside them.
+
+### Naming a type is what opens up its members
+
+The two halves of the drift are one problem. A struct called `SdfPool` gives nothing
+to key a lookup on, so its members cannot be looked up either, and 1754 of the
+remaining members sit behind 440 such names. Conversely, the moment the twelve types
+above were named, `ida_fill.py --exact` could take 102 of their members.
+
+So the order of work is: name the type, then fill it. `ida_fill.py --why` counts what
+blocks the rest.
+
+### Enums need the same corroboration, and mostly fail it
+
+`tools/hd_enum_sites.py` looks for the evidence a bare literal needs: a switch's case
+labels are a set of values from one enum, so a set fitting exactly one enum says
+which. On values alone this is worthless, exactly as it was for type names. Five
+switches fit one enum each and all five were coincidences, `switch (button)` sitting
+perfectly inside `DDS3_PATHBASIC_FLAG` because any four-value set sits inside dozens
+of enums.
+
+Requiring the selector's own name to share a word with the enum's cut it to three,
+and reading those three settled them:
+
+- `nbAi.c`'s `SetGroupTarget2` switches on `code` through 0..10 against `TAR_CODE`'s
+  eleven members, in the `newdata.h` that file already includes. Code 0 is
+  `TAR_CODE_AI`, handled alone, while the ten explicit criteria share a body.
+  Adopted, and its members were already prefixed so nothing collided.
+- `dds3ObjectBase.c` switches on `mode` with six cases against `POLY_MODE`'s six, and
+  the bodies set `animeSpeed` from `animeMode`. It is an animation mode; `POLY_MODE`
+  is `OPAQUE`/`SEMITRANS`/`ADDTRANS`. Rejected. "mode" is too generic a word to
+  corroborate anything.
+- `evtEventViewer.c` switches on `viewer->fileMode` against `EVT_VIEWER_MENU`. Case 5
+  and case 6 corroborate exactly, frame totals against `FRAMELIST` and a frame change
+  against `FRAMECHANGE`, but cases 3 and 4 raise a "FRAME SET.OK?" confirm that
+  `FILENAME` and `OBJLIST` do not explain. Left as a lead: a wrong label here would
+  be the same drift as an invented name.
+
+Of the 329 HD enums, 27 are fully declared here and 297 not at all, and that is
+mostly not neglect. The reconstruction left most members unprefixed, so adopting them
+wholesale would put `ALL`, `IT`, `INIT`, `MIDDLE`, `START` and `END` into the global
+namespace; 25 of the 297 hold names the tree already uses for something else.
+
 ### What is left, and what blocks it
 
 `tools/ida_fill.py --why` counts the remaining `unk_` members by what stops each one,

@@ -43,6 +43,12 @@ def main():
     ap.add_argument("--hd", type=Path, default=DEFAULT_HD)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--all", action="store_true")
+    # Widening the match costs more than it gains: the evidence here is uniqueness
+    # within the unit, so accepting prefixes takes the forced set from 12 to 0 by
+    # making every previously unique match ambiguous. Kept for the record.
+    ap.add_argument("--prefix", action="store_true",
+                    help="also accept our struct as an exact prefix of a longer IDB "
+                         "type; this finds fewer, not more")
     args = ap.parse_args()
 
     sizes = project_sizes(ida_sizes())
@@ -81,7 +87,16 @@ def main():
                 if cand not in idb or cand in taken:
                     continue
                 _, isize, imembers = idb[cand]
-                if [(o, s) for o, s, _, _ in imembers] == mine and total <= isize:
+                theirs = [(o, s) for o, s, _, _ in imembers]
+                if total > isize:
+                    continue
+                if theirs == mine:
+                    hits.append(cand)
+                elif args.prefix and len(mine) >= MIN_MEMBERS \
+                        and theirs[:len(mine)] == mine:
+                    # Our struct often maps only the head of a longer record, so an
+                    # exact prefix is the same evidence over fewer members. Kept
+                    # behind a flag because it widens what counts as a match.
                     hits.append(cand)
             hits = sorted(set(hits))
             rel = path.relative_to(ROOT).as_posix()
