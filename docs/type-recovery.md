@@ -22,6 +22,7 @@ Same order of authority as [IDB corrections](idb-corrections.md).
 | The `SLUS_209.11` IDB | structs already applied at PS2 addresses with layouts and field names, reachable through function prototypes |
 | SMT3 HD symbol recovery, which the IDB carries | most type and enum names, including PS2-specific ones such as much of the sdf rendering layer |
 | The HD reconstruction, exported by `tools/hd_types.py` to `config/smt3/hd_types.txt` and `hd_enums.txt` | member names and their order for 1042 types, and 329 enums with their values; its sizes are advisory, see below |
+| The IDB's own struct members, exported by `tools/ida_members.py` to `config/smt3/ida_members.txt` | 9623 named members for 1341 types, with offsets that can be trusted, since the layouts are applied at PS2 addresses |
 | [010 Editor templates](https://github.com/tge-was-taken/010-Editor-Templates/tree/master/templates), `dds3_*.bt` | on-disk layouts for assets: models, textures, motions, packs |
 
 ## Matching a repo type to an IDB type
@@ -254,6 +255,61 @@ each site. That found nine in `effPCPBoss.c`.
 
 A member whose HD name is `pad`, `resv` or `dummy` is left as `unk_`, since trading
 one empty name for another gains nothing.
+
+### The IDB is the better corpus for members
+
+The HD corpus can only order members, since its sizes are advisory. The IDB's
+layouts are applied at real PS2 addresses, so its offsets can be used as keys:
+`sdfMatPacket_t` is 0xa0 there and in `tools/header_layout.c`, where HD says 0x78.
+
+`tools/ida_members.py` exports 1341 types and 9623 members, every one of them
+named, to `config/smt3/ida_members.txt`. `tools/ida_fill.py` renames an `unk_`
+member only when our computed offset **and** extent both equal an IDB member's, so a
+`u8[8]` covering two IDB fields is refused rather than given the first one's name.
+
+Our own `unk<NN>` names check the layout model before it is trusted: NN is the offset
+the name claims, so a struct where any member disagrees with the computed offset is
+skipped whole rather than half understood.
+
+Three refusals are built in, each from getting it wrong first:
+
+- A name already in the struct cannot be reused. `tagpipeParts` has `mdl` at offset
+  6 where the IDB has it at 5, and taking the IDB's name for the member at 5 would
+  declare `mdl` twice.
+- A struct defined in a header is skipped. Its uses are spread across the tree and an
+  offset name like `unk04` belongs to dozens of other structs, so a tree-wide rename
+  would hit the wrong ones. These are reported instead.
+- Where another struct in the same file declares the same member name, the uses are
+  left for the compiler. An access through the renamed type stops compiling while one
+  through the other type still does, which attributes each site exactly.
+
+That recovered `fclPanel_t` as X, Y, Z, W, H, Col, Spd, Timer, Timer2, Flag and
+TexHandle, and `dds3GlobalWork_t`'s `unk1CFA` as `heartsequip`. The last one
+corroborated itself: `header_layout.c` already asserted a member at 0x1CFA, so the
+rename had to satisfy an assertion written before it.
+
+### Invented type names cannot be recovered by layout
+
+`SdfPool` and `EffRecordPool` have nothing to look up, so layout is the only way in,
+and it does not work. `tools/ida_rename.py` matches a struct's total size and every
+member's offset and extent against the IDB. Of 258 invented types:
+
+- 165 have no IDB layout of that shape at all,
+- 84 match several, or are too plain to tell apart, a struct of four 4-byte words
+  being shared by hundreds,
+- and every unique match read as a coincidence between unrelated things:
+  `MdlObjectAttachment` onto `fclribbon_elem_t`, `EffOwnerBillPayloadView` onto
+  `sdfSortOtNode_tag`. Requiring the module to agree removed the worst of them and
+  still left `SdfVuColorTransform` onto `sdfCorePacketFaceDivParm_t`.
+
+So the tool reports leads and deliberately cannot apply them, and none were applied.
+A shape is not an identity; what settles one of these is the code's own use of the
+type, one at a time.
+
+Their capitalization is not the problem to fix either. `SdfPool` is spelled that way
+**because** it was written here rather than recovered, which is the signal this
+document opens with. Renaming it to `sdfPool_t` would make an invented layout look
+like a recovered one and lose that.
 
 ### What the baseline is for
 
