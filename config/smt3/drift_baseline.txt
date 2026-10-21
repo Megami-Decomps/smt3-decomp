@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 174 types, 1082 members, 506 adopted constants.
+# 169 types, 1082 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -50,11 +50,8 @@ type EffPCPCompactTexturedBlurParams
 type EffPCPCompactTimelineParams
 type EffPCPCompactWork
 type EffPCPDriftEventRow
-type EffPCPDriftEventWork
 type EffPCPEventPlace
 type EffPCPFadeWork
-type EffPCPGroupHead
-type EffPCPPairedEventParams
 type EffPCPPairedEventRow
 type EffPCPPairedEventWork
 type EffPCPRectBounds
@@ -65,7 +62,6 @@ type EffPCPSharedTrailRef
 type EffPCPSpanWork
 type EffPCPSpawnOnceWork
 type EffPCPSpawnRangeEventRow
-type EffPCPSpawnRangeWork
 type EffPCPSpinWork
 type EffPCPSprayWork
 type EffPCPThunderGroup
@@ -106,7 +102,6 @@ type MovObjStream
 type MovOpenParam
 type MovPacStream
 type ParSystem
-type PcpFlashAccumulatingWork
 type PcpFlashColorSlot
 type PcpFlashFadingOrbitWork
 type PcpFlashMotionParticle
@@ -194,10 +189,8 @@ member BattleGroupNode.unk_AC
 member BillObj.unk18
 member BillObj.unk1C
 member BillPluralRecord.unk08
-member EffPCPDriftEventWork.unk10C
 member EffPCPFadeWork.unk10
 member EffPCPPairedEventWork.unk98
-member EffPCPSpawnRangeWork.unk9C
 member EffPCPThunderGroup.unk10
 member EffPCPThunderGroup.unk14
 member EffPCPThunderGroup.unk18
@@ -213,7 +206,6 @@ member MovOpenParam.unk11
 member MovOpenParam.unk12
 member MovPacStream.unk6C
 member ParSystem.unk28
-member PcpFlashAccumulatingWork.unk34
 member PcpFlashRotatingParticle.unk1C
 member SdfDrawNode.unk16
 member SdfGraphCopyPacket.unk0C
@@ -594,6 +586,7 @@ member effPCPDANTE_Damage_t.unk0BC
 member effPCPDANTE_ShowTime_Param_t.unk00
 member effPCPDANTE_ShowTime_t.unk0C4
 member effPCPDANTE_ShowTime_t.unk0C8
+member effPCPFlashPolyPipe_tag.unk34
 member effPCPHama01_tag.unk04
 member effPCPHama01_tag.unk08
 member effPCPHamaCardScatterPart_tag.unk20
@@ -606,6 +599,8 @@ member effPCPMHanma01_tag.unk0C
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
 member effPCPMuzzleFlash_t.unk5C
+member effPCPRadiateBED_tag.unk10C
+member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
 member effPCP_BED_t.unk60

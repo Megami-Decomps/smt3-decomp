@@ -46,7 +46,7 @@ struct effPCPHamaon_tag;
 struct effPCPMHanma01_tag;
 struct effPCPRadiateBEDParam_t;
 struct EffPCPDriftEventRow;
-struct EffPCPDriftEventWork;
+struct effPCPRadiateBED_tag;
 struct effPCPHelperBEDParam_t;
 struct EffPCPEventPlace;
 struct effPCPAnalyzeBED_tag;
@@ -56,12 +56,12 @@ struct EffPCPFadeWork;
 struct effPCPFilterExpParam_t;
 struct effPCPFilterExp_tag;
 struct effPCPRadiateThunderPart_tag;
-struct EffPCPGroupHead;
+struct effPCPRadiateThunderParam_t;
 struct effPCPRadiateThunder_tag;
 struct effPCPThunderSphereExp_tag;
 struct effPCPHelperBEDPart_tag;
 struct effPCPHelperBED_tag;
-struct EffPCPPairedEventParams;
+struct effPCPRadiateTBParam_t;
 struct EffPCPPairedEventRow;
 struct EffPCPPairedEventWork;
 struct EffPCPRectBounds;
@@ -77,7 +77,7 @@ struct EffPCPSpanWork;
 struct EffPCPSpawnOnceWork;
 struct EffPCPSpawnRangeEventRow;
 struct effPCPSpiralBEDParam_t;
-struct EffPCPSpawnRangeWork;
+struct effPCPSpiralBED_tag;
 struct EffPCPSpinWork;
 struct EffPCPSprayWork;
 struct effPCPHama02_tag;
@@ -184,7 +184,7 @@ typedef union EffBattleParameterValue EffBattleParameterValue;
 typedef struct EffBattleEntryList EffBattleEntryList;
 typedef struct SoundBank SoundBank;
 typedef struct SoundMixer SoundMixer;
-typedef struct EffPCPDriftEventWork EffPCPDriftEventWork;
+typedef struct effPCPRadiateBED_tag effPCPRadiateBED_tag;
 typedef struct effPCPHelperBEDParam_t effPCPHelperBEDParam_t;
 typedef struct EffPCPEventPlace EffPCPEventPlace;
 typedef struct EffThunderAlphaParams EffThunderAlphaParams;
@@ -204,13 +204,13 @@ typedef struct effPCPBlurExpParam_t effPCPBlurExpParam_t;
 typedef struct effPCPBlurExp_tag effPCPBlurExp_tag;
 typedef struct effPCPRadiateThunderPart_tag effPCPRadiateThunderPart_tag;
 typedef struct effPCP_ThunderPolyParam_t effPCP_ThunderPolyParam_t;
-typedef struct EffPCPGroupHead EffPCPGroupHead;
+typedef struct effPCPRadiateThunderParam_t effPCPRadiateThunderParam_t;
 typedef struct effPCPRadiateThunder_tag effPCPRadiateThunder_tag;
 typedef struct effPCPThunderSphereExp_tag effPCPThunderSphereExp_tag;
 typedef struct effPCPHelperBEDPart_tag effPCPHelperBEDPart_tag;
 typedef struct effPCPHelperBED_tag effPCPHelperBED_tag;
 typedef struct EffPCPPairedEventRow EffPCPPairedEventRow;
-typedef struct EffPCPPairedEventParams EffPCPPairedEventParams;
+typedef struct effPCPRadiateTBParam_t effPCPRadiateTBParam_t;
 typedef struct EffPCPPairedEventWork EffPCPPairedEventWork;
 typedef struct EffPCPRingWork EffPCPRingWork;
 typedef struct effPCPAgiFireball2Param_t effPCPAgiFireball2Param_t;
@@ -223,7 +223,7 @@ typedef struct EffPCPSpanWork EffPCPSpanWork;
 typedef struct EffPCPSpawnOnceWork EffPCPSpawnOnceWork;
 typedef struct EffPCPSpawnRangeEventRow EffPCPSpawnRangeEventRow;
 typedef struct effPCPSpiralBEDParam_t effPCPSpiralBEDParam_t;
-typedef struct EffPCPSpawnRangeWork EffPCPSpawnRangeWork;
+typedef struct effPCPSpiralBED_tag effPCPSpiralBED_tag;
 typedef struct EffPCPSpinWork EffPCPSpinWork;
 typedef struct effPCPHama02_tag effPCPHama02_tag;
 typedef struct EffPCPThunderGroup EffPCPThunderGroup;
@@ -1128,7 +1128,7 @@ struct SoundMixer {
     BattleEffect *voiceList;
 };
 
-struct EffPCPDriftEventWork {
+struct effPCPRadiateBED_tag {
     effPCPRadiateBEDParam_t params;
     EffPCPDriftEventRow *entries;
     SoundMixer *owner;
@@ -1289,7 +1289,7 @@ struct effPCP_ThunderPolyParam_t {
 };
 
 /* Serialized 0x164-byte group-set input copied into each live owner. */
-struct EffPCPGroupHead {
+struct effPCPRadiateThunderParam_t {
     f32 origin[4];
     u8 pad10[0x40];
     u8 repeat; /* 0x50: restart after the duration. */
@@ -1316,7 +1316,7 @@ struct EffPCPGroupHead {
 /* The general allocation contains this 0x180-byte prefix followed by
  * count entries. The four duplicate-handle groups use a separate allocation. */
 struct effPCPRadiateThunder_tag {
-    EffPCPGroupHead head;
+    effPCPRadiateThunderParam_t head;
     effPCPRadiateThunderPart_tag *entries; /* 0x164: entries at the end of the main allocation */
     f32 scale; /* 0x168: multiplies start/end positions */
     f32 fragmentLength; /* Distance along the normalized fragment direction. */
@@ -1378,7 +1378,7 @@ struct EffPCPPairedEventRow {
     s32 frame;
 };
 
-struct EffPCPPairedEventParams {
+struct effPCPRadiateTBParam_t {
     f32 origin[4];
     u8 repeat;
     u8 pad11[3];
@@ -1392,7 +1392,7 @@ struct EffPCPPairedEventParams {
 };
 
 struct EffPCPPairedEventWork {
-    EffPCPPairedEventParams params;
+    effPCPRadiateTBParam_t params;
     EffPCPPairedEventRow *entries;
     SoundMixer *ownerA, *ownerB;
     u8 unk98;
@@ -1512,7 +1512,7 @@ struct effPCPSpiralBEDParam_t {
 };
 
 /* The 0xAC-byte owner precedes its count * 0x20 event rows in one allocation. */
-struct EffPCPSpawnRangeWork {
+struct effPCPSpiralBED_tag {
     effPCPSpiralBEDParam_t params;
     EffPCPSpawnRangeEventRow *entries;
     struct SoundMixer *owner;
@@ -2391,12 +2391,12 @@ effPCPRingPolyExp2_tag *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *params);
 
 void dds3RingPolyExpListDelete(dds3RingPolyExpList_tag *node);
 
-EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *params, void *ownerParams);
+effPCPSpiralBED_tag *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *params, void *ownerParams);
 
-EffPCPDriftEventWork *effPCPRadiateBEDCreate(effPCPRadiateBEDParam_t *params, void *ownerParams);
+effPCPRadiateBED_tag *effPCPRadiateBEDCreate(effPCPRadiateBEDParam_t *params, void *ownerParams);
 
 EffPCPPairedEventWork *effPCPRadiateTBCreate(
-    EffPCPPairedEventParams *params, void *ownerAParams, void *ownerBParams);
+    effPCPRadiateTBParam_t *params, void *ownerAParams, void *ownerBParams);
 
 effPCPAnalyzeBED_tag *effPCPAnalyzeBEDCreate(void *ownerParams);
 
@@ -2411,7 +2411,7 @@ void effPCPAgiFireballSetPosition(effPCPAgiFireball_tag *work, const void *sourc
 effPCPAgiFireball_tag *effPCPAgiFireballCreate(
     const effPCPAgiFireballParam_t *params, const EffPCPBlockSet *blocks);
 
-effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data);
+effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const effPCPRadiateThunderParam_t *params, void *data);
 
 extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
@@ -6269,8 +6269,8 @@ void effPCPRingPolyExp2SetRotateMatrix(effPCPRingPolyExp2_tag *work, const void 
     SDF_VU0_STOREMATRIX(work->node->localMatrix);
 }
 
-effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data) {
-    EffPCPGroupHead *header = (EffPCPGroupHead *)params;
+effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const effPCPRadiateThunderParam_t *params, void *data) {
+    effPCPRadiateThunderParam_t *header = (effPCPRadiateThunderParam_t *)params;
     void **sourceResources = data;
     u32 entryCount = header->count;
     sdfMemHandle_t *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
@@ -6332,7 +6332,7 @@ effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const EffPCPGroupHead *para
 }
 
 void effPCPRadiateThunderCreatePCF(void *args) {
-    EffPCPGroupHead *work;
+    effPCPRadiateThunderParam_t *work;
     void *resources[4];
     u32 i;
 
@@ -6591,10 +6591,10 @@ void effPCPMakkaSetScale(EffPCPSprayWork *work, f32 scale) {
     work->scale = scale;
 }
 
-EffPCPDriftEventWork *effPCPRadiateBEDCreate(effPCPRadiateBEDParam_t *src, void *params) {
+effPCPRadiateBED_tag *effPCPRadiateBEDCreate(effPCPRadiateBEDParam_t *src, void *params) {
     u32 count = src->count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
-    EffPCPDriftEventWork *work = (void *)sdfMemLock(handle);
+    effPCPRadiateBED_tag *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPDriftEventRow *entry;
     s32 life;
@@ -6633,16 +6633,16 @@ EffPCPDriftEventWork *effPCPRadiateBEDCreate(effPCPRadiateBEDParam_t *src, void 
     return work;
 }
 
-EffPCPDriftEventWork *effPCPRadiateBEDCreatePCF(void *data) {
+effPCPRadiateBED_tag *effPCPRadiateBEDCreatePCF(void *data) {
     effPCPRadiateBEDParam_t *params = dds3EffectPCPDataGetData(data, 0);
 
     return effPCPRadiateBEDCreate(params, dds3EffectPCPDataGetData(data, 1));
 }
 
-EffPCPDriftEventWork *effPCPRadiateBEDCopy(EffPCPDriftEventWork *src) {
+effPCPRadiateBED_tag *effPCPRadiateBEDCopy(effPCPRadiateBED_tag *src) {
     u32 count = src->params.count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 24 + 0x11C);
-    EffPCPDriftEventWork *work = (void *)sdfMemLock(handle);
+    effPCPRadiateBED_tag *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPDriftEventRow *entry;
     s32 life;
@@ -6681,7 +6681,7 @@ EffPCPDriftEventWork *effPCPRadiateBEDCopy(EffPCPDriftEventWork *src) {
     return work;
 }
 
-void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
+void effPCPRadiateBEDDelete(effPCPRadiateBED_tag *work) {
     u32 i = 0;
     u32 count = work->params.count;
     EffPCPDriftEventRow *entry = work->entries;
@@ -6699,7 +6699,7 @@ void effPCPRadiateBEDDelete(EffPCPDriftEventWork *work) {
     sdfMemFreeDirect(work->handle);
 }
 
-void effPCPRadiateBEDPartInit(EffPCPDriftEventWork *work, s32 index) {
+void effPCPRadiateBEDPartInit(effPCPRadiateBED_tag *work, s32 index) {
     EffPCPDriftEventRow *slot;
     f32 spread;
     f32 scale;
@@ -6715,7 +6715,7 @@ void effPCPRadiateBEDPartInit(EffPCPDriftEventWork *work, s32 index) {
     slot->angleStep = work->params.angleStep * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread));
 }
 
-void effPCPRadiateBEDDraw(EffPCPDriftEventWork *work) {
+void effPCPRadiateBEDDraw(effPCPRadiateBED_tag *work) {
     EffPCPEventPlace place;
     f32 base[4] __attribute__((aligned(16)));
     u32 count = work->params.count;
@@ -6779,19 +6779,19 @@ void effPCPRadiateBEDDraw(EffPCPDriftEventWork *work) {
     }
 }
 
-void effPCPRadiateBEDSetPosition(EffPCPDriftEventWork *work, const void *source) {
+void effPCPRadiateBEDSetPosition(effPCPRadiateBED_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPRadiateBEDSetScale(EffPCPDriftEventWork *work, f32 scale) {
+void effPCPRadiateBEDSetScale(effPCPRadiateBED_tag *work, f32 scale) {
     work->scale = scale;
 }
 
-void effPCPRadiateBEDSetColor(EffPCPDriftEventWork *work, u32 color) {
+void effPCPRadiateBEDSetColor(effPCPRadiateBED_tag *work, u32 color) {
     work->color = color;
 }
 
-EffPCPPairedEventWork *effPCPRadiateTBCreate(EffPCPPairedEventParams *src, void *paramsA, void *paramsB) {
+EffPCPPairedEventWork *effPCPRadiateTBCreate(effPCPRadiateTBParam_t *src, void *paramsA, void *paramsB) {
     u32 count = src->count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xA4);
     EffPCPPairedEventWork *work = (void *)sdfMemLock(handle);
@@ -6835,7 +6835,7 @@ EffPCPPairedEventWork *effPCPRadiateTBCreate(EffPCPPairedEventParams *src, void 
 }
 
 EffPCPPairedEventWork *effPCPRadiateTBCreatePCF(void *data) {
-    EffPCPPairedEventParams *params = dds3EffectPCPDataGetData(data, 0);
+    effPCPRadiateTBParam_t *params = dds3EffectPCPDataGetData(data, 0);
     void *ownerAParams = dds3EffectPCPDataGetData(data, 1);
 
     return effPCPRadiateTBCreate(params, ownerAParams, dds3EffectPCPDataGetData(data, 2));
@@ -7040,10 +7040,10 @@ void effPCPRadiateTBSetColor(EffPCPPairedEventWork *work, u32 color) {
     work->color = color;
 }
 
-EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *src, void *params) {
+effPCPSpiralBED_tag *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *src, void *params) {
     u32 count = src->count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = (void *)sdfMemLock(handle);
+    effPCPSpiralBED_tag *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEventRow *entry;
     s32 life;
@@ -7082,16 +7082,16 @@ EffPCPSpawnRangeWork *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *src, void *p
     return work;
 }
 
-EffPCPSpawnRangeWork *effPCPSpiralBEDCreatePCF(void *data) {
+effPCPSpiralBED_tag *effPCPSpiralBEDCreatePCF(void *data) {
     effPCPSpiralBEDParam_t *params = dds3EffectPCPDataGetData(data, 0);
 
     return effPCPSpiralBEDCreate(params, dds3EffectPCPDataGetData(data, 1));
 }
 
-EffPCPSpawnRangeWork *effPCPSpiralBEDCopy(EffPCPSpawnRangeWork *src) {
+effPCPSpiralBED_tag *effPCPSpiralBEDCopy(effPCPSpiralBED_tag *src) {
     u32 count = src->params.count;
     sdfMemHandle_t *handle = sdfMemAllocDirect(count * 32 + 0xAC);
-    EffPCPSpawnRangeWork *work = (void *)sdfMemLock(handle);
+    effPCPSpiralBED_tag *work = (void *)sdfMemLock(handle);
     EffPCPEventPlace place;
     EffPCPSpawnRangeEventRow *entry;
     s32 life;
@@ -7130,7 +7130,7 @@ EffPCPSpawnRangeWork *effPCPSpiralBEDCopy(EffPCPSpawnRangeWork *src) {
     return work;
 }
 
-void effPCPSpiralBEDDelete(EffPCPSpawnRangeWork *work) {
+void effPCPSpiralBEDDelete(effPCPSpiralBED_tag *work) {
     u32 i = 0;
     u32 count = work->params.count;
     EffPCPSpawnRangeEventRow *entry = work->entries;
@@ -7148,7 +7148,7 @@ void effPCPSpiralBEDDelete(EffPCPSpawnRangeWork *work) {
     sdfMemFreeDirect(work->handle);
 }
 
-void effPCPSpiralBEDPartInit(EffPCPSpawnRangeWork *work, s32 index) {
+void effPCPSpiralBEDPartInit(effPCPSpiralBED_tag *work, s32 index) {
     EffPCPSpawnRangeEventRow *slot;
     f32 spread;
     f32 scale;
@@ -7168,7 +7168,7 @@ void effPCPSpiralBEDPartInit(EffPCPSpawnRangeWork *work, s32 index) {
     slot->positionStep = (work->params.endPosition * (dds3GetRandFloatA(dds3EffectBase) * spread + (1.0f - spread)) * scale - slot->position) / (f32)work->params.duration;
 }
 
-void effPCPSpiralBEDDraw(EffPCPSpawnRangeWork *work) {
+void effPCPSpiralBEDDraw(effPCPSpiralBED_tag *work) {
     EffPCPEventPlace place;
     f32 origin[4] __attribute__((aligned(16)));
     u32 count = work->params.count;
@@ -7235,15 +7235,15 @@ void effPCPSpiralBEDDraw(EffPCPSpawnRangeWork *work) {
     }
 }
 
-void effPCPSpiralBEDSetPosition(EffPCPSpawnRangeWork *work, const void *source) {
+void effPCPSpiralBEDSetPosition(effPCPSpiralBED_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPSpiralBEDSetScale(EffPCPSpawnRangeWork *work, f32 scale) {
+void effPCPSpiralBEDSetScale(effPCPSpiralBED_tag *work, f32 scale) {
     work->scale = scale;
 }
 
-void effPCPSpiralBEDSetColor(EffPCPSpawnRangeWork *work, u32 color) {
+void effPCPSpiralBEDSetColor(effPCPSpiralBED_tag *work, u32 color) {
     work->color = color;
 }
 

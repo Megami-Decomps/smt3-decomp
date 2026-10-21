@@ -147,6 +147,14 @@ def main():
             total = (rows[-1][0] + rows[-1][1]) if rows else 0
             if total <= isize:
                 return True
+        # Holding a type the IDB assigns to this very candidate settles it: our
+        # EffPCPDriftEventWork already holds effPCPRadiateBEDParam_t, which the IDB
+        # lists as effPCPRadiateBED_tag's param.
+        theirs_types = {re.sub(r"[\s*\[\]0-9]+", "", t) for _, _, t, _ in imembers}
+        mine_types = {w for text, _, _, _ in ours_fields
+                      for w in re.findall(r"[A-Za-z_]\w*", text) if CONVENTION.search(w)}
+        if mine_types & {t for t in theirs_types if CONVENTION.search(t)}:
+            return True
         # Member count in order is the signal, not size: pointer-against-inline is a
         # layout disagreement, not a different record.
         return len(ours_fields) == len(imembers)
