@@ -288,7 +288,7 @@ TexHandle, and `dds3GlobalWork_t`'s `unk1CFA` as `heartsequip`. The last one
 corroborated itself: `header_layout.c` already asserted a member at 0x1CFA, so the
 rename had to satisfy an assertion written before it.
 
-### Invented type names cannot be recovered by layout
+### Layout alone cannot recover an invented type name
 
 `SdfPool` and `EffRecordPool` have nothing to look up, so layout is the only way in,
 and it does not work. `tools/ida_rename.py` matches a struct's total size and every
@@ -302,14 +302,65 @@ member's offset and extent against the IDB. Of 258 invented types:
   `sdfSortOtNode_tag`. Requiring the module to agree removed the worst of them and
   still left `SdfVuColorTransform` onto `sdfCorePacketFaceDivParm_t`.
 
-So the tool reports leads and deliberately cannot apply them, and none were applied.
-A shape is not an identity; what settles one of these is the code's own use of the
-type, one at a time.
+So the tool reports leads and deliberately cannot apply them. A shape is not an
+identity. What does settle one of these is the code's own use of the type, which the
+next section reaches through the HD function signatures.
 
 Their capitalization is not the problem to fix either. `SdfPool` is spelled that way
 **because** it was written here rather than recovered, which is the signal this
 document opens with. Renaming it to `sdfPool_t` would make an invented layout look
 like a recovered one and lose that.
+
+### What the HD bodies give that its headers do not
+
+The HD `src/` tree is il2cpp output, so its locals are `v5` and its types carry
+`_array` and `_o` suffixes, and its member accesses are often `v3[2]` on a `u64 *`.
+None of that is usable. Its **function signatures** are, and they are what settles an
+invented type name when layout cannot.
+
+Our function and HD's share a name, so the types in HD's signature are the types ours
+handles. `tools/hd_signatures.py` votes a candidate across the whole family of
+functions that use one of our types. Two filters are what make the vote mean
+anything:
+
+- A parameter name is not a type. Counting every identifier in a signature let
+  `hData` out-vote every real type in the file.
+- A candidate only counts for a function whose own name carries its stem.
+  `effPCPMisc.c` holds dozens of effects, so without this the types of every effect
+  in the file vote for each other: `effPCPBurstWork` drew 24 votes for
+  `effPCPEyeThunder_tag` purely by sharing a file with it.
+
+Then `--check-layout` corroborates each vote against the IDB layout, and only a vote
+the layout agrees with exactly is worth applying. Of 40 votes, 4 agreed in both
+directions and were applied:
+
+| ours | the IDB's | why it holds |
+|---|---|---|
+| `EffPCPBurstWork` | `effPCPEyeThunder_tag` | 36 bytes, every offset equal, `length` already agreeing by name, and our `EffThunderFragmentWork *fragmentWork` sits where the IDB has `effPCP_ThunderPoly_t *pThunderPoly`, the type the vote separately proposed for that second struct |
+| `EffPCPAnalyzeWork` | `effPCPAnalyzeBED_tag` | 16 bytes, `scale` agreeing, both pointers corresponding |
+| `EffPCPGrowWork` | `effPCPThunderSphereExp_tag` | `fadeIn`/`fadeOut` against `fade_in`/`fade_out` |
+| `EffUnitObject` | `dds3P2APolygon_tag` | |
+
+The other 36 votes were withheld, and sizing the tree's own types showed why: 28 of
+them disagree on size outright. The vote alone produces false candidates freely; it
+is the second direction that makes it evidence.
+
+Recovering a type's name then licenses its members. `ida_fill.py --exact` takes every
+member name, not only the `unk_` ones, where our struct's every offset and extent
+equals the IDB's: 80 members across 25 structs.
+
+### The rewrite rule that broke the build
+
+A member use is only ever `.name` or `->name`. Rewriting a bare identifier instead
+meant that renaming a member called `billboard` renamed every billboard in the file,
+`#include "billboard.h"` included, and `billManager.c` stopped parsing. It had looked
+survivable while only `unk00`-style names were being renamed, because those are not
+words. Both fillers now rewrite only member-access positions.
+
+What is left over are lines assigning between two structs that share a member name,
+where one side is the renamed type and the other kept its own spelling:
+`work->life = params->duration`. The compiler flags those, and the accessed
+variable's type says which side to put back.
 
 ### What is left, and what blocks it
 
