@@ -16,13 +16,13 @@ struct EffBattleEntryList;
 union EffBattleParameterValue;
 struct EffBillboardSetParams;
 struct EffBillboardSetWork;
-struct EffBlurQuad;
-struct EffBlurScaleParams;
-struct EffBlurScaleSlot;
-struct EffBlurScaleWork;
-struct EffBlurScatterParams;
-struct EffBlurScatterSlot;
-struct EffBlurScatterWork;
+struct effBlurQuad_t;
+struct effBlurScaleParams_t;
+struct effBlurScaleSlot_t;
+struct effBlurScaleWork_t;
+struct effBlurScatterParams_t;
+struct effBlurScatterSlot_t;
+struct effBlurScatterWork_t;
 struct EffBlurTemplateBody;
 struct effPCPAgiraoFirePartList_t;
 struct EffPCPBeamLargeHead;
@@ -87,11 +87,11 @@ struct EffPCPTrailWork;
 struct EffPCPTripleParams;
 struct effPCPAgiraoFire_tag;
 struct effPCPHama01_tag;
-struct EffPacketParams;
+struct effDebugPolyParams_t;
 struct EffParamTable;
 struct EffParamTableRecord;
 struct EffRandState;
-struct EffResourceRectBounds;
+struct effResourceRectBounds_t;
 struct EffResourceRectDrawParams;
 struct EffSpawnParams;
 struct EffThunderAlphaParams;
@@ -110,7 +110,7 @@ struct MdlResourceItem;
 struct MotionEntry;
 struct MovLinearStream;
 union MovObjStream;
-struct ParCell;
+struct parCell_t;
 struct sdfVector3_t;
 struct sdfMatPacket_t;
 struct SdfCommandNode;
@@ -138,7 +138,7 @@ typedef struct BillObj BillObj;
 typedef struct sdfGrOt_t sdfGrOt_t;
 typedef struct EffBillboardSetParams EffBillboardSetParams;
 typedef struct EffBillboardSetWork EffBillboardSetWork;
-typedef struct EffBlurQuad EffBlurQuad;
+typedef struct effBlurQuad_t effBlurQuad_t;
 typedef struct EffBlurTemplateBody EffBlurTemplateBody;
 typedef struct EffBlurTemplate EffBlurTemplate;
 typedef struct EffNode EffNode;
@@ -158,22 +158,22 @@ typedef struct effPartHandle_t effPartHandle_t;
 typedef struct effPCPAgiFireball_tag effPCPAgiFireball_tag;
 typedef struct effPCPEyeThunder_tag effPCPEyeThunder_tag;
 typedef struct EffPCPChargeWork EffPCPChargeWork;
-typedef struct EffResourceRectBounds EffResourceRectBounds;
+typedef struct effResourceRectBounds_t effResourceRectBounds_t;
 typedef struct EffResourceRectDrawParams EffResourceRectDrawParams;
 typedef struct effPCPMultiBlurExp2_tag effPCPMultiBlurExp2_tag;
 typedef struct EffPCPCompactTimelineParams EffPCPCompactTimelineParams;
 typedef struct EffPCPRectBounds EffPCPRectBounds;
 typedef struct EffPCPRectParams EffPCPRectParams;
 typedef struct EffPCPCompactRectParams EffPCPCompactRectParams;
-typedef struct EffBlurScaleParams EffBlurScaleParams;
+typedef struct effBlurScaleParams_t effBlurScaleParams_t;
 typedef struct EffPCPCompactScaleParams EffPCPCompactScaleParams;
-typedef struct EffBlurScatterParams EffBlurScatterParams;
+typedef struct effBlurScatterParams_t effBlurScatterParams_t;
 typedef struct EffPCPCompactScatterParams EffPCPCompactScatterParams;
 typedef struct EffPCPCompactTexturedBlurParams EffPCPCompactTexturedBlurParams;
-typedef struct EffBlurScaleSlot EffBlurScaleSlot;
-typedef struct EffBlurScaleWork EffBlurScaleWork;
-typedef struct EffBlurScatterSlot EffBlurScatterSlot;
-typedef struct EffBlurScatterWork EffBlurScatterWork;
+typedef struct effBlurScaleSlot_t effBlurScaleSlot_t;
+typedef struct effBlurScaleWork_t effBlurScaleWork_t;
+typedef struct effBlurScatterSlot_t effBlurScatterSlot_t;
+typedef struct effBlurScatterWork_t effBlurScatterWork_t;
 typedef struct EffPCPCompactWork EffPCPCompactWork;
 typedef struct effPCPHamaon_tag effPCPHamaon_tag;
 typedef struct effPCPMHanma01_tag effPCPMHanma01_tag;
@@ -191,7 +191,7 @@ typedef struct EffThunderAlphaParams EffThunderAlphaParams;
 typedef struct EffThunderVectorParams EffThunderVectorParams;
 typedef union EffThunderParameterHead EffThunderParameterHead;
 typedef struct effPCPThunderSpherePolyPart_t effPCPThunderSpherePolyPart_t;
-typedef struct ParCell ParCell;
+typedef struct parCell_t parCell_t;
 typedef struct ParSystem ParSystem;
 typedef struct effPCPThunderSpherePoly_t effPCPThunderSpherePoly_t;
 typedef struct effPCPAnalyzeBED_tag effPCPAnalyzeBED_tag;
@@ -263,10 +263,10 @@ typedef struct movieStream_t movieStream_t;
 typedef struct SdfStreamInputDmaTag SdfStreamInputDmaTag;
 typedef struct MdlObj MdlObj;
 typedef struct MdlObjectAttachment MdlObjectAttachment;
-typedef struct MdlPartEntry MdlPartEntry;
+typedef struct mdlPartSlot_t mdlPartSlot_t;
 typedef struct SdfMapPositionRecord SdfMapPositionRecord;
 typedef struct MdlResourceItem MdlResourceItem;
-typedef struct EffPacketParams EffPacketParams;
+typedef struct effDebugPolyParams_t effDebugPolyParams_t;
 typedef struct EffParamTableRecord EffParamTableRecord;
 typedef struct EffParamTable EffParamTable;
 
@@ -484,7 +484,7 @@ struct EffBillboardSetWork {
 struct EffBlurTemplate;
 
 /* Shared rectangle and sampling payload; color is packed or read by channel. */
-struct EffBlurQuad {
+struct effBlurQuad_t {
     u32 color; /* Byte consumers read the packed word through u8 object access. */
     s32 blendControl;
     f32 angle;
@@ -499,7 +499,7 @@ struct EffBlurQuad {
  * separately acquired source texture. */
 struct EffBlurTemplateBody {
     s32 extent;
-    EffBlurQuad source;
+    effBlurQuad_t source;
 };
 
 struct EffBlurTemplate {
@@ -765,7 +765,7 @@ struct EffPCPChargeWork {
     struct sdfMemHandle_t *allocationHandle;
 };
 
-struct EffResourceRectBounds {
+struct effResourceRectBounds_t {
     s32 left;
     s32 top;
     s32 right;
@@ -777,7 +777,7 @@ struct EffResourceRectDrawParams {
     /* The movie blender stores packed RGBA; the renderer samples channels. */
     union { u8 color[4]; u32 rgba; };
     s32 blendControl;
-    EffResourceRectBounds bounds;
+    effResourceRectBounds_t bounds;
 };
 
 /* Nine copied words; the selected source texture belongs to the owner. */
@@ -816,7 +816,7 @@ struct EffPCPBlurExpParams {
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
-    EffBlurQuad source;
+    effBlurQuad_t source;
 };
 
 struct EffPCPBlurExpWork {
@@ -875,7 +875,7 @@ struct EffPCPCompactRectParams {
 };
 
 /* Phase-driven blur parameters and the scale-slot allocation they own. */
-struct EffBlurScaleParams {
+struct effBlurScaleParams_t {
     s32 count;
     f32 phaseStep;
     f32 spacing;
@@ -891,11 +891,11 @@ struct EffBlurScaleParams {
 
 struct EffPCPCompactScaleParams {
     EffPCPCompactTimelineParams timeline;
-    EffBlurScaleParams res;
+    effBlurScaleParams_t res;
 };
 
 /* Random-position blur parameters and their allocated slot owner. */
-struct EffBlurScatterParams {
+struct effBlurScatterParams_t {
     s32 count;
     s32 delaySpread;
     f32 angleStep;
@@ -911,7 +911,7 @@ struct EffBlurScatterParams {
 
 struct EffPCPCompactScatterParams {
     EffPCPCompactTimelineParams timeline;
-    EffBlurScatterParams res;
+    effBlurScatterParams_t res;
 };
 
 typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
@@ -944,30 +944,30 @@ struct EffPCPCompactTexturedBlurParams {
     EffPCPTexturedBlurParams res;
 };
 
-struct EffBlurScaleSlot {
+struct effBlurScaleSlot_t {
     f32 phase;
     f32 angle;
-    EffBlurQuad quad;
+    effBlurQuad_t quad;
 };
 
-struct EffBlurScaleWork {
-    EffBlurScaleParams params;
+struct effBlurScaleWork_t {
+    effBlurScaleParams_t params;
     struct sdfTexHandle_t *texture;
     struct sdfMemHandle_t *allocation;
-    EffBlurScaleSlot *slots;
+    effBlurScaleSlot_t *slots;
 };
 
-struct EffBlurScatterSlot {
+struct effBlurScatterSlot_t {
     s32 delay;
     f32 angle;
-    EffBlurQuad quad;
+    effBlurQuad_t quad;
 };
 
-struct EffBlurScatterWork {
-    EffBlurScatterParams params;
+struct effBlurScatterWork_t {
+    effBlurScatterParams_t params;
     struct sdfTexHandle_t *texture;
     struct sdfMemHandle_t *allocation;
-    EffBlurScatterSlot *slots;
+    effBlurScatterSlot_t *slots;
 };
 
 struct EffPCPCompactWork {
@@ -983,8 +983,8 @@ struct EffPCPCompactWork {
     s32 endExtent;
     s32 frame;
     union {
-        EffBlurScatterWork *scatter;
-        EffBlurScaleWork *scale;
+        effBlurScatterWork_t *scatter;
+        effBlurScaleWork_t *scale;
     } resource;
 };
 
@@ -1214,7 +1214,7 @@ struct effPCPThunderSpherePolyPart_t {
 
 struct ParSystem;
 
-struct ParCell {
+struct parCell_t {
     u128 *history;   /* 0x00 */
     u32 *colors;     /* 0x04: packed per-history-vector colors */
     s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
@@ -1230,7 +1230,7 @@ struct ParSystem {
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
     struct sdfMemHandle_t *allocation; /* 0x10: geometry allocation descriptor */
-    ParCell *cells;      /* 0x14 */
+    parCell_t *cells;      /* 0x14 */
     u128 *vertices;      /* 0x18: backing vector history for all cells */
     u32 *colors;         /* 0x1C: backing color stream for all cells */
     struct sdfMat_t *asset; /* 0x20: submitted draw asset */
@@ -2148,10 +2148,10 @@ struct MdlObjectAttachment {
     u8 attributes[8];
 };
 
-struct MdlPartEntry;
+struct mdlPartSlot_t;
 
 /* One model-viewer part-list slot; the request buffer uses a 0x10-byte stride. */
-struct MdlPartEntry {
+struct mdlPartSlot_t {
     u32 kind;       /* 0x00 */
     s32 state;      /* 0x04 */
     void *object;   /* 0x08 */
@@ -2182,7 +2182,7 @@ struct MdlResourceItem {
                 void *instance;
                 struct EffTrackPolyWork *track;
             };
-            struct MdlPartEntry *slot;
+            struct mdlPartSlot_t *slot;
             struct SdfMapPositionRecord *mapPositionRecord;
             f32 anchorScale;
             u8 pad18[8];
@@ -2225,7 +2225,7 @@ void dds3BillboardSetRGBA(struct BillObj *billboard, u32 parameter);
 
 void dds3BillboardSetScale(struct BillObj *billboard, f32 x, f32 y);
 
-struct EffPacketParams {
+struct effDebugPolyParams_t {
     s16 parameterCount;
     s16 vertexCount;
     u16 primitive;
@@ -2241,14 +2241,14 @@ struct EffPacketParams {
     f32 depth;
 };
 
-extern EffPacketParams D_0056ADB8;
+extern effDebugPolyParams_t D_0056ADB8;
 
 extern sdfGrOt_t *D_0031FEF8[];
 
 extern u8 D_0031FEB0[];
 
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-EffBlurScatterWork *dds3EffectDistortionBlurCreate(EffBlurScatterParams *params);
+effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *params);
 
 extern u8 D_0031FD30[];
 
@@ -2256,19 +2256,19 @@ extern u8 D_0031FD90[];
 
 EffBlurTemplate *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *body);
 
-EffBlurScaleWork *dds3EffectRippleBlurCreate(EffBlurScaleParams *params);
+effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *params);
 
 EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *params);
 
 void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *owner);
 
-void dds3EffectDistortionBlurDelete(EffBlurScatterWork *owner);
+void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *owner);
 
-void dds3EffectRippleBlurDelete(EffBlurScaleWork *owner);
+void dds3EffectRippleBlurDelete(effBlurScaleWork_t *owner);
 
 void dds3EffectFilter(EffResourceRectDrawParams *params);
 
-void dds3EffectBlur(EffBlurQuad *quad);
+void dds3EffectBlur(effBlurQuad_t *quad);
 
 u32 effColorBlend(u32 to, u32 from, f32 amount);
 
@@ -2291,7 +2291,7 @@ EffThunderAlphaParams *effPCPThunderSpherePolyGetParam(effPCPThunderSpherePoly_t
 
 void dds3BillboardDelete(struct BillObj *billboard);
 
-extern void *effPkt3DPrimMakePoly(EffPacketParams *params);
+extern void *effPkt3DPrimMakePoly(effDebugPolyParams_t *params);
 
 extern u8 D_0031FAF0[];
 
@@ -2613,9 +2613,9 @@ void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *work, u32 color)
 void effPCPThunderSpherePolySetPosition(void *work, const void *position);
 void effPCPThunderSpherePolySetScale(f32 scale, effPCPThunderSpherePoly_t *work);
 void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *work);
-void dds3EffectDistortionBlurDraw(EffBlurScatterWork *work);
-void dds3EffectRippleBlurReset(EffBlurScaleWork *work);
-void dds3EffectRippleBlurDraw(EffBlurScaleWork *work);
+void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
+void dds3EffectRippleBlurReset(effBlurScaleWork_t *work);
+void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 void mdlSetScale(MdlCtx *model);
 void dds3BillboardSetAnimKey(BillObj *effect, u32 frame);
 void effPCP_ThunderPolySetColor(effPCP_ThunderPoly_t *work, u32 color);
@@ -4557,7 +4557,7 @@ void effPCPDistortionBlurExpDelete(EffPCPCompactWork *work) {
 }
 
 void effPCPDistortionBlurExpDraw(EffPCPCompactWork *work) {
-    EffBlurScatterWork *resource;
+    effBlurScatterWork_t *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;
@@ -4653,7 +4653,7 @@ void effPCPRippleBlurExpDelete(EffPCPCompactWork *work) {
 }
 
 void effPCPRippleBlurExpDraw(EffPCPCompactWork *work) {
-    EffBlurScaleWork *resource;
+    effBlurScaleWork_t *resource;
     f32 projected[4] __attribute__((aligned(16)));
     s32 frame = work->frame;
     s32 duration = work->duration;

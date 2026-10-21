@@ -26,7 +26,10 @@ MIN_MEMBERS = 4
 
 
 def distinctive(rows):
-    return len(rows) >= MIN_MEMBERS or len({s for _, s, _ in rows}) > 1
+    """A uniform run of words identifies nothing, however long, and length alone was
+    not enough: EffTrackPolyData and dds3Effect_DistortionBlurParam_t are both ten
+    4-byte members and have nothing else in common."""
+    return len(rows) >= MIN_MEMBERS and len({s for _, s, _ in rows}) > 1
 
 
 def hd_pool(hd):

@@ -75,9 +75,14 @@ def parse_enums(hd):
 
 
 def parse(hd):
-    """name -> (kind, members, file) for every HD struct and union."""
+    """name -> (kind, members, file, index) for every HD struct and union.
+
+    The index is the declaration position inside its header, which the originals
+    preserve: a param type is followed by its work type and its parts. HD's own
+    src/*.c sorts its typedefs alphabetically and keeps none of that."""
     out = {}
     for path in sorted((hd / "include").glob("*.h")):
+        order = 0
         lines = path.read_text(errors="replace").splitlines()
         i = 0
         while i < len(lines):
@@ -95,7 +100,8 @@ def parse(hd):
                         dims = re.findall(r"\[([^\]]*)\]", d.group(4))
                         members.append((d.group(1).strip(), len(d.group(2)), d.group(3), dims))
                 i += 1
-            out[name] = (kind, members, path.name)
+            out[name] = (kind, members, path.name, order)
+            order += 1
             i += 1
     return out
 
@@ -124,7 +130,7 @@ def sizes(types):
         if name in busy or name not in types:
             return None  # a self-reference only ever appears behind a pointer
         busy.add(name)
-        kind, members, _ = types[name]
+        kind, members, _, _ = types[name]
         off, align, rows, ok = 0, 1, [], True
         for text, stars, mname, dims in members:
             sz, al = size_align(text, stars)
@@ -193,21 +199,21 @@ def main():
         "# SMT3HD reconstruction struct members, from tools/hd_types.py.",
         "# Member names and order are authoritative; size and offset are ADVISORY,",
         "# because the remaster rewrote inline arrays and embedded structs as pointers.",
-        "# T <name> <kind> <size|?> <file>   then one M row per member:",
+        "# T <name> <kind> <size|?> <file> <index in that header>, then M rows:",
         "# M <offset|?> <size|?> <type> <name>",
     ]
     ok = 0
     for name in sorted(types):
-        kind, members, src = types[name]
+        kind, members, src, order = types[name]
         r = resolved.get(name)
         if r:
             ok += 1
             size, _, rows = r
-            lines.append(f"T {name} {kind} {size} {src}")
+            lines.append(f"T {name} {kind} {size} {src} {order}")
             for off, sz, text, mname, _ in rows:
                 lines.append(f"M {off} {sz} {text} {mname}")
         else:
-            lines.append(f"T {name} {kind} ? {src}")
+            lines.append(f"T {name} {kind} ? {src} {order}")
             for text, stars, mname, _ in members:
                 lines.append(f"M ? ? {text}{'*' * stars} {mname}")
     args.out.write_text("\n".join(lines) + "\n")

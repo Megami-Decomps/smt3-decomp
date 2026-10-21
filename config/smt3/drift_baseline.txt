@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 197 types, 1083 members, 492 adopted constants.
+# 185 types, 1083 members, 492 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -36,13 +36,6 @@ type EffBattleEntryList
 type EffBattleParameterValue
 type EffBillboardSetParams
 type EffBillboardSetWork
-type EffBlurQuad
-type EffBlurScaleParams
-type EffBlurScaleSlot
-type EffBlurScaleWork
-type EffBlurScatterParams
-type EffBlurScatterSlot
-type EffBlurScatterWork
 type EffBlurTemplate
 type EffBlurTemplateBody
 type EffNode
@@ -87,11 +80,9 @@ type EffPCPThunderGroup
 type EffPCPTrailParams
 type EffPCPTrailWork
 type EffPCPTripleParams
-type EffPacketParams
 type EffParamTable
 type EffParamTableRecord
 type EffRandState
-type EffResourceRectBounds
 type EffResourceRectDrawParams
 type EffResourceRectParams
 type EffResourceRectWork
@@ -101,7 +92,6 @@ type EffRingWork
 type EffSpawnParams
 type EffThunderAlphaParams
 type EffThunderCellParams
-type EffThunderDrawParams
 type EffThunderFrag
 type EffThunderParameterHead
 type EffThunderSparkParams
@@ -117,7 +107,6 @@ type MdlDevList
 type MdlDevSlot
 type MdlObj
 type MdlObjectAttachment
-type MdlPartEntry
 type MdlRecord
 type MdlResourceItem
 type MotionEntry
@@ -126,7 +115,6 @@ type MovLinearStream
 type MovObjStream
 type MovOpenParam
 type MovPacStream
-type ParCell
 type ParSystem
 type PcpFlashAccumulatingWork
 type PcpFlashColorSlot

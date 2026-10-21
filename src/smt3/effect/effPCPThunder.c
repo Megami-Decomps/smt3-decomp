@@ -19,7 +19,7 @@ struct EffThunderSparkWork;
 struct effPCPThunderSpherePolyPart_t;
 struct EffThunderVectorParams;
 struct effPCPThunderSpherePoly_t;
-struct ParCell;
+struct parCell_t;
 struct sdfVector3_t;
 struct sdfMatPacket_t;
 union SdfDrawTransform;
@@ -29,7 +29,7 @@ struct sdfGsMemSlice_t;
 typedef struct EffRandState EffRandState;
 typedef struct effPCP_ThunderRadiatePolyPart_t effPCP_ThunderRadiatePolyPart_t;
 typedef struct EffThunderCellParams EffThunderCellParams;
-typedef struct ParCell ParCell;
+typedef struct parCell_t parCell_t;
 typedef union SdfDrawTransform SdfDrawTransform;
 typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
 typedef struct sdfMatPacket_t sdfMatPacket_t;
@@ -112,7 +112,7 @@ struct EffThunderCellParams {
 
 struct ParSystem;
 
-struct ParCell {
+struct parCell_t {
     u128 *history;   /* 0x00 */
     u32 *colors;     /* 0x04: packed per-history-vector colors */
     s32 vertexCount; /* 0x08: active vectors in the topology-specific history */
@@ -221,7 +221,7 @@ struct ParSystem {
     s32 vertexWordCount; /* 0x08 */
     s32 groupDivisor;   /* 0x0C: cell-system allocator input */
     struct sdfMemHandle_t *allocation; /* 0x10: geometry allocation descriptor */
-    ParCell *cells;      /* 0x14 */
+    parCell_t *cells;      /* 0x14 */
     u128 *vertices;      /* 0x18: backing vector history for all cells */
     u32 *colors;         /* 0x1C: backing color stream for all cells */
     struct sdfMat_t *asset; /* 0x20: submitted draw asset */
@@ -596,7 +596,7 @@ void effPCPThunderSphereRotate(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
     ParSystem *system = work->cellSystem;
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     effPCPThunderSpherePolyPart_t *source;
     u128 *vertices;
     s32 count;
@@ -681,7 +681,7 @@ void effPCPThunderSphereRotateAxis(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 direction[4] __attribute__((aligned(16)));
     ParSystem *system = work->cellSystem;
     effPCPThunderSpherePolyPart_t *source = &work->cells[index];
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     u128 *vertices = cell->history;
     s32 rows = system->vertexWordCount / 5;
     s32 i;
@@ -739,7 +739,7 @@ void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *work) {
     s32 cellCount = work->head.vector.cellCount;
     u32 tintColor = work->tintColor;
     effPCPThunderSpherePolyPart_t *cell = work->cells;
-    ParCell *renderCells = renderSystem->cells;
+    parCell_t *renderCells = renderSystem->cells;
     u32 *renderColor;
 
     if (cellCount > 0) {
@@ -763,7 +763,7 @@ void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *work) {
             *renderColor = effMagaCylinderCalcColor(cell->abgr, tintColor);
             i++;
             cell++;
-            renderColor = (u32 *)((u8 *)renderColor + sizeof(ParCell));
+            renderColor = (u32 *)((u8 *)renderColor + sizeof(parCell_t));
         } while (i < cellCount);
     }
     dds3TrackPolyDraw(work->cellSystem);
@@ -864,7 +864,7 @@ void effPCPThunderSphereLowRotate(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
     ParSystem *system = work->cellSystem;
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     effPCPThunderSpherePolyPart_t *source;
     u128 *vertices;
     s32 count;
@@ -937,7 +937,7 @@ void effPCPThunderSphereLowRotateAxis(effPCPThunderSpherePoly_t *work, s32 index
     f32 direction[4] __attribute__((aligned(16)));
     ParSystem *system = work->cellSystem;
     effPCPThunderSpherePolyPart_t *source = &work->cells[index];
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     u128 *vertices = cell->history;
     s32 rows = system->vertexWordCount >> 1;
     s32 i;
@@ -980,7 +980,7 @@ void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *work) {
     s32 cellCount = work->head.vector.cellCount;
     u32 tintColor = work->tintColor;
     effPCPThunderSpherePolyPart_t *cell = work->cells;
-    ParCell *renderCells = renderSystem->cells;
+    parCell_t *renderCells = renderSystem->cells;
     u32 *renderColor;
 
     if (cellCount > 0) {
@@ -1004,7 +1004,7 @@ void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *work) {
             *renderColor = effMagaCylinderCalcColor(cell->abgr, tintColor);
             i++;
             cell++;
-            renderColor = (u32 *)((u8 *)renderColor + sizeof(ParCell));
+            renderColor = (u32 *)((u8 *)renderColor + sizeof(parCell_t));
         } while (i < cellCount);
     }
     dds3TrackPolyDraw(work->cellSystem);
@@ -1084,7 +1084,7 @@ void func_00177BC0(EffThunderSparkWork *work, s32 index) {
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
     ParSystem *system;
-    ParCell *cell;
+    parCell_t *cell;
     u128 *vertices;
     u128 *join;
     s32 i;
@@ -1252,7 +1252,7 @@ void eff_178128(EffThunderSparkWork *work) {
     f32 verticalDamping = work->head.verticalDamping;
     f32 angularDamping = work->head.angularDamping;
     effPCP_ThunderColumnPolyLowPart_t *spark;
-    ParCell *renderCell;
+    parCell_t *renderCell;
     s32 i;
     s32 age;
     f32 angle;
@@ -1385,7 +1385,7 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
     ParSystem *system = work->system;
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     u128 *vertices;
     u128 *join;
     s32 i;
@@ -1574,7 +1574,7 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *work) {
     u32 tintColor = work->color;
     u32 updateCount = work->state.updateCount;
     EffThunderFrag *fragment = work->fragments;
-    ParCell *renderCells = system->cells;
+    parCell_t *renderCells = system->cells;
     s32 canRestart;
 
     if (count > 0) {
@@ -1670,8 +1670,8 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     f32 delta[4] __attribute__((aligned(16)));
     ParSystem *secondarySystem = work->state.secondarySystem;
     ParSystem *primarySystem = work->system;
-    ParCell *secondaryCell = &secondarySystem->cells[index];
-    ParCell *primaryCell = &primarySystem->cells[index];
+    parCell_t *secondaryCell = &secondarySystem->cells[index];
+    parCell_t *primaryCell = &primarySystem->cells[index];
     u128 *vertices;
     u128 *coreVertices;
     u128 *join;
@@ -1858,10 +1858,10 @@ void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *work) {
     ParSystem *secondarySystem = work->state.secondarySystem;
     s32 fragmentCount = work->head.fragmentCount;
     ParSystem *primarySystem = work->system;
-    ParCell *primaryCells = primarySystem->cells;
+    parCell_t *primaryCells = primarySystem->cells;
     u32 tintColor = work->color;
     EffThunderFrag *fragment = work->fragments;
-    ParCell *secondaryCells = secondarySystem->cells;
+    parCell_t *secondaryCells = secondarySystem->cells;
     s32 packedColor;
 
     if (fragmentCount > 0) {
@@ -1948,7 +1948,7 @@ void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32
     f32 side[4] __attribute__((aligned(16)));
     ParSystem *system = work->system;
     effPCP_ThunderRadiatePolyPart_t *source = &work->cells[index];
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     u128 *vertices;
     u128 *join;
     s32 i;
@@ -2089,7 +2089,7 @@ void effPCP_ThunderRadiatePolyDraw(effPCP_ThunderRadiatePoly_t *work) {
     s32 i = 0;
     s32 cellCount = work->head.cellCount;
     effPCP_ThunderRadiatePolyPart_t *cell = work->cells;
-    ParCell *renderCells = work->system->cells;
+    parCell_t *renderCells = work->system->cells;
 
     if (cellCount > 0) {
         do {
@@ -2163,7 +2163,7 @@ void effPCP_ThunderPolyListPartRefresh(effPCP_ThunderPoly_t *work, s32 index, co
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
     ParSystem *system = work->system;
-    ParCell *cell = &system->cells[index];
+    parCell_t *cell = &system->cells[index];
     u128 *vertices;
     u128 *join;
     s32 i;
@@ -2362,7 +2362,7 @@ void effPCP_ThunderPolyListDraw(effPCP_ThunderPolyList_t *group) {
     f32 (*points)[4] = group->head.points;
     effPCP_ThunderPoly_t *work;
     effPCP_ThunderPoly_t *previous;
-    ParCell *cell;
+    parCell_t *cell;
 
     for (; i < segmentCount; i++) {
         work = group->handles[i];
