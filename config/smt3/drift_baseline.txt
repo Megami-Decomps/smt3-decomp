@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 242 types, 1089 members, 492 adopted constants.
+# 233 types, 1088 members, 492 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -24,7 +24,6 @@ type BillKindFuncs
 type BillLinkedValue
 type BillObj
 type BillOtLink
-type BillOut
 type BillPacRequest
 type BillPacketWork
 type BillPluralRecord
@@ -56,7 +55,6 @@ type EffPCPBeamLargeWork
 type EffPCPBeamNode
 type EffPCPBeamWork
 type EffPCPBlockSet
-type EffPCPBlockSetWork
 type EffPCPBlurExpParams
 type EffPCPBlurExpWork
 type EffPCPChargeWork
@@ -83,7 +81,6 @@ type EffPCPGroupEntry
 type EffPCPGroupHead
 type EffPCPGroupSet
 type EffPCPMapEventEntry
-type EffPCPMapEventWork
 type EffPCPPairedEventParams
 type EffPCPPairedEventRow
 type EffPCPPairedEventWork
@@ -113,7 +110,6 @@ type EffPacketParams
 type EffParamTable
 type EffParamTableRecord
 type EffRandState
-type EffRecordPool
 type EffResourceRectBounds
 type EffResourceRectDrawParams
 type EffResourceRectParams
@@ -128,7 +124,6 @@ type EffThunderCellParams
 type EffThunderCellWork
 type EffThunderDrawParams
 type EffThunderFrag
-type EffThunderFragmentParams
 type EffThunderFragmentWork
 type EffThunderGroup
 type EffThunderGroupParams
@@ -181,7 +176,6 @@ type PcpFlashStreakParams
 type PcpFlashStreakWork
 type PcpFlashTrianglePulseParams
 type PcpFlashTrianglePulseWork
-type PcpScatterDraw
 type PcpScatterInstanceA
 type PcpScatterInstanceB
 type PcpScatterInstanceC
@@ -195,7 +189,6 @@ type PcpScatterPlainParticle
 type PcpScatterRadialParams
 type PcpScatterRadialParticle
 type PcpScatterRadialWork
-type PcpScatterRes
 type PcpScatterRibbonParams
 type PcpScatterRibbonParticle
 type PcpScatterRibbonWork
@@ -228,9 +221,7 @@ type SdfKeyTreeItem
 type SdfMapPositionRecord
 type SdfMotionCommand
 type SdfObjectRefCommand
-type SdfPacDecoder
 type SdfPacket
-type SdfPacketChain
 type SdfPacketPatchLink
 type SdfPacketSlot
 type SdfPadEntry
@@ -261,7 +252,6 @@ member BattleEffect.unk20
 member BattleGroupNode.unk_AC
 member BillObj.unk18
 member BillObj.unk1C
-member BillOut.unk0
 member BillPluralRecord.unk08
 member EffPCPCompactFadeWork.unk34
 member EffPCPCrossWork.unk00

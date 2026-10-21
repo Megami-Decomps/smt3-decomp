@@ -162,8 +162,8 @@ typedef struct P2A_TEXANIM_tag {
     s16 sy;
     s16 cx;
     s16 cy;
-    u16 u0;
-    u16 v0;
+    u16 u1;
+    u16 v1;
     u16 u2;
     u16 v2;
     s16 texid;
@@ -172,12 +172,12 @@ typedef struct P2A_TEXANIM_tag {
 } P2A_TEXANIM_tag;
 
 typedef struct billOut_t {
-    s32 unk0;
-    s32 frameIndex;
-    s32 framesRemaining;
-    BillAnimationEntry *entry;
-    P2A_TEXANIM_tag *record;
-} BillOut;
+    s32 hResource;
+    s32 key;
+    s32 wait;
+    BillAnimationEntry *pAnim;
+    P2A_TEXANIM_tag *pTexAnim;
+} dds3BillAnim_tag;
 
 
 enum {
@@ -233,7 +233,7 @@ void dds3Billboard_P2ASetNumber(billObj_t *obj, s32 animationEntryIndex);
 
 /* Advance an entry's frame timer and apply its current record to the shared
  * child payload. Plural descriptors are handled by the dispatcher instead. */
-BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, BillOut *out);
+BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, dds3BillAnim_tag *out);
 
 
 extern void *memcpy(void *dest, const void *src, u32 n);
@@ -665,7 +665,7 @@ billObj_t *dds3Billboard_P2ACreate(void *resourceData) {
     n = data->AnimNum;
     newobj = sdfChipAllocDirect(n * 20 + 0x6C);
     newobj->u.animationData = data;
-    newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
+    newobj->resolvedEntries = (dds3BillAnim_tag *)((u8 *)newobj + 0x6C);
     newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
@@ -684,7 +684,7 @@ billObj_t *dds3Billboard_P2ACopy(const billObj_t *obj) {
     data->count = data->count + 1;
     newobj = sdfChipAllocDirect(n * 20 + 0x6C);
     newobj->u.animationData = data;
-    newobj->resolvedEntries = (BillOut *)((u8 *)newobj + 0x6C);
+    newobj->resolvedEntries = (dds3BillAnim_tag *)((u8 *)newobj + 0x6C);
     newobj->animationActive = 1;
     newobj->pair.packetList = 0;
     newobj->pair.next = 0;
@@ -699,7 +699,7 @@ void dds3Billboard_P2ADelete(billObj_t *obj) {
 
 /* NON_MATCHING: parked so dds3Billboard_P2ADraw matches; it is byte-exact as C. */
 #ifdef NON_MATCHING
-BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, BillOut *out) {
+BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, dds3BillAnim_tag *out) {
     BillAnimationEntry *entry = out->entry;
     dds3BillAnimResource_tag *data = obj->u.animationData;
     P2A_TEXANIM_tag *record;
@@ -710,21 +710,21 @@ BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, BillOut *out) {
     if (entry->flags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
         return NULL;
     }
-    if (out->framesRemaining <= 0) {
-        out->frameIndex++;
-        if ((u32)out->frameIndex >= entry->frameCount) {
+    if (out->wait <= 0) {
+        out->key++;
+        if ((u32)out->key >= entry->frameCount) {
             if (entry->flags & BILL_ANIMATION_FLAG_STOP_AT_END) {
                 obj->animationActive = 0;
-                out->frameIndex = entry->frameCount - 1;
+                out->key = entry->frameCount - 1;
             } else {
-                out->frameIndex = 0;
+                out->key = 0;
             }
         }
-        out->framesRemaining = out->record[out->frameIndex].attr;
+        out->wait = out->record[out->key].attr;
     } else {
-        out->framesRemaining--;
+        out->wait--;
     }
-    index = out->frameIndex;
+    index = out->key;
     record = out->record + index;
     if (entry->flags & BILL_ANIMATION_FLAG_FRAME_COLORS) {
         color = ((u32 *)(data->base + entry->colorOffset))[index];
@@ -802,8 +802,8 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
         savedRotation = obj->rotationAngle;
         records = (BillPluralRecord *)(data->pHeader + entry->offset);
         for (i = 0; i < obj->entryCount; i++) {
-            BillOut *out = (BillOut *)((u8 *)(i * sizeof(BillOut)) + (u32)obj->resolvedEntries);
-            s32 frameIndex = out->frameIndex;
+            dds3BillAnim_tag *out = (dds3BillAnim_tag *)((u8 *)(i * sizeof(dds3BillAnim_tag)) + (u32)obj->resolvedEntries);
+            s32 frameIndex = out->key;
 
             if (frameIndex >= 0) {
                 f32 savedX;
@@ -820,7 +820,7 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
                 child->x = savedX;
                 child->y = savedY;
             } else {
-                out->frameIndex = frameIndex + 1;
+                out->key = frameIndex + 1;
             }
         }
         obj->rotationAngle = savedRotation;
@@ -847,7 +847,7 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
         obj->pair.colors[0] = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
         obj->pair.children[1] = dds3Billboard_P2AAnimDraw(obj, obj->resolvedEntries + 1);
         obj->pair.colors[1] = dds3Billboard_P2AColorMul(savedColor, obj->childParam);
-        flags = obj->resolvedEntries[1].entry->flags;
+        flags = obj->resolvedEntries[1].pAnim->flags;
         if (flags & BILL_ANIMATION_FLAG_PACKET_LIST_2) {
             obj->pair.kind = 2;
         } else if (flags & BILL_ANIMATION_FLAG_PACKET_LIST_3) {
@@ -871,7 +871,7 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
     }
 }
 
-void dds3Billboard_P2ASetAnim(dds3BillAnimResource_tag *animationData, s32 entryIndex, BillOut *resolvedEntry) {
+void dds3Billboard_P2ASetAnim(dds3BillAnimResource_tag *animationData, s32 entryIndex, dds3BillAnim_tag *resolvedEntry) {
     u8 *base;
     BillAnimationEntry *entry;
     s32 offset;
@@ -880,12 +880,12 @@ void dds3Billboard_P2ASetAnim(dds3BillAnimResource_tag *animationData, s32 entry
     base = animationData->pHeader;
     entry = animationData->pAnimTable + entryIndex;
     offset = entry->offset;
-    resolvedEntry->entry = entry;
+    resolvedEntry->pAnim = entry;
     base = base + offset;
-    resolvedEntry->frameIndex = 0;
+    resolvedEntry->key = 0;
     value = ((P2A_TEXANIM_tag *)base)->attr;
-    resolvedEntry->record = (P2A_TEXANIM_tag *)base;
-    resolvedEntry->framesRemaining = value;
+    resolvedEntry->pTexAnim = (P2A_TEXANIM_tag *)base;
+    resolvedEntry->wait = value;
 }
 
 void dds3Billboard_P2ASetNumber(billObj_t *obj, s32 animationEntryIndex) {
@@ -907,7 +907,7 @@ void dds3Billboard_P2ASetNumber(billObj_t *obj, s32 animationEntryIndex) {
         records = (BillPluralRecord *)(data->pHeader + entry->offset);
         for (; i < entry->frameCount; i++) {
             dds3Billboard_P2ASetAnim(data, records[i].entryIndex, obj->resolvedEntries + i);
-            (obj->resolvedEntries)[i].frameIndex = -records[i].delay;
+            (obj->resolvedEntries)[i].key = -records[i].delay;
         }
     } else if (entry->entryModeFlags & 0xC0) {
         printf("billAnim..(A)MTEX SET\n");
@@ -1113,10 +1113,10 @@ void dds3BillboardSetMode(billObj_t *effect, s32 mode) {
         s32 entryCount = effect->entryCount;
         if (entryCount > 0) {
             s32 remaining = entryCount;
-            BillOut *entries = effect->resolvedEntries;
+            dds3BillAnim_tag *entries = effect->resolvedEntries;
             s32 index = 0;
             do {
-                BillAnimationEntry *entry = entries[index].entry;
+                BillAnimationEntry *entry = entries[index].pAnim;
                 u32 flags = entry->flags & ~BILL_ANIMATION_FLAG_PACKET_LIST_MASK;
                 entry->flags = flags;
                 if (mode == 2) {
@@ -1220,15 +1220,15 @@ void dds3BillboardSetAnimKey(billObj_t *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            BillOut *entry = effect->resolvedEntries;
+            dds3BillAnim_tag *entry = effect->resolvedEntries;
             s32 remaining = entryCount;
 
             do {
-                BillAnimationEntry *frameData = entry->entry;
+                BillAnimationEntry *frameData = entry->pAnim;
                 u32 wrappedFrame = startFrame % frameData->frameCount;
                 remaining -= 1;
-                entry->framesRemaining = 0;
-                entry->frameIndex = wrappedFrame;
+                entry->wait = 0;
+                entry->key = wrappedFrame;
                 entry++;
             } while (remaining != 0);
         }
@@ -1240,15 +1240,15 @@ void dds3BillboardSetAnimKey2(billObj_t *effect, u32 startFrame) {
         s32 entryCount = effect->entryCount;
 
         if (entryCount > 0) {
-            BillOut *entry = effect->resolvedEntries;
+            dds3BillAnim_tag *entry = effect->resolvedEntries;
             s32 remaining = entryCount;
 
             do {
-                BillAnimationEntry *frameData = entry->entry;
+                BillAnimationEntry *frameData = entry->pAnim;
                 u32 wrappedFrame = startFrame % frameData->frameCount;
                 remaining -= 1;
-                entry->framesRemaining = 1;
-                entry->frameIndex = wrappedFrame;
+                entry->wait = 1;
+                entry->key = wrappedFrame;
                 entry++;
             } while (remaining != 0);
         }
@@ -1258,8 +1258,8 @@ void dds3BillboardSetAnimKey2(billObj_t *effect, u32 startFrame) {
 /* Read the animation modulus of the first entry, if this is a list billboard. */
 s32 dds3BillboardGetAnimFrame(const billObj_t *effect) {
     if (effect->kind == 1) {
-        const BillOut *entry = effect->resolvedEntries;
-        const BillAnimationEntry *frame = entry->entry;
+        const dds3BillAnim_tag *entry = effect->resolvedEntries;
+        const BillAnimationEntry *frame = entry->pAnim;
         return frame->frameCount;
     }
     return 0;

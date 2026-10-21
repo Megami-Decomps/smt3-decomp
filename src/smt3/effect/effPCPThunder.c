@@ -9,7 +9,7 @@ struct EffThunderCell;
 struct EffThunderCellParams;
 struct EffThunderCellWork;
 struct EffThunderFrag;
-struct EffThunderFragmentParams;
+struct effPCP_ThunderPolyParam_t;
 struct EffThunderGroup;
 struct EffThunderGroupParams;
 union EffThunderParameterHead;
@@ -38,7 +38,7 @@ typedef struct sdfTexPacket_t sdfTexPacket_t;
 typedef struct ParSystem ParSystem;
 typedef struct EffThunderCellWork EffThunderCellWork;
 typedef struct EffThunderFrag EffThunderFrag;
-typedef struct EffThunderFragmentParams EffThunderFragmentParams;
+typedef struct effPCP_ThunderPolyParam_t effPCP_ThunderPolyParam_t;
 typedef struct EffThunderGroupParams EffThunderGroupParams;
 typedef struct effPCP_ThunderColumnPolyLowPart_t effPCP_ThunderColumnPolyLowPart_t;
 typedef struct EffThunderSparkParams EffThunderSparkParams;
@@ -250,7 +250,7 @@ struct EffThunderFragmentWork;
 typedef struct EffThunderFragmentWork EffThunderFragmentWork;
 
 /* Parameter head (0x54 bytes) of the fragment effect, copied verbatim into the work. */
-struct EffThunderFragmentParams {
+struct effPCP_ThunderPolyParam_t {
     f32 start[4];
     f32 end[4];
     u16 systemParam;         /* 0x20 */
@@ -271,7 +271,7 @@ struct EffThunderFragmentParams {
 };
 
 struct EffThunderFragmentWork {
-    EffThunderFragmentParams head;
+    effPCP_ThunderPolyParam_t head;
     EffThunderFrag *fragments; /* 0x54 */
     u32 color;               /* 0x58 */
     union {
@@ -288,7 +288,7 @@ typedef struct EffThunderGroup EffThunderGroup;
 struct EffThunderGroupParams {
     f32 points[10][4];
     s32 count;
-    EffThunderFragmentParams params;
+    effPCP_ThunderPolyParam_t params;
 };
 
 struct EffThunderGroup {
@@ -1308,7 +1308,7 @@ void eff_178128(EffThunderSparkWork *work) {
     }
 }
 
-EffThunderFragmentWork *effPCP_ThunderPolyCreate(EffThunderFragmentParams *parameters) {
+EffThunderFragmentWork *effPCP_ThunderPolyCreate(effPCP_ThunderPolyParam_t *parameters) {
     sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfMemLock(allocationHandle);
     u32 i;
@@ -1346,7 +1346,7 @@ void effPCP_ThunderPolySetColor(EffThunderFragmentWork *work, u32 color) {
     work->color = color;
 }
 
-EffThunderFragmentParams *effPCP_ThunderPolyGetParam(EffThunderFragmentWork *work) {
+effPCP_ThunderPolyParam_t *effPCP_ThunderPolyGetParam(EffThunderFragmentWork *work) {
     return &work->head;
 }
 
@@ -1605,7 +1605,7 @@ void effPCP_ThunderPolyDraw(EffThunderFragmentWork *work) {
     dds3TrackPolyDraw(work->system);
 }
 
-EffThunderFragmentWork *effPCP_ThunderPolyLowCreate(EffThunderFragmentParams *parameters) {
+EffThunderFragmentWork *effPCP_ThunderPolyLowCreate(effPCP_ThunderPolyParam_t *parameters) {
     sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->fragmentCount * sizeof(EffThunderFrag) + sizeof(EffThunderFragmentWork));
     EffThunderFragmentWork *work = (EffThunderFragmentWork *)sdfMemLock(allocationHandle);
     u32 i;
