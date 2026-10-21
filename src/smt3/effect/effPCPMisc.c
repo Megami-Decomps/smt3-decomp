@@ -26,7 +26,7 @@ struct EffBlurScatterWork;
 struct EffBlurTemplateBody;
 struct effPCPAgiraoFirePartList_t;
 struct EffPCPBeamLargeHead;
-struct EffPCPBeamLargeWork;
+struct effPCPRingPolyExp2_tag;
 struct dds3RingPolyExpList_tag;
 struct effPCPRingPolyExpParam_t;
 struct effPCPRingPolyExp_tag;
@@ -149,7 +149,7 @@ typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
 typedef struct sdfMatPacket_t sdfMatPacket_t;
 typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct dds3RingPolyExpList_tag dds3RingPolyExpList_tag;
-typedef struct EffPCPBeamLargeWork EffPCPBeamLargeWork;
+typedef struct effPCPRingPolyExp2_tag effPCPRingPolyExp2_tag;
 typedef struct effPCPRingPolyExpParam_t effPCPRingPolyExpParam_t;
 typedef struct effPCPRingPolyExp_tag effPCPRingPolyExp_tag;
 typedef struct EffPCPBlockSet EffPCPBlockSet;
@@ -635,7 +635,7 @@ struct dds3RingPolyExpList_tag {
     struct sdfMemHandle_t *allocationHandle;
 };
 
-struct EffPCPBeamLargeWork {
+struct effPCPRingPolyExp2_tag {
     EffPCPBeamLargeHead head;
     s32 frame;
     u32 color;
@@ -2383,11 +2383,11 @@ void effPCPAgiFireballSetColor(effPCPAgiFireball_tag *work, u32 color);
 
 extern void effPCPRingPolyExpSetVertex(f32 value, struct effPCPRingPolyExp_tag *work);
 
-void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius);
+void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *work, f32 radius);
 
 effPCPRingPolyExp_tag *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *params);
 
-EffPCPBeamLargeWork *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *params);
+effPCPRingPolyExp2_tag *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *params);
 
 void dds3RingPolyExpListDelete(dds3RingPolyExpList_tag *node);
 
@@ -6097,7 +6097,7 @@ void effPCPRingPolyExpSetDirection(effPCPRingPolyExp_tag *work, void *src) {
     SDF_VU0_STOREMATRIX(work->node);
 }
 
-void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
+void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *work, f32 radius) {
     f32 dir[4];
     f32 rowA[4];
     f32 rowB[4];
@@ -6163,7 +6163,7 @@ void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius) {
     }
 }
 
-void effPCPRingPolyExp2Init(EffPCPBeamLargeWork *work) {
+void effPCPRingPolyExp2Init(effPCPRingPolyExp2_tag *work) {
     work->rotationA = work->head.degreesA * 0.017453291f;
     work->rotationB = work->head.degreesB * 0.017453291f;
     work->rotationStep = work->head.stepDegrees * 0.017453291f;
@@ -6173,9 +6173,9 @@ void effPCPRingPolyExp2Init(EffPCPBeamLargeWork *work) {
     work->frame = 0;
 }
 
-EffPCPBeamLargeWork *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *src)
+effPCPRingPolyExp2_tag *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *src)
 {
-    EffPCPBeamLargeWork *work = sdfChipAllocDirect(sizeof(EffPCPBeamLargeWork));
+    effPCPRingPolyExp2_tag *work = sdfChipAllocDirect(sizeof(effPCPRingPolyExp2_tag));
     u32 segments;
     dds3RingPolyExpList_tag *node;
     u32 *entry;
@@ -6209,20 +6209,20 @@ EffPCPBeamLargeWork *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *src)
     return work;
 }
 
-EffPCPBeamLargeWork *effPCPRingPolyExp2CreatePCF(void *data) {
+effPCPRingPolyExp2_tag *effPCPRingPolyExp2CreatePCF(void *data) {
     return effPCPRingPolyExp2Create(dds3EffectPCPDataGetData(data, 0));
 }
 
-EffPCPBeamLargeWork *effPCPRingPolyExp2Copy(EffPCPBeamLargeWork *work) {
+effPCPRingPolyExp2_tag *effPCPRingPolyExp2Copy(effPCPRingPolyExp2_tag *work) {
     return effPCPRingPolyExp2Create(&work->head);
 }
 
-void effPCPRingPolyExp2Delete(EffPCPBeamLargeWork *work) {
+void effPCPRingPolyExp2Delete(effPCPRingPolyExp2_tag *work) {
     dds3RingPolyExpListDelete(work->node);
     sdfChipFreeDirect(work);
 }
 
-void effPCPRingPolyExp2Draw(EffPCPBeamLargeWork *work) {
+void effPCPRingPolyExp2Draw(effPCPRingPolyExp2_tag *work) {
     s32 frame = work->frame;
     s32 duration = work->head.duration;
     s32 fadeIn = work->head.fadeIn;
@@ -6251,20 +6251,20 @@ void effPCPRingPolyExp2Draw(EffPCPBeamLargeWork *work) {
     work->frame++;
 }
 
-void effPCPRingPolyExp2SetPosition(EffPCPBeamLargeWork *work, const void *source) {
+void effPCPRingPolyExp2SetPosition(effPCPRingPolyExp2_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPRingPolyExp2SetScale(EffPCPBeamLargeWork *work, f32 scale) {
+void effPCPRingPolyExp2SetScale(effPCPRingPolyExp2_tag *work, f32 scale) {
     work->node->scale = scale;
 }
 
-void effPCPRingPolyExp2SetColor(EffPCPBeamLargeWork *work, u32 color) {
+void effPCPRingPolyExp2SetColor(effPCPRingPolyExp2_tag *work, u32 color) {
     work->color = color;
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
-void effPCPRingPolyExp2SetRotateMatrix(EffPCPBeamLargeWork *work, const void *source) {
+void effPCPRingPolyExp2SetRotateMatrix(effPCPRingPolyExp2_tag *work, const void *source) {
     SDF_VU0_LOADMATRIX(source);
     SDF_VU0_STOREMATRIX(work->node->localMatrix);
 }

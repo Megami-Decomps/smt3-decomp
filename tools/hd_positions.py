@@ -147,12 +147,9 @@ def main():
             total = (rows[-1][0] + rows[-1][1]) if rows else 0
             if total <= isize:
                 return True
-        if len(ours_fields) != len(imembers):
-            return False
-        mine = {re.sub(r"\b(struct|union|const)\b", " ", t).strip()
-                for t, _, _, _ in ours_fields}
-        theirs = {re.sub(r"[\s*\[\]0-9]+", "", t) for _, _, t, _ in imembers}
-        return bool({m for m in mine if CONVENTION.search(m)} & theirs)
+        # Member count in order is the signal, not size: pointer-against-inline is a
+        # layout disagreement, not a different record.
+        return len(ours_fields) == len(imembers)
 
     def contained_types(fields):
         out = set()
