@@ -3656,23 +3656,44 @@ void cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCreateBadEffect);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+extern void *hCAMPBadEffect;
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+extern u8 D_00349300[];
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+extern char D_00540040[];
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+extern void *effCAMPBadCreate(u8 *work, s32 kind);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+s32 cmpBadEffSetup(u16 id, u32 flag)
+{
+    s32 kind;
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
-
-INCLUDE_ASM(const s32, "code_0022C578", cmpBadEffSetup);
+    if (cmpEncycWork == 0)
+    {
+        return 0;
+    }
+    switch (flag)
+    {
+    case 0x100:
+        kind = 9;
+        break;
+    case 0x40:
+        kind = 7;
+        break;
+    case 0x20:
+        kind = 6;
+        break;
+    case 0x8000:
+        kind = 0xD;
+        break;
+    default:
+        return 0;
+    }
+    cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
+    hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
+    printf(D_00540040);
+    return 1;
+}
 
 extern void *hCAMPBadEffect;
 
@@ -3739,6 +3760,24 @@ s32 cmpModelSetup(u16 id, s32 blocking)
 #else
 INCLUDE_ASM(const s32, "code_0022C578", cmpModelSetup);
 #endif
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
 
