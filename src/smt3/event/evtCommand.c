@@ -4,8 +4,8 @@
 #include "scr.h"
 #include "field.h"
 
-struct EffNodeDescriptor;
-extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, const struct EffNodeDescriptor *resource);
+struct effPCPAgiraoFirePartList_t;
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, const struct effPCPAgiraoFirePartList_t *resource);
 extern dds3ProcessID_t *evtStartPolygonMovie2(u32 priority, s32 eventId, s32 sceneId);
 
 
@@ -71,7 +71,7 @@ s32 printf(const char *format, ...);
 
 extern void dds3EffectObjectBasicStatOn(void *object, s32 flags);
 
-extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(struct EffNodeDescriptor *descriptor, void *firstVector, void *secondVector);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(struct effPCPAgiraoFirePartList_t *descriptor, void *firstVector, void *secondVector);
 
 extern const char D_0053A990[];
 
@@ -1104,7 +1104,7 @@ u32 evtCommand_EFFECT_BE(void) {
     u8 secondVector[16];
     s32 taskId;
     s32 key;
-    struct EffNodeDescriptor *descriptor;
+    struct effPCPAgiraoFirePartList_t *descriptor;
     dds3Basic_t *object;
 
     memset(firstVector, 0, sizeof(firstVector));
@@ -1311,7 +1311,7 @@ u32 evtCommand_EFFMG1_BE(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = dds3AddMG12EffectObjectBasic2(1, (struct EffNodeDescriptor *)resource);
+    object = dds3AddMG12EffectObjectBasic2(1, (struct effPCPAgiraoFirePartList_t *)resource);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {
@@ -1354,7 +1354,7 @@ u32 evtCommand_EFFMG2_BE(void) {
         scrSetIntReturnValue(0);
         return 1;
     }
-    object = dds3AddMG12EffectObjectBasic2(2, (struct EffNodeDescriptor *)resource);
+    object = dds3AddMG12EffectObjectBasic2(2, (struct effPCPAgiraoFirePartList_t *)resource);
     if (object == NULL) {
         scrSetIntReturnValue(0);
     } else {

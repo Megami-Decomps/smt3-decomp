@@ -154,8 +154,52 @@ def main():
         theirs = {re.sub(r"[\s*\[\]0-9]+", "", t) for _, _, t, _ in imembers}
         return bool({m for m in mine if CONVENTION.search(m)} & theirs)
 
-    oversize = [row for row in forced if corroborates(row[0], row[1]) is False]
-    forced = [row for row in forced if corroborates(row[0], row[1]) is not False]
+    def contained_types(fields):
+        out = set()
+        for text, _, _, _ in fields:
+            for word in re.findall(r"[A-Za-z_]\w*", text):
+                if CONVENTION.search(word):
+                    out.add(word)
+        return out
+
+    def containment_ok(name, target):
+        """Does our struct hold the types the IDB says this one holds?
+
+        A work struct holds its own family's part type, and that settles a case the
+        shape cannot: effPCPWwSpherePolyPart_tag and effPCPHamaCardSpherePart_tag are
+        both 32 bytes. Two renames went to the wrong struct of a pair before this
+        check existed, each holding a record the IDB assigns to the other."""
+        if target not in idb or name not in fields_of:
+            return None
+        theirs = {re.sub(r"[\s*\[\]0-9]+", "", t) for _, _, t, _ in idb[target][2]}
+        theirs = {t for t in theirs if CONVENTION.search(t)}
+        mine = contained_types(fields_of[name])
+        parts = {t for t in theirs if t.endswith(("Part_tag", "Part_t"))}
+        if not parts:
+            return None
+        # Where the IDB says this type embeds a part record, ours must not instead
+        # embed a different family's part.
+        ours_parts = {t for t in mine if t.endswith(("Part_tag", "Part_t"))}
+        if ours_parts:
+            return bool(ours_parts & parts)
+        # Our particle may not be named yet, but its size still has to agree:
+        # PcpScatterPlainInstance holds a 40-byte record where effPCPWwSpherePoly_tag
+        # embeds a 32-byte part, so it is a different family whatever it is called.
+        want = {idb[p][1] for p in parts if p in idb}
+        held = set()
+        for text, stars, _, _ in fields_of[name]:
+            base = re.sub(r"\b(struct|union|const)\b", " ", text).strip()
+            if base in sizes and (stars or base not in idb):
+                held.add(sizes[base])
+        if not want or not held:
+            return None
+        return bool(want & held)
+
+    bad = [row for row in forced
+           if corroborates(row[0], row[1]) is False
+           or containment_ok(row[0], row[1]) is False]
+    forced = [row for row in forced if row not in bad]
+    oversize = bad
 
     print(f"{len(forced)} invented type(s) named by {args.min_positions}+ agreeing "
           f"positions, with a size the IDB can hold:")

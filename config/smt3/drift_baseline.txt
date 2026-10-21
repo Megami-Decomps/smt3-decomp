@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 226 types, 1088 members, 492 adopted constants.
+# 206 types, 1088 members, 492 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -47,29 +47,22 @@ type EffBlurScatterWork
 type EffBlurTemplate
 type EffBlurTemplateBody
 type EffNode
-type EffNodeDescriptor
 type EffOwnerBillParamView
 type EffOwnerBillPayloadView
 type EffPCPBeamLargeHead
 type EffPCPBeamLargeWork
-type EffPCPBeamNode
 type EffPCPBlockSet
 type EffPCPBlurExpParams
 type EffPCPBlurExpWork
 type EffPCPChargeWork
-type EffPCPCompactFadeWork
 type EffPCPCompactRectParams
 type EffPCPCompactScaleParams
 type EffPCPCompactScatterParams
 type EffPCPCompactTexturedBlurParams
 type EffPCPCompactTimelineParams
 type EffPCPCompactWork
-type EffPCPCrossWork
-type EffPCPDelayedPairs
-type EffPCPDriftEventParams
 type EffPCPDriftEventRow
 type EffPCPDriftEventWork
-type EffPCPEventParamHead
 type EffPCPEventPlace
 type EffPCPFLEACHBlurParams
 type EffPCPFLEACHBlurWork
@@ -85,25 +78,19 @@ type EffPCPPairedEventWork
 type EffPCPRectBounds
 type EffPCPRectParams
 type EffPCPRingWork
-type EffPCPRotateParams
-type EffPCPRotateWork
 type EffPCPScaledThunderParams
 type EffPCPSharedTrail
 type EffPCPSharedTrailRef
 type EffPCPSpanWork
 type EffPCPSpawnOnceWork
 type EffPCPSpawnRangeEventRow
-type EffPCPSpawnRangeParams
 type EffPCPSpawnRangeWork
 type EffPCPSpinWork
 type EffPCPSprayWork
-type EffPCPStaggered
 type EffPCPThunderGroup
 type EffPCPTrailParams
 type EffPCPTrailWork
 type EffPCPTripleParams
-type EffPCPTripleWork
-type EffPCPTwinWork
 type EffPacketParams
 type EffParamTable
 type EffParamTableRecord
@@ -119,18 +106,14 @@ type EffSpawnParams
 type EffThunderAlphaParams
 type EffThunderCell
 type EffThunderCellParams
-type EffThunderCellWork
 type EffThunderDrawParams
 type EffThunderFrag
 type EffThunderFragmentWork
-type EffThunderGroup
-type EffThunderGroupParams
 type EffThunderParameterHead
 type EffThunderSparkParams
 type EffThunderSparkWork
 type EffThunderVectorCell
 type EffThunderVectorParams
-type EffThunderVectorWork
 type EffTrackPolyData
 type EffTrackPolyParams
 type EffTrackPolyWork
@@ -156,7 +139,6 @@ type PcpFlashAccumulatingWork
 type PcpFlashColorSlot
 type PcpFlashFadingOrbitWork
 type PcpFlashMotionParticle
-type PcpFlashOffsetRadialParams
 type PcpFlashOffsetRadialWork
 type PcpFlashOrbitArcWork
 type PcpFlashOrbitParticle
@@ -164,7 +146,6 @@ type PcpFlashPulseParticle
 type PcpFlashQuadColorSlot
 type PcpFlashRadialStripParticle
 type PcpFlashRadialStripWork
-type PcpFlashRadialTriangleParams
 type PcpFlashRadialTriangleWork
 type PcpFlashRotatingParticle
 type PcpFlashRotatingQuadParticle
@@ -172,17 +153,16 @@ type PcpFlashRotatingQuadWork
 type PcpFlashScalingOrbitWork
 type PcpFlashStreakParams
 type PcpFlashStreakWork
-type PcpFlashTrianglePulseParams
 type PcpFlashTrianglePulseWork
 type PcpScatterParamsA
 type PcpScatterParamsB
 type PcpScatterParamsC
 type PcpScatterParticle
+type PcpScatterPlainInstance
 type PcpScatterPlainParams
 type PcpScatterPlainParticle
 type PcpScatterRadialParams
 type PcpScatterRadialParticle
-type PcpScatterRadialWork
 type PcpScatterRibbonParams
 type PcpScatterRibbonParticle
 type PcpScatterSpinParams
@@ -246,14 +226,6 @@ member BattleGroupNode.unk_AC
 member BillObj.unk18
 member BillObj.unk1C
 member BillPluralRecord.unk08
-member EffPCPCompactFadeWork.unk34
-member EffPCPCrossWork.unk00
-member EffPCPCrossWork.unk04
-member EffPCPCrossWork.unk08
-member EffPCPDelayedPairs.unk00
-member EffPCPDelayedPairs.unk04
-member EffPCPDelayedPairs.unk08
-member EffPCPDelayedPairs.unk0C
 member EffPCPDriftEventWork.unk10C
 member EffPCPFadeWork.unk10
 member EffPCPPairedEventWork.unk98
@@ -261,10 +233,6 @@ member EffPCPSpawnRangeWork.unk9C
 member EffPCPThunderGroup.unk10
 member EffPCPThunderGroup.unk14
 member EffPCPThunderGroup.unk18
-member EffPCPTwinWork.unk00
-member EffPCPTwinWork.unk04
-member EffPCPTwinWork.unk08
-member EffThunderCellWork.unk4C
 member EffTrackPolyParams.unk1C
 member GParam.unk0
 member GParam.unk4
@@ -662,6 +630,17 @@ member effPCPDANTE_Damage_t.unk0BC
 member effPCPDANTE_ShowTime_Param_t.unk00
 member effPCPDANTE_ShowTime_t.unk0C4
 member effPCPDANTE_ShowTime_t.unk0C8
+member effPCPHama01_tag.unk00
+member effPCPHama01_tag.unk04
+member effPCPHama01_tag.unk08
+member effPCPHamaon_tag.unk00
+member effPCPHamaon_tag.unk04
+member effPCPHamaon_tag.unk08
+member effPCPMHanma01_tag.unk00
+member effPCPMHanma01_tag.unk04
+member effPCPMHanma01_tag.unk08
+member effPCPMHanma01_tag.unk0C
+member effPCPMultiBlurExp2_tag.unk34
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
 member effPCPMuzzleFlash_t.unk5C
@@ -671,6 +650,7 @@ member effPCP_BED_t.unk60
 member effPCP_PBCamera_t.unk58
 member effPCP_PBCamera_t.unk59
 member effPCP_PBCamera_t.unk5C
+member effPCP_ThunderRadiatePoly_t.unk4C
 member effPacketDrawBank_t.unk0000
 member effPacketDrawBank_t.unk1808
 member effPacketDrawBank_t.unk1818
