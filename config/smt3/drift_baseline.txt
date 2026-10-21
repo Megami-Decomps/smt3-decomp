@@ -7,14 +7,13 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 205 types, 1088 members, 492 adopted constants.
+# 197 types, 1083 members, 492 adopted constants.
 
 type AtExitEntry
 type AtExitList
 type BattleEffect
 type BattleGroupNode
 type BattleGroupSlot
-type BillAnimationEntry
 type BillChildPayload
 type BillColorWork
 type BillDrawBank
@@ -68,9 +67,7 @@ type EffPCPFLEACHBlurWork
 type EffPCPFadeWork
 type EffPCPFilterExpParams
 type EffPCPFilterExpWork
-type EffPCPGroupEntry
 type EffPCPGroupHead
-type EffPCPMapEventEntry
 type EffPCPPairedEventParams
 type EffPCPPairedEventRow
 type EffPCPPairedEventWork
@@ -103,15 +100,12 @@ type EffRingParticle
 type EffRingWork
 type EffSpawnParams
 type EffThunderAlphaParams
-type EffThunderCell
 type EffThunderCellParams
 type EffThunderDrawParams
 type EffThunderFrag
-type EffThunderFragmentWork
 type EffThunderParameterHead
 type EffThunderSparkParams
 type EffThunderSparkWork
-type EffThunderVectorCell
 type EffThunderVectorParams
 type EffTrackPolyData
 type EffTrackPolyParams
@@ -163,7 +157,6 @@ type PcpScatterPlainParticle
 type PcpScatterRadialParams
 type PcpScatterRadialParticle
 type PcpScatterRibbonParams
-type PcpScatterRibbonParticle
 type PcpScatterSpinParams
 type PcpScatterSpinWork
 type Quad
@@ -198,7 +191,6 @@ type SdfPacketPatchLink
 type SdfPacketSlot
 type SdfPadEntry
 type SdfPatchableResourcePacket
-type SdfPendingBuffer
 type SdfPool
 type SdfPrimitiveRequest
 type SdfSceneDrawPacket
@@ -247,9 +239,6 @@ member MovPacStream.unk6C
 member ParSystem.unk28
 member PcpFlashAccumulatingWork.unk34
 member PcpFlashRotatingParticle.unk1C
-member PcpScatterRibbonParticle.unk1C
-member PcpScatterRibbonParticle.unk20
-member PcpScatterRibbonParticle.unk24
 member SdfDrawNode.unk16
 member SdfGraphCopyPacket.unk0C
 member SdfItem.unk04
@@ -629,17 +618,15 @@ member effPCPDANTE_Damage_t.unk0BC
 member effPCPDANTE_ShowTime_Param_t.unk00
 member effPCPDANTE_ShowTime_t.unk0C4
 member effPCPDANTE_ShowTime_t.unk0C8
-member effPCPHama01_tag.unk00
 member effPCPHama01_tag.unk04
 member effPCPHama01_tag.unk08
-member effPCPHamaon_tag.unk00
+member effPCPHamaCardScatterPart_tag.unk20
+member effPCPHamaCardScatterPart_tag.unk24
 member effPCPHamaon_tag.unk04
 member effPCPHamaon_tag.unk08
-member effPCPMHanma01_tag.unk00
 member effPCPMHanma01_tag.unk04
 member effPCPMHanma01_tag.unk08
 member effPCPMHanma01_tag.unk0C
-member effPCPMultiBlurExp2_tag.unk34
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
 member effPCPMuzzleFlash_t.unk5C

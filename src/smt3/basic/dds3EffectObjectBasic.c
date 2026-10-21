@@ -126,7 +126,7 @@ typedef struct SdfDrawNode SdfDrawNode;
 struct effPartHandle_t;
 typedef struct effPartHandle_t effPartHandle_t;
 
-typedef struct EffEventWork EffEventWork;
+typedef struct effEveBEDCutHandle_t effEveBEDCutHandle_t;
 
 typedef struct BattleEffect BattleEffect;
 
@@ -216,7 +216,7 @@ typedef struct EffOwnerBillParamView {
 
 void dds3EffectDelete(EffNode *node);
 void dds3BillboardDelete(struct billObj_t *obj);
-void effEveBEDCutDelete(EffEventWork *work);
+void effEveBEDCutDelete(effEveBEDCutHandle_t *work);
 void effEveBEDDelete( effBTL_t *mixer);
 void sdfChipFreeDirect(void *memory);
 s32 dds3InitPoseSet(dds3Basic_t *node);
@@ -228,7 +228,7 @@ void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *object);
 u8 dds3ObjectBaseCheckFlag(struct dds3Basic_t *object, u32 mask);
 void dds3EffectDraw(EffNode *node);
 extern void dds3BillboardDraw(struct billObj_t *bill);
-void effEveBEDCutDraw(EffEventWork *work);
+void effEveBEDCutDraw(effEveBEDCutHandle_t *work);
 dds3Basic_t *dds3AddSceneBasicData(s32 kind);
 void dds3ObjectBaseCreateMover(dds3Basic_t *object);
 void dds3SetPosPoseSet(dds3Basic_t *object, const sdfVector4_t *vector);
@@ -239,7 +239,7 @@ extern billObj_t *dds3BillboardFileLoad(s32 kind, const char *path);
 dds3Basic_t *AddTMXEffect(void *bill, void *vec, s32 extra);
 dds3Basic_t *AddBEDEffect();
 void sdfMemFreeDirect( sdfMemHandle_t *allocation);
-EffEventWork *effEveBEDCutCreate( effBTL_t *owner, u16 kind, const void *params);
+effEveBEDCutHandle_t *effEveBEDCutCreate( effBTL_t *owner, u16 kind, const void *params);
 u32 dds3AllocObjectId(void);
 dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *object);
 extern dds3Basic_t *dds3AreaBasicGetFastArea(void);
