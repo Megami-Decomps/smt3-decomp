@@ -99,9 +99,12 @@ typedef struct
 {
     /* 0x0000 */ u8 unk_00;
     /* 0x0001 */ s8 unk_01;
-    /* 0x0002 */ u8 unk_0002[0x12];
+    /* 0x0002 */ u8 unk_0002[2];
+    /* 0x0004 */ s8 unk_04;
+    /* 0x0005 */ u8 unk_0005[0xF];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x18];
+    /* 0x0018 */ s8 unk_18;
+    /* 0x0019 */ u8 unk_0019[0x17];
     /* 0x0030 */ s8 unk_30;
     /* 0x0031 */ s8 unk_31;
     /* 0x0032 */ u8 unk_0032[0x112E];
@@ -1338,7 +1341,34 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetPartyDSL);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcStockControl);
+s32 cmpCalcStockControl(void)
+{
+    switch (campWork->page[1].cursor.unk_22 + (u8)campWork->page[1].cursor.unk_24)
+    {
+    case 0:
+        cmpApplyStockRecover();
+        if (cmpStartStockMsg(0) == 0)
+        {
+            return 0;
+        }
+        campWork->stock[0].count = 0xA;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        cmpInitDrawList();
+        break;
+    case 1:
+        cmpApplyStockRemove();
+        if (camp_H_cmpLocalStock_t__ctor() == 0)
+        {
+            return 0;
+        }
+        break;
+    case 2:
+        break;
+    }
+    cmpMoveStockCursor(0, 0, (u8 *)&campWork->stock[0]);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcParty);
 
@@ -1955,7 +1985,32 @@ s32 func_00232C08(void)
     return campInfoWork->unk_01 == 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetHeartsSequenceRemove);
+extern u32 pstr[];
+
+extern u32 pstr[];
+
+s32 cmpSetHeartsSequenceRemove(void)
+{
+    if (cmbGlobalWork->equipHearts == 0)
+    {
+        return 0;
+    }
+    if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
+    {
+        campInfoWork->unk_18 = 0;
+        fclSetMessageVar_20743088(0xC, pstr[cmbGlobalWork->equipHearts]);
+        fclSetMessageInvalid(0);
+        fclStartMessage(4);
+        campInfoWork->unk_01 = 3;
+        campInfoWork->unk_04 = 1;
+        return 1;
+    }
+    fclSetMessageInvalid(1);
+    fclStartMessage(1);
+    campInfoWork->unk_01 = 4;
+    campInfoWork->unk_04 = 1;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitHeartsIcon);
 
@@ -2168,7 +2223,53 @@ s32 cmpUnloadStatusModel(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachStatus);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStepHeartsAttachCursor);
+/* campDhUpdateWork, as this unit's animation and icon code reads it. The two
+ * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
+ * A third view, campStatusPanel_t *campDhUpdateWork, is declared above: the
+ * alias is what lets both spellings of the one object coexist, and unifying
+ * them is type recovery on the real allocation, not a rename. */
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x1C];
+    /* 0x001C */ s32 unk_1C;
+    /* 0x0020 */ s32 unk_20;
+    /* 0x0024 */ s32 unk_24;
+    /* 0x0028 */ s32 unk_28;
+    /* 0x002C */ u8 unk_002C[0x114C];
+    /* 0x1178 */ s32 iconTimer[64];
+} campDhTimerWork_t;
+
+extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
+
+void cmpStepHeartsAttachCursor(s32 step)
+{
+    s32 period = 20;
+    s32 phase;
+    s32 parts;
+
+    if (step == 0)
+    {
+        campDhTimerWork->unk_28 = 0;
+    }
+    else
+    {
+        if (campDhTimerWork->unk_28 >= 0x13)
+        {
+            return;
+        }
+        campDhTimerWork->unk_28++;
+    }
+    phase = campDhTimerWork->unk_28 % period;
+    if (phase == 0)
+    {
+        dds3PadVibrationSet(1, 0x80, 0x14);
+    }
+    parts = 3;
+    if (phase == period / parts)
+    {
+        dds3PadVibrationSet(1, 0x40, 0x14);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachConfirm);
 
@@ -2185,22 +2286,6 @@ s32 campDhWaitMessageEnd(void)
     return cmpUnloadStatusModel();
 }
 
-/* campDhUpdateWork, as this unit's animation and icon code reads it. The two
- * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
- * A third view, campStatusPanel_t *campDhUpdateWork, is declared above: the
- * alias is what lets both spellings of the one object coexist, and unifying
- * them is type recovery on the real allocation, not a rename. */
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[0x1C];
-    /* 0x001C */ s32 unk_1C;
-    /* 0x0020 */ s32 unk_20;
-    /* 0x0024 */ s32 unk_24;
-    /* 0x0028 */ u8 unk_0028[0x1150];
-    /* 0x1178 */ s32 iconTimer[64];
-} campDhTimerWork_t;
-
-extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
 
 void campDhAdvanceAnim(void)
 {
@@ -3107,7 +3192,23 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollThumb);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
 
+/* NON_MATCHING: 2 of 42 words differ, exact size: the argument-register copy and
+ * the `slt` are swapped. */
+#ifdef NON_MATCHING
+void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2, s32 flag)
+{
+    if (total < full)
+    {
+        full = total;
+    }
+    cmpDrawBoxF(pos->unk_00, pos->unk_04, pos->unk_08, (u16)pos->unk_0C, (u16)pos->unk_0E, color2,
+                flag);
+    cmpDrawBoxF(pos->unk_00, pos->unk_04, pos->unk_08, (u16)pos->unk_0C * full / total,
+                (u16)pos->unk_0E, color1, flag);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23C918);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_23C9C0);
 
