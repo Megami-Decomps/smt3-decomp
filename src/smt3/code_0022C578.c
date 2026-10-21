@@ -1627,7 +1627,30 @@ void campShowStock(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateLoad);
+void cmpUpdateLoad(void)
+{
+    if (fmProcessChk() != 0)
+    {
+        return;
+    }
+    switch (slGetExitMode())
+    {
+    case 2:
+        dds3FadeIn(0, 0, 0, 0xF);
+        cmpSetLoadState(1);
+        campWork->unk_0000 |= 0x10;
+        cmpDisableInfoWindow();
+        return;
+    case 0:
+        dds3FadeIn(0, 0, 0, 0);
+        cmpSetStockVisible(1);
+        cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, cmpUpdateListSelection,
+                             (u8 *)campWork + 0x1C, 0, 0);
+        campWork->unk_0001 = 0;
+        campWork->unk_0004 = 1;
+        break;
+    }
+}
 
 void campUpdateEffectStep(void)
 {
