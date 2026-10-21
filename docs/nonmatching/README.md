@@ -8,9 +8,10 @@ page and line to open. Conventions are in
 | Drafts | Unit | Page |
 |---|---|---|
 | 49 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 43 | code_001FAE80 | [code_001FAE80.md](code_001FAE80.md) |
 | 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
+| 16 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 14 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
@@ -18,6 +19,7 @@ page and line to open. Conventions are in
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 5 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
 | 4 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
@@ -32,6 +34,7 @@ page and line to open. Conventions are in
 | 3 | kernel/dds3AdminiProcess | [kernel/dds3AdminiProcess.md](kernel/dds3AdminiProcess.md) |
 | 3 | interface/frFont | [interface/frFont.md](interface/frFont.md) |
 | 3 | field/fld_Npc | [field/fld_Npc.md](field/fld_Npc.md) |
+| 3 | fclRagInit | [facility/fclRagInit.md](facility/fclRagInit.md) |
 | 3 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
@@ -39,6 +42,8 @@ page and line to open. Conventions are in
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
+| 2 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
+| 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
@@ -47,8 +52,15 @@ page and line to open. Conventions are in
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
 | 1 | script/scrParameterCommand | [script/scrParameterCommand.md](script/scrParameterCommand.md) |
+| 1 | rstupdate | [result/rstupdate.md](result/rstupdate.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
+| 1 | mviManager | [movie/mviManager.md](movie/mviManager.md) |
+| 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3KernelCore | [kernel/dds3KernelCore.md](kernel/dds3KernelCore.md) |
+| 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
+| 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
+| 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
+| 1 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 1 | event/evtUnitManager | [event/evtUnitManager.md](event/evtUnitManager.md) |
 | 1 | event/evtPicture | [event/evtPicture.md](event/evtPicture.md) |
 | 1 | event/evtEventViewer | [event/evtEventViewer.md](event/evtEventViewer.md) |
