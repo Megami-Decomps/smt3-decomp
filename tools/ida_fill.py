@@ -49,6 +49,62 @@ def ida_sizes():
     return out
 
 
+def project_sizes(sizes):
+    """Add the sizes of types the tree defines itself, resolved from their own members.
+
+    Without these, a struct holding another invented type cannot be sized at all, and
+    14 of the signature votes went uncorroborated for that reason alone."""
+    defs = {}
+    for path in sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h"))):
+        for kind, name, fields, _ in struct_fields(path.read_text(errors="replace")):
+            if name and name not in defs and name not in sizes:
+                defs[name] = (kind, fields)
+
+    known = dict(sizes)
+    busy = set()
+
+    def size_of(name):
+        if name in known:
+            return known[name]
+        if name in busy or name not in defs:
+            return None
+        busy.add(name)
+        kind, fields = defs[name]
+        off, align, ok = 0, 1, True
+        for text, stars, _, dims in fields:
+            unit, al = extent(text, stars, dims, known)
+            if unit is None:
+                base = re.sub(r"\b(struct|union|const|volatile)\b", " ", text)
+                base = re.sub(r"\s+", " ", base).strip()
+                inner = size_of(base) if not stars else 4
+                if inner is None:
+                    ok = False
+                    break
+                count = 1
+                for d in dims:
+                    try:
+                        count *= int(d, 0)
+                    except ValueError:
+                        ok = False
+                        break
+                unit, al = inner * count, min(inner, 8) or 1
+            if kind == "union":
+                off, align = max(off, unit), max(align, al)
+                continue
+            off = (off + al - 1) // al * al
+            off += unit
+            align = max(align, al)
+        busy.discard(name)
+        if not ok:
+            return None
+        known[name] = (off + align - 1) // align * align
+        return known[name]
+
+    for name in list(defs):
+        size_of(name)
+    return known
+
+
 def extent(text, stars, dims, sizes):
     """(bytes, alignment) for one declarator, or (None, None) if the type is unknown."""
     if stars:
@@ -257,7 +313,8 @@ def main():
     ap.add_argument("--limit", type=int, help="only the first N structs")
     args = ap.parse_args()
 
-    sizes, idb = ida_sizes(), ida_members.load(ROOT / "config/smt3/ida_members.txt")
+    sizes = project_sizes(ida_sizes())
+    idb = ida_members.load(ROOT / "config/smt3/ida_members.txt")
     if not idb:
         sys.exit("config/smt3/ida_members.txt missing; run tools/ida_members.py")
     if args.why:

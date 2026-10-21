@@ -93,9 +93,9 @@ def layout_check(rows):
     Two independent directions agreeing, the function family and the layout, is what
     turns a lead into something worth applying."""
     import ida_members
-    from ida_fill import ida_sizes, layout
+    from ida_fill import ida_sizes, layout, project_sizes
 
-    sizes = ida_sizes()
+    sizes = project_sizes(ida_sizes())
     idb = ida_members.load(ROOT / "config" / "smt3" / "ida_members.txt")
     ours = {}
     for p in sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h"))):
