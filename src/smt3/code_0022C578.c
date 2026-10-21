@@ -229,7 +229,9 @@ typedef struct
 typedef struct
 {
     /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 unk_01[0x13];
+    /* 0x0001 */ u8 unk_01[3];
+    /* 0x0004 */ s8 unk_04;
+    /* 0x0005 */ u8 unk_05[0xF];
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ s8 state;
     /* 0x0019 */ u8 unk_19[2];
@@ -1107,7 +1109,16 @@ s32 cmpItemIsStockFull(u16 id)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpItemIsUsable);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpApplyStockRecover);
+void cmpApplyStockRecover(void)
+{
+    s32 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+
+    cmpSetStockFlag((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index);
+    cmpRemoveStockSlot(cmpGetStockInfoIndex(&campWork->stock[0], 0, 1));
+    cmpCompactStockList(index);
+    datClearCommMemory((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index);
+    datAllClearCommMemory();
+}
 
 extern void cmpClearStockFlag(datUnitWork_t *unit);
 
@@ -3212,7 +3223,7 @@ void camp_update_paneleff_Shutdown(void)
     }
 }
 
-extern cmpPanelEff_t *cmpAllocPanelEffWork(void);
+extern cmpPanelEff_t *cmpAllocPanelEffWork();
 
 void *cmpStartProcessPanelEff(void)
 {
@@ -3386,7 +3397,21 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpLoadStatusModel);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetStatusModelMotion);
+#include "motion.h"
+
+extern void mdlLoopMotion(mdlObj_t *ctx, s32 searchId, s8 motionIndex);
+
+void cmpGetStatusModelMotion(mdlObj_t *model)
+{
+    s8 motion = (s8)cmpModelParamTable[cmpStatusModelId].motionId;
+
+    if (cmpStatusModelId == 0 &&
+        (((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->badstatus & 0x8000) != 0) {
+        motion = 2;
+    }
+    mdlLoopMotion(model, 0, motion);
+    model->first->speed = cmpModelParamTable[cmpStatusModelId].scale;
+}
 
 extern datUnitVisual_t datModelParamTable[];
 
