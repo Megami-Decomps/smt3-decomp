@@ -2189,7 +2189,38 @@ INCLUDE_ASM(const s32, "code_0022C578", camp_draw_dh_Process);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhApplyEntry);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhFindEntry);
+s32 campDhFindEntry(void)
+{
+    s8 id = cmpGetHeartsIconId(campDhUpdateWork->unk_31);
+    s8 i;
+
+    if (cmpHeartsIconIsVisible(id) == 0)
+    {
+        return 1;
+    }
+    if (cmbGlobalWork->equipHearts != 0)
+    {
+        if (id == cmbGlobalWork->equipHearts)
+        {
+            return 2;
+        }
+        for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++)
+        {
+            if (id == cmbGlobalWork->unk_01CFB[i])
+            {
+                if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) != 0)
+                {
+                    return 4;
+                }
+            }
+        }
+    }
+    else if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
+    {
+        return 3;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpReturnParamDH);
 
@@ -4285,7 +4316,43 @@ s32 cmpGetCursorMoveMode(cmpCursorWork_t *cursor)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpMoveCursor2);
+s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir)
+{
+    s32 mode = cmpGetCursorMoveMode(cursor);
+
+    if (dir != 0)
+    {
+        if ((mode == 0) || (mode == 2))
+        {
+            cursor->unk_34 = 0;
+        }
+    }
+    else
+    {
+        cmpAdvanceCursorPhase(cursor);
+    }
+    if (mode == 1)
+    {
+        cursor->unk_04 = 2;
+        return 0;
+    }
+    if ((dir == 0) && (mode == 2))
+    {
+        if (dds3PadButtonState[0x26] != 0)
+        {
+            return 0;
+        }
+        if (dds3PadButtonState[0x27] != 0)
+        {
+            return 0;
+        }
+    }
+    /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+    do
+    {
+        return cmpFindNextCursorItem(cursor, dir, 1);
+    } while (0);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpChangeCursorListNums);
 
