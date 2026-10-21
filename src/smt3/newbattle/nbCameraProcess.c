@@ -13,10 +13,10 @@ typedef struct nbCameraStateEntry_t {
 } nbCameraStateEntry_t;
 
 typedef struct nbCameraAnim_t {
-    s32 rotateFrames;
-    f32 rotateStep;
-    s32 distanceFrames;
-    f32 distanceStep;
+    s32 rotate_f;
+    f32 rotate_s;
+    s32 distance_f;
+    f32 distance_s;
 } nbCameraAnim_t;
 
 typedef struct nbCamera_t {
@@ -101,17 +101,17 @@ void nbCameraSetState(u16 state);
 
 void nbCameraClearState(nbCamera_t *pCamera)
 {
-    pCamera->anim.rotateFrames = 0;
-    pCamera->anim.rotateStep = 0;
-    pCamera->anim.distanceFrames = 0;
-    pCamera->anim.distanceStep = 0.0f;
+    pCamera->anim.rotate_f = 0;
+    pCamera->anim.rotate_s = 0;
+    pCamera->anim.distance_f = 0;
+    pCamera->anim.distance_s = 0.0f;
 }
 
 void nbCameraAnim_RotateSet(nbCamera_t *pCamera, s32 frames, s32 total, f32 frame)
 {
-    pCamera->anim.rotateFrames = frames;
-    pCamera->anim.rotateStep = frame / frames;
-    SetRotateMatrixY(pCamera->anim.rotateStep * total);
+    pCamera->anim.rotate_f = frames;
+    pCamera->anim.rotate_s = frame / frames;
+    SetRotateMatrixY(pCamera->anim.rotate_s * total);
     SDF_VU0_LOADVECTOR(&pCamera->direction);
     SDF_VU0_APPLYMATRIX();
     SDF_VU0_STOREVECTOR(&pCamera->direction);
@@ -121,8 +121,8 @@ void func_001B1518(nbCamera_t *pCamera, s32 frames, s32 count, f32 angle)
 {
     f32 step = -angle / (f32)frames;
 
-    pCamera->anim.distanceFrames = frames;
-    pCamera->anim.distanceStep = step;
+    pCamera->anim.distance_f = frames;
+    pCamera->anim.distance_s = step;
     pCamera->distance += step * (f32)count;
 }
 

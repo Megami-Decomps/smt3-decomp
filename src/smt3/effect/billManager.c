@@ -6,12 +6,12 @@
 
 #include "billboard.h"
 
-typedef struct EffUnitObject {
-    f32 localMatrix[4][4];
-    f32 transform[4][4];
-    struct billObj_t *billboard;
-    sdfMat_t *resource;
-} EffUnitObject;
+typedef struct dds3P2APolygon_tag {
+    f32 dir[4][4];
+    f32 rot[4][4];
+    struct billObj_t *hBillboard;
+    sdfMat_t *pMat;
+} dds3P2APolygon_tag;
 
 typedef struct BillKindFuncs {
     struct billObj_t *(*func)();
@@ -292,12 +292,12 @@ s32 dds3BillboardGetAnimNumber(billObj_t *effect);
 s32 dds3BillboardGetAnimFrame(const billObj_t *effect);
 s32 dds3BillboardGetAnimType(billObj_t *effect);
 f32 dds3BillboardGetDirectionScale(void *self, f32 *axis);
-EffUnitObject *dds3P2APolygonCreate(s32 entryIndex);
-EffUnitObject *dds3P2APolygonCopy(const EffUnitObject *source);
-void dds3P2APolygonDelete(EffUnitObject *instance);
-void dds3P2APolygonSetPosition(EffUnitObject *instance, s128 *position);
-void dds3P2APolygonSetRotateMatrix(EffUnitObject *instance, void *matrix);
-void dds3P2APolygonSetRGBA(EffUnitObject *instance, u32 value);
+dds3P2APolygon_tag *dds3P2APolygonCreate(s32 entryIndex);
+dds3P2APolygon_tag *dds3P2APolygonCopy(const dds3P2APolygon_tag *source);
+void dds3P2APolygonDelete(dds3P2APolygon_tag *instance);
+void dds3P2APolygonSetPosition(dds3P2APolygon_tag *instance, s128 *position);
+void dds3P2APolygonSetRotateMatrix(dds3P2APolygon_tag *instance, void *matrix);
+void dds3P2APolygonSetRGBA(dds3P2APolygon_tag *instance, u32 value);
 void dds3P2APolygonSetDirection(void *dst, void *src);
 
 /* NON_MATCHING: 2 of 46 words differ (first at +0x40). */
@@ -1347,54 +1347,54 @@ f32 dds3BillboardGetDirectionScale(void *self, f32 *axis) {
 }
 
 /* Create the indexed billboard and render asset; only the second matrix is initialized. */
-EffUnitObject *dds3P2APolygonCreate(s32 entryIndex) {
-    EffUnitObject *instance = sdfChipAllocDirect(sizeof(EffUnitObject));
+dds3P2APolygon_tag *dds3P2APolygonCreate(s32 entryIndex) {
+    dds3P2APolygon_tag *instance = sdfChipAllocDirect(sizeof(dds3P2APolygon_tag));
 
-    instance->billboard = dds3BillboardCreate(1, entryIndex);
-    instance->resource = sdfMatNew();
-    sdfMatSetConstant(instance->resource, 1.0f);
-    SDF_VU0_STOREIDENTITY(instance->transform);
+    instance->hBillboard = dds3BillboardCreate(1, entryIndex);
+    instance->pMat = sdfMatNew();
+    sdfMatSetConstant(instance->pMat, 1.0f);
+    SDF_VU0_STOREIDENTITY(instance->rot);
     return instance;
 }
 
 /* Retain a cloned billboard's shared data, create a fresh render asset, and reset both matrices. */
-EffUnitObject *dds3P2APolygonCopy(const EffUnitObject *source) {
-    EffUnitObject *instance = sdfChipAllocDirect(sizeof(EffUnitObject));
+dds3P2APolygon_tag *dds3P2APolygonCopy(const dds3P2APolygon_tag *source) {
+    dds3P2APolygon_tag *instance = sdfChipAllocDirect(sizeof(dds3P2APolygon_tag));
 
-    instance->billboard = dds3BillboardCopy(
-        source->billboard);
-    instance->resource = sdfMatNew();
-    sdfMatSetConstant(instance->resource, 1.0f);
-    sdfMatSetDiffuse(instance->resource, 0x80808080);
-    sdfMatSetAmbient(instance->resource, 0x80808080);
-    sdfMatSetSpecular(instance->resource, 0x80808080);
-    SDF_VU0_STOREIDENTITY(instance->transform);
-    SDF_VU0_STOREIDENTITY(instance->localMatrix);
+    instance->hBillboard = dds3BillboardCopy(
+        source->hBillboard);
+    instance->pMat = sdfMatNew();
+    sdfMatSetConstant(instance->pMat, 1.0f);
+    sdfMatSetDiffuse(instance->pMat, 0x80808080);
+    sdfMatSetAmbient(instance->pMat, 0x80808080);
+    sdfMatSetSpecular(instance->pMat, 0x80808080);
+    SDF_VU0_STOREIDENTITY(instance->rot);
+    SDF_VU0_STOREIDENTITY(instance->dir);
     return instance;
 }
 
-void dds3P2APolygonDelete(EffUnitObject *instance) {
-    sdfMatFreeDelayed((sdfMat_t *)instance->resource);
-    dds3BillboardDelete(instance->billboard);
+void dds3P2APolygonDelete(dds3P2APolygon_tag *instance) {
+    sdfMatFreeDelayed((sdfMat_t *)instance->pMat);
+    dds3BillboardDelete(instance->hBillboard);
     sdfChipFreeDirect(instance);
 }
 
-void dds3P2APolygonSetPosition(EffUnitObject *instance, s128 *position) {
-    dds3BillboardSetPosition((s128 *)instance->billboard, position);
+void dds3P2APolygonSetPosition(dds3P2APolygon_tag *instance, s128 *position) {
+    dds3BillboardSetPosition((s128 *)instance->hBillboard, position);
 }
 
 void dds3P2APolygonSetScale(s32 instance, float scale) {
-    dds3BillboardSetScale(((EffUnitObject *)instance)->billboard, scale, scale);
+    dds3BillboardSetScale(((dds3P2APolygon_tag *)instance)->hBillboard, scale, scale);
 }
 
 /* vu0 routine: copy the supplied 4x4 matrix to the instance's second matrix. */
-void dds3P2APolygonSetRotateMatrix(EffUnitObject *instance, void *matrix) {
+void dds3P2APolygonSetRotateMatrix(dds3P2APolygon_tag *instance, void *matrix) {
     SDF_VU0_LOADMATRIX(matrix);
-    SDF_VU0_STOREMATRIX(instance->transform);
+    SDF_VU0_STOREMATRIX(instance->rot);
 }
 
-void dds3P2APolygonSetRGBA(EffUnitObject *instance, u32 value) {
-    dds3BillboardSetRGBA(instance->billboard, value);
+void dds3P2APolygonSetRGBA(dds3P2APolygon_tag *instance, u32 value) {
+    dds3BillboardSetRGBA(instance->hBillboard, value);
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -1402,8 +1402,8 @@ void dds3P2APolygonSetDirection(void *dst, void *src) {
     VU0_COPY_MATRIX(dst, src);
 }
 
-void dds3P2APolygonGetResource(EffUnitObject *instance, s32 *modeValues) {
-    billObj_t *billboard = instance->billboard;
+void dds3P2APolygonGetResource(dds3P2APolygon_tag *instance, s32 *modeValues) {
+    billObj_t *billboard = instance->hBillboard;
 
     if (billboard->kind == 1) {
         u32 modeFlags = billboard->modeFlags;

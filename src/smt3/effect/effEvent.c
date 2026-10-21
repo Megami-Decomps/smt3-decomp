@@ -6,12 +6,12 @@
 #include "ps2asm.h"
 
 typedef struct effEveBEDParams_t {
-    f32 position[4];
-    f32 orientation[4];
-    f32 range;
-    f32 height;
+    f32 center[4];
+    f32 rot[4];
+    f32 r;
+    f32 h;
     f32 scale;
-    u32 color;
+    u32 abgr;
 } effEveBEDParams_t;
 
 /* The constructor reserves 0x38 bytes; only its init prefix is serialized. */
@@ -819,7 +819,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *work) {
     u16 count;
     u8 kind;
 
-    SDF_VU0_LOADVECTOR(work->init.orientation);
+    SDF_VU0_LOADVECTOR(work->init.rot);
     SDF_VU0_LOADVECTOR_B(&D_005343D0);
     Mult();
     ToMatrix();
@@ -873,18 +873,18 @@ INCLUDE_ASM(const s32, "effect/effEvent", effEveBEDCutDraw);
 effSimpleBED_t *effSimpleBEDCreate(effBTL_t *handle, f32 scale) {
     effSimpleBED_t *work = sdfChipAllocDirect(sizeof(effSimpleBED_t));
 
-    work->init.orientation[3] = 1.0f;
-    work->init.range = 50.0f;
-    work->init.height = 180.0f;
-    work->init.position[1] = -90.0f;
+    work->init.rot[3] = 1.0f;
+    work->init.r = 50.0f;
+    work->init.h = 180.0f;
+    work->init.center[1] = -90.0f;
     work->init.scale = scale;
-    work->init.color = EFF_EVENT_NEUTRAL_COLOR;
-    work->init.orientation[0] = 0;
-    work->init.orientation[1] = 0;
-    work->init.orientation[2] = 0;
-    work->init.position[0] = 0;
-    work->init.position[2] = 0;
-    work->init.position[3] = 0;
+    work->init.abgr = EFF_EVENT_NEUTRAL_COLOR;
+    work->init.rot[0] = 0;
+    work->init.rot[1] = 0;
+    work->init.rot[2] = 0;
+    work->init.center[0] = 0;
+    work->init.center[2] = 0;
+    work->init.center[3] = 0;
     work->handle = effEveBEDCreate(handle);
     work->owner = effEveBEDCutCreate(work->handle, 0, &work->init);
     work->active = 1;
@@ -919,16 +919,16 @@ void effSimpleBEDDraw(effSimpleBED_t *work) {
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */
 void effSimpleBEDSetPosition(effSimpleBED_t *work, f32 *position) {
-    work->init.position[0] = position[0];
-    work->init.position[1] = position[1] - work->init.height * 0.5f;
-    work->init.position[2] = position[2];
-    work->init.position[3] = 0;
+    work->init.center[0] = center[0];
+    work->init.center[1] = center[1] - work->init.h * 0.5f;
+    work->init.center[2] = center[2];
+    work->init.center[3] = 0;
     effEveBEDCutSetParams(work->owner, &work->init);
 }
 
 /* Copy the holder's updated packed tint to its event record. */
 void effSimpleBEDSetRGBA(effSimpleBED_t *work, u32 color) {
-    work->init.color = color;
+    work->init.abgr = abgr;
     effEveBEDCutSetParams(work->owner, &work->init);
 }
 
@@ -946,11 +946,11 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *source, effBTLAimParams_t *p
     f32 zero;
 
     if (range == 0) {
-        radius = source->range;
+        radius = source->r;
     } else {
         radius = (f32)range;
     }
-    half = source->height * 0.5f;
+    half = source->h * 0.5f;
     SDF_VU0_COPYVECTOR(&position, source);
     if (mode == 5) {
         if (dir == 8 || dir == 0xA) {
@@ -996,7 +996,7 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *source, effBTLAimParams_t *p
         offset.x = 0.0f;
         offset.z = 1.0f;
         offset.y = 0.0f;
-        SDF_VU0_LOADVECTOR(source->orientation);
+        SDF_VU0_LOADVECTOR(source->rot);
         ToMatrix();
         SetRotateMatrixY_B(D_00320BA0[dir]);
         MultMatrixNoArg();
@@ -1414,7 +1414,7 @@ void effEVECombParSmokeDraw(effEventBillSet_t *work) {
             SDF_VU0_COPYVECTOR_RWSRC(&batch1.centre[n], op);
             batch1.color[n] = color1;
             uvWidth = (s16)((u16)tex1->width << 4);
-            uvHeight = (s16)((u16)tex1->height << 4);
+            uvHeight = (s16)((u16)tex1->h << 4);
             batch1.uv[n][0] = 0;
             batch1.uv[n][1] = 0;
             batch1.uv[n][2] = uvWidth;
@@ -1449,7 +1449,7 @@ void effEVECombParSmokeDraw(effEventBillSet_t *work) {
             SDF_VU0_COPYVECTOR_RWSRC(&batch2.centre[n], op);
             batch2.color[n] = color2;
             uvWidth = (s16)((u16)tex2->width << 4);
-            uvHeight = (s16)((u16)tex2->height << 4);
+            uvHeight = (s16)((u16)tex2->h << 4);
             batch2.uv[n][0] = 0;
             batch2.uv[n][1] = 0;
             batch2.uv[n][2] = uvWidth;

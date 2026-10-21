@@ -49,7 +49,7 @@ typedef struct nbActionStack_t {
     s32 type;
     s32 from;
     s32 to;
-    s32 d;
+    s32 data;
 } nbActionStack_t;
 
 extern nbEncountForm_t nbEncountFormTable[];
@@ -466,7 +466,7 @@ void nbPushAction(s32 type, s32 from, s32 to, s32 d)
     data->actionstack[data->actionstackp].type = type;
     data->actionstack[data->actionstackp].from = from;
     data->actionstack[data->actionstackp].to = to;
-    data->actionstack[data->actionstackp].d = d;
+    data->actionstack[data->actionstackp].data = d;
     data->actionstackp++;
 }
 
@@ -521,7 +521,7 @@ s32 nbPopAction(nbActionStack_t *act)
             act->type = data->actionstack[data->actionstackp].type;
             act->from = data->actionstack[data->actionstackp].from;
             act->to = data->actionstack[data->actionstackp].to;
-            act->d = data->actionstack[data->actionstackp].d;
+            act->data = data->actionstack[data->actionstackp].data;
             return 1;
         }
     }
@@ -692,7 +692,7 @@ void nbSetActionPhase(nbMainProcessData_t *data)
 
     nbPopAction(&act);
     nbUpdateFormation(data);
-    nbInitActionProcess(data, act.type, act.from, act.to, act.d);
+    nbInitActionProcess(data, act.type, act.from, act.to, act.data);
     nbCameraCRSetPlayerFormRequest();
 }
 

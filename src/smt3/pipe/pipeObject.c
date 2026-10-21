@@ -38,9 +38,9 @@ typedef struct tagPipeObject {
 } tagPipeObject;
 
 typedef struct tagPipeTexture {
-    sdfTexHandle_t *handle;
-    sdfMemHandle_t *allocation;
-    struct pipeTextureFile_t *resourceData;
+    sdfTexHandle_t *th;
+    sdfMemHandle_t *mh;
+    struct pipeTextureFile_t *mp;
     u32 unk0C;
 } tagPipeTexture;
 
@@ -451,22 +451,22 @@ s32 PipeTexRelease(void)
 }
 
 s32 texLoad(const char *name, tagPipeTexture *record) {
-    void *allocation = sdfDevLoadFileEx(name, (u32 *)&record->resourceData, 0);
-    record->allocation = allocation;
-    record->handle = sdfTexSet(record->resourceData);
-    if (record->allocation != NULL) {
-        sdfMemFreeDelayedDirect(record->allocation);
-        record->allocation = NULL;
-        record->resourceData = NULL;
+    void *allocation = sdfDevLoadFileEx(name, (u32 *)&record->mp, 0);
+    record->mh = allocation;
+    record->th = sdfTexSet(record->mp);
+    if (record->mh != NULL) {
+        sdfMemFreeDelayedDirect(record->mh);
+        record->mh = NULL;
+        record->mp = NULL;
     }
     return 1;
 }
 
 s32 texRelease(tagPipeTexture *texPtr)
 {
-    if (texPtr->handle != NULL) {
-        sdfTexFreeDelayed(texPtr->handle);
-        texPtr->handle = NULL;
+    if (texPtr->th != NULL) {
+        sdfTexFreeDelayed(texPtr->th);
+        texPtr->th = NULL;
     }
     return 1;
 }

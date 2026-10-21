@@ -4,7 +4,7 @@
 /* The event constructor allocates a complete 16-byte payload. */
 typedef struct
 {
-    dds3ObjectBaseControlWorkData_t *control;
+    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     u8 unk04[12];
 } dds3EventObjectBasicWorkData_t;
 
@@ -28,7 +28,7 @@ u32 EventObjectBasicConstructor(dds3Basic_t *basic)
     work = sdfChipAllocDirect(sizeof(dds3EventObjectBasicWorkData_t));
     basic->workdata = work;
     control = dds3ObjectBaseInitControlWorkData(basic);
-    work->control = control;
+    work->pObjectBaseControlWorkData = control;
     return 1;
 }
 
@@ -38,7 +38,7 @@ void EventObjectBasicDestructor(dds3Basic_t *basic)
 
     dds3FreePoseSet(basic);
     work = basic->workdata;
-    dds3ObjectBaseFreeControlWorkData(work->control);
+    dds3ObjectBaseFreeControlWorkData(work->pObjectBaseControlWorkData);
     sdfChipFreeDirect(work);
 }
 
@@ -70,5 +70,5 @@ dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basi
 {
     const dds3EventObjectBasicWorkData_t *work = basic->workdata;
 
-    return work->control;
+    return work->pObjectBaseControlWorkData;
 }

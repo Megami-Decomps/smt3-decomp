@@ -359,9 +359,9 @@ extern u8 *FildMaskObj, *mat_black, *mat_white, *mat_line;
 extern u32 fldJDataHandle[];
 
 typedef struct fldConstruntAreaFL2_t {
-    u32 word00; /* 0x00 */
+    u32 flag; /* 0x00 */
     const char *areaName; /* 0x04 */
-    u32 areaId; /* 0x08 */
+    u32 areaID; /* 0x08 */
 } fldConstruntAreaFL2_t;
 
 extern dds3Basic_t *dds3AddAreaBasic(u32 areaId, const char *areaName);
@@ -470,7 +470,7 @@ void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *blockTable, u32 blockCount) {
 
     dds3GetControlScene();
     for (i = 0; i < blockCount; i++) {
-        dds3Basic_t *area = dds3AddAreaBasic(blockTable[i].areaId, blockTable[i].areaName);
+        dds3Basic_t *area = dds3AddAreaBasic(blockTable[i].areaID, blockTable[i].areaName);
         if (i == 0) {
             fldGlobalBase.fastArea = area;
         }

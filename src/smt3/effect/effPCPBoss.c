@@ -155,7 +155,7 @@ typedef struct effPCPBossONGYParam_t
 typedef struct effPCPBossONGY_t
 {
     s32 param;
-    void *matrix;
+    void *pMat;
     s32 radian;
     s32 frame;
 } effPCPBossONGY_t;
@@ -335,9 +335,9 @@ typedef struct effPCPBossMETATOBeam_t
 typedef struct effPCPScreenCrackModel_t
 {
     s32 param;
-    s32 part;
+    s32 hModel;
     s32 frame;
-    u32 color;
+    u32 abgr;
 } effPCPScreenCrackModel_t;
 
 typedef struct effPCPMuzzleFlashHead_t
@@ -689,7 +689,7 @@ effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unuse
     work->param = value;
     work->radian = 0;
     matrix = sdfMatNew();
-    work->matrix = matrix;
+    work->pMat = pMat;
     sdfMatSetConstant(matrix, 1.0f);
     effPCPBossONGYTexRenderStart();
     memset(&effPCPBossWork, 0, sizeof(effPCPBossWork_t));
@@ -701,7 +701,7 @@ effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unuse
 void effPCPBossONGYDelete(effPCPBossONGY_t *work)
 {
     effPCPBossONGYTexRenderEnd();
-    sdfMatFreeDelayed(work->matrix);
+    sdfMatFreeDelayed(work->pMat);
     sdfChipFreeDirect(work);
 }
 
@@ -722,7 +722,7 @@ effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unus
     work->param = value;
     work->radian = 0;
     matrix = sdfMatNew();
-    work->matrix = matrix;
+    work->pMat = pMat;
     sdfMatSetConstant(matrix, 1.0f);
     effPCPBossONGYTexRenderStart();
     memset(&effPCPBossWork, 0, sizeof(effPCPBossWork_t));
@@ -734,7 +734,7 @@ effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unus
 void effPCPBossONGY2Delete(effPCPBossONGY_t *work)
 {
     effPCPBossONGYTexRenderEnd();
-    sdfMatFreeDelayed(work->matrix);
+    sdfMatFreeDelayed(work->pMat);
     sdfChipFreeDirect(work);
 }
 
@@ -2350,10 +2350,10 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCreate(effPCPScreenCrackModel_t 
     effPCPScreenCrackModel_t *work = sdfChipAllocDirect(0x10);
 
     work->param = param->param;
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->frame = 0;
     if (pb != NULL) {
-        work->part = dds3EffectPartCreate(3, pb);
+        work->hModel = dds3EffectPartCreate(3, pb);
     }
     effPCPScreenCrackModelInit(work);
     return work;
@@ -2374,13 +2374,13 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCopy(effPCPScreenCrackModel_t *s
     effPCPScreenCrackModel_t *work;
 
     work = effPCPScreenCrackModelCreate(work, NULL);
-    work->part = dds3EffectPartCopy(src->part);
+    work->hModel = dds3EffectPartCopy(src->hModel);
     return work;
 }
 
 void effPCPScreenCrackModelDelete(effPCPScreenCrackModel_t *work)
 {
-    dds3EffectPartDelete(work->part);
+    dds3EffectPartDelete(work->hModel);
     sdfChipFreeDirect(work);
 }
 
@@ -2388,7 +2388,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelDraw);
 
 void effPCPScreenCrackModelSetColor(effPCPScreenCrackModel_t *work, u32 color)
 {
-    work->color = color;
+    work->abgr = abgr;
 }
 
 effPCPMuzzleFlash_t *effPCPMuzzleFlashCreate(effPCPMuzzleFlashHead_t *param, void *billParams)

@@ -87,6 +87,37 @@ def layout(fields, sizes):
     return rows
 
 
+def exact_matches(path, sizes, idb):
+    """[(type, line, [(old, new)])] where every offset and extent matches the IDB.
+
+    An exact layout match licenses taking every member name, not just the unk_ ones:
+    a member sitting at the same place with the same extent in a struct that agrees
+    throughout is that member. Padding names are still not worth taking."""
+    out = []
+    for kind, name, fields, line in struct_fields(path.read_text(errors="replace")):
+        if not name or name not in idb or kind == "union":
+            continue
+        rows = layout(fields, sizes)
+        if not rows:
+            continue
+        _, isize, imembers = idb[name]
+        if [(o, s) for o, s, _ in rows] != [(o, s) for o, s, _, _ in imembers]:
+            continue
+        total = rows[-1][0] + rows[-1][1]
+        if total > isize:
+            continue
+        taken = {nm for _, _, nm in rows}
+        picks = []
+        for (_, _, ours), (_, _, _, theirs) in zip(rows, imembers):
+            if ours == theirs or not theirs or WORTHLESS.match(theirs) or theirs in taken:
+                continue
+            picks.append((ours, theirs))
+            taken.add(theirs)
+        if picks:
+            out.append((name, line, picks))
+    return out
+
+
 def candidates(path, sizes, idb):
     """[(type, line, [(old, new)])] for one file."""
     text = path.read_text(errors="replace")
@@ -129,7 +160,11 @@ def candidates(path, sizes, idb):
 
 def rename_in(path, tname, picks):
     """Rename inside every copy of tname this file defines, and in the file's uses
-    when no other struct here declares the same member name."""
+    when no other struct here declares the same member name.
+
+    A use is only ever `.name` or `->name`. Rewriting a bare identifier instead turns
+    a member called `billboard` into a rename of every billboard in the file,
+    `#include "billboard.h"` included, which is how this went wrong the first time."""
     text = path.read_text()
     done, deferred = 0, []
     for old, new in picks:
@@ -155,7 +190,7 @@ def rename_in(path, tname, picks):
         if shared:
             deferred.append(old)
         else:
-            text = re.sub(rf"\b{re.escape(old)}\b", new, text)
+            text = re.sub(rf"(\.|->)(\s*){re.escape(old)}\b", rf"\g<1>\g<2>{new}", text)
     path.write_text(text)
     return done, deferred
 
@@ -216,6 +251,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--why", action="store_true", help="count what blocks the rest")
+    ap.add_argument("--exact", action="store_true",
+                    help="structs whose every offset and extent matches the IDB, where "
+                         "any invented member name can be taken, not just unk_ ones")
     ap.add_argument("--limit", type=int, help="only the first N structs")
     args = ap.parse_args()
 
@@ -228,7 +266,7 @@ def main():
     files = sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h")))
     total, structs_hit, deferred_all, in_headers = 0, 0, [], []
     for path in files:
-        found = candidates(path, sizes, idb)
+        found = exact_matches(path, sizes, idb) if args.exact else candidates(path, sizes, idb)
         if args.limit and structs_hit >= args.limit:
             break
         for tname, line, picks in found:

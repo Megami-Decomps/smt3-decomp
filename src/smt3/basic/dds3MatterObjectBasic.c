@@ -2,12 +2,12 @@
 #include "basic.h"
 
 typedef struct {
-    /* 0x00 */ dds3ObjectBaseControlWorkData_t *control;
+    /* 0x00 */ dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     /* 0x04 */ u32 hojiID;
-    /* 0x08 */ u32 alphaMode;
-    /* 0x0C */ s32 ot;
-    /* 0x10 */ f32 offset[4];
-    /* 0x20 */ f32 position[4];
+    /* 0x08 */ u32 alpmode;
+    /* 0x0C */ s32 OtLinkIdx;
+    /* 0x10 */ f32 base_pos[4];
+    /* 0x20 */ f32 move_pos[4];
 } dds3MatterObjectBasicWorkData_t;
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
@@ -40,7 +40,7 @@ extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 id, s32 type);
 
 dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *basic) {
     const dds3MatterObjectBasicWorkData_t *work = basic->workdata;
-    return work->control;
+    return work->pObjectBaseControlWorkData;
 }
 
 dds3Basic_t *dds3AddMatterObjectBasic(s32 id, f32 *offset, f32 *rotation) {
@@ -55,10 +55,10 @@ dds3Basic_t *dds3AddMatterObjectBasic(s32 id, f32 *offset, f32 *rotation) {
     dds3SetRotPoseSet(basic, rotation);
     dds3SetPosPoseSet(basic, zero);
     dds3SetRadiusPoseSet(basic->poseset);
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->offset[0] = offset[0];
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->offset[1] = offset[1];
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->offset[2] = offset[2];
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->offset[3] = offset[3];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[0] = offset[0];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[1] = offset[1];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[2] = offset[2];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[3] = offset[3];
     return basic;
 }
 
@@ -67,7 +67,7 @@ void dds3DeleteMatterObjectBasic(dds3Basic_t *basic) {
 }
 
 void dds3MatterObjectBasicSetOt(dds3Basic_t *basic, s32 ot) {
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->ot = ot;
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->OtLinkIdx = ot;
 }
 
 void dds3MatterObjectBasicSetHojiID(dds3Basic_t *basic, u32 hojiID) {
@@ -86,11 +86,11 @@ u32 dds3MatterObjectBasicGetHojiID(u32 id) {
 }
 
 void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *basic, u32 alphaMode) {
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->alphaMode = alphaMode;
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->alpmode = alphaMode;
 }
 
 u32 dds3MatterObjectBasicGetAlpMode(const dds3Basic_t *basic) {
-    return ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->alphaMode;
+    return ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->alpmode;
 }
 
 s32 dds3MatterObjectBasicConstructor(dds3Basic_t *basic) {
@@ -102,18 +102,18 @@ s32 dds3MatterObjectBasicConstructor(dds3Basic_t *basic) {
     basic->workdata = allocation;
     memset(allocation, 0, sizeof(dds3MatterObjectBasicWorkData_t));
     work = basic->workdata;
-    work->control = dds3ObjectBaseInitControlWorkData(basic);
+    work->pObjectBaseControlWorkData = dds3ObjectBaseInitControlWorkData(basic);
     work->hojiID = 0;
-    work->alphaMode = 0;
-    work->ot = -1;
-    work->offset[0] = 0.0f;
-    work->offset[1] = 0.0f;
-    work->offset[2] = 0.0f;
-    work->offset[3] = 1.0f;
-    work->position[0] = 0.0f;
-    work->position[1] = 0.0f;
-    work->position[2] = 0.0f;
-    work->position[3] = 1.0f;
+    work->alpmode = 0;
+    work->OtLinkIdx = -1;
+    work->base_pos[0] = 0.0f;
+    work->base_pos[1] = 0.0f;
+    work->base_pos[2] = 0.0f;
+    work->base_pos[3] = 1.0f;
+    work->move_pos[0] = 0.0f;
+    work->move_pos[1] = 0.0f;
+    work->move_pos[2] = 0.0f;
+    work->move_pos[3] = 1.0f;
     dds3ObjectBaseOnFlag(basic, 0xE2);
     return 1;
 }
@@ -123,7 +123,7 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *basic) {
 
     dds3FreePoseSet(basic);
     work = basic->workdata;
-    dds3ObjectBaseFreeControlWorkData(work->control);
+    dds3ObjectBaseFreeControlWorkData(work->pObjectBaseControlWorkData);
     sdfChipFreeDirect(work);
 }
 

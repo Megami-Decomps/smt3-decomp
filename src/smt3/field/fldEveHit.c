@@ -383,7 +383,7 @@ void fldEveHit_End(void) {
    names it, the transform dds3AddPointBasic consumes, and the two resource
    headers the hit and the event are registered under. */
 typedef struct {
-    u32 type;
+    u32 Type;
     f32 r;
 } fldResPutEveBall_t;
 

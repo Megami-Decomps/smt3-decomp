@@ -33,7 +33,7 @@ enum SdfFileIOCmd {
 };
 
 typedef struct sdfRandCB_t {
-    u32 words[4];
+    u32 v[4];
 } sdfRandCB_t;
 
 enum sdf_tex_resource {
@@ -71,16 +71,16 @@ u32 dds3GetRandA(void *aState)
     {
         state = &sdfDefaultRandCB;
     }
-    x0 = state->words[0];
-    x1 = state->words[1];
-    x2 = state->words[2];
-    x3 = state->words[3];
+    x0 = state->v[0];
+    x1 = state->v[1];
+    x2 = state->v[2];
+    x3 = state->v[3];
     /* Mix the high two bits of x0 and high bit of x2 into the shifted taps. */
     rand = ((x1 << 0x02) | (((x0 >> 0x1e)) % 4)) ^ ((x3 << 0x01) | (((x2 >> 0x1f)) % 2));
-    state->words[0] = rand;
-    state->words[1] = x0;
-    state->words[2] = x1;
-    state->words[3] = x2;
+    state->v[0] = rand;
+    state->v[1] = x0;
+    state->v[2] = x1;
+    state->v[3] = x2;
     return rand;
 }
 

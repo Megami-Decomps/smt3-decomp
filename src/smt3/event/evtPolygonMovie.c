@@ -27,9 +27,9 @@ typedef struct pmdSceneFogTable_t {
 typedef struct pmdFrameTable_t pmdFrameTable_t;
 
 typedef struct pmdEffectTable_t {
-    s32 nameIndex;
-    s32 dataOffset;
-    s32 kind;
+    s32 NameIndex;
+    s32 DataOffset;
+    s32 Type;
     s32 reserve;
 } pmdEffectTable_t;
 
@@ -470,20 +470,20 @@ dds3Basic_t *AddEffect(evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
     basic = NULL;
     scale[3] = 1.0f;
     for (i = 0; i < work->effectCount; i++) {
-        if (strcmp(work->nameTable1[work->effectTable[i].nameIndex], work->nameTable[f->nameIndex]) == 0) {
-            kind = work->effectTable[i].kind;
+        if (strcmp(work->nameTable1[work->effectTable[i].NameIndex], work->nameTable[f->nameIndex]) == 0) {
+            Type = work->effectTable[i].Type;
             switch (kind) {
             case 0:
-                basic = dds3AddD3PEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].dataOffset, position, scale);
+                basic = dds3AddD3PEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].DataOffset, position, scale);
                 break;
             case 2:
-                basic = dds3AddMG12EffectObjectBasic2(1, (u8 *)work->header1 + work->effectTable[i].dataOffset);
+                basic = dds3AddMG12EffectObjectBasic2(1, (u8 *)work->header1 + work->effectTable[i].DataOffset);
                 break;
             case 3:
-                basic = dds3AddMG12EffectObjectBasic2(2, (u8 *)work->header1 + work->effectTable[i].dataOffset);
+                basic = dds3AddMG12EffectObjectBasic2(2, (u8 *)work->header1 + work->effectTable[i].DataOffset);
                 break;
             case 1:
-                basic = dds3AddBEDEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].dataOffset, position, scale);
+                basic = dds3AddBEDEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].DataOffset, position, scale);
                 break;
             }
             break;

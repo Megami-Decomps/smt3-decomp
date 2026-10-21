@@ -33,7 +33,7 @@ struct EffPCPBeamWork;
 struct EffPCPBlockSet;
 struct EffPCPBlockSetParams;
 struct EffPCPBlockSetWork;
-struct EffPCPBurstWork;
+struct effPCPEyeThunder_tag;
 struct EffPCPChargeWork;
 struct EffPCPCompactFadeWork;
 struct EffPCPCompactRectParams;
@@ -49,7 +49,7 @@ struct EffPCPDriftEventRow;
 struct EffPCPDriftEventWork;
 struct EffPCPEventParamHead;
 struct EffPCPEventPlace;
-struct EffPCPAnalyzeWork;
+struct effPCPAnalyzeBED_tag;
 struct EffPCPBlurExpParams;
 struct EffPCPBlurExpWork;
 struct EffPCPFadeWork;
@@ -58,7 +58,7 @@ struct EffPCPFilterExpWork;
 struct EffPCPGroupEntry;
 struct EffPCPGroupHead;
 struct EffPCPGroupSet;
-struct EffPCPGrowWork;
+struct effPCPThunderSphereExp_tag;
 struct EffPCPMapEventEntry;
 struct EffPCPMapEventWork;
 struct EffPCPPairedEventParams;
@@ -156,7 +156,7 @@ typedef struct EffPCPBlockSet EffPCPBlockSet;
 typedef struct EffPCPBlockSetParams EffPCPBlockSetParams;
 typedef struct effPartHandle_t effPartHandle_t;
 typedef struct EffPCPBlockSetWork EffPCPBlockSetWork;
-typedef struct EffPCPBurstWork EffPCPBurstWork;
+typedef struct effPCPEyeThunder_tag effPCPEyeThunder_tag;
 typedef struct EffPCPChargeWork EffPCPChargeWork;
 typedef struct EffResourceRectBounds EffResourceRectBounds;
 typedef struct EffResourceRectDrawParams EffResourceRectDrawParams;
@@ -194,7 +194,7 @@ typedef struct EffThunderVectorCell EffThunderVectorCell;
 typedef struct ParCell ParCell;
 typedef struct ParSystem ParSystem;
 typedef struct EffThunderVectorWork EffThunderVectorWork;
-typedef struct EffPCPAnalyzeWork EffPCPAnalyzeWork;
+typedef struct effPCPAnalyzeBED_tag effPCPAnalyzeBED_tag;
 typedef struct EffPCPFLEACHBlurParams EffPCPFLEACHBlurParams;
 typedef struct EffPCPFLEACHBlurWork EffPCPFLEACHBlurWork;
 typedef struct EffPCPFadeWork EffPCPFadeWork;
@@ -206,7 +206,7 @@ typedef struct EffPCPGroupEntry EffPCPGroupEntry;
 typedef struct EffThunderFragmentParams EffThunderFragmentParams;
 typedef struct EffPCPGroupHead EffPCPGroupHead;
 typedef struct EffPCPGroupSet EffPCPGroupSet;
-typedef struct EffPCPGrowWork EffPCPGrowWork;
+typedef struct effPCPThunderSphereExp_tag effPCPThunderSphereExp_tag;
 typedef struct EffPCPMapEventEntry EffPCPMapEventEntry;
 typedef struct EffPCPMapEventWork EffPCPMapEventWork;
 typedef struct EffPCPPairedEventRow EffPCPPairedEventRow;
@@ -737,13 +737,13 @@ struct EffThunderFragmentWork;
 typedef struct EffThunderFragmentWork EffThunderFragmentWork;
 
 /* Owner for a muzzle thunder ray and its fragment effect. */
-struct EffPCPBurstWork {
-    f32 position[4];                         /* 0x00 */
-    u32 tintColor;                            /* 0x10 */
-    u8 opaque14[4];
-    f32 startDistance;                       /* 0x18 */
+struct effPCPEyeThunder_tag {
+    f32 pos[4];                         /* 0x00 */
+    u32 abgr;                            /* 0x10 */
+    u8 frame[4];
+    f32 start;                       /* 0x18 */
     f32 length;                               /* 0x1C */
-    EffThunderFragmentWork *fragmentWork;    /* 0x20 */
+    EffThunderFragmentWork *pThunderPoly;    /* 0x20 */
 };
 
 /* Captured model-point history and its two parameter resources share this
@@ -916,11 +916,11 @@ struct EffPCPCompactScatterParams {
 
 typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
 
-struct EffPCPAnalyzeWork {
-    struct SoundMixer *owner;
-    struct EffEventWork *event;
+struct effPCPAnalyzeBED_tag {
+    struct SoundMixer *hBED;
+    struct EffEventWork *hBEDCut;
     f32 scale;
-    u32 color;
+    u32 abgr;
 };
 
 /* The FLEACH blur interpolates the two template bodies across the timeline. */
@@ -1326,17 +1326,17 @@ struct EffPCPGroupSet {
     struct sdfMemHandle_t *workHandle; /* 0x17C */
 };
 
-struct EffPCPGrowWork {
-    f32 position[4];
-    s32 duration;
-    s32 fadeIn;
-    s32 fadeOut;
-    s32 base;
-    s32 target;
-    u32 color;
+struct effPCPThunderSphereExp_tag {
+    f32 pos[4];
+    s32 life;
+    s32 fade_in;
+    s32 fade_out;
+    s32 radius_s;
+    s32 radius_e;
+    u32 abgr;
     s32 frame;
     f32 scale;
-    EffThunderVectorWork *handle;
+    EffThunderVectorWork *pThunderSpherePoly;
 };
 
 /* One event per model-map position. Init seeds the entry, then the updater
@@ -2398,9 +2398,9 @@ EffPCPDriftEventWork *effPCPRadiateBEDCreate(EffPCPDriftEventParams *params, voi
 EffPCPPairedEventWork *effPCPRadiateTBCreate(
     EffPCPPairedEventParams *params, void *ownerAParams, void *ownerBParams);
 
-EffPCPAnalyzeWork *effPCPAnalyzeBEDCreate(void *ownerParams);
+effPCPAnalyzeBED_tag *effPCPAnalyzeBEDCreate(void *ownerParams);
 
-void effPCPAnalyzeInit(EffPCPAnalyzeWork *work);
+void effPCPAnalyzeInit(effPCPAnalyzeBED_tag *work);
 
 EffPCPFLEACHBlurWork *effPCPFLEACHBlurCreate(EffPCPFLEACHBlurParams *params);
 
@@ -5536,180 +5536,180 @@ void effPCPBufuLightDraw(void *work) {
     }
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate00_0(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate00_0(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 0;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 0;
     work->length = 375.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FA30);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FA30);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy00_0(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy00_0(void) {
     return effPCPEyeThunderCreate00_0(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate00_1(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate00_1(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 325.0f;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FA90);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FA90);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy00_1(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy00_1(void) {
     return effPCPEyeThunderCreate00_1(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate01_0(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate01_0(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 0;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 0;
     work->length = 375.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FAF0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FAF0);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy01_0(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy01_0(void) {
     return effPCPEyeThunderCreate01_0(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate01_1(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate01_1(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 325.0f;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FB50);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FB50);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy01_1(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy01_1(void) {
     return effPCPEyeThunderCreate01_1(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate02_0(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate02_0(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 0;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 0;
     work->length = 375.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FBB0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FBB0);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy02_0(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy02_0(void) {
     return effPCPEyeThunderCreate02_0(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate02_1(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate02_1(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 325.0f;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FC10);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FC10);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy02_1(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy02_1(void) {
     return effPCPEyeThunderCreate02_1(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate03_0(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate03_0(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 0;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 0;
     work->length = 375.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FC70);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FC70);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy03_0(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy03_0(void) {
     return effPCPEyeThunderCreate03_0(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate03_1(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate03_1(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 325.0f;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FCD0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FCD0);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy03_1(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy03_1(void) {
     return effPCPEyeThunderCreate03_1(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate04_0(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate04_0(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 0;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 0;
     work->length = 375.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FD30);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FD30);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy04_0(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy04_0(void) {
     return effPCPEyeThunderCreate04_0(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate04_1(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate04_1(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 325.0f;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FD90);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FD90);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy04_1(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy04_1(void) {
     return effPCPEyeThunderCreate04_1(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate05_0(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate05_0(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 0;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 0;
     work->length = 375.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FDF0);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FDF0);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy05_0(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy05_0(void) {
     return effPCPEyeThunderCreate05_0(0);
 }
 
-EffPCPBurstWork *effPCPEyeThunderCreate05_1(u32 unused) {
-    EffPCPBurstWork *work;
+effPCPEyeThunder_tag *effPCPEyeThunderCreate05_1(u32 unused) {
+    effPCPEyeThunder_tag *work;
 
-    work = sdfChipAllocDirect(sizeof(EffPCPBurstWork));
-    work->startDistance = 325.0f;
+    work = sdfChipAllocDirect(sizeof(effPCPEyeThunder_tag));
+    work->start = 325.0f;
     work->length = 225.0f;
-    work->fragmentWork = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FE50);
+    work->pThunderPoly = effPCP_ThunderPolyCreate((EffThunderFragmentParams *)D_0031FE50);
     return work;
 }
 
-EffPCPBurstWork *effPCPEyeThunderCopy05_1(void) {
+effPCPEyeThunder_tag *effPCPEyeThunderCopy05_1(void) {
     return effPCPEyeThunderCreate05_1(0);
 }
 
-void effPCPEyeThunderDelete(EffPCPBurstWork *work) {
-    effPCP_ThunderPolyDelete(work->fragmentWork);
+void effPCPEyeThunderDelete(effPCPEyeThunder_tag *work) {
+    effPCP_ThunderPolyDelete(work->pThunderPoly);
     sdfChipFreeDirect(work);
 }
 
-void effPCPEyeThunderDraw(EffPCPBurstWork *work) {
+void effPCPEyeThunderDraw(effPCPEyeThunder_tag *work) {
     f32 point[4];
     f32 dir[4];
     u8 *params;
@@ -5729,14 +5729,14 @@ void effPCPEyeThunderDraw(EffPCPBurstWork *work) {
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(dir);
-    params = (u8 *)effPCP_ThunderPolyGetParam(work->fragmentWork);
+    params = (u8 *)effPCP_ThunderPolyGetParam(work->pThunderPoly);
     dx = dir[0];
     dy = dir[1];
     dz = dir[2];
-    s = work->startDistance;
-    x = work->position[0] + dx * s;
-    y = work->position[1] + dy * s;
-    z = work->position[2] + dz * s;
+    s = work->start;
+    x = work->pos[0] + dx * s;
+    y = work->pos[1] + dy * s;
+    z = work->pos[2] + dz * s;
     point[0] = x;
     point[1] = y;
     point[2] = z;
@@ -5749,63 +5749,63 @@ void effPCPEyeThunderDraw(EffPCPBurstWork *work) {
     point[1] = y;
     point[2] = z;
     SDF_VU0_COPYVECTOR(params + 0x10, point);
-    effPCP_ThunderPolySetColor(work->fragmentWork, work->tintColor);
-    effPCP_ThunderPolyDraw(work->fragmentWork);
+    effPCP_ThunderPolySetColor(work->pThunderPoly, work->abgr);
+    effPCP_ThunderPolyDraw(work->pThunderPoly);
 }
 
-void effPCPEyeThunderSetPosition(EffPCPBurstWork *work, const void *source) {
+void effPCPEyeThunderSetPosition(effPCPEyeThunder_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPEyeThunderSetColor(EffPCPBurstWork *work, u32 color) {
-    work->tintColor = color;
+void effPCPEyeThunderSetColor(effPCPEyeThunder_tag *work, u32 color) {
+    work->abgr = color;
 }
 
-EffPCPGrowWork *effPCPThunderSphereExpCreate(EffPCPScaledThunderParams *params) {
-    EffPCPGrowWork *work = sdfChipAllocDirect(sizeof(EffPCPGrowWork));
+effPCPThunderSphereExp_tag *effPCPThunderSphereExpCreate(EffPCPScaledThunderParams *params) {
+    effPCPThunderSphereExp_tag *work = sdfChipAllocDirect(sizeof(effPCPThunderSphereExp_tag));
     EffThunderVectorWork *handle;
 
     params->res.radiusScale = (f32)params->base;
     params->res.heightScale = (f32)params->base;
     handle = effPCPThunderSpherePolyCreate(&params->res);
-    work->duration = params->duration;
-    work->fadeIn = params->fadeIn;
-    work->fadeOut = params->fadeOut;
-    work->base = params->base;
-    work->target = params->target;
-    work->color = 0x80808080;
+    work->life = params->duration;
+    work->fade_in = params->fadeIn;
+    work->fade_out = params->fadeOut;
+    work->radius_s = params->base;
+    work->radius_e = params->target;
+    work->abgr = 0x80808080;
     work->frame = 0;
     work->scale = 1.0f;
-    work->position[0] = params->res.origin[0];
-    work->position[1] = params->res.origin[1];
-    work->position[2] = params->res.origin[2];
-    work->handle = handle;
+    work->pos[0] = params->res.origin[0];
+    work->pos[1] = params->res.origin[1];
+    work->pos[2] = params->res.origin[2];
+    work->pThunderSpherePoly = pThunderSpherePoly;
     return work;
 }
 
-EffPCPGrowWork *effPCPThunderSphereExpCreatePCF(void *data) {
+effPCPThunderSphereExp_tag *effPCPThunderSphereExpCreatePCF(void *data) {
     return effPCPThunderSphereExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
 
-EffPCPGrowWork *effPCPThunderSphereExpCopy(EffPCPGrowWork *work) {
+effPCPThunderSphereExp_tag *effPCPThunderSphereExpCopy(effPCPThunderSphereExp_tag *work) {
     EffPCPScaledThunderParams params;
-    EffThunderAlphaParams *res = effPCPThunderSpherePolyGetParam(work->handle);
+    EffThunderAlphaParams *res = effPCPThunderSpherePolyGetParam(work->pThunderSpherePoly);
 
-    params.duration = work->duration;
-    params.fadeIn = work->fadeIn;
-    params.fadeOut = work->fadeOut;
-    params.base = work->base;
-    params.target = work->target;
+    params.duration = work->life;
+    params.fadeIn = work->fade_in;
+    params.fadeOut = work->fade_out;
+    params.base = work->radius_s;
+    params.target = work->radius_e;
     params.res = *res;
     return effPCPThunderSphereExpCreate(&params);
 }
 
-void effPCPThunderSphereExpDelete(EffPCPGrowWork *work) {
-    effPCPThunderSpherePolyDelete(work->handle);
+void effPCPThunderSphereExpDelete(effPCPThunderSphereExp_tag *work) {
+    effPCPThunderSpherePolyDelete(work->pThunderSpherePoly);
     sdfChipFreeDirect(work);
 }
 
-void effPCPThunderSphereExpDraw(EffPCPGrowWork *work) {
+void effPCPThunderSphereExpDraw(effPCPThunderSphereExp_tag *work) {
     s32 frame;
     s32 duration;
     s32 fadeIn;
@@ -5816,19 +5816,19 @@ void effPCPThunderSphereExpDraw(EffPCPGrowWork *work) {
     f32 opacity;
     u32 color;
 
-    effPCPThunderSpherePolyGetParam(work->handle);
+    effPCPThunderSpherePolyGetParam(work->pThunderSpherePoly);
     frame = work->frame;
-    duration = work->duration;
+    life = work->life;
     if (duration < frame) {
         return;
     }
-    base = (f32)work->base;
-    extent = (f32)work->target;
+    radius_s = (f32)work->radius_s;
+    extent = (f32)work->radius_e;
     extent -= base;
     extent = base + extent * ((f32)frame / (f32)duration);
     scale = extent / base;
-    fadeIn = work->fadeIn;
-    fadeOut = work->fadeOut;
+    fade_in = work->fade_in;
+    fade_out = work->fade_out;
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
     } else if ((s32)((u32)duration - (u32)frame) <= fadeOut && fadeOut != 0) {
@@ -5836,23 +5836,23 @@ void effPCPThunderSphereExpDraw(EffPCPGrowWork *work) {
     } else {
         opacity = 1.0f;
     }
-    color = work->color;
-    effPCPThunderSpherePolySetColor(work->handle, effColorBlend(color & 0xFFFFFF, color, opacity));
-    effPCPThunderSpherePolySetPosition(work->handle, work->position);
-    effPCPThunderSpherePolySetScale(work->scale * scale, work->handle);
-    effPCPThunderSpherePolyDraw(work->handle);
+    abgr = work->abgr;
+    effPCPThunderSpherePolySetColor(work->pThunderSpherePoly, effColorBlend(color & 0xFFFFFF, color, opacity));
+    effPCPThunderSpherePolySetPosition(work->pThunderSpherePoly, work->pos);
+    effPCPThunderSpherePolySetScale(work->scale * scale, work->pThunderSpherePoly);
+    effPCPThunderSpherePolyDraw(work->pThunderSpherePoly);
     work->frame = (s32)((u32)work->frame + 1);
 }
 
-void effPCPThunderSphereExpSetPosition(EffPCPGrowWork *work, const void *source) {
+void effPCPThunderSphereExpSetPosition(effPCPThunderSphereExp_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPThunderSphereExpSetColor(EffPCPGrowWork *work, u32 color) {
-    work->color = color;
+void effPCPThunderSphereExpSetColor(effPCPThunderSphereExp_tag *work, u32 color) {
+    work->abgr = abgr;
 }
 
-void effPCPThunderSphereExpSetScale(EffPCPGrowWork *work, f32 scale) {
+void effPCPThunderSphereExpSetScale(effPCPThunderSphereExp_tag *work, f32 scale) {
     work->scale = scale;
 }
 
@@ -7456,7 +7456,7 @@ void *effPCPHelperBEDGetModel(EffPCPMapEventWork *work) {
     return dds3EffectPartGetHandle(work->modelResource);
 }
 
-void effPCPAnalyzeInit(EffPCPAnalyzeWork *work) {
+void effPCPAnalyzeInit(effPCPAnalyzeBED_tag *work) {
     EffPCPEventPlace place;
 
     place.payload[0] = 0;
@@ -7471,49 +7471,49 @@ void effPCPAnalyzeInit(EffPCPAnalyzeWork *work) {
     place.payload[9] = 100.0f;
     place.payload[10] = 1.0f;
     place.color = 0x80808080;
-    work->event = effEveBEDCutCreate(work->owner, 2, &place);
+    work->hBEDCut = effEveBEDCutCreate(work->hBED, 2, &place);
 }
 
-EffPCPAnalyzeWork *effPCPAnalyzeBEDCreate(void *ownerParams) {
-    EffPCPAnalyzeWork *work = sdfChipAllocDirect(sizeof(EffPCPAnalyzeWork));
+effPCPAnalyzeBED_tag *effPCPAnalyzeBEDCreate(void *ownerParams) {
+    effPCPAnalyzeBED_tag *work = sdfChipAllocDirect(sizeof(effPCPAnalyzeBED_tag));
 
-    work->owner = 0;
-    work->color = 0x80808080;
+    work->hBED = 0;
+    work->abgr = 0x80808080;
     work->scale = 1.0f;
     if (ownerParams != 0) {
-        work->owner = effEveBEDCreate(ownerParams);
+        work->hBED = effEveBEDCreate(ownerParams);
     }
-    if (work->owner != 0) {
+    if (work->hBED != 0) {
         effPCPAnalyzeInit(work);
     }
     return work;
 }
 
-EffPCPAnalyzeWork *effPCPAnalyzeBEDCreatePCF(void *data) {
+effPCPAnalyzeBED_tag *effPCPAnalyzeBEDCreatePCF(void *data) {
     return effPCPAnalyzeBEDCreate(dds3EffectPCPDataGetData(data, 0));
 }
 
-EffPCPAnalyzeWork *effPCPAnalyzeBEDCopy(EffPCPAnalyzeWork *src) {
-    EffPCPAnalyzeWork *work = effPCPAnalyzeBEDCreate(0);
+effPCPAnalyzeBED_tag *effPCPAnalyzeBEDCopy(effPCPAnalyzeBED_tag *src) {
+    effPCPAnalyzeBED_tag *work = effPCPAnalyzeBEDCreate(0);
 
-    work->owner = src->owner;
+    work->hBED = src->hBED;
     effPCPAnalyzeInit(work);
     return work;
 }
 
-void effPCPAnalyzeBEDDelete(EffPCPAnalyzeWork *work) {
-    if (work->event != NULL) {
-        effEveBEDCutDelete(work->event);
+void effPCPAnalyzeBEDDelete(effPCPAnalyzeBED_tag *work) {
+    if (work->hBEDCut != NULL) {
+        effEveBEDCutDelete(work->hBEDCut);
     }
-    if (work->owner->active == 0) {
-        effEveBEDDelete(work->owner);
+    if (work->hBED->active == 0) {
+        effEveBEDDelete(work->hBED);
     }
     sdfChipFreeDirect(work);
 }
 
 INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00533CC0);
 
-void effPCPAnalyzeBEDDraw(EffPCPAnalyzeWork *work) {
+void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *work) {
     EffPCPEventPlace place;
     EffAimParams aim;
     f32 position[4];
@@ -7563,17 +7563,17 @@ void effPCPAnalyzeBEDDraw(EffPCPAnalyzeWork *work) {
         place.payload[2] = 0.0f;
         place.payload[3] = 0.0f;
     }
-    place.color = work->color;
-    effEveBEDCutSetParams(work->event, &place);
-    effEveBEDCutDraw(work->event);
+    place.color = work->abgr;
+    effEveBEDCutSetParams(work->hBEDCut, &place);
+    effEveBEDCutDraw(work->hBEDCut);
 }
 
-void effPCPAnalyzeBEDSetScale(EffPCPAnalyzeWork *work, f32 scale) {
+void effPCPAnalyzeBEDSetScale(effPCPAnalyzeBED_tag *work, f32 scale) {
     work->scale = scale;
 }
 
-void effPCPAnalyzeBEDSetColor(EffPCPAnalyzeWork *work, u32 color) {
-    work->color = color;
+void effPCPAnalyzeBEDSetColor(effPCPAnalyzeBED_tag *work, u32 color) {
+    work->abgr = abgr;
 }
 
 EffPCPFLEACHBlurWork *effPCPFLEACHBlurCreate(EffPCPFLEACHBlurParams *params) {

@@ -11,9 +11,9 @@ extern void (*D_00551828)(void);
 extern void *memset(void *destination, s32 value, u32 bytes);
 
 typedef struct tagPipeTexture {
-    sdfTexHandle_t *handle;
-    sdfMemHandle_t *allocation;
-    struct pipeTextureFile_t *resourceData;
+    sdfTexHandle_t *th;
+    sdfMemHandle_t *mh;
+    struct pipeTextureFile_t *mp;
     u32 unk0C;
 } tagPipeTexture;
 
@@ -106,7 +106,7 @@ void makaDrawGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
 
     eglLinkSprite((s32)(x - sx * 52.0f), (s32)(y - sy * 30.0f), (s32)(sx * 104.0f),
                   (s32)(sy * 61.0f), 1, 1, 0x68, 0x3D, color, color, color, color,
-                  MakaTex[2].handle);
+                  MakaTex[2].th);
 }
 
 void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
@@ -115,7 +115,7 @@ void makaDrawMultiGauge(s32 x, s32 y, f32 sx, f32 sy, f32 alpha)
 
     eglLinkSprite((s32)(x - sx * 81.0f), (s32)(y - sy * 13.0f), (s32)(sx * 163.0f),
                   (s32)(sy * 26.0f), 1, 1, 0xA3, 0x1A, color, color, color, color,
-                  MakaTex[3].handle);
+                  MakaTex[3].th);
 }
 
 INCLUDE_ASM(const s32, "pipe/pipeMakaAnim", makaDrawNormalGauge);

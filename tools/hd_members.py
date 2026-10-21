@@ -113,7 +113,9 @@ def apply(path, name, renames):
         if shared:
             deferred.append(old)
         else:
-            text = re.sub(rf"\b{re.escape(old)}\b", new, text)
+            # Only `.name` and `->name` are member uses. A bare identifier is not,
+            # and rewriting one renames every unrelated use of a common word.
+            text = re.sub(rf"(\.|->)(\s*){re.escape(old)}\b", rf"\g<1>\g<2>{new}", text)
     path.write_text(text)
     return done, deferred
 

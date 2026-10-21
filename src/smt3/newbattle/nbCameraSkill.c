@@ -9,10 +9,10 @@
 #include "newdata.h"
 
 typedef struct nbCameraAnim_t {
-    s32 rotateFrames;
-    f32 rotateStep;
-    s32 distanceFrames;
-    f32 distanceStep;
+    s32 rotate_f;
+    f32 rotate_s;
+    s32 distance_f;
+    f32 distance_s;
 } nbCameraAnim_t;
 
 typedef struct nbCamera_t {
