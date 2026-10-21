@@ -386,7 +386,9 @@ typedef struct
     /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
     /* 0x84A4 */ u8 unk_84A4[0xC];
-    /* 0x84B0 */ s32 stockAlpha[1];
+    /* 0x84B0 */ s32 stockAlpha[16];
+    /* 0x84F0 */ s8 stockStep[16];
+    /* 0x8500 */ s32 stockDelay[16];
 } campWork_t;
 
 typedef struct
@@ -1516,7 +1518,24 @@ void campUpdateEffectStep(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", func_00232198);
+s32 func_00232198(void)
+{
+    s32 i;
+
+    for (i = 0; i < 0x10; i++) {
+        if (campWork->stockDelay[i] > 0) {
+            campWork->stockDelay[i]--;
+        } else {
+            if (campWork->stockAlpha[i] < 0x100) {
+                campWork->stockAlpha[i] += campWork->stockStep[i];
+                if (campWork->stockAlpha[i] < 0x100) {
+                    continue;
+                }
+            }
+            campWork->stockAlpha[i] = 0x100;
+        }
+    }
+}
 
 s32 campUpdateEffects(void)
 {
@@ -1570,7 +1589,26 @@ void camp_update_stock_Shutdown(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartProcessStock);
+extern s32 camp_calc_stock_Process(s32 id);
+extern s32 camp_draw_stock_Process(s32 id);
+extern s32 camp_update_stock_Process(s32 id);
+
+void *cmpStartProcessStock(cmpLocalStock_t *stock, s32 value)
+{
+    void *proc;
+
+    if (campStatusPanel != NULL) {
+        return NULL;
+    }
+    campStatusPanel = cmpAllocStockProcess(stock, value);
+    proc = dds3StartProcess("camp_calc_stock", 0x3F2, 1, 1, camp_calc_stock_Process, NULL,
+                            campStatusPanel);
+    dds3StartProcess("camp_draw_stock", 0x2B07, 1, 1, camp_draw_stock_Process, NULL,
+                     campStatusPanel);
+    dds3StartProcess("camp_update_stock", 0x520B, 1, 1, camp_update_stock_Process,
+                     camp_update_stock_Shutdown, campStatusPanel);
+    return proc;
+}
 
 void campHideStatusWindow(void)
 {
@@ -1845,7 +1883,21 @@ INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBox);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBoxSprite);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawGaugeBars);
+void campDhDrawGaugeBars(void)
+{
+    s32 corner[4];
+
+    corner[0] = 0;
+    corner[1] = 0x101E80;
+    corner[2] = 0;
+    corner[3] = 0x101E80;
+    cmpDrawBoxGDefault(0x5C0, 0x948, 0, 0xAC, 0x74, corner, 0x47);
+    corner[0] = 0x101E80;
+    corner[1] = 0x101E80;
+    corner[2] = 0x101E80;
+    corner[3] = 0x101E80;
+    cmpDrawBoxGDefault(0x1080, 0x948, 0, 0xF8, 0x74, corner, 0x47);
+}
 
 void fclCalcArrowCursorOffset(s8 index, s32 *x, s32 *y)
 {
@@ -1927,7 +1979,19 @@ void campDhDrawIcon(void)
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawIcon);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHearts);
+extern s32 cmbGetHeartsParam(s8 devilId, s8 index);
+
+void campDhDrawHearts(void)
+{
+    u8 hearts[6];
+    s32 i;
+
+    for (i = 0; i < 6; i++) {
+        hearts[i] = cmbGetHeartsParam(DDS3_GBWK->unk1CFA, (s8)i);
+    }
+    cmpDrawStatusComEx((s32)((u8 *)DDS3_GBWK + 0xA54), 0x80, -1, 0, (s32)hearts, 0, 0xA09DC380,
+                       4, 4, 0);
+}
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDC0);
 
@@ -2065,13 +2129,18 @@ INCLUDE_ASM(const s32, "code_0022C578", campDhRollRatio);
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0x14];
+    /* 0x00 */ u8 unk_00;
+    /* 0x01 */ s8 unk_01;
+    /* 0x02 */ u8 unk_02[0xE];
+    /* 0x10 */ s32 unk_10;
     /* 0x14 */ s32 unk_14;
     /* 0x18 */ f32 unk_18;
     /* 0x1C */ u8 unk_1C[4];
     /* 0x20 */ f32 unk_20;
     /* 0x24 */ u8 unk_24[4];
     /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ s32 unk_30;
 } campDhEntry_t;
 
 extern s32 campDhRollRatio(void);
@@ -2277,7 +2346,16 @@ u8 cmpGetSkillIcon(u16 skill)
     return datSkillTable.normal[skill].costtype;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetSkillCost);
+u16 cmpGetSkillCost(u16 skill, u16 *work)
+{
+    u16 cost = datSkillTable.normal[skill].cost;
+    u16 base = datSkillTable.normal[skill].costbase;
+
+    if (cmpGetSkillIcon(skill) == 1) {
+        cost = base + work[4] * cost / 100;
+    }
+    return cost;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillListRow);
 
@@ -2651,7 +2729,29 @@ void cmpSetStatusWindowHidden(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_calc_status_Process);
+extern void campFreeStatusModel(void);
+
+s32 camp_calc_status_Process(s32 id)
+{
+    cmpStatusPhase = dds3GetProcessData(id);
+    if (cmpStatusWindowHidden >= 2) {
+        if (cmpStatusWindowHidden == 3) {
+            cmpStatusWindowHidden = 0;
+        } else {
+            cmpStatusWindowHidden++;
+        }
+    }
+    campFreeStatusModel();
+    if ((cmpStatusPhase->flags & 0x10) == 0) {
+        return 0;
+    }
+    if (cmpLoadStatusModel() != 0) {
+        return 0;
+    }
+    cmpStatusWindowHidden = 0;
+    cmpUpdateTerminate((cmpInfoWindow_t *)cmpStatusPhase);
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_draw_status_Process);
 
@@ -2694,7 +2794,25 @@ void camp_update_info_Shutdown(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartProcessInfo);
+extern s32 camp_calc_info_Process(s32 id);
+extern s32 camp_draw_info_Process(s32 id);
+extern s32 camp_update_info_Process(s32 id);
+
+s32 cmpStartProcessInfo(s32 text, s32 flag)
+{
+    s32 proc;
+
+    if (cmpInfoWindow != NULL) {
+        return 0;
+    }
+    cmpInfoWindow = cmpAllocInfoProcess((void *)text, flag);
+    proc = (s32)dds3StartProcess("camp_calc_info", 0x3F2, 1, 1, camp_calc_info_Process, NULL,
+                                 cmpInfoWindow);
+    dds3StartProcess("camp_draw_info", 0x2B07, 1, 1, camp_draw_info_Process, NULL, cmpInfoWindow);
+    dds3StartProcess("camp_update_info", 0x520B, 1, 1, camp_update_info_Process,
+                     camp_update_info_Shutdown, cmpInfoWindow);
+    return proc;
+}
 
 void cmpSetInfoWindowHidden(void)
 {
@@ -2749,7 +2867,19 @@ void cmpSetCrossGeneralVal(u8 *work, s8 value)
     work[0x50] = value;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campInitPanelPos);
+extern void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanelPos_t *pos);
+
+void campInitPanelPos(void *panel, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
+{
+    u8 *work = panel;
+
+    fclInitPanelPos(b, c, 0x10, 0, 0, 0, (fclPanelPos_t *)(work + 4));
+    *(s32 *)work = d;
+    *(s32 *)(work + 0x20) = g;
+    *(s32 *)(work + 0x18) = e;
+    *(s32 *)(work + 0x1C) = f;
+    work[0x24] = 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetAfterCrossFunc);
 
