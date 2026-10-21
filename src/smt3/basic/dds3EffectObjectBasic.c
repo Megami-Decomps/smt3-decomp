@@ -109,8 +109,8 @@ void *sdfDevLoadFileEx(void *resource, u32 *id, s32 mode);
 
 struct BillChildPayload;
 typedef struct BillChildPayload BillChildPayload;
-struct BillData;
-typedef struct BillData BillData;
+struct dds3BillAnimResource_tag;
+typedef struct dds3BillAnimResource_tag dds3BillAnimResource_tag;
 struct BillOut;
 typedef struct BillOut BillOut;
 struct EvtUnit;

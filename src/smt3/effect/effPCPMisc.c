@@ -7,10 +7,10 @@ struct BattleGroupNode;
 struct BattleGroupSlot;
 struct BillAnimationEntry;
 struct BillPacketWork;
-struct BillRecord;
+struct P2A_TEXANIM_tag;
 struct BillRenderPair;
 struct BillTextureQuad;
-struct EffAimParams;
+struct effBTL_SkillPositionPtr_t;
 struct EffBattleEntry;
 struct EffBattleEntryList;
 union EffBattleParameterValue;
@@ -28,10 +28,10 @@ struct EffNodeDescriptor;
 struct EffPCPBeamLargeHead;
 struct EffPCPBeamLargeWork;
 struct EffPCPBeamNode;
-struct EffPCPBeamParams;
+struct effPCPRingPolyExpParam_t;
 struct EffPCPBeamWork;
 struct EffPCPBlockSet;
-struct EffPCPBlockSetParams;
+struct effPCPAgiFireballParam_t;
 struct EffPCPBlockSetWork;
 struct effPCPEyeThunder_tag;
 struct EffPCPChargeWork;
@@ -72,7 +72,7 @@ struct EffPCPRotateWork;
 struct EffPCPScaledThunderParams;
 struct EffPCPSharedTrail;
 struct EffPCPSharedTrailRef;
-struct EffPCPSpanParams;
+struct effPCPBreathParam_t;
 struct EffPCPSpanWork;
 struct EffPCPSpawnOnceWork;
 struct EffPCPSpawnRangeEventRow;
@@ -130,8 +130,8 @@ typedef struct BillPacketWork BillPacketWork;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
 typedef struct BillChildPayload BillChildPayload;
 typedef struct BillAnimationEntry BillAnimationEntry;
-typedef struct BillData BillData;
-typedef struct BillRecord BillRecord;
+typedef struct dds3BillAnimResource_tag dds3BillAnimResource_tag;
+typedef struct P2A_TEXANIM_tag P2A_TEXANIM_tag;
 typedef struct BillOut BillOut;
 typedef struct BillRenderPair BillRenderPair;
 typedef struct BillObj BillObj;
@@ -150,10 +150,10 @@ typedef struct sdfMatPacket_t sdfMatPacket_t;
 typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct EffPCPBeamNode EffPCPBeamNode;
 typedef struct EffPCPBeamLargeWork EffPCPBeamLargeWork;
-typedef struct EffPCPBeamParams EffPCPBeamParams;
+typedef struct effPCPRingPolyExpParam_t effPCPRingPolyExpParam_t;
 typedef struct EffPCPBeamWork EffPCPBeamWork;
 typedef struct EffPCPBlockSet EffPCPBlockSet;
-typedef struct EffPCPBlockSetParams EffPCPBlockSetParams;
+typedef struct effPCPAgiFireballParam_t effPCPAgiFireballParam_t;
 typedef struct effPartHandle_t effPartHandle_t;
 typedef struct EffPCPBlockSetWork EffPCPBlockSetWork;
 typedef struct effPCPEyeThunder_tag effPCPEyeThunder_tag;
@@ -179,7 +179,7 @@ typedef struct EffPCPCrossWork EffPCPCrossWork;
 typedef struct EffPCPDelayedPairs EffPCPDelayedPairs;
 typedef struct EffPCPDriftEventRow EffPCPDriftEventRow;
 typedef struct EffPCPDriftEventParams EffPCPDriftEventParams;
-typedef struct EffAimParams EffAimParams;
+typedef struct effBTL_SkillPositionPtr_t effBTL_SkillPositionPtr_t;
 typedef union EffBattleParameterValue EffBattleParameterValue;
 typedef struct EffBattleEntryList EffBattleEntryList;
 typedef struct SoundBank SoundBank;
@@ -218,7 +218,7 @@ typedef struct EffPCPRotateWork EffPCPRotateWork;
 typedef struct EffPCPScaledThunderParams EffPCPScaledThunderParams;
 typedef struct EffPCPSharedTrail EffPCPSharedTrail;
 typedef struct EffPCPSharedTrailRef EffPCPSharedTrailRef;
-typedef struct EffPCPSpanParams EffPCPSpanParams;
+typedef struct effPCPBreathParam_t effPCPBreathParam_t;
 typedef struct EffPCPSpanWork EffPCPSpanWork;
 typedef struct EffPCPSpawnOnceWork EffPCPSpawnOnceWork;
 typedef struct EffPCPSpawnRangeEventRow EffPCPSpawnRangeEventRow;
@@ -342,7 +342,7 @@ struct BillChildPayload {
     struct BillChildPayload *next; /* 0x4C */
 };
 
-struct BillData;
+struct dds3BillAnimResource_tag;
 
 struct BillAnimationEntry {
     s32 offset;
@@ -353,7 +353,7 @@ struct BillAnimationEntry {
 };
 
 /* Runtime header precedes the copied resource bytes; the child table is indirect. */
-struct BillData {
+struct dds3BillAnimResource_tag {
     struct sdfMemHandle_t *allocation; /* Retained general-heap descriptor. */
     u8 *base;
     BillAnimationEntry *entries;
@@ -369,7 +369,7 @@ struct BillOut;
 struct BillOut;
 
 /* Ordinary animation frames contain geometry and texture coordinates. */
-struct BillRecord {
+struct P2A_TEXANIM_tag {
     s16 width;
     s16 height;
     s16 x;
@@ -388,7 +388,7 @@ struct BillOut {
     s32 frameIndex;
     s32 framesRemaining;
     BillAnimationEntry *entry;
-    BillRecord *record;
+    P2A_TEXANIM_tag *record;
 };
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
@@ -416,7 +416,7 @@ struct BillObj {
     union {
         void *payload; /* 0x30: kind-discriminated payload when its type is unknown */
         struct BillChildPayload *child; /* child kinds */
-        struct BillData *animationData; /* kind 1 */
+        struct dds3BillAnimResource_tag *animationData; /* kind 1 */
     };
     BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
     u16 animationActive; /* 0x50: cleared by empty or completed nonlooping animation */
@@ -649,7 +649,7 @@ struct EffPCPBeamLargeWork {
 };
 
 /* The parameter prefix copied into the standard beam work. */
-struct EffPCPBeamParams {
+struct effPCPRingPolyExpParam_t {
     f32 position[4];
     s32 fadeInFrames;
     s32 fadeOutFrames;
@@ -670,7 +670,7 @@ struct EffPCPBeamParams {
 };
 
 struct EffPCPBeamWork {
-    EffPCPBeamParams params;
+    effPCPRingPolyExpParam_t params;
     s32 frame;
     u32 color;
     u32 vertexCount;
@@ -688,7 +688,7 @@ struct EffPCPBlockSet {
 };
 
 /* The serialized parameter block copied into each block-set work record. */
-struct EffPCPBlockSetParams {
+struct effPCPAgiFireballParam_t {
     f32 position[4];
     s32 fadeInFrames;
     s32 fadeOutFrames;
@@ -718,7 +718,7 @@ struct EffPCPBlockSetWork {
     f32 matrix[16];
     f32 previousPosition[4];
     f32 currentPosition[4];
-    EffPCPBlockSetParams params;
+    effPCPAgiFireballParam_t params;
     u32 frame;
     u32 count;
     u32 color;
@@ -1053,7 +1053,7 @@ typedef struct BattleEffect BattleEffect;
 
 typedef void (*BattleEffectCallback)(BattleEffect *effect);
 
-struct EffAimParams {
+struct effBTL_SkillPositionPtr_t {
     u8 scaleKind;
     u8 aimMode;           /* 0x01 */
     u8 directionMode;     /* 0x02 */
@@ -1070,7 +1070,7 @@ typedef struct EffBattleEntry {
     u16 paramKind;                 /* 0x00 */
     u8 pad02[2];
     EffBattleParameterValue value; /* 0x04 */
-    EffAimParams aimParams;        /* 0x08 */
+    effBTL_SkillPositionPtr_t aimParams;        /* 0x08 */
     u32 zeroKindCount;             /* 0x10 */
     u8 kind;                       /* 0x14 */
     u8 pad15[3];
@@ -1411,7 +1411,7 @@ struct EffPCPRingWork {
 
 struct EffPCPRotateParams {
     s32 startFrame[3];
-    EffPCPBlockSetParams group[3];
+    effPCPAgiFireballParam_t group[3];
 };
 
 struct EffPCPRotateWork {
@@ -1449,7 +1449,7 @@ struct EffPCPSharedTrailRef {
 };
 
 /* Serialized inputs copied in full into the orbiting aim-node work owner. */
-struct EffPCPSpanParams {
+struct effPCPBreathParam_t {
     f32 anchor[4];
     u32 holdFrames;
     u32 activeFrames;
@@ -1461,7 +1461,7 @@ struct EffPCPSpanParams {
 /* Constructor allocation is 0x78 bytes and initializes this complete owner. */
 struct EffPCPSpanWork {
     f32 matrix[16];
-    EffPCPSpanParams params;
+    effPCPBreathParam_t params;
     u32 color;
     u32 frame;
     f32 angle;
@@ -2385,7 +2385,7 @@ extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
 
 void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius);
 
-EffPCPBeamWork *effPCPRingPolyExpCreate(EffPCPBeamParams *params);
+EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *params);
 
 EffPCPBeamLargeWork *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *params);
 
@@ -2409,7 +2409,7 @@ void effPCPAgiFireballSetRotateMatrix(EffPCPBlockSetWork *work, const void *sour
 void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source);
 
 EffPCPBlockSetWork *effPCPAgiFireballCreate(
-    const EffPCPBlockSetParams *params, const EffPCPBlockSet *blocks);
+    const effPCPAgiFireballParam_t *params, const EffPCPBlockSet *blocks);
 
 EffPCPGroupSet *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data);
 
@@ -2464,7 +2464,7 @@ extern const u8 D_00533CC0[16];
 typedef struct {
     u8 head[0xC];
     SdfDrawNode **nodes;
-} EffPCPModelNodeList;
+} effPCPAgiFireball2PartList_t;
 
 u32 effBTLSkillCheckRun(void);
 
@@ -2474,7 +2474,7 @@ void effBTLModelGetSphereCenter(void *formation);
 
 s32 effBTLModelGetID(void *formation);
 
-void effBTLPartGetPositionPtr(void *formation, EffAimParams *aim, f32 *out);
+void effBTLPartGetPositionPtr(void *formation, effBTL_SkillPositionPtr_t *aim, f32 *out);
 
 extern EffSpawnParams effPCPZiodin03Param[];
 
@@ -4863,7 +4863,7 @@ void effPCPMegidoraon01SetColor(EffPCPFadeWork *work, u32 color) {
 }
 
 EffPCPSpanWork *effPCPBreathCreate(void *params, EffNodeDescriptor *handleParams) {
-    EffPCPSpanParams *src = params;
+    effPCPBreathParam_t *src = params;
     EffPCPSpanWork *work;
     f32 size;
 
@@ -5043,7 +5043,7 @@ INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreate);
 
 EffPCPBlockSetWork *effPCPAgiFireballCreatePCF(void *parameterTable) {
     EffPCPBlockSet set;
-    EffPCPBlockSetParams *first;
+    effPCPAgiFireballParam_t *first;
     u32 i;
 
     first = dds3EffectPCPDataGetData(parameterTable, 0);
@@ -5198,7 +5198,7 @@ EffPCPBlockSetWork *effPCPAgiFireballSp2Copy(EffPCPBlockSetWork *src) {
 
 EffPCPRotateWork *effPCPAgiFireball2Create(EffPCPRotateParams *src, effPCPBlockSetInputs_t *blocks) {
     EffPCPRotateWork *work;
-    EffPCPBlockSetParams *sub;
+    effPCPAgiFireballParam_t *sub;
     u32 i;
 
     work = sdfChipAllocDirect(sizeof(EffPCPRotateWork));
@@ -5975,7 +5975,7 @@ void effPCPRingPolyExpInit(EffPCPBeamWork *work) {
     work->frame = 0;
 }
 
-EffPCPBeamWork *effPCPRingPolyExpCreate(EffPCPBeamParams *src)
+EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *src)
 {
     EffPCPBeamWork *work = sdfChipAllocDirect(sizeof(EffPCPBeamWork));
     u32 segments;
@@ -6565,7 +6565,7 @@ void effPCPMakkaDraw(EffPCPSprayWork *work) {
             if ((model->flags & 1) == 0) {
                 inner = model->inner;
                 s = 1.0f / work->scale;
-                node = (*(EffPCPModelNodeList **)inner)->nodes[0];
+                node = (*(effPCPAgiFireball2PartList_t **)inner)->nodes[0];
                 scaleVec[0] = s;
                 scaleVec[1] = s;
                 scaleVec[2] = s;
@@ -7515,7 +7515,7 @@ INCLUDE_RODATA(const s32, "effect/effPCPMisc", D_00533CC0);
 
 void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *work) {
     EffPCPEventPlace place;
-    EffAimParams aim;
+    effBTL_SkillPositionPtr_t aim;
     f32 position[4];
     f32 direction[4];
     u8 *form;

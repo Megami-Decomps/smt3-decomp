@@ -13,7 +13,7 @@ struct EffThunderFragmentParams;
 struct EffThunderGroup;
 struct EffThunderGroupParams;
 union EffThunderParameterHead;
-struct EffThunderSpark;
+struct effPCP_ThunderColumnPolyLowPart_t;
 struct EffThunderSparkParams;
 struct EffThunderSparkWork;
 struct EffThunderVectorCell;
@@ -40,7 +40,7 @@ typedef struct EffThunderCellWork EffThunderCellWork;
 typedef struct EffThunderFrag EffThunderFrag;
 typedef struct EffThunderFragmentParams EffThunderFragmentParams;
 typedef struct EffThunderGroupParams EffThunderGroupParams;
-typedef struct EffThunderSpark EffThunderSpark;
+typedef struct effPCP_ThunderColumnPolyLowPart_t effPCP_ThunderColumnPolyLowPart_t;
 typedef struct EffThunderSparkParams EffThunderSparkParams;
 typedef struct EffThunderSparkWork EffThunderSparkWork;
 typedef struct EffThunderVectorCell EffThunderVectorCell;
@@ -298,7 +298,7 @@ struct EffThunderGroup {
 };
 
 /* One orbiting spark and its independently owned particle cell system. */
-struct EffThunderSpark {
+struct effPCP_ThunderColumnPolyLowPart_t {
     s32 age;              /* 0x00 */
     f32 verticalOffset;   /* 0x04 */
     f32 verticalSpeed;    /* 0x08 */
@@ -342,10 +342,10 @@ struct EffThunderSparkParams {
     f32 verticalDamping;             /* 0xA0 */
 };
 
-/* Allocation header followed by sparkCount records of EffThunderSpark. */
+/* Allocation header followed by sparkCount records of effPCP_ThunderColumnPolyLowPart_t. */
 struct EffThunderSparkWork {
     EffThunderSparkParams head;      /* 0x00 */
-    EffThunderSpark *sparks;         /* 0xA4 */
+    effPCP_ThunderColumnPolyLowPart_t *sparks;         /* 0xA4 */
     u32 tintColor;                   /* 0xA8 */
     sdfMemHandle_t *allocationHandle;   /* 0xAC */
 };
@@ -1011,13 +1011,13 @@ void effPCPThunderSpherePolyLowDraw(EffThunderVectorWork *work) {
 }
 
 EffThunderSparkWork *eff_177850(EffThunderSparkParams *parameters) {
-    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->sparkCount * sizeof(EffThunderSpark) + sizeof(EffThunderSparkWork));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->sparkCount * sizeof(effPCP_ThunderColumnPolyLowPart_t) + sizeof(EffThunderSparkWork));
     EffThunderSparkWork *work = (EffThunderSparkWork *)sdfMemLock(allocationHandle);
     s32 delaySpread;
     u32 sparkIndex;
 
     work->head = *parameters;
-    work->sparks = (EffThunderSpark *)(work + 1);
+    work->sparks = (effPCP_ThunderColumnPolyLowPart_t *)(work + 1);
     work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
     work->allocationHandle = allocationHandle;
     if (work->head.startDelaySpread <= 0) {
@@ -1056,7 +1056,7 @@ void func_00177AC0(EffThunderSparkWork *work, u32 tintColor) {
 }
 
 void func_00177AC8(EffThunderSparkWork *work, s32 index) {
-    EffThunderSpark *spark = work->sparks + index;
+    effPCP_ThunderColumnPolyLowPart_t *spark = work->sparks + index;
     f32 randomness;
 
     spark->verticalOffset = 0;
@@ -1251,7 +1251,7 @@ void eff_178128(EffThunderSparkWork *work) {
     f32 heightOffset = work->head.heightOffset;
     f32 verticalDamping = work->head.verticalDamping;
     f32 angularDamping = work->head.angularDamping;
-    EffThunderSpark *spark;
+    effPCP_ThunderColumnPolyLowPart_t *spark;
     ParCell *renderCell;
     s32 i;
     s32 age;

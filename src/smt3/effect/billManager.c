@@ -155,9 +155,9 @@ typedef struct billData_t {
     s32 childCount;
     s32 listRefCount;
     struct billChildPayload_t **children;
-} BillData;
+} dds3BillAnimResource_tag;
 
-typedef struct BillRecord {
+typedef struct P2A_TEXANIM_tag {
     s16 width;
     s16 height;
     s16 x;
@@ -169,14 +169,14 @@ typedef struct BillRecord {
     s16 childIndex;
     s16 frameDelay;  
     f32 rotationAngle;  
-} BillRecord;
+} P2A_TEXANIM_tag;
 
 typedef struct billOut_t {
     s32 unk0;
     s32 frameIndex;
     s32 framesRemaining;
     BillAnimationEntry *entry;
-    BillRecord *record;
+    P2A_TEXANIM_tag *record;
 } BillOut;
 
 
@@ -200,7 +200,7 @@ typedef struct BillPluralRecord {
 #define BILL_VARIANT_MASK 0xFFFF
 
 void dds3BillboardTagLink(billObj_t *obj, BillChildPayload *child);
-BillData *dds3BillAnimLoadP2A(void *resourceData);
+dds3BillAnimResource_tag *dds3BillAnimLoadP2A(void *resourceData);
 void *sdfChipAllocDirect(s32 size);
 void dds3BillboardSetScale(struct billObj_t *billboard, f32 x, f32 y);
 
@@ -226,7 +226,7 @@ billObj_t *dds3BillboardCreate(s32 index, u32 data);
 void dds3BillboardDelete(billObj_t *obj);
 
 /* Drop one reference; the last one releases every entry and the block itself. */
-void dds3BillAnimFreeP2A(BillData *block);
+void dds3BillAnimFreeP2A(dds3BillAnimResource_tag *block);
 
 /* Select an animation and initialize the plural records' signed start delays. */
 void dds3Billboard_P2ASetNumber(billObj_t *obj, s32 animationEntryIndex);
@@ -654,7 +654,7 @@ void dds3Billboard_NormalDraw(billObj_t *obj) {
 }
 
 billObj_t *dds3Billboard_P2ACreate(void *resourceData) {
-    BillData *data;
+    dds3BillAnimResource_tag *data;
     billObj_t *newobj;
     s32 n;
 
@@ -675,7 +675,7 @@ billObj_t *dds3Billboard_P2ACreate(void *resourceData) {
 }
 
 billObj_t *dds3Billboard_P2ACopy(const billObj_t *obj) {
-    BillData *data;
+    dds3BillAnimResource_tag *data;
     s32 n;
     billObj_t *newobj;
 
@@ -701,8 +701,8 @@ void dds3Billboard_P2ADelete(billObj_t *obj) {
 #ifdef NON_MATCHING
 BillChildPayload *dds3Billboard_P2AAnimDraw(billObj_t *obj, BillOut *out) {
     BillAnimationEntry *entry = out->entry;
-    BillData *data = obj->u.animationData;
-    BillRecord *record;
+    dds3BillAnimResource_tag *data = obj->u.animationData;
+    P2A_TEXANIM_tag *record;
     BillChildPayload *child;
     s32 index;
     u32 color;
@@ -793,7 +793,7 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
     }
     modeFlags = obj->modeFlags;
     if (modeFlags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
-        BillData *data = obj->u.animationData;
+        dds3BillAnimResource_tag *data = obj->u.animationData;
         BillAnimationEntry *entry = data->entries + obj->animationEntryIndex;
         BillPluralRecord *records;
         u32 i;
@@ -871,7 +871,7 @@ void dds3Billboard_P2ADraw(billObj_t *obj) {
     }
 }
 
-void dds3Billboard_P2ASetAnim(BillData *animationData, s32 entryIndex, BillOut *resolvedEntry) {
+void dds3Billboard_P2ASetAnim(dds3BillAnimResource_tag *animationData, s32 entryIndex, BillOut *resolvedEntry) {
     u8 *base;
     BillAnimationEntry *entry;
     s32 offset;
@@ -883,13 +883,13 @@ void dds3Billboard_P2ASetAnim(BillData *animationData, s32 entryIndex, BillOut *
     resolvedEntry->entry = entry;
     base = base + offset;
     resolvedEntry->frameIndex = 0;
-    value = ((BillRecord *)base)->frameDelay;
-    resolvedEntry->record = (BillRecord *)base;
+    value = ((P2A_TEXANIM_tag *)base)->frameDelay;
+    resolvedEntry->record = (P2A_TEXANIM_tag *)base;
     resolvedEntry->framesRemaining = value;
 }
 
 void dds3Billboard_P2ASetNumber(billObj_t *obj, s32 animationEntryIndex) {
-    BillData *data = obj->u.animationData;
+    dds3BillAnimResource_tag *data = obj->u.animationData;
     BillAnimationEntry *entry = data->entries + animationEntryIndex;
 
     if (entry->frameCount == 0) {
@@ -928,9 +928,9 @@ void dds3Billboard_P2ASetNumber(billObj_t *obj, s32 animationEntryIndex) {
     obj->animationActive = 1;
 }
 
-BillData *dds3BillAnimLoadP2A(void *resourceData) {
+dds3BillAnimResource_tag *dds3BillAnimLoadP2A(void *resourceData) {
     sdfMemHandle_t *allocation;
-    BillData *block;
+    dds3BillAnimResource_tag *block;
     u8 *base;
     s32 *texOffsets;
     s32 childCount;
@@ -943,7 +943,7 @@ BillData *dds3BillAnimLoadP2A(void *resourceData) {
     childCount = *texOffsets;
     texOffsets++;
     allocation = sdfMemAllocDirect(headerSize + childCount * sizeof(BillChildPayload) + 0x1C);
-    block = (BillData *)sdfMemLock(allocation);
+    block = (dds3BillAnimResource_tag *)sdfMemLock(allocation);
     base = (u8 *)block + 0x1C;
     block->allocation = allocation;
     memcpy(base, resourceData, *(s32 *)resourceData);
@@ -976,7 +976,7 @@ BillData *dds3BillAnimLoadP2A(void *resourceData) {
     return block;
 }
 
-void dds3BillAnimFreeP2A(BillData *block) {
+void dds3BillAnimFreeP2A(dds3BillAnimResource_tag *block) {
     s32 listRefCount = block->listRefCount - 1;
 
     block->listRefCount = listRefCount;
