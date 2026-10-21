@@ -316,7 +316,7 @@ typedef struct effPCPBossKAGU2Attack_t
 
 typedef struct effPCPBossKAGU2MUHENK_t
 {
-    s32 unk00;
+    s32 param;
     u32 color;
 } effPCPBossKAGU2MUHENK_t;
 
@@ -2091,7 +2091,7 @@ effPCPBossKAGU2MUHENK_t *effPCPBossKAGU2MUHENKCreate(void *params)
 {
     effPCPBossKAGU2MUHENK_t *work = sdfChipAllocDirect(sizeof(effPCPBossKAGU2MUHENK_t));
 
-    work->unk00 = 0;
+    work->param = 0;
     work->color = 0x80808080;
     return work;
 }
@@ -2157,7 +2157,7 @@ void effPCPBossKAGU2MUHENKDraw(effPCPBossKAGU2MUHENK_t *work)
         lineEnd.f[2] = pos.f[2] + down.f[2] * 200.0f;
         effDebugLineDraw(&pos, &lineEnd);
     }
-    work->unk00++;
+    work->param++;
 }
 
 void effPCPBossKAGU2MUHENKSetColor(effPCPBossKAGU2MUHENK_t *work, u32 color)

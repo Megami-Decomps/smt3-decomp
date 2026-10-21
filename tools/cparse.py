@@ -253,9 +253,66 @@ def structs(text):
                 break
             at_top = depth == 1
             depth += line.count("{") - line.count("}")
-            decl = MEMBER_LINE.match(line)
+            # The offset comment the tree writes before a member (`/* 0x00 */ s32 X;`)
+            # has to go before the line is judged, or every such member is read as a
+            # comment and the struct looks empty.
+            stripped = re.sub(r"/\*.*?\*/", " ", line)
+            decl = MEMBER_LINE.match(stripped)
             if decl and at_top and not decl.group(1).strip().startswith(("/*", "//", "*", "#")):
                 members.extend(member_names(decl.group(1)))
+            i += 1
+        i += 1
+    return out
+
+
+FIELD_DECL = re.compile(r"^(.*?)(\**)\s*(\w+)\s*((?:\[[^\]]*\])*)$")
+
+
+def struct_fields(text):
+    """Like structs(), but each member as (type, stars, name, [dims]).
+
+    Enough to compute a layout: the declarator's type text, its pointer depth and
+    its array extents. A member declaring several names yields one row each."""
+    out, lines = [], text.split("\n")
+    i = 0
+    while i < len(lines):
+        m = STRUCT_OPEN.match(lines[i])
+        start_at = i
+        if not m:
+            h = STRUCT_HEADER.match(lines[i])
+            if h and i + 1 < len(lines) and lines[i + 1].strip().startswith("{"):
+                m, i = h, i + 1
+            else:
+                i += 1
+                continue
+        kind, tag, start = m.group(1), m.group(2), start_at + 1
+        if "}" in lines[i][m.end():]:
+            i += 1
+            continue  # one-liner; no layout worth computing
+        rows, depth, i = [], 1, i + 1
+        while i < len(lines):
+            close = STRUCT_CLOSE.match(lines[i])
+            if close and depth == 1:
+                out.append((kind, close.group(1) or tag, rows, start))
+                break
+            at_top = depth == 1
+            depth += lines[i].count("{") - lines[i].count("}")
+            body = re.sub(r"/\*.*?\*/", " ", lines[i]).strip()
+            if at_top and body.endswith(";") and not body.startswith(("#", "//", "}")) \
+                    and "{" not in body and "(" not in body:
+                parts = body[:-1].strip().split(",")
+                base = None
+                for n, part in enumerate(parts):
+                    piece = part.strip() if n == 0 else part.strip()
+                    if n and base is not None:
+                        piece = f"{base} {piece}"
+                    d = FIELD_DECL.match(piece)
+                    if not d or not d.group(3):
+                        continue
+                    if n == 0:
+                        base = d.group(1).strip()
+                    rows.append((d.group(1).strip(), len(d.group(2)), d.group(3),
+                                 re.findall(r"\[([^\]]*)\]", d.group(4))))
             i += 1
         i += 1
     return out

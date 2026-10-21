@@ -12,7 +12,7 @@ typedef struct {
 } dds3ModelBasicWorkData_t;
 
 typedef struct {
-    u32 unk00;
+    u32 pRange;
     void *resourceData;
     u8 unk08[8];
     s32 controlValue;

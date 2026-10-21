@@ -199,9 +199,9 @@ typedef struct nbHelpProcessData_t
     s32 type;
     char *text;
     char *text2;
-    s32 unk_C;
+    s32 text3;
     s32 time;
-    u8 unk_14[0x4];
+    u8 textmax[0x4];
     s32 width;
     s32 width2;
     u32 color;
@@ -209,7 +209,7 @@ typedef struct nbHelpProcessData_t
     s32 mesid;
     s32 nextmeshandle;
     s32 nextmesid;
-    s32 unk_34;
+    s32 msgid;
 } nbHelpProcessData_t;
 
 /* 0x1A4 bytes; only the fields this unit touches are named. */
@@ -468,7 +468,7 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
     }
     w->time = time;
     w->type = type;
-    w->unk_C = 0;
+    w->text3 = 0;
 }
 
 void nbDispSkillName(s32 no)
@@ -611,7 +611,7 @@ nbHelpProcessData_t *nbAllocHelpWork(void)
     w = sdfChipAllocDirect(sizeof(nbHelpProcessData_t));
     memset(w, 0, sizeof(nbHelpProcessData_t));
     w->meshandle = -1;
-    w->unk_34 = 0x80;
+    w->msgid = 0x80;
     return w;
 }
 

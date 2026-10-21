@@ -64,15 +64,15 @@ typedef struct
     u8 unk1910[4];
     u8 unk1914[0x10];
     u8 stocklist[65];              /* 0x1924 */
-    u8 unk1965[80];
-    u8 unk19B5[19];
+    u8 stockcnt[80];
+    u8 item[19];
     u8 boss_press[160];            /* 0x19C8 */
-    u8 unk1A68[640];
+    u8 syakkincnt[640];
     u8 negoques[3];                /* 0x1CE8 */
     u8 kotowari[9];                /* 0x1CEB */
     f32 encountkyori;              /* 0x1CF4 */
     u16 encountCount;              /* 0x1CF8 */
-    u8 unk1CFA;
+    u8 heartsequip;
     u8 hearts[0x80];               /* 0x1CFB */
     u8 heartscnt;                  /* 0x1D7B */
     u8 nameData[0x4800];           /* 0x1D7C */

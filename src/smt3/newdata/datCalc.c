@@ -9,7 +9,7 @@ typedef struct
 {
     /* 0x00 */ u16 unk00;
     /* 0x02 */ u16 skill;
-    /* 0x04 */ u8 unk04[4];
+    /* 0x04 */ u8 price[4];
 } datItem_t;
 
 extern datItem_t datItemTable[];
@@ -670,7 +670,7 @@ s32 datCheckPlayerDead(void)
 #ifdef NON_MATCHING
 s32 datGetPlayerParam(s32 id)
 {
-    u8 hearts = DDS3_GBWK->unk1CFA;
+    u8 hearts = DDS3_GBWK->heartsequip;
     s32 param = ((s8 *)((u8 *)id + (u32)DDS3_GBWK))[0xA6A];
 
     if (hearts == 0) {
@@ -950,9 +950,9 @@ void datRemoveHearts(void)
     datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
 
     if (DDS3_GBWK->heartscnt != 0) {
-        cmbSubHeartsParam(DDS3_GBWK->unk1CFA, player);
-        rstStoreHeartsSkill(DDS3_GBWK->unk1CFA, player);
-        DDS3_GBWK->unk1CFA = 0;
+        cmbSubHeartsParam(DDS3_GBWK->heartsequip, player);
+        rstStoreHeartsSkill(DDS3_GBWK->heartsequip, player);
+        DDS3_GBWK->heartsequip = 0;
         cmpSetMaxHPMP(player);
     }
 }
@@ -962,11 +962,11 @@ void datEquipHearts(s32 heartsId)
     datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
 
     if (DDS3_GBWK->heartscnt != 0) {
-        if (DDS3_GBWK->unk1CFA != heartsId) {
+        if (DDS3_GBWK->heartsequip != heartsId) {
             datRemoveHearts();
-            DDS3_GBWK->unk1CFA = heartsId;
-            cmbAddHeartsParam(DDS3_GBWK->unk1CFA, player);
-            rstLoadHeartsSkill(DDS3_GBWK->unk1CFA, player);
+            DDS3_GBWK->heartsequip = heartsId;
+            cmbAddHeartsParam(DDS3_GBWK->heartsequip, player);
+            rstLoadHeartsSkill(DDS3_GBWK->heartsequip, player);
             cmpSetMaxHPMP(player);
         }
     }

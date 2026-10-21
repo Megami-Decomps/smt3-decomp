@@ -7,22 +7,22 @@
 
 typedef struct fclPanel
 {
-    /* 0x00 */ s32 unk_00;
-    /* 0x04 */ s32 unk_04;
-    /* 0x08 */ s32 unk_08;
-    /* 0x0C */ s16 unk_0C;
-    /* 0x0E */ s16 unk_0E;
-    /* 0x10 */ s32 unk_10;
-    /* 0x14 */ u8 unk_14;
+    /* 0x00 */ s32 X;
+    /* 0x04 */ s32 Y;
+    /* 0x08 */ s32 Z;
+    /* 0x0C */ s16 W;
+    /* 0x0E */ s16 H;
+    /* 0x10 */ s32 Col;
+    /* 0x14 */ u8 Spd;
     /* 0x15 */ u8 unk_15[3];
-    /* 0x18 */ s32 unk_18;
-    /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ s32 unk_20;
+    /* 0x18 */ s32 Timer;
+    /* 0x1C */ s32 Timer2;
+    /* 0x20 */ s32 Flag;
     /* 0x24 */ s32 unk_24;
     /* 0x28 */ s32 unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
-    /* 0x34 */ s32 unk_34;
+    /* 0x34 */ s32 TexHandle;
     /* 0x38 */ void (*draw)(struct fclPanel *panel, s32 id);
     /* 0x3C */ void (*update)(struct fclPanel *panel);
 } fclPanel_t;
@@ -54,7 +54,7 @@ typedef struct
 {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
-    /* 0x04 */ u8 unk_04;
+    /* 0x04 */ u8 Flag;
     /* 0x06 */ u16 res;
 } fclSpriteEntry_t;
 
@@ -140,21 +140,21 @@ extern fclSpriteTbl_t D_003306B8[];
 
 void ragDrawHeartsFooter(fclPanel_t *panel, s32 id)
 {
-    cmpDrawBoxF(0x520, 0x200, panel->unk_08, 0x7b, 9, 0x19191e59, id);
-    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 3,
+    cmpDrawBoxF(0x520, 0x200, panel->Z, 0x7b, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 3,
                      ragDrawWork->texHandle, D_003306B8, id);
-    cmpDrawBoxF(0xf60, 0x200, panel->unk_08, 0xe5, 9, 0x161e276e, id);
-    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 4,
+    cmpDrawBoxF(0xf60, 0x200, panel->Z, 0xe5, 9, 0x161e276e, id);
+    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 4,
                      ragDrawWork->texHandle, D_003306B8, id);
 }
 
 void ragDrawListFooter(fclPanel_t *panel, s32 id)
 {
-    cmpDrawBoxF(0x490, 0x200, panel->unk_08, 0x6a, 9, 0x19191e59, id);
-    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 7,
+    cmpDrawBoxF(0x490, 0x200, panel->Z, 0x6a, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 7,
                      ragDrawWork->texHandle, D_003306B8, id);
-    cmpDrawBoxF(0xbb0, 0x200, panel->unk_08, 0x20, 9, 0x19191e59, id);
-    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, 0, 0, 8,
+    cmpDrawBoxF(0xbb0, 0x200, panel->Z, 0x20, 9, 0x19191e59, id);
+    fclDrawSpriteRes(0, 0, panel->Z << 4, 0, 0, 8,
                      ragDrawWork->texHandle, D_003306B8, id);
 }
 

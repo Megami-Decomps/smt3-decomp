@@ -387,7 +387,7 @@ void dds3GlobalWorkUserInit2(s32 mode)
     datInitPlayer();
     datInitBossPress();
     dds3ClearStockTable();
-    DDS3_GBWK->unk1CFA = 0;
+    DDS3_GBWK->heartsequip = 0;
     DDS3_GBWK->heartscnt = 0;
     frInitNameData();
     fldGbInit_System(0);

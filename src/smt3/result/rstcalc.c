@@ -269,7 +269,7 @@ s32 rstChkBeforeSkillOwner(u16 skill, s8 kind, s32 mode)
     rstBeforeSkillList_t list;
     s32 i;
 
-    rstCreateBeforeSkillList(*(s8 *)&DDS3_GBWK->unk1CFA, mode, kind, &list);
+    rstCreateBeforeSkillList(*(s8 *)&DDS3_GBWK->heartsequip, mode, kind, &list);
     for (i = 0; i < list.count; i++) {
         if (skill == list.skill[i]) {
             return 1;
@@ -449,7 +449,7 @@ s8 datGetDevilSlotIndex(u8 devilId);
 
 s32 rstFindDevilSlot(void)
 {
-    s8 raw = *(s8 *)&DDS3_GBWK->unk1CFA;
+    s8 raw = *(s8 *)&DDS3_GBWK->heartsequip;
     u8 id;
     s32 index;
     s32 state;

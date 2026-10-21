@@ -286,14 +286,14 @@ typedef struct nbNegoProcessData_t
 /* Only the fields this unit touches are named; the entry is 38 bytes. */
 typedef struct
 {
-    s8 unk_00;
+    s8 backAttack;
     s8 esc;
     u8 unk_02[0x4];
     u16 id[11];
     u8 unk_1C[0x6];
     u8 unk_22;
     u8 unk_23;
-    u16 unk_24;
+    u16 mae;
 } nbEncountForm_t;
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
@@ -443,8 +443,8 @@ s32 func_0028CFC8(s32 tableno, s32 encno)
     if (tableno > 0) {
         v = nbEncountTable[tableno].unk_04;
     }
-    if (nbEncountFormTable[encno].unk_24 != 0) {
-        v = nbEncountFormTable[encno].unk_24;
+    if (nbEncountFormTable[encno].mae != 0) {
+        v = nbEncountFormTable[encno].mae;
     }
     if (v != 0) {
         return v;

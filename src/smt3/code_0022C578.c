@@ -278,7 +278,7 @@ typedef struct
 {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
-    /* 0x04 */ u8 unk_04;
+    /* 0x04 */ u8 Flag;
     /* 0x06 */ u16 res;
 } fclSpriteEntry_t;
 
@@ -299,10 +299,10 @@ extern s32 sdfDelayedResrcCheck(void);
 typedef struct
 {
     /* 0x00 */ u16 count;
-    /* 0x02 */ s8 unk_02;
+    /* 0x02 */ s8 PartyCnt;
     /* 0x03 */ u8 unk_03[2];
-    /* 0x05 */ s8 unk_05[0x10];
-    /* 0x15 */ s8 unk_15[0x10];
+    /* 0x05 */ s8 StockIdx[0x10];
+    /* 0x15 */ s8 ListIdx[0x10];
     /* 0x25 */ u8 unk_25[0x31];
 } cmpLocalStock_t;
 
@@ -1214,9 +1214,9 @@ void cmpInitStockCursorPos(void)
 {
     s32 rows;
 
-    rows = campWork->stock[0].unk_02 + campWork->stock[0].unk_03[0];
+    rows = campWork->stock[0].PartyCnt + campWork->stock[0].unk_03[0];
     cmpInitCursorRange(campWork->unk_6230, (u8)rows, (u8)rows, 0);
-    rows = campWork->stock[1].unk_02 + campWork->stock[1].unk_03[0];
+    rows = campWork->stock[1].PartyCnt + campWork->stock[1].unk_03[0];
     cmpInitCursorRange((u8 *)campWork + 0x726C, (u8)rows, (u8)rows, 0);
 }
 
@@ -1258,7 +1258,7 @@ s8 camp_H_cmpLocalStock_t__ctor(void)
 
     stock.count = 9;
     cmpBuildStockNameList(&stock);
-    return stock.unk_02;
+    return stock.PartyCnt;
 }
 
 s8 cmpStartStockMsg(s8 flag)
@@ -1273,7 +1273,7 @@ s8 cmpStartStockMsg(s8 flag)
     cmpBuildStockNameList(&stock);
     if (flag != 0)
     {
-        return (u8)stock.unk_02 + stock.unk_03[0];
+        return (u8)stock.PartyCnt + stock.unk_03[0];
     }
     return (s8)stock.unk_03[0];
 }
@@ -1812,7 +1812,7 @@ void cmpInitHeartsIconTable(campInfoWork_t *work)
 
     for (i = 0; i < 0x1B; i++) {
         cmpGetHeartsIconId((s8)i);
-        if (cmpGetHeartsIconId((s8)i) == DDS3_GBWK->unk1CFA) {
+        if (cmpGetHeartsIconId((s8)i) == DDS3_GBWK->heartsequip) {
             work->unk_31 = i;
             return;
         }
@@ -2101,7 +2101,7 @@ void campDhDrawHearts(void)
     s32 i;
 
     for (i = 0; i < 6; i++) {
-        hearts[i] = cmbGetHeartsParam(DDS3_GBWK->unk1CFA, (s8)i);
+        hearts[i] = cmbGetHeartsParam(DDS3_GBWK->heartsequip, (s8)i);
     }
     cmpDrawStatusComEx((s32)((u8 *)DDS3_GBWK + 0xA54), 0x80, -1, 0, (s32)hearts, 0, 0xA09DC380,
                        4, 4, 0);
@@ -3162,7 +3162,7 @@ s32 cmpStockHasRoom(cmpStockWork_t *work, s8 index)
 {
     s32 ofs = index * 0x103C + 0xC0;
     cmpStockInfo_t *info = (cmpStockInfo_t *)((u8 *)work + ofs);
-    s32 limit = work->stock[index].unk_02;
+    s32 limit = work->stock[index].PartyCnt;
 
     return info->unk_0E + info->unk_10 < limit;
 }

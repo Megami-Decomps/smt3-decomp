@@ -66,7 +66,7 @@ typedef struct
 {
     /* 0x00 */ s16 x;
     /* 0x02 */ s16 y;
-    /* 0x04 */ u8 unk_04;
+    /* 0x04 */ u8 Flag;
     /* 0x06 */ u16 res;
 } fclSpriteEntry_t;
 
@@ -158,7 +158,7 @@ void fclSetupSprite(s32 d, fclSprite_t *sprite, u8 id, u16 idx, s32 *texs, fclSp
 
     e = &tbl[id].entries[idx];
     res = &tbl[id].res[e->res];
-    fclSetSpriteEx(sprite, &res->rect, e->x, e->y, d, 0x80808080, e->unk_04, texs[res->tex]);
+    fclSetSpriteEx(sprite, &res->rect, e->x, e->y, d, 0x80808080, e->Flag, texs[res->tex]);
 }
 
 void fclDrawSpriteRect(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx,
