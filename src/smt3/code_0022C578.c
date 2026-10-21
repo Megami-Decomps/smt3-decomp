@@ -342,7 +342,8 @@ typedef struct
     /* 0x24 */ s8 unk_24;
     /* 0x25 */ s8 unk_25;
     /* 0x26 */ u8 unk_26;
-    /* 0x27 */ u8 unk_27[5];
+    /* 0x27 */ u8 unk_27;
+    /* 0x28 */ s32 unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
@@ -486,7 +487,7 @@ typedef struct
     /* 0x18 */ void *owner;
 } cmpSeqInfo_t;
 
-extern void cmpUpdateCursorScroll(cmpCursorWork_t *cursor, s32 mode);
+extern void cmpUpdateCursorScroll(cmpCursorWork_t *cursor, s8 mode);
 
 extern void cmpSetInfoWindowHidden(void);
 
@@ -913,7 +914,23 @@ void cmpInitDrawList(void)
     cmpBuildStockNameList(&campWork->drawStock);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitStockTable);
+void cmpInitStockTable(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++)
+    {
+        campWork->stockAlpha[i] = 0;
+        campWork->stockStep[i] = 0x10;
+        campWork->stockDelay[i] = 0;
+    }
+    for (i = 0; i < 12; i++)
+    {
+        campWork->stockAlpha[i + 4] = 0;
+        campWork->stockStep[i + 4] = 0x20;
+        campWork->stockDelay[i + 4] = i;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpinit);
 
@@ -3187,7 +3204,19 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindFreeStockSlot);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpScaleColorByPhase);
+void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale)
+{
+    if ((phase == 1) || (phase == 3))
+    {
+        colors[2] = (colors[2] & 0xFFFFFF00) | (((colors[2] & 0xFF) * scale) >> 8);
+        colors[3] = (colors[3] & 0xFFFFFF00) | (((colors[3] & 0xFF) * scale) >> 8);
+    }
+    if ((phase == 2) || (phase == 3))
+    {
+        colors[0] = (colors[0] & 0xFFFFFF00) | (((colors[0] & 0xFF) * scale) >> 8);
+        colors[1] = (colors[1] & 0xFFFFFF00) | (((colors[1] & 0xFF) * scale) >> 8);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockHighlight);
 
@@ -3723,7 +3752,30 @@ s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpAddCost);
+s32 cmpAddCost(u16 skill, datUnitWork_t *unit)
+{
+    datNormalSkill_t *entry = &datSkillTable.normal[skill];
+    u16 cost = entry->cost;
+
+    switch (entry->costtype)
+    {
+    case 1:
+        if (unit->hp < cost)
+        {
+            return 0;
+        }
+        datAddHp(unit, -cost);
+        break;
+    case 2:
+        if (unit->mp < cost)
+        {
+            return 0;
+        }
+        datAddMp(unit, -cost);
+        break;
+    }
+    return 1;
+}
 
 s32 cmpGetSkillTargetArea(u16 skillId)
 {
@@ -3890,9 +3942,62 @@ void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e)
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorRange);
+void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag)
+{
+    cmpPadStopWork_t *work = cursor;
+    s32 last;
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorScroll);
+    memset(&work->cursor.unk_20, 0, 0x101C);
+    last = (index < rows) ? index : rows;
+    work->cursor.unk_20 = index;
+    work->cursor.unk_26 = last;
+    work->cursor.unk_22 = 0;
+    work->cursor.unk_24 = 0;
+    work->cursor.unk_25 = 0;
+    work->cursor.unk_28 = flag;
+    work->cursor.unk_2C = 0;
+    work->cursor.unk_30 = 0;
+    work->cursor.unk_34 = 0;
+    work->unk_38 = 0;
+    work->cursor.unk_04 = 0;
+    cmpClearCursorSlots(&work->cursor);
+}
+
+void cmpUpdateCursorScroll(cmpCursorWork_t *cursor, s8 mode)
+{
+    u8 *flags;
+    s32 idx;
+    s32 step;
+    s32 count;
+    s32 i;
+    u8 row;
+
+    flags = (u8 *)cursor->unk_2C;
+    if (flags == NULL)
+    {
+        return;
+    }
+    step = (mode >= 0) ? 1 : -1;
+    row = cursor->unk_24;
+    idx = cursor->unk_22 + row;
+    if (!(flags[idx] & 2))
+    {
+        return;
+    }
+    count = cursor->unk_20;
+    cursor->unk_24 = row + mode;
+    i = 1;
+    while (i < count)
+    {
+        idx += step;
+        if (!(flags[idx] & 2))
+        {
+            return;
+        }
+        cursor->unk_24 = (u8)cursor->unk_24 + mode;
+        i++;
+    }
+}
 
 void cmpSetCursorFlag(cmpCursorWork_t *cursor, s32 flag)
 {
@@ -4011,7 +4116,38 @@ no:
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCursorAtLastEnabled);
+s32 cmpCursorAtLastEnabled(cmpCursorWork_t *cursor)
+{
+    u8 *flags;
+    s32 idx;
+    s32 count;
+    s32 n;
+    s32 i;
+
+    flags = (u8 *)cursor->unk_2C;
+    idx = cursor->unk_22 + (u8)cursor->unk_24;
+    n = 0;
+    if (flags != NULL)
+    {
+        count = cursor->unk_20;
+        for (i = idx + 1; i < count; i++)
+        {
+            if (flags[i] & 2)
+            {
+                n++;
+            }
+        }
+        if (idx >= count - n - 1)
+        {
+            return 1;
+        }
+    }
+    else if (idx == cursor->unk_20 - 1)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindNextCursorItem);
 
@@ -4174,7 +4310,31 @@ s8 cmpGetStockCount(void)
     return cmbGlobalWork->stockCount;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSortStockList);
+void cmpSortStockList(void)
+{
+    s32 i;
+    s32 k;
+    s8 j;
+    s8 cur;
+
+    for (i = 0; i < cmbGlobalWork->stockCount; i++)
+    {
+        j = 0;
+        cur = cmbGlobalWork->stock[i];
+        for (k = 0; k < cmbGlobalWork->stockCount; k++)
+        {
+            if ((i != k) && (cur == (u8)cmbGlobalWork->stock[k]))
+            {
+                cmbGlobalWork->stock[k] = 0;
+                cmbGlobalWork->stockCount--;
+            }
+            else
+            {
+                cmbGlobalWork->stock[j++] = cmbGlobalWork->stock[k];
+            }
+        }
+    }
+}
 
 s8 func_002426F0(void)
 {
@@ -4240,7 +4400,37 @@ s32 cmpChkSeqInfo(cmbGbWork_t *work)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSeqInfo);
+s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 value)
+{
+    s32 stat = cmpChkSeqInfo(work);
+
+    if ((s8)work->unk_00002 >= 0)
+    {
+        if (stat == 1)
+        {
+            return 0;
+        }
+        if (work->unk_00004 > 0)
+        {
+            work->unk_00003 = (u8)work->unk_00001;
+        }
+        work->unk_00001 = (u8)work->unk_00002;
+        work->unk_00002 = -1;
+        return 1;
+    }
+    if (value >= 0)
+    {
+        if (work->unk_00004 > 0)
+        {
+            work->unk_00003 = value;
+        }
+    }
+    if (stat != 1)
+    {
+        work->unk_00005 = 0;
+    }
+    return 0;
+}
 
 void cmpUpdateTerminate(cmpInfoWindow_t *window)
 {
