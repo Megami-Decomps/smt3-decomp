@@ -972,7 +972,24 @@ u8 cmpGetLoadState(void)
     return cmpLoadState;
 }
 
+/* NON_MATCHING: 9 of 35 words differ, exact size. */
+#ifdef NON_MATCHING
+s32 cmpSetStockRemoveEff(u8 *work)
+{
+    s32 index = cmpGetStockInfoIndex((cmpLocalStock_t *)work, 0, 1);
+    s32 room = cmpStockHasRoom((cmpStockWork_t *)work, 0);
+    s32 slot;
+
+    work += 0xAC;
+    slot = cmpFindFreeStockSlot(index, room);
+    if (room == 0) {
+        return cmpGetCursorSlotValue(0, (cmpCursorSlot_t *)(work + slot * 16 + 0x1078)) != 0x100;
+    }
+    return cmpGetCursorSlotValue(0, (cmpCursorSlot_t *)(work + slot * 16 + 0x3C)) != 0x100;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRemoveEff);
+#endif
 
 extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
 
@@ -1091,7 +1108,27 @@ s32 cmpGetSelectSkillID(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkill);
 
+/* NON_MATCHING: 1 of 38 words differs, exact size: xori against retail's sltiu. */
+#ifdef NON_MATCHING
+extern s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit);
+
+s32 cmpChkDoNotUseSkill(u16 skill)
+{
+    s32 index = cmpGetStockInfoIndex(&campWork->stock[0], 0, 0);
+    u8 use;
+
+    if (cmpGetSkillEntry(skill, (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + index) == 0) {
+        return -1;
+    }
+    use = datSkillTable.normal[skill].use & 1;
+    if (use == 0) {
+        return 1;
+    }
+    return skill >= 0x120;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpChkDoNotUseSkill);
+#endif
 
 /* Called above its definition, where ee-gcc assumed int. */
 s8 cmpStartStockMsg(s8 flag);
@@ -1107,7 +1144,33 @@ s32 cmpItemIsStockFull(u16 id)
     return 0;
 }
 
+/* NON_MATCHING: 13 of 28 words differ, 112 bytes against retail's 140. */
+#ifdef NON_MATCHING
+s32 cmpItemIsUsable(u16 item)
+{
+    u8 flags = datItemTable[item].flags;
+    u8 usable = flags & 1;
+
+    if (usable == 0) {
+        return 1;
+    }
+    switch (campWork->page[0].cursor.unk_22 + (u8)campWork->page[0].cursor.unk_24) {
+    case 0:
+        if (cmpItemIsStockFull(item) != 0) {
+            return 1;
+        }
+        return 0;
+    case 1:
+        if ((flags & 2) != 0) {
+            return 0;
+        }
+        return 1;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpItemIsUsable);
+#endif
 
 void cmpApplyStockRecover(void)
 {
@@ -1692,7 +1755,27 @@ s32 camp_draw_stock_Process(s32 id)
     return 0;
 }
 
+/* NON_MATCHING: 2 of 35 words differ, exact size; both are one register name. */
+#ifdef NON_MATCHING
+extern cmpStockSeqInfo_t *cmpStockUpdateState;
+
+s32 camp_update_stock_Process(s32 id)
+{
+    cmpGetPressedButton(0x30);
+    cmpStockUpdateState = dds3GetProcessData(id);
+    if ((cmpStockUpdateState->unk_00[0] & 0x40) != 0) {
+        return -1;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor((cmpCursorWork_t *)((u8 *)cmpStockUpdateState->stock + 0xAC), 0);
+    }
+    cmpUpdateCursorSlots((cmpCursorWork_t *)((u8 *)cmpStockUpdateState->stock + 0xAC));
+    cmpUpdateCursorSlots((cmpCursorWork_t *)((u8 *)cmpStockUpdateState->stock + 0x10E8));
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", camp_update_stock_Process);
+#endif
 
 void cmpSetDHEntry(void) {
 }
@@ -1774,7 +1857,27 @@ s32 campDhIconIsReady(void)
     return campInfoWork->unk_1168 != 0;
 }
 
+/* NON_MATCHING: 136 emitted bytes against retail's 140; one register copy short. */
+#ifdef NON_MATCHING
+extern char D_0053FCE8[];
+
+void campDhCheckTextures(void)
+{
+    s32 ofs;
+    s32 i;
+
+    for (i = 0, ofs = 0x1160; i < 3; i++, ofs += 4) {
+        void **tex = (void **)((u8 *)campInfoWork + ofs + 0xC);
+
+        if (*tex != NULL && *(s32 *)((u8 *)campInfoWork + ofs) == 0) {
+            *(s32 *)((u8 *)campInfoWork + ofs) = sdfTexSet(*tex);
+            printf(D_0053FCE8, i);
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDhCheckTextures);
+#endif
 
 typedef struct
 {
@@ -2158,7 +2261,32 @@ extern s32 campDhRollRatio(void);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhGetEntryRatio);
 
+/* NON_MATCHING: 4 of 38 words differ, exact size; all four are a register pair. */
+#ifdef NON_MATCHING
+void campDhScanEntries(void)
+{
+    s32 ofs;
+    s32 i;
+
+    for (ofs = 0, i = 0x18; i >= 0; i--, ofs += 0x34) {
+        campDhEntry_t *entry = (campDhEntry_t *)((u8 *)campDhUpdateWork + ofs + 0x1278);
+
+        if (entry->unk_01 < 0) {
+            continue;
+        }
+        campDhGetEntryRatio(entry);
+        if (entry->unk_10 > 0) {
+            entry->unk_10 -= 1;
+            continue;
+        }
+        if ((entry->unk_2C = entry->unk_2C + entry->unk_30) >= 0x201) {
+            entry->unk_2C = 0;
+        }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDhScanEntries);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhFindVisibleIcon);
 
@@ -3213,7 +3341,31 @@ void cmpClearPanelEffSlots(cmpPanelEff_t *list)
     }
 }
 
+/* NON_MATCHING: 3 of 38 words differ, exact size; all three are one register name. */
+#ifdef NON_MATCHING
+cmpPanelEff_t *cmpAllocPanelEffWork(value)
+s32 value;
+{
+    cmpPanelEff_t *work;
+    void *chunk;
+
+    if (cmpPanelEffList == NULL) {
+        chunk = sdfMemAllocDirect(0x5C98);
+        work = (cmpPanelEff_t *)sdfMemLock(chunk);
+        memset(work, 0, 0x5C98);
+        work->allocation = chunk;
+        cmpClearPanelEffSlots(work);
+        cmpInitSeqInfo(work, value);
+        work->flags &= ~1;
+        work->unk_04 = 0;
+    } else {
+        work = cmpPanelEffList;
+    }
+    return work;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpAllocPanelEffWork);
+#endif
 
 void camp_update_paneleff_Shutdown(void)
 {
@@ -3719,7 +3871,24 @@ void cmpUpdateCursorSlots(cmpCursorWork_t *cursor)
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorSlots);
 #endif
 
+/* NON_MATCHING: 7 of 37 words differ, exact size. */
+#ifdef NON_MATCHING
+void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e)
+{
+    u8 *work = cursor;
+
+    memset(work + 8, 0, 0x18);
+    *(s32 *)(work + 0x18) = a;
+    *(s32 *)(work + 0x1C) = b;
+    *(s32 *)(work + 8) = a;
+    *(s32 *)work = e;
+    *(s32 *)(work + 0xC) = b;
+    *(s32 *)(work + 0x10) = c;
+    *(s32 *)(work + 0x14) = d;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorRange);
 
@@ -3943,7 +4112,42 @@ void func_00242320(s8 value, u8 *work)
     work[0x2124] = value;
 }
 
+/* NON_MATCHING: 16 of 38 words differ, exact size. */
+#ifdef NON_MATCHING
+s32 cmpCursorSlotIsSelectable(datUnitWork_t *unit, u16 mask, s8 flag)
+{
+    s32 flags = unit->flag;
+    s32 test;
+
+    if ((flags & 1) != 0) {
+        if (flag != 0 && (flags & 2) != 0 && (mask & 0x20) == 0) {
+            goto no;
+        }
+        if ((flags & 0x10) != 0 && (mask & 0x40) == 0) {
+            goto no;
+        }
+        if ((unit->badstatus & 0x800) != 0 && (mask & 0x80) == 0) {
+            goto no;
+        }
+        if ((flags & 4) != 0) {
+            test = mask & 4;
+        } else {
+            test = mask & 8;
+        }
+        if (test == 0) {
+            goto no;
+        }
+        return 1;
+    }
+    if ((mask & 0x10) != 0) {
+        return 1;
+    }
+no:
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpCursorSlotIsSelectable);
+#endif
 
 /* NON_MATCHING: 6 of 32 words differ (first at +0x5C). */
 #ifdef NON_MATCHING

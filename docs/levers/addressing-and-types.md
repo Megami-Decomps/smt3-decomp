@@ -12,6 +12,23 @@
   knows the promoted value is non-negative. Copying the field into an `s32`
   local first and testing that gives retail's `slti`, and the local is reused
   for the `+ 1` store as retail does.
+- A byte offset added to a **reloaded** global on every iteration is a second
+  variable in the `for` init, not an expression. `for (i = 0, ofs = 0x1160;
+  i < 3; i++, ofs += 4)` with the accesses written
+  `*(T *)((u8 *)g + ofs + c)` gives retail's offset induction variable plus a
+  fresh `lw` of the global per iteration; `&g->field + i` lets gcc
+  strength-reduce the subscript into a pointer and hoist the global's load
+  into the preheader, which is 31 of 32 words out in `campDhCheckTextures`.
+  Which of the two init expressions comes **first** decides the saved
+  registers: `ofs` first gives retail's pair in `campDhCheckTextures` and
+  `campDhScanEntries`, `i` first swaps them and costs six more words.
+- `andi 1` followed by a redundant `andi 0xFF` on a value that only feeds a
+  branch is a `u8` local for the masked bit, `u8 usable = flags & 1; if
+  (usable == 0)`. cc1 then zero-extends the QImode pseudo before the test
+  where the direct `if ((flags & 1) == 0)` drops the mask. `cmpItemIsUsable`
+  and `cmpChkDoNotUseSkill` in `code_0022C578` both need it. This is the
+  readable side of `cmpItemHasFlag`'s residual, where the same pair feeds a
+  **return value** and no spelling reaches it.
 - A clear loop written up-counting, whose index the body uses only as a
   subscript, is what gcc reverses and strength-reduces into a decrementing
   address plus a separate `bgez` downcounter.

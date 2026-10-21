@@ -21,8 +21,14 @@ function body:
   when the definition precedes the bare call**: define the callee old-style,
   `s32 f(id) s32 id; { ... }`, which accepts any arity and matched both the
   caller and the callee in `code_001FAE80`'s `shpItemIsUnlocked`. An
-  unprototyped `extern` works instead when the callers sit above the
-  definition. Try both before treating this as impossible.
+  unprototyped `extern T f();` works instead when the callers sit above the
+  definition, and also when the definition is parked behind
+  `#ifdef NON_MATCHING`: `code_0022C578` declares
+  `extern cmpPanelEff_t *cmpAllocPanelEffWork();` so the bare call in
+  `cmpStartProcessPanelEff` keeps matching whichever side of the guard is
+  compiled, with the draft written old-style. An ANSI `(s32 value)` prototype
+  there makes the caller set up `$4` and breaks it. Try both before treating
+  this as impossible.
 - `nbMakaDispOn` needs `GetMakaProcessData` to take an argument, as the HD
   reconstruction shows, but it is defined `(void)` in this unit. This is
   *not* in general a blocker: adding the parameter to the definition costs

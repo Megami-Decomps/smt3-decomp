@@ -76,6 +76,14 @@ These have been ruled out repeatedly and are not worth a second attempt:
   sibcall.
 - Zero-extending a byte with a `sll 24`, `srl 24` pair. ee-gcc emits
   `andi 0xff` for every source shape tried.
+- `sltiu rd, rd, 1` negating a comparison, where ee-gcc emits
+  `xori rd, rd, 1`. combine knows an `sltiu` result is already 0 or 1 and
+  rewrites the "equals zero" test into the cheaper `xori`, so the second
+  `sltiu` needs a value whose range it has lost. `cmpChkDoNotUseSkill` in
+  `code_0022C578` is capped at one differing word by this; `x >= C`,
+  `!(x < C)`, `(x < C) == 0`, `x < C ? 0 : 1`, `(u32)x >= C`,
+  `(u32)(x < C) < 1` and a `u32` local holding the comparison all emit the
+  `xori`.
 - `xori reg, reg, 0` in front of a `movn`. `frGetXShiftLev` in
   `interface/frFont` has one, on `(fontIndex < 2)` feeding
   `movn $18, $6, $3`, so that function is capped by this row and not worth a
