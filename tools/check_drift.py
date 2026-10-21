@@ -35,8 +35,42 @@ EXTERNAL = {
 }
 
 
+ENUMS = ROOT / "config" / "smt3" / "hd_enums.txt"
+
+
 def sources():
     return sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h")))
+
+
+def adopted_enum_members():
+    """{"enum <ENUM>.<MEMBER>"} for every HD enum member the tree declares.
+
+    The tree re-adds the prefix the reconstruction stripped, so NB_PHASE's `NON` is
+    declared as NB_PHASE_NON; either spelling counts as adopted. These travel the
+    opposite way from the names above: once a constant is named it should stay named,
+    so the check fails when one goes missing rather than when one appears."""
+    if not ENUMS.exists():
+        return set()
+    enums, cur = [], None
+    for line in ENUMS.read_text().splitlines():
+        if line.startswith("E "):
+            cur = (line.split()[1], [])
+            enums.append(cur)
+        elif line.startswith("V ") and cur:
+            cur[1].append(line.split(None, 2)[2])
+
+    declared = set()
+    for path in sources():
+        text = path.read_text(errors="replace")
+        declared |= set(re.findall(r"^\s*#\s*define\s+(\w+)", text, re.M))
+        for body in re.findall(r"\benum\b[^{;]*\{(.*?)\}", text, re.S):
+            declared |= set(re.findall(r"[A-Za-z_]\w*", body))
+    out = set()
+    for name, members in enums:
+        for member in members:
+            if member in declared or (name != "-" and f"{name}_{member}" in declared):
+                out.add(f"enum {name}.{member}")
+    return out
 
 
 def scan():
@@ -66,17 +100,23 @@ def load_baseline():
             if line.strip() and not line.startswith("#")} - {""}
 
 
-def write_baseline(found):
+def write_baseline(found, enums):
     types = sorted(k for k in found if k.startswith("type "))
     members = sorted(k for k in found if k.startswith("member "))
     lines = [
-        "# Invented type and member names that already existed when the drift check",
-        "# landed, from tools/check_drift.py --update. The check fails on a name that",
-        "# is NOT here, so this file only ever shrinks: fix one, then --update.",
-        f"# {len(types)} types, {len(members)} members.",
+        "# From tools/check_drift.py --update. Two halves, checked in opposite",
+        "# directions.",
+        "#",
+        "# `type` and `member`: invented names that already existed when the check",
+        "# landed. A name NOT here fails, so this half only ever shrinks: fix one,",
+        "# then --update.",
+        "#",
+        "# `enum`: HD enum members the tree has adopted. One of these going MISSING",
+        "# fails, so a named constant cannot quietly go back to being a literal.",
+        f"# {len(types)} types, {len(members)} members, {len(enums)} adopted constants.",
         "",
     ]
-    lines += types + [""] + members
+    lines += types + [""] + members + [""] + sorted(enums)
     BASELINE.write_text("\n".join(lines) + "\n")
 
 
@@ -86,20 +126,23 @@ def main():
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
 
-    found = scan()
+    found, enums = scan(), adopted_enum_members()
     if args.update:
-        write_baseline(found)
-        print(f"baseline rewritten: {len(found)} entries")
+        write_baseline(found, enums)
+        print(f"baseline rewritten: {len(found)} names, {len(enums)} adopted constants")
         return 0
 
     baseline = load_baseline()
-    new = sorted(set(found) - baseline)
-    fixed = sorted(baseline - set(found))
+    names = {k for k in baseline if not k.startswith("enum ")}
+    was_adopted = {k for k in baseline if k.startswith("enum ")}
+    new = sorted(set(found) - names)
+    fixed = sorted(names - set(found))
+    lost = sorted(was_adopted - enums)
 
     if not args.quiet:
         types = sum(1 for k in found if k.startswith("type "))
-        print(f"{types} invented type names, {len(found) - types} unnamed members "
-              f"({len(baseline)} in the baseline)")
+        print(f"{types} invented type names, {len(found) - types} unnamed members, "
+              f"{len(enums)} adopted HD constants")
         if fixed:
             print(f"{len(fixed)} baseline entries are now clean; "
                   f"run --update to tighten the baseline")
@@ -109,8 +152,12 @@ def main():
         for key in new:
             print(f"  {key}   {found[key]}")
         print("\nLook the name up before inventing one:  python3 tools/hd_names.py <name>")
-        return 1
-    return 0
+    if lost:
+        print(f"\n{len(lost)} adopted constant(s) no longer declared:")
+        for key in lost:
+            print(f"  {key}")
+        print("\nA named constant should not go back to a literal.")
+    return 1 if (new or lost) else 0
 
 
 if __name__ == "__main__":

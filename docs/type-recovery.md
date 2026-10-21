@@ -21,6 +21,7 @@ Same order of authority as [IDB corrections](idb-corrections.md).
 |---|---|
 | The `SLUS_209.11` IDB | structs already applied at PS2 addresses with layouts and field names, reachable through function prototypes |
 | SMT3 HD symbol recovery, which the IDB carries | most type and enum names, including PS2-specific ones such as much of the sdf rendering layer |
+| The HD reconstruction, exported by `tools/hd_types.py` to `config/smt3/hd_types.txt` and `hd_enums.txt` | member names and their order for 1042 types, and 329 enums with their values; its sizes are advisory, see below |
 | [010 Editor templates](https://github.com/tge-was-taken/010-Editor-Templates/tree/master/templates), `dds3_*.bt` | on-disk layouts for assets: models, textures, motions, packs |
 
 ## Matching a repo type to an IDB type
@@ -202,6 +203,111 @@ packet. `code_002B5CD0.c` includes that leaf header rather than retaining its
 invented lighting record, RenderWare matrix or vector copies. The shared
 packet exposes its matrix as `sdfMatrix4_t` and its indexed lighting columns
 as `normalComponents`, without changing the vector type or alignment.
+
+## The HD corpus, and the check that keeps it in use
+
+Invented names kept coming back because nothing looked for the recovered ones and
+nothing failed when a new one appeared. Two corpora and one check close that.
+
+`tools/hd_types.py` reads the HD reconstruction and writes two files, checked in for
+the same reason `config/smt3/ida_types.txt` is, that the HD tree is not part of this
+repo:
+
+| File | What it holds |
+|---|---|
+| `config/smt3/hd_types.txt` | 1042 struct and union layouts, 10579 members |
+| `config/smt3/hd_enums.txt` | 329 enums, 2857 members, each with its value |
+
+**Member names and their order are what these are good for. The sizes are
+advisory.** The remaster rewrote inline arrays and embedded structs as pointers, so
+`u8 Name[24]` reaches the corpus as `u8 *Name`. Against the 146 sizes
+`tools/header_layout.c` proves, the corpus disagreed on 45 before those errors were
+corrected upstream and 22 after. Never take an offset from it; take the names.
+
+Three tools read the corpora:
+
+- `tools/hd_names.py <name>` is the lookup to reach for before inventing a type
+  name. `-m TYPE` lists a type's HD members, `-v VALUE` finds enum members holding a
+  value, `--gaps` reports which HD enums the tree has adopted.
+- `tools/hd_members.py` proposes names for `unk_` members, and only where the answer
+  is forced. See below.
+- `tools/check_drift.py` fails the build on new drift, and runs in CI with the rest
+  of `tools/test_*.py`.
+
+### Forced, not guessed
+
+`hd_members.py` aligns our members against the HD ones on the names both already
+agree on, and treats those as anchors. Between two anchors, if our run of members is
+the same length as the HD run, the pairing is forced: in `nbCamera_AllTable_t`,
+`radius` anchors `unk00` and `unk04` onto `distance` and `up` with nothing else they
+could be. An unequal gap is reported instead, which is most of them: 18 applied
+against 66 left ambiguous.
+
+Two guards came out of getting it wrong. A proposal read off one copy of a type must
+not be written to a copy of a different shape, because
+`nbCamera_AllTable_t` is three members in `nbCameraCommand.c` and two in
+`nbCameraSkill.c`, where one `u8[8]` spans the first two and `distance` would have
+been a lie. And where another struct in the same file declares the same member name,
+the uses are left alone deliberately: an access through the renamed type stops
+compiling while one through the other type still does, so the compiler attributes
+each site. That found nine in `effPCPBoss.c`.
+
+A member whose HD name is `pad`, `resv` or `dummy` is left as `unk_`, since trading
+one empty name for another gains nothing.
+
+### What the baseline is for
+
+`config/smt3/drift_baseline.txt` has two halves, checked in opposite directions.
+
+`type` and `member` rows list the invented names that existed when the check landed,
+258 types and 618 members. A name **not** in the baseline fails, so the tree as it
+stands passes and only new drift breaks the build. The half only ever shrinks: fix
+one, then `--update`.
+
+`enum` rows list the 481 HD enum members the tree has adopted. One of these going
+**missing** fails, so a constant that has been named cannot quietly go back to a
+literal. Adoption counts either spelling: the reconstruction strips an enum's prefix
+off its members, and the tree re-adds it, so `NB_PHASE`'s `NON` is declared here as
+`NB_PHASE_NON` because a bare `NON` would collide.
+
+### Where the enums stand
+
+Of the 329 HD enums, 27 are fully declared here, 5 in part, and 297 not at all. That
+is mostly not neglect. The reconstruction left its enum members unprefixed, so
+adopting them wholesale would put `ALL`, `IT`, `INIT`, `MIDDLE`, `START` and `END`
+into the global namespace: of the 297 undeclared, 25 hold names the tree already
+uses for something else, `SDF_PADMAP` alone holding 12. The five partial ones are the
+real backlog and `hd_names.py --gaps` lists them.
+
+Seven enums are marked `merged` in the corpus, meaning their values repeat because
+the reconstruction ran several enums together. `SDF_PADMAP` holds three, so its value
+4 is both `SDF_PADMAP_L` and `L` and nothing picks between them. A name out of a
+merged enum is a lead, not an answer, and `-v` says so when it offers one.
+
+### Errors corrected in the HD tree
+
+The structural errors this project can prove were patched upstream rather than worked
+around, since every later sweep reads the same corpus. Each fix rests on a size
+assertion in `tools/header_layout.c`, which compiles and links to a byte-identical
+image:
+
+- `sdfGrTagStdReg_t` carried a spurious leading `void *tex`, putting `data` at 8
+  where it is proven to sit at 0 in a 16-byte struct. Eleven packet types embed it,
+  so this one error moved all of them.
+- 24 embedded structs written as pointers, nearly all GS and GIF register writes
+  inside hardware packets, where a pointer would make the entry 4 bytes instead of 16
+  and the hardware would read the wrong words.
+- 12 lost array extents, including `scrProcTable_t.Name` and
+  `scrLabelTable_t.Name` (`u8 *Name` for a proven `u8 Name[24]`) and
+  `scrProcessWork_s.StackData` (28 entries).
+
+Agreement with the proven layouts went from 47 of 146 sizes to 70, and from 241 of
+602 offsets to 293. Both mechanical classes are now empty.
+
+What was deliberately left: 22 types whose size still disagrees through a difference
+in member count alone. Some are the remaster's own additions, which are not errors to
+remove, such as `dds3Basic_t`'s trailing `void *gameObject`. The rest need individual
+evidence rather than a rule.
 
 ## Verifying
 

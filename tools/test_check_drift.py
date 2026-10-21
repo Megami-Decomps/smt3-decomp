@@ -155,5 +155,25 @@ class BaselineTests(unittest.TestCase):
             self.assertNotIn(f"type {name}", found)
 
 
+class AdoptedConstantTests(unittest.TestCase):
+    """The enum half of the baseline, which fails on a member going missing."""
+
+    def test_the_adopted_constants_in_the_baseline_are_still_declared(self) -> None:
+        baseline = {k for k in check_drift.load_baseline() if k.startswith("enum ")}
+        lost = sorted(baseline - check_drift.adopted_enum_members())
+        self.assertEqual(lost, [], f"no longer declared: {lost[:10]}")
+
+    def test_a_prefixed_member_counts_as_adopted(self) -> None:
+        """NB_PHASE's `NON` is spelled NB_PHASE_NON here, because a bare NON would
+        collide; reporting it as missing would advise the opposite of what is right."""
+        adopted = check_drift.adopted_enum_members()
+        self.assertIn("enum NB_PHASE.NON", adopted)
+        self.assertIn("enum NB_PHASE.ENCOUNT", adopted)
+
+    def test_the_baseline_records_some_adopted_constants(self) -> None:
+        baseline = {k for k in check_drift.load_baseline() if k.startswith("enum ")}
+        self.assertGreater(len(baseline), 100)
+
+
 if __name__ == "__main__":
     unittest.main()

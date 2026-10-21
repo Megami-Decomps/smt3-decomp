@@ -1,6 +1,10 @@
 # SMT3HD reconstruction enums, from tools/hd_types.py.
-# E <typedef name|-> <file> <count>   then one V row per member:
+# E <typedef name|-> <file> <count> [merged]   then one V row per member:
 # V <value> <name>
+# `merged` marks an enum whose values repeat, which means the
+# reconstruction ran several enums together: SDF_PADMAP holds three, so its
+# value 4 is SDF_PADMAP_L and L and nothing picks between them. A name from a
+# merged enum is a lead, not an answer.
 E AM_MK field.h 16
 V 0 AM_MK_PLAYER
 V 1 AM_MK_CAMERA
@@ -1103,7 +1107,7 @@ V 5 L135
 V 6 L90
 V 7 L45
 V 8 MAX
-E EFFBTL_CUT effect.h 7
+E EFFBTL_CUT effect.h 7 merged
 V 0 EFFBTL_CUT_1
 V 1 EFFBTL_CUT_2
 V 2 EFFBTL_CUT_3
@@ -1550,7 +1554,7 @@ V 1 ITF_MESBINTYPE_SEL
 E ITF_MESMNG interface.h 2
 V 1 ITF_MESMNG_CONFIG_HIGHSPEED
 V 2 ITF_MESMNG_DISPWIN
-E ITF_MESMNG_STAT interface.h 38
+E ITF_MESMNG_STAT interface.h 38 merged
 V 0 ITF_MESMNG_STAT_NULL
 V 7 ITF_MESMNG_STAT_MES
 V 0 ITF_MESMNG_STAT_MES_NONE
@@ -2118,7 +2122,7 @@ E NEGO_AISYO newbattle.h 3
 V 0 NEGO_AISYO_NORMAL
 V 1 NEGO_AISYO_KILLER
 V 2 NEGO_AISYO_NG
-E NEGO_END newbattle.h 11
+E NEGO_END newbattle.h 11 merged
 V 0 OFF
 V 1 ON
 V 1 NORMAL
@@ -2208,7 +2212,7 @@ V 3 NEGO_TYPE_BINJO
 V 4 NEGO_TYPE_INOTI
 V 5 NEGO_TYPE_KOKETA
 V 6 NEGO_TYPE_PANIC
-E NME name.h 8
+E NME name.h 8 merged
 V 4 NME_TEX_MAX
 V 4 NME_FONT_STYLE
 V 1 NME_FONT_STYLE_CAP
@@ -2549,7 +2553,7 @@ V 6 PB_MESS_EXIT_MAIN
 E PB_MODE pb.h 2
 V 0 PB_MODE_EDIT
 V 1 PB_MODE_GAME
-E PB_MOTION pb.h 4
+E PB_MOTION pb.h 4 merged
 V 0 PB_MOTION_STAY
 V 0 PB_MOTION_READY
 V 1 PB_MOTION_WALK
@@ -2756,7 +2760,7 @@ V 4 SCR_STACK_TYPE_RET
 V 5 SCR_STACK_TYPE_STRING
 V 6 SCR_STACK_TYPE_EMPTY
 V 7 SCR_STACK_TYPE_MAX
-E SDF_PADMAP libsdf.h 37
+E SDF_PADMAP libsdf.h 37 merged
 V 0 SDF_PADMAP_RL
 V 1 SDF_PADMAP_RR
 V 2 SDF_PADMAP_RU
@@ -2906,7 +2910,7 @@ V 2 SDF_IPU_STRM_CB_FILLDATA
 E SdfOt libsdf.h 2
 V 0 SDF_OT_FUNC_SETUP
 V 1 SDF_OT_FUNC_LINK_TO_HEAD
-E SdfPacDecodePacCbAct libsdf.h 6
+E SdfPacDecodePacCbAct libsdf.h 6 merged
 V 0 SDF_PAC_CB_ACT_READ
 V 0 SDF_PAC_CB_ACT_HOLD
 V 1 SDF_PAC_CB_ACT_END

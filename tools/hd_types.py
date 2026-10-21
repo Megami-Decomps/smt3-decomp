@@ -168,16 +168,24 @@ def main():
     enums = parse_enums(args.hd)
     rows = [
         "# SMT3HD reconstruction enums, from tools/hd_types.py.",
-        "# E <typedef name|-> <file> <count>   then one V row per member:",
+        "# E <typedef name|-> <file> <count> [merged]   then one V row per member:",
         "# V <value> <name>",
+        "# `merged` marks an enum whose values repeat, which means the",
+        "# reconstruction ran several enums together: SDF_PADMAP holds three, so its",
+        "# value 4 is SDF_PADMAP_L and L and nothing picks between them. A name from a",
+        "# merged enum is a lead, not an answer.",
     ]
+    merged = 0
     for name, src, members in sorted(enums, key=lambda e: (e[0] or "", e[1])):
-        rows.append(f"E {name or '-'} {src} {len(members)}")
+        values = [v for _, v in members]
+        suspect = len(set(values)) != len(values)
+        merged += suspect
+        rows.append(f"E {name or '-'} {src} {len(members)}" + (" merged" if suspect else ""))
         for mname, value in members:
             rows.append(f"V {value} {mname}")
     args.enums_out.write_text("\n".join(rows) + "\n")
-    print(f"{len(enums)} HD enums, {sum(len(m) for _, _, m in enums)} members "
-          f"-> {args.enums_out}")
+    print(f"{len(enums)} HD enums, {sum(len(m) for _, _, m in enums)} members, "
+          f"{merged} merged -> {args.enums_out}")
 
     types = parse(args.hd)
     resolved = sizes(types)
