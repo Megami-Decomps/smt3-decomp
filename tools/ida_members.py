@@ -38,6 +38,12 @@ def export():
         info = ida_typeinf.tinfo_t()
         if not info.get_numbered_type(til, ordinal):
             continue
+        if info.is_enum():
+            edt = ida_typeinf.enum_type_data_t()
+            if info.get_enum_details(edt):
+                members = [[m.name, int(m.value), 0, "enum"] for m in edt]
+                rows.append([name, "enum", info.get_size() or 4, members])
+            continue
         if not (info.is_struct() or info.is_union()):
             continue
         udt = ida_typeinf.udt_type_data_t()

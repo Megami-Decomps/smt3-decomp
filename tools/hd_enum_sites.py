@@ -18,6 +18,15 @@ CASE = re.compile(r"\bcase\s+(-?(?:0[xX])?[0-9A-Fa-f]+)\s*:")
 MIN_CASES = 4
 
 
+def load_idb_enums():
+    """The IDB's enums, whose members carry their prefix where HD's are often bare,
+    so only 36 of 2938 would collide with a name the tree already uses."""
+    import ida_members
+    idb = ida_members.load(ROOT / "config" / "smt3" / "ida_members.txt")
+    return [(name, "ida_members.txt", [(m[3], m[0]) for m in rows], False)
+            for name, (kind, _, rows) in idb.items() if kind == "enum"]
+
+
 def load_enums():
     out, cur = [], None
     for line in ENUMS.read_text().splitlines():
@@ -55,9 +64,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--min-cases", type=int, default=MIN_CASES)
     ap.add_argument("--all", action="store_true")
+    ap.add_argument("--idb", action="store_true", help="use the IDB's enums")
     args = ap.parse_args()
 
-    enums = load_enums()
+    enums = load_idb_enums() if args.idb else load_enums()
     sure, unsure, none = [], [], 0
     for path in sorted((ROOT / "src").rglob("*.c")):
         text = path.read_text(errors="replace")

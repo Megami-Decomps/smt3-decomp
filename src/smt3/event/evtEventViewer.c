@@ -1,6 +1,25 @@
 #include "common.h"
 #include "basic.h"
 
+/* The viewer's current menu, which EnterMain switches on to decide what Enter does
+ * from each one. Names from the IDB. */
+typedef enum EVT_VIEWER_MENU {
+    EVT_VIEWER_MENU_NON = 0,
+    EVT_VIEWER_MENU_MAIN = 1,
+    EVT_VIEWER_MENU_SELECT = 2,
+    EVT_VIEWER_MENU_FILENAME = 3,
+    EVT_VIEWER_MENU_OBJLIST = 4,
+    EVT_VIEWER_MENU_FRAMELIST = 5,
+    EVT_VIEWER_MENU_FRAMECHANGE = 6,
+    EVT_VIEWER_MENU_INTCHANGE = 7,
+    EVT_VIEWER_MENU_FLOATCHANGE = 8,
+    EVT_VIEWER_MENU_FILENAME2 = 9,
+    EVT_VIEWER_MENU_BASICLIST = 10,
+    EVT_VIEWER_MENU_DATA = 11,
+    EVT_VIEWER_MENU_EVENTPOS = 12,
+    EVT_VIEWER_MENU_MAX = 13
+} EVT_VIEWER_MENU;
+
 /* evtAddFrameInfo allocates/clears a 0x20-byte key. Its parameter bytes
  * depend on the owning track kind; only the list and payload are needed here. */
 typedef struct evtFrameInfo_t {
@@ -896,28 +915,28 @@ s32 EnterMain(void)
     evtViewer_t *viewer = viewerinfo;
 
     switch (viewer->fileMode) {
-    case 0:
-    case 1:
-    case 2:
+    case EVT_VIEWER_MENU_NON:
+    case EVT_VIEWER_MENU_MAIN:
+    case EVT_VIEWER_MENU_SELECT:
         viewer->charCol = 0;
         viewer->charRow = 0;
         PushMenu(9, 0xE4, 0x3C);
         break;
-    case 5:
+    case EVT_VIEWER_MENU_FRAMELIST:
         viewer->value = viewer->frameTotal - 1;
         viewer->valueMin = viewer->frameLast;
         viewer->valueMax = 10000;
         PushMenu(7, 0xB4, 0x78);
         break;
-    case 3:
-    case 4:
+    case EVT_VIEWER_MENU_FILENAME:
+    case EVT_VIEWER_MENU_OBJLIST:
         viewer->unk22BC = 0;
         viewer->menuItemCount = 2;
         viewer->title = "FRAME SET.OK? ";
         viewer->menuTable = D_0032C6E0;
         PushMenu(2, 0xE4, 0x3C);
         break;
-    case 6:
+    case EVT_VIEWER_MENU_FRAMECHANGE:
         viewer->flags |= 1;
         viewer->frameCurrent = viewer->rangeFirst;
         evtViewerStopFrame();
