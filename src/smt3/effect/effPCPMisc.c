@@ -29,7 +29,7 @@ struct EffPCPBeamLargeHead;
 struct EffPCPBeamLargeWork;
 struct EffPCPBeamNode;
 struct effPCPRingPolyExpParam_t;
-struct EffPCPBeamWork;
+struct effPCPRingPolyExp_tag;
 struct EffPCPBlockSet;
 struct effPCPAgiFireballParam_t;
 struct effPCPAgiFireball_tag;
@@ -57,7 +57,7 @@ struct EffPCPFilterExpParams;
 struct EffPCPFilterExpWork;
 struct EffPCPGroupEntry;
 struct EffPCPGroupHead;
-struct EffPCPGroupSet;
+struct effPCPRadiateThunder_tag;
 struct effPCPThunderSphereExp_tag;
 struct EffPCPMapEventEntry;
 struct effPCPHelperBED_tag;
@@ -151,7 +151,7 @@ typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct EffPCPBeamNode EffPCPBeamNode;
 typedef struct EffPCPBeamLargeWork EffPCPBeamLargeWork;
 typedef struct effPCPRingPolyExpParam_t effPCPRingPolyExpParam_t;
-typedef struct EffPCPBeamWork EffPCPBeamWork;
+typedef struct effPCPRingPolyExp_tag effPCPRingPolyExp_tag;
 typedef struct EffPCPBlockSet EffPCPBlockSet;
 typedef struct effPCPAgiFireballParam_t effPCPAgiFireballParam_t;
 typedef struct effPartHandle_t effPartHandle_t;
@@ -205,7 +205,7 @@ typedef struct EffPCPBlurExpWork EffPCPBlurExpWork;
 typedef struct EffPCPGroupEntry EffPCPGroupEntry;
 typedef struct effPCP_ThunderPolyParam_t effPCP_ThunderPolyParam_t;
 typedef struct EffPCPGroupHead EffPCPGroupHead;
-typedef struct EffPCPGroupSet EffPCPGroupSet;
+typedef struct effPCPRadiateThunder_tag effPCPRadiateThunder_tag;
 typedef struct effPCPThunderSphereExp_tag effPCPThunderSphereExp_tag;
 typedef struct EffPCPMapEventEntry EffPCPMapEventEntry;
 typedef struct effPCPHelperBED_tag effPCPHelperBED_tag;
@@ -669,7 +669,7 @@ struct effPCPRingPolyExpParam_t {
     u32 color_e_out;
 };
 
-struct EffPCPBeamWork {
+struct effPCPRingPolyExp_tag {
     effPCPRingPolyExpParam_t params;
     s32 frame;
     u32 color;
@@ -1315,7 +1315,7 @@ struct EffPCPGroupHead {
 
 /* The general allocation contains this 0x180-byte prefix followed by
  * count entries. The four duplicate-handle groups use a separate allocation. */
-struct EffPCPGroupSet {
+struct effPCPRadiateThunder_tag {
     EffPCPGroupHead head;
     EffPCPGroupEntry *entries; /* 0x164: entries at the end of the main allocation */
     f32 scale; /* 0x168: multiplies start/end positions */
@@ -2381,11 +2381,11 @@ void dds3EffectPartDraw(effPartHandle_t *work);
 
 void effPCPAgiFireballSetColor(effPCPAgiFireball_tag *work, u32 color);
 
-extern void effPCPRingPolyExpSetVertex(f32 value, struct EffPCPBeamWork *work);
+extern void effPCPRingPolyExpSetVertex(f32 value, struct effPCPRingPolyExp_tag *work);
 
 void effPCPRingPolyExp2SetVertex(EffPCPBeamLargeWork *work, f32 radius);
 
-EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *params);
+effPCPRingPolyExp_tag *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *params);
 
 EffPCPBeamLargeWork *effPCPRingPolyExp2Create(EffPCPBeamLargeHead *params);
 
@@ -2411,7 +2411,7 @@ void effPCPAgiFireballSetPosition(effPCPAgiFireball_tag *work, const void *sourc
 effPCPAgiFireball_tag *effPCPAgiFireballCreate(
     const effPCPAgiFireballParam_t *params, const EffPCPBlockSet *blocks);
 
-EffPCPGroupSet *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data);
+effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data);
 
 extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
@@ -5930,7 +5930,7 @@ void dds3RingPolyExpListDraw(EffPCPBeamNode *node) {
     entry->regFunc(entry, list);
 }
 
-void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
+void effPCPRingPolyExpSetVertex(f32 radius, effPCPRingPolyExp_tag *work) {
     f32 direction[4];
     f32 inner[4];
     f32 first[4];
@@ -5970,14 +5970,14 @@ void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
     }
 }
 
-void effPCPRingPolyExpInit(EffPCPBeamWork *work) {
+void effPCPRingPolyExpInit(effPCPRingPolyExp_tag *work) {
     effPCPRingPolyExpSetVertex(work->params.radius_s, work);
     work->frame = 0;
 }
 
-EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *src)
+effPCPRingPolyExp_tag *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *src)
 {
-    EffPCPBeamWork *work = sdfChipAllocDirect(sizeof(EffPCPBeamWork));
+    effPCPRingPolyExp_tag *work = sdfChipAllocDirect(sizeof(effPCPRingPolyExp_tag));
     u32 segments;
     EffPCPBeamNode *node;
     u32 *entry;
@@ -6012,20 +6012,20 @@ EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *src)
     return work;
 }
 
-EffPCPBeamWork *effPCPRingPolyExpCreatePCF(void *data) {
+effPCPRingPolyExp_tag *effPCPRingPolyExpCreatePCF(void *data) {
     return effPCPRingPolyExpCreate(dds3EffectPCPDataGetData(data, 0));
 }
 
-EffPCPBeamWork *effPCPRingPolyExpCopy(EffPCPBeamWork *work) {
+effPCPRingPolyExp_tag *effPCPRingPolyExpCopy(effPCPRingPolyExp_tag *work) {
     return effPCPRingPolyExpCreate(&work->params);
 }
 
-void effPCPRingPolyExpDelete(EffPCPBeamWork *work) {
+void effPCPRingPolyExpDelete(effPCPRingPolyExp_tag *work) {
     dds3RingPolyExpListDelete(work->node);
     sdfChipFreeDirect(work);
 }
 
-void effPCPRingPolyExpDraw(EffPCPBeamWork *work) {
+void effPCPRingPolyExpDraw(effPCPRingPolyExp_tag *work) {
     s32 vertexFrames = work->params.life_a;
     s32 endFrame = vertexFrames;
     s32 frame = work->frame;
@@ -6072,25 +6072,25 @@ void effPCPRingPolyExpDraw(EffPCPBeamWork *work) {
     work->frame++;
 }
 
-void effPCPRingPolyExpSetPosition(EffPCPBeamWork *work, const void *source) {
+void effPCPRingPolyExpSetPosition(effPCPRingPolyExp_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPRingPolyExpSetScale(EffPCPBeamWork *work, f32 scale) {
+void effPCPRingPolyExpSetScale(effPCPRingPolyExp_tag *work, f32 scale) {
     work->node->scale = scale;
 }
 
-void effPCPRingPolyExpSetColor(EffPCPBeamWork *work, u32 color) {
+void effPCPRingPolyExpSetColor(effPCPRingPolyExp_tag *work, u32 color) {
     work->color = color;
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
-void effPCPRingPolyExpSetRotateMatrix(EffPCPBeamWork *work, const void *source) {
+void effPCPRingPolyExpSetRotateMatrix(effPCPRingPolyExp_tag *work, const void *source) {
     SDF_VU0_LOADMATRIX(source);
     SDF_VU0_STOREMATRIX(work->node->localMatrix);
 }
 
-void effPCPRingPolyExpSetDirection(EffPCPBeamWork *work, void *src) {
+void effPCPRingPolyExpSetDirection(effPCPRingPolyExp_tag *work, void *src) {
     SDF_VU0_LOADMATRIX(src);
     SetRotateMatrixX_B(1.5707963f);
     MultMatrixNoArg();
@@ -6269,12 +6269,12 @@ void effPCPRingPolyExp2SetRotateMatrix(EffPCPBeamLargeWork *work, const void *so
     SDF_VU0_STOREMATRIX(work->node->localMatrix);
 }
 
-EffPCPGroupSet *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data) {
+effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const EffPCPGroupHead *params, void *data) {
     EffPCPGroupHead *header = (EffPCPGroupHead *)params;
     void **sourceResources = data;
     u32 entryCount = header->count;
     sdfMemHandle_t *workResource = sdfMemAllocDirect(entryCount * 0x18 + 0x180);
-    EffPCPGroupSet *groupSet = (void *)sdfMemLock(workResource);
+    effPCPRadiateThunder_tag *groupSet = (void *)sdfMemLock(workResource);
     EffPCPGroupEntry *groupEntryCursor;
     u32 index;
     u32 duplicateIndex;
@@ -6347,8 +6347,8 @@ void effPCPRadiateThunderCreatePCF(void *args) {
     effPCPRadiateThunderCreate(work, resources);
 }
 
-EffPCPGroupSet *effPCPRadiateThunderCopy(EffPCPGroupSet *work) {
-    EffPCPGroupSet *groupSet = effPCPRadiateThunderCreate(&work->head, 0);
+effPCPRadiateThunder_tag *effPCPRadiateThunderCopy(effPCPRadiateThunder_tag *work) {
+    effPCPRadiateThunder_tag *groupSet = effPCPRadiateThunderCreate(&work->head, 0);
     u32 groupIndex;
     u32 groupByteOffset;
     u32 entryCount;
@@ -6383,7 +6383,7 @@ EffPCPGroupSet *effPCPRadiateThunderCopy(EffPCPGroupSet *work) {
     return groupSet;
 }
 
-void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
+void effPCPRadiateThunderDelete(effPCPRadiateThunder_tag *work) {
     u32 releaseIndex = 0;
     u32 releaseCount = work->head.count;
     EffPCPGroupEntry *fragmentEntryCursor = work->entries;
@@ -6417,7 +6417,7 @@ void effPCPRadiateThunderDelete(EffPCPGroupSet *work) {
     sdfMemFreeDirect(work->workHandle);
 }
 
-void effPCPRadiateThunderPartInit(EffPCPGroupSet *work, s32 index) {
+void effPCPRadiateThunderPartInit(effPCPRadiateThunder_tag *work, s32 index) {
     EffPCPGroupEntry *entry = work->entries + index;
     s32 spread = work->head.delaySpread;
     f32 scale = work->scale;
@@ -6435,19 +6435,19 @@ void effPCPRadiateThunderPartInit(EffPCPGroupSet *work, s32 index) {
     entry->angularStep = work->head.angularStep * (dds3GetRandFloatA(dds3EffectBase) * ratio + (1.0f - ratio));
 }
 
-void effPCPRadiateThunderDraw(EffPCPGroupSet *work);
+void effPCPRadiateThunderDraw(effPCPRadiateThunder_tag *work);
 
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPRadiateThunderDraw);
 
-void effPCPRadiateThunderSetPosition(EffPCPGroupSet *work, const void *source) {
+void effPCPRadiateThunderSetPosition(effPCPRadiateThunder_tag *work, const void *source) {
     SDF_VU0_COPYVECTOR(work, source);
 }
 
-void effPCPRadiateThunderSetScale(EffPCPGroupSet *work, f32 scale) {
+void effPCPRadiateThunderSetScale(effPCPRadiateThunder_tag *work, f32 scale) {
     work->scale = scale;
 }
 
-void effPCPRadiateThunderSetColor(EffPCPGroupSet *work, u32 color) {
+void effPCPRadiateThunderSetColor(effPCPRadiateThunder_tag *work, u32 color) {
     work->color = color;
 }
 

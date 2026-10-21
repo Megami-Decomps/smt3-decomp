@@ -128,17 +128,34 @@ def main():
             if name and name not in fields_of:
                 fields_of[name] = fields
 
-    def fits(name, target):
+    def corroborates(name, target):
+        """None if there is nothing to check, else whether our struct and the IDB's
+        look like the same record.
+
+        Size alone is the wrong test. PcpScatterInstanceA is 0x18c against
+        effPCPWhirlwindPoly_tag's 0x7c purely because the IDB holds its param by
+        pointer and its part inline where ours is the reverse; both still have the
+        same seven members in the same roles, and one member type already agrees
+        exactly. So a size that fits counts, and so does an equal member count with
+        a member type in common."""
         if target not in idb or name not in fields_of:
             return None
-        rows = layout(fields_of[name], sizes)
-        if rows is None:
-            return None
-        total = (rows[-1][0] + rows[-1][1]) if rows else 0
-        return total <= idb[target][1]
+        ours_fields = fields_of[name]
+        _, isize, imembers = idb[target]
+        rows = layout(ours_fields, sizes)
+        if rows is not None:
+            total = (rows[-1][0] + rows[-1][1]) if rows else 0
+            if total <= isize:
+                return True
+        if len(ours_fields) != len(imembers):
+            return False
+        mine = {re.sub(r"\b(struct|union|const)\b", " ", t).strip()
+                for t, _, _, _ in ours_fields}
+        theirs = {re.sub(r"[\s*\[\]0-9]+", "", t) for _, _, t, _ in imembers}
+        return bool({m for m in mine if CONVENTION.search(m)} & theirs)
 
-    oversize = [row for row in forced if fits(row[0], row[1]) is False]
-    forced = [row for row in forced if fits(row[0], row[1]) is not False]
+    oversize = [row for row in forced if corroborates(row[0], row[1]) is False]
+    forced = [row for row in forced if corroborates(row[0], row[1]) is not False]
 
     print(f"{len(forced)} invented type(s) named by {args.min_positions}+ agreeing "
           f"positions, with a size the IDB can hold:")

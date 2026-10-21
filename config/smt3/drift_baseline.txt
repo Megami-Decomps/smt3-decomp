@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 233 types, 1088 members, 492 adopted constants.
+# 226 types, 1088 members, 492 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -53,7 +53,6 @@ type EffOwnerBillPayloadView
 type EffPCPBeamLargeHead
 type EffPCPBeamLargeWork
 type EffPCPBeamNode
-type EffPCPBeamWork
 type EffPCPBlockSet
 type EffPCPBlurExpParams
 type EffPCPBlurExpWork
@@ -79,7 +78,6 @@ type EffPCPFilterExpParams
 type EffPCPFilterExpWork
 type EffPCPGroupEntry
 type EffPCPGroupHead
-type EffPCPGroupSet
 type EffPCPMapEventEntry
 type EffPCPPairedEventParams
 type EffPCPPairedEventRow
@@ -176,14 +174,10 @@ type PcpFlashStreakParams
 type PcpFlashStreakWork
 type PcpFlashTrianglePulseParams
 type PcpFlashTrianglePulseWork
-type PcpScatterInstanceA
-type PcpScatterInstanceB
-type PcpScatterInstanceC
 type PcpScatterParamsA
 type PcpScatterParamsB
 type PcpScatterParamsC
 type PcpScatterParticle
-type PcpScatterPlainInstance
 type PcpScatterPlainParams
 type PcpScatterPlainParticle
 type PcpScatterRadialParams
@@ -191,7 +185,6 @@ type PcpScatterRadialParticle
 type PcpScatterRadialWork
 type PcpScatterRibbonParams
 type PcpScatterRibbonParticle
-type PcpScatterRibbonWork
 type PcpScatterSpinParams
 type PcpScatterSpinWork
 type Quad
