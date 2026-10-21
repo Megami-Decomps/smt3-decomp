@@ -785,7 +785,7 @@ extern char D_0054FB60[];
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
 
-extern s32 cmpModelSetup(s32 a, s32 b);
+extern s32 cmpModelSetup(u16 a, s32 b);
 
 extern s32 cmpChkPadPressUpDown(void);
 
@@ -835,7 +835,7 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 /* Called above its definition, where ee-gcc assumed int. */
 u16 cmpGetStatusModelId(void);
 
-extern s32 cmpModelSetup(s32 a, s32 b);
+extern s32 cmpModelSetup(u16 a, s32 b);
 
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 
@@ -3698,7 +3698,47 @@ void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
     printf(D_00540070, group, id);
 }
 
+/* NON_MATCHING: 4 of 46 words differ, exact size: the two constant-1 pseudos
+ * swap $2 and $3. */
+#ifdef NON_MATCHING
+s32 cmpModelSetup(u16 id, s32 blocking)
+{
+    s32 group;
+    s32 model;
+
+    if (cmpModelInitFlag != 0)
+    {
+        return 0;
+    }
+    if (id == 0)
+    {
+        group = 6;
+        model = 0;
+    }
+    else
+    {
+        group = 6;
+        model = id;
+    }
+    if ((group == D_0054FEEE) && (model == cmpStatusModelId) && (cmpEncycWork != 0))
+    {
+        return 2;
+    }
+    cmpModelFreeResource();
+    D_0054FEEE = group;
+    cmpStatusModelId = model;
+    cmpModelHandle = blocking;
+    cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle);
+    cmpModelInitFlag = 1;
+    if (blocking == 1)
+    {
+        cmpLoadStatusModel();
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpModelSetup);
+#endif
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
 
@@ -3977,7 +4017,35 @@ s32 func_002415D8(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpAllocEffectSlot);
+s32 cmpAllocEffectSlot(s32 color, s8 a, s8 b, cmpCursorSlot_t *slot)
+{
+    s32 alpha = cmpGetCursorSlotValue(0, slot);
+
+    if (cmpGetCursorSlotState(0, slot) == 3)
+    {
+        return 0x89FEFF80;
+    }
+    if (alpha > 0)
+    {
+        if (alpha < 0x100)
+        {
+            /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+            do
+            {
+                return fclBlendColor(color, 0x5B50E080, alpha);
+            } while (0);
+        }
+        return color;
+    }
+    if (a != 0)
+    {
+        if (b == 0)
+        {
+            return 0x89FEFF80;
+        }
+    }
+    return color;
+}
 
 /* NON_MATCHING: 18 of 21 words differ (first at +0x0). */
 #ifdef NON_MATCHING
