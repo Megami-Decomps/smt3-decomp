@@ -48,16 +48,22 @@ def one_round(args):
         for _, name, fields, line in struct_fields(path.read_text(errors="replace")):
             if not name:
                 continue
-            names = tuple(f[2] for f in fields)
-            if len(names) < MIN_MEMBERS or any(EMPTY.match(m) for m in names):
+            names = [f[2] for f in fields]
+            if len(names) < MIN_MEMBERS:
                 continue
+            told = [m for m in names if not EMPTY.match(m)]
+            if len(told) < MIN_MEMBERS:
+                continue  # nothing but padding is no evidence of anything
             # Member types as well as names. PcpScatterPlainInstance and
             # effPCPWhirlwindPoly_tag share every member name and are still different
-            # records, their param members being different types.
+            # records, their param members being different types. An offset-named
+            # member is compared by its slot only, so two copies that left different
+            # offsets unnamed still match.
             members = tuple(
                 (re.sub(r"\s+", " ",
                         re.sub(r"\b(struct|union|const)\b", " ", f[0])).strip(),
-                 f[1], f[2], tuple(f[3])) for f in fields)
+                 f[1], None if EMPTY.match(f[2]) else f[2], tuple(f[3]))
+                for f in fields)
             if INVENTED.match(name) and not CONVENTION.search(name):
                 invented.setdefault(name, (members, path, line))
             elif CONVENTION.search(name):

@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 185 types, 1083 members, 492 adopted constants.
+# 174 types, 1082 members, 492 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -36,15 +36,12 @@ type EffBattleEntryList
 type EffBattleParameterValue
 type EffBillboardSetParams
 type EffBillboardSetWork
-type EffBlurTemplate
 type EffBlurTemplateBody
 type EffNode
 type EffOwnerBillParamView
 type EffOwnerBillPayloadView
 type EffPCPBeamLargeHead
 type EffPCPBlockSet
-type EffPCPBlurExpParams
-type EffPCPBlurExpWork
 type EffPCPChargeWork
 type EffPCPCompactRectParams
 type EffPCPCompactScaleParams
@@ -55,11 +52,7 @@ type EffPCPCompactWork
 type EffPCPDriftEventRow
 type EffPCPDriftEventWork
 type EffPCPEventPlace
-type EffPCPFLEACHBlurParams
-type EffPCPFLEACHBlurWork
 type EffPCPFadeWork
-type EffPCPFilterExpParams
-type EffPCPFilterExpWork
 type EffPCPGroupHead
 type EffPCPPairedEventParams
 type EffPCPPairedEventRow
@@ -67,7 +60,6 @@ type EffPCPPairedEventWork
 type EffPCPRectBounds
 type EffPCPRectParams
 type EffPCPRingWork
-type EffPCPScaledThunderParams
 type EffPCPSharedTrail
 type EffPCPSharedTrailRef
 type EffPCPSpanWork
@@ -79,7 +71,6 @@ type EffPCPSprayWork
 type EffPCPThunderGroup
 type EffPCPTrailParams
 type EffPCPTrailWork
-type EffPCPTripleParams
 type EffParamTable
 type EffParamTableRecord
 type EffRandState
@@ -98,7 +89,6 @@ type EffThunderSparkParams
 type EffThunderSparkWork
 type EffThunderVectorParams
 type EffTrackPolyData
-type EffTrackPolyParams
 type EffTrackPolyWork
 type EffectObjectData
 type IpuDmaState
@@ -171,7 +161,6 @@ type SdfItemList
 type SdfItemListRef
 type SdfKeyPoolNode
 type SdfKeyTreeItem
-type SdfMapPositionRecord
 type SdfMotionCommand
 type SdfObjectRefCommand
 type SdfPacket
@@ -212,7 +201,6 @@ member EffPCPSpawnRangeWork.unk9C
 member EffPCPThunderGroup.unk10
 member EffPCPThunderGroup.unk14
 member EffPCPThunderGroup.unk18
-member EffTrackPolyParams.unk1C
 member GParam.unk0
 member GParam.unk4
 member MovOpenParam.unk00
