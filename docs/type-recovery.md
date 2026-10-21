@@ -487,6 +487,67 @@ mostly not neglect. The reconstruction left most members unprefixed, so adopting
 wholesale would put `ALL`, `IT`, `INIT`, `MIDDLE`, `START` and `END` into the global
 namespace; 25 of the 297 hold names the tree already uses for something else.
 
+### Merge duplicates before anything else
+
+Some invented types are local copies of a type this tree already names correctly, and
+`tools/merge_duplicates.py` settles those with no corpus at all: identical member
+names **and types** in the same order. It runs first, because it is the only method
+here that cannot be fooled by a shape.
+
+That ordering matters. Both the unit-scoped layout and the HD-header neighbour pool
+proposed `dds3MultiBillResource_tag` for `BillRenderPair`, agreeing with each other
+and both wrong: it is an exact duplicate of `include/billboard.h`'s
+`billRenderPair_t`. Two layout methods agreeing is not corroboration when they read
+the same shape. The same mistake, made by hand, had renamed
+`SdfGsDrawDefaultsRegisters` to `sdfGrRefGifPacketHeader_t` when it duplicates
+`sdfGrDrawDefParmPacket_t`; the use sites said so, assigning `SDF_GS_PRMODECONT` to a
+member the rename had called `dmatag`.
+
+Two refinements it needed. Member **types** as well as names, since
+`PcpScatterPlainInstance` and `effPCPWhirlwindPoly_tag` share every member name and
+differ in their param types. And an offset-named member compared by its slot alone,
+so two copies that left different offsets unnamed still match, which is the common
+case. It cascades: merging an inner duplicate is what lets the outer one match.
+
+### Struct locality, and where it survives
+
+Related types sit together in the original headers, a param beside its work type
+beside its parts, so a type's neighbours are a tight candidate pool.
+
+HD's own `src/*.c` keeps none of it: those files sort their typedefs alphabetically,
+and declaration order agrees with ours in only 10 of 124 shared units. The
+`include/` headers do keep it, `effect.h` running
+`effPCPThunderSpherePolyParam_t`, `effPCP_ThunderPolyParam_t` and
+`effPCP_ThunderRadiatePolyParam_t` together, so `hd_types.py` records each type's
+index in its header and `tools/hd_neighbours.py` pools the neighbours of the types a
+unit already names.
+
+It recovered nothing on its own. Its value was negative evidence: the one case it
+spoke on, it agreed with another layout method and both were wrong.
+
+### What the IDB's enums give that HD's do not
+
+The enum half looked closed because HD's members are mostly unprefixed: adopting them
+would put `ALL`, `IT`, `INIT`, `MIDDLE`, `START` and `END` into the global namespace,
+and 25 of its 297 undeclared enums hold names the tree already uses. The IDB's 341
+enums are the applied ones and carry their prefix, and across all 2938 members only
+36 would collide. `ida_members.py` exports them.
+
+What still does not work is matching an enum by its values. A sequential 0..N set
+sits inside every enum of that length, so our `NB_PHASE` "matches" `AM_MK` and our
+`TAR_CODE` matches `BE_DATATYPE`, each with not one member name in common. Nine of
+our fourteen enums draw a same-length false match. What settles an enum is reading
+the code: `TAR_CODE` by `SetGroupTarget2` handling code 0 alone while the ten
+criteria share a body, `EVT_VIEWER_MENU` by `EnterMain` switching on the menu the
+viewer is in, and `POLY_MODE` rejected because the bodies set `animeSpeed`.
+
+### Commit each verified batch before starting the next
+
+Nine renames were applied, built and checksummed, then lost: they were still
+uncommitted when a later bad batch had to come out with
+`git checkout -- src/ include/`, which took them too. Two uncommitted batches at once
+is how that happens.
+
 ### What is left, and what blocks it
 
 `tools/ida_fill.py --why` counts the remaining `unk_` members by what stops each one,
