@@ -689,7 +689,7 @@ effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unuse
     work->param = value;
     work->radian = 0;
     matrix = sdfMatNew();
-    work->pMat = pMat;
+    work->pMat = matrix;
     sdfMatSetConstant(matrix, 1.0f);
     effPCPBossONGYTexRenderStart();
     memset(&effPCPBossWork, 0, sizeof(effPCPBossWork_t));
@@ -722,7 +722,7 @@ effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unus
     work->param = value;
     work->radian = 0;
     matrix = sdfMatNew();
-    work->pMat = pMat;
+    work->pMat = matrix;
     sdfMatSetConstant(matrix, 1.0f);
     effPCPBossONGYTexRenderStart();
     memset(&effPCPBossWork, 0, sizeof(effPCPBossWork_t));
@@ -2388,7 +2388,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelDraw);
 
 void effPCPScreenCrackModelSetColor(effPCPScreenCrackModel_t *work, u32 color)
 {
-    work->abgr = abgr;
+    work->abgr = color;
 }
 
 effPCPMuzzleFlash_t *effPCPMuzzleFlashCreate(effPCPMuzzleFlashHead_t *param, void *billParams)

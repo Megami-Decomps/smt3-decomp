@@ -919,16 +919,16 @@ void effSimpleBEDDraw(effSimpleBED_t *work) {
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */
 void effSimpleBEDSetPosition(effSimpleBED_t *work, f32 *position) {
-    work->init.center[0] = center[0];
-    work->init.center[1] = center[1] - work->init.h * 0.5f;
-    work->init.center[2] = center[2];
+    work->init.center[0] = position[0];
+    work->init.center[1] = position[1] - work->init.h * 0.5f;
+    work->init.center[2] = position[2];
     work->init.center[3] = 0;
     effEveBEDCutSetParams(work->owner, &work->init);
 }
 
 /* Copy the holder's updated packed tint to its event record. */
 void effSimpleBEDSetRGBA(effSimpleBED_t *work, u32 color) {
-    work->init.abgr = abgr;
+    work->init.abgr = color;
     effEveBEDCutSetParams(work->owner, &work->init);
 }
 

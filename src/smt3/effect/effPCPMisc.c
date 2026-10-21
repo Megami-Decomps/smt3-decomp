@@ -5779,7 +5779,7 @@ effPCPThunderSphereExp_tag *effPCPThunderSphereExpCreate(EffPCPScaledThunderPara
     work->pos[0] = params->res.origin[0];
     work->pos[1] = params->res.origin[1];
     work->pos[2] = params->res.origin[2];
-    work->pThunderSpherePoly = pThunderSpherePoly;
+    work->pThunderSpherePoly = handle;
     return work;
 }
 
@@ -5818,17 +5818,17 @@ void effPCPThunderSphereExpDraw(effPCPThunderSphereExp_tag *work) {
 
     effPCPThunderSpherePolyGetParam(work->pThunderSpherePoly);
     frame = work->frame;
-    life = work->life;
+    duration = work->life;
     if (duration < frame) {
         return;
     }
-    radius_s = (f32)work->radius_s;
+    base = (f32)work->radius_s;
     extent = (f32)work->radius_e;
     extent -= base;
     extent = base + extent * ((f32)frame / (f32)duration);
     scale = extent / base;
-    fade_in = work->fade_in;
-    fade_out = work->fade_out;
+    fadeIn = work->fade_in;
+    fadeOut = work->fade_out;
     if (frame < fadeIn && fadeIn != 0) {
         opacity = (f32)frame / (f32)fadeIn;
     } else if ((s32)((u32)duration - (u32)frame) <= fadeOut && fadeOut != 0) {
@@ -5836,7 +5836,7 @@ void effPCPThunderSphereExpDraw(effPCPThunderSphereExp_tag *work) {
     } else {
         opacity = 1.0f;
     }
-    abgr = work->abgr;
+    color = work->abgr;
     effPCPThunderSpherePolySetColor(work->pThunderSpherePoly, effColorBlend(color & 0xFFFFFF, color, opacity));
     effPCPThunderSpherePolySetPosition(work->pThunderSpherePoly, work->pos);
     effPCPThunderSpherePolySetScale(work->scale * scale, work->pThunderSpherePoly);
@@ -5849,7 +5849,7 @@ void effPCPThunderSphereExpSetPosition(effPCPThunderSphereExp_tag *work, const v
 }
 
 void effPCPThunderSphereExpSetColor(effPCPThunderSphereExp_tag *work, u32 color) {
-    work->abgr = abgr;
+    work->abgr = color;
 }
 
 void effPCPThunderSphereExpSetScale(effPCPThunderSphereExp_tag *work, f32 scale) {
@@ -7573,7 +7573,7 @@ void effPCPAnalyzeBEDSetScale(effPCPAnalyzeBED_tag *work, f32 scale) {
 }
 
 void effPCPAnalyzeBEDSetColor(effPCPAnalyzeBED_tag *work, u32 color) {
-    work->abgr = abgr;
+    work->abgr = color;
 }
 
 EffPCPFLEACHBlurWork *effPCPFLEACHBlurCreate(EffPCPFLEACHBlurParams *params) {

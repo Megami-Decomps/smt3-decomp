@@ -471,7 +471,7 @@ dds3Basic_t *AddEffect(evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
     scale[3] = 1.0f;
     for (i = 0; i < work->effectCount; i++) {
         if (strcmp(work->nameTable1[work->effectTable[i].NameIndex], work->nameTable[f->nameIndex]) == 0) {
-            Type = work->effectTable[i].Type;
+            kind = work->effectTable[i].Type;
             switch (kind) {
             case 0:
                 basic = dds3AddD3PEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].DataOffset, position, scale);
