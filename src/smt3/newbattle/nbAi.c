@@ -1350,18 +1350,18 @@ s32 SetGroupTarget2(nbActionProcessData_t *a, s32 code, s32 n)
 
     ret = 0;
     switch (code) {
-    case 0:
+    case TAR_CODE_AI:
         break;
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
+    case TAR_CODE_LIFEMIN:
+    case TAR_CODE_BAD:
+    case TAR_CODE_ID:
+    case TAR_CODE_LIGHT:
+    case TAR_CODE_DARK:
+    case TAR_CODE_PLAYER:
+    case TAR_CODE_JOKEN:
+    case TAR_CODE_RND:
+    case TAR_CODE_BAARLV:
+    case TAR_CODE_LVMIN:
         form = a->data->form;
         for (i = 0; i < 16; i++) {
             if (form->stat & 4) {

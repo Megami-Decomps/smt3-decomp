@@ -225,4 +225,21 @@ typedef struct
 extern datSkillTable_t datSkillTable;
 
 
+/* Target codes for the AI's group and single target helpers. SMT3HD recovers this
+ * enum in its own newdata.h and never cites it from a body, so the names come from
+ * the definition alone; SetGroupTarget2 switches on all eleven values in order. */
+typedef enum TAR_CODE {
+    TAR_CODE_AI = 0,
+    TAR_CODE_LIFEMIN = 1,
+    TAR_CODE_BAD = 2,
+    TAR_CODE_ID = 3,
+    TAR_CODE_LIGHT = 4,
+    TAR_CODE_DARK = 5,
+    TAR_CODE_PLAYER = 6,
+    TAR_CODE_JOKEN = 7,
+    TAR_CODE_RND = 8,
+    TAR_CODE_BAARLV = 9,
+    TAR_CODE_LVMIN = 10,
+} TAR_CODE;
+
 #endif /* NEWDATA_H */
