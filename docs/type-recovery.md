@@ -362,6 +362,67 @@ where one side is the renamed type and the other kept its own spelling:
 `work->life = params->duration`. The compiler flags those, and the accessed
 variable's type says which side to put back.
 
+### The same position of the same function
+
+This is the method that moved the invented names, and it was available all along. I
+rejected positional matching early because arity and pointer depth differ between our
+signatures and HD's, when the fix was to gate on arity rather than abandon it: 5463
+of our functions share a name **and** a parameter count with HD's, and for those,
+parameter i of ours is parameter i of theirs. The type HD names there is the type ours
+handles, which is correspondence rather than the stem heuristic the family vote needed.
+
+`tools/hd_positions.py` reads it off. Most proposals are self-evidencing, since the
+function names the type: `effPCPRingPolyExp2Create`'s return and
+`effPCPRingPolyExp2Init`'s first parameter both name `effPCPRingPolyExp2_tag`.
+
+Three refusals sit on top of it, and each came from being wrong first.
+
+**Size, as a one-way test.** A position says which type a function handles; it cannot
+say our struct is that same record. 31 proposals have our struct larger than the IDB's
+type and are refused, which is as likely to mean our shape is wrong as the name is.
+
+**Structure, because size is too strict on its own.** `PcpScatterInstanceA` is 0x18c
+against `effPCPWhirlwindPoly_tag`'s 0x7c purely because the IDB holds that type's
+param by pointer and its part array inline where ours is the reverse. Both carry the
+same seven members in the same roles, and our `dds3WhirlwindPolyList_tag` member
+already agrees with the IDB's by type. So an equal member count sharing a member type
+counts as well as a size that fits, which recovered seven names the size test alone
+withheld.
+
+**Containment, which shape cannot replace.** `effPCPWwSpherePolyPart_tag` and
+`effPCPHamaCardSpherePart_tag` are both 32 bytes, so a layout match between them is a
+coin flip, and an earlier unit-scoped match lost it. A work struct holds its own
+family's part record, and ours held the other one's in both directions at once:
+`PcpScatterSpinWork` and `PcpScatterPlainInstance` were reverted on that basis.
+`containment_ok()` now refuses the case by the part type where our particle is already
+named, and by the part's size where it is not, since
+`PcpScatterPlainInstance` holds a 40-byte record where `effPCPWwSpherePoly_tag`
+embeds a 32-byte part.
+
+The three methods, the signature family vote, the unit-scoped layout and the
+positional match, now disagree with each other where they are wrong instead of
+agreeing silently, which is the only reason that pair was caught.
+
+### Where the rename scope has to stop
+
+A member use is only ever `.name` or `->name`, and even that is not enough. The check
+for whether another type shares a member name has to span the whole corpus, not the
+file: renaming `P2A_TEXANIM_tag`'s `height` to `sy` rewrote `tex->height` on an
+`sdfTexHandle_t` because that type is declared in a header and the file-local check
+could not see it.
+
+What is left after that is lines touching two structs at once, where one side is the
+renamed type and the other kept its own spelling:
+
+    work->node->drawKind = src->blend
+    spark->up_s = work->head.verticalSpeed
+    sprite->radian = work->params.angleStep
+
+The compiler attributes every one of them, so the loop is: rename, build, and read the
+accessed variable's type at each site it names. Checking `ninja`'s exit status rather
+than grepping its output for one message is part of that; grepping for "no member
+named" hid a whole class of "undeclared" errors and reported a clean build twice.
+
 ### Scope is what makes a layout mean something
 
 Tree-wide layout matching fails, and the reason is scope rather than method. 280 of
