@@ -354,13 +354,13 @@ struct BillAnimationEntry {
 
 /* Runtime header precedes the copied resource bytes; the child table is indirect. */
 struct dds3BillAnimResource_tag {
-    struct sdfMemHandle_t *allocation; /* Retained general-heap descriptor. */
-    u8 *base;
-    BillAnimationEntry *entries;
-    s32 entryCount;
-    s32 childCount;
-    s32 listRefCount;
-    struct BillChildPayload **children;
+    struct sdfMemHandle_t *hMem; /* Retained general-heap descriptor. */
+    u8 *pHeader;
+    BillAnimationEntry *pAnimTable;
+    s32 AnimNum;
+    s32 TexNum;
+    s32 count;
+    struct BillChildPayload **pResList;
 };
 
 struct BillOut;
@@ -370,17 +370,17 @@ struct BillOut;
 
 /* Ordinary animation frames contain geometry and texture coordinates. */
 struct P2A_TEXANIM_tag {
-    s16 width;
-    s16 height;
-    s16 x;
-    s16 y;
+    s16 sx;
+    s16 sy;
+    s16 cx;
+    s16 cy;
     u16 u0;
     u16 v0;
-    u16 u1;
-    u16 v1;
-    s16 childIndex;
-    s16 frameDelay; /* 0x12: signed countdown loaded when selecting a frame */
-    f32 rotationAngle; /* 0x14: copied into the runtime quad rotation in radians. */
+    u16 u2;
+    u16 v2;
+    s16 texid;
+    s16 attr; /* 0x12: signed countdown loaded when selecting a frame */
+    f32 angle; /* 0x14: copied into the runtime quad rotation in radians. */
 };
 
 struct BillOut {
@@ -650,23 +650,23 @@ struct EffPCPBeamLargeWork {
 
 /* The parameter prefix copied into the standard beam work. */
 struct effPCPRingPolyExpParam_t {
-    f32 position[4];
-    s32 fadeInFrames;
-    s32 fadeOutFrames;
-    s32 holdFrames;
-    s32 vertexGrowthFrames;
-    u8 pad20[4];
-    s32 radiusGrowthFrames;
-    f32 startRadius;
-    f32 endRadius;
-    u32 segments;
-    u32 drawKind;
-    f32 firstWidth;
-    u32 firstColor;
-    f32 middleWidth;
-    u32 middleColor;
-    f32 lastWidth;
-    u32 lastColor;
+    f32 pos[4];
+    s32 fade_in;
+    s32 fade_out;
+    s32 wait;
+    s32 life_a;
+    u8 type_a[4];
+    s32 life_r;
+    f32 radius_s;
+    f32 radius_e;
+    u32 split;
+    u32 blend;
+    f32 width_e_in;
+    u32 color_e_in;
+    f32 width_c;
+    u32 color_c;
+    f32 width_e_out;
+    u32 color_e_out;
 };
 
 struct EffPCPBeamWork {
@@ -689,15 +689,15 @@ struct EffPCPBlockSet {
 
 /* The serialized parameter block copied into each block-set work record. */
 struct effPCPAgiFireballParam_t {
-    f32 position[4];
-    s32 fadeInFrames;
-    s32 fadeOutFrames;
+    f32 pos[4];
+    s32 fade_in;
+    s32 fade_out;
     f32 scale;
-    s32 groupSize[3];
-    f32 groupScale[3];
-    f32 groupRandomScale[3];
-    f32 groupScatter[3];
-    s32 tailStartFrame;
+    s32 TrackCount[3];
+    f32 TrackScale[3];
+    f32 TrackScale_r[3];
+    f32 TrackArea[3];
+    s32 OkSmokeFrame;
 };
 
 struct effPartHandle_t;
@@ -1054,11 +1054,11 @@ typedef struct BattleEffect BattleEffect;
 typedef void (*BattleEffectCallback)(BattleEffect *effect);
 
 struct effBTL_SkillPositionPtr_t {
-    u8 scaleKind;
-    u8 aimMode;           /* 0x01 */
-    u8 directionMode;     /* 0x02 */
-    u8 pad3;
-    s32 rangeOverride;    /* 0x04: zero uses the source range */
+    u8 target;
+    u8 height;           /* 0x01 */
+    u8 direction;     /* 0x02 */
+    u8 dmy;
+    s32 radius;    /* 0x04: zero uses the source range */
 };
 
 union EffBattleParameterValue {
@@ -1450,12 +1450,12 @@ struct EffPCPSharedTrailRef {
 
 /* Serialized inputs copied in full into the orbiting aim-node work owner. */
 struct effPCPBreathParam_t {
-    f32 anchor[4];
-    u32 holdFrames;
-    u32 activeFrames;
-    s32 fadeFrames;
-    f32 sweepDegrees;
-    f32 radius;
+    f32 pos[4];
+    u32 start;
+    u32 life;
+    s32 fade_out;
+    f32 angle;
+    f32 move;
 };
 
 /* Constructor allocation is 0x78 bytes and initializes this complete owner. */
@@ -2462,8 +2462,8 @@ extern const u8 D_00533CC0[16];
 
 /* The model root's node list, whose item array sits at 0x0C. */
 typedef struct {
-    u8 head[0xC];
-    SdfDrawNode **nodes;
+    u8 pHelper[0xC];
+    SdfDrawNode **PartList;
 } effPCPAgiFireball2PartList_t;
 
 u32 effBTLSkillCheckRun(void);
@@ -4871,9 +4871,9 @@ EffPCPSpanWork *effPCPBreathCreate(void *params, EffNodeDescriptor *handleParams
     work->params = *src;
     work->color = 0x80808080;
     work->frame = 0;
-    size = work->params.sweepDegrees * 0.017453292f;
+    size = work->params.angle * 0.017453292f;
     work->angle = -(size * 0.5f);
-    work->spin = size / (f32)((s32)work->params.activeFrames - ((work->params.fadeFrames >> 1) + (s32)work->params.holdFrames));
+    work->spin = size / (f32)((s32)work->params.life - ((work->params.fade_out >> 1) + (s32)work->params.start));
     SDF_VU0_STOREIDENTITY(work->matrix);
     work->optionalHandle = 0;
     if (handleParams != NULL) {
@@ -4908,7 +4908,7 @@ void effPCPBreathDelete(EffPCPSpanWork *work) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPBreathDraw);
 
 void effPCPBreathSetPosition(EffPCPSpanWork *work, const void *source) {
-    SDF_VU0_COPYVECTOR(work->params.anchor, source);
+    SDF_VU0_COPYVECTOR(work->params.pos, source);
 }
 
 void effPCPBreathSetColor(EffPCPSpanWork *work, u32 color) {
@@ -5074,8 +5074,8 @@ void effPCPAgiFireballCopySub(EffPCPBlockSetWork *work, EffPCPBlockSetWork *src)
     headModel = dds3EffectPartGetHandle(work->headHandle);
     work->count = headModel->first->frameCount;
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(work->list); groupIndex++) {
-        if (work->params.groupSize[groupIndex] > 0) {
-            groupHandleCount = work->count * work->params.groupSize[groupIndex];
+        if (work->params.TrackCount[groupIndex] > 0) {
+            groupHandleCount = work->count * work->params.TrackCount[groupIndex];
             work->alloc[groupIndex] = sdfMemAllocDirect(groupHandleCount * 4);
             work->list[groupIndex] = (effPartHandle_t **)sdfMemLock(work->alloc[groupIndex]);
             work->list[groupIndex][0] = dds3EffectPartCopy(src->list[groupIndex][0]);
@@ -5119,7 +5119,7 @@ void effPCPAgiFireballDelete(EffPCPBlockSetWork *work) {
         }
         for (groupIndex = 0; groupIndex < 3; groupIndex++) {
             if (work->alloc[groupIndex] != 0) {
-                groupHandleCount = work->count * work->params.groupSize[groupIndex];
+                groupHandleCount = work->count * work->params.TrackCount[groupIndex];
                 for (handleIndex = 0; handleIndex < groupHandleCount; handleIndex++) {
                     if (work->list[groupIndex][handleIndex] != 0) {
                         dds3EffectPartDelete(work->list[groupIndex][handleIndex]);
@@ -5139,7 +5139,7 @@ void effPCPAgiFireballDelete(EffPCPBlockSetWork *work) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballDraw);
 
 void effPCPAgiFireballSetPosition(EffPCPBlockSetWork *work, const void *source) {
-    SDF_VU0_COPYVECTOR(work->params.position, source);
+    SDF_VU0_COPYVECTOR(work->params.pos, source);
 }
 
 void effPCPAgiFireballSetColor(EffPCPBlockSetWork *work, u32 color) {
@@ -5943,12 +5943,12 @@ void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
     u32 i;
 
     VEC3_SPLAT(inner, radius);
-    VEC3_SPLAT(first, radius + work->params.firstWidth);
-    VEC3_SPLAT(middle, first[0] + work->params.middleWidth);
-    VEC3_SPLAT(outer, middle[0] + work->params.lastWidth);
+    VEC3_SPLAT(first, radius + work->params.width_e_in);
+    VEC3_SPLAT(middle, first[0] + work->params.width_c);
+    VEC3_SPLAT(outer, middle[0] + work->params.width_e_out);
     count = (s32)work->node->vertexCount >> 2;
     out = work->node->points;
-    step = 3.14159265f * 2.0f / (f32)work->params.segments;
+    step = 3.14159265f * 2.0f / (f32)work->params.split;
     direction[1] = 0.0f;
     for (i = 0; i < count; i++, out += 16) {
         direction[0] = sdfCos(angle);
@@ -5971,7 +5971,7 @@ void effPCPRingPolyExpSetVertex(f32 radius, EffPCPBeamWork *work) {
 }
 
 void effPCPRingPolyExpInit(EffPCPBeamWork *work) {
-    effPCPRingPolyExpSetVertex(work->params.startRadius, work);
+    effPCPRingPolyExpSetVertex(work->params.radius_s, work);
     work->frame = 0;
 }
 
@@ -5987,9 +5987,9 @@ EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *src)
     work->params = *src;
     work->color = 0x80808080;
     work->frame = 0;
-    segments = src->segments;
+    segments = src->split;
     if (segments < 3) {
-        src->segments = 3;
+        src->split = 3;
         segments = 3;
     }
     node = dds3RingPolyExpListCreate(segments);
@@ -6001,14 +6001,14 @@ EffPCPBeamWork *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *src)
     for (i = 0; i < groups; i++) {
         u32 second;
 
-        entry[0] = src->firstColor;
-        second = src->middleColor;
+        entry[0] = src->color_e_in;
+        second = src->color_c;
         entry[1] = entry[2] = second;
-        entry[3] = src->lastColor;
+        entry[3] = src->color_e_out;
         entry += 4;
     }
     effPCPRingPolyExpInit(work);
-    work->node->drawKind = src->drawKind;
+    work->node->drawKind = src->blend;
     return work;
 }
 
@@ -6026,19 +6026,19 @@ void effPCPRingPolyExpDelete(EffPCPBeamWork *work) {
 }
 
 void effPCPRingPolyExpDraw(EffPCPBeamWork *work) {
-    s32 vertexFrames = work->params.vertexGrowthFrames;
+    s32 vertexFrames = work->params.life_a;
     s32 endFrame = vertexFrames;
     s32 frame = work->frame;
-    s32 fadeIn = work->params.fadeInFrames;
-    s32 fadeOut = work->params.fadeOutFrames;
+    s32 fadeIn = work->params.fade_in;
+    s32 fadeOut = work->params.fade_out;
     f32 t;
     u32 color;
     EffPCPBeamNode *beam;
 
-    if (endFrame < work->params.radiusGrowthFrames) {
-        endFrame = work->params.radiusGrowthFrames;
+    if (endFrame < work->params.life_r) {
+        endFrame = work->params.life_r;
     }
-    endFrame += work->params.holdFrames;
+    endFrame += work->params.wait;
     if (frame > endFrame) return;
     if (frame < vertexFrames) {
         u32 groups;
@@ -6048,14 +6048,14 @@ void effPCPRingPolyExpDraw(EffPCPBeamWork *work) {
     } else {
         work->node->vertexCount = work->vertexCount;
     }
-    if (frame < work->params.radiusGrowthFrames) {
-        t = (f32)work->frame / (f32)work->params.radiusGrowthFrames;
+    if (frame < work->params.life_r) {
+        t = (f32)work->frame / (f32)work->params.life_r;
         effPCPRingPolyExpSetVertex(
-            (work->params.endRadius - work->params.startRadius) *
-                t + work->params.startRadius,
+            (work->params.radius_e - work->params.radius_s) *
+                t + work->params.radius_s,
             work);
     } else {
-        effPCPRingPolyExpSetVertex(work->params.endRadius, work);
+        effPCPRingPolyExpSetVertex(work->params.radius_e, work);
     }
     if (frame < fadeIn && fadeIn != 0) {
         t = (f32)frame / (f32)fadeIn;
@@ -6067,7 +6067,7 @@ void effPCPRingPolyExpDraw(EffPCPBeamWork *work) {
     color = effColorBlend(work->color & 0xFFFFFF, work->color, t);
     beam = work->node;
     beam->color = color;
-    SDF_VU0_COPYVECTOR(&beam->position, work->params.position);
+    SDF_VU0_COPYVECTOR(&beam->position, work->params.pos);
     dds3RingPolyExpListDraw(beam);
     work->frame++;
 }
@@ -6565,7 +6565,7 @@ void effPCPMakkaDraw(EffPCPSprayWork *work) {
             if ((model->flags & 1) == 0) {
                 inner = model->inner;
                 s = 1.0f / work->scale;
-                node = (*(effPCPAgiFireball2PartList_t **)inner)->nodes[0];
+                node = (*(effPCPAgiFireball2PartList_t **)inner)->PartList[0];
                 scaleVec[0] = s;
                 scaleVec[1] = s;
                 scaleVec[2] = s;
@@ -7530,10 +7530,10 @@ void effPCPAnalyzeBEDDraw(effPCPAnalyzeBED_tag *work) {
     place.payload[10] = work->scale;
     if (effBTLSkillCheckRun() != 0) {
         form = effBTLSkillGetTargetFormation(0);
-        aim.scaleKind = 4;
-        aim.aimMode = 1;
-        aim.directionMode = 0;
-        aim.rangeOverride = 0;
+        aim.target = 4;
+        aim.height = 1;
+        aim.direction = 0;
+        aim.radius = 0;
         effBTLPartGetPositionPtr(form, &aim, position);
         SDF_VU0_LOADVECTOR(aViewEye);
         SDF_VU0_LOADVECTOR_B(aViewTarget);

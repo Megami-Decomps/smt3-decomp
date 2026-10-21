@@ -299,14 +299,14 @@ struct EffThunderGroup {
 
 /* One orbiting spark and its independently owned particle cell system. */
 struct effPCP_ThunderColumnPolyLowPart_t {
-    s32 age;              /* 0x00 */
-    f32 verticalOffset;   /* 0x04 */
-    f32 verticalSpeed;    /* 0x08 */
-    f32 orbitAngle;       /* 0x0C */
-    f32 angularSpeed;     /* 0x10 */
-    f32 orbitRadius;      /* 0x14 */
-    f32 heightOffset;     /* 0x18 */
-    ParSystem *system;    /* 0x1C */
+    s32 frame;              /* 0x00 */
+    f32 up;   /* 0x04 */
+    f32 up_s;    /* 0x08 */
+    f32 rotate;       /* 0x0C */
+    f32 rotate_s;     /* 0x10 */
+    f32 radius;      /* 0x14 */
+    f32 height;     /* 0x18 */
+    ParSystem *hPoly;    /* 0x1C */
 };
 
 /* Copied spark constructor input; gaps remain opaque without stronger evidence. */
@@ -1025,11 +1025,11 @@ EffThunderSparkWork *eff_177850(EffThunderSparkParams *parameters) {
     }
     delaySpread = work->head.startDelaySpread;
     for (sparkIndex = 0; sparkIndex < work->head.sparkCount; sparkIndex++) {
-        work->sparks[sparkIndex].system = dds3TrackPolyCreate(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
-        dds3TrackPolyVCSet(work->sparks[sparkIndex].system, 2, (u32)work->head.dispatchArg, (u32)work->head.dispatchArg);
-        dds3TrackPolySetMode(work->sparks[sparkIndex].system, work->head.systemParam);
+        work->sparks[sparkIndex].hPoly = dds3TrackPolyCreate(EFF_THUNDER_SINGLE_CELL, work->head.halfLife * 2 - 1, 0, PAR_CELL_TOPOLOGY_PAIR);
+        dds3TrackPolyVCSet(work->sparks[sparkIndex].hPoly, 2, (u32)work->head.dispatchArg, (u32)work->head.dispatchArg);
+        dds3TrackPolySetMode(work->sparks[sparkIndex].hPoly, work->head.systemParam);
         func_00177AC8(work, sparkIndex);
-        work->sparks[sparkIndex].age = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
+        work->sparks[sparkIndex].frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
     }
     return work;
 }
@@ -1040,7 +1040,7 @@ void eff_177A48(EffThunderSparkWork *work) {
 
     if (sparkCount > 0) {
         do {
-            dds3TrackPolyDelete(work->sparks[sparkIndex].system);
+            dds3TrackPolyDelete(work->sparks[sparkIndex].hPoly);
             sparkIndex++;
         } while (sparkIndex < sparkCount);
     }
@@ -1059,15 +1059,15 @@ void func_00177AC8(EffThunderSparkWork *work, s32 index) {
     effPCP_ThunderColumnPolyLowPart_t *spark = work->sparks + index;
     f32 randomness;
 
-    spark->verticalOffset = 0;
+    spark->up = 0;
     randomness = work->head.verticalSpeedRandomness;
-    spark->verticalSpeed = work->head.verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
-    spark->heightOffset = work->head.heightOffsetRange * dds3GetRandFloatA(dds3EffectBase);
-    spark->orbitAngle = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
+    spark->up_s = work->head.verticalSpeed * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
+    spark->height = work->head.heightOffsetRange * dds3GetRandFloatA(dds3EffectBase);
+    spark->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
     randomness = work->head.angularSpeedRandomness;
-    spark->angularSpeed = work->head.angularSpeed * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
+    spark->rotate_s = work->head.angularSpeed * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
     randomness = work->head.radiusRandomness;
-    spark->orbitRadius = work->head.orbitRadius * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
+    spark->radius = work->head.orbitRadius * (dds3GetRandFloatA(dds3EffectBase) * randomness + (1.0f - randomness));
 }
 
 void func_00177BC0(EffThunderSparkWork *work, s32 index) {
@@ -1100,7 +1100,7 @@ void func_00177BC0(EffThunderSparkWork *work, s32 index) {
 
     VEC3_SPLAT(width, work->head.width);
     VEC3_SPLAT(negativeWidth, -width[0]);
-    system = work->sparks[index].system;
+    system = work->sparks[index].hPoly;
     cell = system->cells;
     cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
@@ -1266,20 +1266,20 @@ void eff_178128(EffThunderSparkWork *work) {
     count = work->head.sparkCount;
     spark = work->sparks;
     for (i = 0; i < count; i++, spark++) {
-        age = spark->age;
+        age = spark->frame;
         if (age == 0) {
             func_00177AC8(work, i);
-            dds3TrackPolyListInit(spark->system, 0);
+            dds3TrackPolyListInit(spark->hPoly, 0);
         } else if (age > 0 && age <= duration) {
-            angle = spark->orbitAngle;
-            radius = spark->orbitRadius;
+            angle = spark->rotate;
+            radius = spark->radius;
             position[0] = origin[0] + sdfCos(angle) * radius;
-            position[1] = origin[1] + spark->verticalOffset - spark->heightOffset;
+            position[1] = origin[1] + spark->up - spark->height;
             position[2] = origin[2] + sdfSin(angle) * radius;
-            spark->verticalOffset += spark->verticalSpeed;
-            spark->orbitAngle += spark->angularSpeed;
-            spark->verticalSpeed *= verticalDamping;
-            spark->angularSpeed *= angularDamping;
+            spark->up += spark->up_s;
+            spark->rotate += spark->rotate_s;
+            spark->up_s *= verticalDamping;
+            spark->rotate_s *= angularDamping;
             if (age < fadeInTime) {
                 alpha = (f32)age / fadeInTime;
             } else if (duration - age <= fadeOutTime) {
@@ -1288,7 +1288,7 @@ void eff_178128(EffThunderSparkWork *work) {
                 alpha = 1.0f;
             }
             color = effMagaCylinderCalcColor(((u32)(alpha * 127.0f) << 24) | 0x808080, tintColor);
-            renderCell = spark->system->cells;
+            renderCell = spark->hPoly->cells;
             lowerHeight = position[1] - heightOffset;
             work->head.loweredPosition[0] = position[0];
             work->head.loweredPosition[1] = lowerHeight;
@@ -1298,12 +1298,12 @@ void eff_178128(EffThunderSparkWork *work) {
             work->head.position[2] = position[2];
             func_00177BC0(work, i);
             renderCell->color = color;
-            dds3TrackPolyDraw(spark->system);
+            dds3TrackPolyDraw(spark->hPoly);
         }
         if (age >= duration && loop) {
-            spark->age = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
+            spark->frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
         } else {
-            spark->age++;
+            spark->frame++;
         }
     }
 }

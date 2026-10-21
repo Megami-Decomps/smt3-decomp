@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 254 types, 1090 members, 481 adopted constants.
+# 242 types, 1089 members, 481 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -17,7 +17,6 @@ type BattleGroupSlot
 type BillAnimationEntry
 type BillChildPayload
 type BillColorWork
-type BillData
 type BillDrawBank
 type BillGeneralEntry
 type BillGeneralRow
@@ -29,13 +28,11 @@ type BillOut
 type BillPacRequest
 type BillPacketWork
 type BillPluralRecord
-type BillRecord
 type BillRenderPair
 type BillScreenParam
 type BillTextureQuad
 type Dds3AdminModeDispatch
 type DevRequest
-type EffAimParams
 type EffBattleEntry
 type EffBattleEntryList
 type EffBattleParameterValue
@@ -57,10 +54,8 @@ type EffOwnerBillPayloadView
 type EffPCPBeamLargeHead
 type EffPCPBeamLargeWork
 type EffPCPBeamNode
-type EffPCPBeamParams
 type EffPCPBeamWork
 type EffPCPBlockSet
-type EffPCPBlockSetParams
 type EffPCPBlockSetWork
 type EffPCPBlurExpParams
 type EffPCPBlurExpWork
@@ -89,7 +84,6 @@ type EffPCPGroupHead
 type EffPCPGroupSet
 type EffPCPMapEventEntry
 type EffPCPMapEventWork
-type EffPCPModelNodeList
 type EffPCPPairedEventParams
 type EffPCPPairedEventRow
 type EffPCPPairedEventWork
@@ -101,7 +95,6 @@ type EffPCPRotateWork
 type EffPCPScaledThunderParams
 type EffPCPSharedTrail
 type EffPCPSharedTrailRef
-type EffPCPSpanParams
 type EffPCPSpanWork
 type EffPCPSpawnOnceWork
 type EffPCPSpawnRangeEventRow
@@ -140,7 +133,6 @@ type EffThunderFragmentWork
 type EffThunderGroup
 type EffThunderGroupParams
 type EffThunderParameterHead
-type EffThunderSpark
 type EffThunderSparkParams
 type EffThunderSparkWork
 type EffThunderVectorCell
@@ -167,7 +159,6 @@ type MovOpenParam
 type MovPacStream
 type ParCell
 type ParSystem
-type PcpFlashAccumulatingParticle
 type PcpFlashAccumulatingWork
 type PcpFlashColorSlot
 type PcpFlashFadingOrbitWork
@@ -209,7 +200,6 @@ type PcpScatterRibbonParams
 type PcpScatterRibbonParticle
 type PcpScatterRibbonWork
 type PcpScatterSpinParams
-type PcpScatterSpinParticle
 type PcpScatterSpinWork
 type Quad
 type QuadF32
@@ -223,7 +213,6 @@ type SdfDrawPacket
 type SdfDrawTransform
 type SdfGeneratedLookupTexture
 type SdfGraphCopyPacket
-type SdfGsDrawDefaultsRegisters
 type SdfGsGouraudTexturedVertex
 type SdfGsGouraudVertex
 type SdfGsSceneBlendRegisters
@@ -258,7 +247,6 @@ type SdfUnpacked
 type SdfUnpackedD
 type SdfVuColorTransform
 type SoundBank
-type SoundFormat
 type SoundMixer
 type VuBlendNode
 type VuIndexedTriangleCount
@@ -307,7 +295,6 @@ member MovOpenParam.unk11
 member MovOpenParam.unk12
 member MovPacStream.unk6C
 member ParSystem.unk28
-member PcpFlashAccumulatingParticle.unk10
 member PcpFlashAccumulatingWork.unk34
 member PcpFlashRotatingParticle.unk1C
 member PcpScatterRibbonParticle.unk1C

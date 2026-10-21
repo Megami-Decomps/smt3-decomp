@@ -214,7 +214,29 @@ def candidates(path, sizes, idb):
     return out
 
 
-def rename_in(path, tname, picks):
+def member_owners():
+    """member name -> the set of types declaring it, across the IDB and the tree.
+
+    A rename of a member use can only go file-wide when no other type anywhere has a
+    member of that name. Checking only the same file's definitions missed every
+    header-defined type, so renaming P2A_TEXANIM_tag's `height` to `sy` also rewrote
+    `tex->height` on an sdfTexHandle_t."""
+    owners = {}
+    for name, (_, _, members) in ida_members.load(
+            ROOT / "config" / "smt3" / "ida_members.txt").items():
+        for _, _, _, member in members:
+            if member:
+                owners.setdefault(member, set()).add(name)
+    for path in sorted(list((ROOT / "src").rglob("*.c"))
+                       + list((ROOT / "include").rglob("*.h"))):
+        for _, name, fields, _ in struct_fields(path.read_text(errors="replace")):
+            if name:
+                for _, _, member, _ in fields:
+                    owners.setdefault(member, set()).add(name)
+    return owners
+
+
+def rename_in(path, tname, picks, owners=None):
     """Rename inside every copy of tname this file defines, and in the file's uses
     when no other struct here declares the same member name.
 
@@ -226,6 +248,8 @@ def rename_in(path, tname, picks):
     for old, new in picks:
         shared = any(n != tname and any(f[2] == old for f in fields)
                      for _, n, fields, _ in struct_fields(text))
+        if owners is not None and len(owners.get(old, {tname}) - {tname}) > 0:
+            shared = True
         lines = text.split("\n")
         for _, sname, _, line in struct_fields(text):
             if sname != tname:
@@ -321,6 +345,7 @@ def main():
         return why_not(sizes, idb)
 
     files = sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h")))
+    owners = member_owners() if args.apply else None
     total, structs_hit, deferred_all, in_headers = 0, 0, [], []
     for path in files:
         found = exact_matches(path, sizes, idb) if args.exact else candidates(path, sizes, idb)
@@ -340,7 +365,7 @@ def main():
             total += len(picks)
             structs_hit += 1
             if args.apply:
-                _, deferred = rename_in(path, tname, picks)
+                _, deferred = rename_in(path, tname, picks, owners)
                 deferred_all += [f"{rel}  {tname}.{d}" for d in deferred]
     print(f"\n{total} member(s) in {structs_hit} struct(s) named by offset")
     if in_headers:
