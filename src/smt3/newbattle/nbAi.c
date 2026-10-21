@@ -172,7 +172,7 @@ typedef struct nbActionProcessData_t
     u8 unk_6C[0x124];
     u32 aiselect;
     s32 aijokentbl;
-    u8 unk_198[0x8];
+    u8 aichktbl[0x8];
     u32 aisummonid;
 } nbActionProcessData_t;
 
@@ -1116,7 +1116,7 @@ s32 nbPickAiAction(nbActionProcessData_t *a, s32 tbl)
     total = 0;
     row = (datDevilAITbl_t *)(D_00398A08 + a->work->id * 164 + tbl * 40);
     for (i = 0; i < 5; i++) {
-        if ((s8)a->unk_198[i] <= 0) {
+        if ((s8)a->aichktbl[i] <= 0) {
             list[cnt++] = i;
             total += row[i].ritu;
         }

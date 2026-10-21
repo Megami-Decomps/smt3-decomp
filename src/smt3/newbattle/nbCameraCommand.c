@@ -67,8 +67,8 @@ extern void effBTLModelAllShow(void);
 
 /* 12-byte rows; nbCameraGetModelAllTable indexes them by unit work slot. */
 typedef struct nbCamera_AllTable_t {
-    f32 unk00;
-    f32 unk04;
+    f32 distance;
+    f32 up;
     f32 radius;
 } nbCamera_AllTable_t;
 

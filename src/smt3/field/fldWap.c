@@ -227,8 +227,8 @@ extern fldActorEntry_t fldDoorTable[256];
 
 /* The 0xA0 scene request block dds3AdminiCallSequence(6, ...) takes. */
 typedef struct {
-    u8 unk00[0x30];
-    u32 unk30;
+    u8 safeUnitPoint[0x30];
+    u32 flag;
     s32 mode;
     u32 sequenceWord38;
     u32 sequenceWord3C;

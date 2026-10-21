@@ -44,8 +44,8 @@ extern s32 gFldAnahoriAkumaIdxMax;
 extern s32 evtBitCheck(s32 bit);
 
 typedef struct {
-    u8 unk00[0x30];
-    u32 unk30;
+    u8 safeUnitPoint[0x30];
+    u32 flag;
     s32 mode;
     u32 sequenceWord38;
     u32 sequenceWord3C;
@@ -389,7 +389,7 @@ void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char 
             fclClearTerminalState();
         }
     }
-    record->unk30 = 0;
+    record->flag = 0;
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
@@ -415,7 +415,7 @@ void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char 
             fclClearTerminalState();
         }
     }
-    record->unk30 = 0;
+    record->flag = 0;
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
@@ -440,7 +440,7 @@ void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char 
             fclClearTerminalState();
         }
     }
-    record->unk30 = 0;
+    record->flag = 0;
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
@@ -465,7 +465,7 @@ void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char 
             fclClearTerminalState();
         }
     }
-    record->unk30 = 0;
+    record->flag = 0;
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
     strcpy(record->name, name);
@@ -483,7 +483,7 @@ void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char 
 
 void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
                     s32 code, s32 link, const char *subname) {
-    record->unk30 = 0;
+    record->flag = 0;
     record->sequenceWord3C = 0;
     record->sequenceWord38 = 0;
     strcpy(record->name, name);

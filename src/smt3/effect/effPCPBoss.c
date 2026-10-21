@@ -156,8 +156,8 @@ typedef struct effPCPBossONGY_t
 {
     s32 param;
     void *matrix;
-    s32 unk08;
-    s32 unk0C;
+    s32 radian;
+    s32 frame;
 } effPCPBossONGY_t;
 
 /* The argument block effPkt3DPrimMakePoly reads. */
@@ -262,7 +262,7 @@ typedef struct effPCPBossThunderbolt_t
 
 typedef struct effPCPBossKAGUInvoke_t
 {
-    u8 unk000[0x3C0];
+    u8 param[0x3C0];
     s32 groupCount;
     void *polyLists[26];
     s32 frame;
@@ -336,7 +336,7 @@ typedef struct effPCPScreenCrackModel_t
 {
     s32 param;
     s32 part;
-    s32 unk08;
+    s32 frame;
     u32 color;
 } effPCPScreenCrackModel_t;
 
@@ -411,7 +411,7 @@ typedef struct effPCPDANTE_Damage_t
 
 typedef struct effPCP_PBCamera_Param_t
 {
-    s32 unk00;
+    s32 life;
 } effPCP_PBCamera_Param_t;
 
 typedef struct effPCP_PBCamera_t
@@ -443,9 +443,9 @@ typedef struct effPCPDANTE_ShowTime_t
 
 typedef struct effPCP_BED_Param_t
 {
-    s32 unk00;
-    s32 unk04;
-    s32 unk08;
+    s32 life;
+    s32 fade_in;
+    s32 fade_out;
 } effPCP_BED_Param_t;
 
 typedef struct effPCP_BED_t
@@ -685,9 +685,9 @@ effPCPBossONGY_t *effPCPBossONGYCreate(effPCPBossONGYParam_t *param, void *unuse
     s32 value = param->pFormation;
     void *matrix;
 
-    work->unk0C = 0;
+    work->frame = 0;
     work->param = value;
-    work->unk08 = 0;
+    work->radian = 0;
     matrix = sdfMatNew();
     work->matrix = matrix;
     sdfMatSetConstant(matrix, 1.0f);
@@ -718,9 +718,9 @@ effPCPBossONGY_t *effPCPBossONGY2Create(effPCPBossONGYParam_t *param, void *unus
     s32 value = param->pFormation;
     void *matrix;
 
-    work->unk0C = 0;
+    work->frame = 0;
     work->param = value;
-    work->unk08 = 0;
+    work->radian = 0;
     matrix = sdfMatNew();
     work->matrix = matrix;
     sdfMatSetConstant(matrix, 1.0f);
@@ -1506,7 +1506,7 @@ effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *param
     memcpy(work, params, 0x3C4);
     work->color = 0x80808080;
     work->frame = 0;
-    memcpy(&thunder.head, &work->unk000[0x360], 0x54);
+    memcpy(&thunder.head, &work->param[0x360], 0x54);
     thunder.head.fragmentCount = 1;
     thunder.count = 9;
     count = work->groupCount * 6;
@@ -2351,7 +2351,7 @@ effPCPScreenCrackModel_t *effPCPScreenCrackModelCreate(effPCPScreenCrackModel_t 
 
     work->param = param->param;
     work->color = 0x80808080;
-    work->unk08 = 0;
+    work->frame = 0;
     if (pb != NULL) {
         work->part = dds3EffectPartCreate(3, pb);
     }
@@ -2721,7 +2721,7 @@ void effPCPDANTE_Damage_SetColor(effPCPDANTE_Damage_t *work, u32 color)
 effPCP_PBCamera_t *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *param, void *pb)
 {
     effPCP_PBCamera_t *work = sdfChipAllocDirect(0x60);
-    s32 value = param->unk00;
+    s32 value = param->life;
 
     work->unk5C = 0;
     work->param = value;
@@ -2959,9 +2959,9 @@ void effPCP_BED_Draw(effPCP_BED_t *work)
 {
     effPCPBossPlace_t place;
     s32 frame = work->unk60;
-    s32 limit = work->param.unk00;
-    s32 fadeIn = work->param.unk04;
-    s32 fadeOut = work->param.unk08;
+    s32 limit = work->param.life;
+    s32 fadeIn = work->param.fade_in;
+    s32 fadeOut = work->param.fade_out;
     s32 rest;
     f32 blend;
     u32 color;

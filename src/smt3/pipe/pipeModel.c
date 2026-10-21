@@ -18,7 +18,7 @@ typedef struct tagpipeBasic {
     void *base;
     mdlObj_t *mdl;
     u8 unk08[4];
-    s32 unk0C;
+    s32 enabled;
     f32 pos[4];
     f32 rot[4];
     f32 scl[4];
@@ -59,9 +59,9 @@ s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize)
     s16 i;
 
     for (i = 0; i < mdlSize; i++) {
-        if (pWork[i].unk0C == 0) {
+        if (pWork[i].enabled == 0) {
             dds3ObjectBaseOffFlag(pWork[i].base, 1);
-            pWork[i].unk0C = 1;
+            pWork[i].enabled = 1;
             return i;
         }
     }
@@ -71,7 +71,7 @@ s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize)
 
 void mymdlDelObject(tagpipeBasic *pWork)
 {
-    pWork->unk0C = 0;
+    pWork->enabled = 0;
     dds3ObjectBaseOnFlag(pWork->base, 1);
     pWork = NULL;
 }
@@ -167,7 +167,7 @@ void mymdlVisibleAll(tagpipeBasic *pWork, s16 mdlSize, s8 value)
     s16 i;
 
     for (i = 0; i < mdlSize; i++) {
-        if (pWork[i].unk0C == 1) {
+        if (pWork[i].enabled == 1) {
             mymdlVisible(&pWork[i], value);
         }
     }

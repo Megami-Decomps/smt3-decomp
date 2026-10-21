@@ -123,7 +123,7 @@ typedef struct nbCommSelProcessData_t {
     s8 commdisable[6][288];
     s32 cnt;
     f32 smritu;
-    u32 unk14B4;
+    u32 animeflag;
     s32 ox;
     s32 oy;
     s32 oz;
@@ -417,7 +417,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", DispCommandPanel);
 
 void AnimeCommandList(nbCommSelProcessData_t *s)
 {
-    if (s->unk14B4 & 0x20) {
+    if (s->animeflag & 0x20) {
         if (s->helpa < 128) {
             s->helpa += 32;
             if (s->helpa > 128) {
@@ -432,9 +432,9 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             }
         }
     }
-    if (s->unk14B4 & 1) {
+    if (s->animeflag & 1) {
         if (s->alpha == 128) {
-            s->unk14B4 &= ~1;
+            s->animeflag &= ~1;
         } else {
             s->alpha += 20;
             if (s->alpha > 128) {
@@ -442,9 +442,9 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             }
         }
     }
-    if (s->unk14B4 & 2) {
+    if (s->animeflag & 2) {
         if (s->alpha == 0) {
-            s->unk14B4 &= ~2;
+            s->animeflag &= ~2;
         } else {
             s->alpha -= 12;
             if (s->alpha < 0) {
@@ -452,9 +452,9 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             }
         }
     }
-    if (s->unk14B4 & 8) {
+    if (s->animeflag & 8) {
         if (s->ox == 0) {
-            s->unk14B4 &= ~8;
+            s->animeflag &= ~8;
         } else {
             s32 d = (s32)(s->ox * 0.5f);
 
@@ -464,10 +464,10 @@ void AnimeCommandList(nbCommSelProcessData_t *s)
             s->ox -= d;
         }
     }
-    if (s->unk14B4 & 4) {
+    if (s->animeflag & 4) {
         if (fabsf(s->smritu) < 0.01f) {
             s->smritu = 0.0f;
-            s->unk14B4 &= ~4;
+            s->animeflag &= ~4;
         } else {
             f32 d = s->smritu * 0.6f;
 
@@ -711,7 +711,7 @@ void nbCloseCommSel(void)
     nbCommSelProcessData_t *s = GetCommSelProcessData();
 
     s->stat = 4;
-    s->unk14B4 = (s->unk14B4 | 2) & ~1;
+    s->animeflag = (s->animeflag | 2) & ~1;
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbCommSelProcess", nbCommSelProcess1);
@@ -755,7 +755,7 @@ void nbSetAutoCommSel(void)
     nbCommSelProcessData_t *s = GetCommSelProcessData();
 
     SetCommCursor2(s);
-    s->unk14B4 |= 0x10;
+    s->animeflag |= 0x10;
 }
 
 nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct nbParty_t *my,
@@ -780,7 +780,7 @@ nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct
         s->nowlisty[i] = 0;
     }
     s->oz = 0xFF0050;
-    s->unk14B4 = 9;
+    s->animeflag = 9;
     s->ox = -0x1E;
     s->cnt = 2;
     s->smritu = 1.0f;

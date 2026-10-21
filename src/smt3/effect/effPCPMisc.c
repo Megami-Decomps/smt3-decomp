@@ -1887,7 +1887,7 @@ struct sdfModelRootNode_t {
     DevRequest *resources;
     DevRequest *slotPairs;
     struct sdfMotionCtrlr_t *motionList;
-    u8 unk18;
+    u8 complexNodeId;
     u8 flags;
     u16 drawFlags;
     u32 color;
@@ -2093,7 +2093,7 @@ struct sdfIpuDecodeCb_t {
     s32 (*read)(struct sdfIpuDecodeCb_t *, struct movieStream_t *, s32, void *, s32);
     struct movieStream_t *readContext; /* Owner context passed to the read callback. */
     u8 inputFeedDmaInFlight;
-    u8 unk65;
+    u8 strmToIpuDmaStep;
     u8 pad66[2];
     IpuDmaState dma;
 };

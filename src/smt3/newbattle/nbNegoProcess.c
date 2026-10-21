@@ -203,7 +203,7 @@ typedef struct nbActionProcessData_t
     u8 unk_6C[0x124];
     u32 aiselect;
     s32 aijokentbl;
-    u8 unk_198[0x8];
+    u8 aichktbl[0x8];
     u32 aisummonid;
 } nbActionProcessData_t;
 

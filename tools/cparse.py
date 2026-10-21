@@ -180,3 +180,82 @@ def declared_name(decl):
     head = re.sub(r"\[[^\]]*\]|=.*", "", head, flags=re.S)  # `D_X[0x18]`, `x = {...}`
     names = re.findall(r"[A-Za-z_]\w*", head)
     return names[-1] if names else None
+
+
+STRUCT_OPEN = re.compile(r"^\s*(?:typedef\s+)?(struct|union)\s*(\w+)?[^;{]*\{")
+# The tree writes the brace on its own line as often as not, and may put a macro
+# between: `typedef struct QWORD_ALIGNED` then `{`. A header with neither a brace
+# nor a semicolon opens a definition when the next code line is that brace.
+STRUCT_HEADER = re.compile(r"^\s*(?:typedef\s+)?(struct|union)\s*(\w+)?\s*\w*\s*$")
+STRUCT_CLOSE = re.compile(r"^\s*\}\s*([A-Za-z_]\w*)?\s*;")
+MEMBER_LINE = re.compile(r"^\s+(.+?);\s*(?://.*)?$")
+
+
+def member_names(decl):
+    """Names a struct member line introduces, which may be several (`s32 a, b;`).
+
+    A member whose type is an inline struct is named after its closing brace, so
+    the text before it is dropped rather than read as a declarator."""
+    decl = re.sub(r"/\*.*?\*/", " ", decl)
+    if "}" in decl:
+        decl = decl.rsplit("}", 1)[1]
+    elif "{" in decl:
+        return []  # opens an inline definition; its name is on the closing line
+    if "(" in decl:  # function pointer: `void (*update)(...)`
+        m = re.search(r"\(\s*\*+\s*(\w+)\s*\)", decl)
+        return [m.group(1)] if m else []
+    out = []
+    for part in decl.split(","):
+        part = re.sub(r"\[[^\]]*\]|:\s*\d+", "", part)
+        names = re.findall(r"[A-Za-z_]\w*", part)
+        if names:
+            out.append(names[-1])
+    return out
+
+
+def structs(text):
+    """Top-level struct and union definitions: (kind, name, [member names], line).
+
+    The name is the tag or the trailing typedef name, whichever is present. Members
+    of a nested definition belong to the nested one, so only depth 1 is collected."""
+    out, lines = [], text.split("\n")
+    i = 0
+    while i < len(lines):
+        m = STRUCT_OPEN.match(lines[i])
+        start_at = i
+        if not m:
+            h = STRUCT_HEADER.match(lines[i])
+            if h and i + 1 < len(lines) and lines[i + 1].strip().startswith("{"):
+                m, i = h, i + 1
+            else:
+                i += 1
+                continue
+        kind, tag, start = m.group(1), m.group(2), start_at + 1
+        # `typedef struct { f32 x, y; } sdfVector2_t;` is a whole definition on one
+        # line, so its closing brace is behind the opening one rather than below it.
+        tail = lines[i][m.end():]
+        if "}" in tail:
+            body, _, after = tail.partition("}")
+            named = re.match(r"\s*([A-Za-z_]\w*)?\s*;", after)
+            inline = []
+            for piece in body.split(";"):
+                if piece.strip():
+                    inline.extend(member_names(" " + piece.strip()))
+            out.append((kind, (named.group(1) if named else None) or tag, inline, start))
+            i += 1
+            continue
+        members, depth, i = [], 1, i + 1
+        while i < len(lines):
+            line = lines[i]
+            close = STRUCT_CLOSE.match(line)
+            if close and depth == 1:
+                out.append((kind, close.group(1) or tag, members, start))
+                break
+            at_top = depth == 1
+            depth += line.count("{") - line.count("}")
+            decl = MEMBER_LINE.match(line)
+            if decl and at_top and not decl.group(1).strip().startswith(("/*", "//", "*", "#")):
+                members.extend(member_names(decl.group(1)))
+            i += 1
+        i += 1
+    return out

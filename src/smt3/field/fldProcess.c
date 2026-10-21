@@ -69,8 +69,8 @@ extern s32 dds3AdminiGetPrevHistoryFlag(void);
 extern void fldDoor_EveBtlExit(s32 fld, s32 arg1);
 
 typedef struct {
-    u8 unk00[0x30];
-    u32 unk30;
+    u8 safeUnitPoint[0x30];
+    u32 flag;
     s32 mode;
     u32 sequenceWord38;
     u32 sequenceWord3C;
