@@ -160,15 +160,70 @@ def rename_in(path, tname, picks):
     return done, deferred
 
 
+def why_not(sizes, idb):
+    """Count the unk_ members still unfilled, by what blocks each one.
+
+    The largest bucket is structs whose name the IDB does not have, which is the
+    invented-type problem wearing another hat: with no name to key on there is
+    nothing to look a member up in either."""
+    from collections import Counter
+    why, members = Counter(), Counter()
+    seen = set()
+    files = sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h")))
+
+    def note(reason, count):
+        why[reason] += 1
+        members[reason] += count
+
+    for path in files:
+        for kind, name, fields, _ in struct_fields(path.read_text(errors="replace")):
+            hits = [f for f in fields if UNNAMED.match(f[2])]
+            if not name or not hits or (name, path.name) in seen:
+                continue
+            seen.add((name, path.name))
+            n = len(hits)
+            if name not in idb:
+                note("no IDB type of that name", n)
+                continue
+            if kind == "union":
+                note("a union", n)
+                continue
+            rows = layout(fields, sizes)
+            if rows is None:
+                note("a member type we cannot size", n)
+                continue
+            claims = [(off, nm) for off, _, nm in rows if UNNAMED.match(nm)]
+            if any(int(UNNAMED.match(nm).group(1), 16) != off for off, nm in claims):
+                note("our offsets disagree with our own unk names", n)
+                continue
+            _, isize, imembers = idb[name]
+            if rows[-1][0] + rows[-1][1] > isize:
+                note("our struct is larger than the IDB's", n)
+                continue
+            by_off = {o: (s, m) for o, s, _, m in imembers}
+            left = sum(1 for off, size, nm in rows if UNNAMED.match(nm)
+                       and (off not in by_off or by_off[off][0] != size
+                            or WORTHLESS.match(by_off[off][1] or "")))
+            if left:
+                note("IDB has no usable name at that exact offset and extent", left)
+    print("unk_ members still unfilled, by what blocks them:")
+    for reason, count in why.most_common():
+        print(f"  {count:>5} structs, {members[reason]:>5} members   {reason}")
+    return 0
+
+
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--why", action="store_true", help="count what blocks the rest")
     ap.add_argument("--limit", type=int, help="only the first N structs")
     args = ap.parse_args()
 
     sizes, idb = ida_sizes(), ida_members.load(ROOT / "config/smt3/ida_members.txt")
     if not idb:
         sys.exit("config/smt3/ida_members.txt missing; run tools/ida_members.py")
+    if args.why:
+        return why_not(sizes, idb)
 
     files = sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h")))
     total, structs_hit, deferred_all, in_headers = 0, 0, [], []

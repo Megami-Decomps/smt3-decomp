@@ -311,6 +311,35 @@ Their capitalization is not the problem to fix either. `SdfPool` is spelled that
 document opens with. Renaming it to `sdfPool_t` would make an invented layout look
 like a recovered one and lose that.
 
+### What is left, and what blocks it
+
+`tools/ida_fill.py --why` counts the remaining `unk_` members by what stops each one,
+and the answer reframes the two halves of this problem as one:
+
+| structs | members | blocked by |
+|---|---|---|
+| 440 | 1754 | no IDB type of that name |
+| 162 | 1174 | IDB has no usable name at that exact offset and extent |
+| 73 | 369 | our struct is larger than the IDB's |
+| 51 | 293 | our offsets disagree with our own `unk` names |
+| 21 | 97 | a member type we cannot size |
+
+The largest bucket is the invented-type problem wearing another hat. A struct called
+`SdfPool` gives nothing to key on, so its members cannot be looked up either:
+recovering one type's identity is what unlocks its members, and 1754 of the remaining
+members sit behind 440 such names. That is why the type names matter beyond style,
+and why they have to be settled from the code one at a time.
+
+The second bucket is different and is real work rather than a dead end: the type is
+known and the offsets line up, but our member is coarser than the IDB's, a
+`u8 unk_15[3]` standing where the IDB has three named fields. Splitting one is a
+layout change rather than a rename, so it can change codegen and has to be verified
+against the image rather than assumed.
+
+The fourth bucket is worth auditing before trusting: 51 structs name members after
+offsets that are not where this project's own layout computation puts them. Either
+the name is stale or the struct has a packing rule not modelled here.
+
 ### What the baseline is for
 
 `config/smt3/drift_baseline.txt` has two halves, checked in opposite directions.
