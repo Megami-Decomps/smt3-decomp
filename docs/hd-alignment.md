@@ -178,6 +178,78 @@ chain resolves to a sentinel meaning "not the type in question" rather than
 blocking. A member missing from the record it should belong to still resolves to
 nothing, which is the conservative branch.
 
+
+### Iterating, and what each round costs
+
+The reconstruction is canonical for nearly all of the source, so this converges
+rather than exhausting. Each round names types, which makes their members
+addressable, which the mechanical fills then take for free:
+
+| Round | Types | Members |
+|---|---|---|
+| Tree-wide rewrites only | 163 | 175 |
+| Resolver over the same reports | 0 | 503 |
+| IDB layout fills | 0 | 43 |
+| Corpus widened to the IDB | 44 | 95 |
+| Types read off their own users | 9 | 13 |
+| IDB fills again | 0 | 46 |
+| Anchored member pairings | 0 | 11 |
+| Second swarm round, fresh pairs | 35 | 375 |
+| IDB fills a third time | 0 | 20 |
+
+Four changes to what the validator accepts came out of a census of its 1,936
+refusals, and together they are worth more than any single method:
+
+- **The corpus is HD plus the IDB's own layouts**, 1,042 records to 1,698. The
+  IDB holds records the reconstruction's headers do not, `datUnitWork_t` among
+  them, and both carry the same symbol recovery.
+- **il2cpp decorations are undone**: an `_o` object wrapper, and a file-qualified
+  name like `effBattleSystem_effBTLSystem_Attack_tag`. Where the IDB itself
+  carries the decorated spelling, that spelling is what the tree adopts.
+- **A single report is corroborated by shape**, a size that fits inside the
+  IDB's record or an equal member count, which is the rule type recovery already
+  settled on. Size stays one-way: ours being larger is as likely to mean our
+  shape is wrong as the name.
+- **The documented pointerization is accepted in the class check**, and a
+  disagreement is settled when one candidate has twice the reports of the next.
+
+### An il2cpp artifact is not a name
+
+`_0` is what il2cpp calls an embedded base class, and the IDB import carries it.
+Taking it overwrote `effBTLSystem_Attack_tag.pFormation`, `pFormation` again on
+the AttackC record, `nbCameraHelper_effFileListHandle_t.resourceCount` and
+`nbCameraHelper_effFLWinHandle_t.x`. All four are back, and `_0`-style indices,
+`m_*`, `klass`, `monitor`, `vtable` and the `_array`/`_Fields` wrappers are now
+refused as both member and type targets. Three more `_0` members in
+`effPCPMisc.c` predate this work and are the same mistake.
+
+### A proposal onto a name the record already has
+
+The report path refuses this; the plan path, which applies another tool's
+proposals, did not. A rename onto a name already in the record reads a different
+field and still compiles, which is the one mistake a rename makes silently. Both
+paths refuse it now.
+
+### What the sdf layer needs, and why it is not a rename
+
+Every record in HD's `libsdf.h` exists on the PS2, so each of the 36 remaining
+invented `Sdf*` records is one of them. No signature says which: they are packet
+records local to `sdf*.c` and HD passes them as `void *`. Layout alone does not
+separate them either, since a record of four 4-byte words fits dozens;
+`tools/hd_header_layout.py` scopes the match to one header and still forces only
+`SdfDrawNode` onto `sdfModelNode_t` (252 bytes, 13 offsets agreeing) and
+`SdfSceneDrawPacket` onto `sdfGrDrawEnv_t` (368 exactly).
+
+What does settle one is the one typed signature HD kept. Its
+`sdf2DMakePrimPacketHeader` takes `sdfGrPacketHeader_t *aPacketPtr` where ours
+takes `SdfDrawPacket *aPacketPtr`, so our record is that one. But the tree
+already has `sdfGrPacketHeader_t`, and ours is a **finer** reading of it: our
+`quadwords`, `pad02`, `pad08` and `command` all sit inside its 16-byte `dmatag`.
+Replacing one with the other changes how the packet is written, not what it is
+called, so it is a merge to be read and verified per record rather than a rename
+to apply. `SdfTextureDrawPacket` is the same shape of problem, 32 bytes of that
+header plus three register writes.
+
 ### What is left
 
 Nothing of the agents' accepted output. The residue is in the reports rather than
