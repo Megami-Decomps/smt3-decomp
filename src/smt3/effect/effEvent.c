@@ -101,11 +101,11 @@ effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMult
 extern u8 D_00320228[];
 extern u8 D_003201F8[];
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
-effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *pParam);
+effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam);
 extern u8 D_00320270[];
 dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
 extern u8 D_00320298[];
-effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam);
+effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 extern s8 D_0054F2C5;
 /* callbackResult must be valid whenever callback is present. */
 extern effEventSetupRecord_t D_003203E0;
@@ -122,7 +122,7 @@ extern effEventSetupRecord_t mblurDebugMenu;
 extern dds3Effect_PartialMultiBlurParam_t D_00320420;
 extern s8 dblurDone;
 extern effEventSetupRecord_t dblurDebugMenu;
-extern effBlurScatterParams_t D_00320598;
+extern dds3Effect_DistortionBlurParam_t D_00320598;
 extern s8 evtViewerDirty;
 extern effEventSetupRecord_t filterDebugMenu;
 extern dds3Effect_Filter_t D_00320770;
@@ -131,7 +131,7 @@ extern effEventSetupRecord_t mfilterDebugMenu;
 extern dds3Effect_PartialMultiFilterParam_t D_00320870;
 extern s8 rblurDone;
 extern effEventSetupRecord_t rblurDebugMenu;
-extern effBlurScaleParams_t D_003209B0;
+extern dds3Effect_RippleBlurParam_t D_003209B0;
 extern sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
 typedef struct dds3Billboard_t dds3Billboard_t;
@@ -393,7 +393,7 @@ void Eve_DistortionBlurOFF(void) {
 }
 
 /* Update scatter parameters without replacing the owned allocation or slots. */
-void Eve_DistortionBlurSetParam(effBlurScatterParams_t *pParam) {
+void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *pParam) {
     hEve_DistortionBlur->params = *pParam;
 }
 
@@ -420,7 +420,7 @@ void Eve_RippleBlurOFF(void) {
 }
 
 /* Update scale parameters without replacing the owned allocation or slots. */
-void Eve_RippleBlurSetParam(effBlurScaleParams_t *pParam) {
+void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *pParam) {
     hEve_RippleBlur->params = *pParam;
 }
 
@@ -486,10 +486,10 @@ void Eve_PartialMultiFilterSetDefTex(void) {
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void Eve_EffectInit(void) {
     hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)D_00320228);
-    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((effBlurScatterParams_t *)D_003201F8);
+    hEve_DistortionBlur = dds3EffectDistortionBlurCreate((dds3Effect_DistortionBlurParam_t *)D_003201F8);
     hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)D_00320270);
-    hEve_RippleBlur = dds3EffectRippleBlurCreate((effBlurScaleParams_t *)D_00320298);
-    Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
+    hEve_RippleBlur = dds3EffectRippleBlurCreate((dds3Effect_RippleBlurParam_t *)D_00320298);
+    Eve_RippleBlurGetParams()->params.number = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
 
 /* Draw every screen effect whose show flag is set; the last one tail calls. */
@@ -627,12 +627,12 @@ s32 dblurProcess(void) {
 }
 
 /* Expose the scatter-blur setup parameters by address. */
-effBlurScatterParams_t *dblurGetParam(void) {
+dds3Effect_DistortionBlurParam_t *dblurGetParam(void) {
     return &D_00320598;
 }
 
 /* Replace setup parameters without replacing the active filter-blur work. */
-void dblurSetParam(effBlurScatterParams_t *parameters) {
+void dblurSetParam(dds3Effect_DistortionBlurParam_t *parameters) {
     D_00320598 = *parameters;
 }
 
@@ -747,12 +747,12 @@ s32 rblurProcess(void) {
 }
 
 /* Expose the scale-blur setup parameters by address. */
-effBlurScaleParams_t *rblurGetParam(void) {
+dds3Effect_RippleBlurParam_t *rblurGetParam(void) {
     return &D_003209B0;
 }
 
 /* Replace setup parameters without replacing the active staggered-blur work. */
-void rblurSetParam(effBlurScaleParams_t *parameters) {
+void rblurSetParam(dds3Effect_RippleBlurParam_t *parameters) {
     D_003209B0 = *parameters;
 }
 
@@ -809,7 +809,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     sdfMatrix4_t marked;
     effBTLCut_t *cut = hEveBEDCut->effect;
     u32 frame = cut->currentFrame;
-    effBTLCutData_t *list = cut->list;
+    effBTL_SkillCutTable_t *list = cut->list;
     effBTL_SkillPartsList_t *entry;
     dds3EffectPart_t **works;
     sdfModelRootNode_t *root;

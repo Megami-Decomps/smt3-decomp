@@ -241,7 +241,7 @@ void effBTLCutListRelease(effBTLCut_t *hBTLCutEffect) {
 
 effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation, s32 stat) {
     effBTLCut_t *cut;
-    effBTLCutData_t *list;
+    effBTL_SkillCutTable_t *list;
     effBTL_SkillPartsList_t *entry;
     dds3EffectPart_t **work;
     u8 actorScaleEnabled;
@@ -437,7 +437,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     sdfMatrix4_t rotB;
     sdfMatrix4_t direction;
     sdfMatrix4_t marked;
-    effBTLCutData_t *list;
+    effBTL_SkillCutTable_t *list;
     effBTL_SkillPartsList_t *entry;
     effBTLAimParams_t *aim;
     nbFormation_t *formation;

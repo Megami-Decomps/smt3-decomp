@@ -153,28 +153,28 @@ extern void p2sdStopBGM(u32 arg);
 /* One loadable field effect: the resource handle trio the loader fills, then
  * the live effect or part handle and the placement the task applies. */
 typedef struct {
-    sdfMemHandle_t *file;
-    void *data;
+    sdfMemHandle_t *mhFile;
+    void *ptr;
     s32 size;
-    void *part;
-    void *eff;
-    s32 life;
+    void *pcf;
+    void *d3p;
+    s32 cnt;
     f32 x;
     f32 y;
     f32 z;
-    f32 turn;
-} fldEffRes_t;
+    f32 r;
+} fldTest_FLDRUN_EFF_t;
 
 typedef struct {
-    fldEffRes_t *res;
+    fldTest_FLDRUN_EFF_t *pEff;
     s32 life;
-    s32 mode;
-    s32 rotate;
-    f32 turnMin;
-    f32 turnMax;
-} fldEffEntry_t;
+    s32 effmode;
+    s32 rotmode;
+    f32 off_cam_range_min;
+    f32 off_cam_range_max;
+} fldTest_FLDRUN_EFFTBL_t;
 
-extern fldEffEntry_t *D_002FBEF0[];
+extern fldTest_FLDRUN_EFFTBL_t *D_002FBEF0[];
 
 extern char D_002FBD40[];
 
@@ -200,21 +200,21 @@ extern char D_00531080[], D_00531098[], D_005310B0[], D_005310C8[];
 
 extern char D_005310E0[], D_005310F8[], D_00531118[], D_00531130[];
 
-extern fldEffRes_t fldDspark01File;
+extern fldTest_FLDRUN_EFF_t fldDspark01File;
 
-extern fldEffRes_t fldDsmoke2File;
+extern fldTest_FLDRUN_EFF_t fldDsmoke2File;
 
-extern fldEffRes_t fldDspark02File;
+extern fldTest_FLDRUN_EFF_t fldDspark02File;
 
-extern fldEffRes_t fldGun02aFile;
+extern fldTest_FLDRUN_EFF_t fldGun02aFile;
 
-extern fldEffRes_t fldGun01a0File;
+extern fldTest_FLDRUN_EFF_t fldGun01a0File;
 
-extern fldEffRes_t fldMuzzleB010File;
+extern fldTest_FLDRUN_EFF_t fldMuzzleB010File;
 
-extern fldEffRes_t fldDsmoke1File;
+extern fldTest_FLDRUN_EFF_t fldDsmoke1File;
 
-extern fldEffRes_t fldDflash1File;
+extern fldTest_FLDRUN_EFF_t fldDflash1File;
 
 extern void Mult(void);
 
@@ -290,8 +290,8 @@ typedef struct
     f32 turn;
     f32 unk14;
     f32 unk18;
-    s16 mapIx;
-    s16 mapIz;
+    s16 ix;
+    s16 iz;
     u8 unk20[0x4];
     u16 unk24;
     u16 unk26;
@@ -299,27 +299,27 @@ typedef struct
     void *unk2C;
     s32 unk30;
     s32 unk34;
-    s32 waitCount;
+    s32 nextframe;
     f32 angleToPlayer;
     f32 speed;
     s32 unk44;
     s32 unk48;
     u32 flag;
-    s32 unk50;
-    s32 unk54;
-    f32 unk58;
-    f32 unk5C;
-    f32 unk60;
+    s32 update_flag;
+    s32 bgm_mode;
+    f32 d_p_len;
+    f32 d_p_dir;
+    f32 d_c_dir;
     s32 unk64;
-    char *doorName;
+    char *pDoor;
     u16 mapIxOld;
     u16 mapIzOld;
     s32 unk70;
-} fldRunDante_t;
+} fldTest_FLDRUN_DANTE_t;
 
 extern char D_00530F30[];
 
-extern fldRunDante_t fldRun_Dante;
+extern fldTest_FLDRUN_DANTE_t fldRun_Dante;
 
 extern s32 fldRunDanteHandle __attribute__((section(".bss")));
 
@@ -552,7 +552,7 @@ void fldRunDanteClear(void)
 
 void fldRunTamaInit(void)
 {
-    fldEffRes_t *res;
+    fldTest_FLDRUN_EFF_t *res;
     sdfVector4_t pos;
     sdfVector4_t rot;
     sdfVector4_t axis;
@@ -583,130 +583,130 @@ void fldRunTamaInit(void)
     dds3ObjectBaseOnFlag(fldRunTama3Basic, 1);
     dds3ObjectBaseOnFlag(fldRunTama3Basic, 0x100);
     res = &fldDspark01File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->file = sdfDevLoadFileEx(D_00531080, &res->data, &res->size);
+    res->mhFile = sdfDevLoadFileEx(D_00531080, &res->ptr, &res->size);
     res = &fldDsmoke2File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_00531098, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_00531098, &res->ptr, &res->size);
     res = &fldDspark02File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_005310B0, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_005310B0, &res->ptr, &res->size);
     res = &fldGun02aFile;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_005310C8, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_005310C8, &res->ptr, &res->size);
     res = &fldGun01a0File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_005310E0, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_005310E0, &res->ptr, &res->size);
     res = &fldMuzzleB010File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_005310F8, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_005310F8, &res->ptr, &res->size);
     res = &fldDsmoke1File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_00531118, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_00531118, &res->ptr, &res->size);
     res = &fldDflash1File;
-    res->file = NULL;
-    res->data = NULL;
+    res->mhFile = NULL;
+    res->ptr = NULL;
     res->size = 0;
-    res->part = NULL;
-    res->eff = NULL;
-    res->life = 0;
+    res->pcf = NULL;
+    res->d3p = NULL;
+    res->cnt = 0;
     res->x = 0.0f;
     res->y = 0.0f;
     res->z = 0.0f;
-    res->turn = 0.0f;
-    res->file = sdfDevLoadFileEx(D_00531130, &res->data, &res->size);
+    res->r = 0.0f;
+    res->mhFile = sdfDevLoadFileEx(D_00531130, &res->ptr, &res->size);
 }
 
 /* NON_MATCHING: 27 of 47 words differ (first at +0x2C). */
 #ifdef NON_MATCHING
 void fldRunTamaFree(void)
 {
-    fldEffEntry_t *entry;
-    fldEffRes_t *res;
+    fldTest_FLDRUN_EFFTBL_t *entry;
+    fldTest_FLDRUN_EFF_t *res;
     void *handle;
     s32 i;
 
     for (i = 0; i < 2; i++) {
-        for (entry = D_002FBEF0[i]; (res = entry->res) != NULL; entry++) {
-            if (entry->mode == 0) {
-                handle = res->eff;
+        for (entry = D_002FBEF0[i]; (res = entry->pEff) != NULL; entry++) {
+            if (entry->effmode == 0) {
+                handle = res->d3p;
                 if (handle != NULL) {
                     dds3EffectDelete(handle);
-                    res->eff = NULL;
+                    res->d3p = NULL;
                 }
             } else {
-                handle = res->part;
+                handle = res->pcf;
                 if (handle != NULL) {
                     dds3EffectPartDelete(handle);
-                    res->part = NULL;
+                    res->pcf = NULL;
                 }
             }
-            handle = res->file;
+            handle = res->mhFile;
             if (handle != NULL) {
                 sdfMemFreeDelayedDirect(handle);
-                res->file = NULL;
+                res->mhFile = NULL;
             }
         }
     }
@@ -719,37 +719,37 @@ INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaFree);
 #ifdef NON_MATCHING
 void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
 {
-    fldRunDante_t *dante = &fldRun_Dante;
-    fldEffEntry_t *entry;
-    fldEffRes_t *res;
+    fldTest_FLDRUN_DANTE_t *dante = &fldRun_Dante;
+    fldTest_FLDRUN_EFFTBL_t *entry;
+    fldTest_FLDRUN_EFF_t *res;
     void *handle;
 
-    for (entry = D_002FBEF0[id]; (res = entry->res) != NULL; entry++) {
-        if (entry->turnMin < dante->unk60 && dante->unk60 < entry->turnMax) {
-            if (entry->mode == 0) {
-                handle = res->eff;
+    for (entry = D_002FBEF0[id]; (res = entry->pEff) != NULL; entry++) {
+        if (entry->off_cam_range_min < dante->d_c_dir && dante->d_c_dir < entry->off_cam_range_max) {
+            if (entry->effmode == 0) {
+                handle = res->d3p;
                 if (handle != NULL) {
                     dds3EffectDelete(handle);
-                    res->eff = NULL;
+                    res->d3p = NULL;
                 }
-                res->eff = dds3EffectLoad(res->data);
-                res->life = entry->life;
+                res->d3p = dds3EffectLoad(res->ptr);
+                res->cnt = entry->life;
                 res->x = x;
                 res->y = y;
                 res->z = z;
-                res->turn = r;
+                res->r = r;
             } else {
-                handle = res->part;
+                handle = res->pcf;
                 if (handle != NULL) {
                     dds3EffectPartDelete(handle);
-                    res->part = NULL;
+                    res->pcf = NULL;
                 }
-                res->part = dds3EffectPartCreate(6, res->data);
-                res->life = entry->life;
+                res->pcf = dds3EffectPartCreate(6, res->ptr);
+                res->cnt = entry->life;
                 res->x = x;
                 res->y = y;
                 res->z = z;
-                res->turn = r;
+                res->r = r;
             }
         }
     }
@@ -764,54 +764,54 @@ void fldRunEffTask(void)
 {
     sdfVector4_t pos;
     sdfMatrix4_t matrix;
-    fldEffEntry_t *entry;
-    fldEffRes_t *res;
+    fldTest_FLDRUN_EFFTBL_t *entry;
+    fldTest_FLDRUN_EFF_t *res;
     s32 i;
 
     memset(&pos, 0, sizeof(pos));
     pos.w = 1.0f;
 
     for (i = 0; i < 2; i++) {
-        for (entry = D_002FBEF0[i]; (res = entry->res) != NULL; entry++) {
-            if (entry->mode == 0) {
-                if (res->eff == NULL) {
+        for (entry = D_002FBEF0[i]; (res = entry->pEff) != NULL; entry++) {
+            if (entry->effmode == 0) {
+                if (res->d3p == NULL) {
                     continue;
                 }
-                if (dds3EffectGetState(res->eff) == 0) {
-                    dds3EffectDelete(res->eff);
-                    res->eff = NULL;
+                if (dds3EffectGetState(res->d3p) == 0) {
+                    dds3EffectDelete(res->d3p);
+                    res->d3p = NULL;
                     continue;
                 }
                 pos.x = res->x;
                 pos.y = res->y;
                 pos.z = res->z;
-                dds3EffectSetPosition(res->eff, &pos);
-                if (entry->rotate == 1) {
-                    SetRotateMatrixY((90.0f - res->turn) * 3.14f / 180.0f);
+                dds3EffectSetPosition(res->d3p, &pos);
+                if (entry->rotmode == 1) {
+                    SetRotateMatrixY((90.0f - res->r) * 3.14f / 180.0f);
                     SDF_VU0_STOREMATRIX(&matrix);
-                    dds3EffectSetRotateMatrix(res->eff, &matrix);
+                    dds3EffectSetRotateMatrix(res->d3p, &matrix);
                 }
-                dds3EffectDraw(res->eff);
+                dds3EffectDraw(res->d3p);
             } else {
-                if (res->part == NULL) {
+                if (res->pcf == NULL) {
                     continue;
                 }
-                if (res->life < 0) {
-                    dds3EffectPartDelete(res->part);
-                    res->part = NULL;
+                if (res->cnt < 0) {
+                    dds3EffectPartDelete(res->pcf);
+                    res->pcf = NULL;
                     continue;
                 }
-                res->life = res->life - 1;
+                res->cnt = res->cnt - 1;
                 pos.x = res->x;
                 pos.y = res->y;
                 pos.z = res->z;
-                dds3EffectPartSetPosition(res->part, &pos);
-                if (entry->rotate == 1) {
-                    SetRotateMatrixY((90.0f - res->turn) * 3.14f / 180.0f);
+                dds3EffectPartSetPosition(res->pcf, &pos);
+                if (entry->rotmode == 1) {
+                    SetRotateMatrixY((90.0f - res->r) * 3.14f / 180.0f);
                     SDF_VU0_STOREMATRIX(&matrix);
-                    dds3EffectPartSetRotateMatrix(res->part, &matrix);
+                    dds3EffectPartSetRotateMatrix(res->pcf, &matrix);
                 }
-                dds3EffectPartDraw(res->part);
+                dds3EffectPartDraw(res->pcf);
             }
         }
     }
@@ -1111,18 +1111,18 @@ void func_0011C790(void) {
 
 void func_0011C798(void)
 {
-    if (fldRun_Dante.waitCount > 0) {
-        fldRun_Dante.waitCount--;
+    if (fldRun_Dante.nextframe > 0) {
+        fldRun_Dante.nextframe--;
     }
 }
 
 void func_0011C7B8(void)
 {
-    if (fldRun_Dante.waitCount > 0) {
-        fldRun_Dante.waitCount--;
+    if (fldRun_Dante.nextframe > 0) {
+        fldRun_Dante.nextframe--;
     }
-    if (fldRun_Dante.unk54 != 0) {
-        fldRun_Dante.unk54 = 0;
+    if (fldRun_Dante.bgm_mode != 0) {
+        fldRun_Dante.bgm_mode = 0;
         fldRun_Dante.flag |= 0x4;
     }
 }
@@ -1131,21 +1131,21 @@ void fldRunDanteDoin(void)
 {
     void **basic;
 
-    if (fldRun_Dante.waitCount > 0) {
-        fldRun_Dante.waitCount--;
+    if (fldRun_Dante.nextframe > 0) {
+        fldRun_Dante.nextframe--;
     }
-    if (fldRun_Dante.waitCount == 0x4E && fldRun_Dante.doorName != NULL) {
-        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.doorName);
+    if (fldRun_Dante.nextframe == 0x4E && fldRun_Dante.pDoor != NULL) {
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 0x11, fldRun_Dante.pDoor);
         fldFindDoorEvent(basic[1]);
     }
-    if (fldRun_Dante.waitCount >= 0x15) {
+    if (fldRun_Dante.nextframe >= 0x15) {
         fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
         fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
-    } else if (fldRun_Dante.waitCount == 0x14) {
-        fldRun_Dante.unk50 = 3;
+    } else if (fldRun_Dante.nextframe == 0x14) {
+        fldRun_Dante.update_flag = 3;
         fldRun_Dante.flag |= 2;
     }
-    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.mapIx, &fldRun_Dante.mapIz);
+    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.ix, &fldRun_Dante.iz);
 }
 
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteMove);
@@ -1156,25 +1156,25 @@ void fldRunDanteSoba(void)
 {
     f32 dist;
 
-    if (fldRun_Dante.waitCount > 0) {
-        fldRun_Dante.waitCount--;
+    if (fldRun_Dante.nextframe > 0) {
+        fldRun_Dante.nextframe--;
     }
-    dist = fldRun_Dante.unk58;
-    fldRun_Dante.angleToPlayer = fldRun_Dante.unk5C;
+    dist = fldRun_Dante.d_p_len;
+    fldRun_Dante.angleToPlayer = fldRun_Dante.d_p_dir;
     fldRun_Dante.turn =
-        fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.unk5C, 10.0f, 1.0f);
+        fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.d_p_dir, 10.0f, 1.0f);
     if (dist > 100.0f) {
         fldRun_Dante.x += sdfSin(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
         fldRun_Dante.z += sdfCos(fldRun_Dante.angleToPlayer * 3.14f / 180.0f) * fldRun_Dante.speed;
     }
-    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.mapIx, &fldRun_Dante.mapIz);
+    FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.ix, &fldRun_Dante.iz);
     if (dist < 3600.0f) {
-        if (fldRun_Dante.unk54 != 1) {
-            fldRun_Dante.unk54 = 1;
+        if (fldRun_Dante.bgm_mode != 1) {
+            fldRun_Dante.bgm_mode = 1;
             fldRun_Dante.flag |= 4;
         }
-    } else if (fldRun_Dante.unk54 != 0) {
-        fldRun_Dante.unk54 = 0;
+    } else if (fldRun_Dante.bgm_mode != 0) {
+        fldRun_Dante.bgm_mode = 0;
         fldRun_Dante.flag |= 4;
     }
 }
@@ -1278,49 +1278,49 @@ void fldRunDanteInit(void)
     case 3:
         fldRun_MAP_OX = 0xF6E;
         fldRun_MAP_OZ = 0xC1C;
-        fldRun_Dante.mapIx = 3;
-        fldRun_Dante.mapIz = 10;
+        fldRun_Dante.ix = 3;
+        fldRun_Dante.iz = 10;
         break;
     case 4:
         fldRun_MAP_OX = 0xC8;
         fldRun_MAP_OZ = 0x64;
-        fldRun_Dante.mapIx = 7;
-        fldRun_Dante.mapIz = 0;
+        fldRun_Dante.ix = 7;
+        fldRun_Dante.iz = 0;
         fldRunDanteStartX[0] = 3;
         fldRunDanteStartX[1] = 2;
         break;
     case 5:
         fldRun_MAP_OX = 0xCE4;
         fldRun_MAP_OZ = -0x834;
-        fldRun_Dante.mapIx = 0;
-        fldRun_Dante.mapIz = 0;
+        fldRun_Dante.ix = 0;
+        fldRun_Dante.iz = 0;
         break;
     case 7:
         fldRun_MAP_OX = -0x1482;
         fldRun_MAP_OZ = 0xFD2;
-        fldRun_Dante.mapIx = 0;
-        fldRun_Dante.mapIz = 0;
+        fldRun_Dante.ix = 0;
+        fldRun_Dante.iz = 0;
         break;
     case 8:
         fldRun_MAP_OX = -0xDAC;
         fldRun_MAP_OZ = -0xB54;
-        fldRun_Dante.mapIx = 0;
-        fldRun_Dante.mapIz = 0;
+        fldRun_Dante.ix = 0;
+        fldRun_Dante.iz = 0;
         break;
     case 9:
         fldRun_MAP_OX = 0x12C;
         fldRun_MAP_OZ = 0x834;
-        fldRun_Dante.mapIx = 0;
-        fldRun_Dante.mapIz = 0;
+        fldRun_Dante.ix = 0;
+        fldRun_Dante.iz = 0;
         break;
     case 10:
         fldRun_MAP_OX = -0xA8C;
         fldRun_MAP_OZ = -0xA8C;
-        fldRun_Dante.mapIx = 0;
-        fldRun_Dante.mapIz = 0;
+        fldRun_Dante.ix = 0;
+        fldRun_Dante.iz = 0;
         break;
     }
-    fldRun_Dante.waitCount = -20;
+    fldRun_Dante.nextframe = -20;
     fldRun_Dante.unk26 = 0;
     fldRun_Dante.unk30 = 0;
     fldRun_Dante.unk34 = 0;
@@ -1329,11 +1329,11 @@ void fldRunDanteInit(void)
     fldRun_Dante.speed = 0.0f;
     fldRun_Dante.unk48 = 0;
     fldRun_Dante.flag = 0;
-    fldRun_Dante.unk54 = 0;
+    fldRun_Dante.bgm_mode = 0;
     fldRun_Dante.unk64 = 0;
-    fldRun_Dante.unk60 = 0.0f;
-    fldRun_Dante.x = fldRun_MAP_OX + (f32)fldRun_MAP_BX * (f32)fldRun_Dante.mapIx;
-    fldRun_Dante.z = fldRun_MAP_OZ + (f32)-fldRun_MAP_BZ * (f32)fldRun_Dante.mapIz;
+    fldRun_Dante.d_c_dir = 0.0f;
+    fldRun_Dante.x = fldRun_MAP_OX + (f32)fldRun_MAP_BX * (f32)fldRun_Dante.ix;
+    fldRun_Dante.z = fldRun_MAP_OZ + (f32)-fldRun_MAP_BZ * (f32)fldRun_Dante.iz;
     switch (fldGlobalBase.floor) {
     case 3:
         fldRunDanteStanceSet(6);
@@ -1427,7 +1427,7 @@ void fldRunDanteSe(void)
     now = fldRun_Dante.unk18;
     prev = fldRun_Dante.unk14;
     vol = fldRunDanteDistToTarget(fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z);
-    switch (fldRun_Dante.unk50) {
+    switch (fldRun_Dante.update_flag) {
     case 0:
         if (prev < 5.0f && 5.0f <= now) {
             seFlag = 1;
@@ -1473,7 +1473,7 @@ void fldRunDanteSe(void)
         p2sdPlaySE(0x6F0005, vol * 30 / 100, 0x3F);
     }
     if (fldRun_Dante.flag & 4) {
-        fldRunDanteSwapBgm(fldRun_Dante.unk54);
+        fldRunDanteSwapBgm(fldRun_Dante.bgm_mode);
     }
 }
 
@@ -1495,8 +1495,8 @@ void fldRunView(void)
     fldRunEffTask();
     fldRunTamaSe();
     FroFtoI(fldGlobalBase.x, fldGlobalBase.z, &fldRunDanteStartX[0], &fldRunDanteStartX[1]);
-    fldRun_Dante.mapIxOld = fldRun_Dante.mapIx;
-    fldRun_Dante.mapIzOld = fldRun_Dante.mapIz;
+    fldRun_Dante.mapIxOld = fldRun_Dante.ix;
+    fldRun_Dante.mapIzOld = fldRun_Dante.iz;
 }
 
 s32 fldRunEncountChk(void)

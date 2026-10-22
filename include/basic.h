@@ -147,7 +147,7 @@ typedef struct
     dds3BasicArrayHandle_t *hEventBasicArray;
     u32 modelType;
     void *pModel;
-    dds3Basic_t *control[8];
+    dds3Basic_t *pBasic[8];
     void *pUserValue;
     struct sdfModelRootNode_t *modelRoot;
     struct sdfMotionCtrlr_t *pMot;

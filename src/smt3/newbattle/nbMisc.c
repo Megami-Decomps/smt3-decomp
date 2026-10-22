@@ -128,12 +128,12 @@ typedef struct nbDevilInfo_t {
 
 extern nbDevilInfo_t datDevilTable[];
 
-typedef struct nbPanelUV_t {
+typedef struct nbPanelProcess_nbPanelTMXuv_t {
     s32 u;
     s32 v;
     s32 uw;
     s32 vh;
-} nbPanelUV_t;
+} nbPanelProcess_nbPanelTMXuv_t;
 
 /* Rows of the same 164-byte stride, a separate object from D_003989E0. */
 typedef struct nbDeadEvent_t {
@@ -497,7 +497,7 @@ void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
 
 void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 rgba)
 {
-    nbPanelUV_t uv;
+    nbPanelProcess_nbPanelTMXuv_t uv;
 
     uv.u = no * 13 + 1;
     uv.v = 1;

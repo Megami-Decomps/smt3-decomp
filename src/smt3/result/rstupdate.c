@@ -50,7 +50,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
 typedef struct
 {
@@ -130,7 +130,7 @@ void fclSetMessageVar_20743088(s8 Index, s32 pStr);
 
 s32 fclStartMessage(s32 MsgNo);
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 void rstChkResult2Process(u8 *work);
 

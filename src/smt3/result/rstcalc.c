@@ -42,7 +42,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
 extern s8 cmbAddLevelUpParamEx(void *work, s8 mode);
 
@@ -181,7 +181,7 @@ extern s32 cmpModelSetup(s32 a, s32 b);
 
 s32 fclStartMessage(s32 MsgNo);
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
 

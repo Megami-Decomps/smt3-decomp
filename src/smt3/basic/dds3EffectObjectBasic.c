@@ -100,8 +100,8 @@ typedef struct
 } dds3EffectObjectBasicWorkData_t;
 
 
-struct billObj_t *dds3BillboardCopy(struct billObj_t *hBillboard);
-struct billObj_t *dds3BillboardCreate(s32 kind, u32 id);
+struct billHandle_t *dds3BillboardCopy(struct billHandle_t *hBillboard);
+struct billHandle_t *dds3BillboardCreate(s32 kind, u32 id);
 void effMagaP4Randomize(void *hEffect);
 void *memset(void *a, s32 b, u32 c);
 void *sdfDevLoadFileEx(void *resource, u32 *id, s32 mode);
@@ -215,7 +215,7 @@ typedef struct EffOwnerBillParamView {
 } EffOwnerBillParamView;
 
 void dds3EffectDelete(EffNode *pData);
-void dds3BillboardDelete(struct billObj_t *hData);
+void dds3BillboardDelete(struct billHandle_t *hData);
 void effEveBEDCutDelete(effEveBEDCutHandle_t *hEveBEDCut);
 void effEveBEDDelete( effBTL_t *hEveBED);
 void sdfChipFreeDirect(void *aPtr);
@@ -227,7 +227,7 @@ void dds3FreePoseSet(dds3Basic_t *basic);
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic);
 u8 dds3ObjectBaseCheckFlag(struct dds3Basic_t *pObjectBasic, u32 flag);
 void dds3EffectDraw(EffNode *pData);
-extern void dds3BillboardDraw(struct billObj_t *hData);
+extern void dds3BillboardDraw(struct billHandle_t *hData);
 void effEveBEDCutDraw(effEveBEDCutHandle_t *hEveBEDCut);
 dds3Basic_t *dds3AddSceneBasicData(s32 type);
 void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
@@ -235,7 +235,7 @@ void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
 void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *node);
 dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot);
-extern billObj_t *dds3BillboardFileLoad(s32 kind, const char *path);
+extern billHandle_t *dds3BillboardFileLoad(s32 kind, const char *path);
 dds3Basic_t *AddTMXEffect(void *tmx, void *pos, s32 rot);
 dds3Basic_t *AddBEDEffect();
 void sdfMemFreeDirect( sdfMemHandle_t *aHandle);
@@ -247,9 +247,9 @@ void dds3AreaBasicRegistItem(dds3Basic_t *pAreaBasic, dds3Basic_t *pItemBasic);
 dds3Basic_t *AddMG12Effect();
 extern void effMagaRandomize(void *hEffect);
 extern s32 sdfModelGetMarkPosMatrix(sdfModelRootNode_t *aRoot, s32 aId);
-void dds3BillboardSetXYOffset(struct billObj_t *hBillboard, f32 x, f32 y);
-void dds3BillboardSetDrawType(struct billObj_t *hBillboard, s32 type);
-void dds3BillboardSetMode(struct billObj_t *hBillboard, s32 mode);
+void dds3BillboardSetXYOffset(struct billHandle_t *hBillboard, f32 x, f32 y);
+void dds3BillboardSetDrawType(struct billHandle_t *hBillboard, s32 type);
+void dds3BillboardSetMode(struct billHandle_t *hBillboard, s32 mode);
 
 void FreeEffectData(dds3EffectObjectBasicWorkData_t *work) {
     dds3EffectObjectBasicWorkData_t *data = work;
@@ -339,7 +339,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *aPtr)
     dds3EffectObjectBasicWorkData_t *work;
     s32 moved = 0;
     EffNode *effect;
-    billObj_t *bill;
+    billHandle_t *bill;
     s32 result;
 
     work = aPtr->workdata;
@@ -549,21 +549,21 @@ dds3Basic_t *AddP2AEffect(void *p2a, void *pos, s32 rot)
     control->modelType = 2;
     area = dds3AreaBasicGetFastArea();
     if (area != NULL) {
-        control->control[5] = area;
+        control->pBasic[5] = area;
         dds3AreaBasicRegistItem(area, basic);
     }
     return basic;
 }
 
 dds3Basic_t *dds3AddP2AEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, s32 rot) {
-    struct billObj_t *bill;
+    struct billHandle_t *bill;
 
-    bill = dds3BillboardCopy((struct billObj_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
+    bill = dds3BillboardCopy((struct billHandle_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
     return AddP2AEffect(bill, pos, rot);
 }
 
 void dds3AddP2AEffectObjectBasic2(u32 effdata, void *pos, s32 rot) {
-    struct billObj_t *bill;
+    struct billHandle_t *bill;
 
     bill = dds3BillboardCreate(1, effdata);
     AddP2AEffect(bill, pos, rot);
@@ -608,22 +608,22 @@ dds3Basic_t *AddTMXEffect(void *tmx, void *pos, s32 rot)
     control->modelType = 2;
     area = dds3AreaBasicGetFastArea();
     if (area != NULL) {
-        control->control[5] = area;
+        control->pBasic[5] = area;
         dds3AreaBasicRegistItem(area, basic);
     }
     return basic;
 }
 
 dds3Basic_t *dds3AddTMXEffectObjectBasic3(dds3Basic_t *ebasic, void *pos, s32 rot) {
-    struct billObj_t *bill;
+    struct billHandle_t *bill;
 
-    bill = dds3BillboardCopy((struct billObj_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
+    bill = dds3BillboardCopy((struct billHandle_t *)((dds3EffectObjectBasicWorkData_t *)ebasic->workdata)->handle);
     return AddTMXEffect(bill, pos, rot);
 }
 
 void dds3AddTMXEffectObjectBasic2(u32 effdata, void *pos, s32 rot)
 {
-    struct billObj_t *bill;
+    struct billHandle_t *bill;
 
     bill = dds3BillboardCreate(0, effdata);
     AddTMXEffect(bill, pos, rot);
@@ -665,7 +665,7 @@ dds3Basic_t *AddD3PEffect(void *eff, void *pos, void *rot)
     control->modelType = 2;
     area = dds3AreaBasicGetFastArea();
     if (area != NULL) {
-        control->control[5] = area;
+        control->pBasic[5] = area;
         dds3AreaBasicRegistItem(area, basic);
     }
     return basic;
@@ -720,7 +720,7 @@ dds3Basic_t *AddBEDEffect(source, position, rotation)
     control->modelType = 2;
     area = dds3AreaBasicGetFastArea();
     if (area != NULL) {
-        control->control[5] = area;
+        control->pBasic[5] = area;
         dds3AreaBasicRegistItem(area, basic);
     }
     return basic;
@@ -789,7 +789,7 @@ dds3Basic_t *AddESPEffect(const char *name, void *pos, void *rot, f32 r) {
     objectHandle->modelType = 2;
     worldNode = dds3AreaBasicGetFastArea();
     if (worldNode != NULL) {
-        objectHandle->control[5] = worldNode;
+        objectHandle->pBasic[5] = worldNode;
         dds3AreaBasicRegistItem(worldNode, obj);
     }
     return obj;
@@ -854,7 +854,7 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     control->modelType = 2;
     area = dds3AreaBasicGetFastArea();
     if (area != NULL) {
-        control->control[5] = area;
+        control->pBasic[5] = area;
         dds3AreaBasicRegistItem(area, basic);
     }
     return basic;
@@ -1061,7 +1061,7 @@ void dds3EffectObjectBasicSetFldEx(dds3Basic_t *basic, fldResourceEffect_t *pRes
     switch (resource->pFldEx->type) {
     case 0:
     case 3:
-        dds3BillboardSetXYOffset((struct billObj_t *)resource->handle, resource->pFldEx->size[0], resource->pFldEx->size[1]);
+        dds3BillboardSetXYOffset((struct billHandle_t *)resource->handle, resource->pFldEx->size[0], resource->pFldEx->size[1]);
         if (resource->pFldEx->type == 3) {
             dds3BillboardSetDrawType(resource->handle, 1);
         }

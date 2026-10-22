@@ -112,7 +112,7 @@ dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *
     memset(control, 0, 0xAC);
     control->modelType = 3;
     control->hEventBasicArray = dds3GetBasicArrayHandle(0);
-    control->control[0] = pObjectBasic;
+    control->pBasic[0] = pObjectBasic;
     for (index = 0; index < 24; index++) {
         control->modelParts[index] = -1;
     }
@@ -125,7 +125,7 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *pControl
     dds3Basic_t *area;
     s32 index;
 
-    owner = pControl->control[0];
+    owner = pControl->pBasic[0];
     area = dds3ObjectBaseGetControlBasic(owner, 5);
     if (area != NULL) {
         dds3AreaBasicGetItemArray(area, owner);
@@ -133,8 +133,8 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *pControl
     for (index = 0; index < 8; index++) {
         if (index < 3) {
             if (index > 0) {
-                if (pControl->control[index] != NULL) {
-                    dds3DeleteSceneBasicData(pControl->control[index]);
+                if (pControl->pBasic[index] != NULL) {
+                    dds3DeleteSceneBasicData(pControl->pBasic[index]);
                 }
             }
         }
@@ -199,13 +199,13 @@ dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Ba
     dds3Basic_t *previous;
 
     previous = dds3ObjectBaseGetControlBasic(pObjectBasic, itemType);
-    dds3GetBaseControlWorkData(pObjectBasic)->control[itemType] = pItemBasic;
+    dds3GetBaseControlWorkData(pObjectBasic)->pBasic[itemType] = pItemBasic;
     return previous;
 }
 
 dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *pObjectBasic, s32 itemType)
 {
-    return dds3GetBaseControlWorkData(pObjectBasic)->control[itemType];
+    return dds3GetBaseControlWorkData(pObjectBasic)->pBasic[itemType];
 }
 
 dds3BasicArrayHandle_t *dds3ObjectBaseGetEventArray(dds3Basic_t *pObjectBasic)

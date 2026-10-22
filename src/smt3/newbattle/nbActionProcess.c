@@ -100,13 +100,13 @@ typedef struct nbDevilData_t {
     u8 unk02[0xA2];
 } nbDevilData_t;
 
-typedef struct nbMasterTextEntry_t {
+typedef struct datDevilNegoFormat_t {
     u8 unk00[0xF];
     u8 talkflag;
     u8 unk10[0x20];
-} nbMasterTextEntry_t;
+} datDevilNegoFormat_t;
 
-extern nbMasterTextEntry_t master_text[];
+extern datDevilNegoFormat_t master_text[];
 
 extern char D_00543880[];
 

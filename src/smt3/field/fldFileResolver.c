@@ -596,10 +596,10 @@ s32 fldMakeObjectBasic3(void) {
             }
             path = (dds3Basic_t *)dds3SceneBasicSearchNameAndType(world, 0x10, (const u8 *)pathName);
             data = dds3MatterObjectBasicGetControlWorkData(object);
-            slot = (dds3Basic_t *)data->control[1];
+            slot = (dds3Basic_t *)data->pBasic[1];
             if (slot == NULL) {
                 dds3ObjectBaseCreateMover(object);
-                slot = (dds3Basic_t *)data->control[1];
+                slot = (dds3Basic_t *)data->pBasic[1];
             }
             resource = (fldMoverWork_t *)slot->workdata;
             if (resource->sourceObject == 0) {
@@ -723,7 +723,7 @@ s32 fldLoadNextFile(s32 field, s32 area) {
 
 void fldFreeNextFile(void) {
     if (pFldNextFileDataF2 != 0) {
-        sdfPacWork_t *work = ((filePacRequest_t *)pFldNextFileDataF2)->packet.resrcHead;
+        sdfPacDecodeResrc_t *work = ((filePacRequest_t *)pFldNextFileDataF2)->packet.resrcHead;
 
         if (work != NULL) {
             do {
@@ -873,7 +873,7 @@ u8 fldCheckNextFile(void) {
 void fldLoadFieldPack(void) {
     char name[32];
     filePacRequest_t *request;
-    sdfPacWork_t *work;
+    sdfPacDecodeResrc_t *work;
 
     if (fldGlobalBase.area < 200) {
         fldPreloadNextFile(name);
@@ -944,7 +944,7 @@ u32 fldLoadFile(const char *name) {
     s32 area;
     s32 index;
     s32 resident;
-    sdfPacWork_t *work;
+    sdfPacDecodeResrc_t *work;
     fldTransferChunk_t *chunk;
 
     gFldFileResetMode = 0;
@@ -1111,7 +1111,7 @@ u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, vo
 void fldFreeFile(void) {
     s32 i;
     filePacRequest_t *request;
-    sdfPacWork_t *work;
+    sdfPacDecodeResrc_t *work;
 
     if (dds3SearchProcessName("PipeMain") != 0) {
         return;

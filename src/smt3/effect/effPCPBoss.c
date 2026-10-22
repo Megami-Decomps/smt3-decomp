@@ -143,8 +143,8 @@ typedef struct effPCPBossBael_t
     effBaelHead_t parameterVector;
     s32 frame;
     u32 color;
-    s32 modelResource;
-    s32 auxResource;
+    s32 hPB;
+    s32 hPCF;
 } effPCPBossBael_t;
 
 typedef struct effPCPBossONGYParam_t
@@ -366,7 +366,7 @@ typedef struct effPCPDANTE_Thunder_Param_t
     s32 fadeOut;
 } effPCPDANTE_Thunder_Param_t;
 
-typedef struct effPCPDANTE_Thunder_t
+typedef struct effPCPDANTE_Thunder_tag
 {
     u8 position[0x10];
     u8 matrix[0x40];
@@ -378,15 +378,15 @@ typedef struct effPCPDANTE_Thunder_t
     u8 drawRequest;
     u8 unkC5[3];
     s32 process;
-} effPCPDANTE_Thunder_t;
+} effPCPDANTE_Thunder_tag;
 
-typedef struct effPCPDANTE_UV_t
+typedef struct effPCPDANTE_UV_tag
 {
     s32 u;
     s32 v;
-    u32 uw;
-    u32 vh;
-} effPCPDANTE_UV_t;
+    u32 w;
+    u32 h;
+} effPCPDANTE_UV_tag;
 
 /* The 16-byte block effPCPDANTE_Damage_Create copies into the work head; the
  * last word is the per-target delay step. */
@@ -396,7 +396,7 @@ typedef struct effPCPDANTE_DamageParam_t
     s32 delayStep;
 } effPCPDANTE_DamageParam_t;
 
-typedef struct effPCPDANTE_Damage_t
+typedef struct effPCPDANTE_Damage_tag
 {
     u8 position[0x10];
     u8 unk010[0x20];
@@ -407,14 +407,14 @@ typedef struct effPCPDANTE_Damage_t
     void *cuts[0x20];
     u8 unk0BC[0x80];
     u32 color;
-} effPCPDANTE_Damage_t;
+} effPCPDANTE_Damage_tag;
 
 typedef struct effPCP_PBCamera_Param_t
 {
     s32 life;
 } effPCP_PBCamera_Param_t;
 
-typedef struct effPCP_PBCamera_t
+typedef struct effPCP_PBCamera_tag
 {
     u8 matrix[0x40];
     u8 position[0x10];
@@ -423,14 +423,14 @@ typedef struct effPCP_PBCamera_t
     u8 unk58;
     u8 unk59[3];
     s32 unk5C;
-} effPCP_PBCamera_t;
+} effPCP_PBCamera_tag;
 
 typedef struct effPCPDANTE_ShowTime_Param_t
 {
     s32 reserve;
 } effPCPDANTE_ShowTime_Param_t;
 
-typedef struct effPCPDANTE_ShowTime_t
+typedef struct effPCPDANTE_ShowTime_tag
 {
     u8 position[0x10];
     s32 param;
@@ -439,7 +439,7 @@ typedef struct effPCPDANTE_ShowTime_t
     s32 unk0C4;
     u8 unk0C8[0xC];
     u8 texLoaded;
-} effPCPDANTE_ShowTime_t;
+} effPCPDANTE_ShowTime_tag;
 
 typedef struct effPCP_BED_Param_t
 {
@@ -525,8 +525,8 @@ extern void dds3EffectPartSetPosition(s32 hEffPart, const void *pPos);
 extern void dds3EffectPartSetColor(s32 hEffPart, u32 abgr);
 extern void dds3EffectPartDraw(s32 hEffPart);
 s32 effPCPDANTE_Thunder_ProcessDraw(void);
-void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_t *hData, const void *pPos);
-void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *hData, const void *pRot);
+void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_tag *hData, const void *pPos);
+void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const void *pRot);
 extern void *effPCPHelperBEDCopy(void *helper);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void *sdfMemAllocDirect(u32 aSize);
@@ -595,8 +595,8 @@ extern void effPCPHelperBEDDraw(void *hData);
 extern void effPCPHelperBEDSetPosition(void *hData, const void *pPos);
 extern void effPCPHelperBEDSetColor(void *hData, u32 abgr);
 extern void effPCPHelperBEDSetScale(void *hData, f32 scale);
-extern effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *pParam);
-extern effPCPDANTE_Damage_t *effPCPDANTE_Damage_Create(void *pParam, void *pBED);
+extern effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *pParam);
+extern effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED);
 extern u8 D_00533E10[];
 extern u8 D_00533DD0[];
 extern u8 D_00533DE0[];
@@ -640,8 +640,8 @@ extern effPCPCrack_t *effPCPCrack2Create(effPCPCrackParam_t *pParam, void *pPB);
 extern effPCPScreenCrackModel_t *effPCPScreenCrackModelCreate(effPCPScreenCrackModel_t *pParam, void *pPB);
 extern effPCPMuzzleFlash_tag *effPCPMuzzleFlashCreate(effPCPMuzzleFlashHead_t *pParam,
                                                     void *pP2A);
-extern effPCP_PBCamera_t *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *pParam, void *pPB);
-extern effPCPDANTE_ShowTime_t *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param_t *pParam,
+extern effPCP_PBCamera_tag *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *pParam, void *pPB);
+extern effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param_t *pParam,
                                                            void *pTMX0, void *pTMX1);
 extern effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED);
 extern effPCP_HBED2_tag *effPCP_HBED2_Create(effPCP_HBED2_Param_t *pParam, void *pPBData, void *pBEDData);
@@ -1065,8 +1065,8 @@ effPCPBossBael_t *effPCPBossBaelCreate(void *pParam, void *pPB, void *pPCF)
     memcpy(&work->parameterVector, pParam, 0x10);
     work->color = 0x80808080;
     work->frame = 0;
-    work->modelResource = dds3EffectPartCreate(3, pPB);
-    work->auxResource = dds3EffectPartCreate(6, pPCF);
+    work->hPB = dds3EffectPartCreate(3, pPB);
+    work->hPCF = dds3EffectPartCreate(6, pPCF);
     return work;
 }
 
@@ -1090,8 +1090,8 @@ effPCPBossBael_t *effPCPBossBaelCopy(effPCPBossBael_t *hData, s32 bPos, s32 tbld
     memcpy(&work->parameterVector, &hData->parameterVector, 0x10);
     work->frame = 0;
     work->color = 0x80808080;
-    work->modelResource = dds3EffectPartCopy(hData->modelResource);
-    work->auxResource = dds3EffectPartCopy(hData->auxResource);
+    work->hPB = dds3EffectPartCopy(hData->hPB);
+    work->hPCF = dds3EffectPartCopy(hData->hPCF);
     return work;
 }
 #else
@@ -1100,8 +1100,8 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelCopy);
 
 void effPCPBossBaelDelete(effPCPBossBael_t *hData)
 {
-    dds3EffectPartDelete(hData->auxResource);
-    dds3EffectPartDelete(hData->modelResource);
+    dds3EffectPartDelete(hData->hPCF);
+    dds3EffectPartDelete(hData->hPB);
     sdfChipFreeDirect(hData);
 }
 
@@ -1126,14 +1126,14 @@ void effPCPBossBaelDraw(effPCPBossBael_t *hData)
         SDF_VU0_STOREIDENTITYVECTOR(hData);
         SDF_VU0_STOREIDENTITY(matrix);
     }
-    dds3EffectPartSetRotateMatrix(hData->modelResource, matrix);
-    dds3EffectPartSetRotateMatrix(hData->auxResource, matrix);
-    dds3EffectPartSetPosition(hData->modelResource, &hData->parameterVector);
-    dds3EffectPartSetPosition(hData->auxResource, &hData->parameterVector);
-    dds3EffectPartSetColor(hData->modelResource, hData->color);
-    dds3EffectPartSetColor(hData->auxResource, hData->color);
-    dds3EffectPartDraw(hData->modelResource);
-    dds3EffectPartDraw(hData->auxResource);
+    dds3EffectPartSetRotateMatrix(hData->hPB, matrix);
+    dds3EffectPartSetRotateMatrix(hData->hPCF, matrix);
+    dds3EffectPartSetPosition(hData->hPB, &hData->parameterVector);
+    dds3EffectPartSetPosition(hData->hPCF, &hData->parameterVector);
+    dds3EffectPartSetColor(hData->hPB, hData->color);
+    dds3EffectPartSetColor(hData->hPCF, hData->color);
+    dds3EffectPartDraw(hData->hPB);
+    dds3EffectPartDraw(hData->hPCF);
     hData->frame++;
 }
 
@@ -2499,9 +2499,9 @@ void effPCPMuzzleFlashSetRotateMatrix(effPCPMuzzleFlash_tag *hData, const void *
 }
 
 /* vu0 routine: the DANTE lightning bolt's work and its draw process. */
-effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *pParam)
+effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Param_t *pParam)
 {
-    effPCPDANTE_Thunder_t *work = sdfChipAllocDirect(sizeof(effPCPDANTE_Thunder_t));
+    effPCPDANTE_Thunder_tag *work = sdfChipAllocDirect(sizeof(effPCPDANTE_Thunder_tag));
     u128 *param;
     s32 process;
 
@@ -2527,7 +2527,7 @@ effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Create(const effPCPDANTE_Thunder_Para
 
 s32 effPCPDANTE_Thunder_ProcessDraw(void)
 {
-    effPCPDANTE_Thunder_t *work = dds3GetProcessData();
+    effPCPDANTE_Thunder_tag *work = dds3GetProcessData();
     u128 matrix[4];
     u128 position;
     void *model;
@@ -2548,29 +2548,29 @@ s32 effPCPDANTE_Thunder_ProcessDraw(void)
     return 0;
 }
 
-effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_CreatePCF(void *hData, s32 bPos, s32 tbldata)
+effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_CreatePCF(void *hData, s32 bPos, s32 tbldata)
 {
     return effPCPDANTE_Thunder_Create(dds3EffectPCPDataGetData(hData, 0, tbldata));
 }
 
-void effPCPDANTE_Thunder_Delete(effPCPDANTE_Thunder_t *hData)
+void effPCPDANTE_Thunder_Delete(effPCPDANTE_Thunder_tag *hData)
 {
     dds3KillProcess(hData->process, 0);
     effPCP_ThunderPolyDelete(hData->poly);
     sdfChipFreeDirect(hData);
 }
 
-effPCPDANTE_Thunder_t *effPCPDANTE_Thunder_Copy(effPCPDANTE_Thunder_t *hData, s32 bPos, s32 tbldata)
+effPCPDANTE_Thunder_tag *effPCPDANTE_Thunder_Copy(effPCPDANTE_Thunder_tag *hData, s32 bPos, s32 tbldata)
 {
     return effPCPDANTE_Thunder_Create(&hData->params);
 }
 
-void effPCPDANTE_Thunder_DrawSub(effPCPDANTE_Thunder_t *hData)
+void effPCPDANTE_Thunder_DrawSub(effPCPDANTE_Thunder_tag *hData)
 {
     hData->drawRequest = 1;
 }
 
-void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_t *hData)
+void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_tag *hData)
 {
     s32 limit = hData->params.limit;
     s32 frame = hData->frame;
@@ -2608,18 +2608,18 @@ void effPCPDANTE_Thunder_Draw(effPCPDANTE_Thunder_t *hData)
     }
 }
 
-void effPCPDANTE_Thunder_SetColor(effPCPDANTE_Thunder_t *hData, u32 abgr)
+void effPCPDANTE_Thunder_SetColor(effPCPDANTE_Thunder_tag *hData, u32 abgr)
 {
     hData->color = abgr;
 }
 
-void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_t *hData, const void *pPos)
+void effPCPDANTE_Thunder_SetPosition(effPCPDANTE_Thunder_tag *hData, const void *pPos)
 {
     SDF_VU0_COPYVECTOR(hData, pPos);
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
-void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *hData, const void *pRot)
+void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_tag *hData, const void *pRot)
 {
     SDF_VU0_LOADMATRIX(pRot);
     SDF_VU0_STOREMATRIX(hData->matrix);
@@ -2627,10 +2627,10 @@ void effPCPDANTE_Thunder_SetRotateMatrix(effPCPDANTE_Thunder_t *hData, const voi
 
 /* NON_MATCHING: 19 of 90 words differ (first at +0x4). */
 #ifdef NON_MATCHING
-effPCPDANTE_Damage_t *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
+effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Create(void *pParam, void *pBED)
 {
     const effPCPDANTE_DamageParam_t *param = pParam;
-    effPCPDANTE_Damage_t *work = sdfChipAllocZeroDirect(sizeof(effPCPDANTE_Damage_t));
+    effPCPDANTE_Damage_tag *work = sdfChipAllocZeroDirect(sizeof(effPCPDANTE_Damage_tag));
     effPCPBossUnit_t *unit;
     u32 bits;
     s32 delay;
@@ -2684,16 +2684,16 @@ void effPCPDANTE_Damage_CreatePCF(void *parameterTable) {
     effPCPDANTE_Damage_Create(firstBlock, secondBlock);
 }
 
-effPCPDANTE_Damage_t *effPCPDANTE_Damage_Copy(effPCPDANTE_Damage_t *hData, s32 bPos, s32 tbldata)
+effPCPDANTE_Damage_tag *effPCPDANTE_Damage_Copy(effPCPDANTE_Damage_tag *hData, s32 bPos, s32 tbldata)
 {
-    effPCPDANTE_Damage_t *work = effPCPDANTE_Damage_Create(hData, NULL);
+    effPCPDANTE_Damage_tag *work = effPCPDANTE_Damage_Create(hData, NULL);
 
     work->unk034 = 0;
     work->bed = hData->bed;
     return work;
 }
 
-void effPCPDANTE_Damage_Delete(effPCPDANTE_Damage_t *hData)
+void effPCPDANTE_Damage_Delete(effPCPDANTE_Damage_tag *hData)
 {
     void **cut;
     u32 i;
@@ -2713,14 +2713,14 @@ void effPCPDANTE_Damage_Delete(effPCPDANTE_Damage_t *hData)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_Damage_Run);
 
-void effPCPDANTE_Damage_SetColor(effPCPDANTE_Damage_t *hData, u32 abgr)
+void effPCPDANTE_Damage_SetColor(effPCPDANTE_Damage_tag *hData, u32 abgr)
 {
     hData->color = abgr;
 }
 
-effPCP_PBCamera_t *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *pParam, void *pPB)
+effPCP_PBCamera_tag *effPCP_PBCamera_Create(effPCP_PBCamera_Param_t *pParam, void *pPB)
 {
-    effPCP_PBCamera_t *work = sdfChipAllocDirect(0x60);
+    effPCP_PBCamera_tag *work = sdfChipAllocDirect(0x60);
     s32 value = pParam->life;
 
     work->unk5C = 0;
@@ -2741,15 +2741,15 @@ void effPCP_PBCamera_CreatePCF(void *parameterTable) {
     effPCP_PBCamera_Create(firstBlock, secondBlock);
 }
 
-effPCP_PBCamera_t *effPCP_PBCamera_Copy(effPCP_PBCamera_t *hData, s32 bPos, s32 tbldata)
+effPCP_PBCamera_tag *effPCP_PBCamera_Copy(effPCP_PBCamera_tag *hData, s32 bPos, s32 tbldata)
 {
-    effPCP_PBCamera_t *work = effPCP_PBCamera_Create((effPCP_PBCamera_Param_t *)&hData->param, NULL);
+    effPCP_PBCamera_tag *work = effPCP_PBCamera_Create((effPCP_PBCamera_Param_t *)&hData->param, NULL);
 
     work->part = dds3EffectPartCopy(hData->part);
     return work;
 }
 
-void effPCP_PBCamera_Delete(effPCP_PBCamera_t *hData)
+void effPCP_PBCamera_Delete(effPCP_PBCamera_tag *hData)
 {
     dds3EffectPartDelete(hData->part);
     sdfChipFreeDirect(hData);
@@ -2757,22 +2757,22 @@ void effPCP_PBCamera_Delete(effPCP_PBCamera_t *hData)
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCP_PBCamera_Run);
 
-void effPCP_PBCamera_SetPosition(effPCP_PBCamera_t *hData, const void *pPos)
+void effPCP_PBCamera_SetPosition(effPCP_PBCamera_tag *hData, const void *pPos)
 {
     SDF_VU0_COPYVECTOR(hData->position, pPos);
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
-void effPCP_PBCamera_SetRotateMatrix(effPCP_PBCamera_t *hData, const void *pMatrix)
+void effPCP_PBCamera_SetRotateMatrix(effPCP_PBCamera_tag *hData, const void *pMatrix)
 {
     SDF_VU0_LOADMATRIX(pMatrix);
     SDF_VU0_STOREMATRIX(hData);
 }
 
-effPCPDANTE_ShowTime_t *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param_t *pParam,
+effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param_t *pParam,
                                                     void *pTMX0, void *pTMX1)
 {
-    effPCPDANTE_ShowTime_t *work = sdfChipAllocZeroDirect(0xD8);
+    effPCPDANTE_ShowTime_tag *work = sdfChipAllocZeroDirect(0xD8);
 
     work->param = pParam->reserve;
     work->unk0C4 = 0;
@@ -2795,9 +2795,9 @@ void effPCPDANTE_ShowTime_CreatePCF(void *parameterTable) {
     effPCPDANTE_ShowTime_Create(firstBlock, secondBlock, thirdBlock);
 }
 
-effPCPDANTE_ShowTime_t *effPCPDANTE_ShowTime_Copy(effPCPDANTE_ShowTime_t *hData, s32 bPos, s32 tbldata)
+effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Copy(effPCPDANTE_ShowTime_tag *hData, s32 bPos, s32 tbldata)
 {
-    effPCPDANTE_ShowTime_t *work =
+    effPCPDANTE_ShowTime_tag *work =
         effPCPDANTE_ShowTime_Create((effPCPDANTE_ShowTime_Param_t *)&hData->param, NULL, NULL);
 
     work->textures[0] = hData->textures[0];
@@ -2806,7 +2806,7 @@ effPCPDANTE_ShowTime_t *effPCPDANTE_ShowTime_Copy(effPCPDANTE_ShowTime_t *hData,
     return work;
 }
 
-void effPCPDANTE_ShowTime_Delete(effPCPDANTE_ShowTime_t *hData)
+void effPCPDANTE_ShowTime_Delete(effPCPDANTE_ShowTime_tag *hData)
 {
     if (hData->texLoaded != 0) {
         sdfTexFreeDelayed(hData->textures[1]);
@@ -2815,7 +2815,7 @@ void effPCPDANTE_ShowTime_Delete(effPCPDANTE_ShowTime_t *hData)
     sdfChipFreeDirect(hData);
 }
 
-void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_t *uv, void *tex)
+void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_tag *uv, void *tex)
 {
     s32 sw;
     s32 sh;
@@ -2823,17 +2823,17 @@ void effPCPDANTE_Sprite_Draw(s32 x, s32 y, f32 scale, u32 color, effPCPDANTE_UV_
     u32 h;
 
     if (scale == 1.0f) {
-        sw = uv->uw;
-        sh = uv->vh;
+        sw = uv->w;
+        sh = uv->h;
     } else {
-        w = uv->uw;
+        w = uv->w;
         sw = (f32)w * scale;
-        h = uv->vh;
+        h = uv->h;
         sh = (f32)h * scale;
         x -= (sw - w) / 2;
         y -= (sh - h) / 2;
     }
-    nbPnlSprite(x, y, sw, sh, uv->u, uv->v, uv->uw, uv->vh, color, tex);
+    nbPnlSprite(x, y, sw, sh, uv->u, uv->v, uv->w, uv->h, color, tex);
 }
 
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Bingo_Draw);
@@ -2844,7 +2844,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 
 /* NON_MATCHING: 4 of 75 words differ (first at +0x34). */
 #ifdef NON_MATCHING
-void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_t *hData)
+void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
     s32 frame = hData->unk0C4;
 
@@ -2871,7 +2871,7 @@ void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_t *hData)
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Draw);
 #endif
 
-void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_t *hData, const void *pPos)
+void effPCPDANTE_ShowTime_SetPosition(effPCPDANTE_ShowTime_tag *hData, const void *pPos)
 {
     SDF_VU0_COPYVECTOR(hData, pPos);
 }

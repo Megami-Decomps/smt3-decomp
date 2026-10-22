@@ -153,7 +153,7 @@ typedef struct nbMainProcessData_t
     u32 exp;
     struct dds3Basic_t *light[2];          /* 0x0A8 */
     u8 unkB0[4];
-    s32 unkB4;
+    s32 niidacamera;
     u8 unkB8[4];
     dds3ProcessID_t *MainProcessID;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
@@ -184,7 +184,7 @@ typedef struct nbMainProcessData_t
     sdfMemHandle_t *eventMemory;
     u32 unk140;
     u32 d31_rebehansya;
-    u8 unk148[8];
+    u8 d31_andahansya[8];
 } nbMainProcessData_t;
 
 typedef struct nbKoukaProcessData_t

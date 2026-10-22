@@ -82,7 +82,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
 typedef struct
 {
@@ -113,7 +113,7 @@ typedef struct
     /* 0x1174 */ s32 unk_1174;
 } campInfoWork_t;
 
-extern fclEncyc_instance_t *g_pinst;
+extern fclEncyc_instance_tag *g_pinst;
 
 extern dds3TitleWork_t *titleWork;
 
@@ -826,7 +826,7 @@ extern void *sdfMemAllocDirect(s32 aSize);
 
 extern s32 sdfMemLock(void *aHandle);
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 /* Called above its definition, where ee-gcc assumed int. */
 u16 cmpGetStatusModelId(void);

@@ -374,7 +374,7 @@ void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work) {
 }
 
 /* Copy only the serialized parameters, leaving the owned work tail intact. */
-void dds3EffectPartialMultiBlurSetParam(effBlurScatterWork_t *hPartialMultiBlur, effBlurScatterParams_t *pParam) {
+void dds3EffectPartialMultiBlurSetParam(effBlurScatterWork_t *hPartialMultiBlur, dds3Effect_DistortionBlurParam_t *pParam) {
     hPartialMultiBlur->params = *pParam;
 }
 
@@ -394,17 +394,17 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    pPart->delay = dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.delaySpread + 1);
+    pPart->delay = dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.interval + 1);
     pPart->angle = -3.14159265f;
-    quad->rotate = pParam->params.uvDisplacementAngleDegrees;
-    quad->abgr = pParam->params.color;
-    quad->blend = pParam->params.blendControl;
-    spread = pParam->params.positionSpread;
-    halfSize = pParam->params.size;
-    quad->center[0] = pParam->params.position[0] +
+    quad->rotate = pParam->params.rotate;
+    quad->abgr = pParam->params.abgr;
+    quad->blend = pParam->params.blend;
+    spread = pParam->params.area;
+    halfSize = pParam->params.width;
+    quad->center[0] = pParam->params.center[0] +
         (s32)(spread * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f));
     halfSize >>= 1;
-    quad->center[1] = pParam->params.position[1] +
+    quad->center[1] = pParam->params.center[1] +
         (s32)(spread * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f));
     centerX = quad->center[0] + 256;
     quad->xy[0][0] = centerX - halfSize;
@@ -414,7 +414,7 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     quad->xy[1][1] = centerY + halfSize;
 }
 
-effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *pParam)
+effBlurScatterWork_t *dds3EffectDistortionBlurCreate(dds3Effect_DistortionBlurParam_t *pParam)
 {
     struct sdfMemHandle_t *allocation;
     effBlurScatterWork_t *work;
@@ -457,10 +457,10 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work) {
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    dds3EffectBlurDrawFrameMask(list, work->params.blendControl, work->texture);
-    if (work->params.count > 0) {
+    dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
+    if (work->params.number > 0) {
         slot = work->slots;
-        remaining = work->params.count;
+        remaining = work->params.number;
         do {
             delay = slot->delay;
             if (delay == 0) {
@@ -468,8 +468,8 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work) {
                     dds3EffectDistBlurPartInit(work, slot);
                 }
                 slot->quad.scale =
-                    work->params.uvDisplacementAmplitude * sdfSin(slot->angle) + 1.0f;
-                level = sdfFloatToULong((f32)(work->params.color >> 24));
+                    work->params.distortion * sdfSin(slot->angle) + 1.0f;
+                level = sdfFloatToULong((f32)(work->params.abgr >> 24));
                 angle = sdfFloatToULong(slot->angle);
                 if (dpdiv(angle, 0.0) < 0) {
                     angle = dpsub(0.0, angle);
@@ -479,7 +479,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work) {
                 alpha = sdfDoubleToUInt(level);
                 slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (alpha << 24);
                 dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                slot->angle = slot->angle + work->params.angleStep;
+                slot->angle = slot->angle + work->params.speed;
             } else {
                 slot->delay = delay - 1;
             }
@@ -494,11 +494,11 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectDistortionBlurDraw);
 #endif
 
 /* Update scale parameters but preserve the allocated destination slot count. */
-void dds3EffectDistortionBlurSetParam(effBlurScaleWork_t *hDistortionBlur, effBlurScaleParams_t *pParam) {
-    u32 count = hDistortionBlur->params.count;
+void dds3EffectDistortionBlurSetParam(effBlurScaleWork_t *hDistortionBlur, dds3Effect_RippleBlurParam_t *pParam) {
+    u32 count = hDistortionBlur->params.number;
 
     hDistortionBlur->params = *pParam;
-    hDistortionBlur->params.count = count;
+    hDistortionBlur->params.number = count;
 }
 
 /* The scale variant has its own source-handle setter. */
@@ -513,9 +513,9 @@ void dds3EffectDistortionBlurSetTex(effBlurScaleWork_t *work) {
 
 /* Size the slot's quad from its current phase, about the work centre. */
 void dds3EffectRipBlurPartAreaSet(effBlurScaleWork_t *pParam, effBlurScaleSlot_t *pPart) {
-    s32 half = (s32)((f32)pParam->params.size * pPart->phase);
-    s32 x = pParam->params.position[0] + 0x100;
-    s32 y = pParam->params.position[1] + 0xE0;
+    s32 half = (s32)((f32)pParam->params.area * pPart->phase);
+    s32 x = pParam->params.center[0] + 0x100;
+    s32 y = pParam->params.center[1] + 0xE0;
 
     pPart->quad.xy[0][0] = x - half;
     pPart->quad.xy[0][1] = y - half;
@@ -529,28 +529,28 @@ void dds3EffectRipBlurPartInit(effBlurScaleWork_t *pParam, effBlurScaleSlot_t *p
 
     pPart->phase = 0.0f;
     pPart->angle = 0.0f;
-    quad->abgr = pParam->params.color;
-    quad->blend = pParam->params.blendControl;
-    quad->rotate = pParam->params.uvDisplacementAngleDegrees;
-    quad->center[0] = pParam->params.position[0];
-    quad->center[1] = pParam->params.position[1];
+    quad->abgr = pParam->params.abgr;
+    quad->blend = pParam->params.blend;
+    quad->rotate = pParam->params.rotate;
+    quad->center[0] = pParam->params.center[0];
+    quad->center[1] = pParam->params.center[1];
 }
 
 /* Reset every slot, then stagger its initial phase by -spacing * index. */
 void dds3EffectRippleBlurReset(effBlurScaleWork_t *hRippleBlur) {
     effBlurScaleSlot_t *slot = hRippleBlur->slots;
-    s32 count = hRippleBlur->params.count;
+    s32 count = hRippleBlur->params.number;
     s32 i;
 
     for (i = 0; i < count; i++, slot++) {
         dds3EffectRipBlurPartInit(hRippleBlur, slot);
-        slot->phase = -(hRippleBlur->params.spacing * (f32)i);
+        slot->phase = -(hRippleBlur->params.interval * (f32)i);
     }
 }
 
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
-effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam) {
-    s32 count = pParam->count;
+effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam) {
+    s32 count = pParam->number;
     void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
     effBlurScaleWork_t *work = (effBlurScaleWork_t *)sdfMemLock(allocation);
     effBlurScaleSlot_t *slot;
@@ -565,7 +565,7 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam) {
     slot = work->slots;
     while (i < count) {
         dds3EffectRipBlurPartInit(work, slot);
-        slot->phase = -(work->params.spacing * (f32)i);
+        slot->phase = -(work->params.interval * (f32)i);
         i++;
         slot++;
     }
@@ -592,27 +592,27 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work) {
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    dds3EffectBlurDrawFrameMask(list, work->params.blendControl, work->texture);
-    remaining = work->params.count;
+    dds3EffectBlurDrawFrameMask(list, work->params.blend, work->texture);
+    remaining = work->params.number;
     if (remaining > 0) {
         slot = work->slots;
         do {
             if (0.0f <= slot->phase) {
                 f32 sine = sdfSin(slot->angle);
 
-                slot->quad.scale = work->params.uvDisplacementAmplitude * sine *
+                slot->quad.scale = work->params.power * sine *
                     (1.0f - slot->phase) + 1.0f;
-                level = (u32)((f32)(work->params.color >> 24) * (1.0f - slot->phase));
+                level = (u32)((f32)(work->params.abgr >> 24) * (1.0f - slot->phase));
                 slot->quad.abgr = (slot->quad.abgr & 0xFFFFFF) | (level << 24);
                 dds3EffectRipBlurPartAreaSet(work, slot);
                 dds3EffectBlurDrawAlphaMulti(list, &slot->quad);
-                slot->angle = slot->angle + work->params.angleStep;
-                slot->phase = slot->phase + work->params.phaseStep;
+                slot->angle = slot->angle + work->params.frequency;
+                slot->phase = slot->phase + work->params.speed;
                 if (1.0f < slot->phase) {
                     dds3EffectRipBlurPartInit(work, slot);
                 }
             } else {
-                slot->phase = slot->phase + work->params.phaseStep;
+                slot->phase = slot->phase + work->params.speed;
             }
             slot++;
         } while (--remaining != 0);

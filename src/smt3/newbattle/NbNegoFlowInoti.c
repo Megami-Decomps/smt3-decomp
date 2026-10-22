@@ -266,16 +266,16 @@ typedef struct {
     s32 mesno;
     u8 unk_04[0x4];
     u8 phase;
-    u8 unk_09;
+    u8 honboutype;
     u8 unk_0A[0xA];
     u16 negorate;
     nbMasterTextKouho_t itema[4];
     nbMasterTextKouho_t itemb[4];
     nbMasterTextKouho_t stone[4];
     u8 unk_2E[0x2];
-} nbMasterTextEntry_t;
+} datDevilNegoFormat_t;
 
-extern nbMasterTextEntry_t master_text[];
+extern datDevilNegoFormat_t master_text[];
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -413,7 +413,7 @@ s32 Flow15_8(nbNegoProcessData_t *n)
 
     nbAddNegoIdKouho(n, 0xF000A);
     nbAddNegoIdKouho(n, 0xF0014);
-    if (master_text[n->ework->id].unk_09 != 1) {
+    if (master_text[n->ework->id].honboutype != 1) {
         rate = 0x55;
     } else {
         rate = 0x28;

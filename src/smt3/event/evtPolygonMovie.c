@@ -63,13 +63,13 @@ typedef struct evtPolygonMovieWork_t {
     u8 unk90[4];
     dds3Effect_PartialMultiBlurParam_t *mblurTable;
     u8 unk98[4];
-    effBlurScatterParams_t *dblurTable;
+    dds3Effect_DistortionBlurParam_t *dblurTable;
     u8 unkA0[4];
     dds3Effect_Filter_t *filterTable;
     u8 unkA8[4];
     dds3Effect_PartialMultiFilterParam_t *mfilterTable;
     u8 unkB0[4];
-    effBlurScaleParams_t *rblurTable;
+    dds3Effect_RippleBlurParam_t *rblurTable;
     u8 unkB8[4];
     s32 mesHandle;
     dds3ProcessID_t *processId;
@@ -170,8 +170,8 @@ extern u32 dds3LightParam[];
 extern pmdSceneFogTable_t D_0056D020;
 extern dds3Effect_Blur_t D_0056D040;
 extern dds3Effect_PartialMultiBlurParam_t D_0056D070;
-extern effBlurScatterParams_t D_0056D0A0;
-extern effBlurScaleParams_t D_0056D0D0;
+extern dds3Effect_DistortionBlurParam_t D_0056D0A0;
+extern dds3Effect_RippleBlurParam_t D_0056D0D0;
 extern dds3Effect_PartialMultiFilterParam_t D_0056D100;
 extern dds3Effect_Filter_t D_0056D130;
 extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
@@ -181,10 +181,10 @@ extern void Eve_BlurOFF(void);
 extern void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *pParam);
 extern void Eve_PartialMultiBlurON(void);
 extern void Eve_PartialMultiBlurOFF(void);
-extern void Eve_DistortionBlurSetParam(effBlurScatterParams_t *pParam);
+extern void Eve_DistortionBlurSetParam(dds3Effect_DistortionBlurParam_t *pParam);
 extern void Eve_DistortionBlurON(void);
 extern void Eve_DistortionBlurOFF(void);
-extern void Eve_RippleBlurSetParam(effBlurScaleParams_t *pParam);
+extern void Eve_RippleBlurSetParam(dds3Effect_RippleBlurParam_t *pParam);
 extern void Eve_RippleBlurON(void);
 extern void Eve_RippleBlurOFF(void);
 extern void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *pParam);
@@ -196,8 +196,8 @@ extern void Eve_FilterOFF(void);
 void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *key1, evtBlendVecColor_t *key2, evtBlendVecColor_t *d);
 void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blur_t *key2, dds3Effect_Blur_t *d);
 void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *key1, dds3Effect_PartialMultiBlurParam_t *key2, dds3Effect_PartialMultiBlurParam_t *d);
-void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlurScatterParams_t *key2, effBlurScatterParams_t *d);
-void evtHokanRipBlur(s32 hokan, f32 ratio, effBlurScaleParams_t *key1, effBlurScaleParams_t *key2, effBlurScaleParams_t *d);
+void evtHokanDistBlur(s32 hokan, f32 ratio, dds3Effect_DistortionBlurParam_t *key1, dds3Effect_DistortionBlurParam_t *key2, dds3Effect_DistortionBlurParam_t *d);
+void evtHokanRipBlur(s32 hokan, f32 ratio, dds3Effect_RippleBlurParam_t *key1, dds3Effect_RippleBlurParam_t *key2, dds3Effect_RippleBlurParam_t *d);
 void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam_t *key1, dds3Effect_PartialMultiFilterParam_t *key2, dds3Effect_PartialMultiFilterParam_t *d);
 void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d);
 s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, char *effname, char *targetname, s32 posindex, s32 cutno);
@@ -235,10 +235,10 @@ extern dds3Effect_Filter_t D_0032C8A0;
 extern dds3Effect_PartialMultiFilterParam_t D_0032C8C0;
 
 
-extern effBlurScatterParams_t D_0032C8F0;
+extern dds3Effect_DistortionBlurParam_t D_0032C8F0;
 
 
-extern effBlurScaleParams_t D_0032C920;
+extern dds3Effect_RippleBlurParam_t D_0032C920;
 
 typedef struct polyMovieClip_t {
     u8 opaque_00[8];
@@ -547,7 +547,7 @@ s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, ch
     case BASIC_TYPE_PATH:
         evtPathLinkAndMake(target, basic);
         control = dds3GetBaseControlWorkData(basic);
-        evtStopMover((polyMovieObject_t *)control->control[1], 1, 0, 0);
+        evtStopMover((polyMovieObject_t *)control->pBasic[1], 1, 0, 0);
         break;
     }
     return i;
@@ -893,8 +893,8 @@ void MBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 void DBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
-    effBlurScatterParams_t *key1;
-    effBlurScatterParams_t *key2;
+    dds3Effect_DistortionBlurParam_t *key1;
+    dds3Effect_DistortionBlurParam_t *key2;
     s32 hokan;
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
@@ -913,7 +913,7 @@ void DBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
     }
     evtHokanDistBlur(hokan, ratio, key1, key2, &D_0056D0A0);
     Eve_DistortionBlurSetParam(&D_0056D0A0);
-    if (((u8 *)&D_0056D0A0.color)[3] < 3) {
+    if (((u8 *)&D_0056D0A0.abgr)[3] < 3) {
         Eve_DistortionBlurOFF();
     } else {
         Eve_DistortionBlurON();
@@ -923,8 +923,8 @@ void DBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 void RBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
-    effBlurScaleParams_t *key1;
-    effBlurScaleParams_t *key2;
+    dds3Effect_RippleBlurParam_t *key1;
+    dds3Effect_RippleBlurParam_t *key2;
     s32 hokan;
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
@@ -943,7 +943,7 @@ void RBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
     }
     evtHokanRipBlur(hokan, ratio, key1, key2, &D_0056D0D0);
     Eve_RippleBlurSetParam(&D_0056D0D0);
-    if (((u8 *)&D_0056D0D0.color)[3] < 3) {
+    if (((u8 *)&D_0056D0D0.abgr)[3] < 3) {
         Eve_RippleBlurOFF();
     } else {
         Eve_RippleBlurON();
@@ -1449,7 +1449,7 @@ void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam
     d->Filter.blendControl = key1->Filter.blendControl;
 }
 
-void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlurScatterParams_t *key2, effBlurScatterParams_t *d)
+void evtHokanDistBlur(s32 hokan, f32 ratio, dds3Effect_DistortionBlurParam_t *key1, dds3Effect_DistortionBlurParam_t *key2, dds3Effect_DistortionBlurParam_t *d)
 {
     s32 positionAxisIndex;
 
@@ -1462,21 +1462,21 @@ void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlu
     if (key2 == NULL) {
         key2 = &D_0032C8F0;
     }
-    d->count = evtHokanUInt(hokan, ratio, key1->count, key2->count);
-    d->delaySpread = evtHokanUInt(hokan, ratio, key1->delaySpread, key2->delaySpread);
-    d->angleStep = evtHokanFloat(hokan, ratio, key1->angleStep, key2->angleStep);
-    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
-    d->blendControl = key1->blendControl;
-    d->uvDisplacementAngleDegrees = evtHokanFloat(hokan, ratio, key1->uvDisplacementAngleDegrees, key2->uvDisplacementAngleDegrees);
-    d->uvDisplacementAmplitude = evtHokanFloat(hokan, ratio, key1->uvDisplacementAmplitude, key2->uvDisplacementAmplitude);
-    d->positionSpread = evtHokanUInt(hokan, ratio, key1->positionSpread, key2->positionSpread);
+    d->number = evtHokanUInt(hokan, ratio, key1->number, key2->number);
+    d->interval = evtHokanUInt(hokan, ratio, key1->interval, key2->interval);
+    d->speed = evtHokanFloat(hokan, ratio, key1->speed, key2->speed);
+    d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
+    d->blend = key1->blend;
+    d->rotate = evtHokanFloat(hokan, ratio, key1->rotate, key2->rotate);
+    d->distortion = evtHokanFloat(hokan, ratio, key1->distortion, key2->distortion);
+    d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        d->position[positionAxisIndex] = evtHokanInt(hokan, ratio, key1->position[positionAxisIndex], key2->position[positionAxisIndex]);
+        d->center[positionAxisIndex] = evtHokanInt(hokan, ratio, key1->center[positionAxisIndex], key2->center[positionAxisIndex]);
     }
-    d->size = evtHokanUInt(hokan, ratio, key1->size, key2->size);
+    d->width = evtHokanUInt(hokan, ratio, key1->width, key2->width);
 }
 
-void evtHokanRipBlur(s32 hokan, f32 ratio, effBlurScaleParams_t *key1, effBlurScaleParams_t *key2, effBlurScaleParams_t *d)
+void evtHokanRipBlur(s32 hokan, f32 ratio, dds3Effect_RippleBlurParam_t *key1, dds3Effect_RippleBlurParam_t *key2, dds3Effect_RippleBlurParam_t *d)
 {
     s32 positionAxisIndex;
 
@@ -1489,18 +1489,18 @@ void evtHokanRipBlur(s32 hokan, f32 ratio, effBlurScaleParams_t *key1, effBlurSc
     if (key2 == NULL) {
         key2 = &D_0032C920;
     }
-    d->count = evtHokanUInt(hokan, ratio, key1->count, key2->count);
-    d->phaseStep = evtHokanFloat(hokan, ratio, key1->phaseStep, key2->phaseStep);
-    d->spacing = evtHokanFloat(hokan, ratio, key1->spacing, key2->spacing);
-    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
-    d->blendControl = key1->blendControl;
-    d->uvDisplacementAngleDegrees = evtHokanFloat(hokan, ratio, key1->uvDisplacementAngleDegrees, key2->uvDisplacementAngleDegrees);
-    d->uvDisplacementAmplitude = evtHokanFloat(hokan, ratio, key1->uvDisplacementAmplitude, key2->uvDisplacementAmplitude);
-    d->angleStep = evtHokanFloat(hokan, ratio, key1->angleStep, key2->angleStep);
+    d->number = evtHokanUInt(hokan, ratio, key1->number, key2->number);
+    d->speed = evtHokanFloat(hokan, ratio, key1->speed, key2->speed);
+    d->interval = evtHokanFloat(hokan, ratio, key1->interval, key2->interval);
+    d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
+    d->blend = key1->blend;
+    d->rotate = evtHokanFloat(hokan, ratio, key1->rotate, key2->rotate);
+    d->power = evtHokanFloat(hokan, ratio, key1->power, key2->power);
+    d->frequency = evtHokanFloat(hokan, ratio, key1->frequency, key2->frequency);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        d->position[positionAxisIndex] = evtHokanInt(hokan, ratio, key1->position[positionAxisIndex], key2->position[positionAxisIndex]);
+        d->center[positionAxisIndex] = evtHokanInt(hokan, ratio, key1->center[positionAxisIndex], key2->center[positionAxisIndex]);
     }
-    d->size = evtHokanUInt(hokan, ratio, key1->size, key2->size);
+    d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
 }
 
 void evtRunUnitMode(dds3Basic_t *unit, s32 mode)

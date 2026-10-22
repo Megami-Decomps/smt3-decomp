@@ -613,7 +613,7 @@ void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 basefram
         break;
     case 16:
         evtPathLinkAndMake(owner, eff);
-        mover = dds3GetBaseControlWorkData(eff)->control[1];
+        mover = dds3GetBaseControlWorkData(eff)->pBasic[1];
         printf(D_0053B4A8, baseframe, currentFrame);
         if ((viewerinfo->flags & 1) != 0) {
             evtStopMover(mover, 0, baseframe, currentFrame);

@@ -970,8 +970,8 @@ void RunSeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         k->data->d31_rebehansya = 0;
         p2sdStopSe(0x1C070000);
     }
-    if (*(s32 *)k->data->unk148 != 0 && se == 0x10008) {
-        *(s32 *)k->data->unk148 = 0;
+    if (*(s32 *)k->data->d31_andahansya != 0 && se == 0x10008) {
+        *(s32 *)k->data->d31_andahansya = 0;
         p2sdStopSe(0x1C740000);
     }
     switch (p->type) {

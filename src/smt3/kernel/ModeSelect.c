@@ -31,7 +31,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
 extern s32 mselShutDown(void);
 
@@ -71,7 +71,7 @@ s32 fclLoadTexture(char *pFileName);
 
 extern s32 evtBitOn(s32 no);
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 INCLUDE_ASM(const s32, "kernel/ModeSelect", mselDevilChoice);
 

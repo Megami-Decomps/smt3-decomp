@@ -303,16 +303,16 @@ typedef struct {
     s32 mesno;
     u8 unk_04[0x4];
     u8 phase;
-    u8 unk_09;
+    u8 honboutype;
     u8 unk_0A[0xA];
     u16 negorate;
     nbMasterTextKouho_t itema[4];
     nbMasterTextKouho_t itemb[4];
     nbMasterTextKouho_t stone[4];
     u8 unk_2E[0x2];
-} nbMasterTextEntry_t;
+} datDevilNegoFormat_t;
 
-extern nbMasterTextEntry_t master_text[];
+extern datDevilNegoFormat_t master_text[];
 
 extern s32 datGetPlayerLevel(void);
 
@@ -818,7 +818,7 @@ INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_22);
 s32 Flow1_23(nbNegoProcessData_t *n)
 {
     datUnitWork_t *work;
-    nbMasterTextEntry_t *mt;
+    datDevilNegoFormat_t *mt;
     s32 *msg;
 
     work = nbGetUnitWorkPointer(n->data, &n->data->party[n->boupartyindex]);
@@ -873,7 +873,7 @@ s32 Flow1_27(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x1001F);
     nbAddNegoIdKouho(n, 0x1001C);
     n->workid[3] = 0x1001E;
-    if (master_text[n->ework->id].unk_09 == 1) {
+    if (master_text[n->ework->id].honboutype == 1) {
         n->nextnegoid = n->nextkouho[1];
     } else {
         n->nextnegoid = n->nextkouho[0];

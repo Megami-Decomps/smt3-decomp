@@ -429,7 +429,7 @@ s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj) {
     if (ref == NULL) {
         return 0;
     }
-    slotNode = ref->control[1];
+    slotNode = ref->pBasic[1];
     if (slotNode == NULL) {
         return 0;
     }

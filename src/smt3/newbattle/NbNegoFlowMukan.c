@@ -266,16 +266,16 @@ typedef struct {
     s32 mesno;
     u8 unk_04[0x4];
     u8 phase;
-    u8 unk_09;
+    u8 honboutype;
     u8 unk_0A[0xA];
     u16 negorate;
     nbMasterTextKouho_t itema[4];
     nbMasterTextKouho_t itemb[4];
     nbMasterTextKouho_t stone[4];
     u8 unk_2E[0x2];
-} nbMasterTextEntry_t;
+} datDevilNegoFormat_t;
 
-extern nbMasterTextEntry_t master_text[];
+extern datDevilNegoFormat_t master_text[];
 
 extern u8 D_003E2470[];
 

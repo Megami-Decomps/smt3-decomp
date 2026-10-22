@@ -274,7 +274,7 @@ s32 nbCameraCheckNiidaCamera(void)
 {
     nbMainProcessData_t *pData = nbGetMainProcessData();
 
-    return dds3GetActiveCameraSceneBasic(dds3GetActiveScene()) == pData->unkB4;
+    return dds3GetActiveCameraSceneBasic(dds3GetActiveScene()) == pData->niidacamera;
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraCheckStateChange);

@@ -33,7 +33,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 
@@ -100,7 +100,7 @@ extern char D_0053DA90[];
 
 extern char D_0053DAA0[];
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 INCLUDE_ASM(const s32, "result/rstinit", rstInitEvoAct);
 

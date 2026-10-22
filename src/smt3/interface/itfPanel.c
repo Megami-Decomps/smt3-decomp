@@ -263,7 +263,7 @@ void itfPnlRelease(itfpanel_t *handle) {
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
 void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
-    handle->renderValue = z;
+    handle->z = z;
     handle->left = x0;
     handle->top = y0;
     handle->right = x1;
@@ -282,7 +282,7 @@ void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1,
     handle->top += y0;
     handle->right += x1;
     handle->bottom += y1;
-    handle->renderValue += z;
+    handle->z += z;
     if (handler != 0) {
         handler(handle->pwork, handle->left, handle->top, handle->right, handle->bottom);
     }
@@ -562,7 +562,7 @@ void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
     colors[1].rgba.alpha = handle->alpha;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
-        itfMiscDrawRectanglePrim(drawBuffer, colors, &D_003265F8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00326608[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], handle->renderValue, pdrawtag);
+        itfMiscDrawRectanglePrim(drawBuffer, colors, &D_003265F8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00326608[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], handle->z, pdrawtag);
     }
 }
 
@@ -580,10 +580,10 @@ void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     }
     colors = data->colors;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326618[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->renderValue, pdrawtag);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326618[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->z, pdrawtag);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F480, &D_00326648[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->renderValue, pdrawtag);
+        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F480, &D_00326648[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->z, pdrawtag);
     }
 }
 
@@ -601,10 +601,10 @@ void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     }
     colors = data->colors;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326660[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326678[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->renderValue, pdrawtag);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326660[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326678[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->z, pdrawtag);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F488, &D_00326690[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->renderValue, pdrawtag);
+        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F488, &D_00326690[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->z, pdrawtag);
     }
 }
 
@@ -631,9 +631,9 @@ void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
         out[3].y = input[3].y - yOffset;
     }
 
-    itfMiscDrawRectanglePrim(buf, colors, D_0054F490, D_0054F498, handle->renderValue, pdrawtag);
+    itfMiscDrawRectanglePrim(buf, colors, D_0054F490, D_0054F498, handle->z, pdrawtag);
     for (i = 0; i < 3; i++) {
-        itfMiscDrawLineStripPrim(vertices, colors, &D_003266A0[i * 5], &D_003266B0[i * 5], 5, handle->renderValue, pdrawtag);
+        itfMiscDrawLineStripPrim(vertices, colors, &D_003266A0[i * 5], &D_003266B0[i * 5], 5, handle->z, pdrawtag);
     }
 }
 
@@ -644,7 +644,7 @@ void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     sdfIVector4_t *colors = data->colors;
 
     colors[0].rgba.alpha = handle->alpha;
-    itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, handle->renderValue, pdrawtag);
+    itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, handle->z, pdrawtag);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
@@ -655,7 +655,7 @@ void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
     colors[1].rgba.alpha = handle->alpha;
     itfMiscDrawAlphaPrim(pdrawtag, 2, 0);
-    itfMiscDrawTriangleStripPrim(drawBuffer, colors, D_0054F4B0, D_0054F4B8, 6, handle->renderValue, pdrawtag);
+    itfMiscDrawTriangleStripPrim(drawBuffer, colors, D_0054F4B0, D_0054F4B8, 6, handle->z, pdrawtag);
     itfMiscDrawAlphaPrim(pdrawtag, 0, 0);
 }
 
@@ -675,19 +675,19 @@ void DrawMesWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
         rect[0].y = top;
         rect[1].x = handle->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003264A0, (itfDrawColor_t *)&handle->red, handle->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003264A0, (itfDrawColor_t *)&handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003264B0, (itfDrawColor_t *)&handle->red, handle->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003264B0, (itfDrawColor_t *)&handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = bottomStart;
         rect[1].y = handle->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003264C0, (itfDrawColor_t *)&handle->red, handle->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003264C0, (itfDrawColor_t *)&handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
     } else {
         itfMiscDrawSpritePrim(&handle->left, &D_003264D0,
-                                      &handle->red, handle->renderValue,
+                                      &handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
     }
 }
@@ -705,20 +705,20 @@ void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     rect[0].y = handle->top;
     rect[1].x = leftInset;
     rect[1].y = handle->bottom;
-    itfMiscDrawSpritePrim(rect, &D_003266C0, color, handle->renderValue,
+    itfMiscDrawSpritePrim(rect, &D_003266C0, color, handle->z,
                                   payload->texture, 0, pdrawtag);
 
     rect[0].x = leftInset;
     rect[0].y = handle->top;
     rect[1].x = rightInset;
     rect[1].y = handle->bottom;
-    itfMiscDrawSpritePrim2(rect, &D_003266D0, color, handle->renderValue, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(rect, &D_003266D0, color, handle->z, 0, pdrawtag);
 
     rect[0].x = handle->right;
     rect[0].y = handle->top;
     rect[1].x = rightInset;
     rect[1].y = handle->bottom;
-    itfMiscDrawSpritePrim2(rect, &D_003266C0, color, handle->renderValue, 0, pdrawtag);
+    itfMiscDrawSpritePrim2(rect, &D_003266C0, color, handle->z, 0, pdrawtag);
 }
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
@@ -735,7 +735,7 @@ void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     colors[1].components[3] = (handle->alpha * 0x20) >> 7;
     for (i = 0; i < 3; i++) {
         itfMiscDrawRectanglePrim(vertices, colors, &D_003266E0[i * 4],
-                        &D_003266F0[i * 4], handle->renderValue, pdrawtag);
+                        &D_003266F0[i * 4], handle->z, pdrawtag);
     }
     bottom = handle->bottom;
     top = handle->top;
@@ -748,19 +748,19 @@ void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
         rect[0].y = top;
         rect[1].x = handle->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003264A0, color, handle->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003264A0, color, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003264B0, color, handle->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003264B0, color, handle->z,
                                       payload->texture, 0, pdrawtag);
         rect[0].y = bottomStart;
         rect[1].y = handle->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003264C0, color, handle->renderValue,
+        itfMiscDrawSpritePrim(rect, &D_003264C0, color, handle->z,
                                       payload->texture, 0, pdrawtag);
     } else {
         itfMiscDrawSpritePrim(&handle->left, &D_003264D0,
-                                      &handle->red, handle->renderValue,
+                                      &handle->red, handle->z,
                                       payload->texture, 0, pdrawtag);
     }
 }

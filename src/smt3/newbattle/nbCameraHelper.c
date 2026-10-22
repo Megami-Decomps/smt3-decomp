@@ -15,7 +15,7 @@ typedef struct
     s32 resourceCount;
     char *directoryPath;
     dds3EffectFileNode_t *head;
-} dds3EffectFileList_t;
+} nbCameraHelper_effFileListHandle_t;
 
 /* Complete 0x44-byte browser owner, including its retained preview texture. */
 typedef struct
@@ -36,8 +36,8 @@ typedef struct
     dds3EffectFileNode_t *selectedEntry;
     dds3EffectFileNode_t *cachedEntry;
     sdfTexHandle_t *textureHandle;
-    dds3EffectFileList_t *resourceList;
-} dds3EffectFileWindow_t;
+    nbCameraHelper_effFileListHandle_t *resourceList;
+} nbCameraHelper_effFLWinHandle_t;
 
 extern s8 dds3PadBitTable[];
 extern s8 D_005298CB[];
@@ -87,8 +87,8 @@ typedef struct
     s32 a;
     dds3EffectSpriteCorner_t corner[2];
 } dds3EffectSpriteVertex_t;
-void dds3EffectListSetTexture(dds3EffectFileWindow_t *work, char *resource);
-void dds3EffectFileListWindowDrawSprite(dds3EffectFileWindow_t *work);
+void dds3EffectListSetTexture(nbCameraHelper_effFLWinHandle_t *work, char *resource);
+void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work);
 
 /* SDK directory entry filled by the directory-read provider. */
 typedef struct
@@ -103,10 +103,10 @@ typedef struct
  * types use a two-character extension, so the dot sits one byte later. */
 /* NON_MATCHING: 6 of 270 words differ (first at +0xE4). */
 #ifdef NON_MATCHING
-dds3EffectFileList_t *dds3EffectFileListCreate(char *path, s32 typeMask)
+nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typeMask)
 {
     dds3EffectDirEnt_t entry;
-    dds3EffectFileList_t *root;
+    nbCameraHelper_effFileListHandle_t *root;
     dds3EffectFileNode_t *previous;
     dds3EffectFileNode_t *node;
     s32 directory;
@@ -116,7 +116,7 @@ dds3EffectFileList_t *dds3EffectFileListCreate(char *path, s32 typeMask)
     char period;
 
     directory = dds3EffectDirOpen(path);
-    root = (dds3EffectFileList_t *)sdfChipAllocDirect(0xC);
+    root = (nbCameraHelper_effFileListHandle_t *)sdfChipAllocDirect(0xC);
     if (sdfHddValid != 0) {
         root->directoryPath = (char *)sdfChipAllocDirect(strlen(path) + 1);
         strcpy(root->directoryPath, path);
@@ -196,7 +196,7 @@ dds3EffectFileList_t *dds3EffectFileListCreate(char *path, s32 typeMask)
 INCLUDE_ASM(const s32, "newbattle/nbCameraHelper", dds3EffectFileListCreate);
 #endif
 
-void dds3EffectFileListDelete(dds3EffectFileList_t *a) {
+void dds3EffectFileListDelete(nbCameraHelper_effFileListHandle_t *a) {
     dds3EffectFileNode_t *node = a->head;
 
     if (node != NULL) {
@@ -210,8 +210,8 @@ void dds3EffectFileListDelete(dds3EffectFileList_t *a) {
     sdfChipFreeDirect(a);
 }
 
-dds3EffectFileWindow_t *dds3EffectFileListWindowCreate(dds3EffectFileList_t *a) {
-    dds3EffectFileWindow_t *resource = sdfChipAllocDirect(sizeof(*resource));
+nbCameraHelper_effFLWinHandle_t *dds3EffectFileListWindowCreate(nbCameraHelper_effFileListHandle_t *a) {
+    nbCameraHelper_effFLWinHandle_t *resource = sdfChipAllocDirect(sizeof(*resource));
 
     resource->x = 0;
     resource->y = 0xC8;
@@ -233,7 +233,7 @@ dds3EffectFileWindow_t *dds3EffectFileListWindowCreate(dds3EffectFileList_t *a) 
     return resource;
 }
 
-s32 dds3EffectFileListWindowDraw(dds3EffectFileWindow_t *a) {
+s32 dds3EffectFileListWindowDraw(nbCameraHelper_effFLWinHandle_t *a) {
     dds3EffectFileNode_t *visibleEntry;
     sdfDrawTag_t *packetList;
     sdfGrOt_t *surface;
@@ -386,7 +386,7 @@ s32 dds3EffectFileListWindowDraw(dds3EffectFileWindow_t *a) {
     return a->result;
 }
 
-void dds3EffectFileListWindowDelete(dds3EffectFileWindow_t *a) {
+void dds3EffectFileListWindowDelete(nbCameraHelper_effFLWinHandle_t *a) {
     sdfTexHandle_t *texture = a->textureHandle;
 
     if (texture != NULL) {
@@ -396,38 +396,38 @@ void dds3EffectFileListWindowDelete(dds3EffectFileWindow_t *a) {
     sdfChipFreeDirect(a);
 }
 
-void dds3EffectFileListWindowSetPos(dds3EffectFileWindow_t *a, s32 b, s32 c) {
+void dds3EffectFileListWindowSetPos(nbCameraHelper_effFLWinHandle_t *a, s32 b, s32 c) {
     a->x = b;
     a->y = c;
 }
 
-u32 dds3_1AB818(dds3EffectFileWindow_t *work) {
+u32 dds3_1AB818(nbCameraHelper_effFLWinHandle_t *work) {
     return work->selectedIndex;
 }
 
-u32 dds3EffectFileListWindowGetState(dds3EffectFileWindow_t *a) {
+u32 dds3EffectFileListWindowGetState(nbCameraHelper_effFLWinHandle_t *a) {
     return a->result;
 }
 
-u32 dds3EffectFileListWindowGetFilename(dds3EffectFileWindow_t *a, char *b) {
+u32 dds3EffectFileListWindowGetFilename(nbCameraHelper_effFLWinHandle_t *a, char *b) {
     sprintf(b, D_0054F268, a->resourceList->directoryPath, a->selectedEntry->name);
     return a->selectedEntry->type;
 }
 
-void dds3EffectFileListWindowSetOt(dds3EffectFileWindow_t *hEffFLWin, u32 ot) {
+void dds3EffectFileListWindowSetOt(nbCameraHelper_effFLWinHandle_t *hEffFLWin, u32 ot) {
     hEffFLWin->repeatDelay = ot;
 }
 
-void dds3EffectFileListWindowSetPadWait(dds3EffectFileWindow_t *hEffFLWin, u32 wait) {
+void dds3EffectFileListWindowSetPadWait(nbCameraHelper_effFLWinHandle_t *hEffFLWin, u32 wait) {
     hEffFLWin->drawSurface = wait;
 }
 
-void dds3EffectFileListWindowSetWindowColor(dds3EffectFileWindow_t *hEffFLWin, u32 frame_c, u32 bg_c) {
+void dds3EffectFileListWindowSetWindowColor(nbCameraHelper_effFLWinHandle_t *hEffFLWin, u32 frame_c, u32 bg_c) {
     hEffFLWin->borderColor = frame_c;
     hEffFLWin->fillColor = bg_c;
 }
 
-void dds3EffectListSetTexture(dds3EffectFileWindow_t *work, char *textureResource) {
+void dds3EffectListSetTexture(nbCameraHelper_effFLWinHandle_t *work, char *textureResource) {
     sdfTexHandle_t *texture;
     sdfMemHandle_t *loadedResource;
     u32 resourceWords[4];
@@ -444,7 +444,7 @@ void dds3EffectListSetTexture(dds3EffectFileWindow_t *work, char *textureResourc
 
 /* NON_MATCHING: 2 of 70 words differ (first at +0x7C). */
 #ifdef NON_MATCHING
-void dds3EffectFileListWindowDrawSprite(dds3EffectFileWindow_t *work)
+void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work)
 {
     sdfDrawTag_t *list;
     void *sprite;

@@ -1,8 +1,8 @@
 #include "interface.h"
 #include "kernel.h"
 
-typedef struct itfMesTable_t itfMesTable_t;
-typedef struct itfMesEntry_t itfMesEntry_t;
+typedef struct itfMesBinMesHeader_t itfMesBinMesHeader_t;
+typedef struct itfMesBinTypeHeader_t itfMesBinTypeHeader_t;
 typedef struct itfMesResource_t itfMesResource_t;
 typedef struct Speaker_tag Speaker_tag;
 typedef struct message_tag message_tag;
@@ -19,17 +19,17 @@ typedef struct debug_tag debug_tag;
 typedef struct itfPadState_t itfPadState_t;
 
 /* Message tables contain relocated encoded-text addresses. */
-struct itfMesTable_t {
+struct itfMesBinMesHeader_t {
     u8 unk0[0x18];
-    s16 count;
+    s16 page;
     s16 bitCount;
-    u32 items[1];
+    u32 addr[1];
 };
 
-struct itfMesEntry_t {
+struct itfMesBinTypeHeader_t {
     /* Relocated item-address table; address 1 marks a branch entry. */
     u32 *itemList;
-    itfMesTable_t *table;
+    itfMesBinMesHeader_t *table;
 };
 
 struct itfMesResource_t {
@@ -41,7 +41,7 @@ struct itfMesResource_t {
     u32 entryCount;
     u8 relocated;
     u8 unk1D[3];
-    itfMesEntry_t entries[1];
+    itfMesBinTypeHeader_t entries[1];
 };
 
 struct Speaker_tag {
@@ -55,7 +55,7 @@ struct Speaker_tag {
 struct message_tag {
     u32 x;
     s32 y;
-    itfMesTable_t *table;
+    itfMesBinMesHeader_t *table;
     frFontHandle_t *pfont;
     s8 phase;
     u8 textInterfaceMask; /* 0x11: result of itfTestTextInterfaceMask(3). */
@@ -325,15 +325,15 @@ void itfMesMngSetVarImmediate2(s32 id, s32 index, const char *pstr, s32 length);
 
 void ResolveResourceAddress(itfMesResource_t *pdata);
 
-itfMesEntry_t *GetTypeHeader2(itfMesResource_t *pfileheader);
+itfMesBinTypeHeader_t *GetTypeHeader2(itfMesResource_t *pfileheader);
 
 #define ITF_MES_MAGIC_MSG1 0x3147534d
 
 u8 *itfMesMngGetDataPtrImmediate(s32 id, s32 message, s32 page);
 
-u8 *GetMessagePagePtr(itfMesTable_t *table, s32 index);
+u8 *GetMessagePagePtr(itfMesBinMesHeader_t *table, s32 index);
 
-itfMesEntry_t *GetTypeHeader(instanceMes_tag *pinst, s32 index);
+itfMesBinTypeHeader_t *GetTypeHeader(instanceMes_tag *pinst, s32 index);
 
 void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha);
 
@@ -858,15 +858,15 @@ s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     instanceMes_tag *panel = pinst[window].mes;
     message_tag *mes = &panel->message;
     Speaker_tag *spk;
-    itfMesTable_t *table;
+    itfMesBinMesHeader_t *table;
     u32 flags;
     u32 mode;
 
     table = GetTypeHeader(panel, entryIndex)->table;
     mes->itemIndex = itemIndex;
     mes->table = table;
-    mes->maxpage = table->count;
-    if (table->count == 0) {
+    mes->maxpage = table->page;
+    if (table->page == 0) {
         printf("itfMesMngRequestMessage() escape 1\n");
         return 0;
     }
@@ -955,8 +955,8 @@ frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, 
 void itfMesMngRequestSelect(s32 id, s32 select) {
     instanceMes_tag *panel = pinst[id].mes;
     select_tag *sel = &panel->select;
-    itfMesEntry_t *entry;
-    itfMesTable_t *table;
+    itfMesBinTypeHeader_t *entry;
+    itfMesBinMesHeader_t *table;
     s32 count;
     s32 y;
     frFontHandle_t *chain;
@@ -977,7 +977,7 @@ void itfMesMngRequestSelect(s32 id, s32 select) {
     if (panel->pext != NULL) {
         frSetExtDic(panel->pext);
     }
-    chain = GetFontHandleUnit(&table->items[1], table->bitCount, sel->mask, sel->x, y, panel->z);
+    chain = GetFontHandleUnit(&table->addr[1], table->bitCount, sel->mask, sel->x, y, panel->z);
     sel->phase = 1;
     sel->lines = count;
     sel->pfont = chain;
@@ -1298,7 +1298,7 @@ void itfMesMngSetVarImmediate2(s32 id, s32 index, const char *pstr, s32 length) 
 itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource) {
     instanceMes_tag *mes = pinst[id].mes;
     itfMesResource_t *previous = mes->pdata;
-    itfMesEntry_t *entry;
+    itfMesBinTypeHeader_t *entry;
     u8 *temporaryFontEntry;
 
     mes->pdata = presource;
@@ -1306,7 +1306,7 @@ itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource) {
     entry = GetTypeHeader2(presource);
     temporaryFontEntry = 0;
     if (presource->magic == ITF_MES_MAGIC_MSG1) {
-        /* itfMesEntry_t is an invented type and the IDB has no counterpart,
+        /* itfMesBinTypeHeader_t is an invented type and the IDB has no counterpart,
          * so +8 past its two known words has no name to take. */
         temporaryFontEntry = *(u8 **)((u8 *)entry + 8);
     }
@@ -1371,13 +1371,13 @@ s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index) {
  * Empty tables and zero/missing encoded items return zero. */
 s32 itfMesMngGetWidth(s32 id, s32 message, s32 page) {
     instanceMes_tag *mes = pinst[id].mes;
-    itfMesTable_t *table;
+    itfMesBinMesHeader_t *table;
     u8 *encodedText;
     frFontHandle_t *glyphChain;
     s32 textExtent;
 
     table = GetTypeHeader(mes, message)->table;
-    if (table->count == 0) {
+    if (table->page == 0) {
         return 0;
     }
     CommitVarTable((s32 *)mes->variable.pptr);
@@ -1603,28 +1603,28 @@ u32 CheckMessageBinary(itfMesResource_t *pdata) {
     return isMessageResource;
 }
 
-itfMesEntry_t *GetTypeHeader(instanceMes_tag *pinst, s32 index)
+itfMesBinTypeHeader_t *GetTypeHeader(instanceMes_tag *pinst, s32 index)
 {
-    itfMesEntry_t *entries = pinst->pdata->entries;
+    itfMesBinTypeHeader_t *entries = pinst->pdata->entries;
 
     return &entries[index];
 }
 
-itfMesEntry_t *GetTypeHeader2(itfMesResource_t *pfileheader)
+itfMesBinTypeHeader_t *GetTypeHeader2(itfMesResource_t *pfileheader)
 {
-    itfMesEntry_t *entries = pfileheader->entries;
+    itfMesBinTypeHeader_t *entries = pfileheader->entries;
 
     return &entries[pfileheader->entryCount];
 }
 
-u8 *GetMessagePagePtr(itfMesTable_t *table, s32 index)
+u8 *GetMessagePagePtr(itfMesBinMesHeader_t *table, s32 index)
 {
-    s32 count = table->count;
+    s32 count = table->page;
 
     if (index < 0 || index >= count) {
         return NULL;
     }
-    return (u8 *)table->items[index];
+    return (u8 *)table->addr[index];
 }
 
 /* Called above its definition, where ee-gcc assumed int. */

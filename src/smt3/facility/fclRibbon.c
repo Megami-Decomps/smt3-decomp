@@ -27,7 +27,7 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
 typedef struct
 {
@@ -55,7 +55,7 @@ extern void fclRbnRelease(fclRibbon_t *phandle);
 
 extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 

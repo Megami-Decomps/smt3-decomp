@@ -364,7 +364,7 @@ typedef struct
 typedef struct
 {
     u8 pad0[0x60];
-    sdfPacWork_t *queueHead;
+    sdfPacDecodeResrc_t *queueHead;
 } fldPacRequest_t;
 
 extern fldPacRequest_t *pacLoad(const char *filename);
@@ -1557,7 +1557,7 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldDrawAreaBlockFont);
 
 void fldInitPacLoader(void) {
     fldPacRequest_t *request;
-    sdfPacWork_t *work;
+    sdfPacDecodeResrc_t *work;
     sdfMemHandle_t *handle;
     u32 i;
 

@@ -11,7 +11,7 @@ typedef struct itfpanel_t {
     sdfMemHandle_t *allocation;
     sdfMemHandle_t *payloadAllocation;
     u32 *pwork;
-    s32 renderValue;
+    s32 z;
     s32 left;
     s32 top;
     s32 right;

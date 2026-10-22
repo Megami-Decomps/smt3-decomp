@@ -30,12 +30,12 @@ typedef struct nbCamera_t {
 
 typedef struct effPartHandle_t effPartHandle_t;
 
-typedef struct nbCameraHelper_t {
+typedef struct nbCameraHelper_tag {
     u8 unk00[0x30];
     u32 unk30;
     s32 unk34;
     effPartHandle_t *hPart;
-} nbCameraHelper_t;
+} nbCameraHelper_tag;
 
 extern void *sdfChipAllocDirect(s32 aSize);
 
@@ -80,7 +80,7 @@ extern f32 D_0054F3A0[];
 
 extern char *nbCameraHelperViewerMode;
 
-extern nbCameraHelper_t *D_0054F3DC;
+extern nbCameraHelper_tag *D_0054F3DC;
 
 extern sdfMemHandle_t *D_0054F3E0;
 
@@ -147,11 +147,11 @@ extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperFileLoadPB);
 
 /* Called above its definition, where ee-gcc assumed int. */
-u16 nbCameraHelperLength(nbCameraHelper_t *hCameraHelper);
+u16 nbCameraHelperLength(nbCameraHelper_tag *hCameraHelper);
 
-nbCameraHelper_t *nbCameraHelperCreate(const char *pFilename)
+nbCameraHelper_tag *nbCameraHelperCreate(const char *pFilename)
 {
-    nbCameraHelper_t *pHelper = sdfChipAllocDirect(0x3C);
+    nbCameraHelper_tag *pHelper = sdfChipAllocDirect(0x3C);
 
     pHelper->hPart = nbCameraHelperFileLoadPB(pFilename);
     pHelper->unk30 = 0;
@@ -159,13 +159,13 @@ nbCameraHelper_t *nbCameraHelperCreate(const char *pFilename)
     return pHelper;
 }
 
-void nbCameraHelperDelete(nbCameraHelper_t *hCameraHelper)
+void nbCameraHelperDelete(nbCameraHelper_tag *hCameraHelper)
 {
     dds3EffectPartDelete(hCameraHelper->hPart);
     sdfChipFreeDirect(hCameraHelper);
 }
 
-u16 nbCameraHelperLength(nbCameraHelper_t *hCameraHelper)
+u16 nbCameraHelperLength(nbCameraHelper_tag *hCameraHelper)
 {
     return dds3EffectPartGetHandle(hCameraHelper->hPart)->first->frameLength;
 }

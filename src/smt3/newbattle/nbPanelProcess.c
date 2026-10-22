@@ -430,14 +430,14 @@ typedef struct {
     s32 z;
     s32 w;
     s32 h;
-} nbPanelXYZ_t;
+} nbPanelProcess_nbPanelXYZ_t;
 
 typedef struct {
     s32 u;
     s32 v;
     s32 uw;
     s32 vh;
-} nbPanelUV_t;
+} nbPanelProcess_nbPanelTMXuv_t;
 
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
                         sdfTexHandle_t *th);
@@ -667,8 +667,8 @@ void nbPanelAllHide(void)
     nbPanelPressGaugeHide();
 }
 
-void nbPanelSpriteCenteringDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelXYZ_t *pArea,
-                                nbPanelUV_t *pUV, u32 abgr, sdfTexHandle_t *hTex)
+void nbPanelSpriteCenteringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, nbPanelProcess_nbPanelXYZ_t *pArea,
+                                nbPanelProcess_nbPanelTMXuv_t *pUV, u32 abgr, sdfTexHandle_t *hTex)
 {
     s32 cx;
     u32 col;
@@ -678,7 +678,7 @@ void nbPanelSpriteCenteringDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelXYZ_t *
     nbPnlSprite(cx + x, pXYZ->y + y, pXYZ->w, pXYZ->h, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
 }
 
-void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelUV_t *pUV, u32 abgr, f32 scale,
+void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, nbPanelProcess_nbPanelTMXuv_t *pUV, u32 abgr, f32 scale,
                             sdfTexHandle_t *hTex)
 {
     s32 sw;
@@ -695,7 +695,7 @@ void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelUV_t *pUV, 
     nbPnlSprite(px + x, py + y, sw, sh, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
 }
 
-void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelUV_t *pUV, u32 abgr, f32 scaleW,
+void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, nbPanelProcess_nbPanelTMXuv_t *pUV, u32 abgr, f32 scaleW,
                               f32 scaleH, sdfTexHandle_t *hTex)
 {
     s32 sw;
@@ -712,8 +712,8 @@ void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelUV_t *pUV
     nbPnlSprite(px + x, py + y, sw, sh, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
 }
 
-void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ_0, nbPanelUV_t *pXYZ_1, u32 rate,
-                            nbPanelXYZ_t *pUV, f32 abgr, sdfTexHandle_t *hTex)
+void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ_0, nbPanelProcess_nbPanelTMXuv_t *pXYZ_1, u32 rate,
+                            nbPanelProcess_nbPanelXYZ_t *pUV, f32 abgr, sdfTexHandle_t *hTex)
 {
     s32 x0;
     s32 y0;
@@ -737,7 +737,7 @@ void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ_0, nbPanelUV_t *pXY
     nbPnlSprite(px + x, py + y, sw, sh, pXYZ_1->u, pXYZ_1->v, pXYZ_1->uw, pXYZ_1->vh, col, hTex);
 }
 
-void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, u32 abgr, char **pString)
+void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, u32 abgr, char **pString)
 {
     _FRQ *frq;
     u32 col;

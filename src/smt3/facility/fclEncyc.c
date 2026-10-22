@@ -52,9 +52,9 @@ typedef struct
     /* 0x0364 */ s32 unk_364;
     /* 0x0368 */ void *allocation;
     /* 0x036C */ s32 unk_36C;
-} fclEncyc_instance_t;
+} fclEncyc_instance_tag;
 
-extern fclEncyc_instance_t *g_pinst;
+extern fclEncyc_instance_tag *g_pinst;
 
 typedef struct
 {
@@ -149,7 +149,7 @@ typedef struct
     /* 0x1E */ u8 unk_1E[2];
     /* 0x20 */ s32 unk_20;
     /* 0x24 */ s32 unk_24;
-} fclReadRibbon_t;
+} fclEncyc_readmainwork_tag;
 
 extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
 
@@ -392,7 +392,7 @@ void fclEncycDebugShutdown(void)
     ReleaseDebug_fclEncyc();
 }
 
-void InitializeInstance(fclEncyc_instance_t *pinst)
+void InitializeInstance(fclEncyc_instance_tag *pinst)
 {
     pinst->unk_6D = 1;
     pinst->modelId = -1;
@@ -419,7 +419,7 @@ extern void *sdfMemAllocDirect(s32 aSize);
 
 extern s32 sdfMemLock(void *aHandle);
 
-void allocPhaseBuffer(fclEncyc_instance_t *work, s32 aSize)
+void allocPhaseBuffer(fclEncyc_instance_tag *work, s32 aSize)
 {
     void *buf = sdfMemAllocDirect(aSize);
     s32 lock = sdfMemLock(buf);
@@ -428,7 +428,7 @@ void allocPhaseBuffer(fclEncyc_instance_t *work, s32 aSize)
     work->unk_36C = lock;
 }
 
-void ReleaseWork(fclEncyc_instance_t *pinst)
+void ReleaseWork(fclEncyc_instance_tag *pinst)
 {
     if (pinst->unk_36C != 0) {
         sdfMemFreeDirect(pinst->allocation);
@@ -438,14 +438,14 @@ void ReleaseWork(fclEncyc_instance_t *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CALC_ENCYC_Process);
 
-extern void SetCameraLightParam(fclEncyc_instance_t *pinst);
+extern void SetCameraLightParam(fclEncyc_instance_tag *pinst);
 
-extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
+extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 s32 DRAW_ENCYC_Process(void)
 {
-    fclEncyc_instance_t *work = g_pinst;
-    void (*phase)(fclEncyc_instance_t *work);
+    fclEncyc_instance_tag *work = g_pinst;
+    void (*phase)(fclEncyc_instance_tag *work);
 
     if (work == NULL) {
         return 0;
@@ -471,7 +471,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseRegistTop);
 
 extern void ReleaseFontList(void **ppfont, s32 num);
 
-void DestPhaseRegistTop(fclEncyc_instance_t *pinst)
+void DestPhaseRegistTop(fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->unk_36C;
 
@@ -496,7 +496,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseRegistConfirm);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 
-void DestPhaseRegistConfirm(fclEncyc_instance_t *pinst)
+void DestPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
 {
     void *scene;
 
@@ -524,7 +524,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadStatus);
 
-void DrawPhaseReadStatus(fclEncyc_instance_t *pinst)
+void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->unk_36C;
 
@@ -542,7 +542,7 @@ void DrawPhaseReadStatus(fclEncyc_instance_t *pinst)
     DrawReadMainHelp(pinst);
 }
 
-void DestPhaseReadStatus(fclEncyc_instance_t *pinst)
+void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->unk_36C;
     void *scene;
@@ -564,7 +564,7 @@ void DestPhaseReadStatus(fclEncyc_instance_t *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadSummon);
 
-void DrawPhaseReadSummon(fclEncyc_instance_t *pinst)
+void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->unk_36C;
 
@@ -600,7 +600,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", RegistAll);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitListWindow);
 
-void PushListwinCursor(fclEncyc_instance_t *pinst, lstListWindow_t *plistwin, s32 Stack)
+void PushListwinCursor(fclEncyc_instance_tag *pinst, lstListWindow_t *plistwin, s32 Stack)
 {
     cmpCursorPos_t *cur = &plistwin->cursorPos;
 
@@ -630,7 +630,7 @@ void AdjustStackCursor(s32 numlist, s16 *pindex, s16 *pshift)
     *pshift = top;
 }
 
-void ResetReadMainRibbon(fclReadRibbon_t *pwork)
+void ResetReadMainRibbon(fclEncyc_readmainwork_tag *pwork)
 {
     pwork->unk_0C = 0;
     pwork->unk_10 = 0x58;
@@ -735,7 +735,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CreateFontExplain);
 
 extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
-void ReleaseFontExplain(fclEncyc_instance_t *pinst, s32 release_mesmng)
+void ReleaseFontExplain(fclEncyc_instance_tag *pinst, s32 release_mesmng)
 {
     s32 base = pinst->unk_36C;
 
@@ -751,7 +751,7 @@ void ReleaseFontExplain(fclEncyc_instance_t *pinst, s32 release_mesmng)
     }
 }
 
-void FadeOutRibbon(fclReadRibbon_t *pwork)
+void FadeOutRibbon(fclEncyc_readmainwork_tag *pwork)
 {
     pwork->unk_1C -= 0x10;
     if (pwork->unk_1C < 0) {
@@ -763,7 +763,7 @@ void FadeOutRibbon(fclReadRibbon_t *pwork)
     pwork->unk_24 -= 0x20;
 }
 
-void FadeInRibbon(fclReadRibbon_t *pwork)
+void FadeInRibbon(fclEncyc_readmainwork_tag *pwork)
 {
     pwork->unk_1C += 0x10;
     if (pwork->unk_1C >= 0x81) {
@@ -820,7 +820,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CalcListElemColor);
 /* Called above its definition, where ee-gcc assumed int. */
 u16 cmpGetStatusModelId(void);
 
-void RequestModelLoad(fclEncyc_instance_t *pinst, s32 id)
+void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id)
 {
     if (cmpGetEncycWork() != 0) {
         if (id == cmpGetStatusModelId()) {
@@ -831,7 +831,7 @@ void RequestModelLoad(fclEncyc_instance_t *pinst, s32 id)
     pinst->flags |= 4;
 }
 
-void SetScreenOffset(fclEncyc_instance_t *pinst, s32 flag)
+void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag)
 {
     if (flag != 0)
     {
@@ -845,7 +845,7 @@ void SetScreenOffset(fclEncyc_instance_t *pinst, s32 flag)
     }
 }
 
-void MoveScreenOffset(fclEncyc_instance_t *pinst)
+void MoveScreenOffset(fclEncyc_instance_tag *pinst)
 {
     if ((pinst->flags & 8) != 0) {
         pinst->screenOfsX -= 16.0f;
@@ -896,9 +896,9 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CirculateDevilObject);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeDevilObjectRegistConfirm);
 
-extern void RequestModelLoad(fclEncyc_instance_t *pinst, s32 id);
+extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
 
-void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_t *pinst)
+void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->unk_36C;
     u16 *record = (u16 *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);

@@ -33,7 +33,7 @@ typedef struct effBTL_SkillPartsList_t {
     u8 unk15[3];
 } effBTL_SkillPartsList_t;
 
-typedef struct effBTLCutData_t {
+typedef struct effBTL_SkillCutTable_t {
     s32 triggerFrame;
     u8 unk04[2];
     u16 shake;
@@ -49,12 +49,12 @@ typedef struct effBTLCutData_t {
     u8 actorScaleEnabled;
     u8 unk75[3];
     effBTL_SkillPartsList_t entries[1]; /* 0x78: variable-length serialized entries */
-} effBTLCutData_t;
+} effBTL_SkillCutTable_t;
 
 /* Each BED bank reserves sixty entries, for a native stride of 0x618. */
 typedef struct effBTLBank_t {
     u8 unk00[8];
-    effBTLCutData_t list;
+    effBTL_SkillCutTable_t list;
     u8 unk98[0x580];
 } effBTLBank_t;
 
@@ -78,7 +78,7 @@ struct effBTLCut_t {
     u16 kind;
     u8 unk16[2];
     s32 unk18;
-    effBTLCutData_t *list;
+    effBTL_SkillCutTable_t *list;
     dds3EffectPart_t *parameterWorks[60]; /* 0x20 */
     effBTLCallback_t sourceFrameCallback; /* 0x110 */
     effBTLCallback_t triggerFrameCallback;

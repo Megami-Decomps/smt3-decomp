@@ -172,7 +172,7 @@ void nbAddStageCamera(nbMainProcessData_t *data)
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
     dds3CameraObjectBasicSetFovy(camera, 0.8726646f);
-    data->unkB4 = (s32)camera;
+    data->niidacamera = (s32)camera;
 }
 
 void nbAddStageCamera2(nbMainProcessData_t *data)
@@ -261,7 +261,7 @@ void StageLoad(void)
         dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
         nbAddStageCamera(data);
         nbAddStageCamera2(data);
-        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), data->unkB4);
+        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), data->niidacamera);
         SetBattleLight(data);
         nbLoadStageSky();
         break;

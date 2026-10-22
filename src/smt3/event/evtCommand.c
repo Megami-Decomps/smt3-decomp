@@ -2180,10 +2180,10 @@ s32 evtCommand_OBJ_PATH_MOVE(void) {
     if (target == NULL)
         return 1;
     data = dds3MatterObjectBasicGetControlWorkData(unit);
-    slotNode = data->control[1];
+    slotNode = data->pBasic[1];
     if (slotNode == NULL) {
         dds3ObjectBaseCreateMover(unit);
-        slotNode = data->control[1];
+        slotNode = data->pBasic[1];
     }
     resource = slotNode->workdata;
     if (resource->sourceObject == NULL) {
