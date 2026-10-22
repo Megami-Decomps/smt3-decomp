@@ -976,7 +976,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         }
         break;
     case EVENT:
-        if (*(s32 *)data->unk118 == 0) {
+        if (*(s32 *)data->EventProcessID == 0) {
             if (data->endtype == 1 || data->endtype == 8) {
                 nbSetNextPhase(ATO);
             } else {

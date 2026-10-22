@@ -265,10 +265,10 @@ typedef struct nbEventProcessData_t {
     s32 time;
     s32 seq;
     s32 seqtime;
-    void *unk_14;
+    void *userdata;
     void (*unk_18)(dds3ProcessID_t *id);
     void *file;
-    nbPacHandle_t *unk_20;
+    nbPacHandle_t *pfile;
     void *mem;
 } nbEventProcessData_t;
 

@@ -70,7 +70,7 @@ dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot) {
         dds3SetRadiusPoseSet(basic->poseset);
         work = basic->workdata;
         work->status = -1;
-        work->unk04 = 0;
+        work->pWorkData = 0;
         dds3ObjectBaseSetControlBasicType(basic, dds3AreaBasicGetFastArea(), 5);
         dds3ObjectBaseRegistArea(basic);
         return basic;

@@ -306,10 +306,10 @@ typedef struct nbEventProcessData_t {
     s32 time;
     s32 seq;
     s32 seqtime;
-    void *unk_14;
+    void *userdata;
     void (*unk_18)(dds3ProcessID_t *id);
     void *file;
-    nbPacHandle_t *unk_20;
+    nbPacHandle_t *pfile;
     void *mem;
 } nbEventProcessData_t;
 
@@ -483,8 +483,8 @@ s32 Daisupe(nbEventProcessData_t *ed)
     nbSetupBattleUnits(ed->data, D_005515BC);
     nbLoadUnitGroup(1, 0, 1);
     if (evtBitCheck(0xC0F) != 0) {
-        nbSetModelHandleOnce(nbGetEventForm(), ed->unk_20);
-        ed->unk_20 = NULL;
+        nbSetModelHandleOnce(nbGetEventForm(), ed->pfile);
+        ed->pfile = NULL;
     }
     form = nbGetEventForm();
     SDF_VU0_COPYVECTOR(&pos, &form->pos);

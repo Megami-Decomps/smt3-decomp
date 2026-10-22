@@ -310,10 +310,10 @@ typedef struct nbEventProcessData_t {
     s32 time;
     s32 seq;
     s32 seqtime;
-    void *unk_14;
+    void *userdata;
     void (*unk_18)(dds3ProcessID_t *id);
     void *file;
-    nbPacHandle_t *unk_20;
+    nbPacHandle_t *pfile;
     void *mem;
 } nbEventProcessData_t;
 
@@ -419,7 +419,7 @@ s32 Model1Start(nbEventProcessData_t *ed)
     }
     nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x389, 1), 2, form);
     if (evtBitCheck(0xC0F)) {
-        ed->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x102);
+        ed->pfile = (nbPacHandle_t *)nbMakeModelPackName(0x102);
     } else {
         sprintf(D_005754E0, D_005467C0, 0x102);
         ed->file = fileLoad(D_005754E0);
@@ -441,7 +441,7 @@ s32 Model1Wait(nbEventProcessData_t *ed)
         dds3SetQuake(0x1E, 0x1F4);
         break;
     }
-    if (ed->seqtime >= 0xF0 && pacCheckEnd(ed->unk_20) != 0) {
+    if (ed->seqtime >= 0xF0 && pacCheckEnd(ed->pfile) != 0) {
         if (evtBitCheck(0xC0F) == 0) {
             ed->mem = fileGetMemHandle(ed->file);
             fileHandleFree(ed->file);

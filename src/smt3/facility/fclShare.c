@@ -38,7 +38,7 @@ typedef struct
     /* 0x0C */ u16 unk_0C;
     /* 0x0E */ u16 unk_0E;
     /* 0x10 */ s32 X;
-    /* 0x14 */ s32 unk_14;
+    /* 0x14 */ s32 Y;
     /* 0x18 */ s32 Z;
     /* 0x1C */ u8 color[4];
     /* 0x20 */ u8 Flag;
@@ -122,7 +122,7 @@ void fclSetSpriteEx(fclSprite_t *pSprite, fclSpriteRect_t *pSpriteBase, s32 X, s
 
     pSprite->X = X << 4;
     pSprite->tex = TexHandle;
-    pSprite->unk_14 = Y << 3;
+    pSprite->Y = Y << 3;
     pSprite->Z = Z;
     pSprite->Flag = Flag;
     fclSetSpriteColor((u8 *)pSprite, Col);
@@ -158,7 +158,7 @@ void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32
     pSprite->unk_08 = U1;
     pSprite->unk_0A = V1;
     pSprite->unk_0C = U2;
-    pSprite->unk_14 = 0;
+    pSprite->Y = 0;
     pSprite->X = 0;
     fclSetSpriteColor((u8 *)pSprite, Col);
 }

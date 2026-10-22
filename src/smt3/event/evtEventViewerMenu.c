@@ -57,7 +57,7 @@ typedef struct {
     u8 unk2290[0x18];
     s32 mainCursor;                 /* 0x22A8 */
     s32 groupFirst;                 /* 0x22AC */
-    u8 unk22B0[4];
+    u8 work_x[4];
     s32 groupCursor;                /* 0x22B4 */
     s32 posCursor;                  /* 0x22B8 */
     s32 itemCursor;                 /* 0x22BC */

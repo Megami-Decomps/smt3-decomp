@@ -86,7 +86,7 @@ struct evtViewerInfo_t {
     s32 entryTotal;                     /* 0x0020 */
     char entryName[256][32];            /* 0x0024 */
     dds3Basic_t *activecamera;          /* 0x2024 */
-    u8 unk2028[4];
+    u8 freecamera[4];
     dds3Basic_t *gamecamera;         /* 0x202C */
     s32 trackCount;                     /* 0x2030 */
     evtViewerObject_s *tracks;            /* 0x2034 */
@@ -106,9 +106,9 @@ struct evtViewerInfo_t {
     s32 rippleBlur;                     /* 0x22A4 */
     s32 fileMode;                       /* 0x22A8 */
     s32 work_base;                        /* 0x22AC */
-    u8 unk22B0[4];
+    u8 work_x[4];
     s32 work_y;                        /* 0x22B4 */
-    u8 unk22B8[4];
+    u8 eventpos_y[4];
     s32 select_y;                        /* 0x22BC */
     s32 menuItemCount;                  /* 0x22C0 */
     char *title;                        /* 0x22C4 */

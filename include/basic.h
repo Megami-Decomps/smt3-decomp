@@ -163,7 +163,7 @@ typedef struct
 typedef struct
 {
     s32 status;
-    s32 unk04;
+    s32 pWorkData;
     struct evtUnit_t *hUnit;
     dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     s32 EL_serialID;

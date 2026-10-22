@@ -294,10 +294,10 @@ typedef struct nbEventProcessData_t {
     s32 time;
     s32 seq;
     s32 seqtime;
-    void *unk_14;
+    void *userdata;
     void (*unk_18)(dds3ProcessID_t *id);
     void *file;
-    nbPacHandle_t *unk_20;
+    nbPacHandle_t *pfile;
     void *mem;
 } nbEventProcessData_t;
 
@@ -531,16 +531,16 @@ void nbEventShutdown(dds3ProcessID_t *id)
         fileHandleFree(e->file);
         e->file = NULL;
     }
-    if (e->unk_20 != NULL) {
+    if (e->pfile != NULL) {
         fileSyncAll();
-        pacFileHandleFree_(e->unk_20);
-        e->unk_20 = NULL;
+        pacFileHandleFree_(e->pfile);
+        e->pfile = NULL;
     }
     if (e->unk_18 != NULL) {
         e->unk_18(id);
     }
-    if (e->unk_14 != NULL) {
-        sdfChipFreeDirect(e->unk_14);
+    if (e->userdata != NULL) {
+        sdfChipFreeDirect(e->userdata);
     }
     sdfChipFreeDirect(e);
 }

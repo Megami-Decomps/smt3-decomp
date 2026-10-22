@@ -246,7 +246,7 @@ typedef struct
     /* 0x0C */ u16 unk_0C;
     /* 0x0E */ u16 unk_0E;
     /* 0x10 */ s32 X;
-    /* 0x14 */ s32 unk_14;
+    /* 0x14 */ s32 Y;
     /* 0x18 */ s32 Z;
     /* 0x1C */ u8 color[4];
     /* 0x20 */ u8 Flag;

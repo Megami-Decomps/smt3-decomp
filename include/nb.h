@@ -140,7 +140,7 @@ typedef struct nbMainProcessData_t
     s16 press4_ten;
     s16 StageMajor;                             /* 0x07C: stagemajor */
     s16 StageMinor;                             /* 0x07E: stageminor */
-    u8 unk80[4];
+    u8 TarSelType[4];
     s32 nakamayobi;                        /* 0x084 */
     s32 eventno;                           /* 0x088 */
     s32 eventrid;
@@ -175,7 +175,7 @@ typedef struct nbMainProcessData_t
     dds3ProcessID_t *helpProcess;
     dds3ProcessID_t *autoCommProcess;
     dds3ProcessID_t *EncProcessID;      /* 0x114 */
-    u8 unk118[4];
+    u8 EventProcessID[4];
     struct effBTL_t *HatudoEff;         /* 0x11C */
     void *pnltex[4];                       /* 0x120 */
     s32 mesmngid;                          /* 0x130 */

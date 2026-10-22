@@ -20,7 +20,7 @@ typedef struct itfPadState_t itfPadState_t;
 
 /* Message tables contain relocated encoded-text addresses. */
 struct itfMesBinMesHeader_t {
-    u8 unk0[0x18];
+    u8 label[0x18];
     s16 page;
     s16 bitCount;
     u32 addr[1];

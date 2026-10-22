@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 121 types, 1007 members, 506 adopted constants.
+# 121 types, 996 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -418,7 +418,6 @@ member dds3TitleWork_t.unk_20
 member dds3TitleWork_t.unk_30
 member dds3TitleWork_t.unk_34
 member dds3TrackPoly_t.unk28
-member dds3UnitObjectBasicWorkData_t.unk04
 member dds3UnitObjectBasicWorkData_t.unk18
 member effBTLAimParams_t.unk03
 member effBTLBank_t.unk00
@@ -451,7 +450,6 @@ member effBTL_SkillLight_t.unknown14
 member effBTL_SkillLight_t.unknown18
 member effBTL_SkillLight_t.unknown1C
 member effBTL_SkillLight_t.unknown20
-member effBTL_SkillPartsList_t.unk02
 member effBTL_SkillPartsList_t.unk15
 member effBaelHead_t.unk00
 member effBaelHead_t.unk04
@@ -592,13 +590,10 @@ member evtViewerGroup_t.unk08
 member evtViewerInfo_t.unk0000
 member evtViewerInfo_t.unk001C
 member evtViewerInfo_t.unk2024
-member evtViewerInfo_t.unk2028
 member evtViewerInfo_t.unk2038
 member evtViewerInfo_t.unk2284
 member evtViewerInfo_t.unk2288
 member evtViewerInfo_t.unk2290
-member evtViewerInfo_t.unk22B0
-member evtViewerInfo_t.unk22B8
 member evtViewerInfo_t.unk22E1
 member evtViewerInfo_t.unk230C
 member evtViewerKey_t.unk10
@@ -679,7 +674,6 @@ member fclSprite_t.unk_08
 member fclSprite_t.unk_0A
 member fclSprite_t.unk_0C
 member fclSprite_t.unk_0E
-member fclSprite_t.unk_14
 member fldAddressWork_t.unk00
 member fldAddressWork_t.unk04
 member fldAddressWork_t.unk08
@@ -785,7 +779,6 @@ member frRelativeImage_t.unk08
 member frTextIndex_t.unk00
 member instanceMes_tag.unk98
 member itfGsState_t.unk00
-member itfMesBinMesHeader_t.unk0
 member itfMesInstance_t.unk04
 member itfMesManager_t.unk8
 member itfMesResource_t.unk0
@@ -882,14 +875,10 @@ member nbEventEntry_t.unk_04
 member nbEventEntry_t.unk_08
 member nbEventEntry_t.unk_0C
 member nbEventEntry_t.unk_10
-member nbEventProcessData_t.unk_14
 member nbEventProcessData_t.unk_18
-member nbEventProcessData_t.unk_20
 member nbInnenRec_t.unk_06
-member nbMainProcessData_t.unk118
 member nbMainProcessData_t.unk134
 member nbMainProcessData_t.unk140
-member nbMainProcessData_t.unk80
 member nbMainProcessData_t.unk_04
 member nbMainProcessData_t.unk_11C
 member nbMainProcessData_t.unk_130
