@@ -52,12 +52,12 @@ typedef struct
     s32 mark0;
     s32 mark1;
     u32 startFrame;
-    s32 unk10;
+    s32 point;
     s32 historyLength;
     f32 sampleStep;
     u32 blend;
     u32 abgr;
-    u32 unk24;
+    u32 sub_alpha_in;
 } effSwordTrackParams_t;
 
 /* Sword trails have their history pointer at +0x30 instead of +0x38. */
@@ -132,7 +132,7 @@ effModelTrackPoly_t *Eff_ModelTrackPolyCreate(Eff_ModelTrackPolyParam_t *pParam)
         sword.mark0 = 0x65;
         sword.mark1 = 0x64;
         sword.startFrame = 8;
-        sword.unk10 = 0xC8;
+        sword.point = 0xC8;
         switch (mdlGetMotionNum(pParam->object, 0)) {
         case 10:
             sword.historyLength = 6;

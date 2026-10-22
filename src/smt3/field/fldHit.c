@@ -47,8 +47,8 @@ struct collision_s {
     f32 vertices[4][4];
     f32 elv[3];
     u32 unkC4;
-    u16 unkC8;
-    u16 unkCA;
+    u16 blockID;
+    u16 hitflag;
     s32 id;
     dds3Basic_t *matter;
     fldCollisionFace_t *pFace;

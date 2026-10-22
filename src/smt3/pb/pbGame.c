@@ -19,7 +19,7 @@ typedef struct
     s32 dispStat;
     s16 x, y;
     s32 dir;
-    u8 unk0C[4];
+    u8 dmy[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
 } pbMyChar_t;

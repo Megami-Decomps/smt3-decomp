@@ -313,9 +313,9 @@ typedef struct {
     s32 targety;
     u8 unk_14[0x8];
     s32 type;
-    s32 unk_20;
+    s32 ritu;
     s32 offtime;
-    s32 unk_28;
+    s32 alpha;
 } nbMakaProcessData_t;
 
 extern void nbFreeEventEntry(nbMainProcessData_t *data);
@@ -443,13 +443,13 @@ void nbMakaStep(nbMakaProcessData_t *w)
     switch (w->stat) {
     case 1:
         w->disp = 1;
-        if (w->unk_28 == 0x80) {
+        if (w->alpha == 0x80) {
             w->stat = 0;
             return;
         }
-        w->unk_28 += 0x20;
-        if (w->unk_28 > 0x80) {
-            w->unk_28 = 0x80;
+        w->alpha += 0x20;
+        if (w->alpha > 0x80) {
+            w->alpha = 0x80;
         }
         return;
     case 2:
@@ -457,10 +457,10 @@ void nbMakaStep(nbMakaProcessData_t *w)
             w->offtime--;
             return;
         }
-        if (w->unk_28 > 0) {
-            w->unk_28 -= 0x14;
-            if (w->unk_28 < 0) {
-                w->unk_28 = 0;
+        if (w->alpha > 0) {
+            w->alpha -= 0x14;
+            if (w->alpha < 0) {
+                w->alpha = 0;
             }
             return;
         }
@@ -477,7 +477,7 @@ s32 nbMakaProcess1(dds3ProcessID_t *id)
     w = dds3GetProcessData(id);
     nbMakaStep(w);
     if (w->disp != 0) {
-        nbDrawMakaNum(w, w->targetx, w->targety, 0x80808080, w->unk_28);
+        nbDrawMakaNum(w, w->targetx, w->targety, 0x80808080, w->alpha);
     }
     return 0;
 }

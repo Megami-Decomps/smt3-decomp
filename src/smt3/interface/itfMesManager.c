@@ -97,7 +97,7 @@ struct window_tag {
 
 struct variable_tag {
     u32 pptr[0x20];
-    sdfMemHandle_t *handles[0x20];
+    sdfMemHandle_t *pmh[0x20];
 };
 
 /* Native 0xC-byte fade record shared by message windows and sound UI state. */
@@ -107,7 +107,7 @@ struct curctr_tag {
     s16 phase;
     s16 ctr0;
     s16 ctr1;
-    u32 frames; /* 0x08: entry advances count frames before triangle skip. */
+    u32 ctr_key; /* 0x08: entry advances count ctr_key before triangle skip. */
 };
 
 struct instanceMes_tag {
@@ -1678,20 +1678,20 @@ void SetVar(mes, slotIndex, source, byteCount)
     s32 allocationBytes;
 
     if (*textAddress != 0) {
-        sdfMemFreeDirect(slots->handles[slotIndex]);
+        sdfMemFreeDirect(slots->pmh[slotIndex]);
         *textAddress = 0;
     }
     if (byteCount <= 0) {
         allocationBytes = (strlen(source) + ITF_MES_STRING_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
-        slots->handles[slotIndex] = sdfMemAllocDirect(allocationBytes);
-        *textAddress = sdfMemLock(slots->handles[slotIndex]);
+        slots->pmh[slotIndex] = sdfMemAllocDirect(allocationBytes);
+        *textAddress = sdfMemLock(slots->pmh[slotIndex]);
         /* String mode copies the padded span, rather than only strlen + 1. */
         memcpy((void *)*textAddress, source, allocationBytes);
         return;
     }
     allocationBytes = (byteCount + ITF_MES_BINARY_COPY_ROUND_BIAS) & ~ITF_MES_COPY_ALIGN_MASK;
-    slots->handles[slotIndex] = sdfMemAllocDirect(allocationBytes);
-    *textAddress = sdfMemLock(slots->handles[slotIndex]);
+    slots->pmh[slotIndex] = sdfMemAllocDirect(allocationBytes);
+    *textAddress = sdfMemLock(slots->pmh[slotIndex]);
     memset((void *)*textAddress, 0, allocationBytes);
     memcpy((void *)*textAddress, source, byteCount);
 }
@@ -2048,7 +2048,7 @@ void InitializeCurCtr(curctr_tag *pcurctr, s32 isdisp)
     pcurctr->ctr0 = 0x40;
     pcurctr->phase = 0;
     pcurctr->ctr1 = 0;
-    pcurctr->frames = 0;
+    pcurctr->ctr_key = 0;
 }
 
 void ForceSetCurCtr(curctr_tag *pcurctr, s16 phase, s16 ctr0, s16 ctr1)
@@ -2080,7 +2080,7 @@ void ReleaseAllVariable(variable_tag *pvariable)
         s32 index = 0x1F - remaining;
 
         if (pvariable->pptr[index] != 0) {
-            sdfMemFreeDirect(pvariable->handles[index]);
+            sdfMemFreeDirect(pvariable->pmh[index]);
             pvariable->pptr[index] = 0;
         }
         remaining--;
@@ -2206,7 +2206,7 @@ void CalcMessage(instanceMes_tag *pinst) {
     }
     flags = pinst->stat;
     if ((flags & 7) == 4) {
-        pinst->fade.frames++;
+        pinst->fade.ctr_key++;
         if (flags & 0x800000) {
             mes->phase = -1;
             return;
@@ -2215,7 +2215,7 @@ void CalcMessage(instanceMes_tag *pinst) {
             pinst->fade.isdraw = 1;
         }
         if (dds3PadButtonState.confirm >= 0 && dds3PadButtonState.primaryCancel >= 0 &&
-            (dds3PadButtonState.primaryTriangle == 0 || pinst->fade.frames < 5)) {
+            (dds3PadButtonState.primaryTriangle == 0 || pinst->fade.ctr_key < 5)) {
             if (mes->textInterfaceMask != 0) {
                 return;
             }
@@ -2382,7 +2382,7 @@ void DrawMesFlow(instanceMes_tag *pinst) {
         if ((flags & 7) >= 3) {
             if (frDrawFont(pinst->message.pfont) > 0) {
                 if ((pinst->stat & 7) != 4) {
-                    pinst->fade.frames = 0;
+                    pinst->fade.ctr_key = 0;
                     pinst->stat = (pinst->stat & ~7) | 4;
                 }
             }

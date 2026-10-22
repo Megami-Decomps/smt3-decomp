@@ -492,7 +492,10 @@ def fix(deferred, rounds=80):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("reports", nargs="+")
+    ap.add_argument("reports", nargs="*")
+    ap.add_argument("--plan", type=Path,
+                    help="apply a TSV of `type<TAB>old<TAB>new` rows instead of reports, "
+                         "for proposals another tool produced (tools/ida_fill.py)")
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--no-types", action="store_true", help="members only")
     ap.add_argument("--fix", action="store_true", help="after --apply, resolve deferred uses by compiling")
@@ -512,7 +515,19 @@ def main():
 
     hd = hd_types()
     ours = our_types()
-    types, members, refused, evidence = plan(list(load_reports(args.reports)), hd, ours, args.verbose)
+    if args.plan:
+        types, members, refused, evidence = {}, defaultdict(dict), [], {}
+        for line in args.plan.read_text().splitlines():
+            if not line.strip() or line.startswith("#"):
+                continue
+            our_t, old_m, new_m = line.split("\t")
+            if our_t in ours and any(m == old_m for f in ours[our_t].values() for _, m, _ in f):
+                members[our_t][old_m] = new_m
+            else:
+                refused.append(f"member {our_t}.{old_m}: not a member of our {our_t}")
+    else:
+        types, members, refused, evidence = plan(
+            list(load_reports(args.reports)), hd, ours, args.verbose)
     if args.no_types:
         types = {}
     # Ownership has to be complete over THIS tree, which is what a rewrite
@@ -543,12 +558,15 @@ def main():
             if not members[our_t]:
                 del members[our_t]
         print(f"excluded {len(drop)} member names")
+    for r in refused if args.plan else []:
+        print("refused", r)
     for t, (hd_t, n) in sorted(types.items()):
         print(f"type {t} -> {hd_t}  ({n} functions; {evidence[('type', t, hd_t)]})")
     for t, picks in sorted(members.items()):
         hd_t = types[t][0] if t in types else t
         for m, new in picks.items():
-            print(f"member {t}.{m} -> {new}  ({evidence[('member', (t, m), (hd_t, new))]})")
+            key = ("member", (t, m), (hd_t, new))
+            print(f"member {t}.{m} -> {new}" + (f"  ({evidence[key]})" if key in evidence else ""))
     print(f"{len(types)} types, {sum(map(len, members.values()))} members, {len(refused)} refused")
     if args.apply and args.resolve:
         touched, counts = apply_resolved(members, ours)

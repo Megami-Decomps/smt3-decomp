@@ -469,13 +469,13 @@ enum EffParamWorkKind {
 
 /* Creation reads the requested mode from this parameter record. */
 struct effPCPSparkleSphereParam_t {
-    s32 mode;
+    s32 abgr;
 };
 
 /* The first sixteen bytes of this allocated billboard set remain opaque. */
 struct effPCPSparkleSphere_tag {
-    u8 opaque00[0x10];
-    u32 mode;
+    u8 pos[0x10];
+    u32 param;
     u32 abgr;
     f32 area;
     struct BillObj *hBill;
@@ -2640,7 +2640,7 @@ static inline s32 InterpolateCompactExtent(s32 from, s32 to,
 effPCPSparkleSphere_tag *effPCPSparkleSphereCreate(effPCPSparkleSphereParam_t *params) {
     effPCPSparkleSphere_tag *billboard = (effPCPSparkleSphere_tag *)sdfChipAllocDirect(sizeof(effPCPSparkleSphere_tag));
 
-    billboard->mode = params->mode;
+    billboard->param = params->abgr;
     billboard->hBill = dds3BillboardGeneral(2);
     dds3BillboardSetMode(billboard->hBill, 2);
     billboard->abgr = 0x80808080;

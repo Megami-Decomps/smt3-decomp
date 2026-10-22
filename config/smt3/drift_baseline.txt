@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 134 types, 1045 members, 506 adopted constants.
+# 134 types, 1031 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -412,8 +412,6 @@ member dds3GlobalWork_t.unk657C
 member dds3LinkedLightWork_t.unk00
 member dds3MatterPathPosition_t.unk00
 member dds3ModelBasicWorkData_t.unk10
-member dds3ModelFileIndex_t.unk4
-member dds3ModelFileIndex_t.unk6
 member dds3ModelRangeBasicWorkData_t.unk08
 member dds3MovieEntry_t.unk_00
 member dds3NeedleModelPart_tag.unk0C
@@ -496,7 +494,6 @@ member effFlashAccumulatingParam_t.unk34
 member effHandler_t.unk4
 member effLegacyInstance_t.unk00
 member effLegacyInstance_t.unk60
-member effPCPBezierBillParam_t.unk2C
 member effPCPBossBED_t.unk0000
 member effPCPBossBUNSIN2Head_t.unk00
 member effPCPBossBUNSIN2Head_t.unk04
@@ -559,7 +556,6 @@ member effPCPMHanma01_tag.unk08
 member effPCPMHanma01_tag.unk0C
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
-member effPCPNeedleSpiralPart_tag.unk10
 member effPCPRadiateBED_tag.unk10C
 member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
@@ -577,8 +573,6 @@ member effSimpleBED_t.unk39
 member effSub_t.unk0
 member effSub_t.unk21
 member effSub_t.unk41
-member effSwordTrackParams_t.unk10
-member effSwordTrackParams_t.unk24
 member effTrackPolyParams_t.unk1C
 member evtMotionSeCue_t.unk08
 member evtPolygonMovieWork_t.unk14
@@ -625,8 +619,6 @@ member evtViewerMenuEntry_t.unk02
 member evtViewerMenuEntry_t.unk04
 member evtViewerMenuEntry_t.unk06
 member evtViewerMovieWork_t.unk00
-member evtViewerObject_s.unk04
-member evtViewerObject_s.unk08
 member evtViewerObject_s.unk10
 member evtViewerUnit_t.unk00
 member evtViewerUnit_t.unk10
@@ -903,8 +895,6 @@ member nbCameraStateEntry_t.unk0D
 member nbCameraUnitWork_t.unk00
 member nbCamera_AllTable_t.unk00
 member nbDeadEvent_t.unk04
-member nbDebugProcessData_t.unk_0C
-member nbDebugProcessData_t.unk_10
 member nbDevilData_t.unk02
 member nbDevilInfo_t.unk05
 member nbDevilInfo_t.unk0E
@@ -952,8 +942,6 @@ member nbMainProcessData_t.unk_C0
 member nbMainProcessData_t.unk_E0
 member nbMainProcessData_t.unk_FC
 member nbMakaProcessData_t.unk_14
-member nbMakaProcessData_t.unk_20
-member nbMakaProcessData_t.unk_28
 member nbMasterTextEntry_t.unk00
 member nbMasterTextEntry_t.unk10
 member nbMasterTextEntry_t.unk_04
@@ -1019,7 +1007,6 @@ member pbMapWork_t.unk01C
 member pbMapWork_t.unk35C
 member pbMatWork_t.unk00
 member pbMoveCharWork_t.unk08
-member pbMyChar_t.unk0C
 member pbPanelEditor_t.unk08
 member pbPanelModel_t.unk00
 member pbRoundBlock_t.unk04
@@ -1120,7 +1107,6 @@ member sdf3DFogPacket_t.unknown18
 member sdf3DFogPacket_t.unknown1C
 member sdfBinaryHeader_t.unk00
 member sdfBinaryHeader_t.unk18
-member sdfCdImageDirEntry_t.unk4
 member sdfFileCmd_t.unk00
 member sdfFileCmd_t.unk14
 member sdfFileCmd_t.unk17

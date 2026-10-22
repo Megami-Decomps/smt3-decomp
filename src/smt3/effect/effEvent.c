@@ -222,8 +222,8 @@ typedef struct effChanHead_t {
 } effChanHead_t;
 
 typedef struct effAPPoint4Part_tag {
-    s32 delay;
-    struct dds3EffectPart_t *param; /* Retained compact effect owner, cloned per record. */
+    s32 frame;
+    struct dds3EffectPart_t *hPart; /* Retained compact effect owner, cloned per record. */
 } effAPPoint4Part_tag;
 
 /* Allocated channel owner shared by the event factory and channel consumers. */
@@ -1601,12 +1601,12 @@ effAPPoint4_tag *effAPPoint4Create(const effChanHead_t *pParams, u16 type, void 
     if (recordCount != 0) {
         delayModulus = work->head.spread;
         parameterTemplate = dds3EffectPartCreate(type, pData);
-        record->param = parameterTemplate;
-        record->delay = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+        record->hPart = parameterTemplate;
+        record->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         record++;
         for (recordIndex = 1; recordIndex < recordCount; recordIndex++) {
-            record->param = dds3EffectPartCopy(parameterTemplate);
-            record->delay = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+            record->hPart = dds3EffectPartCopy(parameterTemplate);
+            record->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             record++;
         }
     }
@@ -1643,8 +1643,8 @@ effAPPoint4_tag *effAPPoint4Copy(effChanSource_t *source) {
         parameterTemplate = source->owner->param;
         delayModulus = work->head.spread;
         for (recordIndex = 0; recordIndex < recordCount; recordIndex++) {
-            recordCursor->param = dds3EffectPartCopy(parameterTemplate);
-            recordCursor->delay = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+            recordCursor->hPart = dds3EffectPartCopy(parameterTemplate);
+            recordCursor->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
             recordCursor++;
         }
     }
@@ -1662,7 +1662,7 @@ void effAPPoint4Delete(effAPPoint4_tag *hData) {
     recordCursor = hData->records;
     if (recordCount != 0) {
         do {
-            dds3EffectPartDelete(recordCursor->param);
+            dds3EffectPartDelete(recordCursor->hPart);
             recordCursor++;
             recordIndex++;
         } while (recordIndex < recordCount);
@@ -1762,7 +1762,7 @@ void effAPPoint4PartInit(effAPPoint4_tag *pAPPoint4, u32 index) {
     bezierSlot->controlPoints[3][0] = jitteredPoint[0];
     bezierSlot->controlPoints[3][1] = jitteredPoint[1];
     bezierSlot->controlPoints[3][2] = jitteredPoint[2];
-    dds3EffectPartSetColor(record->param, 0);
+    dds3EffectPartSetColor(record->hPart, 0);
 }
 
 /* Step active records, update their packed color/position callbacks, and optionally recycle.
@@ -1784,7 +1784,7 @@ void effAPPoint4Draw(effAPPoint4_tag *hData) {
         return;
     }
     do {
-        s32 recordTime = recordCursor->delay;
+        s32 recordTime = recordCursor->frame;
 
         if (recordTime == 0) {
             effAPPoint4PartInit(hData, recordIndex);
@@ -1809,16 +1809,16 @@ void effAPPoint4Draw(effAPPoint4_tag *hData) {
             }
             alpha = (u32)(opacity * EFF_CHANNEL_ALPHA_SCALE);
             color = (alpha << EFF_CHANNEL_ALPHA_SHIFT) | EFF_CHANNEL_RGB_COLOR;
-            dds3EffectPartSetColor(recordCursor->param, color);
-            dds3EffectPartSetPosition(recordCursor->param, position);
-            dds3EffectPartDraw(recordCursor->param);
+            dds3EffectPartSetColor(recordCursor->hPart, color);
+            dds3EffectPartSetPosition(recordCursor->hPart, position);
+            dds3EffectPartDraw(recordCursor->hPart);
         }
         if (recordTime < activeSteps) {
-            recordCursor->delay++;
+            recordCursor->frame++;
         } else if (cycleEnabled != 0) {
-            recordCursor->delay = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
+            recordCursor->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delayModulus);
         } else {
-            recordCursor->delay++;
+            recordCursor->frame++;
         }
         recordCursor++;
         recordIndex++;
@@ -1866,12 +1866,12 @@ void effEveAPP4Randomize(effEmit_t *hEffect) {
     }
     do {
         effAPPoint4PartInit(channelWork, recordIndex);
-        recordCursor->delay = dds3GetRandA((effRandState_t *)dds3EffectBase) % stepModulus;
+        recordCursor->frame = dds3GetRandA((effRandState_t *)dds3EffectBase) % stepModulus;
         bezierSlot = dds3Bezier4PGetPart(channelWork->slots, recordIndex);
         recordIndex++;
-        randomStep = recordCursor->delay;
+        randomStep = recordCursor->frame;
         cursorStep = bezierSlot->step;
-        recordCursor->delay = randomStep + 1;
+        recordCursor->frame = randomStep + 1;
         recordCursor++;
         bezierSlot->t = cursorStep * (f32)randomStep;
     } while (recordIndex < recordCount);

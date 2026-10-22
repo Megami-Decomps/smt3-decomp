@@ -303,8 +303,8 @@ typedef struct {
     nbMainProcessData_t *data;
     s32 seq;
     s32 nextseq;
-    s32 unk_0C;
-    s32 unk_10;
+    s32 side;
+    s32 stockno;
     s32 formindex;
     nbFormation_t *form;
     s32 partyindex;
@@ -472,12 +472,12 @@ void SetTarget_nbDebugProcess(nbDebugProcessData_t *a)
             party = &a->data->party[form->partyindex];
             a->party = party;
             if (party->flag & 2) {
-                a->unk_0C = 1;
-                a->unk_10 = party->statindex;
+                a->side = 1;
+                a->stockno = party->statindex;
                 return;
             }
-            a->unk_0C = 0;
-            a->unk_10 = party->statindex;
+            a->side = 0;
+            a->stockno = party->statindex;
             return;
         }
     }

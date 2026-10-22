@@ -41,8 +41,8 @@ typedef struct evtFrameInfo_t {
 /* Track prefix consumed by the intrusive-list helpers. */
 typedef struct evtViewerObject_s {
     s32 type;
-    s32 unk04;
-    s32 unk08;
+    s32 nameindex;
+    s32 fileindex;
     s32 unitHandle;                /* 0x0C */
     u8 unk10[8];
     s32 childCount;                /* 0x18 */
@@ -442,8 +442,8 @@ evtViewerObject_s *evtAddViewerObject(s32 type)
     }
     memset(track, 0, 0x2C);
     track->type = type;
-    track->unk04 = -1;
-    track->unk08 = -1;
+    track->nameindex = -1;
+    track->fileindex = -1;
     LinkViewerObject(track);
     return track;
 }

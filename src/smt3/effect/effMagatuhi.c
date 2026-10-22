@@ -324,7 +324,7 @@ typedef struct {
 typedef struct effMagaCylinderPart_tag {
     s32 frame;        /* 0x00: negative while waiting; otherwise elapsed frames */
     f32 height;     /* 0x04 */
-    f32 angle;      /* 0x08 */
+    f32 rotate;      /* 0x08 */
     f32 rotate_s;  /* 0x0C */
     f32 radius;     /* 0x10 */
     f32 radius_s; /* 0x14 */
@@ -1533,7 +1533,7 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
 
     elem->frame = 0;
     elem->height = -pMagaCylinder->head.heightSpread * dds3GetRandFloatA(dds3EffectBase);
-    elem->angle = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
+    elem->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = pMagaCylinder->head.angleJitter;
     elem->rotate_s = pMagaCylinder->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaCylinder->head.startJitter;
@@ -1577,7 +1577,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             effMagaCylinderPartInit(pData, i);
         }
         if (age > 0 && age <= life) {
-            angle = particle->angle;
+            angle = particle->rotate;
             radius = particle->radius;
             out[0] = sdfCos(angle) * radius;
             out[1] = particle->height;
@@ -1587,7 +1587,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
-            particle->angle += particle->rotate_s;
+            particle->rotate += particle->rotate_s;
             particle->radius += particle->radius_s;
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
@@ -1673,7 +1673,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
                 angleStep = particle->rotate_s;
                 radiusStep = particle->radius_s;
                 height = particle->height;
-                angle = particle->angle + angleStep * (f32)frameOffset;
+                angle = particle->rotate + angleStep * (f32)frameOffset;
                 radius = particle->radius + radiusStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
@@ -1690,7 +1690,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
                     radius += radiusStep;
                 }
                 particle->radius = radius;
-                particle->angle = angle;
+                particle->rotate = angle;
             }
         }
     }

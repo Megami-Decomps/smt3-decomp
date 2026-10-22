@@ -38,7 +38,7 @@ typedef struct effPCPBezierBillParam_t {
     u32 number;                         /* 0x20 */
     s32 curveFrames;                        /* 0x24 */
     s32 startDelayRange;                    /* 0x28 */
-    u32 unk2C;                              /* 0x2C */
+    u32 fade_in;                              /* 0x2C */
     s32 fadeFrames;                         /* 0x30 */
     f32 width;                              /* 0x34 */
     s32 historyLength;                      /* 0x38 */
