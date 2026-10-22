@@ -27,6 +27,9 @@ quickstart.
   the data memory the upload packet seeds.
 - [Naming drift](naming-drift.md): the audit of member, enum, define, function
   and global names against the IDB, and the queue of fixes it found.
+- [HD alignment](hd-alignment.md): parameter names taken from the IDB
+  prototypes, and type and member names recovered by reading our function
+  bodies against SMT3HD's, with the checks that turn a report into a rename.
 - [SDK and C runtime](sdk-matching.md): the 126,120 bytes of Sony library,
   newlib and libgcc code at the end of `.text`, which archive object each
   function came from, and the compiler that built them.
