@@ -80,71 +80,98 @@ were both renamed to `effPCPSparkleSphere_tag` and the file then defined it
 twice. Two of our types claiming one HD type are two readings of one record,
 which is a merge for `tools/merge_duplicates.py`, not a rename.
 
-### Applying: only what the tree proves unambiguous
+### Applying: by resolved type, never by guess
 
-A member use is only ever `.name` or `->name`, so a rename can be rewritten
-tree-wide when **no other type anywhere in the tree declares that name**. 175 of
-the 676 accepted member renames qualify, and those are what was applied, along
-with all 163 type renames. The other 501 are recorded as backlog rather than
-guessed at; the section below says why.
+A member use is only ever `.name` or `->name`, and which struct it reads is
+settled by the declared type of its object expression, not by the text of the
+line. Two mechanisms apply a rename, in this order:
 
-Of the applied set: 163 types, 175 members, 161 files. The image still hashes to
-`5facfbf7916836613449c922e26a4ec412207b32`, every one of the 151 changed C units
-matches retail function for function under `tools/check_unit.py`, and the full
-`tools/test_*.py` suite passes. `tools/header_layout.c` carries the renamed
+1. **Tree-wide**, when no other type anywhere in the tree declares that name.
+   175 of the accepted renames qualify.
+2. **Per access**, when the name is shared, using `tools/hd_resolve.py` to
+   resolve each use. This is what the other 340 needed.
+
+Of the applied set: 163 types and 515 members across 143 files, the image still
+hashing to `5facfbf7916836613449c922e26a4ec412207b32`, every changed C unit
+matching retail function for function under `tools/check_unit.py`, and the full
+`tools/test_*.py` suite passing. `tools/header_layout.c` carries the renamed
 spellings, so its 755 size and offset claims still compile.
 
-### Compiling and guessing does not work, and here is what it cost
+### Compiling and guessing does not work
 
-The first approach was to rewrite the shared names too, by renaming the struct
-body only and letting the compiler point at every use that stopped compiling: a
-line that errors with *no member named `color`* is a use of a type that just lost
-`color`, so rewrite its next `->color` to the candidate, rebuild, repeat. It
-reached zero unresolved uses after three fixes and still produced a wrong image.
-Each fix is worth recording, because each one looked like the last.
+Before the resolver existed, the shared names were attempted by renaming the
+struct body only and letting the compiler point at every use that stopped
+compiling: a line that errors with *no member named `color`* is a use of a type
+that just lost `color`, so rewrite its next `->color` to the candidate, rebuild,
+repeat. It reached zero unresolved uses after three fixes and still produced a
+wrong image. Each fix is worth recording, because each one looked like the last.
 
 - **The struct body locator.** `cparse.struct_fields` reports a definition's line,
   and in some files that line is wrong, so the body rename edited the
-  *neighbouring* struct. Bodies are now found by name (`struct_spans`), matching
-  both `struct X {` and the `} X;` of an anonymous typedef.
+  *neighbouring* struct. Bodies are now found by name (`struct_spans`).
 - **A candidate can itself be a deferred old name.** `flags` offers `flag`, and
   `flag` is separately renamed to `Ztest` or `Stat`. The error for `flag` then
   read as a fresh rename rather than a failed guess, and the loop abandoned
-  `flags`'s remaining candidates. Continuing an existing chain now takes
-  precedence, which took unresolved uses from 1226 to 92.
+  `flags`'s remaining candidates. That cost took unresolved uses from 1226 to 92.
 - **Two members collapsing onto one candidate.** `angle` and `angleStep` both
   offer `rotate`, and taking it for both produced `part->rotate += part->rotate`.
-  That compiles. `effPCPFlashPolySphere3PartRotate` came back 4 of 7 words wrong
-  and two sibling functions one word each, reading +0x08 where retail reads
-  +0x18. Refusing a candidate already placed on that line for a *different*
-  member fixes this case and not the general one: the same collapse across two
-  lines of one function is still invisible.
+  That compiles. `effPCPFlashPolySphere3PartRotate` came back 4 of 7 words wrong,
+  reading +0x08 where retail reads +0x18.
 
-So the loop converged on *a* compiling tree each time and a different wrong one.
-What settles it is that the question it asks is unanswerable from a line of text:
-an access's member belongs to the declared type of its object expression, and
-choosing between `->rotate` and `->look_r` requires resolving that type. The
-guessing was removed rather than patched again.
+The question the loop asks is unanswerable from a line of text, which is why it
+converged on a different wrong tree each time: an access's member belongs to the
+declared type of its object expression. `tools/hd_resolve.py` answers that
+question instead, and the guessing is gone.
 
-**The checksum alone would not have caught this.** It did fail here, but a
-collapse inside a function whose bytes happen to cancel would not move the image,
-and a failed link leaves the previous image in place so `sha1sum -c` can report
-OK on a build that did not happen. The gate is `ninja`'s own exit status followed
-by `tools/check_unit.py` over every changed unit. That scan is what named
-`effPCPFlash.c` and `effPCPMisc.c` out of 159, with the rest already correct.
+**The checksum alone would not have caught this.** A collapse whose bytes happen
+to cancel would not move the image, and a failed link leaves the previous image
+in place so `sha1sum -c` can report OK on a build that did not happen. The gate
+is `ninja`'s own exit status followed by `tools/check_unit.py` over every changed
+unit. That scan is what named `effPCPFlash.c` and `effPCPMisc.c` out of 159.
 
-### The 501 deferred members, and what they need
+### Resolving an access to its declared type
 
-These are the renames whose old name two or more of our types share, `color`
-(three targets), `head` (six), `scale`, `count`, `mode`, and every `unk00`. They
-are not wrong, and most carry the same evidence as the ones applied; they simply
-cannot be placed by text. Taking them needs a rewriter that resolves each
-access's object expression to a declared type, which means parsing the unit
-rather than scanning it.
+`tools/hd_resolve.py` reads the declarations in scope, per function and at file
+scope, and walks the access chain from its base, so `work->head.degreesA`
+resolves against the type of `head` rather than of `work`. A rename is then
+written exactly where it belongs: of 719 `->color` accesses in the tree, 17
+belong to `dds3Effect_Blur_t` and only those became `->abgr`.
 
-`--exclude` takes a list of member names to drop from the plan, and
-`config/smt3/hd_align/exclude.txt` holds the 17 that defeated the guessing pass,
-kept so the attempt is reproducible rather than because the names are wrong.
+That took the applied set from 175 members to 515. 1967 uses were placed by
+resolved type and 42 more by elimination, where the resolver could not place an
+access but the whole plan renames that name to exactly one target and the line
+holds exactly one unplaceable use. 35 member names remain excluded, listed in
+`config/smt3/hd_align/exclude.txt`.
+
+Four constructs each resolved wrongly first, and each one broke exactly one unit,
+which the per-unit scan named:
+
+- **Old-style (K&R) definitions** declare their parameters between the header and
+  the brace, at file scope, so three functions' `source` parameters collapsed onto
+  one type and `effPCPHamaCardSpiralCopy` read the wrong struct. A K&R definition
+  is now its own scope and its parameters stay out of file scope.
+- **`return work;` has the shape of a declaration**, which typed `work` as
+  `return`. Keywords are refused as declaration types.
+- **A bare cast types the result, not the base.** `->` binds tighter than a cast,
+  so `(sdfVector4_t *)r->plane` casts the member; taking `sdfVector4_t` for `r`
+  resolved the wrong struct. Only a parenthesised cast, `((T *)x)->m`, types the
+  base.
+- **`planar[0] = pos[1];` parses as a declaration** of type `plana` named `r`
+  with an initialiser, which typed a real `collision_s *r` parameter as a struct
+  that does not exist. A declaration always separates type from name by a space
+  or a star; an assignment to an array element does not.
+
+The last one is the one to remember: the first three produce a loud compile error,
+while a false resolution that lands on a member the wrong type happens to have
+would be silent. Nothing but the per-unit byte comparison catches that.
+
+### What is left
+
+The 35 excluded names are where one old name maps to several targets and the
+resolver cannot place every use (`selectedIndex`, `params`, `color` in some
+units). They need the remaining resolver gaps closed rather than a new method:
+function-call results, chained subscripts of pointer arrays, and multi-line
+statements are the cases it still answers with None.
 
 ### Ownership has to count nested members
 
