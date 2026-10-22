@@ -629,6 +629,12 @@ def main():
             our_t, old_m, new_m = line.split("\t")
             if ARTIFACT.match(new_m) and not ARTIFACT.match(old_m):
                 refused.append(f"member {our_t}.{old_m} -> {new_m}: an il2cpp artifact, not a name")
+            elif our_t in ours and any(new_m == m for f in ours[our_t].values()
+                                       if any(x[1] == old_m for x in f) for _, m, _ in f):
+                # Swapping a member onto a name the record already has reads a
+                # different field and still compiles, which is the one mistake a
+                # rename can make silently.
+                refused.append(f"member {our_t}.{old_m} -> {new_m}: {our_t} already has {new_m}")
             elif our_t in ours and any(m == old_m for f in ours[our_t].values() for _, m, _ in f):
                 members[our_t][old_m] = new_m
             else:
