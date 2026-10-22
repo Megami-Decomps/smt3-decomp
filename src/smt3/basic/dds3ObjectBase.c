@@ -230,9 +230,9 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
             if (control->modelType == 0) {
                 mdlFree(control->pModel);
                 work = pObjectBasic->workdata;
-                if (work->unit != NULL) {
-                    evtDeleteUnitHandle(work->unit);
-                    work->unit = NULL;
+                if (work->hUnit != NULL) {
+                    evtDeleteUnitHandle(work->hUnit);
+                    work->hUnit = NULL;
                 }
             }
         } else {
@@ -561,8 +561,8 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
     work = pObjectBasic->workdata;
     control->modelType = 0;
     control->svs = 0;
-    if (work->unit == NULL) {
-        work->unit = evtCreateUnitHandle(pObjectBasic, obj);
+    if (work->hUnit == NULL) {
+        work->hUnit = evtCreateUnitHandle(pObjectBasic, obj);
     }
 }
 
@@ -695,7 +695,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
             dds3ObjectBaseModelLinkOtSvs(pModelOt, pObjectBasic);
             return;
         }
-        light = (void *)((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->unit->value;
+        light = (void *)((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->hUnit->value;
         if (light != NULL) {
             *(void **)&((mdlObj_t *)control->pModel)->inner->light = light;
         } else {

@@ -79,7 +79,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *pBasic)
     f32 fovy;
 
     if (work->pPathControl != NULL) {
-        if (work->pPathControl->flags & DDS3_PATHBASIC_FLAG_POS) {
+        if (work->pPathControl->flag & DDS3_PATHBASIC_FLAG_POS) {
             dds3PathBasicControlGetPos(work->pPathControl);
             SDF_VU0_STOREVECTOR(&pathVector);
             dds3SetPosPoseSet(object, &pathVector);
@@ -87,12 +87,12 @@ s32 MoverBasicMainprocuder(dds3Basic_t *pBasic)
                 SDF_VU0_COPYVECTOR(&((dds3MatterPathPosition_t *)object->workdata)->position, &pathVector);
             }
         }
-        if (work->pPathControl->flags & DDS3_PATHBASIC_FLAG_ROT) {
+        if (work->pPathControl->flag & DDS3_PATHBASIC_FLAG_ROT) {
             dds3PathBasicControlGetRot(work->pPathControl);
             SDF_VU0_STOREVECTOR(&pathVector);
             dds3SetRotPoseSet(object, &pathVector);
         }
-        if (work->pPathControl->flags & DDS3_PATHBASIC_FLAG_FOVY) {
+        if (work->pPathControl->flag & DDS3_PATHBASIC_FLAG_FOVY) {
             if (object->type >> 24 == BASIC_TYPE_CAMERAOBJECT) {
                 fovy = dds3PathBasicControlGetFovy(work->pPathControl);
                 camera = object->workdata;
@@ -100,7 +100,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *pBasic)
                 camera->flag |= 1;
             }
         }
-        if (work->pPathControl->flags & DDS3_PATHBASIC_FLAG_LIGHT) {
+        if (work->pPathControl->flag & DDS3_PATHBASIC_FLAG_LIGHT) {
             if (object->type >> 24 == BASIC_TYPE_LIGHTOBJECT) {
                 dds3PathBasicControlNextStep(work->pPathControl, &light);
                 dds3SetLightObjectPathResoruce(object, &light);

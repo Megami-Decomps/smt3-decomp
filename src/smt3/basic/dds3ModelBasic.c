@@ -7,7 +7,7 @@ typedef struct {
     /* 0x00 */ dds3Basic_t *pTextureBasic;
     /* 0x04 */ sdfItemArray_t *pModelDef;
     /* 0x08 */ sdfMotionPlayBook_t *pMotDef;
-    /* 0x0C */ void *modelResource;
+    /* 0x0C */ void *pTexList;
     /* 0x10 */ u8 unk10[8];
 } dds3ModelBasicWorkData_t;
 
@@ -28,7 +28,7 @@ dds3Basic_t *dds3AddModelBasic(s32 serialID, sdfItemArray_t *pModelDef, sdfMotio
     basic->name = pName;
     work->pTextureBasic = pTextureBasic;
     work->pModelDef = pModelDef;
-    work->modelResource = NULL;
+    work->pTexList = NULL;
     return basic;
 }
 
@@ -37,7 +37,7 @@ dds3Basic_t *dds3AddModelBasic2(s32 serialID, sdfItemArray_t *pModelDef, sdfMoti
     dds3ModelBasicWorkData_t *work = basic->workdata;
 
     basic->serialID = serialID;
-    work->modelResource = pTexList;
+    work->pTexList = pTexList;
     work->pModelDef = pModelDef;
     work->pMotDef = pMotDef;
     basic->name = pName;
@@ -48,8 +48,8 @@ sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic) {
     dds3ModelBasicWorkData_t *work = basic->workdata;
     sdfModelRootNode_t *model;
 
-    if (work->modelResource != NULL) {
-        model = sdfModelMake(work->modelResource, work->pModelDef);
+    if (work->pTexList != NULL) {
+        model = sdfModelMake(work->pTexList, work->pModelDef);
     } else {
         model = sdfModelMake(work->pTextureBasic->workdata, work->pModelDef);
     }

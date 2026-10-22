@@ -87,7 +87,7 @@ s32 dds3GetStatusUnitObjectBasic(dds3Basic_t *aPtr) {
 }
 
 struct evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b) {
-    return ((dds3UnitObjectBasicWorkData_t *)b->workdata)->unit;
+    return ((dds3UnitObjectBasicWorkData_t *)b->workdata)->hUnit;
 }
 
 void dds3UnitObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx) {
@@ -105,9 +105,9 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *aPtr) {
     if (work->status != -1) {
         work->status = -1;
     }
-    if (work->unit != NULL) {
-        evtDeleteUnitHandle(work->unit);
-        work->unit = NULL;
+    if (work->hUnit != NULL) {
+        evtDeleteUnitHandle(work->hUnit);
+        work->hUnit = NULL;
     }
     dds3ObjectBaseFreeModelHandle(aPtr);
     dds3ObjectBaseFreeControlWorkData(work->pObjectBaseControlWorkData);

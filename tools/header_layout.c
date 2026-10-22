@@ -32,7 +32,7 @@ OFF(e05, evtUnit_t, slotFlags, 0xCC);
 OFF(e06, evtUnit_t, tableValues, 0xD8);
 OFF(e07, evtUnit_t, colorDuration, 0x138);
 OFF(e08, evtUnit_t, transitionElapsed, 0x144);
-OFF(e09, dds3UnitObjectBasicWorkData_t, unit, 8);
+OFF(e09, dds3UnitObjectBasicWorkData_t, hUnit, 8);
 OFF(e10, dds3ObjectBaseControlWorkData_t, control, 0x10);
 OFF(e12, evtWorldSourceTransformPrefix_t, rotation, 0x10);
 

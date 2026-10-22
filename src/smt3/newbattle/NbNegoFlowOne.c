@@ -187,7 +187,7 @@ typedef struct
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u32 unk_04;
+    u32 stat;
     u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
@@ -319,7 +319,7 @@ extern s32 datGetPlayerLevel(void);
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 eventrid;
     s32 time;
     s32 seq;
     s32 seqtime;
@@ -404,7 +404,7 @@ s32 Flow1_3(nbNegoProcessData_t *n)
     nbAddNegoIdKouho(n, 0x10005);
     nbAddNegoIdKouho(n, 0x1001F);
     n->workid[3] = 0x10004;
-    if (datCheckTalk(n->pwork) != 0 || (n->actdata->unk_04 & 0x20) == 0) {
+    if (datCheckTalk(n->pwork) != 0 || (n->actdata->stat & 0x20) == 0) {
         n->nextnegoid = n->nextkouho[0];
     } else {
         n->nextnegoid = n->nextkouho[1];

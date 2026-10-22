@@ -237,14 +237,14 @@ void dds3LinkLightObjectToUnitObject(dds3Basic_t *lightbasic, dds3Basic_t *unitb
 {
     dds3UnitObjectBasicWorkData_t *work = unitbasic->workdata;
 
-    evtLinkLightObjectBasic(work->unit, lightbasic, frame);
+    evtLinkLightObjectBasic(work->hUnit, lightbasic, frame);
 }
 
 void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *unitbasic, s32 frame)
 {
     dds3UnitObjectBasicWorkData_t *work = unitbasic->workdata;
 
-    evtUnlinkLightObjectBasic(work->unit, frame);
+    evtUnlinkLightObjectBasic(work->hUnit, frame);
 }
 
 void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource)

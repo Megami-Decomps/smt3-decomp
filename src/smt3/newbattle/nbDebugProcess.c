@@ -158,7 +158,7 @@ typedef struct nbMainProcessData_t
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u32 unk_04;
+    u32 stat;
     u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
@@ -281,7 +281,7 @@ extern u8 dds3PadButtonState[];
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 eventrid;
     s32 time;
     s32 seq;
     s32 seqtime;
@@ -301,7 +301,7 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 /* 0x30 bytes; only the fields this unit touches are named. */
 typedef struct {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 seq;
     s32 nextseq;
     s32 unk_0C;
     s32 unk_10;
@@ -413,7 +413,7 @@ s32 SelectHpMp(nbDebugProcessData_t *d)
     if ((s8)dds3PadButtonState[3] < 0) {
         return -1;
     }
-    switch (d->unk_04) {
+    switch (d->seq) {
     case 5:
         v = work->hp;
         v += delta;
@@ -499,7 +499,7 @@ void SetNextSeq(nbDebugProcessData_t *d)
 
     seq = d->nextseq;
     d->nextseq = -1;
-    d->unk_04 = seq;
+    d->seq = seq;
     switch (seq) {
     case 1:
         SetSelect();
@@ -539,7 +539,7 @@ nbDebugProcessData_t *InitDebugProcessData(nbMainProcessData_t *data)
     w = sdfChipAllocDirect(sizeof(nbDebugProcessData_t));
     memset(w, 0, sizeof(nbDebugProcessData_t));
     w->data = data;
-    w->unk_04 = 0;
+    w->seq = 0;
     w->formindex = 0;
     w->form = NULL;
     menucur = 0;

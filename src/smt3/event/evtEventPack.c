@@ -410,7 +410,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *id) {
     if (motionSeParams->eventTaskId < 600) {
         return 0;
     }
-    unit = ((dds3UnitObjectBasicWorkData_t *)motionNode->workdata)->unit;
+    unit = ((dds3UnitObjectBasicWorkData_t *)motionNode->workdata)->hUnit;
     if (unit == NULL) {
         return -1;
     }

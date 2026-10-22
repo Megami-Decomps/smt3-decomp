@@ -84,11 +84,11 @@ typedef struct effPCPCrack_t
     u8 unk89[3];
     effPCPCrackPart_t *groups;
     void *groupsHandle;
-    u32 groupCount;
+    u32 MarkCount;
     u16 cellCount;
     u8 unk9A[2];
     s32 unk9C;
-    u32 color;
+    u32 abgr;
     void *system;
     s32 part;
 } effPCPCrack_t;
@@ -263,7 +263,7 @@ typedef struct effPCPBossThunderbolt_t
 typedef struct effPCPBossKAGUInvoke_t
 {
     u8 param[0x3C0];
-    s32 groupCount;
+    s32 point;
     void *polyLists[26];
     s32 frame;
     u32 color;
@@ -329,7 +329,7 @@ typedef struct effPCPBossMETATOBeam_t
     s32 fadeOut;
     void *polyLists[2];
     s32 frame;
-    u32 color;
+    u32 abgr;
 } effPCPBossMETATOBeam_t;
 
 typedef struct effPCPScreenCrackModel_t
@@ -349,8 +349,8 @@ typedef struct effPCPMuzzleFlashHead_t
 typedef struct effPCPMuzzleFlash_tag
 {
     u8 matrix[0x40];
-    u8 position[0x10];
-    effPCPMuzzleFlashHead_t head;
+    u8 pos[0x10];
+    effPCPMuzzleFlashHead_t param;
     void *hBillboard;
     s32 frame;
     f32 scale;
@@ -451,9 +451,9 @@ typedef struct effPCP_BED_Param_t
 typedef struct effPCP_BED_tag
 {
     u8 matrix[0x40];
-    u8 position[0x10];
+    u8 pos[0x10];
     effPCP_BED_Param_t param;
-    u32 color;
+    u32 abgr;
     s32 frame;
     effPCPBossBED_t *bed;
     void *cut;
@@ -941,17 +941,17 @@ void effPCPCrackInit(effPCPCrack_t *pPCPCrack)
     model->first->frameStep = pPCPCrack->frameStep;
     mdlSingleMotion(model, 0, 0);
     pPCPCrack->cellCount = model->first->frameCount;
-    pPCPCrack->groupCount = sdfModelGetMarkPosCount(model->inner);
-    pPCPCrack->system = dds3TrackPolyCreate(pPCPCrack->groupCount, pPCPCrack->cellCount, 1, 1);
+    pPCPCrack->MarkCount = sdfModelGetMarkPosCount(model->inner);
+    pPCPCrack->system = dds3TrackPolyCreate(pPCPCrack->MarkCount, pPCPCrack->cellCount, 1, 1);
     dds3TrackPolySetMode(pPCPCrack->system, pPCPCrack->drawBucket);
     pPCPCrack->groupsHandle = NULL;
     if (pPCPCrack->hasCells) {
-        pPCPCrack->groupsHandle = sdfMemAllocDirect(pPCPCrack->groupCount * sizeof(effPCPCrackPart_t)
-            + pPCPCrack->cellCount * pPCPCrack->groupCount * sizeof(effCrackCell_t));
+        pPCPCrack->groupsHandle = sdfMemAllocDirect(pPCPCrack->MarkCount * sizeof(effPCPCrackPart_t)
+            + pPCPCrack->cellCount * pPCPCrack->MarkCount * sizeof(effCrackCell_t));
         nextCells = (effCrackCell_t *)sdfMemLock(pPCPCrack->groupsHandle);
         pPCPCrack->groups = (effPCPCrackPart_t *)nextCells;
-        nextCells = (effCrackCell_t *)((u8 *)nextCells + pPCPCrack->groupCount * sizeof(effPCPCrackPart_t));
-        for (groupIndex = 0, group = pPCPCrack->groups; groupIndex < pPCPCrack->groupCount; groupIndex++, group++) {
+        nextCells = (effCrackCell_t *)((u8 *)nextCells + pPCPCrack->MarkCount * sizeof(effPCPCrackPart_t));
+        for (groupIndex = 0, group = pPCPCrack->groups; groupIndex < pPCPCrack->MarkCount; groupIndex++, group++) {
             effCrackCell_t *cell;
 
             group->hFlash = dds3FlashPolyListCreate(pPCPCrack->cellCount);
@@ -997,7 +997,7 @@ effPCPCrack_t *effPCPCrackCreate(effPCPCrackParam_t *pParam, void *pPB)
     effPCPCrack_t *work = sdfChipAllocDirect(0xAC);
 
     *(effCrackHead_t *)work = pParam->head;
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->unk9C = 0;
     work->part = dds3EffectPartCreate(3, pPB);
     effPCPCrackInit(work);
@@ -1020,7 +1020,7 @@ effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src)
     effPCPCrack_t *work = sdfChipAllocDirect(0xAC);
 
     *(effCrackHead_t *)work = *(effCrackHead_t *)src;
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->unk9C = 0;
     work->part = dds3EffectPartCopy(src->part);
     effPCPCrackInit(work);
@@ -1035,7 +1035,7 @@ void effPCPCrackDelete(effPCPCrack_t *hData)
     u32 groupIndex;
 
     if (hData->groupsHandle != NULL) {
-        for (groupIndex = 0; groupIndex < hData->groupCount; groupIndex++) {
+        for (groupIndex = 0; groupIndex < hData->MarkCount; groupIndex++) {
             dds3FlashPolyListDelete(hData->groups[groupIndex].hFlash);
         }
         sdfMemFreeDirect(hData->groupsHandle);
@@ -1054,7 +1054,7 @@ void effPCPCrackSetPosition(effPCPCrack_t *hData, const void *pPos)
 
 void effPCPCrackSetColor(effPCPCrack_t *hData, u32 abgr)
 {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 effPCPBossBael_t *effPCPBossBaelCreate(void *pParam, void *pPB, void *pPCF)
@@ -1509,7 +1509,7 @@ effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *pPara
     memcpy(&thunder.head, &work->param[0x360], 0x54);
     thunder.head.fragmentCount = 1;
     thunder.count = 9;
-    count = work->groupCount * 6;
+    count = work->point * 6;
     if (count > 0) {
         i = count;
         list = work->polyLists;
@@ -1537,7 +1537,7 @@ void effPCPBossKAGUInvokeDelete(effPCPBossKAGUInvoke_t *hData)
     s32 count;
     s32 i;
 
-    count = hData->groupCount * 6;
+    count = hData->point * 6;
     if (count > 0) {
         i = count;
         list = hData->polyLists;
@@ -2171,7 +2171,7 @@ effPCPCrack_t *effPCPCrack2Create(effPCPCrackParam_t *pParam, void *pPB)
     u32 groupIndex;
 
     work = effPCPCrackCreate(pParam, pPB);
-    for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
+    for (groupIndex = 0; groupIndex < work->MarkCount; groupIndex++) {
         work->groups[groupIndex].rotationStartAge = pParam->rotationStartAge;
         work->groups[groupIndex].rotate = 0.0f;
         work->groups[groupIndex].rotate_add = pParam->angularSpeed;
@@ -2194,7 +2194,7 @@ effPCPCrack_t *effPCPCrack2Copy(effPCPCrack_t *src)
     u32 groupIndex;
 
     work = effPCPCrackCopy(src);
-    for (groupIndex = 0; groupIndex < work->groupCount; groupIndex++) {
+    for (groupIndex = 0; groupIndex < work->MarkCount; groupIndex++) {
         work->groups[groupIndex].rotationStartAge = src->groups[groupIndex].rotationStartAge;
         work->groups[groupIndex].rotate = 0.0f;
         work->groups[groupIndex].rotate_add = src->groups[groupIndex].rotate_add;
@@ -2228,7 +2228,7 @@ effPCPBossMETATOBeam_t *effPCPBossMETATOBeamCreate(void *pParam)
     effPCPBossMETATOBeam_t *work = sdfChipAllocDirect(sizeof(effPCPBossMETATOBeam_t));
 
     memcpy(work, pParam, 0x70);
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->frame = 0;
     memcpy(&thunder.head, work->unk10, 0x54);
     thunder.count = 4;
@@ -2307,7 +2307,7 @@ void effPCPBossMETATOBeamDraw(effPCPBossMETATOBeam_t *hData)
         }
         blendInner = 0x3EA8F5C2;
         blendOuter = 0x3F28F5C2;
-        color = effColorBlend(hData->color & 0xFFFFFF, hData->color, blend);
+        color = effColorBlend(hData->abgr & 0xFFFFFF, hData->abgr, blend);
         for (j = 0; j < 2; j++) {
             effBTLModelGetMarkPosition2(model, 0x14 + j);
             SDF_VU0_STOREVECTOR(&pos);
@@ -2339,7 +2339,7 @@ void effPCPBossMETATOBeamSetPosition(effPCPBossMETATOBeam_t *hData, const void *
 
 void effPCPBossMETATOBeamSetColor(effPCPBossMETATOBeam_t *hData, u32 abgr)
 {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPScreenCrackModelInit(effPCPScreenCrackModel_t *pPCPScrCrackModel) {
@@ -2395,7 +2395,7 @@ effPCPMuzzleFlash_tag *effPCPMuzzleFlashCreate(effPCPMuzzleFlashHead_t *pParam, 
 {
     effPCPMuzzleFlash_tag *work = sdfChipAllocDirect(0x64);
 
-    work->head = *pParam;
+    work->param = *pParam;
     work->scale = 1.0f;
     work->frame = 0;
     SDF_VU0_STOREIDENTITY(work);
@@ -2416,7 +2416,7 @@ effPCPMuzzleFlash_tag *effPCPMuzzleFlashCopy(effPCPMuzzleFlash_tag *hData, s32 b
 {
     effPCPMuzzleFlash_tag *work = sdfChipAllocDirect(0x64);
 
-    work->head = hData->head;
+    work->param = hData->param;
     work->scale = 1.0f;
     work->frame = 0;
     SDF_VU0_STOREIDENTITY(work);
@@ -2459,7 +2459,7 @@ void effPCPMuzzleFlashDraw(effPCPMuzzleFlash_tag *hData)
         SDF_VU0_LOADVECTOR(D_00533DD0);
         SDF_VU0_APPLYMATRIX();
         SDF_VU0_STOREVECTOR(&direction);
-        position = hData->position;
+        position = hData->pos;
         rot = dds3BillboardGetDirectionRotate(position, &direction);
         sc = dds3BillboardGetDirectionScale(position, &direction);
         if (sc < 0.5f) {
@@ -2467,8 +2467,8 @@ void effPCPMuzzleFlashDraw(effPCPMuzzleFlash_tag *hData)
         }
         scale = hData->scale;
         sc = sc * scale;
-        dds3BillboardSetScale(hData->hBillboard, sc * *(f32 *)&hData->head.unk04,
-                              *(f32 *)&hData->head.unk00 * scale);
+        dds3BillboardSetScale(hData->hBillboard, sc * *(f32 *)&hData->param.unk04,
+                              *(f32 *)&hData->param.unk00 * scale);
         dds3BillboardSetRotate(hData->hBillboard, rot);
         dds3BillboardSetPosition(hData->hBillboard, position);
         dds3BillboardDraw(hData->hBillboard);
@@ -2483,7 +2483,7 @@ void effPCPMuzzleFlashSetColor(effPCPMuzzleFlash_tag *hData, u32 abgr)
 
 void effPCPMuzzleFlashSetPosition(effPCPMuzzleFlash_tag *hData, const void *pPos)
 {
-    SDF_VU0_COPYVECTOR(hData->position, pPos);
+    SDF_VU0_COPYVECTOR(hData->pos, pPos);
 }
 
 void effPCPMuzzleFlashSetScale(effPCPMuzzleFlash_tag *hData, f32 scale)
@@ -2886,8 +2886,8 @@ effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED)
 
     work->param = *pParam;
     work->frame = 0;
-    work->color = 0x80808080;
-    SDF_VU0_STOREIDENTITYVECTOR(work->position);
+    work->abgr = 0x80808080;
+    SDF_VU0_STOREIDENTITYVECTOR(work->pos);
     SDF_VU0_STOREIDENTITY(work);
     if (pBED != NULL) {
         place.payload[0] = 0.0f;
@@ -2901,7 +2901,7 @@ effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED)
         place.payload[8] = 100.0f;
         place.payload[9] = 100.0f;
         place.payload[10] = 1.0f;
-        place.color = work->color;
+        place.color = work->abgr;
         bed = effEveBEDCreate(pBED);
         work->bed = bed;
         work->cut = effEveBEDCutCreate(bed, 2, &place);
@@ -2979,8 +2979,8 @@ void effPCP_BED_Draw(effPCP_BED_tag *hData)
             blend = 1.0f;
         }
     }
-    color = effColorBlend(hData->color & 0xFFFFFF, hData->color, blend);
-    SDF_VU0_COPYVECTOR(place.payload, hData->position);
+    color = effColorBlend(hData->abgr & 0xFFFFFF, hData->abgr, blend);
+    SDF_VU0_COPYVECTOR(place.payload, hData->pos);
     effPCP_BED_MatrixToQuaternion(hData);
     SDF_VU0_STOREVECTOR(&place.payload[4]);
     place.payload[8] = 100.0f;
@@ -2994,7 +2994,7 @@ void effPCP_BED_Draw(effPCP_BED_tag *hData)
 
 void effPCP_BED_SetPosition(effPCP_BED_tag *hData, const void *pPos)
 {
-    SDF_VU0_COPYVECTOR(hData->position, pPos);
+    SDF_VU0_COPYVECTOR(hData->pos, pPos);
 }
 
 /* vu0 routine: copy the rotation matrix through vf28-vf31 */
@@ -3006,7 +3006,7 @@ void effPCP_BED_SetRotateMatrix(effPCP_BED_tag *hData, const void *pMatrix)
 
 void effPCP_BED_SetColor(effPCP_BED_tag *hData, u32 abgr)
 {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 effPCP_HBED2_tag *effPCP_HBED2_Create(effPCP_HBED2_Param_t *pParam, void *pPBData, void *pBEDData)

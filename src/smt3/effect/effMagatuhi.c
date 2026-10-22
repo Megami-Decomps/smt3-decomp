@@ -117,7 +117,7 @@ typedef struct effDirEnt_t {
 /* The creation callback's returned payload is retained in this 8-byte dispatch owner. */
 typedef struct dds3MagatuhiPar_tag {
     u32 type;
-    void *payload;
+    void *pHandle;
 } dds3MagatuhiPar_tag;
 
 /* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
@@ -150,12 +150,12 @@ typedef struct {
 
 /* Shared 0x30-byte state: base position, planar drift, and accumulated lift. */
 typedef struct {
-    f32 position[EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
+    f32 pos[EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
     u8 pad0C[4];
     f32 dirUp[EFF_MAGATUHI_XYZ_COMPONENT_COUNT]; /* XZ direction, Y accumulated lift */
     u8 pad1C[4];
     s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
-    f32 scale;
+    f32 amplitude;
     f32 angle;
     f32 up_s;
 } effMagaSmokePart_tag;
@@ -198,7 +198,7 @@ typedef struct effMagatuhiOwner_t {
 /* The 0x30-byte states precede this 0x12C-byte work allocation. */
 typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
-    effMagaSmokeParam_t head;
+    effMagaSmokeParam_t param;
     effMagaSmokePart_tag *pPart;
     u32 abgr;
     effMagatuhiOwner_t *pMagatuhi;
@@ -283,7 +283,7 @@ typedef struct effMagaSpiralPart_tag {
     s32 frame;        /* 0x00: negative while waiting; otherwise elapsed frames */
     f32 up;     /* 0x04 */
     f32 up_s; /* 0x08 */
-    f32 angle;      /* 0x0C */
+    f32 rotate;      /* 0x0C */
     f32 rotate_s;  /* 0x10 */
     f32 radius;     /* 0x14 */
     f32 radius_s; /* 0x18 */
@@ -1101,9 +1101,9 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
     SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)direction);
-    particle->position[0] = radius * direction[0];
-    particle->position[1] = 0.0f;
-    particle->position[2] = radius * direction[2];
+    particle->pos[0] = radius * direction[0];
+    particle->pos[1] = 0.0f;
+    particle->pos[2] = radius * direction[2];
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->dirUp[0] = random + random;
     particle->dirUp[1] = 0.0f;
@@ -1112,7 +1112,7 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
     SDF_VU0_LOADVECTOR(particle->dirUp);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(particle->dirUp);
-    particle->scale = pMagaSmokeConv->head.baseScale *
+    particle->amplitude = pMagaSmokeConv->head.baseScale *
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmokeConv->head.scaleVariation +
          (1.0f - pMagaSmokeConv->head.scaleVariation));
     particle->angle = dds3GetRandFloatA(dds3EffectBase) * EFF_MAGATUHI_FULL_TURN;
@@ -1180,13 +1180,13 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
         }
         if (age > 0 && age <= life) {
             if (slot->step == 0.0f) {
-                SDF_VU0_COPYVECTOR(basePosition, particle->position);
-                radial = particle->scale * sdfSin(particle->angle);
+                SDF_VU0_COPYVECTOR(basePosition, particle->pos);
+                radial = particle->amplitude * sdfSin(particle->angle);
                 particle->dirUp[1] += particle->up_s;
-                point[0] = origin[0] + particle->position[0] + particle->dirUp[0] * radial;
-                point[1] = origin[1] + particle->position[1] + particle->dirUp[1];
-                point[2] = origin[2] + particle->position[2] + particle->dirUp[2] * radial;
-                particle->scale += scaleStep;
+                point[0] = origin[0] + particle->pos[0] + particle->dirUp[0] * radial;
+                point[1] = origin[1] + particle->pos[1] + particle->dirUp[1];
+                point[2] = origin[2] + particle->pos[2] + particle->dirUp[2] * radial;
+                particle->amplitude += scaleStep;
                 particle->angle += angleStep;
                 SDF_VU0_LOADVECTOR(target);
                 SDF_VU0_LOADVECTOR_B(point);
@@ -1738,7 +1738,7 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
     elem->up = 0;
     blend = pMagaSpiral->head.heightJitter;
     elem->up_s = pMagaSpiral->head.heightStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    elem->angle = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
+    elem->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = pMagaSpiral->head.angleJitter;
     elem->rotate_s = pMagaSpiral->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaSpiral->head.startJitter;
@@ -1782,7 +1782,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             effMagaSpiralPartInit(pData, i);
         }
         if (age > 0 && age <= life) {
-            angle = particle->angle;
+            angle = particle->rotate;
             radius = particle->radius;
             out[0] = sdfCos(angle) * radius;
             out[1] = particle->up;
@@ -1793,7 +1793,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
             particle->up += particle->up_s;
-            particle->angle += particle->rotate_s;
+            particle->rotate += particle->rotate_s;
             particle->radius += particle->radius_s;
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
@@ -1880,7 +1880,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
                 angleStep = particle->rotate_s;
                 radiusStep = particle->radius_s;
                 heightStep = particle->up_s;
-                angle = particle->angle + angleStep * (f32)frameOffset;
+                angle = particle->rotate + angleStep * (f32)frameOffset;
                 radius = particle->radius + radiusStep * (f32)frameOffset;
                 height = particle->up + heightStep * (f32)frameOffset;
                 out[3] = 0;
@@ -1900,7 +1900,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
                 }
                 particle->up = height;
                 particle->radius = radius;
-                particle->angle = angle;
+                particle->rotate = angle;
             }
         }
     }
@@ -1916,16 +1916,16 @@ effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
     s32 spread;
     u32 i;
 
-    work->head = *src;
+    work->param = *src;
     work->pPart = particle;
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
-    if (work->head.delaySpread <= 0) {
-        work->head.delaySpread = 1;
+    if (work->param.delaySpread <= 0) {
+        work->param.delaySpread = 1;
     }
-    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
-    spread = work->head.delaySpread;
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->param.particleCount);
+    spread = work->param.delaySpread;
     for (i = 0; i < count; i++) {
         particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
@@ -1947,7 +1947,7 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     f32 random;
 
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    radius = pMagaSmoke->head.initialRadius * (random + random);
+    radius = pMagaSmoke->param.initialRadius * (random + random);
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[0] = random + random;
     direction[1] = 0.0f;
@@ -1956,9 +1956,9 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     SDF_VU0_LOADVECTOR_MEMOPS(*(u128 *)direction);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_MEMOPS(*(u128 *)direction);
-    particle->position[0] = radius * direction[0];
-    particle->position[1] = 0.0f;
-    particle->position[2] = radius * direction[2];
+    particle->pos[0] = radius * direction[0];
+    particle->pos[1] = 0.0f;
+    particle->pos[2] = radius * direction[2];
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     particle->dirUp[0] = random + random;
     particle->dirUp[1] = 0.0f;
@@ -1967,13 +1967,13 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     SDF_VU0_LOADVECTOR(particle->dirUp);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(particle->dirUp);
-    particle->scale = pMagaSmoke->head.initialScale *
-        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->head.initialScaleRandomness +
-         (1.0f - pMagaSmoke->head.initialScaleRandomness));
+    particle->amplitude = pMagaSmoke->param.initialScale *
+        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->param.initialScaleRandomness +
+         (1.0f - pMagaSmoke->param.initialScaleRandomness));
     particle->angle = dds3GetRandFloatA(dds3EffectBase) * EFF_MAGATUHI_FULL_TURN;
-    particle->up_s = pMagaSmoke->head.initialLift *
-        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->head.initialLiftRandomness +
-         (1.0f - pMagaSmoke->head.initialLiftRandomness));
+    particle->up_s = pMagaSmoke->param.initialLift *
+        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->param.initialLiftRandomness +
+         (1.0f - pMagaSmoke->param.initialLiftRandomness));
     effMagaSmokeInitPart(pMagaSmoke->pMagatuhi->valueWork, index);
     effMagaCylinderSetPart(pMagaSmoke->pMagatuhi->valueWork, index, 0);
 }
@@ -1993,18 +1993,18 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     s32 age;
     u32 i;
 
-    count = pData->head.particleCount;
+    count = pData->param.particleCount;
     valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
-    respawn = pData->head.respawn;
+    respawn = pData->param.respawn;
     tintColor = pData->abgr;
-    life = pData->head.lifetimeFrames;
-    spread = pData->head.delaySpread;
-    angleStep = pData->head.angleStep;
-    scaleStep = pData->head.scaleStep;
-    fadeIn = pData->head.fadeIn;
-    fadeOut = pData->head.fadeOut;
-    SDF_VU0_COPYVECTOR(origin, pData->head.origin);
+    life = pData->param.lifetimeFrames;
+    spread = pData->param.delaySpread;
+    angleStep = pData->param.angleStep;
+    scaleStep = pData->param.scaleStep;
+    fadeIn = pData->param.fadeIn;
+    fadeOut = pData->param.fadeOut;
+    SDF_VU0_COPYVECTOR(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->age;
@@ -2012,17 +2012,17 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
             effMagaSmokePartInit(pData, i);
         }
         if (age > 0 && age <= life) {
-            radial = particle->scale * sdfSin(particle->angle);
+            radial = particle->amplitude * sdfSin(particle->angle);
             particle->dirUp[1] += particle->up_s;
-            out[0] = particle->position[0] + particle->dirUp[0] * radial;
-            out[1] = particle->position[1] + particle->dirUp[1];
-            out[2] = particle->position[2] + particle->dirUp[2] * radial;
+            out[0] = particle->pos[0] + particle->dirUp[0] * radial;
+            out[1] = particle->pos[1] + particle->dirUp[1];
+            out[2] = particle->pos[2] + particle->dirUp[2] * radial;
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_LOADVECTOR(out);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
-            particle->scale += scaleStep;
+            particle->amplitude += scaleStep;
             particle->angle += angleStep;
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
@@ -2049,7 +2049,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSmokeDraw);
 
 /* Copy the drift origin as one quadword, preserving the source w. */
 void effMagaSmokeSetPosition(effMagaSmoke_tag *pData, void *pPos) {
-    SDF_VU0_COPYVECTOR(pData->head.origin, pPos);
+    SDF_VU0_COPYVECTOR(pData->param.origin, pPos);
 }
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
@@ -2086,12 +2086,12 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
     if (hEffect->type == EFF_MAGATUHI_CALLBACK_TYPE) {
         if (dds3MagatuhiGetType(hEffect->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
-            count = work->head.particleCount;
+            count = work->param.particleCount;
             valueWork = work->pMagatuhi->valueWork;
-            maxSteps = work->head.maxSteps;
-            frames = work->head.lifetimeFrames;
+            maxSteps = work->param.maxSteps;
+            frames = work->param.lifetimeFrames;
             particle = work->pPart;
-            SDF_VU0_COPYVECTOR(origin, work->head.origin);
+            SDF_VU0_COPYVECTOR(origin, work->param.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSmokePartInit(work, i);
@@ -2106,11 +2106,11 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                     steps = maxSteps - frameOffset;
                     frameOffset = 0;
                 }
-                angleStep = work->head.angleStep;
-                scaleStep = work->head.scaleStep;
+                angleStep = work->param.angleStep;
+                scaleStep = work->param.scaleStep;
                 liftStep = particle->up_s;
                 angle = particle->angle + angleStep * (f32)frameOffset;
-                scale = particle->scale + scaleStep * (f32)frameOffset;
+                scale = particle->amplitude + scaleStep * (f32)frameOffset;
                 lift = particle->dirUp[1] + liftStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
@@ -2118,9 +2118,9 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                     lift += liftStep;
                     /* Keep the sine evaluation even though its result is unused here. */
                     sdfSin(angle);
-                    out[0] = particle->position[0] + particle->dirUp[0] * scale;
-                    out[1] = particle->position[1] + lift;
-                    out[2] = particle->position[2] + particle->dirUp[2] * scale;
+                    out[0] = particle->pos[0] + particle->dirUp[0] * scale;
+                    out[1] = particle->pos[1] + lift;
+                    out[2] = particle->pos[2] + particle->dirUp[2] * scale;
                     SDF_VU0_LOADVECTOR_B(origin);
                     SDF_VU0_LOADVECTOR(out);
                     SDF_VU0_APPLYMATRIX();
@@ -2130,7 +2130,7 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                     scale += scaleStep;
                     angle += angleStep;
                 }
-                particle->scale = scale;
+                particle->amplitude = scale;
                 particle->angle = angle;
                 particle->dirUp[1] = lift;
             }
@@ -2166,24 +2166,24 @@ dds3MagatuhiPar_tag *dds3MagatuhiParCreate(s32 type, void *params) {
     void *payload = D_00320040[type].handler(params);
 
     work->type = type;
-    work->payload = payload;
+    work->pHandle = payload;
     return work;
 }
 
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
 void dds3MagatuhiParDraw(dds3MagatuhiPar_tag *hData) {
-    D_00320044[hData->type].handler(hData->payload);
+    D_00320044[hData->type].handler(hData->pHandle);
 }
 
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
 void dds3MagatuhiParDelete(dds3MagatuhiPar_tag *hData) {
-    D_00320048[hData->type].handler(hData->payload);
+    D_00320048[hData->type].handler(hData->pHandle);
     sdfChipFreeDirect(hData);
 }
 
 /* Return the retained payload passed to this type's callbacks. */
 void *dds3MagatuhiGetHandle(dds3MagatuhiPar_tag *hMagaPar) {
-    return hMagaPar->payload;
+    return hMagaPar->pHandle;
 }
 
 /* Read the dispatch owner's type word; the pointer remains unchecked. */
@@ -2204,7 +2204,7 @@ void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work) {
     void (*handler)(void *) = D_0032004C[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->payload);
+        handler(work->pHandle);
     }
 }
 
@@ -2213,7 +2213,7 @@ void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work) {
     void (*handler)(void *) = D_00320054[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->payload);
+        handler(work->pHandle);
     }
 }
 
@@ -2222,7 +2222,7 @@ void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work) {
     void (*handler)(void *) = D_00320050[work->type].handler;
 
     if (handler != NULL) {
-        handler(work->payload);
+        handler(work->pHandle);
     }
 }
 
@@ -2234,19 +2234,19 @@ void dds3MagatuhiParSetByType(dds3MagatuhiPar_tag *work, s32 slotValue) {
 
     switch (type) {
     case 0:
-        ((effSub_t *)work->payload)->type0SubSlot = slotByte;
+        ((effSub_t *)work->pHandle)->type0SubSlot = slotByte;
         return;
     case 1:
-        ((effSub_t *)work->payload)->type1SubSlot = slotByte;
+        ((effSub_t *)work->pHandle)->type1SubSlot = slotByte;
         return;
     case 2:
-        ((effSub_t *)work->payload)->type2To4SubSlot = slotByte;
+        ((effSub_t *)work->pHandle)->type2To4SubSlot = slotByte;
         return;
     case 3:
-        ((effSub_t *)work->payload)->type2To4SubSlot = slotByte;
+        ((effSub_t *)work->pHandle)->type2To4SubSlot = slotByte;
         return;
     case 4:
-        ((effSub_t *)work->payload)->type2To4SubSlot = slotByte;
+        ((effSub_t *)work->pHandle)->type2To4SubSlot = slotByte;
         return;
     default:
         return;
@@ -2260,15 +2260,15 @@ u32 func_001A8DF8(dds3MagatuhiPar_tag *work, s32 unusedSlotValue) {
 
     switch (type) {
     case 0:
-        return ((effSub_t *)work->payload)->type0SubSlot;
+        return ((effSub_t *)work->pHandle)->type0SubSlot;
     case 1:
-        return ((effSub_t *)work->payload)->type1SubSlot;
+        return ((effSub_t *)work->pHandle)->type1SubSlot;
     case 2:
-        return ((effSub_t *)work->payload)->type2To4SubSlot;
+        return ((effSub_t *)work->pHandle)->type2To4SubSlot;
     case 3:
-        return ((effSub_t *)work->payload)->type2To4SubSlot;
+        return ((effSub_t *)work->pHandle)->type2To4SubSlot;
     case 4:
-        return ((effSub_t *)work->payload)->type2To4SubSlot;
+        return ((effSub_t *)work->pHandle)->type2To4SubSlot;
     default:
         break;
     }
@@ -2283,19 +2283,19 @@ void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work) {
 
     switch (type) {
     case 0:
-        handlerArg = work->payload;
+        handlerArg = work->pHandle;
         break;
     case 1:
-        handlerArg = work->payload;
+        handlerArg = work->pHandle;
         break;
     case 2:
-        handlerArg = (u8 *)work->payload + EFF_SUBWORK_PREFIX_BYTES;
+        handlerArg = (u8 *)work->pHandle + EFF_SUBWORK_PREFIX_BYTES;
         break;
     case 3:
-        handlerArg = (u8 *)work->payload + EFF_SUBWORK_PREFIX_BYTES;
+        handlerArg = (u8 *)work->pHandle + EFF_SUBWORK_PREFIX_BYTES;
         break;
     case 4:
-        handlerArg = (u8 *)work->payload + EFF_SUBWORK_PREFIX_BYTES;
+        handlerArg = (u8 *)work->pHandle + EFF_SUBWORK_PREFIX_BYTES;
         break;
     default:
         break;

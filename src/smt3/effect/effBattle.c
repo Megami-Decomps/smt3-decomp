@@ -187,7 +187,7 @@ effBTL_t *effBTLCreate(void *pData) {
     work->resource = handle;
     *(effBTLImage_t *)work = *(effBTLImage_t *)pData;
     effBTLPartCreate(work, pData);
-    work->active = 0;
+    work->CutCount = 0;
     work->cutList = NULL;
     printf("effBTL:handle create\n");
     return work;
@@ -289,8 +289,8 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation,
         } while (remaining != 0);
     }
     cut->currentFrame = 0;
-    printf("effBTL:cut %d handle create(%p)[%d]\n", cut->kind, cut->state, cut->state->active);
-    cut->state->active++;
+    printf("effBTL:cut %d handle create(%p)[%d]\n", cut->kind, cut->state, cut->state->CutCount);
+    cut->state->CutCount++;
     return cut;
 }
 
@@ -305,9 +305,9 @@ void effBTLCutDelete(effBTLCut_t *hBTLCutEffect) {
         }
     }
     effBTLCutListRelease(hBTLCutEffect);
-    hBTLCutEffect->state->active--;
+    hBTLCutEffect->state->CutCount--;
     printf("effBTL:cut %d handle delete(%p)[%d]\n", hBTLCutEffect->kind, hBTLCutEffect->state,
-           hBTLCutEffect->state->active);
+           hBTLCutEffect->state->CutCount);
     sdfChipFreeDirect(hBTLCutEffect);
 }
 
@@ -492,7 +492,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         if (entry->timing >= frame) {
             continue;
         }
-        kind = entry->kind;
+        kind = entry->reverberations;
         if (kind != 0) {
             if ((flags & 1) == 0) {
                 continue;
@@ -888,23 +888,23 @@ void effBTLSkyFilterRun(void) {
 
 void effBTLFieldFilterON(u32 abgr, u16 frame) {
     if (frame == 0) {
-        effBTLFieldColorFilter.rect.color = abgr;
+        effBTLFieldColorFilter.rect.abgr = abgr;
         effBTLFieldColorFilter.frame = 0;
         return;
     }
     effBTLFieldColorFilter.frame = frame;
     effBTLFieldColorFilter.frameMax = frame;
-    effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.color;
+    effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.abgr;
     effBTLFieldColorFilter.targetColor = abgr;
 }
 
 void effBTLFieldFilterOFF(u16 frame) {
     if (frame == 0) {
         effBTLFieldColorFilter.frame = 0;
-        effBTLFieldColorFilter.rect.color = 0;
+        effBTLFieldColorFilter.rect.abgr = 0;
         return;
     }
-    effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.color;
+    effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.abgr;
     effBTLFieldColorFilter.targetColor = 0;
     effBTLFieldColorFilter.frame = frame;
     effBTLFieldColorFilter.frameMax = frame;
@@ -912,7 +912,7 @@ void effBTLFieldFilterOFF(u16 frame) {
 
 void effBTLFieldFilterRun(void) {
     if (effBTLFieldColorFilter.frame != 0) {
-        effBTLFieldColorFilter.rect.color =
+        effBTLFieldColorFilter.rect.abgr =
             effColorBlend(effBTLFieldColorFilter.targetColor, effBTLFieldColorFilter.baseColor,
                           (f32)effBTLFieldColorFilter.frame / (f32)effBTLFieldColorFilter.frameMax);
         effBTLFieldColorFilter.frame--;
@@ -920,7 +920,7 @@ void effBTLFieldFilterRun(void) {
 }
 
 void effBTLFieldFilterDraw(void) {
-    if (effBTLFieldColorFilter.rect.color & 0xFF000000) {
+    if (effBTLFieldColorFilter.rect.abgr & 0xFF000000) {
         dds3EffectFilter(&effBTLFieldColorFilter.rect);
     }
 }

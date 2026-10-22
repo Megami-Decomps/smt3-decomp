@@ -22,10 +22,10 @@ typedef struct effEveBEDCut_t {
 } effEveBEDCut_t;
 
 typedef struct effSimpleBED_t {
-    effBTL_t *handle;
+    effBTL_t *hBED;
     effEveBEDCut_t *hCut;
     effEveBEDParams_t pParams;
-    u8 active;
+    u8 original;
     u8 unk39[3];
 } effSimpleBED_t;
 
@@ -175,7 +175,7 @@ typedef struct effEVECombParSmokeParam_t {
 } effEVECombParSmokeParam_t;
 
 typedef struct effEVECombParSmokePart_t {
-    f32 position[3];
+    f32 pos[3];
     u8 pad0C[4];
     f32 motion[3]; /* X/Z direction; Y accumulates vertical offset. */
     u8 pad1C[4];
@@ -201,7 +201,7 @@ typedef struct effEVECombParSmokePart_t {
 typedef struct effEVECombParSmoke_t {
     effEVECombParSmokeParam_t head;
     effEVECombParSmokePart_t *pPart;
-    u8 flag;
+    u8 Ztest;
     u8 pad81[3];
     sdfMemHandle_t *hMem;
 } effEVECombParSmoke_t;
@@ -885,17 +885,17 @@ effSimpleBED_t *effSimpleBEDCreate(effBTL_t *pData, f32 scale) {
     work->pParams.center[0] = 0;
     work->pParams.center[2] = 0;
     work->pParams.center[3] = 0;
-    work->handle = effEveBEDCreate(pData);
-    work->hCut = effEveBEDCutCreate(work->handle, 0, &work->pParams);
-    work->active = 1;
+    work->hBED = effEveBEDCreate(pData);
+    work->hCut = effEveBEDCutCreate(work->hBED, 0, &work->pParams);
+    work->original = 1;
     return work;
 }
 
 /* Release the effect, invoke shared teardown only when flagged, then free the holder. */
 void effSimpleBEDDelete(effSimpleBED_t *hSimpleBED) {
     effEveBEDCutDelete(hSimpleBED->hCut);
-    if (hSimpleBED->active != 0) {
-        effEveBEDDelete(hSimpleBED->handle);
+    if (hSimpleBED->original != 0) {
+        effEveBEDDelete(hSimpleBED->hBED);
     }
     sdfChipFreeDirect(hSimpleBED);
 }
@@ -905,10 +905,10 @@ effSimpleBED_t *effSimpleBEDCopy(effSimpleBED_t *hSimpleBEDSrc) {
     effEveBEDParams_t *block = &hSimpleBEDSrc->pParams;
     effSimpleBED_t *work = sdfChipAllocDirect(sizeof(effSimpleBED_t));
 
-    work->hCut = effEveBEDCutCreate(hSimpleBEDSrc->handle, 0, block);
-    work->handle = hSimpleBEDSrc->handle;
+    work->hCut = effEveBEDCutCreate(hSimpleBEDSrc->hBED, 0, block);
+    work->hBED = hSimpleBEDSrc->hBED;
     memcpy(&work->pParams, block, sizeof(work->pParams));
-    work->active = 0;
+    work->original = 0;
     return work;
 }
 
@@ -1024,7 +1024,7 @@ effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam
     work->head = *pParam;
     work->hMem = allocationHandle;
     work->pPart = particle;
-    work->flag = 0;
+    work->Ztest = 0;
     if (work->head.fade_in <= 0) {
         work->head.fade_in = 1;
     }
@@ -1092,9 +1092,9 @@ void effEVECombParSmokePartInit(effEVECombParSmoke_t *pCombParSmoke, s32 index) 
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(direction);
     /* Each coordinate consumes its own radial random factor, not one shared radius. */
-    particle->position[0] = spawnRadius * dds3GetRandFloatA(dds3EffectBase) * direction[0];
-    particle->position[1] = spawnRadius * dds3GetRandFloatA(dds3EffectBase) * direction[1];
-    particle->position[2] = spawnRadius * dds3GetRandFloatA(dds3EffectBase) * direction[2];
+    particle->pos[0] = spawnRadius * dds3GetRandFloatA(dds3EffectBase) * direction[0];
+    particle->pos[1] = spawnRadius * dds3GetRandFloatA(dds3EffectBase) * direction[1];
+    particle->pos[2] = spawnRadius * dds3GetRandFloatA(dds3EffectBase) * direction[2];
     particle->motion[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
     particle->motion[1] = 0;
     particle->motion[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_EVENT_RANDOM_MIDPOINT) * 2.0f;
@@ -1163,23 +1163,23 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
         if (age > 0 && age <= duration) {
             if (particle->wait >= 0) {
                 drift = particle->lateralSpeed;
-                particle->position[0] += side[0] * drift;
-                particle->position[1] += side[1] * drift;
-                particle->position[2] += side[2] * drift;
+                particle->pos[0] += side[0] * drift;
+                particle->pos[1] += side[1] * drift;
+                particle->pos[2] += side[2] * drift;
                 wave = particle->swayAmplitude * sdfSin(particle->swayPhase);
                 particle->motion[1] += particle->verticalSpeed;
-                offset[0] = particle->position[0] + particle->motion[0] * wave;
-                offset[1] = particle->position[1] + particle->motion[1];
-                offset[2] = particle->position[2] + particle->motion[2] * wave;
+                offset[0] = particle->pos[0] + particle->motion[0] * wave;
+                offset[1] = particle->pos[1] + particle->motion[1];
+                offset[2] = particle->pos[2] + particle->motion[2] * wave;
                 particle->verticalSpeed *= growth;
                 particle->lateralSpeed *= growth;
                 particle->swayAmplitude += swayAmplitudeStep;
                 particle->swayPhase += swayPhaseStep;
             } else {
                 particle->wait++;
-                offset[0] = particle->position[0];
-                offset[1] = particle->position[1];
-                offset[2] = particle->position[2];
+                offset[0] = particle->pos[0];
+                offset[1] = particle->pos[1];
+                offset[2] = particle->pos[2];
             }
             if (age < fadeIn) {
                 ratio = (f32)age / (f32)fadeIn;
@@ -1349,23 +1349,23 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
         if (age > 0 && age <= duration) {
             if (particle->wait >= 0) {
                 drift = particle->lateralSpeed;
-                particle->position[0] += side[0] * drift;
-                particle->position[1] += side[1] * drift;
-                particle->position[2] += side[2] * drift;
+                particle->pos[0] += side[0] * drift;
+                particle->pos[1] += side[1] * drift;
+                particle->pos[2] += side[2] * drift;
                 wave = particle->swayAmplitude * sdfSin(particle->swayPhase);
                 particle->motion[1] += particle->verticalSpeed;
-                offset[0] = particle->position[0] + particle->motion[0] * wave;
-                offset[1] = particle->position[1] + particle->motion[1];
-                offset[2] = particle->position[2] + particle->motion[2] * wave;
+                offset[0] = particle->pos[0] + particle->motion[0] * wave;
+                offset[1] = particle->pos[1] + particle->motion[1];
+                offset[2] = particle->pos[2] + particle->motion[2] * wave;
                 particle->verticalSpeed *= growth;
                 particle->lateralSpeed *= growth;
                 particle->swayAmplitude += swayAmplitudeStep;
                 particle->swayPhase += swayPhaseStep;
             } else {
                 particle->wait++;
-                offset[0] = particle->position[0];
-                offset[1] = particle->position[1];
-                offset[2] = particle->position[2];
+                offset[0] = particle->pos[0];
+                offset[1] = particle->pos[1];
+                offset[2] = particle->pos[2];
             }
             if (age < fadeIn) {
                 ratio = (f32)age / (f32)fadeIn;
@@ -1512,7 +1512,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
     gs[1] = 0x5000000310000000;
     gs[2] = 0x1000000000008002;
     gs[3] = 0xE;
-    if (pCombParSmoke->flag != 0) {
+    if (pCombParSmoke->Ztest != 0) {
         gs[4] = 0x51801;
     } else {
         gs[4] = 0x31801;
@@ -1529,7 +1529,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
     gs[1] = 0x5000000310000000;
     gs[2] = 0x1000000000008002;
     gs[3] = 0xE;
-    if (pCombParSmoke->flag != 0) {
+    if (pCombParSmoke->Ztest != 0) {
         gs[4] = 0x51801;
     } else {
         gs[4] = 0x31801;
@@ -1553,7 +1553,7 @@ void effEVECombParSmokeSetPosition(void *pCombParSmoke, void *pPos) {
 
 /* Set the native byte flag without normalizing it to a boolean. */
 void effEVECombParSmokeSetZtest(effEVECombParSmoke_t *pCombParSmoke, u8 test) {
-    pCombParSmoke->flag = test;
+    pCombParSmoke->Ztest = test;
 }
 
 /* Copy the serialized emitter parameters without changing their values. */

@@ -80,7 +80,7 @@ typedef struct evtPolygonMovieWork_t {
 } evtPolygonMovieWork_t;
 
 typedef struct pmdFrameTable_t {
-    u16 kind;
+    u16 ObjectType;
     u16 frame;
     u16 length;
     s16 NameIndex;
@@ -667,7 +667,7 @@ void MG12FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
                 }
             }
         }
-        if (f->kind == 0x15) {
+        if (f->ObjectType == 0x15) {
             if (basic != NULL) {
                 p0 = SearchBasicFromNameIndex_evtPolygonMovie(wdata, f->data.b[4]);
                 p1 = SearchBasicFromNameIndex_evtPolygonMovie(wdata, f->data.b[5]);
@@ -853,7 +853,7 @@ void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
     }
     evtHokanBlur2(hokan, ratio, key1, key2, &D_0056D040);
     Eve_BlurSetParam(&D_0056D040);
-    if (((u8 *)&D_0056D040.color)[3] < 3) {
+    if (((u8 *)&D_0056D040.abgr)[3] < 3) {
         Eve_BlurOFF();
     } else {
         Eve_BlurON();
@@ -883,7 +883,7 @@ void MBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
     }
     evtHokanMultBlur(hokan, ratio, key1, key2, &D_0056D070);
     Eve_PartialMultiBlurSetParam(&D_0056D070);
-    if (((u8 *)&D_0056D070.source.color)[3] < 3) {
+    if (((u8 *)&D_0056D070.Blur.abgr)[3] < 3) {
         Eve_PartialMultiBlurOFF();
     } else {
         Eve_PartialMultiBlurON();
@@ -973,7 +973,7 @@ void MFilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrame
     }
     evtHokanMultFilter(hokan, ratio, key1, key2, &D_0056D100);
     Eve_PartialMultiFilterSetParam(&D_0056D100);
-    if (((u8 *)&D_0056D100.draw.rgba)[3] < 3) {
+    if (((u8 *)&D_0056D100.Filter.rgba)[3] < 3) {
         Eve_PartialMultiFilterOFF();
     } else {
         Eve_PartialMultiFilterON();
@@ -1003,7 +1003,7 @@ void FilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     }
     evtHokanFilter(hokan, ratio, key1, key2, &D_0056D130);
     Eve_FilterSetParam(&D_0056D130);
-    if (((u8 *)&D_0056D130.color)[3] < 2) {
+    if (((u8 *)&D_0056D130.abgr)[3] < 2) {
         Eve_FilterOFF();
     } else {
         Eve_FilterON();
@@ -1026,16 +1026,16 @@ void FrameRun(evtPolygonMovieWork_t *wdata)
         f = &wdata->frameTable[i];
         nf = NULL;
         if (i + 1 < wdata->frameCount) {
-            if (wdata->frameTable[i + 1].kind == f->kind) {
+            if (wdata->frameTable[i + 1].ObjectType == f->ObjectType) {
                 nf = &wdata->frameTable[i + 1];
             }
         }
         if (prev != NULL) {
-            if (prev->kind != f->kind) {
+            if (prev->ObjectType != f->ObjectType) {
                 prev = NULL;
             }
         }
-        switch (f->kind) {
+        switch (f->ObjectType) {
         case 3:
         case 20:
         case 21:
@@ -1095,7 +1095,7 @@ void FrameRun(evtPolygonMovieWork_t *wdata)
             }
         }
     run:
-        func = nowcamera[f->kind];
+        func = nowcamera[f->ObjectType];
         if (func != NULL) {
             func(wdata, f, nf, now);
         }
@@ -1354,12 +1354,12 @@ void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blu
     if (key2 == NULL) {
         key2 = &D_0032C840;
     }
-    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
+    d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
     d->blend = key1->blend;
-    d->angle = evtHokanFloat(hokan, ratio, key1->angle, key2->angle);
+    d->rotate = evtHokanFloat(hokan, ratio, key1->rotate, key2->rotate);
     d->scale = evtHokanFloat(hokan, ratio, key1->scale, key2->scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        d->position[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->position[positionOrCornerIndex], key2->position[positionOrCornerIndex]);
+        d->center[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->center[positionOrCornerIndex], key2->center[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
@@ -1383,16 +1383,16 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *
         key2 = &D_0032C870;
     }
     d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
-    d->source.color = evtHokanColor(hokan, ratio, key1->source.color, key2->source.color);
-    d->source.blend = key1->source.blend;
-    d->source.angle = evtHokanFloat(hokan, ratio, key1->source.angle, key2->source.angle);
-    d->source.scale = evtHokanFloat(hokan, ratio, key1->source.scale, key2->source.scale);
+    d->Blur.abgr = evtHokanColor(hokan, ratio, key1->Blur.abgr, key2->Blur.abgr);
+    d->Blur.blend = key1->Blur.blend;
+    d->Blur.rotate = evtHokanFloat(hokan, ratio, key1->Blur.rotate, key2->Blur.rotate);
+    d->Blur.scale = evtHokanFloat(hokan, ratio, key1->Blur.scale, key2->Blur.scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        d->source.position[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->source.position[positionOrCornerIndex], key2->source.position[positionOrCornerIndex]);
+        d->Blur.center[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->Blur.center[positionOrCornerIndex], key2->Blur.center[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            d->source.xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->source.xy[positionOrCornerIndex][coordinateIndex], key2->source.xy[positionOrCornerIndex][coordinateIndex]);
+            d->Blur.xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->Blur.xy[positionOrCornerIndex][coordinateIndex], key2->Blur.xy[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
@@ -1420,7 +1420,7 @@ void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_
             d->xy[cornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->xy[cornerIndex][coordinateIndex], key2->xy[cornerIndex][coordinateIndex]);
         }
     }
-    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
+    d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
     d->blend = key1->blend;
 }
 #else
@@ -1445,8 +1445,8 @@ void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam
         d->center[centerCoordinateIndex] = evtHokanInt(
             hokan, ratio, key1->center[centerCoordinateIndex], key2->center[centerCoordinateIndex]);
     }
-    d->draw.rgba = evtHokanColor(hokan, ratio, key1->draw.rgba, key2->draw.rgba);
-    d->draw.blendControl = key1->draw.blendControl;
+    d->Filter.rgba = evtHokanColor(hokan, ratio, key1->Filter.rgba, key2->Filter.rgba);
+    d->Filter.blendControl = key1->Filter.blendControl;
 }
 
 void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlurScatterParams_t *key2, effBlurScatterParams_t *d)

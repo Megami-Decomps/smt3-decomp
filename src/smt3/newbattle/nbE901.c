@@ -160,7 +160,7 @@ typedef struct nbMainProcessData_t
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u32 unk_04;
+    u32 stat;
     u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
@@ -302,7 +302,7 @@ extern void func_0024D938(void *e);
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 eventrid;
     s32 time;
     s32 seq;
     s32 seqtime;
@@ -425,7 +425,7 @@ s32 SetUp1(nbEventProcessData_t *ed)
     pos.y = -600.0f;
     memset(&rot, 0, sizeof(rot));
     rot.w = 1.0f;
-    h = evtInitMotionSeProcess(ed->unk_04, 1);
+    h = evtInitMotionSeProcess(ed->eventrid, 1);
     basic = dds3SearchSceneBasic(dds3GetActiveScene(), h, 5);
     D_005515B4 = basic;
     pos.x = 0.0f;

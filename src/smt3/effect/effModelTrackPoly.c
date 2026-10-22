@@ -7,13 +7,13 @@
 typedef struct
 {
     u32 blend;
-    u32 color;
+    u32 abgr;
     s32 point;
     s32 count;
-    s32 head;
+    s32 current;
     s32 split;
     u128 *pVertex;
-    u32 *colors;
+    u32 *pVC;
     sdfMat_t *pMat;
     sdfMemHandle_t *hMem;
 } dds3HermitianTrackPoly_tag;
@@ -42,8 +42,8 @@ typedef struct
 typedef struct
 {
     effModelTrackPoly_t **hPolyList;
-    u32 count;
-    sdfMemHandle_t *handle;
+    u32 number;
+    sdfMemHandle_t *hMem;
 } effMTPolyListHandle_t;
 
 typedef struct
@@ -56,7 +56,7 @@ typedef struct
     s32 historyLength;
     f32 sampleStep;
     u32 blend;
-    u32 color;
+    u32 abgr;
     u32 unk24;
 } effSwordTrackParams_t;
 
@@ -136,23 +136,23 @@ effModelTrackPoly_t *Eff_ModelTrackPolyCreate(Eff_ModelTrackPolyParam_t *pParam)
         switch (mdlGetMotionNum(pParam->object, 0)) {
         case 10:
             sword.historyLength = 6;
-            sword.color = 0x80C8C8C8;
+            sword.abgr = 0x80C8C8C8;
             break;
         case 9:
             sword.historyLength = 5;
-            sword.color = 0xC0C0C0C0;
+            sword.abgr = 0xC0C0C0C0;
             break;
         case 0x11:
             sword.historyLength = 5;
-            sword.color = 0xB8A8A8A8;
+            sword.abgr = 0xB8A8A8A8;
             break;
         case 0x12:
             sword.historyLength = 7;
-            sword.color = 0xC8C8C8C8;
+            sword.abgr = 0xC8C8C8C8;
             break;
         default:
             sword.historyLength = 6;
-            sword.color = 0xB8B8B8B8;
+            sword.abgr = 0xB8B8B8B8;
             break;
         }
         sword.sampleStep = 0.025f;
@@ -207,7 +207,7 @@ void Eff_ModelTrackPolyVertexSet(effModelTrackPoly_t *hMTPoly, const u128 *pVert
 }
 
 void Eff_ModelTrackPolyColorSet(effModelTrackPoly_t *hMTPoly, u32 abgr) {
-    hMTPoly->trackPoly->color = abgr;
+    hMTPoly->trackPoly->abgr = abgr;
 }
 
 void Eff_ModelTrackPolyDrawOnly(effModelTrackPoly_t *hMTPoly) {
@@ -237,12 +237,12 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             if (sword->updateCount < 0x15) {
                 sword->updateCount++;
             } else if (minor >= 0x153 && minor < 0x156) {
-                saved = sword->params.color;
+                saved = sword->params.abgr;
                 if (sword->updateCount >= 0x31) {
-                    sword->params.color = 0;
+                    sword->params.abgr = 0;
                 }
                 effSwordTrackDraw(sword);
-                sword->params.color = saved;
+                sword->params.abgr = saved;
             } else {
                 effSwordTrackDraw(sword);
             }
@@ -271,12 +271,12 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             if ((minor >= 0x153 && minor < 0x156) ? (sword->updateCount < 0x11) : (sword->updateCount < 0xB)) {
                 sword->updateCount++;
             } else {
-                saved = sword->params.color;
+                saved = sword->params.abgr;
                 if (sword->updateCount - 0x48 < 0x35) {
-                    sword->params.color = 0;
+                    sword->params.abgr = 0;
                 }
                 effSwordTrackDraw(sword);
-                sword->params.color = saved;
+                sword->params.abgr = saved;
             }
             break;
         default:
@@ -297,8 +297,8 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
                 dds3HermitianTrackPolyDraw(hMTPoly->trackPoly);
             } else {
                 poly = hMTPoly->trackPoly;
-                if ((poly->color & 0xFF000000) != 0) {
-                    poly->color += 0xE0000000;
+                if ((poly->abgr & 0xFF000000) != 0) {
+                    poly->abgr += 0xE0000000;
                 }
                 dds3HermitianTrackPolyDraw(poly);
             }
@@ -315,9 +315,9 @@ effMTPolyListHandle_t *Eff_ModelTrackPolyListCreate(Eff_ModelTrackPolyParam_t *p
     effMTPolyListHandle_t *list = (effMTPolyListHandle_t *)sdfMemLock(handle);
     u32 workIndex;
 
-    list->handle = handle;
+    list->hMem = handle;
     list->hPolyList = (effModelTrackPoly_t **)(list + 1);
-    list->count = number;
+    list->number = number;
     for (workIndex = 0; workIndex < number; workIndex++) {
         list->hPolyList[workIndex] = Eff_ModelTrackPolyCreate(pParam);
     }
@@ -325,14 +325,14 @@ effMTPolyListHandle_t *Eff_ModelTrackPolyListCreate(Eff_ModelTrackPolyParam_t *p
 }
 
 void Eff_ModelTrackPolyListDelete(effMTPolyListHandle_t *list) {
-    u32 count = list->count;
+    u32 count = list->number;
     u32 workIndex = 0;
 
     while (workIndex < count) {
         Eff_ModelTrackPolyDelete(list->hPolyList[workIndex]);
         workIndex++;
     }
-    sdfMemFreeDirect(list->handle);
+    sdfMemFreeDirect(list->hMem);
 }
 
 void Eff_ModelTrackPolyListVertexSet(effMTPolyListHandle_t *hMTPolyList, s32 index, const u128 *pVertex) {
@@ -348,7 +348,7 @@ void Eff_ModelTrackPolyListColorSet(effMTPolyListHandle_t *hMTPolyList, s32 inde
 }
 
 void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *hMTPolyList) {
-    u32 count = hMTPolyList->count;
+    u32 count = hMTPolyList->number;
     u32 workIndex = 0;
 
     while (workIndex < count) {
@@ -431,13 +431,13 @@ dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 face, s32 split) {
     data->pVertex = (u128 *)cursor;
     cursor += count * sizeof(u128);
     data->blend = 2;
-    data->color = 0x80808080;
+    data->abgr = 0x80808080;
     data->point = count;
     data->count = 0;
-    data->head = 2;
+    data->current = 2;
     data->split = split;
     data->hMem = handle;
-    data->colors = (u32 *)cursor;
+    data->pVC = (u32 *)cursor;
     data->pMat = sdfMatNew();
     sdfMatSetConstant((sdfMat_t *)data->pMat, 1.0f);
     memset(&D_0056AF00, 0, sizeof(D_0056AF00));
@@ -452,8 +452,8 @@ void pMeshDelete(dds3HermitianTrackPoly_tag *hPoly) {
 }
 
 void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_tag *hPoly) {
-    hPoly->head = 2;
-    hPoly->color = 0x80808080;
+    hPoly->current = 2;
+    hPoly->abgr = 0x80808080;
     hPoly->count = 0;
 }
 
@@ -466,7 +466,7 @@ void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *hPoly, u32 *pABGR) 
     u32 count = hPoly->point >> 1;
     f32 step = 1.0f / count;
     u32 i = 0;
-    u32 *colors = hPoly->colors;
+    u32 *colors = hPoly->pVC;
 
     if (count != 0) {
         do {
@@ -481,7 +481,7 @@ void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *hPoly, u32 *pABGR) 
 
 void dds3HermitianTrackPolyGetVertex(dds3HermitianTrackPoly_tag *hPoly, void *pVertex0, void *pVertex1, s32 frame)
 {
-    s32 index = hPoly->head - 2 * (hPoly->split * (frame - 1) + frame);
+    s32 index = hPoly->current - 2 * (hPoly->split * (frame - 1) + frame);
     u8 *vertex;
 
     if (index < 2) {
@@ -493,16 +493,16 @@ void dds3HermitianTrackPolyGetVertex(dds3HermitianTrackPoly_tag *hPoly, void *pV
 }
 
 void dds3HermitianTrackPolySetCurrent(dds3HermitianTrackPoly_tag *hPoly, s32 frame) {
-    s32 pos = hPoly->head + ((hPoly->split - 1) * (frame - 1) + frame) * -2;
+    s32 pos = hPoly->current + ((hPoly->split - 1) * (frame - 1) + frame) * -2;
 
     if (pos < 2) {
         pos += hPoly->point - 2;
     }
-    hPoly->head = pos;
+    hPoly->current = pos;
 }
 
 void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *hPoly, const u128 *pVertex) {
-    s32 position = hPoly->head;
+    s32 position = hPoly->current;
     u128 *points = hPoly->pVertex;
     s32 count;
 
@@ -510,11 +510,11 @@ void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *hPoly, const
     SDF_VU0_COPYVECTOR(&points[position + 1], pVertex + 1);
     position += 2;
     count = hPoly->point;
-    hPoly->head = position;
+    hPoly->current = position;
     if (position == count) {
         SDF_VU0_COPYVECTOR(&points[0], pVertex);
         SDF_VU0_COPYVECTOR(&points[1], pVertex + 1);
-        hPoly->head = 2;
+        hPoly->current = 2;
     }
     if (hPoly->count < count - 2) {
         hPoly->count += 2;
@@ -545,7 +545,7 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
     }
 
     if (activePointCount >= sampleCount * 6) {
-        s32 savedRingPosition = hPoly->head;
+        s32 savedRingPosition = hPoly->current;
         u128 *firstSampleOutputBase;
         u128 *firstSampleOutput;
 
@@ -574,7 +574,7 @@ void dds3HermitianTrackPolySetVertex(dds3HermitianTrackPoly_tag *hPoly, const u1
             } while (sampleIndex != 0);
         }
         hPoly->count = activePointCount;
-        hPoly->head = savedRingPosition;
+        hPoly->current = savedRingPosition;
     }
 
     if (activePointCount >= sampleCount * 4) {
@@ -654,7 +654,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
     sdf3DPrimLinkResetTm(list, 0);
     sdf3DPrimLinkMat(list, hPoly->pMat, 0);
     activePointCount = hPoly->count;
-    runStart[0] = hPoly->head - activePointCount;
+    runStart[0] = hPoly->current - activePointCount;
     if (runStart[0] < 2) {
         wrappedStartOffset = runStart[0] - 2;
         runStart[1] = 0;
@@ -665,11 +665,11 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
         runPointCount[0] = activePointCount;
         runPointCount[1] = 0;
     }
-    D_0056AF00.vertexColor = hPoly->colors;
+    D_0056AF00.vertexColor = hPoly->pVC;
     for (runIndex = 0; runIndex < 2; runIndex++) {
         draw = &D_0056AF00;
         draw->vertex = (sdfVector4_t *)&hPoly->pVertex[runStart[runIndex]];
-        draw->color = hPoly->color;
+        draw->color = hPoly->abgr;
         draw->faceCount = 0x10;
         draw->pointCount = 0x12;
         pointsRemaining = runPointCount[runIndex];
@@ -743,10 +743,10 @@ effSwordTrack_t *effSwordTrackCreate(effSwordTrackParams_t *pParams)
     work->updateCount = 0;
     work->trackPoly = dds3HermitianTrackPolyCreate(pParams->historyLength,
                                                    (s32)(1.0f / pParams->sampleStep));
-    colors[0] = pParams->color;
-    colors[1] = pParams->color;
-    colors[2] = pParams->color;
-    colors[3] = pParams->color;
+    colors[0] = pParams->abgr;
+    colors[1] = pParams->abgr;
+    colors[2] = pParams->abgr;
+    colors[3] = pParams->abgr;
     dds3HermitianTrackPolySetVC(work->trackPoly, colors);
     dds3HermitianTrackPolySetBlend(work->trackPoly, pParams->blend);
     return work;
@@ -786,7 +786,7 @@ void effSwordTrackPolygonDraw(effSwordTrack_t *hSwordTrack)
     sdf3DPrimLinkResetTm(list, 0);
     sdf3DPrimLinkMat(list, data->pMat, 0);
     activePointCount = data->count;
-    runStart[0] = data->head - activePointCount;
+    runStart[0] = data->current - activePointCount;
     if (runStart[0] < 2) {
         runStart[0] -= 2;
         runPointCount[0] = -runStart[0];

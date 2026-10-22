@@ -158,7 +158,7 @@ typedef struct nbMainProcessData_t
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u32 unk_04;
+    u32 stat;
     u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
@@ -265,7 +265,7 @@ extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 eventrid;
     s32 time;
     s32 seq;
     s32 seqtime;

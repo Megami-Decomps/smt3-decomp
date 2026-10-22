@@ -28,7 +28,7 @@ typedef struct
 {
     char *name;
     fldMapItem_t *items;
-    u32 count;
+    u32 nSB;
     void *model;
     fldMapPoint_t *pPos;
 } fldAmAreaData_t;
@@ -845,7 +845,7 @@ s32 fldAutoMap_GetFloor(s32 area, u32 block) {
 
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
-        for (j = 0; j < rec->count; j++, item++) {
+        for (j = 0; j < rec->nSB; j++, item++) {
             if (i == area && j == block) {
                 result = item->floor + 1;
             }
@@ -909,7 +909,7 @@ s32 fldAutoMapGetFloorMax(void) {
 
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
-        for (j = 0; j < rec->count; j++, item++) {
+        for (j = 0; j < rec->nSB; j++, item++) {
             if (max < item->floor) {
                 max = item->floor;
             }
@@ -1244,7 +1244,7 @@ s32 fldAutoMapGetFloorPrev(s32 floor) {
     fldAmAreaData_t *entry = fldAutoMapHeader;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
-        for (j = 0; j < entry->count; j++) {
+        for (j = 0; j < entry->nSB; j++) {
             if (fldAutoMapChkOpen(fldAutoMapField, i, j) != 0) {
                 item = fldAutoMap_GetFloor(i, j);
                 if (item < floor && best < item) {
@@ -1267,7 +1267,7 @@ s32 fldAutoMapGetFloorNext(s32 floor) {
     fldAmAreaData_t *entry = fldAutoMapHeader;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
-        for (j = 0; j < entry->count; j++) {
+        for (j = 0; j < entry->nSB; j++) {
             if (fldAutoMapChkOpen(fldAutoMapField, i, j) != 0) {
                 item = fldAutoMap_GetFloor(i, j);
                 if (floor < item && item < best) {
@@ -1314,7 +1314,7 @@ void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
     rec = fldAutoMapHeader;
     for (; room < fldAutoMapData; room++, rec++) {
         item = rec->items;
-        for (i = 0; i < rec->count; i++, item++) {
+        for (i = 0; i < rec->nSB; i++, item++) {
             visible = 0;
             if (fldAutoMapChkOpen(fldAutoMapField, room, i) != 0) {
                 visible = 1;

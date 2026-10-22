@@ -76,7 +76,7 @@ typedef struct {
     u32 pointResrcID;
     char pointResName[16];
     s32 loadField;
-    s32 kind;
+    s32 loadArea;
     s32 loadScript;
     s32 callmode;
     u16 bgm;
@@ -85,7 +85,7 @@ typedef struct {
     u8 unk68[8];
     char camName[16];
     char FoceScript[16];
-    u32 options;
+    u32 loadMode;
     u8 unk94[12];
 } fldSceneParam_t;
 
@@ -632,14 +632,14 @@ void fldProcTrigSequence(fldSceneParam_t *srcParam, u32 mode) {
         strcpy(scene->pointResName, srcParam->pointResName);
         scene->loadField = srcParam->loadField;
         scene->bgm = srcParam->bgm;
-        scene->kind = srcParam->kind;
+        scene->loadArea = srcParam->loadArea;
         scene->bgmMode = srcParam->bgmMode;
         scene->loadScript = srcParam->loadScript;
         scene->callmode = srcParam->callmode;
         scene->camMode = srcParam->camMode;
         strcpy(scene->camName, srcParam->camName);
         strcpy(scene->FoceScript, srcParam->FoceScript);
-        scene->options = srcParam->options;
+        scene->loadMode = srcParam->loadMode;
     }
     dds3StartProcess("fldProcSequence", 0x3F7, 0, 0, ProcSequence, 0, 0);
     dds3StartProcess(D_00531950, 0x2B0A, 0, 0, ProcDraw, 0, 0);

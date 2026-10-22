@@ -37,8 +37,8 @@ struct fldCollisionFace_t {
 };
 
 struct collision_s {
-    s16 mode;
-    s16 count;
+    s16 mode2D;
+    s16 numedges;
     f32 normal[4];
     f32 num;
     f32 e_normal[4][4];
@@ -51,7 +51,7 @@ struct collision_s {
     u16 unkCA;
     s32 id;
     dds3Basic_t *matter;
-    fldCollisionFace_t *face;
+    fldCollisionFace_t *pFace;
     void *stopData;
     s32 hojiID;
     s32 npcID;
@@ -286,7 +286,7 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
     travel[0] = sdfFabs(current[0] - previous[0]);
     travel[2] = sdfFabs(current[2] - previous[2]);
     for (index = 0; index < D_0054EDA0; index++) {
-        if (!(((collision_s *)fldMatterTable)[index].face->attributes & 0x80)) {
+        if (!(((collision_s *)fldMatterTable)[index].pFace->attributes & 0x80)) {
             continue;
         }
         if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
@@ -319,8 +319,8 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
                                        (sdfVector4_t *)((collision_s *)fldMatterTable)[index].normal) -
                                  ((collision_s *)fldMatterTable)[index].num);
         if (distance < radius) {
-            HitPositionInside2(&clearance, ((collision_s *)fldMatterTable)[index].mode,
-                               ((collision_s *)fldMatterTable)[index].count, current,
+            HitPositionInside2(&clearance, ((collision_s *)fldMatterTable)[index].mode2D,
+                               ((collision_s *)fldMatterTable)[index].numedges, current,
                                &((collision_s *)fldMatterTable)[index], radius);
             if (clearance < 0.0f) {
                 inside = 0;

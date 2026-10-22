@@ -234,7 +234,7 @@ typedef struct {
     u32 pointResrcID;
     char pointResName[16];
     s32 loadField;
-    s32 kind;
+    s32 loadArea;
     s32 loadScript;
     s32 callmode;
     u16 bgm;
@@ -243,7 +243,7 @@ typedef struct {
     u8 unk68[8];
     char camName[16];
     char FoceScript[16];
-    u32 options;
+    u32 loadMode;
     u8 unk94[12];
 } fldSceneParam_t;
 

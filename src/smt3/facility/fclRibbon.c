@@ -36,13 +36,13 @@ typedef struct
     /* 0x06 */ s16 unk_06;
     /* 0x08 */ s16 unk_08;
     /* 0x0A */ s16 unk_0A;
-    /* 0x0C */ s32 flags;
+    /* 0x0C */ s32 stat;
     /* 0x10 */ s16 act;
     /* 0x12 */ u16 deact;
     /* 0x14 */ s32 ctr_act;
     /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 ctr;
-    /* 0x20 */ s32 count;
+    /* 0x20 */ s32 num;
 } fclRibbon_t;
 
 extern void sdfMemFreeDirect(void *aHandle);
@@ -68,10 +68,10 @@ void fclRbnRelease(fclRibbon_t *phandle)
 
 void fclRbnCalc(fclRibbon_t *phandle)
 {
-    if (phandle->flags & 1) {
+    if (phandle->stat & 1) {
         MoveActive(phandle);
     }
-    if (phandle->flags & 2) {
+    if (phandle->stat & 2) {
         MoveDeactive(phandle);
     }
     phandle->ctr = (phandle->ctr - 2) & 0x7F;
@@ -81,10 +81,10 @@ INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnDraw);
 
 void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
 {
-    if (index >= 0 && index < phandle->count && index != phandle->act)
+    if (index >= 0 && index < phandle->num && index != phandle->act)
     {
         phandle->deact = phandle->act;
-        phandle->flags |= 3;
+        phandle->stat |= 3;
         phandle->act = index;
         phandle->ctr_act = 0x40;
         phandle->ctr_deact = 0x80;
@@ -101,7 +101,7 @@ void MoveActive(fclRibbon_t *phandle)
     phandle->ctr_act -= 8;
     if (phandle->ctr_act <= 0) {
         phandle->ctr_act = 0;
-        phandle->flags &= ~1;
+        phandle->stat &= ~1;
     }
 }
 
@@ -110,7 +110,7 @@ void MoveDeactive(fclRibbon_t *phandle)
     phandle->ctr_deact -= 0x10;
     if (phandle->ctr_deact <= 0) {
         phandle->ctr_deact = 0;
-        phandle->flags &= ~2;
+        phandle->stat &= ~2;
     }
 }
 

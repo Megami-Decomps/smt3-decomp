@@ -29,7 +29,7 @@ typedef struct effBTL_SkillPartsList_t {
     effBTLPartValue_t value;
     effBTLAimParams_t aimParams;
     u32 timing;
-    u8 kind;
+    u8 reverberations;
     u8 unk15[3];
 } effBTL_SkillPartsList_t;
 
@@ -63,7 +63,7 @@ typedef struct effBTL_t {
     effBTLBank_t banks[2];
     u8 unkC30[8];
     sdfMemHandle_t *resource;
-    u32 active;
+    u32 CutCount;
     effBTLCut_t *cutList;
 } effBTL_t;
 

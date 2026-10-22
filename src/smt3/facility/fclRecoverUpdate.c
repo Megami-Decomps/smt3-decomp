@@ -16,13 +16,13 @@ typedef struct
     /* 0x06 */ s16 unk_06;
     /* 0x08 */ s16 unk_08;
     /* 0x0A */ s16 unk_0A;
-    /* 0x0C */ s32 flags;
+    /* 0x0C */ s32 stat;
     /* 0x10 */ s16 act;
     /* 0x12 */ u16 deact;
     /* 0x14 */ s32 ctr_act;
     /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 ctr;
-    /* 0x20 */ s32 count;
+    /* 0x20 */ s32 num;
 } fclRibbon_t;
 
 typedef struct

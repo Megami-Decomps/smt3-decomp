@@ -796,7 +796,7 @@ void frFlushGsFontTable(frTextHandle_t *pText) {
 
     if (cachedItem != NULL) {
         if (cachedItem->used_count == 0) {
-            gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex].slots[cachedItem->id] = NULL;
+            gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex].slots[cachedItem->font_no] = NULL;
             fmRetFontMem(cachedItem->list);
             gFT.cachedItemCount--;
         }
@@ -969,7 +969,7 @@ GsFont_t *frTranslateFont2GS(frTextHandle_t *pText, s32 FontNo) {
     }
     clonedResource = frDecodeFontImage(pText->renderValueOrSetupOrShade.setupBytes.fontIndex, FontNo);
     cachedItem = frTranslateUserData(frGetFontWidth(pText->renderValueOrSetupOrShade.setupBytes.fontIndex), frGetFontHeight(pText->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, 1);
-    cachedItem->id = FontNo;
+    cachedItem->font_no = FontNo;
     entry->slots[FontNo] = cachedItem;
     gFT.cachedItemCount++;
     return cachedItem;

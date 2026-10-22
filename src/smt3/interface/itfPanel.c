@@ -232,7 +232,7 @@ itfpanel_t *itfPnlRegist2(s32 type, s32 texhandle) {
     allocation = sdfMemAllocDirect(D_003264E0[type]);
     panel->payloadAllocation = allocation;
     payload = (u32 *)sdfMemLock(allocation);
-    panel->payload = payload;
+    panel->pwork = payload;
     if (texhandle != 0) {
         switch (type) {
         case 6:
@@ -253,7 +253,7 @@ itfpanel_t *itfPnlRegist2(s32 type, s32 texhandle) {
  * before its primary allocation; NULL is a no-op. */
 void itfPnlRelease(itfpanel_t *handle) {
     if (handle != NULL) {
-        if (handle->payload != NULL) {
+        if (handle->pwork != NULL) {
             sdfMemFreeDirect(handle->payloadAllocation);
         }
         sdfMemFreeDirect(handle->allocation);
@@ -269,7 +269,7 @@ void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z
     handle->right = x1;
     handle->bottom = y1;
     if (D_00326428[handle->kind] != 0) {
-        D_00326428[handle->kind](handle->payload);
+        D_00326428[handle->kind](handle->pwork);
     }
 }
 
@@ -284,7 +284,7 @@ void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1,
     handle->bottom += y1;
     handle->renderValue += z;
     if (handler != 0) {
-        handler(handle->payload, handle->left, handle->top, handle->right, handle->bottom);
+        handler(handle->pwork, handle->left, handle->top, handle->right, handle->bottom);
     }
 }
 
@@ -296,7 +296,7 @@ void itfPnlSetColor(itfpanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
     handle->blue = b;
     handle->alpha = a;
     if (CreateColorTable[handle->kind] != 0) {
-        CreateColorTable[handle->kind](handle->payload);
+        CreateColorTable[handle->kind](handle->pwork);
     }
 }
 
@@ -555,7 +555,7 @@ void CreateColorFacility(itfPanelFacilityData_t *base) {
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
 void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
-    itfPanelNormalData_t *data = (itfPanelNormalData_t *)handle->payload;
+    itfPanelNormalData_t *data = (itfPanelNormalData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
     sdfIVector4_t *colors = data->colors;
     s32 quadIndex;
@@ -569,7 +569,7 @@ void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
 void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
-    itfPanelMesWinData_t *data = (itfPanelMesWinData_t *)handle->payload;
+    itfPanelMesWinData_t *data = (itfPanelMesWinData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
     sdfIVector4_t *colors = data->colors + 1;
     s32 alpha = handle->alpha;
@@ -590,7 +590,7 @@ void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
 void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
-    itfPanelSelWinData_t *data = (itfPanelSelWinData_t *)handle->payload;
+    itfPanelSelWinData_t *data = (itfPanelSelWinData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
     sdfIVector4_t *colors = data->colors + 1;
     s32 alpha = handle->alpha;
@@ -610,7 +610,7 @@ void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     sdfIVector2_t vertices[12];
-    itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->payload;
+    itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->pwork;
     sdfIVector2_t *buf = data->vertices;
     sdfIVector4_t *colors = data->colors;
     sdfIVector2_t *input = data->vertices;
@@ -639,7 +639,7 @@ void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Update the first color row's alpha and emit one indexed quad. */
 void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
-    itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->payload;
+    itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
     sdfIVector4_t *colors = data->colors;
 
@@ -649,7 +649,7 @@ void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
 void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
-    itfPanelLeftFadeData_t *data = (itfPanelLeftFadeData_t *)handle->payload;
+    itfPanelLeftFadeData_t *data = (itfPanelLeftFadeData_t *)handle->pwork;
     sdfIVector2_t *drawBuffer = data->vertices;
     sdfIVector4_t *colors = data->colors;
 
@@ -663,7 +663,7 @@ void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
  * submits the live rectangle in the panel. */
 void DrawMesWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
-    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->payload;
+    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->pwork;
     s32 top = handle->top;
     s32 bottom = handle->bottom;
 
@@ -697,7 +697,7 @@ void DrawMesWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
 void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
     itfDrawColor_t *color = (itfDrawColor_t *)&handle->red;
-    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->payload;
+    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->pwork;
     s32 leftInset = handle->left + 0x3E0;
     s32 rightInset = handle->right - 0x3E0;
 
@@ -725,7 +725,7 @@ void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
  * and bottom bands. The short path uses the live rectangle in the panel. */
 void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
-    itfPanelFacilityData_t *payload = (itfPanelFacilityData_t *)handle->payload;
+    itfPanelFacilityData_t *payload = (itfPanelFacilityData_t *)handle->pwork;
     itfDrawVertex_t *vertices = payload->vertices;
     itfDrawColor_t *colors = payload->colors;
     s32 i;

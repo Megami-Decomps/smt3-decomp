@@ -128,7 +128,7 @@ typedef struct
     sdfMemHandle_t *mem_hndl;        /* 0x04 */
     dds3SceneList_t *basictable;            /* 0x08 */
     dds3Basic_t *activecamera;               /* 0x0C */
-    dds3Basic_t *unit;                 /* 0x10 */
+    dds3Basic_t *activeunit;                 /* 0x10 */
     u32 fieldHandle;                  /* 0x14 */
     sdfMemHandle_t *hScrFileHandle;      /* 0x18 */
     void *pScrFileData;                     /* 0x1C */
@@ -164,7 +164,7 @@ typedef struct
 {
     s32 status;
     s32 unk04;
-    struct evtUnit_t *unit;
+    struct evtUnit_t *hUnit;
     dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     s32 EL_serialID;
     s32 ot;
@@ -237,7 +237,7 @@ typedef struct
 struct dds3PathBasicControl_t
 {
     s32 direction;
-    u32 flags;
+    u32 flag;
     f32 frameMax;
     f32 frame;
     s32 spline;

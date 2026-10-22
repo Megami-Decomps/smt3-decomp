@@ -158,7 +158,7 @@ typedef struct nbMainProcessData_t
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u32 unk_04;
+    u32 stat;
     u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
@@ -279,7 +279,7 @@ extern s32 nbBadCurseTimer;
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 eventrid;
     s32 time;
     s32 seq;
     s32 seqtime;
@@ -643,7 +643,7 @@ s32 nbBadCurseStep1(nbActionProcessData_t *a)
             break;
         }
     }
-    a->unk_04 |= 0x200;
+    a->stat |= 0x200;
     return 0;
 }
 

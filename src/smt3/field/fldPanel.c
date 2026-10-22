@@ -6,9 +6,9 @@
 /* The input panel keeps its cursor, message choice and draw request as halfwords. */
 typedef struct
 {
-    u16 position;
+    u16 Count;
     u16 Type;
-    u16 draw;
+    u16 Draw;
     u16 reserved;
 } fldInputPanelProcessData_t;
 
@@ -80,15 +80,15 @@ s32 fldInputPanelProcess2(dds3ProcessID_t *id)
         return 0;
     }
     work = dds3GetProcessData(id);
-    if (work->draw == 0) {
+    if (work->Draw == 0) {
         goto ret0;
     }
     fldDrawInputPanel();
     fldDrawInputCursor(D_003095B0[work->Type] - 0xC, 0x132);
     fldKanjiDraw(D_003095B0[work->Type] + 0xA, 0x98, 0xA09DC380,
         D_003094F0[work->Type]);
-    work->position++;
-    work->draw = 0;
+    work->Count++;
+    work->Draw = 0;
 ret0:
     return 0;
 }
@@ -98,8 +98,8 @@ s32 fldInputPanelProcess1(dds3ProcessID_t *id)
     fldInputPanelProcessData_t *work = sdfChipAllocDirect(8);
 
     work->Type = 1;
-    work->position = 0;
-    work->draw = 0;
+    work->Count = 0;
+    work->Draw = 0;
     work->reserved = 0;
     dds3SetProcessData(id, work);
     return (s32)fldInputPanelProcess2;
@@ -132,7 +132,7 @@ fldInputPanelProcessData_t *fldInputPanelSetDraw(s32 flag)
     fldInputPanelProcessData_t *work;
 
     work = dds3GetProcessData(inputpanel_id);
-    work->draw = flag;
+    work->Draw = flag;
     return work;
 }
 
@@ -174,7 +174,7 @@ s32 fldInputPanelCheckKey(void)
         return 0;
     }
     work = dds3GetProcessData(inputpanel_id);
-    if (work->draw == 0) {
+    if (work->Draw == 0) {
         return -1;
     }
     if (fldGlobalBase.wordCC == 0) {
@@ -184,7 +184,7 @@ s32 fldInputPanelCheckKey(void)
             }
         }
     }
-    work->draw = 0;
+    work->Draw = 0;
     if (fldGlobalBase.wordCC != 0) {
         dds3FadeIn2(8);
         fldGlobalBase.wordCC = 0;

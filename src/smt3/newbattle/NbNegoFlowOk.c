@@ -187,7 +187,7 @@ typedef struct
 typedef struct nbActionProcessData_t
 {
     nbMainProcessData_t *data;
-    u32 unk_04;
+    u32 stat;
     u8 unk_08[0x1C];
     nbParty_t *party;
     nbFormation_t *form;
@@ -298,7 +298,7 @@ extern s32 datGetPlayerLevel(void);
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
-    s32 unk_04;
+    s32 eventrid;
     s32 time;
     s32 seq;
     s32 seqtime;
@@ -423,7 +423,7 @@ s32 Flow9_4(nbNegoProcessData_t *n)
 
 s32 Flow9_5(nbNegoProcessData_t *n)
 {
-    n->actdata->unk_04 |= 8;
+    n->actdata->stat |= 8;
     nbAddNegoIdKouho(n, 0x90007);
     nbDispNegoMessage(n, n->helpmsg, 2, 0);
     return 0;
@@ -501,7 +501,7 @@ s32 Flow9_13(nbNegoProcessData_t *n)
 
 s32 Flow9_14(nbNegoProcessData_t *n)
 {
-    n->actdata->unk_04 |= 8;
+    n->actdata->stat |= 8;
     nbAddNegoIdKouho(n, 0x9000F);
     nbSetMesMakka(n->helpmsg, n->getmakka);
     nbDispNegoMessage(n, n->helpmsg, 3, 0);
@@ -564,7 +564,7 @@ INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOk", Flow9_16);
 
 s32 Flow9_17(nbNegoProcessData_t *n)
 {
-    n->actdata->unk_04 |= 8;
+    n->actdata->stat |= 8;
     nbAddNegoIdKouho(n, 0x90012);
     nbSetMesItem(n->helpmsg, n->getitem);
     nbDispNegoMessage(n, n->helpmsg, 5, 0);
@@ -619,7 +619,7 @@ INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOk", Flow9_20);
 
 s32 Flow9_21(nbNegoProcessData_t *n)
 {
-    n->actdata->unk_04 |= 8;
+    n->actdata->stat |= 8;
     nbAddNegoIdKouho(n, 0x90016);
     n->getinfomsg = nbGetInfoMsg(n->getinfotype);
     return 0;

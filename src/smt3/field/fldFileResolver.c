@@ -723,7 +723,7 @@ s32 fldLoadNextFile(s32 field, s32 area) {
 
 void fldFreeNextFile(void) {
     if (pFldNextFileDataF2 != 0) {
-        sdfPacWork_t *work = ((filePacRequest_t *)pFldNextFileDataF2)->packet.head;
+        sdfPacWork_t *work = ((filePacRequest_t *)pFldNextFileDataF2)->packet.resrcHead;
 
         if (work != NULL) {
             do {
@@ -881,7 +881,7 @@ void fldLoadFieldPack(void) {
         gFldFileF1 = pacLoad(name);
         pacSync(gFldFileF1);
         request = (filePacRequest_t *)gFldFileF1;
-        for (work = request->packet.head; work != NULL; work = work->next) {
+        for (work = request->packet.resrcHead; work != NULL; work = work->next) {
             switch (((sdfPacStdBlockHeader_t *)work->header)->kind) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
                 fldInfLoadFromMem(work->data);
@@ -992,7 +992,7 @@ u32 fldLoadFile(const char *name) {
         D_0054EB98 = 0;
         D_0054EBD0 = 0;
         index = 0;
-        work = ((filePacRequest_t *)fldFileBuf1)->packet.head;
+        work = ((filePacRequest_t *)fldFileBuf1)->packet.resrcHead;
         if (work != NULL) {
             do {
                 switch (index) {
@@ -1183,7 +1183,7 @@ void fldFreeFile(void) {
     }
     request = (filePacRequest_t *)fldFileBuf1;
     if (request != NULL) {
-        work = request->packet.head;
+        work = request->packet.resrcHead;
         i = 0;
         if (work != NULL) {
             do {

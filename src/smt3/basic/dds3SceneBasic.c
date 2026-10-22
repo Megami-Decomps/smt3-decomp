@@ -47,7 +47,7 @@ s32 sceneconstructor(dds3Basic_t *basic)
     work->mem_hndl = NULL;
     work->basictable = NULL;
     work->activecamera = NULL;
-    work->unit = NULL;
+    work->activeunit = NULL;
     work->fieldHandle = 0;
     work->hScrFileHandle = NULL;
     work->pScrFileData = NULL;
@@ -225,13 +225,13 @@ dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *
 
     work = pSceneBasic->workdata;
     previous = dds3GetActiveUnitSceneBasic(pSceneBasic);
-    work->unit = pUnitBasic;
+    work->activeunit = pUnitBasic;
     return previous;
 }
 
 dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic)
 {
-    return ((dds3SceneBasic_t *)pSceneBasic->workdata)->unit;
+    return ((dds3SceneBasic_t *)pSceneBasic->workdata)->activeunit;
 }
 
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type)

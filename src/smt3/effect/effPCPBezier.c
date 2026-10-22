@@ -14,15 +14,15 @@ typedef struct effBezierPlacement_t {
 
 /* One retained fragment-history header follows its point/color buffers. */
 typedef struct dds3BezierTrackPoly_tag {
-    u32 color;                              /* 0x00 */
+    u32 abgr;                              /* 0x00 */
     s32 blend;                       /* 0x04 */
     s32 point;                      /* 0x08: history point capacity */
     s32 count;                   /* 0x0C */
     s32 current;                /* 0x10: first point of the next three-point sample */
     s32 subdivisions;                       /* 0x14: retained input value */
-    u128 *points;                           /* 0x18 */
-    u32 *colors;                            /* 0x1C */
-    sdfMat_t *resourceHandle;               /* 0x20 */
+    u128 *pVertex;                           /* 0x18 */
+    u32 *pVC;                            /* 0x1C */
+    sdfMat_t *pMat;               /* 0x20 */
     sdfMemHandle_t *hMem;                /* 0x24 */
     u128 *pHeadVertex;                        /* 0x28 */
     u32 *pHeadVC;                         /* 0x2C */
@@ -35,7 +35,7 @@ typedef struct effPCPBezierBillParam_t {
     f32 spreadX;                            /* 0x14 */
     f32 spreadZ;                            /* 0x18 */
     f32 height;                             /* 0x1C */
-    u32 groupCount;                         /* 0x20 */
+    u32 number;                         /* 0x20 */
     s32 curveFrames;                        /* 0x24 */
     s32 startDelayRange;                    /* 0x28 */
     u32 unk2C;                              /* 0x2C */
@@ -48,7 +48,7 @@ typedef struct effPCPBezierBillParam_t {
 
 /* One 0x80-byte moving ribbon slot plus its event work. */
 typedef struct effPCPBezierBillPart_tag {
-    f32 position[4];                        /* 0x00: current sampled point */
+    f32 pos[4];                        /* 0x00: current sampled point */
     s32 frame;                                /* 0x10: negative delay, then elapsed frames */
     f32 fadeScale;                          /* 0x14 */
     dds3BezierTrackPoly_tag *hBztp;/* 0x18 */
@@ -58,7 +58,7 @@ typedef struct effPCPBezierBillPart_tag {
 
 /* Allocation header followed by groupCount inline 0x80-byte slots. */
 typedef struct effPCPBezierBill_tag {
-    effPCPBezierBillParam_t params;         /* 0x00 */
+    effPCPBezierBillParam_t param;         /* 0x00 */
     effPCPBezierBillPart_tag *slots;           /* 0x50 */
     u32 abgr;                           /* 0x54 */
     struct effBezierBED_t *soundMixer;           /* 0x58 */
@@ -117,7 +117,7 @@ void dds3BezierTrackPolyDelete(dds3BezierTrackPoly_tag *hPoly);
 
 effPCPBezierBill_tag *effPCPBezierBillCreate(const effPCPBezierBillParam_t *pParam, effBezierBED_t *pBEDData)
 {
-    u32 count = pParam->groupCount;
+    u32 count = pParam->number;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effPCPBezierBillPart_tag) + sizeof(effPCPBezierBill_tag));
     effPCPBezierBill_tag *work = (effPCPBezierBill_tag *)sdfMemLock(allocation);
     effPCPBezierBillPart_tag *slot = (effPCPBezierBillPart_tag *)(work + 1);
@@ -126,29 +126,29 @@ effPCPBezierBill_tag *effPCPBezierBillCreate(const effPCPBezierBillParam_t *pPar
     s32 historyLength, subdivisions;
     u32 i;
 
-    work->params = *pParam;
+    work->param = *pParam;
     work->hMem = allocation;
     work->ownsMixerVoices = 1;
     work->slots = slot;
     work->abgr = 0x80808080;
     work->soundMixer = effEveBEDCreate(pBEDData);
-    historyLength = work->params.historyLength;
+    historyLength = work->param.historyLength;
     if (historyLength == 0) {
-        work->params.historyLength = 1;
+        work->param.historyLength = 1;
         historyLength = 1;
     }
-    subdivisions = work->params.subdivisions;
+    subdivisions = work->param.subdivisions;
     if (subdivisions <= 0) {
-        work->params.subdivisions = 1;
+        work->param.subdivisions = 1;
         subdivisions = 1;
     }
-    if (work->params.startDelayRange <= 0) {
-        work->params.startDelayRange = 1;
+    if (work->param.startDelayRange <= 0) {
+        work->param.startDelayRange = 1;
     }
-    palette[0] = work->params.palette[0];
-    palette[1] = work->params.palette[1];
-    palette[2] = work->params.palette[2];
-    palette[3] = work->params.palette[3];
+    palette[0] = work->param.palette[0];
+    palette[1] = work->param.palette[1];
+    palette[2] = work->param.palette[2];
+    palette[3] = work->param.palette[3];
     place.payload[0] = 0;
     place.payload[1] = 0;
     place.payload[2] = 0;
@@ -184,7 +184,7 @@ void effPCPBezierBillCreatePCF(void *paramTable) {
 }
 
 effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
-    u32 count = src->params.groupCount;
+    u32 count = src->param.number;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effPCPBezierBillPart_tag) + sizeof(effPCPBezierBill_tag));
     effPCPBezierBill_tag *work = (effPCPBezierBill_tag *)sdfMemLock(allocation);
     effPCPBezierBillPart_tag *slot = (effPCPBezierBillPart_tag *)(work + 1);
@@ -193,29 +193,29 @@ effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
     s32 historyLength, subdivisions;
     u32 i;
 
-    work->params = src->params;
+    work->param = src->param;
     work->ownsMixerVoices = 0;
     work->hMem = allocation;
     work->soundMixer = src->soundMixer;
     work->slots = slot;
     work->abgr = 0x80808080;
-    historyLength = work->params.historyLength;
+    historyLength = work->param.historyLength;
     if (historyLength == 0) {
-        work->params.historyLength = 1;
+        work->param.historyLength = 1;
         historyLength = 1;
     }
-    subdivisions = work->params.subdivisions;
+    subdivisions = work->param.subdivisions;
     if (subdivisions <= 0) {
-        work->params.subdivisions = 1;
+        work->param.subdivisions = 1;
         subdivisions = 1;
     }
-    if (work->params.startDelayRange <= 0) {
-        work->params.startDelayRange = 1;
+    if (work->param.startDelayRange <= 0) {
+        work->param.startDelayRange = 1;
     }
-    palette[0] = work->params.palette[0];
-    palette[1] = work->params.palette[1];
-    palette[2] = work->params.palette[2];
-    palette[3] = work->params.palette[3];
+    palette[0] = work->param.palette[0];
+    palette[1] = work->param.palette[1];
+    palette[2] = work->param.palette[2];
+    palette[3] = work->param.palette[3];
     place.payload[0] = 0;
     place.payload[1] = 0;
     place.payload[2] = 0;
@@ -243,7 +243,7 @@ effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
 
 void effPCPBezierBillDelete(effPCPBezierBill_tag *hData) {
     u32 i = 0;
-    u32 count = hData->params.groupCount;
+    u32 count = hData->param.number;
     effPCPBezierBillPart_tag *slot = hData->slots;
 
     if (count != 0) {
@@ -321,15 +321,15 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
     u32 blend;
     u32 j;
 
-    count = hData->params.groupCount;
-    fadeStep = 1.0f / (f32)hData->params.fadeFrames;
-    segments = hData->params.subdivisions - 1;
-    frames = hData->params.curveFrames;
-    delayRange = hData->params.startDelayRange;
-    mode = hData->params.mode;
+    count = hData->param.number;
+    fadeStep = 1.0f / (f32)hData->param.fadeFrames;
+    segments = hData->param.subdivisions - 1;
+    frames = hData->param.curveFrames;
+    delayRange = hData->param.startDelayRange;
+    mode = hData->param.mode;
     tint = hData->abgr;
     slot = hData->slots;
-    SDF_VU0_COPYVECTOR(origin, hData->params.origin);
+    SDF_VU0_COPYVECTOR(origin, hData->param.origin);
     place.payload[4] = 0.0f;
     place.payload[5] = 0.0f;
     place.payload[6] = 0.0f;
@@ -356,17 +356,17 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
     SDF_VU0_LOADVECTOR_B(&aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDir);
-    half[0] = hData->params.width * 0.5f;
-    half[1] = hData->params.width * 0.5f;
-    half[2] = hData->params.width * 0.5f;
+    half[0] = hData->param.width * 0.5f;
+    half[1] = hData->param.width * 0.5f;
+    half[2] = hData->param.width * 0.5f;
     i = 0;
     if (count != 0) {
         do {
         if (slot->curve.parameterStep == 0.0f) {
             bias = 0.5f;
-            drop = -hData->params.height * dds3GetRandFloatA(dds3EffectBase);
-            drift = hData->params.spreadZ * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
-            spawn[0] = origin[0] + hData->params.spreadX * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
+            drop = -hData->param.height * dds3GetRandFloatA(dds3EffectBase);
+            drift = hData->param.spreadZ * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
+            spawn[0] = origin[0] + hData->param.spreadX * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
             spawn[1] = origin[1] - drop;
             spawn[2] = origin[2] + drift;
             SDF_VU0_LOADVECTOR(spawn);
@@ -603,9 +603,9 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
             slot->curve.t = 0.0f;
             slot->curve.parameterStep = 3.0f / (frames * (f32)(segments + 1));
             effPCPBezierEval(&slot->curve, point);
-            slot->position[0] = point[0];
-            slot->position[1] = point[1];
-            slot->position[2] = point[2];
+            slot->pos[0] = point[0];
+            slot->pos[1] = point[1];
+            slot->pos[2] = point[2];
             slot->frame = -(s32)(dds3GetRandA(dds3EffectBase) % delayRange);
             dds3BezierTrackPolyReset(slot->hBztp);
         } else if (slot->frame++ >= 0) {
@@ -613,16 +613,16 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 if (fadeStep < slot->fadeScale) {
                     fade = slot->fadeScale - fadeStep;
                     slot->fadeScale = fade;
-                    slot->hBztp->color = ((u32)(fade * 128.0f) << 24) | 0x808080;
-                    slot->hBztp->color = effMagaCylinderCalcColor(tint, slot->hBztp->color);
+                    slot->hBztp->abgr = ((u32)(fade * 128.0f) << 24) | 0x808080;
+                    slot->hBztp->abgr = effMagaCylinderCalcColor(tint, slot->hBztp->abgr);
                 } else {
                     dds3BezierTrackPolyReset(slot->hBztp);
                 }
             } else {
                 j = 0;
-                prev[0] = slot->position[0];
-                prev[1] = slot->position[1];
-                prev[2] = slot->position[2];
+                prev[0] = slot->pos[0];
+                prev[1] = slot->pos[1];
+                prev[2] = slot->pos[2];
                 if (segments != 0) {
                     do {
                         effPCPBezierEval(&slot->curve, point);
@@ -671,9 +671,9 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_STOREVECTOR_B_NOMEM(tri[2]);
                 dds3BezierTrackPolySetVC(slot->hBztp, (u128 *)tri);
                 endPoints = slot->hBztp->pHeadVertex;
-                slot->position[0] = point[0];
-                slot->position[1] = point[1];
-                slot->position[2] = point[2];
+                slot->pos[0] = point[0];
+                slot->pos[1] = point[1];
+                slot->pos[2] = point[2];
                 SDF_VU0_COPYVECTOR(&endPoints[0], tri[1]);
                 SDF_VU0_COPYVECTOR(&endPoints[1], tri[0]);
                 SDF_VU0_COPYVECTOR(&endPoints[7], tri[2]);
@@ -724,9 +724,9 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_STOREVECTOR(&endPoints[6]);
             }
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
-                place.payload[0] = slot->position[0];
-                place.payload[1] = slot->position[1];
-                place.payload[2] = slot->position[2];
+                place.payload[0] = slot->pos[0];
+                place.payload[1] = slot->pos[1];
+                place.payload[2] = slot->pos[2];
                 place.payload[3] = 0.0f;
                 place.color = tint;
                 facing[0] = center[0] - place.payload[0];
@@ -766,23 +766,23 @@ dds3BezierTrackPoly_tag *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex) {
     dds3BezierTrackPoly_tag *history = (dds3BezierTrackPoly_tag *)(storage + bufferBytes);
     sdfMat_t *asset;
 
-    history->points = (u128 *)storage;
+    history->pVertex = (u128 *)storage;
     storage += count * sizeof(u128);
     history->pHeadVertex = (u128 *)storage;
     storage += 8 * sizeof(u128);
-    history->colors = (u32 *)storage;
+    history->pVC = (u32 *)storage;
     storage += colorBytes;
     history->pHeadVC = (u32 *)storage;
     history->blend = 2;
     history->point = count;
     history->current = 3;
     history->subdivisions = pVertex;
-    history->color = 0x80808080;
+    history->abgr = 0x80808080;
     history->hMem = allocation;
     history->count = 0;
     memcpy(history->pHeadVertex, D_0031F0B0, sizeof(D_0031F0B0));
     asset = sdfMatNew();
-    history->resourceHandle = asset;
+    history->pMat = asset;
     sdfMatSetConstant(asset, 1.0f);
     memset(&dds3BezierVertexCount, 0, 0x2C);
     dds3BezierVertexCount.flags = 0x4000;
@@ -796,13 +796,13 @@ dds3BezierTrackPoly_tag *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex) {
 }
 
 void dds3BezierTrackPolyDelete(dds3BezierTrackPoly_tag *hPoly) {
-    sdfMatFreeDelayed(hPoly->resourceHandle);
+    sdfMatFreeDelayed(hPoly->pMat);
     sdfMemFreeDirect(hPoly->hMem);
 }
 
 void dds3BezierTrackPolyReset(dds3BezierTrackPoly_tag *hPoly) {
     hPoly->current = 3;
-    hPoly->color = 0x80808080;
+    hPoly->abgr = 0x80808080;
     hPoly->count = 0;
 }
 
@@ -813,7 +813,7 @@ void dds3BezierTrackPolyCreate(dds3BezierTrackPoly_tag *face, u32 *split) {
     f32 step = 1.0f / count;
     f32 alpha = 0.0f;
     f32 alphaStep = 1.0f / alphaCount;
-    u32 *colors = face->colors;
+    u32 *colors = face->pVC;
     u32 innerStart = split[0] & 0xFFFFFF;
     u32 innerEnd = split[2] & 0xFFFFFF;
     u32 outerStart = split[1];
@@ -839,7 +839,7 @@ void dds3BezierTrackPolyCreate(dds3BezierTrackPoly_tag *face, u32 *split) {
 
 void dds3BezierTrackPolySetVC(dds3BezierTrackPoly_tag *hPoly, u128 *pABGR) {
     s32 position = hPoly->current;
-    u128 *points = hPoly->points;
+    u128 *points = hPoly->pVertex;
     s32 count;
 
     SDF_VU0_COPYVECTOR(&points[position], pABGR);
@@ -879,7 +879,7 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
-    sdf3DPrimLinkMat(list, hPoly->resourceHandle, 0);
+    sdf3DPrimLinkMat(list, hPoly->pMat, 0);
     recent = hPoly->count;
     start[0] = hPoly->current - recent;
     if (start[0] < 3) {
@@ -892,13 +892,13 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
         length[0] = recent;
         length[1] = 0;
     }
-    dds3BezierVertexCount.colors = hPoly->colors;
-    dds3BezierVertexCount.color = hPoly->color;
+    dds3BezierVertexCount.colors = hPoly->pVC;
+    dds3BezierVertexCount.color = hPoly->abgr;
     for (i = 0; i < 2; i++) {
         draw = &dds3BezierVertexCount;
         remaining = length[i];
         draw->primitiveCount = 16;
-        draw->points = hPoly->points + start[i];
+        draw->points = hPoly->pVertex + start[i];
         draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
@@ -921,7 +921,7 @@ void dds3BezierTrackPolyDraw(dds3BezierTrackPoly_tag *hPoly) {
         colors[3] = colors[2] = colors[1] = edgeColor;
     dds3BezierTrackPolyVertex.colors = colors;
     dds3BezierTrackPolyVertex.points = hPoly->pHeadVertex;
-    dds3BezierTrackPolyVertex.color = hPoly->color;
+    dds3BezierTrackPolyVertex.color = hPoly->abgr;
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierTrackPolyVertex));
     surface = dds3BezierTrackPolyParam[hPoly->blend];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
