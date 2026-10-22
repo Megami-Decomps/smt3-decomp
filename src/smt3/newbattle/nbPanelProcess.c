@@ -433,10 +433,10 @@ typedef struct {
 } nbPanelProcess_nbPanelXYZ_t;
 
 typedef struct {
-    s32 u;
-    s32 v;
-    s32 uw;
-    s32 vh;
+    s32 u0;
+    s32 v0;
+    s32 u1;
+    s32 v1;
 } nbPanelProcess_nbPanelTMXuv_t;
 
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
@@ -675,7 +675,7 @@ void nbPanelSpriteCenteringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ,
 
     cx = pXYZ->x + ((pArea->w - pXYZ->w) >> 1);
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(cx + x, pXYZ->y + y, pXYZ->w, pXYZ->h, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
+    nbPnlSprite(cx + x, pXYZ->y + y, pXYZ->w, pXYZ->h, pUV->u0, pUV->v0, pUV->u1, pUV->v1, col, hTex);
 }
 
 void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, nbPanelProcess_nbPanelTMXuv_t *pUV, u32 abgr, f32 scale,
@@ -692,7 +692,7 @@ void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, nbP
     px = pXYZ->x - ((sw - pXYZ->w) >> 1);
     py = pXYZ->y - ((sh - pXYZ->h) >> 1);
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(px + x, py + y, sw, sh, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
+    nbPnlSprite(px + x, py + y, sw, sh, pUV->u0, pUV->v0, pUV->u1, pUV->v1, col, hTex);
 }
 
 void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, nbPanelProcess_nbPanelTMXuv_t *pUV, u32 abgr, f32 scaleW,
@@ -709,7 +709,7 @@ void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, n
     px = pXYZ->x - ((sw - pXYZ->w) >> 1);
     py = pXYZ->y - ((sh - pXYZ->h) >> 1);
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(px + x, py + y, sw, sh, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
+    nbPnlSprite(px + x, py + y, sw, sh, pUV->u0, pUV->v0, pUV->u1, pUV->v1, col, hTex);
 }
 
 void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ_0, nbPanelProcess_nbPanelTMXuv_t *pXYZ_1, u32 rate,
@@ -734,7 +734,7 @@ void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ_0, n
     sw = x1 - x0;
     sh = y1 - y0;
     col = effMagaCylinderCalcColor(rate, nbPanelBaseABGR);
-    nbPnlSprite(px + x, py + y, sw, sh, pXYZ_1->u, pXYZ_1->v, pXYZ_1->uw, pXYZ_1->vh, col, hTex);
+    nbPnlSprite(px + x, py + y, sw, sh, pXYZ_1->u0, pXYZ_1->v0, pXYZ_1->u1, pXYZ_1->v1, col, hTex);
 }
 
 void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelProcess_nbPanelXYZ_t *pXYZ, u32 abgr, char **pString)

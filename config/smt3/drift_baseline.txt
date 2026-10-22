@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 121 types, 1024 members, 506 adopted constants.
+# 121 types, 1007 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -544,13 +544,9 @@ member effPCPMHanma01_tag.unk0C
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
 member effPCPRadiateBED_tag.unk10C
-member effPCPShockWave01_tag.unk10
 member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
-member effPCPZiodin01_tag.unk10
-member effPCPZiodin01_tag.unk14
-member effPCPZiodin01_tag.unk18
 member effPCP_PBCamera_tag.unk58
 member effPCP_PBCamera_tag.unk59
 member effPCP_PBCamera_tag.unk5C
@@ -774,20 +770,7 @@ member fldTakaraSlot_t.unk10
 member fldTakaraSlot_t.unk28
 member fldTaskInfo_t.unk0
 member fldTaskInfo_t.unk08
-member fldTest_FLDRUN_DANTE_t.unk00
-member fldTest_FLDRUN_DANTE_t.unk14
-member fldTest_FLDRUN_DANTE_t.unk18
 member fldTest_FLDRUN_DANTE_t.unk20
-member fldTest_FLDRUN_DANTE_t.unk24
-member fldTest_FLDRUN_DANTE_t.unk26
-member fldTest_FLDRUN_DANTE_t.unk28
-member fldTest_FLDRUN_DANTE_t.unk2C
-member fldTest_FLDRUN_DANTE_t.unk30
-member fldTest_FLDRUN_DANTE_t.unk34
-member fldTest_FLDRUN_DANTE_t.unk44
-member fldTest_FLDRUN_DANTE_t.unk48
-member fldTest_FLDRUN_DANTE_t.unk64
-member fldTest_FLDRUN_DANTE_t.unk70
 member fldTransferChunk_t.unk00
 member fldWave_t.unk08
 member frFontChild_t.unk00

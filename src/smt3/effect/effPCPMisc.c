@@ -1250,11 +1250,11 @@ struct effPCPThunderSpherePoly_t {
 };
 
 struct effPCPShockWave01_tag {
-    u8 pad00[0x10];
-    f32 unk10; /* Settable input; not read by the observed fade updates. */
-    u32 color;
+    u8 pos[0x10];
+    f32 scale; /* Settable input; not read by the observed fade updates. */
+    u32 abgr;
     u32 frame;
-    effPCPThunderSpherePoly_t *handle; /* 0x1C complete vector work owner */
+    effPCPThunderSpherePoly_t *pThunderPoly; /* 0x1C complete vector work owner */
 };
 
 /* One 0x18-byte per-group fragment entry in the owner's trailing allocation. */
@@ -1561,9 +1561,9 @@ struct effPCPHama02_tag {
 
 struct effPCPZiodin01_tag {
     f32 pos[4];
-    u32 unk10;
-    f32 unk14; /* Settable, but not read by the observed group updates. */
-    u32 unk18;
+    u32 radius;
+    f32 scale; /* Settable, but not read by the observed group updates. */
+    u32 abgr;
     effPCP_ThunderPoly_t *handles[1];
 };
 
@@ -3425,11 +3425,11 @@ void effPCPZiodin01SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPZiodin01SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPZiodin01SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPZiodin02Init(effPCPZiodin01_tag *pPCPZiodin02) {
@@ -3520,11 +3520,11 @@ void effPCPZiodin02SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPZiodin02SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPZiodin02SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPZiodin03Init(effPCPZiodin01_tag *pPCPZiodin03) {
@@ -3613,11 +3613,11 @@ void effPCPZiodin03SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPZiodin03SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPZiodin03SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPZiodin04Init(effPCPZiodin01_tag *pPCPZiodin04) {
@@ -3708,11 +3708,11 @@ void effPCPZiodin04SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPZiodin04SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPZiodin04SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPMZiodin01Init(effPCPZiodin01_tag *pPCPMZiodin01) {
@@ -3774,11 +3774,11 @@ void effPCPMZiodin01SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPMZiodin01SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPMZiodin01SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPMZiodin02Init(effPCPZiodin01_tag *pPCPMZiodin02) {
@@ -3844,11 +3844,11 @@ void effPCPMZiodin02SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPMZiodin02SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPMZiodin02SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPShockWave01Init(effPCPShockWave01_tag *pPCPShockWave01) {
@@ -3856,7 +3856,7 @@ void effPCPShockWave01Init(effPCPShockWave01_tag *pPCPShockWave01) {
 
     handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_ShockWave01_ThunderSpherePoly_Param);
     pPCPShockWave01->frame = 0;
-    pPCPShockWave01->handle = handle;
+    pPCPShockWave01->pThunderPoly = handle;
 }
 
 void *effPCPShockWave01Create(void) {
@@ -3868,7 +3868,7 @@ void *effPCPShockWave01Create(void) {
 }
 
 void effPCPShockWave01Delete(effPCPShockWave01_tag *hData) {
-    effPCPThunderSpherePolyDelete(hData->handle);
+    effPCPThunderSpherePolyDelete(hData->pThunderPoly);
     sdfChipFreeDirect(hData);
 }
 
@@ -3888,7 +3888,7 @@ void effPCPShockWave01Draw(effPCPShockWave01_tag *hData) {
 
     frame = hData->frame;
     if (frame < 0x17) {
-        parameterHead = effPCPThunderSpherePolyGetParam(hData->handle);
+        parameterHead = effPCPThunderSpherePolyGetParam(hData->pThunderPoly);
         frame = hData->frame;
         phase = (f32)frame / 22.0f;
         parameterHead->width = phase * 600.0f + 200.0f;
@@ -3896,13 +3896,13 @@ void effPCPShockWave01Draw(effPCPShockWave01_tag *hData) {
     }
     if (frame >= 0x2D) {
         phase = (f32)(frame - 0x2D) / 30.0f;
-        fadedColor = effColorBlend(hData->color, 0, phase);
+        fadedColor = effColorBlend(hData->abgr, 0, phase);
     } else {
-        fadedColor = hData->color;
+        fadedColor = hData->abgr;
     }
-    effPCPThunderSpherePolySetColor(hData->handle, fadedColor);
-    effPCPThunderSpherePolySetPosition((void *)hData->handle, hData);
-    effPCPThunderSpherePolyDraw(hData->handle);
+    effPCPThunderSpherePolySetColor(hData->pThunderPoly, fadedColor);
+    effPCPThunderSpherePolySetPosition((void *)hData->pThunderPoly, hData);
+    effPCPThunderSpherePolyDraw(hData->pThunderPoly);
     hData->frame++;
 }
 
@@ -3911,11 +3911,11 @@ void effPCPShockWave01SetPosition(effPCPShockWave01_tag *hData, const void *pPos
 }
 
 void effPCPShockWave01SetScale(effPCPShockWave01_tag *hData, f32 scale) {
-    hData->unk10 = scale;
+    hData->scale = scale;
 }
 
 void effPCPShockWave01SetColor(effPCPShockWave01_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPShockWave02Init(effPCPZiodin01_tag *pPCPShockWave02) {
@@ -4004,11 +4004,11 @@ void effPCPShockWave02SetPosition(effPCPZiodin01_tag *hData, const void *pPos) {
 }
 
 void effPCPShockWave02SetScale(effPCPZiodin01_tag *hData, f32 scale) {
-    hData->unk14 = scale;
+    hData->scale = scale;
 }
 
 void effPCPShockWave02SetColor(effPCPZiodin01_tag *hData, u32 abgr) {
-    hData->unk18 = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPHouden01Init(effPCPShockWave01_tag *pPCPHouden01) {
@@ -4016,7 +4016,7 @@ void effPCPHouden01Init(effPCPShockWave01_tag *pPCPHouden01) {
 
     handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_Houden01_ThunderSpherePoly_Param);
     pPCPHouden01->frame = 0;
-    pPCPHouden01->handle = handle;
+    pPCPHouden01->pThunderPoly = handle;
 }
 
 void *effPCPHouden01Create(void) {
@@ -4028,7 +4028,7 @@ void *effPCPHouden01Create(void) {
 }
 
 void effPCPHouden01Delete(effPCPShockWave01_tag *hData) {
-    effPCPThunderSpherePolyDelete(hData->handle);
+    effPCPThunderSpherePolyDelete(hData->pThunderPoly);
     sdfChipFreeDirect(hData);
 }
 
@@ -4052,7 +4052,7 @@ void effPCPHouden01Draw(effPCPShockWave01_tag *hData) {
         return;
     }
     if (frame < 0x1E) {
-        parameterHead = effPCPThunderSpherePolyGetParam(hData->handle);
+        parameterHead = effPCPThunderSpherePolyGetParam(hData->pThunderPoly);
         phase = (f32)frame / 30.0f;
         value = phase * 200.0f + 150.0f;
         parameterHead->width = value;
@@ -4060,13 +4060,13 @@ void effPCPHouden01Draw(effPCPShockWave01_tag *hData) {
     }
     if (frame >= 0x39) {
         phase = ((f32)frame - 57.0f) * 0.125f;
-        fadedColor = effColorBlend(hData->color, 0, phase);
-        effPCPThunderSpherePolySetColor(hData->handle, fadedColor);
+        fadedColor = effColorBlend(hData->abgr, 0, phase);
+        effPCPThunderSpherePolySetColor(hData->pThunderPoly, fadedColor);
     } else {
-        effPCPThunderSpherePolySetColor(hData->handle, hData->color);
+        effPCPThunderSpherePolySetColor(hData->pThunderPoly, hData->abgr);
     }
-    effPCPThunderSpherePolySetPosition((void *)hData->handle, hData);
-    effPCPThunderSpherePolyDraw(hData->handle);
+    effPCPThunderSpherePolySetPosition((void *)hData->pThunderPoly, hData);
+    effPCPThunderSpherePolyDraw(hData->pThunderPoly);
     hData->frame++;
 }
 
@@ -4075,11 +4075,11 @@ void effPCPHouden01SetPosition(effPCPShockWave01_tag *hData, const void *pPos) {
 }
 
 void effPCPHouden01SetScale(effPCPShockWave01_tag *hData, f32 scale) {
-    hData->unk10 = scale;
+    hData->scale = scale;
 }
 
 void effPCPHouden01SetColor(effPCPShockWave01_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 effPCPBlinkMultiBlur_tag *effPCPBlinkMultiBlurCreate(EffPCPTrailParams *params) {
@@ -4720,7 +4720,7 @@ void effPCPMegidora01Init(effPCPShockWave01_tag *pPCPMegidora01) {
 
     handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_Megidora01_ThunderSpherePoly_Param);
     pPCPMegidora01->frame = 0;
-    pPCPMegidora01->handle = handle;
+    pPCPMegidora01->pThunderPoly = handle;
 }
 
 void *effPCPMegidora01Create(void) {
@@ -4732,7 +4732,7 @@ void *effPCPMegidora01Create(void) {
 }
 
 void effPCPMegidora01Delete(effPCPShockWave01_tag *hData) {
-    effPCPThunderSpherePolyDelete(hData->handle);
+    effPCPThunderSpherePolyDelete(hData->pThunderPoly);
     sdfChipFreeDirect(hData);
 }
 
@@ -4753,14 +4753,14 @@ void effPCPMegidora01Draw(effPCPShockWave01_tag *hData) {
 
     frame = hData->frame;
     if (frame < 0x1F) {
-        parameterHead = effPCPThunderSpherePolyGetParam(hData->handle);
+        parameterHead = effPCPThunderSpherePolyGetParam(hData->pThunderPoly);
         frame = hData->frame;
         phase = (f32)frame / 30.0f;
         value = phase * 150.0f + 100.0f;
         parameterHead->width = value;
         parameterHead->height = value;
     } else if (frame - 0x2D < 0x10) {
-        parameterHead = effPCPThunderSpherePolyGetParam(hData->handle);
+        parameterHead = effPCPThunderSpherePolyGetParam(hData->pThunderPoly);
         frame = hData->frame;
         phase = (f32)(frame - 0x2D) / 15.0f;
         value = phase * 150.0f + 250.0f;
@@ -4769,13 +4769,13 @@ void effPCPMegidora01Draw(effPCPShockWave01_tag *hData) {
     }
     if (frame >= 0x2D) {
         phase = (f32)(frame - 0x2D) / 35.0f;
-        fadedColor = effColorBlend(hData->color, 0, phase);
+        fadedColor = effColorBlend(hData->abgr, 0, phase);
     } else {
-        fadedColor = hData->color;
+        fadedColor = hData->abgr;
     }
-    effPCPThunderSpherePolySetColor(hData->handle, fadedColor);
-    effPCPThunderSpherePolySetPosition((void *)hData->handle, hData);
-    effPCPThunderSpherePolyDraw(hData->handle);
+    effPCPThunderSpherePolySetColor(hData->pThunderPoly, fadedColor);
+    effPCPThunderSpherePolySetPosition((void *)hData->pThunderPoly, hData);
+    effPCPThunderSpherePolyDraw(hData->pThunderPoly);
     hData->frame++;
 }
 
@@ -4784,11 +4784,11 @@ void effPCPMegidora01SetPosition(effPCPShockWave01_tag *hData, const void *pPos)
 }
 
 void effPCPMegidora01SetScale(effPCPShockWave01_tag *hData, f32 scale) {
-    hData->unk10 = scale;
+    hData->scale = scale;
 }
 
 void effPCPMegidora01SetColor(effPCPShockWave01_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPMegidoraon01Init(effPCPShockWave01_tag *pPCPMegidoraon01) {
@@ -4796,7 +4796,7 @@ void effPCPMegidoraon01Init(effPCPShockWave01_tag *pPCPMegidoraon01) {
 
     handle = effPCPThunderSpherePolyCreate((effPCPThunderSpherePolyParam_t *)effPCP_Megidoraon01_ThunderSpherePoly_Param);
     pPCPMegidoraon01->frame = 0;
-    pPCPMegidoraon01->handle = handle;
+    pPCPMegidoraon01->pThunderPoly = handle;
 }
 
 void *effPCPMegidoraon01Create(void) {
@@ -4808,7 +4808,7 @@ void *effPCPMegidoraon01Create(void) {
 }
 
 void effPCPMegidoraon01Delete(effPCPShockWave01_tag *hData) {
-    effPCPThunderSpherePolyDelete(hData->handle);
+    effPCPThunderSpherePolyDelete(hData->pThunderPoly);
     sdfChipFreeDirect(hData);
 }
 
@@ -4828,25 +4828,25 @@ void effPCPMegidoraon01Draw(effPCPShockWave01_tag *hData) {
 
     frame = hData->frame;
     if (frame < 0x2E) {
-        parameterHead = effPCPThunderSpherePolyGetParam(hData->handle);
+        parameterHead = effPCPThunderSpherePolyGetParam(hData->pThunderPoly);
         frame = hData->frame;
         phase = (f32)frame / 45.0f;
         parameterHead->height = parameterHead->width = phase * 950.0f + 200.0f;
     } else if (frame >= 0x3C && frame < 0x4C) {
-        parameterHead = effPCPThunderSpherePolyGetParam(hData->handle);
+        parameterHead = effPCPThunderSpherePolyGetParam(hData->pThunderPoly);
         frame = hData->frame;
         phase = (f32)(frame - 0x3C) / 15.0f;
         parameterHead->height = parameterHead->width = phase * 150.0f + 1050.0f;
     }
     if (frame >= 0x3C) {
         phase = (f32)(frame - 0x3C) / 15.0f;
-        fadedColor = effColorBlend(hData->color, 0, phase);
+        fadedColor = effColorBlend(hData->abgr, 0, phase);
     } else {
-        fadedColor = hData->color;
+        fadedColor = hData->abgr;
     }
-    effPCPThunderSpherePolySetColor(hData->handle, fadedColor);
-    effPCPThunderSpherePolySetPosition((void *)hData->handle, hData);
-    effPCPThunderSpherePolyDraw(hData->handle);
+    effPCPThunderSpherePolySetColor(hData->pThunderPoly, fadedColor);
+    effPCPThunderSpherePolySetPosition((void *)hData->pThunderPoly, hData);
+    effPCPThunderSpherePolyDraw(hData->pThunderPoly);
     hData->frame++;
 }
 
@@ -4855,11 +4855,11 @@ void effPCPMegidoraon01SetPosition(effPCPShockWave01_tag *hData, const void *pPo
 }
 
 void effPCPMegidoraon01SetScale(effPCPShockWave01_tag *hData, f32 scale) {
-    hData->unk10 = scale;
+    hData->scale = scale;
 }
 
 void effPCPMegidoraon01SetColor(effPCPShockWave01_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 effPCPBreath_tag *effPCPBreathCreate(void *params, effPCPAgiraoFirePartList_t *handleParams) {

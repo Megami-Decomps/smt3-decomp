@@ -167,7 +167,7 @@ typedef struct {
 
 typedef struct {
     fldTest_FLDRUN_EFF_t *pEff;
-    s32 life;
+    s32 time;
     s32 effmode;
     s32 rotmode;
     f32 off_cam_range_min;
@@ -283,38 +283,38 @@ extern void SetRotateMatrixY(f32 aAngle);
 /* Dante's chase work block. Only the fields the chase code reaches are known. */
 typedef struct
 {
-    s32 unk00;
+    s32 status;
     f32 x;
     f32 y;
     f32 z;
     f32 turn;
-    f32 unk14;
-    f32 unk18;
+    f32 oldframe;
+    f32 nowframe;
     s16 ix;
     s16 iz;
     u8 unk20[0x4];
-    u16 unk24;
-    u16 unk26;
-    s32 unk28;
-    void *unk2C;
-    s32 unk30;
-    s32 unk34;
+    u16 tikamiti;
+    u16 wkmode;
+    s32 RouteIdx;
+    void *RouteDataTop;
+    s32 now;
+    s32 goal;
     s32 nextframe;
     f32 angleToPlayer;
     f32 speed;
-    s32 unk44;
-    s32 unk48;
+    s32 cnt_ex;
+    s32 gunlight_anime;
     u32 flag;
     s32 update_flag;
     s32 bgm_mode;
     f32 d_p_len;
     f32 d_p_dir;
     f32 d_c_dir;
-    s32 unk64;
+    s32 stance;
     char *pDoor;
     u16 mapIxOld;
     u16 mapIzOld;
-    s32 unk70;
+    s32 old_status;
 } fldTest_FLDRUN_DANTE_t;
 
 extern char D_00530F30[];
@@ -733,7 +733,7 @@ void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
                     res->d3p = NULL;
                 }
                 res->d3p = dds3EffectLoad(res->ptr);
-                res->cnt = entry->life;
+                res->cnt = entry->time;
                 res->x = x;
                 res->y = y;
                 res->z = z;
@@ -745,7 +745,7 @@ void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
                     res->pcf = NULL;
                 }
                 res->pcf = dds3EffectPartCreate(6, res->ptr);
-                res->cnt = entry->life;
+                res->cnt = entry->time;
                 res->x = x;
                 res->y = y;
                 res->z = z;
@@ -1197,7 +1197,7 @@ INCLUDE_RODATA(const s32, "field/fldTest", D_00531350);
 
 void fldRunDanteAi(void)
 {
-    switch (fldRun_Dante.unk00) {
+    switch (fldRun_Dante.status) {
     case 0:
         func_0011C790();
         return;
@@ -1321,16 +1321,16 @@ void fldRunDanteInit(void)
         break;
     }
     fldRun_Dante.nextframe = -20;
-    fldRun_Dante.unk26 = 0;
-    fldRun_Dante.unk30 = 0;
-    fldRun_Dante.unk34 = 0;
+    fldRun_Dante.wkmode = 0;
+    fldRun_Dante.now = 0;
+    fldRun_Dante.goal = 0;
     fldRun_Dante.y = 0.0f;
     fldRun_Dante.angleToPlayer = 0.0f;
     fldRun_Dante.speed = 0.0f;
-    fldRun_Dante.unk48 = 0;
+    fldRun_Dante.gunlight_anime = 0;
     fldRun_Dante.flag = 0;
     fldRun_Dante.bgm_mode = 0;
-    fldRun_Dante.unk64 = 0;
+    fldRun_Dante.stance = 0;
     fldRun_Dante.d_c_dir = 0.0f;
     fldRun_Dante.x = fldRun_MAP_OX + (f32)fldRun_MAP_BX * (f32)fldRun_Dante.ix;
     fldRun_Dante.z = fldRun_MAP_OZ + (f32)-fldRun_MAP_BZ * (f32)fldRun_Dante.iz;
@@ -1367,7 +1367,7 @@ void fldRunDanteShutdown(void)
     fldFreeRunMapData();
     fldRunTamaFree();
     if (fldJDataHandle != 0) {
-        fldRun_Dante.unk70 = fldRun_Dante.unk00;
+        fldRun_Dante.old_status = fldRun_Dante.status;
     } else {
         fldRunDanteHandle = -1;
     }
@@ -1424,8 +1424,8 @@ void fldRunDanteSe(void)
     f32 prev;
     f32 now;
 
-    now = fldRun_Dante.unk18;
-    prev = fldRun_Dante.unk14;
+    now = fldRun_Dante.nowframe;
+    prev = fldRun_Dante.oldframe;
     vol = fldRunDanteDistToTarget(fldRun_Dante.x, fldRun_Dante.y, fldRun_Dante.z);
     switch (fldRun_Dante.update_flag) {
     case 0:

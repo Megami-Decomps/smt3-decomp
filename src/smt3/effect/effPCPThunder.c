@@ -240,9 +240,9 @@ struct effPCP_ThunderRadiatePoly_t {
 
 /* Per-fragment countdowns and the packed color consumed by thunder updates. */
 struct effPCP_ThunderPolyPart_t {
-    u32 delayFrames;  /* 0x00 */
-    u32 activeFrames; /* 0x04 */
-    u32 color;        /* 0x08 */
+    u32 wait;  /* 0x00 */
+    u32 refresh; /* 0x04 */
+    u32 abgr;        /* 0x08 */
 };
 
 struct effPCP_ThunderPoly_t;
@@ -1365,9 +1365,9 @@ void effPCP_ThunderPolySetVCNormal(effPCP_ThunderPoly_t *pThunderPoly) {
 void effPCP_ThunderPolyDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
     effPCP_ThunderPolyPart_t *fragment = &work->pPart[index];
 
-    fragment->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
-    fragment->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
-    fragment->color = EFF_THUNDER_NEUTRAL_COLOR;
+    fragment->wait = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
+    fragment->refresh = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->abgr = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
 void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 number) {
@@ -1580,12 +1580,12 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData) {
     if (count > 0) {
         canRestart = updateCount < restartLimit;
         do {
-            if (fragment->delayFrames == 0) {
-                if (fragment->activeFrames != 0) {
+            if (fragment->wait == 0) {
+                if (fragment->refresh != 0) {
                     effPCP_ThunderPolyPartRefresh(hData, i);
-                    fragment->activeFrames--;
-                } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
-                    fragment->color += EFF_THUNDER_ALPHA_WRAP_ADD;
+                    fragment->refresh--;
+                } else if (fragment->abgr & EFF_THUNDER_ALPHA_MASK) {
+                    fragment->abgr += EFF_THUNDER_ALPHA_WRAP_ADD;
                 } else if (restartLimit == 0 || canRestart) {
                     effPCP_ThunderPolyDrawOff(hData, i);
                     dds3TrackPolyListInit(hData->hPoly, i);
@@ -1593,9 +1593,9 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData) {
                     renderCells[i].vertexCount = 0;
                 }
             } else {
-                fragment->delayFrames--;
+                fragment->wait--;
             }
-            renderCells[i].color = effMagaCylinderCalcColor(fragment->color, tintColor);
+            renderCells[i].color = effMagaCylinderCalcColor(fragment->abgr, tintColor);
             i++;
             fragment++;
         } while (i < count);
@@ -1649,9 +1649,9 @@ void effPCP_ThunderPolyLowSetColor(effPCP_ThunderPoly_t *hData, u32 abgr) {
 void effPCP_ThunderPolyLowDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
     effPCP_ThunderPolyPart_t *fragment = &work->pPart[index];
 
-    fragment->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
-    fragment->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
-    fragment->color = EFF_THUNDER_NEUTRAL_COLOR;
+    fragment->wait = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
+    fragment->refresh = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->abgr = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
 void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 number) {
@@ -1866,21 +1866,21 @@ void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *hData) {
 
     if (fragmentCount > 0) {
         do {
-            if (fragment->delayFrames == 0) {
-                if (fragment->activeFrames != 0) {
+            if (fragment->wait == 0) {
+                if (fragment->refresh != 0) {
                     effPCP_ThunderPolyLowPartRefresh(hData, index);
-                    fragment->activeFrames--;
-                } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
-                    fragment->color -= EFF_THUNDER_ALPHA_FADE_STEP;
+                    fragment->refresh--;
+                } else if (fragment->abgr & EFF_THUNDER_ALPHA_MASK) {
+                    fragment->abgr -= EFF_THUNDER_ALPHA_FADE_STEP;
                 } else {
                     effPCP_ThunderPolyLowDrawOff(hData, index);
                     dds3TrackPolyListInit(hData->state.secondarySystem, index);
                     dds3TrackPolyListInit(hData->hPoly, index);
                 }
             } else {
-                fragment->delayFrames--;
+                fragment->wait--;
             }
-            packedColor = effMagaCylinderCalcColor(fragment->color, tintColor);
+            packedColor = effMagaCylinderCalcColor(fragment->abgr, tintColor);
             secondaryCells[index].color = packedColor;
             primaryCells[index].color = packedColor;
             fragment++;

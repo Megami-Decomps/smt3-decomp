@@ -129,10 +129,10 @@ typedef struct nbDevilInfo_t {
 extern nbDevilInfo_t datDevilTable[];
 
 typedef struct nbPanelProcess_nbPanelTMXuv_t {
-    s32 u;
-    s32 v;
-    s32 uw;
-    s32 vh;
+    s32 u0;
+    s32 v0;
+    s32 u1;
+    s32 v1;
 } nbPanelProcess_nbPanelTMXuv_t;
 
 /* Rows of the same 164-byte stride, a separate object from D_003989E0. */
@@ -499,9 +499,9 @@ void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 rgba)
 {
     nbPanelProcess_nbPanelTMXuv_t uv;
 
-    uv.u = no * 13 + 1;
-    uv.v = 1;
-    nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u, uv.v, 0xC, 0x12, rgba, th);
+    uv.u0 = no * 13 + 1;
+    uv.v0 = 1;
+    nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u0, uv.v0, 0xC, 0x12, rgba, th);
 }
 
 /* NON_MATCHING: 24 of 66 words differ (first at +0x74). */

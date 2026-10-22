@@ -27,9 +27,9 @@ struct itfMesBinMesHeader_t {
 };
 
 struct itfMesBinTypeHeader_t {
-    /* Relocated item-address table; address 1 marks a branch entry. */
-    u32 *itemList;
-    itfMesBinMesHeader_t *table;
+    /* Relocated item-address ptr; address 1 marks a branch entry. */
+    u32 *type;
+    itfMesBinMesHeader_t *ptr;
 };
 
 struct itfMesResource_t {
@@ -862,7 +862,7 @@ s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     u32 flags;
     u32 mode;
 
-    table = GetTypeHeader(panel, entryIndex)->table;
+    table = GetTypeHeader(panel, entryIndex)->ptr;
     mes->itemIndex = itemIndex;
     mes->table = table;
     mes->maxpage = table->page;
@@ -962,14 +962,14 @@ void itfMesMngRequestSelect(s32 id, s32 select) {
     frFontHandle_t *chain;
 
     entry = GetTypeHeader(panel, select);
-    if (entry->itemList != (u32 *)1) {
-        printf("itfMesMngRequestSelect() - Invalid Type : %d\n", entry->itemList);
+    if (entry->type != (u32 *)1) {
+        printf("itfMesMngRequestSelect() - Invalid Type : %d\n", entry->type);
     }
     if (sel->pfont != NULL) {
         frDestroyFontRequestAfter(sel->pfont);
         sel->pfont = NULL;
     }
-    table = entry->table;
+    table = entry->ptr;
     count = GetNumSelectItem(table->bitCount, sel->mask);
     y = sel->y - count * 160;
     y += 0xB4;
@@ -1316,7 +1316,7 @@ itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource) {
 
 /* Look up an entry-table item; only the item index has a bounds check. */
 u8 *itfMesMngGetDataPtrImmediate(s32 id, s32 message, s32 page) {
-    return GetMessagePagePtr(GetTypeHeader(pinst[id].mes, message)->table, page);
+    return GetMessagePagePtr(GetTypeHeader(pinst[id].mes, message)->ptr, page);
 }
 
 /* Refresh changed panel values only when both content-status pairs are clear.
@@ -1376,7 +1376,7 @@ s32 itfMesMngGetWidth(s32 id, s32 message, s32 page) {
     frFontHandle_t *glyphChain;
     s32 textExtent;
 
-    table = GetTypeHeader(mes, message)->table;
+    table = GetTypeHeader(mes, message)->ptr;
     if (table->page == 0) {
         return 0;
     }
@@ -1707,7 +1707,7 @@ void CommitVarTable(s32 *pvar)
 
 u8 *GetSpeakerName(instanceMes_tag *pinst)
 {
-    u32 *items = GetTypeHeader2(pinst->pdata)->itemList;
+    u32 *items = GetTypeHeader2(pinst->pdata)->type;
 
     return (u8 *)items[pinst->speaker.num];
 }
