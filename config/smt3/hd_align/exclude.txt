@@ -1,0 +1,20 @@
+# Member names the compiler could not attribute to one type, dropped from the
+# plan by hd_align.py --exclude. Each is a name two or more structs share where
+# a line accesses both, so the fix loop rewrote the wrong occurrence.
+buttons
+cellCount
+color
+colors
+count
+entryCount
+firstOption
+fontIndex
+fragmentCount
+groupCount
+item
+objectRadius
+particleCount
+points
+secondOption
+slotCount
+tag

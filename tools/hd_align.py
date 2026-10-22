@@ -14,7 +14,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cparse import struct_fields  # noqa: E402
-from ida_fill import member_owners  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CONVENTION = re.compile(r"_(?:t\d?|u|e|b|s|tag\d?)$")
@@ -62,6 +61,32 @@ def our_types():
         for _, name, fields, _ in struct_fields(path.read_text(errors="replace")):
             if name:
                 out[name][path] = [(ty + "*" * stars, member, dims) for ty, stars, member, dims in fields]
+    return out
+
+
+DECL = re.compile(r"^\s*(?:const\s+|volatile\s+|struct\s+|union\s+|unsigned\s+|signed\s+)*"
+                  r"[A-Za-z_]\w*[\s*]+([A-Za-z_]\w*)\s*(?:\[[^\]]*\])*\s*;")
+OPEN = re.compile(r"\b(?:struct|union)\b[^;{]*\{")
+
+
+def nested_member_names():
+    """Member names declared below the top level of a struct or union.
+
+    `cparse.struct_fields` records only depth-1 members, so a name an anonymous
+    nested struct declares looks unowned: rewriting `.fontIndex` tree-wide also
+    rewrote `setupBytes.fontIndex`, which frMsgInfo_t does not declare."""
+    out = set()
+    for path in all_sources():
+        depth = 0
+        for line in path.read_text(errors="replace").split("\n"):
+            if depth >= 2:
+                m = DECL.match(line)
+                if m:
+                    out.add(m.group(1))
+            opens = line.count("{")
+            if depth == 0 and opens and not OPEN.search(line):
+                continue  # a function body or an initialiser, not a record
+            depth = max(0, depth + opens - line.count("}"))
     return out
 
 
@@ -296,7 +321,23 @@ def apply(types, members, ours, owners):
     return touched, dict(deferred)
 
 
-def fix(deferred, rounds=40):
+def untaken(candidates, tried, placed, old):
+    """The first candidate not already placed on this line for a different member.
+
+    Two members of one struct can offer the same candidate (`angle` and
+    `angleStep` both offer `rotate`), and collapsing them onto it compiles while
+    reading the wrong offset: `part->rotate += part->rotate` came out 4 words
+    wrong. Repeats of the SAME member on one line are legitimate, though
+    (`dst->color = src->color` when both are that type), so only a clash between
+    two different members is refused."""
+    taken = {e["new"]: e["old"] for e in placed}
+    for c in candidates:
+        if c not in tried and taken.get(c, old) == old:
+            return c
+    return None
+
+
+def fix(deferred, rounds=80):
     """Let the compiler attribute each deferred use.
 
     A line that errors with "no member named old" is a use of a type that lost
@@ -304,7 +345,6 @@ def fix(deferred, rounds=40):
     An error naming a candidate we introduced means the guess was wrong for that
     access: it is put back and the next candidate tried, until none is left."""
     import subprocess
-    introduced = {new: old for old, news in deferred.items() for new in news}
     state = defaultdict(list)  # (file, line) -> [{old, new, tried}]
     fixed, given_up = 0, []
     for _ in range(rounds):
@@ -315,25 +355,31 @@ def fix(deferred, rounds=40):
         for path, line, name in sorted(set(ERROR.findall(out.stdout + out.stderr))):
             p, i = ROOT / path, int(line) - 1
             lines = p.read_text().split("\n")
-            if name in deferred:
-                entry = {"old": name, "new": deferred[name][0], "tried": {deferred[name][0]}}
-                swapped, n = re.subn(ACCESS.format(old=re.escape(name)), rf"\1\2{entry['new']}", lines[i], count=1)
+            # A candidate can itself be a deferred old name (`flags` offers `flag`,
+            # and `flag` is deferred too), so continuing an existing chain has to be
+            # tried first or the loop abandons the outer rename's remaining candidates.
+            entry = next((e for e in state.get((path, i), ()) if e["new"] == name), None)
+            if entry is None and name in deferred:
+                pick = untaken(deferred[name], set(), state.get((path, i), ()), name)
+                if pick is None:
+                    given_up.append(f"{path}:{line}: {name} has no candidate free on this line")
+                    continue
+                entry = {"old": name, "new": pick, "tried": {pick}}
+                swapped, n = re.subn(ACCESS.format(old=re.escape(name)), rf"\1\2{pick}", lines[i], count=1)
                 if not n:
                     continue
                 state[(path, i)].append(entry)
-            elif name in introduced and (path, i) in state:
-                entry = next((e for e in state[(path, i)] if e["new"] == name), None)
-                if entry is None:
-                    continue
-                left = [c for c in deferred[entry["old"]] if c not in entry["tried"]]
-                if not left:
+            elif entry is not None:
+                pick = untaken(deferred[entry["old"]], entry["tried"],
+                               [e for e in state[(path, i)] if e is not entry], entry["old"])
+                if pick is None:
                     swapped = re.sub(ACCESS.format(old=re.escape(name)), rf"\1\2{entry['old']}", lines[i], count=1)
                     state[(path, i)].remove(entry)
                     given_up.append(f"{path}:{line}: {entry['old']} fits none of {deferred[entry['old']]}")
                 else:
-                    swapped = re.sub(ACCESS.format(old=re.escape(name)), rf"\1\2{left[0]}", lines[i], count=1)
-                    entry["new"] = left[0]
-                    entry["tried"].add(left[0])
+                    swapped = re.sub(ACCESS.format(old=re.escape(name)), rf"\1\2{pick}", lines[i], count=1)
+                    entry["new"] = pick
+                    entry["tried"].add(pick)
                     fixed -= 1
             else:
                 continue
@@ -352,6 +398,14 @@ def main():
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--no-types", action="store_true", help="members only")
     ap.add_argument("--fix", action="store_true", help="after --apply, resolve deferred uses by compiling")
+    ap.add_argument("--safe-only", action="store_true",
+                    help="skip members whose old name another type also declares, so every "
+                         "rewrite is unambiguous and no compile-and-guess pass is needed")
+    ap.add_argument("--exclude", type=Path,
+                    help="file of member names to drop from the plan, one per line; "
+                         "write it from a previous run's unresolved list")
+    ap.add_argument("--unresolved-out", type=Path,
+                    help="write the member names --fix could not place, for --exclude")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -360,6 +414,34 @@ def main():
     types, members, refused, evidence = plan(list(load_reports(args.reports)), hd, ours, args.verbose)
     if args.no_types:
         types = {}
+    # Ownership has to be complete over THIS tree, which is what a rewrite
+    # touches; the IDB's own types are not in it and would only over-refuse.
+    owners = defaultdict(set)
+    for name, defs in ours.items():
+        for fields in defs.values():
+            for _, m, _ in fields:
+                owners[m].add(name)
+    for name in nested_member_names():
+        owners[name].add("<nested>")
+    if args.safe_only:
+        kept, dropped = 0, 0
+        for our_t in list(members):
+            safe = {m: n for m, n in members[our_t].items() if not (owners.get(m, set()) - {our_t})}
+            dropped += len(members[our_t]) - len(safe)
+            kept += len(safe)
+            if safe:
+                members[our_t] = safe
+            else:
+                del members[our_t]
+        print(f"safe-only: {kept} members rewritable tree-wide, {dropped} deferred to the backlog")
+    if args.exclude and args.exclude.exists():
+        drop = {l.strip() for l in args.exclude.read_text().splitlines()
+                if l.strip() and not l.startswith("#")}
+        for our_t in list(members):
+            members[our_t] = {m: n for m, n in members[our_t].items() if m not in drop}
+            if not members[our_t]:
+                del members[our_t]
+        print(f"excluded {len(drop)} member names")
     for t, (hd_t, n) in sorted(types.items()):
         print(f"type {t} -> {hd_t}  ({n} functions; {evidence[('type', t, hd_t)]})")
     for t, picks in sorted(members.items()):
@@ -368,13 +450,17 @@ def main():
             print(f"member {t}.{m} -> {new}  ({evidence[('member', (t, m), (hd_t, new))]})")
     print(f"{len(types)} types, {sum(map(len, members.values()))} members, {len(refused)} refused")
     if args.apply:
-        touched, deferred = apply(types, members, ours, member_owners())
+        touched, deferred = apply(types, members, ours, owners)
         print(f"touched {len(touched)} files; {len(deferred)} member names left for the compiler: "
               + ", ".join(f"{o}->{'|'.join(n)}" for o, n in deferred.items()))
         if args.fix:
             fixed, given_up, rc = fix(deferred)
             for g in given_up:
                 print("unresolved", g)
+            if args.unresolved_out:
+                names = sorted({g.split(": ")[1].split(" fits")[0] for g in given_up})
+                args.unresolved_out.write_text("\n".join(names) + "\n" if names else "")
+                print(f"wrote {len(names)} names to {args.unresolved_out}")
             print(f"fixed {fixed} uses; {len(given_up)} unresolved; ninja exit {rc}")
 
 
