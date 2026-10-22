@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""Pair DDS inline-asm macros with this repo's by their instruction bodies.
+
+HD could not inline the engine's VU0 and MMI macros, so its metadata keeps them
+as functions and this repo's macro names come from there. Rules: docs/dds-names.md."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFINE = re.compile(r"^#define\s+([A-Za-z_]\w*)\s*(\([^)]*\))?\s*(.*)$")
+COMMENT = re.compile(r"/\*.*?\*/", re.S)
+STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
+
+
+def macro_bodies(path):
+    """{macro name: (parameter count, normalised body)} for the asm macros in one header."""
+    text = COMMENT.sub(" ", Path(path).read_text())
+    # Join the backslash continuations so each macro is one logical line.
+    text = re.sub(r"\\\n", " ", text)
+    out = {}
+    for line in text.splitlines():
+        m = DEFINE.match(line)
+        if not m or "__asm__" not in m[3]:
+            continue
+        name, params, body = m[1], m[2], m[3]
+        arity = 0 if not params or not params.strip("()").strip() else \
+            len([p for p in params.strip("()").split(",") if p.strip()])
+        # The template is the concatenated string literals; the operand sections
+        # are what is left, with the macro's own parameter names erased so two
+        # repos' spellings do not matter.
+        template = "".join(s for s in STRING.findall(body))
+        tail = STRING.sub('""', body)
+        names = [p.strip() for p in (params or "()").strip("()").split(",") if p.strip()]
+        for i, p in enumerate(names):
+            tail = re.sub(rf"\b{re.escape(p)}\b", f"@{i}", tail)
+        key = (re.sub(r"\s+", " ", template.replace("\\n", "\n").replace("\\t", "\t")).strip(),
+               re.sub(r"\s+", " ", tail).strip())
+        out[name] = (arity, key)
+    return out
+
+
+def hd_identifiers(hd_root):
+    """Every identifier the HD reconstruction mentions, for the evidence gate.
+
+    HD writes a macro-turned-function with a doubled underscore after the module
+    tag, so SDF_VU0_NORMALIZE here is SDF_VU0__NORMALIZE there."""
+    names = set()
+    for path in list(Path(hd_root).rglob("*.h")) + list(Path(hd_root).rglob("*.c")):
+        names |= set(re.findall(r"\bSDF_VU0__\w+|\b[A-Z][A-Z0-9_]{3,}\b", path.read_text(errors="ignore")))
+    return names
+
+
+def hd_spelling(name):
+    return name.replace("SDF_VU0_", "SDF_VU0__", 1)
+
+
+def collect(paths):
+    merged = {}
+    for path in paths:
+        if Path(path).exists():
+            merged.update(macro_bodies(path))
+    return merged
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("--dds-decomp", type=Path, required=True)
+    ap.add_argument("--hd-sources", type=Path,
+                    default=Path("/home/wsl/projects/smt3hd-reconstructed-sources"),
+                    help="the HD reconstruction, which proves a macro name")
+    ap.add_argument("--out-dir", type=Path, default=ROOT / "build" / "dds_names" / "out")
+    args = ap.parse_args()
+
+    mine = collect([ROOT / "include/ps2asm.h"])
+    inc = args.dds_decomp / "include"
+    theirs = collect(sorted(inc.glob("*.h")))
+
+    hd = hd_identifiers(args.hd_sources) if args.hd_sources.exists() else set()
+    by_body = defaultdict(list)
+    for name, (arity, key) in mine.items():
+        by_body[key].append(name)
+
+    rows, renames = [], {}
+    for name, (arity, key) in sorted(theirs.items()):
+        candidates = by_body.get(key, [])
+        if not candidates:
+            rows.append((name, "", "no-body-match", arity))
+        elif len(candidates) > 1:
+            rows.append((name, ",".join(sorted(candidates)), "ambiguous-body", arity))
+        elif candidates[0] == name:
+            rows.append((name, candidates[0], "same", arity))
+        elif hd and hd_spelling(candidates[0]) not in hd:
+            # The body is the same operation, but the name is a contributor's,
+            # wholly or in its variant suffix, so there is nothing to carry.
+            rows.append((name, candidates[0], "reject:name-not-in-hd", arity))
+        else:
+            rows.append((name, candidates[0], "accept", arity))
+            renames[name] = candidates[0]
+
+    # One recovered name must not land on two DDS macros.
+    counts = defaultdict(int)
+    for new in renames.values():
+        counts[new] += 1
+    for old, new in list(renames.items()):
+        if counts[new] > 1:
+            renames.pop(old)
+            rows = [(a, b, "two-dds-macros-one-name" if a == old and st == "accept" else st, c)
+                    for a, b, st, c in rows]
+
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    (args.out_dir / "vu_renames.tsv").write_text(
+        "\n".join(f"{old}\t{new}" for old, new in sorted(renames.items())) + "\n")
+    head = ["# DDS inline-asm macros against this repo's, matched on the instruction body.",
+            "# Generated by smt3-decomp tools/dds_vu_macros.py.",
+            "# dds_macro\tsmt3_macro\tstatus\tparameters"]
+    (args.out_dir / "vu_pairs.tsv").write_text(
+        "\n".join(head + [f"{a}\t{b}\t{st}\t{c}" for a, b, st, c in rows]) + "\n")
+
+    status = defaultdict(int)
+    for *_rest, st, _c in ((r[0], r[1], r[2], r[3]) for r in rows):
+        status[st] += 1
+    matched_bodies = {key for _n, (_a, key) in theirs.items()}
+    print(f"{len(mine)} macros here, {len(theirs)} in dds-decomp")
+    print("  " + "  ".join(f"{k}={v}" for k, v in sorted(status.items())))
+    print(f"  bodies only this repo has: "
+          f"{len({k for _n, (_a, k) in mine.items()} - matched_bodies)}")
+    print(f"wrote vu_renames.tsv and vu_pairs.tsv to {args.out_dir}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

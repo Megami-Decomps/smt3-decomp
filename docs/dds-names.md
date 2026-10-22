@@ -69,3 +69,32 @@ function that reads it, and in `dds3Particle_SparkBuffInit`'s case the old
 spelling is what the match was built on. The rules, the counts and those three
 cases are recorded on the receiving side, in dds-decomp's
 `docs/smt3-data-names.md`.
+
+## Third and fourth stages: types and the VU0 macros
+
+`tools/dds_type_names.py` carries type names across the bridge the function
+pass built: a function named the same in both repos takes the same parameters,
+so each position votes for a type pairing. 59 types landed in each game, the
+same set, since dds-decomp shares one `include/` between the games. The gates
+are four agreeing positions, four times the runner-up, agreeing pointer depth
+and agreeing struct extents where both are declared. This is the method
+[Type recovery](type-recovery.md) already uses inside this repo, pointed
+outward.
+
+`tools/dds_vu_macros.py` carries the VU0 macro names. The evidence is indirect
+but solid: HD's transpiler could not inline the engine's macros, so its
+metadata keeps each as a function named `SDF_VU0__<OP>`, and `include/ps2asm.h`
+adopted those names. Two macros that expand to the same instructions with the
+same operands and clobbers are the same operation, so the name carries; the
+tool then requires the name to exist in the HD reconstruction, which stops a
+contributor's variant suffix from travelling. 15 macros were renamed and 24
+already agreed.
+
+Neither pass can change either game's code. A type name and a macro name are
+both gone before the compiler runs; only a struct's layout and a macro's
+expansion reach it, and those are what the pairing proved equal.
+
+What is left on the macro side is a reconciliation rather than a port: 108 of
+dds-decomp's macros match no body here, and 195 of this repo's bodies have no
+counterpart there. Each is an idiom one repo has written and the other has not,
+or the same idiom under a different clobber list.
