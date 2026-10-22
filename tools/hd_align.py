@@ -41,6 +41,41 @@ def scalar_class(ty):
     return "struct"
 
 
+def idb_shapes():
+    """name -> (size, member count) from the IDB, whose layouts sit at real addresses."""
+    out, cur = {}, None
+    for line in (ROOT / "config" / "smt3" / "ida_members.txt").read_text().splitlines():
+        if line.startswith("T "):
+            p = line.split()
+            cur = p[1]
+            out[cur] = [int(p[3]) if p[3].isdigit() else -1, 0]
+        elif line.startswith("M ") and cur:
+            out[cur][1] += 1
+    return {k: tuple(v) for k, v in out.items()}
+
+
+def layout_fits(ours_t, hd_t, ours, shapes, sizes):
+    """Whether our record's shape corroborates the name, by the rules type
+    recovery settled on: a size that fits, or an equal member count.
+
+    Size is one-way. Ours larger than the IDB's is as likely to mean our shape is
+    wrong as the name, so it does not corroborate; ours fitting inside does."""
+    from ida_fill import layout
+    if hd_t not in shapes:
+        return False
+    size, count = shapes[hd_t]
+    for fields in ours[ours_t].values():
+        rows = layout([(ty.replace("*", "").strip(), ty.count("*"), m, d)
+                       for ty, m, d in fields], sizes)
+        if rows:
+            offset, extent_, _ = rows[-1]
+            if 0 < size and offset + extent_ <= size:
+                return True
+        if count and len(fields) == count:
+            return True
+    return False
+
+
 def hd_types():
     """name -> [(type, member)], from the HD corpus and the IDB's own layouts.
 
@@ -134,6 +169,9 @@ def load_reports(paths):
 
 
 def plan(reports, hd, ours, verbose):
+    from ida_fill import ida_sizes, project_sizes
+    shapes = idb_shapes()
+    sizes = project_sizes(ida_sizes())
     type_votes = defaultdict(Counter)
     member_votes = defaultdict(Counter)
     evidence = {}
@@ -184,9 +222,10 @@ def plan(reports, hd, ours, verbose):
                         for k, e in evidence.items() if k[:2] == ("type", ours_t))
         shared = len({m for f in ours[ours_t].values() for _, m, _ in f}
                      & {m for _, m in hd[hd_t]})
-        if n < 2 and not named_for and shared < 2:
+        fits = layout_fits(ours_t, hd_t, ours, shapes, sizes)
+        if n < 2 and not named_for and shared < 2 and not fits:
             refused.append(f"type {ours_t} -> {hd_t}: one report, not named for it, "
-                           f"{shared} member names shared")
+                           f"{shared} member names shared, shape disagrees")
             continue
         if hd_t in ours or hd_t in used:
             refused.append(f"type {ours_t} -> {hd_t}: the tree already uses the name {hd_t}")
