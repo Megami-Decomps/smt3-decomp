@@ -38,7 +38,7 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
-    /* 0x04 */ s8 unk_04;
+    /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;
@@ -58,7 +58,7 @@ typedef struct
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
-} cmpCursorWork_t;
+} cmpCursorInfo_t;
 
 extern s8 shpProcessStat;
 
@@ -98,7 +98,7 @@ typedef struct
     /* 0x000C */ u8 unk_000C[8];
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ u8 unk_0018[0x14];
-    /* 0x002C */ cmpCursorWork_t listCursor;
+    /* 0x002C */ cmpCursorInfo_t listCursor;
     /* 0x0064 */ u8 unk_0064[0x2324];
     /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;

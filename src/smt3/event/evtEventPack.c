@@ -32,7 +32,7 @@ typedef struct evtPackHeader_t {
 } evtPackHeader_t;
 
 typedef struct evtPackProcessData_t {
-    s32 eventId;
+    s32 eventno;
     s32 stat;
     void *pendingRequest;
     struct sdfMemHandle_t *resourceAllocation;
@@ -105,11 +105,11 @@ typedef struct evtMotionSeTaskParams_t {
     s32 resourceId;
 } evtMotionSeTaskParams_t;
 
-typedef struct evtMotionSeCue_t {
-    s32 frame;
-    s32 fade;
+typedef struct beMotionSeTable_s {
+    s32 Frame;
+    s32 Se;
     u8 unk08[8];
-} evtMotionSeCue_t;
+} beMotionSeTable_s;
 
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
@@ -393,7 +393,7 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *id) {
     s32 motionFrame;
     s32 entryIndex;
     s32 cueIndex;
-    evtMotionSeCue_t *cues;
+    beMotionSeTable_s *cues;
 
     motionSeParams = (evtMotionSeTaskParams_t *)dds3GetProcessData(id);
     if (dds3GetActiveScene() == NULL) {
@@ -420,10 +420,10 @@ s32 evtMotionSeProcess1(dds3ProcessID_t *id) {
         if (packState->entries[entryIndex].kind == 6 &&
             packState->entries[entryIndex].resourceId == motionSeParams->resourceId &&
             packState->entries[entryIndex].motionId == motionId) {
-            cues = (evtMotionSeCue_t *)(packState->payload + packState->entries[entryIndex].dataOffset);
+            cues = (beMotionSeTable_s *)(packState->payload + packState->entries[entryIndex].dataOffset);
             for (cueIndex = 0; cueIndex < packState->entries[entryIndex].cueCount; cueIndex++) {
-                if (cues[cueIndex].frame == motionFrame) {
-                    evtPlaySe(motionSeParams->eventTaskId, cues[cueIndex].fade);
+                if (cues[cueIndex].Frame == motionFrame) {
+                    evtPlaySe(motionSeParams->eventTaskId, cues[cueIndex].Se);
                     printf("EVE_SE motno = %d, frame = %d\n", motionId, motionFrame);
                 }
             }
@@ -463,7 +463,7 @@ void evtLoadEventScript(evtPackProcessData_t *state) {
     struct FileRequest *request;
 
     printf(D_0054FAC0);
-    eventId = state->eventId;
+    eventId = state->eventno;
     eventDirectoryId = eventId - eventId % 10;
     sprintf(D_0056D148, D_0053C678, eventDirectoryId, eventId, eventId);
     request = fileLoad(D_0056D148);
@@ -569,7 +569,7 @@ dds3ProcessID_t *evtLoadEventPack(s32 eventno) {
         evtMakeEventPackName(eventno, taskName);
         taskData = sdfChipAllocDirect(sizeof(evtPackProcessData_t));
         memset(taskData, 0, sizeof(evtPackProcessData_t));
-        taskData->eventId = eventno;
+        taskData->eventno = eventno;
         taskData->stat = 0;
         task = dds3StartProcess(taskName, DDS3_PRIORITY_EVENT_PACK, 1, 1, evtCheckScriptDone, (dds3ProcessFunc_t)evtWaitEventPackLoad, taskData);
     }

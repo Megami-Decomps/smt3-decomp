@@ -632,7 +632,7 @@ SZ(p02, dds3UnitObjectBasicWorkData_t, 0x20);
 OFF(p03, dds3UnitObjectBasicWorkData_t, pObjectBaseControlWorkData, 0xC);
 OFF(p04, dds3UnitObjectBasicWorkData_t, EL_serialID, 0x10);
 OFF(p05, dds3UnitObjectBasicWorkData_t, ot, 0x14);
-SZ(p06, dds3PathKeyframes_t, 0xC);
+SZ(p06, fldResourcePathData_t, 0xC);
 SZ(p07, dds3PathBasicControl_t, 0x24);
 OFF(p08, dds3PathBasicControl_t, spline, 0x10);
 OFF(p09, dds3GlobalWork_t, integers, 0x40);

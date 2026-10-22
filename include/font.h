@@ -35,7 +35,7 @@ struct GsFont_t {
     u8 pad02[2];
     u16 used_count;
     u8 pad06[2];
-    FontMem_t *list;
+    FontMem_t *font_mem;
 };
 
 /* Font items use their own 0x2C-byte pool, separate from parent chains. */

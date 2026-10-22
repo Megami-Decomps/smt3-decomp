@@ -5,13 +5,13 @@ typedef struct
 {
     u8 unk00[0x2C];
     s32 statusTime;
-} nbTarSelWork_t;
+} nbTarSelProcessData_t;
 
 extern char D_005442B8[];
 extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-nbTarSelWork_t *GetTarSelProcessData(void)
+nbTarSelProcessData_t *GetTarSelProcessData(void)
 {
     return dds3GetProcessData(dds3SearchProcessName(D_005442B8));
 }

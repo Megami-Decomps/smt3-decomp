@@ -16,7 +16,7 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 
 typedef struct
 {
-    s32 dispStat;
+    s32 flg;
     s16 x, y;
     s32 dir;
     u8 dmy[4];
@@ -52,10 +52,10 @@ struct pbGroupDB_t { u32 count; pbGroupEntry_t *entry[1]; };
 
 typedef struct
 {
-    s32 unk00;
+    s32 flg;
     union { s32 value; struct { s16 unk04, unk06; }; };
     sdfMat_t *mat;
-} pbMatWork_t;
+} pbExit_t;
 
 typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCamWork_t;
 
@@ -108,7 +108,7 @@ struct pbProcHandle_t
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
-            pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
+            pbRecord_t *record; pbExit_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
             pbViewCamWork_t *viewCam; pbMoveCharWork_t *moveChar;
             pbRoundCamWork_t *roundCam; } data;
@@ -1226,7 +1226,7 @@ void *pbFindGroupEntry(pbGroupDB_t *db, u32 group) {
 INCLUDE_ASM(const s32, "pb/pbGame", pbAddGroupEntry);
 
 void pbFreeGroupEntry(dds3ModelResrc_t *entry) {
-    sdfMemFreeDirect(entry->resourceHandle);
+    sdfMemFreeDirect(entry->effectMemHandle);
     sdfChipFreeDelayedDirect(entry);
 }
 

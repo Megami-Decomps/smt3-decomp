@@ -413,15 +413,15 @@ typedef struct slFileRec_t {
 typedef struct GameFileInfo_t {
     u8 verstr[3];
     u8 ver;
-    u8 tmnlMode;
-    u8 tmnlId;
-    u8 level;
+    u8 TmnlMode;
+    u8 TmnlId;
+    u8 Lv;
     u8 mode;
-    s32 playTime;
+    s32 PlayTime;
     u16 endcnt;
     u16 newfile;
     slFileWork_t work;
-    u8 mapOpen;
+    u8 autoMapOpen;
     u8 unk25[15];
 } GameFileInfo_t;
 
@@ -1893,15 +1893,15 @@ s32 slSaveData_writeFile(void) {
     SL_REC[slot][1] = hdr->verstr[1];
     SL_REC[slot][2] = hdr->verstr[2];
     rec[3] = hdr->ver;
-    rec[4] = hdr->tmnlMode;
-    rec[5] = hdr->tmnlId;
-    rec[6] = hdr->level;
-    *(s32 *)&SL_REC[slot][8] = hdr->playTime;
+    rec[4] = hdr->TmnlMode;
+    rec[5] = hdr->TmnlId;
+    rec[6] = hdr->Lv;
+    *(s32 *)&SL_REC[slot][8] = hdr->PlayTime;
     *(u16 *)&rec[12] = hdr->endcnt;
     *(u16 *)&rec[14] = hdr->newfile;
     rec[7] = hdr->mode;
     *(slFileName_t *)&SL_REC[slot][0x10] = *(slFileName_t *)&hdr->work;
-    SL_REC[slot][0x24] = hdr->mapOpen;
+    SL_REC[slot][0x24] = hdr->autoMapOpen;
     D_00551D30 = (u32)DDS3_GBWK;
     D_00551D34 = 0x1A510;
     if (gSlSaveMode == 0 || gSlSaveMode == 2) {

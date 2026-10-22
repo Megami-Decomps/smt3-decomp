@@ -27,14 +27,14 @@ typedef struct effBTL_SkillPartsList_t {
     u16 type;
     u8 pHandle[2];
     effBTLPartValue_t value;
-    effBTLAimParams_t aimParams;
+    effBTLAimParams_t pos_ptr;
     u32 timing;
     u8 reverberations;
     u8 unk15[3];
 } effBTL_SkillPartsList_t;
 
 typedef struct effBTL_SkillCutTable_t {
-    s32 triggerFrame;
+    s32 frame;
     u8 unk04[2];
     u16 shake;
     u16 shakeFrame;
@@ -64,7 +64,7 @@ typedef struct effBTL_t {
     u8 unkC30[8];
     sdfMemHandle_t *resource;
     u32 CutCount;
-    effBTLCut_t *cutList;
+    effBTLCut_t *hCutListTop;
 } effBTL_t;
 
 /* effBTLCutCreate allocates/clears 0x120 bytes. SMT3 has no DDS color/flags

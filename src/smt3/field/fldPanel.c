@@ -18,7 +18,7 @@ typedef struct
     s32 unk04;
     s32 unk08;
     s32 unk0C;
-} fldAddressWork_t;
+} fldAddressProcessData_t;
 
 extern dds3ProcessID_t *inputpanel_id;
 extern dds3ProcessID_t *addressprocess_id;
@@ -219,7 +219,7 @@ s32 fldAddressProcess2(dds3ProcessID_t *id)
 
 s32 fldAddressProcess1(dds3ProcessID_t *id)
 {
-    fldAddressWork_t *work;
+    fldAddressProcessData_t *work;
 
     work = sdfChipAllocDirect(0x10);
     work->unk00 = 0;

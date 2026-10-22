@@ -50,7 +50,7 @@ typedef struct effPCPBezierBillParam_t {
 typedef struct effPCPBezierBillPart_tag {
     f32 pos[4];                        /* 0x00: current sampled point */
     s32 frame;                                /* 0x10: negative delay, then elapsed frames */
-    f32 fadeScale;                          /* 0x14 */
+    f32 alpha;                          /* 0x14 */
     dds3BezierTrackPoly_tag *hBztp;/* 0x18 */
     effBezierCurve_t curve;           /* 0x1C */
     struct effBezierCut_t *hBEDCut;          /* 0x7C */
@@ -59,10 +59,10 @@ typedef struct effPCPBezierBillPart_tag {
 /* Allocation header followed by groupCount inline 0x80-byte slots. */
 typedef struct effPCPBezierBill_tag {
     effPCPBezierBillParam_t param;         /* 0x00 */
-    effPCPBezierBillPart_tag *slots;           /* 0x50 */
+    effPCPBezierBillPart_tag *pPart;           /* 0x50 */
     u32 abgr;                           /* 0x54 */
-    struct effBezierBED_t *soundMixer;           /* 0x58 */
-    u8 ownsMixerVoices;                      /* 0x5C */
+    struct effBezierBED_t *hBED;           /* 0x58 */
+    u8 original;                      /* 0x5C */
     u8 pad5D[3];                             /* 0x5D */
     sdfMemHandle_t *hMem;                 /* 0x60 */
 } effPCPBezierBill_tag;
@@ -128,10 +128,10 @@ effPCPBezierBill_tag *effPCPBezierBillCreate(const effPCPBezierBillParam_t *pPar
 
     work->param = *pParam;
     work->hMem = allocation;
-    work->ownsMixerVoices = 1;
-    work->slots = slot;
+    work->original = 1;
+    work->pPart = slot;
     work->abgr = 0x80808080;
-    work->soundMixer = effEveBEDCreate(pBEDData);
+    work->hBED = effEveBEDCreate(pBEDData);
     historyLength = work->param.historyLength;
     if (historyLength == 0) {
         work->param.historyLength = 1;
@@ -165,11 +165,11 @@ effPCPBezierBill_tag *effPCPBezierBillCreate(const effPCPBezierBillParam_t *pPar
         slot->hBztp = dds3BezierTrackPolySetVertex(historyLength, subdivisions);
         dds3BezierTrackPolyCreate(slot->hBztp, palette);
         slot->frame = 0;
-        slot->fadeScale = 1.0f;
+        slot->alpha = 1.0f;
         slot->curve.pointIndex = 0;
         slot->curve.t = 0;
         slot->curve.parameterStep = 0;
-        slot->hBEDCut = effEveBEDCutCreate(work->soundMixer, 2, &place);
+        slot->hBEDCut = effEveBEDCutCreate(work->hBED, 2, &place);
     }
     return work;
 }
@@ -194,10 +194,10 @@ effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
     u32 i;
 
     work->param = src->param;
-    work->ownsMixerVoices = 0;
+    work->original = 0;
     work->hMem = allocation;
-    work->soundMixer = src->soundMixer;
-    work->slots = slot;
+    work->hBED = src->hBED;
+    work->pPart = slot;
     work->abgr = 0x80808080;
     historyLength = work->param.historyLength;
     if (historyLength == 0) {
@@ -232,11 +232,11 @@ effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
         slot->hBztp = dds3BezierTrackPolySetVertex(historyLength, subdivisions);
         dds3BezierTrackPolyCreate(slot->hBztp, palette);
         slot->frame = 0;
-        slot->fadeScale = 1.0f;
+        slot->alpha = 1.0f;
         slot->curve.pointIndex = 0;
         slot->curve.t = 0;
         slot->curve.parameterStep = 0;
-        slot->hBEDCut = effEveBEDCutCreate(work->soundMixer, 2, &place);
+        slot->hBEDCut = effEveBEDCutCreate(work->hBED, 2, &place);
     }
     return work;
 }
@@ -244,7 +244,7 @@ effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
 void effPCPBezierBillDelete(effPCPBezierBill_tag *hData) {
     u32 i = 0;
     u32 count = hData->param.number;
-    effPCPBezierBillPart_tag *slot = hData->slots;
+    effPCPBezierBillPart_tag *slot = hData->pPart;
 
     if (count != 0) {
         do {
@@ -254,8 +254,8 @@ void effPCPBezierBillDelete(effPCPBezierBill_tag *hData) {
             slot++;
         } while (i < count);
     }
-    if (hData->ownsMixerVoices != 0) {
-        effEveBEDDelete(hData->soundMixer);
+    if (hData->original != 0) {
+        effEveBEDDelete(hData->hBED);
     }
     sdfMemFreeDirect(hData->hMem);
 }
@@ -328,7 +328,7 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
     delayRange = hData->param.startDelayRange;
     mode = hData->param.mode;
     tint = hData->abgr;
-    slot = hData->slots;
+    slot = hData->pPart;
     SDF_VU0_COPYVECTOR(origin, hData->param.origin);
     place.payload[4] = 0.0f;
     place.payload[5] = 0.0f;
@@ -610,9 +610,9 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
             dds3BezierTrackPolyReset(slot->hBztp);
         } else if (slot->frame++ >= 0) {
             if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
-                if (fadeStep < slot->fadeScale) {
-                    fade = slot->fadeScale - fadeStep;
-                    slot->fadeScale = fade;
+                if (fadeStep < slot->alpha) {
+                    fade = slot->alpha - fadeStep;
+                    slot->alpha = fade;
                     slot->hBztp->abgr = ((u32)(fade * 128.0f) << 24) | 0x808080;
                     slot->hBztp->abgr = effMagaCylinderCalcColor(tint, slot->hBztp->abgr);
                 } else {

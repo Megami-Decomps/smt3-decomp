@@ -188,7 +188,7 @@ effBTL_t *effBTLCreate(void *pData) {
     *(effBTLImage_t *)work = *(effBTLImage_t *)pData;
     effBTLPartCreate(work, pData);
     work->CutCount = 0;
-    work->cutList = NULL;
+    work->hCutListTop = NULL;
     printf("effBTL:handle create\n");
     return work;
 }
@@ -197,7 +197,7 @@ void effBTLDelete(effBTL_t *hBTLEffect) {
     effBTLCut_t *cut;
     effBTLCut_t *next;
 
-    cut = hBTLEffect->cutList;
+    cut = hBTLEffect->hCutListTop;
     while (cut != NULL) {
         next = cut->next;
         effBTLCutDelete(cut);
@@ -215,19 +215,19 @@ s32 effBTLGetMotionChangeFrame(effBTL_t *hBTLEffect, u16 CutNum) {
 
 s32 effBTLGetCutEndFrame(effBTL_t *hBTLEffect, u16 CutNum) {
     s32 bank = CutNum >= 2;
-    return hBTLEffect->banks[bank].list.triggerFrame;
+    return hBTLEffect->banks[bank].list.frame;
 }
 
 s32 effBTLGetDrawEndFrame(effBTL_t *hBTLEffect, u16 CutNum) {
     s32 bank = CutNum >= 2;
     if (CutNum == 2) {
-        return hBTLEffect->banks[bank].list.triggerFrame;
+        return hBTLEffect->banks[bank].list.frame;
     }
     return hBTLEffect->banks[bank].list.colorRampEndFrame;
 }
 
 void effBTLCutListRelease(effBTLCut_t *hBTLCutEffect) {
-    effBTLCut_t **link = &hBTLCutEffect->state->cutList;
+    effBTLCut_t **link = &hBTLCutEffect->state->hCutListTop;
     effBTLCut_t *cur;
 
     while ((cur = *link) != NULL) {
@@ -251,14 +251,14 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation,
     cut = sdfChipAllocDirect(0x120);
     memset(cut, 0, 0x120);
     cut->state = hBTLEffect;
-    cut->next = hBTLEffect->cutList;
-    hBTLEffect->cutList = cut;
+    cut->next = hBTLEffect->hCutListTop;
+    hBTLEffect->hCutListTop = cut;
     list = (CutNum < 2) ? &hBTLEffect->banks[0].list : &hBTLEffect->banks[1].list;
-    cut->triggerFrame = list->triggerFrame;
+    cut->triggerFrame = list->frame;
     cut->kind = CutNum;
     cut->list = list;
     if (CutNum == 2) {
-        cut->colorRampEndFrame = list->triggerFrame;
+        cut->colorRampEndFrame = list->frame;
     } else {
         cut->colorRampEndFrame = list->colorRampEndFrame;
     }
@@ -274,7 +274,7 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation,
             if (entry->type != 0xFFFE) {
                 *work = dds3EffectPartCopy(entry->value.work);
                 if (actorScaleEnabled != 0 && pFormation != NULL) {
-                    u8 scaleKind = entry->aimParams.scaleKind;
+                    u8 scaleKind = entry->pos_ptr.scaleKind;
 
                     if (scaleKind == 0 || scaleKind == 4) {
                         dds3EffectPartSetScale(*work, effBTLPartGetScalePtr(cut->formation));
@@ -507,7 +507,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         if (hBTLCutEffect->parameterWorks[i] == NULL) {
             continue;
         }
-        aim = &entry->aimParams;
+        aim = &entry->pos_ptr;
         effBTLPartGetPositionPtr(formation, aim, &position);
         dds3EffectPartSetPosition(hBTLCutEffect->parameterWorks[i], &position);
         switch (aim->scaleKind) {
@@ -524,7 +524,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
         case 3:
             break;
         case 5:
-            effBTLModelGetMarkMatrix2(formation, entry->aimParams.aimMode);
+            effBTLModelGetMarkMatrix2(formation, entry->pos_ptr.aimMode);
             SDF_VU0_LOADMATRIX_B(&base);
             MultMatrixNoArg();
             SDF_VU0_STOREMATRIX(&marked);

@@ -15,7 +15,7 @@
 #include "event.h"
 #include "effect.h"
 
-typedef struct fldActorEntry_t fldActorEntry_t;
+typedef struct doormovetbl_s doormovetbl_s;
 
 typedef union fldWaypointHeaderValues_t fldWaypointHeaderValues_t;
 
@@ -25,7 +25,7 @@ typedef struct fldWaypointBlock_t fldWaypointBlock_t;
 
 typedef struct devState_t devState_t;
 
-struct fldActorEntry_t {
+struct doormovetbl_s {
     s8 kind;
     u8 pad01;
     s16 requiredFlag;
@@ -70,7 +70,7 @@ struct fldWaypointHeader_t {
 
 struct fldWaypointBlock_t {
     fldWaypointHeader_t headers[FLD_WAYPOINT_HEADER_COUNT];
-    fldActorEntry_t actors[256];
+    doormovetbl_s actors[256];
 };
 
 extern u32 D_0054EC44;
@@ -223,7 +223,7 @@ extern s32 fldDoorWarpTarget;
 
 /* fldDoorTable is fldDoorParamTable.actors: the same 100-byte waypoint record,
    reached through its own symbol at fldDoorParamTable + 0xA0. */
-extern fldActorEntry_t fldDoorTable[256];
+extern doormovetbl_s fldDoorTable[256];
 
 /* The 0xA0 scene request block dds3AdminiCallSequence(6, ...) takes. */
 typedef struct {
@@ -322,30 +322,30 @@ extern f32 fldWmapPlayerState;
 
 /* fldDoorEventTable stride, 84 bytes; the clear leaves +0x20 alone. */
 typedef struct {
-    s32 unk00;
+    s32 stat;
     s32 unk04;
     s32 unk08;
-    s32 unk0C;
+    s32 matter_resid1;
     s32 unk10;
-    s32 unk14;
-    s32 unk18;
-    s32 unk1C;
-    s32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-    f32 unk38;
-    f32 unk3C;
-    f32 unk40;
-    f32 unk44;
-    f32 unk48;
-    f32 unk4C;
-    f32 unk50;
-} fldDoorEvent_t;
+    s32 matter_resid2;
+    s32 cnt1;
+    s32 cnt2;
+    s32 cntmax;
+    f32 x1;
+    f32 y1;
+    f32 z1;
+    f32 mx1;
+    f32 my1;
+    f32 mz1;
+    f32 x2;
+    f32 y2;
+    f32 z2;
+    f32 mx2;
+    f32 my2;
+    f32 mz2;
+} doormovework_s;
 
-extern fldDoorEvent_t fldDoorEventTable[256];
+extern doormovework_s fldDoorEventTable[256];
 
 extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
 
@@ -387,7 +387,7 @@ extern u8 D_00303030[];
 
 u8 *fldDoor_Find2(const char *evename) {
     s32 i;
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
 
     if (evename == NULL) return NULL;
     for (i = 0; i < 256; i++) {
@@ -443,7 +443,7 @@ u8 *fldDoor_Find2(const char *evename) {
 
 u8 *fldDoor_Find3(void) {
     s32 idx = gFldWap_after_nextidx;
-    fldActorEntry_t *entry = &fldDoorTable[idx];
+    doormovetbl_s *entry = &fldDoorTable[idx];
 
     if (entry->floor == fldArea[0] + 1) {
         if (entry->kind == 10) {
@@ -461,7 +461,7 @@ s32 fldDoor_GetWarpEff(void)
 }
 
 s32 fldWapGetDoor(void) {
-    fldActorEntry_t *entry = &fldDoorTable[scriptlabel];
+    doormovetbl_s *entry = &fldDoorTable[scriptlabel];
     s32 motion;
 
     if (entry->kind == 1) {
@@ -497,7 +497,7 @@ extern f32 fldPlayerWarpState;
 
 void fldDoorRun_FindStart(s32 resid) {
     s32 idx;
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     const char *name;
 
     if (fldGlobalBase.area < 10) {
@@ -524,7 +524,7 @@ void fldDoorRun_FindStart(s32 resid) {
     if (entry->kind == 2) {
         if (entry->floor != fldGlobalBase.floor + 1) return;
         fldPlayerFastMode = 1;
-        fldPlayerWarpState = *(f32 *)&fldDoorEventTable[idx].unk24;
+        fldPlayerWarpState = *(f32 *)&fldDoorEventTable[idx].x1;
         if (entry->motion == 1) {
             fldSePlay(0x38);
             dds3FadeOut(0xC0, 0xC0, 0xC0, 0xF);
@@ -550,7 +550,7 @@ void fldDoorRun_FindStart(s32 resid) {
 }
 
 void fldDoor_ExitCamera(const char *evename) {
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     char *entryName;
     dds3Basic_t *camera;
     s32 i;
@@ -597,7 +597,7 @@ extern void fldBgmFadeOut(void);
 
 extern void fldBgmTrans(void);
 
-s32 fldWap_SetBgm(fldActorEntry_t *pWap) {
+s32 fldWap_SetBgm(doormovetbl_s *pWap) {
     s32 result = 0;
 
     if (fldGlobalBase.area != 0x22 && fldGlobalBase.area != 0x20 && fldGlobalBase.area != 0x25 &&
@@ -646,7 +646,7 @@ INCLUDE_ASM(const s32, "field/fldWap", fldSetTerminalIndex);
 
 void fldDoor_SiseExit(void) {
     fldSceneParam_t record;
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     s32 index;
     s32 state;
     s32 zone;
@@ -727,7 +727,7 @@ extern void fldSetSceneParamLoad(fldSceneParam_t *pParam, s32 loadField, s32 loa
                                  s32 bgm, s32 camMode, const char *camName);
 
 void fldWap_Load(s32 tmnltype, s32 tmnlid, fldSceneParam_t *param) {
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     s32 i;
     s32 field;
     s32 zone;
@@ -793,7 +793,7 @@ void fldDoor_EveBtlExit(s32 field, s32 eveno) {
     fldSceneParam_t record;
     s32 block[4];
     s32 param[4];
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     s32 i;
     s32 nextArea;
     s32 nextKind;
@@ -873,7 +873,7 @@ void fldDoor_EveBtlExit(s32 field, s32 eveno) {
 }
 
 void fldDoor_WarpCash(const char *evename) {
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     s32 area;
     s32 room;
     s32 i;
@@ -941,7 +941,7 @@ void fldDoor_WarpCash(const char *evename) {
 }
 
 s32 fldDoor_GetHasigoTbl(s32 getmode) {
-    fldActorEntry_t *entry = &fldDoorTable[scriptlabel];
+    doormovetbl_s *entry = &fldDoorTable[scriptlabel];
     dds3Basic_t *node;
 
     switch (getmode) {
@@ -1017,7 +1017,7 @@ extern s16 gFld_ElvId[];
 void fldDoor_ElvExit(s32 select) {
     fldSceneParam_t record;
     s32 param[4];
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
     s32 i;
     s32 count;
     s32 target;
@@ -1082,30 +1082,30 @@ void fldDoor_ElvExit(s32 select) {
 }
 
 void fldClearDoorEvents(void) {
-    fldDoorEvent_t *entry = fldDoorEventTable;
+    doormovework_s *entry = fldDoorEventTable;
     s32 i;
 
     for (i = 0; i < 256; i++, entry++) {
-        entry->unk00 = 0;
+        entry->stat = 0;
         entry->unk04 = 0;
         entry->unk08 = 0;
-        entry->unk0C = -1;
+        entry->matter_resid1 = -1;
         entry->unk10 = 0;
-        entry->unk14 = -1;
-        entry->unk18 = 0;
-        entry->unk1C = 0;
-        entry->unk24 = 0;
-        entry->unk28 = 0;
-        entry->unk2C = 0;
-        entry->unk30 = 0;
-        entry->unk34 = 0;
-        entry->unk38 = 0;
-        entry->unk3C = 0;
-        entry->unk40 = 0;
-        entry->unk44 = 0;
-        entry->unk48 = 0;
-        entry->unk4C = 0;
-        entry->unk50 = 0;
+        entry->matter_resid2 = -1;
+        entry->cnt1 = 0;
+        entry->cnt2 = 0;
+        entry->x1 = 0;
+        entry->y1 = 0;
+        entry->z1 = 0;
+        entry->mx1 = 0;
+        entry->my1 = 0;
+        entry->mz1 = 0;
+        entry->x2 = 0;
+        entry->y2 = 0;
+        entry->z2 = 0;
+        entry->mx2 = 0;
+        entry->my2 = 0;
+        entry->mz2 = 0;
     }
     scriptlabel = -1;
 }
@@ -1132,8 +1132,8 @@ void fldGetDoorEntry(const void *source) {
 INCLUDE_ASM(const s32, "field/fldWap", fldSetupDoorScenes);
 
 void fldFindDoorEvent(s32 id) {
-    fldDoorEvent_t *e;
-    fldActorEntry_t *entry;
+    doormovework_s *e;
+    doormovetbl_s *entry;
     s32 i;
 
     if (id == 0) {
@@ -1145,26 +1145,26 @@ void fldFindDoorEvent(s32 id) {
     e = fldDoorEventTable;
     entry = fldDoorTable;
     for (i = 0; i < 256; i++) {
-        if (e->unk00 == 1 && e->unk04 == id) {
+        if (e->stat == 1 && e->unk04 == id) {
             s32 motion = entry->motion;
 
-            e->unk00 = 2;
-            e->unk18 = 0;
-            e->unk1C = 0;
+            e->stat = 2;
+            e->cnt1 = 0;
+            e->cnt2 = 0;
             if (motion == 5 || entry->secondaryMotion == 5 || motion == 6 ||
                 entry->secondaryMotion == 6 || motion == 7 ||
                 entry->secondaryMotion == 7 || motion == 8 ||
                 entry->secondaryMotion == 8) {
-                e->unk20 = 0x28;
+                e->cntmax = 0x28;
             } else {
-                e->unk20 = 0x14;
+                e->cntmax = 0x14;
             }
-            e->unk24 = 0.0f;
-            e->unk28 = 0.0f;
-            e->unk2C = 0.0f;
-            e->unk3C = 0.0f;
-            e->unk40 = 0.0f;
-            e->unk44 = 0.0f;
+            e->x1 = 0.0f;
+            e->y1 = 0.0f;
+            e->z1 = 0.0f;
+            e->x2 = 0.0f;
+            e->y2 = 0.0f;
+            e->z2 = 0.0f;
         }
         e++;
         entry++;
@@ -1179,96 +1179,96 @@ s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
     };
-    fldDoorEvent_t *e;
+    doormovework_s *e;
     s32 i;
 
     if (fldGb >= 200) {
         return 0;
     }
     for (i = 0; i < 256; i++) {
-        e = (fldDoorEvent_t *)((u8 *)(i * 0x54) + (u32)fldDoorEventTable);
-        if (e->unk0C == matter_resid) {
-            if (e->unk00 == 2) {
-                s32 count = e->unk18;
-                s32 limit = e->unk20;
+        e = (doormovework_s *)((u8 *)(i * 0x54) + (u32)fldDoorEventTable);
+        if (e->matter_resid1 == matter_resid) {
+            if (e->stat == 2) {
+                s32 count = e->cnt1;
+                s32 limit = e->cntmax;
                 if (count < limit) {
                     if (limit == 0x28) {
                         f32 step = steps[count];
-                        e->unk24 += e->unk30 * step;
-                        e->unk28 += e->unk34 * step;
-                        e->unk2C += e->unk38 * step;
+                        e->x1 += e->mx1 * step;
+                        e->y1 += e->my1 * step;
+                        e->z1 += e->mz1 * step;
                     } else {
-                        e->unk24 += e->unk30;
-                        e->unk28 += e->unk34;
-                        e->unk2C += e->unk38;
+                        e->x1 += e->mx1;
+                        e->y1 += e->my1;
+                        e->z1 += e->mz1;
                         if (evtBitCheck(0xAF3) != 0) {
-                            e->unk24 += e->unk30;
-                            e->unk28 += e->unk34;
-                            e->unk2C += e->unk38;
+                            e->x1 += e->mx1;
+                            e->y1 += e->my1;
+                            e->z1 += e->mz1;
                         }
                     }
-                    e->unk18 = e->unk18 + 1;
+                    e->cnt1 = e->cnt1 + 1;
                 } else if (evtBitCheck(0xAF3) != 0) {
-                    e->unk00 = 3;
-                    e->unk18 = 0;
+                    e->stat = 3;
+                    e->cnt1 = 0;
                 }
-            } else if (e->unk00 == 3) {
-                if (e->unk18 < 0x14) {
-                    e->unk24 -= e->unk30;
-                    e->unk28 -= e->unk34;
-                    e->unk2C -= e->unk38;
+            } else if (e->stat == 3) {
+                if (e->cnt1 < 0x14) {
+                    e->x1 -= e->mx1;
+                    e->y1 -= e->my1;
+                    e->z1 -= e->mz1;
                     if (evtBitCheck(0xAF3) != 0) {
-                        e->unk24 -= e->unk30;
-                        e->unk28 -= e->unk34;
-                        e->unk2C -= e->unk38;
+                        e->x1 -= e->mx1;
+                        e->y1 -= e->my1;
+                        e->z1 -= e->mz1;
                     }
-                    e->unk18 = e->unk18 + 1;
+                    e->cnt1 = e->cnt1 + 1;
                 } else {
-                    e->unk18 = 0;
-                    e->unk00 = 1;
+                    e->cnt1 = 0;
+                    e->stat = 1;
                 }
             } else {
                 continue;
             }
-            *x = e->unk24;
-            *y = e->unk28;
-            *z = e->unk2C;
+            *x = e->x1;
+            *y = e->y1;
+            *z = e->z1;
             return 1;
         }
-        if (e->unk14 == matter_resid) {
-            if (e->unk00 == 2) {
-                s32 count = e->unk1C;
-                s32 limit = e->unk20;
+        if (e->matter_resid2 == matter_resid) {
+            if (e->stat == 2) {
+                s32 count = e->cnt2;
+                s32 limit = e->cntmax;
                 if (count < limit) {
                     if (limit == 0x28) {
                         f32 step = steps[count];
-                        e->unk3C += e->unk48 * step;
-                        e->unk40 += e->unk4C * step;
-                        e->unk44 += e->unk50 * step;
+                        e->x2 += e->mx2 * step;
+                        e->y2 += e->my2 * step;
+                        e->z2 += e->mz2 * step;
                     } else {
-                        e->unk3C += e->unk48;
-                        e->unk40 += e->unk4C;
-                        e->unk44 += e->unk50;
+                        e->x2 += e->mx2;
+                        e->y2 += e->my2;
+                        e->z2 += e->mz2;
                     }
-                    e->unk1C = count + 1;
+                    e->cnt2 = count + 1;
                 } else if (evtBitCheck(0xAF3) != 0) {
-                    e->unk1C = 0;
+                    e->cnt2 = 0;
                 }
-            } else if (e->unk00 == 3) {
-                if (e->unk1C < 0x14) {
-                    e->unk3C -= e->unk48;
-                    e->unk40 -= e->unk4C;
-                    e->unk44 -= e->unk50;
-                    e->unk1C = e->unk1C + 1;
+            } else if (e->stat == 3) {
+                if (e->cnt2 < 0x14) {
+                    e->x2 -= e->mx2;
+                    e->y2 -= e->my2;
+                    e->z2 -= e->mz2;
+                    e->cnt2 = e->cnt2 + 1;
                 } else {
-                    e->unk1C = 0;
+                    e->cnt2 = 0;
                 }
             } else {
                 continue;
             }
-            *x = e->unk3C;
-            *y = e->unk40;
-            *z = e->unk44;
+            *x = e->x2;
+            *y = e->y2;
+            *z = e->z2;
             return 1;
         }
     }

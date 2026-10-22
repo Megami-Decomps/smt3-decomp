@@ -755,8 +755,8 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectFilterDrawTexQuad);
 dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam) {
     dds3Effect_PartialMultiFilter_t *dst = sdfChipAllocDirect(sizeof(dds3Effect_PartialMultiFilter_t));
 
-    dst->texture = dds3BillboardGetGeneralTex(0);
-    memcpy(&dst->params, pParam, sizeof(*pParam));
+    dst->hAlphaTex = dds3BillboardGetGeneralTex(0);
+    memcpy(&dst->param, pParam, sizeof(*pParam));
     return dst;
 }
 
@@ -765,15 +765,15 @@ void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartia
 }
 
 void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
-    s32 half = (s32)((f32)hPartialMultiFilter->params.area * 1.4f);
-    s32 x = hPartialMultiFilter->params.center[0] + 0x100;
-    s32 y = hPartialMultiFilter->params.center[1] + 0xE0;
+    s32 half = (s32)((f32)hPartialMultiFilter->param.area * 1.4f);
+    s32 x = hPartialMultiFilter->param.center[0] + 0x100;
+    s32 y = hPartialMultiFilter->param.center[1] + 0xE0;
 
-    hPartialMultiFilter->params.Filter.bounds.left = x - half;
-    hPartialMultiFilter->params.Filter.bounds.top = y - half;
-    hPartialMultiFilter->params.Filter.bounds.right = x + half;
-    hPartialMultiFilter->params.Filter.bounds.bottom = y + half;
-    dds3EffectFilterDrawTexQuad(&hPartialMultiFilter->params.Filter, hPartialMultiFilter->texture);
+    hPartialMultiFilter->param.Filter.bounds.left = x - half;
+    hPartialMultiFilter->param.Filter.bounds.top = y - half;
+    hPartialMultiFilter->param.Filter.bounds.right = x + half;
+    hPartialMultiFilter->param.Filter.bounds.bottom = y + half;
+    dds3EffectFilterDrawTexQuad(&hPartialMultiFilter->param.Filter, hPartialMultiFilter->hAlphaTex);
 }
 
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00533E30);

@@ -37,7 +37,7 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
-    /* 0x04 */ s8 unk_04;
+    /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;
@@ -57,7 +57,7 @@ typedef struct
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
-} cmpCursorWork_t;
+} cmpCursorInfo_t;
 
 typedef struct
 {
@@ -105,7 +105,7 @@ typedef struct
     /* 0x00006 */ u8 unk_00006[2];
     /* 0x00008 */ s32 unk_00008;
     /* 0x0000C */ u8 unk_0000C[0x10];
-    /* 0x0001C */ cmpCursorWork_t combineCursor;
+    /* 0x0001C */ cmpCursorInfo_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x40BC];
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x123EE];
@@ -120,7 +120,7 @@ typedef struct
     /* 0x16560 */ u8 unk_16560[0x70];
     /* 0x165D0 */ s32 smoke[3];
     /* 0x165DC */ u8 unk_165DC[0x1064];
-    /* 0x17640 */ cmpCursorWork_t menuCursor;
+    /* 0x17640 */ cmpCursorInfo_t menuCursor;
     /* 0x17678 */ u8 unk_17678[0x3060];
     /* 0x1A6D8 */ s32 texHandle[7];
     /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
@@ -144,7 +144,7 @@ typedef struct
     /* 0x000C */ u8 unk_000C[8];
     /* 0x0014 */ void *allocation;
     /* 0x0018 */ u8 unk_0018[0x14];
-    /* 0x002C */ cmpCursorWork_t listCursor;
+    /* 0x002C */ cmpCursorInfo_t listCursor;
     /* 0x0064 */ u8 unk_0064[0x2324];
     /* 0x2388 */ void *unk_2388;
     /* 0x238C */ s32 script;
@@ -156,7 +156,7 @@ typedef struct
 
 extern shpUpdateWork_t *shopUpdateWork;
 
-extern void cmpMoveCursorListEnd(cmpCursorWork_t *cursor);
+extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 

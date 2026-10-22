@@ -326,7 +326,7 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
-    /* 0x04 */ s8 unk_04;
+    /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;
@@ -346,17 +346,17 @@ typedef struct
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
-} cmpCursorWork_t;
+} cmpCursorInfo_t;
 
 typedef struct
 {
-    /* 0x00 */ cmpCursorWork_t cursor;
+    /* 0x00 */ cmpCursorInfo_t cursor;
     /* 0x38 */ s8 unk_38;
 } cmpPadStopWork_t;
 
 typedef struct
 {
-    /* 0x0000 */ cmpCursorWork_t cursor;
+    /* 0x0000 */ cmpCursorInfo_t cursor;
     /* 0x0038 */ u8 unk_0038[0x1004];
 } cmpListPage_t;
 
@@ -486,7 +486,7 @@ typedef struct
     /* 0x18 */ void *owner;
 } cmpSeqInfo_t;
 
-extern void cmpUpdateCursorScroll(cmpCursorWork_t *cursor, s32 mode);
+extern void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s32 mode);
 
 extern void cmpSetInfoWindowHidden(void);
 
@@ -544,7 +544,7 @@ typedef struct
     /* 0x00006 */ u8 unk_00006[2];
     /* 0x00008 */ s32 unk_00008;
     /* 0x0000C */ u8 unk_0000C[0x10];
-    /* 0x0001C */ cmpCursorWork_t combineCursor;
+    /* 0x0001C */ cmpCursorInfo_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x40BC];
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x123EE];
@@ -559,7 +559,7 @@ typedef struct
     /* 0x16560 */ u8 unk_16560[0x70];
     /* 0x165D0 */ s32 smoke[3];
     /* 0x165DC */ u8 unk_165DC[0x1064];
-    /* 0x17640 */ cmpCursorWork_t menuCursor;
+    /* 0x17640 */ cmpCursorInfo_t menuCursor;
     /* 0x17678 */ u8 unk_17678[0x3060];
     /* 0x1A6D8 */ s32 texHandle[7];
     /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
@@ -620,7 +620,7 @@ extern s8 gProcessStat_4;
 
 extern s8 campExitState;
 
-extern void cmpResetCursorInfo(cmpCursorWork_t *cursor);
+extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
 extern void campDrawText(s32 id, s32 flag);
 
@@ -754,7 +754,7 @@ extern void cmpModelFreeResource(void);
 
 extern void cmpResetDrawEnv(void);
 
-extern void cmpMoveCursorListEnd(cmpCursorWork_t *cursor);
+extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
 
@@ -800,15 +800,15 @@ extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 extern void fmProcTrigSequence(s32 mode);
 
 extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
-                             cmpCursorWork_t *cursor, s32 j, s32 k);
+                             cmpCursorInfo_t *cursor, s32 j, s32 k);
 
 void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx, s32 *texList, fclSpriteTbl_t *table, s32 OtNo);
 
 /* Called above its definition, where ee-gcc assumed int. */
-s32 cmpMoveCursor(cmpCursorWork_t *cur, s8 dir);
+s32 cmpMoveCursor(cmpCursorInfo_t *cur, s8 dir);
 
 /* Called above its definition, where ee-gcc assumed int. */
-s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
+s32 cmpMoveCursor2(cmpCursorInfo_t *cursor, s8 dir);
 
 s32 fclDestroyMessage(void);
 
@@ -1767,10 +1767,10 @@ s32 camp_update_stock_Process(s32 id)
         return -1;
     }
     if (cmpChkPadPressUpDown() == 0) {
-        cmpMoveCursor((cmpCursorWork_t *)((u8 *)cmpStockUpdateState->stock + 0xAC), 0);
+        cmpMoveCursor((cmpCursorInfo_t *)((u8 *)cmpStockUpdateState->stock + 0xAC), 0);
     }
-    cmpUpdateCursorSlots((cmpCursorWork_t *)((u8 *)cmpStockUpdateState->stock + 0xAC));
-    cmpUpdateCursorSlots((cmpCursorWork_t *)((u8 *)cmpStockUpdateState->stock + 0x10E8));
+    cmpUpdateCursorSlots((cmpCursorInfo_t *)((u8 *)cmpStockUpdateState->stock + 0xAC));
+    cmpUpdateCursorSlots((cmpCursorInfo_t *)((u8 *)cmpStockUpdateState->stock + 0x10E8));
     return 0;
 }
 #else
@@ -2498,7 +2498,7 @@ u16 cmpGetSkillCost(u16 skill, u16 *work)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillListRow);
 
-void cmpDrawSkillListScrollBar(s32 a, cmpCursorWork_t *cursor)
+void cmpDrawSkillListScrollBar(s32 a, cmpCursorInfo_t *cursor)
 {
     if (cursor->unk_20 != 0) {
         cmpDrawScrollBar(0, 0x280, 0x10, 0xA4, 0x16, 0x80808080, a, cursor->unk_24, cursor,
@@ -3026,7 +3026,7 @@ INCLUDE_ASM(const s32, "code_0022C578", campRunPanelCallback);
 
 void fclInitCursorWindow(void *work, s32 flag, u8 count)
 {
-    cmpCursorWork_t *cursor = (cmpCursorWork_t *)((u8 *)work + 4);
+    cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)((u8 *)work + 4);
 
     cmpInitCursorRange(cursor, count, count, flag);
     cmpInitCursorLayout(cursor, 0, 0, 0, 0, 0x17);
@@ -3797,7 +3797,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpAllocEffectSlot);
 
 /* NON_MATCHING: 18 of 21 words differ (first at +0x0). */
 #ifdef NON_MATCHING
-void cmpClearCursorSlots(cmpCursorWork_t *cur)
+void cmpClearCursorSlots(cmpCursorInfo_t *cur)
 {
     cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cur + 0x3C);
     s32 i;
@@ -3846,7 +3846,7 @@ s8 cmpGetCursorSlotState(s8 index, cmpCursorSlot_t *slot)
 
 /* NON_MATCHING: 30 of 31 words differ (first at +0x4). */
 #ifdef NON_MATCHING
-void cmpUpdateCursorSlots(cmpCursorWork_t *cursor)
+void cmpUpdateCursorSlots(cmpCursorInfo_t *cursor)
 {
     cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cursor + 0x3C);
     s32 i;
@@ -3894,7 +3894,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorRange);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorScroll);
 
-void cmpSetCursorFlag(cmpCursorWork_t *cur, s32 flag)
+void cmpSetCursorFlag(cmpCursorInfo_t *cur, s32 flag)
 {
     cur->unk_2C = flag;
     cmpUpdateCursorScroll(cur, 1);
@@ -3902,7 +3902,7 @@ void cmpSetCursorFlag(cmpCursorWork_t *cur, s32 flag)
 
 /* NON_MATCHING: 9 of 28 words differ (first at +0x8). */
 #ifdef NON_MATCHING
-void cmp_241A10(cmpCursorWork_t *cursor)
+void cmp_241A10(cmpCursorInfo_t *cursor)
 {
     u8 *flags = (u8 *)cursor->unk_2C;
     s32 count;
@@ -3929,7 +3929,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmp_241A10);
 
 /* NON_MATCHING: 3 of 26 words differ (first at +0x20). */
 #ifdef NON_MATCHING
-s32 cmp_241A88(cmpCursorWork_t *cursor, s32 index)
+s32 cmp_241A88(cmpCursorInfo_t *cursor, s32 index)
 {
     u8 *flags = (u8 *)cursor->unk_2C;
     u8 value;
@@ -3953,20 +3953,20 @@ s32 cmp_241A88(cmpCursorWork_t *cursor, s32 index)
 INCLUDE_ASM(const s32, "code_0022C578", cmp_241A88);
 #endif
 
-void cmpResetCursorPos(s16 value, cmpCursorWork_t *cursor)
+void cmpResetCursorPos(s16 value, cmpCursorInfo_t *cursor)
 {
-    cursor->unk_04 = 0;
+    cursor->StopFlag = 0;
     cursor->unk_24 = 0;
     cursor->unk_25 = 0;
     cursor->unk_22 = value;
 }
 
-void cmpSetCursorRow(s8 row, cmpCursorWork_t *cursor)
+void cmpSetCursorRow(s8 row, cmpCursorInfo_t *cursor)
 {
     cursor->unk_24 = row;
 }
 
-void cmpResetCursorInfo(cmpCursorWork_t *cursor)
+void cmpResetCursorInfo(cmpCursorInfo_t *cursor)
 {
     cursor->unk_08 = cursor->unk_18;
     cursor->unk_0C = cursor->unk_1C;
@@ -3985,7 +3985,7 @@ s32 rcvRootHasItems(rcvRootWork_t *work)
     return (flags[work->cursor + work->scroll] & 1) ^ 1;
 }
 
-s32 cmpCursorAtFirstEnabled(cmpCursorWork_t *cursor)
+s32 cmpCursorAtFirstEnabled(cmpCursorInfo_t *cursor)
 {
     s32 count = 0;
     s32 total = cursor->unk_22 + (u8)cursor->unk_24;
@@ -4015,7 +4015,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpCursorAtLastEnabled);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindNextCursorItem);
 
-void cmpAdvanceCursorPhase(cmpCursorWork_t *cursor)
+void cmpAdvanceCursorPhase(cmpCursorInfo_t *cursor)
 {
     cursor->unk_34 += 6;
     if (cursor->unk_34 > 0x200) {
@@ -4023,7 +4023,7 @@ void cmpAdvanceCursorPhase(cmpCursorWork_t *cursor)
     }
 }
 
-s32 cmpMoveCursor(cmpCursorWork_t *cur, s8 dir)
+s32 cmpMoveCursor(cmpCursorInfo_t *cur, s8 dir)
 {
     if (dir != 0)
     {
@@ -4037,12 +4037,12 @@ s32 cmpMoveCursor(cmpCursorWork_t *cur, s8 dir)
     cur = NULL;
 }
 
-s32 cmpGetCursorMoveMode(cmpCursorWork_t *cursor)
+s32 cmpGetCursorMoveMode(cmpCursorInfo_t *cursor)
 {
     if (cursor->unk_20 < 2) {
         return 1;
     }
-    if (cursor->unk_04 != 0) {
+    if (cursor->StopFlag != 0) {
         return 2;
     }
     return 0;
@@ -4052,7 +4052,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpMoveCursor2);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpChangeCursorListNums);
 
-void cmpMoveCursorListEnd(cmpCursorWork_t *cursor)
+void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor)
 {
     s32 end = cursor->unk_20 + 0xFF;
 
@@ -4086,7 +4086,7 @@ s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
     } else {
         work->unk_38 = -delay;
     }
-    if (work->cursor.unk_04 == 2) {
+    if (work->cursor.StopFlag == 2) {
         return bits & ~stop;
     }
     return bits;
@@ -4095,16 +4095,16 @@ s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop)
 INCLUDE_ASM(const s32, "code_0022C578", cmpDisablePadBitStop);
 #endif
 
-s8 cmpGetCursorRow(cmpCursorWork_t *cursor)
+s8 cmpGetCursorRow(cmpCursorInfo_t *cursor)
 {
-    return cursor->unk_04;
+    return cursor->StopFlag;
 }
 
-extern s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
+extern s32 cmpMoveCursor2(cmpCursorInfo_t *cursor, s8 dir);
 
 void cmpMoveStockCursor(s8 index, s8 dir, u8 *base)
 {
-    cmpMoveCursor2((cmpCursorWork_t *)(base + index * 0x103C + 0xAC), dir);
+    cmpMoveCursor2((cmpCursorInfo_t *)(base + index * 0x103C + 0xAC), dir);
 }
 
 void func_00242320(s8 value, u8 *work)

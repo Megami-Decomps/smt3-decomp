@@ -256,21 +256,21 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstCreateBeforeSkillList);
 
 typedef struct
 {
-    /* 0x00 */ s8 count;
+    /* 0x00 */ s8 SkillCnt;
     /* 0x01 */ u8 unk_01[0x19];
     /* 0x1A */ u16 skill[25];
-} rstBeforeSkillList_t;
+} rstSkillInfo_t;
 
 extern void rstCreateBeforeSkillList(s8 HeartsID, s32 pStock, s8 SkillLevOfs,
-                                     rstBeforeSkillList_t *pInfo);
+                                     rstSkillInfo_t *pInfo);
 
 s32 rstChkBeforeSkillOwner(u16 SkillID, s8 LevelOfs, s32 pStock)
 {
-    rstBeforeSkillList_t list;
+    rstSkillInfo_t list;
     s32 i;
 
     rstCreateBeforeSkillList(*(s8 *)&DDS3_GBWK->heartsequip, pStock, LevelOfs, &list);
-    for (i = 0; i < list.count; i++) {
+    for (i = 0; i < list.SkillCnt; i++) {
         if (SkillID == list.skill[i]) {
             return 1;
         }

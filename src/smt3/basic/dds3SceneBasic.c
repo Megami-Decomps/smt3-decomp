@@ -36,7 +36,7 @@ int printf(const char *fmt, ...);
 s32 sceneconstructor(dds3Basic_t *basic)
 {
     dds3SceneBasic_t *work = sdfChipAllocDirect(sizeof(dds3SceneBasic_t));
-    dds3SceneList_t *list;
+    dds3SceneBasicTable_t *list;
     s32 i;
 
     if (work == NULL) {
@@ -51,7 +51,7 @@ s32 sceneconstructor(dds3Basic_t *basic)
     work->fieldHandle = 0;
     work->hScrFileHandle = NULL;
     work->pScrFileData = NULL;
-    work->mem_hndl = sdfMemAllocDirect(BASIC_TYPE_MAX * sizeof(dds3SceneList_t));
+    work->mem_hndl = sdfMemAllocDirect(BASIC_TYPE_MAX * sizeof(dds3SceneBasicTable_t));
     if (work->mem_hndl == NULL) {
         sdfChipFreeDirect(work);
         return 0;
@@ -59,9 +59,9 @@ s32 sceneconstructor(dds3Basic_t *basic)
     list = sdfMemLock(work->mem_hndl);
     work->basictable = list;
     for (i = 0; i < BASIC_TYPE_MAX; i++) {
-        list->count = 0;
-        list->head = NULL;
-        list->tail = NULL;
+        list->linkcount = 0;
+        list->firstbasic = NULL;
+        list->lastbasic = NULL;
         list++;
     }
     basic->workdata = work;
@@ -76,8 +76,8 @@ void scenedestructor(dds3Basic_t *basic)
 
     if (work != NULL) {
         for (type = 0; type < BASIC_TYPE_MAX; type++) {
-            while (work->basictable[type].head != NULL) {
-                dds3DeleteSceneBasicData(work->basictable[type].head);
+            while (work->basictable[type].firstbasic != NULL) {
+                dds3DeleteSceneBasicData(work->basictable[type].firstbasic);
             }
         }
         if (work->mem_hndl != NULL) {
@@ -102,8 +102,8 @@ u32 scenemainprocuder(dds3Basic_t *scene)
         return 0;
     }
     for (type = 0; type <= 0x11; type++) {
-        if (work->basictable[type].count != 0) {
-            basic = work->basictable[type].head;
+        if (work->basictable[type].linkcount != 0) {
+            basic = work->basictable[type].firstbasic;
             if (basic->basicfunction != NULL && basic->basicfunction->mainprocuder != NULL) {
                 do {
                     next = basic->next;
@@ -128,10 +128,10 @@ u32 scenedrawprocuder(dds3Basic_t *scene)
     if (work->visible == 0) {
         return 1;
     }
-    if (work->basictable[BASIC_TYPE_AREA].count == 0) {
+    if (work->basictable[BASIC_TYPE_AREA].linkcount == 0) {
         return 1;
     }
-    basic = work->basictable[BASIC_TYPE_AREA].head;
+    basic = work->basictable[BASIC_TYPE_AREA].firstbasic;
     if (basic->basicfunction == NULL) {
         return 1;
     }
@@ -158,7 +158,7 @@ dds3Basic_t *dds3AddSceneBasicData(s32 type)
 {
     dds3Basic_t *scene;
     dds3Basic_t *basic;
-    dds3SceneList_t *list;
+    dds3SceneBasicTable_t *list;
 
     if ((u32)(type - 2) >= 16) {
         return NULL;
@@ -173,32 +173,32 @@ dds3Basic_t *dds3AddSceneBasicData(s32 type)
         return NULL;
     }
     basic->workpointer = scene;
-    if (list->tail == NULL) {
-        list->head = basic;
-        list->tail = basic;
+    if (list->lastbasic == NULL) {
+        list->firstbasic = basic;
+        list->lastbasic = basic;
     } else {
-        list->tail->next = basic;
-        basic->prev = list->tail;
-        list->tail = basic;
+        list->lastbasic->next = basic;
+        basic->prev = list->lastbasic;
+        list->lastbasic = basic;
     }
-    list->count++;
+    list->linkcount++;
     return basic;
 }
 
 void dds3DeleteSceneBasicData(dds3Basic_t *basic)
 {
-    dds3SceneList_t *list;
+    dds3SceneBasicTable_t *list;
 
     if (basic != NULL && (u32)((basic->type >> 24) - 2) < 16) {
         list = &((dds3SceneBasic_t *)basic->workpointer->workdata)->basictable[basic->type >> 24];
-        if (list->head == basic) {
-            list->head = basic->next;
+        if (list->firstbasic == basic) {
+            list->firstbasic = basic->next;
         }
-        if (list->tail == basic) {
-            list->tail = basic->prev;
+        if (list->lastbasic == basic) {
+            list->lastbasic = basic->prev;
         }
         dds3DeleteBasic(basic);
-        list->count--;
+        list->linkcount--;
     }
 }
 
@@ -238,10 +238,10 @@ dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type)
 {
     dds3Basic_t *basic;
 
-    if (((dds3SceneBasic_t *)pBasic->workdata)->basictable[type].count == 0) {
+    if (((dds3SceneBasic_t *)pBasic->workdata)->basictable[type].linkcount == 0) {
         return NULL;
     }
-    basic = ((dds3SceneBasic_t *)pBasic->workdata)->basictable[type].head;
+    basic = ((dds3SceneBasic_t *)pBasic->workdata)->basictable[type].firstbasic;
     do {
         if (serialID == basic->serialID) {
             return basic;
@@ -257,11 +257,11 @@ dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type)
     dds3BasicArrayHandle_t *handle;
     dds3Basic_t *basic;
 
-    if (work->basictable[type].count == 0) {
+    if (work->basictable[type].linkcount == 0) {
         return NULL;
     }
     handle = dds3GetBasicArrayHandle(0);
-    basic = work->basictable[type].head;
+    basic = work->basictable[type].firstbasic;
     do {
         dds3AddBasicArray(handle, 1);
         dds3SetBasicArray(handle, basic);
@@ -404,7 +404,7 @@ s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *scene, s32 type, dds3Basic_t *
     if (scene == NULL || target == NULL) {
         return 0;
     }
-    basic = ((dds3SceneBasic_t *)scene->workdata)->basictable[type].head;
+    basic = ((dds3SceneBasic_t *)scene->workdata)->basictable[type].firstbasic;
     while (basic != NULL) {
         if (basic == target) {
             return 1;
@@ -416,7 +416,7 @@ s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *scene, s32 type, dds3Basic_t *
 
 s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target)
 {
-    dds3SceneList_t *lists;
+    dds3SceneBasicTable_t *lists;
     s32 type;
 
     if (scene == NULL || target == NULL) {
@@ -424,7 +424,7 @@ s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target)
     }
     lists = ((dds3SceneBasic_t *)scene->workdata)->basictable;
     for (type = 0; type < BASIC_TYPE_MAX; type++) {
-        dds3Basic_t *basic = lists[type].head;
+        dds3Basic_t *basic = lists[type].firstbasic;
 
         if (basic == NULL) {
             continue;
@@ -463,7 +463,7 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const
     if (scene == NULL || name == NULL) {
         return NULL;
     }
-    basic = ((dds3SceneBasic_t *)scene->workdata)->basictable[type].head;
+    basic = ((dds3SceneBasic_t *)scene->workdata)->basictable[type].firstbasic;
     while (basic != NULL) {
         candidate = (u8 *)basic->name;
         if (candidate == NULL) {

@@ -5,7 +5,7 @@ typedef struct frFontHeader_t frFontHeader_t;
 
 typedef struct frFontResource_t frFontResource_t;
 
-typedef struct frFontEntry_t frFontEntry_t;
+typedef struct frFontData_t frFontData_t;
 
 typedef struct frFontNodeHeader_t frFontNodeHeader_t;
 
@@ -50,14 +50,14 @@ struct frFontResource_t {
     s32 thirdDelta; /* 0x18 */
 };
 
-struct frFontEntry_t {
+struct frFontData_t {
     sdfMemHandle_t *allocation;
     frFontHeader_t *resourceHeader;
     s32 metricByteCount;
     s32 valueByteCount;
-    s8 *flagBytes;
+    s8 *prop;
     void *unk14;
-    GsFont_t **slots;
+    GsFont_t **trans;
     struct frFontResource_t *resource;
     u32 unk20;
 };
@@ -79,7 +79,7 @@ struct frFontAtlas_t {
 };
 
 struct frFontSystem_t {
-    frFontEntry_t entries[9];
+    frFontData_t entries[9];
     s32 cachedItemCount;
     s32 itemCount;
     s32 glyphCount;
@@ -162,7 +162,7 @@ typedef struct sdfImageRequest_t {
     u16 height;
 } sdfImageRequest_t;
 
-/* sdfImageSetRelease_t.freeMode: which heap owns the uploaded pixels. */
+/* sdfImageSetPacket_tag.freeMode: which heap owns the uploaded pixels. */
 enum SdfImageSetMem
 {
     SDF_IMAGESET_MEM_IGNORE = 0,
@@ -500,10 +500,10 @@ frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 chan
 
 /* Select by the low byte of slotId; enable the entry and store value + 1 as a byte. */
 void frSetWhiteSpaceW(s32 StyleNo, s32 Width) {
-    frFontEntry_t *entry = &gFT.entries[StyleNo & FR_FONT_BYTE_MASK];
+    frFontData_t *entry = &gFT.entries[StyleNo & FR_FONT_BYTE_MASK];
 
-    entry->flagBytes[0] = FR_FONT_ENTRY_ENABLED;
-    entry->flagBytes[1] = Width + 1;
+    entry->prop[0] = FR_FONT_ENTRY_ENABLED;
+    entry->prop[1] = Width + 1;
 }
 
 /* Reverse the four byte positions of a 32-bit word. */
@@ -564,7 +564,7 @@ void frCreateUserFontPacket(s32 X, s32 Y, s32 Z, frTextHandle_t *pText,
                  pText->cellDimensions.cellWidth,
                  pText->cellDimensions.cellHeight >> FR_FONT_GLYPH_HEIGHT_SHIFT,
                  pText->renderValueOrSetupOrShade.setupBytes.firstOption, pText->parentDimensionsOrRenderWord.renderWord, Z, 1,
-                 &pText->cachedItem->list->uv, &gFT.atlas, Ot);
+                 &pText->cachedItem->font_mem->uv, &gFT.atlas, Ot);
 }
 
 /* Upload an image to GS memory at the given buffer, serialized by the GS semaphore. */
@@ -678,7 +678,7 @@ void frDestroyFontTable(dds3ProcessID_t *id) {
 void frAddFontStyle(
     u8 StyleNo, u8 *pFontData, sdfMemHandle_t *DataMh
 ) {
-    frFontEntry_t *entry;
+    frFontData_t *entry;
     s32 sectionOffset;
     u32 lookupOffset;
 
@@ -699,7 +699,7 @@ void frAddFontStyle(
         s32 flagSectionBytes;
         s32 valueSectionBytes;
 
-        entry->flagBytes = (s8 *)(flagSection + 1);
+        entry->prop = (s8 *)(flagSection + 1);
         entry->metricByteCount = flagDataBytes;
         flagSectionBytes = flagDataBytes + FR_FONT_WORD_BYTES;
         sectionOffset += flagSectionBytes;
@@ -710,12 +710,12 @@ void frAddFontStyle(
         valueSectionBytes = valueDataBytes + FR_FONT_WORD_BYTES;
         sectionOffset += valueSectionBytes;
     } else {
-        entry->flagBytes = NULL;
+        entry->prop = NULL;
         entry->unk14 = NULL;
         entry->metricByteCount = 0;
         entry->valueByteCount = 0;
     }
-    entry->slots = (GsFont_t **)(pFontData + sectionOffset);
+    entry->trans = (GsFont_t **)(pFontData + sectionOffset);
     sectionOffset += entry->resourceHeader->widthCount * FR_FONT_WORD_BYTES;
     entry->resource = (struct frFontResource_t *)(pFontData + sectionOffset);
     lookupOffset = entry->resourceHeader->lookupOffset;
@@ -729,7 +729,7 @@ void frAddFontStyle(
 /* Slots zero/one are not freed here; clear the data pointer only when an allocation exists. */
 void frDelFontStyle(s32 StyleNo) {
     u32 slotIndex = StyleNo & FR_FONT_BYTE_MASK;
-    frFontEntry_t *entry;
+    frFontData_t *entry;
 
     if (slotIndex < FR_FONT_FIRST_RELEASABLE_SLOT) {
         return;
@@ -740,7 +740,7 @@ void frDelFontStyle(s32 StyleNo) {
         sdfMemFreeDirect(entry->allocation);
         entry->resource = NULL;
     }
-    entry->slots = NULL;
+    entry->trans = NULL;
 }
 
 /* Ensure the four named default font files are installed, in slot order. */
@@ -796,8 +796,8 @@ void frFlushGsFontTable(frTextHandle_t *pText) {
 
     if (cachedItem != NULL) {
         if (cachedItem->used_count == 0) {
-            gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex].slots[cachedItem->font_no] = NULL;
-            fmRetFontMem(cachedItem->list);
+            gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex].trans[cachedItem->font_no] = NULL;
+            fmRetFontMem(cachedItem->font_mem);
             gFT.cachedItemCount--;
         }
     }
@@ -926,7 +926,7 @@ GsFont_t *frTranslateUserData(s32 Width, s32 Height, void *pData, s8 DataFreeMod
     imagePosition[0] = atlasNode->uv.u0 >> FR_FONT_ATLAS_POSITION_SHIFT;
     imagePosition[1] = atlasNode->uv.v0 >> FR_FONT_ATLAS_POSITION_SHIFT;
     cachedItem->used_count = 1;
-    cachedItem->list = atlasNode;
+    cachedItem->font_mem = atlasNode;
     if (DataFreeMode == 0) {
         uploadRequest.allocationMode = SDF_IMAGESET_MEM_IGNORE;
     } else {
@@ -947,7 +947,7 @@ GsFont_t *frTranslateUserData(s32 Width, s32 Height, void *pData, s8 DataFreeMod
 /* Decode one packed font-resource entry into a fixed-size clone.
  * Neither allocation nor entry index is checked. */
 u8 *frDecodeFontImage(u8 Style, s32 FontNo) {
-    frFontEntry_t *entry = &gFT.entries[Style];
+    frFontData_t *entry = &gFT.entries[Style];
     u8 *clonedResource = sdfChipAllocDirect(FR_FONT_RESOURCE_CLONE_BYTES);
     frFontImage_t segments;
 
@@ -959,8 +959,8 @@ u8 *frDecodeFontImage(u8 Style, s32 FontNo) {
 /* Retain a cached table item, or create/upload a new one and cache it.
  * New records start with one reference; itemIndex is not bounds-checked. */
 GsFont_t *frTranslateFont2GS(frTextHandle_t *pText, s32 FontNo) {
-    frFontEntry_t *entry = &gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex];
-    GsFont_t *cachedItem = entry->slots[FontNo];
+    frFontData_t *entry = &gFT.entries[pText->renderValueOrSetupOrShade.setupBytes.fontIndex];
+    GsFont_t *cachedItem = entry->trans[FontNo];
     u8 *clonedResource;
 
     if (cachedItem != NULL) {
@@ -970,7 +970,7 @@ GsFont_t *frTranslateFont2GS(frTextHandle_t *pText, s32 FontNo) {
     clonedResource = frDecodeFontImage(pText->renderValueOrSetupOrShade.setupBytes.fontIndex, FontNo);
     cachedItem = frTranslateUserData(frGetFontWidth(pText->renderValueOrSetupOrShade.setupBytes.fontIndex), frGetFontHeight(pText->renderValueOrSetupOrShade.setupBytes.fontIndex), clonedResource, 1);
     cachedItem->font_no = FontNo;
-    entry->slots[FontNo] = cachedItem;
+    entry->trans[FontNo] = cachedItem;
     gFT.cachedItemCount++;
     return cachedItem;
 }

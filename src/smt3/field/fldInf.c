@@ -31,7 +31,7 @@ typedef struct fldInfSet_t fldInfSet_t;
 
 typedef struct fldInfTable_t fldInfTable_t;
 
-typedef struct fldActorEntry_t fldActorEntry_t;
+typedef struct doormovetbl_s doormovetbl_s;
 
 struct fldInfHit_t {
     s8 area;
@@ -97,7 +97,7 @@ struct fldInfTable_t {
 
 typedef struct devState_t devState_t;
 
-struct fldActorEntry_t {
+struct doormovetbl_s {
     s8 kind;
     u8 pad01;
     s16 requiredFlag;
@@ -165,7 +165,7 @@ s32 evtBitCheck(s32 no);
 
 /* fldDoorTable is fldDoorParamTable.actors: the same 100-byte waypoint record,
    reached through its own symbol at fldDoorParamTable + 0xA0. */
-extern fldActorEntry_t fldDoorTable[256];
+extern doormovetbl_s fldDoorTable[256];
 
 extern s32 gFldWapPanel;
 
@@ -352,7 +352,7 @@ extern u8 D_00303030[];
 
 u8 *fldFindEventEntry(const char *name) {
     s32 i;
-    fldActorEntry_t *entry;
+    doormovetbl_s *entry;
 
     if (name == NULL) return NULL;
     for (i = 0; i < 256; i++) {

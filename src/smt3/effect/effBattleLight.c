@@ -51,11 +51,11 @@ typedef struct
     u32 unknown10;
     u32 unknown14;
     u8 reserve18[0x8];
-} effBTLPointLightBase_t;
+} effBattleLight_effBTLPointLight_Base_tag;
 
 extern effBTLPointLight_t effBTLPointLight[32];
 
-extern effBTLPointLightBase_t effBTLPointLightBase[32];
+extern effBattleLight_effBTLPointLight_Base_tag effBTLPointLightBase[32];
 
 s32 effBTLModelGetID(nbFormation_t *pFormation);
 
@@ -182,7 +182,7 @@ void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormat
 void effBTLPointLightStart(void)
 {
     nbFormation_t *pFormation;
-    effBTLPointLightBase_t *pBase;
+    effBattleLight_effBTLPointLight_Base_tag *pBase;
     evtUnit_t *hUnit;
     s32 i;
 

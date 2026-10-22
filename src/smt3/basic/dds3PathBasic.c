@@ -16,13 +16,13 @@ extern void *memset(void *a, s32 b, u32 c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern s32 dds3AllocSplineHandle(f32 (*points)[3], u32 count, s32 mode);
-extern void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f32 time);
+extern void dds3PathEvalSpline(u32 *segment, f32 *weight, fldResourcePathData_t *keys, f32 time);
 extern void Lerp(f32 aRatio);
 extern void dds3FreeSplineHandle(s32 spline);
 extern void sdfChipFreeDirect(void *aPtr);
 
 
-void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f32 frame) {
+void dds3PathEvalSpline(u32 *segment, f32 *weight, fldResourcePathData_t *keys, f32 frame) {
     u32 count = keys->count;
     u32 i;
     u32 *frames = keys->frames;
@@ -61,7 +61,7 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *pControl)
 {
     u32 segment;
     f32 weight;
-    dds3PathKeyframes_t *keys;
+    fldResourcePathData_t *keys;
     f32 (*points)[3];
 
     if (pControl->flag & DDS3_PATH_POSITION_CHANNEL) {
@@ -88,7 +88,7 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl)
 {
     u32 segment;
     f32 weight;
-    dds3PathKeyframes_t *keys;
+    fldResourcePathData_t *keys;
     f32 (*quaternions)[4];
     f32 (*first)[4];
     f32 (*second)[4];
@@ -112,7 +112,7 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLight
 {
     u32 segment;
     f32 weight;
-    dds3PathKeyframes_t *keys;
+    fldResourcePathData_t *keys;
     fldResourceLightPath_t *entries;
 
     if (work->flag & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
@@ -170,7 +170,7 @@ f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *pControl)
 {
     u32 segment;
     f32 weight;
-    dds3PathKeyframes_t *keys;
+    fldResourcePathData_t *keys;
     f32 *values;
 
     if (pControl->flag & DDS3_PATH_SCALAR_CHANNEL) {

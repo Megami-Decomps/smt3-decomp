@@ -9,13 +9,13 @@
 /* Field-only views, with offsets taken from the SMT3 retail accesses. */
 typedef struct
 {
-    s32 flags;
-    s32 soundId;
-    f32 radius;
+    s32 flg;
+    s32 id;
+    f32 r;
     f32 sourceX;
     f32 sourceY;
     f32 sourceZ;
-} fldSe3D_t;
+} fldSe3D_tag;
 
 enum sl_slot_flag
 {
@@ -24,7 +24,7 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
-extern fldSe3D_t fldSe3DTable[8];
+extern fldSe3D_tag fldSe3DTable[8];
 
 extern s32 gFldSe3DNum;
 
@@ -99,14 +99,14 @@ extern s32 fldSeSmgId;
 extern s32 DNG_MAX[];
 
 void fldSe_Init(void) {
-    fldSe3D_t *entry = fldSe3DTable;
+    fldSe3D_tag *entry = fldSe3DTable;
     s32 remaining = 7;
 
     do {
         remaining -= 1;
-        entry->flags = 0;
-        entry->radius = 0;
-        entry->soundId = 0;
+        entry->flg = 0;
+        entry->r = 0;
+        entry->id = 0;
         entry += 1;
     } while (remaining >= 0);
     gFldSe3DNum = 0;
@@ -115,9 +115,9 @@ void fldSe_Init(void) {
 void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) {
     s32 i = gFldSe3DNum;
 
-    fldSe3DTable[i].flags = 0;
-    fldSe3DTable[i].soundId = soundId;
-    fldSe3DTable[i].radius = radius;
+    fldSe3DTable[i].flg = 0;
+    fldSe3DTable[i].id = soundId;
+    fldSe3DTable[i].r = radius;
     fldSe3DTable[i].sourceX = sourceX;
     fldSe3DTable[i].sourceY = sourceY;
     fldSe3DTable[i].sourceZ = sourceZ;
@@ -128,11 +128,11 @@ void fldClearSe3D(void) {
     s32 i;
 
     for (i = 0; i < gFldSe3DNum; i++) {
-        s32 flags = fldSe3DTable[i].flags;
+        s32 flags = fldSe3DTable[i].flg;
 
         if (flags & 1) {
-            fldSe3DTable[i].flags = flags & ~1;
-            p2sdStopSe(gFldBgmTop[fldGlobalBase.area].smgId + fldSe3DTable[i].soundId);
+            fldSe3DTable[i].flg = flags & ~1;
+            p2sdStopSe(gFldBgmTop[fldGlobalBase.area].smgId + fldSe3DTable[i].id);
         }
     }
 }

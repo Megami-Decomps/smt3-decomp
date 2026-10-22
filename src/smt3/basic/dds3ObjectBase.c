@@ -335,7 +335,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, hijBParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -343,7 +343,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, isamuFParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -351,7 +351,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, hutomimiParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -359,7 +359,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, majyoParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -367,7 +367,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, model113Parts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -375,7 +375,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, hikawaParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -383,7 +383,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, hikawaParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -391,7 +391,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, isamuParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -399,7 +399,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, isamuParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -407,7 +407,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, isamuFzParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -415,7 +415,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -423,7 +423,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -431,7 +431,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, yuukoParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 4;
+                control->sdwchrid = 4;
                 control->modelParts[i] = index;
             }
         }
@@ -439,7 +439,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 3;
+                control->sdwchrid = 3;
                 control->modelParts[i] = index;
             }
         }
@@ -447,7 +447,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 3;
+                control->sdwchrid = 3;
                 control->modelParts[i] = index;
             }
         }
@@ -455,7 +455,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, tiakiParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 3;
+                control->sdwchrid = 3;
                 control->modelParts[i] = index;
             }
         }
@@ -463,7 +463,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, tiakiBParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 3;
+                control->sdwchrid = 3;
                 control->modelParts[i] = index;
             }
         }
@@ -471,7 +471,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, hijriParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 2;
+                control->sdwchrid = 2;
                 control->modelParts[i] = index;
             }
         }
@@ -479,7 +479,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 0;
+                control->sdwchrid = 0;
                 control->modelParts[i] = index;
             }
         }
@@ -487,7 +487,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 0;
+                control->sdwchrid = 0;
                 control->modelParts[i] = index;
             }
         }
@@ -495,7 +495,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 0;
+                control->sdwchrid = 0;
                 control->modelParts[i] = index;
             }
         }
@@ -503,7 +503,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 0;
+                control->sdwchrid = 0;
                 control->modelParts[i] = index;
             }
         }
@@ -511,7 +511,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 0;
+                control->sdwchrid = 0;
                 control->modelParts[i] = index;
             }
         }
@@ -519,7 +519,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerAParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 0;
+                control->sdwchrid = 0;
                 control->modelParts[i] = index;
             }
         }
@@ -527,7 +527,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerBParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 1;
+                control->sdwchrid = 1;
                 control->modelParts[i] = index;
             }
         }
@@ -535,7 +535,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
         for (i = 0; i < 17; i++) {
             index = sdfModelGetNodeIndexByName(obj->inner, playerBParts.parts[i]);
             if (index > 0) {
-                control->modelPartCount = 1;
+                control->sdwchrid = 1;
                 control->modelParts[i] = index;
             }
         }

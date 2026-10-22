@@ -136,13 +136,13 @@ typedef struct {
     s32 delaySpread;
     s32 fadeIn;
     s32 fadeOut;
-    f32 initialRadius;
-    f32 initialLift;
-    f32 initialLiftRandomness;
+    f32 radius;
+    f32 up_s;
+    f32 up_s_r;
     f32 angleStep;
-    f32 initialScale;
+    f32 ampli;
     f32 scaleStep;
-    f32 initialScaleRandomness;
+    f32 ampli_r;
     u32 particleCount;
     u32 maxSteps;
     u8 pad48[0x94];
@@ -172,7 +172,7 @@ typedef struct effMagatuhiHistoryParams_t {
 } effMagatuhiHistoryParams_t;
 
 /* History arrays precede this 0x38-byte owner in one retained allocation. */
-typedef struct effMagatuhiValueWork_t {
+typedef struct dds3MagatuhiBill_tag {
     s32 count;
     u16 historyCount;
     u8 pad06[2];
@@ -188,11 +188,11 @@ typedef struct effMagatuhiValueWork_t {
     f32 (*angleRows)[4];
     sdfTexHandle_t *texture;
     struct sdfMemHandle_t *allocationHandle;
-} effMagatuhiValueWork_t;
+} dds3MagatuhiBill_tag;
 
 typedef struct effMagatuhiOwner_t {
     effMagatuhiHistoryParams_t params;
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
 } effMagatuhiOwner_t;
 
 /* The 0x30-byte states precede this 0x12C-byte work allocation. */
@@ -222,36 +222,36 @@ typedef struct {
     u8 pad1C[4];
     u8 respawn;            /* 0x20 */
     u8 pad21[3];
-    s32 lifetimeFrames;    /* 0x24 */
-    s32 delaySpread;       /* 0x28 modulus of the particle delay */
-    s32 fadeInFrames;      /* 0x2C */
-    s32 fadeOutFrames;     /* 0x30 */
+    s32 life;    /* 0x24 */
+    s32 timing;       /* 0x28 modulus of the particle delay */
+    s32 fade_in;      /* 0x2C */
+    s32 fade_out;     /* 0x30 */
     f32 initialRadius;
     f32 baseLiftStep;      /* 0x38 */
     f32 liftVariation;
-    f32 angleStep;         /* 0x40 */
+    f32 s_angle_s;         /* 0x40 */
     f32 baseScale;         /* 0x44 */
-    f32 scaleStep;         /* 0x48 */
+    f32 s_ampli_s;         /* 0x48 */
     f32 scaleVariation;    /* 0x4C */
     f32 captureDistance;   /* 0x50: transition from drift to the path */
-    f32 pathJitter;        /* 0x54 */
-    f32 pathStep;          /* 0x58 */
-    f32 pathAcceleration;  /* 0x5C: multiplier applied to the path step */
-    u32 particleCount;     /* 0x60 */
+    f32 c_ampli;        /* 0x54 */
+    f32 c_step;          /* 0x58 */
+    f32 c_step_a;  /* 0x5C: multiplier applied to the path step */
+    u32 reserve;     /* 0x60 */
     u8 pad64[0x118];
 } effMagaSmokeConvParam_t; /* 0x17C */
 
 /* Bezier parameter head: particle count and delay spread at their native offsets. */
 typedef struct {
     f32 controlPoints[EFF_MAGATUHI_CONTROL_POINT_COUNT][EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 respawn;            /* 0x40 restart finished particles */
+    u8 loop;            /* 0x40 restart finished particles */
     u8 pad41[3];
-    s32 lifetimeFrames;    /* 0x44 frames a particle lives */
-    s32 delaySpread;       /* 0x48 modulus of the particle delay */
-    s32 fadeIn;            /* 0x4C */
-    s32 fadeOut;           /* 0x50 */
+    s32 life;    /* 0x44 frames a particle lives */
+    s32 timing;       /* 0x48 modulus of the particle delay */
+    s32 fade_in;            /* 0x4C */
+    s32 fade_out;           /* 0x50 */
     f32 jitterScales[EFF_MAGATUHI_CONTROL_POINT_COUNT]; /* 0x54 */
-    u32 particleCount;     /* 0x64 */
+    u32 reserve;     /* 0x64 */
     u32 duration;          /* 0x68 */
     u8 pad6C[0x114];
 } effMagaPoint4Param_t; /* 0x180 */
@@ -261,17 +261,17 @@ typedef struct effMagaSpiralParam_t {
     f32 origin[4];
     u8 respawn;            /* 0x10 */
     u8 pad11[3];
-    s32 lifetimeFrames;    /* 0x14 */
-    s32 delaySpread;       /* 0x18 */
-    s32 fadeIn;            /* 0x1C */
-    s32 fadeOut;           /* 0x20 */
-    f32 angleStep;         /* 0x24 */
-    f32 angleJitter;       /* 0x28 */
-    f32 heightStep;        /* 0x2C */
-    f32 heightJitter;      /* 0x30 */
-    f32 startRadius;       /* 0x34 */
-    f32 endRadius;         /* 0x38 */
-    f32 startJitter;       /* 0x3C */
+    s32 life;    /* 0x14 */
+    s32 timing;       /* 0x18 */
+    s32 fade_in;            /* 0x1C */
+    s32 fade_out;           /* 0x20 */
+    f32 rotate_s;         /* 0x24 */
+    f32 rotate_r;       /* 0x28 */
+    f32 up_s;        /* 0x2C */
+    f32 up_r;      /* 0x30 */
+    f32 radius_s;       /* 0x34 */
+    f32 radius_e;         /* 0x38 */
+    f32 radius_s_r;       /* 0x3C */
     f32 endJitter;         /* 0x40 */
     u32 particleCount;     /* 0x44 */
     u32 maxSteps;          /* 0x48 */
@@ -296,7 +296,7 @@ typedef struct effMagaSpiral_tag {
     effMagaSpiralPart_tag *particles;
     effMagatuhiOwner_t *pMagatuhi;
     u32 abgr;
-    sdfMemHandle_t *allocationHandle;
+    sdfMemHandle_t *hMem;
 } effMagaSpiral_tag;
 
 /* Ring parameters copied verbatim into the work at +0x40 (0xDC). */
@@ -304,16 +304,16 @@ typedef struct {
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     u8 respawn;
     u8 pad11[3];
-    s32 lifetimeFrames;
-    s32 delaySpread;
-    s32 fadeIn;
-    s32 fadeOut;
-    f32 angleStep;
-    f32 angleJitter;
-    f32 heightSpread;
-    f32 startRadius;
-    f32 endRadius;
-    f32 startJitter;
+    s32 life;
+    s32 timing;
+    s32 fade_in;
+    s32 fade_out;
+    f32 rotate_s;
+    f32 rotate_r;
+    f32 height;
+    f32 radius_s;
+    f32 radius_e;
+    f32 radius_s_r;
     f32 endJitter;
     u32 particleCount;
     u32 maxSteps;
@@ -348,19 +348,19 @@ typedef struct {
 
 typedef struct {
     effMagaSmokeConvParam_t head;
-    effMagaSmokePart_tag *particles; /* 0x17C */
-    effArrHdr_t *mathResource;    /* 0x180 */
+    effMagaSmokePart_tag *pPart; /* 0x17C */
+    effArrHdr_t *pBezier4P;    /* 0x180 */
     u8 pad184[8];
-    effMagatuhiOwner_t *managedResource; /* 0x18C */
-    sdfMemHandle_t *allocationHandle; /* 0x190 backing allocation, not the particle address */
+    effMagatuhiOwner_t *pMagatuhi; /* 0x18C */
+    sdfMemHandle_t *hMem; /* 0x190 backing allocation, not the particle address */
 } effMagaSmokeConv_tag;
 
 typedef struct {
-    effMagaPoint4Param_t head;
+    effMagaPoint4Param_t param;
     s32 *delays;           /* 0x180 */
     effArrHdr_t *pBezier4P;    /* 0x184 */
-    effMagatuhiOwner_t *managedResource; /* 0x188 */
-    sdfMemHandle_t *allocationHandle; /* 0x18C backing allocation, not the work address */
+    effMagatuhiOwner_t *pMagatuhi; /* 0x188 */
+    sdfMemHandle_t *hMem; /* 0x18C backing allocation, not the work address */
 } effMagaPoint4_tag;
 
 /* Effect subrecord with byte fields at +0x20/+0x40/+0x50 (0x51); DDS1/2 game/code_0018CAC8/00194700.c. */
@@ -555,17 +555,17 @@ extern u32 strlen(const char *text);
 effMagatuhiOwner_t *effMagaCylinderAllocPart(const u32 *source);
 void effMagaCylinderFree(effMagatuhiOwner_t *resource);
 void effMagaCylinderDrawTrack(effMagatuhiOwner_t *resource);
-void effMagaCylinderSetPartPtrs(effMagatuhiValueWork_t *work, s32 slotIndex);
-effMagatuhiValueWork_t *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
+void effMagaCylinderSetPartPtrs(dds3MagatuhiBill_tag *work, s32 slotIndex);
+dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep);
 /* Release the allocation retained by the render/history owner. */
-void effMagaCylinderFreeParts(effMagatuhiValueWork_t *work);
-void effSwordTrackDrawTex(effMagatuhiValueWork_t *work);
-void effMagaCylinderSetPartPos(effMagatuhiValueWork_t *work, s32 index, const f32 vector[4]);
+void effMagaCylinderFreeParts(dds3MagatuhiBill_tag *work);
+void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work);
+void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 vector[4]);
 /* Store a per-slot packed color; the native path does not validate the index. */
-void effMagaCylinderSetPart(effMagatuhiValueWork_t *work, s32 index, u32 color);
+void effMagaCylinderSetPart(dds3MagatuhiBill_tag *work, s32 index, u32 color);
 /* Accumulate 1/historyCount per entry; the nominal last fraction is below 1. */
-void effMagaCylinderBlendColor(effMagatuhiValueWork_t *work, u32 colorA, u32 colorB);
-void effMagaSmokeInitPart(effMagatuhiValueWork_t *valueWork, s32 index);
+void effMagaCylinderBlendColor(dds3MagatuhiBill_tag *work, u32 colorA, u32 colorB);
+void effMagaSmokeInitPart(dds3MagatuhiBill_tag *valueWork, s32 index);
 /* Clone the first-family parameters; return the work after its state array.
  * Clamp only the copied delay modulus, leaving the caller's parameters intact. */
 effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src);
@@ -736,7 +736,7 @@ void effMagaCylinderDrawTrack(effMagatuhiOwner_t *resource) {
     effSwordTrackDrawTex(resource->valueWork);
 }
 
-void effMagaCylinderSetPartPtrs(effMagatuhiValueWork_t *work, s32 slotIndex) {
+void effMagaCylinderSetPartPtrs(dds3MagatuhiBill_tag *work, s32 slotIndex) {
     f32 *angleRow;
 
     work->writeIndices[slotIndex] = 0;
@@ -749,7 +749,7 @@ void effMagaCylinderSetPartPtrs(effMagatuhiValueWork_t *work, s32 slotIndex) {
     angleRow[3] = 0.0f;
 }
 
-effMagatuhiValueWork_t *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep) {
+dds3MagatuhiBill_tag *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32 historyDistanceScale, s32 param, f32 historyAngleStep) {
     s32 countFrames;
     s32 frameTerm;
     s32 countTerm;
@@ -762,14 +762,14 @@ effMagatuhiValueWork_t *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32
     s32 writeIndices;
     s32 validCounts;
     s32 angleValues;
-    effMagatuhiValueWork_t *resource;
+    dds3MagatuhiBill_tag *resource;
     s16 *defaults;
     u32 i;
 
     countFrames = count * historyCount;
     frameTerm = countFrames + historyCount;
     countTerm = (countFrames << 2) + count;
-    allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + sizeof(effMagatuhiValueWork_t);
+    allocationSize = (((count << 3) + ((countTerm + frameTerm) << 1) + (count << 1)) << 1) + sizeof(dds3MagatuhiBill_tag);
     allocation = sdfMemAllocDirect(allocationSize);
     positions = sdfMemLock(allocation);
     colorTable = positions + (countFrames << 4);
@@ -778,7 +778,7 @@ effMagatuhiValueWork_t *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32
     writeIndices = values + (count << 2);
     validCounts = writeIndices + (count << 1);
     angleValues = validCounts + (count << 1);
-    resource = (effMagatuhiValueWork_t *)(angleValues + (count << 4));
+    resource = (dds3MagatuhiBill_tag *)(angleValues + (count << 4));
 
     resource->count = count;
     resource->historyCount = historyCount;
@@ -821,11 +821,11 @@ effMagatuhiValueWork_t *effMagaCylinderAllocTex(s32 count, s32 historyCount, f32
 }
 
 /* Release the allocation retained by the render/history owner. */
-void effMagaCylinderFreeParts(effMagatuhiValueWork_t *work) {
+void effMagaCylinderFreeParts(dds3MagatuhiBill_tag *work) {
     sdfMemFreeDirect(work->allocationHandle);
 }
 
-void effSwordTrackDrawTex(effMagatuhiValueWork_t *work) {
+void effSwordTrackDrawTex(dds3MagatuhiBill_tag *work) {
     f32 positions[15][4];
     u32 colors[15];
     f32 offsets[15][8];
@@ -932,7 +932,7 @@ void effSwordTrackDrawTex(effMagatuhiValueWork_t *work) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))D_00320030[work->drawBucket]->regFunc)(D_00320030[work->drawBucket], list);
 }
 
-void effMagaCylinderSetPartPos(effMagatuhiValueWork_t *work, s32 index, const f32 vector[4]) {
+void effMagaCylinderSetPartPos(dds3MagatuhiBill_tag *work, s32 index, const f32 vector[4]) {
     f32 (*newSlot)[4];
     f32 (*replayPosition)[4];
     f32 (*historyPosition)[4];
@@ -1026,12 +1026,12 @@ void effMagaCylinderSetPartPos(effMagatuhiValueWork_t *work, s32 index, const f3
 }
 
 /* Store a per-slot packed color; the native path does not validate the index. */
-void effMagaCylinderSetPart(effMagatuhiValueWork_t *work, s32 index, u32 color) {
+void effMagaCylinderSetPart(dds3MagatuhiBill_tag *work, s32 index, u32 color) {
     work->slotColors[index] = color;
 }
 
 /* Accumulate 1/historyCount per entry; the nominal last fraction is below 1. */
-void effMagaCylinderBlendColor(effMagatuhiValueWork_t *work, u32 colorA, u32 colorB) {
+void effMagaCylinderBlendColor(dds3MagatuhiBill_tag *work, u32 colorA, u32 colorB) {
     f32 blendFraction = 0.0f;
     u32 historyCount = work->historyCount;
     u32 *paletteEntry = work->colorTable;
@@ -1044,14 +1044,14 @@ void effMagaCylinderBlendColor(effMagatuhiValueWork_t *work, u32 colorA, u32 col
     }
 }
 
-void effMagaSmokeInitPart(effMagatuhiValueWork_t *valueWork, s32 index) {
+void effMagaSmokeInitPart(dds3MagatuhiBill_tag *valueWork, s32 index) {
     effMagaCylinderSetPartPtrs(valueWork, index);
 }
 
 /* Clone the first-family parameters; return the work after its state array.
  * Clamp only the copied delay modulus, leaving the caller's parameters intact. */
 effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
-    u32 count = src->particleCount;
+    u32 count = src->reserve;
     u32 size = count * sizeof(effMagaSmokePart_tag);
     sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmokeConv_tag));
     effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
@@ -1060,14 +1060,14 @@ effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
     u32 particleIndex;
 
     work->head = *src;
-    work->allocationHandle = allocation;
-    work->particles = particle;
-    if (work->head.delaySpread <= 0) {
-        work->head.delaySpread = 1;
+    work->hMem = allocation;
+    work->pPart = particle;
+    if (work->head.timing <= 0) {
+        work->head.timing = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
-    work->mathResource = dds3Bezier4PCreate(count);
-    spread = work->head.delaySpread;
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.reserve);
+    work->pBezier4P = dds3Bezier4PCreate(count);
+    spread = work->head.timing;
     for (particleIndex = 0; particleIndex < count; particleIndex++) {
         particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
@@ -1077,15 +1077,15 @@ effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
 
 /* Release math state, the history owner, then the backing allocation. */
 void effMagaSmokeConvDelete(effMagaSmokeConv_tag *pData) {
-    dds3Bezier4PDelete(pData->mathResource);
-    effMagaCylinderFree(pData->managedResource);
-    sdfMemFreeDirect(pData->allocationHandle);
+    dds3Bezier4PDelete(pData->pBezier4P);
+    effMagaCylinderFree(pData->pMagatuhi);
+    sdfMemFreeDirect(pData->hMem);
 }
 
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w remains unwritten, as in the retail routine. */
 void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
-    effMagaSmokePart_tag *particle = &pMagaSmokeConv->particles[index];
+    effMagaSmokePart_tag *particle = &pMagaSmokeConv->pPart[index];
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
     f32 random;
@@ -1119,11 +1119,11 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
     particle->up_s = pMagaSmokeConv->head.baseLiftStep *
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmokeConv->head.liftVariation +
          (1.0f - pMagaSmokeConv->head.liftVariation));
-    slot = dds3Bezier4PGetPart(pMagaSmokeConv->mathResource, index);
+    slot = dds3Bezier4PGetPart(pMagaSmokeConv->pBezier4P, index);
     slot->t = 0.0f;
     slot->step = 0.0f;
-    effMagaSmokeInitPart(pMagaSmokeConv->managedResource->valueWork, index);
-    effMagaCylinderSetPart(pMagaSmokeConv->managedResource->valueWork, index, 0);
+    effMagaSmokeInitPart(pMagaSmokeConv->pMagatuhi->valueWork, index);
+    effMagaCylinderSetPart(pMagaSmokeConv->pMagatuhi->valueWork, index, 0);
 }
 
 /* Drift until the particle enters the capture radius, then follow a randomized
@@ -1139,7 +1139,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     f32 towardTarget[4];
     f32 startTangent[4];
     effArrHdr_t *mathResource;
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
     effCubicBezierSlot_t *slot;
     u8 respawn;
@@ -1155,23 +1155,23 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);
-    mathResource = pData->mathResource;
-    valueWork = pData->managedResource->valueWork;
-    particle = pData->particles;
-    count = pData->head.particleCount;
+    mathResource = pData->pBezier4P;
+    valueWork = pData->pMagatuhi->valueWork;
+    particle = pData->pPart;
+    count = pData->head.reserve;
     respawn = pData->head.respawn;
-    life = pData->head.lifetimeFrames;
-    spread = pData->head.delaySpread;
-    angleStep = pData->head.angleStep;
-    scaleStep = pData->head.scaleStep;
-    fadeIn = pData->head.fadeInFrames;
-    fadeOut = pData->head.fadeOutFrames;
+    life = pData->head.life;
+    spread = pData->head.timing;
+    angleStep = pData->head.s_angle_s;
+    scaleStep = pData->head.s_ampli_s;
+    fadeIn = pData->head.fade_in;
+    fadeOut = pData->head.fade_out;
     slot = dds3Bezier4PGetPart(mathResource, 0);
     SDF_VU0_COPYVECTOR(origin, &pData->head.originX);
     captureDistance = pData->head.captureDistance;
-    pathJitter = pData->head.pathJitter;
-    pathStep = pData->head.pathStep;
-    pathAcceleration = pData->head.pathAcceleration;
+    pathJitter = pData->head.c_ampli;
+    pathStep = pData->head.c_step;
+    pathAcceleration = pData->head.c_step_a;
     SDF_VU0_COPYVECTOR(target, &pData->head.targetX);
     for (i = 0; i < count; i++, particle++, slot++) {
         age = particle->age;
@@ -1243,7 +1243,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
             particle->age++;
         }
     }
-    effMagaCylinderDrawTrack(pData->managedResource);
+    effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
 
 /* Update the first family's scattered float parameters without touching gaps. */
@@ -1262,22 +1262,22 @@ void effMagaSCSetArea(effMagatuhiCallback_t *hEffect, effMagatuhiFloatParams_t *
 
 /* Clone history parameters; signed delays follow the returned work block. */
 effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
-    u32 count = src->particleCount;
+    u32 count = src->reserve;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(effMagaPoint4_tag));
     effMagaPoint4_tag *work = (effMagaPoint4_tag *)sdfMemLock(allocation);
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
     u32 i;
 
-    work->head = *src;
-    work->allocationHandle = allocation;
+    work->param = *src;
+    work->hMem = allocation;
     work->delays = delays;
-    if (work->head.delaySpread <= 0) {
-        work->head.delaySpread = 1;
+    if (work->param.timing <= 0) {
+        work->param.timing = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->param.reserve);
     work->pBezier4P = dds3Bezier4PCreate(count);
-    spread = work->head.delaySpread;
+    spread = work->param.timing;
     for (i = 0; i < count; i++) {
         *delays++ = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
     }
@@ -1287,8 +1287,8 @@ effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
 /* Release Bezier slots, their history owner, then the backing allocation. */
 void effMagaPoint4Delete(effMagaPoint4_tag *pData) {
     dds3Bezier4PDelete(pData->pBezier4P);
-    effMagaCylinderFree(pData->managedResource);
-    sdfMemFreeDirect(pData->allocationHandle);
+    effMagaCylinderFree(pData->pMagatuhi);
+    sdfMemFreeDirect(pData->hMem);
 }
 
 /* Jitter control points perpendicular to the path and camera viewing direction. */
@@ -1305,17 +1305,17 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     SDF_VU0_LOADVECTOR_B(aViewTarget);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);
-    step = 1.0f / (f32)pMagaPoint4->head.lifetimeFrames;
+    step = 1.0f / (f32)pMagaPoint4->param.life;
     slot = dds3Bezier4PGetPart(pMagaPoint4->pBezier4P, index);
     slot->t = 0;
     slot->step = step;
 
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    scale[0] = pMagaPoint4->head.jitterScales[0] * (random + random);
+    scale[0] = pMagaPoint4->param.jitterScales[0] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0_LOADVECTOR(pMagaPoint4->head.controlPoints[0]);
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->head.controlPoints[1]);
+    SDF_VU0_LOADVECTOR(pMagaPoint4->param.controlPoints[0]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[1]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(viewDirection);
@@ -1330,11 +1330,11 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     slot->controlPoints[0][2] = point[2];
 
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    scale[0] = pMagaPoint4->head.jitterScales[1] * (random + random);
+    scale[0] = pMagaPoint4->param.jitterScales[1] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0_LOADVECTOR(pMagaPoint4->head.controlPoints[1]);
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->head.controlPoints[2]);
+    SDF_VU0_LOADVECTOR(pMagaPoint4->param.controlPoints[1]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[2]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(viewDirection);
@@ -1349,11 +1349,11 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     slot->controlPoints[1][2] = point[2];
 
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    scale[0] = pMagaPoint4->head.jitterScales[2] * (random + random);
+    scale[0] = pMagaPoint4->param.jitterScales[2] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
-    SDF_VU0_LOADVECTOR(pMagaPoint4->head.controlPoints[2]);
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->head.controlPoints[3]);
+    SDF_VU0_LOADVECTOR(pMagaPoint4->param.controlPoints[2]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[3]);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_SUBVECTOR();
     SDF_VU0_LOADVECTOR_B(viewDirection);
@@ -1370,34 +1370,34 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
 
     /* The fourth point reuses the third segment's normalized side direction. */
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    scale[0] = pMagaPoint4->head.jitterScales[3] * (random + random);
+    scale[0] = pMagaPoint4->param.jitterScales[3] * (random + random);
     scale[1] = scale[0];
     scale[2] = scale[0];
     SDF_VU0_LOADVECTOR(lastNormal);
     SDF_VU0_LOADVECTOR_B(scale);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_LOADVECTOR_B(pMagaPoint4->head.controlPoints[3]);
+    SDF_VU0_LOADVECTOR_B(pMagaPoint4->param.controlPoints[3]);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(point);
     slot->controlPoints[3][0] = point[0];
     slot->controlPoints[3][1] = point[1];
     slot->controlPoints[3][2] = point[2];
-    effMagaSmokeInitPart(pMagaPoint4->managedResource->valueWork, index);
-    effMagaCylinderSetPart(pMagaPoint4->managedResource->valueWork, index, 0);
+    effMagaSmokeInitPart(pMagaPoint4->pMagatuhi->valueWork, index);
+    effMagaCylinderSetPart(pMagaPoint4->pMagatuhi->valueWork, index, 0);
 }
 
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
 void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
     effArrHdr_t *slots = pData->pBezier4P;
-    effMagatuhiValueWork_t *valueWork = pData->managedResource->valueWork;
+    dds3MagatuhiBill_tag *valueWork = pData->pMagatuhi->valueWork;
     s32 *delays = pData->delays;
-    u8 respawn = pData->head.respawn;
-    u32 count = pData->head.particleCount;
-    s32 life = pData->head.lifetimeFrames;
-    s32 spread = pData->head.delaySpread;
-    s32 fadeIn = pData->head.fadeIn;
-    s32 fadeOut = pData->head.fadeOut;
+    u8 respawn = pData->param.loop;
+    u32 count = pData->param.reserve;
+    s32 life = pData->param.life;
+    s32 spread = pData->param.timing;
+    s32 fadeIn = pData->param.fade_in;
+    s32 fadeOut = pData->param.fade_out;
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 fade;
     s32 frame;
@@ -1429,7 +1429,7 @@ void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
         }
         delays++;
     }
-    effMagaCylinderDrawTrack(pData->managedResource);
+    effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
@@ -1438,10 +1438,10 @@ void effMagaP4SetPoint(effMagatuhiCallback_t *hEffect, effMagatuhiRowsSrc_t *pP4
     u32 controlPointIndex;
 
     for (controlPointIndex = 0; controlPointIndex < EFF_MAGATUHI_CONTROL_POINT_COUNT; controlPointIndex++) {
-        dst->head.controlPoints[controlPointIndex][0] = pP4Point->controlPoints[controlPointIndex][0];
-        dst->head.controlPoints[controlPointIndex][1] = pP4Point->controlPoints[controlPointIndex][1];
-        dst->head.controlPoints[controlPointIndex][2] = pP4Point->controlPoints[controlPointIndex][2];
-        dst->head.jitterScales[controlPointIndex] = pP4Point->jitterScales[controlPointIndex];
+        dst->param.controlPoints[controlPointIndex][0] = pP4Point->controlPoints[controlPointIndex][0];
+        dst->param.controlPoints[controlPointIndex][1] = pP4Point->controlPoints[controlPointIndex][1];
+        dst->param.controlPoints[controlPointIndex][2] = pP4Point->controlPoints[controlPointIndex][2];
+        dst->param.jitterScales[controlPointIndex] = pP4Point->jitterScales[controlPointIndex];
     }
 }
 
@@ -1449,10 +1449,10 @@ void effMagaP4SetPoint(effMagatuhiCallback_t *hEffect, effMagatuhiRowsSrc_t *pP4
  * Keep the asymmetric duration/age subtraction and unchecked span divisor. */
 void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
     effMagaPoint4_tag *work = dds3MagatuhiGetHandle(hEffect->effect);
-    effMagatuhiValueWork_t *valueWork = work->managedResource->valueWork;
-    u32 historyFrames = work->head.duration;
-    s32 lifetimeFrames = work->head.lifetimeFrames;
-    u32 count = work->head.particleCount;
+    dds3MagatuhiBill_tag *valueWork = work->pMagatuhi->valueWork;
+    u32 historyFrames = work->param.duration;
+    s32 lifetimeFrames = work->param.life;
+    u32 count = work->param.reserve;
     s32 *ages = work->delays;
     f32 samplePosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 startPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -1507,11 +1507,11 @@ effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
-    if (work->head.delaySpread <= 0) {
-        work->head.delaySpread = 1;
+    if (work->head.timing <= 0) {
+        work->head.timing = 1;
     }
     work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
-    spread = work->head.delaySpread;
+    spread = work->head.timing;
     for (i = 0; i < count; i++) {
         particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
@@ -1532,15 +1532,15 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
     f32 t;
 
     elem->frame = 0;
-    elem->height = -pMagaCylinder->head.heightSpread * dds3GetRandFloatA(dds3EffectBase);
+    elem->height = -pMagaCylinder->head.height * dds3GetRandFloatA(dds3EffectBase);
     elem->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
-    blend = pMagaCylinder->head.angleJitter;
-    elem->rotate_s = pMagaCylinder->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    blend = pMagaCylinder->head.startJitter;
-    elem->radius = pMagaCylinder->head.startRadius * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaCylinder->head.rotate_r;
+    elem->rotate_s = pMagaCylinder->head.rotate_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaCylinder->head.radius_s_r;
+    elem->radius = pMagaCylinder->head.radius_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaCylinder->head.endJitter;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    elem->radius_s = (pMagaCylinder->head.endRadius * t - elem->radius) / (f32)pMagaCylinder->head.lifetimeFrames;
+    elem->radius_s = (pMagaCylinder->head.radius_e * t - elem->radius) / (f32)pMagaCylinder->head.life;
     effMagaSmokeInitPart(pMagaCylinder->pMagatuhi->valueWork, index);
     effMagaCylinderSetPart(pMagaCylinder->pMagatuhi->valueWork, index, 0);
 }
@@ -1550,7 +1550,7 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
 void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaCylinderPart_tag *particle;
     u8 respawn;
     u32 count;
@@ -1565,10 +1565,10 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     particle = pData->particles;
     respawn = pData->head.respawn;
     tintColor = pData->abgr;
-    life = pData->head.lifetimeFrames;
-    spread = pData->head.delaySpread;
-    fadeIn = pData->head.fadeIn;
-    fadeOut = pData->head.fadeOut;
+    life = pData->head.life;
+    spread = pData->head.timing;
+    fadeIn = pData->head.fade_in;
+    fadeOut = pData->head.fade_out;
     SDF_VU0_COPYVECTOR(origin, pData->head.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
@@ -1631,7 +1631,7 @@ void effMagaCylinderSetRotateMatrix(effMagaCylinder_tag *pData, void *pMatrix) {
 void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
     u32 k;
     effMagaCylinder_tag *work;
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaCylinderPart_tag *particle;
     u32 count;
     s32 frames;
@@ -1653,7 +1653,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
             count = work->head.particleCount;
             valueWork = work->pMagatuhi->valueWork;
             maxSteps = work->head.maxSteps;
-            frames = work->head.lifetimeFrames;
+            frames = work->head.life;
             particle = work->particles;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
@@ -1708,13 +1708,13 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     work->head = *src;
     work->particles = particle;
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->allocationHandle = allocation;
+    work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
-    if (work->head.delaySpread <= 0) {
-        work->head.delaySpread = 1;
+    if (work->head.timing <= 0) {
+        work->head.timing = 1;
     }
     work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
-    spread = work->head.delaySpread;
+    spread = work->head.timing;
     for (i = 0; i < count; i++) {
         particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
@@ -1725,7 +1725,7 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
 /* Release the orbit history owner before the work/state allocation. */
 void effMagaSpiralDelete(effMagaSpiral_tag *pData) {
     effMagaCylinderFree(pData->pMagatuhi);
-    sdfMemFreeDirect(pData->allocationHandle);
+    sdfMemFreeDirect(pData->hMem);
 }
 
 /* Seed randomized height/angular/radial increments and clear the slot history. */
@@ -1736,16 +1736,16 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
 
     elem->frame = 0;
     elem->up = 0;
-    blend = pMagaSpiral->head.heightJitter;
-    elem->up_s = pMagaSpiral->head.heightStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaSpiral->head.up_r;
+    elem->up_s = pMagaSpiral->head.up_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     elem->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
-    blend = pMagaSpiral->head.angleJitter;
-    elem->rotate_s = pMagaSpiral->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    blend = pMagaSpiral->head.startJitter;
-    elem->radius = pMagaSpiral->head.startRadius * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaSpiral->head.rotate_r;
+    elem->rotate_s = pMagaSpiral->head.rotate_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaSpiral->head.radius_s_r;
+    elem->radius = pMagaSpiral->head.radius_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaSpiral->head.endJitter;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    elem->radius_s = (pMagaSpiral->head.endRadius * t - elem->radius) / (f32)pMagaSpiral->head.lifetimeFrames;
+    elem->radius_s = (pMagaSpiral->head.radius_e * t - elem->radius) / (f32)pMagaSpiral->head.life;
     effMagaSmokeInitPart(pMagaSpiral->pMagatuhi->valueWork, index);
     effMagaCylinderSetPart(pMagaSpiral->pMagatuhi->valueWork, index, 0);
 }
@@ -1755,7 +1755,7 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
 void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaSpiralPart_tag *particle;
     u8 respawn;
     u32 count;
@@ -1770,10 +1770,10 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     particle = pData->particles;
     respawn = pData->head.respawn;
     tintColor = pData->abgr;
-    life = pData->head.lifetimeFrames;
-    spread = pData->head.delaySpread;
-    fadeIn = pData->head.fadeIn;
-    fadeOut = pData->head.fadeOut;
+    life = pData->head.life;
+    spread = pData->head.timing;
+    fadeIn = pData->head.fade_in;
+    fadeOut = pData->head.fade_out;
     SDF_VU0_COPYVECTOR(origin, pData->head.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
@@ -1837,7 +1837,7 @@ void effMagaSpiralSetRotateMatrix(effMagaSpiral_tag *pData, void *pMatrix) {
 void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
     u32 k;
     effMagaSpiral_tag *work;
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaSpiralPart_tag *particle;
     u32 count;
     s32 frames;
@@ -1860,7 +1860,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
             count = work->head.particleCount;
             valueWork = work->pMagatuhi->valueWork;
             maxSteps = work->head.maxSteps;
-            frames = work->head.lifetimeFrames;
+            frames = work->head.life;
             particle = work->particles;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
@@ -1947,7 +1947,7 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     f32 random;
 
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    radius = pMagaSmoke->param.initialRadius * (random + random);
+    radius = pMagaSmoke->param.radius * (random + random);
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
     direction[0] = random + random;
     direction[1] = 0.0f;
@@ -1967,13 +1967,13 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
     SDF_VU0_LOADVECTOR(particle->dirUp);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(particle->dirUp);
-    particle->amplitude = pMagaSmoke->param.initialScale *
-        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->param.initialScaleRandomness +
-         (1.0f - pMagaSmoke->param.initialScaleRandomness));
+    particle->amplitude = pMagaSmoke->param.ampli *
+        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->param.ampli_r +
+         (1.0f - pMagaSmoke->param.ampli_r));
     particle->angle = dds3GetRandFloatA(dds3EffectBase) * EFF_MAGATUHI_FULL_TURN;
-    particle->up_s = pMagaSmoke->param.initialLift *
-        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->param.initialLiftRandomness +
-         (1.0f - pMagaSmoke->param.initialLiftRandomness));
+    particle->up_s = pMagaSmoke->param.up_s *
+        (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->param.up_s_r +
+         (1.0f - pMagaSmoke->param.up_s_r));
     effMagaSmokeInitPart(pMagaSmoke->pMagatuhi->valueWork, index);
     effMagaCylinderSetPart(pMagaSmoke->pMagatuhi->valueWork, index, 0);
 }
@@ -1983,7 +1983,7 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
 void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
     u8 respawn;
     u32 count;
@@ -2066,7 +2066,7 @@ void effMagaSmokeSetRotateMatrix(effMagaSmoke_tag *pData, void *pMatrix) {
 void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
     u32 k;
     effMagaSmoke_tag *work;
-    effMagatuhiValueWork_t *valueWork;
+    dds3MagatuhiBill_tag *valueWork;
     effMagaSmokePart_tag *particle;
     u32 count;
     s32 frames;

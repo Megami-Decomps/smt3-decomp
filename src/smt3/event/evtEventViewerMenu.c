@@ -39,47 +39,47 @@ typedef struct evtViewerGroup_t {
 typedef struct {
     u8 unk0000[4];
     s32 flags;                      /* 0x04 */
-    void *movieWork;                /* 0x08 */
+    void *workdata;                /* 0x08 */
     s32 headerThird;                /* 0x0C */
     s32 headerFirst;
     s32 frameRange;
     s32 nowframe;               /* 0x18 */
     u8 unk001C[4];
-    s32 entryTotal;                 /* 0x20 */
-    char entryName[256][32];        /* 0x24 */
+    s32 nametablecnt;                 /* 0x20 */
+    char nametable[256][32];        /* 0x24 */
     u8 unk2024[0xC];
-    s32 trackCount;                 /* 0x2030 */
+    s32 objcnt;                 /* 0x2030 */
     evtViewerGroup_t *groups;       /* 0x2034 */
     u8 unk2038[0x248];
-    s32 actionMode;                 /* 0x2280 */
+    s32 nowmenu;                 /* 0x2280 */
     u8 unk2284[8];
-    s32 controlState;               /* 0x228C */
+    s32 menusw;               /* 0x228C */
     u8 unk2290[0x18];
     s32 mainCursor;                 /* 0x22A8 */
     s32 groupFirst;                 /* 0x22AC */
     u8 work_x[4];
     s32 groupCursor;                /* 0x22B4 */
-    s32 posCursor;                  /* 0x22B8 */
-    s32 itemCursor;                 /* 0x22BC */
+    s32 eventpos_y;                  /* 0x22B8 */
+    s32 select_y;                 /* 0x22BC */
     s32 itemCount;                  /* 0x22C0 */
-    char *title;                    /* 0x22C4 */
+    char *select_header;                    /* 0x22C4 */
     char **itemNames;               /* 0x22C8 */
-    s32 charCol;                    /* 0x22CC */
-    s32 charRow;                    /* 0x22D0 */
+    s32 filename_x;                    /* 0x22CC */
+    s32 filename_y;                    /* 0x22D0 */
     char nameStorage[0xD];          /* 0x22D4 */
     u8 unk22E1[7];
     char filename[0xC];             /* 0x22E8 */
-    s32 objectCursor;               /* 0x22F4 */
-    s32 objectScroll;               /* 0x22F8 */
-    s32 frameColumn;                /* 0x22FC */
+    s32 objlist_y;               /* 0x22F4 */
+    s32 objlist_base;               /* 0x22F8 */
+    s32 framelist_x;                /* 0x22FC */
     s32 frameFirst;
     s32 frameCursor;
-    evtViewerGroup_t *frameGroup;   /* 0x2308 */
+    evtViewerGroup_t *framelist_target;   /* 0x2308 */
     s32 commandCategory;
     s32 value;                      /* 0x2310 */
-    s32 valueMin;
-    s32 valueMax;
-    f32 floatValue;                 /* 0x231C */
+    s32 min;
+    s32 max;
+    f32 fvalue;                 /* 0x231C */
     f32 floatMin;
     f32 floatMax;
 } evtViewerInfo_t;
@@ -286,7 +286,7 @@ void evtFloatChangeItem(void *tag, s32 ox, s32 oy, u32 no)
         /* The f64 cast is the fptodp libcall, and that libcall is what keeps
          * the format string in a call-saved register across it. */
         sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 4, "     %.1f",
-                                               (f64)viewerinfo->floatValue));
+                                               (f64)viewerinfo->fvalue));
         return;
     case 2:
         sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " L,R = VALUE-+0.1"));
@@ -309,7 +309,7 @@ s32 evtFloatChangeMenu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 0x16, 9, 0, 1, evtFloatChangeHead, evtFloatChangeItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 8) {
+    if (viewerinfo->nowmenu != 8) {
         return 0;
     }
     if (dds3PadButtonState[0x21] < 0) {
@@ -329,12 +329,12 @@ s32 evtFloatChangeMenu(s32 x, s32 y)
     } else if ((u8)dds3PadButtonState[0x27] & 2) {
         step = 1.0f;
     }
-    viewerinfo->floatValue += step;
-    if (viewerinfo->floatValue < viewerinfo->floatMin) {
-        viewerinfo->floatValue = viewerinfo->floatMin;
+    viewerinfo->fvalue += step;
+    if (viewerinfo->fvalue < viewerinfo->floatMin) {
+        viewerinfo->fvalue = viewerinfo->floatMin;
     }
-    if (viewerinfo->floatValue >= viewerinfo->floatMax) {
-        viewerinfo->floatValue = viewerinfo->floatMax;
+    if (viewerinfo->fvalue >= viewerinfo->floatMax) {
+        viewerinfo->fvalue = viewerinfo->floatMax;
     }
     return 0;
 }
@@ -372,7 +372,7 @@ s32 evtIntChangeMenu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 0x16, 9, 0, 1, evtIntChangeHead, evtIntChangeItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 7) {
+    if (viewerinfo->nowmenu != 7) {
         return 0;
     }
     if (dds3PadButtonState[0x21] < 0) {
@@ -394,11 +394,11 @@ s32 evtIntChangeMenu(s32 x, s32 y)
         step = 10;
     }
     viewerinfo->value += step;
-    if (viewerinfo->value < viewerinfo->valueMin) {
-        viewerinfo->value = viewerinfo->valueMin;
+    if (viewerinfo->value < viewerinfo->min) {
+        viewerinfo->value = viewerinfo->min;
     }
-    if (viewerinfo->value >= viewerinfo->valueMax) {
-        viewerinfo->value = viewerinfo->valueMax;
+    if (viewerinfo->value >= viewerinfo->max) {
+        viewerinfo->value = viewerinfo->max;
     }
     return 0;
 }
@@ -444,7 +444,7 @@ s32 evtFrameChangeMenu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 0x16, 0xB, 0, 1, evtFrameChangeHead, evtFrameChangeItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 6) {
+    if (viewerinfo->nowmenu != 6) {
         return 0;
     }
     if (dds3PadButtonState[0x21] < 0) {
@@ -500,7 +500,7 @@ void evtMainMenuItem(void *tag, s32 ox, s32 oy, s32 no)
 
     if (no < 7) {
         if (viewerinfo->mainCursor == no) {
-            color = viewerinfo->actionMode == 1 ? 4 : 5;
+            color = viewerinfo->nowmenu == 1 ? 4 : 5;
         } else {
             color = 0;
         }
@@ -514,7 +514,7 @@ s32 evtMainMenu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 0xF, 7, 0, 7, NULL, evtMainMenuItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 1) {
+    if (viewerinfo->nowmenu != 1) {
         return 0;
     }
     return dds3SelectMenu(0, 1, 7, 1, 7, NULL, NULL, NULL, &viewerinfo->mainCursor);
@@ -522,7 +522,7 @@ s32 evtMainMenu(s32 x, s32 y)
 
 s32 evtSelectHead(void *tag, s32 ox, s32 oy)
 {
-    char *title = viewerinfo->title;
+    char *title = viewerinfo->select_header;
 
     if (title == NULL) {
         return 0;
@@ -535,8 +535,8 @@ void evtSelectItem(void *tag, s32 ox, s32 oy, s32 no)
     s32 color;
 
     if (no < viewerinfo->itemCount) {
-        if (viewerinfo->itemCursor == no) {
-            color = viewerinfo->actionMode == 2 ? 4 : 5;
+        if (viewerinfo->select_y == no) {
+            color = viewerinfo->nowmenu == 2 ? 4 : 5;
         } else {
             color = 0;
         }
@@ -550,8 +550,8 @@ s32 evtSelectMenu(s32 x, s32 y)
     void *list = dds3FontReqAllocDrawTag();
     s32 width = 10;
 
-    if (viewerinfo->title != NULL) {
-        width = strlen(viewerinfo->title);
+    if (viewerinfo->select_header != NULL) {
+        width = strlen(viewerinfo->select_header);
         if (width < 6) {
             width = 6;
         }
@@ -559,11 +559,11 @@ s32 evtSelectMenu(s32 x, s32 y)
     evtMenuDisp(list, x, y, width, viewerinfo->itemCount + 3, 0, viewerinfo->itemCount,
                 evtSelectHead, evtSelectItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 2) {
+    if (viewerinfo->nowmenu != 2) {
         return 0;
     }
     return dds3SelectMenu(0, 1, viewerinfo->itemCount, 1, viewerinfo->itemCount,
-                          NULL, NULL, NULL, &viewerinfo->itemCursor);
+                          NULL, NULL, NULL, &viewerinfo->select_y);
 }
 
 s32 evtFileNameHead(void *tag, s32 ox, s32 oy)
@@ -586,8 +586,8 @@ void evtFileNameItem(void *tag, s32 ox, s32 oy, s32 no)
 
     do {
         color = 0;
-        if (viewerinfo->charRow == no && viewerinfo->charCol == i) {
-            color = viewerinfo->actionMode == 3 ? 4 : 5;
+        if (viewerinfo->filename_y == no && viewerinfo->filename_x == i) {
+            color = viewerinfo->nowmenu == 3 ? 4 : 5;
         }
         ch = *table++;
         cellX = drawX;
@@ -606,17 +606,17 @@ s32 evtFileNameMenu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 0xE, 6, 0, 4, evtFileNameHead, evtFileNameItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 3) {
+    if (viewerinfo->nowmenu != 3) {
         return 0;
     }
-    input = dds3SelectMenu(0, 0xB, 4, 0xB, 4, NULL, NULL, &viewerinfo->charCol,
-                           &viewerinfo->charRow);
+    input = dds3SelectMenu(0, 0xB, 4, 0xB, 4, NULL, NULL, &viewerinfo->filename_x,
+                           &viewerinfo->filename_y);
     if (input < 0) {
         return -1;
     }
     if (input == 1) {
-        key = D_0032CAD0[viewerinfo->charRow][viewerinfo->charCol];
-        if (viewerinfo->charRow == 3 && viewerinfo->charCol >= 4) {
+        key = D_0032CAD0[viewerinfo->filename_y][viewerinfo->filename_x];
+        if (viewerinfo->filename_y == 3 && viewerinfo->filename_x >= 4) {
             switch (key) {
             case 'B':
             case 'S':
@@ -658,7 +658,7 @@ void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no)
 {
     s32 color = 0;
 
-    if (viewerinfo->charRow == no) {
+    if (viewerinfo->filename_y == no) {
         color = 4;
     }
     switch (no) {
@@ -694,17 +694,17 @@ s32 evtFileName2Menu(s32 x, s32 y)
 
     evtMenuDisp(list, x, y, 0x11, 0xB, 0, 8, evtFileName2Head, evtFileName2Item);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 9) {
+    if (viewerinfo->nowmenu != 9) {
         return 0;
     }
     if (dds3PadButtonState[0x26] < 0) {
-        viewerinfo->charRow ^= 1;
+        viewerinfo->filename_y ^= 1;
     }
     if (dds3PadButtonState[0x27] < 0) {
-        viewerinfo->charRow ^= 1;
+        viewerinfo->filename_y ^= 1;
     }
     if ((u8)dds3PadButtonState[0x24] & 2) {
-        switch (viewerinfo->charRow) {
+        switch (viewerinfo->filename_y) {
         case 0:
             if (D_0054F824 >= 0x1F5) {
                 D_0054F824--;
@@ -718,7 +718,7 @@ s32 evtFileName2Menu(s32 x, s32 y)
         }
     }
     if ((u8)dds3PadButtonState[0x25] & 2) {
-        switch (viewerinfo->charRow) {
+        switch (viewerinfo->filename_y) {
         case 0:
             if (D_0054F824 < 0x3E7) {
                 D_0054F824++;
@@ -732,7 +732,7 @@ s32 evtFileName2Menu(s32 x, s32 y)
         }
     }
     if ((u8)dds3PadButtonState[0x28] & 2) {
-        switch (viewerinfo->charRow) {
+        switch (viewerinfo->filename_y) {
         case 0:
             if (D_0054F824 >= 0x1F5) {
                 num = (u16)(D_0054F824 - 500);
@@ -756,7 +756,7 @@ s32 evtFileName2Menu(s32 x, s32 y)
         }
     }
     if ((u8)dds3PadButtonState[0x2A] & 2) {
-        switch (viewerinfo->charRow) {
+        switch (viewerinfo->filename_y) {
         case 0:
             D_0054F824 += 100;
             break;
@@ -789,7 +789,7 @@ void evtObjectListSub(void *tag, evtViewerGroup_t *obj, s32 ox, s32 oy)
         return;
     }
     sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox + 0x3C0, 0x79C0, 0xFEFFFF, 0, D_0054F9B8,
-                                           viewerinfo->entryName[index]));
+                                           viewerinfo->nametable[index]));
 }
 
 void evtObjectListItem(void *tag, s32 ox, s32 oy, s32 no)
@@ -804,20 +804,20 @@ void evtObjectListItem(void *tag, s32 ox, s32 oy, s32 no)
     s32 color;
     s32 i;
 
-    if (viewerinfo->trackCount == 0) {
+    if (viewerinfo->objcnt == 0) {
         return;
     }
-    if (no < viewerinfo->trackCount) {
+    if (no < viewerinfo->objcnt) {
         group = viewerinfo->groups;
         for (i = 0; i < no; i++) {
             group = group->next;
         }
-        if (viewerinfo->objectScroll + viewerinfo->objectCursor == no) {
-            if (viewerinfo->actionMode == 4) {
-                viewerinfo->frameColumn = 0;
+        if (viewerinfo->objlist_base + viewerinfo->objlist_y == no) {
+            if (viewerinfo->nowmenu == 4) {
+                viewerinfo->framelist_x = 0;
                 viewerinfo->frameFirst = 0;
                 viewerinfo->frameCursor = 0;
-                viewerinfo->frameGroup = group;
+                viewerinfo->framelist_target = group;
                 color = 4;
             } else {
                 color = 5;
@@ -836,29 +836,29 @@ s32 evtOjbectListMenu(s32 x, s32 y)
     void *list = dds3FontReqAllocDrawTag();
     s32 visible;
 
-    evtMenuDisp(list, x, y, 8, 0x1D, viewerinfo->objectScroll, viewerinfo->trackCount,
+    evtMenuDisp(list, x, y, 8, 0x1D, viewerinfo->objlist_base, viewerinfo->objcnt,
                 NULL, evtObjectListItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 4) {
+    if (viewerinfo->nowmenu != 4) {
         return 0;
     }
-    if (viewerinfo->trackCount == 0) {
+    if (viewerinfo->objcnt == 0) {
         return 0;
     }
-    if (viewerinfo->trackCount < 0x1D) {
-        visible = viewerinfo->trackCount;
+    if (viewerinfo->objcnt < 0x1D) {
+        visible = viewerinfo->objcnt;
     } else {
         visible = 0x1D;
     }
-    return dds3SelectMenu(0, 1, viewerinfo->trackCount, 1, visible, NULL,
-                          &viewerinfo->objectScroll, NULL, &viewerinfo->objectCursor);
+    return dds3SelectMenu(0, 1, viewerinfo->objcnt, 1, visible, NULL,
+                          &viewerinfo->objlist_base, NULL, &viewerinfo->objlist_y);
 }
 
 /* NON_MATCHING: 39 of 78 words differ (first at +0x20). */
 #ifdef NON_MATCHING
 s32 evtFrameListHead(void *tag, s32 ox, s32 oy)
 {
-    s32 type = viewerinfo->frameGroup->type;
+    s32 type = viewerinfo->framelist_target->type;
     s32 i;
 
     for (i = 0; i < evtFrameList[type * 5]; i++) {
@@ -898,16 +898,16 @@ s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
     s32 color;
     s32 i;
 
-    if (no < viewerinfo->frameGroup->childCount + 1) {
+    if (no < viewerinfo->framelist_target->childCount + 1) {
         key = NULL;
-        if (no != viewerinfo->frameGroup->childCount) {
-            key = viewerinfo->frameGroup->children;
+        if (no != viewerinfo->framelist_target->childCount) {
+            key = viewerinfo->framelist_target->children;
             for (i = 0; i < no; i++) {
                 key = key->next;
             }
         }
         if (viewerinfo->frameCursor + viewerinfo->frameFirst == no) {
-            if (viewerinfo->actionMode == 5) {
+            if (viewerinfo->nowmenu == 5) {
                 color = 4;
             } else {
                 color = 5;
@@ -929,10 +929,10 @@ s32 evtFrameListMenu(s32 x, s32 y)
     s32 visible;
     s32 ret;
 
-    if (viewerinfo->trackCount == 0) {
+    if (viewerinfo->objcnt == 0) {
         return 0;
     }
-    group = viewerinfo->frameGroup;
+    group = viewerinfo->framelist_target;
     if (evtFrameList[group->type * 5] == 0) {
         return -1;
     }
@@ -940,7 +940,7 @@ s32 evtFrameListMenu(s32 x, s32 y)
     evtMenuDisp(list, x, y, 0x1C, 0x19, viewerinfo->frameCursor, group->childCount + 1,
                 evtFrameListHead, evtFrameListItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 5) {
+    if (viewerinfo->nowmenu != 5) {
         return 0;
     }
     if (group->childCount + 1 < 0x18) {
@@ -950,7 +950,7 @@ s32 evtFrameListMenu(s32 x, s32 y)
     }
     ret = dds3SelectMenu(0, evtFrameList[group->type * 5], group->childCount + 1,
                          evtFrameList[group->type * 5], visible, NULL,
-                         &viewerinfo->frameCursor, &viewerinfo->frameColumn,
+                         &viewerinfo->frameCursor, &viewerinfo->framelist_x,
                          &viewerinfo->frameFirst);
     if (dds3PadButtonState[0x20] < 0) {
         ret = -2;
@@ -987,7 +987,7 @@ void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no)
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != 3) {
-            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->basictable[i].head;
+            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->basictable[i].firstbasic;
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;
@@ -1013,7 +1013,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
     list = dds3FontReqAllocDrawTag();
     for (i = 0; i < 0x12; i++) {
         if (i != 3) {
-            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->basictable[i].head;
+            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->basictable[i].firstbasic;
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;
@@ -1024,7 +1024,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
     count++;
     evtMenuDisp(list, x, y, 0x1A, 0x17, viewerinfo->groupFirst, count, NULL, evtBasicListItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 0xA) {
+    if (viewerinfo->nowmenu != 0xA) {
         return 0;
     }
     if (count < shown) {
@@ -1042,12 +1042,12 @@ void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no)
 
     basic = NULL;
     color = 4;
-    if (viewerinfo->posCursor != no) {
+    if (viewerinfo->eventpos_y != no) {
         color = 0;
     }
     slot = ((s8 *)((u8 *)no + (u32)evtGetSelectFrameInfo()))[0xC];
     if (slot >= 0) {
-        basic = dds3SceneBasicSearchName(dds3GetActiveScene(), viewerinfo->entryName[slot]);
+        basic = dds3SceneBasicSearchName(dds3GetActiveScene(), viewerinfo->nametable[slot]);
     }
     sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054FA90, no));
     if (basic != NULL) {
@@ -1062,7 +1062,7 @@ s32 evtEventPosMenu(s32 x, s32 y)
     void *list = dds3FontReqAllocDrawTag();
     s32 rows;
 
-    switch (viewerinfo->frameGroup->type) {
+    switch (viewerinfo->framelist_target->type) {
     case 0x14:
         rows = 2;
         break;
@@ -1074,16 +1074,16 @@ s32 evtEventPosMenu(s32 x, s32 y)
     }
     evtMenuDisp(list, x, y, 0x1C, rows, 0, rows, NULL, evtEventPosItem);
     ((void (*)(void *, void *))D_002F6978[4])(D_002F6978, list);
-    if (viewerinfo->actionMode != 0xC) {
+    if (viewerinfo->nowmenu != 0xC) {
         return 0;
     }
-    return dds3SelectMenu(0, 1, rows, 1, rows, NULL, NULL, NULL, &viewerinfo->posCursor);
+    return dds3SelectMenu(0, 1, rows, 1, rows, NULL, NULL, NULL, &viewerinfo->eventpos_y);
 }
 
 s32 mfilter_Process(void)
 {
     if (mfilterRun() == 0) {
-        viewerinfo->controlState = 0;
+        viewerinfo->menusw = 0;
         return -1;
     }
     return 0;
@@ -1091,7 +1091,7 @@ s32 mfilter_Process(void)
 s32 evtViewerExit(void)
 {
     if (evtViewerCheckDirty() == 0) {
-        viewerinfo->controlState = 0;
+        viewerinfo->menusw = 0;
         return -1;
     }
     return 0;
@@ -1102,7 +1102,7 @@ s32 func_001F79A8(void)
 {
     s32 busy = 1;
 
-    switch (viewerinfo->frameGroup->type) {
+    switch (viewerinfo->framelist_target->type) {
     case 0xD:
         busy = func_001AD6E8();
         break;
@@ -1117,7 +1117,7 @@ s32 func_001F79A8(void)
         break;
     case 0x10:
     case 0x11:
-        if (viewerinfo->controlState == 0) {
+        if (viewerinfo->menusw == 0) {
             return 1;
         }
         break;
@@ -1133,11 +1133,11 @@ s32 func_001F79A8(void)
     if (busy != 0) {
         return 0;
     }
-    if (viewerinfo->controlState == 0) {
+    if (viewerinfo->menusw == 0) {
         return 1;
     }
-    dds3KillProcess((void *)viewerinfo->controlState, 1);
-    viewerinfo->controlState = 0;
+    dds3KillProcess((void *)viewerinfo->menusw, 1);
+    viewerinfo->menusw = 0;
     return 1;
 }
 #else
@@ -1146,7 +1146,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewerMenu", func_001F79A8);
 
 s32 evtViewerDispatch(s32 actionIndex, s32 x, s32 y)
 {
-    s32 mode = viewerinfo->actionMode;
+    s32 mode = viewerinfo->nowmenu;
 
     if (mode == 11 && actionIndex != mode) {
         return 0;
@@ -1340,7 +1340,7 @@ void evtSaveViewerHeader(s32 fd, s32 mode)
     count1 = evtGetViewerObjectTypeCount(1);
     frameCount = evtGetAllFrameInfoCount();
     frameBytes = frameCount * 0x10;
-    nameCount = viewerinfo->entryTotal;
+    nameCount = viewerinfo->nametablecnt;
     nameBytes = nameCount * 0x20;
     count2 = evtGetViewerObjectTypeCount(2);
     count2Bytes = count2 * 0x10;
@@ -1546,8 +1546,8 @@ void evtSaveObjectList(s32 fd)
 {
     s32 i;
 
-    for (i = 0; i < viewerinfo->entryTotal; i++) {
-        evtWriteRecord(fd, viewerinfo->entryName[i], 0x20);
+    for (i = 0; i < viewerinfo->nametablecnt; i++) {
+        evtWriteRecord(fd, viewerinfo->nametable[i], 0x20);
     }
 }
 void evtSaveObjType2(s32 fd)
@@ -1762,15 +1762,15 @@ s32 evtViewerShutdown(s32 kind)
     evtUnRegistUnit();
     evtInitViewerInfo();
     viewerinfo->flags |= 1;
-    if (viewerinfo->movieWork != NULL) {
-        evtFreePolygonMovieWorkData(viewerinfo->movieWork);
-        viewerinfo->movieWork = NULL;
+    if (viewerinfo->workdata != NULL) {
+        evtFreePolygonMovieWorkData(viewerinfo->workdata);
+        viewerinfo->workdata = NULL;
     }
     movie = evtGetPolygonMovieWorkData2(D_0054F824, evt_file_minor, kind);
     if (movie == NULL) {
         return 0;
     }
-    viewerinfo->movieWork = movie;
+    viewerinfo->workdata = movie;
     evtMakeMotionName(movie);
     return 1;
 }

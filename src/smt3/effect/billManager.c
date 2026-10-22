@@ -204,10 +204,10 @@ dds3BillAnimResource_tag *dds3BillAnimLoadP2A(void *resourceData);
 void *sdfChipAllocDirect(s32 aSize);
 void dds3BillboardSetScale(struct billHandle_t *hBillboard, f32 x, f32 y);
 
-typedef struct BillLinkedValue {
+typedef struct P2A_HEAD_t {
     s32 opaque00;
-    s32 value;
-} BillLinkedValue;
+    s32 AnimNum;
+} P2A_HEAD_t;
 
 
 #define EFF_MAGATUHI_VECTOR_WORD_COUNT 4
@@ -408,7 +408,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
     VTX_t *corner;
 
     listIndex = child->packetListIndex;
-    if (listIndex != obj->requestedPacketListIndex) {
+    if (listIndex != obj->mode) {
         batch = child->work;
         count = batch->count;
         if (count > 0) {
@@ -417,7 +417,7 @@ void dds3BillboardTagLink(billHandle_t *obj, BillChildPayload *child) {
                                                   batch->offset, count, NULL));
             batch->count = 0;
         }
-        listIndex = obj->requestedPacketListIndex;
+        listIndex = obj->mode;
         child->packetListIndex = listIndex;
     }
     if (child->pendingLists[listIndex] == NULL) {
@@ -622,7 +622,7 @@ void dds3MultiBillboardLinkOt(void) {
 void dds3Billboard_BasicInit(billHandle_t *pBasic) {
     f32 zero = 0.0f;
     f32 one = 1.0f;
-    pBasic->requestedPacketListIndex = 0;
+    pBasic->mode = 0;
     pBasic->pos[3] = zero;
     pBasic->pos[2] = zero;
     pBasic->pos[1] = zero;
@@ -734,11 +734,11 @@ BillChildPayload *dds3Billboard_P2AAnimDraw(billHandle_t *pP2A, dds3BillAnim_tag
     pP2A->abgr = color;
     child = data->children[record->texid];
     if (entry->flags & BILL_ANIMATION_FLAG_PACKET_LIST_2) {
-        pP2A->requestedPacketListIndex = 2;
+        pP2A->mode = 2;
     } else if (entry->flags & BILL_ANIMATION_FLAG_PACKET_LIST_3) {
-        pP2A->requestedPacketListIndex = 3;
+        pP2A->mode = 3;
     } else {
-        pP2A->requestedPacketListIndex = 1;
+        pP2A->mode = 1;
     }
     pP2A->rot = record->rotationAngle;
     child->uv.components[0] = record->u0;
@@ -1107,7 +1107,7 @@ void dds3BillboardSetMode(billHandle_t *hBillboard, s32 mode) {
     switch (hBillboard->type) {
     case 0:
     case 3:
-        hBillboard->requestedPacketListIndex = mode;
+        hBillboard->mode = mode;
         break;
     case 1: {
         s32 entryCount = hBillboard->entryCount;
@@ -1210,7 +1210,7 @@ s32 dds3BillboardGetCurrentAnimNumber(billHandle_t *hBillboard) {
 
 s32 dds3BillboardGetAnimNumber(billHandle_t *hBillboard) {
     if (hBillboard->type == 1) {
-        return ((BillLinkedValue *)hBillboard->u.animationData->pHeader)->value;
+        return ((P2A_HEAD_t *)hBillboard->u.animationData->pHeader)->AnimNum;
     }
     return 0;
 }

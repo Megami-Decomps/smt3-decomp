@@ -15,7 +15,7 @@ typedef struct {
     u32 pRange;
     void *resourceData;
     u8 unk08[8];
-    s32 controlValue;
+    s32 pPlane;
 } dds3ModelRangeBasicWorkData_t;
 
 
@@ -50,7 +50,7 @@ dds3Basic_t *dds3AddModelRangeBasicNew(s32 serialID, s32 pData, s32 pos, char *p
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_MODELRANGE);
 
     basic->name = pName;
-    ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->controlValue = 0;
+    ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->pPlane = 0;
     basic->serialID = serialID;
     return basic;
 }
@@ -65,5 +65,5 @@ s32 dds3SearchSceneBasicWorkData(u32 id) {
 
     scene = dds3GetControlScene();
     basic = dds3SearchSceneBasic(scene, id, BASIC_TYPE_MATTEROBJECT);
-    return ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->controlValue;
+    return ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->pPlane;
 }

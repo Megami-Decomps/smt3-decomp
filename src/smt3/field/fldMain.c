@@ -15,13 +15,13 @@ extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 extern void fldRunDanteShutdown(void);
 
 typedef struct {
-    s32 active;
-    s32 count;
+    s32 use;
+    s32 cnt;
     u8 unk08[0x8];
-    dds3Basic_t *handle;
-} fldWave_t;
+    dds3Basic_t *pBasic;
+} fldWave_tag;
 
-extern fldWave_t fldWaveBuff[];
+extern fldWave_tag fldWaveBuff[];
 
 extern void *mhfldWaveFile;
 
@@ -745,13 +745,13 @@ void fldWaveInit(void)
         return;
     }
     for (i = 0; i < 0x28; i++) {
-        fldWaveBuff[i].active = 0;
-        fldWaveBuff[i].count = 0;
-        fldWaveBuff[i].handle = NULL;
-        fldWaveBuff[i].handle = dds3AddUnitObjectBasic(dds3AllocObjectId(), pos, rot);
-        dds3SetUnitObjectId(fldWaveBuff[i].handle, D_00531820);
-        dds3ObjectBaseMakeUnit(fldWaveBuff[i].handle, 2, 0x1B);
-        dds3ObjectBaseOnFlag(fldWaveBuff[i].handle, 1);
+        fldWaveBuff[i].use = 0;
+        fldWaveBuff[i].cnt = 0;
+        fldWaveBuff[i].pBasic = NULL;
+        fldWaveBuff[i].pBasic = dds3AddUnitObjectBasic(dds3AllocObjectId(), pos, rot);
+        dds3SetUnitObjectId(fldWaveBuff[i].pBasic, D_00531820);
+        dds3ObjectBaseMakeUnit(fldWaveBuff[i].pBasic, 2, 0x1B);
+        dds3ObjectBaseOnFlag(fldWaveBuff[i].pBasic, 1);
     }
 }
 
@@ -766,25 +766,25 @@ void fldWaveStart(f32 x, f32 y, f32 z)
         return;
     }
     for (i = 0; i < 0x28; i++) {
-        if (fldWaveBuff[i].active != 0) {
+        if (fldWaveBuff[i].use != 0) {
             continue;
         }
-        fldWaveBuff[i].active = 1;
-        fldWaveBuff[i].count = 0;
+        fldWaveBuff[i].use = 1;
+        fldWaveBuff[i].cnt = 0;
         pos[0] = x;
         pos[1] = y;
         pos[2] = z;
-        dds3SetPosPoseSet(fldWaveBuff[i].handle, pos);
-        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].handle), 0, 0);
-        dds3ObjectBaseOffFlag(fldWaveBuff[i].handle, 1);
-        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].handle), 0, 0);
+        dds3SetPosPoseSet(fldWaveBuff[i].pBasic, pos);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].pBasic), 0, 0);
+        dds3ObjectBaseOffFlag(fldWaveBuff[i].pBasic, 1);
+        mdlSingleMotion(dds3ObjectBaseGetModelHandle(fldWaveBuff[i].pBasic), 0, 0);
         return;
     }
 }
 
 void fldWaveTask(void)
 {
-    fldWave_t *p;
+    fldWave_tag *p;
     s32 i;
 
     if (mhfldWaveFile == NULL) {
@@ -792,12 +792,12 @@ void fldWaveTask(void)
     }
     p = fldWaveBuff;
     for (i = 0x27; i >= 0; i--, p++) {
-        if (p->active == 0) {
+        if (p->use == 0) {
             continue;
         }
-        if (++p->count >= 0x47) {
-            dds3ObjectBaseOnFlag(p->handle, 1);
-            p->active = 0;
+        if (++p->cnt >= 0x47) {
+            dds3ObjectBaseOnFlag(p->pBasic, 1);
+            p->use = 0;
         }
     }
 }

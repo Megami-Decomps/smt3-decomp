@@ -117,16 +117,16 @@ struct dds3WorldBasic_t
  * selected members, and the script handle retains the resolved FLW0 image. */
 typedef struct
 {
-    s32 count;
-    dds3Basic_t *head;
-    dds3Basic_t *tail;
-} dds3SceneList_t;
+    s32 linkcount;
+    dds3Basic_t *firstbasic;
+    dds3Basic_t *lastbasic;
+} dds3SceneBasicTable_t;
 
 typedef struct
 {
     s32 mapno;                         /* 0x00 */
     sdfMemHandle_t *mem_hndl;        /* 0x04 */
-    dds3SceneList_t *basictable;            /* 0x08 */
+    dds3SceneBasicTable_t *basictable;            /* 0x08 */
     dds3Basic_t *activecamera;               /* 0x0C */
     dds3Basic_t *activeunit;                 /* 0x10 */
     u32 fieldHandle;                  /* 0x14 */
@@ -154,7 +154,7 @@ typedef struct
     s32 MotMode;
     f32 MotSpeed;
     u32 svs;
-    s32 modelPartCount;
+    s32 sdwchrid;
     s32 modelParts[24];
 } dds3ObjectBaseControlWorkData_t;
 
@@ -220,12 +220,12 @@ typedef struct
         dds3PathTransform_t *transform;
     } data;
     u32 *frames;
-} dds3PathKeyframes_t;
+} fldResourcePathData_t;
 
 typedef struct
 {
     u32 kind;
-    dds3PathKeyframes_t *keys;
+    fldResourcePathData_t *keys;
 } dds3PathCurveEntry_t;
 
 typedef struct
@@ -241,10 +241,10 @@ struct dds3PathBasicControl_t
     f32 frameMax;
     f32 frame;
     s32 spline;
-    dds3PathKeyframes_t *pTransrate;
-    dds3PathKeyframes_t *pRotation;
-    dds3PathKeyframes_t *pFovy;
-    dds3PathKeyframes_t *transformKeys;
+    fldResourcePathData_t *pTransrate;
+    fldResourcePathData_t *pRotation;
+    fldResourcePathData_t *pFovy;
+    fldResourcePathData_t *transformKeys;
 };
 
 /* Shared object-base and path-control entry points. */

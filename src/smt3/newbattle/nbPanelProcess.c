@@ -170,24 +170,24 @@ typedef struct { u8 unk_00[0xC]; s32 width; } nbTextBox_t;
 /* 0x38 bytes of panel flash state; retail never names the fields. */
 typedef struct
 {
-    s32 unk_00;
-    s16 unk_04;
+    s32 PT_1_Frame;
+    s16 PT_1_Process;
     u8 pad_06[0x2];
-    s32 unk_08;
-    s16 unk_0C;
+    s32 PT_2_Frame;
+    s16 PT_2_Process;
     u8 pad_0E[0x2];
-    f32 unk_10;
-    s32 unk_14;
-    s16 unk_18;
+    f32 PT_2_Rate;
+    s32 PT_3_Frame;
+    s16 PT_3_Process;
     u8 pad_1A[0x2];
-    f32 unk_1C;
+    f32 PT_3_Rate;
     s32 unk_20;
     s32 unk_24;
     f32 unk_28;
     f32 unk_2C;
-    s32 unk_30;
-    s32 unk_34;
-} nbPanelFlash_t;
+    s32 abgr;
+    s32 addY;
+} nbPanelFlashData_t;
 
 /* 0x1A4 bytes; only the fields this unit touches are named. */
 typedef struct nbActionProcessData_t
@@ -1102,22 +1102,22 @@ void nbInitPanelProcess(nbMainProcessData_t *data)
     nbPanelBaseRGBA = 0x80808080;
 }
 
-void nbPanelFlashInit(nbPanelFlash_t *pFlash, s32 scale_x, s32 scale_y, s32 abgr, f32 abgr_c, f32 addX, s32 addY)
+void nbPanelFlashInit(nbPanelFlashData_t *pFlash, s32 scale_x, s32 scale_y, s32 abgr, f32 abgr_c, f32 addX, s32 addY)
 {
-    pFlash->unk_04 = 1;
-    pFlash->unk_00 = 0;
-    pFlash->unk_0C = 1;
-    pFlash->unk_08 = 0;
-    pFlash->unk_10 = 0.1f;
-    pFlash->unk_14 = 0;
-    pFlash->unk_18 = 1;
-    pFlash->unk_1C = 0.1f;
+    pFlash->PT_1_Process = 1;
+    pFlash->PT_1_Frame = 0;
+    pFlash->PT_2_Process = 1;
+    pFlash->PT_2_Frame = 0;
+    pFlash->PT_2_Rate = 0.1f;
+    pFlash->PT_3_Frame = 0;
+    pFlash->PT_3_Process = 1;
+    pFlash->PT_3_Rate = 0.1f;
     pFlash->unk_28 = abgr_c;
     pFlash->unk_2C = addX;
     pFlash->unk_20 = scale_x;
     pFlash->unk_24 = scale_y;
-    pFlash->unk_30 = abgr;
-    pFlash->unk_34 = addY;
+    pFlash->abgr = abgr;
+    pFlash->addY = addY;
 }
 
 /* vu0 routine: unpack two colours, multiply and pack */

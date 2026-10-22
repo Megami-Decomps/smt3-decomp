@@ -99,7 +99,7 @@ extern void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s3
 typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
-    /* 0x04 */ s8 unk_04;
+    /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;
@@ -119,7 +119,7 @@ typedef struct
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
-} cmpCursorWork_t;
+} cmpCursorInfo_t;
 
 typedef struct
 {
@@ -257,9 +257,9 @@ void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s
 INCLUDE_ASM(const s32, "facility/fclDraw", fcl_212910);
 
 extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
-                             cmpCursorWork_t *cursor, s32 j, s32 k);
+                             cmpCursorInfo_t *cursor, s32 j, s32 k);
 
-void fcl_2129A0(s32 a, s32 b, cmpCursorWork_t *cursor, s32 d)
+void fcl_2129A0(s32 a, s32 b, cmpCursorInfo_t *cursor, s32 d)
 {
     cmpDrawScrollBar(cursor->unk_08 * 16, cursor->unk_0C * 8, a, cursor->unk_10,
                      cursor->unk_14, 0x80808080, 0x100, 0, cursor, 0, d);

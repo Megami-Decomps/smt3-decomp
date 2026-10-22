@@ -1,19 +1,19 @@
 #include "font.h"
 
-typedef struct fmFontControl_t fmFontControl_t;
+typedef struct FontGsControl_t FontGsControl_t;
 
-struct fmFontControl_t {
-    sdfMemHandle_t *nodeAllocation;
-    sdfMemHandle_t *recordStorageAllocation;
-    s32 cellWidth; /* 0x08 */
-    s32 cellHeight; /* 0x0C */
-    s32 pixelByteCount; /* 0x10 */
-    s32 capacity; /* 0x14 */
-    u32 count; /* 0x18 */
-    FontMem_t *head; /* 0x1C */
+struct FontGsControl_t {
+    sdfMemHandle_t *mh;
+    sdfMemHandle_t *ud_mh;
+    s32 unit_width; /* 0x08 */
+    s32 unit_height; /* 0x0C */
+    s32 unit_size; /* 0x10 */
+    s32 unit_num_max; /* 0x14 */
+    u32 unit_nums; /* 0x18 */
+    FontMem_t *root; /* 0x1C */
 };
 
-extern fmFontControl_t gFGC;
+extern FontGsControl_t gFGC;
 extern s8 D_0054F3FE;
 extern u32 D_0054F414;
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
@@ -28,12 +28,12 @@ extern s32 strlen(const char *s);
 extern void frGetXShiftLev(frTextHandle_t *glyph, s32 shiftIndex, s32 isFirst);
 s32 fmDestroyFontMemControl(void);
 
-fmFontControl_t *fmGetInternalFGC(void) {
+FontGsControl_t *fmGetInternalFGC(void) {
     return &gFGC;
 }
 
 s32 fmGetRestBufNum(void) {
-    return gFGC.count;
+    return gFGC.unit_nums;
 }
 
 /* Build the glyph atlas once: COLUMNS x ROWS cells in a circular node list, each with its
@@ -47,33 +47,33 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
     s32 row;
     s32 column;
 
-    if (gFGC.head != NULL && D_0054F3FE != 0) {
+    if (gFGC.root != NULL && D_0054F3FE != 0) {
         return 0;
     }
     count = columns * rows;
-    gFGC.cellWidth = cellWidth;
-    gFGC.cellHeight = cellHeight;
-    gFGC.count = count;
-    gFGC.capacity = count;
-    gFGC.pixelByteCount = cellWidth * cellHeight / 2;
-    gFGC.nodeAllocation = sdfMemAllocDirect(count * sizeof(FontMem_t));
-    gFGC.head = (FontMem_t *)sdfMemLock(gFGC.nodeAllocation);
+    gFGC.unit_width = cellWidth;
+    gFGC.unit_height = cellHeight;
+    gFGC.unit_nums = count;
+    gFGC.unit_num_max = count;
+    gFGC.unit_size = cellWidth * cellHeight / 2;
+    gFGC.mh = sdfMemAllocDirect(count * sizeof(FontMem_t));
+    gFGC.root = (FontMem_t *)sdfMemLock(gFGC.mh);
     if (recordBytes != 0) {
-        gFGC.recordStorageAllocation = sdfMemAllocDirect(recordBytes * gFGC.count);
-        records = (u8 *)sdfMemLock(gFGC.recordStorageAllocation);
+        gFGC.ud_mh = sdfMemAllocDirect(recordBytes * gFGC.unit_nums);
+        records = (u8 *)sdfMemLock(gFGC.ud_mh);
     }
-    for (i = 0; i < gFGC.count - 1; i++) {
-        gFGC.head[i].next = &gFGC.head[i + 1];
+    for (i = 0; i < gFGC.unit_nums - 1; i++) {
+        gFGC.root[i].next = &gFGC.root[i + 1];
     }
-    gFGC.head[i].next = gFGC.head;
-    for (i = gFGC.count - 1; i > 0; i--) {
-        gFGC.head[i].prev = &gFGC.head[i - 1];
+    gFGC.root[i].next = gFGC.root;
+    for (i = gFGC.unit_nums - 1; i > 0; i--) {
+        gFGC.root[i].prev = &gFGC.root[i - 1];
     }
-    gFGC.head[0].prev = &gFGC.head[gFGC.count - 1];
+    gFGC.root[0].prev = &gFGC.root[gFGC.unit_nums - 1];
     i = 0;
     for (row = 0; row < rows; row++) {
         for (column = 0; column < columns; column++) {
-            node = &gFGC.head[i];
+            node = &gFGC.root[i];
             if (node == NULL) {
                 fmDestroyFontMemControl();
                 return 0;
@@ -97,36 +97,36 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
 
 /* Release the group's handles once and clear its active-node flag. */
 s32 fmDestroyFontMemControl(void) {
-    if (gFGC.head == 0) {
+    if (gFGC.root == 0) {
         return 0;
     }
-    sdfMemFreeDirect(gFGC.nodeAllocation);
-    sdfMemFreeDirect(gFGC.recordStorageAllocation);
-    gFGC.head = 0;
+    sdfMemFreeDirect(gFGC.mh);
+    sdfMemFreeDirect(gFGC.ud_mh);
+    gFGC.root = 0;
     return 1;
 }
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
 FontMem_t *fmRentFontMem(void) {
-    FontMem_t *resourceNode = gFGC.head->next;
+    FontMem_t *resourceNode = gFGC.root->next;
 
     if (resourceNode->id == 0) {
         return NULL;
     }
     resourceNode->prev->next = resourceNode->next;
-    gFGC.count -= 1;
+    gFGC.unit_nums -= 1;
     resourceNode->next->prev = resourceNode->prev;
     return resourceNode;
 }
 
 /* Insert after the list's fixed anchor and update the entry count. */
 void fmRetFontMem(FontMem_t *pFontArea) {
-    FontMem_t *anchor = gFGC.head;
+    FontMem_t *anchor = gFGC.root;
     FontMem_t *nextNode = anchor->next;
 
     pFontArea->prev = anchor;
     pFontArea->next = nextNode;
-    gFGC.count += 1;
+    gFGC.unit_nums += 1;
     anchor->next = pFontArea;
     nextNode->prev = pFontArea;
 }

@@ -81,8 +81,8 @@ typedef struct evtPolygonMovieWork_t {
 
 typedef struct pmdFrameTable_t {
     u16 ObjectType;
-    u16 frame;
-    u16 length;
+    u16 Frame;
+    u16 Length;
     s16 NameIndex;
     union {
         s8 b[8];
@@ -324,7 +324,7 @@ void UnitFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 {
     dds3Basic_t *basic;
 
-    if (f->frame == now) {
+    if (f->Frame == now) {
         if (f->NameIndex >= 0) {
             basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 5, wdata->nameTable[f->NameIndex]);
             if (basic != NULL) {
@@ -344,8 +344,8 @@ void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
             if (evtCameraFrameState == 0) {
                 D_0054F8E0 = -1;
             }
-            if (D_0054F8E0 < f->frame) {
-                D_0054F8E0 = f->frame;
+            if (D_0054F8E0 < f->Frame) {
+                D_0054F8E0 = f->Frame;
                 evtCameraFrameState = (s32)basic;
                 nowfovy = f->data.f[0];
             }
@@ -355,30 +355,30 @@ void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
 
 s32 QuakeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->frame == now) {
+    if (f->Frame == now) {
         if (f->data.h[0] == 0) {
             dds3StopQuake();
         } else {
-            dds3SetQuake(f->length, f->data.h[0]);
+            dds3SetQuake(f->Length, f->data.h[0]);
         }
     }
 }
 
 s32 FadeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->frame == now) {
+    if (f->Frame == now) {
         switch (f->data.h[0]) {
         case 0:
-            dds3FadeIn(0xFF, 0xFF, 0xFF, f->length);
+            dds3FadeIn(0xFF, 0xFF, 0xFF, f->Length);
             break;
         case 1:
-            dds3FadeOut(0xFF, 0xFF, 0xFF, f->length);
+            dds3FadeOut(0xFF, 0xFF, 0xFF, f->Length);
             break;
         case 2:
-            dds3FadeIn(0, 0, 0, f->length);
+            dds3FadeIn(0, 0, 0, f->Length);
             break;
         case 3:
-            dds3FadeOut(0, 0, 0, f->length);
+            dds3FadeOut(0, 0, 0, f->Length);
             break;
         }
     }
@@ -386,7 +386,7 @@ s32 FadeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTabl
 
 void SeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->frame == now) {
+    if (f->Frame == now) {
         evtPlaySe(wdata->eventNo, f->data.h[0]);
     }
 }
@@ -396,7 +396,7 @@ s32 BgmFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable
     s32 eventNo;
     s32 bgm;
 
-    if (f->frame == now) {
+    if (f->Frame == now) {
         eventNo = wdata->eventNo;
         bgm = f->data.h[1];
         printf("bgm_frame e%03d, bgm %d\n", eventNo, bgm);
@@ -435,8 +435,8 @@ void BlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 
     if (f->data.h[2] != 0) {
         if (nf != NULL) {
-            elapsed = now - f->frame;
-            span = nf->frame - f->frame;
+            elapsed = now - f->Frame;
+            span = nf->Frame - f->Frame;
             alpha = (s16)((f->data.h[0] * (span - elapsed) + nf->data.h[0] * elapsed) / span);
             scale = (s16)((f->data.h[1] * (span - elapsed) + nf->data.h[1] * elapsed) / span);
         } else {
@@ -612,7 +612,7 @@ void EffectFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     char *target = NULL;
     dds3Basic_t *basic;
 
-    if (f->frame == now) {
+    if (f->Frame == now) {
         if (f->data.h[3] >= 0) {
             target = wdata->nameTable[f->data.h[3]];
         }
@@ -626,8 +626,8 @@ void EffectFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     if (f->data.b[0] >= 0) {
         basic = wdata->effectBasicTable[f->data.b[0]];
         if (basic != NULL) {
-            if (f->length == now) {
-                if (f->length != 0) {
+            if (f->Length == now) {
+                if (f->Length != 0) {
                     evtEffectLoopControl(basic, 0);
                 }
             }
@@ -650,7 +650,7 @@ void MG12FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
     dds3Basic_t *p1;
     dds3Basic_t *p2;
 
-    if (f->frame == now) {
+    if (f->Frame == now) {
         f->data.b[0] = AddEffectTableMG12(now, wdata, f);
     } else if (f->data.h[1] > 0) {
         if (now == f->data.h[1]) {
@@ -661,8 +661,8 @@ void MG12FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
     if (f->data.b[0] >= 0) {
         basic = wdata->effectBasicTable[f->data.b[0]];
         if (basic != NULL) {
-            if (f->length == now) {
-                if (f->length != 0) {
+            if (f->Length == now) {
+                if (f->Length != 0) {
                     evtEffectLoopControl(basic, 0);
                 }
             }
@@ -683,7 +683,7 @@ void BEDFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTabl
 {
     char *target = NULL;
 
-    if (f->frame == now) {
+    if (f->Frame == now) {
         if (f->data.h[1] >= 0) {
             target = wdata->nameTable[f->data.h[1]];
         }
@@ -702,7 +702,7 @@ s32 LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
     dds3Basic_t *unit;
     void *handle;
 
-    if (f->frame == now) {
+    if (f->Frame == now) {
         if (f->data.h[0] >= 0) {
             light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, wdata->nameTable[f->NameIndex]);
             if (light != NULL) {
@@ -710,9 +710,9 @@ s32 LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
                 if (unit != NULL) {
                     handle = evtGetUnitHandle2(unit);
                     if (f->data.h[1] != 0) {
-                        evtLinkLightObjectBasic(handle, light, f->length);
+                        evtLinkLightObjectBasic(handle, light, f->Length);
                     } else {
-                        evtUnlinkLightObjectBasic(handle, f->length);
+                        evtUnlinkLightObjectBasic(handle, f->Length);
                     }
                 }
             }
@@ -722,15 +722,15 @@ s32 LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 
 void SkyFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->frame == now) {
-        fldSkySetFilter(f->data.w[1], f->data.h[0], f->length);
-        evtSetSkyAlpha(f->length, f->data.h[1]);
+    if (f->Frame == now) {
+        fldSkySetFilter(f->data.w[1], f->data.h[0], f->Length);
+        evtSetSkyAlpha(f->Length, f->data.h[1]);
     }
 }
 
 s32 BokasiFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
-    if (f->frame == now) {
+    if (f->Frame == now) {
         if (f->data.h[0] != 0) {
             evtSetBokasi(1);
         } else {
@@ -744,13 +744,13 @@ f32 GetKeyFrameRatio(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     s32 start;
     s32 end;
 
-    if (now < f->frame) {
+    if (now < f->Frame) {
         start = wdata->cutInfo->FirstFrame;
-        end = f->frame;
+        end = f->Frame;
     } else {
-        start = f->frame;
+        start = f->Frame;
         if (nf != NULL) {
-            end = nf->frame;
+            end = nf->Frame;
         } else {
             end = wdata->cutInfo->LastFrame;
         }
@@ -774,15 +774,15 @@ void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->NameIndex;
         soften1 = f->data.f[0];
         bias1 = f->data.f[1];
-        key1 = wdata->slightTable[f->length];
+        key1 = wdata->slightTable[f->Length];
         if (nf != NULL) {
             bias2 = nf->data.f[1];
             soften2 = nf->data.f[0];
-            key2 = wdata->slightTable[nf->length];
+            key2 = wdata->slightTable[nf->Length];
         } else {
             soften2 = 7.0f;
             bias2 = 0.0f;
@@ -794,7 +794,7 @@ void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         soften1 = 7.0f;
         bias1 = 0.0f;
         soften2 = f->data.f[0];
-        key2 = wdata->slightTable[f->length];
+        key2 = wdata->slightTable[f->Length];
     }
     evtHokanSceneLight(hokan, ratio, key1, key2, D_0056CFF0);
     dds3SetLightColor(0, 0, D_0056CFF0);
@@ -813,17 +813,17 @@ void SFogFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
-        key1 = &wdata->sfogTable[f->length];
+        key1 = &wdata->sfogTable[f->Length];
         if (nf != NULL) {
-            key2 = &wdata->sfogTable[nf->length];
+            key2 = &wdata->sfogTable[nf->Length];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &wdata->sfogTable[f->length];
+        key2 = &wdata->sfogTable[f->Length];
     }
     evtHokanSceneFog(hokan, ratio, &key1->fog, &key2->fog, &D_0056D020.fog);
     dds3SetFogPara(0, D_0056D020.fog.vec[1], D_0056D020.fog.vec[0], D_0056D020.fog.vec[2], D_0056D020.fog.vec[3]);
@@ -839,7 +839,7 @@ void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
         key1 = &wdata->blur2Table[f->data.h[1]];
         if (nf != NULL) {
@@ -869,7 +869,7 @@ void MBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
         key1 = &wdata->mblurTable[f->data.h[1]];
         if (nf != NULL) {
@@ -899,7 +899,7 @@ void DBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
         key1 = &wdata->dblurTable[f->data.h[1]];
         if (nf != NULL) {
@@ -929,7 +929,7 @@ void RBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
         key1 = &wdata->rblurTable[f->data.h[1]];
         if (nf != NULL) {
@@ -959,7 +959,7 @@ void MFilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrame
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
         key1 = &wdata->mfilterTable[f->data.h[1]];
         if (nf != NULL) {
@@ -989,7 +989,7 @@ void FilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
-    if (now >= f->frame) {
+    if (now >= f->Frame) {
         hokan = f->data.h[0];
         key1 = &wdata->filterTable[f->data.h[1]];
         if (nf != NULL) {
@@ -1042,14 +1042,14 @@ void FrameRun(evtPolygonMovieWork_t *wdata)
             if (f->data.h[1] == 0) {
                 length = 0;
             } else {
-                length = f->data.h[1] - f->frame + 1;
+                length = f->data.h[1] - f->Frame + 1;
             }
             break;
         case 18:
             if (f->data.h[0] == 0) {
                 length = 0;
             } else {
-                length = f->data.h[0] - f->frame + 1;
+                length = f->data.h[0] - f->Frame + 1;
             }
             break;
         case 9:
@@ -1068,29 +1068,29 @@ void FrameRun(evtPolygonMovieWork_t *wdata)
             length = -1;
             break;
         default:
-            length = f->length;
+            length = f->Length;
             break;
         }
         if (length > 0) {
             now = wdata->nowFrame;
-            if (now < f->frame) {
+            if (now < f->Frame) {
                 goto next;
             }
-            if (now < f->frame + length) {
+            if (now < f->Frame + length) {
                 goto run;
             }
             goto next;
         } else if (length == 0) {
             now = wdata->nowFrame;
-            if (now < f->frame) {
+            if (now < f->Frame) {
                 goto next;
             }
-        } else if ((now = wdata->nowFrame) < f->frame) {
+        } else if ((now = wdata->nowFrame) < f->Frame) {
             if (prev != NULL) {
                 goto next;
             }
         } else if (nf != NULL) {
-            if (now >= nf->frame) {
+            if (now >= nf->Frame) {
                 goto next;
             }
         }

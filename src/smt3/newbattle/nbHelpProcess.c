@@ -197,15 +197,15 @@ struct _FRQ
 typedef struct nbHelpProcessData_t
 {
     s32 type;
-    char *text;
+    char *text1;
     char *text2;
     s32 text3;
     s32 time;
     u8 textmax[0x4];
-    s32 width;
-    s32 width2;
-    u32 color;
-    s32 meshandle;
+    s32 textwidth;
+    s32 nextwidth;
+    u32 textcol;
+    s32 reqmsgid;
     s32 mesid;
     s32 nextmeshandle;
     s32 nextmesid;
@@ -433,35 +433,35 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
 
     w = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
     nbHelpOff();
-    w->text = text;
+    w->text1 = text;
     w->text2 = text2;
     if (type == 1) {
-        w->meshandle = w->nextmeshandle;
+        w->reqmsgid = w->nextmeshandle;
         w->mesid = w->nextmesid;
     }
-    w->color = color;
+    w->textcol = color;
     switch (type) {
     case 1:
-        w->width = itfMesMngGetWidth(w->meshandle, w->mesid, 0) >> 4;
+        w->textwidth = itfMesMngGetWidth(w->reqmsgid, w->mesid, 0) >> 4;
         break;
     case 2:
-        frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, color, w->text, 0);
-        w->width = frGetStrWidth2(frq);
+        frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, color, w->text1, 0);
+        w->textwidth = frGetStrWidth2(frq);
         frDestroyFontRequestAfter(frq);
         frq = frGetCNameFRQ(0, 1, 0, 0);
-        w->width2 = w->width + 10;
-        w->width = w->width + frGetStrWidth2(frq) + 10;
+        w->nextwidth = w->textwidth + 10;
+        w->textwidth = w->textwidth + frGetStrWidth2(frq) + 10;
         frDestroyFontRequestAfter(frq);
         break;
     case 0:
     default:
-        frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, w->color, w->text, 0);
-        w->width = frGetStrWidth2(frq);
+        frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, w->textcol, w->text1, 0);
+        w->textwidth = frGetStrWidth2(frq);
         frDestroyFontRequestAfter(frq);
         if (w->text2 != NULL) {
-            frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, w->color, w->text2, 0);
-            w->width2 = w->width + 10;
-            w->width = w->width + frGetStrWidth2(frq) + 10;
+            frq = frwGetSmallFontFRQ(0, 0, 0xFF0051, w->textcol, w->text2, 0);
+            w->nextwidth = w->textwidth + 10;
+            w->textwidth = w->textwidth + frGetStrWidth2(frq) + 10;
             frDestroyFontRequestAfter(frq);
         }
         break;
@@ -568,19 +568,19 @@ void nbHelpOff(void)
     nbHelpProcessData_t *h;
 
     h = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
-    if (h->text == NULL) {
+    if (h->text1 == NULL) {
         if (h->type != 1) {
             return;
         }
-        if (h->meshandle < 0) {
+        if (h->reqmsgid < 0) {
             return;
         }
     }
-    h->text = NULL;
+    h->text1 = NULL;
     h->text2 = NULL;
     if (h->type == 1) {
-        itfMesMngRequestMessageRelease(h->meshandle, 0);
-        h->meshandle = -1;
+        itfMesMngRequestMessageRelease(h->reqmsgid, 0);
+        h->reqmsgid = -1;
     }
 }
 
@@ -593,12 +593,12 @@ void nbHelpShutdown(dds3ProcessID_t *id)
     nbHelpProcessData_t *w;
 
     w = dds3GetProcessData(id);
-    if (w->text != NULL || (w->type == 1 && w->meshandle >= 0)) {
-        w->text = NULL;
+    if (w->text1 != NULL || (w->type == 1 && w->reqmsgid >= 0)) {
+        w->text1 = NULL;
         w->text2 = NULL;
         if (w->type == 1) {
-            itfMesMngRequestMessageRelease(w->meshandle, 0);
-            w->meshandle = -1;
+            itfMesMngRequestMessageRelease(w->reqmsgid, 0);
+            w->reqmsgid = -1;
         }
     }
     sdfChipFreeDirect(w);
@@ -610,7 +610,7 @@ nbHelpProcessData_t *nbAllocHelpWork(void)
 
     w = sdfChipAllocDirect(sizeof(nbHelpProcessData_t));
     memset(w, 0, sizeof(nbHelpProcessData_t));
-    w->meshandle = -1;
+    w->reqmsgid = -1;
     w->msgid = 0x80;
     return w;
 }

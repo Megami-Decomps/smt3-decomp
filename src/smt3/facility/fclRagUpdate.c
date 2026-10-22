@@ -32,7 +32,7 @@ typedef struct
 typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
-    /* 0x04 */ s8 unk_04;
+    /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 unk_08;
     /* 0x0C */ s32 unk_0C;
@@ -52,11 +52,11 @@ typedef struct
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
-} cmpCursorWork_t;
+} cmpCursorInfo_t;
 
 typedef struct
 {
-    /* 0x00 */ cmpCursorWork_t cursor;
+    /* 0x00 */ cmpCursorInfo_t cursor;
     /* 0x38 */ s8 unk_38;
 } cmpPadStopWork_t;
 
@@ -73,7 +73,7 @@ typedef struct
     /* 0x000C */ u8 unk_000C[0x48];
     /* 0x0054 */ u16 unk_0054;
     /* 0x0056 */ u8 unk_0056[0xEA];
-    /* 0x0140 */ cmpCursorWork_t listCursor;
+    /* 0x0140 */ cmpCursorInfo_t listCursor;
     /* 0x0178 */ u8 unk_0178[0x44D0];
     /* 0x4648 */ s32 script;
     /* 0x464C */ s32 scriptArg;
@@ -105,7 +105,7 @@ typedef struct
     /* 0x00006 */ u8 unk_00006[2];
     /* 0x00008 */ s32 unk_00008;
     /* 0x0000C */ u8 unk_0000C[0x10];
-    /* 0x0001C */ cmpCursorWork_t combineCursor;
+    /* 0x0001C */ cmpCursorInfo_t combineCursor;
     /* 0x00054 */ u8 unk_00054[0x40BC];
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x123EE];
@@ -120,7 +120,7 @@ typedef struct
     /* 0x16560 */ u8 unk_16560[0x70];
     /* 0x165D0 */ s32 smoke[3];
     /* 0x165DC */ u8 unk_165DC[0x1064];
-    /* 0x17640 */ cmpCursorWork_t menuCursor;
+    /* 0x17640 */ cmpCursorInfo_t menuCursor;
     /* 0x17678 */ u8 unk_17678[0x3060];
     /* 0x1A6D8 */ s32 texHandle[7];
     /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
@@ -129,7 +129,7 @@ typedef struct
     /* 0x1A720 */ fclRibbon_t *ribbon;
 } cmbGbWork_t;
 
-extern void cmpResetCursorInfo(cmpCursorWork_t *cursor);
+extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
@@ -139,12 +139,12 @@ typedef struct
     /* 0x0009 */ u8 unk_0009[0x17];
     /* 0x0020 */ s32 flags;
     /* 0x0024 */ u8 unk_0024[0x138];
-    /* 0x015C */ cmpCursorWork_t listCursor;
+    /* 0x015C */ cmpCursorInfo_t listCursor;
 } lstWork_t;
 
 extern u8 ragHeartsTable[];
 
-extern void cmpMoveCursorListEnd(cmpCursorWork_t *cursor);
+extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern s32 cmpGetPressedButton(s32 mask);
 
@@ -248,7 +248,7 @@ void ragUpdateSeq2(void)
         break;
     case 2:
         fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
-        cmpResetCursorInfo((cmpCursorWork_t *)((u8 *)ragUpdateWork + 0x2470));
+        cmpResetCursorInfo((cmpCursorInfo_t *)((u8 *)ragUpdateWork + 0x2470));
         ragUpdateWork->unk_0001 = 0;
         ragUpdateWork->unk_0004 = button;
         break;
@@ -292,7 +292,7 @@ void ragUpdateSeq3(void)
         break;
     case 2:
         fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
-        cmpResetCursorInfo((cmpCursorWork_t *)((u8 *)ragUpdateWork + 0x3608));
+        cmpResetCursorInfo((cmpCursorInfo_t *)((u8 *)ragUpdateWork + 0x3608));
         ragUpdateWork->unk_0001 = 0;
         ragUpdateWork->unk_0004 = button;
         break;
