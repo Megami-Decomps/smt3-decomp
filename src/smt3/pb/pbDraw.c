@@ -6,7 +6,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-typedef struct pbPanel_t pbPanel_t;
+typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -22,7 +22,7 @@ typedef struct
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
-} pbMyCharacter_t;
+} pbMyChar_t;
 
 typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
 
@@ -39,9 +39,9 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbBlockObj_t;
+typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
 
-typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
@@ -50,22 +50,22 @@ typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
 /* Common panel work header: its constructor installs process and data links. */
-struct pbPanel_t
+struct pbProcHandle_t
 {
     dds3ProcessID_t *process;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
-    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
             pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
             pbViewCamWork_t *viewCam; } data;
 };
 
-extern pbPanel_t *record;
+extern pbProcHandle_t *record;
 
 extern sdfMat_t *sdfMatNew(void);
 
-extern pbPanel_t *blockDB;
+extern pbProcHandle_t *blockDB;
 
 extern void *sdfChipAllocDirect(u32 aSize);
 
@@ -85,15 +85,15 @@ extern void pb_draw_exit_Shutdown(dds3ProcessID_t *id);
 
 extern void sdfMatSetDiffuse(sdfMat_t *aMat, u32 aColor);
 
-extern void pbInitMapBaseMat(pbPanel_t *panel);
+extern void pbInitMapBaseMat(pbProcHandle_t *panel);
 
 extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 
 
-pbPanel_t *pbInitExitDraw(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbInitExitDraw(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbMatWork_t *work;
     panel->process = dds3StartProcess("pb-draw-exit", 0x2AFD, 1, 1, pb_draw_exit_Process,
                                       (dds3ProcessFunc_t)pb_draw_exit_Shutdown, NULL);
@@ -115,15 +115,15 @@ pbPanel_t *pbInitExitDraw(pbPanel_t *parent) {
     return panel;
 }
 
-void pbSetExitDisp(pbPanel_t *p, s8 sw) {
+void pbSetExitDisp(pbProcHandle_t *p, s8 sw) {
     p->data.value->value = sw;
 }
 
-s32 pbGetExitDisp(pbPanel_t *panel) {
+s32 pbGetExitDisp(pbProcHandle_t *panel) {
     return panel->data.value->value;
 }
 
-void pbSetExitPos(pbPanel_t *p, s32 x, s32 y) {
+void pbSetExitPos(pbProcHandle_t *p, s32 x, s32 y) {
     p->x = x;
     p->y = y;
 }
@@ -131,8 +131,8 @@ void pbSetExitPos(pbPanel_t *p, s32 x, s32 y) {
 
 /* NON_MATCHING: 3 of 49 words; the work store and the process load swap delay slots. */
 #ifdef NON_MATCHING
-pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 sw) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
     panel->process = dds3StartProcess("pb-draw-mapbase", 0x2AFD, 1, 1, pb_draw_mapbase_Process,
                                       (dds3ProcessFunc_t)pb_draw_mapbase_Shutdown, NULL);
@@ -154,7 +154,7 @@ INCLUDE_ASM(const s32, "pb/pbDraw", pbInitMapBaseDraw);
 #endif
 
 
-void func_001D4140(pbPanel_t *panel, s32 value) {
+void func_001D4140(pbProcHandle_t *panel, s32 value) {
     panel->data.value->value = value;
 }
 

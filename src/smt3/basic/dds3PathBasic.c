@@ -65,7 +65,7 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *pControl)
     f32 (*points)[3];
 
     if (pControl->flags & DDS3_PATH_POSITION_CHANNEL) {
-        keys = pControl->positionKeys;
+        keys = pControl->pTransrate;
         dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
         points = keys->data.position;
         SDF_VU0_SETVECTOR_X(points[segment + 1][0]);
@@ -94,7 +94,7 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl)
     f32 (*second)[4];
 
     if (pControl->flags & DDS3_PATH_ROTATION_CHANNEL) {
-        keys = pControl->rotationKeys;
+        keys = pControl->pRotation;
         dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
         quaternions = keys->data.rotation;
         first = &quaternions[segment];
@@ -174,7 +174,7 @@ f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *pControl)
     f32 *values;
 
     if (pControl->flags & DDS3_PATH_SCALAR_CHANNEL) {
-        keys = pControl->scalarKeys;
+        keys = pControl->pFovy;
         dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
         values = keys->data.scalar;
         return values[segment] * (1.0f - weight) + values[segment + 1] * weight;

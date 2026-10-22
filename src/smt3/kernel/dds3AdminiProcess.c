@@ -6,15 +6,15 @@ typedef struct dds3AdminiWork
     u32 flag;
     u32 value;
     s8 sequence;
-    s8 nextsequence;
+    s8 NextSequence;
     u8 historyindex;
     u8 unk0B;
     s8 history[8];
     u8 historyflag[8];
-    void *reqdata;
-    u8 reqsize;
-    u8 waittimer;
-} dds3AdminiWork_t;
+    void *CallData;
+    u8 CallDataSize;
+    u8 CallCount;
+} dds3AdminiData_t;
 
 typedef struct dds3AdminiEntry
 {
@@ -67,7 +67,7 @@ extern void *memcpy(void *a, const void *b, u32 c);
 extern s32 dds3ExistProcess(dds3ProcessID_t *id);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-dds3AdminiWork_t *GetAdminiProcessData(void);
+dds3AdminiData_t *GetAdminiProcessData(void);
 void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
 s32 dds3AdminiStartSequence(dds3ProcessID_t *id);
 s32 dds3AdminiNeoProcess(dds3ProcessID_t *id);
@@ -75,14 +75,14 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id);
 void dds3AdminiNeoShutdown(dds3ProcessID_t *id);
 s32 fclEncycFreeEntry(const char *name);
 
-dds3AdminiWork_t *GetAdminiProcessData(void)
+dds3AdminiData_t *GetAdminiProcessData(void)
 {
     return dds3GetProcessData(dds3SearchProcessName(D_0054E8C8));
 }
 
 u32 dds3_102828(void)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
     return work->value;
@@ -92,32 +92,32 @@ u32 dds3_102828(void)
  * Release the old payload before copying the new one. */
 void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
     void *previousData;
     u32 flag;
 
     if (data == NULL || datasize <= 0x100) {
         work = GetAdminiProcessData();
-        previousData = work->reqdata;
-        work->nextsequence = sequence;
+        previousData = work->CallData;
+        work->NextSequence = sequence;
         flag = work->flag;
         flag |= 1;
         flag &= ~8;
         flag &= ~0x10000;
         work->flag = flag;
-        work->waittimer = 2;
+        work->CallCount = 2;
         if (previousData != NULL) {
             sdfChipFreeDirect(previousData);
-            work->reqdata = NULL;
-            work->reqsize = 0;
+            work->CallData = NULL;
+            work->CallDataSize = 0;
         }
         if (data != NULL) {
-            work->reqdata = sdfChipAllocDirect(datasize);
-            memcpy(work->reqdata, data, datasize);
-            work->reqsize = datasize;
+            work->CallData = sdfChipAllocDirect(datasize);
+            memcpy(work->CallData, data, datasize);
+            work->CallDataSize = datasize;
         } else {
-            work->reqdata = NULL;
-            work->reqsize = 0;
+            work->CallData = NULL;
+            work->CallDataSize = 0;
         }
         if (restore != 0) {
             work->flag |= 4;
@@ -129,7 +129,7 @@ void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore)
 
 void dds3AdminiOverwriteSequence(s32 sequence, void *data, u32 datasize)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
 
     dds3AdminiCallSequence(sequence, data, datasize, 0);
     work = GetAdminiProcessData();
@@ -138,7 +138,7 @@ void dds3AdminiOverwriteSequence(s32 sequence, void *data, u32 datasize)
 
 void dds3AdminiExitSequence(void)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
     work->flag |= 2;
@@ -151,12 +151,12 @@ s8 dds3AdminiGetActiveSequence(void)
 
 s8 dds3AdminiGetNextSequence(void)
 {
-    return GetAdminiProcessData()->nextsequence;
+    return GetAdminiProcessData()->NextSequence;
 }
 
 s8 dds3AdminiGetPrevSequence(void)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
     return work->history[(work->historyindex + 7) & 7];
@@ -164,7 +164,7 @@ s8 dds3AdminiGetPrevSequence(void)
 
 u8 dds3AdminiGetPrevHistoryFlag(void)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
     return work->historyflag[(work->historyindex + 7) & 7];
@@ -172,7 +172,7 @@ u8 dds3AdminiGetPrevHistoryFlag(void)
 
 s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
     s32 (*startfunc)(s32 restored, void *reqdata);
     u32 flag;
     u32 nextflag;
@@ -182,13 +182,13 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
     work = dds3GetProcessData(id);
     flag = work->flag;
     if (flag & 1) {
-        if (work->nextsequence >= 0) {
-            if (work->waittimer != 0) {
-                work->waittimer--;
+        if (work->NextSequence >= 0) {
+            if (work->CallCount != 0) {
+                work->CallCount--;
                 return 0;
             }
-            work->sequence = work->nextsequence;
-            work->nextsequence = -1;
+            work->sequence = work->NextSequence;
+            work->NextSequence = -1;
             nextflag = flag;
             nextflag &= ~1;
             nextflag &= ~2;
@@ -214,7 +214,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
             work->historyflag[work->historyindex] = 0;
             startfunc = dds3AdminiList[work->sequence].startfunc;
             if (startfunc != NULL) {
-                startfunc(restored, work->reqdata);
+                startfunc(restored, work->CallData);
             }
             for (i = 0; i < 8; i++) {
                 printf(D_0054E8D0);
@@ -231,7 +231,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
 
 s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
 {
-    dds3AdminiWork_t *work = dds3GetProcessData(id);
+    dds3AdminiData_t *work = dds3GetProcessData(id);
     s32 sequence = work->sequence;
     s32 (*endfunc)(void);
     s32 wait;
@@ -243,7 +243,7 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
             if (wait < 0) {
                 return 0;
             }
-            work->waittimer = wait + 1;
+            work->CallCount = wait + 1;
             work->sequence = -1;
         }
     }
@@ -252,7 +252,7 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
 
 s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
     s32 (*mainfunc)(void);
     s32 index;
 
@@ -274,13 +274,13 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
             if (work->history[index] >= 0 && (work->historyflag[index] & 1)) {
                 printf(D_0052DF60);
                 work->flag |= 0x10001;
-                work->nextsequence = work->history[index];
-                work->waittimer = 2;
+                work->NextSequence = work->history[index];
+                work->CallCount = 2;
                 work->flag &= ~4;
-                if (work->reqdata != NULL) {
-                    sdfChipFreeDirect(work->reqdata);
-                    work->reqdata = NULL;
-                    work->reqsize = 0;
+                if (work->CallData != NULL) {
+                    sdfChipFreeDirect(work->CallData);
+                    work->CallData = NULL;
+                    work->CallDataSize = 0;
                 }
             }
             if (!(work->flag & 1)) {
@@ -290,7 +290,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
         }
     }
     if (work->flag & 1) {
-        if (work->nextsequence >= 0) {
+        if (work->NextSequence >= 0) {
             return (s32)dds3AdminiEndCheck;
         }
     }
@@ -299,7 +299,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
 
 void dds3AdminiNeoShutdown(dds3ProcessID_t *id)
 {
-    dds3AdminiWork_t *work = dds3GetProcessData(id);
+    dds3AdminiData_t *work = dds3GetProcessData(id);
     s32 sequence = work->sequence;
 
     if (sequence >= 0) {
@@ -309,30 +309,30 @@ void dds3AdminiNeoShutdown(dds3ProcessID_t *id)
             endfunc();
         }
     }
-    if (work->reqdata != NULL) {
-        sdfChipFreeDirect(work->reqdata);
+    if (work->CallData != NULL) {
+        sdfChipFreeDirect(work->CallData);
     }
     sdfChipFreeDirect(dds3GetProcessData(id));
 }
 
 void dds3InitAdmini(void)
 {
-    dds3AdminiWork_t *work;
+    dds3AdminiData_t *work;
     s32 i;
 
     if (dds3SearchProcessName(D_0054E8C8) == NULL) {
-        work = sdfChipAllocDirect(sizeof(dds3AdminiWork_t));
+        work = sdfChipAllocDirect(sizeof(dds3AdminiData_t));
         work->flag = 0;
         work->value = 0;
         work->sequence = -1;
-        work->nextsequence = -1;
+        work->NextSequence = -1;
         work->historyindex = 0;
         for (i = 0; i < 8; i++) {
             work->history[i] = -1;
             work->historyflag[i] = 0;
         }
-        work->reqdata = NULL;
-        work->reqsize = 0;
+        work->CallData = NULL;
+        work->CallDataSize = 0;
         dds3StartProcess(D_0054E8C8, DDS3_PRIORITY_ADMINI, 0, 1, dds3AdminiNeoProcess,
                          (dds3ProcessFunc_t)dds3AdminiNeoShutdown, work);
     }

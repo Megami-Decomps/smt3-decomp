@@ -10,7 +10,7 @@ typedef struct
     u16 message;
     u16 draw;
     u16 reserved;
-} fldInputPanelWork_t;
+} fldInputPanelProcessData_t;
 
 typedef struct
 {
@@ -56,7 +56,7 @@ extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
 
 s32 fldInputPanelProcess2(dds3ProcessID_t *id)
 {
-    fldInputPanelWork_t *work;
+    fldInputPanelProcessData_t *work;
 
     if (fldProcCampChk() != 0) {
         return 0;
@@ -95,7 +95,7 @@ ret0:
 
 s32 fldInputPanelProcess1(dds3ProcessID_t *id)
 {
-    fldInputPanelWork_t *work = sdfChipAllocDirect(8);
+    fldInputPanelProcessData_t *work = sdfChipAllocDirect(8);
 
     work->message = 1;
     work->position = 0;
@@ -127,18 +127,18 @@ void fldFreeInputPanel(void)
     }
 }
 
-fldInputPanelWork_t *fldInputPanelSetDraw(s32 flag)
+fldInputPanelProcessData_t *fldInputPanelSetDraw(s32 flag)
 {
-    fldInputPanelWork_t *work;
+    fldInputPanelProcessData_t *work;
 
     work = dds3GetProcessData(inputpanel_id);
     work->draw = flag;
     return work;
 }
 
-fldInputPanelWork_t *fldInputPanelSetMessage(s32 no)
+fldInputPanelProcessData_t *fldInputPanelSetMessage(s32 no)
 {
-    fldInputPanelWork_t *work;
+    fldInputPanelProcessData_t *work;
 
     work = dds3GetProcessData(inputpanel_id);
     work->message = no;
@@ -147,7 +147,7 @@ fldInputPanelWork_t *fldInputPanelSetMessage(s32 no)
 
 s32 fldInputPanelCheckKey(void)
 {
-    fldInputPanelWork_t *work;
+    fldInputPanelProcessData_t *work;
 
     if (fldProcCampChk() != 0) {
         goto ret0;

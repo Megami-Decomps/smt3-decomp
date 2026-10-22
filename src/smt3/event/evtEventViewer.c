@@ -39,7 +39,7 @@ typedef struct evtFrameInfo_t {
 } evtFrameInfo_t;
 
 /* Track prefix consumed by the intrusive-list helpers. */
-typedef struct evtFrameTrack_t {
+typedef struct evtViewerObject_s {
     s32 type;
     s32 unk04;
     s32 unk08;
@@ -48,9 +48,9 @@ typedef struct evtFrameTrack_t {
     s32 childCount;                /* 0x18 */
     evtFrameInfo_t *children;      /* 0x1C */
     evtFrameInfo_t *lastChild;     /* 0x20 */
-    struct evtFrameTrack_t *next;  /* 0x24 */
-    struct evtFrameTrack_t *prev;  /* 0x28 */
-} evtFrameTrack_t;
+    struct evtViewerObject_s *next;  /* 0x24 */
+    struct evtViewerObject_s *prev;  /* 0x28 */
+} evtViewerObject_s;
 
 /* Registered model record in the viewer's movie work table. */
 typedef struct {
@@ -74,25 +74,25 @@ typedef struct {
     u16 unk06;
 } evtViewerMenuEntry_t;
 
-struct evtViewer_t {
+struct evtViewerInfo_t {
     void *block;
     s32 flags;                          /* 0x0004 */
     evtViewerMovieWork_t *movieWork;    /* 0x0008 */
     s32 frameTotal;                     /* 0x000C */
-    s32 rangeFirst;                     /* 0x0010 */
-    s32 frameLast;                      /* 0x0014 */
-    s32 frameCurrent;                   /* 0x0018 */
+    s32 firstframe;                     /* 0x0010 */
+    s32 lastframe;                      /* 0x0014 */
+    s32 nowframe;                   /* 0x0018 */
     s32 lastRunFrame;                   /* 0x001C */
     s32 entryTotal;                     /* 0x0020 */
     char entryName[256][32];            /* 0x0024 */
-    dds3Basic_t *activeCamera;          /* 0x2024 */
+    dds3Basic_t *activecamera;          /* 0x2024 */
     u8 unk2028[4];
-    dds3Basic_t *defaultCamera;         /* 0x202C */
+    dds3Basic_t *gamecamera;         /* 0x202C */
     s32 trackCount;                     /* 0x2030 */
-    evtFrameTrack_t *tracks;            /* 0x2034 */
-    evtFrameTrack_t *lastTrack;         /* 0x2038 */
+    evtViewerObject_s *tracks;            /* 0x2034 */
+    evtViewerObject_s *lastTrack;         /* 0x2038 */
     void *effectBasic[0x7F];            /* 0x203C */
-    s32 unk2238;                        /* 0x2238 */
+    s32 framedisp;                        /* 0x2238 */
     evtViewerMenuEntry_t menuStack[8];  /* 0x223C */
     s32 menuDepth;                      /* 0x227C */
     s32 actionMode;                     /* 0x2280 */
@@ -105,11 +105,11 @@ struct evtViewer_t {
     s32 multiFilter;                    /* 0x22A0 */
     s32 rippleBlur;                     /* 0x22A4 */
     s32 fileMode;                       /* 0x22A8 */
-    s32 unk22AC;                        /* 0x22AC */
+    s32 work_base;                        /* 0x22AC */
     u8 unk22B0[4];
-    s32 unk22B4;                        /* 0x22B4 */
+    s32 work_y;                        /* 0x22B4 */
     u8 unk22B8[4];
-    s32 unk22BC;                        /* 0x22BC */
+    s32 select_y;                        /* 0x22BC */
     s32 menuItemCount;                  /* 0x22C0 */
     char *title;                        /* 0x22C4 */
     s32 *menuTable;                     /* 0x22C8 */
@@ -121,7 +121,7 @@ struct evtViewer_t {
     s32 frameColumn;                    /* 0x22FC */
     s32 frameFirst;                     /* 0x2300 */
     s32 frameCursor;                    /* 0x2304 */
-    evtFrameTrack_t *frameGroup;        /* 0x2308 */
+    evtViewerObject_s *frameGroup;        /* 0x2308 */
     s32 unk230C;
     s32 value;                          /* 0x2310 */
     s32 valueMin;                       /* 0x2314 */
@@ -129,13 +129,13 @@ struct evtViewer_t {
     f32 floatValue;                     /* 0x231C */
 };
 
-typedef struct evtViewer_t evtViewer_t;
-extern evtFrameInfo_t *evtAddFrameInfo(evtFrameTrack_t *track, s32 frame, evtViewer_t *viewer);
+typedef struct evtViewerInfo_t evtViewerInfo_t;
+extern evtFrameInfo_t *evtAddFrameInfo(evtViewerObject_s *track, s32 frame, evtViewerInfo_t *viewer);
 extern void sdfChipFreeDirect(void *aPtr);
 extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
 extern s32 dds3KillProcessName(const char *name, s32 shutdowntimer);
-extern evtViewer_t *viewerinfo;
+extern evtViewerInfo_t *viewerinfo;
 extern void *memset(void *a, s32 b, u32 c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void evtFreePolygonMovieWorkData(void *wdata);
@@ -215,14 +215,14 @@ extern void sdfDrawTagLink(void *aTag, u32 aPacket);
 extern void SetActiveCamera(void);
 extern s32 evtEventViewerProcess3(void);
 extern s32 evtEventViewerProcess4(void);
-void LinkViewerObject(evtFrameTrack_t *obj);
-void UnlinkViewerObject(evtFrameTrack_t *obj);
-void DelFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f);
-void DelViewerObject(evtFrameTrack_t *obj);
+void LinkViewerObject(evtViewerObject_s *obj);
+void UnlinkViewerObject(evtViewerObject_s *obj);
+void DelFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f);
+void DelViewerObject(evtViewerObject_s *obj);
 
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void LinkFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f) {
+void LinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
     evtFrameInfo_t *cursor = parent->children;
 
     if (cursor == 0) {
@@ -260,7 +260,7 @@ void LinkFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f) {
 }
 
 /* Unlink an attached node, clear its links, and decrement the owning list's count. */
-void UnlinkFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f) {
+void UnlinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
     evtFrameInfo_t *nextNode = f->next;
     evtFrameInfo_t *previousNode = f->prev;
     if (previousNode == 0) {
@@ -286,7 +286,7 @@ void UnlinkFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f) {
 }
 
 /* Walk the linked list and reinsert the first out-of-order successor. */
-void SortFrameInfo(evtFrameTrack_t *parent) {
+void SortFrameInfo(evtViewerObject_s *parent) {
     if (parent != 0) {
         evtFrameInfo_t *anchorNode = parent->children;
         while (anchorNode != 0) {
@@ -309,15 +309,15 @@ void SortFrameInfo(evtFrameTrack_t *parent) {
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtAddFrameInfo);
 
-evtFrameInfo_t *AddFrameInfo2(evtFrameTrack_t *group, s32 frame, evtViewer_t *viewer)
+evtFrameInfo_t *AddFrameInfo2(evtViewerObject_s *group, s32 frame, evtViewerInfo_t *viewer)
 {
     return evtAddFrameInfo(group, frame, viewer);
 }
 
 evtFrameInfo_t *evtGetSelectFrameInfo(void)
 {
-    evtViewer_t *viewer = viewerinfo;
-    evtFrameTrack_t *group = viewer->frameGroup;
+    evtViewerInfo_t *viewer = viewerinfo;
+    evtViewerObject_s *group = viewer->frameGroup;
     evtFrameInfo_t *node;
     s32 i;
 
@@ -335,7 +335,7 @@ evtFrameInfo_t *evtGetSelectFrameInfo(void)
 }
 
 /* Release a queued node from its entry, freeing its buffer unless the entry id is 0x12. */
-void DelFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f)
+void DelFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f)
 {
     UnlinkFrameInfo(parent, f);
     if (f->payload != NULL) {
@@ -349,9 +349,9 @@ void DelFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f)
 
 void DelFrameInfo2(void)
 {
-    evtFrameTrack_t *group = viewerinfo->frameGroup;
+    evtViewerObject_s *group = viewerinfo->frameGroup;
     evtFrameInfo_t *node = evtGetSelectFrameInfo();
-    evtViewer_t *viewer;
+    evtViewerInfo_t *viewer;
     s32 slot;
 
     switch (group->type) {
@@ -381,8 +381,8 @@ void DelFrameInfo2(void)
 }
 
 /* Insert the track in ascending type order and bump the viewer's track count. */
-void LinkViewerObject(evtFrameTrack_t *obj) {
-    evtFrameTrack_t *cursor = viewerinfo->tracks;
+void LinkViewerObject(evtViewerObject_s *obj) {
+    evtViewerObject_s *cursor = viewerinfo->tracks;
 
     if (cursor == 0) {
         viewerinfo->tracks = obj;
@@ -417,7 +417,7 @@ void LinkViewerObject(evtFrameTrack_t *obj) {
     viewerinfo->trackCount++;
 }
 
-void UnlinkViewerObject(evtFrameTrack_t *obj) {
+void UnlinkViewerObject(evtViewerObject_s *obj) {
     if (obj->prev == 0) {
         viewerinfo->tracks = obj->next;
     } else {
@@ -433,9 +433,9 @@ void UnlinkViewerObject(evtFrameTrack_t *obj) {
     viewerinfo->trackCount--;
 }
 
-evtFrameTrack_t *evtAddViewerObject(s32 type)
+evtViewerObject_s *evtAddViewerObject(s32 type)
 {
-    evtFrameTrack_t *track = sdfChipAllocDirect(0x2C);
+    evtViewerObject_s *track = sdfChipAllocDirect(0x2C);
 
     if (track == NULL) {
         return NULL;
@@ -450,7 +450,7 @@ evtFrameTrack_t *evtAddViewerObject(s32 type)
 
 s32 evtGetViewerObjectTypeCount(s32 type)
 {
-    evtFrameTrack_t *track = viewerinfo->tracks;
+    evtViewerObject_s *track = viewerinfo->tracks;
     s32 count = 0;
 
     while (track != NULL) {
@@ -464,7 +464,7 @@ s32 evtGetViewerObjectTypeCount(s32 type)
 
 s32 evtGetAllFrameInfoCount(void)
 {
-    evtFrameTrack_t *track = viewerinfo->tracks;
+    evtViewerObject_s *track = viewerinfo->tracks;
     s32 count = 0;
 
     while (track != NULL) {
@@ -474,7 +474,7 @@ s32 evtGetAllFrameInfoCount(void)
     return count;
 }
 
-void DelViewerObject(evtFrameTrack_t *obj)
+void DelViewerObject(evtViewerObject_s *obj)
 {
     while (obj->children != NULL) {
         DelFrameInfo(obj, obj->children);
@@ -485,23 +485,23 @@ void DelViewerObject(evtFrameTrack_t *obj)
 
 void evtSetFirstFrame(void)
 {
-    evtViewer_t *viewer = viewerinfo;
-    s32 currentFrame = viewer->frameCurrent;
+    evtViewerInfo_t *viewer = viewerinfo;
+    s32 currentFrame = viewer->nowframe;
 
-    viewer->rangeFirst = currentFrame;
-    if (viewer->frameLast < currentFrame) {
-        viewer->frameLast = currentFrame;
+    viewer->firstframe = currentFrame;
+    if (viewer->lastframe < currentFrame) {
+        viewer->lastframe = currentFrame;
     }
 }
 
 void evtSetLastFrame(void)
 {
-    evtViewer_t *viewer = viewerinfo;
-    s32 currentFrame = viewer->frameCurrent;
+    evtViewerInfo_t *viewer = viewerinfo;
+    s32 currentFrame = viewer->nowframe;
 
-    viewer->frameLast = currentFrame;
-    if (currentFrame < viewer->rangeFirst) {
-        viewer->rangeFirst = currentFrame;
+    viewer->lastframe = currentFrame;
+    if (currentFrame < viewer->firstframe) {
+        viewer->firstframe = currentFrame;
     }
 }
 
@@ -510,8 +510,8 @@ void evtInitViewerInfo(void)
     memset(viewerinfo, 0, 0x2328);
     viewerinfo->flags |= 1;
     viewerinfo->frameTotal = 0x21C;
-    viewerinfo->frameLast = 0x21B;
-    viewerinfo->unk2238 = 1;
+    viewerinfo->lastframe = 0x21B;
+    viewerinfo->framedisp = 1;
 }
 
 void evtFreeViewerInfo(void)
@@ -588,7 +588,7 @@ void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 basefram
     if (eff == NULL) {
         return;
     }
-    currentFrame = viewerinfo->frameCurrent;
+    currentFrame = viewerinfo->nowframe;
     if (nameindex < 0) {
         return;
     }
@@ -692,13 +692,13 @@ void DrawEffect(void)
 
 void SetActiveCamera(void)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
     void *camera;
 
-    if (viewer->activeCamera != NULL) {
-        camera = viewer->activeCamera;
+    if (viewer->activecamera != NULL) {
+        camera = viewer->activecamera;
     } else {
-        camera = viewer->defaultCamera;
+        camera = viewer->gamecamera;
     }
     if (camera != NULL) {
         dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
@@ -708,7 +708,7 @@ void SetActiveCamera(void)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame1);
 
-void OutFrame1(evtFrameTrack_t *track, evtFrameInfo_t *node)
+void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node)
 {
     s32 slot;
 
@@ -739,20 +739,20 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtRunFrame);
 
 void DrawActiveCameraName(void)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
     char *name;
     char *cameraName;
     void *tag;
 
-    if (viewer->activeCamera != NULL) {
-        cameraName = viewer->activeCamera->name;
+    if (viewer->activecamera != NULL) {
+        cameraName = viewer->activecamera->name;
         if (cameraName != NULL) {
             name = cameraName;
         } else {
             name = D_0054F830;
         }
     } else {
-        if (viewer->defaultCamera == NULL) {
+        if (viewer->gamecamera == NULL) {
             return;
         }
         name = D_0054F834;
@@ -764,43 +764,43 @@ void DrawActiveCameraName(void)
 
 void SelectActiveCamera(void)
 {
-    dds3SceneWork_t *work;
-    evtViewer_t *viewer;
+    dds3SceneBasic_t *work;
+    evtViewerInfo_t *viewer;
     dds3Basic_t *camera;
 
     if (dds3GetActiveScene() == NULL) {
-        viewerinfo->activeCamera = NULL;
+        viewerinfo->activecamera = NULL;
         return;
     }
     work = dds3GetActiveScene()->workdata;
     if (dds3PadButtonState[0x23] < 0) {
         viewer = viewerinfo;
-        camera = viewer->activeCamera;
+        camera = viewer->activecamera;
         if (camera == NULL) {
-            viewer->activeCamera = work->lists[4].tail;
+            viewer->activecamera = work->lists[4].tail;
         } else {
             camera = camera->prev;
             if (camera != NULL) {
-                viewer->activeCamera = camera;
-            } else if (viewer->defaultCamera != NULL) {
-                viewer->activeCamera = NULL;
+                viewer->activecamera = camera;
+            } else if (viewer->gamecamera != NULL) {
+                viewer->activecamera = NULL;
             } else {
-                viewer->activeCamera = work->lists[4].tail;
+                viewer->activecamera = work->lists[4].tail;
             }
         }
     } else if (dds3PadButtonState[0x20] < 0) {
         viewer = viewerinfo;
-        camera = viewer->activeCamera;
+        camera = viewer->activecamera;
         if (camera == NULL) {
-            viewer->activeCamera = work->lists[4].head;
+            viewer->activecamera = work->lists[4].head;
         } else {
             camera = camera->next;
             if (camera != NULL) {
-                viewer->activeCamera = camera;
-            } else if (viewer->defaultCamera != NULL) {
-                viewer->activeCamera = NULL;
+                viewer->activecamera = camera;
+            } else if (viewer->gamecamera != NULL) {
+                viewer->activecamera = NULL;
             } else {
-                viewer->activeCamera = work->lists[4].head;
+                viewer->activecamera = work->lists[4].head;
             }
         }
     } else {
@@ -813,12 +813,12 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtStopFrame);
 
 void evtViewerStopFrame(void)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
 
     if (viewer->flags & 1) {
-        evtStopFrame(0, viewer->frameCurrent);
+        evtStopFrame(0, viewer->nowframe);
     } else {
-        evtStopFrame(1, viewer->frameCurrent);
+        evtStopFrame(1, viewer->nowframe);
     }
 }
 
@@ -829,11 +829,11 @@ void FrameSelect(void)
     s32 last;
 
     if (((u8)dds3PadButtonState[4] & 2) != 0) {
-        delta = viewerinfo->frameCurrent > 0 ? -1 : 0;
+        delta = viewerinfo->nowframe > 0 ? -1 : 0;
     }
     if (((u8)dds3PadButtonState[5] & 2) != 0) {
-        evtViewer_t *viewer = viewerinfo;
-        if (viewer->frameCurrent < viewer->frameTotal - 1) {
+        evtViewerInfo_t *viewer = viewerinfo;
+        if (viewer->nowframe < viewer->frameTotal - 1) {
             delta = 1;
         }
     }
@@ -844,21 +844,21 @@ void FrameSelect(void)
         delta = 10;
     }
     if (dds3PadButtonState[0x2D] < 0) {
-        evtViewer_t *viewer = viewerinfo;
-        if (viewer->frameCurrent != viewer->rangeFirst) {
-            delta = viewer->rangeFirst - viewer->frameCurrent;
+        evtViewerInfo_t *viewer = viewerinfo;
+        if (viewer->nowframe != viewer->firstframe) {
+            delta = viewer->firstframe - viewer->nowframe;
         }
     }
     if (delta != 0) {
-        evtViewer_t *viewer = viewerinfo;
-        frame = viewer->frameCurrent + delta;
+        evtViewerInfo_t *viewer = viewerinfo;
+        frame = viewer->nowframe + delta;
         if (frame < 0) {
             frame = 0;
         }
         last = viewer->frameTotal - 1;
-        viewer->frameCurrent = frame;
+        viewer->nowframe = frame;
         if (last < frame) {
-            viewer->frameCurrent = last;
+            viewer->nowframe = last;
         }
         evtViewerStopFrame();
     }
@@ -866,7 +866,7 @@ void FrameSelect(void)
 
 void PushMenu(s32 no, s32 x, s32 y)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
     s32 depth = viewer->menuDepth + 1;
 
     viewer->actionMode = no;
@@ -888,7 +888,7 @@ void PushMenu(s32 no, s32 x, s32 y)
 
 s32 PopMenu(void)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
     s32 depth = viewer->menuDepth;
     s32 top = depth - 1;
     u16 mode;
@@ -912,7 +912,7 @@ INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B620);
 
 s32 EnterMain(void)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
 
     switch (viewer->fileMode) {
     case EVT_VIEWER_MENU_NON:
@@ -924,13 +924,13 @@ s32 EnterMain(void)
         break;
     case EVT_VIEWER_MENU_FRAMELIST:
         viewer->value = viewer->frameTotal - 1;
-        viewer->valueMin = viewer->frameLast;
+        viewer->valueMin = viewer->lastframe;
         viewer->valueMax = 10000;
         PushMenu(7, 0xB4, 0x78);
         break;
     case EVT_VIEWER_MENU_FILENAME:
     case EVT_VIEWER_MENU_OBJLIST:
-        viewer->unk22BC = 0;
+        viewer->select_y = 0;
         viewer->menuItemCount = 2;
         viewer->title = "FRAME SET.OK? ";
         viewer->menuTable = D_0032C6E0;
@@ -938,7 +938,7 @@ s32 EnterMain(void)
         break;
     case EVT_VIEWER_MENU_FRAMECHANGE:
         viewer->flags |= 1;
-        viewer->frameCurrent = viewer->rangeFirst;
+        viewer->nowframe = viewer->firstframe;
         evtViewerStopFrame();
         viewerinfo->actionMode = 0;
         viewerinfo->menuDepth = 0;
@@ -978,8 +978,8 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", EnterFrameList);
 s32 EnterFrameChange(void)
 {
     evtFrameInfo_t *node = evtGetSelectFrameInfo();
-    evtViewer_t *viewer;
-    evtFrameTrack_t *group;
+    evtViewerInfo_t *viewer;
+    evtViewerObject_s *group;
     s32 type;
 
     if (node != NULL) {
@@ -990,7 +990,7 @@ s32 EnterFrameChange(void)
         case 0:
             node->frame = viewer->value;
             SortFrameInfo(group);
-            evtRunFrame(viewerinfo->frameCurrent);
+            evtRunFrame(viewerinfo->nowframe);
             break;
         case 9:
             switch (type) {
@@ -1015,7 +1015,7 @@ s32 EnterFrameChange(void)
 
 s32 EnterIntFloatChange(void)
 {
-    evtViewer_t *viewer = viewerinfo;
+    evtViewerInfo_t *viewer = viewerinfo;
     s32 value = viewer->value;
     f32 ratio = viewer->floatValue;
     evtFrameInfo_t *node;
@@ -1077,7 +1077,7 @@ s32 EnterIntFloatChange(void)
         node->param.sh[1] = value;
         break;
     }
-    evtRunFrame(viewerinfo->frameCurrent);
+    evtRunFrame(viewerinfo->nowframe);
     PopMenu();
     return 0;
 }
@@ -1112,8 +1112,8 @@ s32 EnterEventPos(void)
     if (evtGetSelectFrameInfo() == NULL) {
         return 0;
     }
-    viewerinfo->unk22AC = 0;
-    viewerinfo->unk22B4 = 0;
+    viewerinfo->work_base = 0;
+    viewerinfo->work_y = 0;
     PushMenu(0xA, 0x9C, 0x54);
     return 0;
 }
@@ -1126,10 +1126,10 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess4);
 #ifdef NON_MATCHING
 s32 evtEventViewerProcess3(void)
 {
-    if (viewerinfo->frameCurrent != viewerinfo->lastRunFrame) {
-        evtRunFrame(viewerinfo->frameCurrent);
+    if (viewerinfo->nowframe != viewerinfo->lastRunFrame) {
+        evtRunFrame(viewerinfo->nowframe);
     }
-    viewerinfo->lastRunFrame = viewerinfo->frameCurrent;
+    viewerinfo->lastRunFrame = viewerinfo->nowframe;
     DrawActiveCameraName();
     DrawEffect();
     if (dds3PadButtonState[0x22] < 0) {
@@ -1144,10 +1144,10 @@ s32 evtEventViewerProcess3(void)
     SelectActiveCamera();
     if (viewerinfo->controlState == 0) {
         if (dds3PadButtonState[0x21] < 0) {
-            if (viewerinfo->unk2238 != 0) {
-                viewerinfo->unk2238 = 0;
+            if (viewerinfo->framedisp != 0) {
+                viewerinfo->framedisp = 0;
             } else {
-                viewerinfo->unk2238 = 1;
+                viewerinfo->framedisp = 1;
             }
         }
     }
@@ -1161,11 +1161,11 @@ s32 evtEventViewerProcess3(void)
             return 0;
         }
     }
-    if (viewerinfo->frameCurrent >= viewerinfo->frameLast) {
+    if (viewerinfo->nowframe >= viewerinfo->lastframe) {
         viewerinfo->flags ^= 1;
         evtViewerStopFrame();
     } else {
-        viewerinfo->frameCurrent = viewerinfo->frameCurrent + 1;
+        viewerinfo->nowframe = viewerinfo->nowframe + 1;
     }
     return 0;
 }
@@ -1175,7 +1175,7 @@ INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess3);
 
 s32 evtEventViewerProcess2(void *id)
 {
-    evtRunFrame(viewerinfo->frameCurrent);
+    evtRunFrame(viewerinfo->nowframe);
     dds3LinkProcess(id, evtInitFrameVar());
     return (s32)evtEventViewerProcess3;
 }
@@ -1200,7 +1200,7 @@ void evtEventViewerShutdown(void *id)
 void evtInitEventViewer(void)
 {
     void *block;
-    evtViewer_t *viewer;
+    evtViewerInfo_t *viewer;
     void *process;
 
     dds3BackColor = 0x80000000;

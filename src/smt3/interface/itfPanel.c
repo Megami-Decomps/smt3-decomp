@@ -11,33 +11,33 @@ typedef union
         s32 blue;
         s32 alpha;
     } rgba;
-} itfPanelColor_t;
-typedef itfPanelColor_t itfDrawColor_t;
-typedef itfPanelVertex_t itfDrawVertex_t;
+} sdfIVector4_t;
+typedef sdfIVector4_t itfDrawColor_t;
+typedef sdfIVector2_t itfDrawVertex_t;
 typedef struct
 {
-    itfPanelVertex_t vertices[8];
-    itfPanelColor_t colors[2];
+    sdfIVector2_t vertices[8];
+    sdfIVector4_t colors[2];
 } itfPanelNormalData_t;
 typedef struct
 {
-    itfPanelVertex_t vertices[40];
-    itfPanelColor_t colors[8];
+    sdfIVector2_t vertices[40];
+    sdfIVector4_t colors[8];
 } itfPanelMesWinData_t;
 typedef struct
 {
-    itfPanelVertex_t vertices[32];
-    itfPanelColor_t colors[6];
+    sdfIVector2_t vertices[32];
+    sdfIVector4_t colors[6];
 } itfPanelSelWinData_t;
 typedef struct
 {
-    itfPanelVertex_t vertices[4];
-    itfPanelColor_t colors[4];
+    sdfIVector2_t vertices[4];
+    sdfIVector4_t colors[4];
 } itfPanelPlainData_t;
 typedef struct
 {
-    itfPanelVertex_t vertices[6];
-    itfPanelColor_t colors[2];
+    sdfIVector2_t vertices[6];
+    sdfIVector4_t colors[2];
 } itfPanelLeftFadeData_t;
 /* Kind 8 owns a distinct 0x64-byte buffer, independently selected by the
  * native allocation, layout-initializer and color-initializer tables. */
@@ -52,17 +52,17 @@ typedef struct itfPanelTextureData_t {
     sdfTexHandle_t *texture;
 } itfPanelTextureData_t;
 
-void itfPnlRelease(itfPanel_t *handle);
+void itfPnlRelease(itfpanel_t *handle);
 
 extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-void itfPnlSetPosition(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
+void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void itfPnlSetPositionOffset(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
+void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void itfPnlSetColor(itfPanel_t *handle, s32 r, s32 g, s32 b, s32 a);
+void itfPnlSetColor(itfpanel_t *handle, s32 r, s32 g, s32 b, s32 a);
 
-void itfPnlDraw(itfPanel_t *handle, sdfGrOt_t *pot);
+void itfPnlDraw(itfpanel_t *handle, sdfGrOt_t *pot);
 
 extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
@@ -72,25 +72,25 @@ extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag);
 
-void itfPnlDrawTag(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void itfPnlDrawTag(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-void CreateVertexNormal(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_COLUMN_COUNT 4
 
 #define ITF_PANEL_COLUMN_INSET 0x200
 
-void CreateVertexMesWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 extern s32 D_00326508[4];
 
-void CreateVertexSelWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_ROW_COUNT 2
 
-void CreateVertexPlain(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexPlain(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
-void CreateVertexLeftFade(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_CORNER_COLUMN_COUNT 3
 
@@ -112,7 +112,7 @@ extern s32 D_003265C8[];
 
 void CreateColorFacility(itfPanelFacilityData_t *base);
 
-void DrawNormal(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_WIDE_PASS_COUNT 3
 
@@ -124,7 +124,7 @@ extern u8 D_003265F8[];
 
 extern u8 D_00326608[];
 
-void DrawMesWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_SEVEN_COLOR_COUNT 7
 
@@ -138,7 +138,7 @@ extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDr
 
 extern u8 D_00326618[], D_00326630[], D_00326648[];
 
-void DrawSelWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_FIVE_COLOR_COUNT 5
 
@@ -148,7 +148,7 @@ extern u8 D_0054F480[8], D_0054F488[8];
 
 extern u8 D_00326660[], D_00326678[], D_00326690[];
 
-void DrawPlain(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern u8 D_0054F490[8];
 
@@ -158,13 +158,13 @@ extern u8 D_003266A0[];
 
 extern u8 D_003266B0[];
 
-void DrawPera1(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern u8 D_0054F4A0[8];
 
 extern u8 D_0054F4A8[8];
 
-void DrawLeftFade(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
@@ -172,7 +172,7 @@ extern u8 D_0054F4B0[8];
 
 extern u8 D_0054F4B8[8];
 
-void DrawSpkWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
@@ -183,7 +183,7 @@ extern void itfMiscDrawSpritePrim2(itfDrawVertex_t *, itfDrawColor_t *, itfDrawC
 
 extern itfDrawColor_t D_003266D0;
 
-void DrawFacility(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
+void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern u8 D_003266E0[];
 
@@ -205,7 +205,7 @@ extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void (*D_00326428[])();
 extern void (*CreateColorTable[])();
-extern void (*DrawTable[])(itfPanel_t *, sdfDrawTag_t *);
+extern void (*DrawTable[])(itfpanel_t *, sdfDrawTag_t *);
 
 static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
     vec[0] = red;
@@ -220,13 +220,13 @@ extern s32 D_003264E0[];
 
 /* Allocate the common record and the kind's payload; kinds 6 to 8 take the
  * caller's value as the first payload word. */
-itfPanel_t *itfPnlRegist2(s32 type, s32 texhandle) {
+itfpanel_t *itfPnlRegist2(s32 type, s32 texhandle) {
     sdfMemHandle_t *allocation;
-    itfPanel_t *panel;
+    itfpanel_t *panel;
     u32 *payload;
 
-    allocation = sdfMemAllocDirect(sizeof(itfPanel_t));
-    panel = (itfPanel_t *)sdfMemLock(allocation);
+    allocation = sdfMemAllocDirect(sizeof(itfpanel_t));
+    panel = (itfpanel_t *)sdfMemLock(allocation);
     panel->kind = type;
     panel->allocation = allocation;
     allocation = sdfMemAllocDirect(D_003264E0[type]);
@@ -251,7 +251,7 @@ itfPanel_t *itfPnlRegist2(s32 type, s32 texhandle) {
 
 /* A sprite with a retained payload owns a secondary allocation. Release that
  * before its primary allocation; NULL is a no-op. */
-void itfPnlRelease(itfPanel_t *handle) {
+void itfPnlRelease(itfpanel_t *handle) {
     if (handle != NULL) {
         if (handle->payload != NULL) {
             sdfMemFreeDirect(handle->payloadAllocation);
@@ -262,7 +262,7 @@ void itfPnlRelease(itfPanel_t *handle) {
 
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
-void itfPnlSetPosition(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
+void itfPnlSetPosition(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
     handle->renderValue = z;
     handle->left = x0;
     handle->top = y0;
@@ -275,7 +275,7 @@ void itfPnlSetPosition(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z
 
 /* Add independent corner/render-value deltas, then notify with the updated
  * corners as well as context. */
-void itfPnlSetPositionOffset(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
+void itfPnlSetPositionOffset(itfpanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
     void (*handler)() = D_00326428[handle->kind];
 
     handle->left += x0;
@@ -290,7 +290,7 @@ void itfPnlSetPositionOffset(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1,
 
 /* Store the RGBA words in packet order, then notify with context.
  * The panel renderers consume these channels directly. */
-void itfPnlSetColor(itfPanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
+void itfPnlSetColor(itfpanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
     handle->red = r;
     handle->green = g;
     handle->blue = b;
@@ -301,7 +301,7 @@ void itfPnlSetColor(itfPanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
 }
 
 /* Build the panel list and append it to the SDK draw-surface pool. */
-void itfPnlDraw(itfPanel_t *handle, sdfGrOt_t *pot) {
+void itfPnlDraw(itfpanel_t *handle, sdfGrOt_t *pot) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);
@@ -311,13 +311,13 @@ void itfPnlDraw(itfPanel_t *handle, sdfGrOt_t *pot) {
 }
 
 /* Invoke the indexed panel handler; panel and kind are trusted. */
-void itfPnlDrawTag(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void itfPnlDrawTag(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     DrawTable[handle->kind](handle, pdrawtag);
 }
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
    Coordinates and inset remain in the renderer's native integer units. */
-void CreateVertexNormal(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexNormal(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 columnIndex;
 
@@ -340,7 +340,7 @@ void CreateVertexNormal(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1)
 }
 
 /* Emit the frame grid and three table-offset rows above and below it. */
-void CreateVertexMesWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexMesWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -383,7 +383,7 @@ void CreateVertexMesWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1)
     }
 }
 
-void CreateVertexSelWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexSelWin(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -427,8 +427,8 @@ void CreateVertexSelWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1)
 }
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
-void CreateVertexPlain(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
-    itfPanelVertex_t *p;
+void CreateVertexPlain(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+    sdfIVector2_t *p;
 
     pwork->x = x0;
     pwork->y = y0;
@@ -444,7 +444,7 @@ void CreateVertexPlain(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) 
 }
 
 /* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
-void CreateVertexLeftFade(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexLeftFade(sdfIVector2_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     s32 rowIndex;
@@ -554,10 +554,10 @@ void CreateColorFacility(itfPanelFacilityData_t *base) {
 }
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void DrawNormal(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawNormal(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelNormalData_t *data = (itfPanelNormalData_t *)handle->payload;
-    itfPanelVertex_t *drawBuffer = data->vertices;
-    itfPanelColor_t *colors = data->colors;
+    sdfIVector2_t *drawBuffer = data->vertices;
+    sdfIVector4_t *colors = data->colors;
     s32 quadIndex;
 
     colors[1].rgba.alpha = handle->alpha;
@@ -568,10 +568,10 @@ void DrawNormal(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
-void DrawMesWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawMesWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelMesWinData_t *data = (itfPanelMesWinData_t *)handle->payload;
-    itfPanelVertex_t *drawBuffer = data->vertices;
-    itfPanelColor_t *colors = data->colors + 1;
+    sdfIVector2_t *drawBuffer = data->vertices;
+    sdfIVector4_t *colors = data->colors + 1;
     s32 alpha = handle->alpha;
     s32 rowIndex;
 
@@ -589,10 +589,10 @@ void DrawMesWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
-void DrawSelWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawSelWin(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelSelWinData_t *data = (itfPanelSelWinData_t *)handle->payload;
-    itfPanelVertex_t *drawBuffer = data->vertices;
-    itfPanelColor_t *colors = data->colors + 1;
+    sdfIVector2_t *drawBuffer = data->vertices;
+    sdfIVector4_t *colors = data->colors + 1;
     s32 alpha = handle->alpha;
     s32 rowIndex;
 
@@ -608,18 +608,18 @@ void DrawSelWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
     }
 }
 
-void DrawPlain(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
-    itfPanelVertex_t vertices[12];
+void DrawPlain(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    sdfIVector2_t vertices[12];
     itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->payload;
-    itfPanelVertex_t *buf = data->vertices;
-    itfPanelColor_t *colors = data->colors;
-    itfPanelVertex_t *input = data->vertices;
+    sdfIVector2_t *buf = data->vertices;
+    sdfIVector4_t *colors = data->colors;
+    sdfIVector2_t *input = data->vertices;
     s32 i;
 
     for (i = 0; i < 3; i++) {
         s32 xOffset = i * 16;
         s32 yOffset = i * 8;
-        itfPanelVertex_t *out = &vertices[i * 4];
+        sdfIVector2_t *out = &vertices[i * 4];
 
         out[0].x = input[0].x + xOffset;
         out[0].y = input[0].y + yOffset;
@@ -638,20 +638,20 @@ void DrawPlain(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-void DrawPera1(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawPera1(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->payload;
-    itfPanelVertex_t *drawBuffer = data->vertices;
-    itfPanelColor_t *colors = data->colors;
+    sdfIVector2_t *drawBuffer = data->vertices;
+    sdfIVector4_t *colors = data->colors;
 
     colors[0].rgba.alpha = handle->alpha;
     itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, handle->renderValue, pdrawtag);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
-void DrawLeftFade(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawLeftFade(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelLeftFadeData_t *data = (itfPanelLeftFadeData_t *)handle->payload;
-    itfPanelVertex_t *drawBuffer = data->vertices;
-    itfPanelColor_t *colors = data->colors;
+    sdfIVector2_t *drawBuffer = data->vertices;
+    sdfIVector4_t *colors = data->colors;
 
     colors[1].rgba.alpha = handle->alpha;
     itfMiscDrawAlphaPrim(pdrawtag, 2, 0);
@@ -661,7 +661,7 @@ void DrawLeftFade(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Split a tall texture into top, stretch and bottom bands; the short path
  * submits the live rectangle in the panel. */
-void DrawMesWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawMesWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
     itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->payload;
     s32 top = handle->top;
@@ -694,7 +694,7 @@ void DrawMesWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */
-void DrawSpkWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawSpkWin2(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
     itfDrawColor_t *color = (itfDrawColor_t *)&handle->red;
     itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->payload;
@@ -723,7 +723,7 @@ void DrawSpkWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
  * and bottom bands. The short path uses the live rectangle in the panel. */
-void DrawFacility(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+void DrawFacility(itfpanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
     itfPanelFacilityData_t *payload = (itfPanelFacilityData_t *)handle->payload;
     itfDrawVertex_t *vertices = payload->vertices;

@@ -404,7 +404,7 @@ s32 CheckActionProcessEnd(nbMainProcessData_t *data)
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        if (data->unkD4[i] != 0) {
+        if (data->ActionProcessID[i] != 0) {
             return 0;
         }
     }
@@ -658,7 +658,7 @@ void nbSetPressMaePhase(nbMainProcessData_t *data)
     if (evtBitCheck(0x8C0) && (data->stat & 8) == 0) {
         data->unk78 = data->unk78 + 1;
     }
-    data->unk7A = data->unk78;
+    data->press4_ten = data->unk78;
     if (data->stat & 8) {
         start = 4;
         cnt = 10;
@@ -754,7 +754,7 @@ void nbSetChkTurnPhase(nbMainProcessData_t *data)
         nbSetNextPhase(EVENT);
         return;
     }
-    if (data->unk78 > 0 || data->unk7A > 0) {
+    if (data->unk78 > 0 || data->press4_ten > 0) {
         if ((data->stat & 0x40000) == 0) {
             nbSetNextOrder();
         }
@@ -865,13 +865,13 @@ void nbSetEndPhase(nbMainProcessData_t *data)
 
 void nbSetDebugPhase(nbMainProcessData_t *data)
 {
-    if (data->unkE8 != 0) {
-        dds3KillProcess(data->unkE8, 1);
+    if (data->CommSelProcessID != 0) {
+        dds3KillProcess(data->CommSelProcessID, 1);
     }
-    if (data->unkD4[data->unkE4] != 0) {
-        dds3KillProcess(data->unkD4[data->unkE4], 1);
+    if (data->ActionProcessID[data->NowActionProcess] != 0) {
+        dds3KillProcess(data->ActionProcessID[data->NowActionProcess], 1);
     }
-    data->unkE4 = 0;
+    data->NowActionProcess = 0;
     nbInitDebugProcess(data);
 }
 
@@ -968,7 +968,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         }
         break;
     case NB_PHASE_ENCOUNT:
-        if (data->encounterProcess == 0) {
+        if (data->EncProcessID == 0) {
             nbCameraPressProcessThrough();
             nbPanelPressTurnOmit();
             nbSetNextPhase(EVENT);
@@ -1016,11 +1016,11 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
                     data->endtype = 0;
                 }
             }
-        } else if (data->unkD4[data->unkE4] == 0) {
+        } else if (data->ActionProcessID[data->NowActionProcess] == 0) {
             nbSetNextPhase(NPC);
             next = 1;
         } else {
-            seq = nbGetActionSeq(data->unkD4[data->unkE4]);
+            seq = nbGetActionSeq(data->ActionProcessID[data->NowActionProcess]);
             if (seq >= 0x14) {
                 nbSetNextPhase(NPC);
                 next = 1;
@@ -1092,7 +1092,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
         }
         break;
     case ATO:
-        if (CheckActionProcessEnd(data) && data->atoProcess == 0 && p2sdGetPcmState() == 0) {
+        if (CheckActionProcessEnd(data) && data->AtoProcessID == 0 && p2sdGetPcmState() == 0) {
             nbSetNextPhase(RESULT);
             next = 1;
         }
@@ -1106,7 +1106,7 @@ s32 nbMainProcess1(dds3ProcessID_t *id)
     case NB_PHASE_END:
         return -1;
     case DEBUG:
-        if (data->debugProcess == 0) {
+        if (data->DebugProcessID == 0) {
             nbSetNextPhase(ACTIONMAE);
             next = 1;
         }
@@ -1138,14 +1138,14 @@ void SetJyocyuData(nbMainProcessData_t *data)
     sdfMemHandle_t *handle;
 
     handle = sdfDevLoadFileEx(D_0054F0F4, 0, 0);
-    data->residentEffect = effBTLCreate(sdfMemLock(handle));
+    data->HatudoEff = effBTLCreate(sdfMemLock(handle));
     sdfMemFreeDirect(handle);
 }
 
 void FreeJyocyuData(nbMainProcessData_t *data)
 {
-    effBTLDelete(data->residentEffect);
-    data->residentEffect = 0;
+    effBTLDelete(data->HatudoEff);
+    data->HatudoEff = 0;
 }
 
 void ClearLocalBit(void)
@@ -1276,7 +1276,7 @@ void *nbInitMainProcessData(void)
     data->press3 = 1.0f;
     data->unk140 = 0;
     data->battletime = 0;
-    data->unk144 = 0;
+    data->d31_rebehansya = 0;
     data->stat = 0;
     SetDebugFlag(data);
     data->mesmngid = itfMesMngInitialize(itfMesEmbedded_3F8228);
@@ -1319,7 +1319,7 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     printf(D_00543540, data->encno);
     printf(D_00543550, data->formationtype);
     data->unk7C = stagemajor;
-    data->unk7E = stageminor;
+    data->StageMinor = stageminor;
     if (data->encno == 0x1D9) {
         evtSetAgeOfMoon(0);
     }

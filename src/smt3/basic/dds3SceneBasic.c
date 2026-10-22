@@ -35,28 +35,28 @@ int printf(const char *fmt, ...);
 
 s32 sceneconstructor(dds3Basic_t *basic)
 {
-    dds3SceneWork_t *work = sdfChipAllocDirect(sizeof(dds3SceneWork_t));
+    dds3SceneBasic_t *work = sdfChipAllocDirect(sizeof(dds3SceneBasic_t));
     dds3SceneList_t *list;
     s32 i;
 
     if (work == NULL) {
         return 0;
     }
-    work->mapNo = -1;
+    work->mapno = -1;
     work->visible = 1;
-    work->listHandle = NULL;
+    work->mem_hndl = NULL;
     work->lists = NULL;
     work->camera = NULL;
     work->unit = NULL;
     work->fieldHandle = 0;
-    work->scriptHandle = NULL;
+    work->hScrFileHandle = NULL;
     work->script = NULL;
-    work->listHandle = sdfMemAllocDirect(BASIC_TYPE_MAX * sizeof(dds3SceneList_t));
-    if (work->listHandle == NULL) {
+    work->mem_hndl = sdfMemAllocDirect(BASIC_TYPE_MAX * sizeof(dds3SceneList_t));
+    if (work->mem_hndl == NULL) {
         sdfChipFreeDirect(work);
         return 0;
     }
-    list = sdfMemLock(work->listHandle);
+    list = sdfMemLock(work->mem_hndl);
     work->lists = list;
     for (i = 0; i < BASIC_TYPE_MAX; i++) {
         list->count = 0;
@@ -71,7 +71,7 @@ s32 sceneconstructor(dds3Basic_t *basic)
 
 void scenedestructor(dds3Basic_t *basic)
 {
-    dds3SceneWork_t *work = basic->workdata;
+    dds3SceneBasic_t *work = basic->workdata;
     s32 type;
 
     if (work != NULL) {
@@ -80,8 +80,8 @@ void scenedestructor(dds3Basic_t *basic)
                 dds3DeleteSceneBasicData(work->lists[type].head);
             }
         }
-        if (work->listHandle != NULL) {
-            sdfMemFreeDirect(work->listHandle);
+        if (work->mem_hndl != NULL) {
+            sdfMemFreeDirect(work->mem_hndl);
         }
         dds3SceneBasicFreeScene(basic);
         dds3SceneBasicReleaseScriptFile(basic);
@@ -93,7 +93,7 @@ void scenedestructor(dds3Basic_t *basic)
 /* Preserve the next link across callbacks that can delete their own basic. */
 u32 scenemainprocuder(dds3Basic_t *scene)
 {
-    dds3SceneWork_t *work = scene->workdata;
+    dds3SceneBasic_t *work = scene->workdata;
     dds3Basic_t *basic;
     dds3Basic_t *next;
     s32 type;
@@ -118,7 +118,7 @@ u32 scenemainprocuder(dds3Basic_t *scene)
 
 u32 scenedrawprocuder(dds3Basic_t *scene)
 {
-    dds3SceneWork_t *work = scene->workdata;
+    dds3SceneBasic_t *work = scene->workdata;
     dds3Basic_t *basic;
     dds3Basic_t *next;
 
@@ -149,8 +149,8 @@ u32 scenedrawprocuder(dds3Basic_t *scene)
 
 void dds3VisibleSceneBasic(dds3Basic_t *basic, s8 visible)
 {
-    if ((dds3SceneWork_t *)basic->workdata != NULL) {
-        ((dds3SceneWork_t *)basic->workdata)->visible = visible;
+    if ((dds3SceneBasic_t *)basic->workdata != NULL) {
+        ((dds3SceneBasic_t *)basic->workdata)->visible = visible;
     }
 }
 
@@ -167,7 +167,7 @@ dds3Basic_t *dds3AddSceneBasicData(s32 type)
     if (scene == NULL) {
         return NULL;
     }
-    list = &((dds3SceneWork_t *)scene->workdata)->lists[type];
+    list = &((dds3SceneBasic_t *)scene->workdata)->lists[type];
     basic = dds3AllocBasic(type);
     if (basic == NULL) {
         return NULL;
@@ -190,7 +190,7 @@ void dds3DeleteSceneBasicData(dds3Basic_t *basic)
     dds3SceneList_t *list;
 
     if (basic != NULL && (u32)((basic->type >> 24) - 2) < 16) {
-        list = &((dds3SceneWork_t *)basic->workpointer->workdata)->lists[basic->type >> 24];
+        list = &((dds3SceneBasic_t *)basic->workpointer->workdata)->lists[basic->type >> 24];
         if (list->head == basic) {
             list->head = basic->next;
         }
@@ -204,7 +204,7 @@ void dds3DeleteSceneBasicData(dds3Basic_t *basic)
 
 dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic)
 {
-    dds3SceneWork_t *work;
+    dds3SceneBasic_t *work;
     dds3Basic_t *previous;
 
     work = pSceneBasic->workdata;
@@ -215,12 +215,12 @@ dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t
 
 dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic)
 {
-    return ((dds3SceneWork_t *)pBasic->workdata)->camera;
+    return ((dds3SceneBasic_t *)pBasic->workdata)->camera;
 }
 
 dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pUnitBasic)
 {
-    dds3SceneWork_t *work;
+    dds3SceneBasic_t *work;
     dds3Basic_t *previous;
 
     work = pSceneBasic->workdata;
@@ -231,17 +231,17 @@ dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *
 
 dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic)
 {
-    return ((dds3SceneWork_t *)pSceneBasic->workdata)->unit;
+    return ((dds3SceneBasic_t *)pSceneBasic->workdata)->unit;
 }
 
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type)
 {
     dds3Basic_t *basic;
 
-    if (((dds3SceneWork_t *)pBasic->workdata)->lists[type].count == 0) {
+    if (((dds3SceneBasic_t *)pBasic->workdata)->lists[type].count == 0) {
         return NULL;
     }
-    basic = ((dds3SceneWork_t *)pBasic->workdata)->lists[type].head;
+    basic = ((dds3SceneBasic_t *)pBasic->workdata)->lists[type].head;
     do {
         if (serialID == basic->serialID) {
             return basic;
@@ -253,7 +253,7 @@ dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type)
 
 dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type)
 {
-    dds3SceneWork_t *work = pBasic->workdata;
+    dds3SceneBasic_t *work = pBasic->workdata;
     dds3BasicArrayHandle_t *handle;
     dds3Basic_t *basic;
 
@@ -272,7 +272,7 @@ dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type)
 
 void dds3SceneBasicMakeScene(dds3Basic_t *scene, const char *name)
 {
-    dds3SceneWork_t *work;
+    dds3SceneBasic_t *work;
     u32 handle;
 
     work = scene->workdata;
@@ -284,7 +284,7 @@ void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area
                                        void *pF1, void *pF2,
                                        void *pTB, u32 pBF)
 {
-    dds3SceneWork_t *work;
+    dds3SceneBasic_t *work;
     u32 handle;
 
     work = pBasic->workdata;
@@ -294,7 +294,7 @@ void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area
 
 void dds3SceneBasicFreeScene(dds3Basic_t *pBasic)
 {
-    dds3SceneWork_t *work;
+    dds3SceneBasic_t *work;
 
     work = pBasic->workdata;
     fldFreeFile();
@@ -303,7 +303,7 @@ void dds3SceneBasicFreeScene(dds3Basic_t *pBasic)
 
 s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
 {
-    dds3SceneWork_t *work;
+    dds3SceneBasic_t *work;
     sdfMemHandle_t *handle;
     u32 address;
     u32 resolved;
@@ -313,7 +313,7 @@ s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
         return 0;
     }
     printf("script %s\n", name);
-    if (work->scriptHandle != NULL) {
+    if (work->hScrFileHandle != NULL) {
         dds3SceneBasicReleaseScriptFile(scene);
     }
     handle = sdfDevLoadFileEx(name, &address, 0);
@@ -321,7 +321,7 @@ s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
     if (resolved == 0) {
         return 0;
     }
-    work->scriptHandle = handle;
+    work->hScrFileHandle = handle;
     work->script = (void *)resolved;
     return 1;
 }
@@ -331,17 +331,17 @@ s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *scene, sdfMemHandle_t *mem
 {
     s32 notAttached = 0;
     void *address;
-    dds3SceneWork_t *work = scene->workdata;
+    dds3SceneBasic_t *work = scene->workdata;
 
     if (mem == NULL) {
         return notAttached;
     }
-    if (work->scriptHandle != NULL) {
+    if (work->hScrFileHandle != NULL) {
         dds3SceneBasicReleaseScriptFile(scene);
     }
     address = sdfMemLock(mem);
     if (address != NULL) {
-        work->scriptHandle = mem;
+        work->hScrFileHandle = mem;
         work->script = address;
         return 1;
     }
@@ -350,18 +350,18 @@ s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *scene, sdfMemHandle_t *mem
 
 void dds3SceneBasicReleaseScriptFile(dds3Basic_t *scene)
 {
-    dds3SceneWork_t *work = scene->workdata;
+    dds3SceneBasic_t *work = scene->workdata;
 
-    if (work->scriptHandle != NULL) {
-        sdfMemFreeDirect(work->scriptHandle);
+    if (work->hScrFileHandle != NULL) {
+        sdfMemFreeDirect(work->hScrFileHandle);
     }
-    work->scriptHandle = NULL;
+    work->hScrFileHandle = NULL;
     work->script = NULL;
 }
 
 s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
 {
-    void *script = ((dds3SceneWork_t *)scene->workdata)->script;
+    void *script = ((dds3SceneBasic_t *)scene->workdata)->script;
     s32 procedure;
 
     if (script == NULL) {
@@ -404,7 +404,7 @@ s32 dds3SceneBasicExistBasicFromType(dds3Basic_t *scene, s32 type, dds3Basic_t *
     if (scene == NULL || target == NULL) {
         return 0;
     }
-    basic = ((dds3SceneWork_t *)scene->workdata)->lists[type].head;
+    basic = ((dds3SceneBasic_t *)scene->workdata)->lists[type].head;
     while (basic != NULL) {
         if (basic == target) {
             return 1;
@@ -422,7 +422,7 @@ s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target)
     if (scene == NULL || target == NULL) {
         return 0;
     }
-    lists = ((dds3SceneWork_t *)scene->workdata)->lists;
+    lists = ((dds3SceneBasic_t *)scene->workdata)->lists;
     for (type = 0; type < BASIC_TYPE_MAX; type++) {
         dds3Basic_t *basic = lists[type].head;
 
@@ -442,7 +442,7 @@ s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target)
 void dds3SetMapNo(dds3Basic_t *scene, u32 mapno)
 {
     if (scene != NULL) {
-        ((dds3SceneWork_t *)scene->workdata)->mapNo = mapno;
+        ((dds3SceneBasic_t *)scene->workdata)->mapno = mapno;
     }
 }
 
@@ -451,7 +451,7 @@ s32 dds3GetMapNo(dds3Basic_t *scene)
     if (scene == NULL) {
         return -1;
     }
-    return ((dds3SceneWork_t *)scene->workdata)->mapNo;
+    return ((dds3SceneBasic_t *)scene->workdata)->mapno;
 }
 
 dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name)
@@ -463,7 +463,7 @@ dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const
     if (scene == NULL || name == NULL) {
         return NULL;
     }
-    basic = ((dds3SceneWork_t *)scene->workdata)->lists[type].head;
+    basic = ((dds3SceneBasic_t *)scene->workdata)->lists[type].head;
     while (basic != NULL) {
         candidate = (u8 *)basic->name;
         if (candidate == NULL) {

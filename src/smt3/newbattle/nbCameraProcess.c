@@ -24,10 +24,10 @@ typedef struct nbCamera_t {
     sdfVector4_t direction;
     f32 distance;
     f32 fovy;
-    u32 stateChange;
+    u32 state_change;
     u32 state;
-    u32 stateOld;
-    u32 stateOld2;
+    u32 state_old;
+    u32 state_old2;
     u32 phase;
     s32 frame;
     u32 type;
@@ -129,7 +129,7 @@ void func_001B1518(nbCamera_t *pCamera, s32 frames, s32 count, f32 angle)
 void nbCameraState_InvokeTargetSelect_SearchSet(void)
 {
     nbMainProcessData_t *pData = nbGetMainProcessData();
-    dds3ProcessID_t *pProcess = pData->unkD4[pData->unkE4];
+    dds3ProcessID_t *pProcess = pData->ActionProcessID[pData->NowActionProcess];
     nbFormation_t *pForm = pData->form;
     nbCameraUnitWork_t *pWork;
     u32 bits;
@@ -152,7 +152,7 @@ void nbCameraState_InvokeTargetSelect_SearchSet(void)
 void nbCameraState_InvokeTarget_SearchSet(void)
 {
     nbMainProcessData_t *pData = nbGetMainProcessData();
-    dds3ProcessID_t *pProcess = pData->unkD4[pData->unkE4];
+    dds3ProcessID_t *pProcess = pData->ActionProcessID[pData->NowActionProcess];
     nbFormation_t *pForm = pData->form;
     nbCameraUnitWork_t *pWork;
     u32 bits;
@@ -175,7 +175,7 @@ void nbCameraState_InvokeTarget_SearchSet(void)
 void nbCameraState_EnemyParty_SearchSet(void)
 {
     nbMainProcessData_t *pData = nbGetMainProcessData();
-    dds3ProcessID_t *pProcess = pData->unkD4[pData->unkE4];
+    dds3ProcessID_t *pProcess = pData->ActionProcessID[pData->NowActionProcess];
     nbFormation_t *pForm = pData->form;
     nbCameraUnitWork_t *pWork;
     u32 bits;
@@ -202,7 +202,7 @@ void nbCameraState_DebugShotAll_Init(void)
 
 void nbCameraSetState(u16 state)
 {
-    pNbCamera.stateChange = state;
+    pNbCamera.state_change = state;
     if (nbCameraStateTable[state].reset != 0) {
         pNbCamera.state = 0;
     }
@@ -210,7 +210,7 @@ void nbCameraSetState(u16 state)
 
 void func_001B1770(u16 state)
 {
-    pNbCamera.stateChange = state;
+    pNbCamera.state_change = state;
     if (nbCameraStateTable[state].reset != 0) {
         pNbCamera.state = 0;
     }
@@ -264,9 +264,9 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraScriptSet);
 void nbCameraInit(void)
 {
     nbCameraShot_All_Set(&pNbCamera);
-    pNbCamera.stateChange = 0;
-    pNbCamera.stateOld2 = 0;
-    pNbCamera.stateOld = 0;
+    pNbCamera.state_change = 0;
+    pNbCamera.state_old2 = 0;
+    pNbCamera.state_old = 0;
     pNbCamera.state = 0;
 }
 

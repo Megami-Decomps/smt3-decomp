@@ -9,7 +9,7 @@ typedef struct
 {
     /* 0x0000 */ u16 unk_00;
     /* 0x0002 */ u16 index;
-    /* 0x0004 */ u8 shift;
+    /* 0x0004 */ u8 Shift;
     /* 0x0005 */ u8 unk_05[3];
 } cmpCursorPos_t;
 
@@ -66,11 +66,11 @@ typedef struct
     /* 0x0C */ s32 flags;
     /* 0x10 */ s16 unk_10;
     /* 0x12 */ u16 unk_12;
-    /* 0x14 */ s32 activeTime;
-    /* 0x18 */ s32 deactiveTime;
+    /* 0x14 */ s32 ctr_act;
+    /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 phase;
     /* 0x20 */ s32 count;
-} fclRbnWork_t;
+} fclRibbon_t;
 
 extern s32 GetValidUnitIndex(s32 pindex);
 
@@ -108,7 +108,7 @@ typedef struct
     /* 0x54 */ s32 unk_54;
 } motionWork_t;
 
-extern fclRbnWork_t *g_pdebug;
+extern fclRibbon_t *g_pdebug;
 
 typedef struct
 {
@@ -175,7 +175,7 @@ extern void fclEncycSetExplainData(void *pbmd);
 
 extern void frDestroyFontRequestAfter(void *pFRQ);
 
-extern void fclRbnRelease(fclRbnWork_t *phandle);
+extern void fclRbnRelease(fclRibbon_t *phandle);
 
 extern void fclEncycStartProcess(void);
 
@@ -494,13 +494,13 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistConfirm);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseRegistConfirm);
 
-extern void fclRbnRelease(fclRbnWork_t *phandle);
+extern void fclRbnRelease(fclRibbon_t *phandle);
 
 void DestPhaseRegistConfirm(fclEncyc_instance_t *pinst)
 {
     void *scene;
 
-    fclRbnRelease(*(fclRbnWork_t **)(pinst->unk_36C + 0x200));
+    fclRbnRelease(*(fclRibbon_t **)(pinst->unk_36C + 0x200));
     cmpResetDrawEnv();
     scene = dds3GetActiveScene();
     if (scene != NULL)
@@ -553,7 +553,7 @@ void DestPhaseReadStatus(fclEncyc_instance_t *pinst)
         frDestroyFontRequestAfter(*(void **)(base + 0x84));
         *(void **)(base + 0x84) = NULL;
     }
-    fclRbnRelease(*(fclRbnWork_t **)(base + 0x80));
+    fclRbnRelease(*(fclRibbon_t **)(base + 0x80));
     cmpResetDrawEnv();
     scene = dds3GetActiveScene();
     if (scene != NULL) {
@@ -605,7 +605,7 @@ void PushListwinCursor(fclEncyc_instance_t *pinst, lstListWindow_t *plistwin, s3
     cmpCursorPos_t *cur = &plistwin->cursorPos;
 
     pinst->listCursor[Stack * 2] = cur->index;
-    pinst->listCursor[Stack * 2 + 1] = cur->shift;
+    pinst->listCursor[Stack * 2 + 1] = cur->Shift;
 }
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", PopListwinCursor);
@@ -948,7 +948,7 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawReadMainHelp);
 void InitializeDebug_fclEncyc(void)
 {
     void *buf = sdfMemAllocDirect(0xC);
-    fclRbnWork_t *work = (fclRbnWork_t *)sdfMemLock(buf);
+    fclRibbon_t *work = (fclRibbon_t *)sdfMemLock(buf);
 
     work->allocation = buf;
     work->unk_04 = 0;

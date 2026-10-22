@@ -58,7 +58,7 @@ typedef struct {
     s32 cy;
     s32 cz;
     sdfDrawTag_t *tag;
-} dbgConsCtl_t;
+} dbgConsCtl_tag;
 
 sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);
 
@@ -1345,12 +1345,12 @@ void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *moji)
     frDestroyFontRequestAfter(object);
 }
 
-void LF(dbgConsCtl_t *cons)
+void LF(dbgConsCtl_tag *cons)
 {
     cons->cy += 0x60;
 }
 
-void initDrawTag(dbgConsCtl_t *cons) {
+void initDrawTag(dbgConsCtl_tag *cons) {
     s32 packet;
     sdfDrawTag_t *packetList;
 
@@ -1362,7 +1362,7 @@ void initDrawTag(dbgConsCtl_t *cons) {
 }
 
 void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 num) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
     f32 screenX;
     f32 screenY;
@@ -1397,7 +1397,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 num) {
 }
 
 void fldDbgPrint2D(s32 x, s32 y, const char *str) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x73C0;
@@ -1421,7 +1421,7 @@ void fldDbgPrint2D(s32 x, s32 y, const char *str) {
 }
 
 void fldDbgPrint2DC(s32 x, s32 y, s32 col, s32 str) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x73C0;
@@ -1445,7 +1445,7 @@ void fldDbgPrint2DC(s32 x, s32 y, s32 col, s32 str) {
 }
 
 void fldDbgPrintNum2D(s32 x, s32 y, s32 num) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x7000;
@@ -1469,7 +1469,7 @@ void fldDbgPrintNum2D(s32 x, s32 y, s32 num) {
 }
 
 void fldDbgPrintNum2DH(s32 x, s32 y, s32 num) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x7000;
@@ -1493,7 +1493,7 @@ void fldDbgPrintNum2DH(s32 x, s32 y, s32 num) {
 }
 
 void fldDbgPrintStr2D(s32 x, s32 y, s32 str) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x7000;
@@ -1517,7 +1517,7 @@ void fldDbgPrintStr2D(s32 x, s32 y, s32 str) {
 }
 
 void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x7000;
@@ -1541,7 +1541,7 @@ void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
 }
 
 void fldDbgPrintStr2DCF(s32 x, s32 y, f32 col, f32 str) {
-    dbgConsCtl_t quad;
+    dbgConsCtl_tag quad;
     sifCommand_t packet;
 
     quad.cx = 0x7000;

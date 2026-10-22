@@ -166,7 +166,7 @@ typedef struct nbActionProcessData_t
     s32 partyindex;
     s32 type;
     s32 target;
-    s32 selectbit;
+    s32 select;
     u8 unk_40[0x28];
     s32 unk_68;
     u8 unk_6C[0x124];
@@ -316,7 +316,7 @@ typedef struct {
     s32 unk_20;
     s32 unk_24;
     s32 unk_28;
-} nbMakaWork_t;
+} nbMakaProcessData_t;
 
 extern void nbFreeEventEntry(nbMainProcessData_t *data);
 
@@ -326,15 +326,15 @@ extern s32 nbMakaProcess1(dds3ProcessID_t *id);
 
 extern void nbMakaShutdown(dds3ProcessID_t *id);
 
-extern nbMakaWork_t *nbAllocMakaWork(void);
+extern nbMakaProcessData_t *nbAllocMakaWork(void);
 
 extern s32 p2sdLoadCheckMidi(s32 MidiNo);
 
 extern void p2sdLoadSMGFile(s32 MidiNo);
 
-extern void nbMakaStep(nbMakaWork_t *w);
+extern void nbMakaStep(nbMakaProcessData_t *w);
 
-extern void nbDrawMakaNum(nbMakaWork_t *w, s32 x, s32 y, u32 col, s32 n);
+extern void nbDrawMakaNum(nbMakaProcessData_t *w, s32 x, s32 y, u32 col, s32 n);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -384,7 +384,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbMakaWork_t *GetMakaProcessData()
+nbMakaProcessData_t *GetMakaProcessData()
 {
     dds3ProcessID_t *id;
 
@@ -397,7 +397,7 @@ nbMakaWork_t *GetMakaProcessData()
 
 void nbMakaDispOn(s32 type)
 {
-    nbMakaWork_t *w;
+    nbMakaProcessData_t *w;
 
     w = GetMakaProcessData();
     if (type == 0) {
@@ -411,7 +411,7 @@ void nbMakaDispOn(s32 type)
 
 void nbMakaDispOff(void)
 {
-    nbMakaWork_t *w;
+    nbMakaProcessData_t *w;
 
     w = GetMakaProcessData();
     if (w->unk_08 != 0) {
@@ -438,7 +438,7 @@ u32 nbPow10(u32 v, s32 n)
 
 INCLUDE_ASM(const s32, "newbattle/nbMakaProcess", nbDrawMakaNum);
 
-void nbMakaStep(nbMakaWork_t *w)
+void nbMakaStep(nbMakaProcessData_t *w)
 {
     switch (w->unk_00) {
     case 1:
@@ -472,7 +472,7 @@ void nbMakaStep(nbMakaWork_t *w)
 
 s32 nbMakaProcess1(dds3ProcessID_t *id)
 {
-    nbMakaWork_t *w;
+    nbMakaProcessData_t *w;
 
     w = dds3GetProcessData(id);
     nbMakaStep(w);
@@ -492,12 +492,12 @@ void nbMakaShutdown(dds3ProcessID_t *id)
     }
 }
 
-nbMakaWork_t *nbAllocMakaWork(void)
+nbMakaProcessData_t *nbAllocMakaWork(void)
 {
-    nbMakaWork_t *w;
+    nbMakaProcessData_t *w;
 
-    w = sdfChipAllocDirect(sizeof(nbMakaWork_t));
-    memset(w, 0, sizeof(nbMakaWork_t));
+    w = sdfChipAllocDirect(sizeof(nbMakaProcessData_t));
+    memset(w, 0, sizeof(nbMakaProcessData_t));
     w->maka = DDS3_GBWK->maka;
     return w;
 }

@@ -23,7 +23,7 @@ typedef union effBTLPartValue_t {
     dds3EffectPart_t *work;
 } effBTLPartValue_t;
 
-typedef struct effBTLPart_t {
+typedef struct effBTL_SkillPartsList_t {
     u16 paramKind;
     u8 unk02[2];
     effBTLPartValue_t value;
@@ -31,7 +31,7 @@ typedef struct effBTLPart_t {
     u32 zeroKindCount;
     u8 kind;
     u8 unk15[3];
-} effBTLPart_t;
+} effBTL_SkillPartsList_t;
 
 typedef struct effBTLCutData_t {
     s32 triggerFrame;
@@ -48,7 +48,7 @@ typedef struct effBTLCutData_t {
     s32 colorRampEndFrame;
     u8 actorScaleEnabled;
     u8 unk75[3];
-    effBTLPart_t entries[1]; /* 0x78: variable-length serialized entries */
+    effBTL_SkillPartsList_t entries[1]; /* 0x78: variable-length serialized entries */
 } effBTLCutData_t;
 
 /* Each BED bank reserves sixty entries, for a native stride of 0x618. */

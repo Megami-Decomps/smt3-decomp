@@ -6,7 +6,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-typedef struct pbPanel_t pbPanel_t;
+typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -22,7 +22,7 @@ typedef struct
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
-} pbMyCharacter_t;
+} pbMyChar_t;
 
 typedef struct { s32 format, type, free, result; } pbMCardInfo_t;
 
@@ -41,9 +41,9 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbBlockObj_t;
+typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
 
-typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
@@ -52,12 +52,12 @@ typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
 /* Common panel work header: its constructor installs process and data links. */
-struct pbPanel_t
+struct pbProcHandle_t
 {
     dds3ProcessID_t *process;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
-    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
             pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
             pbViewCamWork_t *viewCam; } data;
@@ -67,9 +67,9 @@ extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e);
 
-extern pbPanel_t *record;
+extern pbProcHandle_t *record;
 
-extern pbPanel_t *blockDB;
+extern pbProcHandle_t *blockDB;
 
 extern s32 pb_draw_error_Process(dds3ProcessID_t *id);
 
@@ -145,7 +145,7 @@ INCLUDE_ASM(const s32, "pb/pbMCard", pbWriteMCard);
 INCLUDE_ASM(const s32, "pb/pbMCard", pb_draw_error_Process);
 
 void pb_draw_error_Shutdown(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
 }

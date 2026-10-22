@@ -4,7 +4,7 @@
 #include "motion.h"
 
 typedef struct {
-    /* 0x00 */ dds3Basic_t *fallbackModel;
+    /* 0x00 */ dds3Basic_t *pTextureBasic;
     /* 0x04 */ sdfItemArray_t *itemList;
     /* 0x08 */ sdfMotionPlayBook_t *motionTable;
     /* 0x0C */ void *modelResource;

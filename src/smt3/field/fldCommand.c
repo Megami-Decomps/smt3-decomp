@@ -31,7 +31,7 @@ typedef struct
     u32 count;
     void *model;
     fldMapPoint_t *pos;
-} fldMapRoom_t;
+} fldAmAreaData_t;
 
 typedef struct
 {
@@ -83,7 +83,7 @@ extern s32 fldBgmSmgAddr;
 
 extern sdfMemHandle_t *fldAutoMapBuf;
 
-extern fldMapRoom_t *fldAutoMapHeader;
+extern fldAmAreaData_t *fldAutoMapHeader;
 
 extern s32 fldAutoMapData;
 

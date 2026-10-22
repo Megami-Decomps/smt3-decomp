@@ -369,7 +369,7 @@ void nbDelKoukaPacket(nbKoukaPacket_t *p)
 
 void nbDelAllUniqueIDKoukaPacket(s32 uniqueid)
 {
-    dds3ProcessID_t *id = nbGetMainProcessData()->koukaProcess;
+    dds3ProcessID_t *id = nbGetMainProcessData()->KoukaProcessID;
     nbKoukaProcessData_t *work;
     nbKoukaPacket_t *p;
     nbKoukaPacket_t *next;
@@ -392,7 +392,7 @@ void nbDelAllUniqueIDKoukaPacket(s32 uniqueid)
 
 void nbDelAllKoukaPacketType(s32 type)
 {
-    dds3ProcessID_t *id = nbGetMainProcessData()->koukaProcess;
+    dds3ProcessID_t *id = nbGetMainProcessData()->KoukaProcessID;
     nbKoukaProcessData_t *work;
     nbKoukaPacket_t *p;
     nbKoukaPacket_t *next;
@@ -415,7 +415,7 @@ void nbDelAllKoukaPacketType(s32 type)
 
 void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form, s32 motno)
 {
-    dds3ProcessID_t *id = nbGetMainProcessData()->koukaProcess;
+    dds3ProcessID_t *id = nbGetMainProcessData()->KoukaProcessID;
     nbKoukaProcessData_t *work;
     nbKoukaPacket_t *p;
     nbKoukaPacket_t *next;
@@ -442,7 +442,7 @@ void nbDelAllMojiNumEffectKoukaPacket(nbFormation_t *form, s32 motno)
 
 void nbDelUnEventKoukaPacket(void)
 {
-    dds3ProcessID_t *id = nbGetMainProcessData()->koukaProcess;
+    dds3ProcessID_t *id = nbGetMainProcessData()->KoukaProcessID;
     nbKoukaProcessData_t *work;
     nbKoukaPacket_t *p;
     nbKoukaPacket_t *next;
@@ -480,7 +480,7 @@ void nbDelUnEventKoukaPacket(void)
 
 void nbOnOffKoukaPacketFlag(s32 type, u32 flg, s32 sw)
 {
-    dds3ProcessID_t *id = nbGetMainProcessData()->koukaProcess;
+    dds3ProcessID_t *id = nbGetMainProcessData()->KoukaProcessID;
     nbKoukaProcessData_t *work;
     nbKoukaPacket_t *p;
     nbKoukaPacket_t *next;
@@ -507,7 +507,7 @@ void nbOnOffKoukaPacketFlag(s32 type, u32 flg, s32 sw)
 
 s32 nbCheckSePacket(s32 start, s32 se, s32 frame)
 {
-    nbKoukaProcessData_t *work = dds3GetProcessData(nbGetMainProcessData()->koukaProcess);
+    nbKoukaProcessData_t *work = dds3GetProcessData(nbGetMainProcessData()->KoukaProcessID);
     nbKoukaPacket_t *p = work->first;
 
     while (p != NULL) {
@@ -919,9 +919,9 @@ void nbRunKoukaCase12(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         s16 cur;
 
         if ((stat & 8) == 0) {
-            ten = data->unk7A;
+            ten = data->press4_ten;
         }
-        cur = (s16)(u16)data->unk7A;
+        cur = (s16)(u16)data->press4_ten;
         v = data->unk78 + p->data1.s[0];
         if (v < 0) {
             v = 0;
@@ -931,7 +931,7 @@ void nbRunKoukaCase12(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
         if (v < 0) {
             v = 0;
         }
-        data->unk7A = v;
+        data->press4_ten = v;
         if ((stat & 8) == 0) {
             data->unk140 += ten - v;
         }
@@ -966,8 +966,8 @@ void RunSeKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
     s32 se = p->data1.i;
     s32 ok = p2sdLoadCheckMidi(se);
 
-    if (k->data->unk144 != 0 && (se == 0x10008 || se == 0x10009)) {
-        k->data->unk144 = 0;
+    if (k->data->d31_rebehansya != 0 && (se == 0x10008 || se == 0x10009)) {
+        k->data->d31_rebehansya = 0;
         p2sdStopSe(0x1C070000);
     }
     if (*(s32 *)k->data->unk148 != 0 && se == 0x10008) {
@@ -1371,7 +1371,7 @@ s32 nbKoukaShutdown(dds3ProcessID_t *id)
     while (work->first != NULL) {
         DelKoukaPacket(work, work->first);
     }
-    work->data->koukaProcess = NULL;
+    work->data->KoukaProcessID = NULL;
     sdfChipFreeDirect(work);
 }
 
@@ -1393,7 +1393,7 @@ void nbInitKoukaProcess(nbMainProcessData_t *data)
 
     id = dds3StartProcess("nb_kouka", 0x2B08, 1, 1, nbKoukaProcess1, nbKoukaShutdown, work);
     dds3LinkProcess(data->unkBC, id);
-    data->koukaProcess = id;
+    data->KoukaProcessID = id;
 }
 
 INCLUDE_SDATA(const s32, "newbattle/nbKoukaProcess", D_00551138);

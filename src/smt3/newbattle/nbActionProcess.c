@@ -34,7 +34,7 @@ typedef struct nbQuadVector_t {
 
 /* 8-byte rows at +0x88 indexed by formation slot. */
 typedef struct nbTimeList_t {
-    u16 unlock;
+    u16 lockframe;
     u16 end;
     u16 hp;
     u16 pad06;
@@ -683,7 +683,7 @@ void ClearTimeList(nbActionProcessData_t *a)
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        a->timelist[i].unlock = 0;
+        a->timelist[i].lockframe = 0;
         a->timelist[i].end = 0;
         a->timelist[i].hp = 0;
     }
@@ -768,7 +768,7 @@ s32 nbAddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add)
 
 s32 GetUnlockTime(nbActionProcessData_t *a, s32 formindex)
 {
-    return a->timelist[formindex].unlock;
+    return a->timelist[formindex].lockframe;
 }
 
 s32 GetEndTime(nbActionProcessData_t *a, s32 formindex)
@@ -779,36 +779,36 @@ s32 GetEndTime(nbActionProcessData_t *a, s32 formindex)
 void OverwriteTimeList(nbActionProcessData_t *a, s32 formindex, s32 start, s32 locktime, s32 endtime)
 {
     if (locktime >= 0) {
-        if (a->timelist[formindex].unlock < start + locktime) {
-            a->timelist[formindex].unlock = start + locktime;
+        if (a->timelist[formindex].lockframe < start + locktime) {
+            a->timelist[formindex].lockframe = start + locktime;
         }
     }
     if (endtime >= 0) {
         if (a->timelist[formindex].end < start + endtime) {
             a->timelist[formindex].end = start + endtime;
         }
-        if (a->timelist[formindex].end < a->timelist[formindex].unlock) {
-            a->timelist[formindex].end = a->timelist[formindex].unlock;
+        if (a->timelist[formindex].end < a->timelist[formindex].lockframe) {
+            a->timelist[formindex].end = a->timelist[formindex].lockframe;
         }
     }
 }
 
 void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 start, s32 locktime, s32 endtime)
 {
-    if (start < a->timelist[formindex].unlock) {
-        start = a->timelist[formindex].unlock;
+    if (start < a->timelist[formindex].lockframe) {
+        start = a->timelist[formindex].lockframe;
     }
     if (locktime >= 0) {
-        if (a->timelist[formindex].unlock < start + locktime) {
-            a->timelist[formindex].unlock = start + locktime;
+        if (a->timelist[formindex].lockframe < start + locktime) {
+            a->timelist[formindex].lockframe = start + locktime;
         }
     }
     if (endtime >= 0) {
         if (a->timelist[formindex].end < start + endtime) {
             a->timelist[formindex].end = start + endtime;
         }
-        if (a->timelist[formindex].end < a->timelist[formindex].unlock) {
-            a->timelist[formindex].end = a->timelist[formindex].unlock;
+        if (a->timelist[formindex].end < a->timelist[formindex].lockframe) {
+            a->timelist[formindex].end = a->timelist[formindex].lockframe;
         }
     }
 }
@@ -832,8 +832,8 @@ s32 GetAllUnlockTime(nbActionProcessData_t *a)
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        if (max < a->timelist[i].unlock) {
-            max = a->timelist[i].unlock;
+        if (max < a->timelist[i].lockframe) {
+            max = a->timelist[i].lockframe;
         }
     }
     return max;
@@ -1048,9 +1048,9 @@ void KyouseiPress(nbActionProcessData_t *a)
     nbMainProcessData_t *data = a->data;
 
     data->unk78 = 0;
-    data->unk7A = 0;
-    if (data->unkE8 != NULL) {
-        dds3KillProcess(data->unkE8, 0);
+    data->press4_ten = 0;
+    if (data->CommSelProcessID != NULL) {
+        dds3KillProcess(data->CommSelProcessID, 0);
     }
 }
 
@@ -1069,8 +1069,8 @@ void DokodemoPoa(nbActionProcessData_t *a)
             }
         }
     }
-    if (a->data->unkE8 != NULL) {
-        dds3KillProcess(a->data->unkE8, 0);
+    if (a->data->CommSelProcessID != NULL) {
+        dds3KillProcess(a->data->CommSelProcessID, 0);
     }
 }
 
@@ -1164,10 +1164,10 @@ void SetAction_AISCR(nbActionProcessData_t *a)
 
 s32 CheckAction_AISCR(nbActionProcessData_t *a)
 {
-    if (dds3ExistProcess(a->data->aiScriptProcess) != 0) {
+    if (dds3ExistProcess(a->data->AiScriptProcessID) != 0) {
         return 0;
     }
-    a->data->aiScriptProcess = NULL;
+    a->data->AiScriptProcessID = NULL;
     if (a->data->negoresult == 0) {
         SetNextActionSeq(a, 7);
     } else {
@@ -1187,8 +1187,8 @@ void SetAction_DEADSCRIPT(nbActionProcessData_t *a)
 
 s32 CheckAction_DEADSCRIPT(nbActionProcessData_t *a)
 {
-    if (dds3ExistProcess(a->data->aiScriptProcess) == 0) {
-        a->data->aiScriptProcess = NULL;
+    if (dds3ExistProcess(a->data->AiScriptProcessID) == 0) {
+        a->data->AiScriptProcessID = NULL;
         nbMakeUnitFadeOutPacket(0, a, a->form, 0, 10, 10, 10);
         nbAddReturnKoukaPacket(0x19, a, a->party, 1);
         SetTimeList(a, a->form->formindex, 0, 30, 30);
@@ -1450,7 +1450,7 @@ void SetAction_NEGO(nbActionProcessData_t *a)
 
 s32 CheckAction_NEGO(nbActionProcessData_t *a)
 {
-    if (a->data->negoProcess == NULL) {
+    if (a->data->NegoProcessID == NULL) {
         printf(D_00543FB8, a->data->negoresult);
         SetNextActionSeq(a, 10);
         nbPanelDraw(1);
@@ -1673,13 +1673,13 @@ s32 nbGetActionSeq(dds3ProcessID_t *id)
 s32 nbGetPrevActionSeq(void)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
-    s32 i = data->unkE4 - 1;
+    s32 i = data->NowActionProcess - 1;
     dds3ProcessID_t *id;
 
     if (i < 0) {
         i = 3;
     }
-    id = data->unkD4[i];
+    id = data->ActionProcessID[i];
     if (id == NULL) {
         return -1;
     }
@@ -1788,7 +1788,7 @@ void *nbActionProcess1(dds3ProcessID_t *id)
 void nbActionShutdown(dds3ProcessID_t *id)
 {
     nbActionProcessData_t *a = dds3GetProcessData(id);
-    dds3ProcessID_t **p = a->data->unkD4;
+    dds3ProcessID_t **p = a->data->ActionProcessID;
     s32 i;
 
     for (i = 0; i < 4; i++) {
@@ -1836,11 +1836,11 @@ void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to,
     nbActionProcessData_t *a;
     dds3ProcessID_t *id;
 
-    data->unkE4 = (data->unkE4 + 1) % 4;
+    data->NowActionProcess = (data->NowActionProcess + 1) % 4;
     a = InitActionProcessData(data, type, from, to, d);
     id = dds3StartProcess(D_00544120, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
     dds3LinkProcess(data->unkBC, id);
-    data->unkD4[data->unkE4] = id;
+    data->ActionProcessID[data->NowActionProcess] = id;
 }
 
 INCLUDE_RODATA(const s32, "newbattle/nbActionProcess", D_00544120);

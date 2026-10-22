@@ -48,18 +48,18 @@ typedef struct {
     u32 flag;
     s32 mode;
     u32 sequenceWord38;
-    u32 sequenceWord3C;
+    u32 pointResrcID;
     char name[16];
     s32 stage;
     s32 kind;
     s32 enabled;
-    s32 restore;
-    u16 code;
-    u16 sequenceMode;
+    s32 callmode;
+    u16 bgm;
+    u16 bgmMode;
     s32 link;
     u8 unk68[8];
-    char detail[16];
-    char note[16];
+    char camName[16];
+    char FoceScript[16];
     u32 options;
     u8 unk94[12];
 } fldSceneParam_t;
@@ -390,18 +390,18 @@ void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
         }
     }
     pParam->flag = 0;
-    pParam->sequenceWord3C = 0;
+    pParam->pointResrcID = 0;
     pParam->sequenceWord38 = 0;
     strcpy(pParam->name, pointResName);
     pParam->stage = loadField;
     pParam->enabled = 1;
-    pParam->restore = 2;
+    pParam->callmode = 2;
     pParam->kind = loadArea;
-    pParam->code = 0;
-    pParam->sequenceMode = 0;
+    pParam->bgm = 0;
+    pParam->bgmMode = 0;
     pParam->link = 0;
-    memset(pParam->detail, 0, sizeof(pParam->detail));
-    memset(pParam->note, 0, sizeof(pParam->note));
+    memset(pParam->camName, 0, sizeof(pParam->camName));
+    memset(pParam->FoceScript, 0, sizeof(pParam->FoceScript));
     pParam->options = 0;
     fldDoorExitFlag = 0;
     fldDoorExitMode[0] = 0;
@@ -416,18 +416,18 @@ void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
         }
     }
     pParam->flag = 0;
-    pParam->sequenceWord3C = 0;
+    pParam->pointResrcID = 0;
     pParam->sequenceWord38 = 0;
     strcpy(pParam->name, pointResName);
     pParam->stage = loadField;
     pParam->enabled = 1;
-    pParam->restore = 3;
+    pParam->callmode = 3;
     pParam->kind = loadArea;
-    pParam->code = 0;
-    pParam->sequenceMode = 0;
+    pParam->bgm = 0;
+    pParam->bgmMode = 0;
     pParam->link = 0;
-    memset(pParam->detail, 0, sizeof(pParam->detail));
-    memset(pParam->note, 0, sizeof(pParam->note));
+    memset(pParam->camName, 0, sizeof(pParam->camName));
+    memset(pParam->FoceScript, 0, sizeof(pParam->FoceScript));
     pParam->options = 0;
 }
 
@@ -441,18 +441,18 @@ void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
         }
     }
     pParam->flag = 0;
-    pParam->sequenceWord3C = 0;
+    pParam->pointResrcID = 0;
     pParam->sequenceWord38 = 0;
     strcpy(pParam->name, pointResName);
     pParam->stage = loadField;
     pParam->enabled = 1;
     pParam->kind = loadArea;
-    pParam->code = bgm;
+    pParam->bgm = bgm;
     pParam->link = camMode;
-    pParam->restore = 2;
-    pParam->sequenceMode = 0;
-    strcpy(pParam->detail, camName);
-    memset(pParam->note, 0, sizeof(pParam->note));
+    pParam->callmode = 2;
+    pParam->bgmMode = 0;
+    strcpy(pParam->camName, camName);
+    memset(pParam->FoceScript, 0, sizeof(pParam->FoceScript));
     pParam->options = 0;
 }
 
@@ -466,36 +466,36 @@ void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, con
         }
     }
     pParam->flag = 0;
-    pParam->sequenceWord3C = 0;
+    pParam->pointResrcID = 0;
     pParam->sequenceWord38 = 0;
     strcpy(pParam->name, pointResName);
     pParam->stage = loadField;
     pParam->enabled = 1;
-    pParam->restore = 2;
+    pParam->callmode = 2;
     pParam->kind = loadArea;
-    pParam->code = bgm;
-    pParam->sequenceMode = 0;
+    pParam->bgm = bgm;
+    pParam->bgmMode = 0;
     pParam->link = 0;
-    memset(pParam->detail, 0, sizeof(pParam->detail));
-    strcpy(pParam->note, FoceScript);
+    memset(pParam->camName, 0, sizeof(pParam->camName));
+    strcpy(pParam->FoceScript, FoceScript);
     pParam->options = 0;
 }
 
 void fldSetSceneParamLoad(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
                     s32 bgm, s32 camMode, const char *camName) {
     pParam->flag = 0;
-    pParam->sequenceWord3C = 0;
+    pParam->pointResrcID = 0;
     pParam->sequenceWord38 = 0;
     strcpy(pParam->name, pointResName);
     pParam->enabled = 1;
     pParam->stage = loadField;
     pParam->kind = loadArea;
-    pParam->code = bgm;
+    pParam->bgm = bgm;
     pParam->link = camMode;
-    pParam->restore = 2;
-    pParam->sequenceMode = 0;
-    strcpy(pParam->detail, camName);
-    memset(pParam->note, 0, sizeof(pParam->note));
+    pParam->callmode = 2;
+    pParam->bgmMode = 0;
+    strcpy(pParam->camName, camName);
+    memset(pParam->FoceScript, 0, sizeof(pParam->FoceScript));
     pParam->options = 0;
 }
 
@@ -504,16 +504,16 @@ s32 fldGetRestoreMode(void)
     if (fldSceneParam.mode == 1) {
         return 1;
     }
-    if (fldSceneParam.restore == 3) {
+    if (fldSceneParam.callmode == 3) {
         return 3;
     }
-    if (fldSceneParam.restore == 4) {
+    if (fldSceneParam.callmode == 4) {
         return 4;
     }
-    if (fldSceneParam.restore == 5) {
+    if (fldSceneParam.callmode == 5) {
         return 5;
     }
-    if (fldSceneParam.restore == 6) {
+    if (fldSceneParam.callmode == 6) {
         return 2;
     }
     return fldSceneParam.mode != 0 ? 2 : 0;

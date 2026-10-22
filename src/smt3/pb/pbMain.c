@@ -6,7 +6,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-typedef struct pbPanel_t pbPanel_t;
+typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -22,7 +22,7 @@ typedef struct
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
-} pbMyCharacter_t;
+} pbMyChar_t;
 
 typedef struct
 {
@@ -38,7 +38,7 @@ typedef struct
     s16 level, stage;
     u8 unk35C[4];
     s32 menuState;
-    struct pbPanel_t *helpProc;
+    struct pbProcHandle_t *helpProc;
 } pbMapWork_t;
 
 typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
@@ -56,9 +56,9 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbBlockObj_t;
+typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
 
-typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
@@ -67,12 +67,12 @@ typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
 /* Common panel work header: its constructor installs process and data links. */
-struct pbPanel_t
+struct pbProcHandle_t
 {
     dds3ProcessID_t *process;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
-    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
             pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
             pbViewCamWork_t *viewCam; } data;
@@ -90,15 +90,15 @@ extern s8 pbLoadState;
 
 extern pbMapWork_t *D_0054F5C4;
 
-extern pbPanel_t *record;
+extern pbProcHandle_t *record;
 
 extern void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
-extern pbPanel_t *blockDB;
+extern pbProcHandle_t *blockDB;
 
 extern char pbMapPathBuf[];
 
-extern pbPanel_t *pbWaitLoadMapData(pbPanel_t *parent);
+extern pbProcHandle_t *pbWaitLoadMapData(pbProcHandle_t *parent);
 
 extern void *sdfChipAllocDirect(u32 aSize);
 
@@ -163,7 +163,7 @@ void pbEditMainExitProc(void) {
 }
 
 s32 pb_proc_dummy_Process(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     if (panel != NULL) {
         panel->flags = 0x20000;
     }
@@ -171,7 +171,7 @@ s32 pb_proc_dummy_Process(dds3ProcessID_t *id) {
 }
 
 void pb_proc_dummy_Shutdown(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
 }
@@ -190,8 +190,8 @@ s32 pbGetMoveChar(void) {
     return pbMoveChar;
 }
 
-pbPanel_t *pbStartDummy(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartDummy(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
     panel->process = dds3StartProcess("pb-proc-dummy", 0x3EE, 1, 1, pb_proc_dummy_Process,
                                       (dds3ProcessFunc_t)pb_proc_dummy_Shutdown, NULL);
@@ -206,8 +206,8 @@ pbPanel_t *pbStartDummy(pbPanel_t *parent) {
     return panel;
 }
 
-pbPanel_t *pbStartBackGround(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartBackGround(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     panel->process = dds3StartProcess(D_00535E10, 0x2AFD, 1, 1, pb_draw_bg_Process,
                                       (dds3ProcessFunc_t)pb_draw_bg_Shutdown, NULL);
     if (parent != NULL) {
@@ -280,15 +280,15 @@ s8 func_001D4BE8(void) {
 
 /* NON_MATCHING: 1 of 37 words; retail annuls the epilogue restore in a beql delay slot. */
 #ifdef NON_MATCHING
-void func_001D4C08(pbPanel_t *panel) {
+void func_001D4C08(pbProcHandle_t *panel) {
     if (pbMapIsValid() == 0) {
         dds3FadeOut(0, 0, 0, 1);
         dds3ResetProcessFlag(panel->process, 0x10, 1);
         if (pbGetMoveChar() != 0) {
             if (pbGetMoveChar() != 0) {
-                ((pbPanel_t *)pbGetMoveChar())->flags = 0x40000;
+                ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x40000;
             }
-            ((pbPanel_t *)pbGetMoveChar())->flags |= 1;
+            ((pbProcHandle_t *)pbGetMoveChar())->flags |= 1;
         }
     }
 }
@@ -297,7 +297,7 @@ INCLUDE_ASM(const s32, "pb/pbMain", func_001D4C08);
 #endif
 
 
-void pbMakeMapPathHdd(pbPanel_t *parent) {
+void pbMakeMapPathHdd(pbProcHandle_t *parent) {
     if (pbMapPathIdx == 1) {
         dds3FadeOut(0, 0, 0, 1);
         sprintf(pbMapPathBuf, D_00535E20, pbMenuIndex);

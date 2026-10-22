@@ -17,11 +17,11 @@ typedef struct
     /* 0x0C */ s32 flags;
     /* 0x10 */ s16 unk_10;
     /* 0x12 */ u16 unk_12;
-    /* 0x14 */ s32 activeTime;
-    /* 0x18 */ s32 deactiveTime;
+    /* 0x14 */ s32 ctr_act;
+    /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 phase;
     /* 0x20 */ s32 count;
-} fclRbnWork_t;
+} fclRibbon_t;
 
 typedef struct
 {
@@ -126,7 +126,7 @@ typedef struct
     /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
     /* 0x1A718 */ u8 *table;
     /* 0x1A71C */ s32 unk_1A71C;
-    /* 0x1A720 */ fclRbnWork_t *ribbon;
+    /* 0x1A720 */ fclRibbon_t *ribbon;
 } cmbGbWork_t;
 
 extern s32 datAddItem(s32 id, s32 num);

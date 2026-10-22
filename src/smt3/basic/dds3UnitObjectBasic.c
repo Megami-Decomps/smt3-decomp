@@ -122,9 +122,9 @@ void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *unitBasic) {
     dds3UnitObjectBasicWorkData_t *work;
 
     work = unitBasic->workdata;
-    if (work->lightID != -1) {
+    if (work->EL_serialID != -1) {
         dds3UnlinkLightObjectFromUnitObject(unitBasic, 10);
-        work->lightID = -1;
+        work->EL_serialID = -1;
     }
 }
 
@@ -153,15 +153,15 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *unitBasic) {
             lightWork = light->workdata;
             if (!(lightWork->flag & 4) &&
                 dds3ComparePosPoseSet2(unitBasic->poseset, light->poseset) == 0 &&
-                work->lightID == light->serialID) {
+                work->EL_serialID == light->serialID) {
                 dds3UnlinkLightObjectFromUnitObject(unitBasic, 10);
-                work->lightID = -1;
+                work->EL_serialID = -1;
             }
         } while (dds3SetNextBasicArray(list) != 0);
     }
     dds3FreeBasicArrayHandle(list);
 
-    if (work->lightID == -1) {
+    if (work->EL_serialID == -1) {
         list = dds3SceneBasicGetList(scene, BASIC_TYPE_LIGHTOBJECT);
         if (dds3SetFirstBasicArray(list) == 0) {
             goto freeList;
@@ -181,7 +181,7 @@ freeList:
 
 linkLight:
         dds3LinkLightObjectToUnitObject(light, unitBasic, 10);
-        work->lightID = light->serialID;
+        work->EL_serialID = light->serialID;
         dds3FreeBasicArrayHandle(list);
     }
 }

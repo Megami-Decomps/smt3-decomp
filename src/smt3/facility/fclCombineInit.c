@@ -135,11 +135,11 @@ typedef struct
     /* 0x0C */ s32 flags;
     /* 0x10 */ s16 unk_10;
     /* 0x12 */ u16 unk_12;
-    /* 0x14 */ s32 activeTime;
-    /* 0x18 */ s32 deactiveTime;
+    /* 0x14 */ s32 ctr_act;
+    /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 phase;
     /* 0x20 */ s32 count;
-} fclRbnWork_t;
+} fclRibbon_t;
 
 typedef struct
 {
@@ -393,7 +393,7 @@ typedef struct
     /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
     /* 0x1A718 */ u8 *table;
     /* 0x1A71C */ s32 unk_1A71C;
-    /* 0x1A720 */ fclRbnWork_t *ribbon;
+    /* 0x1A720 */ fclRibbon_t *ribbon;
 } cmbGbWork_t;
 
 extern cmbGbWork_t *CMB_GBWK;
@@ -1277,7 +1277,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbChangeSequence);
 
-extern void fclRbnRelease(fclRbnWork_t *phandle);
+extern void fclRbnRelease(fclRibbon_t *phandle);
 
 extern s32 cmpGetPressedButton(s32 mask);
 
@@ -1302,7 +1302,7 @@ s32 cmbWaitCancelButton(void)
     return cmpPlayCursorSE(button);
 }
 
-extern void fclRbnSwitchActive(fclRbnWork_t *phandle, s32 index);
+extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
 
 void cmbSwitchRibbon(void)
 {

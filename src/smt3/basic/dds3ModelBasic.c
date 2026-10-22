@@ -4,7 +4,7 @@
 #include "motion.h"
 
 typedef struct {
-    /* 0x00 */ dds3Basic_t *fallbackModel;
+    /* 0x00 */ dds3Basic_t *pTextureBasic;
     /* 0x04 */ sdfItemArray_t *itemList;
     /* 0x08 */ sdfMotionPlayBook_t *motionTable;
     /* 0x0C */ void *modelResource;
@@ -26,7 +26,7 @@ dds3Basic_t *dds3AddModelBasic(s32 serialID, sdfItemArray_t *pModelDef, sdfMotio
     work->motionTable = pMotDef;
     basic->serialID = serialID;
     basic->name = pName;
-    work->fallbackModel = pTextureBasic;
+    work->pTextureBasic = pTextureBasic;
     work->itemList = pModelDef;
     work->modelResource = NULL;
     return basic;
@@ -51,7 +51,7 @@ sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic) {
     if (work->modelResource != NULL) {
         model = sdfModelMake(work->modelResource, work->itemList);
     } else {
-        model = sdfModelMake(work->fallbackModel->workdata, work->itemList);
+        model = sdfModelMake(work->pTextureBasic->workdata, work->itemList);
     }
     return model;
 }

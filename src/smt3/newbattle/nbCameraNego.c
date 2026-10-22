@@ -17,10 +17,10 @@ typedef struct nbCamera_t {
     sdfVector4_t direction;
     f32 distance;
     f32 fovy;
-    u32 stateChange;
+    u32 state_change;
     u32 state;
-    u32 stateOld;
-    u32 stateOld2;
+    u32 state_old;
+    u32 state_old2;
     u32 phase;
     s32 frame;
     u32 type;

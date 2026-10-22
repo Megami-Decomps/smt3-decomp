@@ -410,7 +410,7 @@ typedef struct slFileRec_t {
     s8 unk25[15];
 } slFileRec_t;
 
-typedef struct slFileHead_t {
+typedef struct GameFileInfo_t {
     u8 verstr[3];
     u8 ver;
     u8 tmnlMode;
@@ -423,10 +423,10 @@ typedef struct slFileHead_t {
     slFileWork_t work;
     u8 mapOpen;
     u8 unk25[15];
-} slFileHead_t;
+} GameFileInfo_t;
 
 #define SL_REC ((u8 (*)[52])D_00569740)
-#define SL_FILE_HEAD ((slFileHead_t *)DDS3_GBWK)
+#define SL_FILE_HEAD ((GameFileInfo_t *)DDS3_GBWK)
 
 extern slFileRec_t D_00569740[];
 
@@ -1867,7 +1867,7 @@ s32 slSaveWriteEnd_saveData(void) {
 #ifdef NON_MATCHING
 s32 slSaveData_writeFile(void) {
     char path[0x50];
-    slFileHead_t *hdr;
+    GameFileInfo_t *hdr;
     u8 *rec;
     s32 slot = sdfMcGetSlotIndex(mccb);
 
@@ -2173,7 +2173,7 @@ s32 slDraw(s32 id) {
 void fmProcTrigSequence(s32 mode) {
     sdfMemHandle_t *handle;
     void *data;
-    slFileHead_t *hdr;
+    GameFileInfo_t *hdr;
     void *scene;
     s32 on = 1;
 

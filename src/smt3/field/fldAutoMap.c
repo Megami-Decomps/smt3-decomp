@@ -31,7 +31,7 @@ typedef struct
     u32 count;
     void *model;
     fldMapPoint_t *pos;
-} fldMapRoom_t;
+} fldAmAreaData_t;
 
 typedef struct
 {
@@ -75,7 +75,7 @@ extern sdfMemHandle_t *fldAutoMapBuf;
 
 void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern fldMapRoom_t *fldAutoMapHeader;
+extern fldAmAreaData_t *fldAutoMapHeader;
 
 extern s32 fldAutoMapData;
 
@@ -506,7 +506,7 @@ void fldAmModelLoadFile(void) {
     fldAddressResolver(data, data + 8);
     info = (u32 *)fldGetInfoHeader(data + 8);
     fldAutoMapData = info[2];
-    fldAutoMapHeader = (fldMapRoom_t *)info[1];
+    fldAutoMapHeader = (fldAmAreaData_t *)info[1];
 }
 #else
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAmModelLoadFile);
@@ -527,7 +527,7 @@ void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
                 u32 mapData = info[2];
 
                 fldAutoMapData = mapData;
-                fldAutoMapHeader = (fldMapRoom_t *)mapHeader;
+                fldAutoMapHeader = (fldAmAreaData_t *)mapHeader;
             }
         }
     }
@@ -838,7 +838,7 @@ void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r) {
 
 s32 fldAutoMap_GetFloor(s32 area, u32 block) {
     s32 result = 1;
-    fldMapRoom_t *rec = fldAutoMapHeader;
+    fldAmAreaData_t *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
     fldMapItem_t *item;
@@ -902,7 +902,7 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *root_node, s32 nodeidx, s32 mode) {
 
 s32 fldAutoMapGetFloorMax(void) {
     s32 max = 0;
-    fldMapRoom_t *rec = fldAutoMapHeader;
+    fldAmAreaData_t *rec = fldAutoMapHeader;
     s32 i;
     u32 j;
     fldMapItem_t *item;
@@ -949,7 +949,7 @@ void fldAutoMapSeqStart(void) {
     f32 px;
     f32 pz;
     fldAmLightParam_t *light;
-    fldMapRoom_t *rec;
+    fldAmAreaData_t *rec;
     s32 i;
     f32 wx;
     f32 wz;
@@ -1241,7 +1241,7 @@ s32 fldAutoMapGetFloorPrev(s32 floor) {
     u32 j;
     s32 item;
     s32 best = -1;
-    fldMapRoom_t *entry = fldAutoMapHeader;
+    fldAmAreaData_t *entry = fldAutoMapHeader;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
@@ -1264,7 +1264,7 @@ s32 fldAutoMapGetFloorNext(s32 floor) {
     u32 j;
     s32 item;
     s32 best = 999;
-    fldMapRoom_t *entry = fldAutoMapHeader;
+    fldAmAreaData_t *entry = fldAutoMapHeader;
 
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         for (j = 0; j < entry->count; j++) {
@@ -1284,7 +1284,7 @@ s32 fldAutoMapGetFloorNext(s32 floor) {
 
 void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     s32 i;
-    fldMapRoom_t *entry = fldAutoMapHeader;
+    fldAmAreaData_t *entry = fldAutoMapHeader;
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         if (i == index) {
             fldMapPoint_t *position = entry->pos;
@@ -1300,7 +1300,7 @@ void fldAllIconDel(s32 index, f32 *x, f32 *z) {
 void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
     s32 room;
     u32 i;
-    fldMapRoom_t *rec;
+    fldAmAreaData_t *rec;
     fldMapItem_t *item;
     fldMapPoint_t *a;
     s32 visible;

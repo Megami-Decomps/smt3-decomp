@@ -58,9 +58,9 @@ void rsetAlpha(s32 mode);
 
 void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 
-extern effBlurTemplateBody_t D_0055DAD8;
+extern dds3Effect_PartialMultiBlurParam_t D_0055DAD8;
 
-extern void dds3EffectPartialMultiBlurSetParam(void *hPartialMultiBlur, effBlurTemplateBody_t *pParam);
+extern void dds3EffectPartialMultiBlurSetParam(void *hPartialMultiBlur, dds3Effect_PartialMultiBlurParam_t *pParam);
 
 extern void dds3EffectPartialMultiBlurDraw(void *blur);
 
@@ -78,7 +78,7 @@ s32 encDrawProc(dds3ProcessID_t *aProcId) {
         aDrawBoxF(0, 0xDF, 0x200, 2, 0, 0, 0, 0x80);
         rsetAlpha(0);
         if (encDrawState >= 13) {
-            D_0055DAD8.source.displacement = D_0055DAD8.source.displacement + 0.001f;
+            D_0055DAD8.source.scale = D_0055DAD8.source.scale + 0.001f;
             D_0055DAD8.extent = D_0055DAD8.extent - 2;
             dds3EffectPartialMultiBlurSetParam(hPartialMultiBlur, &D_0055DAD8);
             dds3EffectPartialMultiBlurDraw(hPartialMultiBlur);
@@ -119,9 +119,9 @@ void encFreeBlur(void)
     }
 }
 
-extern effBlurTemplateBody_t D_0055DAD8;
+extern dds3Effect_PartialMultiBlurParam_t D_0055DAD8;
 
-extern effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *pParam);
+extern effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 
 extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
@@ -133,7 +133,7 @@ void encStart(void) {
     D_0055DAD8.source.color = 0x09808080;
     D_0055DAD8.source.blendControl = 0x44;
     D_0055DAD8.source.angle = 0.01f;
-    D_0055DAD8.source.displacement = 1.02f;
+    D_0055DAD8.source.scale = 1.02f;
     D_0055DAD8.extent = 0x12C;
     gencMode = 0;
     encDrawState = 0;

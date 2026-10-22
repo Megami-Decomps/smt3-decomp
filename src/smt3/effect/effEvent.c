@@ -60,7 +60,7 @@ extern void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut);
 
 /* The stored screen record keeps eight bytes beyond the copied blur quad. */
 typedef struct effScreenDrawParams_t {
-    effBlurQuad_t source;
+    dds3Effect_Blur_t source;
     u8 pad28[8];
 } effScreenDrawParams_t;
 
@@ -88,22 +88,22 @@ extern effBlurScatterWork_t *hEve_DistortionBlur;
 extern s8 Eve_RippleBlurShow;
 extern effBlurScaleWork_t *hEve_RippleBlur;
 extern s8 Eve_FilterShow;
-extern effSolidRectParams_t Eve_Filter;
+extern dds3Effect_Filter_t Eve_Filter;
 extern s8 Eve_PartialMultiFilterShow;
-extern effResourceRectWork_t *hEve_PartialMultiFilter;
-extern void dds3EffectBlur(const effBlurQuad_t *source);
+extern dds3Effect_PartialMultiFilter_t *hEve_PartialMultiFilter;
+extern void dds3EffectBlur(const dds3Effect_Blur_t *source);
 extern void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work);
 extern void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 extern void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
-extern void dds3EffectFilter(effSolidRectParams_t *params);
-extern void dds3EffectPartialMultiFilterDraw(effResourceRectWork_t *hPartialMultiFilter);
-effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *pParam);
+extern void dds3EffectFilter(dds3Effect_Filter_t *params);
+extern void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
+effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 extern u8 D_00320228[];
 extern u8 D_003201F8[];
 /* Factories accept the serialized parameter prefix used by effect callbacks. */
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *pParam);
 extern u8 D_00320270[];
-effResourceRectWork_t *dds3EffectPartialMultiFilterCreate(effResourceRectParams_t *pParam);
+dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
 extern u8 D_00320298[];
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam);
 extern s8 D_0054F2C5;
@@ -119,16 +119,16 @@ extern s8 D_005298CB[];
 extern effScreenDrawParams_t D_003202C8;
 extern s8 mblurDone;
 extern effEventSetupRecord_t mblurDebugMenu;
-extern effBlurTemplateBody_t D_00320420;
+extern dds3Effect_PartialMultiBlurParam_t D_00320420;
 extern s8 dblurDone;
 extern effEventSetupRecord_t dblurDebugMenu;
 extern effBlurScatterParams_t D_00320598;
 extern s8 evtViewerDirty;
 extern effEventSetupRecord_t filterDebugMenu;
-extern effSolidRectParams_t D_00320770;
+extern dds3Effect_Filter_t D_00320770;
 extern s8 mfilterDone;
 extern effEventSetupRecord_t mfilterDebugMenu;
-extern effResourceRectParams_t D_00320870;
+extern dds3Effect_PartialMultiFilterParam_t D_00320870;
 extern s8 rblurDone;
 extern effEventSetupRecord_t rblurDebugMenu;
 extern effBlurScaleParams_t D_003209B0;
@@ -141,7 +141,7 @@ typedef struct dds3EffectPCPData_t dds3EffectPCPData_t;
 /* Shared billboard-emitter parameters copied into each live set. Creation and
  * parameter copies clamp startDelaySpread, fadeIn, and fadeOut to at least
  * one; motionDelaySpread is consumed unchanged. */
-typedef struct effEventBillParams_t {
+typedef struct effEVECombParSmokeParam_t {
     f32 position[4];
     u32 particleCount;
     s32 duration;
@@ -172,15 +172,15 @@ typedef struct effEventBillParams_t {
     f32 swayRandomness;
     s32 colorStartAge; /* Batched path fades primary texture RGB from black. */
     s32 colorTransitionFrames;
-} effEventBillParams_t;
+} effEVECombParSmokeParam_t;
 
-typedef struct effEventBillParticle_t {
+typedef struct effEVECombParSmokePart_t {
     f32 position[3];
     u8 pad0C[4];
     f32 motion[3]; /* X/Z direction; Y accumulates vertical offset. */
     u8 pad1C[4];
     s32 age;
-    s32 motionDelay;
+    s32 wait;
     f32 baseScale;
     f32 scalePhaseX;
     f32 scalePhaseStepX;
@@ -195,16 +195,16 @@ typedef struct effEventBillParticle_t {
     f32 verticalSpeed;
     f32 lateralSpeed;
     u8 pad5C[4];
-} effEventBillParticle_t;
+} effEVECombParSmokePart_t;
 
 /* Particle storage is followed by this owner in the same allocation. */
-typedef struct effEventBillSet_t {
-    effEventBillParams_t head;
-    effEventBillParticle_t *particles;
+typedef struct effEVECombParSmoke_t {
+    effEVECombParSmokeParam_t head;
+    effEVECombParSmokePart_t *particles;
     u8 flag;
     u8 pad81[3];
     sdfMemHandle_t *allocationHandle;
-} effEventBillSet_t;
+} effEVECombParSmoke_t;
 
 
 /* Shared channel parameter block copied into each allocated channel work. */
@@ -221,18 +221,18 @@ typedef struct effChanHead_t {
     u8 pad68[0x100];
 } effChanHead_t;
 
-typedef struct effChanRecord_t {
+typedef struct effAPPoint4Part_tag {
     s32 delay;
     struct dds3EffectPart_t *param; /* Retained compact effect owner, cloned per record. */
-} effChanRecord_t;
+} effAPPoint4Part_tag;
 
 /* Allocated channel owner shared by the event factory and channel consumers. */
-typedef struct effChanWork_t {
+typedef struct effAPPoint4_tag {
     effChanHead_t head;
-    effChanRecord_t *records;
+    effAPPoint4Part_tag *records;
     struct effArrHdr_t *slots; /* Trailing allocation header, not the slot base. */
     sdfMemHandle_t *buffer;
-} effChanWork_t;
+} effAPPoint4_tag;
 
 /* effCopyVertRows writes XYZ at a four-float stride, leaves +0x40..+0x57
  * untouched, then copies four scalars at +0x58. */
@@ -255,7 +255,7 @@ typedef struct effChan_t {
 /* Emitter view: the first eight bytes are not used by this consumer. */
 typedef struct effEmit_t {
     u8 opaque00[8];
-    effChanWork_t *primitive;
+    effAPPoint4_tag *primitive;
 } effEmit_t;
 
 /* Parameter template owner; the four-byte prefix is not read by channel work. */
@@ -313,7 +313,7 @@ void dds3BillboardSetRGBA(struct dds3Billboard_t *hBillboard, u32 abgr);
 /* Radian rotation of the billboard quad in its plane. */
 void dds3BillboardSetRotate(struct dds3Billboard_t *hBillboard, f32 rot);
 extern void dds3BillboardDraw(dds3Billboard_t *hData);
-extern effEventBillParams_t EVE_ParSmokeParam;
+extern effEVECombParSmokeParam_t EVE_ParSmokeParam;
 dds3EffectPart_t *dds3EffectPartCreate(u16 type, void *pData);
 dds3EffectPart_t *dds3EffectPartCopy(dds3EffectPart_t *hEffPartSrc);
 /* Return a borrowed block at the selected record's signed relative offset. */
@@ -366,7 +366,7 @@ void Eve_PartialMultiBlurOFF(void) {
 }
 
 /* Copy the pixel rectangle only; retain its selected source resource. */
-void Eve_PartialMultiBlurSetParam(effBlurTemplateBody_t *pParam) {
+void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *pParam) {
     hEve_PartialMultiBlur->body = *pParam;
 }
 
@@ -447,12 +447,12 @@ void Eve_FilterOFF(void) {
 }
 
 /* Replace the complete solid-rectangle parameter block. */
-void Eve_FilterSetParam(effSolidRectParams_t *pParam) {
+void Eve_FilterSetParam(dds3Effect_Filter_t *pParam) {
     Eve_Filter = *pParam;
 }
 
 /* Expose the solid-rectangle parameter block by address. */
-effSolidRectParams_t *Eve_FilterGetParams(void) {
+dds3Effect_Filter_t *Eve_FilterGetParams(void) {
     return &Eve_Filter;
 }
 
@@ -465,12 +465,12 @@ void Eve_PartialMultiFilterOFF(void) {
 }
 
 /* Copy the resource template body while preserving its selected resource. */
-void Eve_PartialMultiFilterSetParam(effResourceRectParams_t *pParam) {
+void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *pParam) {
     hEve_PartialMultiFilter->params = *pParam;
 }
 
 /* Return the current textured-square work without retaining it. */
-effResourceRectWork_t *Eve_PartialMultiFilterGetParams(void) {
+dds3Effect_PartialMultiFilter_t *Eve_PartialMultiFilterGetParams(void) {
     return hEve_PartialMultiFilter;
 }
 
@@ -485,9 +485,9 @@ void Eve_PartialMultiFilterSetDefTex(void) {
 
 /* Clone the four default work templates; only the staggered slot count is overridden. */
 void Eve_EffectInit(void) {
-    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((effBlurTemplateBody_t *)D_00320228);
+    hEve_PartialMultiBlur = dds3EffectPartialMultiBlurCreate((dds3Effect_PartialMultiBlurParam_t *)D_00320228);
     hEve_DistortionBlur = dds3EffectDistortionBlurCreate((effBlurScatterParams_t *)D_003201F8);
-    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((effResourceRectParams_t *)D_00320270);
+    hEve_PartialMultiFilter = dds3EffectPartialMultiFilterCreate((dds3Effect_PartialMultiFilterParam_t *)D_00320270);
     hEve_RippleBlur = dds3EffectRippleBlurCreate((effBlurScaleParams_t *)D_00320298);
     Eve_RippleBlurGetParams()->params.count = EFF_EVENT_STAGGERED_SLOT_COUNT;
 }
@@ -587,12 +587,12 @@ s32 mblurProcess(void) {
 }
 
 /* Expose the blur-template setup parameters by address. */
-effBlurTemplateBody_t *mblurGetParam(void) {
+dds3Effect_PartialMultiBlurParam_t *mblurGetParam(void) {
     return &D_00320420;
 }
 
 /* Replace the setup template; this does not modify the active blur work. */
-void mblurSetParam(effBlurTemplateBody_t *parameters) {
+void mblurSetParam(dds3Effect_PartialMultiBlurParam_t *parameters) {
     D_00320420 = *parameters;
 }
 
@@ -667,12 +667,12 @@ s32 evtViewerCheckDirty(void) {
 }
 
 /* Expose the solid-rectangle setup parameters by address. */
-effSolidRectParams_t *dblurGetParam2(void) {
+dds3Effect_Filter_t *dblurGetParam2(void) {
     return &D_00320770;
 }
 
 /* Replace the setup block rather than the active solid-rectangle parameters. */
-void dblurSetParam2(effSolidRectParams_t *parameters) {
+void dblurSetParam2(dds3Effect_Filter_t *parameters) {
     D_00320770 = *parameters;
 }
 
@@ -707,12 +707,12 @@ s32 mfilterRun(void) {
 }
 
 /* Expose the resource-template setup body by address. */
-effResourceRectParams_t *mfilterGetParam(void) {
+dds3Effect_PartialMultiFilterParam_t *mfilterGetParam(void) {
     return &D_00320870;
 }
 
 /* Replace the setup body without replacing the active textured-square work. */
-void mfilterSetParam(effResourceRectParams_t *parameters) {
+void mfilterSetParam(dds3Effect_PartialMultiFilterParam_t *parameters) {
     D_00320870 = *parameters;
 }
 
@@ -810,7 +810,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     effBTLCut_t *cut = hEveBEDCut->effect;
     u32 frame = cut->currentFrame;
     effBTLCutData_t *list = cut->list;
-    effBTLPart_t *entry;
+    effBTL_SkillPartsList_t *entry;
     dds3EffectPart_t **works;
     sdfModelRootNode_t *root;
     sdfMatrix4_t *mp;
@@ -1013,12 +1013,12 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *
 
 INCLUDE_RODATA(const s32, "effect/effEvent", D_005343D0);
 
-effEventBillSet_t *effEVECombParSmokeCreate(effEventBillParams_t *pParam) {
+effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam) {
     u32 particleCount = pParam->particleCount;
-    u32 particleBytes = particleCount * sizeof(effEventBillParticle_t);
-    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(effEventBillSet_t));
-    effEventBillParticle_t *particle = (effEventBillParticle_t *)sdfMemLock(allocationHandle);
-    effEventBillSet_t *work = (effEventBillSet_t *)((u8 *)particle + particleBytes);
+    u32 particleBytes = particleCount * sizeof(effEVECombParSmokePart_t);
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(effEVECombParSmoke_t));
+    effEVECombParSmokePart_t *particle = (effEVECombParSmokePart_t *)sdfMemLock(allocationHandle);
+    effEVECombParSmoke_t *work = (effEVECombParSmoke_t *)((u8 *)particle + particleBytes);
     u32 particleIndex;
 
     work->head = *pParam;
@@ -1049,7 +1049,7 @@ effEventBillSet_t *effEVECombParSmokeCreate(effEventBillParams_t *pParam) {
 
 /* Drop the shared texture reference count; zero dispatches both resource handles.
  * The retained allocation is released afterwards, regardless of that count. */
-void effEVECombParSmokeDelete(effEventBillSet_t *pCombParSmoke) {
+void effEVECombParSmokeDelete(effEVECombParSmoke_t *pCombParSmoke) {
     EffEveCPSmokeCount = EffEveCPSmokeCount - 1;
     if (EffEveCPSmokeCount == 0) {
         dds3BillboardDelete((dds3Billboard_t *)hEffEveCPSmokeBill01Tex);
@@ -1060,8 +1060,8 @@ void effEVECombParSmokeDelete(effEventBillSet_t *pCombParSmoke) {
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
    the base-scale random factor; motion's Y component begins as zero height. */
-void effEVECombParSmokePartInit(effEventBillSet_t *pCombParSmoke, s32 index) {
-    effEventBillParticle_t *particle = &pCombParSmoke->particles[index];
+void effEVECombParSmokePartInit(effEVECombParSmoke_t *pCombParSmoke, s32 index) {
+    effEVECombParSmokePart_t *particle = &pCombParSmoke->particles[index];
     f32 direction[EFF_EVENT_VECTOR_COMPONENTS];
     f32 scaleFactor;
     f32 spawnRadius;
@@ -1069,7 +1069,7 @@ void effEVECombParSmokePartInit(effEventBillSet_t *pCombParSmoke, s32 index) {
     s32 motionDelaySpread = pCombParSmoke->head.motionDelaySpread;
 
     particle->age = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % startDelaySpread);
-    particle->motionDelay = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % motionDelaySpread);
+    particle->wait = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % motionDelaySpread);
     scaleFactor = dds3GetRandFloatA(dds3EffectBase) * pCombParSmoke->head.scaleRandomness + (1.0f - pCombParSmoke->head.scaleRandomness);
     particle->baseScale = pCombParSmoke->head.baseScale * scaleFactor;
     particle->scalePhaseX = dds3GetRandFloatA(dds3EffectBase) * (EFF_EVENT_HALF_TURN * 2.0f);
@@ -1107,14 +1107,14 @@ void effEVECombParSmokePartInit(effEventBillSet_t *pCombParSmoke, s32 index) {
     particle->lateralSpeed = pCombParSmoke->head.lateralSpeed * (dds3GetRandFloatA(dds3EffectBase) * pCombParSmoke->head.lateralSpeedRandomness + (1.0f - pCombParSmoke->head.lateralSpeedRandomness));
 }
 
-void eff_1AEC58(effEventBillSet_t *work);
+void eff_1AEC58(effEVECombParSmoke_t *work);
 
 /* vu0 routine: advance and draw every live particle of one smoke set. */
-void eff_1AEC58(effEventBillSet_t *work) {
+void eff_1AEC58(effEVECombParSmoke_t *work) {
     f32 offset[EFF_EVENT_VECTOR_COMPONENTS];
     f32 origin[EFF_EVENT_VECTOR_COMPONENTS];
     f32 side[EFF_EVENT_VECTOR_COMPONENTS];
-    effEventBillParticle_t *particle;
+    effEVECombParSmokePart_t *particle;
     u8 repeat;
     u32 count;
     s32 duration;
@@ -1161,7 +1161,7 @@ void eff_1AEC58(effEventBillSet_t *work) {
             effEVECombParSmokePartInit(work, i);
         }
         if (age > 0 && age <= duration) {
-            if (particle->motionDelay >= 0) {
+            if (particle->wait >= 0) {
                 drift = particle->lateralSpeed;
                 particle->position[0] += side[0] * drift;
                 particle->position[1] += side[1] * drift;
@@ -1176,7 +1176,7 @@ void eff_1AEC58(effEventBillSet_t *work) {
                 particle->swayAmplitude += swayAmplitudeStep;
                 particle->swayPhase += swayPhaseStep;
             } else {
-                particle->motionDelay++;
+                particle->wait++;
                 offset[0] = particle->position[0];
                 offset[1] = particle->position[1];
                 offset[2] = particle->position[2];
@@ -1250,7 +1250,7 @@ PS2_SYMBOL_AT(sdfGrOt_t, effEveCPSmokeOt2, sdfGrOtTable, 0x620);
  * textured quads per particle into the two ordering tables. */
 /* NON_MATCHING: 493 of 711 words differ (first at +0x214). */
 #ifdef NON_MATCHING
-void effEVECombParSmokeDraw(effEventBillSet_t *pCombParSmoke) {
+void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
     effEveBillBatch_t batch1;
     effEveBillBatch_t batch2;
     f32 matrix[4][4];
@@ -1270,7 +1270,7 @@ void effEVECombParSmokeDraw(effEventBillSet_t *pCombParSmoke) {
     s32 fadeOut;
     s32 colorStartAge;
     s32 colorTransitionFrames;
-    effEventBillParticle_t *particle;
+    effEVECombParSmokePart_t *particle;
     u32 color;
     f32 growth;
     f32 swayPhaseStep;
@@ -1347,7 +1347,7 @@ void effEVECombParSmokeDraw(effEventBillSet_t *pCombParSmoke) {
             effEVECombParSmokePartInit(pCombParSmoke, i);
         }
         if (age > 0 && age <= duration) {
-            if (particle->motionDelay >= 0) {
+            if (particle->wait >= 0) {
                 drift = particle->lateralSpeed;
                 particle->position[0] += side[0] * drift;
                 particle->position[1] += side[1] * drift;
@@ -1362,7 +1362,7 @@ void effEVECombParSmokeDraw(effEventBillSet_t *pCombParSmoke) {
                 particle->swayAmplitude += swayAmplitudeStep;
                 particle->swayPhase += swayPhaseStep;
             } else {
-                particle->motionDelay++;
+                particle->wait++;
                 offset[0] = particle->position[0];
                 offset[1] = particle->position[1];
                 offset[2] = particle->position[2];
@@ -1552,18 +1552,18 @@ void effEVECombParSmokeSetPosition(void *pCombParSmoke, void *pPos) {
 }
 
 /* Set the native byte flag without normalizing it to a boolean. */
-void effEVECombParSmokeSetZtest(effEventBillSet_t *pCombParSmoke, u8 test) {
+void effEVECombParSmokeSetZtest(effEVECombParSmoke_t *pCombParSmoke, u8 test) {
     pCombParSmoke->flag = test;
 }
 
 /* Copy the serialized emitter parameters without changing their values. */
-void effEVECombParSmokeGetParams(const effEventBillParams_t *pCombParSmoke, effEventBillParams_t *pParam) {
+void effEVECombParSmokeGetParams(const effEVECombParSmokeParam_t *pCombParSmoke, effEVECombParSmokeParam_t *pParam) {
     *pParam = *pCombParSmoke;
 }
 
 /* Copy parameters and clamp only start-delay spread and fade divisors;
  * motionDelaySpread remains unvalidated on this native path. */
-void effEVECombParSmokeSetParams(effEventBillParams_t *pCombParSmoke, const effEventBillParams_t *pParam) {
+void effEVECombParSmokeSetParams(effEVECombParSmokeParam_t *pCombParSmoke, const effEVECombParSmokeParam_t *pParam) {
     *pCombParSmoke = *pParam;
     if (pCombParSmoke->fadeIn <= 0) {
         pCombParSmoke->fadeIn = 1;
@@ -1581,12 +1581,12 @@ void effEVECombParSmokeCreate2(void) {
     effEVECombParSmokeCreate(&EVE_ParSmokeParam);
 }
 
-effChanWork_t *effAPPoint4Create(const effChanHead_t *pParams, u16 type, void *pData) {
+effAPPoint4_tag *effAPPoint4Create(const effChanHead_t *pParams, u16 type, void *pData) {
     const effChanHead_t *head = pParams;
     u32 recordCount = head->count;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(recordCount * sizeof(effChanRecord_t) + sizeof(effChanWork_t));
-    effChanWork_t *work = (effChanWork_t *)sdfMemLock(allocation);
-    effChanRecord_t *record = (effChanRecord_t *)(work + 1);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(recordCount * sizeof(effAPPoint4Part_tag) + sizeof(effAPPoint4_tag));
+    effAPPoint4_tag *work = (effAPPoint4_tag *)sdfMemLock(allocation);
+    effAPPoint4Part_tag *record = (effAPPoint4Part_tag *)(work + 1);
     dds3EffectPart_t *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
@@ -1623,11 +1623,11 @@ void effAPPoint4CreatePCF(void *data) {
 
 /* Clone channel work, allocate slots and duplicate a parameter template per record.
  * The record count is captured before allocation; a nonpositive delay modulus becomes one. */
-effChanWork_t *effAPPoint4Copy(effChanSource_t *source) {
+effAPPoint4_tag *effAPPoint4Copy(effChanSource_t *source) {
     u32 recordCount = source->head.count;
-    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(effChanRecord_t) + sizeof(effChanWork_t));
-    effChanWork_t *work = (effChanWork_t *)sdfMemLock(allocationHandle);
-    effChanRecord_t *recordCursor = (effChanRecord_t *)(work + 1);
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(recordCount * sizeof(effAPPoint4Part_tag) + sizeof(effAPPoint4_tag));
+    effAPPoint4_tag *work = (effAPPoint4_tag *)sdfMemLock(allocationHandle);
+    effAPPoint4Part_tag *recordCursor = (effAPPoint4Part_tag *)(work + 1);
     dds3EffectPart_t *parameterTemplate;
     s32 delayModulus;
     u32 recordIndex;
@@ -1652,8 +1652,8 @@ effChanWork_t *effAPPoint4Copy(effChanSource_t *source) {
 }
 
 /* Release slot storage, every duplicated parameter and the backing allocation in native order. */
-void effAPPoint4Delete(effChanWork_t *hData) {
-    effChanRecord_t *recordCursor;
+void effAPPoint4Delete(effAPPoint4_tag *hData) {
+    effAPPoint4Part_tag *recordCursor;
     u32 recordIndex = 0;
     u32 recordCount;
 
@@ -1672,12 +1672,12 @@ void effAPPoint4Delete(effChanWork_t *hData) {
 
 /* vu0 routine: Jitter four control points normal to the path and viewing direction.
  * Reuse the final edge normal for the endpoint; retain XYZ-only scale initialization. */
-void effAPPoint4PartInit(effChanWork_t *pAPPoint4, u32 index) {
+void effAPPoint4PartInit(effAPPoint4_tag *pAPPoint4, u32 index) {
     f32 jitterScale[4];
     f32 lastNormal[4];
     f32 viewDirection[4];
     f32 jitteredPoint[4];
-    effChanRecord_t *record = pAPPoint4->records + index;
+    effAPPoint4Part_tag *record = pAPPoint4->records + index;
     effCubicBezierSlot_t *bezierSlot;
     f32 cursorStep;
     f32 centeredRandom;
@@ -1767,8 +1767,8 @@ void effAPPoint4PartInit(effChanWork_t *pAPPoint4, u32 index) {
 
 /* Step active records, update their packed color/position callbacks, and optionally recycle.
  * The slot-zero lookup precedes the empty-count check; retain the time snapshot and later stored increments. */
-void effAPPoint4Draw(effChanWork_t *hData) {
-    effChanRecord_t *recordCursor = hData->records;
+void effAPPoint4Draw(effAPPoint4_tag *hData) {
+    effAPPoint4Part_tag *recordCursor = hData->records;
     effArrHdr_t *bezierSlots = hData->slots;
     u32 recordCount = hData->head.count;
     u32 recordIndex = 0;
@@ -1852,10 +1852,10 @@ void func_001B0730(effChan_t *channel, f32 *source) {
 /* Jitter each slot and choose its initial unsigned-modulo step.
  * Stored record time is one ahead of the Bezier cursor parameter's sampled step. */
 void effEveAPP4Randomize(effEmit_t *hEffect) {
-    effChanWork_t *channelWork = hEffect->primitive;
+    effAPPoint4_tag *channelWork = hEffect->primitive;
     u32 stepModulus = channelWork->head.steps;
     u32 recordCount = channelWork->head.count;
-    effChanRecord_t *recordCursor = channelWork->records;
+    effAPPoint4Part_tag *recordCursor = channelWork->records;
     u32 recordIndex = 0;
     effCubicBezierSlot_t *bezierSlot;
     s32 randomStep;

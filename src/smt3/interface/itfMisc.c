@@ -36,7 +36,7 @@ typedef struct itfLink_t
 typedef struct
 {
     itfLink_t *activeHead, *activeTail, *firstFree, *lastFree;
-} itfLinkPool_t;
+} itfmisclinkstack_t;
 
 typedef struct { s32 x, y, z, w; } itfColorVector_t;
 
@@ -126,7 +126,7 @@ extern s32 printf(const char *format, ...);
 
 /* Initialize a FIFO free list and empty active list.
  * Native do/while writes at least two nodes; the s8 index can wrap. */
-void itfMiscLinkInitialize(itfLinkPool_t *pool, itfLink_t *nodes, s32 count, s32 stride) {
+void itfMiscLinkInitialize(itfmisclinkstack_t *pool, itfLink_t *nodes, s32 count, s32 stride) {
     s8 index = 0;
     itfLink_t *previous = NULL;
     itfLink_t *node = nodes;
@@ -152,7 +152,7 @@ void itfMiscLinkInitialize(itfLinkPool_t *pool, itfLink_t *nodes, s32 count, s32
 }
 
 /* Move the free-list head to the active-list tail; exhausted pools return NULL. */
-itfLink_t *itfMiscLinkTake(itfLinkPool_t *pstack) {
+itfLink_t *itfMiscLinkTake(itfmisclinkstack_t *pstack) {
     itfLink_t *node = pstack->firstFree;
     itfLink_t *next;
 
@@ -179,7 +179,7 @@ itfLink_t *itfMiscLinkTake(itfLinkPool_t *pstack) {
 }
 
 /* Unlink an active node and append it to the free-list tail; membership is trusted. */
-void itfMiscLinkGive(itfLink_t *pelem, itfLinkPool_t *pstack) {
+void itfMiscLinkGive(itfLink_t *pelem, itfmisclinkstack_t *pstack) {
     itfLink_t *previous = pelem->previous;
     itfLink_t *next = pelem->next;
 

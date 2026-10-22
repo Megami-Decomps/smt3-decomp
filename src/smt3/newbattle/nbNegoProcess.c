@@ -197,7 +197,7 @@ typedef struct nbActionProcessData_t
     s32 partyindex;
     s32 type;
     s32 target;
-    s32 selectbit;
+    s32 select;
     u8 unk_40[0x28];
     s32 unk_68;
     u8 unk_6C[0x124];

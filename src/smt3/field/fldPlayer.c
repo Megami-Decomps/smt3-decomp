@@ -766,7 +766,7 @@ void fldPlayerMotReset(void) {
     if (unit == NULL) {
         return;
     }
-    fldPlayerMotion(((mdlObj_t *)dds3UnitObjectBasicGetControlWorkData(unit)->modelHandle)->current.h.motionIndex,
+    fldPlayerMotion(((mdlObj_t *)dds3UnitObjectBasicGetControlWorkData(unit)->pModel)->current.h.motionIndex,
                     9, 10.0f);
 }
 
@@ -780,7 +780,7 @@ void fldPlayerMotReset2(void) {
     if (unit == NULL) {
         return;
     }
-    fldPlayerMotion(((mdlObj_t *)dds3UnitObjectBasicGetControlWorkData(unit)->modelHandle)->current.h.motionIndex,
+    fldPlayerMotion(((mdlObj_t *)dds3UnitObjectBasicGetControlWorkData(unit)->pModel)->current.h.motionIndex,
                     9, 0.0f);
 }
 

@@ -10,7 +10,7 @@ struct fmFontControl_t {
     s32 pixelByteCount; /* 0x10 */
     s32 capacity; /* 0x14 */
     u32 count; /* 0x18 */
-    fmFontNode_t *head; /* 0x1C */
+    FontMem_t *head; /* 0x1C */
 };
 
 extern fmFontControl_t gFGC;
@@ -41,7 +41,7 @@ s32 fmGetRestBufNum(void) {
 s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 cellHeight,
                                s32 recordBytes) {
     u8 *records = NULL;
-    fmFontNode_t *node;
+    FontMem_t *node;
     s32 count;
     s32 i;
     s32 row;
@@ -56,8 +56,8 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
     gFGC.count = count;
     gFGC.capacity = count;
     gFGC.pixelByteCount = cellWidth * cellHeight / 2;
-    gFGC.nodeAllocation = sdfMemAllocDirect(count * sizeof(fmFontNode_t));
-    gFGC.head = (fmFontNode_t *)sdfMemLock(gFGC.nodeAllocation);
+    gFGC.nodeAllocation = sdfMemAllocDirect(count * sizeof(FontMem_t));
+    gFGC.head = (FontMem_t *)sdfMemLock(gFGC.nodeAllocation);
     if (recordBytes != 0) {
         gFGC.recordStorageAllocation = sdfMemAllocDirect(recordBytes * gFGC.count);
         records = (u8 *)sdfMemLock(gFGC.recordStorageAllocation);
@@ -82,7 +82,7 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
             node->uv.u0 = (column * cellWidth) << 4;
             node->uv.u1 = ((column * cellWidth) << 4) + (cellWidth << 4);
             if (records != NULL) {
-                node->item = (frFontRecord_t *)(records + i * recordBytes);
+                node->item = (GsFont_t *)(records + i * recordBytes);
             } else {
                 node->item = NULL;
             }
@@ -107,8 +107,8 @@ s32 fmDestroyFontMemControl(void) {
 }
 
 /* Unlink the first live node after the sentinel, or NULL when its slot is empty. */
-fmFontNode_t *fmRentFontMem(void) {
-    fmFontNode_t *resourceNode = gFGC.head->next;
+FontMem_t *fmRentFontMem(void) {
+    FontMem_t *resourceNode = gFGC.head->next;
 
     if (resourceNode->nodeIndex == 0) {
         return NULL;
@@ -120,9 +120,9 @@ fmFontNode_t *fmRentFontMem(void) {
 }
 
 /* Insert after the list's fixed anchor and update the entry count. */
-void fmRetFontMem(fmFontNode_t *pFontArea) {
-    fmFontNode_t *anchor = gFGC.head;
-    fmFontNode_t *nextNode = anchor->next;
+void fmRetFontMem(FontMem_t *pFontArea) {
+    FontMem_t *anchor = gFGC.head;
+    FontMem_t *nextNode = anchor->next;
 
     pFontArea->prev = anchor;
     pFontArea->next = nextNode;

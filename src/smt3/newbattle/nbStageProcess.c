@@ -269,7 +269,7 @@ void StageLoad(void)
     case 2:
         nbStageState.unk00 = 3;
         data->unk7C = nbStageState.unk04;
-        data->unk7E = nbStageState.unk06;
+        data->StageMinor = nbStageState.unk06;
         break;
     }
 }
@@ -288,7 +288,7 @@ void StageFree(void)
     nbStageState.unk04 = 0;
     nbStageState.unk06 = 0;
     data->unk7C = 0;
-    data->unk7E = 0;
+    data->StageMinor = 0;
     nbStageState.data = 0;
 }
 
@@ -324,7 +324,7 @@ void *nbStageProcess1(dds3ProcessID_t *id)
 
 void nbStageShutdown(dds3ProcessID_t *id)
 {
-    nbGetMainProcessData()->stageProcess = 0;
+    nbGetMainProcessData()->StageProcessID = 0;
     StageFree();
     nbStageState.data = 0;
 }
@@ -352,7 +352,7 @@ void nbInitStageProcess(nbMainProcessData_t *data)
     nbStageState.unk06 = 0;
     id = dds3StartProcess(D_00543688, 0x3F9, 1, 1, nbStageProcess1, nbStageShutdown, NULL);
     dds3LinkProcess(data->unkBC, id);
-    data->stageProcess = id;
+    data->StageProcessID = id;
     draw = dds3StartProcess(D_00543698, 0x2B0E, 1, 1, nbStageDrawProcess1, NULL, NULL);
     dds3LinkProcess(id, draw);
     if (nbGetEncountOn() == 0) {

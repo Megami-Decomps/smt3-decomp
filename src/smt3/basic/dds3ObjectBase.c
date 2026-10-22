@@ -111,7 +111,7 @@ dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *
     control = sdfChipAllocDirect(0xAC);
     memset(control, 0, 0xAC);
     control->modelType = 3;
-    control->eventArray = dds3GetBasicArrayHandle(0);
+    control->hEventBasicArray = dds3GetBasicArrayHandle(0);
     control->control[0] = pObjectBasic;
     for (index = 0; index < 24; index++) {
         control->modelParts[index] = -1;
@@ -143,7 +143,7 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *pControl
     if (pControl->modelRoot != NULL) {
         sdfModelRootFree(pControl->modelRoot, 1, 1);
     }
-    dds3FreeBasicArrayHandle(pControl->eventArray);
+    dds3FreeBasicArrayHandle(pControl->hEventBasicArray);
     sdfChipFreeDirect(pControl);
 }
 
@@ -210,12 +210,12 @@ dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *pObjectBasic, s32 itemTy
 
 dds3BasicArrayHandle_t *dds3ObjectBaseGetEventArray(dds3Basic_t *pObjectBasic)
 {
-    return dds3GetBaseControlWorkData(pObjectBasic)->eventArray;
+    return dds3GetBaseControlWorkData(pObjectBasic)->hEventBasicArray;
 }
 
 void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic)
 {
-    return dds3GetBaseControlWorkData(pObjectBasic)->modelHandle;
+    return dds3GetBaseControlWorkData(pObjectBasic)->pModel;
 }
 
 /* modelType selects the model-context or raw model/motion ownership path. */
@@ -225,10 +225,10 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
     dds3UnitObjectBasicWorkData_t *work;
 
     control = dds3GetBaseControlWorkData(pObjectBasic);
-    if (control->modelHandle != NULL) {
+    if (control->pModel != NULL) {
         if (control->modelType != 1) {
             if (control->modelType == 0) {
-                mdlFree(control->modelHandle);
+                mdlFree(control->pModel);
                 work = pObjectBasic->workdata;
                 if (work->unit != NULL) {
                     evtDeleteUnitHandle(work->unit);
@@ -236,10 +236,10 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
                 }
             }
         } else {
-            sdfModelRootFree(control->modelHandle, 1, 1);
+            sdfModelRootFree(control->pModel, 1, 1);
             sdfMotionCtrlrFree(control->motion);
         }
-        control->modelHandle = NULL;
+        control->pModel = NULL;
         control->modelType = 3;
     }
 }
@@ -312,8 +312,8 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
     s32 i;
 
     control = dds3GetBaseControlWorkData(pObjectBasic);
-    if (control->modelHandle != NULL) {
-        mdlFree(control->modelHandle);
+    if (control->pModel != NULL) {
+        mdlFree(control->pModel);
     }
     obj = mdlLoad(major, minor);
     hijriParts = D_0052F850;
@@ -557,10 +557,10 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
     SDF_VU0_VECTOR_W_SET_ONE();
     mdlSetPosition(obj);
     pObjectBasic->poseset->r = obj->objectRadius;
-    control->modelHandle = obj;
+    control->pModel = obj;
     work = pObjectBasic->workdata;
     control->modelType = 0;
-    control->controlSvs = 0;
+    control->svs = 0;
     if (work->unit == NULL) {
         work->unit = evtCreateUnitHandle(pObjectBasic, obj);
     }
@@ -582,11 +582,11 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *pObjectBasic)
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
     control->modelType = 1;
-    control->modelHandle = model;
+    control->pModel = model;
     control->motion = motion;
-    control->animeSpeed = 1.0f;
-    control->animeMode = 0;
-    control->controlSvs = 0;
+    control->MotSpeed = 1.0f;
+    control->MotMode = 0;
+    control->svs = 0;
 }
 
 /* Modes 0, 4 and 5 play at unit speed; the remaining modes start stopped. */
@@ -596,32 +596,32 @@ void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *pObjectBasic, u32 mode)
 
     switch (mode) {
     case 0:
-        control->animeMode = 0;
-        control->animeSpeed = 1.0f;
+        control->MotMode = 0;
+        control->MotSpeed = 1.0f;
         break;
     case 1:
-        control->animeMode = 1;
-        control->animeSpeed = 0.0f;
+        control->MotMode = 1;
+        control->MotSpeed = 0.0f;
         break;
     case 2:
-        control->animeMode = 2;
-        control->animeSpeed = 0.0f;
+        control->MotMode = 2;
+        control->MotSpeed = 0.0f;
         break;
     case 3:
-        control->animeMode = 3;
-        control->animeSpeed = 0.0f;
+        control->MotMode = 3;
+        control->MotSpeed = 0.0f;
         break;
     case 4:
-        control->animeMode = 4;
-        control->animeSpeed = 1.0f;
+        control->MotMode = 4;
+        control->MotSpeed = 1.0f;
         break;
     case 5:
-        control->animeMode = 5;
-        control->animeSpeed = 1.0f;
+        control->MotMode = 5;
+        control->MotSpeed = 1.0f;
         break;
     case 6:
-        control->animeMode = 6;
-        control->animeSpeed = 0.0f;
+        control->MotMode = 6;
+        control->MotSpeed = 0.0f;
         break;
     }
 }
@@ -661,7 +661,7 @@ void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBa
     rsetOtOfs(0x41);
     rsetTest(1, 1, 0x80, 2, 0, 0, 1, 1);
     rsetFrameMaskRgbOn();
-    mdlLink(control->modelHandle, &D_002F6A38);
+    mdlLink(control->pModel, &D_002F6A38);
     rsetOtOfs(0x43);
     rsetFrameMaskRgbOff();
     rsetAlpha(0);
@@ -684,7 +684,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
     if (dds3ObjectBaseCheckFlag(pObjectBasic, 1) != 0) {
         return;
     }
-    if (control->modelHandle == NULL) {
+    if (control->pModel == NULL) {
         return;
     }
     if (control->modelType != 1) {
@@ -697,11 +697,11 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
         }
         light = (void *)((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->unit->value;
         if (light != NULL) {
-            *(void **)&((mdlObj_t *)control->modelHandle)->inner->light = light;
+            *(void **)&((mdlObj_t *)control->pModel)->inner->light = light;
         } else {
-            *(void **)&((mdlObj_t *)control->modelHandle)->inner->light = NULL;
+            *(void **)&((mdlObj_t *)control->pModel)->inner->light = NULL;
         }
-        mdlLink(control->modelHandle, pModelOt);
+        mdlLink(control->pModel, pModelOt);
         return;
     }
     if ((pObjectBasic->color >> 24) == 0) {
@@ -712,20 +712,20 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
         if (hojiID > 0) {
             if (fldGetAnimeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, hojiID) ==
                 0) {
-                switch (control->animeMode) {
+                switch (control->MotMode) {
                 case 0:
-                    control->animeSpeed = 1.0f;
+                    control->MotSpeed = 1.0f;
                     break;
                 case 1:
-                    control->animeSpeed += 0.05f;
-                    if (1.0f < control->animeSpeed) {
-                        control->animeSpeed = 1.0f;
+                    control->MotSpeed += 0.05f;
+                    if (1.0f < control->MotSpeed) {
+                        control->MotSpeed = 1.0f;
                     }
                     break;
                 case 2:
-                    control->animeSpeed += 0.025f;
-                    if (1.0f < control->animeSpeed) {
-                        control->animeSpeed = 1.0f;
+                    control->MotSpeed += 0.025f;
+                    if (1.0f < control->MotSpeed) {
+                        control->MotSpeed = 1.0f;
                     }
                     break;
                 case 3:
@@ -741,91 +741,91 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                     hojiID = 0;
                     break;
                 }
-                if (control->animeMode == 6) {
+                if (control->MotMode == 6) {
                     sdfMotionSeek(control->motion, (f32)control->motion->frameLength);
-                } else if (0.0f < control->animeSpeed) {
-                    control->motion->speed = control->animeSpeed;
+                } else if (0.0f < control->MotSpeed) {
+                    control->motion->speed = control->MotSpeed;
                     sdfMotionNext(control->motion);
                 }
-                sdfModelEvalTm(control->modelHandle);
+                sdfModelEvalTm(control->pModel);
             } else {
-                switch (control->animeMode) {
+                switch (control->MotMode) {
                 case 0:
                 case 1:
                 case 2:
-                    control->animeSpeed = 0.0f;
-                    control->animeMode = 3;
+                    control->MotSpeed = 0.0f;
+                    control->MotMode = 3;
                     break;
                 case 3:
-                    control->animeSpeed = 0.0f;
+                    control->MotSpeed = 0.0f;
                     break;
                 case 4:
-                    control->animeSpeed -= 0.05f;
-                    if (control->animeSpeed < 0.0f) {
-                        control->animeSpeed = 0.0f;
+                    control->MotSpeed -= 0.05f;
+                    if (control->MotSpeed < 0.0f) {
+                        control->MotSpeed = 0.0f;
                     }
                     break;
                 case 5:
-                    control->animeSpeed -= 0.02f;
-                    if (control->animeSpeed < 0.0f) {
-                        control->animeSpeed = 0.0f;
+                    control->MotSpeed -= 0.02f;
+                    if (control->MotSpeed < 0.0f) {
+                        control->MotSpeed = 0.0f;
                     }
                     break;
                 case 6:
                     hojiID = 0;
                     break;
                 }
-                if (control->animeMode == 6) {
+                if (control->MotMode == 6) {
                     sdfMotionSeek(control->motion, (f32)control->motion->frameLength);
-                } else if (0.0f < control->animeSpeed) {
-                    control->motion->speed = control->animeSpeed;
+                } else if (0.0f < control->MotSpeed) {
+                    control->motion->speed = control->MotSpeed;
                     sdfMotionNext(control->motion);
                 }
-                sdfModelEvalTm(control->modelHandle);
+                sdfModelEvalTm(control->pModel);
             }
         } else {
-            u32 mode = control->animeMode;
+            u32 mode = control->MotMode;
             switch (mode) {
             case 0:
-                control->animeSpeed = 1.0f;
+                control->MotSpeed = 1.0f;
                 break;
             case 1:
-                control->animeSpeed += 0.05f;
-                if (1.0f < control->animeSpeed) {
-                    control->animeSpeed = 1.0f;
+                control->MotSpeed += 0.05f;
+                if (1.0f < control->MotSpeed) {
+                    control->MotSpeed = 1.0f;
                 }
                 break;
             case 2:
-                control->animeSpeed += 0.025f;
-                if (1.0f < control->animeSpeed) {
-                    control->animeSpeed = 1.0f;
+                control->MotSpeed += 0.025f;
+                if (1.0f < control->MotSpeed) {
+                    control->MotSpeed = 1.0f;
                 }
                 break;
             case 3:
-                control->animeSpeed = 0.0f;
+                control->MotSpeed = 0.0f;
                 break;
             case 4:
-                control->animeSpeed -= 0.05f;
-                if (control->animeSpeed < 0.0f) {
-                    control->animeSpeed = 0.0f;
+                control->MotSpeed -= 0.05f;
+                if (control->MotSpeed < 0.0f) {
+                    control->MotSpeed = 0.0f;
                 }
                 /* fallthrough */
             case 5:
-                control->animeSpeed -= 0.02f;
-                if (control->animeSpeed < 0.0f) {
-                    control->animeSpeed = 0.0f;
+                control->MotSpeed -= 0.02f;
+                if (control->MotSpeed < 0.0f) {
+                    control->MotSpeed = 0.0f;
                 }
                 break;
             }
-            if (0.0f < control->animeSpeed) {
-                control->motion->speed = control->animeSpeed;
+            if (0.0f < control->MotSpeed) {
+                control->motion->speed = control->MotSpeed;
                 sdfMotionNext(control->motion);
             }
-            sdfModelEvalTm(control->modelHandle);
+            sdfModelEvalTm(control->pModel);
         }
     }
-    ((sdfModelRootNode_t *)control->modelHandle)->color = pObjectBasic->color;
-    sdfModelLinkOt(pModelOt, control->modelHandle);
+    ((sdfModelRootNode_t *)control->pModel)->color = pObjectBasic->color;
+    sdfModelLinkOt(pModelOt, control->pModel);
     pModelOt = NULL;
 }
 
@@ -894,7 +894,7 @@ void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *pObjectBasic, u32 svs)
     dds3ObjectBaseControlWorkData_t *control;
 
     control = dds3GetBaseControlWorkData(pObjectBasic);
-    control->controlSvs = svs;
+    control->svs = svs;
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D0);

@@ -10,8 +10,8 @@ void *dds3GetProcessData(dds3ProcessID_t *id);
 
 /* SMT3 allocates and clears 0xD4 bytes; the process flag helpers use its head. */
 typedef struct pmdCutInfo_t {
-    s32 firstFrame;
-    s32 lastFrame;
+    s32 FirstFrame;
+    s32 LastFrame;
 } pmdCutInfo_t;
 
 typedef struct evtBlendVecColor_t {
@@ -59,15 +59,15 @@ typedef struct evtPolygonMovieWork_t {
     u8 unk80[4];
     pmdSceneFogTable_t *sfogTable;
     u8 unk88[4];
-    effBlurQuad_t *blur2Table;
+    dds3Effect_Blur_t *blur2Table;
     u8 unk90[4];
-    effBlurTemplateBody_t *mblurTable;
+    dds3Effect_PartialMultiBlurParam_t *mblurTable;
     u8 unk98[4];
     effBlurScatterParams_t *dblurTable;
     u8 unkA0[4];
-    effSolidRectParams_t *filterTable;
+    dds3Effect_Filter_t *filterTable;
     u8 unkA8[4];
-    effResourceRectParams_t *mfilterTable;
+    dds3Effect_PartialMultiFilterParam_t *mfilterTable;
     u8 unkB0[4];
     effBlurScaleParams_t *rblurTable;
     u8 unkB8[4];
@@ -168,17 +168,17 @@ extern s16 dds3ScreenBlurScale;
 extern u8 dds3ScreenBlurFlag;
 extern u32 dds3LightParam[];
 extern pmdSceneFogTable_t D_0056D020;
-extern effBlurQuad_t D_0056D040;
-extern effBlurTemplateBody_t D_0056D070;
+extern dds3Effect_Blur_t D_0056D040;
+extern dds3Effect_PartialMultiBlurParam_t D_0056D070;
 extern effBlurScatterParams_t D_0056D0A0;
 extern effBlurScaleParams_t D_0056D0D0;
-extern effResourceRectParams_t D_0056D100;
-extern effSolidRectParams_t D_0056D130;
+extern dds3Effect_PartialMultiFilterParam_t D_0056D100;
+extern dds3Effect_Filter_t D_0056D130;
 extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
-extern void Eve_BlurSetParam(effBlurQuad_t *pParam);
+extern void Eve_BlurSetParam(dds3Effect_Blur_t *pParam);
 extern void Eve_BlurON(void);
 extern void Eve_BlurOFF(void);
-extern void Eve_PartialMultiBlurSetParam(effBlurTemplateBody_t *pParam);
+extern void Eve_PartialMultiBlurSetParam(dds3Effect_PartialMultiBlurParam_t *pParam);
 extern void Eve_PartialMultiBlurON(void);
 extern void Eve_PartialMultiBlurOFF(void);
 extern void Eve_DistortionBlurSetParam(effBlurScatterParams_t *pParam);
@@ -187,19 +187,19 @@ extern void Eve_DistortionBlurOFF(void);
 extern void Eve_RippleBlurSetParam(effBlurScaleParams_t *pParam);
 extern void Eve_RippleBlurON(void);
 extern void Eve_RippleBlurOFF(void);
-extern void Eve_PartialMultiFilterSetParam(effResourceRectParams_t *pParam);
+extern void Eve_PartialMultiFilterSetParam(dds3Effect_PartialMultiFilterParam_t *pParam);
 extern void Eve_PartialMultiFilterON(void);
 extern void Eve_PartialMultiFilterOFF(void);
-extern void Eve_FilterSetParam(effSolidRectParams_t *pParam);
+extern void Eve_FilterSetParam(dds3Effect_Filter_t *pParam);
 extern void Eve_FilterON(void);
 extern void Eve_FilterOFF(void);
 void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *key1, evtBlendVecColor_t *key2, evtBlendVecColor_t *d);
-void evtHokanBlur2(s32 hokan, f32 ratio, effBlurQuad_t *key1, effBlurQuad_t *key2, effBlurQuad_t *d);
-void evtHokanMultBlur(s32 hokan, f32 ratio, effBlurTemplateBody_t *key1, effBlurTemplateBody_t *key2, effBlurTemplateBody_t *d);
+void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blur_t *key2, dds3Effect_Blur_t *d);
+void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *key1, dds3Effect_PartialMultiBlurParam_t *key2, dds3Effect_PartialMultiBlurParam_t *d);
 void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlurScatterParams_t *key2, effBlurScatterParams_t *d);
 void evtHokanRipBlur(s32 hokan, f32 ratio, effBlurScaleParams_t *key1, effBlurScaleParams_t *key2, effBlurScaleParams_t *d);
-void evtHokanMultFilter(s32 hokan, f32 ratio, effResourceRectParams_t *key1, effResourceRectParams_t *key2, effResourceRectParams_t *d);
-void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRectParams_t *key2, effSolidRectParams_t *d);
+void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam_t *key1, dds3Effect_PartialMultiFilterParam_t *key2, dds3Effect_PartialMultiFilterParam_t *d);
+void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d);
 s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, char *effname, char *targetname, s32 posindex, s32 cutno);
 f32 GetKeyFrameRatio(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now);
 void DelEffectTable_evtPolygonMovie(evtPolygonMovieWork_t *wdata, s32 no);
@@ -223,16 +223,16 @@ extern f32 evtHokanFogParam[4];
 extern u32 D_0032C830[4];
 
 
-extern effBlurQuad_t D_0032C840;
+extern dds3Effect_Blur_t D_0032C840;
 
 
-extern effBlurTemplateBody_t D_0032C870;
+extern dds3Effect_PartialMultiBlurParam_t D_0032C870;
 
 
-extern effSolidRectParams_t D_0032C8A0;
+extern dds3Effect_Filter_t D_0032C8A0;
 
 
-extern effResourceRectParams_t D_0032C8C0;
+extern dds3Effect_PartialMultiFilterParam_t D_0032C8C0;
 
 
 extern effBlurScatterParams_t D_0032C8F0;
@@ -745,14 +745,14 @@ f32 GetKeyFrameRatio(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     s32 end;
 
     if (now < f->frame) {
-        start = wdata->cutInfo->firstFrame;
+        start = wdata->cutInfo->FirstFrame;
         end = f->frame;
     } else {
         start = f->frame;
         if (nf != NULL) {
             end = nf->frame;
         } else {
-            end = wdata->cutInfo->lastFrame;
+            end = wdata->cutInfo->LastFrame;
         }
     }
     if (end != start) {
@@ -833,8 +833,8 @@ void SFogFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
-    effBlurQuad_t *key1;
-    effBlurQuad_t *key2;
+    dds3Effect_Blur_t *key1;
+    dds3Effect_Blur_t *key2;
     s32 hokan;
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
@@ -863,8 +863,8 @@ void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 void MBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
-    effBlurTemplateBody_t *key1;
-    effBlurTemplateBody_t *key2;
+    dds3Effect_PartialMultiBlurParam_t *key1;
+    dds3Effect_PartialMultiBlurParam_t *key2;
     s32 hokan;
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
@@ -953,8 +953,8 @@ void RBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTa
 void MFilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
-    effResourceRectParams_t *key1;
-    effResourceRectParams_t *key2;
+    dds3Effect_PartialMultiFilterParam_t *key1;
+    dds3Effect_PartialMultiFilterParam_t *key2;
     s32 hokan;
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
@@ -983,8 +983,8 @@ void MFilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrame
 void FilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
-    effSolidRectParams_t *key1;
-    effSolidRectParams_t *key2;
+    dds3Effect_Filter_t *key1;
+    dds3Effect_Filter_t *key2;
     s32 hokan;
 
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
@@ -1117,7 +1117,7 @@ s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
     FrameRun(work);
     work->nowFrame++;
     ret = 0;
-    if (work->nowFrame >= work->cutInfo->lastFrame) {
+    if (work->nowFrame >= work->cutInfo->LastFrame) {
         printf("end polygon movie! frame:%d\n", work->nowFrame);
         return -1;
     }
@@ -1340,7 +1340,7 @@ void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *key1, evtBlendVe
     d->color = PackRGBAWord(128.0f);
 }
 
-void evtHokanBlur2(s32 hokan, f32 ratio, effBlurQuad_t *key1, effBlurQuad_t *key2, effBlurQuad_t *d)
+void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blur_t *key2, dds3Effect_Blur_t *d)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -1357,7 +1357,7 @@ void evtHokanBlur2(s32 hokan, f32 ratio, effBlurQuad_t *key1, effBlurQuad_t *key
     d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
     d->blendControl = key1->blendControl;
     d->angle = evtHokanFloat(hokan, ratio, key1->angle, key2->angle);
-    d->displacement = evtHokanFloat(hokan, ratio, key1->displacement, key2->displacement);
+    d->scale = evtHokanFloat(hokan, ratio, key1->scale, key2->scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         d->position[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->position[positionOrCornerIndex], key2->position[positionOrCornerIndex]);
     }
@@ -1368,7 +1368,7 @@ void evtHokanBlur2(s32 hokan, f32 ratio, effBlurQuad_t *key1, effBlurQuad_t *key
     }
 }
 
-void evtHokanMultBlur(s32 hokan, f32 ratio, effBlurTemplateBody_t *key1, effBlurTemplateBody_t *key2, effBlurTemplateBody_t *d)
+void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *key1, dds3Effect_PartialMultiBlurParam_t *key2, dds3Effect_PartialMultiBlurParam_t *d)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
@@ -1386,7 +1386,7 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, effBlurTemplateBody_t *key1, effBlur
     d->source.color = evtHokanColor(hokan, ratio, key1->source.color, key2->source.color);
     d->source.blendControl = key1->source.blendControl;
     d->source.angle = evtHokanFloat(hokan, ratio, key1->source.angle, key2->source.angle);
-    d->source.displacement = evtHokanFloat(hokan, ratio, key1->source.displacement, key2->source.displacement);
+    d->source.scale = evtHokanFloat(hokan, ratio, key1->source.scale, key2->source.scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         d->source.position[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->source.position[positionOrCornerIndex], key2->source.position[positionOrCornerIndex]);
     }
@@ -1397,11 +1397,11 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, effBlurTemplateBody_t *key1, effBlur
     }
 }
 
-void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRectParams_t *key2, effSolidRectParams_t *d);
+void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d);
 
 /* NON_MATCHING: 1 of 72 words differ (first at +0xC0). */
 #ifdef NON_MATCHING
-void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRectParams_t *key2, effSolidRectParams_t *d)
+void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d)
 {
     s32 cornerIndex;
     s32 coordinateIndex;
@@ -1427,7 +1427,7 @@ void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRe
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanFilter);
 #endif
 
-void evtHokanMultFilter(s32 hokan, f32 ratio, effResourceRectParams_t *key1, effResourceRectParams_t *key2, effResourceRectParams_t *d)
+void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam_t *key1, dds3Effect_PartialMultiFilterParam_t *key2, dds3Effect_PartialMultiFilterParam_t *d)
 {
     s32 centerCoordinateIndex;
 

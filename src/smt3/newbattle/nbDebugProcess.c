@@ -166,7 +166,7 @@ typedef struct nbActionProcessData_t
     s32 partyindex;
     s32 type;
     s32 target;
-    s32 selectbit;
+    s32 select;
     u8 unk_40[0x28];
     s32 unk_68;
     u8 unk_6C[0x124];
@@ -312,11 +312,11 @@ typedef struct {
     s32 hp;
     s32 mp;
     u32 bad;
-} nbDebugWork_t;
+} nbDebugProcessData_t;
 
-extern void SetDvlChange(nbDebugWork_t *d);
+extern void SetDvlChange(nbDebugProcessData_t *d);
 
-extern void DispHpMpBad2(nbDebugWork_t *d, nbFormation_t *form);
+extern void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -368,7 +368,7 @@ INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispBadStatus);
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", DispHpMpBad2);
 
-void DispHpMpBad(nbDebugWork_t *d)
+void DispHpMpBad(nbDebugProcessData_t *d)
 {
     nbFormation_t *form;
     s32 i;
@@ -387,7 +387,7 @@ void DispHpMpBad(nbDebugWork_t *d)
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SelectMenu);
 
-s32 SelectHpMp(nbDebugWork_t *d)
+s32 SelectHpMp(nbDebugProcessData_t *d)
 {
     datUnitWork_t *work;
     s32 delta;
@@ -455,7 +455,7 @@ void SetSelect(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SetDvlChange);
 
-void SetTarget_nbDebugProcess(nbDebugWork_t *a)
+void SetTarget_nbDebugProcess(nbDebugProcessData_t *a)
 {
     nbFormation_t *form;
     nbParty_t *party;
@@ -483,7 +483,7 @@ void SetTarget_nbDebugProcess(nbDebugWork_t *a)
     }
 }
 
-void BackUpHpMpBad(nbDebugWork_t *d)
+void BackUpHpMpBad(nbDebugProcessData_t *d)
 {
     datUnitWork_t *unit;
 
@@ -493,7 +493,7 @@ void BackUpHpMpBad(nbDebugWork_t *d)
     d->bad = unit->badstatus;
 }
 
-void SetNextSeq(nbDebugWork_t *d)
+void SetNextSeq(nbDebugProcessData_t *d)
 {
     s32 seq;
 
@@ -532,12 +532,12 @@ void nbDebugShutdown(dds3ProcessID_t *id)
     data->debugproc = NULL;
 }
 
-nbDebugWork_t *InitDebugProcessData(nbMainProcessData_t *data)
+nbDebugProcessData_t *InitDebugProcessData(nbMainProcessData_t *data)
 {
-    nbDebugWork_t *w;
+    nbDebugProcessData_t *w;
 
-    w = sdfChipAllocDirect(sizeof(nbDebugWork_t));
-    memset(w, 0, sizeof(nbDebugWork_t));
+    w = sdfChipAllocDirect(sizeof(nbDebugProcessData_t));
+    memset(w, 0, sizeof(nbDebugProcessData_t));
     w->data = data;
     w->unk_04 = 0;
     w->unk_14 = 0;

@@ -17,10 +17,10 @@ typedef struct nbCamera_t {
     sdfVector4_t direction;
     f32 distance;
     f32 fovy;
-    u32 stateChange;
+    u32 state_change;
     u32 state;
-    u32 stateOld;
-    u32 stateOld2;
+    u32 state_old;
+    u32 state_old2;
     u32 phase;
     s32 frame;
     u32 type;
@@ -66,13 +66,13 @@ extern f32 D_0054F3A0[];
 /* The per-shot parameters the nbCameraShot_*_Set2 family reads; 0x30 on the
  * stack at every call site. */
 typedef struct nbCameraSkillInfo_t {
-    u32 shot1;
-    u32 shot23;
+    u32 shot_1;
+    u32 shot_23;
     f32 angleH;
     f32 angleW;
-    f32 heightMin;
-    f32 widthMin;
-    u32 ptr1;
+    f32 HeightMin;
+    f32 WidthMin;
+    u32 ptr_1;
     u32 ptr23;
     u32 anim;
     u8 pad24[0xC];
@@ -270,8 +270,8 @@ s32 nbCameraBoss_Foru_SIMON_Set(nbCamera_t *pNbCamera)
         } else {
             work.angleW = -0.5235987f;
         }
-        work.heightMin = 0.0f;
-        work.widthMin = 500.0f;
+        work.HeightMin = 0.0f;
+        work.WidthMin = 500.0f;
         nbCameraShot_TargetParty_Set2(pNbCamera, &work);
     } else {
         effBTLModelAllShow();
@@ -761,8 +761,8 @@ s32 nbCameraBoss_Bsnet_Attack_Cut1_Set(nbCamera_t *pNbCamera)
     } else {
         work.angleW = -0.5235987f;
     }
-    work.heightMin = 0.0f;
-    work.widthMin = 0.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 0.0f;
     nbCameraShot_Invoke_Set2(pNbCamera, &work);
     pNbCamera->target.y -= pForm->h * pForm->scl * 0.25f;
     nbCameraShot_GroundCollision(pNbCamera);
@@ -797,8 +797,8 @@ s32 nbCameraBoss_Bsnet_Cut1_Set(nbCamera_t *pNbCamera)
     } else {
         work.angleW = -0.5235987f;
     }
-    work.heightMin = 0.0f;
-    work.widthMin = 0.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 0.0f;
     nbCameraShot_Invoke_Set2(pNbCamera, &work);
     pNbCamera->target.y -= pForm->h * pForm->scl * 0.25f;
     nbCameraShot_GroundCollision(pNbCamera);
@@ -1559,8 +1559,8 @@ s32 nbCameraBoss_Bspish_Cut1_Set(nbCamera_t *pNbCamera)
             work.angleW = -0.5235987f;
             nbCameraBossCutFlag = 1;
         }
-        work.heightMin = 0.0f;
-        work.widthMin = 0.0f;
+        work.HeightMin = 0.0f;
+        work.WidthMin = 0.0f;
         nbCameraShot_Invoke_Set2(pNbCamera, &work);
         nbCameraShot_GroundCollision(pNbCamera);
         break;
@@ -3594,7 +3594,7 @@ s32 nbCameraHero_Cut1_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
     }
     nbCameraHero_Cut_Frame = 0;
     if (nbCameraHero_Cut2_Run(pNbCamera, pNBSInfo) == 0) {
-        if (pNBSInfo->ptr1 != 6) {
+        if (pNBSInfo->ptr_1 != 6) {
             return 0;
         }
         nbCameraShot_PullOne_Init(pNbCamera);
@@ -3619,7 +3619,7 @@ s32 nbCameraHero_Cut1_Run(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
     if (nbCameraHero_Cut2_Run(pNbCamera, pNBSInfo) != 0) {
         return 1;
     }
-    if (pNBSInfo->ptr1 != 6) {
+    if (pNBSInfo->ptr_1 != 6) {
         return 0;
     }
     nbCameraShot_PullOne_Calc(pNbCamera, 0.45f);

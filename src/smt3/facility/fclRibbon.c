@@ -39,34 +39,34 @@ typedef struct
     /* 0x0C */ s32 flags;
     /* 0x10 */ s16 unk_10;
     /* 0x12 */ u16 unk_12;
-    /* 0x14 */ s32 activeTime;
-    /* 0x18 */ s32 deactiveTime;
+    /* 0x14 */ s32 ctr_act;
+    /* 0x18 */ s32 ctr_deact;
     /* 0x1C */ s32 phase;
     /* 0x20 */ s32 count;
-} fclRbnWork_t;
+} fclRibbon_t;
 
 extern void sdfMemFreeDirect(void *aHandle);
 
-extern void MoveActive(fclRbnWork_t *phandle);
+extern void MoveActive(fclRibbon_t *phandle);
 
-extern void MoveDeactive(fclRbnWork_t *phandle);
+extern void MoveDeactive(fclRibbon_t *phandle);
 
-extern void fclRbnRelease(fclRbnWork_t *phandle);
+extern void fclRbnRelease(fclRibbon_t *phandle);
 
-extern void fclRbnSwitchActive(fclRbnWork_t *phandle, s32 index);
+extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
-extern void fclRbnRelease(fclRbnWork_t *phandle);
+extern void fclRbnRelease(fclRibbon_t *phandle);
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnInit);
 
-void fclRbnRelease(fclRbnWork_t *phandle)
+void fclRbnRelease(fclRibbon_t *phandle)
 {
     sdfMemFreeDirect(phandle->allocation);
 }
 
-void fclRbnCalc(fclRbnWork_t *phandle)
+void fclRbnCalc(fclRibbon_t *phandle)
 {
     if (phandle->flags & 1) {
         MoveActive(phandle);
@@ -79,15 +79,15 @@ void fclRbnCalc(fclRbnWork_t *phandle)
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnDraw);
 
-void fclRbnSwitchActive(fclRbnWork_t *phandle, s32 index)
+void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
 {
     if (index >= 0 && index < phandle->count && index != phandle->unk_10)
     {
         phandle->unk_12 = phandle->unk_10;
         phandle->flags |= 3;
         phandle->unk_10 = index;
-        phandle->activeTime = 0x40;
-        phandle->deactiveTime = 0x80;
+        phandle->ctr_act = 0x40;
+        phandle->ctr_deact = 0x80;
         phandle->phase = 0;
     }
 }
@@ -96,20 +96,20 @@ INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnSetPara);
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", dumpCursorInfo);
 
-void MoveActive(fclRbnWork_t *phandle)
+void MoveActive(fclRibbon_t *phandle)
 {
-    phandle->activeTime -= 8;
-    if (phandle->activeTime <= 0) {
-        phandle->activeTime = 0;
+    phandle->ctr_act -= 8;
+    if (phandle->ctr_act <= 0) {
+        phandle->ctr_act = 0;
         phandle->flags &= ~1;
     }
 }
 
-void MoveDeactive(fclRbnWork_t *phandle)
+void MoveDeactive(fclRibbon_t *phandle)
 {
-    phandle->deactiveTime -= 0x10;
-    if (phandle->deactiveTime <= 0) {
-        phandle->deactiveTime = 0;
+    phandle->ctr_deact -= 0x10;
+    if (phandle->ctr_deact <= 0) {
+        phandle->ctr_deact = 0;
         phandle->flags &= ~2;
     }
 }

@@ -9,7 +9,7 @@ extern u64 *effPkt2DAllocF4(u32 prim);
 
 extern u8 dds3EffectBase[];
 
-void dds3EffectBlur(const effBlurQuad_t *source);
+void dds3EffectBlur(const dds3Effect_Blur_t *source);
 
 sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
@@ -103,22 +103,22 @@ typedef struct effBlurPrimTriStrip_t {
     effBlurPrimVertex_t vtx[4];
 } effBlurPrimTriStrip_t;
 
-void dds3EffectBlurDrawQuad(const effBlurQuad_t *pBlur, void *pPrim);
+void dds3EffectBlurDrawQuad(const dds3Effect_Blur_t *pBlur, void *pPrim);
 
 void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *texture);
 
-void dds3EffectBlurDrawAlphaMulti(sdfDrawTag_t *list, const effBlurQuad_t *source);
+void dds3EffectBlurDrawAlphaMulti(sdfDrawTag_t *list, const dds3Effect_Blur_t *source);
 
 void dds3EffectBlurDrawFrameMaskReset(sdfDrawTag_t *list);
 
-void dds3EffectBlurDraw(const effBlurQuad_t *source, sdfTexHandle_t *texture);
+void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, sdfTexHandle_t *texture);
 
 void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHandle_t *texture);
 
 /* Build the alpha-multiply tri-strip: a flat grey quad over the blur rect. */
 /* NON_MATCHING: 26 of 45 words differ (first at +0x18). */
 #ifdef NON_MATCHING
-void dds3EffectBlur_AlphaMultiParmSet(const effBlurQuad_t *pBlur, effBlurPrimTriStrip_t *pSpriteParm) {
+void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPrimTriStrip_t *pSpriteParm) {
     s32 x0;
     s32 y0;
     s32 x1;
@@ -163,7 +163,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectBlur_AlphaMultiParmSet
 
 /* Borrow the display frame as a texture, set the two blend states and the
    sampling window, then draw the source quad through it. */
-void dds3EffectBlur(const effBlurQuad_t *source) {
+void dds3EffectBlur(const dds3Effect_Blur_t *source) {
     sdfDrawTag_t *list;
     void *reference;
     u32 frame;
@@ -292,7 +292,7 @@ void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHan
 }
 
 /* Two tri-strips: the alpha-multiply pass, then the blurred source quad. */
-void dds3EffectBlurDrawAlphaMulti(sdfDrawTag_t *list, const effBlurQuad_t *source) {
+void dds3EffectBlurDrawAlphaMulti(sdfDrawTag_t *list, const dds3Effect_Blur_t *source) {
     sdfGrPacketHeader_t *packet;
 
     packet = effPkt2DAllocTriStrip(1, 0x200);
@@ -317,7 +317,7 @@ void dds3EffectBlurDrawFrameMaskReset(sdfDrawTag_t *list) {
     ot->regFunc(ot, list);
 }
 
-void dds3EffectBlurDraw(const effBlurQuad_t *source, sdfTexHandle_t *texture) {
+void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, sdfTexHandle_t *texture) {
     sdfDrawTag_t *list;
 
     if (dds3NullDrawProc() != 0) {
@@ -330,7 +330,7 @@ void dds3EffectBlurDraw(const effBlurQuad_t *source, sdfTexHandle_t *texture) {
     dds3EffectBlurDrawFrameMaskReset(list);
 }
 
-void dds3EffectBlurSetRect(effBlurTemplateBody_t *work) {
+void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
     s32 x = work->source.position[0] + 0x100;
     s32 y = work->source.position[1] + 0xE0;
     s32 extent = work->extent;
@@ -343,7 +343,7 @@ void dds3EffectBlurSetRect(effBlurTemplateBody_t *work) {
 }
 
 /* Clone a blur template into a fresh allocation. */
-effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *pParam) {
+effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam) {
     effBlurTemplate_t *dst = sdfChipAllocDirect(sizeof(effBlurTemplate_t));
 
     dst->texture = dds3BillboardGetGeneralTex(2);
@@ -389,7 +389,7 @@ void dds3EffectPartialMultiBlurSetTexDef(effBlurScatterWork_t *hPartialMultiBlur
 }
 
 void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot_t *pPart) {
-    effBlurQuad_t *quad = &pPart->quad;
+    dds3Effect_Blur_t *quad = &pPart->quad;
     f32 spread;
     s32 halfSize;
     s32 centerX;
@@ -467,7 +467,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work) {
                 if (3.1415925f < slot->angle) {
                     dds3EffectDistBlurPartInit(work, slot);
                 }
-                slot->quad.displacement =
+                slot->quad.scale =
                     work->params.uvDisplacementAmplitude * sdfSin(slot->angle) + 1.0f;
                 level = sdfFloatToULong((f32)(work->params.color >> 24));
                 angle = sdfFloatToULong(slot->angle);
@@ -525,7 +525,7 @@ void dds3EffectRipBlurPartAreaSet(effBlurScaleWork_t *pParam, effBlurScaleSlot_t
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
 void dds3EffectRipBlurPartInit(effBlurScaleWork_t *pParam, effBlurScaleSlot_t *pPart) {
-    effBlurQuad_t *quad = &pPart->quad;
+    dds3Effect_Blur_t *quad = &pPart->quad;
 
     pPart->phase = 0.0f;
     pPart->angle = 0.0f;
@@ -600,7 +600,7 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work) {
             if (0.0f <= slot->phase) {
                 f32 sine = sdfSin(slot->angle);
 
-                slot->quad.displacement = work->params.uvDisplacementAmplitude * sine *
+                slot->quad.scale = work->params.uvDisplacementAmplitude * sine *
                     (1.0f - slot->phase) + 1.0f;
                 level = (u32)((f32)(work->params.color >> 24) * (1.0f - slot->phase));
                 slot->quad.color = (slot->quad.color & 0xFFFFFF) | (level << 24);
@@ -624,7 +624,7 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectRippleBlurDraw);
 #endif
 
 /* Queue blend state and a uniformly colored GS quad from two source corners. */
-void dds3EffectFilter(effSolidRectParams_t *source) {
+void dds3EffectFilter(dds3Effect_Filter_t *source) {
     sdfDrawTag_t *list;
     sdfGrOt_t *ot;
     u64 *blendPacket;
@@ -752,19 +752,19 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectFilterDrawTexQuad);
 #endif
 
 /* Clone rectangle parameters and select a fresh source handle. */
-effResourceRectWork_t *dds3EffectPartialMultiFilterCreate(effResourceRectParams_t *pParam) {
-    effResourceRectWork_t *dst = sdfChipAllocDirect(sizeof(effResourceRectWork_t));
+dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam) {
+    dds3Effect_PartialMultiFilter_t *dst = sdfChipAllocDirect(sizeof(dds3Effect_PartialMultiFilter_t));
 
     dst->texture = dds3BillboardGetGeneralTex(0);
     memcpy(&dst->params, pParam, sizeof(*pParam));
     return dst;
 }
 
-void dds3EffectPartialMultiFilterDelete(effResourceRectWork_t *hPartialMultiFilter) {
+void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
     sdfChipFreeDirect(hPartialMultiFilter);
 }
 
-void dds3EffectPartialMultiFilterDraw(effResourceRectWork_t *hPartialMultiFilter) {
+void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
     s32 half = (s32)((f32)hPartialMultiFilter->params.extent * 1.4f);
     s32 x = hPartialMultiFilter->params.center[0] + 0x100;
     s32 y = hPartialMultiFilter->params.center[1] + 0xE0;

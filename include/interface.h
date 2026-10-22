@@ -7,7 +7,7 @@
 
 /* Common draw record allocated by the interface object constructors (0x34). */
 /* Allocation fields own general-heap descriptors, not retained payload addresses. */
-typedef struct itfPanel_t {
+typedef struct itfpanel_t {
     sdfMemHandle_t *allocation;
     sdfMemHandle_t *payloadAllocation;
     u32 *payload;
@@ -23,12 +23,12 @@ typedef struct itfPanel_t {
     s32 alpha;
     u8 kind; /* Unsigned index into the panel handler tables. */
     u8 unk31[3];
-} itfPanel_t;
+} itfpanel_t;
 
 /* Point written by the panel vertex builders. */
-typedef struct itfPanelVertex_t {
+typedef struct sdfIVector2_t {
     s32 x;
     s32 y;
-} itfPanelVertex_t;
+} sdfIVector2_t;
 
 #endif /* INTERFACE_H */

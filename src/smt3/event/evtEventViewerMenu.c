@@ -43,7 +43,7 @@ typedef struct {
     s32 headerThird;                /* 0x0C */
     s32 headerFirst;
     s32 frameRange;
-    s32 frameCurrent;               /* 0x18 */
+    s32 nowframe;               /* 0x18 */
     u8 unk001C[4];
     s32 entryTotal;                 /* 0x20 */
     char entryName[256][32];        /* 0x24 */
@@ -82,8 +82,8 @@ typedef struct {
     f32 floatValue;                 /* 0x231C */
     f32 floatMin;
     f32 floatMax;
-} evtViewer_t;
-extern evtViewer_t *viewerinfo;
+} evtViewerInfo_t;
+extern evtViewerInfo_t *viewerinfo;
 extern s32 (*D_0032CB48[])(s32, s32);
 void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f);
 extern s32 mfilterRun(void);
@@ -466,7 +466,7 @@ s32 evtFrameChangeMenu(s32 x, s32 y)
         step = 10;
     }
     if (dds3PadButtonState[0x20] < 0) {
-        step = viewerinfo->frameCurrent - viewerinfo->value;
+        step = viewerinfo->nowframe - viewerinfo->value;
     }
     viewerinfo->value += step;
     if (viewerinfo->value < 0) {
@@ -476,10 +476,10 @@ s32 evtFrameChangeMenu(s32 x, s32 y)
         viewerinfo->value = viewerinfo->headerThird - 1;
     }
     if (dds3PadButtonState[0x2C] != 0) {
-        if (viewerinfo->frameCurrent != viewerinfo->value) {
-            viewerinfo->frameCurrent = viewerinfo->value;
+        if (viewerinfo->nowframe != viewerinfo->value) {
+            viewerinfo->nowframe = viewerinfo->value;
             evtViewerStopFrame();
-            evtRunFrame(viewerinfo->frameCurrent);
+            evtRunFrame(viewerinfo->nowframe);
         }
     }
     return 0;
@@ -959,10 +959,10 @@ s32 evtFrameListMenu(s32 x, s32 y)
         if (viewerinfo->frameCursor + viewerinfo->frameFirst < group->childCount) {
             evtViewerKey_t *key = evtGetSelectFrameInfo();
 
-            if (viewerinfo->frameCurrent != key->frame) {
-                viewerinfo->frameCurrent = key->frame;
+            if (viewerinfo->nowframe != key->frame) {
+                viewerinfo->nowframe = key->frame;
                 evtViewerStopFrame();
-                evtRunFrame(viewerinfo->frameCurrent);
+                evtRunFrame(viewerinfo->nowframe);
             }
         }
     }
@@ -987,7 +987,7 @@ void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no)
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != 3) {
-            for (basic = ((dds3SceneWork_t *)dds3GetActiveScene()->workdata)->lists[i].head;
+            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->lists[i].head;
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;
@@ -1013,7 +1013,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
     list = dds3FontReqAllocDrawTag();
     for (i = 0; i < 0x12; i++) {
         if (i != 3) {
-            for (basic = ((dds3SceneWork_t *)dds3GetActiveScene()->workdata)->lists[i].head;
+            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->lists[i].head;
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;

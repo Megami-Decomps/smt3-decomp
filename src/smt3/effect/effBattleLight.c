@@ -22,7 +22,7 @@ typedef struct
     u32 unknown18;
     u32 unknown1C;
     u32 unknown20;
-} effBTLPointLightParam_t;
+} effBTL_SkillLight_t;
 
 typedef struct
 {
@@ -38,7 +38,7 @@ typedef struct
 /* One light the battle effects place, 32 of them indexed by the formation id. */
 typedef struct
 {
-    effBTLPointLightParam_t param;
+    effBTL_SkillLight_t param;
     u32 unknown24;
     effBTLModelColorParam_t color;
     u32 unknown44;
@@ -63,9 +63,9 @@ u32 effBTLSkillGetInvokeParty(void);
 
 u32 effBTLSkillGetTargetParty(void);
 
-void effBTLPointLightModelSet(effBTLPointLightParam_t *pLight, nbFormation_t *pFormation);
+void effBTLPointLightModelSet(effBTL_SkillLight_t *pLight, nbFormation_t *pFormation);
 
-void effBTLPointLightGroupSet(effBTLPointLightParam_t *pLight, u32 group);
+void effBTLPointLightGroupSet(effBTL_SkillLight_t *pLight, u32 group);
 
 void effBTLPointLightStart(void);
 
@@ -116,7 +116,7 @@ void effBTLPointLightCompulsionOFF(void)
     effBTLPointLightProcess = 0;
 }
 
-void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pFormation)
+void effBTLPointLightModelSet(effBTL_SkillLight_t *pParam, nbFormation_t *pFormation)
 {
     effBTLPointLight_t *pLight;
     s32 id;
@@ -131,7 +131,7 @@ void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pF
     pLight->unknown24 = 0;
 }
 
-void effBTLPointLightGroupSet(effBTLPointLightParam_t *pLight, u32 group)
+void effBTLPointLightGroupSet(effBTL_SkillLight_t *pLight, u32 group)
 {
     nbFormation_t *pFormation;
     s32 i;
@@ -145,7 +145,7 @@ void effBTLPointLightGroupSet(effBTLPointLightParam_t *pLight, u32 group)
     }
 }
 
-void effBTLPointLightSet(effBTLPointLightParam_t *pLight, nbFormation_t *pFormation)
+void effBTLPointLightSet(effBTL_SkillLight_t *pLight, nbFormation_t *pFormation)
 {
     if (pLight->unknown10 == pLight->unknown18) {
         return;

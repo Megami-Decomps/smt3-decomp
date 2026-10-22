@@ -6,7 +6,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-typedef struct pbPanel_t pbPanel_t;
+typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -22,7 +22,7 @@ typedef struct
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
-} pbMyCharacter_t;
+} pbMyChar_t;
 
 typedef struct { s16 number, label; } pbStageEntry_t;
 
@@ -43,7 +43,7 @@ typedef struct
     s16 level, stage;
     u8 unk35C[4];
     s32 menuState;
-    struct pbPanel_t *helpProc;
+    struct pbProcHandle_t *helpProc;
 } pbMapWork_t;
 
 typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
@@ -76,9 +76,9 @@ typedef struct
     f32 rot;
     u8 unkBC[8];
     f32 x, y, z;
-} pbBlockObj_t;
+} pbGroupData_t;
 
-typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { s16 dir; u16 step; f32 speed; s32 unk08; } pbMoveCharWork_t;
 
@@ -102,12 +102,12 @@ typedef struct
 } pbLevel_t;
 
 /* Common panel work header: its constructor installs process and data links. */
-struct pbPanel_t
+struct pbProcHandle_t
 {
     dds3ProcessID_t *process;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
-    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
             pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
             pbViewCamWork_t *viewCam; pbMoveCharWork_t *moveChar;
@@ -128,7 +128,7 @@ extern pbMapWork_t *D_0054F5C4;
 
 extern pbGoal_t *goal;
 
-extern pbPanel_t *record;
+extern pbProcHandle_t *record;
 
 extern void sdfMatFreeDelayed(sdfMat_t *aMat);
 
@@ -140,15 +140,15 @@ typedef void (*pbCharacterFunc_t)(void);
 
 extern pbCharacterFunc_t pbCharacterTable[];
 
-extern pbPanel_t *blockDB;
+extern pbProcHandle_t *blockDB;
 
 extern u32 current_char;
 
 extern f32 D_00327370[];
 
-extern s32 pbPopRecord(pbPanel_t *p, pbPanel_t **c, pbPanel_t *blkDB);
+extern s32 pbPopRecord(pbProcHandle_t *p, pbProcHandle_t **c, pbProcHandle_t *blkDB);
 
-extern pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 eCode, s32 frame);
+extern pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame);
 
 extern void *sdfChipAllocDirect(u32 aSize);
 
@@ -208,7 +208,7 @@ extern pbCursorPos_t D_00551EC4;
 
 extern sdfVector4_t D_0056CDD0[2];
 
-extern void pbSetMapCursorFlag(pbPanel_t *p, s32 flag);
+extern void pbSetMapCursorFlag(pbProcHandle_t *p, s32 flag);
 
 extern void pbSetGameCamera4(s16 x, s16 y);
 
@@ -220,19 +220,19 @@ extern u8 pbGetKeyAction(s32 press);
 
 extern void dds3SetQuake(s32 frame, s32 range);
 
-extern void pbDeleteGroupEntry(pbPanel_t *db, u32 grpID);
+extern void pbDeleteGroupEntry(pbProcHandle_t *db, u32 grpID);
 
-extern void pbRebuildOutline(pbBlockObj_t *p);
+extern void pbRebuildOutline(pbGroupData_t *p);
 
-extern pbPanel_t *pbStartMoveBlock(pbPanel_t *parent, pbBlockObj_t *grp, s32 dir);
+extern pbProcHandle_t *pbStartMoveBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32 dir);
 
 typedef struct { s16 x, y; } pbKeyEntry_t;
 
 extern s16 pbKeyTable[][2];
 
-extern void pbGetMyCharcterPos2(pbPanel_t *p, s16 *x, s16 *y);
+extern void pbGetMyCharcterPos2(pbProcHandle_t *p, s16 *x, s16 *y);
 
-extern void pbMoveMyCharcter(pbPanel_t *p, f32 x, f32 y);
+extern void pbMoveMyCharcter(pbProcHandle_t *p, f32 x, f32 y);
 
 extern s32 game(dds3ProcessID_t *id);
 
@@ -246,17 +246,17 @@ extern void deleteGame(dds3ProcessID_t *id);
 
 extern void pbLoadSystemData(s32 num);
 
-extern pbPanel_t *pbStartBlockDataBase(pbPanel_t *parent);
+extern pbProcHandle_t *pbStartBlockDataBase(pbProcHandle_t *parent);
 
-extern pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 sw);
+extern pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw);
 
-extern pbPanel_t *pbInitExitDraw(pbPanel_t *parent);
+extern pbProcHandle_t *pbInitExitDraw(pbProcHandle_t *parent);
 
-extern pbPanel_t *pbStartRecord(pbPanel_t *parent);
+extern pbProcHandle_t *pbStartRecord(pbProcHandle_t *parent);
 
-extern pbPanel_t *pbStartDrawMapCursor(pbPanel_t *parent);
+extern pbProcHandle_t *pbStartDrawMapCursor(pbProcHandle_t *parent);
 
-extern pbPanel_t *bmap, *mapCursor;
+extern pbProcHandle_t *bmap, *mapCursor;
 
 extern s32 D_0054F5F0;
 
@@ -268,11 +268,11 @@ extern void deleteMoveBlock(dds3ProcessID_t *id);
 
 extern s32 p2sdPlaySE(s32 id, s32 vol, s32 pan);
 
-extern u32 pbAddRecord_flor(pbPanel_t *p, pbBlockObj_t *grp);
+extern u32 pbAddRecord_flor(pbProcHandle_t *p, pbGroupData_t *grp);
 
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
 
-extern u32 pbAddRecord_blk(pbPanel_t *p, pbBlockObj_t *grp);
+extern u32 pbAddRecord_blk(pbProcHandle_t *p, pbGroupData_t *grp);
 
 extern void deleteViewModeCamera(dds3ProcessID_t *id);
 
@@ -282,7 +282,7 @@ extern void updateMotion(void);
 
 extern void pbFreeGroupHandles(pbBlockDB_t *db);
 
-extern void pbFreeGroupEntry(mdlResrc_t *entry);
+extern void pbFreeGroupEntry(dds3ModelResrc_t *entry);
 
 extern void fclClearFlag(s32 flag);
 
@@ -290,25 +290,25 @@ extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
 extern void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
-extern void setRoundBlockData(pbBlockObj_t *grp, s32 dir);
+extern void setRoundBlockData(pbGroupData_t *grp, s32 dir);
 
-extern void func_001D2D00(pbPanel_t *panel, s32 arg);
+extern void func_001D2D00(pbProcHandle_t *panel, s32 arg);
 
-extern pbPanel_t *mychar[];
+extern pbProcHandle_t *mychar[];
 
-extern pbPanel_t *moveB;
+extern pbProcHandle_t *moveB;
 
-extern pbPanel_t *roundCamera;
+extern pbProcHandle_t *roundCamera;
 
 extern char D_00535EF8[];
 
-extern u32 pbPushRecord(pbPanel_t *p);
+extern u32 pbPushRecord(pbProcHandle_t *p);
 
-extern u32 pbMyCharacterDispStat(pbPanel_t *p);
+extern u32 pbMyCharacterDispStat(pbProcHandle_t *p);
 
 extern dds3ProcessID_t *pbStartGiveupConfirm(void);
 
-extern s8 pbCheckPopRecord(pbPanel_t *p);
+extern s8 pbCheckPopRecord(pbProcHandle_t *p);
 
 extern s8 pbCheckPreviousRecord(void);
 
@@ -316,7 +316,7 @@ extern u8 pbRotLKeyAct(void);
 
 extern u8 pbRotRKeyAct(void);
 
-extern pbPanel_t *moveViewCamera;
+extern pbProcHandle_t *moveViewCamera;
 
 extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
 
@@ -373,7 +373,7 @@ INCLUDE_ASM(const s32, "pb/pbGame", roundCheck);
 
 INCLUDE_ASM(const s32, "pb/pbGame", roundDirCheck);
 
-s8 hallCheck(pbBlockObj_t *grp) {
+s8 hallCheck(pbGroupData_t *grp) {
     u32 i;
     s32 cx = grp->cellX;
     s32 cy = grp->cellY;
@@ -567,7 +567,7 @@ INCLUDE_RODATA(const s32, "pb/pbGame", D_00535F08);
 INCLUDE_ASM(const s32, "pb/pbGame", game);
 
 void deleteGame(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     D_0054F5C4->area.map = D_00327458;
     sdfChipFreeDelayedDirect(panel);
 }
@@ -575,7 +575,7 @@ void deleteGame(dds3ProcessID_t *id) {
 INCLUDE_ASM(const s32, "pb/pbGame", pbInitGame);
 
 s32 moveChar(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbMoveCharWork_t *work = panel->data.moveChar;
     u32 step;
     if (work->step < 4) {
@@ -593,7 +593,7 @@ s32 moveChar(dds3ProcessID_t *id) {
 
 INCLUDE_ASM(const s32, "pb/pbGame", deleteMoveChar);
 
-void setMoveBlockData(pbBlockObj_t *grp, s32 dir) {
+void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
     u32 i = 0;
     grp->cellX += pbKeyTable[dir][0];
     grp->cellY += pbKeyTable[dir][1];
@@ -614,14 +614,14 @@ void setMoveBlockData(pbBlockObj_t *grp, s32 dir) {
 /* NON_MATCHING: 30 of 31 words, 124 bytes against retail's 140; retail holds the delta row in three pointer copies and materialises the -1 return late. */
 #ifdef NON_MATCHING
 s32 moveBlock(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
     if (work->step >= 4) {
         return -1;
     }
     {
         f32 *delta = &D_00327370[work->index * 3];
-        pbBlockObj_t *obj = work->block;
+        pbGroupData_t *obj = work->block;
         obj->x = obj->x + delta[0];
         obj->y = obj->y + delta[1];
         obj->z = obj->z + delta[2];
@@ -637,7 +637,7 @@ INCLUDE_ASM(const s32, "pb/pbGame", moveBlock);
 /* NON_MATCHING: 46 of 77 words, 308 bytes against retail's 324; the entry array is hoisted out of the loop retail reloads it in. */
 #ifdef NON_MATCHING
 void deleteMoveBlock(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
     work->block->value = 0;
     if (work->index != 4) {
@@ -649,7 +649,7 @@ void deleteMoveBlock(dds3ProcessID_t *id) {
             moveB = NULL;
         }
     } else {
-        pbBlockObj_t *block;
+        pbGroupData_t *block;
         u32 i;
         dds3SetQuake(0x1E, 0x50);
         pbPushRecord(record);
@@ -693,7 +693,7 @@ void rotXY(s16 *x, s16 *y, s32 dir) {
     }
 }
 
-void setRoundBlockData(pbBlockObj_t *grp, s32 dir) {
+void setRoundBlockData(pbGroupData_t *grp, s32 dir) {
     u32 i = 0;
     grp->rot = 0.0f;
     if (grp->num != 0) {
@@ -715,11 +715,11 @@ void setRoundBlockData(pbBlockObj_t *grp, s32 dir) {
 /* NON_MATCHING: 12 of 34 words, 136 bytes against retail's 140; the two clamp stores cross-jump and the guard exit lands last. */
 #ifdef NON_MATCHING
 s32 roundBlock(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
     u32 step = work->step;
     if (step < 4) {
-        pbBlockObj_t *block = work->block;
+        pbGroupData_t *block = work->block;
         block->rot += work->index * 0.39269909f;
         if (block->rot > 6.28318501f) {
             block->rot -= 6.28318501f;
@@ -736,7 +736,7 @@ INCLUDE_ASM(const s32, "pb/pbGame", roundBlock);
 #endif
 
 void deleteRoundBlock(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbRoundBlock_t *work = panel->data.round;
     pbPushRecord(record);
     setRoundBlockData(work->block, work->index);
@@ -747,7 +747,7 @@ void deleteRoundBlock(dds3ProcessID_t *id) {
 }
 
 s32 roundAutoCamera(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbRoundCamWork_t *work = panel->data.roundCam;
     s32 ret = 0;
     if (work->dir > 0) {
@@ -771,7 +771,7 @@ s32 roundAutoCamera(dds3ProcessID_t *id) {
 }
 
 void deleteRoundAutoCamera(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbPanelValue_t *work = panel->data.value;
     if (cameraAngle > 6.28318501f) {
         cameraAngle = cameraAngle - 6.28318501f;
@@ -787,14 +787,14 @@ void deleteRoundAutoCamera(dds3ProcessID_t *id) {
 INCLUDE_ASM(const s32, "pb/pbGame", viewModeCamera);
 
 void deleteViewModeCamera(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
     moveViewCamera = NULL;
 }
 
 s32 ClearProc(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbPanelValue_t *work = panel->data.value;
     rsetOtOfs(0x47);
     rsetAlpha(0);
@@ -809,7 +809,7 @@ s32 ClearProc(dds3ProcessID_t *id) {
 }
 
 void DeleteClearProc(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
     D_0054F5C4->stage = (u16)D_0054F5C4->stage + 1;
@@ -848,8 +848,8 @@ s16 GetAllStageClearBit(void) {
     return pbLevelTable[D_0054F5C4->level]->clearBit;
 }
 
-pbPanel_t *pbStartGame(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     u32 i;
     pbLoadSystemData(GetStageNumber());
     panel->process = dds3StartProcess(D_00535F50, 0x3EE, 1, 1, game,
@@ -885,8 +885,8 @@ pbPanel_t *pbStartGame(pbPanel_t *parent) {
     return panel;
 }
 
-pbPanel_t *pbStartMoveChar(pbPanel_t *parent, s32 dir, u32 scl) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartMoveChar(pbProcHandle_t *parent, s32 dir, u32 scl) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbMoveCharWork_t *work;
     panel->process = dds3StartProcess(D_00535F60, 0x3EE, 0, 0, moveChar,
                                       (dds3ProcessFunc_t)deleteMoveChar, NULL);
@@ -905,8 +905,8 @@ pbPanel_t *pbStartMoveChar(pbPanel_t *parent, s32 dir, u32 scl) {
     return panel;
 }
 
-pbPanel_t *pbStartMoveBlock(pbPanel_t *parent, pbBlockObj_t *grp, s32 dir) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartMoveBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32 dir) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundBlock_t *work;
     u32 i;
     panel->process = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, moveBlock,
@@ -942,8 +942,8 @@ pbPanel_t *pbStartMoveBlock(pbPanel_t *parent, pbBlockObj_t *grp, s32 dir) {
     return panel;
 }
 
-pbPanel_t *pbStartRoundBlock(pbPanel_t *parent, pbBlockObj_t *grp, s32 dir) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartRoundBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32 dir) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundBlock_t *work;
     u32 i;
     panel->process = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, roundBlock,
@@ -973,8 +973,8 @@ pbPanel_t *pbStartRoundBlock(pbPanel_t *parent, pbBlockObj_t *grp, s32 dir) {
     return panel;
 }
 
-pbPanel_t *pbStartAutoRoundCamera(pbPanel_t *parent, s32 dir) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundCamWork_t *work;
     dds3ProcessID_t *id;
     panel->process = dds3StartProcess(D_00535F90, 0x3EE, 0, 0, roundAutoCamera,
@@ -1028,8 +1028,8 @@ pbPanel_t *pbStartAutoRoundCamera(pbPanel_t *parent, s32 dir) {
     return panel;
 }
 
-pbPanel_t *pbStartViewModeCamera(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartViewModeCamera(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbViewCamWork_t *work;
     panel->process = dds3StartProcess(D_00535FA8, 0x3EE, 0, 0, viewModeCamera,
                                       (dds3ProcessFunc_t)deleteViewModeCamera, NULL);
@@ -1113,8 +1113,8 @@ void pbPreviousRecord(void) {
     }
 }
 
-pbPanel_t *pbStartClear(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartClear(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
     panel->process = dds3StartProcess(D_00535FC8, 0x3EE, 1, 1, ClearProc,
                                       (dds3ProcessFunc_t)DeleteClearProc, NULL);
@@ -1225,7 +1225,7 @@ void *pbFindGroupEntry(pbGroupDB_t *db, u32 group) {
 
 INCLUDE_ASM(const s32, "pb/pbGame", pbAddGroupEntry);
 
-void pbFreeGroupEntry(mdlResrc_t *entry) {
+void pbFreeGroupEntry(dds3ModelResrc_t *entry) {
     sdfMemFreeDirect(entry->resourceHandle);
     sdfChipFreeDelayedDirect(entry);
 }
@@ -1233,7 +1233,7 @@ void pbFreeGroupEntry(mdlResrc_t *entry) {
 void pbFreeGroupHandles(pbBlockDB_t *db) {
     u32 i;
     for (i = 0; i < db->count; i++) {
-        pbFreeGroupEntry((mdlResrc_t *)db->entry[i]);
+        pbFreeGroupEntry((dds3ModelResrc_t *)db->entry[i]);
     }
     db->count = 0;
 }
@@ -1263,7 +1263,7 @@ INCLUDE_ASM(const s32, "pb/pbGame", pbGetBlockAt);
 INCLUDE_ASM(const s32, "pb/pbGame", pb_proc_block_DB_Process);
 
 void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbBlockDB_t *db = panel->data.blockDB;
     sdfMatFreeDelayed(db->mat);
     pbFreeGroupHandles(db);
@@ -1274,7 +1274,7 @@ void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id) {
 INCLUDE_ASM(const s32, "pb/pbGame", pb_draw_map_cursor_Process);
 
 void pb_draw_map_cursor_Shutdown(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     sdfChipFreeDelayedDirect(panel->data.value);
     sdfChipFreeDelayedDirect(panel);
 }

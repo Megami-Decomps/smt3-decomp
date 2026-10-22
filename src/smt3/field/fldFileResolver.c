@@ -57,7 +57,7 @@ struct fldTransferChunk_t {
 
 /* A PAC archive request (kind 1), with its dispatch packet at 0x30. */
 struct filePacRequest_t {
-    u8 kind; /* 0x00 */ u8 state; /* 0x01 */ u8 retryCount; /* 0x02 */ u8 allocationMode; /* 0x03: a callback request's mode */ struct filePacRequest_t *next; /* 0x04 */ char *name; /* 0x08: the duplicated request name */ void *deviceRequest; /* 0x0C */ s32 transferBytes; /* 0x10: a value-pair request's byte count */ s32 totalBytes; /* 0x14 */ void * completionCallback; /* 0x18 */ void *completionArg; /* 0x1C */ sdfMemHandle_t *allocationHandle; /* 0x20: descriptor passed to sdfResourceRetainAddress */ u32 retainedAddress; /* 0x24: a value-pair request's source data */ u32 transferAddress; /* 0x28 */ struct filePacRequest_t *completionNext; /* 0x2C */ sdfPacState_t packet; /* 0x30: PAC requests */ u16 readinessEnabled; /* 0x68: a gate on completion, not a state value */ u16 slot; /* 0x6A: the device-read slot */ struct filePacRequest_t *callbackNext; /* 0x6C: PAC completion callback queue link */
+    u8 kind; /* 0x00 */ u8 state; /* 0x01 */ u8 retryCount; /* 0x02 */ u8 allocationMode; /* 0x03: a callback request's mode */ struct filePacRequest_t *next; /* 0x04 */ char *name; /* 0x08: the duplicated request name */ void *deviceRequest; /* 0x0C */ s32 transferBytes; /* 0x10: a value-pair request's byte count */ s32 totalBytes; /* 0x14 */ void * completionCallback; /* 0x18 */ void *completionArg; /* 0x1C */ sdfMemHandle_t *allocationHandle; /* 0x20: descriptor passed to sdfResourceRetainAddress */ u32 retainedAddress; /* 0x24: a value-pair request's source data */ u32 transferAddress; /* 0x28 */ struct filePacRequest_t *completionNext; /* 0x2C */ sdfPacDecodeCb_t packet; /* 0x30: PAC requests */ u16 readinessEnabled; /* 0x68: a gate on completion, not a state value */ u16 slot; /* 0x6A: the device-read slot */ struct filePacRequest_t *callbackNext; /* 0x6C: PAC completion callback queue link */
 };
 
 
@@ -882,7 +882,7 @@ void fldLoadFieldPack(void) {
         pacSync(gFldFileF1);
         request = (filePacRequest_t *)gFldFileF1;
         for (work = request->packet.head; work != NULL; work = work->next) {
-            switch (((sdfPacPacketHeader_t *)work->header)->kind) {
+            switch (((sdfPacStdBlockHeader_t *)work->header)->kind) {
             case FLD_PACKED_RESOURCE_INFO_TABLE:
                 fldInfLoadFromMem(work->data);
                 sdfMemFreeDelayedDirect(

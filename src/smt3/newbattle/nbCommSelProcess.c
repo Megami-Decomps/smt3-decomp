@@ -49,7 +49,7 @@ typedef struct nbQuadVector_t {
 
 /* 8-byte rows at +0x88 indexed by formation slot. */
 typedef struct nbTimeList_t {
-    u16 unlock;
+    u16 lockframe;
     u16 end;
     u16 hp;
     u16 pad06;
@@ -721,8 +721,8 @@ void nbCommSelShutdown(dds3ProcessID_t *id)
     nbCommSelProcessData_t *s = dds3GetProcessData(id);
     nbMainProcessData_t *data = s->data;
 
-    if (data->unkE8 == id) {
-        data->unkE8 = NULL;
+    if (data->CommSelProcessID == id) {
+        data->CommSelProcessID = NULL;
     }
     sdfMemFreeDirect(s->handle);
 }
@@ -801,7 +801,7 @@ void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
                                            nbCommSelShutdown, s);
 
     dds3LinkProcess(data->unkBC, id);
-    data->unkE8 = id;
+    data->CommSelProcessID = id;
 }
 
 INCLUDE_SDATA(const s32, "newbattle/nbCommSelProcess", D_00551130);

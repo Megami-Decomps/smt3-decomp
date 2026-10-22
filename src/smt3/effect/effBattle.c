@@ -37,7 +37,7 @@ extern u16 effBTLSkyFilterFrame;
 extern u16 effBTLSkyFilterFrameMax;
 extern void effBTLFieldColorEnd(void);
 extern void effBTLFieldColorOFF(void);
-extern void dds3EffectFilter(effSolidRectParams_t *params);
+extern void dds3EffectFilter(dds3Effect_Filter_t *params);
 extern void effBTLFieldColorRun(void);
 extern void effBTLPointLightRun(void);
 extern void effBTLPointLightOFF(void);
@@ -84,7 +84,7 @@ typedef struct effBTLSkillInfo_t {
 extern effBTLSkillInfo_t D_005698E0;
 
 typedef struct effBTLFieldFilter_t {
-    effSolidRectParams_t rect;
+    dds3Effect_Filter_t rect;
     u32 baseColor;
     u32 targetColor;
     u16 frame;
@@ -242,7 +242,7 @@ void effBTLCutListRelease(effBTLCut_t *hBTLCutEffect) {
 effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation, s32 stat) {
     effBTLCut_t *cut;
     effBTLCutData_t *list;
-    effBTLPart_t *entry;
+    effBTL_SkillPartsList_t *entry;
     dds3EffectPart_t **work;
     u8 actorScaleEnabled;
     s32 remaining;
@@ -438,7 +438,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     sdfMatrix4_t direction;
     sdfMatrix4_t marked;
     effBTLCutData_t *list;
-    effBTLPart_t *entry;
+    effBTL_SkillPartsList_t *entry;
     effBTLAimParams_t *aim;
     nbFormation_t *formation;
     u32 frame;
@@ -575,7 +575,7 @@ void effBTLPartCreate(effBTL_t *pSkill, effBTL_t *pData) {
     s32 bankIndex;
 
     for (bankIndex = 0; bankIndex < 2; bankIndex++) {
-        effBTLPart_t *entry = pSkill->banks[bankIndex].list.entries;
+        effBTL_SkillPartsList_t *entry = pSkill->banks[bankIndex].list.entries;
         u16 entryCountForBank = pSkill->banks[bankIndex].list.count;
 
         if (entryCountForBank != 0) {
@@ -587,7 +587,7 @@ void effBTLPartCreate(effBTL_t *pSkill, effBTL_t *pData) {
                         u32 index = entry->value.sourceOffset;
                         u32 sourceBank = index / 0x3C;
                         u32 sourceEntryIndex = index % 0x3C;
-                        effBTLPart_t *sourceEntry = &pSkill->banks[sourceBank].list.entries[sourceEntryIndex];
+                        effBTL_SkillPartsList_t *sourceEntry = &pSkill->banks[sourceBank].list.entries[sourceEntryIndex];
                         dds3EffectPart_t *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
                         u16 sourceKind = sourceEntry->paramKind;
 
@@ -613,7 +613,7 @@ void effBTLPartDelete(effBTL_t *pSkill) {
 
     for (bankIndex = 0; bankIndex < 2; bankIndex++) {
         u16 entryCount = pSkill->banks[bankIndex].list.count;
-        effBTLPart_t *entry = pSkill->banks[bankIndex].list.entries;
+        effBTL_SkillPartsList_t *entry = pSkill->banks[bankIndex].list.entries;
 
         if (entryCount != 0) {
             s32 remaining = entryCount;
@@ -1015,7 +1015,7 @@ void effBTLFieldColorGetBaseColor(void) {
 
     data = nbGetMainProcessData();
     major = data->unk7C - 0xC8;
-    minor = data->unk7E;
+    minor = data->StageMinor;
     if ((u16)major >= 0x28 || minor <= 0 || minor >= 0xB) {
         printf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
         SDF_VU0_LOADVECTOR(D_0031B8F0);
@@ -1039,7 +1039,7 @@ s32 nbEffectDraw(void) {
 
 void nbEffectShutdown(void) {
     effBTLSystemPartHandleDelete();
-    nbGetMainProcessData()->effectProcess = NULL;
+    nbGetMainProcessData()->EffectProcessID = NULL;
 }
 
 void nbInitEffectProcess(nbMainProcessData_t *data) {
@@ -1048,7 +1048,7 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
 
     process = dds3StartProcess("nb_effect", 0x3F9, 2, 1, nbEffectProcess, nbEffectShutdown, NULL);
     dds3LinkProcess(data->unkBC, process);
-    data->effectProcess = process;
+    data->EffectProcessID = process;
     draw = dds3StartProcess("nb_effect_draw", 0x2B0E, 1, 1, nbEffectDraw, NULL, NULL);
     dds3LinkProcess(process, draw);
     effBTLSkillInit();

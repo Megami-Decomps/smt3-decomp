@@ -31,9 +31,9 @@ typedef struct evtPackHeader_t {
     evtPackEntry_t entries[0];
 } evtPackHeader_t;
 
-typedef struct evtPackLoadState_t {
+typedef struct evtPackProcessData_t {
     s32 eventId;
-    s32 loaded;
+    s32 stat;
     void *pendingRequest;
     struct sdfMemHandle_t *resourceAllocation;
     u8 *payload;
@@ -49,11 +49,11 @@ typedef struct evtPackLoadState_t {
     s32 effect71;
     s32 effect76;
     s32 effect75;
-} evtPackLoadState_t;
+} evtPackProcessData_t;
 
 s32 evtGetEventPackStat(u32 eventno);
 
-evtPackLoadState_t *evtGetPackProcessData(u32 eventno);
+evtPackProcessData_t *evtGetPackProcessData(u32 eventno);
 
 void *evtGetResorceData(u32 eventno, s32 rid);
 
@@ -196,31 +196,31 @@ s32 evtGetEventPackStat(u32 eventno) {
 
     task = evtSearchEventPack(eventno);
     if (task != 0) {
-        evtPackLoadState_t *state = (evtPackLoadState_t *)dds3GetProcessData(task);
-        return state->loaded;
+        evtPackProcessData_t *state = (evtPackProcessData_t *)dds3GetProcessData(task);
+        return state->stat;
     }
     return -1;
 }
 
-evtPackLoadState_t *evtGetPackProcessData(u32 eventno) {
+evtPackProcessData_t *evtGetPackProcessData(u32 eventno) {
     dds3ProcessID_t *task;
 
     task = evtSearchEventPack(eventno);
     if (task != 0) {
-        return (evtPackLoadState_t *)dds3GetProcessData(task);
+        return (evtPackProcessData_t *)dds3GetProcessData(task);
     }
     return NULL;
 }
 
 void *evtGetResorceData(u32 eventno, s32 rid) {
     s32 i;
-    evtPackLoadState_t *data;
+    evtPackProcessData_t *data;
     dds3ProcessID_t *task;
 
     task = evtSearchEventPack(eventno);
     if (task != 0) {
-        data = (evtPackLoadState_t *)dds3GetProcessData(task);
-        if (data->loaded != 2) {
+        data = (evtPackProcessData_t *)dds3GetProcessData(task);
+        if (data->stat != 2) {
             return 0;
         }
         for (i = 0; i < data->header->entryCount; i++) {
@@ -234,7 +234,7 @@ void *evtGetResorceData(u32 eventno, s32 rid) {
 }
 
 void func_001FA310(s32 taskId, s32 key) {
-    evtPackLoadState_t *data = evtGetPackProcessData(taskId);
+    evtPackProcessData_t *data = evtGetPackProcessData(taskId);
     void *address = evtGetResorceData(taskId, key);
     sdfTexHandle_t *texture;
     if (address != 0) {
@@ -290,7 +290,7 @@ void *evt_1FA398(s32 taskId, s32 key, s32 modelId) {
 
 /* Decode one retained unit payload and return its new viewer-object key. */
 s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
-    evtPackLoadState_t *packState;
+    evtPackProcessData_t *packState;
     evtPackEntry_t *entry;
     s32 packEntryIndex;
     s32 entrySize;
@@ -336,7 +336,7 @@ s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId) {
 
 /* Start a field BE from the task's resource table when all four payloads exist. */
 s32 evtRegistBEField(s32 eventno, s32 rid) {
-    evtPackLoadState_t *packState;
+    evtPackProcessData_t *packState;
     evtPackEntry_t *entry;
     s32 entryCount;
     s32 remainingEntryCount;
@@ -387,7 +387,7 @@ s32 evtRegistBEField(s32 eventno, s32 rid) {
 s32 evtMotionSeProcess1(dds3ProcessID_t *id) {
     evtMotionSeTaskParams_t *motionSeParams;
     dds3Basic_t *motionNode;
-    evtPackLoadState_t *packState;
+    evtPackProcessData_t *packState;
     evtUnit_t *unit;
     u16 motionId;
     s32 motionFrame;
@@ -457,7 +457,7 @@ dds3ProcessID_t *evtLoadModelSe(s32 modelKey, s32 eventTaskId, s32 resourceId) {
 const char D_0053C678[0x28] __attribute__((aligned(8))) = "/event/e%03d/e%03d/scr/e%03d.be";
 
 /* Resolve the event's script path ("/event/eNNN/eNNN/scr/eNNN.be", grouped by tens) and start loading it. */
-void evtLoadEventScript(evtPackLoadState_t *state) {
+void evtLoadEventScript(evtPackProcessData_t *state) {
     s32 eventId;
     s32 eventDirectoryId;
     struct FileRequest *request;
@@ -468,13 +468,13 @@ void evtLoadEventScript(evtPackLoadState_t *state) {
     sprintf(D_0056D148, D_0053C678, eventDirectoryId, eventId, eventId);
     request = fileLoad(D_0056D148);
     state->pendingRequest = request;
-    state->loaded = 1;
+    state->stat = 1;
 }
 
 /* Retain a ready pack and select its first entry-point record.
  * Clearing the request handle and marking completion occur on separate calls;
  * no entry-point record leaves the existing entryPoint value untouched. */
-void evtCheckEventScriptLoaded(evtPackLoadState_t *state) {
+void evtCheckEventScriptLoaded(evtPackProcessData_t *state) {
     evtPackHeader_t *header;
     s32 entryPointIndex;
 
@@ -496,17 +496,17 @@ void evtCheckEventScriptLoaded(evtPackLoadState_t *state) {
         }
     } else {
         printf(D_0054FAC8);
-        state->loaded = EVT_PACK_LOAD_COMPLETE;
+        state->stat = EVT_PACK_LOAD_COMPLETE;
     }
 }
 
 s32 evtCheckScriptDone(dds3ProcessID_t *task) {
-    evtPackLoadState_t *packState = (evtPackLoadState_t *)dds3GetProcessData(task);
+    evtPackProcessData_t *packState = (evtPackProcessData_t *)dds3GetProcessData(task);
 
-    switch (packState->loaded) {
+    switch (packState->stat) {
     default:
-        if (packState->loaded < 2) {
-            if (packState->loaded == 0) {
+        if (packState->stat < 2) {
+            if (packState->stat == 0) {
                 evtLoadEventScript(packState);
             }
         }
@@ -522,7 +522,7 @@ s32 evtCheckScriptDone(dds3ProcessID_t *task) {
  * File I/O is waited on even when the user-value handle is zero. */
 void evtWaitEventPackLoad(dds3ProcessID_t *task) {
     void *stateHandle = dds3GetProcessData(task);
-    evtPackLoadState_t *packState = (evtPackLoadState_t *)stateHandle;
+    evtPackProcessData_t *packState = (evtPackProcessData_t *)stateHandle;
 
     fileSyncAll();
     if (stateHandle != 0) {
@@ -561,16 +561,16 @@ void evtWaitEventPackLoad(dds3ProcessID_t *task) {
 /* Schedule the event-pack process only if it does not already exist. */
 dds3ProcessID_t *evtLoadEventPack(s32 eventno) {
     char taskName[0x20];
-    evtPackLoadState_t *taskData;
+    evtPackProcessData_t *taskData;
     dds3ProcessID_t *task;
 
     task = evtSearchEventPack(eventno);
     if (task == 0) {
         evtMakeEventPackName(eventno, taskName);
-        taskData = sdfChipAllocDirect(sizeof(evtPackLoadState_t));
-        memset(taskData, 0, sizeof(evtPackLoadState_t));
+        taskData = sdfChipAllocDirect(sizeof(evtPackProcessData_t));
+        memset(taskData, 0, sizeof(evtPackProcessData_t));
         taskData->eventId = eventno;
-        taskData->loaded = 0;
+        taskData->stat = 0;
         task = dds3StartProcess(taskName, DDS3_PRIORITY_EVENT_PACK, 1, 1, evtCheckScriptDone, (dds3ProcessFunc_t)evtWaitEventPackLoad, taskData);
     }
     return task;

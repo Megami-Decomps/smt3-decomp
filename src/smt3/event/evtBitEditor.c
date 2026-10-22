@@ -32,7 +32,7 @@ extern void *memcpy(void *, const void *, u32);
 
 void evtBitOff(s32 no);
 
-/* mdlEffectResrc_t.type: which effect a controller drives. */
+/* dds3ModelEffectCtrlr_t.type: which effect a controller drives. */
 typedef enum dds3ModelEffectType {
     dds3ModelEffectType_P2A = 0,
     dds3ModelEffectType_D3P = 1,
@@ -40,7 +40,7 @@ typedef enum dds3ModelEffectType {
     dds3ModelEffectType_IPU = 3
 } dds3ModelEffectType;
 
-/* mdlPibItem_t.kind, as mdlCreateEffect dispatches on it. */
+/* pibHeaderChunk_t.kind, as mdlCreateEffect dispatches on it. */
 typedef enum PIB_CHUNK_TYPE {
     PIB_CHUNK_TYPE_P2A = 1,
     PIB_CHUNK_TYPE_D3P = 2,

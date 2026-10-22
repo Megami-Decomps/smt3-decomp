@@ -59,7 +59,7 @@ typedef struct nbQuadVector_t {
 
 /* 8-byte rows at +0x88 indexed by formation slot. */
 typedef struct nbTimeList_t {
-    u16 unlock;
+    u16 lockframe;
     u16 end;
     u16 hp;
     u16 pad06;

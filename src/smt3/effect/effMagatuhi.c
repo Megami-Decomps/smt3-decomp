@@ -115,16 +115,16 @@ typedef struct effDirEnt_t {
 } effDirEnt_t;
 
 /* The creation callback's returned payload is retained in this 8-byte dispatch owner. */
-typedef struct effWork_t {
+typedef struct dds3MagatuhiPar_tag {
     u32 type;
     void *payload;
-} effWork_t;
+} dds3MagatuhiPar_tag;
 
 /* Callback input prefix; type 3 contains an effect-dispatch object at +8. */
 typedef struct {
     s32 type;
     u8 pad04[4];
-    effWork_t *effect;
+    dds3MagatuhiPar_tag *effect;
 } effMagatuhiCallback_t;
 
 /* Drift parameters are not ring parameters despite their equal size (0xDC). */
@@ -146,19 +146,19 @@ typedef struct {
     u32 particleCount;
     u32 maxSteps;
     u8 pad48[0x94];
-} effMagatuhiDriftParams_t;
+} effMagaSmokeParam_t;
 
 /* Shared 0x30-byte state: base position, planar drift, and accumulated lift. */
 typedef struct {
     f32 position[EFF_MAGATUHI_XYZ_COMPONENT_COUNT];
     u8 pad0C[4];
-    f32 driftState[EFF_MAGATUHI_XYZ_COMPONENT_COUNT]; /* XZ direction, Y accumulated lift */
+    f32 dirUp[EFF_MAGATUHI_XYZ_COMPONENT_COUNT]; /* XZ direction, Y accumulated lift */
     u8 pad1C[4];
     s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
     f32 scale;
     f32 angle;
     f32 liftStep;
-} effMagatuhiDriftParticle_t;
+} effMagaSmokePart_tag;
 
 /* Seven copied words; the parent appends its independently allocated history. */
 typedef struct effMagatuhiHistoryParams_t {
@@ -198,12 +198,12 @@ typedef struct effMagatuhiOwner_t {
 /* The 0x30-byte states precede this 0x12C-byte work allocation. */
 typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
-    effMagatuhiDriftParams_t head;
-    effMagatuhiDriftParticle_t *particles;
+    effMagaSmokeParam_t head;
+    effMagaSmokePart_tag *particles;
     u32 tintColor;
     effMagatuhiOwner_t *managedResource;
     sdfMemHandle_t *allocationHandle;
-} effMagatuhiDriftWork_t;
+} effMagaSmoke_tag;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
 typedef struct {
@@ -239,7 +239,7 @@ typedef struct {
     f32 pathAcceleration;  /* 0x5C: multiplier applied to the path step */
     u32 particleCount;     /* 0x60 */
     u8 pad64[0x118];
-} effMagatuhiHeadFirst_t; /* 0x17C */
+} effMagaSmokeConvParam_t; /* 0x17C */
 
 /* Bezier parameter head: particle count and delay spread at their native offsets. */
 typedef struct {
@@ -254,10 +254,10 @@ typedef struct {
     u32 particleCount;     /* 0x64 */
     u32 duration;          /* 0x68 */
     u8 pad6C[0x114];
-} effMagatuhiHeadSecond_t; /* 0x180 */
+} effMagaPoint4Param_t; /* 0x180 */
 
 /* Orbit parameters copied into the work record; trailing bytes stay opaque. */
-typedef struct effMagatuhiOrbitParams_t {
+typedef struct effMagaSpiralParam_t {
     f32 origin[4];
     u8 respawn;            /* 0x10 */
     u8 pad11[3];
@@ -276,10 +276,10 @@ typedef struct effMagatuhiOrbitParams_t {
     u32 particleCount;     /* 0x44 */
     u32 maxSteps;          /* 0x48 */
     u8 pad4C[0x94];
-} effMagatuhiOrbitParams_t;
+} effMagaSpiralParam_t;
 
 /* One particle slot; replay visits the first slot in each triplet. */
-typedef struct effMagatuhiOrbitParticle_t {
+typedef struct effMagaSpiralPart_tag {
     s32 age;        /* 0x00: negative while waiting; otherwise elapsed frames */
     f32 height;     /* 0x04 */
     f32 heightStep; /* 0x08 */
@@ -287,17 +287,17 @@ typedef struct effMagatuhiOrbitParticle_t {
     f32 angleStep;  /* 0x10 */
     f32 radius;     /* 0x14 */
     f32 radiusStep; /* 0x18 */
-} effMagatuhiOrbitParticle_t;
+} effMagaSpiralPart_tag;
 
 /* Work is followed by the orbit slots in the same retained allocation. */
-typedef struct effMagatuhiOrbitWork_t {
+typedef struct effMagaSpiral_tag {
     f32 matrix[16];
-    effMagatuhiOrbitParams_t head;
-    effMagatuhiOrbitParticle_t *particles;
+    effMagaSpiralParam_t head;
+    effMagaSpiralPart_tag *particles;
     effMagatuhiOwner_t *managedResource;
     u32 tintColor;
     sdfMemHandle_t *allocationHandle;
-} effMagatuhiOrbitWork_t;
+} effMagaSpiral_tag;
 
 /* Ring parameters copied verbatim into the work at +0x40 (0xDC). */
 typedef struct {
@@ -318,27 +318,27 @@ typedef struct {
     u32 particleCount;
     u32 maxSteps;
     u8 pad48[0x94];
-} effMagatuhiRingParams_t;
+} effMagaCylinderParam_t;
 
 /* Per-particle state allocated after EffMagatuhiRingWork by both titles. */
-typedef struct effMagatuhiRingParticle_t {
+typedef struct effMagaCylinderPart_tag {
     s32 age;        /* 0x00: negative while waiting; otherwise elapsed frames */
     f32 height;     /* 0x04 */
     f32 angle;      /* 0x08 */
     f32 angleStep;  /* 0x0C */
     f32 radius;     /* 0x10 */
     f32 radiusStep; /* 0x14 */
-} effMagatuhiRingParticle_t;
+} effMagaCylinderPart_tag;
 
 /* Work precedes its array of 0x18-byte ring states (0x12C). */
 typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
-    effMagatuhiRingParams_t head;
-    effMagatuhiRingParticle_t *particles;
+    effMagaCylinderParam_t head;
+    effMagaCylinderPart_tag *particles;
     effMagatuhiOwner_t *managedResource;
     u32 tintColor;
     sdfMemHandle_t *allocationHandle;
-} effMagatuhiRingWork_t;
+} effMagaCylinder_tag;
 
 /* Four control points and their jitter scales; copy xyz but preserve each w. */
 typedef struct {
@@ -347,21 +347,21 @@ typedef struct {
 } effMagatuhiRowsSrc_t;
 
 typedef struct {
-    effMagatuhiHeadFirst_t head;
-    effMagatuhiDriftParticle_t *particles; /* 0x17C */
+    effMagaSmokeConvParam_t head;
+    effMagaSmokePart_tag *particles; /* 0x17C */
     effArrHdr_t *mathResource;    /* 0x180 */
     u8 pad184[8];
     effMagatuhiOwner_t *managedResource; /* 0x18C */
     sdfMemHandle_t *allocationHandle; /* 0x190 backing allocation, not the particle address */
-} effMagatuhiWideFirst_t;
+} effMagaSmokeConv_tag;
 
 typedef struct {
-    effMagatuhiHeadSecond_t head;
+    effMagaPoint4Param_t head;
     s32 *delays;           /* 0x180 */
     effArrHdr_t *mathResource;    /* 0x184 */
     effMagatuhiOwner_t *managedResource; /* 0x188 */
     sdfMemHandle_t *allocationHandle; /* 0x18C backing allocation, not the work address */
-} effMagatuhiWideSecond_t;
+} effMagaPoint4_tag;
 
 /* Effect subrecord with byte fields at +0x20/+0x40/+0x50 (0x51); DDS1/2 game/code_0018CAC8/00194700.c. */
 /* Debug viewer record: the destroy hook with its handle slot, the create hook
@@ -568,112 +568,112 @@ void effMagaCylinderBlendColor(effMagatuhiValueWork_t *work, u32 colorA, u32 col
 void effMagaSmokeInitPart(effMagatuhiValueWork_t *valueWork, s32 index);
 /* Clone the first-family parameters; return the work after its state array.
  * Clamp only the copied delay modulus, leaving the caller's parameters intact. */
-effMagatuhiWideFirst_t *effMagaSmokeConvCreate(effMagatuhiHeadFirst_t *src);
+effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src);
 /* Release math state, the history owner, then the backing allocation. */
-void effMagaSmokeConvDelete(effMagatuhiWideFirst_t *pData);
+void effMagaSmokeConvDelete(effMagaSmokeConv_tag *pData);
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w remains unwritten, as in the retail routine. */
-void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *pMagaSmokeConv, s32 index);
+void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index);
 /* Drift until the particle enters the capture radius, then follow a randomized
  * cubic path to the target. Fade-in takes priority over an overlapping fade-out.
  * Preserve the native unwritten point w and unchecked fade divisors. */
-void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *pData);
+void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData);
 /* Update the first family's scattered float parameters without touching gaps. */
 void effMagaSCSetArea(effMagatuhiCallback_t *hEffect, effMagatuhiFloatParams_t *pMagaSCArea);
 /* Clone history parameters; signed delays follow the returned work block. */
-effMagatuhiWideSecond_t *effMagaPoint4Create(effMagatuhiHeadSecond_t *src);
+effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src);
 /* Release Bezier slots, their history owner, then the backing allocation. */
-void effMagaPoint4Delete(effMagatuhiWideSecond_t *pData);
+void effMagaPoint4Delete(effMagaPoint4_tag *pData);
 /* Jitter control points perpendicular to the path and camera viewing direction. */
-void effMagaPoint4PartInit(effMagatuhiWideSecond_t *pMagaPoint4, s32 index);
+void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index);
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
-void effMagaPoint4Draw(effMagatuhiWideSecond_t *pData);
+void effMagaPoint4Draw(effMagaPoint4_tag *pData);
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
 void effMagaP4SetPoint(effMagatuhiCallback_t *hEffect, effMagatuhiRowsSrc_t *pP4Point);
 /* Seed every fourth slot with interpolated samples between two curve positions.
  * Keep the asymmetric duration/age subtraction and unchecked span divisor. */
 void effMagaP4Randomize(effMagatuhiCallback_t *hEffect);
 /* Clone ring parameters; the returned work precedes its individual slots. */
-effMagatuhiRingWork_t *effMagaCylinderCreate(effMagatuhiRingParams_t *src);
+effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src);
 /* Release the ring history owner before the work/state allocation. */
-void effMagaCylinderDelete(effMagatuhiRingWork_t *pData);
+void effMagaCylinderDelete(effMagaCylinder_tag *pData);
 /* Initialize a ring slot and reset the history/value owned by that slot. */
-void effMagaCylinderPartInit(effMagatuhiRingWork_t *pMagaCylinder, s32 index);
+void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index);
 /* Sample the current fixed-height ring before advancing angle and radius.
  * Keep the cached age across initialization and preserve fade-in priority. */
-void effMagaCylinderDraw(effMagatuhiRingWork_t *pData);
+void effMagaCylinderDraw(effMagaCylinder_tag *pData);
 /* Copy the ring origin as one quadword, including its fourth component. */
-void effMagaCylinderSetPosition(effMagatuhiRingWork_t *pData, void *pPos);
+void effMagaCylinderSetPosition(effMagaCylinder_tag *pData, void *pPos);
 /* The historical symbol names a resource, but this slot is packed color. */
-void effMagaCylinderSetRGBA(effMagatuhiRingWork_t *pData, u32 abgr);
+void effMagaCylinderSetRGBA(effMagaCylinder_tag *pData, u32 abgr);
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaCylinderSetRotateMatrix(effMagatuhiRingWork_t *pData, void *pMatrix);
+void effMagaCylinderSetRotateMatrix(effMagaCylinder_tag *pData, void *pMatrix);
 /* Replay the first slot of each three-slot group from a random age. */
 void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect);
 /* Clone orbit parameters; the returned work precedes its individual slots. */
-effMagatuhiOrbitWork_t *effMagaSpiralCreate(effMagatuhiOrbitParams_t *src);
+effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src);
 /* Release the orbit history owner before the work/state allocation. */
-void effMagaSpiralDelete(effMagatuhiOrbitWork_t *pData);
+void effMagaSpiralDelete(effMagaSpiral_tag *pData);
 /* Seed randomized height/angular/radial increments and clear the slot history. */
-void effMagaSpiralPartInit(effMagatuhiOrbitWork_t *pMagaSpiral, s32 index);
+void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index);
 /* Sample and transform the current orbit before advancing its three rates.
  * Keep the cached age across initialization and preserve fade-in priority. */
-void effMagaSpiralDraw(effMagatuhiOrbitWork_t *pData);
+void effMagaSpiralDraw(effMagaSpiral_tag *pData);
 /* Copy the orbit origin as one quadword, preserving the source w. */
-void effMagaSpiralSetPosition(effMagatuhiOrbitWork_t *pData, void *pPos);
+void effMagaSpiralSetPosition(effMagaSpiral_tag *pData, void *pPos);
 /* This callback sets the packed orbit color, not an allocation handle. */
-void effMagaSpiralSetRGBA(effMagatuhiOrbitWork_t *pData, u32 abgr);
+void effMagaSpiralSetRGBA(effMagaSpiral_tag *pData, u32 abgr);
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaSpiralSetRotateMatrix(effMagatuhiOrbitWork_t *pData, void *pMatrix);
+void effMagaSpiralSetRotateMatrix(effMagaSpiral_tag *pData, void *pMatrix);
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
 void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect);
 /* Clone drift parameters; return the work after its 0x30-byte state array. */
-effMagatuhiDriftWork_t *effMagaSmokeCreate(effMagatuhiDriftParams_t *src);
+effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src);
 /* Release the drift history owner before its states-plus-work allocation. */
-void effMagaSmokeDelete(effMagatuhiDriftWork_t *pData);
+void effMagaSmokeDelete(effMagaSmoke_tag *pData);
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
-void effMagaSmokePartInit(effMagatuhiDriftWork_t *pMagaSmoke, s32 index);
+void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index);
 /* Accumulate lift, transform the drift sample, then advance scale and angle.
  * Keep the cached age across initialization and preserve fade-in priority. */
-void effMagaSmokeDraw(effMagatuhiDriftWork_t *pData);
+void effMagaSmokeDraw(effMagaSmoke_tag *pData);
 /* Copy the drift origin as one quadword, preserving the source w. */
-void effMagaSmokeSetPosition(effMagatuhiDriftWork_t *pData, void *pPos);
+void effMagaSmokeSetPosition(effMagaSmoke_tag *pData, void *pPos);
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
-void effMagaSmokeSetRGBA(effMagatuhiDriftWork_t *pData, u32 abgr);
+void effMagaSmokeSetRGBA(effMagaSmoke_tag *pData, u32 abgr);
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaSmokeSetRotateMatrix(effMagatuhiDriftWork_t *pData, void *pMatrix);
+void effMagaSmokeSetRotateMatrix(effMagaSmoke_tag *pData, void *pMatrix);
 /* Replay the first slot of each three-slot drift group from a random age. */
 void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect);
 /* Dispatch replay side effects; retain the native s32 definition's fall-through. */
 s32 effMagaRandomize(effMagatuhiCallback_t *hEffect);
 /* Allocate the dispatch owner before calling the selected payload constructor. */
-effWork_t *dds3MagatuhiParCreate(s32 type, void *params);
+dds3MagatuhiPar_tag *dds3MagatuhiParCreate(s32 type, void *params);
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
-void dds3MagatuhiParDraw(effWork_t *hData);
+void dds3MagatuhiParDraw(dds3MagatuhiPar_tag *hData);
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
-void dds3MagatuhiParDelete(effWork_t *hData);
+void dds3MagatuhiParDelete(dds3MagatuhiPar_tag *hData);
 /* Return the retained payload passed to this type's callbacks. */
-void *dds3MagatuhiGetHandle(effWork_t *hMagaPar);
+void *dds3MagatuhiGetHandle(dds3MagatuhiPar_tag *hMagaPar);
 /* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 dds3MagatuhiGetType(effWork_t *hMagaPar);
+u32 dds3MagatuhiGetType(dds3MagatuhiPar_tag *hMagaPar);
 /* Native node type-three condition slot: accept with the constant result one. */
 u32 dds3MagatuhiParIsActive(void);
 /* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
-void dds3MagatuhiParSetPosition(effWork_t *work);
+void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work);
 /* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
-void dds3MagatuhiParSetRotateMatrix(effWork_t *work);
+void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work);
 /* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
-void dds3MagatuhiParSetRGBA(effWork_t *work);
+void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work);
 /* Store the low byte of slotValue at the type-specific subslot.
    Types two through four share the same location; other types are left unchanged. */
-void dds3MagatuhiParSetByType(effWork_t *work, s32 slotValue);
+void dds3MagatuhiParSetByType(dds3MagatuhiPar_tag *work, s32 slotValue);
 /* Read the type-specific subslot, or zero for other types.
    The callback's second argument is unused. */
-u32 func_001A8DF8(effWork_t *work, s32 unusedSlotValue);
+u32 func_001A8DF8(dds3MagatuhiPar_tag *work, s32 unusedSlotValue);
 /* Types zero/one dispatch from the payload base; two through four skip its prefix.
    Other types still dispatch with a zero argument; no type bounds check is added. */
-void dds3MagatuhiParCopy(effWork_t *work);
+void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work);
 void InitMagatuhiEditorProcess(void);
 void effDebugDrawRectLine(s32 x, s32 y, s32 radius, s32 drawCross);
 
@@ -1050,12 +1050,12 @@ void effMagaSmokeInitPart(effMagatuhiValueWork_t *valueWork, s32 index) {
 
 /* Clone the first-family parameters; return the work after its state array.
  * Clamp only the copied delay modulus, leaving the caller's parameters intact. */
-effMagatuhiWideFirst_t *effMagaSmokeConvCreate(effMagatuhiHeadFirst_t *src) {
+effMagaSmokeConv_tag *effMagaSmokeConvCreate(effMagaSmokeConvParam_t *src) {
     u32 count = src->particleCount;
-    u32 size = count * sizeof(effMagatuhiDriftParticle_t);
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagatuhiWideFirst_t));
-    effMagatuhiDriftParticle_t *particle = (effMagatuhiDriftParticle_t *)sdfMemLock(allocation);
-    effMagatuhiWideFirst_t *work = (effMagatuhiWideFirst_t *)((u8 *)particle + size);
+    u32 size = count * sizeof(effMagaSmokePart_tag);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmokeConv_tag));
+    effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
+    effMagaSmokeConv_tag *work = (effMagaSmokeConv_tag *)((u8 *)particle + size);
     s32 spread;
     u32 particleIndex;
 
@@ -1076,7 +1076,7 @@ effMagatuhiWideFirst_t *effMagaSmokeConvCreate(effMagatuhiHeadFirst_t *src) {
 }
 
 /* Release math state, the history owner, then the backing allocation. */
-void effMagaSmokeConvDelete(effMagatuhiWideFirst_t *pData) {
+void effMagaSmokeConvDelete(effMagaSmokeConv_tag *pData) {
     dds3Bezier4PDelete(pData->mathResource);
     effMagaCylinderFree(pData->managedResource);
     sdfMemFreeDirect(pData->allocationHandle);
@@ -1084,8 +1084,8 @@ void effMagaSmokeConvDelete(effMagatuhiWideFirst_t *pData) {
 
 /* Seed independent normalized XZ position/drift vectors and clear slot history.
  * The vector scratch w remains unwritten, as in the retail routine. */
-void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *pMagaSmokeConv, s32 index) {
-    effMagatuhiDriftParticle_t *particle = &pMagaSmokeConv->particles[index];
+void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
+    effMagaSmokePart_tag *particle = &pMagaSmokeConv->particles[index];
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
     f32 random;
@@ -1105,13 +1105,13 @@ void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *pMagaSmokeConv, s32 index)
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->driftState[0] = random + random;
-    particle->driftState[1] = 0.0f;
+    particle->dirUp[0] = random + random;
+    particle->dirUp[1] = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->driftState[2] = random + random;
-    SDF_VU0_LOADVECTOR(particle->driftState);
+    particle->dirUp[2] = random + random;
+    SDF_VU0_LOADVECTOR(particle->dirUp);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(particle->driftState);
+    SDF_VU0_STOREVECTOR(particle->dirUp);
     particle->scale = pMagaSmokeConv->head.baseScale *
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmokeConv->head.scaleVariation +
          (1.0f - pMagaSmokeConv->head.scaleVariation));
@@ -1129,7 +1129,7 @@ void effMagaSmokeConvPartInit(effMagatuhiWideFirst_t *pMagaSmokeConv, s32 index)
 /* Drift until the particle enters the capture radius, then follow a randomized
  * cubic path to the target. Fade-in takes priority over an overlapping fade-out.
  * Preserve the native unwritten point w and unchecked fade divisors. */
-void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *pData) {
+void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
     f32 point[4];
     f32 origin[4];
     f32 basePosition[4];
@@ -1140,7 +1140,7 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *pData) {
     f32 startTangent[4];
     effArrHdr_t *mathResource;
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiDriftParticle_t *particle;
+    effMagaSmokePart_tag *particle;
     effCubicBezierSlot_t *slot;
     u8 respawn;
     u32 count;
@@ -1182,10 +1182,10 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *pData) {
             if (slot->step == 0.0f) {
                 SDF_VU0_COPYVECTOR(basePosition, particle->position);
                 radial = particle->scale * sdfSin(particle->angle);
-                particle->driftState[1] += particle->liftStep;
-                point[0] = origin[0] + particle->position[0] + particle->driftState[0] * radial;
-                point[1] = origin[1] + particle->position[1] + particle->driftState[1];
-                point[2] = origin[2] + particle->position[2] + particle->driftState[2] * radial;
+                particle->dirUp[1] += particle->liftStep;
+                point[0] = origin[0] + particle->position[0] + particle->dirUp[0] * radial;
+                point[1] = origin[1] + particle->position[1] + particle->dirUp[1];
+                point[2] = origin[2] + particle->position[2] + particle->dirUp[2] * radial;
                 particle->scale += scaleStep;
                 particle->angle += angleStep;
                 SDF_VU0_LOADVECTOR(target);
@@ -1248,7 +1248,7 @@ void effMagaSmokeConvDraw(effMagatuhiWideFirst_t *pData) {
 
 /* Update the first family's scattered float parameters without touching gaps. */
 void effMagaSCSetArea(effMagatuhiCallback_t *hEffect, effMagatuhiFloatParams_t *pMagaSCArea) {
-    effMagatuhiWideFirst_t *dst = dds3MagatuhiGetHandle(hEffect->effect);
+    effMagaSmokeConv_tag *dst = dds3MagatuhiGetHandle(hEffect->effect);
 
     dst->head.originX = pMagaSCArea->originX;
     dst->head.originY = pMagaSCArea->originY;
@@ -1261,10 +1261,10 @@ void effMagaSCSetArea(effMagatuhiCallback_t *hEffect, effMagatuhiFloatParams_t *
 }
 
 /* Clone history parameters; signed delays follow the returned work block. */
-effMagatuhiWideSecond_t *effMagaPoint4Create(effMagatuhiHeadSecond_t *src) {
+effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
     u32 count = src->particleCount;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(effMagatuhiWideSecond_t));
-    effMagatuhiWideSecond_t *work = (effMagatuhiWideSecond_t *)sdfMemLock(allocation);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * EFF_MAGATUHI_DELAY_WORD_BYTES + sizeof(effMagaPoint4_tag));
+    effMagaPoint4_tag *work = (effMagaPoint4_tag *)sdfMemLock(allocation);
     s32 *delays = (s32 *)(work + 1);
     s32 spread;
     u32 i;
@@ -1285,14 +1285,14 @@ effMagatuhiWideSecond_t *effMagaPoint4Create(effMagatuhiHeadSecond_t *src) {
 }
 
 /* Release Bezier slots, their history owner, then the backing allocation. */
-void effMagaPoint4Delete(effMagatuhiWideSecond_t *pData) {
+void effMagaPoint4Delete(effMagaPoint4_tag *pData) {
     dds3Bezier4PDelete(pData->mathResource);
     effMagaCylinderFree(pData->managedResource);
     sdfMemFreeDirect(pData->allocationHandle);
 }
 
 /* Jitter control points perpendicular to the path and camera viewing direction. */
-void effMagaPoint4PartInit(effMagatuhiWideSecond_t *pMagaPoint4, s32 index) {
+void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     f32 scale[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 lastNormal[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 viewDirection[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -1388,7 +1388,7 @@ void effMagaPoint4PartInit(effMagatuhiWideSecond_t *pMagaPoint4, s32 index) {
 
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
-void effMagaPoint4Draw(effMagatuhiWideSecond_t *pData) {
+void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
     effArrHdr_t *slots = pData->mathResource;
     effMagatuhiValueWork_t *valueWork = pData->managedResource->valueWork;
     s32 *delays = pData->delays;
@@ -1434,7 +1434,7 @@ void effMagaPoint4Draw(effMagatuhiWideSecond_t *pData) {
 
 /* Replace control-point xyz and jitter amplitudes without changing point w. */
 void effMagaP4SetPoint(effMagatuhiCallback_t *hEffect, effMagatuhiRowsSrc_t *pP4Point) {
-    effMagatuhiWideSecond_t *dst = dds3MagatuhiGetHandle(hEffect->effect);
+    effMagaPoint4_tag *dst = dds3MagatuhiGetHandle(hEffect->effect);
     u32 controlPointIndex;
 
     for (controlPointIndex = 0; controlPointIndex < EFF_MAGATUHI_CONTROL_POINT_COUNT; controlPointIndex++) {
@@ -1448,7 +1448,7 @@ void effMagaP4SetPoint(effMagatuhiCallback_t *hEffect, effMagatuhiRowsSrc_t *pP4
 /* Seed every fourth slot with interpolated samples between two curve positions.
  * Keep the asymmetric duration/age subtraction and unchecked span divisor. */
 void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
-    effMagatuhiWideSecond_t *work = dds3MagatuhiGetHandle(hEffect->effect);
+    effMagaPoint4_tag *work = dds3MagatuhiGetHandle(hEffect->effect);
     effMagatuhiValueWork_t *valueWork = work->managedResource->valueWork;
     u32 historyFrames = work->head.duration;
     s32 lifetimeFrames = work->head.lifetimeFrames;
@@ -1494,11 +1494,11 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
 }
 
 /* Clone ring parameters; the returned work precedes its individual slots. */
-effMagatuhiRingWork_t *effMagaCylinderCreate(effMagatuhiRingParams_t *src) {
+effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     u32 count = src->particleCount;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagatuhiRingParticle_t) + sizeof(effMagatuhiRingWork_t));
-    effMagatuhiRingWork_t *work = (effMagatuhiRingWork_t *)sdfMemLock(allocation);
-    effMagatuhiRingParticle_t *particle = (effMagatuhiRingParticle_t *)(work + 1);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagaCylinderPart_tag) + sizeof(effMagaCylinder_tag));
+    effMagaCylinder_tag *work = (effMagaCylinder_tag *)sdfMemLock(allocation);
+    effMagaCylinderPart_tag *particle = (effMagaCylinderPart_tag *)(work + 1);
     s32 spread;
     u32 i;
 
@@ -1520,14 +1520,14 @@ effMagatuhiRingWork_t *effMagaCylinderCreate(effMagatuhiRingParams_t *src) {
 }
 
 /* Release the ring history owner before the work/state allocation. */
-void effMagaCylinderDelete(effMagatuhiRingWork_t *pData) {
+void effMagaCylinderDelete(effMagaCylinder_tag *pData) {
     effMagaCylinderFree(pData->managedResource);
     sdfMemFreeDirect(pData->allocationHandle);
 }
 
 /* Initialize a ring slot and reset the history/value owned by that slot. */
-void effMagaCylinderPartInit(effMagatuhiRingWork_t *pMagaCylinder, s32 index) {
-    effMagatuhiRingParticle_t *elem = &pMagaCylinder->particles[index];
+void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
+    effMagaCylinderPart_tag *elem = &pMagaCylinder->particles[index];
     f32 blend;
     f32 t;
 
@@ -1547,11 +1547,11 @@ void effMagaCylinderPartInit(effMagatuhiRingWork_t *pMagaCylinder, s32 index) {
 
 /* NON_MATCHING: 40 of 172 words differ (first at +0x3C). */
 #ifdef NON_MATCHING
-void effMagaCylinderDraw(effMagatuhiRingWork_t *pData) {
+void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiRingParticle_t *particle;
+    effMagaCylinderPart_tag *particle;
     u8 respawn;
     u32 count;
     u32 tintColor;
@@ -1613,26 +1613,26 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaCylinderDraw);
 #endif
 
 /* Copy the ring origin as one quadword, including its fourth component. */
-void effMagaCylinderSetPosition(effMagatuhiRingWork_t *pData, void *pPos) {
+void effMagaCylinderSetPosition(effMagaCylinder_tag *pData, void *pPos) {
     SDF_VU0_COPYVECTOR(pData->head.origin, pPos);
 }
 
 /* The historical symbol names a resource, but this slot is packed color. */
-void effMagaCylinderSetRGBA(effMagatuhiRingWork_t *pData, u32 abgr) {
+void effMagaCylinderSetRGBA(effMagaCylinder_tag *pData, u32 abgr) {
     pData->tintColor = abgr;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaCylinderSetRotateMatrix(effMagatuhiRingWork_t *pData, void *pMatrix) {
+void effMagaCylinderSetRotateMatrix(effMagaCylinder_tag *pData, void *pMatrix) {
     VU0_COPY_MATRIX(pData->matrix, pMatrix);
 }
 
 /* Replay the first slot of each three-slot group from a random age. */
 void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
     u32 k;
-    effMagatuhiRingWork_t *work;
+    effMagaCylinder_tag *work;
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiRingParticle_t *particle;
+    effMagaCylinderPart_tag *particle;
     u32 count;
     s32 frames;
     u32 maxSteps;
@@ -1697,11 +1697,11 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
 }
 
 /* Clone orbit parameters; the returned work precedes its individual slots. */
-effMagatuhiOrbitWork_t *effMagaSpiralCreate(effMagatuhiOrbitParams_t *src) {
+effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     u32 count = src->particleCount;
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagatuhiOrbitParticle_t) + sizeof(effMagatuhiOrbitWork_t));
-    effMagatuhiOrbitWork_t *work = (effMagatuhiOrbitWork_t *)sdfMemLock(allocation);
-    effMagatuhiOrbitParticle_t *particle = (effMagatuhiOrbitParticle_t *)(work + 1);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effMagaSpiralPart_tag) + sizeof(effMagaSpiral_tag));
+    effMagaSpiral_tag *work = (effMagaSpiral_tag *)sdfMemLock(allocation);
+    effMagaSpiralPart_tag *particle = (effMagaSpiralPart_tag *)(work + 1);
     s32 spread;
     u32 i;
 
@@ -1723,14 +1723,14 @@ effMagatuhiOrbitWork_t *effMagaSpiralCreate(effMagatuhiOrbitParams_t *src) {
 }
 
 /* Release the orbit history owner before the work/state allocation. */
-void effMagaSpiralDelete(effMagatuhiOrbitWork_t *pData) {
+void effMagaSpiralDelete(effMagaSpiral_tag *pData) {
     effMagaCylinderFree(pData->managedResource);
     sdfMemFreeDirect(pData->allocationHandle);
 }
 
 /* Seed randomized height/angular/radial increments and clear the slot history. */
-void effMagaSpiralPartInit(effMagatuhiOrbitWork_t *pMagaSpiral, s32 index) {
-    effMagatuhiOrbitParticle_t *elem = &pMagaSpiral->particles[index];
+void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
+    effMagaSpiralPart_tag *elem = &pMagaSpiral->particles[index];
     f32 blend;
     f32 t;
 
@@ -1752,11 +1752,11 @@ void effMagaSpiralPartInit(effMagatuhiOrbitWork_t *pMagaSpiral, s32 index) {
 
 /* NON_MATCHING: 40 of 176 words differ (first at +0x3C). */
 #ifdef NON_MATCHING
-void effMagaSpiralDraw(effMagatuhiOrbitWork_t *pData) {
+void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiOrbitParticle_t *particle;
+    effMagaSpiralPart_tag *particle;
     u8 respawn;
     u32 count;
     u32 tintColor;
@@ -1819,26 +1819,26 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSpiralDraw);
 #endif
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
-void effMagaSpiralSetPosition(effMagatuhiOrbitWork_t *pData, void *pPos) {
+void effMagaSpiralSetPosition(effMagaSpiral_tag *pData, void *pPos) {
     SDF_VU0_COPYVECTOR(pData->head.origin, pPos);
 }
 
 /* This callback sets the packed orbit color, not an allocation handle. */
-void effMagaSpiralSetRGBA(effMagatuhiOrbitWork_t *pData, u32 abgr) {
+void effMagaSpiralSetRGBA(effMagaSpiral_tag *pData, u32 abgr) {
     pData->tintColor = abgr;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaSpiralSetRotateMatrix(effMagatuhiOrbitWork_t *pData, void *pMatrix) {
+void effMagaSpiralSetRotateMatrix(effMagaSpiral_tag *pData, void *pMatrix) {
     VU0_COPY_MATRIX(pData->matrix, pMatrix);
 }
 
 /* Advance the orbiting-particle family: each group of three slots is replayed from a random delay, one orbit step at a time, into the value table. */
 void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
     u32 k;
-    effMagatuhiOrbitWork_t *work;
+    effMagaSpiral_tag *work;
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiOrbitParticle_t *particle;
+    effMagaSpiralPart_tag *particle;
     u32 count;
     s32 frames;
     u32 maxSteps;
@@ -1907,12 +1907,12 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
 }
 
 /* Clone drift parameters; return the work after its 0x30-byte state array. */
-effMagatuhiDriftWork_t *effMagaSmokeCreate(effMagatuhiDriftParams_t *src) {
+effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
     u32 count = src->particleCount;
-    u32 size = count * sizeof(effMagatuhiDriftParticle_t);
-    sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagatuhiDriftWork_t));
-    effMagatuhiDriftParticle_t *particle = (effMagatuhiDriftParticle_t *)sdfMemLock(allocation);
-    effMagatuhiDriftWork_t *work = (effMagatuhiDriftWork_t *)((u8 *)particle + size);
+    u32 size = count * sizeof(effMagaSmokePart_tag);
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(size + sizeof(effMagaSmoke_tag));
+    effMagaSmokePart_tag *particle = (effMagaSmokePart_tag *)sdfMemLock(allocation);
+    effMagaSmoke_tag *work = (effMagaSmoke_tag *)((u8 *)particle + size);
     s32 spread;
     u32 i;
 
@@ -1934,14 +1934,14 @@ effMagatuhiDriftWork_t *effMagaSmokeCreate(effMagatuhiDriftParams_t *src) {
 }
 
 /* Release the drift history owner before its states-plus-work allocation. */
-void effMagaSmokeDelete(effMagatuhiDriftWork_t *pData) {
+void effMagaSmokeDelete(effMagaSmoke_tag *pData) {
     effMagaCylinderFree(pData->managedResource);
     sdfMemFreeDirect(pData->allocationHandle);
 }
 
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
-void effMagaSmokePartInit(effMagatuhiDriftWork_t *pMagaSmoke, s32 index) {
-    effMagatuhiDriftParticle_t *particle = &pMagaSmoke->particles[index];
+void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
+    effMagaSmokePart_tag *particle = &pMagaSmoke->particles[index];
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
     f32 random;
@@ -1960,13 +1960,13 @@ void effMagaSmokePartInit(effMagatuhiDriftWork_t *pMagaSmoke, s32 index) {
     particle->position[1] = 0.0f;
     particle->position[2] = radius * direction[2];
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->driftState[0] = random + random;
-    particle->driftState[1] = 0.0f;
+    particle->dirUp[0] = random + random;
+    particle->dirUp[1] = 0.0f;
     random = dds3GetRandFloatA(dds3EffectBase) - EFF_MAGATUHI_RANDOM_MIDPOINT;
-    particle->driftState[2] = random + random;
-    SDF_VU0_LOADVECTOR(particle->driftState);
+    particle->dirUp[2] = random + random;
+    SDF_VU0_LOADVECTOR(particle->dirUp);
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR(particle->driftState);
+    SDF_VU0_STOREVECTOR(particle->dirUp);
     particle->scale = pMagaSmoke->head.initialScale *
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->head.initialScaleRandomness +
          (1.0f - pMagaSmoke->head.initialScaleRandomness));
@@ -1980,11 +1980,11 @@ void effMagaSmokePartInit(effMagatuhiDriftWork_t *pMagaSmoke, s32 index) {
 
 /* NON_MATCHING: 42 of 182 words differ (first at +0x3C). */
 #ifdef NON_MATCHING
-void effMagaSmokeDraw(effMagatuhiDriftWork_t *pData) {
+void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     f32 out[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiDriftParticle_t *particle;
+    effMagaSmokePart_tag *particle;
     u8 respawn;
     u32 count;
     u32 tintColor;
@@ -2013,10 +2013,10 @@ void effMagaSmokeDraw(effMagatuhiDriftWork_t *pData) {
         }
         if (age > 0 && age <= life) {
             radial = particle->scale * sdfSin(particle->angle);
-            particle->driftState[1] += particle->liftStep;
-            out[0] = particle->position[0] + particle->driftState[0] * radial;
-            out[1] = particle->position[1] + particle->driftState[1];
-            out[2] = particle->position[2] + particle->driftState[2] * radial;
+            particle->dirUp[1] += particle->liftStep;
+            out[0] = particle->position[0] + particle->dirUp[0] * radial;
+            out[1] = particle->position[1] + particle->dirUp[1];
+            out[2] = particle->position[2] + particle->dirUp[2] * radial;
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_LOADVECTOR(out);
             SDF_VU0_APPLYMATRIX();
@@ -2048,26 +2048,26 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSmokeDraw);
 #endif
 
 /* Copy the drift origin as one quadword, preserving the source w. */
-void effMagaSmokeSetPosition(effMagatuhiDriftWork_t *pData, void *pPos) {
+void effMagaSmokeSetPosition(effMagaSmoke_tag *pData, void *pPos) {
     SDF_VU0_COPYVECTOR(pData->head.origin, pPos);
 }
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
-void effMagaSmokeSetRGBA(effMagatuhiDriftWork_t *pData, u32 abgr) {
+void effMagaSmokeSetRGBA(effMagaSmoke_tag *pData, u32 abgr) {
     pData->tintColor = abgr;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
-void effMagaSmokeSetRotateMatrix(effMagatuhiDriftWork_t *pData, void *pMatrix) {
+void effMagaSmokeSetRotateMatrix(effMagaSmoke_tag *pData, void *pMatrix) {
     VU0_COPY_MATRIX(pData->matrix, pMatrix);
 }
 
 /* Replay the first slot of each three-slot drift group from a random age. */
 void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
     u32 k;
-    effMagatuhiDriftWork_t *work;
+    effMagaSmoke_tag *work;
     effMagatuhiValueWork_t *valueWork;
-    effMagatuhiDriftParticle_t *particle;
+    effMagaSmokePart_tag *particle;
     u32 count;
     s32 frames;
     u32 maxSteps;
@@ -2111,16 +2111,16 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                 liftStep = particle->liftStep;
                 angle = particle->angle + angleStep * (f32)frameOffset;
                 scale = particle->scale + scaleStep * (f32)frameOffset;
-                lift = particle->driftState[1] + liftStep * (f32)frameOffset;
+                lift = particle->dirUp[1] + liftStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
                     /* Native ordering: lift advances before sampling, scale/angle after. */
                     lift += liftStep;
                     /* Keep the sine evaluation even though its result is unused here. */
                     sdfSin(angle);
-                    out[0] = particle->position[0] + particle->driftState[0] * scale;
+                    out[0] = particle->position[0] + particle->dirUp[0] * scale;
                     out[1] = particle->position[1] + lift;
-                    out[2] = particle->position[2] + particle->driftState[2] * scale;
+                    out[2] = particle->position[2] + particle->dirUp[2] * scale;
                     SDF_VU0_LOADVECTOR_B(origin);
                     SDF_VU0_LOADVECTOR(out);
                     SDF_VU0_APPLYMATRIX();
@@ -2132,7 +2132,7 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                 }
                 particle->scale = scale;
                 particle->angle = angle;
-                particle->driftState[1] = lift;
+                particle->dirUp[1] = lift;
             }
         }
     }
@@ -2161,8 +2161,8 @@ s32 effMagaRandomize(effMagatuhiCallback_t *hEffect) {
 }
 
 /* Allocate the dispatch owner before calling the selected payload constructor. */
-effWork_t *dds3MagatuhiParCreate(s32 type, void *params) {
-    effWork_t *work = sdfChipAllocDirect(sizeof(*work));
+dds3MagatuhiPar_tag *dds3MagatuhiParCreate(s32 type, void *params) {
+    dds3MagatuhiPar_tag *work = sdfChipAllocDirect(sizeof(*work));
     void *payload = D_00320040[type].handler(params);
 
     work->type = type;
@@ -2171,23 +2171,23 @@ effWork_t *dds3MagatuhiParCreate(s32 type, void *params) {
 }
 
 /* Invoke the primary type callback with the payload; no NULL or type bounds check. */
-void dds3MagatuhiParDraw(effWork_t *hData) {
+void dds3MagatuhiParDraw(dds3MagatuhiPar_tag *hData) {
     D_00320044[hData->type].handler(hData->payload);
 }
 
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
-void dds3MagatuhiParDelete(effWork_t *hData) {
+void dds3MagatuhiParDelete(dds3MagatuhiPar_tag *hData) {
     D_00320048[hData->type].handler(hData->payload);
     sdfChipFreeDirect(hData);
 }
 
 /* Return the retained payload passed to this type's callbacks. */
-void *dds3MagatuhiGetHandle(effWork_t *hMagaPar) {
+void *dds3MagatuhiGetHandle(dds3MagatuhiPar_tag *hMagaPar) {
     return hMagaPar->payload;
 }
 
 /* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 dds3MagatuhiGetType(effWork_t *hMagaPar) {
+u32 dds3MagatuhiGetType(dds3MagatuhiPar_tag *hMagaPar) {
     return hMagaPar->type;
 }
 
@@ -2200,7 +2200,7 @@ u32 dds3MagatuhiParIsActive(void) {
 }
 
 /* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
-void dds3MagatuhiParSetPosition(effWork_t *work) {
+void dds3MagatuhiParSetPosition(dds3MagatuhiPar_tag *work) {
     void (*handler)(void *) = D_0032004C[work->type].handler;
 
     if (handler != NULL) {
@@ -2209,7 +2209,7 @@ void dds3MagatuhiParSetPosition(effWork_t *work) {
 }
 
 /* Node set-matrix slot: invoke optional subtype callback B; preserve the one-formal surface. */
-void dds3MagatuhiParSetRotateMatrix(effWork_t *work) {
+void dds3MagatuhiParSetRotateMatrix(dds3MagatuhiPar_tag *work) {
     void (*handler)(void *) = D_00320054[work->type].handler;
 
     if (handler != NULL) {
@@ -2218,7 +2218,7 @@ void dds3MagatuhiParSetRotateMatrix(effWork_t *work) {
 }
 
 /* Node parameter-word slot: invoke optional subtype callback C; preserve the one-formal surface. */
-void dds3MagatuhiParSetRGBA(effWork_t *work) {
+void dds3MagatuhiParSetRGBA(dds3MagatuhiPar_tag *work) {
     void (*handler)(void *) = D_00320050[work->type].handler;
 
     if (handler != NULL) {
@@ -2228,7 +2228,7 @@ void dds3MagatuhiParSetRGBA(effWork_t *work) {
 
 /* Store the low byte of slotValue at the type-specific subslot.
    Types two through four share the same location; other types are left unchanged. */
-void dds3MagatuhiParSetByType(effWork_t *work, s32 slotValue) {
+void dds3MagatuhiParSetByType(dds3MagatuhiPar_tag *work, s32 slotValue) {
     u8 slotByte = slotValue;
     u32 type = work->type;
 
@@ -2255,7 +2255,7 @@ void dds3MagatuhiParSetByType(effWork_t *work, s32 slotValue) {
 
 /* Read the type-specific subslot, or zero for other types.
    The callback's second argument is unused. */
-u32 func_001A8DF8(effWork_t *work, s32 unusedSlotValue) {
+u32 func_001A8DF8(dds3MagatuhiPar_tag *work, s32 unusedSlotValue) {
     u32 type = work->type;
 
     switch (type) {
@@ -2277,7 +2277,7 @@ u32 func_001A8DF8(effWork_t *work, s32 unusedSlotValue) {
 
 /* Types zero/one dispatch from the payload base; two through four skip its prefix.
    Other types still dispatch with a zero argument; no type bounds check is added. */
-void dds3MagatuhiParCopy(effWork_t *work) {
+void dds3MagatuhiParCopy(dds3MagatuhiPar_tag *work) {
     u32 type = work->type;
     void *handlerArg = NULL;
 

@@ -124,17 +124,17 @@ typedef struct
 
 typedef struct
 {
-    s32 mapNo;                         /* 0x00 */
-    sdfMemHandle_t *listHandle;        /* 0x04 */
+    s32 mapno;                         /* 0x00 */
+    sdfMemHandle_t *mem_hndl;        /* 0x04 */
     dds3SceneList_t *lists;            /* 0x08 */
     dds3Basic_t *camera;               /* 0x0C */
     dds3Basic_t *unit;                 /* 0x10 */
     u32 fieldHandle;                  /* 0x14 */
-    sdfMemHandle_t *scriptHandle;      /* 0x18 */
+    sdfMemHandle_t *hScrFileHandle;      /* 0x18 */
     void *script;                     /* 0x1C */
     s32 visible;                      /* 0x20 */
     u8 unk24[0x1C];
-} dds3SceneWork_t;
+} dds3SceneBasic_t;
 
 struct sdfModelRootNode_t;
 struct sdfMotionCtrlr_t;
@@ -144,16 +144,16 @@ struct sdfMotionCtrlr_t;
 typedef struct
 {
     u32 flag;
-    dds3BasicArrayHandle_t *eventArray;
+    dds3BasicArrayHandle_t *hEventBasicArray;
     u32 modelType;
-    void *modelHandle;
+    void *pModel;
     dds3Basic_t *control[8];
     void *userValue;
     struct sdfModelRootNode_t *modelRoot;
     struct sdfMotionCtrlr_t *motion;
-    s32 animeMode;
-    f32 animeSpeed;
-    u32 controlSvs;
+    s32 MotMode;
+    f32 MotSpeed;
+    u32 svs;
     s32 modelPartCount;
     s32 modelParts[24];
 } dds3ObjectBaseControlWorkData_t;
@@ -166,7 +166,7 @@ typedef struct
     s32 unk04;
     struct evtUnit_t *unit;
     dds3ObjectBaseControlWorkData_t *control;
-    s32 lightID;
+    s32 EL_serialID;
     s32 ot;
     u8 unk18[8];
 } dds3UnitObjectBasicWorkData_t;
@@ -241,9 +241,9 @@ struct dds3PathBasicControl_t
     f32 duration;
     f32 time;
     s32 spline;
-    dds3PathKeyframes_t *positionKeys;
-    dds3PathKeyframes_t *rotationKeys;
-    dds3PathKeyframes_t *scalarKeys;
+    dds3PathKeyframes_t *pTransrate;
+    dds3PathKeyframes_t *pRotation;
+    dds3PathKeyframes_t *pFovy;
     dds3PathKeyframes_t *transformKeys;
 };
 

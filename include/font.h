@@ -6,9 +6,9 @@
 
 typedef struct frFontUvRect_t frFontUvRect_t;
 
-typedef struct fmFontNode_t fmFontNode_t;
+typedef struct FontMem_t FontMem_t;
 
-typedef struct frFontRecord_t frFontRecord_t;
+typedef struct GsFont_t GsFont_t;
 
 typedef struct frTextHandle_t frTextHandle_t;
 
@@ -22,20 +22,20 @@ struct frFontUvRect_t {
     s32 v1;
 };
 
-struct fmFontNode_t {
+struct FontMem_t {
     u32 nodeIndex;
     frFontUvRect_t uv;
-    struct frFontRecord_t *item;
-    struct fmFontNode_t *prev;
-    struct fmFontNode_t *next;
+    struct GsFont_t *item;
+    struct FontMem_t *prev;
+    struct FontMem_t *next;
 };
 
-struct frFontRecord_t {
+struct GsFont_t {
     u16 id;
     u8 pad02[2];
-    u16 refs;
+    u16 used_count;
     u8 pad06[2];
-    fmFontNode_t *list;
+    FontMem_t *list;
 };
 
 /* Font items use their own 0x2C-byte pool, separate from parent chains. */
@@ -86,8 +86,8 @@ struct frTextHandle_t {
         u8 cellHeight;
         u8 opaque[2];
     } cellDimensions;
-    frFontRecord_t *cachedItem;
-    frFontRecord_t *sourceItem;
+    GsFont_t *cachedItem;
+    GsFont_t *sourceItem;
     struct frTextHandle_t *previous;
     struct frTextHandle_t *next;
 };

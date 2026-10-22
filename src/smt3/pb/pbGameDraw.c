@@ -6,7 +6,7 @@
 #include "draw3d.h"
 #include "ps2asm.h"
 
-typedef struct pbPanel_t pbPanel_t;
+typedef struct pbProcHandle_t pbProcHandle_t;
 
 typedef struct { s32 value; } pbPanelValue_t;
 
@@ -22,7 +22,7 @@ typedef struct
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
-} pbMyCharacter_t;
+} pbMyChar_t;
 
 typedef struct
 {
@@ -38,7 +38,7 @@ typedef struct
     s16 level, stage;
     u8 unk35C[4];
     s32 menuState;
-    struct pbPanel_t *helpProc;
+    struct pbProcHandle_t *helpProc;
 } pbMapWork_t;
 
 typedef struct { u8 unk00[4]; u16 group; } pbGroupEntry_t;
@@ -56,9 +56,9 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbBlockObj_t;
+typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
 
-typedef struct { s16 index; u16 step; u8 unk04[4]; pbBlockObj_t *block; } pbRoundBlock_t;
+typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
@@ -67,12 +67,12 @@ typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
 /* Common panel work header: its constructor installs process and data links. */
-struct pbPanel_t
+struct pbProcHandle_t
 {
     dds3ProcessID_t *process;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
-    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyCharacter_t *chara;
+    union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
             pbRecord_t *record; pbMatWork_t *mat; pbBlockDB_t *blockDB;
             pbPanelModel_t *model; pbRoundBlock_t *round; pbErrorWork_t *error;
             pbViewCamWork_t *viewCam; } data;
@@ -82,13 +82,13 @@ extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern pbMapWork_t *D_0054F5C4;
 
-extern pbPanel_t *record;
+extern pbProcHandle_t *record;
 
 extern sdfMat_t *sdfMatNew(void);
 
 extern void sdfMatSetTex(sdfMat_t *aMat, void *aTex);
 
-extern pbPanel_t *blockDB;
+extern pbProcHandle_t *blockDB;
 
 extern void *sdfChipAllocDirect(u32 aSize);
 
@@ -112,9 +112,9 @@ extern void pb_proc_block_DB_Shutdown(dds3ProcessID_t *id);
 
 extern void pbFreeRecord(pbRecordSlot_t *slot);
 
-extern void pbFreeGroupEntry(mdlResrc_t *entry);
+extern void pbFreeGroupEntry(dds3ModelResrc_t *entry);
 
-extern void pbClearRecord(pbPanel_t *p);
+extern void pbClearRecord(pbProcHandle_t *p);
 
 extern void *pbFindGroupEntry(pbGroupDB_t *db, u32 group);
 
@@ -123,8 +123,8 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t deleteExit, void *p);
 
 
-pbPanel_t *pbStartBlockDataBase(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartBlockDataBase(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
     sdfMat_t *mat;
     panel->process = dds3StartProcess("pb-proc-block DB", 0x2AFD, 1, 1, pb_proc_block_DB_Process,
@@ -143,11 +143,11 @@ pbPanel_t *pbStartBlockDataBase(pbPanel_t *parent) {
     return panel;
 }
 
-void *pbSearchGroupDB(pbPanel_t *p, u32 grpID) {
+void *pbSearchGroupDB(pbProcHandle_t *p, u32 grpID) {
     return pbFindGroupEntry(p->data.groupDB, grpID);
 }
 
-void pbDeleteGroupEntry(pbPanel_t *panel, u32 group) {
+void pbDeleteGroupEntry(pbProcHandle_t *panel, u32 group) {
     pbGroupDB_t *db = panel->data.groupDB;
     s32 removed = 0;
     u32 i;
@@ -156,7 +156,7 @@ void pbDeleteGroupEntry(pbPanel_t *panel, u32 group) {
             db->entry[i - 1] = db->entry[i];
         }
         if (db->entry[i]->group == group) {
-            pbFreeGroupEntry((mdlResrc_t *)db->entry[i]);
+            pbFreeGroupEntry((dds3ModelResrc_t *)db->entry[i]);
             removed = 1;
         }
     }
@@ -168,8 +168,8 @@ INCLUDE_ASM(const s32, "pb/pbGameDraw", pbDumpBlockData);
 
 INCLUDE_ASM(const s32, "pb/pbGameDraw", pbRebuildOutline);
 
-pbPanel_t *pbStartDrawMapCursor(pbPanel_t *parent) {
-    pbPanel_t *panel = sdfChipAllocDirect(0x10);
+pbProcHandle_t *pbStartDrawMapCursor(pbProcHandle_t *parent) {
+    pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
     panel->process = dds3StartProcess("pb-draw-map cursor", 0x2AFD, 1, 1, pb_draw_map_cursor_Process,
                                       (dds3ProcessFunc_t)pb_draw_map_cursor_Shutdown, NULL);
@@ -184,7 +184,7 @@ pbPanel_t *pbStartDrawMapCursor(pbPanel_t *parent) {
     return panel;
 }
 
-void pbSetMapCursorFlag(pbPanel_t *p, s32 flag) {
+void pbSetMapCursorFlag(pbProcHandle_t *p, s32 flag) {
     pbPanelValue_t *v = p->data.value;
     if (p != NULL) {
         v->value = flag;
@@ -192,7 +192,7 @@ void pbSetMapCursorFlag(pbPanel_t *p, s32 flag) {
 }
 
 s32 pb_proc_record_Process(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     u32 state = panel->state;
     switch (state) {
     case 4:
@@ -211,7 +211,7 @@ s32 pb_proc_record_Process(dds3ProcessID_t *id) {
 }
 
 void pb_proc_record_Shutdown(dds3ProcessID_t *id) {
-    pbPanel_t *panel = id->workdata;
+    pbProcHandle_t *panel = id->workdata;
     pbRecord_t *rec = panel->data.record;
     pbClearRecord(panel);
     sdfChipFreeDelayedDirect(rec->slot);

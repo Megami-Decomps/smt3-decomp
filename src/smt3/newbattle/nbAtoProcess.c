@@ -14,7 +14,7 @@ INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoProcess1);
 
 void nbAtoShutdown(void)
 {
-    nbGetMainProcessData()->atoProcess = 0;
+    nbGetMainProcessData()->AtoProcessID = 0;
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbInitAtoProcess);

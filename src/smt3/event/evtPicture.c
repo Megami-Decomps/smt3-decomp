@@ -32,7 +32,7 @@ typedef struct
     s32 zoom_p1;
     s32 zoom_time;
     s32 zoom_cnt;
-} evtPictureWork_t;
+} evtPictureProcessData_t;
 
 /* One 0x30-byte row of the eight-entry priority table picpri_Process draws. */
 typedef struct
@@ -81,7 +81,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          dds3ProcessFunc_t drawExit, dds3ProcessFunc_t deleteExit,
                                          void *p);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
-extern evtPictureWork_t *InitPictureProcessData(void);
+extern evtPictureProcessData_t *InitPictureProcessData(void);
 extern s32 evtPictureProcess1(dds3ProcessID_t *id);
 extern void *evtPicturePriList;
 extern void evtPicturePriClear(void);
@@ -167,13 +167,13 @@ void evtPicturePriDraw(void)
 
 void evtPictureDrawOn(dds3ProcessID_t *id)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
     work->flag |= 1;
 }
 
 void evtPictureDrawOff(dds3ProcessID_t *id)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
     work->flag &= ~1;
 }
 
@@ -184,19 +184,19 @@ void evtKillPictureProcess(dds3ProcessID_t *id)
 
 void evtPictureSetOt(dds3ProcessID_t *id, s32 ot)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
     work->ot = ot;
 }
 
 void evtPictureSetPri(dds3ProcessID_t *id, s32 pri)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
     work->pri = pri;
 }
 
 void evtPictureSetSize(dds3ProcessID_t *id, s32 sw, s32 sh, s32 tw, s32 th)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
 
     work->size_sw = sw;
     work->size_sh = sh;
@@ -206,7 +206,7 @@ void evtPictureSetSize(dds3ProcessID_t *id, s32 sw, s32 sh, s32 tw, s32 th)
 
 void evtPictureSetPos(dds3ProcessID_t *id, s32 x0, s32 y0, s32 x1, s32 y1, s32 time)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
 
     work->x = x0;
     work->y = y0;
@@ -220,7 +220,7 @@ void evtPictureSetPos(dds3ProcessID_t *id, s32 x0, s32 y0, s32 x1, s32 y1, s32 t
 
 void evtPictureSetAlpha(dds3ProcessID_t *id, s32 alp0, s32 alp1, s32 time)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
 
     work->alpha = alp0;
     work->alp_a0 = alp0;
@@ -231,7 +231,7 @@ void evtPictureSetAlpha(dds3ProcessID_t *id, s32 alp0, s32 alp1, s32 time)
 
 void evtPictureSetZoom(dds3ProcessID_t *id, s32 zoom0, s32 zoom1, s32 time)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
 
     work->zoom = zoom0;
     work->zoom_p0 = zoom0;
@@ -245,7 +245,7 @@ void evtPictureSwap(void) {
 
 s32 evtPictureStat(dds3ProcessID_t *id)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
     s32 stat = 0;
 
     if (work->pos_cnt != 0) {
@@ -260,9 +260,9 @@ s32 evtPictureStat(dds3ProcessID_t *id)
     return stat;
 }
 
-evtPictureWork_t *InitPictureProcessData(void)
+evtPictureProcessData_t *InitPictureProcessData(void)
 {
-    evtPictureWork_t *work = sdfChipAllocDirect(sizeof(evtPictureWork_t));
+    evtPictureProcessData_t *work = sdfChipAllocDirect(sizeof(evtPictureProcessData_t));
 
     work->flag = 0;
     work->tex = NULL;
@@ -293,7 +293,7 @@ evtPictureWork_t *InitPictureProcessData(void)
     return work;
 }
 
-void LoadTexture(evtPictureWork_t *data, const char *texpath)
+void LoadTexture(evtPictureProcessData_t *data, const char *texpath)
 {
     data->tex = itfMiscLoadTexture(texpath);
 }
@@ -302,7 +302,7 @@ void LoadTexture(evtPictureWork_t *data, const char *texpath)
 #ifdef NON_MATCHING
 s32 evtPictureProcess1(dds3ProcessID_t *id)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
     evtPicturePriTbl_t tbl;
     void *tex;
     s32 t;
@@ -366,7 +366,7 @@ INCLUDE_ASM(const s32, "event/evtPicture", evtPictureProcess1);
 
 s32 evtPictureShutdown(dds3ProcessID_t *id)
 {
-    evtPictureWork_t *work = dds3GetProcessData(id);
+    evtPictureProcessData_t *work = dds3GetProcessData(id);
 
     if (work->tex != NULL) {
         sdfTexFreeDelayed(work->tex);
@@ -377,7 +377,7 @@ s32 evtPictureShutdown(dds3ProcessID_t *id)
 
 dds3ProcessID_t *evtStartPictureProcess2(u32 priority, const char *texdata)
 {
-    evtPictureWork_t *work = InitPictureProcessData();
+    evtPictureProcessData_t *work = InitPictureProcessData();
 
     LoadTexture(work, texdata);
     return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);
@@ -385,7 +385,7 @@ dds3ProcessID_t *evtStartPictureProcess2(u32 priority, const char *texdata)
 
 dds3ProcessID_t *evtStartPictureProcess(u32 priority, void *texpath)
 {
-    evtPictureWork_t *work = InitPictureProcessData();
+    evtPictureProcessData_t *work = InitPictureProcessData();
 
     work->tex = texpath;
     return dds3StartProcess(D_0054F8F0, priority, 1, 1, evtPictureProcess1, evtPictureShutdown, work);

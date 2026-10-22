@@ -231,18 +231,18 @@ typedef struct {
     u32 flag;
     s32 mode;
     u32 sequenceWord38;
-    u32 sequenceWord3C;
+    u32 pointResrcID;
     char name[16];
     s32 stage;
     s32 kind;
     s32 enabled;
-    s32 restore;
-    u16 code;
-    u16 sequenceMode;
+    s32 callmode;
+    u16 bgm;
+    u16 bgmMode;
     s32 link;
     u8 unk68[8];
-    char detail[16];
-    char note[16];
+    char camName[16];
+    char FoceScript[16];
     u32 options;
     u8 unk94[12];
 } fldSceneParam_t;
@@ -706,9 +706,9 @@ void fldDoor_SiseExit(void) {
         fldSetSceneParam4(&record, nextArea, nextKind, entry->sequenceName, entry->sequenceCode,
                           entry->linkKind, entry->linkName);
         if (shortcut != 0) {
-            record.restore = 5;
+            record.callmode = 5;
         } else {
-            record.restore = 4;
+            record.callmode = 4;
         }
         D_0054EDF4 = 0;
         fldDoorSiseState = 0;
@@ -768,7 +768,7 @@ void fldWap_Load(s32 tmnltype, s32 tmnlid, fldSceneParam_t *param) {
         if (nextKind == 0) return;
         fldSetSceneParamLoad(param, field, nextKind, entry->sequenceName, entry->sequenceCode,
                              entry->linkKind, entry->linkName);
-        param->restore = 5;
+        param->callmode = 5;
         if (fldGlobalBase.sequenceCode != entry->sequenceCode) {
             if (entry->sequenceCode != 0) {
                 fldGlobalBase.sequenceCode = entry->sequenceCode;
@@ -866,7 +866,7 @@ void fldDoor_EveBtlExit(s32 field, s32 eveno) {
         gFldNowDZone = entry->flags31;
         fldSetSceneParam4(&record, nextArea, nextKind, entry->sequenceName, entry->sequenceCode,
                           entry->linkKind, entry->linkName);
-        record.restore = 6;
+        record.callmode = 6;
         dds3AdminiCallSequence(6, &record, 0xA0, 0);
         return;
     }

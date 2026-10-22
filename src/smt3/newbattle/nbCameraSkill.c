@@ -20,10 +20,10 @@ typedef struct nbCamera_t {
     sdfVector4_t direction;
     f32 distance;
     f32 fovy;
-    u32 stateChange;
+    u32 state_change;
     u32 state;
-    u32 stateOld;
-    u32 stateOld2;
+    u32 state_old;
+    u32 state_old2;
     u32 phase;
     s32 frame;
     u32 type;
@@ -43,13 +43,13 @@ struct nbParty_t {
 /* The per-shot parameters the nbCameraShot_*_Set2 family reads; 0x30 on the
  * stack at every call site. */
 typedef struct nbCameraSkillInfo_t {
-    u32 shot1;
-    u32 shot23;
+    u32 shot_1;
+    u32 shot_23;
     f32 angleH;
     f32 angleW;
-    f32 heightMin;
-    f32 widthMin;
-    u32 ptr1;
+    f32 HeightMin;
+    f32 WidthMin;
+    u32 ptr_1;
     u32 ptr23;
     u32 anim;
     u8 pad24[0xC];
@@ -220,14 +220,14 @@ void nbCameraShot_TargetParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *p
     }
     half = 0.5f;
     scale = sdfAtan(fov * half);
-    if (pNBSInfo->heightMin != 0.0f) {
-        pNbCamera->target.y = -pNBSInfo->heightMin * half;
+    if (pNBSInfo->HeightMin != 0.0f) {
+        pNbCamera->target.y = -pNBSInfo->HeightMin * half;
     }
-    if (radius + radius < pNBSInfo->heightMin) {
-        radius = pNBSInfo->heightMin * half;
+    if (radius + radius < pNBSInfo->HeightMin) {
+        radius = pNBSInfo->HeightMin * half;
     }
-    if (radius + radius < pNBSInfo->widthMin) {
-        radius = pNBSInfo->widthMin * half;
+    if (radius + radius < pNBSInfo->WidthMin) {
+        radius = pNBSInfo->WidthMin * half;
     }
     radius /= scale;
     effBTLModelGroupGetDirection(group, &direction);
@@ -303,14 +303,14 @@ void nbCameraShot_Invoke_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSIn
     SDF_VU0_STOREVECTOR(pNbCamera);
     radius = effBTLModelGetRadius(pForm);
     scale = sdfAtan(pNbCamera->fovy * 1.35f * 0.5f);
-    if (pNBSInfo->heightMin != 0.0f) {
-        pNbCamera->target.y = -pNBSInfo->heightMin * 0.5f;
+    if (pNBSInfo->HeightMin != 0.0f) {
+        pNbCamera->target.y = -pNBSInfo->HeightMin * 0.5f;
     }
-    if (radius + radius < pNBSInfo->heightMin) {
-        radius = pNBSInfo->heightMin * 0.5f;
+    if (radius + radius < pNBSInfo->HeightMin) {
+        radius = pNBSInfo->HeightMin * 0.5f;
     }
-    if (radius + radius < pNBSInfo->widthMin) {
-        radius = pNBSInfo->widthMin * 0.5f;
+    if (radius + radius < pNBSInfo->WidthMin) {
+        radius = pNBSInfo->WidthMin * 0.5f;
     }
     radius /= scale;
     effBTLModelGetDirection(pForm, &direction);
@@ -353,14 +353,14 @@ void nbCameraShot_Target_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSIn
     half = 0.5f;
     radius = effBTLModelGetRadius(pForm);
     scale = sdfAtan(pNbCamera->fovy * 1.35f * half);
-    if (pNBSInfo->heightMin != 0.0f) {
-        pNbCamera->target.y = -pNBSInfo->heightMin * half;
+    if (pNBSInfo->HeightMin != 0.0f) {
+        pNbCamera->target.y = -pNBSInfo->HeightMin * half;
     }
-    if (radius + radius < pNBSInfo->heightMin) {
-        radius = pNBSInfo->heightMin * half;
+    if (radius + radius < pNBSInfo->HeightMin) {
+        radius = pNBSInfo->HeightMin * half;
     }
-    if (radius + radius < pNBSInfo->widthMin) {
-        radius = pNBSInfo->widthMin * half;
+    if (radius + radius < pNBSInfo->WidthMin) {
+        radius = pNBSInfo->WidthMin * half;
     }
     half = radius / scale;
     effBTLModelGetDirection(pForm, &direction);
@@ -861,14 +861,14 @@ void nbCameraShot_InvokeParty_Set2(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *p
     half = 0.5f;
     zero = 0.0f;
     scale = sdfAtan(pNbCamera->fovy * 1.35f * half);
-    if (pNBSInfo->heightMin != zero) {
-        pNbCamera->target.y = -pNBSInfo->heightMin * half;
+    if (pNBSInfo->HeightMin != zero) {
+        pNbCamera->target.y = -pNBSInfo->HeightMin * half;
     }
-    if (radius + radius < pNBSInfo->heightMin) {
-        radius = pNBSInfo->heightMin * half;
+    if (radius + radius < pNBSInfo->HeightMin) {
+        radius = pNBSInfo->HeightMin * half;
     }
-    if (radius + radius < pNBSInfo->widthMin) {
-        radius = pNBSInfo->widthMin * half;
+    if (radius + radius < pNBSInfo->WidthMin) {
+        radius = pNBSInfo->WidthMin * half;
     }
     half = radius / scale;
     if (pNBSInfo->angleH > zero) {
@@ -1207,8 +1207,8 @@ void nbCameraState_SkillAttack_Init(void)
             ptr[3] = dds3GetRandA(dds3EffectBase) % 14;
             work.angleH = D_003246D0[ptr[2]];
             work.angleW = D_003246F0[ptr[2]];
-            work.heightMin = D_00324710[0];
-            work.widthMin = D_00324720[0];
+            work.HeightMin = D_00324710[0];
+            work.WidthMin = D_00324720[0];
             ptr[4] = 0;
             ptr[5] = 0;
             nbCameraState_InvokeTarget_SearchSet();
@@ -1314,8 +1314,8 @@ void nbCameraState_Cut1Enemy_Init(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pN
     f32 angle;
     f32 half;
 
-    work.heightMin = 0.0f;
-    work.widthMin = 600.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 600.0f;
     angle = 1.0f;
     if ((dds3GetRandA(dds3EffectBase) & 1) == 0) {
         angle = -1.0f;
@@ -1399,7 +1399,7 @@ void nbCameraState_SkillCut1_Init(void)
     if (nbCameraHero_Cut1_Init(&pNbCamera, &nbCameraSkillNBSInfo) != 0) {
         return;
     }
-    switch (nbCameraSkillNBSInfo.shot1) {
+    switch (nbCameraSkillNBSInfo.shot_1) {
     case 0:
         if ((pForm->stat & 0x100) != 0) {
             nbCameraShot_One_Init(&pNbCamera, pForm);
@@ -1437,9 +1437,9 @@ void nbCameraState_SkillCut1_Calc(void)
     if (nbCameraHero_Cut1_Run(&pNbCamera, &nbCameraSkillNBSInfo) != 0) {
         return;
     }
-    if (nbCameraSkillNBSInfo.shot1 != 2) {
-        if (nbCameraSkillNBSInfo.shot1 < 3) {
-            if (nbCameraSkillNBSInfo.shot1 == 0) {
+    if (nbCameraSkillNBSInfo.shot_1 != 2) {
+        if (nbCameraSkillNBSInfo.shot_1 < 3) {
+            if (nbCameraSkillNBSInfo.shot_1 == 0) {
                 if ((pForm->stat & 0x100) != 0) {
                     nbCameraShot_One_Calc(&pNbCamera, effBTLSkillGetInvokeFormation());
                 } else {
@@ -1474,7 +1474,7 @@ void nbCameraState_SkillCut2_Calc(void)
     if (nbCameraBoss_Cut2_Ptr_Run(pCamera, &nbCameraSkillNBSInfo) != 0) {
         return;
     }
-    switch (nbCameraSkillNBSInfo.shot23) {
+    switch (nbCameraSkillNBSInfo.shot_23) {
     case 1:
     case 2:
     case 3:
@@ -1528,8 +1528,8 @@ void nbCameraState_PlayerSide_Init(void)
     effBTLModelTargetPartyShow();
     effBTLModelAllPopPosition();
     effBTLModelAllPopRotate();
-    work.heightMin = 0.0f;
-    work.widthMin = 700.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 700.0f;
     work.angleH = angle;
     switch (dds3GetRandA(dds3EffectBase) & 3) {
     case 0:
@@ -1569,8 +1569,8 @@ void nbCameraState_EnemySide_Init(void)
     effBTLModelTargetPartyShow();
     effBTLModelAllPopPosition();
     effBTLModelAllPopRotate();
-    work.heightMin = 0.0f;
-    work.widthMin = 700.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 700.0f;
     work.angleH = angle;
     switch (dds3GetRandA(dds3EffectBase) & 3) {
     case 0:
@@ -1605,8 +1605,8 @@ void nbCameraEnemyPartySet(f32 pitch, f32 yaw)
     effBTLSkillSetFormationInfo(invoke, bits);
     work.angleH = pitch;
     work.angleW = yaw;
-    work.heightMin = 0.0f;
-    work.widthMin = 700.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 700.0f;
     nbCameraShot_TargetParty_Set2(&pNbCamera, &work);
 }
 
@@ -1635,8 +1635,8 @@ void nbCameraState_EnemyBad_Init(void)
     effBTLModelAllPopRotate();
     effBTLModelAllHide();
     effBTLModelTargetPartyShow();
-    work.heightMin = 0.0f;
-    work.widthMin = 700.0f;
+    work.HeightMin = 0.0f;
+    work.WidthMin = 700.0f;
     work.angleH = 0.17453291f;
     work.angleW = 0.0f;
     nbCameraShot_TargetParty_Set2(pCamera, &work);

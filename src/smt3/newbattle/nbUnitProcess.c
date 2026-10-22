@@ -34,7 +34,7 @@ typedef struct nbQuadVector_t {
 
 /* 8-byte rows at +0x88 indexed by formation slot. */
 typedef struct nbTimeList_t {
-    u16 unlock;
+    u16 lockframe;
     u16 end;
     u16 hp;
     u16 pad06;
@@ -743,7 +743,7 @@ INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbUnitProcess2);
 
 void *nbUnitShutdown(dds3ProcessID_t *id)
 {
-    nbGetMainProcessData()->unitProcess = 0;
+    nbGetMainProcessData()->UnitProcessID = 0;
 }
 
 void nbInitUnitProcess(nbMainProcessData_t *data)
@@ -752,7 +752,7 @@ void nbInitUnitProcess(nbMainProcessData_t *data)
                                            nbUnitShutdown, NULL);
 
     dds3LinkProcess(data->unkBC, id);
-    data->unitProcess = id;
+    data->UnitProcessID = id;
     dds3LinkProcess(id, dds3StartProcess(D_00543768, 0x2B0E, 1, 1, nbUnitDrawProcess1,
                                          NULL, NULL));
 }

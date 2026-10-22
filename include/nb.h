@@ -137,9 +137,9 @@ typedef struct nbMainProcessData_t
     u32 battletime;                        /* 0x070 */
     f32 press3;
     s16 unk78;
-    s16 unk7A;
+    s16 press4_ten;
     s16 unk7C;                             /* 0x07C: stagemajor */
-    s16 unk7E;                             /* 0x07E: stageminor */
+    s16 StageMinor;                             /* 0x07E: stageminor */
     u8 unk80[4];
     s32 nakamayobi;                        /* 0x084 */
     s32 eventno;                           /* 0x088 */
@@ -157,33 +157,33 @@ typedef struct nbMainProcessData_t
     u8 unkB8[4];
     dds3ProcessID_t *unkBC;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
-    dds3ProcessID_t *atoProcess;
+    dds3ProcessID_t *AtoProcessID;
     u8 unkC8[4];
-    dds3ProcessID_t *stageProcess;          /* 0x0CC */
-    dds3ProcessID_t *unitProcess;
-    dds3ProcessID_t *unkD4[4];
-    s32 unkE4;
-    dds3ProcessID_t *unkE8;
+    dds3ProcessID_t *StageProcessID;          /* 0x0CC */
+    dds3ProcessID_t *UnitProcessID;
+    dds3ProcessID_t *ActionProcessID[4];
+    s32 NowActionProcess;
+    dds3ProcessID_t *CommSelProcessID;
     dds3ProcessID_t *tarSelProcess;         /* 0x0EC */
-    dds3ProcessID_t *effectProcess;
-    dds3ProcessID_t *koukaProcess;
-    dds3ProcessID_t *negoProcess;           /* 0x0F8 */
+    dds3ProcessID_t *EffectProcessID;
+    dds3ProcessID_t *KoukaProcessID;
+    dds3ProcessID_t *NegoProcessID;           /* 0x0F8 */
     void *camera;                          /* 0x0FC */
-    dds3ProcessID_t *debugProcess;          /* 0x100 */
-    dds3ProcessID_t *aiScriptProcess;       /* 0x104 */
+    dds3ProcessID_t *DebugProcessID;          /* 0x100 */
+    dds3ProcessID_t *AiScriptProcessID;       /* 0x104 */
     dds3ProcessID_t *panelProcess;
     dds3ProcessID_t *helpProcess;
     dds3ProcessID_t *autoCommProcess;
-    dds3ProcessID_t *encounterProcess;      /* 0x114 */
+    dds3ProcessID_t *EncProcessID;      /* 0x114 */
     u8 unk118[4];
-    struct effBTL_t *residentEffect;         /* 0x11C */
+    struct effBTL_t *HatudoEff;         /* 0x11C */
     void *pnltex[4];                       /* 0x120 */
     s32 mesmngid;                          /* 0x130 */
     u8 unk134[4];
     void *eventPack;                       /* 0x138 */
     sdfMemHandle_t *eventMemory;
     u32 unk140;
-    u32 unk144;
+    u32 d31_rebehansya;
     u8 unk148[8];
 } nbMainProcessData_t;
 

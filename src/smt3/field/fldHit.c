@@ -17,7 +17,7 @@
 
 typedef struct fldCollisionFace_t fldCollisionFace_t;
 
-typedef struct fldValueRecord_t fldValueRecord_t;
+typedef struct collision_s collision_s;
 
 typedef struct fldCollisionDescriptor_t fldCollisionDescriptor_t;
 
@@ -36,11 +36,11 @@ struct fldCollisionFace_t {
     s16 special[2];
 };
 
-struct fldValueRecord_t {
+struct collision_s {
     s16 mode;
     s16 count;
     f32 normal[4];
-    f32 planeConstant;
+    f32 num;
     f32 plane[4][4];
     f32 limit[4];
     f32 bound[4];
@@ -50,11 +50,11 @@ struct fldValueRecord_t {
     u16 unkC8;
     u16 unkCA;
     s32 id;
-    dds3Basic_t *worldNode;
+    dds3Basic_t *matter;
     fldCollisionFace_t *face;
     void *stopData;
-    s32 sceneFlag;
-    s32 ownerIndex;
+    s32 hojiID;
+    s32 npcID;
 };
 
 struct fldCollisionDescriptor_t {
@@ -140,10 +140,10 @@ dds3Basic_t *fldFindMatterIndex(s32 id) {
     s32 index = 0;
 
     if (D_0054EDA0 > 0) {
-        fldValueRecord_t *record = (fldValueRecord_t *)fldMatterTable;
+        collision_s *record = (collision_s *)fldMatterTable;
         do {
             if (record->id == id) {
-                return record->worldNode;
+                return record->matter;
             }
             index++;
             record++;
@@ -156,8 +156,8 @@ void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
     s32 index;
 
     for (index = 0; index < D_0054EDA0; index++) {
-        if (((fldValueRecord_t *)fldMatterTable)[index].id == id) {
-            ((fldValueRecord_t *)fldMatterTable)[index].worldNode = worldNode;
+        if (((collision_s *)fldMatterTable)[index].id == id) {
+            ((collision_s *)fldMatterTable)[index].matter = worldNode;
         }
     }
 }
@@ -170,11 +170,11 @@ void fldClearMatterFlags(void) {
     s32 count = D_0054EDA0;
 
     if (count > 0) {
-        dds3Basic_t **node = &((fldValueRecord_t *)fldMatterTable)->worldNode;
+        dds3Basic_t **node = &((collision_s *)fldMatterTable)->matter;
         do {
             count--;
             *node = NULL;
-            node = (dds3Basic_t **)((u8 *)node + sizeof(fldValueRecord_t));
+            node = (dds3Basic_t **)((u8 *)node + sizeof(collision_s));
         } while (count != 0);
     }
     D_0054EDA0 = 0;
@@ -192,7 +192,7 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
 
 INCLUDE_ASM(const s32, "field/fldHit", fldMakePlane);
 
-s32 HitPositionInside2(f32 *fret, s32 mode2D, s32 numE, f32 *pos, fldValueRecord_t *r, f32 collision) {
+s32 HitPositionInside2(f32 *fret, s32 mode2D, s32 numE, f32 *pos, collision_s *r, f32 collision) {
     f32 probe[3];
     f32 planar[2];
     f32 dist;
@@ -286,16 +286,16 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
     travel[0] = sdfFabs(current[0] - previous[0]);
     travel[2] = sdfFabs(current[2] - previous[2]);
     for (index = 0; index < D_0054EDA0; index++) {
-        if (!(((fldValueRecord_t *)fldMatterTable)[index].face->attributes & 0x80)) {
+        if (!(((collision_s *)fldMatterTable)[index].face->attributes & 0x80)) {
             continue;
         }
         if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                        ((fldValueRecord_t *)fldMatterTable)[index].sceneFlag) != 0) {
+                        ((collision_s *)fldMatterTable)[index].hojiID) != 0) {
             continue;
         }
-        if (((fldValueRecord_t *)fldMatterTable)[index].ownerIndex > 0 &&
+        if (((collision_s *)fldMatterTable)[index].npcID > 0 &&
             fldGbChkNpc(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                        ((fldValueRecord_t *)fldMatterTable)[index].ownerIndex) != 0) {
+                        ((collision_s *)fldMatterTable)[index].npcID) != 0) {
             continue;
         }
         currentSave[0] = current[0];
@@ -304,46 +304,46 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
         previousSave[0] = previous[0];
         previousSave[1] = previous[1];
         previousSave[2] = previous[2];
-        if (((fldValueRecord_t *)fldMatterTable)[index].worldNode != NULL) {
+        if (((collision_s *)fldMatterTable)[index].matter != NULL) {
             moved = 1;
-            current[0] = currentSave[0] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
-            current[1] = currentSave[1] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
-            current[2] = currentSave[2] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
-            previous[0] = previousSave[0] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
-            previous[1] = previousSave[1] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
-            previous[2] = previousSave[2] - ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+            current[0] = currentSave[0] - ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
+            current[1] = currentSave[1] - ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
+            current[2] = currentSave[2] - ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
+            previous[0] = previousSave[0] - ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
+            previous[1] = previousSave[1] - ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
+            previous[2] = previousSave[2] - ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
         } else {
             moved = 0;
         }
         distance = sdfFabs(fldVecDot((sdfVector4_t *)current,
-                                       (sdfVector4_t *)((fldValueRecord_t *)fldMatterTable)[index].normal) -
-                                 ((fldValueRecord_t *)fldMatterTable)[index].planeConstant);
+                                       (sdfVector4_t *)((collision_s *)fldMatterTable)[index].normal) -
+                                 ((collision_s *)fldMatterTable)[index].num);
         if (distance < radius) {
-            HitPositionInside2(&clearance, ((fldValueRecord_t *)fldMatterTable)[index].mode,
-                               ((fldValueRecord_t *)fldMatterTable)[index].count, current,
-                               &((fldValueRecord_t *)fldMatterTable)[index], radius);
+            HitPositionInside2(&clearance, ((collision_s *)fldMatterTable)[index].mode,
+                               ((collision_s *)fldMatterTable)[index].count, current,
+                               &((collision_s *)fldMatterTable)[index], radius);
             if (clearance < 0.0f) {
                 inside = 0;
             } else {
                 inside = 1;
             }
-            if (inside == 1 && ((fldValueRecord_t *)fldMatterTable)[index].worldNode != NULL) {
+            if (inside == 1 && ((collision_s *)fldMatterTable)[index].matter != NULL) {
                 fldGlobalBase.hitMatterIndex = index;
-                ((fldValueRecord_t *)fldMatterTable)[index].previousPosition[0] =
-                    ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
-                ((fldValueRecord_t *)fldMatterTable)[index].previousPosition[1] =
-                    ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
-                ((fldValueRecord_t *)fldMatterTable)[index].previousPosition[2] =
-                    ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+                ((collision_s *)fldMatterTable)[index].previousPosition[0] =
+                    ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
+                ((collision_s *)fldMatterTable)[index].previousPosition[1] =
+                    ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
+                ((collision_s *)fldMatterTable)[index].previousPosition[2] =
+                    ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
             }
         }
         if (moved != 0) {
-            current[0] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
-            current[1] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
-            current[2] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
-            previous[0] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.x;
-            previous[1] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.y;
-            previous[2] += ((fldValueRecord_t *)fldMatterTable)[index].worldNode->poseset->pos.z;
+            current[0] += ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
+            current[1] += ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
+            current[2] += ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
+            previous[0] += ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
+            previous[1] += ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
+            previous[2] += ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
         }
     }
 }
@@ -354,7 +354,7 @@ void fldHitChkUnitElv(f32 *phys_pos) {
     f32 result[4];
     f32 previous[4];
     f32 delta[4];
-    fldValueRecord_t *record;
+    collision_s *record;
     s32 index;
     f32 x;
     f32 y;
@@ -371,17 +371,17 @@ void fldHitChkUnitElv(f32 *phys_pos) {
     if (index == -1) {
         return;
     }
-    record = &((fldValueRecord_t *)fldMatterTable)[index];
-    if (record->worldNode != NULL) {
-        delta[0] = record->worldNode->poseset->pos.x - record->previousPosition[0];
-        delta[1] = record->worldNode->poseset->pos.y - record->previousPosition[1];
-        delta[2] = record->worldNode->poseset->pos.z - record->previousPosition[2];
-        record->previousPosition[0] = record->worldNode->poseset->pos.x;
-        record->previousPosition[1] = record->worldNode->poseset->pos.y;
-        record->previousPosition[2] = record->worldNode->poseset->pos.z;
+    record = &((collision_s *)fldMatterTable)[index];
+    if (record->matter != NULL) {
+        delta[0] = record->matter->poseset->pos.x - record->previousPosition[0];
+        delta[1] = record->matter->poseset->pos.y - record->previousPosition[1];
+        delta[2] = record->matter->poseset->pos.z - record->previousPosition[2];
+        record->previousPosition[0] = record->matter->poseset->pos.x;
+        record->previousPosition[1] = record->matter->poseset->pos.y;
+        record->previousPosition[2] = record->matter->poseset->pos.z;
     }
     if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
-                    record->sceneFlag) != 0) {
+                    record->hojiID) != 0) {
         return;
     }
     x = phys_pos[0] + delta[0];
@@ -425,7 +425,7 @@ void func_0013B668(void) {
 
 INCLUDE_ASM(const s32, "field/fldHit", fldHitWM_Mask);
 
-f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, fldValueRecord_t *collision) {
+f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, collision_s *collision) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
     f32 clearance = pos;

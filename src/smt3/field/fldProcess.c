@@ -73,18 +73,18 @@ typedef struct {
     u32 flag;
     s32 mode;
     u32 sequenceWord38;
-    u32 sequenceWord3C;
+    u32 pointResrcID;
     char name[16];
     s32 stage;
     s32 kind;
     s32 enabled;
-    s32 restore;
-    u16 code;
-    u16 sequenceMode;
+    s32 callmode;
+    u16 bgm;
+    u16 bgmMode;
     s32 link;
     u8 unk68[8];
-    char detail[16];
-    char note[16];
+    char camName[16];
+    char FoceScript[16];
     u32 options;
     u8 unk94[12];
 } fldSceneParam_t;
@@ -572,8 +572,8 @@ s32 RetryMapLoad(void)
         }
         return 1;
     }
-    if (param->mode == 0 && param->note[0] != 0) {
-        dds3SceneBasicStartScript(dds3GetControlScene(), param->note);
+    if (param->mode == 0 && param->FoceScript[0] != 0) {
+        dds3SceneBasicStartScript(dds3GetControlScene(), param->FoceScript);
         return 1;
     }
     if (fldGlobalBase.retryScript == NULL) {
@@ -627,18 +627,18 @@ void fldProcTrigSequence(fldSceneParam_t *srcParam, u32 mode) {
     controller->flags = 0;
     scene->mode = mode;
     if (mode == 0) {
-        scene->sequenceWord3C = srcParam->sequenceWord3C;
+        scene->pointResrcID = srcParam->pointResrcID;
         scene->sequenceWord38 = srcParam->sequenceWord38;
         strcpy(scene->name, srcParam->name);
         scene->stage = srcParam->stage;
-        scene->code = srcParam->code;
+        scene->bgm = srcParam->bgm;
         scene->kind = srcParam->kind;
-        scene->sequenceMode = srcParam->sequenceMode;
+        scene->bgmMode = srcParam->bgmMode;
         scene->enabled = srcParam->enabled;
-        scene->restore = srcParam->restore;
+        scene->callmode = srcParam->callmode;
         scene->link = srcParam->link;
-        strcpy(scene->detail, srcParam->detail);
-        strcpy(scene->note, srcParam->note);
+        strcpy(scene->camName, srcParam->camName);
+        strcpy(scene->FoceScript, srcParam->FoceScript);
         scene->options = srcParam->options;
     }
     dds3StartProcess("fldProcSequence", 0x3F7, 0, 0, ProcSequence, 0, 0);
