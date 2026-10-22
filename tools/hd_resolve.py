@@ -26,22 +26,51 @@ KNR = re.compile(r"^[A-Za-z_][\w \t\*]*?\b\w+\s*\(\s*[A-Za-z_][\w, \t]*\)\s*$((?
 # The object expression ending just before a `.`/`->`. A cast types the base only
 # when both are parenthesised: `->` binds tighter than a cast, so `(T *)r->plane`
 # casts the member, not `r`, and taking T there resolved the wrong struct.
+# The cast may wrap a whole expression, `((T *)base->member)->m`, as long as it
+# holds no further parentheses: a call's result is not something to resolve.
 PCHAIN = re.compile(r"\(\s*\(\s*(?:struct\s+|const\s+)*([A-Za-z_]\w*)\s*\*+\s*\)\s*&?\s*"
-                    r"[A-Za-z_]\w*\s*\)((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
+                    r"[^()]*\)((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
 BCHAIN = re.compile(r"([A-Za-z_]\w*)((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
 STEP = re.compile(r"(?:->|\.)\s*([A-Za-z_]\w*)")
+# Resolved, but to something no rename can target.
+UNKNOWN = "<unknown>"
 # `return work;` and `goto done;` have the shape of a declaration.
 NOT_A_TYPE = {"return", "goto", "break", "continue", "case", "default", "else",
               "do", "typedef", "sizeof", "if", "while", "for", "switch"}
 
 
+# `cparse.struct_fields` skips a definition written on one line, so its members
+# are invisible: `typedef struct { instanceMes_tag *mes; } itfMesInstance_t;`
+ONELINE = re.compile(r"(?:typedef\s+)?(?:struct|union)\s+?(\w+)?\s*\{([^{}]*)\}\s*(\w+)?\s*;")
+ALIAS = re.compile(r"^\s*typedef\s+(?:struct\s+|union\s+)?([A-Za-z_]\w*)\s+([A-Za-z_]\w*)\s*;", re.M)
+MEMBER = re.compile(r"^\s*(?:const\s+|volatile\s+)*(?:struct\s+|union\s+|enum\s+)?"
+                    r"([A-Za-z_]\w*)(?:\s+|\s*\*+\s*)([A-Za-z_]\w*)\s*(?:\[[^\]]*\])*\s*$")
+
+
 def struct_members(root):
     """{type: {member: its type}} over the tree, so a chain can be followed."""
-    out = {}
+    out, aliases = {}, {}
     for path in sorted(list((root / "include").rglob("*.h")) + list((root / "src").rglob("*.c"))):
-        for _, name, fields, _ in struct_fields(path.read_text(errors="replace")):
+        text = path.read_text(errors="replace")
+        for _, name, fields, _ in struct_fields(text):
             if name:
                 out.setdefault(name, {}).update({m: ty for ty, _, m, _ in fields})
+        bare = re.sub(r"/\*.*?\*/", " ", text, flags=re.S)
+        for m in ONELINE.finditer(bare):
+            name = m.group(3) or m.group(1)
+            if not name:
+                continue
+            for decl in m.group(2).split(";"):
+                d = MEMBER.match(decl)
+                if d:
+                    out.setdefault(name, {}).setdefault(d.group(2), d.group(1))
+        for old, new in ALIAS.findall(bare):
+            aliases[new] = old
+    # `typedef EffBlurTemplateBody EffPCPTexturedBlurParams;` names one record twice.
+    for _ in range(4):
+        for new, old in aliases.items():
+            if new not in out and old in out:
+                out[new] = out[old]
     return out
 
 
@@ -115,10 +144,15 @@ def owner_at(text, pos, names, members):
     if ty is None:
         return None
     for step in STEP.findall(steps or ""):
-        ty = (members.get(ty) or {}).get(step)
-        if ty is None:
+        table = members.get(ty)
+        if table is None:
+            # Not a record this tree declares, so it is not one being renamed either.
+            return UNKNOWN
+        if step not in table:
+            # The prefix resolved to the wrong record, or the member sits in a
+            # nested anonymous struct, which struct_fields does not record.
             return None
-        ty = ty.replace("struct ", "").strip()
+        ty = table[step].replace("struct ", "").strip()
     return ty
 
 
