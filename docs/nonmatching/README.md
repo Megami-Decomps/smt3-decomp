@@ -54,7 +54,6 @@ page and line to open. Conventions are in
 | 1 | script/scrParameterCommand | [script/scrParameterCommand.md](script/scrParameterCommand.md) |
 | 1 | rstupdate | [result/rstupdate.md](result/rstupdate.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
-| 1 | mviManager | [movie/mviManager.md](movie/mviManager.md) |
 | 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3KernelCore | [kernel/dds3KernelCore.md](kernel/dds3KernelCore.md) |
 | 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |

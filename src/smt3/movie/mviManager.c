@@ -178,10 +178,20 @@ typedef struct
 {
     /* 0x00 */ u8 unk_00[4];
     /* 0x04 */ void *chip;
-    /* 0x08 */ u16 unk_08;
-    /* 0x0A */ s16 unk_0A;
+    /* 0x08 */ s16 top;
+    /* 0x0A */ s16 cursor;
     /* 0x0C */ u16 unk_0C;
+    /* 0x0E */ s8 playing;
+    /* 0x0F */ u8 pad_0F;
+    /* 0x10 */ sdfDrawTag_t *packets;
 } movieViewerChipList_t;
+
+/* One entry: the next link, then the path it was scanned from. */
+typedef struct movieViewerChip_t
+{
+    /* 0x00 */ struct movieViewerChip_t *next;
+    /* 0x04 */ char path[1];
+} movieViewerChip_t;
 
 /* Also declared above as void *movieViewerWork[], which is how the loader
  * paths use it; this is the chip list the viewer walks. One object, two
@@ -200,8 +210,8 @@ void movieViewerFree(void)
             chip = next;
         } while (chip != NULL);
         movieViewerChips.chip = NULL;
-        movieViewerChips.unk_08 = 0;
-        movieViewerChips.unk_0A = 0;
+        movieViewerChips.top = 0;
+        movieViewerChips.cursor = 0;
         movieViewerChips.unk_0C = 0;
     }
 }
@@ -212,38 +222,68 @@ INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3D8);
 
 INCLUDE_ASM(const s32, "movie/mviManager", movieViewerScanDir);
 
-/* NON_MATCHING: 6 of 14 words match, 56 bytes against retail's 80; the
- * loop closes with a plain `b` where retail has `bgtzl` and five pad nops. */
-#ifdef NON_MATCHING
+/* The entry the cursor sits on, walked from the head. */
 void *movieViewerStep(void)
 {
-    void **chip = (void **)movieViewerChips.chip;
-    s32 n = movieViewerChips.unk_0A;
+    movieViewerChip_t *chip = movieViewerChips.chip;
+    s32 remaining = movieViewerChips.cursor;
 
-    if (chip == NULL) {
-        goto out;
+    if (chip != NULL && remaining > 0) {
+        do {
+            chip = chip->next;
+            remaining--;
+        } while (chip != NULL && remaining > 0);
     }
-    if (n <= 0) {
-        goto out;
-    }
-    chip = *chip;
-loop:
-    if (chip == NULL) {
-        goto out;
-    }
-    n--;
-    if (n > 0) {
-        chip = *chip;
-        goto loop;
-    }
-out:
     return chip;
 }
-#else
-INCLUDE_ASM(const s32, "movie/mviManager", movieViewerStep);
-#endif
 
-INCLUDE_ASM(const s32, "movie/mviManager", movieDebugDrawInfo);
+extern void *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
+
+extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
+
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
+
+extern void sdfPrimLinkF3(sdfDrawTag_t *aTag, s32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aX1,
+                          s32 aY1, s32 aX2, s32 aY2, s32 aZ, s32 (*aAllocator)(s32));
+
+/* "%c%s", in .sdata where a literal cannot go. */
+extern char D_0054FDA8[];
+
+/* One screen of the movie list, with an arrow on the selected row and a
+ * marker at each end the list continues past. */
+void movieDebugDrawInfo(void)
+{
+    movieViewerChip_t *chip;
+    sdfDrawTag_t *tag;
+    s32 selected;
+    s32 i;
+
+    if (movieViewerChips.chip == NULL || movieViewerChips.playing != 0) {
+        return;
+    }
+    tag = movieViewerChips.packets;
+    sdfDrawTagLink(tag, dds3PrimFrameRect(0x7150, 0x7948, 0xFF0080, 0xF60, 0x3F0, 0x30000000,
+                                          0x60404040));
+    selected = movieViewerChips.cursor;
+    i = movieViewerChips.top;
+    chip = movieViewerChips.chip;
+    selected -= i;
+    for (; i > 0; i--) {
+        chip = chip->next;
+    }
+    for (i = 0; i < 8 && chip != NULL; i++, chip = chip->next) {
+        sdfDrawTagLink(tag, sdfDevPrintf(0x7240, 0x79C0 + i * 0x60, 0xFF0080, 0, D_0054FDA8,
+                                         (i == selected) ? '>' : ' ', chip->path));
+    }
+    if (movieViewerChips.top != 0) {
+        sdfPrimLinkF3(tag, 0x8000A0C0, 0, 0x7900, 0x7978, 0x7840, 0x79A8, 0x79C0, 0x79A8,
+                      0xFF0080, 0);
+    }
+    if (chip != NULL) {
+        sdfPrimLinkF3(tag, 0x8000A0C0, 0, 0x7840, 0x7CD8, 0x79C0, 0x7CD8, 0x7900, 0x7D08,
+                      0xFF0080, 0);
+    }
+}
 INCLUDE_SDATA(const s32, "movie/mviManager", PlayingNo);
 
 INCLUDE_SDATA(const s32, "movie/mviManager", D_0054FD98);
