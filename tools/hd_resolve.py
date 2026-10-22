@@ -29,7 +29,8 @@ KNR = re.compile(r"^[A-Za-z_][\w \t\*]*?\b\w+\s*\(\s*[A-Za-z_][\w, \t]*\)\s*$((?
 # The cast may wrap a whole expression, `((T *)base->member)->m`, as long as it
 # holds no further parentheses: a call's result is not something to resolve.
 PCHAIN = re.compile(r"\(\s*\(\s*(?:struct\s+|const\s+)*([A-Za-z_]\w*)\s*\*+\s*\)\s*&?\s*"
-                    r"[^()]*\)((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
+                    r"[^()]*(?:\([^()]*\)[^()]*)*\)"
+                    r"((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
 # A call's result is resolvable too: the function's return type is in the tree.
 CCHAIN = re.compile(r"([A-Za-z_]\w*)\s*\([^()]*\)"
                     r"((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
@@ -162,7 +163,10 @@ def owner_at(text, pos, names, members, funcs=()):
         ty, steps = names.get(m.group(1)), m.group(2)
     if ty is None:
         return None
-    for step in STEP.findall(steps or ""):
+    # A subscript can hold a whole chain of its own
+    # (`entries[pText->setup.fontIndex].slots`), and those members belong to
+    # another record, so the index expressions go before the steps are read.
+    for step in STEP.findall(re.sub(r"\[[^\]]*\]", "", steps or "")):
         table = members.get(ty)
         if table is None:
             # Not a record this tree declares, so it is not one being renamed either.
