@@ -49,11 +49,23 @@ shared masked hash is otherwise rejected, so the stubs are named by their bytes.
 
 ## Second stage: globals
 
-Through pairs whose masked instruction streams are identical, a data reference in
-SMT3 (a `lui`/`%lo` pair or a `$gp`-relative access) sits at the same instruction
-index as the DDS reference, so the named SMT3 global maps to a DDS address with a
-vote per reference. Measured on 2026-10-22: 626 named SMT3 globals reach DDS1 and
-625 reach DDS2 with unanimous votes, two or one conflicting. About half land on an
-address dds-decomp has not symbolised and half on one of its inferred names. Not
-applied; it needs the same provenance treatment as the functions and a check that
-the DDS object has the same extent.
+`tools/dds_data_names.py` carries the data symbol names the same way, and it is
+done: 352 globals on DDS1 and 356 on DDS2. The evidence is positional rather
+than structural. In a pair of functions whose masked instruction streams are
+identical, the instruction at a given index is the same instruction with the
+same registers, so the object it addresses corresponds; each reference is a
+vote, and only unanimous votes are accepted.
+
+What limits the yield is not the evidence but the recipient. About 260 named
+SMT3 globals per game vote for a DDS address that dds-decomp has not
+symbolised, because splat emits the surrounding bytes as one `D_` blob. Those
+are reported as `not-a-dds-symbol` and dropped: the pass renames objects and
+never invents them. Splitting those blobs into real symbols would roughly
+double what this evidence can carry, and is the obvious next piece of work.
+
+Three globals could not be carried at all. ee-gcc's GCSE hashes a `SYMBOL_REF`
+by name, so renaming a global can change a register allocation tie in a
+function that reads it, and in `dds3Particle_SparkBuffInit`'s case the old
+spelling is what the match was built on. The rules, the counts and those three
+cases are recorded on the receiving side, in dds-decomp's
+`docs/smt3-data-names.md`.
