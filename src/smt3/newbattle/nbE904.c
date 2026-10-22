@@ -307,14 +307,14 @@ extern u32 dds3DrawFlag;
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -422,7 +422,7 @@ s32 Model1Start(nbEventProcessData_t *ed)
         ed->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x102);
     } else {
         sprintf(D_005754E0, D_005467C0, 0x102);
-        ed->unk_1C = fileLoad(D_005754E0);
+        ed->file = fileLoad(D_005754E0);
     }
     nbFreeEffectSlot(ed);
     return 0;
@@ -430,7 +430,7 @@ s32 Model1Start(nbEventProcessData_t *ed)
 
 s32 Model1Wait(nbEventProcessData_t *ed)
 {
-    switch (ed->frame) {
+    switch (ed->seqtime) {
     case 1:
         nbBgmFadeOut();
         break;
@@ -441,11 +441,11 @@ s32 Model1Wait(nbEventProcessData_t *ed)
         dds3SetQuake(0x1E, 0x1F4);
         break;
     }
-    if (ed->frame >= 0xF0 && pacCheckEnd(ed->unk_20) != 0) {
+    if (ed->seqtime >= 0xF0 && pacCheckEnd(ed->unk_20) != 0) {
         if (evtBitCheck(0xC0F) == 0) {
-            ed->unk_24 = fileGetMemHandle(ed->unk_1C);
-            fileHandleFree(ed->unk_1C);
-            ed->unk_1C = NULL;
+            ed->mem = fileGetMemHandle(ed->file);
+            fileHandleFree(ed->file);
+            ed->file = NULL;
         }
         nbAddFadeOutKoukaPacket(0, 0, 0xF, 1);
         nbFreeEffectSlot(ed);
@@ -458,13 +458,13 @@ s32 Model1Wait_2(nbEventProcessData_t *ed)
     void *buf;
     s32 size;
 
-    if (ed->frame == 0x1E) {
+    if (ed->seqtime == 0x1E) {
         func_0024D938(ed);
     }
-    if (ed->frame >= 0x20) {
+    if (ed->seqtime >= 0x20) {
         if (evtBitCheck(0xC0F) == 0) {
-            buf = sdfMemLock(ed->unk_24);
-            size = sdfMemGetSize(ed->unk_24);
+            buf = sdfMemLock(ed->mem);
+            size = sdfMemGetSize(ed->mem);
             mdlPackDecode(1, 0x102, 0x101, buf, size);
         }
         nbAddFadeInKoukaPacket(3, 0, 0x28, 1);
@@ -484,7 +484,7 @@ s32 func_002930E8(nbEventProcessData_t *e)
 
 s32 nbE905_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x24) {
+    if (e->seqtime >= 0x24) {
         if (nbMaeCheckDone() != 0) {
             printf(D_005467E0);
             nbMaeWaitStep();

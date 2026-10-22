@@ -78,7 +78,7 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
                 fmDestroyFontMemControl();
                 return 0;
             }
-            node->nodeIndex = i;
+            node->id = i;
             node->uv.u0 = (column * cellWidth) << 4;
             node->uv.u1 = ((column * cellWidth) << 4) + (cellWidth << 4);
             if (records != NULL) {
@@ -110,7 +110,7 @@ s32 fmDestroyFontMemControl(void) {
 FontMem_t *fmRentFontMem(void) {
     FontMem_t *resourceNode = gFGC.head->next;
 
-    if (resourceNode->nodeIndex == 0) {
+    if (resourceNode->id == 0) {
         return NULL;
     }
     resourceNode->prev->next = resourceNode->next;

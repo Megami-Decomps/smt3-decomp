@@ -46,7 +46,7 @@ typedef struct evtViewerObject_s {
     s32 unitHandle;                /* 0x0C */
     u8 unk10[8];
     s32 childCount;                /* 0x18 */
-    evtFrameInfo_t *children;      /* 0x1C */
+    evtFrameInfo_t *p;      /* 0x1C */
     evtFrameInfo_t *lastChild;     /* 0x20 */
     struct evtViewerObject_s *next;  /* 0x24 */
     struct evtViewerObject_s *prev;  /* 0x28 */
@@ -223,10 +223,10 @@ void DelViewerObject(evtViewerObject_s *obj);
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
 void LinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
-    evtFrameInfo_t *cursor = parent->children;
+    evtFrameInfo_t *cursor = parent->p;
 
     if (cursor == 0) {
-        parent->children = f;
+        parent->p = f;
         parent->lastChild = f;
         f->next = 0;
         f->prev = 0;
@@ -234,7 +234,7 @@ void LinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
         while (cursor != 0) {
             if (f->frame < cursor->frame) {
                 if (cursor->prev == 0) {
-                    parent->children = f;
+                    parent->p = f;
                     cursor->prev = f;
                     f->next = cursor;
                     f->prev = 0;
@@ -264,7 +264,7 @@ void UnlinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
     evtFrameInfo_t *nextNode = f->next;
     evtFrameInfo_t *previousNode = f->prev;
     if (previousNode == 0) {
-        parent->children = nextNode;
+        parent->p = nextNode;
     } else {
         previousNode->next = nextNode;
     }
@@ -288,7 +288,7 @@ void UnlinkFrameInfo(evtViewerObject_s *parent, evtFrameInfo_t *f) {
 /* Walk the linked list and reinsert the first out-of-order successor. */
 void SortFrameInfo(evtViewerObject_s *parent) {
     if (parent != 0) {
-        evtFrameInfo_t *anchorNode = parent->children;
+        evtFrameInfo_t *anchorNode = parent->p;
         while (anchorNode != 0) {
             evtFrameInfo_t *resumeNode = anchorNode->next;
             evtFrameInfo_t *candidateNode = resumeNode;
@@ -324,7 +324,7 @@ evtFrameInfo_t *evtGetSelectFrameInfo(void)
     if (group == NULL) {
         return NULL;
     }
-    node = group->children;
+    node = group->p;
     for (i = 0; i < viewer->frameCursor + viewer->frameFirst; i++) {
         if (node == NULL) {
             break;
@@ -476,8 +476,8 @@ s32 evtGetAllFrameInfoCount(void)
 
 void DelViewerObject(evtViewerObject_s *obj)
 {
-    while (obj->children != NULL) {
-        DelFrameInfo(obj, obj->children);
+    while (obj->p != NULL) {
+        DelFrameInfo(obj, obj->p);
     }
     UnlinkViewerObject(obj);
     sdfChipFreeDirect(obj);
@@ -777,7 +777,7 @@ void SelectActiveCamera(void)
         viewer = viewerinfo;
         camera = viewer->activecamera;
         if (camera == NULL) {
-            viewer->activecamera = work->lists[4].tail;
+            viewer->activecamera = work->basictable[4].tail;
         } else {
             camera = camera->prev;
             if (camera != NULL) {
@@ -785,14 +785,14 @@ void SelectActiveCamera(void)
             } else if (viewer->gamecamera != NULL) {
                 viewer->activecamera = NULL;
             } else {
-                viewer->activecamera = work->lists[4].tail;
+                viewer->activecamera = work->basictable[4].tail;
             }
         }
     } else if (dds3PadButtonState[0x20] < 0) {
         viewer = viewerinfo;
         camera = viewer->activecamera;
         if (camera == NULL) {
-            viewer->activecamera = work->lists[4].head;
+            viewer->activecamera = work->basictable[4].head;
         } else {
             camera = camera->next;
             if (camera != NULL) {
@@ -800,7 +800,7 @@ void SelectActiveCamera(void)
             } else if (viewer->gamecamera != NULL) {
                 viewer->activecamera = NULL;
             } else {
-                viewer->activecamera = work->lists[4].head;
+                viewer->activecamera = work->basictable[4].head;
             }
         }
     } else {

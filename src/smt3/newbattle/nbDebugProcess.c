@@ -282,14 +282,14 @@ extern u8 dds3PadButtonState[];
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbSetTargetProcess(s32 act, s32 partyindex, s32 ctype, s32 crule, s32 carea);
@@ -302,10 +302,10 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 typedef struct {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
+    s32 nextseq;
     s32 unk_0C;
     s32 unk_10;
-    s32 unk_14;
+    s32 formindex;
     nbFormation_t *form;
     s32 partyindex;
     nbParty_t *party;
@@ -462,11 +462,11 @@ void SetTarget_nbDebugProcess(nbDebugProcessData_t *a)
     s32 i;
 
     a->form = NULL;
-    a->unk_14 = 0;
+    a->formindex = 0;
     for (i = 0; i < 0x10; i++) {
         form = (nbFormation_t *)(i * sizeof(nbFormation_t) + (s32)a->data->form);
         if (form->stat & 8) {
-            a->unk_14 = i;
+            a->formindex = i;
             a->form = form;
             a->partyindex = form->partyindex;
             party = &a->data->party[form->partyindex];
@@ -497,8 +497,8 @@ void SetNextSeq(nbDebugProcessData_t *d)
 {
     s32 seq;
 
-    seq = d->unk_08;
-    d->unk_08 = -1;
+    seq = d->nextseq;
+    d->nextseq = -1;
     d->unk_04 = seq;
     switch (seq) {
     case 1:
@@ -540,7 +540,7 @@ nbDebugProcessData_t *InitDebugProcessData(nbMainProcessData_t *data)
     memset(w, 0, sizeof(nbDebugProcessData_t));
     w->data = data;
     w->unk_04 = 0;
-    w->unk_14 = 0;
+    w->formindex = 0;
     w->form = NULL;
     menucur = 0;
     return w;

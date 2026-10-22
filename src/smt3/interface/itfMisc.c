@@ -35,7 +35,7 @@ typedef struct itfLink_t
 
 typedef struct
 {
-    itfLink_t *activeHead, *activeTail, *firstFree, *lastFree;
+    itfLink_t *puse_top, *puse_tail, *pdisuse_top, *pdisuse_tail;
 } itfmisclinkstack_t;
 
 typedef struct { s32 x, y, z, w; } itfColorVector_t;
@@ -145,36 +145,36 @@ void itfMiscLinkInitialize(itfmisclinkstack_t *pool, itfLink_t *nodes, s32 count
     node->previous = previous;
     node->index = index;
     node->next = NULL;
-    pool->lastFree = node;
-    pool->firstFree = nodes;
-    pool->activeTail = NULL;
-    pool->activeHead = NULL;
+    pool->pdisuse_tail = node;
+    pool->pdisuse_top = nodes;
+    pool->puse_tail = NULL;
+    pool->puse_top = NULL;
 }
 
 /* Move the free-list head to the active-list tail; exhausted pools return NULL. */
 itfLink_t *itfMiscLinkTake(itfmisclinkstack_t *pstack) {
-    itfLink_t *node = pstack->firstFree;
+    itfLink_t *node = pstack->pdisuse_top;
     itfLink_t *next;
 
     if (node == NULL) {
         return NULL;
     }
     next = node->next;
-    if (pstack->activeHead != NULL) {
-        node->previous = pstack->activeTail;
-        pstack->activeTail->next = node;
+    if (pstack->puse_top != NULL) {
+        node->previous = pstack->puse_tail;
+        pstack->puse_tail->next = node;
     } else {
         node->previous = NULL;
-        pstack->activeHead = node;
+        pstack->puse_top = node;
     }
     node->next = NULL;
-    pstack->activeTail = node;
+    pstack->puse_tail = node;
     if (next != NULL) {
         next->previous = NULL;
     } else {
-        pstack->lastFree = NULL;
+        pstack->pdisuse_tail = NULL;
     }
-    pstack->firstFree = next;
+    pstack->pdisuse_top = next;
     return node;
 }
 
@@ -186,24 +186,24 @@ void itfMiscLinkGive(itfLink_t *pelem, itfmisclinkstack_t *pstack) {
     if (previous != NULL) {
         previous->next = next;
     } else {
-        pstack->activeHead = next;
+        pstack->puse_top = next;
     }
     if (next != NULL) {
         next->previous = previous;
     } else {
-        pstack->activeTail = previous;
+        pstack->puse_tail = previous;
     }
     pelem->next = NULL;
     {
-        itfLink_t *lastFree = pstack->lastFree;
+        itfLink_t *lastFree = pstack->pdisuse_tail;
         pelem->previous = lastFree;
         if (lastFree != NULL) {
             lastFree->next = pelem;
         }
     }
-    pstack->lastFree = pelem;
-    if (pstack->firstFree == NULL) {
-        pstack->firstFree = pelem;
+    pstack->pdisuse_tail = pelem;
+    if (pstack->pdisuse_top == NULL) {
+        pstack->pdisuse_top = pelem;
     }
 }
 

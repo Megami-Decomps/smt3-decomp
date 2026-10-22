@@ -295,14 +295,14 @@ extern u32 f;
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -378,7 +378,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE912", MoveSub);
 s32 Move1(nbEventProcessData_t *ed)
 {
     MoveSub(ed);
-    if (ed->frame == 0x55 && nbCheckLoadGroup(1) == 0) {
+    if (ed->seqtime == 0x55 && nbCheckLoadGroup(1) == 0) {
         nbFreeEffectSlot(ed);
     }
     return 0;
@@ -388,7 +388,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE912", nbE912_Effect1);
 
 s32 nbE912_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x10) {
+    if (e->seqtime >= 0x10) {
         printf(D_00546898);
         e->data->stat &= ~8;
         return 1;
@@ -414,7 +414,7 @@ s32 nbE913_Test(nbEventProcessData_t *e)
 
 s32 nbE913_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0xD3) {
+    if (e->seqtime >= 0xD3) {
         printf(D_005468B0);
         nbDelAllKoukaPacketType(0x2B);
         e->data->endtype = 1;

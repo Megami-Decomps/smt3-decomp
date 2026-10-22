@@ -271,7 +271,7 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation,
     if (count != 0) {
         remaining = count;
         do {
-            if (entry->paramKind != 0xFFFE) {
+            if (entry->type != 0xFFFE) {
                 *work = dds3EffectPartCopy(entry->value.work);
                 if (actorScaleEnabled != 0 && pFormation != NULL) {
                     u8 scaleKind = entry->aimParams.scaleKind;
@@ -489,7 +489,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     count = list->count;
     flags = hBTLCutEffect->unk18;
     for (i = 0; i < count; i++, entry++) {
-        if (entry->zeroKindCount >= frame) {
+        if (entry->timing >= frame) {
             continue;
         }
         kind = entry->kind;
@@ -582,22 +582,22 @@ void effBTLPartCreate(effBTL_t *pSkill, effBTL_t *pData) {
             s32 remainingEntries = entryCountForBank;
 
             do {
-                if (entry->paramKind != 0xFFFE) {
-                    if (entry->paramKind == 0xFFFF) {
+                if (entry->type != 0xFFFE) {
+                    if (entry->type == 0xFFFF) {
                         u32 index = entry->value.sourceOffset;
                         u32 sourceBank = index / 0x3C;
                         u32 sourceEntryIndex = index % 0x3C;
                         effBTL_SkillPartsList_t *sourceEntry = &pSkill->banks[sourceBank].list.entries[sourceEntryIndex];
                         dds3EffectPart_t *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
-                        u16 sourceKind = sourceEntry->paramKind;
+                        u16 sourceKind = sourceEntry->type;
 
                         entry->value.work = duplicatedWork;
-                        entry->paramKind = sourceKind;
+                        entry->type = sourceKind;
                     } else {
-                        entry->value.work = dds3EffectPartCreate(entry->paramKind, sourceBytes + entry->value.sourceOffset);
+                        entry->value.work = dds3EffectPartCreate(entry->type, sourceBytes + entry->value.sourceOffset);
                     }
-                    if (entry->paramKind == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
-                        entry->zeroKindCount++;
+                    if (entry->type == EFF_PARAM_WORK_KIND_EFFECT_NODE) {
+                        entry->timing++;
                     }
                 }
                 entry++;
@@ -619,7 +619,7 @@ void effBTLPartDelete(effBTL_t *pSkill) {
             s32 remaining = entryCount;
 
             do {
-                if (entry->paramKind != 0xFFFE) {
+                if (entry->type != 0xFFFE) {
                     dds3EffectPartDelete(entry->value.work);
                 }
                 entry++;
@@ -1014,7 +1014,7 @@ void effBTLFieldColorGetBaseColor(void) {
     s32 minor;
 
     data = nbGetMainProcessData();
-    major = data->unk7C - 0xC8;
+    major = data->StageMajor - 0xC8;
     minor = data->StageMinor;
     if ((u16)major >= 0x28 || minor <= 0 || minor >= 0xB) {
         printf("effBTLFieldColorGetBaseColor:DummyColorLoad\n");
@@ -1047,7 +1047,7 @@ void nbInitEffectProcess(nbMainProcessData_t *data) {
     dds3ProcessID_t *draw;
 
     process = dds3StartProcess("nb_effect", 0x3F9, 2, 1, nbEffectProcess, nbEffectShutdown, NULL);
-    dds3LinkProcess(data->unkBC, process);
+    dds3LinkProcess(data->MainProcessID, process);
     data->EffectProcessID = process;
     draw = dds3StartProcess("nb_effect_draw", 0x2B0E, 1, 1, nbEffectDraw, NULL, NULL);
     dds3LinkProcess(process, draw);

@@ -79,7 +79,7 @@ s32 encDrawProc(dds3ProcessID_t *aProcId) {
         rsetAlpha(0);
         if (encDrawState >= 13) {
             D_0055DAD8.source.scale = D_0055DAD8.source.scale + 0.001f;
-            D_0055DAD8.extent = D_0055DAD8.extent - 2;
+            D_0055DAD8.area = D_0055DAD8.area - 2;
             dds3EffectPartialMultiBlurSetParam(hPartialMultiBlur, &D_0055DAD8);
             dds3EffectPartialMultiBlurDraw(hPartialMultiBlur);
         }
@@ -131,18 +131,18 @@ void encStart(void) {
     }
     gencStageInnAlp = 0x80;
     D_0055DAD8.source.color = 0x09808080;
-    D_0055DAD8.source.blendControl = 0x44;
+    D_0055DAD8.source.blend = 0x44;
     D_0055DAD8.source.angle = 0.01f;
     D_0055DAD8.source.scale = 1.02f;
-    D_0055DAD8.extent = 0x12C;
+    D_0055DAD8.area = 0x12C;
     gencMode = 0;
     encDrawState = 0;
     D_0055DAD8.source.position[0] = 0;
     D_0055DAD8.source.position[1] = 0;
-    D_0055DAD8.source.corners[0][0] = 0;
-    D_0055DAD8.source.corners[0][1] = 0;
-    D_0055DAD8.source.corners[1][0] = 0;
-    D_0055DAD8.source.corners[1][1] = 0;
+    D_0055DAD8.source.xy[0][0] = 0;
+    D_0055DAD8.source.xy[0][1] = 0;
+    D_0055DAD8.source.xy[1][0] = 0;
+    D_0055DAD8.source.xy[1][1] = 0;
     hPartialMultiBlur = dds3EffectPartialMultiBlurCreate(&D_0055DAD8);
     gencOn = 1;
     if (dds3GetActiveScene() == NULL) {

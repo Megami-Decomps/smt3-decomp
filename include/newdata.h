@@ -49,7 +49,7 @@ typedef struct
      * so the declared type is left as the matching build has it. */
     s32 memHandle;
     s32 unk38;
-    s32 unk3C;
+    s32 playtime;
     s32 integers[256];
     f32 floats[256];
     u32 EventBit[128]; /* 0x840: 4096 event bits */

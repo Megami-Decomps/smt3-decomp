@@ -24,11 +24,11 @@ typedef union effBTLPartValue_t {
 } effBTLPartValue_t;
 
 typedef struct effBTL_SkillPartsList_t {
-    u16 paramKind;
+    u16 type;
     u8 unk02[2];
     effBTLPartValue_t value;
     effBTLAimParams_t aimParams;
-    u32 zeroKindCount;
+    u32 timing;
     u8 kind;
     u8 unk15[3];
 } effBTL_SkillPartsList_t;

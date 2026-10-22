@@ -43,7 +43,7 @@ typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
 typedef struct
 {
     u8 unk00[0xC];
-    s32 width;
+    s32 w_pxls;
 } _FRQ;
 
 typedef struct dds3FontReq_t dds3FontReq_t;
@@ -178,7 +178,7 @@ void NewGame2Push(void)
         slNewGameBit162 = 1;
     }
     D_0054EA16 = DDS3_GBWK->half0C;
-    D_0054EA18 = DDS3_GBWK->unk3C;
+    D_0054EA18 = DDS3_GBWK->playtime;
     D_0054EA1C = sdfMemAllocDirect(0x7E90);
     memcpy(sdfMemGetPtr(D_0054EA1C), (u8 *)DDS3_GBWK + 0x11E80, 0x7E90);
     D_00551C7C = sdfMemAllocDirect(0xA0);
@@ -288,7 +288,7 @@ void NewGame2Pop(void)
     if (slNewGameBit162 != 0) {
         evtBitOn(0xA2);
     }
-    DDS3_GBWK->unk3C = D_0054EA18;
+    DDS3_GBWK->playtime = D_0054EA18;
     DDS3_GBWK->word08 = D_0054EA18;
     DDS3_GBWK->half0C = D_0054EA16;
     memcpy((u8 *)DDS3_GBWK + 0x11E80, sdfMemGetPtr(D_0054EA1C), 0x7E90);
@@ -380,7 +380,7 @@ void dds3GlobalWorkUserInit2(s32 mode)
         DDS3_GBWK->memHandle = saved;
     }
     DDS3_GBWK->unk38 = 0;
-    DDS3_GBWK->unk3C = 0;
+    DDS3_GBWK->playtime = 0;
     dds3GlobalWorkClearFlags();
     evtInitGlobalWork();
     DDS3_GBWK->akuma[0].unk00 = 8;
@@ -496,7 +496,7 @@ dds3FontReq_t *dds3FontReqAddString(s32 x, s32 y, char *str)
 
     frq = frSetFontString(str, 0, 0, 0, NULL, 0);
     if (x == 0x800000) {
-        x = (0x200 - frq->width) * 8;
+        x = (0x200 - frq->w_pxls) * 8;
     }
     frSetDrawPosition(frq, x, y);
     req = sdfChipAllocZeroDirect(sizeof(dds3FontReqString_t));

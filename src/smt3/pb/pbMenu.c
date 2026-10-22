@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -69,7 +69,7 @@ typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -157,7 +157,7 @@ void func_001D4E10(void) {
 }
 
 void exitPB(pbProcHandle_t *p) {
-    dds3ResetProcessFlag(p->process, 0x10, 1);
+    dds3ResetProcessFlag(p->id, 0x10, 1);
     if (pbGetMoveChar() != 0) {
         ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x60000;
     }
@@ -165,7 +165,7 @@ void exitPB(pbProcHandle_t *p) {
 }
 
 void func_001D4E70(pbProcHandle_t *panel) {
-    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    dds3ResetProcessFlag(panel->id, 0x10, 1);
     pbStartGiveupConfirm();
     panel->flags = 0x50000;
 }
@@ -174,7 +174,7 @@ void func_001D4E70(pbProcHandle_t *panel) {
 /* NON_MATCHING: 21 of 22 words; retail annuls the trailing lui in a beql delay slot. */
 #ifdef NON_MATCHING
 void func_001D4EB0(pbProcHandle_t *panel) {
-    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    dds3ResetProcessFlag(panel->id, 0x10, 1);
     if (pbGetMoveChar() != 0) {
         ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
     }
@@ -194,7 +194,7 @@ void pbSetDebugOwner(pbProcHandle_t *panel) {
     pbProcHandle_t *help = pbStartHelp((pbProcHandle_t *)pbGetMoveChar(), work->value);
     dds3ProcessID_t *id;
     D_0054F5C4->helpProc = help;
-    dds3SetProcessFlag(help->process, 0x10, 1);
+    dds3SetProcessFlag(help->id, 0x10, 1);
     id = dds3SearchProcessName(D_00535E90);
     if (id != NULL) {
         dds3ResetProcessFlag(id, 0x10, 2);
@@ -230,17 +230,17 @@ void pb_load_mapdata_Shutdown(dds3ProcessID_t *id) {
 pbProcHandle_t *pbStartMenu(pbProcHandle_t *parent, s32 mode) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
-    panel->process = dds3StartProcess("pb-proc-menu", 0x3F8, 1, 1, pb_proc_menu_Process,
+    panel->id = dds3StartProcess("pb-proc-menu", 0x3F8, 1, 1, pb_proc_menu_Process,
                                       (dds3ProcessFunc_t)pb_proc_menu_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0x10000;
     work = sdfChipAllocDirect(4);
     panel->data.value = work;
     memset(work, 0, 4);
     panel->data.value->value = mode;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     pbMenuState = 0;
     pbMapPathIdx = 0;
     return panel;
@@ -248,13 +248,13 @@ pbProcHandle_t *pbStartMenu(pbProcHandle_t *parent, s32 mode) {
 
 pbProcHandle_t *pbWaitLoadMapData(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
-    panel->process = dds3StartProcess(D_00535EC8, 0x3EE, 1, 1, pb_load_mapdata_Process,
+    panel->id = dds3StartProcess(D_00535EC8, 0x3EE, 1, 1, pb_load_mapdata_Process,
                                       (dds3ProcessFunc_t)pb_load_mapdata_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 

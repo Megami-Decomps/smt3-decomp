@@ -398,14 +398,14 @@ extern s32 nbBadCurseTimer;
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern char D_00551160[];
@@ -509,29 +509,29 @@ s32 nbE915Process_1(dds3ProcessID_t *id)
     nbEventProcessData_t *e;
 
     e = dds3GetProcessData(id);
-    if (D_00527698[e->step](e) != 0) {
+    if (D_00527698[e->seq](e) != 0) {
         return -1;
     }
-    if (e->unk_08 == 0) {
+    if (e->time == 0) {
         nbCameraSetState(0x17);
         nbSetEnemyFormation(e->data);
         nbSetPlayerFormation(e->data, 0);
     }
-    if (e->unk_08 < 0x6E) {
-        if (e->unk_08 == 0) {
+    if (e->time < 0x6E) {
+        if (e->time == 0) {
             nbCameraBoss_BSBERU_E915_Init();
         }
         nbCameraBoss_BSBERU_E915_0_Set();
-    } else if (e->unk_08 == 0x6E) {
+    } else if (e->time == 0x6E) {
         nbCameraBoss_BSBERU_E915_1_Set();
-    } else if (e->unk_08 >= 0xFA) {
-        if (e->unk_08 == 0xFA) {
+    } else if (e->time >= 0xFA) {
+        if (e->time == 0xFA) {
             nbFormDispOff2(nbGetEventForm());
             nbCameraBoss_BSBERU_E915_Init();
         }
         nbCameraBoss_BSBERU_E915_2_Set();
     }
-    if (e->unk_08 == 0) {
+    if (e->time == 0) {
         effBTLSkillStart(0x203, 0);
     }
     nbUpdateEventProcessData(id);

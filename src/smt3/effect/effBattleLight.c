@@ -15,8 +15,8 @@ typedef struct
     u8 unknown02;
     u8 unknown03;
     u32 unknown04;
-    u32 unknown08;
-    u32 unknown0C;
+    u32 diffuse;
+    u32 ambient;
     u32 unknown10;
     u32 unknown14;
     u32 unknown18;
@@ -125,8 +125,8 @@ void effBTLPointLightModelSet(effBTL_SkillLight_t *pParam, nbFormation_t *pForma
     pLight->param = *pParam;
     id = effBTLModelGetID(pFormation);
     if (id == 0x125 || id == 0x108) {
-        pLight->param.unknown08 = 0x80FFB996;
-        pLight->param.unknown0C = 0x80503214;
+        pLight->param.diffuse = 0x80FFB996;
+        pLight->param.ambient = 0x80503214;
     }
     pLight->unknown24 = 0;
 }

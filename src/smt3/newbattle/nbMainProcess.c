@@ -566,7 +566,7 @@ void nbSetMaePhase(nbMainProcessData_t *data)
     nbInitPanelProcess(data);
     nbInitHelpProcess(data);
     nbInitAutoCommProcess(data);
-    nbInitMakaProcess(data->unkBC);
+    nbInitMakaProcess(data->MainProcessID);
     nbInitStageProcess(data);
     nbPanelPressGaugeEncountHide();
 }
@@ -640,25 +640,25 @@ void nbSetPressMaePhase(nbMainProcessData_t *data)
         start = 0;
         cnt = 4;
     }
-    data->unk78 = 0;
+    data->press4_p = 0;
     for (i = start; i < start + cnt; i++) {
         if (data->party[i].flag & 1) {
             if ((data->party[i].flag & 0x20) == 0) {
                 unit = nbGetUnitWorkPointer(data, &data->party[i]);
                 if (unit != 0) {
                     if ((unit->flag & 4) == 0 && (datDevilTable[unit->id].flag & 0x10)) {
-                        data->unk78 = data->unk78 + 2;
+                        data->press4_p = data->press4_p + 2;
                     } else {
-                        data->unk78 = data->unk78 + 1;
+                        data->press4_p = data->press4_p + 1;
                     }
                 }
             }
         }
     }
     if (evtBitCheck(0x8C0) && (data->stat & 8) == 0) {
-        data->unk78 = data->unk78 + 1;
+        data->press4_p = data->press4_p + 1;
     }
-    data->press4_ten = data->unk78;
+    data->press4_ten = data->press4_p;
     if (data->stat & 8) {
         start = 4;
         cnt = 10;
@@ -754,7 +754,7 @@ void nbSetChkTurnPhase(nbMainProcessData_t *data)
         nbSetNextPhase(EVENT);
         return;
     }
-    if (data->unk78 > 0 || data->press4_ten > 0) {
+    if (data->press4_p > 0 || data->press4_ten > 0) {
         if ((data->stat & 0x40000) == 0) {
             nbSetNextOrder();
         }
@@ -1318,7 +1318,7 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     printf("packindex = %d\n", data->packindex);
     printf(D_00543540, data->encno);
     printf(D_00543550, data->formationtype);
-    data->unk7C = stagemajor;
+    data->StageMajor = stagemajor;
     data->StageMinor = stageminor;
     if (data->encno == 0x1D9) {
         evtSetAgeOfMoon(0);
@@ -1327,7 +1327,7 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
     SetJyocyuData(data);
     SetFlag(data);
     ClearLocalBit();
-    data->unkBC = dds3StartProcess(D_005510B8, 0x3FA, 1, 1, nbMainProcess1, nbMainShutdown, data);
+    data->MainProcessID = dds3StartProcess(D_005510B8, 0x3FA, 1, 1, nbMainProcess1, nbMainShutdown, data);
     evtEnableMoonDraw();
     if (data->encno == 0x1C3) {
         nbLoadDeadMoonTex();
@@ -1338,7 +1338,7 @@ void nbInitMainProcess(s32 encpackno, s32 packno, s32 packindex, s32 encno, s32 
 void nbKillMainProcess(void)
 {
     if (dds3SearchProcessPriority(0x3FA) != 0) {
-        dds3KillProcess(nbGetMainProcessData()->unkBC, 1);
+        dds3KillProcess(nbGetMainProcessData()->MainProcessID, 1);
     }
     evtDisableMoonDraw();
     nbFreeDeadMoonTex();

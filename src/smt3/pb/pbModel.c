@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -71,7 +71,7 @@ typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -201,16 +201,16 @@ void pbMoveMyCharcter(pbProcHandle_t *p, f32 x, f32 y) {
 void pbMoveMyCharcter2(pbProcHandle_t *p, s16 x, s16 y) {
     pbMyChar_t *chara = p->data.chara;
     if (p != NULL) {
-        chara->cellX = x + chara->cellX;
-        chara->cellY = y + chara->cellY;
+        chara->x = x + chara->x;
+        chara->y = y + chara->y;
     }
 }
 
 void pbGetCellY(pbProcHandle_t *panel, s16 cx, s16 cy) {
     pbMyChar_t *chara = panel->data.chara;
     if (panel != NULL) {
-        chara->cellX = cx;
-        chara->cellY = cy;
+        chara->x = cx;
+        chara->y = cy;
         chara->pos.x = cx * 40 - 380;
         chara->pos.z = cy * 40 - 380;
     }
@@ -226,8 +226,8 @@ void pbGetMyCharcterPos(pbProcHandle_t *p, sdfVector4_t *pos) {
 void pbGetMyCharcterPos2(pbProcHandle_t *p, s16 *x, s16 *y) {
     pbMyChar_t *chara = p->data.chara;
     if (p != NULL) {
-        *x = chara->cellX;
-        *y = chara->cellY;
+        *x = chara->x;
+        *y = chara->y;
     }
 }
 
@@ -235,7 +235,7 @@ s32 pbGetMyCharcterRot(pbProcHandle_t *p) {
     pbMyChar_t *chara = p->data.chara;
     s32 ret = -1;
     if (p != NULL) {
-        ret = chara->rot;
+        ret = chara->dir;
     }
     return ret;
 }

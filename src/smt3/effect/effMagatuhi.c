@@ -157,7 +157,7 @@ typedef struct {
     s32 age; /* negative: waiting to start; nonnegative: elapsed frames */
     f32 scale;
     f32 angle;
-    f32 liftStep;
+    f32 up_s;
 } effMagaSmokePart_tag;
 
 /* Seven copied words; the parent appends its independently allocated history. */
@@ -199,10 +199,10 @@ typedef struct effMagatuhiOwner_t {
 typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
     effMagaSmokeParam_t head;
-    effMagaSmokePart_tag *particles;
-    u32 tintColor;
-    effMagatuhiOwner_t *managedResource;
-    sdfMemHandle_t *allocationHandle;
+    effMagaSmokePart_tag *pPart;
+    u32 abgr;
+    effMagatuhiOwner_t *pMagatuhi;
+    sdfMemHandle_t *hMem;
 } effMagaSmoke_tag;
 
 /* Float source block read by effMagatuhiCopyFloatBlock. */
@@ -280,13 +280,13 @@ typedef struct effMagaSpiralParam_t {
 
 /* One particle slot; replay visits the first slot in each triplet. */
 typedef struct effMagaSpiralPart_tag {
-    s32 age;        /* 0x00: negative while waiting; otherwise elapsed frames */
-    f32 height;     /* 0x04 */
-    f32 heightStep; /* 0x08 */
+    s32 frame;        /* 0x00: negative while waiting; otherwise elapsed frames */
+    f32 up;     /* 0x04 */
+    f32 up_s; /* 0x08 */
     f32 angle;      /* 0x0C */
-    f32 angleStep;  /* 0x10 */
+    f32 rotate_s;  /* 0x10 */
     f32 radius;     /* 0x14 */
-    f32 radiusStep; /* 0x18 */
+    f32 radius_s; /* 0x18 */
 } effMagaSpiralPart_tag;
 
 /* Work is followed by the orbit slots in the same retained allocation. */
@@ -294,8 +294,8 @@ typedef struct effMagaSpiral_tag {
     f32 matrix[16];
     effMagaSpiralParam_t head;
     effMagaSpiralPart_tag *particles;
-    effMagatuhiOwner_t *managedResource;
-    u32 tintColor;
+    effMagatuhiOwner_t *pMagatuhi;
+    u32 abgr;
     sdfMemHandle_t *allocationHandle;
 } effMagaSpiral_tag;
 
@@ -322,12 +322,12 @@ typedef struct {
 
 /* Per-particle state allocated after EffMagatuhiRingWork by both titles. */
 typedef struct effMagaCylinderPart_tag {
-    s32 age;        /* 0x00: negative while waiting; otherwise elapsed frames */
+    s32 frame;        /* 0x00: negative while waiting; otherwise elapsed frames */
     f32 height;     /* 0x04 */
     f32 angle;      /* 0x08 */
-    f32 angleStep;  /* 0x0C */
+    f32 rotate_s;  /* 0x0C */
     f32 radius;     /* 0x10 */
-    f32 radiusStep; /* 0x14 */
+    f32 radius_s; /* 0x14 */
 } effMagaCylinderPart_tag;
 
 /* Work precedes its array of 0x18-byte ring states (0x12C). */
@@ -335,9 +335,9 @@ typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
     effMagaCylinderParam_t head;
     effMagaCylinderPart_tag *particles;
-    effMagatuhiOwner_t *managedResource;
-    u32 tintColor;
-    sdfMemHandle_t *allocationHandle;
+    effMagatuhiOwner_t *pMagatuhi;
+    u32 abgr;
+    sdfMemHandle_t *hMem;
 } effMagaCylinder_tag;
 
 /* Four control points and their jitter scales; copy xyz but preserve each w. */
@@ -358,7 +358,7 @@ typedef struct {
 typedef struct {
     effMagaPoint4Param_t head;
     s32 *delays;           /* 0x180 */
-    effArrHdr_t *mathResource;    /* 0x184 */
+    effArrHdr_t *pBezier4P;    /* 0x184 */
     effMagatuhiOwner_t *managedResource; /* 0x188 */
     sdfMemHandle_t *allocationHandle; /* 0x18C backing allocation, not the work address */
 } effMagaPoint4_tag;
@@ -1116,7 +1116,7 @@ void effMagaSmokeConvPartInit(effMagaSmokeConv_tag *pMagaSmokeConv, s32 index) {
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmokeConv->head.scaleVariation +
          (1.0f - pMagaSmokeConv->head.scaleVariation));
     particle->angle = dds3GetRandFloatA(dds3EffectBase) * EFF_MAGATUHI_FULL_TURN;
-    particle->liftStep = pMagaSmokeConv->head.baseLiftStep *
+    particle->up_s = pMagaSmokeConv->head.baseLiftStep *
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmokeConv->head.liftVariation +
          (1.0f - pMagaSmokeConv->head.liftVariation));
     slot = dds3Bezier4PGetPart(pMagaSmokeConv->mathResource, index);
@@ -1182,7 +1182,7 @@ void effMagaSmokeConvDraw(effMagaSmokeConv_tag *pData) {
             if (slot->step == 0.0f) {
                 SDF_VU0_COPYVECTOR(basePosition, particle->position);
                 radial = particle->scale * sdfSin(particle->angle);
-                particle->dirUp[1] += particle->liftStep;
+                particle->dirUp[1] += particle->up_s;
                 point[0] = origin[0] + particle->position[0] + particle->dirUp[0] * radial;
                 point[1] = origin[1] + particle->position[1] + particle->dirUp[1];
                 point[2] = origin[2] + particle->position[2] + particle->dirUp[2] * radial;
@@ -1276,7 +1276,7 @@ effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
         work->head.delaySpread = 1;
     }
     work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
-    work->mathResource = dds3Bezier4PCreate(count);
+    work->pBezier4P = dds3Bezier4PCreate(count);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
         *delays++ = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1286,7 +1286,7 @@ effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
 
 /* Release Bezier slots, their history owner, then the backing allocation. */
 void effMagaPoint4Delete(effMagaPoint4_tag *pData) {
-    dds3Bezier4PDelete(pData->mathResource);
+    dds3Bezier4PDelete(pData->pBezier4P);
     effMagaCylinderFree(pData->managedResource);
     sdfMemFreeDirect(pData->allocationHandle);
 }
@@ -1306,7 +1306,7 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDirection);
     step = 1.0f / (f32)pMagaPoint4->head.lifetimeFrames;
-    slot = dds3Bezier4PGetPart(pMagaPoint4->mathResource, index);
+    slot = dds3Bezier4PGetPart(pMagaPoint4->pBezier4P, index);
     slot->t = 0;
     slot->step = step;
 
@@ -1389,7 +1389,7 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
 /* Advance delayed Bezier particles, pack their fade, and submit the owner.
  * Fade-in wins when its interval overlaps fade-out; divisors are unchecked. */
 void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
-    effArrHdr_t *slots = pData->mathResource;
+    effArrHdr_t *slots = pData->pBezier4P;
     effMagatuhiValueWork_t *valueWork = pData->managedResource->valueWork;
     s32 *delays = pData->delays;
     u8 respawn = pData->head.respawn;
@@ -1467,7 +1467,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
     for (particleIndex = 0; particleIndex < count; particleIndex += EFF_MAGATUHI_BEZIER_GROUP_STRIDE) {
         effMagaPoint4PartInit(work, particleIndex);
         *ages = dds3GetRandA((u8 *)dds3EffectBase) % lifetimeFrames;
-        slot = dds3Bezier4PGetPart(work->mathResource, particleIndex);
+        slot = dds3Bezier4PGetPart(work->pBezier4P, particleIndex);
         if (historyFrames < *ages) {
             slot->t = slot->step * (f32)(*ages - historyFrames);
             sampleSpan = historyFrames;
@@ -1476,9 +1476,9 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
             sampleSpan = historyFrames - *ages;
         }
         blendFraction = 0.0f;
-        dds3Bezier4PPartRun(work->mathResource, particleIndex, startPosition);
+        dds3Bezier4PPartRun(work->pBezier4P, particleIndex, startPosition);
         slot->t = slot->step * (f32)*ages;
-        dds3Bezier4PPartRun(work->mathResource, particleIndex, endPosition);
+        dds3Bezier4PPartRun(work->pBezier4P, particleIndex, endPosition);
         blendStep = 1.0f / (f32)sampleSpan;
         for (sampleIndex = 0; sampleIndex < sampleSpan; sampleIndex++) {
             SDF_VU0_LOADVECTOR(startPosition);
@@ -1504,16 +1504,16 @@ effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
 
     work->head = *src;
     work->particles = particle;
-    work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->allocationHandle = allocation;
+    work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
+    work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
     }
     return work;
@@ -1521,8 +1521,8 @@ effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
 
 /* Release the ring history owner before the work/state allocation. */
 void effMagaCylinderDelete(effMagaCylinder_tag *pData) {
-    effMagaCylinderFree(pData->managedResource);
-    sdfMemFreeDirect(pData->allocationHandle);
+    effMagaCylinderFree(pData->pMagatuhi);
+    sdfMemFreeDirect(pData->hMem);
 }
 
 /* Initialize a ring slot and reset the history/value owned by that slot. */
@@ -1531,18 +1531,18 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
     f32 blend;
     f32 t;
 
-    elem->age = 0;
+    elem->frame = 0;
     elem->height = -pMagaCylinder->head.heightSpread * dds3GetRandFloatA(dds3EffectBase);
     elem->angle = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = pMagaCylinder->head.angleJitter;
-    elem->angleStep = pMagaCylinder->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    elem->rotate_s = pMagaCylinder->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaCylinder->head.startJitter;
     elem->radius = pMagaCylinder->head.startRadius * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaCylinder->head.endJitter;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    elem->radiusStep = (pMagaCylinder->head.endRadius * t - elem->radius) / (f32)pMagaCylinder->head.lifetimeFrames;
-    effMagaSmokeInitPart(pMagaCylinder->managedResource->valueWork, index);
-    effMagaCylinderSetPart(pMagaCylinder->managedResource->valueWork, index, 0);
+    elem->radius_s = (pMagaCylinder->head.endRadius * t - elem->radius) / (f32)pMagaCylinder->head.lifetimeFrames;
+    effMagaSmokeInitPart(pMagaCylinder->pMagatuhi->valueWork, index);
+    effMagaCylinderSetPart(pMagaCylinder->pMagatuhi->valueWork, index, 0);
 }
 
 /* NON_MATCHING: 40 of 172 words differ (first at +0x3C). */
@@ -1561,10 +1561,10 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     u32 i;
 
     count = pData->head.particleCount;
-    valueWork = pData->managedResource->valueWork;
+    valueWork = pData->pMagatuhi->valueWork;
     particle = pData->particles;
     respawn = pData->head.respawn;
-    tintColor = pData->tintColor;
+    tintColor = pData->abgr;
     life = pData->head.lifetimeFrames;
     spread = pData->head.delaySpread;
     fadeIn = pData->head.fadeIn;
@@ -1572,7 +1572,7 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     SDF_VU0_COPYVECTOR(origin, pData->head.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
-        age = particle->age;
+        age = particle->frame;
         if (age == 0) {
             effMagaCylinderPartInit(pData, i);
         }
@@ -1587,8 +1587,8 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
-            particle->angle += particle->angleStep;
-            particle->radius += particle->radiusStep;
+            particle->angle += particle->rotate_s;
+            particle->radius += particle->radius_s;
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
             } else if (life - age <= fadeOut) {
@@ -1601,12 +1601,12 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
             effMagaCylinderSetPartPos(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
-            particle->age++;
+            particle->frame++;
         }
     }
-    effMagaCylinderDrawTrack(pData->managedResource);
+    effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
 #else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaCylinderDraw);
@@ -1619,7 +1619,7 @@ void effMagaCylinderSetPosition(effMagaCylinder_tag *pData, void *pPos) {
 
 /* The historical symbol names a resource, but this slot is packed color. */
 void effMagaCylinderSetRGBA(effMagaCylinder_tag *pData, u32 abgr) {
-    pData->tintColor = abgr;
+    pData->abgr = abgr;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -1651,7 +1651,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
         if (dds3MagatuhiGetType(hEffect->effect) == EFF_MAGATUHI_REPLAY_RING) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
             count = work->head.particleCount;
-            valueWork = work->managedResource->valueWork;
+            valueWork = work->pMagatuhi->valueWork;
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
@@ -1660,7 +1660,7 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
-                particle->age = frameOffset;
+                particle->frame = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -1670,8 +1670,8 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
                     steps = maxSteps - frameOffset;
                     frameOffset = 0;
                 }
-                angleStep = particle->angleStep;
-                radiusStep = particle->radiusStep;
+                angleStep = particle->rotate_s;
+                radiusStep = particle->radius_s;
                 height = particle->height;
                 angle = particle->angle + angleStep * (f32)frameOffset;
                 radius = particle->radius + radiusStep * (f32)frameOffset;
@@ -1707,16 +1707,16 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
 
     work->head = *src;
     work->particles = particle;
-    work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
+    work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->allocationHandle = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
-        particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+        particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
     }
     return work;
@@ -1724,7 +1724,7 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
 
 /* Release the orbit history owner before the work/state allocation. */
 void effMagaSpiralDelete(effMagaSpiral_tag *pData) {
-    effMagaCylinderFree(pData->managedResource);
+    effMagaCylinderFree(pData->pMagatuhi);
     sdfMemFreeDirect(pData->allocationHandle);
 }
 
@@ -1734,20 +1734,20 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
     f32 blend;
     f32 t;
 
-    elem->age = 0;
-    elem->height = 0;
+    elem->frame = 0;
+    elem->up = 0;
     blend = pMagaSpiral->head.heightJitter;
-    elem->heightStep = pMagaSpiral->head.heightStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    elem->up_s = pMagaSpiral->head.heightStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     elem->angle = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
     blend = pMagaSpiral->head.angleJitter;
-    elem->angleStep = pMagaSpiral->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    elem->rotate_s = pMagaSpiral->head.angleStep * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaSpiral->head.startJitter;
     elem->radius = pMagaSpiral->head.startRadius * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     blend = pMagaSpiral->head.endJitter;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    elem->radiusStep = (pMagaSpiral->head.endRadius * t - elem->radius) / (f32)pMagaSpiral->head.lifetimeFrames;
-    effMagaSmokeInitPart(pMagaSpiral->managedResource->valueWork, index);
-    effMagaCylinderSetPart(pMagaSpiral->managedResource->valueWork, index, 0);
+    elem->radius_s = (pMagaSpiral->head.endRadius * t - elem->radius) / (f32)pMagaSpiral->head.lifetimeFrames;
+    effMagaSmokeInitPart(pMagaSpiral->pMagatuhi->valueWork, index);
+    effMagaCylinderSetPart(pMagaSpiral->pMagatuhi->valueWork, index, 0);
 }
 
 /* NON_MATCHING: 40 of 176 words differ (first at +0x3C). */
@@ -1766,10 +1766,10 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     u32 i;
 
     count = pData->head.particleCount;
-    valueWork = pData->managedResource->valueWork;
+    valueWork = pData->pMagatuhi->valueWork;
     particle = pData->particles;
     respawn = pData->head.respawn;
-    tintColor = pData->tintColor;
+    tintColor = pData->abgr;
     life = pData->head.lifetimeFrames;
     spread = pData->head.delaySpread;
     fadeIn = pData->head.fadeIn;
@@ -1777,7 +1777,7 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     SDF_VU0_COPYVECTOR(origin, pData->head.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
-        age = particle->age;
+        age = particle->frame;
         if (age == 0) {
             effMagaSpiralPartInit(pData, i);
         }
@@ -1785,16 +1785,16 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             angle = particle->angle;
             radius = particle->radius;
             out[0] = sdfCos(angle) * radius;
-            out[1] = particle->height;
+            out[1] = particle->up;
             out[2] = sdfSin(angle) * radius;
             SDF_VU0_LOADVECTOR_B(origin);
             SDF_VU0_LOADVECTOR(out);
             SDF_VU0_APPLYMATRIX();
             SDF_VU0_ADDVECTOR();
             SDF_VU0_STOREVECTOR(out);
-            particle->height += particle->heightStep;
-            particle->angle += particle->angleStep;
-            particle->radius += particle->radiusStep;
+            particle->up += particle->up_s;
+            particle->angle += particle->rotate_s;
+            particle->radius += particle->radius_s;
             if (age < fadeIn) {
                 fade = (f32)age / (f32)fadeIn;
             } else if (life - age <= fadeOut) {
@@ -1807,12 +1807,12 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
             effMagaCylinderSetPartPos(valueWork, i, out);
         }
         if (age >= life && respawn) {
-            particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
+            particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         } else {
-            particle->age++;
+            particle->frame++;
         }
     }
-    effMagaCylinderDrawTrack(pData->managedResource);
+    effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
 #else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSpiralDraw);
@@ -1825,7 +1825,7 @@ void effMagaSpiralSetPosition(effMagaSpiral_tag *pData, void *pPos) {
 
 /* This callback sets the packed orbit color, not an allocation handle. */
 void effMagaSpiralSetRGBA(effMagaSpiral_tag *pData, u32 abgr) {
-    pData->tintColor = abgr;
+    pData->abgr = abgr;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -1858,7 +1858,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
         if (dds3MagatuhiGetType(hEffect->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
             count = work->head.particleCount;
-            valueWork = work->managedResource->valueWork;
+            valueWork = work->pMagatuhi->valueWork;
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
             particle = work->particles;
@@ -1867,7 +1867,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);
                 frameOffset = dds3GetRandA((u8 *)dds3EffectBase) % frames;
-                particle->age = frameOffset;
+                particle->frame = frameOffset;
                 /* Keep at most maxSteps samples: skip older state only when
                  * the random age exceeds that window; otherwise start at zero. */
                 if (maxSteps < frameOffset) {
@@ -1877,12 +1877,12 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
                     steps = maxSteps - frameOffset;
                     frameOffset = 0;
                 }
-                angleStep = particle->angleStep;
-                radiusStep = particle->radiusStep;
-                heightStep = particle->heightStep;
+                angleStep = particle->rotate_s;
+                radiusStep = particle->radius_s;
+                heightStep = particle->up_s;
                 angle = particle->angle + angleStep * (f32)frameOffset;
                 radius = particle->radius + radiusStep * (f32)frameOffset;
-                height = particle->height + heightStep * (f32)frameOffset;
+                height = particle->up + heightStep * (f32)frameOffset;
                 out[3] = 0;
                 for (k = 0; k < steps; k++) {
                     out[0] = sdfCos(angle) * radius;
@@ -1898,7 +1898,7 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
                     angle += angleStep;
                     radius += radiusStep;
                 }
-                particle->height = height;
+                particle->up = height;
                 particle->radius = radius;
                 particle->angle = angle;
             }
@@ -1917,14 +1917,14 @@ effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
     u32 i;
 
     work->head = *src;
-    work->particles = particle;
-    work->tintColor = EFF_MAGATUHI_NEUTRAL_COLOR;
-    work->allocationHandle = allocation;
+    work->pPart = particle;
+    work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
+    work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
     if (work->head.delaySpread <= 0) {
         work->head.delaySpread = 1;
     }
-    work->managedResource = effMagaCylinderAllocPart(&work->head.particleCount);
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
     spread = work->head.delaySpread;
     for (i = 0; i < count; i++) {
         particle->age = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
@@ -1935,13 +1935,13 @@ effMagaSmoke_tag *effMagaSmokeCreate(effMagaSmokeParam_t *src) {
 
 /* Release the drift history owner before its states-plus-work allocation. */
 void effMagaSmokeDelete(effMagaSmoke_tag *pData) {
-    effMagaCylinderFree(pData->managedResource);
-    sdfMemFreeDirect(pData->allocationHandle);
+    effMagaCylinderFree(pData->pMagatuhi);
+    sdfMemFreeDirect(pData->hMem);
 }
 
 /* vu0 routine: initialize a planar particle with normalized position/drift. */
 void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
-    effMagaSmokePart_tag *particle = &pMagaSmoke->particles[index];
+    effMagaSmokePart_tag *particle = &pMagaSmoke->pPart[index];
     f32 direction[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 radius;
     f32 random;
@@ -1971,11 +1971,11 @@ void effMagaSmokePartInit(effMagaSmoke_tag *pMagaSmoke, s32 index) {
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->head.initialScaleRandomness +
          (1.0f - pMagaSmoke->head.initialScaleRandomness));
     particle->angle = dds3GetRandFloatA(dds3EffectBase) * EFF_MAGATUHI_FULL_TURN;
-    particle->liftStep = pMagaSmoke->head.initialLift *
+    particle->up_s = pMagaSmoke->head.initialLift *
         (dds3GetRandFloatA(dds3EffectBase) * pMagaSmoke->head.initialLiftRandomness +
          (1.0f - pMagaSmoke->head.initialLiftRandomness));
-    effMagaSmokeInitPart(pMagaSmoke->managedResource->valueWork, index);
-    effMagaCylinderSetPart(pMagaSmoke->managedResource->valueWork, index, 0);
+    effMagaSmokeInitPart(pMagaSmoke->pMagatuhi->valueWork, index);
+    effMagaCylinderSetPart(pMagaSmoke->pMagatuhi->valueWork, index, 0);
 }
 
 /* NON_MATCHING: 42 of 182 words differ (first at +0x3C). */
@@ -1994,10 +1994,10 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     u32 i;
 
     count = pData->head.particleCount;
-    valueWork = pData->managedResource->valueWork;
-    particle = pData->particles;
+    valueWork = pData->pMagatuhi->valueWork;
+    particle = pData->pPart;
     respawn = pData->head.respawn;
-    tintColor = pData->tintColor;
+    tintColor = pData->abgr;
     life = pData->head.lifetimeFrames;
     spread = pData->head.delaySpread;
     angleStep = pData->head.angleStep;
@@ -2013,7 +2013,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
         }
         if (age > 0 && age <= life) {
             radial = particle->scale * sdfSin(particle->angle);
-            particle->dirUp[1] += particle->liftStep;
+            particle->dirUp[1] += particle->up_s;
             out[0] = particle->position[0] + particle->dirUp[0] * radial;
             out[1] = particle->position[1] + particle->dirUp[1];
             out[2] = particle->position[2] + particle->dirUp[2] * radial;
@@ -2041,7 +2041,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
             particle->age++;
         }
     }
-    effMagaCylinderDrawTrack(pData->managedResource);
+    effMagaCylinderDrawTrack(pData->pMagatuhi);
 }
 #else
 INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSmokeDraw);
@@ -2054,7 +2054,7 @@ void effMagaSmokeSetPosition(effMagaSmoke_tag *pData, void *pPos) {
 
 /* This callback sets packed drift color; +0x120 is not an owner pointer. */
 void effMagaSmokeSetRGBA(effMagaSmoke_tag *pData, u32 abgr) {
-    pData->tintColor = abgr;
+    pData->abgr = abgr;
 }
 
 /* vu0 routine: copy a 4x4 matrix (four quadwords) through vf28-vf31 */
@@ -2087,10 +2087,10 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
         if (dds3MagatuhiGetType(hEffect->effect) == EFF_MAGATUHI_REPLAY_DRIFT) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
             count = work->head.particleCount;
-            valueWork = work->managedResource->valueWork;
+            valueWork = work->pMagatuhi->valueWork;
             maxSteps = work->head.maxSteps;
             frames = work->head.lifetimeFrames;
-            particle = work->particles;
+            particle = work->pPart;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
@@ -2108,7 +2108,7 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
                 }
                 angleStep = work->head.angleStep;
                 scaleStep = work->head.scaleStep;
-                liftStep = particle->liftStep;
+                liftStep = particle->up_s;
                 angle = particle->angle + angleStep * (f32)frameOffset;
                 scale = particle->scale + scaleStep * (f32)frameOffset;
                 lift = particle->dirUp[1] + liftStep * (f32)frameOffset;

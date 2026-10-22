@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -69,7 +69,7 @@ typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -127,16 +127,16 @@ pbProcHandle_t *pbStartBlockDataBase(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
     sdfMat_t *mat;
-    panel->process = dds3StartProcess("pb-proc-block DB", 0x2AFD, 1, 1, pb_proc_block_DB_Process,
+    panel->id = dds3StartProcess("pb-proc-block DB", 0x2AFD, 1, 1, pb_proc_block_DB_Process,
                                       (dds3ProcessFunc_t)pb_proc_block_DB_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0x10000;
     work = sdfChipAllocDirect(0x108);
     panel->data.blockDB = work;
     memset(work, 0, 0x108);
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     mat = sdfMatNew();
     panel->data.blockDB->mat = mat;
     sdfMatSetTex(mat, D_0054F5C4->baseTex);
@@ -171,16 +171,16 @@ INCLUDE_ASM(const s32, "pb/pbGameDraw", pbRebuildOutline);
 pbProcHandle_t *pbStartDrawMapCursor(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
-    panel->process = dds3StartProcess("pb-draw-map cursor", 0x2AFD, 1, 1, pb_draw_map_cursor_Process,
+    panel->id = dds3StartProcess("pb-draw-map cursor", 0x2AFD, 1, 1, pb_draw_map_cursor_Process,
                                       (dds3ProcessFunc_t)pb_draw_map_cursor_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0x10000;
     work = sdfChipAllocDirect(4);
     panel->data.value = work;
     memset(work, 0, 4);
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 

@@ -295,26 +295,26 @@ extern nbEventEntry_t nbEventEntryTable[];
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 typedef struct {
-    s32 unk_00;
-    s32 maka;
-    s32 unk_08;
-    s32 unk_0C;
-    s32 unk_10;
+    s32 stat;
+    s32 oldmaka;
+    s32 disp;
+    s32 targetx;
+    s32 targety;
     u8 unk_14[0x8];
-    s32 unk_1C;
+    s32 type;
     s32 unk_20;
-    s32 unk_24;
+    s32 offtime;
     s32 unk_28;
 } nbMakaProcessData_t;
 
@@ -401,12 +401,12 @@ void nbMakaDispOn(s32 type)
 
     w = GetMakaProcessData();
     if (type == 0) {
-        w->unk_0C = 0x112;
-        w->unk_10 = 0x10D;
+        w->targetx = 0x112;
+        w->targety = 0x10D;
     }
-    w->maka = DDS3_GBWK->maka;
-    w->unk_1C = type;
-    w->unk_00 = 1;
+    w->oldmaka = DDS3_GBWK->maka;
+    w->type = type;
+    w->stat = 1;
 }
 
 void nbMakaDispOff(void)
@@ -414,11 +414,11 @@ void nbMakaDispOff(void)
     nbMakaProcessData_t *w;
 
     w = GetMakaProcessData();
-    if (w->unk_08 != 0) {
-        if (w->unk_1C == 0) {
-            w->unk_24 = 0x14;
+    if (w->disp != 0) {
+        if (w->type == 0) {
+            w->offtime = 0x14;
         }
-        w->unk_00 = 2;
+        w->stat = 2;
     }
 }
 
@@ -440,11 +440,11 @@ INCLUDE_ASM(const s32, "newbattle/nbMakaProcess", nbDrawMakaNum);
 
 void nbMakaStep(nbMakaProcessData_t *w)
 {
-    switch (w->unk_00) {
+    switch (w->stat) {
     case 1:
-        w->unk_08 = 1;
+        w->disp = 1;
         if (w->unk_28 == 0x80) {
-            w->unk_00 = 0;
+            w->stat = 0;
             return;
         }
         w->unk_28 += 0x20;
@@ -453,8 +453,8 @@ void nbMakaStep(nbMakaProcessData_t *w)
         }
         return;
     case 2:
-        if (w->unk_24 > 0) {
-            w->unk_24--;
+        if (w->offtime > 0) {
+            w->offtime--;
             return;
         }
         if (w->unk_28 > 0) {
@@ -464,8 +464,8 @@ void nbMakaStep(nbMakaProcessData_t *w)
             }
             return;
         }
-        w->unk_08 = 0;
-        w->unk_00 = 0;
+        w->disp = 0;
+        w->stat = 0;
         return;
     }
 }
@@ -476,8 +476,8 @@ s32 nbMakaProcess1(dds3ProcessID_t *id)
 
     w = dds3GetProcessData(id);
     nbMakaStep(w);
-    if (w->unk_08 != 0) {
-        nbDrawMakaNum(w, w->unk_0C, w->unk_10, 0x80808080, w->unk_28);
+    if (w->disp != 0) {
+        nbDrawMakaNum(w, w->targetx, w->targety, 0x80808080, w->unk_28);
     }
     return 0;
 }
@@ -498,7 +498,7 @@ nbMakaProcessData_t *nbAllocMakaWork(void)
 
     w = sdfChipAllocDirect(sizeof(nbMakaProcessData_t));
     memset(w, 0, sizeof(nbMakaProcessData_t));
-    w->maka = DDS3_GBWK->maka;
+    w->oldmaka = DDS3_GBWK->maka;
     return w;
 }
 

@@ -751,7 +751,7 @@ void nbInitUnitProcess(nbMainProcessData_t *data)
     dds3ProcessID_t *id = dds3StartProcess(D_00551118, 0x3F9, 1, 1, nbUnitProcess2,
                                            nbUnitShutdown, NULL);
 
-    dds3LinkProcess(data->unkBC, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->UnitProcessID = id;
     dds3LinkProcess(id, dds3StartProcess(D_00543768, 0x2B0E, 1, 1, nbUnitDrawProcess1,
                                          NULL, NULL));

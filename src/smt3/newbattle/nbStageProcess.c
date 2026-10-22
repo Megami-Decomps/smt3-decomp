@@ -268,7 +268,7 @@ void StageLoad(void)
     case 1:
     case 2:
         nbStageState.unk00 = 3;
-        data->unk7C = nbStageState.unk04;
+        data->StageMajor = nbStageState.unk04;
         data->StageMinor = nbStageState.unk06;
         break;
     }
@@ -287,7 +287,7 @@ void StageFree(void)
     evtFreeStage();
     nbStageState.unk04 = 0;
     nbStageState.unk06 = 0;
-    data->unk7C = 0;
+    data->StageMajor = 0;
     data->StageMinor = 0;
     nbStageState.data = 0;
 }
@@ -351,7 +351,7 @@ void nbInitStageProcess(nbMainProcessData_t *data)
     nbStageState.unk04 = 0;
     nbStageState.unk06 = 0;
     id = dds3StartProcess(D_00543688, 0x3F9, 1, 1, nbStageProcess1, nbStageShutdown, NULL);
-    dds3LinkProcess(data->unkBC, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->StageProcessID = id;
     draw = dds3StartProcess(D_00543698, 0x2B0E, 1, 1, nbStageDrawProcess1, NULL, NULL);
     dds3LinkProcess(id, draw);

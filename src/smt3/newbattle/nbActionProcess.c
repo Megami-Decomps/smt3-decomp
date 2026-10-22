@@ -960,7 +960,7 @@ s32 CheckSenseiNego(nbActionProcessData_t *a)
     datUnitWork_t *work;
     s32 rate;
 
-    if ((u16)a->data->unk7C >= 0xF0 && (u16)a->data->unk7C <= 0xF6) {
+    if ((u16)a->data->StageMajor >= 0xF0 && (u16)a->data->StageMajor <= 0xF6) {
         return 0;
     }
     stat = a->data->stat;
@@ -1047,7 +1047,7 @@ void KyouseiPress(nbActionProcessData_t *a)
 {
     nbMainProcessData_t *data = a->data;
 
-    data->unk78 = 0;
+    data->press4_p = 0;
     data->press4_ten = 0;
     if (data->CommSelProcessID != NULL) {
         dds3KillProcess(data->CommSelProcessID, 0);
@@ -1839,7 +1839,7 @@ void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to,
     data->NowActionProcess = (data->NowActionProcess + 1) % 4;
     a = InitActionProcessData(data, type, from, to, d);
     id = dds3StartProcess(D_00544120, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
-    dds3LinkProcess(data->unkBC, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->ActionProcessID[data->NowActionProcess] = id;
 }
 

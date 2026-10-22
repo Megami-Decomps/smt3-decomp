@@ -327,14 +327,14 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -448,7 +448,7 @@ s32 SetForm(nbEventProcessData_t *e)
 s32 nbE902_Wait1(nbEventProcessData_t *e)
 {
     nbGetEventForm(e);
-    if (*(u16 *)(datModelParamTable + 0x3386E) < e->frame) {
+    if (*(u16 *)(datModelParamTable + 0x3386E) < e->seqtime) {
         nbFreeEffectSlot(e);
     }
     return 0;
@@ -469,11 +469,11 @@ s32 Bunshin1(nbEventProcessData_t *ed)
 
 s32 Wait2(nbEventProcessData_t *ed)
 {
-    if (ed->frame == 1) {
+    if (ed->seqtime == 1) {
         nbFormDispOff(5);
     }
     nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
-    if (effPCPBossBUNSIN2GetLength() < ed->frame) {
+    if (effPCPBossBUNSIN2GetLength() < ed->seqtime) {
         if (dds3GetRandA(dds3EffectBase) & 1) {
             nbCameraEnemyPartySet(pNbCamera, -0.34906584f, -0.26179934f);
         } else {
@@ -507,7 +507,7 @@ s32 Hontai(nbEventProcessData_t *ed)
 
 s32 nbE902_End(nbEventProcessData_t *e)
 {
-    if (e->frame > 0) {
+    if (e->seqtime > 0) {
         printf(D_00546500);
         effBTLSkillEnd();
         if (evtBitCheck(0xBF0) != 0) {
@@ -525,10 +525,10 @@ s32 nbE902Process_1(dds3ProcessID_t *id)
     nbEventProcessData_t *e;
 
     e = dds3GetProcessData(id);
-    if (nbE902Table[e->step](e) != 0) {
+    if (nbE902Table[e->seq](e) != 0) {
         return -1;
     }
-    switch (e->unk_08) {
+    switch (e->time) {
     case 0x25:
         dds3PadVibrationSet(0, 1, 4);
         dds3PadVibrationSet(1, 0xFA, 6);
@@ -560,7 +560,7 @@ s32 nbE903_Wait1(nbEventProcessData_t *e)
 
     form = nbGetEventForm(e);
     /* The animation block the unit basic points at; its end frame sits at +0x2E. */
-    if (*(u16 *)((u8 *)form->hunit->basic->poseset + 0x2E) < e->frame) {
+    if (*(u16 *)((u8 *)form->hunit->basic->poseset + 0x2E) < e->seqtime) {
         nbFreeEffectSlot(e);
     }
     return 0;

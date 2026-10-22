@@ -629,7 +629,7 @@ OFF(vb0, corePktCb_t, matPacket2, 180);
 /* Canonical layouts reconciled across the DDS port units. */
 SZ(p01, dds3ObjectBaseControlWorkData_t, 0xAC);
 SZ(p02, dds3UnitObjectBasicWorkData_t, 0x20);
-OFF(p03, dds3UnitObjectBasicWorkData_t, control, 0xC);
+OFF(p03, dds3UnitObjectBasicWorkData_t, pObjectBaseControlWorkData, 0xC);
 OFF(p04, dds3UnitObjectBasicWorkData_t, EL_serialID, 0x10);
 OFF(p05, dds3UnitObjectBasicWorkData_t, ot, 0x14);
 SZ(p06, dds3PathKeyframes_t, 0xC);
@@ -645,7 +645,7 @@ OFF(p15, dds3GlobalWork_t, encountkyori, 0x1CF4);
 OFF(p16, dds3GlobalWork_t, encountCount, 0x1CF8);
 OFF(p17, dds3GlobalWork_t, previewX, 0x11A78);
 OFF(p17a, dds3GlobalWork_t, memHandle, 0x34);
-OFF(p17b, dds3GlobalWork_t, unk3C, 0x3C);
+OFF(p17b, dds3GlobalWork_t, playtime, 0x3C);
 OFF(p17c, dds3GlobalWork_t, heartsequip, 0x1CFA);
 OFF(p17d, dds3GlobalWork_t, heartscnt, 0x1D7B);
 OFF(p20a, nbMainProcessData_t, nakamayobi, 0x84);

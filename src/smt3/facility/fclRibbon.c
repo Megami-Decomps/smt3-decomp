@@ -37,11 +37,11 @@ typedef struct
     /* 0x08 */ s16 unk_08;
     /* 0x0A */ s16 unk_0A;
     /* 0x0C */ s32 flags;
-    /* 0x10 */ s16 unk_10;
-    /* 0x12 */ u16 unk_12;
+    /* 0x10 */ s16 act;
+    /* 0x12 */ u16 deact;
     /* 0x14 */ s32 ctr_act;
     /* 0x18 */ s32 ctr_deact;
-    /* 0x1C */ s32 phase;
+    /* 0x1C */ s32 ctr;
     /* 0x20 */ s32 count;
 } fclRibbon_t;
 
@@ -74,21 +74,21 @@ void fclRbnCalc(fclRibbon_t *phandle)
     if (phandle->flags & 2) {
         MoveDeactive(phandle);
     }
-    phandle->phase = (phandle->phase - 2) & 0x7F;
+    phandle->ctr = (phandle->ctr - 2) & 0x7F;
 }
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnDraw);
 
 void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
 {
-    if (index >= 0 && index < phandle->count && index != phandle->unk_10)
+    if (index >= 0 && index < phandle->count && index != phandle->act)
     {
-        phandle->unk_12 = phandle->unk_10;
+        phandle->deact = phandle->act;
         phandle->flags |= 3;
-        phandle->unk_10 = index;
+        phandle->act = index;
         phandle->ctr_act = 0x40;
         phandle->ctr_deact = 0x80;
-        phandle->phase = 0;
+        phandle->ctr = 0;
     }
 }
 

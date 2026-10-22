@@ -74,14 +74,14 @@ typedef struct {
     s32 mode;
     u32 sequenceWord38;
     u32 pointResrcID;
-    char name[16];
-    s32 stage;
+    char pointResName[16];
+    s32 loadField;
     s32 kind;
-    s32 enabled;
+    s32 loadScript;
     s32 callmode;
     u16 bgm;
     u16 bgmMode;
-    s32 link;
+    s32 camMode;
     u8 unk68[8];
     char camName[16];
     char FoceScript[16];
@@ -629,14 +629,14 @@ void fldProcTrigSequence(fldSceneParam_t *srcParam, u32 mode) {
     if (mode == 0) {
         scene->pointResrcID = srcParam->pointResrcID;
         scene->sequenceWord38 = srcParam->sequenceWord38;
-        strcpy(scene->name, srcParam->name);
-        scene->stage = srcParam->stage;
+        strcpy(scene->pointResName, srcParam->pointResName);
+        scene->loadField = srcParam->loadField;
         scene->bgm = srcParam->bgm;
         scene->kind = srcParam->kind;
         scene->bgmMode = srcParam->bgmMode;
-        scene->enabled = srcParam->enabled;
+        scene->loadScript = srcParam->loadScript;
         scene->callmode = srcParam->callmode;
-        scene->link = srcParam->link;
+        scene->camMode = srcParam->camMode;
         strcpy(scene->camName, srcParam->camName);
         strcpy(scene->FoceScript, srcParam->FoceScript);
         scene->options = srcParam->options;

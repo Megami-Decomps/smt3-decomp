@@ -291,14 +291,14 @@ extern nbEventEntry_t nbEventEntryTable[];
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -383,8 +383,8 @@ void nbUpdateEventProcessData(dds3ProcessID_t *id)
 
     e = dds3GetProcessData(id);
     if (e != NULL) {
-        e->unk_08++;
-        e->frame++;
+        e->time++;
+        e->seqtime++;
     }
 }
 
@@ -393,7 +393,7 @@ s32 func_0028FA30(nbEventProcessData_t *e)
     if (e == NULL) {
         return 0;
     }
-    return e->step;
+    return e->seq;
 }
 
 /* NON_MATCHING: exact on its own; its presence turns the bnel of three
@@ -403,8 +403,8 @@ s32 func_0028FA30(nbEventProcessData_t *e)
 void nbFreeEffectSlot(nbEventProcessData_t *e)
 {
     if (e != NULL) {
-        e->step++;
-        e->frame = 0;
+        e->seq++;
+        e->seqtime = 0;
     }
 }
 #else
@@ -414,8 +414,8 @@ INCLUDE_ASM(const s32, "newbattle/nbEventProcess", nbFreeEffectSlot);
 void func_0028FA68(nbEventProcessData_t *e, s32 step)
 {
     if (e != NULL) {
-        e->step = step;
-        e->frame = 0;
+        e->seq = step;
+        e->seqtime = 0;
     }
 }
 
@@ -522,14 +522,14 @@ void nbEventShutdown(dds3ProcessID_t *id)
     data->eventproc = NULL;
     e = dds3GetProcessData(id);
     SetWaitMotion(e);
-    if (e->unk_24 != NULL) {
-        sdfMemFreeDirect(e->unk_24);
-        e->unk_24 = NULL;
+    if (e->mem != NULL) {
+        sdfMemFreeDirect(e->mem);
+        e->mem = NULL;
     }
-    if (e->unk_1C != NULL) {
+    if (e->file != NULL) {
         fileSyncAll();
-        fileHandleFree(e->unk_1C);
-        e->unk_1C = NULL;
+        fileHandleFree(e->file);
+        e->file = NULL;
     }
     if (e->unk_20 != NULL) {
         fileSyncAll();

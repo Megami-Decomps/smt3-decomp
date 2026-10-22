@@ -305,14 +305,14 @@ extern void nbSetEnemyFormation(nbMainProcessData_t *data);
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -378,7 +378,7 @@ s32 nbE910Process_1(dds3ProcessID_t *id)
     nbEventProcessData_t *e;
 
     e = dds3GetProcessData(id);
-    if (D_00527518[e->step](e) != 0) {
+    if (D_00527518[e->seq](e) != 0) {
         return -1;
     }
     nbUpdateEventProcessData(id);
@@ -407,7 +407,7 @@ s32 Effect1(nbEventProcessData_t *ed)
 
 s32 Wait1(nbEventProcessData_t *ed)
 {
-    if (ed->frame == 1) {
+    if (ed->seqtime == 1) {
         nbSetEnemyFormation(ed->data);
         nbAllFormDispOn();
         nbGroupFormDispOff(0);

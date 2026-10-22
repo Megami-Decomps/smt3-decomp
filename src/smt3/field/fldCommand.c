@@ -30,7 +30,7 @@ typedef struct
     fldMapItem_t *items;
     u32 count;
     void *model;
-    fldMapPoint_t *pos;
+    fldMapPoint_t *pPos;
 } fldAmAreaData_t;
 
 typedef struct

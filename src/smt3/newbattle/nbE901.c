@@ -303,14 +303,14 @@ extern void func_0024D938(void *e);
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -408,7 +408,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE901", RunUgou);
 
 s32 Wait1_nbE901(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x42) {
+    if (e->seqtime >= 0x42) {
         nbFreeEffectSlot(e);
     }
     return 0;
@@ -446,8 +446,8 @@ s32 SyuGo2(nbEventProcessData_t *ed)
     s32 ofs;
     nbFormation_t *form;
 
-    if (ed->frame >= 0xB) {
-        if (ed->frame == 0xB) {
+    if (ed->seqtime >= 0xB) {
+        if (ed->seqtime == 0xB) {
             ofs = 0x3C0;
             for (i = 9; i >= 0; i--) {
                 form = (nbFormation_t *)((u8 *)ofs + (u32)ed->data->form);
@@ -457,10 +457,10 @@ s32 SyuGo2(nbEventProcessData_t *ed)
                 }
             }
         }
-        if (ed->frame == 0x19) {
+        if (ed->seqtime == 0x19) {
             dds3StartBEDEffectObjectBasic(bedbasic, 2);
         }
-        if (ed->frame >= 0x31) {
+        if (ed->seqtime >= 0x31) {
             nbFreeEffectSlot(ed);
         }
     }
@@ -496,7 +496,7 @@ s32 Daisupe(nbEventProcessData_t *ed)
 
 s32 ReadWait2(nbEventProcessData_t *ed)
 {
-    if (ed->frame >= 0x1F && nbCheckLoadGroup(1) == 0) {
+    if (ed->seqtime >= 0x1F && nbCheckLoadGroup(1) == 0) {
         nbFreeEffectSlot(ed);
     }
     return 0;
@@ -513,7 +513,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE901", Syutugen2);
 s32 End(nbEventProcessData_t *ed)
 {
     nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
-    if (ed->frame < 0x6F) {
+    if (ed->seqtime < 0x6F) {
         return 0;
     }
     effBTLSkillEnd();
@@ -532,10 +532,10 @@ s32 nbE901Process_1(dds3ProcessID_t *id)
     nbEventProcessData_t *e;
 
     e = dds3GetProcessData(id);
-    if (D_00527420[e->step](e) != 0) {
+    if (D_00527420[e->seq](e) != 0) {
         return -1;
     }
-    switch (e->unk_08) {
+    switch (e->time) {
     case 0xD4:
         dds3PadVibrationSet(0, 1, 0xA);
         dds3PadVibrationSet(1, 0xE1, 0xA);

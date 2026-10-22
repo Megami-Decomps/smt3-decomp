@@ -922,11 +922,11 @@ void nbRunKoukaCase12(nbKoukaProcessData_t *k, nbKoukaPacket_t *p)
             ten = data->press4_ten;
         }
         cur = (s16)(u16)data->press4_ten;
-        v = data->unk78 + p->data1.s[0];
+        v = data->press4_p + p->data1.s[0];
         if (v < 0) {
             v = 0;
         }
-        data->unk78 = v;
+        data->press4_p = v;
         v = cur + p->data1.s[1];
         if (v < 0) {
             v = 0;
@@ -1392,7 +1392,7 @@ void nbInitKoukaProcess(nbMainProcessData_t *data)
     dds3ProcessID_t *id;
 
     id = dds3StartProcess("nb_kouka", 0x2B08, 1, 1, nbKoukaProcess1, nbKoukaShutdown, work);
-    dds3LinkProcess(data->unkBC, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->KoukaProcessID = id;
 }
 

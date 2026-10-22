@@ -297,7 +297,7 @@ void nbInitCameraProcess(nbMainProcessData_t *data)
                                                 (dds3ProcessFunc_t)nbCameraProcess_nbCameraProcess,
                                                 (dds3ProcessFunc_t)nbCameraShutdown, NULL);
 
-    dds3LinkProcess(data->unkBC, process);
+    dds3LinkProcess(data->MainProcessID, process);
     data->camera = process;
     dds3LinkProcess(process, dds3StartProcess("nb_camera_draw", 0x2B0E, 1, 1,
                                               (dds3ProcessFunc_t)nbCameraDraw, NULL, NULL));

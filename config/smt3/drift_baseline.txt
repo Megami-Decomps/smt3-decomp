@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 134 types, 1075 members, 506 adopted constants.
+# 134 types, 1048 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -158,7 +158,6 @@ member EffPCPFadeWork.unk10
 member EffPCPThunderGroup.unk10
 member EffPCPThunderGroup.unk14
 member EffPCPThunderGroup.unk18
-member Eff_ModelTrackPolyParam_t.unk1C
 member GParam.unk0
 member GParam.unk4
 member GameFileInfo_t.unk25
@@ -409,7 +408,6 @@ member dds3GlobalWork_t.unk11A7C
 member dds3GlobalWork_t.unk1910
 member dds3GlobalWork_t.unk1914
 member dds3GlobalWork_t.unk38
-member dds3GlobalWork_t.unk3C
 member dds3GlobalWork_t.unk657C
 member dds3LinkedLightWork_t.unk00
 member dds3MatterPathPosition_t.unk00
@@ -463,8 +461,6 @@ member effBTL_SkillLight_t.unknown01
 member effBTL_SkillLight_t.unknown02
 member effBTL_SkillLight_t.unknown03
 member effBTL_SkillLight_t.unknown04
-member effBTL_SkillLight_t.unknown08
-member effBTL_SkillLight_t.unknown0C
 member effBTL_SkillLight_t.unknown10
 member effBTL_SkillLight_t.unknown14
 member effBTL_SkillLight_t.unknown18
@@ -548,7 +544,6 @@ member effPCPDANTE_Damage_t.unk030
 member effPCPDANTE_Damage_t.unk034
 member effPCPDANTE_Damage_t.unk035
 member effPCPDANTE_Damage_t.unk0BC
-member effPCPDANTE_ShowTime_Param_t.unk00
 member effPCPDANTE_ShowTime_t.unk0C4
 member effPCPDANTE_ShowTime_t.unk0C8
 member effPCPFlashPolyPipe_tag.unk34
@@ -564,18 +559,14 @@ member effPCPMHanma01_tag.unk08
 member effPCPMHanma01_tag.unk0C
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
-member effPCPMuzzleFlash_tag.unk5C
 member effPCPNeedleSpiralPart_tag.unk10
 member effPCPRadiateBED_tag.unk10C
-member effPCPRadiateTB_tag.unk98
 member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
-member effPCP_BED_tag.unk60
 member effPCP_PBCamera_t.unk58
 member effPCP_PBCamera_t.unk59
 member effPCP_PBCamera_t.unk5C
-member effPCP_ThunderRadiatePoly_t.unk4C
 member effPacketDrawBank_t.unk0000
 member effPacketDrawBank_t.unk1808
 member effPacketDrawBank_t.unk1818
@@ -701,8 +692,6 @@ member fclRibbon_t.unk_04
 member fclRibbon_t.unk_06
 member fclRibbon_t.unk_08
 member fclRibbon_t.unk_0A
-member fclRibbon_t.unk_10
-member fclRibbon_t.unk_12
 member fclSceneObj_t.unk_00
 member fclSceneObj_t.unk_18
 member fclSprite_t.unk_04
@@ -711,10 +700,7 @@ member fclSprite_t.unk_08
 member fclSprite_t.unk_0A
 member fclSprite_t.unk_0C
 member fclSprite_t.unk_0E
-member fclSprite_t.unk_10
 member fclSprite_t.unk_14
-member fclSprite_t.unk_18
-member fclSprite_t.unk_20
 member fldAddressWork_t.unk00
 member fldAddressWork_t.unk04
 member fldAddressWork_t.unk08
@@ -919,10 +905,8 @@ member nbCameraUnitWork_t.unk00
 member nbCamera_AllTable_t.unk00
 member nbDeadEvent_t.unk04
 member nbDebugProcessData_t.unk_04
-member nbDebugProcessData_t.unk_08
 member nbDebugProcessData_t.unk_0C
 member nbDebugProcessData_t.unk_10
-member nbDebugProcessData_t.unk_14
 member nbDevilData_t.unk02
 member nbDevilInfo_t.unk05
 member nbDevilInfo_t.unk0E
@@ -941,19 +925,14 @@ member nbEventEntry_t.unk_08
 member nbEventEntry_t.unk_0C
 member nbEventEntry_t.unk_10
 member nbEventProcessData_t.unk_04
-member nbEventProcessData_t.unk_08
 member nbEventProcessData_t.unk_14
 member nbEventProcessData_t.unk_18
-member nbEventProcessData_t.unk_1C
 member nbEventProcessData_t.unk_20
-member nbEventProcessData_t.unk_24
 member nbInnenRec_t.unk_06
 member nbMainProcessData_t.unk118
 member nbMainProcessData_t.unk134
 member nbMainProcessData_t.unk140
 member nbMainProcessData_t.unk148
-member nbMainProcessData_t.unk78
-member nbMainProcessData_t.unk7C
 member nbMainProcessData_t.unk80
 member nbMainProcessData_t.unk_04
 member nbMainProcessData_t.unk_11C
@@ -975,14 +954,8 @@ member nbMainProcessData_t.unk_B8
 member nbMainProcessData_t.unk_C0
 member nbMainProcessData_t.unk_E0
 member nbMainProcessData_t.unk_FC
-member nbMakaProcessData_t.unk_00
-member nbMakaProcessData_t.unk_08
-member nbMakaProcessData_t.unk_0C
-member nbMakaProcessData_t.unk_10
 member nbMakaProcessData_t.unk_14
-member nbMakaProcessData_t.unk_1C
 member nbMakaProcessData_t.unk_20
-member nbMakaProcessData_t.unk_24
 member nbMakaProcessData_t.unk_28
 member nbMasterTextEntry_t.unk00
 member nbMasterTextEntry_t.unk10

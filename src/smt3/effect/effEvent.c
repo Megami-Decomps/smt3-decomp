@@ -23,8 +23,8 @@ typedef struct effEveBEDCut_t {
 
 typedef struct effSimpleBED_t {
     effBTL_t *handle;
-    effEveBEDCut_t *owner;
-    effEveBEDParams_t init;
+    effEveBEDCut_t *hCut;
+    effEveBEDParams_t pParams;
     u8 active;
     u8 unk39[3];
 } effSimpleBED_t;
@@ -143,16 +143,16 @@ typedef struct dds3EffectPCPData_t dds3EffectPCPData_t;
  * one; motionDelaySpread is consumed unchanged. */
 typedef struct effEVECombParSmokeParam_t {
     f32 position[4];
-    u32 particleCount;
+    u32 number;
     s32 duration;
-    s32 startDelaySpread;
+    s32 wait;
     s32 motionDelaySpread;
     f32 spawnRadius;
     u32 color;
     s16 drawMode; /* Forwarded to the billboard mode setter in direct draw. */
     u8 pad2A[2];
-    s32 fadeIn;
-    s32 fadeOut;
+    s32 fade_in;
+    s32 fade_out;
     u8 repeat;
     u8 pad35[3];
     f32 baseScale;
@@ -179,7 +179,7 @@ typedef struct effEVECombParSmokePart_t {
     u8 pad0C[4];
     f32 motion[3]; /* X/Z direction; Y accumulates vertical offset. */
     u8 pad1C[4];
-    s32 age;
+    s32 frame;
     s32 wait;
     f32 baseScale;
     f32 scalePhaseX;
@@ -200,10 +200,10 @@ typedef struct effEVECombParSmokePart_t {
 /* Particle storage is followed by this owner in the same allocation. */
 typedef struct effEVECombParSmoke_t {
     effEVECombParSmokeParam_t head;
-    effEVECombParSmokePart_t *particles;
+    effEVECombParSmokePart_t *pPart;
     u8 flag;
     u8 pad81[3];
-    sdfMemHandle_t *allocationHandle;
+    sdfMemHandle_t *hMem;
 } effEVECombParSmoke_t;
 
 
@@ -831,7 +831,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
         remaining = count;
         works = cut->parameterWorks;
         do {
-            if (entry->zeroKindCount < frame) {
+            if (entry->timing < frame) {
                 kind = entry->aimParams.scaleKind;
                 if (works[0] != NULL) {
                     if (kind != 5 || hEveBEDCut->actor == NULL) {
@@ -873,27 +873,27 @@ INCLUDE_ASM(const s32, "effect/effEvent", effEveBEDCutDraw);
 effSimpleBED_t *effSimpleBEDCreate(effBTL_t *pData, f32 scale) {
     effSimpleBED_t *work = sdfChipAllocDirect(sizeof(effSimpleBED_t));
 
-    work->init.rot[3] = 1.0f;
-    work->init.r = 50.0f;
-    work->init.h = 180.0f;
-    work->init.center[1] = -90.0f;
-    work->init.scale = scale;
-    work->init.abgr = EFF_EVENT_NEUTRAL_COLOR;
-    work->init.rot[0] = 0;
-    work->init.rot[1] = 0;
-    work->init.rot[2] = 0;
-    work->init.center[0] = 0;
-    work->init.center[2] = 0;
-    work->init.center[3] = 0;
+    work->pParams.rot[3] = 1.0f;
+    work->pParams.r = 50.0f;
+    work->pParams.h = 180.0f;
+    work->pParams.center[1] = -90.0f;
+    work->pParams.scale = scale;
+    work->pParams.abgr = EFF_EVENT_NEUTRAL_COLOR;
+    work->pParams.rot[0] = 0;
+    work->pParams.rot[1] = 0;
+    work->pParams.rot[2] = 0;
+    work->pParams.center[0] = 0;
+    work->pParams.center[2] = 0;
+    work->pParams.center[3] = 0;
     work->handle = effEveBEDCreate(pData);
-    work->owner = effEveBEDCutCreate(work->handle, 0, &work->init);
+    work->hCut = effEveBEDCutCreate(work->handle, 0, &work->pParams);
     work->active = 1;
     return work;
 }
 
 /* Release the effect, invoke shared teardown only when flagged, then free the holder. */
 void effSimpleBEDDelete(effSimpleBED_t *hSimpleBED) {
-    effEveBEDCutDelete(hSimpleBED->owner);
+    effEveBEDCutDelete(hSimpleBED->hCut);
     if (hSimpleBED->active != 0) {
         effEveBEDDelete(hSimpleBED->handle);
     }
@@ -902,34 +902,34 @@ void effSimpleBEDDelete(effSimpleBED_t *hSimpleBED) {
 
 /* Clone the init block/effect using the same handle; clear the shared-teardown flag. */
 effSimpleBED_t *effSimpleBEDCopy(effSimpleBED_t *hSimpleBEDSrc) {
-    effEveBEDParams_t *block = &hSimpleBEDSrc->init;
+    effEveBEDParams_t *block = &hSimpleBEDSrc->pParams;
     effSimpleBED_t *work = sdfChipAllocDirect(sizeof(effSimpleBED_t));
 
-    work->owner = effEveBEDCutCreate(hSimpleBEDSrc->handle, 0, block);
+    work->hCut = effEveBEDCutCreate(hSimpleBEDSrc->handle, 0, block);
     work->handle = hSimpleBEDSrc->handle;
-    memcpy(&work->init, block, sizeof(work->init));
+    memcpy(&work->pParams, block, sizeof(work->pParams));
     work->active = 0;
     return work;
 }
 
 /* Apply the native owner operation to the pointer stored in the record prefix. */
 void effSimpleBEDDraw(effSimpleBED_t *hSimpleBED) {
-    effEveBEDCutDraw(hSimpleBED->owner);
+    effEveBEDCutDraw(hSimpleBED->hCut);
 }
 
 /* Copy xyz, lower y by half the aim height, clear w and publish the record. */
 void effSimpleBEDSetPosition(effSimpleBED_t *hSimpleBED, f32 *pPos) {
-    hSimpleBED->init.center[0] = pPos[0];
-    hSimpleBED->init.center[1] = pPos[1] - hSimpleBED->init.h * 0.5f;
-    hSimpleBED->init.center[2] = pPos[2];
-    hSimpleBED->init.center[3] = 0;
-    effEveBEDCutSetParams(hSimpleBED->owner, &hSimpleBED->init);
+    hSimpleBED->pParams.center[0] = pPos[0];
+    hSimpleBED->pParams.center[1] = pPos[1] - hSimpleBED->pParams.h * 0.5f;
+    hSimpleBED->pParams.center[2] = pPos[2];
+    hSimpleBED->pParams.center[3] = 0;
+    effEveBEDCutSetParams(hSimpleBED->hCut, &hSimpleBED->pParams);
 }
 
 /* Copy the holder's updated packed tint to its event record. */
 void effSimpleBEDSetRGBA(effSimpleBED_t *hSimpleBED, u32 abgr) {
-    hSimpleBED->init.abgr = abgr;
-    effEveBEDCutSetParams(hSimpleBED->owner, &hSimpleBED->init);
+    hSimpleBED->pParams.abgr = abgr;
+    effEveBEDCutSetParams(hSimpleBED->hCut, &hSimpleBED->pParams);
 }
 
 /* vu0 routine: place one part relative to the record's position and facing. */
@@ -1014,7 +1014,7 @@ void effEveBEDPartGetPositionPtr(effEveBEDParams_t *pParams, effBTLAimParams_t *
 INCLUDE_RODATA(const s32, "effect/effEvent", D_005343D0);
 
 effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam) {
-    u32 particleCount = pParam->particleCount;
+    u32 particleCount = pParam->number;
     u32 particleBytes = particleCount * sizeof(effEVECombParSmokePart_t);
     sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(particleBytes + sizeof(effEVECombParSmoke_t));
     effEVECombParSmokePart_t *particle = (effEVECombParSmokePart_t *)sdfMemLock(allocationHandle);
@@ -1022,26 +1022,26 @@ effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *pParam
     u32 particleIndex;
 
     work->head = *pParam;
-    work->allocationHandle = allocationHandle;
-    work->particles = particle;
+    work->hMem = allocationHandle;
+    work->pPart = particle;
     work->flag = 0;
-    if (work->head.fadeIn <= 0) {
-        work->head.fadeIn = 1;
+    if (work->head.fade_in <= 0) {
+        work->head.fade_in = 1;
     }
-    if (work->head.fadeOut <= 0) {
-        work->head.fadeOut = 1;
+    if (work->head.fade_out <= 0) {
+        work->head.fade_out = 1;
     }
-    if (work->head.startDelaySpread <= 0) {
-        work->head.startDelaySpread = 1;
+    if (work->head.wait <= 0) {
+        work->head.wait = 1;
     }
     EffEveCPSmokeCount = EffEveCPSmokeCount + 1;
     if (EffEveCPSmokeCount == 1) {
         hEffEveCPSmokeBill01Tex = (u32)dds3BillboardFileLoad(0, "/efftool/bill/dbball01.tmx");
         hEffEveCPSmokeBill02Tex = (u32)dds3BillboardFileLoad(0, "/efftool/bill/dbball02.tmx");
     }
-    particleCount = work->head.particleCount;
+    particleCount = work->head.number;
     for (particleIndex = 0; particleIndex < particleCount; particleIndex++) {
-        particle->age = 0;
+        particle->frame = 0;
         particle++;
     }
     return work;
@@ -1055,20 +1055,20 @@ void effEVECombParSmokeDelete(effEVECombParSmoke_t *pCombParSmoke) {
         dds3BillboardDelete((dds3Billboard_t *)hEffEveCPSmokeBill01Tex);
         dds3BillboardDelete((dds3Billboard_t *)hEffEveCPSmokeBill02Tex);
     }
-    sdfMemFreeDirect(pCombParSmoke->allocationHandle);
+    sdfMemFreeDirect(pCombParSmoke->hMem);
 }
 
 /* Randomize delays, scale oscillations, spin and motion. Scale amplitudes share
    the base-scale random factor; motion's Y component begins as zero height. */
 void effEVECombParSmokePartInit(effEVECombParSmoke_t *pCombParSmoke, s32 index) {
-    effEVECombParSmokePart_t *particle = &pCombParSmoke->particles[index];
+    effEVECombParSmokePart_t *particle = &pCombParSmoke->pPart[index];
     f32 direction[EFF_EVENT_VECTOR_COMPONENTS];
     f32 scaleFactor;
     f32 spawnRadius;
-    s32 startDelaySpread = pCombParSmoke->head.startDelaySpread;
+    s32 startDelaySpread = pCombParSmoke->head.wait;
     s32 motionDelaySpread = pCombParSmoke->head.motionDelaySpread;
 
-    particle->age = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % startDelaySpread);
+    particle->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % startDelaySpread);
     particle->wait = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % motionDelaySpread);
     scaleFactor = dds3GetRandFloatA(dds3EffectBase) * pCombParSmoke->head.scaleRandomness + (1.0f - pCombParSmoke->head.scaleRandomness);
     particle->baseScale = pCombParSmoke->head.baseScale * scaleFactor;
@@ -1142,12 +1142,12 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(side);
     growth = work->head.accelerationPercent / 100.0f + 1.0f;
-    particle = work->particles;
-    count = work->head.particleCount;
+    particle = work->pPart;
+    count = work->head.number;
     repeat = work->head.repeat;
     duration = work->head.duration;
-    fadeIn = work->head.fadeIn;
-    fadeOut = work->head.fadeOut;
+    fadeIn = work->head.fade_in;
+    fadeOut = work->head.fade_out;
     color = work->head.color;
     swayPhaseStep = work->head.swayPhaseStep;
     swayAmplitudeStep = work->head.swayAmplitudeStep;
@@ -1156,7 +1156,7 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
     dds3BillboardSetMode((dds3Billboard_t *)hEffEveCPSmokeBill01Tex, work->head.drawMode);
     dds3BillboardSetMode((dds3Billboard_t *)hEffEveCPSmokeBill02Tex, 3);
     for (; i < count; i++, particle++) {
-        age = particle->age;
+        age = particle->frame;
         if (age == 0) {
             effEVECombParSmokePartInit(work, i);
         }
@@ -1214,9 +1214,9 @@ void eff_1AEC58(effEVECombParSmoke_t *work) {
             particle->rotation += particle->angularSpeed;
         }
         if (duration == age && repeat != 0) {
-            particle->age = 0;
+            particle->frame = 0;
         } else {
-            particle->age++;
+            particle->frame++;
         }
     }
 }
@@ -1328,12 +1328,12 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(side);
     growth = pCombParSmoke->head.accelerationPercent / 100.0f + 1.0f;
-    particle = pCombParSmoke->particles;
-    count = pCombParSmoke->head.particleCount;
+    particle = pCombParSmoke->pPart;
+    count = pCombParSmoke->head.number;
     repeat = pCombParSmoke->head.repeat;
     duration = pCombParSmoke->head.duration;
-    fadeIn = pCombParSmoke->head.fadeIn;
-    fadeOut = pCombParSmoke->head.fadeOut;
+    fadeIn = pCombParSmoke->head.fade_in;
+    fadeOut = pCombParSmoke->head.fade_out;
     colorStartAge = pCombParSmoke->head.colorStartAge;
     colorTransitionFrames = pCombParSmoke->head.colorTransitionFrames;
     color = pCombParSmoke->head.color;
@@ -1342,7 +1342,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
     SDF_VU0_COPYVECTOR(origin, pCombParSmoke);
     i = 0;
     for (; i < count; i++, particle++) {
-        age = particle->age;
+        age = particle->frame;
         if (age == 0) {
             effEVECombParSmokePartInit(pCombParSmoke, i);
         }
@@ -1492,9 +1492,9 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
             particle->rotation += particle->angularSpeed;
         }
         if (duration == age && repeat != 0) {
-            particle->age = 0;
+            particle->frame = 0;
         } else {
-            particle->age++;
+            particle->frame++;
         }
     }
     if (batch1.count > 0) {
@@ -1565,14 +1565,14 @@ void effEVECombParSmokeGetParams(const effEVECombParSmokeParam_t *pCombParSmoke,
  * motionDelaySpread remains unvalidated on this native path. */
 void effEVECombParSmokeSetParams(effEVECombParSmokeParam_t *pCombParSmoke, const effEVECombParSmokeParam_t *pParam) {
     *pCombParSmoke = *pParam;
-    if (pCombParSmoke->fadeIn <= 0) {
-        pCombParSmoke->fadeIn = 1;
+    if (pCombParSmoke->fade_in <= 0) {
+        pCombParSmoke->fade_in = 1;
     }
-    if (pCombParSmoke->fadeOut <= 0) {
-        pCombParSmoke->fadeOut = 1;
+    if (pCombParSmoke->fade_out <= 0) {
+        pCombParSmoke->fade_out = 1;
     }
-    if (pCombParSmoke->startDelaySpread <= 0) {
-        pCombParSmoke->startDelaySpread = 1;
+    if (pCombParSmoke->wait <= 0) {
+        pCombParSmoke->wait = 1;
     }
 }
 

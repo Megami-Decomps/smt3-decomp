@@ -297,14 +297,14 @@ extern u32 f;
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -384,10 +384,10 @@ s32 nbE913Process_1(dds3ProcessID_t *id)
     nbEventProcessData_t *e;
 
     e = dds3GetProcessData(id);
-    if (D_00527688[e->step](e) != 0) {
+    if (D_00527688[e->seq](e) != 0) {
         return -1;
     }
-    if (e->unk_08 == 0) {
+    if (e->time == 0) {
         nbCameraSetState(0x17);
         nbCameraBoss_Foru_E913_Set();
     }
@@ -413,7 +413,7 @@ s32 nbE914_Test(nbEventProcessData_t *e)
 
 s32 nbE914_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x10F) {
+    if (e->seqtime >= 0x10F) {
         printf(D_005468C8);
         nbDelAllKoukaPacketType(0x2B);
         e->data->endtype = 1;

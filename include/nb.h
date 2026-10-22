@@ -136,9 +136,9 @@ typedef struct nbMainProcessData_t
     u16 pad_6E;
     u32 battletime;                        /* 0x070 */
     f32 press3;
-    s16 unk78;
+    s16 press4_p;
     s16 press4_ten;
-    s16 unk7C;                             /* 0x07C: stagemajor */
+    s16 StageMajor;                             /* 0x07C: stagemajor */
     s16 StageMinor;                             /* 0x07E: stageminor */
     u8 unk80[4];
     s32 nakamayobi;                        /* 0x084 */
@@ -155,7 +155,7 @@ typedef struct nbMainProcessData_t
     u8 unkB0[4];
     s32 unkB4;
     u8 unkB8[4];
-    dds3ProcessID_t *unkBC;
+    dds3ProcessID_t *MainProcessID;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
     dds3ProcessID_t *AtoProcessID;
     u8 unkC8[4];

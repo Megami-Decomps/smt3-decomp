@@ -987,7 +987,7 @@ void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no)
     count = 0;
     for (i = 0; i < 0x12; i++) {
         if (i != 3) {
-            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->lists[i].head;
+            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->basictable[i].head;
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;
@@ -1013,7 +1013,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
     list = dds3FontReqAllocDrawTag();
     for (i = 0; i < 0x12; i++) {
         if (i != 3) {
-            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->lists[i].head;
+            for (basic = ((dds3SceneBasic_t *)dds3GetActiveScene()->workdata)->basictable[i].head;
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;

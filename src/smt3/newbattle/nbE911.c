@@ -262,14 +262,14 @@ extern char D_00546880[];
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -322,7 +322,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE911", Effect2);
 
 s32 nbE911_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 2) {
+    if (e->seqtime >= 2) {
         printf(D_00546880);
         return 1;
     }
@@ -335,7 +335,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE911", nbE912_Hatudo);
 
 s32 nbE912_Wait1(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x3D) {
+    if (e->seqtime >= 0x3D) {
         nbFreeEffectSlot(e);
     }
     return 0;

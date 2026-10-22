@@ -309,14 +309,14 @@ extern void nbResetFormPosRot(nbFormation_t *form);
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -407,7 +407,7 @@ INCLUDE_ASM(const s32, "newbattle/nbE903", PartsEffect1);
 
 s32 PartsWait(nbEventProcessData_t *ed)
 {
-    if (ed->frame >= 9) {
+    if (ed->seqtime >= 9) {
         nbFreeEffectSlot(ed);
     }
     return 0;
@@ -436,7 +436,7 @@ s32 EffDel(nbEventProcessData_t *ed)
     nbKoukaProcessData_t *k;
     nbKoukaPacket_t *p;
 
-    if (ed->frame == 0x4B) {
+    if (ed->seqtime == 0x4B) {
         k = dds3GetProcessData(ed->data->koukaproc);
         p = k->first;
         while (p != NULL) {
@@ -452,7 +452,7 @@ s32 EffDel(nbEventProcessData_t *ed)
 
 s32 nbE903_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x1F) {
+    if (e->seqtime >= 0x1F) {
         printf(D_00546548);
         e->data->stat |= 0x2000;
         return 1;
@@ -481,7 +481,7 @@ s32 Test(nbEventProcessData_t *ed)
 
 s32 nbE904_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0xBF) {
+    if (e->seqtime >= 0xBF) {
         printf(D_00546570);
         e->data->endtype = 1;
         return 1;

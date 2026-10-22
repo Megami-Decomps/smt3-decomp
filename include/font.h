@@ -23,7 +23,7 @@ struct frFontUvRect_t {
 };
 
 struct FontMem_t {
-    u32 nodeIndex;
+    u32 id;
     frFontUvRect_t uv;
     struct GsFont_t *item;
     struct FontMem_t *prev;

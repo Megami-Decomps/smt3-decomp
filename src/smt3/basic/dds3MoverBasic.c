@@ -24,7 +24,7 @@ extern void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *offset)
 
 typedef struct dds3MoverBasicWorkData_t
 {
-    dds3Basic_t *object;
+    dds3Basic_t *pObjectBasic;
     dds3PathBasicControl_t *pPathControl;
     dds3BasicControlProc_t pFunc;
     dds3Basic_t *pPathBasic;
@@ -61,7 +61,7 @@ void MoverBasicDestructor(dds3Basic_t *pBasic)
 
     work = pBasic->workdata;
     dds3MoverBasicFreePath(pBasic);
-    dds3ObjectBaseSetControlBasicType(work->object, NULL, 1);
+    dds3ObjectBaseSetControlBasicType(work->pObjectBasic, NULL, 1);
     sdfChipFreeDirect(work);
 }
 
@@ -72,7 +72,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *pBasic)
     fldResourceLightPath_t light;
     dds3PoseSet_t relativePose;
     dds3MoverBasicWorkData_t *work = pBasic->workdata;
-    dds3Basic_t *object = work->object;
+    dds3Basic_t *object = work->pObjectBasic;
     dds3PoseSet_t *pose = object->poseset;
     dds3BasicControlProc_t callback;
     dds3CameraObjectBasicWorkData_t *camera;
@@ -130,7 +130,7 @@ dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *pObjectBasic)
     basic = dds3AddSceneBasicData(BASIC_TYPE_MOVER);
     work = basic->workdata;
     basic->serialID = dds3AllocObjectId();
-    work->object = pObjectBasic;
+    work->pObjectBasic = pObjectBasic;
     basic->name = D_002FA670[dds3MoverCount];
     dds3MoverCount++;
     dds3MoverCount %= 10;

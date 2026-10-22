@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -69,7 +69,7 @@ typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -120,10 +120,10 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 pbProcHandle_t *pbStartRecord(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRecord_t *work;
-    panel->process = dds3StartProcess("pb-proc-record", 0x3EE, 1, 1, pb_proc_record_Process,
+    panel->id = dds3StartProcess("pb-proc-record", 0x3EE, 1, 1, pb_proc_record_Process,
                                       (dds3ProcessFunc_t)pb_proc_record_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0x10000;
     work = sdfChipAllocDirect(8);
@@ -131,7 +131,7 @@ pbProcHandle_t *pbStartRecord(pbProcHandle_t *parent) {
     work->pos = 0;
     work->slot = sdfChipAllocDirect(0x1E0);
     memset(work->slot, 0, 0x1E0);
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 

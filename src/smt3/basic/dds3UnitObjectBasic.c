@@ -55,7 +55,7 @@ extern s32 dds3ComparePosPoseSet2(dds3PoseSet_t *first, dds3PoseSet_t *second);
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *unitBasic);
 
 dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *pBasic) {
-    return ((dds3UnitObjectBasicWorkData_t *)pBasic->workdata)->control;
+    return ((dds3UnitObjectBasicWorkData_t *)pBasic->workdata)->pObjectBaseControlWorkData;
 }
 
 dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot) {
@@ -110,7 +110,7 @@ void dds3UnitObjectBasicDestructor(dds3Basic_t *aPtr) {
         work->unit = NULL;
     }
     dds3ObjectBaseFreeModelHandle(aPtr);
-    dds3ObjectBaseFreeControlWorkData(work->control);
+    dds3ObjectBaseFreeControlWorkData(work->pObjectBaseControlWorkData);
     sdfChipFreeDirect(aPtr->workdata);
 }
 

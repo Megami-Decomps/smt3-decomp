@@ -7,7 +7,7 @@
 typedef struct
 {
     u16 position;
-    u16 message;
+    u16 Type;
     u16 draw;
     u16 reserved;
 } fldInputPanelProcessData_t;
@@ -84,9 +84,9 @@ s32 fldInputPanelProcess2(dds3ProcessID_t *id)
         goto ret0;
     }
     fldDrawInputPanel();
-    fldDrawInputCursor(D_003095B0[work->message] - 0xC, 0x132);
-    fldKanjiDraw(D_003095B0[work->message] + 0xA, 0x98, 0xA09DC380,
-        D_003094F0[work->message]);
+    fldDrawInputCursor(D_003095B0[work->Type] - 0xC, 0x132);
+    fldKanjiDraw(D_003095B0[work->Type] + 0xA, 0x98, 0xA09DC380,
+        D_003094F0[work->Type]);
     work->position++;
     work->draw = 0;
 ret0:
@@ -97,7 +97,7 @@ s32 fldInputPanelProcess1(dds3ProcessID_t *id)
 {
     fldInputPanelProcessData_t *work = sdfChipAllocDirect(8);
 
-    work->message = 1;
+    work->Type = 1;
     work->position = 0;
     work->draw = 0;
     work->reserved = 0;
@@ -141,7 +141,7 @@ fldInputPanelProcessData_t *fldInputPanelSetMessage(s32 no)
     fldInputPanelProcessData_t *work;
 
     work = dds3GetProcessData(inputpanel_id);
-    work->message = no;
+    work->Type = no;
     return work;
 }
 

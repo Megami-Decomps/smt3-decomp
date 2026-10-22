@@ -5,9 +5,9 @@ typedef struct dds3AdminiWork
 {
     u32 flag;
     u32 value;
-    s8 sequence;
+    s8 NowSequence;
     s8 NextSequence;
-    u8 historyindex;
+    u8 HistoryPointer;
     u8 unk0B;
     s8 history[8];
     u8 historyflag[8];
@@ -146,7 +146,7 @@ void dds3AdminiExitSequence(void)
 
 s8 dds3AdminiGetActiveSequence(void)
 {
-    return GetAdminiProcessData()->sequence;
+    return GetAdminiProcessData()->NowSequence;
 }
 
 s8 dds3AdminiGetNextSequence(void)
@@ -159,7 +159,7 @@ s8 dds3AdminiGetPrevSequence(void)
     dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
-    return work->history[(work->historyindex + 7) & 7];
+    return work->history[(work->HistoryPointer + 7) & 7];
 }
 
 u8 dds3AdminiGetPrevHistoryFlag(void)
@@ -167,7 +167,7 @@ u8 dds3AdminiGetPrevHistoryFlag(void)
     dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
-    return work->historyflag[(work->historyindex + 7) & 7];
+    return work->historyflag[(work->HistoryPointer + 7) & 7];
 }
 
 s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
@@ -187,7 +187,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
                 work->CallCount--;
                 return 0;
             }
-            work->sequence = work->NextSequence;
+            work->NowSequence = work->NextSequence;
             work->NextSequence = -1;
             nextflag = flag;
             nextflag &= ~1;
@@ -195,30 +195,30 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
             work->flag = nextflag;
             work->value = 0;
             if (flag & 4) {
-                work->historyflag[work->historyindex] |= 1;
+                work->historyflag[work->HistoryPointer] |= 1;
                 work->flag &= ~4;
             }
             if (work->flag & 0x10000) {
                 restored = 1;
                 work->flag &= ~0x10000;
-                work->historyindex = (work->historyindex + 7) & 7;
+                work->HistoryPointer = (work->HistoryPointer + 7) & 7;
             } else {
                 restored = 0;
                 if (work->flag & 8) {
                     work->flag &= ~8;
                 } else {
-                    work->historyindex = (work->historyindex + 1) & 7;
+                    work->HistoryPointer = (work->HistoryPointer + 1) & 7;
                 }
             }
-            work->history[work->historyindex] = work->sequence;
-            work->historyflag[work->historyindex] = 0;
-            startfunc = dds3AdminiList[work->sequence].startfunc;
+            work->history[work->HistoryPointer] = work->NowSequence;
+            work->historyflag[work->HistoryPointer] = 0;
+            startfunc = dds3AdminiList[work->NowSequence].startfunc;
             if (startfunc != NULL) {
                 startfunc(restored, work->CallData);
             }
             for (i = 0; i < 8; i++) {
                 printf(D_0054E8D0);
-                if (work->historyindex == i) {
+                if (work->HistoryPointer == i) {
                     printf(D_0054E8D8);
                 }
                 printf(D_0052DF50, work->history[i], work->historyflag[i]);
@@ -232,7 +232,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
 s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work = dds3GetProcessData(id);
-    s32 sequence = work->sequence;
+    s32 sequence = work->NowSequence;
     s32 (*endfunc)(void);
     s32 wait;
 
@@ -244,7 +244,7 @@ s32 dds3AdminiEndCheck(dds3ProcessID_t *id)
                 return 0;
             }
             work->CallCount = wait + 1;
-            work->sequence = -1;
+            work->NowSequence = -1;
         }
     }
     return (s32)dds3AdminiStartSequence;
@@ -258,8 +258,8 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
 
     work = dds3GetProcessData(id);
     if (!(work->flag & 2)) {
-        if (work->sequence >= 0) {
-            mainfunc = dds3AdminiList[work->sequence].mainfunc;
+        if (work->NowSequence >= 0) {
+            mainfunc = dds3AdminiList[work->NowSequence].mainfunc;
             if (mainfunc != NULL) {
                 if (mainfunc() != 0) {
                     work->flag |= 2;
@@ -269,8 +269,8 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
         }
     }
     if (work->flag & 2) {
-        if (work->sequence >= 0) {
-            index = (work->historyindex + 7) & 7;
+        if (work->NowSequence >= 0) {
+            index = (work->HistoryPointer + 7) & 7;
             if (work->history[index] >= 0 && (work->historyflag[index] & 1)) {
                 printf(D_0052DF60);
                 work->flag |= 0x10001;
@@ -300,7 +300,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
 void dds3AdminiNeoShutdown(dds3ProcessID_t *id)
 {
     dds3AdminiData_t *work = dds3GetProcessData(id);
-    s32 sequence = work->sequence;
+    s32 sequence = work->NowSequence;
 
     if (sequence >= 0) {
         s32 (*endfunc)(void) = dds3AdminiList[sequence].endfunc;
@@ -324,9 +324,9 @@ void dds3InitAdmini(void)
         work = sdfChipAllocDirect(sizeof(dds3AdminiData_t));
         work->flag = 0;
         work->value = 0;
-        work->sequence = -1;
+        work->NowSequence = -1;
         work->NextSequence = -1;
-        work->historyindex = 0;
+        work->HistoryPointer = 0;
         for (i = 0; i < 8; i++) {
             work->history[i] = -1;
             work->historyflag[i] = 0;

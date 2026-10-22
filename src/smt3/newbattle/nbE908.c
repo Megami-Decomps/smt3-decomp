@@ -307,14 +307,14 @@ extern u32 dds3DrawFlag;
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -421,7 +421,7 @@ s32 nbE909_Model1Start(nbEventProcessData_t *e)
         e->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x108);
     } else {
         sprintf(D_005755B0, D_00546840, 0x108);
-        e->unk_1C = fileLoad(D_005755B0);
+        e->file = fileLoad(D_005755B0);
     }
     nbBgmFadeOut();
     nbFreeEffectSlot(e);
@@ -430,12 +430,12 @@ s32 nbE909_Model1Start(nbEventProcessData_t *e)
 
 s32 nbE909_Model1Wait(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x64) {
+    if (e->seqtime >= 0x64) {
         if (pacCheckEnd(e->unk_20) != 0) {
             if (evtBitCheck(0xC0F) == 0) {
-                e->unk_24 = fileGetMemHandle(e->unk_1C);
-                fileHandleFree(e->unk_1C);
-                e->unk_1C = NULL;
+                e->mem = fileGetMemHandle(e->file);
+                fileHandleFree(e->file);
+                e->file = NULL;
             }
             nbAddFadeOutKoukaPacket(0, 0, 0xA, 1);
             nbFreeEffectSlot(e);
@@ -448,13 +448,13 @@ s32 nbE909_Model1Wait_2(nbEventProcessData_t *e)
 {
     void *p;
 
-    if (e->frame == 0xA) {
+    if (e->seqtime == 0xA) {
         func_0024D938(e);
     }
-    if (e->frame >= 0x1E) {
+    if (e->seqtime >= 0x1E) {
         if (evtBitCheck(0xC0F) == 0) {
-            p = sdfMemLock(e->unk_24);
-            mdlPackDecode(1, 0x108, 0x101, p, sdfMemGetSize(e->unk_24));
+            p = sdfMemLock(e->mem);
+            mdlPackDecode(1, 0x108, 0x101, p, sdfMemGetSize(e->mem));
         }
         nbAddFadeInKoukaPacket(3, 0, 0xA, 1);
         nbFreeEffectSlot(e);
@@ -476,7 +476,7 @@ s32 nbE909_Model2Wait_1(nbEventProcessData_t *e)
 
 s32 nbE909_Model2Wait_15(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x51) {
+    if (e->seqtime >= 0x51) {
         if (nbMaeCheckDone() != 0) {
             nbMaeWaitStep();
             nbFreeEffectSlot(e);
@@ -487,7 +487,7 @@ s32 nbE909_Model2Wait_15(nbEventProcessData_t *e)
 
 s32 nbE909_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x1A) {
+    if (e->seqtime >= 0x1A) {
         printf(D_00546860);
         e->data->stat &= ~8;
         return 1;

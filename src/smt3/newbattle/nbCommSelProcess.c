@@ -800,7 +800,7 @@ void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
     dds3ProcessID_t *id = dds3StartProcess(D_005441A8, 0x2B0E, 1, 1, nbCommSelProcess1,
                                            nbCommSelShutdown, s);
 
-    dds3LinkProcess(data->unkBC, id);
+    dds3LinkProcess(data->MainProcessID, id);
     data->CommSelProcessID = id;
 }
 

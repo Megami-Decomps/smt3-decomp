@@ -128,14 +128,14 @@ void dds3EffectBlur_AlphaMultiParmSet(const dds3Effect_Blur_t *pBlur, effBlurPri
     pSpriteParm->g = 128;
     pSpriteParm->b = 128;
     pSpriteParm->a = ((const u8 *)pBlur)[3];
-    x0 = (pBlur->corners[0][0] << 4) + 0x7000;
+    x0 = (pBlur->xy[0][0] << 4) + 0x7000;
     pSpriteParm->vtx[0].x = x0;
-    y0 = (pBlur->corners[0][1] << 3) + 0x7900;
+    y0 = (pBlur->xy[0][1] << 3) + 0x7900;
     pSpriteParm->vtx[0].y = y0;
     pSpriteParm->vtx[1].x = x0;
-    y1 = (pBlur->corners[1][1] << 3) + 0x7900;
+    y1 = (pBlur->xy[1][1] << 3) + 0x7900;
     pSpriteParm->vtx[1].y = y1;
-    x1 = (pBlur->corners[1][0] << 4) + 0x7000;
+    x1 = (pBlur->xy[1][0] << 4) + 0x7000;
     pSpriteParm->vtx[2].x = x1;
     pSpriteParm->vtx[2].y = y0;
     pSpriteParm->vtx[3].x = x1;
@@ -202,7 +202,7 @@ void dds3EffectBlur(const dds3Effect_Blur_t *source) {
         packet[3] = 0xE;
         packet[4] = 0x31001;
         packet[5] = 0x47;
-        packet[6] = source->blendControl;
+        packet[6] = source->blend;
         packet[7] = 0x42;
         sdfDrawTagLink(list, (u32)packet);
     }
@@ -325,7 +325,7 @@ void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, sdfTexHandle_t *texture
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    dds3EffectBlurDrawFrameMask(list, source->blendControl, texture);
+    dds3EffectBlurDrawFrameMask(list, source->blend, texture);
     dds3EffectBlurDrawAlphaMulti(list, source);
     dds3EffectBlurDrawFrameMaskReset(list);
 }
@@ -333,12 +333,12 @@ void dds3EffectBlurDraw(const dds3Effect_Blur_t *source, sdfTexHandle_t *texture
 void dds3EffectBlurSetRect(dds3Effect_PartialMultiBlurParam_t *work) {
     s32 x = work->source.position[0] + 0x100;
     s32 y = work->source.position[1] + 0xE0;
-    s32 extent = work->extent;
+    s32 extent = work->area;
 
-    work->source.corners[0][0] = x - extent;
-    work->source.corners[0][1] = y - extent;
-    work->source.corners[1][0] = x + extent;
-    work->source.corners[1][1] = y + extent;
+    work->source.xy[0][0] = x - extent;
+    work->source.xy[0][1] = y - extent;
+    work->source.xy[1][0] = x + extent;
+    work->source.xy[1][1] = y + extent;
     dds3EffectBlur(&work->source);
 }
 
@@ -365,11 +365,11 @@ void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work) {
     }
     x = work->body.source.position[0] + 0x100;
     y = work->body.source.position[1] + 0xE0;
-    extent = work->body.extent;
-    work->body.source.corners[0][0] = x - extent;
-    work->body.source.corners[0][1] = y - extent;
-    work->body.source.corners[1][0] = x + extent;
-    work->body.source.corners[1][1] = y + extent;
+    extent = work->body.area;
+    work->body.source.xy[0][0] = x - extent;
+    work->body.source.xy[0][1] = y - extent;
+    work->body.source.xy[1][0] = x + extent;
+    work->body.source.xy[1][1] = y + extent;
     dds3EffectBlurDraw(&work->body.source, work->texture);
 }
 
@@ -398,7 +398,7 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     pPart->angle = -3.14159265f;
     quad->angle = pParam->params.uvDisplacementAngleDegrees;
     quad->color = pParam->params.color;
-    quad->blendControl = pParam->params.blendControl;
+    quad->blend = pParam->params.blendControl;
     spread = pParam->params.positionSpread;
     halfSize = pParam->params.size;
     quad->position[0] = pParam->params.position[0] +
@@ -407,11 +407,11 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot
     quad->position[1] = pParam->params.position[1] +
         (s32)(spread * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f));
     centerX = quad->position[0] + 256;
-    quad->corners[0][0] = centerX - halfSize;
-    quad->corners[1][0] = centerX + halfSize;
+    quad->xy[0][0] = centerX - halfSize;
+    quad->xy[1][0] = centerX + halfSize;
     centerY = quad->position[1] + 224;
-    quad->corners[0][1] = centerY - halfSize;
-    quad->corners[1][1] = centerY + halfSize;
+    quad->xy[0][1] = centerY - halfSize;
+    quad->xy[1][1] = centerY + halfSize;
 }
 
 effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *pParam)
@@ -517,10 +517,10 @@ void dds3EffectRipBlurPartAreaSet(effBlurScaleWork_t *pParam, effBlurScaleSlot_t
     s32 x = pParam->params.position[0] + 0x100;
     s32 y = pParam->params.position[1] + 0xE0;
 
-    pPart->quad.corners[0][0] = x - half;
-    pPart->quad.corners[0][1] = y - half;
-    pPart->quad.corners[1][0] = x + half;
-    pPart->quad.corners[1][1] = y + half;
+    pPart->quad.xy[0][0] = x - half;
+    pPart->quad.xy[0][1] = y - half;
+    pPart->quad.xy[1][0] = x + half;
+    pPart->quad.xy[1][1] = y + half;
 }
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
@@ -530,7 +530,7 @@ void dds3EffectRipBlurPartInit(effBlurScaleWork_t *pParam, effBlurScaleSlot_t *p
     pPart->phase = 0.0f;
     pPart->angle = 0.0f;
     quad->color = pParam->params.color;
-    quad->blendControl = pParam->params.blendControl;
+    quad->blend = pParam->params.blendControl;
     quad->angle = pParam->params.uvDisplacementAngleDegrees;
     quad->position[0] = pParam->params.position[0];
     quad->position[1] = pParam->params.position[1];
@@ -646,16 +646,16 @@ void dds3EffectFilter(dds3Effect_Filter_t *source) {
     blendPacket[3] = 0xE;
     blendPacket[4] = 0x31001;
     blendPacket[5] = 0x47;
-    blendPacket[6] = source->blendControl;
+    blendPacket[6] = source->blend;
     blendPacket[7] = 0x42;
     sdfDrawTagLink(list, (u32)blendPacket);
 
     drawPacket = effPkt2DAllocF4(0);
     color = source->color | 0x3F80000000000000ULL;
-    x[0] = (source->corners[0][0] << 4) + 0x7000;
-    x[1] = (source->corners[1][0] << 4) + 0x7000;
-    y[0] = (source->corners[0][1] << 3) + 0x7900;
-    y[1] = (source->corners[1][1] << 3) + 0x7900;
+    x[0] = (source->xy[0][0] << 4) + 0x7000;
+    x[1] = (source->xy[1][0] << 4) + 0x7000;
+    y[0] = (source->xy[0][1] << 3) + 0x7900;
+    y[1] = (source->xy[1][1] << 3) + 0x7900;
     topLeft = (u16)x[0] | ((u32)(u16)y[0] << 16);
     bottomLeft = (u16)x[0] | ((u32)(u16)y[1] << 16);
     topRight = (u16)x[1] | ((u32)(u16)y[0] << 16);
@@ -765,7 +765,7 @@ void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartia
 }
 
 void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter) {
-    s32 half = (s32)((f32)hPartialMultiFilter->params.extent * 1.4f);
+    s32 half = (s32)((f32)hPartialMultiFilter->params.area * 1.4f);
     s32 x = hPartialMultiFilter->params.center[0] + 0x100;
     s32 y = hPartialMultiFilter->params.center[1] + 0xE0;
 

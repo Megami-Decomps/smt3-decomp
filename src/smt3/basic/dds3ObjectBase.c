@@ -177,12 +177,12 @@ void dds3ObjectBaseSetUserValue(dds3Basic_t *pObjectBasic, void *pUserValue)
 
     control = dds3GetBaseControlWorkData(pObjectBasic);
     dds3ObjectBaseGetUserValue(pObjectBasic);
-    control->userValue = pUserValue;
+    control->pUserValue = pUserValue;
 }
 
 void *dds3ObjectBaseGetUserValue(dds3Basic_t *pObjectBasic)
 {
-    return dds3GetBaseControlWorkData(pObjectBasic)->userValue;
+    return dds3GetBaseControlWorkData(pObjectBasic)->pUserValue;
 }
 
 dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic)
@@ -237,7 +237,7 @@ void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
             }
         } else {
             sdfModelRootFree(control->pModel, 1, 1);
-            sdfMotionCtrlrFree(control->motion);
+            sdfMotionCtrlrFree(control->pMot);
         }
         control->pModel = NULL;
         control->modelType = 3;
@@ -583,7 +583,7 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *pObjectBasic)
     sdfModelEvalTm2(model, 1);
     control->modelType = 1;
     control->pModel = model;
-    control->motion = motion;
+    control->pMot = motion;
     control->MotSpeed = 1.0f;
     control->MotMode = 0;
     control->svs = 0;
@@ -707,7 +707,7 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
     if ((pObjectBasic->color >> 24) == 0) {
         return;
     }
-    if (control->motion != NULL) {
+    if (control->pMot != NULL) {
         hojiID = ((dds3ObjectBaseMatterWork_t *)pObjectBasic->workdata)->hojiID;
         if (hojiID > 0) {
             if (fldGetAnimeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, hojiID) ==
@@ -742,10 +742,10 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                     break;
                 }
                 if (control->MotMode == 6) {
-                    sdfMotionSeek(control->motion, (f32)control->motion->frameLength);
+                    sdfMotionSeek(control->pMot, (f32)control->pMot->frameLength);
                 } else if (0.0f < control->MotSpeed) {
-                    control->motion->speed = control->MotSpeed;
-                    sdfMotionNext(control->motion);
+                    control->pMot->speed = control->MotSpeed;
+                    sdfMotionNext(control->pMot);
                 }
                 sdfModelEvalTm(control->pModel);
             } else {
@@ -776,10 +776,10 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                     break;
                 }
                 if (control->MotMode == 6) {
-                    sdfMotionSeek(control->motion, (f32)control->motion->frameLength);
+                    sdfMotionSeek(control->pMot, (f32)control->pMot->frameLength);
                 } else if (0.0f < control->MotSpeed) {
-                    control->motion->speed = control->MotSpeed;
-                    sdfMotionNext(control->motion);
+                    control->pMot->speed = control->MotSpeed;
+                    sdfMotionNext(control->pMot);
                 }
                 sdfModelEvalTm(control->pModel);
             }
@@ -818,8 +818,8 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic
                 break;
             }
             if (0.0f < control->MotSpeed) {
-                control->motion->speed = control->MotSpeed;
-                sdfMotionNext(control->motion);
+                control->pMot->speed = control->MotSpeed;
+                sdfMotionNext(control->pMot);
             }
             sdfModelEvalTm(control->pModel);
         }

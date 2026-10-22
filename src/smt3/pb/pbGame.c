@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -104,7 +104,7 @@ typedef struct
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -778,7 +778,7 @@ void deleteRoundAutoCamera(dds3ProcessID_t *id) {
     } else if (cameraAngle < 0.0f) {
         cameraAngle = cameraAngle + 6.28318501f;
     }
-    dds3ResetProcessFlag(panel->process, 0x10, 1);
+    dds3ResetProcessFlag(panel->id, 0x10, 1);
     sdfChipFreeDelayedDirect(work);
     sdfChipFreeDelayedDirect(panel);
     roundCamera = NULL;
@@ -852,13 +852,13 @@ pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     u32 i;
     pbLoadSystemData(GetStageNumber());
-    panel->process = dds3StartProcess(D_00535F50, 0x3EE, 1, 1, game,
+    panel->id = dds3StartProcess(D_00535F50, 0x3EE, 1, 1, game,
                                       (dds3ProcessFunc_t)deleteGame, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0x10000;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     blockDB = NULL;
     bmap = NULL;
     goal = NULL;
@@ -888,10 +888,10 @@ pbProcHandle_t *pbStartGame(pbProcHandle_t *parent) {
 pbProcHandle_t *pbStartMoveChar(pbProcHandle_t *parent, s32 dir, u32 scl) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbMoveCharWork_t *work;
-    panel->process = dds3StartProcess(D_00535F60, 0x3EE, 0, 0, moveChar,
+    panel->id = dds3StartProcess(D_00535F60, 0x3EE, 0, 0, moveChar,
                                       (dds3ProcessFunc_t)deleteMoveChar, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
     work = sdfChipAllocDirect(0xC);
@@ -900,7 +900,7 @@ pbProcHandle_t *pbStartMoveChar(pbProcHandle_t *parent, s32 dir, u32 scl) {
     work->dir = dir;
     work->step = 0;
     work->speed = scl;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     func_001D2D00(mychar[current_char], 1);
     return panel;
 }
@@ -909,10 +909,10 @@ pbProcHandle_t *pbStartMoveBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundBlock_t *work;
     u32 i;
-    panel->process = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, moveBlock,
+    panel->id = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, moveBlock,
                                       (dds3ProcessFunc_t)deleteMoveBlock, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
     work = sdfChipAllocDirect(0xC);
@@ -921,7 +921,7 @@ pbProcHandle_t *pbStartMoveBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s32
     work->step = 0;
     work->index = dir;
     work->block = grp;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     if (dir == 4) {
         p2sdPlaySE(0x340004, 0x7F, 0x3F);
         pbAddRecord_flor(record, work->block);
@@ -946,10 +946,10 @@ pbProcHandle_t *pbStartRoundBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s3
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundBlock_t *work;
     u32 i;
-    panel->process = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, roundBlock,
+    panel->id = dds3StartProcess(D_00535F78, 0x3EE, 0, 0, roundBlock,
                                       (dds3ProcessFunc_t)deleteRoundBlock, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
     work = sdfChipAllocDirect(0xC);
@@ -958,7 +958,7 @@ pbProcHandle_t *pbStartRoundBlock(pbProcHandle_t *parent, pbGroupData_t *grp, s3
     work->step = 0;
     work->index = dir;
     work->block = grp;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     pbAddRecord_blk(record, grp);
     grp->value = 1;
     i = 0;
@@ -977,10 +977,10 @@ pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbRoundCamWork_t *work;
     dds3ProcessID_t *id;
-    panel->process = dds3StartProcess(D_00535F90, 0x3EE, 0, 0, roundAutoCamera,
+    panel->id = dds3StartProcess(D_00535F90, 0x3EE, 0, 0, roundAutoCamera,
                                       (dds3ProcessFunc_t)deleteRoundAutoCamera, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
     work = sdfChipAllocDirect(8);
@@ -1019,8 +1019,8 @@ pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
         }
         break;
     }
-    dds3SetProcessData(panel->process, panel);
-    dds3SetProcessFlag(panel->process, 0x10, 1);
+    dds3SetProcessData(panel->id, panel);
+    dds3SetProcessFlag(panel->id, 0x10, 1);
     id = dds3SearchProcessName(D_00535F08);
     if (id != NULL) {
         dds3ResetProcessFlag(id, 0x10, 2);
@@ -1031,10 +1031,10 @@ pbProcHandle_t *pbStartAutoRoundCamera(pbProcHandle_t *parent, s32 dir) {
 pbProcHandle_t *pbStartViewModeCamera(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbViewCamWork_t *work;
-    panel->process = dds3StartProcess(D_00535FA8, 0x3EE, 0, 0, viewModeCamera,
+    panel->id = dds3StartProcess(D_00535FA8, 0x3EE, 0, 0, viewModeCamera,
                                       (dds3ProcessFunc_t)deleteViewModeCamera, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
     work = sdfChipAllocDirect(0x30);
@@ -1043,7 +1043,7 @@ pbProcHandle_t *pbStartViewModeCamera(pbProcHandle_t *parent) {
     work->scale = 1.0f;
     SDF_VU0_COPYVECTOR(&work->eye, &aViewEye);
     SDF_VU0_COPYVECTOR(&work->target, &aViewTarget);
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 
@@ -1116,16 +1116,16 @@ void pbPreviousRecord(void) {
 pbProcHandle_t *pbStartClear(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
-    panel->process = dds3StartProcess(D_00535FC8, 0x3EE, 1, 1, ClearProc,
+    panel->id = dds3StartProcess(D_00535FC8, 0x3EE, 1, 1, ClearProc,
                                       (dds3ProcessFunc_t)DeleteClearProc, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
     work = sdfChipAllocDirect(4);
     work->value = 30;
     panel->data.value = work;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 

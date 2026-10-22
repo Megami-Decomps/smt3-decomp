@@ -30,7 +30,7 @@ typedef struct
     fldMapItem_t *items;
     u32 count;
     void *model;
-    fldMapPoint_t *pos;
+    fldMapPoint_t *pPos;
 } fldAmAreaData_t;
 
 typedef struct
@@ -968,7 +968,7 @@ void fldAutoMapSeqStart(void) {
         fldMapPoint_t *pos;
 
         D_00312150[i] = sdfModelMakeEarly(0, rec->model);
-        pos = rec->pos;
+        pos = rec->pPos;
         fldAutoMapModelPos[i].x = pos->x;
         fldAutoMapModelPos[i].y = pos->y;
         fldAutoMapModelPos[i].z = pos->z;
@@ -1287,7 +1287,7 @@ void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     fldAmAreaData_t *entry = fldAutoMapHeader;
     for (i = 0; i < (s32)fldAutoMapData; i++, entry++) {
         if (i == index) {
-            fldMapPoint_t *position = entry->pos;
+            fldMapPoint_t *position = entry->pPos;
             *x = position->x;
             *z = position->z;
             return;

@@ -126,12 +126,12 @@ typedef struct
 {
     s32 mapno;                         /* 0x00 */
     sdfMemHandle_t *mem_hndl;        /* 0x04 */
-    dds3SceneList_t *lists;            /* 0x08 */
-    dds3Basic_t *camera;               /* 0x0C */
+    dds3SceneList_t *basictable;            /* 0x08 */
+    dds3Basic_t *activecamera;               /* 0x0C */
     dds3Basic_t *unit;                 /* 0x10 */
     u32 fieldHandle;                  /* 0x14 */
     sdfMemHandle_t *hScrFileHandle;      /* 0x18 */
-    void *script;                     /* 0x1C */
+    void *pScrFileData;                     /* 0x1C */
     s32 visible;                      /* 0x20 */
     u8 unk24[0x1C];
 } dds3SceneBasic_t;
@@ -148,9 +148,9 @@ typedef struct
     u32 modelType;
     void *pModel;
     dds3Basic_t *control[8];
-    void *userValue;
+    void *pUserValue;
     struct sdfModelRootNode_t *modelRoot;
-    struct sdfMotionCtrlr_t *motion;
+    struct sdfMotionCtrlr_t *pMot;
     s32 MotMode;
     f32 MotSpeed;
     u32 svs;
@@ -165,7 +165,7 @@ typedef struct
     s32 status;
     s32 unk04;
     struct evtUnit_t *unit;
-    dds3ObjectBaseControlWorkData_t *control;
+    dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
     s32 EL_serialID;
     s32 ot;
     u8 unk18[8];
@@ -238,8 +238,8 @@ struct dds3PathBasicControl_t
 {
     s32 direction;
     u32 flags;
-    f32 duration;
-    f32 time;
+    f32 frameMax;
+    f32 frame;
     s32 spline;
     dds3PathKeyframes_t *pTransrate;
     dds3PathKeyframes_t *pRotation;

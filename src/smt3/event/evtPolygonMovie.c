@@ -83,7 +83,7 @@ typedef struct pmdFrameTable_t {
     u16 kind;
     u16 frame;
     u16 length;
-    s16 nameIndex;
+    s16 NameIndex;
     union {
         s8 b[8];
         s16 h[4];
@@ -325,8 +325,8 @@ void UnitFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
     dds3Basic_t *basic;
 
     if (f->frame == now) {
-        if (f->nameIndex >= 0) {
-            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 5, wdata->nameTable[f->nameIndex]);
+        if (f->NameIndex >= 0) {
+            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 5, wdata->nameTable[f->NameIndex]);
             if (basic != NULL) {
                 evtRunUnitMode(basic, f->data.b[0]);
             }
@@ -338,8 +338,8 @@ void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
 {
     dds3Basic_t *basic;
 
-    if (f->nameIndex >= 0) {
-        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, wdata->nameTable[f->nameIndex]);
+    if (f->NameIndex >= 0) {
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, wdata->nameTable[f->NameIndex]);
         if (basic != NULL) {
             if (evtCameraFrameState == 0) {
                 D_0054F8E0 = -1;
@@ -470,7 +470,7 @@ dds3Basic_t *AddEffect(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f)
     basic = NULL;
     scale[3] = 1.0f;
     for (i = 0; i < wdata->effectCount; i++) {
-        if (strcmp(wdata->nameTable1[wdata->effectTable[i].NameIndex], wdata->nameTable[f->nameIndex]) == 0) {
+        if (strcmp(wdata->nameTable1[wdata->effectTable[i].NameIndex], wdata->nameTable[f->NameIndex]) == 0) {
             kind = wdata->effectTable[i].Type;
             switch (kind) {
             case 0:
@@ -574,7 +574,7 @@ s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f
     if (basic == NULL) {
         return -1;
     }
-    basic->name = wdata->nameTable[f->nameIndex];
+    basic->name = wdata->nameTable[f->NameIndex];
     wdata->effectBasicTable[i] = basic;
     name = &f->data.b[4];
     out = parts;
@@ -616,7 +616,7 @@ void EffectFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
         if (f->data.h[3] >= 0) {
             target = wdata->nameTable[f->data.h[3]];
         }
-        f->data.b[0] = AddEffectTable(now, wdata, f, wdata->nameTable[f->nameIndex], target, f->data.b[5], 0);
+        f->data.b[0] = AddEffectTable(now, wdata, f, wdata->nameTable[f->NameIndex], target, f->data.b[5], 0);
     } else if (f->data.h[1] > 0) {
         if (now == f->data.h[1]) {
             DelEffectTable_evtPolygonMovie(wdata, f->data.b[0]);
@@ -687,7 +687,7 @@ void BEDFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTabl
         if (f->data.h[1] >= 0) {
             target = wdata->nameTable[f->data.h[1]];
         }
-        f->data.h[3] = AddEffectTable(now, wdata, f, wdata->nameTable[f->nameIndex], target, -1, f->data.b[4]);
+        f->data.h[3] = AddEffectTable(now, wdata, f, wdata->nameTable[f->NameIndex], target, -1, f->data.b[4]);
     } else if (f->data.h[0] > 0) {
         if (now == f->data.h[0]) {
             DelEffectTable_evtPolygonMovie(wdata, f->data.h[3]);
@@ -704,7 +704,7 @@ s32 LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTab
 
     if (f->frame == now) {
         if (f->data.h[0] >= 0) {
-            light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, wdata->nameTable[f->nameIndex]);
+            light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, wdata->nameTable[f->NameIndex]);
             if (light != NULL) {
                 unit = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 5, wdata->nameTable[f->data.h[0]]);
                 if (unit != NULL) {
@@ -775,7 +775,7 @@ void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameT
     ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
-        hokan = f->nameIndex;
+        hokan = f->NameIndex;
         soften1 = f->data.f[0];
         bias1 = f->data.f[1];
         key1 = wdata->slightTable[f->length];
@@ -1355,7 +1355,7 @@ void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blu
         key2 = &D_0032C840;
     }
     d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
-    d->blendControl = key1->blendControl;
+    d->blend = key1->blend;
     d->angle = evtHokanFloat(hokan, ratio, key1->angle, key2->angle);
     d->scale = evtHokanFloat(hokan, ratio, key1->scale, key2->scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
@@ -1363,7 +1363,7 @@ void evtHokanBlur2(s32 hokan, f32 ratio, dds3Effect_Blur_t *key1, dds3Effect_Blu
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            d->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->corners[positionOrCornerIndex][coordinateIndex], key2->corners[positionOrCornerIndex][coordinateIndex]);
+            d->xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->xy[positionOrCornerIndex][coordinateIndex], key2->xy[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
@@ -1382,9 +1382,9 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *
     if (key2 == NULL) {
         key2 = &D_0032C870;
     }
-    d->extent = evtHokanUInt(hokan, ratio, key1->extent, key2->extent);
+    d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
     d->source.color = evtHokanColor(hokan, ratio, key1->source.color, key2->source.color);
-    d->source.blendControl = key1->source.blendControl;
+    d->source.blend = key1->source.blend;
     d->source.angle = evtHokanFloat(hokan, ratio, key1->source.angle, key2->source.angle);
     d->source.scale = evtHokanFloat(hokan, ratio, key1->source.scale, key2->source.scale);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
@@ -1392,7 +1392,7 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            d->source.corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->source.corners[positionOrCornerIndex][coordinateIndex], key2->source.corners[positionOrCornerIndex][coordinateIndex]);
+            d->source.xy[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->source.xy[positionOrCornerIndex][coordinateIndex], key2->source.xy[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
@@ -1417,11 +1417,11 @@ void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_
     }
     for (cornerIndex = 0; cornerIndex < 2; cornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            d->corners[cornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->corners[cornerIndex][coordinateIndex], key2->corners[cornerIndex][coordinateIndex]);
+            d->xy[cornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->xy[cornerIndex][coordinateIndex], key2->xy[cornerIndex][coordinateIndex]);
         }
     }
     d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
-    d->blendControl = key1->blendControl;
+    d->blend = key1->blend;
 }
 #else
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanFilter);
@@ -1440,7 +1440,7 @@ void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam
     if (key2 == NULL) {
         key2 = &D_0032C8C0;
     }
-    d->extent = evtHokanUInt(hokan, ratio, key1->extent, key2->extent);
+    d->area = evtHokanUInt(hokan, ratio, key1->area, key2->area);
     for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
         d->center[centerCoordinateIndex] = evtHokanInt(
             hokan, ratio, key1->center[centerCoordinateIndex], key2->center[centerCoordinateIndex]);

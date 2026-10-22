@@ -5,8 +5,8 @@
 
 typedef struct {
     /* 0x00 */ dds3Basic_t *pTextureBasic;
-    /* 0x04 */ sdfItemArray_t *itemList;
-    /* 0x08 */ sdfMotionPlayBook_t *motionTable;
+    /* 0x04 */ sdfItemArray_t *pModelDef;
+    /* 0x08 */ sdfMotionPlayBook_t *pMotDef;
     /* 0x0C */ void *modelResource;
     /* 0x10 */ u8 unk10[8];
 } dds3ModelBasicWorkData_t;
@@ -23,11 +23,11 @@ dds3Basic_t *dds3AddModelBasic(s32 serialID, sdfItemArray_t *pModelDef, sdfMotio
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_STATICMODEL);
     dds3ModelBasicWorkData_t *work = basic->workdata;
 
-    work->motionTable = pMotDef;
+    work->pMotDef = pMotDef;
     basic->serialID = serialID;
     basic->name = pName;
     work->pTextureBasic = pTextureBasic;
-    work->itemList = pModelDef;
+    work->pModelDef = pModelDef;
     work->modelResource = NULL;
     return basic;
 }
@@ -38,8 +38,8 @@ dds3Basic_t *dds3AddModelBasic2(s32 serialID, sdfItemArray_t *pModelDef, sdfMoti
 
     basic->serialID = serialID;
     work->modelResource = pTexList;
-    work->itemList = pModelDef;
-    work->motionTable = pMotDef;
+    work->pModelDef = pModelDef;
+    work->pMotDef = pMotDef;
     basic->name = pName;
     return basic;
 }
@@ -49,9 +49,9 @@ sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic) {
     sdfModelRootNode_t *model;
 
     if (work->modelResource != NULL) {
-        model = sdfModelMake(work->modelResource, work->itemList);
+        model = sdfModelMake(work->modelResource, work->pModelDef);
     } else {
-        model = sdfModelMake(work->pTextureBasic->workdata, work->itemList);
+        model = sdfModelMake(work->pTextureBasic->workdata, work->pModelDef);
     }
     return model;
 }
@@ -64,8 +64,8 @@ sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *basic, sdfModelRootNode_t
         return NULL;
     }
     work = basic->workdata;
-    if (work->motionTable != NULL) {
-        motion = sdfMotionCtrlrNew(model, work->motionTable);
+    if (work->pMotDef != NULL) {
+        motion = sdfMotionCtrlrNew(model, work->pMotDef);
         sdfMotionChange(motion, 0, 1);
     }
     return motion;

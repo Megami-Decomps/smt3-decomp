@@ -59,7 +59,7 @@ typedef struct SdfKeyPoolNode {
 typedef struct sdfSortOtNode_tag {
     struct sdfSortOtNode_tag *right; /* 0x00 */
     struct sdfSortOtNode_tag *left;  /* 0x04 */
-    struct SdfKeyTreeItem *item;  /* 0x08 */
+    struct SdfKeyTreeItem *tag;  /* 0x08 */
     s32 balance;                  /* 0x0C */
 } sdfSortOtNode_tag;
 

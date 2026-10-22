@@ -126,15 +126,15 @@ struct frTextBank_t {
 
 /* Encoded text cursor and pending glyph updates; distinct from a glyph (0x20). */
 struct frMsgInfo_t {
-    s32 x;
-    s32 y;
-    s32 z;
-    s8 fontIndex;
-    s8 firstOption;
-    s8 secondOption;
+    s32 X;
+    s32 Y;
+    s32 Z;
+    s8 Style;
+    s8 ColNo;
+    s8 Tp;
     u8 Spd;
     u8 *pMsg;
-    frFontHandle_t *glyphChain;
+    frFontHandle_t *pFRQ;
     s32 Ofs;
     s8 FrqFlag;
     s8 RetFlag;
@@ -1449,7 +1449,7 @@ void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo) {
         return;
     }
     length = strlen((const char *)text);
-    lastFontIndex = pMsgInfo->fontIndex;
+    lastFontIndex = pMsgInfo->Style;
     for (i = 0; i < length; i++) {
         s8 fontIndex;
 
@@ -1463,30 +1463,30 @@ void frCreateVariableRequest(u8 VarNo, frMsgInfo_t *pMsgInfo) {
             encoded[1] = 0;
             code = encoded[0];
         }
-        fontIndex = (u8)pMsgInfo->fontIndex;
+        fontIndex = (u8)pMsgInfo->Style;
         if (fontIndex != lastFontIndex) {
-            frFontHandle_t *chain = pMsgInfo->glyphChain;
+            frFontHandle_t *chain = pMsgInfo->pFRQ;
 
             if (chain != NULL) {
                 if (chain->firstChild != NULL) {
-                    pMsgInfo->glyphChain = frLinkFontString(D_0054F430, 0, pMsgInfo->firstOption, pMsgInfo->secondOption, chain);
-                    chain = pMsgInfo->glyphChain;
+                    pMsgInfo->pFRQ = frLinkFontString(D_0054F430, 0, pMsgInfo->ColNo, pMsgInfo->Tp, chain);
+                    chain = pMsgInfo->pFRQ;
                 }
             } else {
-                pMsgInfo->glyphChain = frLinkFontString(D_0054F430, 0, pMsgInfo->firstOption, pMsgInfo->secondOption, NULL);
-                chain = pMsgInfo->glyphChain;
+                pMsgInfo->pFRQ = frLinkFontString(D_0054F430, 0, pMsgInfo->ColNo, pMsgInfo->Tp, NULL);
+                chain = pMsgInfo->pFRQ;
             }
             frSetDrawSpeed(chain, pMsgInfo->Spd);
             lastFontIndex = fontIndex;
         }
-        pMsgInfo->glyphChain = frSetFontString(encoded, fontIndex, pMsgInfo->firstOption, pMsgInfo->secondOption, pMsgInfo->glyphChain, i == 0);
-        frSetFontSpace(pMsgInfo->glyphChain, gMessageSpaceX);
+        pMsgInfo->pFRQ = frSetFontString(encoded, fontIndex, pMsgInfo->ColNo, pMsgInfo->Tp, pMsgInfo->pFRQ, i == 0);
+        frSetFontSpace(pMsgInfo->pFRQ, gMessageSpaceX);
         frGetMessageCode(code);
     }
 }
 
 void frCreateNewHandle(frMsgInfo_t *pMsgInfo) {
-    frFontHandle_t *chain = pMsgInfo->glyphChain;
+    frFontHandle_t *chain = pMsgInfo->pFRQ;
 
     if (chain != NULL) {
         if (chain->firstChild == NULL) {
@@ -1494,19 +1494,19 @@ void frCreateNewHandle(frMsgInfo_t *pMsgInfo) {
         }
     }
     if (pMsgInfo->FrqFlag != 0) {
-        pMsgInfo->glyphChain = frLinkFontString(D_0054F430, 0, pMsgInfo->firstOption, pMsgInfo->secondOption, chain);
-        frSetDrawSpeed(pMsgInfo->glyphChain, pMsgInfo->Spd);
+        pMsgInfo->pFRQ = frLinkFontString(D_0054F430, 0, pMsgInfo->ColNo, pMsgInfo->Tp, chain);
+        frSetDrawSpeed(pMsgInfo->pFRQ, pMsgInfo->Spd);
         pMsgInfo->FrqFlag = 0;
     }
     if (pMsgInfo->RetFlag != 0) {
-        frSetDrawPosition(pMsgInfo->glyphChain, pMsgInfo->x, pMsgInfo->y);
+        frSetDrawPosition(pMsgInfo->pFRQ, pMsgInfo->X, pMsgInfo->Y);
         pMsgInfo->RetFlag = 0;
     }
 }
 
 /* Advance by eight times cursor spacing and request both context updates. */
 void frMessageReturnCode(frMsgInfo_t *pMsgInfo) {
-    pMsgInfo->y += gMessageStepY * FR_FONT_CONTEXT_CURSOR_SCALE;
+    pMsgInfo->Y += gMessageStepY * FR_FONT_CONTEXT_CURSOR_SCALE;
     pMsgInfo->FrqFlag = 1;
     pMsgInfo->RetFlag = 1;
 }
@@ -1518,9 +1518,9 @@ void frPushTagChar(frMsgInfo_t *ctx, u16 code) {
     encoded[0] = (u32)code >> FR_FONT_BYTE_SHIFT;
     encoded[2] = 0;
     frCreateNewHandle(ctx);
-    ctx->glyphChain = frSetFontString(encoded, ctx->fontIndex, ctx->firstOption, ctx->secondOption, ctx->glyphChain, 0);
-    frSetFontSpace(ctx->glyphChain, gMessageSpaceX);
-    frSetPriority(ctx->glyphChain, ctx->z);
+    ctx->pFRQ = frSetFontString(encoded, ctx->Style, ctx->ColNo, ctx->Tp, ctx->pFRQ, 0);
+    frSetFontSpace(ctx->pFRQ, gMessageSpaceX);
+    frSetPriority(ctx->pFRQ, ctx->Z);
 }
 
 /* NON_MATCHING: 280 of 322 words differ (first at +0x44). */
@@ -1530,22 +1530,22 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
     s32 argCount = code & 0xF;
     s32 pos = *offset;
     u8 *text = mi->pMsg;
-    s8 firstOption = mi->firstOption;
+    s8 firstOption = mi->ColNo;
 
     code = (code << FR_FONT_BYTE_SHIFT) | text[pos];
     pos++;
     *offset = pos;
     switch (code) {
     case 0xF206:
-        mi->fontIndex = text[pos] - 1;
+        mi->Style = text[pos] - 1;
         *offset = pos + 2;
         break;
     case 0xF202:
-        mi->firstOption = text[pos] - 1;
+        mi->ColNo = text[pos] - 1;
         *offset = pos + 2;
         break;
     case 0xF209:
-        mi->secondOption = text[pos] - 1;
+        mi->Tp = text[pos] - 1;
         *offset = pos + 2;
         break;
     case 0xF207:
@@ -1565,8 +1565,8 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         *offset = pos + 2;
         nameIndex = text[pos] - 1;
         frCreateNewHandle(mi);
-        mi->glyphChain = frGetNameFRQ(nameIndex, mi->glyphChain, firstOption);
-        frSetFontSpace(mi->glyphChain, gMessageSpaceX);
+        mi->pFRQ = frGetNameFRQ(nameIndex, mi->pFRQ, firstOption);
+        frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         break;
     }
     case 0xF20B: {
@@ -1575,8 +1575,8 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         *offset = pos + 2;
         nameIndex = text[pos] - 1;
         frCreateNewHandle(mi);
-        mi->glyphChain = frGetName1NFRQ(nameIndex, mi->glyphChain, firstOption);
-        frSetFontSpace(mi->glyphChain, gMessageSpaceX);
+        mi->pFRQ = frGetName1NFRQ(nameIndex, mi->pFRQ, firstOption);
+        frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         break;
     }
     case 0xF20C: {
@@ -1585,8 +1585,8 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         *offset = pos + 2;
         nameIndex = text[pos] - 1;
         frCreateNewHandle(mi);
-        mi->glyphChain = frGetName2NFRQ(nameIndex, mi->glyphChain, firstOption);
-        frSetFontSpace(mi->glyphChain, gMessageSpaceX);
+        mi->pFRQ = frGetName2NFRQ(nameIndex, mi->pFRQ, firstOption);
+        frSetFontSpace(mi->pFRQ, gMessageSpaceX);
         break;
     }
     case 0xF20D: {
@@ -1595,10 +1595,10 @@ s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi) {
         *offset = pos + 2;
         nameIndex = text[pos] - 1;
         frCreateNewHandle(mi);
-        mi->glyphChain = frGetCNameFRQ(nameIndex, mi->fontIndex, mi->glyphChain, firstOption);
+        mi->pFRQ = frGetCNameFRQ(nameIndex, mi->Style, mi->pFRQ, firstOption);
         frEnableMode(1);
-        frSetFontSpace(mi->glyphChain, gMessageSpaceX);
-        frSetDrawSpeed(mi->glyphChain, mi->Spd);
+        frSetFontSpace(mi->pFRQ, gMessageSpaceX);
+        frSetDrawSpeed(mi->pFRQ, mi->Spd);
         break;
     }
     case 0xF20E:
@@ -1802,30 +1802,30 @@ frFontHandle_t *frAnalyzeMessage(frMsgInfo_t *pMsgInfo) {
         if (code < 0x80) {
             encoded[0] = code;
             encoded[1] = 0;
-            pMsgInfo->glyphChain = frSetFontString(encoded, pMsgInfo->fontIndex, pMsgInfo->firstOption, pMsgInfo->secondOption, pMsgInfo->glyphChain, isFirst);
+            pMsgInfo->pFRQ = frSetFontString(encoded, pMsgInfo->Style, pMsgInfo->ColNo, pMsgInfo->Tp, pMsgInfo->pFRQ, isFirst);
         } else {
             code = (code << FR_FONT_BYTE_SHIFT) | pMsgInfo->pMsg[(*offset)++];
             if (code <= 0xC07F) {
                 encoded[0] = (u32)code >> FR_FONT_BYTE_SHIFT;
                 encoded[1] = code;
                 encoded[2] = 0;
-                pMsgInfo->glyphChain = frSetFontString(encoded, pMsgInfo->fontIndex, pMsgInfo->firstOption, pMsgInfo->secondOption, pMsgInfo->glyphChain, isFirst);
+                pMsgInfo->pFRQ = frSetFontString(encoded, pMsgInfo->Style, pMsgInfo->ColNo, pMsgInfo->Tp, pMsgInfo->pFRQ, isFirst);
             } else {
                 code -= 0x4000;
                 encoded[0] = (u32)code >> FR_FONT_BYTE_SHIFT;
                 encoded[1] = code;
                 encoded[2] = 0;
-                pMsgInfo->glyphChain = frSetFontString(encoded, FR_FONT_TEMPORARY_SLOT, pMsgInfo->firstOption, pMsgInfo->secondOption, pMsgInfo->glyphChain, isFirst);
+                pMsgInfo->pFRQ = frSetFontString(encoded, FR_FONT_TEMPORARY_SLOT, pMsgInfo->ColNo, pMsgInfo->Tp, pMsgInfo->pFRQ, isFirst);
             }
             frGetMessageCode(code & 0xFFFF);
         }
         isFirst = 0;
-        frSetFontSpace(pMsgInfo->glyphChain, gMessageSpaceX);
-        frSetPriority(pMsgInfo->glyphChain, pMsgInfo->z);
+        frSetFontSpace(pMsgInfo->pFRQ, gMessageSpaceX);
+        frSetPriority(pMsgInfo->pFRQ, pMsgInfo->Z);
     }
     frDisableMode(1);
     frEnableMode(2);
-    return pMsgInfo->glyphChain;
+    return pMsgInfo->pFRQ;
 }
 #else
 INCLUDE_ASM(const s32, "interface/frFont", frAnalyzeMessage);
@@ -1842,15 +1842,15 @@ frFontHandle_t *MessageRequestEx(s32 X, s32 Y, s32 Style, s32 ColNo, s32 Tp, s32
 frFontHandle_t *MessageRequestEx2(s32 X, s32 Y, s32 Z, s32 Style, s32 ColNo, s32 Tp, s32 Spd, u8 *pMsg, frFontHandle_t *pFRQ) {
     frMsgInfo_t args;
 
-    args.x = X;
-    args.y = Y;
-    args.z = Z << 4;
-    args.fontIndex = Style;
-    args.firstOption = ColNo;
-    args.secondOption = Tp;
+    args.X = X;
+    args.Y = Y;
+    args.Z = Z << 4;
+    args.Style = Style;
+    args.ColNo = ColNo;
+    args.Tp = Tp;
     args.Spd = Spd;
     args.pMsg = pMsg;
-    args.glyphChain = pFRQ;
+    args.pFRQ = pFRQ;
     args.Ofs = 0;
     args.FrqFlag = 1;
     args.RetFlag = 1;

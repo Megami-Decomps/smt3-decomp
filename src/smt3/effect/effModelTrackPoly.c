@@ -8,14 +8,14 @@ typedef struct
 {
     u32 blend;
     u32 color;
-    s32 capacity;
+    s32 point;
     s32 count;
     s32 head;
     s32 split;
-    u128 *vertices;
+    u128 *pVertex;
     u32 *colors;
     sdfMat_t *pMat;
-    sdfMemHandle_t *allocation;
+    sdfMemHandle_t *hMem;
 } dds3HermitianTrackPoly_tag;
 
 typedef struct
@@ -27,7 +27,7 @@ typedef struct
     f32 endFrame;
     u32 sampleInterval;
     s32 historyLength;
-    u32 unk1C;
+    u32 split;
     u32 blend;
     u32 gradientColors[4];
 } Eff_ModelTrackPolyParam_t;
@@ -41,7 +41,7 @@ typedef struct
 
 typedef struct
 {
-    effModelTrackPoly_t **items;
+    effModelTrackPoly_t **hPolyList;
     u32 count;
     sdfMemHandle_t *handle;
 } effMTPolyListHandle_t;
@@ -159,7 +159,7 @@ effModelTrackPoly_t *Eff_ModelTrackPolyCreate(Eff_ModelTrackPolyParam_t *pParam)
         sword.blend = 1;
         work->trackPoly = (dds3HermitianTrackPoly_tag *)effSwordTrackCreate(&sword);
     } else {
-        work->params.unk1C = 6;
+        work->params.split = 6;
         work->updateCount = 0;
         work->trackPoly = dds3HermitianTrackPolyCreate(work->params.historyLength, 6);
         dds3HermitianTrackPolySetVC(work->trackPoly, pParam->gradientColors);
@@ -316,10 +316,10 @@ effMTPolyListHandle_t *Eff_ModelTrackPolyListCreate(Eff_ModelTrackPolyParam_t *p
     u32 workIndex;
 
     list->handle = handle;
-    list->items = (effModelTrackPoly_t **)(list + 1);
+    list->hPolyList = (effModelTrackPoly_t **)(list + 1);
     list->count = number;
     for (workIndex = 0; workIndex < number; workIndex++) {
-        list->items[workIndex] = Eff_ModelTrackPolyCreate(pParam);
+        list->hPolyList[workIndex] = Eff_ModelTrackPolyCreate(pParam);
     }
     return list;
 }
@@ -329,22 +329,22 @@ void Eff_ModelTrackPolyListDelete(effMTPolyListHandle_t *list) {
     u32 workIndex = 0;
 
     while (workIndex < count) {
-        Eff_ModelTrackPolyDelete(list->items[workIndex]);
+        Eff_ModelTrackPolyDelete(list->hPolyList[workIndex]);
         workIndex++;
     }
     sdfMemFreeDirect(list->handle);
 }
 
 void Eff_ModelTrackPolyListVertexSet(effMTPolyListHandle_t *hMTPolyList, s32 index, const u128 *pVertex) {
-    Eff_ModelTrackPolyVertexSet(hMTPolyList->items[index], pVertex);
+    Eff_ModelTrackPolyVertexSet(hMTPolyList->hPolyList[index], pVertex);
 }
 
 void Eff_ModelTrackPolyListReset(effMTPolyListHandle_t *hMTPolyList, s32 index) {
-    Eff_ModelTrackPolyReset(hMTPolyList->items[index]);
+    Eff_ModelTrackPolyReset(hMTPolyList->hPolyList[index]);
 }
 
 void Eff_ModelTrackPolyListColorSet(effMTPolyListHandle_t *hMTPolyList, s32 index, u32 abgr) {
-    Eff_ModelTrackPolyColorSet(hMTPolyList->items[index], abgr);
+    Eff_ModelTrackPolyColorSet(hMTPolyList->hPolyList[index], abgr);
 }
 
 void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *hMTPolyList) {
@@ -352,7 +352,7 @@ void Eff_ModelTrackPolyListDrawOnly(effMTPolyListHandle_t *hMTPolyList) {
     u32 workIndex = 0;
 
     while (workIndex < count) {
-        Eff_ModelTrackPolyDrawOnly(hMTPolyList->items[workIndex]);
+        Eff_ModelTrackPolyDrawOnly(hMTPolyList->hPolyList[workIndex]);
         workIndex++;
     }
 }
@@ -428,15 +428,15 @@ dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 face, s32 split) {
     u8 *cursor = (u8 *)sdfMemLock(handle);
     dds3HermitianTrackPoly_tag *data = (dds3HermitianTrackPoly_tag *)(cursor + bytes);
 
-    data->vertices = (u128 *)cursor;
+    data->pVertex = (u128 *)cursor;
     cursor += count * sizeof(u128);
     data->blend = 2;
     data->color = 0x80808080;
-    data->capacity = count;
+    data->point = count;
     data->count = 0;
     data->head = 2;
     data->split = split;
-    data->allocation = handle;
+    data->hMem = handle;
     data->colors = (u32 *)cursor;
     data->pMat = sdfMatNew();
     sdfMatSetConstant((sdfMat_t *)data->pMat, 1.0f);
@@ -448,7 +448,7 @@ dds3HermitianTrackPoly_tag *dds3HermitianTrackPolyCreate(s32 face, s32 split) {
 
 void pMeshDelete(dds3HermitianTrackPoly_tag *hPoly) {
     sdfMatFreeDelayed((sdfMat_t *)hPoly->pMat);
-    sdfMemFreeDirect(hPoly->allocation);
+    sdfMemFreeDirect(hPoly->hMem);
 }
 
 void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_tag *hPoly) {
@@ -463,7 +463,7 @@ void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_tag *hPoly, u32 blend
 
 void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_tag *hPoly, u32 *pABGR) {
     f32 t = 0.0f;
-    u32 count = hPoly->capacity >> 1;
+    u32 count = hPoly->point >> 1;
     f32 step = 1.0f / count;
     u32 i = 0;
     u32 *colors = hPoly->colors;
@@ -485,9 +485,9 @@ void dds3HermitianTrackPolyGetVertex(dds3HermitianTrackPoly_tag *hPoly, void *pV
     u8 *vertex;
 
     if (index < 2) {
-        index += hPoly->capacity - 2;
+        index += hPoly->point - 2;
     }
-    vertex = (u8 *)hPoly->vertices + index * 16;
+    vertex = (u8 *)hPoly->pVertex + index * 16;
     SDF_VU0_COPYVECTOR(pVertex0, vertex);
     SDF_VU0_COPYVECTOR(pVertex1, vertex + 16);
 }
@@ -496,20 +496,20 @@ void dds3HermitianTrackPolySetCurrent(dds3HermitianTrackPoly_tag *hPoly, s32 fra
     s32 pos = hPoly->head + ((hPoly->split - 1) * (frame - 1) + frame) * -2;
 
     if (pos < 2) {
-        pos += hPoly->capacity - 2;
+        pos += hPoly->point - 2;
     }
     hPoly->head = pos;
 }
 
 void dds3HermitianTrackPolySetVertexSub(dds3HermitianTrackPoly_tag *hPoly, const u128 *pVertex) {
     s32 position = hPoly->head;
-    u128 *points = hPoly->vertices;
+    u128 *points = hPoly->pVertex;
     s32 count;
 
     SDF_VU0_COPYVECTOR(&points[position], pVertex);
     SDF_VU0_COPYVECTOR(&points[position + 1], pVertex + 1);
     position += 2;
-    count = hPoly->capacity;
+    count = hPoly->point;
     hPoly->head = position;
     if (position == count) {
         SDF_VU0_COPYVECTOR(&points[0], pVertex);
@@ -658,7 +658,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
     if (runStart[0] < 2) {
         wrappedStartOffset = runStart[0] - 2;
         runStart[1] = 0;
-        runStart[0] = wrappedStartOffset + hPoly->capacity;
+        runStart[0] = wrappedStartOffset + hPoly->point;
         runPointCount[0] = -wrappedStartOffset;
         runPointCount[1] = activePointCount - runPointCount[0] + 2;
     } else {
@@ -668,7 +668,7 @@ void dds3HermitianTrackPolyDraw(dds3HermitianTrackPoly_tag *hPoly) {
     D_0056AF00.vertexColor = hPoly->colors;
     for (runIndex = 0; runIndex < 2; runIndex++) {
         draw = &D_0056AF00;
-        draw->vertex = (sdfVector4_t *)&hPoly->vertices[runStart[runIndex]];
+        draw->vertex = (sdfVector4_t *)&hPoly->pVertex[runStart[runIndex]];
         draw->color = hPoly->color;
         draw->faceCount = 0x10;
         draw->pointCount = 0x12;
@@ -790,7 +790,7 @@ void effSwordTrackPolygonDraw(effSwordTrack_t *hSwordTrack)
     if (runStart[0] < 2) {
         runStart[0] -= 2;
         runPointCount[0] = -runStart[0];
-        runStart[0] += data->capacity;
+        runStart[0] += data->point;
         runPointCount[1] = activePointCount - runPointCount[0] + 2;
         runStart[1] = 0;
     } else {
@@ -801,7 +801,7 @@ void effSwordTrackPolygonDraw(effSwordTrack_t *hSwordTrack)
     D_0056AF00.vertexColor = NULL;
     for (runIndex = 0; runIndex < 2; runIndex++) {
         draw = &D_0056AF00;
-        draw->vertex = (sdfVector4_t *)&data->vertices[runStart[runIndex]];
+        draw->vertex = (sdfVector4_t *)&data->pVertex[runStart[runIndex]];
         draw->faceCount = 0x10;
         draw->pointCount = 0x12;
         pointsRemaining = runPointCount[runIndex];

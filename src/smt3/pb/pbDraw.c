@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -52,7 +52,7 @@ typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -95,10 +95,10 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 pbProcHandle_t *pbInitExitDraw(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbMatWork_t *work;
-    panel->process = dds3StartProcess("pb-draw-exit", 0x2AFD, 1, 1, pb_draw_exit_Process,
+    panel->id = dds3StartProcess("pb-draw-exit", 0x2AFD, 1, 1, pb_draw_exit_Process,
                                       (dds3ProcessFunc_t)pb_draw_exit_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->x = 10;
     panel->y = 10;
@@ -106,7 +106,7 @@ pbProcHandle_t *pbInitExitDraw(pbProcHandle_t *parent) {
     work = sdfChipAllocDirect(0xC);
     panel->data.mat = work;
     memset(work, 0, 0xC);
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     work->unk00 = 0;
     work->unk06 = 0;
     work->unk04 = 0;
@@ -134,17 +134,17 @@ void pbSetExitPos(pbProcHandle_t *p, s32 x, s32 y) {
 pbProcHandle_t *pbInitMapBaseDraw(pbProcHandle_t *parent, s32 sw) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     void *work;
-    panel->process = dds3StartProcess("pb-draw-mapbase", 0x2AFD, 1, 1, pb_draw_mapbase_Process,
+    panel->id = dds3StartProcess("pb-draw-mapbase", 0x2AFD, 1, 1, pb_draw_mapbase_Process,
                                       (dds3ProcessFunc_t)pb_draw_mapbase_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0x10000;
     work = sdfChipAllocDirect(0xC);
     panel->data.mat = work;
     memset(work, 0, 0xC);
     panel->data.mat->value = sw;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     pbInitMapBaseMat(panel);
     return panel;
 }

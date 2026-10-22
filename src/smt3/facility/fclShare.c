@@ -37,11 +37,11 @@ typedef struct
     /* 0x0A */ u16 unk_0A;
     /* 0x0C */ u16 unk_0C;
     /* 0x0E */ u16 unk_0E;
-    /* 0x10 */ s32 unk_10;
+    /* 0x10 */ s32 X;
     /* 0x14 */ s32 unk_14;
-    /* 0x18 */ s32 unk_18;
+    /* 0x18 */ s32 Z;
     /* 0x1C */ u8 color[4];
-    /* 0x20 */ u8 unk_20;
+    /* 0x20 */ u8 Flag;
 } fclSprite_t;
 
 extern void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
@@ -120,11 +120,11 @@ void fclSetSpriteEx(fclSprite_t *pSprite, fclSpriteRect_t *pSpriteBase, s32 X, s
     s32 v0;
     s32 u1;
 
-    pSprite->unk_10 = X << 4;
+    pSprite->X = X << 4;
     pSprite->tex = TexHandle;
     pSprite->unk_14 = Y << 3;
-    pSprite->unk_18 = Z;
-    pSprite->unk_20 = Flag;
+    pSprite->Z = Z;
+    pSprite->Flag = Flag;
     fclSetSpriteColor((u8 *)pSprite, Col);
     r = (fclSpriteRect_t *)&pSprite->unk_04;
     *r = *pSpriteBase;
@@ -153,13 +153,13 @@ void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32
     pSprite->unk_04 = Xsize;
     pSprite->unk_0E = V2;
     pSprite->tex = TexHandle;
-    pSprite->unk_18 = Z;
+    pSprite->Z = Z;
     pSprite->unk_06 = Ysize;
     pSprite->unk_08 = U1;
     pSprite->unk_0A = V1;
     pSprite->unk_0C = U2;
     pSprite->unk_14 = 0;
-    pSprite->unk_10 = 0;
+    pSprite->X = 0;
     fclSetSpriteColor((u8 *)pSprite, Col);
 }
 
@@ -228,10 +228,10 @@ void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSpri
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = x1 | ((u64)y1 << 32);
-    prim[5] = pSprite->unk_18;
+    prim[5] = pSprite->Z;
     prim[6] = uv[2] | ((u64)uv[3] << 32);
     prim[8] = x0 | ((u64)y0 << 32);
-    prim[9] = pSprite->unk_18;
+    prim[9] = pSprite->Z;
     switch (AlphaFlag) {
     case 1:
         fclDrawPanelSprite2(0x48, OtNo);
@@ -369,16 +369,16 @@ void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = pt[0].x | ((u64)pt[0].y << 32);
-    prim[5] = (u32)(pSprite->unk_18 >> 4);
+    prim[5] = (u32)(pSprite->Z >> 4);
     prim[8] = uv[2] | ((u64)uv[1] << 32);
     prim[10] = pt[1].x | ((u64)pt[1].y << 32);
-    prim[11] = (u32)(pSprite->unk_18 >> 4);
+    prim[11] = (u32)(pSprite->Z >> 4);
     prim[14] = uv[0] | ((u64)uv[3] << 32);
     prim[16] = pt[2].x | ((u64)pt[2].y << 32);
-    prim[17] = (u32)(pSprite->unk_18 >> 4);
+    prim[17] = (u32)(pSprite->Z >> 4);
     prim[20] = uv[2] | ((u64)uv[3] << 32);
     prim[22] = pt[3].x | ((u64)pt[3].y << 32);
-    prim[23] = (u32)(pSprite->unk_18 >> 4);
+    prim[23] = (u32)(pSprite->Z >> 4);
     switch (AlphaFlag) {
     case 1:
         fclDrawPanelSprite2(0x48, OtNo);

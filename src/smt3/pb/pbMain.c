@@ -17,8 +17,8 @@ typedef struct pbGroupDB_t pbGroupDB_t;
 typedef struct
 {
     s32 dispStat;
-    s16 cellX, cellY;
-    s32 rot;
+    s16 x, y;
+    s32 dir;
     u8 unk0C[4];
     sdfVector4_t pos;
     union { s32 field; mdlObj_t *model; };
@@ -69,7 +69,7 @@ typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 /* Common panel work header: its constructor installs process and data links. */
 struct pbProcHandle_t
 {
-    dds3ProcessID_t *process;
+    dds3ProcessID_t *id;
     union { u32 flags; struct { u16 unk04, state; }; };
     s16 x, y;
     union { pbPanelValue_t *value; pbGroupDB_t *groupDB; pbMyChar_t *chara;
@@ -193,28 +193,28 @@ s32 pbGetMoveChar(void) {
 pbProcHandle_t *pbStartDummy(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
     pbPanelValue_t *work;
-    panel->process = dds3StartProcess("pb-proc-dummy", 0x3EE, 1, 1, pb_proc_dummy_Process,
+    panel->id = dds3StartProcess("pb-proc-dummy", 0x3EE, 1, 1, pb_proc_dummy_Process,
                                       (dds3ProcessFunc_t)pb_proc_dummy_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     work = sdfChipAllocDirect(4);
     work->value = 0;
     panel->data.value = work;
     panel->flags = 0;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 
 pbProcHandle_t *pbStartBackGround(pbProcHandle_t *parent) {
     pbProcHandle_t *panel = sdfChipAllocDirect(0x10);
-    panel->process = dds3StartProcess(D_00535E10, 0x2AFD, 1, 1, pb_draw_bg_Process,
+    panel->id = dds3StartProcess(D_00535E10, 0x2AFD, 1, 1, pb_draw_bg_Process,
                                       (dds3ProcessFunc_t)pb_draw_bg_Shutdown, NULL);
     if (parent != NULL) {
-        dds3LinkProcess(parent->process, panel->process);
+        dds3LinkProcess(parent->id, panel->id);
     }
     panel->flags = 0;
-    dds3SetProcessData(panel->process, panel);
+    dds3SetProcessData(panel->id, panel);
     return panel;
 }
 
@@ -283,7 +283,7 @@ s8 func_001D4BE8(void) {
 void func_001D4C08(pbProcHandle_t *panel) {
     if (pbMapIsValid() == 0) {
         dds3FadeOut(0, 0, 0, 1);
-        dds3ResetProcessFlag(panel->process, 0x10, 1);
+        dds3ResetProcessFlag(panel->id, 0x10, 1);
         if (pbGetMoveChar() != 0) {
             if (pbGetMoveChar() != 0) {
                 ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x40000;

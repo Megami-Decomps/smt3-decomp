@@ -8,7 +8,7 @@
 typedef struct
 {
     /* 0x0000 */ u16 unk_00;
-    /* 0x0002 */ u16 index;
+    /* 0x0002 */ u16 Index;
     /* 0x0004 */ u8 Shift;
     /* 0x0005 */ u8 unk_05[3];
 } cmpCursorPos_t;
@@ -64,11 +64,11 @@ typedef struct
     /* 0x08 */ s16 unk_08;
     /* 0x0A */ s16 unk_0A;
     /* 0x0C */ s32 flags;
-    /* 0x10 */ s16 unk_10;
-    /* 0x12 */ u16 unk_12;
+    /* 0x10 */ s16 act;
+    /* 0x12 */ u16 deact;
     /* 0x14 */ s32 ctr_act;
     /* 0x18 */ s32 ctr_deact;
-    /* 0x1C */ s32 phase;
+    /* 0x1C */ s32 ctr;
     /* 0x20 */ s32 count;
 } fclRibbon_t;
 
@@ -604,7 +604,7 @@ void PushListwinCursor(fclEncyc_instance_t *pinst, lstListWindow_t *plistwin, s3
 {
     cmpCursorPos_t *cur = &plistwin->cursorPos;
 
-    pinst->listCursor[Stack * 2] = cur->index;
+    pinst->listCursor[Stack * 2] = cur->Index;
     pinst->listCursor[Stack * 2 + 1] = cur->Shift;
 }
 

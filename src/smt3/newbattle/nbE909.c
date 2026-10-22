@@ -262,14 +262,14 @@ extern void nbPanelAllHide(void);
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
     s32 unk_04;
-    s32 unk_08;
-    s32 step;
-    s32 frame;
+    s32 time;
+    s32 seq;
+    s32 seqtime;
     void *unk_14;
     void (*unk_18)(dds3ProcessID_t *id);
-    void *unk_1C;
+    void *file;
     nbPacHandle_t *unk_20;
-    void *unk_24;
+    void *mem;
 } nbEventProcessData_t;
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
@@ -331,7 +331,7 @@ s32 nbE910_Test(nbEventProcessData_t *e)
 
 s32 nbE910_End(nbEventProcessData_t *e)
 {
-    if (e->frame >= 0x15) {
+    if (e->seqtime >= 0x15) {
         printf(D_00546870);
         e->data->endtype = 8;
         return 1;

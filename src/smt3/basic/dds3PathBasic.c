@@ -66,7 +66,7 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *pControl)
 
     if (pControl->flags & DDS3_PATH_POSITION_CHANNEL) {
         keys = pControl->pTransrate;
-        dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
+        dds3PathEvalSpline(&segment, &weight, keys, pControl->frame);
         points = keys->data.position;
         SDF_VU0_SETVECTOR_X(points[segment + 1][0]);
         SDF_VU0_SETVECTOR_Y(points[segment + 1][1]);
@@ -95,7 +95,7 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl)
 
     if (pControl->flags & DDS3_PATH_ROTATION_CHANNEL) {
         keys = pControl->pRotation;
-        dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
+        dds3PathEvalSpline(&segment, &weight, keys, pControl->frame);
         quaternions = keys->data.rotation;
         first = &quaternions[segment];
         SDF_VU0_LOADVECTOR(first);
@@ -117,7 +117,7 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLight
 
     if (work->flags & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
         keys = work->transformKeys;
-        dds3PathEvalSpline(&segment, &weight, keys, work->time);
+        dds3PathEvalSpline(&segment, &weight, keys, work->frame);
         entries = (fldResourceLightPath_t *)keys->data.transform;
         SDF_VU0_SETVECTOR_X(entries[segment + 1].InsideR);
         SDF_VU0_SETVECTOR_Y(entries[segment + 1].OutsideR);
@@ -175,7 +175,7 @@ f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *pControl)
 
     if (pControl->flags & DDS3_PATH_SCALAR_CHANNEL) {
         keys = pControl->pFovy;
-        dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
+        dds3PathEvalSpline(&segment, &weight, keys, pControl->frame);
         values = keys->data.scalar;
         return values[segment] * (1.0f - weight) + values[segment + 1] * weight;
     }
@@ -190,18 +190,18 @@ s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work)
         return 1;
     }
     if (work->direction == DDS3_PATHBASIC_CONTROL_FORWARD) {
-        if (work->duration > work->time) {
-            work->time = work->time + 1.0f;
+        if (work->frameMax > work->frame) {
+            work->frame = work->frame + 1.0f;
         } else if (work->flags & DDS3_PATHBASIC_FLAG_LOOP) {
-            work->time = 0.0f;
+            work->frame = 0.0f;
         } else {
             result = 0;
         }
     } else if (work->direction == DDS3_PATHBASIC_CONTROL_BACK) {
-        if (work->time > 0.0f) {
-            work->time = work->time - 1.0f;
+        if (work->frame > 0.0f) {
+            work->frame = work->frame - 1.0f;
         } else if (work->flags & DDS3_PATHBASIC_FLAG_LOOP) {
-            work->time = work->duration;
+            work->frame = work->frameMax;
         } else {
             result = 0;
         }
@@ -221,12 +221,12 @@ s32 dds3PathBasicControlGetMode(dds3PathBasicControl_t *work)
 
 void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *pControl, f32 ratio)
 {
-    pControl->time = ratio * pControl->duration;
+    pControl->frame = ratio * pControl->frameMax;
 }
 
 f32 dds3PathBasicControlGetRatio(dds3PathBasicControl_t *pControl)
 {
-    return pControl->time / pControl->duration;
+    return pControl->frame / pControl->frameMax;
 }
 
 void dds3PathBasicPauseOn(dds3PathBasicControl_t *work)
