@@ -285,7 +285,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -293,7 +293,7 @@ extern u32 f;
 
 extern dds3Basic_t *D_005515B4;
 
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, sdfVector4_t *pos);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, sdfVector4_t *pos);
 
 extern void nbSetFormPos(nbFormation_t *form, sdfVector4_t *pos);
 
@@ -320,15 +320,15 @@ extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbF
 
 extern void effBTLSkillEnd(void);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern void nbLoadUnitGroup(s32 a, s32 b, s32 c);
+extern void nbLoadUnitGroup(s32 side, s32 stop, s32 anime);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern s32 nbCheckLoadGroup(s32 group);
+extern s32 nbCheckLoadGroup(s32 side);
 
 extern void nbResetAllFormPosRot(void);
 
@@ -338,9 +338,9 @@ extern void *bedbasic;
 
 extern u8 pNbCamera[];
 
-extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *camera);
+extern void nbCameraBoss_Sp_DOUTYO_Run(u8 *pNbCamera);
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern s32 D_005515BC;
 
@@ -350,9 +350,9 @@ extern void nbSetupBattleUnits(nbMainProcessData_t *data, s32 encno);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
-extern void effPadVibeFadeOUT(s32 port, s32 power, s32 time);
+extern void effPadVibeFadeOUT(s32 mode, s32 power, s32 frame);
 
-extern void dds3StartBEDEffectObjectBasic(void *obj, u32 entryid);
+extern void dds3StartBEDEffectObjectBasic(void *basic, u32 cutno);
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 
@@ -396,7 +396,7 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-dds3Basic_t *nbCreateBasicEffect(void *source, void *position, void *rotation);
+dds3Basic_t *nbCreateBasicEffect(void *p, void *pos, void *rot);
 
 nbFormation_t *nbGetEventForm();
 
@@ -440,28 +440,28 @@ s32 SetUp1(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbE901", SyuGo);
 
-s32 SyuGo2(nbEventProcessData_t *e)
+s32 SyuGo2(nbEventProcessData_t *ed)
 {
     s32 i;
     s32 ofs;
     nbFormation_t *form;
 
-    if (e->frame >= 0xB) {
-        if (e->frame == 0xB) {
+    if (ed->frame >= 0xB) {
+        if (ed->frame == 0xB) {
             ofs = 0x3C0;
             for (i = 9; i >= 0; i--) {
-                form = (nbFormation_t *)((u8 *)ofs + (u32)e->data->form);
+                form = (nbFormation_t *)((u8 *)ofs + (u32)ed->data->form);
                 ofs += 0xF0;
                 if (form->stat & 1) {
                     nbAddMotionKoukaPacket(0, 0, form, 4);
                 }
             }
         }
-        if (e->frame == 0x19) {
+        if (ed->frame == 0x19) {
             dds3StartBEDEffectObjectBasic(bedbasic, 2);
         }
-        if (e->frame >= 0x31) {
-            nbFreeEffectSlot(e);
+        if (ed->frame >= 0x31) {
+            nbFreeEffectSlot(ed);
         }
     }
     return 0;
@@ -510,18 +510,18 @@ s32 Wait2_nbE901(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbE901", Syutugen2);
 
-s32 End(nbEventProcessData_t *e)
+s32 End(nbEventProcessData_t *ed)
 {
     nbCameraBoss_Sp_DOUTYO_Run(pNbCamera);
-    if (e->frame < 0x6F) {
+    if (ed->frame < 0x6F) {
         return 0;
     }
     effBTLSkillEnd();
     nbResetAllFormPosRot();
     dds3DeleteSceneBasicData(bedbasic);
-    e->data->stat |= 8;
-    e->data->press4_p = 0;
-    e->data->pressturn = 0;
+    ed->data->stat |= 8;
+    ed->data->press4_p = 0;
+    ed->data->pressturn = 0;
     return 1;
 }
 

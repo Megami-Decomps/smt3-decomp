@@ -80,23 +80,23 @@ struct pbPanel_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-extern void mdlSetPosition(mdlObj_t *model);
+extern void mdlSetPosition(mdlObj_t *aHandle);
 
-extern void mdlSetRotate(mdlObj_t *model);
+extern void mdlSetRotate(mdlObj_t *aHandle);
 
 extern void FromEuler(void);
 
-extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern pbMapWork_t *D_0054F5C4;
 
 extern pbPanel_t *record;
 
-extern void sdfMatFreeDelayed(sdfMat_t *mat);
+extern void sdfMatFreeDelayed(sdfMat_t *aMat);
 
 extern sdfMat_t *sdfMatNew(void);
 
-extern void sdfMatSetTex(sdfMat_t *mat, void *tex);
+extern void sdfMatSetTex(sdfMat_t *aMat, void *aTex);
 
 extern void pbBuildMapBaseVerts(pbPanel_t *panel);
 
@@ -118,19 +118,19 @@ extern void pbInitMapBaseMat(pbPanel_t *panel);
 
 extern void pbSetModelRotate(mdlObj_t *model, f32 x, f32 y, f32 z);
 
-extern void SetRotateMatrixXYZ(sdfVector4_t *rot);
+extern void SetRotateMatrixXYZ(sdfVector4_t *aAngles);
 
-extern void StoreMatrix(pbMatrix_t *m);
+extern void StoreMatrix(pbMatrix_t *aMatrix);
 
-extern void LoadMatrix(pbMatrix_t *m);
+extern void LoadMatrix(pbMatrix_t *aMatrix);
 
-extern void sdf3DPrimLinkTm(void *prim, s32 mode);
+extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 
 extern void func_001D2D00(pbPanel_t *panel, s32 arg);
 
 extern f32 D_00326C60[];
 
-extern u32 pbMyCharacterDispStat(pbPanel_t *panel);
+extern u32 pbMyCharacterDispStat(pbPanel_t *p);
 
 void pbSetModelPos(mdlObj_t *model, const f32 *position) {
     SDF_VU0_LOADVECTOR(position);
@@ -164,10 +164,10 @@ s32 pbGetPanelField(pbPanel_t *panel) {
     return ret;
 }
 
-u32 pbMyCharacterDispStat(pbPanel_t *panel) {
-    pbMyCharacter_t *chara = panel->data.chara;
+u32 pbMyCharacterDispStat(pbPanel_t *p) {
+    pbMyCharacter_t *chara = p->data.chara;
     u32 ret = 0;
-    if (panel != NULL) {
+    if (p != NULL) {
         ret = chara->dispStat;
     }
     return ret;
@@ -190,19 +190,19 @@ s32 pb_1D2D10(void) {
     return 0;
 }
 
-void pbMoveMyCharcter(pbPanel_t *panel, f32 dx, f32 dz) {
-    pbMyCharacter_t *chara = panel->data.chara;
-    if (panel != NULL) {
-        chara->pos.x += dx;
-        chara->pos.z += dz;
+void pbMoveMyCharcter(pbPanel_t *p, f32 x, f32 y) {
+    pbMyCharacter_t *chara = p->data.chara;
+    if (p != NULL) {
+        chara->pos.x += x;
+        chara->pos.z += y;
     }
 }
 
-void pbMoveMyCharcter2(pbPanel_t *panel, s16 dx, s16 dy) {
-    pbMyCharacter_t *chara = panel->data.chara;
-    if (panel != NULL) {
-        chara->cellX = dx + chara->cellX;
-        chara->cellY = dy + chara->cellY;
+void pbMoveMyCharcter2(pbPanel_t *p, s16 x, s16 y) {
+    pbMyCharacter_t *chara = p->data.chara;
+    if (p != NULL) {
+        chara->cellX = x + chara->cellX;
+        chara->cellY = y + chara->cellY;
     }
 }
 
@@ -216,25 +216,25 @@ void pbGetCellY(pbPanel_t *panel, s16 cx, s16 cy) {
     }
 }
 
-void pbGetMyCharcterPos(pbPanel_t *panel, sdfVector4_t *pos) {
-    pbMyCharacter_t *chara = panel->data.chara;
-    if (panel != NULL) {
+void pbGetMyCharcterPos(pbPanel_t *p, sdfVector4_t *pos) {
+    pbMyCharacter_t *chara = p->data.chara;
+    if (p != NULL) {
         SDF_VU0_COPYVECTOR(pos, &chara->pos);
     }
 }
 
-void pbGetMyCharcterPos2(pbPanel_t *panel, s16 *x, s16 *y) {
-    pbMyCharacter_t *chara = panel->data.chara;
-    if (panel != NULL) {
+void pbGetMyCharcterPos2(pbPanel_t *p, s16 *x, s16 *y) {
+    pbMyCharacter_t *chara = p->data.chara;
+    if (p != NULL) {
         *x = chara->cellX;
         *y = chara->cellY;
     }
 }
 
-s32 pbGetMyCharcterRot(pbPanel_t *panel) {
-    pbMyCharacter_t *chara = panel->data.chara;
+s32 pbGetMyCharcterRot(pbPanel_t *p) {
+    pbMyCharacter_t *chara = p->data.chara;
     s32 ret = -1;
-    if (panel != NULL) {
+    if (p != NULL) {
         ret = chara->rot;
     }
     return ret;

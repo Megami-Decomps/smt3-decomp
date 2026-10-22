@@ -15,17 +15,17 @@
 #include "event.h"
 #include "effect.h"
 
-void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
-extern f32 R360_LR(f32 fromAngle, f32 toAngle);
+extern f32 R360_LR(f32 a, f32 b);
 
 extern f32 fabsf(f32);
 
 extern u32 fldRunDanteGunFlag[];
 
-extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
+extern void dds3ObjectBaseOffFlag(void *pObjectBasic, s32 flag);
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
@@ -33,7 +33,7 @@ extern s32 fldAutoMapChkMode(void);
 
 extern s32 fldGb __attribute__((section(".data")));
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 void fldPlayerOff(void);
 
@@ -57,15 +57,15 @@ typedef struct {
 
 extern fldUnitControl_t *fldGetUnitControl(void);
 
-extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
-extern void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *basic, u32 value);
+extern void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *pObjectBasic, u32 svs);
 
-extern dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene);
+extern dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic);
 
-extern dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *pBasic);
 
-extern void fldPlayerMotion(s32 motion, s32 mode, f32 speed);
+extern void fldPlayerMotion(s32 hisMotion, s32 upMotion, f32 motHokan);
 
 extern void fldPlayerMotReset2(void);
 
@@ -73,13 +73,13 @@ extern s32 fldPlayerFastMode;
 
 extern s32 l_UseCollision;
 
-extern void fldHitChkUnitElv(f32 *pos);
+extern void fldHitChkUnitElv(f32 *phys_pos);
 
-extern void fldHitChkUnit(f32 *pos);
+extern void fldHitChkUnit(f32 *phys_pos);
 
-extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 
-extern void dds3SetSclPoseSet(dds3Basic_t *basic, f32 *scl);
+extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, f32 *scl);
 
 extern f32 fldWmapPlayerState;
 
@@ -95,156 +95,156 @@ extern fldScaleVec_t D_00531D08;
 
 extern fldScaleVec_t D_00531D18;
 
-extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *object, s32 mask);
+extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, s32 flag);
 
-extern void dds3GetPosPoseSet(dds3Basic_t *object);
+extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
-f32 R360_LR(f32 fromDegrees, f32 toDegrees) {
+f32 R360_LR(f32 a, f32 b) {
     f32 diff;
 
-    if (fromDegrees < 0.0f || toDegrees < 0.0f) {
-        fromDegrees += 360.0f;
-        toDegrees += 360.0f;
+    if (a < 0.0f || b < 0.0f) {
+        a += 360.0f;
+        b += 360.0f;
     }
-    fromDegrees = (s32)fromDegrees % 360;
-    toDegrees = (s32)toDegrees % 360;
-    diff = fromDegrees - toDegrees;
+    a = (s32)a % 360;
+    b = (s32)b % 360;
+    diff = a - b;
     if (diff > 180.0f || diff < -180.0f) {
-        if (fromDegrees < toDegrees) {
-            fromDegrees += 360.0f;
+        if (a < b) {
+            a += 360.0f;
         } else {
-            toDegrees += 360.0f;
+            b += 360.0f;
         }
     }
-    return toDegrees - fromDegrees;
+    return b - a;
 }
 
-f32 fldPlayerCalc360_8(f32 angle) {
+f32 fldPlayerCalc360_8(f32 aKakudo) {
     f32 best;
     s32 index;
     f32 diff;
-    while (angle >= 360.0f) {
-        angle -= 360.0f;
+    while (aKakudo >= 360.0f) {
+        aKakudo -= 360.0f;
     }
-    while (angle < 0.0f) {
-        angle += 360.0f;
+    while (aKakudo < 0.0f) {
+        aKakudo += 360.0f;
     }
     best = 900.0f;
     index = -1;
-    diff = fabsf(R360_LR(0.0f, angle));
+    diff = fabsf(R360_LR(0.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 0;
     }
-    diff = fabsf(R360_LR(45.0f, angle));
+    diff = fabsf(R360_LR(45.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 1;
     }
-    diff = fabsf(R360_LR(90.0f, angle));
+    diff = fabsf(R360_LR(90.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 2;
     }
-    diff = fabsf(R360_LR(135.0f, angle));
+    diff = fabsf(R360_LR(135.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 3;
     }
-    diff = fabsf(R360_LR(180.0f, angle));
+    diff = fabsf(R360_LR(180.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 4;
     }
-    diff = fabsf(R360_LR(225.0f, angle));
+    diff = fabsf(R360_LR(225.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 5;
     }
-    diff = fabsf(R360_LR(270.0f, angle));
+    diff = fabsf(R360_LR(270.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 6;
     }
-    diff = fabsf(R360_LR(315.0f, angle));
+    diff = fabsf(R360_LR(315.0f, aKakudo));
     if (diff < best) {
         index = 7;
     }
     switch (index) {
     case 0:
-        angle = 0.0f;
+        aKakudo = 0.0f;
         break;
     case 1:
-        angle = 45.0f;
+        aKakudo = 45.0f;
         break;
     case 2:
-        angle = 90.0f;
+        aKakudo = 90.0f;
         break;
     case 3:
-        angle = 135.0f;
+        aKakudo = 135.0f;
         break;
     case 4:
-        angle = 180.0f;
+        aKakudo = 180.0f;
         break;
     case 5:
-        angle = 225.0f;
+        aKakudo = 225.0f;
         break;
     case 6:
-        angle = 270.0f;
+        aKakudo = 270.0f;
         break;
     case 7:
-        angle = 315.0f;
+        aKakudo = 315.0f;
         break;
     }
-    return angle;
+    return aKakudo;
 }
 
-f32 fldPlayerCalc360_4(f32 angle) {
+f32 fldPlayerCalc360_4(f32 aKakudo) {
     f32 best;
     s32 index;
     f32 diff;
-    while (angle >= 360.0f) {
-        angle -= 360.0f;
+    while (aKakudo >= 360.0f) {
+        aKakudo -= 360.0f;
     }
-    while (angle < 0.0f) {
-        angle += 360.0f;
+    while (aKakudo < 0.0f) {
+        aKakudo += 360.0f;
     }
     best = 900.0f;
     index = -1;
-    diff = fabsf(R360_LR(0.0f, angle));
+    diff = fabsf(R360_LR(0.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 0;
     }
-    diff = fabsf(R360_LR(90.0f, angle));
+    diff = fabsf(R360_LR(90.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 2;
     }
-    diff = fabsf(R360_LR(180.0f, angle));
+    diff = fabsf(R360_LR(180.0f, aKakudo));
     if (diff < best) {
         best = diff;
         index = 4;
     }
-    diff = fabsf(R360_LR(270.0f, angle));
+    diff = fabsf(R360_LR(270.0f, aKakudo));
     if (diff < best) {
         index = 6;
     }
     switch (index) {
     case 0:
-        angle = 0.0f;
+        aKakudo = 0.0f;
         break;
     case 2:
-        angle = 90.0f;
+        aKakudo = 90.0f;
         break;
     case 4:
-        angle = 180.0f;
+        aKakudo = 180.0f;
         break;
     case 6:
-        angle = 270.0f;
+        aKakudo = 270.0f;
         break;
     }
-    return angle;
+    return aKakudo;
 }
 
 s32 fldPlayerMirChk(void) {
@@ -285,12 +285,12 @@ extern s32 fldPlayerStatus[];
 
 extern s32 fldChkVortex(void);
 
-extern void mdlLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex);
+extern void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
-extern void mdlSmoothLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex,
-                                f32 blendLeadFrames, f32 blendFrames);
+extern void mdlSmoothLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber,
+                                f32 aBeforeLeng, f32 aSmoothLeng);
 
-void fldPlayerMotion(s32 motion, s32 mode, f32 speed) {
+void fldPlayerMotion(s32 hisMotion, s32 upMotion, f32 motHokan) {
     fldUnitControl_t *ctl;
     mdlObj_t *model;
     mdlObj_t *model2 = NULL;
@@ -300,7 +300,7 @@ void fldPlayerMotion(s32 motion, s32 mode, f32 speed) {
     if (ctl->handle2 != NULL) {
         model2 = (mdlObj_t *)dds3ObjectBaseGetModelHandle(ctl->handle2);
     }
-    if (motion == mode) {
+    if (hisMotion == upMotion) {
         return;
     }
     model->first->speed = 1.0f;
@@ -311,12 +311,12 @@ void fldPlayerMotion(s32 motion, s32 mode, f32 speed) {
             mdlLoopMotion(model, 3, 0);
         }
     }
-    mdlSmoothLoopMotion(model, 0, mode, speed, speed);
+    mdlSmoothLoopMotion(model, 0, upMotion, motHokan, motHokan);
     if (ctl->handle2 == NULL) {
         return;
     }
     model2->first->speed = 1.0f;
-    mdlSmoothLoopMotion(model2, 0, mode, speed, speed);
+    mdlSmoothLoopMotion(model2, 0, upMotion, motHokan, motHokan);
 }
 
 INCLUDE_ASM(const s32, "field/fldPlayer", fldPlayerMotionSe);
@@ -481,7 +481,7 @@ extern s32 fldEncountTestFlag(s32 mask);
 
 extern void fldEncountSetFlag(s32 mask);
 
-extern void mdlSingleMotion(mdlObj_t *obj, s32 mode, s32 motion);
+extern void mdlSingleMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 extern void fldDmgStart(f32 x, f32 y, f32 z);
 
@@ -491,7 +491,7 @@ extern void fldStatusSet(void);
 
 extern void fldPlayerCalc_WarpRun(void);
 
-extern void fldPlayerMotionSe(s32 motion, s32 motion2);
+extern void fldPlayerMotionSe(s32 hisMotion, s32 upMotion);
 
 extern s32 fldPlayerCalc_Wm2(void);
 

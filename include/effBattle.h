@@ -87,10 +87,10 @@ struct effBTLCut_t {
 };
 
 
-extern effBTL_t *effBTLCreate(void *data);
-extern void effBTLDelete(effBTL_t *work);
-extern effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 flags);
-extern void effBTLCutDelete(effBTLCut_t *work);
-extern void effBTLCutSetScale(effBTLCut_t *work, f32 scale);
+extern effBTL_t *effBTLCreate(void *pData);
+extern void effBTLDelete(effBTL_t *hBTLEffect);
+extern effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation, s32 stat);
+extern void effBTLCutDelete(effBTLCut_t *hBTLCutEffect);
+extern void effBTLCutSetScale(effBTLCut_t *hBTLCutEffect, f32 scale);
 
 #endif

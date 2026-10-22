@@ -258,7 +258,7 @@ extern s32 printf(const char *format, ...);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern char D_00545B78[];
 
@@ -308,13 +308,13 @@ extern u8 D_003494B0[];
 
 extern void nbFreeFormResources(nbMainProcessData_t *data, s32 index);
 
-extern void *sdfMemAllocDirect(u32 size);
+extern void *sdfMemAllocDirect(u32 aSize);
 
-extern void *sdfMemLock(void *p);
+extern void *sdfMemLock(void *aHandle);
 
-extern s32 p2sdLoadCheckMidi(s32 no);
+extern s32 p2sdLoadCheckMidi(s32 MidiNo);
 
-extern void p2sdLoadSMGFile(s32 no);
+extern void p2sdLoadSMGFile(s32 MidiNo);
 
 extern void nbSetMaeFlag(s32 flag);
 
@@ -326,7 +326,7 @@ extern s32 nbMaeCheckDone(void);
 
 extern void nbMaeWaitStep(void);
 
-extern void sdfMemFreeDirect(void *p);
+extern void sdfMemFreeDirect(void *aHandle);
 
 extern void p2sdSetPcmBuffer(void *buf, u32 size);
 
@@ -358,17 +358,17 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern s32 pacFileCheckEnd(void *h);
+extern s32 pacFileCheckEnd(void *pacFileHandle);
 
-extern void *fileGetMemHandle(void *h);
+extern void *fileGetMemHandle(void *fileHandle);
 
-extern void fileHandleFree(void *h);
+extern void fileHandleFree(void *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
 extern void nbLoadMidiFile(s32 no);
 
-extern u32 sdfMemGetSize(void *p);
+extern u32 sdfMemGetSize(void *aHandle);
 
 extern s32 (*D_004EF4B0[])(nbNegoProcessData_t *n);
 
@@ -463,7 +463,7 @@ s32 nbMemoryLoadNegoSe(nbFormation_t *form)
     return 1;
 }
 
-s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 index)
+s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 mot)
 {
     nbMainProcessData_t *data;
     s32 unitid;
@@ -472,10 +472,10 @@ s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 index)
     u32 size;
 
     data = nbGetMainProcessData();
-    if (index < 0) {
+    if (mot < 0) {
         return 0;
     }
-    unitid = nbGetUnitFromAction(form, index);
+    unitid = nbGetUnitFromAction(form, mot);
     if (unitid == 0) {
         return 0;
     }
@@ -488,7 +488,7 @@ s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 index)
     if (formindex < 0) {
         return 0;
     }
-    buf = data->statwork[formindex].buf[index];
+    buf = data->statwork[formindex].buf[mot];
     if (buf == NULL) {
         return 0;
     }

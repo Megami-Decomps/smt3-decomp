@@ -258,23 +258,23 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern char D_00545728[];
 
 extern void *nbDebugProcess1(dds3ProcessID_t *id);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern u8 dds3PadButtonState[];
 
@@ -292,7 +292,7 @@ typedef struct nbEventProcessData_t {
     void *unk_24;
 } nbEventProcessData_t;
 
-extern void nbSetTargetProcess(s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void nbSetTargetProcess(s32 act, s32 partyindex, s32 ctype, s32 crule, s32 carea);
 
 extern u32 menucur;
 
@@ -455,29 +455,29 @@ void SetSelect(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SetDvlChange);
 
-void SetTarget_nbDebugProcess(nbDebugWork_t *d)
+void SetTarget_nbDebugProcess(nbDebugWork_t *a)
 {
     nbFormation_t *form;
     nbParty_t *party;
     s32 i;
 
-    d->form = NULL;
-    d->unk_14 = 0;
+    a->form = NULL;
+    a->unk_14 = 0;
     for (i = 0; i < 0x10; i++) {
-        form = (nbFormation_t *)(i * sizeof(nbFormation_t) + (s32)d->data->form);
+        form = (nbFormation_t *)(i * sizeof(nbFormation_t) + (s32)a->data->form);
         if (form->stat & 8) {
-            d->unk_14 = i;
-            d->form = form;
-            d->partyindex = form->partyindex;
-            party = &d->data->party[form->partyindex];
-            d->party = party;
+            a->unk_14 = i;
+            a->form = form;
+            a->partyindex = form->partyindex;
+            party = &a->data->party[form->partyindex];
+            a->party = party;
             if (party->flag & 2) {
-                d->unk_0C = 1;
-                d->unk_10 = party->statindex;
+                a->unk_0C = 1;
+                a->unk_10 = party->statindex;
                 return;
             }
-            d->unk_0C = 0;
-            d->unk_10 = party->statindex;
+            a->unk_0C = 0;
+            a->unk_10 = party->statindex;
             return;
         }
     }

@@ -82,11 +82,11 @@ typedef struct
     /* 0x04 */ fclSpriteEntry_t *entries;
 } fclSpriteTbl_t;
 
-extern void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *sprite,
-                              u8 flags, u8 mode, u8 filter, s32 ot);
+extern void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
+                              u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo);
 
-extern void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
-                                   fclSprite_t *sprite, u8 flags, u8 mode, u8 filter, s32 ot);
+extern void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
+                                   fclSprite_t *pSprite, u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo);
 
 extern void qsort(void *base, s32 count, s32 size, s32 (*cmp)(const void *a, const void *b));
 
@@ -94,7 +94,7 @@ extern s32 func_00213148(const void *a, const void *b);
 
 extern s32 func_00213190(const void *a, const void *b);
 
-extern void fclDrawSpriteEx(s32 a, s32 b, s32 w, s32 h, fclSprite_t *sprite, s32 flags);
+extern void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo);
 
 typedef struct
 {
@@ -128,8 +128,8 @@ typedef struct
     /* 0x3 */ u8 unk_3;
 } skillSortEntry_t;
 
-extern void fclDrawSpriteRes(s32 x, s32 y, s32 d, s32 *color, s32 id, s32 idx, s32 *texs,
-                             fclSpriteTbl_t *tbl, s32 ot);
+extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 OtNo);
 
 extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
                             s32 arg);
@@ -137,36 +137,36 @@ extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
 
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 id, s32 idx,
-                                s32 *texs, fclSpriteTbl_t *tbl, s32 ot);
+                                s32 *texs, fclSpriteTbl_t *table, s32 OtNo);
 
-void fclDrawBG(fclSprite_t *sprite, s32 flags)
+void fclDrawBG(fclSprite_t *pSprite, s32 OtNo)
 {
-    if (sprite == NULL)
+    if (pSprite == NULL)
     {
-        cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0x80, flags);
+        cmpDrawBoxF(0, 0, 0, 0x200, 0x1C0, 0x80, OtNo);
     }
     else
     {
-        fclDrawSpriteEx(0, 0, sprite->unk_04, sprite->unk_06, sprite, flags);
+        fclDrawSpriteEx(0, 0, pSprite->unk_04, pSprite->unk_06, pSprite, OtNo);
     }
 }
 
-void fclSetupSprite(s32 d, fclSprite_t *sprite, u8 id, u16 idx, s32 *texs, fclSpriteTbl_t *tbl)
+void fclSetupSprite(s32 Z, fclSprite_t *pSprite, u8 page, u16 spriteId, s32 *texList, fclSpriteTbl_t *table)
 {
     fclSpriteEntry_t *e;
     fclSpriteRes_t *res;
 
-    e = &tbl[id].entries[idx];
-    res = &tbl[id].res[e->res];
-    fclSetSpriteEx(sprite, &res->rect, e->x, e->y, d, 0x80808080, e->Flag, texs[res->tex]);
+    e = &table[page].entries[spriteId];
+    res = &table[page].res[e->res];
+    fclSetSpriteEx(pSprite, &res->rect, e->x, e->y, Z, 0x80808080, e->Flag, texList[res->tex]);
 }
 
 void fclDrawSpriteRect(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx,
-                       s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+                       s32 *texList, fclSpriteTbl_t *table, s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclSetupSprite(d, &sprite, id, idx, texList, table);
     sprite.unk_0C = sprite.unk_08 + (sprite.unk_0C - sprite.unk_08) * w / 1000;
     sprite.unk_0E = sprite.unk_0A + (sprite.unk_0E - sprite.unk_0A) * h / 1000;
     sprite.unk_04 = sprite.unk_04 * w / 1000;
@@ -180,57 +180,57 @@ void fclDrawSpriteRect(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s3
         sprite.unk_0E = sprite.unk_0A + 0x40;
     }
     fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
-                      &sprite, sprite.unk_20, 0, 1, ot);
+                      &sprite, sprite.unk_20, 0, 1, OtNo);
 }
 
 void fclDrawSpriteAlpha(s32 x, s32 y, s32 d, u8 mode, s32 *color, s32 id, s32 idx, s32 *texs,
-                        fclSpriteTbl_t *tbl, s32 ot)
+                        fclSpriteTbl_t *table, s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclSetupSprite(d, &sprite, id, idx, texs, table);
     fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
-                      &sprite, sprite.unk_20, mode, 1, ot);
+                      &sprite, sprite.unk_20, mode, 1, OtNo);
 }
 
 void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 id, s32 idx,
-                         s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+                         s32 *texs, fclSpriteTbl_t *table, s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclSetupSprite(d, &sprite, id, idx, texs, table);
     fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
-                      &sprite, sprite.unk_20, 0, filter, ot);
+                      &sprite, sprite.unk_20, 0, filter, OtNo);
 }
 
 void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx,
-                       s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+                       s32 *texList, fclSpriteTbl_t *table, s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclSetupSprite(d, &sprite, id, idx, texList, table);
     fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, w, h, color, &sprite, sprite.unk_20, 0,
-                      1, ot);
+                      1, OtNo);
 }
 
 void fclDrawSpriteFull(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s32 *color, s32 id,
-                       u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+                       u16 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclSetupSprite(d, &sprite, id, spriteId, texList, table);
     fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, w, h, color, &sprite, sprite.unk_20,
-                      mode, 1, ot);
+                      mode, 1, OtNo);
 }
 
 void fclDrawSpriteSizeFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 filter, s32 *color, s32 id,
-                             u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot)
+                             u16 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
+    fclSetupSprite(d, &sprite, id, spriteId, texList, table);
     fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, w, h, color, &sprite, sprite.unk_20, 0,
-                      filter, ot);
+                      filter, OtNo);
 }
 
 void fclDrawSpriteSizeAlphaFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s32 *color,
@@ -244,14 +244,14 @@ void fclDrawSpriteSizeAlphaFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s3
                            sprite.unk_20, mode, 1, ot);
 }
 
-void fclDrawSpriteRes(s32 x, s32 y, s32 d, s32 *color, s32 id, s32 idx, s32 *texs, fclSpriteTbl_t *tbl,
-                      s32 ot)
+void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList, fclSpriteTbl_t *table,
+                      s32 OtNo)
 {
     fclSprite_t sprite;
 
-    fclSetupSprite(d, &sprite, id, idx, texs, tbl);
-    fclDrawSpriteCore(x + sprite.unk_10, y + sprite.unk_14, sprite.unk_04, sprite.unk_06, color,
-                      &sprite, sprite.unk_20, 0, 1, ot);
+    fclSetupSprite(Z, &sprite, page, spriteId, texList, table);
+    fclDrawSpriteCore(X + sprite.unk_10, Y + sprite.unk_14, sprite.unk_04, sprite.unk_06, pClip,
+                      &sprite, sprite.unk_20, 0, 1, OtNo);
 }
 
 INCLUDE_ASM(const s32, "facility/fclDraw", fcl_212910);

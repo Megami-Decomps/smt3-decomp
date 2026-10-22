@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern s32 evtStartEvent(s32 event);
+extern s32 evtStartEvent(s32 no);
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
@@ -131,7 +131,7 @@ typedef struct
 
 extern void cmpResetCursorInfo(cmpCursorWork_t *cursor);
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 typedef struct
 {
@@ -161,7 +161,7 @@ typedef struct
 
 s32 ragFindItemSlot(ragItemReq_t *req);
 
-extern s32 fclScriptStart(s32 script, s32 id, void *arg);
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 
 void ragExit(void)
 {
@@ -217,7 +217,7 @@ extern s32 ragCheckItemUse(s32 item);
 
 extern s32 cmpModelSetup(s32 a, s32 b);
 
-extern void lstMoveCursor(lstWork_t *list, s8 dir);
+extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
 
 extern s32 cmpChkPadPressUpDown(void);
 
@@ -342,7 +342,7 @@ void ragUpdateSeqTalk(void)
     ragUpdateWork->unk_0004 = -1;
 }
 
-extern s32 ragUpdateCallSeq(s32 seq);
+extern s32 ragUpdateCallSeq(s32 SeqNo);
 
 void ragUpdateSeqErr(void)
 {

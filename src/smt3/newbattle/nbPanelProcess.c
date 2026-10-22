@@ -293,9 +293,9 @@ extern s32 printf(const char *format, ...);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *sdfTexSet(void *header);
+extern void *sdfTexSet(void *aTex);
 
-extern void sdfTexFreeDelayed(void *texture);
+extern void sdfTexFreeDelayed(void *aHandle);
 
 extern void *pnbPnlFile1;
 
@@ -411,13 +411,13 @@ extern void nbPanelAutoHide(void);
 
 extern void nbPanelAllHide(void);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern s32 frGetStrWidth2(_FRQ *frq);
+extern s32 frGetStrWidth2(_FRQ *pFRQ);
 
-extern _FRQ *frDestroyFontRequestAfter(_FRQ *frq);
+extern _FRQ *frDestroyFontRequestAfter(_FRQ *pFRQ);
 
-extern _FRQ *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 mode, u32 col, char **str, s32 flag);
+extern _FRQ *frwGetSmallNumFontFRQ(s32 X, s32 Y, s32 Pri, u32 Color, char **pStr, s32 pFRQ);
 
 extern void func_001C7E38(_FRQ *frq, s32 mode, s32 kind);
 
@@ -455,9 +455,9 @@ extern s32 nbPanelLayoutTable2[4][6];
 
 extern s32 nbPanelDrawProcess(void);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern s32 nbPanelAutoCheckShow(void);
 
@@ -507,9 +507,9 @@ extern u32 sdfDevLoadFileEx(char *path, void *dest, void *size);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern void nbPanelDraw(s32 show);
+extern void nbPanelDraw(s32 flag);
 
-extern s32 datCheckDying(datUnitWork_t *unit);
+extern s32 datCheckDying(datUnitWork_t *work);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -519,17 +519,17 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern void *sdfGrAllocPacketBuff(s32 size);
+extern void *sdfGrAllocPacketBuff(s32 aSize);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern u64 *sdf2DMakeStdPacket(void *buff, s32 size);
+extern u64 *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
 
 extern sdfGrOt_t sdfGrOtTable[];
 
-extern void frSetDrawPosition(_FRQ *frq, s32 x, s32 y);
+extern void frSetDrawPosition(_FRQ *pFRQ, s32 X, s32 Y);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
@@ -573,32 +573,32 @@ void nbPnlLoad(void)
     hnbPnlFile4 = sdfDevLoadFileEx(D_00545290, &pnbPnlFile4, 0);
 }
 
-void nbPnlTexSet(nbMainProcessData_t *data)
+void nbPnlTexSet(nbMainProcessData_t *p)
 {
-    data->pnltex[0] = sdfTexSet(pnbPnlFile1);
-    data->pnltex[1] = sdfTexSet(pnbPnlFile2);
-    data->pnltex[2] = sdfTexSet(pnbPnlFile3);
-    data->pnltex[3] = sdfTexSet(pnbPnlFile4);
+    p->pnltex[0] = sdfTexSet(pnbPnlFile1);
+    p->pnltex[1] = sdfTexSet(pnbPnlFile2);
+    p->pnltex[2] = sdfTexSet(pnbPnlFile3);
+    p->pnltex[3] = sdfTexSet(pnbPnlFile4);
 }
 
-void nbPnlTexDel(nbMainProcessData_t *data)
+void nbPnlTexDel(nbMainProcessData_t *p)
 {
-    sdfTexFreeDelayed(data->pnltex[0]);
-    sdfTexFreeDelayed(data->pnltex[1]);
-    sdfTexFreeDelayed(data->pnltex[2]);
-    sdfTexFreeDelayed(data->pnltex[3]);
-    data->pnltex[0] = NULL;
-    data->pnltex[1] = NULL;
-    data->pnltex[2] = NULL;
-    data->pnltex[3] = NULL;
+    sdfTexFreeDelayed(p->pnltex[0]);
+    sdfTexFreeDelayed(p->pnltex[1]);
+    sdfTexFreeDelayed(p->pnltex[2]);
+    sdfTexFreeDelayed(p->pnltex[3]);
+    p->pnltex[0] = NULL;
+    p->pnltex[1] = NULL;
+    p->pnltex[2] = NULL;
+    p->pnltex[3] = NULL;
 }
 
-void nbPnl_setOt(s32 ofs)
+void nbPnl_setOt(s32 otofs)
 {
-    gnbPnlOtOfs = ofs;
+    gnbPnlOtOfs = otofs;
 }
 
-void nbPnl_rsetTex1(s32 tex, s32 ctx)
+void nbPnl_rsetTex1(s32 mmag, s32 mmin)
 {
     sdfDrawTag_t *list;
     u64 *buff;
@@ -609,7 +609,7 @@ void nbPnl_rsetTex1(s32 tex, s32 ctx)
     sdfDrawTagInit(list);
     buff = sdfGrAllocPacketBuff(0x30);
     packet = sdf2DMakeStdPacket(buff, 0x30);
-    packet[4] = (ctx << 6) | (tex << 5);
+    packet[4] = (mmin << 6) | (mmag << 5);
     packet[5] = 0x14;
     sdfDrawTagLink(list, buff);
     ot = &sdfGrOtTable[gnbPnlOtOfs];
@@ -647,10 +647,10 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPnl_rsetAlpha);
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPnlSprite);
 
-void nbPanelBaseColorSet(u32 col)
+void nbPanelBaseColorSet(u32 abgr)
 {
-    nbPanelBaseABGR = col;
-    nbPanelBaseRGBA = (col >> 24) | ((col >> 8) & 0xFF00) | ((col & 0xFF00) << 8) | (col << 24);
+    nbPanelBaseABGR = abgr;
+    nbPanelBaseRGBA = (abgr >> 24) | ((abgr >> 8) & 0xFF00) | ((abgr & 0xFF00) << 8) | (abgr << 24);
 }
 
 void nbPanelAllShow(void)
@@ -667,19 +667,19 @@ void nbPanelAllHide(void)
     nbPanelPressGaugeHide();
 }
 
-void nbPanelSpriteCenteringDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelXYZ_t *area,
-                                nbPanelUV_t *uv, u32 abgr, sdfTexHandle_t *th)
+void nbPanelSpriteCenteringDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelXYZ_t *pArea,
+                                nbPanelUV_t *pUV, u32 abgr, sdfTexHandle_t *hTex)
 {
     s32 cx;
     u32 col;
 
-    cx = p->x + ((area->w - p->w) >> 1);
+    cx = pXYZ->x + ((pArea->w - pXYZ->w) >> 1);
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(cx + x, p->y + y, p->w, p->h, uv->u, uv->v, uv->uw, uv->vh, col, th);
+    nbPnlSprite(cx + x, pXYZ->y + y, pXYZ->w, pXYZ->h, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
 }
 
-void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u32 abgr, f32 scale,
-                            sdfTexHandle_t *th)
+void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelUV_t *pUV, u32 abgr, f32 scale,
+                            sdfTexHandle_t *hTex)
 {
     s32 sw;
     s32 sh;
@@ -687,16 +687,16 @@ void nbPanelSpriteScaleDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u32 
     s32 py;
     u32 col;
 
-    sw = p->w * scale;
-    sh = p->h * scale;
-    px = p->x - ((sw - p->w) >> 1);
-    py = p->y - ((sh - p->h) >> 1);
+    sw = pXYZ->w * scale;
+    sh = pXYZ->h * scale;
+    px = pXYZ->x - ((sw - pXYZ->w) >> 1);
+    py = pXYZ->y - ((sh - pXYZ->h) >> 1);
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(px + x, py + y, sw, sh, uv->u, uv->v, uv->uw, uv->vh, col, th);
+    nbPnlSprite(px + x, py + y, sw, sh, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
 }
 
-void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u32 abgr, f32 sclw,
-                              f32 sclh, sdfTexHandle_t *th)
+void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, nbPanelUV_t *pUV, u32 abgr, f32 scaleW,
+                              f32 scaleH, sdfTexHandle_t *hTex)
 {
     s32 sw;
     s32 sh;
@@ -704,16 +704,16 @@ void nbPanelSpriteScaleWHDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u3
     s32 py;
     u32 col;
 
-    sw = p->w * sclw;
-    sh = p->h * sclh;
-    px = p->x - ((sw - p->w) >> 1);
-    py = p->y - ((sh - p->h) >> 1);
+    sw = pXYZ->w * scaleW;
+    sh = pXYZ->h * scaleH;
+    px = pXYZ->x - ((sw - pXYZ->w) >> 1);
+    py = pXYZ->y - ((sh - pXYZ->h) >> 1);
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(px + x, py + y, sw, sh, uv->u, uv->v, uv->uw, uv->vh, col, th);
+    nbPnlSprite(px + x, py + y, sw, sh, pUV->u, pUV->v, pUV->uw, pUV->vh, col, hTex);
 }
 
-void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u32 abgr,
-                            nbPanelXYZ_t *area, f32 scale, sdfTexHandle_t *th)
+void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ_0, nbPanelUV_t *pXYZ_1, u32 rate,
+                            nbPanelXYZ_t *pUV, f32 abgr, sdfTexHandle_t *hTex)
 {
     s32 x0;
     s32 y0;
@@ -725,25 +725,25 @@ void nbPanelSpriteBlendDraw(s32 x, s32 y, nbPanelXYZ_t *p, nbPanelUV_t *uv, u32 
     s32 sh;
     u32 col;
 
-    x0 = (p->x - area->x) * scale;
-    y0 = (p->y - area->y) * scale;
-    x1 = (p->x + p->w - area->x) * scale;
-    y1 = (p->y + p->h - area->y) * scale;
-    px = area->x + x0;
-    py = area->y + y0;
+    x0 = (pXYZ_0->x - pUV->x) * abgr;
+    y0 = (pXYZ_0->y - pUV->y) * abgr;
+    x1 = (pXYZ_0->x + pXYZ_0->w - pUV->x) * abgr;
+    y1 = (pXYZ_0->y + pXYZ_0->h - pUV->y) * abgr;
+    px = pUV->x + x0;
+    py = pUV->y + y0;
     sw = x1 - x0;
     sh = y1 - y0;
-    col = effMagaCylinderCalcColor(abgr, nbPanelBaseABGR);
-    nbPnlSprite(px + x, py + y, sw, sh, uv->u, uv->v, uv->uw, uv->vh, col, th);
+    col = effMagaCylinderCalcColor(rate, nbPanelBaseABGR);
+    nbPnlSprite(px + x, py + y, sw, sh, pXYZ_1->u, pXYZ_1->v, pXYZ_1->uw, pXYZ_1->vh, col, hTex);
 }
 
-void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelXYZ_t *p, u32 abgr, char **str)
+void nbPanelSmallStringDraw(s32 x, s32 y, nbPanelXYZ_t *pXYZ, u32 abgr, char **pString)
 {
     _FRQ *frq;
     u32 col;
 
     col = effMagaCylinderCalcColor(abgr, nbPanelBaseRGBA);
-    frq = frwGetSmallNumFontFRQ((p->x + x) << 4, (p->y + y) << 3, 0, col, str, 0);
+    frq = frwGetSmallNumFontFRQ((pXYZ->x + x) << 4, (pXYZ->y + y) << 3, 0, col, pString, 0);
     func_001C7E38(frq, 1, 0x47);
     frDestroyFontRequestAfter(frq);
 }
@@ -755,25 +755,25 @@ void nbCenterText(_FRQ *frq, nbTextBox_t *box)
     frSetDrawPosition(frq, frq->x + (((box->width - frGetStrWidth2(frq)) >> 1) << 4), frq->y);
 }
 
-u32 nbPanelHPColor(datUnitWork_t *w)
+u32 nbPanelHPColor(datUnitWork_t *pUnitWork)
 {
     s32 rate;
 
-    if (datCheckDying(w)) {
+    if (datCheckDying(pUnitWork)) {
         return 0x754B3D80;
     }
-    rate = w->hp * 100 / w->maxhp;
+    rate = pUnitWork->hp * 100 / pUnitWork->maxhp;
     if (rate < 25) {
         return 0x754B3D80;
     }
     return rate < 50 ? 0xB4A06480 : 0xA09DC380;
 }
 
-u32 nbPanelMPColor(datUnitWork_t *unit)
+u32 nbPanelMPColor(datUnitWork_t *pUnitWork)
 {
     s32 pct;
 
-    pct = unit->mp * 100 / unit->maxmp;
+    pct = pUnitWork->mp * 100 / pUnitWork->maxmp;
     if (pct < 0x19) {
         return 0x754B3D80;
     }
@@ -788,12 +788,12 @@ INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonScaleDraw);
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelPolygonFlashDraw);
 
-void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *data, s32 index)
+void nbPanelDrawPP0(s32 x, s32 y, nbMainProcessData_t *p, s32 index)
 {
     nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
     nbPnl_rsetAlpha(0);
-    nbPnlSprite(x, y, 0x36, 0x17, 0x34, 1, 0x36, 0x17, nbPanelBaseABGR, data->pnltex[0]);
-    nbPnlSprite(x + 0x36, y, 0xE4, 0x17, 0x69, 1, 1, 0x17, nbPanelBaseABGR, data->pnltex[0]);
+    nbPnlSprite(x, y, 0x36, 0x17, 0x34, 1, 0x36, 0x17, nbPanelBaseABGR, p->pnltex[0]);
+    nbPnlSprite(x + 0x36, y, 0xE4, 0x17, 0x69, 1, 1, 0x17, nbPanelBaseABGR, p->pnltex[0]);
 }
 
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545300);
@@ -1000,9 +1000,9 @@ void nbPanelAnalyzeEnd(void)
     nbPanelAnalyzeProcess = 4;
 }
 
-void nbPanelAnalyzeDraw(datUnitWork_t *unit)
+void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork)
 {
-    pNbPanelAnalyzeUnitWork = unit;
+    pNbPanelAnalyzeUnitWork = pUnitWork;
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelAnalyzeRun);
@@ -1032,9 +1032,9 @@ void nbPanelAutoInit(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelAuto);
 
-void nbPanelDraw(s32 show)
+void nbPanelDraw(s32 flag)
 {
-    if (show) {
+    if (flag) {
         nbPanelAllShow();
     } else {
         nbPanelAllHide();
@@ -1102,35 +1102,35 @@ void nbInitPanelProcess(nbMainProcessData_t *data)
     nbPanelBaseRGBA = 0x80808080;
 }
 
-void nbPanelFlashInit(nbPanelFlash_t *p, s32 a, s32 b, s32 c, f32 x, f32 y, s32 d)
+void nbPanelFlashInit(nbPanelFlash_t *pFlash, s32 scale_x, s32 scale_y, s32 abgr, f32 abgr_c, f32 addX, s32 addY)
 {
-    p->unk_04 = 1;
-    p->unk_00 = 0;
-    p->unk_0C = 1;
-    p->unk_08 = 0;
-    p->unk_10 = 0.1f;
-    p->unk_14 = 0;
-    p->unk_18 = 1;
-    p->unk_1C = 0.1f;
-    p->unk_28 = x;
-    p->unk_2C = y;
-    p->unk_20 = a;
-    p->unk_24 = b;
-    p->unk_30 = c;
-    p->unk_34 = d;
+    pFlash->unk_04 = 1;
+    pFlash->unk_00 = 0;
+    pFlash->unk_0C = 1;
+    pFlash->unk_08 = 0;
+    pFlash->unk_10 = 0.1f;
+    pFlash->unk_14 = 0;
+    pFlash->unk_18 = 1;
+    pFlash->unk_1C = 0.1f;
+    pFlash->unk_28 = abgr_c;
+    pFlash->unk_2C = addX;
+    pFlash->unk_20 = scale_x;
+    pFlash->unk_24 = scale_y;
+    pFlash->unk_30 = abgr;
+    pFlash->unk_34 = addY;
 }
 
 /* vu0 routine: unpack two colours, multiply and pack */
-u32 nbPanelFlashRGBAMulti(u32 a, u32 b)
+u32 nbPanelFlashRGBAMulti(u32 abgr0, u32 abgr1)
 {
     nbColorWork_t work[3];
     u32 unit = 0x3C000000;
     u32 out;
 
-    work[0].word = a;
+    work[0].word = abgr0;
     MMI_RGBA_UNPACK(&work[0], unit);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    work[1].word = b;
+    work[1].word = abgr1;
     MMI_RGBA_UNPACK(&work[1], unit);
     SDF_VU0_MULVECTOR();
     SDF_VU0_dds3ColorFtoI(out, 128.0f);

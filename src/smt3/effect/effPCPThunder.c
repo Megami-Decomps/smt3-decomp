@@ -432,35 +432,35 @@ extern EffRandState dds3EffectBase[];
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(EffRandState *state);
+u32 dds3GetRandA(EffRandState *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(EffRandState *state);
+f32 dds3GetRandFloatA(EffRandState *name);
 
 extern s32 effMagaCylinderCalcColor(s32 color, s32 param);
 
-extern void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32 index);
+extern void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *pThunderRadiatePoly, s32 number);
 
-extern void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 fragmentIndex);
+extern void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 number);
 
-extern void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index);
+extern void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 number);
 
 extern void effPCP_ThunderPolyListPartRefresh(effPCP_ThunderPoly_t *work, s32 index, const u128 *seed);
 
-void effPCP_ThunderPolyDelete(effPCP_ThunderPoly_t *work);
+void effPCP_ThunderPolyDelete(effPCP_ThunderPoly_t *hData);
 
-void dds3TrackPolyListInit(struct ParSystem *system, s32 cellIndex);
+void dds3TrackPolyListInit(struct ParSystem *hTrackPoly, s32 number);
 
 void dds3TrackPolyDraw(struct ParSystem *system);
 
-void dds3TrackPolyDelete(struct ParSystem *system);
+void dds3TrackPolyDelete(struct ParSystem *hTrackPoly);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
-void SetRotateMatrixAxis(f32 angle, const sdfVector3_t *axis);
+void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);
 
-void sdfChipFreeDirect(void *memory);
+void sdfChipFreeDirect(void *aPtr);
 
-void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
+void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 
 extern f32 aViewTarget[4], aViewEye[4];
 
@@ -478,21 +478,21 @@ enum trackPolyTopology {
     PAR_CELL_TOPOLOGY_FIVE_VECTOR = 4
 };
 
-extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
-extern void *sdfMemLock(sdfMemHandle_t *allocation);
-extern void *sdfChipAllocDirect(u32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void *memset(void *a, s32 b, u32 c);
 extern void *dds3EffectPCPDataGetData(void *table, s32 index);
-extern ParSystem *dds3TrackPolyCreate(s32 count, s32 perCell, s32 divisor, u32 kind);
-extern void dds3TrackPolySetMode(ParSystem *system, u16 mode);
-extern void dds3TrackPolyVCSet(ParSystem *work, s32 sub, u32 first, u32 second);
-extern void dds3TrackPolyVC3Set_Acute(ParSystem *system, u32 center, u32 middle, u32 edge);
-extern void dds3TrackPolyVC5Set_Acute(ParSystem *system, u32 center, u32 middle, u32 edge);
-extern void dds3TrackPolyVC5Set_AcuteR(ParSystem *system, u32 center, u32 middle, u32 edge);
-extern void dds3TrackPolyVC5Set_AcuteW(ParSystem *system, u32 center, u32 middle, u32 edge);
-extern void dds3TrackPolyVC5Set_Normal(ParSystem *system, s32 center, s32 middle, s32 edge);
-extern f32 sdfSin(f32 angle);
-extern f32 sdfCos(f32 angle);
+extern ParSystem *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
+extern void dds3TrackPolySetMode(ParSystem *hTrackPoly, u16 mode);
+extern void dds3TrackPolyVCSet(ParSystem *hTrackPoly, s32 type, u32 abgr_in, u32 abgr_out);
+extern void dds3TrackPolyVC3Set_Acute(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_Acute(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_AcuteR(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_AcuteW(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_Normal(ParSystem *hTrackPoly, s32 abgr_0, s32 abgr_1, s32 abgr_2);
+extern f32 sdfSin(f32 aRadius);
+extern f32 sdfCos(f32 aRadius);
 void func_00177AC8(EffThunderSparkWork *work, s32 index);
 void effPCP_ThunderPolyDrawOff(effPCP_ThunderPoly_t *work, s32 index);
 void effPCP_ThunderPolyLowDrawOff(effPCP_ThunderPoly_t *work, s32 index);
@@ -532,26 +532,26 @@ void *effPCPThunderSpherePolyCopy(void *source) {
     return effPCPThunderSpherePolyCreate(source);
 }
 
-void effPCPThunderSpherePolyDelete(effPCPThunderSpherePoly_t *work) {
-    dds3TrackPolyDelete(work->cellSystem);
-    sdfMemFreeDirect(work->allocationHandle);
+void effPCPThunderSpherePolyDelete(effPCPThunderSpherePoly_t *hData) {
+    dds3TrackPolyDelete(hData->cellSystem);
+    sdfMemFreeDirect(hData->allocationHandle);
 }
 
-void effPCPThunderSpherePolySetPosition(void *destination, void *source) {
-    SDF_VU0_COPYVECTOR(destination, source);
+void effPCPThunderSpherePolySetPosition(void *hData, void *pPos) {
+    SDF_VU0_COPYVECTOR(hData, pPos);
 }
 
-void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *work, u32 tintColor) {
-    work->tintColor = tintColor;
+void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *hData, u32 abgr) {
+    hData->tintColor = abgr;
 }
 
-void effPCPThunderSpherePolySetScale(f32 factor, effPCPThunderSpherePoly_t *work) {
-    work->head.vector.radiusScale = work->baseRadiusScale * factor;
-    work->head.vector.heightScale = work->baseHeightScale * factor;
+void effPCPThunderSpherePolySetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
+    scale->head.vector.radiusScale = scale->baseRadiusScale * hData;
+    scale->head.vector.heightScale = scale->baseHeightScale * hData;
 }
 
-EffThunderParameterHead *effPCPThunderSpherePolyGetParam(effPCPThunderSpherePoly_t *work) {
-    return &work->head;
+EffThunderParameterHead *effPCPThunderSpherePolyGetParam(effPCPThunderSpherePoly_t *pThunderPoly) {
+    return &pThunderPoly->head;
 }
 
 void effPCPThunderSphereInit(effPCPThunderSpherePoly_t *work, s32 index) {
@@ -733,12 +733,12 @@ void effPCPThunderSphereRotateAxis(effPCPThunderSpherePoly_t *work, s32 index) {
     }
 }
 
-void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *work) {
+void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *hData) {
     s32 i = 0;
-    ParSystem *renderSystem = work->cellSystem;
-    s32 cellCount = work->head.vector.cellCount;
-    u32 tintColor = work->tintColor;
-    effPCPThunderSpherePolyPart_t *cell = work->cells;
+    ParSystem *renderSystem = hData->cellSystem;
+    s32 cellCount = hData->head.vector.cellCount;
+    u32 tintColor = hData->tintColor;
+    effPCPThunderSpherePolyPart_t *cell = hData->cells;
     parCell_t *renderCells = renderSystem->cells;
     u32 *renderColor;
 
@@ -747,15 +747,15 @@ void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *work) {
         do {
             if (cell->wait == 0) {
                 if (cell->refresh != 0) {
-                    effPCPThunderSphereRotate(work, i);
-                    effPCPThunderSphereRotateAxis(work, i);
+                    effPCPThunderSphereRotate(hData, i);
+                    effPCPThunderSphereRotateAxis(hData, i);
                     cell->refresh--;
                 } else if (cell->abgr & EFF_THUNDER_ALPHA_MASK) {
                     cell->abgr += EFF_THUNDER_ALPHA_WRAP_ADD;
-                    effPCPThunderSphereRotateAxis(work, i);
+                    effPCPThunderSphereRotateAxis(hData, i);
                 } else {
-                    effPCPThunderSphereInit(work, i);
-                    dds3TrackPolyListInit(work->cellSystem, i);
+                    effPCPThunderSphereInit(hData, i);
+                    dds3TrackPolyListInit(hData->cellSystem, i);
                 }
             } else {
                 cell->wait--;
@@ -766,7 +766,7 @@ void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *work) {
             renderColor = (u32 *)((u8 *)renderColor + sizeof(parCell_t));
         } while (i < cellCount);
     }
-    dds3TrackPolyDraw(work->cellSystem);
+    dds3TrackPolyDraw(hData->cellSystem);
 }
 
 effPCPThunderSpherePoly_t *effBTLBindCreateTrack(EffThunderVectorParams *parameters) {
@@ -791,15 +791,15 @@ effPCPThunderSpherePoly_t *effBTLBindCreateTrack(EffThunderVectorParams *paramet
     return work;
 }
 
-void effPCPThunderSpherePolyLowDelete(effPCPThunderSpherePoly_t *work) {
-    dds3TrackPolyDelete(work->cellSystem);
-    sdfMemFreeDirect(work->allocationHandle);
+void effPCPThunderSpherePolyLowDelete(effPCPThunderSpherePoly_t *hData) {
+    dds3TrackPolyDelete(hData->cellSystem);
+    sdfMemFreeDirect(hData->allocationHandle);
 }
 
-void effPCPThunderSpherePolyLowCreate(void *parameterTable) {
+void effPCPThunderSpherePolyLowCreate(void *pParam) {
     void *parameters;
 
-    parameters = dds3EffectPCPDataGetData(parameterTable, EFF_THUNDER_PARAMETER_BLOCK);
+    parameters = dds3EffectPCPDataGetData(pParam, EFF_THUNDER_PARAMETER_BLOCK);
     effBTLBindCreateTrack(parameters);
 }
 
@@ -807,21 +807,21 @@ void effPCPThunderSpherePolyLowCopy(void *parameters) {
     effBTLBindCreateTrack(parameters);
 }
 
-void effPCPThunderSpherePolyLowSetPosition(void *destination, void *source) {
-    SDF_VU0_COPYVECTOR(destination, source);
+void effPCPThunderSpherePolyLowSetPosition(void *hData, void *pPos) {
+    SDF_VU0_COPYVECTOR(hData, pPos);
 }
 
-void effPCPThunderSpherePolyLowSetColor(effPCPThunderSpherePoly_t *work, u32 tintColor) {
-    work->tintColor = tintColor;
+void effPCPThunderSpherePolyLowSetColor(effPCPThunderSpherePoly_t *hData, u32 abgr) {
+    hData->tintColor = abgr;
 }
 
-void effPCPThunderSpherePolyLowSetScale(f32 factor, effPCPThunderSpherePoly_t *work) {
-    work->head.vector.radiusScale = work->baseRadiusScale * factor;
-    work->head.vector.heightScale = work->baseHeightScale * factor;
+void effPCPThunderSpherePolyLowSetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
+    scale->head.vector.radiusScale = scale->baseRadiusScale * hData;
+    scale->head.vector.heightScale = scale->baseHeightScale * hData;
 }
 
-u32 effPCPThunderSpherePolyLowGetParam(u32 value) {
-    return value;
+u32 effPCPThunderSpherePolyLowGetParam(u32 pThunderPoly) {
+    return pThunderPoly;
 }
 
 void effPCPThunderSphereLowInit(effPCPThunderSpherePoly_t *work, s32 index) {
@@ -974,12 +974,12 @@ void effPCPThunderSphereLowRotateAxis(effPCPThunderSpherePoly_t *work, s32 index
     }
 }
 
-void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *work) {
+void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *hData) {
     s32 i = 0;
-    ParSystem *renderSystem = work->cellSystem;
-    s32 cellCount = work->head.vector.cellCount;
-    u32 tintColor = work->tintColor;
-    effPCPThunderSpherePolyPart_t *cell = work->cells;
+    ParSystem *renderSystem = hData->cellSystem;
+    s32 cellCount = hData->head.vector.cellCount;
+    u32 tintColor = hData->tintColor;
+    effPCPThunderSpherePolyPart_t *cell = hData->cells;
     parCell_t *renderCells = renderSystem->cells;
     u32 *renderColor;
 
@@ -988,15 +988,15 @@ void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *work) {
         do {
             if (cell->wait == 0) {
                 if (cell->refresh != 0) {
-                    effPCPThunderSphereLowRotate(work, i);
-                    effPCPThunderSphereLowRotateAxis(work, i);
+                    effPCPThunderSphereLowRotate(hData, i);
+                    effPCPThunderSphereLowRotateAxis(hData, i);
                     cell->refresh--;
                 } else if (cell->abgr & EFF_THUNDER_ALPHA_MASK) {
                     cell->abgr += EFF_THUNDER_ALPHA_WRAP_ADD;
-                    effPCPThunderSphereLowRotateAxis(work, i);
+                    effPCPThunderSphereLowRotateAxis(hData, i);
                 } else {
-                    effPCPThunderSphereLowInit(work, i);
-                    dds3TrackPolyListInit(work->cellSystem, i);
+                    effPCPThunderSphereLowInit(hData, i);
+                    dds3TrackPolyListInit(hData->cellSystem, i);
                 }
             } else {
                 cell->wait--;
@@ -1007,7 +1007,7 @@ void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *work) {
             renderColor = (u32 *)((u8 *)renderColor + sizeof(parCell_t));
         } while (i < cellCount);
     }
-    dds3TrackPolyDraw(work->cellSystem);
+    dds3TrackPolyDraw(hData->cellSystem);
 }
 
 EffThunderSparkWork *eff_177850(EffThunderSparkParams *parameters) {
@@ -1327,39 +1327,39 @@ effPCP_ThunderPoly_t *effPCP_ThunderPolyCreate(effPCP_ThunderPolyParam_t *parame
     return work;
 }
 
-void effPCP_ThunderPolyDelete(effPCP_ThunderPoly_t *work) {
-    dds3TrackPolyDelete(work->system);
-    sdfMemFreeDirect(work->allocationHandle);
+void effPCP_ThunderPolyDelete(effPCP_ThunderPoly_t *hData) {
+    dds3TrackPolyDelete(hData->system);
+    sdfMemFreeDirect(hData->allocationHandle);
 }
 
-void effPCP_ThunderPolySetPosition(u8 *endpoints, void *anchor) {
-        SDF_VU0_LOADVECTOR(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
-        SDF_VU0_LOADVECTOR_B(anchor);
-        SDF_VU0_STOREVECTOR_B(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+void effPCP_ThunderPolySetPosition(u8 *hData, void *pPos) {
+        SDF_VU0_LOADVECTOR(hData + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+        SDF_VU0_LOADVECTOR_B(pPos);
+        SDF_VU0_STOREVECTOR_B(hData + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
         SDF_VU0_SUBVECTOR_B_A();
-        SDF_VU0_LOADVECTOR(endpoints);
+        SDF_VU0_LOADVECTOR(hData);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(endpoints);
+        SDF_VU0_STOREVECTOR(hData);
 }
 
-void effPCP_ThunderPolySetColor(effPCP_ThunderPoly_t *work, u32 color) {
-    work->color = color;
+void effPCP_ThunderPolySetColor(effPCP_ThunderPoly_t *hData, u32 abgr) {
+    hData->color = abgr;
 }
 
-effPCP_ThunderPolyParam_t *effPCP_ThunderPolyGetParam(effPCP_ThunderPoly_t *work) {
-    return &work->head;
+effPCP_ThunderPolyParam_t *effPCP_ThunderPolyGetParam(effPCP_ThunderPoly_t *pThunderPoly) {
+    return &pThunderPoly->head;
 }
 
-void effPCP_ThunderPolySetVCAcute(effPCP_ThunderPoly_t *work) {
-    dds3TrackPolyVC5Set_Acute(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+void effPCP_ThunderPolySetVCAcute(effPCP_ThunderPoly_t *pThunderPoly) {
+    dds3TrackPolyVC5Set_Acute(pThunderPoly->system, pThunderPoly->head.centerColorWord, pThunderPoly->head.middleColorWord, pThunderPoly->head.edgeColorWord);
 }
 
-void effPCP_ThunderPolySetVCAcute2(effPCP_ThunderPoly_t *work) {
-    dds3TrackPolyVC5Set_AcuteR(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+void effPCP_ThunderPolySetVCAcute2(effPCP_ThunderPoly_t *pThunderPoly) {
+    dds3TrackPolyVC5Set_AcuteR(pThunderPoly->system, pThunderPoly->head.centerColorWord, pThunderPoly->head.middleColorWord, pThunderPoly->head.edgeColorWord);
 }
 
-void effPCP_ThunderPolySetVCNormal(effPCP_ThunderPoly_t *work) {
-    dds3TrackPolyVC5Set_Normal(work->system, work->head.centerColorWord, work->head.middleColorWord, work->head.edgeColorWord);
+void effPCP_ThunderPolySetVCNormal(effPCP_ThunderPoly_t *pThunderPoly) {
+    dds3TrackPolyVC5Set_Normal(pThunderPoly->system, pThunderPoly->head.centerColorWord, pThunderPoly->head.middleColorWord, pThunderPoly->head.edgeColorWord);
 }
 
 void effPCP_ThunderPolyDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
@@ -1370,7 +1370,7 @@ void effPCP_ThunderPolyDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
     fragment->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
+void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 number) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -1384,8 +1384,8 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    ParSystem *system = work->system;
-    parCell_t *cell = &system->cells[index];
+    ParSystem *system = pThunderPoly->system;
+    parCell_t *cell = &system->cells[number];
     u128 *vertices;
     u128 *join;
     s32 i;
@@ -1399,20 +1399,20 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     f32 phaseStep;
     f32 facing;
 
-    VEC3_SPLAT(width, work->head.bandWidth);
-    VEC3_SPLAT(outerWidth, width[0] + work->head.edgeWidth);
+    VEC3_SPLAT(width, pThunderPoly->head.bandWidth);
+    VEC3_SPLAT(outerWidth, width[0] + pThunderPoly->head.edgeWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
     cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
-    segments = work->head.halfLife;
-    SDF_VU0_LOADVECTOR(work->head.end);
-    SDF_VU0_LOADVECTOR_B(work->head.start);
+    segments = pThunderPoly->head.halfLife;
+    SDF_VU0_LOADVECTOR(pThunderPoly->head.end);
+    SDF_VU0_LOADVECTOR_B(pThunderPoly->head.start);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(direction);
-    distance /= work->head.halfLife;
-    amplitude = work->head.waveAmplitude;
+    distance /= pThunderPoly->head.halfLife;
+    amplitude = pThunderPoly->head.waveAmplitude;
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
@@ -1423,7 +1423,7 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     SDF_VU0_STOREVECTOR_NOMEM(side);
     phase = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
-    SDF_VU0_COPYVECTOR(position, work->head.start);
+    SDF_VU0_COPYVECTOR(position, pThunderPoly->head.start);
     currentWave = amplitude * sdfSin(phase);
     VEC3_SPLAT(waveScale, currentWave);
     SDF_VU0_LOADVECTOR(side);
@@ -1516,7 +1516,7 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
         phase += phaseStep;
         if (cycle > EFF_THUNDER_HALF_TURN) {
             cycle -= EFF_THUNDER_HALF_TURN;
-            amplitude = work->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
+            amplitude = pThunderPoly->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
         }
         previousWave = currentWave;
         currentWave = amplitude * sdfSin(phase);
@@ -1566,14 +1566,14 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     }
 }
 
-void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *work) {
+void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData) {
     s32 i = 0;
-    ParSystem *system = work->system;
-    s32 count = work->head.fragmentCount;
-    u32 restartLimit = work->head.restartFrameLimit;
-    u32 tintColor = work->color;
-    u32 updateCount = work->state.updateCount;
-    EffThunderFrag *fragment = work->fragments;
+    ParSystem *system = hData->system;
+    s32 count = hData->head.fragmentCount;
+    u32 restartLimit = hData->head.restartFrameLimit;
+    u32 tintColor = hData->color;
+    u32 updateCount = hData->state.updateCount;
+    EffThunderFrag *fragment = hData->fragments;
     parCell_t *renderCells = system->cells;
     s32 canRestart;
 
@@ -1582,13 +1582,13 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *work) {
         do {
             if (fragment->delayFrames == 0) {
                 if (fragment->activeFrames != 0) {
-                    effPCP_ThunderPolyPartRefresh(work, i);
+                    effPCP_ThunderPolyPartRefresh(hData, i);
                     fragment->activeFrames--;
                 } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
                     fragment->color += EFF_THUNDER_ALPHA_WRAP_ADD;
                 } else if (restartLimit == 0 || canRestart) {
-                    effPCP_ThunderPolyDrawOff(work, i);
-                    dds3TrackPolyListInit(work->system, i);
+                    effPCP_ThunderPolyDrawOff(hData, i);
+                    dds3TrackPolyListInit(hData->system, i);
                 } else {
                     renderCells[i].vertexCount = 0;
                 }
@@ -1599,10 +1599,10 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *work) {
             i++;
             fragment++;
         } while (i < count);
-        updateCount = work->state.updateCount;
+        updateCount = hData->state.updateCount;
     }
-    work->state.updateCount = updateCount + 1;
-    dds3TrackPolyDraw(work->system);
+    hData->state.updateCount = updateCount + 1;
+    dds3TrackPolyDraw(hData->system);
 }
 
 effPCP_ThunderPoly_t *effPCP_ThunderPolyLowCreate(effPCP_ThunderPolyParam_t *parameters) {
@@ -1626,24 +1626,24 @@ effPCP_ThunderPoly_t *effPCP_ThunderPolyLowCreate(effPCP_ThunderPolyParam_t *par
     return work;
 }
 
-void effPCP_ThunderPolyLowDelete(effPCP_ThunderPoly_t *work) {
-    dds3TrackPolyDelete(work->state.secondarySystem);
-    dds3TrackPolyDelete(work->system);
-    sdfMemFreeDirect(work->allocationHandle);
+void effPCP_ThunderPolyLowDelete(effPCP_ThunderPoly_t *hData) {
+    dds3TrackPolyDelete(hData->state.secondarySystem);
+    dds3TrackPolyDelete(hData->system);
+    sdfMemFreeDirect(hData->allocationHandle);
 }
 
-void effPCP_ThunderPolyLowSetPosition(u8 *endpoints, void *anchor) {
-        SDF_VU0_LOADVECTOR(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
-        SDF_VU0_LOADVECTOR_B(anchor);
-        SDF_VU0_STOREVECTOR_B(endpoints + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+void effPCP_ThunderPolyLowSetPosition(u8 *hData, void *pPos) {
+        SDF_VU0_LOADVECTOR(hData + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
+        SDF_VU0_LOADVECTOR_B(pPos);
+        SDF_VU0_STOREVECTOR_B(hData + EFF_THUNDER_ENDPOINT_VECTOR_BYTES);
         SDF_VU0_SUBVECTOR_B_A();
-        SDF_VU0_LOADVECTOR(endpoints);
+        SDF_VU0_LOADVECTOR(hData);
         SDF_VU0_ADDVECTOR();
-        SDF_VU0_STOREVECTOR(endpoints);
+        SDF_VU0_STOREVECTOR(hData);
 }
 
-void effPCP_ThunderPolyLowSetColor(effPCP_ThunderPoly_t *work, u32 color) {
-    work->color = color;
+void effPCP_ThunderPolyLowSetColor(effPCP_ThunderPoly_t *hData, u32 abgr) {
+    hData->color = abgr;
 }
 
 void effPCP_ThunderPolyLowDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
@@ -1654,7 +1654,7 @@ void effPCP_ThunderPolyLowDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
     fragment->color = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
-void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
+void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 number) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 negativeOuterWidth[4] __attribute__((aligned(16)));
@@ -1668,10 +1668,10 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    ParSystem *secondarySystem = work->state.secondarySystem;
-    ParSystem *primarySystem = work->system;
-    parCell_t *secondaryCell = &secondarySystem->cells[index];
-    parCell_t *primaryCell = &primarySystem->cells[index];
+    ParSystem *secondarySystem = pThunderPoly->state.secondarySystem;
+    ParSystem *primarySystem = pThunderPoly->system;
+    parCell_t *secondaryCell = &secondarySystem->cells[number];
+    parCell_t *primaryCell = &primarySystem->cells[number];
     u128 *vertices;
     u128 *coreVertices;
     u128 *join;
@@ -1686,22 +1686,22 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     f32 phaseStep;
     f32 facing;
 
-    VEC3_SPLAT(width, work->head.coreWidth);
-    VEC3_SPLAT(outerWidth, (width[0] + work->head.edgeWidth) + work->head.bandWidth);
+    VEC3_SPLAT(width, pThunderPoly->head.coreWidth);
+    VEC3_SPLAT(outerWidth, (width[0] + pThunderPoly->head.edgeWidth) + pThunderPoly->head.bandWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
     secondaryCell->vertexCount = secondarySystem->vertexWordCount;
     primaryCell->vertexCount = primarySystem->vertexWordCount;
     vertices = secondaryCell->history;
     coreVertices = primaryCell->history;
-    segments = work->head.halfLife;
-    SDF_VU0_LOADVECTOR(work->head.end);
-    SDF_VU0_LOADVECTOR_B(work->head.start);
+    segments = pThunderPoly->head.halfLife;
+    SDF_VU0_LOADVECTOR(pThunderPoly->head.end);
+    SDF_VU0_LOADVECTOR_B(pThunderPoly->head.start);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_GETLENGTH(distance);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(direction);
-    distance /= work->head.halfLife;
-    amplitude = work->head.waveAmplitude;
+    distance /= pThunderPoly->head.halfLife;
+    amplitude = pThunderPoly->head.waveAmplitude;
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
@@ -1712,7 +1712,7 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     SDF_VU0_STOREVECTOR_NOMEM(side);
     phase = dds3GetRandFloatA(dds3EffectBase) * (EFF_THUNDER_HALF_TURN * 2.0f);
     cycle = phase - (EFF_THUNDER_HALF_TURN * 2.0f);
-    SDF_VU0_COPYVECTOR(position, work->head.start);
+    SDF_VU0_COPYVECTOR(position, pThunderPoly->head.start);
     currentWave = amplitude * sdfSin(phase);
     VEC3_SPLAT(waveScale, currentWave);
     SDF_VU0_LOADVECTOR(side);
@@ -1803,7 +1803,7 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
         phase += phaseStep;
         if (cycle > EFF_THUNDER_HALF_TURN) {
             cycle -= EFF_THUNDER_HALF_TURN;
-            amplitude = work->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
+            amplitude = pThunderPoly->head.waveAmplitude * (1.0f - dds3GetRandFloatA(dds3EffectBase) * 0.95f);
         }
         previousWave = currentWave;
         currentWave = amplitude * sdfSin(phase);
@@ -1853,14 +1853,14 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *work, s32 index) {
     }
 }
 
-void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *work) {
+void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *hData) {
     s32 index = 0;
-    ParSystem *secondarySystem = work->state.secondarySystem;
-    s32 fragmentCount = work->head.fragmentCount;
-    ParSystem *primarySystem = work->system;
+    ParSystem *secondarySystem = hData->state.secondarySystem;
+    s32 fragmentCount = hData->head.fragmentCount;
+    ParSystem *primarySystem = hData->system;
     parCell_t *primaryCells = primarySystem->cells;
-    u32 tintColor = work->color;
-    EffThunderFrag *fragment = work->fragments;
+    u32 tintColor = hData->color;
+    EffThunderFrag *fragment = hData->fragments;
     parCell_t *secondaryCells = secondarySystem->cells;
     s32 packedColor;
 
@@ -1868,14 +1868,14 @@ void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *work) {
         do {
             if (fragment->delayFrames == 0) {
                 if (fragment->activeFrames != 0) {
-                    effPCP_ThunderPolyLowPartRefresh(work, index);
+                    effPCP_ThunderPolyLowPartRefresh(hData, index);
                     fragment->activeFrames--;
                 } else if (fragment->color & EFF_THUNDER_ALPHA_MASK) {
                     fragment->color -= EFF_THUNDER_ALPHA_FADE_STEP;
                 } else {
-                    effPCP_ThunderPolyLowDrawOff(work, index);
-                    dds3TrackPolyListInit(work->state.secondarySystem, index);
-                    dds3TrackPolyListInit(work->system, index);
+                    effPCP_ThunderPolyLowDrawOff(hData, index);
+                    dds3TrackPolyListInit(hData->state.secondarySystem, index);
+                    dds3TrackPolyListInit(hData->system, index);
                 }
             } else {
                 fragment->delayFrames--;
@@ -1887,8 +1887,8 @@ void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *work) {
             index++;
         } while (index < fragmentCount);
     }
-    dds3TrackPolyDraw(work->state.secondarySystem);
-    dds3TrackPolyDraw(work->system);
+    dds3TrackPolyDraw(hData->state.secondarySystem);
+    dds3TrackPolyDraw(hData->system);
 }
 
 effPCP_ThunderRadiatePoly_t *effPCP_ThunderRadiatePolyCreate(EffThunderCellParams *parameters) {
@@ -1908,17 +1908,17 @@ effPCP_ThunderRadiatePoly_t *effPCP_ThunderRadiatePolyCreate(EffThunderCellParam
     return work;
 }
 
-void effPCP_ThunderRadiatePolyDelete(effPCP_ThunderRadiatePoly_t *work) {
-    dds3TrackPolyDelete(work->system);
-    sdfMemFreeDirect(work->allocationHandle);
+void effPCP_ThunderRadiatePolyDelete(effPCP_ThunderRadiatePoly_t *hData) {
+    dds3TrackPolyDelete(hData->system);
+    sdfMemFreeDirect(hData->allocationHandle);
 }
 
-void effPCP_ThunderRadiatePolySetPosition(void *destination, void *source) {
-    SDF_VU0_COPYVECTOR(destination, source);
+void effPCP_ThunderRadiatePolySetPosition(void *hData, void *pPos) {
+    SDF_VU0_COPYVECTOR(hData, pPos);
 }
 
-void effPCP_ThunderRadiatePolySetColor(effPCP_ThunderRadiatePoly_t *work, u32 value) {
-    work->unk4C = value;
+void effPCP_ThunderRadiatePolySetColor(effPCP_ThunderRadiatePoly_t *hData, u32 abgr) {
+    hData->unk4C = abgr;
 }
 
 void effPCP_ThunderRadiatePolyDrawOff(effPCP_ThunderRadiatePoly_t *work, s32 index) {
@@ -1935,7 +1935,7 @@ void effPCP_ThunderRadiatePolyDrawOff(effPCP_ThunderRadiatePoly_t *work, s32 ind
     cell->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
 }
 
-void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32 index) {
+void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *pThunderRadiatePoly, s32 number) {
     f32 width[4] __attribute__((aligned(16)));
     f32 bandWidth[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
@@ -1946,9 +1946,9 @@ void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32
     f32 direction[4] __attribute__((aligned(16)));
     f32 cameraDirection[4] __attribute__((aligned(16)));
     f32 side[4] __attribute__((aligned(16)));
-    ParSystem *system = work->system;
-    effPCP_ThunderRadiatePolyPart_t *source = &work->cells[index];
-    parCell_t *cell = &system->cells[index];
+    ParSystem *system = pThunderRadiatePoly->system;
+    effPCP_ThunderRadiatePolyPart_t *source = &pThunderRadiatePoly->cells[number];
+    parCell_t *cell = &system->cells[number];
     u128 *vertices;
     u128 *join;
     s32 i;
@@ -1957,13 +1957,13 @@ void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32
     f32 facing;
     f32 stepLength;
 
-    VEC3_SPLAT(width, work->head.coreWidth);
-    VEC3_SPLAT(bandWidth, width[0] + work->head.bandWidth);
-    VEC3_SPLAT(outerWidth, bandWidth[0] + work->head.edgeWidth);
+    VEC3_SPLAT(width, pThunderRadiatePoly->head.coreWidth);
+    VEC3_SPLAT(bandWidth, width[0] + pThunderRadiatePoly->head.bandWidth);
+    VEC3_SPLAT(outerWidth, bandWidth[0] + pThunderRadiatePoly->head.edgeWidth);
     VEC3_SPLAT(negativeOuterWidth, -outerWidth[0]);
     cell->vertexCount = system->vertexWordCount;
     vertices = cell->history;
-    segments = work->head.halfLife;
+    segments = pThunderRadiatePoly->head.halfLife;
     SDF_VU0_LOADVECTOR(aViewTarget);
     SDF_VU0_LOADVECTOR_B(aViewEye);
     SDF_VU0_SUBVECTOR();
@@ -1975,8 +1975,8 @@ void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32
     SDF_VU0_OUTERPRODUCT();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR_NOMEM(side);
-    distance = work->head.length / work->head.halfLife;
-    SDF_VU0_COPYVECTOR(position, work->head.origin);
+    distance = pThunderRadiatePoly->head.length / pThunderRadiatePoly->head.halfLife;
+    SDF_VU0_COPYVECTOR(position, pThunderRadiatePoly->head.origin);
 
     for (i = 0; i < segments; i++) {
         SDF_VU0_LOADVECTOR(direction);
@@ -2085,23 +2085,23 @@ void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *work, s32
     }
 }
 
-void effPCP_ThunderRadiatePolyDraw(effPCP_ThunderRadiatePoly_t *work) {
+void effPCP_ThunderRadiatePolyDraw(effPCP_ThunderRadiatePoly_t *hData) {
     s32 i = 0;
-    s32 cellCount = work->head.cellCount;
-    effPCP_ThunderRadiatePolyPart_t *cell = work->cells;
-    parCell_t *renderCells = work->system->cells;
+    s32 cellCount = hData->head.cellCount;
+    effPCP_ThunderRadiatePolyPart_t *cell = hData->cells;
+    parCell_t *renderCells = hData->system->cells;
 
     if (cellCount > 0) {
         do {
             if (cell->delayFrames == 0) {
                 if (cell->activeFrames != 0) {
-                    effPCP_ThunderRadiatePolyPartRefresh(work, i);
+                    effPCP_ThunderRadiatePolyPartRefresh(hData, i);
                     cell->activeFrames--;
                 } else if (renderCells[i].color & EFF_THUNDER_ALPHA_MASK) {
                     renderCells[i].color -= EFF_THUNDER_ALPHA_FADE_STEP;
                 } else {
-                    effPCP_ThunderRadiatePolyDrawOff(work, i);
-                    dds3TrackPolyListInit(work->system, i);
+                    effPCP_ThunderRadiatePolyDrawOff(hData, i);
+                    dds3TrackPolyListInit(hData->system, i);
                 }
             } else {
                 cell->delayFrames--;
@@ -2110,7 +2110,7 @@ void effPCP_ThunderRadiatePolyDraw(effPCP_ThunderRadiatePoly_t *work) {
             i++;
         } while (i < cellCount);
     }
-    dds3TrackPolyDraw(work->system);
+    dds3TrackPolyDraw(hData->system);
 }
 
 effPCP_ThunderPolyList_t *effPCP_ThunderPolyListCreate(effPCP_ThunderPolyListParam_t *src) {
@@ -2131,21 +2131,21 @@ effPCP_ThunderPolyList_t *effPCP_ThunderPolyListCreate(effPCP_ThunderPolyListPar
     return group;
 }
 
-void effPCP_ThunderPolyListDelete(effPCP_ThunderPolyList_t *group) {
+void effPCP_ThunderPolyListDelete(effPCP_ThunderPolyList_t *hData) {
     s32 fragmentIndex;
 
-    for (fragmentIndex = 0; fragmentIndex < group->head.count - 1; fragmentIndex++) {
-        effPCP_ThunderPolyDelete(group->handles[fragmentIndex]);
+    for (fragmentIndex = 0; fragmentIndex < hData->head.count - 1; fragmentIndex++) {
+        effPCP_ThunderPolyDelete(hData->handles[fragmentIndex]);
     }
-    sdfChipFreeDirect(group);
+    sdfChipFreeDirect(hData);
 }
 
-effPCP_ThunderPolyListParam_t *effPCP_ThunderPolyListGetParam(effPCP_ThunderPolyList_t *resource) {
-    return (effPCP_ThunderPolyListParam_t *)resource;
+effPCP_ThunderPolyListParam_t *effPCP_ThunderPolyListGetParam(effPCP_ThunderPolyList_t *pTPolyList) {
+    return (effPCP_ThunderPolyListParam_t *)pTPolyList;
 }
 
-void effPCP_ThunderPolyListSetColor(effPCP_ThunderPolyList_t *resource, u32 color) {
-    resource->color = color;
+void effPCP_ThunderPolyListSetColor(effPCP_ThunderPolyList_t *hData, u32 abgr) {
+    hData->color = abgr;
 }
 
 void effPCP_ThunderPolyListPartRefresh(effPCP_ThunderPoly_t *work, s32 index, const u128 *seed) {
@@ -2353,28 +2353,28 @@ void effPCP_ThunderPolyListPartRefresh(effPCP_ThunderPoly_t *work, s32 index, co
     }
 }
 
-void effPCP_ThunderPolyListDraw(effPCP_ThunderPolyList_t *group) {
+void effPCP_ThunderPolyListDraw(effPCP_ThunderPolyList_t *hData) {
     s32 i = 0;
-    s32 segmentCount = group->head.count - 1;
+    s32 segmentCount = hData->head.count - 1;
     s32 j;
     s32 fragmentCount;
     u32 color;
-    f32 (*points)[4] = group->head.points;
+    f32 (*points)[4] = hData->head.points;
     effPCP_ThunderPoly_t *work;
     effPCP_ThunderPoly_t *previous;
     parCell_t *cell;
 
     for (; i < segmentCount; i++) {
-        work = group->handles[i];
+        work = hData->handles[i];
         SDF_VU0_COPYVECTOR(work->head.start, points[0]);
         SDF_VU0_COPYVECTOR(work->head.end, points[1]);
         points++;
         fragmentCount = work->head.fragmentCount;
-        color = effMagaCylinderCalcColor(group->color, work->color);
+        color = effMagaCylinderCalcColor(hData->color, work->color);
         cell = work->system->cells;
         for (j = 0; j < fragmentCount; j++) {
             if (i > 0) {
-                previous = group->handles[i - 1];
+                previous = hData->handles[i - 1];
                 effPCP_ThunderPolyListPartRefresh(work, j,
                     previous->system->cells[j].history + previous->system->cells[j].vertexCount - 5);
             } else {

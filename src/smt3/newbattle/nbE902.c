@@ -291,13 +291,13 @@ extern s32 effPCPBossBUNSIN2GetLength(void);
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
 
 extern void nbPanelAllHide(void);
 
-extern void nbGroupFormDispOn(s32 group);
+extern void nbGroupFormDispOn(s32 side);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -309,13 +309,13 @@ extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
 
 extern u32 f;
 
-extern void effBTLSkillSetFormationInfo(s32 invokeIndex, u32 targetBits);
+extern void effBTLSkillSetFormationInfo(s32 InvokeID, u32 TargetBit);
 
-extern void effBTLSkillStart(s32 id, s32 param);
+extern void effBTLSkillStart(s32 id, s32 stat);
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
 
-extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, u32 flag);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, u32 flag);
 
 extern void nbFormDispOff(s32 formindex);
 
@@ -346,7 +346,7 @@ extern u8 datModelParamTable[];
 
 extern void effBTLSkillEnd(void);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -354,13 +354,13 @@ extern char D_00546500[];
 
 extern u8 pNbCamera[];
 
-extern void nbCameraBoss_Ongy_BUNSIN_Run(u8 *camera);
+extern void nbCameraBoss_Ongy_BUNSIN_Run(u8 *pNbCamera);
 
-extern u32 dds3GetRandA(u8 *state);
+extern u32 dds3GetRandA(u8 *name);
 
 extern u8 dds3EffectBase[];
 
-extern void nbCameraEnemyPartySet(u8 *camera, f32 pitch, f32 yaw);
+extern void nbCameraEnemyPartySet(u8 *pNbCamera, f32 angleH, f32 angleW);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -406,9 +406,9 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormation_t *sform, nbFormation_t *form1, nbFormation_t *form2l, nbFormation_t *form2r);
+nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormation_t *sform, nbFormation_t *form1, nbFormation_t *form2, nbFormation_t *form3);
 
-void nbMoveFormation(void *data, s32 from, s32 to);
+void nbMoveFormation(void *data, s32 sindex, s32 dindex);
 
 nbFormation_t *nbGetEventForm();
 
@@ -467,41 +467,41 @@ s32 Bunshin1(nbEventProcessData_t *e)
     return 0;
 }
 
-s32 Wait2(nbEventProcessData_t *e)
+s32 Wait2(nbEventProcessData_t *ed)
 {
-    if (e->frame == 1) {
+    if (ed->frame == 1) {
         nbFormDispOff(5);
     }
     nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
-    if (effPCPBossBUNSIN2GetLength() < e->frame) {
+    if (effPCPBossBUNSIN2GetLength() < ed->frame) {
         if (dds3GetRandA(dds3EffectBase) & 1) {
             nbCameraEnemyPartySet(pNbCamera, -0.34906584f, -0.26179934f);
         } else {
             nbCameraEnemyPartySet(pNbCamera, -0.34906584f, 0.26179934f);
         }
-        nbFreeEffectSlot(e);
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }
 
-s32 Hontai(nbEventProcessData_t *e)
+s32 Hontai(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
     s32 i;
 
     for (i = 4; i < 8; i++) {
-        e->data->form[i].stat |= 0x1000;
-        dds3ObjectBaseOffFlag(e->data->form[i].basic, 0x400);
+        ed->data->form[i].stat |= 0x1000;
+        dds3ObjectBaseOffFlag(ed->data->form[i].basic, 0x400);
     }
-    form = &e->data->form[dds3GetRandIntA(0, 4) + 4];
+    form = &ed->data->form[dds3GetRandIntA(0, 4) + 4];
     form->stat &= ~0x1000;
     if (evtGetAgeOfMoon() == 8) {
         dds3ObjectBaseOnFlag(form->basic, 0x400);
         form->basic->poseset->r = 200.0f;
     }
-    nbSetEnemyFormation(e->data);
+    nbSetEnemyFormation(ed->data);
     nbGroupFormDispOn(1);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
@@ -541,7 +541,7 @@ s32 nbE902Process_1(dds3ProcessID_t *id)
 INCLUDE_ASM(const s32, "newbattle/nbE902", nbE902Process_1);
 #endif
 
-s32 Hatudo(nbEventProcessData_t *e)
+s32 Hatudo(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
 
@@ -550,7 +550,7 @@ s32 Hatudo(nbEventProcessData_t *e)
     nbAddMotionKoukaPacket(0, 0, form, 4);
     nbResetFormPosRot(form);
     nbDispText(text1[0xEC], NULL, 0, 0x5A, 0x89FEFF80);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 

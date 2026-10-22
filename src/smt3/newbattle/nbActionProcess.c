@@ -17,7 +17,7 @@ extern nbFormation_t *nbGetEventForm();
 
 extern void nbPanelDraw(s32 flag);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
 extern s32 datCheckPlayerDead(void);
 
@@ -110,7 +110,7 @@ extern nbMasterTextEntry_t master_text[];
 
 extern char D_00543880[];
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern s32 datCheckTalk(datUnitWork_t *work);
 
@@ -118,28 +118,28 @@ extern s32 evtGetAgeOfMoon(void);
 
 extern char D_00543FA8[]; /* "NEGO p:%d e:%d\n" */
 
-extern void nbInitNegoProcess(nbActionProcessData_t *a, s32 pformindex, s32 eformindex,
-                              u32 negotype, s32 nowindex);
+extern void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eformindex,
+                              u32 negotype, s32 skillid);
 
-extern struct nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, nbActionProcessData_t *a,
-                                                     nbFormation_t *form, s32 type, s32 mode);
+extern struct nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid,
+                                                     nbFormation_t *form, s32 a, s32 frame);
 
 extern s32 effPCPBossONGY2GetLength(void);
 
 extern s32 effPCPBossONGYGetLength(void);
 
-extern struct nbKoukaPacket_t *nbAddOngOutPacket(s32 startframe, nbActionProcessData_t *a,
+extern struct nbKoukaPacket_t *nbAddOngOutPacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                                  nbFormation_t *form);
 
-extern struct nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, nbActionProcessData_t *a,
-                                                      nbFormation_t *form, s32 type);
+extern struct nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid,
+                                                      nbFormation_t *form, s32 motion);
 
-extern struct nbKoukaPacket_t *nbAddOngOut2Packet(s32 startframe, nbActionProcessData_t *a,
+extern struct nbKoukaPacket_t *nbAddOngOut2Packet(s32 startframe, nbActionProcessData_t *uniqueid,
                                                   nbFormation_t *form);
 
 extern s32 nbCheckSingleTargetSkill(s32 skillid);
 
-extern struct nbKoukaPacket_t *nbAddSakeKoukaPacket(s32 startframe, nbActionProcessData_t *a,
+extern struct nbKoukaPacket_t *nbAddSakeKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                                     nbFormation_t *form);
 
 extern char D_00544070[];
@@ -156,11 +156,11 @@ extern char D_005440D8[];
 
 extern void nbPlaySe(s32 no);
 
-extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, void *uniqueid, s32 seid);
+extern struct nbKoukaPacket_t *nbAddSePacket(s32 startframe, void *uniqueid, s32 se);
 
 extern void nbPanelStockEnd(void);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void dds3FadeOut(u32 r, u32 g, u32 b, u32 frame);
 
@@ -170,11 +170,11 @@ extern void SetTarget_nbActionProcess(nbActionProcessData_t *a);
 
 extern s32 AddTimeListHp(nbActionProcessData_t *a, s32 formindex, s32 add);
 
-extern s32 nbMakeDamagePacket(s32 startframe, nbActionProcessData_t *a, nbFormation_t *form,
+extern s32 nbMakeDamagePacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
                               s32 type, s32 hp, s32 mp, s32 badstat, s32 hiteff, s32 dead,
                               s32 deadtype, s32 moji, s32 animeoff);
 
-extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, nbActionProcessData_t *a,
+extern struct nbKoukaPacket_t *nbAddSkillNamePacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                                     s32 id);
 
 extern s32 nbCheckKuisibariSkill(s32 formindex);
@@ -201,31 +201,31 @@ extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
 extern void nbPanelStockSelectInit(void);
 
-extern u32 nbPanelStockSelect(nbMainProcessData_t *data, u32 pad);
+extern u32 nbPanelStockSelect(nbMainProcessData_t *pMainData, u32 pad);
 
-extern void nbMakeUnitFadeOutPacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form,
-                                    u32 col, s32 delay, s32 aframe, s32 colframe);
+extern void nbMakeUnitFadeOutPacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
+                                    u32 col, s32 delay, s32 colframe, s32 aframe);
 
-extern s32 nbAddReturnKoukaPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party,
-                                  s32 kage);
+extern s32 nbAddReturnKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid, struct nbParty_t *party,
+                                  s32 dead);
 
 extern s32 nbCheckEscape(nbMainProcessData_t *data);
 
-extern s32 nbMakePressPacket(s32 start, nbActionProcessData_t *a, f32 press);
+extern s32 nbMakePressPacket(s32 startframe, nbActionProcessData_t *uniqueid, f32 press);
 
-extern s32 nbMakeNewPressPacket(s32 start, nbActionProcessData_t *a, s32 presstype,
+extern s32 nbMakeNewPressPacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 ptype,
                                 nbFormation_t *form);
 
-extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 start, s32 frame,
-                                                       nbActionProcessData_t *a,
+extern struct nbKoukaPacket_t *nbAddMojiEffKoukaPacket(s32 startframe, s32 frame,
+                                                       nbActionProcessData_t *uniqueid,
                                                        nbFormation_t *form, s32 type);
 
-extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 start, nbActionProcessData_t *a,
+extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, nbActionProcessData_t *uniqueid,
                                                     nbFormation_t *form, s32 sw);
 
 s32 CheckKoketaNego(nbActionProcessData_t *a);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern char D_00543768[]; /* "nb_unitdraw" */
 
@@ -236,28 +236,28 @@ void *nbActionProcess1(dds3ProcessID_t *id);
 void nbActionShutdown(dds3ProcessID_t *id);
 
 nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type,
-                                            s32 partyindex, s32 target, s32 adata);
+                                            s32 from, s32 to, s32 d);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern void nbMakeDeadVisualPacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form,
-                                   s32 kage, s32 type);
+extern void nbMakeDeadVisualPacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
+                                   s32 deadtype, s32 deadpcm);
 
 void SetDeadPacket(nbActionProcessData_t *a, s32 formindex);
 
-extern void nbPushAction(s32 type, s32 partyindex, s32 target, s32 script);
+extern void nbPushAction(s32 type, s32 from, s32 to, s32 d);
 
 extern void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
                              s32 *crule, s32 *carea, s32 mode);
 
-extern void nbSetTargetProcess(nbActionProcessData_t *a, s32 partyindex, s32 ctype, s32 crule,
+extern void nbSetTargetProcess(nbActionProcessData_t *act, s32 partyindex, s32 ctype, s32 crule,
                                s32 carea);
 
-extern void nbDispJyokyoHelp(s32 meshandle, s32 mesid, s32 type, s32 value);
+extern void nbDispJyokyoHelp(s32 msgid, s32 no, s32 var_id, s32 var_ind);
 
 extern s32 p2sdGetPcmState(void);
 
@@ -265,7 +265,7 @@ extern void p2sdSyncSound(void);
 
 extern char D_005440E8[];
 
-extern s32 nbMakeSummonPacket(s32 startframe, nbActionProcessData_t *a, s32 side, s32 stockno,
+extern s32 nbMakeSummonPacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 side, s32 stockno,
                               s32 formindex);
 
 extern s32 nbGetTarSelStat(void);
@@ -276,20 +276,20 @@ extern s32 nbCheckBattleSkillError2(s32 nskill, u32 select);
 
 extern u32 nbGetSelectBit(nbMainProcessData_t *data);
 
-extern s32 nbDispSkillErrorMessage(s32 type);
+extern s32 nbDispSkillErrorMessage(s32 err);
 
 extern void nbSetTarSelJyokyoTime(s32 time);
 
 extern s32 GetEndTime(nbActionProcessData_t *a, s32 formindex);
 
-extern s32 nbGetExpMakaItem(datUnitWork_t *work);
+extern s32 nbGetExpMakaItem(datUnitWork_t *w);
 
-extern s32 nbMakeDeadPacket(s32 startframe, nbActionProcessData_t *a, nbFormation_t *form,
+extern s32 nbMakeDeadPacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
                             s32 deadchk);
 
-extern void sdfChipFreeDirect(void *block);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern s32 dds3GetRandIntA(s32 low, s32 high);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 s32 CheckTimeListDead(nbActionProcessData_t *a, s32 formindex);
 
@@ -299,7 +299,7 @@ extern s32 StkSelId;
 
 extern nbActionFunc_t ActionFuncTable[];
 
-extern s32 nbGetUniqueIdKoukaPacketCnt(nbActionProcessData_t *a);
+extern s32 nbGetUniqueIdKoukaPacketCnt(nbActionProcessData_t *uniqueid);
 
 extern void effBTLDelete(void *hBTLEffect);
 
@@ -309,38 +309,38 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern nbDevilData_t D_003989E0[];
 
-extern void nbAddFlareChargePacket(s32 start, nbActionProcessData_t *a, s32 type);
+extern void nbAddFlareChargePacket(s32 startframe, nbActionProcessData_t *uniqueid, s32 point);
 
 void SetNextActionSeq(nbActionProcessData_t *a, s32 nextseq);
 
 void SetDamagePacket(nbActionProcessData_t *a, s32 hp);
 
-void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd);
+void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 start, s32 locktime, s32 endtime);
 
-extern void nbAddAnalyzePacket(s32 start, nbActionProcessData_t *a, nbFormation_t *form);
+extern void nbAddAnalyzePacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form);
 
 extern void nbPanelAnalyzeStart(void);
 
 extern struct nbParty_t *nbGetPartyFromFormindex(s32 formindex);
 
-void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind);
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 var_id, s32 var_ind);
 
-extern s32 nbGetMakaBaramaki(datUnitWork_t *work);
+extern s32 nbGetMakaBaramaki(datUnitWork_t *w);
 
 extern s32 nbCheckFormationPlayerSide(s32 formindex);
 
-extern void datAddMaka(s32 maka);
+extern void datAddMaka(s32 addmaka);
 
-extern s32 nbGetHojoCounter(s32 formindex, s32 hojotype);
+extern s32 nbGetHojoCounter(s32 formindex, s32 type);
 
-extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
+extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
-extern s32 nbMakeReturnPacket(s32 start, nbActionProcessData_t *a, struct nbParty_t *party);
+extern s32 nbMakeReturnPacket(s32 startframe, nbActionProcessData_t *uniqueid, struct nbParty_t *party);
 
 extern void nbDelAllKoukaPacketType(s32 type);
 
 extern void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
-                                 nbActionProcessData_t *a);
+                                 nbActionProcessData_t *act);
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
 
@@ -417,10 +417,10 @@ void SetHitStopFrame(nbActionProcessData_t *a, s32 frame)
     }
 }
 
-void SetEnemyEscapePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
+void SetEnemyEscapePacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
 {
-    nbMakeReturnPacket(start, a, nbGetPartyFromFormindex(formindex));
-    SetTimeList(a, formindex, start, 0x1E, 0x1E);
+    nbMakeReturnPacket(sframe, a, nbGetPartyFromFormindex(dformindex));
+    SetTimeList(a, dformindex, sframe, 0x1E, 0x1E);
 }
 
 void SetAuroraPacket(nbActionProcessData_t *a, s32 formindex)
@@ -473,7 +473,7 @@ void SetAddFlareChargePacket(nbActionProcessData_t *a, s32 start)
     nbAddFlareChargePacket(start, a, 2);
 }
 
-void SetMakaPacket(nbActionProcessData_t *a, s32 unused, s32 time)
+void SetMakaPacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
 {
     s32 maka = nbGetMakaBaramaki(a->work);
 
@@ -484,7 +484,7 @@ void SetMakaPacket(nbActionProcessData_t *a, s32 unused, s32 time)
             maka = limit;
         }
     }
-    SetTimeList(a, a->form->formindex, time, 0x1E, 0x1E);
+    SetTimeList(a, a->form->formindex, sframe, 0x1E, 0x1E);
     nbSetJyokyoMes(a, 0x2C, 0, maka);
     if (nbCheckFormationPlayerSide(a->form->formindex) != 0) {
         datAddMaka(-maka);
@@ -493,18 +493,18 @@ void SetMakaPacket(nbActionProcessData_t *a, s32 unused, s32 time)
     }
 }
 
-void SetTorafuPacket(nbActionProcessData_t *a, s32 formindex, s32 start)
+void SetTorafuPacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
 {
-    nbFormation_t *form = &a->data->form[formindex];
+    nbFormation_t *form = &a->data->form[dformindex];
 
-    nbMakeUnitFadeOutPacket(start, a, form, 0, 6, 6, 6);
-    nbAddFormOnOffPacket(start + 12, a, form, 0);
+    nbMakeUnitFadeOutPacket(sframe, a, form, 0, 6, 6, 6);
+    nbAddFormOnOffPacket(sframe + 12, a, form, 0);
     a->data->endtype = 3;
 }
 
-void SetAnalyzePacket(nbActionProcessData_t *a, s32 formindex, s32 start)
+void SetAnalyzePacket(nbActionProcessData_t *a, s32 dformindex, s32 sframe)
 {
-    nbAddAnalyzePacket(start + 2, a, &a->data->form[formindex]);
+    nbAddAnalyzePacket(sframe + 2, a, &a->data->form[dformindex]);
     nbPanelAnalyzeStart();
     a->stat |= 0x10;
 }
@@ -572,11 +572,11 @@ void SetSakePacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dfo
     SetNewPress(a, 4);
 }
 
-void SetMissPacket(nbActionProcessData_t *a, s32 sformindex, s32 nskill, s32 formindex,
-                   s32 week, s32 start)
+void SetMissPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s32 dformindex,
+                   s32 cnt, s32 frame)
 {
-    nbAddMojiEffKoukaPacket(start, 0x2D, a, &a->data->form[formindex], 3);
-    SetTimeList(a, formindex, start, 10, 20);
+    nbAddMojiEffKoukaPacket(frame, 0x2D, a, &a->data->form[dformindex], 3);
+    SetTimeList(a, dformindex, frame, 10, 20);
     SetPress(a, -2.0f);
     SetNewPress(a, 4);
 }
@@ -612,7 +612,7 @@ void SetOngShadowPacket(nbActionProcessData_t *a, s32 nskill, s32 sformindex, s3
     SetNewPress(a, 0xE);
 }
 
-void SetOngShadowPacket2(nbActionProcessData_t *a, s32 skipindex, s32 frame)
+void SetOngShadowPacket2(nbActionProcessData_t *a, s32 dformindex, s32 frame)
 {
     s32 cnt = 0;
     s32 i;
@@ -621,7 +621,7 @@ void SetOngShadowPacket2(nbActionProcessData_t *a, s32 skipindex, s32 frame)
         nbFormation_t *form;
         u32 stat;
 
-        if (i == skipindex) {
+        if (i == dformindex) {
             continue;
         }
         form = &a->data->form[i];
@@ -776,16 +776,16 @@ s32 GetEndTime(nbActionProcessData_t *a, s32 formindex)
     return a->timelist[formindex].end;
 }
 
-void OverwriteTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd)
+void OverwriteTimeList(nbActionProcessData_t *a, s32 formindex, s32 start, s32 locktime, s32 endtime)
 {
-    if (unlockadd >= 0) {
-        if (a->timelist[formindex].unlock < time + unlockadd) {
-            a->timelist[formindex].unlock = time + unlockadd;
+    if (locktime >= 0) {
+        if (a->timelist[formindex].unlock < start + locktime) {
+            a->timelist[formindex].unlock = start + locktime;
         }
     }
-    if (endadd >= 0) {
-        if (a->timelist[formindex].end < time + endadd) {
-            a->timelist[formindex].end = time + endadd;
+    if (endtime >= 0) {
+        if (a->timelist[formindex].end < start + endtime) {
+            a->timelist[formindex].end = start + endtime;
         }
         if (a->timelist[formindex].end < a->timelist[formindex].unlock) {
             a->timelist[formindex].end = a->timelist[formindex].unlock;
@@ -793,19 +793,19 @@ void OverwriteTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 un
     }
 }
 
-void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 time, s32 unlockadd, s32 endadd)
+void SetTimeList(nbActionProcessData_t *a, s32 formindex, s32 start, s32 locktime, s32 endtime)
 {
-    if (time < a->timelist[formindex].unlock) {
-        time = a->timelist[formindex].unlock;
+    if (start < a->timelist[formindex].unlock) {
+        start = a->timelist[formindex].unlock;
     }
-    if (unlockadd >= 0) {
-        if (a->timelist[formindex].unlock < time + unlockadd) {
-            a->timelist[formindex].unlock = time + unlockadd;
+    if (locktime >= 0) {
+        if (a->timelist[formindex].unlock < start + locktime) {
+            a->timelist[formindex].unlock = start + locktime;
         }
     }
-    if (endadd >= 0) {
-        if (a->timelist[formindex].end < time + endadd) {
-            a->timelist[formindex].end = time + endadd;
+    if (endtime >= 0) {
+        if (a->timelist[formindex].end < start + endtime) {
+            a->timelist[formindex].end = start + endtime;
         }
         if (a->timelist[formindex].end < a->timelist[formindex].unlock) {
             a->timelist[formindex].end = a->timelist[formindex].unlock;
@@ -1803,8 +1803,8 @@ void nbActionShutdown(dds3ProcessID_t *id)
     sdfChipFreeDirect(dds3GetProcessData(id));
 }
 
-nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type, s32 partyindex,
-                                            s32 target, s32 adata)
+nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type, s32 from,
+                                            s32 to, s32 d)
 {
     nbActionProcessData_t *a = sdfChipAllocDirect(0x1A4);
     struct nbParty_t *party;
@@ -1812,7 +1812,7 @@ nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type
     memset(a, 0, 0x1A4);
     a->seq = 0;
     a->data = data;
-    party = &data->party[partyindex];
+    party = &data->party[from];
     a->party = party;
     if ((party->flag & 8) != 0) {
         a->form = NULL;
@@ -1820,24 +1820,24 @@ nbActionProcessData_t *InitActionProcessData(nbMainProcessData_t *data, s32 type
         a->form = &data->form[party->formindex];
     }
     a->work = nbGetUnitWorkPointer(data, a->party);
-    a->partyindex = partyindex;
+    a->partyindex = from;
     a->type = type;
-    a->target = target;
-    a->adata = adata;
+    a->target = to;
+    a->adata = d;
     a->press = -1.0f;
     a->newpresstype = 0;
     ClearTimeList(a);
     return a;
 }
 
-void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 partyindex, s32 target,
-                         s32 adata)
+void nbInitActionProcess(nbMainProcessData_t *data, s32 type, s32 from, s32 to,
+                         s32 d)
 {
     nbActionProcessData_t *a;
     dds3ProcessID_t *id;
 
     data->unkE4 = (data->unkE4 + 1) % 4;
-    a = InitActionProcessData(data, type, partyindex, target, adata);
+    a = InitActionProcessData(data, type, from, to, d);
     id = dds3StartProcess(D_00544120, 0x3F8, 1, 1, nbActionProcess1, nbActionShutdown, a);
     dds3LinkProcess(data->unkBC, id);
     data->unkD4[data->unkE4] = id;

@@ -275,13 +275,13 @@ extern f32 nbFormEnemyInterval;
 
 extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void nbAllFormDispOn(void);
 
-extern void nbGroupFormDispOn(s32 group);
+extern void nbGroupFormDispOn(s32 side);
 
-extern void nbGroupFormDispOff(s32 group);
+extern void nbGroupFormDispOff(s32 side);
 
 extern u32 f;
 
@@ -289,15 +289,15 @@ extern char D_005458A0[];
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
 
-extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, u32 flag);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, u32 flag);
 
 extern void nbFormDispOff(s32 formindex);
 
 extern void nbFormDispOn(s32 formindex);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, sdfVector4_t *pos);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, sdfVector4_t *pos);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, f32 *rot);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, f32 *rot);
 
 extern void Mult(void);
 
@@ -313,9 +313,9 @@ extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
 
 extern void nbResetFormPosRot(nbFormation_t *form);
 
-extern void nbSetPartyFormation(nbMainProcessData_t *data, s32 flag);
+extern void nbSetPartyFormation(nbMainProcessData_t *data, s32 group);
 
-extern void nbCopyFormation(void *data, s32 from, s32 to);
+extern void nbCopyFormation(void *data, s32 sindex, s32 dindex);
 
 extern void nbFormatFormation(nbMainProcessData_t *data, s32 index);
 
@@ -435,7 +435,7 @@ void nbFormDispOn2(nbFormation_t *form)
     nbFormDispOn(form->formindex);
 }
 
-void nbGroupFormDispOff(s32 group)
+void nbGroupFormDispOff(s32 side)
 {
     s32 start;
     s32 count;
@@ -443,7 +443,7 @@ void nbGroupFormDispOff(s32 group)
 
     start = 0;
     count = 0;
-    switch (group) {
+    switch (side) {
     case 0:
         count = 4;
         break;
@@ -461,7 +461,7 @@ void nbGroupFormDispOff(s32 group)
     }
 }
 
-void nbGroupFormDispOn(s32 group)
+void nbGroupFormDispOn(s32 side)
 {
     s32 start;
     s32 count;
@@ -469,7 +469,7 @@ void nbGroupFormDispOn(s32 group)
 
     start = 0;
     count = 0;
-    switch (group) {
+    switch (side) {
     case 0:
         count = 4;
         break;
@@ -637,7 +637,7 @@ INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetPartyFormation);
 
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbSetEnemyFormation);
 
-void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group)
+void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty)
 {
     nbSetPartyFormation(data, 0x100);
 }
@@ -667,11 +667,11 @@ void nbFormatFormation(nbMainProcessData_t *data, s32 index)
 
 INCLUDE_ASM(const s32, "newbattle/nbFormation", nbCopyFormation);
 
-void nbMoveFormation(void *data, s32 from, s32 to)
+void nbMoveFormation(void *data, s32 sindex, s32 dindex)
 {
-    if (from != to) {
-        nbCopyFormation(data, from, to);
-        nbFormatFormation(data, from);
+    if (sindex != dindex) {
+        nbCopyFormation(data, sindex, dindex);
+        nbFormatFormation(data, sindex);
     }
 }
 

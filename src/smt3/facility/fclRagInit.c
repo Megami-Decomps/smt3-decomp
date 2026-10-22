@@ -5,13 +5,13 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
-extern s32 dds3GetRandA(s32 seed);
+extern s32 dds3GetRandA(s32 name);
 
-extern s32 evtStartEvent(s32 event);
+extern s32 evtStartEvent(s32 no);
 
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
@@ -19,7 +19,7 @@ void fclClearFlag(s8 index);
 
 extern void p2sdStopBGM(s32 id);
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 typedef struct
 {
@@ -97,7 +97,7 @@ extern u8 *GBWK_0;
 
 extern s32 printf(const char *fmt, ...);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
@@ -107,7 +107,7 @@ extern char D_0053D1F0[];
 
 extern char D_0053D200[];
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 typedef struct
 {
@@ -139,16 +139,16 @@ extern void fclRagTexCalcSizes();
 
 extern u8 ragHeartsTable[];
 
-extern void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
 
-extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 /* Called above its definition, where ee-gcc assumed int. */
 void *dds3GetActiveScene(void);
 
-void fclRagEventStart(s8 value)
+void fclRagEventStart(s8 Signal)
 {
-    fclSetWorkValue(1, value);
+    fclSetWorkValue(1, Signal);
     fclClearFlag(1);
     evtStartEvent(0x323);
     p2sdPlaySE(0x390001, 0x7F, 0x3F);
@@ -488,7 +488,7 @@ extern campStatusPanel_t *ragCalcWork;
 
 extern void *dds3GetActiveScene(void);
 
-extern void dds3VisibleSceneBasic(void *scene, s32 flag);
+extern void dds3VisibleSceneBasic(void *basic, s32 visible);
 
 void ragUpdateScene(void)
 {

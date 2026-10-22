@@ -287,7 +287,7 @@ typedef struct nbKoukaPacket_t
 
 extern s32 printf(const char *format, ...);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern void nbPanelPartyShow(void);
 
@@ -312,7 +312,7 @@ typedef struct nbEventProcessData_t {
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 bad);
+                                            s32 type, s32 hp, s32 mp, s32 badstat);
 
 extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
@@ -330,7 +330,7 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
@@ -386,11 +386,11 @@ u32 nbGetBackNoNegoId(nbNegoProcessData_t *n, s32 a);
 
 s32 nbGetNegoKureHpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
-s32 nbGetNegoKureHpB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+s32 nbGetNegoKureHpB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
-s32 nbGetNegoKureMpA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+s32 nbGetNegoKureMpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
-s32 nbGetNegoKureMpB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+s32 nbGetNegoKureMpB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 u32 nbGetPrevNegoId(nbNegoProcessData_t *n);
 

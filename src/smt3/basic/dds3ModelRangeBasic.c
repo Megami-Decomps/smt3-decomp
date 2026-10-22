@@ -19,14 +19,14 @@ typedef struct {
 } dds3ModelRangeBasicWorkData_t;
 
 
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *block);
-extern void *memset(void *destination, s32 value, u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern void *memset(void *a, s32 b, u32 c);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern dds3Basic_t *dds3GetControlScene(void);
-extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 id, s32 type);
-extern sdfMemHandle_t *sdfMemGetHandleByPtr(void *resource);
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *handle);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
+extern sdfMemHandle_t *sdfMemGetHandleByPtr(void *aPtr);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
 s32 dds3AllocModelBasicWorkData(dds3Basic_t *basic) {
     basic->workdata = sdfChipAllocDirect(sizeof(dds3ModelBasicWorkData_t));

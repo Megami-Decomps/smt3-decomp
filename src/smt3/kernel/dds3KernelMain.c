@@ -29,18 +29,18 @@ extern char D_0052DCD0[]; /* "font_sys" */
 extern char D_0052DCE0[]; /* "DbgDevDump" */
 extern void dds3InitDrawEnv(void);
 extern void dds3PadInitialize(void);
-extern dds3ProcessID_t *dds3StartProcess(const char *name, s32 priority,
-    s32 startTimer, s32 shutdownTimer, dds3ProcessFunc_t process,
-    dds3ProcessFunc_t shutdown, s32 flag);
-extern s32 dds3FirstProcess(dds3ProcessID_t *process);
-extern s32 dds3DrawFirstProcess(dds3ProcessID_t *process);
-extern s32 dds3DrawProcess(dds3ProcessID_t *process);
-extern s32 dds3BasicMainProcess(dds3ProcessID_t *process);
-extern s32 dds3BasicDrawProcess(dds3ProcessID_t *process);
-extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *process);
-extern s32 frFlipPacketBuf(dds3ProcessID_t *process);
-extern void frDestroyFontTable(dds3ProcessID_t *process);
-extern void frInitFontTable(s32 rowBudget, s32 poolCount);
+extern dds3ProcessID_t *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB,
+    s32 v2, s32 v3, dds3ProcessFunc_t drawExit,
+    dds3ProcessFunc_t deleteExit, s32 p);
+extern s32 dds3FirstProcess(dds3ProcessID_t *id);
+extern s32 dds3DrawFirstProcess(dds3ProcessID_t *id);
+extern s32 dds3DrawProcess(dds3ProcessID_t *id);
+extern s32 dds3BasicMainProcess(dds3ProcessID_t *id);
+extern s32 dds3BasicDrawProcess(dds3ProcessID_t *id);
+extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *id);
+extern s32 frFlipPacketBuf(dds3ProcessID_t *id);
+extern void frDestroyFontTable(dds3ProcessID_t *id);
+extern void frInitFontTable(s32 GsFontNums, s32 TextNums);
 extern void fileSysInit(void);
 extern void itfMesMngInitializeManager(void);
 extern void sndInit(void);
@@ -54,19 +54,19 @@ extern void effBTLSystemInit(void);
 extern void dds3StartMovieManager(void);
 extern void evtPicturePriProcessInit(void);
 extern void dds3GlobalWorkInit(void);
-extern void dds3AddWorld(s32 priority);
+extern void dds3AddWorld(s32 bufcnt);
 extern void dds3InitRandCB(void);
 extern void dds3InitAdmini(void);
-extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
 extern void dds3InitDebugSystem(void);
 extern void cmpTexLoad(void);
 extern void dds3FadeClear(void);
 extern void evtInitMoonProcess(void);
 extern void encInitProcess(void);
 extern u32 sdfGetRunTimeCountBase(void);
-extern u32 sdfGetRunTimeCount(u32 base);
+extern u32 sdfGetRunTimeCount(u32 aBaseTime);
 extern void sdfWaitVblank(s32 count);
-extern void sdfGrReqDrawDelay(s32 value);
+extern void sdfGrReqDrawDelay(s32 count);
 extern void sdfPadWork(void);
 extern void sdfFileCmdThreadSetHiPrio(void);
 extern void sdfFileCmdThreadSetLoPrio(void);
@@ -148,21 +148,21 @@ void dds3PauseOff(void)
     dds3SlowSign = 0;
 }
 
-void dds3Stop(u32 pauseCount)
+void dds3Stop(u32 frame)
 {
-    dds3PauseTime = pauseCount;
+    dds3PauseTime = frame;
     dds3PauseSign = 1;
     dds3SlowSign = 0;
 }
 
-void dds3SlowOn(u32 interval, u32 duration)
+void dds3SlowOn(u32 aSlowTime, u32 slowcnt)
 {
     u32 runCount = dds3RunCount;
 
     dds3SlowSign = 1;
-    dds3SlowTime = interval;
+    dds3SlowTime = aSlowTime;
     dds3SlowRunCount = runCount;
-    dds3SlowEndCount = duration;
+    dds3SlowEndCount = slowcnt;
     dds3PauseSign = 0;
     dds3PauseTime = 0;
 }

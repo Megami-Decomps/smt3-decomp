@@ -12,36 +12,36 @@ extern char D_0052F7C0[]; /* "エリアリストが見つかりません...\n" *
 extern char D_0052F7E8[]; /* "not exist a area  エリアが見つかりません...\n" */
 
 extern s32 printf(const char *fmt, ...);
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern dds3Basic_t *dds3GetControlScene(void);
-extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type);
-extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count);
+extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
+extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt);
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *handle);
 extern u32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *handle);
 extern void dds3ForEachBasicArray(dds3BasicArrayHandle_t *handle, dds3BasicProc_t func);
 extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *handle);
-extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *handle);
-extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *handle);
-extern s32 dds3AddBasicArray(dds3BasicArrayHandle_t *handle, s32 count);
-extern s32 dds3SetBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic);
-extern s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic);
+extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
+extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *hndl);
+extern s32 dds3AddBasicArray(dds3BasicArrayHandle_t *hndl, s32 bufcnt);
+extern s32 dds3SetBasicArray(dds3BasicArrayHandle_t *hndl, dds3Basic_t *data);
+extern s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *hArray, dds3Basic_t *pBasic);
 extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic, u32 mode);
-extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t *item, s32 itemType);
+extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic, s32 itemType);
 
-s32 CB_ReleaseObjectBasic(dds3Basic_t *basic);
-s32 CB_BasicDrawProcuder(dds3Basic_t *basic);
+s32 CB_ReleaseObjectBasic(dds3Basic_t *pBasic);
+s32 CB_BasicDrawProcuder(dds3Basic_t *pBasic);
 u32 dds3AreaBasicTypeHasItems(u32 type);
-dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *area, u32 itemType);
+dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *pAreaBasic, u32 pItemBasic);
 
-s32 AreaBasicConstructor(dds3Basic_t *basic)
+s32 AreaBasicConstructor(dds3Basic_t *pBasic)
 {
     dds3AreaBasicWorkData_t *work;
     u32 i;
 
     work = sdfChipAllocDirect(sizeof(dds3AreaBasicWorkData_t));
-    basic->workdata = work;
+    pBasic->workdata = work;
     for (i = 0; i < 2; i++) {
         work->items[i] = dds3GetBasicArrayHandle(0);
     }
@@ -67,24 +67,24 @@ s32 AreaBasicMainprocuder(dds3Basic_t *basic)
     return 1;
 }
 
-s32 AreaBasicDrawprocuder(dds3Basic_t *basic)
+s32 AreaBasicDrawprocuder(dds3Basic_t *pBasic)
 {
-    dds3AreaBasicWorkData_t *work = basic->workdata;
+    dds3AreaBasicWorkData_t *work = pBasic->workdata;
 
     dds3ForEachBasicArray(work->items[0], CB_BasicDrawProcuder);
     return 1;
 }
 
-s32 CB_ReleaseObjectBasic(dds3Basic_t *basic)
+s32 CB_ReleaseObjectBasic(dds3Basic_t *pBasic)
 {
-    dds3ObjectBaseSetControlBasicType(basic, NULL, 5);
+    dds3ObjectBaseSetControlBasicType(pBasic, NULL, 5);
     return 1;
 }
 
-s32 CB_BasicDrawProcuder(dds3Basic_t *basic)
+s32 CB_BasicDrawProcuder(dds3Basic_t *pBasic)
 {
-    if (basic->basicfunction->drawprocuder != NULL) {
-        return ((dds3BasicProc_t)basic->basicfunction->drawprocuder)(basic);
+    if (pBasic->basicfunction->drawprocuder != NULL) {
+        return ((dds3BasicProc_t)pBasic->basicfunction->drawprocuder)(pBasic);
     }
     return 1;
 }
@@ -101,44 +101,44 @@ u32 dds3AreaBasicTypeHasItems(u32 type)
     return ret;
 }
 
-dds3Basic_t *dds3AddAreaBasic(u32 serialID, char *name)
+dds3Basic_t *dds3AddAreaBasic(u32 serialID, char *pName)
 {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_AREA);
 
     basic->serialID = serialID;
-    basic->name = name;
+    basic->name = pName;
     return basic;
 }
 
-void dds3AreaBasicRegistItem(dds3Basic_t *area, dds3Basic_t *item)
+void dds3AreaBasicRegistItem(dds3Basic_t *pAreaBasic, dds3Basic_t *pItemBasic)
 {
     dds3BasicArrayHandle_t *handle;
 
-    handle = dds3AreaBasicReleaseItem(area, dds3AreaBasicTypeHasItems(item->type >> 24));
+    handle = dds3AreaBasicReleaseItem(pAreaBasic, dds3AreaBasicTypeHasItems(pItemBasic->type >> 24));
     dds3SetFirstBasicArray(handle);
-    if (dds3SetSearchNextBasicArray(handle, item) != 1) {
+    if (dds3SetSearchNextBasicArray(handle, pItemBasic) != 1) {
         dds3AddBasicArray(handle, 1);
-        dds3SetBasicArray(handle, item);
+        dds3SetBasicArray(handle, pItemBasic);
     }
 }
 
 /* Remove the first matching entry from the list selected by the item's type. */
-void dds3AreaBasicGetItemArray(dds3Basic_t *area, dds3Basic_t *item)
+void dds3AreaBasicGetItemArray(dds3Basic_t *pAreaBasic, dds3Basic_t *itemType)
 {
     dds3BasicArrayHandle_t *handle =
-        dds3AreaBasicReleaseItem(area, dds3AreaBasicTypeHasItems(item->type >> 24));
+        dds3AreaBasicReleaseItem(pAreaBasic, dds3AreaBasicTypeHasItems(itemType->type >> 24));
 
-    dds3SearchDeleteBasicArray(handle, item, DDS3_BASICARRAY_SERACHDELETE_MODE_FIRST);
+    dds3SearchDeleteBasicArray(handle, itemType, DDS3_BASICARRAY_SERACHDELETE_MODE_FIRST);
     /* Retail and DDS1 dds3RemoveObjectFromOwnerWorldIndex retain a JAL tail.
      * The consumed list cursor is no longer needed after removal. */
     handle = NULL;
 }
 
-dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *area, u32 itemType)
+dds3BasicArrayHandle_t *dds3AreaBasicReleaseItem(dds3Basic_t *pAreaBasic, u32 pItemBasic)
 {
-    dds3AreaBasicWorkData_t *work = area->workdata;
+    dds3AreaBasicWorkData_t *work = pAreaBasic->workdata;
 
-    return work->items[itemType];
+    return work->items[pItemBasic];
 }
 
 dds3BasicArrayHandle_t *dds3AreaBasicArrangeGetItemArray(dds3Basic_t *area, u32 itemType, dds3BasicProc_t check)

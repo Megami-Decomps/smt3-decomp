@@ -28,9 +28,9 @@ typedef struct nbCamera_t {
     nbCameraAnim_t anim;
 } nbCamera_t;
 
-extern void nbCameraState_Start_Set(nbCamera_t *pCamera);
+extern void nbCameraState_Start_Set(nbCamera_t *pNbCamera);
 
-extern void nbCameraState_Start_BA_Set(nbCamera_t *pCamera);
+extern void nbCameraState_Start_BA_Set(nbCamera_t *pNbCamera);
 
 /* 128-byte party records; this unit only reads the formation index. */
 struct nbParty_t {
@@ -60,9 +60,9 @@ extern nbCamera_t pNbCamera;
 
 extern s32 D_00551E08;
 
-extern void nbCameraState_Start_BA_Animation(nbCamera_t *pCamera);
+extern void nbCameraState_Start_BA_Animation(nbCamera_t *pNbCamera);
 
-extern void nbCameraState_Start_Animation(nbCamera_t *pCamera);
+extern void nbCameraState_Start_Animation(nbCamera_t *pNbCamera);
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraStartEnd", nbCameraState_Start_Set);
 

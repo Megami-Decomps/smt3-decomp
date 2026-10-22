@@ -314,31 +314,31 @@ typedef struct nbNegoProcessData_t
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void itfMesMngSetVar(s32 msgid, s32 type, s32 value, s32 digit);
+extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
 extern datDevilFormat_t datDevilTable[];
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern dds3ProcessID_t *dds3SearchProcessName(const char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
 extern char D_005514F0[];
 
 extern void nbHelpOff(void);
 
-extern s32 itfMesMngGetWidth(s32 msgid, s32 index, s32 mode);
+extern s32 itfMesMngGetWidth(s32 id, s32 message, s32 page);
 
-extern _FRQ *frwGetSmallFontFRQ(s32 x, s32 y, u32 col1, u32 col2, char *str, s32 mode);
+extern _FRQ *frwGetSmallFontFRQ(s32 X, s32 Y, u32 Pri, u32 Color, char *pStr, s32 pFRQ);
 
 extern _FRQ *frGetCNameFRQ(s8 no, s32 style, s32 colorno, s32 tp);
 
-extern s32 frGetStrWidth2(_FRQ *frq);
+extern s32 frGetStrWidth2(_FRQ *pFRQ);
 
-extern _FRQ *frDestroyFontRequestAfter(_FRQ *frq);
+extern _FRQ *frDestroyFontRequestAfter(_FRQ *pFRQ);
 
 extern s32 datGetPlayerLNDLevel(void *work);
 
@@ -354,17 +354,17 @@ extern char *D_005263F8[];
 
 extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
 
-extern void nbDispMsgHelp(s32 meshandle, s32 mesid, s32 type);
+extern void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void itfMesMngRequestMessageRelease(s32 handle, s32 mode);
+extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern s32 nbHelpProcess1(dds3ProcessID_t *id);
 
@@ -471,9 +471,9 @@ void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color)
     w->text3 = 0;
 }
 
-void nbDispSkillName(s32 no)
+void nbDispSkillName(s32 id)
 {
-    nbDispText(text1[no], NULL, 0, 30, 0x89FEFF80);
+    nbDispText(text1[id], NULL, 0, 30, 0x89FEFF80);
 }
 
 void nbDispTextById(s32 no)
@@ -511,44 +511,44 @@ void nb_2891A8(s32 no)
     nbDispText(text1[0x200 + no], NULL, 0, 30, 0x89FEFF80);
 }
 
-void nbDispDevilName(s32 formindex)
+void nbDispDevilName(s32 id)
 {
     char **lndtext;
 
     nbGetMainProcessData();
-    if (formindex == 0) {
+    if (id == 0) {
         lndtext = &datExplainTable[0x40];
         nbDispText(lndtext[datGetPlayerLNDLevel((u8 *)DDS3_GBWK + 0xA54)], NULL, 2, 2,
                    0xA09DC380);
     } else {
-        nbDispText(datExplainTable[datDevilTable[formindex].race], text2[formindex],
+        nbDispText(datExplainTable[datDevilTable[id].race], text2[id],
                    0, 2, 0xA09DC380);
     }}
 
-void nbDispJyokyoHelp(s32 meshandle, s32 mesid, s32 type, s32 value)
+void nbDispJyokyoHelp(s32 msgid, s32 no, s32 var_id, s32 var_ind)
 {
     s32 digit;
 
-    digit = type;
-    if (type == 1) {
-        if (value == 0) {
+    digit = var_id;
+    if (var_id == 1) {
+        if (var_ind == 0) {
             digit = 10;
         }
     }
     if (digit >= 0) {
-        itfMesMngSetVar(meshandle, 0, value, digit);
+        itfMesMngSetVar(msgid, 0, var_ind, digit);
     }
-    nbDispMsgHelp(meshandle, mesid, 1);
+    nbDispMsgHelp(msgid, no, 1);
 }
 
-void nbDispMsgHelp(s32 meshandle, s32 mesid, s32 type)
+void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype)
 {
     nbHelpProcessData_t *w;
 
     w = dds3GetProcessData(dds3SearchProcessName(D_005514F0));
-    w->nextmeshandle = meshandle;
-    w->nextmesid = mesid;
-    switch (type) {
+    w->nextmeshandle = msgid;
+    w->nextmesid = no;
+    switch (msgtype) {
     case 0:
         nbDispText(NULL, NULL, 1, 45, 0x89FEFF80);
         return;

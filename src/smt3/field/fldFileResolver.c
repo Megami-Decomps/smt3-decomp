@@ -63,13 +63,13 @@ struct filePacRequest_t {
 
 dds3Basic_t *fldMakeDmyMatter(void);
 
-extern dds3Basic_t *dds3AddMatterObjectBasic(s32 key, f32 *offset, f32 *rotation);
+extern dds3Basic_t *dds3AddMatterObjectBasic(s32 serialID, f32 *pos, f32 *rot);
 
 extern u32 dds3AllocObjectId(void);
 
 extern void dds3SetUnitObjectId(dds3Basic_t *node, u32 value);
 
-dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId);
+dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID);
 
 /* Return the borrowed secondary world node, or NULL when no world is active. */
 dds3Basic_t *dds3GetControlScene(void);
@@ -78,18 +78,18 @@ extern fldFileResource_t *g_pHitData;
 
 extern u32 g_nHitData;
 
-extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, const u8 *name);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const u8 *name);
 
 /* Read or update the cached world object associated with a resource record ID. */
 dds3Basic_t *fldFindMatterIndex(s32 id);
 
 extern void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode);
 
-dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName);
+dds3Basic_t *fldGetModelRange_From_MatterName(const char *matterName);
 
 extern s32 strcmp(const char *left, const char *right);
 
-void fldMakeFilePath(char *path, s32 field, s32 unused);
+void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 
 extern s32 sprintf(char *dst, const char *format, ...);
@@ -111,17 +111,17 @@ typedef struct fldResourceAreaRef_t {
 
 extern dds3Basic_t *dds3AddModelBasic2(u32 key, void *modelDef, void *playBook, s32 texList, const char *name);
 
-extern void dds3MatterObjectBasicSetOt(dds3Basic_t *object, s32 index);
+extern void dds3MatterObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx);
 
-extern s32 fldCommand_GetHojiID(const char *name);
+extern s32 fldCommand_GetHojiID(const char *pName);
 
-extern void dds3MatterObjectBasicSetHojiID(dds3Basic_t *object, s32 hojiId);
+extern void dds3MatterObjectBasicSetHojiID(dds3Basic_t *aPtr, s32 hojiID);
 
-extern dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *item);
+extern dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic);
 
-extern void dds3ObjectBaseMakeMatter(dds3Basic_t *object);
+extern void dds3ObjectBaseMakeMatter(dds3Basic_t *pObjectBasic);
 
-extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *object);
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *pObjectBasic);
 
 extern fldFileResource_t *D_00551C8C;
 
@@ -131,19 +131,19 @@ extern s32 fldGetHojiFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern s32 fldCommand_SEARCH_ID(const char *);
 
-extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
 
-extern void dds3ObjectBaseCreateMover(void *object);
+extern void dds3ObjectBaseCreateMover(void *pObjectBasic);
 
-extern void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
+extern void dds3MoverBasicSetPath(dds3Basic_t *pMoverBasic, dds3Basic_t *pPathBasic);
 
-extern void dds3MoverBasicMakePath(dds3Basic_t *object);
+extern void dds3MoverBasicMakePath(dds3Basic_t *pMoverBasic);
 
 
-extern dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *object);
+extern dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *pMoverBasic);
 
-extern void evtPathRate(dds3Basic_t *object, f32 multiplier);
+extern void evtPathRate(dds3Basic_t *basic, f32 rate);
 
 extern void dds3MoverBasicUpdate(dds3Basic_t *);
 
@@ -151,15 +151,15 @@ extern s32 fldGetModelFlag(s32 mapId, u32 slotIndex, s32 bit);
 
 extern void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *, u32);
 
-u8 *fldGetInfoHeader(fldTransferChunk_t *chunk);
+u8 *fldGetInfoHeader(fldTransferChunk_t *pData);
 
-void sdfAddressResolverReset(u32 *table, u32 base, const u8 *data, s32 size);
+void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolver(u32 buffer, fldTransferChunk_t *chunk);
+void fldAddressResolver(u32 pFileTop, fldTransferChunk_t *pData);
 
-extern void sdfAddressResolver(s32 *words, s32 relocationBase, const u8 *table, s32 tableBytes);
+extern void sdfAddressResolver(s32 *aDataBody, s32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
 
-void fldAddressResolverReset(u32 buffer, fldTransferChunk_t *chunk);
+void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData);
 
 void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor);
 
@@ -176,27 +176,27 @@ extern struct fileRequest_t *pFldNextFileDataF2;
 
 struct fileRequest_t *pacLoad(const char *requestName);
 
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
-extern s32 pacFileHandleFree_(void *request);
+extern s32 pacFileHandleFree_(void *pacHandle);
 
 u8 fldLoadNextGetStatus2(void);
 
-extern s32 pacCheckEnd(const struct fileRequest_t *request);
+extern s32 pacCheckEnd(const struct fileRequest_t *pacHandle);
 
-s32 fldLoadNextGetStatus3(s32 area, s32 room);
+s32 fldLoadNextGetStatus3(s32 field, s32 area);
 
-sdfMemHandle_t *fldLoadNextFileTB(void **destination, s32 area, s32 room);
+sdfMemHandle_t *fldLoadNextFileTB(void **pData, s32 field, s32 area);
 
-sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern u32 sdfMemLock(sdfMemHandle_t *allocation);
+extern u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *a, const void *b, u32 c);
 
-sdfMemHandle_t *fldLoadNextFileF1(void **destination, s32 area, s32 room);
+sdfMemHandle_t *fldLoadNextFileF1(void **pData, s32 field, s32 area);
 
-sdfMemHandle_t *fldLoadNextFileF2(void **destination, s32 area, s32 room);
+sdfMemHandle_t *fldLoadNextFileF2(void **pData, s32 field, s32 area);
 
 extern u32 D_0054EBE8, D_0054EBEC, D_0054EBEC, D_0054EBF0;
 
@@ -206,7 +206,7 @@ u8 fldCheckNextFile(void);
 
 void fldPreloadNextFile(char *out);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 
 
@@ -232,13 +232,13 @@ extern void fldGetDoorEntry(const void *source);
 
 extern sdfMemHandle_t *fldFieldPackData;
 
-extern s32 sdfMemGetSize(const sdfMemHandle_t *block);
+extern s32 sdfMemGetSize(const sdfMemHandle_t *aHandle);
 
-extern u8 *sdfMemGetPtr(const sdfMemHandle_t *block);
+extern u8 *sdfMemGetPtr(const sdfMemHandle_t *aHandle);
 
-extern void fldAmbLoadFromMem(u8 *chunk, s32 resourceHandle);
+extern void fldAmbLoadFromMem(u8 *data, s32 mh);
 
-extern void fldAutoMapFontInit(s32 mapIndex);
+extern void fldAutoMapFontInit(s32 bank);
 
 void fldFreePac0(void);
 
@@ -248,19 +248,19 @@ u32 fldLoadFile(const char *name);
 
 extern u32 gFldInf_WpExit;
 
-extern s32 dds3GetMapNo(dds3Basic_t *world);
+extern s32 dds3GetMapNo(dds3Basic_t *scene);
 
 extern void fldPlayerALoad(void);
 
 extern void fldInitBlurEffect(void);
 
-extern s32 sdfDevLoadTexList(const char *path);
+extern s32 sdfDevLoadTexList(const char *aFilename);
 
 extern s32 sdfDevLoadFileEx(const char *path, void **destination, s32 mode);
 
 extern void fldSetupDoorScenes(void);
 
-extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *world, void *memory);
+extern s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *scene, void *mem);
 
 extern volatile s32 fldSceneParam[];
 
@@ -270,7 +270,7 @@ extern char D_0054EC10[]; /* "%s.f2" */
 
 extern char D_0054EC18[]; /* "%s.f1" */
 
-extern s32 dds3SearchProcessName(const char *name);
+extern s32 dds3SearchProcessName(const char *namestr);
 
 extern void fldDrwZFree(void);
 
@@ -280,7 +280,7 @@ extern s32 fldTitleChk(void);
 
 extern s32 fldTitleMiniChk(void);
 
-extern s32 dds3KillProcessName(const char *name, s32 shutdownTimer);
+extern s32 dds3KillProcessName(const char *name, s32 shutdowntimer);
 
 extern void fldFreeModelTable(void);
 
@@ -302,7 +302,7 @@ extern void fldSe_Init(void);
 
 extern void fldClearModelSlots(void);
 
-extern s32 sdfTexListFree(s32 list, s32 all);
+extern s32 sdfTexListFree(s32 aList, s32 aReleaseItems);
 
 extern sdfMemHandle_t *D_0055DA98[];
 
@@ -317,7 +317,7 @@ extern struct fileRequest_t *fldFileBuf1;
 
 extern u8 D_0054EC00[];
 
-void fldFileAddrResetMode(u32 relocateOnRelease);
+void fldFileAddrResetMode(u32 mode);
 
 void fldHojiDebugView(void);
 
@@ -327,9 +327,9 @@ extern s32 fldGetAnimeFlag(s32 field, s32 area, s32 block);
 
 
 
-extern void fldDbgPrint2D(s32 x, s32 y, const char *format);
+extern void fldDbgPrint2D(s32 x, s32 y, const char *str);
 
-extern s32 fldGbChkHit(s32 field, s32 area, s32 block);
+extern s32 fldGbChkHit(s32 fld, s32 area, s32 blk);
 
 
 
@@ -348,9 +348,9 @@ u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, vo
 
 extern void fldDrwZAlloc(void);
 
-extern void fldAutoMapSetField(s32 field, s32 area, s32 block);
+extern void fldAutoMapSetField(s32 fld, s32 area, s32 block);
 
-extern s32 sdfTexSetTB(void *data);
+extern s32 sdfTexSetTB(void *aData);
 
 extern u32 D_0054EB98, D_0054EBD0, D_0054EBD4, fldFileBuf2;
 
@@ -364,11 +364,11 @@ typedef struct fldConstruntAreaFL2_t {
     u32 areaID; /* 0x08 */
 } fldConstruntAreaFL2_t;
 
-extern dds3Basic_t *dds3AddAreaBasic(u32 areaId, const char *areaName);
+extern dds3Basic_t *dds3AddAreaBasic(u32 serialID, const char *pName);
 
-void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *blockTable, u32 blockCount);
+void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *pBlockTable, u32 nBlock);
 
-s32 fldLoadNextFile(s32 area, s32 room);
+s32 fldLoadNextFile(s32 field, s32 area);
 
 typedef struct fldFileAreaDataFL2_t {
     u32 word00;
@@ -408,13 +408,13 @@ dds3Basic_t *fldMakeDmyMatter(void) {
     return matter;
 }
 
-dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId) {
+dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 modelRangeID) {
     u32 resourceIndex = 0;
     dds3Basic_t *secondaryWorld = dds3GetControlScene();
     fldFileResource_t *resource = g_pHitData;
 
     for (; resourceIndex < g_nHitData; resourceIndex++, resource++) {
-        if (resourceId == resource->id) {
+        if (modelRangeID == resource->id) {
             if (resource->names != NULL) {
                 fldFileNameEntry_t *nameEntry = resource->names->entries;
                 u32 nameIndex = 0;
@@ -438,7 +438,7 @@ dds3Basic_t *fldGetMatter_From_ModelRangeID(u32 resourceId) {
     return NULL;
 }
 
-dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
+dds3Basic_t *fldGetModelRange_From_MatterName(const char *matterName) {
     u32 resourceIndex = 0;
     dds3Basic_t *secondaryWorld = dds3GetControlScene();
     fldFileResource_t *resource = g_pHitData;
@@ -449,7 +449,7 @@ dds3Basic_t *fldGetModelRange_From_MatterName(const char *resourceEntryName) {
             u32 nameIndex = 0;
 
             for (; nameIndex < resource->names->count; nameIndex++, nameEntry++) {
-                if (strcmp(resourceEntryName, nameEntry->name) == 0) {
+                if (strcmp(matterName, nameEntry->name) == 0) {
                     dds3Basic_t *resolvedObject = dds3SceneBasicSearchNameAndType(secondaryWorld, 11, (const u8 *)resource->name);
                     if (resolvedObject != NULL) {
                         return resolvedObject;
@@ -465,12 +465,12 @@ INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL1);
 
 INCLUDE_ASM(const s32, "field/fldFileResolver", fldMakeResouceBasicFL2);
 
-void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *blockTable, u32 blockCount) {
+void fldMakeBlockBasicFL2(fldConstruntAreaFL2_t *pBlockTable, u32 nBlock) {
     u32 i;
 
     dds3GetControlScene();
-    for (i = 0; i < blockCount; i++) {
-        dds3Basic_t *area = dds3AddAreaBasic(blockTable[i].areaID, blockTable[i].areaName);
+    for (i = 0; i < nBlock; i++) {
+        dds3Basic_t *area = dds3AddAreaBasic(pBlockTable[i].areaID, pBlockTable[i].areaName);
         if (i == 0) {
             fldGlobalBase.fastArea = area;
         }
@@ -630,16 +630,16 @@ void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info) {
     fldRetryFileId[0] = info->pAreaData->label;
 }
 
-u8 *fldGetInfoHeader(fldTransferChunk_t *chunk) {
-    return (u8 *)chunk + sizeof(*chunk);
+u8 *fldGetInfoHeader(fldTransferChunk_t *pData) {
+    return (u8 *)pData + sizeof(*pData);
 }
 
-void sdfAddressResolverReset(u32 *table, u32 base, const u8 *data, s32 size) {
-    const u8 *p = data;
+void sdfAddressResolverReset(u32 *aDataBody, u32 aOffset, const u8 *aAddrInfoPtr, s32 aAddrInfoLeng) {
+    const u8 *p = aAddrInfoPtr;
     s32 code;
     s32 i;
 
-    while (p - data < size) {
+    while (p - aAddrInfoPtr < aAddrInfoLeng) {
         code = *p++;
         if ((code & 1) == 0) {
             code >>= 1;
@@ -651,23 +651,23 @@ void sdfAddressResolverReset(u32 *table, u32 base, const u8 *data, s32 size) {
         } else {
             code = (code >> 3) + 2;
             for (i = 0; i < code; i++) {
-                table++;
-                *table -= base;
+                aDataBody++;
+                *aDataBody -= aOffset;
             }
             continue;
         }
-        table += code;
-        *table -= base;
+        aDataBody += code;
+        *aDataBody -= aOffset;
     }
 }
 
 /* Relocate the words described by this packed-resource transfer chunk. */
-void fldAddressResolver(u32 buffer, fldTransferChunk_t *chunk) {
-    sdfAddressResolver((s32 *)buffer, (s32)buffer, (const u8 *)((s32)buffer + chunk->offset), chunk->size);
+void fldAddressResolver(u32 pFileTop, fldTransferChunk_t *pData) {
+    sdfAddressResolver((s32 *)pFileTop, (s32)pFileTop, (const u8 *)((s32)pFileTop + pData->offset), pData->size);
 }
 
-void fldAddressResolverReset(u32 buffer, fldTransferChunk_t *chunk) {
-    sdfAddressResolverReset((u32 *)buffer, buffer, (u8 *)((s32)buffer + chunk->offset), chunk->size);
+void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData) {
+    sdfAddressResolverReset((u32 *)pFileTop, pFileTop, (u8 *)((s32)pFileTop + pData->offset), pData->size);
 }
 
 void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor) {
@@ -694,28 +694,28 @@ s32 fldLoadNextFile_BtlRet(void) {
     return 0;
 }
 
-s32 fldLoadNextFile(s32 area, s32 room) {
+s32 fldLoadNextFile(s32 field, s32 area) {
     char directory[64];
     char path[80];
 
-    if (area < 10) {
+    if (field < 10) {
         return 1;
     }
-    if (fldGlobalBase.area != area) {
+    if (fldGlobalBase.area != field) {
         return 1;
     }
     if (fldGlobalBase.resourceFlag == 1) {
         return 1;
     }
-    if (fldGlobalBase.resourceArea == area && fldGlobalBase.resourceFloor == room) {
+    if (fldGlobalBase.resourceArea == field && fldGlobalBase.resourceFloor == area) {
         fldGlobalBase.resourceFlag = 2;
         return 1;
     }
     fldFreeNextFile();
-    fldGlobalBase.resourceArea = area;
-    fldGlobalBase.resourceFloor = room;
-    fldMakeFilePath(directory, area, 1);
-    sprintf(path, "%sf%03d_%03d.LB", directory, area, room);
+    fldGlobalBase.resourceArea = field;
+    fldGlobalBase.resourceFloor = area;
+    fldMakeFilePath(directory, field, 1);
+    sprintf(path, "%sf%03d_%03d.LB", directory, field, area);
     pFldNextFileDataF2 = pacLoad(path);
     fldGlobalBase.resourceFlag = 1;
     return 1;
@@ -765,8 +765,8 @@ u8 fldLoadNextGetStatus2(void) {
     return fldLoadNextStatus[0] != 0;
 }
 
-s32 fldLoadNextGetStatus3(s32 area, s32 room) {
-    if (fldGlobalBase.resourceArea != area || fldGlobalBase.resourceFloor != room) {
+s32 fldLoadNextGetStatus3(s32 field, s32 area) {
+    if (fldGlobalBase.resourceArea != field || fldGlobalBase.resourceFloor != area) {
         return 0;
     }
     if (pFldNextFileDataF2 != 0 && pacCheckEnd(pFldNextFileDataF2) != 0) {
@@ -775,12 +775,12 @@ s32 fldLoadNextGetStatus3(s32 area, s32 room) {
     return fldGlobalBase.resourceFlag != 0;
 }
 
-sdfMemHandle_t *fldLoadNextFileTB(void **destination, s32 area, s32 room) {
-    if (fldGlobalBase.resourceArea == area) {
-        if (fldGlobalBase.resourceFloor == room) {
+sdfMemHandle_t *fldLoadNextFileTB(void **pData, s32 field, s32 area) {
+    if (fldGlobalBase.resourceArea == field) {
+        if (fldGlobalBase.resourceFloor == area) {
             sdfMemHandle_t *allocation = sdfMemAllocDirect(D_0054EBE8);
             void *data = (void *)sdfMemLock(allocation);
-            *destination = data;
+            *pData = data;
             memcpy(data, (void *)D_0054EBDC, D_0054EBE8);
             return allocation;
         }
@@ -788,12 +788,12 @@ sdfMemHandle_t *fldLoadNextFileTB(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-sdfMemHandle_t *fldLoadNextFileF1(void **destination, s32 area, s32 room) {
-    if (fldGlobalBase.resourceArea == area) {
-        if (fldGlobalBase.resourceFloor == room) {
+sdfMemHandle_t *fldLoadNextFileF1(void **pData, s32 field, s32 area) {
+    if (fldGlobalBase.resourceArea == field) {
+        if (fldGlobalBase.resourceFloor == area) {
             sdfMemHandle_t *allocation = sdfMemAllocDirect(D_0054EBEC);
             void *data = (void *)sdfMemLock(allocation);
-            *destination = data;
+            *pData = data;
             memcpy(data, (void *)D_0054EBE0, D_0054EBEC);
             return allocation;
         }
@@ -801,12 +801,12 @@ sdfMemHandle_t *fldLoadNextFileF1(void **destination, s32 area, s32 room) {
     return NULL;
 }
 
-sdfMemHandle_t *fldLoadNextFileF2(void **destination, s32 area, s32 room) {
-    if (fldGlobalBase.resourceArea == area) {
-        if (fldGlobalBase.resourceFloor == room) {
+sdfMemHandle_t *fldLoadNextFileF2(void **pData, s32 field, s32 area) {
+    if (fldGlobalBase.resourceArea == field) {
+        if (fldGlobalBase.resourceFloor == area) {
             sdfMemHandle_t *allocation = sdfMemAllocDirect(D_0054EBF0);
             void *data = (void *)sdfMemLock(allocation);
-            *destination = data;
+            *pData = data;
             memcpy(data, (void *)D_0054EBE4, D_0054EBF0);
             return allocation;
         }
@@ -1200,10 +1200,10 @@ void fldFreeFile(void) {
 }
 
 /* Select the ordinary field, battle or event resource directory. */
-void fldMakeFilePath(char *path, s32 field, s32 unused) {
-    if (field < 200) sprintf(path, "/fld/f/f%03d/", field);
-    else if (field < 500) sprintf(path, "/fld/b/f%03d/", field);
-    else sprintf(path, "/fld/e/f%03d/", field);
+void fldMakeFilePath(char *pathstr, s32 field, s32 area) {
+    if (field < 200) sprintf(pathstr, "/fld/f/f%03d/", field);
+    else if (field < 500) sprintf(pathstr, "/fld/b/f%03d/", field);
+    else sprintf(pathstr, "/fld/e/f%03d/", field);
 }
 
 void fldHojiDebugView(void) {
@@ -1295,8 +1295,8 @@ void fldHojiDebugView2(void) {
 }
 
 /* Enable or skip relocation of remaining transfer chunks during field teardown. */
-void fldFileAddrResetMode(u32 relocateOnRelease) {
-    gFldFileResetMode = relocateOnRelease;
+void fldFileAddrResetMode(u32 mode) {
+    gFldFileResetMode = mode;
 }
 INCLUDE_SDATA(const s32, "field/fldFileResolver", D_0054EB98);
 

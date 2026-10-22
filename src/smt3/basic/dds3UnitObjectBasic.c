@@ -10,35 +10,35 @@ extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 
-extern void dds3ObjectBaseCreateMover(dds3Basic_t *basic);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, void *position);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, void *rotation);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, void *rot);
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
 
 extern dds3Basic_t *dds3AreaBasicGetFastArea(void);
 
-extern void dds3ObjectBaseSetControlBasicType(dds3Basic_t *basic, dds3Basic_t *area, s32 type);
+extern void dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic, s32 itemType);
 
-extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *basic);
+extern s32 dds3ObjectBaseRegistArea(dds3Basic_t *pObjectBasic);
 
 extern void dds3FreePoseSet(dds3Basic_t *basic);
 
-extern void evtDeleteUnitHandle(struct evtUnit_t *unit);
+extern void evtDeleteUnitHandle(struct evtUnit_t *h);
 
-extern void dds3ObjectBaseFreeModelHandle(dds3Basic_t *basic);
+extern void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic);
 
-extern void sdfChipFreeDirect(void *block);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *basic, s32 duration);
+extern void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *unitbasic, s32 frame);
 
-extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *basic, s32 duration);
+extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *lightbasic, dds3Basic_t *unitbasic, s32 frame);
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type);
+extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 
 extern s32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *list);
 
@@ -46,27 +46,27 @@ extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *list);
 
 extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *list);
 
-extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *list);
+extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *hndl);
 
-extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *list);
+extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 
 extern s32 dds3ComparePosPoseSet2(dds3PoseSet_t *first, dds3PoseSet_t *second);
 
 void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *basic);
 
-dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic) {
-    return ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->control;
+dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *pBasic) {
+    return ((dds3UnitObjectBasicWorkData_t *)pBasic->workdata)->control;
 }
 
-dds3Basic_t *dds3AddUnitObjectBasic(s32 id, void *position, void *rotation) {
+dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_UNITOBJECT);
     dds3UnitObjectBasicWorkData_t *work;
 
     if (basic != NULL) {
-        basic->serialID = id;
+        basic->serialID = serialID;
         dds3ObjectBaseCreateMover(basic);
-        dds3SetPosPoseSet(basic, position);
-        dds3SetRotPoseSet(basic, rotation);
+        dds3SetPosPoseSet(basic, aPos);
+        dds3SetRotPoseSet(basic, aRot);
         dds3SetRadiusPoseSet(basic->poseset);
         work = basic->workdata;
         work->status = -1;
@@ -82,16 +82,16 @@ void dds3DeleteUnitObjectBasic(dds3Basic_t *basic) {
     dds3DeleteSceneBasicData(basic);
 }
 
-s32 dds3GetStatusUnitObjectBasic(dds3Basic_t *basic) {
-    return ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->status;
+s32 dds3GetStatusUnitObjectBasic(dds3Basic_t *aPtr) {
+    return ((dds3UnitObjectBasicWorkData_t *)aPtr->workdata)->status;
 }
 
-struct evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic) {
-    return ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->unit;
+struct evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b) {
+    return ((dds3UnitObjectBasicWorkData_t *)b->workdata)->unit;
 }
 
-void dds3UnitObjectBasicSetOt(dds3Basic_t *basic, s32 ot) {
-    ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->ot = ot;
+void dds3UnitObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx) {
+    ((dds3UnitObjectBasicWorkData_t *)aPtr->workdata)->ot = idx;
 }
 
 INCLUDE_ASM(const s32, "basic/dds3UnitObjectBasic", dds3UnitObjectBasicConstructor);
@@ -129,8 +129,8 @@ void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *basic) {
 }
 
 /* Detach a light when leaving its radius, then select the first eligible light. */
-void dds3UnitObjectBasicEL_Link(dds3Basic_t *basic) {
-    dds3UnitObjectBasicWorkData_t *work = basic->workdata;
+void dds3UnitObjectBasicEL_Link(dds3Basic_t *unitBasic) {
+    dds3UnitObjectBasicWorkData_t *work = unitBasic->workdata;
     dds3Basic_t *scene = dds3GetControlScene();
     dds3BasicArrayHandle_t *list;
     dds3Basic_t *light;
@@ -152,9 +152,9 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *basic) {
             light = dds3GetBasicArray(list);
             lightWork = light->workdata;
             if (!(lightWork->flag & 4) &&
-                dds3ComparePosPoseSet2(basic->poseset, light->poseset) == 0 &&
+                dds3ComparePosPoseSet2(unitBasic->poseset, light->poseset) == 0 &&
                 work->lightID == light->serialID) {
-                dds3UnlinkLightObjectFromUnitObject(basic, 10);
+                dds3UnlinkLightObjectFromUnitObject(unitBasic, 10);
                 work->lightID = -1;
             }
         } while (dds3SetNextBasicArray(list) != 0);
@@ -170,7 +170,7 @@ void dds3UnitObjectBasicEL_Link(dds3Basic_t *basic) {
             light = dds3GetBasicArray(list);
             lightWork = light->workdata;
             if (!(lightWork->flag & 4) &&
-                dds3ComparePosPoseSet2(basic->poseset, light->poseset) != 0) {
+                dds3ComparePosPoseSet2(unitBasic->poseset, light->poseset) != 0) {
                 goto linkLight;
             }
         } while (dds3SetNextBasicArray(list) != 0);
@@ -180,7 +180,7 @@ freeList:
         return;
 
 linkLight:
-        dds3LinkLightObjectToUnitObject(light, basic, 10);
+        dds3LinkLightObjectToUnitObject(light, unitBasic, 10);
         work->lightID = light->serialID;
         dds3FreeBasicArrayHandle(list);
     }

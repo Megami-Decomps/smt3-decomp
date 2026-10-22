@@ -73,21 +73,21 @@ enum sl_slot_flag
 
 extern sdfMemHandle_t *fldAutoMapBuf;
 
-void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern fldMapRoom_t *fldAutoMapHeader;
 
 extern s32 fldAutoMapData;
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *a, s32 b, u32 c);
 
-extern void sdfModelMakeLocalTm(sdfModelNode_t *node);
+extern void sdfModelMakeLocalTm(sdfModelNode_t *aNode);
 
-extern void sdfModelEvalTm(sdfModelRootNode_t *model);
+extern void sdfModelEvalTm(sdfModelRootNode_t *aRoot);
 
 extern sdfModelOt_t D_002F6A48;
 
-extern void sdfModelLinkOt(sdfModelOt_t *ot, sdfModelRootNode_t *model);
+extern void sdfModelLinkOt(sdfModelOt_t *aOt, sdfModelRootNode_t *aRoot);
 
 extern u32 AutoMapSeq;
 
@@ -97,7 +97,7 @@ extern s32 fldAreaNameLower[];
 
 extern s32 fldAutoMapField;
 
-extern s32 fldAutoMapChkOpen(s32 area, s32 room, u32 item);
+extern s32 fldAutoMapChkOpen(s32 fld, s32 area, u32 block);
 
 extern s32 fldAutoMapBBox;
 
@@ -121,7 +121,7 @@ extern s32 fldNpcModelTable;
 
 extern fldNpcSlot_t fldModelSlotTable[];
 
-extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
 extern u32 strlen(const char *s);
 
@@ -129,14 +129,14 @@ dds3Basic_t *dds3GetActiveScene(void);
 
 extern void fldRegistUnitPad(void);
 
-extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
+extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
-extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2,
-                      u32 gsWord3);
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b,
+                      u32 a);
 
-extern void sdf3DSetCamera(void *node, void *transformMatrix);
+extern void sdf3DSetCamera(void *aParam, void *aCamera);
 
 extern u8 dds3ScreenParam[];
 
@@ -146,11 +146,11 @@ extern u8 D_002FA240[];
 
 extern void InversMatrix(void);
 
-extern void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z);
+extern void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r);
 
 extern f32 D_0054EEA0;
 
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
 extern sdfVector4_t fldAutoMapFieldId;
 
@@ -166,11 +166,11 @@ extern s32 fldNpcCamTarget;
 
 extern s32 sprintf(char *dst, const char *format, ...);
 
-extern void fldAddressResolver(u8 *buffer, void *chunk);
+extern void fldAddressResolver(u8 *pFileTop, void *pData);
 
-extern u8 *fldGetInfoHeader(void *chunk);
+extern u8 *fldGetInfoHeader(void *pData);
 
-extern void fldAutoMapFontInit(s32 field);
+extern void fldAutoMapFontInit(s32 bank);
 
 extern void fldAmModelLoadFile(void);
 
@@ -184,9 +184,9 @@ extern void evtEnableMoonDraw(void);
 
 extern s32 fldMenuOpenFlag[];
 
-extern void frSetFontDrawOT(s32 ot);
+extern void frSetFontDrawOT(s32 OtType);
 
-extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s32 visible);
+extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
 extern void *fldBlurEffectHandle;
 
@@ -230,7 +230,7 @@ extern s32 fldAutoMapFindPlace(s32 fld, s32 area);
 
 extern void *D_0054EEDC;
 
-extern void *dds3EffectLoad(void *resource);
+extern void *dds3EffectLoad(void *pD3P);
 
 extern void *D_00551D08;
 
@@ -242,7 +242,7 @@ extern void *fldDmgBlurHandle;
 
 extern void *fldNpcBlurHandle;
 
-extern sdfTexHandle_t *sdfTexSet(void *resource);
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
 
 extern void *D_00551CD0;
 
@@ -275,15 +275,15 @@ typedef struct
     s32 unk28;
 } fldBlurParam_t;
 
-extern void *dds3EffectDistortionBlurCreate(fldBlurParam_t *param);
+extern void *dds3EffectDistortionBlurCreate(fldBlurParam_t *pParam);
 
-extern void dds3EffectDelete(void *effect);
+extern void dds3EffectDelete(void *pData);
 
 extern s32 fldTakaraSlotCount;
 
 extern s32 fldNpcLoadIdx;
 
-extern void fldMakeFilePath(char *out, s32 field, s32 area);
+extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, u8 **loadedAt, u32 *size);
 
@@ -295,7 +295,7 @@ extern sdfTexHandle_t *D_00551CC0[2];
 
 extern sdfTexHandle_t *fldAutoMapWindowTex[];
 
-extern void sdfModelRootFree(void *model, s32 a, s32 b);
+extern void sdfModelRootFree(void *aRoot, s32 aReleaseNodes, s32 aReleaseMatList);
 
 extern s32 sdfDelayedResrcCheck(void);
 
@@ -303,7 +303,7 @@ extern s32 fldDrawFlag[];
 
 extern s8 dds3PadButtonState[64];
 
-extern void fldDbgPrint2D(s32 x, s32 y, const char *format);
+extern void fldDbgPrint2D(s32 x, s32 y, const char *str);
 
 extern void fldAutoMapDrawOneArea(void);
 
@@ -321,7 +321,7 @@ extern void evtDisableMoonDraw(void);
 
 extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
-extern void *sdfModelMakeEarly(s32 mode, void *resource);
+extern void *sdfModelMakeEarly(s32 aTexList, void *aModelData);
 
 extern s32 fldAutoMapSeqState;
 
@@ -371,9 +371,9 @@ extern fldPacRequest_t *pacLoad(const char *path);
 
 extern void pacSync(fldPacRequest_t *request);
 
-extern void pacFileHandleFree_(fldPacRequest_t *request);
+extern void pacFileHandleFree_(fldPacRequest_t *pacHandle);
 
-extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
+extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
 extern sdfMemHandle_t *fldTakara1File;
 
@@ -438,29 +438,29 @@ extern void *D_0054EF40;
 
 extern s16 fldAutoMapIconOfsTable[][8];
 
-extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 aSize);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 contextOffset);
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 
 extern sdfGrOt_t *fldDrawGetOt(void);
 
-extern void sdfPrimLinkFt4(sdfDrawTag_t *tag, u32 color, s32 mode, s32 x0, s32 y0, s32 u0,
-                           s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2,
-                           s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 mask, void *next);
+extern void sdfPrimLinkFt4(sdfDrawTag_t *aTag, u32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0,
+                           s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aX2, s32 aY2, s32 aU2,
+                           s32 aV2, s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aZ, void *aAllocator);
 
-void fldAutoMapFontInit(s32 fld) {
+void fldAutoMapFontInit(s32 bank) {
     s32 i;
 
     for (i = 0; i < 0x29; i++) {
-        D_00567EA0[i] = strlen(D_0030AB54[fldAutoMapFindArea(fld, i)]);
+        D_00567EA0[i] = strlen(D_0030AB54[fldAutoMapFindArea(bank, i)]);
     }
     for (i = 0; i < 0x29; i++) {
-        D_00567EF8[i] = strlen(D_0030FBD4[fldAutoMapFindFloor(fld, i)]);
+        D_00567EF8[i] = strlen(D_0030FBD4[fldAutoMapFindFloor(bank, i)]);
     }
     for (i = 0; i < 0x18; i++) {
-        D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(fld, i)]);
+        D_00567F50[i] = strlen(D_0030D714[fldAutoMapFindPlace(bank, i)]);
     }
     i = 0;
     if (fldGb[0] < 50) {
@@ -513,13 +513,13 @@ INCLUDE_ASM(const s32, "field/fldAutoMap", fldAmModelLoadFile);
 #endif
 
 
-void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *handle) {
+void fldAmbLoadFromMem(u8 *data, sdfMemHandle_t *mh) {
     s32 field = fldGb[0];
     u32 *info;
 
     if (field < 200) {
         if (field >= 10) {
-            fldAutoMapBuf = handle;
+            fldAutoMapBuf = mh;
             fldAddressResolver(data, data + 8);
             info = (u32 *)fldGetInfoHeader(data + 8);
             {
@@ -683,8 +683,8 @@ void fldAutoMapDrawIconOfsR(s32 index, s32 mode, f32 x, f32 y) {
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsR);
 #endif
 
-extern f32 sdfSin(f32 radians);
-extern void SetRotateMatrixY(f32 angle);
+extern f32 sdfSin(f32 aRadius);
+extern void SetRotateMatrixY(f32 aAngle);
 extern f32 D_0054EE70;
 extern sdfTexHandle_t *fldAutoMapBgTex[];
 
@@ -775,7 +775,7 @@ void fldAutoMapDrawIconOfsRF(s32 index, f32 x, f32 y, f32 z) {
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapDrawIconOfsRF);
 #endif
 
-void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z) {
+void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 r) {
     sdfVector4_t v0;
     sdfVector4_t v1;
     sdfVector4_t v2;
@@ -806,7 +806,7 @@ void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z) {
     v2.x = -4800.0f;
     v2.y = 0.0f;
     v2.z = 4800.0f;
-    SetRotateMatrixY((z + 180.0f) * 3.14f / 180.0f);
+    SetRotateMatrixY((r + 180.0f) * 3.14f / 180.0f);
     SDF_VU0_LOADVECTOR(&v0);
     SDF_VU0_APPLYMATRIX_XYZ();
     SDF_VU0_STOREVECTOR_NOMEM(&v0);
@@ -836,7 +836,7 @@ void fldAutoMapDrawBgOfsRF(f32 x, f32 y, f32 z) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))fldDrawGetOt()->regFunc)(ot, tag);
 }
 
-s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
+s32 fldAutoMap_GetFloor(s32 area, u32 block) {
     s32 result = 1;
     fldMapRoom_t *rec = fldAutoMapHeader;
     s32 i;
@@ -846,7 +846,7 @@ s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     for (i = 0; i < (s32)fldAutoMapData; i++, rec++) {
         item = rec->items;
         for (j = 0; j < rec->count; j++, item++) {
-            if (i == scene && j == index) {
+            if (i == area && j == block) {
                 result = item->floor + 1;
             }
         }
@@ -854,8 +854,8 @@ s32 fldAutoMap_GetFloor(s32 scene, u32 index) {
     return result;
 }
 
-void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
-    sdfModelNode_t *parent = model->nodeList->items[index + 1];
+void fldAutoMapNodeSet(sdfModelRootNode_t *root_node, s32 nodeidx, s32 mode) {
+    sdfModelNode_t *parent = root_node->nodeList->items[nodeidx + 1];
     sdfModelNode_t *first;
     sdfModelNode_t *node;
     sdfModelNode_t *next;
@@ -866,7 +866,7 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
         return;
     }
     parent->children->flags &= ~SDF_MODEL_NODE_FLAG_HIDE;
-    if (clearFlag == 0) {
+    if (mode == 0) {
         parent->children->flags |= SDF_MODEL_NODE_FLAG_HIDE;
     }
 
@@ -882,7 +882,7 @@ void fldAutoMapNodeSet(sdfModelRootNode_t *model, s32 index, s32 clearFlag) {
     for (;;) {
         flags = node->flags & ~SDF_MODEL_NODE_FLAG_HIDE;
         node->flags = flags;
-        if (clearFlag == 0) {
+        if (mode == 0) {
             node->flags = flags | SDF_MODEL_NODE_FLAG_HIDE;
         }
         next = node->next;
@@ -1084,31 +1084,31 @@ u32 fldAutoMapChkMode(void) {
 
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCalc);
 
-void fldAutoMapSetField(s32 field, s32 area, s32 block) {
+void fldAutoMapSetField(s32 fld, s32 area, s32 block) {
     f32 x = fldGlobalBase.x;
     f32 z = fldGlobalBase.z;
 
     fldGlobalBase.blockID = block;
     fldAutoMapFieldId.z = z;
     fldAutoMapFieldId.x = x;
-    fldGlobalBase.area = field;
+    fldGlobalBase.area = fld;
     fldGlobalBase.floor = area;
     fldAutoMapAreaNo = area;
     fldAutoMapFieldId.y = 0.0f;
-    fldAutoMapField = field % 100;
+    fldAutoMapField = fld % 100;
 }
 
-s32 fldAutoMapChkOpen(s32 area, s32 room, u32 item) {
-    s32 floor = area % 100;
+s32 fldAutoMapChkOpen(s32 fld, s32 area, u32 block) {
+    s32 floor = fld % 100;
 
     if (floor < 10) {
         return 0;
     }
     floor -= 10;
     if (floor >= 30) {
-        return (*(u64 *)((u8 *)DDS3_GBWK + 0x17F10 + (floor * 32 + room) * 8) >> item) & 1;
+        return (*(u64 *)((u8 *)DDS3_GBWK + 0x17F10 + (floor * 32 + area) * 8) >> block) & 1;
     }
-    return (*(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + room) * 8) >> item) & 1;
+    return (*(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + area) * 8) >> block) & 1;
 }
 
 void fldAutoMapOpenBlock(s32 flagNumber) {
@@ -1178,10 +1178,10 @@ void fldAutoMapOpenBlock(s32 flagNumber) {
     }
 }
 
-void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber) {
-    s32 room = area % 100;
-    s32 index = floor - 1;
-    s32 bit = flagNumber - 1;
+void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock) {
+    s32 room = fld % 100;
+    s32 index = area - 1;
+    s32 bit = SBlock - 1;
 
     if (room < 10) {
         return;
@@ -1199,10 +1199,10 @@ void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber) {
 /* NON_MATCHING: 40 of 42 words, exact size; the two `addiu -1` setups are swapped
  * between the slot before `div` and the `beql` delay slot. */
 #ifdef NON_MATCHING
-void fldAutoMapCloseBlock2(s32 area, s32 floor, s32 flagNumber) {
-    s32 bit = flagNumber - 1;
-    s32 room = area % 100;
-    s32 index = floor - 1;
+void fldAutoMapCloseBlock2(s32 fld, s32 area, s32 SBlock) {
+    s32 bit = SBlock - 1;
+    s32 room = fld % 100;
+    s32 index = area - 1;
 
     if (room < 10) {
         return;
@@ -1220,23 +1220,23 @@ void fldAutoMapCloseBlock2(s32 area, s32 floor, s32 flagNumber) {
 INCLUDE_ASM(const s32, "field/fldAutoMap", fldAutoMapCloseBlock2);
 #endif
 
-void fldAutoMapNameU(s32 labelIndex) {
-    if (labelIndex >= 0x40) {
+void fldAutoMapNameU(s32 nameID) {
+    if (nameID >= 0x40) {
         fldAreaNameUpper[0] = -1;
     } else {
-        fldAreaNameUpper[0] = labelIndex;
+        fldAreaNameUpper[0] = nameID;
     }
 }
 
-void fldAutoMapNameD(s32 labelIndex) {
-    if (labelIndex >= 0x40) {
+void fldAutoMapNameD(s32 nameID) {
+    if (nameID >= 0x40) {
         fldAreaNameLower[0] = -1;
     } else {
-        fldAreaNameLower[0] = labelIndex;
+        fldAreaNameLower[0] = nameID;
     }
 }
 
-s32 fldAutoMapGetFloorPrev(s32 limit) {
+s32 fldAutoMapGetFloorPrev(s32 floor) {
     s32 i;
     u32 j;
     s32 item;
@@ -1247,19 +1247,19 @@ s32 fldAutoMapGetFloorPrev(s32 limit) {
         for (j = 0; j < entry->count; j++) {
             if (fldAutoMapChkOpen(fldAutoMapField, i, j) != 0) {
                 item = fldAutoMap_GetFloor(i, j);
-                if (item < limit && best < item) {
+                if (item < floor && best < item) {
                     best = item;
                 }
             }
         }
     }
     if (best == -1) {
-        return limit;
+        return floor;
     }
     return best;
 }
 
-s32 fldAutoMapGetFloorNext(s32 limit) {
+s32 fldAutoMapGetFloorNext(s32 floor) {
     s32 i;
     u32 j;
     s32 item;
@@ -1270,14 +1270,14 @@ s32 fldAutoMapGetFloorNext(s32 limit) {
         for (j = 0; j < entry->count; j++) {
             if (fldAutoMapChkOpen(fldAutoMapField, i, j) != 0) {
                 item = fldAutoMap_GetFloor(i, j);
-                if (limit < item && item < best) {
+                if (floor < item && item < best) {
                     best = item;
                 }
             }
         }
     }
     if (best == 999) {
-        return limit;
+        return floor;
     }
     return best;
 }
@@ -1438,12 +1438,12 @@ void fldAutoMapClear(void) {
 
 extern f32 D_0054EEA4;
 extern s32 fldAreaFontWork;
-extern void frPreCalcStrWidth(const char *text, s32 small, s32 mode);
-extern void *frwGetSmallFontFRQ(s32 x, s32 y, s32 mode, u32 rgba, const char *text, s32 flag);
-extern u32 frGetStrWidth2(void *glyphChain);
-extern void frDestroyFontRequestAfter(void *frq);
+extern void frPreCalcStrWidth(const char *pStr, s32 Style, s32 Mode);
+extern void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, u32 Color, const char *pStr, s32 pFRQ);
+extern u32 frGetStrWidth2(void *pFRQ);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 extern void fldDrawAddressPanel(s32 width, s32 x, s32 y);
-extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const char *text);
+extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
 
 /* NON_MATCHING: 57 of 226 words, 908 bytes against 904; the frame holds one
  * saved register too many and the fade arms differ in two words. */

@@ -2,7 +2,7 @@
 #include "kernel.h"
 #include "libsdf.h"
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 INCLUDE_ASM(const s32, "kernel/dds3StartMenu", InitTitleProcess);
 

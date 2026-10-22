@@ -316,27 +316,27 @@ typedef struct nbKoukaPacket_t
 
 extern s32 printf(const char *format, ...);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
-extern void itfMesMngSetVar(s32 msgid, s32 type, s32 value, s32 digit);
+extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
-extern void itfMesMngMsgWndCls(s32 msgwndid);
+extern void itfMesMngMsgWndCls(s32 msgid);
 
 extern datDevilFormat_t datDevilTable[];
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern u32 f;
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern u8 dds3PadButtonState[];
 
-extern s32 nbGetInfoMsg(s32 type);
+extern s32 nbGetInfoMsg(s32 infotype);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
@@ -357,7 +357,7 @@ typedef struct {
 
 extern nbMasterTextEntry_t master_text[];
 
-extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -391,15 +391,15 @@ extern nbInnenRec_t D_003E3158[];
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
-extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 seid);
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern u8 datNegoReqTable[];
 
 extern u8 datNegoTuikaReqtype[];
 
-extern nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *a, s32 pformindex,
+extern nbNegoProcessData_t *InitNegoProcessData(nbActionProcessData_t *actdata, s32 pformindex,
                                                 s32 eformindex, s32 negotype, s32 skillid);
 
 extern void nbSetNegoWaitMotion(nbFormation_t *form);
@@ -426,9 +426,9 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n);
 
-extern s32 nbGetQuestionType(datUnitWork_t *unit);
+extern s32 nbGetQuestionType(datUnitWork_t *w);
 
-extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 extern u8 datNegoReqItemListA[];
 
@@ -438,32 +438,32 @@ extern u8 D_003E2318[];
 
 extern u8 D_003E23F8[];
 
-extern s32 nbSelectKureItemA(s32 group);
+extern s32 nbSelectKureItemA(s32 lv_idx);
 
-extern s32 nbSelectKureItemB(s32 group);
+extern s32 nbSelectKureItemB(s32 lv_idx);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
-extern s32 itfMesMngGetSelPhase(s32 msg);
+extern s32 itfMesMngGetSelPhase(s32 msgid);
 
-extern void itfMesMngSetSelPhase(s32 msg, s32 phase);
+extern void itfMesMngSetSelPhase(s32 msgid, s32 phase);
 
-extern s32 itfMesMngGetSelectNo(s32 msg);
+extern s32 itfMesMngGetSelectNo(s32 msgid);
 
-extern void itfMesMngRequestSelectRelease(s32 msg);
+extern void itfMesMngRequestSelectRelease(s32 id);
 
-extern s32 itfMesMngGetPhase(s32 msg);
+extern s32 itfMesMngGetPhase(s32 msgid);
 
-extern void itfMesMngSetPhase(s32 msg, s32 phase);
+extern void itfMesMngSetPhase(s32 msgid, s32 phase);
 
-extern void itfMesMngMarkBitStat(s32 msg, s32 bits);
+extern void itfMesMngMarkBitStat(s32 id, s32 flag);
 
 extern void itfMesMngRequestSelect(s32 msg, s32 id, s32 flag);
 
 extern void itfMesMngRequestMessage(s32 msg, s32 id, s32 flag);
 
-extern s32 dds3SelectMenu(s32 padset, s32 seccnt, s32 pricnt, s32 secvis, s32 privis,
-                          s32 *secscroll, s32 *priscroll, s32 *seccur, s32 *pricur);
+extern s32 dds3SelectMenu(s32 pad, s32 listsx, s32 listsy, s32 winsx, s32 winsy,
+                          s32 *basex, s32 *basey, s32 *x, s32 *y);
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 
@@ -477,7 +477,7 @@ extern nbInfoSelectEntry_t InfoSelectTable[];
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
@@ -655,36 +655,36 @@ s32 nbGetNegoKureHpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
     return b->maxhp * (dds3GetRandIntA(0, 8) + 14) / 100;
 }
 
-s32 nbGetNegoKureHpB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+s32 nbGetNegoKureHpB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
-    return ework->maxhp * (dds3GetRandIntA(0, 10) + 10) / 100;
+    return b->maxhp * (dds3GetRandIntA(0, 10) + 10) / 100;
 }
 
-s32 nbGetNegoKureMpA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+s32 nbGetNegoKureMpA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
-    return ework->maxmp * (dds3GetRandIntA(0, 30) + 10) / 100;
+    return b->maxmp * (dds3GetRandIntA(0, 30) + 10) / 100;
 }
 
-s32 nbGetNegoKureMpB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+s32 nbGetNegoKureMpB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
-    return ework->maxmp * (dds3GetRandIntA(0, 10) + 10) / 100;
+    return b->maxmp * (dds3GetRandIntA(0, 10) + 10) / 100;
 }
 
-s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
     s32 group;
 
-    if (ework->level == 0) {
+    if (b->level == 0) {
         return 0;
     }
-    if (ework->level >= 0x64) {
+    if (b->level >= 0x64) {
         return 0;
     }
-    group = (ework->level - 1) / 5;
+    group = (b->level - 1) / 5;
     return D_003E2318[(group * 4 + nbSelectKureItemA(group)) * 2];
 }
 
-s32 nbSelectKureItemA(s32 group)
+s32 nbSelectKureItemA(s32 lv_idx)
 {
     u8 *p;
     s32 r;
@@ -692,7 +692,7 @@ s32 nbSelectKureItemA(s32 group)
     s32 i;
 
     r = dds3GetRandIntA(0, 0x64);
-    p = &datNegoReqItemListA[group * 8];
+    p = &datNegoReqItemListA[lv_idx * 8];
     sum = 0;
     for (i = 0; i < 4; i++, p += 2) {
         if (r < sum + *p) {
@@ -703,21 +703,21 @@ s32 nbSelectKureItemA(s32 group)
     return 0;
 }
 
-s32 nbGetKureItemB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework)
+s32 nbGetKureItemB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b)
 {
     s32 group;
 
-    if (ework->level == 0) {
+    if (b->level == 0) {
         return 0;
     }
-    if (ework->level >= 0x64) {
+    if (b->level >= 0x64) {
         return 0;
     }
-    group = (ework->level - 1) / 5;
+    group = (b->level - 1) / 5;
     return D_003E23F8[(group * 3 + nbSelectKureItemB(group)) * 2];
 }
 
-s32 nbSelectKureItemB(s32 group)
+s32 nbSelectKureItemB(s32 lv_idx)
 {
     u8 *p;
     s32 r;
@@ -725,7 +725,7 @@ s32 nbSelectKureItemB(s32 group)
     s32 i;
 
     r = dds3GetRandIntA(0, 0x64);
-    p = &datNegoReqItemListB[group * 6];
+    p = &datNegoReqItemListB[lv_idx * 6];
     sum = 0;
     for (i = 0; i < 3; i++, p += 2) {
         if (r < sum + *p) {
@@ -736,7 +736,7 @@ s32 nbSelectKureItemB(s32 group)
     return 0;
 }
 
-s32 nbGetNegoRequestType(s32 type)
+s32 nbGetNegoRequestType(s32 reqtype)
 {
     u8 *p;
     s32 i;
@@ -745,7 +745,7 @@ s32 nbGetNegoRequestType(s32 type)
 
     r = dds3GetRandIntA(0, 100);
     sum = 0;
-    p = &datNegoReqTable[type * 5];
+    p = &datNegoReqTable[reqtype * 5];
     for (i = 0; i < 5; i++) {
         if (r < sum + *p) {
             return i;
@@ -756,7 +756,7 @@ s32 nbGetNegoRequestType(s32 type)
     return 0;
 }
 
-s32 nbGetNegoTuikaRequestType(s32 type)
+s32 nbGetNegoTuikaRequestType(s32 tuikareqtype)
 {
     u8 *p;
     s32 i;
@@ -765,7 +765,7 @@ s32 nbGetNegoTuikaRequestType(s32 type)
 
     r = dds3GetRandIntA(0, 100);
     sum = 0;
-    p = &datNegoTuikaReqtype[type * 3];
+    p = &datNegoTuikaReqtype[tuikareqtype * 3];
     for (i = 0; i < 3; i++) {
         if (r < sum + *p) {
             return i;
@@ -1001,19 +1001,19 @@ INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F10);
 
 INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", InitNegoProcessData);
 
-void nbInitNegoProcess(nbActionProcessData_t *a, s32 pformindex, s32 eformindex, s32 negotype,
+void nbInitNegoProcess(nbActionProcessData_t *actdata, s32 pformindex, s32 eformindex, s32 negotype,
                       s32 skillid)
 {
     nbNegoProcessData_t *n;
     dds3ProcessID_t *id;
 
-    n = InitNegoProcessData(a, pformindex, eformindex, negotype, skillid);
+    n = InitNegoProcessData(actdata, pformindex, eformindex, negotype, skillid);
     nbSetNegoWaitMotion(n->eform);
     nbSetAllHojoSkillWork(n);
     p2sdBgmVolDown();
     id = dds3StartProcess(D_00551160, 0x3F9, 1, 1, nbNegoProcess1, nbNegoShutdown, n);
-    dds3LinkProcess(a->data->mainproc, id);
-    a->data->negoproc = id;
+    dds3LinkProcess(actdata->data->mainproc, id);
+    actdata->data->negoproc = id;
 }
 INCLUDE_SDATA(const s32, "newbattle/nbNegoProcess", D_00551148);
 

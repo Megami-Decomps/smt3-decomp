@@ -254,13 +254,13 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 typedef struct { u16 type; u8 lo; u8 hi; } nbNegoRateEntry_t;
 
 extern nbNegoRateEntry_t D_003E2540[][7];
 
-extern s32 datGetParam(datUnitWork_t *unit, s32 param);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -278,7 +278,7 @@ typedef struct nbEventProcessData_t {
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern s32 nbGetQuestionType(datUnitWork_t *unit);
+extern s32 nbGetQuestionType(datUnitWork_t *w);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -290,7 +290,7 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 

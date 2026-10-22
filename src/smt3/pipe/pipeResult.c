@@ -12,7 +12,7 @@ extern void fclUpdateMessage(void);
 
 extern void fclEndMessage(void);
 
-extern u32 dds3GetRandA(void *seed);
+extern u32 dds3GetRandA(void *name);
 
 extern char *pStr[];
 
@@ -24,15 +24,15 @@ extern char D_00551808[];
 
 extern void *pipeMessData;
 
-extern s8 fclStartMessage(s32 msgno);
+extern s8 fclStartMessage(s32 MsgNo);
 
 extern void fclDestroyMessage(void);
 
-extern void sdfMemFreeDelayedDirect(void *handle);
+extern void sdfMemFreeDelayedDirect(void *aHandle);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern void fclSetMessageVar_20743088(s8 index, char *str);
+extern void fclSetMessageVar_20743088(s8 Index, char *pStr);
 
 
 INCLUDE_ASM(const s32, "pipe/pipeResult", pipeResultSection);

@@ -3,22 +3,22 @@
 
 #include "ps2asm.h"
 
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 extern s32 dds3InitPoseSet(dds3Basic_t *basic);
 extern void dds3FreePoseSet(dds3Basic_t *basic);
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
-extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
-extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *position);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 extern dds3Basic_t *dds3GetControlScene(void);
-extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene);
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
 extern void dds3SetScreenFovy(f32 fovy);
 extern void ToMatrix(void);
-extern void LookAtMatrix(const sdfVector4_t *eye, const sdfVector4_t *target,
-                          const sdfVector4_t *up);
+extern void LookAtMatrix(const sdfVector4_t *aTarget, const sdfVector4_t *aEye,
+                          const sdfVector4_t *aDown);
 extern sdfVector4_t aViewEye;
 extern sdfVector4_t aViewTarget;
 extern sdfVector4_t aViewDown;
@@ -27,8 +27,8 @@ extern sdfVector4_t D_00530D48;
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
-extern void dds3ObjectBaseCreateMover(dds3Basic_t *basic);
-void MakeCamera(dds3Basic_t *basic);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
+void MakeCamera(dds3Basic_t *pBasic);
 
 s32 func_00112370(dds3Basic_t *basic)
 {
@@ -86,10 +86,10 @@ s32 func_001124F8(void)
 }
 
 /* Rotate the local vectors and cache their world-space look-at matrix. */
-void MakeCamera(dds3Basic_t *basic)
+void MakeCamera(dds3Basic_t *pBasic)
 {
-    dds3CameraObjectBasicWorkData_t *work = basic->workdata;
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3CameraObjectBasicWorkData_t *work = pBasic->workdata;
+    dds3PoseSet_t *pose = pBasic->poseset;
 
     SDF_VU0_LOADVECTOR(&pose->rot);
     ToMatrix();
@@ -125,8 +125,8 @@ dds3Basic_t *dds3AllocCameraObjectBasic(u32 serialID)
     return basic;
 }
 
-dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *position,
-                                           const sdfVector4_t *rotation)
+dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *pos,
+                                           const sdfVector4_t *rot)
 {
     sdfVector4_t initialUp;
     sdfVector4_t initialEye;
@@ -139,8 +139,8 @@ dds3Basic_t *dds3AddCameraObjectBasicTypeFree(u32 serialID, const sdfVector4_t *
     work = basic->workdata;
     work->mode = 1;
     work->fovy = 0.6283185f;
-    dds3SetRotPoseSet(basic, rotation);
-    dds3SetPosPoseSet(basic, position);
+    dds3SetRotPoseSet(basic, rot);
+    dds3SetPosPoseSet(basic, pos);
     dds3SetRadiusPoseSet(basic->poseset);
     SDF_VU0_COPYVECTOR(&work->vertical, &initialUp);
     SDF_VU0_COPYVECTOR(&work->eyeVector, &initialEye);
@@ -208,9 +208,9 @@ void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *basic)
     SDF_VU0_LOADVECTOR_BARRIER(target);
 }
 
-void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy)
+void dds3CameraObjectBasicSetFovy(dds3Basic_t *pBasic, f32 fovy)
 {
-    dds3CameraObjectBasicWorkData_t *work = basic->workdata;
+    dds3CameraObjectBasicWorkData_t *work = pBasic->workdata;
 
     work->fovy = fovy;
     work->flag |= 1;

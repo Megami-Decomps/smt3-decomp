@@ -65,11 +65,11 @@ extern pbPanel_t *record;
 
 extern pbPanel_t *blockDB;
 
-extern pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 code, s32 timer);
+extern pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 eCode, s32 frame);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
@@ -77,13 +77,13 @@ extern s32 pb_draw_error_Process(dds3ProcessID_t *id);
 
 extern void pb_draw_error_Shutdown(dds3ProcessID_t *id);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 /* NON_MATCHING: 2 of 47 words; the process load and the data store swap delay slots. */
 #ifdef NON_MATCHING
-pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 code, s32 timer) {
+pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 eCode, s32 frame) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     pbErrorWork_t *work;
     panel->process = dds3StartProcess("pb-draw-error", 0x2AFD, 1, 1, pb_draw_error_Process,
@@ -92,8 +92,8 @@ pbPanel_t *pbStartErrorDraw(pbPanel_t *parent, s32 code, s32 timer) {
         dds3LinkProcess(parent->process, panel->process);
     }
     work = sdfChipAllocDirect(0xC);
-    work->code = code;
-    work->timer = timer;
+    work->code = eCode;
+    work->timer = frame;
     work->unk04 = 0;
     panel->flags = 0x10000;
     panel->data.error = work;

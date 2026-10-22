@@ -17,10 +17,10 @@ extern s8 gProcessStat_0;
 
 extern cmpSkillList_t *cmpSkillCursor;
 
-extern void *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
-                              void *processfunc, void *shutdownfunc, void *data);
+extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                              void *drawExit, void *deleteExit, void *p);
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 extern s32 datGetMaxHp(datUnitWork_t *work);
 
@@ -182,9 +182,9 @@ extern cmpInfoWindow_t *cmpInfoWindow;
 
 extern cmbWork_t *D_0054FB20;
 
-extern s32 mdlPrepare(s32 group, s32 id, s32 blocking);
+extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 typedef struct
 {
@@ -524,7 +524,7 @@ extern u8 *GBWK_3;
 
 extern s32 printf(const char *fmt, ...);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 typedef struct
 {
@@ -584,11 +584,11 @@ extern cmpDrawBank_t dds3DrawEnv[];
 
 extern u32 dds3GetFrameID(void);
 
-extern void sdfGrSetFrameMaskRGB(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfGrSetFrameMaskReset(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(void *tag, u32 packet);
+extern void sdfDrawTagLinkRefGif(void *aTag, u32 aPacket);
 
 extern void cmpReCalcStockCursorPos(s8 index);
 
@@ -624,9 +624,9 @@ extern void cmpResetCursorInfo(cmpCursorWork_t *cursor);
 
 extern void campDrawText(s32 id, s32 flag);
 
-extern void FromEuler(f32 x, f32 y, f32 z);
+extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 
-extern void mdlSetRotate(void *model);
+extern void mdlSetRotate(void *aHandle);
 
 typedef struct
 {
@@ -664,9 +664,9 @@ extern s32 cmpUnloadStatusModel(void);
 
 typedef s32 (*cmpSeqFunc_t)(void);
 
-extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
-extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
 extern char D_0054FB48[];
 
@@ -746,9 +746,9 @@ extern campStatusPanel_t *campDhUpdateWork;
 
 extern s8 cmpGetHeartsIconId(s8 index);
 
-extern void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
 
-extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 extern void cmpModelFreeResource(void);
 
@@ -758,7 +758,7 @@ extern void cmpMoveCursorListEnd(cmpCursorWork_t *cursor);
 
 extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
 
-extern void frDestroyFontRequestAfter(void *frq);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern void func_0023B500(s32 value);
 
@@ -793,7 +793,7 @@ extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
 extern char D_0054FC20[];
 
-extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 color, s32 d, char *text, s32 f);
+extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 
@@ -802,10 +802,10 @@ extern void fmProcTrigSequence(s32 mode);
 extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
                              cmpCursorWork_t *cursor, s32 j, s32 k);
 
-void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot);
+void fclDrawSpriteSize(s32 x, s32 y, s32 d, s32 w, s32 h, s32 *color, s32 id, s32 idx, s32 *texList, fclSpriteTbl_t *table, s32 OtNo);
 
 /* Called above its definition, where ee-gcc assumed int. */
-s32 cmpMoveCursor(cmpCursorWork_t *cursor, s8 dir);
+s32 cmpMoveCursor(cmpCursorWork_t *cur, s8 dir);
 
 /* Called above its definition, where ee-gcc assumed int. */
 s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
@@ -814,17 +814,17 @@ s32 fclDestroyMessage(void);
 
 void fclLoadFileAsync(const char *name, void *buf);
 
-void fclSetSelMessagePos(s8 pos);
+void fclSetSelMessagePos(s8 SelPos);
 
-s32 fclLoadTexture(char *name);
+s32 fclLoadTexture(char *pFileName);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *ptr);
+extern s32 sdfMemLock(void *aHandle);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *ptr);
+extern s32 sdfMemLock(void *aHandle);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
@@ -1185,7 +1185,7 @@ void cmpApplyStockRecover(void)
 
 extern void cmpClearStockFlag(datUnitWork_t *unit);
 
-extern void datClearCommMemory(datUnitWork_t *unit);
+extern void datClearCommMemory(datUnitWork_t *work);
 
 extern void datAllClearCommMemory(void);
 
@@ -1641,17 +1641,17 @@ typedef struct
     /* 0x1C */ cmpLocalStock_t *stock;
 } cmpStockSeqInfo_t;
 
-void *cmpAllocStockProcess(cmpLocalStock_t *stock, s32 value)
+void *cmpAllocStockProcess(cmpLocalStock_t *pNameList, s32 pParent)
 {
     void *chunk = sdfMemAllocDirect(0x20);
     cmpStockSeqInfo_t *info = sdfMemLock(chunk);
 
     info->allocation = chunk;
-    cmpInitSeqInfo(info, value);
+    cmpInitSeqInfo(info, pParent);
     info->unk_18 = 0;
-    info->stock = stock;
-    stock->count = 0xF;
-    cmpBuildStockNameList(stock);
+    info->stock = pNameList;
+    pNameList->count = 0xF;
+    cmpBuildStockNameList(pNameList);
     return info;
 }
 
@@ -1914,7 +1914,7 @@ void campDhFreeTexture(campInfoWork_t *work)
 
 extern void campDhFreeTexture(campInfoWork_t *work);
 
-extern void sdfMemFreePtrDirect(void *ptr);
+extern void sdfMemFreePtrDirect(void *aPtr);
 
 extern char D_0053FD78[];
 
@@ -2121,7 +2121,7 @@ INCLUDE_ASM(const s32, "code_0022C578", campDhFindEntry);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpReturnParamDH);
 
-extern void datEquipHearts(s32 id);
+extern void datEquipHearts(s32 HeartsID);
 
 void campDhEquipHearts(void)
 {
@@ -2454,7 +2454,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusComEx2);
 
 extern char *pStr[];
 
-extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 color, s32 d, char *text, s32 f);
+extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
 void cmpDrawItemListHeader(s32 x, s32 y, s32 c, u16 index)
 {
@@ -2744,7 +2744,7 @@ void func_0023A980(f32 *pos)
     aViewTarget[3] = 0.0f;
 }
 
-extern void mdlSetPosition(void *model);
+extern void mdlSetPosition(void *aHandle);
 
 void func_0023A9A8(f32 *pos, void *model)
 {
@@ -2767,7 +2767,7 @@ typedef struct
 
 extern cmpModelLink_t D_002F69B8[];
 
-extern void mdlLink(void *model, cmpModelLink_t *link);
+extern void mdlLink(void *aHandle, cmpModelLink_t *aModelOt);
 
 void cmp_23AA28(f32 *a, f32 *rot, void *model, s32 index)
 {
@@ -2914,14 +2914,14 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateStatusModelLoad);
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_update_status_Process);
 
-void *cmpAllocInfoProcess(void *owner, s32 value)
+void *cmpAllocInfoProcess(void *param, s32 pParent)
 {
     void *chunk = sdfMemAllocDirect(0x1C);
     cmpSeqInfo_t *info = sdfMemLock(chunk);
 
     info->allocation = chunk;
-    cmpInitSeqInfo(info, value);
-    info->owner = owner;
+    cmpInitSeqInfo(info, pParent);
+    info->owner = param;
     return info;
 }
 
@@ -3006,7 +3006,7 @@ void cmpSetCrossGeneralVal(u8 *work, s8 value)
     work[0x50] = value;
 }
 
-extern void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanelPos_t *pos);
+extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanelPos_t *pPanelPos);
 
 void campInitPanelPos(void *panel, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
 {
@@ -3471,7 +3471,7 @@ void cmpResetDrawEnv(void)
     dds3ScreenParam[5] = 2048.0f;
 }
 
-extern void mdlFree(s32 handle);
+extern void mdlFree(s32 aHandle);
 
 extern void cmpFreeBadEffect(void);
 
@@ -3515,7 +3515,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpBadEffSetup);
 
 extern void *hCAMPBadEffect;
 
-extern void effCAMPBadDelete(void *eff);
+extern void effCAMPBadDelete(void *hCAMPBadEffect);
 
 extern char D_00540058[];
 
@@ -3551,7 +3551,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpLoadStatusModel);
 
 #include "motion.h"
 
-extern void mdlLoopMotion(mdlObj_t *ctx, s32 searchId, s8 motionIndex);
+extern void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s8 aNumber);
 
 void cmpGetStatusModelMotion(mdlObj_t *model)
 {
@@ -3567,7 +3567,7 @@ void cmpGetStatusModelMotion(mdlObj_t *model)
 
 extern datUnitVisual_t datModelParamTable[];
 
-extern void mdlSetScale(void *model);
+extern void mdlSetScale(void *aHandle);
 
 f32 cmpGetStatusModelScale(void *model, s32 flag)
 {
@@ -3614,7 +3614,7 @@ extern void cmpSetModelRotate(void *model);
 
 extern void cmpSetStatusModelParam(void);
 
-extern void effCAMPBadDraw(void *effect);
+extern void effCAMPBadDraw(void *hCAMPBadEffect);
 
 s32 cmpDrawStatusModel(s32 scene)
 {
@@ -3797,9 +3797,9 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpAllocEffectSlot);
 
 /* NON_MATCHING: 18 of 21 words differ (first at +0x0). */
 #ifdef NON_MATCHING
-void cmpClearCursorSlots(cmpCursorWork_t *cursor)
+void cmpClearCursorSlots(cmpCursorWork_t *cur)
 {
-    cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cursor + 0x3C);
+    cmpCursorSlot_t (*slot)[2] = (cmpCursorSlot_t (*)[2])((u8 *)cur + 0x3C);
     s32 i;
     s32 j;
 
@@ -3873,15 +3873,15 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorSlots);
 
 /* NON_MATCHING: 7 of 37 words differ, exact size. */
 #ifdef NON_MATCHING
-void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e)
+void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 {
-    u8 *work = cursor;
+    u8 *work = cur;
 
     memset(work + 8, 0, 0x18);
     *(s32 *)(work + 0x18) = a;
     *(s32 *)(work + 0x1C) = b;
     *(s32 *)(work + 8) = a;
-    *(s32 *)work = e;
+    *(s32 *)work = mode;
     *(s32 *)(work + 0xC) = b;
     *(s32 *)(work + 0x10) = c;
     *(s32 *)(work + 0x14) = d;
@@ -3894,10 +3894,10 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorRange);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorScroll);
 
-void cmpSetCursorFlag(cmpCursorWork_t *cursor, s32 flag)
+void cmpSetCursorFlag(cmpCursorWork_t *cur, s32 flag)
 {
-    cursor->unk_2C = flag;
-    cmpUpdateCursorScroll(cursor, 1);
+    cur->unk_2C = flag;
+    cmpUpdateCursorScroll(cur, 1);
 }
 
 /* NON_MATCHING: 9 of 28 words differ (first at +0x8). */
@@ -4023,18 +4023,18 @@ void cmpAdvanceCursorPhase(cmpCursorWork_t *cursor)
     }
 }
 
-s32 cmpMoveCursor(cmpCursorWork_t *cursor, s8 dir)
+s32 cmpMoveCursor(cmpCursorWork_t *cur, s8 dir)
 {
     if (dir != 0)
     {
-        cursor->unk_34 = 0;
+        cur->unk_34 = 0;
     }
     else
     {
-        cmpAdvanceCursorPhase(cursor);
+        cmpAdvanceCursorPhase(cur);
     }
-    cmpFindNextCursorItem(cursor, dir, 1);
-    cursor = NULL;
+    cmpFindNextCursorItem(cur, dir, 1);
+    cur = NULL;
 }
 
 s32 cmpGetCursorMoveMode(cmpCursorWork_t *cursor)
@@ -4216,13 +4216,13 @@ void cmpDebugDumpCount(void)
     }
 }
 
-void cmpInitSeqInfo(cmpSeqInfo_t *info, s32 value)
+void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, s32 pParent)
 {
-    info->unk_00 = 3;
-    info->unk_02 = -1;
-    info->unk_05 = 0;
-    info->unk_0C = 0;
-    info->unk_10 = value;
+    pSeq->unk_00 = 3;
+    pSeq->unk_02 = -1;
+    pSeq->unk_05 = 0;
+    pSeq->unk_0C = 0;
+    pSeq->unk_10 = pParent;
 }
 
 s32 cmpChkSeqInfo(cmbGbWork_t *work)

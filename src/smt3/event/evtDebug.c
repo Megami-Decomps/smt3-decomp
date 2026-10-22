@@ -20,19 +20,19 @@ extern u8 dds3PadButtonState[];
 extern sdfGrOt_t sdfGrOtTable[];
 
 
-extern void *sdfGrAllocPacketBuff(u32 size);
+extern void *sdfGrAllocPacketBuff(u32 aSize);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, void *packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
 
 extern void dds3ConsPanelTagLink(sdfDrawTag_t *, s32, s32, s32, s32);
 
-extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 style, const char *format, ...);
+extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
 
 extern s32 sprintf(char *, const char *, ...);
 
-extern s32 sdfFileCheckExist(char *path);
+extern s32 sdfFileCheckExist(char *aFilename);
 
 extern void scrStartScriptByName(s32 handle, const char *path, s32 param);
 

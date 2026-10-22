@@ -71,11 +71,11 @@ typedef struct devState_t devState_t;
 
 extern void *memset(void *, int, unsigned int);
 
-f32 sdfSin(f32 angle);
+f32 sdfSin(f32 aRadius);
 
 extern u32 fldRunDanteGunFlag[];
 
-extern void dds3ObjectBaseOffFlag(void *object, s32 mask);
+extern void dds3ObjectBaseOffFlag(void *pObjectBasic, s32 flag);
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 mask);
 
@@ -87,11 +87,11 @@ extern f32 D_002FCA60[];
 
 extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
 
-extern void evtUnitLightOn(evtUnit_t *unit);
+extern void evtUnitLightOn(evtUnit_t *h);
 
-extern void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 duration, u32 firstColor, u32 secondColor);
+extern void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb);
 
-extern void evtSetUnitLightDir(evtUnit_t *unit, s32 duration);
+extern void evtSetUnitLightDir(evtUnit_t *h, s32 frame);
 
 extern dds3Basic_t *D_0054EAE8;
 
@@ -145,9 +145,9 @@ extern s32 D_0054ED84;
 
 extern s32 D_0054ED8C;
 
-extern void fldSkySetPlayer(s32 duration, f32 colorAX, f32 colorAY, f32 colorAZ,
-                            f32 colorBX, f32 colorBY, f32 colorBZ,
-                            f32 dirX, f32 dirY, f32 dirZ);
+extern void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
+                            f32 r3, f32 g3, f32 b3,
+                            f32 x0, f32 y0, f32 z0);
 
 extern s32 fldSkyEnable;
 
@@ -165,17 +165,17 @@ extern s32 fldGb __attribute__((section(".data")));
 
 extern void dds3SetFogColor(s32, f32 *);
 
-extern s32 dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color);
+extern s32 dds3SetLightColor(s32 frame, s32 no, f32 *col);
 
 extern void dds3SetAmbientColor(s32, f32 *);
 
-extern s32 dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction);
+extern s32 dds3SetLightDir(s32 frame, s32 no, f32 *dir);
 
-extern void dds3SetFogPara(s32 blendFrames, f32 x, f32 y, f32 z, f32 w);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 z, f32 w);
 
-sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-u32 sdfMemLock(sdfMemHandle_t *allocation);
+u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
 extern u32 fldItemBoxObjBuf;
 
@@ -185,23 +185,23 @@ extern u32 D_0054EDA8;
 
 extern u32 D_0054EDAC;
 
-void sdfMemUnlock(sdfMemHandle_t *allocation);
+void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
-void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
-void fldMakeFilePath(char *buffer, s32 area, s32 unused);
+void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-devState_t *sdfFileOpen(const char *path);
+devState_t *sdfFileOpen(const char *aFileName);
 
-void sdfFileRead(devState_t *state, void *buffer, s32 byteCount);
+void sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
 
-void sdfFileClose(devState_t *state);
+void sdfFileClose(devState_t *aHandle);
 
 extern s32 sprintf(char *, const char *, ...);
 
 extern void *memcpy(void *, const void *, unsigned int);
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 extern s32 gSkyTblAnime;
 
@@ -211,7 +211,7 @@ extern s32 gSkyTblBaseIdx;
 
 extern s32 D_002FC0EC __attribute__((section(".data")));
 
-extern void fldSkySetTbl(s32 idx, s32 flag);
+extern void fldSkySetTbl(s32 idx, s32 hokan);
 
 extern s32 gFilterAlpha;
 
@@ -243,22 +243,22 @@ void fldSkyDefaultLoad(void) {
     sdfFileClose(fd);
 }
 
-void fldSkyFieldLoad(s32 area) {
+void fldSkyFieldLoad(s32 field) {
     char path[64];
     char directory[32];
     devState_t *fd;
 
     gFilterAlpha = 0x80;
-    if (area < 200) {
-        fldMakeFilePath(directory, area, 1);
+    if (field < 200) {
+        fldMakeFilePath(directory, field, 1);
         if (fldGlobalBase.area == 0x19 && evtBitCheck(0x599) != 0 && evtBitCheck(0x743) == 0) {
-            sprintf(path, "%sF%03db.SKY", directory, area);
+            sprintf(path, "%sF%03db.SKY", directory, field);
         } else if (fldGlobalBase.area == 0x18 && evtBitCheck(0x4F) != 0) {
-            sprintf(path, "%sF%03db.SKY", directory, area);
+            sprintf(path, "%sF%03db.SKY", directory, field);
         } else if (fldGlobalBase.area == 0x18 && evtBitCheck(0x16) != 0 && evtBitCheck(0x3E) == 0) {
-            sprintf(path, "%sF%03dc.SKY", directory, area);
+            sprintf(path, "%sF%03dc.SKY", directory, field);
         } else {
-            sprintf(path, "%sF%03d.SKY", directory, area);
+            sprintf(path, "%sF%03d.SKY", directory, field);
         }
         fd = sdfFileOpen(path);
         sdfFileRead(fd, fldSkyDefault, 0xE000);
@@ -303,21 +303,21 @@ void fldSkyCalcFilter(void) {
 
 INCLUDE_ASM(const s32, "field/fldSky", fldSkyDrawFilter);
 
-void fldSkySetFilter(s32 area, s32 value, s32 duration) {
+void fldSkySetFilter(s32 idx, s32 mode, s32 hokan) {
     if (fldSkyEnable == 0 && fldGb < 0x32) {
-        duration = 0;
+        hokan = 0;
     }
-    if (duration == 0) {
-        fldSkyFilter = area;
+    if (hokan == 0) {
+        fldSkyFilter = idx;
         fldSkyFilterRate = 1.0f;
         fldSkyFilterTime = 1.0f;
     } else {
         fldSkyFilterRate = 0.0f;
         fldSkyFilter = fldSkyFilterPrev;
-        fldSkyFilterTime = (f32)duration;
+        fldSkyFilterTime = (f32)hokan;
     }
-    fldSkyFilterPrev = area;
-    fldSkyDataTable[area].mode = value;
+    fldSkyFilterPrev = idx;
+    fldSkyDataTable[idx].mode = mode;
 }
 
 void fldSetFilterAnime(s32 anime)
@@ -327,9 +327,9 @@ void fldSetFilterAnime(s32 anime)
     gFilterAnimeOfsA = 0;
 }
 
-void fldSkySetAlpha(s32 alpha)
+void fldSkySetAlpha(s32 alp)
 {
-    gFilterAlpha = alpha;
+    gFilterAlpha = alp;
 }
 
 s32 fldSkyGetAlpha(void)
@@ -337,9 +337,9 @@ s32 fldSkyGetAlpha(void)
     return gFilterAlpha;
 }
 
-void fldSkySetAlphaOfs(s32 ofs)
+void fldSkySetAlphaOfs(s32 alp)
 {
-    fldSkyAlphaOfs = ofs;
+    fldSkyAlphaOfs = alp;
 }
 
 s32 fldSkyGetAlphaOfs(void)
@@ -347,11 +347,11 @@ s32 fldSkyGetAlphaOfs(void)
     return fldSkyAlphaOfs;
 }
 
-void fldSkySetTableAnime(s32 anime)
+void fldSkySetTableAnime(s32 type)
 {
     s32 idx = D_002FC0EC;
 
-    gSkyTblAnime = anime;
+    gSkyTblAnime = type;
     gSkyTblAnimeCntI = 0;
     gSkyTblBaseIdx = idx;
     fldSkySetTbl(idx, 1);
@@ -432,9 +432,9 @@ void fld_136800(s32 duration, f32 lightR, f32 lightG, f32 lightB,
     }
 }
 
-void fldSkySetPlayer(s32 duration, f32 colorAX, f32 colorAY, f32 colorAZ,
-                     f32 colorBX, f32 colorBY, f32 colorBZ,
-                     f32 dirX, f32 dirY, f32 dirZ) {
+void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
+                     f32 r3, f32 g3, f32 b3,
+                     f32 x0, f32 y0, f32 z0) {
     f32 dir[4];
     evtUnit_t *playerUnit = NULL;
     evtUnit_t *secondUnit = NULL;
@@ -453,33 +453,33 @@ void fldSkySetPlayer(s32 duration, f32 colorAX, f32 colorAY, f32 colorAZ,
     mainUnit = evtGetUnitHandle2(D_0054EAE8);
     evtUnitLightOn(mainUnit);
 
-    r = (s32)(colorAX * 128.0f);
-    g = (s32)(colorAY * 128.0f);
-    b = (s32)(colorAZ * 128.0f);
+    r = (s32)(r0 * 128.0f);
+    g = (s32)(g0 * 128.0f);
+    b = (s32)(b0 * 128.0f);
     lightColor = r | (b << 16) | (g << 8) | 0x80000000;
-    r = (s32)(colorBX * 128.0f);
-    g = (s32)(colorBY * 128.0f);
-    b = (s32)(colorBZ * 128.0f);
+    r = (s32)(r3 * 128.0f);
+    g = (s32)(g3 * 128.0f);
+    b = (s32)(b3 * 128.0f);
     ambientColor = r | (b << 16) | (g << 8) | 0x80000000;
-    evtSetUnitLightAndAmbient(mainUnit, duration, lightColor, ambientColor);
+    evtSetUnitLightAndAmbient(mainUnit, intr, lightColor, ambientColor);
     if (fldPlayerUnit != 0) {
-        evtSetUnitLightAndAmbient(playerUnit, duration, lightColor, ambientColor);
+        evtSetUnitLightAndAmbient(playerUnit, intr, lightColor, ambientColor);
     }
     if (D_0054EAF0 != 0) {
-        evtSetUnitLightAndAmbient(secondUnit, duration, lightColor, ambientColor);
+        evtSetUnitLightAndAmbient(secondUnit, intr, lightColor, ambientColor);
     }
 
-    dir[0] = dirX;
-    dir[1] = dirY;
-    dir[2] = dirZ;
+    dir[0] = x0;
+    dir[1] = y0;
+    dir[2] = z0;
     dir[3] = 0.0f;
     SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)dir);
-    evtSetUnitLightDir(mainUnit, duration);
+    evtSetUnitLightDir(mainUnit, intr);
     if (fldPlayerUnit != 0) {
-        evtSetUnitLightDir(playerUnit, duration);
+        evtSetUnitLightDir(playerUnit, intr);
     }
     if (D_0054EAF0 != 0) {
-        evtSetUnitLightDir(secondUnit, duration);
+        evtSetUnitLightDir(secondUnit, intr);
     }
     SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)dir);
     evtSetUnitLightDir(mainUnit, 0);
@@ -490,18 +490,18 @@ void fldSkySetPlayer(s32 duration, f32 colorAX, f32 colorAY, f32 colorAZ,
         evtSetUnitLightDir(secondUnit, 0);
     }
 
-    D_002FCA60[0] = colorAX;
-    D_002FCA60[1] = colorAY;
-    D_002FCA60[2] = colorAZ;
-    D_002FCA60[4] = dirX;
-    D_002FCA60[5] = dirY;
-    D_002FCA60[6] = dirZ;
-    fldSkyPlayerIdx[0] = colorBX;
-    fldSkyPlayerIdx[1] = colorBY;
-    fldSkyPlayerIdx[2] = colorBZ;
+    D_002FCA60[0] = r0;
+    D_002FCA60[1] = g0;
+    D_002FCA60[2] = b0;
+    D_002FCA60[4] = x0;
+    D_002FCA60[5] = y0;
+    D_002FCA60[6] = z0;
+    fldSkyPlayerIdx[0] = r3;
+    fldSkyPlayerIdx[1] = g3;
+    fldSkyPlayerIdx[2] = b3;
 }
 
-void fldSkySetTbl(s32 idx, s32 durationMode) {
+void fldSkySetTbl(s32 idx, s32 hokan) {
     fldAreaWork_t *state = &fldGlobalBase;
     fldLightSet_t *light;
     f32 vec[4];
@@ -513,15 +513,15 @@ void fldSkySetTbl(s32 idx, s32 durationMode) {
 
     if (state->area < 200) {
         if (fldSkyEnable == 0 && state->area < 0x32) {
-            durationMode = 0;
+            hokan = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (durationMode != 0) {
+        if (hokan != 0) {
             duration = defaultDuration;
         }
-        if (durationMode >= 2) {
-            duration = durationMode;
+        if (hokan >= 2) {
+            duration = hokan;
         }
         fldSkyTable = idx;
         fldSkyTableIdx = idx;
@@ -585,19 +585,19 @@ void fldSkySetTbl(s32 idx, s32 durationMode) {
     }
 }
 
-void fldSkySetTblModosu(s32 speed) {
+void fldSkySetTblModosu(s32 hokan) {
     if (fldSkyEnable == 0 && fldGb < 0x32) {
-        speed = 0;
+        hokan = 0;
     }
     if (fldSkyTableIdx != 0 && fldSkyTable != fldSkyTableIdx) {
         if (fldLightMaState == 0) {
             D_002FC0EC = fldSkyTableIdx;
         }
-        fldSkySetTbl(fldSkyTableIdx, speed);
+        fldSkySetTbl(fldSkyTableIdx, hokan);
     }
 }
 
-void fldSkySetTblUpper(s32 idx, s32 mode) {
+void fldSkySetTblUpper(s32 idx, s32 hokan) {
     fldAreaWork_t *state = &fldGlobalBase;
     fldLightSet_t *light;
     f32 vec[4];
@@ -610,15 +610,15 @@ void fldSkySetTblUpper(s32 idx, s32 mode) {
 
     if (state->area < 200) {
         if (fldSkyEnable == 0 && state->area < 0x32) {
-            mode = 0;
+            hokan = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (mode != 0) {
+        if (hokan != 0) {
             duration = defaultDuration;
         }
-        if (mode >= 2) {
-            duration = mode;
+        if (hokan >= 2) {
+            duration = hokan;
         }
         if (fldSkyTable != idx) {
             previousIndex = fldSkyTableIdx;
@@ -699,8 +699,8 @@ void fldSkySetTblUpper(s32 idx, s32 mode) {
     }
 }
 
-void fldSkySetTblLightMaDZ(s32 enabled) {
-    if (enabled == 0) {
+void fldSkySetTblLightMaDZ(s32 idx) {
+    if (idx == 0) {
         dds3ObjectBaseOffFlag(D_0054EAE8, 0x100);
         return;
     }
@@ -708,7 +708,7 @@ void fldSkySetTblLightMaDZ(s32 enabled) {
     dds3UnitObjectBasicEL_LinkFree(D_0054EAE8);
 }
 
-void fldSkySetTblLightMa(s32 idx, s32 durationMode) {
+void fldSkySetTblLightMa(s32 idx, s32 hokan) {
     fldLightSet_t *light;
     f32 vec[4];
     f32 dir[4];
@@ -719,15 +719,15 @@ void fldSkySetTblLightMa(s32 idx, s32 durationMode) {
 
     if (fldGb < 200) {
         if (fldSkyEnable == 0 && fldGb < 0x32) {
-            durationMode = 0;
+            hokan = 0;
         }
         defaultDuration = 15;
         duration = 0;
-        if (durationMode != 0) {
+        if (hokan != 0) {
             duration = defaultDuration;
         }
-        if (durationMode >= 2) {
-            duration = durationMode;
+        if (hokan >= 2) {
+            duration = hokan;
         }
         if (fldSkyLightMaTbl != idx) {
             if (idx == 0) {

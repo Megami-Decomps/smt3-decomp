@@ -7,36 +7,36 @@
 #include "ps2asm.h"
 
 extern dds3ObjectBaseControlWorkData_t *dds3GetCameraObjectBaseControlWorkData(dds3Basic_t *basic);
-extern dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *basic);
-extern dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *basic);
+extern dds3ObjectBaseControlWorkData_t *dds3EffectObjectBasicGetControlWorkData(dds3Basic_t *pBasic);
+extern dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *pBasic);
 extern dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basic_t *basic);
-extern void dds3AreaBasicGetItemArray(dds3Basic_t *area, dds3Basic_t *basic);
+extern void dds3AreaBasicGetItemArray(dds3Basic_t *pAreaBasic, dds3Basic_t *itemType);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
-extern void sdfModelRootFree(sdfModelRootNode_t *model, s32 freeTextures, s32 freeMaterials);
+extern void sdfModelRootFree(sdfModelRootNode_t *aRoot, s32 aReleaseNodes, s32 aReleaseMatList);
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *array);
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 extern sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic);
 extern sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *basic, sdfModelRootNode_t *model);
 extern void dds3GetTMPoseSet(dds3Basic_t *basic);
-extern void sdfModelEvalTm2(sdfModelRootNode_t *model, s32 mode);
-extern void *sdfChipAllocDirect(u32 size);
-extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count);
-extern s32 evtBitCheck(s32 flag);
-extern void rsetOtOfs(s32 ofs);
+extern void sdfModelEvalTm2(sdfModelRootNode_t *aRoot, s32 aFrameId);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt);
+extern s32 evtBitCheck(s32 no);
+extern void rsetOtOfs(s32 otofs);
 extern void rsetAlpha(s32 mode);
 extern void rsetFrameMaskRgbOn(void);
 extern void rsetFrameMaskRgbOff(void);
-extern void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused,
-                     s32 bit17);
-extern void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1,
-                       u32 gsWord2, u32 gsWord3);
-extern void mdlLink(void *model, sdfModelOt_t *ot);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
+                     s32 ztst);
+extern void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 z, u32 r, u32 g,
+                       u32 b, u32 a);
+extern void mdlLink(void *aHandle, sdfModelOt_t *aModelOt);
 extern sdfModelOt_t D_002F6A38;
 extern s32 fldGetAnimeFlag(s32 area, s32 floor, s32 bit);
-extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
-extern void sdfMotionNext(sdfMotionCtrlr_t *motion);
-extern void sdfModelEvalTm(sdfModelRootNode_t *model);
-extern void sdfModelLinkOt(sdfModelOt_t *ot, sdfModelRootNode_t *model);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *aCtrlr, f32 aFrame);
+extern void sdfMotionNext(sdfMotionCtrlr_t *aCtrlr);
+extern void sdfModelEvalTm(sdfModelRootNode_t *aRoot);
+extern void sdfModelLinkOt(sdfModelOt_t *aOt, sdfModelRootNode_t *aRoot);
 
 typedef struct
 {
@@ -64,15 +64,15 @@ extern char D_0054E9E0[];
 extern char D_0054E9E8[];
 extern char D_0054E9F0[];
 extern char D_0054E9F8[];
-extern mdlObj_t *mdlLoad(s32 major, s32 minor);
-extern void mdlGetScale(mdlObj_t *obj);
-extern void mdlSetRotate(mdlObj_t *obj);
-extern void mdlSetPosition(mdlObj_t *obj);
-extern void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale);
+extern mdlObj_t *mdlLoad(s32 aMajor, s32 aMinor);
+extern void mdlGetScale(mdlObj_t *aHandle);
+extern void mdlSetRotate(mdlObj_t *aHandle);
+extern void mdlSetPosition(mdlObj_t *aHandle);
+extern void dds3SetSclPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *scl);
 extern void Normalize(void);
-extern struct evtUnit_t *evtCreateUnitHandle(dds3Basic_t *basic, mdlObj_t *obj);
-extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *model, const char *name);
-extern char *sdfModelGetNodeName(sdfModelRootNode_t *model, s32 index);
+extern struct evtUnit_t *evtCreateUnitHandle(dds3Basic_t *owner, mdlObj_t *model);
+extern s32 sdfModelGetNodeIndexByName(sdfModelRootNode_t *aRoot, const char *aName);
+extern char *sdfModelGetNodeName(sdfModelRootNode_t *aRoot, s32 aIndex);
 extern s32 strcmp(const char *a, const char *b);
 extern s32 printf(const char *fmt, ...);
 
@@ -82,28 +82,28 @@ typedef struct
     s32 hojiID;
 } dds3ObjectBaseMatterWork_t;
 
-void dds3ObjectBaseFreeModelHandle(dds3Basic_t *basic);
-void *dds3ObjectBaseGetUserValue(dds3Basic_t *basic);
+void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic);
+void *dds3ObjectBaseGetUserValue(dds3Basic_t *pObjectBasic);
 s32 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, dds3BasicControlProc_t func);
-extern void mdlFree(void *model);
-extern void evtDeleteUnitHandle(void *handle);
-extern void sdfMotionCtrlrFree(sdfMotionCtrlr_t *motion);
+extern void mdlFree(void *aHandle);
+extern void evtDeleteUnitHandle(void *h);
+extern void sdfMotionCtrlrFree(sdfMotionCtrlr_t *aCtrlr);
 
 u32 BasicTypeToItemType(u32 type);
-void dds3AreaBasicRegistItem(dds3Basic_t *area, dds3Basic_t *basic);
-dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *basic);
+void dds3AreaBasicRegistItem(dds3Basic_t *pAreaBasic, dds3Basic_t *pItemBasic);
+dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *pObjectBasic);
 void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *mover, dds3BasicControlProc_t func);
-void dds3MoverBasicSetPath(dds3Basic_t *mover, dds3Basic_t *path);
-void dds3MoverBasicMakePath(dds3Basic_t *basic);
-void dds3MoverBasicFreePath(dds3Basic_t *mover);
-dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *mover);
+void dds3MoverBasicSetPath(dds3Basic_t *pMoverBasic, dds3Basic_t *pPathBasic);
+void dds3MoverBasicMakePath(dds3Basic_t *pMoverBasic);
+void dds3MoverBasicFreePath(dds3Basic_t *pMoverBasic);
+dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *pMoverBasic);
 
-dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *basic, s32 type);
-dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *basic, dds3Basic_t *control);
-dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *basic, dds3Basic_t *control, s32 type);
+dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *pObjectBasic, s32 itemType);
+dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic);
+dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic, s32 itemType);
 
 
-dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *pObjectBasic)
 {
     dds3ObjectBaseControlWorkData_t *control;
     s32 index;
@@ -112,20 +112,20 @@ dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *
     memset(control, 0, 0xAC);
     control->modelType = 3;
     control->eventArray = dds3GetBasicArrayHandle(0);
-    control->control[0] = basic;
+    control->control[0] = pObjectBasic;
     for (index = 0; index < 24; index++) {
         control->modelParts[index] = -1;
     }
     return control;
 }
 
-void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *control)
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *pControl)
 {
     dds3Basic_t *owner;
     dds3Basic_t *area;
     s32 index;
 
-    owner = control->control[0];
+    owner = pControl->control[0];
     area = dds3ObjectBaseGetControlBasic(owner, 5);
     if (area != NULL) {
         dds3AreaBasicGetItemArray(area, owner);
@@ -133,18 +133,18 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *control)
     for (index = 0; index < 8; index++) {
         if (index < 3) {
             if (index > 0) {
-                if (control->control[index] != NULL) {
-                    dds3DeleteSceneBasicData(control->control[index]);
+                if (pControl->control[index] != NULL) {
+                    dds3DeleteSceneBasicData(pControl->control[index]);
                 }
             }
         }
     }
     dds3ObjectBaseFreeModelHandle(owner);
-    if (control->modelRoot != NULL) {
-        sdfModelRootFree(control->modelRoot, 1, 1);
+    if (pControl->modelRoot != NULL) {
+        sdfModelRootFree(pControl->modelRoot, 1, 1);
     }
-    dds3FreeBasicArrayHandle(control->eventArray);
-    sdfChipFreeDirect(control);
+    dds3FreeBasicArrayHandle(pControl->eventArray);
+    sdfChipFreeDirect(pControl);
 }
 
 void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask)
@@ -155,81 +155,81 @@ void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask)
     control->flag |= mask;
 }
 
-void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 mask)
+void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, s32 flag)
 {
     dds3ObjectBaseControlWorkData_t *control;
 
-    control = dds3GetBaseControlWorkData(basic);
-    control->flag &= ~mask;
+    control = dds3GetBaseControlWorkData(pObjectBasic);
+    control->flag &= ~flag;
 }
 
-u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 mask)
+u8 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, u32 flag)
 {
     dds3ObjectBaseControlWorkData_t *control;
 
-    control = dds3GetBaseControlWorkData(basic);
-    return (control->flag & mask) != 0;
+    control = dds3GetBaseControlWorkData(pObjectBasic);
+    return (control->flag & flag) != 0;
 }
 
-void dds3ObjectBaseSetUserValue(dds3Basic_t *basic, void *userValue)
+void dds3ObjectBaseSetUserValue(dds3Basic_t *pObjectBasic, void *pUserValue)
 {
     dds3ObjectBaseControlWorkData_t *control;
 
-    control = dds3GetBaseControlWorkData(basic);
-    dds3ObjectBaseGetUserValue(basic);
-    control->userValue = userValue;
+    control = dds3GetBaseControlWorkData(pObjectBasic);
+    dds3ObjectBaseGetUserValue(pObjectBasic);
+    control->userValue = pUserValue;
 }
 
-void *dds3ObjectBaseGetUserValue(dds3Basic_t *basic)
+void *dds3ObjectBaseGetUserValue(dds3Basic_t *pObjectBasic)
 {
-    return dds3GetBaseControlWorkData(basic)->userValue;
+    return dds3GetBaseControlWorkData(pObjectBasic)->userValue;
 }
 
-dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *basic, dds3Basic_t *control)
+dds3Basic_t *dds3ObjectBaseSetControlBasic(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic)
 {
-    if (control == NULL) {
+    if (pItemBasic == NULL) {
         return NULL;
     }
-    return dds3ObjectBaseSetControlBasicType(basic, control,
-                                             BasicTypeToItemType(control->type >> 24));
+    return dds3ObjectBaseSetControlBasicType(pObjectBasic, pItemBasic,
+                                             BasicTypeToItemType(pItemBasic->type >> 24));
 }
 
-dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *basic, dds3Basic_t *item, s32 type)
+dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic, s32 itemType)
 {
     dds3Basic_t *previous;
 
-    previous = dds3ObjectBaseGetControlBasic(basic, type);
-    dds3GetBaseControlWorkData(basic)->control[type] = item;
+    previous = dds3ObjectBaseGetControlBasic(pObjectBasic, itemType);
+    dds3GetBaseControlWorkData(pObjectBasic)->control[itemType] = pItemBasic;
     return previous;
 }
 
-dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *basic, s32 type)
+dds3Basic_t *dds3ObjectBaseGetControlBasic(dds3Basic_t *pObjectBasic, s32 itemType)
 {
-    return dds3GetBaseControlWorkData(basic)->control[type];
+    return dds3GetBaseControlWorkData(pObjectBasic)->control[itemType];
 }
 
-dds3BasicArrayHandle_t *dds3ObjectBaseGetEventArray(dds3Basic_t *basic)
+dds3BasicArrayHandle_t *dds3ObjectBaseGetEventArray(dds3Basic_t *pObjectBasic)
 {
-    return dds3GetBaseControlWorkData(basic)->eventArray;
+    return dds3GetBaseControlWorkData(pObjectBasic)->eventArray;
 }
 
-void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic)
+void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic)
 {
-    return dds3GetBaseControlWorkData(basic)->modelHandle;
+    return dds3GetBaseControlWorkData(pObjectBasic)->modelHandle;
 }
 
 /* modelType selects the model-context or raw model/motion ownership path. */
-void dds3ObjectBaseFreeModelHandle(dds3Basic_t *basic)
+void dds3ObjectBaseFreeModelHandle(dds3Basic_t *pObjectBasic)
 {
     dds3ObjectBaseControlWorkData_t *control;
     dds3UnitObjectBasicWorkData_t *work;
 
-    control = dds3GetBaseControlWorkData(basic);
+    control = dds3GetBaseControlWorkData(pObjectBasic);
     if (control->modelHandle != NULL) {
         if (control->modelType != 1) {
             if (control->modelType == 0) {
                 mdlFree(control->modelHandle);
-                work = basic->workdata;
+                work = pObjectBasic->workdata;
                 if (work->unit != NULL) {
                     evtDeleteUnitHandle(work->unit);
                     work->unit = NULL;
@@ -286,7 +286,7 @@ INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530930);
 
 INCLUDE_RODATA(const s32, "basic/dds3ObjectBase", D_00530A98);
 
-void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor)
+void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor)
 {
     sdfVector4_t scale;
     dds3UnitPartTable_t hijriParts;
@@ -311,7 +311,7 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor)
     s32 count;
     s32 i;
 
-    control = dds3GetBaseControlWorkData(basic);
+    control = dds3GetBaseControlWorkData(pObjectBasic);
     if (control->modelHandle != NULL) {
         mdlFree(control->modelHandle);
     }
@@ -549,35 +549,35 @@ void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor)
     }
     mdlGetScale(obj);
     SDF_VU0_STOREVECTOR(&scale);
-    dds3SetSclPoseSet(basic, &scale);
-    SDF_VU0_LOADVECTOR(&basic->poseset->rot);
+    dds3SetSclPoseSet(pObjectBasic, &scale);
+    SDF_VU0_LOADVECTOR(&pObjectBasic->poseset->rot);
     Normalize();
     mdlSetRotate(obj);
-    SDF_VU0_LOADVECTOR(&basic->poseset->pos);
+    SDF_VU0_LOADVECTOR(&pObjectBasic->poseset->pos);
     SDF_VU0_VECTOR_W_SET_ONE();
     mdlSetPosition(obj);
-    basic->poseset->r = obj->objectRadius;
+    pObjectBasic->poseset->r = obj->objectRadius;
     control->modelHandle = obj;
-    work = basic->workdata;
+    work = pObjectBasic->workdata;
     control->modelType = 0;
     control->controlSvs = 0;
     if (work->unit == NULL) {
-        work->unit = evtCreateUnitHandle(basic, obj);
+        work->unit = evtCreateUnitHandle(pObjectBasic, obj);
     }
 }
 
-void dds3ObjectBaseMakeMatter(dds3Basic_t *basic)
+void dds3ObjectBaseMakeMatter(dds3Basic_t *pObjectBasic)
 {
     dds3ObjectBaseControlWorkData_t *control;
     dds3Basic_t *modelBasic;
     sdfMotionCtrlr_t *motion;
     sdfModelRootNode_t *model;
 
-    control = dds3GetBaseControlWorkData(basic);
-    modelBasic = dds3ObjectBaseGetControlBasic(basic, 3);
+    control = dds3GetBaseControlWorkData(pObjectBasic);
+    modelBasic = dds3ObjectBaseGetControlBasic(pObjectBasic, 3);
     model = dds3ModelBasicMakeModel(modelBasic);
     motion = dds3ModelBasicSetMotion(modelBasic, model);
-    dds3GetTMPoseSet(basic);
+    dds3GetTMPoseSet(pObjectBasic);
     SDF_VU0_STOREMATRIX(&model->tm);
     sdfModelEvalTm2(model, 0);
     sdfModelEvalTm2(model, 1);
@@ -590,9 +590,9 @@ void dds3ObjectBaseMakeMatter(dds3Basic_t *basic)
 }
 
 /* Modes 0, 4 and 5 play at unit speed; the remaining modes start stopped. */
-void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *basic, u32 mode)
+void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *pObjectBasic, u32 mode)
 {
-    dds3ObjectBaseControlWorkData_t *control = dds3GetBaseControlWorkData(basic);
+    dds3ObjectBaseControlWorkData_t *control = dds3GetBaseControlWorkData(pObjectBasic);
 
     switch (mode) {
     case 0:
@@ -626,26 +626,26 @@ void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *basic, u32 mode)
     }
 }
 
-s32 dds3ObjectBaseRegistArea(dds3Basic_t *basic)
+s32 dds3ObjectBaseRegistArea(dds3Basic_t *pObjectBasic)
 {
     dds3Basic_t *area;
 
-    area = dds3ObjectBaseGetControlBasic(basic, 5);
+    area = dds3ObjectBaseGetControlBasic(pObjectBasic, 5);
     if (area == NULL) {
         return 0;
     }
-    dds3AreaBasicRegistItem(area, basic);
+    dds3AreaBasicRegistItem(area, pObjectBasic);
     return 1;
 }
 
 /* The save-screen variant: the model is drawn between two full-screen boxes, the
  * second only while event bit 0xAF0 is clear. */
-void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *ot, dds3Basic_t *basic)
+void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic)
 {
     dds3ObjectBaseControlWorkData_t *control;
     s32 tag = 0xEFFFFFF;
 
-    control = dds3GetBaseControlWorkData(basic);
+    control = dds3GetBaseControlWorkData(pObjectBasic);
     if (evtBitCheck(0xAF0) != 0) {
         tag = 0;
     }
@@ -674,14 +674,14 @@ void dds3ObjectBaseModelLinkOtSvs(sdfModelOt_t *ot, dds3Basic_t *basic)
 
 /* The matter path ramps animeSpeed up or down depending on whether the block's
  * anime flag is set, then seeks to the last frame in mode 6. */
-void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic)
+void dds3ObjectBaseModelLinkOt(sdfModelOt_t *pModelOt, dds3Basic_t *pObjectBasic)
 {
     dds3ObjectBaseControlWorkData_t *control;
     void *light;
     s32 hojiID;
 
-    control = dds3GetBaseControlWorkData(basic);
-    if (dds3ObjectBaseCheckFlag(basic, 1) != 0) {
+    control = dds3GetBaseControlWorkData(pObjectBasic);
+    if (dds3ObjectBaseCheckFlag(pObjectBasic, 1) != 0) {
         return;
     }
     if (control->modelHandle == NULL) {
@@ -691,24 +691,24 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic)
         if (control->modelType != 0) {
             return;
         }
-        if (dds3ObjectBaseCheckFlag(basic, 0x800) != 0) {
-            dds3ObjectBaseModelLinkOtSvs(ot, basic);
+        if (dds3ObjectBaseCheckFlag(pObjectBasic, 0x800) != 0) {
+            dds3ObjectBaseModelLinkOtSvs(pModelOt, pObjectBasic);
             return;
         }
-        light = (void *)((dds3UnitObjectBasicWorkData_t *)basic->workdata)->unit->value;
+        light = (void *)((dds3UnitObjectBasicWorkData_t *)pObjectBasic->workdata)->unit->value;
         if (light != NULL) {
             *(void **)&((mdlObj_t *)control->modelHandle)->inner->light = light;
         } else {
             *(void **)&((mdlObj_t *)control->modelHandle)->inner->light = NULL;
         }
-        mdlLink(control->modelHandle, ot);
+        mdlLink(control->modelHandle, pModelOt);
         return;
     }
-    if ((basic->color >> 24) == 0) {
+    if ((pObjectBasic->color >> 24) == 0) {
         return;
     }
     if (control->motion != NULL) {
-        hojiID = ((dds3ObjectBaseMatterWork_t *)basic->workdata)->hojiID;
+        hojiID = ((dds3ObjectBaseMatterWork_t *)pObjectBasic->workdata)->hojiID;
         if (hojiID > 0) {
             if (fldGetAnimeFlag(fldGlobalBase.area, fldGlobalBase.floor + 1, hojiID) ==
                 0) {
@@ -824,25 +824,25 @@ void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic)
             sdfModelEvalTm(control->modelHandle);
         }
     }
-    ((sdfModelRootNode_t *)control->modelHandle)->color = basic->color;
-    sdfModelLinkOt(ot, control->modelHandle);
-    ot = NULL;
+    ((sdfModelRootNode_t *)control->modelHandle)->color = pObjectBasic->color;
+    sdfModelLinkOt(pModelOt, control->modelHandle);
+    pModelOt = NULL;
 }
 
-void dds3ObjectBaseCreateMover(dds3Basic_t *basic)
+void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic)
 {
-    if (dds3ObjectBaseGetControlBasic(basic, 1) == NULL) {
-        dds3ObjectBaseSetControlBasic(basic, dds3AddMoverBasic(basic));
+    if (dds3ObjectBaseGetControlBasic(pObjectBasic, 1) == NULL) {
+        dds3ObjectBaseSetControlBasic(pObjectBasic, dds3AddMoverBasic(pObjectBasic));
     }
 }
 
-void dds3ObjectBaseSetPadControl(dds3Basic_t *basic, dds3BasicControlProc_t func)
+void dds3ObjectBaseSetPadControl(dds3Basic_t *pObjectBasic, dds3BasicControlProc_t pFuncPadControl)
 {
-    dds3ObjectBaseSetPrimaryControl(basic, func);
+    dds3ObjectBaseSetPrimaryControl(pObjectBasic, pFuncPadControl);
     /* Retail dds3ObjectBaseSetPadControl and DDS1 001127A8 keep JAL plus epilogue.
      * DDS cc1probe: this consumed-callback reset is removed in 03.cse,
      * after the sibling-call decision (01.sibling / 02.jump). */
-    func = NULL;
+    pFuncPadControl = NULL;
 }
 
 s32 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, dds3BasicControlProc_t func)
@@ -857,44 +857,44 @@ s32 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, dds3BasicControlProc_t f
     return 1;
 }
 
-void dds3ObjectBaseMakePath(dds3Basic_t *basic, dds3Basic_t *path)
+void dds3ObjectBaseMakePath(dds3Basic_t *pObjectBasic, dds3Basic_t *pPathBasic)
 {
-    dds3MoverBasicSetPath(dds3ObjectBaseGetControlBasic(basic, 1), path);
-    dds3MoverBasicMakePath(basic);
+    dds3MoverBasicSetPath(dds3ObjectBaseGetControlBasic(pObjectBasic, 1), pPathBasic);
+    dds3MoverBasicMakePath(pObjectBasic);
 }
 
-void dds3ObjectBaseFreePath(dds3Basic_t *basic)
+void dds3ObjectBaseFreePath(dds3Basic_t *pObjectBasic)
 {
-    dds3MoverBasicFreePath(dds3ObjectBaseGetControlBasic(basic, 1));
+    dds3MoverBasicFreePath(dds3ObjectBaseGetControlBasic(pObjectBasic, 1));
 }
 
-dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *basic)
+dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(dds3Basic_t *pObjectBasic)
 {
-    return dds3MoverBasicGetPathControl(dds3ObjectBaseGetControlBasic(basic, 1));
+    return dds3MoverBasicGetPathControl(dds3ObjectBaseGetControlBasic(pObjectBasic, 1));
 }
 
-dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic)
 {
     dds3ObjectBaseControlWorkData_t *control;
 
     control = NULL;
-    switch ((basic->type >> 24) - BASIC_TYPE_CAMERAOBJECT) {
-    case 0: control = dds3GetCameraObjectBaseControlWorkData(basic); break;
-    case 1: control = dds3UnitObjectBasicGetControlWorkData(basic); break;
-    case 2: control = dds3MatterObjectBasicGetControlWorkData(basic); break;
-    case 3: control = dds3EffectObjectBasicGetControlWorkData(basic); break;
-    case 4: control = dds3EventObjectBasicGetControlWorkData(basic); break;
-    case 5: control = dds3LightObjectBasicGetControlWorkData(basic); break;
+    switch ((pObjectBasic->type >> 24) - BASIC_TYPE_CAMERAOBJECT) {
+    case 0: control = dds3GetCameraObjectBaseControlWorkData(pObjectBasic); break;
+    case 1: control = dds3UnitObjectBasicGetControlWorkData(pObjectBasic); break;
+    case 2: control = dds3MatterObjectBasicGetControlWorkData(pObjectBasic); break;
+    case 3: control = dds3EffectObjectBasicGetControlWorkData(pObjectBasic); break;
+    case 4: control = dds3EventObjectBasicGetControlWorkData(pObjectBasic); break;
+    case 5: control = dds3LightObjectBasicGetControlWorkData(pObjectBasic); break;
     }
     return control;
 }
 
-void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *basic, u32 value)
+void dds3ObjectBaseSetControlBasicSvs(dds3Basic_t *pObjectBasic, u32 svs)
 {
     dds3ObjectBaseControlWorkData_t *control;
 
-    control = dds3GetBaseControlWorkData(basic);
-    control->controlSvs = value;
+    control = dds3GetBaseControlWorkData(pObjectBasic);
+    control->controlSvs = svs;
 }
 
 INCLUDE_SDATA(const s32, "basic/dds3ObjectBase", D_0054E9D0);

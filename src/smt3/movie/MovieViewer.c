@@ -5,10 +5,10 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
-                              void *processfunc, void *shutdownfunc, void *data);
+extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                              void *drawExit, void *deleteExit, void *p);
 
-extern void *dds3SearchProcessName(const char *name);
+extern void *dds3SearchProcessName(const char *namestr);
 
 typedef struct
 {
@@ -62,7 +62,7 @@ typedef struct
 
 extern movieViewerWork_t movieViewerDebugFlag;
 
-extern s32 dds3KillProcess(s32 process, s32 shutdowntimer);
+extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 

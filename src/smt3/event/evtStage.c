@@ -8,53 +8,53 @@ void dds3GetRadiusPoseSet(dds3Basic_t *node, f32 value);
 
 u32 dds3AllocObjectId(void);
 
-void dds3ObjectBaseCreateMover(void *object);
+void dds3ObjectBaseCreateMover(void *pObjectBasic);
 
 void dds3ObjectBaseSetPadControl(dds3Basic_t *object,
                                      s32 (*update)(struct dds3PoseSet_t *, struct dds3Basic_t *));
 
-dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *world, dds3Basic_t *camera);
+dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 counter, f32 *position, f32 *rotation);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 serialID, f32 *pos, f32 *rot);
 
 struct dds3Basic_t *dds3GetControlScene(void);
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *a, s32 b, u32 c);
 
 
-void mdlLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex);
+void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 
-void *dds3ObjectBaseGetModelHandle(dds3Basic_t *object);
+void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
-void *dds3ObjectBaseSetControlBasic(dds3Basic_t *object, dds3Basic_t *slotData);
+void *dds3ObjectBaseSetControlBasic(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic);
 
-dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
-extern void dds3ObjectBaseMakeUnit(dds3Basic_t *object, s32, s32);
+extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32, s32);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 counter, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot);
 
 extern void dds3ObjectBaseOnFlag(void *object, s32 flags);
 
-extern void dds3ObjectBaseRegistArea(void *object);
+extern void dds3ObjectBaseRegistArea(void *pObjectBasic);
 
-void evtSetUnitPos(u32 targetKey, u32 sourceKey);
+void evtSetUnitPos(u32 unitID, u32 posID);
 
 void Mult(void);
 
 
-void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
 
-void dds3SetRotPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetRotPoseSet(dds3Basic_t *pBasic, u128 *rot);
 
-void dds3GetPosPoseSet(dds3Basic_t *object);
+void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
-extern void FromRotation(f32 angle);
+extern void FromRotation(f32 aAngle);
 
-void dds3DeleteScene(struct dds3Basic_t *worldNode);
+void dds3DeleteScene(struct dds3Basic_t *scene);
 
-void dds3DeleteSceneBasicData(dds3Basic_t *node);
+void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 
 enum {
     EVT_WORLD_SLOT_MOVIE = 3,
@@ -82,29 +82,29 @@ typedef struct evtWorldTable_t {
     u8 pad24[0x1C];
 } evtWorldTable_t;
 
-void fldMakeFilePath(char *buffer, s32 area, s32 unused);
+void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 void dds3SceneBasicMakeScene(dds3Basic_t *object, u32 resourceId);
 
-void dds3SetActiveScene(struct dds3Basic_t *primaryObject);
+void dds3SetActiveScene(struct dds3Basic_t *scene);
 
-void dds3SetControlScene(struct dds3Basic_t *secondaryObject);
+void dds3SetControlScene(struct dds3Basic_t *scene);
 
-void dds3SetMapNo(dds3Basic_t *worldNode, u32 areaRoomKey);
+void dds3SetMapNo(dds3Basic_t *scene, u32 mapno);
 
-s32 evtLoadArea(s32 area, s32 room);
+s32 evtLoadArea(s32 fld, s32 area);
 
 extern dds3Basic_t *dds3AddScene(void);
 
 extern void evtSetTestCamera(void);
 
-extern void dds3SetScreenFovy(f32 fieldOfView);
+extern void dds3SetScreenFovy(f32 fovy);
 
-extern void dds3SetLight(void *lightSource, s32 index);
+extern void dds3SetLight(void *light, s32 no);
 
-extern void dds3SetFog(void *source);
+extern void dds3SetFog(void *fog);
 
-extern void dds3SetAmbient(u128 *source);
+extern void dds3SetAmbient(u128 *ambient);
 
 /* Three parallel lights, 0x40 each, which is what the IDB types here and what
  * the +0x40 steps below were spelling as byte arithmetic. */
@@ -117,19 +117,19 @@ extern u128 D_0032C6D0;
 extern void sprintf(char *, const char *, ...);
 
 
-extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *object, u32 area, u32 room,
-                                                       u32 resource0Data, u32 resource1Data,
-                                                       const sdfTextureOffsetListHeader_t *textureOffsets, u32 flags);
+extern void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area,
+                                                       u32 pF1, u32 pF2,
+                                                       const sdfTextureOffsetListHeader_t *pTB, u32 pBF);
 
 extern s32 scrStartScriptByName(s32 priority, const char *path, s32 option);
 
 extern char D_0056CE50[];
 
-s32 dds3KillProcess(dds3ProcessID_t *task, s32 delayTicks);
+s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-s32 dds3GetProcessCount(u32 state);
+s32 dds3GetProcessCount(u32 type);
 
-dds3ProcessID_t *dds3SearchProcessNumber(u32 taskState, s32 taskIndex);
+dds3ProcessID_t *dds3SearchProcessNumber(u32 type, s32 n);
 
 enum evtProcessState {
     EVT_PROCESS_STATE_DELAYED_START = 1,
@@ -142,23 +142,23 @@ s32 printf(const char *format, ...);
 
 void dds3PathBasicPauseOn(dds3PathBasicControl_t *value);
 
-dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(void *object);
+dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(void *pObjectBasic);
 
 void dds3PathBasicPauseOff(dds3PathBasicControl_t *value);
 
 void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *value, f32 multiplier);
 
 
-void dds3MoverBasicSetPath(dds3Basic_t *object, dds3Basic_t *sourceObject);
+void dds3MoverBasicSetPath(dds3Basic_t *pMoverBasic, dds3Basic_t *pPathBasic);
 
 
-extern void dds3MoverBasicMakePath(dds3Basic_t *object);
+extern void dds3MoverBasicMakePath(dds3Basic_t *pMoverBasic);
 
 f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *value);
 
-void *dds3ObjectBaseGetControlBasic(dds3Basic_t *object, s32 slotIndex);
+void *dds3ObjectBaseGetControlBasic(dds3Basic_t *pObjectBasic, s32 itemType);
 
-dds3PathBasicControl_t *dds3MoverBasicGetPathControl(struct dds3Basic_t *object);
+dds3PathBasicControl_t *dds3MoverBasicGetPathControl(struct dds3Basic_t *pMoverBasic);
 
 
 extern void dds3PathBasicLoopOn(struct dds3PathBasicControl_t *data);
@@ -167,7 +167,7 @@ extern void dds3PathBasicLoopOff(struct dds3PathBasicControl_t *data);
 
 typedef struct effNode_t effNode_t;
 
-void dds3EffectSetLoop(effNode_t *node, u8 flag);
+void dds3EffectSetLoop(effNode_t *hEffect, u8 loop);
 
 typedef struct evtNodeInner_t {
     u8 pad00[0x08];
@@ -176,7 +176,7 @@ typedef struct evtNodeInner_t {
 } evtNodeInner_t;
 
 
-void dds3ObjectBaseMatterAnimeSpeed(struct dds3Basic_t *object, u32 requestedMode);
+void dds3ObjectBaseMatterAnimeSpeed(struct dds3Basic_t *pObjectBasic, u32 mode);
 
 struct dds3Basic_t *dds3GetActiveScene(void);
 
@@ -194,7 +194,7 @@ void evtSetTestCamera(void) {
     dds3ObjectBaseSetPadControl(object, 0);
 }
 
-s32 evtSetRegistUnit(s32 slotKind, s32 resource) {
+s32 evtSetRegistUnit(s32 major, s32 minor) {
     f32 position[4];
     f32 rotation[4];
     s32 counter;
@@ -208,13 +208,13 @@ s32 evtSetRegistUnit(s32 slotKind, s32 resource) {
     object = dds3AddUnitObjectBasic(counter, position, rotation);
     dds3ObjectBaseOnFlag(object, 0x20);
     dds3GetRadiusPoseSet(object, 10.0f);
-    dds3ObjectBaseMakeUnit(object, slotKind, resource);
+    dds3ObjectBaseMakeUnit(object, major, minor);
     mdlLoopMotion((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
     dds3ObjectBaseSetPadControl(object, 0);
     return counter;
 }
 
-s32 evtLoadUnit(s32 slotKind, s32 resource) {
+s32 evtLoadUnit(s32 major, s32 minor) {
     f32 position[4];
     f32 rotation[4];
     s32 counter;
@@ -228,7 +228,7 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     object = dds3AddUnitObjectBasic(counter, position, rotation);
     dds3ObjectBaseOnFlag(object, 0x20);
     dds3GetRadiusPoseSet(object, 10.0f);
-    dds3ObjectBaseMakeUnit(object, slotKind, resource);
+    dds3ObjectBaseMakeUnit(object, major, minor);
     mdlLoopMotion((void *)dds3ObjectBaseGetModelHandle(object), 0, 0);
     dds3ObjectBaseSetControlBasic(object, dds3SearchSceneBasic(dds3GetControlScene(), 0x10000, 2));
     dds3ObjectBaseRegistArea(object);
@@ -237,15 +237,15 @@ s32 evtLoadUnit(s32 slotKind, s32 resource) {
     return counter;
 }
 
-void evtSetUnitPos(u32 targetKey, u32 sourceKey) {
+void evtSetUnitPos(u32 unitID, u32 posID) {
     f32 quaternion[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
     dds3Basic_t *target;
     dds3Basic_t *source;
     evtWorldSourceTransformPrefix_t *sourceTransform;
 
-    target = dds3SearchSceneBasic(dds3GetControlScene(), targetKey, 5);
+    target = dds3SearchSceneBasic(dds3GetControlScene(), unitID, 5);
     if (target != NULL) {
-        source = dds3SearchSceneBasic(dds3GetControlScene(), sourceKey, 0x11);
+        source = dds3SearchSceneBasic(dds3GetControlScene(), posID, 0x11);
         if (source != NULL) {
             sourceTransform = source->workdata;
             dds3SetPosPoseSet(target, (u128 *)&sourceTransform->position);
@@ -291,7 +291,7 @@ const char D_0053A7F8[0x10] = "%sf%03d_%03d";
 
 
 /* Build the field world object and load its stage resource. */
-s32 evtLoadArea(s32 area, s32 room)
+s32 evtLoadArea(s32 fld, s32 area)
 {
     char directory[0x40];
     char resourcePath[0x50];
@@ -301,12 +301,12 @@ s32 evtLoadArea(s32 area, s32 room)
     worldObject = dds3AddScene();
     dds3SetControlScene(worldObject);
     dds3SetActiveScene(worldObject);
-    dds3SetMapNo(worldObject, (area << 16) + room);
-    fldMakeFilePath(directory, area, room);
-    sprintf(resourcePath, D_0053A7F8, directory, area, room);
+    dds3SetMapNo(worldObject, (fld << 16) + area);
+    fldMakeFilePath(directory, fld, area);
+    sprintf(resourcePath, D_0053A7F8, directory, fld, area);
     dds3SceneBasicMakeScene(worldObject, (u32)resourcePath);
     evtSetTestCamera();
-    if (area < 10) {
+    if (fld < 10) {
         dds3SetScreenFovy(0.9424777031f);
     } else {
         dds3SetScreenFovy(0.75398216f);
@@ -320,8 +320,8 @@ s32 evtLoadArea(s32 area, s32 room)
 }
 
 /* Build a field world object from the supplied resource parameters. */
-s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1Data,
-                                     const sdfTextureOffsetListHeader_t *textureOffsets, s32 flags)
+s32 evtLoadArea_FromMemory(s32 fld, s32 area, s32 pF1, s32 pF2,
+                                     const sdfTextureOffsetListHeader_t *pTB, s32 pBF)
 {
     dds3Basic_t *worldObject;
     char directory[0x40];
@@ -330,9 +330,9 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1D
     worldObject = dds3AddScene();
     dds3SetControlScene(worldObject);
     dds3SetActiveScene(worldObject);
-    dds3SetMapNo(worldObject, (area << 16) + room);
-    fldMakeFilePath(directory, area, room);
-    dds3SceneBasicMakeScene_FromMemory(worldObject, area, room, resource0Data, resource1Data, textureOffsets, flags);
+    dds3SetMapNo(worldObject, (fld << 16) + area);
+    fldMakeFilePath(directory, fld, area);
+    dds3SceneBasicMakeScene_FromMemory(worldObject, fld, area, pF1, pF2, pTB, pBF);
     evtSetTestCamera();
     dds3SetScreenFovy(0.75398216f);
     dds3SetLight(&D_0032C5F0[0], 0);
@@ -345,8 +345,8 @@ s32 evtLoadArea_FromMemory(s32 area, s32 room, s32 resource0Data, s32 resource1D
     return 1;
 }
 
-void evtStartEvent(s32 eventId) {
-    sprintf(D_0056CE50, "/event/e%03d/e%03d/scr/e%03d.bf", eventId - eventId % 10, eventId, eventId);
+void evtStartEvent(s32 no) {
+    sprintf(D_0056CE50, "/event/e%03d/e%03d/scr/e%03d.bf", no - no % 10, no, no);
     scrStartScriptByName(0x3EB, D_0056CE50, 0);
 }
 const char D_0053A828[0x28] = "kill field script -> [%s]\n";
@@ -372,60 +372,60 @@ void evtKillFieldScript(void)
     }
 }
 
-void evtPathStop(dds3Basic_t *object)
+void evtPathStop(dds3Basic_t *basic)
 {
     dds3PathBasicControl_t *slotData;
 
-    slotData = dds3ObjectBaseGetPathControl(object);
+    slotData = dds3ObjectBaseGetPathControl(basic);
     if (slotData != 0) {
         dds3PathBasicPauseOn(slotData);
     }
 }
 
-void evtPathStart(dds3Basic_t *object)
+void evtPathStart(dds3Basic_t *basic)
 {
     dds3PathBasicControl_t *slotData;
 
-    slotData = dds3ObjectBaseGetPathControl(object);
+    slotData = dds3ObjectBaseGetPathControl(basic);
     if (slotData != 0) {
         dds3PathBasicPauseOff(slotData);
     }
 }
 
 /* Scale the object's retained path time within the clamped multiplier range. */
-void evtPathRate(dds3Basic_t *worldNode, f32 multiplier) {
+void evtPathRate(dds3Basic_t *basic, f32 rate) {
     dds3PathBasicControl_t *slotData;
 
-    slotData = dds3ObjectBaseGetPathControl(worldNode);
+    slotData = dds3ObjectBaseGetPathControl(basic);
     if (slotData != 0) {
-        if (multiplier < 0.0f) {
-            multiplier = 0.0f;
+        if (rate < 0.0f) {
+            rate = 0.0f;
         }
-        if (multiplier > 1.0f) {
-            multiplier = 1.0f;
+        if (rate > 1.0f) {
+            rate = 1.0f;
         }
-        dds3PathBasicControlSetRatio(slotData, multiplier);
+        dds3PathBasicControlSetRatio(slotData, rate);
     }
 }
 
-void evtPathDir(dds3Basic_t *worldNode, u32 direction) {
+void evtPathDir(dds3Basic_t *basic, u32 dir) {
     dds3PathBasicControl_t *slotData;
 
-    slotData = dds3ObjectBaseGetPathControl(worldNode);
+    slotData = dds3ObjectBaseGetPathControl(basic);
     if (slotData != 0) {
-        dds3PathBasicControlAlterMode(slotData, direction);
+        dds3PathBasicControlAlterMode(slotData, dir);
     }
 }
 
 /* Attach object to the node referenced by owner's owned handle. */
-s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner) {
+s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj) {
     dds3ObjectBaseControlWorkData_t *ref;
     dds3Basic_t *slotNode;
 
-    if (object == NULL) {
+    if (path == NULL) {
         return 0;
     }
-    ref = dds3GetBaseControlWorkData(owner);
+    ref = dds3GetBaseControlWorkData(obj);
     if (ref == NULL) {
         return 0;
     }
@@ -433,7 +433,7 @@ s32 evtPathLinkAndMake(dds3Basic_t *object, dds3Basic_t *owner) {
     if (slotNode == NULL) {
         return 0;
     }
-    dds3MoverBasicSetPath(slotNode, object);
+    dds3MoverBasicSetPath(slotNode, path);
     dds3MoverBasicMakePath(slotNode);
     return 1;
 }
@@ -468,21 +468,21 @@ s32 evtCheckPathStat(dds3Basic_t *obj) {
     return 1;
 }
 
-void evtPathLoop(dds3Basic_t *obj, s32 flag) {
-    dds3PathBasicControl_t *data = dds3ObjectBaseGetPathControl(obj);
+void evtPathLoop(dds3Basic_t *basic, s32 sw) {
+    dds3PathBasicControl_t *data = dds3ObjectBaseGetPathControl(basic);
 
     if (data == NULL) {
         return;
     }
-    if (flag != 0) {
+    if (sw != 0) {
         dds3PathBasicLoopOn(data);
     } else {
         dds3PathBasicLoopOff(data);
     }
 }
 
-dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot) {
-    dds3Basic_t *obj = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), pos, rot);
+dds3Basic_t *evtAddCamera(f32 *eye, f32 *rot) {
+    dds3Basic_t *obj = dds3AddCameraObjectBasicTypeFree(dds3AllocObjectId(), eye, rot);
 
     if (obj == 0) {
         return obj;
@@ -491,8 +491,8 @@ dds3Basic_t *evtAddCamera(f32 *pos, f32 *rot) {
     return obj;
 }
 
-void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
-    evtNodeInner_t *inner = owner->workdata;
+void evtEffectLoopControl(dds3Basic_t *eff, s32 sw) {
+    evtNodeInner_t *inner = eff->workdata;
     void *node;
 
     switch (inner->kind) {
@@ -504,12 +504,12 @@ void evtEffectLoopControl(dds3Basic_t *owner, s32 nodeFlag) {
         return;
     }
     node = inner->node;
-    if (nodeFlag == 0) {
-        dds3EffectSetLoop(node, nodeFlag);
+    if (sw == 0) {
+        dds3EffectSetLoop(node, sw);
     }
 }
 
-s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
+s32 evtStageAnimeControl(s32 type, s32 mode) {
     dds3Basic_t *world = dds3GetActiveScene();
     dds3Basic_t *node;
     s32 combinedMode;
@@ -517,7 +517,7 @@ s32 evtStageAnimeControl(s32 modeSelector, s32 modeValue) {
     if (world == NULL) {
         return 0;
     }
-    combinedMode = modeSelector * 3 + modeValue;
+    combinedMode = type * 3 + mode;
     for (node = ((evtWorldTable_t *)world->workdata)->slots[6].head; node != NULL; node = node->next) {
         dds3ObjectBaseMatterAnimeSpeed(node, combinedMode);
     }

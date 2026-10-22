@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 extern s32 fldWmapEnabled;
 
@@ -67,9 +67,9 @@ extern mselGlobalWork_t *gGlobal;
 
 s32 fclDestroyMessage(void);
 
-s32 fclLoadTexture(char *name);
+s32 fclLoadTexture(char *pFileName);
 
-extern s32 evtBitOn(s32 bit);
+extern s32 evtBitOn(s32 no);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
@@ -116,7 +116,7 @@ void mselLoadBackground(void)
     gGlobal->unk_48 = fclLoadTexture(D_0053DED8);
 }
 
-extern void sdfTexFreeDelayed(s32 handle);
+extern void sdfTexFreeDelayed(s32 aHandle);
 
 void mselFreeTextures(void)
 {
@@ -142,7 +142,7 @@ INCLUDE_ASM(const s32, "kernel/ModeSelect", mselShutDown);
 
 extern void mselFreeTextures(void);
 
-extern void sdfMemFreeDelayedDirect(void *ptr);
+extern void sdfMemFreeDelayedDirect(void *aHandle);
 
 void mselFreeResources(s32 arg)
 {
@@ -185,7 +185,7 @@ extern void dds3ConfigSaveBackup(void);
 
 extern void dds3ConfigRestoreBackup(void);
 
-extern s32 evtBitOn(s32 bit);
+extern s32 evtBitOn(s32 no);
 
 s32 mselStartDataSet(void)
 {
@@ -217,7 +217,7 @@ extern fldDanteGunWork_t fldRunDanteGunFlag;
 
 extern void fldSetNextField(s32 a, s32 b);
 
-extern void dds3AdminiCallSequence(s32 a, void *b, s32 c, s32 d);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 void mselStartGame(void)
 {

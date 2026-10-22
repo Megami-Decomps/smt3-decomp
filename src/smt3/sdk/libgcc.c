@@ -44,7 +44,7 @@ extern char *strcat(char *, const char *);
 
 extern void sceMcInit(void);
 
-extern void sdfGrJoinDrawTag(void *left, void *right);
+extern void sdfGrJoinDrawTag(void *aFore, void *aBack);
 
 /* Pool release logic tests the packet head address and kind at 0xC;
  * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
@@ -77,7 +77,7 @@ typedef struct SdfPool {
 
 /* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
-s32 sdfGrAllocPacketBuff(s32 size);
+s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern s32 WaitSema(s32);
 
@@ -102,24 +102,24 @@ typedef struct Dds3AdminModeDispatch {
 
 extern void *memcpy(void *, const void *, unsigned int);
 
-sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *heavyChild, sdfSortOtNode_tag *parent);
+sdfSortOtNode_tag *sdfSortOtAvlRotateLR(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
-sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *heavyChild, sdfSortOtNode_tag *parent);
+sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *node, sdfSortOtNode_tag *parent);
 
-void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **path, s32 depth, sdfSortOtNode_tag *child,
-                   sdfSortOtNode_tag **root);
+void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **stack, s32 stack_depth, sdfSortOtNode_tag *node,
+                   sdfSortOtNode_tag **root_p);
 
-void sdfSortOtAvlRegist(sdfSortOtNode_tag **tree, SdfKeyTreeItem *item);
+void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, SdfKeyTreeItem *tag);
 
-void sdfGrSortOtReg(SdfPool *pool, SdfKeyPoolNode *node);
+void sdfGrSortOtReg(SdfPool *aOt, SdfKeyPoolNode *aTag);
 
-void sdfGrSortOtFixup(void *first, SdfKeyPoolNode **head, SdfKeyPoolNode **tail);
+void sdfGrSortOtFixup(void *tag, SdfKeyPoolNode **head_p, SdfKeyPoolNode **tail_p);
 
-void sdfGrSortOtTraverse(sdfSortOtNode_tag *node, SdfKeyPoolNode **head, SdfKeyPoolNode **tail);
+void sdfGrSortOtTraverse(sdfSortOtNode_tag *node, SdfKeyPoolNode **head_p, SdfKeyPoolNode **tail_p);
 
-void sdfGrSortOtSetup(SdfPool *pool);
+void sdfGrSortOtSetup(SdfPool *aOt);
 
-void sdfGrSortOtCallback(SdfPool *pool, s32 mode, SdfKeyPoolNode *freeNode);
+void sdfGrSortOtCallback(SdfPool *aOt, s32 aFunc, SdfKeyPoolNode *aData);
 
 typedef struct _reent _reent;
 
@@ -327,7 +327,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *s, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 

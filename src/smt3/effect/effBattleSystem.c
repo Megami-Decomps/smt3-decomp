@@ -25,7 +25,7 @@ extern s32 effBTLCutCount;
 
 extern u32 effBTLCutMaxTable[4];
 
-void effBTLSkillStart(s32 id, s32 param);
+void effBTLSkillStart(s32 id, s32 stat);
 
 void effBTLSkillEnd(void);
 
@@ -144,9 +144,9 @@ typedef struct
 
 extern effBTLSystemCut1Data_t effBTLSystemCut1Data[];
 
-void *effBTLCutGetUserData(void *hCut);
+void *effBTLCutGetUserData(void *hBTLCutEffect);
 
-void effBTLCutSetUserData(void *hCut, void *pUserData);
+void effBTLCutSetUserData(void *hBTLCutEffect, void *pData);
 
 extern s8 effBTLFieldColorOn;
 
@@ -178,27 +178,27 @@ extern void *D_00551DA0;
 
 extern void *D_00551DA4;
 
-void dds3EffectFileListWindowDelete(void *window);
+void dds3EffectFileListWindowDelete(void *a);
 
-void dds3EffectFileListDelete(void *list);
+void dds3EffectFileListDelete(void *a);
 
 extern char D_0054F100[];
 
 extern char effBedNameBuf[];
 
-void evtSetUnitColorRGB(evtUnit_t *hUnit, s32 param, u32 color);
+void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb);
 
-void *dds3EffectFileListCreate(const char *path, s32 max);
+void *dds3EffectFileListCreate(const char *dir, s32 type);
 
-void *dds3EffectFileListWindowCreate(void *hFileList);
+void *dds3EffectFileListWindowCreate(void *a);
 
-void dds3EffectFileListWindowSetPos(void *hWindow, s32 x, s32 y);
+void dds3EffectFileListWindowSetPos(void *a, s32 b, s32 c);
 
-void dds3EffectFileListWindowSetOt(void *hWindow, s32 ot);
+void dds3EffectFileListWindowSetOt(void *hEffFLWin, s32 ot);
 
-void dds3EffectFileListWindowSetPadWait(void *hWindow, s32 wait);
+void dds3EffectFileListWindowSetPadWait(void *hEffFLWin, s32 wait);
 
-void dds3EffectFileListWindowSetWindowColor(void *hWindow, u32 color, u32 frameColor);
+void dds3EffectFileListWindowSetWindowColor(void *hEffFLWin, u32 frame_c, u32 bg_c);
 
 void func_001750D0(s32 param);
 
@@ -212,27 +212,27 @@ typedef struct
     effPartHandle_t *hPart;
 } effBTLSysPart_t;
 
-void sdfMemFreeDirect(sdfMemHandle_t *hMem);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 void effBTLModelGetMarkPosition2(nbFormation_t *pFormation, s32 mark);
 
 void effBTLModelGetMarkPosition3(mdlObj_t *hModel, s32 mark);
 
-void mdlSetClutColor(mdlObj_t *hModel, u32 color, f32 ratio);
+void mdlSetClutColor(mdlObj_t *aHandle, u32 aColor, f32 aRatio);
 
 void *effBTLBindCreateTrack(void *pParam);
 
-void effPCPThunderSpherePolyLowDelete(void *hTrack);
+void effPCPThunderSpherePolyLowDelete(void *hData);
 
-void effPCPThunderSpherePolyLowDraw(void *hTrack);
+void effPCPThunderSpherePolyLowDraw(void *hData);
 
-void effPCPThunderSpherePolyLowSetPosition(void *hTrack, sdfVector4_t *pPosition);
+void effPCPThunderSpherePolyLowSetPosition(void *hData, sdfVector4_t *pPos);
 
-void effPCPThunderSpherePolyLowSetScale(void *hTrack, f32 scale);
+void effPCPThunderSpherePolyLowSetScale(void *hData, f32 scale);
 
-void effPCPThunderSpherePolyLowSetColor(void *hTrack, u32 color);
+void effPCPThunderSpherePolyLowSetColor(void *hData, u32 abgr);
 
-effPCPThunderSpherePolyLowParam_t *effPCPThunderSpherePolyLowGetParam(void *hTrack);
+effPCPThunderSpherePolyLowParam_t *effPCPThunderSpherePolyLowGetParam(void *pThunderPoly);
 
 /* Effect handle of the families that hold one effPCP track and a frame count. */
 typedef struct
@@ -277,7 +277,7 @@ typedef struct
     mdlObj_t *hModel;
 } effBTLSysClose_t;
 
-void dds3SpPoly_RollRingSetEndless(void *hRollRing);
+void dds3SpPoly_RollRingSetEndless(void *pRollRing);
 
 /* Effect handle of the families that play one battle cut. */
 typedef struct
@@ -352,13 +352,13 @@ typedef struct
     effPartHandle_t *hPart3;
 } effBTLSysPart3_t;
 
-void effBTLCutDraw(void *hCut);
+void effBTLCutDraw(void *hBTLCutEffect);
 
-u32 effBTLCutGetCutEndFrame(void *hCut);
+u32 effBTLCutGetCutEndFrame(void *hBTLCutEffect);
 
 void effBTLModelHide(nbFormation_t *pFormation);
 
-void mdlSingleMotion(void *hModel, s32 motion, s32 flag);
+void mdlSingleMotion(void *aHandle, s32 aGroup, s32 aNumber);
 
 void effBTLSystem_Part_DataLoad(effBTLSystem_Part_t *pPartList, u32 count);
 
@@ -372,17 +372,17 @@ void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 
 void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 
-effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPart);
+effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc);
 
 void dds3EffectPartDraw(effPartHandle_t *hEffPart);
 
-void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPosition);
+void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, sdfVector4_t *pPos);
 
 void dds3EffectPartSetScale(effPartHandle_t *hEffPart, f32 scale);
 
-void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 color);
+void dds3EffectPartSetColor(effPartHandle_t *hEffPart, u32 abgr);
 
-void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 rgb);
+void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 bgr);
 
 f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation);
 
@@ -390,11 +390,11 @@ f32 effBTLPartGetScalePtr(nbFormation_t *pFormation);
 
 f32 effBTLPartCalcScale(nbFormation_t *pFormation);
 
-void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 rgb)
+void effBTLSystem_SetUnitColorRGB(nbFormation_t *pFormation, s32 frame, u32 bgr)
 {
     if (pFormation->hunit != NULL) {
-        evtSetUnitColorRGB(pFormation->hunit, frame, rgb);
-        pFormation->modelcol = (pFormation->modelcol & 0xFF000000) | (rgb & 0xFFFFFF);
+        evtSetUnitColorRGB(pFormation->hunit, frame, bgr);
+        pFormation->modelcol = (pFormation->modelcol & 0xFF000000) | (bgr & 0xFFFFFF);
     }
 }
 
@@ -467,39 +467,39 @@ effBTLSysTrack_t *effBTLSys_Shock_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Shock_Delete(effBTLSysTrack_t *hEffect)
+void effBTLSys_Shock_Delete(effBTLSysTrack_t *pData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(pData->pFormation, 4, 0x80808080);
+    effPCPThunderSpherePolyLowDelete(pData->hTrack);
+    sdfChipFreeDirect(pData);
 }
 
-void effBTLSys_Shock_Delete2(effBTLSysTrack_t *hEffect)
+void effBTLSys_Shock_Delete2(effBTLSysTrack_t *pData)
 {
-    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
-    sdfChipFreeDirect(hEffect);
+    effPCPThunderSpherePolyLowDelete(pData->hTrack);
+    sdfChipFreeDirect(pData);
 }
 
-void effBTLSys_Shock_SetColor(effBTLSysTrack_t *hEffect, u32 color)
+void effBTLSys_Shock_SetColor(effBTLSysTrack_t *pData, u32 abgr)
 {
-    effPCPThunderSpherePolyLowSetColor(hEffect->hTrack, color);
+    effPCPThunderSpherePolyLowSetColor(pData->hTrack, abgr);
 }
 
-void effBTLSys_Shock_Draw(effBTLSysTrack_t *hEffect)
+void effBTLSys_Shock_Draw(effBTLSysTrack_t *pData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
+    if (pData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(pData->pFormation, 4, 0x80FFCDCD);
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    effBTLModelGetMarkPosition2(pData->pFormation, 0);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
-    effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
-    hEffect->frame++;
+    effPCPThunderSpherePolyLowSetPosition(pData->hTrack, &position);
+    effPCPThunderSpherePolyLowDraw(pData->hTrack);
+    pData->frame++;
 }
 
-u32 effBTLSys_Shock_GetLength(void *hEffect)
+u32 effBTLSys_Shock_GetLength(void *pData)
 {
     return 0;
 }
@@ -536,43 +536,43 @@ effBTLSysPart_t *effBTLSys_Freeze_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Freeze_Delete(effBTLSysPart_t *hEffect)
+void effBTLSys_Freeze_Delete(effBTLSysPart_t *hData)
 {
-    hEffect->pFormation->hunit->owner->flags &= ~2;
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 0, 0x80808080);
-    mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x808080, 0.0f);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    hData->pFormation->hunit->owner->flags &= ~2;
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 0, 0x80808080);
+    mdlSetClutColor(hData->pFormation->hunit->owner, 0x808080, 0.0f);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Freeze_Delete2(effBTLSysPart_t *hEffect)
+void effBTLSys_Freeze_Delete2(effBTLSysPart_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Freeze_SetColor(effBTLSysPart_t *hEffect, u32 color)
+void effBTLSys_Freeze_SetColor(effBTLSysPart_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
 }
 
-void effBTLSys_Freeze_Draw(effBTLSysPart_t *hEffect)
+void effBTLSys_Freeze_Draw(effBTLSysPart_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 0, 0x80FFF8BC);
-        mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x80FFC39B, 1.0f);
-        hEffect->pFormation->hunit->owner->flags |= 2;
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 0, 0x80FFF8BC);
+        mdlSetClutColor(hData->pFormation->hunit->owner, 0x80FFC39B, 1.0f);
+        hData->pFormation->hunit->owner->flags |= 2;
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    effBTLModelGetMarkPosition2(hData->pFormation, 0);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartDraw(hEffect->hPart);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartDraw(hData->hPart);
+    hData->frame++;
 }
 
-u32 effBTLSys_Freeze_GetLength(void *hEffect)
+u32 effBTLSys_Freeze_GetLength(void *hData)
 {
     return 0;
 }
@@ -609,39 +609,39 @@ effBTLSysPart_t *effBTLSys_Sleep_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Sleep_Delete(effBTLSysPart_t *hEffect)
+void effBTLSys_Sleep_Delete(effBTLSysPart_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Sleep_Delete2(effBTLSysPart_t *hEffect)
+void effBTLSys_Sleep_Delete2(effBTLSysPart_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Sleep_SetColor(effBTLSysPart_t *hEffect, u32 color)
+void effBTLSys_Sleep_SetColor(effBTLSysPart_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
 }
 
-void effBTLSys_Sleep_Draw(effBTLSysPart_t *hEffect)
+void effBTLSys_Sleep_Draw(effBTLSysPart_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFB97D);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80FFB97D);
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
+    effBTLModelGetMarkPosition2(hData->pFormation, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartDraw(hEffect->hPart);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartDraw(hData->hPart);
+    hData->frame++;
 }
 
-u32 effBTLSys_Sleep_GetLength(void *hEffect)
+u32 effBTLSys_Sleep_GetLength(void *hData)
 {
     return 0;
 }
@@ -678,39 +678,39 @@ effBTLSysPart_t *effBTLSys_Panic_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Panic_Delete(effBTLSysPart_t *hEffect)
+void effBTLSys_Panic_Delete(effBTLSysPart_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Panic_Delete2(effBTLSysPart_t *hEffect)
+void effBTLSys_Panic_Delete2(effBTLSysPart_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Panic_SetColor(effBTLSysPart_t *hEffect, u32 color)
+void effBTLSys_Panic_SetColor(effBTLSysPart_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
 }
 
-void effBTLSys_Panic_Draw(effBTLSysPart_t *hEffect)
+void effBTLSys_Panic_Draw(effBTLSysPart_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x8058B8FF);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x8058B8FF);
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
+    effBTLModelGetMarkPosition2(hData->pFormation, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartDraw(hEffect->hPart);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartDraw(hData->hPart);
+    hData->frame++;
 }
 
-u32 effBTLSys_Panic_GetLength(void *hEffect)
+u32 effBTLSys_Panic_GetLength(void *hData)
 {
     return 0;
 }
@@ -747,39 +747,39 @@ effBTLSysTrack_t *effBTLSys_Bind_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Bind_Delete(effBTLSysTrack_t *hEffect)
+void effBTLSys_Bind_Delete(effBTLSysTrack_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    effPCPThunderSpherePolyLowDelete(hData->hTrack);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Bind_Delete2(effBTLSysTrack_t *hEffect)
+void effBTLSys_Bind_Delete2(effBTLSysTrack_t *hData)
 {
-    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
-    sdfChipFreeDirect(hEffect);
+    effPCPThunderSpherePolyLowDelete(hData->hTrack);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Bind_SetColor(effBTLSysTrack_t *hEffect, u32 color)
+void effBTLSys_Bind_SetColor(effBTLSysTrack_t *hData, u32 abgr)
 {
-    effPCPThunderSpherePolyLowSetColor(hEffect->hTrack, color);
+    effPCPThunderSpherePolyLowSetColor(hData->hTrack, abgr);
 }
 
-void effBTLSys_Bind_Draw(effBTLSysTrack_t *hEffect)
+void effBTLSys_Bind_Draw(effBTLSysTrack_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x8080FFD7);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x8080FFD7);
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    effBTLModelGetMarkPosition2(hData->pFormation, 0);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
-    effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
-    hEffect->frame++;
+    effPCPThunderSpherePolyLowSetPosition(hData->hTrack, &position);
+    effPCPThunderSpherePolyLowDraw(hData->hTrack);
+    hData->frame++;
 }
 
-u32 effBTLSys_Bind_GetLength(void *hEffect)
+u32 effBTLSys_Bind_GetLength(void *hData)
 {
     return 0;
 }
@@ -825,46 +825,46 @@ effBTLSysClose_t *effBTLSys_Close_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Close_Delete(effBTLSysClose_t *hEffect)
+void effBTLSys_Close_Delete(effBTLSysClose_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Close_Delete2(effBTLSysClose_t *hEffect)
+void effBTLSys_Close_Delete2(effBTLSysClose_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    dds3EffectPartDelete(hEffect->hPart2);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPart2);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Close_SetColor(effBTLSysClose_t *hEffect, u32 color)
+void effBTLSys_Close_SetColor(effBTLSysClose_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
-    dds3EffectPartSetColor(hEffect->hPart2, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
+    dds3EffectPartSetColor(hData->hPart2, abgr);
 }
 
-void effBTLSys_Close_Draw(effBTLSysClose_t *hEffect)
+void effBTLSys_Close_Draw(effBTLSysClose_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80FFCDCD);
     }
-    effBTLModelGetMarkPosition3(hEffect->hModel, 2);
+    effBTLModelGetMarkPosition3(hData->hModel, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartSetPosition(hEffect->hPart2, &position);
-    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hEffect->hPart))->pHandle);
-    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hEffect->hPart2))->pHandle);
-    dds3EffectPartDraw(hEffect->hPart);
-    dds3EffectPartDraw(hEffect->hPart2);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartSetPosition(hData->hPart2, &position);
+    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hData->hPart))->pHandle);
+    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hData->hPart2))->pHandle);
+    dds3EffectPartDraw(hData->hPart);
+    dds3EffectPartDraw(hData->hPart2);
+    hData->frame++;
 }
 
-u32 effBTLSys_Close_GetLength(void *hEffect)
+u32 effBTLSys_Close_GetLength(void *hData)
 {
     return 0;
 }
@@ -906,39 +906,39 @@ effBTLSysPoison_t *effBTLSys_Poison_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Poison_Delete(effBTLSysPoison_t *hEffect)
+void effBTLSys_Poison_Delete(effBTLSysPoison_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Poison_Delete2(effBTLSysPoison_t *hEffect)
+void effBTLSys_Poison_Delete2(effBTLSysPoison_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Poison_SetColor(effBTLSysPoison_t *hEffect, u32 color)
+void effBTLSys_Poison_SetColor(effBTLSysPoison_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
 }
 
-void effBTLSys_Poison_Draw(effBTLSysPoison_t *hEffect)
+void effBTLSys_Poison_Draw(effBTLSysPoison_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80A53A6C);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80A53A6C);
     }
-    effBTLModelGetMarkPosition3(hEffect->hModel, 2);
+    effBTLModelGetMarkPosition3(hData->hModel, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartDraw(hEffect->hPart);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartDraw(hData->hPart);
+    hData->frame++;
 }
 
-u32 effBTLSys_Poison_GetLength(void *hEffect)
+u32 effBTLSys_Poison_GetLength(void *hData)
 {
     return 0;
 }
@@ -979,44 +979,44 @@ effBTLSysPart2_t *effBTLSys_Charm_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Charm_Delete(effBTLSysPart2_t *hEffect)
+void effBTLSys_Charm_Delete(effBTLSysPart2_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hEffect->hPart);
-    dds3EffectPartDelete(hEffect->hPart2);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPart2);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Charm_Delete2(effBTLSysPart2_t *hEffect)
+void effBTLSys_Charm_Delete2(effBTLSysPart2_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    dds3EffectPartDelete(hEffect->hPart2);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPart2);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Charm_SetColor(effBTLSysPart2_t *hEffect, u32 color)
+void effBTLSys_Charm_SetColor(effBTLSysPart2_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
-    dds3EffectPartSetColor(hEffect->hPart2, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
+    dds3EffectPartSetColor(hData->hPart2, abgr);
 }
 
-void effBTLSys_Charm_Draw(effBTLSysPart2_t *hEffect)
+void effBTLSys_Charm_Draw(effBTLSysPart2_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x808064FF);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x808064FF);
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 2);
+    effBTLModelGetMarkPosition2(hData->pFormation, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartSetPosition(hEffect->hPart2, &position);
-    dds3EffectPartDraw(hEffect->hPart);
-    dds3EffectPartDraw(hEffect->hPart2);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartSetPosition(hData->hPart2, &position);
+    dds3EffectPartDraw(hData->hPart);
+    dds3EffectPartDraw(hData->hPart2);
+    hData->frame++;
 }
 
-u32 effBTLSys_Charm_GetLength(void *hEffect)
+u32 effBTLSys_Charm_GetLength(void *hData)
 {
     return 0;
 }
@@ -1056,39 +1056,39 @@ effBTLSysTrack_t *effBTLSys_Paralyze_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Paralyze_Delete(effBTLSysTrack_t *hEffect)
+void effBTLSys_Paralyze_Delete(effBTLSysTrack_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    effPCPThunderSpherePolyLowDelete(hData->hTrack);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Paralyze_Delete2(effBTLSysTrack_t *hEffect)
+void effBTLSys_Paralyze_Delete2(effBTLSysTrack_t *hData)
 {
-    effPCPThunderSpherePolyLowDelete(hEffect->hTrack);
-    sdfChipFreeDirect(hEffect);
+    effPCPThunderSpherePolyLowDelete(hData->hTrack);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Paralyze_SetColor(effBTLSysTrack_t *hEffect, u32 color)
+void effBTLSys_Paralyze_SetColor(effBTLSysTrack_t *hData, u32 abgr)
 {
-    effPCPThunderSpherePolyLowSetColor(hEffect->hTrack, color);
+    effPCPThunderSpherePolyLowSetColor(hData->hTrack, abgr);
 }
 
-void effBTLSys_Paralyze_Draw(effBTLSysTrack_t *hEffect)
+void effBTLSys_Paralyze_Draw(effBTLSysTrack_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80589BFF);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80589BFF);
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    effBTLModelGetMarkPosition2(hData->pFormation, 0);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    effPCPThunderSpherePolyLowSetPosition(hEffect->hTrack, &position);
-    effPCPThunderSpherePolyLowDraw(hEffect->hTrack);
-    hEffect->frame++;
+    effPCPThunderSpherePolyLowSetPosition(hData->hTrack, &position);
+    effPCPThunderSpherePolyLowDraw(hData->hTrack);
+    hData->frame++;
 }
 
-u32 effBTLSys_Paralyze_GetLength(void *hEffect)
+u32 effBTLSys_Paralyze_GetLength(void *hData)
 {
     return 0;
 }
@@ -1123,29 +1123,29 @@ effBTLSysFrame_t *effBTLSys_Fly_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Fly_Delete(effBTLSysFrame_t *hEffect)
+void effBTLSys_Fly_Delete(effBTLSysFrame_t *hData)
 {
-    effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80808080);
-    sdfChipFreeDirect(hEffect);
+    effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Fly_Delete2(effBTLSysFrame_t *hEffect)
+void effBTLSys_Fly_Delete2(effBTLSysFrame_t *hData)
 {
-    sdfChipFreeDirect(hEffect);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Fly_SetColor(void) {
 }
 
-void effBTLSys_Fly_Draw(effBTLSysFrame_t *hEffect)
+void effBTLSys_Fly_Draw(effBTLSysFrame_t *hData)
 {
-    if (hEffect->frame == 0) {
-        effBTLSystem_SetUnitColorRGB(hEffect->pFormation, 4, 0x80FFCDCD);
+    if (hData->frame == 0) {
+        effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80FFCDCD);
     }
-    hEffect->frame++;
+    hData->frame++;
 }
 
-u32 effBTLSys_Fly_GetLength(void *hEffect)
+u32 effBTLSys_Fly_GetLength(void *hData)
 {
     return 0;
 }
@@ -1180,33 +1180,33 @@ effBTLSysFrame_t *effBTLSys_Stone_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Stone_Delete(effBTLSysFrame_t *hEffect)
+void effBTLSys_Stone_Delete(effBTLSysFrame_t *hData)
 {
-    mdlObj_t *hModel = hEffect->pFormation->hunit->owner;
+    mdlObj_t *hModel = hData->pFormation->hunit->owner;
 
     hModel->flags &= ~2;
     mdlSetClutColor(hModel, 0x808080, 0.0f);
-    sdfChipFreeDirect(hEffect);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Stone_Delete2(effBTLSysFrame_t *hEffect)
+void effBTLSys_Stone_Delete2(effBTLSysFrame_t *hData)
 {
-    sdfChipFreeDirect(hEffect);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Stone_SetColor(void) {
 }
 
-void effBTLSys_Stone_Draw(effBTLSysFrame_t *hEffect)
+void effBTLSys_Stone_Draw(effBTLSysFrame_t *hData)
 {
-    if (hEffect->frame == 0) {
-        mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x80FFEBE1, 1.0f);
-        hEffect->pFormation->hunit->owner->flags |= 2;
+    if (hData->frame == 0) {
+        mdlSetClutColor(hData->pFormation->hunit->owner, 0x80FFEBE1, 1.0f);
+        hData->pFormation->hunit->owner->flags |= 2;
     }
-    hEffect->frame++;
+    hData->frame++;
 }
 
-u32 effBTLSys_Stone_GetLength(void *hEffect)
+u32 effBTLSys_Stone_GetLength(void *hData)
 {
     return 0;
 }
@@ -1243,31 +1243,31 @@ effBTLSysPart_t *effBTLSys_Curse_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Curse_Delete(effBTLSysPart_t *hEffect)
+void effBTLSys_Curse_Delete(effBTLSysPart_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Curse_Delete2(effBTLSysPart_t *hEffect)
+void effBTLSys_Curse_Delete2(effBTLSysPart_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Curse_SetColor(effBTLSysPart_t *hEffect, u32 color)
+void effBTLSys_Curse_SetColor(effBTLSysPart_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
 }
 
-void effBTLSys_Curse_Draw(effBTLSysPart_t *hEffect)
+void effBTLSys_Curse_Draw(effBTLSysPart_t *hData)
 {
-    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->pos);
-    dds3EffectPartDraw(hEffect->hPart);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &hData->pFormation->pos);
+    dds3EffectPartDraw(hData->hPart);
+    hData->frame++;
 }
 
-u32 effBTLSys_Curse_GetLength(void *hEffect)
+u32 effBTLSys_Curse_GetLength(void *hData)
 {
     return 0;
 }
@@ -1308,41 +1308,41 @@ effBTLSysPart2_t *effBTLSys_CurseCAMP_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_CurseCAMP_Delete(effBTLSysPart2_t *hEffect)
+void effBTLSys_CurseCAMP_Delete(effBTLSysPart2_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    dds3EffectPartDelete(hEffect->hPart2);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPart2);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_CurseCAMP_Delete2(effBTLSysPart2_t *hEffect)
+void effBTLSys_CurseCAMP_Delete2(effBTLSysPart2_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart);
-    dds3EffectPartDelete(hEffect->hPart2);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPart2);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_CurseCAMP_SetColor(effBTLSysPart2_t *hEffect, u32 color)
+void effBTLSys_CurseCAMP_SetColor(effBTLSysPart2_t *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hEffect->hPart, color);
-    dds3EffectPartSetColor(hEffect->hPart2, color);
+    dds3EffectPartSetColor(hData->hPart, abgr);
+    dds3EffectPartSetColor(hData->hPart2, abgr);
 }
 
-void effBTLSys_CurseCAMP_Draw(effBTLSysPart2_t *hEffect)
+void effBTLSys_CurseCAMP_Draw(effBTLSysPart2_t *hData)
 {
     sdfVector4_t position;
 
-    dds3EffectPartSetPosition(hEffect->hPart, &hEffect->pFormation->pos);
-    position.x = hEffect->pFormation->pos.x;
-    position.y = hEffect->pFormation->pos.y - 100.0f;
-    position.z = hEffect->pFormation->pos.z;
-    dds3EffectPartSetPosition(hEffect->hPart2, &position);
-    dds3EffectPartDraw(hEffect->hPart);
-    dds3EffectPartDraw(hEffect->hPart2);
-    hEffect->frame++;
+    dds3EffectPartSetPosition(hData->hPart, &hData->pFormation->pos);
+    position.x = hData->pFormation->pos.x;
+    position.y = hData->pFormation->pos.y - 100.0f;
+    position.z = hData->pFormation->pos.z;
+    dds3EffectPartSetPosition(hData->hPart2, &position);
+    dds3EffectPartDraw(hData->hPart);
+    dds3EffectPartDraw(hData->hPart2);
+    hData->frame++;
 }
 
-u32 effBTLSys_CurseCAMP_GetLength(void *hEffect)
+u32 effBTLSys_CurseCAMP_GetLength(void *hData)
 {
     return 0;
 }
@@ -1386,49 +1386,49 @@ effBTLSysPart3_t *effBTLSys_Stone_Dead_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Stone_Dead_Delete(effBTLSysPart3_t *hEffect)
+void effBTLSys_Stone_Dead_Delete(effBTLSysPart3_t *hData)
 {
-    mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x808080, 0.0f);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    mdlSetClutColor(hData->pFormation->hunit->owner, 0x808080, 0.0f);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Stone_Dead_Delete2(effBTLSysPart3_t *hEffect)
+void effBTLSys_Stone_Dead_Delete2(effBTLSysPart3_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Stone_Dead_SetColor(void) {
 }
 
-void effBTLSys_Stone_Dead_Draw(effBTLSysPart3_t *hEffect)
+void effBTLSys_Stone_Dead_Draw(effBTLSysPart3_t *hData)
 {
     sdfVector4_t position;
 
-    if (hEffect->frame == 0) {
-        effBTLModelHide(hEffect->pFormation);
-        mdlSetClutColor(hEffect->pFormation->hunit->owner, 0x80FFEBE1, 1.0f);
-        hEffect->pFormation->hunit->owner->flags |= 2;
+    if (hData->frame == 0) {
+        effBTLModelHide(hData->pFormation);
+        mdlSetClutColor(hData->pFormation->hunit->owner, 0x80FFEBE1, 1.0f);
+        hData->pFormation->hunit->owner->flags |= 2;
     }
-    effBTLModelGetMarkPosition2(hEffect->pFormation, 0);
+    effBTLModelGetMarkPosition2(hData->pFormation, 0);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hEffect->hPart3, &position);
-    dds3EffectPartSetPosition(hEffect->hPart2, &position);
-    dds3EffectPartSetPosition(hEffect->hPart, &position);
-    dds3EffectPartDraw(hEffect->hPart3);
-    dds3EffectPartDraw(hEffect->hPart2);
-    if (hEffect->frame >= 2) {
-        dds3EffectPartDraw(hEffect->hPart);
+    dds3EffectPartSetPosition(hData->hPart3, &position);
+    dds3EffectPartSetPosition(hData->hPart2, &position);
+    dds3EffectPartSetPosition(hData->hPart, &position);
+    dds3EffectPartDraw(hData->hPart3);
+    dds3EffectPartDraw(hData->hPart2);
+    if (hData->frame >= 2) {
+        dds3EffectPartDraw(hData->hPart);
     }
-    hEffect->frame++;
+    hData->frame++;
 }
 
-u32 effBTLSys_Stone_Dead_GetLength(void *hEffect)
+u32 effBTLSys_Stone_Dead_GetLength(void *hData)
 {
     return 50;
 }
@@ -1474,18 +1474,18 @@ effBTLSysHansya_t *effBTLSys_Hansya_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Hansya_Delete(effBTLSysHansya_t *hEffect)
+void effBTLSys_Hansya_Delete(effBTLSysHansya_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Hansya_Delete2(effBTLSysHansya_t *hEffect)
+void effBTLSys_Hansya_Delete2(effBTLSysHansya_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Hansya_SetColor(void) {
@@ -1493,7 +1493,7 @@ void effBTLSys_Hansya_SetColor(void) {
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_Hansya_Draw);
 
-u32 effBTLSys_Hansya_GetLength(void *hEffect)
+u32 effBTLSys_Hansya_GetLength(void *hData)
 {
     return 15;
 }
@@ -1538,22 +1538,22 @@ effBTLSysPart4_t *effBTLSys_Kyusyuu_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Kyusyuu_Delete(effBTLSysPart4_t *hEffect)
+void effBTLSys_Kyusyuu_Delete(effBTLSysPart4_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart4);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart4);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Kyusyuu_Delete2(effBTLSysPart4_t *hEffect)
+void effBTLSys_Kyusyuu_Delete2(effBTLSysPart4_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart4);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart4);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Kyusyuu_SetColor(void) {
@@ -1561,7 +1561,7 @@ void effBTLSys_Kyusyuu_SetColor(void) {
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_Kyusyuu_Draw);
 
-u32 effBTLSys_Kyusyuu_GetLength(void *hEffect)
+u32 effBTLSys_Kyusyuu_GetLength(void *hData)
 {
     return 25;
 }
@@ -1597,30 +1597,30 @@ effBTLSysCut_t *effBTLSys_Return_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Return_Delete(effBTLSysCut_t *hEffect)
+void effBTLSys_Return_Delete(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Return_Delete2(effBTLSysCut_t *hEffect)
+void effBTLSys_Return_Delete2(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Return_SetColor(void) {
 }
 
-void effBTLSys_Return_Draw(effBTLSysCut_t *hEffect)
+void effBTLSys_Return_Draw(effBTLSysCut_t *hData)
 {
-    effBTLCutDraw(hEffect->hCut);
-    hEffect->frame++;
+    effBTLCutDraw(hData->hCut);
+    hData->frame++;
 }
 
-u32 effBTLSys_Return_GetLength(effBTLSysCut_t *hEffect)
+u32 effBTLSys_Return_GetLength(effBTLSysCut_t *hData)
 {
-    return effBTLCutGetCutEndFrame(hEffect->hCut);
+    return effBTLCutGetCutEndFrame(hData->hCut);
 }
 
 void effBTLSys_Return_DataLoad(void)
@@ -1659,26 +1659,26 @@ effBTLSysPart6_t *effBTLSys_Attack_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Attack_Delete(effBTLSysPart6_t *hEffect)
+void effBTLSys_Attack_Delete(effBTLSysPart6_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart6);
-    dds3EffectPartDelete(hEffect->hPart5);
-    dds3EffectPartDelete(hEffect->hPart4);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart6);
+    dds3EffectPartDelete(hData->hPart5);
+    dds3EffectPartDelete(hData->hPart4);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Attack_Delete2(effBTLSysPart6_t *hEffect)
+void effBTLSys_Attack_Delete2(effBTLSysPart6_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart6);
-    dds3EffectPartDelete(hEffect->hPart5);
-    dds3EffectPartDelete(hEffect->hPart4);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart6);
+    dds3EffectPartDelete(hData->hPart5);
+    dds3EffectPartDelete(hData->hPart4);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Attack_SetColor(void) {
@@ -1686,7 +1686,7 @@ void effBTLSys_Attack_SetColor(void) {
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_Attack_Draw);
 
-u32 effBTLSys_Attack_GetLength(void *hEffect)
+u32 effBTLSys_Attack_GetLength(void *hData)
 {
     return 20;
 }
@@ -1733,38 +1733,38 @@ effBTLSysPart12_t *effBTLSys_AttackC_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_AttackC_Delete(effBTLSysPart12_t *hEffect)
+void effBTLSys_AttackC_Delete(effBTLSysPart12_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart12);
-    dds3EffectPartDelete(hEffect->hPart11);
-    dds3EffectPartDelete(hEffect->hPart10);
-    dds3EffectPartDelete(hEffect->hPart9);
-    dds3EffectPartDelete(hEffect->hPart8);
-    dds3EffectPartDelete(hEffect->hPart7);
-    dds3EffectPartDelete(hEffect->hPart6);
-    dds3EffectPartDelete(hEffect->hPart5);
-    dds3EffectPartDelete(hEffect->hPart4);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart12);
+    dds3EffectPartDelete(hData->hPart11);
+    dds3EffectPartDelete(hData->hPart10);
+    dds3EffectPartDelete(hData->hPart9);
+    dds3EffectPartDelete(hData->hPart8);
+    dds3EffectPartDelete(hData->hPart7);
+    dds3EffectPartDelete(hData->hPart6);
+    dds3EffectPartDelete(hData->hPart5);
+    dds3EffectPartDelete(hData->hPart4);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_AttackC_Delete2(effBTLSysPart12_t *hEffect)
+void effBTLSys_AttackC_Delete2(effBTLSysPart12_t *hData)
 {
-    dds3EffectPartDelete(hEffect->hPart12);
-    dds3EffectPartDelete(hEffect->hPart11);
-    dds3EffectPartDelete(hEffect->hPart10);
-    dds3EffectPartDelete(hEffect->hPart9);
-    dds3EffectPartDelete(hEffect->hPart8);
-    dds3EffectPartDelete(hEffect->hPart7);
-    dds3EffectPartDelete(hEffect->hPart6);
-    dds3EffectPartDelete(hEffect->hPart5);
-    dds3EffectPartDelete(hEffect->hPart4);
-    dds3EffectPartDelete(hEffect->hPart3);
-    dds3EffectPartDelete(hEffect->hPart2);
-    dds3EffectPartDelete(hEffect->hPart);
-    sdfChipFreeDirect(hEffect);
+    dds3EffectPartDelete(hData->hPart12);
+    dds3EffectPartDelete(hData->hPart11);
+    dds3EffectPartDelete(hData->hPart10);
+    dds3EffectPartDelete(hData->hPart9);
+    dds3EffectPartDelete(hData->hPart8);
+    dds3EffectPartDelete(hData->hPart7);
+    dds3EffectPartDelete(hData->hPart6);
+    dds3EffectPartDelete(hData->hPart5);
+    dds3EffectPartDelete(hData->hPart4);
+    dds3EffectPartDelete(hData->hPart3);
+    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPart);
+    sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_AttackC_SetColor(void) {
@@ -1772,7 +1772,7 @@ void effBTLSys_AttackC_SetColor(void) {
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSys_AttackC_Draw);
 
-u32 effBTLSys_AttackC_GetLength(void *hEffect)
+u32 effBTLSys_AttackC_GetLength(void *hData)
 {
     return 20;
 }
@@ -1808,30 +1808,30 @@ effBTLSysCut_t *effBTLSys_Encount_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Encount_Delete(effBTLSysCut_t *hEffect)
+void effBTLSys_Encount_Delete(effBTLSysCut_t *pData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(pData->hCut);
+    sdfChipFreeDirect(pData);
 }
 
-void effBTLSys_Encount_Delete2(effBTLSysCut_t *hEffect)
+void effBTLSys_Encount_Delete2(effBTLSysCut_t *pData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(pData->hCut);
+    sdfChipFreeDirect(pData);
 }
 
-void effBTLSys_Encount_Draw(effBTLSysCut_t *hEffect)
+void effBTLSys_Encount_Draw(effBTLSysCut_t *pData)
 {
-    effBTLCutDraw(hEffect->hCut);
-    hEffect->frame++;
+    effBTLCutDraw(pData->hCut);
+    pData->frame++;
 }
 
 void effBTLSys_Encount_SetColor(void) {
 }
 
-u32 effBTLSys_Encount_GetLength(effBTLSysCut_t *hEffect)
+u32 effBTLSys_Encount_GetLength(effBTLSysCut_t *pData)
 {
-    return effBTLCutGetCutEndFrame(hEffect->hCut);
+    return effBTLCutGetCutEndFrame(pData->hCut);
 }
 
 void effBTLSys_Encount_DataLoad(void)
@@ -1865,27 +1865,27 @@ effBTLSysCut_t *effBTLSys_Nego_Kaihuku_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Nego_Kaihuku_Delete(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Kaihuku_Delete(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Nego_Kaihuku_Delete2(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Kaihuku_Delete2(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Nego_Kaihuku_Draw(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Kaihuku_Draw(effBTLSysCut_t *hData)
 {
-    effBTLCutDraw(hEffect->hCut);
-    hEffect->frame++;
+    effBTLCutDraw(hData->hCut);
+    hData->frame++;
 }
 
-u32 effBTLSys_Nego_Kaihuku_GetLength(effBTLSysCut_t *hEffect)
+u32 effBTLSys_Nego_Kaihuku_GetLength(effBTLSysCut_t *hData)
 {
-    return effBTLCutGetCutEndFrame(hEffect->hCut);
+    return effBTLCutGetCutEndFrame(hData->hCut);
 }
 
 void effBTLSys_Nego_Kaihuku_DataLoad(void)
@@ -1919,27 +1919,27 @@ effBTLSysCut_t *effBTLSys_Nego_Kyusyu_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Nego_Kyusyu_Delete(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Kyusyu_Delete(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Nego_Kyusyu_Delete2(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Kyusyu_Delete2(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Nego_Kyusyu_Draw(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Kyusyu_Draw(effBTLSysCut_t *hData)
 {
-    effBTLCutDraw(hEffect->hCut);
-    hEffect->frame++;
+    effBTLCutDraw(hData->hCut);
+    hData->frame++;
 }
 
-u32 effBTLSys_Nego_Kyusyu_GetLength(effBTLSysCut_t *hEffect)
+u32 effBTLSys_Nego_Kyusyu_GetLength(effBTLSysCut_t *hData)
 {
-    return effBTLCutGetCutEndFrame(hEffect->hCut);
+    return effBTLCutGetCutEndFrame(hData->hCut);
 }
 
 void effBTLSys_Nego_Kyusyu_DataLoad(void)
@@ -1973,27 +1973,27 @@ effBTLSysCut_t *effBTLSys_Nego_Stone_Create(nbFormation_t *pFormation)
     return hEffect;
 }
 
-void effBTLSys_Nego_Stone_Delete(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Stone_Delete(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Nego_Stone_Delete2(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Stone_Delete2(effBTLSysCut_t *hData)
 {
-    effBTLCutDelete(hEffect->hCut);
-    sdfChipFreeDirect(hEffect);
+    effBTLCutDelete(hData->hCut);
+    sdfChipFreeDirect(hData);
 }
 
-void effBTLSys_Nego_Stone_Draw(effBTLSysCut_t *hEffect)
+void effBTLSys_Nego_Stone_Draw(effBTLSysCut_t *hData)
 {
-    effBTLCutDraw(hEffect->hCut);
-    hEffect->frame++;
+    effBTLCutDraw(hData->hCut);
+    hData->frame++;
 }
 
-u32 effBTLSys_Nego_Stone_GetLength(effBTLSysCut_t *hEffect)
+u32 effBTLSys_Nego_Stone_GetLength(effBTLSysCut_t *hData)
 {
-    return effBTLCutGetCutEndFrame(hEffect->hCut);
+    return effBTLCutGetCutEndFrame(hData->hCut);
 }
 
 void effBTLSys_Nego_Stone_DataLoad(void)
@@ -2016,53 +2016,53 @@ void effBTLSys_Nego_Stone_PartHandleDelete(void)
     effBTLSystem_Part_HandleDelete(effBTLSystem_Nego_Stone_PartList, 1);
 }
 
-effBTLSystemHandle_t *effBTLSystemCreate(nbFormation_t *pFormation, s32 family)
+effBTLSystemHandle_t *effBTLSystemCreate(nbFormation_t *pFormation, s32 id)
 {
     effBTLSystemHandle_t *hEffect;
 
     hEffect = sdfChipAllocDirect(sizeof(effBTLSystemHandle_t));
-    hEffect->family = family;
+    hEffect->family = id;
     hEffect->pFormation = pFormation;
-    if (D_0031BF00[family].create != NULL) {
-        hEffect->hEffect = D_0031BF00[family].create(pFormation);
+    if (D_0031BF00[id].create != NULL) {
+        hEffect->hEffect = D_0031BF00[id].create(pFormation);
     }
     return hEffect;
 }
 
-void effBTLSystemDelete(effBTLSystemHandle_t *hEffect)
+void effBTLSystemDelete(effBTLSystemHandle_t *hEffBTLSys)
 {
-    if (D_0031BF00[hEffect->family].destroy != NULL) {
-        D_0031BF00[hEffect->family].destroy(hEffect->hEffect);
+    if (D_0031BF00[hEffBTLSys->family].destroy != NULL) {
+        D_0031BF00[hEffBTLSys->family].destroy(hEffBTLSys->hEffect);
     }
-    sdfChipFreeDirect(hEffect);
+    sdfChipFreeDirect(hEffBTLSys);
 }
 
-void effBTLSystemDelete2(effBTLSystemHandle_t *hEffect)
+void effBTLSystemDelete2(effBTLSystemHandle_t *hEffBTLSys)
 {
-    if (D_0031BF00[hEffect->family].destroy2 != NULL) {
-        D_0031BF00[hEffect->family].destroy2(hEffect->hEffect);
+    if (D_0031BF00[hEffBTLSys->family].destroy2 != NULL) {
+        D_0031BF00[hEffBTLSys->family].destroy2(hEffBTLSys->hEffect);
     }
-    sdfChipFreeDirect(hEffect);
+    sdfChipFreeDirect(hEffBTLSys);
 }
 
 INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSystemDraw);
 
-u32 effBTLSystemGetLength(effBTLSystemHandle_t *hEffect)
+u32 effBTLSystemGetLength(effBTLSystemHandle_t *hEffBTLSys)
 {
-    if (D_0031BF00[hEffect->family].getLength != NULL) {
-        return D_0031BF00[hEffect->family].getLength(hEffect->hEffect);
+    if (D_0031BF00[hEffBTLSys->family].getLength != NULL) {
+        return D_0031BF00[hEffBTLSys->family].getLength(hEffBTLSys->hEffect);
     }
     return 0;
 }
 
-s32 effBTLSystemGetID(effBTLSystemHandle_t *hEffect)
+s32 effBTLSystemGetID(effBTLSystemHandle_t *hEffBTLSys)
 {
-    return hEffect->family;
+    return hEffBTLSys->family;
 }
 
-u32 effBTLSystemGetRGBA(s32 family)
+u32 effBTLSystemGetRGBA(s32 id)
 {
-    return D_0031BF00[family].rgba;
+    return D_0031BF00[id].rgba;
 }
 
 void effBTLSystemCut1DataFree(void)
@@ -2201,20 +2201,20 @@ INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005338D8);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_005338F8);
 
-void *effBTLSystemCut1Create(nbFormation_t *pFormation, s32 cut)
+void *effBTLSystemCut1Create(nbFormation_t *pFormation, s32 index)
 {
     effBTLSystemCut1Data_t *pData;
     void *hCut;
 
 loop:
-    pData = &effBTLSystemCut1Data[cut];
+    pData = &effBTLSystemCut1Data[index];
     if (pData->pData == NULL) {
-        cut = 1;
+        index = 1;
         goto loop;
     }
     if (pData->refCount == 0) {
         pData->hBTLEffect = effBTLCreate(pData->pData);
-        printf("effBTLSys:effBTLCreate[%d]\n", cut);
+        printf("effBTLSys:effBTLCreate[%d]\n", index);
     }
     pData->refCount++;
     hCut = effBTLCutCreate(pData->hBTLEffect, 0, pFormation, 0);
@@ -2223,17 +2223,17 @@ loop:
     return hCut;
 }
 
-void effBTLSystemCut1Draw(void *hCut)
+void effBTLSystemCut1Draw(void *hBTLCutEffect)
 {
-    effBTLCutDraw(hCut);
+    effBTLCutDraw(hBTLCutEffect);
 }
 
-void effBTLSystemCut1Delete(void *hCut)
+void effBTLSystemCut1Delete(void *hBTLCutEffect)
 {
     effBTLSystemCut1Data_t *pData;
 
-    pData = effBTLCutGetUserData(hCut);
-    effBTLCutDelete(hCut);
+    pData = effBTLCutGetUserData(hBTLCutEffect);
+    effBTLCutDelete(hBTLCutEffect);
     printf("effBTLSys:effBTLCutDelete\n");
     pData->refCount--;
     if (pData->refCount == 0) {

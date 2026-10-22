@@ -6,37 +6,37 @@
 #include "newdata.h"
 #include "field.h"
 
-extern s32 fldDoor_ElvTakasaToFloor(s32 floor);
+extern s32 fldDoor_ElvTakasaToFloor(s32 takasa);
 
-extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type);
+extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 
 extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *list);
 
-extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *list);
+extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *hndl);
 
-extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *list);
+extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 
 extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *list);
 
-extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
+extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, u32 flag);
 
-extern void rsetOtOfs(u32 buffer);
+extern void rsetOtOfs(u32 otofs);
 
 extern void fldDrwZSave(void);
 
 extern void fldDrwZLoad(void);
 
-extern f32 R360_LR(f32 current, f32 target);
+extern f32 R360_LR(f32 a, f32 b);
 
 extern sdfVector4_t fldCamTarget;
 
 extern s32 fldGb __attribute__((section(".data")));
 
-extern f32 sdfAtan2(f32 x, f32 z);
+extern f32 sdfAtan2(f32 aY, f32 aX);
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
 extern void fldRunDanteShutdown(void);
 
@@ -66,7 +66,7 @@ extern s16 fldRun_MAP_BZ;
 
 extern s32 fldRunAiTimer __attribute__((section(".bss")));
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern void fldSetElvCameraScene(s32 dir);
 
@@ -76,21 +76,21 @@ typedef struct {
     u32 cellsOffset;
 } fldRunMapGrid_t;
 
-extern void fldMakeFilePath(char *path, s32 area, s32 floor);
+extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 extern s32 sprintf(char *text, const char *format, ...);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(char *path, void *destination, void *size);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, void *position);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
 
-extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
-extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, u32 flag);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, u32 flag);
 
-extern void mdlSingleMotion(void *model, s32 motion, s32 flag);
+extern void mdlSingleMotion(void *aHandle, s32 aGroup, s32 aNumber);
 
-extern s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz);
+extern s32 FroFtoI(f32 fx, f32 fz, u16 *rx, u16 *rz);
 
 extern u16 fldRunDanteStartX[2];
 
@@ -108,9 +108,9 @@ extern void fldRunTamaSe(void);
 
 extern void fldRunDanteStanceSet(s32 stance);
 
-extern s32 p2sdLoadCheckMidi(u32 midino);
+extern s32 p2sdLoadCheckMidi(u32 MidiNo);
 
-extern s32 p2sdLoadSMGFile(u32 midino);
+extern s32 p2sdLoadSMGFile(u32 MidiNo);
 
 extern void sdfDrawSync(void);
 
@@ -128,19 +128,19 @@ extern u32 fldDbg_BlurOn[];
 
 extern u32 dds3AllocObjectId(void);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 id, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot);
 
 extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
 
-extern void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 kind, s32 arg2);
+extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor);
 
-extern f32 sdfSin(f32 radians);
+extern f32 sdfSin(f32 aRadius);
 
-extern f32 sdfCos(f32 radians);
+extern f32 sdfCos(f32 aRadius);
 
 extern void fldFindDoorEvent(void *event);
 
-extern void evtBitOn(s32 flag);
+extern void evtBitOn(s32 no);
 
 extern s32 fldJDataHandle __attribute__((section(".data")));
 
@@ -178,9 +178,9 @@ extern fldEffEntry_t *D_002FBEF0[];
 
 extern char D_002FBD40[];
 
-extern void FromRotation(f32 angle);
+extern void FromRotation(f32 aAngle);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
 extern dds3Basic_t *D_0054EAB0;
 
@@ -246,9 +246,9 @@ extern fldTamaSeVol_t D_005311D0;
 
 extern s32 fldRunDanteDistToTarget(f32 x, f32 y, f32 z);
 
-extern void frSetFontDrawOT(s32 ot);
+extern void frSetFontDrawOT(s32 OtType);
 
-extern void fldKanjiDraw(s32 x, s32 y, u32 color, const char *text);
+extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
 
 extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
 
@@ -256,29 +256,29 @@ extern s32 fldProcCampChk(void);
 
 extern s32 fldEncountTestFlag(u32 flag);
 
-extern void dds3EffectDelete(void *node);
+extern void dds3EffectDelete(void *pData);
 
-extern void dds3EffectDraw(void *node);
+extern void dds3EffectDraw(void *pData);
 
-extern s32 dds3EffectGetState(void *node);
+extern s32 dds3EffectGetState(void *hEffect);
 
-extern void *dds3EffectLoad(void *header);
+extern void *dds3EffectLoad(void *pD3P);
 
-extern void dds3EffectSetPosition(void *node, sdfVector4_t *pos);
+extern void dds3EffectSetPosition(void *pData, sdfVector4_t *pPos);
 
-extern void dds3EffectSetRotateMatrix(void *node, sdfMatrix4_t *matrix);
+extern void dds3EffectSetRotateMatrix(void *pData, sdfMatrix4_t *pMatrix);
 
-extern void *dds3EffectPartCreate(s32 kind, void *params);
+extern void *dds3EffectPartCreate(s32 type, void *pData);
 
-extern void dds3EffectPartDelete(void *part);
+extern void dds3EffectPartDelete(void *hEffPart);
 
-extern void dds3EffectPartDraw(void *part);
+extern void dds3EffectPartDraw(void *hEffPart);
 
-extern void dds3EffectPartSetPosition(void *part, sdfVector4_t *pos);
+extern void dds3EffectPartSetPosition(void *hEffPart, sdfVector4_t *pPos);
 
-extern void dds3EffectPartSetRotateMatrix(void *part, sdfMatrix4_t *matrix);
+extern void dds3EffectPartSetRotateMatrix(void *hEffPart, sdfMatrix4_t *pMatrix);
 
-extern void SetRotateMatrixY(f32 angle);
+extern void SetRotateMatrixY(f32 aAngle);
 
 /* Dante's chase work block. Only the fields the chase code reaches are known. */
 typedef struct
@@ -349,13 +349,13 @@ extern void *pFroMapHead;
 
 extern void *fldRunMapScale;
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
 
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
 extern s32 fldAutoMapChkMode(void);
 
@@ -363,9 +363,9 @@ extern void fldClearElvCameraScene(void);
 
 extern void fldRunDanteGetDistAngle(f32 *dist, f32 *angle);
 
-extern s32 ooyTestDrawProc(dds3ProcessID_t *id);
+extern s32 ooyTestDrawProc(dds3ProcessID_t *aProcId);
 
-s32 ooyTestDrawProc(dds3ProcessID_t *id)
+s32 ooyTestDrawProc(dds3ProcessID_t *aProcId)
 {
     if (nbGetEncountOn() != 0) {
         return 0;
@@ -717,7 +717,7 @@ INCLUDE_ASM(const s32, "field/fldTest", fldRunTamaFree);
 
 /* NON_MATCHING: 67 of 73 words differ (first at +0x10). */
 #ifdef NON_MATCHING
-void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 turn)
+void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 r)
 {
     fldRunDante_t *dante = &fldRun_Dante;
     fldEffEntry_t *entry;
@@ -737,7 +737,7 @@ void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 turn)
                 res->x = x;
                 res->y = y;
                 res->z = z;
-                res->turn = turn;
+                res->turn = r;
             } else {
                 handle = res->part;
                 if (handle != NULL) {
@@ -749,7 +749,7 @@ void fldRunEffSet(s32 id, f32 x, f32 y, f32 z, f32 turn)
                 res->x = x;
                 res->y = y;
                 res->z = z;
-                res->turn = turn;
+                res->turn = r;
             }
         }
     }
@@ -820,7 +820,7 @@ void fldRunEffTask(void)
 INCLUDE_ASM(const s32, "field/fldTest", fldRunEffTask);
 #endif
 
-void fldRunTamaSet(f32 x, f32 y, f32 z, f32 turn)
+void fldRunTamaSet(f32 x, f32 y, f32 z, f32 r)
 {
     sdfVector4_t pos;
     sdfVector4_t rot;
@@ -835,8 +835,8 @@ void fldRunTamaSet(f32 x, f32 y, f32 z, f32 turn)
     pos.y = y;
     pos.z = z;
     SDF_VU0_LOADVECTOR(&axis);
-    turn = turn * 3.14f;
-    FromRotation(turn / 180.0f);
+    r = r * 3.14f;
+    FromRotation(r / 180.0f);
     SDF_VU0_STOREVECTOR(&rot);
     switch (D_0054EABC) {
     case 0:
@@ -987,7 +987,7 @@ void fldFreeRunMapData(void)
     }
 }
 
-s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz)
+s32 FroFtoI(f32 fx, f32 fz, u16 *rx, u16 *rz)
 {
     f32 ox = fldRun_MAP_OX;
     f32 oz = fldRun_MAP_OZ;
@@ -1005,8 +1005,8 @@ s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz)
         for (i = 0; i < ((fldRunMapGrid_t *)pFroMapHead)->sizeX; i++) {
             offset = (((fldRunMapGrid_t *)pFroMapHead)->sizeX * j + i) * 2;
             if (((u8 *)fldRunMapScale)[offset] != 0) {
-                dx = x - (ox + (f32)fldRun_MAP_BX * (f32)i);
-                dz = z - (oz + (f32)-fldRun_MAP_BZ * (f32)j);
+                dx = fx - (ox + (f32)fldRun_MAP_BX * (f32)i);
+                dz = fz - (oz + (f32)-fldRun_MAP_BZ * (f32)j);
                 d = sdfSqrt(dx * dx + dz * dz);
                 if (d < best) {
                     best = d;
@@ -1016,8 +1016,8 @@ s32 FroFtoI(f32 x, f32 z, u16 *ix, u16 *iz)
             }
         }
     }
-    *ix = bestX;
-    *iz = bestZ;
+    *rx = bestX;
+    *rz = bestZ;
     if (bestX == 0 && bestZ == 0) {
         return -1;
     }

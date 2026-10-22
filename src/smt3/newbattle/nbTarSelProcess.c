@@ -8,8 +8,8 @@ typedef struct
 } nbTarSelWork_t;
 
 extern char D_005442B8[];
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
-extern void *dds3GetProcessData(dds3ProcessID_t *process);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 nbTarSelWork_t *GetTarSelProcessData(void)
 {

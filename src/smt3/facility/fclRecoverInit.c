@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
@@ -24,7 +24,7 @@ extern rcvWork_t *shutdownfunc;
 
 extern void p2sdStopBGM(s32 id);
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 extern s8 gProcessStat_2;
 
@@ -32,7 +32,7 @@ extern char D_0053D390[];
 
 extern s32 printf(const char *fmt, ...);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 extern char D_0054FBD8[];
 
@@ -40,7 +40,7 @@ extern char D_0053D3F8[];
 
 extern char D_0053D408[];
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 typedef struct
 {
@@ -61,7 +61,7 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 extern void evtDisableMoonDraw(void);
 
@@ -92,8 +92,8 @@ void fclRecoverFreeTextures(fclRecoverWork_t *work)
     printf("RECOVER : Tex free.\n");
 }
 
-extern void lstInitListWindow(s32 a, s32 b, s32 color, s32 d, s32 e, s32 f, s32 g,
-                              void *list);
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s32 Style,
+                              void *pListWindow);
 
 void fclRecoverInitItemList(void *list)
 {

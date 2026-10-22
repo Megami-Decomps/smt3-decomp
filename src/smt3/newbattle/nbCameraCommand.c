@@ -28,11 +28,11 @@ typedef struct nbCamera_t {
     nbCameraAnim_t anim;
 } nbCamera_t;
 
-extern void effBTLModelGroupGetCenter(u32 mask);
+extern void effBTLModelGroupGetCenter(u32 group);
 
-extern f32 nbCameraGroupGetMaxLength(sdfVector4_t *pCenter, u32 mask);
+extern f32 nbCameraGroupGetMaxLength(sdfVector4_t *pPos, u32 group);
 
-extern void nbCameraShot_CommandFixPos_Set2(nbCamera_t *pCamera);
+extern void nbCameraShot_CommandFixPos_Set2(nbCamera_t *pNbCamera);
 
 /* 128-byte party records; this unit only reads the formation index. */
 struct nbParty_t {
@@ -41,13 +41,13 @@ struct nbParty_t {
     u8 unk04[0x7C];
 };
 
-extern f32 effBTLModelGroupGetSphere(u32 mask);
+extern f32 effBTLModelGroupGetSphere(u32 group);
 
-extern void effBTLModelGroupGetDirection(u32 mask, f32 *pDirection);
+extern void effBTLModelGroupGetDirection(u32 group, f32 *pDirection);
 
-extern f32 sdfAtan(f32 x);
+extern f32 sdfAtan(f32 aX);
 
-extern void SetRotateMatrixX(f32 angle);
+extern void SetRotateMatrixX(f32 aAngle);
 
 extern u32 effBTLSkillGetInvokeParty(void);
 
@@ -108,7 +108,7 @@ f32 nbCameraGetModelRadius(nbFormation_t *pFormation)
     return radius;
 }
 
-f32 nbCameraGroupGetMaxLength(sdfVector4_t *pCenter, u32 mask)
+f32 nbCameraGroupGetMaxLength(sdfVector4_t *pPos, u32 group)
 {
     nbFormation_t *pForm = nbGetMainProcessData()->form;
     f32 max = 0.0f;
@@ -116,9 +116,9 @@ f32 nbCameraGroupGetMaxLength(sdfVector4_t *pCenter, u32 mask)
     s32 i;
 
     for (i = 0x1F; i >= 0; i--) {
-        if ((pForm->stat & mask) != 0 && (pForm->stat & 3) == 3) {
+        if ((pForm->stat & group) != 0 && (pForm->stat & 3) == 3) {
             effBTLModelGetSphereCenter(pForm);
-            SDF_VU0_LOADVECTOR_B(pCenter);
+            SDF_VU0_LOADVECTOR_B(pPos);
             SDF_VU0_SUBVECTOR();
             SDF_VU0_GETLENGTH(length);
             length += nbCameraGetModelRadius(pForm);
@@ -131,15 +131,15 @@ f32 nbCameraGroupGetMaxLength(sdfVector4_t *pCenter, u32 mask)
     return max;
 }
 
-f32 nbCameraGroupGetSphere(nbFormation_t *pFormation)
+f32 nbCameraGroupGetSphere(nbFormation_t *group)
 {
     sdfVector4_t center;
 
     f32 length;
 
-    effBTLModelGroupGetCenter(pFormation);
+    effBTLModelGroupGetCenter(group);
     SDF_VU0_STOREVECTOR_MEMOPS(center);
-    length = nbCameraGroupGetMaxLength(&center, pFormation);
+    length = nbCameraGroupGetMaxLength(&center, group);
     SDF_VU0_LOADVECTOR_MEMOPS(center);
     return length;
 }
@@ -157,7 +157,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_CommandFixPos_S
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_AllParty_Set);
 
-void nbCameraShot_FriendParty_Set(nbCamera_t *pCamera)
+void nbCameraShot_FriendParty_Set(nbCamera_t *pNbCamera)
 {
     u32 party;
     f32 radius;
@@ -167,18 +167,18 @@ void nbCameraShot_FriendParty_Set(nbCamera_t *pCamera)
     effBTLModelAllShow();
     party = effBTLSkillGetInvokeParty();
     radius = effBTLModelGroupGetSphere(party);
-    SDF_VU0_STOREVECTOR(pCamera);
-    pCamera->target.x = 0.0f;
+    SDF_VU0_STOREVECTOR(pNbCamera);
+    pNbCamera->target.x = 0.0f;
     if (radius < 250.0f) {
         radius = 250.0f;
     }
-    pCamera->fovy = 0.69813163f;
-    pCamera->distance = radius / sdfAtan(0.49567342f);
-    effBTLModelGroupGetDirection(party, &pCamera->direction);
+    pNbCamera->fovy = 0.69813163f;
+    pNbCamera->distance = radius / sdfAtan(0.49567342f);
+    effBTLModelGroupGetDirection(party, &pNbCamera->direction);
     SetRotateMatrixX(-0.26179934f);
-    SDF_VU0_LOADVECTOR(&pCamera->direction);
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
     SDF_VU0_APPLYMATRIX();
-    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_Summon_Set);

@@ -307,13 +307,13 @@ typedef struct nbEventProcessData_t {
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern char D_00546830[];
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern void nbSingleFormExceptedDispOff(nbFormation_t *form);
 

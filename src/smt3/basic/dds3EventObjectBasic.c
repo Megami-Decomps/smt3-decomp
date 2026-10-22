@@ -10,43 +10,43 @@ typedef struct
 
 extern s32 dds3InitPoseSet(dds3Basic_t *basic);
 extern void dds3FreePoseSet(dds3Basic_t *basic);
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
-extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
-extern void dds3OffPoseSetFlag(dds3PoseSet_t *pose, u32 flag);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
+extern void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag);
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *position);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
-u32 EventObjectBasicConstructor(dds3Basic_t *basic)
+u32 EventObjectBasicConstructor(dds3Basic_t *pBasic)
 {
     dds3EventObjectBasicWorkData_t *work;
     dds3ObjectBaseControlWorkData_t *control;
 
-    dds3InitPoseSet(basic);
+    dds3InitPoseSet(pBasic);
     work = sdfChipAllocDirect(sizeof(dds3EventObjectBasicWorkData_t));
-    basic->workdata = work;
-    control = dds3ObjectBaseInitControlWorkData(basic);
+    pBasic->workdata = work;
+    control = dds3ObjectBaseInitControlWorkData(pBasic);
     work->pObjectBaseControlWorkData = control;
     return 1;
 }
 
-void EventObjectBasicDestructor(dds3Basic_t *basic)
+void EventObjectBasicDestructor(dds3Basic_t *pBasic)
 {
     dds3EventObjectBasicWorkData_t *work;
 
-    dds3FreePoseSet(basic);
-    work = basic->workdata;
+    dds3FreePoseSet(pBasic);
+    work = pBasic->workdata;
     dds3ObjectBaseFreeControlWorkData(work->pObjectBaseControlWorkData);
     sdfChipFreeDirect(work);
 }
 
-s32 EventObjectBasicMainProcuder(dds3Basic_t *basic)
+s32 EventObjectBasicMainProcuder(dds3Basic_t *pBasic)
 {
     dds3PoseSet_t *pose;
 
-    pose = basic->poseset;
+    pose = pBasic->poseset;
     if (dds3CheckPoseSetFlag(pose, POSESET_FLAG_UPDATEPOSE) == 1) {
         dds3OffPoseSetFlag(pose, POSESET_FLAG_UPDATEPOSE);
         dds3SetRadiusPoseSet(pose);
@@ -54,21 +54,21 @@ s32 EventObjectBasicMainProcuder(dds3Basic_t *basic)
     return 1;
 }
 
-dds3Basic_t *dds3AddEventObjectBasic(s32 serialID, const sdfVector4_t *position,
-                                   const sdfVector4_t *rotation)
+dds3Basic_t *dds3AddEventObjectBasic(s32 serialID, const sdfVector4_t *pos,
+                                   const sdfVector4_t *rot)
 {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_EVENTOBJECT);
 
     basic->serialID = serialID;
-    dds3SetPosPoseSet(basic, position);
-    dds3SetRotPoseSet(basic, rotation);
+    dds3SetPosPoseSet(basic, pos);
+    dds3SetRotPoseSet(basic, rot);
     dds3SetRadiusPoseSet(basic->poseset);
     return basic;
 }
 
-dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *basic)
+dds3ObjectBaseControlWorkData_t *dds3EventObjectBasicGetControlWorkData(dds3Basic_t *pBasic)
 {
-    const dds3EventObjectBasicWorkData_t *work = basic->workdata;
+    const dds3EventObjectBasicWorkData_t *work = pBasic->workdata;
 
     return work->pObjectBaseControlWorkData;
 }

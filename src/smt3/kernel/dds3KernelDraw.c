@@ -213,15 +213,15 @@ extern u16 ripbluratarget; extern u16 ripblurswapnow; extern u16 ripblurswapmax;
 extern u32 ripblurovercnt;
 
 s32 *Eve_PartialMultiBlurGetParams(void);
-void Eve_PartialMultiBlurSetParam(void *param);
+void Eve_PartialMultiBlurSetParam(void *pParam);
 void Eve_PartialMultiBlurON(void);
 void Eve_PartialMultiBlurOFF(void);
 s32 *Eve_DistortionBlurGetParams(void);
-void Eve_DistortionBlurSetParam(void *param);
+void Eve_DistortionBlurSetParam(void *pParam);
 void Eve_DistortionBlurON(void);
 void Eve_DistortionBlurOFF(void);
 s32 *Eve_RippleBlurGetParams(void);
-void Eve_RippleBlurSetParam(void *param);
+void Eve_RippleBlurSetParam(void *pParam);
 void Eve_RippleBlurON(void);
 void Eve_RippleBlurOFF(void);
 extern dds3Blur2Param_t blur2target;
@@ -243,15 +243,15 @@ extern s16 bluralphatarget;
 extern s16 blurscaletarget;
 
 s32 *Eve_PartialMultiFilterGetParams(void);
-void Eve_PartialMultiFilterSetParam(void *param);
+void Eve_PartialMultiFilterSetParam(void *pParam);
 void Eve_PartialMultiFilterON(void);
 void Eve_PartialMultiFilterOFF(void);
 s32 *Eve_BlurGetParam(void);
-void Eve_BlurSetParam(void *param);
+void Eve_BlurSetParam(void *pParam);
 void Eve_BlurON(void);
 void Eve_BlurOFF(void);
 
-void setdraw_xy(s32 *rect);
+void setdraw_xy(s32 *xy);
 
 extern dds3FogRange_t dds3FogParam;
 extern dds3FogRange_t dds3FogColor;
@@ -266,16 +266,16 @@ extern sdfGsMemSlice_t *dds3RenderTexHandle;
 extern sdfTexHandle_t *dds3RenderTexture;
 extern sdfMat_t *D_00551BA8;
 
-void sdfTexFree(sdfTexHandle_t *tex);
+void sdfTexFree(sdfTexHandle_t *aHandle);
 sdfMat_t *sdfMatNew(void);
-void *frwGetSmallFontFRQ(s32 x, s32 y, s32 arg2, s32 color, const char *text, void *arg5);
-void frDrawFont(void *req);
-void frDestroyFontRequestAfter(void *req);
+void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char *pStr, void *pFRQ);
+void frDrawFont(void *pFRQ);
+void frDestroyFontRequestAfter(void *pFRQ);
 void *Eve_FilterGetParams(void);
-void Eve_FilterSetParam(void *param);
+void Eve_FilterSetParam(void *pParam);
 void Eve_FilterON(void);
 void Eve_FilterOFF(void);
-void *memcpy(void *dst, const void *src, u32 len);
+void *memcpy(void *a, const void *b, u32 c);
 
 void dds3FadeClear(void);
 s32 dds3FadeCheck(void);
@@ -298,15 +298,15 @@ typedef struct
 } dds3QuakeGain_t;
 
 extern dds3QuakeGain_t D_0054E988[];
-f32 dds3GetRandFloatA(s32 kind);
-void sdfGrSetScreen(s32 screen);
-void sdf3DMakeScreenParam(sdf3DScreenParam_t *param);
-void dds3InitDrawEnvSub(s32 buffer);
+f32 dds3GetRandFloatA(s32 name);
+void sdfGrSetScreen(s32 aMode);
+void sdf3DMakeScreenParam(sdf3DScreenParam_t *aParam);
+void dds3InitDrawEnvSub(s32 i);
 void dds3InitZClearDrawTag(void);
-void sdf3DLinkInitPacket(sdfDrawTag_t *tag, sdf3DInitPacket_t *packet);
-void sdfPreDrawTagInit(sdfPreDrawTag_t *tag);
-void sdfGrSetStdDrawEnv(dds3StdDrawEnv_t *env, sdfGrFrameSet_t *frameSet);
-void sdfGrLinkStdDrawEnv(sdfDrawTag_t *tag, sdfPreDrawTag_t *preTag, dds3StdDrawEnv_t *env);
+void sdf3DLinkInitPacket(sdfDrawTag_t *aTag, sdf3DInitPacket_t *aPacket);
+void sdfPreDrawTagInit(sdfPreDrawTag_t *aTag);
+void sdfGrSetStdDrawEnv(dds3StdDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet);
+void sdfGrLinkStdDrawEnv(sdfDrawTag_t *aTag, sdfPreDrawTag_t *aPreDrawTag, dds3StdDrawEnv_t *aEnv);
 extern sdfGrFrameSet_t D_00529388;
 extern sdfMatrix4_t aProjMatrix;
 extern dds3LightState_t dds3LightParam2;
@@ -355,78 +355,78 @@ PS2_SYMBOL_AT(dds3Blur2Param_t, dds3Blur2State, dds3BlurState, 0x30);
 extern dds3Filter2Param_t dds3BlurParam;
 extern dds3MFilterParam_t D_00556C70;
 
-void *memset(void *dest, s32 value, u32 size);
+void *memset(void *a, s32 b, u32 c);
 f32 fabsf(f32 value);
 u32 dds3GetFrameID(void);
 void dds3FreeRenderTexture(void);
 sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
-void *sdfGrAllocPacketBuff(u32 size);
-void sdfDrawTagInit(sdfDrawTag_t *tag);
-void sdfDrawTagLink(sdfDrawTag_t *tag, void *packet);
-void *sdf2DMakeStdPacket(void *packet, s32 size);
-s32 sdf2DGetPrimPacketSize(s32 registers, s32 loops);
-void sdf2DMakePrimPacketHeader(void *packet, s32 primitive, s32 registers, s32 registerList, s32 loops);
-void *sdf2DGetPrimPtr(void *packet);
-void sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 context);
-void sdfPrimLinkGt4(sdfDrawTag_t *tag, s32 primitive,
-    s32 x0, s32 y0, s32 u0, s32 v0, u32 color0,
-    s32 x1, s32 y1, s32 u1, s32 v1, u32 color1,
-    s32 x2, s32 y2, s32 u2, s32 v2, u32 color2,
-    s32 x3, s32 y3, s32 u3, s32 v3, u32 color3, s32 depth, void *extra);
-void sdf3DPrimLinkResetTm(sdfDrawTag_t *tag, s32 mode);
-void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, s32 mode);
-void *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *param);
-void sdfMatSetTex(sdfMat_t *material, sdfTexHandle_t *texture);
-void sdfMatFreeDelayed(sdfMat_t *material);
+void *sdfGrAllocPacketBuff(u32 aSize);
+void sdfDrawTagInit(sdfDrawTag_t *a);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, void *aPacket);
+void *sdf2DMakeStdPacket(void *aPacket, s32 aLeng);
+s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
+void sdf2DMakePrimPacketHeader(void *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, s32 aGifRegs, s32 aNumOfPrim);
+void *sdf2DGetPrimPtr(void *aPacketPtr);
+void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
+void sdfPrimLinkGt4(sdfDrawTag_t *aTag, s32 aPrim,
+    s32 aX0, s32 aY0, s32 aU0, s32 aV0, u32 aColor0,
+    s32 aX1, s32 aY1, s32 aU1, s32 aV1, u32 aColor1,
+    s32 aX2, s32 aY2, s32 aU2, s32 aV2, u32 aColor2,
+    s32 aX3, s32 aY3, s32 aU3, s32 aV3, u32 aColor3, s32 aZ, void *aAllocator);
+void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, s32 aAllocator);
+void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, s32 aAllocator);
+void *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
+void sdfMatSetTex(sdfMat_t *aMat, sdfTexHandle_t *aTex);
+void sdfMatFreeDelayed(sdfMat_t *aMat);
 void *effDebugDrawWireModel(f32 vertices[][4], u32 *colors, s32 count, s32 alpha);
-void sdfPrimSetOpaquePacket(void *packet);
-void sdfDevSetPrintCB(dds3PrintControl_t *control, s32 x, s32 y, s32 z, u32 color);
-void *sdfDevPrintfEx(dds3PrintControl_t *control, const char *format, ...);
-void *sdfDevPrintf(s32 x, s32 y, s32 z, u32 color, const char *format, ...);
-void sdfGrSetDrawEnv(sdfGrDrawEnv_t *env, sdfGrFrameSet_t *frameSet, s32 buffer);
-void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *packet, sdf3DScreenParam_t *screen, sdfMatrix4_t *matrix);
-void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *packet, sdf3DLight_t **lights, sdfVector4_t *ambient);
-sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 width, s32 height, s32 format);
-sdfTexHandle_t *sdfTexNew(s32 width, s32 height, s32 format, s32 mipmapCount,
-    sdfGsMemSlice_t *pixels, s32 clutFormat, s32 clutCount, sdfGsMemSlice_t *clut);
-void sdfTexSetWrapMode(sdfTexHandle_t *texture, s32 mode);
-void sdfTexMakeGIFPacket(sdfTexHandle_t *texture);
-void MultMatrixRev(sdfMatrix4_t *matrix);
+void sdfPrimSetOpaquePacket(void *aPkt);
+void sdfDevSetPrintCB(dds3PrintControl_t *aCB, s32 aX, s32 aY, s32 aZ, u32 aAttr);
+void *sdfDevPrintfEx(dds3PrintControl_t *aCB, const char *aStr, ...);
+void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, u32 aAttr, const char *aStr, ...);
+void sdfGrSetDrawEnv(sdfGrDrawEnv_t *aEnv, sdfGrFrameSet_t *aFrameSet, s32 aEvenOdd);
+void sdf3DMakeViewportPacket(sdf3DViewportPacket_t *aPacket, sdf3DScreenParam_t *aParam, sdfMatrix4_t *aCamera);
+void sdf3DMakeLightParallelPacket(sdf3DLightParallelPacket_t *aPacket, sdf3DLight_t **aLights, sdfVector4_t *aAmbient);
+sdfGsMemSlice_t *sdfGsAllocFrameBuff(s32 aW, s32 aH, s32 aPixelFormat);
+sdfTexHandle_t *sdfTexNew(s32 aWidth, s32 aHeight, s32 aPixelFormat, s32 aNumOfMipmap,
+    sdfGsMemSlice_t *aPixelGsHandle, s32 aCLUTFormat, s32 aNumOfCLUT, sdfGsMemSlice_t *aCLUTGsHandle);
+void sdfTexSetWrapMode(sdfTexHandle_t *aHandle, s32 aMode);
+void sdfTexMakeGIFPacket(sdfTexHandle_t *aHandle);
+void MultMatrixRev(sdfMatrix4_t *aMatrix);
 void Normalize(void);
 void dds3RotationArc(void);
-void Lerp(f32 blendAmount);
+void Lerp(f32 aRatio);
 void ToMatrix(void);
-void evtHokanBlur2(s32 enabled, f32 ratio, dds3Blur2Param_t *from, dds3Blur2Param_t *to, dds3Blur2Param_t *out);
-void evtHokanMultBlur(s32 enabled, f32 ratio, dds3MultiBlurParam_t *from, dds3MultiBlurParam_t *to, dds3MultiBlurParam_t *out);
-void evtHokanDistBlur(s32 enabled, f32 ratio, dds3DistBlurParam_t *from, dds3DistBlurParam_t *to, dds3DistBlurParam_t *out);
-void evtHokanRipBlur(s32 enabled, f32 ratio, dds3RipBlurBody_t *from, dds3RipBlurBody_t *to, dds3RipBlurBody_t *out);
-void evtHokanFilter(s32 enabled, f32 ratio, dds3Filter2Param_t *from, dds3Filter2Param_t *to, dds3Filter2Param_t *out);
-void evtHokanMultFilter(s32 enabled, f32 ratio, dds3MFilterParam_t *from, dds3MFilterParam_t *to, dds3MFilterParam_t *out);
+void evtHokanBlur2(s32 hokan, f32 ratio, dds3Blur2Param_t *key1, dds3Blur2Param_t *key2, dds3Blur2Param_t *d);
+void evtHokanMultBlur(s32 hokan, f32 ratio, dds3MultiBlurParam_t *key1, dds3MultiBlurParam_t *key2, dds3MultiBlurParam_t *d);
+void evtHokanDistBlur(s32 hokan, f32 ratio, dds3DistBlurParam_t *key1, dds3DistBlurParam_t *key2, dds3DistBlurParam_t *d);
+void evtHokanRipBlur(s32 hokan, f32 ratio, dds3RipBlurBody_t *key1, dds3RipBlurBody_t *key2, dds3RipBlurBody_t *d);
+void evtHokanFilter(s32 hokan, f32 ratio, dds3Filter2Param_t *key1, dds3Filter2Param_t *key2, dds3Filter2Param_t *d);
+void evtHokanMultFilter(s32 hokan, f32 ratio, dds3MFilterParam_t *key1, dds3MFilterParam_t *key2, dds3MFilterParam_t *d);
 
-void dds3InitDrawEnvSub(s32 buffer)
+void dds3InitDrawEnvSub(s32 i)
 {
-    sdfDrawTagInit(&dds3DrawEnv[buffer].initTag);
-    sdf3DLinkInitPacket(&dds3DrawEnv[buffer].initTag, &dds3DrawEnv[buffer].initPacket);
-    sdfDrawTagInit(&dds3DrawEnv[buffer].drawTag);
-    sdfPreDrawTagInit(&dds3DrawEnv[buffer].preDrawTag);
-    sdfGrSetStdDrawEnv(&dds3DrawEnv[buffer].stdEnv, &D_00529388);
+    sdfDrawTagInit(&dds3DrawEnv[i].initTag);
+    sdf3DLinkInitPacket(&dds3DrawEnv[i].initTag, &dds3DrawEnv[i].initPacket);
+    sdfDrawTagInit(&dds3DrawEnv[i].drawTag);
+    sdfPreDrawTagInit(&dds3DrawEnv[i].preDrawTag);
+    sdfGrSetStdDrawEnv(&dds3DrawEnv[i].stdEnv, &D_00529388);
     /* The byte offset is what associates the sum as base plus index; the
      * member path reaches stdEnv.env.clear.clearColor and associates it the
      * other way round. */
-    *(u32 *)((u8 *)&dds3DrawEnv[buffer] + 0x1410) = dds3BackColor;
-    sdfGrLinkStdDrawEnv(&dds3DrawEnv[buffer].drawTag, &dds3DrawEnv[buffer].preDrawTag,
-        &dds3DrawEnv[buffer].stdEnv);
-    sdf3DMakeViewportPacket(&dds3DrawEnv[buffer].viewport, &dds3ScreenParam, &D_002FA240);
-    sdfDrawTagLink(&dds3DrawEnv[buffer].drawTag, &dds3DrawEnv[buffer].viewport);
-    sdf3DMakeLightParallelPacket(&dds3DrawEnv[buffer].light, dds3LightParam.parallel,
+    *(u32 *)((u8 *)&dds3DrawEnv[i] + 0x1410) = dds3BackColor;
+    sdfGrLinkStdDrawEnv(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].preDrawTag,
+        &dds3DrawEnv[i].stdEnv);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[i].viewport, &dds3ScreenParam, &D_002FA240);
+    sdfDrawTagLink(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].viewport);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].light, dds3LightParam.parallel,
         &dds3AmbientColor);
-    sdfDrawTagLink(&dds3DrawEnv[buffer].drawTag, &dds3DrawEnv[buffer].light);
-    sdfDrawTagInit(&dds3DrawEnv[buffer].subTag);
-    sdf3DMakeViewportPacket(&dds3DrawEnv[buffer].subViewport, &dds3ScreenParam2, &aProjMatrix);
-    sdfDrawTagLink(&dds3DrawEnv[buffer].subTag, &dds3DrawEnv[buffer].subViewport);
-    sdf3DMakeLightParallelPacket(&dds3DrawEnv[buffer].subLight, dds3LightParam2.parallel,
+    sdfDrawTagLink(&dds3DrawEnv[i].drawTag, &dds3DrawEnv[i].light);
+    sdfDrawTagInit(&dds3DrawEnv[i].subTag);
+    sdf3DMakeViewportPacket(&dds3DrawEnv[i].subViewport, &dds3ScreenParam2, &aProjMatrix);
+    sdfDrawTagLink(&dds3DrawEnv[i].subTag, &dds3DrawEnv[i].subViewport);
+    sdf3DMakeLightParallelPacket(&dds3DrawEnv[i].subLight, dds3LightParam2.parallel,
         &dds3AmbientColor2);
-    sdfDrawTagLink(&dds3DrawEnv[buffer].subTag, &dds3DrawEnv[buffer].subLight);
+    sdfDrawTagLink(&dds3DrawEnv[i].subTag, &dds3DrawEnv[i].subLight);
 }
 
 void dds3InitDrawEnv(void)
@@ -468,7 +468,7 @@ void dds3InitRenderDrawEnv(void)
 
 /* Replacing a render texture releases the old texture first. A texture-creation
  * failure leaves the allocated framebuffer handle tracked, as in retail. */
-s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect)
+s32 dds3AllocRenderTexture(u16 sx, u16 sy, f32 aspect)
 {
     sdfTexHandle_t *texture;
 
@@ -476,13 +476,13 @@ s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect)
         dds3FreeRenderTexture();
     }
     dds3RenderTex = 0;
-    dds3RenderTexWidth = width;
-    dds3RenderTexHeight = height;
-    dds3RenderTexHandle = sdfGsAllocFrameBuff(width, height, 0);
+    dds3RenderTexWidth = sx;
+    dds3RenderTexHeight = sy;
+    dds3RenderTexHandle = sdfGsAllocFrameBuff(sx, sy, 0);
     if (dds3RenderTexHandle == NULL) {
         return 0;
     }
-    texture = sdfTexNew(width, height, 0, 0, dds3RenderTexHandle, 0, 0, NULL);
+    texture = sdfTexNew(sx, sy, 0, 0, dds3RenderTexHandle, 0, 0, NULL);
     if (texture == NULL) {
         return 0;
     }
@@ -490,8 +490,8 @@ s32 dds3AllocRenderTexture(u16 width, u16 height, f32 aspect)
     sdfTexSetWrapMode(texture, 5);
     sdfTexMakeGIFPacket(texture);
     D_002F5B80.aspect = aspect;
-    D_002F5B80.width = width;
-    D_002F5B80.height = height;
+    D_002F5B80.width = sx;
+    D_002F5B80.height = sy;
     dds3InitRenderDrawEnv();
     return 1;
 }
@@ -582,19 +582,19 @@ void dds3RunQuake(void)
 }
 
 /* Zero amplitude stops the quake; zero duration leaves it running indefinitely. */
-void dds3SetQuake(s32 duration, s32 amplitude)
+void dds3SetQuake(s32 frame, s32 range)
 {
-    if (amplitude == 0) {
+    if (range == 0) {
         dds3QuakeFlag = 0;
         return;
     }
     dds3QuakeFlag = 1;
-    if (duration == 0) {
+    if (frame == 0) {
         dds3QuakeFrame = -1;
     } else {
-        dds3QuakeFrame = duration;
+        dds3QuakeFrame = frame;
     }
-    dds3QuakeYRange = amplitude * 10;
+    dds3QuakeYRange = range * 10;
     dds3QuakeXRange = dds3QuakeYRange * 4 / 10;
 }
 
@@ -645,11 +645,11 @@ void dds3InitZClearDrawTag(void)
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3InitZClearDrawTag);
 #endif
 
-sdfDrawTag_t *dds3LinkZClearDrawTag(s32 state)
+sdfDrawTag_t *dds3LinkZClearDrawTag(s32 sw)
 {
     sdfDrawTag_t *tag = dds3FontReqAllocDrawTag();
 
-    sdfDrawTagLink(tag, &dds3ZClearDrawTag[state][dds3GetFrameID()]);
+    sdfDrawTagLink(tag, &dds3ZClearDrawTag[sw][dds3GetFrameID()]);
     return tag;
 }
 
@@ -662,27 +662,27 @@ void dds3FadeClear(void)
     fadergba[3] = 0;
 }
 
-void dds3FadeSet(s32 red, s32 green, s32 blue, s32 alpha)
+void dds3FadeSet(s32 r, s32 g, s32 b, s32 a)
 {
     dds3DrawFlag &= ~3;
-    fadergba[0] = red;
-    fadergba[1] = green;
-    fadergba[2] = blue;
-    fadergba[3] = alpha;
+    fadergba[0] = r;
+    fadergba[1] = g;
+    fadergba[2] = b;
+    fadergba[3] = a;
 }
 
-void dds3FadeColorSet(s8 red, s8 green, s8 blue)
+void dds3FadeColorSet(s8 r, s8 g, s8 b)
 {
-    fadergba[0] = red;
-    fadergba[1] = green;
-    fadergba[2] = blue;
+    fadergba[0] = r;
+    fadergba[1] = g;
+    fadergba[2] = b;
 }
 
-void dds3FadeIn(s32 red, s32 green, s32 blue, s32 frame)
+void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame)
 {
-    fadergba[0] = red;
-    fadergba[1] = green;
-    fadergba[2] = blue;
+    fadergba[0] = r;
+    fadergba[1] = g;
+    fadergba[2] = b;
     fadergba[3] = -128;
     if (frame == 0) {
         fadergba[3] = 0;
@@ -711,11 +711,11 @@ void dds3FadeIn2(s32 frame)
     }
 }
 
-void dds3FadeOut(s32 red, s32 green, s32 blue, s32 frame)
+void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame)
 {
-    fadergba[0] = red;
-    fadergba[1] = green;
-    fadergba[2] = blue;
+    fadergba[0] = r;
+    fadergba[1] = g;
+    fadergba[2] = b;
     fadergba[3] = 0;
     if (frame == 0) {
         fadenow = 0;
@@ -839,9 +839,9 @@ void dds3DrawFade(void)
 INCLUDE_ASM(const s32, "kernel/dds3KernelDraw", dds3DrawFade);
 #endif
 
-void dds3SetScreenFovy(f32 fieldOfView)
+void dds3SetScreenFovy(f32 fovy)
 {
-    dds3ScreenParam.fovy = fieldOfView;
+    dds3ScreenParam.fovy = fovy;
 }
 
 void dds3SetAmbient(sdfVector4_t *ambient)
@@ -849,22 +849,22 @@ void dds3SetAmbient(sdfVector4_t *ambient)
     SDF_VU0_COPYVECTOR(&dds3LightParam.ambient, ambient);
 }
 
-void dds3SetFog(s32 *param)
+void dds3SetFog(s32 *fog)
 {
-    memcpy(&dds3LightParam.fog, param, 0x14);
+    memcpy(&dds3LightParam.fog, fog, 0x14);
 }
 
-void dds3SetLight(void *light, s32 index)
+void dds3SetLight(void *light, s32 no)
 {
-    dds3LightParam.parallel[index] = light;
+    dds3LightParam.parallel[no] = light;
 }
 
-void setdraw_xy(s32 *rect)
+void setdraw_xy(s32 *xy)
 {
-    rect[2] = 512;
-    rect[3] = 448;
-    rect[1] = 0;
-    rect[0] = 0;
+    xy[2] = 512;
+    xy[3] = 448;
+    xy[1] = 0;
+    xy[0] = 0;
 }
 
 void dds3SetFilter2Para(s32 blend)
@@ -932,11 +932,11 @@ void dds3SetMFilterRGBA(u32 rgba)
     mfiltertarget.color = rgba;
 }
 
-void dds3SetMFilterArea(s32 x, s32 y, s32 z)
+void dds3SetMFilterArea(s32 area, s32 posx, s32 posy)
 {
-    mfiltertarget.area[0] = x;
-    mfiltertarget.area[1] = y;
-    mfiltertarget.area[2] = z;
+    mfiltertarget.area[0] = area;
+    mfiltertarget.area[1] = posx;
+    mfiltertarget.area[2] = posy;
 }
 
 void dds3MFilterSwap(s32 frame)
@@ -1004,9 +1004,9 @@ void dds3SetBlur(s32 frame, s32 alpha, s32 scale)
     }
 }
 
-void dds3SetBlur2Para(f32 rotation, f32 scale, s32 blend)
+void dds3SetBlur2Para(f32 rotate, f32 scale, s32 blend)
 {
-    blur2target.rotation = rotation;
+    blur2target.rotation = rotate;
     blur2target.scale = scale;
     blur2target.blend = blend;
 }
@@ -1016,10 +1016,10 @@ void dds3SetBlur2RGBA(u32 rgba)
     blur2target.color = rgba;
 }
 
-void dds3SetBlur2Area(s32 x, s32 y)
+void dds3SetBlur2Area(s32 posx, s32 posy)
 {
-    blur2target.area[0] = x;
-    blur2target.area[1] = y;
+    blur2target.area[0] = posx;
+    blur2target.area[1] = posy;
 }
 
 void dds3Blur2Swap(s32 frame)
@@ -1067,9 +1067,9 @@ void dds3Blur2Off(s32 frame)
     }
 }
 
-void dds3SetMultiBlurPara(f32 rotation, f32 scale, s32 blend)
+void dds3SetMultiBlurPara(f32 rotate, f32 scale, s32 blend)
 {
-    mulblurtarget.rotation = rotation;
+    mulblurtarget.rotation = rotate;
     mulblurtarget.scale = scale;
     mulblurtarget.blend = blend;
 }
@@ -1079,11 +1079,11 @@ void dds3SetMultiBlurRGBA(u32 rgba)
     mulblurtarget.color = rgba;
 }
 
-void dds3SetMultiBlurArea(s32 extent, s32 x, s32 y)
+void dds3SetMultiBlurArea(s32 area, s32 posx, s32 posy)
 {
-    mulblurtarget.extent = extent;
-    mulblurtarget.x = x;
-    mulblurtarget.y = y;
+    mulblurtarget.extent = area;
+    mulblurtarget.x = posx;
+    mulblurtarget.y = posy;
 }
 
 void dds3MultiBlurSwap(s32 frame)
@@ -1130,21 +1130,21 @@ void dds3MultiBlurOff(s32 frame)
     }
 }
 
-void dds3SetDistBlurPara(s32 count, s32 size, s32 delaySpread, s32 blend,
-                         f32 angleStep, f32 uvAngle, f32 uvAmplitude)
+void dds3SetDistBlurPara(s32 number, s32 width, s32 intval, s32 speed,
+                         f32 rotate, f32 distor, f32 blend)
 {
-    if (count >= 101)
+    if (number >= 101)
 {
         distblurovercnt++;
-        count = 100;
+        number = 100;
     }
-    distblurtarget.count = count;
-    distblurtarget.size = size;
-    distblurtarget.delaySpread = delaySpread;
-    distblurtarget.angleStep = angleStep;
-    distblurtarget.uvAngle = uvAngle;
-    distblurtarget.uvAmplitude = uvAmplitude;
-    distblurtarget.blend = blend;
+    distblurtarget.count = number;
+    distblurtarget.size = width;
+    distblurtarget.delaySpread = intval;
+    distblurtarget.angleStep = rotate;
+    distblurtarget.uvAngle = distor;
+    distblurtarget.uvAmplitude = blend;
+    distblurtarget.blend = speed;
 }
 
 void dds3SetDistBlurRGBA(u32 rgba)
@@ -1152,11 +1152,11 @@ void dds3SetDistBlurRGBA(u32 rgba)
     distblurtarget.color = rgba;
 }
 
-void dds3SetDistBlurArea(s32 spread, s32 x, s32 y)
+void dds3SetDistBlurArea(s32 area, s32 posx, s32 posy)
 {
-    distblurtarget.spread = spread;
-    distblurtarget.x = x;
-    distblurtarget.y = y;
+    distblurtarget.spread = area;
+    distblurtarget.x = posx;
+    distblurtarget.y = posy;
 }
 
 void dds3DistBlurSwap(s32 frame)
@@ -1204,19 +1204,19 @@ void dds3DistBlurOff(s32 frame)
     }
 }
 
-void dds3SetRipBlurPara(s32 count, s32 blend, f32 phase, f32 spacing, f32 angle, f32 amp, f32 anglestep)
+void dds3SetRipBlurPara(s32 number, s32 speed, f32 intval, f32 rotate, f32 distor, f32 distor_s, f32 blend)
 {
-    if (count >= 0x29) {
+    if (number >= 0x29) {
         ripblurovercnt++;
-        count = 0x28;
+        number = 0x28;
     }
-    ripblurtarget.ripple.count = count;
-    ripblurtarget.ripple.phaseStep = phase;
-    ripblurtarget.ripple.spacing = spacing;
-    ripblurtarget.ripple.uvAngle = angle;
-    ripblurtarget.ripple.uvAmplitude = amp;
-    ripblurtarget.ripple.angleStep = anglestep;
-    ripblurtarget.ripple.blend = blend;
+    ripblurtarget.ripple.count = number;
+    ripblurtarget.ripple.phaseStep = intval;
+    ripblurtarget.ripple.spacing = rotate;
+    ripblurtarget.ripple.uvAngle = distor;
+    ripblurtarget.ripple.uvAmplitude = distor_s;
+    ripblurtarget.ripple.angleStep = blend;
+    ripblurtarget.ripple.blend = speed;
 }
 
 void dds3SetRipBlurRGBA(u32 rgba)
@@ -1224,11 +1224,11 @@ void dds3SetRipBlurRGBA(u32 rgba)
     ripblurtarget.ripple.color = rgba;
 }
 
-void dds3SetRipBlurArea(s32 size, s32 x, s32 y)
+void dds3SetRipBlurArea(s32 area, s32 posx, s32 posy)
 {
-    ripblurtarget.ripple.area = size;
-    ripblurtarget.ripple.x = x;
-    ripblurtarget.ripple.y = y;
+    ripblurtarget.ripple.area = area;
+    ripblurtarget.ripple.x = posx;
+    ripblurtarget.ripple.y = posy;
 }
 
 void dds3RipBlurSwap(s32 frame)
@@ -1580,9 +1580,9 @@ void dds3RotationArc(void)
 }
 
 /* vu0 routine: stage an immediate or interpolated parallel light color. */
-void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color)
+void dds3SetLightColor(s32 frame, s32 no, f32 *col)
 {
-    sdf3DLight_t *light = dds3LightParam.parallel[lightIndex];
+    sdf3DLight_t *light = dds3LightParam.parallel[no];
     u32 baseColorWords[4];
     u32 targetColorWords[4];
     u32 packedBaseColor;
@@ -1590,81 +1590,81 @@ void dds3SetLightColor(s32 blendFrames, s32 lightIndex, f32 *color)
     u32 blendFlag;
 
     if (light != NULL) {
-        blendFlag = 4 << (lightIndex * 2);
-        if (blendFrames == 0) {
+        blendFlag = 4 << (no * 2);
+        if (frame == 0) {
             dds3DrawFlag &= ~blendFlag;
-            SDF_VU0_LOADVECTOR(color);
+            SDF_VU0_LOADVECTOR(col);
             SDF_VU0_VECTOR_W_SET_ZERO();
-            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[lightIndex]->color);
+            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[no]->color);
         } else {
-            lightcolormax[lightIndex] = blendFrames;
-            lightcolornow[lightIndex] = 0;
+            lightcolormax[no] = frame;
+            lightcolornow[no] = 0;
             dds3DrawFlag |= blendFlag;
             SDF_VU0_LOADVECTOR(light);
             MMI_RGBA_PACK_128(packedBaseColor);
             baseColorWords[0] = packedBaseColor;
-            dds3LightColor[lightIndex] = packedBaseColor;
-            SDF_VU0_LOADVECTOR(color);
+            dds3LightColor[no] = packedBaseColor;
+            SDF_VU0_LOADVECTOR(col);
             SDF_VU0_VECTOR_W_SET_ZERO();
             MMI_RGBA_PACK_128(packedTargetColor);
-            D_00557230[lightIndex] = packedTargetColor;
+            D_00557230[no] = packedTargetColor;
             targetColorWords[0] = packedTargetColor;
         }
     }
 }
 
-void dds3SetLightDir(s32 blendFrames, s32 lightIndex, f32 *direction)
+void dds3SetLightDir(s32 frame, s32 no, f32 *dir)
 {
     u32 blendFlag;
 
-    if (dds3LightParam.parallel[lightIndex] != NULL) {
-        blendFlag = 8 << (lightIndex * 2);
-        if (blendFrames == 0) {
+    if (dds3LightParam.parallel[no] != NULL) {
+        blendFlag = 8 << (no * 2);
+        if (frame == 0) {
             dds3DrawFlag &= ~blendFlag;
-            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_LOADVECTOR(dir);
             SDF_VU0_NORMALIZE();
             SDF_VU0_VECTOR_W_SET_ZERO();
-            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[lightIndex]->v);
+            SDF_VU0_STOREVECTOR(&dds3LightParam.parallel[no]->v);
         } else {
-            lightdirmax[lightIndex] = blendFrames;
-            lightdirnow[lightIndex] = 0;
+            lightdirmax[no] = frame;
+            lightdirnow[no] = 0;
             dds3DrawFlag |= blendFlag;
-            SDF_VU0_LOADVECTOR(direction);
+            SDF_VU0_LOADVECTOR(dir);
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_NORMALIZE();
             SDF_VU0_COPYVECTOR_A_TO_B();
-            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[lightIndex]->v);
+            SDF_VU0_LOADVECTOR(&dds3LightParam.parallel[no]->v);
             SDF_VU0_VECTOR_W_SET_ZERO();
             SDF_VU0_NORMALIZE();
             /* No memory clobber here: retail recomputes the slot offset after the call. */
-            SDF_VU0_STOREVECTOR_NOMEM(D_00557240[lightIndex]);
+            SDF_VU0_STOREVECTOR_NOMEM(D_00557240[no]);
             dds3RotationArc();
-            SDF_VU0_STOREVECTOR(D_00557270[lightIndex]);
+            SDF_VU0_STOREVECTOR(D_00557270[no]);
         }
     }
 }
 
 /* vu0 routine: stage an immediate or interpolated ambient color. */
-void dds3SetAmbientColor(s32 blendFrames, f32 *color)
+void dds3SetAmbientColor(s32 frame, f32 *col)
 {
     u32 baseColorWords[4];
     u32 targetColorWords[4];
     u32 packedColor;
 
-    if (blendFrames == 0) {
+    if (frame == 0) {
         dds3DrawFlag &= ~0x100;
-        SDF_VU0_LOADVECTOR(color);
+        SDF_VU0_LOADVECTOR(col);
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR(&dds3LightParam.ambient);
     } else {
-        ambientmax = blendFrames;
+        ambientmax = frame;
         ambientnow = 0;
         dds3DrawFlag |= 0x100;
         SDF_VU0_LOADVECTOR(&dds3LightParam.ambient);
         MMI_RGBA_PACK_128(packedColor);
         baseColorWords[0] = packedColor;
         ambientbase = packedColor;
-        SDF_VU0_LOADVECTOR(color);
+        SDF_VU0_LOADVECTOR(col);
         SDF_VU0_VECTOR_W_SET_ONE();
         MMI_RGBA_PACK_128(packedColor);
         targetColorWords[0] = packedColor;
@@ -1673,33 +1673,33 @@ void dds3SetAmbientColor(s32 blendFrames, f32 *color)
 }
 
 /* vu0 routine: stage an immediate or interpolated packed color. */
-void dds3SetFogColor(s32 blendFrames, f32 *color)
+void dds3SetFogColor(s32 frame, f32 *col)
 {
     u32 targetColorWords[4];
     u32 packedTargetColor;
 
-    SDF_VU0_LOADVECTOR(color);
+    SDF_VU0_LOADVECTOR(col);
     SDF_VU0_VECTOR_W_SET_ZERO();
     MMI_RGBA_PACK_255(packedTargetColor);
     targetColorWords[0] = packedTargetColor;
-    if (blendFrames == 0) {
+    if (frame == 0) {
         dds3DrawFlag &= ~0x200;
         dds3LightParam.fog.color = targetColorWords[0];
     } else {
         dds3DrawFlag |= 0x200;
-        fogrgbmax = blendFrames;
+        fogrgbmax = frame;
         fogrgbtarget = targetColorWords[0];
         fogrgbbase = dds3LightParam.fog.color;
         fogrgbnow = 0;
     }
 }
 
-void dds3SetFogPara(s32 blendFrames, f32 fogMax, f32 fogMin, f32 fogNear, f32 fogFar)
+void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 fogNear, f32 fogFar)
 {
-    if (blendFrames == 0) {
+    if (frame == 0) {
         dds3DrawFlag &= ~0x400;
-        dds3FogState.fogMax = fogMax;
-        dds3FogState.fogMin = fogMin;
+        dds3FogState.fogMax = max;
+        dds3FogState.fogMin = min;
         dds3FogState.fogNear = fogNear;
         dds3FogState.fogFar = fogFar;
     } else {
@@ -1708,13 +1708,13 @@ void dds3SetFogPara(s32 blendFrames, f32 fogMax, f32 fogMin, f32 fogNear, f32 fo
         f32 oldNear = dds3FogState.fogNear;
         f32 oldFar = dds3FogState.fogFar;
         dds3DrawFlag |= 0x400;
-        fogparamax = blendFrames;
+        fogparamax = frame;
         dds3FogParam.fogMax = oldMax;
         dds3FogParam.fogMin = oldMin;
         dds3FogParam.fogNear = oldNear;
         dds3FogParam.fogFar = oldFar;
-        dds3FogColor.fogMax = fogMax;
-        dds3FogColor.fogMin = fogMin;
+        dds3FogColor.fogMax = max;
+        dds3FogColor.fogMin = min;
         dds3FogColor.fogNear = fogNear;
         dds3FogColor.fogFar = fogFar;
         fogparanow = 0;
@@ -1870,12 +1870,12 @@ void eglInit(void)
     }
 }
 
-void eglSetOt(u32 surfaceIndex)
+void eglSetOt(u32 ot)
 {
-    egl_OT_Offset = surfaceIndex;
+    egl_OT_Offset = ot;
 }
 
-void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 unusedZte, s32 ztst)
+void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst)
 {
     void *list = (void *)sdfGrAllocPacketBuff(0x20);
     void *packet;
@@ -1894,7 +1894,7 @@ void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32
 
 
 
-void eglLinkAlpha(s32 blendMode)
+void eglLinkAlpha(s32 mode)
 {
     void *list = (void *)sdfGrAllocPacketBuff(0x20);
     void *packet;
@@ -1903,7 +1903,7 @@ void eglLinkAlpha(s32 blendMode)
     sdfDrawTagInit(list);
     packet = (void *)sdfGrAllocPacketBuff(0x30);
     command = (dds3GsCommand_t *)sdf2DMakeStdPacket(packet, 0x30);
-    switch (blendMode) {
+    switch (mode) {
     case 1:
         command->write.data = 0x48;
         break;
@@ -1940,9 +1940,9 @@ void eglLinkAlpha(s32 blendMode)
     }
 }
 
-void eglLinkSprite(s32 x, s32 y, s32 width, s32 height,
-                   s32 u, s32 v, s32 textureWidth, s32 textureHeight,
-                   u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture)
+void eglLinkSprite(s32 x, s32 y, s32 w, s32 h,
+                   s32 u, s32 v, s32 uw, s32 vh,
+                   u32 rgba0, u32 rgba1, u32 rgba2, u32 rgba3, sdfTexHandle_t *th)
 {
     sdfDrawTag_t *list;
     sdfGrOt_t *surface;
@@ -1950,28 +1950,28 @@ void eglLinkSprite(s32 x, s32 y, s32 width, s32 height,
     s32 uLeft, vTop, uRight, vBottom;
 
     list = dds3FontReqAllocDrawTag();
-    sdf2DLinkTexPacket(list, texture, 0);
+    sdf2DLinkTexPacket(list, th, 0);
     left = (x << 4) + 0x7000;
     top = (y << 3);
-    right = (x << 4) + (width << 4) + 0x7000;
-    bottom = top + (height << 3) + 0x7900;
+    right = (x << 4) + (w << 4) + 0x7000;
+    bottom = top + (h << 3) + 0x7900;
     top += 0x7900;
     uLeft = (u << 4);
     vTop = (v << 4);
-    uRight = uLeft + (textureWidth << 4);
-    vBottom = vTop + (textureHeight << 4);
+    uRight = uLeft + (uw << 4);
+    vBottom = vTop + (vh << 4);
     sdfPrimLinkGt4(list, 0x40,
-        left, top, uLeft, vTop, color0,
-        right, top, uRight, vTop, color1,
-        left, bottom, uLeft, vBottom, color3,
-        right, bottom, uRight, vBottom, color2,
+        left, top, uLeft, vTop, rgba0,
+        right, top, uRight, vTop, rgba1,
+        left, bottom, uLeft, vBottom, rgba3,
+        right, bottom, uRight, vBottom, rgba2,
         -1, NULL);
     surface = &sdfGrOtTable[egl_OT_Offset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
 
-void eglLinkBox(s32 x, s32 y, s32 width, s32 height,
-                s32 color0, s32 color1, s32 color2, s32 color3)
+void eglLinkBox(s32 x, s32 y, s32 w, s32 h,
+                s32 rgba0, s32 rgba1, s32 rgba2, s32 rgba3)
 {
     s32 coords[4][2];
     sdfDrawTag_t *command;
@@ -1980,30 +1980,30 @@ void eglLinkBox(s32 x, s32 y, s32 width, s32 height,
     s32 i;
     sdfGrOt_t *descriptor;
 
-    u32 r0 = color0 & 0xFF;
-    u32 g0 = (color0 >> 8) & 0xFF;
-    u32 b0 = (color0 >> 16) & 0xFF;
-    u32 a0 = (u32)color0 >> 24;
-    u32 r1 = color1 & 0xFF;
-    u32 g1 = (color1 >> 8) & 0xFF;
-    u32 b1 = (color1 >> 16) & 0xFF;
-    u32 a1 = (u32)color1 >> 24;
-    u32 r2 = color2 & 0xFF;
-    u32 g2 = (color2 >> 8) & 0xFF;
-    u32 b2 = (color2 >> 16) & 0xFF;
-    u32 a2 = (u32)color2 >> 24;
-    u32 r3 = color3 & 0xFF;
-    u32 g3 = (color3 >> 8) & 0xFF;
-    u32 b3 = (color3 >> 16) & 0xFF;
-    u32 a3 = (u32)color3 >> 24;
+    u32 r0 = rgba0 & 0xFF;
+    u32 g0 = (rgba0 >> 8) & 0xFF;
+    u32 b0 = (rgba0 >> 16) & 0xFF;
+    u32 a0 = (u32)rgba0 >> 24;
+    u32 r1 = rgba1 & 0xFF;
+    u32 g1 = (rgba1 >> 8) & 0xFF;
+    u32 b1 = (rgba1 >> 16) & 0xFF;
+    u32 a1 = (u32)rgba1 >> 24;
+    u32 r2 = rgba2 & 0xFF;
+    u32 g2 = (rgba2 >> 8) & 0xFF;
+    u32 b2 = (rgba2 >> 16) & 0xFF;
+    u32 a2 = (u32)rgba2 >> 24;
+    u32 r3 = rgba3 & 0xFF;
+    u32 g3 = (rgba3 >> 8) & 0xFF;
+    u32 b3 = (rgba3 >> 16) & 0xFF;
+    u32 a3 = (u32)rgba3 >> 24;
     coords[0][0] = x * 16;
     coords[0][1] = y * 8;
-    coords[1][0] = (x + width) * 16;
+    coords[1][0] = (x + w) * 16;
     coords[1][1] = y * 8;
-    coords[2][0] = (x + width) * 16;
-    coords[2][1] = (y + height) * 8;
+    coords[2][0] = (x + w) * 16;
+    coords[2][1] = (y + h) * 8;
     coords[3][0] = x * 16;
-    coords[3][1] = (y + height) * 8;
+    coords[3][1] = (y + h) * 8;
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
@@ -2034,7 +2034,7 @@ void eglLinkBox(s32 x, s32 y, s32 width, s32 height,
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 color1, s32 color2)
+void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 rgba0, s32 rgba1, s32 rgba2)
 {
     s32 coords[3][2];
     sdfDrawTag_t *command;
@@ -2043,18 +2043,18 @@ void eglLinkTri(s32 x0, s32 y0, s32 x1, s32 y1, s32 x2, s32 y2, s32 color0, s32 
     s32 i;
     sdfGrOt_t *descriptor;
 
-    u32 r0 = color0 & 0xFF;
-    u32 g0 = (color0 >> 8) & 0xFF;
-    u32 b0 = (color0 >> 16) & 0xFF;
-    u32 a0 = (u32)color0 >> 24;
-    u32 r1 = color1 & 0xFF;
-    u32 g1 = (color1 >> 8) & 0xFF;
-    u32 b1 = (color1 >> 16) & 0xFF;
-    u32 a1 = (u32)color1 >> 24;
-    u32 r2 = color2 & 0xFF;
-    u32 g2 = (color2 >> 8) & 0xFF;
-    u32 b2 = (color2 >> 16) & 0xFF;
-    u32 a2 = (u32)color2 >> 24;
+    u32 r0 = rgba0 & 0xFF;
+    u32 g0 = (rgba0 >> 8) & 0xFF;
+    u32 b0 = (rgba0 >> 16) & 0xFF;
+    u32 a0 = (u32)rgba0 >> 24;
+    u32 r1 = rgba1 & 0xFF;
+    u32 g1 = (rgba1 >> 8) & 0xFF;
+    u32 b1 = (rgba1 >> 16) & 0xFF;
+    u32 a1 = (u32)rgba1 >> 24;
+    u32 r2 = rgba2 & 0xFF;
+    u32 g2 = (rgba2 >> 8) & 0xFF;
+    u32 b2 = (rgba2 >> 16) & 0xFF;
+    u32 a2 = (u32)rgba2 >> 24;
     coords[0][0] = x0 * 16;
     coords[0][1] = y0 * 8;
     coords[1][0] = x1 * 16;
@@ -2208,7 +2208,7 @@ void eglLinkLine(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, u32 color0, u32
     }
 }
 
-void eglLinkPrint(s32 x, s32 y, u32 color, const char *format)
+void eglLinkPrint(s32 x, s32 y, u32 col, const char *str)
 {
     dds3PrintControl_t sifParameters;
     void *list;
@@ -2218,29 +2218,29 @@ void eglLinkPrint(s32 x, s32 y, u32 color, const char *format)
     packet = (void *)sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket(packet);
     sdfDrawTagLink(list, packet);
-    sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, color);
-    sdfDrawTagLink(list, sdfDevPrintfEx(&sifParameters, format));
+    sdfDevSetPrintCB(&sifParameters, x * 16 + 0x7000, y * 8 + 0x7900, 0x0FFFFF80, col);
+    sdfDrawTagLink(list, sdfDevPrintfEx(&sifParameters, str));
     surface = &sdfGrOtTable[83];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
 
-void eglLinkKanji(s32 x, s32 y, s32 color, const char *text)
+void eglLinkKanji(s32 x, s32 y, s32 rgba, const char *moji)
 {
-    void *req = frwGetSmallFontFRQ(x << 4, y << 3, 0, color, text, NULL);
+    void *req = frwGetSmallFontFRQ(x << 4, y << 3, 0, rgba, moji, NULL);
 
     frDrawFont(req);
     frDestroyFontRequestAfter(req);
 }
 
 /* vu0 routine: project a world point into viewport pixel coordinates. */
-void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z)
+void egl3Dto2D(s32 *x3, s32 *y3, f32 z3, f32 x2, f32 y2)
 {
     f32 point[4];
     f32 screen[4];
 
-    point[0] = x;
-    point[1] = y;
-    point[2] = z;
+    point[0] = z3;
+    point[1] = x2;
+    point[2] = y2;
     point[3] = 1.0f;
     SDF_VU0_LOADMATRIX(&D_002FA240);
     MultMatrixRev(&dds3ScreenParam.TM);
@@ -2253,8 +2253,8 @@ void egl3Dto2D(s32 *gridX, s32 *gridY, f32 x, f32 y, f32 z)
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(screen);
-    *gridX = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
-    *gridY = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
+    *x3 = ((s32)(screen[0] * 16.0f) - 0x7000) >> 4;
+    *y3 = ((s32)(screen[1] * 16.0f) - 0x7900) >> 3;
 }
 INCLUDE_SDATA(const s32, "kernel/dds3KernelDraw", egl_OT_Offset);
 

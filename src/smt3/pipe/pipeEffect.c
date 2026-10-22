@@ -50,7 +50,7 @@ typedef struct PIPE_EFF_t {
 } PIPE_EFF_t;
 
 
-extern void dds3EffectDelete(void *effect);
+extern void dds3EffectDelete(void *pData);
 
 extern s32 offsetCount;
 
@@ -60,7 +60,7 @@ extern PIPE_EFF_t *pipe_DAMAGE01_D3P, *pipe_DAMAGE03_D3P, *pipe_ATTACK01_D3P;
 
 extern void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize);
 
-extern void pipeEffDraw2Doffset(PIPE_EFF_t *effect, u8 maxSize);
+extern void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize);
 
 extern void pipeFreeEffects(PIPE_EFF_t *effect, u8 maxSize);
 
@@ -70,7 +70,7 @@ extern void pipeBulrLimit(void);
 
 extern s32 pipeBulrLimitValue;
 
-extern void sdfMemFreeDelayedDirect(void *handle);
+extern void sdfMemFreeDelayedDirect(void *aHandle);
 
 extern tagPipeObject *objMyData(void);
 

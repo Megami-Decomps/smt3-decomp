@@ -151,19 +151,19 @@ extern u32 gSlExitMode;
 
 extern s32 scrGetIntPara(s32);
 
-fldInputPanel_t *fldInputPanelSetMessage(s32 choice);
+fldInputPanel_t *fldInputPanelSetMessage(s32 no);
 
-fldInputPanel_t *fldInputPanelSetDraw(s32 isPending);
+fldInputPanel_t *fldInputPanelSetDraw(s32 flag);
 
 extern void fldReleaseUnitPad(void);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
-dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *world);
+dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic);
 
 extern void fldPlayerMotReset(void);
 
-extern s32 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *object, void *update);
+extern s32 dds3ObjectBaseSetPrimaryControl(dds3Basic_t *basic, void *func);
 
 extern void fldRegistUnitPad(void);
 
@@ -171,7 +171,7 @@ extern s32 fldCamMode[];
 
 dds3Basic_t *fldGetUnitFollowCamera(void);
 
-dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *world, dds3Basic_t *camera);
+dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
 extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut,
                                                        f32 *targetPositionOut);
@@ -186,13 +186,13 @@ extern s32 fldCamPhokanState;
 
 extern s32 fldCamPHokanMode;
 
-dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
-char *scrGetStrPara(s32 idx);
+char *scrGetStrPara(s32 n);
 
 dds3Basic_t *dds3GetControlScene(void);
 
-dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *world, const u8 *name);
+dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const u8 *name);
 
 s32 printf(const char *format, ...);
 
@@ -204,35 +204,35 @@ extern s32 fldCamUnit[];
 
 extern fldEnvironmentWork_t fldRunDanteGunFlag;
 
-extern void fldSkySetFilter(s32 area, s32 value, s32 duration);
+extern void fldSkySetFilter(s32 idx, s32 mode, s32 hokan);
 
 extern void fldSetFilterAnime(s32);
 
 extern void fldSetModelFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *object, s32 kind);
+dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 
 u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *object);
 
 u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object);
 
-u32 dds3GetBasicArray(const dds3BasicArrayHandle_t *object);
+u32 dds3GetBasicArray(const dds3BasicArrayHandle_t *hndl);
 
-void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *object, u32 value);
+void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *aPtr, u32 alpmode);
 
-u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *object);
+u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 
 void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *node);
 
 extern void fldSetAnimeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
-void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *object, u32 requestedMode);
+void dds3ObjectBaseMatterAnimeSpeed(dds3Basic_t *pObjectBasic, u32 mode);
 
 extern s32 fldArea[];
 
 extern void fldSetNpcFlag(s32 world, s32 stage, s32 room, s32 value);
 
-extern void fldGbSetGimic(s32 world, s32 stage, s32 index, s32 value);
+extern void fldGbSetGimic(s32 fld, s32 area, s32 hojiID, s32 toplast);
 
 extern void fldSetAtariFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
@@ -242,9 +242,9 @@ extern s32 fldSetAnimeFlag2(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 extern void fldSetAnimeId2(s32 area, s32 slotIndex, s32 valueIndex, s32 value);
 
-extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
+extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
 
-extern void fldAutoMapCloseBlock2(s32 area, s32 floor, s32 flagNumber);
+extern void fldAutoMapCloseBlock2(s32 fld, s32 area, s32 SBlock);
 
 u32 fldGetRestoreMode(void);
 
@@ -258,39 +258,39 @@ extern s32 fldDoor_GetElvTbl(s32);
 
 extern s32 fldElvCheckEnd(void);
 
-extern s32 fldWapGetDoor(s32 value);
+extern s32 fldWapGetDoor(s32 getmode);
 
-extern void scrSetIntReturnValue(s32 value);
+extern void scrSetIntReturnValue(s32 i);
 
 extern s32 fldDoor_ChkWarp(void);
 
-extern s32 fldInfNext(s32 param0, s32 param1);
+extern s32 fldInfNext(s32 aline, s32 asel);
 
-extern s32 fldInfGet(s32 actorId, s32 attribute);
+extern s32 fldInfGet(s32 aline, s32 acol);
 
-extern s32 fldInfChkFastPanel(s32 index);
+extern s32 fldInfChkFastPanel(s32 aline);
 
 extern void fldInfToWAP(void);
 
 void fldBgmLoad(void);
 
-extern void fldSePlay(s32 soundId);
+extern void fldSePlay(s32 seid);
 
-extern void fldSeStop(s32 soundId);
+extern void fldSeStop(s32 seid);
 
-extern void fldMotionSePlay(s32 group, s32 sound);
+extern void fldMotionSePlay(s32 seid, s32 subid);
 
 extern s32 fldEncountRate[];
 
-extern const char *fldEveHitResName_Find(u32 key);
+extern const char *fldEveHitResName_Find(u32 pid);
 
-extern void fldDoor_ExitCamera(const char *entry);
+extern void fldDoor_ExitCamera(const char *evename);
 
 extern s32 fldDoor_GetWarpEff(void);
 
-extern fldUnit_t *evtGetUnitHandle(s32 param);
+extern fldUnit_t *evtGetUnitHandle(s32 serial);
 
-extern void fldNpcLightSet(fldUnit_t *unit);
+extern void fldNpcLightSet(fldUnit_t *hEveUnit);
 
 void fldAnahoriSelectInit(void);
 
@@ -314,33 +314,33 @@ extern void fldEncountClearFlag(s32 flags);
 
 extern char *strcpy(char *dst, const char *src);
 
-extern void fldSkySetTbl(s32 table, s32 durationMode);
+extern void fldSkySetTbl(s32 idx, s32 hokan);
 
 extern s32 fldGetTakaraOpen(s32 room);
 
 extern void fldSetTakaraOpen(s32 room);
 
-extern void fldDoor_ElvExit(s32 selection);
+extern void fldDoor_ElvExit(s32 select);
 
 extern void fldElvSetFloor(s32 first, s32 second);
 
 extern void fldElvReset(void);
 
-extern s32 fldEveHitResID_Find(u32 process);
+extern s32 fldEveHitResID_Find(u32 pid);
 
-extern void fldDoorRun_FindStart(s32 scene);
+extern void fldDoorRun_FindStart(s32 resid);
 
 extern void fldBgmContinue(void);
 
-extern void fldMotionSeStop(s32 group, s32 sound);
+extern void fldMotionSeStop(s32 seid, s32 subid);
 
-extern void fldTitleStart(s32 field, s32 option);
+extern void fldTitleStart(s32 fld, s32 waittime);
 
 extern f32 D_0054EEA0;
 
-extern void evtBitOn(s32 bit);
+extern void evtBitOn(s32 no);
 
-extern void evtBitOff(s32 bit);
+extern void evtBitOff(s32 no);
 
 typedef struct
 {
@@ -362,7 +362,7 @@ extern s32 gFldKyouseiTalk;
 
 extern void fldFreeNextFile(void);
 
-extern void fldDoor_WarpEx(s32 index);
+extern void fldDoor_WarpEx(s32 ex_no);
 
 
 extern s32 fldNpcModelFreeIdx;
@@ -380,7 +380,7 @@ extern u32 D_0054F06C;
 extern u32 D_0054F070;
 
 
-extern void fldDoor_Warp(const char *entry);
+extern void fldDoor_Warp(const char *evename);
 
 extern sdfTexHandle_t *fldEATexture;
 
@@ -420,7 +420,7 @@ extern sdfTexHandle_t *slProcPtr;
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern s32 dds3GetRandIntA(s32 low, s32 high);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern s32 D_00316EC8[];
 
@@ -449,9 +449,9 @@ extern f32 gFldSnowW;
 
 extern s32 fldSeSmgId;
 
-extern s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit);
+extern s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put);
 
-extern s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *hit);
+extern s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put);
 
 typedef struct
 {
@@ -476,9 +476,9 @@ extern void *fldItemBoxCount;
 
 extern fldTakaraEntry_t fldTakaraTable[];
 
-extern void fldLoadNextFile(s32 a, s32 b);
+extern void fldLoadNextFile(s32 field, s32 area);
 
-extern void fldDoor_WarpCash(const char *name);
+extern void fldDoor_WarpCash(const char *evename);
 
 
 
@@ -749,22 +749,22 @@ s32 fldCommand_FREE_CASH_F(void) {
     return 1;
 }
 
-s32 fldCommand_SEARCH_ID(const char *name) {
-    dds3Basic_t *entry = dds3SceneBasicSearchName(dds3GetControlScene(), name);
+s32 fldCommand_SEARCH_ID(const char *pName) {
+    dds3Basic_t *entry = dds3SceneBasicSearchName(dds3GetControlScene(), pName);
     if (entry != 0) {
         return entry->serialID;
     }
-    printf("field SEARCH_ID NotFound:[%s]\n", name);
+    printf("field SEARCH_ID NotFound:[%s]\n", pName);
     return -1;
 }
 
-s32 fldCommand_GetHojiID(char *name) {
+s32 fldCommand_GetHojiID(char *pName) {
     s32 index;
-    if (strstr(name, D_0054F0A8) == 0) return 0;
+    if (strstr(pName, D_0054F0A8) == 0) return 0;
     for (index = 0; index < 32; index++) {
-        if (name[index] == '\0') {
+        if (pName[index] == '\0') {
             if (index < 4) return 0;
-            return (name[index - 2] - '0') * 10 + (name[index - 1] - '0');
+            return (pName[index - 2] - '0') * 10 + (pName[index - 1] - '0');
         }
     }
     return 0;

@@ -254,9 +254,9 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
-extern void nbCameraSetTarget(nbFormation_t *form);
+extern void nbCameraSetTarget(nbFormation_t *pTargetForm);
 
 extern s32 datGetPlayerLevel(void);
 
@@ -274,17 +274,17 @@ typedef struct nbEventProcessData_t {
     void *unk_24;
 } nbEventProcessData_t;
 
-extern s32 datGetRace(datUnitWork_t *unit);
+extern s32 datGetRace(datUnitWork_t *work);
 
 extern s32 datSearchDevilStock(s32 id);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern s32 nbGetQuestionType(datUnitWork_t *unit);
+extern s32 nbGetQuestionType(datUnitWork_t *w);
 
 extern s32 datCheckStockFull(void);
 
-extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -296,12 +296,12 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
 // @@DECLS@@
-extern void datAddMaka(s32 maka);
+extern void datAddMaka(s32 addmaka);
 
 extern s32 nbSetNegoYesMotion(nbNegoProcessData_t *n, nbFormation_t *form);
 

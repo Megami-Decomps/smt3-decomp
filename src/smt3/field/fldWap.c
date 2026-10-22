@@ -187,13 +187,13 @@ extern s32 strcmp(const char *left, const char *right);
 
 extern s32 gFldInfIdx;
 
-void fldMakeFilePath(char *buffer, s32 area, s32 unused);
+void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-devState_t *sdfFileOpen(const char *path);
+devState_t *sdfFileOpen(const char *aFileName);
 
-void sdfFileRead(devState_t *state, void *buffer, s32 byteCount);
+void sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
 
-void sdfFileClose(devState_t *state);
+void sdfFileClose(devState_t *aHandle);
 
 extern s32 sprintf(char *, const char *, ...);
 
@@ -205,17 +205,17 @@ extern s32 gFldInf_WpExit;
 
 extern u8 *fldDoor_Find2(const char *);
 
-dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *world, s32 slotIndex, const u8 *name);
+dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const u8 *name);
 
-dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *world, dds3Basic_t *camera);
+dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 extern fldWaypointBlock_t fldDoorParamTable;
 
 void fldPlayerOff(void);
 
-s32 fldLoadNextFile(s32 area, s32 room);
+s32 fldLoadNextFile(s32 field, s32 area);
 
 extern u32 gFld_ElvTakasa;
 
@@ -247,10 +247,10 @@ typedef struct {
     u8 unk94[12];
 } fldSceneParam_t;
 
-extern void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                              s32 code, s32 link, const char *subname);
+extern void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
+                              s32 bgm, s32 camMode, const char *camName);
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 extern s32 D_0054EDF4;
 
@@ -367,7 +367,7 @@ extern s32 fldEveHitCount;
 
 void fldClearDoorEvents(void);
 
-const char *fldEveHitResName_Find(u32 task);
+const char *fldEveHitResName_Find(u32 pid);
 
 extern u8 D_00302FA0[];
 
@@ -385,16 +385,16 @@ extern u8 D_00303010[];
 
 extern u8 D_00303030[];
 
-u8 *fldDoor_Find2(const char *name) {
+u8 *fldDoor_Find2(const char *evename) {
     s32 i;
     fldActorEntry_t *entry;
 
-    if (name == NULL) return NULL;
+    if (evename == NULL) return NULL;
     for (i = 0; i < 256; i++) {
         entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
         if (entry->floor != fldGlobalBase.floor + 1) continue;
-        if (strcmp(name, entry->name) != 0) continue;
+        if (strcmp(evename, entry->name) != 0) continue;
         scriptlabel = i;
         switch (entry->kind) {
         case 1:
@@ -479,7 +479,7 @@ s32 fldWapGetDoor(void) {
 
 extern scrProcessWork_s *scrGetScriptHandle(void);
 
-extern void fldSePlay(s32 soundId);
+extern void fldSePlay(s32 seid);
 
 extern void fldFindDoorEvent(s32 handle);
 
@@ -487,7 +487,7 @@ extern u32 fldLoadNextGetStatus(void);
 
 extern void fldStartBgmLoad(s32 kind);
 
-extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
 extern void dds3FadeColorSet(s32 r, s32 g, s32 b);
 
@@ -495,7 +495,7 @@ extern void fldAnaStart(f32 x, f32 y, f32 z);
 
 extern f32 fldPlayerWarpState;
 
-void fldDoorRun_FindStart(s32 useScript) {
+void fldDoorRun_FindStart(s32 resid) {
     s32 idx;
     fldActorEntry_t *entry;
     const char *name;
@@ -504,7 +504,7 @@ void fldDoorRun_FindStart(s32 useScript) {
         fldPlayerCalc_WarpStart();
         return;
     }
-    if (useScript != 0) {
+    if (resid != 0) {
         name = fldEveHitResName_Find((u32)scrGetScriptHandle()->ProcessID);
         if (name == 0) return;
         if (fldDoor_Find2(name) == 0) return;
@@ -549,13 +549,13 @@ void fldDoorRun_FindStart(s32 useScript) {
     }
 }
 
-void fldDoor_ExitCamera(const char *name) {
+void fldDoor_ExitCamera(const char *evename) {
     fldActorEntry_t *entry;
     char *entryName;
     dds3Basic_t *camera;
     s32 i;
 
-    if (name == NULL) {
+    if (evename == NULL) {
         return;
     }
     for (i = 0; i < 0x100; i++) {
@@ -568,7 +568,7 @@ void fldDoor_ExitCamera(const char *name) {
         }
         entryName = entry->name;
         if (entry->floor == fldGlobalBase.floor + 1) {
-            if (strcmp(name, entryName) == 0) {
+            if (strcmp(evename, entryName) == 0) {
                 if (entry->variantMode == 2) {
                     return;
                 }
@@ -597,22 +597,22 @@ extern void fldBgmFadeOut(void);
 
 extern void fldBgmTrans(void);
 
-s32 fldWap_SetBgm(fldActorEntry_t *entry) {
+s32 fldWap_SetBgm(fldActorEntry_t *pWap) {
     s32 result = 0;
 
     if (fldGlobalBase.area != 0x22 && fldGlobalBase.area != 0x20 && fldGlobalBase.area != 0x25 &&
         fldGlobalBase.area != 0x24 && fldGlobalBase.area != 0x29 && fldGlobalBase.area != 0x2A &&
         fldGlobalBase.area != 0x2B && fldGlobalBase.area != 0x2C && fldGlobalBase.area != 0x2D) {
-        if (fldGlobalBase.sequenceCode != entry->sequenceCode) {
-            result = fldBgmTransChk(fldGlobalBase.sequenceCode, entry->sequenceCode);
-            if (entry->sequenceCode != 0) {
+        if (fldGlobalBase.sequenceCode != pWap->sequenceCode) {
+            result = fldBgmTransChk(fldGlobalBase.sequenceCode, pWap->sequenceCode);
+            if (pWap->sequenceCode != 0) {
                 if (result == 0) {
                     fldBgmFadeOut();
                 }
                 if (result == 1) {
                     gFldSndTransSrc = fldGlobalBase.sequenceCode;
                 }
-                fldGlobalBase.sequenceCode = entry->sequenceCode;
+                fldGlobalBase.sequenceCode = pWap->sequenceCode;
                 if (result == 1) {
                     fldBgmTrans();
                 }
@@ -623,10 +623,10 @@ s32 fldWap_SetBgm(fldActorEntry_t *entry) {
             }
         }
     }
-    if (entry->selectedRoom != 0) {
-        fldGlobalBase.playerSeTable = entry->selectedRoom - 1;
+    if (pWap->selectedRoom != 0) {
+        fldGlobalBase.playerSeTable = pWap->selectedRoom - 1;
     }
-    fldGlobalBase.cameraParamIndex = entry->rowIndex;
+    fldGlobalBase.cameraParamIndex = pWap->rowIndex;
     return result;
 }
 
@@ -723,22 +723,22 @@ extern s16 D_002FC1A0[][2];
 
 extern s16 fldAllCnt[][2];
 
-extern void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                                 s32 code, s32 link, const char *subname);
+extern void fldSetSceneParamLoad(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
+                                 s32 bgm, s32 camMode, const char *camName);
 
-void fldWap_Load(s32 all, s32 sub, fldSceneParam_t *record) {
+void fldWap_Load(s32 tmnltype, s32 tmnlid, fldSceneParam_t *param) {
     fldActorEntry_t *entry;
     s32 i;
     s32 field;
     s32 zone;
     s32 nextKind;
 
-    if (all == 0) {
-        field = D_002FC1A0[sub][0];
+    if (tmnltype == 0) {
+        field = D_002FC1A0[tmnlid][0];
         zone = 3;
     } else {
         zone = 4;
-        field = fldAllCnt[sub][0];
+        field = fldAllCnt[tmnlid][0];
     }
     if (field == 0) return;
     fldDoorLoad(field);
@@ -747,7 +747,7 @@ void fldWap_Load(s32 all, s32 sub, fldSceneParam_t *record) {
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
         if (entry->kind != 7) continue;
         if (zone != entry->motion) continue;
-        if (sub != entry->secondaryMotion) continue;
+        if (tmnlid != entry->secondaryMotion) continue;
         if (entry->variantMode != 0) continue;
         fldGlobalBase.cameraParamIndex = entry->rowIndex;
         if (entry->flags54 != 0) {
@@ -766,9 +766,9 @@ void fldWap_Load(s32 all, s32 sub, fldSceneParam_t *record) {
         gFldNowDZone = entry->flags31;
         if (field == 0) return;
         if (nextKind == 0) return;
-        fldSetSceneParamLoad(record, field, nextKind, entry->sequenceName, entry->sequenceCode,
+        fldSetSceneParamLoad(param, field, nextKind, entry->sequenceName, entry->sequenceCode,
                              entry->linkKind, entry->linkName);
-        record->restore = 5;
+        param->restore = 5;
         if (fldGlobalBase.sequenceCode != entry->sequenceCode) {
             if (entry->sequenceCode != 0) {
                 fldGlobalBase.sequenceCode = entry->sequenceCode;
@@ -785,11 +785,11 @@ extern s16 D_002FC1A2[][2];
 
 extern void fldSetNextField(s32 field, s32 parameter);
 
-extern void fldAutoMapOpenBlock2(s32 area, s32 floor, s32 flagNumber);
+extern void fldAutoMapOpenBlock2(s32 fld, s32 area, s32 SBlock);
 
-extern void evtBitOn(s32 bit);
+extern void evtBitOn(s32 no);
 
-void fldDoor_EveBtlExit(s32 field, s32 zone) {
+void fldDoor_EveBtlExit(s32 field, s32 eveno) {
     fldSceneParam_t record;
     s32 block[4];
     s32 param[4];
@@ -803,7 +803,7 @@ void fldDoor_EveBtlExit(s32 field, s32 zone) {
         entry = &fldDoorTable[i];
         if (entry->requiredFlag != 0 && evtBitCheck(entry->requiredFlag) == 0) continue;
         if (entry->kind != 8) continue;
-        if (entry->motion != zone) continue;
+        if (entry->motion != eveno) continue;
         if (entry->variantMode == 2) {
             fldSetNextField(0, 0);
             fldBgmFadeOut();
@@ -872,13 +872,13 @@ void fldDoor_EveBtlExit(s32 field, s32 zone) {
     }
 }
 
-void fldDoor_WarpCash(const char *name) {
+void fldDoor_WarpCash(const char *evename) {
     fldActorEntry_t *entry;
     s32 area;
     s32 room;
     s32 i;
 
-    if (name == NULL) {
+    if (evename == NULL) {
         return;
     }
     for (i = 0; i < 0x100; i++) {
@@ -887,7 +887,7 @@ void fldDoor_WarpCash(const char *name) {
             continue;
         }
         if (entry->kind == 1 && entry->variantMode == 0) {
-            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(evename, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
                 if (room == 0) {
@@ -897,7 +897,7 @@ void fldDoor_WarpCash(const char *name) {
                 return;
             }
         } else if (entry->kind == 2 && entry->variantMode == 0) {
-            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(evename, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
                 if (room == 0) {
@@ -907,7 +907,7 @@ void fldDoor_WarpCash(const char *name) {
                 return;
             }
         } else if (entry->kind == 3 && entry->variantMode == 0) {
-            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(evename, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
                 if (room == 0) {
@@ -917,7 +917,7 @@ void fldDoor_WarpCash(const char *name) {
                 return;
             }
         } else if (entry->kind == 4 && entry->variantMode == 0) {
-            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(evename, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
                 if (room == 0) {
@@ -927,7 +927,7 @@ void fldDoor_WarpCash(const char *name) {
                 return;
             }
         } else if (entry->kind == 5 && entry->variantMode == 0) {
-            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(name, entry->name) == 0) {
+            if (entry->floor == fldGlobalBase.floor + 1 && strcmp(evename, entry->name) == 0) {
                 area = entry->variant ? entry->variant : fldGlobalBase.area;
                 room = entry->sequenceKind;
                 if (room == 0) {
@@ -940,11 +940,11 @@ void fldDoor_WarpCash(const char *name) {
     }
 }
 
-s32 fldDoor_GetHasigoTbl(s32 kind) {
+s32 fldDoor_GetHasigoTbl(s32 getmode) {
     fldActorEntry_t *entry = &fldDoorTable[scriptlabel];
     dds3Basic_t *node;
 
-    switch (kind) {
+    switch (getmode) {
     case 0:
         return entry->motion;
     case 1:
@@ -963,10 +963,10 @@ s32 fldDoor_GetHasigoTbl(s32 kind) {
     return 0;
 }
 
-s32 fldDoor_GetElvTbl(u32 kind) {
+s32 fldDoor_GetElvTbl(u32 getmode) {
     s32 slot = gFld_ElvTakasa;
 
-    switch (kind) {
+    switch (getmode) {
     case 0:
         return fldDoorParamTable.headers[slot].floorCount;
     case 1:
@@ -1001,20 +1001,20 @@ s32 fldDoor_GetElvTbl(u32 kind) {
     return 0;
 }
 
-s32 fldDoor_ElvTakasaToFloor(s32 index) {
+s32 fldDoor_ElvTakasaToFloor(s32 takasa) {
     s32 slot = gFld_ElvTakasa;
     s32 count = fldDoorParamTable.headers[slot].floorCount;
 
-    if (count - 1 < index) {
+    if (count - 1 < takasa) {
         return count - fldDoorWarpTarget - 1;
     }
-    index = count - index - 1;
-    return fldDoorParamTable.headers[slot].body.data[index];
+    takasa = count - takasa - 1;
+    return fldDoorParamTable.headers[slot].body.data[takasa];
 }
 
 extern s16 gFld_ElvId[];
 
-void fldDoor_ElvExit(s32 index) {
+void fldDoor_ElvExit(s32 select) {
     fldSceneParam_t record;
     s32 param[4];
     fldActorEntry_t *entry;
@@ -1025,10 +1025,10 @@ void fldDoor_ElvExit(s32 index) {
     s32 nextKind;
 
     count = gFld_ElvId[gFld_ElvTakasa * 16 + 1];
-    if (index >= count) {
+    if (select >= count) {
         target = fldDoorWarpTarget;
     } else {
-        target = count - index - 1;
+        target = count - select - 1;
     }
     for (i = 0; i < 0x100; i++) {
         entry = &fldDoorTable[i];
@@ -1171,7 +1171,7 @@ void fldFindDoorEvent(s32 id) {
     }
 }
 
-s32 fldDoor_Step(s32 id, f32 *px, f32 *py, f32 *pz) {
+s32 fldDoor_Step(s32 matter_resid, f32 *x, f32 *y, f32 *z) {
     f32 steps[50] = {
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
         0.5f, 1.4f, 1.0f, 0.5f, 1.0f, 0.6f, 1.2f, 0.8f, 1.2f, 0.8f,
@@ -1187,7 +1187,7 @@ s32 fldDoor_Step(s32 id, f32 *px, f32 *py, f32 *pz) {
     }
     for (i = 0; i < 256; i++) {
         e = (fldDoorEvent_t *)((u8 *)(i * 0x54) + (u32)fldDoorEventTable);
-        if (e->unk0C == id) {
+        if (e->unk0C == matter_resid) {
             if (e->unk00 == 2) {
                 s32 count = e->unk18;
                 s32 limit = e->unk20;
@@ -1230,12 +1230,12 @@ s32 fldDoor_Step(s32 id, f32 *px, f32 *py, f32 *pz) {
             } else {
                 continue;
             }
-            *px = e->unk24;
-            *py = e->unk28;
-            *pz = e->unk2C;
+            *x = e->unk24;
+            *y = e->unk28;
+            *z = e->unk2C;
             return 1;
         }
-        if (e->unk14 == id) {
+        if (e->unk14 == matter_resid) {
             if (e->unk00 == 2) {
                 s32 count = e->unk1C;
                 s32 limit = e->unk20;
@@ -1266,9 +1266,9 @@ s32 fldDoor_Step(s32 id, f32 *px, f32 *py, f32 *pz) {
             } else {
                 continue;
             }
-            *px = e->unk3C;
-            *py = e->unk40;
-            *pz = e->unk44;
+            *x = e->unk3C;
+            *y = e->unk40;
+            *z = e->unk44;
             return 1;
         }
     }

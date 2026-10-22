@@ -287,7 +287,7 @@ typedef struct nbKoukaPacket_t
 
 extern void nbAllFormDispOn(void);
 
-extern void nbGroupFormDispOff(s32 group);
+extern void nbGroupFormDispOff(s32 side);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
@@ -317,11 +317,11 @@ typedef struct nbEventProcessData_t {
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -385,7 +385,7 @@ s32 nbE910Process_1(dds3ProcessID_t *id)
     return 0;
 }
 
-s32 Effect1(nbEventProcessData_t *e)
+s32 Effect1(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
     nbFormation_t *p;
@@ -393,25 +393,25 @@ s32 Effect1(nbEventProcessData_t *e)
     nbPanelAllShow();
     form = nbGetEventForm();
     evtSetUnitMotion(form->hunit, 0x10, 0, 0, 2);
-    p = e->data->form + 4;
-    nbAddUnitStock(e->data, 1, nbAppendEnemyDevilWork(e->data, 0x122, p->formindex), p->formindex);
+    p = ed->data->form + 4;
+    nbAddUnitStock(ed->data, 1, nbAppendEnemyDevilWork(ed->data, 0x122, p->formindex), p->formindex);
     nbInitUnitEffect(p, 0, 0);
-    p = e->data->form + 6;
-    nbAddUnitStock(e->data, 1, nbAppendEnemyDevilWork(e->data, 0x121, p->formindex), p->formindex);
+    p = ed->data->form + 6;
+    nbAddUnitStock(ed->data, 1, nbAppendEnemyDevilWork(ed->data, 0x121, p->formindex), p->formindex);
     nbInitUnitEffect(p, 0, 0);
     nbAddSkillEffectKoukaPacket3(0, 1, evtGetResorceData(0x38F, 1), 2, form);
     nbDispText(text1[0xE6], NULL, 0, 0x5A, 0x89FEFF80);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
-s32 Wait1(nbEventProcessData_t *e)
+s32 Wait1(nbEventProcessData_t *ed)
 {
-    if (e->frame == 1) {
-        nbSetEnemyFormation(e->data);
+    if (ed->frame == 1) {
+        nbSetEnemyFormation(ed->data);
         nbAllFormDispOn();
         nbGroupFormDispOff(0);
-        nbFreeEffectSlot(e);
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }

@@ -55,11 +55,11 @@ extern fldDanteGunWork_t fldRunDanteGunFlag;
 
 extern s32 fldPlayerStepDist;
 
-extern s32 sdfFileOpen(const char *path);
+extern s32 sdfFileOpen(const char *aFileName);
 
-extern void sdfFileRead(s32 fd, void *buffer, s32 size);
+extern void sdfFileRead(s32 aHandle, void *aPtr, s32 aLeng);
 
-extern void sdfFileClose(s32 fd);
+extern void sdfFileClose(s32 aHandle);
 
 extern char D_005315D0[];
 
@@ -73,7 +73,7 @@ extern void fldGbInit_System(s32 mode);
 
 extern void fldGbFlagClear(void);
 
-extern void evtBitOn(s32 flag);
+extern void evtBitOn(s32 no);
 
 extern void fldAllTblLoad(void);
 
@@ -408,19 +408,19 @@ void fldSetAtariFlag(s32 charId, s32 idx, s32 bit, s32 on)
     }
 }
 
-s32 fldGbChkHit(s32 charId, s32 idx, s32 bit)
+s32 fldGbChkHit(s32 fld, s32 area, s32 blk)
 {
     s32 type;
 
-    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+    if (dds3EffectFldTypeIsSpecial(fld) != 0) {
         return 0;
     }
     if (fldGb < 0x28) {
-        type = charId % 100;
-        return ((u32)DDS3_GBWK->gb[type].flags[idx].atariFlag >> bit) & 1;
+        type = fld % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[area].atariFlag >> blk) & 1;
     }
-    type = dds3EffectFldCharToType(charId);
-    return ((u32)DDS3_GBWK->gb[type].flags[idx].atariFlag >> bit) & 1;
+    type = dds3EffectFldCharToType(fld);
+    return ((u32)DDS3_GBWK->gb[type].flags[area].atariFlag >> blk) & 1;
 }
 
 void fldSetModelFlag2(s32 charId, s32 idx, s32 bit, s32 on)
@@ -559,42 +559,42 @@ void fldSetNpcFlag(s32 charId, s32 idx, s32 bit, s32 on)
     }
 }
 
-s32 fldGbChkNpc(s32 charId, s32 idx, s32 bit)
+s32 fldGbChkNpc(s32 fld, s32 area, s32 hojiID)
 {
     s32 type;
 
-    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+    if (dds3EffectFldTypeIsSpecial(fld) != 0) {
         return 0;
     }
     if (fldGb < 0x28) {
-        type = charId % 100;
-        return ((u32)DDS3_GBWK->gb[type].flags[idx].npcFlag >> bit) & 1;
+        type = fld % 100;
+        return ((u32)DDS3_GBWK->gb[type].flags[area].npcFlag >> hojiID) & 1;
     }
-    type = dds3EffectFldCharToType(charId);
-    return ((u32)DDS3_GBWK->gb[type].flags[idx].npcFlag >> bit) & 1;
+    type = dds3EffectFldCharToType(fld);
+    return ((u32)DDS3_GBWK->gb[type].flags[area].npcFlag >> hojiID) & 1;
 }
 
-void fldGbSetGimic(s32 charId, s32 idx, s32 bit, s32 on)
+void fldGbSetGimic(s32 fld, s32 area, s32 hojiID, s32 toplast)
 {
     s32 type;
 
-    if (dds3EffectFldTypeIsSpecial(charId) != 0) {
+    if (dds3EffectFldTypeIsSpecial(fld) != 0) {
         return;
     }
     if (fldGb < 0x28) {
-        type = charId % 100;
-        if (on != 0) {
-            DDS3_GBWK->gb[type].flags[idx].hojiFlag |= 1 << bit;
+        type = fld % 100;
+        if (toplast != 0) {
+            DDS3_GBWK->gb[type].flags[area].hojiFlag |= 1 << hojiID;
         } else {
-            DDS3_GBWK->gb[type].flags[idx].hojiFlag &= ~(1 << bit);
+            DDS3_GBWK->gb[type].flags[area].hojiFlag &= ~(1 << hojiID);
         }
         return;
     }
-    type = dds3EffectFldCharToType(charId);
-    if (on != 0) {
-        DDS3_GBWK->gb[type].flags[idx].hojiFlag |= 1 << bit;
+    type = dds3EffectFldCharToType(fld);
+    if (toplast != 0) {
+        DDS3_GBWK->gb[type].flags[area].hojiFlag |= 1 << hojiID;
     } else {
-        DDS3_GBWK->gb[type].flags[idx].hojiFlag &= ~(1 << bit);
+        DDS3_GBWK->gb[type].flags[area].hojiFlag &= ~(1 << hojiID);
     }
 }
 

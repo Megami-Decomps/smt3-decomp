@@ -296,11 +296,11 @@ extern char D_00545B78[];
 
 extern void datAddHearts(s32 id);
 
-extern void datEquipHearts(s32 id);
+extern void datEquipHearts(s32 HeartsID);
 
 extern void datRemoveHearts(void);
 
-extern s32 rstCalcExpFromLevel(s32 kind, s32 level);
+extern s32 rstCalcExpFromLevel(s32 Index, s32 Level);
 
 extern void effBTLSetFieldColor(u32 color);
 
@@ -318,15 +318,15 @@ extern s32 dds3SearchProcessPriority(s32 priority);
 
 extern void nbExit(void);
 
-extern void *nbEncountCalc(s32 packno, f32 dist);
+extern void *nbEncountCalc(s32 id, f32 length);
 
-extern void nbCallNewBattle(s32 packno, void *enc);
+extern void nbCallNewBattle(s32 encpack, void *data);
 
 extern s32 pack;
 
 extern char D_00545B90[];
 
-extern void dds3KillProcessName(char *namestr, s32 mode);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -342,7 +342,7 @@ typedef struct nbEventProcessData_t {
     void *unk_24;
 } nbEventProcessData_t;
 
-extern void evtBitOn(s32 bit);
+extern void evtBitOn(s32 no);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 

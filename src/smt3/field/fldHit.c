@@ -86,9 +86,9 @@ u32 dds3AllocObjectId(void);
 
 extern s32 fldItemBoxObjCount;
 
-extern void fldHitChkUnitElv(f32 *pos);
+extern void fldHitChkUnitElv(f32 *phys_pos);
 
-extern void fldHitChkUnit(f32 *pos);
+extern void fldHitChkUnit(f32 *phys_pos);
 
 void fldFreeMatterTable(void);
 
@@ -192,22 +192,22 @@ void fldMakePlane(fldCollisionDescriptor_t *geometry, f32 *translation,
 
 INCLUDE_ASM(const s32, "field/fldHit", fldMakePlane);
 
-s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 *pos, fldValueRecord_t *zone, f32 margin) {
+s32 HitPositionInside2(f32 *fret, s32 mode2D, s32 numE, f32 *pos, fldValueRecord_t *r, f32 collision) {
     f32 probe[3];
     f32 planar[2];
     f32 dist;
     f32 slack;
     s32 inside = 0;
     s32 planeIndex;
-    f32 best = margin;
+    f32 best = collision;
 
-    if (mode == 0) {
+    if (mode2D == 0) {
         probe[0] = 0.0f;
         probe[1] = pos[1];
         probe[2] = pos[2];
         planar[0] = pos[1];
         planar[1] = pos[2];
-    } else if (mode == 1) {
+    } else if (mode2D == 1) {
         probe[0] = pos[0];
         probe[1] = 0.0f;
         probe[2] = pos[2];
@@ -220,20 +220,20 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 *pos, fldValueRecord_t
         planar[0] = pos[0];
         planar[1] = pos[1];
     }
-    for (planeIndex = 0; planeIndex < count; planeIndex++) {
-        dist = fldVecDot((sdfVector4_t *)probe, (sdfVector4_t *)zone->plane[planeIndex]) - zone->limit[planeIndex];
-        slack = dist + margin;
+    for (planeIndex = 0; planeIndex < numE; planeIndex++) {
+        dist = fldVecDot((sdfVector4_t *)probe, (sdfVector4_t *)r->plane[planeIndex]) - r->limit[planeIndex];
+        slack = dist + collision;
         if (slack < 0.0f) {
-            *out = -1.0f;
+            *fret = -1.0f;
             return -1;
         }
-        if (planar[0] < zone->bound[0] - margin || planar[1] < zone->bound[1] - margin ||
-            zone->bound[2] + margin < planar[0] || zone->bound[3] + margin < planar[1]) {
-            *out = -1.0f;
+        if (planar[0] < r->bound[0] - collision || planar[1] < r->bound[1] - collision ||
+            r->bound[2] + collision < planar[0] || r->bound[3] + collision < planar[1]) {
+            *fret = -1.0f;
             return -1;
         }
         if (dist < 0.0f) {
-            if (mode == 1) {
+            if (mode2D == 1) {
                 best = dist + 45.0f;
             } else {
                 best = slack;
@@ -244,17 +244,17 @@ s32 HitPositionInside2(f32 *out, s32 mode, s32 count, f32 *pos, fldValueRecord_t
     if (best < 0.001f) {
         best = -1.0f;
     }
-    *out = best;
+    *fret = best;
     return inside;
 }
 
 extern f32 fldHitChkWork[];
 
-extern s32 fldGbChkHit(s32 area, s32 floor, s32 bit);
+extern s32 fldGbChkHit(s32 fld, s32 area, s32 blk);
 
-extern s32 fldGbChkNpc(s32 area, s32 floor, s32 bit);
+extern s32 fldGbChkNpc(s32 fld, s32 area, s32 hojiID);
 
-void fldHitChkUnitElvOnly(f32 *position) {
+void fldHitChkUnitElvOnly(f32 *phys_pos) {
     f32 current[4];
     f32 previous[4];
     f32 currentSave[4];
@@ -267,21 +267,21 @@ void fldHitChkUnitElvOnly(f32 *position) {
     s32 moved;
     s32 inside;
 
-    current[0] = position[0];
-    current[1] = position[1];
-    current[2] = position[2];
+    current[0] = phys_pos[0];
+    current[1] = phys_pos[1];
+    current[2] = phys_pos[2];
     previous[0] = fldHitChkWork[0];
     previous[1] = fldHitChkWork[1];
     previous[2] = fldHitChkWork[2];
     if (fldGlobalBase.area == 1) {
         radius = 25.0f;
-        current[1] = position[1] - 35.0f;
+        current[1] = phys_pos[1] - 35.0f;
     } else if (fldGlobalBase.area < 10) {
         radius = 30.0f;
-        current[1] = position[1] - 35.0f;
+        current[1] = phys_pos[1] - 35.0f;
     } else {
         radius = 45.0f;
-        current[1] = position[1] - 35.0f;
+        current[1] = phys_pos[1] - 35.0f;
     }
     travel[0] = sdfFabs(current[0] - previous[0]);
     travel[2] = sdfFabs(current[2] - previous[2]);
@@ -350,7 +350,7 @@ void fldHitChkUnitElvOnly(f32 *position) {
 
 /* NON_MATCHING: 34 of 97 words differ (first at +0x48). */
 #ifdef NON_MATCHING
-void fldHitChkUnitElv(f32 *position) {
+void fldHitChkUnitElv(f32 *phys_pos) {
     f32 result[4];
     f32 previous[4];
     f32 delta[4];
@@ -365,7 +365,7 @@ void fldHitChkUnitElv(f32 *position) {
     fldGlobalBase.hitValid = 0;
     index = fldGlobalBase.hitMatterIndex;
     if (index == -1) {
-        fldHitChkUnitElvOnly(position);
+        fldHitChkUnitElvOnly(phys_pos);
         index = fldGlobalBase.hitMatterIndex;
     }
     if (index == -1) {
@@ -384,9 +384,9 @@ void fldHitChkUnitElv(f32 *position) {
                     record->sceneFlag) != 0) {
         return;
     }
-    x = position[0] + delta[0];
-    y = position[1] + delta[1];
-    z = position[2] + delta[2];
+    x = phys_pos[0] + delta[0];
+    y = phys_pos[1] + delta[1];
+    z = phys_pos[2] + delta[2];
     previous[0] = fldHitChkWork[0];
     previous[1] = fldHitChkWork[1];
     previous[2] = fldHitChkWork[2];
@@ -394,9 +394,9 @@ void fldHitChkUnitElv(f32 *position) {
     fldGlobalBase.hitX = x;
     fldGlobalBase.hitY = y;
     fldGlobalBase.hitZ = z;
-    position[0] = x;
-    position[1] = y;
-    position[2] = z;
+    phys_pos[0] = x;
+    phys_pos[1] = y;
+    phys_pos[2] = z;
     fldHitChkWork[0] = x;
     fldHitChkWork[1] = y;
     fldHitChkWork[2] = z;
@@ -425,38 +425,38 @@ void func_0013B668(void) {
 
 INCLUDE_ASM(const s32, "field/fldHit", fldHitWM_Mask);
 
-f32 HitPositionInside3(s32 axisMode, s32 planeCount, f32 margin, f32 *position, fldValueRecord_t *zone) {
+f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, fldValueRecord_t *collision) {
     f32 projectedPosition[3];
     f32 planarPosition[2];
-    f32 clearance = margin;
+    f32 clearance = pos;
     f32 planeDistance;
     f32 marginDistance;
     s32 planeIndex;
 
-    if (axisMode == 0) {
+    if (mode2D == 0) {
         projectedPosition[0] = 0.0f;
-        projectedPosition[1] = position[1];
-        projectedPosition[2] = position[2];
-        planarPosition[0] = position[1];
-        planarPosition[1] = position[2];
-    } else if (axisMode == 1) {
-        projectedPosition[0] = position[0];
+        projectedPosition[1] = r[1];
+        projectedPosition[2] = r[2];
+        planarPosition[0] = r[1];
+        planarPosition[1] = r[2];
+    } else if (mode2D == 1) {
+        projectedPosition[0] = r[0];
         projectedPosition[1] = 0.0f;
-        projectedPosition[2] = position[2];
-        planarPosition[0] = position[0];
-        planarPosition[1] = position[2];
+        projectedPosition[2] = r[2];
+        planarPosition[0] = r[0];
+        planarPosition[1] = r[2];
     } else {
-        projectedPosition[0] = position[0];
-        projectedPosition[1] = position[1];
+        projectedPosition[0] = r[0];
+        projectedPosition[1] = r[1];
         projectedPosition[2] = 0.0f;
-        planarPosition[0] = position[0];
-        planarPosition[1] = position[1];
+        planarPosition[0] = r[0];
+        planarPosition[1] = r[1];
     }
-    for (planeIndex = 0; planeIndex < planeCount; planeIndex++) {
-        planeDistance = fldVecDot((sdfVector4_t *)projectedPosition, (sdfVector4_t *)zone->plane[planeIndex]) - zone->limit[planeIndex];
-        marginDistance = planeDistance + margin;
-        if (marginDistance < 0.0f || planarPosition[0] < zone->bound[0] - margin || planarPosition[1] < zone->bound[1] - margin ||
-            zone->bound[2] + margin < planarPosition[0] || zone->bound[3] + margin < planarPosition[1]) {
+    for (planeIndex = 0; planeIndex < numE; planeIndex++) {
+        planeDistance = fldVecDot((sdfVector4_t *)projectedPosition, (sdfVector4_t *)collision->plane[planeIndex]) - collision->limit[planeIndex];
+        marginDistance = planeDistance + pos;
+        if (marginDistance < 0.0f || planarPosition[0] < collision->bound[0] - pos || planarPosition[1] < collision->bound[1] - pos ||
+            collision->bound[2] + pos < planarPosition[0] || collision->bound[3] + pos < planarPosition[1]) {
             return -1.0f;
         }
         if (planeDistance < 0.0f) {

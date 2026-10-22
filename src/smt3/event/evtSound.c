@@ -18,9 +18,9 @@ extern s32 printf(const char *fmt, ...);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern s32 p2sdLoadSMGFile(s32 index);
+extern s32 p2sdLoadSMGFile(s32 MidiNo);
 
-extern s32 p2sdLoadCheckMidi(s32 index);
+extern s32 p2sdLoadCheckMidi(s32 MidiNo);
 
 extern void p2sdPlayBGM(s32 index);
 
@@ -123,14 +123,14 @@ s32 evtStopEventBgm(s32 eventId, s32 variation)
     return soundIndex;
 }
 
-s32 evtPlaySe(s32 eventId, s32 variation)
+s32 evtPlaySe(s32 eventno, s32 seno)
 {
     s32 soundIndex;
 
-    if ((u32)(eventId - 0x258) >= 0x100) {
+    if ((u32)(eventno - 0x258) >= 0x100) {
         return 0;
     }
-    soundIndex = evtGetSoundIndex(eventId, variation);
+    soundIndex = evtGetSoundIndex(eventno, seno);
     p2sdPlaySE(soundIndex, 0x7F, 0x3F);
     return soundIndex;
 }

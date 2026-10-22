@@ -16,9 +16,9 @@ struct fmFontControl_t {
 extern fmFontControl_t gFGC;
 extern s8 D_0054F3FE;
 extern u32 D_0054F414;
-extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern u16 D_00325B10[];
 extern u16 D_00325E50[];
 extern s8 D_00326061[];
@@ -120,15 +120,15 @@ fmFontNode_t *fmRentFontMem(void) {
 }
 
 /* Insert after the list's fixed anchor and update the entry count. */
-void fmRetFontMem(fmFontNode_t *node) {
+void fmRetFontMem(fmFontNode_t *pFontArea) {
     fmFontNode_t *anchor = gFGC.head;
     fmFontNode_t *nextNode = anchor->next;
 
-    node->prev = anchor;
-    node->next = nextNode;
+    pFontArea->prev = anchor;
+    pFontArea->next = nextNode;
     gFGC.count += 1;
-    anchor->next = node;
-    nextNode->prev = node;
+    anchor->next = pFontArea;
+    nextNode->prev = pFontArea;
 }
 
 s32 frFindTagCode(u16 code) {

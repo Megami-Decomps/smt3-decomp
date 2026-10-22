@@ -14,8 +14,8 @@ extern u8 pbRotLKeyAct(void);
 
 extern u8 pbRotRKeyAct(void);
 
-u8 pbGetKeyAction(u8 action) {
-    return keyAct[action + (s8)keyActMode * 5];
+u8 pbGetKeyAction(u8 press) {
+    return keyAct[press + (s8)keyActMode * 5];
 }
 
 u8 pbGetKeyMode(void) {

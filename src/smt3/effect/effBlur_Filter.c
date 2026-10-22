@@ -5,56 +5,56 @@
 extern sdfGrOt_t sdfGrOtTable[];
 
 
-extern u64 *effPkt2DAllocF4(u32 flags);
+extern u64 *effPkt2DAllocF4(u32 prim);
 
 extern u8 dds3EffectBase[];
 
 void dds3EffectBlur(const effBlurQuad_t *source);
 
-sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 index);
+sdfTexHandle_t *dds3BillboardGetGeneralTex(s32 number);
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(u8 *state);
+u32 dds3GetRandA(u8 *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(u8 *state);
+f32 dds3GetRandFloatA(u8 *name);
 
-extern void *memcpy(void *dest, const void *src, u32 n);
+extern void *memcpy(void *a, const void *b, u32 c);
 
-struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
 /* Reserve size bytes from the active packet buffer, rounded up to 16 bytes.
  * Returns the prior cursor as a 32-bit address; the buffer owns this storage. */
-s32 sdfGrAllocPacketBuff(s32 size);
+s32 sdfGrAllocPacketBuff(s32 aSize);
 
-void *sdfChipAllocDirect(s32 size);
+void *sdfChipAllocDirect(s32 aSize);
 
-void sdfDrawTagLink(struct sdfDrawTag_t *list, u32 packetAddress);
+void sdfDrawTagLink(struct sdfDrawTag_t *aTag, u32 aPacket);
 
-void sdfDrawTagInit(struct sdfDrawTag_t *list);
+void sdfDrawTagInit(struct sdfDrawTag_t *a);
 
-void sdfChipFreeDirect(void *memory);
+void sdfChipFreeDirect(void *aPtr);
 
-void sdfMemFreeDirect(struct sdfMemHandle_t *allocation);
+void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 
-u32 sdfMemLock(struct sdfMemHandle_t *allocation);
+u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
 
 extern u32 dds3GetFrameID(void);
 
 extern u32 dds3NullDrawProc(void);
 
-extern void sdfGrSetFrameMaskReset(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
 
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, void *node);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
 
-extern void sdf2DLinkTexPacket(sdfDrawTag_t *list, sdfTexHandle_t *texture, s32 gsContext);
+extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 
-extern void sdfGrSetFrameMaskRGB(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern f32 sdfSin(f32 angle);
+extern f32 sdfSin(f32 aRadius);
 
 extern f64 sdfFloatToULong(f32 value) __attribute__((const));
 
@@ -70,9 +70,9 @@ extern f64 D_00533E30;
 
 extern f64 D_00533E38;
 
-extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 pointCount, s32 flags);
+extern sdfGrPacketHeader_t *effPkt2DAllocTriStrip(s32 num, s32 prim);
 
-extern void *effPkt2DGetPrimPtr(void *packet);
+extern void *effPkt2DGetPrimPtr(void *pPkt);
 
 /* The frame buffers the blur samples from; only the mask source is named. */
 typedef struct effBlurDrawBank_t {
@@ -103,7 +103,7 @@ typedef struct effBlurPrimTriStrip_t {
     effBlurPrimVertex_t vtx[4];
 } effBlurPrimTriStrip_t;
 
-void dds3EffectBlurDrawQuad(const effBlurQuad_t *source, void *prim);
+void dds3EffectBlurDrawQuad(const effBlurQuad_t *pBlur, void *pPrim);
 
 void dds3EffectBlurDrawFrameMask(sdfDrawTag_t *list, s32 blendControl, sdfTexHandle_t *texture);
 
@@ -118,44 +118,44 @@ void dds3EffectFilterDrawTexQuad(effResourceRectDrawParams_t *source, sdfTexHand
 /* Build the alpha-multiply tri-strip: a flat grey quad over the blur rect. */
 /* NON_MATCHING: 26 of 45 words differ (first at +0x18). */
 #ifdef NON_MATCHING
-void dds3EffectBlur_AlphaMultiParmSet(const effBlurQuad_t *source, effBlurPrimTriStrip_t *prim) {
+void dds3EffectBlur_AlphaMultiParmSet(const effBlurQuad_t *pBlur, effBlurPrimTriStrip_t *pSpriteParm) {
     s32 x0;
     s32 y0;
     s32 x1;
     s32 y1;
 
-    prim->r = 128;
-    prim->g = 128;
-    prim->b = 128;
-    prim->a = ((const u8 *)source)[3];
-    x0 = (source->corners[0][0] << 4) + 0x7000;
-    prim->vtx[0].x = x0;
-    y0 = (source->corners[0][1] << 3) + 0x7900;
-    prim->vtx[0].y = y0;
-    prim->vtx[1].x = x0;
-    y1 = (source->corners[1][1] << 3) + 0x7900;
-    prim->vtx[1].y = y1;
-    x1 = (source->corners[1][0] << 4) + 0x7000;
-    prim->vtx[2].x = x1;
-    prim->vtx[2].y = y0;
-    prim->vtx[3].x = x1;
-    prim->vtx[3].y = y1;
-    prim->vtx[0].s = 0.0f;
-    prim->vtx[0].t = 0.0f;
-    prim->vtx[1].s = 0.0f;
-    prim->vtx[1].t = 1.0f;
-    prim->vtx[2].s = 1.0f;
-    prim->vtx[2].t = 0.0f;
-    prim->vtx[3].s = 1.0f;
-    prim->vtx[3].t = 1.0f;
-    prim->vtx[0].z = 0;
-    prim->vtx[0].adc = 0;
-    prim->vtx[1].z = 0;
-    prim->vtx[1].adc = 0;
-    prim->vtx[2].z = 0;
-    prim->vtx[2].adc = 0;
-    prim->vtx[3].z = 0;
-    prim->vtx[3].adc = 0;
+    pSpriteParm->r = 128;
+    pSpriteParm->g = 128;
+    pSpriteParm->b = 128;
+    pSpriteParm->a = ((const u8 *)pBlur)[3];
+    x0 = (pBlur->corners[0][0] << 4) + 0x7000;
+    pSpriteParm->vtx[0].x = x0;
+    y0 = (pBlur->corners[0][1] << 3) + 0x7900;
+    pSpriteParm->vtx[0].y = y0;
+    pSpriteParm->vtx[1].x = x0;
+    y1 = (pBlur->corners[1][1] << 3) + 0x7900;
+    pSpriteParm->vtx[1].y = y1;
+    x1 = (pBlur->corners[1][0] << 4) + 0x7000;
+    pSpriteParm->vtx[2].x = x1;
+    pSpriteParm->vtx[2].y = y0;
+    pSpriteParm->vtx[3].x = x1;
+    pSpriteParm->vtx[3].y = y1;
+    pSpriteParm->vtx[0].s = 0.0f;
+    pSpriteParm->vtx[0].t = 0.0f;
+    pSpriteParm->vtx[1].s = 0.0f;
+    pSpriteParm->vtx[1].t = 1.0f;
+    pSpriteParm->vtx[2].s = 1.0f;
+    pSpriteParm->vtx[2].t = 0.0f;
+    pSpriteParm->vtx[3].s = 1.0f;
+    pSpriteParm->vtx[3].t = 1.0f;
+    pSpriteParm->vtx[0].z = 0;
+    pSpriteParm->vtx[0].adc = 0;
+    pSpriteParm->vtx[1].z = 0;
+    pSpriteParm->vtx[1].adc = 0;
+    pSpriteParm->vtx[2].z = 0;
+    pSpriteParm->vtx[2].adc = 0;
+    pSpriteParm->vtx[3].z = 0;
+    pSpriteParm->vtx[3].adc = 0;
 }
 #else
 INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectBlur_AlphaMultiParmSet);
@@ -343,11 +343,11 @@ void dds3EffectBlurSetRect(effBlurTemplateBody_t *work) {
 }
 
 /* Clone a blur template into a fresh allocation. */
-effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *src) {
+effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *pParam) {
     effBlurTemplate_t *dst = sdfChipAllocDirect(sizeof(effBlurTemplate_t));
 
     dst->texture = dds3BillboardGetGeneralTex(2);
-    memcpy(&dst->body, src, sizeof(*src));
+    memcpy(&dst->body, pParam, sizeof(*pParam));
     return dst;
 }
 
@@ -374,18 +374,18 @@ void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work) {
 }
 
 /* Copy only the serialized parameters, leaving the owned work tail intact. */
-void dds3EffectPartialMultiBlurSetParam(effBlurScatterWork_t *dst, effBlurScatterParams_t *src) {
-    dst->params = *src;
+void dds3EffectPartialMultiBlurSetParam(effBlurScatterWork_t *hPartialMultiBlur, effBlurScatterParams_t *pParam) {
+    hPartialMultiBlur->params = *pParam;
 }
 
 /* Supply a source handle for the first blur variant. */
-void dds3EffectPartialMultiBlurSetTex(effBlurScatterWork_t *work, struct sdfTexHandle_t *sourceHandle) {
-    work->texture = sourceHandle;
+void dds3EffectPartialMultiBlurSetTex(effBlurScatterWork_t *hPartialMultiBlur, struct sdfTexHandle_t *hTex) {
+    hPartialMultiBlur->texture = hTex;
 }
 
 /* Acquire the first variant's source handle from the effect manager. */
-void dds3EffectPartialMultiBlurSetTexDef(effBlurScatterWork_t *work) {
-    work->texture = dds3BillboardGetGeneralTex(2);
+void dds3EffectPartialMultiBlurSetTexDef(effBlurScatterWork_t *hPartialMultiBlur) {
+    hPartialMultiBlur->texture = dds3BillboardGetGeneralTex(2);
 }
 
 void dds3EffectDistBlurPartInit(effBlurScatterWork_t *work, effBlurScatterSlot_t *slot) {
@@ -414,7 +414,7 @@ void dds3EffectDistBlurPartInit(effBlurScatterWork_t *work, effBlurScatterSlot_t
     quad->corners[1][1] = centerY + halfSize;
 }
 
-effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *params)
+effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *pParam)
 {
     struct sdfMemHandle_t *allocation;
     effBlurScatterWork_t *work;
@@ -423,7 +423,7 @@ effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *par
 
     allocation = sdfMemAllocDirect(sizeof(effBlurScatterWork_t) + 100 * sizeof(effBlurScatterSlot_t));
     work = (effBlurScatterWork_t *)sdfMemLock(allocation);
-    work->params = *params;
+    work->params = *pParam;
     work->allocation = allocation;
     work->slots = (effBlurScatterSlot_t *)(work + 1);
     work->texture = dds3BillboardGetGeneralTex(2);
@@ -494,11 +494,11 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectDistortionBlurDraw);
 #endif
 
 /* Update scale parameters but preserve the allocated destination slot count. */
-void dds3EffectDistortionBlurSetParam(effBlurScaleWork_t *dst, effBlurScaleParams_t *src) {
-    u32 count = dst->params.count;
+void dds3EffectDistortionBlurSetParam(effBlurScaleWork_t *hDistortionBlur, effBlurScaleParams_t *pParam) {
+    u32 count = hDistortionBlur->params.count;
 
-    dst->params = *src;
-    dst->params.count = count;
+    hDistortionBlur->params = *pParam;
+    hDistortionBlur->params.count = count;
 }
 
 /* The scale variant has its own source-handle setter. */
@@ -512,45 +512,45 @@ void dds3EffectDistortionBlurSetTex(effBlurScaleWork_t *work) {
 }
 
 /* Size the slot's quad from its current phase, about the work centre. */
-void dds3EffectRipBlurPartAreaSet(effBlurScaleWork_t *work, effBlurScaleSlot_t *slot) {
-    s32 half = (s32)((f32)work->params.size * slot->phase);
-    s32 x = work->params.position[0] + 0x100;
-    s32 y = work->params.position[1] + 0xE0;
+void dds3EffectRipBlurPartAreaSet(effBlurScaleWork_t *pParam, effBlurScaleSlot_t *pPart) {
+    s32 half = (s32)((f32)pParam->params.size * pPart->phase);
+    s32 x = pParam->params.position[0] + 0x100;
+    s32 y = pParam->params.position[1] + 0xE0;
 
-    slot->quad.corners[0][0] = x - half;
-    slot->quad.corners[0][1] = y - half;
-    slot->quad.corners[1][0] = x + half;
-    slot->quad.corners[1][1] = y + half;
+    pPart->quad.corners[0][0] = x - half;
+    pPart->quad.corners[0][1] = y - half;
+    pPart->quad.corners[1][0] = x + half;
+    pPart->quad.corners[1][1] = y + half;
 }
 
 /* Reset a slot for a new burst: zero phase and angle, then copy the colour, the two spare fields and the centre from the work parameters. */
-void dds3EffectRipBlurPartInit(effBlurScaleWork_t *work, effBlurScaleSlot_t *slot) {
-    effBlurQuad_t *quad = &slot->quad;
+void dds3EffectRipBlurPartInit(effBlurScaleWork_t *pParam, effBlurScaleSlot_t *pPart) {
+    effBlurQuad_t *quad = &pPart->quad;
 
-    slot->phase = 0.0f;
-    slot->angle = 0.0f;
-    quad->color = work->params.color;
-    quad->blendControl = work->params.blendControl;
-    quad->angle = work->params.uvDisplacementAngleDegrees;
-    quad->position[0] = work->params.position[0];
-    quad->position[1] = work->params.position[1];
+    pPart->phase = 0.0f;
+    pPart->angle = 0.0f;
+    quad->color = pParam->params.color;
+    quad->blendControl = pParam->params.blendControl;
+    quad->angle = pParam->params.uvDisplacementAngleDegrees;
+    quad->position[0] = pParam->params.position[0];
+    quad->position[1] = pParam->params.position[1];
 }
 
 /* Reset every slot, then stagger its initial phase by -spacing * index. */
-void dds3EffectRippleBlurReset(effBlurScaleWork_t *work) {
-    effBlurScaleSlot_t *slot = work->slots;
-    s32 count = work->params.count;
+void dds3EffectRippleBlurReset(effBlurScaleWork_t *hRippleBlur) {
+    effBlurScaleSlot_t *slot = hRippleBlur->slots;
+    s32 count = hRippleBlur->params.count;
     s32 i;
 
     for (i = 0; i < count; i++, slot++) {
-        dds3EffectRipBlurPartInit(work, slot);
-        slot->phase = -(work->params.spacing * (f32)i);
+        dds3EffectRipBlurPartInit(hRippleBlur, slot);
+        slot->phase = -(hRippleBlur->params.spacing * (f32)i);
     }
 }
 
 /* Allocate an owner and slot array from only the serialized parameter prefix. */
-effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *src) {
-    s32 count = src->count;
+effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam) {
+    s32 count = pParam->count;
     void *allocation = sdfMemAllocDirect(count * 0x30 + 0x38);
     effBlurScaleWork_t *work = (effBlurScaleWork_t *)sdfMemLock(allocation);
     effBlurScaleSlot_t *slot;
@@ -558,7 +558,7 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *src) {
 
     /* Copy through size, leaving the source handle, allocation and slots owned
        by this new work rather than reading a live-work tail from src. */
-    memcpy(work, src, 0x2C);
+    memcpy(work, pParam, 0x2C);
     work->allocation = allocation;
     work->slots = (effBlurScaleSlot_t *)(work + 1);
     work->texture = dds3BillboardGetGeneralTex(3);
@@ -752,11 +752,11 @@ INCLUDE_ASM(const s32, "effect/effBlur_Filter", dds3EffectFilterDrawTexQuad);
 #endif
 
 /* Clone rectangle parameters and select a fresh source handle. */
-effResourceRectWork_t *dds3EffectPartialMultiFilterCreate(effResourceRectParams_t *src) {
+effResourceRectWork_t *dds3EffectPartialMultiFilterCreate(effResourceRectParams_t *pParam) {
     effResourceRectWork_t *dst = sdfChipAllocDirect(sizeof(effResourceRectWork_t));
 
     dst->texture = dds3BillboardGetGeneralTex(0);
-    memcpy(&dst->params, src, sizeof(*src));
+    memcpy(&dst->params, pParam, sizeof(*pParam));
     return dst;
 }
 
@@ -764,16 +764,16 @@ void dds3EffectPartialMultiFilterDelete(effResourceRectWork_t *work) {
     sdfChipFreeDirect(work);
 }
 
-void dds3EffectPartialMultiFilterDraw(effResourceRectWork_t *work) {
-    s32 half = (s32)((f32)work->params.extent * 1.4f);
-    s32 x = work->params.center[0] + 0x100;
-    s32 y = work->params.center[1] + 0xE0;
+void dds3EffectPartialMultiFilterDraw(effResourceRectWork_t *hPartialMultiFilter) {
+    s32 half = (s32)((f32)hPartialMultiFilter->params.extent * 1.4f);
+    s32 x = hPartialMultiFilter->params.center[0] + 0x100;
+    s32 y = hPartialMultiFilter->params.center[1] + 0xE0;
 
-    work->params.draw.bounds.left = x - half;
-    work->params.draw.bounds.top = y - half;
-    work->params.draw.bounds.right = x + half;
-    work->params.draw.bounds.bottom = y + half;
-    dds3EffectFilterDrawTexQuad(&work->params.draw, work->texture);
+    hPartialMultiFilter->params.draw.bounds.left = x - half;
+    hPartialMultiFilter->params.draw.bounds.top = y - half;
+    hPartialMultiFilter->params.draw.bounds.right = x + half;
+    hPartialMultiFilter->params.draw.bounds.bottom = y + half;
+    dds3EffectFilterDrawTexQuad(&hPartialMultiFilter->params.draw, hPartialMultiFilter->texture);
 }
 
 INCLUDE_RODATA(const s32, "effect/effBlur_Filter", D_00533E30);

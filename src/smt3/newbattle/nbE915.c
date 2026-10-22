@@ -368,7 +368,7 @@ extern char D_00546840[];
 
 extern dds3Basic_t *D_005515B4;
 
-extern void effBTLSkillStart(s32 id, s32 param);
+extern void effBTLSkillStart(s32 id, s32 stat);
 
 extern f32 D_005514F8;
 
@@ -496,7 +496,7 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 void nbFormDispOff2(nbFormation_t *form);
 
-void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group);
+void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 
 nbFormation_t *nbGetEventForm();
 

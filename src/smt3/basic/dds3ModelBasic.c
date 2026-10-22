@@ -13,11 +13,11 @@ typedef struct {
 
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
-extern sdfModelRootNode_t *sdfModelMake(void *resource, sdfItemArray_t *items);
+extern sdfModelRootNode_t *sdfModelMake(void *aTexList, sdfItemArray_t *aModelData);
 
-extern sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *model, sdfMotionPlayBook_t *motion);
+extern sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *aModel, sdfMotionPlayBook_t *aBook);
 
-extern void sdfMotionChange(sdfMotionCtrlr_t *motion, s32 cut, s32 mode);
+extern void sdfMotionChange(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType);
 
 dds3Basic_t *dds3AddModelBasic(s32 id, sdfItemArray_t *items, sdfMotionPlayBook_t *motionTable, dds3Basic_t *fallbackModel, char *name) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_STATICMODEL);

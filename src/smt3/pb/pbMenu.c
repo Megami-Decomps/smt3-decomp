@@ -78,9 +78,9 @@ struct pbPanel_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfChipFreeDelayedDirect(void *aPtr);
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
 extern s8 pbLoadState;
 
@@ -88,7 +88,7 @@ extern pbMapWork_t *D_0054F5C4;
 
 extern pbPanel_t *record;
 
-extern void dds3ResetProcessFlag(dds3ProcessID_t *id, u32 mask, s32 value);
+extern void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
 extern pbPanel_t *blockDB;
 
@@ -98,9 +98,9 @@ extern char D_00535E40[], D_00535E68[];
 
 extern pbPanel_t *pbWaitLoadMapData(pbPanel_t *parent);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
@@ -110,7 +110,7 @@ extern void pb_load_mapdata_Shutdown(dds3ProcessID_t *id);
 
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
 
@@ -122,7 +122,7 @@ extern void dds3FadeOut(s32, s32, s32, s32);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern void sdfFileCmdReadFile(char *path, void *dest, s32 size, void *done, s32 arg);
+extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void *aCallback, s32 aUserData);
 
 extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
@@ -130,9 +130,9 @@ extern s32 pbGetMoveChar(void);
 
 extern void dds3AdminiCallSequence(s32, s32, s32, s32);
 
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
-extern void dds3SetProcessFlag(dds3ProcessID_t *id, u32 mask, s32 value);
+extern void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
 extern char D_00535E90[];
 
@@ -142,9 +142,9 @@ extern void pbPreviousRecord(void);
 
 extern pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 extern char D_00535E10[], D_00535EC8[];
 
 
@@ -156,8 +156,8 @@ void func_001D4E08(void) {
 void func_001D4E10(void) {
 }
 
-void exitPB(pbPanel_t *panel) {
-    dds3ResetProcessFlag(panel->process, 0x10, 1);
+void exitPB(pbPanel_t *p) {
+    dds3ResetProcessFlag(p->process, 0x10, 1);
     if (pbGetMoveChar() != 0) {
         ((pbPanel_t *)pbGetMoveChar())->flags = 0x60000;
     }
@@ -258,12 +258,12 @@ pbPanel_t *pbWaitLoadMapData(pbPanel_t *parent) {
     return panel;
 }
 
-void pbLoadSystemData(s32 index) {
+void pbLoadSystemData(s32 num) {
     dds3FadeOut(0, 0, 0, 1);
-    if (index < 30) {
-        sprintf(pbMapPathBuf, D_00535E40, index);
+    if (num < 30) {
+        sprintf(pbMapPathBuf, D_00535E40, num);
     } else {
-        sprintf(pbMapPathBuf, D_00535E68, index);
+        sprintf(pbMapPathBuf, D_00535E68, num);
     }
     sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
     pbLoadState = 0;

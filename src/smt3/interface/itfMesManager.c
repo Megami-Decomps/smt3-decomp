@@ -203,23 +203,23 @@ extern s32 scrGetIntPara(s32);
 
 extern s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex);
 
-void itfMesMngSetPhase(s32 windowIndex, s8 status);
+void itfMesMngSetPhase(s32 msgid, s8 phase);
 
 s32 itfMesMngSelect(void);
 
-extern void itfMesMngRequestSelect(s32 window, s32 entryIndex);
+extern void itfMesMngRequestSelect(s32 id, s32 select);
 
-extern void scrSetIntReturnValue(s32 retVal);
+extern void scrSetIntReturnValue(s32 i);
 
-void itfMesMngRequestSelectRelease(s32 window);
+void itfMesMngRequestSelectRelease(s32 id);
 
-s16 itfMesMngGetSelPhase(s32 windowIndex);
+s16 itfMesMngGetSelPhase(s32 msgid);
 
-s16 itfMesMngGetSelectNo(s32 windowIndex);
+s16 itfMesMngGetSelectNo(s32 msgid);
 
 s32 itfMesMngMaskSelect(void);
 
-void itfMesMngSetMaskSelect(s32 window, u32 mask);
+void itfMesMngSetMaskSelect(s32 id, u32 maskpattern);
 
 s32 itfMesMngCloseWindow(void);
 
@@ -229,13 +229,13 @@ s32 itfMesMngCloseWindow(void);
 
 #define ITF_MES_LOWER_STATUS_SECOND_BIT 0x200
 
-void itfMesMngMsgWndCls(s32 window);
+void itfMesMngMsgWndCls(s32 msgid);
 
-extern void fldPanelSet(s32 unused);
+extern void fldPanelSet(s32 mode);
 
 #define ITF_MES_UPPER_STATUS_PAIR_MASK 0x3000
 
-void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock);
+void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
 #define ITF_MES_CLEAR_SCRIPT_PANEL_BIT 0xFFDFFFFF
 
@@ -245,7 +245,7 @@ u32 itfMesMngCloseSelectWindow(void);
 
 s32 itfMesMngSetMesPosDefault(void);
 
-void itfMesMngSetMesPosition(s32 window, s32 x, s32 y);
+void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
 
 #define ITF_MES_DEFAULT_TEXT_X 0x4B0
 
@@ -253,33 +253,33 @@ void itfMesMngSetMesPosition(s32 window, s32 x, s32 y);
 
 s32 itfMesMngInitialize(itfMesResource_t *sub);
 
-extern itfMesLink_t *itfMiscLinkTake(itfMesLinkControl_t *pool);
+extern itfMesLink_t *itfMiscLinkTake(itfMesLinkControl_t *pstack);
 
 extern itfMesManager_t itfMesMngManager;
 
-sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern u32 sdfMemLock(sdfMemHandle_t *allocation);
+extern u32 sdfMemLock(sdfMemHandle_t *aHandle);
 
-itfMesResource_t *itfMesMngSetResourcePtr(s32 window, itfMesResource_t *sub);
+itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource);
 
-void InitializeSpeaker(itfMesSpeaker_t *cursor, s32 resetPosition);
+void InitializeSpeaker(itfMesSpeaker_t *pspeaker, s32 defaultpos);
 
-void InitializeMessage(itfMesMessage_t *cur, s32 resetPos);
+void InitializeMessage(itfMesMessage_t *pmessage, s32 defaultpos);
 
-extern void InitializeSelect(struct itfMesSelect_t *cursor);
+extern void InitializeSelect(struct itfMesSelect_t *pselect);
 
-void InitializeWindow(itfMesWindow_t *window);
+void InitializeWindow(itfMesWindow_t *pwindow);
 
-void InitializeVariable(itfMesVariable_t *slots);
+void InitializeVariable(itfMesVariable_t *pvariable);
 
-void InitializeCurCtr(itfMesCursor_t *c, s32 preserve);
+void InitializeCurCtr(itfMesCursor_t *pcurctr, s32 isdisp);
 
-void itfMesMngRelease(s32 window);
+void itfMesMngRelease(s32 id);
 
-void DestructFlow(s32 window);
+void DestructFlow(s32 id);
 
-s32 frDestroyFontRequestAfter(frFontHandle_t *glyph);
+s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
 
 #define ITF_MES_ENTRY_STATE_MASK 7
 
@@ -289,79 +289,79 @@ s32 frDestroyFontRequestAfter(frFontHandle_t *glyph);
 
 #define ITF_MES_OPTION_STATE_HIGH_CLEAR_MASK 0xFFFBFFFF
 
-void itfMesMngSetSpeakerPosition(s32 window, s32 x, s32 y);
+void itfMesMngSetSpeakerPosition(s32 id, s32 x, s32 y);
 
-void ChangeFontPosition(frFontHandle_t *glyph, s32 dx, s32 dy);
+void ChangeFontPosition(frFontHandle_t *pfont, s32 dist_x, s32 dist_y);
 
-void itfMesMngSetSpeakerPositionOffset(s32 window, s32 dx, s32 dy);
+void itfMesMngSetSpeakerPositionOffset(s32 id, s32 x, s32 y);
 
-void itfMesMngSetMesPositionOffset(s32 window, s32 dx, s32 dy);
+void itfMesMngSetMesPositionOffset(s32 id, s32 x, s32 y);
 
-void itfMesMngSetSelPosition(s32 window, s32 x, s32 y);
+void itfMesMngSetSelPosition(s32 id, s32 x, s32 y);
 
-void itfMesMngSetSelPositionOffset(s32 window, s32 dx, s32 dy);
+void itfMesMngSetSelPositionOffset(s32 id, s32 x, s32 y);
 
-void itfMesMngSetPriority(s32 window, s32 renderValue);
+void itfMesMngSetPriority(s32 id, s32 z_buf);
 
-void ChangeZBuffer(frFontHandle_t *g, s32 z);
+void ChangeZBuffer(frFontHandle_t *pfont, s32 z);
 
-void itfMesMngSetStat(s32 window, u32 highFlags);
+void itfMesMngSetStat(s32 id, u32 flag);
 
 #define ITF_MES_HIGH_FLAGS_MASK 0xffff0000
 
-s16 itfMesMngGetSelect(s32 window);
+s16 itfMesMngGetSelect(s32 id);
 
-s16 itfMesMngGetMesPage(s32 window);
+s16 itfMesMngGetMesPage(s32 id);
 
-s16 itfMesMngGetMesCurrentPage(s32 window);
+s16 itfMesMngGetMesCurrentPage(s32 id);
 
-u8 *itfMesMngGetVar(s32 window, s32 slotIndex);
+u8 *itfMesMngGetVar(s32 id, s32 index);
 
-void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const char *sourceText);
+void itfMesMngSetVarImmediate(s32 id, u32 index, const char *pstr);
 
-void SetVar(itfMesWork_t *mes, s32 slotIndex, const char *source, s32 byteCount);
+void SetVar(itfMesWork_t *pinst, s32 index, const char *pstr, s32 length);
 
-void itfMesMngSetVarImmediate2(s32 window, s32 slotIndex, const char *source, s32 byteCount);
+void itfMesMngSetVarImmediate2(s32 id, s32 index, const char *pstr, s32 length);
 
-void ResolveResourceAddress(itfMesResource_t *sub);
+void ResolveResourceAddress(itfMesResource_t *pdata);
 
-itfMesEntry_t *GetTypeHeader2(itfMesResource_t *sub);
+itfMesEntry_t *GetTypeHeader2(itfMesResource_t *pfileheader);
 
 #define ITF_MES_MAGIC_MSG1 0x3147534d
 
-u8 *itfMesMngGetDataPtrImmediate(s32 window, s32 entryIndex, s32 itemIndex);
+u8 *itfMesMngGetDataPtrImmediate(s32 id, s32 message, s32 page);
 
 u8 *GetMessagePagePtr(itfMesTable_t *table, s32 index);
 
-itfMesEntry_t *GetTypeHeader(itfMesWork_t *mes, s32 index);
+itfMesEntry_t *GetTypeHeader(itfMesWork_t *pinst, s32 index);
 
-void itfMesMngChangeWindowType(s32 window, s32 panelMode, s32 fadeLimit);
+void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha);
 
 #define ITF_MES_CONTENT_STATUS_MASK 0x3300
 
-extern void ResetWindowPara(itfMesWindow_t *block, s32 panelMode, s32 fadeLimit);
+extern void ResetWindowPara(itfMesWindow_t *pwin, s32 type, s32 alpha);
 
-void itfPnlRelease(itfPanel_t *sprite);
+void itfPnlRelease(itfPanel_t *handle);
 
-s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value);
+s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index);
 
-s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex);
+s32 itfMesMngGetWidth(s32 id, s32 message, s32 page);
 
-void CommitVarTable(s32 *table);
+void CommitVarTable(s32 *pvar);
 
-void frSetExtDic(u8 *fontData);
+void frSetExtDic(u8 *pExtFontData);
 
-frFontHandle_t *MessageRequest(s32 x, s32 y, u8 *encodedText, frFontHandle_t *sub);
+frFontHandle_t *MessageRequest(s32 X, s32 Y, u8 *pMsg, frFontHandle_t *pFRQ);
 
-s32 GetMessageWidth(frFontHandle_t *g);
+s32 GetMessageWidth(frFontHandle_t *pfont);
 
-void itfMesMngSetDefaultSpeed(s32 window, u8 channelValue);
+void itfMesMngSetDefaultSpeed(s32 id, u8 speed);
 
-void itfMesMngSetKutiCallback(s32 window, void (*callback)(void));
+void itfMesMngSetKutiCallback(s32 id, void (*func)(void));
 
 void itfMesMngInitializeManager(void);
 
-extern sdfTexHandle_t *itfMiscLoadTexture(const char *path);
+extern sdfTexHandle_t *itfMiscLoadTexture(const char *filename);
 
 extern void itfMiscLinkInitialize(itfMesLinkControl_t *pool, itfMesLink_t *nodes, s32 count, s32 stride);
 
@@ -369,19 +369,19 @@ extern void itfMiscLinkInitialize(itfMesLinkControl_t *pool, itfMesLink_t *nodes
 
 #define ITF_MES_POOL_NODE_BYTES 0x14
 
-extern dds3ProcessID_t *dds3StartProcess(const char *name, u32 priority, s32 startDelay,
-                         s32 destroyDelay, dds3ProcessFunc_t update,
-                         itfProcessShutdown_t destroy, u32 userValue);
+extern dds3ProcessID_t *dds3StartProcess(const char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                         s32 v3, dds3ProcessFunc_t drawExit,
+                         itfProcessShutdown_t deleteExit, u32 p);
 
 s32 CalcMsgMng_Process(void);
 
 void DrawMsgMng_Shutdown(void);
 
-s32 DrawMsgMng_Process(dds3ProcessID_t *task);
+s32 DrawMsgMng_Process(dds3ProcessID_t *id);
 
-void itfMesMngSetBitStatManager(u32 mask);
+void itfMesMngSetBitStatManager(u32 flags);
 
-void itfMesMngClearBitStatManager(u32 mask);
+void itfMesMngClearBitStatManager(u32 flags);
 
 u16 itfMesMngGetStatManager(void);
 
@@ -389,18 +389,18 @@ s32 itfMesMngDebugProc(void);
 
 extern itfMesDebug_t D_00326700;
 
-itfMesLink_t *DebugChangeInstance(itfMesLink_t *node);
+itfMesLink_t *DebugChangeInstance(itfMesLink_t *pflow);
 
 extern itfPadState_t dds3PadButtonState;
 
-void DebugMoveWinVert(itfMesWindow_t *panel, s32 boundsMode);
+void DebugMoveWinVert(itfMesWindow_t *pwin, s32 flag);
 
-void DebugMoveWinAlpha(itfMesWindow_t *stepper);
+void DebugMoveWinAlpha(itfMesWindow_t *pwin);
 
 sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 
-extern void dds3ConsPanelTagLink(sdfDrawTag_t *packetList, s32 column, s32 row,
-                        s32 columnCount, s32 rowCount);
+extern void dds3ConsPanelTagLink(sdfDrawTag_t *tag, s32 x, s32 y,
+                        s32 sx, s32 sy);
 
 extern char D_0054F4E8[];
 
@@ -408,10 +408,10 @@ extern char *D_0054F4D0[2];
 
 extern char D_0054F4F0[];
 
-extern void sdfDrawTagLink(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
-extern void *sdfDevPrintf(s32 source, s32 end, s32 argument, s32 index,
-                                  const char *format, ...);
+extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr,
+                                  const char *aStr, ...);
 
 extern char *D_00326710[];
 
@@ -424,15 +424,15 @@ void itfMesMngDebugShutdown(void);
 /* Slot record reached through the pool base, one 0x14 bytes per window. */
 extern itfMesLink_t D_0056BE80[];
 
-extern void ReleaseAllWindow(struct itfMesWork_t *effect);
+extern void ReleaseAllWindow(struct itfMesWork_t *pinst);
 
-void ReleaseAllVariable(itfMesVariable_t *slots);
+void ReleaseAllVariable(itfMesVariable_t *pvariable);
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void itfMiscLinkGive(itfMesLink_t *node, itfMesLinkControl_t *pool);
+extern void itfMiscLinkGive(itfMesLink_t *pelem, itfMesLinkControl_t *pstack);
 
-u32 CheckMessageBinary(itfMesResource_t *resource);
+u32 CheckMessageBinary(itfMesResource_t *pdata);
 
 #define ITF_MES_MAGIC_MSG0 0x3047534d
 
@@ -442,67 +442,67 @@ extern u32 strlen(const char *text);
 
 #define ITF_MES_COPY_ALIGN_MASK 3
 
-extern void *memcpy(void *destination, const void *source, u32 size);
+extern void *memcpy(void *a, const void *b, u32 c);
 
 #define ITF_MES_BINARY_COPY_ROUND_BIAS 5
 
-extern void *memset(void *destination, s32 value, u32 size);
+extern void *memset(void *a, s32 b, u32 c);
 
-frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *glyph, s32 from, s32 to);
+frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *pfont, s32 index, s32 lines);
 
-void ChangeFontAlpha(frFontHandle_t *glyph, u32 color);
+void ChangeFontAlpha(frFontHandle_t *pfont, u32 alpha);
 
 #define ITF_MES_COLOR_BYTE_CLEAR_MASK 0xffffff00
 
-void OpenCheckSpeakerWindow(itfMesWork_t *panel);
+void OpenCheckSpeakerWindow(itfMesWork_t *pinst);
 
-void OpenMessageWindow(itfMesWork_t *panel);
+void OpenMessageWindow(itfMesWork_t *pinst);
 
 void ReadytoMessage(itfMesWork_t *panel);
 
-extern itfPanel_t *itfPnlRegist2(s32 kind, u32 payload);
+extern itfPanel_t *itfPnlRegist2(s32 type, u32 texhandle);
 
-void itfPnlSetPosition(itfPanel_t *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue);
+void itfPnlSetPosition(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void itfPnlSetColor(itfPanel_t *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue);
+void itfPnlSetColor(itfPanel_t *handle, s32 r, s32 g, s32 b, s32 a);
 
-void CalcMesFlow(itfMesWork_t *object);
+void CalcMesFlow(itfMesWork_t *pinst);
 
-extern void CalcWindow(itfMesWork_t *panel);
+extern void CalcWindow(itfMesWork_t *pinst);
 
-extern void CalcMessage(itfMesWork_t *mes);
+extern void CalcMessage(itfMesWork_t *pinst);
 
 extern void CalcSelect(itfMesWork_t *);
 
-void CalcCurCtr(itfMesWork_t *panel);
+void CalcCurCtr(itfMesWork_t *pinst);
 
-s32 SelectItem(itfMesWork_t *panel);
+s32 SelectItem(itfMesWork_t *pinst);
 
-void SelectItemMove(itfMesSelect_t *obj, s32 dir);
+void SelectItemMove(itfMesSelect_t *psel, s32 direct);
 
 extern void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
-s32 SelectItemDefKey(itfMesSelect_t *selection);
+s32 SelectItemDefKey(itfMesSelect_t *psel);
 
-void ChangeFontColor(frFontHandle_t *g, s32 row, s32 rows, s32 value);
+void ChangeFontColor(frFontHandle_t *pfont, s32 index, s32 lines, s32 color);
 
 extern u32 dds3NullDrawProc(void);
 
-void DrawMesFlow(itfMesWork_t *panel);
+void DrawMesFlow(itfMesWork_t *pinst);
 
-void DrawWindow(itfMesWork_t *panel);
+void DrawWindow(itfMesWork_t *pinst);
 
-void DrawRetPageCursor(itfMesWork_t *panel);
+void DrawRetPageCursor(itfMesWork_t *pinst);
 
-void DrawSelectCursor(itfMesWork_t *panel);
+void DrawSelectCursor(itfMesWork_t *pinst);
 
-extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
-void DebugDrawWindowLine(itfPanel_t *sprite);
+void DebugDrawWindowLine(itfPanel_t *meswin);
 
-extern s32 sdfGrAllocPacketBuff(s32 size);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *list);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDrawTag_t *);
 
@@ -533,14 +533,14 @@ extern u8 D_0054F500[5];
 
 extern u8 D_0054F508[5];
 
-void itfPnlSetPositionOffset(itfPanel_t *panel, s32 leftDelta, s32 topDelta, s32 rightDelta, s32 bottomDelta, s32 renderValueDelta);
+void itfPnlSetPositionOffset(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void sdfAddressResolver(s32 *dst, s32 base, u8 *table, s32 len);
-void frSetVariableRequest(s32 slot, s32 value);
-void itfMesMngSetSelect(s32 window, s32 count);
-void itfMesMngMarkBitStat(s32 window, u32 mask);
-void itfMesMngClearBitStat(s32 window, u32 mask);
-void itfMesMngSetVar(s32 window, s32 slot, s32 value, s32 selector);
+void sdfAddressResolver(s32 *aDataBody, s32 aOffset, u8 *aAddrInfoPtr, s32 aAddrInfoLeng);
+void frSetVariableRequest(s32 VarNo, s32 pStr);
+void itfMesMngSetSelect(s32 id, s32 selno);
+void itfMesMngMarkBitStat(s32 id, u32 flag);
+void itfMesMngClearBitStat(s32 id, u32 flag);
+void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 /* Poll/start an entry: one ends the command, zero keeps waiting.
    A negative signed status is consumed by clearing it; positive status keeps waiting. */
 s32 itfMesMngMessage(void) {
@@ -568,19 +568,19 @@ s32 itfMesMngMessage(void) {
     return 0;
 }
 
-void itfMesMngSetOffsetY1(s32 window, s32 y1)
+void itfMesMngSetOffsetY1(s32 msgid, s32 y1)
 {
-    itfPnlSetPositionOffset(pinst[window].mes->window.sprite, 0, y1, 0, 0, 0);
+    itfPnlSetPositionOffset(pinst[msgid].mes->window.sprite, 0, y1, 0, 0, 0);
 }
 
-s8 itfMesMngGetPhase(s32 window)
+s8 itfMesMngGetPhase(s32 msgid)
 {
-    return pinst[window].mes->message.textState;
+    return pinst[msgid].mes->message.textState;
 }
 
 /* Store the signed byte entry status; index and payload pointer are trusted. */
-void itfMesMngSetPhase(s32 windowIndex, s8 status) {
-    pinst[windowIndex].mes->message.textState = status;
+void itfMesMngSetPhase(s32 msgid, s8 phase) {
+    pinst[msgid].mes->message.textState = phase;
 }
 
 s32 itfMesMngSelect(void) {
@@ -608,18 +608,18 @@ s32 itfMesMngSelect(void) {
 }
 
 /* Return the option-block signed status word, not the separate entry status byte. */
-s16 itfMesMngGetSelPhase(s32 windowIndex) {
-    return pinst[windowIndex].mes->selection.selectionState;
+s16 itfMesMngGetSelPhase(s32 msgid) {
+    return pinst[msgid].mes->selection.selectionState;
 }
 
-void itfMesMngSetSelPhase(s32 window, s16 phase)
+void itfMesMngSetSelPhase(s32 msgid, s16 phase)
 {
-    pinst[window].mes->selection.selectionState = phase;
+    pinst[msgid].mes->selection.selectionState = phase;
 }
 
 /* Return the same signed word forwarded as the script result when an option completes. */
-s16 itfMesMngGetSelectNo(s32 windowIndex) {
-    return pinst[windowIndex].mes->selection.selectedIndex;
+s16 itfMesMngGetSelectNo(s32 msgid) {
+    return pinst[msgid].mes->selection.selectedIndex;
 }
 
 /* Store the script's panel mask; a negative script window is a no-op. Return 1. */
@@ -677,8 +677,8 @@ s32 itfMesMngCloseWindow(void) {
 
 /* Mark each originally nonzero status pair with both bits, then clean/reset
  * content and clear the script panel bit. The status pairs are set, not cleared. */
-void itfMesMngMsgWndCls(s32 window) {
-    itfMesWork_t *mes = pinst[window].mes;
+void itfMesMngMsgWndCls(s32 msgid) {
+    itfMesWork_t *mes = pinst[msgid].mes;
     u32 previousFlags = mes->flags;
 
     if (previousFlags & ITF_MES_LOWER_STATUS_PAIR_MASK) {
@@ -687,8 +687,8 @@ void itfMesMngMsgWndCls(s32 window) {
     if (previousFlags & ITF_MES_UPPER_STATUS_PAIR_MASK) {
         mes->flags = mes->flags | ITF_MES_UPPER_STATUS_PAIR_MASK;
     }
-    itfMesMngRequestMessageRelease(window, 1);
-    itfMesMngRequestSelectRelease(window);
+    itfMesMngRequestMessageRelease(msgid, 1);
+    itfMesMngRequestSelectRelease(msgid);
     mes->flags &= ITF_MES_CLEAR_SCRIPT_PANEL_BIT;
 }
 
@@ -844,15 +844,15 @@ s32 itfMesMngInitialize(itfMesResource_t *sub) {
 }
 
 /* Destroy an installed nonnegative window slot; no upper-bound validation. */
-void itfMesMngRelease(s32 window) {
-    if (window >= 0 && pinst[window].mes != NULL) {
-        DestructFlow(window);
+void itfMesMngRelease(s32 id) {
+    if (id >= 0 && pinst[id].mes != NULL) {
+        DestructFlow(id);
     }
 }
 
 
 /* Called above its definition, where ee-gcc assumed int. */
-u8 *GetSpeakerName(itfMesWork_t *mes);
+u8 *GetSpeakerName(itfMesWork_t *pinst);
 
 s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
     itfMesWork_t *panel = pinst[window].mes;
@@ -918,15 +918,15 @@ s32 itfMesMngRequestMessage(s32 window, s32 entryIndex, s32 itemIndex) {
 
 /* Release/reset selected-entry glyphs and their status; optionally do the same
  * for primary text. Negative window is a no-op; no other slot validation. */
-void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
+void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker) {
     itfMesWork_t *mes;
     itfMesMessage_t *message;
     itfMesSpeaker_t *primaryTextBlock;
 
-    if (window < 0) {
+    if (id < 0) {
         return;
     }
-    mes = pinst[window].mes;
+    mes = pinst[id].mes;
     message = &mes->message;
     primaryTextBlock = &mes->speaker;
     if (message->glyphChain != NULL) {
@@ -936,7 +936,7 @@ void itfMesMngRequestMessageRelease(s32 window, s32 releasePrimaryBlock) {
     InitializeMessage(message, 0);
     mes->flags &= ~ITF_MES_ENTRY_STATE_MASK;
     mes->flags &= ITF_MES_ENTRY_STATE_HIGH_CLEAR_MASK;
-    if (releasePrimaryBlock == 0) {
+    if (cls_speaker == 0) {
         return;
     }
     if (primaryTextBlock->glyphChain != NULL) {
@@ -952,8 +952,8 @@ extern s32 printf(const char *format, ...);
 /* Called above its definition, where ee-gcc assumed int. */
 frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, s32 depth);
 
-void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
-    itfMesWork_t *panel = pinst[window].mes;
+void itfMesMngRequestSelect(s32 id, s32 select) {
+    itfMesWork_t *panel = pinst[id].mes;
     itfMesSelect_t *sel = &panel->selection;
     itfMesEntry_t *entry;
     itfMesTable_t *table;
@@ -961,7 +961,7 @@ void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
     s32 y;
     frFontHandle_t *chain;
 
-    entry = GetTypeHeader(panel, entryIndex);
+    entry = GetTypeHeader(panel, select);
     if (entry->itemList != (u32 *)1) {
         printf("itfMesMngRequestSelect() - Invalid Type : %d\n", entry->itemList);
     }
@@ -986,8 +986,8 @@ void itfMesMngRequestSelect(s32 window, s32 entryIndex) {
 
 /* Release option glyphs, clear option selection/state and invalidate its rank.
  * Other content and the window allocation remain installed. */
-void itfMesMngRequestSelectRelease(s32 window) {
-    itfMesWork_t *mes = pinst[window].mes;
+void itfMesMngRequestSelectRelease(s32 id) {
+    itfMesWork_t *mes = pinst[id].mes;
     itfMesSelect_t *optionBlock = &mes->selection;
 
     if (optionBlock->glyphChain != NULL) {
@@ -1002,20 +1002,20 @@ void itfMesMngRequestSelectRelease(s32 window) {
     mes->flags &= ITF_MES_OPTION_STATE_HIGH_CLEAR_MASK;
 }
 
-void itfMesMngSetMaskSelect(s32 window, u32 mask)
+void itfMesMngSetMaskSelect(s32 id, u32 maskpattern)
 {
-    pinst[window].mes->selection.panelValue = mask;
+    pinst[id].mes->selection.panelValue = maskpattern;
 }
 
-void itfMesMngSetSelect(s32 window, s32 count)
+void itfMesMngSetSelect(s32 id, s32 selno)
 {
-    itfMesSelect_t *blk = &pinst[window].mes->selection;
+    itfMesSelect_t *blk = &pinst[id].mes->selection;
     u32 mask = blk->panelValue;
     s32 bit = mask & 1;
     s32 n = bit == 0;
     s32 i = 0;
 
-    if (count > 0) {
+    if (selno > 0) {
         do {
             i++;
             mask >>= 1;
@@ -1023,7 +1023,7 @@ void itfMesMngSetSelect(s32 window, s32 count)
             if (bit == 0) {
                 n++;
             }
-        } while (i < count);
+        } while (i < selno);
     }
     n = bit == 0 ? n - 1 : 0;
     blk->selectedIndex = n;
@@ -1031,8 +1031,8 @@ void itfMesMngSetSelect(s32 window, s32 count)
 }
 
 /* Move primary text to an absolute position; an unchanged position is a no-op. */
-void itfMesMngSetSpeakerPosition(s32 window, s32 x, s32 y) {
-    itfMesSpeaker_t *primaryTextBlock = &pinst[window].mes->speaker;
+void itfMesMngSetSpeakerPosition(s32 id, s32 x, s32 y) {
+    itfMesSpeaker_t *primaryTextBlock = &pinst[id].mes->speaker;
     s32 delta[2];
 
     delta[0] = x - primaryTextBlock->x;
@@ -1046,17 +1046,17 @@ void itfMesMngSetSpeakerPosition(s32 window, s32 x, s32 y) {
 }
 
 /* Translate primary text and update its cached position, including zero deltas. */
-void itfMesMngSetSpeakerPositionOffset(s32 window, s32 dx, s32 dy) {
-    itfMesSpeaker_t *primaryTextBlock = &pinst[window].mes->speaker;
+void itfMesMngSetSpeakerPositionOffset(s32 id, s32 x, s32 y) {
+    itfMesSpeaker_t *primaryTextBlock = &pinst[id].mes->speaker;
 
-    ChangeFontPosition(primaryTextBlock->glyphChain, dx, dy);
-    primaryTextBlock->x += dx;
-    primaryTextBlock->y += dy;
+    ChangeFontPosition(primaryTextBlock->glyphChain, x, y);
+    primaryTextBlock->x += x;
+    primaryTextBlock->y += y;
 }
 
 /* Move selected-entry text absolutely; an unchanged position is a no-op. */
-void itfMesMngSetMesPosition(s32 window, s32 x, s32 y) {
-    itfMesMessage_t *message = &pinst[window].mes->message;
+void itfMesMngSetMesPosition(s32 id, s32 x, s32 y) {
+    itfMesMessage_t *message = &pinst[id].mes->message;
     s32 delta[2];
 
     delta[0] = x - message->x;
@@ -1070,17 +1070,17 @@ void itfMesMngSetMesPosition(s32 window, s32 x, s32 y) {
 }
 
 /* Translate selected-entry text and update its cached position. */
-void itfMesMngSetMesPositionOffset(s32 window, s32 dx, s32 dy) {
-    itfMesMessage_t *message = &pinst[window].mes->message;
+void itfMesMngSetMesPositionOffset(s32 id, s32 x, s32 y) {
+    itfMesMessage_t *message = &pinst[id].mes->message;
 
-    ChangeFontPosition(message->glyphChain, dx, dy);
-    message->x += dx;
-    message->y += dy;
+    ChangeFontPosition(message->glyphChain, x, y);
+    message->x += x;
+    message->y += y;
 }
 
 /* Move option text absolutely; an unchanged position is a no-op. */
-void itfMesMngSetSelPosition(s32 window, s32 x, s32 y) {
-    itfMesSelect_t *optionBlock = &pinst[window].mes->selection;
+void itfMesMngSetSelPosition(s32 id, s32 x, s32 y) {
+    itfMesSelect_t *optionBlock = &pinst[id].mes->selection;
     s32 delta[2];
 
     delta[0] = x - optionBlock->x;
@@ -1094,71 +1094,71 @@ void itfMesMngSetSelPosition(s32 window, s32 x, s32 y) {
 }
 
 /* Translate option text and update its cached position. */
-void itfMesMngSetSelPositionOffset(s32 window, s32 dx, s32 dy) {
-    itfMesSelect_t *optionBlock = &pinst[window].mes->selection;
+void itfMesMngSetSelPositionOffset(s32 id, s32 x, s32 y) {
+    itfMesSelect_t *optionBlock = &pinst[id].mes->selection;
 
-    ChangeFontPosition(optionBlock->glyphChain, dx, dy);
-    optionBlock->x += dx;
-    optionBlock->y += dy;
+    ChangeFontPosition(optionBlock->glyphChain, x, y);
+    optionBlock->x += x;
+    optionBlock->y += y;
 }
 
 /* Propagate a changed render value to all three glyph chains before caching it. */
-void itfMesMngSetPriority(s32 window, s32 renderValue) {
-    itfMesWork_t *mes = pinst[window].mes;
+void itfMesMngSetPriority(s32 id, s32 z_buf) {
+    itfMesWork_t *mes = pinst[id].mes;
 
-    if (mes->renderValue == renderValue) {
+    if (mes->renderValue == z_buf) {
         return;
     }
-    ChangeZBuffer(mes->speaker.glyphChain, renderValue);
-    ChangeZBuffer(mes->message.glyphChain, renderValue);
-    ChangeZBuffer(mes->selection.glyphChain, renderValue);
-    mes->renderValue = renderValue;
+    ChangeZBuffer(mes->speaker.glyphChain, z_buf);
+    ChangeZBuffer(mes->message.glyphChain, z_buf);
+    ChangeZBuffer(mes->selection.glyphChain, z_buf);
+    mes->renderValue = z_buf;
 }
 
-u32 itfMesMngGetStat(s32 window)
+u32 itfMesMngGetStat(s32 id)
 {
-    return pinst[window].mes->flags;
+    return pinst[id].mes->flags;
 }
 
 /* Replace only the high half, preserving the existing low-half cast. */
-void itfMesMngSetStat(s32 window, u32 highFlags) {
-    itfMesWork_t *mes = pinst[window].mes;
+void itfMesMngSetStat(s32 id, u32 flag) {
+    itfMesWork_t *mes = pinst[id].mes;
 
-    mes->flags = (u32)(u16)mes->flags | (highFlags & ITF_MES_HIGH_FLAGS_MASK);
+    mes->flags = (u32)(u16)mes->flags | (flag & ITF_MES_HIGH_FLAGS_MASK);
 }
 
-void itfMesMngMarkBitStat(s32 window, u32 mask)
+void itfMesMngMarkBitStat(s32 id, u32 flag)
 {
-    itfMesWork_t *rec = pinst[window].mes;
+    itfMesWork_t *rec = pinst[id].mes;
 
-    rec->flags |= mask & 0xFFFF0000;
+    rec->flags |= flag & 0xFFFF0000;
 }
 
-void itfMesMngClearBitStat(s32 window, u32 mask)
+void itfMesMngClearBitStat(s32 id, u32 flag)
 {
-    itfMesWork_t *rec = pinst[window].mes;
+    itfMesWork_t *rec = pinst[id].mes;
 
-    rec->flags &= ~mask | 0xFFFF;
+    rec->flags &= ~flag | 0xFFFF;
 }
 
 /* Return the cached clear-bit rank; reset state uses -1. */
-s16 itfMesMngGetSelect(s32 window) {
-    return pinst[window].mes->selection.selectedIndex;
+s16 itfMesMngGetSelect(s32 id) {
+    return pinst[id].mes->selection.selectedIndex;
 }
 
 /* Return the selected table's cached item count, without another table lookup. */
-s16 itfMesMngGetMesPage(s32 window) {
-    return pinst[window].mes->message.tableCount;
+s16 itfMesMngGetMesPage(s32 id) {
+    return pinst[id].mes->message.tableCount;
 }
 
 /* Return the stored signed-halfword item index, without another table lookup. */
-s16 itfMesMngGetMesCurrentPage(s32 window) {
-    return pinst[window].mes->message.itemIndex;
+s16 itfMesMngGetMesCurrentPage(s32 id) {
+    return pinst[id].mes->message.itemIndex;
 }
 
 /* Return the replacement text stored in a window slot. */
-u8 *itfMesMngGetVar(s32 window, s32 slotIndex) {
-    return (u8 *)pinst[window].mes->variables.addresses[slotIndex];
+u8 *itfMesMngGetVar(s32 id, s32 index) {
+    return (u8 *)pinst[id].mes->variables.addresses[index];
 }
 
 extern u8 *DDS3_GBWK;
@@ -1220,92 +1220,92 @@ extern char D_00311850[];
 void itfMesMngGetVarLocalize(s32 id);
 
 /* Called above its definition, where ee-gcc assumed int. */
-char *ConvertZenkakuNumber(s32 value, char *buf);
+char *ConvertZenkakuNumber(s32 buf, char *num);
 
-void itfMesMngSetVar(s32 window, s32 slot, s32 value, s32 selector) {
-    switch (selector) {
+void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type) {
+    switch (type) {
     case 0: {
         char buf[16];
 
-        sprintf(buf, D_0054F4C0, value);
-        itfMesMngSetVarImmediate(window, slot, buf);
+        sprintf(buf, D_0054F4C0, num);
+        itfMesMngSetVarImmediate(id, index, buf);
         break;
     }
     case 1:
-        itfMesMngSetVarImmediate(window, slot, text2[value]);
+        itfMesMngSetVarImmediate(id, index, text2[num]);
         break;
     case 8:
-        itfMesMngSetVarImmediate(window, slot, datExplainTable[value]);
+        itfMesMngSetVarImmediate(id, index, datExplainTable[num]);
         break;
     case 3:
-        itfMesMngSetVarImmediate(window, slot, pStr[value]);
+        itfMesMngSetVarImmediate(id, index, pStr[num]);
         break;
     case 4: {
         char text[0x40];
         char *p;
 
         p = text;
-        if (value >= 0x3E9) {
+        if (num >= 0x3E9) {
             *p = 0x52;
             text[1] = 0;
         } else {
-            if (value < 0) {
-                value = -value;
+            if (num < 0) {
+                num = -num;
                 *p = 0x42;
                 p = &text[1];
             }
-            p = ConvertZenkakuNumber(value, p);
+            p = ConvertZenkakuNumber(num, p);
             p[0] = 0x46;
             p[1] = 0;
         }
-        itfMesMngSetVarImmediate(window, slot, text);
+        itfMesMngSetVarImmediate(id, index, text);
         break;
     }
     case 5:
-        itfMesMngSetVarImmediate(window, slot, text1[value]);
+        itfMesMngSetVarImmediate(id, index, text1[num]);
         break;
     case 6:
-        itfMesMngSetVarImmediate(window, slot, &D_00311450[value * 32]);
+        itfMesMngSetVarImmediate(id, index, &D_00311450[num * 32]);
         break;
     case 7:
-        itfMesMngSetVarImmediate(window, slot, &D_00311850[value * 32]);
+        itfMesMngSetVarImmediate(id, index, &D_00311850[num * 32]);
         break;
     case 9:
-        itfMesMngSetVarImmediate(window, slot, pstr[value]);
+        itfMesMngSetVarImmediate(id, index, pstr[num]);
         break;
     case 10: {
         char *buffer = (char *)((u8 *)pinst + 0x9F4);
 
-        itfMesMngGetVarLocalize(value);
-        itfMesMngSetVarImmediate2(window, slot, buffer, strlen(buffer));
+        itfMesMngGetVarLocalize(num);
+        itfMesMngSetVarImmediate2(id, index, buffer, strlen(buffer));
         break;
     }
     }
 }
 
 /* Replace a text slot with a copied NUL-terminated encoded string. */
-void itfMesMngSetVarImmediate(s32 window, u32 slotIndex, const char *sourceText) {
-    SetVar(pinst[window].mes, slotIndex, sourceText, 0);
+void itfMesMngSetVarImmediate(s32 id, u32 index, const char *pstr) {
+    SetVar(pinst[id].mes, index, pstr, 0);
 }
 
 /* Copy text into one of the window's message text slots. */
-void itfMesMngSetVarImmediate2(s32 window, s32 slotIndex, const char *source, s32 byteCount) {
-    SetVar(pinst[window].mes, slotIndex, source, byteCount);
+void itfMesMngSetVarImmediate2(s32 id, s32 index, const char *pstr, s32 length) {
+    SetVar(pinst[id].mes, index, pstr, length);
 }
 
 /* Install/relocate a message resource and cache MSG1's trailing-entry word as
  * the temporary font entry. Return the previous resource without releasing it. */
-itfMesResource_t *itfMesMngSetResourcePtr(s32 window, itfMesResource_t *sub) {
-    itfMesWork_t *mes = pinst[window].mes;
+itfMesResource_t *itfMesMngSetResourcePtr(s32 id, itfMesResource_t *presource) {
+    itfMesWork_t *mes = pinst[id].mes;
     itfMesResource_t *previous = mes->sub;
     itfMesEntry_t *entry;
     u8 *temporaryFontEntry;
 
-    mes->sub = sub;
-    ResolveResourceAddress((itfMesResource_t *)sub);
-    entry = GetTypeHeader2(sub);
+    mes->sub = presource;
+    ResolveResourceAddress((itfMesResource_t *)presource);
+    entry = GetTypeHeader2(presource);
     temporaryFontEntry = 0;
-    if (sub->magic == ITF_MES_MAGIC_MSG1) {
+    if (presource->magic == ITF_MES_MAGIC_MSG1) {
         /* itfMesEntry_t is an invented type and the IDB has no counterpart,
          * so +8 past its two known words has no name to take. */
         temporaryFontEntry = *(u8 **)((u8 *)entry + 8);
@@ -1315,20 +1315,20 @@ itfMesResource_t *itfMesMngSetResourcePtr(s32 window, itfMesResource_t *sub) {
 }
 
 /* Look up an entry-table item; only the item index has a bounds check. */
-u8 *itfMesMngGetDataPtrImmediate(s32 window, s32 entryIndex, s32 itemIndex) {
-    return GetMessagePagePtr(GetTypeHeader(pinst[window].mes, entryIndex)->table, itemIndex);
+u8 *itfMesMngGetDataPtrImmediate(s32 id, s32 message, s32 page) {
+    return GetMessagePagePtr(GetTypeHeader(pinst[id].mes, message)->table, page);
 }
 
 /* Refresh changed panel values only when both content-status pairs are clear.
  * Release the old primitive after applying the panel mode and fade limit. */
-void itfMesMngChangeWindowType(s32 window, s32 panelMode, s32 fadeLimit) {
-    itfMesWork_t *mes = pinst[window].mes;
+void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha) {
+    itfMesWork_t *mes = pinst[id].mes;
     itfMesWindow_t *panelBlock = &mes->window;
 
     if ((mes->flags & ITF_MES_UPPER_STATUS_PAIR_MASK) == 0) {
-        if (mes->panelMode != panelMode || panelBlock->fadeLimit != fadeLimit) {
-            mes->panelMode = panelMode;
-            ResetWindowPara(panelBlock, panelMode, fadeLimit);
+        if (mes->panelMode != type || panelBlock->fadeLimit != alpha) {
+            mes->panelMode = type;
+            ResetWindowPara(panelBlock, type, alpha);
             if (panelBlock->sprite != NULL) {
                 itfPnlRelease(panelBlock->sprite);
                 panelBlock->sprite = NULL;
@@ -1338,19 +1338,19 @@ void itfMesMngChangeWindowType(s32 window, s32 panelMode, s32 fadeLimit) {
 }
 
 /* Set or append the option with `id` in the window's option list; ids 1, 6, 7 and >= 16 are rejected. */
-s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value) {
-    itfMesSelect_t *optionBlock = &pinst[window].mes->selection;
+s32 itfMesMngSetSelectDefKey(s32 id, s32 key, s32 index) {
+    itfMesSelect_t *optionBlock = &pinst[id].mes->selection;
     itfMesOption_t *option = NULL;
     s32 optionIndex;
 
-    if ((u32)id >= 0x10) {
+    if ((u32)key >= 0x10) {
         return 0;
     }
-    if (id == 1 || id == 6 || id == 7) {
+    if (key == 1 || key == 6 || key == 7) {
         return 0;
     }
     for (optionIndex = 0; optionIndex < optionBlock->optionCount; optionIndex++) {
-        if (optionBlock->options[optionIndex].id == id) {
+        if (optionBlock->options[optionIndex].id == key) {
             option = &optionBlock->options[optionIndex];
             break;
         }
@@ -1362,21 +1362,21 @@ s32 itfMesMngSetSelectDefKey(s32 window, s32 id, s32 value) {
         option = &optionBlock->options[optionBlock->optionCount];
         optionBlock->optionCount++;
     }
-    option->id = id;
-    option->value = value;
+    option->id = key;
+    option->value = index;
     return 1;
 }
 
 /* Build and release a temporary glyph chain to measure the widest grouped row.
  * Empty tables and zero/missing encoded items return zero. */
-s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
-    itfMesWork_t *mes = pinst[window].mes;
+s32 itfMesMngGetWidth(s32 id, s32 message, s32 page) {
+    itfMesWork_t *mes = pinst[id].mes;
     itfMesTable_t *table;
     u8 *encodedText;
     frFontHandle_t *glyphChain;
     s32 textExtent;
 
-    table = GetTypeHeader(mes, entryIndex)->table;
+    table = GetTypeHeader(mes, message)->table;
     if (table->count == 0) {
         return 0;
     }
@@ -1384,7 +1384,7 @@ s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
     if (mes->temporaryFontEntry != 0) {
         frSetExtDic(mes->temporaryFontEntry);
     }
-    encodedText = GetMessagePagePtr(table, itemIndex);
+    encodedText = GetMessagePagePtr(table, page);
     if (encodedText == 0) {
         return 0;
     }
@@ -1395,13 +1395,13 @@ s32 itfMesMngGetWidth(s32 window, s32 entryIndex, s32 itemIndex) {
 }
 
 /* Set the fourth color channel used when this window's entry glyphs are built. */
-void itfMesMngSetDefaultSpeed(s32 window, u8 channelValue) {
-    pinst[window].mes->message.color[3] = channelValue;
+void itfMesMngSetDefaultSpeed(s32 id, u8 speed) {
+    pinst[id].mes->message.color[3] = speed;
 }
 
 /* Store the optional callback address invoked without arguments during glyph building. */
-void itfMesMngSetKutiCallback(s32 window, void (*callback)(void)) {
-    pinst[window].mes->callbackAddress = (u32)callback;
+void itfMesMngSetKutiCallback(s32 id, void (*func)(void)) {
+    pinst[id].mes->callbackAddress = (u32)func;
 }
 
 /* Initialize the fixed window pool, load its texture and register the named
@@ -1422,13 +1422,13 @@ void itfMesMngInitializeManager(void) {
 }
 
 /* Set manager flags; the stored result is narrowed to its existing u16 field. */
-void itfMesMngSetBitStatManager(u32 mask) {
-    itfMesMngManager.flags |= mask;
+void itfMesMngSetBitStatManager(u32 flags) {
+    itfMesMngManager.flags |= flags;
 }
 
 /* Clear manager flags; the stored result is narrowed to its existing u16 field. */
-void itfMesMngClearBitStatManager(u32 mask) {
-    itfMesMngManager.flags &= ~mask;
+void itfMesMngClearBitStatManager(u32 flags) {
+    itfMesMngManager.flags &= ~flags;
 }
 
 /* Read the manager's 16-bit flags, distinct from itfMessageFlags. */
@@ -1565,13 +1565,13 @@ void itfMesMngDebugShutdown(void) {
 
 /* Tear down installed content/resources, return the pool record and decrement
  * the pool-array-relative counter. An empty record is a no-op. */
-void DestructFlow(s32 window) {
-    itfMesLink_t *windowRecord = &D_0056BE80[window];
+void DestructFlow(s32 id) {
+    itfMesLink_t *windowRecord = &D_0056BE80[id];
     itfMesWork_t *mes = windowRecord->state;
 
     if (mes != NULL) {
-        itfMesMngRequestMessageRelease(window, 1);
-        itfMesMngRequestSelectRelease(window);
+        itfMesMngRequestMessageRelease(id, 1);
+        itfMesMngRequestSelectRelease(id);
         ReleaseAllWindow(mes);
         ReleaseAllVariable(&mes->variables);
         mes->flags = 0;
@@ -1582,39 +1582,39 @@ void DestructFlow(s32 window) {
     }
 }
 
-void ResolveResourceAddress(itfMesResource_t *sub)
+void ResolveResourceAddress(itfMesResource_t *pdata)
 {
-    s32 *payload = (s32 *)sub->entries;
+    s32 *payload = (s32 *)pdata->entries;
 
-    if (sub->relocated == 0) {
-        sdfAddressResolver(payload, (s32)payload, (u8 *)sub + sub->fixupTableOffset, sub->fixupTableBytes);
-        sub->relocated = 1;
+    if (pdata->relocated == 0) {
+        sdfAddressResolver(payload, (s32)payload, (u8 *)pdata + pdata->fixupTableOffset, pdata->fixupTableBytes);
+        pdata->relocated = 1;
     }
 }
 
 /* Recognize MSG0/MSG1 magic only; this is not complete format validation. */
-u32 CheckMessageBinary(itfMesResource_t *resource) {
+u32 CheckMessageBinary(itfMesResource_t *pdata) {
     u32 isMessageResource;
 
     isMessageResource = 0;
-    if (resource->magic == ITF_MES_MAGIC_MSG0 || resource->magic == ITF_MES_MAGIC_MSG1) { /* "MSG0"/"MSG1" */
+    if (pdata->magic == ITF_MES_MAGIC_MSG0 || pdata->magic == ITF_MES_MAGIC_MSG1) { /* "MSG0"/"MSG1" */
         isMessageResource = 1;
     }
     return isMessageResource;
 }
 
-itfMesEntry_t *GetTypeHeader(itfMesWork_t *mes, s32 index)
+itfMesEntry_t *GetTypeHeader(itfMesWork_t *pinst, s32 index)
 {
-    itfMesEntry_t *entries = mes->sub->entries;
+    itfMesEntry_t *entries = pinst->sub->entries;
 
     return &entries[index];
 }
 
-itfMesEntry_t *GetTypeHeader2(itfMesResource_t *sub)
+itfMesEntry_t *GetTypeHeader2(itfMesResource_t *pfileheader)
 {
-    itfMesEntry_t *entries = sub->entries;
+    itfMesEntry_t *entries = pfileheader->entries;
 
-    return &entries[sub->entryCount];
+    return &entries[pfileheader->entryCount];
 }
 
 u8 *GetMessagePagePtr(itfMesTable_t *table, s32 index)
@@ -1628,7 +1628,7 @@ u8 *GetMessagePagePtr(itfMesTable_t *table, s32 index)
 }
 
 /* Called above its definition, where ee-gcc assumed int. */
-frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *g);
+frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *pfont);
 
 void ReadytoMessage(itfMesWork_t *panel) {
     itfMesMessage_t *mes = &panel->message;
@@ -1696,31 +1696,31 @@ void SetVar(mes, slotIndex, source, byteCount)
     memcpy((void *)*textAddress, source, byteCount);
 }
 
-void CommitVarTable(s32 *table)
+void CommitVarTable(s32 *pvar)
 {
     s32 i;
 
     for (i = 0; i < 32; i++) {
-        frSetVariableRequest(i, table[i]);
+        frSetVariableRequest(i, pvar[i]);
     }
 }
 
-u8 *GetSpeakerName(itfMesWork_t *mes)
+u8 *GetSpeakerName(itfMesWork_t *pinst)
 {
-    u32 *items = GetTypeHeader2(mes->sub)->itemList;
+    u32 *items = GetTypeHeader2(pinst->sub)->itemList;
 
-    return (u8 *)items[mes->speaker.selectedIndex];
+    return (u8 *)items[pinst->speaker.selectedIndex];
 }
 
-s32 GetNumSelectItem(s32 count, u32 mask)
+s32 GetNumSelectItem(s32 allitem, u32 mask)
 {
     s32 n = 0;
 
-    while (count > 0) {
+    while (allitem > 0) {
         u32 bit = mask & 1;
 
         mask >>= 1;
-        count--;
+        allitem--;
         if (bit == 0) {
             n++;
         }
@@ -1753,159 +1753,159 @@ frFontHandle_t *GetFontHandleUnit(u32 *list, s32 count, u32 mask, s32 x, s32 y, 
 /* Discard (to - from - 1) preceding rows when positive, retain the next
  * complete y-group and queue everything after it. Requires non-NULL input;
  * return NULL if discarding preceding rows exhausts the chain. */
-frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *glyph, s32 from, s32 to) {
-    s32 rowsToDiscard = to - from - 1;
-    s32 rowY = glyph->y;
+frFontHandle_t *UnchainFontHandleUnit(frFontHandle_t *pfont, s32 index, s32 lines) {
+    s32 rowsToDiscard = lines - index - 1;
+    s32 rowY = pfont->y;
     frFontHandle_t *nextNode;
     frFontHandle_t *rowHead;
     frFontHandle_t *rowTail;
 
     while (rowsToDiscard > 0) {
-        while (rowY == glyph->y) {
-            nextNode = glyph->previous;
-            glyph->next = NULL;
-            glyph->chainHead = glyph;
-            glyph->previous = NULL;
-            frDestroyFontRequestAfter(glyph);
-            glyph = nextNode;
-            if (glyph == NULL) {
+        while (rowY == pfont->y) {
+            nextNode = pfont->previous;
+            pfont->next = NULL;
+            pfont->chainHead = pfont;
+            pfont->previous = NULL;
+            frDestroyFontRequestAfter(pfont);
+            pfont = nextNode;
+            if (pfont == NULL) {
                 return NULL;
             }
         }
         rowsToDiscard--;
-        rowY = glyph->y;
+        rowY = pfont->y;
     }
-    rowHead = glyph;
+    rowHead = pfont;
     do {
-        rowTail = glyph;
-        glyph = glyph->previous;
-    } while (glyph != NULL && rowY == glyph->y);
-    while (glyph != NULL) {
-        nextNode = glyph->previous;
-        glyph->next = NULL;
-        glyph->chainHead = glyph;
-        glyph->previous = NULL;
-        frDestroyFontRequestAfter(glyph);
-        glyph = nextNode;
+        rowTail = pfont;
+        pfont = pfont->previous;
+    } while (pfont != NULL && rowY == pfont->y);
+    while (pfont != NULL) {
+        nextNode = pfont->previous;
+        pfont->next = NULL;
+        pfont->chainHead = pfont;
+        pfont->previous = NULL;
+        frDestroyFontRequestAfter(pfont);
+        pfont = nextNode;
     }
     rowHead->next = NULL;
     rowTail->previous = NULL;
-    for (glyph = rowHead; glyph != NULL; glyph = glyph->previous) {
+    for (pfont = rowHead; pfont != NULL; pfont = pfont->previous) {
         /* Despite its current name, this link points to the retained row tail. */
-        glyph->chainHead = rowTail;
+        pfont->chainHead = rowTail;
     }
     return rowHead;
 }
 
-frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *g)
+frFontHandle_t *GetLastLinkFontHandle(frFontHandle_t *pfont)
 {
-    while (g->previous != NULL) {
-        g = g->previous;
+    while (pfont->previous != NULL) {
+        pfont = pfont->previous;
     }
-    return g;
+    return pfont;
 }
 
-void GetLastMessagePara(frFontHandle_t *g, itfMesMessage_t *blk)
+void GetLastMessagePara(frFontHandle_t *pfont, itfMesMessage_t *pmessage)
 {
-    frTextHandle_t *shade = g->lastChild;
-    u8 ctx = g->glyphCodeOrContext.byteRoles.encodedContextByte;
+    frTextHandle_t *shade = pfont->lastChild;
+    u8 ctx = pfont->glyphCodeOrContext.byteRoles.encodedContextByte;
 
-    blk->color[3] = ctx >> 1;
-    blk->color[0] = shade->renderValueOrSetupOrShade.setupBytes.fontIndex;
-    blk->color[1] = shade->renderValueOrSetupOrShade.setupBytes.firstOption;
-    blk->color[2] = shade->renderValueOrSetupOrShade.setupBytes.secondOption;
+    pmessage->color[3] = ctx >> 1;
+    pmessage->color[0] = shade->renderValueOrSetupOrShade.setupBytes.fontIndex;
+    pmessage->color[1] = shade->renderValueOrSetupOrShade.setupBytes.firstOption;
+    pmessage->color[2] = shade->renderValueOrSetupOrShade.setupBytes.secondOption;
 }
 
-s32 CountLineMessage(frFontHandle_t *last, frFontHandle_t *first)
+s32 CountLineMessage(frFontHandle_t *pfont_top, frFontHandle_t *pfont)
 {
-    s16 h = first->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
+    s16 h = pfont->parentDimensionsOrRenderWord.parentDimensions.cellHeight;
 
-    return ((first->y - last->y) >> 3) / h + 1;
+    return ((pfont->y - pfont_top->y) >> 3) / h + 1;
 }
 
 /* Translate every linked node in text units; a NULL chain is a no-op. */
-void ChangeFontPosition(frFontHandle_t *glyph, s32 dx, s32 dy) {
-    if (glyph == NULL) {
+void ChangeFontPosition(frFontHandle_t *pfont, s32 dist_x, s32 dist_y) {
+    if (pfont == NULL) {
         return;
     }
     do {
-        glyph->x += dx;
-        glyph->y += dy;
-        glyph = glyph->previous;
-    } while (glyph != NULL);
+        pfont->x += dist_x;
+        pfont->y += dist_y;
+        pfont = pfont->previous;
+    } while (pfont != NULL);
 }
 
-void ChangeZBuffer(frFontHandle_t *g, s32 z)
+void ChangeZBuffer(frFontHandle_t *pfont, s32 z)
 {
-    while (g != NULL) {
-        g->renderValueOrSetupOrShade.renderValue = z;
-        g = g->previous;
+    while (pfont != NULL) {
+        pfont->renderValueOrSetupOrShade.renderValue = z;
+        pfont = pfont->previous;
     }
 }
 
-void ChangeFontColor(frFontHandle_t *g, s32 row, s32 rows, s32 value)
+void ChangeFontColor(frFontHandle_t *pfont, s32 index, s32 lines, s32 color)
 {
-    s32 skip = rows - row - 1;
-    s32 y = g->y;
+    s32 skip = lines - index - 1;
+    s32 y = pfont->y;
     s32 cur = y;
     frTextHandle_t *c;
     u8 flag;
 
     while (skip > 0) {
         while (y == cur) {
-            g = g->previous;
-            if (g == NULL) {
+            pfont = pfont->previous;
+            if (pfont == NULL) {
                 return;
             }
-            cur = g->y;
+            cur = pfont->y;
         }
         skip--;
         y = cur;
     }
-    flag = value;
+    flag = color;
     do {
-        for (c = g->firstChild; c != NULL; c = c->next) {
+        for (c = pfont->firstChild; c != NULL; c = c->next) {
             c->renderValueOrSetupOrShade.setupBytes.firstOption = flag;
         }
-        g = g->previous;
-    } while (g != NULL && y == g->y);
+        pfont = pfont->previous;
+    } while (pfont != NULL && y == pfont->y);
 }
 
-void ChangeFontColorAll(frFontHandle_t *g, u8 flag)
+void ChangeFontColorAll(frFontHandle_t *pfont, u8 color)
 {
     frTextHandle_t *c;
 
-    for (; g != NULL; g = g->previous) {
-        for (c = g->firstChild; c != NULL; c = c->next) {
-            c->renderValueOrSetupOrShade.setupBytes.firstOption = flag;
+    for (; pfont != NULL; pfont = pfont->previous) {
+        for (c = pfont->firstChild; c != NULL; c = c->next) {
+            c->renderValueOrSetupOrShade.setupBytes.firstOption = color;
         }
     }
 }
 
 /* Clear each child's low color byte, then OR the unmasked input word.
  * High input bits can therefore also change the upper bytes. */
-void ChangeFontAlpha(frFontHandle_t *glyph, u32 color) {
+void ChangeFontAlpha(frFontHandle_t *pfont, u32 alpha) {
     frTextHandle_t *child;
 
-    for (; glyph != NULL; glyph = glyph->previous) {
-        for (child = glyph->firstChild; child != NULL; child = child->next) {
-            child->parentDimensionsOrRenderWord.renderWord = child->parentDimensionsOrRenderWord.renderWord & ITF_MES_COLOR_BYTE_CLEAR_MASK | color;
+    for (; pfont != NULL; pfont = pfont->previous) {
+        for (child = pfont->firstChild; child != NULL; child = child->next) {
+            child->parentDimensionsOrRenderWord.renderWord = child->parentDimensionsOrRenderWord.renderWord & ITF_MES_COLOR_BYTE_CLEAR_MASK | alpha;
         }
     }
 }
 
-s32 GetMessageWidth(frFontHandle_t *g)
+s32 GetMessageWidth(frFontHandle_t *pfont)
 {
     s32 max = 0;
 
-    while (g != NULL) {
-        s32 y = g->y;
+    while (pfont != NULL) {
+        s32 y = pfont->y;
         s32 w = 0;
 
         do {
-            w += g->advance;
-            g = g->previous;
-        } while (g != NULL && y == g->y);
+            w += pfont->advance;
+            pfont = pfont->previous;
+        } while (pfont != NULL && y == pfont->y);
         if (w > max) {
             max = w;
         }
@@ -1913,13 +1913,13 @@ s32 GetMessageWidth(frFontHandle_t *g)
     return max << 4;
 }
 
-s32 GetMaskedIndex(s32 skip, u32 mask)
+s32 GetMaskedIndex(s32 index, u32 mask)
 {
     s32 i = 0;
 
     while (i < 0x20) {
         if ((mask & 1) == 0) {
-            if (--skip < 0) {
+            if (--index < 0) {
                 break;
             }
         }
@@ -1929,109 +1929,109 @@ s32 GetMaskedIndex(s32 skip, u32 mask)
     return i;
 }
 
-void RaiseMessageSpeedMax(frFontHandle_t *chain)
+void RaiseMessageSpeedMax(frFontHandle_t *pfont)
 {
-    while (chain != NULL) {
-        if (chain->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
-            frSetDrawSpeed(chain, 0x80);
+    while (pfont != NULL) {
+        if (pfont->firstChild->renderValueOrSetupOrShade.setupBytes.secondOption == 0) {
+            frSetDrawSpeed(pfont, 0x80);
         }
-        chain = chain->previous;
+        pfont = pfont->previous;
     }
 }
 
-void RaiseMessageSpeedMaxAll(frFontHandle_t *chain)
+void RaiseMessageSpeedMaxAll(frFontHandle_t *pfont)
 {
-    while (chain != NULL) {
-        frSetDrawSpeed(chain, 0x80);
-        chain = chain->previous;
+    while (pfont != NULL) {
+        frSetDrawSpeed(pfont, 0x80);
+        pfont = pfont->previous;
     }
 }
 
-void OpenMessageWindow(itfMesWork_t *panel) {
-    itfMesWindow_t *place = &panel->window;
-    itfMesMessage_t *mes = &panel->message;
+void OpenMessageWindow(itfMesWork_t *pinst) {
+    itfMesWindow_t *place = &pinst->window;
+    itfMesMessage_t *mes = &pinst->message;
 
     if (place->sprite == NULL) {
-        if (panel->panelMode != 2) {
+        if (pinst->panelMode != 2) {
             place->sprite = itfPnlRegist2(6, (u32)itfMesMngManager.windowTexture);
         } else {
             place->sprite = itfPnlRegist2(8, (u32)itfMesMngManager.windowTexture);
         }
     }
     itfPnlSetPosition(place->sprite, mes->x + place->bounds[0], mes->y + place->bounds[1],
-                      mes->x + place->bounds[2], mes->y + place->bounds[3], panel->renderValue);
+                      mes->x + place->bounds[2], mes->y + place->bounds[3], pinst->renderValue);
     itfPnlSetColor(place->sprite, place->red, place->green, place->blue, 0);
-    panel->flags = (panel->flags & ~0x300) | 0x100;
+    pinst->flags = (pinst->flags & ~0x300) | 0x100;
 }
 
-void OpenCheckSpeakerWindow(itfMesWork_t *panel) {
-    itfMesSpeaker_t *origin = &panel->speaker;
-    itfMesWindow_t *place = &panel->window;
-    if (origin->glyphChain != NULL && !(panel->flags & 0x10000)) {
+void OpenCheckSpeakerWindow(itfMesWork_t *pinst) {
+    itfMesSpeaker_t *origin = &pinst->speaker;
+    itfMesWindow_t *place = &pinst->window;
+    if (origin->glyphChain != NULL && !(pinst->flags & 0x10000)) {
         if (place->frame == NULL) {
             s32 width = origin->glyphChain->advance * 16;
             place->frame = itfPnlRegist2(7, (u32)itfMesMngManager.windowTexture);
-            itfPnlSetPosition(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xE8, panel->renderValue);
+            itfPnlSetPosition(place->frame, origin->x - 0x2D0, origin->y - 0x68, origin->x + width + 0x2D0, origin->y + 0xE8, pinst->renderValue);
             itfPnlSetColor(place->frame, 0x7F, 0x7F, 0x7F, 0);
         }
-        panel->flags = (panel->flags & ~0x3000) | 0x1000;
+        pinst->flags = (pinst->flags & ~0x3000) | 0x1000;
     } else if (place->frame != 0) {
-        panel->flags |= 0x3000;
+        pinst->flags |= 0x3000;
     }
 }
 
-void InitializeSpeaker(itfMesSpeaker_t *cursor, s32 resetPosition) {
-    if (resetPosition != 0) {
-        cursor->x = 0x430;
-        cursor->y = 0x9B0;
+void InitializeSpeaker(itfMesSpeaker_t *pspeaker, s32 defaultpos) {
+    if (defaultpos != 0) {
+        pspeaker->x = 0x430;
+        pspeaker->y = 0x9B0;
     }
-    cursor->glyphChain = 0;
-    cursor->selectedIndex = 0xffff;
+    pspeaker->glyphChain = 0;
+    pspeaker->selectedIndex = 0xffff;
 }
 
-void InitializeMessage(itfMesMessage_t *cur, s32 resetPos) {
-    if (resetPos != 0) {
-        cur->x = 0x4B0;
-        cur->y = 0xA88;
+void InitializeMessage(itfMesMessage_t *pmessage, s32 defaultpos) {
+    if (defaultpos != 0) {
+        pmessage->x = 0x4B0;
+        pmessage->y = 0xA88;
     }
-    cur->glyphChain = NULL;
-    cur->textState = 0;
-    cur->textInterfaceMask = 0;
-    cur->lineCount = 0;
-    cur->itemIndex = 0;
-    cur->tableCount = 0;
-    cur->color[0] = 0;
-    cur->color[1] = 0;
-    cur->color[2] = 0;
-    cur->color[3] = 0x80;
-    cur->table = NULL;
+    pmessage->glyphChain = NULL;
+    pmessage->textState = 0;
+    pmessage->textInterfaceMask = 0;
+    pmessage->lineCount = 0;
+    pmessage->itemIndex = 0;
+    pmessage->tableCount = 0;
+    pmessage->color[0] = 0;
+    pmessage->color[1] = 0;
+    pmessage->color[2] = 0;
+    pmessage->color[3] = 0x80;
+    pmessage->table = NULL;
 }
 
-void InitializeSelect(itfMesSelect_t *sel)
+void InitializeSelect(itfMesSelect_t *pselect)
 {
-    sel->x = 0x560;
-    sel->y = 0xBC8;
-    sel->glyphChain = NULL;
-    sel->panelValue = 0;
-    sel->selectionState = 0;
-    sel->selectedIndex = -1;
-    sel->savedIndex = -1;
-    sel->rowCount = 0;
-    sel->glyphColorIntensity = 0;
-    sel->optionCount = 0;
+    pselect->x = 0x560;
+    pselect->y = 0xBC8;
+    pselect->glyphChain = NULL;
+    pselect->panelValue = 0;
+    pselect->selectionState = 0;
+    pselect->selectedIndex = -1;
+    pselect->savedIndex = -1;
+    pselect->rowCount = 0;
+    pselect->glyphColorIntensity = 0;
+    pselect->optionCount = 0;
 }
 
-void InitializeWindow(itfMesWindow_t *block)
+void InitializeWindow(itfMesWindow_t *pwindow)
 {
-    block->frame = NULL;
-    block->sprite = NULL;
-    ResetWindowPara(block, 0, 0);
+    pwindow->frame = NULL;
+    pwindow->sprite = NULL;
+    ResetWindowPara(pwindow, 0, 0);
 }
 
-void InitializeVariable(itfMesVariable_t *slots)
+void InitializeVariable(itfMesVariable_t *pvariable)
 {
     s32 n = 0x1F;
-    u32 *p = &slots->addresses[31];
+    u32 *p = &pvariable->addresses[31];
 
     do {
         n--;
@@ -2040,26 +2040,26 @@ void InitializeVariable(itfMesVariable_t *slots)
     } while (n >= 0);
 }
 
-void InitializeCurCtr(itfMesCursor_t *c, s32 preserve)
+void InitializeCurCtr(itfMesCursor_t *pcurctr, s32 isdisp)
 {
-    if (preserve == 0) {
-        c->kind = 0;
+    if (isdisp == 0) {
+        pcurctr->kind = 0;
     }
-    c->alpha = 0x40;
-    c->phase = 0;
-    c->timer = 0;
-    c->frames = 0;
+    pcurctr->alpha = 0x40;
+    pcurctr->phase = 0;
+    pcurctr->timer = 0;
+    pcurctr->frames = 0;
 }
 
-void ForceSetCurCtr(itfMesCursor_t *c, s16 phase, s16 alpha, s16 timer)
+void ForceSetCurCtr(itfMesCursor_t *pcurctr, s16 phase, s16 ctr0, s16 ctr1)
 {
-    c->phase = phase;
-    c->alpha = alpha;
-    c->timer = timer;
+    pcurctr->phase = phase;
+    pcurctr->alpha = ctr0;
+    pcurctr->timer = ctr1;
 }
 
-void ReleaseAllWindow(itfMesWork_t *panel) {
-    itfMesWindow_t *place = &panel->window;
+void ReleaseAllWindow(itfMesWork_t *pinst) {
+    itfMesWindow_t *place = &pinst->window;
 
     if (place->frame != NULL) {
         itfPnlRelease(place->frame);
@@ -2069,25 +2069,25 @@ void ReleaseAllWindow(itfMesWork_t *panel) {
         itfPnlRelease(place->sprite);
         place->sprite = NULL;
     }
-    panel->flags &= ~0xF00;
+    pinst->flags &= ~0xF00;
 }
 
-void ReleaseAllVariable(itfMesVariable_t *slots)
+void ReleaseAllVariable(itfMesVariable_t *pvariable)
 {
     s32 remaining = 0x1F;
 
     do {
         s32 index = 0x1F - remaining;
 
-        if (slots->addresses[index] != 0) {
-            sdfMemFreeDirect(slots->handles[index]);
-            slots->addresses[index] = 0;
+        if (pvariable->addresses[index] != 0) {
+            sdfMemFreeDirect(pvariable->handles[index]);
+            pvariable->addresses[index] = 0;
         }
         remaining--;
     } while (remaining >= 0);
 }
 
-char *ConvertZenkakuNumber(s32 value, char *buf) {
+char *ConvertZenkakuNumber(s32 buf, char *num) {
     s32 digits[10];
     s32 count = 0;
     s32 radix = 10;
@@ -2095,101 +2095,101 @@ char *ConvertZenkakuNumber(s32 value, char *buf) {
     s32 i;
 
     do {
-        *p = value % radix;
-        value = value / radix;
+        *p = buf % radix;
+        buf = buf / radix;
         count++;
         p++;
-    } while (value > 0 && count < 10);
+    } while (buf > 0 && count < 10);
 
     for (i = count - 1; i >= 0; i--) {
-        *buf = (u8)digits[i] + 0x30;
-        buf++;
+        *num = (u8)digits[i] + 0x30;
+        num++;
     }
-    *buf = 0;
-    return buf;
+    *num = 0;
+    return num;
 }
 
-void ResetWindowPara(itfMesWindow_t *block, s32 panelMode, s32 fadeLimit)
+void ResetWindowPara(itfMesWindow_t *pwin, s32 type, s32 alpha)
 {
-    switch (panelMode) {
+    switch (type) {
     default:
-        block->bounds[0] = -0x1390;
-        block->bounds[1] = -0x3D8;
-        block->bounds[2] = 0x2A30;
-        block->bounds[3] = 0x590;
-        block->red = 0x7F;
-        block->green = 0x7F;
-        block->blue = 0x7F;
-        block->fadeLimit = (fadeLimit > 0) ? fadeLimit : 0x66;
+        pwin->bounds[0] = -0x1390;
+        pwin->bounds[1] = -0x3D8;
+        pwin->bounds[2] = 0x2A30;
+        pwin->bounds[3] = 0x590;
+        pwin->red = 0x7F;
+        pwin->green = 0x7F;
+        pwin->blue = 0x7F;
+        pwin->fadeLimit = (alpha > 0) ? alpha : 0x66;
         break;
     case 1:
-        block->bounds[0] = -0x1DB0;
-        block->bounds[1] = -0x2F8;
-        block->bounds[2] = 0x2C30;
-        block->bounds[3] = 0x548;
-        block->red = 0x7F;
-        block->green = 0x7F;
-        block->blue = 0x7F;
-        block->fadeLimit = (fadeLimit > 0) ? fadeLimit : 0x57;
+        pwin->bounds[0] = -0x1DB0;
+        pwin->bounds[1] = -0x2F8;
+        pwin->bounds[2] = 0x2C30;
+        pwin->bounds[3] = 0x548;
+        pwin->red = 0x7F;
+        pwin->green = 0x7F;
+        pwin->blue = 0x7F;
+        pwin->fadeLimit = (alpha > 0) ? alpha : 0x57;
         break;
     case 2:
-        block->bounds[0] = -0x1390;
-        block->bounds[1] = -0x208;
-        block->bounds[2] = 0x2A30;
-        block->bounds[3] = 0x410;
-        block->red = 0x7F;
-        block->green = 0x7F;
-        block->blue = 0x7F;
-        block->fadeLimit = (fadeLimit > 0) ? fadeLimit : 0x87;
+        pwin->bounds[0] = -0x1390;
+        pwin->bounds[1] = -0x208;
+        pwin->bounds[2] = 0x2A30;
+        pwin->bounds[3] = 0x410;
+        pwin->red = 0x7F;
+        pwin->green = 0x7F;
+        pwin->blue = 0x7F;
+        pwin->fadeLimit = (alpha > 0) ? alpha : 0x87;
         break;
     }
 }
 
-void CalcMesFlow(itfMesWork_t *object) {
-    CalcWindow(object);
-    CalcMessage(object);
-    CalcSelect(object);
-    CalcCurCtr(object);
+void CalcMesFlow(itfMesWork_t *pinst) {
+    CalcWindow(pinst);
+    CalcMessage(pinst);
+    CalcSelect(pinst);
+    CalcCurCtr(pinst);
 }
 
-void CalcWindow(itfMesWork_t *panel) {
-    itfMesWindow_t *place = &panel->window;
+void CalcWindow(itfMesWork_t *pinst) {
+    itfMesWindow_t *place = &pinst->window;
     itfPanel_t *sprite = place->sprite;
     itfPanel_t *frame;
     u32 mode;
 
-    mode = panel->flags & 0x300;
+    mode = pinst->flags & 0x300;
     switch (mode) {
     case 0x100:
         sprite->alpha += 0x18;
         if (sprite->alpha >= place->fadeLimit) {
             sprite->alpha = place->fadeLimit;
-            panel->flags = (panel->flags & ~0x307) | 0x203;
+            pinst->flags = (pinst->flags & ~0x307) | 0x203;
         }
         break;
     case 0x300:
         sprite->alpha -= 8;
         if (sprite->alpha <= 0) {
             sprite->alpha = 0;
-            panel->flags &= ~0x300;
+            pinst->flags &= ~0x300;
         }
         break;
     }
     frame = place->frame;
-    mode = panel->flags & 0x3000;
+    mode = pinst->flags & 0x3000;
     switch (mode) {
     case 0x1000:
         frame->alpha += 0x20;
         if (frame->alpha >= 0xC8) {
             frame->alpha = 0xC8;
-            panel->flags = (panel->flags & ~0x3000) | 0x2000;
+            pinst->flags = (pinst->flags & ~0x3000) | 0x2000;
         }
         break;
     case 0x3000:
         frame->alpha -= 0x20;
         if (frame->alpha <= 0) {
             frame->alpha = 0;
-            panel->flags &= ~0x3000;
+            pinst->flags &= ~0x3000;
             itfPnlRelease(frame);
             place->frame = NULL;
         }
@@ -2197,25 +2197,25 @@ void CalcWindow(itfMesWork_t *panel) {
     }
 }
 
-void CalcMessage(itfMesWork_t *panel) {
-    itfMesMessage_t *mes = &panel->message;
+void CalcMessage(itfMesWork_t *pinst) {
+    itfMesMessage_t *mes = &pinst->message;
     u32 flags;
 
     if (mes->textState != 1) {
         return;
     }
-    flags = panel->flags;
+    flags = pinst->flags;
     if ((flags & 7) == 4) {
-        panel->fade.frames++;
+        pinst->fade.frames++;
         if (flags & 0x800000) {
             mes->textState = -1;
             return;
         }
         if ((flags & 0x100000) == 0) {
-            panel->fade.kind = 1;
+            pinst->fade.kind = 1;
         }
         if (dds3PadButtonState.confirm >= 0 && dds3PadButtonState.primaryCancel >= 0 &&
-            (dds3PadButtonState.primaryTriangle == 0 || panel->fade.frames < 5)) {
+            (dds3PadButtonState.primaryTriangle == 0 || pinst->fade.frames < 5)) {
             if (mes->textInterfaceMask != 0) {
                 return;
             }
@@ -2223,25 +2223,25 @@ void CalcMessage(itfMesWork_t *panel) {
         if (mes->textInterfaceMask != 0) {
             p2sdPlaySE(9, 0x7F, 0x3F);
         }
-        InitializeCurCtr(&panel->fade, 0);
+        InitializeCurCtr(&pinst->fade, 0);
         mes->itemIndex++;
         if (mes->itemIndex >= mes->tableCount) {
             mes->textState = -1;
             return;
         }
-        CommitVarTable((s32 *)panel->variables.addresses);
-        if (panel->temporaryFontEntry != NULL) {
-            frSetExtDic(panel->temporaryFontEntry);
+        CommitVarTable((s32 *)pinst->variables.addresses);
+        if (pinst->temporaryFontEntry != NULL) {
+            frSetExtDic(pinst->temporaryFontEntry);
         }
-        ReadytoMessage(panel);
-        OpenCheckSpeakerWindow(panel);
-        panel->flags = (panel->flags & ~7) | 3;
+        ReadytoMessage(pinst);
+        OpenCheckSpeakerWindow(pinst);
+        pinst->flags = (pinst->flags & ~7) | 3;
     } else if (dds3PadButtonState.confirm < 0 || dds3PadButtonState.primaryCancel < 0 ||
                dds3PadButtonState.primaryTriangle != 0) {
         if (!(flags & 0x400000)) {
             RaiseMessageSpeedMaxAll(mes->glyphChain);
-            if (panel->speaker.glyphChain != NULL) {
-                frSetDrawSpeed(panel->speaker.glyphChain, 0x80);
+            if (pinst->speaker.glyphChain != NULL) {
+                frSetDrawSpeed(pinst->speaker.glyphChain, 0x80);
             }
         }
     }
@@ -2249,8 +2249,8 @@ void CalcMessage(itfMesWork_t *panel) {
 
 INCLUDE_ASM(const s32, "interface/itfMesManager", CalcSelect);
 
-s32 SelectItem(itfMesWork_t *panel) {
-    itfMesSelect_t *sel = &panel->selection;
+s32 SelectItem(itfMesWork_t *pinst) {
+    itfMesSelect_t *sel = &pinst->selection;
     s32 dir = 0;
     s32 index;
     if (dds3PadButtonState.prev & 2) {
@@ -2266,7 +2266,7 @@ s32 SelectItem(itfMesWork_t *panel) {
     }
     if (dir != 0) {
         SelectItemMove(sel, dir);
-        InitializeCurCtr(&panel->fade, 1);
+        InitializeCurCtr(&pinst->fade, 1);
     }
     if (dds3PadButtonState.confirm < 0) {
         p2sdPlaySE(8, 0x7F, 0x3F);
@@ -2285,39 +2285,39 @@ s32 SelectItem(itfMesWork_t *panel) {
     return 0;
 }
 
-void SelectItemMove(itfMesSelect_t *obj, s32 dir) {
-    s32 cur = obj->selectedIndex;
+void SelectItemMove(itfMesSelect_t *psel, s32 direct) {
+    s32 cur = psel->selectedIndex;
     u16 maxv;
-    ChangeFontColor(obj->glyphChain, cur, obj->rowCount, 0);
-    if (dir < 0) {
+    ChangeFontColor(psel->glyphChain, cur, psel->rowCount, 0);
+    if (direct < 0) {
         cur = cur - 1;
         if (cur < 0) {
-            cur = obj->rowCount - 1;
+            cur = psel->rowCount - 1;
         }
-        maxv = obj->rowCount;
+        maxv = psel->rowCount;
     } else {
         cur = cur + 1;
-        if (cur >= obj->rowCount) {
+        if (cur >= psel->rowCount) {
             cur = 0;
         }
-        maxv = obj->rowCount;
+        maxv = psel->rowCount;
     }
-    ChangeFontColor(obj->glyphChain, cur, (s16)maxv, 1);
-    obj->selectedIndex = cur;
-    obj->savedIndex = cur;
+    ChangeFontColor(psel->glyphChain, cur, (s16)maxv, 1);
+    psel->selectedIndex = cur;
+    psel->savedIndex = cur;
     p2sdPlaySE(1, 0x7F, 0x3F);
 }
 
-s32 SelectItemDefKey(itfMesSelect_t *selection) {
+s32 SelectItemDefKey(itfMesSelect_t *psel) {
     s32 i;
 
-    for (i = 0; i < selection->optionCount; i++) {
-        itfMesOption_t *option = &selection->options[i];
+    for (i = 0; i < psel->optionCount; i++) {
+        itfMesOption_t *option = &psel->options[i];
 
         if (dds3PadButtonState.buttons[option->id] < 0) {
             s32 prefixLength = option->value;
             s32 rank = 0;
-            u32 mask = selection->panelValue;
+            u32 mask = psel->panelValue;
 
             if (prefixLength > 0) {
                 s32 remaining = prefixLength;
@@ -2336,8 +2336,8 @@ s32 SelectItemDefKey(itfMesSelect_t *selection) {
     return -1;
 }
 
-void CalcCurCtr(itfMesWork_t *panel) {
-    itfMesCursor_t *fade = &panel->fade;
+void CalcCurCtr(itfMesWork_t *pinst) {
+    itfMesCursor_t *fade = &pinst->fade;
     s32 minimumAlpha;
     if (fade->kind != 0) {
         if (fade->timer > 0) {
@@ -2366,33 +2366,33 @@ void CalcCurCtr(itfMesWork_t *panel) {
 
 /* NON_MATCHING: 37 of 99 words, exact size; two guards emit bnel where retail has bnez and everything after shifts. */
 #ifdef NON_MATCHING
-void DrawMesFlow(itfMesWork_t *panel) {
-    u32 flags = panel->flags;
+void DrawMesFlow(itfMesWork_t *pinst) {
+    u32 flags = pinst->flags;
     itfMesSelect_t *sel;
     s16 index;
 
     itfMesMngManager.flags &= ~2;
-    DrawWindow(panel);
+    DrawWindow(pinst);
     if (!(flags & 0x10000)) {
-        if (panel->speaker.glyphChain != NULL) {
-            frDrawFont(panel->speaker.glyphChain);
+        if (pinst->speaker.glyphChain != NULL) {
+            frDrawFont(pinst->speaker.glyphChain);
         }
     }
     if (!(flags & 0x20000)) {
         if ((flags & 7) >= 3) {
-            if (frDrawFont(panel->message.glyphChain) > 0) {
-                if ((panel->flags & 7) != 4) {
-                    panel->fade.frames = 0;
-                    panel->flags = (panel->flags & ~7) | 4;
+            if (frDrawFont(pinst->message.glyphChain) > 0) {
+                if ((pinst->flags & 7) != 4) {
+                    pinst->fade.frames = 0;
+                    pinst->flags = (pinst->flags & ~7) | 4;
                 }
             }
         }
     }
     if (!(flags & 0x40000)) {
         if ((flags & 0x38) >= 0x18) {
-            if (frDrawFontEx(panel->selection.glyphChain, 1) > 0) {
+            if (frDrawFontEx(pinst->selection.glyphChain, 1) > 0) {
                 if ((flags & 0x38) == 0x18) {
-                    sel = &panel->selection;
+                    sel = &pinst->selection;
                     index = sel->selectedIndex;
                     if (sel->selectedIndex == -1) {
                         sel->selectedIndex = 0;
@@ -2400,17 +2400,17 @@ void DrawMesFlow(itfMesWork_t *panel) {
                         index = 0;
                     }
                     ChangeFontColor(sel->glyphChain, index, sel->rowCount, 1);
-                    panel->fade.kind = 2;
-                    panel->flags = (panel->flags & ~0x38) | 0x20;
+                    pinst->fade.kind = 2;
+                    pinst->flags = (pinst->flags & ~0x38) | 0x20;
                 }
             }
         }
     }
-    if ((panel->fade.kind & 1) != 0) {
-        DrawRetPageCursor(panel);
+    if ((pinst->fade.kind & 1) != 0) {
+        DrawRetPageCursor(pinst);
     }
-    if ((panel->fade.kind & 2) != 0) {
-        DrawSelectCursor(panel);
+    if ((pinst->fade.kind & 2) != 0) {
+        DrawSelectCursor(pinst);
     }
 }
 #else
@@ -2418,33 +2418,33 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", DrawMesFlow);
 #endif
 
 
-void DrawWindow(itfMesWork_t *panel) {
-    itfMesWindow_t *place = &panel->window;
-    u32 flags = panel->flags;
+void DrawWindow(itfMesWork_t *pinst) {
+    itfMesWindow_t *place = &pinst->window;
+    u32 flags = pinst->flags;
 
     if (flags & 0x80000) {
         return;
     }
     if ((flags & 0x300) >= 0x100) {
-        itfPnlDraw(place->sprite, &sdfGrOtTable[panel->drawSurfaceIndex]);
+        itfPnlDraw(place->sprite, &sdfGrOtTable[pinst->drawSurfaceIndex]);
         itfMesMngManager.flags |= 2;
         if (place->frame != NULL) {
-            itfPnlDraw(place->frame, &sdfGrOtTable[panel->drawSurfaceIndex]);
+            itfPnlDraw(place->frame, &sdfGrOtTable[pinst->drawSurfaceIndex]);
         }
     }
-    if (D_00326700.window != NULL && D_00326700.window->state == panel && place != NULL) {
+    if (D_00326700.window != NULL && D_00326700.window->state == pinst && place != NULL) {
         DebugDrawWindowLine(place->sprite);
     }
 }
 
 /* NON_MATCHING: 128 of 191 words, exact size; the three stack arrays' store and constant order is scheduled differently. */
 #ifdef NON_MATCHING
-void DrawSelectCursor(itfMesWork_t *panel) {
+void DrawSelectCursor(itfMesWork_t *pinst) {
     s32 uv[4];
     s32 color[4];
     s32 rect[4];
-    itfMesCursor_t *fade = &panel->fade;
-    itfMesSelect_t *sel = &panel->selection;
+    itfMesCursor_t *fade = &pinst->fade;
+    itfMesSelect_t *sel = &pinst->selection;
     sdfDrawTag_t *list;
     sdfGrOt_t *packetOwner;
     s32 x;
@@ -2472,12 +2472,12 @@ void DrawSelectCursor(itfMesWork_t *panel) {
     rect[0] = x - 0xF0;
     rect[2] = D_00326728[0];
     rect[3] = y + 0xA8;
-    itfMiscDrawSpritePlanePrim(rect, color, panel->renderValue, 0, list);
+    itfMiscDrawSpritePlanePrim(rect, color, pinst->renderValue, 0, list);
     D_00326728[1] = y - 8;
     D_00326728[3] = y - 8;
     D_00326728[5] = y + 0xA8;
     D_00326728[7] = y + 0xA8;
-    itfMiscDrawRectanglePrim(D_00326728, "W", D_00326768, D_00326770, panel->renderValue, list);
+    itfMiscDrawRectanglePrim(D_00326728, "W", D_00326768, D_00326770, pinst->renderValue, list);
     uv[0] = 0x150;
     uv[1] = 0x2F0;
     uv[2] = 0x1B0;
@@ -2490,7 +2490,7 @@ void DrawSelectCursor(itfMesWork_t *panel) {
     rect[2] = x - 0xF0;
     rect[3] = y + 0x88;
     rect[1] = y + 8;
-    itfMiscDrawSpritePrim(rect, uv, color, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+    itfMiscDrawSpritePrim(rect, uv, color, pinst->renderValue, itfMesMngManager.windowTexture, 0, list);
     uv[0] = 0x260;
     uv[1] = 0x2F0;
     uv[3] = 0x3F0;
@@ -2498,7 +2498,7 @@ void DrawSelectCursor(itfMesWork_t *panel) {
     color[3] = fade->alpha;
     rect[2] = rect[0] + 0x100;
     rect[3] = rect[1] + 0x80;
-    itfMiscDrawSpritePrim2(rect, uv, color, panel->renderValue, 0, list);
+    itfMiscDrawSpritePrim2(rect, uv, color, pinst->renderValue, 0, list);
     timer = fade->timer;
     if (timer > 0) {
         d = 0x80 - timer;
@@ -2508,10 +2508,10 @@ void DrawSelectCursor(itfMesWork_t *panel) {
         rect[3] += d >> 1;
         color[3] = timer;
         itfMiscDrawAlphaPrim(list, 1, 0);
-        itfMiscDrawSpritePrim2(rect, uv, color, panel->renderValue, 0, list);
+        itfMiscDrawSpritePrim2(rect, uv, color, pinst->renderValue, 0, list);
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
-    packetOwner = &sdfGrOtTable[panel->drawSurfaceIndex];
+    packetOwner = &sdfGrOtTable[pinst->drawSurfaceIndex];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
 }
 #else
@@ -2519,9 +2519,9 @@ INCLUDE_ASM(const s32, "interface/itfMesManager", DrawSelectCursor);
 #endif
 
 
-void DrawRetPageCursor(itfMesWork_t *panel) {
+void DrawRetPageCursor(itfMesWork_t *pinst) {
     s32 rect[4];
-    itfMesCursor_t *fade = &panel->fade;
+    itfMesCursor_t *fade = &pinst->fade;
     sdfDrawTag_t *list;
     sdfGrOt_t *packetOwner;
     s32 timer;
@@ -2534,7 +2534,7 @@ void DrawRetPageCursor(itfMesWork_t *panel) {
     D_00326788[3] = fade->alpha;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
-    itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+    itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, pinst->renderValue, itfMesMngManager.windowTexture, 0, list);
     timer = fade->timer;
     if (timer > 0) {
         d = 0x80 - timer;
@@ -2544,10 +2544,10 @@ void DrawRetPageCursor(itfMesWork_t *panel) {
         rect[3] += d;
         D_00326788[3] = timer;
         itfMiscDrawAlphaPrim(list, 1, 0);
-        itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, panel->renderValue, itfMesMngManager.windowTexture, 0, list);
+        itfMiscDrawSpritePrim(rect, D_00326778, D_00326788, pinst->renderValue, itfMesMngManager.windowTexture, 0, list);
         itfMiscDrawAlphaPrim(list, 0, 0);
     }
-    packetOwner = &sdfGrOtTable[panel->drawSurfaceIndex];
+    packetOwner = &sdfGrOtTable[pinst->drawSurfaceIndex];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
 }
 
@@ -2562,7 +2562,7 @@ s32 CalcMsgMng_Process(void) {
 
 /* NON_MATCHING: 24 of 28 words, exact size; bnel against retail's bne on the DrawMesFlow loop, waiting on that callee. */
 #ifdef NON_MATCHING
-s32 DrawMsgMng_Process(dds3ProcessID_t *task) {
+s32 DrawMsgMng_Process(dds3ProcessID_t *id) {
     itfMesLink_t *node;
 
     if (dds3NullDrawProc() != 0) {
@@ -2593,12 +2593,12 @@ void DrawMsgMng_Shutdown(void) {
     itfMesMngManager.windowTexture = NULL;
 }
 
-void DebugDrawWindowLine(itfPanel_t *sprite) {
+void DebugDrawWindowLine(itfPanel_t *meswin) {
     s32 vertices[4][2] = {
-        {sprite->left, sprite->top},
-        {sprite->right, sprite->top},
-        {sprite->right, sprite->bottom},
-        {sprite->left, sprite->bottom}
+        {meswin->left, meswin->top},
+        {meswin->right, meswin->top},
+        {meswin->right, meswin->bottom},
+        {meswin->left, meswin->bottom}
     };
     sdfDrawTag_t *list;
     sdfGrOt_t *packetOwner;
@@ -2610,14 +2610,14 @@ void DebugDrawWindowLine(itfPanel_t *sprite) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, list);
 }
 
-void DebugMoveWinVert(itfMesWindow_t *panel, s32 boundsMode) {
-    itfPanel_t *sprite = panel->sprite;
+void DebugMoveWinVert(itfMesWindow_t *pwin, s32 flag) {
+    itfPanel_t *sprite = pwin->sprite;
     s32 *bounds;
     s32 dx;
     s32 dy;
 
     if (sprite != NULL) {
-        bounds = panel->bounds;
+        bounds = pwin->bounds;
         if (dds3PadButtonState.coarseDown & 2) {
             dx = -16;
         } else {
@@ -2633,7 +2633,7 @@ void DebugMoveWinVert(itfMesWindow_t *panel, s32 boundsMode) {
             dy *= 8;
         }
         if (dx != 0 || dy != 0) {
-            switch (boundsMode) {
+            switch (flag) {
             case 0:
                 itfPnlSetPositionOffset(sprite, dx, dy, 0, 0, 0);
                 bounds[0] += dx;
@@ -2657,7 +2657,7 @@ void DebugMoveWinVert(itfMesWindow_t *panel, s32 boundsMode) {
 }
 
 /* Step the stepper's index by pad input: one per press, ten with the fast modifier held; mirror it into the target. */
-void DebugMoveWinAlpha(itfMesWindow_t *stepper) {
+void DebugMoveWinAlpha(itfMesWindow_t *pwin) {
     s32 step;
 
     if (dds3PadButtonState.coarseDown & 2) {
@@ -2674,16 +2674,16 @@ void DebugMoveWinAlpha(itfMesWindow_t *stepper) {
         step *= 10;
     }
     if (step != 0) {
-        s32 index = (stepper->fadeLimit + step) & 0xFF;
+        s32 index = (pwin->fadeLimit + step) & 0xFF;
 
-        stepper->fadeLimit = index;
-        if (stepper->sprite != NULL) {
-            stepper->sprite->alpha = index;
+        pwin->fadeLimit = index;
+        if (pwin->sprite != NULL) {
+            pwin->sprite->alpha = index;
         }
     }
 }
 
-itfMesLink_t *DebugChangeInstance(itfMesLink_t *node) {
+itfMesLink_t *DebugChangeInstance(itfMesLink_t *pflow) {
     s32 index = 0;
     s32 count = itfMesMngManager.activeWindowCount;
 
@@ -2691,22 +2691,22 @@ itfMesLink_t *DebugChangeInstance(itfMesLink_t *node) {
         return NULL;
     }
     for (;;) {
-        if (node != NULL) {
-            node = node->previous;
+        if (pflow != NULL) {
+            pflow = pflow->previous;
         }
-        if (node == NULL) {
-            node = itfMesMngManager.pool.activeTail;
+        if (pflow == NULL) {
+            pflow = itfMesMngManager.pool.activeTail;
         }
-        if ((node->state)->window.sprite != NULL) {
+        if ((pflow->state)->window.sprite != NULL) {
             break;
         }
         index++;
         if (count < index) {
-            node = NULL;
+            pflow = NULL;
             break;
         }
     }
-    return node;
+    return pflow;
 }
 INCLUDE_SDATA(const s32, "interface/itfMesManager", D_0054F4C0);
 

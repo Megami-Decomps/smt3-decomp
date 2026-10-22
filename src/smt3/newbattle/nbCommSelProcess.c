@@ -17,17 +17,17 @@ extern char D_00551130[];
 
 extern void cmpSetSkillListRows(s32 rows);
 
-extern void *frwGetSmallFontFRQ(s32 x, s32 y, u32 col1, u32 col2, char *str, void *parent);
+extern void *frwGetSmallFontFRQ(s32 X, s32 Y, u32 Pri, u32 Color, char *pStr, void *pFRQ);
 
-extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, u32 col1, u32 col2, char *str, void *parent);
+extern void *frwGetSmallNumFontFRQ(s32 X, s32 Y, u32 Pri, u32 Color, char *pStr, void *pFRQ);
 
-extern s32 frDrawFontEx(void *frq, s8 mode);
+extern s32 frDrawFontEx(void *pFRQ, s8 Mode);
 
-extern s32 frDestroyFontRequestAfter(void *frq);
+extern s32 frDestroyFontRequestAfter(void *pFRQ);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern s32 datGetSkillCost(datUnitWork_t *work, s32 no);
+extern s32 datGetSkillCost(datUnitWork_t *w, s32 nskill);
 
 extern void DispCommCursor(s32 ox, s32 oy, s32 a);
 
@@ -139,32 +139,32 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 
-extern void sdfPrimLinkG4(sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, u32 color0, s32 x1,
-                          s32 y1, u32 color1, s32 x2, s32 y2, u32 color2, s32 x3, s32 y3,
-                          u32 color3, s32 depth, void *alloc);
+extern void sdfPrimLinkG4(sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, u32 aColor0, s32 aX1,
+                          s32 aY1, u32 aColor1, s32 aX2, s32 aY2, u32 aColor2, s32 aX3, s32 aY3,
+                          u32 aColor3, s32 aZ, void *aAllocator);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern dds3ProcessID_t *dds3SearchProcessName(const char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
-extern void sdfMemFreeDirect(void *handle);
+extern void sdfMemFreeDirect(void *aHandle);
 
 extern void SetCommCursor2(nbCommSelProcessData_t *s);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern char D_00551118[];
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct nbParty_t *my,
-                                               nbActionProcessData_t *a);
+                                               nbActionProcessData_t *act);
 
 void *nbCommSelProcess1(dds3ProcessID_t *id);
 
@@ -179,9 +179,9 @@ extern char *D_00551114;
 extern s32 StkSelId;
 
 extern void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
-                                 nbActionProcessData_t *a);
+                                 nbActionProcessData_t *act);
 
-void MemoryCommand(nbCommSelProcessData_t *s);
+void MemoryCommand(nbCommSelProcessData_t *t);
 
 s32 GetCommListCnt(nbCommSelProcessData_t *s, s32 type);
 
@@ -617,11 +617,11 @@ s32 CheckSelectError(nbCommSelProcessData_t *s)
     return s->commdisable[type][s->nowcursor[type]] > 0;
 }
 
-void MemoryCommand(nbCommSelProcessData_t *s)
+void MemoryCommand(nbCommSelProcessData_t *t)
 {
-    datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
-    s32 type = s->nowtype;
-    u16 d = s->commlist[type][s->nowcursor[type]];
+    datUnitWork_t *work = nbGetUnitWorkPointer(t->data, t->my);
+    s32 type = t->nowtype;
+    u16 d = t->commlist[type][t->nowcursor[type]];
 
     switch (type) {
     case 0:
@@ -759,7 +759,7 @@ void nbSetAutoCommSel(void)
 }
 
 nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct nbParty_t *my,
-                                               nbActionProcessData_t *a)
+                                               nbActionProcessData_t *act)
 {
     void *h = sdfMemAllocDirect(0x14D0);
     nbCommSelProcessData_t *s = sdfMemLock(h);
@@ -768,8 +768,8 @@ nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct
     memset(s, 0, 0x14D0);
     s->handle = h;
     s->data = data;
-    s->act = a;
-    if ((a->stat & 0x80) != 0) {
+    s->act = act;
+    if ((act->stat & 0x80) != 0) {
         s->stat = 2;
     } else {
         s->stat = 1;
@@ -794,9 +794,9 @@ nbCommSelProcessData_t *InitCommSelProcessData(nbMainProcessData_t *data, struct
 }
 
 void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
-                          nbActionProcessData_t *a)
+                          nbActionProcessData_t *act)
 {
-    nbCommSelProcessData_t *s = InitCommSelProcessData(data, my, a);
+    nbCommSelProcessData_t *s = InitCommSelProcessData(data, my, act);
     dds3ProcessID_t *id = dds3StartProcess(D_005441A8, 0x2B0E, 1, 1, nbCommSelProcess1,
                                            nbCommSelShutdown, s);
 

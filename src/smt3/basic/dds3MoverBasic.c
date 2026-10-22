@@ -10,16 +10,16 @@ typedef struct
 } dds3MatterPathPosition_t;
 
 extern void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work);
-extern void dds3PathBasicControlGetRot(dds3PathBasicControl_t *work);
+extern void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl);
 extern f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *work);
 extern void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLightPath_t *output);
 extern s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work);
-extern void dds3SetLightObjectPathResoruce(dds3Basic_t *basic, fldResourceLightPath_t *res);
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *position);
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
-extern void dds3BackupPoseSet(dds3PoseSet_t *pose);
+extern void dds3SetLightObjectPathResoruce(dds3Basic_t *basic, fldResourceLightPath_t *resource);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
+extern void dds3BackupPoseSet(dds3PoseSet_t *pPoseSet);
 extern void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale);
-extern void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+extern void dds3AddRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 extern void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *offset);
 
 typedef struct dds3MoverBasicWorkData_t
@@ -33,45 +33,45 @@ typedef struct dds3MoverBasicWorkData_t
 extern s32 dds3MoverCount;
 extern char D_002FA670[10][16]; /* "MOVER00".."MOVER09" */
 
-extern void *memset(void *s, s32 c, u32 n);
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *memset(void *a, s32 b, u32 c);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern u32 dds3AllocObjectId(void);
-extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *object, dds3Basic_t *item, s32 itemType);
+extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic, s32 itemType);
 extern dds3PathBasicControl_t *dds3AllocPathBasicWorkData(dds3Basic_t *pathBasic);
 extern void dds3DeletePathControl(dds3PathBasicControl_t *control);
 
-void dds3MoverBasicFreePath(dds3Basic_t *basic);
-s32 MoverBasicMainprocuder(dds3Basic_t *basic);
+void dds3MoverBasicFreePath(dds3Basic_t *pMoverBasic);
+s32 MoverBasicMainprocuder(dds3Basic_t *pBasic);
 
-s32 MoverBasicConstructor(dds3Basic_t *basic)
+s32 MoverBasicConstructor(dds3Basic_t *pBasic)
 {
     dds3MoverBasicWorkData_t *work;
 
     work = sdfChipAllocDirect(sizeof(dds3MoverBasicWorkData_t));
-    basic->workdata = work;
+    pBasic->workdata = work;
     memset(work, 0, sizeof(dds3MoverBasicWorkData_t));
     return 1;
 }
 
-void MoverBasicDestructor(dds3Basic_t *basic)
+void MoverBasicDestructor(dds3Basic_t *pBasic)
 {
     dds3MoverBasicWorkData_t *work;
 
-    work = basic->workdata;
-    dds3MoverBasicFreePath(basic);
+    work = pBasic->workdata;
+    dds3MoverBasicFreePath(pBasic);
     dds3ObjectBaseSetControlBasicType(work->object, NULL, 1);
     sdfChipFreeDirect(work);
 }
 
 /* Paths supply absolute channels; a primary callback supplies relative pose. */
-s32 MoverBasicMainprocuder(dds3Basic_t *basic)
+s32 MoverBasicMainprocuder(dds3Basic_t *pBasic)
 {
     sdfVector4_t pathVector;
     fldResourceLightPath_t light;
     dds3PoseSet_t relativePose;
-    dds3MoverBasicWorkData_t *work = basic->workdata;
+    dds3MoverBasicWorkData_t *work = pBasic->workdata;
     dds3Basic_t *object = work->object;
     dds3PoseSet_t *pose = object->poseset;
     dds3BasicControlProc_t callback;
@@ -122,7 +122,7 @@ s32 MoverBasicMainprocuder(dds3Basic_t *basic)
     return 1;
 }
 
-dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object)
+dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *pObjectBasic)
 {
     dds3Basic_t *basic;
     dds3MoverBasicWorkData_t *work;
@@ -130,30 +130,30 @@ dds3Basic_t *dds3AddMoverBasic(dds3Basic_t *object)
     basic = dds3AddSceneBasicData(BASIC_TYPE_MOVER);
     work = basic->workdata;
     basic->serialID = dds3AllocObjectId();
-    work->object = object;
+    work->object = pObjectBasic;
     basic->name = D_002FA670[dds3MoverCount];
     dds3MoverCount++;
     dds3MoverCount %= 10;
     return basic;
 }
 
-void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *basic, dds3BasicControlProc_t func)
+void dds3MoverBasicSetCallBackPrimaryControl(dds3Basic_t *mover, dds3BasicControlProc_t func)
 {
-    dds3MoverBasicWorkData_t *work = basic->workdata;
+    dds3MoverBasicWorkData_t *work = mover->workdata;
 
     work->primarycontrol = func;
 }
 
-void dds3MoverBasicSetPath(dds3Basic_t *basic, dds3Basic_t *pathBasic)
+void dds3MoverBasicSetPath(dds3Basic_t *pMoverBasic, dds3Basic_t *pPathBasic)
 {
-    dds3MoverBasicWorkData_t *work = basic->workdata;
+    dds3MoverBasicWorkData_t *work = pMoverBasic->workdata;
 
-    work->pathbasic = pathBasic;
+    work->pathbasic = pPathBasic;
 }
 
-void dds3MoverBasicMakePath(dds3Basic_t *basic)
+void dds3MoverBasicMakePath(dds3Basic_t *pMoverBasic)
 {
-    dds3MoverBasicWorkData_t *work = basic->workdata;
+    dds3MoverBasicWorkData_t *work = pMoverBasic->workdata;
 
     if (work->pathcontrol != NULL) {
         dds3DeletePathControl(work->pathcontrol);
@@ -161,9 +161,9 @@ void dds3MoverBasicMakePath(dds3Basic_t *basic)
     work->pathcontrol = dds3AllocPathBasicWorkData(work->pathbasic);
 }
 
-void dds3MoverBasicFreePath(dds3Basic_t *basic)
+void dds3MoverBasicFreePath(dds3Basic_t *pMoverBasic)
 {
-    dds3MoverBasicWorkData_t *work = basic->workdata;
+    dds3MoverBasicWorkData_t *work = pMoverBasic->workdata;
 
     if (work->pathcontrol != NULL) {
         dds3DeletePathControl(work->pathcontrol);
@@ -171,16 +171,16 @@ void dds3MoverBasicFreePath(dds3Basic_t *basic)
     }
 }
 
-dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *basic)
+dds3PathBasicControl_t *dds3MoverBasicGetPathControl(dds3Basic_t *pMoverBasic)
 {
-    dds3MoverBasicWorkData_t *work = basic->workdata;
+    dds3MoverBasicWorkData_t *work = pMoverBasic->workdata;
 
     return work->pathcontrol;
 }
 
-s32 dds3MoverBasicUpdate(dds3Basic_t *basic)
+s32 dds3MoverBasicUpdate(dds3Basic_t *pBasic)
 {
-    return MoverBasicMainprocuder(basic);
+    return MoverBasicMainprocuder(pBasic);
 }
 
 u32 BasicTypeToItemType(u32 type)

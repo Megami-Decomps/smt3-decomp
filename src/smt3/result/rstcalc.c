@@ -16,9 +16,9 @@ typedef struct
 
 extern datDevilInfo_t datDevilTable[];
 
-extern s32 dds3GetRandA(s32 seed);
+extern s32 dds3GetRandA(s32 name);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 typedef struct
 {
@@ -68,7 +68,7 @@ typedef struct
     /* 0x3C */ u8 unk_3C[6];
 } datRaceEntry_t;
 
-extern void rstSetMaxHpMp(s32 mode, s32 arg);
+extern void rstSetMaxHpMp(s32 Mode, s32 pStock);
 
 typedef struct
 {
@@ -168,9 +168,9 @@ extern s8 cmbCheckEvoUnlocked(u16 devilId, datUnitWork_t *list, u8 count);
 
 extern s32 cmbCopyEvoDevil(datUnitWork_t *unit, u16 skill);
 
-extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
+extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
-extern evtUnit_t *evtGetUnitHandle2(void *obj);
+extern evtUnit_t *evtGetUnitHandle2(void *unit);
 
 /* Called above its definition, where ee-gcc assumed int. */
 void *dds3GetActiveScene(void);
@@ -179,7 +179,7 @@ extern void *dds3GetActiveScene(void);
 
 extern s32 cmpModelSetup(s32 a, s32 b);
 
-s32 fclStartMessage(s32 id);
+s32 fclStartMessage(s32 MsgNo);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
@@ -198,9 +198,9 @@ typedef struct
 
 extern rstMotionReq_t D_00332458[];
 
-void rstSetMotionReqFromTbl(s8 index)
+void rstSetMotionReqFromTbl(s8 Type)
 {
-    s32 i = EventStart->unit->id * 7 + index;
+    s32 i = EventStart->unit->id * 7 + Type;
 
     func_0021FE30(D_00332458[i].unk_00, 0, (f32)D_00332458[i].unk_01,
                   (f32)D_00332458[i].unk_02);
@@ -208,9 +208,9 @@ void rstSetMotionReqFromTbl(s8 index)
 
 extern s8 cmbChkSkillOwner(u16 skillId, datUnitWork_t *unit);
 
-s32 rstChkAddSkill(u16 skillId)
+s32 rstChkAddSkill(u16 SkillID)
 {
-    if (cmbChkSkillOwner(skillId, EventStart->unit) >= 0) {
+    if (cmbChkSkillOwner(SkillID, EventStart->unit) >= 0) {
         return 0;
     }
     return (EventStart->unit->skillcnt >= 8) ? 2 : 1;
@@ -261,17 +261,17 @@ typedef struct
     /* 0x1A */ u16 skill[25];
 } rstBeforeSkillList_t;
 
-extern void rstCreateBeforeSkillList(s8 devilId, s32 mode, s8 kind,
-                                     rstBeforeSkillList_t *list);
+extern void rstCreateBeforeSkillList(s8 HeartsID, s32 pStock, s8 SkillLevOfs,
+                                     rstBeforeSkillList_t *pInfo);
 
-s32 rstChkBeforeSkillOwner(u16 skill, s8 kind, s32 mode)
+s32 rstChkBeforeSkillOwner(u16 SkillID, s8 LevelOfs, s32 pStock)
 {
     rstBeforeSkillList_t list;
     s32 i;
 
-    rstCreateBeforeSkillList(*(s8 *)&DDS3_GBWK->heartsequip, mode, kind, &list);
+    rstCreateBeforeSkillList(*(s8 *)&DDS3_GBWK->heartsequip, pStock, LevelOfs, &list);
     for (i = 0; i < list.count; i++) {
-        if (skill == list.skill[i]) {
+        if (SkillID == list.skill[i]) {
             return 1;
         }
     }
@@ -282,7 +282,7 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstAutoAsignDevilParam);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEventInfo);
 
-extern s32 rstSetLevelUpCount(datUnitWork_t *unit);
+extern s32 rstSetLevelUpCount(datUnitWork_t *pStock);
 
 extern s32 cmpModelSetup(s32 a, s32 b);
 
@@ -337,9 +337,9 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstChkSkillPowerUp2);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstRndGetPowerUpSkill);
 
-s32 rstChkDevilSkillPowerUp(datUnitWork_t *work)
+s32 rstChkDevilSkillPowerUp(datUnitWork_t *pStock)
 {
-    s32 flag = work->flag & 0x40;
+    s32 flag = pStock->flag & 0x40;
 
     if (flag != 0) {
         return 1;
@@ -425,10 +425,10 @@ void rstLoadHeartsSkill(void) {
 void rstStoreHeartsSkill(void) {
 }
 
-void rstInitSkillAct(s8 flag)
+void rstInitSkillAct(s8 Pos)
 {
     cmpStatSetTimer(0, 1);
-    rstSetSkillActFlag(flag);
+    rstSetSkillActFlag(Pos);
     EventStart->unk_2308 = 0x1E;
     p2sdPlaySE(0x2B0003, 0x7F, 0x3F);
 }
@@ -495,7 +495,7 @@ s32 cmbGetParamBase(datUnitWork_t *unit, s32 index)
     return value;
 }
 
-extern s32 datGetParam(datUnitWork_t *unit, s32 index);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
 s32 cmbGetParam(datUnitWork_t *unit, s32 index)
 {
@@ -1102,9 +1102,9 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusRow2);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusPanel);
 
-extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
+extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
-extern evtUnit_t *evtGetUnitHandle2(void *obj);
+extern evtUnit_t *evtGetUnitHandle2(void *unit);
 
 s32 rstFindUnitScene(s32 work)
 {

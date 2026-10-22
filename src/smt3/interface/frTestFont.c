@@ -28,7 +28,7 @@ extern frFontRequest_t *frTestFontHandle;
 
 extern void fclDestroyMessage(void);
 
-extern void frDestroyFontRequest(frFontRequest_t *request);
+extern void frDestroyFontRequest(frFontRequest_t *pFRQ);
 
 INCLUDE_ASM(const s32, "interface/frTestFont", frTestFontInit);
 

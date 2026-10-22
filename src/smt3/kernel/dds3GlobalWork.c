@@ -6,7 +6,7 @@
 #include "newdata.h"
 #include "field.h"
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern void dds3GlobalWorkUserInit2(s32 mode);
 
@@ -28,13 +28,13 @@ extern void NewGame2Push(void);
 
 extern void NewGame2Pop(void);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
+extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
 extern void fldGbInit_System(s32 mode);
 
-extern void evtBitOn(s32 flag);
+extern void evtBitOn(s32 no);
 
 typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
 
@@ -109,30 +109,30 @@ extern sdfMemHandle_t *D_0054EA1C;
 
 extern sdfMemHandle_t *D_00551C7C;
 
-extern void *sdfChipAllocZeroDirect(s32 size);
+extern void *sdfChipAllocZeroDirect(s32 aSize);
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void *sdfGrAllocPacketBuff(s32 size);
+extern void *sdfGrAllocPacketBuff(s32 aSize);
 
-extern s32 sdfDrawTagInit(sdfDrawTag_t *tag);
+extern s32 sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern sdfDrawTag_t *sdfPrimAllocDrawTag(void *allocator);
+extern sdfDrawTag_t *sdfPrimAllocDrawTag(void *aAllocator);
 
-extern void sdfPrimLinkBoxLine(sdfDrawTag_t *tag, u32 color, u32 prim, s32 x0, s32 y0, s32 x1,
-                               s32 y1, u32 z, void *allocator);
+extern void sdfPrimLinkBoxLine(sdfDrawTag_t *aTag, u32 aColor, u32 aPrim, s32 aX0, s32 aY0, s32 aX1,
+                               s32 aY1, u32 aZ, void *aAllocator);
 
-extern s32 frDrawFont(_FRQ *frq);
+extern s32 frDrawFont(_FRQ *pFRQ);
 
-extern void frSetFontColorNo(_FRQ *frq, u8 colorno);
+extern void frSetFontColorNo(_FRQ *pFRQ, u8 ColorNo);
 
 extern _FRQ *frSetFontString(char *str, s32 style, s32 colorno, s32 tp, _FRQ *frq, s32 mode);
 
-extern void frSetDrawPosition(_FRQ *frq, s32 x, s32 y);
+extern void frSetDrawPosition(_FRQ *pFRQ, s32 X, s32 Y);
 
-extern _FRQ *frDestroyFontRequestAfter(_FRQ *frq);
+extern _FRQ *frDestroyFontRequestAfter(_FRQ *pFRQ);
 
 INCLUDE_ASM(const s32, "kernel/dds3GlobalWork", dds3GlobalWorkInit);
 
@@ -555,7 +555,7 @@ sdfDrawTag_t *dds3FontReqAllocDrawTag(void)
     return tag;
 }
 
-u64 *dds3PrimFrameRect(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 colorA, u32 colorB) {
+u64 *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol) {
     u64 *packet;
     s32 right;
     s32 bottom;
@@ -563,39 +563,39 @@ u64 *dds3PrimFrameRect(s32 x, s32 y, s32 depth, s32 width, s32 height, u32 color
 
     packet = (u64 *)sdfGrAllocPacketBuff(0x80);
     packet[0] = 7;
-    right = x + width;
-    bottom = y + height;
-    depthHigh = (u64)(u32)depth << 32;
+    right = aX + aW;
+    bottom = aY + aH;
+    depthHigh = (u64)(u32)aZ << 32;
     packet[1] = 0x5000000700000000ULL;
     packet[2] = 0xB400000000008001ULL;
     packet[3] = 0x55555105510ULL;
     packet[4] = 0x146;
-    packet[5] = colorA | 0x3F80000000000000ULL;
-    packet[6] = (u32)(((u32)x & 0xFFFF) | ((u32)y << 16)) | depthHigh;
+    packet[5] = aBgCol | 0x3F80000000000000ULL;
+    packet[6] = (u32)(((u32)aX & 0xFFFF) | ((u32)aY << 16)) | depthHigh;
     packet[7] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
     packet[8] = 0x142;
-    packet[9] = colorB | 0x3F80000000000000ULL;
-    packet[14] = (u32)(((u32)(x - 0x10) & 0xFFFF) | ((u32)(y - 8) << 16)) | depthHigh;
+    packet[9] = aFrameCol | 0x3F80000000000000ULL;
+    packet[14] = (u32)(((u32)(aX - 0x10) & 0xFFFF) | ((u32)(aY - 8) << 16)) | depthHigh;
     packet[10] = packet[14];
-    packet[11] = (u32)(((u32)right & 0xFFFF) | ((u32)(y - 8) << 16)) | depthHigh;
+    packet[11] = (u32)(((u32)right & 0xFFFF) | ((u32)(aY - 8) << 16)) | depthHigh;
     packet[12] = (u32)(((u32)right & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
-    packet[13] = (u32)(((u32)(x - 0x10) & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
+    packet[13] = (u32)(((u32)(aX - 0x10) & 0xFFFF) | ((u32)bottom << 16)) | depthHigh;
     packet[15] = 0;
     return packet;
 }
 
-u64 *dds3PrimLine(s32 x0, s32 y0, s32 z0, s32 color0, s32 x1, s32 y1, s32 z1, s32 color1, s32 flags) {
+u64 *dds3PrimLine(s32 aX0, s32 aY0, s32 aZ0, s32 aColor0, s32 aX1, s32 aY1, s32 aZ1, s32 aColor1, s32 aMode) {
     u64 *packet = (u64 *)sdfGrAllocPacketBuff(0x50);
 
     packet[0] = 4;
     packet[1] = 0x5000000400000000ULL;
     packet[2] = 0x5400000000008001ULL;
     packet[3] = 0x51510;
-    packet[4] = flags | 0x109;
-    packet[5] = (u32)color0 | ((u64)0xFE00 << 46);
-    packet[6] = (u32)((x0 & 0xFFFF) | (y0 << 16)) | ((u64)((u32)z0 >> 4) << 32);
-    packet[7] = (u32)color1 | ((u64)0xFE00 << 46);
-    packet[8] = (u32)((x1 & 0xFFFF) | (y1 << 16)) | ((u64)((u32)z1 >> 4) << 32);
+    packet[4] = aMode | 0x109;
+    packet[5] = (u32)aColor0 | ((u64)0xFE00 << 46);
+    packet[6] = (u32)((aX0 & 0xFFFF) | (aY0 << 16)) | ((u64)((u32)aZ0 >> 4) << 32);
+    packet[7] = (u32)aColor1 | ((u64)0xFE00 << 46);
+    packet[8] = (u32)((aX1 & 0xFFFF) | (aY1 << 16)) | ((u64)((u32)aZ1 >> 4) << 32);
     packet[9] = 0;
     return packet;
 }

@@ -260,9 +260,9 @@ extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
 
-extern s32 datGet3Zokusei(datUnitWork_t *unit);
+extern s32 datGet3Zokusei(datUnitWork_t *work);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 
@@ -276,15 +276,15 @@ typedef struct {
 
 extern datDevilAI_t D_003989E0[];
 
-extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 type, s32 para);
+extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n);
 
-extern s32 nbAiChkJoken(nbActionProcessData_t *a, u32 joken);
+extern s32 nbAiChkJoken(nbActionProcessData_t *a, u32 jo);
 
-extern s32 nbGetHojoCounter(s32 formindex, s32 hojotype);
+extern s32 nbGetHojoCounter(s32 formindex, s32 type);
 
 extern void nbRunAi(nbActionProcessData_t *a);
 
-extern void nbRunAiSub(nbActionProcessData_t *a, s32 no);
+extern void nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
 extern char D_00545728[];
 
@@ -295,7 +295,7 @@ extern u8 D_00398A08[];
 
 extern s32 datGetPlayerLevel(void);
 
-extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type);
+extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -315,11 +315,11 @@ extern s32 ChkAiHojo(s32 formindex, s32 hojotype);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
+extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
 extern s32 ChkAiHojoMax(s32 formindex, s32 hojotype);
 
-extern u32 datGetAisyo(datUnitWork_t *unit, s32 type);
+extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -1052,14 +1052,14 @@ s32 Chk_SKILLNOMP(nbActionProcessData_t *a, s32 nskill)
     return 0;
 }
 
-s32 nbAiChkJoken(nbActionProcessData_t *a, u32 joken)
+s32 nbAiChkJoken(nbActionProcessData_t *a, u32 jo)
 {
     u32 prev;
     s32 type;
     s32 para;
 
-    type = joken >> 16;
-    para = joken & 0xFFFF;
+    type = jo >> 16;
+    para = jo & 0xFFFF;
     if (type == 0) {
         return 1;
     }

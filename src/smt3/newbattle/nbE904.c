@@ -297,7 +297,7 @@ extern char D_005754E0[];
 
 extern char D_005467C0[];
 
-extern void mdlPackDecode(s32 group, s32 id, s32 mode, void *data, s32 size);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
 extern void func_0024D938(void *e);
 
@@ -319,11 +319,11 @@ typedef struct nbEventProcessData_t {
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern void *sdfMemLock(void *p);
+extern void *sdfMemLock(void *aHandle);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -341,7 +341,7 @@ extern char D_00546548[];
 
 extern char D_00546570[];
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -351,15 +351,15 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern s32 pacCheckEnd(nbPacHandle_t *h);
+extern s32 pacCheckEnd(nbPacHandle_t *pacHandle);
 
-extern void *fileGetMemHandle(void *h);
+extern void *fileGetMemHandle(void *fileHandle);
 
-extern void fileHandleFree(void *h);
+extern void fileHandleFree(void *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern u32 sdfMemGetSize(void *p);
+extern u32 sdfMemGetSize(void *aHandle);
 
 extern nbKoukaPacket_t *nbAddFadeInKoukaPacket(s32 startframe, s32 uniqueid, s32 length,
                                                s32 coltype);
@@ -406,7 +406,7 @@ nbFormation_t *nbGetEventForm();
 
 INCLUDE_ASM(const s32, "newbattle/nbE904", nbE904Process_1);
 
-s32 Model1Start(nbEventProcessData_t *e)
+s32 Model1Start(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
     s32 i;
@@ -415,22 +415,22 @@ s32 Model1Start(nbEventProcessData_t *e)
     form = nbGetEventForm();
     evtSetUnitMotion(form->hunit, 0x10, 0xA, 0, 2);
     for (i = 4; i < 9; i++) {
-        D_00575520[i] = e->data->party[form->partyindex].count[i];
+        D_00575520[i] = ed->data->party[form->partyindex].count[i];
     }
     nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x389, 1), 2, form);
     if (evtBitCheck(0xC0F)) {
-        e->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x102);
+        ed->unk_20 = (nbPacHandle_t *)nbMakeModelPackName(0x102);
     } else {
         sprintf(D_005754E0, D_005467C0, 0x102);
-        e->unk_1C = fileLoad(D_005754E0);
+        ed->unk_1C = fileLoad(D_005754E0);
     }
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
-s32 Model1Wait(nbEventProcessData_t *e)
+s32 Model1Wait(nbEventProcessData_t *ed)
 {
-    switch (e->frame) {
+    switch (ed->frame) {
     case 1:
         nbBgmFadeOut();
         break;
@@ -441,14 +441,14 @@ s32 Model1Wait(nbEventProcessData_t *e)
         dds3SetQuake(0x1E, 0x1F4);
         break;
     }
-    if (e->frame >= 0xF0 && pacCheckEnd(e->unk_20) != 0) {
+    if (ed->frame >= 0xF0 && pacCheckEnd(ed->unk_20) != 0) {
         if (evtBitCheck(0xC0F) == 0) {
-            e->unk_24 = fileGetMemHandle(e->unk_1C);
-            fileHandleFree(e->unk_1C);
-            e->unk_1C = NULL;
+            ed->unk_24 = fileGetMemHandle(ed->unk_1C);
+            fileHandleFree(ed->unk_1C);
+            ed->unk_1C = NULL;
         }
         nbAddFadeOutKoukaPacket(0, 0, 0xF, 1);
-        nbFreeEffectSlot(e);
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }

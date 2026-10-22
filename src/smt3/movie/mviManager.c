@@ -5,8 +5,8 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
-                              void *processfunc, void *shutdownfunc, void *data);
+extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                              void *drawExit, void *deleteExit, void *p);
 
 extern u8 D_00343E74[];
 
@@ -47,7 +47,7 @@ typedef struct
 
 extern rcvWork_t *shutdownfunc;
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
 extern u8 D_00343E40[];
 
@@ -57,9 +57,9 @@ extern void movieStop(void);
 
 extern char D_0053F100[];
 
-extern s32 scrGetIntPara(s32 index);
+extern s32 scrGetIntPara(s32 n);
 
-extern void scrSetIntReturnValue(s32 value);
+extern void scrSetIntReturnValue(s32 i);
 
 extern s32 dds3PlayMovieByIndex(s32 index);
 
@@ -83,9 +83,9 @@ extern s32 PlayingNo;
 
 extern void sdfIpuRunDecode(s32 frames);
 
-extern void movieCloseStream(u8 *movie);
+extern void movieCloseStream(u8 *stream);
 
-extern s32 dds3KillProcess(s32 process, s32 shutdowntimer);
+extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
@@ -95,7 +95,7 @@ s32 movieDrawProc(void)
     return 0;
 }
 
-extern void movieOpenStream(dds3MovieEntry_t *table, char *name, s32 no);
+extern void movieOpenStream(dds3MovieEntry_t *stream, char *desc, s32 path);
 
 extern char D_0053F3C8[];
 

@@ -60,7 +60,7 @@ typedef struct {
     sdfDrawTag_t *tag;
 } dbgConsCtl_t;
 
-sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *header);
+sdfTexHandle_t *sdfTexSet(const TMX_HEADER_t *aTex);
 
 extern u32 D_0054EC44;
 
@@ -74,27 +74,27 @@ extern u8 sdfTexEmbedded_2FC4A0[];
 
 extern sdfMat_t *sdfMatNew(void);
 
-s32 sdf2DLinkTexPacket(sdfDrawTag_t *packetList, sdfTexHandle_t *texture, s32 contextOffset);
+s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 
-sdfGrPacketHeader_t *sdf2DAllocSprite(s32 loopCount);
+sdfGrPacketHeader_t *sdf2DAllocSprite(s32 aNumOfSpr);
 
-void sdfDrawTagInit(sdfDrawTag_t *list);
+void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void sdfDrawTagLink(sdfDrawTag_t *list, u32 packetAddress);
+void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
-s32 sdfGrAllocPacketBuff(s32 size);
+s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern s32 sdf2DGetPrimPtr(s32);
 
 void sdfPrimLinkGt4(
-    sdfDrawTag_t *list, s32 primitive, s32 x0, s32 y0, s32 u0, s32 v0,
-    s32 color0, s32 x1, s32 y1, s32 u1, s32 v1, s32 color1, s32 x2, s32 y2,
-    s32 u2, s32 v2, s32 color2, s32 x3, s32 y3, s32 u3, s32 v3, s32 color3,
-    s32 depth, s32 (*allocatePacket)(s32));
+    sdfDrawTag_t *aTag, s32 aPrim, s32 aX0, s32 aY0, s32 aU0, s32 aV0,
+    s32 aColor0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aColor1, s32 aX2, s32 aY2,
+    s32 aU2, s32 aV2, s32 aColor2, s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aColor3,
+    s32 aZ, s32 (*aAllocator)(s32));
 
 sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
 
-void MultMatrixRev(const void *matrix);
+void MultMatrixRev(const void *aMatrix);
 
 extern u8 D_002FA240[];
 
@@ -106,19 +106,19 @@ extern u8 aProjMatrix[];
 
 extern u32 sdf2DMakeStdPacket(u32, s32);
 
-sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 primitiveFlags,
-                                       s32 registerCount, s64 registerList,
-                                       s32 loopCount);
+sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *aPacketPtr, s32 aPrimReg,
+                                       s32 aNumOfRegs, s64 aGifRegs,
+                                       s32 aNumOfPrim);
 
-extern s32 sdf2DGetPrimPacketSize(s32 registerCount, s32 loopCount);
+extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 
-struct sdfTexBuf_t *sdfTexGetPacket(sdfTexHandle_t *texture);
+struct sdfTexBuf_t *sdfTexGetPacket(sdfTexHandle_t *aHandle);
 
-s32 sdfTexGetPacketLength(const sdfTexHandle_t *texture);
+s32 sdfTexGetPacketLength(const sdfTexHandle_t *aHandle);
 
-void SetRotateMatrixZ(f32 angle);
+void SetRotateMatrixZ(f32 aAngle);
 
-void sdfDrawTagLinkRef(sdfDrawTag_t *list, u32 packetAddress);
+void sdfDrawTagLinkRef(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void sdf3DMakeDirectRefPacket(dmaPacketHeader_t *, u32, s32);
 
@@ -133,41 +133,41 @@ extern f32 D_002FC720[][4];
 
 extern u32 D_002FC740[];
 
-void sdf3DPrimLinkResetTm(sdfDrawTag_t *packetList,
-                              s32 (*allocatePacket)(s32));
+void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag,
+                              s32 (*aAllocator)(s32));
 
-void sdf3DPrimLinkMat(sdfDrawTag_t *packetList, sdfMat_t *asset,
-                              s32 (*allocatePacket)(s32));
+void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat,
+                              s32 (*aAllocator)(s32));
 
-u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *request);
+u32 *sdf3DPrimMakePoly(sdf3DPrimPolyParm_t *aParm);
 
 extern void *memset(void *, int, unsigned int);
 
 void sdfFreeAutoDelayed(void *data);
 
 void sdfLinkStoreImage(
-    sdfDrawTag_t *list, sdfGsMemSlice_t *source, s32 sourceX, s32 sourceY,
-    s32 width, s32 height, s32 resourceAddress, s32 arg7, s32 arg8,
-    s32 (*allocatePacket)(s32));
+    sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aSrcX, s32 aSrcY,
+    s32 aWidth, s32 aHeight, s32 aBuffer, s32 aCallback, s32 aCallbackParam,
+    s32 (*aAllocator)(s32));
 
-sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*allocator)(s32));
+sdfDrawTag_t *sdfPrimAllocDrawTag(s32 (*aAllocator)(s32));
 
 extern sdfGrFrameSet_t D_00529388;
 
 void sdfLinkLoadImage(
-    sdfDrawTag_t *list, sdfGsMemSlice_t *source, s32 destinationX,
-    s32 destinationY, s32 width, s32 height, s32 sourceAddress,
-    s32 (*allocatePacket)(s32));
+    sdfDrawTag_t *aDrawTag, sdfGsMemSlice_t *aGsHandle, s32 aDstX,
+    s32 aDstY, s32 aWidth, s32 aHeight, s32 aBuffer,
+    s32 (*aAllocator)(s32));
 
-s32 frDestroyFontRequestAfter(struct frFontGlyph_t *glyph);
+s32 frDestroyFontRequestAfter(struct frFontGlyph_t *pFRQ);
 
-s32 frDrawFont(frFontGlyph_t *glyph);
+s32 frDrawFont(frFontGlyph_t *pFRQ);
 
-void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *packet);
+void sdfPrimSetOpaquePacket(sdfPrimTransPacket_t *aPkt);
 
-void sdfDevSetPrintCB(sifCommand_t *packet, s32 source, s32 end, s32 argument, s32 index);
+void sdfDevSetPrintCB(sifCommand_t *aCB, s32 aX, s32 aY, s32 aZ, s32 aAttr);
 
-void *sdfDevPrintfEx(void *packet, const char *format, ...);
+void *sdfDevPrintfEx(void *aCB, const char *aStr, ...);
 
 extern u8 D_0054EC50[];
 
@@ -175,9 +175,9 @@ extern void InversMatrix(void);
 
 extern u8 D_0054EC58[];
 
-f32 sdfSin(f32 angle);
+f32 sdfSin(f32 aRadius);
 
-f32 sdfCos(f32 angle);
+f32 sdfCos(f32 aRadius);
 
 extern void *memcpy(void *, const void *, unsigned int);
 
@@ -205,13 +205,13 @@ extern fldDrawBank_t dds3DrawEnv[];
 
 extern u32 dds3GetFrameID(void);
 
-extern void sdfGrSetFrameMaskRGB(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskRGB(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfGrSetFrameMaskReset(const u8 *source, void *packet, s32 gsContext);
+extern void sdfGrSetFrameMaskReset(const u8 *aEnv, void *aHdr, s32 aContext);
 
-extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfDrawTagLinkRefGif(sdfDrawTag_t *aTag, u32 aPacket);
 
-extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *list, u32 source, void *node);
+extern void sdfGrLinkDispFrameTex(sdfDrawTag_t *aTag, u32 aEnv, void *aPkt);
 
 void fldDrawInit(void) {
     if (D_0054EC44 == 0) {
@@ -230,7 +230,7 @@ sdfGrOt_t *fldDrawGetOt(void)
     return &sdfGrOtTable[rsetFrameMaskOtOffset];
 }
 
-void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
+void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba, sdfTexHandle_t *th) {
     void *handle = sdf2DAllocSprite(1);
     fldSpriteVertex_t *vtx = (fldSpriteVertex_t *)sdf2DGetPrimPtr((s32)handle);
     s32 ubase = u * 16;
@@ -240,10 +240,10 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
     sdfDrawTag_t *command;
     sdfGrOt_t *descriptor;
 
-    vtx->r = color & 0xFF;
-    vtx->g = (color >> 8) & 0xFF;
-    vtx->b = (color >> 16) & 0xFF;
-    vtx->a = (color >> 24) & 0xFF;
+    vtx->r = rgba & 0xFF;
+    vtx->g = (rgba >> 8) & 0xFF;
+    vtx->b = (rgba >> 16) & 0xFF;
+    vtx->a = (rgba >> 24) & 0xFF;
     vtx->corner[0].u = ubase;
     vtx->corner[0].v = vbase;
     vtx->corner[0].x = xl;
@@ -258,48 +258,48 @@ void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 c
     vtx->corner[1].flag = 0;
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
-    sdf2DLinkTexPacket(command, texture, 0);
+    sdf2DLinkTexPacket(command, th, 0);
     sdfDrawTagLink(command, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void DrwSprite2DC(s32 x, s32 y, s32 width, s32 height,
-                   s32 u, s32 v, s32 textureWidth, s32 textureHeight,
-                   u32 color0, u32 color1, u32 color2, u32 color3, sdfTexHandle_t *texture) {
+void DrwSprite2DC(s32 x, s32 y, s32 w, s32 h,
+                   s32 u, s32 v, s32 uw, s32 vh,
+                   u32 rgba0, u32 rgba1, u32 rgba2, u32 rgba3, sdfTexHandle_t *th) {
     sdfDrawTag_t *list;
     sdfGrOt_t *surface;
     s32 left, top, right, bottom;
     s32 uLeft, vTop, uRight, vBottom;
 
     list = dds3FontReqAllocDrawTag();
-    sdf2DLinkTexPacket(list, texture, 0);
+    sdf2DLinkTexPacket(list, th, 0);
     left = (x << 4) + 0x7000;
     top = (y << 3);
-    right = (x << 4) + (width << 4) + 0x7000;
-    bottom = top + (height << 3) + 0x7900;
+    right = (x << 4) + (w << 4) + 0x7000;
+    bottom = top + (h << 3) + 0x7900;
     top += 0x7900;
     uLeft = (u << 4);
     vTop = (v << 4);
-    uRight = uLeft + (textureWidth << 4);
-    vBottom = vTop + (textureHeight << 4);
+    uRight = uLeft + (uw << 4);
+    vBottom = vTop + (vh << 4);
     sdfPrimLinkGt4(list, 0x40,
-        left, top, uLeft, vTop, color0,
-        right, top, uRight, vTop, color1,
-        left, bottom, uLeft, vBottom, color3,
-        right, bottom, uRight, vBottom, color2,
+        left, top, uLeft, vTop, rgba0,
+        right, top, uRight, vTop, rgba1,
+        left, bottom, uLeft, vBottom, rgba3,
+        right, bottom, uRight, vBottom, rgba2,
         -1, NULL);
     surface = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
 
-void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 color, sdfTexHandle_t *texture) {
+void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba, sdfTexHandle_t *th) {
     void *handle = sdf2DAllocSprite(1);
     fldSpriteVertex_t *vtx = (fldSpriteVertex_t *)sdf2DGetPrimPtr((s32)handle);
-    s32 r = color & 0xFF;
-    s32 g = (color >> 8) & 0xFF;
-    s32 b = (color >> 16) & 0xFF;
-    s32 a = (color >> 24) & 0xFF;
+    s32 r = rgba & 0xFF;
+    s32 g = (rgba >> 8) & 0xFF;
+    s32 b = (rgba >> 16) & 0xFF;
+    s32 a = (rgba >> 24) & 0xFF;
     s32 ubase = u * 16;
     s32 vbase = v * 16;
     s32 xl = (s32)(x * 16.0f) + 0x7000;
@@ -325,14 +325,14 @@ void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh, s32 
     vtx->corner[1].flag = 0;
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
-    sdf2DLinkTexPacket(command, texture, 0);
+    sdf2DLinkTexPacket(command, th, 0);
     sdfDrawTagLink(command, (u32)handle);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
-    f32 vec[4] = { x, y, z, 1.0f };
+void fldPoint3To2(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
+    f32 vec[4] = { z3, x2, y2, 1.0f };
     f32 result[4];
 
     SDF_VU0_LOADMATRIX(D_002FA240);
@@ -346,12 +346,12 @@ void fldPoint3To2(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(result);
-    *dstX = result[0];
-    *dstY = result[1];
+    *x3 = result[0];
+    *y3 = result[1];
 }
 
-void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
-    f32 vec[4] = { x, y, z, 1.0f };
+void fldPoint3To2H(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
+    f32 vec[4] = { z3, x2, y2, 1.0f };
     f32 result[4];
 
     SDF_VU0_LOADMATRIX(aProjMatrix);
@@ -365,8 +365,8 @@ void fldPoint3To2H(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam2.trans);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(result);
-    *dstX = result[0];
-    *dstY = result[1];
+    *x3 = result[0];
+    *y3 = result[1];
 }
 
 void fldPoint3To2_A(void) {
@@ -375,8 +375,8 @@ void fldPoint3To2_A(void) {
     SDF_VU0_COPYMATRIX_A_TO_B();
 }
 
-void fldPoint3To2_B(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
-    f32 vec[4] = { x, y, z, 1.0f };
+void fldPoint3To2_B(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
+    f32 vec[4] = { z3, x2, y2, 1.0f };
     f32 result[4];
 
     SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)vec);
@@ -387,24 +387,24 @@ void fldPoint3To2_B(f32 *dstX, f32 *dstY, f32 x, f32 y, f32 z) {
     SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(result);
-    *dstX = result[0];
-    *dstY = result[1];
+    *x3 = result[0];
+    *y3 = result[1];
 }
 
-extern void rsetOtOfs(s32 ofs);
+extern void rsetOtOfs(s32 otofs);
 
 /* NON_MATCHING: exact on its own; its presence turns two bnel of encDrawProc
    into bne. */
 #ifdef NON_MATCHING
-void rsetOtOfs(s32 ofs)
+void rsetOtOfs(s32 otofs)
 {
-    rsetFrameMaskOtOffset = ofs;
+    rsetFrameMaskOtOffset = otofs;
 }
 #else
 INCLUDE_ASM(const s32, "field/fldDraw", rsetOtOfs);
 #endif
 
-void rsetTexa(s32 lower, s32 bits, u64 upper) {
+void rsetTexa(s32 ta0, s32 aem, u64 ta1) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 packet;
     u64 *entry;
@@ -414,13 +414,13 @@ void rsetTexa(s32 lower, s32 bits, u64 upper) {
     packet = sdfGrAllocPacketBuff(0x30);
     entry = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
     entry[5] = 0x3B;
-    entry[4] = (u64)(bits << 15) | (upper << 32) | lower;
+    entry[4] = (u64)(aem << 15) | (ta1 << 32) | ta0;
     sdfDrawTagLink(command, packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused, s32 bit17) {
+void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     s32 packet;
     u64 *data;
@@ -429,7 +429,7 @@ void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32
     sdfDrawTagInit(command);
     packet = sdfGrAllocPacketBuff(0x30);
     data = (u64 *)sdf2DMakeStdPacket(packet, 0x30);
-    data[4] = (bit17 << 17) | 0x10000 | (bit15 << 15) | (bit14 << 14) | (bit12 << 12) | (bit4 << 4) | (bit1 << 1) | bit0;
+    data[4] = (ztst << 17) | 0x10000 | (datm << 15) | (date << 14) | (afail << 12) | (aref << 4) | (atst << 1) | ate;
     data[5] = 0x47;
     sdfDrawTagLink(command, packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
@@ -480,7 +480,7 @@ void rsetAlpha(s32 mode) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
+void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 r, u32 g, u32 b) {
     s32 coords[4];
     sdfDrawTag_t *command;
     sdfGrPacketHeader_t *packet;
@@ -500,8 +500,8 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
     packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 2));
     sdf2DMakePrimPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
-    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
-    hi = (u64)gsWord2 | (0x8000LL << 24);
+    lo = (u64)r | ((u64)g << 32);
+    hi = (u64)b | (0x8000LL << 24);
     pos = coords;
     for (i = 0; i < 2; i++) {
         dst[0] = lo;
@@ -517,7 +517,7 @@ void aDrawLineStripPrim(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2) {
+void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 r, u32 g, u32 b) {
     u32 coords[4];
     sdfDrawTag_t *command;
     sdfGrPacketHeader_t *packet;
@@ -537,8 +537,8 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
     packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 2));
     sdf2DMakePrimPacketHeader(packet, 0x49, 2, 0x41, 2);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
-    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
-    hi = (u64)gsWord2 | (0x8000LL << 24);
+    lo = (u64)r | ((u64)g << 32);
+    hi = (u64)b | (0x8000LL << 24);
     pos = coords;
     for (i = 0; i < 2; i++) {
         dst[0] = lo;
@@ -554,7 +554,7 @@ void aDrawLineDirect(u32 x0, u32 y0, u32 x1, u32 y1, u32 gsWord0, u32 gsWord1, u
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
+void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a) {
     s32 coords[8];
     sdfDrawTag_t *command;
     sdfGrPacketHeader_t *packet;
@@ -578,8 +578,8 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
     packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
-    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
-    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
+    lo = (u64)r | ((u64)g << 32);
+    hi = (u64)b | ((u64)a << 32);
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -595,7 +595,7 @@ void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
+void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 z, u32 r, u32 g, u32 b, u32 a) {
     s32 coords[8];
     sdfDrawTag_t *command;
     sdfGrPacketHeader_t *packet;
@@ -620,9 +620,9 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
     packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
-    tag = vertexTag;
-    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
-    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
+    tag = z;
+    lo = (u64)r | ((u64)g << 32);
+    hi = (u64)b | ((u64)a << 32);
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -638,7 +638,7 @@ void aDrawBoxFZ(s32 x, s32 y, s32 w, s32 h, u32 vertexTag, u32 gsWord0, u32 gsWo
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3) {
+void aDrawBoxF_Direct(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a) {
     u32 coords[8];
     sdfDrawTag_t *command;
     sdfGrPacketHeader_t *packet;
@@ -649,21 +649,21 @@ void aDrawBoxF_Direct(s32 x0, s32 y0, s32 x1, s32 y1, u32 gsWord0, u32 gsWord1, 
     sdfGrOt_t *descriptor;
     s32 i;
 
-    coords[0] = x0;
-    coords[1] = y0;
-    coords[2] = x1;
-    coords[3] = y0;
-    coords[4] = x1;
-    coords[5] = y1;
-    coords[6] = x0;
-    coords[7] = y1;
+    coords[0] = x;
+    coords[1] = y;
+    coords[2] = w;
+    coords[3] = y;
+    coords[4] = w;
+    coords[5] = h;
+    coords[6] = x;
+    coords[7] = h;
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     packet = (sdfGrPacketHeader_t *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(2, 4));
     sdf2DMakePrimPacketHeader(packet, 0x4D, 2, 0x41, 4);
     dst = (u64 *)sdf2DGetPrimPtr((s32)packet);
-    lo = (u64)gsWord0 | ((u64)gsWord1 << 32);
-    hi = (u64)gsWord2 | ((u64)gsWord3 << 32);
+    lo = (u64)r | ((u64)g << 32);
+    hi = (u64)b | ((u64)a << 32);
     pos = coords;
     for (i = 0; i < 4; i++) {
         dst[0] = lo;
@@ -859,7 +859,7 @@ void func_0012A140(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsW
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void drawSprite3D(sdfTexHandle_t *texture, Sprite3D_t *sprite) {
+void drawSprite3D(sdfTexHandle_t *th, Sprite3D_t *spr3d) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     dmaPacketHeader_t *header;
     u8 *packet;
@@ -868,15 +868,15 @@ void drawSprite3D(sdfTexHandle_t *texture, Sprite3D_t *sprite) {
 
     sdfDrawTagInit(command);
     header = (dmaPacketHeader_t *)sdfGrAllocPacketBuff(0x20);
-    sdf3DMakeDirectRefPacket(header, (u32)sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
+    sdf3DMakeDirectRefPacket(header, (u32)sdfTexGetPacket(th), sdfTexGetPacketLength(th));
     sdfDrawTagLinkRef(command, (u32)header);
-    SetRotateMatrixZ(sprite->rot);
+    SetRotateMatrixZ(spr3d->rot);
     SDF_VU0_STOREMATRIX(mat);
     packet = (u8 *)sdfGrAllocPacketBuff(0x38);
     sdfBillBoardMakeTMPacket(packet, mat);
     sdfDrawTagLink(command, (u32)packet);
     packet = (u8 *)sdfGrAllocPacketBuff(0x80);
-    sdfBillBoardMake1(packet, &sprite->pos, sprite->col, sprite->uv, sprite->vt);
+    sdfBillBoardMake1(packet, &spr3d->pos, spr3d->col, spr3d->uv, spr3d->vt);
     sdfDrawTagLink(command, (u32)packet);
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
@@ -908,18 +908,18 @@ void rsetFrameMaskRgbOff(void) {
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32 w) {
+void ooyTestLine3D(u32 x0, u32 y0, f32 z0, f32 col0, f32 x1, f32 y1, f32 z1, f32 col1) {
     sdfDrawTag_t *list;
     s32 record;
     sdfGrOt_t *descriptor;
-    D_002FC720[0][0] = x;
-    D_002FC720[0][1] = y;
-    D_002FC720[0][2] = z;
-    D_002FC720[1][0] = u;
-    D_002FC720[1][1] = v;
-    D_002FC720[1][2] = w;
-    D_002FC740[1] = second;
-    D_002FC740[0] = first;
+    D_002FC720[0][0] = z0;
+    D_002FC720[0][1] = col0;
+    D_002FC720[0][2] = x1;
+    D_002FC720[1][0] = y1;
+    D_002FC720[1][1] = z1;
+    D_002FC720[1][2] = col1;
+    D_002FC740[1] = y0;
+    D_002FC740[0] = x0;
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     record = (s32)effDebugDrawWireModel((const f32 (*)[4])D_002FC720, D_002FC740, 2, 0x80);
@@ -928,10 +928,10 @@ void ooyTestLine3D(u32 first, u32 second, f32 x, f32 y, f32 z, f32 u, f32 v, f32
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, list);
 }
 
-void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
-                         f32 x0, f32 y0, f32 z0,
+void fldDrawPoly3(s32 x0, s32 y0, s32 z0,
                          f32 x1, f32 y1, f32 z1,
-                         f32 x2, f32 y2, f32 z2) {
+                         f32 x2, f32 y2, f32 z2,
+                         f32 col0, f32 col1, f32 col2) {
     sdf3DPrimPolyParm_t desc;
     sdfVector4_t vertices[3];
     u32 colors[3];
@@ -948,18 +948,18 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
     desc.pointCount = 3;
     desc.vertex = vertices;
     desc.vertexColor = colors;
-    vertices[0].x = x0;
-    vertices[0].y = y0;
-    vertices[0].z = z0;
-    vertices[1].x = x1;
-    vertices[1].y = y1;
-    vertices[1].z = z1;
-    vertices[2].x = x2;
-    vertices[2].y = y2;
-    vertices[2].z = z2;
-    colors[0] = color0;
-    colors[1] = color1;
-    colors[2] = color2;
+    vertices[0].x = x1;
+    vertices[0].y = y1;
+    vertices[0].z = z1;
+    vertices[1].x = x2;
+    vertices[1].y = y2;
+    vertices[1].z = z2;
+    vertices[2].x = col0;
+    vertices[2].y = col1;
+    vertices[2].z = col2;
+    colors[0] = x0;
+    colors[1] = y0;
+    colors[2] = z0;
     sdfDrawTagLink(command, (u32)sdf3DPrimMakePoly(&desc));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
@@ -967,10 +967,10 @@ void fldDrawPoly3(s32 color0, s32 color1, s32 color2,
 
 extern u64 D_002FC750[];
 
-void fldDrawPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
-                  s32 color1, f32 x1, f32 y1, f32 z1,
-                  s32 color2, f32 x2, f32 y2, f32 z2,
-                  s32 color3, f32 x3, f32 y3, f32 z3) {
+void fldDrawPoly4(s32 x0, f32 y0, f32 z0, f32 x1,
+                  s32 y1, f32 z1, f32 x2, f32 y2,
+                  s32 z2, f32 x3, f32 y3, f32 z3,
+                  s32 col0, f32 col1, f32 col2, f32 col3) {
     sdf3DPrimPolyParm_t desc;
     sdfVector4_t vertices[4];
     u32 colors[4];
@@ -990,32 +990,32 @@ void fldDrawPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
     desc.vertexColor = colors;
     desc.faceIndex = (u32 *)strip;
     memcpy(strip, D_002FC750, sizeof(strip));
-    vertices[0].x = x0;
-    vertices[0].y = y0;
-    vertices[0].z = z0;
-    vertices[1].x = x1;
-    vertices[1].y = y1;
-    vertices[1].z = z1;
-    vertices[2].x = x2;
-    vertices[2].y = y2;
-    vertices[2].z = z2;
-    vertices[3].x = x3;
-    vertices[3].y = y3;
-    vertices[3].z = z3;
-    colors[0] = color0;
-    colors[1] = color1;
-    colors[2] = color2;
-    colors[3] = color3;
+    vertices[0].x = y0;
+    vertices[0].y = z0;
+    vertices[0].z = x1;
+    vertices[1].x = z1;
+    vertices[1].y = x2;
+    vertices[1].z = y2;
+    vertices[2].x = x3;
+    vertices[2].y = y3;
+    vertices[2].z = z3;
+    vertices[3].x = col1;
+    vertices[3].y = col2;
+    vertices[3].z = col3;
+    colors[0] = x0;
+    colors[1] = y1;
+    colors[2] = z2;
+    colors[3] = col0;
     sdfDrawTagLink(command, (u32)sdf3DPrimMakePoly(&desc));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
 }
 
-void fldDrawTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
-                     s32 color1, f32 x1, f32 y1, f32 z1,
-                     s32 color2, f32 x2, f32 y2, f32 z2,
-                     s32 color3, f32 x3, f32 y3, f32 z3,
-                     sdfTexHandle_t *texture, f32 u0, f32 v0, f32 u1, f32 v1) {
+void fldDrawTexPoly4(s32 x0, f32 y0, f32 z0, f32 x1,
+                     s32 y1, f32 z1, f32 x2, f32 y2,
+                     s32 z2, f32 x3, f32 y3, f32 z3,
+                     s32 s0, f32 t0, f32 s1, f32 t1,
+                     sdfTexHandle_t *col0, f32 col1, f32 col2, f32 col3, f32 th) {
     sdf3DPrimPolyParm_t desc;
     sdfVector4_t vertices[4];
     u32 colors[4];
@@ -1026,7 +1026,7 @@ void fldDrawTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
     sdfGrOt_t *descriptor;
 
     asset = sdfMatNew();
-    sdfMatSetTex(asset, texture);
+    sdfMatSetTex(asset, col0);
     command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(command);
     sdf3DPrimLinkResetTm(command, 0);
@@ -1040,30 +1040,30 @@ void fldDrawTexPoly4(s32 color0, f32 x0, f32 y0, f32 z0,
     desc.faceIndex = (u32 *)strip;
     desc.uv = uvs;
     memcpy(strip, D_002FC750, sizeof(strip));
-    vertices[0].x = x0;
-    vertices[0].y = y0;
-    vertices[0].z = z0;
-    vertices[1].x = x2;
-    vertices[1].y = y2;
-    vertices[1].z = z2;
-    vertices[2].x = x3;
-    vertices[2].y = y3;
-    vertices[2].z = z3;
-    vertices[3].x = x1;
-    vertices[3].y = y1;
-    vertices[3].z = z1;
-    colors[0] = color0;
-    colors[1] = color2;
-    colors[2] = color3;
-    colors[3] = color1;
-    uvs[0].x = u0;
-    uvs[0].y = v0;
-    uvs[1].x = u0;
-    uvs[1].y = v1;
-    uvs[2].x = u1;
-    uvs[2].y = v1;
-    uvs[3].x = u1;
-    uvs[3].y = v0;
+    vertices[0].x = y0;
+    vertices[0].y = z0;
+    vertices[0].z = x1;
+    vertices[1].x = x3;
+    vertices[1].y = y3;
+    vertices[1].z = z3;
+    vertices[2].x = t0;
+    vertices[2].y = s1;
+    vertices[2].z = t1;
+    vertices[3].x = z1;
+    vertices[3].y = x2;
+    vertices[3].z = y2;
+    colors[0] = x0;
+    colors[1] = z2;
+    colors[2] = s0;
+    colors[3] = y1;
+    uvs[0].x = col1;
+    uvs[0].y = col2;
+    uvs[1].x = col1;
+    uvs[1].y = th;
+    uvs[2].x = col3;
+    uvs[2].y = th;
+    uvs[3].x = col3;
+    uvs[3].y = col2;
     sdfDrawTagLink(command, (u32)sdf3DPrimMakePoly(&desc));
     descriptor = &sdfGrOtTable[rsetFrameMaskOtOffset];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))descriptor->regFunc)(descriptor, command);
@@ -1260,7 +1260,7 @@ void fldDrawPos(const f32 *pos) {
     drawSprite3D(D_0054EC60, &packet);
 }
 
-void fldDrawPosCol(const f32 *pos, s32 color) {
+void fldDrawPosCol(const f32 *pos, s32 rgba) {
     Sprite3D_t packet;
     f32 half = 36.0f;
 
@@ -1280,7 +1280,7 @@ void fldDrawPosCol(const f32 *pos, s32 color) {
     packet.vt[2].y = half;
     packet.vt[3].x = -half;
     packet.vt[3].y = half;
-    packet.col = color;
+    packet.col = rgba;
     packet.pos.x = pos[0];
     packet.pos.y = pos[1];
     packet.pos.z = pos[2];
@@ -1291,10 +1291,10 @@ void fldDrawPosCol(const f32 *pos, s32 color) {
     drawSprite3D(D_0054EC60, &packet);
 }
 
-void fldDraw2DBar(s32 x, s32 y, s32 width, s32 height) {
-    DrwSprite2D(x, y, 0x10, height, 0, 0, 0x10, 0x20, 0x60000040, D_0054EC60);
-    DrwSprite2D(x + 0x10, y, width - 0x20, height, 0x10, 0, 1, 0x20, 0x60000040, D_0054EC60);
-    DrwSprite2D(x + width - 0x10, y, 0x10, height, 0x10, 0, 0x10, 0x20, 0x60000040, D_0054EC60);
+void fldDraw2DBar(s32 x, s32 y, s32 w, s32 h) {
+    DrwSprite2D(x, y, 0x10, h, 0, 0, 0x10, 0x20, 0x60000040, D_0054EC60);
+    DrwSprite2D(x + 0x10, y, w - 0x20, h, 0x10, 0, 1, 0x20, 0x60000040, D_0054EC60);
+    DrwSprite2D(x + w - 0x10, y, 0x10, h, 0x10, 0, 0x10, 0x20, 0x60000040, D_0054EC60);
     rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
     rsetAlpha(0);
 }
@@ -1336,11 +1336,11 @@ void fldDrwZLoad(void) {
     }
 }
 
-void fldKanjiDraw(s32 x, s32 y, u32 colors, const u8 *text)
+void fldKanjiDraw(s32 x, s32 y, u32 rgba, const u8 *moji)
 {
     frFontGlyph_t *object;
 
-    object = frwGetSmallFontFRQ(x << 4, y << 4, 0, colors, text, 0);
+    object = frwGetSmallFontFRQ(x << 4, y << 4, 0, rgba, moji, 0);
     frDrawFont(object);
     frDestroyFontRequestAfter(object);
 }
@@ -1350,18 +1350,18 @@ void LF(dbgConsCtl_t *cons)
     cons->cy += 0x60;
 }
 
-void initDrawTag(dbgConsCtl_t *quad) {
+void initDrawTag(dbgConsCtl_t *cons) {
     s32 packet;
     sdfDrawTag_t *packetList;
 
     packetList = dds3FontReqAllocDrawTag();
-    quad->tag = packetList;
+    cons->tag = packetList;
     packet = sdfGrAllocPacketBuff(0x40);
     sdfPrimSetOpaquePacket((sdfPrimTransPacket_t *)packet);
-    sdfDrawTagLink(quad->tag, packet);
+    sdfDrawTagLink(cons->tag, packet);
 }
 
-void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
+void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 num) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
     f32 screenX;
@@ -1388,7 +1388,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, (s32)screenX * 16, (s32)screenY * 16, quad.cz, 1);
     sdfDrawTagLink(quad.tag,
-                    (u32)sdfDevPrintfEx(&packet, D_0054EC50, drawValue));
+                    (u32)sdfDevPrintfEx(&packet, D_0054EC50, num));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1396,7 +1396,7 @@ void fldDbgPrint3D(f32 x, f32 y, f32 z, s32 drawValue) {
     }
 }
 
-void fldDbgPrint2D(s32 x, s32 y, const char *format) {
+void fldDbgPrint2D(s32 x, s32 y, const char *str) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
 
@@ -1412,7 +1412,7 @@ void fldDbgPrint2D(s32 x, s32 y, const char *format) {
     quad.pz = 0x0FFFFF7D;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x, quad.cy + y, quad.cz, 0);
-    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, format));
+    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, str));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[83];
@@ -1420,7 +1420,7 @@ void fldDbgPrint2D(s32 x, s32 y, const char *format) {
     }
 }
 
-void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
+void fldDbgPrint2DC(s32 x, s32 y, s32 col, s32 str) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
 
@@ -1435,8 +1435,8 @@ void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     quad.sx = 0x1A40;
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfDevSetPrintCB(&packet, quad.cx + x, quad.cy + y, quad.cz, packetField);
-    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
+    sdfDevSetPrintCB(&packet, quad.cx + x, quad.cy + y, quad.cz, col);
+    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, (const char *)str));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1444,7 +1444,7 @@ void fldDbgPrint2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     }
 }
 
-void fldDbgPrintNum2D(s32 x, s32 y, s32 drawValue) {
+void fldDbgPrintNum2D(s32 x, s32 y, s32 num) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
 
@@ -1460,7 +1460,7 @@ void fldDbgPrintNum2D(s32 x, s32 y, s32 drawValue) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x * 16, quad.cy + y * 8, quad.cz, 0);
-    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, D_0054EC50, drawValue));
+    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, D_0054EC50, num));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1468,7 +1468,7 @@ void fldDbgPrintNum2D(s32 x, s32 y, s32 drawValue) {
     }
 }
 
-void fldDbgPrintNum2DH(s32 x, s32 y, s32 drawValue) {
+void fldDbgPrintNum2DH(s32 x, s32 y, s32 num) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
 
@@ -1484,7 +1484,7 @@ void fldDbgPrintNum2DH(s32 x, s32 y, s32 drawValue) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x * 16, quad.cy + y * 8, quad.cz, 0);
-    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, D_0054EC58, drawValue));
+    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, D_0054EC58, num));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1492,7 +1492,7 @@ void fldDbgPrintNum2DH(s32 x, s32 y, s32 drawValue) {
     }
 }
 
-void fldDbgPrintStr2D(s32 x, s32 y, s32 drawValue) {
+void fldDbgPrintStr2D(s32 x, s32 y, s32 str) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
 
@@ -1508,7 +1508,7 @@ void fldDbgPrintStr2D(s32 x, s32 y, s32 drawValue) {
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
     sdfDevSetPrintCB(&packet, quad.cx + x * 16, quad.cy + y * 8, quad.cz, 0);
-    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
+    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, (const char *)str));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];
@@ -1540,7 +1540,7 @@ void fldDbgPrintStr2DC(s32 x, s32 y, s32 packetField, s32 drawValue) {
     }
 }
 
-void fldDbgPrintStr2DCF(s32 packetField, s32 drawValue, f32 x, f32 y) {
+void fldDbgPrintStr2DCF(s32 x, s32 y, f32 col, f32 str) {
     dbgConsCtl_t quad;
     sifCommand_t packet;
 
@@ -1555,8 +1555,8 @@ void fldDbgPrintStr2DCF(s32 packetField, s32 drawValue, f32 x, f32 y) {
     quad.sx = 0x1A40;
     quad.pz = 0x0FFFFF7F;
     initDrawTag(&quad);
-    sdfDevSetPrintCB(&packet, quad.cx + (s32)(x * 16.0f), quad.cy + (s32)(y * 8.0f), quad.cz, packetField);
-    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, (const char *)drawValue));
+    sdfDevSetPrintCB(&packet, quad.cx + (s32)(col * 16.0f), quad.cy + (s32)(str * 8.0f), quad.cz, x);
+    sdfDrawTagLink(quad.tag, (u32)sdfDevPrintfEx(&packet, (const char *)y));
     LF(&quad);
     {
         sdfGrOt_t *textOt = &sdfGrOtTable[81];

@@ -91,7 +91,7 @@ extern char D_0053D028[];
 
 extern char D_0053D038[];
 
-extern void frDestroyFontRequestAfter(void *frq);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern s32 sprintf(char *out, const char *fmt, ...);
 
@@ -101,7 +101,7 @@ INCLUDE_ASM(const s32, "facility/fclShopCalc", shpChkChoiceMax);
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shop_Process);
 
-void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
+void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
 extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
                             s32 arg);
@@ -127,9 +127,9 @@ extern s32 fclGetPanelAnimTarget(fclPanelAnim_t *anim);
 extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
 
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 id, s32 idx,
-                                s32 *texs, fclSpriteTbl_t *tbl, s32 ot);
+                                s32 *texs, fclSpriteTbl_t *table, s32 OtNo);
 
-extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 d, s32 color, char *str, s32 f);
+extern void *frwGetNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 

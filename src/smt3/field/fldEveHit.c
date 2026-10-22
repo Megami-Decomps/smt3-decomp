@@ -199,11 +199,11 @@ u32 dds3AllocObjectId(void);
 
 void *dds3EventBasicGetResource(dds3Basic_t *object);
 
-dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
 dds3Basic_t *dds3GetControlScene(void);
 
-void dds3SceneBasicEndScript(void *unusedContext, const char *taskName);
+void dds3SceneBasicEndScript(void *scene, const char *procname);
 
 /* Common prefix of the event payloads registered by fldEveHit_AddEveData.
  * The scene lookup consumes the object ID, not the remaining payload. */
@@ -215,7 +215,7 @@ extern fldEventDataHeader_t *fldEveHitDataTable[];
 
 extern u32 gEvnRngPid[];
 
-extern scrProcessWork_s *scrSearchScriptName(char *name);
+extern scrProcessWork_s *scrSearchScriptName(char *scriptname);
 
 extern s32 gFldEveRngIdx_N;
 
@@ -231,11 +231,11 @@ extern s32 fldEveHitState;
 
 extern u32 gEveNum;
 
-s32 dds3ExistProcess(dds3ProcessID_t *task);
+s32 dds3ExistProcess(dds3ProcessID_t *id);
 
-s32 dds3KillProcess(dds3ProcessID_t *task, s32 delayTicks);
+s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-s32 dds3SceneBasicStartScript(dds3Basic_t *worldNode, const char *taskName);
+s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s8 fldDoorExitMode[];
 
@@ -253,7 +253,7 @@ extern s32 gFldInfIdx;
 
 extern const char D_002FF3E0[];
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 extern s32 gFldKyouseiTalk;
 
@@ -428,16 +428,16 @@ extern char D_002FCD80[];
 
 extern u32 dds3AllocObjectId(void);
 
-extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *data, char *name);
+extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *pData, char *pName);
 
 extern dds3Basic_t *dds3AddEventBasic(s32 id, void *resource, char *name);
 
-extern s32 fldEveHit_AddEveHit(fldResHead_t *head, dds3Basic_t *basic);
+extern s32 fldEveHit_AddEveHit(fldResHead_t *pEvnRng, dds3Basic_t *pBasic);
 
-u32 fldEveHit_AddEveData(fldEventDataHeader_t *data, dds3Basic_t *object) {
+u32 fldEveHit_AddEveData(fldEventDataHeader_t *pEve, dds3Basic_t *pBasic) {
     u32 index = gEveNum;
 
-    fldEveHitDataTable[index] = data;
+    fldEveHitDataTable[index] = pEve;
     gEveNum = index + 1;
     return index;
 }
@@ -446,7 +446,7 @@ INCLUDE_ASM(const s32, "field/fldEveHit", fldEveHit_AddEveHit);
 
 extern void ToMatrix(void);
 
-s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit)
+s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *put)
 {
     f32 dir[4];
     f32 pos[4];
@@ -459,13 +459,13 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit)
     memset(pos, 0, 0x10);
     pos[3] = 1.0f;
     for (i = 0; i < fldEveRngCount; i++) {
-        if (fldEveHitTable[i].worldObjectKey != hit->serialID) {
+        if (fldEveHitTable[i].worldObjectKey != put->serialID) {
             continue;
         }
         info = (fldTaskInfo_t *)gEvnRng[i]->data;
         switch (info->shape->kind) {
         case 0:
-            target = (f32 *)hit->workdata;
+            target = (f32 *)put->workdata;
             pos[0] = target[0];
             pos[1] = target[1];
             pos[2] = target[2];
@@ -515,7 +515,7 @@ s32 fldEveHit_ChkDir(dds3Basic_t *unit, dds3Basic_t *hit)
 
 /* NON_MATCHING: 32 of 153 words differ (first at +0x8). */
 #ifdef NON_MATCHING
-s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *hit)
+s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *put)
 {
     f32 dir[4];
     f32 pos[4];
@@ -528,14 +528,14 @@ s32 fldEveHit_ChkDir2(dds3Basic_t *unit, dds3Basic_t *hit)
     memset(pos, 0, 0x10);
     pos[3] = 1.0f;
     for (i = 0; i < fldEveRngCount; i++) {
-        if (fldEveHitTable[i].worldObjectKey != hit->serialID) {
+        if (fldEveHitTable[i].worldObjectKey != put->serialID) {
             continue;
         }
         info = (fldTaskInfo_t *)gEvnRng[i]->data;
         switch (info->shape->kind) {
         case 0:
             probe = pos;
-            *(u128 *)pos = *(u128 *)hit->workdata;
+            *(u128 *)pos = *(u128 *)put->workdata;
             SDF_VU0_LOADVECTOR(&unit->poseset->rot);
             ToMatrix();
             SDF_VU0_STORE_ROW2(dir);
@@ -624,12 +624,12 @@ s32 fldEveHitTestPlanes(sdfVector4_t *pos, s32 idx) {
     return 1;
 }
 
-s32 fldEveHit_ScriptStart(char *name, s32 idx) {
+s32 fldEveHit_ScriptStart(char *pScriptName, s32 idx) {
     s32 pid;
     s32 mode;
 
-    if (scrSearchScriptName(name) == NULL) {
-        pid = dds3SceneBasicStartScript(dds3GetActiveScene(), name);
+    if (scrSearchScriptName(pScriptName) == NULL) {
+        pid = dds3SceneBasicStartScript(dds3GetActiveScene(), pScriptName);
         gEvnRngPid[idx] = pid;
         gFldEveRngIdx = idx;
         mode = fldEveHitTable[idx].mode;
@@ -640,17 +640,17 @@ s32 fldEveHit_ScriptStart(char *name, s32 idx) {
     return -1;
 }
 
-s32 fldEveHit_ScriptEnd(char *flag, u32 slot) {
-    gEvnRngPid[slot] = 0;
-    if (scrSearchScriptName(flag) != 0) {
-        dds3SceneBasicEndScript(dds3GetActiveScene(), flag);
+s32 fldEveHit_ScriptEnd(char *pScriptName, u32 idx) {
+    gEvnRngPid[idx] = 0;
+    if (scrSearchScriptName(pScriptName) != 0) {
+        dds3SceneBasicEndScript(dds3GetActiveScene(), pScriptName);
         return 0;
     }
     return -1;
 }
 
-u32 fldEveHit_ScriptEnd2(u32 slot) {
-    u32 *task = &gEvnRngPid[slot];
+u32 fldEveHit_ScriptEnd2(u32 idx) {
+    u32 *task = &gEvnRngPid[idx];
 
     if (dds3ExistProcess((dds3ProcessID_t *)*task) != 0) {
         dds3KillProcess((dds3ProcessID_t *)*task, 0);
@@ -677,13 +677,13 @@ s32 fldEveHit_ChkEveHitAfter(void) {
     return 1;
 }
 
-s32 fldEveHit_ChkOn(const char *name) {
+s32 fldEveHit_ChkOn(const char *evehitname) {
     s32 i;
 
     for (i = 0; i < 32; i++) {
         if (gFldEveHitOnOffTbl[i].area == fldGlobalBase.area &&
             gFldEveHitOnOffTbl[i].floor == fldGlobalBase.floor + 1 &&
-            strcmp(gFldEveHitOnOffTbl[i].name, name) == 0) {
+            strcmp(gFldEveHitOnOffTbl[i].name, evehitname) == 0) {
             return evtBitCheck(gFldEveHitOnOffTbl[i].flag) != 0;
         }
     }
@@ -722,10 +722,10 @@ void fldPurgeEveRngProcesses(void) {
     }
 }
 
-s32 fldEveHitResID_Find(u32 task) {
+s32 fldEveHitResID_Find(u32 pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (gEvnRngPid[slotIndex] == task) {
+        if (gEvnRngPid[slotIndex] == pid) {
             return gEvnRng[slotIndex]->id;
         }
     }
@@ -743,10 +743,10 @@ s32 fldFindEveRngIndex(u32 task) {
     return -1;
 }
 
-const char *fldEveHitResName_Find(u32 task) {
+const char *fldEveHitResName_Find(u32 pid) {
     s32 slotIndex;
     for (slotIndex = 0; slotIndex < fldEveRngCount; slotIndex++) {
-        if (gEvnRngPid[slotIndex] == task) {
+        if (gEvnRngPid[slotIndex] == pid) {
             return gEvnRng[slotIndex]->name;
         }
     }

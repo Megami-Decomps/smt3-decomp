@@ -61,11 +61,11 @@ struct pbPanel_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfChipFreeDelayedDirect(void *aPtr);
 
 extern pbPanel_t *record;
 
-extern void mdlFree(mdlObj_t *model);
+extern void mdlFree(mdlObj_t *aHandle);
 
 extern pbPanel_t *blockDB;
 

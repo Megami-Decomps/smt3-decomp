@@ -129,7 +129,7 @@ typedef struct
     /* 0x1A720 */ fclRbnWork_t *ribbon;
 } cmbGbWork_t;
 
-extern s32 datAddItem(s32 itemId, s32 count);
+extern s32 datAddItem(s32 id, s32 num);
 
 typedef struct
 {
@@ -160,9 +160,9 @@ extern void cmpMoveCursorListEnd(cmpCursorWork_t *cursor);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
-u8 shpAddServiceTicket(s32 count)
+u8 shpAddServiceTicket(s32 Nums)
 {
-    datAddItem(0x3D, count);
+    datAddItem(0x3D, Nums);
     return cmbGlobalWork->unk_1965;
 }
 

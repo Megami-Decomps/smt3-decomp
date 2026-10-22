@@ -2,18 +2,18 @@
 #include "basic.h"
 #include "ps2asm.h"
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 extern void Normalize(void);
 extern void Mult(void);
 extern void ToMatrix(void);
 extern f32 fabsf(f32 value);
 
-void dds3BackupPoseSet(dds3PoseSet_t *pose);
+void dds3BackupPoseSet(dds3PoseSet_t *pPoseSet);
 
 
 extern u32 dds3ObjectIdCounter;
 
-void sdfChipFreeDirect(void *ptr);
+void sdfChipFreeDirect(void *aPtr);
 
 
 extern void dds3DeleteBasic(dds3Basic_t *basic);
@@ -115,33 +115,33 @@ void dds3FreePoseSet(dds3Basic_t *basic)
     }
 }
 
-void dds3OnPoseSetFlag(dds3PoseSet_t *poseset, u32 flag)
+void dds3OnPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag)
 {
-    poseset->flag |= flag;
+    pPoseSet->flag |= flag;
 }
 
-void dds3OffPoseSetFlag(dds3PoseSet_t *poseset, u32 flag)
+void dds3OffPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag)
 {
-    poseset->flag &= ~flag;
+    pPoseSet->flag &= ~flag;
 }
 
-s32 dds3CheckPoseSetFlag(dds3PoseSet_t *poseset, u32 flag)
+s32 dds3CheckPoseSetFlag(dds3PoseSet_t *pPoseSet, u32 flag)
 {
-    return (poseset->flag & flag) != 0;
+    return (pPoseSet->flag & flag) != 0;
 }
 
 /* vu0 routine: reset translation/rotation and set unit scale. */
-void dds3BackupPoseSet(dds3PoseSet_t *pose)
+void dds3BackupPoseSet(dds3PoseSet_t *pPoseSet)
 {
-    sdfVector4_t *position = &pose->pos;
+    sdfVector4_t *position = &pPoseSet->pos;
     sdfVector4_t *rotation;
     sdfVector4_t *scale;
 
     SDF_VU0_STOREIDENTITYVECTOR(position);
-    rotation = &pose->rot;
+    rotation = &pPoseSet->rot;
     SDF_VU0_STOREIDENTITYVECTOR(rotation);
     SDF_VU0_SETSCALE1VECTOR();
-    scale = &pose->scl;
+    scale = &pPoseSet->scl;
     SDF_VU0_STOREVECTOR(scale);
 }
 
@@ -162,45 +162,45 @@ f32 func_0010DE98(dds3Basic_t *basic)
     return basic->poseset->r;
 }
 
-void dds3SetPosPoseSet(dds3Basic_t *basic, const sdfVector4_t *position)
+void dds3SetPosPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *pos)
 {
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3PoseSet_t *pose = pBasic->poseset;
     sdfVector4_t *dst = &pose->pos;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    SDF_VU0_COPYVECTOR(dst, position);
+    SDF_VU0_COPYVECTOR(dst, pos);
 }
 
-void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation)
+void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot)
 {
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3PoseSet_t *pose = pBasic->poseset;
     sdfVector4_t *dst = &pose->rot;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    SDF_VU0_COPYVECTOR(dst, rotation);
+    SDF_VU0_COPYVECTOR(dst, rot);
 }
 
-void dds3SetSclPoseSet(dds3Basic_t *basic, const sdfVector4_t *scale)
+void dds3SetSclPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *scl)
 {
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3PoseSet_t *pose = pBasic->poseset;
     sdfVector4_t *dst = &pose->scl;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
-    SDF_VU0_COPYVECTOR(dst, scale);
+    SDF_VU0_COPYVECTOR(dst, scl);
 }
 
 /* vu0 routine: return the position in vf10 with homogeneous w = 1. */
-void dds3GetPosPoseSet(dds3Basic_t *basic)
+void dds3GetPosPoseSet(dds3Basic_t *pBasic)
 {
-    sdfVector4_t *position = &basic->poseset->pos;
+    sdfVector4_t *position = &pBasic->poseset->pos;
 
     SDF_VU0_LOADVECTOR_BARRIER(position);
     SDF_VU0_VECTOR_W_SET_ONE();
 }
 
-void dds3GetRotPoseSet(dds3Basic_t *basic)
+void dds3GetRotPoseSet(dds3Basic_t *pBasic)
 {
-    sdfVector4_t *rotation = &basic->poseset->rot;
+    sdfVector4_t *rotation = &pBasic->poseset->rot;
 
     SDF_VU0_LOADVECTOR_BARRIER(rotation);
     Normalize();
@@ -226,13 +226,13 @@ void dds3GetPosPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *offset)
     SDF_VU0_STOREVECTOR(&pose->pos);
 }
 
-void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation)
+void dds3AddRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot)
 {
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3PoseSet_t *pose = pBasic->poseset;
 
     pose->flag = (pose->flag | POSESET_FLAG_UPDATEPOSE) & ~POSESET_FLAG_UPDATETM;
     SDF_VU0_LOADVECTOR(&pose->rot);
-    SDF_VU0_LOADVECTOR_B(rotation);
+    SDF_VU0_LOADVECTOR_B(rot);
     Mult();
     SDF_VU0_STOREVECTOR(&pose->rot);
 }
@@ -313,16 +313,16 @@ s32 dds3ComparePosPoseSet2(dds3PoseSet_t *left, dds3PoseSet_t *right)
     return 0;
 }
 
-s32 dds3CallBasicMainProc(dds3Basic_t *basic)
+s32 dds3CallBasicMainProc(dds3Basic_t *pBasic)
 {
     dds3BasicFunction_t *function;
     s32 result;
 
     result = 1;
-    if (basic != NULL) {
-        function = basic->basicfunction;
+    if (pBasic != NULL) {
+        function = pBasic->basicfunction;
         if (function != NULL && function->mainprocuder != NULL) {
-            result = ((s32 (*)(dds3Basic_t *))function->mainprocuder)(basic);
+            result = ((s32 (*)(dds3Basic_t *))function->mainprocuder)(pBasic);
         }
     }
     return result;

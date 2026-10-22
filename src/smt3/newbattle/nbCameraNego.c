@@ -39,7 +39,7 @@ extern void effBTLModelGetSphereCenter(nbFormation_t *pFormation);
 
 extern s32 effBTLModelGetMarkPosition(nbFormation_t *pFormation, s32 mark);
 
-extern nbFormation_t *effBTLSkillGetTargetFormation(s32 index);
+extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
 
 extern s32 effBTLModelGetID(nbFormation_t *pFormation);
 

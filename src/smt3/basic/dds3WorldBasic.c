@@ -4,26 +4,26 @@
 
 extern dds3Basic_t *dds3TheWorld;
 
-void *sdfChipAllocDirect(u32 size);
-void *sdfMemAllocDirect(u32 size);
-void *sdfMemLock(sdfMemHandle_t *handle);
-void sdfMemFreeDirect(sdfMemHandle_t *handle);
-s32 dds3CallBasicMainProc(dds3Basic_t *basic);
+void *sdfChipAllocDirect(u32 aSize);
+void *sdfMemAllocDirect(u32 aSize);
+void *sdfMemLock(sdfMemHandle_t *aHandle);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+s32 dds3CallBasicMainProc(dds3Basic_t *pBasic);
 s32 dds3CallBasicDrawProc(dds3Basic_t *basic);
 void dds3DeleteScene(dds3Basic_t *scene);
 void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *handle);
-u32 dds3SetBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic);
-void sdfChipFreeDirect(void *ptr);
+u32 dds3SetBasicArray(dds3BasicArrayHandle_t *hndl, dds3Basic_t *data);
+void sdfChipFreeDirect(void *aPtr);
 dds3Basic_t *dds3AllocBasic(u32 type);
 void dds3DeleteBasic(dds3Basic_t *basic);
-u32 dds3AddBasicArray(dds3BasicArrayHandle_t *handle, s32 count);
+u32 dds3AddBasicArray(dds3BasicArrayHandle_t *hndl, s32 bufcnt);
 u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *handle);
-dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *handle);
+dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *hndl);
 u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *handle);
-u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *handle);
+u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 void dds3DeleteBasicArray(dds3BasicArrayHandle_t *handle);
 void dds3DeleteAllBasicArray(dds3BasicArrayHandle_t *handle);
-s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *handle, const dds3Basic_t *basic);
+s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *hArray, const dds3Basic_t *pBasic);
 
 s32 worldconstructor(dds3Basic_t *basic)
 {
@@ -91,7 +91,7 @@ s32 worlddrawprocuder(dds3Basic_t *basic)
     return 1;
 }
 
-dds3Basic_t *dds3AddWorld(s32 count)
+dds3Basic_t *dds3AddWorld(s32 bufcnt)
 {
     dds3Basic_t *world;
     dds3WorldBasic_t *work;
@@ -101,22 +101,22 @@ dds3Basic_t *dds3AddWorld(s32 count)
     if (dds3TheWorld != NULL) {
         return NULL;
     }
-    if ((u32)(count - 32) >= 0x7FE0) {
+    if ((u32)(bufcnt - 32) >= 0x7FE0) {
         return NULL;
     }
     world = dds3AllocBasic(BASIC_TYPE_WORLD);
     work = world->workdata;
-    handle = sdfMemAllocDirect(count * sizeof(dds3BasicArray_t));
+    handle = sdfMemAllocDirect(bufcnt * sizeof(dds3BasicArray_t));
     work->basicarray_hndl = handle;
     work->basicarray = sdfMemLock(handle);
-    work->basicarraycnt = count;
-    for (i = 0; i < count; i++) {
+    work->basicarraycnt = bufcnt;
+    for (i = 0; i < bufcnt; i++) {
         if (i == 0) {
             work->basicarray[i].prev = -1;
         } else {
             work->basicarray[i].prev = i - 1;
         }
-        if (i == count - 1) {
+        if (i == bufcnt - 1) {
             work->basicarray[i].next = -1;
         } else {
             work->basicarray[i].next = i + 1;
@@ -124,8 +124,8 @@ dds3Basic_t *dds3AddWorld(s32 count)
         work->basicarray[i].target = NULL;
     }
     work->firstempty = 0;
-    work->lastempty = count - 1;
-    work->emptycount = count;
+    work->lastempty = bufcnt - 1;
+    work->emptycount = bufcnt;
     dds3TheWorld = world;
     return world;
 }
@@ -224,7 +224,7 @@ void dds3DeleteScene(dds3Basic_t *scene)
     dds3DeleteBasic(scene);
 }
 
-dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count)
+dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt)
 {
     dds3WorldBasic_t *world;
     dds3BasicArrayHandle_t *handle;
@@ -233,7 +233,7 @@ dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count)
         return NULL;
     }
     world = (dds3WorldBasic_t *)dds3TheWorld->workdata;
-    if (world->emptycount < count) {
+    if (world->emptycount < bufcnt) {
         return NULL;
     }
     handle = sdfChipAllocDirect(sizeof(dds3BasicArrayHandle_t));
@@ -254,7 +254,7 @@ dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count)
         handle->prev = world->lastheader;
         world->lastheader = handle;
     }
-    dds3AddBasicArray(handle, count);
+    dds3AddBasicArray(handle, bufcnt);
     return handle;
 }
 
@@ -387,44 +387,44 @@ s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basi
 }
 
 /* The walk stops at the first empty slot, so a NULL basic never matches. */
-s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *handle, const dds3Basic_t *basic)
+s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *hArray, const dds3Basic_t *pBasic)
 {
     dds3Basic_t *target;
 
     do {
-        target = dds3GetBasicArray(handle);
+        target = dds3GetBasicArray(hArray);
         if (target == NULL) {
             return 0;
         }
-        if (basic == target) {
+        if (pBasic == target) {
             return 1;
         }
-    } while (dds3SetNextBasicArray(handle) != 0);
+    } while (dds3SetNextBasicArray(hArray) != 0);
     return 0;
 }
 
-u32 dds3AddBasicArray(dds3BasicArrayHandle_t *handle, s32 count)
+u32 dds3AddBasicArray(dds3BasicArrayHandle_t *hndl, s32 bufcnt)
 {
     dds3WorldBasic_t *world;
     s16 first;
     s16 last;
     s32 i;
 
-    if (count == 0) {
+    if (bufcnt == 0) {
         return 1;
     }
     if (dds3TheWorld == NULL) {
         return 0;
     }
     world = dds3TheWorld->workdata;
-    if (world->emptycount < count || count < 0) {
+    if (world->emptycount < bufcnt || bufcnt < 0) {
         return 0;
     }
-    if (handle == NULL) {
+    if (hndl == NULL) {
         return 0;
     }
     first = world->firstempty;
-    for (i = 0; i < count - 1; i++) {
+    for (i = 0; i < bufcnt - 1; i++) {
         world->firstempty = world->basicarray[world->firstempty].next;
     }
     last = world->firstempty;
@@ -435,17 +435,17 @@ u32 dds3AddBasicArray(dds3BasicArrayHandle_t *handle, s32 count)
         world->basicarray[last].next = -1;
         world->basicarray[world->firstempty].prev = -1;
     }
-    world->emptycount -= count;
-    if (handle->lastindex < 0) {
-        handle->lastindex = last;
-        handle->firstindex = first;
+    world->emptycount -= bufcnt;
+    if (hndl->lastindex < 0) {
+        hndl->lastindex = last;
+        hndl->firstindex = first;
     } else {
-        world->basicarray[handle->lastindex].next = first;
-        world->basicarray[first].prev = handle->lastindex;
-        handle->lastindex = last;
+        world->basicarray[hndl->lastindex].next = first;
+        world->basicarray[first].prev = hndl->lastindex;
+        hndl->lastindex = last;
     }
-    handle->nowindex = first;
-    handle->count += count;
+    hndl->nowindex = first;
+    hndl->count += bufcnt;
     return 1;
 }
 
@@ -460,27 +460,27 @@ u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *handle)
     return count;
 }
 
-u32 dds3SetBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic)
+u32 dds3SetBasicArray(dds3BasicArrayHandle_t *hndl, dds3Basic_t *data)
 {
-    if (handle->count == 0) {
+    if (hndl->count == 0) {
         return 0;
     }
-    if (handle->nowindex < 0) {
+    if (hndl->nowindex < 0) {
         return 0;
     }
-    ((dds3WorldBasic_t *)dds3TheWorld->workdata)->basicarray[handle->nowindex].target = basic;
+    ((dds3WorldBasic_t *)dds3TheWorld->workdata)->basicarray[hndl->nowindex].target = data;
     return 1;
 }
 
-dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *handle)
+dds3Basic_t *dds3GetBasicArray(const dds3BasicArrayHandle_t *hndl)
 {
-    if (handle->count == 0) {
+    if (hndl->count == 0) {
         return NULL;
     }
-    if (handle->nowindex < 0) {
+    if (hndl->nowindex < 0) {
         return NULL;
     }
-    return ((dds3WorldBasic_t *)dds3TheWorld->workdata)->basicarray[handle->nowindex].target;
+    return ((dds3WorldBasic_t *)dds3TheWorld->workdata)->basicarray[hndl->nowindex].target;
 }
 
 u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *handle)
@@ -489,14 +489,14 @@ u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *handle)
     return handle->firstindex >= 0;
 }
 
-u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *handle)
+u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl)
 {
-    if (handle->nowindex < 0) {
+    if (hndl->nowindex < 0) {
         return 0;
     }
-    handle->nowindex =
-        ((dds3WorldBasic_t *)dds3TheWorld->workdata)->basicarray[handle->nowindex].next;
-    return handle->nowindex >= 0;
+    hndl->nowindex =
+        ((dds3WorldBasic_t *)dds3TheWorld->workdata)->basicarray[hndl->nowindex].next;
+    return hndl->nowindex >= 0;
 }
 
 s32 dds3ForEachBasicArray(dds3BasicArrayHandle_t *handle, s32 (*func)(dds3Basic_t *))

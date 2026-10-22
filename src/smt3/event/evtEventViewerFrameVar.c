@@ -3,9 +3,9 @@
 
 extern char D_0053BC98[];
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 s32 FrameVarProcess(dds3ProcessID_t *id);
 

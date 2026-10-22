@@ -8,17 +8,17 @@ extern u8 dds3PadVibrationMode[2];
 
 extern s32 dds3PadVibrationTable[2];
 
-extern u32 dds3GetProcessRunTime(dds3ProcessID_t *process);
+extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 
-extern s32 dds3GetRandIntA(s32 stream, s32 limit);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern s32 dds3GetGlobalConfigFlag(u32 flag);
 
 extern void dds3GetVibrationLevel(void);
 
-extern void sdfPadSetAct0(s32 pad, u16 level);
+extern void sdfPadSetAct0(s32 pad, u16 value);
 
-extern void sdfPadSetAct1(s32 pad, u8 level);
+extern void sdfPadSetAct1(s32 pad, u8 value);
 
 extern void sdfPadSetAct(s32 pad, s32 small, s32 large);
 

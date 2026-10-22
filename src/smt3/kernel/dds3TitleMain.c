@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 typedef struct
 {
@@ -67,7 +67,7 @@ typedef struct
 
 extern mselGlobalWork_t *gGlobal;
 
-extern void frDestroyFontRequestAfter(void *frq);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
@@ -92,9 +92,9 @@ s32 msel_2286A0(void)
     return 0;
 }
 
-extern void *frwGetSmallFontFRQ(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d);
+extern void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, s32 pStr, s32 pFRQ);
 
-extern void frDrawFontEx(void *frq, s32 mode);
+extern void frDrawFontEx(void *pFRQ, s32 Mode);
 
 void mselDrawMenuText(s32 x, s32 y, s32 text, s32 arg)
 {
@@ -104,7 +104,7 @@ void mselDrawMenuText(s32 x, s32 y, s32 text, s32 arg)
     frDestroyFontRequestAfter(frq);
 }
 
-extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 a, s32 b, s32 c, s32 d);
+extern void *frwGetSmallNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, s32 pStr, s32 pFRQ);
 
 void mselDrawSaveNum(s32 x, s32 y, s32 text, s32 arg)
 {

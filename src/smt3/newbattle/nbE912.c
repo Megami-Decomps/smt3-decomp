@@ -307,21 +307,21 @@ typedef struct nbEventProcessData_t {
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern s32 nbCheckLoadGroup(s32 group);
+extern s32 nbCheckLoadGroup(s32 side);
 
 extern void nbDelAllKoukaPacketType(s32 type);
 
-extern void MoveSub(nbEventProcessData_t *e);
+extern void MoveSub(nbEventProcessData_t *ed);
 
 extern char D_00546898[];
 
 extern char D_005468B0[];
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern void nbSingleFormExceptedDispOff(nbFormation_t *form);
 
@@ -375,11 +375,11 @@ nbFormation_t *nbGetEventForm();
 
 INCLUDE_ASM(const s32, "newbattle/nbE912", MoveSub);
 
-s32 Move1(nbEventProcessData_t *e)
+s32 Move1(nbEventProcessData_t *ed)
 {
-    MoveSub(e);
-    if (e->frame == 0x55 && nbCheckLoadGroup(1) == 0) {
-        nbFreeEffectSlot(e);
+    MoveSub(ed);
+    if (ed->frame == 0x55 && nbCheckLoadGroup(1) == 0) {
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }

@@ -254,21 +254,21 @@ typedef struct nbNegoProcessData_t
     s32 selectcur;
 } nbNegoProcessData_t;
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern dds3ProcessID_t *dds3SearchProcessName(const char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern void p2sdPlayBGM(s32 no);
 
@@ -320,7 +320,7 @@ typedef struct {
 
 extern void nbFreeEventEntry(nbMainProcessData_t *data);
 
-extern s32 evtGetEventPackStat(s32 rid);
+extern s32 evtGetEventPackStat(s32 eventno);
 
 extern s32 nbMakaProcess1(dds3ProcessID_t *id);
 
@@ -328,9 +328,9 @@ extern void nbMakaShutdown(dds3ProcessID_t *id);
 
 extern nbMakaWork_t *nbAllocMakaWork(void);
 
-extern s32 p2sdLoadCheckMidi(s32 no);
+extern s32 p2sdLoadCheckMidi(s32 MidiNo);
 
-extern void p2sdLoadSMGFile(s32 no);
+extern void p2sdLoadSMGFile(s32 MidiNo);
 
 extern void nbMakaStep(nbMakaWork_t *w);
 
@@ -338,7 +338,7 @@ extern void nbDrawMakaNum(nbMakaWork_t *w, s32 x, s32 y, u32 col, s32 n);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern void nbMakaDispOn(s32 no);
+extern void nbMakaDispOn(s32 type);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -348,7 +348,7 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern dds3ProcessID_t *evtLoadEventPack(s32 rid);
+extern dds3ProcessID_t *evtLoadEventPack(s32 eventno);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
@@ -395,17 +395,17 @@ nbMakaWork_t *GetMakaProcessData()
     return dds3GetProcessData(id);
 }
 
-void nbMakaDispOn(s32 no)
+void nbMakaDispOn(s32 type)
 {
     nbMakaWork_t *w;
 
     w = GetMakaProcessData();
-    if (no == 0) {
+    if (type == 0) {
         w->unk_0C = 0x112;
         w->unk_10 = 0x10D;
     }
     w->maka = DDS3_GBWK->maka;
-    w->unk_1C = no;
+    w->unk_1C = type;
     w->unk_00 = 1;
 }
 

@@ -258,15 +258,15 @@ extern s32 printf(const char *format, ...);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern s32 nbGetSelectBit(nbMainProcessData_t *data);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern char D_00545CE0[];
 
@@ -290,9 +290,9 @@ typedef struct nbEventProcessData_t {
     void *unk_24;
 } nbEventProcessData_t;
 
-extern void nbSetJyokyoMes(nbActionProcessData_t *a, s32 mes, s32 type, s32 id);
+extern void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 var_id, s32 var_ind);
 
-extern void nbLoadUnitGroup(s32 a, s32 b, s32 c);
+extern void nbLoadUnitGroup(s32 side, s32 stop, s32 anime);
 
 extern s32 nbFindBadCurseTarget(nbActionProcessData_t *a, s32 step);
 
@@ -321,7 +321,7 @@ extern void nbEncShutdown(dds3ProcessID_t *id);
 
 extern char D_00551550[];
 
-extern s32 nbCheckLoadGroup(s32 group);
+extern s32 nbCheckLoadGroup(s32 side);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 

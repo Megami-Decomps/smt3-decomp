@@ -82,7 +82,7 @@ typedef struct
     /* 0x2314 */ u32 evoBgFade;
 } rstWork_t;
 
-extern void rstSetMaxHpMp(s32 mode, s32 arg);
+extern void rstSetMaxHpMp(s32 Mode, s32 pStock);
 
 extern void func_00224230(datUnitWork_t *unit);
 
@@ -126,17 +126,17 @@ s8 rstFindSkillSlot(u16 skill, cmbUnit_t *unit);
 
 extern char *text2[];
 
-void fclSetMessageVar_20743088(s8 index, s32 value);
+void fclSetMessageVar_20743088(s8 Index, s32 pStr);
 
-s32 fclStartMessage(s32 id);
+s32 fclStartMessage(s32 MsgNo);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
 void rstChkResult2Process(u8 *work);
 
-void rstOverWriteSkill(u16 *slot, u16 skill)
+void rstOverWriteSkill(u16 *pSkill, u16 NewSkillID)
 {
-    *slot = skill;
+    *pSkill = NewSkillID;
     rstSetMaxHpMp(1, startPos->unk_16C);
 }
 
@@ -284,15 +284,15 @@ extern s32 datExplainTable[];
 
 extern datMasterText_t master_text[];
 
-void rstStartIntroduce(u16 devilId)
+void rstStartIntroduce(u16 DevilID)
 {
-    fclSetMessageVar_20743088(0, (s32)text2[devilId]);
-    fclSetMessageVar_20743088(4, datExplainTable[datDevilTable[devilId].race]);
-    if (devilId == 0xCF) {
+    fclSetMessageVar_20743088(0, (s32)text2[DevilID]);
+    fclSetMessageVar_20743088(4, datExplainTable[datDevilTable[DevilID].race]);
+    if (DevilID == 0xCF) {
         fclStartMessage(0xC6);
         return;
     }
-    fclStartMessage(master_text[devilId].mesno + 0xA8);
+    fclStartMessage(master_text[DevilID].mesno + 0xA8);
 }
 
 void rstUpdateEvoBgFade(void)

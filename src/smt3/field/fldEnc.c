@@ -17,10 +17,10 @@
 
 typedef struct frFontGlyph_t frFontGlyph_t;
 
-struct frFontGlyph_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 depth,
-    u32 colors, const u8 *text, struct frFontGlyph_t *parent);
+struct frFontGlyph_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri,
+    u32 Color, const u8 *pStr, struct frFontGlyph_t *pFRQ);
 
-f32 sdfAtan2(f32 y, f32 x);
+f32 sdfAtan2(f32 aY, f32 aX);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
@@ -34,19 +34,19 @@ extern char D_0054EC80[];
 
 extern void dds3EffectPartialMultiBlurDelete(void *p);
 
-extern s32 encDrawProc(dds3ProcessID_t *id);
+extern s32 encDrawProc(dds3ProcessID_t *aProcId);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 flag, dds3ProcessFunc_t func, void *arg,
-                                         void *parent);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit, void *deleteExit,
+                                         void *p);
 
 extern s32 gencOn;
 
 extern s32 gencMode;
 
-extern void rsetOtOfs(s32 ofs);
+extern void rsetOtOfs(s32 otofs);
 
-void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 gsWord0, u32 gsWord1, u32 gsWord2, u32 gsWord3);
+void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
 
 void fldDrawBokasi(void);
 
@@ -56,17 +56,17 @@ s32 nbGetEncountOn(void);
 
 void rsetAlpha(s32 mode);
 
-void rsetTest(s32 bit0, s32 bit1, s32 bit4, s32 bit12, s32 bit14, s32 bit15, s32 unused, s32 bit17);
+void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 
 extern effBlurTemplateBody_t D_0055DAD8;
 
-extern void dds3EffectPartialMultiBlurSetParam(void *blur, effBlurTemplateBody_t *body);
+extern void dds3EffectPartialMultiBlurSetParam(void *hPartialMultiBlur, effBlurTemplateBody_t *pParam);
 
 extern void dds3EffectPartialMultiBlurDraw(void *blur);
 
 extern void encFreeBlur(void);
 
-s32 encDrawProc(dds3ProcessID_t *id) {
+s32 encDrawProc(dds3ProcessID_t *aProcId) {
     if (gencOn == 0) {
         return 0;
     }
@@ -121,9 +121,9 @@ void encFreeBlur(void)
 
 extern effBlurTemplateBody_t D_0055DAD8;
 
-extern effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *body);
+extern effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t *pParam);
 
-extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 flag);
+extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
 void encStart(void) {
     if (nbGetEncountOn() != 0) {

@@ -8,7 +8,7 @@ struct pipeTextureFile_t;
 
 extern void (*D_00551828)(void);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
 typedef struct tagPipeTexture {
     sdfTexHandle_t *th;
@@ -25,9 +25,9 @@ typedef struct tagMakaObject_t {
     void *makaObject;
 } tagMakaObject_t;
 
-extern void eglLinkSprite(s32 x, s32 y, s32 width, s32 height, s32 u, s32 v,
-                          s32 textureWidth, s32 textureHeight, u32 color0, u32 color1,
-                          u32 color2, u32 color3, sdfTexHandle_t *texture);
+extern void eglLinkSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v,
+                          s32 uw, s32 vh, u32 rgba0, u32 rgba1,
+                          u32 rgba2, u32 rgba3, sdfTexHandle_t *th);
 
 extern void makaInit(void);
 

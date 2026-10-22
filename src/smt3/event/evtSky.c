@@ -17,27 +17,27 @@ extern s32 fldbokasi;
 
 extern s16 fldSkyGetAlphaOfs(void);
 
-extern void fldSkySetAlphaOfs(s32 alpha);
+extern void fldSkySetAlphaOfs(s32 alp);
 
-extern void fldSkySetAlpha(s32 alpha);
+extern void fldSkySetAlpha(s32 alp);
 
 extern void fldSetFilterAnime(s32 anime);
 
-extern void fldSkySetFilter(s32 r, s32 g, s32 b);
+extern void fldSkySetFilter(s32 idx, s32 mode, s32 hokan);
 
 extern void fldSkyDrawFilter(void);
 
 extern void fldDrawFrameSprite(void);
 
-extern void rsetOtOfs(s32 ofs);
+extern void rsetOtOfs(s32 otofs);
 
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 void evtUpdateSkyAlpha(void);
 
@@ -45,24 +45,24 @@ s32 evtSkyProcess1(dds3ProcessID_t *id);
 
 void evtSkyShutdown(dds3ProcessID_t *id);
 
-void evtSetBokasi(s32 bokasi)
+void evtSetBokasi(s32 sw)
 {
-    fldbokasi = bokasi;
+    fldbokasi = sw;
 }
 
-void evtSetSkyAlpha(s32 time, s32 alpha)
+void evtSetSkyAlpha(s32 frame, s32 a)
 {
     s16 current;
 
     current = fldSkyGetAlphaOfs();
-    if (current != alpha) {
-        if (time == 0) {
-            fldSkySetAlphaOfs(alpha);
+    if (current != a) {
+        if (frame == 0) {
+            fldSkySetAlphaOfs(a);
             skyanime = 0;
         } else {
-            skyamax = time;
+            skyamax = frame;
             skyatarget = current;
-            skyabase_par = alpha;
+            skyabase_par = a;
             skyanime = 1;
             skyanow = 0;
         }

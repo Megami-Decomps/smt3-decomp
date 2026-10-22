@@ -56,7 +56,7 @@ extern s32 SignalSema(s32 sema);
 extern s32 DeleteSema(s32 sema);
 extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
                          void *recv, s32 rsize, void *endfunc, void *endpara);
-extern s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flag);
+extern s32 sceMcOpen(s32 a, s32 b, char *c, s32 d);
 extern s32 sceSifCheckStatRpc(void *cd);
 extern void mcDelayThread(s32 ticks);
 extern char *strncpy(char *dst, const char *src, u32 n);
@@ -126,7 +126,7 @@ s32 sceMcGetSlotMax(s32 port)
     return D_0059AD00;
 }
 
-s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flag)
+s32 sceMcOpen(s32 a, s32 b, char *c, s32 d)
 {
     s32 ret;
 
@@ -137,14 +137,14 @@ s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flag)
         SignalSema(D_0052BB24);
         return -100;
     }
-    if (name == NULL || *name == 0) {
+    if (c == NULL || *c == 0) {
         SignalSema(D_0052BB24);
         return -210;
     }
-    strncpy(D_005997F0.name, name, 0x3FF);
-    D_005997F0.port = port;
-    D_005997F0.flag = flag;
-    D_005997F0.slot = slot;
+    strncpy(D_005997F0.name, c, 0x3FF);
+    D_005997F0.port = a;
+    D_005997F0.flag = d;
+    D_005997F0.slot = b;
     D_005997F0.name[0x3FF] = 0;
     ret = sceSifCallRpc(&D_00599740, 2, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
     if (ret == 0) {
@@ -155,9 +155,9 @@ s32 sceMcOpen(s32 port, s32 slot, char *name, s32 flag)
     return ret;
 }
 
-s32 sceMcMkdir(s32 port, s32 slot, char *name)
+s32 sceMcMkdir(s32 a, s32 b, char *c)
 {
-    s32 ret = sceMcOpen(port, slot, name, 0x40);
+    s32 ret = sceMcOpen(a, b, c, 0x40);
 
     if (ret == 0) {
         D_0052BB20 = 11;
@@ -165,7 +165,7 @@ s32 sceMcMkdir(s32 port, s32 slot, char *name)
     return ret;
 }
 
-s32 sceMcClose(s32 fd)
+s32 sceMcClose(s32 a)
 {
     s32 ret;
 
@@ -176,7 +176,7 @@ s32 sceMcClose(s32 fd)
         SignalSema(D_0052BB24);
         return -100;
     }
-    D_005997C0.w[0] = fd;
+    D_005997C0.w[0] = a;
     ret = sceSifCallRpc(&D_00599740, 3, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
     if (ret == 0) {
         D_0052BB20 = 3;
@@ -211,7 +211,7 @@ s32 sceMcSeek(s32 fd, s32 offset, s32 origin)
 
 INCLUDE_ASM(const s32, "sdk/libmc", mceIntrReadFixAlign);
 
-s32 sceMcRead(s32 fd, void *buf, s32 size)
+s32 sceMcRead(s32 a, void *b, s32 c)
 {
     s32 ret;
 
@@ -222,11 +222,11 @@ s32 sceMcRead(s32 fd, void *buf, s32 size)
         SignalSema(D_0052BB24);
         return -100;
     }
-    D_005997C0.w[0] = fd;
+    D_005997C0.w[0] = a;
     D_005997C0.w[7] = (s32)D_00599C40;
-    D_005997C0.w[6] = (s32)buf;
-    D_005997C0.w[3] = size;
-    sceSifWriteBackDCache(buf, size);
+    D_005997C0.w[6] = (s32)b;
+    D_005997C0.w[3] = c;
+    sceSifWriteBackDCache(b, c);
     sceSifWriteBackDCache(D_00599C40, 0xC0);
     ret = sceSifCallRpc(&D_00599740, 5, 1, &D_005997C0, 48, &D_0059AD00, 4,
                         mceIntrReadFixAlign, D_00599C40);
@@ -242,7 +242,7 @@ s32 sceMcRead(s32 fd, void *buf, s32 size)
  * two size branches and the saved-register pair holding the descriptor are
  * the only differences left. */
 #ifdef NON_MATCHING
-s32 sceMcWrite(s32 fd, void *buf, s32 size)
+s32 sceMcWrite(s32 a, void *b, s32 c)
 {
     s32 ret;
     u32 i;
@@ -254,24 +254,24 @@ s32 sceMcWrite(s32 fd, void *buf, s32 size)
         SignalSema(D_0052BB24);
         return -100;
     }
-    D_005997C0.w[0] = fd;
-    if (size < 17) {
-        D_005997C0.w[5] = size;
+    D_005997C0.w[0] = a;
+    if (c < 17) {
+        D_005997C0.w[5] = c;
         D_005997C0.w[6] = 0;
         D_005997C0.w[3] = 0;
     } else {
         /* The IOP side wants the bulk transfer 16-byte aligned, so the leading
          * bytes up to the next boundary travel inside the request itself. */
-        u32 top = ((u32)buf - 1) & ~15;
-        u32 bot = (u32)buf - 16;
+        u32 top = ((u32)b - 1) & ~15;
+        u32 bot = (u32)b - 16;
         s32 head = top - bot;
 
-        D_005997C0.w[6] = (s32)buf + head;
-        D_005997C0.w[3] = size - head;
+        D_005997C0.w[6] = (s32)b + head;
+        D_005997C0.w[3] = c - head;
         D_005997C0.w[5] = head;
     }
     for (i = 0; i < D_005997C0.w[5]; i++) {
-        D_005997C0.data[i] = ((u8 *)buf)[i];
+        D_005997C0.data[i] = ((u8 *)b)[i];
     }
     FlushCache(0);
     ret = sceSifCallRpc(&D_00599740, 6, 1, &D_005997C0, 48, &D_0059AD00, 4, 0, 0);
@@ -293,7 +293,7 @@ INCLUDE_ASM(const s32, "sdk/libmc", mcDelayThread);
 /* NON_MATCHING: 224 bytes, retail's size, with the loop's done = 0 landing in
  * the branch delay slot where retail keeps a nop. */
 #ifdef NON_MATCHING
-s32 sceMcSync(s32 mode, s32 *cmd, s32 *result)
+s32 sceMcSync(s32 a, s32 *b, s32 *c)
 {
     s32 done;
     s32 ok;
@@ -302,7 +302,7 @@ s32 sceMcSync(s32 mode, s32 *cmd, s32 *result)
         return -1;
     }
     done = sceSifCheckStatRpc(&D_00599740);
-    if (mode == 0 && done != 0) {
+    if (a == 0 && done != 0) {
         while (1) {
             done = 0;
             if (sceSifCheckStatRpc(&D_00599740) == 0) {
@@ -312,13 +312,13 @@ s32 sceMcSync(s32 mode, s32 *cmd, s32 *result)
         }
     }
     ok = done == 0;
-    if (cmd != NULL) {
-        *cmd = D_0052BB20;
+    if (b != NULL) {
+        *b = D_0052BB20;
     }
     if (ok) {
         D_0052BB20 = 0;
-        if (result != NULL) {
-            *result = D_0059AD00;
+        if (c != NULL) {
+            *c = D_0059AD00;
         }
         SignalSema(D_0052BB24);
     }
@@ -330,7 +330,7 @@ INCLUDE_ASM(const s32, "sdk/libmc", sceMcSync);
 
 INCLUDE_ASM(const s32, "sdk/libmc", mceGetInfoApdx);
 
-s32 sceMcGetInfo(s32 port, s32 slot, s32 *type, s32 *free, s32 *format)
+s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e)
 {
     s32 ret;
 
@@ -341,27 +341,27 @@ s32 sceMcGetInfo(s32 port, s32 slot, s32 *type, s32 *free, s32 *format)
         SignalSema(D_0052BB24);
         return -100;
     }
-    D_005997C0.w[1] = port;
-    D_005997C0.w[2] = slot;
+    D_005997C0.w[1] = a;
+    D_005997C0.w[2] = b;
     D_005997C0.w[7] = (s32)D_00599C40;
-    if (type != NULL) {
+    if (c != NULL) {
         D_005997C0.w[5] = 1;
     } else {
         D_005997C0.w[5] = 0;
     }
-    if (free != NULL) {
+    if (d != NULL) {
         D_005997C0.w[4] = 1;
     } else {
         D_005997C0.w[4] = 0;
     }
-    if (format != NULL) {
+    if (e != NULL) {
         D_005997C0.w[3] = 1;
     } else {
         D_005997C0.w[3] = 0;
     }
-    D_00599768 = (s32)type;
-    D_0059976C = (s32)free;
-    D_00599770 = (s32)format;
+    D_00599768 = (s32)c;
+    D_0059976C = (s32)d;
+    D_00599770 = (s32)e;
     sceSifWriteBackDCache(D_00599C40, 0xC0);
     ret = sceSifCallRpc(&D_00599740, 1, 1, &D_005997C0, 48, &D_0059AD00, 4,
                         mceGetInfoApdx, D_00599C40);
@@ -382,7 +382,7 @@ s32 sceMcUdCheckNewCard(void)
     return D_0059AD00;
 }
 
-s32 sceMcGetDir(s32 port, s32 slot, char *name, s32 mode, s32 maxent, void *table)
+s32 sceMcGetDir(s32 a, s32 b, char *c, s32 d, s32 e, void *f)
 {
     s32 ret;
 
@@ -393,19 +393,19 @@ s32 sceMcGetDir(s32 port, s32 slot, char *name, s32 mode, s32 maxent, void *tabl
         SignalSema(D_0052BB24);
         return -100;
     }
-    if (name == NULL || *name == 0) {
+    if (c == NULL || *c == 0) {
         SignalSema(D_0052BB24);
         return -210;
     }
-    D_005997F0.port = port;
-    D_005997F0.slot = slot;
-    D_005997F0.flag = mode;
-    D_005997F0.maxent = maxent;
-    D_005997F0.pwd = table;
-    strncpy(D_005997F0.name, name, 0x3FF);
+    D_005997F0.port = a;
+    D_005997F0.slot = b;
+    D_005997F0.flag = d;
+    D_005997F0.maxent = e;
+    D_005997F0.pwd = f;
+    strncpy(D_005997F0.name, c, 0x3FF);
     D_005997F0.name[0x3FF] = 0;
-    if (maxent >= 0) {
-        sceSifWriteBackDCache(table, maxent << 6);
+    if (e >= 0) {
+        sceSifWriteBackDCache(f, e << 6);
     }
     ret = sceSifCallRpc(&D_00599740, 13, 1, &D_005997F0, 0x414, &D_0059AD00, 4, 0, 0);
     if (ret == 0) {
@@ -418,7 +418,7 @@ s32 sceMcGetDir(s32 port, s32 slot, char *name, s32 mode, s32 maxent, void *tabl
 
 INCLUDE_ASM(const s32, "sdk/libmc", mceStorePwd);
 
-s32 sceMcChdir(s32 port, s32 slot, char *name, char *pwd)
+s32 sceMcChdir(s32 a, s32 b, char *c, char *d)
 {
     s32 ret;
 
@@ -429,18 +429,18 @@ s32 sceMcChdir(s32 port, s32 slot, char *name, char *pwd)
         SignalSema(D_0052BB24);
         return -100;
     }
-    if (name == NULL || *name == 0) {
+    if (c == NULL || *c == 0) {
         SignalSema(D_0052BB24);
         return -210;
     }
-    D_005997F0.port = port;
+    D_005997F0.port = a;
     D_005997F0.pwd = D_00599D00;
-    D_005997F0.slot = slot;
-    strncpy(D_005997F0.name, name, 0x3FF);
+    D_005997F0.slot = b;
+    strncpy(D_005997F0.name, c, 0x3FF);
     D_005997F0.name[0x3FF] = 0;
     sceSifWriteBackDCache(D_00599D00, 0x400);
     ret = sceSifCallRpc(&D_00599740, 12, 1, &D_005997F0, 0x414, &D_0059AD00, 4,
-                        mceStorePwd, pwd);
+                        mceStorePwd, d);
     if (ret == 0) {
         D_0052BB20 = 12;
     } else {

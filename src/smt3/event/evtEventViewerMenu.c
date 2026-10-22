@@ -85,7 +85,7 @@ typedef struct {
 } evtViewer_t;
 extern evtViewer_t *viewerinfo;
 extern s32 (*D_0032CB48[])(s32, s32);
-void evtFrameListItemSub(void *list, s32 x, s32 y, s32 color, evtViewerKey_t *key);
+void evtFrameListItemSub(void *tag, s32 ox, s32 oy, s32 co, evtViewerKey_t *f);
 extern s32 mfilterRun(void);
 extern s32 evtViewerCheckDirty(void);
 
@@ -100,11 +100,11 @@ extern u16 D_0054F824;
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern s32 sdfDevPrintf(s32 x, s32 y, u32 color, s32 flag, const char *format, ...);
+extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
 
-extern s32 sceWrite(s32 fd, const void *buffer, s32 size);
+extern s32 sceWrite(s32 a, const void *b, s32 c);
 
-extern void sdfDrawTagLink(void *list, u32 tag);
+extern void sdfDrawTagLink(void *aTag, u32 aPacket);
 
 extern void *D_002F6978[];
 
@@ -123,8 +123,8 @@ extern char D_0054F9A8[];
 typedef s32 (*evtMenuHead_t)(void *list, s32 x, s32 y);
 typedef void (*evtMenuItem_t)(void *list, s32 x, s32 y, s32 index);
 
-void evtMenuDisp(void *list, s32 column, s32 row, s32 colCount, s32 rowCount,
-                 s32 scroll, s32 total, void *head, void *item);
+void evtMenuDisp(void *tag, s32 x, s32 y, s32 sx, s32 sy,
+                 s32 baseitem, s32 maxitem, void *head, void *item);
 
 extern char D_0054F9C0[];
 
@@ -136,7 +136,7 @@ extern s8 dds3PadButtonState[];
 
 extern void evtViewerStopFrame(void);
 
-extern void evtRunFrame(s32 frame);
+extern void evtRunFrame(s32 nowframe);
 
 extern char D_0054F9D0[];
 
@@ -162,8 +162,8 @@ extern char *frameheadstr[];
 
 extern s8 framelist_xcnt[];
 
-s32 evtFrameListHead(void *list, s32 x, s32 y);
-s32 evtFrameListItem(void *list, s32 x, s32 y, s32 index);
+s32 evtFrameListHead(void *tag, s32 ox, s32 oy);
+s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no);
 
 extern s32 func_001AD6E8(void);
 
@@ -183,11 +183,11 @@ extern void evtUnRegistUnit(void);
 
 extern void evtInitViewerInfo(void);
 
-extern void evtFreePolygonMovieWorkData(void *work);
+extern void evtFreePolygonMovieWorkData(void *wdata);
 
-extern void *evtGetPolygonMovieWorkData2(s32 major, s32 minor, s32 kind);
+extern void *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 type);
 
-extern void evtMakeMotionName(void *work);
+extern void evtMakeMotionName(void *pWork);
 
 extern s32 evtGetViewerObjectTypeCount(s32 type);
 
@@ -201,9 +201,9 @@ extern s32 printf(const char *fmt, ...);
 
 extern s32 sceOpen();
 
-extern s32 sceClose(s32 fd);
+extern s32 sceClose(s32 a);
 
-extern s32 sceSync(const char *device, s32 flag);
+extern s32 sceSync(const char *a, s32 b);
 
 
 
@@ -215,56 +215,56 @@ extern char D_0054FAA0[];
 
 extern char D_0054FAA8[];
 
-void evtBasicListItem(void *list, s32 x, s32 y, s32 index);
+void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no);
 
-void evtEventPosItem(void *list, s32 x, s32 y, s32 index);
-s32 evtFileName2Head(void *list, s32 x, s32 y);
-void evtFileName2Item(void *list, s32 x, s32 y, u32 index);
-s32 evtFileNameHead(void *list, s32 x, s32 y);
-void evtFileNameItem(void *list, s32 x, s32 y, s32 row);
+void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no);
+s32 evtFileName2Head(void *tag, s32 ox, s32 oy);
+void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no);
+s32 evtFileNameHead(void *tag, s32 ox, s32 oy);
+void evtFileNameItem(void *tag, s32 ox, s32 oy, s32 no);
 
-extern void dds3ConsPanelTagLink(void *list, s32 column, s32 row, s32 columnCount, s32 rowCount);
+extern void dds3ConsPanelTagLink(void *tag, s32 x, s32 y, s32 sx, s32 sy);
 
-void evtObjectListSub(void *list, evtViewerGroup_t *group, s32 x, s32 y);
-void evtObjectListItem(void *list, s32 x, s32 y, s32 index);
+void evtObjectListSub(void *tag, evtViewerGroup_t *obj, s32 ox, s32 oy);
+void evtObjectListItem(void *tag, s32 ox, s32 oy, s32 no);
 
-s32 evtSelectHead(void *list, s32 x, s32 y);
-void evtSelectItem(void *list, s32 x, s32 y, s32 index);
-void evtMainMenuItem(void *list, s32 x, s32 y, s32 index);
+s32 evtSelectHead(void *tag, s32 ox, s32 oy);
+void evtSelectItem(void *tag, s32 ox, s32 oy, s32 no);
+void evtMainMenuItem(void *tag, s32 ox, s32 oy, s32 no);
 
 /* NON_MATCHING: 49 of 112 words differ (first at +0x34). */
 #ifdef NON_MATCHING
-void evtMenuDisp(void *list, s32 column, s32 row, s32 colCount, s32 rowCount,
-                 s32 scroll, s32 total, void *head, void *item)
+void evtMenuDisp(void *tag, s32 x, s32 y, s32 sx, s32 sy,
+                 s32 baseitem, s32 maxitem, void *head, void *item)
 {
     s32 used = 0;
     s32 px;
     s32 py;
     s32 index;
 
-    dds3ConsPanelTagLink(list, column, row, colCount, rowCount);
-    px = column * 16 + 0x7000;
-    py = row * 8 + 0x7900;
+    dds3ConsPanelTagLink(tag, x, y, sx, sy);
+    px = x * 16 + 0x7000;
+    py = y * 8 + 0x7900;
     if (head != NULL) {
-        used = ((evtMenuHead_t)head)(list, px, py);
+        used = ((evtMenuHead_t)head)(tag, px, py);
         py += used * 0x60;
     }
-    for (index = scroll; used < rowCount; used++) {
+    for (index = baseitem; used < sy; used++) {
         if (item != NULL) {
-            ((evtMenuItem_t)item)(list, px, py, index);
+            ((evtMenuItem_t)item)(tag, px, py, index);
             py += 0x60;
             index++;
         }
     }
     if (evtMenuDisp_cnt & 0x10) {
-        px = (column + colCount * 5) * 16 + 0x7060;
-        py = row * 8 + 0x78B0;
-        if (scroll > 0) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(px, py, 0xFEFFFF, 6, D_0054F9A0));
+        px = (x + sx * 5) * 16 + 0x7060;
+        py = y * 8 + 0x78B0;
+        if (baseitem > 0) {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(px, py, 0xFEFFFF, 6, D_0054F9A0));
         }
-        py = (row + rowCount * 12) * 8 + 0x78F0;
-        if (index < total) {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(px, py, 0xFEFFFF, 6, D_0054F9A8));
+        py = (y + sy * 12) * 8 + 0x78F0;
+        if (index < maxitem) {
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(px, py, 0xFEFFFF, 6, D_0054F9A8));
         }
     }
     evtMenuDisp_cnt++;
@@ -273,32 +273,32 @@ void evtMenuDisp(void *list, s32 column, s32 row, s32 colCount, s32 rowCount,
 INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtMenuDisp);
 #endif
 
-s32 evtFloatChangeHead(void *list, s32 x, s32 y)
+s32 evtFloatChangeHead(void *tag, s32 ox, s32 oy)
 {
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
-void evtFloatChangeItem(void *list, s32 x, s32 y, u32 index)
+void evtFloatChangeItem(void *tag, s32 ox, s32 oy, u32 no)
 {
-    switch (index) {
+    switch (no) {
     case 0:
         /* The f64 cast is the fptodp libcall, and that libcall is what keeps
          * the format string in a call-saved register across it. */
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, "     %.1f",
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 4, "     %.1f",
                                                (f64)viewerinfo->floatValue));
         return;
     case 2:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " L,R = VALUE-+0.1"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " L,R = VALUE-+0.1"));
         return;
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = VALUE-+1.0"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " U,D = VALUE-+1.0"));
         return;
     case 4:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RR  = ENTER"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RR  = ENTER"));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RD  = CANCEL"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RD  = CANCEL"));
         break;
     }
 }
@@ -339,29 +339,29 @@ s32 evtFloatChangeMenu(s32 x, s32 y)
     return 0;
 }
 
-s32 evtIntChangeHead(void *list, s32 x, s32 y)
+s32 evtIntChangeHead(void *tag, s32 ox, s32 oy)
 {
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "VALUE CHANGE."));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, "VALUE CHANGE."));
     return 2;
 }
 
-void evtIntChangeItem(void *list, s32 x, s32 y, u32 index)
+void evtIntChangeItem(void *tag, s32 ox, s32 oy, u32 no)
 {
-    switch (index) {
+    switch (no) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_0054F9B0, viewerinfo->value));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 4, D_0054F9B0, viewerinfo->value));
         return;
     case 2:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " L,R = VALUE-+"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " L,R = VALUE-+"));
         return;
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = VALUE-+10"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " U,D = VALUE-+10"));
         return;
     case 4:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RR  = ENTER"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RR  = ENTER"));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RD  = CANCEL"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RD  = CANCEL"));
         break;
     }
 }
@@ -403,35 +403,35 @@ s32 evtIntChangeMenu(s32 x, s32 y)
     return 0;
 }
 
-s32 evtFrameChangeHead(void *list, s32 x, s32 y)
+s32 evtFrameChangeHead(void *tag, s32 ox, s32 oy)
 {
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, "FRAME CHANGE."));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, "FRAME CHANGE."));
     return 2;
 }
 
-void evtFrameChangeItem(void *list, s32 x, s32 y, u32 index)
+void evtFrameChangeItem(void *tag, s32 ox, s32 oy, u32 no)
 {
-    switch (index) {
+    switch (no) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 4, D_0054F9B0, viewerinfo->value));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 4, D_0054F9B0, viewerinfo->value));
         return;
     case 2:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " L,R = FRMAE-+"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " L,R = FRMAE-+"));
         return;
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " U,D = FRAME-+10"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " U,D = FRAME-+10"));
         return;
     case 4:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RR  = ENTER"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RR  = ENTER"));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RD  = CANCEL"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RD  = CANCEL"));
         return;
     case 6:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " RL  = NOW FRAME"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " RL  = NOW FRAME"));
         return;
     case 7:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, " ST  = CAMERA FOCUS"));
         break;
     case 8:
         break;
@@ -485,7 +485,7 @@ s32 evtFrameChangeMenu(s32 x, s32 y)
     return 0;
 }
 
-void evtMainMenuItem(void *list, s32 x, s32 y, s32 index)
+void evtMainMenuItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     char names[7][30] = {
         "SAVE PROJ    >>",
@@ -498,13 +498,13 @@ void evtMainMenuItem(void *list, s32 x, s32 y, s32 index)
     };
     s32 color;
 
-    if (index < 7) {
-        if (viewerinfo->mainCursor == index) {
+    if (no < 7) {
+        if (viewerinfo->mainCursor == no) {
             color = viewerinfo->actionMode == 1 ? 4 : 5;
         } else {
             color = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0054F9B8, names[index]));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054F9B8, names[no]));
     }
 }
 
@@ -520,28 +520,28 @@ s32 evtMainMenu(s32 x, s32 y)
     return dds3SelectMenu(0, 1, 7, 1, 7, NULL, NULL, NULL, &viewerinfo->mainCursor);
 }
 
-s32 evtSelectHead(void *list, s32 x, s32 y)
+s32 evtSelectHead(void *tag, s32 ox, s32 oy)
 {
     char *title = viewerinfo->title;
 
     if (title == NULL) {
         return 0;
     }
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0054F9B8, title));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, D_0054F9B8, title));
     return 2;
 }
-void evtSelectItem(void *list, s32 x, s32 y, s32 index)
+void evtSelectItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     s32 color;
 
-    if (index < viewerinfo->itemCount) {
-        if (viewerinfo->itemCursor == index) {
+    if (no < viewerinfo->itemCount) {
+        if (viewerinfo->itemCursor == no) {
             color = viewerinfo->actionMode == 2 ? 4 : 5;
         } else {
             color = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0054F9C0,
-                                               viewerinfo->itemNames[index]));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054F9C0,
+                                               viewerinfo->itemNames[no]));
     }
 }
 
@@ -566,19 +566,19 @@ s32 evtSelectMenu(s32 x, s32 y)
                           NULL, NULL, NULL, &viewerinfo->itemCursor);
 }
 
-s32 evtFileNameHead(void *list, s32 x, s32 y)
+s32 evtFileNameHead(void *tag, s32 ox, s32 oy)
 {
     char text[16];
 
     sprintf(text, D_0054F9C8, (s32)viewerinfo + 0x22D4, (s32)viewerinfo + 0x22E0);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0054F9B8, text));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, D_0054F9B8, text));
     return 2;
 }
 
-void evtFileNameItem(void *list, s32 x, s32 y, s32 row)
+void evtFileNameItem(void *tag, s32 ox, s32 oy, s32 no)
 {
-    s32 drawX = x + 0xC0;
-    s8 *table = D_0032CAD0[row];
+    s32 drawX = ox + 0xC0;
+    s8 *table = D_0032CAD0[no];
     s32 i = 0;
     s32 color;
     s8 ch;
@@ -586,14 +586,14 @@ void evtFileNameItem(void *list, s32 x, s32 y, s32 row)
 
     do {
         color = 0;
-        if (viewerinfo->charRow == row && viewerinfo->charCol == i) {
+        if (viewerinfo->charRow == no && viewerinfo->charCol == i) {
             color = viewerinfo->actionMode == 3 ? 4 : 5;
         }
         ch = *table++;
         cellX = drawX;
         drawX += 0xC0;
         i++;
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(cellX, y, 0xFEFFFF, color, D_0054F9D0, ch));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(cellX, oy, 0xFEFFFF, color, D_0054F9D0, ch));
     } while (i < 0xB);
 }
 
@@ -645,45 +645,45 @@ s32 evtFileNameMenu(s32 x, s32 y)
     return 0;
 }
 
-s32 evtFileName2Head(void *list, s32 x, s32 y)
+s32 evtFileName2Head(void *tag, s32 ox, s32 oy)
 {
     char name[32];
 
     sprintf(name, "[E%3d_%03d.PM1+2]", D_0054F824, evt_file_minor);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0, D_0054F9B8, name));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0, D_0054F9B8, name));
     return 2;
 }
 
-void evtFileName2Item(void *list, s32 x, s32 y, u32 index)
+void evtFileName2Item(void *tag, s32 ox, s32 oy, u32 no)
 {
     s32 color = 0;
 
-    if (viewerinfo->charRow == index) {
+    if (viewerinfo->charRow == no) {
         color = 4;
     }
-    switch (index) {
+    switch (no) {
     case 0:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_0054F9D8));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_0054F9E0, D_0054F824));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054F9D8));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox + 0x600, oy, 0xFEFFFF, color, D_0054F9E0, D_0054F824));
         return;
     case 1:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_0054F9E8));
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x600, y, 0xFEFFFF, color, D_0054F9F0, evt_file_minor));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054F9E8));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox + 0x600, oy, 0xFEFFFF, color, D_0054F9F0, evt_file_minor));
         return;
     case 3:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " L,R = NO-+"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, " L,R = NO-+"));
         return;
     case 4:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " U,D = SELECT"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, " U,D = SELECT"));
         return;
     case 5:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " RR  = ENTER"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, " RR  = ENTER"));
         return;
     case 6:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " RD  = CANCEL"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, " RD  = CANCEL"));
         return;
     case 7:
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " RL  = SET 600"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, " RL  = SET 600"));
         break;
     }
 }
@@ -777,22 +777,22 @@ s32 evtFileName2Menu(s32 x, s32 y)
     return 0;
 }
 
-void evtObjectListSub(void *list, evtViewerGroup_t *group, s32 x, s32 y)
+void evtObjectListSub(void *tag, evtViewerGroup_t *obj, s32 ox, s32 oy)
 {
     s32 index;
 
-    x += 0x6C0;
-    dds3ConsPanelTagLink(list, (x - 0x7000) >> 4, 0x18, 0x1C, 3);
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, 0x79C0, 0xFEFFFF, 0xE, D_0054F9F8));
-    index = group->entryHeader;
+    ox += 0x6C0;
+    dds3ConsPanelTagLink(tag, (ox - 0x7000) >> 4, 0x18, 0x1C, 3);
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, 0x79C0, 0xFEFFFF, 0xE, D_0054F9F8));
+    index = obj->entryHeader;
     if (index < 0) {
         return;
     }
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x + 0x3C0, 0x79C0, 0xFEFFFF, 0, D_0054F9B8,
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox + 0x3C0, 0x79C0, 0xFEFFFF, 0, D_0054F9B8,
                                            viewerinfo->entryName[index]));
 }
 
-void evtObjectListItem(void *list, s32 x, s32 y, s32 index)
+void evtObjectListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     char names[24][30] = {
         "STAGE", "UNIT", "CAMERA", "D3P", "MESSAGE", "SE",
@@ -807,12 +807,12 @@ void evtObjectListItem(void *list, s32 x, s32 y, s32 index)
     if (viewerinfo->trackCount == 0) {
         return;
     }
-    if (index < viewerinfo->trackCount) {
+    if (no < viewerinfo->trackCount) {
         group = viewerinfo->groups;
-        for (i = 0; i < index; i++) {
+        for (i = 0; i < no; i++) {
             group = group->next;
         }
-        if (viewerinfo->objectScroll + viewerinfo->objectCursor == index) {
+        if (viewerinfo->objectScroll + viewerinfo->objectCursor == no) {
             if (viewerinfo->actionMode == 4) {
                 viewerinfo->frameColumn = 0;
                 viewerinfo->frameFirst = 0;
@@ -822,11 +822,11 @@ void evtObjectListItem(void *list, s32 x, s32 y, s32 index)
             } else {
                 color = 5;
             }
-            evtObjectListSub(list, group, x, y);
+            evtObjectListSub(tag, group, ox, oy);
         } else {
             color = 0;
         }
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0054F9B8,
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054F9B8,
                                                names[group->type]));
     }
 }
@@ -856,7 +856,7 @@ s32 evtOjbectListMenu(s32 x, s32 y)
 
 /* NON_MATCHING: 39 of 78 words differ (first at +0x20). */
 #ifdef NON_MATCHING
-s32 evtFrameListHead(void *list, s32 x, s32 y)
+s32 evtFrameListHead(void *tag, s32 ox, s32 oy)
 {
     s32 type = viewerinfo->frameGroup->type;
     s32 i;
@@ -864,9 +864,9 @@ s32 evtFrameListHead(void *list, s32 x, s32 y)
     for (i = 0; i < evtFrameList[type * 5]; i++) {
         s32 w = framelist_xcnt[D_0032C9E2[i + type * 10]] * 0xC0;
 
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_0054F9B8,
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054F9B8,
                                                frameheadstr[D_0032C9E2[i + type * 10]]));
-        x += w;
+        ox += w;
     }
     return 1;
 }
@@ -892,21 +892,21 @@ INCLUDE_RODATA(const s32, "event/evtEventViewerMenu", D_0053C2A0);
 
 INCLUDE_ASM(const s32, "event/evtEventViewerMenu", evtFrameListItemSub);
 
-s32 evtFrameListItem(void *list, s32 x, s32 y, s32 index)
+s32 evtFrameListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     evtViewerKey_t *key;
     s32 color;
     s32 i;
 
-    if (index < viewerinfo->frameGroup->childCount + 1) {
+    if (no < viewerinfo->frameGroup->childCount + 1) {
         key = NULL;
-        if (index != viewerinfo->frameGroup->childCount) {
+        if (no != viewerinfo->frameGroup->childCount) {
             key = viewerinfo->frameGroup->children;
-            for (i = 0; i < index; i++) {
+            for (i = 0; i < no; i++) {
                 key = key->next;
             }
         }
-        if (viewerinfo->frameCursor + viewerinfo->frameFirst == index) {
+        if (viewerinfo->frameCursor + viewerinfo->frameFirst == no) {
             if (viewerinfo->actionMode == 5) {
                 color = 4;
             } else {
@@ -916,9 +916,9 @@ s32 evtFrameListItem(void *list, s32 x, s32 y, s32 index)
             color = 0;
         }
         if (key != NULL) {
-            evtFrameListItemSub(list, x, y, color, key);
+            evtFrameListItemSub(tag, ox, oy, color, key);
         } else {
-            sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
+            sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color ? color : 8, "----- NEW FRAME -----"));
         }
     }
 }
@@ -969,7 +969,7 @@ s32 evtFrameListMenu(s32 x, s32 y)
     return ret;
 }
 
-void evtBasicListItem(void *list, s32 x, s32 y, s32 index)
+void evtBasicListItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     s32 color;
     s32 count;
@@ -977,11 +977,11 @@ void evtBasicListItem(void *list, s32 x, s32 y, s32 index)
     dds3Basic_t *basic;
 
     color = 4;
-    if (viewerinfo->groupFirst + viewerinfo->groupCursor != index) {
+    if (viewerinfo->groupFirst + viewerinfo->groupCursor != no) {
         color = 0;
     }
-    if (index == 0) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, " -----------------------"));
+    if (no == 0) {
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, " -----------------------"));
         return;
     }
     count = 0;
@@ -991,8 +991,8 @@ void evtBasicListItem(void *list, s32 x, s32 y, s32 index)
                  basic != NULL; basic = basic->next) {
                 if (basic->name != NULL) {
                     count++;
-                    if (count == index) {
-                        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color,
+                    if (count == no) {
+                        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color,
                                                                D_0054F9C0, basic->name));
                         return;
                     }
@@ -1034,7 +1034,7 @@ s32 evtBasicListMenu(s32 x, s32 y)
                           &viewerinfo->groupCursor);
 }
 
-void evtEventPosItem(void *list, s32 x, s32 y, s32 index)
+void evtEventPosItem(void *tag, s32 ox, s32 oy, s32 no)
 {
     dds3Basic_t *basic;
     s32 color;
@@ -1042,18 +1042,18 @@ void evtEventPosItem(void *list, s32 x, s32 y, s32 index)
 
     basic = NULL;
     color = 4;
-    if (viewerinfo->posCursor != index) {
+    if (viewerinfo->posCursor != no) {
         color = 0;
     }
-    slot = ((s8 *)((u8 *)index + (u32)evtGetSelectFrameInfo()))[0xC];
+    slot = ((s8 *)((u8 *)no + (u32)evtGetSelectFrameInfo()))[0xC];
     if (slot >= 0) {
         basic = dds3SceneBasicSearchName(dds3GetActiveScene(), viewerinfo->entryName[slot]);
     }
-    sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, 0xE, D_0054FA90, index));
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, 0xE, D_0054FA90, no));
     if (basic != NULL) {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, D_0054FA98, basic->name));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, D_0054FA98, basic->name));
     } else {
-        sdfDrawTagLink(list, (u32)sdfDevPrintf(x, y, 0xFEFFFF, color, "   -----------------------"));
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(ox, oy, 0xFEFFFF, color, "   -----------------------"));
     }
 }
 

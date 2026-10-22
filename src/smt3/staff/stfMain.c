@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 typedef struct
 {
@@ -31,7 +31,7 @@ typedef struct
     /* 0x036C */ s32 unk_36C;
 } fclEncyc_instance_t;
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 extern s32 stfShutDown(void);
 

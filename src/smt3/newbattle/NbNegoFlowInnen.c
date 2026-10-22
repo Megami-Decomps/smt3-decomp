@@ -289,9 +289,9 @@ extern nbInnenRec_t D_003E3158[];
 
 extern s32 datSearchDevilStock(s32 id);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern void evtBitOn(s32 bit);
+extern void evtBitOn(s32 no);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -309,11 +309,11 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern void datAddItem(s32 item, s32 cnt);
+extern void datAddItem(s32 id, s32 num);
 
 extern s32 (*D_004EF4B0[])(nbNegoProcessData_t *n);
 

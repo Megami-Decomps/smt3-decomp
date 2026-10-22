@@ -110,10 +110,10 @@ typedef struct
 
 extern u8 ragHeartsTable[];
 
-extern void fclDrawSpriteRes(s32 x, s32 y, s32 d, s32 *color, s32 id, s32 idx, s32 *texs,
-                             fclSpriteTbl_t *tbl, s32 ot);
+extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 OtNo);
 
-void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
+void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
 extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
                             s32 arg);

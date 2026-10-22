@@ -8,7 +8,7 @@ extern void (*D_00551828)(void);
 
 extern void *dds3AllocConfigWork(s32 mode);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern s32 dds3GetGlobalConfigFlag(s32 index);
 
@@ -26,9 +26,9 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void fclSetSprite(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i, s32 j);
+extern void fclSetSprite(s32 pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2, s32 Col, s32 TexHandle);
 
-extern void fclDrawBG(void *sprite, s32 flags);
+extern void fclDrawBG(void *pSprite, s32 OtNo);
 
 extern s32 dds3ConfigBackup;
 
@@ -55,11 +55,11 @@ extern u8 *DDS3_GBWK;
 
 extern s32 fclGetPanelAnimPhase(void *p);
 
-extern void sdfTexFree(void *handle);
+extern void sdfTexFree(void *aHandle);
 
 extern s32 dds3GetConfigFlag(u32 index, s32 *table);
 
-extern void *fclLoadTexture(char *filename);
+extern void *fclLoadTexture(char *pFileName);
 
 extern void fclSetPanelAnimState(u8 *panel, s8 state);
 
@@ -73,9 +73,9 @@ extern s32 dds3GetConfigAnimPhase(void);
 
 extern s32 printf(const char *fmt, ...);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *sdfMemLock(void *handle);
+extern void *sdfMemLock(void *aHandle);
 
 void slKillLoadProcess(void)
 {

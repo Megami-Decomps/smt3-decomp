@@ -6,34 +6,34 @@ extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3AllocBasic(u32 type);
 extern void dds3DeleteBasic(dds3Basic_t *basic);
 extern void drawSceneBasicList(void);
-extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 count);
-extern s32 dds3AddBasicArray(dds3BasicArrayHandle_t *handle, s32 count);
-extern s32 dds3SetBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic);
+extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt);
+extern s32 dds3AddBasicArray(dds3BasicArrayHandle_t *hndl, s32 bufcnt);
+extern s32 dds3SetBasicArray(dds3BasicArrayHandle_t *hndl, dds3Basic_t *data);
 extern u32 fldLoadFile(const char *name);
-extern u32 fldLoadFile_FromMemory(u32 area, u32 room, void *resource0,
-                                  void *resource1, void *textureOffsets, u32 flags);
+extern u32 fldLoadFile_FromMemory(u32 field, u32 area, void *pF1,
+                                  void *pF2, void *pTB, u32 pBF);
 extern void fldFreeFile(void);
-extern void *sdfMemLock(sdfMemHandle_t *handle);
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern dds3ProcessID_t *dds3SearchProcessName(const char *name);
-extern void dds3KillProcess(dds3ProcessID_t *process, s32 mode);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+extern dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
+extern void dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
-dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene);
-dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene);
+dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
+dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic);
 void dds3SceneBasicReleaseScriptFile(dds3Basic_t *scene);
 dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 void dds3SceneBasicFreeScene(dds3Basic_t *scene);
 
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
-extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
-extern s32 scrSearchProcedureName(void *scrdata, char *procName);
-extern void scrStartScript2(s32 priority, void *data, s32 messageHandle);
+extern s32 scrSearchProcedureName(void *scrdata, char *procname);
+extern void scrStartScript2(s32 a, void *b, s32 c);
 int printf(const char *fmt, ...);
 
-s32 sceneconstructor(dds3Basic_t *scene)
+s32 sceneconstructor(dds3Basic_t *basic)
 {
     dds3SceneWork_t *work = sdfChipAllocDirect(sizeof(dds3SceneWork_t));
     dds3SceneList_t *list;
@@ -64,14 +64,14 @@ s32 sceneconstructor(dds3Basic_t *scene)
         list->tail = NULL;
         list++;
     }
-    scene->workdata = work;
+    basic->workdata = work;
     printf("Scene constructor!\n");
     return 1;
 }
 
-void scenedestructor(dds3Basic_t *scene)
+void scenedestructor(dds3Basic_t *basic)
 {
-    dds3SceneWork_t *work = scene->workdata;
+    dds3SceneWork_t *work = basic->workdata;
     s32 type;
 
     if (work != NULL) {
@@ -83,8 +83,8 @@ void scenedestructor(dds3Basic_t *scene)
         if (work->listHandle != NULL) {
             sdfMemFreeDirect(work->listHandle);
         }
-        dds3SceneBasicFreeScene(scene);
-        dds3SceneBasicReleaseScriptFile(scene);
+        dds3SceneBasicFreeScene(basic);
+        dds3SceneBasicReleaseScriptFile(basic);
         sdfChipFreeDirect(work);
     }
     printf("Scene destructor!\n");
@@ -147,10 +147,10 @@ u32 scenedrawprocuder(dds3Basic_t *scene)
     return 1;
 }
 
-void dds3VisibleSceneBasic(dds3Basic_t *scene, s8 visible)
+void dds3VisibleSceneBasic(dds3Basic_t *basic, s8 visible)
 {
-    if ((dds3SceneWork_t *)scene->workdata != NULL) {
-        ((dds3SceneWork_t *)scene->workdata)->visible = visible;
+    if ((dds3SceneWork_t *)basic->workdata != NULL) {
+        ((dds3SceneWork_t *)basic->workdata)->visible = visible;
     }
 }
 
@@ -202,46 +202,46 @@ void dds3DeleteSceneBasicData(dds3Basic_t *basic)
     }
 }
 
-dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera)
+dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic)
 {
     dds3SceneWork_t *work;
     dds3Basic_t *previous;
 
-    work = scene->workdata;
-    previous = dds3GetActiveCameraSceneBasic(scene);
-    work->camera = camera;
+    work = pSceneBasic->workdata;
+    previous = dds3GetActiveCameraSceneBasic(pSceneBasic);
+    work->camera = pCameraBasic;
     return previous;
 }
 
-dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *scene)
+dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic)
 {
-    return ((dds3SceneWork_t *)scene->workdata)->camera;
+    return ((dds3SceneWork_t *)pBasic->workdata)->camera;
 }
 
-dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *scene, dds3Basic_t *unit)
+dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pUnitBasic)
 {
     dds3SceneWork_t *work;
     dds3Basic_t *previous;
 
-    work = scene->workdata;
-    previous = dds3GetActiveUnitSceneBasic(scene);
-    work->unit = unit;
+    work = pSceneBasic->workdata;
+    previous = dds3GetActiveUnitSceneBasic(pSceneBasic);
+    work->unit = pUnitBasic;
     return previous;
 }
 
-dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *scene)
+dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic)
 {
-    return ((dds3SceneWork_t *)scene->workdata)->unit;
+    return ((dds3SceneWork_t *)pSceneBasic->workdata)->unit;
 }
 
-dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type)
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type)
 {
     dds3Basic_t *basic;
 
-    if (((dds3SceneWork_t *)scene->workdata)->lists[type].count == 0) {
+    if (((dds3SceneWork_t *)pBasic->workdata)->lists[type].count == 0) {
         return NULL;
     }
-    basic = ((dds3SceneWork_t *)scene->workdata)->lists[type].head;
+    basic = ((dds3SceneWork_t *)pBasic->workdata)->lists[type].head;
     do {
         if (serialID == basic->serialID) {
             return basic;
@@ -251,9 +251,9 @@ dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serialID, s32 type)
     return NULL;
 }
 
-dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *scene, s32 type)
+dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type)
 {
-    dds3SceneWork_t *work = scene->workdata;
+    dds3SceneWork_t *work = pBasic->workdata;
     dds3BasicArrayHandle_t *handle;
     dds3Basic_t *basic;
 
@@ -280,15 +280,15 @@ void dds3SceneBasicMakeScene(dds3Basic_t *scene, const char *name)
     work->fieldHandle = handle;
 }
 
-void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *scene, u32 area, u32 room,
-                                       void *resource0, void *resource1,
-                                       void *textureOffsets, u32 flags)
+void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area,
+                                       void *pF1, void *pF2,
+                                       void *pTB, u32 pBF)
 {
     dds3SceneWork_t *work;
     u32 handle;
 
-    work = scene->workdata;
-    handle = fldLoadFile_FromMemory(area, room, resource0, resource1, textureOffsets, flags);
+    work = pBasic->workdata;
+    handle = fldLoadFile_FromMemory(field, area, pF1, pF2, pTB, pBF);
     work->fieldHandle = handle;
 }
 
@@ -327,21 +327,21 @@ s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)
 }
 
 /* A null handle preserves the old script; replacement releases it first. */
-s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *scene, sdfMemHandle_t *handle)
+s32 dds3SceneBasicLoadScriptFile_FromMem(dds3Basic_t *scene, sdfMemHandle_t *mem)
 {
     s32 notAttached = 0;
     void *address;
     dds3SceneWork_t *work = scene->workdata;
 
-    if (handle == NULL) {
+    if (mem == NULL) {
         return notAttached;
     }
     if (work->scriptHandle != NULL) {
         dds3SceneBasicReleaseScriptFile(scene);
     }
-    address = sdfMemLock(handle);
+    address = sdfMemLock(mem);
     if (address != NULL) {
-        work->scriptHandle = handle;
+        work->scriptHandle = mem;
         work->script = address;
         return 1;
     }
@@ -359,7 +359,7 @@ void dds3SceneBasicReleaseScriptFile(dds3Basic_t *scene)
     work->script = NULL;
 }
 
-s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *name)
+s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *procname)
 {
     void *script = ((dds3SceneWork_t *)scene->workdata)->script;
     s32 procedure;
@@ -368,28 +368,28 @@ s32 dds3SceneBasicStartScript(dds3Basic_t *scene, char *name)
         printf("script data invalid!!\n");
         return 0;
     }
-    if (name == NULL) {
-        printf("script null name %s\n", name);
+    if (procname == NULL) {
+        printf("script null name %s\n", procname);
         return 0;
     }
-    procedure = scrSearchProcedureName(script, name);
+    procedure = scrSearchProcedureName(script, procname);
     if (procedure < 0) {
-        printf("script procname invalid [%s]\n", name);
+        printf("script procname invalid [%s]\n", procname);
         return 0;
     }
-    if (dds3SearchProcessName(name) != NULL) {
+    if (dds3SearchProcessName(procname) != NULL) {
         return 0;
     }
     scrStartScript2(0x3EA, script, procedure);
     script = NULL;
 }
 
-void dds3SceneBasicEndScript(dds3Basic_t *scene, const char *name)
+void dds3SceneBasicEndScript(dds3Basic_t *scene, const char *procname)
 {
     dds3ProcessID_t *process;
 
-    if (name != NULL) {
-        process = dds3SearchProcessName(name);
+    if (procname != NULL) {
+        process = dds3SearchProcessName(procname);
         if (process == NULL) {
             return;
         }
@@ -439,10 +439,10 @@ s32 dds3SceneBasicExistBasic(dds3Basic_t *scene, dds3Basic_t *target)
     return 0;
 }
 
-void dds3SetMapNo(dds3Basic_t *scene, u32 mapNo)
+void dds3SetMapNo(dds3Basic_t *scene, u32 mapno)
 {
     if (scene != NULL) {
-        ((dds3SceneWork_t *)scene->workdata)->mapNo = mapNo;
+        ((dds3SceneWork_t *)scene->workdata)->mapNo = mapno;
     }
 }
 

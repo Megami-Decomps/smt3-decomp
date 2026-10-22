@@ -258,11 +258,11 @@ extern s32 printf(const char *format, ...);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void nbDispMsgHelp(s32 meshandle, s32 mesid, s32 type);
+extern void nbDispMsgHelp(s32 msgid, s32 no, s32 msgtype);
 
 extern void nbPlaySe(s32 no);
 
-extern void mdlPackDecode(s32 group, s32 id, s32 mode, void *data, s32 size);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -280,13 +280,13 @@ typedef struct nbEventProcessData_t {
 
 extern s32 nbFindStockSkillError(void);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern char D_00545DC8[];
 
-extern void *sdfMemAllocDirect(u32 size);
+extern void *sdfMemAllocDirect(u32 aSize);
 
-extern void *sdfMemLock(void *p);
+extern void *sdfMemLock(void *aHandle);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -296,11 +296,11 @@ extern char D_005464A8[];
 
 extern char D_005464C0[];
 
-extern void pacFileHandleFree_(void *h);
+extern void pacFileHandleFree_(void *pacHandle);
 
-extern s32 pacLoadUseTail(char *name);
+extern s32 pacLoadUseTail(char *filename);
 
-extern void sdfMemFreeDirect(void *p);
+extern void sdfMemFreeDirect(void *aHandle);
 
 extern s32 sprintf(char *buf, const char *format, ...);
 
@@ -316,15 +316,15 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern void *memcpy(void *dst, const void *src, u32 n);
+extern void *memcpy(void *a, const void *b, u32 c);
 
-extern s32 pacCheckEnd(nbPacHandle_t *h);
+extern s32 pacCheckEnd(nbPacHandle_t *pacHandle);
 
 extern void nbAddFormEntry(void *buf, s32 group, s32 id);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern s32 mdlPrepare(s32 group, s32 id, s32 blocking);
+extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
 extern void nbLoadMidiFile(s32 no);
 
@@ -365,12 +365,12 @@ s32 nbGetMotionTable(s32 unitid, s32 index);
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", CheckHojo);
 
 /* s32 with no return keeps the one shared epilogue retail has. */
-s32 nbDispSkillErrorMessage(s32 type)
+s32 nbDispSkillErrorMessage(s32 err)
 {
     nbMainProcessData_t *data;
 
     data = nbGetMainProcessData();
-    switch (type) {
+    switch (err) {
     case 2:
         nbDispMsgHelp(data->unk_130, 0x42, 3);
         break;
@@ -378,17 +378,17 @@ s32 nbDispSkillErrorMessage(s32 type)
         nbDispMsgHelp(data->unk_130, 0x46, 3);
         break;
     }
-    if (type > 0 && (type < 3 || type == 4)) {
+    if (err > 0 && (err < 3 || err == 4)) {
         nbPlaySe(0xD);
     }
 }
 
 /* NON_MATCHING: 1 of 18 words differ (first at +0x14). */
 #ifdef NON_MATCHING
-s32 nbCheckBattleSkillError1(s32 id)
+s32 nbCheckBattleSkillError1(s32 nskill)
 {
-    if (id < 0x33) {
-        if (id >= 0x31) {
+    if (nskill < 0x33) {
+        if (nskill >= 0x31) {
             if (nbFindStockSkillError() == 0) {
                 return 2;
             }

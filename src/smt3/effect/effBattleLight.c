@@ -63,9 +63,9 @@ u32 effBTLSkillGetInvokeParty(void);
 
 u32 effBTLSkillGetTargetParty(void);
 
-void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pFormation);
+void effBTLPointLightModelSet(effBTLPointLightParam_t *pLight, nbFormation_t *pFormation);
 
-void effBTLPointLightGroupSet(effBTLPointLightParam_t *pParam, u32 mask);
+void effBTLPointLightGroupSet(effBTLPointLightParam_t *pLight, u32 group);
 
 void effBTLPointLightStart(void);
 
@@ -75,9 +75,9 @@ void effBTLPointLightEnd(void);
 
 void effBTLModelColorMain(void);
 
-void evtUnitLightOff(evtUnit_t *hUnit, s32 param);
+void evtUnitLightOff(evtUnit_t *h, s32 frame);
 
-void evtSetUnitColorRGB(evtUnit_t *hUnit, s32 param, u32 color);
+void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb);
 
 void effBTLPointLightInit(void)
 {
@@ -131,42 +131,42 @@ void effBTLPointLightModelSet(effBTLPointLightParam_t *pParam, nbFormation_t *pF
     pLight->unknown24 = 0;
 }
 
-void effBTLPointLightGroupSet(effBTLPointLightParam_t *pParam, u32 mask)
+void effBTLPointLightGroupSet(effBTLPointLightParam_t *pLight, u32 group)
 {
     nbFormation_t *pFormation;
     s32 i;
 
     pFormation = *(nbFormation_t **)nbGetMainProcessData();
     for (i = 0x1F; i >= 0; i--) {
-        if ((pFormation->stat & mask) != 0 && (pFormation->stat & 3) == 3) {
-            effBTLPointLightModelSet(pParam, pFormation);
+        if ((pFormation->stat & group) != 0 && (pFormation->stat & 3) == 3) {
+            effBTLPointLightModelSet(pLight, pFormation);
         }
         pFormation++;
     }
 }
 
-void effBTLPointLightSet(effBTLPointLightParam_t *pParam, nbFormation_t *pFormation)
+void effBTLPointLightSet(effBTLPointLightParam_t *pLight, nbFormation_t *pFormation)
 {
-    if (pParam->unknown10 == pParam->unknown18) {
+    if (pLight->unknown10 == pLight->unknown18) {
         return;
     }
-    switch (pParam->type) {
+    switch (pLight->type) {
     case 0:
-        effBTLPointLightModelSet(pParam, pFormation);
+        effBTLPointLightModelSet(pLight, pFormation);
         break;
     case 1:
-        effBTLPointLightGroupSet(pParam, effBTLSkillGetInvokeParty());
+        effBTLPointLightGroupSet(pLight, effBTLSkillGetInvokeParty());
         break;
     case 2:
-        effBTLPointLightGroupSet(pParam, effBTLSkillGetTargetParty());
+        effBTLPointLightGroupSet(pLight, effBTLSkillGetTargetParty());
         break;
     case 3:
-        effBTLPointLightGroupSet(pParam, 0x700);
+        effBTLPointLightGroupSet(pLight, 0x700);
         break;
     }
 }
 
-void effBTLModelColorSet(effBTLModelColorParam_t *pParam, nbFormation_t *pFormation)
+void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormation)
 {
     effBTLPointLight_t *pLight;
     s32 id;
@@ -174,7 +174,7 @@ void effBTLModelColorSet(effBTLModelColorParam_t *pParam, nbFormation_t *pFormat
     id = effBTLModelGetID(pFormation);
     if (id != 0x125 && id != 0x108) {
         pLight = &effBTLPointLight[pFormation->formindex];
-        pLight->color = *pParam;
+        pLight->color = *pModel;
         pLight->unknown44 = 0;
     }
 }

@@ -285,7 +285,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern u32 f;
 
@@ -307,12 +307,12 @@ typedef struct nbEventProcessData_t {
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern void nbPanelDraw(s32 show);
+extern void nbPanelDraw(s32 flag);
 
 extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 bad);
+                                            s32 type, s32 hp, s32 mp, s32 badstat);
 
-extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern s32 nbGetNegoYaruMakkaB(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -324,16 +324,16 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern s32 datCheckItemFull(s32 item);
+extern s32 datCheckItemFull(s32 id);
 
 // @@DECLS@@
-extern void datAddMaka(s32 maka);
+extern void datAddMaka(s32 addmaka);
 
-extern void datAddItem(s32 item, s32 cnt);
+extern void datAddItem(s32 id, s32 num);
 
 extern s32 (*D_004EF4B0[])(nbNegoProcessData_t *n);
 

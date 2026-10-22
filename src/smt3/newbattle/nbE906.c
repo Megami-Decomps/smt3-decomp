@@ -297,7 +297,7 @@ extern char D_00575548[];
 
 extern char D_00546800[];
 
-extern void mdlPackDecode(s32 group, s32 id, s32 mode, void *data, s32 size);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
 extern void func_0024D938(void *e);
 
@@ -321,11 +321,11 @@ typedef struct nbEventProcessData_t {
 
 extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern void *sdfMemLock(void *p);
+extern void *sdfMemLock(void *aHandle);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -337,7 +337,7 @@ extern s32 sprintf(char *buf, const char *format, ...);
 
 extern s32 nbMakeModelPackName(s32 no);
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -347,15 +347,15 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern s32 pacCheckEnd(nbPacHandle_t *h);
+extern s32 pacCheckEnd(nbPacHandle_t *pacHandle);
 
-extern void *fileGetMemHandle(void *h);
+extern void *fileGetMemHandle(void *fileHandle);
 
-extern void fileHandleFree(void *h);
+extern void fileHandleFree(void *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern u32 sdfMemGetSize(void *p);
+extern u32 sdfMemGetSize(void *aHandle);
 
 extern nbKoukaPacket_t *nbAddFadeInKoukaPacket(s32 startframe, s32 uniqueid, s32 length,
                                                s32 coltype);

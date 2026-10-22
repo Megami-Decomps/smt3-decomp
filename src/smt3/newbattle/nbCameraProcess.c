@@ -35,7 +35,7 @@ typedef struct nbCamera_t {
     nbCameraAnim_t anim;
 } nbCamera_t;
 
-extern void SetRotateMatrixY(f32 angle);
+extern void SetRotateMatrixY(f32 aAngle);
 
 extern void effBTLModelAllHide(void);
 
@@ -55,15 +55,15 @@ typedef struct nbCameraUnitWork_t {
     nbFormation_t *pForm;
 } nbCameraUnitWork_t;
 
-extern void *dds3GetProcessData(dds3ProcessID_t *process);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern void nbCameraInit(void);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 
 
@@ -79,7 +79,7 @@ extern nbCamera_t pNbCamera;
 
 extern nbCameraStateEntry_t nbCameraStateTable[];
 
-extern void effBTLSkillSetFormationInfo(u32 invokeId, u32 targetBits);
+extern void effBTLSkillSetFormationInfo(u32 InvokeID, u32 TargetBit);
 
 extern void effBTLModelAllPopPosition(void);
 
@@ -87,7 +87,7 @@ extern void effBTLModelAllPopRotate(void);
 
 extern void func_0016E1F8(void);
 
-extern void nbCameraShot_All_Set(nbCamera_t *pCamera);
+extern void nbCameraShot_All_Set(nbCamera_t *pNbCamera);
 
 typedef struct dds3Scene_t dds3Scene_t;
 
@@ -95,7 +95,7 @@ extern nbFormation_t *effBTLSkillGetInvokeFormation(void);
 
 extern dds3Scene_t *dds3GetActiveScene(void);
 
-extern s32 dds3GetActiveCameraSceneBasic(dds3Scene_t *pScene);
+extern s32 dds3GetActiveCameraSceneBasic(dds3Scene_t *pBasic);
 
 void nbCameraSetState(u16 state);
 
@@ -107,14 +107,14 @@ void nbCameraClearState(nbCamera_t *pCamera)
     pCamera->anim.distance_s = 0.0f;
 }
 
-void nbCameraAnim_RotateSet(nbCamera_t *pCamera, s32 frames, s32 total, f32 frame)
+void nbCameraAnim_RotateSet(nbCamera_t *pNbCamera, s32 frame, s32 rotate, f32 start_f)
 {
-    pCamera->anim.rotate_f = frames;
-    pCamera->anim.rotate_s = frame / frames;
-    SetRotateMatrixY(pCamera->anim.rotate_s * total);
-    SDF_VU0_LOADVECTOR(&pCamera->direction);
+    pNbCamera->anim.rotate_f = frame;
+    pNbCamera->anim.rotate_s = start_f / frame;
+    SetRotateMatrixY(pNbCamera->anim.rotate_s * rotate);
+    SDF_VU0_LOADVECTOR(&pNbCamera->direction);
     SDF_VU0_APPLYMATRIX();
-    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
 }
 
 void func_001B1518(nbCamera_t *pCamera, s32 frames, s32 count, f32 angle)
@@ -246,10 +246,10 @@ void nbCameraEventSetTarget(nbFormation_t *pTargetForm)
     nbCameraSetState(24);
 }
 
-void nbCameraScriptSet1Shot(nbFormation_t *pFormation)
+void nbCameraScriptSet1Shot(nbFormation_t *pTargetForm)
 {
     effBTLSkillSetFormationInfo(effBTLSkillGetInvokeFormation()->formindex,
-                                1 << pFormation->formindex);
+                                1 << pTargetForm->formindex);
     effBTLModelAllPopPosition();
     effBTLModelAllPopRotate();
     effBTLModelAllHide();
@@ -291,14 +291,14 @@ void nbCameraShutdown(dds3ProcessID_t *id)
     nbGetMainProcessData()->camera = NULL;
 }
 
-void nbInitCameraProcess(nbMainProcessData_t *pData)
+void nbInitCameraProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *process = dds3StartProcess("nb_camera", 0x3FB, 2, 1,
                                                 (dds3ProcessFunc_t)nbCameraProcess_nbCameraProcess,
                                                 (dds3ProcessFunc_t)nbCameraShutdown, NULL);
 
-    dds3LinkProcess(pData->unkBC, process);
-    pData->camera = process;
+    dds3LinkProcess(data->unkBC, process);
+    data->camera = process;
     dds3LinkProcess(process, dds3StartProcess("nb_camera_draw", 0x2B0E, 1, 1,
                                               (dds3ProcessFunc_t)nbCameraDraw, NULL, NULL));
     nbCameraInit();

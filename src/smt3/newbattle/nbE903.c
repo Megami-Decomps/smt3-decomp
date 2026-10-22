@@ -324,7 +324,7 @@ extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                                s32 motion);
 
-extern void evtSetUnitMotion(evtUnitHandle_t *hunit, s32 motion, s32 a, s32 b, s32 c);
+extern void evtSetUnitMotion(evtUnitHandle_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
@@ -338,13 +338,13 @@ extern char D_00546548[];
 
 extern char D_00546570[];
 
-extern void *evtGetResorceData(s32 id, s32 type);
+extern void *evtGetResorceData(s32 eventno, s32 rid);
 
 extern void nbSingleFormExceptedDispOff(nbFormation_t *form);
 
-extern u32 effBTLCutGetFrame(effBTLCutHandle_t *h);
+extern u32 effBTLCutGetFrame(effBTLCutHandle_t *hBTLCutEffect);
 
-extern void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *h, u32 endframe);
+extern void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *hBTLCutEffect, u32 frame);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -396,19 +396,19 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 nbFormation_t *nbGetEventForm();
 
-s32 Parts1(nbEventProcessData_t *e)
+s32 Parts1(nbEventProcessData_t *ed)
 {
-    nbAddMotionKoukaPacket(0, 0, nbGetEventForm(e), 0x10);
-    nbFreeEffectSlot(e);
+    nbAddMotionKoukaPacket(0, 0, nbGetEventForm(ed), 0x10);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
 INCLUDE_ASM(const s32, "newbattle/nbE903", PartsEffect1);
 
-s32 PartsWait(nbEventProcessData_t *e)
+s32 PartsWait(nbEventProcessData_t *ed)
 {
-    if (e->frame >= 9) {
-        nbFreeEffectSlot(e);
+    if (ed->frame >= 9) {
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }
@@ -417,17 +417,17 @@ INCLUDE_RODATA(const s32, "newbattle/nbE903", D_00546518);
 
 INCLUDE_RODATA(const s32, "newbattle/nbE903", D_00546528);
 
-s32 PartsEffect2(nbEventProcessData_t *e)
+s32 PartsEffect2(nbEventProcessData_t *ed)
 {
     s32 list[4] = {0, 1, 3, 4};
     nbFormation_t *form;
     s32 i;
 
     for (i = 0; i < 4; i++) {
-        form = &e->data->form[list[i] + 4];
+        form = &ed->data->form[list[i] + 4];
         nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x387, i + 5), 2, form);
     }
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
@@ -462,11 +462,11 @@ s32 nbE903_End(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbE903", nbE903Process_1);
 
-s32 Test(nbEventProcessData_t *e)
+s32 Test(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
 
-    form = &e->data->form[5];
+    form = &ed->data->form[5];
     nbPanelAllHide();
     nbSingleFormExceptedDispOff(form);
     evtSetUnitMotion(form->hunit, 0x17, 0, 0, 2);
@@ -475,7 +475,7 @@ s32 Test(nbEventProcessData_t *e)
     nbAddFadeOutKoukaPacket(0x5A, 0, 0x46, 1);
     nbResetFormPosRot(form);
     nbSetFormPos(form, &D_00527490);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 

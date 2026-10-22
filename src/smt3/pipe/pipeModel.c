@@ -6,13 +6,13 @@
 
 extern void (*D_00551828)(void);
 
-extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(mdlObj_t *model, s32 index);
+extern sdfMotionCtrlr_t *mdlGetMotionCtrlr(mdlObj_t *aHandle, s32 aGroup);
 
-extern u32 dds3GetRandA(void *seed);
+extern u32 dds3GetRandA(void *name);
 
-extern void sdfMotionSeek(sdfMotionCtrlr_t *motion, f32 frame);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *aCtrlr, f32 aFrame);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
 typedef struct tagpipeBasic {
     void *base;
@@ -37,19 +37,19 @@ extern void mymdlInitObject(tagpipeBasic *pWork, u16 mdlSize);
 
 extern void dds3DeleteUnitObjectBasic(void *basic);
 
-extern void DEBUG_PRINT(const char *fmt, ...);
+extern void DEBUG_PRINT(const char *str, ...);
 
-extern u32 mdlGetColor(void *handle);
+extern u32 mdlGetColor(void *aHandle);
 
-extern void mdlSetColor(void *handle, u32 color);
+extern void mdlSetColor(void *aHandle, u32 aColor);
 
 extern void dds3ObjectBaseOnFlag(void *basic, u32 flag);
 
-extern void dds3SetPosPoseSet(void *basic, f32 *pos);
+extern void dds3SetPosPoseSet(void *pBasic, f32 *pos);
 
-extern void dds3SetRotPoseSet(void *basic, f32 *rot);
+extern void dds3SetRotPoseSet(void *pBasic, f32 *rot);
 
-extern void dds3SetSclPoseSet(void *basic, f32 *scl);
+extern void dds3SetSclPoseSet(void *pBasic, f32 *scl);
 
 
 INCLUDE_ASM(const s32, "pipe/pipeModel", InitModel);
@@ -137,17 +137,17 @@ void mymdlAlphaSet(tagpipeBasic *pWork, u8 alpha)
     pWork = NULL;
 }
 
-void mymdlInit(tagpipeBasic *pWork, u16 mdlSize, f32 sx, f32 sy, f32 sz, f32 sw)
+void mymdlInit(tagpipeBasic *pWork, u16 sclx, f32 scly, f32 sclz, f32 sclw, f32 mdlSize)
 {
     u16 i;
 
-    for (i = 0; i < mdlSize; i++) {
+    for (i = 0; i < sclx; i++) {
         memset(pWork, 0, 0x40);
         pWork->pos[3] = 1.0f;
-        pWork->scl[0] = sx;
-        pWork->scl[1] = sy;
-        pWork->scl[2] = sz;
-        pWork->scl[3] = sw;
+        pWork->scl[0] = scly;
+        pWork->scl[1] = sclz;
+        pWork->scl[2] = sclw;
+        pWork->scl[3] = mdlSize;
         pWork++;
     }
 }

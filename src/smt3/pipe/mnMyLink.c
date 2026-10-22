@@ -6,17 +6,17 @@
 
 extern void (*D_00551828)(void);
 
-extern f32 sdfSin(f32 angle);
+extern f32 sdfSin(f32 aRadius);
 
-extern f32 sdfCos(f32 angle);
+extern f32 sdfCos(f32 aRadius);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
-extern void *memcpy(void *destination, const void *source, u32 bytes);
+extern void *memcpy(void *a, const void *b, u32 c);
 
-extern void *sdfMemGetPtr(void *handle);
+extern void *sdfMemGetPtr(void *aHandle);
 
-extern void sdfMemFreeDirect(void *handle);
+extern void sdfMemFreeDirect(void *aHandle);
 
 f32 vecLength(f32 *vector);
 
@@ -49,7 +49,7 @@ extern f32 vecDot(f32 *a, f32 *b);
 
 extern f32 __ieee754_acosf(f32 x);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
 
 INCLUDE_ASM(const s32, "pipe/mnMyLink", LoadLinkData);
@@ -65,13 +65,13 @@ s32 pipeLinkGetNum(u8 *lPtr, s32 size)
     return num;
 }
 
-s32 pipeCreateLink(tagPipeLinkInfo *pInfo, s32 maxNum)
+s32 pipeCreateLink(tagPipeLinkInfo *pInfo, s32 nodeNum)
 {
     if (pInfo == NULL) {
         return 0;
     }
-    pInfo->aHandle = sdfMemAllocDirect(maxNum * 16);
-    pInfo->maxNum = maxNum;
+    pInfo->aHandle = sdfMemAllocDirect(nodeNum * 16);
+    pInfo->maxNum = nodeNum;
     pipeInitLink(pInfo);
     return 1;
 }
@@ -383,25 +383,25 @@ void mtxRotateZ(sdfMatrix4_t *matrix, f32 angle) {
     *matrix = rotated;
 }
 
-void mtxStore(sdfMatrix4_t *destination, sdfMatrix4_t *source) {
-    sdfMatrix4_t sourceCopy = *source;
+void mtxStore(sdfMatrix4_t *pDst, sdfMatrix4_t *pSrc) {
+    sdfMatrix4_t sourceCopy = *pSrc;
 
-    destination->m[0] = sourceCopy.m[0];
-    destination->m[1] = sourceCopy.m[4];
-    destination->m[2] = sourceCopy.m[8];
-    destination->m[3] = sourceCopy.m[12];
-    destination->m[4] = sourceCopy.m[1];
-    destination->m[5] = sourceCopy.m[5];
-    destination->m[6] = sourceCopy.m[9];
-    destination->m[7] = sourceCopy.m[13];
-    destination->m[8] = sourceCopy.m[2];
-    destination->m[9] = sourceCopy.m[6];
-    destination->m[10] = sourceCopy.m[10];
-    destination->m[11] = sourceCopy.m[14];
-    destination->m[12] = sourceCopy.m[3];
-    destination->m[13] = sourceCopy.m[7];
-    destination->m[14] = sourceCopy.m[11];
-    destination->m[15] = sourceCopy.m[15];
+    pDst->m[0] = sourceCopy.m[0];
+    pDst->m[1] = sourceCopy.m[4];
+    pDst->m[2] = sourceCopy.m[8];
+    pDst->m[3] = sourceCopy.m[12];
+    pDst->m[4] = sourceCopy.m[1];
+    pDst->m[5] = sourceCopy.m[5];
+    pDst->m[6] = sourceCopy.m[9];
+    pDst->m[7] = sourceCopy.m[13];
+    pDst->m[8] = sourceCopy.m[2];
+    pDst->m[9] = sourceCopy.m[6];
+    pDst->m[10] = sourceCopy.m[10];
+    pDst->m[11] = sourceCopy.m[14];
+    pDst->m[12] = sourceCopy.m[3];
+    pDst->m[13] = sourceCopy.m[7];
+    pDst->m[14] = sourceCopy.m[11];
+    pDst->m[15] = sourceCopy.m[15];
 }
 
 f32 *mtx_2A7B10(f32 *direction, f32 *matrix) {

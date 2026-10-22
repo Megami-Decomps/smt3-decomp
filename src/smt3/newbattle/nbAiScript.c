@@ -256,27 +256,27 @@ typedef struct nbNegoProcessData_t
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void itfMesMngSetVar(s32 msgid, s32 type, s32 value, s32 digit);
+extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
 extern void nbPanelAutoHide(void);
 
 extern nbActionProcessData_t *scrGetData(void);
 
-extern s32 scrGetIntPara(s32 no);
+extern s32 scrGetIntPara(s32 n);
 
-extern void scrSetIntReturnValue(s32 value);
+extern void scrSetIntReturnValue(s32 i);
 
 extern void nbSetNormalSkill0(datUnitWork_t *work);
 
 extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
 
-extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 type, s32 para);
+extern s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n);
 
 extern s32 nbGetSelectBit(nbMainProcessData_t *data);
 
-extern s32 nbAiChkJoken(nbActionProcessData_t *a, u32 joken);
+extern s32 nbAiChkJoken(nbActionProcessData_t *a, u32 jo);
 
-extern s32 nbGetHojoCounter(s32 formindex, s32 hojotype);
+extern s32 nbGetHojoCounter(s32 formindex, s32 type);
 
 extern s32 nbGetAisyoTable(s32 formindex);
 
@@ -286,35 +286,35 @@ extern s32 nbGetEscapeSwitch(nbMainProcessData_t *data);
 
 extern void nbRunAi(nbActionProcessData_t *a);
 
-extern void nbRunAiSub(nbActionProcessData_t *a, s32 no);
+extern void nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
-extern f32 scrGetFloatPara(s32 no);
+extern f32 scrGetFloatPara(s32 n);
 
-extern void nbCameraScriptSet(sdfVector4_t *pos, sdfVector4_t *rot);
+extern void nbCameraScriptSet(sdfVector4_t *pPos, sdfVector4_t *pQ);
 
-extern void nbCameraScriptSet1Shot(nbFormation_t *form);
+extern void nbCameraScriptSet1Shot(nbFormation_t *pTargetForm);
 
-extern void nbCameraScriptSetBougai(nbFormation_t *form);
+extern void nbCameraScriptSetBougai(nbFormation_t *pTargetForm);
 
 extern void nbPanelAllHide(void);
 
 extern void nbAllFormDispOn(void);
 
-extern void nbGroupFormDispOn(s32 group);
+extern void nbGroupFormDispOn(s32 side);
 
-extern void nbGroupFormDispOff(s32 group);
+extern void nbGroupFormDispOff(s32 side);
 
 extern s32 btl_ai_rot_cnt;
 
-extern dds3ProcessID_t *scrStartScript2(s32 handle, u8 *script, s32 arg);
+extern dds3ProcessID_t *scrStartScript2(s32 a, u8 *b, s32 c);
 
-extern void scrSetUserData(dds3ProcessID_t *id, void *data);
+extern void scrSetUserData(dds3ProcessID_t *id, void *p);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern u8 scrEmbedded_4F0800[];
 
@@ -564,13 +564,13 @@ s32 nbCommand_AI_TAR_JOKEN(void)
     return 1;
 }
 
-static void AiChkJoken(s32 joken)
+static void AiChkJoken(s32 c)
 {
     nbActionProcessData_t *a;
 
     a = scrGetData();
     a->aiselect = 0;
-    if (nbAiChkJoken(a, joken)) {
+    if (nbAiChkJoken(a, c)) {
         scrSetIntReturnValue(1);
     } else {
         scrSetIntReturnValue(0);

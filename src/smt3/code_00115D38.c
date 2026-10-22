@@ -3,7 +3,7 @@
 #include "model.h"
 #include "motion.h"
 
-extern void sdfChipFreeDirect(void *block);
+extern void sdfChipFreeDirect(void *aPtr);
 
 void dds3PathBasicFreeControl(dds3Basic_t *basic) {
     sdfChipFreeDirect(basic->workdata);

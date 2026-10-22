@@ -14,21 +14,21 @@ extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 
-extern void dds3ObjectBaseCreateMover(dds3Basic_t *basic);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, void *position);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, void *rotation);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, void *rot);
 
 extern void dds3SetRadiusPoseSet(dds3PoseSet_t *pose);
 
 extern void dds3FreePoseSet(dds3Basic_t *basic);
 
-extern void sdfChipFreeDirect(void *block);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void *memset(void *destination, s32 value, u32 size);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void dds3InitPoseSet(dds3Basic_t *basic);
 
@@ -36,73 +36,73 @@ extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, u32 flag);
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 id, s32 type);
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
-dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *basic) {
-    const dds3MatterObjectBasicWorkData_t *work = basic->workdata;
+dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *pBasic) {
+    const dds3MatterObjectBasicWorkData_t *work = pBasic->workdata;
     return work->pObjectBaseControlWorkData;
 }
 
-dds3Basic_t *dds3AddMatterObjectBasic(s32 id, f32 *offset, f32 *rotation) {
+dds3Basic_t *dds3AddMatterObjectBasic(s32 serialID, f32 *pos, f32 *rot) {
     f32 zero[4];
     dds3Basic_t *basic;
 
     memset(zero, 0, sizeof(zero));
     zero[3] = 1.0f;
     basic = dds3AddSceneBasicData(BASIC_TYPE_MATTEROBJECT);
-    basic->serialID = id;
+    basic->serialID = serialID;
     dds3ObjectBaseCreateMover(basic);
-    dds3SetRotPoseSet(basic, rotation);
+    dds3SetRotPoseSet(basic, rot);
     dds3SetPosPoseSet(basic, zero);
     dds3SetRadiusPoseSet(basic->poseset);
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[0] = offset[0];
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[1] = offset[1];
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[2] = offset[2];
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[3] = offset[3];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[0] = pos[0];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[1] = pos[1];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[2] = pos[2];
+    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->base_pos[3] = pos[3];
     return basic;
 }
 
-void dds3DeleteMatterObjectBasic(dds3Basic_t *basic) {
-    dds3DeleteSceneBasicData(basic);
+void dds3DeleteMatterObjectBasic(dds3Basic_t *aPtr) {
+    dds3DeleteSceneBasicData(aPtr);
 }
 
-void dds3MatterObjectBasicSetOt(dds3Basic_t *basic, s32 ot) {
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->OtLinkIdx = ot;
+void dds3MatterObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx) {
+    ((dds3MatterObjectBasicWorkData_t *)aPtr->workdata)->OtLinkIdx = idx;
 }
 
-void dds3MatterObjectBasicSetHojiID(dds3Basic_t *basic, u32 hojiID) {
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->hojiID = hojiID;
+void dds3MatterObjectBasicSetHojiID(dds3Basic_t *aPtr, u32 hojiID) {
+    ((dds3MatterObjectBasicWorkData_t *)aPtr->workdata)->hojiID = hojiID;
 }
 
-u32 dds3MatterObjectBasicGetHojiID(u32 id) {
+u32 dds3MatterObjectBasicGetHojiID(u32 resID) {
     dds3Basic_t *scene;
     dds3Basic_t *basic;
     dds3MatterObjectBasicWorkData_t *work;
 
     scene = dds3GetControlScene();
-    basic = dds3SearchSceneBasic(scene, id, BASIC_TYPE_MATTEROBJECT);
+    basic = dds3SearchSceneBasic(scene, resID, BASIC_TYPE_MATTEROBJECT);
     work = basic->workdata;
     return work->hojiID;
 }
 
-void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *basic, u32 alphaMode) {
-    ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->alpmode = alphaMode;
+void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *aPtr, u32 alpmode) {
+    ((dds3MatterObjectBasicWorkData_t *)aPtr->workdata)->alpmode = alpmode;
 }
 
-u32 dds3MatterObjectBasicGetAlpMode(const dds3Basic_t *basic) {
-    return ((dds3MatterObjectBasicWorkData_t *)basic->workdata)->alpmode;
+u32 dds3MatterObjectBasicGetAlpMode(const dds3Basic_t *aPtr) {
+    return ((dds3MatterObjectBasicWorkData_t *)aPtr->workdata)->alpmode;
 }
 
-s32 dds3MatterObjectBasicConstructor(dds3Basic_t *basic) {
+s32 dds3MatterObjectBasicConstructor(dds3Basic_t *aPtr) {
     dds3MatterObjectBasicWorkData_t *work;
     void *allocation;
 
-    dds3InitPoseSet(basic);
+    dds3InitPoseSet(aPtr);
     allocation = sdfChipAllocDirect(sizeof(dds3MatterObjectBasicWorkData_t));
-    basic->workdata = allocation;
+    aPtr->workdata = allocation;
     memset(allocation, 0, sizeof(dds3MatterObjectBasicWorkData_t));
-    work = basic->workdata;
-    work->pObjectBaseControlWorkData = dds3ObjectBaseInitControlWorkData(basic);
+    work = aPtr->workdata;
+    work->pObjectBaseControlWorkData = dds3ObjectBaseInitControlWorkData(aPtr);
     work->hojiID = 0;
     work->alpmode = 0;
     work->OtLinkIdx = -1;
@@ -114,15 +114,15 @@ s32 dds3MatterObjectBasicConstructor(dds3Basic_t *basic) {
     work->move_pos[1] = 0.0f;
     work->move_pos[2] = 0.0f;
     work->move_pos[3] = 1.0f;
-    dds3ObjectBaseOnFlag(basic, 0xE2);
+    dds3ObjectBaseOnFlag(aPtr, 0xE2);
     return 1;
 }
 
-void dds3MatterObjectBasicDestructor(dds3Basic_t *basic) {
+void dds3MatterObjectBasicDestructor(dds3Basic_t *aPtr) {
     dds3MatterObjectBasicWorkData_t *work;
 
-    dds3FreePoseSet(basic);
-    work = basic->workdata;
+    dds3FreePoseSet(aPtr);
+    work = aPtr->workdata;
     dds3ObjectBaseFreeControlWorkData(work->pObjectBaseControlWorkData);
     sdfChipFreeDirect(work);
 }

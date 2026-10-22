@@ -47,7 +47,7 @@ extern s32 gMsgID;
 
 extern s32 gSelMsgNo;
 
-extern s8 fclEndMessageEx(s8 flag);
+extern s8 fclEndMessageEx(s8 Mode);
 
 extern void evtFreeStage(void);
 
@@ -55,19 +55,19 @@ extern s32 sdfDelayedResrcCheck(void);
 
 extern void fclFilterOFF(void);
 
-extern void sdfFileCmdReadFile(const char *name, s32 offset, s32 size, void *done, void *buf);
+extern void sdfFileCmdReadFile(const char *aFileName, s32 aBuffer, s32 aLength, void *aCallback, void *aUserData);
 
-extern void itfMesMngSetVarImmediate(s32 msg, s8 index, s32 value);
+extern void itfMesMngSetVarImmediate(s32 id, s8 index, s32 pstr);
 
-extern s32 itfMesMngGetSelectNo(s32 msg);
+extern s32 itfMesMngGetSelectNo(s32 msgid);
 
-extern s32 itfMesMngGetSelPhase(s32 msg);
+extern s32 itfMesMngGetSelPhase(s32 msgid);
 
 extern s32 fclWorkValue[16];
 
-extern s32 scrGetIntPara(s32 index);
+extern s32 scrGetIntPara(s32 n);
 
-extern void scrSetIntReturnValue(s32 value);
+extern void scrSetIntReturnValue(s32 i);
 
 typedef struct
 {
@@ -95,44 +95,44 @@ typedef struct
  * partial views; the alias holds them apart until one covers the object. */
 extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
 
-extern s32 datAddItem(s32 itemId, s32 count);
+extern s32 datAddItem(s32 id, s32 num);
 
-extern s32 dds3KillProcess(s32 process, s32 shutdowntimer);
+extern s32 dds3KillProcess(s32 id, s32 shutdowntimer);
 
 extern s32 fclChkMessage(void);
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
 
 extern s8 gMsgFlag;
 
-extern void itfMesMngRelease(s32 msg);
+extern void itfMesMngRelease(s32 id);
 
 extern void *dds3GetControlScene(void);
 
 extern void *dds3SceneBasicSearchNameAndType(void *scene, s32 type, char *name);
 
-void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
+void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
 extern void shuffleIndices(s8 *order, s32 count, s32 rounds);
 
 extern s32 cmpItemOrder(u8 *a, u8 *b);
 
-extern s32 fclScriptStart(s32 script, s32 id, void *arg);
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 
 extern s32 datGetItemSlotIndex(s32 id);
 
 extern void datAddHearts(s32 id);
 
-s32 fclAddItem(u16 id, s32 count)
+s32 fclAddItem(u16 ItemID, s32 Nums)
 {
-    s32 slot = datGetItemSlotIndex(id);
+    s32 slot = datGetItemSlotIndex(ItemID);
 
     if (slot != 0) {
         datAddHearts(slot);
     } else {
-        datAddItem(id, count);
+        datAddItem(ItemID, Nums);
     }
     return 1;
 }
@@ -156,7 +156,7 @@ s32 fcl_213998(char *name, fclSceneObj_t *dst)
 
 extern s32 dds3GetMapNo(void *scene);
 
-extern void evtLoadArea(s32 area, s32 map);
+extern void evtLoadArea(s32 fld, s32 area);
 
 void fclLoadStage(s32 area, s32 map)
 {
@@ -168,11 +168,11 @@ void fclLoadStage(s32 area, s32 map)
     evtLoadArea(area, map);
 }
 
-extern void dds3SetBlur(s32 a, s32 b, s32 c);
+extern void dds3SetBlur(s32 frame, s32 alpha, s32 scale);
 
-extern void dds3MultiBlurOff(s32 a);
+extern void dds3MultiBlurOff(s32 frame);
 
-extern void dds3DistBlurOff(s32 a);
+extern void dds3DistBlurOff(s32 frame);
 
 extern void Eve_BlurOFF(void);
 
@@ -204,39 +204,39 @@ void fclFreeStage(void)
     fclFilterOFF();
 }
 
-void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel)
+void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos)
 {
-    panel->X = a;
-    panel->Y = b;
-    panel->Z = c;
-    panel->W = d;
-    panel->H = e;
-    panel->Col = f;
+    pPanelPos->X = X;
+    pPanelPos->Y = Y;
+    pPanelPos->Z = Z;
+    pPanelPos->W = W;
+    pPanelPos->H = H;
+    pPanelPos->Col = Work;
 }
 
-void fclScriptForcedEnd(u8 *script)
+void fclScriptForcedEnd(u8 *PID)
 {
-    if (script != NULL && dds3GetProcessStat(script) != 0) {
-        dds3KillProcess(script, 0);
-        script = NULL;
+    if (PID != NULL && dds3GetProcessStat(PID) != 0) {
+        dds3KillProcess(PID, 0);
+        PID = NULL;
     }
 }
 
-extern s32 scrStartScript2(s32 id, s32 script, s32 arg);
+extern s32 scrStartScript2(s32 a, s32 b, s32 c);
 
-s32 fclScriptStart(s32 script, s32 id, void *arg)
+s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
 {
     s32 handle;
 
-    if (arg != NULL)
+    if (pPID != NULL)
     {
-        fclScriptForcedEnd(*(u8 **)arg);
+        fclScriptForcedEnd(*(u8 **)pPID);
     }
-    handle = scrStartScript2(0x7D0, script, id);
+    handle = scrStartScript2(0x7D0, pScriptData, StartNo);
     fclClearFlag(0);
-    if (arg != NULL)
+    if (pPID != NULL)
     {
-        *(s32 *)arg = handle;
+        *(s32 *)pPID = handle;
     }
     return handle;
 }
@@ -313,7 +313,7 @@ INCLUDE_ASM(const s32, "facility/fclMisc", fclBlendColor);
 
 extern s32 itfMesMngInitialize(void);
 
-extern void itfMesMngChangeWindowType(s32 msg, s32 type, s32 flag);
+extern void itfMesMngChangeWindowType(s32 id, s32 type, s32 alpha);
 
 s32 fclInitMessage(void)
 {
@@ -329,38 +329,38 @@ s32 fclInitMessage(void)
     return ret;
 }
 
-extern void itfMesMngMarkBitStat(s32 msg, s32 bits);
+extern void itfMesMngMarkBitStat(s32 id, s32 flag);
 
 extern void itfMesMngRequestMessage(s32 msg, s32 id, s32 flag);
 
-extern void itfMesMngSetSelPhase(s32 msg, s32 phase);
+extern void itfMesMngSetSelPhase(s32 msgid, s32 phase);
 
-s32 fclStartMessage(s32 id)
+s32 fclStartMessage(s32 MsgNo)
 {
     if (gMsgID < 0)
     {
         return 0;
     }
     itfMesMngMarkBitStat(gMsgID, 0x200000);
-    itfMesMngRequestMessage(gMsgID, id, 0);
+    itfMesMngRequestMessage(gMsgID, MsgNo, 0);
     itfMesMngSetSelPhase(gMsgID, -1);
     gMsgFlag = 1;
     return 1;
 }
 
-s32 fclStartSelMessage(s32 no)
+s32 fclStartSelMessage(s32 SelMsgNo)
 {
     if (gMsgID < 0) {
         return 0;
     }
-    gSelMsgNo = no;
+    gSelMsgNo = SelMsgNo;
     return 1;
 }
 
-void fclSetSelMessagePos(s8 pos)
+void fclSetSelMessagePos(s8 SelPos)
 {
     if (gMsgID >= 0) {
-        gSelMsgPos = pos;
+        gSelMsgPos = SelPos;
     }
 }
 
@@ -377,21 +377,21 @@ s8 fclGetSelMessagePos(void)
     return itfMesMngGetSelectNo(gMsgID);
 }
 
-extern void itfMesMngSetPhase(s32 msg, s32 phase);
+extern void itfMesMngSetPhase(s32 msgid, s32 phase);
 
-extern void itfMesMngMsgWndCls(s32 msg);
+extern void itfMesMngMsgWndCls(s32 msgid);
 
-extern void itfMesMngRequestMessageRelease(s32 msg, s32 flag);
+extern void itfMesMngRequestMessageRelease(s32 id, s32 cls_speaker);
 
-extern void fclSetMessageInvalid(s8 flag);
+extern void fclSetMessageInvalid(s8 Mode);
 
-s8 fclEndMessageEx(s8 flag)
+s8 fclEndMessageEx(s8 Mode)
 {
     if (gMsgID < 0) {
         return 0;
     }
     itfMesMngSetPhase(gMsgID, 0);
-    if (flag != 0) {
+    if (Mode != 0) {
         itfMesMngMsgWndCls(gMsgID);
     }
     itfMesMngRequestMessageRelease(gMsgID, 0);
@@ -438,9 +438,9 @@ s32 fclChkSelMessage(void)
 
 INCLUDE_ASM(const s32, "facility/fclMisc", fclUpdateMessage);
 
-void fclSetMessageVar_20743088(s8 index, s32 value)
+void fclSetMessageVar_20743088(s8 Index, s32 pStr)
 {
-    itfMesMngSetVarImmediate(gMsgID, index, value);
+    itfMesMngSetVarImmediate(gMsgID, Index, pStr);
 }
 
 s8 fcl_214270(void)
@@ -448,11 +448,11 @@ s8 fcl_214270(void)
     return gMsgInvFlag;
 }
 
-extern void itfMesMngClearBitStat(s32 msg, s32 bits);
+extern void itfMesMngClearBitStat(s32 id, s32 flag);
 
-void fclSetMessageInvalid(s8 flag)
+void fclSetMessageInvalid(s8 Mode)
 {
-    if (flag != 0) {
+    if (Mode != 0) {
         itfMesMngClearBitStat(gMsgID, 0x800000);
         itfMesMngClearBitStat(gMsgID, 0x100000);
         gMsgInvFlag = 0;
@@ -465,9 +465,9 @@ void fclSetMessageInvalid(s8 flag)
     }
 }
 
-extern void itfMesMngSetMesPosition(s32 msg, s32 x, s32 y);
+extern void itfMesMngSetMesPosition(s32 id, s32 x, s32 y);
 
-extern void itfMesMngSetOffsetY1(s32 msg, s32 y);
+extern void itfMesMngSetOffsetY1(s32 msgid, s32 y1);
 
 void fcl_2142F0(s32 x, s32 y)
 {
@@ -475,17 +475,17 @@ void fcl_2142F0(s32 x, s32 y)
     itfMesMngSetOffsetY1(gMsgID, -((0x15F - y) * 8));
 }
 
-s32 fclChkMessageDraw(void *proc)
+s32 fclChkMessageDraw(void *PID)
 {
-    if (dds3GetProcessStat(proc) == 1)
+    if (dds3GetProcessStat(PID) == 1)
     {
         return 1;
     }
-    if (dds3GetProcessStat(proc) == 2)
+    if (dds3GetProcessStat(PID) == 2)
     {
         return 1;
     }
-    return dds3GetProcessStat(proc) == 3;
+    return dds3GetProcessStat(PID) == 3;
 }
 
 void fclClearFlag(s8 index)

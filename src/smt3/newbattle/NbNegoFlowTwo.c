@@ -256,15 +256,15 @@ typedef struct nbNegoProcessData_t
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
 
-extern s32 datCheckSyojiSkill(datUnitWork_t *unit, s32 skill);
+extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern void nbSetMesItem(s32 msgid, s32 it);
 
-extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *pwork, datUnitWork_t *ework);
+extern s32 nbGetKureItemA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
-extern s32 datGetParam(datUnitWork_t *unit, s32 param);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -280,11 +280,11 @@ typedef struct nbEventProcessData_t {
     void *unk_24;
 } nbEventProcessData_t;
 
-extern s32 datGetRace(datUnitWork_t *unit);
+extern s32 datGetRace(datUnitWork_t *work);
 
 extern s32 nbSearchHojoSkillWork(nbNegoProcessData_t *n, s32 type);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern s32 nbGetNegoKureMakkaA(nbNegoProcessData_t *n, datUnitWork_t *a, datUnitWork_t *b);
 
@@ -292,11 +292,11 @@ extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern s32 nbGetHojoSkillWorkCnt(nbNegoProcessData_t *n);
 
-extern s32 datCheckItem(s32 item, s32 cnt);
+extern s32 datCheckItem(s32 id, s32 num);
 
-extern void nbMakaDispOn(s32 no);
+extern void nbMakaDispOn(s32 type);
 
-extern s32 datCheckDying(datUnitWork_t *unit);
+extern s32 datCheckDying(datUnitWork_t *work);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -308,14 +308,14 @@ extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
 extern void nbAddNegoIdKouho(nbNegoProcessData_t *n, u32 id);
 
-extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 mes, s32 type, s32 wait);
+extern void nbDispNegoMessage(nbNegoProcessData_t *n, s32 msgid, s32 msgno, s32 sel);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
 // @@DECLS@@
-extern void datAddMaka(s32 maka);
+extern void datAddMaka(s32 addmaka);
 
-extern void datAddItem(s32 item, s32 cnt);
+extern void datAddItem(s32 id, s32 num);
 
 extern s32 nbSetNegoYesMotion(nbNegoProcessData_t *n, nbFormation_t *form);
 

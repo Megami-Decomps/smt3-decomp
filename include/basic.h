@@ -248,12 +248,12 @@ struct dds3PathBasicControl_t
 };
 
 /* Shared object-base and path-control entry points. */
-dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *basic);
-void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *control);
-dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
-dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *basic);
-dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *basic);
-void dds3PathBasicControlAlterMode(dds3PathBasicControl_t *work, s32 direction);
+dds3ObjectBaseControlWorkData_t *dds3ObjectBaseInitControlWorkData(dds3Basic_t *pObjectBasic);
+void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *pControl);
+dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic);
+dds3ObjectBaseControlWorkData_t *dds3UnitObjectBasicGetControlWorkData(dds3Basic_t *pBasic);
+dds3ObjectBaseControlWorkData_t *dds3MatterObjectBasicGetControlWorkData(const dds3Basic_t *pBasic);
+void dds3PathBasicControlAlterMode(dds3PathBasicControl_t *pControl, s32 mode);
 s32 dds3PathBasicControlGetMode(dds3PathBasicControl_t *work);
 
 /* dds3AllocBasic rejects a type outside this range. */

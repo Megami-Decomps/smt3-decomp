@@ -25,13 +25,13 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
-void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern void rsetOtOfs(u32);
 
 extern void rsetAlpha(s32);
 
-dds3ProcessID_t *dds3SearchProcessName(const char *name);
+dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
 extern s32 slProcShutDownFlg;
 
@@ -51,7 +51,7 @@ u32 sdfMcGetSlotFlags(s32 request, s32 slot);
 
 extern s32 slChooseData_getCardInfoNext(void);
 
-extern void mcMakeFileName(char *dst, s32 number);
+extern void mcMakeFileName(char *path, s32 num);
 
 extern u32 strlen(const char *s);
 
@@ -65,9 +65,9 @@ extern s32 D_00551D50;
 
 slMcResult_t sdfMcFuncOpen1(s32 *resultOut);
 
-sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-void *sdfMemLock(sdfMemHandle_t *allocation);
+void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 extern sdfMemHandle_t *slLoadFileFd;
 
@@ -85,7 +85,7 @@ extern void sdfMcFuncClose(s32);
 
 extern s32 slHeadLoadProc_closeFile(void);
 
-void dds3FadeOut(s32 red, s32 green, s32 blue, s32 duration);
+void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
 extern void *slExitWaitNextFunc;
 
@@ -105,7 +105,7 @@ extern u32 slQueryYesNoMsg;
 
 extern u32 gslDrawFlagFile;
 
-s32 slQueryYesNo(void *start, void *finish, s32 mode);
+s32 slQueryYesNo(void *yesFunc, void *noFunc, s32 yesNoDefault);
 
 s32 slSaveData(void);
 
@@ -133,7 +133,7 @@ s32 slExitToTitle2(void);
 
 extern char D_005328D0[];
 
-fldFileRequest_t *fileLoad(const char *requestName);
+fldFileRequest_t *fileLoad(const char *filename);
 
 extern sdfMemHandle_t *D_00551D44;
 
@@ -187,7 +187,7 @@ void sdfMcSetCardStat(s32 request);
 
 s32 slSaveData_chdir(void);
 
-void sdfMcFuncMkdir(u32 context, const char *path);
+void sdfMcFuncMkdir(u32 mccb, const char *cb);
 
 s32 slSaveProc_Write_mkdir(void);
 
@@ -213,7 +213,7 @@ extern u32 D_00551D48;
 
 extern u32 D_00551D4C;
 
-s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, u32 *pendingRequestStatus);
+s32 slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr);
 
 void sdfMcFuncDelete(u32 context, const char *path);
 
@@ -273,15 +273,15 @@ extern s32 gslAnimCnt;
 
 extern s32 slDraw(s32);
 
-s32 pacFileCheckEnd(const fldFileRequest_t *request);
+s32 pacFileCheckEnd(const fldFileRequest_t *pacFileHandle);
 
-sdfMemHandle_t *fileGetMemHandle(const fldFileRequest_t *request);
+sdfMemHandle_t *fileGetMemHandle(const fldFileRequest_t *fileHandle);
 
-u8 *fileGetLoadPtr(const fldFileRequest_t *request);
+u8 *fileGetLoadPtr(const fldFileRequest_t *fileHandle);
 
-u32 fileGetLoadSize(const fldFileRequest_t *request);
+u32 fileGetLoadSize(const fldFileRequest_t *fileHandle);
 
-s32 fileHandleFree(fldFileRequest_t *request);
+s32 fileHandleFree(fldFileRequest_t *fileHandle);
 
 extern char D_00532948[];
 
@@ -301,15 +301,15 @@ extern u32 gSlExitMode;
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
-extern void *frwGetSmallFontFRQ(s32 x, s32 y, s32 mode, u32 rgba, const char *text, s32 flag);
+extern void *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, u32 Color, const char *pStr, s32 pFRQ);
 
-extern void *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 mode, u32 rgba, const char *text, s32 flag);
+extern void *frwGetSmallNumFontFRQ(s32 X, s32 Y, s32 Pri, u32 Color, const char *pStr, s32 pFRQ);
 
-extern void frDrawFont(void *request);
+extern void frDrawFont(void *pFRQ);
 
-extern void frDrawFontEx(void *request, s32 mode);
+extern void frDrawFontEx(void *pFRQ, s32 Mode);
 
-extern void frDestroyFontRequestAfter(void *request);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern void *slKanjiDraw_handle;
 
@@ -329,9 +329,9 @@ extern u32 D_0054F06C;
 
 extern u32 D_0054F070;
 
-extern void dds3AdminiCallSequence(s32 kind, s32 *argument, s32 mode, s32 flag);
+extern void dds3AdminiCallSequence(s32 sequence, s32 *data, s32 datasize, s32 restore);
 
-extern void frSetFontDrawOT(s32 ot);
+extern void frSetFontDrawOT(s32 OtType);
 
 extern void sdfMcClearSlotFlags(s32 request, s32 slot);
 
@@ -341,10 +341,10 @@ extern s32 slTopMenuSel[];
 
 extern f32 slNextPageDraw_fc;
 
-extern f32 sdfSin(f32 radians);
+extern f32 sdfSin(f32 aRadius);
 
 extern void DrwSprite2DF(f32 x, f32 y, f32 w, f32 h, s32 u, s32 v, s32 uw, s32 vh,
-                         s32 color, sdfTexHandle_t *texture);
+                         s32 rgba, sdfTexHandle_t *th);
 
 extern sdfTexHandle_t *slProcPtr;
 
@@ -360,17 +360,17 @@ extern s32 slFormatStart(void);
 
 extern s32 slFormatCancel(void);
 
-extern void frEnableMode(s32 mode);
+extern void frEnableMode(s32 Flag);
 
-extern void frDisableMode(s32 mode);
+extern void frDisableMode(s32 Flag);
 
 extern void *frSetFontString(const char *text, s32 a1, s32 a2, s32 a3, s32 a4, s32 a5);
 
-extern void frSetFontSpace(void *request, s32 space);
+extern void frSetFontSpace(void *pFRQ, s32 Space);
 
-extern void frSetDrawPosition(void *request, s32 x, s32 y);
+extern void frSetDrawPosition(void *pFRQ, s32 X, s32 Y);
 
-extern void frSetFontColor(void *request, u32 rgba);
+extern void frSetFontColor(void *pFRQ, u32 Color);
 
 extern void func_001C7E38(void *request, s32 a1, s32 a2);
 
@@ -385,7 +385,7 @@ extern s32 gSlFileErroeFlg;
 
 extern s32 slFileSelCalc(void);
 
-extern void *memset(void *dst, s32 value, u32 count);
+extern void *memset(void *a, s32 b, u32 c);
 
 typedef struct slFileName_t {
     s8 ch[20];
@@ -441,7 +441,7 @@ extern void aDrawBoxG(s32 x, s32 y, s32 w, s32 h, u32 r0, u32 g0, u32 b0, u32 a0
                       u32 r1, u32 g1, u32 b1, u32 a1, u32 r2, u32 g2, u32 b2, u32 a2,
                       u32 r3, u32 g3, u32 b3, u32 a3);
 
-extern void slFileSelDraw(s32 task);
+extern void slFileSelDraw(s32 id);
 
 extern void slDrawInfo(void);
 
@@ -452,7 +452,7 @@ extern void slDrawError(void);
 
 extern s32 datGetPlayerLevel(void);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern s32 gSlSaveMode;
 
@@ -559,31 +559,31 @@ extern s32 gslFlushCnt;
 
 extern s32 gSlMcAccessCnt;
 
-extern void dds3FadeIn(s32 red, s32 green, s32 blue, s32 duration);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
-extern sdfTexHandle_t *sdfTexSet(void *data);
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **dataOut, s32 flag);
 
-extern void evtBitOn(s32 bit);
+extern void evtBitOn(s32 no);
 
-extern void dds3StartProcess(const char *name, s32 priority, s32 a2, s32 a3,
-                             s32 (*calc)(dds3ProcessID_t *), s32 (*shutdown)(void), void *work);
+extern void dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                             s32 (*drawExit)(dds3ProcessID_t *), s32 (*deleteExit)(void), void *p);
 
 extern void *dds3GetActiveScene(void);
 
-extern void dds3VisibleSceneBasic(void *scene, s32 visible);
+extern void dds3VisibleSceneBasic(void *basic, s32 visible);
 
 extern s32 slShutDownProcess(void);
 
 
 
 
-void mcMakeFileName(char *dst, s32 number) {
+void mcMakeFileName(char *path, s32 num) {
     if (slDDS3To31Flg != 0) {
-        sprintf(dst, D_00532860, 0xFEDA, number);
+        sprintf(path, D_00532860, 0xFEDA, num);
     } else {
-        sprintf(dst, D_00532860, 0x51AF, number);
+        sprintf(path, D_00532860, 0x51AF, num);
     }
 }
 
@@ -608,12 +608,12 @@ INCLUDE_RODATA(const s32, "mc/slMain", D_00532860);
 
 INCLUDE_ASM(const s32, "mc/slMain", slVersionConvert_Step3);
 
-u8 slGetPadTrig(s32 condition) {
-    return condition != 0 && slProcShutDownFlg == 1;
+u8 slGetPadTrig(s32 map) {
+    return map != 0 && slProcShutDownFlg == 1;
 }
 
-u8 slGetPadRep(s32 loaded) {
-    return loaded != 0 && slProcShutDownFlg == 1;
+u8 slGetPadRep(s32 map) {
+    return map != 0 && slProcShutDownFlg == 1;
 }
 
 
@@ -641,15 +641,15 @@ INCLUDE_ASM(const s32, "mc/slMain", slCopyNonZero);
 #endif
 
 
-void slKanjiDraw(s32 x, s32 y, u32 rgba, const char *text) {
-    slKanjiDraw_handle = frwGetSmallFontFRQ(x << 4, y << 4, 0, rgba, text, 0);
+void slKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji) {
+    slKanjiDraw_handle = frwGetSmallFontFRQ(x << 4, y << 4, 0, rgba, moji, 0);
     frDrawFont(slKanjiDraw_handle);
     frDestroyFontRequestAfter(slKanjiDraw_handle);
 }
 
-void slKanjiDrawH(s32 x, s32 y, u32 rgba, const char *text) {
+void slKanjiDrawH(s32 x, s32 y, u32 rgba, const char *moji) {
     frEnableMode(1);
-    slKanjiDrawH_handle = frSetFontString(text, 0, 0, 0, 0, 0);
+    slKanjiDrawH_handle = frSetFontString(moji, 0, 0, 0, 0, 0);
     frDisableMode(1);
     frSetFontSpace(slKanjiDrawH_handle, 3);
     frSetDrawPosition(slKanjiDrawH_handle, x << 4, y << 4);
@@ -659,8 +659,8 @@ void slKanjiDrawH(s32 x, s32 y, u32 rgba, const char *text) {
     frSetFontDrawOT(0x48);
 }
 
-void slKanjiDrawN(s32 x, s32 y, u32 rgba, const char *text) {
-    void *request = frwGetSmallNumFontFRQ(x << 4, y << 4, 0, rgba, text, 0);
+void slKanjiDrawN(s32 x, s32 y, u32 rgba, const char *moji) {
+    void *request = frwGetSmallNumFontFRQ(x << 4, y << 4, 0, rgba, moji, 0);
 
     frDrawFontEx(request, 1);
     frDestroyFontRequestAfter(request);
@@ -844,11 +844,11 @@ void slDrawError(void) {
     }
 }
 
-void slSetInfo(u32 state) {
+void slSetInfo(u32 id) {
     s32 previous;
 
     previous = gslInfoCode;
-    gslInfoCode = state;
+    gslInfoCode = id;
     if (previous == 0) {
         gSlWindowCnt = 0;
     }
@@ -988,9 +988,9 @@ s32 slHeadLoadProc_closeFile(void) {
     return slNoCard();
 }
 
-s32 slExitWait(void *callback) {
+s32 slExitWait(void *nextFunc) {
     dds3FadeOut(0, 0, 0, 15);
-    slExitWaitNextFunc = callback;
+    slExitWaitNextFunc = nextFunc;
     slExitWaitCnt = 20;
     return (s32)slExitWaitProc;
 }
@@ -1463,8 +1463,8 @@ s32 slExitWaitProc(void) {
     return 0;
 }
 
-s32 slHitAnyKeyNoChk(u32 callback) {
-    slHitAnyKeyNextFunc = callback;
+s32 slHitAnyKeyNoChk(u32 nextFunc) {
+    slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
     return (s32)slHitAnyKeyNoChkProc;
 }
@@ -1483,8 +1483,8 @@ s32 slHitAnyKeyNoChkProc(void) {
     return 0;
 }
 
-s32 slHitAnyKey(u32 callback) {
-    slHitAnyKeyNextFunc = callback;
+s32 slHitAnyKey(u32 nextFunc) {
+    slHitAnyKeyNextFunc = nextFunc;
     gslErrorKeyFlag = 0;
     sdfMcRegetInfo(mccb);
     return (s32)slHitAnyKeyProc;
@@ -1924,12 +1924,12 @@ s32 slSaveData_deleteIconSys(void) {
     return (s32)slSaveProc_Write_deleteIconSys;
 }
 
-s32 slSaveWriteFile(const char *fileName, u32 *dataAddressSlot, u32 *dataSizeSlot, void *continuation, u32 *pendingRequestStatus) {
-    slSaveWriteFile_buff = dataAddressSlot;
-    slSaveWriteFile_size = dataSizeSlot;
-    slSaveWriteFile_endFunc = continuation;
-    slSaveWriteFile_dataWaitPtr = pendingRequestStatus;
-    sdfMcFuncOpen(mccb, fileName, 0x203);
+s32 slSaveWriteFile(const char *filename, u32 *buff, u32 *size, void *endFunc, u32 *srcPtr) {
+    slSaveWriteFile_buff = buff;
+    slSaveWriteFile_size = size;
+    slSaveWriteFile_endFunc = endFunc;
+    slSaveWriteFile_dataWaitPtr = srcPtr;
+    sdfMcFuncOpen(mccb, filename, 0x203);
     return (s32)slSaveProc_openFile;
 }
 
@@ -2118,13 +2118,13 @@ INCLUDE_RODATA(const s32, "mc/slMain", D_005328F0);
 
 INCLUDE_ASM(const s32, "mc/slMain", slFileSelDraw);
 
-s32 slCalc(dds3ProcessID_t *task) {
+s32 slCalc(dds3ProcessID_t *id) {
     s32 next;
     u32 job;
     s32 (*cur)();
     gslAnimCnt++;
-    slDraw((s32)task);
-    next = proc_func_ans(task);
+    slDraw((s32)id);
+    next = proc_func_ans(id);
     if (next == -1) {
         return next;
     }
@@ -2144,7 +2144,7 @@ s32 slCalc(dds3ProcessID_t *task) {
     return 0;
 }
 
-s32 slDraw(s32 task) {
+s32 slDraw(s32 id) {
     rsetOtOfs(0x46);
     rsetAlpha(0);
     rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
@@ -2160,7 +2160,7 @@ s32 slDraw(s32 task) {
                   0x2B, 0x30, 0x40, 0x73, 0x2B, 0x30, 0x40, 0);
     }
     if (gslDrawFlagFile != 0) {
-        slFileSelDraw(task);
+        slFileSelDraw(id);
     }
     slDrawInfo();
     slQueryYesNoDraw();
@@ -2265,10 +2265,10 @@ u32 slGetExitType(void) {
 
 INCLUDE_ASM(const s32, "mc/slMain", slQueryYesNoProc);
 
-s32 slQueryYesNo(void *start, void *finish, s32 mode) {
-    slQueryYesFunc = start;
-    slQueryNoFunc = finish;
-    slQueryYesNoCursor = mode;
+s32 slQueryYesNo(void *yesFunc, void *noFunc, s32 yesNoDefault) {
+    slQueryYesFunc = yesFunc;
+    slQueryNoFunc = noFunc;
+    slQueryYesNoCursor = yesNoDefault;
     slQueryYesNoKeyFlag = 0;
     if (slQueryYesNoMsg != 4 && slQueryYesNoMsg != 8) {
         sdfMcRegetInfo(mccb);
@@ -2284,9 +2284,9 @@ u32 slGetExitMode(void) {
     return gSlExitMode;
 }
 
-void slSetTmnlID(s16 x, s16 y) {
+void slSetTmnlID(s16 type, s16 id) {
     dds3GlobalWork_t *state = DDS3_GBWK;
 
-    state->previewX = x;
-    state->previewY = y;
+    state->previewX = type;
+    state->previewY = id;
 }

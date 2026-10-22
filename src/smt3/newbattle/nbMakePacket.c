@@ -326,35 +326,35 @@ extern nbKoukaProcessData_t *nbGetKoukaProcessData(void);
 extern nbKoukaPacket_t *nbAddKoukaPacket(nbKoukaProcessData_t *k, s32 startframe, s32 framelength,
                                          s32 uniqueid);
 
-extern effBTL_t *effBTLCreate(u8 *bed);
+extern effBTL_t *effBTLCreate(u8 *pData);
 
-extern effBTLCutHandle_t *effBTLCutCreate(effBTL_t *hbtl, u16 cutno, nbFormation_t *form, s32 flag);
+extern effBTLCutHandle_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, nbFormation_t *pFormation, s32 stat);
 
-extern s32 effBTLGetCutEndFrame(effBTL_t *hbtl, u16 cutno);
+extern s32 effBTLGetCutEndFrame(effBTL_t *hBTLEffect, u16 CutNum);
 
 extern s32 printf(const char *format, ...);
 
-extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 seid);
+extern nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se);
 
-extern s32 nbCheckSePacket(s32 startframe, s32 seid, s32 range);
+extern s32 nbCheckSePacket(s32 start, s32 se, s32 frame);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
-extern void *effBTLSystemCreate(nbFormation_t *form, u16 no);
+extern void *effBTLSystemCreate(nbFormation_t *pFormation, u16 id);
 
-extern s32 effBTLSystemGetLength(void *hsys);
+extern s32 effBTLSystemGetLength(void *hEffBTLSys);
 
 extern s32 effPCPBossBUNSINGetLength(void);
 
-extern void *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *param);
+extern void *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *pParam);
 
 extern s32 effPCPBossBUNSIN2GetLength(void);
 
-extern void *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2Param_t *param);
+extern void *effPCPBossBUNSIN2Create(effPCPBossBUNSIN2Param_t *pParam);
 
 extern s32 effPCPBossONGYGetLength(void);
 
-extern void *effPCPBossONGYCreate(effPCPBossONGYParam_t *param);
+extern void *effPCPBossONGYCreate(effPCPBossONGYParam_t *pParam);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -366,15 +366,15 @@ extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t 
 
 extern s32 effPCPBossONGY2GetLength(void);
 
-extern void *effPCPBossONGY2Create(effPCPBossONGY2Param_t *param);
+extern void *effPCPBossONGY2Create(effPCPBossONGY2Param_t *pParam);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern u32 f;
 
 extern void ToMatrix(void);
 
-extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *form, nbFormation_t *target);
+extern f32 nbMakeUnitMoveGetCyDist(nbFormation_t *i_form, nbFormation_t *t_form);
 
 extern s32 sdfFloatToULong(f32 value);
 
@@ -395,12 +395,12 @@ typedef struct nbEventProcessData_t {
 extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
                                                s32 motion);
 
-extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 seid);
+extern nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern nbKoukaPacket_t *nbMakeKaifukuPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
-                                            s32 type, s32 hp, s32 mp, s32 bad);
+                                            s32 type, s32 hp, s32 mp, s32 badstat);
 
 extern s32 nbMakeDamagePacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 type, s32 hp,
                               s32 mp, s32 badstat, s32 hiteff, s32 dead, s32 deadtype, s32 moji,
@@ -544,7 +544,7 @@ nbKoukaPacket_t *nbAddHomeMoveKoukaPacket(s32 startframe, s32 uniqueid, s32 part
     return p;
 }
 
-nbKoukaPacket_t *nbAddRotKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno, sdfVector4_t *rot,
+nbKoukaPacket_t *nbAddRotKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno, sdfVector4_t *v,
                                      s32 speed)
 {
     nbKoukaPacket_t *p;
@@ -552,7 +552,7 @@ nbKoukaPacket_t *nbAddRotKoukaPacket(s32 startframe, s32 uniqueid, s32 partyno, 
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid);
     p->type = 3;
     p->partyno = partyno;
-    SDF_VU0_COPYVECTOR(&p->v, rot);
+    SDF_VU0_COPYVECTOR(&p->v, v);
     p->data1.i = speed;
     return p;
 }
@@ -1037,42 +1037,42 @@ nbKoukaPacket_t *nbAddDeadPcmPacket(s32 startframe, s32 uniqueid, nbFormation_t 
     return p;
 }
 
-nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 seid)
+nbKoukaPacket_t *nbAddSePacket(s32 startframe, s32 uniqueid, s32 se)
 {
     nbKoukaPacket_t *p;
 
-    if (nbCheckSePacket(startframe, seid, 5) != 0) {
+    if (nbCheckSePacket(startframe, se, 5) != 0) {
         return NULL;
     }
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid);
     p->type = 25;
-    p->data1.i = seid;
+    p->data1.i = se;
     return p;
 }
 
-nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 seid)
+nbKoukaPacket_t *nbAddSePacket2(s32 startframe, s32 uniqueid, s32 se)
 {
     nbKoukaPacket_t *p;
 
-    if (nbCheckSePacket(startframe, seid, 5) != 0) {
+    if (nbCheckSePacket(startframe, se, 5) != 0) {
         return NULL;
     }
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid);
     p->type = 28;
-    p->data1.i = seid;
+    p->data1.i = se;
     return p;
 }
 
-nbKoukaPacket_t *nbAddSePacketLock(s32 startframe, s32 uniqueid, s32 seid)
+nbKoukaPacket_t *nbAddSePacketLock(s32 startframe, s32 uniqueid, s32 se)
 {
     nbKoukaPacket_t *p;
 
-    if (nbCheckSePacket(startframe, seid, 5) != 0) {
+    if (nbCheckSePacket(startframe, se, 5) != 0) {
         return NULL;
     }
     p = nbAddKoukaPacket(nbGetKoukaProcessData(), startframe, 0, uniqueid);
     p->type = 29;
-    p->data1.i = seid;
+    p->data1.i = se;
     return p;
 }
 
@@ -1170,8 +1170,8 @@ nbKoukaPacket_t *nbAddOngBunshinPacket(s32 startframe, s32 uniqueid, nbFormation
 }
 
 nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormation_t *sform,
-                                        nbFormation_t *form1, nbFormation_t *form2l,
-                                        nbFormation_t *form2r)
+                                        nbFormation_t *form1, nbFormation_t *form2,
+                                        nbFormation_t *form3)
 {
     effPCPBossBUNSIN2Param_t param;
     nbKoukaProcessData_t *k;
@@ -1182,8 +1182,8 @@ nbKoukaPacket_t *nbAddOngBunshin2Packet(s32 startframe, s32 uniqueid, nbFormatio
     p = nbAddKoukaPacket(k, startframe, effPCPBossBUNSIN2GetLength(), uniqueid);
     param.pStartForm = sform;
     param.pForm1 = form1;
-    param.pForm2L = form2l;
-    param.pForm2R = form2r;
+    param.pForm2L = form2;
+    param.pForm2R = form3;
     h = effPCPBossBUNSIN2Create(&param);
     p->type = 40;
     p->data1.p = h;

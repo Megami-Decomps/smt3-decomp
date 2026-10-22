@@ -80,9 +80,9 @@ struct pbPanel_t
 
 extern s32 pbMoveChar;
 
-extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfChipFreeDelayedDirect(void *aPtr);
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern u32 pbMapIsValid(void);
 
@@ -92,7 +92,7 @@ extern pbMapWork_t *D_0054F5C4;
 
 extern pbPanel_t *record;
 
-extern void dds3ResetProcessFlag(dds3ProcessID_t *id, u32 mask, s32 value);
+extern void dds3ResetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type);
 
 extern pbPanel_t *blockDB;
 
@@ -100,9 +100,9 @@ extern char pbMapPathBuf[];
 
 extern pbPanel_t *pbWaitLoadMapData(pbPanel_t *parent);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
@@ -118,7 +118,7 @@ extern void dds3FadeOut(s32, s32, s32, s32);
 
 extern s32 sprintf(char *buf, const char *fmt, ...);
 
-extern void sdfFileCmdReadFile(char *path, void *dest, s32 size, void *done, s32 arg);
+extern void sdfFileCmdReadFile(char *aFileName, void *aBuffer, s32 aLength, void *aCallback, s32 aUserData);
 
 extern s32 pbLoadSystemDataDone(s32 handle, s32 status);
 
@@ -136,11 +136,11 @@ extern void fldProcNextJump(void);
 
 extern s8 pbCheckPreviousRecord(void);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
-extern void sdfTexFreeDelayed(void *tex);
+extern void sdfTexFreeDelayed(void *aHandle);
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
 extern char D_00535E10[], D_00535E20[], D_00535EC8[];
 

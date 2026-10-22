@@ -54,25 +54,25 @@ extern u8 D_0054F470[8], D_0054F478[8], D_003263D8[], D_003263E0[];
 
 extern itfColorVector_t D_003263E8[];
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *, u32 *, s32);
 
-extern sdfTexHandle_t *sdfTexSet(void *data);
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
 
-extern s32 sdf2DGetPrimPacketSize(s32 registers, s32 count);
+extern s32 sdf2DGetPrimPacketSize(s32 aNumOfRegs, s32 aNumOfPrim);
 
-extern s32 sdfGrAllocPacketBuff(u32 size);
+extern s32 sdfGrAllocPacketBuff(u32 aSize);
 
-extern void sdf2DMakePrimPacketHeader(void *packet, s32 prim, s32 registers, u64 descriptor, s32 count);
+extern void sdf2DMakePrimPacketHeader(void *aPacketPtr, s32 aPrimReg, s32 aNumOfRegs, u64 aGifRegs, s32 aNumOfPrim);
 
-extern s32 sdf2DGetPrimPtr(s32 packet);
+extern s32 sdf2DGetPrimPtr(s32 aPacketPtr);
 
-extern u32 sdf2DMakeStdPacket(u32 packet, s32 size);
+extern u32 sdf2DMakeStdPacket(u32 aPacket, s32 aLeng);
 
 extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *, sdfTexHandle_t *, s32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *, u32 packet);
+extern void sdfDrawTagLink(sdfDrawTag_t *, u32 aPacket);
 
 extern s32 dds3AdminiGetActiveSequence(void);
 
@@ -152,58 +152,58 @@ void itfMiscLinkInitialize(itfLinkPool_t *pool, itfLink_t *nodes, s32 count, s32
 }
 
 /* Move the free-list head to the active-list tail; exhausted pools return NULL. */
-itfLink_t *itfMiscLinkTake(itfLinkPool_t *pool) {
-    itfLink_t *node = pool->firstFree;
+itfLink_t *itfMiscLinkTake(itfLinkPool_t *pstack) {
+    itfLink_t *node = pstack->firstFree;
     itfLink_t *next;
 
     if (node == NULL) {
         return NULL;
     }
     next = node->next;
-    if (pool->activeHead != NULL) {
-        node->previous = pool->activeTail;
-        pool->activeTail->next = node;
+    if (pstack->activeHead != NULL) {
+        node->previous = pstack->activeTail;
+        pstack->activeTail->next = node;
     } else {
         node->previous = NULL;
-        pool->activeHead = node;
+        pstack->activeHead = node;
     }
     node->next = NULL;
-    pool->activeTail = node;
+    pstack->activeTail = node;
     if (next != NULL) {
         next->previous = NULL;
     } else {
-        pool->lastFree = NULL;
+        pstack->lastFree = NULL;
     }
-    pool->firstFree = next;
+    pstack->firstFree = next;
     return node;
 }
 
 /* Unlink an active node and append it to the free-list tail; membership is trusted. */
-void itfMiscLinkGive(itfLink_t *node, itfLinkPool_t *pool) {
-    itfLink_t *previous = node->previous;
-    itfLink_t *next = node->next;
+void itfMiscLinkGive(itfLink_t *pelem, itfLinkPool_t *pstack) {
+    itfLink_t *previous = pelem->previous;
+    itfLink_t *next = pelem->next;
 
     if (previous != NULL) {
         previous->next = next;
     } else {
-        pool->activeHead = next;
+        pstack->activeHead = next;
     }
     if (next != NULL) {
         next->previous = previous;
     } else {
-        pool->activeTail = previous;
+        pstack->activeTail = previous;
     }
-    node->next = NULL;
+    pelem->next = NULL;
     {
-        itfLink_t *lastFree = pool->lastFree;
-        node->previous = lastFree;
+        itfLink_t *lastFree = pstack->lastFree;
+        pelem->previous = lastFree;
         if (lastFree != NULL) {
-            lastFree->next = node;
+            lastFree->next = pelem;
         }
     }
-    pool->lastFree = node;
-    if (pool->firstFree == NULL) {
-        pool->firstFree = node;
+    pstack->lastFree = pelem;
+    if (pstack->firstFree == NULL) {
+        pstack->firstFree = pelem;
     }
 }
 
@@ -230,40 +230,40 @@ void itfMiscSetRatioRGB(itfColorVector_t *output, s32 scaleX, s32 scaleY, s32 sc
 }
 
 /* Replace each child color; parent color words are not modified. */
-void itfMiscChangeFontVertexColor(frFontRequest_t *entry, u32 color) {
-    for (; entry != NULL; entry = entry->previous) {
+void itfMiscChangeFontVertexColor(frFontRequest_t *pfont, u32 color) {
+    for (; pfont != NULL; pfont = pfont->previous) {
         frFontChild_t *child;
-        for (child = entry->firstChild; child != NULL; child = child->next) {
+        for (child = pfont->firstChild; child != NULL; child = child->next) {
             child->parentDimensionsOrRenderWord.renderWord = color;
         }
     }
 }
 
 /* Clear each child's low byte, then OR unmasked bits into the full color word. */
-void itfMiscChangeFontAlpha(frFontRequest_t *entry, u32 colorBits) {
-    for (; entry != NULL; entry = entry->previous) {
+void itfMiscChangeFontAlpha(frFontRequest_t *pfont, u32 alpha) {
+    for (; pfont != NULL; pfont = pfont->previous) {
         frFontChild_t *child;
-        for (child = entry->firstChild; child != NULL; child = child->next) {
-            child->parentDimensionsOrRenderWord.renderWord = (child->parentDimensionsOrRenderWord.renderWord & ~ITF_BYTE_MASK) | colorBits;
+        for (child = pfont->firstChild; child != NULL; child = child->next) {
+            child->parentDimensionsOrRenderWord.renderWord = (child->parentDimensionsOrRenderWord.renderWord & ~ITF_BYTE_MASK) | alpha;
         }
     }
 }
 
 /* Translate parent entries only; child coordinates are left unchanged. */
-void itfMiscMoveFontPosition(frFontRequest_t *entry, u32 xOffset, u32 yOffset) {
-    for (; entry != NULL; entry = entry->previous) {
-        entry->x += xOffset;
-        entry->y += yOffset;
+void itfMiscMoveFontPosition(frFontRequest_t *pfont, u32 ofsx, u32 ofsy) {
+    for (; pfont != NULL; pfont = pfont->previous) {
+        pfont->x += ofsx;
+        pfont->y += ofsy;
     }
 }
 
 /* Keep the sprite texture handle while releasing the temporary file allocation. */
-sdfTexHandle_t *itfMiscLoadTexture(const char *path) {
+sdfTexHandle_t *itfMiscLoadTexture(const char *filename) {
     sdfMemHandle_t *fileAllocation;
     sdfTexHandle_t *textureHandle;
     u32 assetInfo[ITF_VECTOR_WORD_COUNT];
 
-    fileAllocation = sdfDevLoadFileEx(path, assetInfo, 0);
+    fileAllocation = sdfDevLoadFileEx(filename, assetInfo, 0);
     textureHandle = sdfTexSet((void *)(assetInfo[0]));
     sdfMemFreeDirect(fileAllocation);
     return textureHandle;
@@ -561,7 +561,7 @@ void itfMiscDrawGauge(s32 value, s32 limit, s32 highlight,
 }
 
 /* Retail "DbgDevDump" task callback: perform no dump work and return zero. */
-s32 dds3DebugDevDumpProcess(dds3ProcessID_t *task) {
+s32 dds3DebugDevDumpProcess(dds3ProcessID_t *id) {
     return 0;
 }
 

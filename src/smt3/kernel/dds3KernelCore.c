@@ -20,24 +20,24 @@ extern dds3ProcessID_t *runninglistf;
 extern dds3ProcessID_t *runninglistl;
 extern u32 runninglistcnt;
 
-void DeleteProcessList(dds3ProcessID_t *delp);
-void AddProcessList(dds3ProcessID_t *addp);
+void DeleteProcessList(dds3ProcessID_t *setp);
+void AddProcessList(dds3ProcessID_t *setp);
 void StartProcess(dds3ProcessID_t *setp);
 void StartingProcess(void);
-void KillProcess(dds3ProcessID_t *killp);
-void EndProcess(dds3ProcessID_t *endp);
-void dds3UnlinkProcess(dds3ProcessID_t *unp);
-s32 RunProcess(dds3ProcessID_t *runp);
+void KillProcess(dds3ProcessID_t *setp);
+void EndProcess(dds3ProcessID_t *setp);
+void dds3UnlinkProcess(dds3ProcessID_t *target);
+s32 RunProcess(dds3ProcessID_t *pro);
 void RunningProcess(void);
 void dds3EndingProcess(void);
-void ChangeProcessFlag(s32 onoff, dds3ProcessID_t *target, u32 flag, s32 type);
+void ChangeProcessFlag(s32 change, dds3ProcessID_t *target, u32 flag, s32 type);
 s32 dds3ExistProcess(dds3ProcessID_t *id);
-dds3ProcessID_t *dds3SearchProcessName(char *name);
+dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
-void ChangeProcessFlagChild(s32 onoff, dds3ProcessID_t *target, u32 flag);
+void ChangeProcessFlagChild(s32 change, dds3ProcessID_t *parent, u32 flag);
 
-void *sdfChipAllocDirect(u32 size);
-void sdfChipFreeDirect(void *ptr);
+void *sdfChipAllocDirect(u32 aSize);
+void sdfChipFreeDirect(void *aPtr);
 int printf(const char *fmt, ...);
 
 extern char D_0054E878[];
@@ -49,53 +49,53 @@ extern char D_0054E8A0[];
 extern char D_0054E8A8[];
 extern char D_0054E8B0[];
 extern char dds3ProcessTreeDepth[];
-void DebugProcess(dds3ProcessID_t *process, const char *heading);
+void DebugProcess(dds3ProcessID_t *pro, const char *mes);
 
-void DeleteProcessList(dds3ProcessID_t *delp)
+void DeleteProcessList(dds3ProcessID_t *setp)
 {
-    if ((delp->flag & 0xF) == 0) {
+    if ((setp->flag & 0xF) == 0) {
         return;
     }
-    if ((delp->flag & 0xF) >= 4) {
+    if ((setp->flag & 0xF) >= 4) {
         return;
     }
 
-    if (delp->prev != NULL) {
-        delp->prev->next = delp->next;
+    if (setp->prev != NULL) {
+        setp->prev->next = setp->next;
     } else {
-        switch (delp->flag & 0xF) {
+        switch (setp->flag & 0xF) {
         case 1:
-            startinglistf = delp->next;
+            startinglistf = setp->next;
             break;
         case 2:
-            runninglistf = delp->next;
+            runninglistf = setp->next;
             break;
         case 3:
-            endinglistf = delp->next;
+            endinglistf = setp->next;
             break;
         }
     }
 
-    if (delp->next != NULL) {
-        delp->next->prev = delp->prev;
+    if (setp->next != NULL) {
+        setp->next->prev = setp->prev;
     } else {
-        switch (delp->flag & 0xF) {
+        switch (setp->flag & 0xF) {
         case 1:
-            startinglistl = delp->prev;
+            startinglistl = setp->prev;
             break;
         case 2:
-            runninglistl = delp->prev;
+            runninglistl = setp->prev;
             break;
         case 3:
-            endinglistl = delp->prev;
+            endinglistl = setp->prev;
             break;
         }
     }
 
-    delp->next = NULL;
-    delp->prev = NULL;
+    setp->next = NULL;
+    setp->prev = NULL;
 
-    switch (delp->flag & 0xF) {
+    switch (setp->flag & 0xF) {
     case 1:
         startinglistcnt--;
         break;
@@ -108,11 +108,11 @@ void DeleteProcessList(dds3ProcessID_t *delp)
     }
 }
 
-void AddProcessList(dds3ProcessID_t *addp)
+void AddProcessList(dds3ProcessID_t *setp)
 {
     dds3ProcessID_t *p;
 
-    switch (addp->flag & 0xF) {
+    switch (setp->flag & 0xF) {
     case 1:
         p = startinglistf;
         break;
@@ -128,73 +128,73 @@ void AddProcessList(dds3ProcessID_t *addp)
     }
 
     if (p == NULL) {
-        switch (addp->flag & 0xF) {
+        switch (setp->flag & 0xF) {
         case 1:
-            startinglistf = addp;
-            startinglistl = addp;
+            startinglistf = setp;
+            startinglistl = setp;
             break;
         case 2:
-            runninglistf = addp;
-            runninglistl = addp;
+            runninglistf = setp;
+            runninglistl = setp;
             break;
         case 3:
-            endinglistf = addp;
-            endinglistl = addp;
+            endinglistf = setp;
+            endinglistl = setp;
             break;
         }
-        addp->prev = NULL;
-        addp->next = NULL;
+        setp->prev = NULL;
+        setp->next = NULL;
     } else {
         while (p != NULL) {
-            if (addp->priority < p->priority) {
+            if (setp->priority < p->priority) {
                 if (p->prev != NULL) {
-                    p->prev->next = addp;
-                    addp->prev = p->prev;
-                    addp->next = p;
-                    p->prev = addp;
+                    p->prev->next = setp;
+                    setp->prev = p->prev;
+                    setp->next = p;
+                    p->prev = setp;
                 } else {
-                    switch (addp->flag & 0xF) {
+                    switch (setp->flag & 0xF) {
                     case 1:
-                        startinglistf = addp;
+                        startinglistf = setp;
                         break;
                     case 2:
-                        runninglistf = addp;
+                        runninglistf = setp;
                         break;
                     case 3:
-                        endinglistf = addp;
+                        endinglistf = setp;
                         break;
                     }
-                    addp->prev = NULL;
-                    addp->next = p;
-                    p->prev = addp;
+                    setp->prev = NULL;
+                    setp->next = p;
+                    p->prev = setp;
                 }
                 break;
             }
             p = p->next;
         }
         if (p == NULL) {
-            switch (addp->flag & 0xF) {
+            switch (setp->flag & 0xF) {
             case 1:
-                startinglistl->next = addp;
-                addp->prev = startinglistl;
-                startinglistl = addp;
+                startinglistl->next = setp;
+                setp->prev = startinglistl;
+                startinglistl = setp;
                 break;
             case 2:
-                runninglistl->next = addp;
-                addp->prev = runninglistl;
-                runninglistl = addp;
+                runninglistl->next = setp;
+                setp->prev = runninglistl;
+                runninglistl = setp;
                 break;
             case 3:
-                endinglistl->next = addp;
-                addp->prev = endinglistl;
-                endinglistl = addp;
+                endinglistl->next = setp;
+                setp->prev = endinglistl;
+                endinglistl = setp;
                 break;
             }
-            addp->next = NULL;
+            setp->next = NULL;
         }
     }
 
-    switch (addp->flag & 0xF) {
+    switch (setp->flag & 0xF) {
     case 1:
         startinglistcnt++;
         break;
@@ -234,18 +234,18 @@ void StartingProcess(void)
     }
 }
 
-s32 RunProcess(dds3ProcessID_t *task)
+s32 RunProcess(dds3ProcessID_t *pro)
 {
     s32 port;
     s32 inputIndex;
     s32 nextUpdate;
 
-    if (task->flag & 0x20) {
+    if (pro->flag & 0x20) {
         return 1;
     }
-    runprocess = task;
+    runprocess = pro;
 
-    if (task->flag & 0x10) {
+    if (pro->flag & 0x10) {
         for (port = 0; port < 2; port++) {
             for (inputIndex = 0; inputIndex < 16; inputIndex++) {
                 dds3PadButtonState[0][port][inputIndex] = 0;
@@ -271,18 +271,18 @@ s32 RunProcess(dds3ProcessID_t *task)
         }
     }
 
-    if (task->processfunc != NULL && task->processfunc != (dds3ProcessFunc_t)-1) {
-        nextUpdate = task->processfunc(task);
+    if (pro->processfunc != NULL && pro->processfunc != (dds3ProcessFunc_t)-1) {
+        nextUpdate = pro->processfunc(pro);
         if (nextUpdate != 0) {
-            task->processfunc = (dds3ProcessFunc_t)nextUpdate;
+            pro->processfunc = (dds3ProcessFunc_t)nextUpdate;
         }
-        if (nextUpdate == -1 && (task->flag & 0xF) == 2) {
-            EndProcess(task);
+        if (nextUpdate == -1 && (pro->flag & 0xF) == 2) {
+            EndProcess(pro);
             runprocess = 0;
             return 0;
         }
     }
-    task->runtime++;
+    pro->runtime++;
     runprocess = 0;
     return 1;
 }
@@ -346,42 +346,42 @@ loop:
 INCLUDE_ASM(const s32, "kernel/dds3KernelCore", RunningProcess);
 #endif
 
-void KillProcess(dds3ProcessID_t *killp)
+void KillProcess(dds3ProcessID_t *setp)
 {
     dds3ProcessID_t *p;
     dds3ProcessID_t *nextp;
 
-    p = killp->child;
+    p = setp->child;
     while (p != NULL) {
         nextp = p->sibling;
         dds3KillProcess(p, 0);
         p = nextp;
     }
 
-    DeleteProcessList(killp);
-    printf("shutdown %s!!\n", killp->name);
-    if (killp->shutdownfunc != NULL) {
-        killp->shutdownfunc(killp);
+    DeleteProcessList(setp);
+    printf("shutdown %s!!\n", setp->name);
+    if (setp->shutdownfunc != NULL) {
+        setp->shutdownfunc(setp);
     }
-    killp->flag &= ~0xF;
-    dds3UnlinkProcess(killp);
-    sdfChipFreeDirect(killp);
+    setp->flag &= ~0xF;
+    dds3UnlinkProcess(setp);
+    sdfChipFreeDirect(setp);
 }
 
-void EndProcess(dds3ProcessID_t *endp)
+void EndProcess(dds3ProcessID_t *setp)
 {
-    u32 stat = endp->flag & 0xF;
+    u32 stat = setp->flag & 0xF;
 
     if (stat < 3) {
         if (stat == 0) {
             return;
         }
 
-        DeleteProcessList(endp);
-        endp->flag = (endp->flag & ~0xF) | 3;
-        AddProcessList(endp);
-        if (endp->shutdowntimer == 0) {
-            KillProcess(endp);
+        DeleteProcessList(setp);
+        setp->flag = (setp->flag & ~0xF) | 3;
+        AddProcessList(setp);
+        if (setp->shutdowntimer == 0) {
+            KillProcess(setp);
         }
     }
 }
@@ -406,32 +406,32 @@ void dds3EndingProcess(void)
 }
 
 
-void ChangeProcessFlagChild(s32 onoff, dds3ProcessID_t *target, u32 flag)
+void ChangeProcessFlagChild(s32 change, dds3ProcessID_t *parent, u32 flag)
 {
     dds3ProcessID_t *p;
 
-    if (onoff != 0) {
-        target->flag |= flag & 0x0FFFFFF0;
+    if (change != 0) {
+        parent->flag |= flag & 0x0FFFFFF0;
     } else {
-        target->flag &= ~(flag & 0x0FFFFFF0);
+        parent->flag &= ~(flag & 0x0FFFFFF0);
     }
-    p = target->child;
+    p = parent->child;
     while (p != NULL) {
-        ChangeProcessFlagChild(onoff, p, flag);
+        ChangeProcessFlagChild(change, p, flag);
         p = p->sibling;
     }
 }
 
 /* The 0x0FFFFFF0 mask keeps callers out of the state nibble and the top four
  * bits of flag. */
-void ChangeProcessFlag(s32 onoff, dds3ProcessID_t *target, u32 flag, s32 type)
+void ChangeProcessFlag(s32 change, dds3ProcessID_t *target, u32 flag, s32 type)
 {
     dds3ProcessID_t *p = NULL;
     s32 list;
 
     switch (type) {
     case 0:
-        if (onoff != 0) {
+        if (change != 0) {
             target->flag |= flag & 0x0FFFFFF0;
         } else {
             target->flag &= ~(flag & 0x0FFFFFF0);
@@ -456,7 +456,7 @@ void ChangeProcessFlag(s32 onoff, dds3ProcessID_t *target, u32 flag, s32 type)
 
                 while (p != NULL) {
                     if ((p != target && type == 1) || type == 3) {
-                        if (onoff != 0) {
+                        if (change != 0) {
                             p->flag |= mask;
                         } else {
                             p->flag &= ~mask;
@@ -468,14 +468,14 @@ void ChangeProcessFlag(s32 onoff, dds3ProcessID_t *target, u32 flag, s32 type)
         }
         return;
     case 2:
-        ChangeProcessFlagChild(onoff, target, flag);
+        ChangeProcessFlagChild(change, target, flag);
         break;
     }
 }
 
-u32 dds3GetProcessCount(u32 stat)
+u32 dds3GetProcessCount(u32 type)
 {
-    switch (stat & 0xF) {
+    switch (type & 0xF) {
     case 1:
         return startinglistcnt;
     case 2:
@@ -486,12 +486,12 @@ u32 dds3GetProcessCount(u32 stat)
     return 0;
 }
 
-dds3ProcessID_t *dds3SearchProcessNumber(u32 stat, s32 n)
+dds3ProcessID_t *dds3SearchProcessNumber(u32 type, s32 n)
 {
     dds3ProcessID_t *p = startinglistf;
     s32 i;
 
-    switch (stat & 0xF) {
+    switch (type & 0xF) {
     case 1:
         break;
     case 2:
@@ -510,28 +510,28 @@ dds3ProcessID_t *dds3SearchProcessNumber(u32 stat, s32 n)
     return p;
 }
 
-void DebugProcess(dds3ProcessID_t *process, const char *heading)
+void DebugProcess(dds3ProcessID_t *pro, const char *mes)
 {
-    printf(D_0054E878, heading);
-    while (process != NULL) {
-        printf("NAME:(%-24s) ", process->name);
-        printf("PID:(0x%08X) ", process);
+    printf(D_0054E878, mes);
+    while (pro != NULL) {
+        printf("NAME:(%-24s) ", pro->name);
+        printf("PID:(0x%08X) ", pro);
         printf(D_0054E880);
-        if (process->flag & 0x10) {
+        if (pro->flag & 0x10) {
             printf(D_0054E888);
         } else {
             printf(D_0054E890);
         }
-        if (process->flag & 0x20) {
+        if (pro->flag & 0x20) {
             printf(D_0054E898);
         } else {
             printf(D_0054E888);
         }
         printf(D_0054E8A0);
-        printf("PRIO:(%5d) ", process->priority);
-        printf("RUNTIME:(%d) ", process->runtime);
-        printf("TIMER:(%d, %d)\n", process->starttimer, process->shutdowntimer);
-        process = process->next;
+        printf("PRIO:(%5d) ", pro->priority);
+        printf("RUNTIME:(%d) ", pro->runtime);
+        printf("TIMER:(%d, %d)\n", pro->starttimer, pro->shutdowntimer);
+        pro = pro->next;
     }
 }
 
@@ -549,25 +549,25 @@ void dds3PrintProcessList(void)
     printf(D_0054E8A8);
 }
 
-void DebugProcessTree(dds3ProcessID_t *process, s32 depth)
+void DebugProcessTree(dds3ProcessID_t *ps, s32 level)
 {
-    printf(D_0054E8B0, dds3ProcessTreeDepth, process);
-    if (process->child != NULL) {
-        if (process->parent == NULL) {
+    printf(D_0054E8B0, dds3ProcessTreeDepth, ps);
+    if (ps->child != NULL) {
+        if (ps->parent == NULL) {
             dds3ProcessTreeDepth[0] = ' ';
         } else {
-            if (process->sibling == NULL) {
-                dds3ProcessTreeDepth[depth * 4] = ' ';
+            if (ps->sibling == NULL) {
+                dds3ProcessTreeDepth[level * 4] = ' ';
             } else {
-                dds3ProcessTreeDepth[depth * 4] = '|';
+                dds3ProcessTreeDepth[level * 4] = '|';
             }
         }
-        dds3ProcessTreeDepth[depth * 4 + 4] = 0;
-        DebugProcessTree(process->child, depth + 1);
-        dds3ProcessTreeDepth[depth * 4] = 0;
+        dds3ProcessTreeDepth[level * 4 + 4] = 0;
+        DebugProcessTree(ps->child, level + 1);
+        dds3ProcessTreeDepth[level * 4] = 0;
     }
-    if (process->sibling != NULL) {
-        DebugProcessTree(process->sibling, depth);
+    if (ps->sibling != NULL) {
+        DebugProcessTree(ps->sibling, level);
     }
 }
 
@@ -617,9 +617,9 @@ s32 dds3ProcessMain(void)
 
 /* namehash is the name's byte sum, which dds3SearchProcessName uses to reject
  * most candidates without a compare. */
-dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
-                                  dds3ProcessFunc_t processfunc, dds3ProcessFunc_t shutdownfunc,
-                                  void *data)
+dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                                  dds3ProcessFunc_t drawExit, dds3ProcessFunc_t deleteExit,
+                                  void *p)
 {
     dds3ProcessID_t *setp = sdfChipAllocDirect(sizeof(dds3ProcessID_t));
     s32 i = 0;
@@ -628,17 +628,17 @@ dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s
         return NULL;
     }
     setp->namehash = 0;
-    while ((setp->name[i] = namestr[i]) != 0 && i < 0x18) {
-        setp->namehash += namestr[i];
+    while ((setp->name[i] = v1[i]) != 0 && i < 0x18) {
+        setp->namehash += v1[i];
         i++;
     }
-    setp->priority = priority;
+    setp->priority = dDS3_PRIORITY_DRAW_PB;
     setp->flag = 1;
-    setp->starttimer = starttimer;
-    setp->shutdowntimer = shutdowntimer;
-    setp->processfunc = processfunc;
-    setp->shutdownfunc = shutdownfunc;
-    setp->workdata = data;
+    setp->starttimer = v2;
+    setp->shutdowntimer = v3;
+    setp->processfunc = drawExit;
+    setp->shutdownfunc = deleteExit;
+    setp->workdata = p;
     setp->name[0x17] = 0;
     setp->starttime = 0;
     setp->runtime = 0;
@@ -724,7 +724,7 @@ u32 dds3GetProcessStat(dds3ProcessID_t *id)
 }
 
 /* The name compare runs back to front, from the terminator down to byte 0. */
-dds3ProcessID_t *dds3SearchProcessName(char *name)
+dds3ProcessID_t *dds3SearchProcessName(char *namestr)
 {
     s32 len;
     s32 hash;
@@ -735,8 +735,8 @@ dds3ProcessID_t *dds3SearchProcessName(char *name)
     p = NULL;
     hash = 0;
     len = 0;
-    while (name[len] != '\0') {
-        hash += name[len];
+    while (namestr[len] != '\0') {
+        hash += namestr[len];
         len++;
     }
 
@@ -756,7 +756,7 @@ dds3ProcessID_t *dds3SearchProcessName(char *name)
         while (p != NULL) {
             if (p->namehash == hash) {
                 for (i = len;; i--) {
-                    if (name[i] != p->name[i]) {
+                    if (namestr[i] != p->name[i]) {
                         break;
                     }
                     if (i == 0) {
@@ -854,44 +854,44 @@ void dds3DebugNowProcess(void)
     }
 }
 
-void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child)
+void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target)
 {
     dds3ProcessID_t *p;
 
-    if (child->parent != NULL) {
-        dds3UnlinkProcess(child);
+    if (target->parent != NULL) {
+        dds3UnlinkProcess(target);
     }
     if (parent->child != NULL) {
         p = parent->child;
         while (p->sibling != NULL) {
             p = p->sibling;
         }
-        p->sibling = child;
+        p->sibling = target;
     } else {
-        parent->child = child;
+        parent->child = target;
     }
-    child->parent = parent;
+    target->parent = parent;
 }
 
-void dds3UnlinkProcess(dds3ProcessID_t *unp)
+void dds3UnlinkProcess(dds3ProcessID_t *target)
 {
-    dds3ProcessID_t *parent = unp->parent;
+    dds3ProcessID_t *parent = target->parent;
     dds3ProcessID_t *p;
 
     if (parent == NULL) {
         return;
     }
-    if (parent->child == unp) {
-        parent->child = unp->sibling;
+    if (parent->child == target) {
+        parent->child = target->sibling;
     } else {
         p = parent->child;
-        while (p->sibling != unp) {
+        while (p->sibling != target) {
             p = p->sibling;
         }
-        p->sibling = unp->sibling;
+        p->sibling = target->sibling;
     }
-    unp->parent = NULL;
-    unp->sibling = NULL;
+    target->parent = NULL;
+    target->sibling = NULL;
 }
 
 void dds3SetProcessFlag(dds3ProcessID_t *target, u32 flag, s32 type)

@@ -34,7 +34,7 @@ extern char D_00543698[];
 
 extern u8 D_003FA760[];
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern struct dds3Basic_t *dds3GetControlScene(void);
 
@@ -75,13 +75,13 @@ extern void evtFreeStage(void);
 
 extern s32 sdfDelayedResrcCheck(void);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern sdfVector4_t D_00543628;
 
@@ -91,39 +91,39 @@ extern char *D_00551110;
 
 extern char *D_00551114;
 
-extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 id, sdfVector4_t *pos, f32 *rot);
+extern dds3Basic_t *dds3AddCameraObjectBasicTypeFree(s32 serialID, sdfVector4_t *pos, f32 *rot);
 
 extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 r);
 
-extern void dds3ObjectBaseCreateMover(dds3Basic_t *basic);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 
-extern void dds3ObjectBaseSetPadControl(dds3Basic_t *basic, dds3BasicControlProc_t func);
+extern void dds3ObjectBaseSetPadControl(dds3Basic_t *pObjectBasic, dds3BasicControlProc_t pFuncPadControl);
 
-extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *basic, f32 fovy);
+extern void dds3CameraObjectBasicSetFovy(dds3Basic_t *pBasic, f32 fovy);
 
 extern char D_00543668[];
 
 extern char D_00543678[];
 
-extern void *memcpy(void *dst, const void *src, u32 n);
+extern void *memcpy(void *a, const void *b, u32 c);
 
 extern s32 dds3GetActiveScene(void);
 
-extern dds3Basic_t *dds3GetActiveCameraSceneBasic(s32 scene);
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(s32 pBasic);
 
-extern void dds3SetActiveCameraSceneBasic(s32 scene, s32 basic);
+extern void dds3SetActiveCameraSceneBasic(s32 pSceneBasic, s32 pCameraBasic);
 
-extern void dds3SetRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rot);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
 extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *basic);
 
 extern void dds3SetScreenFovy(f32 fovy);
 
-extern void FromEuler(f32 x, f32 y, f32 z);
+extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 
-extern s32 evtLoadArea(s32 area, s32 room);
+extern s32 evtLoadArea(s32 fld, s32 area);
 
-extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
+extern void dds3SetPosPoseSet(struct dds3Basic_t *pBasic, sdfVector4_t *pos);
 
 extern nbStageState_t nbStageState;
 

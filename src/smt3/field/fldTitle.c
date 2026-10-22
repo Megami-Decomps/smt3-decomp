@@ -15,19 +15,19 @@ enum sl_slot_flag
 
 extern char D_005327B0[];
 
-dds3ProcessID_t *dds3SearchProcessName(const char *name);
+dds3ProcessID_t *dds3SearchProcessName(const char *namestr);
 
 extern char D_00532820[];
 
 extern sdfTexHandle_t *fldTitleMiniTex;
 
-extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
 extern sdfTexHandle_t *fldTitleMiniWork;
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
-extern void fldTitleStart(s32 field, s32 option);
+extern void fldTitleStart(s32 fld, s32 waittime);
 
 extern sdfTexHandle_t *D_0054EF98;
 

@@ -5,11 +5,11 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
-extern void *dds3SearchProcessName(const char *name);
+extern void *dds3SearchProcessName(const char *namestr);
 
 typedef struct
 {
@@ -123,11 +123,11 @@ void rstSetTestParam(void)
     cmbGlobalWork->party[4].unit.exp += cmbGlobalWork->party[4].unit.level * 100;
 }
 
-s32 rstChkLevelUpTarget(datUnitWork_t *unit)
+s32 rstChkLevelUpTarget(datUnitWork_t *pStock)
 {
-    if (unit->flag & 1) {
-        if (!(unit->badstatus & 0x800)) {
-            if (cmbGetLevelUpCount(unit, 0) > 0) {
+    if (pStock->flag & 1) {
+        if (!(pStock->badstatus & 0x800)) {
+            if (cmbGetLevelUpCount(pStock, 0) > 0) {
                 return 1;
             }
         }
@@ -135,7 +135,7 @@ s32 rstChkLevelUpTarget(datUnitWork_t *unit)
     return 0;
 }
 
-extern s32 rstChkLevelUpTarget(datUnitWork_t *unit);
+extern s32 rstChkLevelUpTarget(datUnitWork_t *pStock);
 
 s32 rstChkResultEntry(void)
 {
@@ -153,16 +153,16 @@ s32 rstChkResultEntry(void)
 
 extern s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp);
 
-u8 rstCalcLevelFromExp(u8 index, u32 exp)
+u8 rstCalcLevelFromExp(u8 Index, u32 Exp)
 {
-    datUnitWork_t *unit = &cmbGlobalWork->party[index].unit;
+    datUnitWork_t *unit = &cmbGlobalWork->party[Index].unit;
 
-    return (u8)unit->level + cmbGetLevelUpCount(unit, exp - unit->exp);
+    return (u8)unit->level + cmbGetLevelUpCount(unit, Exp - unit->exp);
 }
 
-s32 rstCalcExpFromLevel(u8 id, s32 level)
+s32 rstCalcExpFromLevel(u8 Index, s32 Level)
 {
-    return datCopyDevilWorkEntry(&cmbGlobalWork->party[id].unit, level);
+    return datCopyDevilWorkEntry(&cmbGlobalWork->party[Index].unit, Level);
 }
 
 void rstChkResult2Process(u8 *work)

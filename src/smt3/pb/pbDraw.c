@@ -67,13 +67,13 @@ extern sdfMat_t *sdfMatNew(void);
 
 extern pbPanel_t *blockDB;
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern s32 pb_draw_mapbase_Process(dds3ProcessID_t *id);
 
@@ -83,13 +83,13 @@ extern s32 pb_draw_exit_Process(dds3ProcessID_t *id);
 
 extern void pb_draw_exit_Shutdown(dds3ProcessID_t *id);
 
-extern void sdfMatSetDiffuse(sdfMat_t *mat, u32 color);
+extern void sdfMatSetDiffuse(sdfMat_t *aMat, u32 aColor);
 
 extern void pbInitMapBaseMat(pbPanel_t *panel);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 
 pbPanel_t *pbInitExitDraw(pbPanel_t *parent) {
@@ -115,23 +115,23 @@ pbPanel_t *pbInitExitDraw(pbPanel_t *parent) {
     return panel;
 }
 
-void pbSetExitDisp(pbPanel_t *panel, s8 disp) {
-    panel->data.value->value = disp;
+void pbSetExitDisp(pbPanel_t *p, s8 sw) {
+    p->data.value->value = sw;
 }
 
 s32 pbGetExitDisp(pbPanel_t *panel) {
     return panel->data.value->value;
 }
 
-void pbSetExitPos(pbPanel_t *panel, s32 x, s32 y) {
-    panel->x = x;
-    panel->y = y;
+void pbSetExitPos(pbPanel_t *p, s32 x, s32 y) {
+    p->x = x;
+    p->y = y;
 }
 
 
 /* NON_MATCHING: 3 of 49 words; the work store and the process load swap delay slots. */
 #ifdef NON_MATCHING
-pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 arg) {
+pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 sw) {
     pbPanel_t *panel = sdfChipAllocDirect(0x10);
     void *work;
     panel->process = dds3StartProcess("pb-draw-mapbase", 0x2AFD, 1, 1, pb_draw_mapbase_Process,
@@ -143,7 +143,7 @@ pbPanel_t *pbInitMapBaseDraw(pbPanel_t *parent, s32 arg) {
     work = sdfChipAllocDirect(0xC);
     panel->data.mat = work;
     memset(work, 0, 0xC);
-    panel->data.mat->value = arg;
+    panel->data.mat->value = sw;
     dds3SetProcessData(panel->process, panel);
     pbInitMapBaseMat(panel);
     return panel;

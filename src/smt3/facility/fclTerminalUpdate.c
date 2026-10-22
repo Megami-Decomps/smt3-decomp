@@ -15,7 +15,7 @@ extern void p2sdStopAllSe(void);
 
 extern s32 dds3FadeCheck(void);
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 typedef struct
 {
@@ -43,7 +43,7 @@ typedef struct
 
 extern trmUpdateWork_t *trmUpdateWork;
 
-s32 trmEndEvent(s32 stopbgm);
+s32 trmEndEvent(s32 BgmMode);
 
 extern s16 fldAllCnt[][2];
 
@@ -96,7 +96,7 @@ extern s32 fmProcessChk(void);
 
 extern s32 trmGetSaveResult(void);
 
-extern void trmStartSaveAct(s32 mode);
+extern void trmStartSaveAct(s32 Mode);
 
 void trmUpdateSave(void)
 {
@@ -109,7 +109,7 @@ void trmUpdateSave(void)
     }
 }
 
-extern void slSetTmnlID(s8 index, u16 id);
+extern void slSetTmnlID(s8 type, u16 id);
 
 extern void fmProcTrigSequence(s32 mode);
 

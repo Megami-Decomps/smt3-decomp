@@ -7,7 +7,7 @@ extern void dds3ParticleManagerExit(void);
 extern void dds3PolygonManagerExit(void);
 extern void dds3BillboardManagerExit(void);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 /* An effect handle: the type's entry in EffMajorTable plus the instance that
  * entry's create returned. version is stamped from the data revision. */
@@ -58,8 +58,8 @@ typedef struct effLegacyInstance_t
 } effLegacyInstance_t;
 
 
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 int printf(const char *fmt, ...);
 EQUATE_FPTODP();
 
@@ -76,20 +76,20 @@ void dds3EffectDataRevision(effResourceHeader_t *header);
 extern u8 dds3EffectBase[];
 extern char D_0054F0B0[];
 extern sdfGrOt_t sdfGrOtTable[];
-extern void sdfRandomizeByTime(void *state);
+extern void sdfRandomizeByTime(void *aCB);
 extern void dds3BillboardManagerInit(void);
 extern void dds3PolygonManagerInit(void);
 extern void dds3ParticleManagerInit(void);
 extern void effDebugInit(void);
 extern void Eve_EffectInit(void);
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
-extern s32 sdfGrAllocPacketBuff(s32 size);
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
-s32 dds3EffectManagerRunF(dds3ProcessID_t *id);
-s32 dds3EffectManagerRun(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID);
+s32 dds3EffectManagerRun(dds3ProcessID_t *ProcessID);
 void dds3EffectManagerExit(void);
 
 void dds3EffectManagerInit(void) {
@@ -109,7 +109,7 @@ void dds3EffectManagerExit(void) {
     dds3BillboardManagerExit();
 }
 
-s32 dds3EffectManagerRunF(dds3ProcessID_t *id)
+s32 dds3EffectManagerRunF(dds3ProcessID_t *ProcessID)
 {
     sdfDrawTag_t *list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfGrOt_t *ot;
@@ -133,7 +133,7 @@ s32 dds3EffectManagerRunF(dds3ProcessID_t *id)
     return 0;
 }
 
-s32 dds3EffectManagerRun(dds3ProcessID_t *id)
+s32 dds3EffectManagerRun(dds3ProcessID_t *ProcessID)
 {
     dds3PolygonLinkOt();
     dds3TrackPolyLinkOt();
@@ -169,69 +169,69 @@ effNode_t *dds3EffectCreate(u16 type, u16 arg, s32 param)
     return node;
 }
 
-void dds3EffectDelete(effNode_t *node)
+void dds3EffectDelete(effNode_t *pData)
 {
-    EffMajorTable[node->type].del(node->instance);
-    sdfChipFreeDirect(node);
+    EffMajorTable[pData->type].del(pData->instance);
+    sdfChipFreeDirect(pData);
 }
 
-void dds3EffectDraw(effNode_t *node)
+void dds3EffectDraw(effNode_t *pData)
 {
-    EffMajorTable[node->type].draw(node->instance);
+    EffMajorTable[pData->type].draw(pData->instance);
 }
 
-void dds3EffectReset(effNode_t *node)
+void dds3EffectReset(effNode_t *hEffect)
 {
-    EffMajorTable[node->type].reset(node->instance);
+    EffMajorTable[hEffect->type].reset(hEffect->instance);
 }
 
-void dds3EffectSetScale(effNode_t *node, f32 scale)
+void dds3EffectSetScale(effNode_t *pData, f32 scale)
 {
-    EffMajorTable[node->type].setscale(node->instance, scale);
+    EffMajorTable[pData->type].setscale(pData->instance, scale);
 }
 
-s32 dds3EffectGetState(effNode_t *node)
+s32 dds3EffectGetState(effNode_t *hEffect)
 {
-    return EffMajorTable[node->type].getstate(node->instance);
+    return EffMajorTable[hEffect->type].getstate(hEffect->instance);
 }
 
-void dds3EffectSetPosition(effNode_t *node, sdfVector4_t *pos)
+void dds3EffectSetPosition(effNode_t *pData, sdfVector4_t *pPos)
 {
-    EffMajorTable[node->type].setposition(node->instance, pos);
+    EffMajorTable[pData->type].setposition(pData->instance, pPos);
 }
 
-void dds3EffectSetRotateMatrix(effNode_t *node, sdfMatrix4_t *matrix)
+void dds3EffectSetRotateMatrix(effNode_t *pData, sdfMatrix4_t *pMatrix)
 {
-    EffMajorTable[node->type].setrotatematrix(node->instance, matrix);
+    EffMajorTable[pData->type].setrotatematrix(pData->instance, pMatrix);
 }
 
-void dds3EffectSetRGBA(effNode_t *node, u32 rgba)
+void dds3EffectSetRGBA(effNode_t *pData, u32 abgr)
 {
-    EffMajorTable[node->type].setrgba(node->instance, rgba);
+    EffMajorTable[pData->type].setrgba(pData->instance, abgr);
 }
 
-void dds3EffectSetLoop(effNode_t *node, u8 loop)
+void dds3EffectSetLoop(effNode_t *hEffect, u8 loop)
 {
-    EffMajorTable[node->type].setloop(node->instance, loop);
+    EffMajorTable[hEffect->type].setloop(hEffect->instance, loop);
 }
 
-s32 dds3EffectGetLoop(effNode_t *node)
+s32 dds3EffectGetLoop(effNode_t *hEffect)
 {
-    return EffMajorTable[node->type].getloop(node->instance);
+    return EffMajorTable[hEffect->type].getloop(hEffect->instance);
 }
 
 
-effNode_t *dds3EffectLoad(effResourceHeader_t *header)
+effNode_t *dds3EffectLoad(effResourceHeader_t *pD3P)
 {
     effNode_t *node;
     effLegacyInstance_t *instance;
 
-    if (header->version < 1.03f) {
-        printf("old version!![%f]\n", header->version);
-        dds3EffectDataRevision(header);
+    if (pD3P->version < 1.03f) {
+        printf("old version!![%f]\n", pD3P->version);
+        dds3EffectDataRevision(pD3P);
     }
-    node = dds3EffectCreate((u16)header->type, (u16)header->arg, (s32)header->payload);
-    if (header->version <= 1.02f) {
+    node = dds3EffectCreate((u16)pD3P->type, (u16)pD3P->arg, (s32)pD3P->payload);
+    if (pD3P->version <= 1.02f) {
         switch (node->type) {
         case 0:
         case 1:
@@ -248,13 +248,13 @@ effNode_t *dds3EffectLoad(effResourceHeader_t *header)
     return node;
 }
 
-effNode_t *dds3EffectFileLoad(const char *resource) {
+effNode_t *dds3EffectFileLoad(const char *pFilename) {
     u32 resolvedId;
     sdfMemHandle_t *resourceHandle;
     effNode_t *node;
 
-    printf("d3p file read...[%s]\n", resource);
-    resourceHandle = sdfDevLoadFileEx(resource, &resolvedId, 0);
+    printf("d3p file read...[%s]\n", pFilename);
+    resourceHandle = sdfDevLoadFileEx(pFilename, &resolvedId, 0);
     node = dds3EffectLoad((effResourceHeader_t *)resolvedId);
     sdfMemFreeDirect(resourceHandle);
     return node;

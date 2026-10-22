@@ -65,13 +65,13 @@ extern pbPanel_t *record;
 
 extern pbPanel_t *blockDB;
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern s32 pb_draw_help_Process(dds3ProcessID_t *id);
 
@@ -79,9 +79,9 @@ extern void pb_draw_help_Shutdown(dds3ProcessID_t *id);
 
 extern pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 
 pbPanel_t *pbStartHelp(pbPanel_t *parent, s32 page) {

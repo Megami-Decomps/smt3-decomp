@@ -5,9 +5,9 @@ typedef struct {
     void *textures[4];
 } nmeTextureWork_t;
 
-extern void sdfTexFree(void *texture);
+extern void sdfTexFree(void *aHandle);
 
-extern void dds3KillProcessName(const char *name, s32 hierarchy);
+extern void dds3KillProcessName(const char *name, s32 shutdowntimer);
 
 extern char D_00551690[];
 

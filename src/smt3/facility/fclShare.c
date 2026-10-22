@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 typedef struct
 {
@@ -44,16 +44,16 @@ typedef struct
     /* 0x20 */ u8 unk_20;
 } fclSprite_t;
 
-extern void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *sprite,
-                              u8 flags, u8 mode, u8 filter, s32 ot);
+extern void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite,
+                              u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo);
 
-extern void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
-                                   fclSprite_t *sprite, u8 flags, u8 mode, u8 filter, s32 ot);
+extern void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
+                                   fclSprite_t *pSprite, u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo);
 
-extern void fclSetSprite(fclSprite_t *sprite, s32 x, s32 y, s32 d, s32 u0, s32 v0, s32 u1,
-                         s32 v1, s32 color, s32 tex);
+extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2,
+                         s32 V2, s32 Col, s32 TexHandle);
 
-extern void fclDrawSpriteEx(s32 a, s32 b, s32 w, s32 h, fclSprite_t *sprite, s32 flags);
+extern void fclDrawSpriteEx(s32 X, s32 Y, s32 W, s32 H, fclSprite_t *pSprite, s32 OtNo);
 
 extern void fclRunPanelAnim(void *work);
 
@@ -89,96 +89,96 @@ extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
 
 extern void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
 
-extern s32 sdfTexSet(void *data);
+extern s32 sdfTexSet(void *aTex);
 
-s32 fclLoadTexture(char *name)
+s32 fclLoadTexture(char *pFileName)
 {
     void *data;
     s32 size;
     void *file;
     s32 handle;
 
-    file = sdfDevLoadFileEx(name, &data, &size);
+    file = sdfDevLoadFileEx(pFileName, &data, &size);
     handle = sdfTexSet(data);
     sdfMemFreeDirect(file);
     return handle;
 }
 
-void fclSetSpriteColor(u8 *sprite, u32 color)
+void fclSetSpriteColor(u8 *pSprite, u32 Col)
 {
-    sprite[0x1C] = color >> 24;
-    sprite[0x1D] = color >> 16;
-    sprite[0x1E] = color >> 8;
-    sprite[0x1F] = color;
+    pSprite[0x1C] = Col >> 24;
+    pSprite[0x1D] = Col >> 16;
+    pSprite[0x1E] = Col >> 8;
+    pSprite[0x1F] = Col;
 }
 
-void fclSetSpriteEx(fclSprite_t *sprite, fclSpriteRect_t *rect, s32 a, s32 b, s32 d, s32 color,
-                    s32 e, s32 tex)
+void fclSetSpriteEx(fclSprite_t *pSprite, fclSpriteRect_t *pSpriteBase, s32 X, s32 Y, s32 Z, s32 Col,
+                    s32 Flag, s32 TexHandle)
 {
     fclSpriteRect_t *r;
     s32 u0;
     s32 v0;
     s32 u1;
 
-    sprite->unk_10 = a << 4;
-    sprite->tex = tex;
-    sprite->unk_14 = b << 3;
-    sprite->unk_18 = d;
-    sprite->unk_20 = e;
-    fclSetSpriteColor((u8 *)sprite, color);
-    r = (fclSpriteRect_t *)&sprite->unk_04;
-    *r = *rect;
+    pSprite->unk_10 = X << 4;
+    pSprite->tex = TexHandle;
+    pSprite->unk_14 = Y << 3;
+    pSprite->unk_18 = Z;
+    pSprite->unk_20 = Flag;
+    fclSetSpriteColor((u8 *)pSprite, Col);
+    r = (fclSpriteRect_t *)&pSprite->unk_04;
+    *r = *pSpriteBase;
     if (r->x == 0) {
-        r->x = sprite->unk_0C;
+        r->x = pSprite->unk_0C;
     }
-    if (sprite->unk_06 == 0) {
-        sprite->unk_06 = sprite->unk_0E;
+    if (pSprite->unk_06 == 0) {
+        pSprite->unk_06 = pSprite->unk_0E;
     }
-    u0 = sprite->unk_08;
-    v0 = sprite->unk_0A;
-    u1 = sprite->unk_0C;
-    sprite->unk_08 = u0 << 4;
-    sprite->unk_0A = v0 << 4;
-    sprite->unk_0C = (u1 + u0) << 4;
-    sprite->unk_0E = (sprite->unk_0E + v0) << 4;
+    u0 = pSprite->unk_08;
+    v0 = pSprite->unk_0A;
+    u1 = pSprite->unk_0C;
+    pSprite->unk_08 = u0 << 4;
+    pSprite->unk_0A = v0 << 4;
+    pSprite->unk_0C = (u1 + u0) << 4;
+    pSprite->unk_0E = (pSprite->unk_0E + v0) << 4;
 }
 
-void fclSetSprite(fclSprite_t *sprite, s32 x, s32 y, s32 d, s32 u0, s32 v0, s32 u1, s32 v1,
-                  s32 color, s32 tex)
+void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2, s32 V2,
+                  s32 Col, s32 TexHandle)
 {
-    u0 <<= 4;
-    v0 <<= 4;
-    u1 <<= 4;
-    v1 <<= 4;
-    sprite->unk_04 = x;
-    sprite->unk_0E = v1;
-    sprite->tex = tex;
-    sprite->unk_18 = d;
-    sprite->unk_06 = y;
-    sprite->unk_08 = u0;
-    sprite->unk_0A = v0;
-    sprite->unk_0C = u1;
-    sprite->unk_14 = 0;
-    sprite->unk_10 = 0;
-    fclSetSpriteColor((u8 *)sprite, color);
+    U1 <<= 4;
+    V1 <<= 4;
+    U2 <<= 4;
+    V2 <<= 4;
+    pSprite->unk_04 = Xsize;
+    pSprite->unk_0E = V2;
+    pSprite->tex = TexHandle;
+    pSprite->unk_18 = Z;
+    pSprite->unk_06 = Ysize;
+    pSprite->unk_08 = U1;
+    pSprite->unk_0A = V1;
+    pSprite->unk_0C = U2;
+    pSprite->unk_14 = 0;
+    pSprite->unk_10 = 0;
+    fclSetSpriteColor((u8 *)pSprite, Col);
 }
 
-void fclSetSpriteNormal(fclSprite_t *a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
+void fclSetSpriteNormal(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 Col, s32 TexHandle)
 {
-    fclSetSprite(a, b, c, d, e, f, e + b, f + c, g, h);
+    fclSetSprite(pSprite, Xsize, Ysize, Z, U1, V1, U1 + Xsize, V1 + Ysize, Col, TexHandle);
 }
 
-void fclDrawSprite(s32 a, s32 b, fclSprite_t *sprite)
+void fclDrawSprite(s32 X, s32 Y, fclSprite_t *pSprite)
 {
-    fclDrawSpriteEx(a, b, sprite->unk_04, sprite->unk_06, sprite, 0x47);
+    fclDrawSpriteEx(X, Y, pSprite->unk_04, pSprite->unk_06, pSprite, 0x47);
 }
 
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteEx);
 
 /* NON_MATCHING: 111 of 180 words differ (first at +0x20). */
 #ifdef NON_MATCHING
-void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *sprite, u8 flags,
-                       u8 mode, u8 filter, s32 ot)
+void fclDrawSpriteCore(s32 X, s32 Y, s32 W, s32 H, s32 *pCol, fclSprite_t *pSprite, u8 FlipFlag,
+                       u8 AlphaFlag, u8 FilterFlag, s32 OtNo)
 {
     sdfGrOt_t *otp;
     void *packet;
@@ -192,83 +192,83 @@ void fclDrawSpriteCore(s32 x, s32 y, s32 w, s32 h, s32 *color, fclSprite_t *spri
     u32 t;
     u32 c;
 
-    if (filter == 0) {
-        sdfTexSetFilter(sprite->tex, 0, 1);
+    if (FilterFlag == 0) {
+        sdfTexSetFilter(pSprite->tex, 0, 1);
     } else {
-        sdfTexSetFilter(sprite->tex, 1, 1);
+        sdfTexSetFilter(pSprite->tex, 1, 1);
     }
     packet = (void *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(5, 1));
     sdf2DMakePrimPacketHeader(packet, 0x156, 5, 0x43431, 1);
     prim = (u64 *)sdf2DGetPrimPtr(packet);
-    uv[0] = sprite->unk_08 + 8;
-    uv[1] = sprite->unk_0A + 8;
-    uv[2] = sprite->unk_0C + 8;
-    uv[3] = sprite->unk_0E + 8;
-    x0 = x + 0x6FF8;
-    y0 = y + 0x78FC;
-    x1 = x0 + (w << 4);
-    y1 = y0 + (h << 3);
-    if ((flags & 1) != 0) {
+    uv[0] = pSprite->unk_08 + 8;
+    uv[1] = pSprite->unk_0A + 8;
+    uv[2] = pSprite->unk_0C + 8;
+    uv[3] = pSprite->unk_0E + 8;
+    x0 = X + 0x6FF8;
+    y0 = Y + 0x78FC;
+    x1 = x0 + (W << 4);
+    y1 = y0 + (H << 3);
+    if ((FlipFlag & 1) != 0) {
         t = x0;
         x0 = x1;
         x1 = t;
     }
-    if ((flags & 2) != 0) {
+    if ((FlipFlag & 2) != 0) {
         t = y0;
         y0 = y1;
         y1 = t;
     }
-    if (color == NULL) {
-        prim[0] = sprite->color[0] | ((u64)sprite->color[1] << 32);
-        prim[1] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+    if (pCol == NULL) {
+        prim[0] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
+        prim[1] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
     } else {
-        c = *(u32 *)color;
+        c = *(u32 *)pCol;
         prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
         prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = x1 | ((u64)y1 << 32);
-    prim[5] = sprite->unk_18;
+    prim[5] = pSprite->unk_18;
     prim[6] = uv[2] | ((u64)uv[3] << 32);
     prim[8] = x0 | ((u64)y0 << 32);
-    prim[9] = sprite->unk_18;
-    switch (mode) {
+    prim[9] = pSprite->unk_18;
+    switch (AlphaFlag) {
     case 1:
-        fclDrawPanelSprite2(0x48, ot);
+        fclDrawPanelSprite2(0x48, OtNo);
         break;
     case 2:
-        fclDrawPanelSprite2(0x42, ot);
+        fclDrawPanelSprite2(0x42, OtNo);
         break;
     default:
-        fclDrawPanelSprite2(0x44, ot);
+        fclDrawPanelSprite2(0x44, OtNo);
         break;
     }
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdf2DLinkTexPacket(tag, sprite->tex, 0);
+    sdf2DLinkTexPacket(tag, pSprite->tex, 0);
     sdfDrawTagLink(tag, packet);
-    otp = &sdfGrOtTable[ot];
+    otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
-    fclDrawPanelSprite2(0x44, ot);
+    fclDrawPanelSprite2(0x44, OtNo);
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteCore);
 #endif
 
-extern f32 sdfSin(f32 angle);
+extern f32 sdfSin(f32 aRadius);
 
-extern f32 sdfCos(f32 angle);
+extern f32 sdfCos(f32 aRadius);
 
-void fclCalcRotPos(s32 *x, s32 *y, f32 angle, s32 w, s32 h, s32 ox, s32 oy)
+void fclCalcRotPos(s32 *pBufX, s32 *pBufY, f32 DistX, s32 DistY, s32 CenterX, s32 CenterY, s32 Angle)
 {
-    f32 rad = angle * 0.0174532925f;
-    f32 hh = h * 0.875f;
-    f32 hw = w / 2;
+    f32 rad = DistX * 0.0174532925f;
+    f32 hh = CenterX * 0.875f;
+    f32 hw = DistY / 2;
 
-    *x = sdfCos(rad) * hw - sdfSin(rad) * hh;
-    *y = sdfSin(rad) * hw + sdfCos(rad) * hh;
-    *x = *x * 2 + ox;
-    *y = *y / 0.875f + oy;
+    *pBufX = sdfCos(rad) * hw - sdfSin(rad) * hh;
+    *pBufY = sdfSin(rad) * hw + sdfCos(rad) * hh;
+    *pBufX = *pBufX * 2 + CenterY;
+    *pBufY = *pBufY / 0.875f + Angle;
 }
 
 typedef struct
@@ -277,14 +277,14 @@ typedef struct
     /* 0x4 */ s32 y;
 } fclRotPoint_t;
 
-extern void fclCalcRotPos(s32 *x, s32 *y, f32 angle, s32 w, s32 h, s32 ox, s32 oy);
+extern void fclCalcRotPos(s32 *pBufX, s32 *pBufY, f32 DistX, s32 DistY, s32 CenterX, s32 CenterY, s32 Angle);
 
 /* NON_MATCHING: 86 of 298 words differ at the exact size: the angle `mov.s`
  * scheduled out of three call delay slots, one byte of the colour read as a
  * shift rather than a load, and the quadword block hoisted. */
 #ifdef NON_MATCHING
-void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
-                            fclSprite_t *sprite, u8 flags, u8 mode, u8 filter, s32 ot)
+void fclDrawSpriteAngleCore(s32 X, s32 Y, s32 W, s32 H, f32 Angle, s32 *pCol,
+                            fclSprite_t *pSprite, u8 FlipFlag, u8 AlphaFlag, u8 FilterFlag, s32 OtNo)
 {
     sdfGrOt_t *otp;
     void *packet;
@@ -303,18 +303,18 @@ void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
     s32 t;
     u32 c;
 
-    if (filter == 0) {
-        sdfTexSetFilter(sprite->tex, 0, 1);
+    if (FilterFlag == 0) {
+        sdfTexSetFilter(pSprite->tex, 0, 1);
     } else {
-        sdfTexSetFilter(sprite->tex, 1, 1);
+        sdfTexSetFilter(pSprite->tex, 1, 1);
     }
     packet = (void *)sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(3, 4));
     sdf2DMakePrimPacketHeader(packet, 0x15C, 3, 0x531, 4);
     prim = (u64 *)sdf2DGetPrimPtr(packet);
-    x0 = x + 0x7000;
-    y0 = y + 0x7900;
-    x1 = x0 + (w << 4);
-    y1 = y0 + (h << 3);
+    x0 = X + 0x7000;
+    y0 = Y + 0x7900;
+    x1 = x0 + (W << 4);
+    y1 = y0 + (H << 3);
     hw = (x1 - x0) / 2;
     hh = (y1 - y0) / 2;
     cx = x0 + hw;
@@ -323,15 +323,15 @@ void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
     pt[0].y = y0;
     pt[3].x = x1;
     pt[3].y = y1;
-    fclCalcRotPos(&pt[0].x, &pt[0].y, angle, -hw, -hh, cx, cy);
-    fclCalcRotPos(&pt[1].x, &pt[1].y, angle, hw, -hh, cx, cy);
-    fclCalcRotPos(&pt[2].x, &pt[2].y, angle, -hw, hh, cx, cy);
-    fclCalcRotPos(&pt[3].x, &pt[3].y, angle, hw, hh, cx, cy);
-    uv[0] = sprite->unk_08;
-    uv[2] = sprite->unk_0C;
-    uv[1] = sprite->unk_0A;
-    uv[3] = sprite->unk_0E;
-    if ((flags & 1) != 0) {
+    fclCalcRotPos(&pt[0].x, &pt[0].y, Angle, -hw, -hh, cx, cy);
+    fclCalcRotPos(&pt[1].x, &pt[1].y, Angle, hw, -hh, cx, cy);
+    fclCalcRotPos(&pt[2].x, &pt[2].y, Angle, -hw, hh, cx, cy);
+    fclCalcRotPos(&pt[3].x, &pt[3].y, Angle, hw, hh, cx, cy);
+    uv[0] = pSprite->unk_08;
+    uv[2] = pSprite->unk_0C;
+    uv[1] = pSprite->unk_0A;
+    uv[3] = pSprite->unk_0E;
+    if ((FlipFlag & 1) != 0) {
         t = pt[0].x;
         pt[0].x = pt[1].x;
         pt[1].x = t;
@@ -339,7 +339,7 @@ void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
         pt[2].x = pt[3].x;
         pt[3].x = t;
     }
-    if ((flags & 2) != 0) {
+    if ((FlipFlag & 2) != 0) {
         t = pt[0].y;
         pt[0].y = pt[1].y;
         pt[1].y = t;
@@ -347,17 +347,17 @@ void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
         pt[2].y = pt[3].y;
         pt[3].y = t;
     }
-    if (color == NULL) {
-        prim[0] = sprite->color[0] | ((u64)sprite->color[1] << 32);
-        prim[1] = sprite->color[2] | ((u64)sprite->color[3] << 32);
-        prim[6] = sprite->color[0] | ((u64)sprite->color[1] << 32);
-        prim[7] = sprite->color[2] | ((u64)sprite->color[3] << 32);
-        prim[12] = sprite->color[0] | ((u64)sprite->color[1] << 32);
-        prim[13] = sprite->color[2] | ((u64)sprite->color[3] << 32);
-        prim[18] = sprite->color[0] | ((u64)sprite->color[1] << 32);
-        prim[19] = sprite->color[2] | ((u64)sprite->color[3] << 32);
+    if (pCol == NULL) {
+        prim[0] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
+        prim[1] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
+        prim[6] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
+        prim[7] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
+        prim[12] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
+        prim[13] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
+        prim[18] = pSprite->color[0] | ((u64)pSprite->color[1] << 32);
+        prim[19] = pSprite->color[2] | ((u64)pSprite->color[3] << 32);
     } else {
-        c = *(u32 *)color;
+        c = *(u32 *)pCol;
         prim[1] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
         prim[0] = ((c >> 24) & 0xFF) | ((u64)((c >> 16) & 0xFF) << 32);
         prim[7] = ((c >> 8) & 0xFF) | ((u64)(c & 0xFF) << 32);
@@ -369,34 +369,34 @@ void fclDrawSpriteAngleCore(s32 x, s32 y, s32 w, s32 h, f32 angle, s32 *color,
     }
     prim[2] = uv[0] | ((u64)uv[1] << 32);
     prim[4] = pt[0].x | ((u64)pt[0].y << 32);
-    prim[5] = (u32)(sprite->unk_18 >> 4);
+    prim[5] = (u32)(pSprite->unk_18 >> 4);
     prim[8] = uv[2] | ((u64)uv[1] << 32);
     prim[10] = pt[1].x | ((u64)pt[1].y << 32);
-    prim[11] = (u32)(sprite->unk_18 >> 4);
+    prim[11] = (u32)(pSprite->unk_18 >> 4);
     prim[14] = uv[0] | ((u64)uv[3] << 32);
     prim[16] = pt[2].x | ((u64)pt[2].y << 32);
-    prim[17] = (u32)(sprite->unk_18 >> 4);
+    prim[17] = (u32)(pSprite->unk_18 >> 4);
     prim[20] = uv[2] | ((u64)uv[3] << 32);
     prim[22] = pt[3].x | ((u64)pt[3].y << 32);
-    prim[23] = (u32)(sprite->unk_18 >> 4);
-    switch (mode) {
+    prim[23] = (u32)(pSprite->unk_18 >> 4);
+    switch (AlphaFlag) {
     case 1:
-        fclDrawPanelSprite2(0x48, ot);
+        fclDrawPanelSprite2(0x48, OtNo);
         break;
     case 2:
-        fclDrawPanelSprite2(0x42, ot);
+        fclDrawPanelSprite2(0x42, OtNo);
         break;
     default:
-        fclDrawPanelSprite2(0x44, ot);
+        fclDrawPanelSprite2(0x44, OtNo);
         break;
     }
     tag = (void *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(tag);
-    sdf2DLinkTexPacket(tag, sprite->tex, 0);
+    sdf2DLinkTexPacket(tag, pSprite->tex, 0);
     sdfDrawTagLink(tag, packet);
-    otp = &sdfGrOtTable[ot];
+    otp = &sdfGrOtTable[OtNo];
     otp->regFunc(otp, tag);
-    fclDrawPanelSprite2(0x44, ot);
+    fclDrawPanelSprite2(0x44, OtNo);
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclShare", fclDrawSpriteAngleCore);

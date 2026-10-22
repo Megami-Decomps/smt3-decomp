@@ -30,7 +30,7 @@ extern s32 dds3SelectMenu(s32, s32, s32, s32, s32, s32 *, s32 *, s32 *, s32 *);
 
 extern void *memcpy(void *, const void *, u32);
 
-void evtBitOff(s32 flag);
+void evtBitOff(s32 no);
 
 /* mdlEffectResrc_t.type: which effect a controller drives. */
 typedef enum dds3ModelEffectType {
@@ -78,7 +78,7 @@ extern char D_0054F740[];
 
 extern char D_0054F748[];
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */ void evtBitOn(s32 flag);
 

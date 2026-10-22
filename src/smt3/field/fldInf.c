@@ -127,11 +127,11 @@ dds3Basic_t *dds3GetActiveScene(void);
 
 extern u32 gEvnRngPid[];
 
-extern scrProcessWork_s *scrSearchScriptName(char *name);
+extern scrProcessWork_s *scrSearchScriptName(char *scriptname);
 
 extern fldFileResource_t *gEvnRng[];
 
-s32 dds3SceneBasicStartScript(dds3Basic_t *worldNode, const char *taskName);
+s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s32 strcmp(const char *left, const char *right);
 
@@ -141,13 +141,13 @@ extern s32 gFldInfIdx;
 
 extern const char D_002FF3E0[];
 
-void fldMakeFilePath(char *buffer, s32 area, s32 unused);
+void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
-devState_t *sdfFileOpen(const char *path);
+devState_t *sdfFileOpen(const char *aFileName);
 
-void sdfFileRead(devState_t *state, void *buffer, s32 byteCount);
+void sdfFileRead(devState_t *aHandle, void *aPtr, s32 aLeng);
 
-void sdfFileClose(devState_t *state);
+void sdfFileClose(devState_t *aHandle);
 
 extern s32 sprintf(char *, const char *, ...);
 
@@ -161,7 +161,7 @@ extern s32 gFldInf_WpExit;
 
 extern u8 *fldDoor_Find2(const char *);
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 /* fldDoorTable is fldDoorParamTable.actors: the same 100-byte waypoint record,
    reached through its own symbol at fldDoorParamTable + 0xA0. */
@@ -171,15 +171,15 @@ extern s32 gFldWapPanel;
 
 extern u8 D_00303020[];
 
-const char *fldInf_FindTypeEveNpc(const char *eventName) {
+const char *fldInf_FindTypeEveNpc(const char *evename) {
     s32 packOrSetIndex;
     s32 eventHitIndex;
-    if (eventName == 0) return 0;
+    if (evename == 0) return 0;
     for (packOrSetIndex = 0; packOrSetIndex < 8; packOrSetIndex++) {
         if (fldInfTable.packs[packOrSetIndex].setIndex != 0) {
             for (eventHitIndex = 0; eventHitIndex < 5; eventHitIndex++) {
                 if (fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].area == fldGlobalBase.floor + 1 &&
-                    strcmp(eventName, fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
+                    strcmp(evename, fldInfTable.packs[packOrSetIndex].hits[eventHitIndex].eventName) == 0) {
                     gFldInfIdx = fldInfTable.packs[packOrSetIndex].setIndex;
                     return D_002FF3E0;
                 }
@@ -189,7 +189,7 @@ const char *fldInf_FindTypeEveNpc(const char *eventName) {
     for (packOrSetIndex = 0; packOrSetIndex < 40; packOrSetIndex++) {
         if ((u16)fldInfTable.sets[packOrSetIndex].kindArea.packed < 2 &&
             fldInfTable.sets[packOrSetIndex].action == fldGlobalBase.floor + 1 &&
-            strcmp(eventName, fldInfTable.sets[packOrSetIndex].eventName) == 0) {
+            strcmp(evename, fldInfTable.sets[packOrSetIndex].eventName) == 0) {
             gFldInfIdx = packOrSetIndex;
             return D_002FF3E0;
         }
@@ -199,13 +199,13 @@ const char *fldInf_FindTypeEveNpc(const char *eventName) {
 
 /* NON_MATCHING: 183 of 184 words differ (first at +0x0). */
 #ifdef NON_MATCHING
-s32 fldInfChkFastPanel(s32 row) {
+s32 fldInfChkFastPanel(s32 aline) {
     s32 value;
     s32 slot;
     s32 index;
 
-    if (row < 0xA) {
-        index = row - 1;
+    if (aline < 0xA) {
+        index = aline - 1;
         if (fldInfTable.sets[gFldInfIdx].flags[index].flag == 0) {
             value = fldInfTable.sets[gFldInfIdx].flags[index].offTarget;
         } else if (evtBitCheck(fldInfTable.sets[gFldInfIdx].flags[index].flag) != 0) {
@@ -214,7 +214,7 @@ s32 fldInfChkFastPanel(s32 row) {
             value = fldInfTable.sets[gFldInfIdx].flags[index].offTarget;
         }
     } else {
-        index = row - 0xA;
+        index = aline - 0xA;
         value = fldInfTable.sets[gFldInfIdx].messages[index].targets[0];
     }
     switch (value) {
@@ -263,7 +263,7 @@ s32 fldInfChkFastPanel(s32 row) {
     }
     index = value - 0xA;
     if (fldInfTable.sets[gFldInfIdx].messages[index].kind == -1) {
-        return fldInfChkFastPanel(row);
+        return fldInfChkFastPanel(aline);
     }
     if ((u16)fldInfTable.sets[gFldInfIdx].messages[index].kind >= 2) {
         return 0;
@@ -286,11 +286,11 @@ INCLUDE_ASM(const s32, "field/fldInf", fldInfChkFastPanel);
 
 INCLUDE_ASM(const s32, "field/fldInf", fldInfNext);
 
-s32 fldInfGet(s32 row, s32 which) {
-    s32 message = row - 10;
+s32 fldInfGet(s32 aline, s32 acol) {
+    s32 message = aline - 10;
     s32 ret = 0;
 
-    switch (which) {
+    switch (acol) {
     case 0:
         ret = fldInfTable.sets[gFldInfIdx].messages[message].kind;
         break;
@@ -314,8 +314,8 @@ void fldInfLoad(s32 field) {
     }
 }
 
-void fldInfLoadFromMem(const void *source) {
-    memcpy(&fldInfTable, source, sizeof(fldInfTable));
+void fldInfLoadFromMem(const void *data) {
+    memcpy(&fldInfTable, data, sizeof(fldInfTable));
 }
 
 void fldInfToWAP(void) {

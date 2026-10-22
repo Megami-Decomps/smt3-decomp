@@ -39,12 +39,12 @@ typedef struct
     /* 0x015C */ cmpCursorWork_t listCursor;
 } lstWork_t;
 
-extern void lstMoveCursor(lstWork_t *list, s8 dir);
+extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
 
-extern void lstInitListWindow(s32 a, s32 b, s32 color, s32 d, s32 e, s32 f, s32 g,
-                              void *list);
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s32 Style,
+                              void *pListWindow);
 
-extern void lstMoveCursor2(lstWork_t *list, s8 dir);
+extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 
 extern void cmpDrawScrollBar(s32 a, s32 b, s32 c, s32 d, s32 e, s32 color, s32 g, s32 h,
                              cmpCursorWork_t *cursor, s32 j, s32 k);
@@ -62,24 +62,24 @@ void func_002134F8(u8 *base, u8 mask, s32 index)
 }
 
 /* Called above its definition, where ee-gcc assumed int. */
-s32 cmpMoveCursor(cmpCursorWork_t *cursor, s8 dir);
+s32 cmpMoveCursor(cmpCursorWork_t *cur, s8 dir);
 
-void lstMoveCursor(lstWork_t *work, s8 dir)
+void lstMoveCursor(lstWork_t *pListWindow, s8 Dir)
 {
     s32 first;
     s32 pos;
 
-    first = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
-    if (dir == 0) {
-        cmpMoveCursor(&work->listCursor, 0);
+    first = pListWindow->listCursor.unk_22 + (u8)pListWindow->listCursor.unk_24;
+    if (Dir == 0) {
+        cmpMoveCursor(&pListWindow->listCursor, 0);
         return;
     }
-    while (cmpMoveCursor(&work->listCursor, dir) != 0) {
-        pos = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
+    while (cmpMoveCursor(&pListWindow->listCursor, Dir) != 0) {
+        pos = pListWindow->listCursor.unk_22 + (u8)pListWindow->listCursor.unk_24;
         if (pos == first) {
             break;
         }
-        if ((work->unk_0009[pos + 0x50] & 1) != 0) {
+        if ((pListWindow->unk_0009[pos + 0x50] & 1) != 0) {
             break;
         }
     }
@@ -88,22 +88,22 @@ void lstMoveCursor(lstWork_t *work, s8 dir)
 /* Called above its definition, where ee-gcc assumed int. */
 s32 cmpMoveCursor2(cmpCursorWork_t *cursor, s8 dir);
 
-void lstMoveCursor2(lstWork_t *work, s8 dir)
+void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir)
 {
     s32 first;
     s32 pos;
 
-    first = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
-    if (dir == 0) {
-        cmpMoveCursor2(&work->listCursor, 0);
+    first = pListWindow->listCursor.unk_22 + (u8)pListWindow->listCursor.unk_24;
+    if (Dir == 0) {
+        cmpMoveCursor2(&pListWindow->listCursor, 0);
         return;
     }
-    while (cmpMoveCursor2(&work->listCursor, dir) != 0) {
-        pos = work->listCursor.unk_22 + (u8)work->listCursor.unk_24;
+    while (cmpMoveCursor2(&pListWindow->listCursor, Dir) != 0) {
+        pos = pListWindow->listCursor.unk_22 + (u8)pListWindow->listCursor.unk_24;
         if (pos == first) {
             break;
         }
-        if ((work->unk_0009[pos + 0x50] & 1) != 0) {
+        if ((pListWindow->unk_0009[pos + 0x50] & 1) != 0) {
             break;
         }
     }
@@ -136,18 +136,18 @@ typedef struct
     /* 0x0170 */ s32 unk_170;
 } lstWindowWork_t;
 
-void lstDrawListWindowCursor(lstWindowWork_t *work, s32 arg)
+void lstDrawListWindowCursor(lstWindowWork_t *pListWindow, s32 OtNo)
 {
-    cmpDrawScrollBar(work->x + work->unk_164 * 16, work->y + work->unk_168 * 8,
-                     work->unk_08, work->unk_16C, work->unk_170, 0x80808080, 0x100, 0,
-                     (cmpCursorWork_t *)((u8 *)work + 0x15C), 0, arg);
+    cmpDrawScrollBar(pListWindow->x + pListWindow->unk_164 * 16, pListWindow->y + pListWindow->unk_168 * 8,
+                     pListWindow->unk_08, pListWindow->unk_16C, pListWindow->unk_170, 0x80808080, 0x100, 0,
+                     (cmpCursorWork_t *)((u8 *)pListWindow + 0x15C), 0, OtNo);
 }
 
-extern void lstMoveCursor(lstWork_t *work, s8 dir);
+extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
 
-s32 lstPageUp(lstWork_t *work)
+s32 lstPageUp(lstWork_t *plistwin)
 {
-    cmpCursorWork_t *cursor = &work->listCursor;
+    cmpCursorWork_t *cursor = &plistwin->listCursor;
     s32 count = cursor->unk_26;
     s32 i;
 
@@ -155,14 +155,14 @@ s32 lstPageUp(lstWork_t *work)
         if (cursor->unk_04 != 0) {
             break;
         }
-        lstMoveCursor(work, -1);
+        lstMoveCursor(plistwin, -1);
     }
     return i;
 }
 
-s32 lstPageDown(lstWork_t *work)
+s32 lstPageDown(lstWork_t *plistwin)
 {
-    cmpCursorWork_t *cursor = &work->listCursor;
+    cmpCursorWork_t *cursor = &plistwin->listCursor;
     s32 count = cursor->unk_26;
     s32 i;
 
@@ -170,7 +170,7 @@ s32 lstPageDown(lstWork_t *work)
         if (cursor->unk_04 != 0) {
             break;
         }
-        lstMoveCursor(work, 1);
+        lstMoveCursor(plistwin, 1);
     }
     return i;
 }

@@ -5,11 +5,11 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 typedef struct
 {
@@ -22,7 +22,7 @@ extern void p2sdStopBGM(s32 id);
 
 extern cmbWork_t *D_0054FB20;
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 typedef struct
 {
@@ -75,7 +75,7 @@ extern shopProcWork_t *shopProcWork;
 
 extern s32 printf(const char *fmt, ...);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 extern char D_0054FB48[];
 
@@ -83,7 +83,7 @@ extern char D_0053D028[];
 
 extern char D_0053D038[];
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 typedef struct
 {
@@ -127,9 +127,9 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
 
-extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 /* Called above its definition, where ee-gcc assumed int. */
 void *sdfDevLoadFileEx(char *name, void **data, s32 *size);

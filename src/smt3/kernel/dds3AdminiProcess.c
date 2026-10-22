@@ -57,18 +57,18 @@ int printf(const char *fmt, ...);
 
 extern dds3AdminiEntry_t dds3AdminiList[];
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
-extern void *memcpy(void *dest, const void *source, u32 size);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern void *memcpy(void *a, const void *b, u32 c);
 extern s32 dds3ExistProcess(dds3ProcessID_t *id);
 extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
 
 dds3AdminiWork_t *GetAdminiProcessData(void);
-void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep);
+void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore);
 s32 dds3AdminiStartSequence(dds3ProcessID_t *id);
 s32 dds3AdminiNeoProcess(dds3ProcessID_t *id);
 s32 dds3AdminiEndCheck(dds3ProcessID_t *id);
@@ -90,13 +90,13 @@ u32 dds3_102828(void)
 
 /* Requests retain byte-sized sequence/size storage: 256 bytes records zero.
  * Release the old payload before copying the new one. */
-void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep)
+void dds3AdminiCallSequence(s32 sequence, void *data, u32 datasize, s32 restore)
 {
     dds3AdminiWork_t *work;
     void *previousData;
     u32 flag;
 
-    if (data == NULL || size <= 0x100) {
+    if (data == NULL || datasize <= 0x100) {
         work = GetAdminiProcessData();
         previousData = work->reqdata;
         work->nextsequence = sequence;
@@ -112,14 +112,14 @@ void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep)
             work->reqsize = 0;
         }
         if (data != NULL) {
-            work->reqdata = sdfChipAllocDirect(size);
-            memcpy(work->reqdata, data, size);
-            work->reqsize = size;
+            work->reqdata = sdfChipAllocDirect(datasize);
+            memcpy(work->reqdata, data, datasize);
+            work->reqsize = datasize;
         } else {
             work->reqdata = NULL;
             work->reqsize = 0;
         }
-        if (keep != 0) {
+        if (restore != 0) {
             work->flag |= 4;
         } else {
             work->flag &= ~4;
@@ -127,11 +127,11 @@ void dds3AdminiCallSequence(s32 sequence, void *data, u32 size, s32 keep)
     }
 }
 
-void dds3AdminiOverwriteSequence(s32 sequence, void *data, u32 size)
+void dds3AdminiOverwriteSequence(s32 sequence, void *data, u32 datasize)
 {
     dds3AdminiWork_t *work;
 
-    dds3AdminiCallSequence(sequence, data, size, 0);
+    dds3AdminiCallSequence(sequence, data, datasize, 0);
     work = GetAdminiProcessData();
     work->flag |= 8;
 }

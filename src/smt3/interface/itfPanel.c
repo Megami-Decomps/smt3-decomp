@@ -52,51 +52,51 @@ typedef struct itfPanelTextureData_t {
     sdfTexHandle_t *texture;
 } itfPanelTextureData_t;
 
-void itfPnlRelease(itfPanel_t *sprite);
+void itfPnlRelease(itfPanel_t *handle);
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-void itfPnlSetPosition(itfPanel_t *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue);
+void itfPnlSetPosition(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void itfPnlSetPositionOffset(itfPanel_t *panel, s32 leftDelta, s32 topDelta, s32 rightDelta, s32 bottomDelta, s32 renderValueDelta);
+void itfPnlSetPositionOffset(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z);
 
-void itfPnlSetColor(itfPanel_t *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue);
+void itfPnlSetColor(itfPanel_t *handle, s32 r, s32 g, s32 b, s32 a);
 
-void itfPnlDraw(itfPanel_t *panel, sdfGrOt_t *packetOwner);
+void itfPnlDraw(itfPanel_t *handle, sdfGrOt_t *pot);
 
-extern s32 sdfGrAllocPacketBuff(s32 size);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
 #define ITF_PANEL_PACKET_LIST_BYTES 0x20
 
-extern void sdfDrawTagInit(sdfDrawTag_t *list);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 void DrawTestAlphaPrim(sdfDrawTag_t *list);
 
-void itfPnlDrawTag(itfPanel_t *panel, sdfDrawTag_t *list);
+void itfPnlDrawTag(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-void CreateVertexNormal(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexNormal(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_COLUMN_COUNT 4
 
 #define ITF_PANEL_COLUMN_INSET 0x200
 
-void CreateVertexMesWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexMesWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 extern s32 D_00326508[4];
 
-void CreateVertexSelWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexSelWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_ROW_COUNT 2
 
-void CreateVertexPlain(itfPanelVertex_t *v, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexPlain(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
-void CreateVertexLeftFade(itfPanelVertex_t *v, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexLeftFade(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 #define ITF_PANEL_CORNER_COLUMN_COUNT 3
 
 #define ITF_PANEL_CORNER_STRIP_WIDTH 0x5A0
 
-void CreateVertexFacility(itfPanelFacilityData_t *base, s32 x0, s32 y0, s32 x1, s32 y1);
+void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1);
 
 extern void itfMiscSetRatioRGB(s32 *output, s32 scaleX, s32 scaleY, s32 scaleZ, s32 w, const s32 *input, s32 count);
 
@@ -112,7 +112,7 @@ extern s32 D_003265C8[];
 
 void CreateColorFacility(itfPanelFacilityData_t *base);
 
-void DrawNormal(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawNormal(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_WIDE_PASS_COUNT 3
 
@@ -164,7 +164,7 @@ extern u8 D_0054F4A0[8];
 
 extern u8 D_0054F4A8[8];
 
-void DrawLeftFade(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawLeftFade(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag);
 
@@ -172,7 +172,7 @@ extern u8 D_0054F4B0[8];
 
 extern u8 D_0054F4B8[8];
 
-void DrawSpkWin2(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawSpkWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawSpritePrim(void *, void *, void *, s32, sdfTexHandle_t *, s32, sdfDrawTag_t *);
 
@@ -183,7 +183,7 @@ extern void itfMiscDrawSpritePrim2(itfDrawVertex_t *, itfDrawColor_t *, itfDrawC
 
 extern itfDrawColor_t D_003266D0;
 
-void DrawFacility(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawFacility(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern u8 D_003266E0[];
 
@@ -201,7 +201,7 @@ extern itfDrawColor_t D_003264D0;
 
 extern u32 sdf2DMakeStdPacket(u32, s32);
 
-extern void sdfDrawTagLink(sdfDrawTag_t *list, u32 packetAddress);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 
 extern void (*D_00326428[])();
 extern void (*CreateColorTable[])();
@@ -214,35 +214,35 @@ static inline void SetVec4(u32 *vec, u32 red, u32 green, u32 blue, u32 alpha) {
     vec[3] = alpha;
 }
 
-extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern s32 D_003264E0[];
 
 /* Allocate the common record and the kind's payload; kinds 6 to 8 take the
  * caller's value as the first payload word. */
-itfPanel_t *itfPnlRegist2(s32 kind, s32 value) {
+itfPanel_t *itfPnlRegist2(s32 type, s32 texhandle) {
     sdfMemHandle_t *allocation;
     itfPanel_t *panel;
     u32 *payload;
 
     allocation = sdfMemAllocDirect(sizeof(itfPanel_t));
     panel = (itfPanel_t *)sdfMemLock(allocation);
-    panel->kind = kind;
+    panel->kind = type;
     panel->allocation = allocation;
-    allocation = sdfMemAllocDirect(D_003264E0[kind]);
+    allocation = sdfMemAllocDirect(D_003264E0[type]);
     panel->payloadAllocation = allocation;
     payload = (u32 *)sdfMemLock(allocation);
     panel->payload = payload;
-    if (value != 0) {
-        switch (kind) {
+    if (texhandle != 0) {
+        switch (type) {
         case 6:
-            payload[0] = value;
+            payload[0] = texhandle;
             break;
         case 7:
-            payload[0] = value;
+            payload[0] = texhandle;
             break;
         case 8:
-            payload[0] = value;
+            payload[0] = texhandle;
             break;
         }
     }
@@ -251,73 +251,73 @@ itfPanel_t *itfPnlRegist2(s32 kind, s32 value) {
 
 /* A sprite with a retained payload owns a secondary allocation. Release that
  * before its primary allocation; NULL is a no-op. */
-void itfPnlRelease(itfPanel_t *sprite) {
-    if (sprite != NULL) {
-        if (sprite->payload != NULL) {
-            sdfMemFreeDirect(sprite->payloadAllocation);
+void itfPnlRelease(itfPanel_t *handle) {
+    if (handle != NULL) {
+        if (handle->payload != NULL) {
+            sdfMemFreeDirect(handle->payloadAllocation);
         }
-        sdfMemFreeDirect(sprite->allocation);
+        sdfMemFreeDirect(handle->allocation);
     }
 }
 
 /* Store rectangle corners and the caller's render value before notifying the
  * kind-specific handler with context only. No kind-range or context checks. */
-void itfPnlSetPosition(itfPanel_t *panel, s32 left, s32 top, s32 right, s32 bottom, s32 renderValue) {
-    panel->renderValue = renderValue;
-    panel->left = left;
-    panel->top = top;
-    panel->right = right;
-    panel->bottom = bottom;
-    if (D_00326428[panel->kind] != 0) {
-        D_00326428[panel->kind](panel->payload);
+void itfPnlSetPosition(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
+    handle->renderValue = z;
+    handle->left = x0;
+    handle->top = y0;
+    handle->right = x1;
+    handle->bottom = y1;
+    if (D_00326428[handle->kind] != 0) {
+        D_00326428[handle->kind](handle->payload);
     }
 }
 
 /* Add independent corner/render-value deltas, then notify with the updated
  * corners as well as context. */
-void itfPnlSetPositionOffset(itfPanel_t *panel, s32 leftDelta, s32 topDelta, s32 rightDelta, s32 bottomDelta, s32 renderValueDelta) {
-    void (*handler)() = D_00326428[panel->kind];
+void itfPnlSetPositionOffset(itfPanel_t *handle, s32 x0, s32 y0, s32 x1, s32 y1, s32 z) {
+    void (*handler)() = D_00326428[handle->kind];
 
-    panel->left += leftDelta;
-    panel->top += topDelta;
-    panel->right += rightDelta;
-    panel->bottom += bottomDelta;
-    panel->renderValue += renderValueDelta;
+    handle->left += x0;
+    handle->top += y0;
+    handle->right += x1;
+    handle->bottom += y1;
+    handle->renderValue += z;
     if (handler != 0) {
-        handler(panel->payload, panel->left, panel->top, panel->right, panel->bottom);
+        handler(handle->payload, handle->left, handle->top, handle->right, handle->bottom);
     }
 }
 
 /* Store the RGBA words in packet order, then notify with context.
  * The panel renderers consume these channels directly. */
-void itfPnlSetColor(itfPanel_t *panel, s32 redValue, s32 greenValue, s32 blueValue, s32 alphaValue) {
-    panel->red = redValue;
-    panel->green = greenValue;
-    panel->blue = blueValue;
-    panel->alpha = alphaValue;
-    if (CreateColorTable[panel->kind] != 0) {
-        CreateColorTable[panel->kind](panel->payload);
+void itfPnlSetColor(itfPanel_t *handle, s32 r, s32 g, s32 b, s32 a) {
+    handle->red = r;
+    handle->green = g;
+    handle->blue = b;
+    handle->alpha = a;
+    if (CreateColorTable[handle->kind] != 0) {
+        CreateColorTable[handle->kind](handle->payload);
     }
 }
 
 /* Build the panel list and append it to the SDK draw-surface pool. */
-void itfPnlDraw(itfPanel_t *panel, sdfGrOt_t *packetOwner) {
+void itfPnlDraw(itfPanel_t *handle, sdfGrOt_t *pot) {
     sdfDrawTag_t *packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(ITF_PANEL_PACKET_LIST_BYTES);
 
     sdfDrawTagInit(packetList);
     DrawTestAlphaPrim(packetList);
-    itfPnlDrawTag(panel, packetList);
-    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))packetOwner->regFunc)(packetOwner, packetList);
+    itfPnlDrawTag(handle, packetList);
+    ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))pot->regFunc)(pot, packetList);
 }
 
 /* Invoke the indexed panel handler; panel and kind are trusted. */
-void itfPnlDrawTag(itfPanel_t *panel, sdfDrawTag_t *list) {
-    DrawTable[panel->kind](panel, list);
+void itfPnlDrawTag(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    DrawTable[handle->kind](handle, pdrawtag);
 }
 
 /* Emit top/bottom vertices for four columns; collapse overlapping inner columns to the midpoint.
    Coordinates and inset remain in the renderer's native integer units. */
-void CreateVertexNormal(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexNormal(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 columnIndex;
 
@@ -330,17 +330,17 @@ void CreateVertexNormal(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 
         columnX[2] = columnX[1];
     }
     for (columnIndex = 0; columnIndex < ITF_PANEL_COLUMN_COUNT; columnIndex++) {
-        vertices->x = columnX[columnIndex];
-        vertices->y = y0;
-        vertices++;
-        vertices->x = columnX[columnIndex];
-        vertices->y = y1;
-        vertices++;
+        pwork->x = columnX[columnIndex];
+        pwork->y = y0;
+        pwork++;
+        pwork->x = columnX[columnIndex];
+        pwork->y = y1;
+        pwork++;
     }
 }
 
 /* Emit the frame grid and three table-offset rows above and below it. */
-void CreateVertexMesWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexMesWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -356,9 +356,9 @@ void CreateVertexMesWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 
     ys[3] = y1 + 0x80;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
-            vertices->x = xs[j];
-            vertices->y = ys[i];
-            vertices++;
+            pwork->x = xs[j];
+            pwork->y = ys[i];
+            pwork++;
         }
     }
     xs[0] = x0 - 0x100;
@@ -368,22 +368,22 @@ void CreateVertexMesWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 
     ys[0] = y0;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
-            vertices->x = xs[j];
-            vertices->y = ys[0] + D_00326508[i];
-            vertices++;
+            pwork->x = xs[j];
+            pwork->y = ys[0] + D_00326508[i];
+            pwork++;
         }
     }
     ys[0] = y1;
     for (i = 0; i < 3; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
-            vertices->x = xs[j];
-            vertices->y = ys[0] - D_00326508[i];
-            vertices++;
+            pwork->x = xs[j];
+            pwork->y = ys[0] - D_00326508[i];
+            pwork++;
         }
     }
 }
 
-void CreateVertexSelWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexSelWin(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 xs[ITF_PANEL_COLUMN_COUNT];
     s32 ys[4];
     s32 i;
@@ -399,9 +399,9 @@ void CreateVertexSelWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 
     ys[3] = y1 + 0x80;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
-            vertices->x = xs[j];
-            vertices->y = ys[i];
-            vertices++;
+            pwork->x = xs[j];
+            pwork->y = ys[i];
+            pwork++;
         }
     }
     xs[0] = x0 - 0x100;
@@ -411,40 +411,40 @@ void CreateVertexSelWin(itfPanelVertex_t *vertices, s32 x0, s32 y0, s32 x1, s32 
     ys[0] = y0;
     for (i = 0; i < ITF_PANEL_ROW_COUNT; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
-            vertices->x = xs[j];
-            vertices->y = ys[0] + i * 8;
-            vertices++;
+            pwork->x = xs[j];
+            pwork->y = ys[0] + i * 8;
+            pwork++;
         }
     }
     ys[0] = y1;
     for (i = 0; i < ITF_PANEL_ROW_COUNT; i++) {
         for (j = 0; j < ITF_PANEL_COLUMN_COUNT; j++) {
-            vertices->x = xs[j];
-            vertices->y = ys[0] - i * 8;
-            vertices++;
+            pwork->x = xs[j];
+            pwork->y = ys[0] - i * 8;
+            pwork++;
         }
     }
 }
 
 /* Write the rectangle corners in top-left, top-right, bottom-right, bottom-left order. */
-void CreateVertexPlain(itfPanelVertex_t *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexPlain(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     itfPanelVertex_t *p;
 
-    v->x = x0;
-    v->y = y0;
-    p = v + 1;
+    pwork->x = x0;
+    pwork->y = y0;
+    p = pwork + 1;
     p->x = x1;
     p->y = y0;
-    p = v + 2;
+    p = pwork + 2;
     p->x = x1;
     p->y = y1;
-    p = v + 3;
+    p = pwork + 3;
     p->x = x0;
     p->y = y1;
 }
 
 /* Write two rows of three columns; the middle column is the right edge minus a fixed strip width. */
-void CreateVertexLeftFade(itfPanelVertex_t *v, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexLeftFade(itfPanelVertex_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_CORNER_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
     s32 rowIndex;
@@ -457,19 +457,19 @@ void CreateVertexLeftFade(itfPanelVertex_t *v, s32 x0, s32 y0, s32 x1, s32 y1) {
     rowY[1] = y1;
     for (rowIndex = 0; rowIndex < ITF_PANEL_ROW_COUNT; rowIndex++) {
         for (columnIndex = 0; columnIndex < ITF_PANEL_CORNER_COLUMN_COUNT; columnIndex++) {
-            v->x = columnX[columnIndex];
-            v->y = rowY[rowIndex];
-            v++;
+            pwork->x = columnX[columnIndex];
+            pwork->y = rowY[rowIndex];
+            pwork++;
         }
     }
 }
 
 /* Write four fixed horizontal columns with inset top/bottom coordinates.
    x0 and x1 are intentionally unused; do not replace the fixed horizontal positions. */
-void CreateVertexFacility(itfPanelFacilityData_t *base, s32 x0, s32 y0, s32 x1, s32 y1) {
+void CreateVertexFacility(itfPanelFacilityData_t *pwork, s32 x0, s32 y0, s32 x1, s32 y1) {
     s32 columnX[ITF_PANEL_COLUMN_COUNT];
     s32 rowY[ITF_PANEL_ROW_COUNT];
-    itfDrawVertex_t *vertices = base->vertices;
+    itfDrawVertex_t *vertices = pwork->vertices;
     s32 columnIndex;
     columnX[0] = 0x1A0;
     columnX[1] = 0x480;
@@ -488,11 +488,11 @@ void CreateVertexFacility(itfPanelFacilityData_t *base, s32 x0, s32 y0, s32 x1, 
 }
 
 /* Populate RGBA rows at bytes 0x40/0x50; the first row is transparent. */
-void CreateColorNormal(itfPanelNormalData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = data->colors[0].components;
+void CreateColorNormal(itfPanelNormalData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+    u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 0);
-    colorRow = data->colors[1].components;
+    colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
 }
 
@@ -517,12 +517,12 @@ void CreateColorSelWin(itfPanelSelWinData_t *data, u32 red, u32 green, u32 blue,
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
-void CreateColorPlain(itfPanelPlainData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = data->colors[0].components;
+void CreateColorPlain(itfPanelPlainData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+    u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)data->colors[1].components, red, green, blue, alpha, D_003265B8, 1);
-    itfMiscSetRatioRGB((s32 *)data->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, D_003265C8, 2);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[1].components, red, green, blue, alpha, D_003265B8, 1);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, ITF_PANEL_FULL_COLOR_SCALE, D_003265C8, 2);
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path. */
@@ -536,11 +536,11 @@ void CreateColorPera1(itfPanelPlainData_t *data, s32 red, s32 green, s32 blue, s
 }
 
 /* Populate RGBA rows at bytes 0x30/0x40; the first row is transparent. */
-void CreateColorLeftFade(itfPanelLeftFadeData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = data->colors[0].components;
+void CreateColorLeftFade(itfPanelLeftFadeData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+    u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 0);
-    colorRow = data->colors[1].components;
+    colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
 }
 
@@ -554,15 +554,15 @@ void CreateColorFacility(itfPanelFacilityData_t *base) {
 }
 
 /* Draw the panel's three flat quads from one vertex/color buffer; each quad uses its own 4-byte index rows. */
-void DrawNormal(itfPanel_t *panel, sdfDrawTag_t *command) {
-    itfPanelNormalData_t *data = (itfPanelNormalData_t *)panel->payload;
+void DrawNormal(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    itfPanelNormalData_t *data = (itfPanelNormalData_t *)handle->payload;
     itfPanelVertex_t *drawBuffer = data->vertices;
     itfPanelColor_t *colors = data->colors;
     s32 quadIndex;
 
-    colors[1].rgba.alpha = panel->alpha;
+    colors[1].rgba.alpha = handle->alpha;
     for (quadIndex = 0; quadIndex < ITF_PANEL_WIDE_PASS_COUNT; quadIndex++) {
-        itfMiscDrawRectanglePrim(drawBuffer, colors, &D_003265F8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00326608[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], panel->renderValue, command);
+        itfMiscDrawRectanglePrim(drawBuffer, colors, &D_003265F8[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], &D_00326608[quadIndex * ITF_PANEL_QUAD_INDEX_COUNT], handle->renderValue, pdrawtag);
     }
 }
 
@@ -648,120 +648,120 @@ void DrawPera1(itfPanel_t *panel, sdfDrawTag_t *command) {
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
-void DrawLeftFade(itfPanel_t *panel, sdfDrawTag_t *command) {
-    itfPanelLeftFadeData_t *data = (itfPanelLeftFadeData_t *)panel->payload;
+void DrawLeftFade(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    itfPanelLeftFadeData_t *data = (itfPanelLeftFadeData_t *)handle->payload;
     itfPanelVertex_t *drawBuffer = data->vertices;
     itfPanelColor_t *colors = data->colors;
 
-    colors[1].rgba.alpha = panel->alpha;
-    itfMiscDrawAlphaPrim(command, 2, 0);
-    itfMiscDrawTriangleStripPrim(drawBuffer, colors, D_0054F4B0, D_0054F4B8, 6, panel->renderValue, command);
-    itfMiscDrawAlphaPrim(command, 0, 0);
+    colors[1].rgba.alpha = handle->alpha;
+    itfMiscDrawAlphaPrim(pdrawtag, 2, 0);
+    itfMiscDrawTriangleStripPrim(drawBuffer, colors, D_0054F4B0, D_0054F4B8, 6, handle->renderValue, pdrawtag);
+    itfMiscDrawAlphaPrim(pdrawtag, 0, 0);
 }
 
 /* Split a tall texture into top, stretch and bottom bands; the short path
  * submits the live rectangle in the panel. */
-void DrawMesWin2(itfPanel_t *panel, sdfDrawTag_t *command) {
+void DrawMesWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
-    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)panel->payload;
-    s32 top = panel->top;
-    s32 bottom = panel->bottom;
+    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->payload;
+    s32 top = handle->top;
+    s32 bottom = handle->bottom;
 
     if (bottom - top >= 0x8B1) {
         s32 topEnd = top + 0x458;
         s32 bottomStart = bottom - 0x458;
 
-        rect[0].x = panel->left;
+        rect[0].x = handle->left;
         rect[0].y = top;
-        rect[1].x = panel->right;
+        rect[1].x = handle->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003264A0, (itfDrawColor_t *)&panel->red, panel->renderValue,
-                                      payload->texture, 0, command);
+        itfMiscDrawSpritePrim(rect, &D_003264A0, (itfDrawColor_t *)&handle->red, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003264B0, (itfDrawColor_t *)&panel->red, panel->renderValue,
-                                      payload->texture, 0, command);
+        itfMiscDrawSpritePrim(rect, &D_003264B0, (itfDrawColor_t *)&handle->red, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
         rect[0].y = bottomStart;
-        rect[1].y = panel->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003264C0, (itfDrawColor_t *)&panel->red, panel->renderValue,
-                                      payload->texture, 0, command);
+        rect[1].y = handle->bottom;
+        itfMiscDrawSpritePrim(rect, &D_003264C0, (itfDrawColor_t *)&handle->red, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
     } else {
-        itfMiscDrawSpritePrim(&panel->left, &D_003264D0,
-                                      &panel->red, panel->renderValue,
-                                      payload->texture, 0, command);
+        itfMiscDrawSpritePrim(&handle->left, &D_003264D0,
+                                      &handle->red, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
     }
 }
 
 /* Bind the texture for the left cap, then draw the center and reversed right
  * cap. Insets are captured before the first submission; Y bounds are live. */
-void DrawSpkWin2(itfPanel_t *panel, sdfDrawTag_t *command) {
+void DrawSpkWin2(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
-    itfDrawColor_t *color = (itfDrawColor_t *)&panel->red;
-    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)panel->payload;
-    s32 leftInset = panel->left + 0x3E0;
-    s32 rightInset = panel->right - 0x3E0;
+    itfDrawColor_t *color = (itfDrawColor_t *)&handle->red;
+    itfPanelTextureData_t *payload = (itfPanelTextureData_t *)handle->payload;
+    s32 leftInset = handle->left + 0x3E0;
+    s32 rightInset = handle->right - 0x3E0;
 
-    rect[0].x = panel->left;
-    rect[0].y = panel->top;
+    rect[0].x = handle->left;
+    rect[0].y = handle->top;
     rect[1].x = leftInset;
-    rect[1].y = panel->bottom;
-    itfMiscDrawSpritePrim(rect, &D_003266C0, color, panel->renderValue,
-                                  payload->texture, 0, command);
+    rect[1].y = handle->bottom;
+    itfMiscDrawSpritePrim(rect, &D_003266C0, color, handle->renderValue,
+                                  payload->texture, 0, pdrawtag);
 
     rect[0].x = leftInset;
-    rect[0].y = panel->top;
+    rect[0].y = handle->top;
     rect[1].x = rightInset;
-    rect[1].y = panel->bottom;
-    itfMiscDrawSpritePrim2(rect, &D_003266D0, color, panel->renderValue, 0, command);
+    rect[1].y = handle->bottom;
+    itfMiscDrawSpritePrim2(rect, &D_003266D0, color, handle->renderValue, 0, pdrawtag);
 
-    rect[0].x = panel->right;
-    rect[0].y = panel->top;
+    rect[0].x = handle->right;
+    rect[0].y = handle->top;
     rect[1].x = rightInset;
-    rect[1].y = panel->bottom;
-    itfMiscDrawSpritePrim2(rect, &D_003266C0, color, panel->renderValue, 0, command);
+    rect[1].y = handle->bottom;
+    itfMiscDrawSpritePrim2(rect, &D_003266C0, color, handle->renderValue, 0, pdrawtag);
 }
 
 /* Draw the three inset flat quads, then split a tall texture into top, stretch
  * and bottom bands. The short path uses the live rectangle in the panel. */
-void DrawFacility(itfPanel_t *panel, sdfDrawTag_t *command) {
+void DrawFacility(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfDrawVertex_t rect[2];
-    itfPanelFacilityData_t *payload = (itfPanelFacilityData_t *)panel->payload;
+    itfPanelFacilityData_t *payload = (itfPanelFacilityData_t *)handle->payload;
     itfDrawVertex_t *vertices = payload->vertices;
     itfDrawColor_t *colors = payload->colors;
     s32 i;
     s32 top;
     s32 bottom;
 
-    colors[1].components[3] = (panel->alpha * 0x20) >> 7;
+    colors[1].components[3] = (handle->alpha * 0x20) >> 7;
     for (i = 0; i < 3; i++) {
         itfMiscDrawRectanglePrim(vertices, colors, &D_003266E0[i * 4],
-                        &D_003266F0[i * 4], panel->renderValue, command);
+                        &D_003266F0[i * 4], handle->renderValue, pdrawtag);
     }
-    bottom = panel->bottom;
-    top = panel->top;
+    bottom = handle->bottom;
+    top = handle->top;
     if (bottom - top >= 0x569) {
         s32 topEnd = top + 0x2B4;
         s32 bottomStart = bottom - 0x2B4;
-        s32 *color = &panel->red;
+        s32 *color = &handle->red;
 
-        rect[0].x = panel->left;
+        rect[0].x = handle->left;
         rect[0].y = top;
-        rect[1].x = panel->right;
+        rect[1].x = handle->right;
         rect[1].y = topEnd;
-        itfMiscDrawSpritePrim(rect, &D_003264A0, color, panel->renderValue,
-                                      payload->texture, 0, command);
+        itfMiscDrawSpritePrim(rect, &D_003264A0, color, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
         rect[0].y = topEnd;
         rect[1].y = bottomStart;
-        itfMiscDrawSpritePrim(rect, &D_003264B0, color, panel->renderValue,
-                                      payload->texture, 0, command);
+        itfMiscDrawSpritePrim(rect, &D_003264B0, color, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
         rect[0].y = bottomStart;
-        rect[1].y = panel->bottom;
-        itfMiscDrawSpritePrim(rect, &D_003264C0, color, panel->renderValue,
-                                      payload->texture, 0, command);
+        rect[1].y = handle->bottom;
+        itfMiscDrawSpritePrim(rect, &D_003264C0, color, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
     } else {
-        itfMiscDrawSpritePrim(&panel->left, &D_003264D0,
-                                      &panel->red, panel->renderValue,
-                                      payload->texture, 0, command);
+        itfMiscDrawSpritePrim(&handle->left, &D_003264D0,
+                                      &handle->red, handle->renderValue,
+                                      payload->texture, 0, pdrawtag);
     }
 }
 

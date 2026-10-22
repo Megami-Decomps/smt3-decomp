@@ -12,14 +12,14 @@
 #define DDS3_PATH_SCALAR_CHANNEL 0x4
 #define DDS3_PATH_WORLD_TRANSFORM_CHANNEL 0x10
 
-extern void *memset(void *dst, s32 value, u32 size);
-extern void *sdfChipAllocDirect(u32 size);
-extern dds3Basic_t *dds3AddSceneBasicData(s32 kind);
+extern void *memset(void *a, s32 b, u32 c);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern s32 dds3AllocSplineHandle(f32 (*points)[3], u32 count, s32 mode);
 extern void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f32 time);
-extern void Lerp(f32 weight);
+extern void Lerp(f32 aRatio);
 extern void dds3FreeSplineHandle(s32 spline);
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
 
 void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f32 frame) {
@@ -84,7 +84,7 @@ void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work)
     }
 }
 
-void dds3PathBasicControlGetRot(dds3PathBasicControl_t *work)
+void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl)
 {
     u32 segment;
     f32 weight;
@@ -93,9 +93,9 @@ void dds3PathBasicControlGetRot(dds3PathBasicControl_t *work)
     f32 (*first)[4];
     f32 (*second)[4];
 
-    if (work->flags & DDS3_PATH_ROTATION_CHANNEL) {
-        keys = work->rotationKeys;
-        dds3PathEvalSpline(&segment, &weight, keys, work->time);
+    if (pControl->flags & DDS3_PATH_ROTATION_CHANNEL) {
+        keys = pControl->rotationKeys;
+        dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
         quaternions = keys->data.rotation;
         first = &quaternions[segment];
         SDF_VU0_LOADVECTOR(first);
@@ -209,9 +209,9 @@ s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work)
     return result;
 }
 
-void dds3PathBasicControlAlterMode(dds3PathBasicControl_t *work, s32 direction)
+void dds3PathBasicControlAlterMode(dds3PathBasicControl_t *pControl, s32 mode)
 {
-    work->direction = direction;
+    pControl->direction = mode;
 }
 
 s32 dds3PathBasicControlGetMode(dds3PathBasicControl_t *work)

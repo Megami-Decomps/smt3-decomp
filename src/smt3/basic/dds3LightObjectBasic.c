@@ -10,8 +10,8 @@ typedef struct
 
 extern dds3SceneLightParam_t dds3LightParam;
 PS2_SYMBOL_AT(sdfVector4_t, dds3LightObjectAmbient, dds3LightParam, 0x10);
-extern void evtLinkLightObjectBasic(void *unit, dds3Basic_t *light, s32 frames);
-extern void evtUnlinkLightObjectBasic(void *unit, s32 frames);
+extern void evtLinkLightObjectBasic(void *h, dds3Basic_t *light, s32 frame);
+extern void evtUnlinkLightObjectBasic(void *h, s32 frame);
 
 
 struct sdf3DLightParallelPacket_t;
@@ -58,15 +58,15 @@ typedef struct fldResourceLight_t
 } fldResourceLight_t;
 
 
-extern void *memset(void *s, s32 c, u32 n);
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *memset(void *a, s32 b, u32 c);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 extern s32 dds3InitPoseSet(dds3Basic_t *basic);
 extern void dds3FreePoseSet(dds3Basic_t *basic);
 extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
-extern void dds3ObjectBaseCreateMover(dds3Basic_t *basic);
+extern void dds3ObjectBaseCreateMover(dds3Basic_t *pObjectBasic);
 
 s32 lightconstructor(dds3Basic_t *basic)
 {
@@ -111,8 +111,8 @@ void lightdestructor(dds3Basic_t *basic)
     dds3FreePoseSet(basic);
 }
 
-extern void sdf3DMakeLightParallelPacket(struct sdf3DLightParallelPacket_t *packet,
-                                         sdf3DLight_t **lights, sdfVector4_t *ambient);
+extern void sdf3DMakeLightParallelPacket(struct sdf3DLightParallelPacket_t *aPacket,
+                                         sdf3DLight_t **aLights, sdfVector4_t *aAmbient);
 
 /* vu0 routine: blend the stored light and ambient colours toward the target */
 s32 lightmainprocedure(dds3Basic_t *basic)
@@ -186,11 +186,11 @@ dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(dds3Basi
     return work->ObjectBaseControlWorkData;
 }
 
-dds3Basic_t *dds3AddLightObjectBasic(u32 serialID)
+dds3Basic_t *dds3AddLightObjectBasic(u32 serial)
 {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_LIGHTOBJECT);
 
-    basic->serialID = serialID;
+    basic->serialID = serial;
     dds3ObjectBaseCreateMover(basic);
     return basic;
 }
@@ -201,7 +201,7 @@ void dds3DeleteLightObjectBasic(dds3Basic_t *basic)
 }
 
 /* vu0 routine: pack the live scene light and ambient colours */
-void dds3LinkSceneLight(dds3Basic_t *basic, s32 frames)
+void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame)
 {
     dds3LightColorWork_t work[2];
     dds3LightObjectBasicWorkData_t *data = basic->workdata;
@@ -210,11 +210,11 @@ void dds3LinkSceneLight(dds3Basic_t *basic, s32 frames)
     u32 nextColor;
 
     data->Flag |= 1;
-    if (frames == 0) {
+    if (frame == 0) {
         data->Flag &= ~2;
     } else {
         data->Flag |= 2;
-        data->SwitchFrame = frames;
+        data->SwitchFrame = frame;
         SDF_VU0_LOADVECTOR(dds3LightParam.sources[0]);
         MMI_RGBA_PACK_UNIT(lightColor, 128.0f);
         work[0].word = lightColor;
@@ -233,62 +233,62 @@ void dds3UnlinkSceneLight(dds3Basic_t *basic)
     work->Flag &= ~3;
 }
 
-void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 frames)
+void dds3LinkLightObjectToUnitObject(dds3Basic_t *lightbasic, dds3Basic_t *unitbasic, s32 frame)
 {
-    dds3UnitObjectBasicWorkData_t *work = unit->workdata;
+    dds3UnitObjectBasicWorkData_t *work = unitbasic->workdata;
 
-    evtLinkLightObjectBasic(work->unit, light, frames);
+    evtLinkLightObjectBasic(work->unit, lightbasic, frame);
 }
 
-void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *unit, s32 frames)
+void dds3UnlinkLightObjectFromUnitObject(dds3Basic_t *unitbasic, s32 frame)
 {
-    dds3UnitObjectBasicWorkData_t *work = unit->workdata;
+    dds3UnitObjectBasicWorkData_t *work = unitbasic->workdata;
 
-    evtUnlinkLightObjectBasic(work->unit, frames);
+    evtUnlinkLightObjectBasic(work->unit, frame);
 }
 
-void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *res)
+void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource)
 {
     dds3LightObjectBasicWorkData_t *work = basic->workdata;
 
     work->Flag = 0;
-    if (res->Flag & 1) {
+    if (resource->Flag & 1) {
         work->Flag = 1;
     }
-    if (res->Flag & 2) {
+    if (resource->Flag & 2) {
         work->Flag |= 4;
     }
 
-    work->InsideR = res->InsideR;
-    work->AnimeType = res->AnimeType;
-    work->OutsideR = res->OutsideR;
-    work->Soften = res->Soften;
-    work->Bias = res->Bias;
-    work->Light.color.x = res->DiffuseR;
-    work->Light.color.y = res->DiffuseG;
-    work->Light.color.z = res->DiffuseB;
+    work->InsideR = resource->InsideR;
+    work->AnimeType = resource->AnimeType;
+    work->OutsideR = resource->OutsideR;
+    work->Soften = resource->Soften;
+    work->Bias = resource->Bias;
+    work->Light.color.x = resource->DiffuseR;
+    work->Light.color.y = resource->DiffuseG;
+    work->Light.color.z = resource->DiffuseB;
     work->Light.color.w = 0.0f;
-    work->Ambient.x = res->AmbientR;
-    work->Ambient.y = res->AmbientG;
-    work->Ambient.z = res->AmbientB;
+    work->Ambient.x = resource->AmbientR;
+    work->Ambient.y = resource->AmbientG;
+    work->Ambient.z = resource->AmbientB;
     work->Ambient.w = 1.0f;
 }
 
-void dds3SetLightObjectPathResoruce(dds3Basic_t *basic, fldResourceLightPath_t *res)
+void dds3SetLightObjectPathResoruce(dds3Basic_t *basic, fldResourceLightPath_t *resource)
 {
     dds3LightObjectBasicWorkData_t *work = basic->workdata;
 
-    work->InsideR = res->InsideR;
-    work->OutsideR = res->OutsideR;
-    work->Soften = res->Soften;
-    work->Bias = res->Bias;
-    work->Light.color.x = res->DiffuseR;
-    work->Light.color.y = res->DiffuseG;
-    work->Light.color.z = res->DiffuseB;
+    work->InsideR = resource->InsideR;
+    work->OutsideR = resource->OutsideR;
+    work->Soften = resource->Soften;
+    work->Bias = resource->Bias;
+    work->Light.color.x = resource->DiffuseR;
+    work->Light.color.y = resource->DiffuseG;
+    work->Light.color.z = resource->DiffuseB;
     work->Light.color.w = 0.0f;
-    work->Ambient.x = res->AmbientR;
-    work->Ambient.y = res->AmbientG;
-    work->Ambient.z = res->AmbientB;
+    work->Ambient.x = resource->AmbientR;
+    work->Ambient.y = resource->AmbientG;
+    work->Ambient.z = resource->AmbientB;
     work->Ambient.w = 1.0f;
 }
 

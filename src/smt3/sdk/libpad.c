@@ -75,7 +75,7 @@ extern const char *D_00529FB0[8] __attribute__((section(".data")));
 extern const char *D_00529FD0[4] __attribute__((section(".data")));
 
 extern void SyncDCache(void *start, void *end);
-extern void *memcpy(void *dst, const void *src, u32 len);
+extern void *memcpy(void *a, const void *b, u32 c);
 extern char *strcpy(char *dst, const char *src);
 extern s32 sceSifCallRpc(void *cd, u32 fno, u32 mode, void *send, s32 ssize,
                          void *recv, s32 rsize, void *endfunc, void *endpara);
@@ -92,7 +92,7 @@ typedef struct sceSifDmaData {
 
 extern padCmd D_00598AC0[2][4] __attribute__((section(".data")));
 extern s32 D_00529FAC __attribute__((section(".data")));
-extern void *memset(void *dst, int c, u32 len);
+extern void *memset(void *a, int b, u32 c);
 extern int scePrintf(const char *fmt, ...);
 extern s32 sceSifDmaStat(u32 id);
 extern u32 sceSifSetDma(sceSifDmaData *data, s32 count);

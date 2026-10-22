@@ -6,7 +6,7 @@
 #include "ps2asm.h"
 
 
-void *dds3GetProcessData(dds3ProcessID_t *task);
+void *dds3GetProcessData(dds3ProcessID_t *id);
 
 /* SMT3 allocates and clears 0xD4 bytes; the process flag helpers use its head. */
 typedef struct pmdCutInfo_t {
@@ -92,42 +92,42 @@ typedef struct pmdFrameTable_t {
     } data;
 } pmdFrameTable_t;
 
-void dds3SetProcessData(dds3ProcessID_t *task, void *data);
+void dds3SetProcessData(dds3ProcessID_t *id, void *data);
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, char *name);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
-extern void evtPlaySe(s32 group, s32 se);
-extern void evtSetBokasi(s32 on);
-extern void dds3SetQuake(s32 length, s32 amount);
+extern void evtPlaySe(s32 eventno, s32 seno);
+extern void evtSetBokasi(s32 sw);
+extern void dds3SetQuake(s32 frame, s32 range);
 extern void dds3StopQuake(void);
-extern void fldSkySetFilter(s32 filter, s32 mode, s32 frames);
-extern void evtSetSkyAlpha(s32 frames, s32 alpha);
-void evtFreePolygonMovieWorkData(evtPolygonMovieWork_t *work);
+extern void fldSkySetFilter(s32 idx, s32 mode, s32 hokan);
+extern void evtSetSkyAlpha(s32 frame, s32 a);
+void evtFreePolygonMovieWorkData(evtPolygonMovieWork_t *wdata);
 extern dds3Basic_t *dds3GetActiveScene(void);
-extern void sdfChipFreeDirect(void *block);
+extern void sdfChipFreeDirect(void *aPtr);
 extern void itfMesMngRelease(s32 id);
 extern void fileSyncAll(void);
-extern void fileHandleFree(void *handle);
-extern void sdfMemFreeDirect(void *handle);
-extern void FrameRun(evtPolygonMovieWork_t *work);
+extern void fileHandleFree(void *fileHandle);
+extern void sdfMemFreeDirect(void *aHandle);
+extern void FrameRun(evtPolygonMovieWork_t *wdata);
 extern s32 printf(const char *fmt, ...);
 extern f32 D_0056CFF0[12];
 extern s32 strcmp(const char *a, const char *b);
-extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *resource, f32 *position, f32 *scale);
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *resource, f32 *position, f32 *scale);
-extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 kind, void *resource);
-extern void dds3EffectObjectBasicStatOn(dds3Basic_t *basic, s32 stat);
-extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *basic, s32 entry);
-extern void evtEffectLoopControl(dds3Basic_t *basic, s32 mode);
-extern void dds3EffectObjectSetMG12Pos(dds3Basic_t *basic, dds3Basic_t *p0, dds3Basic_t *p1, dds3Basic_t *p2, dds3Basic_t *p3);
+extern dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, f32 *pos, f32 *rot);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
+extern dds3Basic_t *dds3AddMG12EffectObjectBasic2(s32 type, void *effdata);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *basic, s32 s);
+extern void dds3StartBEDEffectObjectBasic(dds3Basic_t *basic, s32 cutno);
+extern void evtEffectLoopControl(dds3Basic_t *eff, s32 sw);
+extern void dds3EffectObjectSetMG12Pos(dds3Basic_t *eff, dds3Basic_t *p1, dds3Basic_t *p2, dds3Basic_t *p3, dds3Basic_t *p4);
 dds3Basic_t *SearchBasicFromNameIndex_evtPolygonMovie(evtPolygonMovieWork_t *work, s32 nameIndex);
-s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f);
+s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f);
 extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
-extern void dds3EffectObjectPresetMG12(dds3Basic_t *basic);
-extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *owner);
-extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *owner, s32 index);
-extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *target);
-extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
+extern void dds3EffectObjectPresetMG12(dds3Basic_t *eff);
+extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *target);
+extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *target, s32 index);
+extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
+extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic);
 extern void evtPlayEventBgm(s32 eventNo, s32 bgm);
 extern void evtFadeInEventBgm(s32 eventNo, s32 bgm);
 extern void evtStopEventBgm(s32 eventNo, s32 bgm);
@@ -136,33 +136,33 @@ extern void p2sdBgmVolDown(void);
 extern void p2sdBgmVolUp(void);
 extern void p2sdStopAllBgm(void);
 extern s32 pacFileCheckEnd(void);
-extern sdfMemHandle_t *fileGetMemHandle(void *request);
-extern void *fileLoad(const char *name);
+extern sdfMemHandle_t *fileGetMemHandle(void *fileHandle);
+extern void *fileLoad(const char *filename);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, void *data, s32 mode);
-extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTimer,
-                                         s32 shutdownTimer, dds3ProcessFunc_t processFunc,
-                                         dds3ProcessFunc_t shutdownFunc, void *data);
-void evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *work, void *pm1data, void *pm2data);
-s32 evtPolygonMovieProcess1(dds3ProcessID_t *task);
-void evtPolygonMovieShutdown(dds3ProcessID_t *task);
-void SetPMFileName(s32 eventNo, s32 cutNo, char *pm1file, char *pm2file);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
+void evtGetPolygonMovieWorkData1(evtPolygonMovieWork_t *wdata, void *pm1data, void *pm2data);
+s32 evtPolygonMovieProcess1(dds3ProcessID_t *id);
+void evtPolygonMovieShutdown(dds3ProcessID_t *id);
+void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file);
 evtPolygonMovieWork_t *InitPolygonMovieWorkData(void);
 extern f32 sdfFaceDivSoften;
 extern f32 sdfFaceDivBias;
-extern void dds3SetLightColor(s32 index, s32 kind, f32 *color);
-extern void dds3SetLightDir(s32 index, s32 kind, f32 *dir);
-extern void dds3SetAmbientColor(s32 kind, f32 *color);
-extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
-extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
-extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *basic);
+extern void dds3SetLightColor(s32 frame, s32 no, f32 *col);
+extern void dds3SetLightDir(s32 frame, s32 no, f32 *dir);
+extern void dds3SetAmbientColor(s32 frame, f32 *col);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
+extern evtUnit_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask);
-extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 mask);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, s32 flag);
 extern void *evtGetUnitHandle2(dds3Basic_t *unit);
-extern void evtLinkLightObjectBasic(void *handle, dds3Basic_t *light, s32 frames);
-extern void evtUnlinkLightObjectBasic(void *handle, s32 frames);
+extern void evtLinkLightObjectBasic(void *h, dds3Basic_t *light, s32 frame);
+extern void evtUnlinkLightObjectBasic(void *h, s32 frame);
 extern s32 sprintf(char *buffer, const char *format, ...);
-void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out);
-f32 evtHokanFloat(s32 enable, f32 t, f32 a, f32 b);
+void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d);
+f32 evtHokanFloat(s32 hokan, f32 ratio, f32 f1, f32 f2);
 extern s16 dds3ScreenBlurAlpha;
 extern s16 dds3ScreenBlurScale;
 extern u8 dds3ScreenBlurFlag;
@@ -174,49 +174,49 @@ extern effBlurScatterParams_t D_0056D0A0;
 extern effBlurScaleParams_t D_0056D0D0;
 extern effResourceRectParams_t D_0056D100;
 extern effSolidRectParams_t D_0056D130;
-extern void dds3SetFogPara(s32 mode, f32 min, f32 max, f32 near, f32 far);
-extern void Eve_BlurSetParam(effBlurQuad_t *param);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
+extern void Eve_BlurSetParam(effBlurQuad_t *pParam);
 extern void Eve_BlurON(void);
 extern void Eve_BlurOFF(void);
-extern void Eve_PartialMultiBlurSetParam(effBlurTemplateBody_t *param);
+extern void Eve_PartialMultiBlurSetParam(effBlurTemplateBody_t *pParam);
 extern void Eve_PartialMultiBlurON(void);
 extern void Eve_PartialMultiBlurOFF(void);
-extern void Eve_DistortionBlurSetParam(effBlurScatterParams_t *param);
+extern void Eve_DistortionBlurSetParam(effBlurScatterParams_t *pParam);
 extern void Eve_DistortionBlurON(void);
 extern void Eve_DistortionBlurOFF(void);
-extern void Eve_RippleBlurSetParam(effBlurScaleParams_t *param);
+extern void Eve_RippleBlurSetParam(effBlurScaleParams_t *pParam);
 extern void Eve_RippleBlurON(void);
 extern void Eve_RippleBlurOFF(void);
-extern void Eve_PartialMultiFilterSetParam(effResourceRectParams_t *param);
+extern void Eve_PartialMultiFilterSetParam(effResourceRectParams_t *pParam);
 extern void Eve_PartialMultiFilterON(void);
 extern void Eve_PartialMultiFilterOFF(void);
-extern void Eve_FilterSetParam(effSolidRectParams_t *param);
+extern void Eve_FilterSetParam(effSolidRectParams_t *pParam);
 extern void Eve_FilterON(void);
 extern void Eve_FilterOFF(void);
-void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor_t *b, evtBlendVecColor_t *out);
-void evtHokanBlur2(s32 enable, f32 t, effBlurQuad_t *a, effBlurQuad_t *b, effBlurQuad_t *out);
-void evtHokanMultBlur(s32 enable, f32 t, effBlurTemplateBody_t *a, effBlurTemplateBody_t *b, effBlurTemplateBody_t *out);
-void evtHokanDistBlur(s32 enable, f32 t, effBlurScatterParams_t *a, effBlurScatterParams_t *b, effBlurScatterParams_t *out);
-void evtHokanRipBlur(s32 enable, f32 t, effBlurScaleParams_t *a, effBlurScaleParams_t *b, effBlurScaleParams_t *out);
-void evtHokanMultFilter(s32 enable, f32 t, effResourceRectParams_t *a, effResourceRectParams_t *b, effResourceRectParams_t *out);
-void evtHokanFilter(s32 enable, f32 t, effSolidRectParams_t *a, effSolidRectParams_t *b, effSolidRectParams_t *out);
-s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f, char *effName, char *targetName, s32 posIndex, s32 cutNo);
-f32 GetKeyFrameRatio(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now);
-void DelEffectTable_evtPolygonMovie(evtPolygonMovieWork_t *work, s32 no);
+void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *key1, evtBlendVecColor_t *key2, evtBlendVecColor_t *d);
+void evtHokanBlur2(s32 hokan, f32 ratio, effBlurQuad_t *key1, effBlurQuad_t *key2, effBlurQuad_t *d);
+void evtHokanMultBlur(s32 hokan, f32 ratio, effBlurTemplateBody_t *key1, effBlurTemplateBody_t *key2, effBlurTemplateBody_t *d);
+void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlurScatterParams_t *key2, effBlurScatterParams_t *d);
+void evtHokanRipBlur(s32 hokan, f32 ratio, effBlurScaleParams_t *key1, effBlurScaleParams_t *key2, effBlurScaleParams_t *d);
+void evtHokanMultFilter(s32 hokan, f32 ratio, effResourceRectParams_t *key1, effResourceRectParams_t *key2, effResourceRectParams_t *d);
+void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRectParams_t *key2, effSolidRectParams_t *d);
+s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, char *effname, char *targetname, s32 posindex, s32 cutno);
+f32 GetKeyFrameRatio(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now);
+void DelEffectTable_evtPolygonMovie(evtPolygonMovieWork_t *wdata, s32 no);
 void evtRunUnitMode(dds3Basic_t *unit, s32 mode);
 typedef void (*evtFrameFunc_t)(evtPolygonMovieWork_t *, pmdFrameTable_t *, pmdFrameTable_t *, s32);
 extern evtFrameFunc_t nowcamera[];
-extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 extern void dds3SetScreenFovy(f32 fovy);
 extern s32 evtCameraFrameState;
 extern f32 nowfovy;
 extern s32 D_0054F8E0;
 
-extern void *sdfChipAllocDirect(u32 size);
-extern void *memset(void *destination, s32 value, u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void *memset(void *a, s32 b, u32 c);
 
 /* vu0 routine: blend two RGBA8888 colours by t */
-u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b);
+u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2);
 
 extern f32 evtHokanFogParam[4];
 
@@ -256,7 +256,7 @@ typedef struct polyMovieObject_t {
     polyMovieState_t *state;
 } polyMovieObject_t;
 
-s32 evtStopMover(polyMovieObject_t *movie, s32 undo, s32 start, s32 end);
+s32 evtStopMover(polyMovieObject_t *mover, s32 sw, s32 baseframe, s32 nowframe);
 
 typedef struct evtScaledValue_t {
     u32 word00;
@@ -279,9 +279,9 @@ extern f32 D_0032C800[4];
 
 extern f32 D_0032C810[4];
 
-struct sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+struct sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-u32 sdfMemLock(struct sdfMemHandle_t *allocation);
+u32 sdfMemLock(struct sdfMemHandle_t *aHandle);
 
 typedef struct pmdEntry_t {
     u32 type;
@@ -300,7 +300,7 @@ typedef struct pmdHeader_t {
 
 sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out);
 
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *a, const void *b, u32 c);
 
 static inline void UnpackRGBAWordFloat(u32 color, f32 unit) {
     u32 rgba[4];
@@ -320,13 +320,13 @@ static inline void SetBlendVecW(f32 w)
     SDF_VU0_SETVECTOR_W(w);
 }
 
-void UnitFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void UnitFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     dds3Basic_t *basic;
 
     if (f->frame == now) {
         if (f->nameIndex >= 0) {
-            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 5, work->nameTable[f->nameIndex]);
+            basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 5, wdata->nameTable[f->nameIndex]);
             if (basic != NULL) {
                 evtRunUnitMode(basic, f->data.b[0]);
             }
@@ -334,12 +334,12 @@ void UnitFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
     }
 }
 
-void CameraFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void CameraFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     dds3Basic_t *basic;
 
     if (f->nameIndex >= 0) {
-        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, work->nameTable[f->nameIndex]);
+        basic = dds3SceneBasicSearchNameAndType(dds3GetControlScene(), 4, wdata->nameTable[f->nameIndex]);
         if (basic != NULL) {
             if (evtCameraFrameState == 0) {
                 D_0054F8E0 = -1;
@@ -353,7 +353,7 @@ void CameraFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTa
     }
 }
 
-s32 QuakeFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+s32 QuakeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     if (f->frame == now) {
         if (f->data.h[0] == 0) {
@@ -364,7 +364,7 @@ s32 QuakeFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
     }
 }
 
-s32 FadeFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+s32 FadeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     if (f->frame == now) {
         switch (f->data.h[0]) {
@@ -384,20 +384,20 @@ s32 FadeFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable
     }
 }
 
-void SeFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void SeFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     if (f->frame == now) {
-        evtPlaySe(work->eventNo, f->data.h[0]);
+        evtPlaySe(wdata->eventNo, f->data.h[0]);
     }
 }
 
-s32 BgmFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+s32 BgmFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     s32 eventNo;
     s32 bgm;
 
     if (f->frame == now) {
-        eventNo = work->eventNo;
+        eventNo = wdata->eventNo;
         bgm = f->data.h[1];
         printf("bgm_frame e%03d, bgm %d\n", eventNo, bgm);
         switch (f->data.h[0]) {
@@ -426,7 +426,7 @@ s32 BgmFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_
     }
 }
 
-void BlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void BlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     s32 alpha;
     s32 scale;
@@ -456,7 +456,7 @@ void BlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
     }
 }
 
-dds3Basic_t *AddEffect(evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
+dds3Basic_t *AddEffect(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f)
 {
     f32 position[4];
     f32 scale[4];
@@ -469,21 +469,21 @@ dds3Basic_t *AddEffect(evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
     kind = 0;
     basic = NULL;
     scale[3] = 1.0f;
-    for (i = 0; i < work->effectCount; i++) {
-        if (strcmp(work->nameTable1[work->effectTable[i].NameIndex], work->nameTable[f->nameIndex]) == 0) {
-            kind = work->effectTable[i].Type;
+    for (i = 0; i < wdata->effectCount; i++) {
+        if (strcmp(wdata->nameTable1[wdata->effectTable[i].NameIndex], wdata->nameTable[f->nameIndex]) == 0) {
+            kind = wdata->effectTable[i].Type;
             switch (kind) {
             case 0:
-                basic = dds3AddD3PEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].DataOffset, position, scale);
+                basic = dds3AddD3PEffectObjectBasic2((u8 *)wdata->header1 + wdata->effectTable[i].DataOffset, position, scale);
                 break;
             case 2:
-                basic = dds3AddMG12EffectObjectBasic2(1, (u8 *)work->header1 + work->effectTable[i].DataOffset);
+                basic = dds3AddMG12EffectObjectBasic2(1, (u8 *)wdata->header1 + wdata->effectTable[i].DataOffset);
                 break;
             case 3:
-                basic = dds3AddMG12EffectObjectBasic2(2, (u8 *)work->header1 + work->effectTable[i].DataOffset);
+                basic = dds3AddMG12EffectObjectBasic2(2, (u8 *)wdata->header1 + wdata->effectTable[i].DataOffset);
                 break;
             case 1:
-                basic = dds3AddBEDEffectObjectBasic2((u8 *)work->header1 + work->effectTable[i].DataOffset, position, scale);
+                basic = dds3AddBEDEffectObjectBasic2((u8 *)wdata->header1 + wdata->effectTable[i].DataOffset, position, scale);
                 break;
             }
             break;
@@ -498,7 +498,7 @@ dds3Basic_t *AddEffect(evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
     return basic;
 }
 
-s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f, char *effName, char *targetName, s32 posIndex, s32 cutNo)
+s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, char *effname, char *targetname, s32 posindex, s32 cutno)
 {
     s32 i;
     dds3Basic_t *basic;
@@ -506,33 +506,33 @@ s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f, cha
     dds3ObjectBaseControlWorkData_t *control;
 
     for (i = 0; i < 0x7F; i++) {
-        if (work->effectBasicTable[i] == NULL) {
+        if (wdata->effectBasicTable[i] == NULL) {
             break;
         }
     }
     if (i == 0x7F) {
         return -1;
     }
-    basic = AddEffect(work, f);
+    basic = AddEffect(wdata, f);
     if (basic == NULL) {
         return -1;
     }
-    basic->name = effName;
-    work->effectBasicTable[i] = basic;
+    basic->name = effname;
+    wdata->effectBasicTable[i] = basic;
     if (f->data.b[4] != 0) {
         dds3EffectObjectPresetMG12(basic);
     }
-    if (targetName == NULL) {
+    if (targetname == NULL) {
         return i;
     }
-    target = dds3SceneBasicSearchName(dds3GetActiveScene(), targetName);
+    target = dds3SceneBasicSearchName(dds3GetActiveScene(), targetname);
     if (target == NULL) {
         return i;
     }
     switch (target->type >> 24) {
     case BASIC_TYPE_UNITOBJECT:
-        if (posIndex >= 0) {
-            dds3EffectObjectBasicLinkObjectIndex(basic, target, posIndex);
+        if (posindex >= 0) {
+            dds3EffectObjectBasicLinkObjectIndex(basic, target, posindex);
             break;
         }
         /* fallthrough */
@@ -553,7 +553,7 @@ s32 AddEffectTable(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f, cha
     return i;
 }
 
-s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
+s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f)
 {
     dds3Basic_t *parts[4];
     s32 i;
@@ -563,25 +563,25 @@ s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
     dds3Basic_t **out;
 
     for (i = 0; i < 0x7F; i++) {
-        if (work->effectBasicTable[i] == NULL) {
+        if (wdata->effectBasicTable[i] == NULL) {
             break;
         }
     }
     if (i == 0x7F) {
         return -1;
     }
-    basic = AddEffect(work, f);
+    basic = AddEffect(wdata, f);
     if (basic == NULL) {
         return -1;
     }
-    basic->name = work->nameTable[f->nameIndex];
-    work->effectBasicTable[i] = basic;
+    basic->name = wdata->nameTable[f->nameIndex];
+    wdata->effectBasicTable[i] = basic;
     name = &f->data.b[4];
     out = parts;
     for (j = 0; j < 4; j++) {
         *out = NULL;
         if (*name >= 0) {
-            *out = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 7, work->nameTable[*name]);
+            *out = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 7, wdata->nameTable[*name]);
         }
         name++;
         out++;
@@ -594,37 +594,37 @@ s32 AddEffectTableMG12(s32 now, evtPolygonMovieWork_t *work, pmdFrameTable_t *f)
     return i;
 }
 
-void DelEffectTable_evtPolygonMovie(evtPolygonMovieWork_t *work, s32 no)
+void DelEffectTable_evtPolygonMovie(evtPolygonMovieWork_t *wdata, s32 no)
 {
     dds3Basic_t *basic;
 
     if (no >= 0) {
-        basic = work->effectBasicTable[no];
+        basic = wdata->effectBasicTable[no];
         if (basic != NULL) {
             dds3DeleteSceneBasicData(basic);
-            work->effectBasicTable[no] = NULL;
+            wdata->effectBasicTable[no] = NULL;
         }
     }
 }
 
-void EffectFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void EffectFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     char *target = NULL;
     dds3Basic_t *basic;
 
     if (f->frame == now) {
         if (f->data.h[3] >= 0) {
-            target = work->nameTable[f->data.h[3]];
+            target = wdata->nameTable[f->data.h[3]];
         }
-        f->data.b[0] = AddEffectTable(now, work, f, work->nameTable[f->nameIndex], target, f->data.b[5], 0);
+        f->data.b[0] = AddEffectTable(now, wdata, f, wdata->nameTable[f->nameIndex], target, f->data.b[5], 0);
     } else if (f->data.h[1] > 0) {
         if (now == f->data.h[1]) {
-            DelEffectTable_evtPolygonMovie(work, f->data.b[0]);
+            DelEffectTable_evtPolygonMovie(wdata, f->data.b[0]);
             f->data.b[0] = -1;
         }
     }
     if (f->data.b[0] >= 0) {
-        basic = work->effectBasicTable[f->data.b[0]];
+        basic = wdata->effectBasicTable[f->data.b[0]];
         if (basic != NULL) {
             if (f->length == now) {
                 if (f->length != 0) {
@@ -643,7 +643,7 @@ dds3Basic_t *SearchBasicFromNameIndex_evtPolygonMovie(evtPolygonMovieWork_t *wor
     return dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 7, work->nameTable[nameIndex]);
 }
 
-void MG12FrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void MG12FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     dds3Basic_t *basic;
     dds3Basic_t *p0;
@@ -651,15 +651,15 @@ void MG12FrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
     dds3Basic_t *p2;
 
     if (f->frame == now) {
-        f->data.b[0] = AddEffectTableMG12(now, work, f);
+        f->data.b[0] = AddEffectTableMG12(now, wdata, f);
     } else if (f->data.h[1] > 0) {
         if (now == f->data.h[1]) {
-            DelEffectTable_evtPolygonMovie(work, f->data.b[0]);
+            DelEffectTable_evtPolygonMovie(wdata, f->data.b[0]);
             f->data.b[0] = -1;
         }
     }
     if (f->data.b[0] >= 0) {
-        basic = work->effectBasicTable[f->data.b[0]];
+        basic = wdata->effectBasicTable[f->data.b[0]];
         if (basic != NULL) {
             if (f->length == now) {
                 if (f->length != 0) {
@@ -669,34 +669,34 @@ void MG12FrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
         }
         if (f->kind == 0x15) {
             if (basic != NULL) {
-                p0 = SearchBasicFromNameIndex_evtPolygonMovie(work, f->data.b[4]);
-                p1 = SearchBasicFromNameIndex_evtPolygonMovie(work, f->data.b[5]);
-                p2 = SearchBasicFromNameIndex_evtPolygonMovie(work, f->data.b[6]);
+                p0 = SearchBasicFromNameIndex_evtPolygonMovie(wdata, f->data.b[4]);
+                p1 = SearchBasicFromNameIndex_evtPolygonMovie(wdata, f->data.b[5]);
+                p2 = SearchBasicFromNameIndex_evtPolygonMovie(wdata, f->data.b[6]);
                 dds3EffectObjectSetMG12Pos(basic, p0, p1, p2,
-                                           SearchBasicFromNameIndex_evtPolygonMovie(work, f->data.b[7]));
+                                           SearchBasicFromNameIndex_evtPolygonMovie(wdata, f->data.b[7]));
             }
         }
     }
 }
 
-void BEDFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void BEDFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     char *target = NULL;
 
     if (f->frame == now) {
         if (f->data.h[1] >= 0) {
-            target = work->nameTable[f->data.h[1]];
+            target = wdata->nameTable[f->data.h[1]];
         }
-        f->data.h[3] = AddEffectTable(now, work, f, work->nameTable[f->nameIndex], target, -1, f->data.b[4]);
+        f->data.h[3] = AddEffectTable(now, wdata, f, wdata->nameTable[f->nameIndex], target, -1, f->data.b[4]);
     } else if (f->data.h[0] > 0) {
         if (now == f->data.h[0]) {
-            DelEffectTable_evtPolygonMovie(work, f->data.h[3]);
+            DelEffectTable_evtPolygonMovie(wdata, f->data.h[3]);
             f->data.h[3] = -1;
         }
     }
 }
 
-s32 LightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+s32 LightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     dds3Basic_t *light;
     dds3Basic_t *unit;
@@ -704,9 +704,9 @@ s32 LightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
 
     if (f->frame == now) {
         if (f->data.h[0] >= 0) {
-            light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, work->nameTable[f->nameIndex]);
+            light = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 9, wdata->nameTable[f->nameIndex]);
             if (light != NULL) {
-                unit = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 5, work->nameTable[f->data.h[0]]);
+                unit = dds3SceneBasicSearchNameAndType(dds3GetActiveScene(), 5, wdata->nameTable[f->data.h[0]]);
                 if (unit != NULL) {
                     handle = evtGetUnitHandle2(unit);
                     if (f->data.h[1] != 0) {
@@ -720,7 +720,7 @@ s32 LightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTabl
     }
 }
 
-void SkyFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void SkyFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     if (f->frame == now) {
         fldSkySetFilter(f->data.w[1], f->data.h[0], f->length);
@@ -728,7 +728,7 @@ void SkyFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable
     }
 }
 
-s32 BokasiFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+s32 BokasiFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     if (f->frame == now) {
         if (f->data.h[0] != 0) {
@@ -739,20 +739,20 @@ s32 BokasiFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTab
     }
 }
 
-f32 GetKeyFrameRatio(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+f32 GetKeyFrameRatio(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     s32 start;
     s32 end;
 
     if (now < f->frame) {
-        start = work->cutInfo->firstFrame;
+        start = wdata->cutInfo->firstFrame;
         end = f->frame;
     } else {
         start = f->frame;
         if (nf != NULL) {
             end = nf->frame;
         } else {
-            end = work->cutInfo->lastFrame;
+            end = wdata->cutInfo->lastFrame;
         }
     }
     if (end != start) {
@@ -761,7 +761,7 @@ f32 GetKeyFrameRatio(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTa
     return 0.0f;
 }
 
-void SLightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void SLightFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     f32 *key1;
@@ -772,17 +772,17 @@ void SLightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTa
     f32 bias2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->nameIndex;
         soften1 = f->data.f[0];
         bias1 = f->data.f[1];
-        key1 = work->slightTable[f->length];
+        key1 = wdata->slightTable[f->length];
         if (nf != NULL) {
             bias2 = nf->data.f[1];
             soften2 = nf->data.f[0];
-            key2 = work->slightTable[nf->length];
+            key2 = wdata->slightTable[nf->length];
         } else {
             soften2 = 7.0f;
             bias2 = 0.0f;
@@ -794,7 +794,7 @@ void SLightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTa
         soften1 = 7.0f;
         bias1 = 0.0f;
         soften2 = f->data.f[0];
-        key2 = work->slightTable[f->length];
+        key2 = wdata->slightTable[f->length];
     }
     evtHokanSceneLight(hokan, ratio, key1, key2, D_0056CFF0);
     dds3SetLightColor(0, 0, D_0056CFF0);
@@ -804,52 +804,52 @@ void SLightFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTa
     sdfFaceDivBias = evtHokanFloat(hokan, ratio, bias1, bias2);
 }
 
-void SFogFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void SFogFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     pmdSceneFogTable_t *key1;
     pmdSceneFogTable_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->sfogTable[f->length];
+        key1 = &wdata->sfogTable[f->length];
         if (nf != NULL) {
-            key2 = &work->sfogTable[nf->length];
+            key2 = &wdata->sfogTable[nf->length];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->sfogTable[f->length];
+        key2 = &wdata->sfogTable[f->length];
     }
     evtHokanSceneFog(hokan, ratio, &key1->fog, &key2->fog, &D_0056D020.fog);
     dds3SetFogPara(0, D_0056D020.fog.vec[1], D_0056D020.fog.vec[0], D_0056D020.fog.vec[2], D_0056D020.fog.vec[3]);
     dds3LightParam[12] = D_0056D020.fog.color;
 }
 
-void Blur2FrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void Blur2FrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     effBlurQuad_t *key1;
     effBlurQuad_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->blur2Table[f->data.h[1]];
+        key1 = &wdata->blur2Table[f->data.h[1]];
         if (nf != NULL) {
-            key2 = &work->blur2Table[nf->data.h[1]];
+            key2 = &wdata->blur2Table[nf->data.h[1]];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->blur2Table[f->data.h[1]];
+        key2 = &wdata->blur2Table[f->data.h[1]];
     }
     evtHokanBlur2(hokan, ratio, key1, key2, &D_0056D040);
     Eve_BlurSetParam(&D_0056D040);
@@ -860,26 +860,26 @@ void Blur2FrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTab
     }
 }
 
-void MBlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void MBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     effBlurTemplateBody_t *key1;
     effBlurTemplateBody_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->mblurTable[f->data.h[1]];
+        key1 = &wdata->mblurTable[f->data.h[1]];
         if (nf != NULL) {
-            key2 = &work->mblurTable[nf->data.h[1]];
+            key2 = &wdata->mblurTable[nf->data.h[1]];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->mblurTable[f->data.h[1]];
+        key2 = &wdata->mblurTable[f->data.h[1]];
     }
     evtHokanMultBlur(hokan, ratio, key1, key2, &D_0056D070);
     Eve_PartialMultiBlurSetParam(&D_0056D070);
@@ -890,26 +890,26 @@ void MBlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTab
     }
 }
 
-void DBlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void DBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     effBlurScatterParams_t *key1;
     effBlurScatterParams_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->dblurTable[f->data.h[1]];
+        key1 = &wdata->dblurTable[f->data.h[1]];
         if (nf != NULL) {
-            key2 = &work->dblurTable[nf->data.h[1]];
+            key2 = &wdata->dblurTable[nf->data.h[1]];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->dblurTable[f->data.h[1]];
+        key2 = &wdata->dblurTable[f->data.h[1]];
     }
     evtHokanDistBlur(hokan, ratio, key1, key2, &D_0056D0A0);
     Eve_DistortionBlurSetParam(&D_0056D0A0);
@@ -920,26 +920,26 @@ void DBlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTab
     }
 }
 
-void RBlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void RBlurFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     effBlurScaleParams_t *key1;
     effBlurScaleParams_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->rblurTable[f->data.h[1]];
+        key1 = &wdata->rblurTable[f->data.h[1]];
         if (nf != NULL) {
-            key2 = &work->rblurTable[nf->data.h[1]];
+            key2 = &wdata->rblurTable[nf->data.h[1]];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->rblurTable[f->data.h[1]];
+        key2 = &wdata->rblurTable[f->data.h[1]];
     }
     evtHokanRipBlur(hokan, ratio, key1, key2, &D_0056D0D0);
     Eve_RippleBlurSetParam(&D_0056D0D0);
@@ -950,26 +950,26 @@ void RBlurFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTab
     }
 }
 
-void MFilterFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void MFilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     effResourceRectParams_t *key1;
     effResourceRectParams_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->mfilterTable[f->data.h[1]];
+        key1 = &wdata->mfilterTable[f->data.h[1]];
         if (nf != NULL) {
-            key2 = &work->mfilterTable[nf->data.h[1]];
+            key2 = &wdata->mfilterTable[nf->data.h[1]];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->mfilterTable[f->data.h[1]];
+        key2 = &wdata->mfilterTable[f->data.h[1]];
     }
     evtHokanMultFilter(hokan, ratio, key1, key2, &D_0056D100);
     Eve_PartialMultiFilterSetParam(&D_0056D100);
@@ -980,26 +980,26 @@ void MFilterFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameT
     }
 }
 
-void FilterFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
+void FilterFrameFunc(evtPolygonMovieWork_t *wdata, pmdFrameTable_t *f, pmdFrameTable_t *nf, s32 now)
 {
     f32 ratio;
     effSolidRectParams_t *key1;
     effSolidRectParams_t *key2;
     s32 hokan;
 
-    ratio = GetKeyFrameRatio(work, f, nf, now);
+    ratio = GetKeyFrameRatio(wdata, f, nf, now);
     hokan = 1;
     if (now >= f->frame) {
         hokan = f->data.h[0];
-        key1 = &work->filterTable[f->data.h[1]];
+        key1 = &wdata->filterTable[f->data.h[1]];
         if (nf != NULL) {
-            key2 = &work->filterTable[nf->data.h[1]];
+            key2 = &wdata->filterTable[nf->data.h[1]];
         } else {
             key2 = NULL;
         }
     } else {
         key1 = NULL;
-        key2 = &work->filterTable[f->data.h[1]];
+        key2 = &wdata->filterTable[f->data.h[1]];
     }
     evtHokanFilter(hokan, ratio, key1, key2, &D_0056D130);
     Eve_FilterSetParam(&D_0056D130);
@@ -1010,7 +1010,7 @@ void FilterFrameFunc(evtPolygonMovieWork_t *work, pmdFrameTable_t *f, pmdFrameTa
     }
 }
 
-void FrameRun(evtPolygonMovieWork_t *work)
+void FrameRun(evtPolygonMovieWork_t *wdata)
 {
     s32 i;
     pmdFrameTable_t *f;
@@ -1022,12 +1022,12 @@ void FrameRun(evtPolygonMovieWork_t *work)
 
     evtCameraFrameState = 0;
     prev = NULL;
-    for (i = 0; i < work->frameCount; i++) {
-        f = &work->frameTable[i];
+    for (i = 0; i < wdata->frameCount; i++) {
+        f = &wdata->frameTable[i];
         nf = NULL;
-        if (i + 1 < work->frameCount) {
-            if (work->frameTable[i + 1].kind == f->kind) {
-                nf = &work->frameTable[i + 1];
+        if (i + 1 < wdata->frameCount) {
+            if (wdata->frameTable[i + 1].kind == f->kind) {
+                nf = &wdata->frameTable[i + 1];
             }
         }
         if (prev != NULL) {
@@ -1072,7 +1072,7 @@ void FrameRun(evtPolygonMovieWork_t *work)
             break;
         }
         if (length > 0) {
-            now = work->nowFrame;
+            now = wdata->nowFrame;
             if (now < f->frame) {
                 goto next;
             }
@@ -1081,11 +1081,11 @@ void FrameRun(evtPolygonMovieWork_t *work)
             }
             goto next;
         } else if (length == 0) {
-            now = work->nowFrame;
+            now = wdata->nowFrame;
             if (now < f->frame) {
                 goto next;
             }
-        } else if ((now = work->nowFrame) < f->frame) {
+        } else if ((now = wdata->nowFrame) < f->frame) {
             if (prev != NULL) {
                 goto next;
             }
@@ -1097,7 +1097,7 @@ void FrameRun(evtPolygonMovieWork_t *work)
     run:
         func = nowcamera[f->kind];
         if (func != NULL) {
-            func(work, f, nf, now);
+            func(wdata, f, nf, now);
         }
     next:
         prev = f;
@@ -1108,12 +1108,12 @@ void FrameRun(evtPolygonMovieWork_t *work)
     }
 }
 
-s32 evtPolygonMovieProcess2(dds3ProcessID_t *task)
+s32 evtPolygonMovieProcess2(dds3ProcessID_t *id)
 {
     evtPolygonMovieWork_t *work;
     s32 ret;
 
-    work = (evtPolygonMovieWork_t *)dds3GetProcessData(task);
+    work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
     FrameRun(work);
     work->nowFrame++;
     ret = 0;
@@ -1161,12 +1161,12 @@ void CheckLoad_evtPolygonMovie(evtPolygonMovieWork_t *work)
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", CheckLoad_evtPolygonMovie);
 #endif
 
-s32 evtCheckPolygonMovieRun(dds3ProcessID_t *task)
+s32 evtCheckPolygonMovieRun(dds3ProcessID_t *id)
 {
     evtPolygonMovieWork_t *state;
     s32 set;
 
-    state = (evtPolygonMovieWork_t *)dds3GetProcessData(task);
+    state = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
     set = 0;
     if (state->movieFlags & 8) {
         set = 1;
@@ -1180,51 +1180,51 @@ INCLUDE_RODATA(const s32, "event/evtPolygonMovie", D_0053BB20);
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtPolygonMovieProcess1);
 
-void evtPolygonMovieShutdown(dds3ProcessID_t *task)
+void evtPolygonMovieShutdown(dds3ProcessID_t *id)
 {
-    evtFreePolygonMovieWorkData(dds3GetProcessData(task));
-    dds3SetProcessData(task, NULL);
+    evtFreePolygonMovieWorkData(dds3GetProcessData(id));
+    dds3SetProcessData(id, NULL);
 }
 
-f32 evtHokanFloat(s32 enable, f32 t, f32 a, f32 b)
+f32 evtHokanFloat(s32 hokan, f32 ratio, f32 f1, f32 f2)
 {
-    if (enable) {
-        return a * (1.0f - t) + b * t;
+    if (hokan) {
+        return f1 * (1.0f - ratio) + f2 * ratio;
     }
-    return a;
+    return f1;
 }
 
-s32 evtHokanInt(s32 enable, f32 t, s32 a, s32 b)
+s32 evtHokanInt(s32 hokan, f32 ratio, s32 i1, s32 i2)
 {
-    s32 result = a;
+    s32 result = i1;
 
-    if (enable) {
-        result = (s32)((f32)a * (1.0f - t) + (f32)b * t);
+    if (hokan) {
+        result = (s32)((f32)i1 * (1.0f - ratio) + (f32)i2 * ratio);
     }
     return result;
 }
 
-u32 evtHokanUInt(s32 enable, f32 t, u32 a, u32 b)
+u32 evtHokanUInt(s32 hokan, f32 ratio, u32 i1, u32 i2)
 {
-    if (enable) {
-        return (u32)((f32)a * (1.0f - t) + (f32)b * t);
+    if (hokan) {
+        return (u32)((f32)i1 * (1.0f - ratio) + (f32)i2 * ratio);
     }
-    return a;
+    return i1;
 }
 
 /* vu0 routine: blend two RGBA8888 colours by t */
 /* NON_MATCHING: 9 of 49 words differ (first at +0x4). */
 #ifdef NON_MATCHING
-u32 evtHokanColor(s32 enable, f32 t, u32 a, u32 b)
+u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2)
 {
-    u32 color = a;
+    u32 color = c1;
 
-    if (enable) {
-        eeUnpackRGBAWordFloat(a, 1.0f / 128.0f);
-        SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
+    if (hokan) {
+        eeUnpackRGBAWordFloat(c1, 1.0f / 128.0f);
+        SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        eeUnpackRGBAWordFloat(b, 1.0f / 128.0f);
-        SDF_VU0_SCALEVECTOR_BITS(t);
+        eeUnpackRGBAWordFloat(c2, 1.0f / 128.0f);
+        SDF_VU0_SCALEVECTOR_BITS(ratio);
         SDF_VU0_ADDVECTOR();
         color = eePackRGBAWord(128.0f);
     }
@@ -1235,272 +1235,272 @@ INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanColor);
 #endif
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
-void evtHokanSceneLight(s32 enable, f32 t, f32 *a, f32 *b, f32 *out)
+void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d)
 {
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a != NULL) {
-        SDF_VU0_LOADVECTOR(a);
+    if (key1 != NULL) {
+        SDF_VU0_LOADVECTOR(key1);
     } else {
         SDF_VU0_LOADVECTOR(D_0032C7F0);
     }
-    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
-    if (b != NULL) {
-        SDF_VU0_LOADVECTOR_B(b);
+    SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
+    if (key2 != NULL) {
+        SDF_VU0_LOADVECTOR_B(key2);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C7F0);
     }
-    SDF_VU0_SCALEVECTOR_B_V0(t);
+    SDF_VU0_SCALEVECTOR_B_V0(ratio);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(out);
-    if (a != NULL) {
-        SDF_VU0_LOADVECTOR(a + 4);
+    SDF_VU0_STOREVECTOR(d);
+    if (key1 != NULL) {
+        SDF_VU0_LOADVECTOR(key1 + 4);
     } else {
         SDF_VU0_LOADVECTOR(D_0032C800);
     }
-    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
-    if (b != NULL) {
-        SDF_VU0_LOADVECTOR_B(b + 4);
+    SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
+    if (key2 != NULL) {
+        SDF_VU0_LOADVECTOR_B(key2 + 4);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C800);
     }
-    SDF_VU0_SCALEVECTOR_B_V0(t);
+    SDF_VU0_SCALEVECTOR_B_V0(ratio);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_STOREVECTOR(out + 4);
-    if (a != NULL) {
-        SDF_VU0_LOADVECTOR(a + 8);
+    SDF_VU0_STOREVECTOR(d + 4);
+    if (key1 != NULL) {
+        SDF_VU0_LOADVECTOR(key1 + 8);
     } else {
         SDF_VU0_LOADVECTOR(D_0032C810);
     }
-    SDF_VU0_SCALEVECTOR_V0(1.0f - t);
-    if (b != NULL) {
-        SDF_VU0_LOADVECTOR_B(b + 8);
+    SDF_VU0_SCALEVECTOR_V0(1.0f - ratio);
+    if (key2 != NULL) {
+        SDF_VU0_LOADVECTOR_B(key2 + 8);
     } else {
         SDF_VU0_LOADVECTOR_B(D_0032C810);
     }
-    SDF_VU0_SCALEVECTOR_B_V0(t);
+    SDF_VU0_SCALEVECTOR_B_V0(ratio);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_VECTOR_W_SET_ONE();
-    SDF_VU0_STOREVECTOR(out + 8);
+    SDF_VU0_STOREVECTOR(d + 8);
 }
 
 /* vu0 routine: blend a vector and an RGBA8888 colour by t (missing input =
  * default vector/colour) */
-void evtHokanSceneFog(s32 enable, f32 t, evtBlendVecColor_t *a, evtBlendVecColor_t *b, evtBlendVecColor_t *out)
+void evtHokanSceneFog(s32 hokan, f32 ratio, evtBlendVecColor_t *key1, evtBlendVecColor_t *key2, evtBlendVecColor_t *d)
 {
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a != NULL) {
-        SDF_VU0_SETVECTOR_X(a->vec[0]);
-        SDF_VU0_SETVECTOR_Y(a->vec[1]);
-        SDF_VU0_SETVECTOR_Z(a->vec[2]);
-        SetBlendVecW(a->vec[3]);
+    if (key1 != NULL) {
+        SDF_VU0_SETVECTOR_X(key1->vec[0]);
+        SDF_VU0_SETVECTOR_Y(key1->vec[1]);
+        SDF_VU0_SETVECTOR_Z(key1->vec[2]);
+        SetBlendVecW(key1->vec[3]);
     } else {
         SDF_VU0_SETVECTOR_X(evtHokanFogParam[1]);
         SDF_VU0_SETVECTOR_Y(evtHokanFogParam[0]);
         SDF_VU0_SETVECTOR_Z(evtHokanFogParam[2]);
         SetBlendVecW(evtHokanFogParam[3]);
     }
-    SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
+    SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    if (b != NULL) {
-        SDF_VU0_SETVECTOR_X(b->vec[0]);
-        SDF_VU0_SETVECTOR_Y(b->vec[1]);
-        SDF_VU0_SETVECTOR_Z(b->vec[2]);
-        SetBlendVecW(b->vec[3]);
+    if (key2 != NULL) {
+        SDF_VU0_SETVECTOR_X(key2->vec[0]);
+        SDF_VU0_SETVECTOR_Y(key2->vec[1]);
+        SDF_VU0_SETVECTOR_Z(key2->vec[2]);
+        SetBlendVecW(key2->vec[3]);
     } else {
         SDF_VU0_SETVECTOR_X(evtHokanFogParam[1]);
         SDF_VU0_SETVECTOR_Y(evtHokanFogParam[0]);
         SDF_VU0_SETVECTOR_Z(evtHokanFogParam[2]);
         SetBlendVecW(evtHokanFogParam[3]);
     }
-    SDF_VU0_SCALEVECTOR_BITS(t);
+    SDF_VU0_SCALEVECTOR_BITS(ratio);
     SDF_VU0_ADDVECTOR();
-    SDF_VU0_GETVECTOR_X(out->vec[0]);
-    SDF_VU0_GETVECTOR_Y(out->vec[1]);
-    SDF_VU0_GETVECTOR_Z(out->vec[2]);
-    SDF_VU0_GETVECTOR_W(out->vec[3]);
-    if (a != NULL) {
-        UnpackRGBAWordFloat(a->color, 1.0f / 128.0f);
+    SDF_VU0_GETVECTOR_X(d->vec[0]);
+    SDF_VU0_GETVECTOR_Y(d->vec[1]);
+    SDF_VU0_GETVECTOR_Z(d->vec[2]);
+    SDF_VU0_GETVECTOR_W(d->vec[3]);
+    if (key1 != NULL) {
+        UnpackRGBAWordFloat(key1->color, 1.0f / 128.0f);
     } else {
         UnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
-    SDF_VU0_SCALEVECTOR_BITS(1.0f - t);
+    SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
     SDF_VU0_COPYVECTOR_A_TO_B();
-    if (b != NULL) {
-        UnpackRGBAWordFloat(b->color, 1.0f / 128.0f);
+    if (key2 != NULL) {
+        UnpackRGBAWordFloat(key2->color, 1.0f / 128.0f);
     } else {
         UnpackRGBAWordFloat(D_0032C830[0], 1.0f / 128.0f);
     }
-    SDF_VU0_SCALEVECTOR_BITS(t);
+    SDF_VU0_SCALEVECTOR_BITS(ratio);
     SDF_VU0_ADDVECTOR();
-    out->color = PackRGBAWord(128.0f);
+    d->color = PackRGBAWord(128.0f);
 }
 
-void evtHokanBlur2(s32 enable, f32 t, effBlurQuad_t *a, effBlurQuad_t *b, effBlurQuad_t *out)
+void evtHokanBlur2(s32 hokan, f32 ratio, effBlurQuad_t *key1, effBlurQuad_t *key2, effBlurQuad_t *d)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a == NULL) {
-        a = &D_0032C840;
+    if (key1 == NULL) {
+        key1 = &D_0032C840;
     }
-    if (b == NULL) {
-        b = &D_0032C840;
+    if (key2 == NULL) {
+        key2 = &D_0032C840;
     }
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->angle = evtHokanFloat(enable, t, a->angle, b->angle);
-    out->displacement = evtHokanFloat(enable, t, a->displacement, b->displacement);
+    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
+    d->blendControl = key1->blendControl;
+    d->angle = evtHokanFloat(hokan, ratio, key1->angle, key2->angle);
+    d->displacement = evtHokanFloat(hokan, ratio, key1->displacement, key2->displacement);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->position[positionOrCornerIndex] = evtHokanInt(enable, t, a->position[positionOrCornerIndex], b->position[positionOrCornerIndex]);
+        d->position[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->position[positionOrCornerIndex], key2->position[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[positionOrCornerIndex][coordinateIndex], b->corners[positionOrCornerIndex][coordinateIndex]);
+            d->corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->corners[positionOrCornerIndex][coordinateIndex], key2->corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
 
-void evtHokanMultBlur(s32 enable, f32 t, effBlurTemplateBody_t *a, effBlurTemplateBody_t *b, effBlurTemplateBody_t *out)
+void evtHokanMultBlur(s32 hokan, f32 ratio, effBlurTemplateBody_t *key1, effBlurTemplateBody_t *key2, effBlurTemplateBody_t *d)
 {
     s32 positionOrCornerIndex;
     s32 coordinateIndex;
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a == NULL) {
-        a = &D_0032C870;
+    if (key1 == NULL) {
+        key1 = &D_0032C870;
     }
-    if (b == NULL) {
-        b = &D_0032C870;
+    if (key2 == NULL) {
+        key2 = &D_0032C870;
     }
-    out->extent = evtHokanUInt(enable, t, a->extent, b->extent);
-    out->source.color = evtHokanColor(enable, t, a->source.color, b->source.color);
-    out->source.blendControl = a->source.blendControl;
-    out->source.angle = evtHokanFloat(enable, t, a->source.angle, b->source.angle);
-    out->source.displacement = evtHokanFloat(enable, t, a->source.displacement, b->source.displacement);
+    d->extent = evtHokanUInt(hokan, ratio, key1->extent, key2->extent);
+    d->source.color = evtHokanColor(hokan, ratio, key1->source.color, key2->source.color);
+    d->source.blendControl = key1->source.blendControl;
+    d->source.angle = evtHokanFloat(hokan, ratio, key1->source.angle, key2->source.angle);
+    d->source.displacement = evtHokanFloat(hokan, ratio, key1->source.displacement, key2->source.displacement);
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
-        out->source.position[positionOrCornerIndex] = evtHokanInt(enable, t, a->source.position[positionOrCornerIndex], b->source.position[positionOrCornerIndex]);
+        d->source.position[positionOrCornerIndex] = evtHokanInt(hokan, ratio, key1->source.position[positionOrCornerIndex], key2->source.position[positionOrCornerIndex]);
     }
     for (positionOrCornerIndex = 0; positionOrCornerIndex < 2; positionOrCornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->source.corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->source.corners[positionOrCornerIndex][coordinateIndex], b->source.corners[positionOrCornerIndex][coordinateIndex]);
+            d->source.corners[positionOrCornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->source.corners[positionOrCornerIndex][coordinateIndex], key2->source.corners[positionOrCornerIndex][coordinateIndex]);
         }
     }
 }
 
-void evtHokanFilter(s32 enable, f32 t, effSolidRectParams_t *a, effSolidRectParams_t *b, effSolidRectParams_t *out);
+void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRectParams_t *key2, effSolidRectParams_t *d);
 
 /* NON_MATCHING: 1 of 72 words differ (first at +0xC0). */
 #ifdef NON_MATCHING
-void evtHokanFilter(s32 enable, f32 t, effSolidRectParams_t *a, effSolidRectParams_t *b, effSolidRectParams_t *out)
+void evtHokanFilter(s32 hokan, f32 ratio, effSolidRectParams_t *key1, effSolidRectParams_t *key2, effSolidRectParams_t *d)
 {
     s32 cornerIndex;
     s32 coordinateIndex;
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a == NULL) {
-        a = &D_0032C8A0;
+    if (key1 == NULL) {
+        key1 = &D_0032C8A0;
     }
-    if (b == NULL) {
-        b = &D_0032C8A0;
+    if (key2 == NULL) {
+        key2 = &D_0032C8A0;
     }
     for (cornerIndex = 0; cornerIndex < 2; cornerIndex++) {
         for (coordinateIndex = 0; coordinateIndex < 2; coordinateIndex++) {
-            out->corners[cornerIndex][coordinateIndex] = evtHokanInt(enable, t, a->corners[cornerIndex][coordinateIndex], b->corners[cornerIndex][coordinateIndex]);
+            d->corners[cornerIndex][coordinateIndex] = evtHokanInt(hokan, ratio, key1->corners[cornerIndex][coordinateIndex], key2->corners[cornerIndex][coordinateIndex]);
         }
     }
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
+    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
+    d->blendControl = key1->blendControl;
 }
 #else
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanFilter);
 #endif
 
-void evtHokanMultFilter(s32 enable, f32 t, effResourceRectParams_t *a, effResourceRectParams_t *b, effResourceRectParams_t *out)
+void evtHokanMultFilter(s32 hokan, f32 ratio, effResourceRectParams_t *key1, effResourceRectParams_t *key2, effResourceRectParams_t *d)
 {
     s32 centerCoordinateIndex;
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a == NULL) {
-        a = &D_0032C8C0;
+    if (key1 == NULL) {
+        key1 = &D_0032C8C0;
     }
-    if (b == NULL) {
-        b = &D_0032C8C0;
+    if (key2 == NULL) {
+        key2 = &D_0032C8C0;
     }
-    out->extent = evtHokanUInt(enable, t, a->extent, b->extent);
+    d->extent = evtHokanUInt(hokan, ratio, key1->extent, key2->extent);
     for (centerCoordinateIndex = 0; centerCoordinateIndex < 2; centerCoordinateIndex++) {
-        out->center[centerCoordinateIndex] = evtHokanInt(
-            enable, t, a->center[centerCoordinateIndex], b->center[centerCoordinateIndex]);
+        d->center[centerCoordinateIndex] = evtHokanInt(
+            hokan, ratio, key1->center[centerCoordinateIndex], key2->center[centerCoordinateIndex]);
     }
-    out->draw.rgba = evtHokanColor(enable, t, a->draw.rgba, b->draw.rgba);
-    out->draw.blendControl = a->draw.blendControl;
+    d->draw.rgba = evtHokanColor(hokan, ratio, key1->draw.rgba, key2->draw.rgba);
+    d->draw.blendControl = key1->draw.blendControl;
 }
 
-void evtHokanDistBlur(s32 enable, f32 t, effBlurScatterParams_t *a, effBlurScatterParams_t *b, effBlurScatterParams_t *out)
+void evtHokanDistBlur(s32 hokan, f32 ratio, effBlurScatterParams_t *key1, effBlurScatterParams_t *key2, effBlurScatterParams_t *d)
 {
     s32 positionAxisIndex;
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a == NULL) {
-        a = &D_0032C8F0;
+    if (key1 == NULL) {
+        key1 = &D_0032C8F0;
     }
-    if (b == NULL) {
-        b = &D_0032C8F0;
+    if (key2 == NULL) {
+        key2 = &D_0032C8F0;
     }
-    out->count = evtHokanUInt(enable, t, a->count, b->count);
-    out->delaySpread = evtHokanUInt(enable, t, a->delaySpread, b->delaySpread);
-    out->angleStep = evtHokanFloat(enable, t, a->angleStep, b->angleStep);
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->uvDisplacementAngleDegrees = evtHokanFloat(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
-    out->uvDisplacementAmplitude = evtHokanFloat(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
-    out->positionSpread = evtHokanUInt(enable, t, a->positionSpread, b->positionSpread);
+    d->count = evtHokanUInt(hokan, ratio, key1->count, key2->count);
+    d->delaySpread = evtHokanUInt(hokan, ratio, key1->delaySpread, key2->delaySpread);
+    d->angleStep = evtHokanFloat(hokan, ratio, key1->angleStep, key2->angleStep);
+    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
+    d->blendControl = key1->blendControl;
+    d->uvDisplacementAngleDegrees = evtHokanFloat(hokan, ratio, key1->uvDisplacementAngleDegrees, key2->uvDisplacementAngleDegrees);
+    d->uvDisplacementAmplitude = evtHokanFloat(hokan, ratio, key1->uvDisplacementAmplitude, key2->uvDisplacementAmplitude);
+    d->positionSpread = evtHokanUInt(hokan, ratio, key1->positionSpread, key2->positionSpread);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        out->position[positionAxisIndex] = evtHokanInt(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
+        d->position[positionAxisIndex] = evtHokanInt(hokan, ratio, key1->position[positionAxisIndex], key2->position[positionAxisIndex]);
     }
-    out->size = evtHokanUInt(enable, t, a->size, b->size);
+    d->size = evtHokanUInt(hokan, ratio, key1->size, key2->size);
 }
 
-void evtHokanRipBlur(s32 enable, f32 t, effBlurScaleParams_t *a, effBlurScaleParams_t *b, effBlurScaleParams_t *out)
+void evtHokanRipBlur(s32 hokan, f32 ratio, effBlurScaleParams_t *key1, effBlurScaleParams_t *key2, effBlurScaleParams_t *d)
 {
     s32 positionAxisIndex;
 
-    if (enable == 0) {
-        t = 0.0f;
+    if (hokan == 0) {
+        ratio = 0.0f;
     }
-    if (a == NULL) {
-        a = &D_0032C920;
+    if (key1 == NULL) {
+        key1 = &D_0032C920;
     }
-    if (b == NULL) {
-        b = &D_0032C920;
+    if (key2 == NULL) {
+        key2 = &D_0032C920;
     }
-    out->count = evtHokanUInt(enable, t, a->count, b->count);
-    out->phaseStep = evtHokanFloat(enable, t, a->phaseStep, b->phaseStep);
-    out->spacing = evtHokanFloat(enable, t, a->spacing, b->spacing);
-    out->color = evtHokanColor(enable, t, a->color, b->color);
-    out->blendControl = a->blendControl;
-    out->uvDisplacementAngleDegrees = evtHokanFloat(enable, t, a->uvDisplacementAngleDegrees, b->uvDisplacementAngleDegrees);
-    out->uvDisplacementAmplitude = evtHokanFloat(enable, t, a->uvDisplacementAmplitude, b->uvDisplacementAmplitude);
-    out->angleStep = evtHokanFloat(enable, t, a->angleStep, b->angleStep);
+    d->count = evtHokanUInt(hokan, ratio, key1->count, key2->count);
+    d->phaseStep = evtHokanFloat(hokan, ratio, key1->phaseStep, key2->phaseStep);
+    d->spacing = evtHokanFloat(hokan, ratio, key1->spacing, key2->spacing);
+    d->color = evtHokanColor(hokan, ratio, key1->color, key2->color);
+    d->blendControl = key1->blendControl;
+    d->uvDisplacementAngleDegrees = evtHokanFloat(hokan, ratio, key1->uvDisplacementAngleDegrees, key2->uvDisplacementAngleDegrees);
+    d->uvDisplacementAmplitude = evtHokanFloat(hokan, ratio, key1->uvDisplacementAmplitude, key2->uvDisplacementAmplitude);
+    d->angleStep = evtHokanFloat(hokan, ratio, key1->angleStep, key2->angleStep);
     for (positionAxisIndex = 0; positionAxisIndex < 2; positionAxisIndex++) {
-        out->position[positionAxisIndex] = evtHokanInt(enable, t, a->position[positionAxisIndex], b->position[positionAxisIndex]);
+        d->position[positionAxisIndex] = evtHokanInt(hokan, ratio, key1->position[positionAxisIndex], key2->position[positionAxisIndex]);
     }
-    out->size = evtHokanUInt(enable, t, a->size, b->size);
+    d->size = evtHokanUInt(hokan, ratio, key1->size, key2->size);
 }
 
 void evtRunUnitMode(dds3Basic_t *unit, s32 mode)
@@ -1528,43 +1528,43 @@ void evtRunUnitMode(dds3Basic_t *unit, s32 mode)
     }
 }
 
-void evtSetPolygonMovieFlag(dds3ProcessID_t *process, s32 mask)
+void evtSetPolygonMovieFlag(dds3ProcessID_t *id, s32 flag)
 {
-    evtPolygonMovieWork_t *work = (evtPolygonMovieWork_t *)dds3GetProcessData(process);
-    work->movieFlags |= mask;
+    evtPolygonMovieWork_t *work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
+    work->movieFlags |= flag;
 }
 
-void evtResetPolygonMovieFlag(dds3ProcessID_t *process, s32 mask)
+void evtResetPolygonMovieFlag(dds3ProcessID_t *id, s32 flag)
 {
-    evtPolygonMovieWork_t *work = (evtPolygonMovieWork_t *)dds3GetProcessData(process);
-    work->movieFlags &= ~mask;
+    evtPolygonMovieWork_t *work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
+    work->movieFlags &= ~flag;
 }
 
-u8 evtCheckPolygonMovieFlag(dds3ProcessID_t *process, u32 mask)
+u8 evtCheckPolygonMovieFlag(dds3ProcessID_t *id, u32 flag)
 {
-    evtPolygonMovieWork_t *work = (evtPolygonMovieWork_t *)dds3GetProcessData(process);
-    return (work->movieFlags & mask) != 0;
+    evtPolygonMovieWork_t *work = (evtPolygonMovieWork_t *)dds3GetProcessData(id);
+    return (work->movieFlags & flag) != 0;
 }
 
 /* Scale the clip to the elapsed fraction of its duration, then apply or undo it. */
-s32 evtStopMover(polyMovieObject_t *movie, s32 undo, s32 startFrame, s32 endFrame)
+s32 evtStopMover(polyMovieObject_t *mover, s32 sw, s32 baseframe, s32 nowframe)
 {
     polyMovieClip_t *clip;
     s32 elapsedFrames;
     s32 duration;
 
-    elapsedFrames = endFrame - startFrame;
+    elapsedFrames = nowframe - baseframe;
     if (elapsedFrames < 0) {
         elapsedFrames = 0;
     }
-    clip = movie->state->clip;
+    clip = mover->state->clip;
     if (clip != NULL) {
         duration = (s32)clip->duration;
         if (duration <= elapsedFrames) {
             elapsedFrames = duration;
         }
         dds3PathBasicControlSetRatio((evtScaledValue_t *)clip, (f32)elapsedFrames / (f32)duration);
-        if (undo == 0) {
+        if (sw == 0) {
             dds3PathBasicPauseOn((evtScaledValue_t *)clip);
         } else {
             dds3PathBasicPauseOff((evtScaledValue_t *)clip);
@@ -1586,29 +1586,29 @@ evtPolygonMovieWork_t *InitPolygonMovieWorkData(void)
 
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData1);
 
-void evtFreePolygonMovieWorkData(evtPolygonMovieWork_t *work)
+void evtFreePolygonMovieWorkData(evtPolygonMovieWork_t *wdata)
 {
-    if (work != NULL) {
-        if (work->effectBasicTable != NULL) {
-            sdfChipFreeDirect(work->effectBasicTable);
+    if (wdata != NULL) {
+        if (wdata->effectBasicTable != NULL) {
+            sdfChipFreeDirect(wdata->effectBasicTable);
         }
-        if (work->mesHandle >= 0) {
-            itfMesMngRelease(work->mesHandle);
+        if (wdata->mesHandle >= 0) {
+            itfMesMngRelease(wdata->mesHandle);
         }
         fileSyncAll();
-        if (work->file04 != NULL) {
-            fileHandleFree(work->file04);
+        if (wdata->file04 != NULL) {
+            fileHandleFree(wdata->file04);
         }
-        if (work->file4C != NULL) {
-            fileHandleFree(work->file4C);
+        if (wdata->file4C != NULL) {
+            fileHandleFree(wdata->file4C);
         }
-        if (work->mem08 != NULL) {
-            sdfMemFreeDirect(work->mem08);
+        if (wdata->mem08 != NULL) {
+            sdfMemFreeDirect(wdata->mem08);
         }
-        if (work->mem50 != NULL) {
-            sdfMemFreeDirect(work->mem50);
+        if (wdata->mem50 != NULL) {
+            sdfMemFreeDirect(wdata->mem50);
         }
-        sdfChipFreeDirect(work);
+        sdfChipFreeDirect(wdata);
     }
 }
 
@@ -1628,15 +1628,15 @@ sdfMemHandle_t *evtAllocMovieWork(pmdHeader_t **out)
     return handle;
 }
 
-void SetPMFileName(s32 eventNo, s32 cutNo, char *pm1file, char *pm2file)
+void SetPMFileName(s32 eventno, s32 cutno, char *pm1file, char *pm2file)
 {
-    sprintf(pm1file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1", eventNo / 10 * 10, eventNo, eventNo, cutNo, eventNo, cutNo);
-    sprintf(pm2file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", eventNo / 10 * 10, eventNo, eventNo, cutNo, eventNo, cutNo);
+    sprintf(pm1file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM1", eventno / 10 * 10, eventno, eventno, cutno, eventno, cutno);
+    sprintf(pm2file, "/event/e%03d/e%03d/e%03d_%03d/E%03d_%03d.PM2", eventno / 10 * 10, eventno, eventno, cutno, eventno, cutno);
 }
 
 /* NON_MATCHING: 2 of 60 words differ (first at +0x5C). */
 #ifdef NON_MATCHING
-evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventNo, s32 cutNo, s32 type)
+evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventno, s32 cutno, s32 type)
 {
     char pm1file[64];
     char pm2file[64];
@@ -1646,7 +1646,7 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventNo, s32 cutNo, s32 t
     sdfMemHandle_t *handle1;
     sdfMemHandle_t *handle2;
 
-    SetPMFileName(eventNo, cutNo, pm1file, pm2file);
+    SetPMFileName(eventno, cutno, pm1file, pm2file);
     handle1 = sdfDevLoadFileEx(pm1file, &pm1data, 0);
     if (pm1data == NULL) {
         return NULL;
@@ -1664,24 +1664,24 @@ evtPolygonMovieWork_t *evtGetPolygonMovieWorkData2(s32 eventNo, s32 cutNo, s32 t
     }
     work->mem08 = handle1;
     work->mem50 = handle2;
-    work->eventNo = eventNo;
-    work->cutNo = cutNo;
+    work->eventNo = eventno;
+    work->cutNo = cutno;
     return work;
 }
 #else
 INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtGetPolygonMovieWorkData2);
 #endif
 
-void evtStartPolygonMovie2(s32 priority, s32 eventNo, s32 cutNo)
+void evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno)
 {
     char pm1file[64];
     char pm2file[64];
     evtPolygonMovieWork_t *work;
 
-    SetPMFileName(eventNo, cutNo, pm1file, pm2file);
+    SetPMFileName(eventno, cutno, pm1file, pm2file);
     work = InitPolygonMovieWorkData();
-    work->eventNo = eventNo;
-    work->cutNo = cutNo;
+    work->eventNo = eventno;
+    work->cutNo = cutno;
     work->file04 = fileLoad(pm1file);
     work->movieFlags |= 2;
     work->file4C = fileLoad(pm2file);

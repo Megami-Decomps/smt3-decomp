@@ -37,9 +37,9 @@ typedef struct nbCameraHelper_t {
     effPartHandle_t *hPart;
 } nbCameraHelper_t;
 
-extern void *sdfChipAllocDirect(s32 size);
+extern void *sdfChipAllocDirect(s32 aSize);
 
-extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *name);
+extern effPartHandle_t *nbCameraHelperFileLoadPB(const char *pFilename);
 
 /* 128-byte party records; this unit only reads the formation index. */
 struct nbParty_t {
@@ -50,19 +50,19 @@ struct nbParty_t {
 
 extern f32 D_0054F3A0[];
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, u32 mark);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, u32 aId);
 
-extern void *dds3EffectFileListCreate(const char *path, s32 max);
+extern void *dds3EffectFileListCreate(const char *dir, s32 type);
 
-extern void *dds3EffectFileListWindowCreate(void *hFileList);
+extern void *dds3EffectFileListWindowCreate(void *a);
 
-extern void dds3EffectFileListWindowSetPos(void *pWork, s32 x, s32 y);
+extern void dds3EffectFileListWindowSetPos(void *a, s32 b, s32 c);
 
-extern void dds3EffectFileListWindowSetOt(void *pWork, s32 ot);
+extern void dds3EffectFileListWindowSetOt(void *hEffFLWin, s32 ot);
 
-extern void dds3EffectFileListWindowSetPadWait(void *pWork, s32 wait);
+extern void dds3EffectFileListWindowSetPadWait(void *hEffFLWin, s32 wait);
 
-extern void dds3EffectFileListWindowSetWindowColor(void *pWork, u32 fill, u32 edge);
+extern void dds3EffectFileListWindowSetWindowColor(void *hEffFLWin, u32 frame_c, u32 bg_c);
 
 extern const char D_005358A8[];
 
@@ -110,7 +110,7 @@ extern u32 nbCameraBoss_BSBERU_E915_Frame;
 
 extern f32 nbCameraBoss_BSBERU_E915_Rate;
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern void nbCameraHelperModelSetSub(mdlObj_t *hModel, u32 target, u32 eye);
 
@@ -126,11 +126,11 @@ extern mdlObj_t *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 
 extern void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 
-extern void sdfChipFreeDirect(void *pChip);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void dds3EffectFileListWindowDelete(void *pWork);
+extern void dds3EffectFileListWindowDelete(void *a);
 
-extern void dds3EffectFileListDelete(void *hFileList);
+extern void dds3EffectFileListDelete(void *a);
 
 extern s32 nbCameraBoss_BSARI_SIMANO_Type;
 
@@ -140,34 +140,34 @@ extern u8 nbCameraBoss_Pish_MUHENK_Type;
 
 extern u32 nbCameraBoss_Pish_MUHENK_Frame;
 
-extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperFileLoadPB);
 
 /* Called above its definition, where ee-gcc assumed int. */
-u16 nbCameraHelperLength(nbCameraHelper_t *pHelper);
+u16 nbCameraHelperLength(nbCameraHelper_t *hCameraHelper);
 
-nbCameraHelper_t *nbCameraHelperCreate(const char *name)
+nbCameraHelper_t *nbCameraHelperCreate(const char *pFilename)
 {
     nbCameraHelper_t *pHelper = sdfChipAllocDirect(0x3C);
 
-    pHelper->hPart = nbCameraHelperFileLoadPB(name);
+    pHelper->hPart = nbCameraHelperFileLoadPB(pFilename);
     pHelper->unk30 = 0;
     pHelper->unk34 = nbCameraHelperLength(pHelper);
     return pHelper;
 }
 
-void nbCameraHelperDelete(nbCameraHelper_t *pHelper)
+void nbCameraHelperDelete(nbCameraHelper_t *hCameraHelper)
 {
-    dds3EffectPartDelete(pHelper->hPart);
-    sdfChipFreeDirect(pHelper);
+    dds3EffectPartDelete(hCameraHelper->hPart);
+    sdfChipFreeDirect(hCameraHelper);
 }
 
-u16 nbCameraHelperLength(nbCameraHelper_t *pHelper)
+u16 nbCameraHelperLength(nbCameraHelper_t *hCameraHelper)
 {
-    return dds3EffectPartGetHandle(pHelper->hPart)->first->frameLength;
+    return dds3EffectPartGetHandle(hCameraHelper->hPart)->first->frameLength;
 }
 
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperRun);
@@ -199,7 +199,7 @@ void nbCameraHelperModelSet(mdlObj_t *hModel)
     nbCameraHelperModelSetSub(hModel, 0, 1);
 }
 
-s32 nbCameraHelperViewer_PB_Init(s32 unused)
+s32 nbCameraHelperViewer_PB_Init(s32 pData)
 {
     void *hFileList = dds3EffectFileListCreate(D_005358A8, 0x10);
     void *pWork;
@@ -212,7 +212,7 @@ s32 nbCameraHelperViewer_PB_Init(s32 unused)
     dds3EffectFileListWindowSetPadWait(nbCameraHelperViewerPBWork, 0x53);
     dds3EffectFileListWindowSetWindowColor(nbCameraHelperViewerPBWork, 0x80806020, 0x80000000);
     nbCameraHelperViewerMode = NULL;
-    return unused;
+    return pData;
 }
 
 INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperViewer_PB_Draw);
@@ -223,7 +223,7 @@ void nbCameraHelperViewer_PB_End(void *pData)
     dds3EffectFileListDelete(nbCameraHelperViewerPBHandle);
 }
 
-s32 nbCameraHelperViewer_Init(s32 unused)
+s32 nbCameraHelperViewer_Init(s32 pData)
 {
     s32 size;
 
@@ -245,7 +245,7 @@ s32 nbCameraHelperViewer_Init(s32 unused)
         D_0054F3E4 = sdfMemAllocDirect(size);
         nbCameraHelperViewerHandle = sdfMemLock(D_0054F3E4);
     }
-    return unused;
+    return pData;
 }
 
 INCLUDE_RODATA(const s32, "code_001C55F8", D_00535850);

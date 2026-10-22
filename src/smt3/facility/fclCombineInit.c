@@ -39,10 +39,10 @@ extern cmpSkillList_t *cmpSkillCursor;
 
 extern s32 cmbDrawSequence(void);
 
-extern void *dds3StartProcess(char *namestr, u32 priority, s32 starttimer, s32 shutdowntimer,
-                              void *processfunc, void *shutdownfunc, void *data);
+extern void *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                              void *drawExit, void *deleteExit, void *p);
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclUpdateInit(void);
 
@@ -97,7 +97,7 @@ extern cmbPairEntry_t D_0032DB90[];
 
 extern datDevilInfo_t datDevilTable[];
 
-extern s32 dds3GetRandA(s32 seed);
+extern s32 dds3GetRandA(s32 name);
 
 extern s32 datGetMaxHp(datUnitWork_t *work);
 
@@ -109,13 +109,13 @@ extern s32 cmbCalcResultLevel(cmbUnit_t *unitA, cmbUnit_t *unitB, s32 mode, s8 f
 
 extern s32 cmbGetRaceCombineResult(s32 race, u8 level);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern s32 evtStartEvent(s32 event);
+extern s32 evtStartEvent(s32 no);
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern void *dds3SearchProcessName(const char *name);
+extern void *dds3SearchProcessName(const char *namestr);
 
 extern s32 dds3GetProcessStat(void *id);
 
@@ -181,9 +181,9 @@ extern void sortSkillList(cmbUnit_t *unit);
 
 extern void p2sdStopBGM(s32 id);
 
-extern s32 mdlPrepare(s32 group, s32 id, s32 blocking);
+extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 typedef struct fclPanel
 {
@@ -276,8 +276,8 @@ extern s32 sdfDelayedResrcCheck(void);
 
 extern void fclFilterOFF(void);
 
-extern void fclSetSprite(fclSprite_t *sprite, s32 x, s32 y, s32 d, s32 u0, s32 v0, s32 u1,
-                         s32 v1, s32 color, s32 tex);
+extern void fclSetSprite(fclSprite_t *pSprite, s32 Xsize, s32 Ysize, s32 Z, s32 U1, s32 V1, s32 U2,
+                         s32 V2, s32 Col, s32 TexHandle);
 
 typedef struct
 {
@@ -352,7 +352,7 @@ extern s32 printf(const char *fmt, ...);
 
 extern u8 D_0032D1F0[];
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 typedef struct
 {
@@ -398,7 +398,7 @@ typedef struct
 
 extern cmbGbWork_t *CMB_GBWK;
 
-extern s32 datAddItem(s32 itemId, s32 count);
+extern s32 datAddItem(s32 id, s32 num);
 
 extern s32 cmpStatSetTimer(s32 kind, s8 index);
 
@@ -412,14 +412,14 @@ extern void cmpResetCursorInfo(cmpCursorWork_t *cursor);
 
 extern s32 func_002043E0(u32 **work);
 
-extern void mdlSmoothLoopMotion(void *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
-                                f32 blendDurationFrames);
+extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
+                                f32 aSmoothLeng);
 
-extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
-extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
 
@@ -451,9 +451,9 @@ extern void fclRagTexInit(fclRagTex_t *tex, s32 a, s32 b, s32 c, s32 d, s32 e, s
 
 extern void fclRagTexCalcSizes();
 
-extern void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
 
-extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 e);
+extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
 
 extern void cmpModelFreeResource(void);
 
@@ -463,9 +463,9 @@ extern void cmpMoveCursorListEnd(cmpCursorWork_t *cursor);
 
 extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
 
-extern void fclEncycSetExplainData(void *data);
+extern void fclEncycSetExplainData(void *pbmd);
 
-extern void frDestroyFontRequestAfter(void *frq);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineDisableCmdZensyo);
 
@@ -484,9 +484,9 @@ s32 fclCombineChkEventStat(void)
     return 0;
 }
 
-void fclCombineEventStart(s8 value)
+void fclCombineEventStart(s8 Signal)
 {
-    fclSetWorkValue(1, value);
+    fclSetWorkValue(1, Signal);
     fclClearFlag(1);
     evtStartEvent(0x320);
 }
@@ -1149,8 +1149,8 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawInfoSprite);
 
 extern fclSpriteTbl_t cmbSpriteTable[];
 
-extern void fclDrawSpriteRes(s32 x, s32 y, s32 d, s32 *color, s32 id, s32 idx, s32 *texs,
-                             fclSpriteTbl_t *tbl, s32 ot);
+extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 OtNo);
 
 void cmbDrawTopSprite(void)
 {
@@ -1277,7 +1277,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateStockCursor);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbChangeSequence);
 
-extern void fclRbnRelease(fclRbnWork_t *work);
+extern void fclRbnRelease(fclRbnWork_t *phandle);
 
 extern s32 cmpGetPressedButton(s32 mask);
 
@@ -1302,7 +1302,7 @@ s32 cmbWaitCancelButton(void)
     return cmpPlayCursorSE(button);
 }
 
-extern void fclRbnSwitchActive(fclRbnWork_t *rbn, s32 index);
+extern void fclRbnSwitchActive(fclRbnWork_t *phandle, s32 index);
 
 void cmbSwitchRibbon(void)
 {
@@ -1397,7 +1397,7 @@ void cmbFreeIntroduceModels(void)
     }
 }
 
-extern void effEVECombParSmokeDelete(s32 handle);
+extern void effEVECombParSmokeDelete(s32 pCombParSmoke);
 
 void cmbFreeSmokeEffect(void)
 {
@@ -1410,7 +1410,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateIntroduce);
 
 extern void fclEncycStartProcess(void);
 
-extern void fclEncycSetTexHandle(s32 *src);
+extern void fclEncycSetTexHandle(s32 *texhandle);
 
 void cmbStartEncycView(void)
 {
@@ -1512,7 +1512,7 @@ s32 cmbActionExists(void *work)
     return result;
 }
 
-extern void mdlGetFilebase(s32 kind, u16 id, char *out, s32 size);
+extern void mdlGetFilebase(s32 aMajor, u16 aMinor, char *aName, s32 aNameLeng);
 
 extern s32 sprintf(char *out, const char *fmt, ...);
 
@@ -1568,7 +1568,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetActionModelHandle);
 
 extern void cmbGetActionModelHandle(void);
 
-extern void mdlLoopMotion(void *model, s32 a, s32 b);
+extern void mdlLoopMotion(void *aHandle, s32 aGroup, s32 aNumber);
 
 void *cmbUpdateIntroduceModel(void *work)
 {
@@ -1666,8 +1666,8 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTargetModel);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetSceneModel);
 
-extern void sdfModelOtInit(void *table, sdfGrOt_t *first, sdfGrOt_t *second, sdfGrOt_t *third,
-                           sdfGrOt_t *fourth);
+extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1, sdfGrOt_t *aOt2,
+                           sdfGrOt_t *aOt3);
 
 void cmbInitModelOt(s32 unused, void *table)
 {
@@ -1682,9 +1682,9 @@ INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CE38);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbLoadTargetModel);
 
-extern void *dds3SearchSceneBasic(void *scene, u32 serialID, s32 type);
+extern void *dds3SearchSceneBasic(void *pBasic, u32 serialID, s32 type);
 
-extern evtUnit_t *evtGetUnitHandle2(void *obj);
+extern evtUnit_t *evtGetUnitHandle2(void *unit);
 
 /* Called above its definition, where ee-gcc assumed int. */
 void *dds3GetActiveScene(void);
@@ -1736,7 +1736,7 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetActionWorkValues);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRunActionSe);
 
-extern void fclCombineBGM(s8 mode);
+extern void fclCombineBGM(s8 Mode);
 
 /* NON_MATCHING: 3 of 25 words differ (first at +0x54). */
 #ifdef NON_MATCHING
@@ -1770,7 +1770,7 @@ void func_00205DB8(void)
     func_002043E0(CMB_GBWK->unk_1654C);
 }
 
-extern void effEVECombParSmokeSetZtest(s32 handle, s32 flag);
+extern void effEVECombParSmokeSetZtest(s32 pCombParSmoke, s32 test);
 
 void cmb_205DF0(void)
 {

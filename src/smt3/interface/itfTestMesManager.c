@@ -67,7 +67,7 @@ extern void *sdfDevPrintfEx(void *, const char *, ...);
 
 extern s32 printf(const char *, ...);
 
-extern f32 sdfSin(f32 angle);
+extern f32 sdfSin(f32 aRadius);
 
 s32 pbCalcFovDegrees(f32 *, f32, f32, f32, f32);
 
@@ -127,25 +127,25 @@ extern void *D_0054F514;
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
-extern dds3ProcessID_t *scrStartScript2(s32 handle, u8 *script, s32 arg);
+extern dds3ProcessID_t *scrStartScript2(s32 a, u8 *b, s32 c);
 
-extern void itfMesMngSetKutiCallback(s32 meshandle, void *func);
+extern void itfMesMngSetKutiCallback(s32 id, void *func);
 
 extern void itfDebugPrintMark(void);
 
-extern void sdfTexFreeDelayed(void *tex);
+extern void sdfTexFreeDelayed(void *aHandle);
 
-extern void *itfMiscLoadTexture(char *name);
+extern void *itfMiscLoadTexture(char *filename);
 
-extern void *sdfGrAllocPacketBuff(u32 size);
+extern void *sdfGrAllocPacketBuff(u32 aSize);
 
-extern void *sdf2DMakeStdPacket(void *buff, u32 size);
+extern void *sdf2DMakeStdPacket(void *aPacket, u32 aLeng);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
 extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 mode, s32 value);
 

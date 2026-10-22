@@ -10,9 +10,9 @@ extern void (*D_00551828)(void);
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *data, s32 mode);
 
-extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *data);
+extern sdfTexHandle_t *sdfTexSet(struct pipeTextureFile_t *aTex);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
 typedef struct tagpipeBasic {
     void *base;
@@ -69,7 +69,7 @@ extern void Initmymdl(void);
 
 extern void objInitMyAdd(void);
 
-extern s32 texLoad(const char *name, tagPipeTexture *texPtr);
+extern s32 texLoad(const char *filename, tagPipeTexture *texPtr);
 
 extern void vecRotate2D(f32 *vector, f32 angle);
 
@@ -97,9 +97,9 @@ extern void workRelease(void);
 
 extern s32 PipeTexRelease(void);
 
-extern void mdlSmoothLoopMotion(void *handle, s32 group, s32 number, f32 beforeLeng, f32 smoothLeng);
+extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng, f32 aSmoothLeng);
 
-extern void DEBUG_PRINT(const char *fmt, ...);
+extern void DEBUG_PRINT(const char *str, ...);
 
 extern tagPipeEnemyInfo D_00528F78[];
 
@@ -113,7 +113,7 @@ extern s32 myMaka;
 
 extern s32 pipeMyMakaCount;
 
-extern void sdfMemFreeDelayedDirect(void *handle);
+extern void sdfMemFreeDelayedDirect(void *aHandle);
 
 extern void objMdlDel(tagPipeObject *objPtr);
 
@@ -131,7 +131,7 @@ extern void objDelAll(void);
 
 extern void objVisibleAll(s8 value);
 
-extern void sdfTexFreeDelayed(void *handle);
+extern void sdfTexFreeDelayed(void *aHandle);
 
 void workRelease(void)
 {
@@ -190,26 +190,26 @@ INCLUDE_ASM(const s32, "pipe/pipeObject", objMake);
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objOption);
 
-void objOptionInc(tagPipeObject *objPtr, u8 step)
+void objOptionInc(tagPipeObject *objPtr, u8 op)
 {
     f32 pos[3];
 
-    if (step < 0x14) {
+    if (op < 0x14) {
         objPtr->offset += 0x1E;
         return;
     }
-    if (step >= 0x64) {
+    if (op >= 0x64) {
         return;
     }
     objPtr->offset += 0x1E;
     pos[0] = objPtr->pos[0];
     pos[1] = objPtr->pos[1];
     pos[2] = 0.0f;
-    if (step < 0x28) {
+    if (op < 0x28) {
         vecRotate2D(pos, 0.17453293f);
-    } else if (step < 0x3C) {
+    } else if (op < 0x3C) {
         vecRotate2D(pos, -0.17453293f);
-    } else if (step < 0x50) {
+    } else if (op < 0x50) {
         vecRotate2D(pos, 0.087266461f);
     } else {
         vecRotate2D(pos, -0.087266461f);
@@ -402,27 +402,27 @@ void partsInit(void)
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", partsAdd);
 
-void partsDel(tagpipeParts *pParts)
+void partsDel(tagpipeParts *pPtr)
 {
-    if ((u8)pParts->mdl == 0xFF) {
+    if ((u8)pPtr->mdl == 0xFF) {
         return;
     }
-    switch (pParts->id) {
+    switch (pPtr->id) {
     case 1:
     case 3:
-        mymdlDelObject(&PipeLine[pParts->mdl]);
-        DEBUG_PRINT("-----PipeLine %d DEL OBJECT\n", pParts->mdl);
+        mymdlDelObject(&PipeLine[pPtr->mdl]);
+        DEBUG_PRINT("-----PipeLine %d DEL OBJECT\n", pPtr->mdl);
         break;
     case 2:
-        mymdlDelObject(&PipeCur[pParts->mdl]);
-        DEBUG_PRINT("-----PipeCur %d DEL OBJECT\n", pParts->mdl);
+        mymdlDelObject(&PipeCur[pPtr->mdl]);
+        DEBUG_PRINT("-----PipeCur %d DEL OBJECT\n", pPtr->mdl);
         break;
     case 4:
-        mymdlDelObject(&PipeCur2[pParts->mdl]);
-        DEBUG_PRINT("-----PipeCur2 %d DEL OBJECT\n", pParts->mdl);
+        mymdlDelObject(&PipeCur2[pPtr->mdl]);
+        DEBUG_PRINT("-----PipeCur2 %d DEL OBJECT\n", pPtr->mdl);
         break;
     }
-    pParts->id = -1;
+    pPtr->id = -1;
 }
 
 
@@ -450,14 +450,14 @@ s32 PipeTexRelease(void)
     return 1;
 }
 
-s32 texLoad(const char *name, tagPipeTexture *record) {
-    void *allocation = sdfDevLoadFileEx(name, (u32 *)&record->mp, 0);
-    record->mh = allocation;
-    record->th = sdfTexSet(record->mp);
-    if (record->mh != NULL) {
-        sdfMemFreeDelayedDirect(record->mh);
-        record->mh = NULL;
-        record->mp = NULL;
+s32 texLoad(const char *filename, tagPipeTexture *texPtr) {
+    void *allocation = sdfDevLoadFileEx(filename, (u32 *)&texPtr->mp, 0);
+    texPtr->mh = allocation;
+    texPtr->th = sdfTexSet(texPtr->mp);
+    if (texPtr->mh != NULL) {
+        sdfMemFreeDelayedDirect(texPtr->mh);
+        texPtr->mh = NULL;
+        texPtr->mp = NULL;
     }
     return 1;
 }

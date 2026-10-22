@@ -85,39 +85,39 @@ typedef struct effBezierDrawParam_t {
 } effBezierDrawParam_t;
 
 
-extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
-extern void *sdfMemLock(sdfMemHandle_t *allocation);
-extern void sdfMemFreeDirect(sdfMemHandle_t *allocation);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 extern sdfMat_t *sdfMatNew(void);
-extern void sdfMatSetConstant(sdfMat_t *material, f32 constant);
-extern void sdfMatFreeDelayed(sdfMat_t *material);
-extern void *memcpy(void *dst, const void *src, u32 size);
-extern void *memset(void *dst, s32 value, u32 size);
+extern void sdfMatSetConstant(sdfMat_t *aMat, f32 aRatio);
+extern void sdfMatFreeDelayed(sdfMat_t *aMat);
+extern void *memcpy(void *a, const void *b, u32 c);
+extern void *memset(void *a, s32 b, u32 c);
 extern void *dds3EffectPCPDataGetData(void *table, s32 index);
-extern effBezierBED_t *effEveBEDCreate(effBezierBED_t *params);
-extern void effEveBEDDelete(effBezierBED_t *bed);
-extern effBezierCut_t *effEveBEDCutCreate(effBezierBED_t *bed, s32 mode, effBezierPlacement_t *place);
-extern void effEveBEDCutDelete(effBezierCut_t *cut);
-extern u32 effColorBlend(u32 firstColor, u32 secondColor, f32 blend);
-extern s32 sdfGrAllocPacketBuff(s32 size);
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *tag, void *allocator);
-extern void sdf3DPrimLinkMat(sdfDrawTag_t *tag, sdfMat_t *material, void *allocator);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
-extern void *effPkt3DPrimMakePoly(effBezierDrawParam_t *params);
+extern effBezierBED_t *effEveBEDCreate(effBezierBED_t *pData);
+extern void effEveBEDDelete(effBezierBED_t *hEveBED);
+extern effBezierCut_t *effEveBEDCutCreate(effBezierBED_t *hEveBED, s32 CutNum, effBezierPlacement_t *pParams);
+extern void effEveBEDCutDelete(effBezierCut_t *hEveBEDCut);
+extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
+extern void sdf3DPrimLinkResetTm(sdfDrawTag_t *aTag, void *aAllocator);
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *aTag, sdfMat_t *aMat, void *aAllocator);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void *effPkt3DPrimMakePoly(effBezierDrawParam_t *aParm);
 
 extern effBezierDrawParam_t dds3BezierVertexCount, dds3BezierTrackPolyVertex;
 extern const f32 D_0031F0B0[8][4];
 extern const u32 D_0031F020[28], D_0031F090[8];
 extern sdfGrOt_t *dds3BezierTrackPolyParam[];
 
-effBezierTrackPoly_t *dds3BezierTrackPolySetVertex(s32 historyLength, s32 subdivisions);
-void dds3BezierTrackPolyCreate(effBezierTrackPoly_t *history, u32 *gradientColors);
-void dds3BezierTrackPolyDelete(effBezierTrackPoly_t *work);
+effBezierTrackPoly_t *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex);
+void dds3BezierTrackPolyCreate(effBezierTrackPoly_t *face, u32 *split);
+void dds3BezierTrackPolyDelete(effBezierTrackPoly_t *hPoly);
 
-effBezierWork_t *effPCPBezierBillCreate(const effBezierParam_t *src, effBezierBED_t *eventParams)
+effBezierWork_t *effPCPBezierBillCreate(const effBezierParam_t *pParam, effBezierBED_t *pBEDData)
 {
-    u32 count = src->groupCount;
+    u32 count = pParam->groupCount;
     sdfMemHandle_t *allocation = sdfMemAllocDirect(count * sizeof(effBezierSlot_t) + sizeof(effBezierWork_t));
     effBezierWork_t *work = (effBezierWork_t *)sdfMemLock(allocation);
     effBezierSlot_t *slot = (effBezierSlot_t *)(work + 1);
@@ -126,12 +126,12 @@ effBezierWork_t *effPCPBezierBillCreate(const effBezierParam_t *src, effBezierBE
     s32 historyLength, subdivisions;
     u32 i;
 
-    work->params = *src;
+    work->params = *pParam;
     work->allocation = allocation;
     work->ownsMixerVoices = 1;
     work->slots = slot;
     work->tintColor = 0x80808080;
-    work->soundMixer = effEveBEDCreate(eventParams);
+    work->soundMixer = effEveBEDCreate(pBEDData);
     historyLength = work->params.historyLength;
     if (historyLength == 0) {
         work->params.historyLength = 1;
@@ -241,10 +241,10 @@ effBezierWork_t *effPCPBezierBillCopy(effBezierWork_t *src) {
     return work;
 }
 
-void effPCPBezierBillDelete(effBezierWork_t *group) {
+void effPCPBezierBillDelete(effBezierWork_t *hData) {
     u32 i = 0;
-    u32 count = group->params.groupCount;
-    effBezierSlot_t *slot = group->slots;
+    u32 count = hData->params.groupCount;
+    effBezierSlot_t *slot = hData->slots;
 
     if (count != 0) {
         do {
@@ -254,36 +254,36 @@ void effPCPBezierBillDelete(effBezierWork_t *group) {
             slot++;
         } while (i < count);
     }
-    if (group->ownsMixerVoices != 0) {
-        effEveBEDDelete(group->soundMixer);
+    if (hData->ownsMixerVoices != 0) {
+        effEveBEDDelete(hData->soundMixer);
     }
-    sdfMemFreeDirect(group->allocation);
+    sdfMemFreeDirect(hData->allocation);
 }
 
 extern effRandState_t dds3EffectBase[];
 extern sdfVector4_t aViewEye, aViewTarget;
 extern u32 effBTLSkillCheckRun(void);
-extern s32 effBTLSkillGetTargetFormation(s32 index);
+extern s32 effBTLSkillGetTargetFormation(s32 number);
 extern s32 effBTLSkillGetInvokeFormation(void);
-extern void effBTLModelGetSphereCenter(s32 formation);
-extern f32 dds3GetRandFloatA(effRandState_t *state);
-extern u32 dds3GetRandA(effRandState_t *state);
-extern void SetRotateMatrixAxis(f32 angle, const f32 *axis);
+extern void effBTLModelGetSphereCenter(s32 pFormation);
+extern f32 dds3GetRandFloatA(effRandState_t *name);
+extern u32 dds3GetRandA(effRandState_t *name);
+extern void SetRotateMatrixAxis(f32 aAngle, const f32 *aAxis);
 extern s32 effPCPBezierEval(effBezierCurve_t *curve, f32 *out);
 extern u32 effMagaCylinderCalcColor(u32 color, u32 scale);
-extern f32 sdfAtan2(f32 x, f32 z);
-extern void FromEuler(f32 x, f32 y, f32 z);
-extern void effEveBEDCutSetParams(effBezierCut_t *cut, const effBezierPlacement_t *place);
-extern void effEveBEDCutDraw(effBezierCut_t *cut);
+extern f32 sdfAtan2(f32 aY, f32 aX);
+extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
+extern void effEveBEDCutSetParams(effBezierCut_t *hEveBEDCut, const effBezierPlacement_t *pParams);
+extern void effEveBEDCutDraw(effBezierCut_t *hEveBEDCut);
 
-void dds3BezierTrackPolyReset(effBezierTrackPoly_t *history);
-void dds3BezierTrackPolySetVC(effBezierTrackPoly_t *history, u128 *source);
-void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *history);
+void dds3BezierTrackPolyReset(effBezierTrackPoly_t *hPoly);
+void dds3BezierTrackPolySetVC(effBezierTrackPoly_t *hPoly, u128 *pABGR);
+void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *hPoly);
 
 /* vu0 routine: respawns each ribbon's bezier controls and walks its history. */
 /* NON_MATCHING: 15 of 1497 words differ (first at +0x1188). */
 #ifdef NON_MATCHING
-void effPCPBezierBillDraw(effBezierWork_t *work)
+void effPCPBezierBillDraw(effBezierWork_t *hData)
 {
     effBezierPlacement_t place;
     f32 center[4];
@@ -321,15 +321,15 @@ void effPCPBezierBillDraw(effBezierWork_t *work)
     u32 blend;
     u32 j;
 
-    count = work->params.groupCount;
-    fadeStep = 1.0f / (f32)work->params.fadeFrames;
-    segments = work->params.subdivisions - 1;
-    frames = work->params.curveFrames;
-    delayRange = work->params.startDelayRange;
-    mode = work->params.mode;
-    tint = work->tintColor;
-    slot = work->slots;
-    SDF_VU0_COPYVECTOR(origin, work->params.origin);
+    count = hData->params.groupCount;
+    fadeStep = 1.0f / (f32)hData->params.fadeFrames;
+    segments = hData->params.subdivisions - 1;
+    frames = hData->params.curveFrames;
+    delayRange = hData->params.startDelayRange;
+    mode = hData->params.mode;
+    tint = hData->tintColor;
+    slot = hData->slots;
+    SDF_VU0_COPYVECTOR(origin, hData->params.origin);
     place.payload[4] = 0.0f;
     place.payload[5] = 0.0f;
     place.payload[6] = 0.0f;
@@ -356,17 +356,17 @@ void effPCPBezierBillDraw(effBezierWork_t *work)
     SDF_VU0_LOADVECTOR_B(&aViewEye);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_STOREVECTOR(viewDir);
-    half[0] = work->params.width * 0.5f;
-    half[1] = work->params.width * 0.5f;
-    half[2] = work->params.width * 0.5f;
+    half[0] = hData->params.width * 0.5f;
+    half[1] = hData->params.width * 0.5f;
+    half[2] = hData->params.width * 0.5f;
     i = 0;
     if (count != 0) {
         do {
         if (slot->curve.parameterStep == 0.0f) {
             bias = 0.5f;
-            drop = -work->params.height * dds3GetRandFloatA(dds3EffectBase);
-            drift = work->params.spreadZ * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
-            spawn[0] = origin[0] + work->params.spreadX * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
+            drop = -hData->params.height * dds3GetRandFloatA(dds3EffectBase);
+            drift = hData->params.spreadZ * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
+            spawn[0] = origin[0] + hData->params.spreadX * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
             spawn[1] = origin[1] - drop;
             spawn[2] = origin[2] + drift;
             SDF_VU0_LOADVECTOR(spawn);
@@ -757,8 +757,8 @@ void effPCPBezierBillSetColor(effBezierWork_t *work, u32 color)
     work->tintColor = color;
 }
 
-effBezierTrackPoly_t *dds3BezierTrackPolySetVertex(s32 historyLength, s32 subdivisions) {
-    s32 count = historyLength * subdivisions * 3 + 6;
+effBezierTrackPoly_t *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex) {
+    s32 count = hPoly * pVertex * 3 + 6;
     u32 colorBytes = count * sizeof(u32);
     u32 bufferBytes = count * (sizeof(u128) + sizeof(u32)) + 8 * (sizeof(u128) + sizeof(u32));
     sdfMemHandle_t *allocation = sdfMemAllocDirect(bufferBytes + sizeof(effBezierTrackPoly_t));
@@ -776,7 +776,7 @@ effBezierTrackPoly_t *dds3BezierTrackPolySetVertex(s32 historyLength, s32 subdiv
     history->surfaceIndex = 2;
     history->pointCapacity = count;
     history->nextPointWriteIndex = 3;
-    history->subdivisions = subdivisions;
+    history->subdivisions = pVertex;
     history->color = 0x80808080;
     history->allocation = allocation;
     history->activePointCount = 0;
@@ -795,29 +795,29 @@ effBezierTrackPoly_t *dds3BezierTrackPolySetVertex(s32 historyLength, s32 subdiv
     return history;
 }
 
-void dds3BezierTrackPolyDelete(effBezierTrackPoly_t *work) {
-    sdfMatFreeDelayed(work->resourceHandle);
-    sdfMemFreeDirect(work->allocation);
+void dds3BezierTrackPolyDelete(effBezierTrackPoly_t *hPoly) {
+    sdfMatFreeDelayed(hPoly->resourceHandle);
+    sdfMemFreeDirect(hPoly->allocation);
 }
 
-void dds3BezierTrackPolyReset(effBezierTrackPoly_t *history) {
-    history->nextPointWriteIndex = 3;
-    history->color = 0x80808080;
-    history->activePointCount = 0;
+void dds3BezierTrackPolyReset(effBezierTrackPoly_t *hPoly) {
+    hPoly->nextPointWriteIndex = 3;
+    hPoly->color = 0x80808080;
+    hPoly->activePointCount = 0;
 }
 
-void dds3BezierTrackPolyCreate(effBezierTrackPoly_t *history, u32 *gradientColors) {
+void dds3BezierTrackPolyCreate(effBezierTrackPoly_t *face, u32 *split) {
     f32 t = 0.0f;
-    u32 count = history->pointCapacity / 3;
+    u32 count = face->pointCapacity / 3;
     u32 alphaCount = count >> 1;
     f32 step = 1.0f / count;
     f32 alpha = 0.0f;
     f32 alphaStep = 1.0f / alphaCount;
-    u32 *colors = history->colors;
-    u32 innerStart = gradientColors[0] & 0xFFFFFF;
-    u32 innerEnd = gradientColors[2] & 0xFFFFFF;
-    u32 outerStart = gradientColors[1];
-    u32 outerEnd = gradientColors[3];
+    u32 *colors = face->colors;
+    u32 innerStart = split[0] & 0xFFFFFF;
+    u32 innerEnd = split[2] & 0xFFFFFF;
+    u32 outerStart = split[1];
+    u32 outerEnd = split[3];
     u32 i = 0;
 
     if (count != 0) {
@@ -837,29 +837,29 @@ void dds3BezierTrackPolyCreate(effBezierTrackPoly_t *history, u32 *gradientColor
     }
 }
 
-void dds3BezierTrackPolySetVC(effBezierTrackPoly_t *history, u128 *source) {
-    s32 position = history->nextPointWriteIndex;
-    u128 *points = history->points;
+void dds3BezierTrackPolySetVC(effBezierTrackPoly_t *hPoly, u128 *pABGR) {
+    s32 position = hPoly->nextPointWriteIndex;
+    u128 *points = hPoly->points;
     s32 count;
 
-    SDF_VU0_COPYVECTOR(&points[position], source);
-    SDF_VU0_COPYVECTOR(&points[position + 1], source + 1);
-    SDF_VU0_COPYVECTOR(&points[position + 2], source + 2);
+    SDF_VU0_COPYVECTOR(&points[position], pABGR);
+    SDF_VU0_COPYVECTOR(&points[position + 1], pABGR + 1);
+    SDF_VU0_COPYVECTOR(&points[position + 2], pABGR + 2);
     position += 3;
-    count = history->pointCapacity;
-    history->nextPointWriteIndex = position;
+    count = hPoly->pointCapacity;
+    hPoly->nextPointWriteIndex = position;
     if (position == count) {
-        SDF_VU0_COPYVECTOR(&points[0], source);
-        SDF_VU0_COPYVECTOR(&points[1], source + 1);
-        SDF_VU0_COPYVECTOR(&points[2], source + 2);
-        history->nextPointWriteIndex = 3;
+        SDF_VU0_COPYVECTOR(&points[0], pABGR);
+        SDF_VU0_COPYVECTOR(&points[1], pABGR + 1);
+        SDF_VU0_COPYVECTOR(&points[2], pABGR + 2);
+        hPoly->nextPointWriteIndex = 3;
     }
-    if (history->activePointCount < count - 3) {
-        history->activePointCount += 3;
+    if (hPoly->activePointCount < count - 3) {
+        hPoly->activePointCount += 3;
     }
 }
 
-void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *history) {
+void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *hPoly) {
     s32 start[4];
     s32 length[4];
     sdfDrawTag_t *list;
@@ -873,32 +873,32 @@ void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *history) {
     u32 centerColor;
     sdfGrOt_t *surface;
 
-    if (history->activePointCount == 0) {
+    if (hPoly->activePointCount == 0) {
         return;
     }
     list = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(list);
     sdf3DPrimLinkResetTm(list, 0);
-    sdf3DPrimLinkMat(list, history->resourceHandle, 0);
-    recent = history->activePointCount;
-    start[0] = history->nextPointWriteIndex - recent;
+    sdf3DPrimLinkMat(list, hPoly->resourceHandle, 0);
+    recent = hPoly->activePointCount;
+    start[0] = hPoly->nextPointWriteIndex - recent;
     if (start[0] < 3) {
         wrapped = start[0] - 3;
         start[1] = 0;
-        start[0] = wrapped + history->pointCapacity;
+        start[0] = wrapped + hPoly->pointCapacity;
         length[0] = -wrapped;
         length[1] = recent - length[0] + 3;
     } else {
         length[0] = recent;
         length[1] = 0;
     }
-    dds3BezierVertexCount.colors = history->colors;
-    dds3BezierVertexCount.color = history->color;
+    dds3BezierVertexCount.colors = hPoly->colors;
+    dds3BezierVertexCount.color = hPoly->color;
     for (i = 0; i < 2; i++) {
         draw = &dds3BezierVertexCount;
         remaining = length[i];
         draw->primitiveCount = 16;
-        draw->points = history->points + start[i];
+        draw->points = hPoly->points + start[i];
         draw->pointCount = 15;
         while (remaining >= 15) {
             remaining -= 12;
@@ -913,17 +913,17 @@ void dds3BezierTrackPolyDraw(effBezierTrackPoly_t *history) {
             draw->colors += remaining;
         }
     }
-    colors = history->endColors;
+    colors = hPoly->endColors;
     edgeColor = dds3BezierVertexCount.colors[-3];
     centerColor = dds3BezierVertexCount.colors[-2];
     colors[0] = centerColor;
     colors[7] = colors[6] = colors[5] = colors[4] =
         colors[3] = colors[2] = colors[1] = edgeColor;
     dds3BezierTrackPolyVertex.colors = colors;
-    dds3BezierTrackPolyVertex.points = history->endPoints;
-    dds3BezierTrackPolyVertex.color = history->color;
+    dds3BezierTrackPolyVertex.points = hPoly->endPoints;
+    dds3BezierTrackPolyVertex.color = hPoly->color;
     sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&dds3BezierTrackPolyVertex));
-    surface = dds3BezierTrackPolyParam[history->surfaceIndex];
+    surface = dds3BezierTrackPolyParam[hPoly->surfaceIndex];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, list);
 }
 

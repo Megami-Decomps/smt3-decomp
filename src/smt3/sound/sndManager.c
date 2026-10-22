@@ -44,7 +44,7 @@ extern dds3TitleWork_t *titleWork;
 
 extern void p2sdStopAllSe(void);
 
-extern void sdfMemFreeDirect(void *ptr);
+extern void sdfMemFreeDirect(void *aHandle);
 
 extern s32 titleAllocWork(s32 arg);
 
@@ -52,11 +52,11 @@ extern void movieStop(void);
 
 extern s8 dds3PadButtonState[];
 
-extern s32 scrGetIntPara(s32 index);
+extern s32 scrGetIntPara(s32 n);
 
 extern s32 p2sdPlayBGM(s32 id);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 extern void p2sdPlaySE(s32 index, s32 volume, s32 pan);
 
@@ -72,12 +72,12 @@ extern char D_0054FD18[]; /* "/sound/" */
 
 extern char *strcat(char *dst, const char *src);
 
-extern void *memcpy(void *dst, const void *src, u32 size);
+extern void *memcpy(void *a, const void *b, u32 c);
 
-char *sdfSndMakeFilename(char *dst, const char *name)
+char *sdfSndMakeFilename(char *aDstName, const char *aSrcName)
 {
-    memcpy(dst, D_0054FD18, 8);
-    return strcat(dst, name);
+    memcpy(aDstName, D_0054FD18, 8);
+    return strcat(aDstName, aSrcName);
 }
 
 extern s8 D_0054FD10;
@@ -94,9 +94,9 @@ extern char D_00342FC0[];
 
 extern void *D_0033A540[];
 
-extern void sdfSndInit(char *a, s32 b, char *c, s32 d);
+extern void sdfSndInit(char *aVcInfo, s32 aNumVc, char *aSqInfo, s32 aNumSq);
 
-extern void p2sdLoadSMGFile(void *file);
+extern void p2sdLoadSMGFile(void *MidiNo);
 
 void sndInit(void)
 {

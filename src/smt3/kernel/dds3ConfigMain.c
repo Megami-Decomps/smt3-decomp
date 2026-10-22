@@ -8,20 +8,20 @@ extern void (*D_00551828)(void);
 
 extern void *dds3AllocConfigWork(s32 mode);
 
-extern s32 dds3CalcConfig(void *process);
+extern s32 dds3CalcConfig(void *PID);
 
-extern s32 dds3DrawConfig(void *process);
+extern s32 dds3DrawConfig(void *PID);
 
-extern s32 dds3UpdateConfig(void *process);
+extern s32 dds3UpdateConfig(void *PID);
 
-extern void dds3DestroyConfig(void *process);
+extern void dds3DestroyConfig(void *PID);
 
-extern void *dds3StartProcess(const char *name, s32 priority, s32 startDelay, s32 endDelay,
-                             s32 (*update)(void *), void (*destroy)(void *), void *work);
+extern void *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2, s32 v3,
+                             s32 (*drawExit)(void *), void (*deleteExit)(void *), void *p);
 
-extern void sdfMemFreeDirect(void *handle);
+extern void sdfMemFreeDirect(void *aHandle);
 
-extern s32 dds3AdminiCallSequence(s32 kind, s32 *arg, s32 a, s32 b);
+extern s32 dds3AdminiCallSequence(s32 sequence, s32 *data, s32 datasize, s32 restore);
 
 extern void dds3FreeConfigTexture(void *texture);
 
@@ -43,7 +43,7 @@ extern s32 cmpUpdateTerminate(u8 *p);
 
 extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
 
-void dds3DestroyConfig(void *process)
+void dds3DestroyConfig(void *PID)
 {
     s32 seq = 1;
 
@@ -100,7 +100,7 @@ s32 dds3CalcConfig(void *PID)
     return 0;
 }
 
-s32 dds3DrawConfig(void *process)
+s32 dds3DrawConfig(void *PID)
 {
     u8 *gbwk = GBWK;
 

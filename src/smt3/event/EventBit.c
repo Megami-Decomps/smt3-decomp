@@ -14,7 +14,7 @@ extern void evtDisableMoonCalc(void);
 
 void evtBitAllOff(void);
 
-void evtBitOff(s32 flag);
+void evtBitOff(s32 no);
 
 /* mdlEffectResrc_t.type: which effect a controller drives. */
 typedef enum dds3ModelEffectType {
@@ -64,17 +64,17 @@ void evtBitAllOff_FieldDebug(void) {
 }
 
 /* Signed flag indices need a bias before arithmetic right shift divides by 32. */
-void evtBitOn(s32 flag) {
-    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    DDS3_GBWK->EventBit[adjustedFlag >> 5] |= 1 << flag;
+void evtBitOn(s32 no) {
+    s32 adjustedFlag = (no < 0) ? no + 0x1f : no;
+    DDS3_GBWK->EventBit[adjustedFlag >> 5] |= 1 << no;
 }
 
-void evtBitOff(s32 flag) {
-    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    DDS3_GBWK->EventBit[adjustedFlag >> 5] &= ~(1 << flag);
+void evtBitOff(s32 no) {
+    s32 adjustedFlag = (no < 0) ? no + 0x1f : no;
+    DDS3_GBWK->EventBit[adjustedFlag >> 5] &= ~(1 << no);
 }
 
-s32 evtBitCheck(s32 flag) {
-    s32 adjustedFlag = (flag < 0) ? flag + 0x1f : flag;
-    return (((s32)DDS3_GBWK->EventBit[adjustedFlag >> 5] >> flag) & 1);
+s32 evtBitCheck(s32 no) {
+    s32 adjustedFlag = (no < 0) ? no + 0x1f : no;
+    return (((s32)DDS3_GBWK->EventBit[adjustedFlag >> 5] >> no) & 1);
 }

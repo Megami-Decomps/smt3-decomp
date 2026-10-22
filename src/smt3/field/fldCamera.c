@@ -25,13 +25,13 @@ struct fldFollowCameraControl_t {
 
 extern void *memset(void *, int, unsigned int);
 
-f32 sdfSin(f32 angle);
+f32 sdfSin(f32 aRadius);
 
-f32 sdfCos(f32 angle);
+f32 sdfCos(f32 aRadius);
 
 fldFollowCameraControl_t *fldGetFollowCameraControl(void);
 
-void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
 
 extern f32 fldCamPhokanSelX[];
 
@@ -49,7 +49,7 @@ extern f32 fldCamTarget[];
 
 dds3Basic_t *fldGetUnitFollowCamera(void);
 
-dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *world);
+dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
 
 dds3Basic_t *dds3GetActiveScene(void);
 
@@ -64,11 +64,11 @@ extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut
 
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *, u32);
 
-extern scrProcessWork_s *scrSearchScriptName(char *name);
+extern scrProcessWork_s *scrSearchScriptName(char *scriptname);
 
 extern s32 strcmp(const char *left, const char *right);
 
-s32 evtBitCheck(s32 flag);
+s32 evtBitCheck(s32 no);
 
 extern s32 fldCamResetOn;
 
@@ -90,7 +90,7 @@ extern fldUnitControl_t *fldGetUnitControl(void);
 
 extern f32 fldCamLength;
 
-extern void dds3GetPosPoseSet(dds3Basic_t *object);
+extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
 f32 fldCalcAngleBetween(f32 fromX, f32 fromZ, f32 toX, f32 toZ);
 
@@ -253,7 +253,7 @@ void calcCamNormalNPC(void) {
     ((s32 (*)(dds3Basic_t *))node->basicfunction->mainprocuder)(node);
 }
 
-extern void dds3GetRotPoseSet(dds3Basic_t *object);
+extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 
 extern f32 EulerAngleAxisY(void);
 
@@ -443,7 +443,7 @@ INCLUDE_RODATA(const s32, "field/fldCamera", D_00531BF0);
 
 INCLUDE_ASM(const s32, "field/fldCamera", fldCamMain);
 
-extern void *dds3SearchProcessName(const char *name);
+extern void *dds3SearchProcessName(const char *namestr);
 
 extern void dds3SetScreenFovy(f32 fovy);
 
@@ -478,11 +478,11 @@ s32 fldCamMiwatasiChk(void)
     return fldCamMiwatasi;
 }
 
-s32 fldCamNpcCamChk(char *name) {
-    if (name == NULL) {
+s32 fldCamNpcCamChk(char *pName) {
+    if (pName == NULL) {
         return 0;
     }
-    if (fldGlobalBase.mode == 5 && strcmp(fldGlobalBase.requestedSceneName, name) == 0) {
+    if (fldGlobalBase.mode == 5 && strcmp(fldGlobalBase.requestedSceneName, pName) == 0) {
         return 1;
     }
     return 0;

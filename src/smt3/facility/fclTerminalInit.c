@@ -5,11 +5,11 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void dds3KillProcessName(char *namestr, s32 flag);
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
 void fclFreeStage(void);
 
-extern void *dds3SearchProcessName(const char *name);
+extern void *dds3SearchProcessName(const char *namestr);
 
 extern s8 gCallMode;
 
@@ -21,7 +21,7 @@ extern s8 gProcessStat_3;
 
 extern u8 gCommandFlag[4];
 
-extern s32 scrGetIntPara(s32 index);
+extern s32 scrGetIntPara(s32 n);
 
 typedef struct
 {
@@ -36,7 +36,7 @@ extern u8 *GBWK_3;
 
 extern s32 printf(const char *fmt, ...);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 extern u8 fclTerminalCommandCount[1];
 
@@ -46,7 +46,7 @@ extern char D_0053D650[];
 
 extern char D_0053D660[];
 
-extern void fclScriptForcedEnd(u8 *script);
+extern void fclScriptForcedEnd(u8 *PID);
 
 extern s32 sprintf(char *out, const char *fmt, ...);
 
@@ -71,17 +71,17 @@ extern char D_0053D5B0[]; /* "e%d_main" */
 
 extern char D_0054FC20[];
 
-s32 trmCreateEventProcessName(s32 mode, char *name)
+s32 trmCreateEventProcessName(s32 Type, char *pBuf)
 {
     s32 no = trmGetEventNo(1, GBWK_3);
 
     if (no < 0) {
         return 0;
     }
-    if (mode == 0) {
-        sprintf(name, D_0053D5B0, no);
+    if (Type == 0) {
+        sprintf(pBuf, D_0053D5B0, no);
     } else {
-        sprintf(name, D_0054FC20, no);
+        sprintf(pBuf, D_0054FC20, no);
     }
     return 1;
 }
@@ -95,11 +95,11 @@ void trmEndBGM(void)
 
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", trmStartEvent);
 
-s32 trmEndEvent(s32 stopbgm)
+s32 trmEndEvent(s32 BgmMode)
 {
     char name[0x20];
 
-    if (stopbgm != 0) {
+    if (BgmMode != 0) {
         trmEndBGM();
     }
     fclScriptForcedEnd(*(u8 **)(GBWK_3 + 0x2220));
@@ -114,7 +114,7 @@ s32 trmEndEvent(s32 stopbgm)
     return 1;
 }
 
-extern s32 trmCreateEventProcessName(s32 mode, char *name);
+extern s32 trmCreateEventProcessName(s32 Type, char *pBuf);
 
 s32 trmChkEventWait(void)
 {

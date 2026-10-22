@@ -35,7 +35,7 @@ extern void func_00116BB8(void);
 
 extern s32 dds3GlobalWorkInit(void);
 
-extern void sdfTexFree(s32 handle);
+extern void sdfTexFree(s32 aHandle);
 
 typedef struct
 {

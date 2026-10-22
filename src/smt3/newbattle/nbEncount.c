@@ -304,13 +304,13 @@ extern nbEncountForm_t nbEncountFormTable[];
 
 extern datDevilFormat_t datDevilTable[];
 
-extern void *nbEncountCalc(s32 packno, f32 dist);
+extern void *nbEncountCalc(s32 id, f32 length);
 
 extern s32 nbEncountMax;
 
 extern s32 func_0028CFC8(s32 tableno, s32 encno);
 
-extern s32 nbGetUnitID(datUnitWork_t *unit);
+extern s32 nbGetUnitID(datUnitWork_t *work);
 
 extern s32 datGetPlayerLevel(void);
 
@@ -388,7 +388,7 @@ u16 nbGetEncountCnt(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbEncount", nbEncountCalc);
 
-s32 nbCheckEncountLevel(s32 encno)
+s32 nbCheckEncountLevel(s32 tbl)
 {
     u16 *p;
     s32 sum;
@@ -397,12 +397,12 @@ s32 nbCheckEncountLevel(s32 encno)
     s32 id;
     s32 lvl;
 
-    if (encno == 0) {
+    if (tbl == 0) {
         return 0;
     }
     sum = 0;
     cnt = 0;
-    p = nbEncountFormTable[encno].id;
+    p = nbEncountFormTable[tbl].id;
     for (i = 10; i >= 0; i--) {
         id = *p++;
         if (id != 0) {

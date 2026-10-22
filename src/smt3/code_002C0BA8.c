@@ -3,7 +3,7 @@
 #include "libsdf.h"
 #include "ps2asm.h"
 
-u32 dds3GetRandA(void *aState);
+u32 dds3GetRandA(void *name);
 
 enum SdfFileIOCmdStat {
     SDF_FILE_CMD_STAT_INIT = 0,
@@ -59,9 +59,9 @@ enum sdf_stream_playback {
 extern sdfRandCB_t sdfDefaultRandCB;
 
 /* Four-word shift-register PRNG; NULL selects the shared effect RNG state. */
-u32 dds3GetRandA(void *aState)
+u32 dds3GetRandA(void *name)
 {
-    sdfRandCB_t *state = aState;
+    sdfRandCB_t *state = name;
     u32 x0;
     u32 x1;
     u32 x2;
@@ -85,12 +85,12 @@ u32 dds3GetRandA(void *aState)
 }
 
 /* Uniform float in [0, 1): 24 random bits scaled by 2^-24. */
-f32 dds3GetRandFloatA(sdfRandCB_t *state) {
-    u32 value = dds3GetRandA(state) & 0xFFFFFF;
+f32 dds3GetRandFloatA(sdfRandCB_t *name) {
+    u32 value = dds3GetRandA(name) & 0xFFFFFF;
     return (f32)value * 5.9604644775390625e-8f;
 }
 
-u32 dds3GetRandIntA(void *aState, u32 aRange)
+u32 dds3GetRandIntA(void *aLimit, u32 name)
 {
-    return dds3GetRandA(aState) % aRange;
+    return dds3GetRandA(aLimit) % name;
 }

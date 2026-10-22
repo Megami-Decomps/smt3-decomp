@@ -4,7 +4,7 @@
 
 extern dds3ProcessID_t *dds3SearchProcessPriority(u32 priority);
 
-extern void *dds3GetProcessData(dds3ProcessID_t *process);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern void nbKillMainProcess(void);
 
@@ -60,7 +60,7 @@ extern void nbSetupBattleUnits(nbMainProcessData_t *data, s32 encno);
 
 extern void nbCameraSetState(s32 state);
 
-extern void nbGroupFormDispOff(s32 group);
+extern void nbGroupFormDispOff(s32 side);
 
 extern void nbInitEncProcess(nbMainProcessData_t *data);
 
@@ -84,9 +84,9 @@ extern s32 D_0054F0F4;
 
 extern sdfMemHandle_t *sdfDevLoadFileEx(s32 path, void *destination, void *size);
 
-extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern s32 printf(const char *format, ...);
 
@@ -124,19 +124,19 @@ extern void nbPanelPressGaugeEncountHide(void);
 
 extern void fileSyncAll(void);
 
-extern void sdfChipFreeDirect(void *block);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void nbFreeAllFormResources(nbMainProcessData_t *data);
 
 extern void nbFreeEventPack(nbMainProcessData_t *data);
 
-extern void itfMesMngRelease(s32 msg);
+extern void itfMesMngRelease(s32 id);
 
 extern s32 itfMesMngInitialize(void *resource);
 
@@ -160,7 +160,7 @@ extern s32 evtBitCheck(s32 no);
 
 extern char D_00543540[]; /* "encno = %d\n" */
 
-extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hsys);
+extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hEffBTLSys);
 
 extern void nbGetEncountTableItem(nbMainProcessData_t *data);
 
@@ -176,7 +176,7 @@ extern char D_00543478[]; /* "level up !!\n" */
 
 extern char D_005510B8[]; /* "nb_main" */
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 extern s32 rstChkResultEntry(void);
 
@@ -186,19 +186,19 @@ extern void evtEnableMoonDraw(void);
 
 extern void nbLoadDeadMoonTex(void);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 extern s32 nbMainProcess1(dds3ProcessID_t *id);
 
-extern s32 nbCheckBadKaifuku(datUnitWork_t *unit, s32 type);
+extern s32 nbCheckBadKaifuku(datUnitWork_t *work, s32 type);
 
-extern u32 datGetMaxHp(datUnitWork_t *unit);
+extern u32 datGetMaxHp(datUnitWork_t *work);
 
-extern u32 datGetMaxMp(datUnitWork_t *unit);
+extern u32 datGetMaxMp(datUnitWork_t *work);
 
-extern void datSetAutoKaifukuSkill(datUnitWork_t *unit, s32 skill);
+extern void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill);
 
 extern void nbInitAtoProcess(nbMainProcessData_t *data);
 
@@ -210,7 +210,7 @@ extern void nbSetPressMaePhase(nbMainProcessData_t *data);
 
 extern s8 dds3PadButtonState[64];
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern struct nbKoukaPacket_t *nbAddDeadPcmPacket(s32 startframe, s32 uniqueid,
                                                   nbFormation_t *form);
@@ -224,7 +224,7 @@ extern s32 nbCheckRenzokuEncount(nbMainProcessData_t *data);
 
 extern char D_00543458[];
 
-extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
+extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
 extern void nbSetOrder(void);
 
@@ -1142,10 +1142,10 @@ void SetJyocyuData(nbMainProcessData_t *data)
     sdfMemFreeDirect(handle);
 }
 
-void FreeJyocyuData(nbMainProcessData_t *work)
+void FreeJyocyuData(nbMainProcessData_t *data)
 {
-    effBTLDelete(work->residentEffect);
-    work->residentEffect = 0;
+    effBTLDelete(data->residentEffect);
+    data->residentEffect = 0;
 }
 
 void ClearLocalBit(void)

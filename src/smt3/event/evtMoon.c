@@ -24,9 +24,9 @@ s32 evtGetAgeOfMoon16(void)
     return DDS3_GBWK->moonPhase;
 }
 
-void evtSetAgeOfMoon(u8 phase)
+void evtSetAgeOfMoon(u8 age)
 {
-    DDS3_GBWK->moonPhase = phase & 0xF;
+    DDS3_GBWK->moonPhase = age & 0xF;
     DDS3_GBWK->moonTimer = 0.0f;
 }
 

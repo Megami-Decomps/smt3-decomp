@@ -242,7 +242,7 @@ extern s32 WaitSema(s32 sema);
 
 extern s32 vfprintf(FILE *fp, const char *fmt, va_list ap);
 
-extern void *memset(void *s, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *_calloc_r(_reent *r, u32 n, u32 size);
 

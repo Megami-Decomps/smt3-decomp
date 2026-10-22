@@ -63,9 +63,9 @@ struct pbPanel_t
             pbViewCamWork_t *viewCam; } data;
 };
 
-extern void sdfChipFreeDelayedDirect(void *ptr);
+extern void sdfChipFreeDelayedDirect(void *aPtr);
 
-extern s32 sceMcGetInfo(s32 port, s32 slot, s32 *type, s32 *free, s32 *format);
+extern s32 sceMcGetInfo(s32 a, s32 b, s32 *c, s32 *d, s32 *e);
 
 extern pbPanel_t *record;
 
@@ -75,31 +75,31 @@ extern s32 pb_draw_error_Process(dds3ProcessID_t *id);
 
 extern void pb_draw_error_Shutdown(dds3ProcessID_t *id);
 
-extern void sceMcMkdir(s32 port, s32 slot, const char *name);
+extern void sceMcMkdir(s32 a, s32 b, const char *c);
 
-extern void sceMcChdir(s32 port, s32 slot, const char *newdir, char *currentdir);
+extern void sceMcChdir(s32 a, s32 b, const char *c, char *d);
 
-extern void sceMcGetDir(s32 port, s32 slot, const char *name, u32 mode, s32 maxent, void *table);
+extern void sceMcGetDir(s32 a, s32 b, const char *c, u32 d, s32 e, void *f);
 
-extern void sceMcSync(s32 mode, s32 *cmd, s32 *result);
+extern void sceMcSync(s32 a, s32 *b, s32 *c);
 
 INCLUDE_ASM(const s32, "pb/pbMCard", pbInitMCard);
 
-s32 pbGetFormatStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
-    return sceMcGetInfo(port, slot, NULL, NULL, &info->format);
+s32 pbGetFormatStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
+    return sceMcGetInfo(port, slot, NULL, NULL, &stat->format);
 }
 
-s32 pbGetTypeStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
-    return sceMcGetInfo(port, slot, &info->type, NULL, NULL);
+s32 pbGetTypeStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
+    return sceMcGetInfo(port, slot, &stat->type, NULL, NULL);
 }
 
-s32 pbGetFreeStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
-    return sceMcGetInfo(port, slot, NULL, &info->free, NULL);
+s32 pbGetFreeStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
+    return sceMcGetInfo(port, slot, NULL, &stat->free, NULL);
 }
 
-void pbGetStatusMCard(s32 port, s32 slot, pbMCardInfo_t *info) {
-    sceMcGetInfo(port, slot, &info->type, &info->free, &info->format);
-    sceMcSync(0, NULL, &info->result);
+void pbGetStatusMCard(s32 port, s32 slot, pbMCardInfo_t *stat) {
+    sceMcGetInfo(port, slot, &stat->type, &stat->free, &stat->format);
+    sceMcSync(0, NULL, &stat->result);
 }
 
 s32 pbGetDirMCard(s32 port, s32 slot, const char *fileName, void *tbl) {

@@ -43,27 +43,27 @@ extern s8 dds3PadBitTable[];
 extern s8 D_005298CB[];
 extern char D_0054F268[];
 extern sdfGrOt_t sdfGrOtTable[];
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 extern s32 sprintf(char *destination, const char *format, ...);
-extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 extern sdfMemHandle_t *sdfDevLoadFileEx(char *name, void *topPtr, s32 *sizePtr);
-extern sdfTexHandle_t *sdfTexSet(void *data);
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
-extern void *sdfGrAllocPacketBuff(u32 size);
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
-extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
-extern void *dds3PrimFrameRect(s32 x, s32 y, s32 z, s32 width, s32 height, u32 fill, u32 border);
-extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 flags, const char *format, ...);
-extern void dds3AdminiCallSequence(s32 sequence, s32 data, s32 bytes, s32 flags);
+extern sdfTexHandle_t *sdfTexSet(void *aTex);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
+extern void *sdfGrAllocPacketBuff(u32 aSize);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
+extern void *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
+extern void *sdfDevPrintf(s32 aX, s32 aY, s32 aZ, s32 aAttr, const char *aStr, ...);
+extern void dds3AdminiCallSequence(s32 sequence, s32 data, s32 datasize, s32 restore);
 extern u8 sdfHddValid;
 extern u32 strlen(const char *s);
 extern char *strcpy(char *dst, const char *src);
 extern s32 dds3EffectDirOpen(void *name);
 extern void dds3EffectDirClose(s32 directory);
-extern void *sdf2DAllocSprite(s32 loopCount);
-extern void *sdf2DGetPrimPtr(void *packet);
-extern void sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 gsContext);
+extern void *sdf2DAllocSprite(s32 aNumOfSpr);
+extern void *sdf2DGetPrimPtr(void *aPacketPtr);
+extern void sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 
 /* One textureless sprite as sdf2D lays it out: the colour, then two corners
  * of 0x20 bytes each. */
@@ -196,8 +196,8 @@ dds3EffectFileList_t *dds3EffectFileListCreate(char *path, s32 typeMask)
 INCLUDE_ASM(const s32, "newbattle/nbCameraHelper", dds3EffectFileListCreate);
 #endif
 
-void dds3EffectFileListDelete(dds3EffectFileList_t *root) {
-    dds3EffectFileNode_t *node = root->head;
+void dds3EffectFileListDelete(dds3EffectFileList_t *a) {
+    dds3EffectFileNode_t *node = a->head;
 
     if (node != NULL) {
         do {
@@ -206,17 +206,17 @@ void dds3EffectFileListDelete(dds3EffectFileList_t *root) {
             node = next;
         } while (node != NULL);
     }
-    sdfChipFreeDirect(root->directoryPath);
-    sdfChipFreeDirect(root);
+    sdfChipFreeDirect(a->directoryPath);
+    sdfChipFreeDirect(a);
 }
 
-dds3EffectFileWindow_t *dds3EffectFileListWindowCreate(dds3EffectFileList_t *list) {
+dds3EffectFileWindow_t *dds3EffectFileListWindowCreate(dds3EffectFileList_t *a) {
     dds3EffectFileWindow_t *resource = sdfChipAllocDirect(sizeof(*resource));
 
     resource->x = 0;
     resource->y = 0xC8;
     resource->result = 0;
-    resource->resourceCount = list->resourceCount;
+    resource->resourceCount = a->resourceCount;
     resource->unk10 = 0;
     resource->selectedIndex = 0;
     resource->visibleIndex = 0;
@@ -225,126 +225,126 @@ dds3EffectFileWindow_t *dds3EffectFileListWindowCreate(dds3EffectFileList_t *lis
     resource->drawSurface = 0x47;
     resource->borderColor = 0x40806020;
     resource->fillColor = 0x30000000;
-    resource->firstVisibleEntry = list->head;
-    resource->selectedEntry = list->head;
+    resource->firstVisibleEntry = a->head;
+    resource->selectedEntry = a->head;
     resource->cachedEntry = 0;
     resource->textureHandle = 0;
-    resource->resourceList = list;
+    resource->resourceList = a;
     return resource;
 }
 
-s32 dds3EffectFileListWindowDraw(dds3EffectFileWindow_t *descriptor) {
+s32 dds3EffectFileListWindowDraw(dds3EffectFileWindow_t *a) {
     dds3EffectFileNode_t *visibleEntry;
     sdfDrawTag_t *packetList;
     sdfGrOt_t *surface;
     s32 drawnRows;
     s32 contentRow;
 
-    if (descriptor->repeatDelay != 0) {
-        descriptor->repeatDelay--;
-    } else if (descriptor->firstVisibleEntry == NULL) {
+    if (a->repeatDelay != 0) {
+        a->repeatDelay--;
+    } else if (a->firstVisibleEntry == NULL) {
         if (D_005298CB[0] < 0) {
-            descriptor->result = 2;
+            a->result = 2;
         }
-    } else if (descriptor->result == 0) {
+    } else if (a->result == 0) {
         dds3EffectFileNode_t *navigationEntry;
         dds3EffectFileNode_t *selectedEntry;
         s32 navigationStep;
         if ((dds3PadBitTable[6] & 2) != 0) {
-            if (descriptor->selectedEntry->previous != NULL) {
-                descriptor->selectedEntry = descriptor->selectedEntry->previous;
-                descriptor->selectedIndex--;
-                if (descriptor->visibleIndex != 0) {
-                    descriptor->visibleIndex--;
+            if (a->selectedEntry->previous != NULL) {
+                a->selectedEntry = a->selectedEntry->previous;
+                a->selectedIndex--;
+                if (a->visibleIndex != 0) {
+                    a->visibleIndex--;
                 }
-                if (descriptor->selectedEntry == descriptor->firstVisibleEntry) {
-                    if (descriptor->selectedEntry->previous != NULL) {
-                        descriptor->firstVisibleEntry = descriptor->selectedEntry->previous;
-                        descriptor->visibleIndex = 1;
+                if (a->selectedEntry == a->firstVisibleEntry) {
+                    if (a->selectedEntry->previous != NULL) {
+                        a->firstVisibleEntry = a->selectedEntry->previous;
+                        a->visibleIndex = 1;
                     }
                 }
             }
         } else if ((dds3PadBitTable[7] & 2) != 0) {
-            if (descriptor->selectedEntry->next != NULL) {
-                descriptor->selectedEntry = descriptor->selectedEntry->next;
-                descriptor->selectedIndex++;
-                descriptor->visibleIndex++;
-                if (descriptor->visibleIndex == 0xE) {
-                    if (descriptor->firstVisibleEntry->next != NULL) {
-                        descriptor->firstVisibleEntry = descriptor->firstVisibleEntry->next;
-                        descriptor->visibleIndex = 0xD;
+            if (a->selectedEntry->next != NULL) {
+                a->selectedEntry = a->selectedEntry->next;
+                a->selectedIndex++;
+                a->visibleIndex++;
+                if (a->visibleIndex == 0xE) {
+                    if (a->firstVisibleEntry->next != NULL) {
+                        a->firstVisibleEntry = a->firstVisibleEntry->next;
+                        a->visibleIndex = 0xD;
                     }
                 }
             }
         } else if ((dds3PadBitTable[9] & 2) != 0) {
-            selectedEntry = descriptor->selectedEntry;
+            selectedEntry = a->selectedEntry;
             for (navigationStep = 0; navigationStep < 0xF; navigationStep++) {
                 navigationEntry = selectedEntry->previous;
                 if (navigationEntry != NULL) {
-                    descriptor->selectedEntry = navigationEntry;
-                    descriptor->selectedIndex--;
-                    if (descriptor->visibleIndex != 0) {
-                        descriptor->visibleIndex--;
+                    a->selectedEntry = navigationEntry;
+                    a->selectedIndex--;
+                    if (a->visibleIndex != 0) {
+                        a->visibleIndex--;
                     }
-                    selectedEntry = descriptor->selectedEntry;
-                    if (selectedEntry == descriptor->firstVisibleEntry) {
+                    selectedEntry = a->selectedEntry;
+                    if (selectedEntry == a->firstVisibleEntry) {
                         dds3EffectFileNode_t *previous = selectedEntry->previous;
                         if (previous != NULL) {
-                            descriptor->firstVisibleEntry = previous;
-                            descriptor->visibleIndex = 1;
+                            a->firstVisibleEntry = previous;
+                            a->visibleIndex = 1;
                         }
                     }
                 }
             }
         } else if ((dds3PadBitTable[11] & 2) != 0) {
             for (navigationStep = 0; navigationStep < 0xF; navigationStep++) {
-                navigationEntry = descriptor->selectedEntry->next;
+                navigationEntry = a->selectedEntry->next;
                 if (navigationEntry != NULL) {
-                    descriptor->selectedEntry = navigationEntry;
-                    descriptor->selectedIndex++;
-                    descriptor->visibleIndex++;
-                    if (descriptor->visibleIndex == 0xE) {
-                        dds3EffectFileNode_t *next = descriptor->firstVisibleEntry->next;
+                    a->selectedEntry = navigationEntry;
+                    a->selectedIndex++;
+                    a->visibleIndex++;
+                    if (a->visibleIndex == 0xE) {
+                        dds3EffectFileNode_t *next = a->firstVisibleEntry->next;
                         if (next != NULL) {
-                            descriptor->firstVisibleEntry = next;
-                            descriptor->visibleIndex = 0xD;
+                            a->firstVisibleEntry = next;
+                            a->visibleIndex = 0xD;
                         }
                     }
                 }
             }
         } else if (dds3PadBitTable[3] < 0) {
-            descriptor->result = 2;
+            a->result = 2;
         } else if (dds3PadBitTable[1] < 0) {
-            descriptor->result = 1;
+            a->result = 1;
         } else {
-            dds3EffectFileNode_t *cachedEntry = descriptor->cachedEntry;
-            selectedEntry = descriptor->selectedEntry;
+            dds3EffectFileNode_t *cachedEntry = a->cachedEntry;
+            selectedEntry = a->selectedEntry;
             if (cachedEntry != selectedEntry) {
                 s32 category = selectedEntry->type;
                 switch (category) {
                 case 1: {
                     char resourceName[0x70];
                     sprintf(resourceName, D_0054F268,
-                        descriptor->resourceList->directoryPath, selectedEntry->name);
-                    dds3EffectListSetTexture(descriptor, resourceName);
-                    descriptor->previewActive = category;
-                    selectedEntry = descriptor->selectedEntry;
+                        a->resourceList->directoryPath, selectedEntry->name);
+                    dds3EffectListSetTexture(a, resourceName);
+                    a->previewActive = category;
+                    selectedEntry = a->selectedEntry;
                     break;
                 }
                 case 2:
-                    descriptor->previewActive = 0;
+                    a->previewActive = 0;
                     break;
                 case 4:
-                    descriptor->previewActive = 0;
+                    a->previewActive = 0;
                     break;
                 default:
-                    descriptor->previewActive = 0;
+                    a->previewActive = 0;
                     break;
                 }
-                descriptor->cachedEntry = selectedEntry;
+                a->cachedEntry = selectedEntry;
             }
-            if (descriptor->previewActive != 0) {
-                dds3EffectFileListWindowDrawSprite(descriptor);
+            if (a->previewActive != 0) {
+                dds3EffectFileListWindowDrawSprite(a);
             }
         }
     }
@@ -352,26 +352,26 @@ s32 dds3EffectFileListWindowDraw(dds3EffectFileWindow_t *descriptor) {
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
-        0x8000 - (descriptor->x << 4), 0x8000 - (descriptor->y << 3),
-        0xFEFFFF, 0xC00, 0x620, descriptor->fillColor, descriptor->borderColor));
-    if (descriptor->previewActive != 0) {
+        0x8000 - (a->x << 4), 0x8000 - (a->y << 3),
+        0xFEFFFF, 0xC00, 0x620, a->fillColor, a->borderColor));
+    if (a->previewActive != 0) {
         sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
-            0x8000 - (descriptor->x << 4),
-            0x8000 - ((descriptor->y - 0xC4) << 3),
+            0x8000 - (a->x << 4),
+            0x8000 - ((a->y - 0xC4) << 3),
             0xFEFFFF, 0x800, 0x400, 0, 0x40806020));
     }
-    contentRow = descriptor->y - 2;
+    contentRow = a->y - 2;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x8000 - ((descriptor->x - 2) << 4),
+        0x8000 - ((a->x - 2) << 4),
         0x8000 - (contentRow << 3), 0xFF0000, 5,
-        descriptor->resourceList->directoryPath));
+        a->resourceList->directoryPath));
     contentRow -= 0xC;
-    visibleEntry = descriptor->firstVisibleEntry;
+    visibleEntry = a->firstVisibleEntry;
     drawnRows = 0;
     while (visibleEntry != NULL) {
-        s32 selectionFlags = visibleEntry == descriptor->selectedEntry ? 4 : 0;
+        s32 selectionFlags = visibleEntry == a->selectedEntry ? 4 : 0;
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x8000 - ((descriptor->x - 2) << 4),
+            0x8000 - ((a->x - 2) << 4),
             0x8000 - (contentRow << 3), 0xFF0000,
             selectionFlags, visibleEntry->name));
         drawnRows++;
@@ -381,50 +381,50 @@ s32 dds3EffectFileListWindowDraw(dds3EffectFileWindow_t *descriptor) {
         }
         visibleEntry = visibleEntry->next;
     }
-    surface = &sdfGrOtTable[descriptor->drawSurface];
+    surface = &sdfGrOtTable[a->drawSurface];
     ((void (*)(sdfGrOt_t *, sdfDrawTag_t *))surface->regFunc)(surface, packetList);
-    return descriptor->result;
+    return a->result;
 }
 
-void dds3EffectFileListWindowDelete(dds3EffectFileWindow_t *work) {
-    sdfTexHandle_t *texture = work->textureHandle;
+void dds3EffectFileListWindowDelete(dds3EffectFileWindow_t *a) {
+    sdfTexHandle_t *texture = a->textureHandle;
 
     if (texture != NULL) {
         sdfTexFreeDelayed(texture);
-        work->textureHandle = NULL;
+        a->textureHandle = NULL;
     }
-    sdfChipFreeDirect(work);
+    sdfChipFreeDirect(a);
 }
 
-void dds3EffectFileListWindowSetPos(dds3EffectFileWindow_t *message, s32 x, s32 y) {
-    message->x = x;
-    message->y = y;
+void dds3EffectFileListWindowSetPos(dds3EffectFileWindow_t *a, s32 b, s32 c) {
+    a->x = b;
+    a->y = c;
 }
 
 u32 dds3_1AB818(dds3EffectFileWindow_t *work) {
     return work->selectedIndex;
 }
 
-u32 dds3EffectFileListWindowGetState(dds3EffectFileWindow_t *work) {
-    return work->result;
+u32 dds3EffectFileListWindowGetState(dds3EffectFileWindow_t *a) {
+    return a->result;
 }
 
-u32 dds3EffectFileListWindowGetFilename(dds3EffectFileWindow_t *message, char *destination) {
-    sprintf(destination, D_0054F268, message->resourceList->directoryPath, message->selectedEntry->name);
-    return message->selectedEntry->type;
+u32 dds3EffectFileListWindowGetFilename(dds3EffectFileWindow_t *a, char *b) {
+    sprintf(b, D_0054F268, a->resourceList->directoryPath, a->selectedEntry->name);
+    return a->selectedEntry->type;
 }
 
-void dds3EffectFileListWindowSetOt(dds3EffectFileWindow_t *work, u32 value) {
-    work->repeatDelay = value;
+void dds3EffectFileListWindowSetOt(dds3EffectFileWindow_t *hEffFLWin, u32 ot) {
+    hEffFLWin->repeatDelay = ot;
 }
 
-void dds3EffectFileListWindowSetPadWait(dds3EffectFileWindow_t *work, u32 value) {
-    work->drawSurface = value;
+void dds3EffectFileListWindowSetPadWait(dds3EffectFileWindow_t *hEffFLWin, u32 wait) {
+    hEffFLWin->drawSurface = wait;
 }
 
-void dds3EffectFileListWindowSetWindowColor(dds3EffectFileWindow_t *message, u32 borderColor, u32 fillColor) {
-    message->borderColor = borderColor;
-    message->fillColor = fillColor;
+void dds3EffectFileListWindowSetWindowColor(dds3EffectFileWindow_t *hEffFLWin, u32 frame_c, u32 bg_c) {
+    hEffFLWin->borderColor = frame_c;
+    hEffFLWin->fillColor = bg_c;
 }
 
 void dds3EffectListSetTexture(dds3EffectFileWindow_t *work, char *textureResource) {

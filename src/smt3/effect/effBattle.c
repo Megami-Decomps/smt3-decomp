@@ -11,11 +11,11 @@ enum {
     EFF_PARAM_WORK_KIND_EFFECT_NODE = 0
 };
 
-extern void dds3EffectPartDelete(dds3EffectPart_t *part);
-extern dds3EffectPart_t *dds3EffectPartCopy(dds3EffectPart_t *part);
-extern dds3EffectPart_t *dds3EffectPartCreate(u16 kind, void *params);
-extern void dds3EffectPartSetScale(dds3EffectPart_t *part, f32 scale);
-extern void sdfChipFreeDirect(void *ptr);
+extern void dds3EffectPartDelete(dds3EffectPart_t *hEffPart);
+extern dds3EffectPart_t *dds3EffectPartCopy(dds3EffectPart_t *hEffPartSrc);
+extern dds3EffectPart_t *dds3EffectPartCreate(u16 type, void *pData);
+extern void dds3EffectPartSetScale(dds3EffectPart_t *hEffPart, f32 scale);
+extern void sdfChipFreeDirect(void *aPtr);
 extern s32 printf(const char *format, ...);
 extern f32 D_0031B8B0[4];
 extern f32 D_0031B8A0[4];
@@ -45,17 +45,17 @@ extern void effBTLSkillClearActive(void);
 extern void effBTLPartPtrResetAllModelCenterOffset(void);
 extern void effBTLSystemPartHandleDelete(void);
 extern void nbCameraSetState(s32 state);
-extern void sdfMemFreeDirect(void *handle);
-extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
-extern void *sdfChipAllocDirect(s32 size);
-extern f32 effBTLPartGetScalePtr(nbFormation_t *formation);
-extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(void *aHandle);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
+extern void *sdfChipAllocDirect(s32 aSize);
+extern f32 effBTLPartGetScalePtr(nbFormation_t *pFormation);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 typedef struct effBTLImage_t {
     s32 words[0xC38 / 4];
 } effBTLImage_t;
-extern u32 effColorBlend(u32 firstColor, u32 secondColor, f32 blend);
-extern void nbStageFilterAlp(s32 alpha);
+extern u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
+extern void nbStageFilterAlp(s32 alp);
 extern void effBTLPointLightON(void);
 extern void effBTLPointLightInit(void);
 extern void effBTLSkillSetActive(void);
@@ -64,15 +64,15 @@ extern void effBTLPartPtrGetAllModelCenterOffset(void);
 extern void effBTLModelShowInit(void);
 extern void effBTLSystemPartHandleCreate(void);
 extern void effBTLFieldColorON(u32 id);
-extern dds3ProcessID_t *dds3StartProcess(const char *name, s32 priority, s32 startDelay,
-                                         s32 endDelay, dds3ProcessFunc_t process,
-                                         dds3ProcessFunc_t shutdown, void *workData);
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern dds3ProcessID_t *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 extern u16 D_0031B8C0[];
 extern sdfVector4_t D_00319FA0[];
 extern sdfVector4_t D_0031B8F0[];
 extern s32 fldSkyGetAlpha(void);
-extern void *memset(void *dst, s32 value, u32 count);
+extern void *memset(void *a, s32 b, u32 c);
 
 typedef struct effBTLSkillInfo_t {
     nbFormation_t *invokeForm;
@@ -150,26 +150,26 @@ extern effBTLColorRow_t D_00317750[];
 extern f32 D_00532EA0[4];
 extern f32 D_00532EB0[4];
 extern f32 D_00532EC0[4];
-extern void effBTLPointLightSet(void *light, void *formation);
-extern void effBTLModelColorSet(void *keys, void *formation);
-extern void effBTLPartGetPositionPtr(void *formation, effBTLAimParams_t *aim, sdfVector4_t *out);
-extern void effBTLPartGetRotateMatrixPtr(effBTLAimParams_t *aim, sdfMatrix4_t *out);
-extern f32 effBTLPartGetRadiusPtr(void *formation, effBTLAimParams_t *aim);
-extern void effBTLModelGetMarkMatrix2(void *formation, s32 mark);
+extern void effBTLPointLightSet(void *pLight, void *pFormation);
+extern void effBTLModelColorSet(void *pModel, void *pFormation);
+extern void effBTLPartGetPositionPtr(void *pFormation, effBTLAimParams_t *pPosPtr, sdfVector4_t *pPos);
+extern void effBTLPartGetRotateMatrixPtr(effBTLAimParams_t *pPosPtr, sdfMatrix4_t *pMatrix);
+extern f32 effBTLPartGetRadiusPtr(void *pFormation, effBTLAimParams_t *pPosPtr);
+extern void effBTLModelGetMarkMatrix2(void *pFormation, s32 mark);
 extern void effBTLCutSetMax(u8 kind, u32 frame);
 extern void dds3SetQuake(s32 frame, s32 range);
-extern void dds3EffectPartSetPosition(dds3EffectPart_t *part, sdfVector4_t *position);
-extern void dds3EffectPartSetRotateMatrix(dds3EffectPart_t *part, sdfMatrix4_t *matrix);
-extern void dds3EffectPartSetDirection(dds3EffectPart_t *part, sdfMatrix4_t *matrix);
-extern void dds3EffectPartSetArea(dds3EffectPart_t *part, f32 area);
-extern void dds3EffectPartSetColor(dds3EffectPart_t *part, u32 color);
-extern void dds3EffectPartDraw(dds3EffectPart_t *part);
+extern void dds3EffectPartSetPosition(dds3EffectPart_t *hEffPart, sdfVector4_t *pPos);
+extern void dds3EffectPartSetRotateMatrix(dds3EffectPart_t *hEffPart, sdfMatrix4_t *pMatrix);
+extern void dds3EffectPartSetDirection(dds3EffectPart_t *hEffPart, sdfMatrix4_t *pMatrix);
+extern void dds3EffectPartSetArea(dds3EffectPart_t *hEffPart, f32 area);
+extern void dds3EffectPartSetColor(dds3EffectPart_t *hEffPart, u32 abgr);
+extern void dds3EffectPartDraw(dds3EffectPart_t *hEffPart);
 extern void Mult(void);
 extern void ToMatrix(void);
 extern void MultMatrixNoArg(void);
-extern void SetRotateMatrixAxis(f32 angle, const f32 *axis);
+extern void SetRotateMatrixAxis(f32 aAngle, const f32 *aAxis);
 extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
-extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frames);
+extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame);
 extern void dds3UnlinkSceneLight(dds3Basic_t *basic);
 
 extern effBTLLightParams_t dds3LightParam;
@@ -178,60 +178,60 @@ typedef f32 effBTLVector4_t[4];
 
 PS2_SYMBOL_AT(effBTLVector4_t, effBTLSceneAmbient, dds3LightParam, 0x10);
 
-effBTL_t *effBTLCreate(void *data) {
+effBTL_t *effBTLCreate(void *pData) {
     sdfMemHandle_t *handle;
     effBTL_t *work;
 
     handle = sdfMemAllocDirect(0xC44);
     work = sdfMemLock(handle);
     work->resource = handle;
-    *(effBTLImage_t *)work = *(effBTLImage_t *)data;
-    effBTLPartCreate(work, data);
+    *(effBTLImage_t *)work = *(effBTLImage_t *)pData;
+    effBTLPartCreate(work, pData);
     work->active = 0;
     work->cutList = NULL;
     printf("effBTL:handle create\n");
     return work;
 }
 
-void effBTLDelete(effBTL_t *work) {
+void effBTLDelete(effBTL_t *hBTLEffect) {
     effBTLCut_t *cut;
     effBTLCut_t *next;
 
-    cut = work->cutList;
+    cut = hBTLEffect->cutList;
     while (cut != NULL) {
         next = cut->next;
         effBTLCutDelete(cut);
         cut = next;
     }
-    effBTLPartDelete(work);
-    sdfMemFreeDirect(work->resource);
+    effBTLPartDelete(hBTLEffect);
+    sdfMemFreeDirect(hBTLEffect->resource);
     printf("effBTL:handle delete\n");
 }
 
-s32 effBTLGetMotionChangeFrame(effBTL_t *handle, u16 kind) {
-    s32 bank = kind >= 2;
-    return handle->banks[bank].list.callbackFrame;
+s32 effBTLGetMotionChangeFrame(effBTL_t *hBTLEffect, u16 CutNum) {
+    s32 bank = CutNum >= 2;
+    return hBTLEffect->banks[bank].list.callbackFrame;
 }
 
-s32 effBTLGetCutEndFrame(effBTL_t *handle, u16 kind) {
-    s32 bank = kind >= 2;
-    return handle->banks[bank].list.triggerFrame;
+s32 effBTLGetCutEndFrame(effBTL_t *hBTLEffect, u16 CutNum) {
+    s32 bank = CutNum >= 2;
+    return hBTLEffect->banks[bank].list.triggerFrame;
 }
 
-s32 effBTLGetDrawEndFrame(effBTL_t *handle, u16 kind) {
-    s32 bank = kind >= 2;
-    if (kind == 2) {
-        return handle->banks[bank].list.triggerFrame;
+s32 effBTLGetDrawEndFrame(effBTL_t *hBTLEffect, u16 CutNum) {
+    s32 bank = CutNum >= 2;
+    if (CutNum == 2) {
+        return hBTLEffect->banks[bank].list.triggerFrame;
     }
-    return handle->banks[bank].list.colorRampEndFrame;
+    return hBTLEffect->banks[bank].list.colorRampEndFrame;
 }
 
-void effBTLCutListRelease(effBTLCut_t *cut) {
-    effBTLCut_t **link = &cut->state->cutList;
+void effBTLCutListRelease(effBTLCut_t *hBTLCutEffect) {
+    effBTLCut_t **link = &hBTLCutEffect->state->cutList;
     effBTLCut_t *cur;
 
     while ((cur = *link) != NULL) {
-        if (cur == cut) {
+        if (cur == hBTLCutEffect) {
             *link = cur->next;
             return;
         }
@@ -239,7 +239,7 @@ void effBTLCutListRelease(effBTLCut_t *cut) {
     }
 }
 
-effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 flags) {
+effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation, s32 stat) {
     effBTLCut_t *cut;
     effBTLCutData_t *list;
     effBTLPart_t *entry;
@@ -250,21 +250,21 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 fla
 
     cut = sdfChipAllocDirect(0x120);
     memset(cut, 0, 0x120);
-    cut->state = owner;
-    cut->next = owner->cutList;
-    owner->cutList = cut;
-    list = (kind < 2) ? &owner->banks[0].list : &owner->banks[1].list;
+    cut->state = hBTLEffect;
+    cut->next = hBTLEffect->cutList;
+    hBTLEffect->cutList = cut;
+    list = (CutNum < 2) ? &hBTLEffect->banks[0].list : &hBTLEffect->banks[1].list;
     cut->triggerFrame = list->triggerFrame;
-    cut->kind = kind;
+    cut->kind = CutNum;
     cut->list = list;
-    if (kind == 2) {
+    if (CutNum == 2) {
         cut->colorRampEndFrame = list->triggerFrame;
     } else {
         cut->colorRampEndFrame = list->colorRampEndFrame;
     }
     work = cut->parameterWorks;
-    cut->unk18 = flags;
-    cut->formation = formation;
+    cut->unk18 = stat;
+    cut->formation = pFormation;
     count = cut->list->count;
     entry = cut->list->entries;
     actorScaleEnabled = cut->list->actorScaleEnabled;
@@ -273,7 +273,7 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 fla
         do {
             if (entry->paramKind != 0xFFFE) {
                 *work = dds3EffectPartCopy(entry->value.work);
-                if (actorScaleEnabled != 0 && formation != NULL) {
+                if (actorScaleEnabled != 0 && pFormation != NULL) {
                     u8 scaleKind = entry->aimParams.scaleKind;
 
                     if (scaleKind == 0 || scaleKind == 4) {
@@ -296,84 +296,84 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *owner, u16 kind, void *formation, s32 fla
 
 /* Release each nonzero parameter-work slot, unlink the owner, then drop its active count.
  * The diagnostic observes the decremented count before the owner is freed. */
-void effBTLCutDelete(effBTLCut_t *owner) {
+void effBTLCutDelete(effBTLCut_t *hBTLCutEffect) {
     s32 workIndex;
 
     for (workIndex = 0; workIndex < EFF_BATTLE_PARAMETER_WORK_CAPACITY; workIndex++) {
-        if (owner->parameterWorks[workIndex] != 0) {
-            dds3EffectPartDelete(owner->parameterWorks[workIndex]);
+        if (hBTLCutEffect->parameterWorks[workIndex] != 0) {
+            dds3EffectPartDelete(hBTLCutEffect->parameterWorks[workIndex]);
         }
     }
-    effBTLCutListRelease(owner);
-    owner->state->active--;
-    printf("effBTL:cut %d handle delete(%p)[%d]\n", owner->kind, owner->state,
-           owner->state->active);
-    sdfChipFreeDirect(owner);
+    effBTLCutListRelease(hBTLCutEffect);
+    hBTLCutEffect->state->active--;
+    printf("effBTL:cut %d handle delete(%p)[%d]\n", hBTLCutEffect->kind, hBTLCutEffect->state,
+           hBTLCutEffect->state->active);
+    sdfChipFreeDirect(hBTLCutEffect);
 }
 
 /* Return the policy controlling trigger-frame copying and minimum ramp selection. */
-u16 effBTLCutGetCutNumber(effBTLCut_t *work) {
-    return work->kind;
+u16 effBTLCutGetCutNumber(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->kind;
 }
 
 /* Read the frame counter that the native updater advances after callbacks. */
-u32 effBTLCutGetFrame(effBTLCut_t *work) {
-    return work->currentFrame;
+u32 effBTLCutGetFrame(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->currentFrame;
 }
 
-void *effBTLCutGetFormation(effBTLCut_t *cut) {
-    return cut->formation;
+void *effBTLCutGetFormation(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->formation;
 }
 
-void effBTLCutSetMotionChangeCallbackFunc(effBTLCut_t *cut, effBTLCallback_t callback) {
-    cut->sourceFrameCallback = callback;
+void effBTLCutSetMotionChangeCallbackFunc(effBTLCut_t *hBTLCutEffect, effBTLCallback_t pCallbackFunc) {
+    hBTLCutEffect->sourceFrameCallback = pCallbackFunc;
 }
 
 /* Store the callback used when the current frame reaches triggerFrame. */
-void effBTLCutSetCutEndCallbackFunc(effBTLCut_t *work, effBTLCallback_t callback) {
-    work->triggerFrameCallback = callback;
+void effBTLCutSetCutEndCallbackFunc(effBTLCut_t *hBTLCutEffect, effBTLCallback_t pCallbackFunc) {
+    hBTLCutEffect->triggerFrameCallback = pCallbackFunc;
 }
 
 /* Read the callback frame from the linked source. */
-s32 effBTLCutGetMotionChangeFrame(effBTLCut_t *work) {
-    return work->list->callbackFrame;
+s32 effBTLCutGetMotionChangeFrame(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->list->callbackFrame;
 }
 
 /* Set the trigger frame; mode 0 also copies its stored bits into the color-ramp endpoint. */
-void effBTLCutSetCutEndFrame(effBTLCut_t *work, s32 triggerFrame) {
-    work->triggerFrame = triggerFrame;
-    if (work->kind == EFF_BATTLE_COPY_TRIGGER_FRAME) {
-        work->colorRampEndFrame = triggerFrame;
+void effBTLCutSetCutEndFrame(effBTLCut_t *hBTLCutEffect, s32 frame) {
+    hBTLCutEffect->triggerFrame = frame;
+    if (hBTLCutEffect->kind == EFF_BATTLE_COPY_TRIGGER_FRAME) {
+        hBTLCutEffect->colorRampEndFrame = frame;
     }
 }
 
 /* Return the frame tested by the native trigger callback. */
-u32 effBTLCutGetCutEndFrame(effBTLCut_t *work) {
-    return work->triggerFrame;
+u32 effBTLCutGetCutEndFrame(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->triggerFrame;
 }
 
 /* Select the ramp endpoint: mode 1 keeps the unsigned minimum; other modes replace it. */
-void effBTLCutSetDrawEndFrame(effBTLCut_t *work, u32 endFrame) {
-    if (work->kind == EFF_BATTLE_MINIMUM_RAMP_END_FRAME) {
-        if (endFrame < work->colorRampEndFrame) {
-            work->colorRampEndFrame = endFrame;
+void effBTLCutSetDrawEndFrame(effBTLCut_t *hBTLCutEffect, u32 frame) {
+    if (hBTLCutEffect->kind == EFF_BATTLE_MINIMUM_RAMP_END_FRAME) {
+        if (frame < hBTLCutEffect->colorRampEndFrame) {
+            hBTLCutEffect->colorRampEndFrame = frame;
         }
         return;
     }
-    work->colorRampEndFrame = endFrame;
+    hBTLCutEffect->colorRampEndFrame = frame;
 }
 
 /* Return the selected endpoint used by native color-ramp calculation. */
-u32 effBTLCutGetDrawEndFrame(effBTLCut_t *work) {
-    return work->colorRampEndFrame;
+u32 effBTLCutGetDrawEndFrame(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->colorRampEndFrame;
 }
 
-void effBTLCutSetUserData(effBTLCut_t *cut, void *userData) {
-    cut->userData = userData;
+void effBTLCutSetUserData(effBTLCut_t *hBTLCutEffect, void *pData) {
+    hBTLCutEffect->userData = pData;
 }
 
-void *effBTLCutGetUserData(effBTLCut_t *cut) {
-    return cut->userData;
+void *effBTLCutGetUserData(effBTLCut_t *hBTLCutEffect) {
+    return hBTLCutEffect->userData;
 }
 
 typedef struct effBTLColorWork_t {
@@ -381,7 +381,7 @@ typedef struct effBTLColorWork_t {
     u8 pad04[12];
 } effBTLColorWork_t;
 
-u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration) {
+u32 effBTLCutGetAllPartColor(u32 frame, u32 frame_end) {
     effBTLColorWork_t work[1];
     u32 color;
     char *format;
@@ -393,15 +393,15 @@ u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration) {
     s32 bb;
     f32 ratio;
 
-    if (duration == 0 || elapsed >= duration) {
+    if (frame_end == 0 || frame >= frame_end) {
         return 0x808080;
     }
-    if (duration < 6) {
-        ratio = (f32)(duration - elapsed) / (f32)duration;
+    if (frame_end < 6) {
+        ratio = (f32)(frame_end - frame) / (f32)frame_end;
     } else {
         ratio = 1.0f;
-        if (duration - 6 < elapsed) {
-            ratio = (f32)(duration - elapsed) / 6.0f;
+        if (frame_end - 6 < frame) {
+            ratio = (f32)(frame_end - frame) / 6.0f;
         }
     }
     SDF_VU0_LOADVECTOR(D_0031B8B0);
@@ -414,13 +414,13 @@ u32 effBTLCutGetAllPartColor(u32 elapsed, u32 duration) {
     return color;
 }
 
-void effBTLCutSetCameraState(effBTLCut_t *cut) {
+void effBTLCutSetCameraState(effBTLCut_t *hBTLCutEffect) {
     s32 dummy;
     s32 *block = &dummy;
 
     if ((nbGetMainProcessData()->stat & 0x1000) == 0) {
-        if (cut->kind < 3) {
-            nbCameraSetState(D_0031B8C0[cut->kind]);
+        if (hBTLCutEffect->kind < 3) {
+            nbCameraSetState(D_0031B8C0[hBTLCutEffect->kind]);
         }
     }
 }
@@ -430,7 +430,7 @@ void effBTLCutSetCameraState(effBTLCut_t *cut) {
 /* Called above its definition, where ee-gcc assumed int. */
 u32 effBTLSkillGetInvokeParty(void);
 
-void effBTLCutDraw(effBTLCut_t *cut) {
+void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     sdfVector4_t position;
     sdfMatrix4_t base;
     sdfMatrix4_t rotA;
@@ -448,11 +448,11 @@ void effBTLCutDraw(effBTLCut_t *cut) {
     s32 i;
     u8 kind;
 
-    frame = cut->currentFrame;
-    list = cut->list;
-    formation = cut->formation;
+    frame = hBTLCutEffect->currentFrame;
+    list = hBTLCutEffect->list;
+    formation = hBTLCutEffect->formation;
     if (frame == 0) {
-        effBTLCutSetCameraState(cut);
+        effBTLCutSetCameraState(hBTLCutEffect);
         effBTLPointLightSet(list->colorKeys, formation);
         effBTLModelColorSet(list->rgbKeys, formation);
     }
@@ -485,9 +485,9 @@ void effBTLCutDraw(effBTLCut_t *cut) {
         SDF_VU0_STOREMATRIX(&rotB);
     }
     entry = list->entries;
-    color = effBTLCutGetAllPartColor(frame, cut->colorRampEndFrame);
+    color = effBTLCutGetAllPartColor(frame, hBTLCutEffect->colorRampEndFrame);
     count = list->count;
-    flags = cut->unk18;
+    flags = hBTLCutEffect->unk18;
     for (i = 0; i < count; i++, entry++) {
         if (entry->zeroKindCount >= frame) {
             continue;
@@ -504,22 +504,22 @@ void effBTLCutDraw(effBTLCut_t *cut) {
                 continue;
             }
         }
-        if (cut->parameterWorks[i] == NULL) {
+        if (hBTLCutEffect->parameterWorks[i] == NULL) {
             continue;
         }
         aim = &entry->aimParams;
         effBTLPartGetPositionPtr(formation, aim, &position);
-        dds3EffectPartSetPosition(cut->parameterWorks[i], &position);
+        dds3EffectPartSetPosition(hBTLCutEffect->parameterWorks[i], &position);
         switch (aim->scaleKind) {
         case 0:
         case 4:
-            dds3EffectPartSetRotateMatrix(cut->parameterWorks[i], &base);
+            dds3EffectPartSetRotateMatrix(hBTLCutEffect->parameterWorks[i], &base);
             break;
         case 1:
-            dds3EffectPartSetRotateMatrix(cut->parameterWorks[i], &rotA);
+            dds3EffectPartSetRotateMatrix(hBTLCutEffect->parameterWorks[i], &rotA);
             break;
         case 2:
-            dds3EffectPartSetRotateMatrix(cut->parameterWorks[i], &rotB);
+            dds3EffectPartSetRotateMatrix(hBTLCutEffect->parameterWorks[i], &rotB);
             break;
         case 3:
             break;
@@ -528,23 +528,23 @@ void effBTLCutDraw(effBTLCut_t *cut) {
             SDF_VU0_LOADMATRIX_B(&base);
             MultMatrixNoArg();
             SDF_VU0_STOREMATRIX(&marked);
-            dds3EffectPartSetRotateMatrix(cut->parameterWorks[i], &marked);
+            dds3EffectPartSetRotateMatrix(hBTLCutEffect->parameterWorks[i], &marked);
             break;
         }
         effBTLPartGetRotateMatrixPtr(aim, &direction);
-        dds3EffectPartSetDirection(cut->parameterWorks[i], &direction);
-        dds3EffectPartSetArea(cut->parameterWorks[i], effBTLPartGetRadiusPtr(formation, aim));
-        dds3EffectPartSetColor(cut->parameterWorks[i], color);
-        dds3EffectPartDraw(cut->parameterWorks[i]);
+        dds3EffectPartSetDirection(hBTLCutEffect->parameterWorks[i], &direction);
+        dds3EffectPartSetArea(hBTLCutEffect->parameterWorks[i], effBTLPartGetRadiusPtr(formation, aim));
+        dds3EffectPartSetColor(hBTLCutEffect->parameterWorks[i], color);
+        dds3EffectPartDraw(hBTLCutEffect->parameterWorks[i]);
     }
-    if (list->callbackFrame == frame && cut->sourceFrameCallback != NULL) {
-        cut->sourceFrameCallback(cut);
+    if (list->callbackFrame == frame && hBTLCutEffect->sourceFrameCallback != NULL) {
+        hBTLCutEffect->sourceFrameCallback(hBTLCutEffect);
     }
-    if (cut->triggerFrame == frame && cut->triggerFrameCallback != NULL) {
-        cut->triggerFrameCallback(cut);
+    if (hBTLCutEffect->triggerFrame == frame && hBTLCutEffect->triggerFrameCallback != NULL) {
+        hBTLCutEffect->triggerFrameCallback(hBTLCutEffect);
     }
-    effBTLCutSetMax(cut->kind, cut->currentFrame);
-    cut->currentFrame++;
+    effBTLCutSetMax(hBTLCutEffect->kind, hBTLCutEffect->currentFrame);
+    hBTLCutEffect->currentFrame++;
 }
 #else
 INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EA0);
@@ -556,27 +556,27 @@ INCLUDE_RODATA(const s32, "effect/effBattle", D_00532EC0);
 INCLUDE_ASM(const s32, "effect/effBattle", effBTLCutDraw);
 #endif
 
-void effBTLCutSetScale(effBTLCut_t *effect, f32 scale) {
+void effBTLCutSetScale(effBTLCut_t *hBTLCutEffect, f32 scale) {
     s32 i;
     s32 count;
 
     if (scale != 1.0f) {
-        count = effect->list->count;
+        count = hBTLCutEffect->list->count;
         for (i = 0; i < count; i++) {
-            dds3EffectPartSetScale(effect->parameterWorks[i], scale);
+            dds3EffectPartSetScale(hBTLCutEffect->parameterWorks[i], scale);
         }
     }
 }
 
 /* Rebuild each cloned bank's parameter work, resolving shared-entry references
  * and preserving disabled descriptors. */
-void effBTLPartCreate(effBTL_t *destination, effBTL_t *source) {
-    u8 *sourceBytes = (u8 *)source;
+void effBTLPartCreate(effBTL_t *pSkill, effBTL_t *pData) {
+    u8 *sourceBytes = (u8 *)pData;
     s32 bankIndex;
 
     for (bankIndex = 0; bankIndex < 2; bankIndex++) {
-        effBTLPart_t *entry = destination->banks[bankIndex].list.entries;
-        u16 entryCountForBank = destination->banks[bankIndex].list.count;
+        effBTLPart_t *entry = pSkill->banks[bankIndex].list.entries;
+        u16 entryCountForBank = pSkill->banks[bankIndex].list.count;
 
         if (entryCountForBank != 0) {
             s32 remainingEntries = entryCountForBank;
@@ -587,7 +587,7 @@ void effBTLPartCreate(effBTL_t *destination, effBTL_t *source) {
                         u32 index = entry->value.sourceOffset;
                         u32 sourceBank = index / 0x3C;
                         u32 sourceEntryIndex = index % 0x3C;
-                        effBTLPart_t *sourceEntry = &destination->banks[sourceBank].list.entries[sourceEntryIndex];
+                        effBTLPart_t *sourceEntry = &pSkill->banks[sourceBank].list.entries[sourceEntryIndex];
                         dds3EffectPart_t *duplicatedWork = dds3EffectPartCopy(sourceEntry->value.work);
                         u16 sourceKind = sourceEntry->paramKind;
 
@@ -608,12 +608,12 @@ void effBTLPartCreate(effBTL_t *destination, effBTL_t *source) {
 }
 
 /* Release each initialized parameter-work entry in the handle's two banks. */
-void effBTLPartDelete(effBTL_t *handle) {
+void effBTLPartDelete(effBTL_t *pSkill) {
     s32 bankIndex;
 
     for (bankIndex = 0; bankIndex < 2; bankIndex++) {
-        u16 entryCount = handle->banks[bankIndex].list.count;
-        effBTLPart_t *entry = handle->banks[bankIndex].list.entries;
+        u16 entryCount = pSkill->banks[bankIndex].list.count;
+        effBTLPart_t *entry = pSkill->banks[bankIndex].list.entries;
 
         if (entryCount != 0) {
             s32 remaining = entryCount;
@@ -667,7 +667,7 @@ void effBTLSkillEnd(void) {
     printf("effBTL:Skill End\n");
 }
 
-void effBTLSkillSetFormationInfo(s32 formIndex, u32 targetBit) {
+void effBTLSkillSetFormationInfo(s32 InvokeID, u32 TargetBit) {
     nbFormation_t *form;
     nbFormation_t **target;
     u32 bit;
@@ -675,13 +675,13 @@ void effBTLSkillSetFormationInfo(s32 formIndex, u32 targetBit) {
     s32 i;
 
     form = nbGetMainProcessData()->form;
-    D_005698E0.targetBit = targetBit;
-    D_005698E0.invokeForm = &form[formIndex];
+    D_005698E0.targetBit = TargetBit;
+    D_005698E0.invokeForm = &form[InvokeID];
     target = D_005698E0.targetForm;
     bit = 1;
     count = 0;
     for (i = 0; i < 32; i++) {
-        if (targetBit & bit) {
+        if (TargetBit & bit) {
             *target++ = form;
             count++;
         }
@@ -840,14 +840,14 @@ void effBTLFieldColorEnd(void) {
     }
 }
 
-void effBTLFieldLightDirectionSet(const f32 *direction) {
-    SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, direction);
+void effBTLFieldLightDirectionSet(const f32 *pDir) {
+    SDF_VU0_COPYVECTOR(dds3LightParam.sources[0] + 4, pDir);
 }
 
-void effBTLFieldLightAxisSet(const f32 *axis);
+void effBTLFieldLightAxisSet(const f32 *pAxis);
 
-void effBTLFieldLightAxisSet(const f32 *axis) {
-    SDF_VU0_COPYVECTOR(effBTLFieldLightAnimAxis, axis);
+void effBTLFieldLightAxisSet(const f32 *pAxis) {
+    SDF_VU0_COPYVECTOR(effBTLFieldLightAnimAxis, pAxis);
 }
 
 void effBTLFieldLightAnimationSet(s32 frame, f32 angle) {
@@ -856,11 +856,11 @@ void effBTLFieldLightAnimationSet(s32 frame, f32 angle) {
     effBTLFieldLightAnimRotate = angle / frame;
 }
 
-void effBTLSkyFilterON(s32 alphaTarget, u16 frame) {
+void effBTLSkyFilterON(s32 alpha, u16 frame) {
     s32 frameCount = frame;
 
     effBTLSkyFilterAlphaBase = fldSkyGetAlpha();
-    effBTLSkyFilterAlphaTarget = alphaTarget;
+    effBTLSkyFilterAlphaTarget = alpha;
     effBTLSkyFilterFrame = frameCount;
     effBTLSkyFilterFrameMax = frameCount;
 }
@@ -886,16 +886,16 @@ void effBTLSkyFilterRun(void) {
     }
 }
 
-void effBTLFieldFilterON(u32 color, u16 frame) {
+void effBTLFieldFilterON(u32 abgr, u16 frame) {
     if (frame == 0) {
-        effBTLFieldColorFilter.rect.color = color;
+        effBTLFieldColorFilter.rect.color = abgr;
         effBTLFieldColorFilter.frame = 0;
         return;
     }
     effBTLFieldColorFilter.frame = frame;
     effBTLFieldColorFilter.frameMax = frame;
     effBTLFieldColorFilter.baseColor = effBTLFieldColorFilter.rect.color;
-    effBTLFieldColorFilter.targetColor = color;
+    effBTLFieldColorFilter.targetColor = abgr;
 }
 
 void effBTLFieldFilterOFF(u16 frame) {

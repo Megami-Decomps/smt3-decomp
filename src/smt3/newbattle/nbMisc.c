@@ -15,9 +15,9 @@ extern f32 dds3ScreenParam[];
 
 extern void ReverseMatrix(void);
 
-extern void MultMatrixRev(f32 *matrix);
+extern void MultMatrixRev(f32 *aMatrix);
 
-extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *aRoot, s32 aId);
 
 extern void nbDrawTargetCursor(s32 type, s32 x, s32 y);
 
@@ -27,7 +27,7 @@ extern s32 evtGetAgeOfMoon16(void);
 
 extern void evtSetAgeOfMoon(s32 age);
 
-extern void datSetDevilWork(s32 devilid, datUnitWork_t *work);
+extern void datSetDevilWork(s32 id, datUnitWork_t *w);
 
 extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
                         sdfTexHandle_t *th);
@@ -154,15 +154,15 @@ void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                         sdfVector4_t *center, f32 r, f32 scl, f32 h);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 s32 nbClipEffectNum(s32 screenPosition[4]);
 
 void nbLoadKoukaPos(nbFormation_t *form);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
-extern u32 effBTLSystemGetRGBA(s32 type);
+extern u32 effBTLSystemGetRGBA(s32 id);
 
 extern char D_00544120[]; /* "nb_action" */
 
@@ -177,15 +177,15 @@ extern void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 
 
 extern s32 datCheckStockFull(void);
 
-extern s32 datSearchDevilStock(s32 devilid);
+extern s32 datSearchDevilStock(s32 id);
 
 extern s32 fclEncycRegist(datUnitWork_t *work, s32 mode);
 
 extern void nbSortOrder(s32 start);
 
-extern s32 datGetParam(datUnitWork_t *unit, s32 param);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
-extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group);
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 
 extern nbEncountForm_t nbEncountFormTable[];
 
@@ -207,7 +207,7 @@ extern nbDeadEvent_t D_00398A80[];
 
 extern void itfMesMngSetVar(s32 id, s32 index, s32 num, s32 type);
 
-void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind);
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 var_id, s32 var_ind);
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
 
@@ -495,13 +495,13 @@ void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag)
     }
 }
 
-void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 col)
+void nbDrawPanelSprite(sdfTexHandle_t *th, s32 no, s32 x, s32 y, u32 rgba)
 {
     nbPanelUV_t uv;
 
     uv.u = no * 13 + 1;
     uv.v = 1;
-    nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u, uv.v, 0xC, 0x12, col, th);
+    nbPnlSprite(x >> 4, y >> 3, 0xC, 0x12, uv.u, uv.v, 0xC, 0x12, rgba, th);
 }
 
 /* NON_MATCHING: 24 of 66 words differ (first at +0x74). */
@@ -553,7 +553,7 @@ INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetTargetSkill);
 
 INCLUDE_ASM(const s32, "newbattle/nbMisc", nbSetNormalSkill0);
 
-s32 nbGetNakama(datUnitWork_t *work)
+s32 nbGetNakama(datUnitWork_t *s)
 {
     datUnitWork_t *stock;
     s32 i;
@@ -562,14 +562,14 @@ s32 nbGetNakama(datUnitWork_t *work)
         return 0;
     }
     stock = NULL;
-    datSearchDevilStock(work->id);
+    datSearchDevilStock(s->id);
     for (i = 4; i < 0x10; i++) {
         if ((DDS3_GBWK->akuma[i].flag & 1) == 0) {
             stock = (datUnitWork_t *)&DDS3_GBWK->akuma[i].flag;
             break;
         }
     }
-    datSetDevilWork(work->id, stock);
+    datSetDevilWork(s->id, stock);
     fclEncycRegist(stock, 0);
     *((u8 *)(*(s32 *)((u8 *)DDS3_GBWK + 0x1924)) + (u32)DDS3_GBWK + 0x1914) = i;
     *(s32 *)((u8 *)DDS3_GBWK + 0x1924) = *(s32 *)((u8 *)DDS3_GBWK + 0x1924) + 1;
@@ -585,11 +585,11 @@ void nbSetDevilNameMes(s32 hmsg, s32 no, datUnitWork_t *work)
     itfMesMngSetVar(hmsg, no, work->id, 1);
 }
 
-void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 varid, s32 varind)
+void nbSetJyokyoMes(nbActionProcessData_t *a, s32 jyokyomes, s32 var_id, s32 var_ind)
 {
     a->jyokyomes = nbGetJyokyoMes(a->data, jyokyomes);
-    a->jyo_varid = varid;
-    a->jyo_varind = varind;
+    a->jyo_varid = var_id;
+    a->jyo_varind = var_ind;
 }
 
 s32 nbGetJyokyoMes(nbMainProcessData_t *data, s32 jyokyomes)
@@ -634,7 +634,7 @@ u32 nbGetModelColor(nbFormation_t *form)
     return 0x80808080;
 }
 
-s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 devilid, s32 formindex)
+s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex)
 {
     datUnitWork_t *unit = data->enemyunit;
     nbDevilInfo_t *info;
@@ -650,8 +650,8 @@ s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 devilid, s32 formindex
         return -1;
     }
     work = &unit[i];
-    datSetDevilWork(devilid, work);
-    info = &datDevilTable[devilid];
+    datSetDevilWork(id, work);
+    info = &datDevilTable[id];
     work->flag |= 2;
     work->maxhp = info->maxhp;
     work->hp = info->hp;

@@ -134,7 +134,7 @@ extern s32 cmpPlayCursorSE(s32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
-extern s32 fclScriptStart(s32 script, s32 id, void *arg);
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
 
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
@@ -155,11 +155,11 @@ INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateSeqAllRecover);
 
 extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
-extern void lstMoveCursor2(lstWork_t *list, s8 dir);
+extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 
 extern s32 rcvUpdateData(void);
 
-extern s32 rcvUpdateCallSeq(s32 seq);
+extern s32 rcvUpdateCallSeq(s32 SeqNo);
 
 void rcvUpdateSeqRecover(void)
 {
@@ -273,7 +273,7 @@ INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdatePanelAnim);
 
 INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateSeqRoot);
 
-extern s32 rcvUpdateCallSeq(s32 seq);
+extern s32 rcvUpdateCallSeq(s32 SeqNo);
 
 void rcvUpdateSeqTalk(void)
 {

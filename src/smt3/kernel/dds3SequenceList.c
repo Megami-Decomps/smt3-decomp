@@ -26,9 +26,9 @@ extern void fclCombineProcessEnd(void);
 extern void fclCombineProcessStart(void);
 extern void fclRagProcessEnd(void);
 extern void fclRecoverProcessEnd(void);
-extern void fclRecoverProcessStart(s32 mode);
+extern void fclRecoverProcessStart(s32 Place);
 extern void fclShopProcessEnd(void);
-extern void fclShopProcessStart(void *requestData);
+extern void fclShopProcessStart(void *pPlace);
 extern void fclTerminalProcessEnd(void);
 extern void fldProc_CallSisetuReturn(void);
 extern void fmProcTrigSequence(s32 mode);
@@ -55,27 +55,27 @@ extern s32 trmCheckProcessStat(void);
 
 extern int printf(const char *fmt, ...);
 extern const char D_0052E230[];
-extern void fldProcTrigSequence(void *record, u32 mode);
+extern void fldProcTrigSequence(void *srcParam, u32 mode);
 extern void nmeStartProcesses(s32 arg0, s32 arg1, s32 arg2);
-extern void fclRagProcessStart(s32 mode);
+extern void fclRagProcessStart(s32 Place);
 extern void pbStartMapEditor(s32 mode, s32 stage);
 extern void evtKillEventViewer(void);
 
 extern s32 cmbCheckProcessStat(void);
-extern void InitPipe(s32 mapIdx, s32 prev);
+extern void InitPipe(s32 data, s32 prevData);
 extern void dds3AdminiExitSequence(void);
 extern void nbInitBattleTest(void);
-extern void nbCallNewBattle(s32 packno, void *enc);
-extern s32 evtLoadArea(s32 area, s32 room);
-extern s32 evtLoadUnit(s32 slotKind, s32 resource);
-extern evtUnit_t *evtGetUnitHandle(s32 worldObjectKey);
-extern void evtSetUnitMotion(evtUnit_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode);
-extern void mdlSmoothLoopMotion(mdlObj_t *ctx, s32 searchId, s32 motionIndex, f32 blendLeadFrames,
-                                f32 blendDurationFrames);
-extern void evtStartEvent(s32 eventId);
+extern void nbCallNewBattle(s32 encpack, void *data);
+extern s32 evtLoadArea(s32 fld, s32 area);
+extern s32 evtLoadUnit(s32 major, s32 minor);
+extern evtUnit_t *evtGetUnitHandle(s32 serial);
+extern void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode);
+extern void mdlSmoothLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
+                                f32 aSmoothLeng);
+extern void evtStartEvent(s32 no);
 extern s32 evtNextEventNo;
 extern s32 fldGb __attribute__((section(".data")));
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 extern s32 itfMesMngInitialize(void *sub);
 
 
@@ -83,11 +83,11 @@ extern scrProcessWork_s *scrHandleFirst;
 extern scrProcessWork_s *scrHandleLast;
 extern s32 scrHandleCount;
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern dds3ProcessID_t *dds3SearchProcessPriority(u32 priority);
 extern s32 dds3StartMenuProcess(dds3ProcessID_t *id);
 extern void func_00157050(void);
@@ -98,7 +98,7 @@ extern void fldAllShutDown(void);
 extern s32 fldProcShutDown2(void);
 extern void fldProcNextJump(void);
 extern void evtInitSky(void);
-extern void fclTerminalProcessStart(s32 arg0, s32 arg1);
+extern void fclTerminalProcessStart(s32 TerminalType, s32 TerminalNo);
 extern scrProcessWork_s *scrPrintProcedureStart(scrHeader_t *header, scrTypeTable_t *typetable,
                                                 scrProcTable_t *proctable,
                                                 scrLabelTable_t *labeltable, scrCode_u *code,
@@ -148,13 +148,13 @@ s32 CheckBootMc(void)
     return operationResult == 0;
 }
 
-void CallTitle(u32 unused, u32 *modeOverride)
+void CallTitle(u32 flg, u32 *data)
 {
-    if (modeOverride == 0) {
+    if (data == 0) {
         titleStart(0);
         return;
     }
-    titleStart(*modeOverride);
+    titleStart(*data);
 }
 
 s32 ExitTitle(void)
@@ -615,9 +615,9 @@ s32 CheckCombineTest(void)
     return 0;
 }
 
-void CallShopTest(s32 unused, void *requestData)
+void CallShopTest(s32 flg, void *data)
 {
-    fclShopProcessStart(requestData);
+    fclShopProcessStart(data);
 }
 
 s32 ExitShopTest(void)
@@ -677,11 +677,11 @@ s32 CheckRecoverTest(void)
     return taskState == 0;
 }
 
-void CallTerminalTest(dds3ProcessID_t *id, s32 *args)
+void CallTerminalTest(dds3ProcessID_t *flg, s32 *data)
 {
     evtInitSky();
-    if (args != NULL) {
-        fclTerminalProcessStart(args[0], args[1]);
+    if (data != NULL) {
+        fclTerminalProcessStart(data[0], data[1]);
         return;
     }
     fclTerminalProcessStart(0, 1);
@@ -871,13 +871,13 @@ s32 CheckPipe(void)
     return sceneState == 0;
 }
 
-void CallModeSelect(u32 unused, u32 *modeOverride)
+void CallModeSelect(u32 flg, u32 *data)
 {
-    if (modeOverride == 0) {
+    if (data == 0) {
         mselExit(0);
         return;
     }
-    mselExit(*modeOverride);
+    mselExit(*data);
 }
 
 s32 ExitModeSelect(void)

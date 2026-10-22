@@ -58,7 +58,7 @@ enum sl_slot_flag
     SL_SLOT_FLAG_DELETE_BEFORE_WRITE = 8
 };
 
-extern void *memset(void *dst, s32 value, u32 size);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern s32 fldTakaraCount;
 
@@ -80,19 +80,19 @@ extern s32 fldNpcModelTable;
 
 extern fldNpcSlot_t fldModelSlotTable[];
 
-extern s32 fldGbChkNpc(s32 mapId, u32 slotIndex, s32 bit);
+extern s32 fldGbChkNpc(s32 fld, u32 area, s32 hojiID);
 
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *object, u32 flags);
 
 extern u8 D_003129D0[0x100];
 
-extern void sdfTexFreeDelayed(sdfTexHandle_t *texture);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 
 extern void *memcpy(void *, const void *, unsigned int);
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
 extern s32 fldNpcModelFreeIdx;
 
@@ -100,33 +100,33 @@ extern dds3Basic_t *fldNpcFreeCount;
 
 extern s32 fldNpcCamTarget;
 
-extern void mdlUnRegist(s32 kind, s32 slot);
+extern void mdlUnRegist(s32 aMajor, s32 aMinor);
 
 extern void dds3DeleteUnitObjectBasic(dds3Basic_t *object);
 
 extern s32 sprintf(char *dst, const char *format, ...);
 
-extern void dds3EffectReset(void *effect);
+extern void dds3EffectReset(void *hEffect);
 
-extern void dds3EffectSetPosition(void *effect, const sdfVector4_t *position);
+extern void dds3EffectSetPosition(void *pData, const sdfVector4_t *pPos);
 
 extern void *D_0054EEDC;
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern void dds3EffectDelete(void *effect);
+extern void dds3EffectDelete(void *pData);
 
-extern void fldMakeFilePath(char *out, s32 field, s32 area);
+extern void fldMakeFilePath(char *pathstr, s32 field, s32 area);
 
 extern char D_00532790[];
 
 extern char D_005327A0[];
 
-extern s32 sdfFileOpen(const char *path);
+extern s32 sdfFileOpen(const char *aFileName);
 
-extern void sdfFileRead(s32 fd, void *buffer, s32 size);
+extern void sdfFileRead(s32 aHandle, void *aPtr, s32 aLeng);
 
-extern void sdfFileClose(s32 fd);
+extern void sdfFileClose(s32 aHandle);
 
 extern sdfMemHandle_t *fldNpcModelCount;
 
@@ -140,19 +140,19 @@ extern sdfTexHandle_t *hEffPart;
 
 extern void *fldItemBoxCount;
 
-extern void dds3EffectPartDelete(void *effect);
+extern void dds3EffectPartDelete(void *hEffPart);
 
-extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 size);
+extern sdfDrawTag_t *sdfGrAllocPacketBuff(s32 aSize);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 contextOffset);
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *aTag, sdfTexHandle_t *aTexHndl, s32 aCtx);
 
-extern void SetRotateMatrixY(f32 angle);
+extern void SetRotateMatrixY(f32 aAngle);
 
-extern void sdfPrimLinkFt4(sdfDrawTag_t *tag, u32 color, s32 mode, s32 x0, s32 y0, s32 u0,
-                           s32 v0, s32 x1, s32 y1, s32 u1, s32 v1, s32 x2, s32 y2, s32 u2,
-                           s32 v2, s32 x3, s32 y3, s32 u3, s32 v3, s32 mask, void *next);
+extern void sdfPrimLinkFt4(sdfDrawTag_t *aTag, u32 aColor, s32 aPrim, s32 aX0, s32 aY0, s32 aU0,
+                           s32 aV0, s32 aX1, s32 aY1, s32 aU1, s32 aV1, s32 aX2, s32 aY2, s32 aU2,
+                           s32 aV2, s32 aX3, s32 aY3, s32 aU3, s32 aV3, s32 aZ, void *aAllocator);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
@@ -168,55 +168,55 @@ extern f32 D_0054EF60;
 
 extern f32 EulerAngleAxisY(void);
 
-extern void sdfModelSetFaceDivParm(sdfModelRootNode_t *root, f32 soften, f32 bias);
+extern void sdfModelSetFaceDivParm(sdfModelRootNode_t *aRoot, f32 aSoften, f32 aBias);
 
-extern f32 sdfSin(f32 radians);
+extern f32 sdfSin(f32 aRadius);
 
-extern f32 sdfCos(f32 radians);
+extern f32 sdfCos(f32 aRadius);
 
 extern s32 fldArea[];
 
-extern void dds3SetRotPoseSet(dds3Basic_t *object, const sdfVector4_t *rot);
+extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
-extern void mdlSingleMotion(mdlObj_t *obj, s32 searchId, s32 motionIndex);
+extern void mdlSingleMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
 extern s32 fldEncountTestFlag(s32 flag);
 
-extern void *dds3EffectPartCreate(s32 type, void *data);
+extern void *dds3EffectPartCreate(s32 type, void *pData);
 
 extern void *D_0054EF2C;
 
 extern const sdfVector4_t D_00532720;
 
-extern mdlObj_t *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern mdlObj_t *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
-extern void FromRotation(f32 angle);
+extern void FromRotation(f32 aAngle);
 
 extern void Mult(void);
 
-extern void mdlLoopMotion(mdlObj_t *obj, s32 searchId, s32 motionIndex);
+extern void mdlLoopMotion(mdlObj_t *aHandle, s32 aGroup, s32 aNumber);
 
-extern void mdlPackDecode(s32 group, s32 id, s32 mode, const u8 *data, s32 size);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, const u8 *buff, s32 leng);
 
-extern void mdlSetColor(mdlObj_t *obj, u32 color);
+extern void mdlSetColor(mdlObj_t *aHandle, u32 aColor);
 
 extern u32 dds3AllocObjectId(void);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 id, const sdfVector4_t *position, const sdfVector4_t *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, const sdfVector4_t *aPos, const sdfVector4_t *aRot);
 
-extern void dds3UnitObjectBasicSetOt(dds3Basic_t *basic, s32 index);
+extern void dds3UnitObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx);
 
 extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
 
-extern void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 major, s32 minor);
+extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor);
 
-extern evtUnit_t *evtGetUnitHandle2(void *object);
+extern evtUnit_t *evtGetUnitHandle2(void *unit);
 
-extern void evtUnitLightOn(evtUnit_t *unit);
+extern void evtUnitLightOn(evtUnit_t *h);
 
-extern void evtSetUnitLightDir(evtUnit_t *unit, s32 duration);
+extern void evtSetUnitLightDir(evtUnit_t *h, s32 frame);
 
-extern void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 duration, u32 light, u32 ambient);
+extern void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb);
 
 extern s32 fldNpcDrawCount;
 
@@ -230,7 +230,7 @@ extern const sdfVector4_t D_00532770;
 
 extern void *fldBlurEffectId[];
 
-extern void dds3EffectSetLoop(void *effect, u8 loop);
+extern void dds3EffectSetLoop(void *hEffect, u8 loop);
 
 extern u32 fldNpcBlurHandle;
 
@@ -241,7 +241,7 @@ extern u32 fldDmgBlurHandle;
 
 /* NON_MATCHING: 38 of 163 words differ (first at +0x4). */
 #ifdef NON_MATCHING
-void fldNpcLightSet(evtUnit_t *unit) {
+void fldNpcLightSet(evtUnit_t *hEveUnit) {
     dds3Basic_t *object;
     mdlObj_t *model;
     u8 *row;
@@ -252,7 +252,7 @@ void fldNpcLightSet(evtUnit_t *unit) {
     u32 ambient;
     sdfVector4_t vec;
 
-    object = unit->effObj;
+    object = hEveUnit->effObj;
     model = dds3ObjectBaseGetModelHandle(object);
     SDF_VU0_LOADVECTOR(&object->poseset->rot);
     row = &D_003129D0[(fldArea[0] + 1) * 8];
@@ -278,7 +278,7 @@ void fldNpcLightSet(evtUnit_t *unit) {
         dir = dir + 70.0f;
         power = 0.6f;
     }
-    evtUnitLightOn(unit);
+    evtUnitLightOn(hEveUnit);
     dds3ObjectBaseOnFlag(object, 0x100);
     sdfModelSetFaceDivParm(model->inner, (f32)(row[6] >> 4), (f32)(row[6] & 0xF));
     rad = dir * 3.14f / 180.0f;
@@ -288,14 +288,14 @@ void fldNpcLightSet(evtUnit_t *unit) {
     vec.w = 0.0f;
     SDF_VU0_LOADVECTOR(&vec);
     SDF_VU0_NORMALIZE();
-    evtSetUnitLightDir(unit, 0);
+    evtSetUnitLightDir(hEveUnit, 0);
     light = row[0] | (row[1] << 8) | (row[2] << 16) | 0x80000000;
     ambient = row[3] | (row[4] << 8) | (row[5] << 16) | 0x80000000;
-    evtSetUnitLightAndAmbient(unit, 0, light, ambient);
+    evtSetUnitLightAndAmbient(hEveUnit, 0, light, ambient);
     SDF_VU0_LOADVECTOR(&vec);
     SDF_VU0_NORMALIZE();
-    evtSetUnitLightDir(unit, 0);
-    evtSetUnitLightAndAmbient(unit, 0, light, ambient);
+    evtSetUnitLightDir(hEveUnit, 0);
+    evtSetUnitLightAndAmbient(hEveUnit, 0, light, ambient);
 }
 #else
 INCLUDE_ASM(const s32, "field/fld_Npc", fldNpcLightSet);
@@ -822,17 +822,17 @@ void fldNpcHojiRefresh(void) {
     }
 }
 
-void fldNpcLightLoad(s32 index) {
+void fldNpcLightLoad(s32 field) {
     char path[0x40];
     char directory[0x20];
     s32 fd;
 
-    if (index < 100) {
-        fldMakeFilePath(directory, index, 1);
-        if (index == 0x18 && evtBitCheck(0x4F) != 0) {
+    if (field < 100) {
+        fldMakeFilePath(directory, field, 1);
+        if (field == 0x18 && evtBitCheck(0x4F) != 0) {
             sprintf(path, D_00532790, directory, 0x18);
         } else {
-            sprintf(path, D_005327A0, directory, index);
+            sprintf(path, D_005327A0, directory, field);
         }
         fd = sdfFileOpen(path);
         sdfFileRead(fd, D_003129D0, 0x100);

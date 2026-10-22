@@ -111,35 +111,35 @@ typedef struct nbParty_t
     u16 hojoskill[8];
 } nbParty_t;
 
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
-extern void *sdfChipAllocDirect(u32 size);
-extern void sdfChipFreeDirect(void *ptr);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
 extern void nbPanelStockFadeOUT(void);
 extern void nbPanelStockEnd(void);
 
 extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
-extern void dds3SlowOn(u32 interval, u32 duration);
-extern void dds3Stop(u32 pauseCount);
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern void dds3SlowOn(u32 aSlowTime, u32 slowcnt);
+extern void dds3Stop(u32 frame);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 extern s32 evtGetAgeOfMoon16(void);
 extern void evtSetAgeOfMoon(s32 age);
 extern void effBTLSkillEnd(void);
-extern void effBTLSkillStart(s32 id, s32 param);
-extern void effBTLSystemDelete(struct effBTLSysHandle_t *handle);
-extern void effBTLSystemDraw(struct effBTLSysHandle_t *handle);
-extern struct effBTLSysHandle_t *effBTLSystemCreate(nbFormation_t *form, s32 no);
+extern void effBTLSkillStart(s32 id, s32 stat);
+extern void effBTLSystemDelete(struct effBTLSysHandle_t *hEffBTLSys);
+extern void effBTLSystemDraw(struct effBTLSysHandle_t *hEffBTLSys);
+extern struct effBTLSysHandle_t *effBTLSystemCreate(nbFormation_t *pFormation, s32 id);
 extern void nbAddHpMp(s32 formindex, s32 type, s32 n);
-extern void nbDispJyokyoHelp(s32 meshandle, s32 mesid, s32 type, s32 value);
-extern void nbDispSkillName(s32 no);
+extern void nbDispJyokyoHelp(s32 msgid, s32 no, s32 var_id, s32 var_ind);
+extern void nbDispSkillName(s32 id);
 extern void nbFormDispOff(s32 formindex);
 extern void nbFormDispOn(s32 formindex);
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
-extern void nbPanelAnalyzeDraw(datUnitWork_t *unit);
+extern void nbPanelAnalyzeDraw(datUnitWork_t *pUnitWork);
 extern void nbPanelDraw(s32 flag);
 extern void nbReturnUnit(s32 partyno, s32 lost, s32 dead);
 extern void nbRunKoukaType1(s32 partyindex, sdfVector4_t *pos, f32 time);
@@ -148,30 +148,30 @@ extern void nbSetDamage(nbFormation_t *form, f32 range, s32 week);
 extern void nbSetDamage2(nbFormation_t *form, f32 range);
 extern void nbSetBadstatMotion(nbFormation_t *form, s32 type, f32 range);
 extern void nbSetBadstatMotion2(nbFormation_t *form);
-extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 speed);
-extern void nbSetWaitMotion(nbFormation_t *form, s32 mode, f32 speed);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion2, s32 mode, f32 ritu);
+extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu);
 extern void nbSetBadStat(s32 formindex, s32 sw, s32 badstat);
 extern s32 nbSetHojoKouka(s32 formindex, s32 hojotype, s32 hojopoint, s32 nvirtual);
 extern void nbSetSakeKoukaParam(nbFormation_t *form, f32 range, f32 power);
 
-extern void effBTLCutDelete(struct effBTLCutHandle_t *h);
-extern void effBTLDelete(void *h);
-extern void effBTLSystemCut1Delete(struct effBTLCutHandle_t *h);
-extern void effBTLSystemDelete2(struct effBTLSysHandle_t *h);
-extern void effPCPBossBUNSINDelete(void *work);
-extern void effPCPBossBUNSIN2Delete(void *work);
-extern void effPCPBossONGYDelete(void *work);
-extern void effPCPBossONGY2Delete(void *work);
+extern void effBTLCutDelete(struct effBTLCutHandle_t *hBTLCutEffect);
+extern void effBTLDelete(void *hBTLEffect);
+extern void effBTLSystemCut1Delete(struct effBTLCutHandle_t *hBTLCutEffect);
+extern void effBTLSystemDelete2(struct effBTLSysHandle_t *hEffBTLSys);
+extern void effPCPBossBUNSINDelete(void *pPCPBossBUNSIN);
+extern void effPCPBossBUNSIN2Delete(void *pPCPBossBUNSIN2);
+extern void effPCPBossONGYDelete(void *pPCPBossONGY);
+extern void effPCPBossONGY2Delete(void *pPCPBossONGY2);
 extern void nbDelKoukaEntry(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
 extern void nbReturnKoukaUnit(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
-extern void effBTLCutDraw(struct effBTLCutHandle_t *h);
-extern void effBTLSystemCut1Draw(struct effBTLCutHandle_t *h);
-extern struct effBTLCutHandle_t *effBTLCutCreate(void *hbtl, u16 cutno, nbFormation_t *form,
-                                                 s32 flag);
-extern s32 evtSetUnitColorA(evtUnit_t *unit, s32 duration, u32 color);
-extern s32 evtSetUnitColorRGB(evtUnit_t *unit, s32 duration, u32 color);
-extern void evtSetWaitHokanFrame(evtUnit_t *unit, s32 before, s32 smooth);
-extern s32 p2sdLoadCheckMidi(s32 midino);
+extern void effBTLCutDraw(struct effBTLCutHandle_t *hBTLCutEffect);
+extern void effBTLSystemCut1Draw(struct effBTLCutHandle_t *hBTLCutEffect);
+extern struct effBTLCutHandle_t *effBTLCutCreate(void *hBTLEffect, u16 CutNum, nbFormation_t *pFormation,
+                                                 s32 stat);
+extern s32 evtSetUnitColorA(evtUnit_t *h, s32 frame, u32 a);
+extern s32 evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb);
+extern void evtSetWaitHokanFrame(evtUnit_t *h, s32 before, s32 smooth);
+extern s32 p2sdLoadCheckMidi(s32 MidiNo);
 extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
 extern void p2sdStopSe(s32 sound);
 extern void datDebugPrintf(const char *fmt, ...);
@@ -182,12 +182,12 @@ extern s32 printf(char *fmt, ...);
 extern char D_00551138[];
 extern void dds3FadeIn2(s32 frame);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
-extern u32 effBTLCutGetFrame(struct effBTLCutHandle_t *h);
-extern void effBTLCutSetCutEndFrame(struct effBTLCutHandle_t *h, s32 frame);
-extern void effPCPBossBUNSINDraw(void *work);
-extern void effPCPBossBUNSIN2Draw(void *work);
-extern void effPCPBossONGYDraw(void *work);
-extern void effPCPBossONGY2Draw(void *work);
+extern u32 effBTLCutGetFrame(struct effBTLCutHandle_t *hBTLCutEffect);
+extern void effBTLCutSetCutEndFrame(struct effBTLCutHandle_t *hBTLCutEffect, s32 frame);
+extern void effPCPBossBUNSINDraw(void *pPCPBossBUNSIN);
+extern void effPCPBossBUNSIN2Draw(void *pPCPBossBUNSIN2);
+extern void effPCPBossONGYDraw(void *pPCPBossONGY);
+extern void effPCPBossONGY2Draw(void *pPCPBossONGY2);
 extern void nbClipKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
 extern void nbDrawKoukaNum(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
 extern void RunFlyKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
@@ -197,10 +197,10 @@ extern void RunStockPanelFadeOutKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *
 extern void RunUnitColKouka(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
 extern void nbAddOrder(s32 findex);
 extern void nbSetEnemyFormation(nbMainProcessData_t *data, s32 group);
-extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 group);
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
 extern void nbSummonUnit(s32 side, s32 stockno, s32 formindex);
 extern void nbUpdateOrder(void);
-extern nbKoukaProcessData_t *InitKoukaProcessData(nbMainProcessData_t *battle);
+extern nbKoukaProcessData_t *InitKoukaProcessData(nbMainProcessData_t *data);
 extern void nbLinkPacket(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
 extern void DelKoukaPacket(nbKoukaProcessData_t *k, nbKoukaPacket_t *p);
 extern void nbDelKoukaPacket(nbKoukaPacket_t *p);
@@ -1375,11 +1375,11 @@ s32 nbKoukaShutdown(dds3ProcessID_t *id)
     sdfChipFreeDirect(work);
 }
 
-nbKoukaProcessData_t *InitKoukaProcessData(nbMainProcessData_t *battle)
+nbKoukaProcessData_t *InitKoukaProcessData(nbMainProcessData_t *data)
 {
     nbKoukaProcessData_t *work = sdfChipAllocDirect(sizeof(nbKoukaProcessData_t));
 
-    work->data = battle;
+    work->data = data;
     work->packetcnt = 0;
     work->first = NULL;
     work->last = NULL;

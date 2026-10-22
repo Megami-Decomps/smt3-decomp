@@ -258,19 +258,19 @@ extern s32 printf(const char *format, ...);
 
 extern nbMainProcessData_t *nbGetMainProcessData(void);
 
-extern void *memset(void *dst, s32 c, u32 n);
+extern void *memset(void *a, s32 b, u32 c);
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern void *sdfChipAllocDirect(u32 size);
+extern void *sdfChipAllocDirect(u32 aSize);
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
 /* 28-byte entries; only the fields this unit reads are named. */
 typedef struct {
@@ -305,9 +305,9 @@ extern void nbFreeEffectSlot(nbEventProcessData_t *e);
 
 extern s32 nbFindStockSkillError(void);
 
-extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *source, void *position, void *rotation);
+extern dds3Basic_t *dds3AddBEDEffectObjectBasic2(void *data, void *pos, void *rot);
 
-extern void dds3EffectObjectBasicStatOn(dds3Basic_t *basic, u32 stat);
+extern void dds3EffectObjectBasicStatOn(dds3Basic_t *basic, u32 s);
 
 extern void nbFreeEventEntry(nbMainProcessData_t *data);
 
@@ -325,11 +325,11 @@ extern void *nbEventProcess3(dds3ProcessID_t *id);
 
 extern char D_00545DB0[];
 
-extern void pacFileHandleFree_(void *h);
+extern void pacFileHandleFree_(void *pacHandle);
 
-extern void sdfMemFreeDirect(void *p);
+extern void sdfMemFreeDirect(void *aHandle);
 
-extern void nbSetWaitMotion(nbFormation_t *form, s32 mode, f32 speed);
+extern void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu);
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
@@ -339,11 +339,11 @@ extern s32 (*D_00527688[])(nbEventProcessData_t *e);
 
 extern s32 (*D_00527698[])(nbEventProcessData_t *e);
 
-extern void fileHandleFree(void *h);
+extern void fileHandleFree(void *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 speed);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion2, s32 mode, f32 ritu);
 
 extern s32 (*D_004EF4B0[])(nbNegoProcessData_t *n);
 
@@ -435,37 +435,37 @@ nbEventProcessData_t *e;
     return NULL;
 }
 
-dds3Basic_t *nbCreateBasicEffect(void *source, void *position, void *rotation)
+dds3Basic_t *nbCreateBasicEffect(void *p, void *pos, void *rot)
 {
     dds3Basic_t *basic;
 
-    basic = dds3AddBEDEffectObjectBasic2(source, position, rotation);
+    basic = dds3AddBEDEffectObjectBasic2(p, pos, rot);
     dds3EffectObjectBasicStatOn(basic, 1);
     return basic;
 }
 
-void ResetWaitMotion(nbEventProcessData_t *e)
+void ResetWaitMotion(nbEventProcessData_t *ed)
 {
     s32 i;
 
     for (i = 0; i < 14; i++) {
-        if (e->data->form[i].stat & 1) {
-            if (e->data->form[i].stat & 2) {
-                nbSetWaitMotion(&e->data->form[i], 0, 1.0f);
+        if (ed->data->form[i].stat & 1) {
+            if (ed->data->form[i].stat & 2) {
+                nbSetWaitMotion(&ed->data->form[i], 0, 1.0f);
             }
         }
     }
 }
 
-void SetWaitMotion(nbEventProcessData_t *e)
+void SetWaitMotion(nbEventProcessData_t *ed)
 {
     s32 i;
 
     for (i = 0; i < 14; i++) {
-        if (e->data->form[i].stat & 1) {
-            if (e->data->form[i].stat & 2) {
-                nbSetWaitMotion(&e->data->form[i], 0, 1.0f);
-                nbSetUnitMotion(&e->data->form[i], 0, 0, 1.0f);
+        if (ed->data->form[i].stat & 1) {
+            if (ed->data->form[i].stat & 2) {
+                nbSetWaitMotion(&ed->data->form[i], 0, 1.0f);
+                nbSetUnitMotion(&ed->data->form[i], 0, 0, 1.0f);
             }
         }
     }

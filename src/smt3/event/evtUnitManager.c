@@ -35,21 +35,21 @@ typedef struct {
 
 extern evtLightParams_t dds3LightParam;
 
-void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *target, s32 duration);
+void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame);
 
-void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 duration, u32 firstColor, u32 secondColor);
+void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb);
 
-void evtSetUnitLightDir(evtUnit_t *unit, s32 duration);
+void evtSetUnitLightDir(evtUnit_t *h, s32 frame);
 
-void evtSetUnitColorRGB(evtUnit_t *unit, s32 duration, u32 color);
+void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb);
 
-u32 mdlGetColor(mdlObj_t *ctx);
+u32 mdlGetColor(mdlObj_t *aHandle);
 
-void mdlSetColor(mdlObj_t *ctx, u32 value);
+void mdlSetColor(mdlObj_t *aHandle, u32 aColor);
 
-void evtSetUnitColorA(evtUnit_t *unit, s32 duration, u32 color);
+void evtSetUnitColorA(evtUnit_t *h, s32 frame, u32 a);
 
-void evtUnitLightOn(evtUnit_t *unit);
+void evtUnitLightOn(evtUnit_t *h);
 
 enum {
     EFF_WORLD_KIND_WORLD_INFO = 0,
@@ -70,19 +70,19 @@ enum {
     EFF_WORLD_KIND_COUNT = 18
 };
 
-dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *world, u32 key, s32 kind);
+dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
 struct dds3Basic_t *dds3GetActiveScene(void);
 
 evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit);
 
-void sdfChipFreeDirect(void *memory);
+void sdfChipFreeDirect(void *aPtr);
 
 void dds3DeletePathControl(dds3PathBasicControl_t *path);
 
-s32 evtDeleteUnitHandle(evtUnit_t *work);
+s32 evtDeleteUnitHandle(evtUnit_t *h);
 
-void evtSetWaitMotion(evtUnit_t *unit, s32 value);
+void evtSetWaitMotion(evtUnit_t *h, s32 motion);
 
 typedef enum {
     SDF_MOTION_STATE_UNINITIALIZED = 0,
@@ -92,15 +92,15 @@ typedef enum {
     SDF_MOTION_STATE_SUSPENDED = 6,
 } sdfMotionState_t;
 
-void dds3PathBasicControlGetRot(dds3PathBasicControl_t *path);
+void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl);
 
 s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *path);
 
-void dds3SetPosPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetPosPoseSet(dds3Basic_t *pBasic, u128 *pos);
 
-void dds3SetRotPoseSet(dds3Basic_t *object, u128 *vector);
+void dds3SetRotPoseSet(dds3Basic_t *pBasic, u128 *rot);
 
-void FromEuler(f32 x, f32 y, f32 z);
+void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
 
 void Mult(void);
 
@@ -114,11 +114,11 @@ dds3PathBasicControl_t *dds3AllocPathBasicWorkData(struct dds3Basic_t *object);
 
 void ToMatrix(void);
 
-s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale);
+s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio);
 
 void dds3GetPosPoseSetMCR(dds3Basic_t *object, u128 *vector);
 
-extern void evtGetUnitDirVector(evtUnit_t *unit);
+extern void evtGetUnitDirVector(evtUnit_t *h);
 
 
 /* vf10 = (a - b) with y replaced by 0 */
@@ -130,10 +130,10 @@ void evtVu0SubVectorXZAxis(f32 *a, f32 *b) {
 }
 
 /* vf10 = the unit's rotated y axis flattened to the ground plane, negated */
-void evtGetUnitDirVector(evtUnit_t *unit) {
+void evtGetUnitDirVector(evtUnit_t *h) {
     f32 v[4];
 
-    SDF_VU0_LOADVECTOR(&unit->effObj->poseset->rot);
+    SDF_VU0_LOADVECTOR(&h->effObj->poseset->rot);
     ToMatrix();
     SDF_VU0_STORE_ROW2(v);
     v[1] = 0.0f;
@@ -144,22 +144,22 @@ void evtGetUnitDirVector(evtUnit_t *unit) {
 }
 
 /* vu0 routine: test target range or the selected path endpoint. */
-s32 evtCheckMoveEnd(evtUnit_t *unit) {
+s32 evtCheckMoveEnd(evtUnit_t *h) {
     f32 value;
 
-    switch (unit->motionSubmode) {
+    switch (h->motionSubmode) {
     case 0:
     case 1:
     case 2:
-        evtVu0SubVectorXZAxis(unit->targetVector, (f32 *)&unit->effObj->poseset->pos);
+        evtVu0SubVectorXZAxis(h->targetVector, (f32 *)&h->effObj->poseset->pos);
         SDF_VU0_GETLENGTH(value);
         if (value <= 20.0f) {
             return 1;
         }
         break;
     case 3:
-        value = dds3PathBasicControlGetRatio((void *)unit->pathHandle);
-        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
+        value = dds3PathBasicControlGetRatio((void *)h->pathHandle);
+        if (h->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (value == 0.0f) {
                 return 1;
             }
@@ -171,19 +171,19 @@ s32 evtCheckMoveEnd(evtUnit_t *unit) {
     return 0;
 }
 
-s32 evtGetNextMovePos(evtUnit_t *unit) {
+s32 evtGetNextMovePos(evtUnit_t *h) {
     f32 t;
 
-    if (unit->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
+    if (h->motionState != EVT_UNIT_MOTION_STATE_SOURCE) {
         return 0;
     }
-    switch (unit->transitionSourceKind) {
+    switch (h->transitionSourceKind) {
     case EVT_UNIT_TRANSITION_SOURCE_COPIED_VECTOR:
     case EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE:
         break;
     case EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE:
-        t = dds3PathBasicControlGetRatio((void *)unit->pathHandle);
-        if (unit->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
+        t = dds3PathBasicControlGetRatio((void *)h->pathHandle);
+        if (h->flags & EVT_UNIT_FLAG_PATH_REVERSE) {
             if (t == 0.0f) {
                 return 0;
             }
@@ -192,16 +192,16 @@ s32 evtGetNextMovePos(evtUnit_t *unit) {
                 return 0;
             }
         }
-        t += unit->pathSpeed;
+        t += h->pathSpeed;
         if (t < 0.0f) {
             t = 0.0f;
         }
         if (1.0f < t) {
             t = 1.0f;
         }
-        dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)unit->pathHandle, t);
-        dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
-        SDF_VU0_STOREVECTOR(unit->targetVector);
+        dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)h->pathHandle, t);
+        dds3PathBasicControlGetPos((dds3PathBasicControl_t *)h->pathHandle);
+        SDF_VU0_STOREVECTOR(h->targetVector);
         return 1;
     }
     return 0;
@@ -236,21 +236,21 @@ f32 GetSplineLength(dds3PathBasicControl_t *path) {
 INCLUDE_ASM(const s32, "event/evtUnitManager", UnitAnime);
 
 /* vu0 routine: load vf10 with the unit's colour (flag 0x100), its target's vector, or the default */
-void GetBaseLightRGB(evtUnit_t *unit) {
+void GetBaseLightRGB(evtUnit_t *h) {
     evtTargetInfo_t *info = 0;
     s32 ownVector = 0;
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((dds3Basic_t *)unit->currentTransitionValue)->workdata;
+    if (h->currentTransitionValue != 0 && (h->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        info = ((dds3Basic_t *)h->currentTransitionValue)->workdata;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
-    if (unit->flags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR) {
+    if (h->flags & EVT_UNIT_FLAG_USE_UNIT_FIRST_COLOR) {
         scale = 0.0078125f;
-        color = unit->color;
+        color = h->color;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(info);
@@ -260,21 +260,21 @@ void GetBaseLightRGB(evtUnit_t *unit) {
 }
 
 /* vu0 routine: load the target info secondColor vector when unit-owned. */
-void GetBaseAmbientRGB(evtUnit_t *unit) {
+void GetBaseAmbientRGB(evtUnit_t *h) {
     evtTargetInfo_t *info = 0;
     s32 ownVector = 0;
     s32 color;
     f32 scale;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        info = ((dds3Basic_t *)unit->currentTransitionValue)->workdata;
+    if (h->currentTransitionValue != 0 && (h->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        info = ((dds3Basic_t *)h->currentTransitionValue)->workdata;
         if (info->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
-    if (unit->flags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR) {
+    if (h->flags & EVT_UNIT_FLAG_USE_UNIT_SECOND_COLOR) {
         scale = 0.0078125f;
-        color = unit->color50;
+        color = h->color50;
         EE_MMI_RGBA_UNPACK(&color, scale);
     } else if (ownVector) {
                 SDF_VU0_LOADVECTOR(info->secondColor);
@@ -284,18 +284,18 @@ void GetBaseAmbientRGB(evtUnit_t *unit) {
 }
 
 /* vu0 routine: load vf10 with the unit's vector, or the default one */
-void GetBaseLightDir(evtUnit_t *unit) {
+void GetBaseLightDir(evtUnit_t *h) {
     s32 ownVector = 0;
 
-    if (unit->currentTransitionValue != 0 && (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
-        if (((evtTargetInfo_t *)((dds3Basic_t *)unit->currentTransitionValue)->workdata)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
+    if (h->currentTransitionValue != 0 && (h->flags & EVT_UNIT_FLAG_TARGET_TRANSITION)) {
+        if (((evtTargetInfo_t *)((dds3Basic_t *)h->currentTransitionValue)->workdata)->flags & EVT_TARGET_INFO_FLAG_UNIT_OWNS_VECTOR) {
             ownVector = 1;
         }
     }
-    if (unit->flags & 0x400) {
-                SDF_VU0_LOADVECTOR(unit->vec10);
+    if (h->flags & 0x400) {
+                SDF_VU0_LOADVECTOR(h->vec10);
     } else if (ownVector) {
-                SDF_VU0_LOADVECTOR(unit->vec10);
+                SDF_VU0_LOADVECTOR(h->vec10);
     } else {
                 SDF_VU0_LOADVECTOR(dds3LightParam.sources[0] + 4);
     }
@@ -315,10 +315,10 @@ typedef struct {
     u8 pad20[0x20];
 } evtLightSource_t;
 
-void sdf3DMakeLightParallelPacket(void *packet, evtLightSource_t **lights, sdfVector4_t *ambient);
+void sdf3DMakeLightParallelPacket(void *aPacket, evtLightSource_t **aLights, sdfVector4_t *aAmbient);
 
 /* vu0 routine: unpack the unit's colours into a parallel light packet. */
-void MakeLightPacket(evtUnit_t *unit) {
+void MakeLightPacket(evtUnit_t *h) {
     evtLightSource_t source;
     sdfVector4_t ambient;
     evtLightSource_t *lights[3] = { &source, NULL, NULL };
@@ -327,22 +327,22 @@ void MakeLightPacket(evtUnit_t *unit) {
     f32 *channel;
     s32 i;
 
-    flags = unit->flags;
+    flags = h->flags;
     if (flags & 0x20000) {
         return;
     }
-    unit->value = 0;
+    h->value = 0;
     if ((flags & 0x40000) == 0) {
         if ((flags & 0x700) == 0) {
             return;
         }
     }
-    work[0].word = unit->color;
+    work[0].word = h->color;
     EE_MMI_RGBA_UNPACK(&work[0], 0.0078125f);
     SDF_VU0_STOREVECTOR_MEMOPS(source.color);
-    SDF_VU0_LOADVECTOR(unit->vec10);
+    SDF_VU0_LOADVECTOR(h->vec10);
     SDF_VU0_STOREVECTOR(&source.direction);
-    work[1].word = unit->color50;
+    work[1].word = h->color50;
     EE_MMI_RGBA_UNPACK(&work[1], 0.0078125f);
     SDF_VU0_STOREVECTOR(&ambient);
     ambient.w = 1.0f;
@@ -353,38 +353,38 @@ void MakeLightPacket(evtUnit_t *unit) {
         }
         channel++;
     }
-    sdf3DMakeLightParallelPacket(unit->endpointWork, lights, &ambient);
-    unit->value = (u32)unit->endpointWork;
+    sdf3DMakeLightParallelPacket(h->endpointWork, lights, &ambient);
+    h->value = (u32)h->endpointWork;
 }
 
-void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *target, s32 duration) {
-    unit->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
-    unit->previousTransitionValue = unit->currentTransitionValue;
-    unit->currentTransitionValue = (s32)target;
-    if (duration == 0) {
-        unit->previousTransitionValue = 0;
-        unit->transitionElapsed = 0;
-        unit->transitionDuration = 0;
-        unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
+void evtLinkLightObjectBasic(evtUnit_t *h, dds3Basic_t *light, s32 frame) {
+    h->flags |= EVT_UNIT_FLAG_TARGET_TRANSITION;
+    h->previousTransitionValue = h->currentTransitionValue;
+    h->currentTransitionValue = (s32)light;
+    if (frame == 0) {
+        h->previousTransitionValue = 0;
+        h->transitionElapsed = 0;
+        h->transitionDuration = 0;
+        h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
     } else {
-        unit->flags |= EVT_UNIT_FLAG_TARGET_BLEND_IN;
-        unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_OUT;
-        unit->transitionDuration = duration;
-        unit->transitionElapsed = 0;
+        h->flags |= EVT_UNIT_FLAG_TARGET_BLEND_IN;
+        h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_OUT;
+        h->transitionDuration = frame;
+        h->transitionElapsed = 0;
     }
 }
 
-void evtUnlinkLightObjectBasic(evtUnit_t *unit, s32 duration) {
-    if (unit->currentTransitionValue != 0) {
-        if (duration == 0) {
-            unit->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
-            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
-            unit->currentTransitionValue = 0;
+void evtUnlinkLightObjectBasic(evtUnit_t *h, s32 frame) {
+    if (h->currentTransitionValue != 0) {
+        if (frame == 0) {
+            h->flags &= ~EVT_UNIT_FLAG_TARGET_TRANSITION;
+            h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_PHASES;
+            h->currentTransitionValue = 0;
         } else {
-            unit->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
-            unit->transitionDuration = duration;
-            unit->flags |= EVT_UNIT_FLAG_TARGET_BLEND_OUT;
-            unit->transitionElapsed = 0;
+            h->flags &= ~EVT_UNIT_FLAG_TARGET_BLEND_IN;
+            h->transitionDuration = frame;
+            h->flags |= EVT_UNIT_FLAG_TARGET_BLEND_OUT;
+            h->transitionElapsed = 0;
         }
     }
 }
@@ -395,108 +395,108 @@ void func_001E35B0(evtUnit_t *unit, u32 value)
     unit->flags = unit->flags | EVT_UNIT_FLAG_VALUE_CHANGED;
 }
 
-void evtUnlinkExternalLightPacket(evtUnit_t *unit) {
-    unit->flags = unit->flags & ~EVT_UNIT_FLAG_VALUE_CHANGED;
-    MakeLightPacket(unit);
+void evtUnlinkExternalLightPacket(evtUnit_t *h) {
+    h->flags = h->flags & ~EVT_UNIT_FLAG_VALUE_CHANGED;
+    MakeLightPacket(h);
 }
 
 /* vu0 routine: pack the base light and ambient vectors into the unit's colours. */
 /* NON_MATCHING: 3 of 37 words differ (first at +0x10). */
 #ifdef NON_MATCHING
-void evtSetUnitLightAndAmbient(evtUnit_t *unit, s32 duration, u32 firstColor, u32 secondColor) {
+void evtSetUnitLightAndAmbient(evtUnit_t *h, s32 frame, u32 lrgb, u32 argb) {
     evtColorWork_t work[2];
     u32 scale;
     s32 light;
     s32 ambient;
 
     scale = 0x43000000;
-    unit->color08 = firstColor;
-    unit->colorDuration = duration;
-    unit->color58 = secondColor;
-    GetBaseLightRGB(unit);
+    h->color08 = lrgb;
+    h->colorDuration = frame;
+    h->color58 = argb;
+    GetBaseLightRGB(h);
     MMI_RGBA_PACK_UNIT(light, scale);
-    unit->firstCurrent = light;
+    h->firstCurrent = light;
     work[0].word = light;
-    GetBaseAmbientRGB(unit);
+    GetBaseAmbientRGB(h);
     MMI_RGBA_PACK_UNIT(ambient, scale);
-    unit->color54 = ambient;
-    unit->flags = (unit->flags | 0x800) & ~0x1000;
+    h->color54 = ambient;
+    h->flags = (h->flags | 0x800) & ~0x1000;
 }
 #else
 INCLUDE_ASM(const s32, "event/evtUnitManager", evtSetUnitLightAndAmbient);
 #endif
 
 /* vu0 routine: normalise the target direction and retain the current source. */
-void evtSetUnitLightDir(evtUnit_t *unit, s32 duration) {
-    unit->directionDuration = duration;
+void evtSetUnitLightDir(evtUnit_t *h, s32 frame) {
+    h->directionDuration = frame;
     SDF_VU0_VECTOR_W_SET_ZERO();
     SDF_VU0_NORMALIZE();
-    SDF_VU0_STOREVECTOR_NOMEM(unit->vec30);
-    GetBaseLightDir(unit);
-    SDF_VU0_STOREVECTOR_NOMEM(unit->vec20);
-    unit->flags = (unit->flags | 0x2400) & ~0x4000;
+    SDF_VU0_STOREVECTOR_NOMEM(h->vec30);
+    GetBaseLightDir(h);
+    SDF_VU0_STOREVECTOR_NOMEM(h->vec20);
+    h->flags = (h->flags | 0x2400) & ~0x4000;
 }
 
-void evtSetUnitColorRGB(evtUnit_t *unit, s32 duration, u32 color) {
-    unit->rgbDuration = duration;
-    unit->rgbElapsed = 0;
-    if (duration == 0) {
-        mdlSetColor((mdlObj_t *)unit->owner,
-            (mdlGetColor((mdlObj_t *)unit->owner) & 0xFF000000) | (color & 0xFFFFFF));
-        unit->color60 = (unit->color60 & 0xFF000000) | (color & 0xFFFFFF);
-        unit->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
+void evtSetUnitColorRGB(evtUnit_t *h, s32 frame, u32 rgb) {
+    h->rgbDuration = frame;
+    h->rgbElapsed = 0;
+    if (frame == 0) {
+        mdlSetColor((mdlObj_t *)h->owner,
+            (mdlGetColor((mdlObj_t *)h->owner) & 0xFF000000) | (rgb & 0xFFFFFF));
+        h->color60 = (h->color60 & 0xFF000000) | (rgb & 0xFFFFFF);
+        h->flags &= ~EVT_UNIT_FLAG_RGB_TRANSITION;
     } else {
-        u32 currentRgb = mdlGetColor((mdlObj_t *)unit->owner) & 0xFFFFFF;
+        u32 currentRgb = mdlGetColor((mdlObj_t *)h->owner) & 0xFFFFFF;
 
-        unit->color60 = (unit->color60 & 0xFF000000) | currentRgb;
-        unit->color64 = (unit->color64 & 0xFF000000) | (color & 0xFFFFFF);
-        unit->flags |= EVT_UNIT_FLAG_RGB_TRANSITION;
+        h->color60 = (h->color60 & 0xFF000000) | currentRgb;
+        h->color64 = (h->color64 & 0xFF000000) | (rgb & 0xFFFFFF);
+        h->flags |= EVT_UNIT_FLAG_RGB_TRANSITION;
     }
 }
 
-void evtSetUnitColorA(evtUnit_t *unit, s32 duration, u32 color) {
-    unit->alphaDuration = duration;
-    unit->alphaElapsed = 0;
-    if (duration == 0) {
-        mdlSetColor((mdlObj_t *)unit->owner,
-            (mdlGetColor((mdlObj_t *)unit->owner) & 0xFFFFFF) | (color & 0xFF000000));
-        unit->color60 = (unit->color60 & 0xFFFFFF) | (color & 0xFF000000);
-        unit->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
+void evtSetUnitColorA(evtUnit_t *h, s32 frame, u32 a) {
+    h->alphaDuration = frame;
+    h->alphaElapsed = 0;
+    if (frame == 0) {
+        mdlSetColor((mdlObj_t *)h->owner,
+            (mdlGetColor((mdlObj_t *)h->owner) & 0xFFFFFF) | (a & 0xFF000000));
+        h->color60 = (h->color60 & 0xFFFFFF) | (a & 0xFF000000);
+        h->flags &= ~EVT_UNIT_FLAG_ALPHA_TRANSITION;
     } else {
-        u32 currentAlpha = mdlGetColor((mdlObj_t *)unit->owner) & 0xFF000000;
+        u32 currentAlpha = mdlGetColor((mdlObj_t *)h->owner) & 0xFF000000;
 
-        unit->color60 = (unit->color60 & 0xFFFFFF) | currentAlpha;
-        unit->color64 = (unit->color64 & 0xFFFFFF) | (color & 0xFF000000);
-        unit->flags |= EVT_UNIT_FLAG_ALPHA_TRANSITION;
+        h->color60 = (h->color60 & 0xFFFFFF) | currentAlpha;
+        h->color64 = (h->color64 & 0xFFFFFF) | (a & 0xFF000000);
+        h->flags |= EVT_UNIT_FLAG_ALPHA_TRANSITION;
     }
 }
 
-u8 evtUnitLightAnimeStat(evtUnit_t *unit)
+u8 evtUnitLightAnimeStat(evtUnit_t *h)
 {
-    return (unit->flags & 0x7800) != 0;
+    return (h->flags & 0x7800) != 0;
 }
 
-void evtUnitLightOn(evtUnit_t *unit)
+void evtUnitLightOn(evtUnit_t *h)
 {
-    unit->flags = unit->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
+    h->flags = h->flags | EVT_UNIT_FLAG_USE_UNIT_COLOR_CHANNELS;
 }
 
-void evtUnitLightOff(evtUnit_t *unit, s32 duration) {
-    if (duration == 0) {
-        unit->flags &= ~0x700;
-        unit->flags &= ~0x5000;
-        unit->flags &= ~0x2800;
+void evtUnitLightOff(evtUnit_t *h, s32 frame) {
+    if (frame == 0) {
+        h->flags &= ~0x700;
+        h->flags &= ~0x5000;
+        h->flags &= ~0x2800;
     } else {
-        evtSetUnitLightAndAmbient(unit, duration, 0, 0);
-        unit->flags = (unit->flags & ~0x800) | 0x1000;
+        evtSetUnitLightAndAmbient(h, frame, 0, 0);
+        h->flags = (h->flags & ~0x800) | 0x1000;
                 SDF_VU0_LOADIDENTITYVECTOR();
-        evtSetUnitLightDir(unit, duration);
-        unit->flags = (unit->flags & ~0x2000) | 0x4000;
+        evtSetUnitLightDir(h, frame);
+        h->flags = (h->flags & ~0x2000) | 0x4000;
     }
 }
 
-evtUnit_t *evtGetUnitHandle(s32 worldObjectKey) {
-    dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), worldObjectKey, EFF_WORLD_KIND_FOLLOW_MODEL);
+evtUnit_t *evtGetUnitHandle(s32 serial) {
+    dds3Basic_t *obj = dds3SearchSceneBasic(dds3GetActiveScene(), serial, EFF_WORLD_KIND_FOLLOW_MODEL);
 
     if (obj != NULL) {
         return ((dds3UnitObjectBasicWorkData_t *)obj->workdata)->unit;
@@ -504,18 +504,18 @@ evtUnit_t *evtGetUnitHandle(s32 worldObjectKey) {
     return NULL;
 }
 
-evtUnit_t *evtGetUnitHandle2(dds3Basic_t *obj) {
-    if (obj == NULL) {
+evtUnit_t *evtGetUnitHandle2(dds3Basic_t *unit) {
+    if (unit == NULL) {
         return NULL;
     }
-    return ((dds3UnitObjectBasicWorkData_t *)obj->workdata)->unit;
+    return ((dds3UnitObjectBasicWorkData_t *)unit->workdata)->unit;
 }
 
-void *sdfChipAllocDirect(u32 size);
+void *sdfChipAllocDirect(u32 aSize);
 
 extern sdfVector4_t D_0053A850;
 
-evtUnit_t *evtCreateUnitHandle(dds3Basic_t *effObj, mdlObj_t *owner) {
+evtUnit_t *evtCreateUnitHandle(dds3Basic_t *owner, mdlObj_t *model) {
     evtUnit_t *work;
     sdfVector4_t axis;
 
@@ -526,8 +526,8 @@ evtUnit_t *evtCreateUnitHandle(dds3Basic_t *effObj, mdlObj_t *owner) {
     work->waitBlendEnd = 10;
     work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_WORLD_NODE;
     work->transitionMotionScale = 1.0f;
-    work->effObj = effObj;
-    work->owner = owner;
+    work->effObj = owner;
+    work->owner = model;
     work->motionSetup.endFrame = 10;
     work->waitBlendStart = 0;
     work->motionSetup.startFrame = 0;
@@ -544,103 +544,103 @@ evtUnit_t *evtCreateUnitHandle(dds3Basic_t *effObj, mdlObj_t *owner) {
     return work;
 }
 
-s32 evtDeleteUnitHandle(evtUnit_t *transitionWork) {
+s32 evtDeleteUnitHandle(evtUnit_t *h) {
     void *endpointWork;
 
-    if (transitionWork == NULL) {
+    if (h == NULL) {
         return 1;
     }
-    endpointWork = transitionWork->endpointWork;
-    transitionWork->owner->inner->light = 0;
+    endpointWork = h->endpointWork;
+    h->owner->inner->light = 0;
     if (endpointWork != NULL) {
         sdfChipFreeDirect(endpointWork);
-        transitionWork->endpointWork = NULL;
+        h->endpointWork = NULL;
     }
-    if (transitionWork->pathHandle != 0) {
-        dds3DeletePathControl((dds3PathBasicControl_t *)transitionWork->pathHandle);
-        transitionWork->pathHandle = 0;
+    if (h->pathHandle != 0) {
+        dds3DeletePathControl((dds3PathBasicControl_t *)h->pathHandle);
+        h->pathHandle = 0;
     }
-    sdfChipFreeDirect(transitionWork);
+    sdfChipFreeDirect(h);
     return 1;
 }
 
-s32 evtGetUnitStat(evtUnit_t *unit) {
-    return unit->motionState;
+s32 evtGetUnitStat(evtUnit_t *h) {
+    return h->motionState;
 }
 
 /* Callers pass the promoted full-width value (one reads a byte table field);
  * only the low halfword is stored. */
-void evtSetWaitMotion(evtUnit_t *unit, s32 storedParameter) {
-    unit->waitMotion = storedParameter;
+void evtSetWaitMotion(evtUnit_t *h, s32 motion) {
+    h->waitMotion = motion;
 }
 
-void evtSetWaitMotionSpeed(evtUnit_t *unit, f32 transitionMotionScale) {
-    unit->transitionMotionScale = transitionMotionScale;
+void evtSetWaitMotionSpeed(evtUnit_t *h, f32 sp) {
+    h->transitionMotionScale = sp;
 }
 
-void evtSetWaitHokanFrame(evtUnit_t *unit, s32 firstParameter, s32 secondParameter) {
-    unit->waitBlendStart = firstParameter;
-    unit->waitBlendEnd = secondParameter;
+void evtSetWaitHokanFrame(evtUnit_t *h, s32 before, s32 smooth) {
+    h->waitBlendStart = before;
+    h->waitBlendEnd = smooth;
 }
 
-s32 evtCheckUnitWait(evtUnit_t *unit) {
-    s32 state = evtGetUnitStat(unit);
+s32 evtCheckUnitWait(evtUnit_t *h) {
+    s32 state = evtGetUnitStat(h);
 
     if (state == EVT_UNIT_MOTION_STATE_IDLE) {
         return 1;
     }
-    if (state == EVT_UNIT_MOTION_STATE_MOTION && unit->motionTicks > 0 &&
-        unit->owner->first->stat == SDF_MOTION_STATE_TERMINAL) {
+    if (state == EVT_UNIT_MOTION_STATE_MOTION && h->motionTicks > 0 &&
+        h->owner->first->stat == SDF_MOTION_STATE_TERMINAL) {
         return 1;
     }
     return 0;
 }
 
-void evtSetUnitKutiMotion(evtUnit_t *unit, s32 firstSlot, s32 secondSlot) {
-    unit->firstSlot = firstSlot;
-    unit->secondSlot = secondSlot;
+void evtSetUnitKutiMotion(evtUnit_t *h, s32 group, s32 motion) {
+    h->firstSlot = group;
+    h->secondSlot = motion;
 }
 
 INCLUDE_ASM(const s32, "event/evtUnitManager", evtRunUnitKutiMotion);
 
-void evtSetUnitMotion(evtUnit_t *unit, s32 motionId, s32 startFrame, s32 endFrame, s32 mode) {
-    unit->flags &= ~0x1;
-    unit->flags &= ~0x20;
-    unit->flags &= ~0x40;
-    unit->flags &= ~0x400000;
-    unit->flags &= ~0x800000;
-    unit->motionState = EVT_UNIT_MOTION_STATE_MOTION;
-    (&unit->motionSetup)->motionId = motionId;
-    (&unit->motionSetup)->startFrame = startFrame;
-    (&unit->motionSetup)->endFrame = endFrame;
-    unit->flags |= 0x80;
-    unit->motionTicks = 0;
-    unit->motionCallback = 0;
+void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode) {
+    h->flags &= ~0x1;
+    h->flags &= ~0x20;
+    h->flags &= ~0x40;
+    h->flags &= ~0x400000;
+    h->flags &= ~0x800000;
+    h->motionState = EVT_UNIT_MOTION_STATE_MOTION;
+    (&h->motionSetup)->motionId = motion;
+    (&h->motionSetup)->startFrame = before;
+    (&h->motionSetup)->endFrame = smooth;
+    h->flags |= 0x80;
+    h->motionTicks = 0;
+    h->motionCallback = 0;
     switch (mode) {
     case 0:
-        unit->flags |= 0x20;
+        h->flags |= 0x20;
         break;
     case 1:
-        unit->flags |= 0x1;
+        h->flags |= 0x1;
         break;
     case 2:
         break;
     case 3:
-        unit->flags |= 0x40;
+        h->flags |= 0x40;
         break;
     }
 }
 
 extern f32 __ieee754_acosf(f32 x);
 
-extern void FromRotation(f32 angle);
+extern void FromRotation(f32 aAngle);
 
-void dds3AddRotPoseSet(dds3Basic_t *basic, const sdfVector4_t *rotation);
+void dds3AddRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
 extern sdfVector4_t D_0053A860;
 
 /* vu0 routine: turn the unit toward dir, at most a tenth of a radian a frame. */
-s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale) {
+s32 evtUnitRotationTarget(evtUnit_t *h, f32 *pos, f32 radio) {
     sdfVector4_t axis;
     sdfVector4_t rotation;
     sdfVector4_t flat;
@@ -648,9 +648,9 @@ s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale) {
     f32 angle;
 
     axis = D_0053A860;
-    evtGetUnitDirVector(unit);
+    evtGetUnitDirVector(h);
     SDF_VU0_COPYVECTOR_A_TO_C();
-    evtVu0SubVectorXZAxis(dir, (f32 *)&unit->effObj->poseset->pos);
+    evtVu0SubVectorXZAxis(pos, (f32 *)&h->effObj->poseset->pos);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(&flat);
     SDF_VU0_LOADVECTOR_B_MEMOPS(axis);
@@ -667,8 +667,8 @@ s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale) {
     if (0.0f < cross) {
         angle = -angle;
     }
-    angle = angle * scale;
-    if ((unit->flags & 0x200000) == 0) {
+    angle = angle * radio;
+    if ((h->flags & 0x200000) == 0) {
         if (angle < -0.15707963f) {
             angle = -0.15707963f;
         }
@@ -679,63 +679,63 @@ s32 evtUnitRotationTarget(evtUnit_t *unit, f32 *dir, f32 scale) {
     SDF_VU0_LOADVECTOR_MEMOPS(axis);
     FromRotation(angle);
     SDF_VU0_STOREVECTOR_NOMEM(&rotation);
-    dds3AddRotPoseSet(unit->effObj, &rotation);
+    dds3AddRotPoseSet(h->effObj, &rotation);
     return 0;
 }
 
 /* Flat, negated direction of the rotation in quat, offset by the effect object's point, aimed with evtRotateUnitTowardTarget. */
-s32 evtUnitRotationQuat(evtUnit_t *unit, f32 *quat, f32 angle) {
+s32 evtUnitRotationQuat(evtUnit_t *h, f32 *rot, f32 radio) {
     f32 v[4];
 
-    SDF_VU0_LOADVECTOR(quat);
+    SDF_VU0_LOADVECTOR(rot);
     ToMatrix();
     SDF_VU0_GET_ROW2();
     VU0_SET_VF10_Y_CLEAR_W(0.0f);
     SDF_VU0_NORMALIZE();
     SDF_VU0_SCALEVECTOR_V0(-1.0f);
-    SDF_VU0_LOADVECTOR_B(&unit->effObj->poseset->pos);
+    SDF_VU0_LOADVECTOR_B(&h->effObj->poseset->pos);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(v);
-    return evtUnitRotationTarget(unit, v, angle);
+    return evtUnitRotationTarget(h, v, radio);
 }
 
-s32 evtUnitMoveType0(evtUnit_t *unit) {
+s32 evtUnitMoveType0(evtUnit_t *h) {
     f32 v[4];
     f32 scale;
     dds3Basic_t *obj;
 
-    evtUnitRotationTarget(unit, unit->targetVector, unit->directionOffset * 0.01f);
-    if (unit->directionOffset != 0) {
-        evtGetUnitDirVector(unit);
-        obj = unit->effObj;
+    evtUnitRotationTarget(h, h->targetVector, h->directionOffset * 0.01f);
+    if (h->directionOffset != 0) {
+        evtGetUnitDirVector(h);
+        obj = h->effObj;
     } else {
-        SDF_VU0_LOADVECTOR(unit->targetVector);
-        obj = unit->effObj;
+        SDF_VU0_LOADVECTOR(h->targetVector);
+        obj = h->effObj;
         SDF_VU0_LOADVECTOR_B(&obj->poseset->pos);
         SDF_VU0_SUBVECTOR();
         SDF_VU0_NORMALIZE();
     }
-    scale = unit->motionParameter * 0.1f;
+    scale = h->motionParameter * 0.1f;
     SDF_VU0_SCALEVECTOR_V0(scale);
     SDF_VU0_STOREVECTOR(v);
     dds3GetPosPoseSetMCR(obj, (u128 *)v);
     return 1;
 }
 
-s32 evtUnitMoveTypePathTrace(evtUnit_t *unit) {
+s32 evtUnitMoveTypePathTrace(evtUnit_t *h) {
     f32 v[4];
 
-    dds3PathBasicControlIsFinished((dds3PathBasicControl_t *)unit->pathHandle);
-    dds3PathBasicControlGetPos((dds3PathBasicControl_t *)unit->pathHandle);
+    dds3PathBasicControlIsFinished((dds3PathBasicControl_t *)h->pathHandle);
+    dds3PathBasicControlGetPos((dds3PathBasicControl_t *)h->pathHandle);
     SDF_VU0_STOREVECTOR(v);
-    dds3SetPosPoseSet(unit->effObj, (u128 *)v);
-    if (unit->flags & 0x10) {
-        dds3PathBasicControlGetRot((dds3PathBasicControl_t *)unit->pathHandle);
+    dds3SetPosPoseSet(h->effObj, (u128 *)v);
+    if (h->flags & 0x10) {
+        dds3PathBasicControlGetRot((dds3PathBasicControl_t *)h->pathHandle);
         SDF_VU0_COPYVECTOR_A_TO_B();
         FromEuler(0.0f, 3.14159265f, 0.0f);
         Mult();
         SDF_VU0_STOREVECTOR(v);
-        dds3SetRotPoseSet(unit->effObj, (u128 *)v);
+        dds3SetRotPoseSet(h->effObj, (u128 *)v);
     }
     return 1;
 }
@@ -744,27 +744,27 @@ void func_001E4108(evtUnit_t *work, void *src) {
     SDF_VU0_COPYVECTOR(work->targetVector, src);
 }
 
-void evtSetUnitRot1(evtUnit_t *work, s128 *vector, s32 frames) {
-    if (frames > 0 && frames <= 100) {
-        work->linkedUnit = NULL;
-        work->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
-        SDF_VU0_COPYVECTOR(work->targetVector, vector);
-        work->motionParameter = frames;
-        work->directionOffset = 0;
-        work->motionCallback = 0;
-        work->motionTicks = 0;
+void evtSetUnitRot1(evtUnit_t *h, s128 *rot, s32 para1) {
+    if (para1 > 0 && para1 <= 100) {
+        h->linkedUnit = NULL;
+        h->motionState = EVT_UNIT_MOTION_STATE_VECTOR;
+        SDF_VU0_COPYVECTOR(h->targetVector, rot);
+        h->motionParameter = para1;
+        h->directionOffset = 0;
+        h->motionCallback = 0;
+        h->motionTicks = 0;
     }
 }
 
-void evtSetUnitRot2(evtUnit_t *work, s32 worldObjectKey, s32 frames) {
+void evtSetUnitRot2(evtUnit_t *h, s32 posID, s32 para1) {
     dds3Basic_t *worldUnit;
     evtWorldSourceTransformPrefix_t *source;
 
-    worldUnit = dds3SearchSceneBasic(dds3GetControlScene(), worldObjectKey, 0x11);
+    worldUnit = dds3SearchSceneBasic(dds3GetControlScene(), posID, 0x11);
     if (worldUnit != NULL) {
         source = worldUnit->workdata;
-        evtSetUnitRot1(work, (s128 *)&source->rotation, frames);
-        work->linkedUnit = worldUnit;
+        evtSetUnitRot1(h, (s128 *)&source->rotation, para1);
+        h->linkedUnit = worldUnit;
     }
 }
 
@@ -793,69 +793,69 @@ void evtSetUnitMove2(evtUnit_t *work, s32 motionSubmode, s32 worldObjectKey, s32
     }
 }
 
-void evtSetUnitMove3(evtUnit_t *work, s32 pathObjectKey, s32 frames, s32 directionOffset, s32 pathFollowMode, s32 dirFlag, s32 sideMode) {
+void evtSetUnitMove3(evtUnit_t *h, s32 pathID, s32 para1, s32 para2, s32 movesys, s32 movedir, s32 rotsys) {
     dds3Basic_t *pathSource;
     dds3PathBasicControl_t *path;
 
-    pathSource = dds3SearchSceneBasic(dds3GetControlScene(), pathObjectKey, 0x10);
+    pathSource = dds3SearchSceneBasic(dds3GetControlScene(), pathID, 0x10);
     if (pathSource == NULL) {
         return;
     }
-    if (work->pathHandle != 0) {
-        dds3DeletePathControl((dds3PathBasicControl_t *)work->pathHandle);
+    if (h->pathHandle != 0) {
+        dds3DeletePathControl((dds3PathBasicControl_t *)h->pathHandle);
     }
     path = dds3AllocPathBasicWorkData(pathSource);
-    work->pathHandle = (s32)path;
-    work->pathSpeed = 40.0f / GetSplineLength(path);
-    if (dirFlag == 0) {
+    h->pathHandle = (s32)path;
+    h->pathSpeed = 40.0f / GetSplineLength(path);
+    if (movedir == 0) {
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, 0.0f);
         dds3PathBasicControlAlterMode(path, 0);
     } else {
         dds3PathBasicControlSetRatio((dds3PathBasicControl_t *)path, 1.0f);
         dds3PathBasicControlAlterMode(path, 1);
-        work->pathSpeed = -work->pathSpeed;
+        h->pathSpeed = -h->pathSpeed;
     }
-    switch (pathFollowMode) {
+    switch (movesys) {
     case 0:
-        work->motionSubmode = 0;
-        work->flags &= ~2;
+        h->motionSubmode = 0;
+        h->flags &= ~2;
         break;
     case 1:
-        work->motionSubmode = 3;
-        work->flags |= 2;
+        h->motionSubmode = 3;
+        h->flags |= 2;
         break;
     }
-    switch (dirFlag) {
+    switch (movedir) {
     case 0:
-        work->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
+        h->flags &= ~EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     case 1:
-        work->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
+        h->flags |= EVT_UNIT_FLAG_PATH_REVERSE;
         break;
     }
-    switch (sideMode) {
+    switch (rotsys) {
     case 0:
-        work->flags &= ~8;
-        work->flags &= ~0x10;
+        h->flags &= ~8;
+        h->flags &= ~0x10;
         break;
     case 1:
-        work->flags |= 8;
-        work->flags &= ~0x10;
+        h->flags |= 8;
+        h->flags &= ~0x10;
         break;
     case 2:
-        work->flags &= ~8;
-        work->flags |= 0x10;
+        h->flags &= ~8;
+        h->flags |= 0x10;
         break;
     }
-    work->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
-    work->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
-    work->linkedUnit = pathSource;
+    h->motionState = EVT_UNIT_MOTION_STATE_SOURCE;
+    h->transitionSourceKind = EVT_UNIT_TRANSITION_SOURCE_PATH_CURVE;
+    h->linkedUnit = pathSource;
     dds3PathBasicControlGetPos(path);
-    SDF_VU0_STOREVECTOR(work->targetVector);
-    work->motionParameter = frames;
-    work->directionOffset = directionOffset;
-    work->motionCallback = 0;
-    work->motionTicks = 0;
+    SDF_VU0_STOREVECTOR(h->targetVector);
+    h->motionParameter = para1;
+    h->directionOffset = para2;
+    h->motionCallback = 0;
+    h->motionTicks = 0;
 }
 
 s32 func_001E4510(evtUnit_t *work, s32 (*callback)(evtUnit_t *, s32)) {

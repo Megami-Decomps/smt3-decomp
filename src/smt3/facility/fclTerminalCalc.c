@@ -5,7 +5,7 @@
 #include "ps2asm.h"
 #include "event.h"
 
-extern void frDestroyFontRequestAfter(void *frq);
+extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 
@@ -15,7 +15,7 @@ extern char D_00311450[][0x20];
 
 extern char D_00311850[][0x20];
 
-extern void *frwGetSmallFontFRQ2(s32 x, s32 y, s32 color, s32 d, char *text, s32 f);
+extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
 void *trmGetListFont(s32 x, s32 y, s32 color, s32 d, s8 index, s8 which, s32 arg6)
 {

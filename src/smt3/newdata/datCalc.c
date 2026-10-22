@@ -2,8 +2,8 @@
 #include "datCalc.h"
 
 extern s32 evtBitCheck(s32 no);
-extern s32 GetButuriAttack(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power);
-extern u32 datGetAisyo(datUnitWork_t *work, s32 element);
+extern s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza);
+extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 extern void func_0022E168(u16 devilId);
 typedef struct
 {
@@ -32,7 +32,7 @@ typedef struct
 extern datLevelUpRecord_t datLevelUpTable[];
 extern datUnitWork_t D_003493C0;
 
-extern s32 memset(void *dst, s32 value, s32 size);
+extern s32 memset(void *a, s32 b, s32 c);
 extern s32 printf(const char *fmt, ...);
 extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 extern s32 fclEncycRegist(datUnitWork_t *work, s32 overwrite);
@@ -49,15 +49,15 @@ typedef struct
 
 extern datSkill_t attr[];
 
-extern s32 dds3GetRandIntA(s32 low, s32 high);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 extern s32 datCountRegisteredHearts(void);
 extern void datAddHeartsEntry(s32 id, datUnitWork_t *work);
 extern void evtBitOn(s32 no);
 extern void cmbAddHeartsParam(s32 devilId, datUnitWork_t *work);
-extern void rstLoadHeartsSkill(s8 devilId, datUnitWork_t *work);
+extern void rstLoadHeartsSkill(s8 HeartsID, datUnitWork_t *pStock);
 extern u32 datAisyoTable[248][16];
 extern void cmbSubHeartsParam(s32 devilId, datUnitWork_t *work);
-extern void rstStoreHeartsSkill(s8 devilId, datUnitWork_t *work);
+extern void rstStoreHeartsSkill(s8 HeartsID, datUnitWork_t *pStock);
 extern void datSetAutoKaifukuSkill(datUnitWork_t *work, s32 skill);
 extern s32 datAddDevil(s32 id, s32 sw);
 extern f32 D_0054E478;
@@ -204,32 +204,32 @@ s32 datGetSakePow(datUnitWork_t *work)
 
 INCLUDE_ASM(const s32, "newdata/datCalc", GetButuriAttack);
 
-s32 GetButuriKaifuku(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power)
+s32 GetButuriKaifuku(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
 {
-    return GetButuriAttack(skill, attacker, target, power);
+    return GetButuriAttack(nskill, s, d, waza);
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", GetMagicAttack);
 
-s32 GetMagicKaifuku(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power)
+s32 GetMagicKaifuku(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
 {
-    s32 ma = datGetParam(attacker, 2);
+    s32 ma = datGetParam(s, 2);
     s32 rnd = dds3GetRandIntA(0, 8);
 
-    return (ma * 4 + attacker->level + rnd) / 10.0f * power;
+    return (ma * 4 + s->level + rnd) / 10.0f * waza;
 }
 
-s32 GetMaxHpWazaPoint(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target, s32 power)
+s32 GetMaxHpWazaPoint(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
 {
-    if (attacker->flag & 0x20) {
-        return datGetBaseMaxHp(attacker) / 69.6f * power * 0.6f - 50.0f / (attacker->level + 10);
+    if (s->flag & 0x20) {
+        return datGetBaseMaxHp(s) / 69.6f * waza * 0.6f - 50.0f / (s->level + 10);
     }
-    return attacker->maxhp / 69.6f * power;
+    return s->maxhp / 69.6f * waza;
 }
 
-f32 GetAisyoRitu(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target)
+f32 GetAisyoRitu(s32 nskill, datUnitWork_t *s, datUnitWork_t *d)
 {
-    s32 element = attr[skill].skillattr;
+    s32 element = attr[nskill].skillattr;
     f32 ritu = 1.0f;
 
     switch (element) {
@@ -239,7 +239,7 @@ f32 GetAisyoRitu(s32 skill, datUnitWork_t *attacker, datUnitWork_t *target)
     case 14:
         break;
     default:
-        ritu = (datGetAisyo(target, element) & 0xFFFF) * 0.01f;
+        ritu = (datGetAisyo(d, element) & 0xFFFF) * 0.01f;
     }
     return ritu;
 }
@@ -270,9 +270,9 @@ void datSetBadStat(datUnitWork_t *work, u32 badstat)
     }
 }
 
-void datResetBadStat(datUnitWork_t *work, s32 mask)
+void datResetBadStat(datUnitWork_t *work, s32 badstat)
 {
-    work->badstatus &= ~mask;
+    work->badstatus &= ~badstat;
 }
 
 u32 datGetMaxHp(datUnitWork_t *work)
@@ -402,32 +402,32 @@ s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill)
     return 0;
 }
 
-u32 datGetAisyo(datUnitWork_t *work, s32 element)
+u32 datGetAisyo(datUnitWork_t *work, s32 attr)
 {
     u32 aisyo;
 
-    if (element == -1) {
+    if (attr == -1) {
         return 0;
     }
     if (work->flag & 4) {
-        aisyo = datAisyoTable[0][element];
+        aisyo = datAisyoTable[0][attr];
     } else {
-        aisyo = datAisyoTable[datDevilTable[work->id].aisyoid][element];
+        aisyo = datAisyoTable[datDevilTable[work->id].aisyoid][attr];
     }
     if ((work->badstatus & 0xFFF) == 0x400) {
-        aisyo = datAisyoTable[246][element];
+        aisyo = datAisyoTable[246][attr];
     }
     return aisyo;
 }
 
-u32 datGetAisyoValue(datUnitWork_t *work, s32 element)
+u32 datGetAisyoValue(datUnitWork_t *work, s32 attr)
 {
-    return (u16)datGetAisyo(work, element);
+    return (u16)datGetAisyo(work, attr);
 }
 
-u32 datGetAisyoFlag(datUnitWork_t *work, s32 element)
+u32 datGetAisyoFlag(datUnitWork_t *work, s32 attr)
 {
-    return datGetAisyo(work, element) & 0xFFFF0000;
+    return datGetAisyo(work, attr) & 0xFFFF0000;
 }
 
 s32 datGetBadStatusAttr(s32 bad)
@@ -488,9 +488,9 @@ s32 datCheckDying(datUnitWork_t *work)
     return work->hp * 100 / work->maxhp < 25;
 }
 
-void datAddMaka(s32 amount)
+void datAddMaka(s32 addmaka)
 {
-    s32 balance = DDS3_GBWK->maka + amount;
+    s32 balance = DDS3_GBWK->maka + addmaka;
 
     if (balance < 0) {
         balance = 0;
@@ -501,19 +501,19 @@ void datAddMaka(s32 amount)
     DDS3_GBWK->maka = balance;
 }
 
-void datAddMakaPar(s32 percent)
+void datAddMakaPar(s32 addmaka)
 {
     s32 maka = DDS3_GBWK->maka;
     s32 delta;
     s32 mag;
 
-    if (percent < 0) {
-        mag = -percent;
+    if (addmaka < 0) {
+        mag = -addmaka;
     } else {
-        mag = percent;
+        mag = addmaka;
     }
     delta = maka * mag / 100;
-    if (percent < 0) {
+    if (addmaka < 0) {
         maka = maka - delta;
     } else {
         maka = maka + delta;
@@ -528,9 +528,9 @@ void datAddMakaPar(s32 percent)
     DDS3_GBWK->maka = maka;
 }
 
-s32 datCheckMaka(s32 amount)
+s32 datCheckMaka(s32 maka)
 {
-    if (DDS3_GBWK->maka < amount) {
+    if (DDS3_GBWK->maka < maka) {
         return 0;
     }
     return 1;
@@ -760,12 +760,12 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamageFld);
 
 /* NON_MATCHING: 54 of 68 words differ (first at +0x4). */
 #ifdef NON_MATCHING
-void datPartyDamagePipe(s32 rate1, s32 rate2)
+void datPartyDamagePipe(s32 big, s32 sml)
 {
     s32 aofs;
     s32 i;
 
-    if (rate1 == 0 && rate2 == 0) {
+    if (big == 0 && sml == 0) {
         return;
     }
     aofs = 0xA50;
@@ -774,7 +774,7 @@ void datPartyDamagePipe(s32 rate1, s32 rate2)
             s32 hp = ((fldAnahoriAkuma_t *)((u8 *)DDS3_GBWK + aofs))->hp;
 
             if (hp != 0) {
-                s32 damage = hp / 10 * rate1 + hp * 3 / 100 * rate2;
+                s32 damage = hp / 10 * big + hp * 3 / 100 * sml;
 
                 if (evtBitCheck(0xAF2) == 0) {
                     damage *= 3;
@@ -921,9 +921,9 @@ s32 datGetUniqueDevilId(s32 uid)
     return -1;
 }
 
-void datAddExp(datUnitWork_t *work, s32 amount)
+void datAddExp(datUnitWork_t *w, s32 exp)
 {
-    work->exp += amount;
+    w->exp += exp;
 }
 
 s32 datAddHearts(s32 id)
@@ -957,14 +957,14 @@ void datRemoveHearts(void)
     }
 }
 
-void datEquipHearts(s32 heartsId)
+void datEquipHearts(s32 HeartsID)
 {
     datUnitWork_t *player = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
 
     if (DDS3_GBWK->heartscnt != 0) {
-        if (DDS3_GBWK->heartsequip != heartsId) {
+        if (DDS3_GBWK->heartsequip != HeartsID) {
             datRemoveHearts();
-            DDS3_GBWK->heartsequip = heartsId;
+            DDS3_GBWK->heartsequip = HeartsID;
             cmbAddHeartsParam(DDS3_GBWK->heartsequip, player);
             rstLoadHeartsSkill(DDS3_GBWK->heartsequip, player);
             cmpSetMaxHPMP(player);
@@ -994,7 +994,7 @@ void datFieldSkillKaifuku(void)
     }
 }
 
-s32 datCheckSkillInParty(s32 skill)
+s32 datCheckSkillInParty(s32 skillid)
 {
     s32 i;
     s32 ofs;
@@ -1006,7 +1006,7 @@ s32 datCheckSkillInParty(s32 skill)
         ofs += 0xEC;
         if (flag & 1) {
             if (flag & 2) {
-                if (datCheckSyojiSkill(unit, skill)) {
+                if (datCheckSyojiSkill(unit, skillid)) {
                     return 1;
                 }
             }
@@ -1070,33 +1070,33 @@ void datAddKotowariPoint(s32 type, s32 point)
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetKotowariLank);
 
-s32 datGetSkillCost(datUnitWork_t *work, s32 skill)
+s32 datGetSkillCost(datUnitWork_t *w, s32 nskill)
 {
     s32 cost = 0;
 
-    switch (datSkillTable.normal[skill].costtype) {
+    switch (datSkillTable.normal[nskill].costtype) {
     case 1:
-        if ((work->flag & 4) == 0) {
-            if (datDevilTable[work->id].flag & 0x200) {
+        if ((w->flag & 4) == 0) {
+            if (datDevilTable[w->id].flag & 0x200) {
                 return 0;
             }
-            if (work->flag & 0x20) {
+            if (w->flag & 0x20) {
                 return 0;
             }
         }
-        cost = work->maxhp * datSkillTable.normal[skill].cost / 100 +
-               datSkillTable.normal[skill].costbase;
+        cost = w->maxhp * datSkillTable.normal[nskill].cost / 100 +
+               datSkillTable.normal[nskill].costbase;
         if (cost <= 0) {
             cost = 1;
         }
         break;
     case 2:
-        if ((work->flag & 4) == 0) {
-            if (datDevilTable[work->id].flag & 0x400) {
+        if ((w->flag & 4) == 0) {
+            if (datDevilTable[w->id].flag & 0x400) {
                 return 0;
             }
         }
-        cost = datSkillTable.normal[skill].cost;
+        cost = datSkillTable.normal[nskill].cost;
         break;
     }
     return cost;
@@ -1136,9 +1136,9 @@ void datInitBossPress(void)
     }
 }
 
-void datDelDevil(u16 devilId)
+void datDelDevil(u16 id)
 {
-    func_0022E168(devilId);
+    func_0022E168(id);
 }
 
 s32 datGetItemSkillNo(s32 itemid)
@@ -1159,18 +1159,18 @@ u16 datGetLevelForDraw(datUnitWork_t *work)
 }
 
 
-void datCopyDevilWork(s32 id, datUnitWork_t *work)
+void datCopyDevilWork(s32 id, datUnitWork_t *w)
 {
     u16 *skill;
     s32 cnt;
     s32 i;
 
-    work->level = datDevilTable[id].level;
+    w->level = datDevilTable[id].level;
     for (i = 0; i < 6; i++) {
-        work->param[i] = datDevilTable[id].param[i];
+        w->param[i] = datDevilTable[id].param[i];
     }
     cnt = 0;
-    skill = work->skill;
+    skill = w->skill;
     for (i = 0; i < 24; i++) {
         if (datLevelUpTable[id].skill[i].kind == 0 &&
             datLevelUpTable[id].skill[i].type == 1) {
@@ -1178,15 +1178,15 @@ void datCopyDevilWork(s32 id, datUnitWork_t *work)
             cnt++;
         }
     }
-    work->maxhp = datGetMaxHp(work);
-    work->hp = work->maxhp;
-    work->maxmp = datGetMaxMp(work);
-    work->mp = work->maxmp;
-    work->skillcnt = cnt;
-    printf("YAMI-B Lv:%d\n", work->level);
-    work->exp = datCopyDevilWorkEntry(work, work->level);
-    printf("YAMI-B Exp:%d\n", work->exp);
-    fclEncycRegist(work, 0);
+    w->maxhp = datGetMaxHp(w);
+    w->hp = w->maxhp;
+    w->maxmp = datGetMaxMp(w);
+    w->mp = w->maxmp;
+    w->skillcnt = cnt;
+    printf("YAMI-B Lv:%d\n", w->level);
+    w->exp = datCopyDevilWorkEntry(w, w->level);
+    printf("YAMI-B Exp:%d\n", w->exp);
+    fclEncycRegist(w, 0);
 }
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datBossRashGetRec);

@@ -8,9 +8,9 @@
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern void dds3GetPosPoseSet(dds3Basic_t *basic);
+extern void dds3GetPosPoseSet(dds3Basic_t *pBasic);
 
-extern void dds3GetRotPoseSet(dds3Basic_t *basic);
+extern void dds3GetRotPoseSet(dds3Basic_t *pBasic);
 
 extern void fldRunDanteShutdown(void);
 
@@ -41,7 +41,7 @@ extern s32 gFldAnahoriAkumaIdx;
 
 extern s32 gFldAnahoriAkumaIdxMax;
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 typedef struct {
     u8 safeUnitPoint[0x30];
@@ -113,13 +113,13 @@ extern void dds3ConfigSaveBackup(void);
 
 extern void dds3ConfigRestoreBackup(void);
 
-extern void dds3SetPosPoseSet(dds3Basic_t *basic, void *position);
+extern void dds3SetPosPoseSet(dds3Basic_t *pBasic, void *pos);
 
-extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *basic);
+extern void *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
 
-extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, u32 flag);
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, u32 flag);
 
-extern void mdlSingleMotion(void *model, s32 motion, s32 flag);
+extern void mdlSingleMotion(void *aHandle, s32 aGroup, s32 aNumber);
 
 extern void dds3GlobalWorkUserInit2(s32 mode);
 
@@ -127,15 +127,15 @@ extern dds3Basic_t *fldAnaBasic;
 
 extern char D_00531950[];
 
-extern void datDelDevil(s32 devilId);
+extern void datDelDevil(s32 id);
 
 extern u32 dds3AllocObjectId(void);
 
-extern dds3Basic_t *dds3AddUnitObjectBasic(s32 id, void *position, void *rotation);
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot);
 
 extern void dds3SetUnitObjectId(dds3Basic_t *basic, const char *name);
 
-extern void dds3ObjectBaseMakeUnit(dds3Basic_t *basic, s32 kind, s32 arg2);
+extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor);
 
 extern char D_00531820[];
 
@@ -153,11 +153,11 @@ extern void *gfldWavePtr;
 
 extern s32 gfldWaveSize;
 
-extern void mdlPackDecode(s32 group, s32 id, s32 mode, void *data, s32 size);
+extern void mdlPackDecode(s32 major, s32 minor, s32 regFlags, void *buff, s32 leng);
 
-extern void *sdfMemAllocDirect(s32 size);
+extern void *sdfMemAllocDirect(s32 aSize);
 
-extern void *sdfMemGetPtr(sdfMemHandle_t *handle);
+extern void *sdfMemGetPtr(sdfMemHandle_t *aHandle);
 
 extern void *gfldPlayerPtr;
 
@@ -165,17 +165,17 @@ extern s32 gfldPlayerSizeBk;
 
 extern s32 slGetExitType(void);
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 extern void fldGbInit_System(s32 mode);
 
-extern void evtBitOn(s32 flag);
+extern void evtBitOn(s32 no);
 
 extern void fldSetNextField(s32 field, s32 parameter);
 
-void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name);
+void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName);
 
-extern dds3ProcessID_t *dds3SearchProcessName(char *name);
+extern dds3ProcessID_t *dds3SearchProcessName(char *namestr);
 
 extern fldSceneParam_t fldSceneParam;
 
@@ -197,9 +197,9 @@ extern void fldLightMaClear(void);
 
 extern s32 fldLightMaIdxCalc(void);
 
-extern void fldSePlay(s32 no);
+extern void fldSePlay(s32 seid);
 
-extern void fldSkySetTblLightMa(s32 idx, s32 flag);
+extern void fldSkySetTblLightMa(s32 idx, s32 hokan);
 
 extern void fldDrawInit(void);
 
@@ -207,7 +207,7 @@ extern void fldInitAllValue(void);
 
 extern void fldSe_Init(void);
 
-extern void sdfRandomize(void *state, u32 seed);
+extern void sdfRandomize(void *aCB, u32 aSeed);
 
 extern void fldInitPacLoader(void);
 
@@ -227,7 +227,7 @@ extern s32 fldUnitPad(dds3PoseSet_t *pUpdatePoseSet, dds3Basic_t *pBasic);
 
 extern void fldPlayerCalc_Hit(void);
 
-extern void fldHitChkUnit(sdfVector4_t *pos);
+extern void fldHitChkUnit(sdfVector4_t *phys_pos);
 
 extern sdfVector4_t D_00531830;
 
@@ -239,7 +239,7 @@ extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *basic, sdfVector4_t *t
 
 extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 radius);
 
-extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
 extern void fldStatusSet(void);
 
@@ -251,8 +251,8 @@ extern void fldReleaseUnitPad(void);
 
 extern sdfGrOt_t *D_002F6A18[4];
 
-extern void sdfModelOtInit(void *table, sdfGrOt_t *first, sdfGrOt_t *second,
-                           sdfGrOt_t *third, sdfGrOt_t *fourth);
+extern void sdfModelOtInit(void *aModelOt, sdfGrOt_t *aOt0, sdfGrOt_t *aOt1,
+                           sdfGrOt_t *aOt2, sdfGrOt_t *aOt3);
 
 typedef struct
 {
@@ -297,9 +297,9 @@ extern sdfMemHandle_t *fldPlayerAnimData;
 
 extern s32 D_002FC3D8 __attribute__((section(".data")));
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
 extern void fldEveHit_End(void);
 
@@ -381,122 +381,122 @@ void fldInitAllValue(void)
     memset(fldGetFollowCameraControl(), 0, 0x7C);
 }
 
-void fldSetSceneParam2(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
+void fldSetSceneParam2(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName) {
     if (dds3SearchProcessName(D_00531690) != NULL) {
-        if (fldGlobalBase.area == stage) {
+        if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
             fclClearTerminalState();
         }
     }
-    record->flag = 0;
-    record->sequenceWord3C = 0;
-    record->sequenceWord38 = 0;
-    strcpy(record->name, name);
-    record->stage = stage;
-    record->enabled = 1;
-    record->restore = 2;
-    record->kind = kind;
-    record->code = 0;
-    record->sequenceMode = 0;
-    record->link = 0;
-    memset(record->detail, 0, sizeof(record->detail));
-    memset(record->note, 0, sizeof(record->note));
-    record->options = 0;
+    pParam->flag = 0;
+    pParam->sequenceWord3C = 0;
+    pParam->sequenceWord38 = 0;
+    strcpy(pParam->name, pointResName);
+    pParam->stage = loadField;
+    pParam->enabled = 1;
+    pParam->restore = 2;
+    pParam->kind = loadArea;
+    pParam->code = 0;
+    pParam->sequenceMode = 0;
+    pParam->link = 0;
+    memset(pParam->detail, 0, sizeof(pParam->detail));
+    memset(pParam->note, 0, sizeof(pParam->note));
+    pParam->options = 0;
     fldDoorExitFlag = 0;
     fldDoorExitMode[0] = 0;
 }
 
-void fldSetSceneParam3(fldSceneParam_t *record, s32 stage, s32 kind, const char *name) {
+void fldSetSceneParam3(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName) {
     if (dds3SearchProcessName(D_00531690) != NULL) {
-        if (fldGlobalBase.area == stage) {
+        if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
             fclClearTerminalState();
         }
     }
-    record->flag = 0;
-    record->sequenceWord3C = 0;
-    record->sequenceWord38 = 0;
-    strcpy(record->name, name);
-    record->stage = stage;
-    record->enabled = 1;
-    record->restore = 3;
-    record->kind = kind;
-    record->code = 0;
-    record->sequenceMode = 0;
-    record->link = 0;
-    memset(record->detail, 0, sizeof(record->detail));
-    memset(record->note, 0, sizeof(record->note));
-    record->options = 0;
+    pParam->flag = 0;
+    pParam->sequenceWord3C = 0;
+    pParam->sequenceWord38 = 0;
+    strcpy(pParam->name, pointResName);
+    pParam->stage = loadField;
+    pParam->enabled = 1;
+    pParam->restore = 3;
+    pParam->kind = loadArea;
+    pParam->code = 0;
+    pParam->sequenceMode = 0;
+    pParam->link = 0;
+    memset(pParam->detail, 0, sizeof(pParam->detail));
+    memset(pParam->note, 0, sizeof(pParam->note));
+    pParam->options = 0;
 }
 
-void fldSetSceneParam4(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                    s32 code, s32 link, const char *subname) {
+void fldSetSceneParam4(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
+                    s32 bgm, s32 camMode, const char *camName) {
     if (dds3SearchProcessName(D_00531690) != NULL) {
-        if (fldGlobalBase.area == stage) {
+        if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
             fclClearTerminalState();
         }
     }
-    record->flag = 0;
-    record->sequenceWord3C = 0;
-    record->sequenceWord38 = 0;
-    strcpy(record->name, name);
-    record->stage = stage;
-    record->enabled = 1;
-    record->kind = kind;
-    record->code = code;
-    record->link = link;
-    record->restore = 2;
-    record->sequenceMode = 0;
-    strcpy(record->detail, subname);
-    memset(record->note, 0, sizeof(record->note));
-    record->options = 0;
+    pParam->flag = 0;
+    pParam->sequenceWord3C = 0;
+    pParam->sequenceWord38 = 0;
+    strcpy(pParam->name, pointResName);
+    pParam->stage = loadField;
+    pParam->enabled = 1;
+    pParam->kind = loadArea;
+    pParam->code = bgm;
+    pParam->link = camMode;
+    pParam->restore = 2;
+    pParam->sequenceMode = 0;
+    strcpy(pParam->detail, camName);
+    memset(pParam->note, 0, sizeof(pParam->note));
+    pParam->options = 0;
 }
 
-void fldSetSceneParam5(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                    s32 code, const char *subname) {
+void fldSetSceneParam5(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
+                    s32 bgm, const char *FoceScript) {
     if (dds3SearchProcessName(D_00531690) != NULL) {
-        if (fldGlobalBase.area == stage) {
+        if (fldGlobalBase.area == loadField) {
             fldGlobalBase.reuseAreaResources = 1;
         } else {
             fclClearTerminalState();
         }
     }
-    record->flag = 0;
-    record->sequenceWord3C = 0;
-    record->sequenceWord38 = 0;
-    strcpy(record->name, name);
-    record->stage = stage;
-    record->enabled = 1;
-    record->restore = 2;
-    record->kind = kind;
-    record->code = code;
-    record->sequenceMode = 0;
-    record->link = 0;
-    memset(record->detail, 0, sizeof(record->detail));
-    strcpy(record->note, subname);
-    record->options = 0;
+    pParam->flag = 0;
+    pParam->sequenceWord3C = 0;
+    pParam->sequenceWord38 = 0;
+    strcpy(pParam->name, pointResName);
+    pParam->stage = loadField;
+    pParam->enabled = 1;
+    pParam->restore = 2;
+    pParam->kind = loadArea;
+    pParam->code = bgm;
+    pParam->sequenceMode = 0;
+    pParam->link = 0;
+    memset(pParam->detail, 0, sizeof(pParam->detail));
+    strcpy(pParam->note, FoceScript);
+    pParam->options = 0;
 }
 
-void fldSetSceneParamLoad(fldSceneParam_t *record, s32 stage, s32 kind, const char *name,
-                    s32 code, s32 link, const char *subname) {
-    record->flag = 0;
-    record->sequenceWord3C = 0;
-    record->sequenceWord38 = 0;
-    strcpy(record->name, name);
-    record->enabled = 1;
-    record->stage = stage;
-    record->kind = kind;
-    record->code = code;
-    record->link = link;
-    record->restore = 2;
-    record->sequenceMode = 0;
-    strcpy(record->detail, subname);
-    memset(record->note, 0, sizeof(record->note));
-    record->options = 0;
+void fldSetSceneParamLoad(fldSceneParam_t *pParam, s32 loadField, s32 loadArea, const char *pointResName,
+                    s32 bgm, s32 camMode, const char *camName) {
+    pParam->flag = 0;
+    pParam->sequenceWord3C = 0;
+    pParam->sequenceWord38 = 0;
+    strcpy(pParam->name, pointResName);
+    pParam->enabled = 1;
+    pParam->stage = loadField;
+    pParam->kind = loadArea;
+    pParam->code = bgm;
+    pParam->link = camMode;
+    pParam->restore = 2;
+    pParam->sequenceMode = 0;
+    strcpy(pParam->detail, camName);
+    memset(pParam->note, 0, sizeof(pParam->note));
+    pParam->options = 0;
 }
 
 s32 fldGetRestoreMode(void)

@@ -314,15 +314,15 @@ extern u32 nbGetBadStat(s32 formindex);
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, nbParty_t *party);
 
-extern void datAddHp(datUnitWork_t *unit, s32 n);
+extern void datAddHp(datUnitWork_t *work, s32 hp);
 
-extern void datAddMp(datUnitWork_t *unit, s32 n);
+extern void datAddMp(datUnitWork_t *work, s32 mp);
 
-extern void datSetBadStat(datUnitWork_t *unit, s32 badstat);
+extern void datSetBadStat(datUnitWork_t *work, s32 badstat);
 
-extern void datResetBadStat(datUnitWork_t *unit, s32 badstat);
+extern void datResetBadStat(datUnitWork_t *work, s32 badstat);
 
-extern s32 datGet3Zokusei(datUnitWork_t *unit);
+extern s32 datGet3Zokusei(datUnitWork_t *work);
 
 extern datSkillTable_t datSkillTable;
 
@@ -334,21 +334,21 @@ extern nbParty_t *nbGetPartyFromFormindex(s32 formindex);
 
 extern s32 nbGetButuriAttack(s32 nskill, s32 sformindex, s32 dformindex, s32 waza);
 
-extern s32 datCheckSyojiSkill(datUnitWork_t *unit, s32 skill);
+extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
 extern s32 evtGetAgeOfMoon(void);
 
-extern s32 dds3GetRandIntA(s32 min, s32 max);
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
 
 extern s32 nbCheckSkillCost(s32 formindex, s32 nskill);
 
-extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *unit);
+extern datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 
 extern datDevilFormat_t datDevilTable[];
 
-extern u32 nbGetAisyo(s32 nskill, s32 dformindex, s32 skillattr);
+extern u32 nbGetAisyo(s32 nskill, s32 formindex, s32 attr);
 
-extern s32 nbGetHojoCounter(s32 formindex, s32 hojotype);
+extern s32 nbGetHojoCounter(s32 formindex, s32 type);
 
 extern s32 nbGetAisyoTable(s32 formindex);
 
@@ -360,9 +360,9 @@ extern char D_00544D30[];
 
 extern s32 sdfFloatToULong(f32 value);
 
-extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type);
+extern s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side);
 
-extern s32 datGetParam(datUnitWork_t *unit, s32 param);
+extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
@@ -380,7 +380,7 @@ typedef struct nbEventProcessData_t {
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
-extern void nbSetHojoCounter(s32 formindex, s32 hojotype, s32 n);
+extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
 extern s32 nbGetHojoCounterMax(s32 hojotype);
 
@@ -627,13 +627,13 @@ s32 nbGetNormalSkillAttr(s32 nskill)
     return attr[nskill].skillattr;
 }
 
-void nbSetHojoCounter(s32 formindex, s32 type, s32 n)
+void nbSetHojoCounter(s32 formindex, s32 type, s32 point)
 {
     nbParty_t *party;
 
     party = nbGetPartyFromFormindex(formindex);
     if (party != NULL) {
-        party->count[type] = n;
+        party->count[type] = point;
     }
 }
 
@@ -842,7 +842,7 @@ INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetEncountTableItem);
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetExpMakaItem);
 
-s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type)
+s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side)
 {
     s32 i;
     s32 cnt;
@@ -852,7 +852,7 @@ s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type)
     sum = 0;
     for (i = 0; i < 14; i++) {
         if ((data->party[i].flag & 1) != 0 && (data->party[i].flag & 4) == 0) {
-            if (type == 0) {
+            if (side == 0) {
                 if ((data->party[i].flag & 2) != 0) {
                     continue;
                 }
@@ -871,7 +871,7 @@ s32 nbGetLvAvg(nbMainProcessData_t *data, s32 type)
     return sum / cnt;
 }
 
-s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 mode)
+s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 side)
 {
     datUnitWork_t *w;
     s32 i;
@@ -881,7 +881,7 @@ s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 mode)
 
     sum = 0;
     cnt = 0;
-    if (mode == 0) {
+    if (side == 0) {
         w = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
         for (i = 0; i < 16; i++) {
             if ((w->flag & 1) != 0) {
@@ -907,7 +907,7 @@ s32 nbGetLvAvg2(nbMainProcessData_t *data, s32 mode)
     return sum / cnt;
 }
 
-s32 nbGetParamAvg(nbMainProcessData_t *data, s32 type, s32 param)
+s32 nbGetParamAvg(nbMainProcessData_t *data, s32 side, s32 paratype)
 {
     s32 i;
     s32 cnt;
@@ -917,7 +917,7 @@ s32 nbGetParamAvg(nbMainProcessData_t *data, s32 type, s32 param)
     sum = 0;
     for (i = 0; i < 14; i++) {
         if ((data->party[i].flag & 1) != 0 && (data->party[i].flag & 4) == 0) {
-            if (type == 0) {
+            if (side == 0) {
                 if ((data->party[i].flag & 2) != 0) {
                     continue;
                 }
@@ -927,7 +927,7 @@ s32 nbGetParamAvg(nbMainProcessData_t *data, s32 type, s32 param)
                 }
             }
             cnt++;
-            sum += datGetParam(nbGetUnitWorkPointer(data, &data->party[i]), param);
+            sum += datGetParam(nbGetUnitWorkPointer(data, &data->party[i]), paratype);
         }
     }
     if (cnt == 0) {
@@ -936,7 +936,7 @@ s32 nbGetParamAvg(nbMainProcessData_t *data, s32 type, s32 param)
     return sum / cnt;
 }
 
-s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 mode, s32 param)
+s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 side, s32 paratype)
 {
     datUnitWork_t *w;
     s32 i;
@@ -947,14 +947,14 @@ s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 mode, s32 param)
 
     cnt = 0;
     sum = 0;
-    if (mode == 0) {
+    if (side == 0) {
         for (i = 0, ofs = 0; i < 16; i++) {
             w = (datUnitWork_t *)((u8 *)DDS3_GBWK + ofs + 0xA54);
             ofs += 0xEC;
             if ((w->flag & 1) != 0) {
                 if ((w->flag & 2) != 0) {
                     cnt++;
-                    sum += datGetParam(w, param);
+                    sum += datGetParam(w, paratype);
                 }
             }
         }
@@ -963,7 +963,7 @@ s32 nbGetParamAvg2(nbMainProcessData_t *data, s32 mode, s32 param)
             id = nbEncountFormTable[data->encno].id[i];
             if (id != 0) {
                 cnt++;
-                sum += datDevilTable[id].param[param];
+                sum += datDevilTable[id].param[paratype];
             }
         }
     }
@@ -1054,9 +1054,9 @@ void nbSetKuisibariStop(s32 formindex)
     }
 }
 
-s32 nbHatudoCheckSkill(datUnitWork_t *unit, s32 skill)
+s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill)
 {
-    if (datCheckSyojiSkill(unit, skill) == 0) {
+    if (datCheckSyojiSkill(work, skill) == 0) {
         return 0;
     }
     switch (skill) {
@@ -1068,9 +1068,9 @@ s32 nbHatudoCheckSkill(datUnitWork_t *unit, s32 skill)
     return 1;
 }
 
-s32 nbCheckSingleTargetSkill(s32 nskill)
+s32 nbCheckSingleTargetSkill(s32 skillid)
 {
-    return datSkillTable.normal[nskill].targettype == 0;
+    return datSkillTable.normal[skillid].targettype == 0;
 }
 
 s32 nbCheckFormationPlayerSide(s32 formindex)
@@ -1085,13 +1085,13 @@ s32 nbCheckFormationFriend(s32 formindex1, s32 formindex2)
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetMakaBaramaki);
 
-s32 nbCheckBadPanicAction(datUnitWork_t *unit)
+s32 nbCheckBadPanicAction(datUnitWork_t *w)
 {
     u32 flag;
     s32 ritu;
     s32 hit;
 
-    flag = unit->flag;
+    flag = w->flag;
     if ((flag & 4) != 0) {
         ritu = 30;
     } else if ((flag & 0x20) != 0) {

@@ -57,19 +57,19 @@ extern u32 frFontRowBuf;
 
 extern u32 strlen(const char *text);
 
-extern void *memcpy(void *dest, const void *source, u32 size);
+extern void *memcpy(void *a, const void *b, u32 c);
 
-extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 
-extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
-extern void frSetWhiteSpaceW(s32 font, s32 width);
+extern void frSetWhiteSpaceW(s32 StyleNo, s32 Width);
 
-extern void frEnableMode(s32 mode);
+extern void frEnableMode(s32 Flag);
 
-extern u8 frDisableMode(u8 mode);
+extern u8 frDisableMode(u8 Flag);
 
 extern frFontRequest_t *frLinkFontString(const char *, s8, s8, s8, frFontRequest_t *);
 
@@ -85,9 +85,9 @@ extern void frSetFontColorNo(frFontRequest_t *, u8);
 
 extern frFontRequest_t *frCombineFontRequest(frFontRequest_t *, frFontRequest_t *);
 
-extern void frLoadFontData(s32 font, const char *path);
+extern void frLoadFontData(s32 StyleNo, const char *pFileName);
 
-extern void frDelFontStyle(s32 font);
+extern void frDelFontStyle(s32 StyleNo);
 
 typedef struct { u8 unk00[0x10]; u32 headerWord; } frPackedHeader_t;
 
@@ -179,9 +179,9 @@ frFontRequest_t *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *t
     return chain;
 }
 
-frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 depth, s32 colors, const char *text, frFontRequest_t *parent)
+frFontRequest_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char *pStr, frFontRequest_t *pFRQ)
 {
-    frFontRequest_t *handle = frwGetFontEx(x, y, depth, colors, text, 1, 0, parent);
+    frFontRequest_t *handle = frwGetFontEx(X, Y, Pri, Color, pStr, 1, 0, pFRQ);
 
     frSetFontSpace(handle, 3);
     return handle;

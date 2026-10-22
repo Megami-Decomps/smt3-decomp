@@ -23,16 +23,16 @@ typedef struct
 extern dds3ProcessID_t *inputpanel_id;
 extern dds3ProcessID_t *addressprocess_id;
 extern char D_0054EE18[]; /* "address" */
-extern void *sdfChipAllocDirect(s32 size);
-extern void sdfChipFreeDirect(void *block);
-extern void *dds3GetProcessData(dds3ProcessID_t *process);
-extern void dds3SetProcessData(dds3ProcessID_t *process, void *data);
-extern dds3ProcessID_t *dds3StartProcess(const char *name, s32 priority,
-    s32 startTimer, s32 shutdownTimer, dds3ProcessFunc_t process,
-    dds3ProcessFunc_t shutdown, s32 flag);
-extern void dds3KillProcess(dds3ProcessID_t *process, s32 killChildren);
-extern s32 fldInputPanelProcess2(dds3ProcessID_t *process);
-extern s32 fldAddressProcess2(dds3ProcessID_t *process);
+extern void *sdfChipAllocDirect(s32 aSize);
+extern void sdfChipFreeDirect(void *aPtr);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern void dds3SetProcessData(dds3ProcessID_t *id, void *data);
+extern dds3ProcessID_t *dds3StartProcess(const char *v1, s32 dDS3_PRIORITY_DRAW_PB,
+    s32 v2, s32 v3, dds3ProcessFunc_t drawExit,
+    dds3ProcessFunc_t deleteExit, s32 p);
+extern void dds3KillProcess(dds3ProcessID_t *id, s32 shutdowntimer);
+extern s32 fldInputPanelProcess2(dds3ProcessID_t *id);
+extern s32 fldAddressProcess2(dds3ProcessID_t *id);
 extern s32 fldProcCampChk(void);
 extern s32 fldProcAmChk(void);
 extern s32 fmProcessChk(void);
@@ -52,9 +52,9 @@ extern s32 D_003095B0[];
 extern char D_003094F0[][16];
 extern void fldDrawInputPanel(void);
 extern void fldDrawInputCursor(s32 x, s32 y);
-extern void fldKanjiDraw(s32 x, s32 y, u32 colors, const char *text);
+extern void fldKanjiDraw(s32 x, s32 y, u32 rgba, const char *moji);
 
-s32 fldInputPanelProcess2(dds3ProcessID_t *process)
+s32 fldInputPanelProcess2(dds3ProcessID_t *id)
 {
     fldInputPanelWork_t *work;
 
@@ -79,7 +79,7 @@ s32 fldInputPanelProcess2(dds3ProcessID_t *process)
     if (fldInputPanelState[0] != 0) {
         return 0;
     }
-    work = dds3GetProcessData(process);
+    work = dds3GetProcessData(id);
     if (work->draw == 0) {
         goto ret0;
     }
@@ -93,7 +93,7 @@ ret0:
     return 0;
 }
 
-s32 fldInputPanelProcess1(dds3ProcessID_t *process)
+s32 fldInputPanelProcess1(dds3ProcessID_t *id)
 {
     fldInputPanelWork_t *work = sdfChipAllocDirect(8);
 
@@ -101,15 +101,15 @@ s32 fldInputPanelProcess1(dds3ProcessID_t *process)
     work->position = 0;
     work->draw = 0;
     work->reserved = 0;
-    dds3SetProcessData(process, work);
+    dds3SetProcessData(id, work);
     return (s32)fldInputPanelProcess2;
 }
 
-void fldInputPanelShutdown(dds3ProcessID_t *process)
+void fldInputPanelShutdown(dds3ProcessID_t *id)
 {
     void *work;
 
-    work = dds3GetProcessData(process);
+    work = dds3GetProcessData(id);
     sdfChipFreeDirect(work);
     inputpanel_id = 0;
 }
@@ -127,21 +127,21 @@ void fldFreeInputPanel(void)
     }
 }
 
-fldInputPanelWork_t *fldInputPanelSetDraw(s32 draw)
+fldInputPanelWork_t *fldInputPanelSetDraw(s32 flag)
 {
     fldInputPanelWork_t *work;
 
     work = dds3GetProcessData(inputpanel_id);
-    work->draw = draw;
+    work->draw = flag;
     return work;
 }
 
-fldInputPanelWork_t *fldInputPanelSetMessage(s32 message)
+fldInputPanelWork_t *fldInputPanelSetMessage(s32 no)
 {
     fldInputPanelWork_t *work;
 
     work = dds3GetProcessData(inputpanel_id);
-    work->message = message;
+    work->message = no;
     return work;
 }
 
@@ -195,7 +195,7 @@ ret0:
 }
 
 
-s32 fldAddressProcess2(dds3ProcessID_t *process)
+s32 fldAddressProcess2(dds3ProcessID_t *id)
 {
     if (fldProcCampChk() != 0) {
         return 0;
@@ -217,7 +217,7 @@ s32 fldAddressProcess2(dds3ProcessID_t *process)
     return 0;
 }
 
-s32 fldAddressProcess1(dds3ProcessID_t *process)
+s32 fldAddressProcess1(dds3ProcessID_t *id)
 {
     fldAddressWork_t *work;
 
@@ -226,15 +226,15 @@ s32 fldAddressProcess1(dds3ProcessID_t *process)
     work->unk04 = 0;
     work->unk08 = 0;
     work->unk0C = 0;
-    dds3SetProcessData(process, work);
+    dds3SetProcessData(id, work);
     return (s32)fldAddressProcess2;
 }
 
-void fldAddressShutdown(dds3ProcessID_t *process)
+void fldAddressShutdown(dds3ProcessID_t *id)
 {
     void *work;
 
-    work = dds3GetProcessData(process);
+    work = dds3GetProcessData(id);
     sdfChipFreeDirect(work);
     addressprocess_id = 0;
 }

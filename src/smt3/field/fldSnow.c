@@ -15,9 +15,9 @@ enum sl_slot_flag
 
 extern s32 fldSnowActive;
 
-sdfMemHandle_t *sdfMemAllocDirect(s32 requestedBytes);
+sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 
-void *sdfMemLock(sdfMemHandle_t *allocation);
+void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
@@ -37,20 +37,20 @@ extern fldSeedWork_t *gFldSeedBuff;
 
 extern sdfMemHandle_t *fldSnowSeedBuf;
 
-extern void sdfMemUnlock(sdfMemHandle_t *allocation);
+extern void sdfMemUnlock(sdfMemHandle_t *aHandle);
 
-extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *allocation);
+extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
-extern void *sdfGrAllocPacketBuff(s32 size);
+extern void *sdfGrAllocPacketBuff(s32 aSize);
 
-extern void sdfDrawTagInit(void *tag);
+extern void sdfDrawTagInit(void *a);
 
-extern void sdfDrawTagLink(void *tag, void *packet);
+extern void sdfDrawTagLink(void *aTag, void *aPacket);
 
-extern void sdfBillBoardMake1(void *packet, const sdfVector4_t *position, u32 color,
-                              const void *uv, const void *vtx);
+extern void sdfBillBoardMake1(void *aPacket, const sdfVector4_t *aCenter, u32 aColor,
+                              const void *aUVList, const void *aXYOffsetList);
 
 extern sdfGrOt_t sdfGrOtTable[85];
 
@@ -72,19 +72,19 @@ extern f32 gFldSnowW;
 
 extern void fldSnowSeedReset(void);
 
-extern s32 dds3GetRandA(s32 kind);
+extern s32 dds3GetRandA(s32 name);
 
-extern u32 sdfTexGetPacket(sdfTexHandle_t *texture);
+extern u32 sdfTexGetPacket(sdfTexHandle_t *aHandle);
 
-extern s32 sdfTexGetPacketLength(sdfTexHandle_t *texture);
+extern s32 sdfTexGetPacketLength(sdfTexHandle_t *aHandle);
 
-extern void sdf3DMakeDirectRefPacket(void *packet, u32 sourceAddress, s32 payloadBytes);
+extern void sdf3DMakeDirectRefPacket(void *aPacket, u32 aData, s32 aLeng);
 
-extern void sdfDrawTagLinkRef(void *tag, void *packet);
+extern void sdfDrawTagLinkRef(void *aTag, void *aPacket);
 
-extern void SetRotateMatrixZ(f32 angle);
+extern void SetRotateMatrixZ(f32 aAngle);
 
-extern void sdfBillBoardMakeTMPacket(void *packet, const f32 *matrix);
+extern void sdfBillBoardMakeTMPacket(void *aPacket, const f32 *aTM);
 
 
 void fldSetSnowActive(void) {

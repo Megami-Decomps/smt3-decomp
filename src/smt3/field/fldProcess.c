@@ -66,7 +66,7 @@ extern s32 dds3AdminiGetNextSequence(void);
 
 extern s32 dds3AdminiGetPrevHistoryFlag(void);
 
-extern void fldDoor_EveBtlExit(s32 fld, s32 arg1);
+extern void fldDoor_EveBtlExit(s32 field, s32 eveno);
 
 typedef struct {
     u8 safeUnitPoint[0x30];
@@ -133,9 +133,9 @@ extern char D_00531690[], D_00531950[];
 
 extern s32 fldProcShutDownFlg;
 
-extern s32 ProcSequence(dds3ProcessID_t *process);
+extern s32 ProcSequence(dds3ProcessID_t *id);
 
-extern s32 ProcDraw(dds3ProcessID_t *process);
+extern s32 ProcDraw(dds3ProcessID_t *id);
 
 extern void fldFreeSnowSeed(void);
 
@@ -173,7 +173,7 @@ extern void *gfldPlayerPtr;
 
 extern s32 gfldPlayerSizeBk;
 
-extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 size, s32 mode);
+extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 extern void fldSetNextField(s32 field, s32 parameter);
 
@@ -207,7 +207,7 @@ extern void fldStatusSet(void);
 
 extern dds3Basic_t *dds3GetActiveScene(void);
 
-extern void dds3VisibleSceneBasic(dds3Basic_t *scene, s32 flag);
+extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
 extern u8 cmpGetLoadState(void);
 
@@ -225,13 +225,13 @@ extern void p2sdPlaySE(s32 id, s32 vol, s32 pan);
 
 extern void fldPlayerPosRot(void);
 
-extern void dds3FadeOut(s32 red, s32 green, s32 blue, s32 frame);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 
 extern void fldPlayerMotReset(void);
 
 extern void cmpProcessStart(void);
 
-extern s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *name);
+extern s32 dds3SceneBasicStartScript(dds3Basic_t *scene, const char *procname);
 
 extern s32 fldLightMaState __attribute__((section(".data")));
 
@@ -335,9 +335,9 @@ extern void *pFroMapHead;
 
 extern void *fldRunMapScale;
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, dds3ProcessFunc_t processfunc,
-                                         dds3ProcessFunc_t shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, dds3ProcessFunc_t drawExit,
+                                         dds3ProcessFunc_t deleteExit, void *p);
 
 extern s32 dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -619,7 +619,7 @@ s32 fldEncountTestFlag(u32 flag)
     return (fldEncountFlags & flag) != 0;
 }
 
-void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
+void fldProcTrigSequence(fldSceneParam_t *srcParam, u32 mode) {
     fldSceneParam_t *scene = &fldSceneParam;
     fldSequenceController_t *controller = &fldAutoMapSeqFlags;
 
@@ -627,19 +627,19 @@ void fldProcTrigSequence(fldSceneParam_t *record, u32 mode) {
     controller->flags = 0;
     scene->mode = mode;
     if (mode == 0) {
-        scene->sequenceWord3C = record->sequenceWord3C;
-        scene->sequenceWord38 = record->sequenceWord38;
-        strcpy(scene->name, record->name);
-        scene->stage = record->stage;
-        scene->code = record->code;
-        scene->kind = record->kind;
-        scene->sequenceMode = record->sequenceMode;
-        scene->enabled = record->enabled;
-        scene->restore = record->restore;
-        scene->link = record->link;
-        strcpy(scene->detail, record->detail);
-        strcpy(scene->note, record->note);
-        scene->options = record->options;
+        scene->sequenceWord3C = srcParam->sequenceWord3C;
+        scene->sequenceWord38 = srcParam->sequenceWord38;
+        strcpy(scene->name, srcParam->name);
+        scene->stage = srcParam->stage;
+        scene->code = srcParam->code;
+        scene->kind = srcParam->kind;
+        scene->sequenceMode = srcParam->sequenceMode;
+        scene->enabled = srcParam->enabled;
+        scene->restore = srcParam->restore;
+        scene->link = srcParam->link;
+        strcpy(scene->detail, srcParam->detail);
+        strcpy(scene->note, srcParam->note);
+        scene->options = srcParam->options;
     }
     dds3StartProcess("fldProcSequence", 0x3F7, 0, 0, ProcSequence, 0, 0);
     dds3StartProcess(D_00531950, 0x2B0A, 0, 0, ProcDraw, 0, 0);

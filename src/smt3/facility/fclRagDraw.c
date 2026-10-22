@@ -42,7 +42,7 @@ typedef struct
     /* 0x1C */ s32 unk_1C;
 } fclPanelPos_t;
 
-void fclInitPanelPos(s32 a, s32 b, s32 c, s16 d, s16 e, s32 f, fclPanel_t *panel);
+void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
@@ -78,12 +78,12 @@ void ragDrawSeqConfirm(void)
     }
 }
 
-s32 ragDrawSeqRoot(s32 active)
+s32 ragDrawSeqRoot(s32 Mode)
 {
     fclPanelPos_t pos;
     s32 mode = 1;
 
-    if (active != 0) {
+    if (Mode != 0) {
         mode = 0;
         if (fclGetFlag(0) == 0) {
             mode = 2;

@@ -88,7 +88,7 @@ extern u8 D_0054F584;
 
 extern pbDebugWork_t *g_pdebug_0;
 
-extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *aHandle);
 
 extern pbMapWork_t *D_0054F5C4;
 
@@ -98,9 +98,9 @@ extern pbPanel_t *record;
 
 extern pbPanel_t *blockDB;
 
-extern sdfMemHandle_t *sdfMemAllocDirect(u32 size);
+extern sdfMemHandle_t *sdfMemAllocDirect(u32 aSize);
 
-extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 
 extern u8 degree_mode;
 

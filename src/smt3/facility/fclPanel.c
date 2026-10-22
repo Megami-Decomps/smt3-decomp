@@ -27,22 +27,22 @@ typedef struct fclPanel
     /* 0x3C */ void (*update)(struct fclPanel *panel);
 } fclPanel_t;
 
-extern void sdfChipFreeDirect(void *ptr);
+extern void sdfChipFreeDirect(void *aPtr);
 
-void fclDrawPanelTypeDef(fclPanel_t *panel, s32 flags)
+void fclDrawPanelTypeDef(fclPanel_t *pPanel, s32 OtNo)
 {
-    s32 color = panel->Col;
+    s32 color = pPanel->Col;
 
-    fclDrawPanelSprite2(0x44, flags);
-    cmpDrawBoxF(panel->X, panel->Y, panel->Z, (u16)panel->W,
-                (u16)panel->H, color, flags);
+    fclDrawPanelSprite2(0x44, OtNo);
+    cmpDrawBoxF(pPanel->X, pPanel->Y, pPanel->Z, (u16)pPanel->W,
+                (u16)pPanel->H, color, OtNo);
 }
 
-void fclUpdatePanelTypeDef(fclPanel_t *panel)
+void fclUpdatePanelTypeDef(fclPanel_t *pPanel)
 {
-    panel->Timer += panel->Spd;
-    if (panel->Timer > 0x100) {
-        panel->Timer = 0x100;
+    pPanel->Timer += pPanel->Spd;
+    if (pPanel->Timer > 0x100) {
+        pPanel->Timer = 0x100;
     }
 }
 
@@ -50,31 +50,31 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0Grad);
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0);
 
-void fclUpdatePanelType0(fclPanel_t *panel)
+void fclUpdatePanelType0(fclPanel_t *pPanel)
 {
-    panel->Timer += panel->Spd;
-    if (panel->Timer > 0x100) {
-        panel->Timer = 0x100;
+    pPanel->Timer += pPanel->Spd;
+    if (pPanel->Timer > 0x100) {
+        pPanel->Timer = 0x100;
     }
 }
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType1);
 
-void fclUpdatePanelType1(fclPanel_t *panel)
+void fclUpdatePanelType1(fclPanel_t *pPanel)
 {
-    panel->Timer += panel->Spd;
-    if (panel->Timer > 0x200) {
-        panel->Timer = 0;
+    pPanel->Timer += pPanel->Spd;
+    if (pPanel->Timer > 0x200) {
+        pPanel->Timer = 0;
     }
 }
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType2);
 
-void fclUpdatePanelType2(fclPanel_t *panel)
+void fclUpdatePanelType2(fclPanel_t *pPanel)
 {
-    panel->Timer += panel->Spd;
-    if (panel->Timer > 0x100) {
-        panel->Timer = 0x100;
+    pPanel->Timer += pPanel->Spd;
+    if (pPanel->Timer > 0x100) {
+        pPanel->Timer = 0x100;
     }
 }
 
@@ -86,50 +86,50 @@ INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelEdges);
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType3);
 
-void fclUpdatePanelType3(fclPanel_t *panel)
+void fclUpdatePanelType3(fclPanel_t *pPanel)
 {
-    panel->Timer += panel->Spd;
-    if (panel->Timer >= 0x201) {
-        panel->Timer = 0;
+    pPanel->Timer += pPanel->Spd;
+    if (pPanel->Timer >= 0x201) {
+        pPanel->Timer = 0;
     }
-    panel->Timer2 += 0x20;
-    if (panel->Timer2 >= 0x201) {
-        panel->Timer2 = 0x200;
+    pPanel->Timer2 += 0x20;
+    if (pPanel->Timer2 >= 0x201) {
+        pPanel->Timer2 = 0x200;
     }
 }
 
-void fclSetPanelTex(fclPanel_t *panel, s32 a, s32 b, s32 c, s32 d, s32 e)
+void fclSetPanelTex(fclPanel_t *pPanel, s32 UV1, s32 UV2, s32 UV3, s32 UV4, s32 TexHandle)
 {
-    panel->unk_24 = a;
-    panel->unk_28 = b;
-    panel->unk_2C = c;
-    panel->unk_30 = d;
-    panel->TexHandle = e;
+    pPanel->unk_24 = UV1;
+    pPanel->unk_28 = UV2;
+    pPanel->unk_2C = UV3;
+    pPanel->unk_30 = UV4;
+    pPanel->TexHandle = TexHandle;
 }
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclInitPanel);
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclCreatePanel);
 
-s32 fclDestroyPanel(void *panel)
+s32 fclDestroyPanel(void *pPanel)
 {
-    sdfChipFreeDirect(panel);
+    sdfChipFreeDirect(pPanel);
     return 1;
 }
 
 /* NON_MATCHING: 8 of 21 words differ (first at +0x10). */
 #ifdef NON_MATCHING
-s32 fclDrawPanel(fclPanel_t *panel, s32 id)
+s32 fclDrawPanel(fclPanel_t *pPanel, s32 OtNo)
 {
-    fclDrawPanelSprite(0x53001, id);
-    panel->draw(panel, id);
-    return fclDrawPanelSprite(0x5101B, id);
+    fclDrawPanelSprite(0x53001, OtNo);
+    pPanel->draw(pPanel, OtNo);
+    return fclDrawPanelSprite(0x5101B, OtNo);
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanel);
 #endif
 
-void fclUpdatePanel(fclPanel_t *panel)
+void fclUpdatePanel(fclPanel_t *pPanel)
 {
-    panel->update(panel);
+    pPanel->update(pPanel);
 }

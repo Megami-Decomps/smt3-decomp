@@ -19,7 +19,7 @@ void nbSetWaitMotion(nbFormation_t *form, s32 motion, f32 ritu);
 
 extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
 
-void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 ritu);
+void nbSetUnitMotion(nbFormation_t *form, s32 motion2, s32 mode, f32 ritu);
 
 void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
 
@@ -97,22 +97,22 @@ extern sdfGrOt_t sdfGrOtTable[];
 
 void nbGetUnitMarkPos(s32 type, nbFormation_t *form, sdfDrawTag_t *tag);
 
-extern void *sdfGrAllocPacketBuff(u32 size);
+extern void *sdfGrAllocPacketBuff(u32 aSize);
 
-extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern void effBTLSystemDraw(struct effBTLSysHandle_t *handle);
+extern void effBTLSystemDraw(struct effBTLSysHandle_t *hEffBTLSys);
 
 void nbDrawRotatedModel(sdfDrawTag_t *tag, sdfVector4_t *pos, sdfVector4_t *rot,
                         sdfVector4_t *center, f32 r, f32 scl, f32 h);
 
 extern s32 datCheckDying(datUnitWork_t *work);
 
-extern s32 mdlGetNumOfCut(struct mdlObj_t *ctx, s32 searchId);
+extern s32 mdlGetNumOfCut(struct mdlObj_t *aHandle, s32 aGroup);
 
-extern void evtSetWaitMotion(struct evtUnit_t *hunit, s32 motion);
+extern void evtSetWaitMotion(struct evtUnit_t *h, s32 motion);
 
-extern void evtSetWaitMotionSpeed(struct evtUnit_t *hunit, f32 speed);
+extern void evtSetWaitMotionSpeed(struct evtUnit_t *h, f32 sp);
 
 extern s32 GetDyingBadWaitMotion(nbFormation_t *form, s32 motion, datUnitWork_t *work);
 
@@ -126,13 +126,13 @@ void *nbUnitShutdown(dds3ProcessID_t *id);
 
 void *nbUnitDrawProcess1(dds3ProcessID_t *id);
 
-extern dds3ProcessID_t *dds3StartProcess(char *namestr, u32 priority, s32 starttimer,
-                                         s32 shutdowntimer, void *processfunc,
-                                         void *shutdownfunc, void *data);
+extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                                         s32 v3, void *drawExit,
+                                         void *deleteExit, void *p);
 
-extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *child);
+extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
-extern s32 mdlGetMinorNum(mdlObj_t *obj);
+extern s32 mdlGetMinorNum(mdlObj_t *aHandle);
 
 /* The 0x1C-byte motion records at datUnitVisual_t +0x2C; the shared view splits
  * the same bytes as part[], six bytes later. */
@@ -146,17 +146,17 @@ typedef struct nbUnitMotion_t {
     u8 unk18[4];
 } nbUnitMotion_t;
 
-extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed);
+extern f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu);
 
-extern f32 dds3GetRandFloatA(s32 stream);
+extern f32 dds3GetRandFloatA(s32 name);
 
-extern void dds3SetPosPoseSet(struct dds3Basic_t *basic, sdfVector4_t *pos);
+extern void dds3SetPosPoseSet(struct dds3Basic_t *pBasic, sdfVector4_t *pos);
 
 extern void nbReturnUnit(s32 partyno, s32 lost, s32 dead);
 
 extern datUnitWork_t *nbGetUnitWorkFromFormindex(s32 formindex);
 
-extern s32 nbMakeUnitFadeInPacket(s32 startframe, void *id, nbFormation_t *form, u32 col,
+extern s32 nbMakeUnitFadeInPacket(s32 startframe, void *uniqueid, nbFormation_t *form, u32 col,
                                   s32 delay, s32 aframe, s32 colframe);
 
 extern datUnitWork_t *nbGetUnitWorkPointer(nbMainProcessData_t *data, struct nbParty_t *party);
@@ -271,13 +271,13 @@ s32 nbGetMotionActframe(nbFormation_t *form, s32 motion, f32 ritu)
     return frame / nbGetMotionSpeed(form, motion, ritu);
 }
 
-f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed)
+f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu)
 {
     datUnitVisual_t *visual = nbGetUnitVisual(nbGetUnitWorkFromFormindex(form->formindex));
-    f32 motspeed = *(f32 *)visual->part[part].unk02;
+    f32 motspeed = *(f32 *)visual->part[motion].unk02;
 
-    if (speed != 1.0f) {
-        motspeed *= speed;
+    if (ritu != 1.0f) {
+        motspeed *= ritu;
     }
     return motspeed;
 }
@@ -286,20 +286,20 @@ f32 nbGetMotionSpeed(nbFormation_t *form, s32 part, f32 speed)
 
 #ifdef NON_MATCHING
 
-s32 nbGetMotionNo(nbFormation_t *form, s32 mot)
+s32 nbGetMotionNo(nbFormation_t *form, s32 motion)
 {
     datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
     s32 id = nbGetUnitID(work);
     datUnitVisual_t *visual = nbGetUnitVisual(work);
-    u32 ofs = mot * sizeof(nbUnitMotion_t) + 0x30;
+    u32 ofs = motion * sizeof(nbUnitMotion_t) + 0x30;
 
-    form->cr = *(f32 *)((u8 *)(mot * sizeof(nbUnitMotion_t)) + (u32)visual + 0x38) * form->scl;
+    form->cr = *(f32 *)((u8 *)(motion * sizeof(nbUnitMotion_t)) + (u32)visual + 0x38) * form->scl;
     form->movey = *(f32 *)((u8 *)visual + ofs + 0xC);
     form->movez = *(f32 *)((u8 *)visual + ofs + 0x10);
     if (id == 0) {
-        return D_003493A0[mot];
+        return D_003493A0[motion];
     }
-    return D_0034F1C0[mot];
+    return D_0034F1C0[motion];
 }
 
 #else
@@ -507,7 +507,7 @@ void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect)
     }
 }
 
-void nbLoadUnitGroup(s32 side, s32 kage, s32 noeffect)
+void nbLoadUnitGroup(s32 side, s32 stop, s32 anime)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     s32 start = 0;
@@ -524,7 +524,7 @@ void nbLoadUnitGroup(s32 side, s32 kage, s32 noeffect)
         break;
     }
     for (i = start; i < start + cnt; i++) {
-        nbInitUnitEffect(&data->form[i], kage, noeffect);
+        nbInitUnitEffect(&data->form[i], stop, anime);
     }
 }
 
@@ -547,7 +547,7 @@ s32 nbCheckLoad(nbFormation_t *form)
     return 1;
 }
 
-s32 nbCheckLoadGroup(s32 group)
+s32 nbCheckLoadGroup(s32 side)
 {
     nbMainProcessData_t *data = nbGetMainProcessData();
     s32 start;
@@ -556,7 +556,7 @@ s32 nbCheckLoadGroup(s32 group)
 
     start = 0;
     cnt = 0;
-    switch (group) {
+    switch (side) {
     case 0:
         cnt = 4;
         break;

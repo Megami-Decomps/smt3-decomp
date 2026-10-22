@@ -131,54 +131,54 @@ struct evtViewer_t {
 
 typedef struct evtViewer_t evtViewer_t;
 extern evtFrameInfo_t *evtAddFrameInfo(evtFrameTrack_t *track, s32 frame, evtViewer_t *viewer);
-extern void sdfChipFreeDirect(void *memory);
+extern void sdfChipFreeDirect(void *aPtr);
 extern void dds3DeleteSceneBasicData(void *basic);
 extern void evtInitViewerInfo(void);
-extern s32 dds3KillProcessName(const char *name, s32 hierarchy);
+extern s32 dds3KillProcessName(const char *name, s32 shutdowntimer);
 extern evtViewer_t *viewerinfo;
-extern void *memset(void *dst, s32 value, u32 size);
-extern void *sdfChipAllocDirect(u32 size);
-extern void evtFreePolygonMovieWorkData(void *work);
+extern void *memset(void *a, s32 b, u32 c);
+extern void *sdfChipAllocDirect(u32 aSize);
+extern void evtFreePolygonMovieWorkData(void *wdata);
 extern void *dds3SceneBasicSearchNameAndType(void *scene, s32 type, const char *name);
-extern void *dds3AddBEDEffectObjectBasic2(void *resource, f32 *position, f32 *scale);
-extern void dds3EffectObjectBasicStatOn(void *basic, s32 stat);
-extern void dds3StartBEDEffectObjectBasic(void *basic, s32 frame);
-extern void LinkEffectBasic(dds3Basic_t *basic, s32 nameIndex, s32 objectIndex, s32 frame);
+extern void *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
+extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
+extern void dds3StartBEDEffectObjectBasic(void *basic, s32 cutno);
+extern void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 baseframe);
 extern dds3Basic_t *dds3SceneBasicSearchName(dds3Basic_t *scene, const char *name);
-extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *owner);
-extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *owner, s32 index);
-extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *target);
-extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *basic);
-extern s32 evtStopMover(void *mover, s32 undo, s32 startFrame, s32 endFrame);
+extern void dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *target);
+extern s32 dds3EffectObjectBasicLinkObjectIndex(dds3Basic_t *basic, dds3Basic_t *target, s32 index);
+extern s32 evtPathLinkAndMake(dds3Basic_t *path, dds3Basic_t *obj);
+extern dds3ObjectBaseControlWorkData_t *dds3GetBaseControlWorkData(dds3Basic_t *pObjectBasic);
+extern s32 evtStopMover(void *mover, s32 sw, s32 baseframe, s32 nowframe);
 extern char D_0053B4A8[];
 extern s8 D_0032C9E2[];
 extern s32 PopMenu(void);
 extern s32 strcmp(const char *a, const char *b);
 extern char *strcpy(char *dst, const char *src);
-extern void evtRunFrame(s32 frame);
+extern void evtRunFrame(s32 nowframe);
 extern s32 evtInitFrameVar(void);
-extern void dds3LinkProcess(void *process, s32 task);
+extern void dds3LinkProcess(void *parent, s32 target);
 extern void evtFreeStage(void);
 extern s32 sdfDelayedResrcCheck(void);
 extern void evtFreeViewerInfo(void);
-extern void **dds3GetProcessData(void *process);
-extern void sdfMemFreeDirect(void *memory);
+extern void **dds3GetProcessData(void *id);
+extern void sdfMemFreeDirect(void *aHandle);
 extern s32 SearchNameTable(const char *name);
-extern void evtStopFrame(s32 mode, s32 frame);
-extern void *dds3SetActiveCameraSceneBasic(void *scene, void *camera);
+extern void evtStopFrame(s32 sw, s32 nowframe);
+extern void *dds3SetActiveCameraSceneBasic(void *pSceneBasic, void *pCameraBasic);
 extern f32 dds3CameraObjectBasicGetFovy(void *camera);
 extern void dds3SetScreenFovy(f32 fovy);
 extern void evtRunUnitMode(s32 unit, s32 mode);
-extern void *sdfMemAllocDirect(s32 size);
-extern void *sdfMemLock(void *handle);
-extern void *dds3StartProcess(const char *namestr, u32 priority, s32 starttimer,
-                              s32 shutdowntimer, void *processfunc, void *shutdownfunc,
-                              void *data);
+extern void *sdfMemAllocDirect(s32 aSize);
+extern void *sdfMemLock(void *aHandle);
+extern void *dds3StartProcess(const char *v1, u32 dDS3_PRIORITY_DRAW_PB, s32 v2,
+                              s32 v3, void *drawExit, void *deleteExit,
+                              void *p);
 extern s32 evtInitSky(void);
 extern u32 dds3BackColor;
-extern void PushMenu(s32 mode, s32 first, s32 second);
+extern void PushMenu(s32 no, s32 x, s32 y);
 extern void DelEffectTable_evtEventViewer(s32 index);
-extern void DelBED(evtFrameInfo_t *node);
+extern void DelBED(evtFrameInfo_t *frame);
 extern s8 dds3PadButtonState[];
 extern void *evtGetUnityCalcArea(void);
 extern void dds3EffectBlur(void *area);
@@ -199,7 +199,7 @@ extern u16 D_0054F824;
 extern void evtViewerStopFrame(void);
 extern s32 sprintf(char *buf, const char *fmt, ...);
 extern s32 printf(const char *fmt, ...);
-extern void mdlUnRegist(s32 model, s32 index);
+extern void mdlUnRegist(s32 aMajor, s32 aMinor);
 extern s32 D_0032C6E0[];
 extern s32 capwait;
 extern void DrawEffect(void);
@@ -210,92 +210,92 @@ extern char *D_0054F834;
 extern char D_0054F838[];
 extern void *D_002F6978[];
 extern void *dds3FontReqAllocDrawTag(void);
-extern s32 sdfDevPrintf(s32 x, s32 y, u32 color, s32 flag, const char *format, ...);
-extern void sdfDrawTagLink(void *list, u32 tag);
+extern s32 sdfDevPrintf(s32 aX, s32 aY, u32 aZ, s32 aAttr, const char *aStr, ...);
+extern void sdfDrawTagLink(void *aTag, u32 aPacket);
 extern void SetActiveCamera(void);
 extern s32 evtEventViewerProcess3(void);
 extern s32 evtEventViewerProcess4(void);
-void LinkViewerObject(evtFrameTrack_t *insertedNode);
-void UnlinkViewerObject(evtFrameTrack_t *removedNode);
-void DelFrameInfo(evtFrameTrack_t *entry, evtFrameInfo_t *node);
-void DelViewerObject(evtFrameTrack_t *entry);
+void LinkViewerObject(evtFrameTrack_t *obj);
+void UnlinkViewerObject(evtFrameTrack_t *obj);
+void DelFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f);
+void DelViewerObject(evtFrameTrack_t *obj);
 
 
 /* Insert after existing equal keys, keeping ascending order and incrementing count. */
-void LinkFrameInfo(evtFrameTrack_t *list, evtFrameInfo_t *insertedNode) {
-    evtFrameInfo_t *cursor = list->children;
+void LinkFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f) {
+    evtFrameInfo_t *cursor = parent->children;
 
     if (cursor == 0) {
-        list->children = insertedNode;
-        list->lastChild = insertedNode;
-        insertedNode->next = 0;
-        insertedNode->prev = 0;
+        parent->children = f;
+        parent->lastChild = f;
+        f->next = 0;
+        f->prev = 0;
     } else {
         while (cursor != 0) {
-            if (insertedNode->frame < cursor->frame) {
+            if (f->frame < cursor->frame) {
                 if (cursor->prev == 0) {
-                    list->children = insertedNode;
-                    cursor->prev = insertedNode;
-                    insertedNode->next = cursor;
-                    insertedNode->prev = 0;
+                    parent->children = f;
+                    cursor->prev = f;
+                    f->next = cursor;
+                    f->prev = 0;
                 } else {
-                    cursor->prev->next = insertedNode;
-                    insertedNode->prev = cursor->prev;
-                    insertedNode->next = cursor;
-                    cursor->prev = insertedNode;
+                    cursor->prev->next = f;
+                    f->prev = cursor->prev;
+                    f->next = cursor;
+                    cursor->prev = f;
                 }
                 break;
             }
             cursor = cursor->next;
         }
         if (cursor == 0) {
-            evtFrameInfo_t *tailNode = list->lastChild;
-            tailNode->next = insertedNode;
-            insertedNode->prev = list->lastChild;
-            insertedNode->next = 0;
-            list->lastChild = insertedNode;
+            evtFrameInfo_t *tailNode = parent->lastChild;
+            tailNode->next = f;
+            f->prev = parent->lastChild;
+            f->next = 0;
+            parent->lastChild = f;
         }
     }
-    list->childCount++;
+    parent->childCount++;
 }
 
 /* Unlink an attached node, clear its links, and decrement the owning list's count. */
-void UnlinkFrameInfo(evtFrameTrack_t *list, evtFrameInfo_t *removedNode) {
-    evtFrameInfo_t *nextNode = removedNode->next;
-    evtFrameInfo_t *previousNode = removedNode->prev;
+void UnlinkFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f) {
+    evtFrameInfo_t *nextNode = f->next;
+    evtFrameInfo_t *previousNode = f->prev;
     if (previousNode == 0) {
-        list->children = nextNode;
+        parent->children = nextNode;
     } else {
         previousNode->next = nextNode;
     }
     {
-        evtFrameInfo_t *previousNeighbor = removedNode->prev;
-        evtFrameInfo_t *nextNeighbor = removedNode->next;
+        evtFrameInfo_t *previousNeighbor = f->prev;
+        evtFrameInfo_t *nextNeighbor = f->next;
         if (nextNeighbor == 0) {
-            list->lastChild = previousNeighbor;
+            parent->lastChild = previousNeighbor;
         } else {
             nextNeighbor->prev = previousNeighbor;
         }
     }
     {
-        s32 nodeCount = list->childCount;
-        removedNode->prev = 0;
-        removedNode->next = 0;
-        list->childCount = nodeCount - 1;
+        s32 nodeCount = parent->childCount;
+        f->prev = 0;
+        f->next = 0;
+        parent->childCount = nodeCount - 1;
     }
 }
 
 /* Walk the linked list and reinsert the first out-of-order successor. */
-void SortFrameInfo(evtFrameTrack_t *list) {
-    if (list != 0) {
-        evtFrameInfo_t *anchorNode = list->children;
+void SortFrameInfo(evtFrameTrack_t *parent) {
+    if (parent != 0) {
+        evtFrameInfo_t *anchorNode = parent->children;
         while (anchorNode != 0) {
             evtFrameInfo_t *resumeNode = anchorNode->next;
             evtFrameInfo_t *candidateNode = resumeNode;
             while (candidateNode != 0) {
                 if (candidateNode->frame < anchorNode->frame) {
-                    UnlinkFrameInfo(list, candidateNode);
-                    LinkFrameInfo(list, candidateNode);
+                    UnlinkFrameInfo(parent, candidateNode);
+                    LinkFrameInfo(parent, candidateNode);
                     /* Resume from the relocated node's new successor, not its old one. */
                     resumeNode = candidateNode->next;
                     break;
@@ -335,16 +335,16 @@ evtFrameInfo_t *evtGetSelectFrameInfo(void)
 }
 
 /* Release a queued node from its entry, freeing its buffer unless the entry id is 0x12. */
-void DelFrameInfo(evtFrameTrack_t *entry, evtFrameInfo_t *node)
+void DelFrameInfo(evtFrameTrack_t *parent, evtFrameInfo_t *f)
 {
-    UnlinkFrameInfo(entry, node);
-    if (node->payload != NULL) {
-        if (entry->type != 0x12) {
-            sdfChipFreeDirect(node->payload);
+    UnlinkFrameInfo(parent, f);
+    if (f->payload != NULL) {
+        if (parent->type != 0x12) {
+            sdfChipFreeDirect(f->payload);
         }
-        node->payload = NULL;
+        f->payload = NULL;
     }
-    sdfChipFreeDirect(node);
+    sdfChipFreeDirect(f);
 }
 
 void DelFrameInfo2(void)
@@ -381,55 +381,55 @@ void DelFrameInfo2(void)
 }
 
 /* Insert the track in ascending type order and bump the viewer's track count. */
-void LinkViewerObject(evtFrameTrack_t *insertedNode) {
+void LinkViewerObject(evtFrameTrack_t *obj) {
     evtFrameTrack_t *cursor = viewerinfo->tracks;
 
     if (cursor == 0) {
-        viewerinfo->tracks = insertedNode;
-        viewerinfo->lastTrack = insertedNode;
-        insertedNode->next = 0;
-        insertedNode->prev = 0;
+        viewerinfo->tracks = obj;
+        viewerinfo->lastTrack = obj;
+        obj->next = 0;
+        obj->prev = 0;
     } else {
         while (cursor != 0) {
-            if (insertedNode->type < cursor->type) {
+            if (obj->type < cursor->type) {
                 if (cursor->prev == 0) {
-                    viewerinfo->tracks = insertedNode;
-                    cursor->prev = insertedNode;
-                    insertedNode->next = cursor;
-                    insertedNode->prev = 0;
+                    viewerinfo->tracks = obj;
+                    cursor->prev = obj;
+                    obj->next = cursor;
+                    obj->prev = 0;
                 } else {
-                    cursor->prev->next = insertedNode;
-                    insertedNode->prev = cursor->prev;
-                    insertedNode->next = cursor;
-                    cursor->prev = insertedNode;
+                    cursor->prev->next = obj;
+                    obj->prev = cursor->prev;
+                    obj->next = cursor;
+                    cursor->prev = obj;
                 }
                 break;
             }
             cursor = cursor->next;
         }
         if (cursor == 0) {
-            viewerinfo->lastTrack->next = insertedNode;
-            insertedNode->prev = viewerinfo->lastTrack;
-            insertedNode->next = 0;
-            viewerinfo->lastTrack = insertedNode;
+            viewerinfo->lastTrack->next = obj;
+            obj->prev = viewerinfo->lastTrack;
+            obj->next = 0;
+            viewerinfo->lastTrack = obj;
         }
     }
     viewerinfo->trackCount++;
 }
 
-void UnlinkViewerObject(evtFrameTrack_t *removedNode) {
-    if (removedNode->prev == 0) {
-        viewerinfo->tracks = removedNode->next;
+void UnlinkViewerObject(evtFrameTrack_t *obj) {
+    if (obj->prev == 0) {
+        viewerinfo->tracks = obj->next;
     } else {
-        removedNode->prev->next = removedNode->next;
+        obj->prev->next = obj->next;
     }
-    if (removedNode->next == 0) {
-        viewerinfo->lastTrack = removedNode->prev;
+    if (obj->next == 0) {
+        viewerinfo->lastTrack = obj->prev;
     } else {
-        removedNode->next->prev = removedNode->prev;
+        obj->next->prev = obj->prev;
     }
-    removedNode->prev = 0;
-    removedNode->next = 0;
+    obj->prev = 0;
+    obj->next = 0;
     viewerinfo->trackCount--;
 }
 
@@ -474,13 +474,13 @@ s32 evtGetAllFrameInfoCount(void)
     return count;
 }
 
-void DelViewerObject(evtFrameTrack_t *entry)
+void DelViewerObject(evtFrameTrack_t *obj)
 {
-    while (entry->children != NULL) {
-        DelFrameInfo(entry, entry->children);
+    while (obj->children != NULL) {
+        DelFrameInfo(obj, obj->children);
     }
-    UnlinkViewerObject(entry);
-    sdfChipFreeDirect(entry);
+    UnlinkViewerObject(obj);
+    sdfChipFreeDirect(obj);
 }
 
 void evtSetFirstFrame(void)
@@ -579,27 +579,27 @@ void *SearchBasicFromNameIndex_evtEventViewer(s32 index)
 
 INCLUDE_RODATA(const s32, "event/evtEventViewer", D_0053B4A8);
 
-void LinkEffectBasic(dds3Basic_t *basic, s32 nameIndex, s32 objectIndex, s32 frame)
+void LinkEffectBasic(dds3Basic_t *eff, s32 nameindex, s32 posindex, s32 baseframe)
 {
     dds3Basic_t *owner;
     s32 currentFrame;
     void *mover;
 
-    if (basic == NULL) {
+    if (eff == NULL) {
         return;
     }
     currentFrame = viewerinfo->frameCurrent;
-    if (nameIndex < 0) {
+    if (nameindex < 0) {
         return;
     }
-    owner = dds3SceneBasicSearchName(dds3GetActiveScene(), viewerinfo->entryName[nameIndex]);
+    owner = dds3SceneBasicSearchName(dds3GetActiveScene(), viewerinfo->entryName[nameindex]);
     if (owner == NULL) {
         return;
     }
     switch (owner->type >> 24) {
     case 5:
-        if (objectIndex >= 0) {
-            dds3EffectObjectBasicLinkObjectIndex(basic, owner, objectIndex);
+        if (posindex >= 0) {
+            dds3EffectObjectBasicLinkObjectIndex(eff, owner, posindex);
             break;
         }
         /* fallthrough */
@@ -609,16 +609,16 @@ void LinkEffectBasic(dds3Basic_t *basic, s32 nameIndex, s32 objectIndex, s32 fra
     case 8:
     case 9:
     case 17:
-        dds3EffectObjectBasicLinkObject(basic, owner);
+        dds3EffectObjectBasicLinkObject(eff, owner);
         break;
     case 16:
-        evtPathLinkAndMake(owner, basic);
-        mover = dds3GetBaseControlWorkData(basic)->control[1];
-        printf(D_0053B4A8, frame, currentFrame);
+        evtPathLinkAndMake(owner, eff);
+        mover = dds3GetBaseControlWorkData(eff)->control[1];
+        printf(D_0053B4A8, baseframe, currentFrame);
         if ((viewerinfo->flags & 1) != 0) {
-            evtStopMover(mover, 0, frame, currentFrame);
+            evtStopMover(mover, 0, baseframe, currentFrame);
         } else {
-            evtStopMover(mover, 1, frame, currentFrame);
+            evtStopMover(mover, 1, baseframe, currentFrame);
         }
         break;
     }
@@ -634,7 +634,7 @@ void DelEffectTable_evtEventViewer(s32 index)
     }
 }
 
-void *AddBED(void *resource, s32 startFrame, s32 ownerNameIndex, s32 billboardEntry, s32 linkFrame)
+void *AddBED(void *data, s32 cutno, s32 nameindex, s32 posindex, s32 baseframe)
 {
     f32 position[4];
     f32 scale[4];
@@ -643,19 +643,19 @@ void *AddBED(void *resource, s32 startFrame, s32 ownerNameIndex, s32 billboardEn
     memset(position, 0, sizeof(position));
     memset(scale, 0, sizeof(scale));
     scale[3] = 1.0f;
-    basic = dds3AddBEDEffectObjectBasic2(resource, position, scale);
+    basic = dds3AddBEDEffectObjectBasic2(data, position, scale);
     dds3EffectObjectBasicStatOn(basic, 1);
-    dds3StartBEDEffectObjectBasic(basic, startFrame);
-    LinkEffectBasic(basic, ownerNameIndex, billboardEntry, linkFrame);
+    dds3StartBEDEffectObjectBasic(basic, cutno);
+    LinkEffectBasic(basic, nameindex, posindex, baseframe);
     return basic;
 }
 
-void DelBED(evtFrameInfo_t *node)
+void DelBED(evtFrameInfo_t *frame)
 {
-    if (node->payload != NULL) {
-        dds3DeleteSceneBasicData(node->payload);
+    if (frame->payload != NULL) {
+        dds3DeleteSceneBasicData(frame->payload);
     }
-    node->payload = NULL;
+    frame->payload = NULL;
 }
 
 void DrawEffect(void)
@@ -864,19 +864,19 @@ void FrameSelect(void)
     }
 }
 
-void PushMenu(s32 mode, s32 first, s32 second)
+void PushMenu(s32 no, s32 x, s32 y)
 {
     evtViewer_t *viewer = viewerinfo;
     s32 depth = viewer->menuDepth + 1;
 
-    viewer->actionMode = mode;
+    viewer->actionMode = no;
     viewer->menuDepth = depth;
-    viewer->menuStack[depth].mode = mode;
-    viewer->menuStack[depth].unk02 = first;
-    viewer->menuStack[depth].unk04 = second;
-    if (mode > 0) {
-        if (mode >= 3) {
-            if (mode == 3) {
+    viewer->menuStack[depth].mode = no;
+    viewer->menuStack[depth].unk02 = x;
+    viewer->menuStack[depth].unk04 = y;
+    if (no > 0) {
+        if (no >= 3) {
+            if (no == 3) {
                 viewer->charCol = 0;
                 viewer->charRow = 0;
                 viewer->nameStorage[0] = 0;
@@ -1173,10 +1173,10 @@ s32 evtEventViewerProcess3(void)
 INCLUDE_ASM(const s32, "event/evtEventViewer", evtEventViewerProcess3);
 #endif
 
-s32 evtEventViewerProcess2(void *process)
+s32 evtEventViewerProcess2(void *id)
 {
     evtRunFrame(viewerinfo->frameCurrent);
-    dds3LinkProcess(process, evtInitFrameVar());
+    dds3LinkProcess(id, evtInitFrameVar());
     return (s32)evtEventViewerProcess3;
 }
 
@@ -1186,14 +1186,14 @@ s32 evtEventViewerProcess1(void)
     return (s32)evtEventViewerProcess2;
 }
 
-void evtEventViewerShutdown(void *process)
+void evtEventViewerShutdown(void *id)
 {
     evtFreeStage();
     while (sdfDelayedResrcCheck() != 0) {
     }
     evtUnRegistUnit();
     evtFreeViewerInfo();
-    sdfMemFreeDirect(*dds3GetProcessData(process));
+    sdfMemFreeDirect(*dds3GetProcessData(id));
     viewerinfo = NULL;
 }
 

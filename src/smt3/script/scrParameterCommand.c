@@ -3,59 +3,59 @@
 #include "kernel.h"
 #include "newdata.h"
 
-extern s32 scrGetIntPara(s32 parameterIndex);
+extern s32 scrGetIntPara(s32 n);
 
-extern void scrSetIntReturnValue(s32 value);
+extern void scrSetIntReturnValue(s32 i);
 
-extern void datAddItem(s32 itemId, s32 amount);
+extern void datAddItem(s32 id, s32 num);
 
-extern void datAddHearts(s32 amount);
+extern void datAddHearts(s32 id);
 
-extern void datAddMaka(s32 amount);
+extern void datAddMaka(s32 addmaka);
 
-extern void datAddMakaPar(s32 percent);
+extern void datAddMakaPar(s32 addmaka);
 
-extern s32 datCheckMaka(s32 amount);
+extern s32 datCheckMaka(s32 maka);
 
-extern void datPartyDamage(s32 percent);
+extern void datPartyDamage(s32 mode);
 
 extern void datPartyKaifuku(void);
 
-extern s32 datGetUniqueDevilId(s32 uniqueId);
+extern s32 datGetUniqueDevilId(s32 uid);
 
 extern s32 datCheckStockFull(void);
 
-extern s32 datGetPlayerParam(s32 parameter);
+extern s32 datGetPlayerParam(s32 id);
 
-extern void datAddPlayerParam(s32 parameter, s32 amount);
+extern void datAddPlayerParam(s32 id, s32 add);
 
-extern s32 datGetNakamaParam(s32 devilId, s32 parameter);
+extern s32 datGetNakamaParam(s32 did, s32 id);
 
 extern s32 datGetPlayerLND(void);
 
 extern s32 datGetPlayerLevel(void);
 
-extern void datDeadNakama(s32 devilId);
+extern void datDeadNakama(s32 did);
 
-extern s32 datBossRashGetRec(s32 encounterId, s32 record);
+extern s32 datBossRashGetRec(s32 eid, s32 type);
 
 extern void datRemoveHearts(void);
 
-extern void datEquipHearts(s32 heartsId);
+extern void datEquipHearts(s32 HeartsID);
 
 extern s32 p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
-extern s32 datSearchDevilStock(s32 devilId);
+extern s32 datSearchDevilStock(s32 id);
 
-extern s32 datAddDevil(s32 devilId, s32 kind);
+extern s32 datAddDevil(s32 id, s32 sw);
 
-extern s32 datAddUniqueDevil(s32 devilId, s32 kind, s32 uniqueId);
+extern s32 datAddUniqueDevil(s32 id, s32 sw, s32 uid);
 
-extern s32 datSearchUniqueDevilStock(s32 uniqueId);
+extern s32 datSearchUniqueDevilStock(s32 uid);
 
-extern s32 datDelDevil(s32 devilId);
+extern s32 datDelDevil(s32 id);
 
-extern void datCopyDevilWork(s32 slot, datUnitWork_t *work);
+extern void datCopyDevilWork(s32 id, datUnitWork_t *w);
 
 s32 prm_ITEM_PLUS(void)
 {

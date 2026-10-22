@@ -66,17 +66,17 @@ void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
 
 void fldBgmLoad(void);
 
-extern void fldSePlay(s32 soundId);
+extern void fldSePlay(s32 seid);
 
-extern void fldSeStop(s32 soundId);
+extern void fldSeStop(s32 seid);
 
-extern void fldMotionSePlay(s32 group, s32 sound);
+extern void fldMotionSePlay(s32 seid, s32 subid);
 
 extern s32 (*proc_func_ans)(dds3ProcessID_t *process);
 
 extern void fldBgmContinue(void);
 
-extern void fldMotionSeStop(s32 group, s32 sound);
+extern void fldMotionSeStop(s32 seid, s32 subid);
 
 typedef struct
 {
@@ -90,7 +90,7 @@ extern s32 fldGetBgmTrack(s32 code);
 
 extern void p2sdSetBgmTrack(s32 track);
 
-extern s32 evtBitCheck(s32 bit);
+extern s32 evtBitCheck(s32 no);
 
 extern void fldBgmPlay(void);
 
@@ -244,94 +244,94 @@ void fldBgmStop(void) {
     D_002FC020[0] = 0;
 }
 
-void fldSePlay(s32 soundId) {
+void fldSePlay(s32 seid) {
     s32 id;
 
     if (fldGlobalBase.area >= 50) {
         return;
     }
-    if (soundId < 0x10) {
+    if (seid < 0x10) {
         return;
     }
-    if (soundId == 0x2D) {
+    if (seid == 0x2D) {
         if (fldGlobalBase.area < 10) {
             return;
         }
     }
-    if (soundId == 0x80) {
+    if (seid == 0x80) {
         p2sdPlaySE(0x660060, 0x7F, 0x3F);
         return;
     }
-    if (soundId == 0x81) {
+    if (seid == 0x81) {
         p2sdPlaySE(0x660061, 0x7F, 0x3F);
         return;
     }
-    if (soundId == 0x82) {
+    if (seid == 0x82) {
         p2sdPlaySE(0x660064, 0x7F, 0x3F);
         return;
     }
-    if (soundId == 0x83) {
+    if (seid == 0x83) {
         p2sdPlaySE(0x6E0001, 0x7F, 0x3F);
         return;
     }
-    id = fldSeSmgId + soundId;
+    id = fldSeSmgId + seid;
     if (fldGlobalBase.area == 20) {
         s32 floor = fldGlobalBase.floor;
 
         if (floor == 5 || floor == 8 || floor == 13 || floor == 14 || floor == 15 ||
             floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
-            id = DNG_MAX[0] + soundId;
+            id = DNG_MAX[0] + seid;
         }
     }
     p2sdPlaySE(id, 0x7F, 0x3F);
 }
 
-void fldSeStop(s32 soundId) {
+void fldSeStop(s32 seid) {
     s32 id;
 
     if (fldGlobalBase.area >= 50) {
         return;
     }
-    if (soundId == 0x100) {
+    if (seid == 0x100) {
         p2sdStopSe(0x660060);
         return;
     }
-    if (soundId == 0x101) {
+    if (seid == 0x101) {
         p2sdStopSe(0x660061);
         return;
     }
-    if (soundId == 0x102) {
+    if (seid == 0x102) {
         p2sdStopSe(0x660064);
         return;
     }
-    id = fldSeSmgId + soundId;
+    id = fldSeSmgId + seid;
     if (fldGlobalBase.area == 20) {
         s32 floor = fldGlobalBase.floor;
 
         if (floor == 5 || floor == 8 || floor == 13 || floor == 14 || floor == 15 ||
             floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
-            id = DNG_MAX[0] + soundId;
+            id = DNG_MAX[0] + seid;
         }
     }
     p2sdStopSe(id);
 }
 
-void fldSeVol(s32 soundId, s32 volume) {
+void fldSeVol(s32 seid, s32 vol) {
     s32 id;
 
     if (fldGlobalBase.area >= 50) {
         return;
     }
-    id = fldSeSmgId + soundId;
+    id = fldSeSmgId + seid;
     if (fldGlobalBase.area == 20) {
         s32 floor = fldGlobalBase.floor;
 
         if (floor == 5 || floor == 8 || floor == 13 || floor == 14 || floor == 15 ||
             floor == 24 || (floor == 12 && evtBitCheck(0x16) != 0)) {
-            id = DNG_MAX[0] + soundId;
+            id = DNG_MAX[0] + seid;
         }
     }
-    p2sdPlaySE(id, volume, 0x3F);
+    p2sdPlaySE(id, vol, 0x3F);
 }
 
 void fld_1457F8(s32 mode) {
@@ -388,20 +388,20 @@ s32 fldWaitBgmReload(void) {
 
 INCLUDE_ASM(const s32, "field/fldSe", fldBgmBitChk);
 
-void fldMotionSePlay(s32 seId, s32 subId) {
+void fldMotionSePlay(s32 seid, s32 subid) {
     s32 cmd = 0x9010000;
 
-    if (seId != 0) {
-        cmd = 0x9000000 + ((seId << 16) + subId);
+    if (seid != 0) {
+        cmd = 0x9000000 + ((seid << 16) + subid);
     }
     p2sdPlaySE(cmd, 0x7F, 0x3F);
 }
 
-void fldMotionSeStop(s32 seId, s32 subId) {
+void fldMotionSeStop(s32 seid, s32 subid) {
     s32 cmd = 0x9010000;
 
-    if (seId != 0) {
-        cmd = 0x9000000 + ((seId << 16) + subId);
+    if (seid != 0) {
+        cmd = 0x9000000 + ((seid << 16) + subid);
     }
     p2sdStopSe(cmd);
 }

@@ -8,9 +8,9 @@ extern void (*D_00551828)(void);
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern void *memset(void *destination, s32 value, u32 bytes);
+extern void *memset(void *a, s32 b, u32 c);
 
-extern void sdfMemFreeDirect(void *handle);
+extern void sdfMemFreeDirect(void *aHandle);
 
 typedef struct tagPipeObject {
     s32 offset;
@@ -36,7 +36,7 @@ typedef struct tagPipeLinkInfo {
 
 extern u16 myStatus;
 
-extern s32 datGetPlayerParam(s32 index);
+extern s32 datGetPlayerParam(s32 id);
 
 extern u8 camMode, CameraAction, offsetStep, offsetStepCount;
 
@@ -56,7 +56,7 @@ extern void objInitMyAdd(void);
 
 extern s32 p2sdPlayBGM(u32 midino);
 
-extern void dds3FadeIn(s32 kind, s32 r, s32 g, s32 frames);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
 extern u8 debugMode, pipeInitDone;
 
@@ -105,13 +105,13 @@ extern void pipeEffRelease(void);
 extern s32 PipeTexRelease(void);
 
 
-extern void DEBUG_PRINT(const char *fmt, ...);
+extern void DEBUG_PRINT(const char *str, ...);
 
 extern void eglSetOt(s32 ot);
 
 extern void eglLinkAlpha(s32 mode);
 
-extern void eglLinkTest(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h);
+extern void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
 
 extern void ObjectDraw(void);
 

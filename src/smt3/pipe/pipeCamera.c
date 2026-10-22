@@ -23,13 +23,13 @@ extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 radius);
 
 extern dds3Basic_t *dds3GetControlScene(void);
 
-extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *scene, dds3Basic_t *camera);
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
 extern void dds3SetScreenFovy(f32 fovy);
 
 extern s32 pipeCheckLevel(s32 level, s32 type);
 
-extern void dds3SetPosPoseSet(void *basic, f32 *pos);
+extern void dds3SetPosPoseSet(void *pBasic, f32 *pos);
 
 extern void CalcCamera(void);
 
