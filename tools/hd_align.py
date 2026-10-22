@@ -124,9 +124,16 @@ def plan(reports, hd, ours, verbose):
     used = set()
     for path in all_sources():
         used.update(re.findall(r"\b[A-Za-z_]\w*\b", strip.sub(" ", path.read_text(errors="replace"))))
+    applied = {}
     for ours_t, votes in type_votes.items():
         if ours_t not in ours:
-            refused.append(f"type {ours_t}: not defined in the tree")
+            # An earlier pass may have taken this rename already, in which case the
+            # report still carries our old spelling and its members are still owed.
+            done = [h for h in votes if h in ours and h in hd]
+            if len(done) == 1:
+                applied[ours_t] = done[0]
+            else:
+                refused.append(f"type {ours_t}: not defined in the tree")
             continue
         if len(votes) > 1:
             refused.append(f"type {ours_t}: proposals disagree {dict(votes)}")
@@ -167,12 +174,18 @@ def plan(reports, hd, ours, verbose):
                 del types[ours_t]
 
     def hd_name_of(t):
-        return types[t][0] if t in types else t
+        if t in types:
+            return types[t][0]
+        return applied.get(t, t)
 
     members = defaultdict(dict)  # our type -> {our member: hd member}
-    for (our_t, our_m), votes in member_votes.items():
+    for (reported_t, our_m), votes in member_votes.items():
+        our_t = applied.get(reported_t, reported_t)
+        if our_t != reported_t:
+            for key in [k for k in evidence if k[0] == "member" and k[1] == (reported_t, our_m)]:
+                evidence.setdefault(("member", (our_t, our_m), key[2]), evidence[key])
         if our_t not in ours:
-            refused.append(f"member {our_t}.{our_m}: type not in the tree")
+            refused.append(f"member {reported_t}.{our_m}: type not in the tree")
             continue
         if len(votes) > 1:
             refused.append(f"member {our_t}.{our_m}: proposals disagree {dict(votes)}")
@@ -289,6 +302,91 @@ def rename_bodies(our_t, picks, ours):
         path.write_text("\n".join(lines))
 
 
+def apply_resolved(members, ours):
+    """Rewrite each member use whose object expression resolves to the renamed type.
+
+    This is what a shared member name needs: `->color` belongs to whichever type
+    the base identifier was declared as, so only the accesses that resolve to our
+    type are rewritten and the rest are left exactly as they were. An access the
+    resolver cannot place is left alone and shows up as a compile error naming the
+    old member, which is loud rather than silent."""
+    import hd_resolve
+
+    members_of = hd_resolve.struct_members(ROOT)
+    touched, counts = set(), Counter()
+    for our_t, picks in members.items():
+        rename_bodies(our_t, picks, ours)
+        touched.update(ours[our_t])
+    for path in all_sources():
+        text = path.read_text(errors="replace")
+        if not any(old in text for picks in members.values() for old in picks):
+            continue
+        scope_list = hd_resolve.scopes(text)
+        globals_ = hd_resolve.file_scope(text, scope_list)
+        edits = []
+        for our_t, picks in members.items():
+            for old, new in picks.items():
+                for start, end, owner in hd_resolve.accesses(
+                        text, old, scope_list, globals_, members_of):
+                    if owner == our_t:
+                        edits.append((start, end, old, new))
+        for start, end, old, new in sorted(edits, reverse=True):
+            text = text[:start] + re.sub(rf"{re.escape(old)}$", new, text[start:end]) + text[end:]
+            counts[old] += 1
+        if edits:
+            path.write_text(text)
+            touched.add(path)
+    return touched, counts
+
+
+def fix_single(members, rounds=25):
+    """Place the accesses the resolver could not, where only one target is possible.
+
+    An access the resolver left alone errors with the old member name. When the
+    whole plan renames that name to exactly one target, and the error line holds
+    exactly one unresolvable access of it, the placement is forced rather than
+    guessed. Anything else is reported and left."""
+    import subprocess
+    import hd_resolve
+
+    targets = defaultdict(set)
+    for picks in members.values():
+        for old, new in picks.items():
+            targets[old].add(new)
+    single = {o: next(iter(v)) for o, v in targets.items() if len(v) == 1}
+    members_of = hd_resolve.struct_members(ROOT)
+    placed, stuck = 0, []
+    for _ in range(rounds):
+        out = subprocess.run(["ninja", "-k", "0"], cwd=ROOT, capture_output=True, text=True)
+        if out.returncode == 0:
+            return placed, [], 0
+        progress = False
+        stuck = []
+        for path, line, name in sorted(set(ERROR.findall(out.stdout + out.stderr))):
+            if name not in single:
+                stuck.append(f"{path}:{line}: {name} has {len(targets[name])} possible targets")
+                continue
+            p = ROOT / path
+            text = p.read_text()
+            lines = text.splitlines()
+            start = sum(len(l) + 1 for l in lines[:int(line) - 1])
+            end = start + len(lines[int(line) - 1])
+            sc = hd_resolve.scopes(text)
+            unknown = [a for a in hd_resolve.accesses(
+                text, name, sc, hd_resolve.file_scope(text, sc), members_of)
+                if a[2] is None and start <= a[0] < end]
+            if len(unknown) != 1:
+                stuck.append(f"{path}:{line}: {len(unknown)} unresolvable uses of {name}")
+                continue
+            s, e, _ = unknown[0]
+            p.write_text(text[:s] + re.sub(rf"{re.escape(name)}$", single[name], text[s:e]) + text[e:])
+            placed += 1
+            progress = True
+        if not progress:
+            return placed, stuck, out.returncode
+    return placed, stuck, 1
+
+
 def apply(types, members, ours, owners):
     """Rename struct bodies, then uses: tree-wide where no other type declares the
     old name, else left for the compiler to attribute (see fix)."""
@@ -398,6 +496,9 @@ def main():
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--no-types", action="store_true", help="members only")
     ap.add_argument("--fix", action="store_true", help="after --apply, resolve deferred uses by compiling")
+    ap.add_argument("--resolve", action="store_true",
+                    help="place each member use by the resolved type of its object "
+                         "expression, which is what a shared member name needs")
     ap.add_argument("--safe-only", action="store_true",
                     help="skip members whose old name another type also declares, so every "
                          "rewrite is unambiguous and no compile-and-guess pass is needed")
@@ -449,7 +550,17 @@ def main():
         for m, new in picks.items():
             print(f"member {t}.{m} -> {new}  ({evidence[('member', (t, m), (hd_t, new))]})")
     print(f"{len(types)} types, {sum(map(len, members.values()))} members, {len(refused)} refused")
-    if args.apply:
+    if args.apply and args.resolve:
+        touched, counts = apply_resolved(members, ours)
+        print(f"touched {len(touched)} files; {sum(counts.values())} uses placed by type")
+        for old, n in counts.most_common(10):
+            print(f"  {old}: {n}")
+        if args.fix:
+            n, stuck, rc = fix_single(members)
+            for s in stuck:
+                print("stuck", s)
+            print(f"placed {n} more by elimination; {len(stuck)} stuck; ninja exit {rc}")
+    elif args.apply:
         touched, deferred = apply(types, members, ours, owners)
         print(f"touched {len(touched)} files; {len(deferred)} member names left for the compiler: "
               + ", ".join(f"{o}->{'|'.join(n)}" for o, n in deferred.items()))
