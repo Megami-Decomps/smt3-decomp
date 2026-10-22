@@ -30,6 +30,9 @@ KNR = re.compile(r"^[A-Za-z_][\w \t\*]*?\b\w+\s*\(\s*[A-Za-z_][\w, \t]*\)\s*$((?
 # holds no further parentheses: a call's result is not something to resolve.
 PCHAIN = re.compile(r"\(\s*\(\s*(?:struct\s+|const\s+)*([A-Za-z_]\w*)\s*\*+\s*\)\s*&?\s*"
                     r"[^()]*\)((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
+# A call's result is resolvable too: the function's return type is in the tree.
+CCHAIN = re.compile(r"([A-Za-z_]\w*)\s*\([^()]*\)"
+                    r"((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
 BCHAIN = re.compile(r"([A-Za-z_]\w*)((?:\s*\[[^\]]*\]|\s*(?:->|\.)\s*[A-Za-z_]\w*)*)$")
 STEP = re.compile(r"(?:->|\.)\s*([A-Za-z_]\w*)")
 # Resolved, but to something no rename can target.
@@ -71,6 +74,20 @@ def struct_members(root):
         for new, old in aliases.items():
             if new not in out and old in out:
                 out[new] = out[old]
+    return out
+
+
+PROTO = re.compile(r"^((?:static\s+|extern\s+|const\s+)*[A-Za-z_]\w*)[\s*]+([A-Za-z_]\w*)\s*\([^;{}]*\)\s*[;{]", re.M)
+
+
+def function_types(root):
+    """{function: return type}, for a call used as an object expression."""
+    out = {}
+    for path in sorted(list((root / "include").rglob("*.h")) + list((root / "src").rglob("*.c"))):
+        for m in PROTO.finditer(re.sub(r"/\*.*?\*/", " ", path.read_text(errors="replace"), flags=re.S)):
+            ty = m.group(1).split()[-1]
+            if ty not in NOT_A_TYPE:
+                out.setdefault(m.group(2), ty)
     return out
 
 
@@ -127,7 +144,7 @@ def file_scope(text, scope_list=()):
     return names
 
 
-def owner_at(text, pos, names, members):
+def owner_at(text, pos, names, members, funcs=()):
     """The type whose member the access at `pos` reads, or None if unresolvable.
 
     `pos` is the offset of the `.` or `->`. The chain is followed from its base,
@@ -136,6 +153,8 @@ def owner_at(text, pos, names, members):
     m = PCHAIN.search(head)
     if m:
         ty, steps = m.group(1), m.group(2)
+    elif (c := CCHAIN.search(head)) and c.group(1) in funcs:
+        ty, steps = funcs[c.group(1)], c.group(2)
     else:
         m = BCHAIN.search(head)
         if not m:
@@ -156,7 +175,7 @@ def owner_at(text, pos, names, members):
     return ty
 
 
-def accesses(text, member, scope_list, globals_, members):
+def accesses(text, member, scope_list, globals_, members, funcs=()):
     """[(punct_start, name_end, owner or None)] for every `.member` use."""
     out = []
     for m in re.finditer(r"(->|\.)\s*" + re.escape(member) + r"\b", text):
@@ -165,5 +184,5 @@ def accesses(text, member, scope_list, globals_, members):
             if start <= m.start() < end:
                 names.update(local)
                 break
-        out.append((m.start(), m.end(), owner_at(text, m.start(), names, members)))
+        out.append((m.start(), m.end(), owner_at(text, m.start(), names, members, funcs)))
     return out

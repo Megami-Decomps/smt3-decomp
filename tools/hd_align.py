@@ -42,7 +42,12 @@ def scalar_class(ty):
 
 
 def hd_types():
-    """name -> [(type, member)]"""
+    """name -> [(type, member)], from the HD corpus and the IDB's own layouts.
+
+    Both carry the HD symbol recovery, and the IDB holds records the
+    reconstruction's headers do not, so a target absent from one is often in the
+    other. HD wins where both describe a record, its member order being what that
+    corpus is authoritative on."""
     out, cur = {}, None
     for line in (ROOT / "config" / "smt3" / "hd_types.txt").read_text().splitlines():
         if line.startswith("T "):
@@ -51,7 +56,33 @@ def hd_types():
         elif line.startswith("M ") and cur:
             p = line.split(None, 4)
             out[cur].append((p[3], p[4].strip() if len(p) > 4 else ""))
-    return out
+    cur = None
+    for line in (ROOT / "config" / "smt3" / "ida_members.txt").read_text().splitlines():
+        if line.startswith("T "):
+            name = line.split()[1]
+            cur = None if out.get(name) else name
+            out.setdefault(cur, [])
+        elif line.startswith("M ") and cur:
+            p = line.split(None, 4)
+            out[cur].append((p[3], p[4].strip() if len(p) > 4 else ""))
+    return {k: v for k, v in out.items() if k and v}
+
+
+def normalise(name, corpus):
+    """The corpus name a report means, undoing il2cpp's decorations.
+
+    Its output carries an `_o` suffix for the object wrapper and qualifies a
+    file-local record with its file (`effBattleSystem_effBTLSystem_Attack_tag`),
+    neither of which is the original type name."""
+    if name in corpus:
+        return name
+    for cand in ([name[:-2]] if name.endswith("_o") else []) + \
+                [name.split("_", i)[-1] for i in range(1, name.count("_") + 1)]:
+        if cand in corpus:
+            return cand
+        if cand.endswith("_o") and cand[:-2] in corpus:
+            return cand[:-2]
+    return name
 
 
 def our_types():
@@ -126,6 +157,7 @@ def plan(reports, hd, ours, verbose):
         used.update(re.findall(r"\b[A-Za-z_]\w*\b", strip.sub(" ", path.read_text(errors="replace"))))
     applied = {}
     for ours_t, votes in type_votes.items():
+        votes = Counter({normalise(k, hd): v for k, v in votes.items()})
         if ours_t not in ours:
             # An earlier pass may have taken this rename already, in which case the
             # report still carries our old spelling and its members are still owed.
@@ -135,19 +167,26 @@ def plan(reports, hd, ours, verbose):
             else:
                 refused.append(f"type {ours_t}: not defined in the tree")
             continue
-        if len(votes) > 1:
+        ranked = votes.most_common()
+        if len(ranked) > 1 and not (ranked[0][1] >= 2 and ranked[0][1] >= 2 * ranked[1][1]):
             refused.append(f"type {ours_t}: proposals disagree {dict(votes)}")
             continue
-        (hd_t, n), = votes.items()
+        hd_t, n = ranked[0]
         if ours_t in hd:
             refused.append(f"type {ours_t} -> {hd_t}: {ours_t} is itself an HD type")
             continue
         if hd_t not in hd:
             refused.append(f"type {ours_t} -> {hd_t}: not an HD type")
             continue
-        # One report is enough only when the function's own name carries the type's stem.
-        if n < 2 and stem(hd_t) not in evidence[("type", ours_t, hd_t)].split(":")[0].lower():
-            refused.append(f"type {ours_t} -> {hd_t}: one report, from a function not named for it")
+        # One report needs corroboration: the function's own name carrying the
+        # type's stem, or two member names our record already shares with it.
+        named_for = any(stem(hd_t) in e.split(":")[0].lower()
+                        for k, e in evidence.items() if k[:2] == ("type", ours_t))
+        shared = len({m for f in ours[ours_t].values() for _, m, _ in f}
+                     & {m for _, m in hd[hd_t]})
+        if n < 2 and not named_for and shared < 2:
+            refused.append(f"type {ours_t} -> {hd_t}: one report, not named for it, "
+                           f"{shared} member names shared")
             continue
         if hd_t in ours or hd_t in used:
             refused.append(f"type {ours_t} -> {hd_t}: the tree already uses the name {hd_t}")
@@ -180,6 +219,7 @@ def plan(reports, hd, ours, verbose):
 
     members = defaultdict(dict)  # our type -> {our member: hd member}
     for (reported_t, our_m), votes in member_votes.items():
+        votes = Counter({(normalise(a, hd), b): v for (a, b), v in votes.items()})
         our_t = applied.get(reported_t, reported_t)
         if our_t != reported_t:
             for key in [k for k in evidence if k[0] == "member" and k[1] == (reported_t, our_m)]:
@@ -187,10 +227,11 @@ def plan(reports, hd, ours, verbose):
         if our_t not in ours:
             refused.append(f"member {reported_t}.{our_m}: type not in the tree")
             continue
-        if len(votes) > 1:
+        ranked = votes.most_common()
+        if len(ranked) > 1 and not (ranked[0][1] >= 2 and ranked[0][1] >= 2 * ranked[1][1]):
             refused.append(f"member {our_t}.{our_m}: proposals disagree {dict(votes)}")
             continue
-        ((hd_t, hd_m), n), = votes.items()
+        (hd_t, hd_m), n = ranked[0]
         if hd_name_of(our_t) != hd_t:
             refused.append(f"member {our_t}.{our_m} -> {hd_t}.{hd_m}: {our_t} is not {hd_t} here")
             continue
@@ -208,7 +249,10 @@ def plan(reports, hd, ours, verbose):
         hd_ty = next(ty for ty, m in hd[hd_t] if m == hd_m)
         ours_cls = scalar_class(found[0][0]) if not found[0][1] else "struct"
         hd_cls = scalar_class(hd_ty)
-        if ours_cls != hd_cls and not (hd_cls == "ptr" and ours_cls == "struct"):
+        # The remaster rewrote inline arrays and embedded records as pointers, so an
+        # HD pointer standing where we hold the bytes inline is the expected shape.
+        pointerized = hd_cls == "ptr" and (ours_cls in ("struct", "int") or found[0][1])
+        if ours_cls != hd_cls and not pointerized and {ours_cls, hd_cls} != {"struct", "int"}:
             refused.append(f"member {our_t}.{our_m} ({found[0][0]}) -> {hd_t}.{hd_m} ({hd_ty}): class differs")
             continue
         existing = {m for fields in defs.values() if any(f[1] == our_m for f in fields)
@@ -302,7 +346,7 @@ def rename_bodies(our_t, picks, ours):
         path.write_text("\n".join(lines))
 
 
-def apply_resolved(members, ours):
+def apply_resolved(types, members, ours):
     """Rewrite each member use whose object expression resolves to the renamed type.
 
     This is what a shared member name needs: `->color` belongs to whichever type
@@ -313,6 +357,7 @@ def apply_resolved(members, ours):
     import hd_resolve
 
     members_of = hd_resolve.struct_members(ROOT)
+    funcs = hd_resolve.function_types(ROOT)
     touched, counts = set(), Counter()
     for our_t, picks in members.items():
         rename_bodies(our_t, picks, ours)
@@ -327,7 +372,7 @@ def apply_resolved(members, ours):
         for our_t, picks in members.items():
             for old, new in picks.items():
                 for start, end, owner in hd_resolve.accesses(
-                        text, old, scope_list, globals_, members_of):
+                        text, old, scope_list, globals_, members_of, funcs):
                     if owner == our_t:
                         edits.append((start, end, old, new))
         for start, end, old, new in sorted(edits, reverse=True):
@@ -336,6 +381,14 @@ def apply_resolved(members, ours):
         if edits:
             path.write_text(text)
             touched.add(path)
+    if types:
+        pat = re.compile(r"\b(" + "|".join(re.escape(k) for k in types) + r")\b")
+        for path in all_sources():
+            text = path.read_text(errors="replace")
+            swapped = pat.sub(lambda m: types[m.group(1)][0], text)
+            if swapped != text:
+                path.write_text(swapped)
+                touched.add(path)
     return touched, counts
 
 
@@ -355,6 +408,7 @@ def fix_single(members, rounds=25):
             targets[old].add(new)
     single = {o: next(iter(v)) for o, v in targets.items() if len(v) == 1}
     members_of = hd_resolve.struct_members(ROOT)
+    funcs = hd_resolve.function_types(ROOT)
     placed, stuck = 0, []
     for _ in range(rounds):
         out = subprocess.run(["ninja", "-k", "0"], cwd=ROOT, capture_output=True, text=True)
@@ -373,7 +427,7 @@ def fix_single(members, rounds=25):
             end = start + len(lines[int(line) - 1])
             sc = hd_resolve.scopes(text)
             unknown = [a for a in hd_resolve.accesses(
-                text, name, sc, hd_resolve.file_scope(text, sc), members_of)
+                text, name, sc, hd_resolve.file_scope(text, sc), members_of, funcs)
                 if a[2] is None and start <= a[0] < end]
             if len(unknown) != 1:
                 stuck.append(f"{path}:{line}: {len(unknown)} unresolvable uses of {name}")
@@ -561,7 +615,8 @@ def main():
     for r in refused if args.plan else []:
         print("refused", r)
     for t, (hd_t, n) in sorted(types.items()):
-        print(f"type {t} -> {hd_t}  ({n} functions; {evidence[('type', t, hd_t)]})")
+        why = next((e for k, e in evidence.items() if k[:2] == ("type", t)), "")
+        print(f"type {t} -> {hd_t}  ({n} functions; {why})")
     for t, picks in sorted(members.items()):
         hd_t = types[t][0] if t in types else t
         for m, new in picks.items():
@@ -569,7 +624,7 @@ def main():
             print(f"member {t}.{m} -> {new}" + (f"  ({evidence[key]})" if key in evidence else ""))
     print(f"{len(types)} types, {sum(map(len, members.values()))} members, {len(refused)} refused")
     if args.apply and args.resolve:
-        touched, counts = apply_resolved(members, ours)
+        touched, counts = apply_resolved(types, members, ours)
         print(f"touched {len(touched)} files; {sum(counts.values())} uses placed by type")
         for old, n in counts.most_common(10):
             print(f"  {old}: {n}")
