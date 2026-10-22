@@ -137,56 +137,50 @@ resolves against the type of `head` rather than of `work`. A rename is then
 written exactly where it belongs: of 719 `->color` accesses in the tree, 17
 belong to `dds3Effect_Blur_t` and only those became `->abgr`.
 
-That took the applied set from 175 members to 515. 1967 uses were placed by
-resolved type and 42 more by elimination, where the resolver could not place an
-access but the whole plan renames that name to exactly one target and the line
-holds exactly one unplaceable use. 35 member names remain excluded, listed in
-`config/smt3/hd_align/exclude.txt`.
+That took the applied set from 175 members to 678, every one of the accepted
+proposals, with nothing excluded. 1281 uses were placed in the final pass, and
+`--fix` places an access the resolver cannot when the whole plan renames that
+name to one target and the line holds exactly one unplaceable use.
 
-Four constructs each resolved wrongly first, and each one broke exactly one unit,
-which the per-unit scan named:
+Six constructs each resolved wrongly first, and each broke exactly one unit,
+which `tools/check_unit.py` named:
 
 - **Old-style (K&R) definitions** declare their parameters between the header and
-  the brace, at file scope, so three functions' `source` parameters collapsed onto
-  one type and `effPCPHamaCardSpiralCopy` read the wrong struct. A K&R definition
-  is now its own scope and its parameters stay out of file scope.
+  the brace, at file scope, so three functions' `source` parameters collapsed
+  onto one type and `effPCPHamaCardSpiralCopy` read the wrong struct. A K&R
+  definition is now its own scope and its parameters stay out of file scope.
 - **`return work;` has the shape of a declaration**, which typed `work` as
   `return`. Keywords are refused as declaration types.
-- **A bare cast types the result, not the base.** `->` binds tighter than a cast,
-  so `(sdfVector4_t *)r->plane` casts the member; taking `sdfVector4_t` for `r`
-  resolved the wrong struct. Only a parenthesised cast, `((T *)x)->m`, types the
-  base.
 - **`planar[0] = pos[1];` parses as a declaration** of type `plana` named `r`
   with an initialiser, which typed a real `collision_s *r` parameter as a struct
   that does not exist. A declaration always separates type from name by a space
-  or a star; an assignment to an array element does not.
+  or a star; an assignment to an array element does not. This is the subtlest of
+  the six and the one to remember.
+- **A bare cast types the result, not the base.** `->` binds tighter than a cast,
+  so `(sdfVector4_t *)r->plane` casts the member. Only a parenthesised cast types
+  the base, and it may wrap a whole expression: `((dds3SceneBasic_t *)b->workdata)->unit`.
+- **A one-line record has no members at all** as far as `cparse.struct_fields` is
+  concerned, so every chain through `itfMesInstance_t` failed. Worse,
+  `filePacRequest_t` puts its whole body on one line with interleaved comments,
+  so splitting on `;` produced nonsense until the comments were stripped.
+- **A typedef alias names one record twice.** Following
+  `typedef EffBlurTemplateBody EffPCPTexturedBlurParams;` is what makes
+  `params->res.source.color` resolve, which is the chain that feeds
+  `dds3Effect_Blur_t`.
 
-The last one is the one to remember: the first three produce a loud compile error,
-while a false resolution that lands on a member the wrong type happens to have
-would be silent. Nothing but the per-unit byte comparison catches that.
+Where a chain resolves to a type that has no such member, the rename is simply
+not applied there, which is the right answer rather than a forced guess:
+`((filePacRequest_t *)x)->packet.head` resolves to `sdfPacDecodeCb_t`, and that
+record has no `head`.
+
+A type absent from the tree's own records cannot be one being renamed, so such a
+chain resolves to a sentinel meaning "not the type in question" rather than
+blocking. A member missing from the record it should belong to still resolves to
+nothing, which is the conservative branch.
 
 ### What is left
 
-The 35 excluded names are where one old name maps to several targets and the
-resolver cannot place every use (`selectedIndex`, `params`, `color` in some
-units). They need the remaining resolver gaps closed rather than a new method:
-function-call results, chained subscripts of pointer arrays, and multi-line
-statements are the cases it still answers with None.
-
-### Ownership has to count nested members
-
-The one-type test is only as good as the ownership map, and the first version of
-it missed a whole class: `cparse.struct_fields` records depth-1 members only, so
-a name declared by an anonymous struct *inside* another record looked unowned.
-Rewriting `.fontIndex` tree-wide therefore also rewrote
-`pText->renderValueOrSetupOrShade.setupBytes.fontIndex`, which is a different
-record, and `frFont.c` lost eleven accesses that way. `nested_member_names()`
-adds every declaration below the top level of a struct or union as an extra
-owner, which puts `fontIndex`, `firstOption` and `secondOption` back in the
-deferred set where they belong.
-
-The filter and the rewrite must also share one map. They did not at first: the
-filter used the tree's own members while the rewrite used a map that included the
-IDB's types, so five names the filter had cleared were deferred by the rewrite,
-left half-renamed, and six units stopped compiling. Those six read as failures of
-the *rename* until the error output showed they were failures to compile.
+Nothing of the agents' accepted output. The residue is in the reports rather than
+the application: 1439 proposals the validator refused, most of them because two
+of our types claim one HD type, or because a proposal came from a single function
+not named for the type. Those need reading, not machinery.
