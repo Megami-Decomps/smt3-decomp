@@ -487,7 +487,8 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
 
     n.rule("as", f"{AS} {AS_FLAGS} -o $out $in", description="as $in")
     n.rule("bin", f"{OBJCOPY} -I binary -O elf32-littlemips -B mips:5900 $in $out", description="bin $in")
-    n.rule("eeasm", f"{sys.executable} tools/eeas_compat.py $in $out", description="ee-as compat $in")
+    n.rule("eeasm", f"{sys.executable} tools/eeas_compat.py --prefix build/eeasm $in",
+           description="ee-as compat $unit")
     n.rule("vuas", f"{sys.executable} tools/vuas.py $in -o $out", description="vuas $in")
     n.rule(
         "cc",
@@ -535,13 +536,15 @@ def write_ninja(versions: list[str], args: argparse.Namespace) -> dict[str, list
                 n.build(str(obj), "bin", str(src))
             else:
                 text = (ROOT / src).read_text(errors="replace")
-                eeasm = []
                 nonmatchings = Path("asm") / version / "nonmatchings"
-                for _, folder, name in include_directives(text, context=str(src)):
-                    asm = nonmatchings / folder / f"{name}.s"
-                    out = Path("build") / "eeasm" / asm
-                    n.build(str(out), "eeasm", str(asm), implicit=["tools/eeas_compat.py"])
-                    eeasm.append(str(out))
+                asm_files = list(dict.fromkeys(
+                    str(nonmatchings / folder / f"{name}.s")
+                    for _, folder, name in include_directives(text, context=str(src))
+                ))
+                eeasm = [f"build/eeasm/{asm}" for asm in asm_files]
+                if asm_files:
+                    n.build(eeasm, "eeasm", asm_files, implicit=["tools/eeas_compat.py"],
+                            variables={"unit": str(src)})
                 cdefs = f"'-DASM_ROOT=\"build/eeasm/{nonmatchings}/\"' -DVERSION_{version.upper()}"
                 unit = src.relative_to(Path("src") / version).with_suffix("").as_posix()
                 flags = unit_cflags(version).get(unit, "")
