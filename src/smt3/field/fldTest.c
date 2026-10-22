@@ -10,13 +10,13 @@ extern s32 fldDoor_ElvTakasaToFloor(s32 takasa);
 
 extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 
-extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *list);
+extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *hndl);
 
 extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *hndl);
 
 extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 
-extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *list);
+extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
 
 extern s32 dds3ObjectBaseCheckFlag(dds3Basic_t *pObjectBasic, u32 flag);
 

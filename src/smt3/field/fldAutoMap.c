@@ -190,7 +190,7 @@ extern void dds3VisibleSceneBasic(dds3Basic_t *basic, s32 visible);
 
 extern void *fldBlurEffectHandle;
 
-extern void dds3EffectDistortionBlurDelete(void *handle);
+extern void dds3EffectDistortionBlurDelete(void *hDistortionBlur);
 
 extern sdfTexHandle_t *fldEATexture;
 
@@ -367,9 +367,9 @@ typedef struct
     sdfPacWork_t *queueHead;
 } fldPacRequest_t;
 
-extern fldPacRequest_t *pacLoad(const char *path);
+extern fldPacRequest_t *pacLoad(const char *filename);
 
-extern void pacSync(fldPacRequest_t *request);
+extern void pacSync(fldPacRequest_t *pacFileHandle);
 
 extern void pacFileHandleFree_(fldPacRequest_t *pacHandle);
 
@@ -1111,10 +1111,10 @@ s32 fldAutoMapChkOpen(s32 fld, s32 area, u32 block) {
     return (*(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + area) * 8) >> block) & 1;
 }
 
-void fldAutoMapOpenBlock(s32 flagNumber) {
+void fldAutoMapOpenBlock(s32 blockID) {
     s32 floor;
 
-    if (flagNumber <= 0) {
+    if (blockID <= 0) {
         return;
     }
     if (fldEncountTestFlag(0x80) != 0) {
@@ -1125,55 +1125,55 @@ void fldAutoMapOpenBlock(s32 flagNumber) {
         return;
     }
     floor -= 10;
-    fldGlobalBase.blockID = flagNumber - 1;
+    fldGlobalBase.blockID = blockID - 1;
     if (floor >= 30) {
         u32 ofs = 0x17F10 + (floor * 32 + fldGlobalBase.floor) * 8;
 
-        *(u64 *)((u8 *)DDS3_GBWK + ofs) |= (u64)1 << (flagNumber - 1);
+        *(u64 *)((u8 *)DDS3_GBWK + ofs) |= (u64)1 << (blockID - 1);
     } else {
         *(u64 *)((u8 *)DDS3_GBWK + 0xFC58 + (floor * 32 + fldGlobalBase.floor) * 8) |=
-            (u64)1 << (flagNumber - 1);
+            (u64)1 << (blockID - 1);
     }
-    fldGlobalBase.amSBlock = flagNumber;
+    fldGlobalBase.amSBlock = blockID;
     fldGlobalBase.amFloor = fldAutoMap_GetFloor(fldGlobalBase.floor, fldGlobalBase.blockID);
     if (fldAutoMapField == 25) {
         if (fldGlobalBase.floor == 0) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 17, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 17, blockID);
         }
         if (fldGlobalBase.floor == 16) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 1, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 1, blockID);
         }
         if (fldGlobalBase.floor == 1) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 18, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 18, blockID);
         }
         if (fldGlobalBase.floor == 17) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 2, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 2, blockID);
         }
         if (fldGlobalBase.floor == 2) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 19, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 19, blockID);
         }
         if (fldGlobalBase.floor == 18) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 3, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 3, blockID);
         }
         if (fldGlobalBase.floor == 3) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 20, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 20, blockID);
         }
         if (fldGlobalBase.floor == 19) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 4, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 4, blockID);
         }
         if (fldGlobalBase.floor == 4) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 21, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 21, blockID);
         }
         if (fldGlobalBase.floor == 20) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 5, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 5, blockID);
         }
     }
     if (fldAutoMapField == 34) {
         if (fldGlobalBase.floor == 1) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 3, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 3, blockID);
         }
         if (fldGlobalBase.floor == 2) {
-            fldAutoMapOpenBlock2(fldAutoMapField, 2, flagNumber);
+            fldAutoMapOpenBlock2(fldAutoMapField, 2, blockID);
         }
     }
 }
@@ -1297,7 +1297,7 @@ void fldAllIconDel(s32 index, f32 *x, f32 *z) {
     *z = 0.0f;
 }
 
-void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
+void fldAutoMapGetBBox(f32 *getX0, f32 *getZ0, f32 *getX1, f32 *getZ1) {
     s32 room;
     u32 i;
     fldMapRoom_t *rec;
@@ -1307,10 +1307,10 @@ void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
     fldMapPoint_t *b;
 
     room = 0;
-    *minX = 0.0f;
-    *maxZ = 0.0f;
-    *maxX = 0.0f;
-    *minZ = 0.0f;
+    *getX0 = 0.0f;
+    *getZ0 = 0.0f;
+    *getX1 = 0.0f;
+    *getZ1 = 0.0f;
     rec = fldAutoMapHeader;
     for (; room < fldAutoMapData; room++, rec++) {
         item = rec->items;
@@ -1325,30 +1325,30 @@ void fldAutoMapGetBBox(f32 *minX, f32 *maxZ, f32 *maxX, f32 *minZ) {
             if (visible != 0) {
                 a = item->pointA;
                 if (a != NULL) {
-                    if (*minX > a->x) {
-                        *minX = a->x;
+                    if (*getX0 > a->x) {
+                        *getX0 = a->x;
                     }
                     b = item->pointB;
-                    if (*minX > b->x) {
-                        *minX = b->x;
+                    if (*getX0 > b->x) {
+                        *getX0 = b->x;
                     }
-                    if (*maxX < a->x) {
-                        *maxX = a->x;
+                    if (*getX1 < a->x) {
+                        *getX1 = a->x;
                     }
-                    if (*maxX < b->x) {
-                        *maxX = b->x;
+                    if (*getX1 < b->x) {
+                        *getX1 = b->x;
                     }
-                    if (*maxZ < a->z) {
-                        *maxZ = a->z;
+                    if (*getZ0 < a->z) {
+                        *getZ0 = a->z;
                     }
-                    if (*maxZ < b->z) {
-                        *maxZ = b->z;
+                    if (*getZ0 < b->z) {
+                        *getZ0 = b->z;
                     }
-                    if (a->z < *minZ) {
-                        *minZ = a->z;
+                    if (a->z < *getZ1) {
+                        *getZ1 = a->z;
                     }
-                    if (b->z < *minZ) {
-                        *minZ = b->z;
+                    if (b->z < *getZ1) {
+                        *getZ1 = b->z;
                     }
                 }
             }

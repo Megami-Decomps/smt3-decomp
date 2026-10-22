@@ -414,7 +414,7 @@ s32 Wait1_nbE901(nbEventProcessData_t *e)
     return 0;
 }
 
-s32 SetUp1(nbEventProcessData_t *e)
+s32 SetUp1(nbEventProcessData_t *ed)
 {
     sdfVector4_t pos;
     sdfVector4_t rot;
@@ -425,7 +425,7 @@ s32 SetUp1(nbEventProcessData_t *e)
     pos.y = -600.0f;
     memset(&rot, 0, sizeof(rot));
     rot.w = 1.0f;
-    h = evtInitMotionSeProcess(e->unk_04, 1);
+    h = evtInitMotionSeProcess(ed->unk_04, 1);
     basic = dds3SearchSceneBasic(dds3GetActiveScene(), h, 5);
     D_005515B4 = basic;
     pos.x = 0.0f;
@@ -434,7 +434,7 @@ s32 SetUp1(nbEventProcessData_t *e)
     dds3SetPosPoseSet(basic, &pos);
     evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515B4), 0, 0, 0, 2);
     bedbasic = nbCreateBasicEffect(evtGetResorceData(0x385, 2), &pos, &rot);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
@@ -467,37 +467,37 @@ s32 SyuGo2(nbEventProcessData_t *ed)
     return 0;
 }
 
-s32 Cls1(nbEventProcessData_t *e)
+s32 Cls1(nbEventProcessData_t *ed)
 {
-    func_0024D938(e);
-    nbFreeEffectSlot(e);
+    func_0024D938(ed);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
-s32 Daisupe(nbEventProcessData_t *e)
+s32 Daisupe(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
     sdfVector4_t pos;
 
     nbSetMainPhase(D_005515BC);
-    nbSetupBattleUnits(e->data, D_005515BC);
+    nbSetupBattleUnits(ed->data, D_005515BC);
     nbLoadUnitGroup(1, 0, 1);
     if (evtBitCheck(0xC0F) != 0) {
-        nbSetModelHandleOnce(nbGetEventForm(), e->unk_20);
-        e->unk_20 = NULL;
+        nbSetModelHandleOnce(nbGetEventForm(), ed->unk_20);
+        ed->unk_20 = NULL;
     }
     form = nbGetEventForm();
     SDF_VU0_COPYVECTOR(&pos, &form->pos);
     pos.y -= 1000.0f;
     nbSetFormPos(form, &pos);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
-s32 ReadWait2(nbEventProcessData_t *e)
+s32 ReadWait2(nbEventProcessData_t *ed)
 {
-    if (e->frame >= 0x1F && nbCheckLoadGroup(1) == 0) {
-        nbFreeEffectSlot(e);
+    if (ed->frame >= 0x1F && nbCheckLoadGroup(1) == 0) {
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }

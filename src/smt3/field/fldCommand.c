@@ -173,8 +173,8 @@ dds3Basic_t *fldGetUnitFollowCamera(void);
 
 dds3Basic_t *dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
 
-extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut,
-                                                       f32 *targetPositionOut);
+extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *pBasic, f32 *tgtpos,
+                                                       f32 *campos);
 
 extern void fldCamGetPhokanParam(void);
 
@@ -212,9 +212,9 @@ extern void fldSetModelFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 
 dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 
-u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *object);
+u16 dds3GetBasicArrayCount(const dds3BasicArrayHandle_t *hndl);
 
-u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *object);
+u32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *hndl);
 
 u32 dds3GetBasicArray(const dds3BasicArrayHandle_t *hndl);
 
@@ -222,7 +222,7 @@ void dds3MatterObjectBasicSetAlpMode(dds3Basic_t *aPtr, u32 alpmode);
 
 u32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 
-void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *node);
+void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
 
 extern void fldSetAnimeFlag(s32 area, s32 slotIndex, s32 bit, s32 enabled);
 

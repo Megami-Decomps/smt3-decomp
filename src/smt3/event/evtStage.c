@@ -144,9 +144,9 @@ void dds3PathBasicPauseOn(dds3PathBasicControl_t *value);
 
 dds3PathBasicControl_t *dds3ObjectBaseGetPathControl(void *pObjectBasic);
 
-void dds3PathBasicPauseOff(dds3PathBasicControl_t *value);
+void dds3PathBasicPauseOff(dds3PathBasicControl_t *pControl);
 
-void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *value, f32 multiplier);
+void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *pControl, f32 ratio);
 
 
 void dds3MoverBasicSetPath(dds3Basic_t *pMoverBasic, dds3Basic_t *pPathBasic);
@@ -154,16 +154,16 @@ void dds3MoverBasicSetPath(dds3Basic_t *pMoverBasic, dds3Basic_t *pPathBasic);
 
 extern void dds3MoverBasicMakePath(dds3Basic_t *pMoverBasic);
 
-f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *value);
+f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *pControl);
 
 void *dds3ObjectBaseGetControlBasic(dds3Basic_t *pObjectBasic, s32 itemType);
 
 dds3PathBasicControl_t *dds3MoverBasicGetPathControl(struct dds3Basic_t *pMoverBasic);
 
 
-extern void dds3PathBasicLoopOn(struct dds3PathBasicControl_t *data);
+extern void dds3PathBasicLoopOn(struct dds3PathBasicControl_t *pControl);
 
-extern void dds3PathBasicLoopOff(struct dds3PathBasicControl_t *data);
+extern void dds3PathBasicLoopOff(struct dds3PathBasicControl_t *pControl);
 
 typedef struct effNode_t effNode_t;
 

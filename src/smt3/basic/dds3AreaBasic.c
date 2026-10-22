@@ -18,16 +18,16 @@ extern dds3Basic_t *dds3AddSceneBasicData(s32 type);
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3BasicArrayHandle_t *dds3SceneBasicGetList(dds3Basic_t *pBasic, s32 type);
 extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt);
-extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *handle);
-extern u32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *handle);
+extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
+extern u32 dds3GetBasicArrayCount(dds3BasicArrayHandle_t *hndl);
 extern void dds3ForEachBasicArray(dds3BasicArrayHandle_t *handle, dds3BasicProc_t func);
-extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *handle);
+extern s32 dds3SetFirstBasicArray(dds3BasicArrayHandle_t *hndl);
 extern s32 dds3SetNextBasicArray(dds3BasicArrayHandle_t *hndl);
 extern dds3Basic_t *dds3GetBasicArray(dds3BasicArrayHandle_t *hndl);
 extern s32 dds3AddBasicArray(dds3BasicArrayHandle_t *hndl, s32 bufcnt);
 extern s32 dds3SetBasicArray(dds3BasicArrayHandle_t *hndl, dds3Basic_t *data);
 extern s32 dds3SetSearchNextBasicArray(dds3BasicArrayHandle_t *hArray, dds3Basic_t *pBasic);
-extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *handle, dds3Basic_t *basic, u32 mode);
+extern s32 dds3SearchDeleteBasicArray(dds3BasicArrayHandle_t *hArray, dds3Basic_t *pBasic, u32 mode);
 extern dds3Basic_t *dds3ObjectBaseSetControlBasicType(dds3Basic_t *pObjectBasic, dds3Basic_t *pItemBasic, s32 itemType);
 
 s32 CB_ReleaseObjectBasic(dds3Basic_t *pBasic);
@@ -48,12 +48,12 @@ s32 AreaBasicConstructor(dds3Basic_t *pBasic)
     return 1;
 }
 
-void AreaBasicDestructor(dds3Basic_t *basic)
+void AreaBasicDestructor(dds3Basic_t *pBasic)
 {
     dds3AreaBasicWorkData_t *work;
     u32 i;
 
-    work = basic->workdata;
+    work = pBasic->workdata;
     dds3ForEachBasicArray(work->items[0], CB_ReleaseObjectBasic);
     dds3ForEachBasicArray(work->items[1], CB_ReleaseObjectBasic);
     for (i = 0; i < 2; i++) {

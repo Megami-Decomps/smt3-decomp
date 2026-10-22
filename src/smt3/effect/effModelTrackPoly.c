@@ -114,7 +114,7 @@ void effSwordTrackPolygon2DDraw(effSwordTrack_t *hSwordTrack);
 extern s32 sdfModelGetMarkPos(void *aRoot, s32 aId);
 s32 Eff_ModelTrackPoly_DANTE_Check(mdlObj_t *hModel);
 effSwordTrack_t *effSwordTrackCreate(effSwordTrackParam_t *pParams);
-void effSwordTrackDelete(effSwordTrack_t *work);
+void effSwordTrackDelete(effSwordTrack_t *hSwordTrack);
 void effSwordTrackReset(effSwordTrack_t *hSwordTrack);
 /* Endpoint pairs are sampled into the history ring below. */
 
@@ -347,12 +347,12 @@ void Eff_ModelTrackPolyListColorSet(effModelTrackPolyList_t *hMTPolyList, s32 in
     Eff_ModelTrackPolyColorSet(hMTPolyList->items[index], abgr);
 }
 
-void Eff_ModelTrackPolyListDrawOnly(effModelTrackPolyList_t *list) {
-    u32 count = list->count;
+void Eff_ModelTrackPolyListDrawOnly(effModelTrackPolyList_t *hMTPolyList) {
+    u32 count = hMTPolyList->count;
     u32 workIndex = 0;
 
     while (workIndex < count) {
-        Eff_ModelTrackPolyDrawOnly(list->items[workIndex]);
+        Eff_ModelTrackPolyDrawOnly(hMTPolyList->items[workIndex]);
         workIndex++;
     }
 }
@@ -446,9 +446,9 @@ dds3HermitianTrackPoly_t *dds3HermitianTrackPolyCreate(s32 face, s32 split) {
     return data;
 }
 
-void pMeshDelete(dds3HermitianTrackPoly_t *data) {
-    sdfMatFreeDelayed((sdfMat_t *)data->material);
-    sdfMemFreeDirect(data->allocation);
+void pMeshDelete(dds3HermitianTrackPoly_t *hPoly) {
+    sdfMatFreeDelayed((sdfMat_t *)hPoly->material);
+    sdfMemFreeDirect(hPoly->allocation);
 }
 
 void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_t *hPoly) {
@@ -457,8 +457,8 @@ void dds3HermitianTrackPolyReset(dds3HermitianTrackPoly_t *hPoly) {
     hPoly->count = 0;
 }
 
-void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_t *data, u32 kind) {
-    data->blend = kind;
+void dds3HermitianTrackPolySetBlend(dds3HermitianTrackPoly_t *hPoly, u32 blend) {
+    hPoly->blend = blend;
 }
 
 void dds3HermitianTrackPolySetVC(dds3HermitianTrackPoly_t *hPoly, u32 *pABGR) {
@@ -752,10 +752,10 @@ effSwordTrack_t *effSwordTrackCreate(effSwordTrackParam_t *pParams)
     return work;
 }
 
-void effSwordTrackDelete(effSwordTrack_t *work)
+void effSwordTrackDelete(effSwordTrack_t *hSwordTrack)
 {
-    pMeshDelete(work->trackPoly);
-    sdfChipFreeDirect(work);
+    pMeshDelete(hSwordTrack->trackPoly);
+    sdfChipFreeDirect(hSwordTrack);
 }
 
 void effSwordTrackRecord(effSwordTrack_t *hSwordTrack)

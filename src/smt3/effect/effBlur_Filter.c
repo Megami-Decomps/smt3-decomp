@@ -351,8 +351,8 @@ effBlurTemplate_t *dds3EffectPartialMultiBlurCreate(const effBlurTemplateBody_t 
     return dst;
 }
 
-void dds3EffectPartialMultiBlurDelete(effBlurTemplate_t *owner) {
-    sdfChipFreeDirect(owner);
+void dds3EffectPartialMultiBlurDelete(effBlurTemplate_t *hPartialMultiBlur) {
+    sdfChipFreeDirect(hPartialMultiBlur);
 }
 
 void dds3EffectPartialMultiBlurDraw(effBlurTemplate_t *work) {
@@ -388,23 +388,23 @@ void dds3EffectPartialMultiBlurSetTexDef(effBlurScatterWork_t *hPartialMultiBlur
     hPartialMultiBlur->texture = dds3BillboardGetGeneralTex(2);
 }
 
-void dds3EffectDistBlurPartInit(effBlurScatterWork_t *work, effBlurScatterSlot_t *slot) {
-    effBlurQuad_t *quad = &slot->quad;
+void dds3EffectDistBlurPartInit(effBlurScatterWork_t *pParam, effBlurScatterSlot_t *pPart) {
+    effBlurQuad_t *quad = &pPart->quad;
     f32 spread;
     s32 halfSize;
     s32 centerX;
     s32 centerY;
-    slot->delay = dds3GetRandA((u8 *)dds3EffectBase) % (work->params.delaySpread + 1);
-    slot->angle = -3.14159265f;
-    quad->angle = work->params.uvDisplacementAngleDegrees;
-    quad->color = work->params.color;
-    quad->blendControl = work->params.blendControl;
-    spread = work->params.positionSpread;
-    halfSize = work->params.size;
-    quad->position[0] = work->params.position[0] +
+    pPart->delay = dds3GetRandA((u8 *)dds3EffectBase) % (pParam->params.delaySpread + 1);
+    pPart->angle = -3.14159265f;
+    quad->angle = pParam->params.uvDisplacementAngleDegrees;
+    quad->color = pParam->params.color;
+    quad->blendControl = pParam->params.blendControl;
+    spread = pParam->params.positionSpread;
+    halfSize = pParam->params.size;
+    quad->position[0] = pParam->params.position[0] +
         (s32)(spread * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f));
     halfSize >>= 1;
-    quad->position[1] = work->params.position[1] +
+    quad->position[1] = pParam->params.position[1] +
         (s32)(spread * ((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f));
     centerX = quad->position[0] + 256;
     quad->corners[0][0] = centerX - halfSize;
@@ -436,8 +436,8 @@ effBlurScatterWork_t *dds3EffectDistortionBlurCreate(effBlurScatterParams_t *pPa
 }
 
 /* Release the first variant's owned effect resource. */
-void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *work) {
-    sdfMemFreeDirect(work->allocation);
+void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur) {
+    sdfMemFreeDirect(hDistortionBlur->allocation);
 }
 
 /* Each live slot waits out its delay, then fades as its angle leaves zero. */
@@ -573,8 +573,8 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam) {
 }
 
 /* Release the scale variant's allocation, including its inline slot array. */
-void dds3EffectRippleBlurDelete(effBlurScaleWork_t *work) {
-    sdfMemFreeDirect(work->allocation);
+void dds3EffectRippleBlurDelete(effBlurScaleWork_t *hRippleBlur) {
+    sdfMemFreeDirect(hRippleBlur->allocation);
 }
 
 /* A slot stays dark until its phase reaches zero, then fades out over one
@@ -760,8 +760,8 @@ effResourceRectWork_t *dds3EffectPartialMultiFilterCreate(effResourceRectParams_
     return dst;
 }
 
-void dds3EffectPartialMultiFilterDelete(effResourceRectWork_t *work) {
-    sdfChipFreeDirect(work);
+void dds3EffectPartialMultiFilterDelete(effResourceRectWork_t *hPartialMultiFilter) {
+    sdfChipFreeDirect(hPartialMultiFilter);
 }
 
 void dds3EffectPartialMultiFilterDraw(effResourceRectWork_t *hPartialMultiFilter) {

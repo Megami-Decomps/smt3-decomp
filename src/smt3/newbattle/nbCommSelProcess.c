@@ -181,7 +181,7 @@ extern s32 StkSelId;
 extern void nbInitCommSelProcess(nbMainProcessData_t *data, struct nbParty_t *my,
                                  nbActionProcessData_t *act);
 
-void MemoryCommand(nbCommSelProcessData_t *t);
+void MemoryCommand(nbCommSelProcessData_t *s);
 
 s32 GetCommListCnt(nbCommSelProcessData_t *s, s32 type);
 
@@ -617,11 +617,11 @@ s32 CheckSelectError(nbCommSelProcessData_t *s)
     return s->commdisable[type][s->nowcursor[type]] > 0;
 }
 
-void MemoryCommand(nbCommSelProcessData_t *t)
+void MemoryCommand(nbCommSelProcessData_t *s)
 {
-    datUnitWork_t *work = nbGetUnitWorkPointer(t->data, t->my);
-    s32 type = t->nowtype;
-    u16 d = t->commlist[type][t->nowcursor[type]];
+    datUnitWork_t *work = nbGetUnitWorkPointer(s->data, s->my);
+    s32 type = s->nowtype;
+    u16 d = s->commlist[type][s->nowcursor[type]];
 
     switch (type) {
     case 0:

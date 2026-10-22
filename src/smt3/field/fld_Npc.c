@@ -102,7 +102,7 @@ extern s32 fldNpcCamTarget;
 
 extern void mdlUnRegist(s32 aMajor, s32 aMinor);
 
-extern void dds3DeleteUnitObjectBasic(dds3Basic_t *object);
+extern void dds3DeleteUnitObjectBasic(dds3Basic_t *aPtr);
 
 extern s32 sprintf(char *dst, const char *format, ...);
 

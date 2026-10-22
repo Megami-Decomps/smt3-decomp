@@ -32,7 +32,7 @@ extern void *hPartialMultiBlur;
 
 extern char D_0054EC80[];
 
-extern void dds3EffectPartialMultiBlurDelete(void *p);
+extern void dds3EffectPartialMultiBlurDelete(void *hPartialMultiBlur);
 
 extern s32 encDrawProc(dds3ProcessID_t *aProcId);
 

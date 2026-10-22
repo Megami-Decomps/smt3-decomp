@@ -1694,14 +1694,14 @@ void dds3SetFogColor(s32 frame, f32 *col)
     }
 }
 
-void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 fogNear, f32 fogFar)
+void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far)
 {
     if (frame == 0) {
         dds3DrawFlag &= ~0x400;
         dds3FogState.fogMax = max;
         dds3FogState.fogMin = min;
-        dds3FogState.fogNear = fogNear;
-        dds3FogState.fogFar = fogFar;
+        dds3FogState.fogNear = near;
+        dds3FogState.fogFar = far;
     } else {
         f32 oldMax = dds3FogState.fogMax;
         f32 oldMin = dds3FogState.fogMin;
@@ -1715,8 +1715,8 @@ void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 fogNear, f32 fogFar)
         dds3FogParam.fogFar = oldFar;
         dds3FogColor.fogMax = max;
         dds3FogColor.fogMin = min;
-        dds3FogColor.fogNear = fogNear;
-        dds3FogColor.fogFar = fogFar;
+        dds3FogColor.fogNear = near;
+        dds3FogColor.fogFar = far;
         fogparanow = 0;
     }
 }

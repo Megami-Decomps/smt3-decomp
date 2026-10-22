@@ -37,7 +37,7 @@ extern s32 dds3DrawFirstProcess(dds3ProcessID_t *id);
 extern s32 dds3DrawProcess(dds3ProcessID_t *id);
 extern s32 dds3BasicMainProcess(dds3ProcessID_t *id);
 extern s32 dds3BasicDrawProcess(dds3ProcessID_t *id);
-extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *id);
+extern s32 dds3DebugDevDumpProcess(dds3ProcessID_t *proc_id);
 extern s32 frFlipPacketBuf(dds3ProcessID_t *id);
 extern void frDestroyFontTable(dds3ProcessID_t *id);
 extern void frInitFontTable(s32 GsFontNums, s32 TextNums);

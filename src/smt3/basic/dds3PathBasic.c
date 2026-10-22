@@ -39,13 +39,13 @@ void dds3PathEvalSpline(u32 *segment, f32 *weight, dds3PathKeyframes_t *keys, f3
     *weight = 1.0f;
 }
 
-dds3Basic_t *dds3AddPathBasic(s32 key, void *work, const char *name)
+dds3Basic_t *dds3AddPathBasic(s32 serialID, void *pData, const char *pName)
 {
     dds3Basic_t *object = dds3AddSceneBasicData(0x10);
 
-    object->serialID = key;
-    object->name = name;
-    object->workdata = work;
+    object->serialID = serialID;
+    object->name = pName;
+    object->workdata = pData;
     return object;
 }
 
@@ -57,16 +57,16 @@ void dds3DeletePathControl(dds3PathBasicControl_t *work)
     sdfChipFreeDirect(work);
 }
 
-void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work)
+void dds3PathBasicControlGetPos(dds3PathBasicControl_t *pControl)
 {
     u32 segment;
     f32 weight;
     dds3PathKeyframes_t *keys;
     f32 (*points)[3];
 
-    if (work->flags & DDS3_PATH_POSITION_CHANNEL) {
-        keys = work->positionKeys;
-        dds3PathEvalSpline(&segment, &weight, keys, work->time);
+    if (pControl->flags & DDS3_PATH_POSITION_CHANNEL) {
+        keys = pControl->positionKeys;
+        dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
         points = keys->data.position;
         SDF_VU0_SETVECTOR_X(points[segment + 1][0]);
         SDF_VU0_SETVECTOR_Y(points[segment + 1][1]);
@@ -166,16 +166,16 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLight
     }
 }
 
-f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *work)
+f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *pControl)
 {
     u32 segment;
     f32 weight;
     dds3PathKeyframes_t *keys;
     f32 *values;
 
-    if (work->flags & DDS3_PATH_SCALAR_CHANNEL) {
-        keys = work->scalarKeys;
-        dds3PathEvalSpline(&segment, &weight, keys, work->time);
+    if (pControl->flags & DDS3_PATH_SCALAR_CHANNEL) {
+        keys = pControl->scalarKeys;
+        dds3PathEvalSpline(&segment, &weight, keys, pControl->time);
         values = keys->data.scalar;
         return values[segment] * (1.0f - weight) + values[segment + 1] * weight;
     }
@@ -219,14 +219,14 @@ s32 dds3PathBasicControlGetMode(dds3PathBasicControl_t *work)
     return work->direction;
 }
 
-void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *work, f32 ratio)
+void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *pControl, f32 ratio)
 {
-    work->time = ratio * work->duration;
+    pControl->time = ratio * pControl->duration;
 }
 
-f32 dds3PathBasicControlGetRatio(dds3PathBasicControl_t *work)
+f32 dds3PathBasicControlGetRatio(dds3PathBasicControl_t *pControl)
 {
-    return work->time / work->duration;
+    return pControl->time / pControl->duration;
 }
 
 void dds3PathBasicPauseOn(dds3PathBasicControl_t *work)
@@ -234,17 +234,17 @@ void dds3PathBasicPauseOn(dds3PathBasicControl_t *work)
     work->flags |= DDS3_PATHBASIC_FLAG_STOP;
 }
 
-void dds3PathBasicPauseOff(dds3PathBasicControl_t *work)
+void dds3PathBasicPauseOff(dds3PathBasicControl_t *pControl)
 {
-    work->flags &= ~DDS3_PATHBASIC_FLAG_STOP;
+    pControl->flags &= ~DDS3_PATHBASIC_FLAG_STOP;
 }
 
-void dds3PathBasicLoopOn(dds3PathBasicControl_t *work)
+void dds3PathBasicLoopOn(dds3PathBasicControl_t *pControl)
 {
-    work->flags |= DDS3_PATHBASIC_FLAG_LOOP;
+    pControl->flags |= DDS3_PATHBASIC_FLAG_LOOP;
 }
 
-void dds3PathBasicLoopOff(dds3PathBasicControl_t *work)
+void dds3PathBasicLoopOff(dds3PathBasicControl_t *pControl)
 {
-    work->flags &= ~DDS3_PATHBASIC_FLAG_LOOP;
+    pControl->flags &= ~DDS3_PATHBASIC_FLAG_LOOP;
 }

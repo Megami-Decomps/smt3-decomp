@@ -54,7 +54,7 @@ extern s8 dds3PadButtonState[];
 
 extern s32 scrGetIntPara(s32 n);
 
-extern s32 p2sdPlayBGM(s32 id);
+extern s32 p2sdPlayBGM(s32 MidiNo);
 
 extern void sdfTexFree(s32 aHandle);
 

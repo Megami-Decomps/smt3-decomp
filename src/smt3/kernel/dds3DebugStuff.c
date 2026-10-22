@@ -24,9 +24,9 @@ extern u8 dds3PadButtonState[];
 
 extern void dds3DebugFloatEditEx(f32 *value, u8 *pad, f32 step, f32 min, f32 max, f32 scale);
 
-extern void dds3DebugIntEditEx(void *value, s32 type, s64 min, s64 max, s64 step, s64 bigStep, s8 *pad);
+extern void dds3DebugIntEditEx(void *aValue, s32 aValueSize, s64 aMin, s64 aMax, s64 aSmall, s64 aLarge, s8 *aPadMap);
 
-extern s32 dds3DebugColorEditEx(u32 *value, s32 digits, s8 *pad);
+extern s32 dds3DebugColorEditEx(u32 *aValue, s32 aColumn, s8 *aPadMap);
 
 u64 *dds3PrimFrameRect(s32 aX, s32 aY, s32 aZ, s32 aW, s32 aH, u32 aBgCol, u32 aFrameCol);
 
@@ -85,100 +85,100 @@ void dds3DebugFloatEdit(f32 *value, f32 step, f32 min, f32 max, f32 scale)
     dds3DebugFloatEditEx(value, &dds3PadButtonState[0x20], step, min, max, scale);
 }
 
-void dds3DebugIntEditEx(void *valueAddress, s32 storageType, s64 min, s64 max, s64 step, s64 bigStep, s8 *padState) {
+void dds3DebugIntEditEx(void *aValue, s32 aValueSize, s64 aMin, s64 aMax, s64 aSmall, s64 aLarge, s8 *aPadMap) {
     s64 adjustedValue;
-    switch (storageType) {
+    switch (aValueSize) {
     case 1:
-        adjustedValue = *(u8 *)valueAddress;
+        adjustedValue = *(u8 *)aValue;
         break;
     case 2:
-        adjustedValue = *(u16 *)valueAddress;
+        adjustedValue = *(u16 *)aValue;
         break;
     case 4:
-        adjustedValue = *(u32 *)valueAddress;
+        adjustedValue = *(u32 *)aValue;
         break;
     case -1:
-        adjustedValue = *(s8 *)valueAddress;
+        adjustedValue = *(s8 *)aValue;
         break;
     case -2:
-        adjustedValue = *(s16 *)valueAddress;
+        adjustedValue = *(s16 *)aValue;
         break;
     case -4:
-        adjustedValue = *(s32 *)valueAddress;
+        adjustedValue = *(s32 *)aValue;
         break;
     default:
         return;
     }
-    if (padState[5] & 0x80) {
-        adjustedValue += bigStep;
-        if (max < adjustedValue) {
-            adjustedValue = min;
+    if (aPadMap[5] & 0x80) {
+        adjustedValue += aLarge;
+        if (aMax < adjustedValue) {
+            adjustedValue = aMin;
         }
-    } else if (padState[5] & 2) {
-        adjustedValue += bigStep;
-        if (max < adjustedValue) {
-            adjustedValue = max;
+    } else if (aPadMap[5] & 2) {
+        adjustedValue += aLarge;
+        if (aMax < adjustedValue) {
+            adjustedValue = aMax;
         }
-    } else if (padState[4] & 0x80) {
-        adjustedValue -= bigStep;
-        if (adjustedValue < min) {
-            adjustedValue = max;
+    } else if (aPadMap[4] & 0x80) {
+        adjustedValue -= aLarge;
+        if (adjustedValue < aMin) {
+            adjustedValue = aMax;
         }
-    } else if (padState[4] & 2) {
-        adjustedValue -= bigStep;
-        if (adjustedValue < min) {
-            adjustedValue = min;
+    } else if (aPadMap[4] & 2) {
+        adjustedValue -= aLarge;
+        if (adjustedValue < aMin) {
+            adjustedValue = aMin;
         }
-    } else if (padState[7] & 0x80) {
-        adjustedValue += step;
-        if (max < adjustedValue) {
-            adjustedValue = min;
+    } else if (aPadMap[7] & 0x80) {
+        adjustedValue += aSmall;
+        if (aMax < adjustedValue) {
+            adjustedValue = aMin;
         }
-    } else if (padState[7] & 2) {
-        adjustedValue += step;
-        if (max < adjustedValue) {
-            adjustedValue = max;
+    } else if (aPadMap[7] & 2) {
+        adjustedValue += aSmall;
+        if (aMax < adjustedValue) {
+            adjustedValue = aMax;
         }
-    } else if (padState[6] & 0x80) {
-        adjustedValue -= step;
-        if (adjustedValue < min) {
-            adjustedValue = max;
+    } else if (aPadMap[6] & 0x80) {
+        adjustedValue -= aSmall;
+        if (adjustedValue < aMin) {
+            adjustedValue = aMax;
 
         }
-    } else if (padState[6] & 2) {
-        adjustedValue -= step;
-        if (adjustedValue < min) {
-            adjustedValue = min;
+    } else if (aPadMap[6] & 2) {
+        adjustedValue -= aSmall;
+        if (adjustedValue < aMin) {
+            adjustedValue = aMin;
         }
     } else {
         return;
     }
-    switch (storageType) {
+    switch (aValueSize) {
     case -1:
     case 1:
-        *(u8 *)valueAddress = adjustedValue;
+        *(u8 *)aValue = adjustedValue;
         break;
     case -2:
     case 2:
-        *(u16 *)valueAddress = adjustedValue;
+        *(u16 *)aValue = adjustedValue;
         break;
     case -4:
     case 4:
-        *(u32 *)valueAddress = adjustedValue;
+        *(u32 *)aValue = adjustedValue;
         break;
     }
 }
 
-void dds3DebugIntEdit(void *value, s32 a1, s64 a2, s64 a3, s64 a4, s64 a5)
+void dds3DebugIntEdit(void *aValue, s32 aValueSize, s64 aMin, s64 aMax, s64 aSmall, s64 aLarge)
 {
-    dds3DebugIntEditEx(value, a1, a2, a3, a4, a5, (s8 *)&dds3PadButtonState[0x20]);
+    dds3DebugIntEditEx(aValue, aValueSize, aMin, aMax, aSmall, aLarge, (s8 *)&dds3PadButtonState[0x20]);
 }
 
-s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *padState) {
-    s32 originalColor = *color;
+s32 dds3DebugColorEditEx(u32 *aValue, s32 aColumn, s8 *aPadMap) {
+    s32 originalColor = *aValue;
     s32 channelValue = originalColor;
     s32 updatedColor;
-    switch (channel) {
+    switch (aColumn) {
     case 0:
         break;
     case 1:
@@ -192,26 +192,26 @@ s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *padState) {
         break;
     }
     channelValue &= 0xFF;
-    if (((padState[5] & 0x80) || (padState[7] & 0x80)) && channelValue == 0xFF) {
+    if (((aPadMap[5] & 0x80) || (aPadMap[7] & 0x80)) && channelValue == 0xFF) {
         channelValue = 0;
-    } else if (padState[5] & 2) {
+    } else if (aPadMap[5] & 2) {
         channelValue += 10;
         if (channelValue >= 0x100) {
             channelValue = 0xFF;
         }
-    } else if (((padState[4] & 0x80) || (padState[6] & 0x80)) && channelValue == 0) {
+    } else if (((aPadMap[4] & 0x80) || (aPadMap[6] & 0x80)) && channelValue == 0) {
         channelValue = 0xFF;
-    } else if (padState[4] & 2) {
+    } else if (aPadMap[4] & 2) {
         channelValue -= 10;
         if (channelValue < 0) {
             channelValue = 0;
         }
-    } else if (padState[7] & 2) {
+    } else if (aPadMap[7] & 2) {
         channelValue += 1;
         if (channelValue >= 0x100) {
             channelValue = 0xFF;
         }
-    } else if (padState[6] & 2) {
+    } else if (aPadMap[6] & 2) {
         channelValue -= 1;
         if (channelValue < 0) {
             channelValue = 0;
@@ -219,7 +219,7 @@ s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *padState) {
     } else {
         return 0;
     }
-    switch (channel) {
+    switch (aColumn) {
     case 0:
         updatedColor = (originalColor & 0xFFFFFF00) | channelValue;
         break;
@@ -233,13 +233,13 @@ s32 dds3DebugColorEditEx(u32 *color, s32 channel, s8 *padState) {
         updatedColor = (originalColor & 0x00FFFFFF) | (channelValue << 24);
         break;
     }
-    *color = updatedColor;
+    *aValue = updatedColor;
     return updatedColor != originalColor;
 }
 
-void dds3DebugColorEdit(u32 *value, s32 digits)
+void dds3DebugColorEdit(u32 *aValue, s32 aColumn)
 {
-    dds3DebugColorEditEx(value, digits, (s8 *)&dds3PadButtonState[0x20]);
+    dds3DebugColorEditEx(aValue, aColumn, (s8 *)&dds3PadButtonState[0x20]);
 }
 
 void dds3MenuStepValue(char *out, f32 value)

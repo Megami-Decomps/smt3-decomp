@@ -9,9 +9,9 @@ typedef struct
     sdfVector4_t position;
 } dds3MatterPathPosition_t;
 
-extern void dds3PathBasicControlGetPos(dds3PathBasicControl_t *work);
+extern void dds3PathBasicControlGetPos(dds3PathBasicControl_t *pControl);
 extern void dds3PathBasicControlGetRot(dds3PathBasicControl_t *pControl);
-extern f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *work);
+extern f32 dds3PathBasicControlGetFovy(dds3PathBasicControl_t *pControl);
 extern void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLightPath_t *output);
 extern s32 dds3PathBasicControlIsFinished(dds3PathBasicControl_t *work);
 extern void dds3SetLightObjectPathResoruce(dds3Basic_t *basic, fldResourceLightPath_t *resource);

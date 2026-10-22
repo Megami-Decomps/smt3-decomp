@@ -13,11 +13,11 @@ extern dds3ObjectBaseControlWorkData_t *dds3LightObjectBasicGetControlWorkData(d
 extern void dds3AreaBasicGetItemArray(dds3Basic_t *pAreaBasic, dds3Basic_t *itemType);
 extern void dds3DeleteSceneBasicData(dds3Basic_t *basic);
 extern void sdfModelRootFree(sdfModelRootNode_t *aRoot, s32 aReleaseNodes, s32 aReleaseMatList);
-extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *array);
+extern void dds3FreeBasicArrayHandle(dds3BasicArrayHandle_t *hndl);
 extern void sdfChipFreeDirect(void *aPtr);
 extern sdfModelRootNode_t *dds3ModelBasicMakeModel(dds3Basic_t *basic);
 extern sdfMotionCtrlr_t *dds3ModelBasicSetMotion(dds3Basic_t *basic, sdfModelRootNode_t *model);
-extern void dds3GetTMPoseSet(dds3Basic_t *basic);
+extern void dds3GetTMPoseSet(dds3Basic_t *pBasic);
 extern void sdfModelEvalTm2(sdfModelRootNode_t *aRoot, s32 aFrameId);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern dds3BasicArrayHandle_t *dds3GetBasicArrayHandle(s32 bufcnt);

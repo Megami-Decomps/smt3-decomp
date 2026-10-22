@@ -270,7 +270,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
 
-extern void p2sdPlayBGM(s32 no);
+extern void p2sdPlayBGM(s32 MidiNo);
 
 extern void p2sdStopBGM(s32 no);
 

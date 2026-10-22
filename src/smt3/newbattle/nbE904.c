@@ -453,22 +453,22 @@ s32 Model1Wait(nbEventProcessData_t *ed)
     return 0;
 }
 
-s32 Model1Wait_2(nbEventProcessData_t *e)
+s32 Model1Wait_2(nbEventProcessData_t *ed)
 {
     void *buf;
     s32 size;
 
-    if (e->frame == 0x1E) {
-        func_0024D938(e);
+    if (ed->frame == 0x1E) {
+        func_0024D938(ed);
     }
-    if (e->frame >= 0x20) {
+    if (ed->frame >= 0x20) {
         if (evtBitCheck(0xC0F) == 0) {
-            buf = sdfMemLock(e->unk_24);
-            size = sdfMemGetSize(e->unk_24);
+            buf = sdfMemLock(ed->unk_24);
+            size = sdfMemGetSize(ed->unk_24);
             mdlPackDecode(1, 0x102, 0x101, buf, size);
         }
         nbAddFadeInKoukaPacket(3, 0, 0x28, 1);
-        nbFreeEffectSlot(e);
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }

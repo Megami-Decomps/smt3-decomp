@@ -250,22 +250,22 @@ void dds3GetSclPoseSetMCR(dds3Basic_t *basic, const sdfVector4_t *scale)
 }
 
 /* vu0 routine: compose scale, quaternion rotation and translation in vf28-31. */
-void dds3MakeMatrix(const sdfVector4_t *scale, const sdfVector4_t *rotation,
-                    const sdfVector4_t *translation)
+void dds3MakeMatrix(const sdfVector4_t *scale, const sdfVector4_t *quaternion,
+                    const sdfVector4_t *transrate)
 {
-    SDF_VU0_LOADVECTOR(rotation);
+    SDF_VU0_LOADVECTOR(quaternion);
     ToMatrix();
     SDF_VU0_LOADVECTOR(scale);
     SDF_VU0_SCALE_XYZ();
-    SDF_VU0_LOADVECTOR(translation);
+    SDF_VU0_LOADVECTOR(transrate);
     SDF_VU0_VECTOR_W_SET_ONE();
     SDF_VU0_SET_ROW3();
 }
 
 /* Load the cached matrix, rebuilding it only when a pose setter invalidated it. */
-void dds3GetTMPoseSet(dds3Basic_t *basic)
+void dds3GetTMPoseSet(dds3Basic_t *pBasic)
 {
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3PoseSet_t *pose = pBasic->poseset;
     u32 flags = pose->flag;
 
     if (flags & POSESET_FLAG_UPDATETM) {

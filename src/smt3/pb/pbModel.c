@@ -132,9 +132,9 @@ extern f32 D_00326C60[];
 
 extern u32 pbMyCharacterDispStat(pbPanel_t *p);
 
-void pbSetModelPos(mdlObj_t *model, const f32 *position) {
-    SDF_VU0_LOADVECTOR(position);
-    mdlSetPosition(model);
+void pbSetModelPos(mdlObj_t *aHandle, const f32 *pos) {
+    SDF_VU0_LOADVECTOR(pos);
+    mdlSetPosition(aHandle);
 }
 
 void pb_1D2B18(mdlObj_t *model, sdfVector4_t *rot) {

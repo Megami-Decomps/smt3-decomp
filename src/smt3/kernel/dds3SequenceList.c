@@ -16,7 +16,7 @@ extern s32 checkConfigState(void);
 extern s32 checkResultStat(void);
 extern void cmpProcessStart(void);
 extern void dds3ConfigProcessEnd(void);
-extern void dds3ConfigProcessStart(s32 mode);
+extern void dds3ConfigProcessStart(s32 Mode);
 extern void evtChkEndProcess(void);
 extern void evtExitSky(void);
 extern void evtFreeStage(void);

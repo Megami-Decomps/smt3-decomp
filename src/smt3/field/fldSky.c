@@ -95,7 +95,7 @@ extern void evtSetUnitLightDir(evtUnit_t *h, s32 frame);
 
 extern dds3Basic_t *D_0054EAE8;
 
-extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *spawnedObject);
+extern void dds3UnitObjectBasicEL_LinkFree(dds3Basic_t *unitBasic);
 
 extern u32 fldSkyTable;
 
@@ -171,7 +171,7 @@ extern void dds3SetAmbientColor(s32, f32 *);
 
 extern s32 dds3SetLightDir(s32 frame, s32 no, f32 *dir);
 
-extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 z, f32 w);
+extern void dds3SetFogPara(s32 frame, f32 max, f32 min, f32 near, f32 far);
 
 sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 

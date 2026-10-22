@@ -197,7 +197,7 @@ dds3Basic_t *dds3GetActiveScene(void);
 
 u32 dds3AllocObjectId(void);
 
-void *dds3EventBasicGetResource(dds3Basic_t *object);
+void *dds3EventBasicGetResource(dds3Basic_t *pBasic);
 
 dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
 
@@ -430,7 +430,7 @@ extern u32 dds3AllocObjectId(void);
 
 extern dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *pData, char *pName);
 
-extern dds3Basic_t *dds3AddEventBasic(s32 id, void *resource, char *name);
+extern dds3Basic_t *dds3AddEventBasic(s32 serialID, void *pData, char *pName);
 
 extern s32 fldEveHit_AddEveHit(fldResHead_t *pEvnRng, dds3Basic_t *pBasic);
 

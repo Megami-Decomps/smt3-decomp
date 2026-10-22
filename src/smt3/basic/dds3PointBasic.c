@@ -20,7 +20,7 @@ dds3Basic_t *dds3AddPointBasic(u32 serialID, fldResourcePoint_t *pData, char *pN
     return basic;
 }
 
-fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *basic)
+fldResourcePoint_t *dds3PointBasicGetResource(dds3Basic_t *pPointBasic)
 {
-    return basic->workdata;
+    return pPointBasic->workdata;
 }

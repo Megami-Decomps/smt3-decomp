@@ -159,9 +159,9 @@ INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CF70);
 
 INCLUDE_ASM(const s32, "facility/fclShopInit", fclShopTexLoad);
 
-void fclShopTexFree(shpUpdateWork_t *work)
+void fclShopTexFree(shpUpdateWork_t *pData)
 {
-    s32 *tex = work->texHandle;
+    s32 *tex = pData->texHandle;
     s8 i;
 
     for (i = 0; (u8)i < 2; i++) {

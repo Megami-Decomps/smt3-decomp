@@ -183,9 +183,9 @@ dds3Basic_t *dds3AddCameraObjectBasic(u32 serialID, f32 fovy, const sdfVector4_t
     return basic;
 }
 
-void dds3DeleteCameraObjectBasic(dds3Basic_t *basic)
+void dds3DeleteCameraObjectBasic(dds3Basic_t *pBasic)
 {
-    dds3DeleteSceneBasicData(basic);
+    dds3DeleteSceneBasicData(pBasic);
 }
 
 /* vu0 routine: return the camera matrix in vf28-vf31. */
@@ -201,9 +201,9 @@ void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *basic, const sdfVector4_t *ta
 }
 
 /* vu0 routine: return the cached world-space target in vf10. */
-void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *basic)
+void dds3CameraObjectBasicGetTargetPos(dds3Basic_t *pBasic)
 {
-    sdfVector4_t *target = &((dds3CameraObjectBasicWorkData_t *)basic->workdata)->targetPos;
+    sdfVector4_t *target = &((dds3CameraObjectBasicWorkData_t *)pBasic->workdata)->targetPos;
 
     SDF_VU0_LOADVECTOR_BARRIER(target);
 }
@@ -223,18 +223,18 @@ void func_001128F0(dds3Basic_t *basic, f32 fovy)
     work->fovy = fovy;
 }
 
-f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *basic)
+f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *pBasic)
 {
-    dds3CameraObjectBasicWorkData_t *work = basic->workdata;
+    dds3CameraObjectBasicWorkData_t *work = pBasic->workdata;
 
     return work->fovy;
 }
 
 /* vu0 routine: refresh the rotated vectors and copy target/eye to the caller. */
-void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *basic, sdfVector4_t *target, sdfVector4_t *eye)
+void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *pBasic, sdfVector4_t *tgtpos, sdfVector4_t *campos)
 {
-    dds3CameraObjectBasicWorkData_t *work = basic->workdata;
-    dds3PoseSet_t *pose = basic->poseset;
+    dds3CameraObjectBasicWorkData_t *work = pBasic->workdata;
+    dds3PoseSet_t *pose = pBasic->poseset;
 
     SDF_VU0_LOADVECTOR(&pose->rot);
     ToMatrix();
@@ -250,19 +250,19 @@ void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *basic, sdfVector4_t *target, sd
         SDF_VU0_VECTOR_W_SET_ONE();
         SDF_VU0_STOREVECTOR(&work->targetPos);
     }
-    target->x = work->targetPos.x;
-    target->y = work->targetPos.y;
-    target->z = work->targetPos.z;
-    target->w = work->targetPos.w;
-    eye->x = pose->pos.x;
-    eye->y = pose->pos.y;
-    eye->z = pose->pos.z;
-    eye->w = pose->pos.w;
+    tgtpos->x = work->targetPos.x;
+    tgtpos->y = work->targetPos.y;
+    tgtpos->z = work->targetPos.z;
+    tgtpos->w = work->targetPos.w;
+    campos->x = pose->pos.x;
+    campos->y = pose->pos.y;
+    campos->z = pose->pos.z;
+    campos->w = pose->pos.w;
 }
 
-u32 dds3CameraObjectBasicGetMode(dds3Basic_t *basic)
+u32 dds3CameraObjectBasicGetMode(dds3Basic_t *pBasic)
 {
-    dds3CameraObjectBasicWorkData_t *work = basic->workdata;
+    dds3CameraObjectBasicWorkData_t *work = pBasic->workdata;
 
     return work->mode;
 }

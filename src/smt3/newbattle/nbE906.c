@@ -461,28 +461,28 @@ s32 nbE907_Model1Wait_2(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbE906", nbE907_Model2Start);
 
-s32 Model2Wait_1(nbEventProcessData_t *e)
+s32 Model2Wait_1(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
     void *res;
 
-    form = nbGetEventForm(e);
+    form = nbGetEventForm(ed);
     evtSetUnitMotion(form->hunit, 0x11, 0xA, 0, 0);
     dds3DrawFlag |= 0x2000000;
     res = evtGetResorceData(0x38B, 2);
     nbAddSkillEffectKoukaPacket3(0, 0, res, 2, form);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
-s32 Model2Wait_15(nbEventProcessData_t *e)
+s32 Model2Wait_15(nbEventProcessData_t *ed)
 {
     if (nbMaeCheckDone() != 0) {
         nbMaeWaitStep();
     }
-    if (e->frame >= 0x76) {
+    if (ed->frame >= 0x76) {
         if (nbMaeCheckDone() != 0) {
-            nbFreeEffectSlot(e);
+            nbFreeEffectSlot(ed);
         }
     }
     return 0;

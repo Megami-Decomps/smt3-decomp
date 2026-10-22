@@ -166,7 +166,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 extern s32 SearchNameTable(const char *name);
 extern void evtStopFrame(s32 sw, s32 nowframe);
 extern void *dds3SetActiveCameraSceneBasic(void *pSceneBasic, void *pCameraBasic);
-extern f32 dds3CameraObjectBasicGetFovy(void *camera);
+extern f32 dds3CameraObjectBasicGetFovy(void *pBasic);
 extern void dds3SetScreenFovy(f32 fovy);
 extern void evtRunUnitMode(s32 unit, s32 mode);
 extern void *sdfMemAllocDirect(s32 aSize);

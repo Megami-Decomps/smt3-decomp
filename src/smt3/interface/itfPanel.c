@@ -70,7 +70,7 @@ extern s32 sdfGrAllocPacketBuff(s32 aSize);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-void DrawTestAlphaPrim(sdfDrawTag_t *list);
+void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag);
 
 void itfPnlDrawTag(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
@@ -124,7 +124,7 @@ extern u8 D_003265F8[];
 
 extern u8 D_00326608[];
 
-void DrawMesWin(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawMesWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_SEVEN_COLOR_COUNT 7
 
@@ -138,7 +138,7 @@ extern void itfMiscDrawLineStripPrim(void *, void *, u8 *, u8 *, s32, u32, sdfDr
 
 extern u8 D_00326618[], D_00326630[], D_00326648[];
 
-void DrawSelWin(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawSelWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 #define ITF_PANEL_FIVE_COLOR_COUNT 5
 
@@ -148,7 +148,7 @@ extern u8 D_0054F480[8], D_0054F488[8];
 
 extern u8 D_00326660[], D_00326678[], D_00326690[];
 
-void DrawPlain(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawPlain(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern u8 D_0054F490[8];
 
@@ -158,7 +158,7 @@ extern u8 D_003266A0[];
 
 extern u8 D_003266B0[];
 
-void DrawPera1(itfPanel_t *panel, sdfDrawTag_t *command);
+void DrawPera1(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
 extern u8 D_0054F4A0[8];
 
@@ -166,7 +166,7 @@ extern u8 D_0054F4A8[8];
 
 void DrawLeftFade(itfPanel_t *handle, sdfDrawTag_t *pdrawtag);
 
-extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
 extern u8 D_0054F4B0[8];
 
@@ -497,23 +497,23 @@ void CreateColorNormal(itfPanelNormalData_t *pwork, u32 red, u32 green, u32 blue
 }
 
 /* Write the two color rows, then scale six template rows; the first fourth component is one. */
-void CreateColorMesWin(itfPanelMesWinData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = data->colors[0].components;
+void CreateColorMesWin(itfPanelMesWinData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+    u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 1);
-    colorRow = data->colors[1].components;
+    colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)data->colors[2].components, red, green, blue, alpha, D_00326518, 6);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, D_00326518, 6);
 }
 
 /* Write the two color rows, then scale four template rows; the first fourth component is one. */
-void CreateColorSelWin(itfPanelSelWinData_t *data, u32 red, u32 green, u32 blue, u32 alpha) {
-    u32 *colorRow = data->colors[0].components;
+void CreateColorSelWin(itfPanelSelWinData_t *pwork, u32 red, u32 green, u32 blue, u32 alpha) {
+    u32 *colorRow = pwork->colors[0].components;
 
     SetVec4(colorRow, red, green, blue, 1);
-    colorRow = data->colors[1].components;
+    colorRow = pwork->colors[1].components;
     SetVec4(colorRow, red, green, blue, alpha);
-    itfMiscSetRatioRGB((s32 *)data->colors[2].components, red, green, blue, alpha, D_00326578, 4);
+    itfMiscSetRatioRGB((s32 *)pwork->colors[2].components, red, green, blue, alpha, D_00326578, 4);
 }
 
 /* Set the base color, one alpha-scaled gradient row, and two rows at full color scale. */
@@ -526,8 +526,8 @@ void CreateColorPlain(itfPanelPlainData_t *pwork, u32 red, u32 green, u32 blue, 
 }
 
 /* Set the four color words at byte 0x20, consumed as a color record by the quad path. */
-void CreateColorPera1(itfPanelPlainData_t *data, s32 red, s32 green, s32 blue, s32 alpha) {
-    u32 *color = data->colors[0].components;
+void CreateColorPera1(itfPanelPlainData_t *pwork, s32 red, s32 green, s32 blue, s32 alpha) {
+    u32 *color = pwork->colors[0].components;
 
     color[0] = red;
     color[1] = green;
@@ -568,11 +568,11 @@ void DrawNormal(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 
 /* Update seven alpha words, then emit three wide and six side strips.
    The first color row is deliberately excluded from the alpha update. */
-void DrawMesWin(itfPanel_t *panel, sdfDrawTag_t *command) {
-    itfPanelMesWinData_t *data = (itfPanelMesWinData_t *)panel->payload;
+void DrawMesWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    itfPanelMesWinData_t *data = (itfPanelMesWinData_t *)handle->payload;
     itfPanelVertex_t *drawBuffer = data->vertices;
     itfPanelColor_t *colors = data->colors + 1;
-    s32 alpha = panel->alpha;
+    s32 alpha = handle->alpha;
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_COLOR_COUNT; rowIndex++, colors++) {
@@ -580,20 +580,20 @@ void DrawMesWin(itfPanel_t *panel, sdfDrawTag_t *command) {
     }
     colors = data->colors;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326618[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326618[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326630[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->renderValue, pdrawtag);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_SEVEN_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F480, &D_00326648[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F480, &D_00326648[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->renderValue, pdrawtag);
     }
 }
 
 /* Update five alpha words, then emit three wide and two side strips.
    The first color row is deliberately excluded from the alpha update. */
-void DrawSelWin(itfPanel_t *panel, sdfDrawTag_t *command) {
-    itfPanelSelWinData_t *data = (itfPanelSelWinData_t *)panel->payload;
+void DrawSelWin(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    itfPanelSelWinData_t *data = (itfPanelSelWinData_t *)handle->payload;
     itfPanelVertex_t *drawBuffer = data->vertices;
     itfPanelColor_t *colors = data->colors + 1;
-    s32 alpha = panel->alpha;
+    s32 alpha = handle->alpha;
     s32 rowIndex;
 
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_COLOR_COUNT; rowIndex++, colors++) {
@@ -601,16 +601,16 @@ void DrawSelWin(itfPanel_t *panel, sdfDrawTag_t *command) {
     }
     colors = data->colors;
     for (rowIndex = 0; rowIndex < ITF_PANEL_WIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326660[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326678[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawTriangleStripPrim(drawBuffer, colors, &D_00326660[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], &D_00326678[rowIndex * ITF_PANEL_WIDE_INDEX_COUNT], ITF_PANEL_WIDE_INDEX_COUNT, handle->renderValue, pdrawtag);
     }
     for (rowIndex = 0; rowIndex < ITF_PANEL_FIVE_SIDE_PASS_COUNT; rowIndex++) {
-        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F488, &D_00326690[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(drawBuffer + 16 + rowIndex * 4, colors, D_0054F488, &D_00326690[rowIndex * ITF_PANEL_QUAD_INDEX_COUNT], ITF_PANEL_QUAD_INDEX_COUNT, handle->renderValue, pdrawtag);
     }
 }
 
-void DrawPlain(itfPanel_t *panel, sdfDrawTag_t *command) {
+void DrawPlain(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
     itfPanelVertex_t vertices[12];
-    itfPanelPlainData_t *data = (itfPanelPlainData_t *)panel->payload;
+    itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->payload;
     itfPanelVertex_t *buf = data->vertices;
     itfPanelColor_t *colors = data->colors;
     itfPanelVertex_t *input = data->vertices;
@@ -631,20 +631,20 @@ void DrawPlain(itfPanel_t *panel, sdfDrawTag_t *command) {
         out[3].y = input[3].y - yOffset;
     }
 
-    itfMiscDrawRectanglePrim(buf, colors, D_0054F490, D_0054F498, panel->renderValue, command);
+    itfMiscDrawRectanglePrim(buf, colors, D_0054F490, D_0054F498, handle->renderValue, pdrawtag);
     for (i = 0; i < 3; i++) {
-        itfMiscDrawLineStripPrim(vertices, colors, &D_003266A0[i * 5], &D_003266B0[i * 5], 5, panel->renderValue, command);
+        itfMiscDrawLineStripPrim(vertices, colors, &D_003266A0[i * 5], &D_003266B0[i * 5], 5, handle->renderValue, pdrawtag);
     }
 }
 
 /* Update the first color row's alpha and emit one indexed quad. */
-void DrawPera1(itfPanel_t *panel, sdfDrawTag_t *command) {
-    itfPanelPlainData_t *data = (itfPanelPlainData_t *)panel->payload;
+void DrawPera1(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
+    itfPanelPlainData_t *data = (itfPanelPlainData_t *)handle->payload;
     itfPanelVertex_t *drawBuffer = data->vertices;
     itfPanelColor_t *colors = data->colors;
 
-    colors[0].rgba.alpha = panel->alpha;
-    itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, panel->renderValue, command);
+    colors[0].rgba.alpha = handle->alpha;
+    itfMiscDrawRectanglePrim(drawBuffer, colors, D_0054F4A0, D_0054F4A8, handle->renderValue, pdrawtag);
 }
 
 /* Bracket the six-index panel draw with table-state two and its native reset to zero. */
@@ -766,7 +766,7 @@ void DrawFacility(itfPanel_t *handle, sdfDrawTag_t *pdrawtag) {
 }
 
 /* Append two GS A+D state writes: TEST_1 (0x47), then ALPHA_1 (0x42). */
-void DrawTestAlphaPrim(sdfDrawTag_t *list) {
+void DrawTestAlphaPrim(sdfDrawTag_t *pdrawtag) {
     s32 packet = sdfGrAllocPacketBuff(ITF_PANEL_STATE_PACKET_BYTES);
     u64 *stateWords = (u64 *)sdf2DMakeStdPacket(packet, ITF_PANEL_STATE_PACKET_BYTES);
 
@@ -774,7 +774,7 @@ void DrawTestAlphaPrim(sdfDrawTag_t *list) {
     stateWords[5] = 0x47;
     stateWords[6] = 0x44;
     stateWords[7] = 0x42;
-    sdfDrawTagLink(list, packet);
+    sdfDrawTagLink(pdrawtag, packet);
 }
 INCLUDE_SDATA(const s32, "interface/itfPanel", D_0054F480);
 

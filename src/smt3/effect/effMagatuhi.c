@@ -654,9 +654,9 @@ void dds3MagatuhiParDraw(effWork_t *hData);
 /* Invoke the release callback, then free the outer work; no callback NULL check. */
 void dds3MagatuhiParDelete(effWork_t *hData);
 /* Return the retained payload passed to this type's callbacks. */
-void *dds3MagatuhiGetHandle(effWork_t *work);
+void *dds3MagatuhiGetHandle(effWork_t *hMagaPar);
 /* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 dds3MagatuhiGetType(effWork_t *work);
+u32 dds3MagatuhiGetType(effWork_t *hMagaPar);
 /* Native node type-three condition slot: accept with the constant result one. */
 u32 dds3MagatuhiParIsActive(void);
 /* Node set-vector slot: invoke optional subtype callback A; preserve the one-formal surface. */
@@ -2182,13 +2182,13 @@ void dds3MagatuhiParDelete(effWork_t *hData) {
 }
 
 /* Return the retained payload passed to this type's callbacks. */
-void *dds3MagatuhiGetHandle(effWork_t *work) {
-    return work->payload;
+void *dds3MagatuhiGetHandle(effWork_t *hMagaPar) {
+    return hMagaPar->payload;
 }
 
 /* Read the dispatch owner's type word; the pointer remains unchecked. */
-u32 dds3MagatuhiGetType(effWork_t *work) {
-    return work->type;
+u32 dds3MagatuhiGetType(effWork_t *hMagaPar) {
+    return hMagaPar->type;
 }
 
 void func_001A8CD0(void) {

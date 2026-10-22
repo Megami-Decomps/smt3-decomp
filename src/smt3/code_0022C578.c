@@ -1325,7 +1325,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpCalcStockControl);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcParty);
 
-extern void dds3ConfigProcessStart(s32 mode);
+extern void dds3ConfigProcessStart(s32 Mode);
 
 void cmpCalcConfig(void)
 {

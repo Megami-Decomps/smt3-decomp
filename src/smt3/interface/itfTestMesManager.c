@@ -131,7 +131,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, dds3ProcessFunc_t drawExit,
                                          dds3ProcessFunc_t deleteExit, void *p);
 
-extern dds3ProcessID_t *scrStartScript2(s32 a, u8 *b, s32 c);
+extern dds3ProcessID_t *scrStartScript2(s32 priority, u8 *scrdata, s32 startproc);
 
 extern void itfMesMngSetKutiCallback(s32 id, void *func);
 
@@ -147,10 +147,10 @@ extern void *sdf2DMakeStdPacket(void *aPacket, u32 aLeng);
 
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
 
-extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 mode, s32 value);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
-extern void itfMiscDrawSpritePrim(s32 *rect, s32 *uv, s32 *color, s32 z, void *tex, s32 flag,
-                                  sdfDrawTag_t *tag);
+extern void itfMiscDrawSpritePrim(s32 *pos, s32 *uv, s32 *color, s32 z, void *texhandle, s32 context,
+                                  sdfDrawTag_t *pdrawtag);
 extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
 
 

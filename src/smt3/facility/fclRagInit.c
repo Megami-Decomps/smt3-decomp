@@ -366,9 +366,9 @@ INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagLoadTextures);
 
 extern char D_0053D188[];
 
-void fclRagTexFree(u8 *work)
+void fclRagTexFree(u8 *pData)
 {
-    s32 *tex = (s32 *)(work + 0x4654);
+    s32 *tex = (s32 *)(pData + 0x4654);
     s8 i;
 
     for (i = 0; (u8)i < 2; i++) {
@@ -378,9 +378,9 @@ void fclRagTexFree(u8 *work)
     printf(D_0053D188);
 }
 
-void fclRagTexLoad(u8 *work)
+void fclRagTexLoad(u8 *pData)
 {
-    fclRagTex_t *tex = (fclRagTex_t *)(work + 0x4740);
+    fclRagTex_t *tex = (fclRagTex_t *)(pData + 0x4740);
     u32 i;
 
     for (i = 0; i < 2; i++) {
@@ -406,7 +406,7 @@ typedef struct
     /* 0x464C */ s32 unk_464C;
 } fclRagWork_t;
 
-extern void fclRagTexFree(u8 *work);
+extern void fclRagTexFree(u8 *pData);
 
 extern void evtDisableMoonDraw(void);
 

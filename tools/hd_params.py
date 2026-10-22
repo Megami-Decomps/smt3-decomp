@@ -93,7 +93,26 @@ def function_items(text):
             yield m.group(2), m.start(), m.end(), m.group(3), False
 
 
-def plan(path, protos, stats, skips):
+HD = Path("/home/wsl/projects/smt3hd-reconstructed-sources/src")
+
+
+def hd_signatures():
+    """name -> parameter list text of HD's definition, where that tree is present.
+
+    The IDB names came from HD and agree with it on all but a dozen slots, where
+    the IDB was edited afterwards (`a`, `b`, `c` for `priority`, `scrdata`,
+    `startproc`); HD is the source, so its name wins when both exist."""
+    out = {}
+    if not HD.exists():
+        return out
+    for path in sorted(HD.glob("*.c")):
+        for m in SIG.finditer(path.read_text(errors="replace")):
+            if m.group(0).rstrip().endswith("{"):
+                out.setdefault(m.group(2), m.group(3))
+    return out
+
+
+def plan(path, protos, stats, skips, hd=None):
     text = path.read_text()
     edits = []
     for name, start, end, params, is_def in function_items(text):
@@ -104,6 +123,10 @@ def plan(path, protos, stats, skips):
         if not m:
             continue
         ours, theirs = param_names(params), param_names(m.group(1))
+        if hd and name in hd:
+            hd_names = param_names(hd[name])
+            if len(hd_names) == len(theirs):
+                theirs = [h if h and not DUMMY.match(h) else t for t, h in zip(theirs, hd_names)]
         if len(ours) != len(theirs) or not ours:
             if is_def and ours and len(ours) != len(theirs):
                 stats["arity"] += 1
@@ -135,10 +158,11 @@ def main():
     stats = {"functions": 0, "params": 0, "decls": 0, "arity": 0}
     skips = []
     files = sorted(list((args.root / "src").rglob("*.c")) + list((args.root / "include").rglob("*.h")))
+    hd = hd_signatures()
     for path in files:
         if args.only and not re.search(args.only, path.as_posix()):
             continue
-        text, edits = plan(path, protos, stats, skips)
+        text, edits = plan(path, protos, stats, skips, hd)
         if not edits:
             continue
         for _, _, _, is_def, name, mapping in edits:

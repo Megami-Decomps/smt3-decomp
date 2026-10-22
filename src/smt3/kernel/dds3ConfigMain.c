@@ -59,9 +59,9 @@ void dds3DestroyConfig(void *PID)
     }
 }
 
-void dds3ConfigProcessStart(s32 mode) {
+void dds3ConfigProcessStart(s32 Mode) {
     if (GBWK == 0) {
-        GBWK = dds3AllocConfigWork(mode);
+        GBWK = dds3AllocConfigWork(Mode);
         dds3StartProcess(D_00551700, 0x3F2, 1, 1, dds3CalcConfig, NULL, GBWK);
         dds3StartProcess("config_draw", 0x2B07, 1, 1, dds3DrawConfig, NULL, GBWK);
         dds3StartProcess("config_update", 0x520B, 1, 1, dds3UpdateConfig, dds3DestroyConfig, GBWK);

@@ -431,13 +431,13 @@ s32 PartsEffect2(nbEventProcessData_t *ed)
     return 0;
 }
 
-s32 EffDel(nbEventProcessData_t *e)
+s32 EffDel(nbEventProcessData_t *ed)
 {
     nbKoukaProcessData_t *k;
     nbKoukaPacket_t *p;
 
-    if (e->frame == 0x4B) {
-        k = dds3GetProcessData(e->data->koukaproc);
+    if (ed->frame == 0x4B) {
+        k = dds3GetProcessData(ed->data->koukaproc);
         p = k->first;
         while (p != NULL) {
             if (p->uniqueid == 1 && p->type == 0x2B && p->cuteff != NULL) {
@@ -445,7 +445,7 @@ s32 EffDel(nbEventProcessData_t *e)
             }
             p = p->next;
         }
-        nbFreeEffectSlot(e);
+        nbFreeEffectSlot(ed);
     }
     return 0;
 }

@@ -20,7 +20,7 @@ extern void sdfPadSetAct0(s32 pad, u16 value);
 
 extern void sdfPadSetAct1(s32 pad, u8 value);
 
-extern void sdfPadSetAct(s32 pad, s32 small, s32 large);
+extern void sdfPadSetAct(s32 pad, s32 value0, s32 value1);
 
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration);
 

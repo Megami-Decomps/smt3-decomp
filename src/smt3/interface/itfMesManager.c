@@ -513,19 +513,19 @@ extern u8 D_00326768[];
 
 extern u8 D_00326770[];
 
-extern void itfMiscDrawSpritePlanePrim(void *vertices, void *colors, s32 tail, s32 flag, sdfDrawTag_t *command);
+extern void itfMiscDrawSpritePlanePrim(void *pos, void *color, s32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern void itfMiscDrawRectanglePrim(void *vertices, void *colors, u8 *vertexIndex, u8 *colorIndex, s32 tail, sdfDrawTag_t *command);
 
-extern void itfMiscDrawSpritePrim2(void *vertices, void *uv, void *colors, s32 tail, s32 flag, sdfDrawTag_t *command);
+extern void itfMiscDrawSpritePrim2(void *pos, void *uv, void *color, s32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern s32 D_00326778[4];
 
 extern s32 D_00326788[4];
 
-extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail, sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *command);
+extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 z, sdfTexHandle_t *texhandle, s32 context, sdfDrawTag_t *pdrawtag);
 
-extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *command, s32 index, s32 flag);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
 
 extern s32 D_00326798[];
 

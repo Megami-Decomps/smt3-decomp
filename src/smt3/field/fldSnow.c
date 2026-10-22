@@ -183,7 +183,7 @@ void fldFreeSnowSeed(void) {
     }
 }
 
-void fldSnowSpriteTex(sdfTexHandle_t *texture) {
+void fldSnowSpriteTex(sdfTexHandle_t *th) {
     void *tag = sdfGrAllocPacketBuff(0x20);
     void *header;
     void *packet;
@@ -192,7 +192,7 @@ void fldSnowSpriteTex(sdfTexHandle_t *texture) {
 
     sdfDrawTagInit(tag);
     header = sdfGrAllocPacketBuff(0x20);
-    sdf3DMakeDirectRefPacket(header, sdfTexGetPacket(texture), sdfTexGetPacketLength(texture));
+    sdf3DMakeDirectRefPacket(header, sdfTexGetPacket(th), sdfTexGetPacketLength(th));
     sdfDrawTagLinkRef(tag, header);
     SetRotateMatrixZ(0.0f);
     SDF_VU0_STOREMATRIX(mat);
@@ -203,15 +203,15 @@ void fldSnowSpriteTex(sdfTexHandle_t *texture) {
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);
 }
 
-void fldSnowSprite3D(const sdfVector4_t *work) {
+void fldSnowSprite3D(const sdfVector4_t *spr3d) {
     void *tag = sdfGrAllocPacketBuff(0x20);
     void *packet;
     sdfGrOt_t *ot;
 
     sdfDrawTagInit(tag);
     packet = sdfGrAllocPacketBuff(0x80);
-    sdfBillBoardMake1(packet, work, *(u32 *)((u8 *)work + 0x40), (u8 *)work + 0x10,
-                      (u8 *)work + 0x20);
+    sdfBillBoardMake1(packet, spr3d, *(u32 *)((u8 *)spr3d + 0x40), (u8 *)spr3d + 0x10,
+                      (u8 *)spr3d + 0x20);
     sdfDrawTagLink(tag, packet);
     ot = &sdfGrOtTable[44];
     ((void (*)(sdfGrOt_t *, void *))ot->regFunc)(ot, tag);

@@ -147,7 +147,7 @@ extern void evtDisableMoonDraw(void);
 
 extern void fldFreeAddressProcess(void);
 
-extern void dds3EffectDistortionBlurDelete(void *blur);
+extern void dds3EffectDistortionBlurDelete(void *hDistortionBlur);
 
 extern void campKillProcesses(void);
 

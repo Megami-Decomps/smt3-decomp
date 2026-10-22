@@ -318,7 +318,7 @@ typedef struct
 
 extern cmbSlotParam_t D_0032DE28[];
 
-extern s32 p2sdPlayBGM(s32 id);
+extern s32 p2sdPlayBGM(s32 MidiNo);
 
 typedef struct
 {
@@ -1620,7 +1620,7 @@ extern void *dds3GetControlScene(void);
 
 extern void *dds3SceneBasicSearchNameAndType(void *scene, s32 type, char *name);
 
-extern void *dds3PointBasicGetResource(void *point);
+extern void *dds3PointBasicGetResource(void *pPointBasic);
 
 /* NON_MATCHING: 9 of 25 words differ (first at +0x20). */
 #ifdef NON_MATCHING

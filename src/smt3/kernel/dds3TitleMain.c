@@ -73,9 +73,9 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_t *work);
 
 INCLUDE_ASM(const s32, "kernel/dds3TitleMain", dds3Titlemain);
 
-s32 titleStart(s32 arg)
+s32 titleStart(s32 mode)
 {
-    titleAllocWork(arg);
+    titleAllocWork(mode);
     return -1;
 }
 

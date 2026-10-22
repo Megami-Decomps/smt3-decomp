@@ -267,11 +267,11 @@ typedef struct evtScaledValue_t {
     u8 pad18[4];
 } evtScaledValue_t;
 
-void dds3PathBasicControlSetRatio(evtScaledValue_t *value, f32 multiplier);
+void dds3PathBasicControlSetRatio(evtScaledValue_t *pControl, f32 ratio);
 
 void dds3PathBasicPauseOn(evtScaledValue_t *value);
 
-void dds3PathBasicPauseOff(evtScaledValue_t *value);
+void dds3PathBasicPauseOff(evtScaledValue_t *pControl);
 
 extern f32 D_0032C7F0[4];
 

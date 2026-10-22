@@ -4,11 +4,11 @@
 #include "ps2asm.h"
 
 
-f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *value);
+f32 dds3PathBasicControlGetRatio(const dds3PathBasicControl_t *pControl);
 
-void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *value, f32 multiplier);
+void dds3PathBasicControlSetRatio(dds3PathBasicControl_t *pControl, f32 ratio);
 
-void dds3PathBasicControlGetPos(dds3PathBasicControl_t *path);
+void dds3PathBasicControlGetPos(dds3PathBasicControl_t *pControl);
 
 f32 GetSplineLength(dds3PathBasicControl_t *path);
 

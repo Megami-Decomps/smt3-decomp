@@ -35,7 +35,7 @@ extern void mymdlVisibleAll(tagpipeBasic *pWork, s16 mdlSize, s8 value);
 
 extern void mymdlInitObject(tagpipeBasic *pWork, u16 mdlSize);
 
-extern void dds3DeleteUnitObjectBasic(void *basic);
+extern void dds3DeleteUnitObjectBasic(void *aPtr);
 
 extern void DEBUG_PRINT(const char *str, ...);
 

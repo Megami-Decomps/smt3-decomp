@@ -5,6 +5,6 @@
 
 extern void sdfChipFreeDirect(void *aPtr);
 
-void dds3PathBasicFreeControl(dds3Basic_t *basic) {
-    sdfChipFreeDirect(basic->workdata);
+void dds3PathBasicFreeControl(dds3Basic_t *pControl) {
+    sdfChipFreeDirect(pControl->workdata);
 }

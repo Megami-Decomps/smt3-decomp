@@ -158,14 +158,14 @@ extern s32 dds3GetMapNo(void *scene);
 
 extern void evtLoadArea(s32 fld, s32 area);
 
-void fclLoadStage(s32 area, s32 map)
+void fclLoadStage(s32 MajorNo, s32 MinorNo)
 {
-    s32 id = (area << 16) + map;
+    s32 id = (MajorNo << 16) + MinorNo;
 
     if (dds3GetMapNo(dds3GetControlScene()) == id) {
         return;
     }
-    evtLoadArea(area, map);
+    evtLoadArea(MajorNo, MinorNo);
 }
 
 extern void dds3SetBlur(s32 frame, s32 alpha, s32 scale);
@@ -222,7 +222,7 @@ void fclScriptForcedEnd(u8 *PID)
     }
 }
 
-extern s32 scrStartScript2(s32 a, s32 b, s32 c);
+extern s32 scrStartScript2(s32 priority, s32 scrdata, s32 startproc);
 
 s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID)
 {

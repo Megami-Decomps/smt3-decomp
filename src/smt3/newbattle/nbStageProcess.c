@@ -115,7 +115,7 @@ extern void dds3SetActiveCameraSceneBasic(s32 pSceneBasic, s32 pCameraBasic);
 
 extern void dds3SetRotPoseSet(dds3Basic_t *pBasic, const sdfVector4_t *rot);
 
-extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *basic);
+extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *pBasic);
 
 extern void dds3SetScreenFovy(f32 fovy);
 

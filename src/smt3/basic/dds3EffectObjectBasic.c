@@ -219,11 +219,11 @@ void dds3BillboardDelete(struct billObj_t *hData);
 void effEveBEDCutDelete(effEveBEDCutHandle_t *hEveBEDCut);
 void effEveBEDDelete( effBTL_t *hEveBED);
 void sdfChipFreeDirect(void *aPtr);
-s32 dds3InitPoseSet(dds3Basic_t *node);
+s32 dds3InitPoseSet(dds3Basic_t *basic);
 void *sdfChipAllocDirect(u32 aSize);
 extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 mask);
 extern u8 opaque40[0x60];
-void dds3FreePoseSet(dds3Basic_t *node);
+void dds3FreePoseSet(dds3Basic_t *basic);
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic);
 u8 dds3ObjectBaseCheckFlag(struct dds3Basic_t *pObjectBasic, u32 flag);
 void dds3EffectDraw(EffNode *pData);
@@ -251,8 +251,8 @@ void dds3BillboardSetXYOffset(struct billObj_t *hBillboard, f32 x, f32 y);
 void dds3BillboardSetDrawType(struct billObj_t *hBillboard, s32 type);
 void dds3BillboardSetMode(struct billObj_t *hBillboard, s32 mode);
 
-void FreeEffectData(dds3EffectObjectBasicWorkData_t *pWork) {
-    dds3EffectObjectBasicWorkData_t *data = pWork;
+void FreeEffectData(dds3EffectObjectBasicWorkData_t *work) {
+    dds3EffectObjectBasicWorkData_t *data = work;
 
     switch (data->type) {
     case 1:
@@ -319,15 +319,15 @@ s32 dds3EffectObjectBasicConstructor(dds3Basic_t *aPtr) {
     return 1;
 }
 
-void dds3EffectObjectBasicDestructor(dds3Basic_t *pBasic) {
+void dds3EffectObjectBasicDestructor(dds3Basic_t *aPtr) {
     dds3EffectObjectBasicWorkData_t *data;
 
-    data = pBasic->workdata;
+    data = aPtr->workdata;
     FreeEffectData(data);
-    dds3FreePoseSet(pBasic);
+    dds3FreePoseSet(aPtr);
     dds3ObjectBaseFreeControlWorkData(data->pObjectBaseControlWorkData);
-    sdfChipFreeDirect(pBasic->workdata);
-    pBasic->workdata = NULL;
+    sdfChipFreeDirect(aPtr->workdata);
+    aPtr->workdata = NULL;
 }
 
 /* Resolve the owner transform, then forward it to the live effect backend. */
@@ -1048,16 +1048,16 @@ void dds3EffectObjectBasicUnlinkObject(dds3Basic_t *basic)
     work->stat &= ~EFF_OBJ_FLAG_OWNER_BILL_ENTRY;
 }
 
-void dds3EffectObjectBasicSetFldEx(dds3Basic_t *owner, fldResourceEffect_t *config) {
-    dds3EffectObjectBasicWorkData_t *resource = owner->workdata;
-    dds3PoseSet_t *source = owner->poseset;
+void dds3EffectObjectBasicSetFldEx(dds3Basic_t *basic, fldResourceEffect_t *pResEff) {
+    dds3EffectObjectBasicWorkData_t *resource = basic->workdata;
+    dds3PoseSet_t *source = basic->poseset;
 
-    resource->pFldEx = config;
+    resource->pFldEx = pResEff;
     resource->FldExBasePos.x = source->pos.x;
     resource->FldExBasePos.y = source->pos.y;
     resource->FldExBasePos.z = source->pos.z;
     resource->FldExBasePos.w = source->pos.w;
-    dds3EffectObjectBasicStatOn((struct dds3Basic_t *)owner, 0x10);
+    dds3EffectObjectBasicStatOn((struct dds3Basic_t *)basic, 0x10);
     switch (resource->pFldEx->type) {
     case 0:
     case 3:

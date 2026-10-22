@@ -311,13 +311,13 @@ typedef struct nbEventProcessData_t {
     void *unk_24;
 } nbEventProcessData_t;
 
-extern s32 ChkAiHojo(s32 formindex, s32 hojotype);
+extern s32 ChkAiHojo(s32 formindex, s32 n);
 
 extern s32 (*D_00527518[])(nbEventProcessData_t *e);
 
 extern void nbSetHojoCounter(s32 formindex, s32 type, s32 point);
 
-extern s32 ChkAiHojoMax(s32 formindex, s32 hojotype);
+extern s32 ChkAiHojoMax(s32 formindex, s32 n);
 
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 
@@ -371,18 +371,18 @@ extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 s32 nbCheckSkillUse(s32 formindex, s32 nskill);
 
-s32 Chk_MYHP(nbActionProcessData_t *a, s32 hp)
+s32 Chk_MYHP(nbActionProcessData_t *a, s32 n)
 {
-    if (a->work->hp * 100 / a->work->maxhp <= hp) {
+    if (a->work->hp * 100 / a->work->maxhp <= n) {
         a->aiselect = 1 << a->form->formindex;
         return 1;
     }
     return 0;
 }
 
-s32 Chk_MYMP(nbActionProcessData_t *a, s32 mp)
+s32 Chk_MYMP(nbActionProcessData_t *a, s32 n)
 {
-    if (a->work->mp <= mp) {
+    if (a->work->mp <= n) {
         a->aiselect = 1 << a->form->formindex;
         return 1;
     }
@@ -501,9 +501,9 @@ s32 Chk_ENCNT(nbActionProcessData_t *a, s32 n)
     return 0;
 }
 
-s32 Chk_MYBAD(nbActionProcessData_t *a, s32 badstat)
+s32 Chk_MYBAD(nbActionProcessData_t *a, s32 n)
 {
-    if ((a->work->badstatus & 0xFFF) == badstat) {
+    if ((a->work->badstatus & 0xFFF) == n) {
         a->aiselect = 1 << a->form->formindex;
         return 1;
     }
@@ -662,9 +662,9 @@ s32 Chk_FRID(nbActionProcessData_t *a, s32 n)
     return a->aiselect != 0;
 }
 
-s32 ChkAiHojo(s32 formindex, s32 hojotype)
+s32 ChkAiHojo(s32 formindex, s32 n)
 {
-    switch (hojotype) {
+    switch (n) {
     case 0:
         if (nbGetHojoCounter(formindex, 4) > 0) {
             return 1;
@@ -810,7 +810,7 @@ s32 Chk_FRHOJO(nbActionProcessData_t *a, s32 n)
 
 /* NON_MATCHING: 1 of 55 words differ (first at +0x6C). */
 #ifdef NON_MATCHING
-s32 Chk_ENHOJOMAX(nbActionProcessData_t *a, s32 hojotype)
+s32 Chk_ENHOJOMAX(nbActionProcessData_t *a, s32 n)
 {
     s32 i;
     s32 one;
@@ -829,7 +829,7 @@ s32 Chk_ENHOJOMAX(nbActionProcessData_t *a, s32 hojotype)
         if (a->data->party[i].flag & 0x20) {
             continue;
         }
-        if (ChkAiHojoMax(a->data->party[i].formindex, hojotype) == 0) {
+        if (ChkAiHojoMax(a->data->party[i].formindex, n) == 0) {
             continue;
         }
         a->aiselect |= one << a->data->party[i].formindex;
@@ -842,7 +842,7 @@ INCLUDE_ASM(const s32, "newbattle/nbAi", Chk_ENHOJOMAX);
 
 /* NON_MATCHING: 1 of 55 words differ (first at +0x6C). */
 #ifdef NON_MATCHING
-s32 Chk_FRHOJOMAX(nbActionProcessData_t *a, s32 hojotype)
+s32 Chk_FRHOJOMAX(nbActionProcessData_t *a, s32 n)
 {
     s32 i;
     s32 one;
@@ -861,7 +861,7 @@ s32 Chk_FRHOJOMAX(nbActionProcessData_t *a, s32 hojotype)
         if (a->data->party[i].flag & 0x20) {
             continue;
         }
-        if (ChkAiHojoMax(a->data->party[i].formindex, hojotype) == 0) {
+        if (ChkAiHojoMax(a->data->party[i].formindex, n) == 0) {
             continue;
         }
         a->aiselect |= one << a->data->party[i].formindex;
@@ -995,25 +995,25 @@ s32 Chk_SENSEI_286530(nbActionProcessData_t *a)
     return 0;
 }
 
-s32 Chk_PLV(nbActionProcessData_t *a, s32 lv)
+s32 Chk_PLV(nbActionProcessData_t *a, s32 n)
 {
-    if (datGetPlayerLevel() < lv) {
+    if (datGetPlayerLevel() < n) {
         return 0;
     }
     return 1;
 }
 
-s32 Chk_PPARTYLV(nbActionProcessData_t *a, s32 lv)
+s32 Chk_PPARTYLV(nbActionProcessData_t *a, s32 n)
 {
-    if (nbGetLvAvg(a->data, 0) < lv) {
+    if (nbGetLvAvg(a->data, 0) < n) {
         return 0;
     }
     return 1;
 }
 
-s32 Chk_TURN(nbActionProcessData_t *a, s32 turn)
+s32 Chk_TURN(nbActionProcessData_t *a, s32 n)
 {
-    if (a->data->turn < turn) {
+    if (a->data->turn < n) {
         return 0;
     }
     return 1;
@@ -1043,9 +1043,9 @@ s32 Chk_ENHAMAMHK(nbActionProcessData_t *a, s32 n)
     return a->aiselect != 0;
 }
 
-s32 Chk_SKILLNOMP(nbActionProcessData_t *a, s32 nskill)
+s32 Chk_SKILLNOMP(nbActionProcessData_t *a, s32 n)
 {
-    if (nbCheckSkillCost(a->form->formindex, nskill) != 0) {
+    if (nbCheckSkillCost(a->form->formindex, n) != 0) {
         a->aiselect = 1 << a->form->formindex;
         return 1;
     }

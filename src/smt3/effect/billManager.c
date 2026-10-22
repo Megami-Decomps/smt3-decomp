@@ -48,8 +48,8 @@ extern void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 extern void *sdfMemGetPtr(struct sdfMemHandle_t *aHandle);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
-extern BillPacRequest *pacLoad(const char *path);
-extern void pacSync(BillPacRequest *request);
+extern BillPacRequest *pacLoad(const char *filename);
+extern void pacSync(BillPacRequest *pacFileHandle);
 extern void pacFileHandleFree_(void *pacHandle);
 
 billObj_t *dds3BillboardGeneral(s32 number);

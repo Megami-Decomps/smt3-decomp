@@ -2260,11 +2260,11 @@ effBlurScaleWork_t *dds3EffectRippleBlurCreate(effBlurScaleParams_t *pParam);
 
 EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *pParam);
 
-void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *owner);
+void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *hPartialMultiFilter);
 
-void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *owner);
+void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur);
 
-void dds3EffectRippleBlurDelete(effBlurScaleWork_t *owner);
+void dds3EffectRippleBlurDelete(effBlurScaleWork_t *hRippleBlur);
 
 void dds3EffectFilter(EffResourceRectDrawParams *params);
 
@@ -2417,7 +2417,7 @@ extern EffPCPSharedTrail *pBlinkMultiBlurBase;
 
 EffPCPSpanWork *effPCPBreathCreate(void *params, effPCPAgiraoFirePartList_t *handleParams);
 
-void dds3EffectPartialMultiBlurDelete(dds3Effect_PartialMultiBlur_t *owner);
+void dds3EffectPartialMultiBlurDelete(dds3Effect_PartialMultiBlur_t *hPartialMultiBlur);
 
 extern u8 effPCP_Megidoraon01_ThunderSpherePoly_Param[];
 

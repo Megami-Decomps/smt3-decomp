@@ -109,7 +109,7 @@ typedef struct fldResourceAreaRef_t {
     const u8 *name; /* 0x04 */
 } fldResourceAreaRef_t;
 
-extern dds3Basic_t *dds3AddModelBasic2(u32 key, void *modelDef, void *playBook, s32 texList, const char *name);
+extern dds3Basic_t *dds3AddModelBasic2(u32 serialID, void *pModelDef, void *pMotDef, s32 pTexList, const char *pName);
 
 extern void dds3MatterObjectBasicSetOt(dds3Basic_t *aPtr, s32 idx);
 
@@ -161,7 +161,7 @@ extern void sdfAddressResolver(s32 *aDataBody, s32 aOffset, const u8 *aAddrInfoP
 
 void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData);
 
-void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor);
+void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area);
 
 extern u32 D_0054EBF4;
 
@@ -174,7 +174,7 @@ void fldFreeNextFile(void);
 
 extern struct fileRequest_t *pFldNextFileDataF2;
 
-struct fileRequest_t *pacLoad(const char *requestName);
+struct fileRequest_t *pacLoad(const char *filename);
 
 extern void sdfMemFreeDelayedDirect(sdfMemHandle_t *aHandle);
 
@@ -220,7 +220,7 @@ extern char * strcpy(char *, const char *);
 
 extern struct fileRequest_t *gFldFileF1;
 
-extern void pacSync(struct fileRequest_t *request);
+extern void pacSync(struct fileRequest_t *pacFileHandle);
 
 extern void fldInfLoadFromMem(const void *);
 
@@ -670,9 +670,9 @@ void fldAddressResolverReset(u32 pFileTop, fldTransferChunk_t *pData) {
     sdfAddressResolverReset((u32 *)pFileTop, pFileTop, (u8 *)((s32)pFileTop + pData->offset), pData->size);
 }
 
-void fldLoadNextFile_SetId_BtlRet(u32 area, u32 floor) {
-    D_0054EBF4 = area;
-    D_0054EBF8 = floor;
+void fldLoadNextFile_SetId_BtlRet(u32 field, u32 area) {
+    D_0054EBF4 = field;
+    D_0054EBF8 = area;
 }
 
 s32 fldLoadNextFile_BtlRet(void) {

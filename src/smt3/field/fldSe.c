@@ -32,7 +32,7 @@ extern s32 D_002FC020[];
 
 extern s32 fldBgmTrackTable[];
 
-void p2sdPlayBGM(s32 trackId);
+void p2sdPlayBGM(s32 MidiNo);
 
 extern u32 fldSeLastBgm;
 

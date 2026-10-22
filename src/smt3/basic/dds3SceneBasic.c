@@ -23,14 +23,14 @@ dds3Basic_t *dds3GetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic);
 void dds3SceneBasicReleaseScriptFile(dds3Basic_t *scene);
 dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 void dds3DeleteSceneBasicData(dds3Basic_t *basic);
-void dds3SceneBasicFreeScene(dds3Basic_t *scene);
+void dds3SceneBasicFreeScene(dds3Basic_t *pBasic);
 
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);
 extern sdfMemHandle_t *sdfMemAllocDirect(s32 aSize);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
 extern s32 scrSearchProcedureName(void *scrdata, char *procname);
-extern void scrStartScript2(s32 a, void *b, s32 c);
+extern void scrStartScript2(s32 priority, void *scrdata, s32 startproc);
 int printf(const char *fmt, ...);
 
 s32 sceneconstructor(dds3Basic_t *basic)
@@ -292,11 +292,11 @@ void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area
     work->fieldHandle = handle;
 }
 
-void dds3SceneBasicFreeScene(dds3Basic_t *scene)
+void dds3SceneBasicFreeScene(dds3Basic_t *pBasic)
 {
     dds3SceneWork_t *work;
 
-    work = scene->workdata;
+    work = pBasic->workdata;
     fldFreeFile();
     work->fieldHandle = 0;
 }

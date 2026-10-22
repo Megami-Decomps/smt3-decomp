@@ -59,8 +59,8 @@ extern f32 D_0055DB20[];
 
 extern f32 D_0055DB10[];
 
-extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *camera, f32 *worldEyeOut,
-                                                      f32 *targetPositionOut);
+extern void dds3CameraObjectBasicGetTgtCam(dds3Basic_t *pBasic, f32 *tgtpos,
+                                                      f32 *campos);
 
 extern void dds3OnPoseSetFlag(dds3PoseSet_t *, u32);
 
@@ -198,7 +198,7 @@ extern f32 D_0054EF80;
 
 extern void dds3CameraObjectBasicGetCameraTM(dds3Basic_t *camera, void *out);
 
-extern void dds3GetTMPoseSet(dds3Basic_t *object);
+extern void dds3GetTMPoseSet(dds3Basic_t *pBasic);
 
 void calcCamNormalNPC(void) {
     union {

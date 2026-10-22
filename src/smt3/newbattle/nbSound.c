@@ -274,7 +274,7 @@ extern s32 nbResultCount;
 
 extern s32 bgmno;
 
-extern void p2sdPlayBGM(s32 no);
+extern void p2sdPlayBGM(s32 MidiNo);
 
 extern s32 nbBgmSaved;
 

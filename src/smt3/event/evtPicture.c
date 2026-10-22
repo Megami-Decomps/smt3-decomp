@@ -69,9 +69,9 @@ extern void eglLinkTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 da
 extern void eglLinkAlpha(s32 mode);
 extern void *sdfGrAllocPacketBuff(s32 aSize);
 extern void sdfDrawTagInit(sdfDrawTag_t *a);
-extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *tag, s32 index, s32 flag);
-extern void itfMiscDrawSpritePrim(void *vertexData, void *uvData, void *colorData, s32 tail,
-                                  void *texture, s32 flag, sdfDrawTag_t *tag);
+extern void itfMiscDrawAlphaPrim(sdfDrawTag_t *pdrawtag, s32 tp, s32 context);
+extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 z,
+                                  void *texhandle, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void sdfChipFreeDirect(void *aPtr);

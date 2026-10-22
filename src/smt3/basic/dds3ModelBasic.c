@@ -19,28 +19,28 @@ extern sdfMotionCtrlr_t *sdfMotionCtrlrNew(sdfModelRootNode_t *aModel, sdfMotion
 
 extern void sdfMotionChange(sdfMotionCtrlr_t *aCtrlr, s32 aCutNum, s32 aType);
 
-dds3Basic_t *dds3AddModelBasic(s32 id, sdfItemArray_t *items, sdfMotionPlayBook_t *motionTable, dds3Basic_t *fallbackModel, char *name) {
+dds3Basic_t *dds3AddModelBasic(s32 serialID, sdfItemArray_t *pModelDef, sdfMotionPlayBook_t *pMotDef, dds3Basic_t *pTextureBasic, char *pName) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_STATICMODEL);
     dds3ModelBasicWorkData_t *work = basic->workdata;
 
-    work->motionTable = motionTable;
-    basic->serialID = id;
-    basic->name = name;
-    work->fallbackModel = fallbackModel;
-    work->itemList = items;
+    work->motionTable = pMotDef;
+    basic->serialID = serialID;
+    basic->name = pName;
+    work->fallbackModel = pTextureBasic;
+    work->itemList = pModelDef;
     work->modelResource = NULL;
     return basic;
 }
 
-dds3Basic_t *dds3AddModelBasic2(s32 id, sdfItemArray_t *items, sdfMotionPlayBook_t *motionTable, void *modelResource, char *name) {
+dds3Basic_t *dds3AddModelBasic2(s32 serialID, sdfItemArray_t *pModelDef, sdfMotionPlayBook_t *pMotDef, void *pTexList, char *pName) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_STATICMODEL);
     dds3ModelBasicWorkData_t *work = basic->workdata;
 
-    basic->serialID = id;
-    work->modelResource = modelResource;
-    work->itemList = items;
-    work->motionTable = motionTable;
-    basic->name = name;
+    basic->serialID = serialID;
+    work->modelResource = pTexList;
+    work->itemList = pModelDef;
+    work->motionTable = pMotDef;
+    basic->name = pName;
     return basic;
 }
 

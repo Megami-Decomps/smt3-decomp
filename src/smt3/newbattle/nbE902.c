@@ -414,15 +414,15 @@ nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-s32 Pos1(nbEventProcessData_t *e)
+s32 Pos1(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
     nbFormation_t *p;
     s32 i;
 
-    nbMoveFormation(e->data, nbGetEventForm(e)->formindex, 5);
-    nbSetActionCommand(e->data, 0x10D);
-    p = e->data->form + 4;
+    nbMoveFormation(ed->data, nbGetEventForm(ed)->formindex, 5);
+    nbSetActionCommand(ed->data, 0x10D);
+    p = ed->data->form + 4;
     for (i = 0; i < 10; i++) {
         if (p->stat & 0x800) {
             p->stat |= 8;
@@ -434,7 +434,7 @@ s32 Pos1(nbEventProcessData_t *e)
     effBTLSkillSetFormationInfo(form->formindex, 0);
     effBTLSkillStart(0xE9, 0);
     nbDispText(text1[0xE9], NULL, 0, 0x5A, 0x89FEFF80);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 
@@ -456,14 +456,14 @@ s32 nbE902_Wait1(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbE902", SelectCopy);
 
-s32 Bunshin1(nbEventProcessData_t *e)
+s32 Bunshin1(nbEventProcessData_t *ed)
 {
     nbFormation_t *form;
 
-    form = e->data->form;
-    nbAddOngBunshin2Packet(0, (s32)e, &form[5], &form[6], &form[4], &form[7]);
+    form = ed->data->form;
+    nbAddOngBunshin2Packet(0, (s32)ed, &form[5], &form[6], &form[4], &form[7]);
     nbCameraBoss_Ongy_BUNSIN_Run(pNbCamera);
-    nbFreeEffectSlot(e);
+    nbFreeEffectSlot(ed);
     return 0;
 }
 

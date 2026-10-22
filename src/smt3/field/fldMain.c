@@ -35,7 +35,7 @@ extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
 
 extern void fldPlayerAFree(void);
 
-extern void fldLoadNextFile_SetId_BtlRet(s32 id, s32 arg1);
+extern void fldLoadNextFile_SetId_BtlRet(s32 field, s32 area);
 
 extern s32 gFldAnahoriAkumaIdx;
 

@@ -46,12 +46,12 @@ void dds3ModelBasicFreeModel(dds3Basic_t *basic) {
     sdfChipFreeDirect(work);
 }
 
-dds3Basic_t *dds3AddModelRangeBasicNew(s32 id, s32 unused1, s32 unused2, char *name) {
+dds3Basic_t *dds3AddModelRangeBasicNew(s32 serialID, s32 pData, s32 pos, char *pName) {
     dds3Basic_t *basic = dds3AddSceneBasicData(BASIC_TYPE_MODELRANGE);
 
-    basic->name = name;
+    basic->name = pName;
     ((dds3ModelRangeBasicWorkData_t *)basic->workdata)->controlValue = 0;
-    basic->serialID = id;
+    basic->serialID = serialID;
     return basic;
 }
 

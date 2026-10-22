@@ -54,7 +54,7 @@ extern u8 attackCount;
 
 extern void objInitMyAdd(void);
 
-extern s32 p2sdPlayBGM(u32 midino);
+extern s32 p2sdPlayBGM(u32 MidiNo);
 
 extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
