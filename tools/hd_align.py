@@ -93,6 +93,12 @@ def plan(reports, hd, ours, verbose):
 
     refused = []
     types = {}
+    # Every identifier in code positions: a one-line typedef or a forward
+    # declaration of the target name is a collision the struct parser cannot see.
+    strip = re.compile(r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"', re.S)
+    used = set()
+    for path in all_sources():
+        used.update(re.findall(r"\b[A-Za-z_]\w*\b", strip.sub(" ", path.read_text(errors="replace"))))
     for ours_t, votes in type_votes.items():
         if ours_t not in ours:
             refused.append(f"type {ours_t}: not defined in the tree")
@@ -111,8 +117,8 @@ def plan(reports, hd, ours, verbose):
         if n < 2 and stem(hd_t) not in evidence[("type", ours_t, hd_t)].split(":")[0].lower():
             refused.append(f"type {ours_t} -> {hd_t}: one report, from a function not named for it")
             continue
-        if hd_t in ours:
-            refused.append(f"type {ours_t} -> {hd_t}: the tree already defines {hd_t}")
+        if hd_t in ours or hd_t in used:
+            refused.append(f"type {ours_t} -> {hd_t}: the tree already uses the name {hd_t}")
             continue
         if not CONVENTION.search(hd_t):
             refused.append(f"type {ours_t} -> {hd_t}: not a recovered-looking name")
@@ -187,10 +193,13 @@ def plan(reports, hd, ours, verbose):
             bad = set()
             for (m1, n1, i1), (m2, n2, i2) in zip(seq, seq[1:]):
                 if i2 <= i1:
-                    bad.add(m1 if m1 in members[our_t] else m2)
+                    # Two members we did not rename being out of HD's order is
+                    # the tree's own layout reading, not this plan's mistake.
+                    bad.update(m for m in (m1, m2) if m in members[our_t])
             for m in bad:
-                refused.append(f"member {our_t}.{m} -> {members[our_t][m]}: out of HD member order")
-                del members[our_t][m]
+                if m in members[our_t]:
+                    refused.append(f"member {our_t}.{m} -> {members[our_t][m]}: out of HD member order")
+                    del members[our_t][m]
         targets = Counter(members[our_t].values())
         for m, new in list(members[our_t].items()):
             if targets[new] > 1:
@@ -213,22 +222,44 @@ def all_sources():
     return sorted(list((ROOT / "include").rglob("*.h")) + list((ROOT / "src").rglob("*.c")))
 
 
+def struct_spans(lines, name):
+    """[(first, last)] line index spans of every definition of struct `name`.
+
+    Found by name rather than by struct_fields' line number, which is off in
+    some files and once renamed members of the neighbouring struct instead."""
+    spans = []
+    header = re.compile(rf"\b(?:struct|union)\s+{re.escape(name)}\b")
+    closer = re.compile(rf"^\s*\}}\s*{re.escape(name)}\s*;")
+    for i, line in enumerate(lines):
+        if header.search(line) and ("{" in line or (i + 1 < len(lines) and lines[i + 1].strip().startswith("{"))):
+            depth, j = 0, i
+            while j < len(lines):
+                depth += lines[j].count("{") - lines[j].count("}")
+                if depth == 0 and "{" in "".join(lines[i:j + 1]):
+                    spans.append((i, j))
+                    break
+                j += 1
+        elif closer.match(line):
+            depth, j = 0, i
+            while j >= 0:
+                depth += lines[j].count("}") - lines[j].count("{")
+                if depth == 0:
+                    spans.append((j, i))
+                    break
+                j -= 1
+    return sorted(set(spans))
+
+
 def rename_bodies(our_t, picks, ours):
     """Rename the members inside every definition of our_t."""
     for path in ours[our_t]:
-        text = path.read_text()
-        lines = text.split("\n")
-        for _, sname, _, line in struct_fields(text):
-            if sname != our_t:
-                continue
-            start, depth, end = line - 1, 0, line - 1
-            for i in range(start, len(lines)):
-                depth += lines[i].count("{") - lines[i].count("}")
-                if depth == 0 and i > start:
-                    end = i
-                    break
+        lines = path.read_text().split("\n")
+        spans = struct_spans(lines, our_t)
+        if not spans:
+            print(f"warning: no body of {our_t} found in {path}")
+        for first, last in spans:
             for old, new in picks.items():
-                for i in range(start, end + 1):
+                for i in range(first, last + 1):
                     lines[i] = re.sub(rf"\b{re.escape(old)}\b", new, lines[i])
         path.write_text("\n".join(lines))
 
