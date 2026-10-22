@@ -8,7 +8,7 @@ struct effPCPThunderSpherePolyParam_t;
 struct effPCP_ThunderRadiatePolyPart_t;
 struct effPCP_ThunderRadiatePolyParam_t;
 struct effPCP_ThunderRadiatePoly_t;
-struct EffThunderFrag;
+struct effPCP_ThunderPolyPart_t;
 struct effPCP_ThunderPolyParam_t;
 struct effPCP_ThunderPolyList_t;
 struct effPCP_ThunderPolyListParam_t;
@@ -37,7 +37,7 @@ typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
 typedef struct ParSystem ParSystem;
 typedef struct effPCP_ThunderRadiatePoly_t effPCP_ThunderRadiatePoly_t;
-typedef struct EffThunderFrag EffThunderFrag;
+typedef struct effPCP_ThunderPolyPart_t effPCP_ThunderPolyPart_t;
 typedef struct effPCP_ThunderPolyParam_t effPCP_ThunderPolyParam_t;
 typedef struct effPCP_ThunderPolyListParam_t effPCP_ThunderPolyListParam_t;
 typedef struct effPCP_ThunderColumnPolyLowPart_t effPCP_ThunderColumnPolyLowPart_t;
@@ -239,7 +239,7 @@ struct effPCP_ThunderRadiatePoly_t {
 };
 
 /* Per-fragment countdowns and the packed color consumed by thunder updates. */
-struct EffThunderFrag {
+struct effPCP_ThunderPolyPart_t {
     u32 delayFrames;  /* 0x00 */
     u32 activeFrames; /* 0x04 */
     u32 color;        /* 0x08 */
@@ -272,7 +272,7 @@ struct effPCP_ThunderPolyParam_t {
 
 struct effPCP_ThunderPoly_t {
     effPCP_ThunderPolyParam_t head;
-    EffThunderFrag *pPart; /* 0x54 */
+    effPCP_ThunderPolyPart_t *pPart; /* 0x54 */
     u32 color;               /* 0x58 */
     union {
         u32 updateCount;     /* single-hPoly variant */
@@ -1309,12 +1309,12 @@ void eff_178128(EffThunderSparkWork *work) {
 }
 
 effPCP_ThunderPoly_t *effPCP_ThunderPolyCreate(effPCP_ThunderPolyParam_t *parameters) {
-    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->number * sizeof(EffThunderFrag) + sizeof(effPCP_ThunderPoly_t));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->number * sizeof(effPCP_ThunderPolyPart_t) + sizeof(effPCP_ThunderPoly_t));
     effPCP_ThunderPoly_t *work = (effPCP_ThunderPoly_t *)sdfMemLock(allocationHandle);
     u32 i;
 
     work->head = *parameters;
-    work->pPart = (EffThunderFrag *)(work + 1);
+    work->pPart = (effPCP_ThunderPolyPart_t *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->hPoly = dds3TrackPolyCreate(work->head.number, work->head.split * 2 - 1, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     dds3TrackPolyVC5Set_AcuteW(work->hPoly, work->head.color_center, work->head.color_border, work->head.color_edge);
@@ -1363,7 +1363,7 @@ void effPCP_ThunderPolySetVCNormal(effPCP_ThunderPoly_t *pThunderPoly) {
 }
 
 void effPCP_ThunderPolyDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
-    EffThunderFrag *fragment = &work->pPart[index];
+    effPCP_ThunderPolyPart_t *fragment = &work->pPart[index];
 
     fragment->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
     fragment->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
@@ -1573,7 +1573,7 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData) {
     u32 restartLimit = hData->head.restartFrameLimit;
     u32 tintColor = hData->color;
     u32 updateCount = hData->state.updateCount;
-    EffThunderFrag *fragment = hData->pPart;
+    effPCP_ThunderPolyPart_t *fragment = hData->pPart;
     parCell_t *renderCells = system->cells;
     s32 canRestart;
 
@@ -1606,12 +1606,12 @@ void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData) {
 }
 
 effPCP_ThunderPoly_t *effPCP_ThunderPolyLowCreate(effPCP_ThunderPolyParam_t *parameters) {
-    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->number * sizeof(EffThunderFrag) + sizeof(effPCP_ThunderPoly_t));
+    sdfMemHandle_t *allocationHandle = sdfMemAllocDirect(parameters->number * sizeof(effPCP_ThunderPolyPart_t) + sizeof(effPCP_ThunderPoly_t));
     effPCP_ThunderPoly_t *work = (effPCP_ThunderPoly_t *)sdfMemLock(allocationHandle);
     u32 i;
 
     work->head = *parameters;
-    work->pPart = (EffThunderFrag *)(work + 1);
+    work->pPart = (effPCP_ThunderPolyPart_t *)(work + 1);
     work->allocationHandle = allocationHandle;
     work->state.secondarySystem = dds3TrackPolyCreate(work->head.number, work->head.split * 2 - 1, 0, PAR_CELL_TOPOLOGY_TRIANGLE);
     dds3TrackPolyVCSet(work->state.secondarySystem, 2, work->head.color_border, work->head.color_edge);
@@ -1647,7 +1647,7 @@ void effPCP_ThunderPolyLowSetColor(effPCP_ThunderPoly_t *hData, u32 abgr) {
 }
 
 void effPCP_ThunderPolyLowDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
-    EffThunderFrag *fragment = &work->pPart[index];
+    effPCP_ThunderPolyPart_t *fragment = &work->pPart[index];
 
     fragment->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
     fragment->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
@@ -1860,7 +1860,7 @@ void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *hData) {
     ParSystem *primarySystem = hData->hPoly;
     parCell_t *primaryCells = primarySystem->cells;
     u32 tintColor = hData->color;
-    EffThunderFrag *fragment = hData->pPart;
+    effPCP_ThunderPolyPart_t *fragment = hData->pPart;
     parCell_t *secondaryCells = secondarySystem->cells;
     s32 packedColor;
 

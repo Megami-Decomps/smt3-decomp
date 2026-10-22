@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 130 types, 1024 members, 506 adopted constants.
+# 121 types, 1024 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -42,14 +42,10 @@ type EffPCPBlockSet
 type EffPCPCompactRectParams
 type EffPCPCompactTexturedBlurParams
 type EffPCPCompactTimelineParams
-type EffPCPCompactWork
 type EffPCPEventPlace
-type EffPCPFadeWork
 type EffPCPRectBounds
 type EffPCPRectParams
 type EffPCPRingWork
-type EffPCPSpinWork
-type EffPCPThunderGroup
 type EffPCPTrailParams
 type EffParamTable
 type EffParamTableRecord
@@ -59,7 +55,6 @@ type EffResourceRectParams
 type EffResourceRectWork
 type EffRingColorSlot
 type EffSpawnParams
-type EffThunderFrag
 type EffThunderParameterHead
 type EffThunderSparkParams
 type EffThunderSparkWork
@@ -82,13 +77,10 @@ type MovOpenParam
 type MovPacStream
 type ParSystem
 type PcpFlashColorSlot
-type PcpFlashMotionParticle
 type PcpFlashQuadColorSlot
-type PcpFlashStreakParams
 type PcpScatterParamsA
 type PcpScatterParamsB
 type PcpScatterParamsC
-type PcpScatterParticle
 type PcpScatterPlainParams
 type PcpScatterPlainParticle
 type PcpScatterRadialParams
@@ -113,7 +105,6 @@ type SdfGsSceneBlendRegisters
 type SdfGsTextureStateValues
 type SdfGsTexturedVertex
 type SdfGsTwoVertexPacket
-type SdfGsTwoVertexPayload
 type SdfItem
 type SdfItemList
 type SdfItemListRef
@@ -150,10 +141,6 @@ member BattleGroupNode.unk_AC
 member BillObj.unk18
 member BillObj.unk1C
 member BillPluralRecord.unk08
-member EffPCPFadeWork.unk10
-member EffPCPThunderGroup.unk10
-member EffPCPThunderGroup.unk14
-member EffPCPThunderGroup.unk18
 member GParam.unk0
 member GParam.unk4
 member GameFileInfo_t.unk25
@@ -557,9 +544,13 @@ member effPCPMHanma01_tag.unk0C
 member effPCPMuzzleFlashHead_t.unk00
 member effPCPMuzzleFlashHead_t.unk04
 member effPCPRadiateBED_tag.unk10C
+member effPCPShockWave01_tag.unk10
 member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
+member effPCPZiodin01_tag.unk10
+member effPCPZiodin01_tag.unk14
+member effPCPZiodin01_tag.unk18
 member effPCP_PBCamera_tag.unk58
 member effPCP_PBCamera_tag.unk59
 member effPCP_PBCamera_tag.unk5C
