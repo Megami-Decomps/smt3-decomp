@@ -98,3 +98,28 @@ What is left on the macro side is a reconciliation rather than a port: 108 of
 dds-decomp's macros match no body here, and 195 of this repo's bodies have no
 counterpart there. Each is an idiom one repo has written and the other has not,
 or the same idiom under a different clobber list.
+
+### Why the types pass under-detects, and what would fix it
+
+Voting on parameter positions only sees a type that crosses a function
+boundary. A struct used as a local, or embedded in another struct, casts no
+vote, so most of the `Sdf*` layouts that HD's `libsdf.h` proves exist here were
+missed. `SdfDrawPacket` and `SdfTextureDrawPacket` are the clearest examples.
+
+Layout matching does not fill that gap. Measured on 2026-10-23: of 92 DDS
+structs carrying at least four offset comments, exactly 2 matched one of this
+repo's layouts uniquely, because only 81 of 256 assert a size and the offset
+sequences differ wherever dds-decomp groups bytes its own way. Loosening the
+test to containment, every DDS offset being a real member offset of the
+candidate, produced 9 unique answers of which the believable ones were the
+types that already carry the recovered name. Structs built from 4-byte fields
+contain each other's offsets, which is the trap
+[Type backlog](type-backlog.md) records: two shape methods can agree and both
+be wrong.
+
+The discriminating signal is member names. `config/smt3/hd_types.txt` carries
+167 `libsdf.h` types with their members, and the HD corpus is authoritative
+for member names and their order even where its sizes are not. A DDS struct
+whose member names overlap a `libsdf.h` struct's, in order, is that struct, and
+the overlap is specific in a way an offset set is not. That is the next method
+to build, and it would serve the member-name pass at the same time.

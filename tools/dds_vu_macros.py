@@ -39,6 +39,8 @@ def macro_bodies(path):
         names = [p.strip() for p in (params or "()").strip("()").split(",") if p.strip()]
         for i, p in enumerate(names):
             tail = re.sub(rf"\b{re.escape(p)}\b", f"@{i}", tail)
+        # The operand constraints stay in the key: "f" and "r" bind the same
+        # expression to different register classes and emit different code.
         key = (re.sub(r"\s+", " ", template.replace("\\n", "\n").replace("\\t", "\t")).strip(),
                re.sub(r"\s+", " ", tail).strip())
         out[name] = (arity, key)
