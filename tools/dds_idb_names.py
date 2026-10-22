@@ -18,8 +18,10 @@ IDA_SCRIPTS = Path(
     os.environ.get("IDA_SKILL_SCRIPTS", Path.home() / ".claude/skills/ida-instances/scripts"))
 PORTS = os.environ.get("IDA_MCP_PORTS", "13337-13437")
 
+# py_eval execs this with split globals and locals, so the blob and the flag come
+# in as arguments and the imports live inside the function.
 PAYLOAD = r'''
-def run():
+def run(ROWS, APPLY):
     import base64, json, zlib
     import ida_name, idc
     rows = json.loads(zlib.decompress(base64.b64decode(ROWS)))
@@ -40,8 +42,6 @@ def run():
             out["renamed"] += 1
     return json.dumps(out)
 
-RESULT = run()
-RESULT
 '''
 
 
@@ -64,7 +64,7 @@ def main():
 
     instances = ida.get_instances(ida.parse_ports(PORTS), refresh=False)
     port = ida.resolve_target(args.instance, instances)
-    code = f"ROWS = {blob!r}\nAPPLY = {args.apply!r}\n" + PAYLOAD
+    code = PAYLOAD + f"\nRESULT = run({blob!r}, {args.apply!r})\nRESULT\n"
     out = ida.call_tool(port, "py_eval", {"code": code, "new_locals": True})
     if out.get("stderr"):
         sys.exit(out["stderr"])

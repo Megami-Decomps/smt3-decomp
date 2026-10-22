@@ -141,6 +141,7 @@ class Game:
     def __init__(self, version, pairs_path, cache_dir, smt3_elf, dds_elf, dds_decomp):
         self.version = version
         self.excluded = read_excludes(dds_decomp / "config" / "smt3_names_exclude.txt").get(version, {})
+        self.prefixes = set()
         self.pairs = read_pairs(pairs_path)
         self.smt3, self.dds = read_cache(cache_dir, smt3_elf, dds_elf)
         self.symbols = read_symbols(dds_decomp / "config" / version / "symbol_addrs.txt")
@@ -150,6 +151,14 @@ class Game:
         self.kinds = read_sources(dds_decomp / "config" / version / "name_sources.txt")
         self.rows = []       # (dds_addr, dds_name, smt3_addr, smt3_name, status, evidence)
         self.accepted = {}   # dds_addr -> (smt3_addr, smt3_name, evidence)
+
+    def in_batch(self, b):
+        """True when this address belongs to the batch being generated."""
+        if not self.prefixes:
+            return True
+        name = self.symbols.get(b) or ""
+        m = re.match(r"^_*([A-Za-z][a-z0-9]*)", name)
+        return (m.group(1) if m else "") in self.prefixes
 
     def candidates(self, smt3_text_end):
         """Every SMT3 function with a usable pair, after the hash rules."""
@@ -223,6 +232,8 @@ class Game:
                 status = "reject:not-in-dds-symbols"
             elif b in self.excluded:
                 status = "reject:excluded"
+            elif not self.in_batch(b):
+                status = "skip:other-batch"
             elif b in taken:
                 status = "reject:two-smt3-functions"
             if status == "accept":
@@ -246,37 +257,44 @@ class Game:
                      for bb, dn, a, sn, st, ev in self.rows]
 
     def ordered(self):
-        """Accepted rows in an order names.py can apply one at a time.
+        """Accepted rows as (parking rows, final rows), each in applicable order.
 
-        names.py refuses a name another address still holds, so a row waits for the
-        row that frees its name; a cycle is broken by parking one address on a
-        temporary name first."""
+        names.py refuses a name another address still holds and validates row by
+        row, so a row waits for the one that frees its name. A cycle has no such
+        order, and is broken by parking one address on a temporary name. The two
+        groups must be applied in separate names.py runs: it rewrites C references
+        in one simultaneous pass, which permutes names correctly but cannot create
+        a temporary name and consume it again in the same run."""
         pending = dict(sorted(self.accepted.items()))
         holder = {self.symbols[b]: b for b in pending if b in self.symbols}
-        out = []
+        pre, out = [], []
         while pending:
             ready = [b for b, (_a, name, _ev) in pending.items()
                      if holder.get(name) in (None, b) or holder[name] not in pending]
             if not ready:
                 b = next(iter(pending))
-                out.append((b, f"tmp_{b:08X}", "cycle"))
+                pre.append((b, f"tmp_{b:08X}", "cycle"))
                 holder.pop(self.symbols[b], None)
                 continue
             for b in ready:
                 out.append((b, *pending.pop(b)[1:]))
-        return out
+        return pre, out
 
     def write(self, out_dir):
         v = self.version
-        names = []
-        for b, name, ev in self.ordered():
-            a, _name, _ev = self.accepted[b]
-            old = self.symbols.get(b) or (self.dds[b][3] if b in self.dds else "?")
-            note = f"SMT3HD name via SLUS_209.11 0x{a:08X}, {ev}; was {old}"
-            if ev == "cycle":
-                note = "parked while a rename cycle resolves"
-            names.append(f"0x{b:08X}\t{name}\tinferred\t{note}")
-        (out_dir / f"names_{v}.tsv").write_text("\n".join(names) + "\n")
+        pre, final = self.ordered()
+        rows = lambda group: [
+            f"0x{b:08X}\t{name}\tinferred\t" + (
+                "parked while a rename cycle resolves" if ev == "cycle" else
+                f"SMT3HD name via SLUS_209.11 0x{self.accepted[b][0]:08X}, {ev}; was "
+                + (self.symbols.get(b) or (self.dds[b][3] if b in self.dds else "?")))
+            for b, name, ev in group]
+        (out_dir / f"names_{v}.tsv").write_text("\n".join(rows(final)) + "\n")
+        path = out_dir / f"names_{v}_pre.tsv"
+        if pre:
+            path.write_text("\n".join(rows(pre)) + "\n")
+        elif path.exists():
+            path.unlink()
         # The net old-to-new map, for the headers, docs and config that names.py
         # leaves alone (dds-decomp tools/rename_refs.py).
         renames = []
@@ -322,6 +340,8 @@ def propagate_twins(g1, g2, dds1_dds2_pairs):
                     src.accepted.pop(b, None)
                     dst.accepted.pop(t, None)
                 continue
+            if not dst.in_batch(t):
+                continue
             current = dst.symbols.get(t) or (dst.dds[t][3] if t in dst.dds else "?")
             other = dst.by_name.get(name)
             if dst.kinds.get(t) == "evidence":
@@ -344,7 +364,7 @@ def propagate_twins(g1, g2, dds1_dds2_pairs):
             t = dst.by_name.get(old) if old else None
             if t is None or t in dst.accepted or dst.kinds.get(t) == "evidence":
                 continue
-            if t not in dst.symbols or RUNTIME.match(old):
+            if t not in dst.symbols or RUNTIME.match(old) or not dst.in_batch(t):
                 continue
             other = dst.by_name.get(name)
             if other is not None and other != t and other not in dst.accepted:
@@ -379,6 +399,11 @@ def main():
     ap.add_argument("--dds-decomp", type=Path, required=True,
                     help="dds-decomp checkout; its orig/ holds the two DDS ELFs")
     ap.add_argument("--smt3-elf", default=str(ROOT / "orig/smt3/SLUS_209.11"))
+    ap.add_argument("--prefix", nargs="*", default=[], metavar="P",
+                    help="only rename functions whose current dds-decomp name starts "
+                         "with one of these module prefixes, for one batch at a time")
+    ap.add_argument("--list-prefixes", action="store_true",
+                    help="print how many renames each current module prefix carries")
     ap.add_argument("--smt3-text-end", type=lambda s: int(s, 0), default=0x002E6E44)
     ap.add_argument("--out-dir", type=Path, default=ROOT / "build" / "dds_names")
     args = ap.parse_args()
@@ -387,7 +412,22 @@ def main():
               args.dds_decomp / "orig/dds1/SLUS_209.74", args.dds_decomp)
     g2 = Game("dds2", args.dds2[0], args.dds2[1], args.smt3_elf,
               args.dds_decomp / "orig/dds2/SLUS_211.52", args.dds_decomp)
+    for g in (g1, g2):
+        g.prefixes = set(args.prefix)
     dropped = transitivity_drops(g1, g2, read_pairs(args.dds1_dds2), args.smt3_text_end)
+    if args.list_prefixes:
+        counts = Counter()
+        for g in (g1, g2):
+            g.prefixes = set()
+            g.decide(args.smt3_text_end, dropped)
+            for b in g.accepted:
+                name = g.symbols.get(b) or ""
+                m = re.match(r"^_*([A-Za-z][a-z0-9]*)", name)
+                counts[(m.group(1) if m else "?")] += 1
+        for prefix, n in counts.most_common():
+            print(f"{prefix:>12}  {n}")
+        print(f"{len(counts)} prefixes, {sum(counts.values())} renames over both games")
+        return 0
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for g in (g1, g2):
         g.decide(args.smt3_text_end, dropped)
