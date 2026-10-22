@@ -313,7 +313,7 @@ typedef struct
 /* Effect handle of the Attack family, six parts. */
 typedef struct
 {
-    nbFormation_t *_0;
+    nbFormation_t *pFormation;
     u32 frame;
     effPartHandle_t *hPart;
     effPartHandle_t *hPart2;
@@ -326,7 +326,7 @@ typedef struct
 /* Effect handle of the AttackC family, the Attack parts plus six of its own. */
 typedef struct
 {
-    nbFormation_t *_0;
+    nbFormation_t *pFormation;
     u32 frame;
     effPartHandle_t *hPart;
     effPartHandle_t *hPart2;
@@ -1648,7 +1648,7 @@ effBattleSystem_effBTLSystem_Attack_tag *effBTLSys_Attack_Create(nbFormation_t *
     effBattleSystem_effBTLSystem_Attack_tag *hEffect;
 
     hEffect = sdfChipAllocDirect(sizeof(effBattleSystem_effBTLSystem_Attack_tag));
-    hEffect->_0 = pFormation;
+    hEffect->pFormation = pFormation;
     hEffect->frame = 0;
     hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Attack_PartList[0].hPart);
     hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[1].hPart);
@@ -1716,7 +1716,7 @@ effBattleSystem_effBTLSystem_AttackC_tag *effBTLSys_AttackC_Create(nbFormation_t
     effBattleSystem_effBTLSystem_AttackC_tag *hEffect;
 
     hEffect = sdfChipAllocDirect(sizeof(effBattleSystem_effBTLSystem_AttackC_tag));
-    hEffect->_0 = pFormation;
+    hEffect->pFormation = pFormation;
     hEffect->frame = 0;
     hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Attack_PartList[0].hPart);
     hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Attack_PartList[1].hPart);

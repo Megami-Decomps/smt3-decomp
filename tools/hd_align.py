@@ -19,6 +19,13 @@ ROOT = Path(__file__).resolve().parents[1]
 CONVENTION = re.compile(r"_(?:t\d?|u|e|b|s|tag\d?)$")
 
 
+# il2cpp names an embedded base `_0`, `_1`, and carries its own runtime fields.
+# None of these is an original member name, and taking one is a regression:
+# `effBTLSystem_Attack_tag.pFormation` became `_0`.
+ARTIFACT = re.compile(r"^(?:_\d+|m_\w+|klass|monitor|vtable|_vtbl|obj|fields|"
+                      r"padding\d*|_padding\w*)$")
+
+
 def stem(name):
     """`effPCPSparkleSphereParam_t` -> `effpcpsparklesphere`, what a function name carries."""
     return re.sub(r"(param|part|list)\d*$", "", CONVENTION.sub("", name).lower())
@@ -230,6 +237,9 @@ def plan(reports, hd, ours, verbose):
         if hd_t in ours or hd_t in used:
             refused.append(f"type {ours_t} -> {hd_t}: the tree already uses the name {hd_t}")
             continue
+        if ARTIFACT.match(hd_t) or hd_t.endswith(("_array", "_StaticFields", "_Fields")):
+            refused.append(f"type {ours_t} -> {hd_t}: an il2cpp artifact, not a name")
+            continue
         if not CONVENTION.search(hd_t):
             refused.append(f"type {ours_t} -> {hd_t}: not a recovered-looking name")
             continue
@@ -276,6 +286,9 @@ def plan(reports, hd, ours, verbose):
             continue
         if hd_t not in hd or hd_m not in {m for _, m in hd[hd_t]}:
             refused.append(f"member {our_t}.{our_m} -> {hd_t}.{hd_m}: no such HD member")
+            continue
+        if ARTIFACT.match(hd_m):
+            refused.append(f"member {our_t}.{our_m} -> {hd_m}: an il2cpp artifact, not a name")
             continue
         if our_m == hd_m:
             continue
@@ -614,7 +627,9 @@ def main():
             if not line.strip() or line.startswith("#"):
                 continue
             our_t, old_m, new_m = line.split("\t")
-            if our_t in ours and any(m == old_m for f in ours[our_t].values() for _, m, _ in f):
+            if ARTIFACT.match(new_m) and not ARTIFACT.match(old_m):
+                refused.append(f"member {our_t}.{old_m} -> {new_m}: an il2cpp artifact, not a name")
+            elif our_t in ours and any(m == old_m for f in ours[our_t].values() for _, m, _ in f):
                 members[our_t][old_m] = new_m
             else:
                 refused.append(f"member {our_t}.{old_m}: not a member of our {our_t}")

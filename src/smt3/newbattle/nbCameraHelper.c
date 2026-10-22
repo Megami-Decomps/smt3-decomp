@@ -12,7 +12,7 @@ typedef struct dds3EffectFileNode_t
 
 typedef struct
 {
-    s32 _0;
+    s32 resourceCount;
     char *directoryPath;
     dds3EffectFileNode_t *head;
 } nbCameraHelper_effFileListHandle_t;
@@ -20,7 +20,7 @@ typedef struct
 /* Complete 0x44-byte browser owner, including its retained preview texture. */
 typedef struct
 {
-    s32 _0;
+    s32 x;
     s32 y;
     s32 result;
     s32 resourceCount;
@@ -126,7 +126,7 @@ nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typ
     }
     previous = NULL;
     root->head = NULL;
-    root->_0 = 0;
+    root->resourceCount = 0;
     while ((length = dds3EffectDirRead(directory, &entry)) > 0) {
         if ((entry.flags & 0xF000) == 0x1000) {
             continue;
@@ -186,7 +186,7 @@ nbCameraHelper_effFileListHandle_t *dds3EffectFileListCreate(char *path, s32 typ
         }
         node->next = NULL;
         node->previous = previous;
-        root->_0++;
+        root->resourceCount++;
         previous = node;
     }
     dds3EffectDirClose(directory);
@@ -213,10 +213,10 @@ void dds3EffectFileListDelete(nbCameraHelper_effFileListHandle_t *a) {
 nbCameraHelper_effFLWinHandle_t *dds3EffectFileListWindowCreate(nbCameraHelper_effFileListHandle_t *a) {
     nbCameraHelper_effFLWinHandle_t *resource = sdfChipAllocDirect(sizeof(*resource));
 
-    resource->_0 = 0;
+    resource->x = 0;
     resource->y = 0xC8;
     resource->result = 0;
-    resource->resourceCount = a->_0;
+    resource->resourceCount = a->resourceCount;
     resource->unk10 = 0;
     resource->selectedIndex = 0;
     resource->visibleIndex = 0;
@@ -352,17 +352,17 @@ s32 dds3EffectFileListWindowDraw(nbCameraHelper_effFLWinHandle_t *a) {
     packetList = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
     sdfDrawTagInit(packetList);
     sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
-        0x8000 - (a->_0 << 4), 0x8000 - (a->y << 3),
+        0x8000 - (a->x << 4), 0x8000 - (a->y << 3),
         0xFEFFFF, 0xC00, 0x620, a->fillColor, a->borderColor));
     if (a->previewActive != 0) {
         sdfDrawTagLink(packetList, (u32)dds3PrimFrameRect(
-            0x8000 - (a->_0 << 4),
+            0x8000 - (a->x << 4),
             0x8000 - ((a->y - 0xC4) << 3),
             0xFEFFFF, 0x800, 0x400, 0, 0x40806020));
     }
     contentRow = a->y - 2;
     sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-        0x8000 - ((a->_0 - 2) << 4),
+        0x8000 - ((a->x - 2) << 4),
         0x8000 - (contentRow << 3), 0xFF0000, 5,
         a->resourceList->directoryPath));
     contentRow -= 0xC;
@@ -371,7 +371,7 @@ s32 dds3EffectFileListWindowDraw(nbCameraHelper_effFLWinHandle_t *a) {
     while (visibleEntry != NULL) {
         s32 selectionFlags = visibleEntry == a->selectedEntry ? 4 : 0;
         sdfDrawTagLink(packetList, (u32)sdfDevPrintf(
-            0x8000 - ((a->_0 - 2) << 4),
+            0x8000 - ((a->x - 2) << 4),
             0x8000 - (contentRow << 3), 0xFF0000,
             selectionFlags, visibleEntry->name));
         drawnRows++;
@@ -397,7 +397,7 @@ void dds3EffectFileListWindowDelete(nbCameraHelper_effFLWinHandle_t *a) {
 }
 
 void dds3EffectFileListWindowSetPos(nbCameraHelper_effFLWinHandle_t *a, s32 b, s32 c) {
-    a->_0 = b;
+    a->x = b;
     a->y = c;
 }
 
@@ -467,7 +467,7 @@ void dds3EffectFileListWindowDrawSprite(nbCameraHelper_effFLWinHandle_t *work)
     vertex->corner[0].v = 0;
     vertex->corner[1].u = work->textureHandle->width << 4;
     vertex->corner[1].v = work->textureHandle->height << 4;
-    left = 0x8000 - (work->_0 << 4);
+    left = 0x8000 - (work->x << 4);
     vertex->corner[0].x = left;
     left += 0x800;
     top = 0x8000 - ((work->y - 0xC4) << 3);
