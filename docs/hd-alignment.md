@@ -80,19 +80,86 @@ were both renamed to `effPCPSparkleSphere_tag` and the file then defined it
 twice. Two of our types claiming one HD type are two readings of one record,
 which is a merge for `tools/merge_duplicates.py`, not a rename.
 
-### Applying, and letting the compiler attribute the rest
+### Applying: only what the tree proves unambiguous
 
-A member use is only ever `.name` or `->name`, so a rename whose old name no
-other type anywhere declares is rewritten tree-wide. Most old names are
-shared (`color`, `scale`, `handle`, and every `unk00`), and those are
-rewritten only in the struct body; the compiler then reports every use that
-stopped compiling, and since exactly the renamed types lost that member, a
-line that errors with *no member named `color`* is a use of one of them.
-`--fix` rewrites the next `->color` on that line to the candidate, rebuilds,
-and repeats. When one old name has several candidates (`unk00` on two
-types), a later error naming the candidate it tried means the guess was
-wrong for that access, so it is put back and the next candidate tried; an
-access that fits none is restored and reported.
+A member use is only ever `.name` or `->name`, so a rename can be rewritten
+tree-wide when **no other type anywhere in the tree declares that name**. 175 of
+the 676 accepted member renames qualify, and those are what was applied, along
+with all 163 type renames. The other 501 are recorded as backlog rather than
+guessed at; the section below says why.
 
-Judge the result by `ninja`'s exit status. A failed link leaves the previous
-image in place, so `sha1sum -c` can say OK on a build that did not happen.
+Of the applied set: 163 types, 175 members, 161 files. The image still hashes to
+`5facfbf7916836613449c922e26a4ec412207b32`, every one of the 151 changed C units
+matches retail function for function under `tools/check_unit.py`, and the full
+`tools/test_*.py` suite passes. `tools/header_layout.c` carries the renamed
+spellings, so its 755 size and offset claims still compile.
+
+### Compiling and guessing does not work, and here is what it cost
+
+The first approach was to rewrite the shared names too, by renaming the struct
+body only and letting the compiler point at every use that stopped compiling: a
+line that errors with *no member named `color`* is a use of a type that just lost
+`color`, so rewrite its next `->color` to the candidate, rebuild, repeat. It
+reached zero unresolved uses after three fixes and still produced a wrong image.
+Each fix is worth recording, because each one looked like the last.
+
+- **The struct body locator.** `cparse.struct_fields` reports a definition's line,
+  and in some files that line is wrong, so the body rename edited the
+  *neighbouring* struct. Bodies are now found by name (`struct_spans`), matching
+  both `struct X {` and the `} X;` of an anonymous typedef.
+- **A candidate can itself be a deferred old name.** `flags` offers `flag`, and
+  `flag` is separately renamed to `Ztest` or `Stat`. The error for `flag` then
+  read as a fresh rename rather than a failed guess, and the loop abandoned
+  `flags`'s remaining candidates. Continuing an existing chain now takes
+  precedence, which took unresolved uses from 1226 to 92.
+- **Two members collapsing onto one candidate.** `angle` and `angleStep` both
+  offer `rotate`, and taking it for both produced `part->rotate += part->rotate`.
+  That compiles. `effPCPFlashPolySphere3PartRotate` came back 4 of 7 words wrong
+  and two sibling functions one word each, reading +0x08 where retail reads
+  +0x18. Refusing a candidate already placed on that line for a *different*
+  member fixes this case and not the general one: the same collapse across two
+  lines of one function is still invisible.
+
+So the loop converged on *a* compiling tree each time and a different wrong one.
+What settles it is that the question it asks is unanswerable from a line of text:
+an access's member belongs to the declared type of its object expression, and
+choosing between `->rotate` and `->look_r` requires resolving that type. The
+guessing was removed rather than patched again.
+
+**The checksum alone would not have caught this.** It did fail here, but a
+collapse inside a function whose bytes happen to cancel would not move the image,
+and a failed link leaves the previous image in place so `sha1sum -c` can report
+OK on a build that did not happen. The gate is `ninja`'s own exit status followed
+by `tools/check_unit.py` over every changed unit. That scan is what named
+`effPCPFlash.c` and `effPCPMisc.c` out of 159, with the rest already correct.
+
+### The 501 deferred members, and what they need
+
+These are the renames whose old name two or more of our types share, `color`
+(three targets), `head` (six), `scale`, `count`, `mode`, and every `unk00`. They
+are not wrong, and most carry the same evidence as the ones applied; they simply
+cannot be placed by text. Taking them needs a rewriter that resolves each
+access's object expression to a declared type, which means parsing the unit
+rather than scanning it.
+
+`--exclude` takes a list of member names to drop from the plan, and
+`config/smt3/hd_align/exclude.txt` holds the 17 that defeated the guessing pass,
+kept so the attempt is reproducible rather than because the names are wrong.
+
+### Ownership has to count nested members
+
+The one-type test is only as good as the ownership map, and the first version of
+it missed a whole class: `cparse.struct_fields` records depth-1 members only, so
+a name declared by an anonymous struct *inside* another record looked unowned.
+Rewriting `.fontIndex` tree-wide therefore also rewrote
+`pText->renderValueOrSetupOrShade.setupBytes.fontIndex`, which is a different
+record, and `frFont.c` lost eleven accesses that way. `nested_member_names()`
+adds every declaration below the top level of a struct or union as an extra
+owner, which puts `fontIndex`, `firstOption` and `secondOption` back in the
+deferred set where they belong.
+
+The filter and the rewrite must also share one map. They did not at first: the
+filter used the tree's own members while the rewrite used a map that included the
+IDB's types, so five names the filter had cleared were deferred by the rewrite,
+left half-renamed, and six units stopped compiling. Those six read as failures of
+the *rename* until the error output showed they were failures to compile.
