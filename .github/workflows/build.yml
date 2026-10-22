@@ -30,6 +30,16 @@ jobs:
         with:
           python-version: '3.12'
 
+      # The compiler, binutils, objdiff and glibc are all pinned URLs.
+      - name: Cache build tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            tools/bin
+            tools/compilers
+            tools/glibc32
+          key: tools-${{ hashFiles('tools/download_tools.py', 'tools/ee_as_relax.py', 'tools/ee_gcc_aslr.py') }}
+
       # The compiler is needed before the tool tests: tools/test_headers.py
       # compiles every header with cc1.
       - name: Install dependencies
