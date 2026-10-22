@@ -14,7 +14,7 @@ typedef struct {
 typedef struct {
     u32 pRange;
     void *resourceData;
-    u8 unk08[8];
+    u8 hPlane[8];
     s32 pPlane;
 } dds3ModelRangeBasicWorkData_t;
 

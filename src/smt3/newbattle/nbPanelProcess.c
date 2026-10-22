@@ -182,9 +182,9 @@ typedef struct
     u8 pad_1A[0x2];
     f32 PT_3_Rate;
     s32 unk_20;
-    s32 unk_24;
-    f32 unk_28;
-    f32 unk_2C;
+    s32 abgr_c;
+    f32 scale_x;
+    f32 scale_y;
     s32 abgr;
     s32 addY;
 } nbPanelFlashData_t;
@@ -1112,10 +1112,10 @@ void nbPanelFlashInit(nbPanelFlashData_t *pFlash, s32 scale_x, s32 scale_y, s32 
     pFlash->PT_3_Frame = 0;
     pFlash->PT_3_Process = 1;
     pFlash->PT_3_Rate = 0.1f;
-    pFlash->unk_28 = abgr_c;
-    pFlash->unk_2C = addX;
+    pFlash->scale_x = abgr_c;
+    pFlash->scale_y = addX;
     pFlash->unk_20 = scale_x;
-    pFlash->unk_24 = scale_y;
+    pFlash->abgr_c = scale_y;
     pFlash->abgr = abgr;
     pFlash->addY = addY;
 }

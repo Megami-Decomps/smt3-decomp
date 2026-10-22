@@ -342,8 +342,8 @@ typedef struct effPCPScreenCrackModel_t
 
 typedef struct effPCPMuzzleFlashParam_t
 {
-    s32 unk00;
-    s32 unk04;
+    s32 scale_h;
+    s32 scale_w;
 } effPCPMuzzleFlashParam_t;
 
 typedef struct effPCPMuzzleFlash_tag
@@ -2467,8 +2467,8 @@ void effPCPMuzzleFlashDraw(effPCPMuzzleFlash_tag *hData)
         }
         scale = hData->scale;
         sc = sc * scale;
-        dds3BillboardSetScale(hData->hBillboard, sc * *(f32 *)&hData->param.unk04,
-                              *(f32 *)&hData->param.unk00 * scale);
+        dds3BillboardSetScale(hData->hBillboard, sc * *(f32 *)&hData->param.scale_w,
+                              *(f32 *)&hData->param.scale_h * scale);
         dds3BillboardSetRotate(hData->hBillboard, rot);
         dds3BillboardSetPosition(hData->hBillboard, position);
         dds3BillboardDraw(hData->hBillboard);

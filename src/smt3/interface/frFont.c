@@ -56,10 +56,10 @@ struct frFontData_t {
     s32 metricByteCount;
     s32 valueByteCount;
     s8 *prop;
-    void *unk14;
+    void *ysht;
     GsFont_t **trans;
     struct frFontResource_t *resource;
-    u32 unk20;
+    u32 data;
 };
 
 /* Free-list header stored immediately before each interface-pool payload. */
@@ -705,13 +705,13 @@ void frAddFontStyle(
         sectionOffset += flagSectionBytes;
         valueSection = (s32 *)(pFontData + sectionOffset);
         valueDataBytes = *valueSection;
-        entry->unk14 = valueSection + 1;
+        entry->ysht = valueSection + 1;
         entry->valueByteCount = valueDataBytes;
         valueSectionBytes = valueDataBytes + FR_FONT_WORD_BYTES;
         sectionOffset += valueSectionBytes;
     } else {
         entry->prop = NULL;
-        entry->unk14 = NULL;
+        entry->ysht = NULL;
         entry->metricByteCount = 0;
         entry->valueByteCount = 0;
     }
@@ -720,9 +720,9 @@ void frAddFontStyle(
     entry->resource = (struct frFontResource_t *)(pFontData + sectionOffset);
     lookupOffset = entry->resourceHeader->lookupOffset;
     if (lookupOffset != 0) {
-        entry->unk20 = (u32)(pFontData + lookupOffset);
+        entry->data = (u32)(pFontData + lookupOffset);
     } else {
-        entry->unk20 = 0;
+        entry->data = 0;
     }
 }
 

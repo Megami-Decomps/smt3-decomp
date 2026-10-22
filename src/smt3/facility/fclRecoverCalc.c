@@ -89,7 +89,7 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[4];
+    /* 0x00 */ u8 StepY[4];
     /* 0x04 */ s8 StopFlag;
     /* 0x05 */ u8 unk_05[3];
     /* 0x08 */ s32 unk_08;

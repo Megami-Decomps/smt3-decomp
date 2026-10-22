@@ -205,7 +205,7 @@ void *sdfChipAllocDirect(s32 aSize);
 void dds3BillboardSetScale(struct billHandle_t *hBillboard, f32 x, f32 y);
 
 typedef struct P2A_HEAD_t {
-    s32 opaque00;
+    s32 tmxofs;
     s32 AnimNum;
 } P2A_HEAD_t;
 

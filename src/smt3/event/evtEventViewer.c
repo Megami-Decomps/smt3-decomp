@@ -122,7 +122,7 @@ struct evtViewerInfo_t {
     s32 frameFirst;                     /* 0x2300 */
     s32 frameCursor;                    /* 0x2304 */
     evtViewerObject_s *framelist_target;        /* 0x2308 */
-    s32 unk230C;
+    s32 framelist_type;
     s32 value;                          /* 0x2310 */
     s32 min;                       /* 0x2314 */
     s32 max;                       /* 0x2318 */

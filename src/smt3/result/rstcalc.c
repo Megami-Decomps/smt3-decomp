@@ -257,7 +257,7 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstCreateBeforeSkillList);
 typedef struct
 {
     /* 0x00 */ s8 SkillCnt;
-    /* 0x01 */ u8 unk_01[0x19];
+    /* 0x01 */ u8 TargetLevel[0x19];
     /* 0x1A */ u16 skill[25];
 } rstSkillInfo_t;
 

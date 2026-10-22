@@ -323,10 +323,10 @@ extern f32 fldWmapPlayerState;
 /* fldDoorEventTable stride, 84 bytes; the clear leaves +0x20 alone. */
 typedef struct {
     s32 stat;
-    s32 unk04;
-    s32 unk08;
+    s32 evehit_resid;
+    s32 mode1;
     s32 matter_resid1;
-    s32 unk10;
+    s32 mode2;
     s32 matter_resid2;
     s32 cnt1;
     s32 cnt2;
@@ -514,7 +514,7 @@ void fldDoorRun_FindStart(s32 resid) {
     if (entry->kind == 1) {
         if (entry->floor != fldGlobalBase.floor + 1) return;
         fldSePlay(entry->sound);
-        fldFindDoorEvent(fldDoorEventTable[idx].unk04);
+        fldFindDoorEvent(fldDoorEventTable[idx].evehit_resid);
         if (entry->variant >= 6) return;
         if (entry->variant < 0) return;
         if (fldLoadNextGetStatus() != 0) return;
@@ -1087,10 +1087,10 @@ void fldClearDoorEvents(void) {
 
     for (i = 0; i < 256; i++, entry++) {
         entry->stat = 0;
-        entry->unk04 = 0;
-        entry->unk08 = 0;
+        entry->evehit_resid = 0;
+        entry->mode1 = 0;
         entry->matter_resid1 = -1;
-        entry->unk10 = 0;
+        entry->mode2 = 0;
         entry->matter_resid2 = -1;
         entry->cnt1 = 0;
         entry->cnt2 = 0;
@@ -1145,7 +1145,7 @@ void fldFindDoorEvent(s32 id) {
     e = fldDoorEventTable;
     entry = fldDoorTable;
     for (i = 0; i < 256; i++) {
-        if (e->stat == 1 && e->unk04 == id) {
+        if (e->stat == 1 && e->evehit_resid == id) {
             s32 motion = entry->motion;
 
             e->stat = 2;

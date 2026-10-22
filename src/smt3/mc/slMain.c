@@ -422,7 +422,7 @@ typedef struct GameFileInfo_t {
     u16 newfile;
     slFileWork_t work;
     u8 autoMapOpen;
-    u8 unk25[15];
+    u8 autoMapOpenEX[15];
 } GameFileInfo_t;
 
 #define SL_REC ((u8 (*)[52])D_00569740)

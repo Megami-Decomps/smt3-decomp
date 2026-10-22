@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 115 types, 965 members, 506 adopted constants.
+# 115 types, 949 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -137,7 +137,6 @@ member BillObj.unk1C
 member BillPluralRecord.unk08
 member GParam.unk0
 member GParam.unk4
-member GameFileInfo_t.unk25
 member MovOpenParam.unk00
 member MovOpenParam.unk02
 member MovOpenParam.unk04
@@ -263,7 +262,6 @@ member cmbUnitSkills_t.unk_00
 member cmbUnlockEntry_t.unk_02
 member cmbWork_t.unk_01
 member cmbWork_t.unk_1C
-member cmpCursorInfo_t.unk_00
 member cmpCursorInfo_t.unk_05
 member cmpCursorInfo_t.unk_08
 member cmpCursorInfo_t.unk_0C
@@ -393,7 +391,6 @@ member dds3GlobalWork_t.unk657C
 member dds3LinkedLightWork_t.unk00
 member dds3MatterPathPosition_t.unk00
 member dds3ModelBasicWorkData_t.unk10
-member dds3ModelRangeBasicWorkData_t.unk08
 member dds3MovieEntry_t.unk_00
 member dds3NeedleModelPart_tag.unk0C
 member dds3Polygon_t.unk02
@@ -413,9 +410,6 @@ member dds3TitleWork_t.unk_30
 member dds3TitleWork_t.unk_34
 member dds3TrackPoly_t.unk28
 member dds3UnitObjectBasicWorkData_t.unk18
-member doormovework_s.unk04
-member doormovework_s.unk08
-member doormovework_s.unk10
 member effBTLAimParams_t.unk03
 member effBTLBank_t.unk00
 member effBTLBank_t.unk98
@@ -524,7 +518,6 @@ member effPCPDANTE_Damage_tag.unk035
 member effPCPDANTE_Damage_tag.unk0BC
 member effPCPDANTE_ShowTime_tag.unk0C4
 member effPCPDANTE_ShowTime_tag.unk0C8
-member effPCPFlashPolyPipeParam_t.unk34
 member effPCPFlashPolyPipe_tag.unk34
 member effPCPFlashPolySpherePart_tag.unk1C
 member effPCPHama01_tag.unk04
@@ -536,8 +529,6 @@ member effPCPHamaon_tag.unk08
 member effPCPMHanma01_tag.unk04
 member effPCPMHanma01_tag.unk08
 member effPCPMHanma01_tag.unk0C
-member effPCPMuzzleFlashParam_t.unk00
-member effPCPMuzzleFlashParam_t.unk04
 member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
@@ -590,7 +581,6 @@ member evtViewerInfo_t.unk2284
 member evtViewerInfo_t.unk2288
 member evtViewerInfo_t.unk2290
 member evtViewerInfo_t.unk22E1
-member evtViewerInfo_t.unk230C
 member evtViewerKey_t.unk10
 member evtViewerMenuEntry_t.unk02
 member evtViewerMenuEntry_t.unk04
@@ -743,8 +733,6 @@ member fldTransferChunk_t.unk00
 member fldWave_tag.unk08
 member frFontChild_t.unk00
 member frFontChild_t.unk14
-member frFontData_t.unk14
-member frFontData_t.unk20
 member frFontRequest_t.unk00
 member frFontRequest_t.unk0C
 member frFontRequest_t.unk28
@@ -878,9 +866,6 @@ member nbNegoSkillEntry_t.unk_00
 member nbPacEntry_t.unk_00
 member nbPacHandle_t.unk_00
 member nbPanelFlashData_t.unk_20
-member nbPanelFlashData_t.unk_24
-member nbPanelFlashData_t.unk_28
-member nbPanelFlashData_t.unk_2C
 member nbParty_t.unk04
 member nbStageState_t.unk00
 member nbStageState_t.unk04
@@ -986,7 +971,6 @@ member rstDrawWork_t.unk_7D
 member rstMotionReq_t.unk_00
 member rstMotionReq_t.unk_01
 member rstMotionReq_t.unk_02
-member rstSkillInfo_t.unk_01
 member rstSkillSlot_t.unk_00
 member rstSkillSlot_t.unk_22
 member rstSkillSlot_t.unk_23

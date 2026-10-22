@@ -12,9 +12,9 @@ typedef struct
     s32 flg;
     s32 id;
     f32 r;
-    f32 sourceX;
-    f32 sourceY;
-    f32 sourceZ;
+    f32 x;
+    f32 y;
+    f32 z;
 } fldSe3D_tag;
 
 enum sl_slot_flag
@@ -118,9 +118,9 @@ void fldAddSe3D(s32 soundId, f32 radius, f32 sourceX, f32 sourceY, f32 sourceZ) 
     fldSe3DTable[i].flg = 0;
     fldSe3DTable[i].id = soundId;
     fldSe3DTable[i].r = radius;
-    fldSe3DTable[i].sourceX = sourceX;
-    fldSe3DTable[i].sourceY = sourceY;
-    fldSe3DTable[i].sourceZ = sourceZ;
+    fldSe3DTable[i].x = sourceX;
+    fldSe3DTable[i].y = sourceY;
+    fldSe3DTable[i].z = sourceZ;
     gFldSe3DNum = i + 1;
 }
 
