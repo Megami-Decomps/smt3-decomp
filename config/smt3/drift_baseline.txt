@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 115 types, 940 members, 506 adopted constants.
+# 115 types, 939 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -574,7 +574,6 @@ member evtViewerInfo_t.unk2024
 member evtViewerInfo_t.unk2038
 member evtViewerInfo_t.unk2284
 member evtViewerInfo_t.unk2288
-member evtViewerInfo_t.unk2290
 member evtViewerInfo_t.unk22E1
 member evtViewerKey_t.unk10
 member evtViewerMenuEntry_t.unk02

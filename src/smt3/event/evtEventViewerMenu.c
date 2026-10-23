@@ -54,7 +54,12 @@ typedef struct {
     s32 nowmenu;                 /* 0x2280 */
     u8 unk2284[8];
     s32 menusw;               /* 0x228C */
-    u8 unk2290[0x18];
+    u32 drawblur2;
+    u32 drawmblur;
+    u32 drawdblur;
+    u32 drawfilter;
+    u32 drawmfilter;
+    u32 drawrblur;
     s32 mainCursor;                 /* 0x22A8 */
     s32 groupFirst;                 /* 0x22AC */
     u8 work_x[4];
