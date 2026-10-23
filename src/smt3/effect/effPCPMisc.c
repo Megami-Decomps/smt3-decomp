@@ -989,10 +989,7 @@ struct effPCPDistortionBlurExp_tag {
 };
 
 struct effPCPHamaon_tag {
-    u32 _0;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
+    f32 pos[4];
     u32 color;
     f32 scale;
     effPartHandle_t *base; /* Parameter work for the anchor model. */
@@ -1005,10 +1002,7 @@ struct effPCPHamaon_tag {
  * three words are initialized by creation and cloning; their meanings remain
  * unknown. */
 struct effPCPMHanma01_tag {
-    u32 _0;
-    u32 unk04;
-    u32 unk08;
-    u8 unk0C[4];
+    f32 pos[4];
     u32 color;
     f32 scale;
     effPartHandle_t *handle[12];
@@ -1605,10 +1599,7 @@ struct effPCPAgiraoFire_tag {
 /* The twin effect owns eight pairs of parameter works, one shared work per
  * slot, and per-slot state/countdowns. Its constructors allocate 0xBC bytes. */
 struct effPCPHama01_tag {
-    u32 _0;
-    u32 unk04;
-    u32 unk08;
-    u8 pad0C[4];
+    f32 pos[4];
     u32 color;
     u32 frame;
     f32 scale;
@@ -2736,11 +2727,11 @@ effPCPHama01_tag *effPCPHama01Create(void *src) {
         work->shared[slotIndex] = dds3EffectPartCopy(work->shared[0]);
         work->state[slotIndex] = 0;
     }
-    work->_0 = 0;
+    work->pos[0] = 0.0f;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->unk04 = 0;
-    work->unk08 = 0;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
     work->frame = 0;
     return work;
 }
@@ -2773,11 +2764,11 @@ effPCPHama01_tag *effPCPHama01Copy(effPCPHama01_tag *src) {
         work->state[slotIndex] = 0;
         effPCPHama01PartInit(work, slotIndex);
     }
-    work->_0 = 0;
+    work->pos[0] = 0.0f;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->unk04 = 0;
-    work->unk08 = 0;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
     work->frame = 0;
     return work;
 }
@@ -2975,11 +2966,11 @@ effPCPHamaon_tag *effPCPHamaonCreate(void *src) {
             effPCPHamaonPartInit(work, i, j);
         }
     }
-    work->_0 = 0;
+    work->pos[0] = 0.0f;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->unk04 = 0;
-    work->unk08 = 0;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
     return work;
 }
 
@@ -3009,11 +3000,11 @@ effPCPHamaon_tag *effPCPHamaonCopy(effPCPHamaon_tag *src) {
             effPCPHamaonPartInit(work, i, j);
         }
     }
-    work->_0 = 0;
+    work->pos[0] = 0.0f;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->unk04 = 0;
-    work->unk08 = 0;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
     return work;
 }
 
@@ -3078,9 +3069,9 @@ effPCPMHanma01_tag *effPCPMHanma01Create(void *source) {
     }
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->_0 = 0;
-    work->unk04 = 0;
-    work->unk08 = 0;
+    work->pos[0] = 0.0f;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
     return work;
 }
 
@@ -3113,9 +3104,9 @@ effPCPMHanma01_tag *effPCPMHanma01Copy(effPCPMHanma01_tag *source) {
     }
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->_0 = 0;
-    work->unk04 = 0;
-    work->unk08 = 0;
+    work->pos[0] = 0.0f;
+    work->pos[1] = 0.0f;
+    work->pos[2] = 0.0f;
     return work;
 }
 

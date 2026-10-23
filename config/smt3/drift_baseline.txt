@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 110 types, 920 members, 506 adopted constants.
+# 110 types, 913 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -503,15 +503,8 @@ member effPCPDANTE_Damage_tag.unk035
 member effPCPDANTE_Damage_tag.unk0BC
 member effPCPFlashPolyPipe_tag.unk34
 member effPCPFlashPolySpherePart_tag.unk1C
-member effPCPHama01_tag.unk04
-member effPCPHama01_tag.unk08
 member effPCPHamaCardScatterPart_tag.unk20
 member effPCPHamaCardScatterPart_tag.unk24
-member effPCPHamaon_tag.unk04
-member effPCPHamaon_tag.unk08
-member effPCPMHanma01_tag.unk04
-member effPCPMHanma01_tag.unk08
-member effPCPMHanma01_tag.unk0C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
 member effPCP_PBCamera_tag.unk58
