@@ -18,11 +18,9 @@ import struct
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_unit import address, inline_asm_share  # noqa: E402
 from retail_elf import ROOT, load_segments  # noqa: E402
 
 sys.path.insert(0, str(ROOT))
-from configure import objdiff_progress_category  # noqa: E402
 
 VERSIONS = json.loads((ROOT / "config/versions.json").read_text())
 VERSION_PATTERN = "|".join(re.escape(version) for version in VERSIONS) or r"(?!)"
@@ -83,6 +81,8 @@ def compiler_functions(assembly: str) -> set[str]:
 
 def ineligible_asm_bodies(assembly: str, source: str) -> set[str]:
     """Apply the same ASMBODY and documented VU exemptions as check_unit."""
+    from check_unit import inline_asm_share
+
     result = set()
     for name, (asm, total) in inline_asm_share(assembly).items():
         source_name = re.sub(r"\.\d+$", "", name)
@@ -371,6 +371,8 @@ class Production:
         # label. Prove the complete interval, not just its first named symbol.
         report_spans = []
         for target, entry in report.items():
+            from check_unit import address
+
             retail_address = address(target, self.syms)
             size = int(entry["size"])
             if retail_address is None or size <= 0 or size % 4:
@@ -395,6 +397,8 @@ class Production:
                     raise ValueError(f"{name}:{target}: overlapping/incomplete production providers")
                 owner_address = start + owner_at
                 plain_name = re.sub(r"\.\d+$", "", emitted)
+                from check_unit import address
+
                 if address(plain_name, self.syms) != owner_address:
                     raise ValueError(f"{name}:{emitted}: production/retail address differs")
                 if (emitted, owner_address, owner_size) not in self.linked_symbols:
@@ -503,6 +507,8 @@ def reconcile(report: dict, scope: str, root: Path = ROOT, *,
         evidence["units"].append(item)
     if not proven:
         raise ValueError("report contains no game-code production evidence")
+    from configure import objdiff_progress_category
+
     for version, production in proofs.items():
         prefix = f"build/{version}/src/{version}/"
         expected = {path[len(prefix):-2] for path in production.map
