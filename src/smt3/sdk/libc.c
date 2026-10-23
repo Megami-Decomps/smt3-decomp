@@ -14,7 +14,6 @@ enum {
     SDF_POOL_PUSH_FREE = 1
 };
 
-struct SdfKeyTreeItem;
 
 struct sdfDrawTag_t;
 
@@ -23,14 +22,6 @@ struct sdfSortOtNode_tag;
 struct sdfGrOt_t;
 
 #define SDF_POOL_FREE_KIND 0xFFFF
-
-/* Tree view of a pool node: the link word at +0 becomes the replaced-item
- * link, +0x4..+0xB stay opaque, and +0xC is compared as a float key. */
-typedef struct SdfKeyTreeItem {
-    struct SdfKeyTreeItem *replaced; /* 0x00 */
-    u8 pad04[8];                     /* 0x04: opaque */
-    f32 key;                         /* 0x0C */
-} SdfKeyTreeItem;
 
 extern void StartThread();
 
@@ -48,18 +39,18 @@ extern void sdfGrJoinDrawTag(void *aFore, void *aBack);
 
 /* Pool release logic tests the packet head address and kind at 0xC;
  * bytes at 0x8 remain opaque. The float-key tree insertion helper reads the
- * same +0xC word through SdfKeyTreeItem. DDS1/2 game/code_002EEA18/003478C0.c. */
+ * same +0xC word through sdfDrawTag_t. DDS1/2 game/code_002EEA18/003478C0.c. */
 typedef struct sdfDrawTag_t {
     struct sdfDrawTag_t *next; /* 0x00 */
     s32 head;       /* 0x04: first DMA packet address. */
     u8 tail[4];                  /* 0x08 */
-    s32 z;                    /* 0x0C */
+    f32 z;                    /* 0x0C */
 } sdfDrawTag_t;
 
 typedef struct sdfSortOtNode_tag {
     struct sdfSortOtNode_tag *right; /* 0x00 */
     struct sdfSortOtNode_tag *left;  /* 0x04 */
-    struct SdfKeyTreeItem *tag;  /* 0x08 */
+    struct sdfDrawTag_t *tag;  /* 0x08 */
     s32 balance;                  /* 0x0C */
 } sdfSortOtNode_tag;
 
@@ -109,7 +100,7 @@ sdfSortOtNode_tag *sdfSortOtAvlRotateRL(sdfSortOtNode_tag *node, sdfSortOtNode_t
 void sdfSortOtAvlCheckBalance(sdfSortOtNode_tag **stack, s32 stack_depth, sdfSortOtNode_tag *node,
                    sdfSortOtNode_tag **root_p);
 
-void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, SdfKeyTreeItem *tag);
+void sdfSortOtAvlRegist(sdfSortOtNode_tag **root_p, sdfDrawTag_t *tag);
 
 void sdfGrSortOtReg(sdfGrOt_t *aOt, sdfDrawTag_t *aTag);
 
