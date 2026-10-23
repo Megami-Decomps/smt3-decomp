@@ -113,7 +113,7 @@ union movieDecodeCtx_t;
 struct parCell_t;
 struct sdfVector3_t;
 struct sdfMatPacket_t;
-struct SdfCommandNode;
+struct sdfModelPacketHeader_tag;
 struct sdfModelNode_t;
 union SdfDrawTransform;
 struct SdfGsTextureStateValues;
@@ -245,7 +245,7 @@ typedef struct SdfItem SdfItem;
 typedef struct SdfItemListRef SdfItemListRef;
 typedef struct BattleGroupNode BattleGroupNode;
 typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
-typedef struct SdfCommandNode SdfCommandNode;
+typedef struct sdfModelPacketHeader_tag sdfModelPacketHeader_tag;
 typedef struct sdfModelNode_t sdfModelNode_t;
 typedef struct sdfModelRootNode_t sdfModelRootNode_t;
 typedef struct MdlDevSlot MdlDevSlot;
@@ -1837,8 +1837,8 @@ typedef struct SdfDmaTagHeader {
 
 /* Command-list node: allocation owns the node and trailing command data.
  * A null descriptor identifies a separately chip-allocated node. */
-struct SdfCommandNode {
-    struct SdfCommandNode *next;
+struct sdfModelPacketHeader_tag {
+    struct sdfModelPacketHeader_tag *next;
     u8 kind;
     s8 packetSelector;
     s16 quadwordCount;
@@ -1858,7 +1858,7 @@ struct sdfModelNode_t {
     s32 id;                   /* 0x18: lookup key when model flags bit 0 is set */
     u32 color;                   /* 0x1C */
     u8 drawPacketMemHandle[8];
-    SdfCommandNode *drawPacket[2];     /* 0x28: command drawPacket for both buffered frames */
+    sdfModelPacketHeader_tag *drawPacket[2];     /* 0x28: command drawPacket for both buffered frames */
     u8 *tmPacket; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
     const f32 *bounds;     /* 0x34: optional two xyz corners used by clipping */
     void *shape;             /* 0x38: item this node was built from */
