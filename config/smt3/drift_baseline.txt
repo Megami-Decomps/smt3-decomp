@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 108 types, 929 members, 506 adopted constants.
+# 107 types, 929 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -116,7 +116,6 @@ type SoundBank
 type SoundMixer
 type VuBlendNode
 type VuIndexedTriangleCount
-type VuWork
 
 member AtExitEntry.unk00
 member AtExitEntry.unk04

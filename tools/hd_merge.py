@@ -119,7 +119,10 @@ def main():
                 len({tuple((o, s) for o, s, _ in r) for r in theirs}) != 1:
             refused.append(f"{a} -> {b}: the tree gives one of them several layouts")
             continue
-        if mine[0][-1][0] + mine[0][-1][1] != theirs[0][-1][0] + theirs[0][-1][1]:
+        # Ours may stop short of theirs: `VuWork` is `corePktCb_t` without its last
+        # two words. Every member of ours still has to pair off one for one, which
+        # align() checks, so only the tail is left out.
+        if mine[0][-1][0] + mine[0][-1][1] > theirs[0][-1][0] + theirs[0][-1][1]:
             refused.append(f"{a} -> {b}: {mine[0][-1][0] + mine[0][-1][1]} bytes "
                            f"against {theirs[0][-1][0] + theirs[0][-1][1]}")
             continue
