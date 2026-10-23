@@ -256,3 +256,80 @@ Nothing of the agents' accepted output. The residue is in the reports rather tha
 the application: 1439 proposals the validator refused, most of them because two
 of our types claim one HD type, or because a proposal came from a single function
 not named for the type. Those need reading, not machinery.
+
+## A third corpus: the remaster's own metadata
+
+The reconstruction's headers declare 1,042 records, only what its sources
+needed, so a member in any other record had nothing to be checked against. The
+remaster's PC build carries every class in its il2cpp metadata, and IDA's import
+of it names each one's fields: `tools/hd_il2cpp_types.py` exports the
+`<Name>__Fields` records of that database to `config/smt3/hd_il2cpp_types.txt`,
+4,504 of this game's records with 18,560 named members, 3,748 of them records the
+headers never declare. Offsets there are the managed 64-bit layout and do not
+transfer; the member names and their order do, which is what the validator
+checks. `hd_align.py`, `hd_members.py` and the batch builders all read it as a
+third corpus behind HD and the IDB.
+
+It bought less than its size suggests: 65 more unnamed members sit in a record it
+knows, and seven more gaps close by member order alone. Most of our unnamed
+members are in records no corpus has under any name.
+
+## Our name for their record
+
+Some of our types carry the right members under a name of our own, so nothing
+keyed on the name finds them. `rstWork_t` is HD's `rstData_t`: HD's
+`rstAddSkill` reads `GBWK->LevelUpCnt`, `GBWK->EventParam`,
+`GBWK->GetHeartsSkill` and `GBWK->pCurrentStock` where ours reads `unk_1B`,
+`unk_22`, `unk_24` and `unk_16C`.
+
+`tools/hd_type_map.py` finds those pairs without a name to go on. It resolves
+every member access in both copies of each function it can, by the declared type
+of the object expression, and counts which of their records meets which of ours.
+Co-occurrence alone maps any two records one function reads together, so a pair
+also has to name a record our tree does not have, beat its runner-up twice over,
+and agree on a member name our copy already carries (or carry four reports). That
+leaves 64 pairs, among them the five facility work records (`shpUpdateWork_t` is
+`fclDataShop_t`, `ragUpdateWork_t` is `fclDataRag_t`) which hold 70 unnamed
+members between them.
+
+The map does not rename anything. Our record is usually the wider one, holding
+inline what the remaster points to, so `--type-map` only tells the validator
+which record a member proposal is checked against.
+
+## A merge, where the target name is taken
+
+The commonest refusal for an invented type is that the tree already has the name:
+13 of the 30 the type swarm proposed. That is a merge rather than a rename, and
+`tools/hd_merge.py` does the ones that are mechanical. It compares both layouts
+in our own tree, pairs the members that sit at the same place with the same
+extent, and replaces one of ours covering several of theirs with their own
+declaration lines, which is only sound while nothing reads it.
+
+One of the thirteen passed: `BillObj` is `billHandle_t`, same 96 bytes, five
+members renamed. The rest are refused for a reason worth keeping: our record
+reads the same bytes **more coarsely** and the covering member is read. `QuadF32`
+is `sdfVector4_t` but its one `components[4]` is indexed; `SdfSceneDrawPacket` is
+`sdfGrDrawEnv_t` but its `blendState` covers their four register writes.
+Rewriting those uses is decompilation, not renaming.
+
+## What cannot be done by gap arithmetic
+
+`hd_members.py` pairs an unk_ member when the gap between two shared names holds
+as many of HD's members as ours. The obvious extension, choosing from a wider gap
+by scalar class, was written and then deleted: of 17 placements it forced, 15 were
+wrong, and each in a way worth recording.
+
+- A candidate dropped for being padding is often part of what our member covers.
+  `mdlEffectResrc_IPU_t.unk0A` spans HD's `pad` and its `tex`, and the rule read
+  it as `tex`.
+- A member of ours that HD does not have shifts everything after it:
+  `effPCP_PBCamera_tag.part` is their `hPB`, so our `unk58` took `hPB` while it
+  is their `ex`.
+- Where we hold a vector inline and they point to it, our first words are their
+  whole field: `effPCPHamaon_tag`'s `_0`, `unk04`, `unk08` and `pad0C` are their
+  one `pos`, and `unk04` took `pos` while `unk08` took `abgr`.
+
+Only two of the seventeen survived reading, `effBTL_SkillLight_t.unknown10` as
+`color_anim` and `dds3ScatterPolyList_tag.unk1C` as `scale`, and both were
+applied by hand. The lesson is the one the resolver already taught: a member is
+placed by what the code does with it, not by what fits beside it.
