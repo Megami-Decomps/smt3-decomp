@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 112 types, 920 members, 506 adopted constants.
+# 110 types, 920 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -92,7 +92,6 @@ type SdfGeneratedLookupTexture
 type SdfGraphCopyPacket
 type SdfGsGouraudTexturedVertex
 type SdfGsGouraudVertex
-type SdfGsSceneBlendRegisters
 type SdfGsTextureStateValues
 type SdfGsTexturedVertex
 type SdfGsTwoVertexPacket
@@ -108,7 +107,6 @@ type SdfPacketPatchLink
 type SdfPatchableResourcePacket
 type SdfPool
 type SdfPrimitiveRequest
-type SdfSceneDrawPacket
 type SdfStreamInputDmaTag
 type SdfStreamReadRequest
 type SdfStreamState
