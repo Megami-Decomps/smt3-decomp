@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 100 types, 927 members, 506 adopted constants.
+# 97 types, 927 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -63,8 +63,6 @@ type MdlObj
 type MdlObjectAttachment
 type MdlRecord
 type MdlResourceItem
-type MotionEntry
-type MotionTable
 type MovLinearStream
 type MovOpenParam
 type MovPacStream
@@ -94,7 +92,6 @@ type SdfGsTwoVertexPacket
 type SdfItem
 type SdfItemList
 type SdfItemListRef
-type SdfMotionCommand
 type SdfObjectRefCommand
 type SdfPacket
 type SdfPatchableResourcePacket

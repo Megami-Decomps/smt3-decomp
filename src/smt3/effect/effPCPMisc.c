@@ -107,7 +107,7 @@ struct MdlDevSlot;
 struct MdlObjectAttachment;
 struct MdlRecord;
 struct MdlResourceItem;
-struct MotionEntry;
+struct sdfMotionCutDef_t;
 struct MovLinearStream;
 union movieDecodeCtx_t;
 struct parCell_t;
@@ -119,7 +119,7 @@ union SdfDrawTransform;
 struct SdfGsTextureStateValues;
 struct SdfItem;
 struct SdfItemList;
-struct SdfMotionCommand;
+struct sdfMotionNodeDef_t;
 struct sdfIpuDecodeCb_t;
 struct SdfStreamInputDmaTag;
 struct sdfGsMemSlice_t;
@@ -234,9 +234,9 @@ typedef struct effPCPAgiraoFire_tag effPCPAgiraoFire_tag;
 typedef struct effPCPHama01_tag effPCPHama01_tag;
 typedef struct EffRandState EffRandState;
 typedef struct EffSpawnParams EffSpawnParams;
-typedef struct MotionEntry MotionEntry;
-typedef struct SdfMotionCommand SdfMotionCommand;
-typedef struct MotionTable MotionTable;
+typedef struct sdfMotionCutDef_t sdfMotionCutDef_t;
+typedef struct sdfMotionNodeDef_t sdfMotionNodeDef_t;
+typedef struct sdfMotionPlayBook_t sdfMotionPlayBook_t;
 typedef struct BattleGroupSlot BattleGroupSlot;
 typedef struct DevRequest DevRequest;
 typedef struct MdlRecord MdlRecord;
@@ -1632,46 +1632,46 @@ struct dds3ModelHandle_t;
 
 typedef struct dds3ModelHandle_t dds3ModelHandle_t;
 
-struct MotionTable;
+struct sdfMotionPlayBook_t;
 
 /* Serialized clip duration/reserved remain halfwords (tools/fld.py).
  * The viewer MAXFRAME diagnostic reads their packed little-endian word. */
-struct MotionEntry {
+struct sdfMotionCutDef_t {
     union {
         struct {
-            u16 frameCount;
-            u16 unk02;
+            u16 frameLength;
+            u16 pad;
         };
         u32 packedHeader;
     };
-    u32 bindingData[1];
+    u32 chunk[1];
 };
 
-struct SdfMotionCommand {
+struct sdfMotionNodeDef_t {
     union {
-        u32 packedCommand;
+        u32 typeId;
         struct {
             /* Runtime dispatch shifts the command word right by 16. */
             u16 selector;
             u16 family;
         } binding;
     };
-    u32 targetIndex;
+    u32 nodeId;
 };
 
 /* Resource header followed by the binding commands used to construct a motion. */
-struct MotionTable {
-    u16 entryCount; /* Motion-index upper bound returned by mdlGetNumOfCut. */
-    u16 commandCount;
-    MotionEntry **entries;
-    SdfMotionCommand commands[1];
+struct sdfMotionPlayBook_t {
+    u16 numOfCut; /* Motion-index upper bound returned by mdlGetNumOfCut. */
+    u16 numOfNode;
+    sdfMotionCutDef_t **cutList;
+    sdfMotionNodeDef_t nodeDefList[1];
 };
 
 struct BattleGroupSlot {
     s32 flags;
     s16 motionSlotIndex;
     s16 motionIndex;
-    MotionTable *motionTable;
+    sdfMotionPlayBook_t *motionTable;
     struct sdfMemHandle_t *resourceHandle;
 };
 
@@ -1803,7 +1803,7 @@ struct sdfMotionCtrlr_t;
 struct sdfMotionCtrlr_t {
     struct sdfMotionCtrlr_t *next;
     sdfModelRootNode_t *owner;
-    MotionTable *motionTable;
+    sdfMotionPlayBook_t *motionTable;
     s32 playbookMemHandle;
     DevRequest *request;
     f32 blendDurationFrames;
