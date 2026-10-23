@@ -68,8 +68,8 @@ def align(mine, theirs, uses):
             return None, None, f"our {name} at {off} matches nothing of theirs"
         if sum(s for _, s, _ in inside) != size or inside[-1][0] + inside[-1][1] != off + size:
             return None, None, f"their members do not tile our {name}"
-        if any(not m or WORTHLESS.match(m) for _, _, m in inside):
-            return None, None, f"their members inside our {name} are padding"
+        if any(not m for _, _, m in inside) or all(WORTHLESS.match(m) for _, _, m in inside):
+            return None, None, f"their members inside our {name} are all padding"
         if uses.get(name, 0):
             return None, None, f"our {name} covers {len(inside)} of theirs and is read"
         splits[name] = [m for _, _, m in inside]

@@ -121,8 +121,8 @@ struct SdfChunkHeader;
 typedef struct SdfChunkHeader SdfChunkHeader;
 struct SdfDmaTagHeader;
 typedef struct SdfDmaTagHeader SdfDmaTagHeader;
-struct SdfDrawNode;
-typedef struct SdfDrawNode SdfDrawNode;
+struct sdfModelNode_t;
+typedef struct sdfModelNode_t sdfModelNode_t;
 struct effPartHandle_t;
 typedef struct effPartHandle_t effPartHandle_t;
 

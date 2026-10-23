@@ -114,7 +114,7 @@ struct parCell_t;
 struct sdfVector3_t;
 struct sdfMatPacket_t;
 struct SdfCommandNode;
-struct SdfDrawNode;
+struct sdfModelNode_t;
 union SdfDrawTransform;
 struct SdfGsTextureStateValues;
 struct SdfItem;
@@ -246,7 +246,7 @@ typedef struct SdfItemListRef SdfItemListRef;
 typedef struct BattleGroupNode BattleGroupNode;
 typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
 typedef struct SdfCommandNode SdfCommandNode;
-typedef struct SdfDrawNode SdfDrawNode;
+typedef struct sdfModelNode_t sdfModelNode_t;
 typedef struct sdfModelRootNode_t sdfModelRootNode_t;
 typedef struct MdlDevSlot MdlDevSlot;
 typedef struct MdlDevList MdlDevList;
@@ -1847,33 +1847,35 @@ struct SdfCommandNode {
 };
 
 /* Allocated as 0x100-byte nodes; each owns a circular list of child draw nodes. */
-struct SdfDrawNode {
-    struct SdfDrawNode *previous; /* 0x00 */
-    struct SdfDrawNode *next;     /* 0x04 */
-    struct SdfDrawNode *parent;   /* 0x08 */
-    struct SdfDrawNode *children; /* 0x0C */
+struct sdfModelNode_t {
+    struct sdfModelNode_t *prev; /* 0x00 */
+    struct sdfModelNode_t *next;     /* 0x04 */
+    struct sdfModelNode_t *parent;   /* 0x08 */
+    struct sdfModelNode_t *children; /* 0x0C */
     struct sdfModelRootNode_t *root;        /* 0x10: backlink installed by sdfModelNodeAdd */
     u16 flags;                   /* 0x14 */
-    s16 unk16;                   /* 0x16: constructor sentinel is -1 */
-    s32 nodeId;                   /* 0x18: lookup key when model flags bit 0 is set */
+    s16 drawAttr;                   /* 0x16: constructor sentinel is -1 */
+    s32 id;                   /* 0x18: lookup key when model flags bit 0 is set */
     u32 color;                   /* 0x1C */
-    u8 pad20[8];
-    SdfCommandNode *lists[2];     /* 0x28: command lists for both buffered frames */
-    u8 *workspace; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
-    const f32 *boundsCorners;     /* 0x34: optional two xyz corners used by clipping */
-    void *sourceItem;             /* 0x38: item this node was built from */
-    u8 pad3C[0x14];
-    f32 quaternion[4];           /* 0x50 */
-    f32 translation[4];          /* 0x60 */
+    u8 drawPacketMemHandle[8];
+    SdfCommandNode *drawPacket[2];     /* 0x28: command drawPacket for both buffered frames */
+    u8 *tmPacket; /* Two 0x80-byte frame packets, allocated on first use. */                  /* 0x30 */
+    const f32 *bounds;     /* 0x34: optional two xyz corners used by clipping */
+    void *shape;             /* 0x38: item this node was built from */
+    u32 pad0;
+    void *userData;
+    u32 pad1[3];
+    f32 rotate[4];           /* 0x50 */
+    f32 pos[4];          /* 0x60 */
     f32 scale[4];                /* 0x70 */
-    f32 localMatrix[4][4];       /* 0x80: all four local basis/translation rows */
-    f32 worldMatrix[4][4];       /* 0xC0: local transform composed with its parent */
+    f32 localNoScaledTm[4][4];       /* 0x80: all four local basis/pos rows */
+    f32 tm[4][4];       /* 0xC0: local transform composed with its parent */
 };
 
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
 struct sdfModelRootNode_t {
     DevRequest *list;
-    SdfDrawNode *rootNode;
+    sdfModelNode_t *rootNode;
     void *assetData;
     DevRequest *resources;
     DevRequest *slotPairs;
@@ -2454,7 +2456,7 @@ extern const u8 D_00533CC0[16];
 /* The model root's node list, whose item array sits at 0x0C. */
 typedef struct {
     u8 pHelper[0xC];
-    SdfDrawNode **PartList;
+    sdfModelNode_t **PartList;
 } effPCPAgiFireball2PartList_t;
 
 u32 effBTLSkillCheckRun(void);
@@ -6492,8 +6494,8 @@ void effPCPMakkaDelete(effPCPMakka_tag *hData) {
     sdfChipFreeDirect(hData);
 }
 
-void effPCPMakkaUpdateNode(SdfDrawNode *node) {
-    SdfDrawNode *child;
+void effPCPMakkaUpdateNode(sdfModelNode_t *node) {
+    sdfModelNode_t *child;
 
     SDF_VU0_STOREVECTOR(node->scale);
     child = node->children;
@@ -6510,7 +6512,7 @@ void effPCPMakkaDraw(effPCPMakka_tag *hData) {
     dds3ModelHandle_t *model;
     sdfModelRootNode_t *inner;
     sdfMotionCtrlr_t **slot;
-    SdfDrawNode *node;
+    sdfModelNode_t *node;
     u8 *form;
     u32 count;
     u32 i;

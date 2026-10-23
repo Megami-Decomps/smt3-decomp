@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 101 types, 928 members, 506 adopted constants.
+# 100 types, 927 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -82,7 +82,6 @@ type SdfChunkHeader
 type SdfCommandNode
 type SdfDmaReferenceChainPacket
 type SdfDmaTagHeader
-type SdfDrawNode
 type SdfDrawPacket
 type SdfDrawTransform
 type SdfGeneratedLookupTexture
@@ -131,7 +130,6 @@ member MovOpenParam.unk11
 member MovOpenParam.unk12
 member MovPacStream.unk6C
 member ParSystem.unk28
-member SdfDrawNode.unk16
 member SdfGraphCopyPacket.unk0C
 member SdfItem.unk04
 member SdfPacket.unk0
