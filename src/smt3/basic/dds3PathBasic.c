@@ -116,7 +116,7 @@ void dds3PathBasicControlNextStep(dds3PathBasicControl_t *work, fldResourceLight
     fldResourceLightPath_t *entries;
 
     if (work->flag & DDS3_PATH_WORLD_TRANSFORM_CHANNEL) {
-        keys = work->transformKeys;
+        keys = work->pLight;
         dds3PathEvalSpline(&segment, &weight, keys, work->frame);
         entries = (fldResourceLightPath_t *)keys->data.transform;
         SDF_VU0_SETVECTOR_X(entries[segment + 1].InsideR);

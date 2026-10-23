@@ -26,7 +26,7 @@ typedef struct
     f32 frame_s;
     f32 frame_e;
     u32 record;
-    s32 historyLength;
+    s32 face;
     u32 split;
     u32 blend;
     u32 gradientColors[4];
@@ -64,7 +64,7 @@ typedef struct
 typedef struct
 {
     effSwordTrackParams_t param_dante;
-    u32 updateCount;
+    u32 frame;
     u32 otIndex;
     dds3HermitianTrackPoly_tag *hPoly;
 } Eff_ModelTrackPoly_tag;
@@ -161,7 +161,7 @@ effModelTrackPoly_t *Eff_ModelTrackPolyCreate(Eff_ModelTrackPolyParam_t *pParam)
     } else {
         work->params.split = 6;
         work->updateCount = 0;
-        work->trackPoly = dds3HermitianTrackPolyCreate(work->params.historyLength, 6);
+        work->trackPoly = dds3HermitianTrackPolyCreate(work->params.face, 6);
         dds3HermitianTrackPolySetVC(work->trackPoly, pParam->gradientColors);
         dds3HermitianTrackPolySetBlend(work->trackPoly, pParam->blend);
     }
@@ -227,18 +227,18 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
         sword = (Eff_ModelTrackPoly_tag *)hMTPoly->trackPoly;
         switch (mdlGetMotionNum(hMTPoly->params.hModel, 0)) {
         case 10:
-            if (sword->updateCount < 0x1A) {
-                sword->updateCount++;
+            if (sword->frame < 0x1A) {
+                sword->frame++;
             } else {
                 effSwordTrackDraw(sword);
             }
             break;
         case 9:
-            if (sword->updateCount < 0x15) {
-                sword->updateCount++;
+            if (sword->frame < 0x15) {
+                sword->frame++;
             } else if (minor >= 0x153 && minor < 0x156) {
                 saved = sword->param_dante.abgr;
-                if (sword->updateCount >= 0x31) {
+                if (sword->frame >= 0x31) {
                     sword->param_dante.abgr = 0;
                 }
                 effSwordTrackDraw(sword);
@@ -248,31 +248,31 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             }
             break;
         case 0x10:
-            if (sword->updateCount < 0xB) {
-                sword->updateCount++;
+            if (sword->frame < 0xB) {
+                sword->frame++;
             } else {
                 effSwordTrackDraw(sword);
             }
             break;
         case 0x11:
             if (minor >= 0x153 && minor < 0x156) {
-                if (sword->updateCount < 0x1C) {
-                    sword->updateCount++;
+                if (sword->frame < 0x1C) {
+                    sword->frame++;
                 } else {
                     effSwordTrackDraw(sword);
                 }
-            } else if (sword->updateCount < 0x16) {
-                sword->updateCount++;
+            } else if (sword->frame < 0x16) {
+                sword->frame++;
             } else {
                 effSwordTrackDraw(sword);
             }
             break;
         case 0x12:
-            if ((minor >= 0x153 && minor < 0x156) ? (sword->updateCount < 0x11) : (sword->updateCount < 0xB)) {
-                sword->updateCount++;
+            if ((minor >= 0x153 && minor < 0x156) ? (sword->frame < 0x11) : (sword->frame < 0xB)) {
+                sword->frame++;
             } else {
                 saved = sword->param_dante.abgr;
-                if (sword->updateCount - 0x48 < 0x35) {
+                if (sword->frame - 0x48 < 0x35) {
                     sword->param_dante.abgr = 0;
                 }
                 effSwordTrackDraw(sword);
@@ -280,10 +280,10 @@ void Eff_ModelTrackPolyDraw(effModelTrackPoly_t *hMTPoly)
             }
             break;
         default:
-            if (sword->updateCount >= 0xB) {
+            if (sword->frame >= 0xB) {
                 effSwordTrackDraw(sword);
             } else {
-                sword->updateCount++;
+                sword->frame++;
             }
             break;
         }
@@ -740,7 +740,7 @@ Eff_ModelTrackPoly_tag *effSwordTrackCreate(effSwordTrackParams_t *pParams)
     u32 colors[4];
 
     work->param_dante = *pParams;
-    work->updateCount = 0;
+    work->frame = 0;
     work->hPoly = dds3HermitianTrackPolyCreate(pParams->historyLength,
                                                    (s32)(1.0f / pParams->step));
     colors[0] = pParams->abgr;
@@ -885,11 +885,11 @@ void effSwordTrackDraw(Eff_ModelTrackPoly_tag *hSwordTrack)
         ot->regFunc(ot, list);
     }
     effSwordTrackPolygon2DDraw(hSwordTrack);
-    hSwordTrack->updateCount++;
+    hSwordTrack->frame++;
 }
 
 void effSwordTrackReset(Eff_ModelTrackPoly_tag *hSwordTrack)
 {
-    hSwordTrack->updateCount = 0;
+    hSwordTrack->frame = 0;
     dds3HermitianTrackPolyReset(hSwordTrack->hPoly);
 }

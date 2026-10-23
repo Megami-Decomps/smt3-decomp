@@ -39,15 +39,15 @@ typedef struct effPCPBossThunderParam_t
     effPCPBossThunderHead_t head;
 } effPCPBossThunderParam_t;
 
-typedef struct effCrackCell_t
+typedef struct effPCPCrackPartFlash_t
 {
-    f32 offsetDistance;
-    f32 baseExtent;
-    f32 tipExtent;
-    s32 age;
-    u8 flip;
+    f32 length;
+    f32 width_in;
+    f32 width_out;
+    s32 frame;
+    u8 type;
     u8 unk11[3];
-} effCrackCell_t;
+} effPCPCrackPartFlash_t;
 
 typedef struct effPCPCrackPart_t
 {
@@ -57,7 +57,7 @@ typedef struct effPCPCrackPart_t
     f32 rotate;
     s32 rotationStartAge;
     f32 rotate_add;
-    effCrackCell_t *pSize;
+    effPCPCrackPartFlash_t *pSize;
 } effPCPCrackPart_t;
 
 typedef struct effPCPCrack_t
@@ -82,7 +82,7 @@ typedef struct effPCPCrack_t
     s32 blend;
     u8 directionMode;
     u8 unk89[3];
-    effPCPCrackPart_t *groups;
+    effPCPCrackPart_t *pPart;
     void *groupsHandle;
     u32 MarkCount;
     u16 cellCount;
@@ -192,9 +192,9 @@ typedef struct effPCPBossBUNSINNode_t
 
 typedef struct effPCPBossBUNSIN_t
 {
-    f32 posA[4];
-    f32 posB[4];
-    effPCPBossBUNSINParam_t marks;
+    f32 pos_s[4];
+    f32 pos_e[4];
+    effPCPBossBUNSINParam_t param;
     void *matrix;
     s32 unk2C;
     s32 unk30;
@@ -254,7 +254,7 @@ typedef struct effPCPBossUnit_t
 typedef struct effPCPBossThunderbolt_t
 {
     u8 position[0x10];
-    u8 unk10[0x54];
+    u8 param[0x54];
     void *pTPolyList;
     s32 frame;
     u32 color;
@@ -280,7 +280,7 @@ typedef struct effPCPBossKAGUAttack_t
     void *polyLists[32];
     effPCPBossBED_t *hBED;
     void *cut;
-    s32 unkF4;
+    s32 frame;
     u32 color;
 } effPCPBossKAGUAttack_t;
 
@@ -645,7 +645,7 @@ extern effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTim
                                                            void *pTMX0, void *pTMX1);
 extern effPCP_BED_tag *effPCP_BED_Create(effPCP_BED_Param_t *pParam, void *pBED);
 extern effPCP_HBED2_tag *effPCP_HBED2_Create(effPCP_HBED2_Param_t *pParam, void *pPBData, void *pBEDData);
-void effPCPCrackSizeInit(effPCPCrack_t *pPCPCrack, effCrackCell_t *pSize);
+void effPCPCrackSizeInit(effPCPCrack_t *pPCPCrack, effPCPCrackPartFlash_t *pSize);
 
 void effPCPBossONGYTexRenderStart(void)
 {
@@ -751,19 +751,19 @@ effPCPBossBUNSIN_t *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *pParam)
     effPCPBossBUNSINNode_t *node;
     void *matrix;
 
-    work->marks = *pParam;
+    work->param = *pParam;
     work->unk2C = 0;
-    node = (effPCPBossBUNSINNode_t *)work->marks.pStartForm;
+    node = (effPCPBossBUNSINNode_t *)work->param.pStartForm;
     work->unk30 = 0;
-    work->posA[0] = node->pos[0];
-    work->posA[1] = node->pos[1];
-    work->posA[2] = node->pos[2];
-    work->posA[3] = 0.0f;
-    node = (effPCPBossBUNSINNode_t *)work->marks.pEndForm;
-    work->posB[0] = node->pos[0];
-    work->posB[1] = node->pos[1];
-    work->posB[2] = node->pos[2];
-    work->posB[3] = 0.0f;
+    work->pos_s[0] = node->pos[0];
+    work->pos_s[1] = node->pos[1];
+    work->pos_s[2] = node->pos[2];
+    work->pos_s[3] = 0.0f;
+    node = (effPCPBossBUNSINNode_t *)work->param.pEndForm;
+    work->pos_e[0] = node->pos[0];
+    work->pos_e[1] = node->pos[1];
+    work->pos_e[2] = node->pos[2];
+    work->pos_e[3] = 0.0f;
     matrix = sdfMatNew();
     work->matrix = matrix;
     sdfMatSetConstant(matrix, 1.0f);
@@ -911,27 +911,27 @@ s32 effPCPBossBUNSIN2GetLength(void)
     return effPCPBossBUNSINGetLength() * 2;
 }
 
-void effPCPCrackSizeInit(effPCPCrack_t *pPCPCrack, effCrackCell_t *pSize)
+void effPCPCrackSizeInit(effPCPCrack_t *pPCPCrack, effPCPCrackPartFlash_t *pSize)
 {
     f32 blend = pPCPCrack->offsetRandomness;
     f32 scale = pPCPCrack->scale;
     f32 t;
 
-    pSize->offsetDistance = pPCPCrack->offsetDistance *
+    pSize->length = pPCPCrack->offsetDistance *
         (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend)) * scale;
     blend = pPCPCrack->extentRandomness;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    pSize->baseExtent = pPCPCrack->baseExtent * t * scale;
-    pSize->tipExtent = pPCPCrack->tipExtent * t * scale;
-    pSize->flip = dds3GetRandA(dds3EffectBase) & 1;
-    pSize->age = -(dds3GetRandA(dds3EffectBase) % pPCPCrack->delaySpread);
+    pSize->width_in = pPCPCrack->baseExtent * t * scale;
+    pSize->width_out = pPCPCrack->tipExtent * t * scale;
+    pSize->type = dds3GetRandA(dds3EffectBase) & 1;
+    pSize->frame = -(dds3GetRandA(dds3EffectBase) % pPCPCrack->delaySpread);
 }
 
 void effPCPCrackInit(effPCPCrack_t *pPCPCrack)
 {
     effCrackModel_t *model = dds3EffectPartGetHandle(pPCPCrack->part);
     effPCPCrackPart_t *group;
-    effCrackCell_t *nextCells;
+    effPCPCrackPartFlash_t *nextCells;
     u32 groupIndex;
     u32 cellIndex;
 
@@ -947,12 +947,12 @@ void effPCPCrackInit(effPCPCrack_t *pPCPCrack)
     pPCPCrack->groupsHandle = NULL;
     if (pPCPCrack->hasCells) {
         pPCPCrack->groupsHandle = sdfMemAllocDirect(pPCPCrack->MarkCount * sizeof(effPCPCrackPart_t)
-            + pPCPCrack->cellCount * pPCPCrack->MarkCount * sizeof(effCrackCell_t));
-        nextCells = (effCrackCell_t *)sdfMemLock(pPCPCrack->groupsHandle);
-        pPCPCrack->groups = (effPCPCrackPart_t *)nextCells;
-        nextCells = (effCrackCell_t *)((u8 *)nextCells + pPCPCrack->MarkCount * sizeof(effPCPCrackPart_t));
-        for (groupIndex = 0, group = pPCPCrack->groups; groupIndex < pPCPCrack->MarkCount; groupIndex++, group++) {
-            effCrackCell_t *cell;
+            + pPCPCrack->cellCount * pPCPCrack->MarkCount * sizeof(effPCPCrackPartFlash_t));
+        nextCells = (effPCPCrackPartFlash_t *)sdfMemLock(pPCPCrack->groupsHandle);
+        pPCPCrack->pPart = (effPCPCrackPart_t *)nextCells;
+        nextCells = (effPCPCrackPartFlash_t *)((u8 *)nextCells + pPCPCrack->MarkCount * sizeof(effPCPCrackPart_t));
+        for (groupIndex = 0, group = pPCPCrack->pPart; groupIndex < pPCPCrack->MarkCount; groupIndex++, group++) {
+            effPCPCrackPartFlash_t *cell;
 
             group->hFlash = dds3FlashPolyListCreate(pPCPCrack->cellCount);
             if (pPCPCrack->directionMode == 0) {
@@ -1036,7 +1036,7 @@ void effPCPCrackDelete(effPCPCrack_t *hData)
 
     if (hData->groupsHandle != NULL) {
         for (groupIndex = 0; groupIndex < hData->MarkCount; groupIndex++) {
-            dds3FlashPolyListDelete(hData->groups[groupIndex].hFlash);
+            dds3FlashPolyListDelete(hData->pPart[groupIndex].hFlash);
         }
         sdfMemFreeDirect(hData->groupsHandle);
     }
@@ -1412,7 +1412,7 @@ effPCPBossThunderbolt_t *effPCPBossThunderboltCreate(effPCPBossThunderbolt_t *pP
     memcpy(work, pParam, 0x64);
     work->color = 0x80808080;
     work->frame = 0;
-    memcpy(&thunder.head, work->unk10, 0x54);
+    memcpy(&thunder.head, work->param, 0x54);
     thunder.count = 4;
     work->pTPolyList = effPCP_ThunderPolyListCreate(&thunder);
     return work;
@@ -1565,7 +1565,7 @@ effPCPBossKAGUAttack_t *effPCPBossKAGUAttackCreate(effPCPBossKAGUAttack_t *pPara
     u32 i;
 
     memcpy(work, pParam, 0x6C);
-    work->unkF4 = 0;
+    work->frame = 0;
     work->color = 0x80808080;
     if (pBEDData != NULL) {
         effPCPBossBED_t *bed;
@@ -2172,9 +2172,9 @@ effPCPCrack_t *effPCPCrack2Create(effPCPCrackParam_t *pParam, void *pPB)
 
     work = effPCPCrackCreate(pParam, pPB);
     for (groupIndex = 0; groupIndex < work->MarkCount; groupIndex++) {
-        work->groups[groupIndex].rotationStartAge = pParam->rotationStartAge;
-        work->groups[groupIndex].rotate = 0.0f;
-        work->groups[groupIndex].rotate_add = pParam->angularSpeed;
+        work->pPart[groupIndex].rotationStartAge = pParam->rotationStartAge;
+        work->pPart[groupIndex].rotate = 0.0f;
+        work->pPart[groupIndex].rotate_add = pParam->angularSpeed;
     }
     return work;
 }
@@ -2195,9 +2195,9 @@ effPCPCrack_t *effPCPCrack2Copy(effPCPCrack_t *src)
 
     work = effPCPCrackCopy(src);
     for (groupIndex = 0; groupIndex < work->MarkCount; groupIndex++) {
-        work->groups[groupIndex].rotationStartAge = src->groups[groupIndex].rotationStartAge;
-        work->groups[groupIndex].rotate = 0.0f;
-        work->groups[groupIndex].rotate_add = src->groups[groupIndex].rotate_add;
+        work->pPart[groupIndex].rotationStartAge = src->pPart[groupIndex].rotationStartAge;
+        work->pPart[groupIndex].rotate = 0.0f;
+        work->pPart[groupIndex].rotate_add = src->pPart[groupIndex].rotate_add;
     }
     return work;
 }

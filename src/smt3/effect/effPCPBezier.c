@@ -19,7 +19,7 @@ typedef struct dds3BezierTrackPoly_tag {
     s32 point;                      /* 0x08: history point capacity */
     s32 count;                   /* 0x0C */
     s32 current;                /* 0x10: first point of the next three-point sample */
-    s32 subdivisions;                       /* 0x14: retained input value */
+    s32 split;                       /* 0x14: retained input value */
     u128 *pVertex;                           /* 0x18 */
     u32 *pVC;                            /* 0x1C */
     sdfMat_t *pMat;               /* 0x20 */
@@ -776,7 +776,7 @@ dds3BezierTrackPoly_tag *dds3BezierTrackPolySetVertex(s32 hPoly, s32 pVertex) {
     history->blend = 2;
     history->point = count;
     history->current = 3;
-    history->subdivisions = pVertex;
+    history->split = pVertex;
     history->abgr = 0x80808080;
     history->hMem = allocation;
     history->count = 0;

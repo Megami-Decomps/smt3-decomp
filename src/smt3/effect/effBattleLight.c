@@ -42,7 +42,7 @@ typedef struct
     u32 unknown24;
     effBTLModelColorParam_t color;
     u32 unknown44;
-} effBTLPointLight_t;
+} effBattleLight_effBTLPointLight_tag;
 
 /* The unit position and model id a light starts from. */
 typedef struct
@@ -53,7 +53,7 @@ typedef struct
     u8 reserve18[0x8];
 } effBattleLight_effBTLPointLight_Base_tag;
 
-extern effBTLPointLight_t effBTLPointLight[32];
+extern effBattleLight_effBTLPointLight_tag effBTLPointLight[32];
 
 extern effBattleLight_effBTLPointLight_Base_tag effBTLPointLightBase[32];
 
@@ -118,7 +118,7 @@ void effBTLPointLightCompulsionOFF(void)
 
 void effBTLPointLightModelSet(effBTL_SkillLight_t *pParam, nbFormation_t *pFormation)
 {
-    effBTLPointLight_t *pLight;
+    effBattleLight_effBTLPointLight_tag *pLight;
     s32 id;
 
     pLight = &effBTLPointLight[pFormation->formindex];
@@ -168,7 +168,7 @@ void effBTLPointLightSet(effBTL_SkillLight_t *pLight, nbFormation_t *pFormation)
 
 void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormation)
 {
-    effBTLPointLight_t *pLight;
+    effBattleLight_effBTLPointLight_tag *pLight;
     s32 id;
 
     id = effBTLModelGetID(pFormation);

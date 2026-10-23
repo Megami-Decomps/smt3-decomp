@@ -20,17 +20,17 @@ typedef struct
 {
     sdfVector4_t position[2];
     f32 radius[2];
-} dds3MagaArea_t;
+} effMagaSCArea_t;
 
 typedef struct
 {
     sdfVector4_t position[4];
     f32 radius[4];
-} dds3MagaPoints_t;
+} effMagaP4Point_t;
 
 extern const dds3EffectEventParameters_t D_00530E20;
-extern const dds3MagaArea_t D_00530E50;
-extern const dds3MagaPoints_t D_00530E78;
+extern const effMagaSCArea_t D_00530E50;
+extern const effMagaP4Point_t D_00530E78;
 extern void *memcpy(void *a, const void *b, u32 c);
 extern void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 extern void dds3BillboardSetAnimNumber(void *hBillboard, u32 number);
@@ -807,8 +807,8 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
 {
     sdfVector4_t position;
     sdfVector4_t rotation;
-    dds3MagaArea_t areaParameters;
-    dds3MagaPoints_t pointParameters;
+    effMagaSCArea_t areaParameters;
+    effMagaP4Point_t pointParameters;
     EffNode *effect;
     dds3Basic_t *basic;
     dds3EffectObjectBasicWorkData_t *work;
@@ -935,8 +935,8 @@ s32 dds3EffectObjectSetMG12Pos(dds3Basic_t *eff, dds3Basic_t *p1,
                               dds3Basic_t *p2, dds3Basic_t *p3, dds3Basic_t *p4)
 {
     dds3EffectObjectBasicWorkData_t *work;
-    dds3MagaArea_t *area;
-    dds3MagaPoints_t *points;
+    effMagaSCArea_t *area;
+    effMagaP4Point_t *points;
 
     if (eff->type >> 24 != EFF_OBJ_KIND) {
         return 0;

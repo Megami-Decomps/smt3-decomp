@@ -130,7 +130,7 @@ typedef struct {
 /* Drift parameters are not ring parameters despite their equal size (0xDC). */
 typedef struct {
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 respawn;
+    u8 loop;
     u8 pad11[3];
     s32 lifetimeFrames;
     s32 delaySpread;
@@ -144,7 +144,7 @@ typedef struct {
     f32 scaleStep;
     f32 ampli_r;
     u32 particleCount;
-    u32 maxSteps;
+    u32 reserve;
     u8 pad48[0x94];
 } effMagaSmokeParam_t;
 
@@ -259,7 +259,7 @@ typedef struct {
 /* Orbit parameters copied into the work record; trailing bytes stay opaque. */
 typedef struct effMagaSpiralParam_t {
     f32 origin[4];
-    u8 respawn;            /* 0x10 */
+    u8 loop;            /* 0x10 */
     u8 pad11[3];
     s32 life;    /* 0x14 */
     s32 timing;       /* 0x18 */
@@ -274,7 +274,7 @@ typedef struct effMagaSpiralParam_t {
     f32 radius_s_r;       /* 0x3C */
     f32 endJitter;         /* 0x40 */
     u32 particleCount;     /* 0x44 */
-    u32 maxSteps;          /* 0x48 */
+    u32 reserve;          /* 0x48 */
     u8 pad4C[0x94];
 } effMagaSpiralParam_t;
 
@@ -293,7 +293,7 @@ typedef struct effMagaSpiralPart_tag {
 typedef struct effMagaSpiral_tag {
     f32 matrix[16];
     effMagaSpiralParam_t head;
-    effMagaSpiralPart_tag *particles;
+    effMagaSpiralPart_tag *pPart;
     effMagatuhiOwner_t *pMagatuhi;
     u32 abgr;
     sdfMemHandle_t *hMem;
@@ -302,7 +302,7 @@ typedef struct effMagaSpiral_tag {
 /* Ring parameters copied verbatim into the work at +0x40 (0xDC). */
 typedef struct {
     f32 origin[EFF_MAGATUHI_VECTOR_WORD_COUNT];
-    u8 respawn;
+    u8 loop;
     u8 pad11[3];
     s32 life;
     s32 timing;
@@ -316,7 +316,7 @@ typedef struct {
     f32 radius_s_r;
     f32 endJitter;
     u32 particleCount;
-    u32 maxSteps;
+    u32 reserve;
     u8 pad48[0x94];
 } effMagaCylinderParam_t;
 
@@ -334,7 +334,7 @@ typedef struct effMagaCylinderPart_tag {
 typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
     effMagaCylinderParam_t head;
-    effMagaCylinderPart_tag *particles;
+    effMagaCylinderPart_tag *pPart;
     effMagatuhiOwner_t *pMagatuhi;
     u32 abgr;
     sdfMemHandle_t *hMem;
@@ -1503,7 +1503,7 @@ effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     u32 i;
 
     work->head = *src;
-    work->particles = particle;
+    work->pPart = particle;
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
@@ -1527,7 +1527,7 @@ void effMagaCylinderDelete(effMagaCylinder_tag *pData) {
 
 /* Initialize a ring slot and reset the history/value owned by that slot. */
 void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
-    effMagaCylinderPart_tag *elem = &pMagaCylinder->particles[index];
+    effMagaCylinderPart_tag *elem = &pMagaCylinder->pPart[index];
     f32 blend;
     f32 t;
 
@@ -1562,8 +1562,8 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
 
     count = pData->head.particleCount;
     valueWork = pData->pMagatuhi->valueWork;
-    particle = pData->particles;
-    respawn = pData->head.respawn;
+    particle = pData->pPart;
+    respawn = pData->head.loop;
     tintColor = pData->abgr;
     life = pData->head.life;
     spread = pData->head.timing;
@@ -1652,9 +1652,9 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
             count = work->head.particleCount;
             valueWork = work->pMagatuhi->valueWork;
-            maxSteps = work->head.maxSteps;
+            maxSteps = work->head.reserve;
             frames = work->head.life;
-            particle = work->particles;
+            particle = work->pPart;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
@@ -1706,7 +1706,7 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     u32 i;
 
     work->head = *src;
-    work->particles = particle;
+    work->pPart = particle;
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
@@ -1730,7 +1730,7 @@ void effMagaSpiralDelete(effMagaSpiral_tag *pData) {
 
 /* Seed randomized height/angular/radial increments and clear the slot history. */
 void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
-    effMagaSpiralPart_tag *elem = &pMagaSpiral->particles[index];
+    effMagaSpiralPart_tag *elem = &pMagaSpiral->pPart[index];
     f32 blend;
     f32 t;
 
@@ -1767,8 +1767,8 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
 
     count = pData->head.particleCount;
     valueWork = pData->pMagatuhi->valueWork;
-    particle = pData->particles;
-    respawn = pData->head.respawn;
+    particle = pData->pPart;
+    respawn = pData->head.loop;
     tintColor = pData->abgr;
     life = pData->head.life;
     spread = pData->head.timing;
@@ -1859,9 +1859,9 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
             count = work->head.particleCount;
             valueWork = work->pMagatuhi->valueWork;
-            maxSteps = work->head.maxSteps;
+            maxSteps = work->head.reserve;
             frames = work->head.life;
-            particle = work->particles;
+            particle = work->pPart;
             SDF_VU0_COPYVECTOR(origin, work->head.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
@@ -1996,7 +1996,7 @@ void effMagaSmokeDraw(effMagaSmoke_tag *pData) {
     count = pData->param.particleCount;
     valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
-    respawn = pData->param.respawn;
+    respawn = pData->param.loop;
     tintColor = pData->abgr;
     life = pData->param.lifetimeFrames;
     spread = pData->param.delaySpread;
@@ -2088,7 +2088,7 @@ void effMagaSmokeRandomize(effMagatuhiCallback_t *hEffect) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
             count = work->param.particleCount;
             valueWork = work->pMagatuhi->valueWork;
-            maxSteps = work->param.maxSteps;
+            maxSteps = work->param.reserve;
             frames = work->param.lifetimeFrames;
             particle = work->pPart;
             SDF_VU0_COPYVECTOR(origin, work->param.origin);

@@ -244,7 +244,7 @@ struct dds3PathBasicControl_t
     fldResourcePathData_t *pTransrate;
     fldResourcePathData_t *pRotation;
     fldResourcePathData_t *pFovy;
-    fldResourcePathData_t *transformKeys;
+    fldResourcePathData_t *pLight;
 };
 
 /* Shared object-base and path-control entry points. */
