@@ -436,8 +436,8 @@ typedef struct effPCPDANTE_ShowTime_tag
     s32 param;
     u8 panels[3][0x38];
     void *textures[2];
-    s32 unk0C4;
-    u8 unk0C8[0xC];
+    s32 frame;
+    u8 frameParts[0xC];
     u8 texLoaded;
 } effPCPDANTE_ShowTime_tag;
 
@@ -2775,7 +2775,7 @@ effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param
     effPCPDANTE_ShowTime_tag *work = sdfChipAllocZeroDirect(0xD8);
 
     work->param = pParam->reserve;
-    work->unk0C4 = 0;
+    work->frame = 0;
     if (pTMX0 != NULL && pTMX1 != NULL) {
         work->textures[0] = sdfTexSet(pTMX0);
         work->textures[1] = sdfTexSet(pTMX1);
@@ -2846,7 +2846,7 @@ INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_ShowTime_Draw);
 #ifdef NON_MATCHING
 void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
 {
-    s32 frame = hData->unk0C4;
+    s32 frame = hData->frame;
 
     if (frame == 0) {
         nbPanelFlashInit(hData->panels[0], 0x43BBFF, 0x12A2F5, 0xA0, 0.45f, 0.35f, 0x5C);
@@ -2865,7 +2865,7 @@ void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
         nbPanelFlashDraw(hData->panels[2], 0x80808080);
         effPCPDANTE_ShowTime_ShowTime_Draw(hData);
     }
-    hData->unk0C4++;
+    hData->frame++;
 }
 #else
 INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPDANTE_ShowTime_Draw);

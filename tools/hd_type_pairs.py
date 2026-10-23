@@ -45,7 +45,17 @@ def main():
         elif line.startswith("M ") and cur:
             p = line.split(None, 4)
             ida[cur].append((p[3], p[4].strip() if len(p) > 4 else ""))
-    corpus = {**ida, **{k: v for k, v in hdm.items() if v}}
+    il2cpp, cur = {}, None
+    path = ROOT / "config" / "smt3" / "hd_il2cpp_types.txt"
+    if path.exists():
+        for line in path.read_text().splitlines():
+            if line.startswith("T "):
+                cur = line.split()[1]
+                il2cpp[cur] = []
+            elif line.startswith("M ") and cur:
+                p2 = line.split(None, 4)
+                il2cpp[cur].append((p2[3], p2[4].strip() if len(p2) > 4 else ""))
+    corpus = {**il2cpp, **ida, **{k: v for k, v in hdm.items() if v}}
 
     # Our invented types, with the file that defines each and its member list.
     invented = {}

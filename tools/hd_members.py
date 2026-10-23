@@ -23,15 +23,28 @@ UNNAMED = re.compile(r"^(?:unk(?:nown)?(?:[_0-9]|$)|field_0x)", re.I)
 WORTHLESS = re.compile(r"^(?:pad+\d*|padd\d*|resv\d*|reserve\d*|reserved\d*|dummy\d*)$", re.I)
 
 
+IL2CPP = ROOT / "config" / "smt3" / "hd_il2cpp_types.txt"
+
+
 def load_hd():
-    out, cur = {}, None
-    for line in TYPES.read_text().splitlines():
-        if line.startswith("T "):
-            cur = line.split()[1]
-            out[cur] = []
-        elif line.startswith("M ") and cur:
-            out[cur].append(line.split()[-1])
-    return out
+    """type -> [member names in declaration order], headers first.
+
+    The remaster's metadata (tools/hd_il2cpp_types.py) carries records the
+    reconstruction's headers never declare, in the same order."""
+    out = {}
+    for path in (TYPES, IL2CPP):
+        if not path.exists():
+            continue
+        cur = None
+        for line in path.read_text().splitlines():
+            if line.startswith("T "):
+                key = line.split()[1]
+                cur = None if out.get(key) else key
+                if cur:
+                    out[cur] = []
+            elif line.startswith("M ") and cur:
+                out[cur].append(line.split()[-1])
+    return {k: v for k, v in out.items() if v}
 
 
 def project_structs():

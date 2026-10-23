@@ -26,7 +26,7 @@ f32 func_002A7DF8(f32 base, f32 exponent);
 
 typedef struct tagPipeLinkData {
     u16 id;
-    u8 unk02[2];
+    u8 partsID[2];
     struct tagPipeLinkData *next;
     struct tagPipeLinkData *prev;
     u8 unk0C[4];

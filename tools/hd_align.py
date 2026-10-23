@@ -89,7 +89,8 @@ def hd_types():
     Both carry the HD symbol recovery, and the IDB holds records the
     reconstruction's headers do not, so a target absent from one is often in the
     other. HD wins where both describe a record, its member order being what that
-    corpus is authoritative on."""
+    corpus is authoritative on. The remaster's own metadata
+    (tools/hd_il2cpp_types.py) fills the records neither declares."""
     out, cur = {}, None
     for line in (ROOT / "config" / "smt3" / "hd_types.txt").read_text().splitlines():
         if line.startswith("T "):
@@ -107,6 +108,17 @@ def hd_types():
         elif line.startswith("M ") and cur:
             p = line.split(None, 4)
             out[cur].append((p[3], p[4].strip() if len(p) > 4 else ""))
+    cur = None
+    il2cpp = ROOT / "config" / "smt3" / "hd_il2cpp_types.txt"
+    if il2cpp.exists():
+        for line in il2cpp.read_text().splitlines():
+            if line.startswith("T "):
+                name = line.split()[1]
+                cur = None if out.get(name) else name
+                out.setdefault(cur, [])
+            elif line.startswith("M ") and cur:
+                p = line.split(None, 4)
+                out[cur].append((p[3], p[4].strip() if len(p) > 4 else ""))
     return {k: v for k, v in out.items() if k and v}
 
 
@@ -175,7 +187,24 @@ def load_reports(paths):
                 yield b.get("batch", path), fn
 
 
-def plan(reports, hd, ours, verbose):
+def load_type_map(path):
+    """{our type: the HD record it is, without renaming it}.
+
+    Some of our types hold HD's members under a name of our own: `rstWork_t` is
+    HD's `rstData_t`. The map says which record a member proposal is checked
+    against; it never renames the type, since ours is often the wider record."""
+    out = {}
+    if not path or not path.exists():
+        return out
+    for line in path.read_text().splitlines():
+        if line.strip() and not line.startswith("#"):
+            parts = line.split("\t")
+            if len(parts) >= 2:
+                out[parts[0]] = parts[1]
+    return out
+
+
+def plan(reports, hd, ours, verbose, aliases=None):
     from ida_fill import ida_sizes, project_sizes
     shapes = idb_shapes()
     sizes = project_sizes(ida_sizes())
@@ -261,10 +290,14 @@ def plan(reports, hd, ours, verbose):
                                + (f", {keep} wins on {top_n} reports" if keep else ""))
                 del types[ours_t]
 
+    aliases = aliases or {}
+
     def hd_name_of(t):
         if t in types:
             return types[t][0]
-        return applied.get(t, t)
+        if t in applied:
+            return applied[t]
+        return aliases.get(t, t)
 
     members = defaultdict(dict)  # our type -> {our member: hd member}
     for (reported_t, our_m), votes in member_votes.items():
@@ -616,12 +649,16 @@ def main():
                          "write it from a previous run's unresolved list")
     ap.add_argument("--unresolved-out", type=Path,
                     help="write the member names --fix could not place, for --exclude")
+    ap.add_argument("--type-map", type=Path,
+                    help="TSV of `ours<TAB>HD` rows naming the HD record one of our "
+                         "types is, so its member proposals can be checked")
     ap.add_argument("-v", "--verbose", action="store_true")
     args = ap.parse_args()
 
     hd = hd_types()
     ours = our_types()
     if args.plan:
+        aliases = load_type_map(args.type_map)
         types, members, refused, evidence = {}, defaultdict(dict), [], {}
         for line in args.plan.read_text().splitlines():
             if not line.strip() or line.startswith("#"):
@@ -641,7 +678,8 @@ def main():
                 refused.append(f"member {our_t}.{old_m}: not a member of our {our_t}")
     else:
         types, members, refused, evidence = plan(
-            list(load_reports(args.reports)), hd, ours, args.verbose)
+            list(load_reports(args.reports)), hd, ours, args.verbose,
+            load_type_map(args.type_map))
     if args.no_types:
         types = {}
     # Ownership has to be complete over THIS tree, which is what a rewrite

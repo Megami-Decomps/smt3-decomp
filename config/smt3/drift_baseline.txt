@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 115 types, 945 members, 506 adopted constants.
+# 115 types, 940 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -444,8 +444,6 @@ member effBaelHead_t.unk08
 member effBaelHead_t.unk0C
 member effBattleLight_effBTLPointLight_Base_tag.unknown10
 member effBattleLight_effBTLPointLight_Base_tag.unknown14
-member effBattleLight_effBTLPointLight_tag.unknown24
-member effBattleLight_effBTLPointLight_tag.unknown44
 member effBlurPrimVertex_t.unk0C
 member effBlurPrimVertex_t.unk1E
 member effCrackModel_t.unk00
@@ -515,8 +513,6 @@ member effPCPDANTE_Damage_tag.unk030
 member effPCPDANTE_Damage_tag.unk034
 member effPCPDANTE_Damage_tag.unk035
 member effPCPDANTE_Damage_tag.unk0BC
-member effPCPDANTE_ShowTime_tag.unk0C4
-member effPCPDANTE_ShowTime_tag.unk0C8
 member effPCPFlashPolyPipe_tag.unk34
 member effPCPFlashPolySpherePart_tag.unk1C
 member effPCPHama01_tag.unk04
@@ -1043,7 +1039,6 @@ member stfUiWork_t.unk_010C
 member stfUiWork_t.unk_0110
 member stfUiWork_t.unk_0114
 member stfUiWork_t.unk_0118
-member tagPipeLinkData.unk02
 member tagPipeLinkData.unk0C
 member tagPipeObject.unk1B
 member tagPipePosTable_t.unk08

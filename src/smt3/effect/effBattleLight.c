@@ -39,9 +39,9 @@ typedef struct
 typedef struct
 {
     effBTL_SkillLight_t param;
-    u32 unknown24;
+    u32 light_frame;
     effBTLModelColorParam_t color;
-    u32 unknown44;
+    u32 model_frame;
 } effBattleLight_effBTLPointLight_tag;
 
 /* The unit position and model id a light starts from. */
@@ -128,7 +128,7 @@ void effBTLPointLightModelSet(effBTL_SkillLight_t *pParam, nbFormation_t *pForma
         pLight->param.diffuse = 0x80FFB996;
         pLight->param.ambient = 0x80503214;
     }
-    pLight->unknown24 = 0;
+    pLight->light_frame = 0;
 }
 
 void effBTLPointLightGroupSet(effBTL_SkillLight_t *pLight, u32 group)
@@ -175,7 +175,7 @@ void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormat
     if (id != 0x125 && id != 0x108) {
         pLight = &effBTLPointLight[pFormation->formindex];
         pLight->color = *pModel;
-        pLight->unknown44 = 0;
+        pLight->model_frame = 0;
     }
 }
 
