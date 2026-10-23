@@ -109,7 +109,7 @@ struct MdlRecord;
 struct MdlResourceItem;
 struct MotionEntry;
 struct MovLinearStream;
-union MovObjStream;
+union movieDecodeCtx_t;
 struct parCell_t;
 struct sdfVector3_t;
 struct sdfMatPacket_t;
@@ -257,7 +257,7 @@ typedef struct IpuDmaState IpuDmaState;
 typedef struct sdfFileCmdHandle_t sdfFileCmdHandle_t;
 typedef struct MovLinearStream MovLinearStream;
 typedef struct MovPacStream MovPacStream;
-typedef union MovObjStream MovObjStream;
+typedef union movieDecodeCtx_t movieDecodeCtx_t;
 typedef struct sdfIpuDecodeCb_t sdfIpuDecodeCb_t;
 typedef struct movieStream_t movieStream_t;
 typedef struct SdfStreamInputDmaTag SdfStreamInputDmaTag;
@@ -2038,7 +2038,7 @@ struct MovPacStream {
     u8 *scratch;
 };
 
-union MovObjStream {
+union movieDecodeCtx_t {
     struct MovLinearStream *linear;
     struct MovPacStream *pac;
 };
@@ -2102,7 +2102,7 @@ struct movieStream_t {
     struct sdfFileCmdHandle_t *file;
     s32 totalBytes;
     s32 remainingBytes;
-    MovObjStream stream;
+    movieDecodeCtx_t stream;
     u8 pacEnabled;
     u8 pad21;
     u8 packetLimit;
