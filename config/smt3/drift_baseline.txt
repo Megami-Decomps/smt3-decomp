@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 115 types, 924 members, 506 adopted constants.
+# 112 types, 920 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -20,7 +20,6 @@ type BillDrawBank
 type BillGeneralEntry
 type BillGeneralRow
 type BillKindFuncs
-type BillObj
 type BillOtLink
 type BillPacRequest
 type BillPacketWork
@@ -34,7 +33,6 @@ type EffBattleEntry
 type EffBattleEntryList
 type EffBattleParameterValue
 type EffBlurTemplateBody
-type EffNode
 type EffOwnerBillParamView
 type EffOwnerBillPayloadView
 type EffPCPBlockSet
@@ -79,7 +77,6 @@ type PcpScatterParamsC
 type PcpScatterPlainParams
 type PcpScatterPlainParticle
 type PcpScatterRadialParams
-type PcpScatterRadialParticle
 type PcpScatterSpinParams
 type Quad
 type QuadF32
@@ -132,8 +129,6 @@ member AtExitEntry.unk10
 member BattleEffect.unk120
 member BattleEffect.unk20
 member BattleGroupNode.unk_AC
-member BillObj.unk18
-member BillObj.unk1C
 member BillPluralRecord.unk08
 member GParam.unk0
 member GParam.unk4
@@ -395,7 +390,6 @@ member dds3NeedleModelPart_tag.unk0C
 member dds3Polygon_t.unk02
 member dds3Polygon_t.unk08
 member dds3RipBlurParam_t.unk2C
-member dds3ScatterPolyList_tag.unk1C
 member dds3SceneBasic_t.unk24
 member dds3SpPolyLoopWork_t.unk00
 member dds3SpPolyLoopWork_t.unk65
@@ -430,7 +424,6 @@ member effBTL_SkillLight_t.unknown01
 member effBTL_SkillLight_t.unknown02
 member effBTL_SkillLight_t.unknown03
 member effBTL_SkillLight_t.unknown04
-member effBTL_SkillLight_t.unknown10
 member effBTL_SkillLight_t.unknown14
 member effBTL_SkillLight_t.unknown18
 member effBTL_SkillLight_t.unknown1C

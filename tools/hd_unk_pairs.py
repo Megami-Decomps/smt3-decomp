@@ -79,6 +79,9 @@ def main():
     ap.add_argument("--batch", type=int, default=2)
     ap.add_argument("--max-funcs", type=int, default=4)
     ap.add_argument("--map", type=Path, default=ROOT / "config" / "smt3" / "hd_type_map.txt")
+    ap.add_argument("--allow-unpaired", action="store_true",
+                    help="also batch types whose readers the remaster does not define, "
+                         "where the record's member list is the only evidence")
     args = ap.parse_args()
 
     hd = hd_records()
@@ -124,7 +127,7 @@ def main():
         users = []
         for fn, src, body, owners in our_defs:
             hits = owners.get(name, set()) & set(unk)
-            if hits and fn in hd_defs:
+            if hits and (fn in hd_defs or args.allow_unpaired):
                 users.append((len(hits), fn, src, body))
         users.sort(reverse=True, key=lambda u: u[0])
         if not users:
@@ -148,10 +151,13 @@ def main():
                 for off, size, ty, m in hd[r["hd"]]:
                     f.write(f"  {off:>6} {size:>4} {ty} {m}\n")
                 for _, fn, src, body in r["users"]:
-                    hd_file, hd_body = hd_defs[fn]
                     f.write(f"--- OURS {fn} ({src.relative_to(ROOT).as_posix()})\n"
                             f"{clip(body).rstrip()}\n")
-                    f.write(f"--- HD {fn} ({hd_file})\n{clip(hd_body).rstrip()}\n")
+                    if fn in hd_defs:
+                        hd_file, hd_body = hd_defs[fn]
+                        f.write(f"--- HD {fn} ({hd_file})\n{clip(hd_body).rstrip()}\n")
+                    else:
+                        f.write(f"--- HD {fn}: the remaster has no function of this name\n")
                 f.write("\n")
         index.append({"batch": out.name,
                       "types": [(r["type"], r["hd"], len(r["unk"])) for r in records[i:i + args.batch]]})

@@ -134,14 +134,14 @@ typedef struct dds3BillAnimResource_tag dds3BillAnimResource_tag;
 typedef struct P2A_TEXANIM_tag P2A_TEXANIM_tag;
 typedef struct dds3BillAnim_tag dds3BillAnim_tag;
 typedef struct BillRenderPair BillRenderPair;
-typedef struct BillObj BillObj;
+typedef struct billHandle_t billHandle_t;
 typedef struct sdfGrOt_t sdfGrOt_t;
 typedef struct effPCPSparkleSphereParam_t effPCPSparkleSphereParam_t;
 typedef struct effPCPSparkleSphere_tag effPCPSparkleSphere_tag;
 typedef struct dds3Effect_Blur_t dds3Effect_Blur_t;
 typedef struct EffBlurTemplateBody EffBlurTemplateBody;
 typedef struct dds3Effect_PartialMultiBlur_t dds3Effect_PartialMultiBlur_t;
-typedef struct EffNode EffNode;
+typedef struct effHandle_t effHandle_t;
 typedef struct effPCPAgiraoFirePartList_t effPCPAgiraoFirePartList_t;
 typedef struct effPCPRingPolyExp2Param_t effPCPRingPolyExp2Param_t;
 typedef union SdfDrawTransform SdfDrawTransform;
@@ -272,7 +272,7 @@ typedef struct EffParamTable EffParamTable;
 
 #define EFF_DEG2RAD 0.017453292f
 
-struct BillObj;
+struct billHandle_t;
 
 struct BillChildPayload;
 
@@ -401,22 +401,22 @@ struct BillRenderPair {
     struct BillRenderPair *next; /* 0x18 */
 };
 
-struct BillObj {
-    f32 position[4]; /* 0x00: copied as a four-component position by both render paths. */
+struct billHandle_t {
+    f32 pos[4]; /* 0x00: copied as a four-component pos by both render paths. */
     f32 childScaleX;  /* 0x10: set by dds3BillboardSetScale */
     f32 childScaleY;  /* 0x14 */
     f32 unk18;
     f32 unk1C;
-    f32 rotationAngle;  /* 0x20: radian angle used to rotate the quad corners. */
-    u32 childParam;   /* 0x24: set by dds3BillboardSetRGBA */
+    f32 rot;  /* 0x20: radian angle used to rotate the quad corners. */
+    u32 abgr;   /* 0x24: set by dds3BillboardSetRGBA */
     void (*callback)(); /* 0x28: called by dds3BillboardDraw; set from the
                           per-index table by dds3BillboardCreate */
-    u16 kind;         /* 0x2C: kind 0/3 child, kind 1 animation list */
-    u16 requestedPacketListIndex; /* 0x2E: selected child packet-list pool */
+    u16 type;         /* 0x2C: type 0/3 child, type 1 animation list */
+    u16 mode; /* 0x2E: selected child packet-list pool */
     union {
-        void *payload; /* 0x30: kind-discriminated payload when its type is unknown */
+        void *payload; /* 0x30: type-discriminated payload when its type is unknown */
         struct BillChildPayload *child; /* child kinds */
-        struct dds3BillAnimResource_tag *animationData; /* kind 1 */
+        struct dds3BillAnimResource_tag *animationData; /* type 1 */
     };
     BillRenderPair pair; /* 0x34: used by the mode-0x80 entry renderer */
     u16 animationActive; /* 0x50: cleared by empty or completed nonlooping animation */
@@ -478,7 +478,7 @@ struct effPCPSparkleSphere_tag {
     u32 param;
     u32 abgr;
     f32 area;
-    struct BillObj *hBill;
+    struct billHandle_t *hBill;
 };
 
 struct dds3Effect_PartialMultiBlur_t;
@@ -507,10 +507,10 @@ struct dds3Effect_PartialMultiBlur_t {
     struct sdfTexHandle_t *texture;
 };
 
-struct EffNode;
+struct effHandle_t;
 
 /* Live effect node allocated in a 0x10-byte size-class block. */
-struct EffNode {
+struct effHandle_t {
     u32 type;       /* 0x00: type-operation row */
     s32 arg;        /* 0x04 */
     s32 instance;   /* 0x08: type-specific instance word */
@@ -518,7 +518,7 @@ struct EffNode {
 };
 
 /* Complete serialized effect-resource header. The payload's size and format
- * depend on type; this is not the separately allocated live EffNode.
+ * depend on type; this is not the separately allocated live effHandle_t.
  * Compatibility conversion examines the complete type and argument words,
  * while node creation consumes their low halfwords. */
 struct effPCPAgiraoFirePartList_t {
@@ -1406,7 +1406,7 @@ struct EffPCPRingWork {
     u32 color10;
     u32 color14;
     f32 scale;
-    BillObj *handle;
+    billHandle_t *handle;
 };
 
 struct effPCPAgiFireball2Param_t {
@@ -1466,7 +1466,7 @@ struct effPCPBreath_tag {
     u32 frame;
     f32 rotate;
     f32 speed;
-    struct EffNode *hD3P;
+    struct effHandle_t *hD3P;
 };
 
 /* Shared spawn-once work record used by the paired effect implementations. */
@@ -1599,7 +1599,7 @@ struct effPCPAgiraoFire_tag {
     effPCPAgiraoFireParam_t head;
     s32 frame;
     u32 color;
-    struct EffNode *handles[21];
+    struct effHandle_t *handles[21];
 };
 
 /* The twin effect owns eight pairs of parameter works, one shared work per
@@ -2217,13 +2217,13 @@ struct dds3ModelHandle_t {
  * bank being accumulated in place. */
 
 
-extern void dds3BillboardDraw(BillObj *hData);
+extern void dds3BillboardDraw(billHandle_t *hData);
 
-void dds3BillboardSetMode(struct BillObj *hBillboard, s32 mode);
+void dds3BillboardSetMode(struct billHandle_t *hBillboard, s32 mode);
 
-void dds3BillboardSetRGBA(struct BillObj *hBillboard, u32 abgr);
+void dds3BillboardSetRGBA(struct billHandle_t *hBillboard, u32 abgr);
 
-void dds3BillboardSetScale(struct BillObj *hBillboard, f32 x, f32 y);
+void dds3BillboardSetScale(struct billHandle_t *hBillboard, f32 x, f32 y);
 
 struct effDebugPolyParams_t {
     s16 parameterCount;
@@ -2272,16 +2272,16 @@ void dds3EffectBlur(dds3Effect_Blur_t *quad);
 
 u32 effColorBlend(u32 abgr0, u32 abgr1, f32 rate);
 
-EffNode *dds3EffectCopy(const EffNode *source);
+effHandle_t *dds3EffectCopy(const effHandle_t *source);
 
 extern EffSpawnParams effPCPShockWave02Param[];
 
 /* Copy one 128-bit vector from the read-only source to destination storage. */
 void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 
-void dds3EffectSetPosition(struct EffNode *pData, const void *pPos);
+void dds3EffectSetPosition(struct effHandle_t *pData, const void *pPos);
 
-struct BillObj *dds3BillboardGeneral(s32 number);
+struct billHandle_t *dds3BillboardGeneral(s32 number);
 
 effPCPThunderSpherePoly_t *effPCPThunderSpherePolyCreate(effPCPThunderSpherePolyParam_t *parameters);
 
@@ -2289,7 +2289,7 @@ void effPCPThunderSpherePolyDelete(effPCPThunderSpherePoly_t *hData);
 
 effPCPThunderSpherePolyParam_t *effPCPThunderSpherePolyGetParam(effPCPThunderSpherePoly_t *pThunderPoly);
 
-void dds3BillboardDelete(struct BillObj *hData);
+void dds3BillboardDelete(struct billHandle_t *hData);
 
 extern void *effPkt3DPrimMakePoly(effDebugPolyParams_t *aParm);
 
@@ -2299,7 +2299,7 @@ extern u8 D_0031FB50[];
 
 extern EffRandState dds3EffectBase[];
 
-void dds3EffectDelete(EffNode *pData);
+void dds3EffectDelete(effHandle_t *pData);
 
 void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 
@@ -2421,7 +2421,7 @@ void dds3EffectPartialMultiBlurDelete(dds3Effect_PartialMultiBlur_t *hPartialMul
 
 extern u8 effPCP_Megidoraon01_ThunderSpherePoly_Param[];
 
-void dds3EffectSetRGBA(EffNode *pData, u32 abgr);
+void dds3EffectSetRGBA(effHandle_t *pData, u32 abgr);
 
 extern EffSpawnParams D_0031F590[];
 
@@ -2438,7 +2438,7 @@ void effPCP_ThunderPolyDelete(effPCP_ThunderPoly_t *hData);
 
 void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData);
 
-void dds3EffectDraw(EffNode *pData);
+void dds3EffectDraw(effHandle_t *pData);
 
 u32 effBTLSkillCheckRun(void);
 
@@ -2608,7 +2608,7 @@ extern f32 D_0031F570[8];
 extern const f32 effPCPRadiateTBParam[4] __attribute__((aligned(16)));
 void ReverseMatrix(void);
 void effScreenOffset(void);
-EffNode *dds3EffectLoad(effPCPAgiraoFirePartList_t *pD3P);
+effHandle_t *dds3EffectLoad(effPCPAgiraoFirePartList_t *pD3P);
 void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *hData, u32 abgr);
 void effPCPThunderSpherePolySetPosition(void *hData, const void *pPos);
 void effPCPThunderSpherePolySetScale(f32 hData, effPCPThunderSpherePoly_t *scale);
@@ -2617,7 +2617,7 @@ void dds3EffectDistortionBlurDraw(effBlurScatterWork_t *work);
 void dds3EffectRippleBlurReset(effBlurScaleWork_t *hRippleBlur);
 void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 void mdlSetScale(dds3ModelHandle_t *aHandle);
-void dds3BillboardSetAnimKey(BillObj *hBillboard, u32 frame);
+void dds3BillboardSetAnimKey(billHandle_t *hBillboard, u32 frame);
 void effPCP_ThunderPolySetColor(effPCP_ThunderPoly_t *hData, u32 abgr);
 void dds3EffectPartialMultiFilterDraw(EffResourceRectWork *hPartialMultiFilter);
 void SetRotateMatrixY_B(f32 aAngle);
@@ -2657,7 +2657,7 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *hData) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
-    BillObj *handle;
+    billHandle_t *handle;
     f32 scale;
     u32 color;
     s32 i;
@@ -3201,7 +3201,7 @@ void effPCPMudoDraw(effPCPMudo_tag *hData) {
     f32 position[4] __attribute__((aligned(16)));
     u32 i;
     u32 color;
-    BillObj *bill;
+    billHandle_t *bill;
     dds3ModelHandle_t *model;
     f32 scale;
     u32 count;
@@ -4925,7 +4925,7 @@ void effPCPBreathSetRotateMatrix(effPCPBreath_tag *hData, const void *pMatrix) {
 
 effPCPAgiraoFire_tag *effPCPAgiraoFireCreate(effPCPAgiraoFireParam_t *pParam, effPCPAgiraoFirePartList_t **pPartList) {
     effPCPAgiraoFire_tag *work;
-    struct EffNode **handle;
+    struct effHandle_t **handle;
     u32 i;
 
     work = sdfChipAllocDirect(sizeof(effPCPAgiraoFire_tag));
@@ -4961,8 +4961,8 @@ void effPCPAgiraoFireCreatePCF(void *data) {
 
 effPCPAgiraoFire_tag *effPCPAgiraoFireCopy(effPCPAgiraoFire_tag *src) {
     effPCPAgiraoFire_tag *work;
-    struct EffNode **sourceHandleCursor;
-    struct EffNode **destinationHandleCursor;
+    struct effHandle_t **sourceHandleCursor;
+    struct effHandle_t **destinationHandleCursor;
     u32 slotIndex;
 
     work = sdfChipAllocDirect(sizeof(effPCPAgiraoFire_tag));
@@ -4982,7 +4982,7 @@ effPCPAgiraoFire_tag *effPCPAgiraoFireCopy(effPCPAgiraoFire_tag *src) {
 }
 
 void effPCPAgiraoFireDelete(effPCPAgiraoFire_tag *hData) {
-    struct EffNode **handleCursor;
+    struct effHandle_t **handleCursor;
     u32 slotIndex;
 
     handleCursor = hData->handles;
@@ -5021,9 +5021,9 @@ void effPCPAgiraoFireDraw(effPCPAgiraoFire_tag *hData) {
             SDF_VU0_STOREVECTOR(position);
             for (handleIndex = 0; handleIndex < 7; handleIndex++) {
                 if (frame >= (s32)((u32)hData->head.handleDelay[handleIndex] + (u32)start)) {
-                    dds3EffectSetRGBA((struct EffNode *)hData->handles[group * 7 + handleIndex], color);
-                    dds3EffectSetPosition((struct EffNode *)hData->handles[group * 7 + handleIndex], position);
-                    dds3EffectDraw((struct EffNode *)hData->handles[group * 7 + handleIndex]);
+                    dds3EffectSetRGBA((struct effHandle_t *)hData->handles[group * 7 + handleIndex], color);
+                    dds3EffectSetPosition((struct effHandle_t *)hData->handles[group * 7 + handleIndex], position);
+                    dds3EffectDraw((struct effHandle_t *)hData->handles[group * 7 + handleIndex]);
                 }
             }
         }

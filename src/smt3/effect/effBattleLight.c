@@ -17,7 +17,7 @@ typedef struct
     u32 unknown04;
     u32 diffuse;
     u32 ambient;
-    u32 unknown10;
+    u32 color_anim;
     u32 unknown14;
     u32 unknown18;
     u32 unknown1C;
@@ -147,7 +147,7 @@ void effBTLPointLightGroupSet(effBTL_SkillLight_t *pLight, u32 group)
 
 void effBTLPointLightSet(effBTL_SkillLight_t *pLight, nbFormation_t *pFormation)
 {
-    if (pLight->unknown10 == pLight->unknown18) {
+    if (pLight->color_anim == pLight->unknown18) {
         return;
     }
     switch (pLight->type) {

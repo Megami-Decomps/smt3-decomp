@@ -35,8 +35,8 @@ extern void *memcpy(void *a, const void *b, u32 c);
 extern void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 extern void dds3BillboardSetAnimNumber(void *hBillboard, u32 number);
 extern void dds3EffectSetPosition(void *pData, const void *pPos);
-extern struct EffNode *dds3EffectLoad(void *pD3P);
-extern struct EffNode *dds3EffectFileLoad(u32 pFilename);
+extern struct effHandle_t *dds3EffectLoad(void *pD3P);
+extern struct effHandle_t *dds3EffectFileLoad(u32 pFilename);
 extern  effBTL_t *effEveBEDCreate( effBTL_t *pData);
 extern void effMagaSCSetArea(void *hEffect, const void *pMagaSCArea);
 extern void effMagaP4SetPoint(void *hEffect, const void *pP4Point);
@@ -132,12 +132,12 @@ typedef struct BattleEffect BattleEffect;
 
 typedef void (*FileRequestCallback)(void *request, u32 arg);
 
-typedef struct EffNode {
+typedef struct effHandle_t {
     u32 type;
     s32 arg;
     s32 instance;
     f32 unkC;
-} EffNode;
+} effHandle_t;
 
 enum {
     EFF_WORLD_KIND_WORLD_INFO = 0,
@@ -214,7 +214,7 @@ typedef struct EffOwnerBillParamView {
      sdfModelRootNode_t *model;
 } EffOwnerBillParamView;
 
-void dds3EffectDelete(EffNode *pData);
+void dds3EffectDelete(effHandle_t *pData);
 void dds3BillboardDelete(struct billHandle_t *hData);
 void effEveBEDCutDelete(effEveBEDCutHandle_t *hEveBEDCut);
 void effEveBEDDelete( effBTL_t *hEveBED);
@@ -226,7 +226,7 @@ extern u8 opaque40[0x60];
 void dds3FreePoseSet(dds3Basic_t *basic);
 void dds3EffectObjectBasicCalcFldEx(dds3Basic_t *basic);
 u8 dds3ObjectBaseCheckFlag(struct dds3Basic_t *pObjectBasic, u32 flag);
-void dds3EffectDraw(EffNode *pData);
+void dds3EffectDraw(effHandle_t *pData);
 extern void dds3BillboardDraw(struct billHandle_t *hData);
 void effEveBEDCutDraw(effEveBEDCutHandle_t *hEveBEDCut);
 dds3Basic_t *dds3AddSceneBasicData(s32 type);
@@ -338,7 +338,7 @@ s32 dds3EffectObjectBasicMainProcedure(dds3Basic_t *aPtr)
     sdfVector4_t rotation = {0, 0, 0, 1.0f};
     dds3EffectObjectBasicWorkData_t *work;
     s32 moved = 0;
-    EffNode *effect;
+    effHandle_t *effect;
     billHandle_t *bill;
     s32 result;
 
@@ -673,7 +673,7 @@ dds3Basic_t *AddD3PEffect(void *eff, void *pos, void *rot)
 
 dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, void *pos, void *rot)
 {
-    EffNode *effect;
+    effHandle_t *effect;
 
     effect = dds3EffectLoad(effdata);
     return AddD3PEffect(effect, pos, rot);
@@ -681,7 +681,7 @@ dds3Basic_t *dds3AddD3PEffectObjectBasic2(void *effdata, void *pos, void *rot)
 
 dds3Basic_t *dds3AddD3PEffectObjectBasic(u32 file, void *pos, void *rot)
 {
-    EffNode *effect;
+    effHandle_t *effect;
 
     effect = dds3EffectFileLoad(file);
     return AddD3PEffect(effect, pos, rot);
@@ -809,7 +809,7 @@ dds3Basic_t *AddMG12Effect(kind, descriptor)
     sdfVector4_t rotation;
     effMagaSCArea_t areaParameters;
     effMagaP4Point_t pointParameters;
-    EffNode *effect;
+    effHandle_t *effect;
     dds3Basic_t *basic;
     dds3EffectObjectBasicWorkData_t *work;
     dds3ObjectBaseControlWorkData_t *control;
