@@ -18,14 +18,6 @@
 
 /* ---- quadword memory ---- */
 
-/* The record keeps a 16-byte memory operand from decaying to a pointer. */
-typedef struct {
-    u32 words[4];
-} Quad;
-typedef struct {
-    f32 components[4];
-} QuadF32;
-
 /* lq/sq through $2. Plain C `*(u128 *)dst = *(u128 *)src` gives the same pair
  * but lets the sq fall into a jr delay slot. */
 #define SDF_VU0_COPYVECTOR(dst, src) __asm__ volatile ( \
@@ -780,8 +772,8 @@ typedef struct {
     : : "r" (vectors), "r" (matrix), "r" (cache) : "memory")
 #define SDF_VU0_COPYVECTOR_MEMOPS(dst, src) __asm__ volatile ( \
     ".set noreorder\n\tlq $2, 0(%2)\n\tsq $2, 0(%1)\n\t.set reorder" \
-    : "=m" (*(QuadF32 *)(dst)) \
-    : "r" (dst), "r" (src), "m" (*(const QuadF32 *)(src)) \
+    : "=m" (*(u128 *)(dst)) \
+    : "r" (dst), "r" (src), "m" (*(const u128 *)(src)) \
     : "$2")
 #define EE_LOAD_UNALIGNED_WORD(out, src) __asm__ volatile ( \
     "lwr %0, 0(%1)\n\t" \

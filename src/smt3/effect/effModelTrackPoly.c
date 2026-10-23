@@ -192,7 +192,7 @@ void Eff_ModelTrackPolyReset(effModelTrackPoly_t *hMTPoly)
 
 void Eff_ModelTrackPolyGetMarkPosition(effModelTrackPoly_t *hMTPoly)
 {
-    QuadF32 pair[2];
+    sdfVector4_t pair[2];
     mdlObj_t *object = hMTPoly->params.hModel;
 
     sdfModelGetMarkPos(object->inner, hMTPoly->params.mark0);
@@ -761,7 +761,7 @@ void effSwordTrackDelete(Eff_ModelTrackPoly_tag *hSwordTrack)
 void effSwordTrackRecord(Eff_ModelTrackPoly_tag *hSwordTrack)
 {
     mdlObj_t *object = hSwordTrack->param_dante.hModel;
-    QuadF32 points[2];
+    sdfVector4_t points[2];
 
     sdfModelGetMarkPos(object->inner, hSwordTrack->param_dante.mark0);
     SDF_VU0_STOREVECTOR_MEMOPS(points[0]);

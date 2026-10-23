@@ -473,7 +473,7 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
     dir[1] = y0;
     dir[2] = z0;
     dir[3] = 0.0f;
-    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)dir);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const u128 *)dir);
     evtSetUnitLightDir(mainUnit, intr);
     if (fldPlayerUnit != 0) {
         evtSetUnitLightDir(playerUnit, intr);
@@ -481,7 +481,7 @@ void fldSkySetPlayer(s32 intr, f32 r0, f32 g0, f32 b0,
     if (D_0054EAF0 != 0) {
         evtSetUnitLightDir(secondUnit, intr);
     }
-    SDF_VU0_LOADVECTOR_MEMOPS(*(const Quad *)dir);
+    SDF_VU0_LOADVECTOR_MEMOPS(*(const u128 *)dir);
     evtSetUnitLightDir(mainUnit, 0);
     if (fldPlayerUnit != 0) {
         evtSetUnitLightDir(playerUnit, 0);
