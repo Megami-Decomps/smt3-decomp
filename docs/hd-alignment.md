@@ -333,3 +333,59 @@ Only two of the seventeen survived reading, `effBTL_SkillLight_t.unknown10` as
 `color_anim` and `dds3ScatterPolyList_tag.unk1C` as `scale`, and both were
 applied by hand. The lesson is the one the resolver already taught: a member is
 placed by what the code does with it, not by what fits beside it.
+
+## Type names: the IDB's own type at the same place
+
+The strongest evidence for an invented type is not a body at all. The IDB types
+every parameter slot, return value and struct member it recovered, so wherever
+one of ours stands in a place the IDB types too, that type is the answer.
+`tools/ida_type_votes.py` collects those votes from three places (a parameter
+slot where the arity agrees, a return type, and a member at the same offset and
+extent of a record the IDB has) and writes them out as a report for `hd_align.py`
+and a merge plan for `hd_merge.py`.
+
+Fourteen types came back with two or more votes. Only one was a rename
+(`MovObjStream` is `movieDecodeCtx_t`); the other thirteen named a record the tree
+already has, which is what makes `hd_merge.py` the tool that matters here. Two
+proofs stood out for being independent of each other: every `*Predraw` prototype
+types its first parameter `sdfPreDrawHook_t`, and `sdfPreDrawTag_t`'s `head` and
+`tail` are the same record, so our `SdfPacketPatchLink` was that record twice over.
+
+### What the merges needed
+
+`hd_merge.py` grew two rules to take them, both of which keep the build as the
+proof:
+
+- **Ours may stop short of theirs.** `VuWork` is `corePktCb_t` without its last
+  two words: 31 members pairing one for one from offset 0, which renamed all 31
+  and placed 89 uses. A record of ours that is *larger* is still refused.
+- **A member of ours covering several of theirs may be split**, and their padding
+  names among the pieces no longer refuse it, as long as one piece is a real
+  name. `SdfDrawNode`'s `pad3C` became `pad0`, `userData`, `pad1` on the way to
+  `sdfModelNode_t`.
+
+The sort-OT records needed reading rather than either rule. `SdfPool` is
+`sdfGrOt_t` word for word, including the two callbacks our copy had as `release`
+and `update`; `SdfKeyPoolNode` and `SdfKeyTreeItem` are both `sdfDrawTag_t`, the
+pool reading its sort key as the free marker and the AVL comparing it as a float.
+Folding those two into one record meant taking the IDB's `f32 z` and reading its
+bits at the pool's comparison, which the unit comparison then confirmed.
+
+Two placeholder records went the other way, to a type rather than a record:
+`Quad` and `QuadF32` existed to keep a 16-byte memory operand from decaying to a
+pointer in the VU0 macros, which `u128` does by itself, and the float one is the
+engine's `sdfVector4_t` (seven IDB slots say so).
+
+### A type defined in several units has to be renamed in all of them
+
+`SdfPool` and `SdfKeyPoolNode` were also declared in `src/smt3/sdk/libc.c` and
+`libgcc.c`, so renaming them in `sdfSortOt.c` moved the drift count by one
+instead of three. The drift check counts a name once across the tree, which is
+the right behaviour and also the reason a rename has to find every copy.
+
+### What layout alone still cannot do
+
+Matching an invented record against the tree's own conventionally named records
+by layout produced 5,461 candidate pairs for 96 types. A record of a few words
+fits thousands of others, so the only use for layout here is confirming a pair
+some other evidence already named.
