@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 110 types, 908 members, 506 adopted constants.
+# 110 types, 929 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -335,6 +335,7 @@ member cmpStockSeqInfo_t.unk_00
 member cmpStockSeqInfo_t.unk_18
 member cmpStockSeqInfo_t.unk_19
 member cmpStockWork_t.unk_00AC
+member collision_s.unkC4
 member datCommentEntry_t.unk_03
 member datDevilAI_t.unk_00
 member datDevilAI_t.unk_A4
@@ -380,6 +381,7 @@ member dds3GlobalWork_t.unk1910
 member dds3GlobalWork_t.unk1914
 member dds3GlobalWork_t.unk38
 member dds3GlobalWork_t.unk657C
+member dds3GlobalWork_t.unkA42
 member dds3LinkedLightWork_t.unk00
 member dds3MatterPathPosition_t.unk00
 member dds3ModelBasicWorkData_t.unk10
@@ -391,6 +393,7 @@ member dds3RipBlurParam_t.unk2C
 member dds3SceneBasic_t.unk24
 member dds3SpPolyLoopWork_t.unk00
 member dds3SpPolyLoopWork_t.unk65
+member dds3SpPolyLoopWork_t.unkB4
 member dds3Spline_t.unk20
 member dds3Spline_t.unk24
 member dds3Spline_t.unk28
@@ -427,6 +430,7 @@ member effBTL_SkillLight_t.unknown18
 member effBTL_SkillLight_t.unknown1C
 member effBTL_SkillLight_t.unknown20
 member effBTL_SkillPartsList_t.unk15
+member effBTL_t.unkC30
 member effBaelHead_t.unk00
 member effBaelHead_t.unk04
 member effBaelHead_t.unk08
@@ -452,6 +456,7 @@ member effEventSetupRecord_t.unknown00
 member effEventSetupRecord_t.unknown28
 member effEventSetupRecord_t.unknown30
 member effEventSetupRecord_t.unknown3C
+member effHandle_t.unkC
 member effHandler_t.unk4
 member effLegacyInstance_t.unk00
 member effLegacyInstance_t.unk60
@@ -467,6 +472,7 @@ member effPCPBossHUnit_t.unk00
 member effPCPBossKAGU2Attack_t.unk00
 member effPCPBossKAGU2Attack_t.unk58
 member effPCPBossKAGU2Attack_t.unk68
+member effPCPBossKAGU2Attack_t.unkB4
 member effPCPBossKAGUAttack_t.unk00
 member effPCPBossKAGUAttack_t.unk58
 member effPCPBossKAGUAttack_t.unk68
@@ -500,6 +506,7 @@ member effPCPDANTE_Damage_tag.unk030
 member effPCPDANTE_Damage_tag.unk034
 member effPCPDANTE_Damage_tag.unk035
 member effPCPDANTE_Damage_tag.unk0BC
+member effPCPDANTE_Thunder_tag.unkC5
 member effPCPFlashPolyPipe_tag.unk34
 member effPCPFlashPolySpherePart_tag.unk1C
 member effPCPHamaCardScatterPart_tag.unk20
@@ -530,6 +537,10 @@ member evtPolygonMovieWork_t.unk80
 member evtPolygonMovieWork_t.unk88
 member evtPolygonMovieWork_t.unk90
 member evtPolygonMovieWork_t.unk98
+member evtPolygonMovieWork_t.unkA0
+member evtPolygonMovieWork_t.unkA8
+member evtPolygonMovieWork_t.unkB0
+member evtPolygonMovieWork_t.unkB8
 member evtStartWork_t.unk_00
 member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
@@ -641,6 +652,8 @@ member fldAnahoriAkuma_t.unk0C
 member fldAnahoriAkuma_t.unk14
 member fldAnahoriAkuma_t.unk1B
 member fldAreaWork_t.unk58
+member fldAreaWork_t.unkC4
+member fldAreaWork_t.unkFC
 member fldBlurParam_t.unk00
 member fldBlurParam_t.unk04
 member fldBlurParam_t.unk08
@@ -715,8 +728,10 @@ member frTextIndex_t.unk00
 member instanceMes_tag.unk98
 member itfGsState_t.unk00
 member itfMesInstance_t.unk04
+member itfMesManager_t.unkE
 member itfMesResource_t.unk0
 member itfMesResource_t.unk1D
+member itfMesResource_t.unkC
 member itfpanel_t.unk31
 member lstListWindow_t.unk_0000
 member lstWindowWork_t.unk_08
@@ -803,7 +818,6 @@ member nbEncountForm_t.unk_1C
 member nbEncountForm_t.unk_22
 member nbEncountForm_t.unk_23
 member nbEventEntry_t.unk_04
-member nbEventEntry_t.unk_08
 member nbEventEntry_t.unk_0C
 member nbEventEntry_t.unk_10
 member nbEventProcessData_t.unk_18
@@ -866,6 +880,8 @@ member pbGoal_t.unk00
 member pbGroupData_t.unk04
 member pbGroupData_t.unk08
 member pbGroupData_t.unk16
+member pbGroupData_t.unkB4
+member pbGroupData_t.unkBC
 member pbGroupEntry_t.unk00
 member pbLevel_t.unk02
 member pbMapArea_t.unk00
@@ -963,6 +979,8 @@ member sdf3DFogPacket_t.unknown02
 member sdf3DFogPacket_t.unknown10
 member sdf3DFogPacket_t.unknown18
 member sdf3DFogPacket_t.unknown1C
+member sdf3DFogPacket_t.unknownC8
+member sdf3DFogPacket_t.unknownCC
 member sdfBinaryHeader_t.unk00
 member sdfBinaryHeader_t.unk18
 member sdfFileCmd_t.unk00
@@ -972,6 +990,8 @@ member sdfGrStdDrawEnv_t.unk0C
 member sdfIpuDecodeCb_t.unk65
 member sdfKernelThreadParam_t.unk18
 member sdfSndTrackPacket_t.unk4
+member sdfSndTrackPacket_t.unkA
+member sdfSndTrackPacket_t.unkC
 member sdfTextureOffsetListHeader_t.unknown00
 member shopProcWork_t.unk_00
 member shpItemEntry_t.unk_00
@@ -993,6 +1013,7 @@ member slFileRec_t.unk25
 member sndChannel_t.unk1
 member sndChannel_t.unk2
 member sndChannel_t.unk4
+member sndChannel_t.unkC
 member sndMergedWork_t.unk1E0
 member stfUiWork_t.unk_0004
 member stfUiWork_t.unk_0008

@@ -24,8 +24,10 @@ INVENTED = re.compile(r"^[A-Z][a-z0-9]")
 
 # A member the decompiler named after its offset rather than its job. The `unk`
 # prefix has to be followed by the offset or nothing, so a real word that starts
-# with it (`unknownReason`) is not swept up.
-UNNAMED = re.compile(r"^(?:unk(?:nown)?(?:[_0-9]|$)|field_0x|dummy\d|unused\d)", re.I)
+# with it (`unknownReason`) is not swept up. The offset is hex, so `unkB0` counts
+# too: leaving the hex letters out hid 22 members from this check.
+UNNAMED = re.compile(r"^(?:unk(?:nown)?(?:[_0-9]|[0-9A-Fa-f]+$|$)"
+                     r"|field_0x|dummy\d|unused\d)", re.I)
 
 # Names that are correct as they are: newlib, the Sony SDK and the IDB's own
 # spellings, which must not be renamed to fit the convention.

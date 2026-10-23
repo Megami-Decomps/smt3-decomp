@@ -152,13 +152,13 @@ typedef struct nbMainProcessData_t
     u32 maka;
     u32 exp;
     struct dds3Basic_t *light[2];          /* 0x0A8 */
-    u8 unkB0[4];
+    u8 gamecamera[4];
     s32 niidacamera;
-    u8 unkB8[4];
+    u8 eventcamera[4];
     dds3ProcessID_t *MainProcessID;
     dds3ProcessID_t *maeProcess;            /* 0x0C0 */
     dds3ProcessID_t *AtoProcessID;
-    u8 unkC8[4];
+    u8 ResultProcessID[4];
     dds3ProcessID_t *StageProcessID;          /* 0x0CC */
     dds3ProcessID_t *UnitProcessID;
     dds3ProcessID_t *ActionProcessID[4];

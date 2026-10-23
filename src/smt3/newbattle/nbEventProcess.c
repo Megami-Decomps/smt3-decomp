@@ -276,7 +276,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 typedef struct {
     s32 rid;
     s32 unk_04;
-    s32 unk_08;
+    s32 encno;
     s32 unk_0C;
     s32 unk_10;
     u16 fadetime;

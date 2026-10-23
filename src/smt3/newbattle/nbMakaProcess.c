@@ -280,7 +280,7 @@ extern char D_00551560[];
 typedef struct {
     s32 rid;
     s32 unk_04;
-    s32 unk_08;
+    s32 encno;
     s32 unk_0C;
     s32 unk_10;
     u16 fadetime;
@@ -544,7 +544,7 @@ s32 nbCheckEventEntries(nbMainProcessData_t *data)
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        if (nbEventEntryTable[i].unk_08 != 0 && nbEventEntryTable[i].unk_08 == data->encno) {
+        if (nbEventEntryTable[i].encno != 0 && nbEventEntryTable[i].encno == data->encno) {
             if (nbEventEntryTable[i].rid != 0 &&
                 evtGetEventPackStat(nbEventEntryTable[i].rid) != 2) {
                 return 0;
@@ -563,7 +563,7 @@ void nbStartEventPacks(nbMainProcessData_t *data)
     s32 i;
 
     for (i = 0; i < 16; i++) {
-        if (nbEventEntryTable[i].unk_08 != 0 && nbEventEntryTable[i].unk_08 == data->encno) {
+        if (nbEventEntryTable[i].encno != 0 && nbEventEntryTable[i].encno == data->encno) {
             if (nbEventEntryTable[i].rid != 0) {
                 dds3LinkProcess(data->mainproc,
                                 evtLoadEventPack(nbEventEntryTable[i].rid));

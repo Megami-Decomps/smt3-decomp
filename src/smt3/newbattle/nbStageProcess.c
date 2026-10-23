@@ -190,7 +190,7 @@ void nbAddStageCamera2(nbMainProcessData_t *data)
     dds3ObjectBaseCreateMover(camera);
     dds3ObjectBaseSetPadControl(camera, 0);
     dds3CameraObjectBasicSetFovy(camera, 0.6981317f);
-    *(dds3Basic_t **)data->unkB8 = camera;
+    *(dds3Basic_t **)data->eventcamera = camera;
 }
 
 void nbSetStageParam(s16 a, s16 b)
