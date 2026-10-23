@@ -77,7 +77,7 @@ struct effBTLCut_t {
     u32 colorRampEndFrame;
     u16 kind;
     u8 unk16[2];
-    s32 unk18;
+    s32 stat;
     effBTL_SkillCutTable_t *list;
     dds3EffectPart_t *parameterWorks[60]; /* 0x20 */
     effBTLCallback_t sourceFrameCallback; /* 0x110 */

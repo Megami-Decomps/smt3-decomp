@@ -1516,7 +1516,7 @@ struct effPCPSpiralBED_tag {
     effPCPSpiralBEDParam_t param;
     effPCPSpiralBEDPart_tag *pPart;
     struct SoundMixer *hBED;
-    u8 unk9C;
+    u8 original;
     u8 pad9D[3];
     f32 scale;
     u32 color;
@@ -7053,7 +7053,7 @@ effPCPSpiralBED_tag *effPCPSpiralBEDCreate(effPCPSpiralBEDParam_t *pParam, void 
     entry = (effPCPSpiralBEDPart_tag *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
-    work->unk9C = 1;
+    work->original = 1;
     work->pPart = entry;
     work->scale = 1.0f;
     work->hBED = effEveBEDCreate(pBEDData);
@@ -7101,7 +7101,7 @@ effPCPSpiralBED_tag *effPCPSpiralBEDCopy(effPCPSpiralBED_tag *src) {
     entry = (effPCPSpiralBEDPart_tag *)(work + 1);
     work->handle = handle;
     work->color = 0x80808080;
-    work->unk9C = 0;
+    work->original = 0;
     work->pPart = entry;
     work->scale = 1.0f;
     work->hBED = src->hBED;

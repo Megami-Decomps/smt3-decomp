@@ -776,7 +776,7 @@ s32 nbCameraBoss_Bsnet_Attack_Cut1_Run(nbCamera_t *pNbCamera)
     if (id == 0x200) {
         return 0;
     }
-    if (pNbCamera->frame < datModelParamTable[id].part[2].unk18) {
+    if (pNbCamera->frame < datModelParamTable[id].part[2].actframe) {
         pNbCamera->distance += 12.5f;
     }
     nbCameraShot_GroundCollision(pNbCamera);
@@ -812,7 +812,7 @@ s32 nbCameraBoss_Bsnet_Cut1_Run(nbCamera_t *pNbCamera)
     if (id == 0x200) {
         return 0;
     }
-    if (pNbCamera->frame < datModelParamTable[id].part[3].unk18) {
+    if (pNbCamera->frame < datModelParamTable[id].part[3].actframe) {
         pNbCamera->distance -= 15.0f;
     }
     nbCameraShot_GroundCollision(pNbCamera);
@@ -3623,7 +3623,7 @@ s32 nbCameraHero_Cut1_Run(nbCamera_t *pNbCamera, nbCameraSkillInfo_t *pNBSInfo)
         return 0;
     }
     nbCameraShot_PullOne_Calc(pNbCamera, 0.45f);
-    if (pNbCamera->frame < datModelParamTable[0].part[11].unk18) {
+    if (pNbCamera->frame < datModelParamTable[0].part[11].actframe) {
         SetRotateMatrixY(0.017453291f);
         SDF_VU0_LOADVECTOR(&pNbCamera->direction);
         SDF_VU0_APPLYMATRIX();

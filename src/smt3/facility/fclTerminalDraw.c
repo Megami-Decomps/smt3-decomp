@@ -23,12 +23,12 @@ typedef struct
     /* 0x11D6 */ s16 unk_11D6;
     /* 0x11D8 */ u8 unk_11D8;
     /* 0x11D9 */ u8 unk_11D9[0x1018];
-    /* 0x21F1 */ s8 unk_21F1;
-    /* 0x21F2 */ u16 unk_21F2;
-    /* 0x21F4 */ s8 unk_21F4[0x21];
+    /* 0x21F1 */ s8 TerminalType;
+    /* 0x21F2 */ u16 TerminalNo;
+    /* 0x21F4 */ s8 TerminalList[0x21];
     /* 0x2215 */ s8 unk_2215;
     /* 0x2216 */ u8 unk_2216[0xA];
-    /* 0x2220 */ s32 unk_2220;
+    /* 0x2220 */ s32 ScriptPID;
     /* 0x2224 */ u8 unk_2224[0xC];
     /* 0x2230 */ s32 saveProcess;
     /* 0x2234 */ u8 unk_2234[4];
@@ -43,8 +43,8 @@ extern s16 fldAllCnt[][2];
 
 s32 trmGetSaveResult(void)
 {
-    if (trmUpdateWork->unk_21F1 == 0) {
-        s32 phase = trmUpdateWork->unk_21F2;
+    if (trmUpdateWork->TerminalType == 0) {
+        s32 phase = trmUpdateWork->TerminalNo;
 
         if (phase < 0x14) {
             if (phase >= 0x12) {

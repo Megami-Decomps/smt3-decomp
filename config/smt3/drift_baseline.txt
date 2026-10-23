@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 115 types, 939 members, 506 adopted constants.
+# 115 types, 924 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -373,7 +373,6 @@ member datSkillBadWindow_t.unk_08
 member datUnitVisualPart_t.unk00
 member datUnitVisualPart_t.unk01
 member datUnitVisualPart_t.unk02
-member datUnitVisualPart_t.unk18
 member datUnitVisualPart_t.unk1A
 member datUnitVisual_t.unk182
 member datUnitVisual_t.unk30
@@ -414,7 +413,6 @@ member effBTLAimParams_t.unk03
 member effBTLBank_t.unk00
 member effBTLBank_t.unk98
 member effBTLCut_t.unk16
-member effBTLCut_t.unk18
 member effBTLLightWork_t.unk00
 member effBTLModelColorParam_t.unknown00
 member effBTLModelColorParam_t.unknown04
@@ -506,7 +504,6 @@ member effPCPCrack_t.unk48
 member effPCPCrack_t.unk6C
 member effPCPCrack_t.unk89
 member effPCPCrack_t.unk9A
-member effPCPCrack_t.unk9C
 member effPCPDANTE_Damage_Param_t.unk00
 member effPCPDANTE_Damage_tag.unk010
 member effPCPDANTE_Damage_tag.unk030
@@ -524,7 +521,6 @@ member effPCPHamaon_tag.unk08
 member effPCPMHanma01_tag.unk04
 member effPCPMHanma01_tag.unk08
 member effPCPMHanma01_tag.unk0C
-member effPCPSpiralBED_tag.unk9C
 member effPCPThunderSpherePolyLowParam_t.unknown00
 member effPCPThunderSpherePolyLowParam_t.unknown20
 member effPCP_PBCamera_tag.unk58
@@ -971,23 +967,16 @@ member rstWork_t.unk_0001
 member rstWork_t.unk_0002
 member rstWork_t.unk_0004
 member rstWork_t.unk_0005
-member rstWork_t.unk_129E
 member rstWork_t.unk_129F
 member rstWork_t.unk_12A5
-member rstWork_t.unk_16C
 member rstWork_t.unk_170
-member rstWork_t.unk_18
-member rstWork_t.unk_19
 member rstWork_t.unk_1A
-member rstWork_t.unk_1B
 member rstWork_t.unk_1C
-member rstWork_t.unk_22
 member rstWork_t.unk_22E4
 member rstWork_t.unk_22E5
 member rstWork_t.unk_2308
 member rstWork_t.unk_230C
 member rstWork_t.unk_2310
-member rstWork_t.unk_24
 member rstWork_t.unk_26
 member rstWork_t.unk_78
 member rstWork_t.unk_7C
@@ -1056,12 +1045,8 @@ member trmUpdateWork_t.unk_003E
 member trmUpdateWork_t.unk_11D6
 member trmUpdateWork_t.unk_11D8
 member trmUpdateWork_t.unk_11D9
-member trmUpdateWork_t.unk_21F1
-member trmUpdateWork_t.unk_21F2
-member trmUpdateWork_t.unk_21F4
 member trmUpdateWork_t.unk_2215
 member trmUpdateWork_t.unk_2216
-member trmUpdateWork_t.unk_2220
 member trmUpdateWork_t.unk_2224
 member trmUpdateWork_t.unk_2234
 

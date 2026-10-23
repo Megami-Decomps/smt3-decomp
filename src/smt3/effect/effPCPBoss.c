@@ -87,7 +87,7 @@ typedef struct effPCPCrack_t
     u32 MarkCount;
     u16 cellCount;
     u8 unk9A[2];
-    s32 unk9C;
+    s32 frame;
     u32 abgr;
     void *system;
     s32 part;
@@ -998,7 +998,7 @@ effPCPCrack_t *effPCPCrackCreate(effPCPCrackParam_t *pParam, void *pPB)
 
     *(effCrackHead_t *)work = pParam->head;
     work->abgr = 0x80808080;
-    work->unk9C = 0;
+    work->frame = 0;
     work->part = dds3EffectPartCreate(3, pPB);
     effPCPCrackInit(work);
     return work;
@@ -1021,7 +1021,7 @@ effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src)
 
     *(effCrackHead_t *)work = *(effCrackHead_t *)src;
     work->abgr = 0x80808080;
-    work->unk9C = 0;
+    work->frame = 0;
     work->part = dds3EffectPartCopy(src->part);
     effPCPCrackInit(work);
     return work;

@@ -59,19 +59,19 @@ typedef struct
     /* 0x0002 */ u8 unk_0002[2];
     /* 0x0004 */ s8 unk_0004;
     /* 0x0005 */ u8 unk_0005[0x13];
-    /* 0x0018 */ u8 unk_18;
-    /* 0x0019 */ u8 unk_19;
+    /* 0x0018 */ u8 AsignParamMax;
+    /* 0x0019 */ u8 AsignParam;
     /* 0x001A */ u8 unk_1A;
-    /* 0x001B */ u8 unk_1B;
+    /* 0x001B */ u8 LevelUpCnt;
     /* 0x001C */ u8 unk_1C[6];
-    /* 0x0022 */ u16 unk_22;
-    /* 0x0024 */ u16 unk_24;
+    /* 0x0022 */ u16 EventParam;
+    /* 0x0024 */ u16 GetHeartsSkill;
     /* 0x0026 */ u8 unk_26[0x52];
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ u8 unk_7C[0xF0];
-    /* 0x016C */ datUnitWork_t *unk_16C;
+    /* 0x016C */ datUnitWork_t *pCurrentStock;
     /* 0x0170 */ u8 unk_170[0x112E];
-    /* 0x129E */ s8 unk_129E;
+    /* 0x129E */ s8 Flag;
     /* 0x129F */ u8 unk_129F[6];
     /* 0x12A5 */ u8 unk_12A5[0x103F];
     /* 0x22E4 */ u8 unk_22E4;
@@ -137,7 +137,7 @@ void rstChkResult2Process(u8 *work);
 void rstOverWriteSkill(u16 *pSkill, u16 NewSkillID)
 {
     *pSkill = NewSkillID;
-    rstSetMaxHpMp(1, startPos->unk_16C);
+    rstSetMaxHpMp(1, startPos->pCurrentStock);
 }
 
 extern s32 rstAddSkillToSlot(u16 skill, cmbUnit_t *unit);
@@ -148,19 +148,19 @@ void rstAddSkill(void)
     s8 slot;
     s32 count;
 
-    if (startPos->unk_16C->id == 0) {
-        skill = startPos->unk_24;
+    if (startPos->pCurrentStock->id == 0) {
+        skill = startPos->GetHeartsSkill;
     } else {
-        skill = startPos->unk_22;
+        skill = startPos->EventParam;
     }
-    count = startPos->unk_1B;
-    startPos->unk_1B = count - 1;
-    rstAddSkillToSlot(skill, (cmbUnit_t *)startPos->unk_16C);
-    slot = rstFindSkillSlot(skill, (cmbUnit_t *)startPos->unk_16C);
+    count = startPos->LevelUpCnt;
+    startPos->LevelUpCnt = count - 1;
+    rstAddSkillToSlot(skill, (cmbUnit_t *)startPos->pCurrentStock);
+    slot = rstFindSkillSlot(skill, (cmbUnit_t *)startPos->pCurrentStock);
     if (slot >= 0) {
-        rstClearSkillSlot((cmbUnit_t *)startPos->unk_16C, (u8)slot);
+        rstClearSkillSlot((cmbUnit_t *)startPos->pCurrentStock, (u8)slot);
     }
-    rstSetMaxHpMp(1, startPos->unk_16C);
+    rstSetMaxHpMp(1, startPos->pCurrentStock);
 }
 
 /* NON_MATCHING: 1 of 24 words matches positionally, 23 of 24 with the register
@@ -168,7 +168,7 @@ void rstAddSkill(void)
 #ifdef NON_MATCHING
 s32 rstBuildDestroyList(void)
 {
-    datUnitWork_t *unit = startPos->unk_16C;
+    datUnitWork_t *unit = startPos->pCurrentStock;
     s32 i;
     s8 count = 0;
     u16 skill;
@@ -202,10 +202,10 @@ u16 rstSkillSlotIsFull(cmbUnitSkills_t *skills, rstSkillSlot_t *slot)
     s8 index = slot->unk_22 + slot->unk_24;
 
     if (index >= skills->skillCount) {
-        if (startPos->unk_16C->id == 0) {
-            return startPos->unk_24;
+        if (startPos->pCurrentStock->id == 0) {
+            return startPos->GetHeartsSkill;
         }
-        return startPos->unk_22;
+        return startPos->EventParam;
     }
     return skills->skill[index];
 }
@@ -232,7 +232,7 @@ s32 rstWaitConfirmButton(void)
 
 void rstResetAsignParam(void)
 {
-    startPos->unk_19 = startPos->unk_18;
+    startPos->AsignParam = startPos->AsignParamMax;
     rstChkResult2Process((u8 *)startPos);
 }
 
@@ -247,17 +247,17 @@ void func_00224230(datUnitWork_t *unit)
 
 void rstAddAsignParam(void)
 {
-    func_00224230(startPos->unk_16C);
+    func_00224230(startPos->pCurrentStock);
 }
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqAsignPlayerParam);
 
 void rstUpdateSeqPlayerLevelUpOnly(void)
 {
-    if (startPos->unk_129E == 0)
+    if (startPos->Flag == 0)
     {
         fclStartMessage(1);
-        startPos->unk_129E = 1;
+        startPos->Flag = 1;
     }
     if (fclChkMessage() == 0)
     {

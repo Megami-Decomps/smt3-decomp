@@ -263,7 +263,7 @@ effBTLCut_t *effBTLCutCreate(effBTL_t *hBTLEffect, u16 CutNum, void *pFormation,
         cut->colorRampEndFrame = list->colorRampEndFrame;
     }
     work = cut->parameterWorks;
-    cut->unk18 = stat;
+    cut->stat = stat;
     cut->formation = pFormation;
     count = cut->list->count;
     entry = cut->list->entries;
@@ -487,7 +487,7 @@ void effBTLCutDraw(effBTLCut_t *hBTLCutEffect) {
     entry = list->entries;
     color = effBTLCutGetAllPartColor(frame, hBTLCutEffect->colorRampEndFrame);
     count = list->count;
-    flags = hBTLCutEffect->unk18;
+    flags = hBTLCutEffect->stat;
     for (i = 0; i < count; i++, entry++) {
         if (entry->timing >= frame) {
             continue;
