@@ -18,11 +18,11 @@ typedef struct nbQuadVector_t {
 
 /* One object: StageData is its byte at +1 and nbStageParam its word at +8. */
 typedef struct nbStageState_t {
-    u8 unk00;
+    u8 stat;
     u8 data;
     u8 pad02[2];
-    s16 unk04;
-    u16 unk06;
+    s16 major;
+    u16 minor;
     u32 param;
 } nbStageState_t;
 
@@ -195,19 +195,19 @@ void nbAddStageCamera2(nbMainProcessData_t *data)
 
 void nbSetStageParam(s16 a, s16 b)
 {
-    nbStageState.unk04 = a;
-    nbStageState.unk06 = b;
+    nbStageState.major = a;
+    nbStageState.minor = b;
     nbStageState.data = 2;
-    nbStageState.unk00 = 0;
+    nbStageState.stat = 0;
     nbStageState.param = 0x80;
 }
 
 void func_0024C6F0(void)
 {
     nbStageState.param = 0;
-    nbStageState.unk04 = 0;
-    nbStageState.unk06 = 0;
-    nbStageState.unk00 = 0;
+    nbStageState.major = 0;
+    nbStageState.minor = 0;
+    nbStageState.stat = 0;
     nbStageState.data = 3;
 }
 
@@ -244,12 +244,12 @@ void StageLoad(void)
     memset(&q, 0, 0x10);
     q.w = 1.0f;
     data = nbGetMainProcessData();
-    state = nbStageState.unk00;
+    state = nbStageState.stat;
     switch (state) {
     case 0:
-        nbStageState.unk00 = 1;
+        nbStageState.stat = 1;
         nbFreeStage();
-        evtLoadArea(nbStageState.unk04, nbStageState.unk06);
+        evtLoadArea(nbStageState.major, nbStageState.minor);
         camera = dds3GetActiveCameraSceneBasic(dds3GetActiveScene());
         dds3CameraObjectBasicSetFovy(camera, 0.8726646f);
         dds3SetPosPoseSet(camera, &pos);
@@ -267,9 +267,9 @@ void StageLoad(void)
         break;
     case 1:
     case 2:
-        nbStageState.unk00 = 3;
-        data->StageMajor = nbStageState.unk04;
-        data->StageMinor = nbStageState.unk06;
+        nbStageState.stat = 3;
+        data->StageMajor = nbStageState.major;
+        data->StageMinor = nbStageState.minor;
         break;
     }
 }
@@ -285,8 +285,8 @@ void StageFree(void)
     nbMainProcessData_t *data = nbGetMainProcessData();
 
     evtFreeStage();
-    nbStageState.unk04 = 0;
-    nbStageState.unk06 = 0;
+    nbStageState.major = 0;
+    nbStageState.minor = 0;
     data->StageMajor = 0;
     data->StageMinor = 0;
     nbStageState.data = 0;
@@ -302,7 +302,7 @@ void *nbStageProcess1(dds3ProcessID_t *id)
     case 2:
         StageLoad();
         dds3FadeColorSet(0, 0, 0);
-        if (nbStageState.unk00 == 3) {
+        if (nbStageState.stat == 3) {
             nbStageState.data = 1;
             if ((data->stat & 0x800) != 0) {
                 break;
@@ -345,11 +345,11 @@ void nbInitStageProcess(nbMainProcessData_t *data)
     dds3ProcessID_t *id;
     dds3ProcessID_t *draw;
 
-    nbStageState.unk00 = 0;
+    nbStageState.stat = 0;
     nbStageState.data = 0;
     nbStageState.pad02[0] = 0;
-    nbStageState.unk04 = 0;
-    nbStageState.unk06 = 0;
+    nbStageState.major = 0;
+    nbStageState.minor = 0;
     id = dds3StartProcess(D_00543688, 0x3F9, 1, 1, nbStageProcess1, nbStageShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, id);
     data->StageProcessID = id;

@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 110 types, 913 members, 506 adopted constants.
+# 110 types, 908 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -462,7 +462,6 @@ member effPCPBossBUNSIN2Head_t.unk08
 member effPCPBossBUNSIN2Head_t.unk0C
 member effPCPBossBUNSINNode_t.unk00
 member effPCPBossBUNSIN_t.unk2C
-member effPCPBossBUNSIN_t.unk30
 member effPCPBossDengeki_t.unk00
 member effPCPBossHUnit_t.unk00
 member effPCPBossKAGU2Attack_t.unk00
@@ -716,7 +715,6 @@ member frTextIndex_t.unk00
 member instanceMes_tag.unk98
 member itfGsState_t.unk00
 member itfMesInstance_t.unk04
-member itfMesManager_t.unk8
 member itfMesResource_t.unk0
 member itfMesResource_t.unk1D
 member itfpanel_t.unk31
@@ -838,9 +836,6 @@ member nbPacEntry_t.unk_00
 member nbPacHandle_t.unk_00
 member nbPanelFlashData_t.unk_20
 member nbParty_t.unk04
-member nbStageState_t.unk00
-member nbStageState_t.unk04
-member nbStageState_t.unk06
 member nbStatWork_t.unk_02
 member nbTarSelProcessData_t.unk00
 member nbTextBox_t.unk_00

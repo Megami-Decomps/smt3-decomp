@@ -197,7 +197,7 @@ typedef struct effPCPBossBUNSIN_t
     effPCPBossBUNSINParam_t param;
     void *matrix;
     s32 unk2C;
-    s32 unk30;
+    s32 frame;
 } effPCPBossBUNSIN_t;
 
 typedef struct effPCPBossBUNSIN2Head_t
@@ -754,7 +754,7 @@ effPCPBossBUNSIN_t *effPCPBossBUNSINCreate(effPCPBossBUNSINParam_t *pParam)
     work->param = *pParam;
     work->unk2C = 0;
     node = (effPCPBossBUNSINNode_t *)work->param.pStartForm;
-    work->unk30 = 0;
+    work->frame = 0;
     work->pos_s[0] = node->pos[0];
     work->pos_s[1] = node->pos[1];
     work->pos_s[2] = node->pos[2];

@@ -146,7 +146,7 @@ struct itfMesLinkControl_t {
 struct itfMesManager_t {
     u32 activeWindowCount;
     sdfTexHandle_t *windowTexture;
-    u32 unk8;
+    u32 ctr;
     u16 flags;
     u16 unkE;
     itfMesLinkControl_t pool;
@@ -1410,7 +1410,7 @@ void itfMesMngInitializeManager(void) {
     itfMesLink_t *poolNode;
 
     itfMesMngManager.activeWindowCount = 0;
-    itfMesMngManager.unk8 = 0;
+    itfMesMngManager.ctr = 0;
     itfMesMngManager.flags = 0;
     itfMesMngManager.windowTexture = itfMiscLoadTexture("/itf/MESWIN.TMX");
     itfMiscLinkInitialize(&itfMesMngManager.pool, itfMesMngManager.nodes, ITF_MES_WINDOW_CAPACITY, ITF_MES_POOL_NODE_BYTES);
@@ -2574,7 +2574,7 @@ s32 DrawMsgMng_Process(dds3ProcessID_t *id) {
         DrawMesFlow(node->state);
         node = next;
     }
-    itfMesMngManager.unk8++;
+    itfMesMngManager.ctr++;
     return 0;
 }
 #else
