@@ -624,7 +624,7 @@ int func_000078D4(u8 *, char, int, u8, u8, u8, u8, u16, u32);
 int func_00007F54(u8 *, char, unsigned int, u8, u8, u8, u8, u16, u32);
 int func_00008350(u8 *, char, unsigned int, u8, u8, char, char, s16, int);
 sceHSynVoice_t *hsynVoiceMaskClearOne(u8 allocHint);
-int hsynModulationApply(u16 a, u8 b, int on, int done);
+sceHSynVoice_t *hsynModulationApply(u16 vnum0, u8 coreMask, int on, int done);
 int hsynModulationStep(u16 a, u8 b);
 sceHSynVoice_t *hsynPanApply(s16, char);
 int hsynLfoStep(int, u8, u8);

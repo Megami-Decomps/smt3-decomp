@@ -3289,7 +3289,95 @@ sceHSynVoice_t *hsynVoiceMaskClearOne(u8 allocHint)
     return hsynVoiceMaskClear(allocHint);
 }
 /* ENDF hsynVoiceMaskClearOne */
-INCLUDE_ASM("MODHSYN", hsynModulationApply);
+/* FUNC hsynModulationApply */
+sceHSynVoice_t *hsynModulationApply(u16 vnum, u8 coreMask, int on, int done)
+{
+    sceHSynVoice_t *best;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynChanSet_t *set;
+    u8 sel;
+    u16 cur;
+    u16 best300;
+    u16 unk12;
+    u16 f;
+    int i;
+    int n;
+
+    sel = coreMask;
+    i = 1;
+    best = NULL;
+    best300 = 0x300;
+    unk12 = 0xFFFF;
+    cur = vnum;
+    if ((coreMask & 0x30) == 0) {
+        sel = 0x30;
+    }
+    do {
+        if ((sel & hsynCoreBit[i]) != 0) {
+            end = (sceHSynVoice_t *)hsynCoreList[i];
+            for (v = end->prev; v != end; v = v->prev) {
+                f = v->flags & 0x300;
+                if (on != 0) {
+                    if (done != 0) {
+                        if (v->unk57 != 1) {
+                            continue;
+                        }
+                    } else if (v->unk57 == 1) {
+                        continue;
+                    }
+                }
+                if (f < best300) {
+                    if (vnum >= v->vnum) {
+                        cur = v->vnum;
+                        best300 = f;
+                        unk12 = v->unk12;
+                        best = v;
+                    }
+                } else if (f == best300) {
+                    if (v->vnum == cur) {
+                        if (v->unk12 < unk12) {
+                            unk12 = v->unk12;
+                            best = v;
+                        }
+                    } else if (v->vnum < cur) {
+                        cur = v->vnum;
+                        unk12 = v->unk12;
+                        best = v;
+                    }
+                }
+            }
+        }
+        i--;
+    } while (i != -1);
+    if (best != NULL) {
+        hsynKeyOffPending[best->core] |= 1 << best->index;
+        set = best->slotp;
+        n = set->nActive;
+        if (n != 0) {
+            set->nActive = n - 1;
+        }
+        if (best->unk57 == 0) {
+            n = hsynActiveCount;
+            if (n != 0) {
+                hsynActiveCount = n - 1;
+            }
+        } else if (best->unk57 == 1) {
+            n = hsynRelCount;
+            if (n != 0) {
+                hsynRelCount = n - 1;
+            }
+        }
+        hsynVoiceSlotSet(best);
+        hsynVoiceMaskGet(best);
+        best->flags = 0;
+        best->tag = 0xFF;
+        best->unk57 = 0xFF;
+        best->unk58 = 0xFF;
+    }
+    return best;
+}
+/* ENDF hsynModulationApply */
 /* FUNC hsynModulationStep */
 int hsynModulationStep(u16 a, u8 b)
 {
@@ -3305,7 +3393,7 @@ int hsynModulationStep(u16 a, u8 b)
     } else if (hsynRelCount >= limit) {
         done = 1;
     }
-    return hsynModulationApply(a, b, on, done);
+    return (int)hsynModulationApply(a, b, on, done);
 }
 /* ENDF hsynModulationStep */
 /* FUNC hsynPanApply */
