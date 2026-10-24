@@ -1817,20 +1817,6 @@ struct sdfMotionCtrlr_t {
     u8 pad33;
 };
 
-struct SdfDmaTagHeader;
-
-/* DMA tag prefix followed by the two VIF words used by indexed-model writers.
- * The control byte stays whole, and address is a hardware word rather than a
- * CPU pointer. */
-typedef struct SdfDmaTagHeader {
-    u16 quadwordCount;
-    u8 reservedByte;
-    u8 control;
-    u32 address;
-    u32 firstVifCode;
-    u32 secondVifCode;
-} QWORD_ALIGNED SdfDmaTagHeader;
-
 /* Command-list node: allocation owns the node and trailing command data.
  * A null descriptor identifies a separately chip-allocated node. */
 struct sdfModelPacketHeader_tag {
@@ -1883,8 +1869,8 @@ struct sdfModelRootNode_t {
     f32 matrix[4][4];
     f32 rotationQuaternion[4];
     f32 scaleVector[4];
-    struct SdfDmaTagHeader *lighting; /* Borrowed first DMA reference prefix. */
-    struct SdfDmaTagHeader *secondaryLighting; /* Borrowed second DMA reference prefix. */
+    sdfDmaTag_t *lighting; /* Borrowed first DMA reference prefix. */
+    sdfDmaTag_t *secondaryLighting; /* Borrowed second DMA reference prefix. */
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
     struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
