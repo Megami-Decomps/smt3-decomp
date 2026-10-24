@@ -2164,7 +2164,46 @@ int hsynCoreStateSet(sceHSynVoice_t *v)
     return 0;
 }
 /* ENDF hsynCoreStateSet */
+#ifdef NON_MATCHING
+/* One nop long: gcc hoists the lfoB phase load above the volume
+ * product's mflo, where retail schedules it after the shift. */
+/* FUNC func_0000A810 */
+int func_0000A810(sceHSynVoice_t *v, int rate, u8 vol)
+{
+    sceHSynChannel_t *chan;
+    sceHSynSlot_t *slot;
+    int period;
+    u32 prod;
+    int level;
+    int target;
+    int step;
+
+    period = (rate << 8) / hsynTickScale;
+    chan = v->chan;
+    slot = chan->slot;
+    period--;
+    if (period <= 0) {
+        period = 1;
+    }
+    prod = vol * hsynVolumeScale(vol, v->unk4A, slot->unk10, slot->unk0C);
+    prod = prod * (chan->vol * chan->pan);
+    level = prod >> 14;
+    level = (u16)level;
+    target = v->unk18 + *(s16 *)&v->lfoB.unk02;
+    target = level - target;
+    step = (target << 16) / period;
+    v->lfoB.unk0C = period;
+    v->lfoB.unk04 = v->lfoB.unk02;
+    v->lfoB.unk10 = 1;
+    v->lfoB.unk00 = 1;
+    v->lfoB.unk06 = target;
+    v->lfoB.unk08 = step;
+    return 0;
+}
+/* ENDF func_0000A810 */
+#else
 INCLUDE_ASM("MODHSYN", func_0000A810);
+#endif
 INCLUDE_ASM("MODHSYN", D_0000A92C);
 /* FUNC func_0000A930 */
 void func_0000A930(u32 *out, int wrap, s8 pan)
