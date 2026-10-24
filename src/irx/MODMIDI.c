@@ -9,7 +9,29 @@
 
 INCLUDE_ASM("MODMIDI", modmidi_e26);
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Init);
-INCLUDE_ASM("MODMIDI", midiParseHeader);
+/* FUNC midiParseHeader */
+/* Not a parser: a 4+4 character chunk tag comparator, with both tags passed
+ * as words and both strings read backwards. */
+int midiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
+{
+    char *p0;
+    char *p1;
+    u32 i;
+
+    p0 = (char *)&tag0;
+    p1 = (char *)&tag1;
+    if (midiVerbose != 0) {
+        stdio_printf(aCCCCCCCC, p0[3], p0[2], p0[1], p0[0], p1[3], p1[2],
+                     p1[1], p1[0]);
+    }
+    for (i = 0; i < 4; i++) {
+        if (p0[i] != magic[3 - i] || p1[i] != name[3 - i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+/* ENDF midiParseHeader */
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Load);
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Unload);
 INCLUDE_ASM("MODMIDI", D_000006A4);

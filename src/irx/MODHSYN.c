@@ -24,7 +24,25 @@ INCLUDE_ASM("MODHSYN", D_00000044);
 INCLUDE_ASM("MODHSYN", func_00000050);
 INCLUDE_ASM("MODHSYN", modhsyn_e7);
 INCLUDE_ASM("MODHSYN", D_000002D4);
-INCLUDE_ASM("MODHSYN", hsynLoadBank);
+/* FUNC hsynLoadBank */
+/* Not a loader: a 4+4 character chunk tag comparator, with both tags passed
+ * as words and both strings read backwards. */
+int hsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name)
+{
+    char *p0;
+    char *p1;
+    u32 i;
+
+    p0 = (char *)&tag0;
+    p1 = (char *)&tag1;
+    for (i = 0; i < 4; i++) {
+        if (p0[i] != magic[3 - i] || p1[i] != name[3 - i]) {
+            return 0;
+        }
+    }
+    return 1;
+}
+/* ENDF hsynLoadBank */
 INCLUDE_ASM("MODHSYN", modhsyn_sceHSyn_Load);
 INCLUDE_ASM("MODHSYN", modhsyn_e28);
 INCLUDE_ASM("MODHSYN", D_00000714);
@@ -113,7 +131,7 @@ int modhsyn_e26(u32 *mask)
 /* Three registers apart: retail keeps the unit index in the dead slotNo
  * register, gcc reuses the one holding slotNo * 2. */
 /* FUNC hsynParamSlotResolve */
-int hsynParamSlotResolve(sceHSynWork_t *work, int slotNo, sceHSynSlot_t **pslot, u16 **pval)
+int hsynParamSlotResolve(sceHSynWork_t *work, int slotNo, sceHSynSlot_t **pslot, sceHSynChanSet_t **pset)
 {
     sceHSynTbl_t *tbl;
     sceHSynSlot_t *slot;
@@ -127,7 +145,7 @@ int hsynParamSlotResolve(sceHSynWork_t *work, int slotNo, sceHSynSlot_t **pslot,
         if (unit < tbl->nEntryWord) {
             slot = (sceHSynSlot_t *)((void **)tbl->entry)[unit * 2 + 1];
             *pslot = slot;
-            *pval = &slot->unk14;
+            *pset = (sceHSynChanSet_t *)&slot->unk14;
             return 1;
         }
     }
@@ -141,12 +159,12 @@ INCLUDE_ASM("MODHSYN", hsynParamSlotResolve);
 int modhsyn_e10(sceHSynWork_t *work, int slotNo, s16 val)
 {
     sceHSynSlot_t *slot;
-    u16 *p;
+    sceHSynChanSet_t *set;
 
-    if (hsynParamSlotResolve(work, slotNo, &slot, &p) == 0) {
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
         return -1;
     }
-    *p = val;
+    set->unk00 = val;
     return 0;
 }
 /* ENDF modhsyn_e10 */
@@ -154,17 +172,62 @@ int modhsyn_e10(sceHSynWork_t *work, int slotNo, s16 val)
 int modhsyn_e11(sceHSynWork_t *work, int slotNo)
 {
     sceHSynSlot_t *slot;
-    u16 *p;
+    sceHSynChanSet_t *set;
 
-    if (hsynParamSlotResolve(work, slotNo, &slot, &p) == 0) {
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
         return 0;
     }
-    return *p;
+    return set->unk00;
 }
 /* ENDF modhsyn_e11 */
-INCLUDE_ASM("MODHSYN", modhsyn_e12);
-INCLUDE_ASM("MODHSYN", modhsyn_e13);
-INCLUDE_ASM("MODHSYN", modhsyn_e14);
+/* FUNC modhsyn_e12 */
+int modhsyn_e12(sceHSynWork_t *work, int slotNo)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    int i;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    for (i = 0; i < 16; i++) {
+        hsynVoiceAllocByChannel(&set->chan[i]);
+    }
+    return 0;
+}
+/* ENDF modhsyn_e12 */
+/* FUNC modhsyn_e13 */
+int modhsyn_e13(sceHSynWork_t *work, int slotNo)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    int i;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    for (i = 0; i < 16; i++) {
+        hsynVoiceStop(&set->chan[i]);
+    }
+    return 0;
+}
+/* ENDF modhsyn_e13 */
+/* FUNC modhsyn_e14 */
+int modhsyn_e14(sceHSynWork_t *work, int slotNo)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    int i;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    for (i = 0; i < 16; i++) {
+        hsynVoiceApplyAll(&set->chan[i]);
+    }
+    return 0;
+}
+/* ENDF modhsyn_e14 */
 INCLUDE_ASM("MODHSYN", modhsyn_e9);
 /* FUNC modhsyn_e15 */
 int modhsyn_e15(sceHSynStat_t *stat)
@@ -229,8 +292,38 @@ int modhsyn_e19(u8 val)
     return 0;
 }
 /* ENDF modhsyn_e19 */
-INCLUDE_ASM("MODHSYN", modhsyn_e20);
-INCLUDE_ASM("MODHSYN", modhsyn_e21);
+/* FUNC modhsyn_e20 */
+int modhsyn_e20(sceHSynWork_t *work, int slotNo)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    if ((slot->flags & 1) == 0) {
+        return -1;
+    }
+    hsynVoiceAllocExport20(&set->chan[0]);
+    return 0;
+}
+/* ENDF modhsyn_e20 */
+/* FUNC modhsyn_e21 */
+int modhsyn_e21(sceHSynWork_t *work, int slotNo)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    if ((slot->flags & 1) == 0) {
+        return -1;
+    }
+    hsynVoiceReleaseExport21(&set->chan[0]);
+    return 0;
+}
+/* ENDF modhsyn_e21 */
 INCLUDE_ASM("MODHSYN", modhsyn_e22);
 INCLUDE_ASM("MODHSYN", modhsyn_e25);
 INCLUDE_ASM("MODHSYN", modhsyn_e23);
@@ -572,7 +665,20 @@ int hsynSeqEmit(sceHSynEnv_t *env, int sel)
 }
 /* ENDF hsynSeqEmit */
 INCLUDE_ASM("MODHSYN", hsynEffectDispatch);
-INCLUDE_ASM("MODHSYN", hsynSeqStateReset);
+/* FUNC hsynSeqStateReset */
+void hsynSeqStateReset(sceHSynLfo_t *lfo)
+{
+    if (lfo->unk02 != 0) {
+        lfo->unk00 = 1;
+        lfo->unk04 = lfo->unk02;
+    } else if (lfo->unk0C != 0) {
+        lfo->unk00 = 2;
+        lfo->unk08 = 0;
+    } else {
+        lfo->unk00 = 3;
+    }
+}
+/* ENDF hsynSeqStateReset */
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretA);
 INCLUDE_ASM("MODHSYN", hsynSeqStart);
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretB);
