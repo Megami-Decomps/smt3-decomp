@@ -17,6 +17,7 @@ quickstart.
 - [IDB corrections](idb-corrections.md): names and layouts in the IDA database
   that the retail code proves wrong, and the proof for each.
 - [Building the IRX modules](irx-modules.md): how the three IOP modules in
+- [What iop-gcc 2.8.1 wants](irx-idioms.md): the source shapes that reproduce the IRX modules' instructions
   `USERIRX/` build byte-identical from source, the container format, and where
   to put C.
 - [The SDF IRX modules](sdf-irx-modules.md): the three IOP modules in

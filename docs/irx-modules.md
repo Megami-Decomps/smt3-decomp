@@ -211,6 +211,10 @@ front of `.rodata` and move every string after it. The rest are off by a
 handful of instructions, usually the order of two basic blocks or which
 register a value lands in.
 
+What the compiler wants, shape by shape, is in
+[What iop-gcc 2.8.1 wants](irx-idioms.md). Read it before grinding a function by
+hand: the remaining difference is usually one of the thirty-odd entries there.
+
 `tools/irx_diff.py` is the loop: build, then
 
 ```
