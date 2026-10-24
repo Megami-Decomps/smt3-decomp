@@ -1857,7 +1857,83 @@ u16 hsynBuildAdsr2(int note, sceSmgSmplEnt_t *tone)
     return v;
 }
 /* ENDF hsynBuildAdsr2 */
-INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathA);
+/* FUNC hsynVoiceUpdatePathA */
+void hsynVoiceUpdatePathA(sceHSynVoice_t *v)
+{
+    sceSmgProgEnt_t *prog;
+    sceSmgProgKey_t *key;
+    sceSmgSmplEnt_t *tone;
+    sceHSynChannel_t *chan;
+    sceHSynSlot_t *slot;
+    int base;
+    int bias;
+    int t;
+    int t2;
+    int bend;
+    s8 pan;
+    u8 e;
+    s16 pitch;
+
+    chan = v->chan;
+    prog = v->prog;
+    tone = v->tone;
+    key = v->key;
+    slot = chan->slot;
+    hsynSeqInterpretA(&v->envA, (int)prog, (u8 *)slot->unk08, slot->unk04,
+                      tone->unk28 & 7, tone->unk20, tone->unk22,
+                      hsynTickScale, 0);
+    bias = ((v->ch - key->unk0B) * key->unk0A) / 12;
+    base = hsynSdSetParamVolume(v, (s8)tone->unk05, tone->flags, tone->unk07);
+    v->unk24 = hsynEnvRateLookup(prog->unk18, bias, base);
+    v->unk26 = hsynEnvRateLookup(prog->unk1A, bias, base);
+    hsynSeqInterpretA(&v->envB, (int)prog, (u8 *)slot->unk08, slot->unk04,
+                      tone->unk28 & 0x70, tone->unk24, tone->unk26,
+                      hsynTickScale, 1);
+    bias = ((v->ch - key->unk0D) * key->unk0C) / 12;
+    base = hsynSdSetParamVolume(v, (s8)tone->unk08, tone->unk09, tone->unk0A);
+    v->unk51 = hsynEnvLevelLookup(prog->unk20, bias, base);
+    v->unk52 = hsynEnvLevelLookup(prog->unk21, bias, base);
+    hsynSdSetParamVolumeLeft(v, chan->unk2D);
+    hsynSdSetParamVolumeRight(v, chan->unk2E);
+    base = hsynVolumeScale(v->vel, v->unk4A, slot->unk10, slot->unk0C);
+    t = (u8)prog->unk06 * key->unk10;
+    t2 = t * tone->unk10;
+    bend = (t2 * base) / 16384;
+    v->unk16 = (u32)(bend * hsynSdSetParamBend(v)) >> 16;
+    bias = (v->ch - key->unk0F) * key->unk0E;
+    bias = bias + (v->ch - prog->unk0B) * prog->unk0A;
+    v->unk4E = prog->unk0C & 1;
+    hsynSdSetParamAdsr(v, bias / 12);
+    if ((v->vol & 0x80) != 0) {
+        pan = (u8)chan->unk31;
+    } else {
+        pan = (u8)v->vol - 0x40;
+        if (pan < -0x3F) {
+            pan = -0x3F;
+        }
+    }
+    func_00004AE4(v, pan);
+    if (v->unk55 != 0xFF) {
+        e = v->unk55;
+    } else {
+        e = chan->pan;
+    }
+    v->unk54 = e;
+    hsynSdSetParamEnvelope(v);
+    v->unk1C = 0xFFFF;
+    v->unk1A = 0xFFFF;
+    if (v->vag != NULL) {
+        v->unk30 = 0x7FFFFFFF;
+        v->unk3C = ((u32)*(u16 *)&v->vag->unk04 << 16) / 48000;
+        if ((v->unk28 & 0x8000) != 0) {
+            pitch = chan->unk26;
+        } else {
+            pitch = (u16)v->unk28 - 0x2000;
+        }
+        hsynSdSetParamPitch(v, pitch);
+    }
+}
+/* ENDF hsynVoiceUpdatePathA */
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathA);
 /* FUNC hsynVoicePitchCommit */
 void hsynVoicePitchCommit(sceHSynVoice_t *v)
