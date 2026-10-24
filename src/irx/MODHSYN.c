@@ -1747,8 +1747,147 @@ sceHSynVoice_t *hsynVoiceMaskClear(u8 allocHint)
     return v;
 }
 /* ENDF hsynVoiceMaskClear */
-INCLUDE_ASM("MODHSYN", hsynVoiceEnvelopeAdvance);
-INCLUDE_ASM("MODHSYN", hsynVoiceVolumeAdvance);
+/* FUNC hsynVoiceEnvelopeAdvance */
+sceHSynVoice_t *hsynVoiceEnvelopeAdvance(u16 vnum, s8 coreMask)
+{
+    sceHSynVoice_t *best;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynChanSet_t *set;
+    u8 sel;
+    u16 best300;
+    u16 unk12;
+    u16 f;
+    u32 limit;
+    int i;
+    int n;
+
+    sel = coreMask;
+    i = 1;
+    best = NULL;
+    best300 = 0x300;
+    unk12 = 0xFFFF;
+    if ((coreMask & 0x30) == 0) {
+        sel = 0x30;
+    }
+    limit = vnum;
+    do {
+        if ((sel & hsynCoreBit[i]) != 0) {
+            end = (sceHSynVoice_t *)hsynCoreList[i];
+            for (v = end->prev; v != end; v = v->prev) {
+                f = v->flags & 0x300;
+                if (v->unk57 != 0) {
+                    continue;
+                }
+                if (f < best300) {
+                    if (limit >= v->vnum) {
+                        vnum = v->vnum;
+                        best300 = f;
+                        unk12 = v->unk12;
+                        best = v;
+                    }
+                } else if (f == best300) {
+                    if (v->vnum == vnum) {
+                        if (v->unk12 < unk12) {
+                            unk12 = v->unk12;
+                            best = v;
+                        }
+                    } else if (v->vnum < vnum) {
+                        vnum = v->vnum;
+                        unk12 = v->unk12;
+                        best = v;
+                    }
+                }
+            }
+        }
+        i--;
+    } while (i != -1);
+    if (best != NULL) {
+        hsynKeyOffPending[best->core] |= 1 << best->index;
+        set = best->slotp;
+        n = set->nActive;
+        if (n != 0) {
+            set->nActive = n - 1;
+        }
+        if (best->unk57 == 0) {
+            n = hsynActiveCount;
+            if (n != 0) {
+                hsynActiveCount = n - 1;
+            }
+        } else if (best->unk57 == 1) {
+            n = hsynRelCount;
+            if (n != 0) {
+                hsynRelCount = n - 1;
+            }
+        }
+        hsynVoiceSlotSet(best);
+        hsynVoiceMaskGet(best);
+        best->flags = 0;
+        best->tag = 0xFF;
+        best->unk57 = 0xFF;
+        best->unk58 = 0xFF;
+    }
+    return best;
+}
+/* ENDF hsynVoiceEnvelopeAdvance */
+/* FUNC hsynVoiceVolumeAdvance */
+sceHSynVoice_t *hsynVoiceVolumeAdvance(s16 vnum0, s8 coreMask)
+{
+    sceHSynVoice_t *best;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynChanSet_t *set;
+    u8 sel;
+    u16 vnum;
+    int i;
+    int n;
+
+    sel = coreMask;
+    i = 1;
+    best = NULL;
+    vnum = vnum0 + 1;
+    if ((coreMask & 0x30) == 0) {
+        sel = 0x30;
+    }
+    do {
+        if ((sel & hsynCoreBit[i]) != 0) {
+            end = (sceHSynVoice_t *)hsynActiveList[i];
+            for (v = end->prev; v != end; v = v->prev) {
+                if (v->unk57 == 0 && v->vnum < vnum) {
+                    vnum = v->vnum;
+                    best = v;
+                }
+            }
+        }
+        i--;
+    } while (i != -1);
+    if (best != NULL) {
+        set = best->slotp;
+        n = set->nActive;
+        if (n != 0) {
+            set->nActive = n - 1;
+        }
+        if (best->unk57 == 0) {
+            n = hsynActiveCount;
+            if (n != 0) {
+                hsynActiveCount = n - 1;
+            }
+        } else if (best->unk57 == 1) {
+            n = hsynRelCount;
+            if (n != 0) {
+                hsynRelCount = n - 1;
+            }
+        }
+        hsynVoiceSlotSet(best);
+        hsynVoiceMaskGet(best);
+        best->flags = 0;
+        best->tag = 0xFF;
+        best->unk57 = 0xFF;
+        best->unk58 = 0xFF;
+    }
+    return best;
+}
+/* ENDF hsynVoiceVolumeAdvance */
 INCLUDE_ASM("MODHSYN", hsynVoiceRetrigger);
 /* FUNC hsynLfoApply */
 sceHSynVoice_t *hsynLfoApply(sceHSynVoice_t *v, int keyOff)
