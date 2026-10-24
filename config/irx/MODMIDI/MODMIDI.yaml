@@ -11,8 +11,7 @@ idb: DDS3_IRX/MODMIDI
 module:
   name: Midi_Sequencer_Module
   version: 0x0202
-  # Provisional: the entry is .text 0 and the IDB has not named it yet.
-  entry: func_00000000
+  entry: modmidi_e26
 
 paths:
   target: orig/irx/MODMIDI.IRX

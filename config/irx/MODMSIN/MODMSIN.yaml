@@ -10,8 +10,7 @@ idb: DDS3_IRX/MODMSIN
 module:
   name: Midi_Message_Input_Module
   version: 0x0101
-  # Provisional: the entry is .text 0 and the IDB has not named it yet.
-  entry: func_00000000
+  entry: modmsin_e10
 
 paths:
   target: orig/irx/MODMSIN.IRX

@@ -10,8 +10,7 @@ idb: DDS3_IRX/MODHSYN
 module:
   name: SPU2_Synthesizer_Module
   version: 0x0105
-  # Provisional: the entry is .text 0 and the IDB has not named it yet.
-  entry: func_00000000
+  entry: modhsyn_e30
 
 paths:
   target: orig/irx/MODHSYN.IRX
