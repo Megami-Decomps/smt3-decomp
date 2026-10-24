@@ -12,7 +12,7 @@ INCLUDE_ASM("MODMSIN", D_00000044);
 INCLUDE_ASM("MODMSIN", modmsin_sceMSIn_Init);
 INCLUDE_ASM("MODMSIN", modmsin_e5);
 INCLUDE_ASM("MODMSIN", modmsin_e6);
-INCLUDE_ASM("MODMSIN", MsInBufferAppend);
+INCLUDE_ASM("MODMSIN", msinBufferAppend);
 INCLUDE_ASM("MODMSIN", modmsin_e7);
 INCLUDE_ASM("MODMSIN", modmsin_e8);
 INCLUDE_ASM("MODMSIN", modmsin_e9);
