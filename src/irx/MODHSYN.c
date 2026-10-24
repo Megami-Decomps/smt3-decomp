@@ -762,8 +762,89 @@ int modhsyn_e21(sceHSynWork_t *work, int slotNo)
     return 0;
 }
 /* ENDF modhsyn_e21 */
-INCLUDE_ASM("MODHSYN", modhsyn_e22);
-INCLUDE_ASM("MODHSYN", modhsyn_e25);
+/* FUNC modhsyn_e22 */
+int modhsyn_e22(sceHSynWork_t *work, int slotNo, u32 tag, u8 *out, s8 max)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int n;
+    int i;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    if ((slot->flags & 1) == 0) {
+        return -1;
+    }
+    n = 0;
+    chan = set->chan;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = v->chPrev) {
+            if (v->tag == tag) {
+                out[n] = v->index + v->core * 24;
+                n++;
+                if (n >= max) {
+                    return n;
+                }
+            }
+        }
+    }
+    return n;
+}
+/* ENDF modhsyn_e22 */
+/* FUNC modhsyn_e25 */
+int modhsyn_e25(sceHSynWork_t *work, int slotNo, u32 *out, int max)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int n;
+    int i;
+    int j;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    if ((slot->flags & 1) == 0) {
+        return -1;
+    }
+    n = 0;
+    chan = set->chan;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = v->chPrev) {
+            for (j = 0; j < n; j++) {
+                if (out[j] == v->tag) {
+                    break;
+                }
+            }
+            if (j < n) {
+                continue;
+            }
+            out[n] = v->tag;
+            n++;
+            if (n >= max) {
+                return n;
+            }
+        }
+    }
+    return n;
+}
+/* ENDF modhsyn_e25 */
 INCLUDE_ASM("MODHSYN", modhsyn_e23);
 INCLUDE_ASM("MODHSYN", modhsyn_e24);
 INCLUDE_ASM("MODHSYN", hsynInitCores);

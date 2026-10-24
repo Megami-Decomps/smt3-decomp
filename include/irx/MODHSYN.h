@@ -551,8 +551,8 @@ int hsynCmdVoiceAlloc(int kind, sceHSynSlot_t *slot, int a3, u8 a4, u8 note, u8 
 int modhsyn_e19(u8);
 int modhsyn_e20(sceHSynWork_t *work, int slotNo);
 int modhsyn_e21(sceHSynWork_t *work, int slotNo);
-int modhsyn_e22(int, int, int, int, char);
-int modhsyn_e25(int, int, u32 *, int);
+int modhsyn_e22(sceHSynWork_t *work, int slotNo, u32 tag, u8 *out, s8 max);
+int modhsyn_e25(sceHSynWork_t *work, int slotNo, u32 *out, int max);
 int modhsyn_e23(int, int, u8, int, char);
 int modhsyn_e24(int, int, u8, int, char);
 void hsynInitCores();
