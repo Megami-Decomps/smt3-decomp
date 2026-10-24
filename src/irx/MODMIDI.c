@@ -536,7 +536,56 @@ int midiSelectTrack(sceMidiSlot_t *slot)
     return 1;
 }
 /* ENDF midiSelectTrack */
-INCLUDE_ASM("MODMIDI", modmidi_sceMidi_SelectMidi);
+/* FUNC modmidi_sceMidi_SelectMidi */
+int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    sceMidiMidiChunk_t *midi;
+    sceMidiSmfHdr_t *hdr;
+    int i;
+    u32 div;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    midi = trk->midi;
+    if (slot->flags & 2) {
+        modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
+    }
+    slot->flags &= ~6;
+    slot->midiNo = -1;
+    if ((slot->flags & 1) == 0) {
+        return -1;
+    }
+    if (midi == NULL) {
+        return -1;
+    }
+    if (midi->nTrack < midiNo) {
+        return -1;
+    }
+    hdr = (sceMidiSmfHdr_t *)((u8 *)midi + midi->trackOfs[midiNo]);
+    trk->smfHdr = (u8 *)&hdr->format;
+    if (hdr->format != 1 || *(u16 *)(trk->smfHdr + 2) == 0 ||
+        hdr->size < 0xC) {
+        trk->smfHdr = NULL;
+    }
+    for (i = 0; i < 8; i++) {
+        trk->loop[i].id = 0xFF;
+        trk->loop[i].count = 0xFF;
+    }
+    trk->smfData = (u8 *)hdr + hdr->size;
+    div = hdr->division;
+    trk->tempo = 500000;
+    trk->speed = 0x100;
+    trk->division = div;
+    if (midiSelectTrack(slot) == 0) {
+        return -1;
+    }
+    slot->midiNo = midiNo;
+    return 0;
+}
+/* ENDF modmidi_sceMidi_SelectMidi */
 /* FUNC modmidi_e16 */
 int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick)
 {
@@ -845,7 +894,48 @@ void midiSongSelect(sceMidiSlot_t *slot, u8 **songCur)
     }
 }
 /* ENDF midiSongSelect */
-INCLUDE_ASM("MODMIDI", modmidi_sceMidi_SelectSong);
+/* FUNC modmidi_sceMidi_SelectSong */
+int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    sceMidiSongChunk_t *song;
+    sceMidiSongChunk_t *cur;
+    u32 ofs;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    song = trk->song;
+    if (song == NULL) {
+        return -1;
+    }
+    if (song->nSong < songNo) {
+        return -1;
+    }
+    if (song->songOfs[songNo] == -1) {
+        return -1;
+    }
+    if (slot->flags & 0x100) {
+        modmidi_e8(work, slotNo, 0);
+    }
+    cur = trk->song;
+    ofs = cur->songOfs[songNo];
+    trk->fadeTicks = 0;
+    trk->fadeLeft = 0;
+    trk->songData = (u8 *)cur + ofs;
+    trk->curMidi = 0x80;
+    trk->songVol = 0x80;
+    trk->unk12F = 0xFF;
+    trk->songFlags = 0;
+    trk->loopCount = 0x40;
+    trk->unk133 = 0x78;
+    trk->songSpeed = 0x100;
+    slot->songNo = songNo;
+    midiSongSelect(slot, &trk->songData);
+    return 0;
+}
+/* ENDF modmidi_sceMidi_SelectSong */
 /* FUNC midiSongSetTempo */
 void midiSongSetTempo(sceMidiTrack_t *trk, int val)
 {
