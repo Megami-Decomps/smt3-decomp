@@ -334,36 +334,287 @@ INCLUDE_ASM("MODHSYN", D_00009AC4);
 INCLUDE_ASM("MODHSYN", hsynSeqEmitTail);
 INCLUDE_ASM("MODHSYN", D_00009AFC);
 INCLUDE_ASM("MODHSYN", modhsyn_e16);
-INCLUDE_ASM("MODHSYN", hsynSdLockAcquire);
-INCLUDE_ASM("MODHSYN", hsynSdLockRelease);
-/* FUNC hsynSdLockWait */
-int hsynSdLockWait(int *p, int v)
+/* FUNC hsynSdLockAcquire */
+/* The work area is a ring of 28-byte call records; +0 holds the opcode with
+ * bit 31 set while the call is outstanding, +4 its result. */
+sceHSynSdLogEnt_t *hsynSdLockAcquire()
 {
-    if (p != NULL) {
-        p[1] = v;
-        p[0] &= 0x7FFFFFFF;
+    sceHSynSdLog_t *w;
+    u32 i;
+    sceHSynSdLogEnt_t *e;
+
+    w = hsynSdWorkArea;
+    if (w == NULL) {
+        return NULL;
+    }
+    i = w->index;
+    e = &w->entry[i];
+    w->index = i + 1;
+    if (i + 1 >= w->size) {
+        w->index = 0;
+    }
+    return e;
+}
+/* ENDF hsynSdLockAcquire */
+/* FUNC hsynSdLockRelease */
+void hsynSdLockRelease(sceHSynSdLogEnt_t *e, int op, u32 a0, u32 a1, u32 a2, u32 a3, u32 a4)
+{
+    if (e != NULL) {
+        e->op = op | 0x80000000;
+        e->arg[0] = a0;
+        e->arg[1] = a1;
+        e->arg[2] = a2;
+        e->arg[3] = a3;
+        e->arg[4] = a4;
+    }
+}
+/* ENDF hsynSdLockRelease */
+/* FUNC hsynSdLockWait */
+void hsynSdLockWait(sceHSynSdLogEnt_t *e, int result)
+{
+    if (e != NULL) {
+        e->result = result;
+        e->op &= 0x7FFFFFFF;
     }
 }
 /* ENDF hsynSdLockWait */
-INCLUDE_ASM("MODHSYN", hsynSdInit);
-INCLUDE_ASM("MODHSYN", hsynSdSetParam);
-INCLUDE_ASM("MODHSYN", hsynSdGetParam);
-INCLUDE_ASM("MODHSYN", hsynSdSetSwitch);
-INCLUDE_ASM("MODHSYN", hsynSdGetSwitch);
-INCLUDE_ASM("MODHSYN", hsynSdSetAddr);
-INCLUDE_ASM("MODHSYN", hsynSdGetAddr);
-INCLUDE_ASM("MODHSYN", hsynSdSetCoreAttr);
-INCLUDE_ASM("MODHSYN", hsynSdNote2Pitch);
-INCLUDE_ASM("MODHSYN", hsynSdPitch2Note);
-INCLUDE_ASM("MODHSYN", hsynSdProcBatch);
-INCLUDE_ASM("MODHSYN", hsynSdProcBatchEx);
-INCLUDE_ASM("MODHSYN", hsynSdVoiceTrans);
-INCLUDE_ASM("MODHSYN", hsynSdBlockTrans);
-INCLUDE_ASM("MODHSYN", hsynSdVoiceTransStatus);
-INCLUDE_ASM("MODHSYN", hsynSdBlockTransStatus);
-INCLUDE_ASM("MODHSYN", hsynSdSetEffectAttr);
-INCLUDE_ASM("MODHSYN", hsynSdGetEffectAttr);
-INCLUDE_ASM("MODHSYN", hsynSdClearEffectWorkArea);
+/* FUNC hsynSdInit */
+int hsynSdInit(u32 flag)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 0, flag, 0, 0, 0, 0);
+    ret = libsd_sceSdInit(flag);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdInit */
+/* FUNC hsynSdSetParam */
+int hsynSdSetParam(u16 entry, u16 value)
+{
+    sceHSynSdLogEnt_t *e;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 1, entry, value, 0, 0, 0);
+    libsd_sceSdSetParam(entry, value);
+    hsynSdLockWait(e, 0);
+}
+/* ENDF hsynSdSetParam */
+/* FUNC hsynSdGetParam */
+int hsynSdGetParam(u16 entry)
+{
+    sceHSynSdLogEnt_t *e;
+    u16 ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 2, entry, 0, 0, 0, 0);
+    ret = libsd_sceSdGetParam(entry);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdGetParam */
+/* FUNC hsynSdSetSwitch */
+int hsynSdSetSwitch(u16 entry, u32 value)
+{
+    sceHSynSdLogEnt_t *e;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 3, entry, value, 0, 0, 0);
+    libsd_sceSdSetSwitch(entry, value);
+    hsynSdLockWait(e, 0);
+}
+/* ENDF hsynSdSetSwitch */
+/* FUNC hsynSdGetSwitch */
+u32 hsynSdGetSwitch(u16 entry)
+{
+    sceHSynSdLogEnt_t *e;
+    u32 ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 4, entry, 0, 0, 0, 0);
+    ret = libsd_sceSdGetSwitch(entry);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdGetSwitch */
+/* FUNC hsynSdSetAddr */
+int hsynSdSetAddr(u16 entry, u32 value)
+{
+    sceHSynSdLogEnt_t *e;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 5, entry, value, 0, 0, 0);
+    libsd_sceSdSetAddr(entry, value);
+    hsynSdLockWait(e, 0);
+}
+/* ENDF hsynSdSetAddr */
+/* FUNC hsynSdGetAddr */
+u32 hsynSdGetAddr(u16 entry)
+{
+    sceHSynSdLogEnt_t *e;
+    u32 ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 6, entry, 0, 0, 0, 0);
+    ret = libsd_sceSdGetAddr(entry);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdGetAddr */
+/* FUNC hsynSdSetCoreAttr */
+int hsynSdSetCoreAttr(u16 entry, u16 value)
+{
+    sceHSynSdLogEnt_t *e;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 7, entry, value, 0, 0, 0);
+    libsd_sceSdSetCoreAttr(entry, value);
+    hsynSdLockWait(e, 0);
+}
+/* ENDF hsynSdSetCoreAttr */
+/* FUNC hsynSdNote2Pitch */
+int hsynSdNote2Pitch(u16 center, u16 fine, u16 note, s16 bend)
+{
+    sceHSynSdLogEnt_t *e;
+    u16 ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 9, center, fine, note, bend, 0);
+    ret = libsd_sceSdNote2Pitch(center, fine, note, bend);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdNote2Pitch */
+/* FUNC hsynSdPitch2Note */
+int hsynSdPitch2Note(u16 center, u16 fine, u16 pitch)
+{
+    sceHSynSdLogEnt_t *e;
+    u16 ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 10, center, fine, pitch, 0, 0);
+    ret = libsd_sceSdPitch2Note(center, fine, pitch);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdPitch2Note */
+/* FUNC hsynSdProcBatch */
+int hsynSdProcBatch(u32 *cmds, u32 *rets, u32 count)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 11, (u32)cmds, (u32)rets, count, 0, 0);
+    ret = libsd_sceSdProcBatch(cmds, rets, count);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdProcBatch */
+/* FUNC hsynSdProcBatchEx */
+int hsynSdProcBatchEx(u32 *cmds, u32 *rets, u32 count, u32 flags)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 12, (u32)cmds, (u32)rets, count, flags, 0);
+    ret = libsd_sceSdProcBatchEx(cmds, rets, count, flags);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdProcBatchEx */
+/* FUNC hsynSdVoiceTrans */
+int hsynSdVoiceTrans(s16 chan, u16 mode, u8 *iopAddr, u32 spuAddr, u32 size)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 13, chan, mode, (u32)iopAddr, spuAddr, size);
+    ret = libsd_sceSdVoiceTrans(chan, mode, iopAddr, spuAddr, size);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdVoiceTrans */
+/* FUNC hsynSdBlockTrans */
+int hsynSdBlockTrans(s16 chan, u16 mode, u8 *iopAddr, u32 size)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 14, chan, mode, (u32)iopAddr, size, 0);
+    ret = libsd_sceSdBlockTrans(chan, mode, iopAddr, size);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdBlockTrans */
+/* FUNC hsynSdVoiceTransStatus */
+int hsynSdVoiceTransStatus(s16 chan, s16 flag)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 15, chan, flag, 0, 0, 0);
+    ret = libsd_sceSdVoiceTransStatus(chan, flag);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdVoiceTransStatus */
+/* FUNC hsynSdBlockTransStatus */
+int hsynSdBlockTransStatus(s16 chan, s16 flag)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 16, chan, flag, 0, 0, 0);
+    ret = libsd_sceSdBlockTransStatus(chan, flag);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdBlockTransStatus */
+/* FUNC hsynSdSetEffectAttr */
+int hsynSdSetEffectAttr(int core, sceSdEffectAttr_t *attr)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 19, core, (u32)attr, 0, 0, 0);
+    ret = libsd_sceSdSetEffectAttr(core, attr);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdSetEffectAttr */
+/* FUNC hsynSdGetEffectAttr */
+void hsynSdGetEffectAttr(int core, sceSdEffectAttr_t *attr)
+{
+    sceHSynSdLogEnt_t *e;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 20, core, (u32)attr, 0, 0, 0);
+    libsd_sceSdGetEffectAttr(core, attr);
+    hsynSdLockWait(e, 0);
+}
+/* ENDF hsynSdGetEffectAttr */
+/* FUNC hsynSdClearEffectWorkArea */
+int hsynSdClearEffectWorkArea(int core, int channel, int effectMode)
+{
+    sceHSynSdLogEnt_t *e;
+    int ret;
+
+    e = hsynSdLockAcquire();
+    hsynSdLockRelease(e, 21, core, channel, effectMode, 0, 0);
+    ret = libsd_sceSdClearEffectWorkArea(core, channel, effectMode);
+    hsynSdLockWait(e, ret);
+    return ret;
+}
+/* ENDF hsynSdClearEffectWorkArea */
 INCLUDE_ASM("MODHSYN", D_0000A5E4);
 INCLUDE_ASM("MODHSYN", hsynEffectDepthSet);
 /* FUNC hsynCoreStateGet */

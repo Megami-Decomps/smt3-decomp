@@ -107,13 +107,23 @@ typedef struct {
 
 s32 libsd_sceSdInit(s32 flag);
 u16 libsd_sceSdSetParam(u16 entry, u16 value);
+u16 libsd_sceSdGetParam(u16 entry);
 void libsd_sceSdSetSwitch(u16 entry, u32 value);
 u32 libsd_sceSdGetSwitch(u16 entry);
 void libsd_sceSdSetAddr(u16 entry, u32 value);
+u32 libsd_sceSdGetAddr(u16 entry);
 u16 libsd_sceSdSetCoreAttr(u16 entry, u16 value);
-s32 libsd_sceSdVoiceTrans(s16 chan, u16 mode, u32 iopaddr, u32 spuaddr, u32 size);
+u16 libsd_sceSdNote2Pitch(u16 center, u16 fine, u16 note, s16 bend);
+u16 libsd_sceSdPitch2Note(u16 center, u16 fine, u16 pitch);
+s32 libsd_sceSdProcBatch(u32 *cmds, u32 *rets, u32 count);
+s32 libsd_sceSdProcBatchEx(u32 *cmds, u32 *rets, u32 count, u32 flags);
+s32 libsd_sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 spuaddr, u32 size);
+s32 libsd_sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size);
 s32 libsd_sceSdVoiceTransStatus(s16 chan, s16 flag);
+s32 libsd_sceSdBlockTransStatus(s16 chan, s16 flag);
 s32 libsd_sceSdSetEffectAttr(s32 core, sceSdEffectAttr_t *attr);
+void libsd_sceSdGetEffectAttr(s32 core, sceSdEffectAttr_t *attr);
+s32 libsd_sceSdClearEffectWorkArea(s32 core, s32 channel, s32 effectMode);
 void *libsd_sceSdSetSpu2IntrHandler(void *func, void *arg);
 
 #endif /* IRX_IOP_H */

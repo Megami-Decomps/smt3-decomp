@@ -37,6 +37,8 @@ typedef struct sceHSynTbl_t sceHSynTbl_t;
 typedef struct sceHSynWork_t sceHSynWork_t;
 typedef struct sceHSynStat_t sceHSynStat_t;
 typedef struct sceHSynOption_t sceHSynOption_t;
+typedef struct sceHSynSdLogEnt_t sceHSynSdLogEnt_t;
+typedef struct sceHSynSdLog_t sceHSynSdLog_t;
 
 struct sceHSynVoice_t;
 struct sceHSynSlot_t;
@@ -343,6 +345,21 @@ struct sceHSynOption_t
   int *var;
 };
 
+struct sceHSynSdLogEnt_t
+{
+  unsigned int op;
+  int result;
+  unsigned int arg[5];
+};
+
+struct sceHSynSdLog_t
+{
+  unsigned int size;
+  unsigned int unk04;
+  unsigned int index;
+  struct sceHSynSdLogEnt_t entry[1];
+};
+
 /* A layout the compiler reads differently is a build error. */
 typedef char __MODHSYN_sizeof_sceSmgChunk_t[(sizeof(sceSmgChunk_t) == 20) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceSmgVers_t[(sizeof(sceSmgVers_t) == 16) ? 1 : -1];
@@ -369,6 +386,8 @@ typedef char __MODHSYN_sizeof_sceHSynTbl_t[(sizeof(sceHSynTbl_t) == 8) ? 1 : -1]
 typedef char __MODHSYN_sizeof_sceHSynWork_t[(sizeof(sceHSynWork_t) == 8) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynStat_t[(sizeof(sceHSynStat_t) == 56) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynOption_t[(sizeof(sceHSynOption_t) == 12) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynSdLogEnt_t[(sizeof(sceHSynSdLogEnt_t) == 28) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynSdLog_t[(sizeof(sceHSynSdLog_t) == 40) ? 1 : -1];
 
 /* Functions -------------------------------------------------------- */
 
@@ -507,10 +526,10 @@ int hsynSeqInterpretA(int, int, u8 *, int, char, u16, u16, unsigned int, int);
 int hsynSeqStart(sceHSynEnv_t *env);
 int hsynSeqInterpretB(int, int, u8 *, int, char, u16, u16, unsigned int, int);
 int hsynSeqEmitTail();
-int modhsyn_e16(u32 *block);
-int hsynSdLockAcquire();
-unsigned int hsynSdLockRelease(unsigned int *, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-int hsynSdLockWait(int *, int);
+int modhsyn_e16(struct sceHSynSdLog_t *w);
+struct sceHSynSdLogEnt_t *hsynSdLockAcquire();
+void hsynSdLockRelease(struct sceHSynSdLogEnt_t *e, int op, unsigned int a0, unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4);
+void hsynSdLockWait(struct sceHSynSdLogEnt_t *e, int result);
 int hsynSdInit(u32 flag);
 int hsynSdSetParam(u16 entry, u16 value);
 int hsynSdGetParam(u16 entry);
@@ -557,7 +576,7 @@ extern int (*hsynCurveEval2[10])(u8, u8);
 extern u8 (*hsynCurveEval1[10])(u8);
 extern s16 hsynSineTable[200];
 extern int hsynRandSeed;
-extern void *hsynSdWorkArea;
+extern struct sceHSynSdLog_t *hsynSdWorkArea;
 extern unsigned int hsynSdParamTable[16];
 extern struct sceHSynVoice_t *hsynFreeList[2][2];
 extern u32 hsynTickScale;
