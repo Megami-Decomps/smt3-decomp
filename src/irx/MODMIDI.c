@@ -1158,7 +1158,64 @@ int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32
 /* ENDF midiSongApplyState */
 INCLUDE_ASM("MODMIDI", midiSongRepeat);
 INCLUDE_ASM("MODMIDI", midiPlaySong);
+/* FUNC modmidi_e8 */
+#ifdef NON_MATCHING
+/* Four bytes long: gcc reloads the slot pointer for the shared
+ * slot->flags store where retail keeps it in a register, and cross-jumps
+ * case 1's MidiPlaySwitch call with the one in case 2. */
+int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    u32 f;
+    u32 g;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    if (slot->songNo == -1) {
+        return -1;
+    }
+    switch (mode) {
+    case 0:
+        slot->flags &= ~0x700;
+        trk->songFlags = 0;
+        modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
+        if (trk->fadeLeft != 0) {
+            trk->fadeLeft = 0;
+            trk->curMidi = trk->nextMidi;
+        }
+        midiSongSelect(slot, &trk->songData);
+        return 0;
+    case 1:
+        slot->flags &= ~0x100;
+        trk->songFlags = 0;
+        modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
+        return 0;
+    case 2:
+        if (slot->flags & 0x100) {
+            return 0;
+        }
+        trk->songFlags &= 0xFC;
+        f = slot->flags;
+        if (f & 0x400) {
+            g = f & ~0x300;
+        } else if ((f & 0x200) != 0) {
+            slot->flags = f | 0x100;
+            modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 1);
+            return 0;
+        } else {
+            g = f | 0x100;
+        }
+        slot->flags = g;
+        return 0;
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM("MODMIDI", modmidi_e8);
+#endif
+/* ENDF modmidi_e8 */
 /* FUNC midiSongServiceTick */
 void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
 {
@@ -1257,7 +1314,77 @@ int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
     return 0;
 }
 /* ENDF modmidi_sceMidi_SongSetAbsolute */
+/* FUNC midiSearchPlay */
+#ifdef NON_MATCHING
+/* Equivalent, same size: gcc materialises the 0x7F and 0xA1 compare
+ * constants inside the loop where retail hoists all four into caller-saved
+ * registers, and keeps the two debug printf calls apart where retail
+ * cross-jumps them. */
+int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int flag)
+{
+    u8 *p;
+    u8 *save;
+    u32 count;
+    u8 c;
+    u8 v;
+
+    count = 0;
+    midiSongSelect(slot, &trk->songData);
+    save = trk->songCur;
+    trk->songFlags = 4;
+    for (;;) {
+        p = trk->songCur;
+        c = p[0];
+        trk->songCur = p + 1;
+        if (c != 0xA0) {
+            if (midiDebug != 0) {
+                stdio_printf(aSearchplayUnkn);
+            }
+            goto fail;
+        }
+        c = p[1];
+        trk->songCur = p + 2;
+        v = p[2];
+        trk->songCur = p + 3;
+        switch (c) {
+        case 0:
+            count++;
+            if (target < count) {
+                if (flag != 0) {
+                    trk->songCur = save;
+                } else {
+                    trk->songCur = p;
+                }
+                trk->songFlags = 0;
+                return 1;
+            }
+            save = p + 3;
+            break;
+        case 0x11:
+            if (p[3] != 0xA1) {
+                if (midiDebug != 0) {
+                    stdio_printf(aSearchplayLoop);
+                }
+                goto fail;
+            }
+            trk->songCur = p + 6;
+            break;
+        case 0x7F:
+            if (v == c) {
+                goto fail;
+            }
+            break;
+        }
+    }
+fail:
+    slot->flags = (slot->flags & ~0x300) | 0x400;
+    trk->songFlags = 0;
+    return 0;
+}
+#else
 INCLUDE_ASM("MODMIDI", midiSearchPlay);
+#endif
+/* ENDF midiSearchPlay */
 /* FUNC modmidi_e13 */
 int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4)
 {
