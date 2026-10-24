@@ -1952,7 +1952,73 @@ void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend)
     v->unk34 = depth * bend / 8192;
 }
 /* ENDF hsynSdSetParamPitch */
+#ifdef NON_MATCHING
+/* One instruction short: gcc keeps envB.level live into the second arm where
+ * retail loads it again. */
+/* FUNC func_00004614 */
+void func_00004614(sceHSynVoice_t *v)
+{
+    u32 e;
+    u32 l;
+    u32 r;
+    u32 m;
+    int vol;
+    int g;
+    int pol;
+
+    vol = v->unk18;
+    if (v->unk57 == 1) {
+        if (v->lfoB.unk00 != 0) {
+            vol += (s16)v->lfoB.unk02;
+        }
+    }
+    vol = (vol * v->slotp->unk00) / 256;
+    if (v->envB.level >= 0) {
+        g = (vol * ((v->envB.level * v->unk4F) / 128 + 0x4000)) / 16384;
+    } else {
+        g = (vol * ((v->envB.level * v->unk50) / 128 + 0x4000)) / 16384;
+    }
+    if (g < 0) {
+        g = 0;
+    }
+    m = v->unk4C;
+    if (v->unk57 == 1 && *(u32 *)&v->param[0] != 0) {
+        m = *(u32 *)&v->param[44];
+    }
+    l = (m * g) >> 7;
+    if (l >= 0x4000) {
+        l = 0x3FFF;
+    }
+    m = v->unk4D;
+    if (v->unk57 == 1 && *(u32 *)&v->param[0] != 0) {
+        m = *(u32 *)&v->param[48];
+    }
+    r = (m * g) >> 7;
+    if (r >= 0x4000) {
+        r = 0x3FFF;
+    }
+    if (l != v->unk1A || r != v->unk1C) {
+        pol = v->unk53;
+        e = v->core | (v->index << 1);
+        v->unk1A = l;
+        v->unk1C = r;
+        if (v->unk57 == 1 && *(u32 *)&v->param[0] != 0) {
+            pol = v->param[52];
+        }
+        if (pol != 0) {
+            hsynSdSetParam(e, l);
+            hsynSdSetParam(e | 0x100, r);
+        } else {
+            hsynSdSetParam(e, -l & 0x7FFF);
+            hsynSdSetParam(e | 0x100, -r & 0x7FFF);
+        }
+    }
+}
+#else
 INCLUDE_ASM("MODHSYN", func_00004614);
+#endif
+/* ENDF func_00004614 */
+/* ENDF func_00004614 */
 /* FUNC hsynSdSetParamEnvelope */
 void hsynSdSetParamEnvelope(sceHSynVoice_t *voice)
 {

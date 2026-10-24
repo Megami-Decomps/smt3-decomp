@@ -579,7 +579,7 @@ int hsynVoiceUpdatePathA(sceHSynVoice_t *v);
 int hsynVoiceKeyOnPathA(sceHSynVoice_t *v);
 void hsynVoicePitchCommit(sceHSynVoice_t *v);
 void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend);
-int func_00004614(int);
+void func_00004614(sceHSynVoice_t *v);
 void hsynSdSetParamEnvelope(sceHSynVoice_t *voice);
 s32 hsynSdSetParamVolume(sceHSynVoice_t *v, s8 scale, u8 a, u8 b);
 void hsynSdSetParamVolumeLeft(sceHSynVoice_t *v, u8 scale);
