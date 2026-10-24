@@ -38,6 +38,9 @@ typedef struct sceHSynWork_t sceHSynWork_t;
 typedef struct sceHSynStat_t sceHSynStat_t;
 typedef struct sceHSynOption_t sceHSynOption_t;
 
+struct sceHSynVoice_t;
+struct sceHSynSlot_t;
+
 struct sceSmgChunk_t
 {
   char magic[4];
@@ -201,14 +204,14 @@ struct sceHSynLfo_t
 
 struct sceHSynChannel_t
 {
-  struct sceHSynChannel_t::sceHSynVoice_t *onNext;
-  struct sceHSynChannel_t::sceHSynVoice_t *onPrev;
-  struct sceHSynChannel_t::sceHSynVoice_t *relNext;
-  struct sceHSynChannel_t::sceHSynVoice_t *relPrev;
-  struct sceHSynChannel_t::sceHSynVoice_t *offNext;
-  struct sceHSynChannel_t::sceHSynVoice_t *offPrev;
+  struct sceHSynVoice_t *onNext;
+  struct sceHSynVoice_t *onPrev;
+  struct sceHSynVoice_t *relNext;
+  struct sceHSynVoice_t *relPrev;
+  struct sceHSynVoice_t *offNext;
+  struct sceHSynVoice_t *offPrev;
   struct sceSmgProgEnt_t *prog;
-  struct sceHSynChannel_t::sceHSynSlot_t *slot;
+  struct sceHSynSlot_t *slot;
   struct sceHSynBank_t *bank;
   u16 bendRange;
   u16 unk26;
@@ -268,7 +271,7 @@ struct sceHSynVoice_t
   u8 path;
   u8 unk5A;
   u8 unk5B;
-  struct sceHSynVoice_t::sceHSynSlot_t *slotp;
+  struct sceHSynSlot_t *slotp;
   struct sceHSynChannel_t *chan;
   struct sceSmgProgEnt_t *prog;
   struct sceSmgProgKey_t *key;
