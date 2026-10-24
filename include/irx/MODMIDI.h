@@ -210,7 +210,7 @@ struct sceMidiSeq_t
 
 struct sceMidiTbl_t
 {
-  u32 nSeqWord;
+  int nSeqWord;
   struct sceMidiSeq_t *seq;
   u32 nVoiceWord;
   struct sceMidiVoice_t *voice;
