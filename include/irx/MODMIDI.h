@@ -292,6 +292,7 @@ int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on);
 int midiSelectTrack(sceMidiSlot_t *slot);
 int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo);
 int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick);
+void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 ch);
 int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, u8 vol);
 int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol);
 int modmidi_e19(sceMidiWork_t *work, int slotNo, u8 bpm);
@@ -312,7 +313,8 @@ int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32
 int midiSongRepeat(sceMidiSlot_t *slot, u8 count);
 int midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
 int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode);
-int midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
+void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
+int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol);
 int modmidi_e10(sceMidiWork_t *work, int slotNo, u8 val);
 int modmidi_e11(sceMidiWork_t *work, int slotNo, u8 val);
 int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed);

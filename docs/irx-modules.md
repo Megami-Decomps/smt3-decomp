@@ -261,6 +261,13 @@ What the compiler wants, shape by shape, is in
 [What iop-gcc 2.8.1 wants](irx-idioms.md). Read it before grinding a function by
 hand: the remaining difference is usually one of the thirty-odd entries there.
 
+A guarded draft is never compiled by the normal build, which takes the assembly
+instead, so one can carry an error indefinitely. `tools/check_irx_nonmatching.py`
+compiles every module's C with `NON_MATCHING` using the host compiler and is a
+syntax check rather than a matching one. It found a missing declaration, three
+bare returns in a function the database called `int`, and a cast on the left of
+an assignment that had been there since the first commit.
+
 `tools/irx_diff.py` is the loop: build, then
 
 ```

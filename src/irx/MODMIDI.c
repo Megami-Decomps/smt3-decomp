@@ -626,7 +626,7 @@ INCLUDE_ASM("MODMIDI", midiSongRepeat);
 INCLUDE_ASM("MODMIDI", midiPlaySong);
 INCLUDE_ASM("MODMIDI", modmidi_e8);
 /* FUNC midiSongServiceTick */
-int midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
+void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
 {
     sceMidiTrack_t *trk;
     u32 flags;

@@ -114,6 +114,11 @@ def export():
             continue
         funcs.add(ea)
         name = idc.get_func_name(ea)
+        # A function IDA has not named is func_<address> here, the same name
+        # tools/irx_symbols.py gives it, because the module's own C calls it by
+        # that name while it is still assembly and needs the prototype.
+        if name.startswith(("sub_", "nullsub_")):
+            name = "func_%08X" % ea
         tif = ida_typeinf.tinfo_t()
         got = ida_nalt.get_tinfo(tif, ea)
         protos.append([ea, name, tif._print(name, flags) if got else None])

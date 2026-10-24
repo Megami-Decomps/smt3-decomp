@@ -2550,12 +2550,12 @@ s32 sdfAdpcmUploadBlock(void)
 
     if (sdfAdpcm.stereo) {
         while (libsd_sceSdVoiceTrans(sdfAdpcm.core, 0,
-                                     sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9),
+                                     (u8 *)(sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9)),
                                      sdfAdpcm.spuAddr + (sdfAdpcm.xferBlk << 8), 0x100) < 0) {
         }
         libsd_sceSdVoiceTransStatus(sdfAdpcm.core, 1);
         while (libsd_sceSdVoiceTrans(sdfAdpcm.core, 0,
-                                     sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9) + 256,
+                                     (u8 *)(sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9) + 256),
                                      sdfAdpcm.spuAddr + (sdfAdpcm.xferBlk << 8) + 768,
                                      0x100) < 0) {
         }
@@ -2565,7 +2565,7 @@ s32 sdfAdpcmUploadBlock(void)
         off = sdfAdpcm.xferBlk << 8;
     } else {
         while (libsd_sceSdVoiceTrans(sdfAdpcm.core, 0,
-                                     sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9),
+                                     (u8 *)(sdfAdpcm.iopBuf + ((s8)sdfAdpcm.xferIdx << 9)),
                                      sdfAdpcm.spuAddr + (sdfAdpcm.xferBlk << 9), 0x200) < 0) {
         }
         libsd_sceSdVoiceTransStatus(sdfAdpcm.core, 1);
@@ -2816,7 +2816,7 @@ void sdfAdpcmStreamInit(void *arg)
         stdio_printf(aSdfadpcmFreqSL, sdfAdpcmFreqNames[sdfAdpcmHeader.freq],
                      sdfAdpcm.bytesLeft, (s8)sdfAdpcm.stereo);
         sdfAdpcm.playing = 1;
-        (s8)sdfAdpcm.coreId = 0;
+        sdfAdpcm.coreId = 0;
         libsd_sceSdSetCoreAttr(4, 0);
         sdfAdpcm.core = 0;
         sdfSndWorkArea->banks[7].size = 512;

@@ -363,6 +363,7 @@ void func_00000D24(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
     int all;
+    int pan;
     int i;
 
     val -= 0x40;
