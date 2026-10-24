@@ -592,7 +592,31 @@ s8 hsynEnvLevelLookup(s8 delta, s32 base, s32 bias)
     return v;
 }
 /* ENDF hsynEnvLevelLookup */
+#ifdef NON_MATCHING
+/* Seven registers apart: the key delta and the mask land in the other
+ * order. */
+/* FUNC hsynAdjustFieldByKey */
+u16 hsynAdjustFieldByKey(u16 field, s8 scale, int keyDelta, u16 mask, int shift)
+{
+    int delta;
+    int v;
+
+    delta = keyDelta * scale / 12;
+    if (delta != 0) {
+        v = ((field >> shift) & mask) + delta;
+        if (v < 0) {
+            v = 0;
+        } else if (v > mask) {
+            v = mask;
+        }
+        field = (field & ~(mask << shift)) | (v << shift);
+    }
+    return field;
+}
+/* ENDF hsynAdjustFieldByKey */
+#else
 INCLUDE_ASM("MODHSYN", hsynAdjustFieldByKey);
+#endif
 /* FUNC hsynBuildAdsr1 */
 u16 hsynBuildAdsr1(int note, sceSmgSmplEnt_t *tone)
 {
@@ -1292,7 +1316,31 @@ int hsynSdClearEffectWorkArea(int core, int channel, int effectMode)
 }
 /* ENDF hsynSdClearEffectWorkArea */
 INCLUDE_ASM("MODHSYN", D_0000A5E4);
+#ifdef NON_MATCHING
+/* One instruction short: retail copies the counter before incrementing it,
+ * gcc folds the copy into the add. */
+/* FUNC hsynEffectDepthSet */
+int hsynEffectDepthSet(sceHSynLfo_t *lfo)
+{
+    u32 n;
+
+    if (lfo->unk00 == 1) {
+        n = lfo->unk10;
+        if (n < lfo->unk0C) {
+            lfo->unk10 = n + 1;
+            lfo->unk02 = lfo->unk04 + (lfo->unk08 * n >> 8);
+        } else {
+            lfo->unk00 = 2;
+            lfo->unk02 = lfo->unk04 + lfo->unk06;
+            lfo->unk10 = lfo->unk10 + 1;
+        }
+    }
+    return 0;
+}
+/* ENDF hsynEffectDepthSet */
+#else
 INCLUDE_ASM("MODHSYN", hsynEffectDepthSet);
+#endif
 /* FUNC hsynCoreStateGet */
 int hsynCoreStateGet(sceHSynVoice_t *v)
 {
@@ -1308,7 +1356,33 @@ int hsynCoreStateGet(sceHSynVoice_t *v)
 /* ENDF hsynCoreStateGet */
 INCLUDE_ASM("MODHSYN", hsynPitchBendApply);
 INCLUDE_ASM("MODHSYN", D_0000A754);
+#ifdef NON_MATCHING
+/* One instruction short: retail copies the counter before incrementing it,
+ * gcc folds the copy into the add. */
+/* FUNC hsynEffectFeedbackSet */
+int hsynEffectFeedbackSet(sceHSynVoice_t *voice)
+{
+    sceHSynLfo_t *lfo;
+    u32 n;
+
+    lfo = &voice->lfoB;
+    if (lfo->unk00 == 1) {
+        n = lfo->unk10;
+        if (n < lfo->unk0C) {
+            lfo->unk10 = n + 1;
+            lfo->unk02 = lfo->unk04 + (lfo->unk08 * n >> 16);
+        } else {
+            lfo->unk02 = lfo->unk04 + lfo->unk06;
+            lfo->unk00 = 2;
+            lfo->unk10 = lfo->unk10 + 1;
+        }
+    }
+    return 0;
+}
+/* ENDF hsynEffectFeedbackSet */
+#else
 INCLUDE_ASM("MODHSYN", hsynEffectFeedbackSet);
+#endif
 /* FUNC hsynCoreStateSet */
 int hsynCoreStateSet(sceHSynVoice_t *v)
 {
