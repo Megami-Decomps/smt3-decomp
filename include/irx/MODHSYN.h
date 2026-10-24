@@ -293,7 +293,7 @@ struct sceHSynChannel_t
   u8 unk2E;
   u8 unk2F;
   s8 unk30;
-  u8 unk31;
+  s8 unk31;
   u8 unk32;
   u8 priority;
   u8 unk34;

@@ -237,7 +237,41 @@ void hsynVoiceIndexGet(sceHSynChannel_t *chan, u8 val)
     chan->unk34 = val;
 }
 /* ENDF hsynVoiceIndexGet */
+#ifdef NON_MATCHING
+/* Two instructions swapped, as in hsynVoiceSetPitch: gcc schedules the head
+ * pointer ahead of the saved value the loop passes on. */
+/* FUNC func_00000C58 */
+void func_00000C58(sceHSynChannel_t *chan, u8 val)
+{
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+    sceHSynVoice_t **head;
+    s8 n;
+
+    n = val - 0x40;
+    if (n < -0x3F) {
+        n = -0x3F;
+    }
+    if (chan->unk31 == n) {
+        return;
+    }
+    chan->unk31 = n;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0, head = heads; i < 3; i++, head++) {
+        end = *head;
+        for (v = end->chNext; v != end; v = v->chNext) {
+            func_00004AE4(v, n);
+        }
+    }
+}
+/* ENDF func_00000C58 */
+#else
 INCLUDE_ASM("MODHSYN", func_00000C58);
+#endif
 INCLUDE_ASM("MODHSYN", func_00000D24);
 INCLUDE_ASM("MODHSYN", func_00000E40);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetPitchDirect);
@@ -614,7 +648,16 @@ void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend)
 }
 /* ENDF hsynSdSetParamPitch */
 INCLUDE_ASM("MODHSYN", func_00004614);
-INCLUDE_ASM("MODHSYN", hsynSdSetParamEnvelope);
+/* FUNC hsynSdSetParamEnvelope */
+void hsynSdSetParamEnvelope(sceHSynVoice_t *voice)
+{
+    u32 v;
+
+    v = voice->chan->vol * voice->unk54;
+    v = v * voice->unk16;
+    voice->unk18 = v >> 14;
+}
+/* ENDF hsynSdSetParamEnvelope */
 /* FUNC hsynSdSetParamVolume */
 s32 hsynSdSetParamVolume(sceHSynVoice_t *v, s8 scale, u8 a, u8 b)
 {
