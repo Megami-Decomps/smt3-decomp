@@ -567,7 +567,41 @@ void hsynServiceTick(sceHSynEntry_t *entry, int nEntryWord)
 INCLUDE_ASM("MODHSYN", hsynServiceTick);
 #endif
 INCLUDE_ASM("MODHSYN", func_000017EC);
-INCLUDE_ASM("MODHSYN", modhsyn_e8);
+/* FUNC modhsyn_e8 */
+int modhsyn_e8(int *masks)
+{
+    sceHSynVoice_t *freeEnd;
+    sceHSynVoice_t *relEnd;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t *next;
+    u8 *cnt;
+    u32 mask;
+    int i;
+
+    for (i = 0; i < 2; i++) {
+        freeEnd = (sceHSynVoice_t *)hsynFreeList[i];
+        relEnd = (sceHSynVoice_t *)hsynRelList[i];
+        cnt = &hsynFreeCount[i];
+        mask = masks[i];
+        hsynVoiceMask[i] = mask;
+        for (v = relEnd->next; v != relEnd; v = relEnd->next) {
+            hsynVoiceMaskGet(v);
+            hsynCoreIndexSet(v, freeEnd);
+            (*cnt)++;
+        }
+        for (v = freeEnd->next; v != freeEnd; v = v->next) {
+            if (mask & (1 << v->index)) {
+                next = v->prev;
+                hsynVoiceMaskGet(v);
+                hsynCoreIndexGet(v, relEnd);
+                (*cnt)--;
+                v = next;
+            }
+        }
+    }
+    return 0;
+}
+/* ENDF modhsyn_e8 */
 /* FUNC modhsyn_e26 */
 int modhsyn_e26(u32 *mask)
 {
