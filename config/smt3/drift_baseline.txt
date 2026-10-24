@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 96 types, 927 members, 506 adopted constants.
+# 92 types, 926 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -24,7 +24,6 @@ type BillOtLink
 type BillPacRequest
 type BillPacketWork
 type BillPluralRecord
-type BillRenderPair
 type BillScreenParam
 type BillTextureQuad
 type Dds3AdminModeDispatch
@@ -43,8 +42,6 @@ type EffPCPRectParams
 type EffPCPRingWork
 type EffParamTable
 type EffParamTableRecord
-type EffRandState
-type EffResourceRectDrawParams
 type EffResourceRectParams
 type EffResourceRectWork
 type EffRingColorSlot
@@ -66,7 +63,6 @@ type MdlResourceItem
 type MovLinearStream
 type MovOpenParam
 type MovPacStream
-type ParSystem
 type PcpFlashColorSlot
 type PcpFlashQuadColorSlot
 type PcpScatterParamsB
@@ -125,7 +121,6 @@ member MovOpenParam.unk10
 member MovOpenParam.unk11
 member MovOpenParam.unk12
 member MovPacStream.unk6C
-member ParSystem.unk28
 member SdfGraphCopyPacket.unk0C
 member SdfItem.unk04
 member SdfPacket.unk0

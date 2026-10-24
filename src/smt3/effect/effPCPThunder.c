@@ -3,7 +3,7 @@
 #include "sdf_resource.h"
 #include "sdf_types.h"
 
-struct EffRandState;
+struct effRandState_t;
 struct effPCPThunderSpherePolyParam_t;
 struct effPCP_ThunderRadiatePolyPart_t;
 struct effPCP_ThunderRadiatePolyParam_t;
@@ -26,7 +26,7 @@ union SdfDrawTransform;
 struct SdfGsTextureStateValues;
 struct sdfGsMemSlice_t;
 
-typedef struct EffRandState EffRandState;
+typedef struct effRandState_t effRandState_t;
 typedef struct effPCP_ThunderRadiatePolyPart_t effPCP_ThunderRadiatePolyPart_t;
 typedef struct effPCP_ThunderRadiatePolyParam_t effPCP_ThunderRadiatePolyParam_t;
 typedef struct parCell_t parCell_t;
@@ -35,7 +35,7 @@ typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
 typedef struct sdfMatPacket_t sdfMatPacket_t;
 typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
-typedef struct ParSystem ParSystem;
+typedef struct parSystem_t parSystem_t;
 typedef struct effPCP_ThunderRadiatePoly_t effPCP_ThunderRadiatePoly_t;
 typedef struct effPCP_ThunderPolyPart_t effPCP_ThunderPolyPart_t;
 typedef struct effPCP_ThunderPolyParam_t effPCP_ThunderPolyParam_t;
@@ -77,7 +77,7 @@ typedef struct effPCPThunderSpherePoly_t effPCPThunderSpherePoly_t;
 
 /* Mid-grey fragment colour (0x80 in each channel). */
 /* Four ordered 32-bit words in the shared effect random-number state. */
-struct EffRandState {
+struct effRandState_t {
     u32 words[4];
 };
 
@@ -110,7 +110,7 @@ struct effPCP_ThunderRadiatePolyParam_t {
     u32 color_edge;
 };
 
-struct ParSystem;
+struct parSystem_t;
 
 struct parCell_t {
     u128 *history;   /* 0x00 */
@@ -214,7 +214,7 @@ struct sdfMemHandle_t;
 
 
 /* The cell-system allocation ends with this complete 0x2C-byte owner. */
-struct ParSystem {
+struct parSystem_t {
     u16 kind;            /* 0x00: ParCellTopology code; native integer storage */
     u16 bucket;          /* 0x02: packet submission bucket */
     s32 cellCount;       /* 0x04 */
@@ -225,7 +225,7 @@ struct ParSystem {
     u128 *vertices;      /* 0x18: backing vector history for all cells */
     u32 *colors;         /* 0x1C: backing color stream for all cells */
     struct sdfMat_t *asset; /* 0x20: submitted draw asset */
-    struct ParSystem *next; /* 0x24: pending cell-system list */
+    struct parSystem_t *next; /* 0x24: pending cell-system list */
     s32 unk28;           /* 0x28 */
 };
 
@@ -234,7 +234,7 @@ struct effPCP_ThunderRadiatePoly_t {
     effPCP_ThunderRadiatePolyParam_t head;
     effPCP_ThunderRadiatePolyPart_t *pPart; /* 0x48 */
     u32 abgr; /* 0x4C: settable, otherwise unobserved */
-    ParSystem *hPoly; /* 0x50 */
+    parSystem_t *hPoly; /* 0x50 */
     sdfMemHandle_t *hMem; /* 0x54 */
 };
 
@@ -276,9 +276,9 @@ struct effPCP_ThunderPoly_t {
     u32 color;               /* 0x58 */
     union {
         u32 updateCount;     /* single-hPoly variant */
-        ParSystem *secondarySystem; /* dual-hPoly variant */
+        parSystem_t *secondarySystem; /* dual-hPoly variant */
     } state;                 /* 0x5C */
-    ParSystem *hPoly;            /* 0x60 */
+    parSystem_t *hPoly;            /* 0x60 */
     sdfMemHandle_t *allocationHandle; /* 0x64 */
 }; /* 0x68 */
 
@@ -306,7 +306,7 @@ struct effPCP_ThunderColumnPolyLowPart_t {
     f32 rotate_s;     /* 0x10 */
     f32 radius;      /* 0x14 */
     f32 height;     /* 0x18 */
-    ParSystem *hPoly;    /* 0x1C */
+    parSystem_t *hPoly;    /* 0x1C */
 };
 
 /* Copied spark constructor input; gaps remain opaque without stronger evidence. */
@@ -415,7 +415,7 @@ struct effPCPThunderSpherePoly_t {
     u32 tintColor;
     f32 baseRadiusScale;
     f32 baseHeightScale;
-    struct ParSystem *hPoly;
+    struct parSystem_t *hPoly;
     struct sdfMemHandle_t *allocationHandle;
 };
 
@@ -428,14 +428,14 @@ struct effPCPThunderSpherePoly_t {
 #define VEC3_SPLAT(v, x) ((v)[0] = (x), (v)[1] = (x), (v)[2] = (x))
 
 
-extern EffRandState dds3EffectBase[];
+extern effRandState_t dds3EffectBase[];
 
 /* Advance caller-owned state, returning its next 32-bit value. NULL selects
  * the shared effect RNG state. */
-u32 dds3GetRandA(EffRandState *name);
+u32 dds3GetRandA(effRandState_t *name);
 
 /* Returns 24 random bits scaled to [0, 1); NULL selects the shared state. */
-f32 dds3GetRandFloatA(EffRandState *name);
+f32 dds3GetRandFloatA(effRandState_t *name);
 
 extern s32 effMagaCylinderCalcColor(s32 color, s32 param);
 
@@ -449,11 +449,11 @@ extern void effPCP_ThunderPolyListPartRefresh(effPCP_ThunderPoly_t *work, s32 in
 
 void effPCP_ThunderPolyDelete(effPCP_ThunderPoly_t *hData);
 
-void dds3TrackPolyListInit(struct ParSystem *hTrackPoly, s32 number);
+void dds3TrackPolyListInit(struct parSystem_t *hTrackPoly, s32 number);
 
-void dds3TrackPolyDraw(struct ParSystem *system);
+void dds3TrackPolyDraw(struct parSystem_t *system);
 
-void dds3TrackPolyDelete(struct ParSystem *hTrackPoly);
+void dds3TrackPolyDelete(struct parSystem_t *hTrackPoly);
 
 /* Load axis-angle rotation into VU0 vf28-vf31. */
 void SetRotateMatrixAxis(f32 aAngle, const sdfVector3_t *aAxis);
@@ -483,14 +483,14 @@ extern void *sdfMemLock(sdfMemHandle_t *aHandle);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void *memset(void *a, s32 b, u32 c);
 extern void *dds3EffectPCPDataGetData(void *table, s32 index);
-extern ParSystem *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
-extern void dds3TrackPolySetMode(ParSystem *hTrackPoly, u16 mode);
-extern void dds3TrackPolyVCSet(ParSystem *hTrackPoly, s32 type, u32 abgr_in, u32 abgr_out);
-extern void dds3TrackPolyVC3Set_Acute(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
-extern void dds3TrackPolyVC5Set_Acute(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
-extern void dds3TrackPolyVC5Set_AcuteR(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
-extern void dds3TrackPolyVC5Set_AcuteW(ParSystem *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
-extern void dds3TrackPolyVC5Set_Normal(ParSystem *hTrackPoly, s32 abgr_0, s32 abgr_1, s32 abgr_2);
+extern parSystem_t *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, u32 type);
+extern void dds3TrackPolySetMode(parSystem_t *hTrackPoly, u16 mode);
+extern void dds3TrackPolyVCSet(parSystem_t *hTrackPoly, s32 type, u32 abgr_in, u32 abgr_out);
+extern void dds3TrackPolyVC3Set_Acute(parSystem_t *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_Acute(parSystem_t *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_AcuteR(parSystem_t *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_AcuteW(parSystem_t *hTrackPoly, u32 abgr_0, u32 abgr_1, u32 abgr_2);
+extern void dds3TrackPolyVC5Set_Normal(parSystem_t *hTrackPoly, s32 abgr_0, s32 abgr_1, s32 abgr_2);
 extern f32 sdfSin(f32 aRadius);
 extern f32 sdfCos(f32 aRadius);
 void func_00177AC8(EffThunderSparkWork *work, s32 index);
@@ -558,8 +558,8 @@ void effPCPThunderSphereInit(effPCPThunderSpherePoly_t *work, s32 index) {
     effPCPThunderSpherePolyPart_t *cell = work->pPart + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->wait = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.vector.startDelayRange;
-    cell->refresh = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->wait = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.vector.startDelayRange;
+    cell->refresh = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     scratchVector[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
@@ -595,7 +595,7 @@ void effPCPThunderSphereRotate(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 width[4] __attribute__((aligned(16)));
     f32 outerWidth[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
-    ParSystem *system = work->hPoly;
+    parSystem_t *system = work->hPoly;
     parCell_t *cell = &system->cells[index];
     effPCPThunderSpherePolyPart_t *source;
     u128 *vertices;
@@ -679,7 +679,7 @@ void effPCPThunderSphereRotate(effPCPThunderSpherePoly_t *work, s32 index) {
 void effPCPThunderSphereRotateAxis(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 axis[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
-    ParSystem *system = work->hPoly;
+    parSystem_t *system = work->hPoly;
     effPCPThunderSpherePolyPart_t *source = &work->pPart[index];
     parCell_t *cell = &system->cells[index];
     u128 *vertices = cell->history;
@@ -735,7 +735,7 @@ void effPCPThunderSphereRotateAxis(effPCPThunderSpherePoly_t *work, s32 index) {
 
 void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *hData) {
     s32 i = 0;
-    ParSystem *renderSystem = hData->hPoly;
+    parSystem_t *renderSystem = hData->hPoly;
     s32 cellCount = hData->head.vector.cellCount;
     u32 tintColor = hData->tintColor;
     effPCPThunderSpherePolyPart_t *cell = hData->pPart;
@@ -828,8 +828,8 @@ void effPCPThunderSphereLowInit(effPCPThunderSpherePoly_t *work, s32 index) {
     effPCPThunderSpherePolyPart_t *cell = work->pPart + index;
     f32 scratchVector[EFF_THUNDER_VECTOR_COMPONENTS];
 
-    cell->wait = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.vector.startDelayRange;
-    cell->refresh = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->wait = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.vector.startDelayRange;
+    cell->refresh = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.vector.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     scratchVector[0] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
     scratchVector[1] = 0;
     scratchVector[2] = (dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT) * EFF_THUNDER_RANDOM_SPAN;
@@ -863,7 +863,7 @@ void effPCPThunderSphereLowRotate(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 origin[4] __attribute__((aligned(16)));
     f32 width[4] __attribute__((aligned(16)));
     f32 rotation[4] __attribute__((aligned(16)));
-    ParSystem *system = work->hPoly;
+    parSystem_t *system = work->hPoly;
     parCell_t *cell = &system->cells[index];
     effPCPThunderSpherePolyPart_t *source;
     u128 *vertices;
@@ -935,7 +935,7 @@ void effPCPThunderSphereLowRotate(effPCPThunderSpherePoly_t *work, s32 index) {
 void effPCPThunderSphereLowRotateAxis(effPCPThunderSpherePoly_t *work, s32 index) {
     f32 axis[4] __attribute__((aligned(16)));
     f32 direction[4] __attribute__((aligned(16)));
-    ParSystem *system = work->hPoly;
+    parSystem_t *system = work->hPoly;
     effPCPThunderSpherePolyPart_t *source = &work->pPart[index];
     parCell_t *cell = &system->cells[index];
     u128 *vertices = cell->history;
@@ -976,7 +976,7 @@ void effPCPThunderSphereLowRotateAxis(effPCPThunderSpherePoly_t *work, s32 index
 
 void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *hData) {
     s32 i = 0;
-    ParSystem *renderSystem = hData->hPoly;
+    parSystem_t *renderSystem = hData->hPoly;
     s32 cellCount = hData->head.vector.cellCount;
     u32 tintColor = hData->tintColor;
     effPCPThunderSpherePolyPart_t *cell = hData->pPart;
@@ -1029,7 +1029,7 @@ EffThunderSparkWork *eff_177850(EffThunderSparkParams *parameters) {
         dds3TrackPolyVCSet(work->sparks[sparkIndex].hPoly, 2, (u32)work->head.dispatchArg, (u32)work->head.dispatchArg);
         dds3TrackPolySetMode(work->sparks[sparkIndex].hPoly, work->head.systemParam);
         func_00177AC8(work, sparkIndex);
-        work->sparks[sparkIndex].frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
+        work->sparks[sparkIndex].frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
     }
     return work;
 }
@@ -1083,7 +1083,7 @@ void func_00177BC0(EffThunderSparkWork *work, s32 index) {
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    ParSystem *system;
+    parSystem_t *system;
     parCell_t *cell;
     u128 *vertices;
     u128 *join;
@@ -1301,7 +1301,7 @@ void eff_178128(EffThunderSparkWork *work) {
             dds3TrackPolyDraw(spark->hPoly);
         }
         if (age >= duration && loop) {
-            spark->frame = -(dds3GetRandA((EffRandState *)dds3EffectBase) % delaySpread);
+            spark->frame = -(dds3GetRandA((effRandState_t *)dds3EffectBase) % delaySpread);
         } else {
             spark->frame++;
         }
@@ -1365,8 +1365,8 @@ void effPCP_ThunderPolySetVCNormal(effPCP_ThunderPoly_t *pThunderPoly) {
 void effPCP_ThunderPolyDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
     effPCP_ThunderPolyPart_t *fragment = &work->pPart[index];
 
-    fragment->wait = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
-    fragment->refresh = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->wait = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.startDelayRange;
+    fragment->refresh = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->abgr = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
@@ -1384,7 +1384,7 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 numbe
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    ParSystem *system = pThunderPoly->hPoly;
+    parSystem_t *system = pThunderPoly->hPoly;
     parCell_t *cell = &system->cells[number];
     u128 *vertices;
     u128 *join;
@@ -1568,7 +1568,7 @@ void effPCP_ThunderPolyPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 numbe
 
 void effPCP_ThunderPolyDraw(effPCP_ThunderPoly_t *hData) {
     s32 i = 0;
-    ParSystem *system = hData->hPoly;
+    parSystem_t *system = hData->hPoly;
     s32 count = hData->head.number;
     u32 restartLimit = hData->head.restartFrameLimit;
     u32 tintColor = hData->color;
@@ -1649,8 +1649,8 @@ void effPCP_ThunderPolyLowSetColor(effPCP_ThunderPoly_t *hData, u32 abgr) {
 void effPCP_ThunderPolyLowDrawOff(effPCP_ThunderPoly_t *work, s32 index) {
     effPCP_ThunderPolyPart_t *fragment = &work->pPart[index];
 
-    fragment->wait = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
-    fragment->refresh = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    fragment->wait = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.startDelayRange;
+    fragment->refresh = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
     fragment->abgr = EFF_THUNDER_NEUTRAL_COLOR;
 }
 
@@ -1668,8 +1668,8 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 nu
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    ParSystem *secondarySystem = pThunderPoly->state.secondarySystem;
-    ParSystem *primarySystem = pThunderPoly->hPoly;
+    parSystem_t *secondarySystem = pThunderPoly->state.secondarySystem;
+    parSystem_t *primarySystem = pThunderPoly->hPoly;
     parCell_t *secondaryCell = &secondarySystem->cells[number];
     parCell_t *primaryCell = &primarySystem->cells[number];
     u128 *vertices;
@@ -1855,9 +1855,9 @@ void effPCP_ThunderPolyLowPartRefresh(effPCP_ThunderPoly_t *pThunderPoly, s32 nu
 
 void effPCP_ThunderPolyLowDraw(effPCP_ThunderPoly_t *hData) {
     s32 index = 0;
-    ParSystem *secondarySystem = hData->state.secondarySystem;
+    parSystem_t *secondarySystem = hData->state.secondarySystem;
     s32 fragmentCount = hData->head.number;
-    ParSystem *primarySystem = hData->hPoly;
+    parSystem_t *primarySystem = hData->hPoly;
     parCell_t *primaryCells = primarySystem->cells;
     u32 tintColor = hData->color;
     effPCP_ThunderPolyPart_t *fragment = hData->pPart;
@@ -1931,8 +1931,8 @@ void effPCP_ThunderRadiatePolyDrawOff(effPCP_ThunderRadiatePoly_t *work, s32 ind
     cell->directionY = centeredRandom + centeredRandom;
     centeredRandom = dds3GetRandFloatA(dds3EffectBase) - EFF_THUNDER_RANDOM_MIDPOINT;
     cell->directionZ = centeredRandom + centeredRandom;
-    cell->delayFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.startDelayRange;
-    cell->activeFrames = dds3GetRandA((EffRandState *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
+    cell->delayFrames = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.startDelayRange;
+    cell->activeFrames = dds3GetRandA((effRandState_t *)dds3EffectBase) % work->head.activeFrameRange + EFF_THUNDER_MIN_ACTIVE_FRAMES;
 }
 
 void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *pThunderRadiatePoly, s32 number) {
@@ -1946,7 +1946,7 @@ void effPCP_ThunderRadiatePolyPartRefresh(effPCP_ThunderRadiatePoly_t *pThunderR
     f32 direction[4] __attribute__((aligned(16)));
     f32 cameraDirection[4] __attribute__((aligned(16)));
     f32 side[4] __attribute__((aligned(16)));
-    ParSystem *system = pThunderRadiatePoly->hPoly;
+    parSystem_t *system = pThunderRadiatePoly->hPoly;
     effPCP_ThunderRadiatePolyPart_t *source = &pThunderRadiatePoly->pPart[number];
     parCell_t *cell = &system->cells[number];
     u128 *vertices;
@@ -2162,7 +2162,7 @@ void effPCP_ThunderPolyListPartRefresh(effPCP_ThunderPoly_t *work, s32 index, co
     f32 stepScale[4] __attribute__((aligned(16)));
     f32 previousSide[4] __attribute__((aligned(16)));
     f32 delta[4] __attribute__((aligned(16)));
-    ParSystem *system = work->hPoly;
+    parSystem_t *system = work->hPoly;
     parCell_t *cell = &system->cells[index];
     u128 *vertices;
     u128 *join;

@@ -51,14 +51,9 @@ def head(text):
     return words[0] if words else None
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--min-votes", type=int, default=2)
-    ap.add_argument("--report", type=Path, help="write a report for hd_align.py")
-    ap.add_argument("--merge-plan", type=Path, help="write a plan for hd_merge.py")
-    args = ap.parse_args()
-
-    base, proto = invented(), protos()
+def collect(base=None):
+    """(votes, why): {our type: Counter(IDB type)} and one evidence line each."""
+    base, proto = base or invented(), protos()
     ours = our_types()
     idb = ida_members.load(ROOT / "config" / "smt3" / "ida_members.txt")
     sizes = project_sizes(ida_sizes())
@@ -105,7 +100,18 @@ def main():
                     continue
                 vote(ours_t, by_offset[off][1],
                      f"{name}: the member at 0x{off:x} is {by_offset[off][1]} in the IDB")
+    return votes, why
 
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--min-votes", type=int, default=2)
+    ap.add_argument("--report", type=Path, help="write a report for hd_align.py")
+    ap.add_argument("--merge-plan", type=Path, help="write a plan for hd_merge.py")
+    args = ap.parse_args()
+
+    ours = our_types()
+    votes, why = collect()
     renames, merges = [], []
     for t, cands in sorted(votes.items()):
         ranked = cands.most_common()
