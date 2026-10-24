@@ -4,8 +4,8 @@
  * and turns it into the channel messages the synthesiser plays.
  * See docs/irx-modules.md.
  *
- * Every chunk is still assembly: the module has no C yet, and the names are
- * the addresses until the IDB has them. */
+ * The chunks still in assembly are the ones no C has been written for yet,
+ * plus the import stubs and the import and export tables between them. */
 
 INCLUDE_ASM("MODMIDI", modmidi_e26);
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Init);
@@ -145,7 +145,43 @@ INCLUDE_ASM("MODMIDI", midiStopAllNotes);
 INCLUDE_ASM("MODMIDI", midiTrackServiceTick);
 INCLUDE_ASM("MODMIDI", midiApplyPlayState);
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiPlaySwitch);
-INCLUDE_ASM("MODMIDI", midiSelectTrack);
+/* FUNC midiSelectTrack */
+int midiSelectTrack(sceMidiSlot_t *slot)
+{
+    sceMidiTrack_t *trk;
+    int i;
+
+    trk = &slot->trk;
+    slot->tick = 0;
+    trk->tick = 0;
+    trk->frac = 0;
+    trk->usPerTick = 0;
+    trk->runStatus = 0;
+    trk->deltaHeld = 0;
+    trk->ctlLoopId = 0xFF;
+    trk->ctlNrpn = 0xFF;
+    trk->ctlLoopCnt = 0xFF;
+    trk->ctlRpn = 0xFF;
+    trk->cur = trk->smfData;
+    for (i = 0; i < 16; i++) {
+        trk->chVol[i] = 0x7F;
+        trk->ch[i].prog = 0xFF;
+        trk->ch[i].bank = 0xFF;
+        trk->ch[i].cc1 = 0xFF;
+        trk->ch[i].cc2 = 0xFF;
+        trk->ch[i].cc5 = 0xFF;
+        trk->ch[i].vol = 0xFF;
+        trk->ch[i].pan = 0xFF;
+        trk->ch[i].expr = 0xFF;
+        trk->ch[i].sustain = 0xFF;
+        trk->ch[i].portamento = 0xFF;
+        trk->ch[i].bend = 0xFFFF;
+    }
+    midiTrackSeekAbsolute(trk);
+    midiTrackReset(trk);
+    return 1;
+}
+/* ENDF midiSelectTrack */
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_SelectMidi);
 INCLUDE_ASM("MODMIDI", modmidi_e16);
 /* FUNC func_00001FE4 */
@@ -165,7 +201,7 @@ void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *
 /* The two return -1 paths come out as one shared tail where retail has
  * two, so the branch arrangement differs. */
 /* FUNC modmidi_sceMidi_MidiSetVolume */
-int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol)
+int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, u8 vol)
 {
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
@@ -328,9 +364,59 @@ int modmidi_e24(sceMidiWork_t *work, int slotNo)
     return trk->tempo;
 }
 /* ENDF modmidi_e24 */
-INCLUDE_ASM("MODMIDI", midiSongStopNotes);
+/* FUNC midiSongStopNotes */
+void midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len)
+{
+    sceMidiTbl_t *tbl;
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    sceMidiVoiceTbl_t *vt;
+    u32 *seg;
+    u32 ofs;
+    u32 ch;
+
+    tbl = work->tbl;
+    /* The pair at sceMidiSeq_t+8 is a {count, pointer} segment of its own. */
+    ofs = (slotNo << 4) | 8;
+    seg = (u32 *)(ofs + (u32)tbl->seq);
+    slot = (sceMidiSlot_t *)seg[1];
+    if (slot != NULL) {
+        trk = &slot->trk;
+        vt = (sceMidiVoiceTbl_t *)&tbl->nVoiceWord;
+        msg &= 0xFFFFF0;
+        for (ch = 0; ch < 16; ch++) {
+            midiSendChMsg(slot, trk, vt, msg | ch, len);
+        }
+    }
+}
+/* ENDF midiSongStopNotes */
 INCLUDE_ASM("MODMIDI", D_00002548);
+/* FUNC midiSongApplyVolume */
+#ifdef NON_MATCHING
+/* Two instructions longer: gcc keeps trk->fadeLeft in $a0 and has to save
+ * work in another register. */
+void midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk)
+{
+    int v;
+    int t;
+
+    if (trk->fadeLeft != 0) {
+        v = (trk->curMidi - trk->nextMidi) * trk->fadeLeft / trk->fadeTicks +
+            trk->nextMidi;
+    } else {
+        v = trk->curMidi;
+    }
+    t = v * trk->songVol;
+    v = t / 128;
+    if (trk->unk12F != v) {
+        modmidi_sceMidi_MidiSetVolume(work, slotNo, 0xFF, v);
+        trk->unk12F = v;
+    }
+}
+#else
 INCLUDE_ASM("MODMIDI", midiSongApplyVolume);
+#endif
+/* ENDF midiSongApplyVolume */
 /* FUNC midiSongLookup */
 int midiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk)
 {

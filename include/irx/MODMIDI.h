@@ -146,11 +146,11 @@ struct sceMidiTrack_t
   u16 chActive;
   u8 chVol[16];
   u8 chExpr[16];
-  struct sceMidiChState_t ch[16];
+  sceMidiChState_t ch[16];
   u8 *songData;
   u8 *songCur;
-  u32 fadeTicks;
-  u32 fadeLeft;
+  int fadeTicks;
+  int fadeLeft;
   u8 nextMidi;
   u8 curMidi;
   u8 songVol;
@@ -161,8 +161,8 @@ struct sceMidiTrack_t
   u8 unk133;
   u16 songSpeed;
   u16 unk136;
-  struct sceMidiRepeat_t repeat[8];
-  struct sceMidiLoop_t loop[8];
+  sceMidiRepeat_t repeat[8];
+  sceMidiLoop_t loop[8];
 };
 
 struct sceMidiSlot_t
@@ -292,7 +292,7 @@ int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on);
 int midiSelectTrack(sceMidiSlot_t *slot);
 int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo);
 int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick);
-int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol);
+int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, u8 vol);
 int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol);
 int modmidi_e19(sceMidiWork_t *work, int slotNo, u8 bpm);
 int modmidi_e20(sceMidiWork_t *work, int slotNo);
@@ -300,8 +300,8 @@ int modmidi_sceMidi_MidiSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed);
 int modmidi_e22(sceMidiWork_t *work, int slotNo);
 int modmidi_e23(sceMidiWork_t *work, int slotNo, int tempo);
 int modmidi_e24(sceMidiWork_t *work, int slotNo);
-int midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len);
-int midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk);
+void midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len);
+void midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk);
 int midiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk);
 void midiSongSelect(sceMidiSlot_t *slot, u8 **songCur);
 int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo);
