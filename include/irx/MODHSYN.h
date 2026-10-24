@@ -434,6 +434,7 @@ struct sceHSynStat_t
   u32 nActive;
   u32 nFree;
   u8 state[2][24];
+  u16 unk38[2][24];
 };
 
 struct sceHSynOption_t
@@ -494,7 +495,7 @@ typedef char __MODHSYN_sizeof_sceHSynSeq_t[(sizeof(sceHSynSeq_t) == 1032) ? 1 : 
 typedef char __MODHSYN_sizeof_sceHSynEntry_t[(sizeof(sceHSynEntry_t) == 16) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynTbl_t[(sizeof(sceHSynTbl_t) == 8) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynWork_t[(sizeof(sceHSynWork_t) == 8) ? 1 : -1];
-typedef char __MODHSYN_sizeof_sceHSynStat_t[(sizeof(sceHSynStat_t) == 56) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynStat_t[(sizeof(sceHSynStat_t) == 152) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynOption_t[(sizeof(sceHSynOption_t) == 12) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynSdLogEnt_t[(sizeof(sceHSynSdLogEnt_t) == 28) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynSdLog_t[(sizeof(sceHSynSdLog_t) == 40) ? 1 : -1];
@@ -553,8 +554,8 @@ int modhsyn_e20(sceHSynWork_t *work, int slotNo);
 int modhsyn_e21(sceHSynWork_t *work, int slotNo);
 int modhsyn_e22(sceHSynWork_t *work, int slotNo, u32 tag, u8 *out, s8 max);
 int modhsyn_e25(sceHSynWork_t *work, int slotNo, u32 *out, int max);
-int modhsyn_e23(int, int, u8, int, char);
-int modhsyn_e24(int, int, u8, int, char);
+int modhsyn_e23(sceHSynWork_t *work, int slotNo, u8 tag, u8 *out, s8 max);
+int modhsyn_e24(sceHSynWork_t *work, int slotNo, u8 tag, u16 *out, s8 max);
 void hsynInitCores();
 void hsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t *at);
 void hsynCoreIndexSet(sceHSynVoice_t *v, sceHSynVoice_t *at);

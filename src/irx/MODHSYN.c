@@ -845,8 +845,112 @@ int modhsyn_e25(sceHSynWork_t *work, int slotNo, u32 *out, int max)
     return n;
 }
 /* ENDF modhsyn_e25 */
-INCLUDE_ASM("MODHSYN", modhsyn_e23);
+/* FUNC modhsyn_e23 */
+int modhsyn_e23(sceHSynWork_t *work, int slotNo, u8 tag, u8 *out, s8 max)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t **head;
+    sceHSynVoice_t **base;
+    int n;
+    int ch;
+    int i;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    if (hsynStat == NULL) {
+        return -1;
+    }
+    if ((slot->flags & 1) != 0) {
+        return -1;
+    }
+    n = 0;
+    ch = 0;
+    base = heads;
+    for (; ch < 16; ch++) {
+        chan = &set->chan[ch];
+        heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+        heads[1] = (sceHSynVoice_t *)chan;
+        heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+        for (i = 0, head = base; i < 3; i++, head++) {
+            end = *head;
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag == tag) {
+                    out[n] = hsynStat->state[v->core][v->index];
+                    n++;
+                    if (n >= max) {
+                        return n;
+                    }
+                }
+            }
+        }
+    }
+    return n;
+}
+/* ENDF modhsyn_e23 */
+#ifdef NON_MATCHING
+/* Same size: two independent preheader instructions, the cached stat
+ * pointer and the hoisted tag mask, come out in the other order. */
+/* FUNC modhsyn_e24 */
+int modhsyn_e24(sceHSynWork_t *work, int slotNo, u8 tag, u16 *out, s8 max)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynChanSet_t *sp;
+    sceHSynStat_t *stat;
+    sceHSynChannel_t *chan;
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t **head;
+    sceHSynVoice_t **base;
+    int n;
+    int ch;
+    int i;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    if (hsynStat == NULL) {
+        return -1;
+    }
+    if ((slot->flags & 1) != 0) {
+        return -1;
+    }
+    n = 0;
+    ch = 0;
+    sp = set;
+    base = heads;
+    stat = hsynStat;
+    for (; ch < 16; ch++) {
+        chan = &sp->chan[ch];
+        heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+        heads[1] = (sceHSynVoice_t *)chan;
+        heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+        for (i = 0, head = base; i < 3; i++, head++) {
+            end = *head;
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag == tag) {
+                    out[n] = stat->unk38[v->core][v->index];
+                    n++;
+                    if (n >= max) {
+                        return n;
+                    }
+                }
+            }
+        }
+    }
+    return n;
+}
+/* ENDF modhsyn_e24 */
+#else
 INCLUDE_ASM("MODHSYN", modhsyn_e24);
+#endif
 INCLUDE_ASM("MODHSYN", hsynInitCores);
 /* FUNC hsynCoreIndexGet */
 void hsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t *at)
