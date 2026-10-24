@@ -59,7 +59,47 @@ int hsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name)
 }
 /* ENDF hsynLoadBank */
 INCLUDE_ASM("MODHSYN", modhsyn_sceHSyn_Load);
-INCLUDE_ASM("MODHSYN", modhsyn_e28);
+/* FUNC modhsyn_e28 */
+int modhsyn_e28(sceHSynWork_t *work, int slotNo, u32 bankIdx)
+{
+    sceHSynTbl_t *tbl;
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynBank_t *bank;
+    u32 unit;
+    int i;
+    int ofs;
+
+    if (work == NULL || bankIdx >= 0x10) {
+        return -1;
+    }
+    tbl = work->tbl;
+    unit = slotNo * 2 + 1;
+    if (unit >= tbl->nEntryWord) {
+        return -1;
+    }
+    slot = (sceHSynSlot_t *)((void **)tbl->entry)[unit * 2 + 1];
+    if (slot == NULL) {
+        return -1;
+    }
+    set = (sceHSynChanSet_t *)&slot->unk14;
+    if (slot->path == 1) {
+        bankIdx = 0;
+    }
+    bank = &set->bank[bankIdx];
+    bank->head = NULL;
+    bank->prog = NULL;
+    bank->sset = NULL;
+    bank->smpl = NULL;
+    bank->vagi = NULL;
+    bank->setb = NULL;
+    bank->spuAddr = 0;
+    for (i = 0, ofs = 4; i < 16; i++, ofs += 0x38) {
+        hsynResetState((sceHSynChannel_t *)((char *)set + ofs), slot);
+    }
+    return 0;
+}
+/* ENDF modhsyn_e28 */
 INCLUDE_ASM("MODHSYN", D_00000714);
 /* FUNC hsynResetState */
 void hsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot)
@@ -315,7 +355,33 @@ INCLUDE_ASM("MODHSYN", func_00000C58);
 #endif
 INCLUDE_ASM("MODHSYN", func_00000D24);
 INCLUDE_ASM("MODHSYN", func_00000E40);
-INCLUDE_ASM("MODHSYN", hsynVoiceSetPitchDirect);
+/* FUNC hsynVoiceSetPitchDirect */
+void hsynVoiceSetPitchDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 hi, u8 lo)
+{
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    s16 bend;
+    int i;
+
+    bend = (hi << 7) + lo - 0x2000;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chNext; v != end; v = v->chNext) {
+            if (tag != 0x7F && v->tag != tag) {
+                continue;
+            }
+            if ((ch & 0x80) == 0 && v->ch != ch) {
+                continue;
+            }
+            hsynSdSetParamPitch(v, bend);
+        }
+    }
+}
+/* ENDF hsynVoiceSetPitchDirect */
 INCLUDE_ASM("MODHSYN", D_0000106C);
 /* FUNC hsynVoiceApplyAll */
 void hsynVoiceApplyAll(sceHSynChannel_t *chan)
@@ -339,7 +405,52 @@ void hsynVoiceRefreshHook(void)
 /* ENDF hsynVoiceRefreshHook */
 INCLUDE_ASM("MODHSYN", hsynVoiceDirectPass);
 INCLUDE_ASM("MODHSYN", hsynVoiceRefresh);
+#ifdef NON_MATCHING
+/* Two instructions short: gcc bases the entry loads on entry+0xC
+ * instead of keeping the +8 segment pointer live. */
+/* FUNC hsynServiceTick */
+void hsynServiceTick(sceHSynEntry_t *entry, int nEntryWord)
+{
+    sceHSynSeq_t *seq;
+    sceHSynSlot_t *slot;
+    u32 *p;
+    u32 *seg;
+    u8 *data;
+    u8 *end;
+    int i;
+    int w;
+    int n;
+
+    i = 0;
+    p = (u32 *)entry;
+    for (w = 1; w < nEntryWord; w += 2) {
+        seg = p + 2;
+        seq = (sceHSynSeq_t *)p[1];
+        slot = (sceHSynSlot_t *)seg[1];
+        if (seq != NULL && slot != NULL) {
+            data = seq->data;
+            n = seq->len + 8;
+            end = (u8 *)seq + n;
+            if (data < end) {
+                seq->len = 0;
+                switch (slot->flags & 1) {
+                case 0:
+                    hsynVoiceRefresh((sceHSynSlot_t *)seg[1], i, data, end);
+                    break;
+                case 1:
+                    func_0000273C((sceHSynSlot_t *)seg[1], i, data, end);
+                    break;
+                }
+            }
+        }
+        p += 4;
+        i++;
+    }
+}
+/* ENDF hsynServiceTick */
+#else
 INCLUDE_ASM("MODHSYN", hsynServiceTick);
+#endif
 INCLUDE_ASM("MODHSYN", func_000017EC);
 INCLUDE_ASM("MODHSYN", modhsyn_e8);
 /* FUNC modhsyn_e26 */
@@ -883,7 +994,61 @@ void hsynSdSetParamVolumeRight(sceHSynVoice_t *v, u8 scale)
     v->unk22 = t;
 }
 /* ENDF hsynSdSetParamVolumeRight */
+#ifdef NON_MATCHING
+/* Two instructions short: gcc enters the second wrap loop at its
+ * bottom test where retail emits a guard with an unfilled delay slot. */
+/* FUNC hsynSdSetParamAdsr */
+void hsynSdSetParamAdsr(sceHSynVoice_t *v, s32 bias)
+{
+    int p;
+    int k;
+    int t;
+    int lo;
+    int hi;
+    int x;
+
+    p = v->prog->unk07;
+    k = v->key->unk11;
+    t = v->tone->unk0D;
+    if (v->unk4E != 0) {
+        lo = p - 0x80;
+        hi = k + t;
+        hi += bias;
+        x = lo + hi;
+        while (x >= 0x80) {
+            x -= 0xFF;
+        }
+        while (x < -0x80) {
+            x += 0xFF;
+        }
+        v->unk1E = x;
+        return;
+    }
+    if (p < 0) {
+        p = -p;
+    }
+    if (k < 0) {
+        k = -k;
+    }
+    if (t < 0) {
+        t = -t;
+    }
+    lo = p - 0x80;
+    hi = k + t;
+    hi += bias;
+    x = lo + hi;
+    if (x < 0) {
+        x = 0;
+    } else if (x >= 0x80) {
+        x = 0x7F;
+    }
+    v->unk53 = 1;
+    v->unk1E = x;
+}
+/* ENDF hsynSdSetParamAdsr */
+#else
 INCLUDE_ASM("MODHSYN", hsynSdSetParamAdsr);
+#endif
 INCLUDE_ASM("MODHSYN", func_00004AE4);
 INCLUDE_ASM("MODHSYN", hsynSdSetParamBend);
 INCLUDE_ASM("MODHSYN", func_00004D90);
@@ -986,7 +1151,43 @@ void func_00005AA0(sceHSynVoice_t *v, u16 scale)
     v->unk22 = t;
 }
 /* ENDF func_00005AA0 */
+#ifdef NON_MATCHING
+/* Two instructions short: the same second-wrap-loop shape as
+ * hsynSdSetParamAdsr. */
+/* FUNC func_00005B4C */
+/* The +4 byte of the program entry is read signed here and unsigned as a key
+ * count in hsynVoiceParamReset, so the cast stands in for a field the struct
+ * cannot hold both ways. */
+void func_00005B4C(sceHSynVoice_t *v)
+{
+    int x;
+
+    x = *(s8 *)&v->prog->nKey;
+    if (v->unk4E != 0) {
+        while (x >= 0x80) {
+            x -= 0xFF;
+        }
+        while (x < -0x80) {
+            x += 0xFF;
+        }
+        v->unk1E = x;
+        return;
+    }
+    if (x < 0) {
+        x = -x;
+    }
+    if (x < 0) {
+        x = 0;
+    } else if (x >= 0x80) {
+        x = 0x7F;
+    }
+    v->unk53 = 1;
+    v->unk1E = x;
+}
+/* ENDF func_00005B4C */
+#else
 INCLUDE_ASM("MODHSYN", func_00005B4C);
+#endif
 INCLUDE_ASM("MODHSYN", D_00005BDC);
 /* FUNC hsynSpu2SettleDelay */
 int hsynSpu2SettleDelay()
