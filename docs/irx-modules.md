@@ -195,7 +195,8 @@ assembly `.rodata`).
 
 ### Where MODHSYN stands
 
-63 of the 218 have C, 136 of them matching. The 29 still bare, smallest first:
+136 functions match and 19 more are equivalent under `NON_MATCHING`. The 29
+still bare, smallest first:
 
 | Chunk | Lines of asm | Note |
 | --- | --- | --- |
