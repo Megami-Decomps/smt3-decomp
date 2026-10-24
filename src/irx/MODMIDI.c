@@ -141,10 +141,101 @@ int midiChannelReset(sceMidiTrack_t *trk, u8 ch)
 }
 /* ENDF midiChannelReset */
 INCLUDE_ASM("MODMIDI", midiPlayEnv);
-INCLUDE_ASM("MODMIDI", midiStopAllNotes);
+/* FUNC midiStopAllNotes */
+int midiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
+{
+    sceMidiTrack_t *trk;
+    u32 ch;
+
+    trk = &slot->trk;
+    for (ch = 0; ch < 16; ch++) {
+        if (trk->chActive & midiChBit[ch]) {
+            midiSendChMsg(slot, trk, vt, ch | 0x40B0, 3);
+            midiSendChMsg(slot, trk, vt, ch | 0x7BB0, 3);
+        }
+    }
+    trk->chActive = 0;
+}
+/* ENDF midiStopAllNotes */
+#ifdef NON_MATCHING
+/* Two instructions swapped: gcc schedules frac = 0 ahead of the vt argument
+ * copy in the block that stops the track. */
+/* FUNC midiTrackServiceTick */
+int midiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
+{
+    sceMidiTrack_t *trk;
+    u32 frac;
+
+    trk = &slot->trk;
+    frac = trk->frac + midiTickScale;
+    for (;;) {
+        if (midiPlayEnv(slot, trk, vt) == 0) {
+            frac = 0;
+            slot->flags &= ~2;
+            midiStopAllNotes(slot, vt);
+            break;
+        }
+        if (frac < trk->usPerTick) {
+            break;
+        }
+        frac -= trk->usPerTick;
+        slot->tick++;
+    }
+    trk->frac = frac;
+}
+/* ENDF midiTrackServiceTick */
+#else
 INCLUDE_ASM("MODMIDI", midiTrackServiceTick);
+#endif
 INCLUDE_ASM("MODMIDI", midiApplyPlayState);
+#ifdef NON_MATCHING
+/* Three registers apart: retail clears the bit in place in the register the
+ * shared store uses, gcc loads into a second temp. */
+/* FUNC modmidi_sceMidi_MidiPlaySwitch */
+int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on)
+{
+    sceMidiTbl_t *tbl;
+    sceMidiVoiceTbl_t *vt;
+    sceMidiSlot_t *slot;
+    u32 flags;
+    u32 unit;
+
+    if (work == NULL) {
+        return -1;
+    }
+    tbl = work->tbl;
+    unit = slotNo * 2 + 1;
+    if (unit >= tbl->nSeqWord) {
+        return -1;
+    }
+    slot = (sceMidiSlot_t *)((void **)tbl->seq)[unit * 2 + 1];
+    if (slot == NULL) {
+        return -1;
+    }
+    vt = (sceMidiVoiceTbl_t *)&tbl->nVoiceWord;
+    if (on != 0) {
+        if (on != 1) {
+            return 0;
+        }
+        if ((slot->flags & 5) != on || slot->midiNo == -1) {
+            return -1;
+        }
+        midiApplyPlayState(slot, vt);
+        flags = slot->flags | 2;
+    } else {
+        if ((slot->flags & 2) == 0) {
+            return 0;
+        }
+        midiStopAllNotes(slot, vt);
+        flags = slot->flags & ~2;
+    }
+    slot->flags = flags;
+    return 0;
+}
+/* ENDF modmidi_sceMidi_MidiPlaySwitch */
+#else
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiPlaySwitch);
+#endif
 /* FUNC midiSelectTrack */
 int midiSelectTrack(sceMidiSlot_t *slot)
 {
@@ -489,11 +580,63 @@ void midiSongSetFlags(sceMidiTrack_t *trk, int val)
     trk->unk133 = val;
 }
 /* ENDF midiSongSetFlags */
-INCLUDE_ASM("MODMIDI", midiSongApplyState);
+/* FUNC midiSongApplyState */
+int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo)
+{
+    sceMidiTrack_t *trk;
+
+    trk = &slot->trk;
+    if (modmidi_sceMidi_SelectMidi(work, slotNo, midiNo) != 0) {
+        return 0;
+    }
+    modmidi_sceMidi_MidiSetAbsolute(work, slotNo, trk->songSpeed);
+    modmidi_e19(work, slotNo, trk->unk133);
+    if (modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 1) != 0) {
+        return 0;
+    }
+    midiSongApplyVolume(work, slotNo, trk);
+    midiSongStopNotes(work, slotNo, (trk->loopCount << 16) | 0xAB0, 3);
+    slot->flags |= 0x200;
+    return 1;
+}
+/* ENDF midiSongApplyState */
 INCLUDE_ASM("MODMIDI", midiSongRepeat);
 INCLUDE_ASM("MODMIDI", midiPlaySong);
 INCLUDE_ASM("MODMIDI", modmidi_e8);
-INCLUDE_ASM("MODMIDI", midiSongServiceTick);
+/* FUNC midiSongServiceTick */
+int midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
+{
+    sceMidiTrack_t *trk;
+    u32 flags;
+    u32 keep;
+    u8 songFlags;
+
+    if ((slot->flags & 0x100) == 0) {
+        return;
+    }
+    trk = &slot->trk;
+    if (trk->fadeLeft != 0) {
+        trk->fadeLeft--;
+        if (trk->fadeLeft == 0) {
+            trk->curMidi = trk->nextMidi;
+        }
+        midiSongApplyVolume(work, slotNo, trk);
+    }
+    flags = slot->flags;
+    if ((flags & 0x202) == 0x202) {
+        return;
+    }
+    songFlags = trk->songFlags;
+    if (songFlags & 1) {
+        keep = flags & 0x700;
+        if (midiSearchPlay(slot, trk, trk->searchId, songFlags & 2) == 0) {
+            return;
+        }
+        slot->flags |= keep;
+    }
+    midiPlaySong(work, slotNo, slot);
+}
+/* ENDF midiSongServiceTick */
 /* FUNC func_000031DC */
 int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol)
 {
