@@ -389,3 +389,28 @@ Matching an invented record against the tree's own conventionally named records
 by layout produced 5,461 candidate pairs for 96 types. A record of a few words
 fits thousands of others, so the only use for layout here is confirming a pair
 some other evidence already named.
+
+## Picking the rest by hand
+
+The types left after all of that are the ones where no rule decides and a person
+has to look. `tools/type_match.py --serve` puts them on a page: our record and a
+candidate's laid out side by side, aligned by offset, with every record in the
+four corpora ranked behind it.
+
+The ranking mixes the IDB slot votes, how many of our offsets and extents the
+candidate reproduces (counted only when both sides have real PS2 layouts),
+agreement between the member names, the closeness of the sizes, and how much of
+our name survives in theirs. Each candidate also says whether `hd_merge.py` could
+take it as it stands or what would hold it up, which separates a decision that
+applies from one that needs the record read first. `/` searches all 5,823 records
+for the one the ranking missed.
+
+Decisions land in `config/smt3/type_decisions.tsv` as they are made, and
+`--write-plans DIR` turns them into the inputs `hd_align.py` and `hd_merge.py`
+already take, so nothing about the apply path or its verification changes.
+
+The first thing it surfaced was a class nothing else had looked for: five of our
+invented records already exist in the tree under a conventional spelling, two
+contributors having named the same record twice. Four of them (`BillRenderPair`
+as `billRenderPair_t`, `EffRandState`, `EffResourceRectDrawParams`, `ParSystem`)
+merged with no member renames at all.
