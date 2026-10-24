@@ -639,10 +639,10 @@ s32 sdfSndInitWorkAreas(void)
     mslot = sdfSndMidiSlotWork;
     i = 0;
     do {
-        sdfSndMidiSeq[i].data = mslot;
-        sdfSndMidiSeq[i].unk08 = 0;
-        sdfSndMidiSeq[i].slot = NULL;
+        sdfSndMidiSeq[i].slot = mslot;
         sdfSndMidiSeq[i].unk00 = 0;
+        sdfSndMidiSeq[i].data = NULL;
+        sdfSndMidiSeq[i].unk08 = 0;
         mslot++;
         i++;
     } while (i < 16);
@@ -1894,7 +1894,7 @@ s32 sdfSndUnloadBank(s32 kind)
     ret = 3;
     if (kind >= 0) {
         sdfSndStopByGroup(kind);
-        sdfSndWorkArea->banks[kind].spuAddr = 0;
+        sdfSndWorkArea->banks[kind].waveSize = 0;
         sdfSndWorkArea->banks[kind].size = 0;
         sdfSndWorkArea->stat[kind].id = -1;
         if (kind == 1) {

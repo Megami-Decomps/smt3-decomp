@@ -459,3 +459,28 @@ and these names describe something else:
   sample entry's `velLow`/`velHigh`, and the *key* split from `ch` against the
   program key's `keyLow`/`keyHigh`, which is the field a key number belongs in.
   Nothing in the retail code settles it, so both names stand.
+
+## Three field mix-ups in SDFSDMAN's C
+
+Found by compiling the driver natively in the sdfplay side project, where the C
+runs rather than only being read. All three are in `NON_MATCHING` bodies, so the
+byte-identical build never noticed, but anything that compiles the C does.
+
+`sdfSndInitWorkAreas` stored the MIDI slot work area in `sdfSndMidiSeq[i].data`
+and cleared `.slot`. Retail does the opposite, and the folded base offset is why
+it reads the wrong way round at a glance: the loop's induction variable starts
+at 8, so `sw $7, %lo(sdfSndMidiSeq + 0x4)($1)` lands on `seq[i] + 0xC`, and the
+two stores through `sdfSndMidiTbl + 0x8` and `+ 0xc` land on `seq[i] + 0x0` and
+`+ 0x4`. Swapped, every `seq[i].slot` is NULL and the sequence thread faults on
+its first tick. Fixed.
+
+`sdfSndUnloadBank` zeroed `banks[kind].spuAddr`. Retail zeroes `+0x14` off
+`workArea + kind*16`, and with `banks` at `workArea + 0x10` that is
+`banks[kind].waveSize`. Zeroing `spuAddr` instead sends the next bank's wave
+upload to SPU2 address 0. Fixed.
+
+`sdfSndLoadSmg` writes `stat[bank].kind` as one `u16`. Retail does two byte
+stores, `sb` at `stat[kind] + 4` and `+ 5`, from two separate `lbu`s of the
+header's `kindPacked` word. So the field is two `u8`s rather than a halfword.
+Left alone: the evidence says the shape but not what the second byte means, and
+the bank selection uses `kindPacked >> 24`, which is neither of them.
