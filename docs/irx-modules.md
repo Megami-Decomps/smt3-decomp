@@ -31,8 +31,8 @@ The remaining chunks are import stubs and the tables between them.
 Sony's three are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
 feeds it, and `MODMSIN`, the message queue between them. They are what plays a
 `.SMG` bank, so the sound driver's bank path is almost entirely calls into them,
-and the USA and Maniax discs ship the same files byte for byte. `MODMSIN` and
-`MODMIDI` are complete; `MODHSYN` is part way.
+and the USA and Maniax discs ship the same files byte for byte. All three are
+complete: every function has C.
 
 ## The toolchain
 
@@ -43,10 +43,9 @@ driver does. `-O2` reproduces the code; the first function tried,
 allocation and the `div` trap expansion.
 
 The same compiler and flags reproduce Sony's three modules, which is not a
-given, since those came from Sony's own build rather than Atlus's. The four in
-`MODHSYN` that have C were byte-exact as written, sign extension, two-branch
-clamps and delay-slot filling included, so `iop-gcc 2.95.2-102` has not been
-needed for them either.
+given, since those came from Sony's own build rather than Atlus's. Sign
+extension, two-branch clamps and delay-slot filling all come out of 2.8.1
+unaided, so `iop-gcc 2.95.2-102` has not been needed for them either.
 
 Linking uses the decompals `ld`, since iop-gcc ships none. Registers are
 written numerically in the asm: gas 2.8 predates the o32 aliases, the same
@@ -132,8 +131,7 @@ the container section above for why the rounding matters.
 `src/irx/<module>.c` owns `.text`. It started as nothing but `INCLUDE_ASM`
 lines in link order; decompiling a function means replacing its line with the
 C body in the same place, so the function stays where it was. Every function
-in the three SDF modules now has C; Sony's three are nearly all still
-assembly.
+in all six modules now has C.
 
 What stays `INCLUDE_ASM` with no C, and always will: the IRX import stubs
 (`jr $ra` plus the import id) and the import and export tables between them,
@@ -191,53 +189,41 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
 | `MODMIDI.IRX` | 62 | 41 | 13 |
-| `MODHSYN.IRX` | 218 | 137 | 22 |
+| `MODHSYN.IRX` | 218 | 148 | 36 |
 
 ### Where MODHSYN stands
 
-137 functions match and 22 more are equivalent under `NON_MATCHING`. The 25
-still bare, smallest first:
+Every function has C. 148 match and 36 are equivalent under `NON_MATCHING`;
+nothing is bare. The remaining chunks are the IRX import stubs and the tables
+between them, which never become C.
 
-| Chunk | Lines of asm | Note |
-| --- | --- | --- |
-| `func_00008350` | 47 | a nine-argument forwarder; blocked again, see below |
-| `hsynVoiceKeyOff` | 118 | |
-| `func_000017EC` | 122 | |
-| `hsynVoiceDirectPass` | 124 | sibling of the matched `hsynVoiceUpdatePass`; expect another switch |
-| `hsynServiceVoices` | 125 | |
-| `func_00000050` | 129 | |
-| `hsynEffectDispatch` | 131 | jump table; steps the LFO through `sceHSynEnv_t::wave` |
-| `hsynInitCores` | 131 | |
-| `hsynVoicePitchCommit` | 142 | |
-| `func_00004614` | 146 | |
-| `hsynVoiceEventDispatch` | 149 | jump table; the `0xB0` arm of `hsynVoiceUpdatePass` |
-| `hsynModulationApply` | 153 | |
-| `hsynVoiceUpdatePathB` | 153 | |
-| `func_00004D90` | 192 | |
-| `modhsyn_sceHSyn_Load` | 200 | |
-| `hsynSeqInterpretA`, `hsynSeqInterpretB` | 243 each | jump tables; the LFO state machines |
-| `hsynVoiceUpdatePathA` | 247 | |
-| `func_00007F54` | 266 | note-on, the simple program path |
-| `hsynVoiceKeyOnPathB` | 298 | |
-| `hsynVoiceKeyOnPathA` | 304 | |
-| `func_0000AB90` | 345 | jump table; six arguments, called by the matched `func_000021B8` |
-| `hsynVoiceEngineStep` | 366 | |
-| `func_000078D4` | 434 | note-on, the key/sample/vag search |
-| `func_0000273C` | 553 | jump table |
+Six of the 36 cannot match at all while `.rodata` is assembly: their switch
+compiles to a jump table whose `L_<address>` case labels the assembly
+`.rodata` already defines, so a C body leaves them undefined and the *link*
+fails. They are `hsynEffectDispatch`, `hsynVoiceEventDispatch`,
+`hsynSeqInterpretA`, `hsynSeqInterpretB`, `func_0000AB90` and `func_0000273C`.
 
-Six of those have jump tables, listed in the table above, and so cannot match
-while `.rodata` is assembly: the assembly `.rodata` already holds each one's
-`L_<address>` case labels, so replacing the body leaves them undefined and the
-link fails. Write the C, guard it under `NON_MATCHING` and move on. MODMIDI's
-`midiPlaySong` and `midiPlayEnv` went that way.
+The other 30 break down as:
 
-`func_00008350` is still blocked, for a different reason than before. The
-generated header now does give it prototypes for `func_000078D4` and
-`func_00007F54`, but those two prototypes are wrong where it matters: the
-forwarder sign-extends its seventh argument (`sll`/`sra 24`) on the way
-through, which only happens for an `int` or `s8` formal, while the database
-declares both callees' seventh parameter `u8`. Recovering the two callees'
-real parameter types is the way in, and both are on the list above anyway.
+| Function | Why |
+| --- | --- |
+| `hsynInitCores` | four instructions out of place: gcc schedules the outer loop's preheader after the list-head stores |
+| `func_00004614` | one short: gcc keeps `envB.level` live into the second arm where retail reloads it |
+| `hsynVoiceUpdatePathB` | one short: gcc keeps `v->vag` live across two halfword stores |
+| `func_00008350` | byte-identical but for one register pair |
+| `modhsyn_sceHSyn_Load` | six short: gcc cross-jumps the two identical bank-clearing blocks |
+| `hsynVoiceEngineStep`, `func_000078D4`, `func_00007F54` | the retail bodies spill a dozen values to the frame; a C body of this shape keeps them in registers |
+| the other 22 | inherited from earlier agents |
+
+Three of the four large note-on paths (`func_000078D4`, `func_00007F54`,
+`hsynVoiceEngineStep`) share one shape: walk the program's key list, the sample
+set and the sample entries, resolve a VAG, free a voice by one of four
+escalating strategies, then fill the voice and call `hsynVoiceUpdatePathA` or
+`PathB`. Reading one makes the other two quick.
+
+`func_00008350` is settled: it is a nine-argument forwarder whose `path`
+selects `func_000078D4` or `func_00007F54`, and the recovered parameter types
+are in [IDB corrections](idb-corrections.md).
 
 ### Where MODMIDI stands
 

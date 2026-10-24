@@ -85,6 +85,18 @@ function by hand: the remaining difference is usually one of them.
   `<< 8` over 254 spelling.
 - **Force reassociation with a local.** `msg = (vol << 16) | 0x7B0; ... ch | msg`
   holds where the same expression in parentheses does not.
+- **A `u8` destination folds `x & 0xFF` into a move; an `int` destination keeps
+  the `andi`.** `hsynVoiceDirectPass` passes a masked copy of a byte to a `u8`
+  formal and to the test that guards it; only `int vel = val & 0xFF;` leaves the
+  `andi` in place for both.
+- **A variable reused for a second load of the same width loses gcc's
+  knowledge of its bits**, so a later narrowing conversion is emitted rather
+  than elided. `hsynVoiceDirectPass` reads two bytes into one local for that
+  reason, and the register sharing follows.
+- **A pointer cast with the base added first keeps retail's operand order.**
+  `(u8 *)slot + idx * sizeof(sceHSynChannel_t) + 0x18` gives
+  `addu base, idx*56` then `addiu 0x18`, where `&slot->chan[idx]` folds the
+  `0x18` into the index arithmetic and adds the base last.
 
 ## Loops
 
@@ -120,6 +132,12 @@ function by hand: the remaining difference is usually one of them.
   `addu $2,$16,$0 / slt / bne / addiu $16,$16,1` latch, where
   `for (i = 0; i < n; i++)` compares the post-increment value directly and
   saves the copy.
+- **Two early-exit sites that each increment the counter give it the lower
+  callee-saved register, and cross-jumping merges them back.** `hsynServiceVoices`
+  has one `n++` block in retail; writing it once leaves the counter one register
+  too high, and writing `goto skip`/`goto skip2` with an `n++` behind each label
+  doubles the reference count, wins the register, and still comes out as one
+  block.
 - **A counter shared with a later loop gets the callee-saved register.**
   Reusing one variable as both the slot index and the following loop's counter
   is what gives it `$16` and the induction-variable copy; two separate
@@ -150,6 +168,15 @@ function by hand: the remaining difference is usually one of them.
   than `+` is what yields `ori`, and the `ofs + (u32)ptr` operand order picks the
   destination register. It does not always hold: `hsynServiceTick` is two short
   because gcc bases the entry loads on `entry+0xC` anyway.
+- **An array written back to front wants a pointer local.** Two or more stores
+  to `sym[n]`, `sym[n-1]`, ... keep the symbol itself as the `%lo` base only if
+  the address comes from a local pointer; writing `sym[1] = 0; sym[0] = 0;`
+  directly makes gcc base them on `sym+4`. `hsynInitCores` clears six arrays
+  that way and `func_00000050` one.
+- **Indexing a cached base beats a self-incrementing pointer when the uses are
+  at two offsets.** `entry[slotNo].seq` and `entry[slotNo].slot` reduce to one
+  pointer based at the entry; `entry++` with the same two uses biases the
+  pointer by the larger offset and reads the other one negatively.
 - **An index table counts 8-byte units, not entries**, and the unit
   subexpression has to be shared with the bounds check or gcc emits
   `sll 4 / lw 0xC`.
@@ -217,6 +244,19 @@ spelling the shared statement differently) all leave the merge in place:
 `jump.c` runs after the shape of the C stops mattering. `midiParseMetaEvent`,
 `modmidi_e8`, `midiSongRepeat` and `midiSearchPlay` are each one or a few
 instructions short for this reason.
+
+**A load retail recomputes.** Where retail loads the same field twice with the
+two loads separated only by stores to other fields of the same object, gcc's
+CSE keeps the first value live and the function comes out one instruction
+short. `func_00004614` (`envB.level` across a branch) and
+`hsynVoiceUpdatePathB` (`v->vag` across two halfword stores) are the recorded
+cases; a local for the first read, a pointer local for the stores and
+reordering the arms all leave the CSE in place.
+
+**A heavily spilled body.** `hsynVoiceEngineStep`, `func_000078D4` and
+`func_00007F54` each park a dozen values in frame slots and reload them every
+time. A C body with the same locals keeps them in registers instead, and the
+spill pattern is not reachable from the source.
 
 **A store to a global immediately before a test.** gas refuses to move the
 second half of a `sw reg, sym` macro into the following branch's delay slot, so

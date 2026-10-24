@@ -541,3 +541,85 @@ untyped `u32 *seg` instead.
 | --- | --- | --- | --- |
 | `sceHSynVoice_t::unk1E` | `u16` | `s16` | `func_00004AE4` reads it with `lh` and negates it when it comes out below zero; a `u16` field makes gcc emit `lhu`. Nothing else in the module loads the field, so the change is contained |
 | `hsynVoiceRefreshHook` | `void(void)` | `void(sceHSynSlot_t *slot, u8 *data, int len)` | the body is `jr $ra` and settles nothing, but `hsynVoiceRefresh` sets up all three argument registers before the call: the slot, the start of the system-exclusive run and the byte count it just scanned |
+
+## Applied on 2026-10-25: the last of MODHSYN
+
+All in the `DDS3_IRX/MODHSYN` database, found while finishing the module's
+remaining 25 functions. A byte-identical build of the function concerned is the
+proof except where noted.
+
+### Member types
+
+| Type | Member | Was | Now | Proof |
+| --- | --- | --- | --- | --- |
+| `sceHSynVoice_t` | `unk28` (+0x28) | `u16` | `s16` | `hsynInitCores` stores -1 there; a `u16` field makes gcc build the constant with `ori 0xFFFF` where retail has `addiu -1` |
+| `sceHSynVoice_t` | `vol` (+0x56) | `u8` | `s8` | the same function stores -0x80; a `u8` field makes gcc emit `addiu 0x80` |
+
+Both fields are read *both* ways by `hsynVoiceUpdatePathA`, which has `lb` and
+`lbu` of +0x56 and `lh` and `lhu` of +0x28 within twenty instructions. The
+store settles the declared type and the unsigned reads take a cast, the same
+split already recorded for `sceSmgProgEnt_t`'s +4.
+
+### Functions that return nothing
+
+Six more where no path sets `$2` and the callers discard the result:
+`hsynVoicePitchCommit`, `func_00004614`, `hsynVoiceUpdatePathA`,
+`hsynVoiceUpdatePathB`, `hsynVoiceKeyOnPathA`, `hsynVoiceKeyOnPathB`.
+
+`hsynVoiceKeyOff` is `int(void)`, not `int(sceHSynVoice_t *)`: it walks both
+cores' lists itself and never reads `$4`.
+
+### Prototypes the retail code settled
+
+| Function | Was | Now |
+| --- | --- | --- |
+| `hsynVoiceDirectPass` | `int(int, int, u8, u8 *)` | `void(sceHSynSlot_t *slot, int status, u8 sel, u8 *p)`; it reaches `slot + 0x18 + idx*56`, which is `slot->chan[idx]` |
+| `hsynModulationApply` | `int(u16, u8, int, int)` | `sceHSynVoice_t *(u16, u8, int, int)`; it is the third copy of the `hsynVoiceEnvelopeAdvance` voice stealer and returns the voice it took |
+| `hsynEffectDispatch` | `int(char *)` | `int(sceHSynEnv_t *env)`; it steps the env and calls through `env->wave` |
+| `hsynSeqInterpretA` | `int(int, ...)` | `void(sceHSynEnv_t *env, ...)`, matching `hsynSeqInterpretB` |
+| `hsynSeqInterpretB` | ninth argument unnamed | `void(sceHSynEnv_t *, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)` |
+| `hsynVoiceEventDispatch` | second parameter `u8 *` | `sceHSynChannel_t *`; every arm is a channel-field write or a `sceHSynChannel_t *` call |
+
+### The nine-argument forwarder and its two callees
+
+`func_00008350` is `int(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, u8 a6, int a7, u16 a8, u32 a9)`:
+it reads `slot->path` and forwards to `func_000078D4` for 0, `func_00007F54`
+for 1, and returns -1 otherwise. The retail code pins the two callees' narrow
+parameters by which conversions the forwarder emits:
+
+| Parameter | Forwarder | `func_000078D4` | `func_00007F54` |
+| --- | --- | --- | --- |
+| a2 | `int` | `int` | `int` |
+| a5 | `u8` | `u8` (passed with no conversion) | `int` (passed with `andi 0xFF`) |
+| a6 | `u8` | `int` | `int` |
+| a7 | `int` | `s8` (`sll`/`sra 24` at the call) | `s8` |
+| a8 | `u16` | `int` (`andi 0xFFFF`) | `int` |
+
+A conversion appears only where the two types differ, so each `andi` or
+`sll`/`sra` in the forwarder names one callee formal. `a2` must be `int` in all
+three: `char` to `char` would be re-extended, which is three instructions the
+forwarder does not have.
+
+### Names the code disproves
+
+Still no renames, but these are now read:
+
+- `func_000078D4`, `func_00007F54` and `hsynVoiceEngineStep` are one family:
+  walk the program's key list, the sample set and the sample entries, resolve a
+  VAG, free a voice by one of four escalating strategies, then fill the voice.
+  `func_000078D4` and `func_00007F54` set `unk57 = 1` and bump `hsynRelCount`
+  where `hsynVoiceEngineStep` sets 0 and bumps `hsynActiveCount`, so the first
+  two start a release-tail voice and the third a plain one.
+- `hsynSeqInterpretA` and `B` are not interpreters. They install one of six
+  waveform readers in `sceHSynEnv_t::wave`, convert a period and a depth into
+  `unk02` and `unk0C` through `hsynTickScale`, and seed the phase. They differ
+  only in which four bytes of `sceSmgProgEnt_t` they read, B's being A's plus 4.
+- `func_0000273C` is the system-exclusive dispatcher: it resyncs on 0xFE, reads
+  a 32-bit tag and a command byte, and routes the 0x90/0xA0 nibbles to
+  `func_00008350`, 0xB0 through a 35-entry table of channel commands, and 0xC0
+  to a smaller table of voice-allocation commands.
+- `func_0000AB90` is a parameter-ramp setter writing a 14-word block at
+  `sceHSynVoice_t::param`, so `param[56]` is a struct of fourteen `int`s.
+- `func_00004D90` returns the number of voices it serviced, which
+  `func_000017EC` stores in `sceHSynStat_t::nFree`; `hsynServiceVoices` returns
+  the number it *skipped*, stored in `nActive`. Both names are backwards.
