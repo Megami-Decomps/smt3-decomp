@@ -3416,7 +3416,24 @@ int hsynVoiceReleaseGroup(int chan, u16 vnum)
 /* ENDF hsynVoiceReleaseGroup */
 INCLUDE_ASM("MODHSYN", func_000078D4);
 INCLUDE_ASM("MODHSYN", func_00007F54);
+#ifdef NON_MATCHING
+/* Byte-identical apart from one register pair: gcc gives a8 the lower
+ * call-clobbered register where retail gives it to a7. */
+/* FUNC func_00008350 */
+int func_00008350(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, u8 a6, int a7, u16 a8, u32 a9)
+{
+    switch (slot->path) {
+    case 0:
+        return func_000078D4(slot, a2, a3, a4, a5, a6, a7, a8, a9);
+    case 1:
+        return func_00007F54(slot, a2, a3, a4, a5, a6, a7, a8, a9);
+    }
+    return -1;
+}
+#else
 INCLUDE_ASM("MODHSYN", func_00008350);
+#endif
+/* ENDF func_00008350 */
 /* FUNC hsynVoiceMaskClearOne */
 sceHSynVoice_t *hsynVoiceMaskClearOne(u8 allocHint)
 {
