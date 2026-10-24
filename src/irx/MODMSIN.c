@@ -1,6 +1,6 @@
 #include "MODMSIN.h"
 
-extern u8 D_00000300[];
+extern u8 msinLibraryTable[];
 
 /* MODMSIN.IRX, Sony's MIDI message input module: the queue
  * sceMSIn_PutMsg writes into, which the synthesiser drains.
@@ -16,7 +16,7 @@ int modmsin_e10(void)
     s32 res;
 
     intrman_CpuSuspendIntr(&state);
-    res = loadcore_ReleaseLibraryEntries(D_00000300);
+    res = loadcore_ReleaseLibraryEntries(msinLibraryTable);
     intrman_CpuResumeIntr(state);
     return res != 0;
 }
@@ -163,7 +163,7 @@ int modmsin_e9(sceMSInWork_t *work, u32 port, const u8 *msg)
     return msinBufferAppend(work, port, msg, len);
 }
 /* ENDF modmsin_e9 */
-INCLUDE_ASM("MODMSIN", D_00000300);
+INCLUDE_ASM("MODMSIN", msinLibraryTable);
 /* FUNC modmsin_e3 */
 void modmsin_e3(void)
 {

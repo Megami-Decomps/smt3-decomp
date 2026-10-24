@@ -415,7 +415,7 @@ int hsynChannelStateGet(sceHSynVoice_t *v)
 }
 /* ENDF hsynChannelStateGet */
 INCLUDE_ASM("MODHSYN", func_0000AB90);
-INCLUDE_ASM("MODHSYN", D_0000B000);
+INCLUDE_ASM("MODHSYN", hsynLibraryTable);
 /* FUNC hsynRetnStub */
 void hsynRetnStub(void)
 {

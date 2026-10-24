@@ -560,7 +560,7 @@ int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
 /* ENDF modmidi_sceMidi_SongSetAbsolute */
 INCLUDE_ASM("MODMIDI", midiSearchPlay);
 INCLUDE_ASM("MODMIDI", modmidi_e13);
-INCLUDE_ASM("MODMIDI", D_000036C0);
+INCLUDE_ASM("MODMIDI", midiLibraryTable);
 /* FUNC modmidi_e3 */
 void modmidi_e3(void)
 {
