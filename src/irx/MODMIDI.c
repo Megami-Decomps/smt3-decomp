@@ -570,7 +570,168 @@ int midiChannelReset(sceMidiTrack_t *trk, u8 ch)
     return v;
 }
 /* ENDF midiChannelReset */
+/* FUNC midiPlayEnv */
+#ifdef NON_MATCHING
+/* Cannot match while .rodata is assembly: the controller switch compiles to
+ * a jump table, and the table in the assembly .rodata already holds this
+ * body's case labels, so a table emitted from the C file will not link. */
+int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
+{
+    u8 *p;
+    u8 status;
+    u8 d1;
+    u8 d2;
+    u32 msg;
+    u32 idx;
+    int len;
+    int ch;
+
+    while (slot->tick >= trk->tick) {
+        p = trk->cur;
+        status = p[0];
+        trk->cur = p + 1;
+        if (status & 0x80) {
+            d1 = p[1];
+            trk->cur = p + 2;
+        } else {
+            d1 = status;
+            if (trk->runStatus == 0) {
+                if (midiDebug != 0) {
+                    stdio_printf(aPlayenvRunning, status, trk->runStatus);
+                }
+                return 0;
+            }
+            status = trk->runStatus;
+        }
+        if (status >= 0xF0) {
+            trk->deltaHeld = 0;
+            switch (status) {
+            case 0xF0:
+                midiParseExcEvent(slot, trk, vt);
+                break;
+            case 0xF7:
+                midiReadDeltaTime(trk);
+                break;
+            case 0xFF:
+                if (midiParseMetaEvent(slot, trk, d1) == 0) {
+                    return 0;
+                }
+                break;
+            default:
+                if (midiDebug != 0) {
+                    stdio_printf(aPlayenvUnknown, status);
+                }
+                return 0;
+            }
+        } else {
+            msg = status | (d1 << 8);
+            trk->runStatus = status;
+            ch = status & 0xF;
+            d2 = 0;
+            len = 2;
+            switch (status & 0xF0) {
+            case 0x80:
+            case 0xD0:
+                break;
+            case 0xC0:
+                trk->ch[ch].prog = d1 & 0x7F;
+                break;
+            case 0x90:
+            case 0xE0:
+                p = trk->cur;
+                d2 = p[0];
+                trk->cur = p + 1;
+                msg |= d2 << 16;
+                len = 3;
+                if (status >= 0xE0) {
+                    trk->ch[ch].bend = msg >> 8;
+                }
+                break;
+            case 0xA0:
+                if (trk->smfHdr == NULL) {
+                    p = trk->cur;
+                    d2 = p[0];
+                    trk->cur = p + 1;
+                    msg |= d2 << 16;
+                    len = 3;
+                    break;
+                }
+                idx = (ch | (d1 & 0xF0)) << 1;
+                len = 3;
+                if (idx >= *(u16 *)(trk->smfHdr + 2)) {
+                    len = 0;
+                    break;
+                }
+                msg = trk->smfHdr[idx + 4] | (trk->smfHdr[idx + 5] << 8);
+                msg |= (((d1 & 0xF) << 3) | 7) << 16;
+                break;
+            case 0xB0:
+                p = trk->cur;
+                d2 = p[0];
+                trk->cur = p + 1;
+                msg |= d2 << 16;
+                len = 3;
+                switch (d1) {
+                case 0:
+                    trk->ch[ch].bank = d2 & 0x7F;
+                    break;
+                case 1:
+                    trk->ch[ch].cc1 = d2 & 0x7F;
+                    break;
+                case 2:
+                    trk->ch[ch].cc2 = d2 & 0x7F;
+                    break;
+                case 5:
+                    trk->ch[ch].cc5 = d2 & 0x7F;
+                    break;
+                case 7:
+                    trk->chVol[ch] = d2 & 0x7F;
+                    trk->ch[ch].vol = d2 & 0x7F;
+                    d2 = (d2 & 0x80) | midiChannelReset(trk, ch);
+                    msg = (msg & 0xFFFF) | (d2 << 16);
+                    break;
+                case 10:
+                    trk->ch[ch].pan = d2 & 0x7F;
+                    break;
+                case 11:
+                    trk->ch[ch].expr = d2 & 0x7F;
+                    break;
+                case 32:
+                    slot->chanMask[ch] = 1 << (d2 & 0xF);
+                    break;
+                case 64:
+                    trk->ch[ch].sustain = d2 & 0x7F;
+                    break;
+                case 65:
+                    trk->ch[ch].portamento = d2 & 0x7F;
+                    break;
+                case 6:
+                case 38:
+                case 98:
+                case 99:
+                    midiScanLoops(slot, trk, status, d1, d2 & 0x7F, (int)vt);
+                    break;
+                }
+                break;
+            default:
+                if (midiDebug != 0) {
+                    stdio_printf(aPlayenvUnknown, status);
+                }
+                return 0;
+            }
+            if (len != 0) {
+                midiSendChMsg(slot, trk, vt, msg, len);
+            }
+            trk->deltaHeld = (d1 | d2) & 0x80;
+        }
+        midiTrackReset(trk);
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM("MODMIDI", midiPlayEnv);
+#endif
+/* ENDF midiPlayEnv */
 /* FUNC midiStopAllNotes */
 int midiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
 {
@@ -1335,7 +1496,134 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
 INCLUDE_ASM("MODMIDI", midiSongRepeat);
 #endif
 /* ENDF midiSongRepeat */
+/* FUNC midiPlaySong */
+#ifdef NON_MATCHING
+/* Cannot match while .rodata is assembly: the switch compiles to a jump
+ * table, and the table in the assembly .rodata already holds this body's
+ * case labels, so a table emitted from the C file will not link. */
+void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
+{
+    sceMidiTrack_t *trk;
+    u8 *p;
+    u8 c;
+    u8 cmd;
+    u8 arg;
+
+    trk = &slot->trk;
+    while (slot->flags & 0x100) {
+        p = trk->songCur;
+        c = p[0];
+        trk->songCur = p + 1;
+        if (c != 0xA0) {
+            if (midiDebug != 0) {
+                stdio_printf(aPlaysongUnknow, c);
+            }
+            modmidi_e8(work, slotNo, 0);
+            return;
+        }
+        cmd = p[1];
+        trk->songCur = p + 2;
+        arg = p[2];
+        trk->songCur = p + 3;
+        switch (cmd) {
+        case 0:
+            if (midiSongApplyState(work, slotNo, slot, arg) != 0) {
+                return;
+            }
+            trk->songFlags &= 0xFB;
+            break;
+        case 1:
+            midiSongSetTempo(trk, arg);
+            break;
+        case 2:
+            midiSongSetTempo(trk, arg + trk->curMidi);
+            break;
+        case 3:
+            midiSongSetTempo(trk, trk->curMidi - arg);
+            break;
+        case 4:
+            midiSongSetLoopCount(trk, arg);
+            break;
+        case 5:
+            midiSongSetLoopCount(trk, arg + trk->loopCount);
+            break;
+        case 6:
+            midiSongSetLoopCount(trk, trk->loopCount - arg);
+            break;
+        case 7:
+            trk->fadeTicks = arg * 12800000 / midiTickScale;
+            break;
+        case 8:
+            if (trk->curMidi == arg) {
+                trk->fadeLeft = 0;
+            } else {
+                trk->fadeLeft = trk->fadeTicks;
+            }
+            if (trk->fadeLeft != 0) {
+                trk->nextMidi = arg;
+            } else {
+                midiSongSetTempo(trk, arg);
+            }
+            break;
+        case 0x11:
+            if (trk->songFlags & 4) {
+                p = trk->songCur;
+                c = p[0];
+                if (c != 0xA1) {
+                    if (midiDebug != 0) {
+                        stdio_printf(aPlaysongLoopOf, c);
+                    }
+                    modmidi_e8(work, slotNo, 0);
+                    return;
+                }
+                trk->songCur = p + 3;
+            } else if (midiSongRepeat(slot, arg) == 0) {
+                modmidi_e8(work, slotNo, 0);
+                return;
+            }
+            break;
+        case 0x21:
+            midiSongSetFlags(trk, arg);
+            break;
+        case 0x22:
+            midiSongSetFlags(trk, arg + trk->unk133);
+            break;
+        case 0x23:
+            midiSongSetFlags(trk, trk->unk133 - arg);
+            break;
+        case 0x7F:
+            switch (arg) {
+            case 0:
+                modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
+                midiSongStopNotes(work, slotNo, 0x78B0, 3);
+                break;
+            case 1:
+                modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
+                break;
+            case 0x7F:
+                slot->flags = (slot->flags & ~0x300) | 0x400;
+                break;
+            default:
+                if (midiDebug != 0) {
+                    stdio_printf(aPlaysongUnknow_0, arg);
+                }
+                modmidi_e8(work, slotNo, 0);
+                return;
+            }
+            break;
+        default:
+            if (midiDebug != 0) {
+                stdio_printf(aPlaysongUnknow_1, cmd);
+            }
+            modmidi_e8(work, slotNo, 0);
+            return;
+        }
+    }
+}
+#else
 INCLUDE_ASM("MODMIDI", midiPlaySong);
+#endif
+/* ENDF midiPlaySong */
 /* FUNC modmidi_e8 */
 #ifdef NON_MATCHING
 /* Four bytes long: gcc reloads the slot pointer for the shared

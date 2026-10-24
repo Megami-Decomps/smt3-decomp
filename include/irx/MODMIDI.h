@@ -311,7 +311,7 @@ void midiSongSetLoopCount(sceMidiTrack_t *trk, int val);
 void midiSongSetFlags(sceMidiTrack_t *trk, int val);
 int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo);
 int midiSongRepeat(sceMidiSlot_t *slot, u8 count);
-int midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
+void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
 int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode);
 void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
 int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol);
