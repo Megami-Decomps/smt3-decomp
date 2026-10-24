@@ -188,9 +188,20 @@ assembly `.rodata`).
 | `SDFIOP.IRX` | 5 | 5 | 0 |
 | `SDFIOPFL.IRX` | 6 | 6 | 0 |
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
-| `MODMSIN.IRX` | 12 | 0 | 0 |
-| `MODMIDI.IRX` | 62 | 0 | 0 |
-| `MODHSYN.IRX` | 219 | 4 | 0 |
+| `MODMSIN.IRX` | 12 | 12 | 0 |
+| `MODMIDI.IRX` | 62 | 31 | 5 |
+| `MODHSYN.IRX` | 219 | 89 | 8 |
+
+Two things only Sony's modules turned up, both about delay slots and neither
+fixable from the C:
+
+- `gas` refuses to move the second half of a `sw reg, sym` macro expansion
+  into a following branch's delay slot, where the retail assembler put it. Any
+  function whose last act before a test is a store to a global is a nop long;
+  `modhsyn_e16` is the smallest case.
+- where retail fills a slot by moving the fall-through's first instruction
+  down, gcc sometimes copies the branch target's instead and keeps both, which
+  costs one instruction.
 
 The three that cannot match while `.rodata` is assembly are
 `sdfSndGetVolTable`, `sdfSndLoadSmg` and `sdfSndDrvRpcInit`: each compiles its

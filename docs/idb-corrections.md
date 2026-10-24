@@ -294,3 +294,44 @@ table the sequencer calls its voice table is that module's buffer table.
 So one queue per slot, which `MODMSIN` appends to and the synthesiser drains.
 The type is now `sceMSInBuf_t` with `size`, `len` and `data`, the array is
 `sdfSndMsInBuf`, and both pointers into it are called `buf`.
+
+## Sony's sound modules, from the retail code
+
+All of these come from a byte-identical build of the function that uses them,
+in the `DDS3_IRX/MODHSYN` and `DDS3_IRX/MODMIDI` databases.
+
+Prototypes:
+
+- `hsynVoiceFlagsSet` is `void(sceHSynChannel_t *, u8)`; a signed second
+  parameter gives `sll/sra 24` where retail has `andi 0xFF`.
+- `hsynUnrefTableSetB`, `hsynUnrefTableSetC` and `hsynVolumeScale` return `u8`;
+  `hsynTableEntryFill` returns `int` and masks a `u8` local itself, which is
+  why its callers mask again.
+- `hsynCmdReset` takes `u8 **`: it reads a variable-length value and writes the
+  cursor back through the pointer every byte.
+- `hsynParamSlotResolve` is
+  `int(sceHSynWork_t *, int, sceHSynSlot_t **, sceHSynChanSet_t **)`. Its
+  second output is `(sceHSynChanSet_t *)&slot->unk14`, so `+4` from there is
+  `chan[0]`; `modhsyn_e10`/`e11`/`e12`/`e13`/`e14`/`e20`/`e21` all reach the
+  channels that way rather than through the slot.
+- `modhsyn_e20`, `modhsyn_e21` take `(sceHSynWork_t *, int)`.
+- `hsynVoiceAllocExport20` and `hsynVoiceReleaseExport21` take
+  `sceHSynChannel_t *`.
+- `hsynSeqStateReset` takes `sceHSynLfo_t *`, not an env.
+- `hsynSdSetParamEnvelope` is `void(sceHSynVoice_t *)`.
+- `hsynEffectDepthSet` is `int(sceHSynLfo_t *)` and `hsynEffectFeedbackSet`
+  `int(sceHSynVoice_t *)`, the latter working on `voice->lfoB`.
+- `hsynModulationStep` is `int(u16, u8)` and `hsynModulationApply`
+  `int(u16, u8, int, int)`.
+- `hsynBuildAdsr1`/`hsynBuildAdsr2` take the note as `int`: a `u8` parameter
+  would be masked before the subtraction and retail copies it as is.
+- `hsynAdjustFieldByKey`'s shift is `int`, not `s8`; `srav`/`sllv` use it with
+  no sign extension.
+- `func_00000C58` is `void(sceHSynChannel_t *, u8)` and `hsynVolumeScale`'s
+  third parameter is `u8 *`.
+
+`sceHSynChannel_t` fields, each settled by a signed load or by a `-1` constant
+shared with a byte store:
+
+- `unk26` and `unk28` are `s16` (`lh`, and `addiu -1` rather than `ori 0xFFFF`)
+- `unk30` and `unk31` are `s8`
