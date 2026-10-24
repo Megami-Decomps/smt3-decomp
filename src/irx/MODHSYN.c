@@ -1235,7 +1235,75 @@ void hsynSdSetParamAdsr(sceHSynVoice_t *v, s32 bias)
 INCLUDE_ASM("MODHSYN", hsynSdSetParamAdsr);
 #endif
 INCLUDE_ASM("MODHSYN", func_00004AE4);
-INCLUDE_ASM("MODHSYN", hsynSdSetParamBend);
+/* FUNC hsynSdSetParamBend */
+u32 hsynSdSetParamBend(sceHSynVoice_t *v)
+{
+    sceSmgSmplEnt_t *tone;
+    sceSmgProgKey_t *key;
+    u32 r;
+    u32 prod;
+    int t;
+    int m;
+    int num;
+
+    tone = v->tone;
+    key = v->key;
+    r = 0x10000;
+    if (v->vel >= tone->unk03) {
+        m = tone->velHigh;
+        m &= 0x80;
+        if (m != 0) {
+            t = tone->velHigh & 0x7F;
+            if (t != tone->unk03) {
+                t++;
+                num = t - v->vel;
+                t = t - tone->unk03;
+                r = (u32)(num << 16) / (u32)t;
+            }
+        }
+    } else {
+        m = tone->velLow;
+        m &= 0x80;
+        if (m != 0) {
+            t = tone->velLow & 0x7F;
+            if (t != tone->unk03) {
+                t--;
+                num = v->vel - t;
+                t = tone->unk03 - t;
+                r = (u32)(num << 16) / (u32)t;
+            }
+        }
+    }
+    if (v->ch >= key->unk03) {
+        m = key->keyHigh;
+        m &= 0x80;
+        if (m != 0) {
+            t = key->keyHigh & 0x7F;
+            if (t != key->unk03) {
+                t++;
+                num = t - v->ch;
+                prod = r * num;
+                t = t - key->unk03;
+                r = prod / (u32)t;
+            }
+        }
+    } else {
+        m = key->keyLow;
+        m &= 0x80;
+        if (m != 0) {
+            t = key->keyLow & 0x7F;
+            if (t != key->unk03) {
+                t--;
+                num = v->ch - t;
+                prod = r * num;
+                t = key->unk03 - t;
+                r = prod / (u32)t;
+            }
+        }
+    }
+    return r;
+}
+/* ENDF hsynSdSetParamBend */
 INCLUDE_ASM("MODHSYN", func_00004D90);
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOff);
 /* FUNC hsynVoiceStateClear */
@@ -1398,7 +1466,43 @@ int hsynSpu2SettleDelay()
 }
 /* ENDF hsynSpu2SettleDelay */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocScan);
-INCLUDE_ASM("MODHSYN", hsynVoiceMaskUpdate);
+/* FUNC hsynVoiceMaskUpdate */
+int hsynVoiceMaskUpdate(sceHSynVoice_t *v)
+{
+    sceHSynChanSet_t *set;
+    u8 *st;
+    int n;
+
+    set = v->slotp;
+    v->flags = 0;
+    n = set->nActive;
+    if (n != 0) {
+        set->nActive = n - 1;
+    }
+    if (v->unk57 == 0) {
+        n = hsynActiveCount;
+        if (n != 0) {
+            hsynActiveCount = n - 1;
+        }
+    } else if (v->unk57 == 1) {
+        n = hsynRelCount;
+        if (n != 0) {
+            hsynRelCount = n - 1;
+        }
+    }
+    hsynVoiceMaskGet(v);
+    hsynFreeCount[v->core]++;
+    hsynCoreIndexGet(v, (sceHSynVoice_t *)hsynFreeList[v->core]);
+    if (hsynStat != NULL) {
+        st = &hsynStat->state[v->core][v->index];
+        *st &= 0x8F;
+    }
+    v->tag = 0xFF;
+    v->unk57 = 0xFF;
+    v->unk58 = 0xFF;
+    return 0xFF;
+}
+/* ENDF hsynVoiceMaskUpdate */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocByPriority);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocByChannel);
 /* FUNC hsynVoiceStop */
@@ -1552,8 +1656,98 @@ int hsynModulationStep(u16 a, u8 b)
     return hsynModulationApply(a, b, on, done);
 }
 /* ENDF hsynModulationStep */
-INCLUDE_ASM("MODHSYN", hsynPanApply);
-INCLUDE_ASM("MODHSYN", hsynLfoStep);
+/* FUNC hsynPanApply */
+sceHSynVoice_t *hsynPanApply(s16 vnum0, char allocHint)
+{
+    sceHSynVoice_t *best;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynChanSet_t *set;
+    u8 sel;
+    u16 vnum;
+    int i;
+    int n;
+
+    sel = allocHint;
+    i = 1;
+    best = NULL;
+    vnum = vnum0 + 1;
+    if ((allocHint & 0x30) == 0) {
+        sel = 0x30;
+    }
+    do {
+        if ((sel & hsynCoreBit[i]) != 0) {
+            end = (sceHSynVoice_t *)hsynActiveList[i];
+            for (v = end->prev; v != end; v = v->prev) {
+                if (v->vnum < vnum) {
+                    vnum = v->vnum;
+                    best = v;
+                }
+            }
+        }
+        i--;
+    } while (i != -1);
+    if (best != NULL) {
+        set = best->slotp;
+        n = set->nActive;
+        if (n != 0) {
+            set->nActive = n - 1;
+        }
+        if (best->unk57 == 0) {
+            n = hsynActiveCount;
+            if (n != 0) {
+                hsynActiveCount = n - 1;
+            }
+        } else if (best->unk57 == 1) {
+            n = hsynRelCount;
+            if (n != 0) {
+                hsynRelCount = n - 1;
+            }
+        }
+        hsynVoiceSlotSet(best);
+        hsynVoiceMaskGet(best);
+        best->flags = 0;
+        best->tag = 0xFF;
+        best->unk57 = 0xFF;
+        best->unk58 = 0xFF;
+    }
+    return best;
+}
+/* ENDF hsynPanApply */
+/* FUNC hsynLfoStep */
+int hsynLfoStep(int chan, u8 pitch, u8 min)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int n;
+    int i;
+
+    n = 0;
+    heads[0] = (sceHSynVoice_t *)(chan + 8);
+    heads[1] = (sceHSynVoice_t *)(chan - 8);
+    for (i = 0; i < 2; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = v->chPrev) {
+            if (v->pitch == pitch) {
+                n++;
+            }
+        }
+    }
+    if (min >= n) {
+        return 0;
+    }
+    for (i = 0; i < 2; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = v->chPrev) {
+            if (v->pitch == pitch) {
+                v = hsynLfoApply(v, i == 1);
+            }
+        }
+    }
+    return 1;
+}
+/* ENDF hsynLfoStep */
 INCLUDE_ASM("MODHSYN", D_00008914);
 /* FUNC hsynUnrefParamGetA */
 int hsynUnrefParamGetA(u8 a, u8 b)
@@ -2437,7 +2631,64 @@ void func_0000A930(u32 *out, int wrap, s8 pan)
     }
 }
 /* ENDF func_0000A930 */
+#ifdef NON_MATCHING
+/* One instruction short: retail copies the pan value into the shift temp
+   before shifting it in place, which no form of the expression reproduces. */
+/* FUNC func_0000A9FC */
+int func_0000A9FC(sceHSynVoice_t *v)
+{
+    int *p;
+    int state;
+    int n;
+    int x;
+
+    state = *(int *)v->param;
+    p = (int *)v->param;
+    if (state == 1) {
+        if ((u32)p[9] >= (u32)p[6]) {
+            n = p[7];
+            p[9] = 0;
+            if (n != 0) {
+                n--;
+                p[7] = n;
+                if (n == 0) {
+                    if (p[8] != 0) {
+                        p[7] = 1;
+                        p[8] = 0;
+                        p[6] = p[10];
+                    } else {
+                        p[7] = -1;
+                        p[9] = p[6];
+                    }
+                }
+            }
+            if ((u32)p[9] >= (u32)p[6]) {
+                goto stop;
+            }
+        }
+        x = p[3] + p[5] * p[9];
+        if (x > 0x7F000) {
+            x -= 0xFF000;
+        } else if (x < -0x7FFFF) {
+            x += 0xFF000;
+        }
+        p[2] = x;
+        x = x / 4096;
+        goto done;
+stop:
+        x = p[4];
+        p[0] = 2;
+        p[2] = x << 12;
+done:
+        p[9]++;
+        func_0000A930((u32 *)&p[11], v->unk4E, x);
+    }
+    return 0;
+}
+/* ENDF func_0000A9FC */
+#else
 INCLUDE_ASM("MODHSYN", func_0000A9FC);
+#endif
 /* FUNC hsynChannelStateGet */
 int hsynChannelStateGet(sceHSynVoice_t *v)
 {

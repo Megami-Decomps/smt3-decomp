@@ -611,7 +611,7 @@ int hsynVoiceReleaseGroup(int, u16);
 sceHSynVoice_t *hsynVoiceMaskClearOne(u8 allocHint);
 int hsynModulationApply(u16 a, u8 b, int on, int done);
 int hsynModulationStep(u16 a, u8 b);
-int hsynPanApply(s16, char);
+sceHSynVoice_t *hsynPanApply(s16, char);
 int hsynLfoStep(int, u8, u8);
 int hsynUnrefParamGetA(u8, u8);
 int hsynUnrefParamGetB(u8, u8);
