@@ -3,8 +3,8 @@
 /* MODHSYN.IRX, Sony's SPU2 synthesiser: it owns the voices and the envelopes,
  * and a .SMG's bank is loaded into it. See docs/irx-modules.md.
  *
- * Every chunk is still assembly: the module has no C yet, and the names are
- * the addresses until the IDB has them. */
+ * The chunks still in assembly are the ones no C has been written for yet,
+ * plus the import stubs and the import and export tables between them. */
 
 INCLUDE_ASM("MODHSYN", modhsyn_e30);
 INCLUDE_ASM("MODHSYN", D_00000044);
@@ -23,9 +23,19 @@ INCLUDE_ASM("MODHSYN", hsynVoiceSetAttack);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetRelease);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetVolumeLeft);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetVolumeRight);
-INCLUDE_ASM("MODHSYN", hsynVoiceFlagsGet);
+/* FUNC hsynVoiceFlagsGet */
+int hsynVoiceFlagsGet(sceHSynChannel_t *chan, u8 semitones)
+{
+    chan->bendRange = semitones * 20;
+}
+/* ENDF hsynVoiceFlagsGet */
 INCLUDE_ASM("MODHSYN", hsynVoiceFlagsSet);
-INCLUDE_ASM("MODHSYN", hsynVoiceIndexGet);
+/* FUNC hsynVoiceIndexGet */
+void hsynVoiceIndexGet(sceHSynChannel_t *chan, u8 val)
+{
+    chan->unk34 = val;
+}
+/* ENDF hsynVoiceIndexGet */
 INCLUDE_ASM("MODHSYN", func_00000C58);
 INCLUDE_ASM("MODHSYN", func_00000D24);
 INCLUDE_ASM("MODHSYN", func_00000E40);
@@ -74,12 +84,58 @@ INCLUDE_ASM("MODHSYN", modhsyn_e25);
 INCLUDE_ASM("MODHSYN", modhsyn_e23);
 INCLUDE_ASM("MODHSYN", modhsyn_e24);
 INCLUDE_ASM("MODHSYN", hsynInitCores);
-INCLUDE_ASM("MODHSYN", hsynCoreIndexGet);
-INCLUDE_ASM("MODHSYN", hsynCoreIndexSet);
-INCLUDE_ASM("MODHSYN", hsynVoiceMaskGet);
-INCLUDE_ASM("MODHSYN", hsynVoiceSlotGet);
+/* FUNC hsynCoreIndexGet */
+void hsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t *at)
+{
+    sceHSynVoice_t *p;
+
+    v->prev = at;
+    p = at->next;
+    v->next = p;
+    at->next = v;
+    p->prev = v;
+}
+/* ENDF hsynCoreIndexGet */
+/* FUNC hsynCoreIndexSet */
+void hsynCoreIndexSet(sceHSynVoice_t *v, sceHSynVoice_t *at)
+{
+    sceHSynVoice_t *p;
+
+    v->next = at;
+    p = at->prev;
+    v->prev = p;
+    at->prev = v;
+    p->next = v;
+}
+/* ENDF hsynCoreIndexSet */
+/* FUNC hsynVoiceMaskGet */
+void hsynVoiceMaskGet(sceHSynVoice_t *v)
+{
+    v->next->prev = v->prev;
+    v->prev->next = v->next;
+}
+/* ENDF hsynVoiceMaskGet */
+/* FUNC hsynVoiceSlotGet */
+void hsynVoiceSlotGet(sceHSynVoice_t *v, sceHSynVoice_t **head)
+{
+    sceHSynVoice_t *n;
+
+    /* head points at the chNext/chPrev pair of the list's sentinel. */
+    v->chPrev = (sceHSynVoice_t *)((u8 *)head - 8);
+    n = head[0];
+    v->chNext = n;
+    head[0] = v;
+    n->chPrev = v;
+}
+/* ENDF hsynVoiceSlotGet */
 INCLUDE_ASM("MODHSYN", D_00003734);
-INCLUDE_ASM("MODHSYN", hsynVoiceSlotSet);
+/* FUNC hsynVoiceSlotSet */
+void hsynVoiceSlotSet(sceHSynVoice_t *v)
+{
+    v->chNext->chPrev = v->chPrev;
+    v->chPrev->chNext = v->chNext;
+}
+/* ENDF hsynVoiceSlotSet */
 INCLUDE_ASM("MODHSYN", hsynServiceVoices);
 /* FUNC hsynEnvRateLookup */
 s16 hsynEnvRateLookup(s16 delta, s32 base, s32 bias)
@@ -152,7 +208,12 @@ INCLUDE_ASM("MODHSYN", hsynVoiceAllocForCmd);
 INCLUDE_ASM("MODHSYN", hsynVoiceMaskSet);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocExport20);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathB);
-INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathBEntry);
+/* FUNC hsynVoiceAllocPathBEntry */
+int hsynVoiceAllocPathBEntry(int a, int b)
+{
+    return hsynVoiceAllocPathB(a + 0x18, b);
+}
+/* ENDF hsynVoiceAllocPathBEntry */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathC);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathCEntry);
 INCLUDE_ASM("MODHSYN", hsynVoiceReleaseExport21);
@@ -201,8 +262,21 @@ INCLUDE_ASM("MODHSYN", hsynUnrefTableSetA);
 INCLUDE_ASM("MODHSYN", hsynUnrefTableSetB);
 INCLUDE_ASM("MODHSYN", hsynUnrefTableSetC);
 INCLUDE_ASM("MODHSYN", hsynVolumeScale);
-INCLUDE_ASM("MODHSYN", hsynSeqByteRead);
-INCLUDE_ASM("MODHSYN", hsynSeqWordRead);
+/* FUNC hsynSeqByteRead */
+int hsynSeqByteRead(sceHSynEnv_t *env)
+{
+    return (s16)((env->unk1C - 0x8000) >> 1);
+}
+/* ENDF hsynSeqByteRead */
+/* FUNC hsynSeqWordRead */
+int hsynSeqWordRead(sceHSynEnv_t *env)
+{
+    u32 t;
+
+    t = 0xFFFF - env->unk1C;
+    return (s16)((t - 0x8000) >> 1);
+}
+/* ENDF hsynSeqWordRead */
 INCLUDE_ASM("MODHSYN", hsynSeqVarLenRead);
 INCLUDE_ASM("MODHSYN", hsynSeqSkip);
 INCLUDE_ASM("MODHSYN", hsynSeqSeek);
