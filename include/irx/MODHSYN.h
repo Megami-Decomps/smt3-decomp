@@ -576,7 +576,7 @@ u16 hsynAdjustFieldByKey(u16 field, s8 scale, int keyDelta, u16 mask, int shift)
 u16 hsynBuildAdsr1(int note, sceSmgSmplEnt_t *tone);
 u16 hsynBuildAdsr2(int note, sceSmgSmplEnt_t *tone);
 void hsynVoiceUpdatePathA(sceHSynVoice_t *v);
-int hsynVoiceKeyOnPathA(sceHSynVoice_t *v);
+void hsynVoiceKeyOnPathA(sceHSynVoice_t *v);
 void hsynVoicePitchCommit(sceHSynVoice_t *v);
 void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend);
 void func_00004614(sceHSynVoice_t *v);
@@ -591,7 +591,7 @@ int func_00004D90();
 int hsynVoiceKeyOff();
 int hsynVoiceStateClear(sceHSynVoice_t *v);
 void hsynVoiceUpdatePathB(sceHSynVoice_t *v);
-int hsynVoiceKeyOnPathB(sceHSynVoice_t *v);
+void hsynVoiceKeyOnPathB(sceHSynVoice_t *v);
 void hsynEnvAttackStep(sceHSynVoice_t *v, u8 scale);
 void hsynEnvDecayStep(sceHSynVoice_t *v, u8 scale);
 void func_00005AA0(sceHSynVoice_t *v, u16 scale);

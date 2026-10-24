@@ -783,7 +783,7 @@ void hsynVoiceDirectPass(sceHSynSlot_t *slot, int status, u8 sel, u8 *p)
     u8 a;
     u8 b;
     u8 tag;
-    int note;
+    u32 note;
     int val;
     int vel;
 
@@ -2113,7 +2113,79 @@ void hsynVoiceUpdatePathA(sceHSynVoice_t *v)
     }
 }
 /* ENDF hsynVoiceUpdatePathA */
-INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathA);
+/* FUNC hsynVoiceKeyOnPathA */
+void hsynVoiceKeyOnPathA(sceHSynVoice_t *v)
+{
+    sceSmgSmplEnt_t *tone;
+    u32 clk[2];
+    u32 bit;
+    u16 ent;
+    int core;
+    int idx;
+    u32 note;
+    u8 *st;
+
+    idx = v->index;
+    core = v->core;
+    tone = v->tone;
+    ent = core | (idx << 1);
+    bit = 1 << idx;
+    func_00004614(v);
+    if (v->vag != NULL) {
+        hsynNoiseMask[v->core] &= ~bit;
+        hsynVoicePitchCommit(v);
+        hsynSdSetAddr(ent | 0x2040, v->spuAddr + v->vag->spuOfs);
+        hsynSdSetParam(ent | 0x300, hsynBuildAdsr1(v->ch, tone));
+        hsynSdSetParam(ent | 0x400, hsynBuildAdsr2(v->ch, tone));
+        if ((*((u8 *)v->vag + 6) & 1) == 0) {
+            v->flags |= 1;
+        }
+    } else {
+        note = v->ch;
+        if (note >= 0x40) {
+            note = 0x3F;
+        }
+        hsynSdSetCoreAttr(v->core | 8, note);
+        hsynNoiseMask[v->core] |= bit;
+    }
+    hsynSdSetSwitch(v->core | 0x1400, hsynNoiseMask[v->core]);
+    if ((tone->allocHint & 1) != 0) {
+        hsynMixMaskL[v->core][0] |= bit;
+    } else {
+        hsynMixMaskL[v->core][0] &= ~bit;
+    }
+    if ((tone->allocHint & 2) != 0) {
+        hsynMixMaskL[v->core][1] |= bit;
+    } else {
+        hsynMixMaskL[v->core][1] &= ~bit;
+    }
+    if ((tone->allocHint & 4) != 0) {
+        hsynMixMaskR[v->core][0] |= bit;
+    } else {
+        hsynMixMaskR[v->core][0] &= ~bit;
+    }
+    if ((tone->allocHint & 8) != 0) {
+        hsynMixMaskR[v->core][1] |= bit;
+    } else {
+        hsynMixMaskR[v->core][1] &= ~bit;
+    }
+    hsynSdSetSwitch(v->core | 0x1800, hsynMixMaskL[v->core][0]);
+    hsynSdSetSwitch(v->core | 0x1A00, hsynMixMaskL[v->core][1]);
+    hsynSdSetSwitch(v->core | 0x1900, hsynMixMaskR[v->core][0]);
+    hsynSdSetSwitch(v->core | 0x1B00, hsynMixMaskR[v->core][1]);
+    hsynKeyOnPending[v->core] |= bit;
+    hsynLastKeyOnCore = v->core;
+    hsynLastKeyOnVoice = v->index;
+    thbase_GetSystemTime(clk);
+    thbase_SysClock2USec(clk, &hsynSettleTimeHi, &hsynSettleTimeLo);
+    v->state = 3;
+    v->flags = v->flags & 0xFFF7;
+    if (hsynStat != NULL) {
+        st = hsynStat->state[v->core];
+        st[v->index] = (st[v->index] & 0x8F) | 0x20;
+    }
+}
+/* ENDF hsynVoiceKeyOnPathA */
 /* FUNC hsynVoicePitchCommit */
 void hsynVoicePitchCommit(sceHSynVoice_t *v)
 {
@@ -2121,7 +2193,7 @@ void hsynVoicePitchCommit(sceHSynVoice_t *v)
     u32 r;
     int lvl;
     int pitch;
-    int note;
+    u32 note;
     int fine;
     int center;
     int tmp;
@@ -2762,7 +2834,79 @@ void hsynVoiceUpdatePathB(sceHSynVoice_t *v)
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathB);
 #endif
 /* ENDF hsynVoiceUpdatePathB */
-INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathB);
+/* FUNC hsynVoiceKeyOnPathB */
+void hsynVoiceKeyOnPathB(sceHSynVoice_t *v)
+{
+    sceSmgProgEnt_t *prog;
+    u32 clk[2];
+    u32 bit;
+    u16 ent;
+    int core;
+    int idx;
+    u32 note;
+    u8 *st;
+
+    idx = v->index;
+    core = v->core;
+    prog = v->prog;
+    ent = core | (idx << 1);
+    bit = 1 << idx;
+    func_00004614(v);
+    if (v->vag != NULL) {
+        hsynNoiseMask[v->core] &= ~bit;
+        hsynVoicePitchCommit(v);
+        hsynSdSetAddr(ent | 0x2040, v->spuAddr + v->vag->spuOfs);
+        hsynSdSetParam(ent | 0x300, *(u16 *)&prog->unk0E);
+        hsynSdSetParam(ent | 0x400, *(u16 *)&prog->unk10[0]);
+        if ((*((u8 *)v->vag + 6) & 1) == 0) {
+            v->flags |= 1;
+        }
+    } else {
+        note = v->ch;
+        if (note >= 0x40) {
+            note = 0x3F;
+        }
+        hsynSdSetCoreAttr(v->core | 8, note);
+        hsynNoiseMask[v->core] |= bit;
+    }
+    hsynSdSetSwitch(v->core | 0x1400, hsynNoiseMask[v->core]);
+    if ((prog->unk0D & 1) != 0) {
+        hsynMixMaskL[v->core][0] |= bit;
+    } else {
+        hsynMixMaskL[v->core][0] &= ~bit;
+    }
+    if ((prog->unk0D & 2) != 0) {
+        hsynMixMaskL[v->core][1] |= bit;
+    } else {
+        hsynMixMaskL[v->core][1] &= ~bit;
+    }
+    if ((prog->unk0D & 4) != 0) {
+        hsynMixMaskR[v->core][0] |= bit;
+    } else {
+        hsynMixMaskR[v->core][0] &= ~bit;
+    }
+    if ((prog->unk0D & 8) != 0) {
+        hsynMixMaskR[v->core][1] |= bit;
+    } else {
+        hsynMixMaskR[v->core][1] &= ~bit;
+    }
+    hsynSdSetSwitch(v->core | 0x1800, hsynMixMaskL[v->core][0]);
+    hsynSdSetSwitch(v->core | 0x1A00, hsynMixMaskL[v->core][1]);
+    hsynSdSetSwitch(v->core | 0x1900, hsynMixMaskR[v->core][0]);
+    hsynSdSetSwitch(v->core | 0x1B00, hsynMixMaskR[v->core][1]);
+    hsynKeyOnPending[v->core] |= bit;
+    hsynLastKeyOnCore = v->core;
+    hsynLastKeyOnVoice = v->index;
+    thbase_GetSystemTime(clk);
+    thbase_SysClock2USec(clk, &hsynSettleTimeHi, &hsynSettleTimeLo);
+    v->state = 3;
+    v->flags = v->flags & 0xFFF7;
+    if (hsynStat != NULL) {
+        st = hsynStat->state[v->core];
+        st[v->index] = (st[v->index] & 0x8F) | 0x20;
+    }
+}
+/* ENDF hsynVoiceKeyOnPathB */
 /* FUNC hsynEnvAttackStep */
 void hsynEnvAttackStep(sceHSynVoice_t *v, u8 scale)
 {
