@@ -451,7 +451,29 @@ int modhsyn_e14(sceHSynWork_t *work, int slotNo)
     return 0;
 }
 /* ENDF modhsyn_e14 */
-INCLUDE_ASM("MODHSYN", modhsyn_e9);
+/* FUNC modhsyn_e9 */
+int modhsyn_e9(sceHSynCore_t *c)
+{
+    sceSdEffectAttr_t attr;
+    int on;
+
+    attr.core = c->core;
+    attr.depth_L = c->depthL;
+    attr.depth_R = c->depthR;
+    attr.delay = c->delay;
+    attr.feedback = c->feedback;
+    attr.mode = hsynChannelMap[c->mode & 0xF];
+    on = attr.mode != 0;
+    if ((c->mode & 0x100) != 0) {
+        attr.mode |= 0x100;
+    }
+    hsynSdSetEffectAttr(c->core, &attr);
+    hsynSdSetCoreAttr((u16)c->core | 2, on);
+    hsynSdSetParam((u16)c->core | 0xB80, c->volL);
+    hsynSdSetParam((u16)c->core | 0xC80, c->volR);
+    return 0;
+}
+/* ENDF modhsyn_e9 */
 /* FUNC modhsyn_e15 */
 int modhsyn_e15(sceHSynStat_t *stat)
 {
@@ -815,8 +837,52 @@ s32 hsynSdSetParamVolume(sceHSynVoice_t *v, s8 scale, u8 a, u8 b)
         / 65536;
 }
 /* ENDF hsynSdSetParamVolume */
-INCLUDE_ASM("MODHSYN", hsynSdSetParamVolumeLeft);
-INCLUDE_ASM("MODHSYN", hsynSdSetParamVolumeRight);
+/* FUNC hsynSdSetParamVolumeLeft */
+void hsynSdSetParamVolumeLeft(sceHSynVoice_t *v, u8 scale)
+{
+    int t;
+
+    t = (scale * v->prog->unk22) / 128;
+    t += v->unk51;
+    if (t >= 0x80) {
+        t = 0x7F;
+    } else if (t < -0x80) {
+        t = -0x80;
+    }
+    v->unk4F = t;
+    t = (scale * v->prog->unk23) / 128;
+    t += v->unk52;
+    if (t >= 0x80) {
+        t = 0x7F;
+    } else if (t < -0x80) {
+        t = -0x80;
+    }
+    v->unk50 = t;
+}
+/* ENDF hsynSdSetParamVolumeLeft */
+/* FUNC hsynSdSetParamVolumeRight */
+void hsynSdSetParamVolumeRight(sceHSynVoice_t *v, u8 scale)
+{
+    int t;
+
+    t = (scale * v->prog->unk1C) / 128;
+    t += v->unk24;
+    if (t > 0x7FFF) {
+        t = 0x7FFF;
+    } else if (t < -0x8000) {
+        t = -0x8000;
+    }
+    v->unk20 = t;
+    t = (scale * v->prog->unk1E) / 128;
+    t += v->unk26;
+    if (t > 0x7FFF) {
+        t = 0x7FFF;
+    } else if (t < -0x8000) {
+        t = -0x8000;
+    }
+    v->unk22 = t;
+}
+/* ENDF hsynSdSetParamVolumeRight */
 INCLUDE_ASM("MODHSYN", hsynSdSetParamAdsr);
 INCLUDE_ASM("MODHSYN", func_00004AE4);
 INCLUDE_ASM("MODHSYN", hsynSdSetParamBend);
@@ -953,11 +1019,56 @@ INCLUDE_ASM("MODHSYN", hsynVoiceStop);
 INCLUDE_ASM("MODHSYN", hsynVoiceRelease);
 INCLUDE_ASM("MODHSYN", hsynVoiceStealScan);
 INCLUDE_ASM("MODHSYN", hsynVoiceEngineStep);
-INCLUDE_ASM("MODHSYN", hsynVoiceMaskClear);
+/* FUNC hsynVoiceMaskClear */
+sceHSynVoice_t *hsynVoiceMaskClear(u8 allocHint)
+{
+    sceHSynVoice_t *v;
+    int idx;
+    int n;
+
+    switch (allocHint & 0x30) {
+    case 0x10:
+        idx = 0;
+        break;
+    case 0x20:
+        idx = 1;
+        break;
+    default:
+        idx = hsynFreeCount[0] < hsynFreeCount[1];
+        break;
+    }
+    n = hsynFreeCount[idx];
+    if (n == 0) {
+        return NULL;
+    }
+    hsynFreeCount[idx] = n - 1;
+    v = hsynFreeList[idx][1];
+    hsynVoiceMaskGet(v);
+    return v;
+}
+/* ENDF hsynVoiceMaskClear */
 INCLUDE_ASM("MODHSYN", hsynVoiceEnvelopeAdvance);
 INCLUDE_ASM("MODHSYN", hsynVoiceVolumeAdvance);
 INCLUDE_ASM("MODHSYN", hsynVoiceRetrigger);
-INCLUDE_ASM("MODHSYN", hsynLfoApply);
+/* FUNC hsynLfoApply */
+sceHSynVoice_t *hsynLfoApply(sceHSynVoice_t *v, int keyOff)
+{
+    sceHSynVoice_t *next;
+
+    next = v->chNext;
+    if ((v->flags & 8) != 0) {
+        hsynVoiceSlotSet(v);
+        hsynVoiceMaskSet(v);
+        return next;
+    }
+    if (keyOff == 1) {
+        hsynKeyOffPending[v->core] |= keyOff << v->index;
+    }
+    hsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
+    hsynVoiceReleaseOne(v);
+    return next;
+}
+/* ENDF hsynLfoApply */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocForCmd);
 /* FUNC hsynVoiceMaskSet */
 int hsynVoiceMaskSet(sceHSynVoice_t *v)
@@ -1117,7 +1228,35 @@ int func_00008C1C(u8 from, u8 to)
 /* ENDF func_00008C1C */
 INCLUDE_ASM("MODHSYN", func_00008C88);
 INCLUDE_ASM("MODHSYN", func_00008D54);
+#ifdef NON_MATCHING
+/* Same size and instructions: gcc coalesces `curve` into the dying `sel`
+ * register where retail gives it one of its own. */
+/* FUNC hsynVolumeCurveLookup */
+int hsynVolumeCurveLookup(u8 a, u8 b, u8 sel, u8 *tbl, int nTbl)
+{
+    u32 curve;
+    int idx;
+
+    idx = sel >> 4;
+    if (a == 0) {
+        a = 1;
+    }
+    idx--;
+    if (idx != -1 && idx < nTbl) {
+        tbl += idx * 126;
+        a = tbl[a - 1];
+        b = tbl[b - 1];
+    }
+    curve = sel & 0xF;
+    if (curve >= 11) {
+        curve = 0;
+    }
+    return hsynCurveEval2[curve](a, b);
+}
+/* ENDF hsynVolumeCurveLookup */
+#else
 INCLUDE_ASM("MODHSYN", hsynVolumeCurveLookup);
+#endif
 /* FUNC hsynUnrefStubA */
 u8 hsynUnrefStubA(s32 v)
 {
@@ -1279,7 +1418,7 @@ int hsynSeqEmit(sceHSynEnv_t *env, int wrapped)
 /* ENDF hsynSeqEmit */
 INCLUDE_ASM("MODHSYN", hsynEffectDispatch);
 /* FUNC hsynSeqStateReset */
-void hsynSeqStateReset(sceHSynLfo_t *lfo)
+void hsynSeqStateReset(sceHSynEnv_t *lfo)
 {
     if (lfo->unk02 != 0) {
         lfo->unk00 = 1;
@@ -1293,7 +1432,37 @@ void hsynSeqStateReset(sceHSynLfo_t *lfo)
 }
 /* ENDF hsynSeqStateReset */
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretA);
-INCLUDE_ASM("MODHSYN", hsynSeqStart);
+/* FUNC hsynSeqStart */
+void hsynSeqStart(sceHSynEnv_t *env)
+{
+    if (env->unk01 == 0) {
+        return;
+    }
+    switch (env->unk00) {
+    case 0:
+        hsynSeqStateReset(env);
+        break;
+    case 1:
+        env->unk00 = 6;
+        break;
+    case 2:
+    case 3:
+        if (env->unk02 != 0) {
+            env->unk00 = 4;
+            env->unk04 = env->unk02;
+        } else if (env->unk0C != 0) {
+            env->unk00 = 5;
+            env->unk08 = 0x10000;
+        } else {
+            env->unk00 = 6;
+        }
+        break;
+    default:
+        env->unk00 = 6;
+        break;
+    }
+}
+/* ENDF hsynSeqStart */
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretB);
 INCLUDE_ASM("MODHSYN", D_00009AC4);
 /* FUNC hsynSeqEmitTail */
@@ -1644,7 +1813,35 @@ int hsynCoreStateGet(sceHSynVoice_t *v)
     return 0;
 }
 /* ENDF hsynCoreStateGet */
-INCLUDE_ASM("MODHSYN", hsynPitchBendApply);
+/* FUNC hsynPitchBendApply */
+int hsynPitchBendApply(sceHSynVoice_t *v, int rate, u16 depth, int dir)
+{
+    int period;
+    int step;
+    int d;
+    u16 e;
+
+    period = (rate << 8) / hsynTickScale;
+    d = (depth << 7) / 100;
+    period--;
+    e = d;
+    if (period <= 0) {
+        period = 1;
+    }
+    step = (e << 8) / period;
+    if (dir == 0xF) {
+        step = -step;
+        e = -d;
+    }
+    v->lfoA.unk08 = step;
+    v->lfoA.unk04 = v->lfoA.unk02;
+    v->lfoA.unk10 = 1;
+    v->lfoA.unk00 = 1;
+    v->lfoA.unk06 = e;
+    v->lfoA.unk0C = period;
+    return 0;
+}
+/* ENDF hsynPitchBendApply */
 INCLUDE_ASM("MODHSYN", D_0000A754);
 #ifdef NON_MATCHING
 /* One instruction short: retail copies the counter before incrementing it,

@@ -40,6 +40,7 @@ typedef struct sceHSynOption_t sceHSynOption_t;
 typedef struct sceHSynSdLogEnt_t sceHSynSdLogEnt_t;
 typedef struct sceHSynSdLog_t sceHSynSdLog_t;
 typedef struct sceHSynChanSet_t sceHSynChanSet_t;
+typedef struct sceHSynCore_t sceHSynCore_t;
 
 struct sceHSynVoice_t;
 struct sceHSynSlot_t;
@@ -384,7 +385,7 @@ struct sceHSynSlot_t
   u32 unk04;
   u32 unk08;
   u32 unk0C;
-  u32 unk10;
+  u8 *unk10;
   u16 unk14;
   u8 nActive;
   u8 unk17;
@@ -457,6 +458,18 @@ struct sceHSynSdLog_t
   struct sceHSynSdLogEnt_t entry[1];
 };
 
+struct sceHSynCore_t
+{
+  u32 core;
+  u32 mode;
+  u16 depthL;
+  u16 depthR;
+  u32 delay;
+  u32 feedback;
+  u16 volL;
+  u16 volR;
+};
+
 /* A layout the compiler reads differently is a build error. */
 typedef char __MODHSYN_sizeof_sceSmgChunk_t[(sizeof(sceSmgChunk_t) == 20) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceSmgVers_t[(sizeof(sceSmgVers_t) == 16) ? 1 : -1];
@@ -486,6 +499,7 @@ typedef char __MODHSYN_sizeof_sceHSynOption_t[(sizeof(sceHSynOption_t) == 12) ? 
 typedef char __MODHSYN_sizeof_sceHSynSdLogEnt_t[(sizeof(sceHSynSdLogEnt_t) == 28) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynSdLog_t[(sizeof(sceHSynSdLog_t) == 40) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceHSynChanSet_t[(sizeof(sceHSynChanSet_t) == 1348) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynCore_t[(sizeof(sceHSynCore_t) == 24) ? 1 : -1];
 
 /* Functions -------------------------------------------------------- */
 
@@ -521,7 +535,7 @@ int modhsyn_e11(sceHSynWork_t *work, int slotNo);
 int modhsyn_e12(sceHSynWork_t *work, int slotNo);
 int modhsyn_e13(sceHSynWork_t *work, int slotNo);
 int modhsyn_e14(sceHSynWork_t *work, int slotNo);
-int modhsyn_e9(u16 *);
+int modhsyn_e9(sceHSynCore_t *c);
 int modhsyn_e15(sceHSynStat_t *stat);
 void hsynEffectAttrRead(u8 sel, u8 mode);
 void hsynEffectAttrWrite(u8 sel, u8 val);
@@ -559,8 +573,8 @@ int hsynVoicePitchCommit(sceHSynVoice_t *v);
 void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend);
 void hsynSdSetParamEnvelope(sceHSynVoice_t *voice);
 s32 hsynSdSetParamVolume(sceHSynVoice_t *v, s8 scale, u8 a, u8 b);
-s32 hsynSdSetParamVolumeLeft(sceHSynVoice_t *v, u8 scale);
-s32 hsynSdSetParamVolumeRight(sceHSynVoice_t *v, u8 scale);
+void hsynSdSetParamVolumeLeft(sceHSynVoice_t *v, u8 scale);
+void hsynSdSetParamVolumeRight(sceHSynVoice_t *v, u8 scale);
 s32 hsynSdSetParamAdsr(sceHSynVoice_t *v, s32 bias);
 u32 hsynSdSetParamBend(sceHSynVoice_t *v);
 int hsynVoiceKeyOff(sceHSynVoice_t *v);
@@ -582,7 +596,7 @@ sceHSynVoice_t *hsynVoiceMaskClear(u8 allocHint);
 sceHSynVoice_t *hsynVoiceEnvelopeAdvance(u16 vnum, s8 coreMask);
 sceHSynVoice_t *hsynVoiceVolumeAdvance(s16 vnum, s8 coreMask);
 s32 hsynVoiceRetrigger(sceHSynChannel_t *chan, u8 pitch);
-int hsynLfoApply(sceHSynVoice_t *v);
+sceHSynVoice_t *hsynLfoApply(sceHSynVoice_t *v, int keyOff);
 void hsynVoiceAllocForCmd(int, int, int, u8, u8, int, int);
 int hsynVoiceMaskSet(sceHSynVoice_t *v);
 int hsynVoiceAllocExport20(sceHSynChannel_t *chan);
@@ -604,7 +618,7 @@ int hsynUnrefParamSetA(u8, u8);
 int hsynUnrefParamSetB(u8, u8);
 int hsynUnrefParamSetC(u8, u8);
 int hsynUnrefParamSetD(u8, u8);
-int hsynVolumeCurveLookup(u8, u8, u8, int, int);
+int hsynVolumeCurveLookup(u8 a, u8 b, u8 sel, u8 *tbl, int nTbl);
 u8 hsynUnrefStubA(s32 v);
 u8 hsynUnrefStubB(u8 v);
 int hsynTableEntryFill(u8 x);
@@ -619,9 +633,9 @@ int hsynSeqSkip(sceHSynEnv_t *env, int wrapped);
 int hsynSeqSeek(sceHSynEnv_t *env, int wrapped);
 int hsynSeqEmit(sceHSynEnv_t *env, int wrapped);
 int hsynEffectDispatch(char *);
-void hsynSeqStateReset(sceHSynLfo_t *lfo);
+void hsynSeqStateReset(sceHSynEnv_t *env);
 int hsynSeqInterpretA(int, int, u8 *, int, char, u16, u16, unsigned int, int);
-int hsynSeqStart(sceHSynEnv_t *env);
+void hsynSeqStart(sceHSynEnv_t *env);
 int hsynSeqInterpretB(int, int, u8 *, int, char, u16, u16, unsigned int, int);
 int hsynSeqEmitTail();
 int modhsyn_e16(struct sceHSynSdLog_t *w);
@@ -649,7 +663,7 @@ void hsynSdGetEffectAttr(int core, sceSdEffectAttr_t *attr);
 int hsynSdClearEffectWorkArea(int core, int channel, int effectMode);
 int hsynEffectDepthSet(sceHSynLfo_t *lfo);
 int hsynCoreStateGet(sceHSynVoice_t *v);
-int hsynPitchBendApply(int, int, u16, int);
+int hsynPitchBendApply(sceHSynVoice_t *v, int rate, u16 depth, int dir);
 int hsynEffectFeedbackSet(sceHSynVoice_t *voice);
 int hsynCoreStateSet(sceHSynVoice_t *v);
 int hsynChannelStateGet(sceHSynVoice_t *v);
