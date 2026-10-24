@@ -617,7 +617,95 @@ int midiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
 #else
 INCLUDE_ASM("MODMIDI", midiTrackServiceTick);
 #endif
-INCLUDE_ASM("MODMIDI", midiApplyPlayState);
+/* FUNC midiApplyPlayState */
+void midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
+{
+    sceMidiTrack_t *trk;
+    u32 ch;
+    u8 t;
+    u8 v;
+    u16 w;
+
+    trk = &slot->trk;
+    for (ch = 0; ch < 16; ch++) {
+        t = trk->ch[ch].bank;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].bank << 16;
+            msg |= 0xB0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        t = trk->ch[ch].prog;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].prog << 8;
+            msg |= 0xC0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 2);
+        }
+        t = trk->ch[ch].cc1;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].cc1 << 16;
+            msg |= 0x1B0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        t = trk->ch[ch].cc2;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].cc2 << 16;
+            msg |= 0x2B0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        t = trk->ch[ch].cc5;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].cc5 << 16;
+            msg |= 0x5B0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        v = trk->ch[ch].vol;
+        if ((v & 0x80) == 0) {
+            trk->chVol[ch] = v;
+            func_00001FE4(slot, trk, vt, ch);
+        }
+        t = trk->ch[ch].pan;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].pan << 16;
+            msg |= 0xAB0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        t = trk->ch[ch].expr;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].expr << 16;
+            msg |= 0xBB0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        t = trk->ch[ch].sustain;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].sustain << 16;
+            msg |= 0x40B0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        t = trk->ch[ch].portamento;
+        t &= 0x80;
+        if (t == 0) {
+            u32 msg = trk->ch[ch].portamento << 16;
+            msg |= 0x41B0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+        w = trk->ch[ch].bend;
+        w &= 0x8080;
+        if (w == 0) {
+            u32 msg = trk->ch[ch].bend << 8;
+            msg |= 0xE0;
+            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        }
+    }
+}
+/* ENDF midiApplyPlayState */
 #ifdef NON_MATCHING
 /* Three registers apart: retail clears the bit in place in the register the
  * shared store uses, gcc loads into a second temp. */
@@ -1156,7 +1244,97 @@ int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32
     return 1;
 }
 /* ENDF midiSongApplyState */
+/* FUNC midiSongRepeat */
+#ifdef NON_MATCHING
+/* 16 bytes long: gcc cross-jumps the four `return 1` exits into one block
+ * at the end, where retail sets the 1 in each exit's branch delay slot. */
+int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
+{
+    sceMidiTrack_t *trk;
+    sceMidiRepeat_t *rep;
+    u8 *p;
+    u8 *cur;
+    u32 delta;
+    u32 hi;
+    u32 lo;
+    int i;
+    int c;
+
+    trk = &slot->trk;
+    p = trk->songCur;
+    if (p[0] != 0xA1) {
+        if (midiDebug != 0) {
+            stdio_printf(aSongrepeatStat, p[0]);
+        }
+        return 0;
+    }
+    trk->songCur = p + 1;
+    hi = p[1];
+    trk->songCur = p + 2;
+    lo = p[2];
+    trk->songCur = p + 3;
+    midiRepeatInfo.total = count;
+    midiRepeatInfo.id = (u32)trk->songCur;
+    delta = hi << 8;
+    delta += lo;
+    if (count != 0) {
+        cur = trk->songCur;
+        rep = trk->repeat;
+        for (i = 8; i != 0; i--, rep++) {
+            if (rep->cursor != cur) {
+                continue;
+            }
+            c = rep->count - 1;
+            rep->count = c;
+            if ((u8)c == 0) {
+                rep->cursor = NULL;
+                return 1;
+            }
+            if (slot->loopCb == NULL) {
+                break;
+            }
+            midiRepeatInfo.pass = count - c + 1;
+            if (slot->loopCb(&midiRepeatInfo, slot->loopArg) != 0) {
+                break;
+            }
+            rep->cursor = NULL;
+            return 1;
+        }
+        if (i == 0) {
+            rep = trk->repeat;
+            for (i = 8; i != 0; i--, rep++) {
+                if (rep->cursor != NULL) {
+                    continue;
+                }
+                midiRepeatInfo.pass = 1;
+                if (slot->loopCb != NULL &&
+                    slot->loopCb(&midiRepeatInfo, slot->loopArg) == 0) {
+                    return 1;
+                }
+                rep->cursor = cur;
+                rep->count = count;
+                break;
+            }
+            if (i == 0) {
+                if (midiDebug != 0) {
+                    stdio_printf(aSongrepeatRepe);
+                }
+                return 0;
+            }
+        }
+    } else if (slot->loopCb != NULL) {
+        midiRepeatInfo.pass = 0;
+        if (slot->loopCb(&midiRepeatInfo, slot->loopArg) == 0) {
+            return 1;
+        }
+    }
+    trk->songCur = trk->songData + delta;
+    return 1;
+}
+#else
 INCLUDE_ASM("MODMIDI", midiSongRepeat);
+#endif
+/* ENDF midiSongRepeat */
 INCLUDE_ASM("MODMIDI", midiPlaySong);
 /* FUNC modmidi_e8 */
 #ifdef NON_MATCHING

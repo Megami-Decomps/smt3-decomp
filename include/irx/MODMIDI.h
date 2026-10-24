@@ -287,7 +287,7 @@ int midiChannelReset(sceMidiTrack_t *trk, u8 ch);
 int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt);
 int midiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
 int midiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
-int midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
+void midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
 int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on);
 int midiSelectTrack(sceMidiSlot_t *slot);
 int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo);
