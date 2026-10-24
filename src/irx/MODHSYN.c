@@ -5669,7 +5669,203 @@ int hsynChannelStateGet(sceHSynVoice_t *v)
     return 0;
 }
 /* ENDF hsynChannelStateGet */
+#ifdef NON_MATCHING
+/* The switch on the parameter selector compiles to a jump table, and the
+ * assembly .rodata already holds its case labels, so a C body here will not
+ * link. */
+/* FUNC func_0000AB90 */
+int func_0000AB90(sceHSynVoice_t *v, u32 a3, int a4, u8 a8, s8 a9, int a10)
+{
+    int *p;
+    int rate;
+    int step;
+    int apply;
+    int cur;
+    int tgt;
+    int base;
+    int from;
+    int to;
+    int d;
+    int lim;
+    int t;
+
+    step = 1;
+    rate = 1;
+    apply = 1;
+    p = (int *)v->param;
+    if (a3 >= 14) {
+        return -1;
+    }
+    base = (v->unk5A + 0x40) << 12;
+    cur = (u8)v->unk5A + 0x40;
+    if ((u32)(p[0] - 1) < 2) {
+        base = p[2];
+        cur = (int)((u32)(base < 0 ? base + 0xFFF : base) >> 12);
+    }
+    tgt = cur;
+    if (a4 != 0) {
+        step = (a4 << 8) / hsynTickScale;
+        rate = 0xFF000 / step;
+    }
+    switch (a3) {
+    case 1:
+        rate = -rate;
+        /* fall through */
+    case 0:
+        p[7] = a8;
+        p[8] = 0;
+        break;
+    case 2:
+        apply = 0;
+        p[7] = 1;
+        p[8] = 0;
+        p[4] = v->unk5A + 0x40;
+        break;
+    case 3:
+        p[7] = a8;
+        tgt = (u8)a9;
+        from = (s8)cur;
+        to = (s8)tgt;
+        if (from < 0) {
+            from += 0x100;
+        }
+        if (to < 0) {
+            to += 0x100;
+        }
+        d = to - from;
+        if (d < 0) {
+            d += 0x100;
+        } else if (d == 0) {
+            d = 0x100;
+        }
+        t = (d << 12) / rate;
+        p[8] = 1;
+        p[10] = t;
+        break;
+    case 4:
+        p[7] = a8;
+        tgt = (u8)a9;
+        from = (s8)cur;
+        to = (s8)tgt;
+        if (from < 0) {
+            from += 0x100;
+        }
+        if (to < 0) {
+            to += 0x100;
+        }
+        d = to - from;
+        if (d < 0) {
+            d += 0x100;
+        } else if (d == 0) {
+            d = 0x100;
+        }
+        d = 0x100 - d;
+        t = (d << 12) / rate;
+        rate = -rate;
+        p[8] = 1;
+        p[10] = t;
+        break;
+    case 12:
+        p[7] = 1;
+        tgt = (u8)a9;
+        from = (s8)cur;
+        to = (s8)tgt;
+        if (from < 0) {
+            from += 0x100;
+        }
+        if (to < 0) {
+            to += 0x100;
+        }
+        d = to - from;
+        if (d < 0) {
+            d += 0x100;
+        } else if (d == 0) {
+            d = 0x100;
+        }
+        rate = (d << 12) / step;
+        p[10] = step;
+        p[8] = 0;
+        break;
+    case 13:
+        p[7] = 1;
+        tgt = (u8)a9;
+        from = (s8)cur;
+        to = (s8)tgt;
+        if (from < 0) {
+            from += 0x100;
+        }
+        if (to < 0) {
+            to += 0x100;
+        }
+        d = to - from;
+        if (d < 0) {
+            d += 0x100;
+        }
+        d = 0x100 - d;
+        if (d == 0) {
+            d = 0x100;
+        }
+        rate = -((d << 12) / step);
+        p[10] = step;
+        p[8] = 0;
+        break;
+    case 5:
+        apply = 0;
+        from = (s8)v->unk5A + 0x40;
+        if (from < 0) {
+            from = (s8)v->unk5A + 0x140;
+        }
+        to = (s8)a9;
+        if (to < 0) {
+            to += 0x100;
+        }
+        d = to - from;
+        if (d < 0) {
+            d += 0x100;
+        } else if (d == 0) {
+            d = 0x100;
+        }
+        lim = p[1];
+        rate = p[5];
+        if ((lim & 2) != 0) {
+            d = 0x100 - d;
+            if (d == 0) {
+                d = 0x100;
+            }
+            rate = -rate;
+        }
+        t = (d << 12) / rate;
+        p[4] = (s8)a9;
+        if ((u32)p[10] >= (u32)t) {
+            p[10] = t;
+        } else {
+            p[6] = t;
+            p[8] = 0;
+        }
+        p[7] = 1;
+        break;
+    default:
+        return -1;
+    }
+    if (apply == 0) {
+        return 0;
+    }
+    p[0] = 1;
+    p[3] = base;
+    p[4] = (s8)tgt;
+    p[5] = rate;
+    p[6] = step;
+    p[9] = 0;
+    p[1] = hsynSdParamTable[a3];
+    p[11] = v->unk4C;
+    p[12] = v->unk4D;
+    p[13] = (s8)v->unk53;
+    return 0;
+}
+/* ENDF func_0000AB90 */
+#else
 INCLUDE_ASM("MODHSYN", func_0000AB90);
+#endif
 INCLUDE_ASM("MODHSYN", hsynLibraryTable);
 /* FUNC hsynRetnStub */
 void hsynRetnStub(void)
