@@ -10,59 +10,314 @@
 
 #include "iop.h"
 
+/* Types ------------------------------------------------------------ */
+
+typedef struct sceSmgChunk_t sceSmgChunk_t;
+typedef struct sceMidiVers_t sceMidiVers_t;
+typedef struct sceMidiSequ_t sceMidiSequ_t;
+typedef struct sceMidiMidiChunk_t sceMidiMidiChunk_t;
+typedef struct sceMidiSongChunk_t sceMidiSongChunk_t;
+typedef struct sceMidiSmfHdr_t sceMidiSmfHdr_t;
+typedef struct sceMidiChState_t sceMidiChState_t;
+typedef struct sceMidiLoop_t sceMidiLoop_t;
+typedef struct sceMidiRepeat_t sceMidiRepeat_t;
+typedef struct sceMidiTrack_t sceMidiTrack_t;
+typedef struct sceMidiSlot_t sceMidiSlot_t;
+typedef struct sceMidiBuf_t sceMidiBuf_t;
+typedef struct sceMidiVoice_t sceMidiVoice_t;
+typedef struct sceMidiSeq_t sceMidiSeq_t;
+typedef struct sceMidiTbl_t sceMidiTbl_t;
+typedef struct sceMidiWork_t sceMidiWork_t;
+typedef struct sceMidiLoopInfo_t sceMidiLoopInfo_t;
+typedef struct sceMidiOption_t sceMidiOption_t;
+typedef struct sceMidiVoiceTbl_t sceMidiVoiceTbl_t;
+
+struct sceSmgChunk_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nOffset;
+  u32 offset[1];
+};
+
+struct sceMidiVers_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u8 unk0C;
+  u8 unk0D;
+  u8 version;
+  u8 unk0F;
+};
+
+struct sceMidiSequ_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nOffset;
+  u32 songOfs;
+  u32 midiOfs;
+};
+
+struct sceMidiMidiChunk_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nTrack;
+  u32 trackOfs[1];
+};
+
+struct sceMidiSongChunk_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nSong;
+  u32 songOfs[1];
+};
+
+struct sceMidiSmfHdr_t
+{
+  u32 size;
+  u16 division;
+  u16 format;
+  u16 nTrack;
+  u16 unk0A;
+};
+
+struct sceMidiChState_t
+{
+  u8 prog;
+  u8 bank;
+  u8 cc1;
+  u8 cc2;
+  u8 cc5;
+  u8 vol;
+  u8 pan;
+  u8 expr;
+  u8 sustain;
+  u8 portamento;
+  u16 bend;
+};
+
+struct sceMidiLoop_t
+{
+  u8 id;
+  u8 count;
+  u8 unk02;
+  u8 unk03;
+  u32 time;
+  u8 *ptr;
+};
+
+struct sceMidiRepeat_t
+{
+  u8 *cursor;
+  u8 count;
+  u8 pad[3];
+};
+
+struct sceMidiTrack_t
+{
+  struct sceMidiSequ_t *sequ;
+  struct sceMidiMidiChunk_t *midi;
+  struct sceMidiSongChunk_t *song;
+  u8 *smfHdr;
+  u8 *smfData;
+  u8 *cur;
+  u32 tick;
+  u32 frac;
+  u32 usPerTick;
+  u32 division;
+  u32 tempo;
+  u32 speed;
+  u8 runStatus;
+  u8 deltaHeld;
+  u8 vol;
+  u8 ctlNrpn;
+  u8 ctlLoopId;
+  u8 ctlRpn;
+  u8 ctlLoopCnt;
+  u8 unk37[3];
+  u16 chActive;
+  u8 chVol[16];
+  u8 chExpr[16];
+  struct sceMidiChState_t ch[16];
+  u8 *songData;
+  u8 *songCur;
+  u32 fadeTicks;
+  u32 fadeLeft;
+  u8 nextMidi;
+  u8 curMidi;
+  u8 songVol;
+  u8 unk12F;
+  u8 songFlags;
+  u8 searchId;
+  u8 loopCount;
+  u8 unk133;
+  u16 songSpeed;
+  u16 unk136;
+  struct sceMidiRepeat_t repeat[8];
+  struct sceMidiLoop_t loop[8];
+};
+
+struct sceMidiSlot_t
+{
+  s32 songNo;
+  s32 midiNo;
+  u32 tick;
+  u32 flags;
+  u16 chanMask[16];
+  u16 bufMask;
+  u16 pad32;
+  int (*chMsgCb)(u32 msg, int arg);
+  int chMsgArg;
+  int (*metaCb)(u8 type, u8 *data, int len, int arg);
+  int metaArg;
+  int (*excCb)(u8 *data, int len, int arg);
+  int excArg;
+  int (*loopCb)(void *info, int arg);
+  int loopArg;
+  void (*ctlCb)(int ch, int val, u32 time, int arg);
+  int ctlArg;
+  struct sceMidiTrack_t trk;
+};
+
+struct sceMidiBuf_t
+{
+  u32 size;
+  u32 len;
+  u8 data[1024];
+};
+
+struct sceMidiVoice_t
+{
+  u32 unk00;
+  struct sceMidiBuf_t *buf;
+};
+
+struct sceMidiSeq_t
+{
+  u32 unk00;
+  struct sceMidiVers_t *data;
+  u32 unk08;
+  struct sceMidiSlot_t *slot;
+};
+
+struct sceMidiTbl_t
+{
+  u32 nSeqWord;
+  struct sceMidiSeq_t *seq;
+  u32 nVoiceWord;
+  struct sceMidiVoice_t *voice;
+};
+
+struct sceMidiWork_t
+{
+  u32 nTblWord;
+  struct sceMidiTbl_t *tbl;
+};
+
+struct sceMidiLoopInfo_t
+{
+  u8 unk00;
+  u8 total;
+  u8 pass;
+  u8 unk03;
+  u32 id;
+};
+
+struct sceMidiOption_t
+{
+  const char *name;
+  int len;
+  int *var;
+};
+
+struct sceMidiVoiceTbl_t
+{
+  u32 nVoiceWord;
+  struct sceMidiVoice_t *voice;
+};
+
+/* A layout the compiler reads differently is a build error. */
+typedef char __MODMIDI_sizeof_sceSmgChunk_t[(sizeof(sceSmgChunk_t) == 20) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiVers_t[(sizeof(sceMidiVers_t) == 16) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiSequ_t[(sizeof(sceMidiSequ_t) == 24) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiMidiChunk_t[(sizeof(sceMidiMidiChunk_t) == 20) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiSongChunk_t[(sizeof(sceMidiSongChunk_t) == 20) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiSmfHdr_t[(sizeof(sceMidiSmfHdr_t) == 12) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiChState_t[(sizeof(sceMidiChState_t) == 12) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiLoop_t[(sizeof(sceMidiLoop_t) == 12) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiRepeat_t[(sizeof(sceMidiRepeat_t) == 8) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiTrack_t[(sizeof(sceMidiTrack_t) == 472) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiSlot_t[(sizeof(sceMidiSlot_t) == 564) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiBuf_t[(sizeof(sceMidiBuf_t) == 1032) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiVoice_t[(sizeof(sceMidiVoice_t) == 8) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiSeq_t[(sizeof(sceMidiSeq_t) == 16) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiTbl_t[(sizeof(sceMidiTbl_t) == 16) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiWork_t[(sizeof(sceMidiWork_t) == 8) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiLoopInfo_t[(sizeof(sceMidiLoopInfo_t) == 8) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiOption_t[(sizeof(sceMidiOption_t) == 12) ? 1 : -1];
+typedef char __MODMIDI_sizeof_sceMidiVoiceTbl_t[(sizeof(sceMidiVoiceTbl_t) == 8) ? 1 : -1];
+
 /* Functions -------------------------------------------------------- */
 
-s32 modmidi_e26(int, int);
-int modmidi_sceMidi_Init(int *, int);
-int midiParseHeader(int, int, int, int);
-int modmidi_sceMidi_Load(int, int);
-int modmidi_sceMidi_Unload(int, int);
-int modmidi_e5(int);
-u8 *midiLoopTableAdd(u8 *, u8);
-int midiScanLoops(int, int, char, u8, u8, int);
-unsigned int midiTrackSeekAbsolute(u32 *);
-int midiReadVarLen(int);
-int midiTrackReset(int);
-int midiReadDeltaTime(int);
-s32 midiParseMetaEvent(u32 *, u32 *, u8);
-int midiOutputPush(unsigned int, unsigned int *);
-int midiParseExcEvent(int, int, unsigned int *);
-int midiSendChMsg(int, int, unsigned int *, int, int);
-int midiChannelReset(int, u8);
-int midiPlayEnv(u32 *, int, unsigned int *);
-s32 midiStopAllNotes(int, unsigned int *);
-s32 midiTrackServiceTick(u32 *, unsigned int *);
-s32 midiApplyPlayState(int, unsigned int *);
-int modmidi_sceMidi_MidiPlaySwitch(int, int, int);
-int midiSelectTrack(int);
-int modmidi_sceMidi_SelectMidi(int, int, unsigned int);
-int modmidi_e16(int, int, unsigned int);
-int modmidi_sceMidi_MidiSetVolume(int, int, u8, char);
-int modmidi_e18(int, int, u8, char);
-int modmidi_e19(int, int, u8);
-int modmidi_e20(int, int);
-int modmidi_sceMidi_MidiSetAbsolute(int, int, u16);
-int modmidi_e22(int, int);
-int modmidi_e23(int, int, int);
-int modmidi_e24(int, int);
-int midiSongStopNotes(int, int, int, int);
-int midiSongApplyVolume(int, int, int);
-int midiSongLookup(int, int, u32 *, u32 *);
-int midiSongSelect(int, int *);
-int modmidi_sceMidi_SelectSong(int, int, unsigned int);
-s32 midiSongSetTempo(int, int);
-s32 midiSongSetLoopCount(int, int);
-s32 midiSongSetFlags(int, int);
-int midiSongApplyState(int, int, int, unsigned int);
-int midiSongRepeat(int, char);
-int midiPlaySong(int, int, int);
-int modmidi_e8(int, int, int);
-int midiSongServiceTick(int, int, int);
-int modmidi_e10(int, int, u8);
-int modmidi_e11(int, int, u8);
-int modmidi_sceMidi_SongSetAbsolute(int, int, u16);
-int midiSearchPlay(int, int, unsigned int, int);
-int modmidi_e13(int, int, unsigned int, unsigned int);
+int modmidi_e26(int argc, char **argv);
+int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval);
+int midiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name);
+int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo);
+int modmidi_sceMidi_Unload(sceMidiWork_t *work, int slotNo);
+int modmidi_e5(sceMidiWork_t *work);
+sceMidiLoop_t *midiLoopTableAdd(sceMidiLoop_t *tbl, u8 id);
+int midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc, u8 val, int allowCb);
+u32 midiTrackSeekAbsolute(sceMidiTrack_t *trk);
+int midiReadVarLen(sceMidiTrack_t *trk);
+int midiTrackReset(sceMidiTrack_t *trk);
+int midiReadDeltaTime(sceMidiTrack_t *trk);
+int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type);
+sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt);
+int midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt);
+int midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 msg, int len);
+int midiChannelReset(sceMidiTrack_t *trk, u8 ch);
+int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt);
+int midiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
+int midiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
+int midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
+int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on);
+int midiSelectTrack(sceMidiSlot_t *slot);
+int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo);
+int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick);
+int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol);
+int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol);
+int modmidi_e19(sceMidiWork_t *work, int slotNo, u8 bpm);
+int modmidi_e20(sceMidiWork_t *work, int slotNo);
+int modmidi_sceMidi_MidiSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed);
+int modmidi_e22(sceMidiWork_t *work, int slotNo);
+int modmidi_e23(sceMidiWork_t *work, int slotNo, int tempo);
+int modmidi_e24(sceMidiWork_t *work, int slotNo);
+int midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len);
+int midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk);
+int midiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk);
+int midiSongSelect(sceMidiSlot_t *slot, u8 **songCur);
+int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo);
+int midiSongSetTempo(sceMidiTrack_t *trk, int val);
+int midiSongSetLoopCount(sceMidiTrack_t *trk, int val);
+int midiSongSetFlags(sceMidiTrack_t *trk, int val);
+int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo);
+int midiSongRepeat(sceMidiSlot_t *slot, u8 count);
+int midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
+int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode);
+int midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
+int modmidi_e10(sceMidiWork_t *work, int slotNo, u8 val);
+int modmidi_e11(sceMidiWork_t *work, int slotNo, u8 val);
+int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed);
+int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int flag);
+int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4);
 
 /* Data ------------------------------------------------------------- */
 
@@ -71,10 +326,10 @@ extern u8 aVerbose[];
 extern u8 aDebug[];
 extern u8 aScemidienvsize[];
 extern u8 aCCCCCCCC[];
-extern u8 aScei[];
-extern u8 aVers[];
-extern u8 aSequ[];
-extern u8 aSong[];
+extern const char magic[];
+extern const char name[];
+extern const char aSequ[];
+extern const char aSong[];
 extern u8 aMidi[];
 extern u8 aLoopStartDuple[];
 extern u8 aLoopTableOverf[];
@@ -93,5 +348,12 @@ extern u8 aPlaysongUnknow_0[];
 extern u8 aPlaysongUnknow_1[];
 extern u8 aSearchplayUnkn[];
 extern u8 aSearchplayLoop[];
+extern u32 midiDebug;
+extern u32 midiVerbose;
+extern struct sceMidiOption_t midiOptions[2];
+extern u16 midiChBit[16];
+extern struct sceMidiLoopInfo_t midiLoopInfo;
+extern struct sceMidiLoopInfo_t midiRepeatInfo;
+extern u32 midiTickScale;
 
 #endif /* IRX_MODMIDI_H */

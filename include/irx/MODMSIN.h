@@ -10,16 +10,56 @@
 
 #include "iop.h"
 
+/* Types ------------------------------------------------------------ */
+
+typedef struct sceMSInBuf_t sceMSInBuf_t;
+typedef struct sceMSInEntry_t sceMSInEntry_t;
+typedef struct sceMSInTbl_t sceMSInTbl_t;
+typedef struct sceMSInWork_t sceMSInWork_t;
+
+struct sceMSInBuf_t
+{
+  u32 size;
+  u32 len;
+  u8 data[1024];
+};
+
+struct sceMSInEntry_t
+{
+  u32 unk00;
+  struct sceMSInBuf_t *buf;
+};
+
+struct sceMSInTbl_t
+{
+  u32 nSeqWord;
+  void *seq;
+  u32 nBufWord;
+  struct sceMSInEntry_t *buf;
+};
+
+struct sceMSInWork_t
+{
+  u32 nTblWord;
+  struct sceMSInTbl_t *tbl;
+};
+
+/* A layout the compiler reads differently is a build error. */
+typedef char __MODMSIN_sizeof_sceMSInBuf_t[(sizeof(sceMSInBuf_t) == 1032) ? 1 : -1];
+typedef char __MODMSIN_sizeof_sceMSInEntry_t[(sizeof(sceMSInEntry_t) == 8) ? 1 : -1];
+typedef char __MODMSIN_sizeof_sceMSInTbl_t[(sizeof(sceMSInTbl_t) == 16) ? 1 : -1];
+typedef char __MODMSIN_sizeof_sceMSInWork_t[(sizeof(sceMSInWork_t) == 8) ? 1 : -1];
+
 /* Functions -------------------------------------------------------- */
 
-s32 modmsin_e10();
-int modmsin_sceMSIn_Init(int *);
+int modmsin_e10();
+int modmsin_sceMSIn_Init(sceMSInWork_t *work);
 int modmsin_e5();
 int modmsin_e6();
-int msinBufferAppend(int, unsigned int, char *, int);
-int modmsin_e7(int, unsigned int, int);
-int modmsin_e8(int, unsigned int, char *, unsigned int);
-int modmsin_e9(int, unsigned int, char *);
+int msinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len);
+int modmsin_e7(sceMSInWork_t *work, u32 port, u32 msg);
+int modmsin_e8(sceMSInWork_t *work, u32 port, const u8 *msg, u32 maxLen);
+int modmsin_e9(sceMSInWork_t *work, u32 port, const u8 *msg);
 
 /* Data ------------------------------------------------------------- */
 
