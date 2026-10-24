@@ -63,7 +63,7 @@ def detype(text: str) -> str:
         text = pattern.sub(repl, text)
     return text
 
-PAYLOAD = r'''
+PAYLOAD_TEMPLATE = r'''
 def export():
     import json
     import ida_bytes, ida_funcs, ida_nalt, ida_segment, ida_typeinf, idautils, idc
@@ -77,6 +77,7 @@ def export():
             self.parts.append(text)
             return 0
 
+    skip = set(%s)
     til = ida_typeinf.get_idati()
     types, ordinals = [], []
     for i in range(1, ida_typeinf.get_ordinal_limit()):
@@ -90,6 +91,7 @@ def export():
         ordinals.append(i)
 
     sink = Sink()
+    ordinals = [o for o, t in zip(ordinals, types) if t[0] not in skip]
     if ordinals:
         ida_typeinf.print_decls(sink, til, ordinals,
                                 ida_typeinf.PDF_INCL_DEPS | ida_typeinf.PDF_DEF_FWD)
@@ -126,13 +128,14 @@ RESULT = export()
 '''
 
 
-def collect(instance: str, ports: str | None) -> dict:
+def collect(instance: str, ports: str | None, skip: set[str]) -> dict:
+    payload = PAYLOAD_TEMPLATE.replace('%s', repr(sorted(skip)), 1)
     sys.path.insert(0, str(IDA_SCRIPTS))
     import ida
 
     instances = ida.get_instances(ida.parse_ports(ports or ida.DEFAULT_PORTS), refresh=False)
     port = ida.resolve_target(instance, instances)
-    out = ida.call_tool(port, "py_eval", {"code": PAYLOAD, "new_locals": True})
+    out = ida.call_tool(port, "py_eval", {"code": payload, "new_locals": True})
     if out.get("stderr"):
         raise SystemExit(f"IDAPython failed:\n{out['stderr']}")
     return json.loads(ida.call_tool(port, "py_eval", {"code": "RESULT"})["result"])
@@ -172,7 +175,8 @@ def render(module: str, blob: dict, iop_declared: set[str]) -> str:
          ""]
 
     decls = clean_decls(blob["decls"])
-    named = [t for t in blob["types"] if t[0] not in BUILTIN]
+    named = [t for t in blob["types"]
+             if t[0] not in BUILTIN and f"struct {t[0]}" in decls]
     if decls:
         L += ["/* Types ------------------------------------------------------------ */",
               ""]
@@ -209,10 +213,13 @@ def render(module: str, blob: dict, iop_declared: set[str]) -> str:
     return "\n".join(L)
 
 
-def iop_h_names() -> set[str]:
-    """Everything include/irx/iop.h declares, so we do not redeclare it."""
+def iop_h_names() -> tuple[set[str], set[str]]:
+    """What include/irx/iop.h already declares: functions, then types."""
     text = (ROOT / "include" / "irx" / "iop.h").read_text()
-    return set(re.findall(r"\b(\w+)\s*\(", text))
+    funcs = set(re.findall(r"\b(\w+)\s*\(", text))
+    types = set(re.findall(r"^\}\s*(\w+);", text, re.M))
+    types |= set(re.findall(r"^typedef\s+[\w\s*]+?(\w+);", text, re.M))
+    return funcs, types
 
 
 def main() -> None:
@@ -222,15 +229,16 @@ def main() -> None:
     ap.add_argument("--ports", default=None)
     args = ap.parse_args()
 
-    declared = iop_h_names()
+    declared, iop_types = iop_h_names()
     for module in args.modules or irx_config.modules():
         cfg = irx_config.load(module)
         if "idb" not in cfg:
             continue
-        blob = collect(cfg["idb"], args.ports)
+        blob = collect(cfg["idb"], args.ports, BUILTIN | iop_types)
         path = ROOT / "include" / "irx" / f"{module}.h"
-        path.write_text(render(module, blob, declared))
-        named = [t for t in blob["types"] if t[0] not in BUILTIN]
+        text = render(module, blob, declared)
+        path.write_text(text)
+        named = [t for t in blob["types"] if f"struct {t[0]}" in text]
         protos = [p for p in blob["protos"]
                   if p[2] and not PLACEHOLDER.match(p[1])
                   and not IMPORT_PREFIX.match(p[1])]

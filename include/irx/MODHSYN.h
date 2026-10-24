@@ -12,7 +12,6 @@
 
 /* Types ------------------------------------------------------------ */
 
-typedef struct sceSdEffectAttr_t sceSdEffectAttr_t;
 typedef struct sceSmgChunk_t sceSmgChunk_t;
 typedef struct sceSmgVers_t sceSmgVers_t;
 typedef struct sceSmgHead_t sceSmgHead_t;
@@ -38,16 +37,6 @@ typedef struct sceHSynTbl_t sceHSynTbl_t;
 typedef struct sceHSynWork_t sceHSynWork_t;
 typedef struct sceHSynStat_t sceHSynStat_t;
 typedef struct sceHSynOption_t sceHSynOption_t;
-
-struct sceSdEffectAttr_t
-{
-  s32 core;
-  u32 mode;
-  u16 depth_L;
-  u16 depth_R;
-  s32 delay;
-  s32 feedback;
-};
 
 struct sceSmgChunk_t
 {
@@ -352,7 +341,6 @@ struct sceHSynOption_t
 };
 
 /* A layout the compiler reads differently is a build error. */
-typedef char __MODHSYN_sizeof_sceSdEffectAttr_t[(sizeof(sceSdEffectAttr_t) == 20) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceSmgChunk_t[(sizeof(sceSmgChunk_t) == 20) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceSmgVers_t[(sizeof(sceSmgVers_t) == 16) ? 1 : -1];
 typedef char __MODHSYN_sizeof_sceSmgHead_t[(sizeof(sceSmgHead_t) == 40) ? 1 : -1];
