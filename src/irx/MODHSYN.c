@@ -353,8 +353,81 @@ void func_00000C58(sceHSynChannel_t *chan, u8 val)
 #else
 INCLUDE_ASM("MODHSYN", func_00000C58);
 #endif
+#ifdef NON_MATCHING
+/* Same instructions, two registers swapped: retail keeps the clamped pan in
+   $2 and the sign-extended test value in the argument register. */
+/* FUNC func_00000D24 */
+void func_00000D24(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)
+{
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int pan;
+    int all;
+    int i;
+
+    val -= 0x40;
+    pan = val;
+    if ((s8)val < -0x3F) {
+        pan = -0x3F;
+    }
+    all = ch & 0x80;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chNext; v != end; v = v->chNext) {
+            if (tag != 0x7F && v->tag != tag) {
+                continue;
+            }
+            if (all == 0 && v->ch != ch) {
+                continue;
+            }
+            func_00004AE4(v, (s8)pan);
+        }
+    }
+}
+/* ENDF func_00000D24 */
+#else
 INCLUDE_ASM("MODHSYN", func_00000D24);
+#endif
+#ifdef NON_MATCHING
+/* One instruction short: retail forms the unsigned high half of the divide
+   with a signed multiply plus a correction, where gcc here uses multu. */
+/* FUNC func_00000E40 */
+void func_00000E40(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 val)
+{
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    u32 scaled;
+    int all;
+    int i;
+
+    all = ch & 0x80;
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    scaled = ((u32)val << 8) / 254;
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chNext; v != end; v = v->chNext) {
+            if (tag != 0x7F && v->tag != tag) {
+                continue;
+            }
+            if (all == 0 && v->ch != ch) {
+                continue;
+            }
+            v->unk54 = scaled;
+            hsynSdSetParamEnvelope(v);
+        }
+    }
+}
+/* ENDF func_00000E40 */
+#else
 INCLUDE_ASM("MODHSYN", func_00000E40);
+#endif
 /* FUNC hsynVoiceSetPitchDirect */
 void hsynVoiceSetPitchDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 hi, u8 lo)
 {
