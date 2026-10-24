@@ -315,7 +315,163 @@ sceMidiLoop_t *midiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
     return NULL;
 }
 /* ENDF midiLoopTableAdd */
+/* FUNC midiScanLoops */
+#ifdef NON_MATCHING
+/* 40 bytes long: gcc keeps the four control-change arms and the many
+ * `r++` exits as separate blocks where retail cross-jumps them, so the
+ * two switches come out one layer flatter. */
+void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
+                   u8 val, sceMidiVoiceTbl_t *vt)
+{
+    sceMidiLoop_t *e;
+    int r;
+    int i;
+    u8 cnt;
+
+    switch (cc) {
+    case 0x62:
+        trk->ctlRpn = val;
+        trk->ctlLoopCnt = 0xFF;
+        trk->ctlLoopId = 0xFF;
+        break;
+    case 0x63:
+        trk->ctlNrpn = val;
+        trk->ctlLoopCnt = 0xFF;
+        trk->ctlLoopId = 0xFF;
+        break;
+    case 6:
+        trk->ctlLoopId = val;
+        break;
+    case 0x26:
+        trk->ctlLoopCnt = val;
+        break;
+    default:
+        return;
+    }
+    r = 0;
+    switch (trk->ctlNrpn) {
+    case 0:
+        if (trk->ctlLoopId == 0xFF) {
+            break;
+        }
+        e = midiLoopTableAdd(trk->loop, trk->ctlLoopId);
+        if (e == NULL) {
+            e = trk->loop;
+            for (i = 7; i != -1; i--, e++) {
+                if (e->id == 0xFF) {
+                    break;
+                }
+            }
+        } else if (e->count != 0xFF && midiDebug != 0) {
+            stdio_printf(aLoopStartDuple, trk->ctlLoopId);
+        }
+        if (e != NULL) {
+            e->count = 0xFF;
+            e->id = trk->ctlLoopId;
+            e->unk02 = trk->runStatus;
+            e->unk03 = trk->deltaHeld;
+            e->time = trk->tick;
+            e->ptr = trk->cur;
+        } else if (midiDebug != 0) {
+            stdio_printf(aLoopTableOverf);
+        }
+        r++;
+        break;
+    case 1:
+        if (trk->ctlLoopId == 0xFF || trk->ctlLoopCnt == 0xFF) {
+            break;
+        }
+        if ((slot->flags & 8) || vt == NULL) {
+            r++;
+            break;
+        }
+        e = midiLoopTableAdd(trk->loop, trk->ctlLoopId);
+        if (e == NULL) {
+            if (midiDebug != 0) {
+                stdio_printf(aNotFoundLoopSt, trk->ctlLoopId);
+            }
+            r++;
+            break;
+        }
+        if (e->count == 0xFF) {
+            e->count = trk->ctlLoopCnt;
+        }
+        cnt = trk->ctlLoopCnt;
+        if (cnt != 0 && e->count == 0) {
+            e->count = 0xFF;
+            r++;
+            break;
+        }
+        if (slot->loopCb != NULL) {
+            midiLoopInfo.total = cnt;
+            midiLoopInfo.pass = trk->ctlLoopCnt - e->count + 1;
+            midiLoopInfo.id = e->id;
+            if (slot->loopCb(&midiLoopInfo, slot->loopArg) == 0) {
+                e->count = 0xFF;
+                break;
+            }
+        }
+        trk->cur = e->ptr;
+        slot->tick = e->time;
+        trk->tick = e->time;
+        trk->deltaHeld = e->unk03;
+        trk->runStatus = e->unk02;
+        if (trk->ctlLoopCnt != 0) {
+            e->count = e->count - 1;
+        }
+        r++;
+        break;
+    case 0x10:
+        if (trk->ctlRpn == 0) {
+            goto sendId;
+        }
+        if (trk->ctlRpn == 1) {
+            goto sendIdCount;
+        }
+        break;
+    case 0x11:
+    sendId:
+        if (trk->ctlLoopId == 0xFF) {
+            break;
+        }
+        if (vt == NULL || slot->ctlCb == NULL) {
+            r++;
+            break;
+        }
+        slot->ctlCb(status & 0xF, val, (u32)trk->cur, slot->ctlArg);
+        r++;
+        break;
+    case 0x12:
+    sendIdCount:
+        if (trk->ctlLoopId == 0xFF || trk->ctlLoopCnt == 0xFF) {
+            break;
+        }
+        if (vt == NULL || slot->ctlCb == NULL) {
+            r++;
+            break;
+        }
+        slot->ctlCb(status & 0xF,
+                    ((trk->ctlLoopId & 0x7F) << 7) | (trk->ctlLoopCnt & 0x7F),
+                    (u32)trk->cur, slot->ctlArg);
+        r++;
+        break;
+    case 0x7F:
+        if (trk->ctlRpn == 0xFF) {
+            r = 1;
+        }
+        break;
+    }
+    if (r != 0) {
+        trk->ctlLoopCnt = 0xFF;
+        trk->ctlLoopId = 0xFF;
+        trk->ctlRpn = 0xFF;
+        trk->ctlNrpn = 0xFF;
+    }
+}
+#else
 INCLUDE_ASM("MODMIDI", midiScanLoops);
+#endif
+/* ENDF midiScanLoops */
 /* FUNC midiTrackSeekAbsolute */
 u32 midiTrackSeekAbsolute(sceMidiTrack_t *trk)
 {
@@ -709,7 +865,7 @@ int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
                 case 38:
                 case 98:
                 case 99:
-                    midiScanLoops(slot, trk, status, d1, d2 & 0x7F, (int)vt);
+                    midiScanLoops(slot, trk, status, d1, d2 & 0x7F, vt);
                     break;
                 }
                 break;

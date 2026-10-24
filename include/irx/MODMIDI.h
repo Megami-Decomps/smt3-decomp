@@ -274,7 +274,7 @@ int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo);
 int modmidi_sceMidi_Unload(sceMidiWork_t *work, int slotNo);
 int modmidi_e5(sceMidiWork_t *work);
 sceMidiLoop_t *midiLoopTableAdd(sceMidiLoop_t *tbl, u8 id);
-int midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc, u8 val, int allowCb);
+void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc, u8 val, sceMidiVoiceTbl_t *vt);
 u32 midiTrackSeekAbsolute(sceMidiTrack_t *trk);
 int midiReadVarLen(sceMidiTrack_t *trk);
 int midiTrackReset(sceMidiTrack_t *trk);
