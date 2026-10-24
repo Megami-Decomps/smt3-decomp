@@ -420,3 +420,63 @@ invented records already exist in the tree under a conventional spelling, two
 contributors having named the same record twice. Four of them (`BillRenderPair`
 as `billRenderPair_t`, `EffRandState`, `EffResourceRectDrawParams`, `ParSystem`)
 merged with no member renames at all.
+
+## Why the picked ones were invisible to the rules
+
+Eleven types matched by hand in the picker went in. Three were corrected on the
+way: the record a person sees in the usage is often the *head* of the record our
+definition is. Every one of them was refused or unranked for a reason worth
+fixing or knowing.
+
+**The layout engine could not see through an anonymous union.**
+`sdfGrPacketHeader_t` is a union of `sdfDmaTag_t` and the two whole hardware
+words, followed by the GIF tag. `cparse.struct_fields` does not descend into the
+anonymous union, so the record measured 16 bytes against the IDB's 32, and every
+size comparison refused the three packets that *are* it (`SdfDrawPacket`,
+`SdfPacket`, and `SdfTextureDrawPacket` through its header). `type_match.py` now
+takes the IDB's layout wherever our parse of a record disagrees with it.
+
+**A record of ours finer than theirs is refused by design.** `hd_merge.py` splits
+one of our members into several of theirs; it never folds several of ours into
+one of theirs, because that rewrites the uses: `textureWordA` and
+`registerAddressA` become `tex1.data` and `tex1.reg`. Four of the eleven needed
+exactly that, two to four lines each. It stays manual.
+
+**The remaster's pointerization hides the PS2 record.** `sdfPrimFrameMovePacket_t`
+is `{sdfPreDrawHook_t *worker; sdfPrimBitBltPacket_t *packet}`, 8 bytes in the
+IDB, because the remaster points at both. On the PS2 they are inline: 16 + 0x70 =
+128 bytes, exactly our `SdfGraphCopyPacket`. Nothing that scores by size can
+find that, and the usage shows only the head, which is why the pick was
+`sdfPreDrawHook_t`. The query that answers it is "which records begin with a
+hook", and the IDB answers it in one line.
+
+**Our declaration was half the engine's record.** Our `sdfPreDrawHook_t` stopped
+at `next` and `predrawFunc`; the engine's carries `option0` and `option1` too, so
+both owners held those two words as loose fields of their own
+(`resourceIndexXor`, `unk08`, `unk0C`). No rule compares one record against
+another record plus the first two fields of its neighbour.
+
+**Two records parsed as one.** `SdfDmaTagHeader` came out as 32 bytes and twelve
+members because the parser ran it together with the record declared after it, its
+`QWORD_ALIGNED` tail confusing the close. Compared at that size, `sdfDmaTag_t`
+(16 bytes, and what its six fields plainly are) never scored.
+
+**A flexible array member has no counterpart.** `SdfItemList`'s `firstItem[0]`
+and `SdfItem`'s three Euler floats against one `sdfVector4_t rotate` both stopped
+the pairing, though neither record is read anywhere: the merge was a declaration
+swap with no codegen to change.
+
+### Two corrections the evidence forced
+
+`SdfDmaTagHeader` was matched against `sdfDrawReqRec_t`, which is a draw request
+(`drawTag`, `preDraw`, `drawCount`, buffer ids); our six fields are a DMA tag's
+`qwc`, `pad`, `id`, `addr` and its two data words, so it became `sdfDmaTag_t`.
+`SdfGraphCopyPacket` and `SdfPatchableResourcePacket` were matched against
+`sdfPreDrawHook_t`, which is the 16-byte head they begin with rather than the
+whole record; the IDB names the records themselves `sdfPrimFrameMovePacket_t` and
+`sdfStoreFrameImagePacket_t`.
+
+One mistake the per-unit check caught, as it is meant to: reading offset 8 of a
+DMA tag as `addr`. It is the tag's first data word; `addr` sits at 4. The build
+was byte-identical except for one `sw` offset, which is the whole argument for
+comparing every changed unit rather than trusting the link.
