@@ -362,7 +362,6 @@ void func_00000D24(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
-    int pan;
     int all;
     int i;
 
@@ -861,15 +860,13 @@ void hsynCmdProgramChange(int base, int unused, int rate, int state, u8 note, u8
 }
 /* ENDF hsynCmdProgramChange */
 /* FUNC func_000021B8 */
-void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, int a9, int a10, u32 tag)
+void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)
 {
     sceHSynVoice_t *heads[2];
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
-    int pan;
     int i;
 
-    pan = a9;
     if ((*(u8 *)(base + 2) & 1) != 0) {
         heads[0] = (sceHSynVoice_t *)(base + 16);
         heads[1] = (sceHSynVoice_t *)(base + 32);
@@ -888,7 +885,7 @@ void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 
                 if (v->ch != ch) {
                     continue;
                 }
-                func_0000AB90(v, a3, a4, a8, (s8)pan, a10);
+                func_0000AB90(v, a3, a4, a8, a9, a10);
             }
         }
     }
