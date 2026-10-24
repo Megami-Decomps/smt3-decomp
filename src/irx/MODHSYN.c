@@ -2448,7 +2448,65 @@ int hsynVoiceStateClear(sceHSynVoice_t *v)
     return t;
 }
 /* ENDF hsynVoiceStateClear */
+#ifdef NON_MATCHING
+/* One instruction short: gcc keeps v->vag live across the two halfword stores
+ * where retail loads it again. */
+/* FUNC hsynVoiceUpdatePathB */
+void hsynVoiceUpdatePathB(sceHSynVoice_t *v)
+{
+    sceSmgProgEnt_t *prog;
+    sceHSynChannel_t *chan;
+    sceHSynSlot_t *slot;
+    int base;
+    int t;
+    s8 pan;
+    u8 sc;
+
+    prog = v->prog;
+    chan = v->chan;
+    slot = chan->slot;
+    hsynSeqInterpretB(&v->envA, (int)prog, (u8 *)slot->unk08, slot->unk04,
+                      prog->unk31 & 7, *(u16 *)&prog->unk22, prog->unk26,
+                      hsynTickScale, 0);
+    base = hsynSdSetParamVolume(v, prog->unk2A, prog->unk2C, prog->unk2E);
+    v->unk24 = hsynEnvRateLookup(prog->unk1C, 0, base);
+    v->unk26 = hsynEnvRateLookup(prog->unk1E, 0, base);
+    hsynSeqInterpretB(&v->envB, (int)prog, (u8 *)slot->unk08, slot->unk04,
+                      prog->unk31 & 0x70, prog->unk24, prog->unk28,
+                      hsynTickScale, 1);
+    base = hsynSdSetParamVolume(v, prog->unk2B, prog->unk2D, prog->unk2F);
+    v->unk51 = hsynEnvLevelLookup(prog->unk20, 0, base);
+    v->unk52 = hsynEnvLevelLookup(prog->unk21, 0, base);
+    hsynEnvAttackStep(v, chan->unk2D);
+    hsynEnvDecayStep(v, chan->unk2E);
+    sc = hsynVolumeScale(v->vel, v->unk4A, slot->unk10, slot->unk0C);
+    v->unk16 = *((u8 *)prog + 3) * sc;
+    v->unk4E = prog->unk0C & 1;
+    func_00005B4C(v);
+    t = (u8)v->vol;
+    if (t == 0x80) {
+        pan = 0;
+    } else {
+        pan = t - 0x40;
+        if (pan < -0x3F) {
+            pan = -0x3F;
+        }
+    }
+    func_00004AE4(v, pan);
+    v->unk54 = chan->pan;
+    hsynSdSetParamEnvelope(v);
+    v->unk1C = 0xFFFF;
+    v->unk1A = 0xFFFF;
+    if (v->vag != NULL) {
+        v->unk30 = 0x7FFFFFFF;
+        v->unk34 = 0;
+        v->unk3C = ((u32)*(u16 *)&v->vag->unk04 << 16) / 48000;
+    }
+}
+#else
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathB);
+#endif
+/* ENDF hsynVoiceUpdatePathB */
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathB);
 /* FUNC hsynEnvAttackStep */
 void hsynEnvAttackStep(sceHSynVoice_t *v, u8 scale)

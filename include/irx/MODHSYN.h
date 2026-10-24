@@ -590,7 +590,7 @@ u32 hsynSdSetParamBend(sceHSynVoice_t *v);
 int func_00004D90();
 int hsynVoiceKeyOff();
 int hsynVoiceStateClear(sceHSynVoice_t *v);
-int hsynVoiceUpdatePathB(sceHSynVoice_t *v);
+void hsynVoiceUpdatePathB(sceHSynVoice_t *v);
 int hsynVoiceKeyOnPathB(sceHSynVoice_t *v);
 void hsynEnvAttackStep(sceHSynVoice_t *v, u8 scale);
 void hsynEnvDecayStep(sceHSynVoice_t *v, u8 scale);
