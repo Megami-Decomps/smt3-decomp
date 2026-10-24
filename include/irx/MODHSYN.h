@@ -10,24 +10,393 @@
 
 #include "iop.h"
 
+/* Types ------------------------------------------------------------ */
+
+typedef struct sceSdEffectAttr_t sceSdEffectAttr_t;
+typedef struct sceSmgChunk_t sceSmgChunk_t;
+typedef struct sceSmgVers_t sceSmgVers_t;
+typedef struct sceSmgHead_t sceSmgHead_t;
+typedef struct sceSmgProgEnt_t sceSmgProgEnt_t;
+typedef struct sceSmgProgKey_t sceSmgProgKey_t;
+typedef struct sceSmgProg_t sceSmgProg_t;
+typedef struct sceSmgSsetEnt_t sceSmgSsetEnt_t;
+typedef struct sceSmgSset_t sceSmgSset_t;
+typedef struct sceSmgSmplEnt_t sceSmgSmplEnt_t;
+typedef struct sceSmgSmpl_t sceSmgSmpl_t;
+typedef struct sceSmgVagiEnt_t sceSmgVagiEnt_t;
+typedef struct sceSmgVagi_t sceSmgVagi_t;
+typedef struct sceSmgSetb_t sceSmgSetb_t;
+typedef struct sceHSynBank_t sceHSynBank_t;
+typedef struct sceHSynEnv_t sceHSynEnv_t;
+typedef struct sceHSynLfo_t sceHSynLfo_t;
+typedef struct sceHSynChannel_t sceHSynChannel_t;
+typedef struct sceHSynVoice_t sceHSynVoice_t;
+typedef struct sceHSynSlot_t sceHSynSlot_t;
+typedef struct sceHSynSeq_t sceHSynSeq_t;
+typedef struct sceHSynEntry_t sceHSynEntry_t;
+typedef struct sceHSynTbl_t sceHSynTbl_t;
+typedef struct sceHSynWork_t sceHSynWork_t;
+typedef struct sceHSynStat_t sceHSynStat_t;
+typedef struct sceHSynOption_t sceHSynOption_t;
+
+struct sceSdEffectAttr_t
+{
+  s32 core;
+  u32 mode;
+  u16 depth_L;
+  u16 depth_R;
+  s32 delay;
+  s32 feedback;
+};
+
+struct sceSmgChunk_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 ofs[1];
+};
+
+struct sceSmgVers_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u8 unk0C;
+  u8 unk0D;
+  u8 version;
+  u8 unk0F;
+};
+
+struct sceSmgHead_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 unk10;
+  u32 progOfs;
+  u32 ssetOfs;
+  u32 smplOfs;
+  u32 vagiOfs;
+  u32 setbOfs;
+};
+
+struct sceSmgProgEnt_t
+{
+  u32 keyOfs;
+  u8 nKey;
+  u8 unk05;
+  u8 unk06;
+  u8 unk07;
+};
+
+struct sceSmgProgKey_t
+{
+  u16 ssetIdx;
+  u8 keyLow;
+  u8 unk03;
+  u8 keyHigh;
+  u8 unk05[15];
+};
+
+struct sceSmgProg_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 ofs[1];
+};
+
+struct sceSmgSsetEnt_t
+{
+  u8 unk00;
+  u8 velLow;
+  u8 velHigh;
+  u8 nSmpl;
+  u16 smplIdx[1];
+};
+
+struct sceSmgSset_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 ofs[1];
+};
+
+struct sceSmgSmplEnt_t
+{
+  u16 vagiIdx;
+  u8 velLow;
+  u8 unk03;
+  u8 velHigh;
+  u8 unk05;
+  u8 flags;
+  u8 unk07[7];
+  u8 pitch;
+  u8 voiceOfs;
+  u8 unk10[25];
+  u8 allocHint;
+};
+
+struct sceSmgSmpl_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 ofs[1];
+};
+
+struct sceSmgVagiEnt_t
+{
+  u32 spuOfs;
+  u32 unk04;
+};
+
+struct sceSmgVagi_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 ofs[1];
+};
+
+struct sceSmgSetb_t
+{
+  char magic[4];
+  char name[4];
+  u32 size;
+  u32 nEntry;
+  u32 ofs[1];
+};
+
+struct sceHSynBank_t
+{
+  struct sceSmgHead_t *head;
+  struct sceSmgProg_t *prog;
+  struct sceSmgSset_t *sset;
+  struct sceSmgSmpl_t *smpl;
+  struct sceSmgVagi_t *vagi;
+  struct sceSmgSetb_t *setb;
+  u32 spuAddr;
+};
+
+struct sceHSynEnv_t
+{
+  u8 unk00[16];
+  s16 level;
+  s16 unk12;
+  u32 phase;
+  u32 unk1C;
+  u32 rate;
+  u8 unk20[8];
+};
+
+struct sceHSynLfo_t
+{
+  u8 unk00;
+  u8 unk01;
+  u16 unk02;
+  u16 unk04;
+  u16 unk06;
+  u32 unk08;
+  u32 unk0C;
+  u32 unk10;
+};
+
+struct sceHSynChannel_t
+{
+  struct sceHSynChannel_t::sceHSynVoice_t *onNext;
+  struct sceHSynChannel_t::sceHSynVoice_t *onPrev;
+  struct sceHSynChannel_t::sceHSynVoice_t *relNext;
+  struct sceHSynChannel_t::sceHSynVoice_t *relPrev;
+  struct sceHSynChannel_t::sceHSynVoice_t *offNext;
+  struct sceHSynChannel_t::sceHSynVoice_t *offPrev;
+  struct sceSmgProgEnt_t *prog;
+  struct sceHSynChannel_t::sceHSynSlot_t *slot;
+  struct sceHSynBank_t *bank;
+  u16 bendRange;
+  u16 unk26;
+  u16 unk28;
+  u8 bankIdx;
+  u8 vol;
+  u8 pan;
+  u8 unk2D;
+  u8 unk2E;
+  u8 unk2F;
+  u8 unk30;
+  u8 unk31;
+  u8 unk32;
+  u8 priority;
+  u8 unk34;
+  u8 unk35;
+  u8 unk36;
+  u8 unk37;
+};
+
+struct sceHSynVoice_t
+{
+  struct sceHSynVoice_t *next;
+  struct sceHSynVoice_t *prev;
+  struct sceHSynVoice_t *chNext;
+  struct sceHSynVoice_t *chPrev;
+  u16 flags;
+  u16 unk12;
+  u16 vnum;
+  u16 unk16;
+  u32 unk18;
+  u32 unk1C;
+  u32 unk20;
+  u32 unk24;
+  u16 unk28;
+  u16 unk2A;
+  u16 unk2C;
+  u16 unk2E;
+  u32 unk30;
+  u32 unk34;
+  u32 unk38;
+  u32 unk3C;
+  u8 core;
+  u8 index;
+  u8 note;
+  u8 ch;
+  u32 tag;
+  u8 vel;
+  u8 pitch;
+  u8 unk4A;
+  u8 state;
+  u8 unk4C[9];
+  u8 unk55;
+  u8 vol;
+  u8 unk57;
+  u8 unk58;
+  u8 path;
+  u8 unk5A;
+  u8 unk5B;
+  struct sceHSynVoice_t::sceHSynSlot_t *slotp;
+  struct sceHSynChannel_t *chan;
+  struct sceSmgProgEnt_t *prog;
+  struct sceSmgProgKey_t *key;
+  struct sceSmgSmplEnt_t *tone;
+  struct sceSmgVagiEnt_t *vag;
+  u32 spuAddr;
+  struct sceHSynEnv_t envA;
+  struct sceHSynEnv_t envB;
+  struct sceHSynLfo_t lfoA;
+  struct sceHSynLfo_t lfoB;
+  u8 param[56];
+};
+
+struct sceHSynSlot_t
+{
+  u8 voiceBase;
+  u8 maxVoice;
+  u8 flags;
+  u8 path;
+  u32 unk04;
+  u32 unk08;
+  u32 unk0C;
+  u32 unk10;
+  u16 unk14;
+  u8 nActive;
+  u8 unk17;
+  struct sceHSynChannel_t chan[16];
+  struct sceHSynBank_t bank[16];
+};
+
+struct sceHSynSeq_t
+{
+  u32 size;
+  u32 len;
+  u8 data[1024];
+};
+
+struct sceHSynEntry_t
+{
+  u32 unk00;
+  struct sceHSynSeq_t *seq;
+  u32 unk08;
+  struct sceHSynSlot_t *slot;
+};
+
+struct sceHSynTbl_t
+{
+  u32 nEntryWord;
+  struct sceHSynEntry_t *entry;
+};
+
+struct sceHSynWork_t
+{
+  u32 nTblWord;
+  struct sceHSynTbl_t *tbl;
+};
+
+struct sceHSynStat_t
+{
+  u32 nActive;
+  u32 nFree;
+  u8 state[2][24];
+};
+
+struct sceHSynOption_t
+{
+  const char *name;
+  int len;
+  int *var;
+};
+
+/* A layout the compiler reads differently is a build error. */
+typedef char __MODHSYN_sizeof_sceSdEffectAttr_t[(sizeof(sceSdEffectAttr_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgChunk_t[(sizeof(sceSmgChunk_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgVers_t[(sizeof(sceSmgVers_t) == 16) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgHead_t[(sizeof(sceSmgHead_t) == 40) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgProgEnt_t[(sizeof(sceSmgProgEnt_t) == 8) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgProgKey_t[(sizeof(sceSmgProgKey_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgProg_t[(sizeof(sceSmgProg_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgSsetEnt_t[(sizeof(sceSmgSsetEnt_t) == 6) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgSset_t[(sizeof(sceSmgSset_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgSmplEnt_t[(sizeof(sceSmgSmplEnt_t) == 42) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgSmpl_t[(sizeof(sceSmgSmpl_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgVagiEnt_t[(sizeof(sceSmgVagiEnt_t) == 8) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgVagi_t[(sizeof(sceSmgVagi_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceSmgSetb_t[(sizeof(sceSmgSetb_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynBank_t[(sizeof(sceHSynBank_t) == 28) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynEnv_t[(sizeof(sceHSynEnv_t) == 40) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynLfo_t[(sizeof(sceHSynLfo_t) == 20) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynChannel_t[(sizeof(sceHSynChannel_t) == 56) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynVoice_t[(sizeof(sceHSynVoice_t) == 296) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynSlot_t[(sizeof(sceHSynSlot_t) == 1368) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynSeq_t[(sizeof(sceHSynSeq_t) == 1032) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynEntry_t[(sizeof(sceHSynEntry_t) == 16) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynTbl_t[(sizeof(sceHSynTbl_t) == 8) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynWork_t[(sizeof(sceHSynWork_t) == 8) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynStat_t[(sizeof(sceHSynStat_t) == 56) ? 1 : -1];
+typedef char __MODHSYN_sizeof_sceHSynOption_t[(sizeof(sceHSynOption_t) == 12) ? 1 : -1];
+
 /* Functions -------------------------------------------------------- */
 
-s32 modhsyn_e30();
-int modhsyn_e7(s16, int, int, unsigned int);
-int hsynLoadBank(int, int, int, int);
-int modhsyn_sceHSyn_Load(int, int, int *, int, unsigned int);
-int modhsyn_e28(int, int, unsigned int);
-int hsynResetState(int, int);
-int hsynVoiceParamReset(int, int, u8);
+int modhsyn_e30();
+int modhsyn_e7(s16 core, u16 spuAddr, u32 iopAddr, u32 size);
+int hsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name);
+int modhsyn_sceHSyn_Load(sceHSynWork_t *work, int slotNo, u32 spuAddr, sceSmgVers_t *img, u32 bankIdx);
+int modhsyn_e28(sceHSynWork_t *work, int slotNo, u32 bankIdx);
+int hsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot);
+int hsynVoiceParamReset(sceHSynSlot_t *slot, sceHSynChannel_t *chan, u8 prog);
 int hsynVoiceSetPitch(int, u8, u8);
 s32 hsynVoiceEnvelopeApply(int, int);
 int hsynVoiceSetAttack(int, u8);
 int hsynVoiceSetRelease(int, u8);
 int hsynVoiceSetVolumeLeft(int, u8);
 int hsynVoiceSetVolumeRight(int, u8);
-int hsynVoiceFlagsGet(int, u8);
-int hsynVoiceFlagsSet(int, char);
-int hsynVoiceIndexGet(u32, u32);
+int hsynVoiceFlagsGet(sceHSynChannel_t *chan, u8 semitones);
+int hsynVoiceFlagsSet(sceHSynChannel_t *chan, s8 val);
+void hsynVoiceIndexGet(sceHSynChannel_t *chan, u8 val);
 s32 hsynVoiceSetPitchDirect(int, u8, int, u8, u8);
 int hsynVoiceApplyAll(int);
 int hsynVoiceEventDispatch(int, u8 *, char, u8);
@@ -35,9 +404,9 @@ int hsynVoiceUpdatePass(int, int, char, u8, u8);
 void hsynVoiceRefreshHook();
 int hsynVoiceDirectPass(int, int, u8, u8 *);
 s32 hsynVoiceRefresh(int, int, u8 *, unsigned int);
-s32 hsynServiceTick(int, int);
+int hsynServiceTick(sceHSynEntry_t *entry, int nEntryWord);
 int modhsyn_e8(int *);
-int modhsyn_e26(u32 *);
+int modhsyn_e26(u32 *mask);
 int hsynParamSlotResolve(int, int, u32 *, u32 *);
 int modhsyn_e10(int, int, s16);
 int modhsyn_e11(int, int);
@@ -45,18 +414,18 @@ int modhsyn_e12(int, int);
 int modhsyn_e13(int, int);
 int modhsyn_e14(int, int);
 int modhsyn_e9(u16 *);
-int modhsyn_e15(int);
-int hsynEffectAttrRead(char, u8);
-int hsynEffectAttrWrite(char, u8);
+int modhsyn_e15(sceHSynStat_t *stat);
+int hsynEffectAttrRead(sceSdEffectAttr_t *attr);
+int hsynEffectAttrWrite(sceSdEffectAttr_t *attr);
 int modhsyn_e17(int, int, int);
 int modhsyn_e18(int);
-s32 modhsyn_e27();
+int modhsyn_e27();
 int hsynCmdReset(u32 *);
 int hsynCmdProgramChange(int, int, int, int, u8, u8, u8, int);
 int hsynCmdChannelPressure(int, int, int, int, int, u8, u8, u16, int);
 int hsynCmdNoteOff(int, int, int, int, u8, u8, s16, int);
 int hsynCmdNoteOn(int, int, int, int, u8, u8, s16, int);
-int hsynCmdVoiceAlloc(int, int, int, int, u8, u8, u16, int);
+int hsynCmdVoiceAlloc(int kind, sceHSynSlot_t *slot, int a3, u8 a4, u8 note, u8 ch, u16 a7, u32 tag);
 int modhsyn_e19(u8);
 int modhsyn_e20(int, int);
 int modhsyn_e21(int, int);
@@ -64,21 +433,21 @@ int modhsyn_e22(int, int, int, int, char);
 int modhsyn_e25(int, int, u32 *, int);
 int modhsyn_e23(int, int, u8, int, char);
 int modhsyn_e24(int, int, u8, int, char);
-int *hsynInitCores();
-int hsynCoreIndexGet(int *, int *);
-u32 *hsynCoreIndexSet(u32 *, int);
-int hsynVoiceMaskGet(u32 *);
-int hsynVoiceSlotGet(int, int *);
-int hsynVoiceSlotSet(int);
+void hsynInitCores();
+void hsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t **head);
+void hsynCoreIndexSet(sceHSynVoice_t *v, sceHSynVoice_t **head);
+void hsynVoiceMaskGet(sceHSynVoice_t *v);
+void hsynVoiceSlotGet(sceHSynVoice_t *v, sceHSynVoice_t **head);
+void hsynVoiceSlotSet(sceHSynVoice_t *v);
 int hsynServiceVoices();
 s16 hsynEnvRateLookup(s16 delta, s32 base, s32 bias);
 s8 hsynEnvLevelLookup(s8 delta, s32 base, s32 bias);
 int hsynAdjustFieldByKey(int, char, int, u16, char);
-int hsynBuildAdsr1(int, int);
-int hsynBuildAdsr2(int, int);
-int hsynVoiceUpdatePathA(int);
-int hsynVoiceKeyOnPathA(int);
-int hsynVoicePitchCommit(int);
+u16 hsynBuildAdsr1(u8 ch, sceSmgSsetEnt_t *sset);
+u16 hsynBuildAdsr2(u8 ch, sceSmgSsetEnt_t *sset);
+int hsynVoiceUpdatePathA(sceHSynVoice_t *v);
+int hsynVoiceKeyOnPathA(sceHSynVoice_t *v);
+int hsynVoicePitchCommit(sceHSynVoice_t *v);
 void hsynSdSetParamPitch(int, s16);
 unsigned int hsynSdSetParamEnvelope(int);
 int hsynSdSetParamVolume(int, char, u8, u8);
@@ -86,28 +455,28 @@ s32 hsynSdSetParamVolumeLeft(int, u8);
 s32 hsynSdSetParamVolumeRight(int, u8);
 s32 hsynSdSetParamAdsr(int, int);
 int hsynSdSetParamBend(int);
-int hsynVoiceKeyOff();
-int hsynVoiceStateClear(int);
-unsigned int hsynVoiceUpdatePathB(int);
-int hsynVoiceKeyOnPathB(int);
+int hsynVoiceKeyOff(sceHSynVoice_t *v);
+int hsynVoiceStateClear(sceHSynVoice_t *v);
+int hsynVoiceUpdatePathB(sceHSynVoice_t *v);
+int hsynVoiceKeyOnPathB(sceHSynVoice_t *v);
 s32 hsynEnvAttackStep(int, u8);
 s32 hsynEnvDecayStep(int, u8);
-s32 hsynSpu2SettleDelay();
-int hsynVoiceAllocScan(int, u8, int);
-int hsynVoiceMaskUpdate(int);
+int hsynSpu2SettleDelay();
+int hsynVoiceAllocScan(sceHSynChannel_t *chan, u8 ch, u32 tag);
+int hsynVoiceMaskUpdate(sceHSynVoice_t *v);
 int hsynVoiceAllocByPriority(int, u8);
 s32 hsynVoiceAllocByChannel(int);
-s32 hsynVoiceStop(int);
-int hsynVoiceRelease(int);
+int hsynVoiceStop(sceHSynVoice_t *v);
+int hsynVoiceRelease(sceHSynVoice_t *v);
 int hsynVoiceStealScan(int, u16);
-void hsynVoiceEngineStep(u8 *, int, char, u8, u8, int);
-u32 *hsynVoiceMaskClear(char);
+void hsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, s8 status, u8 note, u8 vel, u32 tag);
+sceHSynVoice_t *hsynVoiceMaskClear(s8 allocHint);
 int hsynVoiceEnvelopeAdvance(u16, char);
 int hsynVoiceVolumeAdvance(s16, char);
 s32 hsynVoiceRetrigger(int, u8);
-int hsynLfoApply(int, int);
+int hsynLfoApply(sceHSynVoice_t *v);
 void hsynVoiceAllocForCmd(int, int, int, u8, u8, int, int);
-int hsynVoiceMaskSet(int);
+int hsynVoiceMaskSet(sceHSynVoice_t *v);
 int hsynVoiceAllocExport20(int);
 int hsynVoiceAllocPathB(int, int);
 int hsynVoiceAllocPathBEntry(int, int);
@@ -116,9 +485,9 @@ int hsynVoiceAllocPathCEntry(int, int, int, int);
 s32 hsynVoiceReleaseExport21(int);
 int hsynVoiceReleaseOne(int);
 int hsynVoiceReleaseGroup(int, u16);
-u32 *hsynVoiceMaskClearOne(char);
+sceHSynVoice_t *hsynVoiceMaskClearOne(s8 allocHint);
 int hsynModulationApply(u16, char, int, int);
-int hsynModulationStep(u16, char);
+int hsynModulationStep(sceHSynVoice_t *v);
 int hsynPanApply(s16, char);
 int hsynLfoStep(int, u8, u8);
 int hsynUnrefParamGetA(u8, u8);
@@ -135,60 +504,76 @@ int hsynUnrefTableSetA(u8);
 int hsynUnrefTableSetB(char);
 int hsynUnrefTableSetC(char);
 int hsynVolumeScale(u8, u8, int, int);
-int hsynSeqByteRead(int);
-int hsynSeqWordRead(int);
-int hsynSeqVarLenRead(int);
-int hsynSeqSkip(int);
-int hsynSeqSeek(int);
-int hsynSeqEmit(int, int);
+int hsynSeqByteRead(sceHSynEnv_t *env);
+int hsynSeqWordRead(sceHSynEnv_t *env);
+int hsynSeqVarLenRead(sceHSynEnv_t *env);
+int hsynSeqSkip(sceHSynEnv_t *env);
+int hsynSeqSeek(sceHSynEnv_t *env);
+int hsynSeqEmit(sceHSynEnv_t *env, int sel);
 int hsynEffectDispatch(char *);
-int hsynSeqStateReset(int);
+int hsynSeqStateReset(sceHSynEnv_t *env);
 int hsynSeqInterpretA(int, int, u8 *, int, char, u16, u16, unsigned int, int);
-int hsynSeqStart(u8 *);
+int hsynSeqStart(sceHSynEnv_t *env);
 int hsynSeqInterpretB(int, int, u8 *, int, char, u16, u16, unsigned int, int);
 int hsynSeqEmitTail();
-int modhsyn_e16(int);
+int modhsyn_e16(u32 *block);
 int hsynSdLockAcquire();
 unsigned int hsynSdLockRelease(unsigned int *, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
 int hsynSdLockWait(int *, int);
-int hsynSdInit(unsigned int);
-int hsynSdSetParam(u16, u16);
-int hsynSdGetParam(u16);
-int hsynSdSetSwitch(u16, unsigned int);
-int hsynSdGetSwitch(u16);
-int hsynSdSetAddr(u16, unsigned int);
-int hsynSdGetAddr(u16);
-int hsynSdSetCoreAttr(u16, u16);
-int hsynSdNote2Pitch(u16, u16, u16, s16);
-int hsynSdPitch2Note(u16, u16, u16);
-int hsynSdProcBatch(unsigned int, unsigned int, unsigned int);
-int hsynSdProcBatchEx(unsigned int, unsigned int, unsigned int, unsigned int);
-int hsynSdVoiceTrans(s16, u16, unsigned int, unsigned int, unsigned int);
-int hsynSdBlockTrans(s16, u16, unsigned int, unsigned int);
-int hsynSdVoiceTransStatus(s16, s16);
-int hsynSdBlockTransStatus(s16, s16);
-int hsynSdSetEffectAttr(unsigned int, unsigned int);
-int hsynSdGetEffectAttr(unsigned int, unsigned int);
-int hsynSdClearEffectWorkArea(unsigned int, unsigned int, unsigned int);
-int hsynEffectDepthSet(int);
-int hsynCoreStateGet(int);
+int hsynSdInit(u32 flag);
+int hsynSdSetParam(u16 entry, u16 value);
+int hsynSdGetParam(u16 entry);
+int hsynSdSetSwitch(u16 entry, u32 value);
+u32 hsynSdGetSwitch(u16 entry);
+int hsynSdSetAddr(u16 entry, u32 value);
+u32 hsynSdGetAddr(u16 entry);
+int hsynSdSetCoreAttr(u16 entry, u16 value);
+int hsynSdNote2Pitch(u16 center, u16 fine, u16 note, s16 bend);
+int hsynSdPitch2Note(u16 center, u16 fine, u16 pitch);
+int hsynSdProcBatch(u32 *cmds, u32 *rets, u32 count);
+int hsynSdProcBatchEx(u32 *cmds, u32 *rets, u32 count, u32 flags);
+int hsynSdVoiceTrans(s16 chan, u16 mode, u8 *iopAddr, u32 spuAddr, u32 size);
+int hsynSdBlockTrans(s16 chan, u16 mode, u8 *iopAddr, u32 size);
+int hsynSdVoiceTransStatus(s16 chan, s16 flag);
+int hsynSdBlockTransStatus(s16 chan, s16 flag);
+int hsynSdSetEffectAttr(int core, sceSdEffectAttr_t *attr);
+void hsynSdGetEffectAttr(int core, sceSdEffectAttr_t *attr);
+int hsynSdClearEffectWorkArea(int core, int channel, int effectMode);
+int hsynEffectDepthSet(int core, u16 depthL, u16 depthR);
+int hsynCoreStateGet(sceHSynVoice_t *v);
 int hsynPitchBendApply(int, int, u16, int);
-int hsynEffectFeedbackSet(int);
-int hsynCoreStateSet(int);
-int hsynChannelStateGet(u32 *);
+int hsynEffectFeedbackSet(int core, int feedback, int delay);
+int hsynCoreStateSet(sceHSynVoice_t *v);
+int hsynChannelStateGet(sceHSynVoice_t *v);
 void hsynRetnStub();
 
 /* Data ------------------------------------------------------------- */
 
 extern u8 aSpu2Synthesize[];
-extern u8 aScei[];
-extern u8 aVers[];
-extern u8 aHead[];
-extern u8 aProg[];
-extern u8 aSset[];
-extern u8 aSmpl[];
-extern u8 aVagi[];
-extern u8 aSetb[];
+extern const char magic[];
+extern const char name[];
+extern const char aHead[];
+extern const char aProg[];
+extern const char aSset[];
+extern const char aSmpl[];
+extern const char aVagi[];
+extern const char aSetb[];
 extern u8 aSesqUnknownCom[];
+extern struct sceHSynVoice_t *hsynFreeList[2][2];
+extern u32 hsynTickScale;
+extern u32 hsynNoiseMask[2];
+extern u32 hsynKeyOnPending[2];
+extern u32 hsynVoiceMask[2];
+extern struct sceHSynVoice_t *hsynCoreList[2][2];
+extern struct sceHSynStat_t *hsynStat;
+extern u32 hsynKeyOffPending[2];
+extern u32 hsynMixMaskL[2][2];
+extern struct sceHSynVoice_t *hsynRelList[2][2];
+extern struct sceHSynVoice_t hsynVoices[2][24];
+extern struct sceHSynVoice_t *hsynActiveList[2][2];
+extern u8 hsynFreeCount[2];
+extern u32 hsynMixMaskR[2][2];
+extern u8 hsynEnabled;
+extern u8 hsynActiveCount;
 
 #endif /* IRX_MODHSYN_H */
