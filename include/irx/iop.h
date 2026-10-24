@@ -93,4 +93,26 @@ void loadcore_FlushDcache(void);
 s32 intrman_CpuSuspendIntr(s32 *state);
 s32 intrman_CpuResumeIntr(s32 state);
 
+/* libsd, the SPU2 library. Declared here rather than beside the sound
+ * driver because Sony's MODHSYN imports it too. */
+typedef struct {
+    s32 core;
+    u32 mode;
+    u16 depth_L;
+    u16 depth_R;
+    s32 delay;
+    s32 feedback;
+} sceSdEffectAttr_t;
+
+s32 libsd_sceSdInit(s32 flag);
+u16 libsd_sceSdSetParam(u16 entry, u16 value);
+void libsd_sceSdSetSwitch(u16 entry, u32 value);
+u32 libsd_sceSdGetSwitch(u16 entry);
+void libsd_sceSdSetAddr(u16 entry, u32 value);
+u16 libsd_sceSdSetCoreAttr(u16 entry, u16 value);
+s32 libsd_sceSdVoiceTrans(s16 chan, u16 mode, u32 iopaddr, u32 spuaddr, u32 size);
+s32 libsd_sceSdVoiceTransStatus(s16 chan, s16 flag);
+s32 libsd_sceSdSetEffectAttr(s32 core, sceSdEffectAttr_t *attr);
+void *libsd_sceSdSetSpu2IntrHandler(void *func, void *arg);
+
 #endif /* IRX_IOP_H */

@@ -1,4 +1,4 @@
-#include "iop.h"
+#include "MODMSIN.h"
 
 /* MODMSIN.IRX, Sony's MIDI message input module: the queue
  * sceMSIn_PutMsg writes into, which the synthesiser drains.
