@@ -148,9 +148,94 @@ INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiPlaySwitch);
 INCLUDE_ASM("MODMIDI", midiSelectTrack);
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_SelectMidi);
 INCLUDE_ASM("MODMIDI", modmidi_e16);
-INCLUDE_ASM("MODMIDI", func_00001FE4);
+/* FUNC func_00001FE4 */
+void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 ch)
+{
+    u32 vol;
+    u32 msg;
+
+    if (slot->flags & 2) {
+        vol = midiChannelReset(trk, ch);
+        msg = (vol << 16) | 0x7B0;
+        midiSendChMsg(slot, trk, vt, ch | msg, 3);
+    }
+}
+/* ENDF func_00001FE4 */
+#ifdef NON_MATCHING
+/* The two return -1 paths come out as one shared tail where retail has
+ * two, so the branch arrangement differs. */
+/* FUNC modmidi_sceMidi_MidiSetVolume */
+int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    sceMidiVoiceTbl_t *vt;
+    u8 i;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    vt = (sceMidiVoiceTbl_t *)&work->tbl->nVoiceWord;
+    if (ch < 16) {
+        trk->chExpr[ch] = vol;
+        func_00001FE4(slot, trk, vt, ch);
+        return 0;
+    }
+    if (ch != 0xFF) {
+        return -1;
+    }
+    trk->vol = vol;
+    if (slot->flags & 2) {
+        for (i = 0; i < 16; i++) {
+            func_00001FE4(slot, trk, vt, i);
+        }
+    }
+    return 0;
+}
+/* ENDF modmidi_sceMidi_MidiSetVolume */
+#else
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiSetVolume);
+#endif
+#ifdef NON_MATCHING
+/* Two instructions longer: gcc reloads trk from its stack slot after the
+ * chVol store instead of keeping it in a register. */
+/* FUNC modmidi_e18 */
+int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    sceMidiVoiceTbl_t *vt;
+    u8 v;
+    u8 i;
+
+    v = vol;
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    vt = (sceMidiVoiceTbl_t *)&work->tbl->nVoiceWord;
+    if (vol < 0) {
+        v = 0x7F;
+    }
+    if (ch < 16) {
+        trk->chVol[ch] = v;
+        trk->ch[ch].vol = v;
+        func_00001FE4(slot, trk, vt, ch);
+        return 0;
+    }
+    if (ch != 0xFF) {
+        return -1;
+    }
+    for (i = 0; i < 16; i++) {
+        trk->chVol[i] = v;
+        trk->ch[i].vol = v;
+        func_00001FE4(slot, trk, vt, i);
+    }
+    return 0;
+}
+/* ENDF modmidi_e18 */
+#else
 INCLUDE_ASM("MODMIDI", modmidi_e18);
+#endif
 /* FUNC modmidi_e19 */
 int modmidi_e19(sceMidiWork_t *work, int slotNo, u8 bpm)
 {
@@ -323,10 +408,70 @@ INCLUDE_ASM("MODMIDI", midiSongRepeat);
 INCLUDE_ASM("MODMIDI", midiPlaySong);
 INCLUDE_ASM("MODMIDI", modmidi_e8);
 INCLUDE_ASM("MODMIDI", midiSongServiceTick);
-INCLUDE_ASM("MODMIDI", func_000031DC);
-INCLUDE_ASM("MODMIDI", modmidi_e10);
-INCLUDE_ASM("MODMIDI", modmidi_e11);
-INCLUDE_ASM("MODMIDI", modmidi_sceMidi_SongSetAbsolute);
+/* FUNC func_000031DC */
+int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    trk->songVol = vol;
+    if (slot->flags & 0x200) {
+        midiSongApplyVolume(work, slotNo, trk);
+    }
+    return 0;
+}
+/* ENDF func_000031DC */
+/* FUNC modmidi_e10 */
+int modmidi_e10(sceMidiWork_t *work, int slotNo, u8 val)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    midiSongSetTempo(trk, val);
+    if (slot->flags & 0x200) {
+        midiSongApplyVolume(work, slotNo, trk);
+    }
+    return 0;
+}
+/* ENDF modmidi_e10 */
+/* FUNC modmidi_e11 */
+int modmidi_e11(sceMidiWork_t *work, int slotNo, u8 val)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    midiSongSetFlags(trk, val);
+    if (slot->flags & 0x200) {
+        modmidi_e19(work, slotNo, trk->unk133);
+    }
+    return 0;
+}
+/* ENDF modmidi_e11 */
+/* FUNC modmidi_sceMidi_SongSetAbsolute */
+int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    trk->songSpeed = speed;
+    if (slot->flags & 0x200) {
+        modmidi_sceMidi_MidiSetAbsolute(work, slotNo, trk->songSpeed);
+    }
+    return 0;
+}
+/* ENDF modmidi_sceMidi_SongSetAbsolute */
 INCLUDE_ASM("MODMIDI", midiSearchPlay);
 INCLUDE_ASM("MODMIDI", modmidi_e13);
 INCLUDE_ASM("MODMIDI", D_000036C0);

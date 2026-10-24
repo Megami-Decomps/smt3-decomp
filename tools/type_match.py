@@ -229,6 +229,13 @@ def build():
     for source in (il2, hd, idb, mine_all):   # later sources win on a name clash
         for k, v in source.items():
             pool[k] = v
+    # Our parse of a record is not always its layout: `struct_fields` does not
+    # descend into an anonymous union, so `sdfGrPacketHeader_t` measured 16 bytes
+    # against the IDB's 32 and every size comparison refused it. Where the two
+    # disagree, the IDB's layout is the one taken from the real addresses.
+    for k, v in idb.items():
+        if k in mine_all and v[0] != mine_all[k][0]:
+            pool[k] = v
     reliable = {"tree", "idb"}
 
     out = []
