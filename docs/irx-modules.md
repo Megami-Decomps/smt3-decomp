@@ -127,7 +127,7 @@ assembly `.rodata`).
 | --- | --- | --- | --- |
 | `SDFIOP.IRX` | 5 | 5 | 0 |
 | `SDFIOPFL.IRX` | 6 | 6 | 0 |
-| `SDFSDMAN.IRX` | 72 | 32 | 40 |
+| `SDFSDMAN.IRX` | 72 | 33 | 39 |
 
 The three that cannot match while `.rodata` is assembly are
 `sdfSndGetVolTable`, `sdfSndLoadSmg` and `sdfSndDrvRpcInit`: each compiles its

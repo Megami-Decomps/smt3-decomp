@@ -364,7 +364,7 @@ typedef struct {
     s8 voiceL;
     s8 voiceR;
     s8 onMemory;
-    u8 stereo;
+    s8 stereo;
     s8 fadeState;
     u8 unk0F;
     s32 fadeStep;

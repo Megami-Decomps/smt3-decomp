@@ -133,7 +133,7 @@ s32 sdfAdpcmStop(void);
 s32 sdfAdpcmUploadBlock(void);
 s32 sdfAdpcmSpu2IntrHandler(void *arg);
 s32 sdfAdpcmFillBuffer(s32 blocking);
-s32 sdfAdpcmSetVolume(s16 vol);
+s32 sdfAdpcmSetVolume(s32 vol);
 s32 sdfAdpcmStreamPlay(const char *path, s32 vol, s8 onMemory);
 void sdfAdpcmStreamInit(void *arg);
 
@@ -2476,8 +2476,6 @@ INCLUDE_ASM("SDFSDMAN", sdfSndCallEeRpc);
 #endif
 
 INCLUDE_ASM("SDFSDMAN", D_000045C8);
-#ifdef NON_MATCHING
-/* 1 instruction longer than the retail code. */
 /* FUNC sdfAdpcmFadeTick */
 /* One step of the stream fade out, called once per sequence tick. */
 s32 sdfAdpcmFadeTick(void)
@@ -2499,9 +2497,6 @@ s32 sdfAdpcmFadeTick(void)
     return sdfAdpcmStop();
 }
 /* ENDF sdfAdpcmFadeTick */
-#else
-INCLUDE_ASM("SDFSDMAN", sdfAdpcmFadeTick);
-#endif
 
 /* FUNC sdfAdpcmFadeOut */
 s32 sdfAdpcmFadeOut(s32 step)
@@ -2689,32 +2684,31 @@ INCLUDE_ASM("SDFSDMAN", sdfAdpcmFillBuffer);
 #endif
 
 #ifdef NON_MATCHING
-/* 3 instructions longer than the retail code. */
+/* 2 instructions longer than the retail code. */
 /* FUNC sdfAdpcmSetVolume */
-s32 sdfAdpcmSetVolume(s16 vol)
+s32 sdfAdpcmSetVolume(s32 vol)
 {
-    u16 v;
     u16 entry;
     u16 entryR;
     u16 last;
     u16 lastVol;
 
-    v = vol << 7;
-    if ((v & 0x80) != 0) {
-        v |= 0xFF;
+    vol = vol << 7;
+    if ((vol & 0x80) != 0) {
+        vol |= 0xFF;
     }
     if (sdfAdpcm.stereo) {
         entry = 2 * sdfAdpcm.voiceL + (s8)sdfAdpcm.coreId;
         entryR = 2 * sdfAdpcm.voiceR + (s8)sdfAdpcm.coreId;
-        libsd_sceSdSetParam(entry, v);
+        libsd_sceSdSetParam(entry, vol);
         libsd_sceSdSetParam(entry | 0x100, 0);
         libsd_sceSdSetParam(entryR, 0);
         last = entryR | 0x100;
-        lastVol = v;
+        lastVol = vol;
     } else {
-        lastVol = v;
+        lastVol = vol;
         entry = 2 * sdfAdpcm.voiceL + (s8)sdfAdpcm.coreId;
-        libsd_sceSdSetParam(entry, v);
+        libsd_sceSdSetParam(entry, vol);
         last = entry | 0x100;
     }
     return libsd_sceSdSetParam(last, lastVol);
@@ -2822,7 +2816,7 @@ void sdfAdpcmStreamInit(void *arg)
         stdio_printf(aSdfadpcmFreqSL, sdfAdpcmFreqNames[sdfAdpcmHeader.freq],
                      sdfAdpcm.bytesLeft, (s8)sdfAdpcm.stereo);
         sdfAdpcm.playing = 1;
-        sdfAdpcm.coreId = 0;
+        (s8)sdfAdpcm.coreId = 0;
         libsd_sceSdSetCoreAttr(4, 0);
         sdfAdpcm.core = 0;
         sdfSndWorkArea->banks[7].size = 512;
