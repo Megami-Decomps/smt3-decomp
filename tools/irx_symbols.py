@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export the IRX module symbols from their IDBs into config/<name>/symbol_addrs.txt.
+"""Export the IRX module symbols from their IDBs into config/irx/<name>/symbol_addrs.txt.
 
     python tools/irx_symbols.py            # all three modules
     python tools/irx_symbols.py SDFIOP

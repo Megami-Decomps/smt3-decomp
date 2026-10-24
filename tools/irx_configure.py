@@ -166,7 +166,7 @@ def write_ninja(args) -> None:
         n.default("all")
         n.build("build-irx.ninja", "configure",
                 implicit=[str(TOOLS / "irx_configure.py")]
-                + [f"config/{m}/{m}.yaml" for m in irx_config.modules()])
+                + [f"config/irx/{m}/{m}.yaml" for m in irx_config.modules()])
     print(f"wrote {out}")
 
 

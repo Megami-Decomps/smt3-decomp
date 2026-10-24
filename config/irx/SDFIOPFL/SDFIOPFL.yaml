@@ -14,4 +14,4 @@ paths:
   asm: asm/irx/SDFIOPFL
   src: src/irx/SDFIOPFL.c
   build: build/irx/SDFIOPFL
-  symbols: config/SDFIOPFL/symbol_addrs.txt
+  symbols: config/irx/SDFIOPFL/symbol_addrs.txt

@@ -102,8 +102,8 @@ iop-gcc, and the module is still byte-identical.
 Each module has its own config directory, laid out like `config/smt3`:
 
 ```
-config/SDFSDMAN/SDFSDMAN.yaml      the module: sha1, .iopmod fields, paths
-config/SDFSDMAN/symbol_addrs.txt   splat's symbol_addrs format
+config/irx/SDFSDMAN/SDFSDMAN.yaml      the module: sha1, .iopmod fields, paths
+config/irx/SDFSDMAN/symbol_addrs.txt   splat's symbol_addrs format
 ```
 
 The yaml is authored. It names the `.iopmod` fields that are not derived from

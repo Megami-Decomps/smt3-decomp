@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Load the per-module config in config/<module>/<module>.yaml."""
+"""Load the per-module config in config/irx/<module>/<module>.yaml."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,7 +7,7 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG = ROOT / "config"
+CONFIG = ROOT / "config" / "irx"
 
 
 def modules() -> list[str]:
@@ -24,7 +24,7 @@ def load(module: str) -> dict:
     cfg["module_dir"] = module
     for key in ("name", "sha1", "module", "paths"):
         if key not in cfg:
-            raise SystemExit(f"config/{module}/{module}.yaml: missing {key!r}")
+            raise SystemExit(f"config/irx/{module}/{module}.yaml: missing {key!r}")
     return cfg
 
 
