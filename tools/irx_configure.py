@@ -135,8 +135,15 @@ def write_ninja(args) -> None:
 
             objs = []
             if (ROOT / src).exists():
+                # The generated header has to be a dependency, or a change to
+                # it leaves text.o stale and the verify passes on code that no
+                # longer compiles.
+                headers = ["include/irx/irx.h", "include/irx/iop.h"]
+                generated = Path("include") / "irx" / f"{module}.h"
+                if (ROOT / generated).exists():
+                    headers.append(str(generated))
                 n.build(str(b / "text.o"), "iopcc", [str(src)],
-                        implicit=deps + ["include/irx/irx.h"])
+                        implicit=deps + headers)
             else:
                 text_s = b / "text.s"
                 n.build(str(text_s), "textlist", [], variables={"module": module})
