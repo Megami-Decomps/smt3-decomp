@@ -716,8 +716,84 @@ int hsynCmdReset(u8 **pp)
 INCLUDE_ASM("MODHSYN", hsynCmdProgramChange);
 INCLUDE_ASM("MODHSYN", func_000021B8);
 INCLUDE_ASM("MODHSYN", hsynCmdChannelPressure);
-INCLUDE_ASM("MODHSYN", hsynCmdNoteOff);
-INCLUDE_ASM("MODHSYN", hsynCmdNoteOn);
+/* FUNC hsynCmdNoteOff */
+void hsynCmdNoteOff(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    if ((*(u8 *)(base + 2) & 1) != 0) {
+        heads[0] = (sceHSynVoice_t *)(base + 16);
+        heads[1] = (sceHSynVoice_t *)(base + 32);
+        for (i = 0; i < 2; i++) {
+            end = heads[i];
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag != tag) {
+                    continue;
+                }
+                if (v->unk58 != state) {
+                    continue;
+                }
+                if (v->note != note) {
+                    continue;
+                }
+                if (v->ch != ch) {
+                    continue;
+                }
+                switch (sel) {
+                case 0:
+                    v->unk20 = val;
+                    break;
+                case 1:
+                    v->unk4F = val;
+                    break;
+                }
+            }
+        }
+    }
+}
+/* ENDF hsynCmdNoteOff */
+/* FUNC hsynCmdNoteOn */
+void hsynCmdNoteOn(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    if ((*(u8 *)(base + 2) & 1) != 0) {
+        heads[0] = (sceHSynVoice_t *)(base + 16);
+        heads[1] = (sceHSynVoice_t *)(base + 32);
+        for (i = 0; i < 2; i++) {
+            end = heads[i];
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag != tag) {
+                    continue;
+                }
+                if (v->unk58 != state) {
+                    continue;
+                }
+                if (v->note != note) {
+                    continue;
+                }
+                if (v->ch != ch) {
+                    continue;
+                }
+                switch (sel) {
+                case 0:
+                    v->unk22 = val;
+                    break;
+                case 1:
+                    v->unk50 = val;
+                    break;
+                }
+            }
+        }
+    }
+}
+/* ENDF hsynCmdNoteOn */
 INCLUDE_ASM("MODHSYN", hsynCmdVoiceAlloc);
 INCLUDE_ASM("MODHSYN", func_0000273C);
 /* FUNC modhsyn_e19 */
