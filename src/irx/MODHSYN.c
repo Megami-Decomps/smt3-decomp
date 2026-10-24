@@ -205,7 +205,12 @@ INCLUDE_ASM("MODHSYN", hsynVoiceVolumeAdvance);
 INCLUDE_ASM("MODHSYN", hsynVoiceRetrigger);
 INCLUDE_ASM("MODHSYN", hsynLfoApply);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocForCmd);
-INCLUDE_ASM("MODHSYN", hsynVoiceMaskSet);
+/* FUNC hsynVoiceMaskSet */
+int hsynVoiceMaskSet(sceHSynVoice_t *v)
+{
+    return hsynVoiceMaskUpdate(v);
+}
+/* ENDF hsynVoiceMaskSet */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocExport20);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathB);
 /* FUNC hsynVoiceAllocPathBEntry */
@@ -215,14 +220,29 @@ int hsynVoiceAllocPathBEntry(int a, int b)
 }
 /* ENDF hsynVoiceAllocPathBEntry */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathC);
-INCLUDE_ASM("MODHSYN", hsynVoiceAllocPathCEntry);
+/* FUNC hsynVoiceAllocPathCEntry */
+int hsynVoiceAllocPathCEntry(int a, int b, int c, int d)
+{
+    return hsynVoiceAllocPathC(a + 0x18, b, c, d);
+}
+/* ENDF hsynVoiceAllocPathCEntry */
 INCLUDE_ASM("MODHSYN", hsynVoiceReleaseExport21);
-INCLUDE_ASM("MODHSYN", hsynVoiceReleaseOne);
+/* FUNC hsynVoiceReleaseOne */
+int hsynVoiceReleaseOne(sceHSynVoice_t *v)
+{
+    return hsynVoiceRelease(v);
+}
+/* ENDF hsynVoiceReleaseOne */
 INCLUDE_ASM("MODHSYN", hsynVoiceReleaseGroup);
 INCLUDE_ASM("MODHSYN", func_000078D4);
 INCLUDE_ASM("MODHSYN", func_00007F54);
 INCLUDE_ASM("MODHSYN", func_00008350);
-INCLUDE_ASM("MODHSYN", hsynVoiceMaskClearOne);
+/* FUNC hsynVoiceMaskClearOne */
+sceHSynVoice_t *hsynVoiceMaskClearOne(u8 allocHint)
+{
+    return hsynVoiceMaskClear(allocHint);
+}
+/* ENDF hsynVoiceMaskClearOne */
 INCLUDE_ASM("MODHSYN", hsynModulationApply);
 INCLUDE_ASM("MODHSYN", hsynModulationStep);
 INCLUDE_ASM("MODHSYN", hsynPanApply);
@@ -258,7 +278,15 @@ u8 hsynUnrefStubB(u8 v)
 }
 /* ENDF hsynUnrefStubB */
 INCLUDE_ASM("MODHSYN", hsynTableEntryFill);
-INCLUDE_ASM("MODHSYN", hsynUnrefTableSetA);
+/* FUNC hsynUnrefTableSetA */
+u8 hsynUnrefTableSetA(u8 x)
+{
+    u32 r;
+
+    r = hsynTableEntryFill(x);
+    return 0x80 - r;
+}
+/* ENDF hsynUnrefTableSetA */
 INCLUDE_ASM("MODHSYN", hsynUnrefTableSetB);
 INCLUDE_ASM("MODHSYN", hsynUnrefTableSetC);
 INCLUDE_ASM("MODHSYN", hsynVolumeScale);
@@ -278,7 +306,18 @@ int hsynSeqWordRead(sceHSynEnv_t *env)
 }
 /* ENDF hsynSeqWordRead */
 INCLUDE_ASM("MODHSYN", hsynSeqVarLenRead);
-INCLUDE_ASM("MODHSYN", hsynSeqSkip);
+/* FUNC hsynSeqSkip */
+int hsynSeqSkip(sceHSynEnv_t *env)
+{
+    int v;
+
+    v = -0x4000;
+    if ((int)env->unk1C > 0x7FFF) {
+        v = 0x4000;
+    }
+    return v;
+}
+/* ENDF hsynSeqSkip */
 INCLUDE_ASM("MODHSYN", hsynSeqSeek);
 INCLUDE_ASM("MODHSYN", hsynSeqEmit);
 INCLUDE_ASM("MODHSYN", hsynEffectDispatch);
@@ -292,7 +331,15 @@ INCLUDE_ASM("MODHSYN", D_00009AFC);
 INCLUDE_ASM("MODHSYN", modhsyn_e16);
 INCLUDE_ASM("MODHSYN", hsynSdLockAcquire);
 INCLUDE_ASM("MODHSYN", hsynSdLockRelease);
-INCLUDE_ASM("MODHSYN", hsynSdLockWait);
+/* FUNC hsynSdLockWait */
+int hsynSdLockWait(int *p, int v)
+{
+    if (p != NULL) {
+        p[1] = v;
+        p[0] &= 0x7FFFFFFF;
+    }
+}
+/* ENDF hsynSdLockWait */
 INCLUDE_ASM("MODHSYN", hsynSdInit);
 INCLUDE_ASM("MODHSYN", hsynSdSetParam);
 INCLUDE_ASM("MODHSYN", hsynSdGetParam);
@@ -314,16 +361,59 @@ INCLUDE_ASM("MODHSYN", hsynSdGetEffectAttr);
 INCLUDE_ASM("MODHSYN", hsynSdClearEffectWorkArea);
 INCLUDE_ASM("MODHSYN", D_0000A5E4);
 INCLUDE_ASM("MODHSYN", hsynEffectDepthSet);
-INCLUDE_ASM("MODHSYN", hsynCoreStateGet);
+/* FUNC hsynCoreStateGet */
+int hsynCoreStateGet(sceHSynVoice_t *v)
+{
+    v->lfoA.unk00 = 0;
+    v->lfoA.unk04 = 0;
+    v->lfoA.unk02 = 0;
+    v->lfoA.unk06 = 0;
+    v->lfoA.unk08 = 0;
+    v->lfoA.unk0C = 0;
+    v->lfoA.unk10 = 0;
+    return 0;
+}
+/* ENDF hsynCoreStateGet */
 INCLUDE_ASM("MODHSYN", hsynPitchBendApply);
 INCLUDE_ASM("MODHSYN", D_0000A754);
 INCLUDE_ASM("MODHSYN", hsynEffectFeedbackSet);
-INCLUDE_ASM("MODHSYN", hsynCoreStateSet);
+/* FUNC hsynCoreStateSet */
+int hsynCoreStateSet(sceHSynVoice_t *v)
+{
+    v->lfoB.unk00 = 0;
+    v->lfoB.unk04 = 0;
+    v->lfoB.unk02 = 0;
+    v->lfoB.unk06 = 0;
+    v->lfoB.unk08 = 0;
+    v->lfoB.unk0C = 0;
+    v->lfoB.unk10 = 0;
+    return 0;
+}
+/* ENDF hsynCoreStateSet */
 INCLUDE_ASM("MODHSYN", func_0000A810);
 INCLUDE_ASM("MODHSYN", D_0000A92C);
 INCLUDE_ASM("MODHSYN", func_0000A930);
 INCLUDE_ASM("MODHSYN", func_0000A9FC);
-INCLUDE_ASM("MODHSYN", hsynChannelStateGet);
+/* FUNC hsynChannelStateGet */
+int hsynChannelStateGet(sceHSynVoice_t *v)
+{
+    *(u32 *)&v->param[0] = 0;
+    *(u32 *)&v->param[4] = -1;
+    *(u32 *)&v->param[8] = 0;
+    *(u32 *)&v->param[12] = 0;
+    *(u32 *)&v->param[16] = 0;
+    *(u32 *)&v->param[20] = 0;
+    *(u32 *)&v->param[24] = 0;
+    *(u32 *)&v->param[28] = 0;
+    *(u32 *)&v->param[32] = 0;
+    *(u32 *)&v->param[36] = 0;
+    *(u32 *)&v->param[40] = 0;
+    *(u32 *)&v->param[44] = 0x80;
+    *(u32 *)&v->param[48] = 0x80;
+    *(u32 *)&v->param[52] = 1;
+    return 0;
+}
+/* ENDF hsynChannelStateGet */
 INCLUDE_ASM("MODHSYN", func_0000AB90);
 INCLUDE_ASM("MODHSYN", D_0000B000);
 /* FUNC hsynRetnStub */
