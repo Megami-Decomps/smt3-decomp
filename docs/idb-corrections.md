@@ -335,3 +335,64 @@ shared with a byte store:
 
 - `unk26` and `unk28` are `s16` (`lh`, and `addiu -1` rather than `ori 0xFFFF`)
 - `unk30` and `unk31` are `s8`
+
+## Applied on 2026-10-24: sceHSynEnv_t is the 40-byte LFO
+
+`sceHSynEnv_t`'s `unk00[16]` blob and its trailing `unk20[8]` both hid real
+fields, and the names past +0x10 were one slot out. `hsynSeqSeek` settles the
+tail: it reads a `u32` phase at +0x18, a `s16 *` table at +0x20 and a `u16`
+count at +0x24, interpolates between two entries and halves the result.
+`hsynSeqInterpretA`/`B` settle the head: they write a byte at +0, a byte at +1,
+a halfword at +2, words at +0xC, +0x14, +0x18 and +0x1C, a halfword at +0x10
+and the table pair at +0x20/+0x24. The layout is now
+
+    u8 unk00; u8 unk01; u16 unk02; u16 unk04; u16 unk06; u32 unk08; u32 unk0C;
+    s16 level; s16 unk12; int (*wave)(sceHSynEnv_t *, int); u32 phase; u32 rate;
+    s16 *tbl; u16 nTbl; u16 unk26;
+
+which is `sceHSynLfo_t`'s 20 bytes extended, so the voice's `envA`/`envB` are
+LFO state and the 20-byte `lfoA`/`lfoB` are something else. The queued renaming
+pass should take that up.
+
+`wave` at +0x14 is a function pointer, not the `phase` the old names put there:
+`hsynSeqInterpretA` stores one of `hsynSeqByteRead`, `hsynSeqWordRead`,
+`hsynSeqVarLenRead`, `hsynSeqSkip`, `hsynSeqEmit` or `hsynSeqSeek` into it, and
+`hsynEffectDispatch` calls through it with a second argument saying the phase
+wrapped. All six now take `(sceHSynEnv_t *, int)`, since one field cannot hold
+two signatures and `hsynSeqEmit` is the one that reads the flag.
+
+That also supersedes the earlier record that `hsynSeqStateReset` takes
+`sceHSynLfo_t *`. It was only provable while the env's first 16 bytes were an
+opaque array; `hsynSeqInterpretA` passes it the same object it writes +0x24 of,
+so it takes `sceHSynEnv_t *`.
+
+### Two thbase import stubs
+
+| Address | Was | Now | Proof |
+| --- | --- | --- | --- |
+| 0x0000B1DC | `thbase_USecToSysClock` | `thbase_GetSystemTime` | ordinal 34, and `hsynSpu2SettleDelay` calls it with one pointer argument, not a microsecond count and a pointer |
+| 0x0000B1E4 | `sub_B1E4` | `thbase_SysClock2USec` | ordinal 40, called as `(clock, &sec, &usec)` with the clock the line above produced, and the two outputs differenced against `hsynSettleTimeHi`/`Lo` |
+
+`func_0000B1E4` was counted as a real function; it is `jr $ra` plus an import
+id, so it never becomes C.
+
+### Prototypes the retail code corrected
+
+| Function | Was | Now |
+| --- | --- | --- |
+| `modhsyn_e7` | `(s16, u16 spuAddr, u32 iopAddr, u32)` | `(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)`, forwarded positionally to `hsynSdVoiceTrans` |
+| `hsynEffectAttrRead` | `(sceSdEffectAttr_t *)` | `(int sel, u8 mode)`; the attr block is its own stack local |
+| `hsynEffectAttrWrite` | `(sceSdEffectAttr_t *)` | `(u8 sel, u8 val)`, same |
+| `hsynVoiceParamReset` | `(sceHSynSlot_t *, ...)` | `(sceHSynChanSet_t *set, ...)`: it reaches `set + 0x384 + idx*28`, and `bank[16]` sits at +0x384 of the chan set, not of the slot |
+| `modhsyn_e17` | `(int, int, int)` | `(sceHSynWork_t *, int slotNo, u8 *out)` |
+| `modhsyn_e9` | `(u16 *)` | `(sceHSynCore_t *)`, a new 24-byte block `{core, mode, depthL, depthR, delay, feedback, volL, volR}` |
+| `hsynLfoApply` | `(sceHSynVoice_t *)` | `sceHSynVoice_t *(sceHSynVoice_t *, int keyOff)` |
+| `hsynPitchBendApply` | `(int, int, u16, int)` | `(sceHSynVoice_t *, int rate, u16 depth, int dir)`, writing `lfoA` |
+| `hsynVolumeCurveLookup` | fourth argument `int` | `u8 *`, which also made `sceHSynSlot_t::unk10` a `u8 *` |
+| `hsynVoiceRefresh` | `(int, int, u8 *, unsigned int)` | `(sceHSynSlot_t *, int idx, u8 *p, u8 *end)`; `hsynServiceTick` passes the sequence bounds it just compared |
+| `hsynServiceTick`, `hsynVoiceStop`, `hsynVoiceReleaseExport21`, `hsynEnvAttackStep`, `hsynEnvDecayStep`, `hsynSdSetParamVolumeLeft`/`Right`, `hsynSdSetParamAdsr`, `hsynSeqStart` | `int`/`s32` | `void`: no path sets `$2`, and the two tails leave different values in it |
+
+One conflict the database cannot hold: `sceSmgProgEnt_t`'s +4 byte is read
+`lbu` by `hsynVoiceParamReset`, which tests it as a key count, and `lb` by
+`func_00005B4C`, which uses it as a signed transpose. The field stays `u8 nKey`
+and `func_00005B4C` casts.

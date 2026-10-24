@@ -24,14 +24,15 @@ is the proof. What the modules do is in
 | `SDFSDMAN.IRX` | 39981 | 157 | 72 |
 | `MODMSIN.IRX` | 1929 | 17 | 12 |
 | `MODMIDI.IRX` | 21965 | 71 | 62 |
-| `MODHSYN.IRX` | 59501 | 238 | 219 |
+| `MODHSYN.IRX` | 59501 | 238 | 218 |
 
 The remaining chunks are import stubs and the tables between them.
 
 Sony's three are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
 feeds it, and `MODMSIN`, the message queue between them. They are what plays a
 `.SMG` bank, so the sound driver's bank path is almost entirely calls into them,
-and the USA and Maniax discs ship the same files byte for byte. None has C yet.
+and the USA and Maniax discs ship the same files byte for byte. `MODMSIN` is
+complete; the other two are part way.
 
 ## The toolchain
 
@@ -190,7 +191,7 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
 | `MODMIDI.IRX` | 62 | 31 | 5 |
-| `MODHSYN.IRX` | 219 | 89 | 8 |
+| `MODHSYN.IRX` | 218 | 115 | 14 |
 
 Two things only Sony's modules turned up, both about delay slots and neither
 fixable from the C:
