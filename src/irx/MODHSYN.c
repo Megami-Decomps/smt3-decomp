@@ -3296,7 +3296,155 @@ int hsynVoiceStealScan(sceHSynChanSet_t *cs, u16 vnum)
     return 1;
 }
 /* ENDF hsynVoiceStealScan */
+#ifdef NON_MATCHING
+/* Equivalent but not matching: the retail body spills a dozen values to the
+ * frame and a C body of this shape keeps them in registers. */
+/* FUNC hsynVoiceEngineStep */
+void hsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int status, u8 note, u8 vel, u32 tag)
+{
+    sceHSynChanSet_t *set;
+    sceSmgProgEnt_t *prog;
+    sceHSynBank_t *bank;
+    sceSmgProgKey_t *key;
+    sceSmgSset_t *sset;
+    sceSmgSmpl_t *smpl;
+    sceSmgVagi_t *vagi;
+    sceSmgSsetEnt_t *se;
+    sceSmgSmplEnt_t *tone;
+    sceSmgVagiEnt_t *vag;
+    sceHSynVoice_t *v;
+    u8 *st;
+    int nKey;
+    int i;
+    int vnum;
+    int started;
+    u8 stateByte;
+
+    set = (sceHSynChanSet_t *)&slot->unk14;
+    prog = chan->prog;
+    bank = chan->bank;
+    if (prog == NULL) {
+        return;
+    }
+    started = 0;
+    nKey = prog->nKey;
+    key = (sceSmgProgKey_t *)((u8 *)prog + prog->keyOfs);
+    sset = bank->sset;
+    smpl = bank->smpl;
+    vagi = bank->vagi;
+    if (nKey <= 0) {
+        return;
+    }
+    stateByte = status | 0x90;
+    do {
+        if (note < (key->keyLow & 0x7F) || (key->keyHigh & 0x7F) < note) {
+            goto nextKey;
+        }
+        if (sset->nEntry < key->ssetIdx) {
+            goto nextKey;
+        }
+        se = (sceSmgSsetEnt_t *)((u8 *)sset + sset->ofs[key->ssetIdx]);
+        if (vel < se->velLow || se->velHigh < vel) {
+            goto nextKey;
+        }
+        if (se->nSmpl == 0) {
+            goto nextKey;
+        }
+        for (i = 0; i < se->nSmpl; i++) {
+            if (smpl->nEntry < se->smplIdx[i]) {
+                continue;
+            }
+            tone = (sceSmgSmplEnt_t *)((u8 *)smpl + smpl->ofs[se->smplIdx[i]]);
+            if (vel < (tone->velLow & 0x7F) || (tone->velHigh & 0x7F) < vel) {
+                continue;
+            }
+            vag = NULL;
+            if (vagi->nEntry >= tone->vagiIdx) {
+                vag = (sceSmgVagiEnt_t *)((u8 *)vagi + vagi->ofs[tone->vagiIdx]);
+                if (vag->spuOfs == -1) {
+                    continue;
+                }
+            }
+            if (tone->voiceOfs != 0) {
+                hsynVoiceRetrigger(chan, tone->voiceOfs);
+            }
+            vnum = tone->pitch + slot->voiceBase;
+            if (set->nActive >= slot->maxVoice) {
+                if (hsynVoiceStealScan(set, vnum) == 0) {
+                    return;
+                }
+            }
+            v = hsynVoiceMaskClear(tone->allocHint);
+            if (v == NULL) {
+                if (hsynSdSyncFlag != 0) {
+                    hsynSdSyncFlag = 0;
+                    if (hsynVoiceKeyOff() != 0) {
+                        v = hsynVoiceMaskClear(tone->allocHint);
+                    }
+                }
+                if (v == NULL) {
+                    v = hsynVoiceEnvelopeAdvance(vnum, tone->allocHint);
+                    if (v == NULL) {
+                        v = hsynVoiceVolumeAdvance(vnum, tone->allocHint);
+                        if (v == NULL) {
+                            continue;
+                        }
+                    }
+                }
+            }
+            v->flags = 0x208;
+            v->slotp = set;
+            v->chan = chan;
+            v->prog = prog;
+            v->tone = tone;
+            v->vag = vag;
+            v->key = key;
+            v->unk12 = 0;
+            v->unk38 = 0;
+            v->vnum = vnum;
+            v->ch = note;
+            v->tag = tag;
+            v->unk2C = 0;
+            v->spuAddr = bank->spuAddr;
+            v->vel = vel;
+            v->pitch = tone->voiceOfs;
+            v->unk4A = se->unk00;
+            v->unk28 = chan->unk28;
+            v->unk55 = chan->unk2F;
+            v->unk57 = 0;
+            v->vol = chan->unk30;
+            v->path = slot->path;
+            hsynCoreStateGet(v);
+            hsynCoreStateSet(v);
+            hsynChannelStateGet(v);
+            set->nActive++;
+            hsynActiveCount++;
+            hsynVoiceSlotGet(v, (sceHSynVoice_t **)chan);
+            started = 1;
+            if ((chan->priority & 0x80) == 0 && chan->bendRange != 0) {
+                hsynVoiceStateClear(v);
+            }
+            hsynVoiceUpdatePathA(v);
+            hsynCoreIndexGet(v, (sceHSynVoice_t *)hsynActiveList[v->core]);
+            if (hsynStat != NULL) {
+                st = hsynStat->state[v->core];
+                st[v->index] = stateByte;
+            }
+        }
+    nextKey:
+        key++;
+        nKey--;
+    } while (nKey > 0);
+    if (started != 0) {
+        chan->unk28 = -1;
+        chan->unk2F = 0xFF;
+        chan->unk30 = -1;
+    }
+}
+/* ENDF hsynVoiceEngineStep */
+#else
 INCLUDE_ASM("MODHSYN", hsynVoiceEngineStep);
+#endif
 /* FUNC hsynVoiceMaskClear */
 sceHSynVoice_t *hsynVoiceMaskClear(u8 allocHint)
 {
