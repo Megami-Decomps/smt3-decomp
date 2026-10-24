@@ -191,11 +191,11 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
 | `MODMIDI.IRX` | 62 | 41 | 13 |
-| `MODHSYN.IRX` | 218 | 142 | 23 |
+| `MODHSYN.IRX` | 218 | 137 | 22 |
 
 ### Where MODHSYN stands
 
-142 functions match and 23 more are equivalent under `NON_MATCHING`. The 25
+137 functions match and 22 more are equivalent under `NON_MATCHING`. The 25
 still bare, smallest first:
 
 | Chunk | Lines of asm | Note |
