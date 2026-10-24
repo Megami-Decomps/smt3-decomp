@@ -1,12 +1,25 @@
 #include "MODHSYN.h"
 
+extern u8 hsynLibraryTable[];
+
 /* MODHSYN.IRX, Sony's SPU2 synthesiser: it owns the voices and the envelopes,
  * and a .SMG's bank is loaded into it. See docs/irx-modules.md.
  *
  * The chunks still in assembly are the ones no C has been written for yet,
  * plus the import stubs and the import and export tables between them. */
 
-INCLUDE_ASM("MODHSYN", modhsyn_e30);
+/* FUNC modhsyn_e30 */
+int modhsyn_e30()
+{
+    s32 state;
+    s32 res;
+
+    intrman_CpuSuspendIntr(&state);
+    res = loadcore_ReleaseLibraryEntries(hsynLibraryTable);
+    intrman_CpuResumeIntr(state);
+    return res != 0;
+}
+/* ENDF modhsyn_e30 */
 INCLUDE_ASM("MODHSYN", D_00000044);
 INCLUDE_ASM("MODHSYN", func_00000050);
 INCLUDE_ASM("MODHSYN", modhsyn_e7);
@@ -29,7 +42,19 @@ int hsynVoiceFlagsGet(sceHSynChannel_t *chan, u8 semitones)
     chan->bendRange = semitones * 20;
 }
 /* ENDF hsynVoiceFlagsGet */
-INCLUDE_ASM("MODHSYN", hsynVoiceFlagsSet);
+/* FUNC hsynVoiceFlagsSet */
+void hsynVoiceFlagsSet(sceHSynChannel_t *chan, u8 on)
+{
+    if (on != 0) {
+        if (chan->priority == 0xFF) {
+            chan->priority = 0x80;
+            chan->unk34 = 0x80;
+        }
+    } else {
+        chan->priority = 0xFF;
+    }
+}
+/* ENDF hsynVoiceFlagsSet */
 /* FUNC hsynVoiceIndexGet */
 void hsynVoiceIndexGet(sceHSynChannel_t *chan, u8 val)
 {
@@ -54,7 +79,14 @@ INCLUDE_ASM("MODHSYN", hsynVoiceRefresh);
 INCLUDE_ASM("MODHSYN", hsynServiceTick);
 INCLUDE_ASM("MODHSYN", func_000017EC);
 INCLUDE_ASM("MODHSYN", modhsyn_e8);
-INCLUDE_ASM("MODHSYN", modhsyn_e26);
+/* FUNC modhsyn_e26 */
+int modhsyn_e26(u32 *mask)
+{
+    mask[0] = hsynVoiceMask[0];
+    mask[1] = hsynVoiceMask[1];
+    return 0;
+}
+/* ENDF modhsyn_e26 */
 INCLUDE_ASM("MODHSYN", hsynParamSlotResolve);
 INCLUDE_ASM("MODHSYN", modhsyn_e10);
 INCLUDE_ASM("MODHSYN", modhsyn_e11);
@@ -72,7 +104,22 @@ int modhsyn_e15(sceHSynStat_t *stat)
 INCLUDE_ASM("MODHSYN", hsynEffectAttrRead);
 INCLUDE_ASM("MODHSYN", hsynEffectAttrWrite);
 INCLUDE_ASM("MODHSYN", modhsyn_e17);
-INCLUDE_ASM("MODHSYN", modhsyn_e18);
+/* FUNC modhsyn_e18 */
+int modhsyn_e18(int mode)
+{
+    switch (mode) {
+    case 0:
+        hsynEnabled = 1;
+        break;
+    case 1:
+        hsynEnabled = 0;
+        break;
+    default:
+        return -1;
+    }
+    return 0;
+}
+/* ENDF modhsyn_e18 */
 /* FUNC modhsyn_e27 */
 int modhsyn_e27(void)
 {
@@ -87,7 +134,16 @@ INCLUDE_ASM("MODHSYN", hsynCmdNoteOff);
 INCLUDE_ASM("MODHSYN", hsynCmdNoteOn);
 INCLUDE_ASM("MODHSYN", hsynCmdVoiceAlloc);
 INCLUDE_ASM("MODHSYN", func_0000273C);
-INCLUDE_ASM("MODHSYN", modhsyn_e19);
+/* FUNC modhsyn_e19 */
+int modhsyn_e19(u8 val)
+{
+    if (val >= 0x31) {
+        return -1;
+    }
+    hsynModDisable = val;
+    return 0;
+}
+/* ENDF modhsyn_e19 */
 INCLUDE_ASM("MODHSYN", modhsyn_e20);
 INCLUDE_ASM("MODHSYN", modhsyn_e21);
 INCLUDE_ASM("MODHSYN", modhsyn_e22);
@@ -259,8 +315,18 @@ INCLUDE_ASM("MODHSYN", hsynModulationStep);
 INCLUDE_ASM("MODHSYN", hsynPanApply);
 INCLUDE_ASM("MODHSYN", hsynLfoStep);
 INCLUDE_ASM("MODHSYN", D_00008914);
-INCLUDE_ASM("MODHSYN", hsynUnrefParamGetA);
-INCLUDE_ASM("MODHSYN", hsynUnrefParamGetB);
+/* FUNC hsynUnrefParamGetA */
+int hsynUnrefParamGetA(u8 a, u8 b)
+{
+    return ((a - b) << 16) / 126;
+}
+/* ENDF hsynUnrefParamGetA */
+/* FUNC hsynUnrefParamGetB */
+int hsynUnrefParamGetB(u8 a, u8 b)
+{
+    return ((b - a) << 16) / 126;
+}
+/* ENDF hsynUnrefParamGetB */
 INCLUDE_ASM("MODHSYN", hsynUnrefParamSetA);
 INCLUDE_ASM("MODHSYN", hsynUnrefParamSetB);
 INCLUDE_ASM("MODHSYN", hsynUnrefParamSetC);
@@ -310,7 +376,20 @@ int hsynSeqWordRead(sceHSynEnv_t *env)
     return (s16)((t - 0x8000) >> 1);
 }
 /* ENDF hsynSeqWordRead */
-INCLUDE_ASM("MODHSYN", hsynSeqVarLenRead);
+/* FUNC hsynSeqVarLenRead */
+int hsynSeqVarLenRead(sceHSynEnv_t *env)
+{
+    int v;
+
+    v = env->unk1C;
+    if (v > 0xBFFF) {
+        v -= 0x10000;
+    } else if (v >= 0x4001) {
+        v = 0x8000 - v;
+    }
+    return (s16)v;
+}
+/* ENDF hsynSeqVarLenRead */
 /* FUNC hsynSeqSkip */
 int hsynSeqSkip(sceHSynEnv_t *env)
 {
@@ -324,16 +403,53 @@ int hsynSeqSkip(sceHSynEnv_t *env)
 }
 /* ENDF hsynSeqSkip */
 INCLUDE_ASM("MODHSYN", hsynSeqSeek);
-INCLUDE_ASM("MODHSYN", hsynSeqEmit);
+/* FUNC hsynSeqEmit */
+int hsynSeqEmit(sceHSynEnv_t *env, int sel)
+{
+    int v;
+
+    if (sel != 0) {
+        v = (s16)hsynSeqEmitTail() >> 2;
+    } else {
+        v = env->level;
+    }
+    return v;
+}
+/* ENDF hsynSeqEmit */
 INCLUDE_ASM("MODHSYN", hsynEffectDispatch);
 INCLUDE_ASM("MODHSYN", hsynSeqStateReset);
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretA);
 INCLUDE_ASM("MODHSYN", hsynSeqStart);
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretB);
 INCLUDE_ASM("MODHSYN", D_00009AC4);
-INCLUDE_ASM("MODHSYN", hsynSeqEmitTail);
+/* FUNC hsynSeqEmitTail */
+int hsynSeqEmitTail()
+{
+    int seed;
+
+    seed = hsynRandSeed * 0x41C64E6D + 0x3039;
+    hsynRandSeed = seed;
+    return seed >> 16;
+}
+/* ENDF hsynSeqEmitTail */
 INCLUDE_ASM("MODHSYN", D_00009AFC);
+#ifdef NON_MATCHING
+/* One nop long: gas will not move the second half of the `sw w, sym` macro
+ * into the branch delay slot, where the retail assembler put it. */
+/* FUNC modhsyn_e16 */
+int modhsyn_e16(sceHSynSdLog_t *w)
+{
+    hsynSdWorkArea = w;
+    if (w != NULL) {
+        w->index = 0;
+        w->unk04 = 0;
+    }
+    return 0;
+}
+/* ENDF modhsyn_e16 */
+#else
 INCLUDE_ASM("MODHSYN", modhsyn_e16);
+#endif
 /* FUNC hsynSdLockAcquire */
 /* The work area is a ring of 28-byte call records; +0 holds the opcode with
  * bit 31 set while the call is outstanding, +4 its result. */
