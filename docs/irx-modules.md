@@ -191,7 +191,7 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
 | `MODMIDI.IRX` | 62 | 31 | 5 |
-| `MODHSYN.IRX` | 218 | 115 | 14 |
+| `MODHSYN.IRX` | 218 | 118 | 15 |
 
 Two things only Sony's modules turned up, both about delay slots and neither
 fixable from the C:
