@@ -554,7 +554,7 @@ void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 
 void hsynCmdChannelPressure(int base, int unused, int dir, int rate, int state, u8 note, u8 ch, u16 depth, u32 tag);
 void hsynCmdNoteOff(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag);
 void hsynCmdNoteOn(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag);
-int hsynCmdVoiceAlloc(int kind, sceHSynSlot_t *slot, int a3, u8 a4, u8 note, u8 ch, u16 a7, u32 tag);
+void hsynCmdVoiceAlloc(int kind, sceHSynSlot_t *slot, int a3, int a4, u8 note, u8 ch, u16 a7, u32 tag);
 void func_0000273C(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end);
 int modhsyn_e19(u8);
 int modhsyn_e20(sceHSynWork_t *work, int slotNo);

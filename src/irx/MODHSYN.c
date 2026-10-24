@@ -1036,7 +1036,60 @@ void hsynCmdNoteOn(int sel, int base, int unused, int state, u8 note, u8 ch, s16
     }
 }
 /* ENDF hsynCmdNoteOn */
+/* FUNC hsynCmdVoiceAlloc */
+#ifdef NON_MATCHING
+/* Eight bytes short: gcc hoists the 0x10000 dividend and the
+ * (a7 << 8) + half sum out of the voice walk, where retail rebuilds both
+ * inside it. */
+void hsynCmdVoiceAlloc(int kind, sceHSynSlot_t *slot, int a3, int a4, u8 note,
+                       u8 ch, u16 a7, u32 tag)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    u32 scale;
+    u32 half;
+    u32 t;
+    int one;
+    int i;
+
+    if ((slot->flags & 1) == 0) {
+        return;
+    }
+    heads[0] = (sceHSynVoice_t *)((char *)&slot->chan[0].onNext - 8);
+    heads[1] = (sceHSynVoice_t *)((char *)&slot->chan[0].offNext - 8);
+    one = 1;
+    scale = hsynTickScale;
+    half = scale >> one;
+    for (i = 0; i < 2; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = v->chPrev) {
+            if (v->tag != tag) {
+                continue;
+            }
+            if (v->unk58 != a4) {
+                continue;
+            }
+            if (v->note != note) {
+                continue;
+            }
+            if (v->ch != ch) {
+                continue;
+            }
+            t = a7 << 8;
+            t += half;
+            if (kind == 0) {
+                v->envA.rate = 0x10000 / (t / scale);
+            } else if (kind == one) {
+                v->envB.rate = 0x10000 / (t / scale);
+            }
+        }
+    }
+}
+#else
 INCLUDE_ASM("MODHSYN", hsynCmdVoiceAlloc);
+#endif
+/* ENDF hsynCmdVoiceAlloc */
 INCLUDE_ASM("MODHSYN", func_0000273C);
 /* FUNC modhsyn_e19 */
 int modhsyn_e19(u8 val)
