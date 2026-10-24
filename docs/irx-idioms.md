@@ -108,6 +108,26 @@ function by hand: the remaining difference is usually one of them.
   two and reverses that order.
 - `for (i = 7; i != -1; i--)` gives `bne $reg, -1`; `i >= 0` gives `bgez`. Both
   appear in retail.
+- **A derived bound keeps the guard's constant in a register.**
+  `for (slotNo = 0; slotNo * 2 + 1 < n; slotNo++)` makes gcc strength-reduce
+  `slotNo*2+1` into its own induction variable and build the folded initial
+  value 1 into a register for the loop guard (`addiu $2,$0,1` then `slt`).
+  The equivalent `for (unit = 1; unit < n; unit += 2)` folds the guard to
+  `slti n, 2` and shares the 1 with the induction variable, which also changes
+  every callee-saved assignment. `modmidi_sceMidi_Init` needed the derived form.
+- **`do { ... } while (i++ < n)` is one instruction longer than the `for`.**
+  Guarded by `if (n > 0)` with `i = 1`, it reproduces retail's
+  `addu $2,$16,$0 / slt / bne / addiu $16,$16,1` latch, where
+  `for (i = 0; i < n; i++)` compares the post-increment value directly and
+  saves the copy.
+- **A counter shared with a later loop gets the callee-saved register.**
+  Reusing one variable as both the slot index and the following loop's counter
+  is what gives it `$16` and the induction-variable copy; two separate
+  variables move every other pointer one register along.
+- **A per-iteration pointer to an array element stops strength reduction.**
+  `cnt = &hsynFreeCount[i];` then `(*cnt)++` gives retail's
+  `addu $19, $21, $3` inside the loop, where `hsynFreeCount[i]++` lets gcc
+  hoist the base and reduce the pointer, costing an extra `addiu`.
 - **The three-list broadcast loop**, used by five MODHSYN setters, matches as
   `heads[3]` filled with `chan-8`, `chan`, `chan+8`, then
   `for (i = 0, head = heads; i < 3; i++, head++)` around
@@ -115,6 +135,13 @@ function by hand: the remaining difference is usually one of them.
   `i` the higher callee-saved register.
 
 ## Reaching data
+
+- **Stepping to the next `{count, pointer}` segment needs a self-advancing
+  pointer.** `seg += 2` on a `u32 *` gives retail's `addiu $17, $17, 8` and
+  reads through the new base; any separately named pointer (`vt =
+  (sceMidiVoiceTbl_t *)&tbl->nVoiceWord`, even through an integer cast) lets
+  gcc fold the first load back onto the old base and keep both registers
+  alive. `modmidi_sceMidi_Init` walks the work table that way.
 
 - **The `{count, pointer}` segment.** Several functions reach a table through
   *base+8* then *+4*, never one folded `+0xC`. Matching needs the pair treated
@@ -135,6 +162,11 @@ function by hand: the remaining difference is usually one of them.
 
 ## Switches
 
+- **Case bodies come out in source order; the compare chain does not.** gcc
+  builds the comparison tree from the case *values*, so reordering the cases
+  only moves the bodies. `midiParseMetaEvent` needed `case 0x51` written
+  before `case 0x2F`, and `midiScanLoops` the two RPN arms first.
+
 - **A two-armed test on a command byte is a `switch`, not an `if`/`else if`.**
   gcc lays a switch out as the compare chain first, then the case bodies, each
   ending in a jump to the common tail; `if (sel == 0) ... else if (sel == 1)`
@@ -148,6 +180,14 @@ function by hand: the remaining difference is usually one of them.
 
 ## Shared tails
 
+- **A block-scoped local coalesces with the argument register; a
+  function-scoped one does not.** `midiApplyPlayState` builds eleven channel
+  messages; declaring `u32 msg` once at the top gives it a single pseudo that
+  cannot live in `$7`, so every call ends `or $7, $17, $2`. Declaring
+  `u32 msg` inside each `if` block lets gcc build the value in `$7` the way
+  retail does. Writing the expression inline instead makes gcc reassociate it
+  to `(ch | 0xB0) | (v << 16)`.
+
 - **A `goto` is sometimes the only way to get retail's block order.** Where one
   arm sets a value and both arms fall into a common tail, writing the tail twice
   puts the short arm first and duplicates it. `func_0000A9FC` needs the
@@ -159,6 +199,24 @@ function by hand: the remaining difference is usually one of them.
   count but changes which pseudo wins a callee-saved register.
 
 ## What is not fixable from the C
+
+**A jump table while `.rodata` is assembly.** A switch dense enough for a
+table cannot be written at all: the assembly `.rodata` already holds the
+function's `L_<address>` case labels, so replacing the body leaves them
+undefined and the link fails. Eight functions are in that position, two in
+MODMIDI (`midiPlaySong`, `midiPlayEnv`) and six in MODHSYN
+(`hsynEffectDispatch`, `hsynVoiceEventDispatch`, `hsynSeqInterpretA`,
+`hsynSeqInterpretB`, `func_0000273C`, `func_0000AB90`). Write the C, guard it
+and move on.
+
+**gcc's cross-jumping.** Where two paths end in the same few instructions,
+gcc 2.8 merges them and jumps into the middle of the surviving copy, even
+when retail keeps both. Source-level attempts to break it up (a named result,
+a `goto` to a label placed where retail's block sits, reordering the arms,
+spelling the shared statement differently) all leave the merge in place:
+`jump.c` runs after the shape of the C stops mattering. `midiParseMetaEvent`,
+`modmidi_e8`, `midiSongRepeat` and `midiSearchPlay` are each one or a few
+instructions short for this reason.
 
 **A store to a global immediately before a test.** gas refuses to move the
 second half of a `sw reg, sym` macro into the following branch's delay slot, so

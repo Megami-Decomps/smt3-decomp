@@ -484,3 +484,53 @@ stores, `sb` at `stat[kind] + 4` and `+ 5`, from two separate `lbu`s of the
 header's `kindPacked` word. So the field is two `u8`s rather than a halfword.
 Left alone: the evidence says the shape but not what the second byte means, and
 the bank selection uses `kindPacked >> 24`, which is neither of them.
+
+## Applied on 2026-10-24: MODMIDI and MODHSYN prototypes, and three retail bugs
+
+All in the `DDS3_IRX/MODMIDI` and `DDS3_IRX/MODHSYN` databases, all found while
+writing the C for Sony's sequencer. The byte-identical build of the function
+concerned is the proof except where noted.
+
+### Functions that return nothing
+
+Five more where no path sets `$2` and every caller discards the result, so the
+database's `int` was a guess:
+
+| Function | Caller evidence |
+| --- | --- |
+| `midiSendChMsg` | `$2` ends as `trk->chActive | bit` on one exit and the loop mask on another; `midiSongStopNotes` and `midiTrackServiceTick` discard it |
+| `midiParseExcEvent` | `$2` ends as the advanced `trk->cur`; `midiPlayEnv` discards it |
+| `midiApplyPlayState` | `$2` is the loop's own `sltiu` leftover; `modmidi_sceMidi_MidiPlaySwitch` discards it |
+| `midiPlaySong` | `midiSongServiceTick` discards it |
+| `midiScanLoops` | `$2` is `0xFF` on the reset path and stale otherwise; `midiPlayEnv` discards it |
+| `hsynCmdVoiceAlloc` | the epilogue is a bare `jr $31`; `func_0000273C` discards it |
+
+### Prototypes the retail code settled
+
+| Function | Was | Now |
+| --- | --- | --- |
+| `midiScanLoops` | sixth parameter `int allowCb` | `sceMidiVoiceTbl_t *vt`: `midiPlayEnv` passes its own `vt` through, and the body only tests it against NULL |
+| `hsynCmdVoiceAlloc` | fourth parameter `u8 a4` | `int a4`: it is compared against `voice->unk58` with no mask, where a `u8` formal costs an `andi 0xFF` |
+
+`sceMidiTbl_t` is really two `{count, pointer}` segments rather than one
+sixteen-byte block. `modmidi_sceMidi_Init` steps a single pointer from the
+sequence segment to the buffer segment with `addiu $17, $17, 8` and reads both
+words through the new base, which is only reproducible by advancing one
+pointer. The type is left alone because every other function reaches the
+second pair as `&tbl->nVoiceWord` and matches that way; `sceMidi_Init` uses an
+untyped `u32 *seg` instead.
+
+### Three retail bugs, reproduced as they are
+
+- `modmidi_sceMidi_Unload` passes the *unit* index to
+  `modmidi_sceMidi_MidiPlaySwitch`, which derives the unit from a slot number
+  itself. The stop therefore targets slot `2n+1` rather than `n`, so unloading
+  a playing slot never stops it.
+- `midiParseExcEvent`'s buffer walk skips four mask bits when the low nibble is
+  *non-zero*; `midiSendChMsg`, which is otherwise the same loop, skips them
+  when the nibble is empty. The exclusive-event path can therefore step over a
+  buffer that is enabled.
+- `midiScanLoops`'s loop-start arm falls back to an inline scan for a free
+  table entry, and when the table is full the cursor runs one past the end
+  instead of becoming NULL. The `aLoopTableOverf` complaint beside it is
+  therefore unreachable and a full table is written past.
