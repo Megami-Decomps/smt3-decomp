@@ -1,4 +1,4 @@
-#include "iop.h"
+#include "MODHSYN.h"
 
 /* MODHSYN.IRX, Sony's SPU2 synthesiser: it owns the voices and the envelopes,
  * and a .SMG's bank is loaded into it. See docs/irx-modules.md.

@@ -1,4 +1,4 @@
-#include "iop.h"
+#include "MODMIDI.h"
 
 /* MODMIDI.IRX, Sony's MIDI sequencer: it reads a bank's SCEIMidi block
  * and turns it into the channel messages the synthesiser plays.
