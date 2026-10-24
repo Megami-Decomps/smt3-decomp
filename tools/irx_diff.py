@@ -68,6 +68,22 @@ def built_symbols(elf: Path) -> dict:
     return syms
 
 
+def stale_warning(cfg: dict, built: Path) -> None:
+    """Say so when the image predates the source.
+
+    The diff reads whatever was packed last, so a compile that failed leaves the
+    previous image in place and every function still diffs clean.
+    """
+    if not built.exists():
+        raise SystemExit(f"{built}: not built yet; run ninja -f build-irx.ninja")
+    newest = max((p.stat().st_mtime for p in (irx_config.path(cfg, "src"),)
+                  if p.exists()), default=0)
+    if newest > built.stat().st_mtime:
+        print(f"warning: {built.name} is older than {cfg['paths']['src']}; "
+              f"the last build failed or did not run, so this diff is stale",
+              file=sys.stderr)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -78,6 +94,7 @@ def main() -> None:
     cfg = irx_config.load(args.module)
     want, base = text(irx_config.path(cfg, "target"))
     built_path = irx_config.path(cfg, "build").parent / f"{args.module}.IRX"
+    stale_warning(cfg, built_path)
     got, got_base = text(built_path)
 
     if args.sizes:

@@ -40,6 +40,15 @@ IMPORT_PREFIX = re.compile(r"^(libsd|intrman|loadcore|stdio|sysclib|thbase|thsem
 # at all: MIPS has one calling convention.
 IDAISM = [
     (re.compile(r"\b__(fastcall|cdecl|stdcall|usercall|noreturn|spoils)\b\s*"), ""),
+    # The signed spellings come first: otherwise __int8 is rewritten on its own
+    # and leaves "signed s8", which does not compile.
+    (re.compile(r"\bsigned __int8\b"), "s8"),
+    (re.compile(r"\bsigned __int16\b"), "s16"),
+    (re.compile(r"\bsigned __int32\b"), "s32"),
+    (re.compile(r"\bsigned __int64\b"), "s64"),
+    (re.compile(r"\bsigned char\b"), "s8"),
+    (re.compile(r"\bunsigned char\b"), "u8"),
+    (re.compile(r"\bunsigned short\b"), "u16"),
     (re.compile(r"\bunsigned __int8\b"), "u8"),
     (re.compile(r"\bunsigned __int16\b"), "u16"),
     (re.compile(r"\bunsigned __int32\b"), "u32"),
