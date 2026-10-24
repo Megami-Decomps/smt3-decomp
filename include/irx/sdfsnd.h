@@ -19,15 +19,19 @@ typedef struct {
     u8 rest[1348];
 } sceHSynSlot_t;
 
+/* The message queue one slot's worth of MIDI events passes through, which
+ * MODMSIN appends to and the synthesiser drains. The driver hands the same
+ * array to both, as sceHSynEntry_t.buf and as sceMidiVoice_t.buf, and writes
+ * 1032 into size, which is the capacity of data. */
 typedef struct {
     u32 size;
-    u32 unk04;
-    u8 rest[1024];
-} sceHSynSeq_t;
+    u32 len;
+    u8 data[1024];
+} sceMSInBuf_t;
 
 typedef struct {
     u32 unk00;
-    sceHSynSeq_t *seq;
+    sceMSInBuf_t *buf;
     u32 unk08;
     sceHSynSlot_t *slot;
 } sceHSynEntry_t;
@@ -73,9 +77,11 @@ typedef struct {
     sceMidiSlot_t *slot;
 } sceMidiSeq_t;
 
+/* MODMSIN walks the MIDI work area's table to reach these, so what the
+ * sequencer calls a voice entry is that module's buffer entry. */
 typedef struct {
     u32 unk00;
-    void *work;
+    sceMSInBuf_t *buf;
 } sceMidiVoice_t;
 
 typedef struct {
@@ -320,7 +326,7 @@ extern sceHSynWork_t sdfSndHsynWork;
 extern sceHSynTbl_t sdfSndHsynTbl;
 extern sceHSynEntry_t sdfSndHsynEntry[16];
 extern sceHSynSlot_t sdfSndHsynSlotWork[16];
-extern sceHSynSeq_t sdfSndHsynSeqWork[16];
+extern sceMSInBuf_t sdfSndMsInBuf[16];
 extern sceMidiWork_t sdfSndMidiWork;
 extern sceMidiTbl_t sdfSndMidiTbl;
 extern sceMidiSeq_t sdfSndMidiSeq[16];

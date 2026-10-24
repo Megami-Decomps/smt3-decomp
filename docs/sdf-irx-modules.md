@@ -266,7 +266,7 @@ of them matched on the first try:
 | `sdfSndSlot_t` | 52 | `sdfSndSlots` walked 13 ints at a time |
 | `sceMidiSlot_t` | 564 | `sdfSndMidiSlotWork` walked 141 dwords at a time |
 | `sceHSynSlot_t` | 1368 | `sdfSndHsynSlotWork` in `sdfSndInitWorkAreas` |
-| `sceHSynSeq_t` | 1032 | `sdfSndHsynSeqWork`, and the module writes 1032 into its first word |
+| `sceMSInBuf_t` | 1032 | `sdfSndMsInBuf`, whose first word the driver sets to 1032 |
 | `sdfSmgHeader_t` | 176 | the header read length |
 | `sdfSndCmd_t` | 128 | the command ring slot |
 | `SifRpcClientData_t` | 40 | `server` lands at +0x24, which is what the bind loop polls |

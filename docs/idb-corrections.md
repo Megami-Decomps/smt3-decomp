@@ -276,3 +276,21 @@ The header, the two semaphore parameter blocks and the two semaphore ids after
 it stay separate: `sdfAdpcmSpu2IntrHandler` reaches 0x1A88C through its own
 `%hi`/`%lo` pair while holding the struct base in a register, so the struct
 ends at 0x1A848.
+
+## sceHSynSeq_t is the MIDI message queue
+
+The sixteen 1032-byte blocks at `sdfSndHsynSeqWork` were typed `sceHSynSeq_t`
+on the assumption that a synthesiser entry pointing at them made them the
+synthesiser's sequence buffers. Recovering `MODMSIN.IRX` settled what they are:
+its `sceMSInBuf_t` is 1032 bytes of `{u32 size; u32 len; u8 data[1024]}`, and it
+reaches them through the work area's table, entry by entry.
+
+The driver's own wiring is the proof. `sdfSndInitWorkAreas` hands the same array
+to both modules, as `sdfSndHsynEntry[i].seq` and as `sdfSndMidiVoice[i].work`,
+and writes 1032 into the first word, which is the buffer's capacity rather than
+anything sequence shaped. `sceMSIn_PutMsg` takes the MIDI work area, so the
+table the sequencer calls its voice table is that module's buffer table.
+
+So one queue per slot, which `MODMSIN` appends to and the synthesiser drains.
+The type is now `sceMSInBuf_t` with `size`, `len` and `data`, the array is
+`sdfSndMsInBuf`, and both pointers into it are called `buf`.

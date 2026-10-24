@@ -593,10 +593,10 @@ s32 sdfSndInitWorkAreas(void)
 {
     s32 i;
     u32 bank;
-    sceHSynSeq_t *hseq;
+    sceMSInBuf_t *hseq;
     sceHSynSlot_t *hslot;
     sceMidiSlot_t *mslot;
-    sceHSynSeq_t *voice;
+    sceMSInBuf_t *voice;
 
     sdfSndHsynWork.unk00 = 1;
     sdfSndHsynWork.unk10 = 0;
@@ -604,16 +604,16 @@ s32 sdfSndInitWorkAreas(void)
     sdfSndHsynWork.tbl = &sdfSndHsynTbl;
     sdfSndHsynTbl.nEntry = 32;
     sdfSndHsynTbl.entry = sdfSndHsynEntry;
-    hseq = sdfSndHsynSeqWork;
+    hseq = sdfSndMsInBuf;
     hslot = sdfSndHsynSlotWork;
     i = 0;
     do {
         sdfSndHsynEntry[i].unk00 = 0;
-        sdfSndHsynEntry[i].seq = hseq;
+        sdfSndHsynEntry[i].buf = hseq;
         sdfSndHsynEntry[i].unk08 = 0;
         sdfSndHsynEntry[i].slot = hslot;
         hseq->size = 1032;
-        hseq->unk04 = 0;
+        hseq->len = 0;
         hseq++;
         hslot++;
         i++;
@@ -649,10 +649,10 @@ s32 sdfSndInitWorkAreas(void)
 
     sdfSndMidiTbl.nVoice = 16;
     sdfSndMidiTbl.voice = sdfSndMidiVoice;
-    voice = sdfSndHsynSeqWork;
+    voice = sdfSndMsInBuf;
     i = 0;
     do {
-        sdfSndMidiVoice[i].work = voice;
+        sdfSndMidiVoice[i].buf = voice;
         sdfSndMidiVoice[i].unk00 = 0;
         voice++;
         i++;
