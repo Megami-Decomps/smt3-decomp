@@ -99,11 +99,11 @@ def write_ninja(args) -> None:
         n.variable("ninja_required_version", "1.10")
         n.newline()
         run = i386(ROOT)
-        n.rule("iopas", f"{run}{IOP_AS} -EL -I. -o $out $in", description="iop-as $in")
+        n.rule("iopas", f"{run}{IOP_AS} -EL -G 0 -I. -o $out $in", description="iop-as $in")
         n.rule("iopcc",
                f"{run}{CPP} -lang-c $cppflags -Iinclude/irx $in $out.i && "
-               f"{run}{CC1} -quiet -O2 $cflags $out.i -o $out.s && "
-               f"{run}{IOP_AS} -EL -I. -o $out $out.s",
+               f"{run}{CC1} -quiet -O2 -G 0 $cflags $out.i -o $out.s && "
+               f"{run}{IOP_AS} -EL -G 0 -I. -o $out $out.s",
                description="iop-gcc $in")
         n.variable("cppflags", " ".join(CPP_DEFINES))
         n.variable("cflags", "")
