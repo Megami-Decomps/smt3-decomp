@@ -191,18 +191,16 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
 | `MODMIDI.IRX` | 62 | 41 | 13 |
-| `MODHSYN.IRX` | 218 | 141 | 21 |
+| `MODHSYN.IRX` | 218 | 142 | 23 |
 
 ### Where MODHSYN stands
 
-141 functions match and 21 more are equivalent under `NON_MATCHING`. The 27
+142 functions match and 23 more are equivalent under `NON_MATCHING`. The 25
 still bare, smallest first:
 
 | Chunk | Lines of asm | Note |
 | --- | --- | --- |
 | `func_00008350` | 47 | a nine-argument forwarder; blocked again, see below |
-| `func_00004AE4` | 98 | takes `(voice, s8 pan)`, called by `func_00000D24` |
-| `hsynVoiceRefresh` | 103 | sequence-bounds walker |
 | `hsynVoiceKeyOff` | 118 | |
 | `func_000017EC` | 122 | |
 | `hsynVoiceDirectPass` | 124 | sibling of the matched `hsynVoiceUpdatePass`; expect another switch |

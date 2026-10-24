@@ -514,12 +514,78 @@ void hsynVoiceUpdatePass(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePass);
 #endif
 /* FUNC hsynVoiceRefreshHook */
-void hsynVoiceRefreshHook(void)
+void hsynVoiceRefreshHook(sceHSynSlot_t *slot, u8 *data, int len)
 {
 }
 /* ENDF hsynVoiceRefreshHook */
 INCLUDE_ASM("MODHSYN", hsynVoiceDirectPass);
+/* FUNC hsynVoiceRefresh */
+#ifdef NON_MATCHING
+/* Four bytes short: retail shares one `p < end` test block, placed before
+ * the body with the function entry jumping over it, and each continue pays a
+ * `j` plus the compare; gcc keeps the test at the bottom of the loop. */
+void hsynVoiceRefresh(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
+{
+    u8 *start;
+    u8 c;
+    u8 d1;
+    int d2;
+    int len;
+    int step;
+
+    do {
+        c = *p++;
+        if ((c & 0x80) == 0) {
+            continue;
+        }
+        if (c < 0xF0) {
+            if (p >= end) {
+                return;
+            }
+            d2 = 0;
+            d1 = *p++;
+            if (hsynStatusFlags[(c - 0x80) >> 4] != 0) {
+                if (p >= end) {
+                    return;
+                }
+                d2 = *p++;
+            }
+            hsynVoiceUpdatePass(slot, idx, c, d1, d2);
+            continue;
+        }
+        step = 4;
+        if (c == 0xF0) {
+            if (p >= end) {
+                return;
+            }
+            start = p;
+            len = 0;
+            while (*p++ != 0xF7) {
+                if (p >= end) {
+                    return;
+                }
+                len++;
+            }
+            hsynVoiceRefreshHook(slot, start, len);
+            continue;
+        }
+        if (c != 0xF9) {
+            if (c != 0xFD) {
+                continue;
+            }
+            step = 6;
+        }
+        p += step;
+        if (p > end) {
+            continue;
+        }
+        hsynVoiceDirectPass((int)slot, idx, c, p);
+    } while (p < end);
+}
+#else
 INCLUDE_ASM("MODHSYN", hsynVoiceRefresh);
+#endif
+/* ENDF hsynVoiceRefresh */
 #ifdef NON_MATCHING
 /* Two instructions short: gcc bases the entry loads on entry+0xC
  * instead of keeping the +8 segment pointer live. */

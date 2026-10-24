@@ -534,3 +534,10 @@ untyped `u32 *seg` instead.
   table entry, and when the table is full the cursor runs one past the end
   instead of becoming NULL. The `aLoopTableOverf` complaint beside it is
   therefore unreachable and a full table is written past.
+
+### Two more MODHSYN corrections
+
+| What | Was | Now | Proof |
+| --- | --- | --- | --- |
+| `sceHSynVoice_t::unk1E` | `u16` | `s16` | `func_00004AE4` reads it with `lh` and negates it when it comes out below zero; a `u16` field makes gcc emit `lhu`. Nothing else in the module loads the field, so the change is contained |
+| `hsynVoiceRefreshHook` | `void(void)` | `void(sceHSynSlot_t *slot, u8 *data, int len)` | the body is `jr $ra` and settles nothing, but `hsynVoiceRefresh` sets up all three argument registers before the call: the slot, the start of the system-exclusive run and the byte count it just scanned |
