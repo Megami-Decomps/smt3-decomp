@@ -40,7 +40,7 @@ struct sceMSInTbl_t
 
 struct sceMSInWork_t
 {
-  u32 nTblWord;
+  int nTblWord;
   struct sceMSInTbl_t *tbl;
 };
 
@@ -60,6 +60,7 @@ int msinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len);
 int modmsin_e7(sceMSInWork_t *work, u32 port, u32 msg);
 int modmsin_e8(sceMSInWork_t *work, u32 port, const u8 *msg, u32 maxLen);
 int modmsin_e9(sceMSInWork_t *work, u32 port, const u8 *msg);
+void modmsin_e3();
 
 /* Data ------------------------------------------------------------- */
 

@@ -87,6 +87,7 @@ s32 sifman_SifSetIOPrcvaddr(void);
 
 /* loadcore */
 s32 loadcore_RegisterLibraryEntries(void *lib);
+s32 loadcore_ReleaseLibraryEntries(void *lib);
 void loadcore_FlushDcache(void);
 
 /* intrman */
