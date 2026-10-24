@@ -3885,7 +3885,181 @@ int hsynVoiceReleaseGroup(int chan, u16 vnum)
     return 1;
 }
 /* ENDF hsynVoiceReleaseGroup */
+#ifdef NON_MATCHING
+/* Equivalent but not matching: the retail body spills a dozen values to the
+ * frame and a C body of this shape keeps them in registers. */
+/* FUNC func_000078D4 */
+int func_000078D4(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, int a6, s8 a7, int a8, u32 a9)
+{
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    sceHSynBank_t *bank;
+    sceSmgProg_t *prog;
+    sceSmgProgEnt_t *ent;
+    sceSmgProgKey_t *key;
+    sceSmgSset_t *sset;
+    sceSmgSmpl_t *smpl;
+    sceSmgVagi_t *vagi;
+    sceSmgSsetEnt_t *se;
+    sceSmgSmplEnt_t *tone;
+    sceSmgVagiEnt_t *vag;
+    sceHSynVoice_t *v;
+    u8 *st;
+    u32 ofs;
+    int nKey;
+    int i;
+    int vnum;
+    int started;
+    u8 stateByte;
+
+    set = (sceHSynChanSet_t *)&slot->unk14;
+    chan = slot->chan;
+    bank = &set->bank[a3];
+    ent = NULL;
+    prog = bank->prog;
+    if (prog != NULL && prog->nEntry >= a4) {
+        ofs = prog->ofs[a4];
+        if (ofs != -1) {
+            ent = (sceSmgProgEnt_t *)((u8 *)prog + ofs);
+            if (ent->nKey == 0) {
+                ent = NULL;
+            }
+        }
+    }
+    if (ent == NULL) {
+        return -1;
+    }
+    started = 0;
+    chan->prog = ent;
+    nKey = ent->nKey;
+    key = (sceSmgProgKey_t *)((u8 *)ent + ent->keyOfs);
+    sset = bank->sset;
+    smpl = bank->smpl;
+    vagi = bank->vagi;
+    if (nKey <= 0) {
+        goto tail;
+    }
+    stateByte = a2 | 0x90;
+    do {
+        if (a5 < (key->keyLow & 0x7F) || (key->keyHigh & 0x7F) < a5) {
+            goto nextKey;
+        }
+        if (sset->nEntry < key->ssetIdx) {
+            goto nextKey;
+        }
+        se = (sceSmgSsetEnt_t *)((u8 *)sset + sset->ofs[key->ssetIdx]);
+        if (a6 < se->velLow || se->velHigh < a6) {
+            goto nextKey;
+        }
+        if (se->nSmpl == 0) {
+            goto nextKey;
+        }
+        for (i = 0; i < se->nSmpl; i++) {
+            if (smpl->nEntry < se->smplIdx[i]) {
+                continue;
+            }
+            tone = (sceSmgSmplEnt_t *)((u8 *)smpl + smpl->ofs[se->smplIdx[i]]);
+            if (a6 < (tone->velLow & 0x7F) || (tone->velHigh & 0x7F) < a6) {
+                continue;
+            }
+            vag = NULL;
+            if (vagi->nEntry >= tone->vagiIdx) {
+                vag = (sceSmgVagiEnt_t *)((u8 *)vagi + vagi->ofs[tone->vagiIdx]);
+                if (vag->spuOfs == -1) {
+                    continue;
+                }
+            }
+            if (tone->voiceOfs != 0) {
+                hsynVoiceRetrigger(chan, tone->voiceOfs);
+            }
+            vnum = tone->pitch + slot->voiceBase;
+            if (set->nActive >= slot->maxVoice) {
+                if (hsynVoiceReleaseGroup((int)set, vnum) == 0) {
+                    return -1;
+                }
+            }
+            if (hsynModDisable != 0 && hsynRelCount >= hsynModDisable) {
+                v = hsynModulationApply(vnum, tone->allocHint, 1, 1);
+            } else {
+                v = hsynVoiceMaskClear(tone->allocHint);
+                if (v == NULL) {
+                    if (hsynSdSyncFlag != 0) {
+                        hsynSdSyncFlag = 0;
+                        if (hsynVoiceKeyOff() != 0) {
+                            v = hsynVoiceMaskClear(tone->allocHint);
+                        }
+                    }
+                    if (v == NULL) {
+                        v = (sceHSynVoice_t *)hsynModulationStep(vnum, tone->allocHint);
+                        if (v == NULL) {
+                            v = hsynPanApply(vnum, tone->allocHint);
+                        }
+                    }
+                }
+            }
+            if (v == NULL) {
+                continue;
+            }
+            v->flags = 0x208;
+            if ((slot->flags & 2) != 0) {
+                v->flags = 0x608;
+            }
+            v->slotp = set;
+            v->chan = chan;
+            v->prog = ent;
+            v->key = key;
+            v->tone = tone;
+            v->vag = vag;
+            v->unk12 = 0;
+            v->unk38 = 0;
+            v->vnum = vnum;
+            v->note = a4;
+            v->ch = a5;
+            v->tag = a9;
+            v->vel = a6;
+            v->unk2C = a8;
+            v->spuAddr = bank->spuAddr;
+            v->pitch = tone->voiceOfs;
+            v->unk4A = se->unk00;
+            v->unk28 = chan->unk28;
+            v->unk55 = chan->unk2F;
+            v->vol = a7;
+            v->unk57 = 1;
+            v->unk58 = a3;
+            v->path = slot->path;
+            hsynCoreStateGet(v);
+            hsynCoreStateSet(v);
+            hsynChannelStateGet(v);
+            set->nActive++;
+            hsynRelCount++;
+            hsynVoiceSlotGet(v, (sceHSynVoice_t **)chan);
+            started = 1;
+            if ((chan->priority & 0x80) == 0 && chan->bendRange != 0) {
+                hsynVoiceStateClear(v);
+            }
+            hsynVoiceUpdatePathA(v);
+            hsynCoreIndexGet(v, (sceHSynVoice_t *)hsynActiveList[v->core]);
+            if (hsynStat != NULL) {
+                st = hsynStat->state[v->core];
+                st[v->index] = stateByte;
+            }
+        }
+    nextKey:
+        key++;
+        nKey--;
+    } while (nKey > 0);
+tail:
+    if (started != 0) {
+        chan->unk28 = -1;
+        chan->unk2F = 0xFF;
+        chan->unk30 = -1;
+    }
+    return 0;
+}
+/* ENDF func_000078D4 */
+#else
 INCLUDE_ASM("MODHSYN", func_000078D4);
+#endif
 #ifdef NON_MATCHING
 /* Equivalent but not matching: the retail body keeps its narrow parameters in
  * frame slots and a C body of this shape keeps them in registers. */
