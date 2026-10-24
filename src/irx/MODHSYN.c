@@ -518,7 +518,66 @@ void hsynVoiceRefreshHook(sceHSynSlot_t *slot, u8 *data, int len)
 {
 }
 /* ENDF hsynVoiceRefreshHook */
-INCLUDE_ASM("MODHSYN", hsynVoiceDirectPass);
+/* FUNC hsynVoiceDirectPass */
+void hsynVoiceDirectPass(sceHSynSlot_t *slot, int status, u8 sel, u8 *p)
+{
+    sceHSynChannel_t *chan;
+    u8 a;
+    u8 b;
+    u8 tag;
+    int note;
+    int val;
+    int vel;
+
+    a = *p++;
+    b = *p++;
+    val = *p++;
+    chan = (sceHSynChannel_t *)((u8 *)slot + (b & 0xF) * sizeof(sceHSynChannel_t) + 0x18);
+    switch (sel) {
+    case 0xF9:
+        switch (a) {
+        case 0:
+            chan->unk2F = val;
+            break;
+        case 1:
+            chan->unk30 = val;
+            break;
+        case 2:
+            chan->unk28 = val + (*p << 7);
+            break;
+        }
+        break;
+    case 0xFD:
+        note = val;
+        tag = *p++;
+        val = *p++;
+        if ((b & 0x10) != 0) {
+            note |= 0x80;
+        }
+        switch (a) {
+        case 0x10:
+            vel = val & 0xFF;
+            note &= 0x7F;
+            if (vel != 0) {
+                hsynVoiceEngineStep(slot, chan, status, note, vel, tag);
+            } else {
+                hsynVoiceAllocScan(chan, note, tag);
+            }
+            break;
+        case 0:
+            func_00000E40(chan, note, tag, val);
+            break;
+        case 1:
+            func_00000D24(chan, note, tag, val);
+            break;
+        case 2:
+            hsynVoiceSetPitchDirect(chan, note, tag, *p, val);
+            break;
+        }
+        break;
+    }
+}
+/* ENDF hsynVoiceDirectPass */
 /* FUNC hsynVoiceRefresh */
 #ifdef NON_MATCHING
 /* Four bytes short: retail shares one `p < end` test block, placed before
@@ -579,7 +638,7 @@ void hsynVoiceRefresh(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
         if (p > end) {
             continue;
         }
-        hsynVoiceDirectPass((int)slot, idx, c, p);
+        hsynVoiceDirectPass(slot, idx, c, p);
     } while (p < end);
 }
 #else
@@ -632,7 +691,46 @@ void hsynServiceTick(sceHSynEntry_t *entry, int nEntryWord)
 #else
 INCLUDE_ASM("MODHSYN", hsynServiceTick);
 #endif
-INCLUDE_ASM("MODHSYN", func_000017EC);
+/* FUNC func_000017EC */
+int func_000017EC(sceHSynWork_t *work)
+{
+    sceHSynTbl_t *tbl;
+    u32 vm;
+    u32 inv;
+    int core;
+    int nActive;
+    int nFree;
+
+    if (hsynLastKeyOnVoice != 0xFF) {
+        if (hsynSpu2SettleDelay() != 0) {
+            hsynLastKeyOnVoice = 0xFF;
+        }
+    }
+    for (core = 0; core < 2; core++) {
+        inv = ~hsynVoiceMask[core];
+        hsynMixMaskL[core][0] &= inv;
+        hsynMixMaskL[core][1] &= inv;
+        hsynMixMaskR[core][0] &= inv;
+        hsynMixMaskR[core][1] &= inv;
+        vm = hsynVoiceMask[core];
+        if (vm != 0) {
+            hsynMixMaskL[core][0] |= hsynSdGetSwitch(core | 0x1800) & vm;
+            hsynMixMaskL[core][1] |= hsynSdGetSwitch(core | 0x1A00) & vm;
+            hsynMixMaskR[core][0] |= hsynSdGetSwitch(core | 0x1900) & vm;
+            hsynMixMaskR[core][1] |= hsynSdGetSwitch(core | 0x1B00) & vm;
+        }
+    }
+    tbl = work->tbl;
+    hsynServiceTick(tbl->entry, tbl->nEntryWord);
+    nActive = hsynServiceVoices();
+    nFree = func_00004D90();
+    if (hsynStat != NULL) {
+        hsynStat->nActive = nActive;
+        hsynStat->nFree = nFree;
+    }
+    return 0;
+}
+/* ENDF func_000017EC */
 /* FUNC modhsyn_e8 */
 int modhsyn_e8(int *masks)
 {
@@ -1805,7 +1903,64 @@ u32 hsynSdSetParamBend(sceHSynVoice_t *v)
 }
 /* ENDF hsynSdSetParamBend */
 INCLUDE_ASM("MODHSYN", func_00004D90);
-INCLUDE_ASM("MODHSYN", hsynVoiceKeyOff);
+/* FUNC hsynVoiceKeyOff */
+int hsynVoiceKeyOff(void)
+{
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t *next;
+    u8 *st;
+    u32 sw;
+    int envx;
+    int core;
+    int ret;
+    u16 f;
+    u8 state;
+
+    ret = 0;
+    for (core = 0; core < 2; core++) {
+        end = (sceHSynVoice_t *)hsynCoreList[core];
+        sw = hsynSdGetSwitch(core | 0x1700);
+        for (v = end->prev; v != end; v = v->prev) {
+            f = v->flags;
+            envx = hsynSdGetParam(core | (v->index << 1) | 0x500);
+            v->unk12 = envx;
+            if ((f & 0x300) != 0) {
+                state = v->state;
+                if (state != 0) {
+                    if ((sw & (1 << v->index)) == 0) {
+                        v->state = 0;
+                    } else {
+                        v->state = state - 1;
+                    }
+                    v->unk12 = 0x7FFF;
+                    continue;
+                }
+                if ((sw & (1 << v->index)) == 0) {
+                    continue;
+                }
+                if ((u16)envx == 0) {
+                    goto release;
+                }
+                continue;
+            }
+            if ((u16)envx != 0) {
+                continue;
+            }
+        release:
+            next = v->next;
+            hsynVoiceRelease(v);
+            if (hsynStat != NULL) {
+                st = hsynStat->state[v->core];
+                st[v->index] &= 0x8F;
+            }
+            v = next;
+            ret = 1;
+        }
+    }
+    return ret;
+}
+/* ENDF hsynVoiceKeyOff */
 /* FUNC hsynVoiceStateClear */
 int hsynVoiceStateClear(sceHSynVoice_t *v)
 {
