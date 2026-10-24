@@ -1,8 +1,9 @@
 # Building the IRX modules
 
-The three IOP modules in `USERIRX/` build byte-identical from source, with
-their own compiler, linker script and container packer. The build is separate
-from the main ELF's and touches none of it.
+Six IOP modules build byte-identical from source, with their own compiler,
+linker script and container packer: the three Atlus wrote in `USERIRX/`, and
+the three of Sony's in `SOUNDIRX/` that the sound driver needs. The build is
+separate from the main ELF's and touches none of it.
 
 ```
 python tools/download_tools.py          # brings in iop-gcc 2.8.1
@@ -21,8 +22,16 @@ is the proof. What the modules do is in
 | `SDFIOP.IRX` | 2857 | 32 | 5 |
 | `SDFIOPFL.IRX` | 3113 | 28 | 6 |
 | `SDFSDMAN.IRX` | 39981 | 157 | 72 |
+| `MODMSIN.IRX` | 1929 | 17 | 12 |
+| `MODMIDI.IRX` | 21965 | 71 | 62 |
+| `MODHSYN.IRX` | 59501 | 238 | 219 |
 
 The remaining chunks are import stubs and the tables between them.
+
+Sony's three are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
+feeds it, and `MODMSIN`, the message queue between them. They are what plays a
+`.SMG` bank, so the sound driver's bank path is almost entirely calls into them,
+and the USA and Maniax discs ship the same files byte for byte. None has C yet.
 
 ## The toolchain
 
@@ -50,19 +59,40 @@ R_MIPS_26, R_MIPS_HI16 and R_MIPS_LO16.
 `tools/irx.py` reads and writes the container. Its layout is fixed:
 
 - the ELF header, two program headers, then `.iopmod` at 0x74
-- the load segment at file offset 0xA0, so every allocatable section sits at
-  its address plus 0xA0
+- the load segment right after `.iopmod`, rounded up to 16, so every
+  allocatable section sits at its address plus that offset. `.iopmod` is
+  0x1A bytes plus the module name and its NUL, so where the segment starts
+  depends on how long the name is: `sdf_sound_driver` is exactly 18 bytes and
+  lands the segment on 0xA0, while Sony's longer names push it to 0xB0
 - `.shstrtab`, the section header table, then the `.rel` sections in section
   order, then a one-entry `.symtab` and an empty `.strtab`
 
 A NOBITS section records the end of the file data as its offset rather than its
 own address plus the delta. `.iopmod` carries the module info pointer, the
 entry point, `gp`, and the text, data and bss sizes; `gp` is 0x7ff0 past the end
-of `.data` in all three modules, which is where `.sdata` would start.
+of `.data` in every module, which is where `.sdata` would start.
+
+Three details only Sony's modules forced, all of which the three SDF modules
+satisfied by accident:
+
+- a module carries a `.bss` section header even with nothing in it, which
+  `MODMSIN` is. Every other section is dropped when it comes out empty.
+- the `.bss` reservation in `bss.s` is byte aligned, because gas rounds a
+  NOBITS section's size up to its own alignment and `MODHSYN`'s `.bss` is
+  0x3842 bytes, which four-byte alignment turns into 0x3844. Symbols inside it
+  are placed by the `.space` runs, not by the alignment.
+- a `%hi`/`%lo` pair's two relocations sit together in the table, before the
+  relocation of any instruction physically between them. That happens when the
+  `%lo` lands in a jump's delay slot: the compiler writes `lui`/`addiu`/`jal`,
+  the assembler moves the `addiu` down into the slot, and the relocations keep
+  the order from before the move. Assembly under `.set noreorder` is already in
+  final order, so gas emits strictly by offset and the packer puts each `LO16`
+  back beside its `HI16`. It is a no-op once a function is C and gas fills the
+  delay slot itself.
 
 `python tools/irx.py info orig/irx/SDFSDMAN.IRX` prints all of it. The reader
-and writer round-trip all three retail files byte for byte, which is what
-pinned the layout down before any of it was built from source.
+and writer round-trip all six retail files byte for byte, which is what pinned
+the layout down before any of it was built from source.
 
 ## Splitting
 
@@ -86,17 +116,16 @@ Two details the retail files forced:
   form, because they have to resolve from `.rodata`.
 
 `bss.s` reserves its space in a `.bss.reserve` input section that the linker
-script folds into `.bss`. gas rounds a NOBITS section's size up to the
-section's alignment, and `SDFSDMAN`'s `.bss` ends eight bytes short of a
-16-byte boundary; the empty `.bss` beside the reservation is what still gives
-the output section its alignment of 16.
+script folds into `.bss`, byte aligned so gas cannot round its size up, with
+the empty `.bss` beside it giving the output section its alignment of 16. See
+the container section above for why the rounding matters.
 
 ## Writing C
 
 `src/irx/<module>.c` owns `.text`. It started as nothing but `INCLUDE_ASM`
 lines in link order; decompiling a function means replacing its line with the
 C body in the same place, so the function stays where it was. Every function
-in the three modules now has C.
+in the three SDF modules now has C; none of Sony's three has any yet.
 
 What stays `INCLUDE_ASM` with no C, and always will: the IRX import stubs
 (`jr $ra` plus the import id) and the import and export tables between them,
@@ -128,6 +157,9 @@ assembly `.rodata`).
 | `SDFIOP.IRX` | 5 | 5 | 0 |
 | `SDFIOPFL.IRX` | 6 | 6 | 0 |
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
+| `MODMSIN.IRX` | 12 | 0 | 0 |
+| `MODMIDI.IRX` | 62 | 0 | 0 |
+| `MODHSYN.IRX` | 219 | 0 | 0 |
 
 The three that cannot match while `.rodata` is assembly are
 `sdfSndGetVolTable`, `sdfSndLoadSmg` and `sdfSndDrvRpcInit`: each compiles its
@@ -172,9 +204,18 @@ The yaml is authored. It names the `.iopmod` fields that are not derived from
 the link (the module name, its version and the entry symbol), the sha1 of the
 retail file, and where the module's asm, source and build output live.
 `tools/irx_config.py` reads it and every tool takes its paths from there, so
-adding a fourth module is a directory and a yaml.
+adding a module is a directory and a yaml.
 
-`symbol_addrs.txt` is generated from the IDB by `tools/irx_symbols.py`.
+It may also carry an `idb:` key naming the database its symbols come from, as
+a path fragment rather than a module name. Sony's sound modules need it:
+several builds of each are usually open at once, Nocturne's and whichever
+later one came with another game, and the module name alone picks the wrong
+one or refuses as ambiguous.
+
+`symbol_addrs.txt` is generated from the IDB by `tools/irx_symbols.py`. A
+function IDA has found but not named comes across as `func_<address>`, because
+its bounds are what give the splitter one chunk per function; unnamed data is
+left out, since the splitter names what it finds there itself.
 
 There is no checked-in chunk order. `tools/irx_split.py` writes one under
 `build/` to bootstrap the C file, and after that the `INCLUDE_ASM` lines in
