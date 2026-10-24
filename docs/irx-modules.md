@@ -139,6 +139,30 @@ What stays `INCLUDE_ASM` with no C, and always will: the IRX import stubs
 the `D_<address>` chunks. They come from the linker's IRX macros, not from a
 compiler.
 
+### Types and prototypes come from the IDB
+
+A module whose config names an `idb:` also has a generated
+`include/irx/<module>.h`, which its `.c` includes in place of `iop.h`:
+
+```
+python tools/irx_headers.py MODHSYN
+```
+
+It carries the module's recovered structs, the prototype of every function the
+database has a type for, and its named data. Every struct comes with a
+compile-time size check, so a layout the compiler reads differently than IDA
+does is a build error rather than a quietly wrong decompilation. IDA's own
+spellings are translated on the way out, since `__fastcall` and `_DWORD` mean
+nothing to iop-gcc 2.8.1 and `#pragma pack` postdates it.
+
+The database is the source of truth, so the loop runs in both directions. A
+prototype IDA guessed and the retail code disproves shows up as `conflicting
+types for ...` the moment the C is written against the truth, and the fix is to
+correct the database and regenerate, not to edit the header or bend the C.
+`hsynEnvRateLookup` went that way: IDA had it as `int(int, int, int)`, the
+matching C is `s16(s16, s32, s32)`, and the byte-identical build is what
+settles it.
+
 A function whose C is equivalent but does not reproduce the retail
 instructions sits under `#ifdef NON_MATCHING`, with the `INCLUDE_ASM` the
 default build uses in the `#else`, and a comment saying how far off it is:
