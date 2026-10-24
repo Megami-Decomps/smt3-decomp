@@ -46,7 +46,40 @@ int hsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name)
 INCLUDE_ASM("MODHSYN", modhsyn_sceHSyn_Load);
 INCLUDE_ASM("MODHSYN", modhsyn_e28);
 INCLUDE_ASM("MODHSYN", D_00000714);
-INCLUDE_ASM("MODHSYN", hsynResetState);
+/* FUNC hsynResetState */
+void hsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot)
+{
+    sceHSynVoice_t *v;
+
+    v = (sceHSynVoice_t *)((char *)chan - 8);
+    chan->onPrev = v;
+    chan->onNext = v;
+    v = (sceHSynVoice_t *)((char *)chan + 8);
+    chan->offPrev = v;
+    chan->offNext = v;
+    chan->relPrev = (sceHSynVoice_t *)chan;
+    chan->relNext = (sceHSynVoice_t *)chan;
+    chan->prog = NULL;
+    chan->slot = slot;
+    chan->bank = NULL;
+    chan->unk32 = 0;
+    chan->unk26 = 0;
+    chan->bendRange = 0;
+    chan->unk28 = -1;
+    chan->bankIdx = 0;
+    chan->vol = 0x80;
+    chan->pan = 0x80;
+    chan->unk2D = 0;
+    chan->unk2F = 0xFF;
+    chan->unk30 = -1;
+    chan->unk2E = 0;
+    chan->unk31 = 0;
+    chan->priority = 0xFF;
+    chan->unk37 = 0xFF;
+    chan->unk36 = 0xFF;
+    chan->unk35 = 0xFF;
+}
+/* ENDF hsynResetState */
 INCLUDE_ASM("MODHSYN", hsynVoiceParamReset);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetPitch);
 INCLUDE_ASM("MODHSYN", hsynVoiceEnvelopeApply);
@@ -106,7 +139,19 @@ INCLUDE_ASM("MODHSYN", func_00000D24);
 INCLUDE_ASM("MODHSYN", func_00000E40);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetPitchDirect);
 INCLUDE_ASM("MODHSYN", D_0000106C);
-INCLUDE_ASM("MODHSYN", hsynVoiceApplyAll);
+/* FUNC hsynVoiceApplyAll */
+void hsynVoiceApplyAll(sceHSynChannel_t *chan)
+{
+    hsynVoiceAllocByPriority(chan, 0);
+    hsynVoiceSetPitch(chan, 0x40, 0);
+    hsynVoiceSetVolumeLeft(chan, 0);
+    hsynVoiceSetVolumeRight(chan, 0);
+    hsynVoiceSetAttack(chan, 0x7F);
+    func_00000C58(chan, 0x40);
+    hsynVoiceSetRelease(chan, 0x7F);
+    hsynVoiceFlagsSet(chan, 0);
+}
+/* ENDF hsynVoiceApplyAll */
 INCLUDE_ASM("MODHSYN", hsynVoiceEventDispatch);
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePass);
 /* FUNC hsynVoiceRefreshHook */
@@ -548,10 +593,58 @@ int hsynUnrefParamGetB(u8 a, u8 b)
     return ((b - a) << 16) / 126;
 }
 /* ENDF hsynUnrefParamGetB */
-INCLUDE_ASM("MODHSYN", hsynUnrefParamSetA);
-INCLUDE_ASM("MODHSYN", hsynUnrefParamSetB);
-INCLUDE_ASM("MODHSYN", hsynUnrefParamSetC);
-INCLUDE_ASM("MODHSYN", hsynUnrefParamSetD);
+/* FUNC hsynUnrefParamSetA */
+int hsynUnrefParamSetA(u8 a, u8 b)
+{
+    int x;
+    int y;
+
+    x = ((a - 1) << 15) / 126;
+    x = x * x;
+    y = ((b - 1) << 15) / 126;
+    y = y * y;
+    return (x - y) / 16384;
+}
+/* ENDF hsynUnrefParamSetA */
+/* FUNC hsynUnrefParamSetB */
+int hsynUnrefParamSetB(u8 a, u8 b)
+{
+    int x;
+    int y;
+
+    x = ((a - 1) << 15) / 126;
+    x = 0x10000 - x * x / 16384;
+    y = ((b - 1) << 15) / 126;
+    y = 0x10000 - y * y / 16384;
+    return x - y;
+}
+/* ENDF hsynUnrefParamSetB */
+/* FUNC hsynUnrefParamSetC */
+int hsynUnrefParamSetC(u8 a, u8 b)
+{
+    int x;
+    int y;
+
+    x = 0x10000 - ((a - 1) << 15) / 126;
+    x = 0x10000 - x * x / 16384;
+    y = 0x10000 - ((b - 1) << 15) / 126;
+    y = 0x10000 - y * y / 16384;
+    return x - y;
+}
+/* ENDF hsynUnrefParamSetC */
+/* FUNC hsynUnrefParamSetD */
+int hsynUnrefParamSetD(u8 a, u8 b)
+{
+    int x;
+    int y;
+
+    x = 0x10000 - ((a - 1) << 15) / 126;
+    x = x * x / 16384;
+    y = 0x10000 - ((b - 1) << 15) / 126;
+    y = y * y / 16384;
+    return x - y;
+}
+/* ENDF hsynUnrefParamSetD */
 INCLUDE_ASM("MODHSYN", func_00008BB0);
 INCLUDE_ASM("MODHSYN", func_00008C1C);
 INCLUDE_ASM("MODHSYN", func_00008C88);
@@ -608,7 +701,36 @@ u8 hsynUnrefTableSetC(u8 x)
     return hsynTableEntryFill(0x80 - x);
 }
 /* ENDF hsynUnrefTableSetC */
+#ifdef NON_MATCHING
+/* Five registers apart: gcc keeps the curve index in the sel register where
+ * retail uses a fresh one. */
+/* FUNC hsynVolumeScale */
+u8 hsynVolumeScale(u8 val, u8 sel, u8 *tbl, int n)
+{
+    int idx;
+    u32 curve;
+
+    idx = sel >> 4;
+    if (val == 0) {
+        val = 1;
+    }
+    /* Separate from the shift: folded into one expression gcc rewrites the
+     * -1 test as a test of sel >> 4 against zero. */
+    idx--;
+    if (idx != -1 && idx < n) {
+        tbl += idx * 126;
+        val = tbl[val - 1];
+    }
+    curve = sel & 0xF;
+    if (curve >= 11) {
+        curve = 0;
+    }
+    return hsynCurveEval1[curve](val);
+}
+/* ENDF hsynVolumeScale */
+#else
 INCLUDE_ASM("MODHSYN", hsynVolumeScale);
+#endif
 /* FUNC hsynSeqByteRead */
 int hsynSeqByteRead(sceHSynEnv_t *env)
 {

@@ -603,7 +603,7 @@ int hsynTableEntryFill(u8 x);
 u8 hsynUnrefTableSetA(u8 x);
 u8 hsynUnrefTableSetB(u8 x);
 u8 hsynUnrefTableSetC(u8 x);
-int hsynVolumeScale(u8, u8, int, int);
+u8 hsynVolumeScale(u8 val, u8 sel, u8 *tbl, int n);
 int hsynSeqByteRead(sceHSynEnv_t *env);
 int hsynSeqWordRead(sceHSynEnv_t *env);
 int hsynSeqVarLenRead(sceHSynEnv_t *env);
