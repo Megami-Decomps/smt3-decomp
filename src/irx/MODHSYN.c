@@ -713,9 +713,71 @@ int hsynCmdReset(u8 **pp)
     return acc;
 }
 /* ENDF hsynCmdReset */
-INCLUDE_ASM("MODHSYN", hsynCmdProgramChange);
+/* FUNC hsynCmdProgramChange */
+void hsynCmdProgramChange(int base, int unused, int rate, int state, u8 note, u8 ch, u8 vol, u32 tag)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    if ((*(u8 *)(base + 2) & 1) != 0) {
+        heads[0] = (sceHSynVoice_t *)(base + 16);
+        heads[1] = (sceHSynVoice_t *)(base + 32);
+        for (i = 0; i < 2; i++) {
+            end = heads[i];
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag != tag) {
+                    continue;
+                }
+                if (v->unk58 != state) {
+                    continue;
+                }
+                if (v->note != note) {
+                    continue;
+                }
+                if (v->ch != ch) {
+                    continue;
+                }
+                func_0000A810(v, rate, vol);
+            }
+        }
+    }
+}
+/* ENDF hsynCmdProgramChange */
 INCLUDE_ASM("MODHSYN", func_000021B8);
-INCLUDE_ASM("MODHSYN", hsynCmdChannelPressure);
+/* FUNC hsynCmdChannelPressure */
+void hsynCmdChannelPressure(int base, int unused, int dir, int rate, int state, u8 note, u8 ch, u16 depth, u32 tag)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    if ((*(u8 *)(base + 2) & 1) != 0) {
+        heads[0] = (sceHSynVoice_t *)(base + 16);
+        heads[1] = (sceHSynVoice_t *)(base + 32);
+        for (i = 0; i < 2; i++) {
+            end = heads[i];
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag != tag) {
+                    continue;
+                }
+                if (v->unk58 != state) {
+                    continue;
+                }
+                if (v->note != note) {
+                    continue;
+                }
+                if (v->ch != ch) {
+                    continue;
+                }
+                hsynPitchBendApply(v, rate, depth, dir);
+            }
+        }
+    }
+}
+/* ENDF hsynCmdChannelPressure */
 /* FUNC hsynCmdNoteOff */
 void hsynCmdNoteOff(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag)
 {
