@@ -8,7 +8,72 @@
  * plus the import stubs and the import and export tables between them. */
 
 INCLUDE_ASM("MODMIDI", modmidi_e26);
-INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Init);
+/* FUNC modmidi_sceMidi_Init */
+int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval)
+{
+    int slotNo;
+    u32 *seg;
+    sceMidiSeq_t *seq;
+    sceMidiVoice_t *voice;
+    sceMidiSlot_t *slot;
+    int i;
+
+    midiTickScale = interval << 7;
+    if (work == NULL) {
+        return -1;
+    }
+    /* The work table is a run of {count, pointer} segments, the sequence
+     * slots then the output buffers, and the second is reached by stepping
+     * the same pointer rather than through sceMidiTbl_t's later fields. */
+    seg = (u32 *)work->tbl;
+    if ((int)work->nTblWord < 2) {
+        return -1;
+    }
+    if (seg == NULL) {
+        return -1;
+    }
+    seq = (sceMidiSeq_t *)seg[1];
+    if (seg[0] & 1) {
+        return -1;
+    }
+    if (seq == NULL) {
+        return -1;
+    }
+    for (slotNo = 0; slotNo * 2 + 1 < (int)seg[0]; slotNo++) {
+        slot = seq[slotNo].slot;
+        if (slot != NULL) {
+            for (i = 15; i >= 0; i--) {
+                slot->chanMask[i] = 1;
+            }
+            slot->bufMask = 1;
+            slot->chMsgCb = NULL;
+            slot->metaCb = NULL;
+            slot->excCb = NULL;
+            slot->loopCb = NULL;
+            slot->ctlCb = NULL;
+            modmidi_sceMidi_Load(work, slotNo);
+        }
+    }
+    seg += 2;
+    voice = (sceMidiVoice_t *)seg[1];
+    if (seg[0] == 0) {
+        return -1;
+    }
+    if (voice == NULL) {
+        return -1;
+    }
+    if ((int)seg[0] > 0) {
+        slotNo = 1;
+        do {
+            if (voice->buf != NULL) {
+                voice->buf->len = 0;
+            }
+            voice++;
+        } while (slotNo++ < (int)seg[0]);
+    }
+    return 0;
+}
+/* ENDF modmidi_sceMidi_Init */
 /* FUNC midiParseHeader */
 /* Not a parser: a 4+4 character chunk tag comparator, with both tags passed
  * as words and both strings read backwards. */
@@ -32,8 +97,151 @@ int midiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
     return 1;
 }
 /* ENDF midiParseHeader */
+/* FUNC modmidi_sceMidi_Load */
+#ifdef NON_MATCHING
+/* Equivalent, same size. Four pointers land one callee-saved register off
+ * retail's, the chExpr fill recomputes trk+i rather than carrying gcc's
+ * biased cursor, and gcc threads every failure branch into the epilogue
+ * where retail keeps a separate return -1 block before the success path. */
+int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo)
+{
+    sceMidiTbl_t *tbl;
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    sceMidiVers_t *vers;
+    sceMidiSequ_t *sequ;
+    sceMidiSongChunk_t *song;
+    sceMidiMidiChunk_t *midi;
+    u32 unit;
+    u32 ofs;
+    int i;
+
+    if (work == NULL) {
+        return -1;
+    }
+    tbl = work->tbl;
+    unit = slotNo * 2 + 1;
+    if (unit >= tbl->nSeqWord) {
+        return -1;
+    }
+    slot = tbl->seq[slotNo].slot;
+    if (slot == NULL) {
+        return -1;
+    }
+    trk = &slot->trk;
+    slot->songNo = -1;
+    slot->midiNo = -1;
+    slot->tick = 0;
+    slot->flags = 0;
+    trk->sequ = NULL;
+    trk->midi = NULL;
+    trk->song = NULL;
+    trk->chActive = 0;
+    for (i = 15; i >= 0; i--) {
+        trk->chExpr[i] = 0x80;
+    }
+    trk->vol = 0x80;
+    vers = work->tbl->seq[slotNo].data;
+    if (vers == NULL) {
+        return -1;
+    }
+    if (midiParseHeader(*(u32 *)vers->magic, *(u32 *)vers->name, magic, name) == 0) {
+        return -1;
+    }
+    sequ = (sceMidiSequ_t *)((u8 *)vers + vers->size);
+    if (midiParseHeader(*(u32 *)sequ->magic, *(u32 *)sequ->name, magic, aSequ) == 0) {
+        return -1;
+    }
+    ofs = sequ->songOfs;
+    song = (sceMidiSongChunk_t *)((u8 *)vers + ofs);
+    if (ofs == -1 ||
+        midiParseHeader(*(u32 *)song->magic, *(u32 *)song->name, magic, aSong) == 0) {
+        song = NULL;
+    }
+    ofs = sequ->midiOfs;
+    if (ofs == -1) {
+        return -1;
+    }
+    midi = (sceMidiMidiChunk_t *)((u8 *)vers + ofs);
+    if (midiParseHeader(*(u32 *)midi->magic, *(u32 *)midi->name, magic,
+                        (const char *)aMidi) == 0) {
+        return -1;
+    }
+    trk->sequ = sequ;
+    trk->midi = midi;
+    trk->song = song;
+    slot->flags = 1;
+    return 0;
+}
+#else
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Load);
-INCLUDE_ASM("MODMIDI", modmidi_sceMidi_Unload);
+#endif
+/* ENDF modmidi_sceMidi_Load */
+/* FUNC modmidi_sceMidi_Unload */
+/* Retail passes the unit index, not the slot number, to MidiPlaySwitch,
+ * which derives the unit again: the stop never reaches the right slot. */
+int modmidi_sceMidi_Unload(sceMidiWork_t *work, int slotNo)
+{
+    sceMidiTbl_t *tbl;
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    u32 unit;
+    int ch;
+
+    if (work == NULL) {
+        return -1;
+    }
+    tbl = work->tbl;
+    unit = slotNo * 2 + 1;
+    if (unit >= tbl->nSeqWord) {
+        return -1;
+    }
+    slot = (sceMidiSlot_t *)((void **)tbl->seq)[unit * 2 + 1];
+    if (slot == NULL) {
+        return -1;
+    }
+    if (slot->flags & 2) {
+        modmidi_sceMidi_MidiPlaySwitch(work, unit, 0);
+    }
+    trk = &slot->trk;
+    slot->songNo = -1;
+    slot->midiNo = -1;
+    slot->flags = 0;
+    slot->tick = 0;
+    trk->sequ = NULL;
+    trk->vol = 0x80;
+    trk->midi = NULL;
+    trk->song = NULL;
+    trk->smfHdr = NULL;
+    trk->smfData = NULL;
+    trk->tick = 0;
+    trk->frac = 0;
+    trk->usPerTick = 0;
+    trk->runStatus = 0;
+    trk->deltaHeld = 0;
+    trk->ctlLoopId = 0xFF;
+    trk->ctlNrpn = 0xFF;
+    trk->ctlLoopCnt = 0xFF;
+    trk->ctlRpn = 0xFF;
+    trk->chActive = 0;
+    for (ch = 0; ch < 16; ch++) {
+        trk->chVol[ch] = 0;
+        trk->chExpr[ch] = 0;
+        trk->ch[ch].prog = 0xFF;
+        trk->ch[ch].bank = 0xFF;
+        trk->ch[ch].cc1 = 0xFF;
+        trk->ch[ch].cc2 = 0xFF;
+        trk->ch[ch].cc5 = 0xFF;
+        trk->ch[ch].vol = 0xFF;
+        trk->ch[ch].pan = 0xFF;
+        trk->ch[ch].expr = 0xFF;
+        trk->ch[ch].sustain = 0xFF;
+        trk->ch[ch].portamento = 0xFF;
+        trk->ch[ch].bend = 0xFFFF;
+    }
+    return 0;
+}
+/* ENDF modmidi_sceMidi_Unload */
 INCLUDE_ASM("MODMIDI", D_000006A4);
 /* FUNC modmidi_e5 */
 int modmidi_e5(sceMidiWork_t *work)
@@ -296,7 +504,43 @@ int midiSelectTrack(sceMidiSlot_t *slot)
 }
 /* ENDF midiSelectTrack */
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_SelectMidi);
-INCLUDE_ASM("MODMIDI", modmidi_e16);
+/* FUNC modmidi_e16 */
+int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    u32 t;
+    int r;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    if (tick < slot->tick) {
+        if (midiSelectTrack(slot) == 0) {
+            return -1;
+        }
+    }
+    while (slot->tick < tick) {
+        if (slot->flags & 4) {
+            return -1;
+        }
+        t = trk->tick;
+        if (t >= tick) {
+            slot->tick = tick;
+            break;
+        }
+        slot->tick = t;
+        if (midiPlayEnv(slot, trk, NULL) == 0) {
+            break;
+        }
+    }
+    r = 0;
+    if (slot->tick != tick) {
+        r = -1;
+    }
+    return r;
+}
+/* ENDF modmidi_e16 */
 /* FUNC func_00001FE4 */
 void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 ch)
 {
