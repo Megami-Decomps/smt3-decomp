@@ -262,3 +262,17 @@ Hex-Rays merges adjacent field stores into one wide store through the union's
 largest member. Delete the named type first, then declare the replacement.
 Deleting it also orphans any pointer already applied to a global, which then
 prints as `struct #24 *`; re-apply the pointer type afterwards.
+
+## The ADPCM state is one struct
+
+`SDFSDMAN` had 25 separate globals from 0x1A810 to 0x1A847, named one at a
+time while the module was being mapped. The code proves they are the fields of
+a single object: `sdfAdpcmFadeOut` loads 0x1A812 into a register and reaches
+0x1A820 as `0xE` off that same register, which gcc only does for two fields of
+one object. They are now `sdfAdpcm`, a `sdfAdpcm_t` at 0x1A810, and the field
+names are the old global names with the prefix dropped.
+
+The header, the two semaphore parameter blocks and the two semaphore ids after
+it stay separate: `sdfAdpcmSpu2IntrHandler` reaches 0x1A88C through its own
+`%hi`/`%lo` pair while holding the struct base in a register, so the struct
+ends at 0x1A848.
