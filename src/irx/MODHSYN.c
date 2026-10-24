@@ -470,7 +470,49 @@ void hsynVoiceApplyAll(sceHSynChannel_t *chan)
 }
 /* ENDF hsynVoiceApplyAll */
 INCLUDE_ASM("MODHSYN", hsynVoiceEventDispatch);
+#ifdef NON_MATCHING
+/* One instruction short: retail copies the note argument out of its argument
+   register so the next argument's load can reuse it. */
+/* FUNC hsynVoiceUpdatePass */
+void hsynVoiceUpdatePass(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 vel)
+{
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    int cmd;
+
+    set = (sceHSynChanSet_t *)&slot->unk14;
+    chan = &set->chan[sel & 0xF];
+    cmd = sel & 0xF0;
+    switch (cmd) {
+    case 0x80:
+        hsynVoiceAllocScan(chan, note, 0xFF);
+        break;
+    case 0x90:
+        if (vel != 0) {
+            hsynVoiceEngineStep(slot, chan, status, note, vel, 0xFF);
+        } else {
+            hsynVoiceAllocScan(chan, note, 0xFF);
+        }
+        break;
+    case 0xA0:
+        break;
+    case 0xB0:
+        hsynVoiceEventDispatch((int)set, (u8 *)chan, note, vel);
+        break;
+    case 0xC0:
+        hsynVoiceParamReset(set, chan, note);
+        break;
+    case 0xD0:
+        break;
+    case 0xE0:
+        hsynVoiceSetPitch(chan, vel, note);
+        break;
+    }
+}
+/* ENDF hsynVoiceUpdatePass */
+#else
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePass);
+#endif
 /* FUNC hsynVoiceRefreshHook */
 void hsynVoiceRefreshHook(void)
 {
@@ -818,7 +860,40 @@ void hsynCmdProgramChange(int base, int unused, int rate, int state, u8 note, u8
     }
 }
 /* ENDF hsynCmdProgramChange */
-INCLUDE_ASM("MODHSYN", func_000021B8);
+/* FUNC func_000021B8 */
+void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, int a9, int a10, u32 tag)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int pan;
+    int i;
+
+    pan = a9;
+    if ((*(u8 *)(base + 2) & 1) != 0) {
+        heads[0] = (sceHSynVoice_t *)(base + 16);
+        heads[1] = (sceHSynVoice_t *)(base + 32);
+        for (i = 0; i < 2; i++) {
+            end = heads[i];
+            for (v = end->chPrev; v != end; v = v->chPrev) {
+                if (v->tag != tag) {
+                    continue;
+                }
+                if (v->unk58 != state) {
+                    continue;
+                }
+                if (v->note != note) {
+                    continue;
+                }
+                if (v->ch != ch) {
+                    continue;
+                }
+                func_0000AB90(v, a3, a4, a8, (s8)pan, a10);
+            }
+        }
+    }
+}
+/* ENDF func_000021B8 */
 /* FUNC hsynCmdChannelPressure */
 void hsynCmdChannelPressure(int base, int unused, int dir, int rate, int state, u8 note, u8 ch, u16 depth, u32 tag)
 {
