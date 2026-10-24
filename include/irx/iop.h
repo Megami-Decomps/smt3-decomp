@@ -68,6 +68,8 @@ s32 thbase_iWakeupThread(s32 tid);
 s32 thbase_iCancelWakeupThread(s32 tid);
 s32 thbase_DelayThread(u32 usec);
 s32 thbase_USec2SysClock(u32 usec, u32 *sysclock);
+s32 thbase_GetSystemTime(u32 *sysclock);
+s32 thbase_SysClock2USec(u32 *sysclock, u32 *sec, u32 *usec);
 s32 thbase_e43(void);
 
 /* thsemap */

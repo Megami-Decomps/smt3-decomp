@@ -845,12 +845,106 @@ int hsynVoiceStateClear(sceHSynVoice_t *v)
 /* ENDF hsynVoiceStateClear */
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathB);
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathB);
-INCLUDE_ASM("MODHSYN", hsynEnvAttackStep);
-INCLUDE_ASM("MODHSYN", hsynEnvDecayStep);
-INCLUDE_ASM("MODHSYN", func_00005AA0);
+/* FUNC hsynEnvAttackStep */
+void hsynEnvAttackStep(sceHSynVoice_t *v, u8 scale)
+{
+    sceSmgProgEnt_t *p;
+    int t;
+
+    p = v->prog;
+    t = (scale * p->unk20) / 128;
+    t += v->unk51;
+    if (t >= 0x80) {
+        t = 0x7F;
+    } else if (t < -0x80) {
+        t = -0x80;
+    }
+    v->unk4F = t;
+    t = (scale * p->unk21) / 128;
+    t += v->unk52;
+    if (t >= 0x80) {
+        t = 0x7F;
+    } else if (t < -0x80) {
+        t = -0x80;
+    }
+    v->unk50 = t;
+}
+/* ENDF hsynEnvAttackStep */
+/* FUNC hsynEnvDecayStep */
+void hsynEnvDecayStep(sceHSynVoice_t *v, u8 scale)
+{
+    sceSmgProgEnt_t *p;
+    int t;
+
+    p = v->prog;
+    t = (scale * p->unk1C) / 128;
+    t += v->unk24;
+    if (t > 0x7FFF) {
+        t = 0x7FFF;
+    } else if (t < -0x8000) {
+        t = -0x8000;
+    }
+    v->unk20 = t;
+    t = (scale * p->unk1E) / 128;
+    t += v->unk26;
+    if (t > 0x7FFF) {
+        t = 0x7FFF;
+    } else if (t < -0x8000) {
+        t = -0x8000;
+    }
+    v->unk22 = t;
+}
+/* ENDF hsynEnvDecayStep */
+/* FUNC func_00005AA0 */
+void func_00005AA0(sceHSynVoice_t *v, u16 scale)
+{
+    sceSmgProgEnt_t *p;
+    int t;
+
+    p = v->prog;
+    t = (scale * p->unk1C) / 128;
+    t += v->unk24;
+    if (t > 0x7FFF) {
+        t = 0x7FFF;
+    } else if (t < -0x8000) {
+        t = -0x8000;
+    }
+    v->unk20 = t;
+    t = (scale * p->unk1E) / 128;
+    t += v->unk26;
+    if (t > 0x7FFF) {
+        t = 0x7FFF;
+    } else if (t < -0x8000) {
+        t = -0x8000;
+    }
+    v->unk22 = t;
+}
+/* ENDF func_00005AA0 */
 INCLUDE_ASM("MODHSYN", func_00005B4C);
 INCLUDE_ASM("MODHSYN", D_00005BDC);
-INCLUDE_ASM("MODHSYN", hsynSpu2SettleDelay);
+/* FUNC hsynSpu2SettleDelay */
+int hsynSpu2SettleDelay()
+{
+    u32 clk[2];
+    u32 sec;
+    int usec;
+    int t;
+
+    thbase_GetSystemTime(clk);
+    thbase_SysClock2USec(clk, &sec, (u32 *)&usec);
+    if (sec == hsynSettleTimeHi) {
+        usec -= hsynSettleTimeLo;
+    } else {
+        sec--;
+        if (sec == hsynSettleTimeHi) {
+            return 1;
+        }
+        t = usec + 1000000;
+        usec = t - hsynSettleTimeLo;
+    }
+    return usec >= 0x15;
+}
+/* ENDF hsynSpu2SettleDelay */
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocScan);
 INCLUDE_ASM("MODHSYN", hsynVoiceMaskUpdate);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocByPriority);
@@ -989,8 +1083,38 @@ int hsynUnrefParamSetD(u8 a, u8 b)
     return x - y;
 }
 /* ENDF hsynUnrefParamSetD */
-INCLUDE_ASM("MODHSYN", func_00008BB0);
-INCLUDE_ASM("MODHSYN", func_00008C1C);
+/* FUNC func_00008BB0 */
+int func_00008BB0(u8 from, u8 to)
+{
+    int n;
+
+    if (from == to) {
+        return 0;
+    }
+    if (to < from) {
+        n = 0x7F - to;
+    } else {
+        n = to - 1;
+    }
+    return ((from - to) << 16) / n;
+}
+/* ENDF func_00008BB0 */
+/* FUNC func_00008C1C */
+int func_00008C1C(u8 from, u8 to)
+{
+    int n;
+
+    if (from == to) {
+        return 0;
+    }
+    if (to < from) {
+        n = 0x7F - to;
+    } else {
+        n = to - 1;
+    }
+    return ((to - from) << 16) / n;
+}
+/* ENDF func_00008C1C */
 INCLUDE_ASM("MODHSYN", func_00008C88);
 INCLUDE_ASM("MODHSYN", func_00008D54);
 INCLUDE_ASM("MODHSYN", hsynVolumeCurveLookup);
@@ -1621,6 +1745,6 @@ INCLUDE_ASM("MODHSYN", loadcore_ReleaseLibraryEntries);
 INCLUDE_ASM("MODHSYN", D_0000B19C);
 INCLUDE_ASM("MODHSYN", thbase_DelayThread);
 INCLUDE_ASM("MODHSYN", D_0000B1C0);
-INCLUDE_ASM("MODHSYN", thbase_USecToSysClock);
-INCLUDE_ASM("MODHSYN", func_0000B1E4);
+INCLUDE_ASM("MODHSYN", thbase_GetSystemTime);
+INCLUDE_ASM("MODHSYN", thbase_SysClock2USec);
 INCLUDE_ASM("MODHSYN", D_0000B1EC);
