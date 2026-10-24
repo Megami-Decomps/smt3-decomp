@@ -577,7 +577,7 @@ u16 hsynBuildAdsr1(int note, sceSmgSmplEnt_t *tone);
 u16 hsynBuildAdsr2(int note, sceSmgSmplEnt_t *tone);
 int hsynVoiceUpdatePathA(sceHSynVoice_t *v);
 int hsynVoiceKeyOnPathA(sceHSynVoice_t *v);
-int hsynVoicePitchCommit(sceHSynVoice_t *v);
+void hsynVoicePitchCommit(sceHSynVoice_t *v);
 void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend);
 int func_00004614(int);
 void hsynSdSetParamEnvelope(sceHSynVoice_t *voice);

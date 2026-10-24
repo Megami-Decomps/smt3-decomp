@@ -1859,7 +1859,81 @@ u16 hsynBuildAdsr2(int note, sceSmgSmplEnt_t *tone)
 /* ENDF hsynBuildAdsr2 */
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathA);
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathA);
-INCLUDE_ASM("MODHSYN", hsynVoicePitchCommit);
+/* FUNC hsynVoicePitchCommit */
+void hsynVoicePitchCommit(sceHSynVoice_t *v)
+{
+    u32 prod;
+    u32 r;
+    int lvl;
+    int pitch;
+    int note;
+    int fine;
+    int center;
+    int tmp;
+    int d;
+
+    lvl = v->envA.level;
+    if (lvl >= 0) {
+        pitch = v->unk20;
+    } else {
+        pitch = v->unk22;
+    }
+    pitch = (pitch * lvl) / 16384;
+    pitch = pitch + (v->unk34 + v->unk38);
+    if (v->unk57 == 1) {
+        if (v->lfoA.unk00 != 0) {
+            pitch += (s16)v->lfoA.unk02;
+        }
+    }
+    if (pitch == v->unk30) {
+        return;
+    }
+    if (v->unk2C != 0 && (v->flags & 0x400) == 0) {
+        pitch = v->unk2C;
+        v->unk30 = pitch;
+    } else {
+        v->unk30 = pitch;
+        switch (v->path) {
+        case 1:
+            center = v->ch;
+            note = center + v->prog->unk05;
+            fine = v->prog->unk06;
+            tmp = fine;
+            break;
+        case 0:
+        default:
+            center = v->tone->unk0B;
+            tmp = v->tone->unk0C;
+            note = (v->ch + v->prog->unk08) + v->key->unk12;
+            fine = (v->prog->unk09 + tmp) + v->key->unk13;
+            break;
+        }
+        if (v->unk2C != 0) {
+            r = hsynSdPitch2Note(center, tmp, v->unk2C);
+            r &= 0xFFFF;
+            note = r >> 8;
+            fine = r & 0xFF;
+        }
+        pitch += fine;
+        if (pitch < 0) {
+            d = pitch / 128;
+            note += d;
+            pitch -= d * 128;
+            if (pitch != 0) {
+                pitch += 128;
+                note--;
+            }
+        }
+        pitch = (u16)hsynSdNote2Pitch(center, 0, note, pitch);
+        prod = pitch * v->unk3C;
+        pitch = prod >> 16;
+    }
+    if (pitch >= 0x4000) {
+        pitch = 0x3FFF;
+    }
+    hsynSdSetParam(v->core | (v->index << 1) | 0x200, pitch);
+}
+/* ENDF hsynVoicePitchCommit */
 /* FUNC hsynSdSetParamPitch */
 void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend)
 {
