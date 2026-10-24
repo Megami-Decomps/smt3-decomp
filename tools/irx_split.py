@@ -287,9 +287,12 @@ def dump_bss(module: irx.Module, syms: SymbolMap) -> str:
     """Reserve the bss symbols.
 
     gas rounds a NOBITS section's size up to the section's own alignment, and
-    .bss ends eight bytes short of a 16-byte boundary, so the reservation goes
-    into a `.reserve` input section the linker script folds into .bss. The
-    empty .bss beside it is what gives the output section its alignment.
+    .bss rarely ends on a 16-byte boundary, so the reservation goes into a
+    `.reserve` input section the linker script folds into .bss. The empty .bss
+    beside it is what gives the output section its alignment. The reservation
+    itself is byte aligned so that nothing rounds its size either: MODHSYN's
+    .bss is 0x3842 bytes, which four-byte alignment would round to 0x3844.
+    Symbol placement inside it comes from the .space runs, not the alignment.
     """
     lines = []
     for sec in module.sections:
@@ -299,7 +302,7 @@ def dump_bss(module: irx.Module, syms: SymbolMap) -> str:
         lines.append(f'    .section {sec.name}, "aw", @nobits')
         lines.append(f"    .align {align}")
         lines.append(f'    .section {sec.name}.reserve, "aw", @nobits')
-        lines.append("    .align 2")
+        lines.append("    .align 0")
         cursor = sec.addr
         for addr in [a for a in syms.sorted if sec.addr <= a < sec.addr + sec.size]:
             if addr > cursor:
