@@ -1888,7 +1888,40 @@ sceHSynVoice_t *hsynVoiceVolumeAdvance(s16 vnum0, s8 coreMask)
     return best;
 }
 /* ENDF hsynVoiceVolumeAdvance */
-INCLUDE_ASM("MODHSYN", hsynVoiceRetrigger);
+/* FUNC hsynVoiceRetrigger */
+void hsynVoiceRetrigger(sceHSynChannel_t *chan, u8 pitch)
+{
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t *next;
+    int i;
+
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = v->chPrev) {
+            if (v->pitch != pitch) {
+                continue;
+            }
+            next = v->chNext;
+            if ((v->flags & 8) != 0) {
+                hsynVoiceSlotSet(v);
+                hsynVoiceMaskUpdate(v);
+            } else {
+                if (i < 2) {
+                    hsynKeyOffPending[v->core] |= 1 << v->index;
+                }
+                hsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
+                hsynVoiceRelease(v);
+            }
+            v = next;
+        }
+    }
+}
+/* ENDF hsynVoiceRetrigger */
 /* FUNC hsynLfoApply */
 sceHSynVoice_t *hsynLfoApply(sceHSynVoice_t *v, int keyOff)
 {
@@ -1956,7 +1989,39 @@ int hsynVoiceReleaseOne(sceHSynVoice_t *v)
     return hsynVoiceRelease(v);
 }
 /* ENDF hsynVoiceReleaseOne */
-INCLUDE_ASM("MODHSYN", hsynVoiceReleaseGroup);
+/* FUNC hsynVoiceReleaseGroup */
+int hsynVoiceReleaseGroup(int chan, u16 vnum)
+{
+    sceHSynVoice_t *best;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+
+    end = (sceHSynVoice_t *)(chan + 12);
+    best = NULL;
+    for (v = end->chNext; v != end; v = v->chNext) {
+        if (v->vnum <= vnum) {
+            best = v;
+            vnum = v->vnum;
+        }
+    }
+    if (best == NULL) {
+        end = (sceHSynVoice_t *)(chan - 4);
+        for (v = end->chNext; v != end; v = v->chNext) {
+            if (v->vnum <= vnum) {
+                best = v;
+                vnum = v->vnum;
+            }
+        }
+        if (best == NULL) {
+            return 0;
+        }
+    }
+    hsynKeyOffPending[best->core] |= 1 << best->index;
+    hsynSdSetParam((best->core | (best->index << 1)) | 0x400, 0xC021);
+    hsynVoiceReleaseOne(best);
+    return 1;
+}
+/* ENDF hsynVoiceReleaseGroup */
 INCLUDE_ASM("MODHSYN", func_000078D4);
 INCLUDE_ASM("MODHSYN", func_00007F54);
 INCLUDE_ASM("MODHSYN", func_00008350);

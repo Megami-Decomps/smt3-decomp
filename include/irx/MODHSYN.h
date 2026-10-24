@@ -596,7 +596,7 @@ void hsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, s8 status,
 sceHSynVoice_t *hsynVoiceMaskClear(u8 allocHint);
 sceHSynVoice_t *hsynVoiceEnvelopeAdvance(u16 vnum, s8 coreMask);
 sceHSynVoice_t *hsynVoiceVolumeAdvance(s16 vnum, s8 coreMask);
-s32 hsynVoiceRetrigger(sceHSynChannel_t *chan, u8 pitch);
+void hsynVoiceRetrigger(sceHSynChannel_t *chan, u8 pitch);
 sceHSynVoice_t *hsynLfoApply(sceHSynVoice_t *v, int keyOff);
 void hsynVoiceAllocForCmd(int, int, int, u8, u8, int, int);
 int hsynVoiceMaskSet(sceHSynVoice_t *v);
