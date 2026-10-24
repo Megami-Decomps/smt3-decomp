@@ -3886,7 +3886,133 @@ int hsynVoiceReleaseGroup(int chan, u16 vnum)
 }
 /* ENDF hsynVoiceReleaseGroup */
 INCLUDE_ASM("MODHSYN", func_000078D4);
+#ifdef NON_MATCHING
+/* Equivalent but not matching: the retail body keeps its narrow parameters in
+ * frame slots and a C body of this shape keeps them in registers. */
+/* FUNC func_00007F54 */
+int func_00007F54(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, int a5, int a6, s8 a7, int a8, u32 a9)
+{
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    sceHSynBank_t *bank;
+    sceSmgSetb_t *setb;
+    sceSmgVagi_t *vagi;
+    sceSmgVagiEnt_t *vag;
+    sceHSynVoice_t *v;
+    u8 *grp;
+    u8 *ent;
+    u8 *st;
+    u32 ofs;
+    int lo;
+    int vnum;
+
+    set = (sceHSynChanSet_t *)&slot->unk14;
+    chan = slot->chan;
+    bank = &set->bank[0];
+    if (bank == NULL) {
+        return -1;
+    }
+    setb = bank->setb;
+    vagi = bank->vagi;
+    if (setb == NULL || vagi == NULL) {
+        return -1;
+    }
+    if (setb->nEntry < a3) {
+        return -1;
+    }
+    ofs = setb->ofs[a3];
+    if (ofs == -1) {
+        return -1;
+    }
+    grp = (u8 *)setb + ofs;
+    if (*(u32 *)grp < a4) {
+        return -1;
+    }
+    ent = (u8 *)setb + *(u32 *)(grp + a4 * 4 + 4);
+    lo = ent[5];
+    if (a5 < lo || ent[6] < a5) {
+        return -1;
+    }
+    ent = (u8 *)ent + *(u32 *)ent + ent[4] * ((a5 - lo) & 0xFF);
+    vag = NULL;
+    if (vagi->nEntry >= *(u16 *)ent) {
+        vag = (sceSmgVagiEnt_t *)((u8 *)vagi + vagi->ofs[*(u16 *)ent]);
+        if (vag->spuOfs == -1) {
+            return -1;
+        }
+    }
+    if (ent[7] != 0) {
+        hsynLfoStep((int)chan, ent[7], ent[8]);
+    }
+    vnum = ent[9] + slot->voiceBase;
+    if (set->nActive >= slot->maxVoice) {
+        if (hsynVoiceReleaseGroup((int)set, vnum) == 0) {
+            return -1;
+        }
+    }
+    v = hsynVoiceMaskClearOne(ent[0xD]);
+    if (v == NULL) {
+        if (hsynSdSyncFlag != 0) {
+            hsynSdSyncFlag = 0;
+            if (hsynVoiceKeyOff() != 0) {
+                v = hsynVoiceMaskClearOne(ent[0xD]);
+            }
+        }
+        if (v == NULL) {
+            v = (sceHSynVoice_t *)hsynModulationStep(vnum, ent[0xD]);
+            if (v == NULL) {
+                v = hsynPanApply(vnum, ent[0xD]);
+                if (v == NULL) {
+                    return -1;
+                }
+            }
+        }
+    }
+    v->flags = 0x208;
+    if ((slot->flags & 2) != 0) {
+        v->flags = 0x608;
+    }
+    v->slotp = set;
+    v->chan = chan;
+    v->prog = (sceSmgProgEnt_t *)ent;
+    v->key = NULL;
+    v->tone = NULL;
+    v->vag = vag;
+    v->unk12 = 0;
+    v->unk38 = 0;
+    v->vnum = vnum;
+    v->note = a4;
+    v->ch = a5;
+    v->tag = a9;
+    v->vel = a6;
+    v->unk2C = a8;
+    v->spuAddr = bank->spuAddr;
+    v->pitch = ent[7];
+    v->unk28 = -1;
+    v->unk55 = 0xFF;
+    v->vol = a7;
+    v->unk57 = 1;
+    v->unk4A = ent[2];
+    v->unk58 = a3;
+    v->path = slot->path;
+    hsynCoreStateGet(v);
+    hsynCoreStateSet(v);
+    hsynChannelStateGet(v);
+    set->nActive++;
+    hsynRelCount++;
+    hsynVoiceSlotGet(v, (sceHSynVoice_t **)chan);
+    hsynVoiceUpdatePathB(v);
+    hsynCoreIndexGet(v, (sceHSynVoice_t *)hsynActiveList[v->core]);
+    if (hsynStat != NULL) {
+        st = hsynStat->state[v->core];
+        st[v->index] = a2 | 0x90;
+    }
+    return 0;
+}
+/* ENDF func_00007F54 */
+#else
 INCLUDE_ASM("MODHSYN", func_00007F54);
+#endif
 #ifdef NON_MATCHING
 /* Byte-identical apart from one register pair: gcc gives a8 the lower
  * call-clobbered register where retail gives it to a7. */
