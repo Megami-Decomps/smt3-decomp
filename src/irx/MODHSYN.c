@@ -654,7 +654,80 @@ void hsynVoiceApplyAll(sceHSynChannel_t *chan)
     hsynVoiceFlagsSet(chan, 0);
 }
 /* ENDF hsynVoiceApplyAll */
+#ifdef NON_MATCHING
+/* The switch on the controller number compiles to a jump table, and the
+ * assembly .rodata already holds its case labels, so a C body here will not
+ * link. */
+/* FUNC hsynVoiceEventDispatch */
+void hsynVoiceEventDispatch(int set, sceHSynChannel_t *chan, u8 cc, u8 val)
+{
+    switch (cc) {
+    case 0:
+        chan->bankIdx = val;
+        break;
+    case 1:
+        hsynVoiceSetVolumeRight(chan, val);
+        break;
+    case 2:
+        hsynVoiceSetVolumeLeft(chan, val);
+        break;
+    case 5:
+        hsynVoiceFlagsGet(chan, val);
+        break;
+    case 7:
+        hsynVoiceSetAttack(chan, val);
+        break;
+    case 10:
+        func_00000C58(chan, val);
+        break;
+    case 11:
+        hsynVoiceSetRelease(chan, val);
+        break;
+    case 64:
+        hsynVoiceAllocByPriority(chan, val);
+        break;
+    case 65:
+        hsynVoiceFlagsSet(chan, val);
+        break;
+    case 84:
+        hsynVoiceIndexGet(chan, val);
+        break;
+    case 120:
+        hsynVoiceStop(chan);
+        break;
+    case 121:
+        hsynVoiceApplyAll(chan);
+        break;
+    case 123:
+        hsynVoiceAllocByChannel(chan);
+        break;
+    case 99:
+        chan->unk35 = val;
+        chan->unk37 = 0xFF;
+        chan->unk36 = 0xFF;
+        break;
+    case 98:
+        chan->unk36 = val;
+        break;
+    case 6:
+        chan->unk37 = val;
+        if (chan->unk36 != 0xFF) {
+            if (chan->unk35 == 2) {
+                hsynEffectAttrRead(chan->unk36, chan->unk37);
+            } else if (chan->unk35 == 3) {
+                hsynEffectAttrWrite(chan->unk36, chan->unk37);
+            }
+        }
+        chan->unk37 = 0xFF;
+        chan->unk36 = 0xFF;
+        chan->unk35 = 0xFF;
+        break;
+    }
+}
+/* ENDF hsynVoiceEventDispatch */
+#else
 INCLUDE_ASM("MODHSYN", hsynVoiceEventDispatch);
+#endif
 #ifdef NON_MATCHING
 /* One instruction short: retail copies the note argument out of its argument
    register so the next argument's load can reuse it. */
@@ -682,7 +755,7 @@ void hsynVoiceUpdatePass(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 
     case 0xA0:
         break;
     case 0xB0:
-        hsynVoiceEventDispatch((int)set, (u8 *)chan, note, vel);
+        hsynVoiceEventDispatch((int)set, chan, note, vel);
         break;
     case 0xC0:
         hsynVoiceParamReset(set, chan, note);
@@ -4074,7 +4147,88 @@ int hsynSeqEmit(sceHSynEnv_t *env, int wrapped)
     return v;
 }
 /* ENDF hsynSeqEmit */
+#ifdef NON_MATCHING
+/* The switch on the state byte compiles to a jump table, and the assembly
+ * .rodata already holds its case labels, so a C body here will not link. */
+/* FUNC hsynEffectDispatch */
+int hsynEffectDispatch(sceHSynEnv_t *env)
+{
+    u32 ph;
+    int state;
+    int lvl;
+    int wrapped;
+    int n;
+    int t;
+
+    wrapped = 0;
+    lvl = 0;
+    state = env->unk00;
+    if (state == 0 || state >= 6) {
+        goto out;
+    }
+    if (state >= 2) {
+        ph = env->phase + env->rate;
+        if ((int)ph > 0xFFFF) {
+            ph -= 0x10000;
+            wrapped = 1;
+        }
+        lvl = env->wave(env, wrapped);
+        env->phase = ph;
+    }
+    switch (state) {
+    case 1:
+        env->unk04--;
+        if (env->unk04 != 0) {
+            break;
+        }
+        if (env->unk0C != 0) {
+            env->unk08 = 0;
+            env->unk00 = 2;
+        } else {
+            env->unk00 = 3;
+        }
+        break;
+    case 2:
+        n = env->unk08;
+        lvl = ((s16)lvl * n) / 0x10000;
+        t = n + env->unk0C;
+        env->unk08 = t;
+        if (t > 0xFFFF) {
+            env->unk00 = 3;
+        }
+        break;
+    case 3:
+        break;
+    case 4:
+        env->unk04--;
+        if (env->unk04 != 0) {
+            break;
+        }
+        if (env->unk0C != 0) {
+            env->unk08 = 0x10000;
+            env->unk00 = 5;
+        } else {
+            env->unk00 = 6;
+        }
+        break;
+    case 5:
+        n = env->unk08;
+        lvl = ((s16)lvl * n) / 0x10000;
+        t = n - env->unk0C;
+        env->unk08 = t;
+        if (t <= 0) {
+            env->unk00 = 6;
+        }
+        break;
+    }
+out:
+    env->level = lvl;
+    return (s16)lvl;
+}
+/* ENDF hsynEffectDispatch */
+#else
 INCLUDE_ASM("MODHSYN", hsynEffectDispatch);
+#endif
 /* FUNC hsynSeqStateReset */
 void hsynSeqStateReset(sceHSynEnv_t *lfo)
 {

@@ -526,7 +526,7 @@ void func_00000D24(sceHSynChannel_t *chan, u8 ch, u32 tag, int val);
 void func_00000E40(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 val);
 void hsynVoiceSetPitchDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 hi, u8 lo);
 void hsynVoiceApplyAll(sceHSynChannel_t *chan);
-int hsynVoiceEventDispatch(int set, u8 *chan, u8 note, u8 vel);
+void hsynVoiceEventDispatch(int set, sceHSynChannel_t *chan, u8 cc, u8 val);
 void hsynVoiceUpdatePass(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 vel);
 void hsynVoiceRefreshHook(sceHSynSlot_t *slot, u8 *data, int len);
 void hsynVoiceDirectPass(sceHSynSlot_t *slot, int status, u8 sel, u8 *p);
