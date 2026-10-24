@@ -118,6 +118,36 @@ def read(path: Path) -> Module:
                   version, _strz(im.data, 0x1A))
 
 
+def _pair_hi_lo_order(relocs: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Put each LO16 straight after its HI16, the way the retail tables are.
+
+    The original assembler emitted a %hi/%lo pair's relocations together, at
+    the point it resolved the pair, and only then whatever relocation belonged
+    to an instruction physically between them. That happens when the %lo lands
+    in a jump's delay slot: the compiler writes lui/addiu/jal, the assembler
+    moves the addiu down into the slot, and the relocations keep the order
+    before the move. Our assembly is already in final order under .set
+    noreorder, so gas emits strictly by offset instead.
+
+    The pairing is by order, nth HI16 with nth LO16, which is the same
+    assumption tools/irx_split.py's pair_hi_lo reads them back under. Where a
+    pair is already adjacent this does nothing, so a function that has become
+    C and had its delay slot filled by gas passes through untouched.
+    """
+    out = list(relocs)
+    i = 0
+    while i < len(out):
+        if out[i][1] != R_MIPS_HI16:
+            i += 1
+            continue
+        lo = next((k for k in range(i + 1, len(out)) if out[k][1] == R_MIPS_LO16), None)
+        if lo is None:
+            raise SystemExit(f"HI16 at {out[i][0]:#x} with no LO16 after it")
+        out.insert(i + 1, out.pop(lo))
+        i += 2
+    return out
+
+
 def iopmod_bytes(m: Module) -> bytes:
     body = struct.pack("<6IH", m.moduleinfo, m.entry, m.gp,
                        m.text_size, m.data_size, m.bss_size, m.version)
@@ -305,6 +335,7 @@ def pack_from_elf(elf: Path, name: str, version: int) -> Module:
             by_name[target].relocs.append((roff - by_name[target].addr, ty))
     for s in alloc:
         s.relocs.sort(key=lambda r: r[0])
+        s.relocs = _pair_hi_lo_order(s.relocs)
 
     syms = _symbols(d, secs)
     gp = syms.get("_gp")
