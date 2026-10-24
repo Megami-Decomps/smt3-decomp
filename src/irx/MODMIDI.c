@@ -388,7 +388,72 @@ sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
 }
 /* ENDF midiOutputPush */
 INCLUDE_ASM("MODMIDI", midiParseExcEvent);
-INCLUDE_ASM("MODMIDI", midiSendChMsg);
+/* FUNC midiSendChMsg */
+void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
+                   sceMidiVoiceTbl_t *vt, u32 msg, int len)
+{
+    sceMidiVoice_t *v;
+    sceMidiBuf_t *buf;
+    u8 *p;
+    u32 w;
+    u32 mask;
+    u32 total;
+    int ch;
+    int index;
+    int shift;
+    int n;
+
+    msg &= 0x7F7FFF;
+    if (slot->chMsgCb != NULL) {
+        msg = slot->chMsgCb(msg, slot->chMsgArg);
+        if (msg == 0) {
+            return;
+        }
+    }
+    ch = msg & 0xF;
+    trk->chActive |= midiChBit[ch];
+    if (vt == NULL) {
+        return;
+    }
+    mask = slot->chanMask[ch];
+    if (mask == 0) {
+        return;
+    }
+    index = 0;
+    shift = 1;
+    do {
+        shift = 1;
+        if (mask & shift) {
+            v = midiOutputPush(index, vt);
+            if (v != NULL) {
+                buf = v->buf;
+                if (buf != NULL) {
+                    total = buf->len + len;
+                    if (buf->size < total + 8) {
+                        if (midiDebug != 0) {
+                            stdio_printf(aSendchmsgBuffe);
+                        }
+                    } else {
+                        w = msg;
+                        p = (u8 *)buf + (buf->len + 8);
+                        buf->len = total;
+                        n = len - 1;
+                        while (n != -1) {
+                            *p++ = w;
+                            w >>= 8;
+                            n--;
+                        }
+                    }
+                }
+            }
+        } else if ((mask & 0xF) == 0) {
+            shift = 4;
+        }
+        mask >>= shift;
+        index += shift;
+    } while (mask != 0);
+}
+/* ENDF midiSendChMsg */
 /* FUNC midiChannelReset */
 int midiChannelReset(sceMidiTrack_t *trk, u8 ch)
 {

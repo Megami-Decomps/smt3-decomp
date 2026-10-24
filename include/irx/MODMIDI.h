@@ -282,7 +282,7 @@ int midiReadDeltaTime(sceMidiTrack_t *trk);
 int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type);
 sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt);
 int midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt);
-int midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 msg, int len);
+void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 msg, int len);
 int midiChannelReset(sceMidiTrack_t *trk, u8 ch);
 int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt);
 int midiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt);
