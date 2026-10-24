@@ -29,7 +29,17 @@ sceMidiLoop_t *midiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
 }
 /* ENDF midiLoopTableAdd */
 INCLUDE_ASM("MODMIDI", midiScanLoops);
-INCLUDE_ASM("MODMIDI", midiTrackSeekAbsolute);
+/* FUNC midiTrackSeekAbsolute */
+u32 midiTrackSeekAbsolute(sceMidiTrack_t *trk)
+{
+    u32 us;
+
+    us = (trk->tempo << 7) / trk->division;
+    us = (us << 8) / trk->speed;
+    trk->usPerTick = us;
+    return us;
+}
+/* ENDF midiTrackSeekAbsolute */
 /* FUNC midiReadVarLen */
 int midiReadVarLen(sceMidiTrack_t *trk)
 {
@@ -47,8 +57,39 @@ int midiReadVarLen(sceMidiTrack_t *trk)
     return v;
 }
 /* ENDF midiReadVarLen */
-INCLUDE_ASM("MODMIDI", midiTrackReset);
-INCLUDE_ASM("MODMIDI", midiReadDeltaTime);
+/* FUNC midiTrackReset */
+int midiTrackReset(sceMidiTrack_t *trk)
+{
+    u8 *p;
+    int v;
+    u8 c;
+
+    v = 0;
+    if (trk->deltaHeld != 0) {
+        trk->deltaHeld = 0;
+    } else {
+        p = trk->cur;
+        do {
+            c = *p++;
+            v = (v << 7) + (c & 0x7F);
+        } while (c & 0x80);
+        trk->cur = p;
+        trk->tick += v;
+    }
+    return v;
+}
+/* ENDF midiTrackReset */
+/* FUNC midiReadDeltaTime */
+int midiReadDeltaTime(sceMidiTrack_t *trk)
+{
+    int v;
+
+    trk->cur--;
+    v = midiReadVarLen(trk);
+    trk->cur += v;
+    return v;
+}
+/* ENDF midiReadDeltaTime */
 INCLUDE_ASM("MODMIDI", midiParseMetaEvent);
 /* FUNC midiOutputPush */
 sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
@@ -61,7 +102,20 @@ sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
 /* ENDF midiOutputPush */
 INCLUDE_ASM("MODMIDI", midiParseExcEvent);
 INCLUDE_ASM("MODMIDI", midiSendChMsg);
-INCLUDE_ASM("MODMIDI", midiChannelReset);
+/* FUNC midiChannelReset */
+int midiChannelReset(sceMidiTrack_t *trk, u8 ch)
+{
+    u32 prod;
+    u32 v;
+
+    prod = trk->chVol[ch] * trk->chExpr[ch] * trk->vol;
+    v = prod >> 14;
+    if (v >= 0x80) {
+        v = 0x7F;
+    }
+    return v;
+}
+/* ENDF midiChannelReset */
 INCLUDE_ASM("MODMIDI", midiPlayEnv);
 INCLUDE_ASM("MODMIDI", midiStopAllNotes);
 INCLUDE_ASM("MODMIDI", midiTrackServiceTick);
@@ -75,10 +129,51 @@ INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiSetVolume);
 INCLUDE_ASM("MODMIDI", modmidi_e18);
 INCLUDE_ASM("MODMIDI", modmidi_e19);
 INCLUDE_ASM("MODMIDI", modmidi_e20);
-INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiSetAbsolute);
-INCLUDE_ASM("MODMIDI", modmidi_e22);
+/* FUNC modmidi_sceMidi_MidiSetAbsolute */
+int modmidi_sceMidi_MidiSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    trk->speed = speed;
+    midiTrackSeekAbsolute(trk);
+    return 0;
+}
+/* ENDF modmidi_sceMidi_MidiSetAbsolute */
+/* FUNC modmidi_e22 */
+int modmidi_e22(sceMidiWork_t *work, int slotNo)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return 0;
+    }
+    if (slot->midiNo == -1) {
+        return 0;
+    }
+    return (u16)trk->speed;
+}
+/* ENDF modmidi_e22 */
 INCLUDE_ASM("MODMIDI", modmidi_e23);
-INCLUDE_ASM("MODMIDI", modmidi_e24);
+/* FUNC modmidi_e24 */
+int modmidi_e24(sceMidiWork_t *work, int slotNo)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return 0;
+    }
+    if (slot->midiNo == -1) {
+        return 0;
+    }
+    return trk->tempo;
+}
+/* ENDF modmidi_e24 */
 INCLUDE_ASM("MODMIDI", midiSongStopNotes);
 INCLUDE_ASM("MODMIDI", D_00002548);
 INCLUDE_ASM("MODMIDI", midiSongApplyVolume);
