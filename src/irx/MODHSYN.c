@@ -1565,7 +1565,105 @@ int modhsyn_e24(sceHSynWork_t *work, int slotNo, u8 tag, u16 *out, s8 max)
 #else
 INCLUDE_ASM("MODHSYN", modhsyn_e24);
 #endif
+#ifdef NON_MATCHING
+/* Four instructions out of place: gcc schedules the outer loop's preheader
+ * (the hoisted 0xFF and the induction-variable init) after the list-head
+ * stores, where retail interleaves it with the register saves. */
+/* FUNC hsynInitCores */
+void hsynInitCores(void)
+{
+    sceHSynVoice_t *a;
+    sceHSynVoice_t *b;
+    sceHSynVoice_t *v;
+    u32 *p0;
+    u32 *p1;
+    u32 *p2;
+    u32 *p3;
+    u32 *p4;
+    u8 *cnt;
+    int core;
+    int i;
+
+    a = (sceHSynVoice_t *)hsynRelList[0];
+    b = (sceHSynVoice_t *)hsynRelList[1];
+    hsynRelList[0][1] = a;
+    hsynRelList[0][0] = a;
+    hsynRelList[1][1] = b;
+    hsynRelList[1][0] = b;
+    a = (sceHSynVoice_t *)hsynCoreList[0];
+    b = (sceHSynVoice_t *)hsynCoreList[1];
+    hsynCoreList[0][1] = a;
+    hsynCoreList[0][0] = a;
+    hsynCoreList[1][1] = b;
+    hsynCoreList[1][0] = b;
+    a = (sceHSynVoice_t *)hsynActiveList[0];
+    b = (sceHSynVoice_t *)hsynActiveList[1];
+    hsynActiveList[0][1] = a;
+    hsynActiveList[0][0] = a;
+    hsynActiveList[1][1] = b;
+    hsynActiveList[1][0] = b;
+    a = (sceHSynVoice_t *)hsynFreeList[0];
+    b = (sceHSynVoice_t *)hsynFreeList[1];
+    hsynFreeList[0][1] = a;
+    hsynFreeList[0][0] = a;
+    hsynFreeList[1][1] = b;
+    hsynFreeList[1][0] = b;
+    for (core = 0; core < 2; core++) {
+        for (i = 0; i < 24; i++) {
+            v = &hsynVoices[core][i];
+            v->unk28 = -1;
+            v->flags = 0;
+            v->slotp = NULL;
+            v->chan = NULL;
+            v->prog = NULL;
+            v->key = NULL;
+            v->tone = NULL;
+            v->vag = NULL;
+            v->spuAddr = 0;
+            v->unk12 = 0;
+            v->unk38 = 0;
+            v->vnum = 0;
+            v->core = core;
+            v->index = i;
+            v->unk55 = 0xFF;
+            v->vol = -0x80;
+            v->tag = 0xFF;
+            v->unk57 = 0xFF;
+            v->unk58 = 0xFF;
+            v->unk2C = 0;
+            hsynCoreStateGet(v);
+            hsynCoreStateSet(v);
+            hsynChannelStateGet(v);
+            hsynCoreIndexSet(v, (sceHSynVoice_t *)hsynFreeList[core]);
+        }
+    }
+    cnt = hsynFreeCount;
+    cnt[1] = 24;
+    cnt[0] = 24;
+    p0 = hsynKeyOffPending;
+    p0[1] = 0;
+    p0[0] = 0;
+    p1 = hsynKeyOnPending;
+    p1[1] = 0;
+    p1[0] = 0;
+    p2 = hsynNoiseMask;
+    p2[1] = 0;
+    p2[0] = 0;
+    p3 = (u32 *)hsynMixMaskL;
+    p3[3] = 0;
+    p3[2] = 0;
+    p3[1] = 0;
+    p3[0] = 0;
+    p4 = (u32 *)hsynMixMaskR;
+    p4[3] = 0;
+    p4[2] = 0;
+    p4[1] = 0;
+    p4[0] = 0;
+}
+#else
 INCLUDE_ASM("MODHSYN", hsynInitCores);
+#endif
+/* ENDF hsynInitCores */
 /* FUNC hsynCoreIndexGet */
 void hsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t *at)
 {

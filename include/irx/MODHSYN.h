@@ -329,7 +329,7 @@ struct sceHSynVoice_t
   s16 unk22;
   s16 unk24;
   s16 unk26;
-  u16 unk28;
+  s16 unk28;
   u16 unk2A;
   u16 unk2C;
   u16 unk2E;
@@ -356,7 +356,7 @@ struct sceHSynVoice_t
   u8 unk53;
   u8 unk54;
   u8 unk55;
-  u8 vol;
+  s8 vol;
   u8 unk57;
   u8 unk58;
   u8 path;
