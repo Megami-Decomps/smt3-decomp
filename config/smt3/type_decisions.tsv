@@ -1,13 +1,2 @@
 # From tools/type_match.py. ours<TAB>target<TAB>kind<TAB>note;
 # an empty target is a type looked at and left alone.
-SdfDmaReferenceChainPacket	sdfGrRefGifPacketHeader_t	merge	
-SdfDmaTagHeader	sdfDrawReqRec_t	merge	
-SdfDrawPacket	sdfGrPacketHeader_t	merge	
-SdfGraphCopyPacket	sdfGrStdDrawEnv_t	merge	
-SdfItem	sdfModelNodeDef_t	merge	
-SdfItemList	sdfModelNodeDefList_t	merge	
-SdfPacket	sdfGrPacketHeader_t	merge	
-SdfPatchableResourcePacket	sdfPreDrawHook_t	merge	
-SdfTextureDrawPacket	sdf2DTexPacket_t	merge	
-SdfVuColorTransform	sdfCorePacketFaceDivParm_t	rename	
-VuBlendNode	sdfCorePacketPointBuff_tag	rename	
