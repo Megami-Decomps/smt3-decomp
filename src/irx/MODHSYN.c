@@ -77,8 +77,34 @@ INCLUDE_ASM("MODHSYN", hsynVoiceSlotGet);
 INCLUDE_ASM("MODHSYN", D_00003734);
 INCLUDE_ASM("MODHSYN", hsynVoiceSlotSet);
 INCLUDE_ASM("MODHSYN", hsynServiceVoices);
-INCLUDE_ASM("MODHSYN", hsynEnvRateLookup);
-INCLUDE_ASM("MODHSYN", hsynEnvLevelLookup);
+/* FUNC hsynEnvRateLookup */
+s16 hsynEnvRateLookup(s16 delta, s32 base, s32 bias)
+{
+    s32 v;
+
+    v = base + bias + delta;
+    if (v > 0x7FFF) {
+        v = 0x7FFF;
+    } else if (v < -0x8000) {
+        v = -0x8000;
+    }
+    return v;
+}
+/* ENDF hsynEnvRateLookup */
+/* FUNC hsynEnvLevelLookup */
+s8 hsynEnvLevelLookup(s8 delta, s32 base, s32 bias)
+{
+    s32 v;
+
+    v = base + bias + delta;
+    if (v >= 0x80) {
+        v = 0x7F;
+    } else if (v < -0x80) {
+        v = -0x80;
+    }
+    return v;
+}
+/* ENDF hsynEnvLevelLookup */
 INCLUDE_ASM("MODHSYN", hsynAdjustFieldByKey);
 INCLUDE_ASM("MODHSYN", hsynBuildAdsr1);
 INCLUDE_ASM("MODHSYN", hsynBuildAdsr2);
@@ -154,8 +180,18 @@ INCLUDE_ASM("MODHSYN", func_00008D54);
 INCLUDE_ASM("MODHSYN", func_00008D6C);
 INCLUDE_ASM("MODHSYN", func_00008DD4);
 INCLUDE_ASM("MODHSYN", hsynVolumeCurveLookup);
-INCLUDE_ASM("MODHSYN", hsynUnrefStubA);
-INCLUDE_ASM("MODHSYN", hsynUnrefStubB);
+/* FUNC hsynUnrefStubA */
+u8 hsynUnrefStubA(s32 v)
+{
+    return v;
+}
+/* ENDF hsynUnrefStubA */
+/* FUNC hsynUnrefStubB */
+u8 hsynUnrefStubB(u8 v)
+{
+    return 0x80 - v;
+}
+/* ENDF hsynUnrefStubB */
 INCLUDE_ASM("MODHSYN", hsynTableEntryFill);
 INCLUDE_ASM("MODHSYN", hsynUnrefTableSetA);
 INCLUDE_ASM("MODHSYN", hsynUnrefTableSetB);

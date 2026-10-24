@@ -41,6 +41,12 @@ driver does. `-O2` reproduces the code; the first function tried,
 `sdfSndIsqrt`, came out byte-exact with no coaxing, including register
 allocation and the `div` trap expansion.
 
+The same compiler and flags reproduce Sony's three modules, which is not a
+given, since those came from Sony's own build rather than Atlus's. The four in
+`MODHSYN` that have C were byte-exact as written, sign extension, two-branch
+clamps and delay-slot filling included, so `iop-gcc 2.95.2-102` has not been
+needed for them either.
+
 Linking uses the decompals `ld`, since iop-gcc ships none. Registers are
 written numerically in the asm: gas 2.8 predates the o32 aliases, the same
 reason `config/smt3/SLUS_209.11.yaml` sets `mips_abi_gpr: numeric`.
@@ -125,7 +131,8 @@ the container section above for why the rounding matters.
 `src/irx/<module>.c` owns `.text`. It started as nothing but `INCLUDE_ASM`
 lines in link order; decompiling a function means replacing its line with the
 C body in the same place, so the function stays where it was. Every function
-in the three SDF modules now has C; none of Sony's three has any yet.
+in the three SDF modules now has C; Sony's three are nearly all still
+assembly.
 
 What stays `INCLUDE_ASM` with no C, and always will: the IRX import stubs
 (`jr $ra` plus the import id) and the import and export tables between them,
@@ -159,7 +166,7 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 0 | 0 |
 | `MODMIDI.IRX` | 62 | 0 | 0 |
-| `MODHSYN.IRX` | 219 | 0 | 0 |
+| `MODHSYN.IRX` | 219 | 4 | 0 |
 
 The three that cannot match while `.rodata` is assembly are
 `sdfSndGetVolTable`, `sdfSndLoadSmg` and `sdfSndDrvRpcInit`: each compiles its
