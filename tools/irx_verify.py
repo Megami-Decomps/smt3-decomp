@@ -16,13 +16,16 @@ import irx  # noqa: E402
 
 def locate(module: irx.Module, offset: int) -> str:
     """Name the part of the file an offset falls in."""
+    base = irx.load_offset(len(irx.iopmod_bytes(module)))
     for s in module.sections:
-        if s.type == irx.SHT_NOBITS or not s.size:
+        # .iopmod sits before the load segment and shares address 0 with
+        # .text, so it would otherwise claim .text's offsets.
+        if s.type == irx.SHT_NOBITS or not s.size or s.name == ".iopmod":
             continue
-        start = s.addr + irx.LOAD_OFFSET
+        start = s.addr + base
         if start <= offset < start + s.size:
             return f"{s.name}+{offset - start:#x} (vram {s.addr + offset - start:#x})"
-    if offset < 0x74:
+    if offset < irx.IOPMOD_OFFSET:
         return "ELF header or program headers"
     return "container metadata"
 

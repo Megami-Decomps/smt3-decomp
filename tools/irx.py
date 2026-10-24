@@ -22,9 +22,18 @@ SHF_MIPS_GPREL = 0x10000000
 EM_MIPS = 8
 EF_MIPS_NOREORDER = 1
 
-# The load segment starts here, right after the ELF header, two program headers
-# and the .iopmod section rounded up to the .text alignment.
-LOAD_OFFSET = 0xA0
+# The load segment starts right after the ELF header, two program headers and
+# the .iopmod section, rounded up to the .text alignment. .iopmod carries the
+# module name, so where that lands depends on how long the name is: the three
+# SDF modules all come out at 0xA0, Sony's sound modules have longer names and
+# come out at 0xB0.
+IOPMOD_OFFSET = 0x74
+LOAD_ALIGN = 0x10
+
+
+def load_offset(iopmod_size: int) -> int:
+    end = IOPMOD_OFFSET + iopmod_size
+    return (end + LOAD_ALIGN - 1) & ~(LOAD_ALIGN - 1)
 R_MIPS_32, R_MIPS_26, R_MIPS_HI16, R_MIPS_LO16 = 2, 4, 5, 6
 RELOC_NAMES = {R_MIPS_32: "R_MIPS_32", R_MIPS_26: "R_MIPS_26",
                R_MIPS_HI16: "R_MIPS_HI16", R_MIPS_LO16: "R_MIPS_LO16"}
@@ -118,16 +127,17 @@ def iopmod_bytes(m: Module) -> bytes:
 def write(m: Module, path: Path) -> bytes:
     """Lay the module out exactly the way the retail files are laid out.
 
-    Allocatable sections follow the load segment at LOAD_OFFSET with a fixed
+    Allocatable sections follow the load segment with a fixed
     vaddr-to-offset delta, then .shstrtab, the section header table, the .rel
     sections in section order, and finally the stub symtab and strtab.
     """
     iopmod = iopmod_bytes(m)
+    base = load_offset(len(iopmod))
     alloc = [s for s in m.sections if s.flags & SHF_ALLOC]
-    end = LOAD_OFFSET
+    end = base
     for s in alloc:
         if s.type != SHT_NOBITS:
-            s.offset = s.addr + LOAD_OFFSET
+            s.offset = s.addr + base
             end = max(end, s.offset + s.size)
     # A NOBITS section occupies no file space, so it points at the end of the
     # data rather than at its own address plus the load delta.
@@ -139,7 +149,7 @@ def write(m: Module, path: Path) -> bytes:
     # .rel immediately after, then .shstrtab, .symtab, .strtab. The name table
     # is built in that same order.
     order: list[Section] = []
-    im = Section(".iopmod", SHT_IOPMOD, 0, 0, 0x74, len(iopmod), 0, 0, 4, 0, iopmod)
+    im = Section(".iopmod", SHT_IOPMOD, 0, 0, IOPMOD_OFFSET, len(iopmod), 0, 0, 4, 0, iopmod)
     order.append(im)
     rel_for: dict[str, Section] = {}
     for s in alloc:
@@ -184,10 +194,10 @@ def write(m: Module, path: Path) -> bytes:
     struct.pack_into("<HHIIIIIHHHHHH", out, 0x10, ET_IRX, EM_MIPS, 1, m.entry,
                      52, shoff, m.flags, 52, 32, 2, 40, len(order) + 1,
                      index[id(shstrtab)])
-    struct.pack_into("<8I", out, 52, PT_IOPMOD, 0x74, 0, 0, len(iopmod), 0, 4, 4)
+    struct.pack_into("<8I", out, 52, PT_IOPMOD, IOPMOD_OFFSET, 0, 0, len(iopmod), 0, 4, 4)
     memsz = max(s.addr + s.size for s in alloc)
-    filesz = end - LOAD_OFFSET
-    struct.pack_into("<8I", out, 52 + 32, 1, LOAD_OFFSET, 0, 0, filesz, memsz, 7, 0x10)
+    filesz = end - base
+    struct.pack_into("<8I", out, 52 + 32, 1, base, 0, 0, filesz, memsz, 7, 0x10)
 
     for s in order:
         if s.type != SHT_NOBITS and s.data:
@@ -259,7 +269,10 @@ def pack_from_elf(elf: Path, name: str, version: int) -> Module:
     keep = [".text", ".rodata", ".data", ".sdata", ".sbss", ".bss"]
     alloc = []
     for want in keep:
-        s = next((x for x in secs if x["name"] == want and x["size"]), None)
+        # A retail module carries a .bss header even with nothing in it, which
+        # MODMSIN is: every other section is dropped when it comes out empty.
+        s = next((x for x in secs
+                  if x["name"] == want and (x["size"] or want == ".bss")), None)
         if s is None:
             continue
         ty = SHT_NOBITS if s["type"] == SHT_NOBITS else SHT_PROGBITS
