@@ -18,6 +18,7 @@ import re
 import sys
 from collections import Counter
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import unquote
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -25,9 +26,11 @@ import ida_members  # noqa: E402
 import ida_type_votes  # noqa: E402
 from hd_align import CONVENTION, our_types  # noqa: E402
 from hd_merge import align, member_uses  # noqa: E402
+from hd_pairs import definitions  # noqa: E402
 from ida_fill import ida_sizes, layout, project_sizes  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+HD_SRC = Path("/home/wsl/projects/smt3hd-reconstructed-sources/src")
 DECISIONS = ROOT / "config" / "smt3" / "type_decisions.tsv"
 CACHE = ROOT / "build" / "type_match.json"
 HTML = Path(__file__).resolve().parent / "type_match.html"
@@ -112,6 +115,64 @@ def score(mine, theirs, votes, ours_name, their_name, reliable):
     if theirs[0] > 0:
         why.append(f"{theirs[0]} bytes against our {mine[0]}")
     return round(total, 1), why
+
+
+def mentions(body, name, limit=3):
+    """The lines of a body that name a type, trimmed for display."""
+    out = []
+    for line in body.split("\n"):
+        if re.search(rf"\b{re.escape(name)}\b", line):
+            out.append(line.strip()[:150])
+            if len(out) == limit:
+                break
+    return out
+
+
+def usage_index(pool, idb, mine_all):
+    """record name -> where it is used, from the IDB, HD's sources and our tree.
+
+    What settles a candidate is usually not its layout but what the code does
+    with it, so each record carries the prototypes that take it, the remaster's
+    functions that declare one, the records that hold one, and our own uses."""
+    out = {k: {"protos": [], "hd": [], "held": [], "ours": [], "refs": []} for k in pool}
+
+    for fn, proto in ida_type_votes.protos().items():
+        for word in set(re.findall(r"[A-Za-z_]\w*", proto)):
+            row = out.get(word)
+            if row is not None and len(row["protos"]) < 6:
+                row["protos"].append(proto[:150])
+
+    for records, tag in ((idb, ""), (mine_all, ", ours")):
+        for name, rec in records.items():
+            for _, _, ty, member in rec[1]:
+                key = re.sub(r"[\*\[].*$", "", ty).strip()
+                row = out.get(key)
+                if row is not None and len(row["held"]) < 8 and key != name:
+                    row["held"].append(f"{name}.{member}  ({ty}{tag})")
+
+    for source, bucket, cap in ((HD_SRC.glob("*.c") if HD_SRC.exists() else [], "hd", 6),
+                                (sorted((ROOT / "src").rglob("*.c")), "ours", 8)):
+        for path in source:
+            for fn, body in definitions(path).items():
+                for word in set(re.findall(r"[A-Za-z_]\w*", body)):
+                    row = out.get(word)
+                    if row is None or len(row[bucket]) >= cap:
+                        continue
+                    row[bucket].append({"fn": fn, "file": path.name,
+                                        "lines": mentions(body, word, 4)})
+
+    # A type of ours often appears only in declarations, never inside a body, so
+    # the plain references are what there is to compare.
+    for path in sorted(list((ROOT / "src").rglob("*.c")) + list((ROOT / "include").rglob("*.h"))):
+        rel = path.relative_to(ROOT).as_posix()
+        for n, line in enumerate(path.read_text(errors="replace").split("\n"), 1):
+            if len(line) > 400:
+                continue
+            for word in set(re.findall(r"[A-Za-z_]\w*", line)):
+                row = out.get(word)
+                if row is not None and len(row["refs"]) < 10:
+                    row["refs"].append(f"{rel}:{n}  {line.strip()[:120]}")
+    return out
 
 
 def definition(path, name):
@@ -207,8 +268,10 @@ def build():
     index = [{"name": k, "source": v[2], "size": v[0], "members": len(v[1]),
               "kind": "merge" if k in mine_all else "rename"}
              for k, v in sorted(pool.items()) if k not in set(invented())]
+    print("  indexing where each record is used ...")
     return {"types": out, "index": index,
-            "records": {k: v[1] for k, v in pool.items()}}
+            "records": {k: v[1] for k, v in pool.items()},
+            "usage": usage_index(pool, idb, mine_all)}
 
 
 def load_decisions():
@@ -234,6 +297,7 @@ class Handler(BaseHTTPRequestHandler):
     payload = []
     index = []
     records = {}
+    usage = {}
     decisions = {}
 
     def log_message(self, *a):
@@ -249,11 +313,12 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.startswith("/api/record"):
-            name = self.path.split("name=")[-1]
-            self._send(json.dumps({"name": name, "rows": self.records.get(name, [])}))
+            name = unquote(self.path.split("name=")[-1])
+            self._send(json.dumps({"name": name, "rows": self.records.get(name, []),
+                                   "usage": self.usage.get(name, {})}))
         elif self.path.startswith("/api/types"):
             self._send(json.dumps({"types": self.payload, "index": self.index,
-                                   "decisions": self.decisions}))
+                                   "usage": self.usage, "decisions": self.decisions}))
         else:
             self._send(HTML.read_text(), "text/html; charset=utf-8")
 
@@ -326,6 +391,7 @@ def main():
     Handler.payload = payload
     Handler.index = data["index"]
     Handler.records = data["records"]
+    Handler.usage = data.get("usage", {})
     Handler.decisions = load_decisions()
     server = HTTPServer(("127.0.0.1", args.port), Handler)
     print(f"http://127.0.0.1:{args.port}/   (decisions go to "

@@ -405,6 +405,12 @@ take it as it stands or what would hold it up, which separates a decision that
 applies from one that needs the record read first. `/` searches all 5,823 records
 for the one the ranking missed.
 
+Under the layouts, both records' uses sit side by side, because what settles a
+candidate is usually not its shape but what the code does with it: the prototypes
+that take it, the remaster's functions that declare one, the records that hold
+one, the functions in our tree that read one, and the plain references, which are
+all a type of ours has when it only ever appears in declarations.
+
 Decisions land in `config/smt3/type_decisions.tsv` as they are made, and
 `--write-plans DIR` turns them into the inputs `hd_align.py` and `hd_merge.py`
 already take, so nothing about the apply path or its verification changes.

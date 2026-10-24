@@ -1,155 +1,161 @@
 <title>Type match</title>
 <style>
   :root {
-    --bg: #14161a; --panel: #1b1e24; --line: #2b303a; --ink: #d7dbe3;
-    --dim: #8b93a3; --ok: #5bc98f; --warn: #d9a84b; --bad: #d96b6b;
+    --bg: #14161a; --panel: #1b1e24; --sunk: #101216; --line: #2b303a; --ink: #d7dbe3;
+    --dim: #868fa0; --faint: #5d6675; --ok: #5bc98f; --warn: #d9a84b; --bad: #d9707a;
     --pick: #6aa6ff;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
          font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-  header { display: flex; gap: 16px; align-items: baseline; padding: 8px 12px;
-           border-bottom: 1px solid var(--line); position: sticky; top: 0;
-           background: var(--bg); z-index: 2; }
+  header { display: flex; gap: 16px; align-items: baseline; padding: 7px 12px;
+           border-bottom: 1px solid var(--line); }
   header b { font-size: 15px; }
   .grow { flex: 1; }
-  .keys { color: var(--dim); font-size: 12px; }
-  main { display: grid; grid-template-columns: 240px 1fr; height: calc(100vh - 41px); }
-  #list { overflow: auto; border-right: 1px solid var(--line); }
-  #list div { padding: 3px 10px; cursor: pointer; white-space: nowrap;
+  .keys { color: var(--faint); font-size: 12px; }
+  .keys b { color: var(--dim); font-size: 12px; }
+  main { display: grid; grid-template-columns: 230px minmax(480px, 1fr) 390px;
+         height: calc(100vh - 38px); }
+  /* On a narrow window the sidebar goes under the table rather than squeezing it. */
+  @media (max-width: 1240px) {
+    main { grid-template-columns: 200px 1fr; grid-template-rows: 1fr auto; }
+    #side { grid-column: 2; border-left: 0; border-top: 1px solid var(--line);
+            max-height: 42vh; }
+  }
+
+  #list { overflow: auto; border-right: 1px solid var(--line); padding-bottom: 40px; }
+  #list div { padding: 2px 10px; cursor: pointer; white-space: nowrap;
               overflow: hidden; text-overflow: ellipsis; }
   #list div.on { background: var(--panel); color: #fff; box-shadow: inset 2px 0 var(--pick); }
-  #list div .tag { float: right; color: var(--dim); }
+  #list .tag { float: right; color: var(--faint); }
   #list div.done .tag { color: var(--ok); }
   #list div.left .tag { color: var(--warn); }
-  #work { overflow: auto; padding: 12px 14px 60px; }
-  h2 { margin: 0 0 2px; font-size: 16px; }
-  .meta { color: var(--dim); margin-bottom: 10px; }
-  .cands { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .cand { border: 1px solid var(--line); background: var(--panel); padding: 4px 8px;
-          cursor: pointer; border-radius: 3px; }
+
+  #work { overflow: auto; padding: 10px 14px 60px; }
+  #side { overflow: auto; border-left: 1px solid var(--line); padding: 10px 12px 60px; }
+
+  h2 { margin: 0; font-size: 15px; font-weight: normal; }
+  h2 .vs { color: var(--faint); margin: 0 8px; }
+  h2 .them { color: var(--pick); }
+  .meta { color: var(--dim); }
+  .files { color: var(--faint); margin: 2px 0 8px; }
+  .bar { display: flex; gap: 14px; margin: 8px 0; color: var(--dim); }
+  .bar b { font-weight: normal; }
+  .sw { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; }
+  .sw.e { background: var(--ok); } .sw.s { background: var(--warn); }
+  .sw.o { background: var(--bad); } .sw.t { background: var(--faint); }
+
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 1px 10px 1px 0; white-space: nowrap; }
+  th { color: var(--faint); font-weight: normal; position: sticky; top: 0;
+       background: var(--bg); border-bottom: 1px solid var(--line); z-index: 1; }
+  td.off { color: var(--faint); width: 64px; }
+  td.r { border-left: 1px solid var(--line); padding-left: 10px; }
+  tr.exact td.r, tr.exact td.l { color: var(--ok); }
+  tr.shifted td.r, tr.shifted td.l { color: var(--warn); }
+  tr.mine td.l { color: var(--bad); }
+  tr.theirs td.r { color: var(--faint); }
+  tr:hover td { background: var(--sunk); }
+  .ty { color: var(--dim); }
+
+  details { margin-top: 12px; }
+  summary { color: var(--dim); cursor: pointer; }
+  pre { background: var(--panel); border: 1px solid var(--line); padding: 8px 10px;
+        margin: 6px 0 0; overflow: auto; color: var(--dim); max-height: 300px; }
+
+  .cand { border: 1px solid var(--line); background: var(--panel); border-radius: 3px;
+          padding: 3px 8px; margin-bottom: 3px; cursor: pointer; display: flex; gap: 8px; }
+  .cand:hover { border-color: var(--faint); }
   .cand.on { border-color: var(--pick); color: #fff; }
-  .cand .n { color: var(--dim); margin-right: 6px; }
-  .cand .k { color: var(--dim); margin-left: 6px; font-size: 11px; }
-  .cand.auto { border-left: 3px solid var(--ok); }
-  .held { color: var(--warn); }
-  table { border-collapse: collapse; width: 100%; max-width: 1100px; }
-  th, td { text-align: left; padding: 1px 8px 1px 0; white-space: nowrap; }
-  th { color: var(--dim); font-weight: normal; border-bottom: 1px solid var(--line); }
-  td.off { color: var(--dim); }
-  tr.exact td.r { color: var(--ok); }
-  tr.shifted td.r { color: var(--warn); }
-  tr.only td.r, tr.only td.l { color: var(--bad); }
-  .why { margin: 8px 0 14px; }
-  .why li { color: var(--dim); }
-  .ev { color: var(--ink); }
-  .none { color: var(--dim); padding: 20px 0; }
-  .sep { border-left: 1px solid var(--line); padding-left: 10px; }
-  pre.src { background: var(--panel); border: 1px solid var(--line); padding: 8px 10px;
-            margin: 0 0 14px; max-width: 1100px; overflow: auto; color: var(--dim);
-            max-height: 230px; }
-  #find { position: fixed; inset: 60px auto auto 50%; transform: translateX(-50%);
-          width: 520px; background: var(--panel); border: 1px solid var(--pick);
+  .cand.auto { box-shadow: inset 3px 0 var(--ok); }
+  .cand .n { color: var(--faint); width: 16px; }
+  .cand .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+  .cand .sc { color: var(--dim); }
+  .cand .badge { color: var(--faint); }
+  .cand .badge.merge { color: var(--dim); }
+  h3 { margin: 16px 0 4px; font-size: 12px; font-weight: normal; color: var(--faint);
+       text-transform: uppercase; letter-spacing: .08em; }
+  ul { margin: 4px 0; padding-left: 16px; }
+  li { color: var(--dim); }
+  li.ev { color: var(--ink); }
+  li.held { color: var(--warn); }
+  li.auto { color: var(--ok); }
+  .usecmp { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px;
+            margin-top: 18px; border-top: 1px solid var(--line); padding-top: 4px; }
+  .usecmp > div { min-width: 0; }
+  .usecmp h3:first-child { margin-top: 8px; }
+  .who { color: var(--ink); margin: 10px 0 0; }
+  .who .them { color: var(--pick); }
+  .use { margin-bottom: 7px; }
+  .use .fn { color: var(--ink); }
+  .use .where { color: var(--faint); }
+  .use code { display: block; color: var(--dim); white-space: pre-wrap;
+              word-break: break-word; }
+  .none { color: var(--faint); }
+  .decided { color: var(--ok); margin-top: 6px; }
+
+  #find { position: fixed; inset: 56px auto auto 50%; transform: translateX(-50%);
+          width: 560px; background: var(--panel); border: 1px solid var(--pick);
           padding: 8px; display: none; z-index: 3; }
-  #find input { width: 100%; background: var(--bg); color: var(--ink); font: inherit;
+  #find input { width: 100%; background: var(--sunk); color: var(--ink); font: inherit;
                 border: 1px solid var(--line); padding: 5px 7px; }
   #find div { padding: 2px 6px; cursor: pointer; }
-  #find div.on { background: var(--bg); color: #fff; }
-  #find .k { color: var(--dim); float: right; }
+  #find div.on { background: var(--sunk); color: #fff; }
+  #find .k { color: var(--faint); float: right; }
 </style>
 
 <header>
   <b>Type match</b>
   <span id="count" class="keys"></span>
   <span class="grow"></span>
-  <span class="keys">j/k type &nbsp; &larr;/&rarr; candidate &nbsp; <b>enter</b> take
-    &nbsp; <b>s</b> leave alone &nbsp; <b>x</b> clear &nbsp; <b>n</b> next undecided
-    &nbsp; <b>/</b> search every record</span>
+  <span class="keys"><b>j/k</b> type <b>&larr;/&rarr;</b> candidate <b>enter</b> take
+    <b>s</b> leave alone <b>x</b> clear <b>n</b> next undecided <b>/</b> search
+    <b>d</b> declaration</span>
 </header>
 <div id="find">
-  <input id="q" placeholder="record name, then enter to take it" autocomplete="off" oninput="drawHits()">
+  <input id="q" placeholder="record name, then enter to compare it" autocomplete="off" oninput="drawHits()">
   <div id="hits"></div>
 </div>
 <main>
   <div id="list"></div>
   <div id="work"></div>
+  <div id="side"></div>
 </main>
 
 <script>
-let TYPES = [], INDEX = [], DEC = {}, ti = 0, ci = 0;
-let finding = false, hits = [], hi = 0, preview = null;
+let TYPES = [], INDEX = [], USAGE = {}, DEC = {}, ti = 0, ci = 0;
+let finding = false, hits = [], hi = 0, showSrc = false;
 
 const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const hex = n => '0x' + n.toString(16).toUpperCase().padStart(3, '0');
+const cur = () => TYPES[ti];
+const sel = () => (cur()?.candidates || [])[ci];
 
 function load() {
   fetch('/api/types').then(r => r.json()).then(d => {
-    TYPES = d.types; INDEX = d.index || []; DEC = d.decisions || {};
+    TYPES = d.types; INDEX = d.index || []; USAGE = d.usage || {}; DEC = d.decisions || {};
     draw();
   });
 }
 
-function post(body) {
-  return fetch('/api/decide', {method: 'POST', body: JSON.stringify(body)}).then(r => r.json());
-}
+const post = body =>
+  fetch('/api/decide', {method: 'POST', body: JSON.stringify(body)}).then(r => r.json());
 
 function take(name, kind) {
-  const t = TYPES[ti];
-  if (!name) {
-    const c = t.candidates[ci];
-    if (!c) return;
-    name = c.name; kind = c.kind;
-  }
-  DEC[t.type] = {target: name, kind: kind, note: ''};
-  post({type: t.type, target: name, kind: kind}).then(() => { preview = null; next(true); });
-}
-
-// Searching the whole pool, for the record the ranking did not float up.
-function openFind() {
-  finding = true; hi = 0;
-  document.getElementById('find').style.display = 'block';
-  const q = document.getElementById('q');
-  q.value = ''; q.focus(); drawHits();
-}
-
-function closeFind() {
-  finding = false;
-  document.getElementById('find').style.display = 'none';
-  document.getElementById('q').blur();
-}
-
-function drawHits() {
-  const s = document.getElementById('q').value.toLowerCase();
-  hits = !s ? [] : INDEX.filter(r => r.name.toLowerCase().includes(s)).slice(0, 12);
-  hi = Math.min(hi, Math.max(hits.length - 1, 0));
-  document.getElementById('hits').innerHTML = hits.map((r, i) =>
-    `<div class="${i === hi ? 'on' : ''}" onmousedown="hi=${i};pickHit()">${esc(r.name)}
-      <span class="k">${r.size}B · ${r.members}m · ${r.kind} · ${r.source}</span></div>`).join('');
-}
-
-function pickHit() {
-  const r = hits[hi];
-  if (!r) return;
-  closeFind();
-  // Show it against ours before it is taken.
-  fetch('/api/record?name=' + encodeURIComponent(r.name)).then(x => x.json()).then(rec => {
-    preview = {name: r.name, kind: r.kind, source: r.source, score: '—',
-               why: ['found by search, ' + r.size + ' bytes, ' + r.members + ' members'],
-               rows: rec.rows, evidence: ''};
-    const t = TYPES[ti];
-    t.candidates = [preview, ...t.candidates.filter(c => c.name !== r.name)];
-    ci = 0; draw();
-  });
+  const t = cur();
+  if (!name) { const c = sel(); if (!c) return; name = c.name; kind = c.kind; }
+  DEC[t.type] = {target: name, kind, note: ''};
+  post({type: t.type, target: name, kind}).then(draw);
 }
 
 function leave() {
-  const t = TYPES[ti];
+  const t = cur();
   DEC[t.type] = {target: '', kind: 'skip', note: ''};
-  post({type: t.type, target: '', kind: 'skip'}).then(() => { next(true); });
+  post({type: t.type, target: '', kind: 'skip'}).then(() => next(true));
 }
 
 function clear() {
-  const t = TYPES[ti];
+  const t = cur();
   delete DEC[t.type];
   post({type: t.type, clear: true}).then(draw);
 }
@@ -162,8 +168,43 @@ function next(undecidedOnly) {
   draw();
 }
 
-function rowsFor(t, c) {
-  // One row per offset either side uses, so a field with no counterpart shows a gap.
+/* ---- search every record, not just the ranked ones ---- */
+function openFind() {
+  finding = true; hi = 0;
+  document.getElementById('find').style.display = 'block';
+  const q = document.getElementById('q');
+  q.value = ''; q.focus(); drawHits();
+}
+function closeFind() {
+  finding = false;
+  document.getElementById('find').style.display = 'none';
+  document.getElementById('q').blur();
+}
+function drawHits() {
+  const s = document.getElementById('q').value.toLowerCase();
+  hits = !s ? [] : INDEX.filter(r => r.name.toLowerCase().includes(s)).slice(0, 12);
+  hi = Math.min(hi, Math.max(hits.length - 1, 0));
+  document.getElementById('hits').innerHTML = hits.map((r, i) =>
+    `<div class="${i === hi ? 'on' : ''}" onmousedown="hi=${i};pickHit()">${esc(r.name)}
+      <span class="k">${r.size}B · ${r.members}m · ${r.kind} · ${r.source}</span></div>`).join('');
+}
+function pickHit() {
+  const r = hits[hi];
+  if (!r) return;
+  closeFind();
+  fetch('/api/record?name=' + encodeURIComponent(r.name)).then(x => x.json()).then(rec => {
+    USAGE[r.name] = rec.usage || USAGE[r.name];
+    const t = cur();
+    t.candidates = [{name: r.name, kind: r.kind, source: r.source, score: '—', held: '',
+                     why: [`${r.size} bytes, ${r.members} members, found by search`],
+                     rows: rec.rows, evidence: ''},
+                    ...t.candidates.filter(c => c.name !== r.name)];
+    ci = 0; draw();
+  });
+}
+
+/* ---- the comparison ---- */
+function aligned(t, c) {
   const offs = new Set();
   t.rows.forEach(r => offs.add(r[0]));
   if (c) c.rows.forEach(r => offs.add(r[0]));
@@ -171,10 +212,54 @@ function rowsFor(t, c) {
   const theirs = c ? new Map(c.rows.map(r => [r[0], r])) : new Map();
   return [...offs].sort((a, b) => a - b).map(o => {
     const a = mine.get(o), b = theirs.get(o);
-    let cls = 'only';
-    if (a && b) cls = a[1] === b[1] ? 'exact' : 'shifted';
+    const cls = a && b ? (a[1] === b[1] ? 'exact' : 'shifted') : a ? 'mine' : 'theirs';
     return {o, a, b, cls};
   });
+}
+
+const cell = r => r ? `<span class="ty">${esc(r[2])}</span> ${esc(r[3])}` +
+                      ` <span class="off">(${r[1]})</span>` : '';
+
+function usageBlock(title, rows, render) {
+  if (!rows || !rows.length) return '';
+  return `<h3>${title}</h3>` + rows.map(render).join('');
+}
+
+const fnRow = r => `<div class="use"><span class="fn">${esc(r.fn)}</span>
+    <span class="where">${esc(r.file)}</span>
+    ${(r.lines || []).map(l => '<code>' + esc(l) + '</code>').join('')}</div>`;
+
+const protoRow = p => `<div class="use"><code>${esc(p)}</code></div>`;
+
+function usageColumn(name, u, mine) {
+  u = u || {};
+  const body = usageBlock('typed by the IDB in', u.protos, protoRow)
+    + usageBlock('the remaster&rsquo;s code', u.hd, fnRow)
+    + usageBlock('held by', u.held, protoRow)
+    + usageBlock(mine ? 'our code' : 'our tree', u.ours, fnRow)
+    + usageBlock('referenced at', u.refs, protoRow);
+  return `<div><p class="who">${mine ? '' : '<span class="them">'}${esc(name)}${mine ? '' : '</span>'}</p>
+    ${body || '<p class="none">nothing references it</p>'}</div>`;
+}
+
+function drawSide() {
+  const t = cur(), c = sel(), d = DEC[t.type];
+  const cands = t.candidates.length
+    ? t.candidates.map((x, i) => `<div class="cand ${i === ci ? 'on' : ''} ${x.kind === 'merge' && !x.held ? 'auto' : ''}"
+         onclick="ci=${i};draw()"><span class="n">${i + 1}</span>
+         <span class="nm">${esc(x.name)}</span>
+         <span class="sc">${x.score}</span>
+         <span class="badge ${x.kind}">${x.kind}</span>
+         <span class="sc">${x.source}</span></div>`).join('')
+    : '<p class="none">nothing scored above zero — press / to search</p>';
+
+  document.getElementById('side').innerHTML = `
+    <h3>candidates</h3>${cands}
+    ${d ? `<div class="decided">taken: ${d.target ? esc(d.target) + ' (' + esc(d.kind) + ')' : 'left alone'} — x to clear</div>` : ''}
+    ${c ? `<h3>why</h3><ul>${c.why.map(w => '<li>' + esc(w) + '</li>').join('')}
+        ${c.evidence ? '<li class="ev">' + esc(c.evidence) + '</li>' : ''}
+        ${c.held ? '<li class="held">hd_merge would refuse: ' + esc(c.held) + '</li>' : ''}
+        ${c.kind === 'merge' && !c.held ? '<li class="auto">hd_merge applies this as it stands</li>' : ''}</ul>` : ''}`;
 }
 
 function draw() {
@@ -185,39 +270,41 @@ function draw() {
 
   document.getElementById('list').innerHTML = TYPES.map((t, i) => {
     const d = DEC[t.type];
-    const cls = ['', i === ti ? 'on' : '', d ? (d.target ? 'done' : 'left') : ''].join(' ');
-    const tag = d ? (d.target ? '✓' : '–') : (t.candidates.length ? t.candidates.length : '0');
+    const cls = [i === ti ? 'on' : '', d ? (d.target ? 'done' : 'left') : ''].join(' ');
+    const tag = d ? (d.target ? '✓' : '–') : t.candidates.length;
     return `<div class="${cls}" onclick="ti=${i};ci=0;draw()">${esc(t.type)}<span class="tag">${tag}</span></div>`;
   }).join('');
 
-  const t = TYPES[ti];
+  const t = cur();
   if (!t) { document.getElementById('work').innerHTML = '<p class="none">nothing to match</p>'; return; }
-  const c = t.candidates[ci];
-  const d = DEC[t.type];
-
-  const cands = t.candidates.length
-    ? t.candidates.map((x, i) => `<div class="cand ${i === ci ? 'on' : ''} ${x.kind === 'merge' && !x.held ? 'auto' : ''}" onclick="ci=${i};draw()">
-        <span class="n">${i + 1}</span>${esc(x.name)}<span class="k">${x.score} · ${x.kind} · ${x.source}</span></div>`).join('')
-    : '<span class="none">no candidate scored above zero</span>';
-
-  const table = `<table><tr><th>offset</th><th>ours</th><th class="sep">${c ? esc(c.name) : '—'}</th></tr>` +
-    rowsFor(t, c).map(r => `<tr class="${r.cls}">
-        <td class="off">${hex(r.o)}</td>
-        <td class="l">${r.a ? esc(r.a[2]) + ' ' + esc(r.a[3]) + ' <span class="off">(' + r.a[1] + ')</span>' : ''}</td>
-        <td class="r sep">${r.b ? esc(r.b[2]) + ' ' + esc(r.b[3]) + ' <span class="off">(' + r.b[1] + ')</span>' : ''}</td>
-      </tr>`).join('') + '</table>';
+  const c = sel();
+  const rows = aligned(t, c);
+  const n = {exact: 0, shifted: 0, mine: 0, theirs: 0};
+  rows.forEach(r => n[r.cls]++);
 
   document.getElementById('work').innerHTML = `
-    <h2>${esc(t.type)} <span class="meta">${t.size} bytes, ${t.rows.length} members</span></h2>
-    <div class="meta">${t.files.map(esc).join('  ')}${t.users.length ? '<br>used by ' + t.users.slice(0, 6).map(esc).join(', ') : ''}</div>
-    <div class="cands">${cands}</div>
-    ${t.source ? `<pre class="src">${esc(t.source)}</pre>` : ''}
-    ${c ? `<ul class="why">${c.why.map(w => '<li>' + esc(w) + '</li>').join('')}
-      ${c.held ? '<li class="held">hd_merge would refuse this: ' + esc(c.held) + '</li>' : ''}
-      ${c.kind === 'merge' && !c.held ? '<li class="ev">hd_merge applies this as it stands</li>' : ''}
-      ${c.evidence ? '<li class="ev">' + esc(c.evidence) + '</li>' : ''}</ul>` : ''}
-    ${d ? `<div class="meta">decided: ${d.target ? esc(d.target) + ' (' + esc(d.kind) + ')' : 'left alone'} — x to clear</div>` : ''}
-    ${table}`;
+    <h2>${esc(t.type)} <span class="meta">${t.size}B, ${t.rows.length}m</span>
+        <span class="vs">against</span>
+        <span class="them">${c ? esc(c.name) : '—'}</span>
+        <span class="meta">${c ? c.size + 'B, ' + c.rows.length + 'm' : ''}</span></h2>
+    <div class="files">${t.files.map(esc).join('  ')}</div>
+    <div class="bar">
+      <b><span class="sw e"></span>${n.exact} same place and size</b>
+      <b><span class="sw s"></span>${n.shifted} same offset only</b>
+      <b><span class="sw o"></span>${n.mine} only ours</b>
+      <b><span class="sw t"></span>${n.theirs} only theirs</b>
+    </div>
+    <table><tr><th>offset</th><th>ours</th><th class="r">${c ? esc(c.name) : ''}</th></tr>
+      ${rows.map(r => `<tr class="${r.cls}"><td class="off">${hex(r.o)}</td>
+        <td class="l">${cell(r.a)}</td><td class="r">${cell(r.b)}</td></tr>`).join('')}
+    </table>
+    ${t.source ? `<details ${showSrc ? 'open' : ''} ontoggle="showSrc=this.open">
+      <summary>our declaration</summary><pre>${esc(t.source)}</pre></details>` : ''}
+    <div class="usecmp">
+      ${usageColumn(t.type, USAGE[t.type], true)}
+      ${c ? usageColumn(c.name, USAGE[c.name], false) : '<div></div>'}
+    </div>`;
+  drawSide();
 }
 
 addEventListener('keydown', e => {
@@ -232,17 +319,16 @@ addEventListener('keydown', e => {
     return;
   }
   if (e.key === '/') { openFind(); e.preventDefault(); return; }
-  const t = TYPES[ti];
-  if (e.key === 'j') { ti = Math.min(ti + 1, TYPES.length - 1); ci = 0; draw(); }
-  else if (e.key === 'k') { ti = Math.max(ti - 1, 0); ci = 0; draw(); }
+  const t = cur();
+  if (e.key === 'j' || e.key === 'ArrowDown') { ti = Math.min(ti + 1, TYPES.length - 1); ci = 0; draw(); }
+  else if (e.key === 'k' || e.key === 'ArrowUp') { ti = Math.max(ti - 1, 0); ci = 0; draw(); }
   else if (e.key === 'ArrowRight' || e.key === 'l') { if (t) ci = Math.min(ci + 1, t.candidates.length - 1); draw(); }
   else if (e.key === 'ArrowLeft' || e.key === 'h') { ci = Math.max(ci - 1, 0); draw(); }
-  else if (e.key === 'ArrowDown') { ti = Math.min(ti + 1, TYPES.length - 1); ci = 0; draw(); }
-  else if (e.key === 'ArrowUp') { ti = Math.max(ti - 1, 0); ci = 0; draw(); }
   else if (e.key === 'Enter') take();
   else if (e.key === 's') leave();
   else if (e.key === 'x') clear();
   else if (e.key === 'n') next(true);
+  else if (e.key === 'd') { showSrc = !showSrc; draw(); }
   else if (e.key >= '1' && e.key <= '9') { ci = Math.min(+e.key - 1, (t?.candidates.length || 1) - 1); draw(); }
   else return;
   e.preventDefault();
