@@ -1629,8 +1629,95 @@ void hsynVoiceStop(sceHSynChannel_t *chan)
     }
 }
 /* ENDF hsynVoiceStop */
-INCLUDE_ASM("MODHSYN", hsynVoiceRelease);
-INCLUDE_ASM("MODHSYN", hsynVoiceStealScan);
+/* FUNC hsynVoiceRelease */
+int hsynVoiceRelease(sceHSynVoice_t *v)
+{
+    sceHSynChanSet_t *set;
+    u8 *st;
+    int n;
+
+    hsynVoiceSlotSet(v);
+    set = v->slotp;
+    v->flags = 0;
+    n = set->nActive;
+    if (n != 0) {
+        set->nActive = n - 1;
+    }
+    if (v->unk57 == 0) {
+        n = hsynActiveCount;
+        if (n != 0) {
+            hsynActiveCount = n - 1;
+        }
+    } else if (v->unk57 == 1) {
+        n = hsynRelCount;
+        if (n != 0) {
+            hsynRelCount = n - 1;
+        }
+    }
+    hsynVoiceMaskGet(v);
+    hsynFreeCount[v->core]++;
+    hsynCoreIndexGet(v, (sceHSynVoice_t *)hsynFreeList[v->core]);
+    if (hsynStat != NULL) {
+        st = &hsynStat->state[v->core][v->index];
+        *st &= 0x8F;
+    }
+    v->tag = 0xFF;
+    v->unk57 = 0xFF;
+    v->unk58 = 0xFF;
+    v->lfoA.unk00 = 0;
+    v->lfoB.unk00 = 0;
+    *(u32 *)v->param = 0;
+    return 0xFF;
+}
+/* ENDF hsynVoiceRelease */
+/* FUNC hsynVoiceStealScan */
+int hsynVoiceStealScan(sceHSynChanSet_t *cs, u16 vnum)
+{
+    sceHSynVoice_t *best;
+    sceHSynVoice_t *chan;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    best = NULL;
+    for (i = 0; i < 16; i++) {
+        chan = (sceHSynVoice_t *)&cs->chan[i];
+        end = (sceHSynVoice_t *)((char *)chan + 8);
+        for (v = end->chNext; v != end; v = v->chNext) {
+            if (v->vnum <= vnum) {
+                best = v;
+                vnum = v->vnum;
+            }
+        }
+    }
+    if (best == NULL) {
+        for (i = 0; i < 16; i++) {
+            chan = (sceHSynVoice_t *)&cs->chan[i];
+            end = (sceHSynVoice_t *)((char *)chan - 8);
+            for (v = end->chNext; v != end; v = v->chNext) {
+                if (v->vnum <= vnum) {
+                    best = v;
+                    vnum = v->vnum;
+                }
+            }
+            end = chan;
+            for (v = end->chNext; v != end; v = v->chNext) {
+                if (v->vnum <= vnum) {
+                    best = v;
+                    vnum = v->vnum;
+                }
+            }
+        }
+        if (best == NULL) {
+            return 0;
+        }
+    }
+    hsynKeyOffPending[best->core] |= 1 << best->index;
+    hsynSdSetParam((best->core | (best->index << 1)) | 0x400, 0xC021);
+    hsynVoiceRelease(best);
+    return 1;
+}
+/* ENDF hsynVoiceStealScan */
 INCLUDE_ASM("MODHSYN", hsynVoiceEngineStep);
 /* FUNC hsynVoiceMaskClear */
 sceHSynVoice_t *hsynVoiceMaskClear(u8 allocHint)
