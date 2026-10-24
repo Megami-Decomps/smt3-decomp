@@ -16,6 +16,12 @@ quickstart.
   invented.
 - [IDB corrections](idb-corrections.md): names and layouts in the IDA database
   that the retail code proves wrong, and the proof for each.
+- [Building the IRX modules](irx-modules.md): how the three IOP modules in
+  `USERIRX/` build byte-identical from source, the container format, and where
+  to put C.
+- [The SDF IRX modules](sdf-irx-modules.md): the three IOP modules in
+  `USERIRX/`, the sound driver's command table and work area, the two SIF RPC
+  services the EE hosts for them, and the .SMG and ADPCM headers.
 - [The Japanese builds](maniax-build.md): how `SLPM_654.62` and `SLPM_666.81`
   compare to retail, how the USA names were carried onto them, and what the two
   builds are and are not worth.

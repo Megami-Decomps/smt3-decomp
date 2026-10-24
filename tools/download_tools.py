@@ -29,7 +29,8 @@ COMPILER_URL = "https://github.com/decompme/compilers/releases/download/compiler
 COMPILER_EXTS = (".tar.xz", ".tar.gz")
 # ee-gcc 2.96 built the game code; 2.9 built the Sony EE libraries, and its cc1
 # output matches the one in SDK 2.0.4 (docs/sdk-matching.md).
-DEFAULT_COMPILERS = ["ee-gcc2.96", "ee-gcc2.9-991111-01"]
+# iop-gcc 2.8.1 built the three IRX modules in USERIRX/ (docs/irx-modules.md).
+DEFAULT_COMPILERS = ["ee-gcc2.96", "ee-gcc2.9-991111-01", "iop-gcc2.8.1"]
 BINUTILS_URL = ("https://github.com/decompals/binutils-mips-ps2-decompals/releases/download/"
                 "v0.10/binutils-mips-ps2-decompals-linux-x86-64.tar.gz")
 OBJDIFF_URL = "https://github.com/encounter/objdiff/releases/download/v3.8.1/objdiff-cli-linux-x86_64"

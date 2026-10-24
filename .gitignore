@@ -18,6 +18,7 @@ orig/*
 /tools/compilers
 /tools/glibc32
 /build.ninja
+/build-irx.ninja
 /build.ninja.tmp
 /.ninja_*
 /objdiff.json
