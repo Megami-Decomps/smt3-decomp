@@ -322,6 +322,11 @@ def split(module: str) -> None:
     syms = SymbolMap(rows)
     funcs = [r for r in rows if r[3] == "F"]
     out = irx_config.path(cfg, "asm")
+    # Clear the chunk directory: a rename in the IDB changes a chunk's file
+    # name, and the old file would otherwise sit there looking current.
+    if (out / "text").is_dir():
+        for stale in (out / "text").glob("*.s"):
+            stale.unlink()
     (out / "text").mkdir(parents=True, exist_ok=True)
 
     chunks = disasm_text(mod, syms, funcs, jump_targets(mod))

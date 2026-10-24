@@ -34,7 +34,11 @@ INCLUDE_ASM("MODHSYN", D_0000106C);
 INCLUDE_ASM("MODHSYN", hsynVoiceApplyAll);
 INCLUDE_ASM("MODHSYN", hsynVoiceEventDispatch);
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePass);
-INCLUDE_ASM("MODHSYN", hsynVoiceRefreshHook);
+/* FUNC hsynVoiceRefreshHook */
+void hsynVoiceRefreshHook(void)
+{
+}
+/* ENDF hsynVoiceRefreshHook */
 INCLUDE_ASM("MODHSYN", hsynVoiceDirectPass);
 INCLUDE_ASM("MODHSYN", hsynVoiceRefresh);
 INCLUDE_ASM("MODHSYN", hsynServiceTick);
@@ -248,7 +252,11 @@ INCLUDE_ASM("MODHSYN", func_0000A9FC);
 INCLUDE_ASM("MODHSYN", hsynChannelStateGet);
 INCLUDE_ASM("MODHSYN", func_0000AB90);
 INCLUDE_ASM("MODHSYN", D_0000B000);
-INCLUDE_ASM("MODHSYN", hsynRetnStub);
+/* FUNC hsynRetnStub */
+void hsynRetnStub(void)
+{
+}
+/* ENDF hsynRetnStub */
 INCLUDE_ASM("MODHSYN", D_0000B094);
 INCLUDE_ASM("MODHSYN", libsd_sceSdInit);
 INCLUDE_ASM("MODHSYN", libsd_sceSdSetParam);

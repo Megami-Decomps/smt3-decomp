@@ -32,7 +32,7 @@ s32 hsynVoiceSetPitchDirect(int, u8, int, u8, u8);
 int hsynVoiceApplyAll(int);
 int hsynVoiceEventDispatch(int, u8 *, char, u8);
 int hsynVoiceUpdatePass(int, int, char, u8, u8);
-int hsynVoiceRefreshHook(u32, u32, u32);
+void hsynVoiceRefreshHook();
 int hsynVoiceDirectPass(int, int, u8, u8 *);
 s32 hsynVoiceRefresh(int, int, u8 *, unsigned int);
 s32 hsynServiceTick(int, int);
@@ -176,6 +176,7 @@ int hsynPitchBendApply(int, int, u16, int);
 int hsynEffectFeedbackSet(int);
 int hsynCoreStateSet(int);
 int hsynChannelStateGet(u32 *);
+void hsynRetnStub();
 
 /* Data ------------------------------------------------------------- */
 
