@@ -62,12 +62,23 @@ INCLUDE_ASM("MODHSYN", modhsyn_e12);
 INCLUDE_ASM("MODHSYN", modhsyn_e13);
 INCLUDE_ASM("MODHSYN", modhsyn_e14);
 INCLUDE_ASM("MODHSYN", modhsyn_e9);
-INCLUDE_ASM("MODHSYN", modhsyn_e15);
+/* FUNC modhsyn_e15 */
+int modhsyn_e15(sceHSynStat_t *stat)
+{
+    hsynStat = stat;
+    return 0;
+}
+/* ENDF modhsyn_e15 */
 INCLUDE_ASM("MODHSYN", hsynEffectAttrRead);
 INCLUDE_ASM("MODHSYN", hsynEffectAttrWrite);
 INCLUDE_ASM("MODHSYN", modhsyn_e17);
 INCLUDE_ASM("MODHSYN", modhsyn_e18);
-INCLUDE_ASM("MODHSYN", modhsyn_e27);
+/* FUNC modhsyn_e27 */
+int modhsyn_e27(void)
+{
+    return (hsynEnabled ^ 1) != 0;
+}
+/* ENDF modhsyn_e27 */
 INCLUDE_ASM("MODHSYN", hsynCmdReset);
 INCLUDE_ASM("MODHSYN", hsynCmdProgramChange);
 INCLUDE_ASM("MODHSYN", func_000021B8);
