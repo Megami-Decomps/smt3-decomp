@@ -1465,7 +1465,49 @@ int hsynSpu2SettleDelay()
     return usec >= 0x15;
 }
 /* ENDF hsynSpu2SettleDelay */
-INCLUDE_ASM("MODHSYN", hsynVoiceAllocScan);
+/* FUNC hsynVoiceAllocScan */
+void hsynVoiceAllocScan(sceHSynChannel_t *chan, u8 ch, u32 tag)
+{
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t *next;
+    u8 *st;
+    u16 flags;
+
+    if (chan->priority < 0x81) {
+        chan->priority = ch;
+    }
+    end = (sceHSynVoice_t *)((char *)chan - 8);
+    for (v = end->chPrev; v != end; v = v->chPrev) {
+        if (v->ch != ch) {
+            continue;
+        }
+        if (v->tag != tag && tag != 0xFF) {
+            continue;
+        }
+        next = v->chNext;
+        hsynVoiceSlotSet(v);
+        flags = v->flags;
+        v->flags = flags & 0xFCFF;
+        if (chan->unk32 != 0) {
+            v->flags = (flags & 0xFCFF) | 0x100;
+            hsynVoiceSlotGet(v, &chan->relNext);
+        } else if ((flags & 8) != 0) {
+            hsynVoiceMaskUpdate(v);
+        } else {
+            hsynSeqStart(&v->envA);
+            hsynSeqStart(&v->envB);
+            hsynKeyOffPending[v->core] |= 1 << v->index;
+            hsynVoiceSlotGet(v, &chan->offNext);
+            if (hsynStat != NULL) {
+                st = &hsynStat->state[v->core][v->index];
+                *st = (*st & 0x8F) | 0x30;
+            }
+        }
+        v = next;
+    }
+}
+/* ENDF hsynVoiceAllocScan */
 /* FUNC hsynVoiceMaskUpdate */
 int hsynVoiceMaskUpdate(sceHSynVoice_t *v)
 {
@@ -1503,8 +1545,69 @@ int hsynVoiceMaskUpdate(sceHSynVoice_t *v)
     return 0xFF;
 }
 /* ENDF hsynVoiceMaskUpdate */
-INCLUDE_ASM("MODHSYN", hsynVoiceAllocByPriority);
-INCLUDE_ASM("MODHSYN", hsynVoiceAllocByChannel);
+/* FUNC hsynVoiceAllocByPriority */
+void hsynVoiceAllocByPriority(sceHSynChannel_t *chan, u8 val)
+{
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    u8 *st;
+
+    if (val != 0) {
+        chan->unk32 = val;
+    } else if (chan->unk32 != 0) {
+        chan->unk32 = val;
+        end = (sceHSynVoice_t *)chan;
+        for (v = end->chNext; v != end; v = end->chNext) {
+            hsynVoiceSlotSet(v);
+            if ((v->flags & 8) != 0) {
+                hsynVoiceMaskUpdate(v);
+            } else {
+                hsynSeqStart(&v->envA);
+                hsynSeqStart(&v->envB);
+                hsynKeyOffPending[v->core] |= 1 << v->index;
+                hsynVoiceSlotGet(v, &chan->offNext);
+                v->flags &= 0xFCFF;
+                if (hsynStat != NULL) {
+                    st = &hsynStat->state[v->core][v->index];
+                    *st = (*st & 0x8F) | 0x30;
+                }
+            }
+        }
+    }
+}
+/* ENDF hsynVoiceAllocByPriority */
+/* FUNC hsynVoiceAllocByChannel */
+void hsynVoiceAllocByChannel(sceHSynChannel_t *chan)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    u8 *st;
+    u16 flags;
+    int i;
+
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    for (i = 0; i < 2; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = end->chPrev) {
+            hsynVoiceSlotSet(v);
+            flags = v->flags;
+            if ((flags & 8) != 0) {
+                hsynVoiceMaskUpdate(v);
+            } else {
+                v->flags = flags & 0xFCFF;
+                hsynKeyOffPending[v->core] |= 1 << v->index;
+                hsynVoiceSlotGet(v, &chan->offNext);
+                if (hsynStat != NULL) {
+                    st = &hsynStat->state[v->core][v->index];
+                    *st = (*st & 0x8F) | 0x30;
+                }
+            }
+        }
+    }
+}
+/* ENDF hsynVoiceAllocByChannel */
 /* FUNC hsynVoiceStop */
 void hsynVoiceStop(sceHSynChannel_t *chan)
 {
