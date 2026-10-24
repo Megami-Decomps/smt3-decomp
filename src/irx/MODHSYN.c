@@ -32,8 +32,30 @@ INCLUDE_ASM("MODHSYN", hsynResetState);
 INCLUDE_ASM("MODHSYN", hsynVoiceParamReset);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetPitch);
 INCLUDE_ASM("MODHSYN", hsynVoiceEnvelopeApply);
-INCLUDE_ASM("MODHSYN", hsynVoiceSetAttack);
-INCLUDE_ASM("MODHSYN", hsynVoiceSetRelease);
+/* FUNC hsynVoiceSetAttack */
+void hsynVoiceSetAttack(sceHSynChannel_t *chan, u8 val)
+{
+    u8 n;
+
+    n = (val << 7) / 127;
+    if (chan->vol != n) {
+        chan->vol = n;
+        hsynVoiceEnvelopeApply(chan, 0);
+    }
+}
+/* ENDF hsynVoiceSetAttack */
+/* FUNC hsynVoiceSetRelease */
+void hsynVoiceSetRelease(sceHSynChannel_t *chan, u8 val)
+{
+    u8 n;
+
+    n = (val << 7) / 127;
+    if (chan->pan != n) {
+        chan->pan = n;
+        hsynVoiceEnvelopeApply(chan, 1);
+    }
+}
+/* ENDF hsynVoiceSetRelease */
 INCLUDE_ASM("MODHSYN", hsynVoiceSetVolumeLeft);
 INCLUDE_ASM("MODHSYN", hsynVoiceSetVolumeRight);
 /* FUNC hsynVoiceFlagsGet */
@@ -87,9 +109,59 @@ int modhsyn_e26(u32 *mask)
     return 0;
 }
 /* ENDF modhsyn_e26 */
+#ifdef NON_MATCHING
+/* Three registers apart: retail keeps the unit index in the dead slotNo
+ * register, gcc reuses the one holding slotNo * 2. */
+/* FUNC hsynParamSlotResolve */
+int hsynParamSlotResolve(sceHSynWork_t *work, int slotNo, sceHSynSlot_t **pslot, u16 **pval)
+{
+    sceHSynTbl_t *tbl;
+    sceHSynSlot_t *slot;
+    u32 unit;
+
+    if (work != NULL) {
+        tbl = work->tbl;
+        /* nEntryWord counts eight-byte units, so a slot owns units 2n and
+         * 2n+1 and its sceHSynSlot_t pointer is the odd one's second word. */
+        unit = slotNo * 2 + 1;
+        if (unit < tbl->nEntryWord) {
+            slot = (sceHSynSlot_t *)((void **)tbl->entry)[unit * 2 + 1];
+            *pslot = slot;
+            *pval = &slot->unk14;
+            return 1;
+        }
+    }
+    return 0;
+}
+/* ENDF hsynParamSlotResolve */
+#else
 INCLUDE_ASM("MODHSYN", hsynParamSlotResolve);
-INCLUDE_ASM("MODHSYN", modhsyn_e10);
-INCLUDE_ASM("MODHSYN", modhsyn_e11);
+#endif
+/* FUNC modhsyn_e10 */
+int modhsyn_e10(sceHSynWork_t *work, int slotNo, s16 val)
+{
+    sceHSynSlot_t *slot;
+    u16 *p;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &p) == 0) {
+        return -1;
+    }
+    *p = val;
+    return 0;
+}
+/* ENDF modhsyn_e10 */
+/* FUNC modhsyn_e11 */
+int modhsyn_e11(sceHSynWork_t *work, int slotNo)
+{
+    sceHSynSlot_t *slot;
+    u16 *p;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &p) == 0) {
+        return 0;
+    }
+    return *p;
+}
+/* ENDF modhsyn_e11 */
 INCLUDE_ASM("MODHSYN", modhsyn_e12);
 INCLUDE_ASM("MODHSYN", modhsyn_e13);
 INCLUDE_ASM("MODHSYN", modhsyn_e14);
@@ -126,7 +198,20 @@ int modhsyn_e27(void)
     return (hsynEnabled ^ 1) != 0;
 }
 /* ENDF modhsyn_e27 */
-INCLUDE_ASM("MODHSYN", hsynCmdReset);
+/* FUNC hsynCmdReset */
+int hsynCmdReset(u8 **pp)
+{
+    u32 acc;
+    u8 b;
+
+    acc = 0;
+    do {
+        b = *(*pp)++;
+        acc = (acc << 7) + (b & 0x7F);
+    } while (b & 0x80);
+    return acc;
+}
+/* ENDF hsynCmdReset */
 INCLUDE_ASM("MODHSYN", hsynCmdProgramChange);
 INCLUDE_ASM("MODHSYN", func_000021B8);
 INCLUDE_ASM("MODHSYN", hsynCmdChannelPressure);
@@ -238,10 +323,36 @@ INCLUDE_ASM("MODHSYN", hsynBuildAdsr2);
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathA);
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathA);
 INCLUDE_ASM("MODHSYN", hsynVoicePitchCommit);
-INCLUDE_ASM("MODHSYN", hsynSdSetParamPitch);
+/* FUNC hsynSdSetParamPitch */
+void hsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend)
+{
+    sceSmgProgKey_t *key;
+    u16 depth;
+
+    key = v->key;
+    if (key == NULL) {
+        return;
+    }
+    if (bend >= 0) {
+        depth = key->unk08;
+    } else {
+        depth = key->unk06;
+    }
+    v->unk34 = depth * bend / 8192;
+}
+/* ENDF hsynSdSetParamPitch */
 INCLUDE_ASM("MODHSYN", func_00004614);
 INCLUDE_ASM("MODHSYN", hsynSdSetParamEnvelope);
-INCLUDE_ASM("MODHSYN", hsynSdSetParamVolume);
+/* FUNC hsynSdSetParamVolume */
+s32 hsynSdSetParamVolume(sceHSynVoice_t *v, s8 scale, u8 a, u8 b)
+{
+    sceHSynSlot_t *slot;
+
+    slot = v->chan->slot;
+    return hsynVolumeCurveLookup(v->vel, a, b, slot->unk10, slot->unk0C) * scale
+        / 65536;
+}
+/* ENDF hsynSdSetParamVolume */
 INCLUDE_ASM("MODHSYN", hsynSdSetParamVolumeLeft);
 INCLUDE_ASM("MODHSYN", hsynSdSetParamVolumeRight);
 INCLUDE_ASM("MODHSYN", hsynSdSetParamAdsr);
@@ -311,7 +422,24 @@ sceHSynVoice_t *hsynVoiceMaskClearOne(u8 allocHint)
 }
 /* ENDF hsynVoiceMaskClearOne */
 INCLUDE_ASM("MODHSYN", hsynModulationApply);
-INCLUDE_ASM("MODHSYN", hsynModulationStep);
+/* FUNC hsynModulationStep */
+int hsynModulationStep(u16 a, u8 b)
+{
+    u8 limit;
+    int on;
+    int done;
+
+    on = 1;
+    done = 0;
+    limit = hsynModDisable;
+    if (limit == 0) {
+        on = 0;
+    } else if (hsynRelCount >= limit) {
+        done = 1;
+    }
+    return hsynModulationApply(a, b, on, done);
+}
+/* ENDF hsynModulationStep */
 INCLUDE_ASM("MODHSYN", hsynPanApply);
 INCLUDE_ASM("MODHSYN", hsynLfoStep);
 INCLUDE_ASM("MODHSYN", D_00008914);
@@ -348,7 +476,21 @@ u8 hsynUnrefStubB(u8 v)
     return 0x80 - v;
 }
 /* ENDF hsynUnrefStubB */
-INCLUDE_ASM("MODHSYN", hsynTableEntryFill);
+/* FUNC hsynTableEntryFill */
+int hsynTableEntryFill(u8 x)
+{
+    u32 v;
+    int r;
+
+    r = 1;
+    v = x;
+    v = v * v / 127;
+    if (v != 0) {
+        r = v & 0xFF;
+    }
+    return r;
+}
+/* ENDF hsynTableEntryFill */
 /* FUNC hsynUnrefTableSetA */
 u8 hsynUnrefTableSetA(u8 x)
 {
@@ -358,8 +500,21 @@ u8 hsynUnrefTableSetA(u8 x)
     return 0x80 - r;
 }
 /* ENDF hsynUnrefTableSetA */
-INCLUDE_ASM("MODHSYN", hsynUnrefTableSetB);
-INCLUDE_ASM("MODHSYN", hsynUnrefTableSetC);
+/* FUNC hsynUnrefTableSetB */
+u8 hsynUnrefTableSetB(u8 x)
+{
+    int c;
+
+    c = 0x80;
+    return c - hsynTableEntryFill(c - x);
+}
+/* ENDF hsynUnrefTableSetB */
+/* FUNC hsynUnrefTableSetC */
+u8 hsynUnrefTableSetC(u8 x)
+{
+    return hsynTableEntryFill(0x80 - x);
+}
+/* ENDF hsynUnrefTableSetC */
 INCLUDE_ASM("MODHSYN", hsynVolumeScale);
 /* FUNC hsynSeqByteRead */
 int hsynSeqByteRead(sceHSynEnv_t *env)
