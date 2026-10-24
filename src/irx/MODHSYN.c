@@ -2273,7 +2273,102 @@ u32 hsynSdSetParamBend(sceHSynVoice_t *v)
     return r;
 }
 /* ENDF hsynSdSetParamBend */
-INCLUDE_ASM("MODHSYN", func_00004D90);
+/* FUNC func_00004D90 */
+int func_00004D90(void)
+{
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t *next;
+    u8 *st;
+    u32 sw;
+    int envx;
+    int core;
+    int n;
+    int t;
+    u16 f;
+    u8 state;
+
+    n = 0;
+    for (core = 0; core < 2; core++) {
+        end = (sceHSynVoice_t *)hsynCoreList[core];
+        sw = hsynSdGetSwitch(core | 0x1700);
+        for (v = end->prev; v != end; v = v->prev) {
+            f = v->flags;
+            if (hsynSdSyncFlag != 0) {
+                envx = hsynSdGetParam(core | (v->index << 1) | 0x500);
+                if ((f & 0x300) != 0) {
+                    state = v->state;
+                    if (state != 0) {
+                        if ((sw & (1 << v->index)) == 0) {
+                            v->state = 0;
+                        } else {
+                            v->state = state - 1;
+                        }
+                        envx = 0x7FFF;
+                        goto post;
+                    }
+                    if ((sw & (1 << v->index)) == 0) {
+                        goto post;
+                    }
+                    if ((u16)envx == 0) {
+                        goto release;
+                    }
+                    goto post;
+                }
+                if ((u16)envx != 0) {
+                    goto post;
+                }
+            release:
+                next = v->next;
+                hsynVoiceRelease(v);
+                if (hsynStat != NULL) {
+                    st = hsynStat->state[v->core];
+                    st[v->index] &= 0x8F;
+                }
+                v = next;
+                continue;
+            post:
+                if (hsynStat != NULL) {
+                    hsynStat->unk38[v->core][v->index] = envx;
+                }
+            }
+            if (v->vag != NULL) {
+                if ((f & 6) != 0) {
+                    if ((f & 2) != 0) {
+                        t = v->unk38 + v->unk2A;
+                        v->unk38 = t;
+                        if (t >= 0) {
+                            v->unk38 = 0;
+                            v->flags = v->flags & 0xFFFD;
+                        }
+                    } else {
+                        t = v->unk38 - v->unk2A;
+                        v->unk38 = t;
+                        if (t <= 0) {
+                            v->unk38 = 0;
+                            v->flags = v->flags & 0xFFFB;
+                        }
+                    }
+                }
+                hsynEffectDispatch(&v->envA);
+                if (v->unk57 == 1) {
+                    hsynEffectDepthSet(&v->lfoA);
+                }
+                hsynVoicePitchCommit(v);
+            }
+            hsynEffectDispatch(&v->envB);
+            if (v->unk57 == 1) {
+                func_0000A9FC(v);
+                hsynEffectFeedbackSet(v);
+            }
+            func_00004614(v);
+            n++;
+        }
+    }
+    hsynSdSyncFlag = 1;
+    return n;
+}
+/* ENDF func_00004D90 */
 /* FUNC hsynVoiceKeyOff */
 int hsynVoiceKeyOff(void)
 {
