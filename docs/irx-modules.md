@@ -16,11 +16,13 @@ ninja -f build-irx.ninja
 is the proof. What the modules do is in
 [The SDF IRX modules](sdf-irx-modules.md).
 
-| Module | Bytes | .text chunks | Functions |
+| Module | Bytes | .text chunks | Real functions |
 | --- | --- | --- | --- |
-| `SDFIOP.IRX` | 2857 | 32 | 22 |
-| `SDFIOPFL.IRX` | 3113 | 28 | 20 |
-| `SDFSDMAN.IRX` | 39981 | 157 | 139 |
+| `SDFIOP.IRX` | 2857 | 32 | 5 |
+| `SDFIOPFL.IRX` | 3113 | 28 | 6 |
+| `SDFSDMAN.IRX` | 39981 | 157 | 72 |
+
+The remaining chunks are import stubs and the tables between them.
 
 ## The toolchain
 
@@ -91,11 +93,71 @@ the output section its alignment of 16.
 
 ## Writing C
 
-`src/irx/<module>.c` owns `.text`. It starts as nothing but `INCLUDE_ASM` lines
-in link order, and decompiling a function means replacing its line with the C
-body in the same place, so the function stays where it was. `sdfSndIsqrt` in
-`src/irx/SDFSDMAN.c` is the worked example: it is real C, compiled by
-iop-gcc, and the module is still byte-identical.
+`src/irx/<module>.c` owns `.text`. It started as nothing but `INCLUDE_ASM`
+lines in link order; decompiling a function means replacing its line with the
+C body in the same place, so the function stays where it was. Every function
+in the three modules now has C.
+
+What stays `INCLUDE_ASM` with no C, and always will: the IRX import stubs
+(`jr $ra` plus the import id) and the import and export tables between them,
+the `D_<address>` chunks. They come from the linker's IRX macros, not from a
+compiler.
+
+A function whose C is equivalent but does not reproduce the retail
+instructions sits under `#ifdef NON_MATCHING`, with the `INCLUDE_ASM` the
+default build uses in the `#else`, and a comment saying how far off it is:
+
+```c
+#ifdef NON_MATCHING
+/* One instruction short: gcc fills the branch delay slot ... */
+s32 sdfSndUpdateVoiceMap(void)
+{
+    ...
+}
+#else
+INCLUDE_ASM("SDFSDMAN", sdfSndUpdateVoiceMap);
+#endif
+```
+
+So the default build is still byte-identical, and `-DNON_MATCHING` compiles
+the C instead (it will not link for `SDFSDMAN`, whose jump tables live in the
+assembly `.rodata`).
+
+| Module | Functions | Matching C | Under `NON_MATCHING` |
+| --- | --- | --- | --- |
+| `SDFIOP.IRX` | 5 | 5 | 0 |
+| `SDFIOPFL.IRX` | 6 | 6 | 0 |
+| `SDFSDMAN.IRX` | 72 | 32 | 40 |
+
+The three that cannot match while `.rodata` is assembly are
+`sdfSndGetVolTable`, `sdfSndLoadSmg` and `sdfSndDrvRpcInit`: each compiles its
+switch to a jump table, and a table emitted from the C file would land at the
+front of `.rodata` and move every string after it. The rest are off by a
+handful of instructions, usually the order of two basic blocks or which
+register a value lands in.
+
+`tools/irx_diff.py` is the loop: build, then
+
+```
+python tools/irx_diff.py SDFSDMAN --sizes     # chunks whose size changed
+python tools/irx_diff.py SDFSDMAN <function>  # retail and built side by side
+```
+
+Sizes first: while any chunk is the wrong size everything after it moves, so
+the byte comparison only means something once `--sizes` reports no change.
+
+Three things the retail code settled that are worth knowing before adding
+more C:
+
+- `-G 0`. The default small data threshold puts a four byte extern in `.sbss`
+  and reaches it through `gp`; the retail code uses `%hi` and `%lo`
+  everywhere.
+- `sdfSdManInit` was a translation unit of its own. The linker aligned what
+  follows it to 16, which is the stray `nop` at the end of the function; the
+  C file reproduces it with an `__asm__(".align 4")`.
+- The ADPCM state is one struct (`sdfAdpcm`), not twenty globals. The retail
+  code reaches `fadeStep` at 14 off the same base register it loaded for
+  `playing`, which only happens for fields of one object.
 
 ## Config
 

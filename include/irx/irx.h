@@ -10,6 +10,16 @@ typedef unsigned int u32;
 typedef signed char s8;
 typedef short s16;
 typedef int s32;
+typedef unsigned long long u64;
+typedef long long s64;
+
+typedef char *va_list;
+#define va_start(ap, last) ((ap) = (va_list)__builtin_next_arg(last))
+#define va_end(ap) ((void)0)
+
+#ifndef NULL
+#define NULL 0
+#endif
 
 #ifndef ASM_ROOT
 #error "ASM_ROOT must be defined by the build (see tools/irx_configure.py)"
@@ -24,5 +34,9 @@ typedef int s32;
             "\t.include \"" ASM_ROOT MODULE "/text/" #NAME ".s\"\n" \
             "\t.set reorder\n"                                 \
             "\t.set at\n")
+
+/* A function whose C is equivalent but does not reproduce the retail
+ * instructions sits under #ifdef NON_MATCHING, with the INCLUDE_ASM the
+ * default build uses in the #else. */
 
 #endif /* IRX_H */
