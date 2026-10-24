@@ -21,7 +21,86 @@ int modhsyn_e30()
 }
 /* ENDF modhsyn_e30 */
 INCLUDE_ASM("MODHSYN", D_00000044);
-INCLUDE_ASM("MODHSYN", func_00000050);
+/* FUNC func_00000050 */
+int func_00000050(sceHSynWork_t *work, int interval)
+{
+    sceHSynTbl_t *tbl;
+    sceHSynEntry_t *entry;
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynBank_t *bank;
+    u32 *mask;
+    u32 n;
+    int slotNo;
+    int i;
+    int j;
+
+    hsynStat = NULL;
+    hsynTickScale = ((u32)interval << 8) / 1000;
+    if (work == NULL) {
+        return -1;
+    }
+    tbl = work->tbl;
+    if (work->nTblWord == 0) {
+        return -1;
+    }
+    if (tbl == NULL) {
+        return -1;
+    }
+    n = tbl->nEntryWord;
+    entry = tbl->entry;
+    if ((n & 1) != 0) {
+        return -1;
+    }
+    if (entry == NULL) {
+        return -1;
+    }
+    for (slotNo = 0; slotNo * 2 + 1 < (int)tbl->nEntryWord; slotNo++) {
+        if (entry[slotNo].seq == NULL) {
+            continue;
+        }
+        slot = entry[slotNo].slot;
+        if (slot == NULL) {
+            continue;
+        }
+        slot->maxVoice = 0x30;
+        slot->voiceBase = 0;
+        slot->flags = 0;
+        slot->path = 0;
+        slot->unk04 = 0;
+        slot->unk08 = 0;
+        slot->unk0C = 0;
+        slot->unk10 = NULL;
+        set = (sceHSynChanSet_t *)&slot->unk14;
+        set->unk00 = 0x100;
+        set->nActive = 0;
+        for (i = 0; i < 16; i++) {
+            bank = &set->bank[i];
+            bank->head = NULL;
+            bank->prog = NULL;
+            bank->sset = NULL;
+            bank->smpl = NULL;
+            bank->vagi = NULL;
+            bank->setb = NULL;
+            bank->spuAddr = 0;
+        }
+        for (j = 0; j < 16; j++) {
+            hsynResetState(&set->chan[j], slot);
+        }
+    }
+    hsynInitCores();
+    hsynLastKeyOnVoice = 0xFF;
+    mask = hsynVoiceMask;
+    mask[1] = 0;
+    mask[0] = 0;
+    hsynEnabled = 0;
+    hsynSdSyncFlag = 1;
+    hsynModDisable = 0;
+    hsynRelCount = 0;
+    hsynActiveCount = 0;
+    return 0;
+}
+/* ENDF func_00000050 */
 /* FUNC modhsyn_e7 */
 int modhsyn_e7(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)
 {
@@ -1539,7 +1618,61 @@ void hsynVoiceSlotSet(sceHSynVoice_t *v)
     v->chPrev->chNext = v->chNext;
 }
 /* ENDF hsynVoiceSlotSet */
-INCLUDE_ASM("MODHSYN", hsynServiceVoices);
+/* FUNC hsynServiceVoices */
+int hsynServiceVoices(void)
+{
+    int n;
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    sceHSynVoice_t *next;
+    u32 m;
+    int core;
+
+    n = 0;
+    for (core = 0; core < 2; core++) {
+        m = hsynKeyOffPending[core];
+        if (m != 0) {
+            hsynSdSetSwitch(core | 0x1600, m);
+            hsynKeyOffPending[core] = 0;
+        }
+    }
+    for (core = 0; core < 2; core++) {
+        end = (sceHSynVoice_t *)hsynActiveList[core];
+        for (v = end->prev; v != end; v = v->prev) {
+            if (v->unk57 == 1 && v->ch == 0xFF) {
+                goto skip;
+            }
+            if ((u16)hsynSdGetParam(core | (v->index << 1) | 0x500) >= 0x3E8) {
+                goto skip2;
+            }
+            next = v->next;
+            switch (v->path) {
+            case 0:
+                hsynVoiceKeyOnPathA(v);
+                break;
+            case 1:
+                hsynVoiceKeyOnPathB(v);
+                break;
+            }
+            hsynVoiceMaskGet(v);
+            hsynCoreIndexGet(v, (sceHSynVoice_t *)hsynCoreList[core]);
+            v = next;
+            continue;
+        skip2:
+            n++;
+            continue;
+        skip:
+            n++;
+        }
+        m = hsynKeyOnPending[core];
+        if (m != 0) {
+            hsynSdSetSwitch(core | 0x1500, m);
+            hsynKeyOnPending[core] = 0;
+        }
+    }
+    return n;
+}
+/* ENDF hsynServiceVoices */
 /* FUNC hsynEnvRateLookup */
 s16 hsynEnvRateLookup(s16 delta, s32 base, s32 bias)
 {
@@ -3228,6 +3361,7 @@ int hsynSeqSkip(sceHSynEnv_t *env, int wrapped)
 /* FUNC hsynSeqSeek */
 int hsynSeqSeek(sceHSynEnv_t *env, int wrapped)
 {
+    u32 *mask;
     u32 n;
     u32 prod;
     u32 i;
@@ -3627,6 +3761,7 @@ INCLUDE_ASM("MODHSYN", D_0000A5E4);
 /* FUNC hsynEffectDepthSet */
 int hsynEffectDepthSet(sceHSynLfo_t *lfo)
 {
+    u32 *mask;
     u32 n;
 
     if (lfo->unk00 == 1) {
@@ -3696,6 +3831,7 @@ INCLUDE_ASM("MODHSYN", D_0000A754);
 int hsynEffectFeedbackSet(sceHSynVoice_t *voice)
 {
     sceHSynLfo_t *lfo;
+    u32 *mask;
     u32 n;
 
     lfo = &voice->lfoB;
