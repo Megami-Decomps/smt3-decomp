@@ -53,6 +53,36 @@ function by hand: the remaining difference is usually one of them.
   cannot cross.
 - **Hoist a constant above a division to get it into a register.** `r = 1`
   before the divide is what makes gcc reuse the `1` as the `srlv` shift amount.
+- **Reusing one variable for a destructive mask kills the CSE of the load.**
+  `t = tone->velHigh; t &= 0x80; if (t) { t = tone->velHigh & 0x7F; ... }` gives
+  retail's two `lbu`s of the same field, because overwriting the pseudo that
+  held the load invalidates the available expression. `t = x & 0x80` keeps the
+  load in a temp and gcc then CSEs it and sinks the `& 0x7F` into the branch
+  delay slot. `hsynSdSetParamBend` needed all four of its arms written that way.
+- **Write a divisor back into the same variable to stop the scheduler.**
+  `num = t - v->vel; t = t - tone->unk03;` leaves the second `subu` dependent on
+  `t`'s register, so it cannot be hoisted into the preceding load's delay slot;
+  a fresh `den` local can be, and costs a `nop`.
+- **A repeated literal rematerialises; a named local gets its own register.**
+  `v->tag = 0xFF; ... return 0xFF;` lets gcc hoist the constant into a branch
+  delay slot, lose it to the body, and build it again, which is what retail does
+  twice in `hsynVoiceMaskUpdate`. An `int r = 0xFF` gets a callee-saved register
+  and costs a copy at the return instead.
+- **An `s8` stack parameter passed on without a prototype is loaded before the
+  guard.** `func_000021B8` declares its ninth argument `s8` and hands it to an
+  `INCLUDE_ASM` callee; the `lw`/`sll`/`sra` then sit above the function's first
+  test. Declaring it `int` and casting at the call site leaves the load in the
+  loop preheader instead.
+- **A narrow parameter passed to a parameter of the same narrow type is
+  re-extended.** gcc does not track that an incoming `s8` already arrives
+  sign-extended, so `s8` to `s8` costs `sll`/`sra` while `s8` to `int` is a
+  plain move. `hsynVoiceUpdatePass` forwards its status byte with a `move`,
+  which is what made `hsynVoiceEngineStep`'s third parameter `int`.
+- **`(x << 8) / 254` and `(x << 7) / 127` are not the same code.** An even
+  divisor sends gcc through its pre-shift path, which folds the shift and picks
+  the single-word magic retail has; the odd form picks a 33-bit magic and three
+  extra instructions. `func_00000E40` scales a 0..127 controller and needs the
+  `<< 8` over 254 spelling.
 - **Force reassociation with a local.** `msg = (vol << 16) | 0x7B0; ... ch | msg`
   holds where the same expression in parentheses does not.
 
@@ -71,6 +101,11 @@ function by hand: the remaining difference is usually one of them.
   emits the guard twice.
 - **`ch = 0;` before the loop with an empty `for` init** reorders two preheader
   initialisations, which is what `modhsyn_e23` wanted.
+- **Two walks over the same head array want two cursors, or none.** In
+  `hsynLfoStep` the indexed form `end = heads[i]` gives each loop its own
+  strength-reduced pointer *and* puts it after the hoisted loop invariant in the
+  preheader, which is the order retail has; a shared `head` cursor merges the
+  two and reverses that order.
 - `for (i = 7; i != -1; i--)` gives `bne $reg, -1`; `i >= 0` gives `bgez`. Both
   appear in retail.
 - **The three-list broadcast loop**, used by five MODHSYN setters, matches as
@@ -98,6 +133,31 @@ function by hand: the remaining difference is usually one of them.
   `p0 = (char *)&tag0; ... p0[i]` matches where `*((char *)&tag0 + i)` gives the
   operands the other way round. Loop counter `u32`, for `sltiu`.
 
+## Switches
+
+- **A two-armed test on a command byte is a `switch`, not an `if`/`else if`.**
+  gcc lays a switch out as the compare chain first, then the case bodies, each
+  ending in a jump to the common tail; `if (sel == 0) ... else if (sel == 1)`
+  inlines the first body and comes out two instructions short.
+  `hsynCmdNoteOff` and `hsynCmdNoteOn` both needed the switch form.
+- **An empty case is still a case.** gcc's binary search picks its nodes from
+  the case *values*, so a value whose body is empty still shows up as a compare
+  that jumps to the epilogue, and leaving it out reshapes the whole chain.
+  `hsynVoiceUpdatePass` needed `case 0xA0:` and `case 0xD0:` with nothing in
+  them to reproduce retail's tree.
+
+## Shared tails
+
+- **A `goto` is sometimes the only way to get retail's block order.** Where one
+  arm sets a value and both arms fall into a common tail, writing the tail twice
+  puts the short arm first and duplicates it. `func_0000A9FC` needs the
+  arithmetic arm, then `goto done`, then the short arm falling through into the
+  shared tail, which is exactly what retail's layout is.
+- **Walk the list with one `v = next` after the if-else chain.** gcc copies that
+  single `move` into each arm's branch delay slot, which is what retail's three
+  copies in `hsynVoiceAllocScan` are; writing it in every arm also matches the
+  count but changes which pseudo wins a callee-saved register.
+
 ## What is not fixable from the C
 
 **A store to a global immediately before a test.** gas refuses to move the
@@ -109,7 +169,12 @@ recorded case. Guard it under `NON_MATCHING` and move on.
 
 A `+4` in `.text` moves `.bss` by 0x10, through the output section's alignment,
 so one wrong-sized chunk makes every later `%hi`/`%lo` data reference differ.
-Run `irx_diff.py <module> --sizes` and fix sizes first.
+Run `irx_diff.py <module> --sizes` and fix sizes first. But `--sizes` only
+reports chunks whose *length* changed: a function with retail's instruction
+count and the wrong registers reports nothing, and a wrong-sized function
+earlier in the file hides every later difference. Always finish with the plain
+`irx_diff.py <module>`, whose first line is the list of differing chunks, and
+only trust a green `ninja` as proof.
 
 `irx_diff.py` reads the image that was packed last. It warns when that image is
 older than the source, but check the build output for `FAILED` before trusting

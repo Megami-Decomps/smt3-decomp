@@ -396,3 +396,66 @@ One conflict the database cannot hold: `sceSmgProgEnt_t`'s +4 byte is read
 `lbu` by `hsynVoiceParamReset`, which tests it as a key count, and `lb` by
 `func_00005B4C`, which uses it as a signed transpose. The field stays `u8 nKey`
 and `func_00005B4C` casts.
+
+## Applied on 2026-10-24: MODHSYN voice allocation and command prototypes
+
+All in the `DDS3_IRX/MODHSYN` database, all proved by a byte-identical build of
+the function concerned.
+
+### Functions that return nothing
+
+Fifteen more where no path sets `$2`, so the IDB's `int`/`s32` was a guess. In
+most of them the last write to `$v0` is the loop's own `slti` leftover, which is
+what Hex-Rays renders as `result = ++i < 2`.
+
+`hsynVoiceAllocScan`, `hsynVoiceAllocByPriority`, `hsynVoiceAllocByChannel`,
+`hsynVoiceRetrigger`, `hsynVoiceAllocExport20`, `hsynVoiceAllocPathB`,
+`hsynVoiceAllocPathBEntry`, `hsynVoiceAllocPathC`, `hsynVoiceAllocPathCEntry`,
+`hsynCmdNoteOff`, `hsynCmdNoteOn`, `hsynCmdProgramChange`,
+`hsynCmdChannelPressure`, `hsynVoiceUpdatePass`, `func_000021B8`.
+
+The two `*Entry` wrappers follow their callees: each is one `jal` and nothing
+else, so whatever the callee leaves in `$2` is incidental.
+
+### Prototypes the retail code settled
+
+| Function | Now |
+| --- | --- |
+| `hsynVoiceAllocForCmd` | `void(int base, int unused1, int state, u8 note, u8 ch, int unused2, u32 tag)`; the second and sixth arguments are never read, `base + 0x10` is the list sentinel and `base + 0x18` the channel |
+| `hsynVoiceAllocPathB` | `void(int base, u32 tag)` |
+| `hsynVoiceAllocPathC` | `void(int base, int unused, u32 tag, u32 mask)`; it matches `(v->tag & mask) == (tag & mask)` |
+| `hsynCmdNoteOff`, `hsynCmdNoteOn` | `void(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag)` |
+| `hsynCmdProgramChange` | `void(int base, int unused, int rate, int state, u8 note, u8 ch, u8 vol, u32 tag)` |
+| `hsynCmdChannelPressure` | `void(int base, int unused, int dir, int rate, int state, u8 note, u8 ch, u16 depth, u32 tag)` |
+| `hsynVoiceUpdatePass` | `void(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 vel)` |
+| `hsynVoiceEventDispatch` | third parameter `u8`, not `char`: its caller passes the note with `andi 0xFF`, where a `char` formal would give `sll`/`sra 24` |
+| `hsynVoiceEngineStep` | third parameter `int`, not `s8`: `hsynVoiceUpdatePass` forwards its status byte with a plain `move`, and gcc re-extends for an `s8` formal |
+| `func_000021B8` | `void(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)`; it forwards six of those to `func_0000AB90` |
+| `func_00000D24`, `func_00000E40` | `void(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)` and `void(..., u8 val)`: `func_00000D24` subtracts 0x40 from the raw argument register, so a `u8` formal's mask is one instruction too many, while `func_00000E40` does mask |
+
+`hsynPanApply` was already `sceHSynVoice_t *(s16, char)` in the database but the
+generated header still said `int`; regenerating it was the whole fix.
+
+### Names the code disproves
+
+No renames were made (a renaming pass is queued), but the bodies are now read
+and these names describe something else:
+
+- `hsynPanApply` picks the active voice with the lowest `vnum` across the
+  enabled cores, unlinks it and blanks its tag. It is a voice stealer. So are
+  `hsynVoiceVolumeAdvance`, which is the same function with an extra
+  `unk57 == 0` filter, and `hsynVoiceEnvelopeAdvance`, which ranks on
+  `flags & 0x300` then `vnum` then `unk12`.
+- `hsynLfoStep` counts the voices on two of a channel's three lists whose
+  `pitch` matches, and if that count exceeds its third argument walks them again
+  through `hsynLfoApply`. It is a voice-count limiter, not an LFO step.
+- The whole `hsynVoiceAlloc*` family *releases* voices: `hsynVoiceAllocScan`,
+  `ByPriority`, `ByChannel`, `ForCmd`, `PathB`, `PathC` and `Export20` all walk
+  a channel list, key the voice off and move it to the off list or hand it back
+  to the free list. `hsynVoiceStealScan` and `hsynVoiceReleaseGroup` are the two
+  that really do free a voice for a new note.
+- `sceHSynVoice_t`'s `note` (+0x42) and `ch` (+0x43) may be the wrong way round.
+  `hsynSdSetParamBend` interpolates the velocity split from `vel` against the
+  sample entry's `velLow`/`velHigh`, and the *key* split from `ch` against the
+  program key's `keyLow`/`keyHigh`, which is the field a key number belongs in.
+  Nothing in the retail code settles it, so both names stand.

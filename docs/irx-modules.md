@@ -191,7 +191,52 @@ assembly `.rodata`).
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
 | `MODMIDI.IRX` | 62 | 31 | 5 |
-| `MODHSYN.IRX` | 218 | 118 | 15 |
+| `MODHSYN.IRX` | 218 | 136 | 19 |
+
+### Where MODHSYN stands
+
+63 of the 218 have C, 136 of them matching. The 29 still bare, smallest first:
+
+| Chunk | Lines of asm | Note |
+| --- | --- | --- |
+| `func_00004AE4` | 98 | takes `(voice, s8 pan)`, called by `func_00000D24` |
+| `hsynVoiceRefresh` | 103 | sequence-bounds walker |
+| `func_000017EC` | 122 | |
+| `hsynVoiceDirectPass` | 124 | sibling of the matched `hsynVoiceUpdatePass`; expect another switch |
+| `hsynServiceVoices` | 125 | |
+| `func_00000050` | 129 | |
+| `hsynEffectDispatch` | 131 | steps the LFO through `sceHSynEnv_t::wave` |
+| `hsynInitCores` | 131 | |
+| `hsynVoicePitchCommit` | 142 | |
+| `func_00004614` | 146 | |
+| `hsynVoiceEventDispatch` | 149 | the `0xB0` arm of `hsynVoiceUpdatePass` |
+| `modhsyn_e8` | 93 | |
+| `hsynCmdVoiceAlloc` | 94 | |
+| `hsynModulationApply` | 153 | |
+| `hsynVoiceUpdatePathB` | 153 | |
+| `func_00004D90` | 192 | |
+| `modhsyn_sceHSyn_Load` | 200 | |
+| `hsynSeqInterpretA`, `hsynSeqInterpretB` | 243 each | the LFO state machines |
+| `hsynVoiceUpdatePathA` | 247 | |
+| `func_00007F54` | 266 | note-on, the simple program path |
+| `hsynVoiceKeyOnPathB` | 298 | |
+| `hsynVoiceKeyOnPathA` | 304 | |
+| `func_0000AB90` | 345 | six arguments, called by the matched `func_000021B8` |
+| `hsynVoiceEngineStep` | 366 | |
+| `func_000078D4` | 434 | note-on, the key/sample/vag search |
+| `func_0000273C` | 553 | |
+
+`func_00008350` is a nine-argument forwarder that switches on `*(u8 *)(p + 3)`
+and calls `func_000078D4` or `func_00007F54`. It cannot be written until those
+two carry prototypes, because the forwarder narrows three of its arguments on
+the way through (`andi 0xFF`, `sll`/`sra 24`, `andi 0xFFFF`) and an implicit
+declaration promotes them all to `int`. Both are still `sub_*` in the database,
+which `tools/irx_headers.py` filters out as placeholder names, so they need to
+be renamed to their `func_<address>` form before a prototype reaches the header.
+
+The nineteen under `NON_MATCHING` are listed by their own comments. Four are
+new and all four are one instruction or one register pair away:
+`func_0000A9FC`, `func_00000E40`, `func_00000D24` and `hsynVoiceUpdatePass`.
 
 Two things only Sony's modules turned up, both about delay slots and neither
 fixable from the C:
