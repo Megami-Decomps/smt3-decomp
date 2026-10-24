@@ -22,7 +22,22 @@ int modhsyn_e30()
 /* ENDF modhsyn_e30 */
 INCLUDE_ASM("MODHSYN", D_00000044);
 INCLUDE_ASM("MODHSYN", func_00000050);
-INCLUDE_ASM("MODHSYN", modhsyn_e7);
+/* FUNC modhsyn_e7 */
+int modhsyn_e7(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)
+{
+    u32 end;
+    int done;
+
+    end = (size >> 6) << 6;
+    if ((size & 0x3F) != 0) {
+        end += 0x40;
+    }
+    hsynSdVoiceTransStatus(core, 1);
+    done = hsynSdVoiceTrans(core, 0, iopAddr, spuAddr, size);
+    hsynSdVoiceTransStatus(core, 1);
+    return (done == end) ? 0 : -1;
+}
+/* ENDF modhsyn_e7 */
 INCLUDE_ASM("MODHSYN", D_000002D4);
 /* FUNC hsynLoadBank */
 /* Not a loader: a 4+4 character chunk tag comparator, with both tags passed
@@ -80,7 +95,33 @@ void hsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot)
     chan->unk35 = 0xFF;
 }
 /* ENDF hsynResetState */
-INCLUDE_ASM("MODHSYN", hsynVoiceParamReset);
+/* FUNC hsynVoiceParamReset */
+void hsynVoiceParamReset(sceHSynChanSet_t *set, sceHSynChannel_t *chan, u8 prog)
+{
+    sceSmgProgEnt_t *ent;
+    sceHSynBank_t *bank;
+    sceSmgProg_t *p;
+
+    ent = NULL;
+    bank = NULL;
+    if (chan->bankIdx < 16) {
+        bank = &set->bank[chan->bankIdx];
+        p = bank->prog;
+        if (p != NULL && p->nEntry >= prog && p->ofs[prog] != -1) {
+            ent = (sceSmgProgEnt_t *)((char *)p + p->ofs[prog]);
+            if (ent->nKey == 0) {
+                ent = NULL;
+            }
+        }
+    }
+    chan->prog = ent;
+    if (ent != NULL) {
+        chan->bank = bank;
+    } else {
+        chan->bank = NULL;
+    }
+}
+/* ENDF hsynVoiceParamReset */
 #ifdef NON_MATCHING
 /* Two instructions swapped: gcc schedules the head pointer ahead of the
  * saved bend value. */
@@ -418,9 +459,91 @@ int modhsyn_e15(sceHSynStat_t *stat)
     return 0;
 }
 /* ENDF modhsyn_e15 */
-INCLUDE_ASM("MODHSYN", hsynEffectAttrRead);
-INCLUDE_ASM("MODHSYN", hsynEffectAttrWrite);
-INCLUDE_ASM("MODHSYN", modhsyn_e17);
+/* FUNC hsynEffectAttrRead */
+void hsynEffectAttrRead(u8 sel, u8 mode)
+{
+    sceSdEffectAttr_t attr;
+    int core;
+    int t;
+
+    if (mode >= 10) {
+        return;
+    }
+    if (sel != 0 && sel != 0x10) {
+        return;
+    }
+    t = sel & 0x10;
+    core = t != 0;
+    hsynSdGetEffectAttr(core, &attr);
+    attr.mode = mode | 0x100;
+    hsynSdSetEffectAttr(core, &attr);
+}
+/* ENDF hsynEffectAttrRead */
+/* FUNC hsynEffectAttrWrite */
+void hsynEffectAttrWrite(u8 sel, u8 val)
+{
+    sceSdEffectAttr_t attr;
+    int core;
+    int v;
+    int t;
+
+    if ((sel & 0xE0) != 0) {
+        return;
+    }
+    t = sel & 0x10;
+    core = t != 0;
+    hsynSdGetEffectAttr(core, &attr);
+    switch (sel & 0xF) {
+    case 0:
+        v = (val & 0xFF) << 8;
+        attr.depth_R = v;
+        attr.depth_L = v;
+        break;
+    case 1:
+        v = -((val & 0xFF) << 8);
+        attr.depth_R = v;
+        attr.depth_L = v;
+        break;
+    case 2:
+        attr.delay = val & 0xFF;
+        break;
+    case 3:
+        attr.feedback = val & 0xFF;
+        break;
+    }
+    hsynSdSetEffectAttr(core, &attr);
+}
+/* ENDF hsynEffectAttrWrite */
+/* FUNC modhsyn_e17 */
+int modhsyn_e17(sceHSynWork_t *work, int slotNo, u8 *out)
+{
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynChannel_t *chan;
+    u8 flags;
+    int on;
+    int i;
+    int ofs;
+
+    if (hsynParamSlotResolve(work, slotNo, &slot, &set) == 0) {
+        return -1;
+    }
+    for (i = 0, ofs = 4; i < 16; i++, ofs += 0x38) {
+        chan = (sceHSynChannel_t *)((char *)set + ofs);
+        on = (char *)chan->onNext != (char *)chan - 8;
+        flags = on;
+        if ((char *)chan->relNext != (char *)chan) {
+            flags = on | 2;
+        }
+
+        if ((char *)chan->offNext != (char *)chan + 8) {
+            flags |= 4;
+        }
+        out[i] = flags;
+    }
+    return 0;
+}
+/* ENDF modhsyn_e17 */
 /* FUNC modhsyn_e18 */
 int modhsyn_e18(int mode)
 {
@@ -699,7 +822,27 @@ INCLUDE_ASM("MODHSYN", func_00004AE4);
 INCLUDE_ASM("MODHSYN", hsynSdSetParamBend);
 INCLUDE_ASM("MODHSYN", func_00004D90);
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOff);
-INCLUDE_ASM("MODHSYN", hsynVoiceStateClear);
+/* FUNC hsynVoiceStateClear */
+int hsynVoiceStateClear(sceHSynVoice_t *v)
+{
+    int x;
+    u32 q;
+    int t;
+
+    x = (v->chan->priority - v->ch) << 7;
+    v->unk38 = x;
+    if (x < 0) {
+        x = -x;
+        v->flags |= 2;
+    } else {
+        v->flags |= 4;
+    }
+    q = (x * hsynTickScale) / v->chan->bendRange;
+    t = (int)q / 256;
+    v->unk2A = t;
+    return t;
+}
+/* ENDF hsynVoiceStateClear */
 INCLUDE_ASM("MODHSYN", hsynVoiceUpdatePathB);
 INCLUDE_ASM("MODHSYN", hsynVoiceKeyOnPathB);
 INCLUDE_ASM("MODHSYN", hsynEnvAttackStep);
@@ -933,26 +1076,26 @@ u8 hsynVolumeScale(u8 val, u8 sel, u8 *tbl, int n)
 INCLUDE_ASM("MODHSYN", hsynVolumeScale);
 #endif
 /* FUNC hsynSeqByteRead */
-int hsynSeqByteRead(sceHSynEnv_t *env)
+int hsynSeqByteRead(sceHSynEnv_t *env, int wrapped)
 {
-    return (s16)((env->unk1C - 0x8000) >> 1);
+    return (s16)((env->phase - 0x8000) >> 1);
 }
 /* ENDF hsynSeqByteRead */
 /* FUNC hsynSeqWordRead */
-int hsynSeqWordRead(sceHSynEnv_t *env)
+int hsynSeqWordRead(sceHSynEnv_t *env, int wrapped)
 {
     u32 t;
 
-    t = 0xFFFF - env->unk1C;
+    t = 0xFFFF - env->phase;
     return (s16)((t - 0x8000) >> 1);
 }
 /* ENDF hsynSeqWordRead */
 /* FUNC hsynSeqVarLenRead */
-int hsynSeqVarLenRead(sceHSynEnv_t *env)
+int hsynSeqVarLenRead(sceHSynEnv_t *env, int wrapped)
 {
     int v;
 
-    v = env->unk1C;
+    v = env->phase;
     if (v > 0xBFFF) {
         v -= 0x10000;
     } else if (v >= 0x4001) {
@@ -962,24 +1105,47 @@ int hsynSeqVarLenRead(sceHSynEnv_t *env)
 }
 /* ENDF hsynSeqVarLenRead */
 /* FUNC hsynSeqSkip */
-int hsynSeqSkip(sceHSynEnv_t *env)
+int hsynSeqSkip(sceHSynEnv_t *env, int wrapped)
 {
     int v;
 
     v = -0x4000;
-    if ((int)env->unk1C > 0x7FFF) {
+    if ((int)env->phase > 0x7FFF) {
         v = 0x4000;
     }
     return v;
 }
 /* ENDF hsynSeqSkip */
-INCLUDE_ASM("MODHSYN", hsynSeqSeek);
+/* FUNC hsynSeqSeek */
+int hsynSeqSeek(sceHSynEnv_t *env, int wrapped)
+{
+    u32 n;
+    u32 prod;
+    u32 i;
+    s16 *t;
+    int a;
+    int b;
+
+    n = env->nTbl;
+    prod = env->phase * n;
+    t = env->tbl;
+    i = prod >> 16;
+    a = t[i];
+    i++;
+    if (i >= n) {
+        i = 0;
+    }
+    b = t[i];
+    a += ((b - a) * (int)(prod & 0xFFFF)) >> 16;
+    return (s16)(a / 2);
+}
+/* ENDF hsynSeqSeek */
 /* FUNC hsynSeqEmit */
-int hsynSeqEmit(sceHSynEnv_t *env, int sel)
+int hsynSeqEmit(sceHSynEnv_t *env, int wrapped)
 {
     int v;
 
-    if (sel != 0) {
+    if (wrapped != 0) {
         v = (s16)hsynSeqEmitTail() >> 2;
     } else {
         v = env->level;

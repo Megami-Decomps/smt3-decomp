@@ -251,13 +251,21 @@ struct sceHSynBank_t
 
 struct sceHSynEnv_t
 {
-  u8 unk00[16];
+  u8 unk00;
+  u8 unk01;
+  u16 unk02;
+  u16 unk04;
+  u16 unk06;
+  u32 unk08;
+  u32 unk0C;
   s16 level;
   s16 unk12;
+  int (*wave)(struct sceHSynEnv_t *, int);
   u32 phase;
-  u32 unk1C;
   u32 rate;
-  u8 unk20[8];
+  s16 *tbl;
+  u16 nTbl;
+  u16 unk26;
 };
 
 struct sceHSynLfo_t
@@ -482,12 +490,12 @@ typedef char __MODHSYN_sizeof_sceHSynChanSet_t[(sizeof(sceHSynChanSet_t) == 1348
 /* Functions -------------------------------------------------------- */
 
 int modhsyn_e30();
-int modhsyn_e7(s16 core, u16 spuAddr, u32 iopAddr, u32 size);
+int modhsyn_e7(s16 core, u8 *iopAddr, u32 spuAddr, u32 size);
 int hsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name);
 int modhsyn_sceHSyn_Load(sceHSynWork_t *work, int slotNo, u32 spuAddr, sceSmgVers_t *img, u32 bankIdx);
 int modhsyn_e28(sceHSynWork_t *work, int slotNo, u32 bankIdx);
 void hsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot);
-void hsynVoiceParamReset(sceHSynSlot_t *slot, sceHSynChannel_t *chan, u8 prog);
+void hsynVoiceParamReset(sceHSynChanSet_t *set, sceHSynChannel_t *chan, u8 prog);
 void hsynVoiceSetPitch(sceHSynChannel_t *chan, u8 hi, u8 lo);
 void hsynVoiceEnvelopeApply(sceHSynChannel_t *chan, int copyRelease);
 void hsynVoiceSetAttack(sceHSynChannel_t *chan, u8 val);
@@ -515,9 +523,9 @@ int modhsyn_e13(sceHSynWork_t *work, int slotNo);
 int modhsyn_e14(sceHSynWork_t *work, int slotNo);
 int modhsyn_e9(u16 *);
 int modhsyn_e15(sceHSynStat_t *stat);
-int hsynEffectAttrRead(sceSdEffectAttr_t *attr);
-int hsynEffectAttrWrite(sceSdEffectAttr_t *attr);
-int modhsyn_e17(int, int, int);
+void hsynEffectAttrRead(u8 sel, u8 mode);
+void hsynEffectAttrWrite(u8 sel, u8 val);
+int modhsyn_e17(sceHSynWork_t *work, int slotNo, u8 *out);
 int modhsyn_e18(int);
 int modhsyn_e27();
 int hsynCmdReset(u8 **pp);
@@ -604,12 +612,12 @@ u8 hsynUnrefTableSetA(u8 x);
 u8 hsynUnrefTableSetB(u8 x);
 u8 hsynUnrefTableSetC(u8 x);
 u8 hsynVolumeScale(u8 val, u8 sel, u8 *tbl, int n);
-int hsynSeqByteRead(sceHSynEnv_t *env);
-int hsynSeqWordRead(sceHSynEnv_t *env);
-int hsynSeqVarLenRead(sceHSynEnv_t *env);
-int hsynSeqSkip(sceHSynEnv_t *env);
-int hsynSeqSeek(sceHSynEnv_t *env);
-int hsynSeqEmit(sceHSynEnv_t *env, int sel);
+int hsynSeqByteRead(sceHSynEnv_t *env, int wrapped);
+int hsynSeqWordRead(sceHSynEnv_t *env, int wrapped);
+int hsynSeqVarLenRead(sceHSynEnv_t *env, int wrapped);
+int hsynSeqSkip(sceHSynEnv_t *env, int wrapped);
+int hsynSeqSeek(sceHSynEnv_t *env, int wrapped);
+int hsynSeqEmit(sceHSynEnv_t *env, int wrapped);
 int hsynEffectDispatch(char *);
 void hsynSeqStateReset(sceHSynLfo_t *lfo);
 int hsynSeqInterpretA(int, int, u8 *, int, char, u16, u16, unsigned int, int);
