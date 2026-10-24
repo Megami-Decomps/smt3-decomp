@@ -137,7 +137,113 @@ int hsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name)
     return 1;
 }
 /* ENDF hsynLoadBank */
+#ifdef NON_MATCHING
+/* Six instructions short: gcc cross-jumps the two identical bank-clearing
+ * blocks that retail keeps twice. */
+/* FUNC modhsyn_sceHSyn_Load */
+int modhsyn_sceHSyn_Load(sceHSynWork_t *work, int slotNo, u32 spuAddr, sceSmgVers_t *img, u32 bankIdx)
+{
+    sceHSynTbl_t *tbl;
+    sceHSynSlot_t *slot;
+    sceHSynChanSet_t *set;
+    sceHSynBank_t *bank;
+    sceSmgHead_t *head;
+    u32 unit;
+
+    if (work == NULL || bankIdx >= 0x10) {
+        return -1;
+    }
+    tbl = work->tbl;
+    unit = slotNo * 2 + 1;
+    if (unit >= tbl->nEntryWord) {
+        return -1;
+    }
+    slot = *(sceHSynSlot_t **)((u8 *)tbl->entry + (unit << 3) + 4);
+    set = (sceHSynChanSet_t *)&slot->unk14;
+    if (slot->path == 1) {
+        bankIdx = 0;
+    }
+    bank = &set->bank[bankIdx];
+    if (spuAddr != 0 && img != NULL) {
+        goto load;
+    }
+    bank->head = NULL;
+    bank->prog = NULL;
+    bank->sset = NULL;
+    bank->smpl = NULL;
+    bank->vagi = NULL;
+    bank->setb = NULL;
+    bank->spuAddr = 0;
+    return 0;
+load:
+    bank->head = (sceSmgHead_t *)((u8 *)img + 0x10);
+    if (bank->head->progOfs != -1) {
+        bank->prog = (sceSmgProg_t *)((u8 *)img + bank->head->progOfs);
+    }
+    if (bank->head->ssetOfs != -1) {
+        bank->sset = (sceSmgSset_t *)((u8 *)img + bank->head->ssetOfs);
+    }
+    if (bank->head->smplOfs != -1) {
+        bank->smpl = (sceSmgSmpl_t *)((u8 *)img + bank->head->smplOfs);
+    }
+    if (bank->head->vagiOfs != -1) {
+        bank->vagi = (sceSmgVagi_t *)((u8 *)img + bank->head->vagiOfs);
+    }
+    if (img->version >= 2) {
+        if (bank->head->setbOfs != -1) {
+            bank->setb = (sceSmgSetb_t *)((u8 *)img + bank->head->setbOfs);
+        }
+    }
+    if (hsynLoadBank(*(u32 *)img->magic, *(u32 *)img->name, magic, name) == 0) {
+        goto fail;
+    }
+    head = bank->head;
+    if (hsynLoadBank(*(u32 *)head->magic, *(u32 *)head->name, magic, aHead) == 0) {
+        goto fail;
+    }
+    if (bank->prog != NULL) {
+        if (hsynLoadBank(*(u32 *)bank->prog->magic, *(u32 *)bank->prog->name, magic, aProg) == 0) {
+            goto fail;
+        }
+    }
+    if (bank->sset != NULL) {
+        if (hsynLoadBank(*(u32 *)bank->sset->magic, *(u32 *)bank->sset->name, magic, aSset) == 0) {
+            goto fail;
+        }
+    }
+    if (bank->smpl != NULL) {
+        if (hsynLoadBank(*(u32 *)bank->smpl->magic, *(u32 *)bank->smpl->name, magic, aSmpl) == 0) {
+            goto fail;
+        }
+    }
+    if (bank->vagi != NULL) {
+        if (hsynLoadBank(*(u32 *)bank->vagi->magic, *(u32 *)bank->vagi->name, magic, aVagi) == 0) {
+            goto fail;
+        }
+    }
+    if (bank->setb == NULL) {
+        goto ok;
+    }
+    if (hsynLoadBank(*(u32 *)bank->setb->magic, *(u32 *)bank->setb->name, magic, aSetb) != 0) {
+        goto ok;
+    }
+fail:
+    bank->head = NULL;
+    bank->prog = NULL;
+    bank->sset = NULL;
+    bank->smpl = NULL;
+    bank->vagi = NULL;
+    bank->setb = NULL;
+    bank->spuAddr = 0;
+    return -1;
+ok:
+    bank->spuAddr = spuAddr;
+    return 0;
+}
+#else
 INCLUDE_ASM("MODHSYN", modhsyn_sceHSyn_Load);
+#endif
+/* ENDF modhsyn_sceHSyn_Load */
 /* FUNC modhsyn_e28 */
 int modhsyn_e28(sceHSynWork_t *work, int slotNo, u32 bankIdx)
 {
