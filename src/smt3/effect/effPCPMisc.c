@@ -117,8 +117,8 @@ struct sdfModelPacketHeader_tag;
 struct sdfModelNode_t;
 union SdfDrawTransform;
 struct SdfGsTextureStateValues;
-struct SdfItem;
-struct SdfItemList;
+struct sdfModelNodeDef_t;
+struct sdfModelNodeDefList_t;
 struct sdfMotionNodeDef_t;
 struct sdfIpuDecodeCb_t;
 struct SdfStreamInputDmaTag;
@@ -241,7 +241,7 @@ typedef struct BattleGroupSlot BattleGroupSlot;
 typedef struct DevRequest DevRequest;
 typedef struct MdlRecord MdlRecord;
 typedef struct SdfChunkHeader SdfChunkHeader;
-typedef struct SdfItem SdfItem;
+typedef struct sdfModelNodeDef_t sdfModelNodeDef_t;
 typedef struct SdfItemListRef SdfItemListRef;
 typedef struct BattleGroupNode BattleGroupNode;
 typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
@@ -1727,45 +1727,41 @@ struct SdfChunkHeader {
 };
 
 /* Native model constructor reference: AMB roots and the FLD model wrapper's
- * four-word subrecord. The item list has a variable-length body of SdfItem
- * records beginning at its firstItem array. */
-typedef struct SdfItemList SdfItemList;
+ * four-word subrecord. The list has a variable-length body of node
+ * definitions following its header. */
+typedef struct sdfModelNodeDefList_t sdfModelNodeDefList_t;
 
-/* Per-item view after packed-resource or scene relocation, applied by
- * sdfModelNodeBaseSet. Command-list fields hold relocated pointers. */
-struct SdfItem {
-    u16 commandSetupMode; /* 0x00: selects the optional command-list form */
-    u16 reserved02;       /* 0x02 */
-    u32 unk04;            /* 0x04 */
-    s32 nodeId;       /* 0x08 */
-    s32 parentNodeIndex; /* 0x0C: negative means this node has no parent */
-    f32 rotationX;    /* 0x10: Euler angles supplied to the quaternion builder */
-    f32 rotationY;    /* 0x14 */
-    f32 rotationZ;    /* 0x18 */
-    u8 pad1C[4];
-    u128 translation; /* 0x20 */
+/* Per-node definition after packed-resource or scene relocation, applied by
+ * sdfModelNodeBaseSet. The shape pointers are relocated in place. */
+struct sdfModelNodeDef_t {
+    u16 format;       /* 0x00: selects the shape-pointer form */
+    u16 pad0;         /* 0x02 */
+    u32 pad1;         /* 0x04 */
+    s32 id;           /* 0x08 */
+    s32 parentIndex;  /* 0x0C: negative means this node has no parent */
+    sdfVector4_t rotate; /* 0x10: Euler angles supplied to the quaternion builder */
+    u128 pos;         /* 0x20 */
     u128 scale;       /* 0x30 */
-    const f32 *boundsCorners; /* 0x40: optional two xyz corners used by clipping */
+    const f32 *bounds; /* 0x40: optional two xyz corners used by clipping */
     union {
-        u32 *inlineCommandLists[3]; /* SDF_ITEM_COMMAND_SETUP_INLINE_LISTS */
+        struct sdfShapeHeader_t *shape[3]; /* format 0: one header per ot slot */
         struct {
-            u32 **commandLists; /* SDF_ITEM_COMMAND_SETUP_NULL_TERMINATED_LIST_TABLE */
+            struct sdfShapeHeader_t **table; /* format 1: null-terminated table */
             u32 unk48;
             u32 unk4C;
-        } commandList;
-    } commandData; /* 0x44: other modes leave the command tail unused */
+        } indirect;
+    } shapes;         /* 0x44: other formats leave the tail unused */
 };
 
 /* Variable-length serialized list: a 0x10-byte header, followed by count
- * complete 0x50-byte items. The array contributes no bytes to the header. */
-struct SdfItemList {
+ * complete 0x50-byte node definitions. */
+struct sdfModelNodeDefList_t {
     s32 count;
-    u8 pad_0x04[0x0C];
-    SdfItem firstItem[0];
+    u8 pad[0x0C];
 };
 
 struct SdfItemListRef {
-    SdfItemList *items; /* 0x00 */
+    sdfModelNodeDefList_t *items; /* 0x00 */
     u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
     s32 slotPairCount; /* 0x08: passed to sdfModelMakeMorphList */
     struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
