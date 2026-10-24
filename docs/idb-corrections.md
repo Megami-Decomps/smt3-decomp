@@ -196,3 +196,69 @@ report `0 differ`.
   `dds3ProcessID_t *`.
 - `sdfShape_t` exists as a local type but no function prototype or global in the database refers
   to it, so the retail code says nothing about it either way. Left in place.
+
+## Applied on 2026-10-24: the three SDF IRX databases
+
+These are separate IDBs from `SLUS_209.11` and nothing in them feeds
+`symbol_addrs.txt`, so none of this affects the build. The same rule applies
+anyway: where the module's own code proves a name wrong, fix it in the IDB.
+The map is in [The SDF IRX modules](sdf-irx-modules.md).
+
+### Function boundary
+
+`SDFSDMAN.IRX` had its entry split in two: an 8-byte `sub_0` holding the
+prologue and the body as `sdfSdManInit` at 0x8. Hex-Rays answered with 24
+phantom arguments because the stack adjustment was outside the function. Both
+were deleted and one function defined over 0x0..0x110, which decompiles into
+three clean `CreateThread` blocks.
+
+### Names the code contradicted
+
+| Module | Address | Was | Now | Proof |
+| --- | --- | --- | --- | --- |
+| `SDFSDMAN` | 0xC40 | `sdfSndMidiLoad` | `sdfSndSeqThread` | `sdfSndInitSynth` creates it as a thread at priority 30 and stores its id where `sdfSndTimerSetup` registers the hardware timer handler, which only calls `iWakeupThread` on it. The body opens with `SleepThread` and runs the periodic service work. It loads nothing |
+| `SDFIOPFL` | 0x474 | `loadcore_ReleaseLibraryEntries` | `loadcore_RegisterLibraryEntries` | ordinal 6, not 7, and the failure path prints `RegisterLibraryEntries fail` |
+| `SDFSDMAN` | 0x5678 | `sifman_SifSetDChain` | `sifman_sceSifSetDma` | called as `(sifdma_t *, 1)` and its result is the id passed to the next call |
+| `SDFSDMAN` | 0x5680 | `sifman_SifSetDma` | `sifman_sceSifDmaStat` | takes that id, is polled until negative, and the complaint is `sceSifDmaStat didn't finish` |
+| `SDFSDMAN` | 0x54A8 | `modhsyn_e7` | `modhsyn_sceHSyn_VoiceTrans` | its return is branched on straight into `sceHSyn_VoiceTrans error!` |
+| `SDFSDMAN` | 0x5514 | `modmidi_e16` | `modmidi_sceMidi_MidiSetLocation` | same, into `sceMidi_MidiSetLocation error!` |
+| `SDFSDMAN` | 0x5540 | `modmsin_e7` | `modmsin_sceMSIn_PutMsg` | same, into `sceMSIn_PutMsg fail.` |
+| both small modules | | `sysclib_e42` | `sysclib_vsprintf` | ordinal 42, and the caller formats into a stack buffer then calls `printf` |
+| `SDFIOP` | 0x428, 0x430 | `modload_e8`, `modload_e10` | `StartModule`, `LoadModuleBuffer` | ordinal 10 takes only a buffer and its failure prints `LoadModuleBuffer fail`; ordinal 8 then takes `(modid, path, arglen, args, &result)` |
+
+`modhsyn` ordinals 5, 8, 13, 15 and 18 and `modmidi` ordinal 5 are left as
+ordinals. They are used in ways consistent with a tick, an attribute set and a
+voice stop, but no string or signature pins them, and a guess dressed as a
+recovered Sony name is worse than `e13`. `thbase` ordinal 43 is likewise left
+alone: it returns a free-running clock that `p2sdIrxSpuIopMap` differences
+against 33000000 for its timeout, which does not identify it.
+
+### Naming pass
+
+All 182 functions across the three databases now carry names, up from 121, and
+every referenced global that is not a string literal is named in `SDFSDMAN`.
+
+## Applied on 2026-10-24: types and prototypes across the SDF IRX databases
+
+Every function in the three databases now carries a prototype and every global a
+type; the reconstructed structs and the two findings that came out of typing
+are in [The SDF IRX modules](sdf-irx-modules.md). Two more import names were
+disproved in the process, both in `SDFSDMAN`:
+
+| Address | Was | Now | Proof |
+| --- | --- | --- | --- |
+| 0x5724 | `thbase_JoinThread` | `thbase_DelayThread` | called as `(1000)` inside a DMA retry loop and `(10000)` in an idle loop, return value discarded. Those are not thread ids, and joining a thread is not what paces a retry |
+| 0x572C | `thbase_iCancelAlarm` | `thbase_USec2SysClock` | `sdfSndTimerSetup` passes 4167 and the address of an uninitialised stack word, then reads that word back and hands it to `SetTimerHandler` as the compare value. `iCancelAlarm` does not write through its second argument. 4167 µs is the 240 Hz sequencer tick, and the same 4167 goes to `sceHSyn_Init` and `sceMidi_Init` |
+
+Both are named for the behaviour the data flow proves, not for a guessed Sony
+spelling: ordinal 33 delays by the microseconds it is given and ordinal 39
+converts microseconds to timer ticks, whichever of the SDK's spellings each one
+actually is.
+
+One trap worth knowing when retyping through MCP. `declare_type` will edit a
+named type's body but will not change its kind, so redeclaring a `union` as a
+`struct` of the same name leaves every global still typed as the union, and
+Hex-Rays merges adjacent field stores into one wide store through the union's
+largest member. Delete the named type first, then declare the replacement.
+Deleting it also orphans any pointer already applied to a global, which then
+prints as `struct #24 *`; re-apply the pointer type afterwards.
