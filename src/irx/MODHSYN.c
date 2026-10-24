@@ -1512,7 +1512,203 @@ void hsynCmdVoiceAlloc(int kind, sceHSynSlot_t *slot, int a3, int a4, u8 note,
 INCLUDE_ASM("MODHSYN", hsynCmdVoiceAlloc);
 #endif
 /* ENDF hsynCmdVoiceAlloc */
+#ifdef NON_MATCHING
+/* The switch on the system-exclusive command byte compiles to a jump table,
+ * and the assembly .rodata already holds its case labels, so a C body here
+ * will not link. */
+/* FUNC func_0000273C */
+void func_0000273C(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
+{
+    u8 *cur;
+    u8 *q;
+    u32 tag;
+    u32 w0;
+    u32 w1;
+    int val;
+    int ch;
+    int cmd;
+    int sub;
+    int b0;
+    int b1;
+    int b2;
+    int b3;
+    int n;
+    int c;
+    int lo;
+    int hi;
+
+    cur = p;
+    do {
+        c = *cur++;
+        if (c != 0xFE) {
+            do {
+                if (cur >= end) {
+                    return;
+                }
+                c = *cur++;
+            } while (c != 0xFE);
+        }
+        q = cur;
+        if (q >= end) {
+            return;
+        }
+        if (q + 6 >= end) {
+            return;
+        }
+        tag = q[1] | (q[2] << 8) | (q[3] << 16) | (q[4] << 24);
+        sub = q[5];
+        ch = sub & 0xF;
+        cur = q + 6;
+        switch (sub & 0xF0) {
+        case 0x90:
+        case 0xA0:
+            n = (q[0] != 0) ? 6 : 5;
+            if (cur + n > end) {
+                break;
+            }
+            b0 = *cur++;
+            b1 = *cur++;
+            b2 = *cur++;
+            b3 = -0x80;
+            if (q[0] != 0) {
+                b3 = *cur++;
+            }
+            lo = *cur++;
+            hi = *cur++;
+            val = lo | (hi << 7);
+            if ((sub & 0xF0) == 0x90) {
+                func_00008350(slot, idx, ch, b0, b1, b2, (s8)b3, val, tag);
+            } else if (b2 == 0) {
+                hsynVoiceAllocForCmd((int)slot, idx, ch, b0, b1, 0, tag);
+            } else {
+                func_00008350(slot, idx, ch, b0, b1, b2, (s8)b3, val, tag);
+            }
+            break;
+        case 0xB0:
+            if (q + 9 >= end) {
+                break;
+            }
+            b0 = q[6];
+            b1 = q[7];
+            cmd = q[8];
+            cur = q + 9;
+            switch (cmd) {
+            case 0:
+            case 1:
+            case 3:
+            case 4:
+                val = hsynCmdReset(&cur);
+                lo = *cur++;
+                hi = *cur++;
+                func_000021B8((int)slot, idx, cmd, val, ch, b0, b1, lo, hi, 0, tag);
+                break;
+            case 2:
+                func_000021B8((int)slot, idx, cmd, 0, ch, b0, b1, 0, 0, 0, tag);
+                break;
+            case 5:
+                lo = cur[0];
+                cur += 2;
+                func_000021B8((int)slot, idx, cmd, 0, ch, b0, b1, 0, lo, 0, tag);
+                break;
+            case 7:
+                val = hsynCmdReset(&cur);
+                lo = cur[0];
+                cur += 2;
+                hsynCmdProgramChange((int)slot, idx, val, ch, b0, b1, lo, tag);
+                break;
+            case 10:
+                hsynCmdReset(&cur);
+                cur += 2;
+                break;
+            case 12:
+            case 13:
+                val = hsynCmdReset(&cur);
+                lo = cur[0];
+                cur += 2;
+                func_000021B8((int)slot, idx, cmd, val, ch, b0, b1, 0, lo, 0, tag);
+                break;
+            case 14:
+            case 15:
+                val = hsynCmdReset(&cur);
+                lo = *cur++;
+                hi = *cur++;
+                hsynCmdChannelPressure((int)slot, idx, cmd, val, ch, b0, b1,
+                                       lo | (hi << 8), tag);
+                break;
+            case 16:
+                lo = *cur++;
+                hi = *cur++;
+                hsynCmdNoteOff(0, (int)slot, idx, ch, b0, b1, lo | (hi << 8), tag);
+                break;
+            case 17:
+                lo = *cur++;
+                hi = *cur++;
+                hsynCmdNoteOn(0, (int)slot, idx, ch, b0, b1, lo | (hi << 8), tag);
+                break;
+            case 18:
+                val = hsynCmdReset(&cur);
+                hsynCmdVoiceAlloc(0, slot, idx, ch, b0, b1, val, tag);
+                break;
+            case 32:
+                lo = *cur++;
+                hi = *cur++;
+                hsynCmdNoteOff(1, (int)slot, idx, ch, b0, b1, lo | (hi << 8), tag);
+                break;
+            case 33:
+                lo = *cur++;
+                hi = *cur++;
+                hsynCmdNoteOn(1, (int)slot, idx, ch, b0, b1, lo | (hi << 8), tag);
+                break;
+            case 34:
+                val = hsynCmdReset(&cur);
+                hsynCmdVoiceAlloc(1, slot, idx, ch, b0, b1, val, tag);
+                break;
+            default:
+                thbase_DelayThread((u32)aSesqUnknownCom);
+                break;
+            }
+            break;
+        case 0xC0:
+            q = cur;
+            cmd = *cur++;
+            switch (cmd) {
+            case 0x1E:
+                w0 = q[1] | (q[2] << 8) | (q[3] << 16) | (q[4] << 24);
+                w1 = q[5] | (q[6] << 8) | (q[7] << 16) | (q[8] << 24);
+                cur = q + 9;
+                hsynVoiceAllocPathCEntry((int)slot, tag, w0, w1);
+                break;
+            case 0x1F:
+                hsynVoiceAllocPathBEntry((int)slot, tag);
+                break;
+            case 0x00:
+            case 0x11:
+            case 0x12:
+                cur = q + 3;
+                break;
+            case 0x10:
+                cur = q + 6;
+                break;
+            case 0x13:
+                cur = q + 4;
+                break;
+            case 0x20:
+            case 0x30:
+                cur = q + 2;
+                break;
+            case 0x31:
+                hsynCmdReset(&cur);
+                cur += 2;
+                break;
+            }
+            break;
+        }
+    } while (cur < end);
+}
+/* ENDF func_0000273C */
+#else
 INCLUDE_ASM("MODHSYN", func_0000273C);
+#endif
 /* FUNC modhsyn_e19 */
 int modhsyn_e19(u8 val)
 {
