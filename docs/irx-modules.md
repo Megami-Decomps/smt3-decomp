@@ -31,8 +31,8 @@ The remaining chunks are import stubs and the tables between them.
 Sony's three are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
 feeds it, and `MODMSIN`, the message queue between them. They are what plays a
 `.SMG` bank, so the sound driver's bank path is almost entirely calls into them,
-and the USA and Maniax discs ship the same files byte for byte. `MODMSIN` is
-complete; the other two are part way.
+and the USA and Maniax discs ship the same files byte for byte. `MODMSIN` and
+`MODMIDI` are complete; `MODHSYN` is part way.
 
 ## The toolchain
 
@@ -190,54 +190,65 @@ assembly `.rodata`).
 | `SDFIOPFL.IRX` | 6 | 6 | 0 |
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
 | `MODMSIN.IRX` | 12 | 12 | 0 |
-| `MODMIDI.IRX` | 62 | 31 | 5 |
-| `MODHSYN.IRX` | 218 | 136 | 19 |
+| `MODMIDI.IRX` | 62 | 41 | 13 |
+| `MODHSYN.IRX` | 218 | 141 | 21 |
 
 ### Where MODHSYN stands
 
-136 functions match and 19 more are equivalent under `NON_MATCHING`. The 29
+141 functions match and 21 more are equivalent under `NON_MATCHING`. The 27
 still bare, smallest first:
 
 | Chunk | Lines of asm | Note |
 | --- | --- | --- |
+| `func_00008350` | 47 | a nine-argument forwarder; blocked again, see below |
 | `func_00004AE4` | 98 | takes `(voice, s8 pan)`, called by `func_00000D24` |
 | `hsynVoiceRefresh` | 103 | sequence-bounds walker |
+| `hsynVoiceKeyOff` | 118 | |
 | `func_000017EC` | 122 | |
 | `hsynVoiceDirectPass` | 124 | sibling of the matched `hsynVoiceUpdatePass`; expect another switch |
 | `hsynServiceVoices` | 125 | |
 | `func_00000050` | 129 | |
-| `hsynEffectDispatch` | 131 | steps the LFO through `sceHSynEnv_t::wave` |
+| `hsynEffectDispatch` | 131 | jump table; steps the LFO through `sceHSynEnv_t::wave` |
 | `hsynInitCores` | 131 | |
 | `hsynVoicePitchCommit` | 142 | |
 | `func_00004614` | 146 | |
-| `hsynVoiceEventDispatch` | 149 | the `0xB0` arm of `hsynVoiceUpdatePass` |
-| `modhsyn_e8` | 93 | |
-| `hsynCmdVoiceAlloc` | 94 | |
+| `hsynVoiceEventDispatch` | 149 | jump table; the `0xB0` arm of `hsynVoiceUpdatePass` |
 | `hsynModulationApply` | 153 | |
 | `hsynVoiceUpdatePathB` | 153 | |
 | `func_00004D90` | 192 | |
 | `modhsyn_sceHSyn_Load` | 200 | |
-| `hsynSeqInterpretA`, `hsynSeqInterpretB` | 243 each | the LFO state machines |
+| `hsynSeqInterpretA`, `hsynSeqInterpretB` | 243 each | jump tables; the LFO state machines |
 | `hsynVoiceUpdatePathA` | 247 | |
 | `func_00007F54` | 266 | note-on, the simple program path |
 | `hsynVoiceKeyOnPathB` | 298 | |
 | `hsynVoiceKeyOnPathA` | 304 | |
-| `func_0000AB90` | 345 | six arguments, called by the matched `func_000021B8` |
+| `func_0000AB90` | 345 | jump table; six arguments, called by the matched `func_000021B8` |
 | `hsynVoiceEngineStep` | 366 | |
 | `func_000078D4` | 434 | note-on, the key/sample/vag search |
-| `func_0000273C` | 553 | |
+| `func_0000273C` | 553 | jump table |
 
-`func_00008350` is a nine-argument forwarder that switches on `*(u8 *)(p + 3)`
-and calls `func_000078D4` or `func_00007F54`. It cannot be written until those
-two carry prototypes, because the forwarder narrows three of its arguments on
-the way through (`andi 0xFF`, `sll`/`sra 24`, `andi 0xFFFF`) and an implicit
-declaration promotes them all to `int`. Both are still `sub_*` in the database,
-which `tools/irx_headers.py` filters out as placeholder names, so they need to
-be renamed to their `func_<address>` form before a prototype reaches the header.
+Six of those have jump tables, listed in the table above, and so cannot match
+while `.rodata` is assembly: the assembly `.rodata` already holds each one's
+`L_<address>` case labels, so replacing the body leaves them undefined and the
+link fails. Write the C, guard it under `NON_MATCHING` and move on. MODMIDI's
+`midiPlaySong` and `midiPlayEnv` went that way.
 
-The nineteen under `NON_MATCHING` are listed by their own comments. Four are
-new and all four are one instruction or one register pair away:
-`func_0000A9FC`, `func_00000E40`, `func_00000D24` and `hsynVoiceUpdatePass`.
+`func_00008350` is still blocked, for a different reason than before. The
+generated header now does give it prototypes for `func_000078D4` and
+`func_00007F54`, but those two prototypes are wrong where it matters: the
+forwarder sign-extends its seventh argument (`sll`/`sra 24`) on the way
+through, which only happens for an `int` or `s8` formal, while the database
+declares both callees' seventh parameter `u8`. Recovering the two callees'
+real parameter types is the way in, and both are on the list above anyway.
+
+### Where MODMIDI stands
+
+All 62 functions have C: 41 match and 13 are equivalent under `NON_MATCHING`.
+Those 13 break down as two that cannot match at all (`midiPlaySong`,
+`midiPlayEnv`, both jump tables), five whose only difference is gcc
+cross-jumping a tail retail keeps twice (`midiParseMetaEvent`, `modmidi_e8`,
+`midiSongRepeat`, `midiSearchPlay`, `midiScanLoops`), and six inherited from
+earlier agents.
 
 Two things only Sony's modules turned up, both about delay slots and neither
 fixable from the C:
