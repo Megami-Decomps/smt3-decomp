@@ -377,7 +377,50 @@ int midiReadDeltaTime(sceMidiTrack_t *trk)
     return v;
 }
 /* ENDF midiReadDeltaTime */
+/* FUNC midiParseMetaEvent */
+#ifdef NON_MATCHING
+/* Four bytes short: gcc cross-jumps the `trk->cur += len` tail the
+ * callback-handled path and the default both end in, and hoists the
+ * `return 1` out of the compare chain; retail keeps two copies. */
+int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
+{
+    int len;
+
+    len = midiReadVarLen(trk);
+    if (slot->metaCb != NULL) {
+        if (slot->metaCb(type, trk->cur, len, slot->metaArg) == 0) {
+            trk->cur += len;
+            return type != 0x2F;
+        }
+    }
+    switch (type) {
+    case 0x51:
+        if (len != 3) {
+            if (midiDebug != 0) {
+                stdio_printf(aParsemetaevent, len);
+            }
+            return 0;
+        }
+        trk->tempo = trk->cur[0] << 16;
+        trk->tempo += trk->cur[1] << 8;
+        trk->tempo += trk->cur[2];
+        if (midiVerbose != 0) {
+            stdio_printf(aTempoD, 60000000 / trk->tempo);
+        }
+        trk->cur += 3;
+        midiTrackSeekAbsolute(trk);
+        return 1;
+    case 0x2F:
+        slot->flags |= 4;
+        return 0;
+    }
+    trk->cur += len;
+    return 1;
+}
+#else
 INCLUDE_ASM("MODMIDI", midiParseMetaEvent);
+#endif
+/* ENDF midiParseMetaEvent */
 /* FUNC midiOutputPush */
 sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
 {
@@ -387,7 +430,66 @@ sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
     return &vt->voice[index];
 }
 /* ENDF midiOutputPush */
-INCLUDE_ASM("MODMIDI", midiParseExcEvent);
+/* FUNC midiParseExcEvent */
+void midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
+                       sceMidiVoiceTbl_t *vt)
+{
+    sceMidiVoice_t *v;
+    sceMidiBuf_t *buf;
+    u8 *p;
+    u8 *src;
+    u32 mask;
+    int len;
+    int index;
+    int shift;
+    int n;
+    u32 total;
+
+    len = midiReadVarLen(trk);
+    if (slot->excCb == NULL ||
+        slot->excCb(trk->cur, len, slot->excArg) != 0) {
+        if (vt != NULL) {
+            mask = slot->bufMask;
+            if (mask != 0) {
+                index = 0;
+                do {
+                    shift = 1;
+                    if (mask & shift) {
+                        v = midiOutputPush(index, vt);
+                        if (v != NULL) {
+                            buf = v->buf;
+                            if (buf != NULL) {
+                                if (buf->size >= buf->len + len + 9) {
+                                    p = (u8 *)buf + (buf->len + 8);
+                                    src = trk->cur;
+                                    total = buf->len + 1;
+                                    buf->len = total + len;
+                                    *p = 0xF0;
+                                    p++;
+                                    n = len - 1;
+                                    while (n != -1) {
+                                        *p++ = *src++;
+                                        n--;
+                                    }
+                                } else if (midiDebug != 0) {
+                                    stdio_printf(aPaesexceventBu);
+                                }
+                            }
+                        }
+                    } else if ((mask & 0xF) != 0) {
+                        /* Retail: midiSendChMsg skips four bits when the
+                         * nibble is empty, this one when it is not. */
+                        shift = 4;
+                    }
+                    mask >>= shift;
+                    index += shift;
+                } while (mask != 0);
+            }
+        }
+    }
+    trk->cur += len;
+}
+/* ENDF midiParseExcEvent */
 /* FUNC midiSendChMsg */
 void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                    sceMidiVoiceTbl_t *vt, u32 msg, int len)
