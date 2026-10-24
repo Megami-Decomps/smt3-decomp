@@ -4243,7 +4243,114 @@ void hsynSeqStateReset(sceHSynEnv_t *lfo)
     }
 }
 /* ENDF hsynSeqStateReset */
+#ifdef NON_MATCHING
+/* The switch on the mode byte compiles to a jump table, and the assembly
+ * .rodata already holds its case labels, so a C body here will not link. */
+/* FUNC hsynSeqInterpretA */
+void hsynSeqInterpretA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)
+{
+    u8 *b;
+    int i;
+    int k;
+    int w;
+    int step;
+    int d;
+    int ph;
+
+    b = (u8 *)prog;
+    env->unk01 = 0;
+    env->unk00 = 0;
+    env->level = 0;
+    if ((sel & 0x77) == 0) {
+        return;
+    }
+    env->tbl = NULL;
+    if (which != 0) {
+        w = b[0xF];
+    } else {
+        w = b[0xE];
+    }
+    k = w & 0x80;
+    if (k == 0) {
+        switch (w & 0xFF) {
+        case 1:
+            env->wave = hsynSeqByteRead;
+            break;
+        case 2:
+            env->wave = hsynSeqWordRead;
+            break;
+        case 3:
+            env->wave = hsynSeqVarLenRead;
+            break;
+        case 4:
+            env->wave = hsynSeqSkip;
+            break;
+        case 5:
+            env->wave = hsynSeqEmit;
+            break;
+        case 6:
+            env->tbl = hsynSineTable;
+            env->nTbl = 200;
+            env->wave = hsynSeqSeek;
+            break;
+        default:
+            return;
+        }
+    } else {
+        for (i = 0; i < n; i++, seg += 8) {
+            if (seg[0] == k) {
+                env->tbl = *(s16 **)(seg + 4);
+                env->nTbl = *(u16 *)(seg + 2);
+                env->wave = hsynSeqSeek;
+                break;
+            }
+        }
+        if (env->tbl == NULL && env->nTbl == 0) {
+            return;
+        }
+    }
+    env->unk02 = ((period << 8) + tick / 2) / tick;
+    d = ((depth << 8) + tick / 2) / tick;
+    if (d != 0) {
+        d = 0x10000 / d;
+        if (d == 0) {
+            d = 1;
+        }
+    }
+    env->unk0C = d;
+    if (which != 0) {
+        env->phase = b[0x13] << 8;
+        ph = (int)(env->phase * (s16)hsynSeqEmitTail()) / 0x10000;
+        env->phase = ph;
+        ph = ph + (b[0x11] << 8);
+        env->phase = ph;
+        step = *(u16 *)(b + 0x16) << 8;
+    } else {
+        env->phase = b[0x12] << 8;
+        ph = (int)(env->phase * (s16)hsynSeqEmitTail()) / 0x10000;
+        env->phase = ph;
+        ph = ph + (b[0x10] << 8);
+        env->phase = ph;
+        step = *(u16 *)(b + 0x14) << 8;
+    }
+    ph = env->phase;
+    if (ph < 0) {
+        env->phase = ph + 0x10000;
+    } else if (ph > 0xFFFF) {
+        env->phase = ph - 0x10000;
+    }
+    env->rate = 0x10000 / ((step + tick / 2) / tick);
+    if ((sel & 0x66) != 0) {
+        env->unk01 = 1;
+    }
+    if ((sel & 0x55) != 0) {
+        hsynSeqStateReset(env);
+    }
+}
+/* ENDF hsynSeqInterpretA */
+#else
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretA);
+#endif
 /* FUNC hsynSeqStart */
 void hsynSeqStart(sceHSynEnv_t *env)
 {
@@ -4275,7 +4382,114 @@ void hsynSeqStart(sceHSynEnv_t *env)
     }
 }
 /* ENDF hsynSeqStart */
+#ifdef NON_MATCHING
+/* The switch on the mode byte compiles to a jump table, and the assembly
+ * .rodata already holds its case labels, so a C body here will not link. */
+/* FUNC hsynSeqInterpretB */
+void hsynSeqInterpretB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)
+{
+    u8 *b;
+    int i;
+    int k;
+    int w;
+    int step;
+    int d;
+    int ph;
+
+    b = (u8 *)prog;
+    env->unk01 = 0;
+    env->unk00 = 0;
+    env->level = 0;
+    if ((sel & 0x77) == 0) {
+        return;
+    }
+    env->tbl = NULL;
+    if (which != 0) {
+        w = b[0x13];
+    } else {
+        w = b[0x12];
+    }
+    k = w & 0x80;
+    if (k == 0) {
+        switch (w & 0xFF) {
+        case 1:
+            env->wave = hsynSeqByteRead;
+            break;
+        case 2:
+            env->wave = hsynSeqWordRead;
+            break;
+        case 3:
+            env->wave = hsynSeqVarLenRead;
+            break;
+        case 4:
+            env->wave = hsynSeqSkip;
+            break;
+        case 5:
+            env->wave = hsynSeqEmit;
+            break;
+        case 6:
+            env->tbl = hsynSineTable;
+            env->nTbl = 200;
+            env->wave = hsynSeqSeek;
+            break;
+        default:
+            return;
+        }
+    } else {
+        for (i = 0; i < n; i++, seg += 8) {
+            if (seg[0] == k) {
+                env->tbl = *(s16 **)(seg + 4);
+                env->nTbl = *(u16 *)(seg + 2);
+                env->wave = hsynSeqSeek;
+                break;
+            }
+        }
+        if (env->tbl == NULL && env->nTbl == 0) {
+            return;
+        }
+    }
+    env->unk02 = ((period << 8) + tick / 2) / tick;
+    d = ((depth << 8) + tick / 2) / tick;
+    if (d != 0) {
+        d = 0x10000 / d;
+        if (d == 0) {
+            d = 1;
+        }
+    }
+    env->unk0C = d;
+    if (which != 0) {
+        env->phase = b[0x17] << 8;
+        ph = (int)(env->phase * (s16)hsynSeqEmitTail()) / 0x10000;
+        env->phase = ph;
+        ph = ph + (b[0x15] << 8);
+        env->phase = ph;
+        step = *(u16 *)(b + 0x1A) << 8;
+    } else {
+        env->phase = b[0x16] << 8;
+        ph = (int)(env->phase * (s16)hsynSeqEmitTail()) / 0x10000;
+        env->phase = ph;
+        ph = ph + (b[0x14] << 8);
+        env->phase = ph;
+        step = *(u16 *)(b + 0x18) << 8;
+    }
+    ph = env->phase;
+    if (ph < 0) {
+        env->phase = ph + 0x10000;
+    } else if (ph > 0xFFFF) {
+        env->phase = ph - 0x10000;
+    }
+    env->rate = 0x10000 / ((step + tick / 2) / tick);
+    if ((sel & 0x66) != 0) {
+        env->unk01 = 1;
+    }
+    if ((sel & 0x55) != 0) {
+        hsynSeqStateReset(env);
+    }
+}
+/* ENDF hsynSeqInterpretB */
+#else
 INCLUDE_ASM("MODHSYN", hsynSeqInterpretB);
+#endif
 INCLUDE_ASM("MODHSYN", D_00009AC4);
 /* FUNC hsynSeqEmitTail */
 int hsynSeqEmitTail()
