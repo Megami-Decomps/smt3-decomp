@@ -1015,7 +1015,27 @@ INCLUDE_ASM("MODHSYN", hsynVoiceAllocScan);
 INCLUDE_ASM("MODHSYN", hsynVoiceMaskUpdate);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocByPriority);
 INCLUDE_ASM("MODHSYN", hsynVoiceAllocByChannel);
-INCLUDE_ASM("MODHSYN", hsynVoiceStop);
+/* FUNC hsynVoiceStop */
+void hsynVoiceStop(sceHSynChannel_t *chan)
+{
+    sceHSynVoice_t *heads[3];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)chan;
+    heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 3; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = end->chPrev) {
+            hsynKeyOffPending[v->core] |= 1 << v->index;
+            hsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
+            hsynVoiceRelease(v);
+        }
+    }
+}
+/* ENDF hsynVoiceStop */
 INCLUDE_ASM("MODHSYN", hsynVoiceRelease);
 INCLUDE_ASM("MODHSYN", hsynVoiceStealScan);
 INCLUDE_ASM("MODHSYN", hsynVoiceEngineStep);
@@ -1091,7 +1111,26 @@ int hsynVoiceAllocPathCEntry(int a, int b, int c, int d)
     return hsynVoiceAllocPathC(a + 0x18, b, c, d);
 }
 /* ENDF hsynVoiceAllocPathCEntry */
-INCLUDE_ASM("MODHSYN", hsynVoiceReleaseExport21);
+/* FUNC hsynVoiceReleaseExport21 */
+void hsynVoiceReleaseExport21(sceHSynChannel_t *chan)
+{
+    sceHSynVoice_t *heads[2];
+    sceHSynVoice_t *end;
+    sceHSynVoice_t *v;
+    int i;
+
+    heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
+    heads[1] = (sceHSynVoice_t *)((char *)chan + 8);
+    for (i = 0; i < 2; i++) {
+        end = heads[i];
+        for (v = end->chPrev; v != end; v = end->chPrev) {
+            hsynKeyOffPending[v->core] |= 1 << v->index;
+            hsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
+            hsynVoiceReleaseOne(v);
+        }
+    }
+}
+/* ENDF hsynVoiceReleaseExport21 */
 /* FUNC hsynVoiceReleaseOne */
 int hsynVoiceReleaseOne(sceHSynVoice_t *v)
 {
@@ -1226,8 +1265,49 @@ int func_00008C1C(u8 from, u8 to)
     return ((to - from) << 16) / n;
 }
 /* ENDF func_00008C1C */
-INCLUDE_ASM("MODHSYN", func_00008C88);
+/* FUNC func_00008C88 */
+int func_00008C88(u8 from, u8 to)
+{
+    int d;
+    int q;
+
+    if (from == to) {
+        return 0;
+    }
+    d = (from - to) << 15;
+    if (to < from) {
+        q = d / (0x7F - to);
+        return (q * q) / 16384;
+    }
+    q = d / (to - 1);
+    return -((q * q) / 16384);
+}
+/* ENDF func_00008C88 */
+#ifdef NON_MATCHING
+/* Same size: the two `0x8000 - q` subtractions land in q's register
+ * rather than the constant's. */
+/* FUNC func_00008D54 */
+int func_00008D54(u8 from, u8 to)
+{
+    int d;
+    int t;
+    int q;
+
+    if (from == to) {
+        return 0;
+    }
+    d = (from - to) << 15;
+    if (to < from) {
+        t = 0x8000 - d / (0x7F - to);
+        return 0x10000 - (t * t) / 16384;
+    }
+    t = d / (to - 1) + 0x8000;
+    return (t * t) / 16384 - 0x10000;
+}
+/* ENDF func_00008D54 */
+#else
 INCLUDE_ASM("MODHSYN", func_00008D54);
+#endif
 #ifdef NON_MATCHING
 /* Same size and instructions: gcc coalesces `curve` into the dying `sel`
  * register where retail gives it one of its own. */
@@ -1885,7 +1965,53 @@ int hsynCoreStateSet(sceHSynVoice_t *v)
 /* ENDF hsynCoreStateSet */
 INCLUDE_ASM("MODHSYN", func_0000A810);
 INCLUDE_ASM("MODHSYN", D_0000A92C);
-INCLUDE_ASM("MODHSYN", func_0000A930);
+/* FUNC func_0000A930 */
+void func_0000A930(u32 *out, int wrap, s8 pan)
+{
+    int x;
+    int en;
+
+    en = hsynEnabled;
+    out[1] = 0x80;
+    out[0] = 0x80;
+    if (en != 0) {
+        return;
+    }
+    x = pan;
+    if (wrap != 0) {
+        if (x < -0x80) {
+            x += 0xFF;
+        } else if (x >= 0x80) {
+            x -= 0xFF;
+        }
+        if (x < 0) {
+            x = -x;
+        }
+    } else {
+        if (x >= 0x80) {
+            x = 0x7F;
+        }
+        if (x < -0x80) {
+            x = -0x80;
+        }
+    }
+    if (x == 0) {
+        out[1] = 0;
+        return;
+    }
+    if (x >= 0x7F) {
+        out[0] = 0;
+        return;
+    }
+    if (x < 0x40) {
+        out[1] = (x << 1) & 0xFF;
+        return;
+    }
+    if (x > 0x40) {
+        out[0] = ((0x80 - x) << 1) & 0xFF;
+    }
+}
+/* ENDF func_0000A930 */
 INCLUDE_ASM("MODHSYN", func_0000A9FC);
 /* FUNC hsynChannelStateGet */
 int hsynChannelStateGet(sceHSynVoice_t *v)
