@@ -58,6 +58,9 @@ s32 sysclib_vsprintf(char *buf, const char *fmt, va_list ap);
 void *sysclib_memcpy(void *dst, const void *src, s32 len);
 void *sysclib_memset(void *dst, s32 c, s32 len);
 s32 sysclib_strlen(const char *s);
+s32 sysclib_strncmp(const char *a, const char *b, s32 n);
+s32 sysclib_strtol(const char *s, char **end, s32 base);
+s32 sysclib_look_ctype_table(s32 c);
 
 /* thbase */
 s32 thbase_CreateThread(iop_thread_t *param);

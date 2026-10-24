@@ -1,5 +1,7 @@
 #include "MODMIDI.h"
 
+extern u8 midiLibraryTable[];
+
 /* MODMIDI.IRX, Sony's MIDI sequencer: it reads a bank's SCEIMidi block
  * and turns it into the channel messages the synthesiser plays.
  * See docs/irx-modules.md.
@@ -7,7 +9,38 @@
  * The chunks still in assembly are the ones no C has been written for yet,
  * plus the import stubs and the import and export tables between them. */
 
-INCLUDE_ASM("MODMIDI", modmidi_e26);
+/* FUNC modmidi_e26 */
+int modmidi_e26(int argc, char **argv)
+{
+    char *p;
+    s32 state;
+    s32 res;
+    int i;
+    int k;
+
+    for (i = 1; i < argc; i++) {
+        p = argv[i];
+        if (sysclib_strlen(p) == 0) {
+            continue;
+        }
+        while (sysclib_look_ctype_table(*p) & 8) {
+            p++;
+        }
+        for (k = 0; midiOptions[k].len > 0; k++) {
+            if (sysclib_strncmp(p, midiOptions[k].name,
+                                midiOptions[k].len) == 0) {
+                *midiOptions[k].var =
+                    sysclib_strtol(p + (midiOptions[k].len + 1), NULL, 10);
+                break;
+            }
+        }
+    }
+    intrman_CpuSuspendIntr(&state);
+    res = loadcore_ReleaseLibraryEntries(midiLibraryTable);
+    intrman_CpuResumeIntr(state);
+    return res != 0;
+}
+/* ENDF modmidi_e26 */
 /* FUNC modmidi_sceMidi_Init */
 int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval)
 {
@@ -968,7 +1001,41 @@ int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
 }
 /* ENDF modmidi_sceMidi_SongSetAbsolute */
 INCLUDE_ASM("MODMIDI", midiSearchPlay);
-INCLUDE_ASM("MODMIDI", modmidi_e13);
+/* FUNC modmidi_e13 */
+int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4)
+{
+    sceMidiSlot_t *slot;
+    sceMidiTrack_t *trk;
+    u32 f;
+
+    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+        return -1;
+    }
+    if (slot->songNo == -1) {
+        return -1;
+    }
+    f = slot->flags & 0x700;
+    if (slot->flags & 0x100) {
+        if (a4 & 1) {
+            trk->songFlags = (a4 & 2) ? 1 : 3;
+            trk->searchId = a3;
+            return 0;
+        }
+        modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
+        if (trk->fadeLeft != 0) {
+            trk->fadeLeft = 0;
+            trk->curMidi = trk->nextMidi;
+        }
+    }
+    if (midiSearchPlay(slot, trk, a3, ((a4 >> 1) ^ 1) & 1) == 0) {
+        return -1;
+    }
+    if (f & 0x100) {
+        return modmidi_e8(work, slotNo, 2);
+    }
+    return 0;
+}
+/* ENDF modmidi_e13 */
 INCLUDE_ASM("MODMIDI", midiLibraryTable);
 /* FUNC modmidi_e3 */
 void modmidi_e3(void)
