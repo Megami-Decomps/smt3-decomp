@@ -303,11 +303,11 @@ int modmidi_e24(sceMidiWork_t *work, int slotNo);
 int midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len);
 int midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk);
 int midiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk);
-int midiSongSelect(sceMidiSlot_t *slot, u8 **songCur);
+void midiSongSelect(sceMidiSlot_t *slot, u8 **songCur);
 int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo);
-int midiSongSetTempo(sceMidiTrack_t *trk, int val);
-int midiSongSetLoopCount(sceMidiTrack_t *trk, int val);
-int midiSongSetFlags(sceMidiTrack_t *trk, int val);
+void midiSongSetTempo(sceMidiTrack_t *trk, int val);
+void midiSongSetLoopCount(sceMidiTrack_t *trk, int val);
+void midiSongSetFlags(sceMidiTrack_t *trk, int val);
 int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo);
 int midiSongRepeat(sceMidiSlot_t *slot, u8 count);
 int midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);
@@ -318,6 +318,7 @@ int modmidi_e11(sceMidiWork_t *work, int slotNo, u8 val);
 int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed);
 int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int flag);
 int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4);
+void modmidi_e3();
 
 /* Data ------------------------------------------------------------- */
 
