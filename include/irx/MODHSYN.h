@@ -324,7 +324,7 @@ struct sceHSynVoice_t
   u16 unk18;
   u16 unk1A;
   u16 unk1C;
-  u16 unk1E;
+  s16 unk1E;
   s16 unk20;
   s16 unk22;
   s16 unk24;

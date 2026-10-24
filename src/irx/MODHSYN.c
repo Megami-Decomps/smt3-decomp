@@ -1605,7 +1605,70 @@ void hsynSdSetParamAdsr(sceHSynVoice_t *v, s32 bias)
 #else
 INCLUDE_ASM("MODHSYN", hsynSdSetParamAdsr);
 #endif
+/* FUNC func_00004AE4 */
+#ifdef NON_MATCHING
+/* Same size and the same instructions: gcc fills the hsynEnabled branch's
+ * delay slot with the sign extension and retail with the `p = pan` copy, so
+ * the four instructions of the clamp come out in a different order. */
+void func_00004AE4(sceHSynVoice_t *v, s8 pan)
+{
+    s8 p;
+    int n;
+    int sign;
+
+    v->unk4D = 0x80;
+    v->unk4C = 0x80;
+    v->unk5A = 0;
+    if (hsynEnabled != 0) {
+        return;
+    }
+    p = pan;
+    if (pan >= 0x40) {
+        p = 0x3F;
+    } else {
+        if (pan < -0x3F) {
+            p = -0x3F;
+        }
+    }
+    if (v->unk4E != 0) {
+        n = v->unk1E;
+        sign = 1;
+        if (n < 0) {
+            n = -n;
+            sign = 0;
+        }
+        n += p;
+        if (n < 0) {
+            sign ^= 1;
+            n = -n;
+        } else if (n >= 0x80) {
+            sign ^= 1;
+            n = 0x100 - n;
+        }
+        v->unk53 = sign;
+        n -= 0x40;
+    } else {
+        n = p + v->unk1E - 0x40;
+    }
+    if (n > 0) {
+        if (n >= 0x3F) {
+            v->unk4C = 0;
+        } else {
+            v->unk4C = ((0x3F - n) << 7) / 63;
+        }
+    } else if (n < 0) {
+        if (n < -0x3E) {
+            v->unk4D = 0;
+        } else {
+            v->unk4D = ((n + 0x3F) << 7) / 63;
+        }
+    }
+    v->unk5A = n;
+}
+#else
 INCLUDE_ASM("MODHSYN", func_00004AE4);
+#endif
+/* ENDF func_00004AE4 */
 /* FUNC hsynSdSetParamBend */
 u32 hsynSdSetParamBend(sceHSynVoice_t *v)
 {
