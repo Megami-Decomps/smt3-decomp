@@ -347,21 +347,15 @@ INCLUDE_ASM("LIBSD", libsd_sceSdGetCoreAttr);
 #endif
 /* ENDF libsd_sceSdGetCoreAttr */
 /* FUNC libsd_sceSdSetTransCallback */
-#ifdef NON_MATCHING
-/* Three short: gcc's CSE keeps the stored pointer live where retail reloads
- * sceSdTransCallback[chan] for the read-back. */
 void *libsd_sceSdSetTransCallback(u16 chan, void *func)
 {
     void *volatile sync;
     void *old = sceSdTransCallback[chan];
 
-    sceSdTransCallback[chan] = func;
+    *(u32 *)&sceSdTransCallback[chan] = (u32)func;
     sync = sceSdTransCallback[chan];
     return old;
 }
-#else
-INCLUDE_ASM("LIBSD", libsd_sceSdSetTransCallback);
-#endif
 /* ENDF libsd_sceSdSetTransCallback */
 /* FUNC libsd_sceSdSetTransIntrHandler */
 void *libsd_sceSdSetTransIntrHandler(s32 chan, void *func, void *arg)
