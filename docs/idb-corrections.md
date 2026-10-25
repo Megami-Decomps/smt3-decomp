@@ -900,3 +900,29 @@ be four plus an ellipsis, which builds byte-identical but then disagrees with
 the four-parameter definition in `LIBSD.c` and fails
 `tools/check_irx_nonmatching.py`. Writing the body against `va_list` would settle
 it; nothing in this game needs it.
+
+## nbMaeState and nbMaeCounter are MIDI numbers
+
+`nbMaeState` -> `nbMaeMidiNo`, `nbMaeCounter` -> `nbMaeSubMidiNo`, and the
+unnamed `dword_551540` -> `nbMaeLoadDone`.
+
+Both of the old names say the wrong kind of thing. The two variables are only
+ever written with a packed MIDI number and only ever read as the argument to
+`p2sdLoadCheckMidi` and `p2sdLoadSMGFile`. `nbSetMaeFlag` case 6 writes
+`0x280000` to the first and `0x290000` to the second, which are MIDI0028 and
+MIDI0029; the fifteen cases cover the battle themes, each a pair. Neither holds
+a state and neither counts anything.
+
+The proof is contained: both symbols are referenced only from `nbSetMaeFlag`
+and `nbMaeCheckDone`, 8 and 7 times, with no other reader in the image.
+
+What the pair is for is worth recording, because it is not visible from either
+name. A battle keeps two banks resident at once. `nbSetMaeFlag` loads
+`nbMaeMidiNo` and `nbMaeCheckDone` then loads `nbMaeSubMidiNo` in its state 3
+and waits for both, so the sequence in the first bank can reach the samples in
+the second through a bank select. MIDI0028's sequence opens with exactly that:
+controller 0, value 0x80.
+
+`nbMaeFlag` is left alone. It is the state machine's own variable, taking 0, 1,
+3, 4 and 5, so "flag" is loose rather than wrong, and `nbSetMaeFlag` anchors
+the spelling.

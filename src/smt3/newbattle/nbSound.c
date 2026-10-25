@@ -340,13 +340,13 @@ extern char D_00545BE0[];
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
-extern s32 nbMaeState;
+extern s32 nbMaeMidiNo;
 
-extern s32 nbMaeCounter;
+extern s32 nbMaeSubMidiNo;
 
 extern s32 nbMaeFlag;
 
-extern s32 D_00551540;
+extern s32 nbMaeLoadDone;
 
 extern void nbBgmStop(void);
 
@@ -638,14 +638,14 @@ void nbAllocMainProcessData(nbMainProcessData_t *data)
 /* NON_MATCHING: exact on its own; its presence turns nbE905_End's bnel into bne. */
 s32 nbMaeCheckDone()
 {
-    if (D_00551540 == 1) {
+    if (nbMaeLoadDone == 1) {
         return 1;
     }
     switch (nbMaeFlag) {
     case 0:
         break;
     case 1:
-        if (p2sdLoadCheckMidi(nbMaeState) != 1) {
+        if (p2sdLoadCheckMidi(nbMaeMidiNo) != 1) {
             return 0;
         }
         nbMaeFlag++;
@@ -654,22 +654,22 @@ s32 nbMaeCheckDone()
         nbMaeFlag++;
         break;
     case 3:
-        if (p2sdLoadCheckMidi(nbMaeCounter) != 0) {
+        if (p2sdLoadCheckMidi(nbMaeSubMidiNo) != 0) {
             nbMaeFlag = 5;
         } else {
-            p2sdLoadSMGFile(nbMaeCounter);
+            p2sdLoadSMGFile(nbMaeSubMidiNo);
             nbMaeFlag++;
         }
         break;
     case 4:
-        if (p2sdLoadCheckMidi(nbMaeCounter) != 1) {
+        if (p2sdLoadCheckMidi(nbMaeSubMidiNo) != 1) {
             return 0;
         }
         nbMaeFlag++;
         break;
     case 5:
         nbMaeFlag = 0;
-        D_00551540 = 1;
+        nbMaeLoadDone = 1;
         return 1;
     }
     return 0;
@@ -740,11 +740,13 @@ INCLUDE_SDATA(const s32, "newbattle/nbSound", nbBgmFadeState);
 
 INCLUDE_SDATA(const s32, "newbattle/nbSound", nbResultCount);
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeState);
+INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeMidiNo);
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeCounter);
+INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeSubMidiNo);
 
 INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeFlag);
 
-INCLUDE_SDATA(const s32, "newbattle/nbSound", D_00551540);
+INCLUDE_SDATA(const s32, "newbattle/nbSound", nbMaeLoadDone);
+
+INCLUDE_SDATA(const s32, "newbattle/nbSound", D_00551544);
 

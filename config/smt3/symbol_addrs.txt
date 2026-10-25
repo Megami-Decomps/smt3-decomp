@@ -10189,7 +10189,7 @@ nbDebugUnitLabelTable = 0x005455C8; // type:u32 size:0x90
 nbDigitStringTable = 0x00545D88; // type:u32 size:0x28
 // .lit4 data (1)
 sdfModelShapeWeightEpsilon = 0x0054E744; // size:0x4
-// .sdata data (667)
+// .sdata data (668)
 dds3FrameCount = 0x0054E800; // type:u32 size:0x4
 dds3RunCount = 0x0054E804; // type:u32 size:0x4
 dds3SoftResetFlag = 0x0054E808; // type:u8 size:0x1
@@ -10725,9 +10725,10 @@ bgmno = 0x00551524; // type:u32 size:0x4
 nbBgmSaved = 0x00551528; // type:u32 size:0x4
 nbBgmFadeState = 0x0055152C; // type:u32 size:0x4
 nbResultCount = 0x00551530; // type:u32 size:0x4
-nbMaeState = 0x00551534; // type:u32 size:0x4
-nbMaeCounter = 0x00551538; // type:u32 size:0x4
+nbMaeMidiNo = 0x00551534; // type:u32 size:0x4
+nbMaeSubMidiNo = 0x00551538; // type:u32 size:0x4
 nbMaeFlag = 0x0055153C; // type:u32 size:0x4
+nbMaeLoadDone = 0x00551540; // type:u32 size:0x4
 readbasetime = 0x00551548; // type:u32 size:0x4
 readtime = 0x0055154C; // type:u32 size:0x4
 nbBadCurseTimer = 0x00551558; // type:u32 size:0x4

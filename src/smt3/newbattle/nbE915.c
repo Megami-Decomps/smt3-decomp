@@ -444,13 +444,13 @@ extern s32 D_005515BC;
 
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
-extern s32 nbMaeState;
+extern s32 nbMaeMidiNo;
 
-extern s32 nbMaeCounter;
+extern s32 nbMaeSubMidiNo;
 
 extern s32 nbMaeFlag;
 
-extern s32 D_00551540;
+extern s32 nbMaeLoadDone;
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
 

@@ -169,8 +169,6 @@ void movieViewerDrawInfo(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F418);
-
 extern s8 dds3PadBitTable[];
 
 extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
@@ -187,6 +185,8 @@ extern char D_0054FDC8[];
 
 /* The memory window: a cursor over the eight nibbles of either source address,
  * the word above and the 8x8 block below. */
+INCLUDE_RODATA(const s32, "movie/MovieViewer", D_0053F418);
+
 s32 movieViewerDebugDraw(void)
 {
     sdfDrawTag_t *tag;
