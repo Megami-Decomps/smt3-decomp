@@ -72,7 +72,7 @@ s32 sceSdApplyEffectAttrMask(s32 core, sceSdEffectPreset_t *preset)
         sceSdWriteAddrReg(core, 0x174, preset->apf2Size);
     if (all || (mask & 0x4))
         *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x774) = preset->iirVol;
-    if (all || (mask & 0x8))
+    if (all || (mask & IOP_DMA_CH7_ENABLE))
         *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x776) = preset->comb1Vol;
     if (all || (mask & 0x10))
         *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x778) = preset->comb2Vol;
@@ -104,7 +104,7 @@ s32 sceSdApplyEffectAttrMask(s32 core, sceSdEffectPreset_t *preset)
         sceSdWriteAddrReg(core, 0x184, preset->sameRSrc);
     if (all || (mask & 0x40000))
         sceSdWriteAddrReg(core, 0x186, preset->diffLDst);
-    if (all || (mask & 0x80000))
+    if (all || (mask & IOP_DMA_CH4_ENABLE))
         sceSdWriteAddrReg(core, 0x188, preset->diffRDst);
     if (all || (mask & 0x100000))
         sceSdWriteAddrReg(core, 0x18A, preset->comb3LSrc);
@@ -303,8 +303,8 @@ void libsd_sceSdGetEffectAttr(s32 core, sceSdEffectAttr_t *attr)
     attr->mode = sceSdEffectAttr[core].mode;
     attr->delay = sceSdEffectAttr[core].delay;
     attr->feedback = sceSdEffectAttr[core].feedback;
-    attr->depth_L = *(volatile u16 *)(0xBF900764 + core * 0x28);
-    attr->depth_R = *(volatile u16 *)(0xBF900766 + core * 0x28);
+    attr->depth_L = *(volatile u16 *)SPU2_EVOLL(core);
+    attr->depth_R = *(volatile u16 *)SPU2_EVOLR(core);
 }
 /* ENDF libsd_sceSdGetEffectAttr */
 /* FUNC libsd_sceSdSetEffectAttr */
@@ -331,7 +331,7 @@ s32 libsd_sceSdSetEffectAttr(s32 core, sceSdEffectAttr_t *attr)
     enabled = 0;
     oldMode = 0;
     recopied = 0;
-    statReg = (volatile u16 *)((core << 10) + 0xBF90019A);
+    statReg = (volatile u16 *)SPU2_ATTR(core);
     preset.mask = 0;
     mode = attr->mode;
     if ((mode & 0x100) != 0) {
@@ -412,13 +412,13 @@ s32 libsd_sceSdSetEffectAttr(s32 core, sceSdEffectAttr_t *attr)
         if (res < 0)
             goto done;
     }
-    *(volatile u16 *)(core * 0x28 + 0xBF900764) = attr->depth_L;
-    *(volatile u16 *)(core * 0x28 + 0xBF900766) = attr->depth_R;
+    *(volatile u16 *)SPU2_EVOLL(core) = attr->depth_L;
+    *(volatile u16 *)SPU2_EVOLR(core) = attr->depth_R;
     sceSdApplyEffectAttrMask(core, &preset);
     if (copied != 0) {
-        *(volatile u16 *)(regOfs * 2 + 0xBF9002E0) = sceSdEffectAreaStart[core] >> 17;
-        *(volatile u16 *)(regOfs * 2 + 0xBF9002E2) = sceSdEffectAreaStart[core] >> 1;
-        sync = *(volatile u16 *)(regOfs * 2 + 0xBF9002E2);
+        *(volatile u16 *)(regOfs * 2 + SPU2_ESA(0)) = sceSdEffectAreaStart[core] >> 17;
+        *(volatile u16 *)(regOfs * 2 + (SPU2_ESA(0) + 2)) = sceSdEffectAreaStart[core] >> 1;
+        sync = *(volatile u16 *)(regOfs * 2 + (SPU2_ESA(0) + 2));
     }
     res = 0;
     if (clean != 0)
@@ -437,7 +437,7 @@ done:
 /* FUNC sceSdGetEffectAreaEnd */
 u32 sceSdGetEffectAreaEnd(s32 core)
 {
-    volatile u16 *reg = (volatile u16 *)(0xBF90033C + (core << 10));
+    volatile u16 *reg = (volatile u16 *)SPU2_EEA(core);
 
     return (*reg << 17) | 0x1FFFF;
 }
@@ -458,7 +458,7 @@ s32 libsd_sceSdSetEffectMode(s32 core, sceSdEffectAttr_t *attr)
 
     clean = 0;
     channel = 0;
-    statReg = (volatile u16 *)((core << 10) + 0xBF90019A);
+    statReg = (volatile u16 *)SPU2_ATTR(core);
     preset.mask = 0;
     mode = attr->mode;
     if ((mode & 0x100) != 0) {
@@ -484,12 +484,12 @@ s32 libsd_sceSdSetEffectMode(s32 core, sceSdEffectAttr_t *attr)
         *statReg &= 0xFF7F;
         intrman_CpuResumeIntr(state);
     }
-    *(volatile u16 *)(core * 0x28 + 0xBF900764) = 0;
-    *(volatile u16 *)(core * 0x28 + 0xBF900766) = 0;
+    *(volatile u16 *)SPU2_EVOLL(core) = 0;
+    *(volatile u16 *)SPU2_EVOLR(core) = 0;
     sceSdApplyEffectAttrMask(core, &preset);
     {
-        volatile u16 *areaHi = (volatile u16 *)(0xBF9002E0 + (core << 10));
-        volatile u16 *areaLo = (volatile u16 *)(0xBF9002E2 + (core << 10));
+        volatile u16 *areaHi = (volatile u16 *)SPU2_ESA(core);
+        volatile u16 *areaLo = (volatile u16 *)(SPU2_ESA(core) + 2);
 
         *areaHi = sceSdEffectAreaStart[core] >> 17;
         *areaLo = sceSdEffectAreaStart[core] >> 1;
@@ -538,8 +538,8 @@ s32 libsd_sceSdSetEffectModeParams(s32 core, sceSdEffectAttr_t *attr)
         sceSdApplyEffectAttrMask(core, &preset);
       }
     }
-    *(volatile u16 *)(core * 0x28 + 0xBF900764) = attr->depth_L;
-    *(volatile u16 *)(core * 0x28 + 0xBF900766) = attr->depth_R;
+    *(volatile u16 *)SPU2_EVOLL(core) = attr->depth_L;
+    *(volatile u16 *)SPU2_EVOLR(core) = attr->depth_R;
     sceSdStubNoOp();
     return 0;
 }
@@ -550,74 +550,74 @@ s32 sceSdInitDma()
 {
     s32 state;
 
-    *(volatile u32 *)0xBF801404 = 0xBF900000;
-    *(volatile u32 *)0xBF80140C = 0xBF900800;
+    *(volatile u32 *)IOP_SPU2_DMA0_BANK = 0xBF900000;
+    *(volatile u32 *)IOP_SPU2_DMA1_BANK = 0xBF900800;
     intrman_CpuSuspendIntr(&state);
-    *(volatile u32 *)0xBF8010F0 |= 0x80000;
-    *(volatile u32 *)0xBF801570 |= 0x8;
+    *(volatile u32 *)IOP_DPCR |= IOP_DMA_CH4_ENABLE;
+    *(volatile u32 *)IOP_DPCR2 |= IOP_DMA_CH7_ENABLE;
     intrman_CpuResumeIntr(state);
-    *(volatile u32 *)0xBF801014 = 0x200B31E1;
-    *(volatile u32 *)0xBF801414 = 0x200B31E1;
+    *(volatile u32 *)IOP_SPU_DELAY = 0x200B31E1;
+    *(volatile u32 *)IOP_SPU2_DELAY = 0x200B31E1;
 }
 /* ENDF sceSdInitDma */
 /* FUNC sceSdInitHardware */
 s32 sceSdInitHardware()
 {
     sceSdInitDma();
-    *(volatile u16 *)0xBF9007C6 = 0x900;
-    *(volatile u16 *)0xBF9007C8 = 0x200;
-    *(volatile u16 *)0xBF9007CA = 0x8;
+    *(volatile u16 *)SPU2_SPDIF_MODE = 0x900;
+    *(volatile u16 *)SPU2_SPDIF_MEDIA = 0x200;
+    *(volatile u16 *)SPU2_SPDIF_PROTECT = IOP_DMA_CH7_ENABLE;
 }
 /* ENDF sceSdInitHardware */
 /* FUNC sceSdInitCoreMix */
 s32 sceSdInitCoreMix(s32 keepEffect)
 {
-    *(volatile u16 *)0xBF9007C0 = 0xC032;
+    *(volatile u16 *)SPU2_SPDIF_OUT = 0xC032;
     if (keepEffect == 0) {
-        *(volatile u16 *)0xBF90019A = 0xC000;
-        *(volatile u16 *)0xBF90059A = 0xC001;
+        *(volatile u16 *)SPU2_ATTR(0) = 0xC000;
+        *(volatile u16 *)SPU2_ATTR(1) = 0xC001;
     } else {
-        *(volatile u16 *)0xBF90019A = 0xC080;
-        *(volatile u16 *)0xBF90059A = 0xC081;
+        *(volatile u16 *)SPU2_ATTR(0) = 0xC080;
+        *(volatile u16 *)SPU2_ATTR(1) = 0xC081;
     }
-    *(volatile u16 *)0xBF900188 = 0xFFFF;
-    *(volatile u16 *)0xBF90018A = 0xFF;
-    *(volatile u16 *)0xBF900190 = 0xFFFF;
-    *(volatile u16 *)0xBF900192 = 0xFF;
-    *(volatile u16 *)0xBF90018C = 0xFFFF;
-    *(volatile u16 *)0xBF90018E = 0xFF;
-    *(volatile u16 *)0xBF900194 = 0xFFFF;
-    *(volatile u16 *)0xBF900196 = 0xFF;
-    *(volatile u16 *)0xBF900588 = 0xFFFF;
-    *(volatile u16 *)0xBF90058A = 0xFF;
-    *(volatile u16 *)0xBF900590 = 0xFFFF;
-    *(volatile u16 *)0xBF900592 = 0xFF;
-    *(volatile u16 *)0xBF90058C = 0xFFFF;
-    *(volatile u16 *)0xBF90058E = 0xFF;
-    *(volatile u16 *)0xBF900594 = 0xFFFF;
-    *(volatile u16 *)0xBF900596 = 0xFF;
-    *(volatile u16 *)0xBF900198 = 0xFF0;
-    *(volatile u16 *)0xBF900598 = 0xFFC;
+    *(volatile u16 *)SPU2_VMIXL(0) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXL(0) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXR(0) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXR(0) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXEL(0) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXEL(0) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXER(0) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXER(0) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXL(1) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXL(1) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXR(1) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXR(1) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXEL(1) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXEL(1) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_VMIXER(1) = 0xFFFF;
+    *(volatile u16 *)(SPU2_VMIXER(1) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_MMIX(0) = 0xFF0;
+    *(volatile u16 *)SPU2_MMIX(1) = 0xFFC;
     if (keepEffect == 0) {
-        *(volatile u16 *)0xBF900760 = 0;
-        *(volatile u16 *)0xBF900762 = 0;
-        *(volatile u16 *)0xBF900788 = 0;
-        *(volatile u16 *)0xBF90078A = 0;
-        *(volatile u16 *)0xBF900764 = 0;
-        *(volatile u16 *)0xBF900766 = 0;
-        *(volatile u16 *)0xBF90078C = 0;
-        *(volatile u16 *)0xBF90078E = 0;
-        *(volatile u16 *)0xBF90033C = 0xE;
-        *(volatile u16 *)0xBF90073C = 0xF;
+        *(volatile u16 *)SPU2_MVOLL(0) = 0;
+        *(volatile u16 *)SPU2_MVOLR(0) = 0;
+        *(volatile u16 *)SPU2_MVOLL(1) = 0;
+        *(volatile u16 *)SPU2_MVOLR(1) = 0;
+        *(volatile u16 *)SPU2_EVOLL(0) = 0;
+        *(volatile u16 *)SPU2_EVOLR(0) = 0;
+        *(volatile u16 *)SPU2_EVOLL(1) = 0;
+        *(volatile u16 *)SPU2_EVOLR(1) = 0;
+        *(volatile u16 *)SPU2_EEA(0) = 0xE;
+        *(volatile u16 *)SPU2_EEA(1) = 0xF;
     }
-    *(volatile u16 *)0xBF900768 = 0;
-    *(volatile u16 *)0xBF90076A = 0;
-    *(volatile u16 *)0xBF900790 = 0x7FFF;
-    *(volatile u16 *)0xBF900792 = 0x7FFF;
-    *(volatile u16 *)0xBF90076C = 0;
-    *(volatile u16 *)0xBF90076E = 0;
-    *(volatile u16 *)0xBF900794 = 0;
-    *(volatile u16 *)0xBF900796 = 0;
+    *(volatile u16 *)SPU2_AVOLL(0) = 0;
+    *(volatile u16 *)SPU2_AVOLR(0) = 0;
+    *(volatile u16 *)SPU2_AVOLL(1) = 0x7FFF;
+    *(volatile u16 *)SPU2_AVOLR(1) = 0x7FFF;
+    *(volatile u16 *)SPU2_BVOLL(0) = 0;
+    *(volatile u16 *)SPU2_BVOLR(0) = 0;
+    *(volatile u16 *)SPU2_BVOLL(1) = 0;
+    *(volatile u16 *)SPU2_BVOLR(1) = 0;
 }
 /* ENDF sceSdInitCoreMix */
 INCLUDE_ASM("LIBSD", libsd_sceSdVoiceTrans);
@@ -663,45 +663,45 @@ s32 sceSdResetCores()
 {
     u32 i;
 
-    *(volatile u16 *)0xBF9007C0 = 0;
+    *(volatile u16 *)SPU2_SPDIF_OUT = 0;
     sceSdDelay(2);
-    *(volatile u16 *)0xBF9007C0 = 0x8000;
+    *(volatile u16 *)SPU2_SPDIF_OUT = 0x8000;
     sceSdDelay(1);
-    *(volatile u16 *)0xBF900760 = 0;
-    *(volatile u16 *)0xBF900762 = 0;
-    *(volatile u16 *)0xBF900788 = 0;
-    *(volatile u16 *)0xBF90078A = 0;
-    *(volatile u16 *)0xBF9001B0 = 0;
-    *(volatile u16 *)0xBF9005B0 = 0;
-    *(volatile u16 *)0xBF90019A = 0;
-    *(volatile u16 *)0xBF90059A = 0;
+    *(volatile u16 *)SPU2_MVOLL(0) = 0;
+    *(volatile u16 *)SPU2_MVOLR(0) = 0;
+    *(volatile u16 *)SPU2_MVOLL(1) = 0;
+    *(volatile u16 *)SPU2_MVOLR(1) = 0;
+    *(volatile u16 *)SPU2_ADMAS(0) = 0;
+    *(volatile u16 *)SPU2_ADMAS(1) = 0;
+    *(volatile u16 *)SPU2_ATTR(0) = 0;
+    *(volatile u16 *)SPU2_ATTR(1) = 0;
     sceSdDelay(1);
-    *(volatile u16 *)0xBF90019A = 0x8000;
-    *(volatile u16 *)0xBF90059A = 0x8000;
-    *(volatile u16 *)0xBF900760 = 0;
-    *(volatile u16 *)0xBF900762 = 0;
-    *(volatile u16 *)0xBF900788 = 0;
-    *(volatile u16 *)0xBF90078A = 0;
+    *(volatile u16 *)SPU2_ATTR(0) = 0x8000;
+    *(volatile u16 *)SPU2_ATTR(1) = 0x8000;
+    *(volatile u16 *)SPU2_MVOLL(0) = 0;
+    *(volatile u16 *)SPU2_MVOLR(0) = 0;
+    *(volatile u16 *)SPU2_MVOLL(1) = 0;
+    *(volatile u16 *)SPU2_MVOLR(1) = 0;
     i = 0;
-    while ((*(volatile u16 *)0xBF900344 & 0x7FF) != 0
-           || (*(volatile u16 *)0xBF900744 & 0x7FF) != 0) {
+    while ((*(volatile u16 *)SPU2_STATX(0) & 0x7FF) != 0
+           || (*(volatile u16 *)SPU2_STATX(1) & 0x7FF) != 0) {
         if (i >= 0xF01)
             break;
         sceSdDelay(1);
         i++;
     }
-    *(volatile u16 *)0xBF9001A4 = 0xFFFF;
-    *(volatile u16 *)0xBF9001A6 = 0xFF;
-    *(volatile u16 *)0xBF9005A4 = 0xFFFF;
-    *(volatile u16 *)0xBF9005A6 = 0xFF;
-    *(volatile u16 *)0xBF900180 = 0;
-    *(volatile u16 *)0xBF900182 = 0;
-    *(volatile u16 *)0xBF900580 = 0;
-    *(volatile u16 *)0xBF900582 = 0;
-    *(volatile u16 *)0xBF900184 = 0;
-    *(volatile u16 *)0xBF900186 = 0;
-    *(volatile u16 *)0xBF900584 = 0;
-    *(volatile u16 *)0xBF900586 = 0;
+    *(volatile u16 *)SPU2_KOFF(0) = 0xFFFF;
+    *(volatile u16 *)(SPU2_KOFF(0) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_KOFF(1) = 0xFFFF;
+    *(volatile u16 *)(SPU2_KOFF(1) + 2) = 0xFF;
+    *(volatile u16 *)SPU2_PMON(0) = 0;
+    *(volatile u16 *)(SPU2_PMON(0) + 2) = 0;
+    *(volatile u16 *)SPU2_PMON(1) = 0;
+    *(volatile u16 *)(SPU2_PMON(1) + 2) = 0;
+    *(volatile u16 *)SPU2_NON(0) = 0;
+    *(volatile u16 *)(SPU2_NON(0) + 2) = 0;
+    *(volatile u16 *)SPU2_NON(1) = 0;
+    *(volatile u16 *)(SPU2_NON(1) + 2) = 0;
     return 0;
 }
 #else
@@ -711,7 +711,7 @@ INCLUDE_ASM("LIBSD", sceSdResetCores);
 /* FUNC sceSdSetDmaModeWrite */
 u32 sceSdSetDmaModeWrite(s32 core)
 {
-    volatile u32 *reg = (volatile u32 *)(0xBF801014 + (core << 10));
+    volatile u32 *reg = (volatile u32 *)(IOP_SPU_DELAY + (core << 10));
 
     *reg = *reg & 0xF0FFFFFF;
 }
@@ -719,7 +719,7 @@ u32 sceSdSetDmaModeWrite(s32 core)
 /* FUNC sceSdSetDmaModeRead */
 u32 sceSdSetDmaModeRead(s32 core)
 {
-    volatile u32 *reg = (volatile u32 *)(0xBF801014 + (core << 10));
+    volatile u32 *reg = (volatile u32 *)(IOP_SPU_DELAY + (core << 10));
 
     *reg = (*reg & 0xF0FFFFFF) | 0x2000000;
 }
@@ -758,8 +758,8 @@ u32 size;
     s32 core = op >> 4;
     s32 v = core << 9;
     volatile u32 *chcr = (volatile u32 *)(core * 0x440 + 0xBF8010C8);
-    volatile u16 *attr = (volatile u16 *)((v << 1) + 0xBF90019A);
-    volatile u16 *admaStat = (volatile u16 *)((v << 1) + 0xBF9001B0);
+    volatile u16 *attr = (volatile u16 *)(SPU2_ATTR(0) + (v << 1));
+    volatile u16 *admaStat = (volatile u16 *)(SPU2_ADMAS(0) + (v << 1));
     volatile u16 sync;
     s32 ret = 0;
     s32 state;
@@ -768,9 +768,9 @@ u32 size;
     switch (op & 0xF) {
     case 2:
         addr = (addr >> 1) & ~7;
-        *(volatile u16 *)((v << 1) + 0xBF9001AA) = addr;
-        *(volatile u16 *)((v << 1) + 0xBF9001A8) = addr >> 16;
-        sync = *(volatile u16 *)((v << 1) + 0xBF9001A8);
+        *(volatile u16 *)((SPU2_TSA(0) + 2) + (v << 1)) = addr;
+        *(volatile u16 *)(SPU2_TSA(0) + (v << 1)) = addr >> 16;
+        sync = *(volatile u16 *)(SPU2_TSA(0) + (v << 1));
         break;
     case 4:
         if ((*attr & 0x30) != 0 || (*chcr & 0x1000000) != 0 || *admaStat != 0)
@@ -815,7 +815,7 @@ u32 size;
                 pos = pos1;
             *chcr = *chcr & 0xFEFFFFFF;
             if ((*attr & 0x30) != 0) {
-                volatile u16 *dmaStat = (volatile u16 *)((v << 1) + 0xBF900344);
+                volatile u16 *dmaStat = (volatile u16 *)(SPU2_STATX(0) + (v << 1));
 
                 i = 0;
                 while ((*dmaStat & 0x80) == 0) {
@@ -1229,8 +1229,8 @@ INCLUDE_ASM("LIBSD", libsd_sceSdPitch2Note);
 s32 sceSdSetSpdifMode(s32 mode)
 {
     volatile s32 sync;
-    volatile u16 *attrReg = (volatile u16 *)0xBF9007C0;
-    volatile u16 *ctrlReg = (volatile u16 *)0xBF9007C6;
+    volatile u16 *attrReg = (volatile u16 *)SPU2_SPDIF_OUT;
+    volatile u16 *ctrlReg = (volatile u16 *)SPU2_SPDIF_MODE;
     u16 reg0 = *attrReg;
     u16 reg1 = *ctrlReg;
     u16 first = reg0 & 0xFE57;
@@ -1259,17 +1259,17 @@ s32 sceSdSetSpdifMode(s32 mode)
     else
         b &= 0x7FFF;
     if ((mode & 0xF00) == 0x800) {
-        *(volatile u16 *)0xBF9007C8 = 0x200;
+        *(volatile u16 *)SPU2_SPDIF_MEDIA = 0x200;
         b = (b & 0xC0FF) | 0x1900;
     } else if ((mode & 0xF00) == 0x400) {
-        *(volatile u16 *)0xBF9007C8 = 0;
+        *(volatile u16 *)SPU2_SPDIF_MEDIA = 0;
         b = (b & 0xC0FF) | 0x100;
     } else {
-        *(volatile u16 *)0xBF9007C8 = 0x200;
+        *(volatile u16 *)SPU2_SPDIF_MEDIA = 0x200;
         b = (b & 0xC0FF) | 0x900;
     }
-    *(volatile u16 *)0xBF9007C0 = a;
-    *(volatile u16 *)0xBF9007C6 = b;
+    *(volatile u16 *)SPU2_SPDIF_OUT = a;
+    *(volatile u16 *)SPU2_SPDIF_MODE = b;
     sceSdSpdifMode = mode;
     sync = sceSdSpdifMode;
     return 0;
@@ -1332,7 +1332,7 @@ INCLUDE_ASM("LIBSD", libsd_sceSdSetCoreAttr);
  * them undefined and the link fails. */
 u16 libsd_sceSdGetCoreAttr(u16 entry)
 {
-    u16 reg = *(volatile u16 *)(0xBF90019A + ((entry & 1) << 10));
+    u16 reg = *(volatile u16 *)SPU2_ATTR(entry & 1);
 
     switch (entry & 0xE) {
     case 2:
@@ -1423,9 +1423,9 @@ s32 sceSdIrqHandler()
         flags = (*(volatile u16 *)0xBF9007C2 & 0xC) >> 2;
         while (flags != 0) {
             if (flags & 1)
-                *(volatile u16 *)0xBF90019A &= 0xFFBF;
+                *(volatile u16 *)SPU2_ATTR(0) &= 0xFFBF;
             if (flags & 2)
-                *(volatile u16 *)0xBF90059A &= 0xFFBF;
+                *(volatile u16 *)SPU2_ATTR(1) &= 0xFFBF;
             if (sceSdSpu2IntrHandler != 0)
                 ((void (*)(s32, void *))sceSdSpu2IntrHandler)(flags, sceSdSpu2IntrArg);
             else if (sceSdIrqCallback != 0)
@@ -1442,7 +1442,7 @@ INCLUDE_ASM("LIBSD", sceSdIrqHandler);
 /* FUNC sceSdResetVoices */
 #ifdef NON_MATCHING
 /* Retail's length and instructions, but two address pseudos land in other
- * registers: the lui half of 0xBF90019A survives the timeout loop in retail
+ * registers: the lui half of SPU2_ATTR(0) survives the timeout loop in retail
  * and gcc rematerialises it in the loop's last delay slot. */
 s32 sceSdResetVoices()
 {
@@ -1450,26 +1450,26 @@ s32 sceSdResetVoices()
     volatile u16 *src = sceSdDummyBlock;
     volatile u16 *v0 = (volatile u16 *)0xBF900000;
     volatile u16 *v1 = (volatile u16 *)0xBF900400;
-    volatile u16 *a0 = (volatile u16 *)0xBF9001C0;
-    volatile u16 *a1 = (volatile u16 *)0xBF9005C0;
+    volatile u16 *a0 = (volatile u16 *)SPU2_SSA(0);
+    volatile u16 *a1 = (volatile u16 *)SPU2_SSA(1);
     volatile u16 *lo;
     volatile u16 *hi;
     volatile u16 *lo2;
     volatile u16 *hi2;
 
-    *(volatile u16 *)0xBF9001A8 = 0;
-    *(volatile u16 *)0xBF9001AA = 0x2800;
+    *(volatile u16 *)SPU2_TSA(0) = 0;
+    *(volatile u16 *)(SPU2_TSA(0) + 2) = 0x2800;
     for (i = 0; i < 8; i++)
-        *(volatile u16 *)0xBF9001AC = *src++;
-    *(volatile u16 *)0xBF90019A = (*(volatile u16 *)0xBF90019A & 0xFFCF) | 0x10;
+        *(volatile u16 *)SPU2_DATA0(0) = *src++;
+    *(volatile u16 *)SPU2_ATTR(0) = (*(volatile u16 *)SPU2_ATTR(0) & 0xFFCF) | 0x10;
     i = 0;
-    while ((*(volatile u16 *)0xBF900344 & 0x400) != 0) {
+    while ((*(volatile u16 *)SPU2_STATX(0) & 0x400) != 0) {
         sceSdDelay(1);
         i++;
         if (i > 0x1000000)
             break;
     }
-    *(volatile u16 *)0xBF90019A = *(volatile u16 *)0xBF90019A & 0xFFCF;
+    *(volatile u16 *)SPU2_ATTR(0) = *(volatile u16 *)SPU2_ATTR(0) & 0xFFCF;
     for (i = 0; i < 0x18; i++) {
         *v1 = 0;
         *v0++ = *v1++;
@@ -1491,26 +1491,26 @@ s32 sceSdResetVoices()
         a1 += 5;
         a0 += 5;
     }
-    lo = (volatile u16 *)0xBF9001A0;
-    hi = (volatile u16 *)0xBF9005A0;
-    lo2 = (volatile u16 *)0xBF9001A2;
-    hi2 = (volatile u16 *)0xBF9005A2;
+    lo = (volatile u16 *)SPU2_KON(0);
+    hi = (volatile u16 *)SPU2_KON(1);
+    lo2 = (volatile u16 *)(SPU2_KON(0) + 2);
+    hi2 = (volatile u16 *)(SPU2_KON(1) + 2);
     *hi = 0xFFFF;
     *lo = *hi;
     *hi2 = 0xFF;
     *lo2 = *hi2;
     sceSdDelay(3);
-    lo = (volatile u16 *)0xBF9001A4;
-    hi = (volatile u16 *)0xBF9005A4;
-    lo2 = (volatile u16 *)0xBF9001A6;
-    hi2 = (volatile u16 *)0xBF9005A6;
+    lo = (volatile u16 *)SPU2_KOFF(0);
+    hi = (volatile u16 *)SPU2_KOFF(1);
+    lo2 = (volatile u16 *)(SPU2_KOFF(0) + 2);
+    hi2 = (volatile u16 *)(SPU2_KOFF(1) + 2);
     *hi = 0xFFFF;
     *lo = *hi;
     *hi2 = 0xFF;
     *lo2 = *hi2;
     sceSdDelay(3);
-    lo = (volatile u16 *)0xBF900340;
-    hi = (volatile u16 *)0xBF900342;
+    lo = (volatile u16 *)SPU2_ENDX(0);
+    hi = (volatile u16 *)(SPU2_ENDX(0) + 2);
     *hi = 0;
     *lo = *hi;
 }
@@ -1560,10 +1560,10 @@ s32 sceSdInitState(s32 flag)
         sysclib_bzero(sceSdEffectAttr, 0x28);
         sceSdEffectAreaStart[0] = 0x1DFFF0;
         sceSdEffectAreaStart[1] = 0x1FFFF0;
-        *(volatile u16 *)0xBF9002E0 = 0xE;
-        *(volatile u16 *)0xBF9002E2 = 0xFFF8;
-        *(volatile u16 *)0xBF9006E0 = 0xF;
-        *(volatile u16 *)0xBF9006E2 = 0xFFF8;
+        *(volatile u16 *)SPU2_ESA(0) = 0xE;
+        *(volatile u16 *)(SPU2_ESA(0) + 2) = 0xFFF8;
+        *(volatile u16 *)SPU2_ESA(1) = 0xF;
+        *(volatile u16 *)(SPU2_ESA(1) + 2) = 0xFFF8;
     }
     flag = 0;
     param[0] = 2;
@@ -1676,7 +1676,7 @@ IRX_IMPORT(loadcore, RegisterLibraryEntries, 0x6);
 IRX_IMPORT_TABLE_END;
 IRX_IMPORT_TABLE(sifman, 1, 1);
 IRX_IMPORT(sifman, sceSifSetDma, 0x7);
-IRX_IMPORT(sifman, sceSifDmaStat, 0x8);
+IRX_IMPORT(sifman, sceSifDmaStat, IOP_DMA_CH7_ENABLE);
 IRX_IMPORT_TABLE_END;
 IRX_IMPORT_TABLE(sysclib, 1, 3);
 IRX_IMPORT(sysclib, bzero, 0x11);
@@ -1686,7 +1686,7 @@ IRX_IMPORT(thevent, CreateEventFlag, 0x4);
 IRX_IMPORT(thevent, DeleteEventFlag, 0x5);
 IRX_IMPORT(thevent, SetEventFlag, 0x6);
 IRX_IMPORT(thevent, iSetEventFlag, 0x7);
-IRX_IMPORT(thevent, ClearEventFlag, 0x8);
+IRX_IMPORT(thevent, ClearEventFlag, IOP_DMA_CH7_ENABLE);
 IRX_IMPORT(thevent, iClearEventFlag, 0x9);
 IRX_IMPORT(thevent, WaitEventFlag, 0xa);
 IRX_IMPORT_TABLE_END;
