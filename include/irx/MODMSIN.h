@@ -56,7 +56,7 @@ int modmsin_e10();
 int modmsin_sceMSIn_Init(sceMSInWork_t *work);
 int modmsin_e5();
 int modmsin_e6();
-int msinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len);
+int sceMsinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len);
 int modmsin_e7(sceMSInWork_t *work, u32 port, u32 msg);
 int modmsin_e8(sceMSInWork_t *work, u32 port, const u8 *msg, u32 maxLen);
 int modmsin_e9(sceMSInWork_t *work, u32 port, const u8 *msg);

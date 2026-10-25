@@ -26,11 +26,11 @@ int modmidi_e26(int argc, char **argv)
         while (sysclib_look_ctype_table(*p) & 8) {
             p++;
         }
-        for (k = 0; midiOptions[k].len > 0; k++) {
-            if (sysclib_strncmp(p, midiOptions[k].name,
-                                midiOptions[k].len) == 0) {
-                *midiOptions[k].var =
-                    sysclib_strtol(p + (midiOptions[k].len + 1), NULL, 10);
+        for (k = 0; sceMidiOptions[k].len > 0; k++) {
+            if (sysclib_strncmp(p, sceMidiOptions[k].name,
+                                sceMidiOptions[k].len) == 0) {
+                *sceMidiOptions[k].var =
+                    sysclib_strtol(p + (sceMidiOptions[k].len + 1), NULL, 10);
                 break;
             }
         }
@@ -51,7 +51,7 @@ int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval)
     sceMidiSlot_t *slot;
     int i;
 
-    midiTickScale = interval << 7;
+    sceMidiTickScale = interval << 7;
     if (work == NULL) {
         return -1;
     }
@@ -107,10 +107,10 @@ int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval)
     return 0;
 }
 /* ENDF modmidi_sceMidi_Init */
-/* FUNC midiParseHeader */
+/* FUNC sceMidiParseHeader */
 /* Not a parser: a 4+4 character chunk tag comparator, with both tags passed
  * as words and both strings read backwards. */
-int midiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
+int sceMidiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
 {
     char *p0;
     char *p1;
@@ -118,7 +118,7 @@ int midiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
 
     p0 = (char *)&tag0;
     p1 = (char *)&tag1;
-    if (midiVerbose != 0) {
+    if (sceMidiVerbose != 0) {
         stdio_printf(aCCCCCCCC, p0[3], p0[2], p0[1], p0[0], p1[3], p1[2],
                      p1[1], p1[0]);
     }
@@ -129,7 +129,7 @@ int midiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
     }
     return 1;
 }
-/* ENDF midiParseHeader */
+/* ENDF sceMidiParseHeader */
 /* FUNC modmidi_sceMidi_Load */
 #ifdef NON_MATCHING
 /* Equivalent, same size. Four pointers land one callee-saved register off
@@ -178,17 +178,17 @@ int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo)
     if (vers == NULL) {
         return -1;
     }
-    if (midiParseHeader(*(u32 *)vers->magic, *(u32 *)vers->name, magic, name) == 0) {
+    if (sceMidiParseHeader(*(u32 *)vers->magic, *(u32 *)vers->name, magic, name) == 0) {
         return -1;
     }
     sequ = (sceMidiSequ_t *)((u8 *)vers + vers->size);
-    if (midiParseHeader(*(u32 *)sequ->magic, *(u32 *)sequ->name, magic, aSequ) == 0) {
+    if (sceMidiParseHeader(*(u32 *)sequ->magic, *(u32 *)sequ->name, magic, aSequ) == 0) {
         return -1;
     }
     ofs = sequ->songOfs;
     song = (sceMidiSongChunk_t *)((u8 *)vers + ofs);
     if (ofs == -1 ||
-        midiParseHeader(*(u32 *)song->magic, *(u32 *)song->name, magic, aSong) == 0) {
+        sceMidiParseHeader(*(u32 *)song->magic, *(u32 *)song->name, magic, aSong) == 0) {
         song = NULL;
     }
     ofs = sequ->midiOfs;
@@ -196,7 +196,7 @@ int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo)
         return -1;
     }
     midi = (sceMidiMidiChunk_t *)((u8 *)vers + ofs);
-    if (midiParseHeader(*(u32 *)midi->magic, *(u32 *)midi->name, magic,
+    if (sceMidiParseHeader(*(u32 *)midi->magic, *(u32 *)midi->name, magic,
                         (const char *)aMidi) == 0) {
         return -1;
     }
@@ -292,18 +292,18 @@ int modmidi_e5(sceMidiWork_t *work)
             continue;
         }
         if (slot->flags & 2) {
-            midiTrackServiceTick(slot, vt);
+            sceMidiTrackServiceTick(slot, vt);
         }
         if (slot->flags & 0x100) {
-            midiSongServiceTick(work, unit / 2, slot);
+            sceMidiSongServiceTick(work, unit / 2, slot);
         }
     }
     return 0;
 }
 /* ENDF modmidi_e5 */
 INCLUDE_ASM("MODMIDI", D_00000784);
-/* FUNC midiLoopTableAdd */
-sceMidiLoop_t *midiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
+/* FUNC sceMidiLoopTableAdd */
+sceMidiLoop_t *sceMidiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
 {
     int i;
 
@@ -314,13 +314,13 @@ sceMidiLoop_t *midiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
     }
     return NULL;
 }
-/* ENDF midiLoopTableAdd */
-/* FUNC midiScanLoops */
+/* ENDF sceMidiLoopTableAdd */
+/* FUNC sceMidiScanLoops */
 #ifdef NON_MATCHING
 /* 40 bytes long: gcc keeps the four control-change arms and the many
  * `r++` exits as separate blocks where retail cross-jumps them, so the
  * two switches come out one layer flatter. */
-void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
+void sceMidiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
                    u8 val, sceMidiVoiceTbl_t *vt)
 {
     sceMidiLoop_t *e;
@@ -354,7 +354,7 @@ void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
         if (trk->ctlLoopId == 0xFF) {
             break;
         }
-        e = midiLoopTableAdd(trk->loop, trk->ctlLoopId);
+        e = sceMidiLoopTableAdd(trk->loop, trk->ctlLoopId);
         if (e == NULL) {
             e = trk->loop;
             for (i = 7; i != -1; i--, e++) {
@@ -362,7 +362,7 @@ void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
                     break;
                 }
             }
-        } else if (e->count != 0xFF && midiDebug != 0) {
+        } else if (e->count != 0xFF && sceMidiDebug != 0) {
             stdio_printf(aLoopStartDuple, trk->ctlLoopId);
         }
         if (e != NULL) {
@@ -372,7 +372,7 @@ void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
             e->unk03 = trk->deltaHeld;
             e->time = trk->tick;
             e->ptr = trk->cur;
-        } else if (midiDebug != 0) {
+        } else if (sceMidiDebug != 0) {
             stdio_printf(aLoopTableOverf);
         }
         r++;
@@ -385,9 +385,9 @@ void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
             r++;
             break;
         }
-        e = midiLoopTableAdd(trk->loop, trk->ctlLoopId);
+        e = sceMidiLoopTableAdd(trk->loop, trk->ctlLoopId);
         if (e == NULL) {
-            if (midiDebug != 0) {
+            if (sceMidiDebug != 0) {
                 stdio_printf(aNotFoundLoopSt, trk->ctlLoopId);
             }
             r++;
@@ -403,10 +403,10 @@ void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
             break;
         }
         if (slot->loopCb != NULL) {
-            midiLoopInfo.total = cnt;
-            midiLoopInfo.pass = trk->ctlLoopCnt - e->count + 1;
-            midiLoopInfo.id = e->id;
-            if (slot->loopCb(&midiLoopInfo, slot->loopArg) == 0) {
+            sceMidiLoopInfo.total = cnt;
+            sceMidiLoopInfo.pass = trk->ctlLoopCnt - e->count + 1;
+            sceMidiLoopInfo.id = e->id;
+            if (slot->loopCb(&sceMidiLoopInfo, slot->loopArg) == 0) {
                 e->count = 0xFF;
                 break;
             }
@@ -469,11 +469,11 @@ void midiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc,
     }
 }
 #else
-INCLUDE_ASM("MODMIDI", midiScanLoops);
+INCLUDE_ASM("MODMIDI", sceMidiScanLoops);
 #endif
-/* ENDF midiScanLoops */
-/* FUNC midiTrackSeekAbsolute */
-u32 midiTrackSeekAbsolute(sceMidiTrack_t *trk)
+/* ENDF sceMidiScanLoops */
+/* FUNC sceMidiTrackSeekAbsolute */
+u32 sceMidiTrackSeekAbsolute(sceMidiTrack_t *trk)
 {
     u32 us;
 
@@ -482,9 +482,9 @@ u32 midiTrackSeekAbsolute(sceMidiTrack_t *trk)
     trk->usPerTick = us;
     return us;
 }
-/* ENDF midiTrackSeekAbsolute */
-/* FUNC midiReadVarLen */
-int midiReadVarLen(sceMidiTrack_t *trk)
+/* ENDF sceMidiTrackSeekAbsolute */
+/* FUNC sceMidiReadVarLen */
+int sceMidiReadVarLen(sceMidiTrack_t *trk)
 {
     u8 *p;
     int v;
@@ -499,9 +499,9 @@ int midiReadVarLen(sceMidiTrack_t *trk)
     trk->cur = p;
     return v;
 }
-/* ENDF midiReadVarLen */
-/* FUNC midiTrackReset */
-int midiTrackReset(sceMidiTrack_t *trk)
+/* ENDF sceMidiReadVarLen */
+/* FUNC sceMidiTrackReset */
+int sceMidiTrackReset(sceMidiTrack_t *trk)
 {
     u8 *p;
     int v;
@@ -521,28 +521,28 @@ int midiTrackReset(sceMidiTrack_t *trk)
     }
     return v;
 }
-/* ENDF midiTrackReset */
-/* FUNC midiReadDeltaTime */
-int midiReadDeltaTime(sceMidiTrack_t *trk)
+/* ENDF sceMidiTrackReset */
+/* FUNC sceMidiReadDeltaTime */
+int sceMidiReadDeltaTime(sceMidiTrack_t *trk)
 {
     int v;
 
     trk->cur--;
-    v = midiReadVarLen(trk);
+    v = sceMidiReadVarLen(trk);
     trk->cur += v;
     return v;
 }
-/* ENDF midiReadDeltaTime */
-/* FUNC midiParseMetaEvent */
+/* ENDF sceMidiReadDeltaTime */
+/* FUNC sceMidiParseMetaEvent */
 #ifdef NON_MATCHING
 /* Four bytes short: gcc cross-jumps the `trk->cur += len` tail the
  * callback-handled path and the default both end in, and hoists the
  * `return 1` out of the compare chain; retail keeps two copies. */
-int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
+int sceMidiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
 {
     int len;
 
-    len = midiReadVarLen(trk);
+    len = sceMidiReadVarLen(trk);
     if (slot->metaCb != NULL) {
         if (slot->metaCb(type, trk->cur, len, slot->metaArg) == 0) {
             trk->cur += len;
@@ -552,7 +552,7 @@ int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
     switch (type) {
     case 0x51:
         if (len != 3) {
-            if (midiDebug != 0) {
+            if (sceMidiDebug != 0) {
                 stdio_printf(aParsemetaevent, len);
             }
             return 0;
@@ -560,11 +560,11 @@ int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
         trk->tempo = trk->cur[0] << 16;
         trk->tempo += trk->cur[1] << 8;
         trk->tempo += trk->cur[2];
-        if (midiVerbose != 0) {
+        if (sceMidiVerbose != 0) {
             stdio_printf(aTempoD, 60000000 / trk->tempo);
         }
         trk->cur += 3;
-        midiTrackSeekAbsolute(trk);
+        sceMidiTrackSeekAbsolute(trk);
         return 1;
     case 0x2F:
         slot->flags |= 4;
@@ -574,20 +574,20 @@ int midiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
     return 1;
 }
 #else
-INCLUDE_ASM("MODMIDI", midiParseMetaEvent);
+INCLUDE_ASM("MODMIDI", sceMidiParseMetaEvent);
 #endif
-/* ENDF midiParseMetaEvent */
-/* FUNC midiOutputPush */
-sceMidiVoice_t *midiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
+/* ENDF sceMidiParseMetaEvent */
+/* FUNC sceMidiOutputPush */
+sceMidiVoice_t *sceMidiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
 {
     if (index >= vt->nVoiceWord) {
         return NULL;
     }
     return &vt->voice[index];
 }
-/* ENDF midiOutputPush */
-/* FUNC midiParseExcEvent */
-void midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
+/* ENDF sceMidiOutputPush */
+/* FUNC sceMidiParseExcEvent */
+void sceMidiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                        sceMidiVoiceTbl_t *vt)
 {
     sceMidiVoice_t *v;
@@ -601,7 +601,7 @@ void midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
     int n;
     u32 total;
 
-    len = midiReadVarLen(trk);
+    len = sceMidiReadVarLen(trk);
     if (slot->excCb == NULL ||
         slot->excCb(trk->cur, len, slot->excArg) != 0) {
         if (vt != NULL) {
@@ -611,7 +611,7 @@ void midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                 do {
                     shift = 1;
                     if (mask & shift) {
-                        v = midiOutputPush(index, vt);
+                        v = sceMidiOutputPush(index, vt);
                         if (v != NULL) {
                             buf = v->buf;
                             if (buf != NULL) {
@@ -627,13 +627,13 @@ void midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                                         *p++ = *src++;
                                         n--;
                                     }
-                                } else if (midiDebug != 0) {
+                                } else if (sceMidiDebug != 0) {
                                     stdio_printf(aPaesexceventBu);
                                 }
                             }
                         }
                     } else if ((mask & 0xF) != 0) {
-                        /* Retail: midiSendChMsg skips four bits when the
+                        /* Retail: sceMidiSendChMsg skips four bits when the
                          * nibble is empty, this one when it is not. */
                         shift = 4;
                     }
@@ -645,9 +645,9 @@ void midiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
     }
     trk->cur += len;
 }
-/* ENDF midiParseExcEvent */
-/* FUNC midiSendChMsg */
-void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
+/* ENDF sceMidiParseExcEvent */
+/* FUNC sceMidiSendChMsg */
+void sceMidiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                    sceMidiVoiceTbl_t *vt, u32 msg, int len)
 {
     sceMidiVoice_t *v;
@@ -669,7 +669,7 @@ void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
         }
     }
     ch = msg & 0xF;
-    trk->chActive |= midiChBit[ch];
+    trk->chActive |= sceMidiChBit[ch];
     if (vt == NULL) {
         return;
     }
@@ -682,13 +682,13 @@ void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
     do {
         shift = 1;
         if (mask & shift) {
-            v = midiOutputPush(index, vt);
+            v = sceMidiOutputPush(index, vt);
             if (v != NULL) {
                 buf = v->buf;
                 if (buf != NULL) {
                     total = buf->len + len;
                     if (buf->size < total + 8) {
-                        if (midiDebug != 0) {
+                        if (sceMidiDebug != 0) {
                             stdio_printf(aSendchmsgBuffe);
                         }
                     } else {
@@ -711,9 +711,9 @@ void midiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
         index += shift;
     } while (mask != 0);
 }
-/* ENDF midiSendChMsg */
-/* FUNC midiChannelReset */
-int midiChannelReset(sceMidiTrack_t *trk, u8 ch)
+/* ENDF sceMidiSendChMsg */
+/* FUNC sceMidiChannelReset */
+int sceMidiChannelReset(sceMidiTrack_t *trk, u8 ch)
 {
     u32 prod;
     u32 v;
@@ -725,13 +725,13 @@ int midiChannelReset(sceMidiTrack_t *trk, u8 ch)
     }
     return v;
 }
-/* ENDF midiChannelReset */
-/* FUNC midiPlayEnv */
+/* ENDF sceMidiChannelReset */
+/* FUNC sceMidiPlayEnv */
 #ifdef NON_MATCHING
 /* Cannot match while .rodata is assembly: the controller switch compiles to
  * a jump table, and the table in the assembly .rodata already holds this
  * body's case labels, so a table emitted from the C file will not link. */
-int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
+int sceMidiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
 {
     u8 *p;
     u8 status;
@@ -752,7 +752,7 @@ int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
         } else {
             d1 = status;
             if (trk->runStatus == 0) {
-                if (midiDebug != 0) {
+                if (sceMidiDebug != 0) {
                     stdio_printf(aPlayenvRunning, status, trk->runStatus);
                 }
                 return 0;
@@ -763,18 +763,18 @@ int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
             trk->deltaHeld = 0;
             switch (status) {
             case 0xF0:
-                midiParseExcEvent(slot, trk, vt);
+                sceMidiParseExcEvent(slot, trk, vt);
                 break;
             case 0xF7:
-                midiReadDeltaTime(trk);
+                sceMidiReadDeltaTime(trk);
                 break;
             case 0xFF:
-                if (midiParseMetaEvent(slot, trk, d1) == 0) {
+                if (sceMidiParseMetaEvent(slot, trk, d1) == 0) {
                     return 0;
                 }
                 break;
             default:
-                if (midiDebug != 0) {
+                if (sceMidiDebug != 0) {
                     stdio_printf(aPlayenvUnknown, status);
                 }
                 return 0;
@@ -843,7 +843,7 @@ int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
                 case 7:
                     trk->chVol[ch] = d2 & 0x7F;
                     trk->ch[ch].vol = d2 & 0x7F;
-                    d2 = (d2 & 0x80) | midiChannelReset(trk, ch);
+                    d2 = (d2 & 0x80) | sceMidiChannelReset(trk, ch);
                     msg = (msg & 0xFFFF) | (d2 << 16);
                     break;
                 case 10:
@@ -865,61 +865,61 @@ int midiPlayEnv(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt)
                 case 38:
                 case 98:
                 case 99:
-                    midiScanLoops(slot, trk, status, d1, d2 & 0x7F, vt);
+                    sceMidiScanLoops(slot, trk, status, d1, d2 & 0x7F, vt);
                     break;
                 }
                 break;
             default:
-                if (midiDebug != 0) {
+                if (sceMidiDebug != 0) {
                     stdio_printf(aPlayenvUnknown, status);
                 }
                 return 0;
             }
             if (len != 0) {
-                midiSendChMsg(slot, trk, vt, msg, len);
+                sceMidiSendChMsg(slot, trk, vt, msg, len);
             }
             trk->deltaHeld = (d1 | d2) & 0x80;
         }
-        midiTrackReset(trk);
+        sceMidiTrackReset(trk);
     }
     return 1;
 }
 #else
-INCLUDE_ASM("MODMIDI", midiPlayEnv);
+INCLUDE_ASM("MODMIDI", sceMidiPlayEnv);
 #endif
-/* ENDF midiPlayEnv */
-/* FUNC midiStopAllNotes */
-int midiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
+/* ENDF sceMidiPlayEnv */
+/* FUNC sceMidiStopAllNotes */
+int sceMidiStopAllNotes(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
 {
     sceMidiTrack_t *trk;
     u32 ch;
 
     trk = &slot->trk;
     for (ch = 0; ch < 16; ch++) {
-        if (trk->chActive & midiChBit[ch]) {
-            midiSendChMsg(slot, trk, vt, ch | 0x40B0, 3);
-            midiSendChMsg(slot, trk, vt, ch | 0x7BB0, 3);
+        if (trk->chActive & sceMidiChBit[ch]) {
+            sceMidiSendChMsg(slot, trk, vt, ch | 0x40B0, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | 0x7BB0, 3);
         }
     }
     trk->chActive = 0;
 }
-/* ENDF midiStopAllNotes */
+/* ENDF sceMidiStopAllNotes */
 #ifdef NON_MATCHING
 /* Two instructions swapped: gcc schedules frac = 0 ahead of the vt argument
  * copy in the block that stops the track. */
-/* FUNC midiTrackServiceTick */
-int midiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
+/* FUNC sceMidiTrackServiceTick */
+int sceMidiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
 {
     sceMidiTrack_t *trk;
     u32 frac;
 
     trk = &slot->trk;
-    frac = trk->frac + midiTickScale;
+    frac = trk->frac + sceMidiTickScale;
     for (;;) {
-        if (midiPlayEnv(slot, trk, vt) == 0) {
+        if (sceMidiPlayEnv(slot, trk, vt) == 0) {
             frac = 0;
             slot->flags &= ~2;
-            midiStopAllNotes(slot, vt);
+            sceMidiStopAllNotes(slot, vt);
             break;
         }
         if (frac < trk->usPerTick) {
@@ -930,12 +930,12 @@ int midiTrackServiceTick(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
     }
     trk->frac = frac;
 }
-/* ENDF midiTrackServiceTick */
+/* ENDF sceMidiTrackServiceTick */
 #else
-INCLUDE_ASM("MODMIDI", midiTrackServiceTick);
+INCLUDE_ASM("MODMIDI", sceMidiTrackServiceTick);
 #endif
-/* FUNC midiApplyPlayState */
-void midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
+/* FUNC sceMidiApplyPlayState */
+void sceMidiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
 {
     sceMidiTrack_t *trk;
     u32 ch;
@@ -950,35 +950,35 @@ void midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
         if (t == 0) {
             u32 msg = trk->ch[ch].bank << 16;
             msg |= 0xB0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         t = trk->ch[ch].prog;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].prog << 8;
             msg |= 0xC0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 2);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 2);
         }
         t = trk->ch[ch].cc1;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].cc1 << 16;
             msg |= 0x1B0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         t = trk->ch[ch].cc2;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].cc2 << 16;
             msg |= 0x2B0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         t = trk->ch[ch].cc5;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].cc5 << 16;
             msg |= 0x5B0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         v = trk->ch[ch].vol;
         if ((v & 0x80) == 0) {
@@ -990,39 +990,39 @@ void midiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
         if (t == 0) {
             u32 msg = trk->ch[ch].pan << 16;
             msg |= 0xAB0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         t = trk->ch[ch].expr;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].expr << 16;
             msg |= 0xBB0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         t = trk->ch[ch].sustain;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].sustain << 16;
             msg |= 0x40B0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         t = trk->ch[ch].portamento;
         t &= 0x80;
         if (t == 0) {
             u32 msg = trk->ch[ch].portamento << 16;
             msg |= 0x41B0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
         w = trk->ch[ch].bend;
         w &= 0x8080;
         if (w == 0) {
             u32 msg = trk->ch[ch].bend << 8;
             msg |= 0xE0;
-            midiSendChMsg(slot, trk, vt, ch | msg, 3);
+            sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
         }
     }
 }
-/* ENDF midiApplyPlayState */
+/* ENDF sceMidiApplyPlayState */
 #ifdef NON_MATCHING
 /* Three registers apart: retail clears the bit in place in the register the
  * shared store uses, gcc loads into a second temp. */
@@ -1055,13 +1055,13 @@ int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on)
         if ((slot->flags & 5) != on || slot->midiNo == -1) {
             return -1;
         }
-        midiApplyPlayState(slot, vt);
+        sceMidiApplyPlayState(slot, vt);
         flags = slot->flags | 2;
     } else {
         if ((slot->flags & 2) == 0) {
             return 0;
         }
-        midiStopAllNotes(slot, vt);
+        sceMidiStopAllNotes(slot, vt);
         flags = slot->flags & ~2;
     }
     slot->flags = flags;
@@ -1071,8 +1071,8 @@ int modmidi_sceMidi_MidiPlaySwitch(sceMidiWork_t *work, int slotNo, int on)
 #else
 INCLUDE_ASM("MODMIDI", modmidi_sceMidi_MidiPlaySwitch);
 #endif
-/* FUNC midiSelectTrack */
-int midiSelectTrack(sceMidiSlot_t *slot)
+/* FUNC sceMidiSelectTrack */
+int sceMidiSelectTrack(sceMidiSlot_t *slot)
 {
     sceMidiTrack_t *trk;
     int i;
@@ -1103,11 +1103,11 @@ int midiSelectTrack(sceMidiSlot_t *slot)
         trk->ch[i].portamento = 0xFF;
         trk->ch[i].bend = 0xFFFF;
     }
-    midiTrackSeekAbsolute(trk);
-    midiTrackReset(trk);
+    sceMidiTrackSeekAbsolute(trk);
+    sceMidiTrackReset(trk);
     return 1;
 }
-/* ENDF midiSelectTrack */
+/* ENDF sceMidiSelectTrack */
 /* FUNC modmidi_sceMidi_SelectMidi */
 int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo)
 {
@@ -1118,7 +1118,7 @@ int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo)
     int i;
     u32 div;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     midi = trk->midi;
@@ -1151,7 +1151,7 @@ int modmidi_sceMidi_SelectMidi(sceMidiWork_t *work, int slotNo, u32 midiNo)
     trk->tempo = 500000;
     trk->speed = 0x100;
     trk->division = div;
-    if (midiSelectTrack(slot) == 0) {
+    if (sceMidiSelectTrack(slot) == 0) {
         return -1;
     }
     slot->midiNo = midiNo;
@@ -1166,11 +1166,11 @@ int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick)
     u32 t;
     int r;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     if (tick < slot->tick) {
-        if (midiSelectTrack(slot) == 0) {
+        if (sceMidiSelectTrack(slot) == 0) {
             return -1;
         }
     }
@@ -1184,7 +1184,7 @@ int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick)
             break;
         }
         slot->tick = t;
-        if (midiPlayEnv(slot, trk, NULL) == 0) {
+        if (sceMidiPlayEnv(slot, trk, NULL) == 0) {
             break;
         }
     }
@@ -1202,9 +1202,9 @@ void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *
     u32 msg;
 
     if (slot->flags & 2) {
-        vol = midiChannelReset(trk, ch);
+        vol = sceMidiChannelReset(trk, ch);
         msg = (vol << 16) | 0x7B0;
-        midiSendChMsg(slot, trk, vt, ch | msg, 3);
+        sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
     }
 }
 /* ENDF func_00001FE4 */
@@ -1219,7 +1219,7 @@ int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, u8 vol
     sceMidiVoiceTbl_t *vt;
     u8 i;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     vt = (sceMidiVoiceTbl_t *)&work->tbl->nVoiceWord;
@@ -1256,7 +1256,7 @@ int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol)
     u8 i;
 
     v = vol;
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     vt = (sceMidiVoiceTbl_t *)&work->tbl->nVoiceWord;
@@ -1289,11 +1289,11 @@ int modmidi_e19(sceMidiWork_t *work, int slotNo, u8 bpm)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     trk->tempo = 60000000U / bpm;
-    midiTrackSeekAbsolute(trk);
+    sceMidiTrackSeekAbsolute(trk);
     return 0;
 }
 /* ENDF modmidi_e19 */
@@ -1304,7 +1304,7 @@ int modmidi_e20(sceMidiWork_t *work, int slotNo)
     sceMidiTrack_t *trk;
     u32 bpm;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0 || slot->midiNo == -1 ||
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0 || slot->midiNo == -1 ||
         trk->tempo == 0) {
         return 0;
     }
@@ -1323,11 +1323,11 @@ int modmidi_sceMidi_MidiSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     trk->speed = speed;
-    midiTrackSeekAbsolute(trk);
+    sceMidiTrackSeekAbsolute(trk);
     return 0;
 }
 /* ENDF modmidi_sceMidi_MidiSetAbsolute */
@@ -1337,7 +1337,7 @@ int modmidi_e22(sceMidiWork_t *work, int slotNo)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return 0;
     }
     if (slot->midiNo == -1) {
@@ -1352,11 +1352,11 @@ int modmidi_e23(sceMidiWork_t *work, int slotNo, int tempo)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     trk->tempo = tempo;
-    midiTrackSeekAbsolute(trk);
+    sceMidiTrackSeekAbsolute(trk);
     return 0;
 }
 /* ENDF modmidi_e23 */
@@ -1366,7 +1366,7 @@ int modmidi_e24(sceMidiWork_t *work, int slotNo)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return 0;
     }
     if (slot->midiNo == -1) {
@@ -1375,8 +1375,8 @@ int modmidi_e24(sceMidiWork_t *work, int slotNo)
     return trk->tempo;
 }
 /* ENDF modmidi_e24 */
-/* FUNC midiSongStopNotes */
-void midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len)
+/* FUNC sceMidiSongStopNotes */
+void sceMidiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len)
 {
     sceMidiTbl_t *tbl;
     sceMidiSlot_t *slot;
@@ -1396,17 +1396,17 @@ void midiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len)
         vt = (sceMidiVoiceTbl_t *)&tbl->nVoiceWord;
         msg &= 0xFFFFF0;
         for (ch = 0; ch < 16; ch++) {
-            midiSendChMsg(slot, trk, vt, msg | ch, len);
+            sceMidiSendChMsg(slot, trk, vt, msg | ch, len);
         }
     }
 }
-/* ENDF midiSongStopNotes */
+/* ENDF sceMidiSongStopNotes */
 INCLUDE_ASM("MODMIDI", D_00002548);
-/* FUNC midiSongApplyVolume */
+/* FUNC sceMidiSongApplyVolume */
 #ifdef NON_MATCHING
 /* Two instructions longer: gcc keeps trk->fadeLeft in $a0 and has to save
  * work in another register. */
-void midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk)
+void sceMidiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk)
 {
     int v;
     int t;
@@ -1425,11 +1425,11 @@ void midiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk)
     }
 }
 #else
-INCLUDE_ASM("MODMIDI", midiSongApplyVolume);
+INCLUDE_ASM("MODMIDI", sceMidiSongApplyVolume);
 #endif
-/* ENDF midiSongApplyVolume */
-/* FUNC midiSongLookup */
-int midiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk)
+/* ENDF sceMidiSongApplyVolume */
+/* FUNC sceMidiSongLookup */
+int sceMidiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk)
 {
     sceMidiTbl_t *tbl;
     sceMidiSlot_t *slot;
@@ -1452,9 +1452,9 @@ int midiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMi
     }
     return 0;
 }
-/* ENDF midiSongLookup */
-/* FUNC midiSongSelect */
-void midiSongSelect(sceMidiSlot_t *slot, u8 **songCur)
+/* ENDF sceMidiSongLookup */
+/* FUNC sceMidiSongSelect */
+void sceMidiSongSelect(sceMidiSlot_t *slot, u8 **songCur)
 {
     int i;
 
@@ -1465,7 +1465,7 @@ void midiSongSelect(sceMidiSlot_t *slot, u8 **songCur)
         songCur[7 + i * 2] = NULL;
     }
 }
-/* ENDF midiSongSelect */
+/* ENDF sceMidiSongSelect */
 /* FUNC modmidi_sceMidi_SelectSong */
 int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo)
 {
@@ -1475,7 +1475,7 @@ int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo)
     sceMidiSongChunk_t *cur;
     u32 ofs;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     song = trk->song;
@@ -1504,12 +1504,12 @@ int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo)
     trk->unk133 = 0x78;
     trk->songSpeed = 0x100;
     slot->songNo = songNo;
-    midiSongSelect(slot, &trk->songData);
+    sceMidiSongSelect(slot, &trk->songData);
     return 0;
 }
 /* ENDF modmidi_sceMidi_SelectSong */
-/* FUNC midiSongSetTempo */
-void midiSongSetTempo(sceMidiTrack_t *trk, int val)
+/* FUNC sceMidiSongSetTempo */
+void sceMidiSongSetTempo(sceMidiTrack_t *trk, int val)
 {
     if (val < 0) {
         val = 0;
@@ -1518,9 +1518,9 @@ void midiSongSetTempo(sceMidiTrack_t *trk, int val)
     }
     trk->curMidi = val;
 }
-/* ENDF midiSongSetTempo */
-/* FUNC midiSongSetLoopCount */
-void midiSongSetLoopCount(sceMidiTrack_t *trk, int val)
+/* ENDF sceMidiSongSetTempo */
+/* FUNC sceMidiSongSetLoopCount */
+void sceMidiSongSetLoopCount(sceMidiTrack_t *trk, int val)
 {
     if (val < 0) {
         val = 0;
@@ -1529,9 +1529,9 @@ void midiSongSetLoopCount(sceMidiTrack_t *trk, int val)
     }
     trk->loopCount = val;
 }
-/* ENDF midiSongSetLoopCount */
-/* FUNC midiSongSetFlags */
-void midiSongSetFlags(sceMidiTrack_t *trk, int val)
+/* ENDF sceMidiSongSetLoopCount */
+/* FUNC sceMidiSongSetFlags */
+void sceMidiSongSetFlags(sceMidiTrack_t *trk, int val)
 {
     if (val < 0xA) {
         val = 0xA;
@@ -1540,9 +1540,9 @@ void midiSongSetFlags(sceMidiTrack_t *trk, int val)
     }
     trk->unk133 = val;
 }
-/* ENDF midiSongSetFlags */
-/* FUNC midiSongApplyState */
-int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo)
+/* ENDF sceMidiSongSetFlags */
+/* FUNC sceMidiSongApplyState */
+int sceMidiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo)
 {
     sceMidiTrack_t *trk;
 
@@ -1555,17 +1555,17 @@ int midiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32
     if (modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 1) != 0) {
         return 0;
     }
-    midiSongApplyVolume(work, slotNo, trk);
-    midiSongStopNotes(work, slotNo, (trk->loopCount << 16) | 0xAB0, 3);
+    sceMidiSongApplyVolume(work, slotNo, trk);
+    sceMidiSongStopNotes(work, slotNo, (trk->loopCount << 16) | 0xAB0, 3);
     slot->flags |= 0x200;
     return 1;
 }
-/* ENDF midiSongApplyState */
-/* FUNC midiSongRepeat */
+/* ENDF sceMidiSongApplyState */
+/* FUNC sceMidiSongRepeat */
 #ifdef NON_MATCHING
 /* 16 bytes long: gcc cross-jumps the four `return 1` exits into one block
  * at the end, where retail sets the 1 in each exit's branch delay slot. */
-int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
+int sceMidiSongRepeat(sceMidiSlot_t *slot, u8 count)
 {
     sceMidiTrack_t *trk;
     sceMidiRepeat_t *rep;
@@ -1580,7 +1580,7 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
     trk = &slot->trk;
     p = trk->songCur;
     if (p[0] != 0xA1) {
-        if (midiDebug != 0) {
+        if (sceMidiDebug != 0) {
             stdio_printf(aSongrepeatStat, p[0]);
         }
         return 0;
@@ -1590,8 +1590,8 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
     trk->songCur = p + 2;
     lo = p[2];
     trk->songCur = p + 3;
-    midiRepeatInfo.total = count;
-    midiRepeatInfo.id = (u32)trk->songCur;
+    sceMidiRepeatInfo.total = count;
+    sceMidiRepeatInfo.id = (u32)trk->songCur;
     delta = hi << 8;
     delta += lo;
     if (count != 0) {
@@ -1610,8 +1610,8 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
             if (slot->loopCb == NULL) {
                 break;
             }
-            midiRepeatInfo.pass = count - c + 1;
-            if (slot->loopCb(&midiRepeatInfo, slot->loopArg) != 0) {
+            sceMidiRepeatInfo.pass = count - c + 1;
+            if (slot->loopCb(&sceMidiRepeatInfo, slot->loopArg) != 0) {
                 break;
             }
             rep->cursor = NULL;
@@ -1623,9 +1623,9 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
                 if (rep->cursor != NULL) {
                     continue;
                 }
-                midiRepeatInfo.pass = 1;
+                sceMidiRepeatInfo.pass = 1;
                 if (slot->loopCb != NULL &&
-                    slot->loopCb(&midiRepeatInfo, slot->loopArg) == 0) {
+                    slot->loopCb(&sceMidiRepeatInfo, slot->loopArg) == 0) {
                     return 1;
                 }
                 rep->cursor = cur;
@@ -1633,15 +1633,15 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
                 break;
             }
             if (i == 0) {
-                if (midiDebug != 0) {
+                if (sceMidiDebug != 0) {
                     stdio_printf(aSongrepeatRepe);
                 }
                 return 0;
             }
         }
     } else if (slot->loopCb != NULL) {
-        midiRepeatInfo.pass = 0;
-        if (slot->loopCb(&midiRepeatInfo, slot->loopArg) == 0) {
+        sceMidiRepeatInfo.pass = 0;
+        if (slot->loopCb(&sceMidiRepeatInfo, slot->loopArg) == 0) {
             return 1;
         }
     }
@@ -1649,15 +1649,15 @@ int midiSongRepeat(sceMidiSlot_t *slot, u8 count)
     return 1;
 }
 #else
-INCLUDE_ASM("MODMIDI", midiSongRepeat);
+INCLUDE_ASM("MODMIDI", sceMidiSongRepeat);
 #endif
-/* ENDF midiSongRepeat */
-/* FUNC midiPlaySong */
+/* ENDF sceMidiSongRepeat */
+/* FUNC sceMidiPlaySong */
 #ifdef NON_MATCHING
 /* Cannot match while .rodata is assembly: the switch compiles to a jump
  * table, and the table in the assembly .rodata already holds this body's
  * case labels, so a table emitted from the C file will not link. */
-void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
+void sceMidiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
 {
     sceMidiTrack_t *trk;
     u8 *p;
@@ -1671,7 +1671,7 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
         c = p[0];
         trk->songCur = p + 1;
         if (c != 0xA0) {
-            if (midiDebug != 0) {
+            if (sceMidiDebug != 0) {
                 stdio_printf(aPlaysongUnknow, c);
             }
             modmidi_e8(work, slotNo, 0);
@@ -1683,31 +1683,31 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
         trk->songCur = p + 3;
         switch (cmd) {
         case 0:
-            if (midiSongApplyState(work, slotNo, slot, arg) != 0) {
+            if (sceMidiSongApplyState(work, slotNo, slot, arg) != 0) {
                 return;
             }
             trk->songFlags &= 0xFB;
             break;
         case 1:
-            midiSongSetTempo(trk, arg);
+            sceMidiSongSetTempo(trk, arg);
             break;
         case 2:
-            midiSongSetTempo(trk, arg + trk->curMidi);
+            sceMidiSongSetTempo(trk, arg + trk->curMidi);
             break;
         case 3:
-            midiSongSetTempo(trk, trk->curMidi - arg);
+            sceMidiSongSetTempo(trk, trk->curMidi - arg);
             break;
         case 4:
-            midiSongSetLoopCount(trk, arg);
+            sceMidiSongSetLoopCount(trk, arg);
             break;
         case 5:
-            midiSongSetLoopCount(trk, arg + trk->loopCount);
+            sceMidiSongSetLoopCount(trk, arg + trk->loopCount);
             break;
         case 6:
-            midiSongSetLoopCount(trk, trk->loopCount - arg);
+            sceMidiSongSetLoopCount(trk, trk->loopCount - arg);
             break;
         case 7:
-            trk->fadeTicks = arg * 12800000 / midiTickScale;
+            trk->fadeTicks = arg * 12800000 / sceMidiTickScale;
             break;
         case 8:
             if (trk->curMidi == arg) {
@@ -1718,7 +1718,7 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
             if (trk->fadeLeft != 0) {
                 trk->nextMidi = arg;
             } else {
-                midiSongSetTempo(trk, arg);
+                sceMidiSongSetTempo(trk, arg);
             }
             break;
         case 0x11:
@@ -1726,32 +1726,32 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
                 p = trk->songCur;
                 c = p[0];
                 if (c != 0xA1) {
-                    if (midiDebug != 0) {
+                    if (sceMidiDebug != 0) {
                         stdio_printf(aPlaysongLoopOf, c);
                     }
                     modmidi_e8(work, slotNo, 0);
                     return;
                 }
                 trk->songCur = p + 3;
-            } else if (midiSongRepeat(slot, arg) == 0) {
+            } else if (sceMidiSongRepeat(slot, arg) == 0) {
                 modmidi_e8(work, slotNo, 0);
                 return;
             }
             break;
         case 0x21:
-            midiSongSetFlags(trk, arg);
+            sceMidiSongSetFlags(trk, arg);
             break;
         case 0x22:
-            midiSongSetFlags(trk, arg + trk->unk133);
+            sceMidiSongSetFlags(trk, arg + trk->unk133);
             break;
         case 0x23:
-            midiSongSetFlags(trk, trk->unk133 - arg);
+            sceMidiSongSetFlags(trk, trk->unk133 - arg);
             break;
         case 0x7F:
             switch (arg) {
             case 0:
                 modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
-                midiSongStopNotes(work, slotNo, 0x78B0, 3);
+                sceMidiSongStopNotes(work, slotNo, 0x78B0, 3);
                 break;
             case 1:
                 modmidi_sceMidi_MidiPlaySwitch(work, slotNo, 0);
@@ -1760,7 +1760,7 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
                 slot->flags = (slot->flags & ~0x300) | 0x400;
                 break;
             default:
-                if (midiDebug != 0) {
+                if (sceMidiDebug != 0) {
                     stdio_printf(aPlaysongUnknow_0, arg);
                 }
                 modmidi_e8(work, slotNo, 0);
@@ -1768,7 +1768,7 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
             }
             break;
         default:
-            if (midiDebug != 0) {
+            if (sceMidiDebug != 0) {
                 stdio_printf(aPlaysongUnknow_1, cmd);
             }
             modmidi_e8(work, slotNo, 0);
@@ -1777,9 +1777,9 @@ void midiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
     }
 }
 #else
-INCLUDE_ASM("MODMIDI", midiPlaySong);
+INCLUDE_ASM("MODMIDI", sceMidiPlaySong);
 #endif
-/* ENDF midiPlaySong */
+/* ENDF sceMidiPlaySong */
 /* FUNC modmidi_e8 */
 #ifdef NON_MATCHING
 /* Four bytes long: gcc reloads the slot pointer for the shared
@@ -1792,7 +1792,7 @@ int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode)
     u32 f;
     u32 g;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     if (slot->songNo == -1) {
@@ -1807,7 +1807,7 @@ int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode)
             trk->fadeLeft = 0;
             trk->curMidi = trk->nextMidi;
         }
-        midiSongSelect(slot, &trk->songData);
+        sceMidiSongSelect(slot, &trk->songData);
         return 0;
     case 1:
         slot->flags &= ~0x100;
@@ -1838,8 +1838,8 @@ int modmidi_e8(sceMidiWork_t *work, int slotNo, int mode)
 INCLUDE_ASM("MODMIDI", modmidi_e8);
 #endif
 /* ENDF modmidi_e8 */
-/* FUNC midiSongServiceTick */
-void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
+/* FUNC sceMidiSongServiceTick */
+void sceMidiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
 {
     sceMidiTrack_t *trk;
     u32 flags;
@@ -1855,7 +1855,7 @@ void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
         if (trk->fadeLeft == 0) {
             trk->curMidi = trk->nextMidi;
         }
-        midiSongApplyVolume(work, slotNo, trk);
+        sceMidiSongApplyVolume(work, slotNo, trk);
     }
     flags = slot->flags;
     if ((flags & 0x202) == 0x202) {
@@ -1864,26 +1864,26 @@ void midiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
     songFlags = trk->songFlags;
     if (songFlags & 1) {
         keep = flags & 0x700;
-        if (midiSearchPlay(slot, trk, trk->searchId, songFlags & 2) == 0) {
+        if (sceMidiSearchPlay(slot, trk, trk->searchId, songFlags & 2) == 0) {
             return;
         }
         slot->flags |= keep;
     }
-    midiPlaySong(work, slotNo, slot);
+    sceMidiPlaySong(work, slotNo, slot);
 }
-/* ENDF midiSongServiceTick */
+/* ENDF sceMidiSongServiceTick */
 /* FUNC func_000031DC */
 int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol)
 {
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     trk->songVol = vol;
     if (slot->flags & 0x200) {
-        midiSongApplyVolume(work, slotNo, trk);
+        sceMidiSongApplyVolume(work, slotNo, trk);
     }
     return 0;
 }
@@ -1894,12 +1894,12 @@ int modmidi_e10(sceMidiWork_t *work, int slotNo, u8 val)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
-    midiSongSetTempo(trk, val);
+    sceMidiSongSetTempo(trk, val);
     if (slot->flags & 0x200) {
-        midiSongApplyVolume(work, slotNo, trk);
+        sceMidiSongApplyVolume(work, slotNo, trk);
     }
     return 0;
 }
@@ -1910,10 +1910,10 @@ int modmidi_e11(sceMidiWork_t *work, int slotNo, u8 val)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
-    midiSongSetFlags(trk, val);
+    sceMidiSongSetFlags(trk, val);
     if (slot->flags & 0x200) {
         modmidi_e19(work, slotNo, trk->unk133);
     }
@@ -1926,7 +1926,7 @@ int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     trk->songSpeed = speed;
@@ -1936,13 +1936,13 @@ int modmidi_sceMidi_SongSetAbsolute(sceMidiWork_t *work, int slotNo, u16 speed)
     return 0;
 }
 /* ENDF modmidi_sceMidi_SongSetAbsolute */
-/* FUNC midiSearchPlay */
+/* FUNC sceMidiSearchPlay */
 #ifdef NON_MATCHING
 /* Equivalent, same size: gcc materialises the 0x7F and 0xA1 compare
  * constants inside the loop where retail hoists all four into caller-saved
  * registers, and keeps the two debug printf calls apart where retail
  * cross-jumps them. */
-int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int flag)
+int sceMidiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int flag)
 {
     u8 *p;
     u8 *save;
@@ -1951,7 +1951,7 @@ int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int fla
     u8 v;
 
     count = 0;
-    midiSongSelect(slot, &trk->songData);
+    sceMidiSongSelect(slot, &trk->songData);
     save = trk->songCur;
     trk->songFlags = 4;
     for (;;) {
@@ -1959,7 +1959,7 @@ int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int fla
         c = p[0];
         trk->songCur = p + 1;
         if (c != 0xA0) {
-            if (midiDebug != 0) {
+            if (sceMidiDebug != 0) {
                 stdio_printf(aSearchplayUnkn);
             }
             goto fail;
@@ -1984,7 +1984,7 @@ int midiSearchPlay(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u32 target, int fla
             break;
         case 0x11:
             if (p[3] != 0xA1) {
-                if (midiDebug != 0) {
+                if (sceMidiDebug != 0) {
                     stdio_printf(aSearchplayLoop);
                 }
                 goto fail;
@@ -2004,9 +2004,9 @@ fail:
     return 0;
 }
 #else
-INCLUDE_ASM("MODMIDI", midiSearchPlay);
+INCLUDE_ASM("MODMIDI", sceMidiSearchPlay);
 #endif
-/* ENDF midiSearchPlay */
+/* ENDF sceMidiSearchPlay */
 /* FUNC modmidi_e13 */
 int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4)
 {
@@ -2014,7 +2014,7 @@ int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4)
     sceMidiTrack_t *trk;
     u32 f;
 
-    if (midiSongLookup(work, slotNo, &slot, &trk) == 0) {
+    if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
     if (slot->songNo == -1) {
@@ -2033,7 +2033,7 @@ int modmidi_e13(sceMidiWork_t *work, int slotNo, u32 a3, u32 a4)
             trk->curMidi = trk->nextMidi;
         }
     }
-    if (midiSearchPlay(slot, trk, a3, ((a4 >> 1) ^ 1) & 1) == 0) {
+    if (sceMidiSearchPlay(slot, trk, a3, ((a4 >> 1) ^ 1) & 1) == 0) {
         return -1;
     }
     if (f & 0x100) {

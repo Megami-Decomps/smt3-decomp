@@ -63,8 +63,8 @@ int modmsin_e6(void)
     return 0;
 }
 /* ENDF modmsin_e6 */
-/* FUNC msinBufferAppend */
-int msinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len)
+/* FUNC sceMsinBufferAppend */
+int sceMsinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len)
 {
     u32 *seg;
     sceMSInBuf_t *buf;
@@ -92,7 +92,7 @@ int msinBufferAppend(sceMSInWork_t *work, u32 port, const u8 *msg, int len)
     }
     return 0;
 }
-/* ENDF msinBufferAppend */
+/* ENDF sceMsinBufferAppend */
 /* FUNC modmsin_e7 */
 int modmsin_e7(sceMSInWork_t *work, u32 port, u32 msg)
 {
@@ -124,7 +124,7 @@ int modmsin_e7(sceMSInWork_t *work, u32 port, u32 msg)
     default:
         return -1;
     }
-    return msinBufferAppend(work, port, (const u8 *)&msg, len);
+    return sceMsinBufferAppend(work, port, (const u8 *)&msg, len);
 }
 /* ENDF modmsin_e7 */
 /* FUNC modmsin_e8 */
@@ -139,7 +139,7 @@ int modmsin_e8(sceMSInWork_t *work, u32 port, const u8 *msg, u32 maxLen)
     }
     for (len = 2; len <= maxLen; len++) {
         if (*p++ == 0xF7) {
-            return msinBufferAppend(work, port, msg, len);
+            return sceMsinBufferAppend(work, port, msg, len);
         }
     }
     return -1;
@@ -160,7 +160,7 @@ int modmsin_e9(sceMSInWork_t *work, u32 port, const u8 *msg)
     default:
         return -1;
     }
-    return msinBufferAppend(work, port, msg, len);
+    return sceMsinBufferAppend(work, port, msg, len);
 }
 /* ENDF modmsin_e9 */
 INCLUDE_ASM("MODMSIN", msinLibraryTable);

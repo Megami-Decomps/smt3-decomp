@@ -20,10 +20,10 @@ function by hand: the remaining difference is usually one of them.
   each branch delay slot and jump to the epilogue"; a flat run of early returns
   gives separate tails. Try all three.
 - **An early `return 0` duplicated at the end blocks cross-jumping.** Wrapping
-  the body in `if (state == 1) { ... } return 0;` is what `hsynEffectDepthSet`
+  the body in `if (state == 1) { ... } return 0;` is what `sceHsynEffectDepthSet`
   needed.
 - **A statement between `i--` and the `if` fills the branch delay slot.**
-  `hsynPitchBendApply` wanted `period--; e = d; if (period <= 0)`.
+  `sceHsynPitchBendApply` wanted `period--; e = d; if (period <= 0)`.
 
 ## Types and arithmetic
 
@@ -41,7 +41,7 @@ function by hand: the remaining difference is usually one of them.
 - **`u16` for a truncating copy keeps two registers alive**, giving
   `negu $6, $8` rather than `negu $6, $6`.
 - **`(x & bit) != 0` split into two statements gives `andi` then `sltu`; inline
-  it gives `srl` then `andi`.** `hsynEffectAttrRead` and `Write` both need
+  it gives `srl` then `andi`.** `sceHsynEffectAttrRead` and `Write` both need
   `t = sel & 0x10; core = t != 0;`.
 - **`v = x; v = v * v;` is not `v = x * x;`** The extra statement frees the
   argument register. `(q * q) / 16384` as one expression is the opposite case:
@@ -58,7 +58,7 @@ function by hand: the remaining difference is usually one of them.
   retail's two `lbu`s of the same field, because overwriting the pseudo that
   held the load invalidates the available expression. `t = x & 0x80` keeps the
   load in a temp and gcc then CSEs it and sinks the `& 0x7F` into the branch
-  delay slot. `hsynSdSetParamBend` needed all four of its arms written that way.
+  delay slot. `sceHsynSdSetParamBend` needed all four of its arms written that way.
 - **Write a divisor back into the same variable to stop the scheduler.**
   `num = t - v->vel; t = t - tone->unk03;` leaves the second `subu` dependent on
   `t`'s register, so it cannot be hoisted into the preceding load's delay slot;
@@ -66,7 +66,7 @@ function by hand: the remaining difference is usually one of them.
 - **A repeated literal rematerialises; a named local gets its own register.**
   `v->tag = 0xFF; ... return 0xFF;` lets gcc hoist the constant into a branch
   delay slot, lose it to the body, and build it again, which is what retail does
-  twice in `hsynVoiceMaskUpdate`. An `int r = 0xFF` gets a callee-saved register
+  twice in `sceHsynVoiceMaskUpdate`. An `int r = 0xFF` gets a callee-saved register
   and costs a copy at the return instead.
 - **An `s8` stack parameter passed on without a prototype is loaded before the
   guard.** `func_000021B8` declares its ninth argument `s8` and hands it to an
@@ -76,8 +76,8 @@ function by hand: the remaining difference is usually one of them.
 - **A narrow parameter passed to a parameter of the same narrow type is
   re-extended.** gcc does not track that an incoming `s8` already arrives
   sign-extended, so `s8` to `s8` costs `sll`/`sra` while `s8` to `int` is a
-  plain move. `hsynVoiceUpdatePass` forwards its status byte with a `move`,
-  which is what made `hsynVoiceEngineStep`'s third parameter `int`.
+  plain move. `sceHsynVoiceUpdatePass` forwards its status byte with a `move`,
+  which is what made `sceHsynVoiceEngineStep`'s third parameter `int`.
 - **`(x << 8) / 254` and `(x << 7) / 127` are not the same code.** An even
   divisor sends gcc through its pre-shift path, which folds the shift and picks
   the single-word magic retail has; the odd form picks a 33-bit magic and three
@@ -86,12 +86,12 @@ function by hand: the remaining difference is usually one of them.
 - **Force reassociation with a local.** `msg = (vol << 16) | 0x7B0; ... ch | msg`
   holds where the same expression in parentheses does not.
 - **A `u8` destination folds `x & 0xFF` into a move; an `int` destination keeps
-  the `andi`.** `hsynVoiceDirectPass` passes a masked copy of a byte to a `u8`
+  the `andi`.** `sceHsynVoiceDirectPass` passes a masked copy of a byte to a `u8`
   formal and to the test that guards it; only `int vel = val & 0xFF;` leaves the
   `andi` in place for both.
 - **A variable reused for a second load of the same width loses gcc's
   knowledge of its bits**, so a later narrowing conversion is emitted rather
-  than elided. `hsynVoiceDirectPass` reads two bytes into one local for that
+  than elided. `sceHsynVoiceDirectPass` reads two bytes into one local for that
   reason, and the register sharing follows.
 - **A pointer cast with the base added first keeps retail's operand order.**
   `(u8 *)slot + idx * sizeof(sceHSynChannel_t) + 0x18` gives
@@ -105,8 +105,8 @@ function by hand: the remaining difference is usually one of them.
 - **`heads[i]` against an explicit `head` pointer decides where a hoisted loop
   invariant lands.** When the body also needs a constant such as
   `1 << v->index`, the indexed form puts the strength-reduced pointer after the
-  invariant in the preheader, which `hsynVoiceStop` needs and
-  `hsynVoiceSetPitch` does not.
+  invariant in the preheader, which `sceHsynVoiceStop` needs and
+  `sceHsynVoiceSetPitch` does not.
 - **Let gcc strength-reduce `out[n]`** rather than keeping your own cursor: the
   reduced induction variable is born in the inner preheader, after the guard.
 - **Drop a redundant `if (n > 0)` around a `for (j = 0; j < n; j++)`**, or gcc
@@ -114,7 +114,7 @@ function by hand: the remaining difference is usually one of them.
 - **`ch = 0;` before the loop with an empty `for` init** reorders two preheader
   initialisations, which is what `modhsyn_e23` wanted.
 - **Two walks over the same head array want two cursors, or none.** In
-  `hsynLfoStep` the indexed form `end = heads[i]` gives each loop its own
+  `sceHsynLfoStep` the indexed form `end = heads[i]` gives each loop its own
   strength-reduced pointer *and* puts it after the hoisted loop invariant in the
   preheader, which is the order retail has; a shared `head` cursor merges the
   two and reverses that order.
@@ -133,7 +133,7 @@ function by hand: the remaining difference is usually one of them.
   `for (i = 0; i < n; i++)` compares the post-increment value directly and
   saves the copy.
 - **Two early-exit sites that each increment the counter give it the lower
-  callee-saved register, and cross-jumping merges them back.** `hsynServiceVoices`
+  callee-saved register, and cross-jumping merges them back.** `sceHsynServiceVoices`
   has one `n++` block in retail; writing it once leaves the counter one register
   too high, and writing `goto skip`/`goto skip2` with an `n++` behind each label
   doubles the reference count, wins the register, and still comes out as one
@@ -143,8 +143,8 @@ function by hand: the remaining difference is usually one of them.
   is what gives it `$16` and the induction-variable copy; two separate
   variables move every other pointer one register along.
 - **A per-iteration pointer to an array element stops strength reduction.**
-  `cnt = &hsynFreeCount[i];` then `(*cnt)++` gives retail's
-  `addu $19, $21, $3` inside the loop, where `hsynFreeCount[i]++` lets gcc
+  `cnt = &sceHsynFreeCount[i];` then `(*cnt)++` gives retail's
+  `addu $19, $21, $3` inside the loop, where `sceHsynFreeCount[i]++` lets gcc
   hoist the base and reduce the pointer, costing an extra `addiu`.
 - **The three-list broadcast loop**, used by five MODHSYN setters, matches as
   `heads[3]` filled with `chan-8`, `chan`, `chan+8`, then
@@ -166,12 +166,12 @@ function by hand: the remaining difference is usually one of them.
   as one object: `seg = &work->tbl->nBufWord; seg[1]`, or
   `ofs = (slotNo << 4) | 8; seg = (u32 *)(ofs + (u32)tbl->seq)`. The `|` rather
   than `+` is what yields `ori`, and the `ofs + (u32)ptr` operand order picks the
-  destination register. It does not always hold: `hsynServiceTick` is two short
+  destination register. It does not always hold: `sceHsynServiceTick` is two short
   because gcc bases the entry loads on `entry+0xC` anyway.
 - **An array written back to front wants a pointer local.** Two or more stores
   to `sym[n]`, `sym[n-1]`, ... keep the symbol itself as the `%lo` base only if
   the address comes from a local pointer; writing `sym[1] = 0; sym[0] = 0;`
-  directly makes gcc base them on `sym+4`. `hsynInitCores` clears six arrays
+  directly makes gcc base them on `sym+4`. `sceHsynInitCores` clears six arrays
   that way and `func_00000050` one.
 - **Indexing a cached base beats a self-incrementing pointer when the uses are
   at two offsets.** `entry[slotNo].seq` and `entry[slotNo].slot` reduce to one
@@ -191,24 +191,24 @@ function by hand: the remaining difference is usually one of them.
 
 - **Case bodies come out in source order; the compare chain does not.** gcc
   builds the comparison tree from the case *values*, so reordering the cases
-  only moves the bodies. `midiParseMetaEvent` needed `case 0x51` written
-  before `case 0x2F`, and `midiScanLoops` the two RPN arms first.
+  only moves the bodies. `sceMidiParseMetaEvent` needed `case 0x51` written
+  before `case 0x2F`, and `sceMidiScanLoops` the two RPN arms first.
 
 - **A two-armed test on a command byte is a `switch`, not an `if`/`else if`.**
   gcc lays a switch out as the compare chain first, then the case bodies, each
   ending in a jump to the common tail; `if (sel == 0) ... else if (sel == 1)`
   inlines the first body and comes out two instructions short.
-  `hsynCmdNoteOff` and `hsynCmdNoteOn` both needed the switch form.
+  `sceHsynCmdNoteOff` and `sceHsynCmdNoteOn` both needed the switch form.
 - **An empty case is still a case.** gcc's binary search picks its nodes from
   the case *values*, so a value whose body is empty still shows up as a compare
   that jumps to the epilogue, and leaving it out reshapes the whole chain.
-  `hsynVoiceUpdatePass` needed `case 0xA0:` and `case 0xD0:` with nothing in
+  `sceHsynVoiceUpdatePass` needed `case 0xA0:` and `case 0xD0:` with nothing in
   them to reproduce retail's tree.
 
 ## Shared tails
 
 - **A block-scoped local coalesces with the argument register; a
-  function-scoped one does not.** `midiApplyPlayState` builds eleven channel
+  function-scoped one does not.** `sceMidiApplyPlayState` builds eleven channel
   messages; declaring `u32 msg` once at the top gives it a single pseudo that
   cannot live in `$7`, so every call ends `or $7, $17, $2`. Declaring
   `u32 msg` inside each `if` block lets gcc build the value in `$7` the way
@@ -222,7 +222,7 @@ function by hand: the remaining difference is usually one of them.
   shared tail, which is exactly what retail's layout is.
 - **Walk the list with one `v = next` after the if-else chain.** gcc copies that
   single `move` into each arm's branch delay slot, which is what retail's three
-  copies in `hsynVoiceAllocScan` are; writing it in every arm also matches the
+  copies in `sceHsynVoiceAllocScan` are; writing it in every arm also matches the
   count but changes which pseudo wins a callee-saved register.
 
 ## What is not fixable from the C
@@ -231,9 +231,9 @@ function by hand: the remaining difference is usually one of them.
 table cannot be written at all: the assembly `.rodata` already holds the
 function's `L_<address>` case labels, so replacing the body leaves them
 undefined and the link fails. Eight functions are in that position, two in
-MODMIDI (`midiPlaySong`, `midiPlayEnv`) and six in MODHSYN
-(`hsynEffectDispatch`, `hsynVoiceEventDispatch`, `hsynSeqInterpretA`,
-`hsynSeqInterpretB`, `func_0000273C`, `func_0000AB90`). Write the C, guard it
+MODMIDI (`sceMidiPlaySong`, `sceMidiPlayEnv`) and six in MODHSYN
+(`sceHsynEffectDispatch`, `sceHsynVoiceEventDispatch`, `sceHsynSeqInterpretA`,
+`sceHsynSeqInterpretB`, `func_0000273C`, `func_0000AB90`). Write the C, guard it
 and move on.
 
 **gcc's cross-jumping.** Where two paths end in the same few instructions,
@@ -241,19 +241,19 @@ gcc 2.8 merges them and jumps into the middle of the surviving copy, even
 when retail keeps both. Source-level attempts to break it up (a named result,
 a `goto` to a label placed where retail's block sits, reordering the arms,
 spelling the shared statement differently) all leave the merge in place:
-`jump.c` runs after the shape of the C stops mattering. `midiParseMetaEvent`,
-`modmidi_e8`, `midiSongRepeat` and `midiSearchPlay` are each one or a few
+`jump.c` runs after the shape of the C stops mattering. `sceMidiParseMetaEvent`,
+`modmidi_e8`, `sceMidiSongRepeat` and `sceMidiSearchPlay` are each one or a few
 instructions short for this reason.
 
 **A load retail recomputes.** Where retail loads the same field twice with the
 two loads separated only by stores to other fields of the same object, gcc's
 CSE keeps the first value live and the function comes out one instruction
 short. `func_00004614` (`envB.level` across a branch) and
-`hsynVoiceUpdatePathB` (`v->vag` across two halfword stores) are the recorded
+`sceHsynVoiceUpdatePathB` (`v->vag` across two halfword stores) are the recorded
 cases; a local for the first read, a pointer local for the stores and
 reordering the arms all leave the CSE in place.
 
-**A heavily spilled body.** `hsynVoiceEngineStep`, `func_000078D4` and
+**A heavily spilled body.** `sceHsynVoiceEngineStep`, `func_000078D4` and
 `func_00007F54` each park a dozen values in frame slots and reload them every
 time. A C body with the same locals keeps them in registers instead, and the
 spill pattern is not reachable from the source.

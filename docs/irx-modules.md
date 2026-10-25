@@ -158,7 +158,7 @@ The database is the source of truth, so the loop runs in both directions. A
 prototype IDA guessed and the retail code disproves shows up as `conflicting
 types for ...` the moment the C is written against the truth, and the fix is to
 correct the database and regenerate, not to edit the header or bend the C.
-`hsynEnvRateLookup` went that way: IDA had it as `int(int, int, int)`, the
+`sceHsynEnvRateLookup` went that way: IDA had it as `int(int, int, int)`, the
 matching C is `s16(s16, s32, s32)`, and the byte-identical build is what
 settles it.
 
@@ -200,25 +200,25 @@ between them, which never become C.
 Six of the 36 cannot match at all while `.rodata` is assembly: their switch
 compiles to a jump table whose `L_<address>` case labels the assembly
 `.rodata` already defines, so a C body leaves them undefined and the *link*
-fails. They are `hsynEffectDispatch`, `hsynVoiceEventDispatch`,
-`hsynSeqInterpretA`, `hsynSeqInterpretB`, `func_0000AB90` and `func_0000273C`.
+fails. They are `sceHsynEffectDispatch`, `sceHsynVoiceEventDispatch`,
+`sceHsynSeqInterpretA`, `sceHsynSeqInterpretB`, `func_0000AB90` and `func_0000273C`.
 
 The other 30 break down as:
 
 | Function | Why |
 | --- | --- |
-| `hsynInitCores` | four instructions out of place: gcc schedules the outer loop's preheader after the list-head stores |
+| `sceHsynInitCores` | four instructions out of place: gcc schedules the outer loop's preheader after the list-head stores |
 | `func_00004614` | one short: gcc keeps `envB.level` live into the second arm where retail reloads it |
-| `hsynVoiceUpdatePathB` | one short: gcc keeps `v->vag` live across two halfword stores |
+| `sceHsynVoiceUpdatePathB` | one short: gcc keeps `v->vag` live across two halfword stores |
 | `func_00008350` | byte-identical but for one register pair |
 | `modhsyn_sceHSyn_Load` | six short: gcc cross-jumps the two identical bank-clearing blocks |
-| `hsynVoiceEngineStep`, `func_000078D4`, `func_00007F54` | the retail bodies spill a dozen values to the frame; a C body of this shape keeps them in registers |
+| `sceHsynVoiceEngineStep`, `func_000078D4`, `func_00007F54` | the retail bodies spill a dozen values to the frame; a C body of this shape keeps them in registers |
 | the other 22 | inherited from earlier agents |
 
 Three of the four large note-on paths (`func_000078D4`, `func_00007F54`,
-`hsynVoiceEngineStep`) share one shape: walk the program's key list, the sample
+`sceHsynVoiceEngineStep`) share one shape: walk the program's key list, the sample
 set and the sample entries, resolve a VAG, free a voice by one of four
-escalating strategies, then fill the voice and call `hsynVoiceUpdatePathA` or
+escalating strategies, then fill the voice and call `sceHsynVoiceUpdatePathA` or
 `PathB`. Reading one makes the other two quick.
 
 `func_00008350` is settled: it is a nine-argument forwarder whose `path`
@@ -228,10 +228,10 @@ are in [IDB corrections](idb-corrections.md).
 ### Where MODMIDI stands
 
 All 62 functions have C: 41 match and 13 are equivalent under `NON_MATCHING`.
-Those 13 break down as two that cannot match at all (`midiPlaySong`,
-`midiPlayEnv`, both jump tables), five whose only difference is gcc
-cross-jumping a tail retail keeps twice (`midiParseMetaEvent`, `modmidi_e8`,
-`midiSongRepeat`, `midiSearchPlay`, `midiScanLoops`), and six inherited from
+Those 13 break down as two that cannot match at all (`sceMidiPlaySong`,
+`sceMidiPlayEnv`, both jump tables), five whose only difference is gcc
+cross-jumping a tail retail keeps twice (`sceMidiParseMetaEvent`, `modmidi_e8`,
+`sceMidiSongRepeat`, `sceMidiSearchPlay`, `sceMidiScanLoops`), and six inherited from
 earlier agents.
 
 Two things only Sony's modules turned up, both about delay slots and neither
