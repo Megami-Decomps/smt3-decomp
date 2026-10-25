@@ -72,7 +72,7 @@ s32 sceSdApplyEffectAttrMask(s32 core, sceSdEffectPreset_t *preset)
         sceSdWriteAddrReg(core, 0x174, preset->apf2Size);
     if (all || (mask & 0x4))
         *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x774) = preset->iirVol;
-    if (all || (mask & IOP_DMA_CH7_ENABLE))
+    if (all || (mask & 0x8))
         *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x776) = preset->comb1Vol;
     if (all || (mask & 0x10))
         *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x778) = preset->comb2Vol;
@@ -104,7 +104,7 @@ s32 sceSdApplyEffectAttrMask(s32 core, sceSdEffectPreset_t *preset)
         sceSdWriteAddrReg(core, 0x184, preset->sameRSrc);
     if (all || (mask & 0x40000))
         sceSdWriteAddrReg(core, 0x186, preset->diffLDst);
-    if (all || (mask & IOP_DMA_CH4_ENABLE))
+    if (all || (mask & 0x80000))
         sceSdWriteAddrReg(core, 0x188, preset->diffRDst);
     if (all || (mask & 0x100000))
         sceSdWriteAddrReg(core, 0x18A, preset->comb3LSrc);
@@ -566,7 +566,7 @@ s32 sceSdInitHardware()
     sceSdInitDma();
     *(volatile u16 *)SPU2_SPDIF_MODE = 0x900;
     *(volatile u16 *)SPU2_SPDIF_MEDIA = 0x200;
-    *(volatile u16 *)SPU2_SPDIF_PROTECT = IOP_DMA_CH7_ENABLE;
+    *(volatile u16 *)SPU2_SPDIF_PROTECT = 0x8;
 }
 /* ENDF sceSdInitHardware */
 /* FUNC sceSdInitCoreMix */
@@ -1676,7 +1676,7 @@ IRX_IMPORT(loadcore, RegisterLibraryEntries, 0x6);
 IRX_IMPORT_TABLE_END;
 IRX_IMPORT_TABLE(sifman, 1, 1);
 IRX_IMPORT(sifman, sceSifSetDma, 0x7);
-IRX_IMPORT(sifman, sceSifDmaStat, IOP_DMA_CH7_ENABLE);
+IRX_IMPORT(sifman, sceSifDmaStat, 0x8);
 IRX_IMPORT_TABLE_END;
 IRX_IMPORT_TABLE(sysclib, 1, 3);
 IRX_IMPORT(sysclib, bzero, 0x11);
@@ -1686,7 +1686,7 @@ IRX_IMPORT(thevent, CreateEventFlag, 0x4);
 IRX_IMPORT(thevent, DeleteEventFlag, 0x5);
 IRX_IMPORT(thevent, SetEventFlag, 0x6);
 IRX_IMPORT(thevent, iSetEventFlag, 0x7);
-IRX_IMPORT(thevent, ClearEventFlag, IOP_DMA_CH7_ENABLE);
+IRX_IMPORT(thevent, ClearEventFlag, 0x8);
 IRX_IMPORT(thevent, iClearEventFlag, 0x9);
 IRX_IMPORT(thevent, WaitEventFlag, 0xa);
 IRX_IMPORT_TABLE_END;
