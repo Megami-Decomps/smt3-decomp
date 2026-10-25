@@ -876,3 +876,27 @@ a prototyped definition would reject the one-argument calls that follow it.
 It was `u32`. `libsd_sceSdSetTransIntrHandler` stores the caller's argument
 there and `libsd_sceSdGetTransIntrHandlerArgument` returns it as a pointer, so
 `void *` is what it holds. Codegen is unchanged; the C is honest instead.
+
+## sceSdBlockTrans reads a fifth argument, but four is the right declaration
+
+`iop.h` declares `libsd_sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size)`
+and that stays, but the retail function does read a fifth argument.
+
+It is easy to miss and I got this wrong once by grepping for a literal
+`0x58($29)`, which is not there. The evidence is the prologue and a computed
+load. `sw $7, 0xC($29)` is the *first* instruction, before `addiu $29, $29, -0x48`:
+that spills the fourth register argument into the caller's incoming slot, which
+is gcc 2.8's `va_start` making the named arguments addressable. The fifth is then
+read with `addiu $2, $29, 0x5B` / `addiu $3, $0, -0x4` / `and $2, $2, $3` /
+`lw $2, 0x0($2)`, where `0x5B & ~3` is `0x58`, which is caller_sp+0x10. It is
+passed on as `sceSdBlockTransWrite`'s resume position.
+
+So a search for a literal incoming-argument offset proves nothing when the
+address is computed; `va_arg` always computes it.
+
+Four parameters is still the correct declaration for this game: MODHSYN's only
+call site passes four and matches byte-identically. The faithful spelling would
+be four plus an ellipsis, which builds byte-identical but then disagrees with
+the four-parameter definition in `LIBSD.c` and fails
+`tools/check_irx_nonmatching.py`. Writing the body against `va_list` would settle
+it; nothing in this game needs it.
