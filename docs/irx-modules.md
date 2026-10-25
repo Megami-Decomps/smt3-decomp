@@ -1,8 +1,8 @@
 # Building the IRX modules
 
-Six IOP modules build byte-identical from source, with their own compiler,
+Seven IOP modules build byte-identical from source, with their own compiler,
 linker script and container packer: the three Atlus wrote in `USERIRX/`, and
-the three of Sony's in `SOUNDIRX/` that the sound driver needs. The build is
+the four of Sony's in `SOUNDIRX/` that the sound driver needs. The build is
 separate from the main ELF's and touches none of it.
 
 ```
@@ -25,14 +25,16 @@ is the proof. What the modules do is in
 | `MODMSIN.IRX` | 1929 | 17 | 12 |
 | `MODMIDI.IRX` | 21965 | 71 | 62 |
 | `MODHSYN.IRX` | 59501 | 232 | 213 |
+| `LIBSD.IRX` | 28573 | 95 | 79 |
 
 The remaining chunks are import stubs and the tables between them. Both
 numbers are what `tools/irx_split.py` prints, so the function count
 includes those stubs; the table under Writing C counts only the functions
 that have a body.
 
-Sony's three are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
-feeds it, and `MODMSIN`, the message queue between them. They are what plays a
+Sony's four are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
+feeds it, `MODMSIN`, the message queue between them, and `LIBSD`, the SPU2
+register and transfer library all of them sit on. They are what plays a
 `.SMG` bank, so the sound driver's bank path is almost entirely calls into them,
 and the USA and Maniax discs ship the same files byte for byte. All three are
 complete: every function has C.
@@ -45,7 +47,7 @@ driver does. `-O2` reproduces the code; the first function tried,
 `sdfSndIsqrt`, came out byte-exact with no coaxing, including register
 allocation and the `div` trap expansion.
 
-The same compiler and flags reproduce Sony's three modules, which is not a
+The same compiler and flags reproduce Sony's four modules, which is not a
 given, since those came from Sony's own build rather than Atlus's. Sign
 extension, two-branch clamps and delay-slot filling all come out of 2.8.1
 unaided, so `iop-gcc 2.95.2-102` has not been needed for them either.
@@ -100,7 +102,7 @@ satisfied by accident:
   delay slot itself.
 
 `python tools/irx.py info orig/irx/SDFSDMAN.IRX` prints all of it. The reader
-and writer round-trip all six retail files byte for byte, which is what pinned
+and writer round-trip all seven retail files byte for byte, which is what pinned
 the layout down before any of it was built from source.
 
 ## Splitting
