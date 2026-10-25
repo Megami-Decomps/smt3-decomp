@@ -192,7 +192,7 @@ fail:
 
 /* sdfSdManInit was a translation unit of its own: the linker aligned what
  * follows it to 16, leaving one nop behind. */
-__asm__(".align 4");
+ALIGN_TEXT(4);
 
 /* Newton's method; the caller wants the distance between two points. */
 s32 sdfSndIsqrt(s32 v)

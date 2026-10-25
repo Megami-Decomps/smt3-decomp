@@ -35,6 +35,10 @@ typedef char *va_list;
             "\t.set reorder\n"                                 \
             "\t.set at\n")
 
+/* Alignment the retail linker inserted at a translation unit boundary. The
+ * argument is a power of two, as MIPS gas takes it. */
+#define ALIGN_TEXT(n) __asm__("\t.align " #n)
+
 /* A function whose C is equivalent but does not reproduce the retail
  * instructions sits under #ifdef NON_MATCHING, with the INCLUDE_ASM the
  * default build uses in the #else. */

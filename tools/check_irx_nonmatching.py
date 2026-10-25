@@ -33,6 +33,7 @@ typedef int s32;
 typedef unsigned long long u64;
 typedef long long s64;
 #define INCLUDE_ASM(MODULE, NAME)
+#define ALIGN_TEXT(n)
 #endif
 """
 
