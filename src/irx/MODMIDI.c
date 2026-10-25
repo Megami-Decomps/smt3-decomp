@@ -2049,15 +2049,15 @@ void modmidi_e3(void)
 }
 /* ENDF modmidi_e3 */
 INCLUDE_ASM("MODMIDI", D_00003748);
-INCLUDE_ASM("MODMIDI", intrman_CpuSuspendIntr);
-INCLUDE_ASM("MODMIDI", intrman_CpuResumeIntr);
+IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
+IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
 INCLUDE_ASM("MODMIDI", D_00003774);
-INCLUDE_ASM("MODMIDI", loadcore_ReleaseLibraryEntries);
+IRX_IMPORT(loadcore, ReleaseLibraryEntries, 0x6);
 INCLUDE_ASM("MODMIDI", D_00003798);
-INCLUDE_ASM("MODMIDI", stdio_printf);
+IRX_IMPORT(stdio, printf, 0x4);
 INCLUDE_ASM("MODMIDI", D_000037BC);
-INCLUDE_ASM("MODMIDI", sysclib_look_ctype_table);
-INCLUDE_ASM("MODMIDI", sysclib_strlen);
-INCLUDE_ASM("MODMIDI", sysclib_strncmp);
-INCLUDE_ASM("MODMIDI", sysclib_strtol);
+IRX_IMPORT(sysclib, look_ctype_table, 0x8);
+IRX_IMPORT(sysclib, strlen, 0x1B);
+IRX_IMPORT(sysclib, strncmp, 0x1D);
+IRX_IMPORT(sysclib, strtol, 0x24);
 INCLUDE_ASM("MODMIDI", D_000037F8);

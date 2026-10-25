@@ -170,8 +170,8 @@ void modmsin_e3(void)
 }
 /* ENDF modmsin_e3 */
 INCLUDE_ASM("MODMSIN", D_00000348);
-INCLUDE_ASM("MODMSIN", intrman_CpuSuspendIntr);
-INCLUDE_ASM("MODMSIN", intrman_CpuResumeIntr);
+IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
+IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
 INCLUDE_ASM("MODMSIN", D_00000374);
-INCLUDE_ASM("MODMSIN", loadcore_ReleaseLibraryEntries);
+IRX_IMPORT(loadcore, ReleaseLibraryEntries, 0x6);
 INCLUDE_ASM("MODMSIN", D_00000398);

@@ -35,6 +35,19 @@ typedef char *va_list;
             "\t.set reorder\n"                                 \
             "\t.set at\n")
 
+/* An IOP import stub: the loader rewrites these two instructions into a jump to
+ * the resolved export, and the ordinal tells it which one. The symbol keeps the
+ * library prefix, so two libraries exporting the same short name stay distinct.
+ * Same shape as ps2sdk's DECLARE_IMPORT. */
+#define IRX_IMPORT(LIB, NAME, ORDINAL)            \
+    __asm__(".section .text\n"                    \
+            "\t.set noreorder\n"                  \
+            "\t.globl " #LIB "_" #NAME "\n"       \
+            #LIB "_" #NAME ":\n"                   \
+            "\tjr $31\n"                          \
+            "\taddiu $0, $0, " #ORDINAL "\n"      \
+            "\t.set reorder\n")
+
 /* Alignment the retail linker inserted at a translation unit boundary. The
  * argument is a power of two, as MIPS gas takes it. */
 #define ALIGN_TEXT(n) __asm__("\t.align " #n)
