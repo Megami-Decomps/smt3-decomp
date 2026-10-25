@@ -27,6 +27,12 @@ function by hand: the remaining difference is usually one of them.
 
 ## Types and arithmetic
 
+- **A narrow return type lets gcc narrow a later mask.** With
+  `u16 libsd_sceSdGetParam(u16)` in scope, gcc knows the result's high bits are
+  clear and turns `v & ~0x3F00` into `andi 0xC0FF`; retail's own translation
+  unit had no prototype in scope, so the call result is int-width and the mask
+  needs a register. `libsd_sceSdSetCoreAttr` is two instructions short for that
+  reason and the header is right, so it stays guarded.
 - **Unsigned shifts and divides need an unsigned operand, not a cast on the
   result.** A `u32` local for the product, `60000000U` for the literal.
 - `x / 128` on a signed value gives `bgez / addiu 0x7F / sra 7`;
@@ -154,6 +160,32 @@ function by hand: the remaining difference is usually one of them.
 
 ## Reaching data
 
+- **A hardware register is `volatile`, and that is what produces retail's
+  address form.** `*(u32 *)0xBF801404 = x` lets gcc put the constant in the
+  store's offset, so gas expands it to `lui` plus `sw 0x1404($x)`;
+  `*(volatile u32 *)0xBF801404` makes gcc build the whole address in a register,
+  `lui 0xBF80` then `ori 0x1404` then `sw 0($x)`, which is what every LIBSD
+  register access has. For an indexed register the shape is a `volatile`
+  pointer local holding `CONST + (expr)`:
+  `volatile u16 *reg = (volatile u16 *)(0xBF90033C + (core << 10));`
+  Spelling the same address as `0xBF900000 + (core << 10) + 0x33C` folds again,
+  because gcc sees a nested plus and legitimizes it back into the memory
+  operand.
+- **The final address add's operand order is the source's.** `offset + base`
+  gives `addu $4, $4, $2` and `base + offset` gives `addu $2, $2, $4`.
+  Parenthesising picks it, and hoisting the base into its own local also fixes
+  which term is *evaluated* first: `libsd_sceSdGetParam` needs the table lookup
+  computed first but added second, which only
+  `base = tbl[entry >> 8] + ...;  reg = (volatile u16 *)(((entry & 0x3E) << 3) + base);`
+  gives. `libsd_sceSdSetParam`, the same function with a store, wants the plain
+  left-to-right sum.
+- **A dead `sw` to a frame of 8 is a `volatile` local read back after a global
+  is written.** Six LIBSD setters end `theGlobal = func; sync = theGlobal;` with
+  a `volatile` local, which is the whole reason for their frame; `sceSdStubNoOp`
+  is four `sync = 0;` on a `volatile s32` and nothing else. Write
+  `void *volatile sync`, not `volatile void *sync`: the latter is a pointer to
+  volatile void, the pointer itself is not volatile, and gcc deletes the store.
+
 - **Stepping to the next `{count, pointer}` segment needs a self-advancing
   pointer.** `seg += 2` on a `u32 *` gives retail's `addiu $17, $17, 8` and
   reads through the new base; any separately named pointer (`vt =
@@ -235,6 +267,14 @@ MODMIDI (`sceMidiPlaySong`, `sceMidiPlayEnv`) and six in MODHSYN
 (`sceHsynLfoStep`, `sceHsynVoiceEventDispatch`, `sceHsynLfoSetupA`,
 `sceHsynLfoSetupB`, `sceHsynCmdDispatch`, `sceHsynVoiceSetParamRamp`). Write the C, guard it
 and move on.
+
+**A `la` of a symbol the same assembly file defines.** gas decides whether to
+fill a `jal`'s delay slot while it is parsing, so `la $4, sym` followed by `jal`
+keeps retail's `nop` when `sym` is still undefined at that point and loses it to
+the `addiu` when `sym` is already defined. MODHSYN's `start` matches because its
+library table lives in `.data`; LIBSD's cannot, because its export table is the
+first `INCLUDE_ASM` in the same text translation unit. `start` is guarded for
+that one `nop`.
 
 **gcc's cross-jumping.** Where two paths end in the same few instructions,
 gcc 2.8 merges them and jumps into the middle of the surviving copy, even
