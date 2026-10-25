@@ -2048,16 +2048,20 @@ void modmidi_e3(void)
 {
 }
 /* ENDF modmidi_e3 */
-INCLUDE_ASM("MODMIDI", D_00003748);
+ALIGN_TEXT(4);
+IRX_IMPORT_TABLE(intrman, 1, 2);
 IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
 IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
-INCLUDE_ASM("MODMIDI", D_00003774);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(loadcore, 1, 3);
 IRX_IMPORT(loadcore, ReleaseLibraryEntries, 0x6);
-INCLUDE_ASM("MODMIDI", D_00003798);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(stdio, 1, 3);
 IRX_IMPORT(stdio, printf, 0x4);
-INCLUDE_ASM("MODMIDI", D_000037BC);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(sysclib, 1, 3);
 IRX_IMPORT(sysclib, look_ctype_table, 0x8);
-IRX_IMPORT(sysclib, strlen, 0x1B);
-IRX_IMPORT(sysclib, strncmp, 0x1D);
+IRX_IMPORT(sysclib, strlen, 0x1b);
+IRX_IMPORT(sysclib, strncmp, 0x1d);
 IRX_IMPORT(sysclib, strtol, 0x24);
-INCLUDE_ASM("MODMIDI", D_000037F8);
+IRX_IMPORT_TABLE_END;

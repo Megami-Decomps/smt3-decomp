@@ -1664,7 +1664,7 @@ void sceHsynCmdDispatch(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
                 sceHsynCmdVoiceAlloc(1, slot, idx, ch, b0, b1, val, tag);
                 break;
             default:
-                thbase_DelayThread((u32)aSesqUnknownCom);
+                stdio_printf(aSesqUnknownCom);
                 break;
             }
             break;
@@ -6068,18 +6068,19 @@ void sceHsynRetnStub(void)
 {
 }
 /* ENDF sceHsynRetnStub */
-INCLUDE_ASM("MODHSYN", D_0000B094);
+ALIGN_TEXT(4);
+IRX_IMPORT_TABLE(libsd, 1, 5);
 IRX_IMPORT(libsd, sceSdInit, 0x4);
 IRX_IMPORT(libsd, sceSdSetParam, 0x5);
 IRX_IMPORT(libsd, sceSdGetParam, 0x6);
 IRX_IMPORT(libsd, sceSdSetSwitch, 0x7);
 IRX_IMPORT(libsd, sceSdGetSwitch, 0x8);
 IRX_IMPORT(libsd, sceSdSetAddr, 0x9);
-IRX_IMPORT(libsd, sceSdGetAddr, 0xA);
-IRX_IMPORT(libsd, sceSdSetCoreAttr, 0xB);
-IRX_IMPORT(libsd, sceSdNote2Pitch, 0xD);
-IRX_IMPORT(libsd, sceSdPitch2Note, 0xE);
-IRX_IMPORT(libsd, sceSdProcBatch, 0xF);
+IRX_IMPORT(libsd, sceSdGetAddr, 0xa);
+IRX_IMPORT(libsd, sceSdSetCoreAttr, 0xb);
+IRX_IMPORT(libsd, sceSdNote2Pitch, 0xd);
+IRX_IMPORT(libsd, sceSdPitch2Note, 0xe);
+IRX_IMPORT(libsd, sceSdProcBatch, 0xf);
 IRX_IMPORT(libsd, sceSdProcBatchEx, 0x10);
 IRX_IMPORT(libsd, sceSdVoiceTrans, 0x11);
 IRX_IMPORT(libsd, sceSdBlockTrans, 0x12);
@@ -6088,14 +6089,19 @@ IRX_IMPORT(libsd, sceSdBlockTransStatus, 0x14);
 IRX_IMPORT(libsd, sceSdSetEffectAttr, 0x17);
 IRX_IMPORT(libsd, sceSdGetEffectAttr, 0x18);
 IRX_IMPORT(libsd, sceSdClearEffectWorkArea, 0x19);
-INCLUDE_ASM("MODHSYN", D_0000B14C);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(intrman, 1, 2);
 IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
 IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
-INCLUDE_ASM("MODHSYN", D_0000B178);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(loadcore, 1, 3);
 IRX_IMPORT(loadcore, ReleaseLibraryEntries, 0x6);
-INCLUDE_ASM("MODHSYN", D_0000B19C);
-IRX_IMPORT(thbase, DelayThread, 0x4);
-INCLUDE_ASM("MODHSYN", D_0000B1C0);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(stdio, 1, 3);
+IRX_IMPORT(stdio, printf, 0x4);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(thbase, 1, 2);
 IRX_IMPORT(thbase, GetSystemTime, 0x22);
 IRX_IMPORT(thbase, SysClock2USec, 0x28);
-INCLUDE_ASM("MODHSYN", D_0000B1EC);
+IRX_IMPORT_TABLE_END;
+ALIGN_TEXT(4);

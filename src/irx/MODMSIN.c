@@ -169,9 +169,11 @@ void modmsin_e3(void)
 {
 }
 /* ENDF modmsin_e3 */
-INCLUDE_ASM("MODMSIN", D_00000348);
+ALIGN_TEXT(4);
+IRX_IMPORT_TABLE(intrman, 1, 2);
 IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
 IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
-INCLUDE_ASM("MODMSIN", D_00000374);
+IRX_IMPORT_TABLE_END;
+IRX_IMPORT_TABLE(loadcore, 1, 3);
 IRX_IMPORT(loadcore, ReleaseLibraryEntries, 0x6);
-INCLUDE_ASM("MODMSIN", D_00000398);
+IRX_IMPORT_TABLE_END;

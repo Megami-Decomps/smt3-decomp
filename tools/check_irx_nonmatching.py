@@ -35,6 +35,8 @@ typedef long long s64;
 #define INCLUDE_ASM(MODULE, NAME)
 #define ALIGN_TEXT(n)
 #define IRX_IMPORT(LIB, NAME, ORDINAL)
+#define IRX_IMPORT_TABLE(LIB, MAJOR, MINOR)
+#define IRX_IMPORT_TABLE_END
 #endif
 """
 

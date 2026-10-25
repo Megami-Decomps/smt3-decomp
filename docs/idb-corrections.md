@@ -796,3 +796,21 @@ Two names the pass read but did not change, both outside its scope:
 `sceHsynSdSetParamAdsr` sets no ADSR, it is the path-A `sceHsynVoiceSetPanBase`,
 and `sceMidiChannelReset` resets nothing, it returns a channel's effective
 volume.
+
+## MODHSYN's stdio import was named for the wrong library
+
+`DDS3_IRX/MODHSYN` 0xB1B8 was `thbase_DelayThread`; it is `stdio_printf`.
+
+The import stub sits inside the `stdio` table, whose header is at 0xB1A4 and
+whose zero terminator is at 0xB1C0, and it is that table's only entry. Its
+ordinal is 4, which every other module in the build already imports as
+`stdio_printf`. MODHSYN's `thbase` table starts after it at 0xB1C8 and imports
+only ordinals 0x22 and 0x28, so it has no `DelayThread` at all.
+
+The C agreed: the one call site passed a string, `thbase_DelayThread((u32)aSesqUnknownCom)`,
+and needed the cast only because the prototype was wrong. It is now
+`stdio_printf(aSesqUnknownCom)`, which is how the other modules call it, and
+MODHSYN still builds byte-identical.
+
+Found by cross-checking every import stub's symbol against the import table
+that contains it, which `IRX_IMPORT` made possible.

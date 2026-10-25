@@ -35,6 +35,24 @@ typedef char *va_list;
             "\t.set reorder\n"                                 \
             "\t.set at\n")
 
+/* The header of one IOP import table: the magic, the library version, and an
+ * eight byte name field the loader matches against a resident library. The
+ * IRX_IMPORT stubs for that library follow it, then IRX_IMPORT_TABLE_END. */
+#define IRX_IMPORT_TABLE(LIB, MAJOR, MINOR)                 \
+    __asm__(".section .text\n"                              \
+            "\t.word 0x41e00000\n"                          \
+            "\t.word 0\n"                                   \
+            "\t.word (" #MAJOR " << 8) | " #MINOR "\n"      \
+            ".L__irx_name_" #LIB ":\n"                      \
+            "\t.ascii \"" #LIB "\"\n"                       \
+            "\t.fill 8 - (. - .L__irx_name_" #LIB "), 1, 0\n")
+
+/* The zero entry that ends an import table's stub list. */
+#define IRX_IMPORT_TABLE_END                                \
+    __asm__(".section .text\n"                              \
+            "\t.word 0\n"                                   \
+            "\t.word 0\n")
+
 /* An IOP import stub: the loader rewrites these two instructions into a jump to
  * the resolved export, and the ordinal tells it which one. The symbol keeps the
  * library prefix, so two libraries exporting the same short name stay distinct.
