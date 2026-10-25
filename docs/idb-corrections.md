@@ -396,8 +396,8 @@ id, so it never becomes C.
 
 One conflict the database cannot hold: `sceSmgProgEnt_t`'s +4 byte is read
 `lbu` by `sceHsynChannelSetProgram`, which tests it as a key count, and `lb` by
-`func_00005B4C`, which uses it as a signed transpose. The field stays `u8 nKey`
-and `func_00005B4C` casts.
+`sceHsynVoiceSetPanBase`, which uses it as a signed transpose. The field stays `u8 nKey`
+and `sceHsynVoiceSetPanBase` casts.
 
 ## Applied on 2026-10-24: MODHSYN voice allocation and command prototypes
 
@@ -414,7 +414,7 @@ what Hex-Rays renders as `result = ++i < 2`.
 `sceHsynChannelKeyOffByPitch`, `sceHsynChannelKeyOffAll`, `sceHsynChannelKeyOffByTag`,
 `sceHsynChannelKeyOffByTagEntry`, `sceHsynChannelKeyOffByTagMask`, `sceHsynChannelKeyOffByTagMaskEntry`,
 `sceHsynCmdNoteOff`, `sceHsynCmdNoteOn`, `sceHsynCmdProgramChange`,
-`sceHsynCmdChannelPressure`, `sceHsynVoiceUpdatePass`, `func_000021B8`.
+`sceHsynCmdChannelPressure`, `sceHsynVoiceUpdatePass`, `sceHsynCmdSetParamRamp`.
 
 The two `*Entry` wrappers follow their callees: each is one `jal` and nothing
 else, so whatever the callee leaves in `$2` is incidental.
@@ -432,7 +432,7 @@ else, so whatever the callee leaves in `$2` is incidental.
 | `sceHsynVoiceUpdatePass` | `void(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 vel)` |
 | `sceHsynVoiceEventDispatch` | third parameter `u8`, not `char`: its caller passes the note with `andi 0xFF`, where a `char` formal would give `sll`/`sra 24` |
 | `sceHsynChannelNoteOn` | third parameter `int`, not `s8`: `sceHsynVoiceUpdatePass` forwards its status byte with a plain `move`, and gcc re-extends for an `s8` formal |
-| `func_000021B8` | `void(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)`; it forwards six of those to `sceHsynVoiceSetParamRamp` |
+| `sceHsynCmdSetParamRamp` | `void(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)`; it forwards six of those to `sceHsynVoiceSetParamRamp` |
 | `sceHsynChannelSetPanDirect`, `sceHsynChannelSetExpressionDirect` | `void(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)` and `void(..., u8 val)`: `sceHsynChannelSetPanDirect` subtracts 0x40 from the raw argument register, so a `u8` formal's mask is one instruction too many, while `sceHsynChannelSetExpressionDirect` does mask |
 
 `sceHsynVoiceStealByVnum` was already `sceHSynVoice_t *(s16, char)` in the database but the
@@ -593,7 +593,7 @@ split already recorded for `sceSmgProgEnt_t`'s +4.
 ### Functions that return nothing
 
 Six more where no path sets `$2` and the callers discard the result:
-`sceHsynVoicePitchCommit`, `func_00004614`, `sceHsynVoiceUpdatePathA`,
+`sceHsynVoicePitchCommit`, `sceHsynVoiceVolumeCommit`, `sceHsynVoiceUpdatePathA`,
 `sceHsynVoiceUpdatePathB`, `sceHsynVoiceKeyOnPathA`, `sceHsynVoiceKeyOnPathB`.
 
 `sceHsynVoiceKeyOff` is `int(void)`, not `int(sceHSynVoice_t *)`: it walks both
@@ -652,7 +652,7 @@ Read here, renamed in the pass recorded at the end of this file:
 - `sceHsynVoiceSetParamRamp` is a parameter-ramp setter writing a 14-word block at
   `sceHSynVoice_t::param`, so `param[56]` is a struct of fourteen `int`s.
 - `sceHsynUpdateVoiceState` (`func_00004D90` until it was read) returns the
-  number of voices it serviced, which `func_000017EC` stores in
+  number of voices it serviced, which `sceHsynServiceAll` stores in
   `sceHSynStat_t`'s word at +0; `sceHsynServiceVoices` returns the number it
   *skipped*, stored at +4. The two field names were therefore backwards. They
   are swapped in the pass recorded at the end of this file.
@@ -768,3 +768,31 @@ multiply together in `sceHsynVoiceSetParamRamp`; the pan is what
 `sceHsynVoiceSetPan` splits into left and right. Controller 84
 (`sceHsynChannelSetPortamentoNote`) writes `unk34`, a second copy of the glide
 source that nothing in the module reads, so `unk34` is left as it is.
+
+## Applied on 2026-10-25: the last fourteen `func_` names in Sony's modules
+
+Twelve in `DDS3_IRX/MODHSYN` and two in `DDS3_IRX/MODMIDI`, the only functions
+in the six modules still named for their address. All six modules stay
+byte-identical.
+
+| Address | Now | What the code does |
+| --- | --- | --- |
+| `MODHSYN` 0x17EC | `sceHsynServiceAll` | export ordinal 5, the per-tick service `sdfSndSeqThread` calls: clears the key-on settle latch, rebuilds both cores' mix masks from `sceHsynSdGetSwitch`, then runs `sceHsynServiceTick`, `sceHsynServiceVoices` and `sceHsynUpdateVoiceState` and publishes their counts in `sceHsynStat` |
+| `MODHSYN` 0x21B8 | `sceHsynCmdSetParamRamp` | the `sceHsynCmd*` sibling for system-exclusive commands 0..5 and 12..13: walks both channel lists and calls `sceHsynVoiceSetParamRamp` on every voice matching tag, state, note and channel |
+| `MODHSYN` 0x4614 | `sceHsynVoiceVolumeCommit` | folds `unk18`, `lfoB`, the slot volume, `envB.level` and the two pan scalers into a left and a right level, caches them in `unk1A`/`unk1C` and writes the voice's two SPU2 volume registers |
+| `MODHSYN` 0x5AA0 | `sceHsynUnrefEnvDecayStep` | unreferenced third copy of `sceHsynEnvDecayStep`, identical but for a `u16` scale |
+| `MODHSYN` 0x5B4C | `sceHsynVoiceSetPanBase` | the path-B counterpart of `sceHsynSdSetParamAdsr`: derives `unk1E`, the pan `sceHsynVoiceSetPan` offsets by, and the `unk53` polarity from the program entry's signed +4 byte |
+| `MODHSYN` 0x8BB0 | `sceHsynCurveSpanLinear` | `sceHsynCurveEval2[6]`: `((from - to) << 16) / n`, where `n` is the steps left to the end of the range rather than the fixed 126 of entries 0..5 |
+| `MODHSYN` 0x8C1C | `sceHsynCurveSpanLinearInv` | entry 7, the same with the subtraction the other way round |
+| `MODHSYN` 0x8C88 | `sceHsynCurveSpanSquare` | entry 8, that slope squared, signed by direction |
+| `MODHSYN` 0x8D54 | `sceHsynCurveSpanSquareInv` | entry 9, the `0x10000 - t * t / 16384` form of it |
+| `MODHSYN` 0xA810 | `sceHsynVoiceSetVolumeRamp` | arms `lfoB` as a volume ramp: a period from the rate and `sceHsynTickScale`, a target from the volume byte scaled by the voice curve and `chan->vol * chan->expression`, and the per-tick step between them |
+| `MODHSYN` 0xA930 | `sceHsynPanSplit` | writes a signed pan as the left and right volume scaler pair, the same clamp and wrap `sceHsynVoiceSetPan` does but to a caller-supplied pair |
+| `MODHSYN` 0xA9FC | `sceHsynVoiceParamRampStep` | steps the 14-word ramp block `sceHsynVoiceSetParamRamp` wrote: advances the counter, spends the repeat count, wraps the value, ends the ramp with state 2 and pushes the result through `sceHsynPanSplit` |
+| `MODMIDI` 0x1FE4 | `sceMidiSendChannelVolume` | sends controller 7 for one channel with the volume `sceMidiChannelReset` computes from `chVol`, `chExpr` and the track volume |
+| `MODMIDI` 0x31DC | `sceMidiSongSetMasterVolume` | export ordinal 9: writes `trk->songVol`, the scale `sceMidiSongApplyVolume` multiplies over the faded song volume, and re-applies it |
+
+Two names the pass read but did not change, both outside its scope:
+`sceHsynSdSetParamAdsr` sets no ADSR, it is the path-A `sceHsynVoiceSetPanBase`,
+and `sceMidiChannelReset` resets nothing, it returns a channel's effective
+volume.

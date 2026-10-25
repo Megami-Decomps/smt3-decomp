@@ -983,7 +983,7 @@ void sceMidiApplyPlayState(sceMidiSlot_t *slot, sceMidiVoiceTbl_t *vt)
         v = trk->ch[ch].vol;
         if ((v & 0x80) == 0) {
             trk->chVol[ch] = v;
-            func_00001FE4(slot, trk, vt, ch);
+            sceMidiSendChannelVolume(slot, trk, vt, ch);
         }
         t = trk->ch[ch].pan;
         t &= 0x80;
@@ -1195,8 +1195,8 @@ int modmidi_e16(sceMidiWork_t *work, int slotNo, u32 tick)
     return r;
 }
 /* ENDF modmidi_e16 */
-/* FUNC func_00001FE4 */
-void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 ch)
+/* FUNC sceMidiSendChannelVolume */
+void sceMidiSendChannelVolume(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 ch)
 {
     u32 vol;
     u32 msg;
@@ -1207,7 +1207,7 @@ void func_00001FE4(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *
         sceMidiSendChMsg(slot, trk, vt, ch | msg, 3);
     }
 }
-/* ENDF func_00001FE4 */
+/* ENDF sceMidiSendChannelVolume */
 #ifdef NON_MATCHING
 /* The two return -1 paths come out as one shared tail where retail has
  * two, so the branch arrangement differs. */
@@ -1225,7 +1225,7 @@ int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, u8 vol
     vt = (sceMidiVoiceTbl_t *)&work->tbl->nVoiceWord;
     if (ch < 16) {
         trk->chExpr[ch] = vol;
-        func_00001FE4(slot, trk, vt, ch);
+        sceMidiSendChannelVolume(slot, trk, vt, ch);
         return 0;
     }
     if (ch != 0xFF) {
@@ -1234,7 +1234,7 @@ int modmidi_sceMidi_MidiSetVolume(sceMidiWork_t *work, int slotNo, u8 ch, u8 vol
     trk->vol = vol;
     if (slot->flags & 2) {
         for (i = 0; i < 16; i++) {
-            func_00001FE4(slot, trk, vt, i);
+            sceMidiSendChannelVolume(slot, trk, vt, i);
         }
     }
     return 0;
@@ -1266,7 +1266,7 @@ int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol)
     if (ch < 16) {
         trk->chVol[ch] = v;
         trk->ch[ch].vol = v;
-        func_00001FE4(slot, trk, vt, ch);
+        sceMidiSendChannelVolume(slot, trk, vt, ch);
         return 0;
     }
     if (ch != 0xFF) {
@@ -1275,7 +1275,7 @@ int modmidi_e18(sceMidiWork_t *work, int slotNo, u8 ch, s8 vol)
     for (i = 0; i < 16; i++) {
         trk->chVol[i] = v;
         trk->ch[i].vol = v;
-        func_00001FE4(slot, trk, vt, i);
+        sceMidiSendChannelVolume(slot, trk, vt, i);
     }
     return 0;
 }
@@ -1872,8 +1872,8 @@ void sceMidiSongServiceTick(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot
     sceMidiPlaySong(work, slotNo, slot);
 }
 /* ENDF sceMidiSongServiceTick */
-/* FUNC func_000031DC */
-int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol)
+/* FUNC sceMidiSongSetMasterVolume */
+int sceMidiSongSetMasterVolume(sceMidiWork_t *work, int slotNo, u8 vol)
 {
     sceMidiSlot_t *slot;
     sceMidiTrack_t *trk;
@@ -1887,7 +1887,7 @@ int func_000031DC(sceMidiWork_t *work, int slotNo, u8 vol)
     }
     return 0;
 }
-/* ENDF func_000031DC */
+/* ENDF sceMidiSongSetMasterVolume */
 /* FUNC modmidi_e10 */
 int modmidi_e10(sceMidiWork_t *work, int slotNo, u8 val)
 {

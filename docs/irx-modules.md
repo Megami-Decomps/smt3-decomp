@@ -211,7 +211,7 @@ The other 30 break down as:
 | Function | Why |
 | --- | --- |
 | `sceHsynInitCores` | four instructions out of place: gcc schedules the outer loop's preheader after the list-head stores |
-| `func_00004614` | one short: gcc keeps `envB.level` live into the second arm where retail reloads it |
+| `sceHsynVoiceVolumeCommit` | one short: gcc keeps `envB.level` live into the second arm where retail reloads it |
 | `sceHsynVoiceUpdatePathB` | one short: gcc keeps `v->vag` live across two halfword stores |
 | `sceHsynVoiceStart` | byte-identical but for one register pair |
 | `modhsyn_sceHSyn_Load` | six short: gcc cross-jumps the two identical bank-clearing blocks |

@@ -69,7 +69,7 @@ function by hand: the remaining difference is usually one of them.
   twice in `sceHsynVoiceFree`. An `int r = 0xFF` gets a callee-saved register
   and costs a copy at the return instead.
 - **An `s8` stack parameter passed on without a prototype is loaded before the
-  guard.** `func_000021B8` declares its ninth argument `s8` and hands it to an
+  guard.** `sceHsynCmdSetParamRamp` declares its ninth argument `s8` and hands it to an
   `INCLUDE_ASM` callee; the `lw`/`sll`/`sra` then sit above the function's first
   test. Declaring it `int` and casting at the call site leaves the load in the
   loop preheader instead.
@@ -217,7 +217,7 @@ function by hand: the remaining difference is usually one of them.
 
 - **A `goto` is sometimes the only way to get retail's block order.** Where one
   arm sets a value and both arms fall into a common tail, writing the tail twice
-  puts the short arm first and duplicates it. `func_0000A9FC` needs the
+  puts the short arm first and duplicates it. `sceHsynVoiceParamRampStep` needs the
   arithmetic arm, then `goto done`, then the short arm falling through into the
   shared tail, which is exactly what retail's layout is.
 - **Walk the list with one `v = next` after the if-else chain.** gcc copies that
@@ -248,7 +248,7 @@ instructions short for this reason.
 **A load retail recomputes.** Where retail loads the same field twice with the
 two loads separated only by stores to other fields of the same object, gcc's
 CSE keeps the first value live and the function comes out one instruction
-short. `func_00004614` (`envB.level` across a branch) and
+short. `sceHsynVoiceVolumeCommit` (`envB.level` across a branch) and
 `sceHsynVoiceUpdatePathB` (`v->vag` across two halfword stores) are the recorded
 cases; a local for the first read, a pointer local for the stores and
 reordering the arms all leave the CSE in place.

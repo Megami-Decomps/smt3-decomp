@@ -949,8 +949,8 @@ void sceHsynServiceTick(sceHSynEntry_t *entry, int nEntryWord)
 #else
 INCLUDE_ASM("MODHSYN", sceHsynServiceTick);
 #endif
-/* FUNC func_000017EC */
-int func_000017EC(sceHSynWork_t *work)
+/* FUNC sceHsynServiceAll */
+int sceHsynServiceAll(sceHSynWork_t *work)
 {
     sceHSynTbl_t *tbl;
     u32 vm;
@@ -988,7 +988,7 @@ int func_000017EC(sceHSynWork_t *work)
     }
     return 0;
 }
-/* ENDF func_000017EC */
+/* ENDF sceHsynServiceAll */
 /* FUNC modhsyn_e8 */
 int modhsyn_e8(int *masks)
 {
@@ -1310,14 +1310,14 @@ void sceHsynCmdProgramChange(int base, int unused, int rate, int state, u8 note,
                 if (v->ch != ch) {
                     continue;
                 }
-                func_0000A810(v, rate, vol);
+                sceHsynVoiceSetVolumeRamp(v, rate, vol);
             }
         }
     }
 }
 /* ENDF sceHsynCmdProgramChange */
-/* FUNC func_000021B8 */
-void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)
+/* FUNC sceHsynCmdSetParamRamp */
+void sceHsynCmdSetParamRamp(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)
 {
     sceHSynVoice_t *heads[2];
     sceHSynVoice_t *end;
@@ -1347,7 +1347,7 @@ void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 
         }
     }
 }
-/* ENDF func_000021B8 */
+/* ENDF sceHsynCmdSetParamRamp */
 /* FUNC sceHsynCmdChannelPressure */
 void sceHsynCmdChannelPressure(int base, int unused, int dir, int rate, int state, u8 note, u8 ch, u16 depth, u32 tag)
 {
@@ -1600,15 +1600,15 @@ void sceHsynCmdDispatch(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
                 val = sceHsynCmdReset(&cur);
                 lo = *cur++;
                 hi = *cur++;
-                func_000021B8((int)slot, idx, cmd, val, ch, b0, b1, lo, hi, 0, tag);
+                sceHsynCmdSetParamRamp((int)slot, idx, cmd, val, ch, b0, b1, lo, hi, 0, tag);
                 break;
             case 2:
-                func_000021B8((int)slot, idx, cmd, 0, ch, b0, b1, 0, 0, 0, tag);
+                sceHsynCmdSetParamRamp((int)slot, idx, cmd, 0, ch, b0, b1, 0, 0, 0, tag);
                 break;
             case 5:
                 lo = cur[0];
                 cur += 2;
-                func_000021B8((int)slot, idx, cmd, 0, ch, b0, b1, 0, lo, 0, tag);
+                sceHsynCmdSetParamRamp((int)slot, idx, cmd, 0, ch, b0, b1, 0, lo, 0, tag);
                 break;
             case 7:
                 val = sceHsynCmdReset(&cur);
@@ -1625,7 +1625,7 @@ void sceHsynCmdDispatch(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
                 val = sceHsynCmdReset(&cur);
                 lo = cur[0];
                 cur += 2;
-                func_000021B8((int)slot, idx, cmd, val, ch, b0, b1, 0, lo, 0, tag);
+                sceHsynCmdSetParamRamp((int)slot, idx, cmd, val, ch, b0, b1, 0, lo, 0, tag);
                 break;
             case 14:
             case 15:
@@ -2326,7 +2326,7 @@ void sceHsynVoiceKeyOnPathA(sceHSynVoice_t *v)
     tone = v->tone;
     ent = core | (idx << 1);
     bit = 1 << idx;
-    func_00004614(v);
+    sceHsynVoiceVolumeCommit(v);
     if (v->vag != NULL) {
         sceHsynNoiseMask[v->core] &= ~bit;
         sceHsynVoicePitchCommit(v);
@@ -2478,8 +2478,8 @@ void sceHsynSdSetParamPitch(sceHSynVoice_t *v, s16 bend)
 #ifdef NON_MATCHING
 /* One instruction short: gcc keeps envB.level live into the second arm where
  * retail loads it again. */
-/* FUNC func_00004614 */
-void func_00004614(sceHSynVoice_t *v)
+/* FUNC sceHsynVoiceVolumeCommit */
+void sceHsynVoiceVolumeCommit(sceHSynVoice_t *v)
 {
     u32 e;
     u32 l;
@@ -2538,10 +2538,10 @@ void func_00004614(sceHSynVoice_t *v)
     }
 }
 #else
-INCLUDE_ASM("MODHSYN", func_00004614);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceVolumeCommit);
 #endif
-/* ENDF func_00004614 */
-/* ENDF func_00004614 */
+/* ENDF sceHsynVoiceVolumeCommit */
+/* ENDF sceHsynVoiceVolumeCommit */
 /* FUNC sceHsynSdSetParamEnvelope */
 void sceHsynSdSetParamEnvelope(sceHSynVoice_t *voice)
 {
@@ -2881,10 +2881,10 @@ int sceHsynUpdateVoiceState(void)
             }
             sceHsynLfoStep(&v->envB);
             if (v->unk57 == 1) {
-                func_0000A9FC(v);
+                sceHsynVoiceParamRampStep(v);
                 sceHsynEffectFeedbackSet(v);
             }
-            func_00004614(v);
+            sceHsynVoiceVolumeCommit(v);
             n++;
         }
     }
@@ -3005,7 +3005,7 @@ void sceHsynVoiceUpdatePathB(sceHSynVoice_t *v)
     sc = sceHsynVolumeScale(v->vel, v->unk4A, slot->unk10, slot->unk0C);
     v->unk16 = *((u8 *)prog + 3) * sc;
     v->unk4E = prog->unk0C & 1;
-    func_00005B4C(v);
+    sceHsynVoiceSetPanBase(v);
     t = (u8)v->vol;
     if (t == 0x80) {
         pan = 0;
@@ -3047,7 +3047,7 @@ void sceHsynVoiceKeyOnPathB(sceHSynVoice_t *v)
     prog = v->prog;
     ent = core | (idx << 1);
     bit = 1 << idx;
-    func_00004614(v);
+    sceHsynVoiceVolumeCommit(v);
     if (v->vag != NULL) {
         sceHsynNoiseMask[v->core] &= ~bit;
         sceHsynVoicePitchCommit(v);
@@ -3153,8 +3153,8 @@ void sceHsynEnvDecayStep(sceHSynVoice_t *v, u8 scale)
     v->unk22 = t;
 }
 /* ENDF sceHsynEnvDecayStep */
-/* FUNC func_00005AA0 */
-void func_00005AA0(sceHSynVoice_t *v, u16 scale)
+/* FUNC sceHsynUnrefEnvDecayStep */
+void sceHsynUnrefEnvDecayStep(sceHSynVoice_t *v, u16 scale)
 {
     sceSmgProgEnt_t *p;
     int t;
@@ -3177,15 +3177,15 @@ void func_00005AA0(sceHSynVoice_t *v, u16 scale)
     }
     v->unk22 = t;
 }
-/* ENDF func_00005AA0 */
+/* ENDF sceHsynUnrefEnvDecayStep */
 #ifdef NON_MATCHING
 /* Two instructions short: the same second-wrap-loop shape as
  * sceHsynSdSetParamAdsr. */
-/* FUNC func_00005B4C */
+/* FUNC sceHsynVoiceSetPanBase */
 /* The +4 byte of the program entry is read signed here and unsigned as a key
  * count in sceHsynChannelSetProgram, so the cast stands in for a field the struct
  * cannot hold both ways. */
-void func_00005B4C(sceHSynVoice_t *v)
+void sceHsynVoiceSetPanBase(sceHSynVoice_t *v)
 {
     int x;
 
@@ -3211,9 +3211,9 @@ void func_00005B4C(sceHSynVoice_t *v)
     v->unk53 = 1;
     v->unk1E = x;
 }
-/* ENDF func_00005B4C */
+/* ENDF sceHsynVoiceSetPanBase */
 #else
-INCLUDE_ASM("MODHSYN", func_00005B4C);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceSetPanBase);
 #endif
 INCLUDE_ASM("MODHSYN", D_00005BDC);
 /* FUNC sceHsynSpu2SettleDelay */
@@ -4671,8 +4671,8 @@ int sceHsynUnrefParamSetD(u8 a, u8 b)
     return x - y;
 }
 /* ENDF sceHsynUnrefParamSetD */
-/* FUNC func_00008BB0 */
-int func_00008BB0(u8 from, u8 to)
+/* FUNC sceHsynCurveSpanLinear */
+int sceHsynCurveSpanLinear(u8 from, u8 to)
 {
     int n;
 
@@ -4686,9 +4686,9 @@ int func_00008BB0(u8 from, u8 to)
     }
     return ((from - to) << 16) / n;
 }
-/* ENDF func_00008BB0 */
-/* FUNC func_00008C1C */
-int func_00008C1C(u8 from, u8 to)
+/* ENDF sceHsynCurveSpanLinear */
+/* FUNC sceHsynCurveSpanLinearInv */
+int sceHsynCurveSpanLinearInv(u8 from, u8 to)
 {
     int n;
 
@@ -4702,9 +4702,9 @@ int func_00008C1C(u8 from, u8 to)
     }
     return ((to - from) << 16) / n;
 }
-/* ENDF func_00008C1C */
-/* FUNC func_00008C88 */
-int func_00008C88(u8 from, u8 to)
+/* ENDF sceHsynCurveSpanLinearInv */
+/* FUNC sceHsynCurveSpanSquare */
+int sceHsynCurveSpanSquare(u8 from, u8 to)
 {
     int d;
     int q;
@@ -4720,12 +4720,12 @@ int func_00008C88(u8 from, u8 to)
     q = d / (to - 1);
     return -((q * q) / 16384);
 }
-/* ENDF func_00008C88 */
+/* ENDF sceHsynCurveSpanSquare */
 #ifdef NON_MATCHING
 /* Same size: the two `0x8000 - q` subtractions land in q's register
  * rather than the constant's. */
-/* FUNC func_00008D54 */
-int func_00008D54(u8 from, u8 to)
+/* FUNC sceHsynCurveSpanSquareInv */
+int sceHsynCurveSpanSquareInv(u8 from, u8 to)
 {
     int d;
     int t;
@@ -4742,9 +4742,9 @@ int func_00008D54(u8 from, u8 to)
     t = d / (to - 1) + 0x8000;
     return (t * t) / 16384 - 0x10000;
 }
-/* ENDF func_00008D54 */
+/* ENDF sceHsynCurveSpanSquareInv */
 #else
-INCLUDE_ASM("MODHSYN", func_00008D54);
+INCLUDE_ASM("MODHSYN", sceHsynCurveSpanSquareInv);
 #endif
 #ifdef NON_MATCHING
 /* Same size and instructions: gcc coalesces `curve` into the dying `sel`
@@ -5702,8 +5702,8 @@ int sceHsynCoreStateSet(sceHSynVoice_t *v)
 #ifdef NON_MATCHING
 /* One nop long: gcc hoists the lfoB phase load above the volume
  * product's mflo, where retail schedules it after the shift. */
-/* FUNC func_0000A810 */
-int func_0000A810(sceHSynVoice_t *v, int rate, u8 vol)
+/* FUNC sceHsynVoiceSetVolumeRamp */
+int sceHsynVoiceSetVolumeRamp(sceHSynVoice_t *v, int rate, u8 vol)
 {
     sceHSynChannel_t *chan;
     sceHSynSlot_t *slot;
@@ -5735,13 +5735,13 @@ int func_0000A810(sceHSynVoice_t *v, int rate, u8 vol)
     v->lfoB.unk08 = step;
     return 0;
 }
-/* ENDF func_0000A810 */
+/* ENDF sceHsynVoiceSetVolumeRamp */
 #else
-INCLUDE_ASM("MODHSYN", func_0000A810);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceSetVolumeRamp);
 #endif
 INCLUDE_ASM("MODHSYN", D_0000A92C);
-/* FUNC func_0000A930 */
-void func_0000A930(u32 *out, int wrap, s8 pan)
+/* FUNC sceHsynPanSplit */
+void sceHsynPanSplit(u32 *out, int wrap, s8 pan)
 {
     int x;
     int en;
@@ -5786,12 +5786,12 @@ void func_0000A930(u32 *out, int wrap, s8 pan)
         out[0] = ((0x80 - x) << 1) & 0xFF;
     }
 }
-/* ENDF func_0000A930 */
+/* ENDF sceHsynPanSplit */
 #ifdef NON_MATCHING
 /* One instruction short: retail copies the pan value into the shift temp
    before shifting it in place, which no form of the expression reproduces. */
-/* FUNC func_0000A9FC */
-int func_0000A9FC(sceHSynVoice_t *v)
+/* FUNC sceHsynVoiceParamRampStep */
+int sceHsynVoiceParamRampStep(sceHSynVoice_t *v)
 {
     int *p;
     int state;
@@ -5837,13 +5837,13 @@ stop:
         p[2] = x << 12;
 done:
         p[9]++;
-        func_0000A930((u32 *)&p[11], v->unk4E, x);
+        sceHsynPanSplit((u32 *)&p[11], v->unk4E, x);
     }
     return 0;
 }
-/* ENDF func_0000A9FC */
+/* ENDF sceHsynVoiceParamRampStep */
 #else
-INCLUDE_ASM("MODHSYN", func_0000A9FC);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceParamRampStep);
 #endif
 /* FUNC sceHsynChannelStateGet */
 int sceHsynChannelStateGet(sceHSynVoice_t *v)
