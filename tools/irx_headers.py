@@ -174,6 +174,24 @@ def clean_decls(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", text).strip()
 
 
+def name_anonymous_structs(decls: str) -> tuple[str, dict]:
+    """Give an anonymous struct the name its typedef uses.
+
+    IDA names a struct with no tag after a hash of its layout, so the header
+    ends up with `struct $4ABAB...` bodies that nothing readable refers to and a
+    typedef beside each one. Fold the two together.
+    """
+    pairs = re.findall(r"^typedef struct (\$[0-9A-Fa-f]+) (\w+);$", decls, re.M)
+    rename = {h: n for h, n in pairs if not n.startswith("$")}
+    for h, n in rename.items():
+        decls = decls.replace(h, n)
+    # the bodies now carry their real names, and render() emits one forward
+    # typedef per struct, so the aliases here are redundant
+    out = [l for l in decls.splitlines()
+           if not re.match(r"^typedef struct (\w+) \1;$", l)]
+    return "\n".join(out), rename
+
+
 def render(module: str, blob: dict, iop_declared: set[str]) -> str:
     L = [f"#ifndef IRX_{module}_H",
          f"#define IRX_{module}_H",
@@ -189,8 +207,12 @@ def render(module: str, blob: dict, iop_declared: set[str]) -> str:
          ""]
 
     decls = clean_decls(blob["decls"])
+    decls, renamed = name_anonymous_structs(decls)
     named = [t for t in blob["types"]
-             if t[0] not in BUILTIN and f"struct {t[0]}" in decls]
+             if t[0] not in BUILTIN and f"struct {renamed.get(t[0], t[0])}" in decls]
+    named = [(renamed.get(n, n), sz, udt) for n, sz, udt in named]
+    seen = set()                      # the hash struct and its typedef are one type
+    named = [t for t in named if not (t[0] in seen or seen.add(t[0]))]
     if decls:
         L += ["/* Types ------------------------------------------------------------ */",
               ""]

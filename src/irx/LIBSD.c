@@ -71,21 +71,21 @@ s32 sceSdApplyEffectAttrMask(s32 core, sceSdEffectPreset_t *preset)
     if (all || (mask & 0x2))
         sceSdWriteAddrReg(core, 0x174, preset->apf2Size);
     if (all || (mask & 0x4))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x774) = preset->iirVol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VIIR) = preset->iirVol;
     if (all || (mask & 0x8))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x776) = preset->comb1Vol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VCOMB1) = preset->comb1Vol;
     if (all || (mask & 0x10))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x778) = preset->comb2Vol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VCOMB2) = preset->comb2Vol;
     if (all || (mask & 0x20))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x77A) = preset->comb3Vol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VCOMB3) = preset->comb3Vol;
     if (all || (mask & 0x40))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x77C) = preset->comb4Vol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VCOMB4) = preset->comb4Vol;
     if (all || (mask & 0x80))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x77E) = preset->wallVol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VWALL) = preset->wallVol;
     if (all || (mask & 0x100))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x780) = preset->apf1Vol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VAPF1) = preset->apf1Vol;
     if (all || (mask & 0x200))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x782) = preset->apf2Vol;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VAPF2) = preset->apf2Vol;
     if (all || (mask & 0x400))
         sceSdWriteAddrReg(core, 0x176, preset->sameLDst);
     if (all || (mask & 0x800))
@@ -127,9 +127,9 @@ s32 sceSdApplyEffectAttrMask(s32 core, sceSdEffectPreset_t *preset)
     if (all || (mask & 0x20000000))
         sceSdWriteAddrReg(core, 0x19C, preset->apf2RDst);
     if (all || (mask & 0x40000000))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x784) = preset->inCoefL;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VLIN) = preset->inCoefL;
     if (all || (mask & 0x80000000))
-        *(volatile u16 *)(core * 0x28 + sceSdRegBase + 0x786) = preset->inCoefR;
+        *(volatile u16 *)(core * 0x28 + sceSdRegBase + SPU2_O_VRIN) = preset->inCoefR;
 }
 /* ENDF sceSdApplyEffectAttrMask */
 ALIGN_TEXT(4);

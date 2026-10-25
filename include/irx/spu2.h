@@ -130,6 +130,22 @@
 #define SPU2_MVOLXR(core)     (*(volatile u16 *)SPU2_MVOLXR_A(core))
 #define SPU2_MVOLXR_HI(core)  (*(volatile u16 *)(SPU2_MVOLXR_A(core) + 2))
 
+/* The reverb coefficients, in the same stride 40 block as the volumes above.
+ * sceSdApplyEffectAttrMask reaches these through the runtime sceSdRegBase
+ * rather than a literal base, so they are offsets: the retail code loads that
+ * global and adds, and naming the whole address here would change the code.
+ * Names are the SPU2 reverb coefficients the recovered mask bits select. */
+#define SPU2_O_VIIR     0x774
+#define SPU2_O_VCOMB1   0x776
+#define SPU2_O_VCOMB2   0x778
+#define SPU2_O_VCOMB3   0x77A
+#define SPU2_O_VCOMB4   0x77C
+#define SPU2_O_VWALL    0x77E
+#define SPU2_O_VAPF1    0x780
+#define SPU2_O_VAPF2    0x782
+#define SPU2_O_VLIN     0x784
+#define SPU2_O_VRIN     0x786
+
 /* Not per core. */
 #define SPU2_SPDIF_OUT_A        0xBF9007C0
 #define SPU2_SPDIF_OUT          (*(volatile u16 *)SPU2_SPDIF_OUT_A)

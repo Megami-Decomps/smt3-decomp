@@ -13,11 +13,11 @@
 /* Types ------------------------------------------------------------ */
 
 typedef struct $34162BA5F6278889E9127ADB4C505E54 $34162BA5F6278889E9127ADB4C505E54;
-typedef struct $3C942D984E826A86B16C080821D2B445 $3C942D984E826A86B16C080821D2B445;
-typedef struct $4ABABBDA0A4FB51A4CDBBE3CE84D35CE $4ABABBDA0A4FB51A4CDBBE3CE84D35CE;
-typedef struct $0931E0613BC3DA45A22B4270B53F5B54 $0931E0613BC3DA45A22B4270B53F5B54;
-typedef struct $CD05D2383D4BFC340FE43D91B8BAA335 $CD05D2383D4BFC340FE43D91B8BAA335;
-typedef struct $A5B8BCC80647B130F4FDBC340E1BE2F4 $A5B8BCC80647B130F4FDBC340E1BE2F4;
+typedef struct sceSdBatch_t sceSdBatch_t;
+typedef struct sceSdEffectPreset_t sceSdEffectPreset_t;
+typedef struct sceSdClearChunk_t sceSdClearChunk_t;
+typedef struct sceSdTransIntrArg_t sceSdTransIntrArg_t;
+typedef struct sceSdSifDma_t sceSdSifDma_t;
 
 struct $34162BA5F6278889E9127ADB4C505E54
 {
@@ -29,16 +29,15 @@ struct $34162BA5F6278889E9127ADB4C505E54
   s32 feedback;
 };
 
-struct $3C942D984E826A86B16C080821D2B445
+struct sceSdBatch_t
 {
   u16 func;
   u16 entry;
   u32 value;
 };
 
-typedef struct $3C942D984E826A86B16C080821D2B445 sceSdBatch_t;
 
-struct $4ABABBDA0A4FB51A4CDBBE3CE84D35CE
+struct sceSdEffectPreset_t
 {
   u32 mask;
   u16 apf1Size;
@@ -75,25 +74,22 @@ struct $4ABABBDA0A4FB51A4CDBBE3CE84D35CE
   u16 inCoefR;
 };
 
-typedef struct $4ABABBDA0A4FB51A4CDBBE3CE84D35CE sceSdEffectPreset_t;
 
-struct $0931E0613BC3DA45A22B4270B53F5B54
+struct sceSdClearChunk_t
 {
   u32 addr;
   u32 size;
 };
 
-typedef struct $0931E0613BC3DA45A22B4270B53F5B54 sceSdClearChunk_t;
 
-struct $CD05D2383D4BFC340FE43D91B8BAA335
+struct sceSdTransIntrArg_t
 {
   u32 op;
   void *arg;
 };
 
-typedef struct $CD05D2383D4BFC340FE43D91B8BAA335 sceSdTransIntrArg_t;
 
-struct $A5B8BCC80647B130F4FDBC340E1BE2F4
+struct sceSdSifDma_t
 {
   void *src;
   void *dest;
@@ -101,15 +97,14 @@ struct $A5B8BCC80647B130F4FDBC340E1BE2F4
   s32 attr;
 };
 
-typedef struct $A5B8BCC80647B130F4FDBC340E1BE2F4 sceSdSifDma_t;
 
 /* A layout the compiler reads differently is a build error. */
 typedef char __LIBSD_sizeof_$34162BA5F6278889E9127ADB4C505E54[(sizeof($34162BA5F6278889E9127ADB4C505E54) == 20) ? 1 : -1];
-typedef char __LIBSD_sizeof_$3C942D984E826A86B16C080821D2B445[(sizeof($3C942D984E826A86B16C080821D2B445) == 8) ? 1 : -1];
-typedef char __LIBSD_sizeof_$4ABABBDA0A4FB51A4CDBBE3CE84D35CE[(sizeof($4ABABBDA0A4FB51A4CDBBE3CE84D35CE) == 68) ? 1 : -1];
-typedef char __LIBSD_sizeof_$0931E0613BC3DA45A22B4270B53F5B54[(sizeof($0931E0613BC3DA45A22B4270B53F5B54) == 8) ? 1 : -1];
-typedef char __LIBSD_sizeof_$CD05D2383D4BFC340FE43D91B8BAA335[(sizeof($CD05D2383D4BFC340FE43D91B8BAA335) == 8) ? 1 : -1];
-typedef char __LIBSD_sizeof_$A5B8BCC80647B130F4FDBC340E1BE2F4[(sizeof($A5B8BCC80647B130F4FDBC340E1BE2F4) == 16) ? 1 : -1];
+typedef char __LIBSD_sizeof_sceSdBatch_t[(sizeof(sceSdBatch_t) == 8) ? 1 : -1];
+typedef char __LIBSD_sizeof_sceSdEffectPreset_t[(sizeof(sceSdEffectPreset_t) == 68) ? 1 : -1];
+typedef char __LIBSD_sizeof_sceSdClearChunk_t[(sizeof(sceSdClearChunk_t) == 8) ? 1 : -1];
+typedef char __LIBSD_sizeof_sceSdTransIntrArg_t[(sizeof(sceSdTransIntrArg_t) == 8) ? 1 : -1];
+typedef char __LIBSD_sizeof_sceSdSifDma_t[(sizeof(sceSdSifDma_t) == 16) ? 1 : -1];
 
 /* Functions -------------------------------------------------------- */
 
