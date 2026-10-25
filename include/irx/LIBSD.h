@@ -12,22 +12,12 @@
 
 /* Types ------------------------------------------------------------ */
 
-typedef struct $34162BA5F6278889E9127ADB4C505E54 $34162BA5F6278889E9127ADB4C505E54;
 typedef struct sceSdBatch_t sceSdBatch_t;
 typedef struct sceSdEffectPreset_t sceSdEffectPreset_t;
 typedef struct sceSdClearChunk_t sceSdClearChunk_t;
 typedef struct sceSdTransIntrArg_t sceSdTransIntrArg_t;
 typedef struct sceSdSifDma_t sceSdSifDma_t;
 
-struct $34162BA5F6278889E9127ADB4C505E54
-{
-  s32 core;
-  u32 mode;
-  u16 depth_L;
-  u16 depth_R;
-  s32 delay;
-  s32 feedback;
-};
 
 struct sceSdBatch_t
 {
@@ -99,7 +89,6 @@ struct sceSdSifDma_t
 
 
 /* A layout the compiler reads differently is a build error. */
-typedef char __LIBSD_sizeof_$34162BA5F6278889E9127ADB4C505E54[(sizeof($34162BA5F6278889E9127ADB4C505E54) == 20) ? 1 : -1];
 typedef char __LIBSD_sizeof_sceSdBatch_t[(sizeof(sceSdBatch_t) == 8) ? 1 : -1];
 typedef char __LIBSD_sizeof_sceSdEffectPreset_t[(sizeof(sceSdEffectPreset_t) == 68) ? 1 : -1];
 typedef char __LIBSD_sizeof_sceSdClearChunk_t[(sizeof(sceSdClearChunk_t) == 8) ? 1 : -1];

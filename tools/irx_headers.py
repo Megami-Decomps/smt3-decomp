@@ -246,7 +246,32 @@ def render(module: str, blob: dict, iop_declared: set[str]) -> str:
         L.append("")
 
     L += [f"#endif /* IRX_{module}_H */", ""]
-    return "\n".join(L)
+    return drop_orphan_structs("\n".join(L))
+
+
+def drop_orphan_structs(text: str) -> str:
+    """Remove a layout-hash struct that nothing in the header refers to.
+
+    An anonymous struct whose only alias is a type iop.h already declares has
+    its typedef skipped, which leaves the body behind under IDA's hash with
+    nothing pointing at it. Drop the body, its forward typedef and its size
+    check rather than emit a name no one can use.
+    """
+    for h in sorted(set(re.findall(r"\$[0-9A-Fa-f]{32}", text))):
+        body = re.search(r"^struct %s\n\{.*?^\};\n" % re.escape(h), text, re.M | re.S)
+        fwd = f"typedef struct {h} {h};\n"
+        chk = re.search(r"^typedef char __\w+?_sizeof_%s\[[^\]]*\];\n" % re.escape(h),
+                        text, re.M)
+        spent = len(re.findall(re.escape(h), (body.group(0) if body else "")
+                               + fwd + (chk.group(0) if chk else "")))
+        if len(re.findall(re.escape(h), text)) != spent:
+            continue                      # something really uses it; leave it alone
+        if body:
+            text = text.replace(body.group(0), "", 1)
+        text = text.replace(fwd, "", 1)
+        if chk:
+            text = text.replace(chk.group(0), "", 1)
+    return text
 
 
 def iop_h_names() -> tuple[set[str], set[str]]:
