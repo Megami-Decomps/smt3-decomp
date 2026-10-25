@@ -620,9 +620,91 @@ s32 sceSdInitCoreMix(s32 keepEffect)
     *(volatile u16 *)SPU2_BVOLR(1) = 0;
 }
 /* ENDF sceSdInitCoreMix */
+/* FUNC libsd_sceSdVoiceTrans */
+#ifdef NON_MATCHING
+/* The instruction stream is retail's but the allocation is not: gcc gives
+ * mode, spuaddr, core and size a different four of the callee-saved
+ * registers, which costs the first branch its delay slot. */
+s32 libsd_sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 spuaddr, u32 size)
+{
+    s32 core = chan & 1;
+    u32 len;
+
+    if (sceSdTransferOp((core << 4) | 4) != 0)
+        return -210;
+    if (sceSdTransIdle[core] != 1)
+        return -201;
+    switch (mode & 3) {
+    case 0:
+        if ((mode & 8) == 0) {
+            sceSdTransIntrArg[core].op = core | 0x500;
+            sceSdTransByIo[core] = 0;
+            sceSdTransferOp((core << 4) | 2, spuaddr);
+            if (intrman_QueryIntrContext() != 0)
+                thevent_iClearEventFlag(sceSdTransEventFlag[core], -2);
+            else
+                thevent_ClearEventFlag(sceSdTransEventFlag[core], -2);
+            sceSdTransIdle[core] = 0;
+            len = (size >> 6) << 6;
+            if ((size & 0x3F) != 0)
+                len += 0x40;
+            return sceSdTransferOp((core << 4) | 6, iopaddr, len);
+        }
+        sceSdTransIntrArg[core].op = core | 0x500;
+        sceSdTransByIo[core] = 1;
+        sceSdTransferOp((core << 4) | 2, spuaddr);
+        len = (size >> 6) << 6;
+        if ((size & 0x3F) != 0)
+            len += 0x40;
+        size = len;
+        sceSdVoiceTransIo((u16 *)iopaddr, size, core);
+        return size;
+    case 1:
+        sceSdTransIntrArg[core].op = core | 0x900;
+        sceSdTransByIo[core] = 0;
+        sceSdTransferOp((core << 4) | 2, spuaddr);
+        if (intrman_QueryIntrContext() != 0)
+            thevent_iClearEventFlag(sceSdTransEventFlag[core], -2);
+        else
+            thevent_ClearEventFlag(sceSdTransEventFlag[core], -2);
+        sceSdTransIdle[core] = 0;
+        len = (size >> 6) << 6;
+        if ((size & 0x3F) != 0)
+            len += 0x40;
+        return sceSdTransferOp((core << 4) | 5, iopaddr, len);
+    }
+    return -100;
+}
+#else
 INCLUDE_ASM("LIBSD", libsd_sceSdVoiceTrans);
+#endif
+/* ENDF libsd_sceSdVoiceTrans */
 ALIGN_TEXT(4);
-INCLUDE_ASM("LIBSD", libsd_sceSdVoiceTransStatus);
+/* FUNC libsd_sceSdVoiceTransStatus */
+s32 libsd_sceSdVoiceTransStatus(s16 chan, s16 flag)
+{
+    u32 resbits;
+
+    if (sceSdTransByIo[chan] == 1 || sceSdTransIdle[chan] == 1)
+        return 1;
+    switch (flag) {
+    case 1:
+        if (intrman_QueryIntrContext() != 0)
+            return -202;
+        thevent_WaitEventFlag(sceSdTransEventFlag[chan], 1, 0, &resbits);
+        sceSdTransDone[chan] = 0;
+        sceSdTransIdle[chan] = 1;
+        break;
+    case 0:
+        if (sceSdTransDone[chan] != 0) {
+            sceSdTransDone[chan] = 0;
+            sceSdTransIdle[chan] = 1;
+        }
+        break;
+    }
+    return sceSdTransIdle[chan];
+}
+/* ENDF libsd_sceSdVoiceTransStatus */
 /* FUNC libsd_sceSdStopTrans */
 s32 libsd_sceSdStopTrans(s32 chan)
 {
@@ -635,7 +717,78 @@ s32 libsd_sceSdStopTrans(s32 chan)
 }
 /* ENDF libsd_sceSdStopTrans */
 ALIGN_TEXT(4);
+/* FUNC libsd_sceSdBlockTrans */
+#ifdef NON_MATCHING
+/* One instruction over: retail reads a fifth argument through va_arg, which
+ * keeps `size` in a register while spilling it for va_start; iop.h declares
+ * four parameters, so taking its address is the only way to reach the
+ * argument and that makes every use of `size` go through memory. */
+s32 libsd_sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size)
+{
+    volatile s32 sync;
+    s32 core = chan & 1;
+    s32 ret = -100;
+    s32 busy;
+
+    busy = sceSdTransferOp((core << 4) | 4);
+    switch (mode & 3) {
+    case 0:
+        if (busy != 0)
+            return -210;
+        sceSdTransIntrArg[core].op = core | 0x600;
+        if ((mode & 0x10) != 0) {
+            sceSdTransIntrArg[core].op = core | 0x1600;
+            size >>= 1;
+        }
+        ret = sceSdBlockTransWrite((u32)iopaddr, size, chan, mode, 0);
+        if (ret < 0) {
+            sceSdTransIntrArg[core].op = core;
+            sync = sceSdTransIntrArg[core].op;
+        }
+        return ret;
+    case 1:
+        if (busy != 0)
+            return -210;
+        sceSdTransIntrArg[core].op = core | 0xA00;
+        if ((mode & 0x10) != 0) {
+            sceSdTransIntrArg[core].op = core | 0x1A00;
+            size >>= 1;
+        }
+        ret = sceSdBlockTransRead((u32)iopaddr, size, core, mode);
+        if (ret < 0) {
+            sceSdTransIntrArg[core].op = core;
+            sync = sceSdTransIntrArg[core].op;
+        }
+        return ret;
+    case 3:
+        if (busy != 0)
+            return -210;
+        sceSdTransIntrArg[core].op = core | 0x600;
+        if ((mode & 0x10) != 0) {
+            sceSdTransIntrArg[core].op = core | 0x1600;
+            size >>= 1;
+        }
+        /* Retail takes a fifth argument here, which iop.h does not declare;
+         * this is what va_arg compiles to. */
+        ret = sceSdBlockTransWrite((u32)iopaddr, size, chan, mode,
+                                   *(u32 *)((((u32)(&size + 1)) + 3) & ~3));
+        if (ret < 0) {
+            sceSdTransIntrArg[core].op = core;
+            sync = sceSdTransIntrArg[core].op;
+        }
+        return ret;
+    case 2:
+        sceSdTransIntrArg[core].op = core;
+        sync = sceSdTransIntrArg[core].op;
+        ret = sceSdTransferOp((core << 4) | 0xA);
+        return ret;
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM("LIBSD", libsd_sceSdBlockTrans);
+#endif
+/* ENDF libsd_sceSdBlockTrans */
 /* FUNC libsd_sceSdBlockTransStatus */
 s32 libsd_sceSdBlockTransStatus(s16 chan, s16 flag)
 {
@@ -858,12 +1011,349 @@ u32 size;
 INCLUDE_ASM("LIBSD", sceSdTransferOp);
 #endif
 /* ENDF sceSdTransferOp */
+/* FUNC sceSdVoiceTransIo */
+#ifdef NON_MATCHING
+/* One instruction short: retail keeps core << 9 in a callee-saved register
+ * for the final core attribute store, where a local for it costs four spills
+ * instead. */
+s32 sceSdVoiceTransIo(u16 *iopaddr, u32 size, s32 core)
+{
+    s32 w = core << 10;
+    volatile u16 *data = (volatile u16 *)(w + 0xBF9001AC);
+    volatile u16 *attr = (volatile u16 *)(w + 0xBF90019A);
+    s32 state;
+    s32 n;
+    s32 i;
+    u32 t;
+
+    while (size != 0) {
+        if (size <= 0x40)
+            n = size;
+        else
+            n = 0x40;
+        for (i = 0; i < n; i += 2)
+            *data = *iopaddr++;
+        intrman_CpuSuspendIntr(&state);
+        *attr = (*attr & 0xFFCF) | 0x10;
+        intrman_CpuResumeIntr(state);
+        {
+            volatile u16 *dmaStat = (volatile u16 *)(w + 0xBF900344);
+
+            t = 0;
+            while ((*dmaStat & 0x400) != 0) {
+                if (++t > 0xF00)
+                    break;
+                sceSdDelay(1);
+            }
+        }
+        size -= n;
+    }
+    {
+        volatile u16 *reg = (volatile u16 *)(w + 0xBF90019A);
+        volatile s32 sync;
+
+        intrman_CpuSuspendIntr(&state);
+        *reg = *reg & 0xFFCF;
+        intrman_CpuResumeIntr(state);
+        sceSdTransIdle[core] = 1;
+        sync = sceSdTransIdle[core];
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM("LIBSD", sceSdVoiceTransIo);
+#endif
+/* ENDF sceSdVoiceTransIo */
+/* FUNC sceSdDmaIntrHandler */
+#ifdef NON_MATCHING
+/* One instruction over: gcc cross-jumps neither of the two transfer-handler
+ * calls that retail merges, because the two paths reach the callback pointer
+ * through different index registers. */
+s32 sceSdDmaIntrHandler(sceSdTransIntrArg_t *arg)
+{
+    volatile u32 sync;
+    s32 intr;
+    s32 core;
+    s32 v;
+    s32 m;
+    s32 i;
+    u32 t;
+
+    if ((arg->op & 0xC00) == 0x400)
+        intr = 1;
+    else if ((arg->op & 0xC00) == 0x800)
+        intr = 0;
+    else
+        return 1;
+    core = arg->op & 0xFF;
+    v = core << 9;
+    m = core * 0x220;
+    if ((arg->op & 0x300) == 0x100) {
+        volatile u16 *dmaStat = (volatile u16 *)((core << 10) + 0xBF900344);
+        volatile u16 *attr;
+
+        i = 0;
+        while ((*dmaStat & 0x80) == 0) {
+            if (++i > 0x1000000)
+                break;
+        }
+        attr = (volatile u16 *)((v << 1) + 0xBF90019A);
+        *attr = *attr & 0xFFCF;
+        t = 0;
+        while ((*attr & 0x30) != 0) {
+            if (++t > 0xF00)
+                break;
+        }
+        if (intr == 0)
+            loadcore_FlushDcache();
+        if (sceSdCleanStepCallback[core] != 0) {
+            ((void (*)(s32, s32))sceSdCleanStepCallback[core])(core, 0);
+            return 1;
+        }
+        thevent_iSetEventFlag(sceSdTransEventFlag[core], 1);
+        if (sceSdTransIntrHandler[core] != 0) {
+            sceSdTransIdle[core] = 1;
+            ((void (*)(s32, void *))sceSdTransIntrHandler[core])(core, arg->arg);
+            return 1;
+        }
+        if (sceSdTransCallback[core] != 0) {
+            sceSdTransIdle[core] = 1;
+            ((void (*)(void))sceSdTransCallback[core])();
+            return 1;
+        }
+        sceSdTransDone[core] = 1;
+        return 1;
+    }
+    if ((arg->op & 0x300) != 0x200)
+        return 1;
+    if ((arg->op & 0x1000) == 0) {
+        volatile u16 *attr = (volatile u16 *)((core << 10) + 0xBF90019A);
+        volatile u16 *admaStat = (volatile u16 *)((core << 10) + 0xBF9001B0);
+
+        *attr = *attr & 0xFFCF;
+        *admaStat = 0;
+        sync = *admaStat;
+    } else {
+        volatile u16 *bcrHi = (volatile u16 *)(core * 0x440 + 0xBF8010C6);
+        volatile u32 *madr = (volatile u32 *)(m * 2 + 0xBF8010C0);
+        volatile u32 *chcr = (volatile u32 *)(m * 2 + 0xBF8010C8);
+        s32 half = 1 - sceSdBlockHalf[core];
+        u32 pos = sceSdBlockAddr[core] + half * sceSdBlockSize[core];
+
+        *bcrHi = sceSdBlockSize[core] / 64 + (sceSdBlockSize[core] % 64 > 0);
+        sceSdBlockHalf[core] = half;
+        *madr = pos;
+        *chcr = intr | 0x1000200;
+        sync = *chcr;
+    }
+    if (intr == 0)
+        loadcore_FlushDcache();
+    if (sceSdTransIntrHandler[core] != 0) {
+        ((void (*)(s32, void *))sceSdTransIntrHandler[core])(core, arg->arg);
+        return 1;
+    }
+    if (sceSdTransCallback[core] != 0) {
+        ((void (*)(void))sceSdTransCallback[core])();
+        return 1;
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM("LIBSD", sceSdDmaIntrHandler);
-INCLUDE_ASM("LIBSD", sceSdBlockTransPoll);
+#endif
+/* ENDF sceSdDmaIntrHandler */
+/* FUNC sceSdBlockTransPoll */
+s32 sceSdBlockTransPoll(s32 core)
+{
+    s32 half1 = sceSdBlockHalf[core];
+    volatile u32 *madr = (volatile u32 *)(core * 0x440 + 0xBF8010C0);
+    u32 pos1 = *madr;
+    s32 half = sceSdBlockHalf[core];
+    s32 v = core << 9;
+    u32 pos = *madr;
+
+    if (half1 == half && pos1 != pos)
+        pos = pos1;
+    {
+        volatile u16 *admaStat = (volatile u16 *)((v << 1) + 0xBF9001B0);
+
+        if ((*admaStat & 7) == 0)
+            pos = 0;
+    }
+    return (half << 24) | (pos & 0xFFFFFF);
+}
+/* ENDF sceSdBlockTransPoll */
+/* FUNC sceSdBlockTransWrite */
+#ifdef NON_MATCHING
+/* Two nops: gcc emits the reload of `state` after the core attribute store,
+ * so gas has nothing to put in the resume call's delay slot, where retail
+ * reloads it into the attribute load's slot instead. */
+s32 sceSdBlockTransWrite(u32 addr, u32 size, s16 chan, u16 mode, u32 start)
+{
+    s32 core = chan & 1;
+    s32 v = core << 9;
+    s32 ch = core * 0x220;
+    s32 len;
+    s32 state;
+
+    sceSdBlockAddr[core] = addr;
+    sceSdBlockHalf[core] = 0;
+    sceSdBlockSize[core] = size;
+    if (start == 0) {
+        start = addr;
+        len = size;
+    } else {
+        u32 off = start - addr;
+
+        if (off >= size) {
+            if ((mode & 0x10) == 0)
+                return -100;
+            off -= size;
+            if (off >= size)
+                return -100;
+            sceSdBlockHalf[core]++;
+        }
+        len = size - off;
+        if (len % 1024 > 0) {
+            len = (len / 1024 + 1) * 1024;
+            start = addr + (sceSdBlockHalf[core] * size + (size - len));
+        }
+    }
+    {
+        volatile u16 *attr;
+        volatile u16 *tsah;
+        volatile u16 *tsal;
+        volatile u16 *admaStat;
+
+        intrman_CpuSuspendIntr(&state);
+        attr = (volatile u16 *)((v << 1) + 0xBF90019A);
+        *attr = *attr & 0xFFCF;
+        intrman_CpuResumeIntr(state);
+        tsah = (volatile u16 *)((v << 1) + 0xBF9001A8);
+        tsal = (volatile u16 *)((v << 1) + 0xBF9001AA);
+        admaStat = (volatile u16 *)((v << 1) + 0xBF9001B0);
+        *tsah = 0;
+        *tsal = 0;
+        *admaStat = 1 << core;
+    }
+    sceSdSetDmaModeWrite(core);
+    {
+        volatile u32 *madr = (volatile u32 *)(ch * 2 + 0xBF8010C0);
+        volatile u16 *bcrLo = (volatile u16 *)(ch * 2 + 0xBF8010C4);
+        volatile u16 *bcrHi = (volatile u16 *)(ch * 2 + 0xBF8010C6);
+        volatile u32 *chcr = (volatile u32 *)(ch * 2 + 0xBF8010C8);
+        volatile u32 sync;
+
+        *madr = start;
+        *bcrLo = 0x10;
+        *bcrHi = len / 64 + (len % 64 > 0);
+        *chcr = 0x1000201;
+        sync = *chcr;
+    }
+    return size;
+}
+#else
 INCLUDE_ASM("LIBSD", sceSdBlockTransWrite);
+#endif
+/* ENDF sceSdBlockTransWrite */
+/* FUNC sceSdBlockTransRead */
+#ifdef NON_MATCHING
+/* Same length as retail, but gcc allocates the mode parameter and the DMA
+ * channel base into the opposite callee-saved registers and forms the
+ * channel base one instruction earlier. */
+s32 sceSdBlockTransRead(u32 addr, u32 size, s16 chan, u16 mode)
+{
+    s32 core = chan & 1;
+    s32 w = core << 10;
+    s32 ch = core * 0x440;
+    s32 state;
+
+    sceSdBlockAddr[core] = addr;
+    sceSdBlockHalf[core] = 0;
+    sceSdBlockSize[core] = size;
+    {
+        volatile u16 *attr;
+
+        intrman_CpuSuspendIntr(&state);
+        attr = (volatile u16 *)(w + 0xBF90019A);
+        *attr = *attr & 0xFFCF;
+        intrman_CpuResumeIntr(state);
+    }
+    {
+        volatile u16 *tsah = (volatile u16 *)(w + 0xBF9001A8);
+        volatile u16 *tsal = (volatile u16 *)(w + 0xBF9001AA);
+        volatile u16 *ctrl = (volatile u16 *)(w + 0xBF9001AE);
+
+        *tsah = 0;
+        *tsal = ((mode & 0xF00) << 1) + 0x400;
+        *ctrl = (mode & 0xF000) >> 11;
+    }
+    sceSdDelay(3);
+    {
+        volatile u16 *admaStat = (volatile u16 *)(w + 0xBF9001B0);
+
+        *admaStat = 4;
+    }
+    sceSdSetDmaModeRead(core);
+    {
+        volatile u32 *madr = (volatile u32 *)(ch + 0xBF8010C0);
+        volatile u16 *bcrLo = (volatile u16 *)(ch + 0xBF8010C4);
+        volatile u16 *bcrHi = (volatile u16 *)(ch + 0xBF8010C6);
+        volatile u32 *chcr = (volatile u32 *)(ch + 0xBF8010C8);
+        volatile u32 sync;
+
+        *madr = addr;
+        *bcrLo = 0x10;
+        *bcrHi = sceSdBlockSize[core] / 64 + (sceSdBlockSize[core] % 64 > 0);
+        *chcr = 0x1000200;
+        sync = *chcr;
+    }
+    return size;
+}
+#else
 INCLUDE_ASM("LIBSD", sceSdBlockTransRead);
+#endif
+/* ENDF sceSdBlockTransRead */
+/* FUNC sceSdSifDmaToEe */
+#ifdef NON_MATCHING
+/* Two instructions short: retail keeps &state in a callee-saved register and
+ * peels the wait loop's first iteration onto it. */
+s32 sceSdSifDmaToEe(void *eeaddr, void *iopaddr, s32 size)
+{
+    sceSdSifDma_t dma;
+    s32 state;
+    s32 id;
+    s32 stat;
+    s32 tries;
+    s32 ret = 0;
+
+    dma.dest = eeaddr;
+    dma.src = iopaddr;
+    dma.size = size;
+    dma.attr = 0;
+    intrman_CpuSuspendIntr(&state);
+    id = sifman_sceSifSetDma(&dma, 1);
+    intrman_CpuResumeIntr(state);
+    if (id == 0)
+        return -1;
+    tries = 0;
+    stat = 0;
+    while (stat >= 0) {
+        if (tries < 0) {
+            ret = -1;
+            break;
+        }
+        intrman_CpuSuspendIntr(&state);
+        stat = sifman_sceSifDmaStat(id);
+        intrman_CpuResumeIntr(state);
+        tries++;
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM("LIBSD", sceSdSifDmaToEe);
+#endif
+/* ENDF sceSdSifDmaToEe */
 /* FUNC libsd_sceSdProcBatch */
 #ifdef NON_MATCHING
 /* The dispatch compiles to a jump table whose case labels the assembly
