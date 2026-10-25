@@ -88,7 +88,7 @@ typedef struct $0931E0613BC3DA45A22B4270B53F5B54 sceSdClearChunk_t;
 struct $CD05D2383D4BFC340FE43D91B8BAA335
 {
   u32 op;
-  u32 arg;
+  void *arg;
 };
 
 typedef struct $CD05D2383D4BFC340FE43D91B8BAA335 sceSdTransIntrArg_t;
