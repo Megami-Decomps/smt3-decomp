@@ -24,9 +24,12 @@ is the proof. What the modules do is in
 | `SDFSDMAN.IRX` | 39981 | 157 | 72 |
 | `MODMSIN.IRX` | 1929 | 17 | 12 |
 | `MODMIDI.IRX` | 21965 | 71 | 62 |
-| `MODHSYN.IRX` | 59501 | 238 | 218 |
+| `MODHSYN.IRX` | 59501 | 232 | 213 |
 
-The remaining chunks are import stubs and the tables between them.
+The remaining chunks are import stubs and the tables between them. Both
+numbers are what `tools/irx_split.py` prints, so the function count
+includes those stubs; the table under Writing C counts only the functions
+that have a body.
 
 Sony's three are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
 feeds it, and `MODMSIN`, the message queue between them. They are what plays a
@@ -187,13 +190,13 @@ assembly `.rodata`).
 | `SDFIOP.IRX` | 5 | 5 | 0 |
 | `SDFIOPFL.IRX` | 6 | 6 | 0 |
 | `SDFSDMAN.IRX` | 72 | 33 | 39 |
-| `MODMSIN.IRX` | 12 | 12 | 0 |
-| `MODMIDI.IRX` | 62 | 41 | 13 |
-| `MODHSYN.IRX` | 218 | 148 | 36 |
+| `MODMSIN.IRX` | 9 | 9 | 0 |
+| `MODMIDI.IRX` | 54 | 41 | 13 |
+| `MODHSYN.IRX` | 188 | 152 | 36 |
 
 ### Where MODHSYN stands
 
-Every function has C. 148 match and 36 are equivalent under `NON_MATCHING`;
+Every function has C. 152 match and 36 are equivalent under `NON_MATCHING`;
 nothing is bare. The remaining chunks are the IRX import stubs and the tables
 between them, which never become C.
 
