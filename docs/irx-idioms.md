@@ -211,6 +211,9 @@ function by hand: the remaining difference is usually one of them.
   store-then-reload with no extra instruction, which is how `libsd_sceSdQuit`
   and `sceSdInitState` reach `sceSdTransEventFlag`. `*(u32 *)&sym = v` defeats
   the CSE for an indexed array element but not for a scalar.
+- **`(core << 9) << 1` stays two shifts only when a basic-block boundary
+  separates them**, and an indexed register's pointer local formed outside the
+  block that uses it gets hoisted into a callee-saved register instead.
 - **A hardware register's `volatile` pointer local must be block-scoped.** A
   function-scoped one is computed in the prologue and burns a callee-saved
   register; declared in the block that uses it, the whole constant is built

@@ -36,7 +36,7 @@ Sony's four are `MODHSYN`, the SPU2 synthesiser, `MODMIDI`, the sequencer that
 feeds it, `MODMSIN`, the message queue between them, and `LIBSD`, the SPU2
 register and transfer library all of them sit on. They are what plays a
 `.SMG` bank, so the sound driver's bank path is almost entirely calls into them,
-and the USA and Maniax discs ship the same files byte for byte. All three are
+and the USA and Maniax discs ship the same files byte for byte. All four are
 complete: every function has C.
 
 ## The toolchain
@@ -196,7 +196,7 @@ before applying one, and never run those binaries against this driver.
 `src/irx/<module>.c` owns `.text`. It started as nothing but `INCLUDE_ASM`
 lines in link order; decompiling a function means replacing its line with the
 C body in the same place, so the function stays where it was. Every function
-in all six modules now has C.
+in all seven modules now has C.
 
 What stays `INCLUDE_ASM` with no C, and always will: the IRX import stubs
 (`jr $ra` plus the import id) and the import and export tables between them,
@@ -255,6 +255,44 @@ assembly `.rodata`).
 | `MODMSIN.IRX` | 9 | 9 | 0 |
 | `MODMIDI.IRX` | 54 | 41 | 13 |
 | `MODHSYN.IRX` | 188 | 152 | 36 |
+| `LIBSD.IRX` | 60 | 37 | 23 |
+
+### Where LIBSD stands
+
+Every function has C: 37 match and 23 are equivalent under `NON_MATCHING`;
+nothing is bare. The export table at `.text` 0 stays assembly, since it holds
+relocated function pointers rather than ordinals.
+
+Four of the 23 cannot match while `.rodata` is assembly, their switch or
+dispatch compiling to a jump table whose `L_<address>` case labels the assembly
+`.rodata` already defines: `libsd_sceSdProcBatch`, `libsd_sceSdProcBatchEx`,
+`libsd_sceSdGetCoreAttr` and `sceSdTransferOp`.
+
+`start` is its own class. gas decides whether to fill a `jal`'s delay slot
+while parsing, so the `la` of the export table loses retail's `nop` to the
+`addiu` because the table is assembled into the same translation unit; the
+identical source matches in MODHSYN, whose library table is in `.data`.
+
+The rest are the familiar handful of instructions: which callee-saved registers
+four live values land in (`libsd_sceSdVoiceTrans`, `sceSdBlockTransRead`,
+`sceSdResetVoices`), a scheduler permutation of one block
+(`sceSdSetSpdifMode`, `libsd_sceSdSetAddr`, `libsd_sceSdClearEffectWorkArea`,
+`sceSdInitState`), a load retail recomputes (`sceSdIrqHandler`,
+`sceSdVoiceTransIo`), cross-jumping (`sceSdDmaIntrHandler`,
+`sceSdResetCores`), gas refusing to move the second half of a `sw reg, sym`
+into a following delay slot (`libsd_sceSdInit`, `sceSdBlockTransWrite`), and
+two prototypes that are right for the API but not for retail's own translation
+unit, which had none in scope: `libsd_sceSdGetParam` returning `u16` costs
+`libsd_sceSdSetCoreAttr` a register mask, and `libsd_sceSdPitch2Note`'s `u16`
+parameters cost it a mask and a spill.
+
+What `iop.h` says about LIBSD is otherwise right. One thing it does not say:
+`libsd_sceSdBlockTrans` reads a fifth argument through `va_arg` when
+`mode & 3 == 3`, which is the one instruction that version is over. The
+declaration's four parameters are right for every caller in this game, since
+MODHSYN's wrapper passes four and matches, so the faithful spelling would be
+four parameters plus an ellipsis. Left alone, because the other modules'
+matching builds depend on that declaration.
 
 ### Where MODHSYN stands
 
