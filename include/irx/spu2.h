@@ -146,6 +146,17 @@
 #define SPU2_O_VLIN     0x784
 #define SPU2_O_VRIN     0x786
 
+/* The two IOP DMA channels the SPU2 transfers run on: channel 4 at 0xBF8010C0
+ * and channel 7 at 0xBF801500, which is why the stride between them is 0x440.
+ * MADR is the host address, BCR holds the block size and the block count in
+ * its two halfwords, CHCR is the control word. Every site adds its own channel
+ * offset, in one of several forms, so these are addresses and not lvalues. */
+#define IOP_DMA_SPU_STRIDE  0x440
+#define IOP_DMA_MADR_A      0xBF8010C0
+#define IOP_DMA_BCR_A       0xBF8010C4
+#define IOP_DMA_BCR_HI_A    0xBF8010C6
+#define IOP_DMA_CHCR_A      0xBF8010C8
+
 /* Not per core. */
 #define SPU2_SPDIF_OUT_A        0xBF9007C0
 #define SPU2_SPDIF_OUT          (*(volatile u16 *)SPU2_SPDIF_OUT_A)

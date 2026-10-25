@@ -910,7 +910,7 @@ u32 size;
 {
     s32 core = op >> 4;
     s32 v = core << 9;
-    volatile u32 *chcr = (volatile u32 *)(core * 0x440 + 0xBF8010C8);
+    volatile u32 *chcr = (volatile u32 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_CHCR_A);
     volatile u16 *attr = (volatile u16 *)(SPU2_ATTR_A(0) + (v << 1));
     volatile u16 *admaStat = (volatile u16 *)(SPU2_ADMAS_A(0) + (v << 1));
     volatile u16 sync;
@@ -944,9 +944,9 @@ u32 size;
         else
             sceSdSetDmaModeRead(core);
         blocks = (size >> 6) + ((size & 0x3F) != 0);
-        *(volatile u32 *)(core * 0x440 + 0xBF8010C0) = addr;
-        *(volatile u16 *)(core * 0x440 + 0xBF8010C4) = 0x10;
-        *(volatile u16 *)(core * 0x440 + 0xBF8010C6) = blocks;
+        *(volatile u32 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_MADR_A) = addr;
+        *(volatile u16 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_BCR_A) = 0x10;
+        *(volatile u16 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_BCR_HI_A) = blocks;
         *chcr = ((op & 0xF) == 6) ? 0x1000201 : 0x1000200;
         sync = *chcr;
         ret = blocks << 6;
@@ -958,7 +958,7 @@ u32 size;
         s32 stopped;
 
         if ((*chcr & 0x1000000) != 0) {
-            volatile u32 *madr = (volatile u32 *)(core * 0x440 + 0xBF8010C0);
+            volatile u32 *madr = (volatile u32 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_MADR_A);
             s32 half1 = sceSdBlockHalf[core];
             u32 pos1 = *madr;
 
@@ -1134,9 +1134,9 @@ s32 sceSdDmaIntrHandler(sceSdTransIntrArg_t *arg)
         *admaStat = 0;
         sync = *admaStat;
     } else {
-        volatile u16 *bcrHi = (volatile u16 *)(core * 0x440 + 0xBF8010C6);
-        volatile u32 *madr = (volatile u32 *)(m * 2 + 0xBF8010C0);
-        volatile u32 *chcr = (volatile u32 *)(m * 2 + 0xBF8010C8);
+        volatile u16 *bcrHi = (volatile u16 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_BCR_HI_A);
+        volatile u32 *madr = (volatile u32 *)(m * 2 + IOP_DMA_MADR_A);
+        volatile u32 *chcr = (volatile u32 *)(m * 2 + IOP_DMA_CHCR_A);
         s32 half = 1 - sceSdBlockHalf[core];
         u32 pos = sceSdBlockAddr[core] + half * sceSdBlockSize[core];
 
@@ -1166,7 +1166,7 @@ INCLUDE_ASM("LIBSD", sceSdDmaIntrHandler);
 s32 sceSdBlockTransPoll(s32 core)
 {
     s32 half1 = sceSdBlockHalf[core];
-    volatile u32 *madr = (volatile u32 *)(core * 0x440 + 0xBF8010C0);
+    volatile u32 *madr = (volatile u32 *)(core * IOP_DMA_SPU_STRIDE + IOP_DMA_MADR_A);
     u32 pos1 = *madr;
     s32 half = sceSdBlockHalf[core];
     s32 v = core << 9;
@@ -1238,10 +1238,10 @@ s32 sceSdBlockTransWrite(u32 addr, u32 size, s16 chan, u16 mode, u32 start)
     }
     sceSdSetDmaModeWrite(core);
     {
-        volatile u32 *madr = (volatile u32 *)(ch * 2 + 0xBF8010C0);
-        volatile u16 *bcrLo = (volatile u16 *)(ch * 2 + 0xBF8010C4);
-        volatile u16 *bcrHi = (volatile u16 *)(ch * 2 + 0xBF8010C6);
-        volatile u32 *chcr = (volatile u32 *)(ch * 2 + 0xBF8010C8);
+        volatile u32 *madr = (volatile u32 *)(ch * 2 + IOP_DMA_MADR_A);
+        volatile u16 *bcrLo = (volatile u16 *)(ch * 2 + IOP_DMA_BCR_A);
+        volatile u16 *bcrHi = (volatile u16 *)(ch * 2 + IOP_DMA_BCR_HI_A);
+        volatile u32 *chcr = (volatile u32 *)(ch * 2 + IOP_DMA_CHCR_A);
         volatile u32 sync;
 
         *madr = start;
@@ -1296,10 +1296,10 @@ s32 sceSdBlockTransRead(u32 addr, u32 size, s16 chan, u16 mode)
     }
     sceSdSetDmaModeRead(core);
     {
-        volatile u32 *madr = (volatile u32 *)(ch + 0xBF8010C0);
-        volatile u16 *bcrLo = (volatile u16 *)(ch + 0xBF8010C4);
-        volatile u16 *bcrHi = (volatile u16 *)(ch + 0xBF8010C6);
-        volatile u32 *chcr = (volatile u32 *)(ch + 0xBF8010C8);
+        volatile u32 *madr = (volatile u32 *)(ch + IOP_DMA_MADR_A);
+        volatile u16 *bcrLo = (volatile u16 *)(ch + IOP_DMA_BCR_A);
+        volatile u16 *bcrHi = (volatile u16 *)(ch + IOP_DMA_BCR_HI_A);
+        volatile u32 *chcr = (volatile u32 *)(ch + IOP_DMA_CHCR_A);
         volatile u32 sync;
 
         *madr = addr;
