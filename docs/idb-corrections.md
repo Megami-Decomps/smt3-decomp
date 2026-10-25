@@ -334,7 +334,7 @@ Prototypes:
 shared with a byte store:
 
 - `unk26` and `unk28` are `s16` (`lh`, and `addiu -1` rather than `ori 0xFFFF`)
-- `unk30` and `unk31` are `s8`
+- `unk30` and `pan` (+0x31) are `s8`
 
 ## Applied on 2026-10-24: sceHSynEnv_t is the 40-byte LFO
 
@@ -631,10 +631,9 @@ Read here, renamed in the pass recorded at the end of this file:
   `sceHSynVoice_t::param`, so `param[56]` is a struct of fourteen `int`s.
 - `sceHsynUpdateVoiceState` (`func_00004D90` until it was read) returns the
   number of voices it serviced, which `func_000017EC` stores in
-  `sceHSynStat_t::nFree`; `sceHsynServiceVoices` returns the number it
-  *skipped*, stored in `nActive`. The two struct field names are therefore
-  backwards; the functions are named for what they do and the fields are left
-  alone, since nothing but this one caller reads them.
+  `sceHSynStat_t`'s word at +0; `sceHsynServiceVoices` returns the number it
+  *skipped*, stored at +4. The two field names were therefore backwards. They
+  are swapped in the pass recorded at the end of this file.
 
 ## Applied on 2026-10-25: Sony's three sound modules renamed
 
@@ -662,11 +661,11 @@ is on a MIDI controller number, so each arm names the function it calls.
 | `hsynVoiceSetPitch` | `sceHsynChannelSetPitchBend` | 14-bit value less 0x2000 into `chan->unk26`, broadcast to the channel's voices |
 | `hsynVoiceEnvelopeApply` | `sceHsynChannelApplyVolume` | recomputes every voice's `unk18` through `sceHsynSdSetParamEnvelope` |
 | `hsynVoiceSetAttack` | `sceHsynChannelSetVolume` | controller 7, writes `chan->vol` |
-| `hsynVoiceSetRelease` | `sceHsynChannelSetExpression` | controller 11, writes the second volume scale |
+| `hsynVoiceSetRelease` | `sceHsynChannelSetExpression` | controller 11, writes `chan->expression`, the second volume scale |
 | `hsynVoiceFlagsGet` | `sceHsynChannelSetBendRange` | controller 5, writes `chan->bendRange = 20 * semitones` |
-| `hsynVoiceFlagsSet` | `sceHsynChannelSetPortamento` | controller 65, arms `chan->priority` at 0x80 or disarms it at 0xFF |
+| `hsynVoiceFlagsSet` | `sceHsynChannelSetPortamento` | controller 65, arms `chan->portaNote` at 0x80 or disarms it at 0xFF |
 | `hsynVoiceIndexGet` | `sceHsynChannelSetPortamentoNote` | controller 84; it stores, where the name said it loaded |
-| `func_00000C58` | `sceHsynChannelSetPan` | controller 10, writes `chan->unk31` and broadcasts |
+| `func_00000C58` | `sceHsynChannelSetPan` | controller 10, writes `chan->pan` (+0x31) and broadcasts |
 | `func_00000D24` | `sceHsynChannelSetPanDirect` | the same, filtered by tag and channel |
 | `func_00000E40` | `sceHsynChannelSetExpressionDirect` | expression, filtered by tag and channel |
 | `func_00004AE4` | `sceHsynVoiceSetPan` | turns a signed pan into the voice's two volume scales |
@@ -723,16 +722,27 @@ is on a MIDI controller number, so each arm names the function it calls.
 | `func_000078D4`, `func_00007F54` | `sceHsynVoiceStartPathA`, `PathB` | the two note-on paths `slot->path` selects between |
 | `func_00008350` | `sceHsynVoiceStart` | the nine-argument forwarder that selects them |
 
-Controllers 65 and 84 are what settle `sceHSynChannel_t::priority`, which the
-earlier record left as a pitch quantity fitting neither name. It is the
-portamento note: `sceHsynChannelSetPortamento` arms it at 0x80 and disarms it at
-0xFF, and `sceHsynChannelNoteOff` opens with
-`if (chan->priority < 0x81) chan->priority = note`, recording the released note
-as the glide source. The field is left named `priority` rather than renamed,
-because a member rename reaches the C and this pass was symbols only.
+Controllers 65 and 84 are what settle the byte at +0x33, which the earlier
+record left as a `priority` fitting neither name. It is the portamento note, and
+is now called `portaNote`. Three member renames came out of this pass and are
+recorded below.
 
-Two names the code contradicts but does not replace. `sceHSynChannel_t::pan` is
-written by `sceHsynChannelSetExpression` and multiplies into a volume, so it is
-an expression level, while the real pan is `unk31`; and `sceHSynStat_t`'s
-`nFree` and `nActive` are swapped, as the entry above records. Both are member
-names, left for a pass that can carry the C with them.
+## Applied on 2026-10-25: three member corrections in MODHSYN
+
+A function rename touches only symbols; a member rename reaches the C that uses
+the member, so these were deferred from the naming pass above to a pass that
+could carry `src/irx/MODHSYN.c` with them. All six IRX modules stay
+byte-identical, which is what proves the renames are names only.
+
+| Type | Was | Now | Proof |
+| --- | --- | --- | --- |
+| `sceHSynChannel_t` | `pan` (+0x2C) | `expression` | controller 11 writes it, and `sceHsynSdSetParamEnvelope` is `voice->unk18 = (chan->vol * voice->unk54 * voice->unk16) >> 14` with `unk54` copied from it. It is a volume scale beside `vol`, not a position |
+| `sceHSynChannel_t` | `unk31` (+0x31) | `pan` | controller 10 writes it and broadcasts it through `sceHsynVoiceSetPan`, which turns it into the voice's two volume scalers `unk4C` and `unk4D` |
+| `sceHSynChannel_t` | `priority` (+0x33) | `portaNote` | `sceHsynChannelSetPortamento` arms it at 0x80 and disarms it at 0xFF, `sceHsynChannelNoteOff` opens `if (chan->portaNote < 0x81) chan->portaNote = note`, and `sceHsynVoiceStateClear` computes `(v->chan->portaNote - v->ch) << 7` as the glide delta |
+| `sceHSynStat_t` | `nActive` (+0), `nFree` (+4) | `nFree`, `nActive` | `sub_17EC` stores `sceHsynServiceVoices`' count of voices it *declined* to key on at +0 and `sceHsynUpdateVoiceState`'s count of voices it serviced at +4. The playing count is the second, so the pair was the wrong way round |
+
+`chan->expression` and `chan->vol` are the channel's two volume scales and
+multiply together in `sceHsynVoiceSetParamRamp`; the pan is what
+`sceHsynVoiceSetPan` splits into left and right. Controller 84
+(`sceHsynChannelSetPortamentoNote`) writes `unk34`, a second copy of the glide
+source that nothing in the module reads, so `unk34` is left as it is.

@@ -308,13 +308,13 @@ void sceHsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot)
     chan->unk28 = -1;
     chan->bankIdx = 0;
     chan->vol = 0x80;
-    chan->pan = 0x80;
+    chan->expression = 0x80;
     chan->unk2D = 0;
     chan->unk2F = 0xFF;
     chan->unk30 = -1;
     chan->unk2E = 0;
-    chan->unk31 = 0;
-    chan->priority = 0xFF;
+    chan->pan = 0;
+    chan->portaNote = 0xFF;
     chan->unk37 = 0xFF;
     chan->unk36 = 0xFF;
     chan->unk35 = 0xFF;
@@ -395,7 +395,7 @@ void sceHsynChannelApplyVolume(sceHSynChannel_t *chan, int copyRelease)
         end = *head;
         for (v = end->chNext; v != end; v = v->chNext) {
             if (copyRelease != 0) {
-                v->unk54 = chan->pan;
+                v->unk54 = chan->expression;
             }
             sceHsynSdSetParamEnvelope(v);
         }
@@ -420,8 +420,8 @@ void sceHsynChannelSetExpression(sceHSynChannel_t *chan, u8 val)
     u8 n;
 
     n = (val << 7) / 127;
-    if (chan->pan != n) {
-        chan->pan = n;
+    if (chan->expression != n) {
+        chan->expression = n;
         sceHsynChannelApplyVolume(chan, 1);
     }
 }
@@ -488,12 +488,12 @@ int sceHsynChannelSetBendRange(sceHSynChannel_t *chan, u8 semitones)
 void sceHsynChannelSetPortamento(sceHSynChannel_t *chan, u8 on)
 {
     if (on != 0) {
-        if (chan->priority == 0xFF) {
-            chan->priority = 0x80;
+        if (chan->portaNote == 0xFF) {
+            chan->portaNote = 0x80;
             chan->unk34 = 0x80;
         }
     } else {
-        chan->priority = 0xFF;
+        chan->portaNote = 0xFF;
     }
 }
 /* ENDF sceHsynChannelSetPortamento */
@@ -520,10 +520,10 @@ void sceHsynChannelSetPan(sceHSynChannel_t *chan, u8 val)
     if (n < -0x3F) {
         n = -0x3F;
     }
-    if (chan->unk31 == n) {
+    if (chan->pan == n) {
         return;
     }
-    chan->unk31 = n;
+    chan->pan = n;
     heads[0] = (sceHSynVoice_t *)((char *)chan - 8);
     heads[1] = (sceHSynVoice_t *)chan;
     heads[2] = (sceHSynVoice_t *)((char *)chan + 8);
@@ -956,8 +956,8 @@ int func_000017EC(sceHSynWork_t *work)
     u32 vm;
     u32 inv;
     int core;
-    int nActive;
     int nFree;
+    int nActive;
 
     if (sceHsynLastKeyOnVoice != 0xFF) {
         if (sceHsynSpu2SettleDelay() != 0) {
@@ -980,11 +980,11 @@ int func_000017EC(sceHSynWork_t *work)
     }
     tbl = work->tbl;
     sceHsynServiceTick(tbl->entry, tbl->nEntryWord);
-    nActive = sceHsynServiceVoices();
-    nFree = sceHsynUpdateVoiceState();
+    nFree = sceHsynServiceVoices();
+    nActive = sceHsynUpdateVoiceState();
     if (sceHsynStat != NULL) {
-        sceHsynStat->nActive = nActive;
         sceHsynStat->nFree = nFree;
+        sceHsynStat->nActive = nActive;
     }
     return 0;
 }
@@ -2280,7 +2280,7 @@ void sceHsynVoiceUpdatePathA(sceHSynVoice_t *v)
     v->unk4E = prog->unk0C & 1;
     sceHsynSdSetParamAdsr(v, bias / 12);
     if ((v->vol & 0x80) != 0) {
-        pan = (u8)chan->unk31;
+        pan = (u8)chan->pan;
     } else {
         pan = (u8)v->vol - 0x40;
         if (pan < -0x3F) {
@@ -2291,7 +2291,7 @@ void sceHsynVoiceUpdatePathA(sceHSynVoice_t *v)
     if (v->unk55 != 0xFF) {
         e = v->unk55;
     } else {
-        e = chan->pan;
+        e = chan->expression;
     }
     v->unk54 = e;
     sceHsynSdSetParamEnvelope(v);
@@ -2957,7 +2957,7 @@ int sceHsynVoiceStateClear(sceHSynVoice_t *v)
     u32 q;
     int t;
 
-    x = (v->chan->priority - v->ch) << 7;
+    x = (v->chan->portaNote - v->ch) << 7;
     v->unk38 = x;
     if (x < 0) {
         x = -x;
@@ -3016,7 +3016,7 @@ void sceHsynVoiceUpdatePathB(sceHSynVoice_t *v)
         }
     }
     sceHsynVoiceSetPan(v, pan);
-    v->unk54 = chan->pan;
+    v->unk54 = chan->expression;
     sceHsynSdSetParamEnvelope(v);
     v->unk1C = 0xFFFF;
     v->unk1A = 0xFFFF;
@@ -3248,8 +3248,8 @@ void sceHsynChannelNoteOff(sceHSynChannel_t *chan, u8 ch, u32 tag)
     u8 *st;
     u16 flags;
 
-    if (chan->priority < 0x81) {
-        chan->priority = ch;
+    if (chan->portaNote < 0x81) {
+        chan->portaNote = ch;
     }
     end = (sceHSynVoice_t *)((char *)chan - 8);
     for (v = end->chPrev; v != end; v = v->chPrev) {
@@ -3617,7 +3617,7 @@ void sceHsynChannelNoteOn(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int statu
             sceHsynActiveCount++;
             sceHsynVoiceChLink(v, (sceHSynVoice_t **)chan);
             started = 1;
-            if ((chan->priority & 0x80) == 0 && chan->bendRange != 0) {
+            if ((chan->portaNote & 0x80) == 0 && chan->bendRange != 0) {
                 sceHsynVoiceStateClear(v);
             }
             sceHsynVoiceUpdatePathA(v);
@@ -4230,7 +4230,7 @@ int sceHsynVoiceStartPathA(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, in
             sceHsynRelCount++;
             sceHsynVoiceChLink(v, (sceHSynVoice_t **)chan);
             started = 1;
-            if ((chan->priority & 0x80) == 0 && chan->bendRange != 0) {
+            if ((chan->portaNote & 0x80) == 0 && chan->bendRange != 0) {
                 sceHsynVoiceStateClear(v);
             }
             sceHsynVoiceUpdatePathA(v);
@@ -5721,7 +5721,7 @@ int func_0000A810(sceHSynVoice_t *v, int rate, u8 vol)
         period = 1;
     }
     prod = vol * sceHsynVolumeScale(vol, v->unk4A, slot->unk10, slot->unk0C);
-    prod = prod * (chan->vol * chan->pan);
+    prod = prod * (chan->vol * chan->expression);
     level = prod >> 14;
     level = (u16)level;
     target = v->unk18 + *(s16 *)&v->lfoB.unk02;

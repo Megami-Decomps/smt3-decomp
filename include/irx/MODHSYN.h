@@ -297,14 +297,14 @@ struct sceHSynChannel_t
   s16 unk28;
   u8 bankIdx;
   u8 vol;
-  u8 pan;
+  u8 expression;
   u8 unk2D;
   u8 unk2E;
   u8 unk2F;
   s8 unk30;
-  s8 unk31;
+  s8 pan;
   u8 unk32;
-  u8 priority;
+  u8 portaNote;
   u8 unk34;
   u8 unk35;
   u8 unk36;
@@ -431,8 +431,8 @@ struct sceHSynWork_t
 
 struct sceHSynStat_t
 {
-  u32 nActive;
   u32 nFree;
+  u32 nActive;
   u8 state[2][24];
   u16 unk38[2][24];
 };
