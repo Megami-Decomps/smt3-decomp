@@ -3561,10 +3561,10 @@ void sceHsynChannelNoteOn(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int statu
                     continue;
                 }
             }
-            if (tone->voiceOfs != 0) {
-                sceHsynChannelKeyOffByPitch(chan, tone->voiceOfs);
+            if (tone->pitch != 0) {
+                sceHsynChannelKeyOffByPitch(chan, tone->pitch);
             }
-            vnum = tone->pitch + slot->voiceBase;
+            vnum = tone->voiceOfs + slot->voiceBase;
             if (set->nActive >= slot->maxVoice) {
                 if (sceHsynVoiceStealScan(set, vnum) == 0) {
                     return;
@@ -3603,7 +3603,7 @@ void sceHsynChannelNoteOn(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int statu
             v->unk2C = 0;
             v->spuAddr = bank->spuAddr;
             v->vel = vel;
-            v->pitch = tone->voiceOfs;
+            v->pitch = tone->pitch;
             v->unk4A = se->unk00;
             v->unk28 = chan->unk28;
             v->unk55 = chan->unk2F;
@@ -4165,10 +4165,10 @@ int sceHsynVoiceStartPathA(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, in
                     continue;
                 }
             }
-            if (tone->voiceOfs != 0) {
-                sceHsynChannelKeyOffByPitch(chan, tone->voiceOfs);
+            if (tone->pitch != 0) {
+                sceHsynChannelKeyOffByPitch(chan, tone->pitch);
             }
-            vnum = tone->pitch + slot->voiceBase;
+            vnum = tone->voiceOfs + slot->voiceBase;
             if (set->nActive >= slot->maxVoice) {
                 if (sceHsynVoiceStealFromChannel((int)set, vnum) == 0) {
                     return -1;
@@ -4215,7 +4215,7 @@ int sceHsynVoiceStartPathA(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, in
             v->vel = a6;
             v->unk2C = a8;
             v->spuAddr = bank->spuAddr;
-            v->pitch = tone->voiceOfs;
+            v->pitch = tone->pitch;
             v->unk4A = se->unk00;
             v->unk28 = chan->unk28;
             v->unk55 = chan->unk2F;

@@ -493,6 +493,28 @@ header's `kindPacked` word. So the field is two `u8`s rather than a halfword.
 Left alone: the evidence says the shape but not what the second byte means, and
 the bank selection uses `kindPacked >> 24`, which is neither of them.
 
+## Two swapped fields in MODHSYN's C
+
+`sceSmgSmplEnt_t::pitch` (+0xE) and `voiceOfs` (+0xF) were the wrong way round
+in `sceHsynChannelNoteOn` and `sceHsynVoiceStartPathA`, in all three places each
+function uses them. Both bodies are `NON_MATCHING`, so the byte-identical build
+never saw it; the sdfplay side project, which compiles the C and plays a bank,
+did.
+
+Retail settles it at the instruction level. In `sceHsynChannelNoteOn`,
+`lbu $v0, 0xE($s2)` at 0x67FC is the value tested and passed to
+`sceHsynChannelKeyOffByPitch`, and `lbu $a1, 0xF($s2)` at 0x6814 is what
+`slot->voiceBase` is added to for the voice number. `sceHsynVoiceStartPathA`
+has the same pair. The voice's own `pitch`, which
+`sceHsynChannelKeyOffByPitch` matches on, therefore comes from +0xE.
+
+Swapped, every note of a chord that resolves to one sample shares a kill group,
+so each note-on freed the chord's earlier notes before the next synthesiser tick
+could key them on. A ten second render of a bank keyed 66 of 198 note-ons; with
+the fields the right way round it keys all 198, and the playing voice count goes
+from three to nine. `sceHsynVoiceStartPathB` was not affected: it reaches the
+same two bytes as `ent[7]` and `ent[9]` off an untyped pointer.
+
 ## Applied on 2026-10-24: MODMIDI and MODHSYN prototypes, and three retail bugs
 
 All in the `DDS3_IRX/MODMIDI` and `DDS3_IRX/MODHSYN` databases, all found while
