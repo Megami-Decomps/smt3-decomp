@@ -814,3 +814,24 @@ MODHSYN still builds byte-identical.
 
 Found by cross-checking every import stub's symbol against the import table
 that contains it, which `IRX_IMPORT` made possible.
+
+## loadcore ordinal 6 is RegisterLibraryEntries, not Release
+
+`DDS3_IRX/MODHSYN` 0xB194, `DDS3_IRX/MODMIDI` 0x3790 and `DDS3_IRX/MODMSIN`
+0x390 were all `loadcore_ReleaseLibraryEntries`. All three are
+`loadcore_RegisterLibraryEntries`.
+
+The build contradicted itself: `SDFIOPFL` imported loadcore ordinal 6 as
+`RegisterLibraryEntries` while the three Sony modules imported the same ordinal
+of the same library as `ReleaseLibraryEntries`. The retail code settles it.
+Ordinal 6 is each module's only loadcore import, and `SDFSDMAN` imports the
+library each of them publishes, so each one must register its entries at load.
+A module that only ever released them could never be imported at all.
+`SDFSDMAN` separately imports ordinal 5 as `FlushDcache`, which leaves 7 for
+`ReleaseLibraryEntries`.
+
+`iop.h` had both names declared with the same signature; the Release
+declaration is gone, since nothing in the build imports ordinal 7.
+
+Found the same way as the stdio correction above, by checking each import
+stub's name against its ordinal once `IRX_IMPORT` made the ordinal visible.

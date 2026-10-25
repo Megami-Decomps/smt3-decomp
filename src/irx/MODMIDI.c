@@ -36,7 +36,7 @@ int modmidi_e26(int argc, char **argv)
         }
     }
     intrman_CpuSuspendIntr(&state);
-    res = loadcore_ReleaseLibraryEntries(midiLibraryTable);
+    res = loadcore_RegisterLibraryEntries(midiLibraryTable);
     intrman_CpuResumeIntr(state);
     return res != 0;
 }
@@ -2054,7 +2054,7 @@ IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
 IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
 IRX_IMPORT_TABLE_END;
 IRX_IMPORT_TABLE(loadcore, 1, 3);
-IRX_IMPORT(loadcore, ReleaseLibraryEntries, 0x6);
+IRX_IMPORT(loadcore, RegisterLibraryEntries, 0x6);
 IRX_IMPORT_TABLE_END;
 IRX_IMPORT_TABLE(stdio, 1, 3);
 IRX_IMPORT(stdio, printf, 0x4);
