@@ -21,7 +21,7 @@ int modmsin_e10(void)
     return res != 0;
 }
 /* ENDF modmsin_e10 */
-INCLUDE_ASM("MODMSIN", D_00000044);
+ALIGN_TEXT(4);
 /* FUNC modmsin_sceMSIn_Init */
 int modmsin_sceMSIn_Init(sceMSInWork_t *work)
 {

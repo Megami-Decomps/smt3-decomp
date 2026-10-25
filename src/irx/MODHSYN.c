@@ -20,7 +20,7 @@ int modhsyn_e30()
     return res != 0;
 }
 /* ENDF modhsyn_e30 */
-INCLUDE_ASM("MODHSYN", D_00000044);
+ALIGN_TEXT(4);
 /* FUNC modhsyn_sceHSyn_Init */
 int modhsyn_sceHSyn_Init(sceHSynWork_t *work, int interval)
 {
@@ -117,7 +117,7 @@ int modhsyn_e7(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)
     return (done == end) ? 0 : -1;
 }
 /* ENDF modhsyn_e7 */
-INCLUDE_ASM("MODHSYN", D_000002D4);
+ALIGN_TEXT(4);
 /* FUNC sceHsynTagMatch */
 /* Not a loader: a 4+4 character chunk tag comparator, with both tags passed
  * as words and both strings read backwards. */
@@ -285,7 +285,7 @@ int modhsyn_e28(sceHSynWork_t *work, int slotNo, u32 bankIdx)
     return 0;
 }
 /* ENDF modhsyn_e28 */
-INCLUDE_ASM("MODHSYN", D_00000714);
+ALIGN_TEXT(4);
 /* FUNC sceHsynResetState */
 void sceHsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot)
 {
@@ -640,7 +640,7 @@ void sceHsynVoiceSetPitchDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 hi, u
     }
 }
 /* ENDF sceHsynVoiceSetPitchDirect */
-INCLUDE_ASM("MODHSYN", D_0000106C);
+ALIGN_TEXT(4);
 /* FUNC sceHsynChannelResetControllers */
 void sceHsynChannelResetControllers(sceHSynChannel_t *chan)
 {
@@ -3215,7 +3215,7 @@ void sceHsynVoiceSetPanBase(sceHSynVoice_t *v)
 #else
 INCLUDE_ASM("MODHSYN", sceHsynVoiceSetPanBase);
 #endif
-INCLUDE_ASM("MODHSYN", D_00005BDC);
+ALIGN_TEXT(4);
 /* FUNC sceHsynSpu2SettleDelay */
 int sceHsynSpu2SettleDelay()
 {
@@ -4606,7 +4606,7 @@ int sceHsynChannelLimitByPitch(int chan, u8 pitch, u8 min)
     return 1;
 }
 /* ENDF sceHsynChannelLimitByPitch */
-INCLUDE_ASM("MODHSYN", D_00008914);
+ALIGN_TEXT(4);
 /* FUNC sceHsynUnrefParamGetA */
 int sceHsynUnrefParamGetA(u8 a, u8 b)
 {
@@ -5278,7 +5278,7 @@ void sceHsynLfoSetupB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16
 #else
 INCLUDE_ASM("MODHSYN", sceHsynLfoSetupB);
 #endif
-INCLUDE_ASM("MODHSYN", D_00009AC4);
+ALIGN_TEXT(4);
 /* FUNC sceHsynRand */
 int sceHsynRand()
 {
@@ -5289,7 +5289,7 @@ int sceHsynRand()
     return seed >> 16;
 }
 /* ENDF sceHsynRand */
-INCLUDE_ASM("MODHSYN", D_00009AFC);
+ALIGN_TEXT(4);
 #ifdef NON_MATCHING
 /* One nop long: gas will not move the second half of the `sw w, sym` macro
  * into the branch delay slot, where the retail assembler put it. */
@@ -5588,7 +5588,7 @@ int sceHsynSdClearEffectWorkArea(int core, int channel, int effectMode)
     return ret;
 }
 /* ENDF sceHsynSdClearEffectWorkArea */
-INCLUDE_ASM("MODHSYN", D_0000A5E4);
+ALIGN_TEXT(4);
 #ifdef NON_MATCHING
 /* One instruction short: retail copies the counter before incrementing it,
  * gcc folds the copy into the add. */
@@ -5657,7 +5657,7 @@ int sceHsynPitchBendApply(sceHSynVoice_t *v, int rate, u16 depth, int dir)
     return 0;
 }
 /* ENDF sceHsynPitchBendApply */
-INCLUDE_ASM("MODHSYN", D_0000A754);
+ALIGN_TEXT(4);
 #ifdef NON_MATCHING
 /* One instruction short: retail copies the counter before incrementing it,
  * gcc folds the copy into the add. */
@@ -5739,7 +5739,7 @@ int sceHsynVoiceSetVolumeRamp(sceHSynVoice_t *v, int rate, u8 vol)
 #else
 INCLUDE_ASM("MODHSYN", sceHsynVoiceSetVolumeRamp);
 #endif
-INCLUDE_ASM("MODHSYN", D_0000A92C);
+ALIGN_TEXT(4);
 /* FUNC sceHsynPanSplit */
 void sceHsynPanSplit(u32 *out, int wrap, s8 pan)
 {

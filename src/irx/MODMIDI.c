@@ -275,7 +275,7 @@ int modmidi_sceMidi_Unload(sceMidiWork_t *work, int slotNo)
     return 0;
 }
 /* ENDF modmidi_sceMidi_Unload */
-INCLUDE_ASM("MODMIDI", D_000006A4);
+ALIGN_TEXT(4);
 /* FUNC modmidi_e5 */
 int modmidi_e5(sceMidiWork_t *work)
 {
@@ -301,7 +301,7 @@ int modmidi_e5(sceMidiWork_t *work)
     return 0;
 }
 /* ENDF modmidi_e5 */
-INCLUDE_ASM("MODMIDI", D_00000784);
+ALIGN_TEXT(4);
 /* FUNC sceMidiLoopFind */
 sceMidiLoop_t *sceMidiLoopFind(sceMidiLoop_t *tbl, u8 id)
 {
@@ -1401,7 +1401,7 @@ void sceMidiSongStopNotes(sceMidiWork_t *work, int slotNo, u32 msg, int len)
     }
 }
 /* ENDF sceMidiSongStopNotes */
-INCLUDE_ASM("MODMIDI", D_00002548);
+ALIGN_TEXT(4);
 /* FUNC sceMidiSongApplyVolume */
 #ifdef NON_MATCHING
 /* Two instructions longer: gcc keeps trk->fadeLeft in $a0 and has to save

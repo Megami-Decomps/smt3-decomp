@@ -2438,7 +2438,7 @@ s32 sdfSndDrvRpcInit(void *arg)
 INCLUDE_ASM("SDFSDMAN", sdfSndDrvRpcInit);
 #endif
 
-INCLUDE_ASM("SDFSDMAN", D_000044BC);
+ALIGN_TEXT(4);
 #ifdef NON_MATCHING
 /* 8 instructions short of the retail code. */
 /* FUNC sdfSndCallEeRpc */
@@ -2475,7 +2475,7 @@ s32 sdfSndCallEeRpc(s32 arg, void *buf, s32 len, u32 fno, u32 *reply)
 INCLUDE_ASM("SDFSDMAN", sdfSndCallEeRpc);
 #endif
 
-INCLUDE_ASM("SDFSDMAN", D_000045C8);
+ALIGN_TEXT(4);
 /* FUNC sdfAdpcmFadeTick */
 /* One step of the stream fade out, called once per sequence tick. */
 s32 sdfAdpcmFadeTick(void)
