@@ -302,7 +302,7 @@ in the `DDS3_IRX/MODHSYN` and `DDS3_IRX/MODMIDI` databases.
 
 Prototypes:
 
-- `sceHsynVoiceFlagsSet` is `void(sceHSynChannel_t *, u8)`; a signed second
+- `sceHsynChannelSetPortamento` is `void(sceHSynChannel_t *, u8)`; a signed second
   parameter gives `sll/sra 24` where retail has `andi 0xFF`.
 - `sceHsynUnrefTableSetB`, `sceHsynUnrefTableSetC` and `sceHsynVolumeScale` return `u8`;
   `sceHsynTableEntryFill` returns `int` and masks a `u8` local itself, which is
@@ -315,19 +315,19 @@ Prototypes:
   `chan[0]`; `modhsyn_e10`/`e11`/`e12`/`e13`/`e14`/`e20`/`e21` all reach the
   channels that way rather than through the slot.
 - `modhsyn_e20`, `modhsyn_e21` take `(sceHSynWork_t *, int)`.
-- `sceHsynVoiceAllocExport20` and `sceHsynVoiceReleaseExport21` take
+- `sceHsynChannelKeyOffAll` and `sceHsynChannelStopVoices` take
   `sceHSynChannel_t *`.
-- `sceHsynSeqStateReset` takes `sceHSynLfo_t *`, not an env.
+- `sceHsynLfoStart` takes `sceHSynLfo_t *`, not an env.
 - `sceHsynSdSetParamEnvelope` is `void(sceHSynVoice_t *)`.
 - `sceHsynEffectDepthSet` is `int(sceHSynLfo_t *)` and `sceHsynEffectFeedbackSet`
   `int(sceHSynVoice_t *)`, the latter working on `voice->lfoB`.
-- `sceHsynModulationStep` is `int(u16, u8)` and `sceHsynModulationApply`
+- `sceHsynVoiceSteal` is `int(u16, u8)` and `sceHsynVoiceStealByEnvPhaseEx`
   `int(u16, u8, int, int)`.
 - `sceHsynBuildAdsr1`/`sceHsynBuildAdsr2` take the note as `int`: a `u8` parameter
   would be masked before the subtraction and retail copies it as is.
 - `sceHsynAdjustFieldByKey`'s shift is `int`, not `s8`; `srav`/`sllv` use it with
   no sign extension.
-- `func_00000C58` is `void(sceHSynChannel_t *, u8)` and `sceHsynVolumeScale`'s
+- `sceHsynChannelSetPan` is `void(sceHSynChannel_t *, u8)` and `sceHsynVolumeScale`'s
   third parameter is `u8 *`.
 
 `sceHSynChannel_t` fields, each settled by a signed load or by a `-1` constant
@@ -339,10 +339,10 @@ shared with a byte store:
 ## Applied on 2026-10-24: sceHSynEnv_t is the 40-byte LFO
 
 `sceHSynEnv_t`'s `unk00[16]` blob and its trailing `unk20[8]` both hid real
-fields, and the names past +0x10 were one slot out. `sceHsynSeqSeek` settles the
+fields, and the names past +0x10 were one slot out. `sceHsynLfoSine` settles the
 tail: it reads a `u32` phase at +0x18, a `s16 *` table at +0x20 and a `u16`
 count at +0x24, interpolates between two entries and halves the result.
-`sceHsynSeqInterpretA`/`B` settle the head: they write a byte at +0, a byte at +1,
+`sceHsynLfoSetupA`/`B` settle the head: they write a byte at +0, a byte at +1,
 a halfword at +2, words at +0xC, +0x14, +0x18 and +0x1C, a halfword at +0x10
 and the table pair at +0x20/+0x24. The layout is now
 
@@ -351,19 +351,21 @@ and the table pair at +0x20/+0x24. The layout is now
     s16 *tbl; u16 nTbl; u16 unk26;
 
 which is `sceHSynLfo_t`'s 20 bytes extended, so the voice's `envA`/`envB` are
-LFO state and the 20-byte `lfoA`/`lfoB` are something else. The queued renaming
-pass should take that up.
+LFO state and the 20-byte `lfoA`/`lfoB` are something else. The function names
+have since been corrected to match (`sceHsynLfoSetupA`, `sceHsynLfoStep` and the
+six waveform evaluators); the two member names are still as the later SDK build
+had them, because nothing in the retail code says what `lfoA`/`lfoB` hold.
 
 `wave` at +0x14 is a function pointer, not the `phase` the old names put there:
-`sceHsynSeqInterpretA` stores one of `sceHsynSeqByteRead`, `sceHsynSeqWordRead`,
-`sceHsynSeqVarLenRead`, `sceHsynSeqSkip`, `sceHsynSeqEmit` or `sceHsynSeqSeek` into it, and
-`sceHsynEffectDispatch` calls through it with a second argument saying the phase
+`sceHsynLfoSetupA` stores one of `sceHsynLfoSawUp`, `sceHsynLfoSawDown`,
+`sceHsynLfoTriangle`, `sceHsynLfoSquare`, `sceHsynLfoNoise` or `sceHsynLfoSine` into it, and
+`sceHsynLfoStep` calls through it with a second argument saying the phase
 wrapped. All six now take `(sceHSynEnv_t *, int)`, since one field cannot hold
-two signatures and `sceHsynSeqEmit` is the one that reads the flag.
+two signatures and `sceHsynLfoNoise` is the one that reads the flag.
 
-That also supersedes the earlier record that `sceHsynSeqStateReset` takes
+That also supersedes the earlier record that `sceHsynLfoStart` takes
 `sceHSynLfo_t *`. It was only provable while the env's first 16 bytes were an
-opaque array; `sceHsynSeqInterpretA` passes it the same object it writes +0x24 of,
+opaque array; `sceHsynLfoSetupA` passes it the same object it writes +0x24 of,
 so it takes `sceHSynEnv_t *`.
 
 ### Two thbase import stubs
@@ -383,17 +385,17 @@ id, so it never becomes C.
 | `modhsyn_e7` | `(s16, u16 spuAddr, u32 iopAddr, u32)` | `(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)`, forwarded positionally to `sceHsynSdVoiceTrans` |
 | `sceHsynEffectAttrRead` | `(sceSdEffectAttr_t *)` | `(int sel, u8 mode)`; the attr block is its own stack local |
 | `sceHsynEffectAttrWrite` | `(sceSdEffectAttr_t *)` | `(u8 sel, u8 val)`, same |
-| `sceHsynVoiceParamReset` | `(sceHSynSlot_t *, ...)` | `(sceHSynChanSet_t *set, ...)`: it reaches `set + 0x384 + idx*28`, and `bank[16]` sits at +0x384 of the chan set, not of the slot |
+| `sceHsynChannelSetProgram` | `(sceHSynSlot_t *, ...)` | `(sceHSynChanSet_t *set, ...)`: it reaches `set + 0x384 + idx*28`, and `bank[16]` sits at +0x384 of the chan set, not of the slot |
 | `modhsyn_e17` | `(int, int, int)` | `(sceHSynWork_t *, int slotNo, u8 *out)` |
 | `modhsyn_e9` | `(u16 *)` | `(sceHSynCore_t *)`, a new 24-byte block `{core, mode, depthL, depthR, delay, feedback, volL, volR}` |
-| `sceHsynLfoApply` | `(sceHSynVoice_t *)` | `sceHSynVoice_t *(sceHSynVoice_t *, int keyOff)` |
+| `sceHsynVoiceKeyOffOne` | `(sceHSynVoice_t *)` | `sceHSynVoice_t *(sceHSynVoice_t *, int keyOff)` |
 | `sceHsynPitchBendApply` | `(int, int, u16, int)` | `(sceHSynVoice_t *, int rate, u16 depth, int dir)`, writing `lfoA` |
 | `sceHsynVolumeCurveLookup` | fourth argument `int` | `u8 *`, which also made `sceHSynSlot_t::unk10` a `u8 *` |
 | `sceHsynVoiceRefresh` | `(int, int, u8 *, unsigned int)` | `(sceHSynSlot_t *, int idx, u8 *p, u8 *end)`; `sceHsynServiceTick` passes the sequence bounds it just compared |
-| `sceHsynServiceTick`, `sceHsynVoiceStop`, `sceHsynVoiceReleaseExport21`, `sceHsynEnvAttackStep`, `sceHsynEnvDecayStep`, `sceHsynSdSetParamVolumeLeft`/`Right`, `sceHsynSdSetParamAdsr`, `sceHsynSeqStart` | `int`/`s32` | `void`: no path sets `$2`, and the two tails leave different values in it |
+| `sceHsynServiceTick`, `sceHsynChannelAllSoundOff`, `sceHsynChannelStopVoices`, `sceHsynEnvAttackStep`, `sceHsynEnvDecayStep`, `sceHsynSdSetParamVolumeLeft`/`Right`, `sceHsynSdSetParamAdsr`, `sceHsynLfoKeyOff` | `int`/`s32` | `void`: no path sets `$2`, and the two tails leave different values in it |
 
 One conflict the database cannot hold: `sceSmgProgEnt_t`'s +4 byte is read
-`lbu` by `sceHsynVoiceParamReset`, which tests it as a key count, and `lb` by
+`lbu` by `sceHsynChannelSetProgram`, which tests it as a key count, and `lb` by
 `func_00005B4C`, which uses it as a signed transpose. The field stays `u8 nKey`
 and `func_00005B4C` casts.
 
@@ -408,9 +410,9 @@ Fifteen more where no path sets `$2`, so the IDB's `int`/`s32` was a guess. In
 most of them the last write to `$v0` is the loop's own `slti` leftover, which is
 what Hex-Rays renders as `result = ++i < 2`.
 
-`sceHsynVoiceAllocScan`, `sceHsynVoiceAllocByPriority`, `sceHsynVoiceAllocByChannel`,
-`sceHsynVoiceRetrigger`, `sceHsynVoiceAllocExport20`, `sceHsynVoiceAllocPathB`,
-`sceHsynVoiceAllocPathBEntry`, `sceHsynVoiceAllocPathC`, `sceHsynVoiceAllocPathCEntry`,
+`sceHsynChannelNoteOff`, `sceHsynChannelSetHold`, `sceHsynChannelAllNotesOff`,
+`sceHsynChannelKeyOffByPitch`, `sceHsynChannelKeyOffAll`, `sceHsynChannelKeyOffByTag`,
+`sceHsynChannelKeyOffByTagEntry`, `sceHsynChannelKeyOffByTagMask`, `sceHsynChannelKeyOffByTagMaskEntry`,
 `sceHsynCmdNoteOff`, `sceHsynCmdNoteOn`, `sceHsynCmdProgramChange`,
 `sceHsynCmdChannelPressure`, `sceHsynVoiceUpdatePass`, `func_000021B8`.
 
@@ -421,39 +423,45 @@ else, so whatever the callee leaves in `$2` is incidental.
 
 | Function | Now |
 | --- | --- |
-| `sceHsynVoiceAllocForCmd` | `void(int base, int unused1, int state, u8 note, u8 ch, int unused2, u32 tag)`; the second and sixth arguments are never read, `base + 0x10` is the list sentinel and `base + 0x18` the channel |
-| `sceHsynVoiceAllocPathB` | `void(int base, u32 tag)` |
-| `sceHsynVoiceAllocPathC` | `void(int base, int unused, u32 tag, u32 mask)`; it matches `(v->tag & mask) == (tag & mask)` |
+| `sceHsynChannelNoteOffMatch` | `void(int base, int unused1, int state, u8 note, u8 ch, int unused2, u32 tag)`; the second and sixth arguments are never read, `base + 0x10` is the list sentinel and `base + 0x18` the channel |
+| `sceHsynChannelKeyOffByTag` | `void(int base, u32 tag)` |
+| `sceHsynChannelKeyOffByTagMask` | `void(int base, int unused, u32 tag, u32 mask)`; it matches `(v->tag & mask) == (tag & mask)` |
 | `sceHsynCmdNoteOff`, `sceHsynCmdNoteOn` | `void(int sel, int base, int unused, int state, u8 note, u8 ch, s16 val, u32 tag)` |
 | `sceHsynCmdProgramChange` | `void(int base, int unused, int rate, int state, u8 note, u8 ch, u8 vol, u32 tag)` |
 | `sceHsynCmdChannelPressure` | `void(int base, int unused, int dir, int rate, int state, u8 note, u8 ch, u16 depth, u32 tag)` |
 | `sceHsynVoiceUpdatePass` | `void(sceHSynSlot_t *slot, int status, char sel, u8 note, u8 vel)` |
 | `sceHsynVoiceEventDispatch` | third parameter `u8`, not `char`: its caller passes the note with `andi 0xFF`, where a `char` formal would give `sll`/`sra 24` |
-| `sceHsynVoiceEngineStep` | third parameter `int`, not `s8`: `sceHsynVoiceUpdatePass` forwards its status byte with a plain `move`, and gcc re-extends for an `s8` formal |
-| `func_000021B8` | `void(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)`; it forwards six of those to `func_0000AB90` |
-| `func_00000D24`, `func_00000E40` | `void(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)` and `void(..., u8 val)`: `func_00000D24` subtracts 0x40 from the raw argument register, so a `u8` formal's mask is one instruction too many, while `func_00000E40` does mask |
+| `sceHsynChannelNoteOn` | third parameter `int`, not `s8`: `sceHsynVoiceUpdatePass` forwards its status byte with a plain `move`, and gcc re-extends for an `s8` formal |
+| `func_000021B8` | `void(int base, int unused, u32 a3, int a4, int state, u8 note, u8 ch, u8 a8, s8 a9, int a10, u32 tag)`; it forwards six of those to `sceHsynVoiceSetParamRamp` |
+| `sceHsynChannelSetPanDirect`, `sceHsynChannelSetExpressionDirect` | `void(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)` and `void(..., u8 val)`: `sceHsynChannelSetPanDirect` subtracts 0x40 from the raw argument register, so a `u8` formal's mask is one instruction too many, while `sceHsynChannelSetExpressionDirect` does mask |
 
-`sceHsynPanApply` was already `sceHSynVoice_t *(s16, char)` in the database but the
+`sceHsynVoiceStealByVnum` was already `sceHSynVoice_t *(s16, char)` in the database but the
 generated header still said `int`; regenerating it was the whole fix.
 
-### Names the code disproves
+### Names the code disproved
 
-No renames were made (a renaming pass is queued), but the bodies are now read
-and these names describe something else:
+The bodies were read here and the names corrected in the pass recorded at the
+end of this file. What the evidence was:
 
-- `sceHsynPanApply` picks the active voice with the lowest `vnum` across the
-  enabled cores, unlinks it and blanks its tag. It is a voice stealer. So are
-  `sceHsynVoiceVolumeAdvance`, which is the same function with an extra
-  `unk57 == 0` filter, and `sceHsynVoiceEnvelopeAdvance`, which ranks on
+- `sceHsynVoiceStealByVnum` (named `hsynPanApply` when ported from the later SDK
+  build) picks the active voice with the lowest `vnum` across the enabled cores,
+  unlinks it and blanks its tag. It is a voice stealer, and so are the two
+  copies beside it: `sceHsynVoiceStealByVnumActive` is the same function with an
+  extra `unk57 == 0` filter, and `sceHsynVoiceStealByEnvPhase` ranks on
   `flags & 0x300` then `vnum` then `unk12`.
-- `sceHsynLfoStep` counts the voices on two of a channel's three lists whose
-  `pitch` matches, and if that count exceeds its third argument walks them again
-  through `sceHsynLfoApply`. It is a voice-count limiter, not an LFO step.
-- The whole `hsynVoiceAlloc*` family *releases* voices: `sceHsynVoiceAllocScan`,
-  `ByPriority`, `ByChannel`, `ForCmd`, `PathB`, `PathC` and `Export20` all walk
-  a channel list, key the voice off and move it to the off list or hand it back
-  to the free list. `sceHsynVoiceStealScan` and `sceHsynVoiceReleaseGroup` are the two
-  that really do free a voice for a new note.
+- `sceHsynChannelLimitByPitch` counts the voices on two of a channel's three
+  lists whose `pitch` matches, and if that count exceeds its third argument
+  walks them again through `sceHsynVoiceKeyOffOne`. It is a voice-count limiter,
+  which is why it no longer carries the name `hsynLfoStep`.
+- The whole `hsynVoiceAlloc*` family *released* voices rather than allocating
+  them. Each walks a channel list, keys the voice off and moves it to the off
+  list or hands it back to the free list, so each is now named for the event it
+  serves: `sceHsynChannelNoteOff`, `sceHsynChannelSetHold`,
+  `sceHsynChannelAllNotesOff`, `sceHsynChannelNoteOffMatch`,
+  `sceHsynChannelKeyOffByTag`, `sceHsynChannelKeyOffByTagMask` and
+  `sceHsynChannelKeyOffAll`. `sceHsynVoiceStealScan` and
+  `sceHsynVoiceStealFromChannel` are the two that really do free a voice for a
+  new note, and both keep their names.
 - `sceHSynVoice_t`'s `note` (+0x42) and `ch` (+0x43) may be the wrong way round.
   `sceHsynSdSetParamBend` interpolates the velocity split from `vel` against the
   sample entry's `velLow`/`velHigh`, and the *key* split from `ch` against the
@@ -503,7 +511,7 @@ database's `int` was a guess:
 | `sceMidiApplyPlayState` | `$2` is the loop's own `sltiu` leftover; `modmidi_sceMidi_MidiPlaySwitch` discards it |
 | `sceMidiPlaySong` | `sceMidiSongServiceTick` discards it |
 | `sceMidiScanLoops` | `$2` is `0xFF` on the reset path and stale otherwise; `sceMidiPlayEnv` discards it |
-| `sceHsynCmdVoiceAlloc` | the epilogue is a bare `jr $31`; `func_0000273C` discards it |
+| `sceHsynCmdVoiceAlloc` | the epilogue is a bare `jr $31`; `sceHsynCmdDispatch` discards it |
 
 ### Prototypes the retail code settled
 
@@ -539,7 +547,7 @@ untyped `u32 *seg` instead.
 
 | What | Was | Now | Proof |
 | --- | --- | --- | --- |
-| `sceHSynVoice_t::unk1E` | `u16` | `s16` | `func_00004AE4` reads it with `lh` and negates it when it comes out below zero; a `u16` field makes gcc emit `lhu`. Nothing else in the module loads the field, so the change is contained |
+| `sceHSynVoice_t::unk1E` | `u16` | `s16` | `sceHsynVoiceSetPan` reads it with `lh` and negates it when it comes out below zero; a `u16` field makes gcc emit `lhu`. Nothing else in the module loads the field, so the change is contained |
 | `sceHsynVoiceRefreshHook` | `void(void)` | `void(sceHSynSlot_t *slot, u8 *data, int len)` | the body is `jr $ra` and settles nothing, but `sceHsynVoiceRefresh` sets up all three argument registers before the call: the slot, the start of the system-exclusive run and the byte count it just scanned |
 
 ## Applied on 2026-10-25: the last of MODHSYN
@@ -574,20 +582,20 @@ cores' lists itself and never reads `$4`.
 | Function | Was | Now |
 | --- | --- | --- |
 | `sceHsynVoiceDirectPass` | `int(int, int, u8, u8 *)` | `void(sceHSynSlot_t *slot, int status, u8 sel, u8 *p)`; it reaches `slot + 0x18 + idx*56`, which is `slot->chan[idx]` |
-| `sceHsynModulationApply` | `int(u16, u8, int, int)` | `sceHSynVoice_t *(u16, u8, int, int)`; it is the third copy of the `sceHsynVoiceEnvelopeAdvance` voice stealer and returns the voice it took |
-| `sceHsynEffectDispatch` | `int(char *)` | `int(sceHSynEnv_t *env)`; it steps the env and calls through `env->wave` |
-| `sceHsynSeqInterpretA` | `int(int, ...)` | `void(sceHSynEnv_t *env, ...)`, matching `sceHsynSeqInterpretB` |
-| `sceHsynSeqInterpretB` | ninth argument unnamed | `void(sceHSynEnv_t *, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)` |
+| `sceHsynVoiceStealByEnvPhaseEx` | `int(u16, u8, int, int)` | `sceHSynVoice_t *(u16, u8, int, int)`; it is the third copy of the `sceHsynVoiceStealByEnvPhase` voice stealer and returns the voice it took |
+| `sceHsynLfoStep` | `int(char *)` | `int(sceHSynEnv_t *env)`; it steps the env and calls through `env->wave` |
+| `sceHsynLfoSetupA` | `int(int, ...)` | `void(sceHSynEnv_t *env, ...)`, matching `sceHsynLfoSetupB` |
+| `sceHsynLfoSetupB` | ninth argument unnamed | `void(sceHSynEnv_t *, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)` |
 | `sceHsynVoiceEventDispatch` | second parameter `u8 *` | `sceHSynChannel_t *`; every arm is a channel-field write or a `sceHSynChannel_t *` call |
 
 ### The nine-argument forwarder and its two callees
 
-`func_00008350` is `int(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, u8 a6, int a7, u16 a8, u32 a9)`:
-it reads `slot->path` and forwards to `func_000078D4` for 0, `func_00007F54`
+`sceHsynVoiceStart` is `int(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, u8 a6, int a7, u16 a8, u32 a9)`:
+it reads `slot->path` and forwards to `sceHsynVoiceStartPathA` for 0, `sceHsynVoiceStartPathB`
 for 1, and returns -1 otherwise. The retail code pins the two callees' narrow
 parameters by which conversions the forwarder emits:
 
-| Parameter | Forwarder | `func_000078D4` | `func_00007F54` |
+| Parameter | Forwarder | `sceHsynVoiceStartPathA` | `sceHsynVoiceStartPathB` |
 | --- | --- | --- | --- |
 | a2 | `int` | `int` | `int` |
 | a5 | `u8` | `u8` (passed with no conversion) | `int` (passed with `andi 0xFF`) |
@@ -600,26 +608,131 @@ A conversion appears only where the two types differ, so each `andi` or
 three: `char` to `char` would be re-extended, which is three instructions the
 forwarder does not have.
 
-### Names the code disproves
+### Names the code disproved
 
-Still no renames, but these are now read:
+Read here, renamed in the pass recorded at the end of this file:
 
-- `func_000078D4`, `func_00007F54` and `sceHsynVoiceEngineStep` are one family:
+- `sceHsynVoiceStartPathA`, `sceHsynVoiceStartPathB` and `sceHsynChannelNoteOn` are one family:
   walk the program's key list, the sample set and the sample entries, resolve a
   VAG, free a voice by one of four escalating strategies, then fill the voice.
-  `func_000078D4` and `func_00007F54` set `unk57 = 1` and bump `sceHsynRelCount`
-  where `sceHsynVoiceEngineStep` sets 0 and bumps `sceHsynActiveCount`, so the first
+  `sceHsynVoiceStartPathA` and `sceHsynVoiceStartPathB` set `unk57 = 1` and bump `sceHsynRelCount`
+  where `sceHsynChannelNoteOn` sets 0 and bumps `sceHsynActiveCount`, so the first
   two start a release-tail voice and the third a plain one.
-- `sceHsynSeqInterpretA` and `B` are not interpreters. They install one of six
+- `sceHsynLfoSetupA` and `B` are not interpreters, which is what
+  `hsynSeqInterpretA`/`B` called them. They install one of six
   waveform readers in `sceHSynEnv_t::wave`, convert a period and a depth into
   `unk02` and `unk0C` through `sceHsynTickScale`, and seed the phase. They differ
   only in which four bytes of `sceSmgProgEnt_t` they read, B's being A's plus 4.
-- `func_0000273C` is the system-exclusive dispatcher: it resyncs on 0xFE, reads
+- `sceHsynCmdDispatch` is the system-exclusive dispatcher: it resyncs on 0xFE, reads
   a 32-bit tag and a command byte, and routes the 0x90/0xA0 nibbles to
-  `func_00008350`, 0xB0 through a 35-entry table of channel commands, and 0xC0
+  `sceHsynVoiceStart`, 0xB0 through a 35-entry table of channel commands, and 0xC0
   to a smaller table of voice-allocation commands.
-- `func_0000AB90` is a parameter-ramp setter writing a 14-word block at
+- `sceHsynVoiceSetParamRamp` is a parameter-ramp setter writing a 14-word block at
   `sceHSynVoice_t::param`, so `param[56]` is a struct of fourteen `int`s.
-- `func_00004D90` returns the number of voices it serviced, which
-  `func_000017EC` stores in `sceHSynStat_t::nFree`; `sceHsynServiceVoices` returns
-  the number it *skipped*, stored in `nActive`. Both names are backwards.
+- `sceHsynUpdateVoiceState` (`func_00004D90` until it was read) returns the
+  number of voices it serviced, which `func_000017EC` stores in
+  `sceHSynStat_t::nFree`; `sceHsynServiceVoices` returns the number it
+  *skipped*, stored in `nActive`. The two struct field names are therefore
+  backwards; the functions are named for what they do and the fields are left
+  alone, since nothing but this one caller reads them.
+
+## Applied on 2026-10-25: Sony's three sound modules renamed
+
+Two changes in one pass, in the `DDS3_IRX/MODHSYN`, `DDS3_IRX/MODMIDI` and
+`DDS3_IRX/MODMSIN` databases. All six IRX modules stay byte-identical, which is
+what proves a rename touched only symbols.
+
+### The module prefix
+
+210 symbols gained Sony's `sce`: `hsyn*` to `sceHsyn*`, `midi*` to `sceMidi*`,
+`msin*` to `sceMsin*`, at the start of a name only. The export-ordinal names
+(`modhsyn_eNN`), the `modhsyn_sceHSyn_*` import stubs, the foreign stubs
+(`libsd_*`, `intrman_*`, `thbase_*`), the `D_<address>` tables, `*LibraryTable`
+and the `sce*_t` type names were left as they were.
+
+### The names the code disproved
+
+Each was read before it was renamed. The dispatcher at
+`sceHsynVoiceEventDispatch` is what settles most of the channel half: its switch
+is on a MIDI controller number, so each arm names the function it calls.
+
+| Was | Now | What the code does |
+| --- | --- | --- |
+| `hsynVoiceParamReset` | `sceHsynChannelSetProgram` | resolves `chan->prog` and `chan->bank` from a program number |
+| `hsynVoiceSetPitch` | `sceHsynChannelSetPitchBend` | 14-bit value less 0x2000 into `chan->unk26`, broadcast to the channel's voices |
+| `hsynVoiceEnvelopeApply` | `sceHsynChannelApplyVolume` | recomputes every voice's `unk18` through `sceHsynSdSetParamEnvelope` |
+| `hsynVoiceSetAttack` | `sceHsynChannelSetVolume` | controller 7, writes `chan->vol` |
+| `hsynVoiceSetRelease` | `sceHsynChannelSetExpression` | controller 11, writes the second volume scale |
+| `hsynVoiceFlagsGet` | `sceHsynChannelSetBendRange` | controller 5, writes `chan->bendRange = 20 * semitones` |
+| `hsynVoiceFlagsSet` | `sceHsynChannelSetPortamento` | controller 65, arms `chan->priority` at 0x80 or disarms it at 0xFF |
+| `hsynVoiceIndexGet` | `sceHsynChannelSetPortamentoNote` | controller 84; it stores, where the name said it loaded |
+| `func_00000C58` | `sceHsynChannelSetPan` | controller 10, writes `chan->unk31` and broadcasts |
+| `func_00000D24` | `sceHsynChannelSetPanDirect` | the same, filtered by tag and channel |
+| `func_00000E40` | `sceHsynChannelSetExpressionDirect` | expression, filtered by tag and channel |
+| `func_00004AE4` | `sceHsynVoiceSetPan` | turns a signed pan into the voice's two volume scales |
+| `hsynVoiceApplyAll` | `sceHsynChannelResetControllers` | controller 121: every controller back to its default |
+| `hsynVoiceAllocScan` | `sceHsynChannelNoteOff` | what `sceHsynVoiceUpdatePass` runs for status 0x80 |
+| `hsynVoiceAllocByPriority` | `sceHsynChannelSetHold` | controller 64; zero releases everything parked on the sustain list |
+| `hsynVoiceAllocByChannel` | `sceHsynChannelAllNotesOff` | controller 123 |
+| `hsynVoiceStop` | `sceHsynChannelAllSoundOff` | controller 120 |
+| `hsynVoiceAllocForCmd` | `sceHsynChannelNoteOffMatch` | keys off on tag, state, note and channel together |
+| `hsynVoiceAllocExport20` | `sceHsynChannelKeyOffAll` | |
+| `hsynVoiceAllocPathB`, `...Entry` | `sceHsynChannelKeyOffByTag`, `...Entry` | |
+| `hsynVoiceAllocPathC`, `...Entry` | `sceHsynChannelKeyOffByTagMask`, `...Entry` | |
+| `hsynVoiceReleaseExport21` | `sceHsynChannelStopVoices` | |
+| `hsynVoiceRetrigger` | `sceHsynChannelKeyOffByPitch` | |
+| `hsynLfoStep` | `sceHsynChannelLimitByPitch` | |
+| `hsynLfoApply` | `sceHsynVoiceKeyOffOne` | keys off or frees one voice and returns the next on the list |
+| `hsynVoiceEngineStep` | `sceHsynChannelNoteOn` | what `sceHsynVoiceUpdatePass` runs for status 0x90 |
+| `hsynVoiceMaskClear`, `...One` | `sceHsynVoiceAlloc`, `sceHsynVoiceAllocEntry` | pops a voice off a core's free list; this is the allocator |
+| `hsynVoiceMaskUpdate`, `hsynVoiceMaskSet` | `sceHsynVoiceFree`, `sceHsynVoiceFreeEntry` | |
+| `hsynVoiceRelease`, `hsynVoiceReleaseOne` | `sceHsynVoiceChFree`, `sceHsynVoiceChFreeEntry` | the same, for a voice still on a channel list |
+| `hsynVoiceMaskGet` | `sceHsynVoiceUnlink` | |
+| `hsynVoiceSlotGet`, `hsynVoiceSlotSet` | `sceHsynVoiceChLink`, `sceHsynVoiceChUnlink` | |
+| `hsynCoreIndexGet`, `hsynCoreIndexSet` | `sceHsynVoiceInsertAfter`, `sceHsynVoiceInsertBefore` | |
+| `hsynPanApply` | `sceHsynVoiceStealByVnum` | |
+| `hsynVoiceVolumeAdvance` | `sceHsynVoiceStealByVnumActive` | |
+| `hsynVoiceEnvelopeAdvance` | `sceHsynVoiceStealByEnvPhase` | |
+| `hsynModulationApply` | `sceHsynVoiceStealByEnvPhaseEx` | the same ranking with two more filters |
+| `hsynModulationStep` | `sceHsynVoiceSteal` | decides those two filters from the release budget |
+| `hsynVoiceReleaseGroup` | `sceHsynVoiceStealFromChannel` | |
+| `hsynSeqByteRead` | `sceHsynLfoSawUp` | `(phase - 0x8000) >> 1` |
+| `hsynSeqWordRead` | `sceHsynLfoSawDown` | the same, inverted |
+| `hsynSeqVarLenRead` | `sceHsynLfoTriangle` | folds the middle half |
+| `hsynSeqSkip` | `sceHsynLfoSquare` | plus or minus 0x4000 |
+| `hsynSeqSeek` | `sceHsynLfoSine` | interpolates two entries of `env->tbl` |
+| `hsynSeqEmit` | `sceHsynLfoNoise` | holds `env->level`, resamples on wrap |
+| `hsynSeqEmitTail` | `sceHsynRand` | the module's linear congruential generator |
+| `hsynEffectDispatch` | `sceHsynLfoStep` | advances the phase and calls through `env->wave` |
+| `hsynSeqStateReset` | `sceHsynLfoStart` | |
+| `hsynSeqStart` | `sceHsynLfoKeyOff` | |
+| `hsynSeqInterpretA`, `B` | `sceHsynLfoSetupA`, `B` | |
+| `hsynSdLockAcquire` | `sceHsynSdLogNext` | takes the next entry of a ring buffer |
+| `hsynSdLockRelease` | `sceHsynSdLogCall` | records the libsd call and its five arguments |
+| `hsynSdLockWait` | `sceHsynSdLogResult` | records the return value and clears the busy bit |
+| `hsynLoadBank` | `sceHsynTagMatch` | compares two four-character chunk tags |
+| `midiParseHeader` | `sceMidiTagMatch` | the same comparator with a debug print |
+| `midiOutputPush` | `sceMidiVoiceLookup` | a bounds-checked index into the voice table |
+| `midiLoopTableAdd` | `sceMidiLoopFind` | finds the entry whose `id` matches, over eight |
+| `midiSongSetTempo` | `sceMidiSongSetVolume` | clamps to 0..128 and writes the song volume, which `sceMidiSongApplyVolume` fades |
+| `midiSongSetFlags` | `sceMidiSongSetBpm` | clamps to 10..255 and writes the tempo, 120 by default |
+| `func_00000050` | `modhsyn_sceHSyn_Init` | MODHSYN export 4: sets the tick scale from the interval and validates the work table |
+| `func_00004D90` | `sceHsynUpdateVoiceState` | polls each voice's SPU2 envelope and advances its state |
+| `func_0000273C` | `sceHsynCmdDispatch` | the system-exclusive dispatcher |
+| `func_0000AB90` | `sceHsynVoiceSetParamRamp` | writes the 14-word ramp block at `sceHSynVoice_t::param` |
+| `func_000078D4`, `func_00007F54` | `sceHsynVoiceStartPathA`, `PathB` | the two note-on paths `slot->path` selects between |
+| `func_00008350` | `sceHsynVoiceStart` | the nine-argument forwarder that selects them |
+
+Controllers 65 and 84 are what settle `sceHSynChannel_t::priority`, which the
+earlier record left as a pitch quantity fitting neither name. It is the
+portamento note: `sceHsynChannelSetPortamento` arms it at 0x80 and disarms it at
+0xFF, and `sceHsynChannelNoteOff` opens with
+`if (chan->priority < 0x81) chan->priority = note`, recording the released note
+as the glide source. The field is left named `priority` rather than renamed,
+because a member rename reaches the C and this pass was symbols only.
+
+Two names the code contradicts but does not replace. `sceHSynChannel_t::pan` is
+written by `sceHsynChannelSetExpression` and multiplies into a volume, so it is
+an expression level, while the real pan is `unk31`; and `sceHSynStat_t`'s
+`nFree` and `nActive` are swapped, as the entry above records. Both are member
+names, left for a pass that can carry the C with them.

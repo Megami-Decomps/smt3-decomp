@@ -200,8 +200,8 @@ between them, which never become C.
 Six of the 36 cannot match at all while `.rodata` is assembly: their switch
 compiles to a jump table whose `L_<address>` case labels the assembly
 `.rodata` already defines, so a C body leaves them undefined and the *link*
-fails. They are `sceHsynEffectDispatch`, `sceHsynVoiceEventDispatch`,
-`sceHsynSeqInterpretA`, `sceHsynSeqInterpretB`, `func_0000AB90` and `func_0000273C`.
+fails. They are `sceHsynLfoStep`, `sceHsynVoiceEventDispatch`,
+`sceHsynLfoSetupA`, `sceHsynLfoSetupB`, `sceHsynVoiceSetParamRamp` and `sceHsynCmdDispatch`.
 
 The other 30 break down as:
 
@@ -210,19 +210,19 @@ The other 30 break down as:
 | `sceHsynInitCores` | four instructions out of place: gcc schedules the outer loop's preheader after the list-head stores |
 | `func_00004614` | one short: gcc keeps `envB.level` live into the second arm where retail reloads it |
 | `sceHsynVoiceUpdatePathB` | one short: gcc keeps `v->vag` live across two halfword stores |
-| `func_00008350` | byte-identical but for one register pair |
+| `sceHsynVoiceStart` | byte-identical but for one register pair |
 | `modhsyn_sceHSyn_Load` | six short: gcc cross-jumps the two identical bank-clearing blocks |
-| `sceHsynVoiceEngineStep`, `func_000078D4`, `func_00007F54` | the retail bodies spill a dozen values to the frame; a C body of this shape keeps them in registers |
+| `sceHsynChannelNoteOn`, `sceHsynVoiceStartPathA`, `sceHsynVoiceStartPathB` | the retail bodies spill a dozen values to the frame; a C body of this shape keeps them in registers |
 | the other 22 | inherited from earlier agents |
 
-Three of the four large note-on paths (`func_000078D4`, `func_00007F54`,
-`sceHsynVoiceEngineStep`) share one shape: walk the program's key list, the sample
+Three of the four large note-on paths (`sceHsynVoiceStartPathA`, `sceHsynVoiceStartPathB`,
+`sceHsynChannelNoteOn`) share one shape: walk the program's key list, the sample
 set and the sample entries, resolve a VAG, free a voice by one of four
 escalating strategies, then fill the voice and call `sceHsynVoiceUpdatePathA` or
 `PathB`. Reading one makes the other two quick.
 
-`func_00008350` is settled: it is a nine-argument forwarder whose `path`
-selects `func_000078D4` or `func_00007F54`, and the recovered parameter types
+`sceHsynVoiceStart` is settled: it is a nine-argument forwarder whose `path`
+selects `sceHsynVoiceStartPathA` or `sceHsynVoiceStartPathB`, and the recovered parameter types
 are in [IDB corrections](idb-corrections.md).
 
 ### Where MODMIDI stands

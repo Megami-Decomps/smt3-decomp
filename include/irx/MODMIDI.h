@@ -269,18 +269,18 @@ typedef char __MODMIDI_sizeof_sceMidiVoiceTbl_t[(sizeof(sceMidiVoiceTbl_t) == 8)
 
 int modmidi_e26(int argc, char **argv);
 int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval);
-int sceMidiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name);
+int sceMidiTagMatch(u32 tag0, u32 tag1, const char *magic, const char *name);
 int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo);
 int modmidi_sceMidi_Unload(sceMidiWork_t *work, int slotNo);
 int modmidi_e5(sceMidiWork_t *work);
-sceMidiLoop_t *sceMidiLoopTableAdd(sceMidiLoop_t *tbl, u8 id);
+sceMidiLoop_t *sceMidiLoopFind(sceMidiLoop_t *tbl, u8 id);
 void sceMidiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc, u8 val, sceMidiVoiceTbl_t *vt);
 u32 sceMidiTrackSeekAbsolute(sceMidiTrack_t *trk);
 int sceMidiReadVarLen(sceMidiTrack_t *trk);
 int sceMidiTrackReset(sceMidiTrack_t *trk);
 int sceMidiReadDeltaTime(sceMidiTrack_t *trk);
 int sceMidiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type);
-sceMidiVoice_t *sceMidiOutputPush(u32 index, sceMidiVoiceTbl_t *vt);
+sceMidiVoice_t *sceMidiVoiceLookup(u32 index, sceMidiVoiceTbl_t *vt);
 void sceMidiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt);
 void sceMidiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk, sceMidiVoiceTbl_t *vt, u32 msg, int len);
 int sceMidiChannelReset(sceMidiTrack_t *trk, u8 ch);
@@ -306,9 +306,9 @@ void sceMidiSongApplyVolume(sceMidiWork_t *work, int slotNo, sceMidiTrack_t *trk
 int sceMidiSongLookup(sceMidiWork_t *work, int slotNo, sceMidiSlot_t **pslot, sceMidiTrack_t **ptrk);
 void sceMidiSongSelect(sceMidiSlot_t *slot, u8 **songCur);
 int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo);
-void sceMidiSongSetTempo(sceMidiTrack_t *trk, int val);
+void sceMidiSongSetVolume(sceMidiTrack_t *trk, int val);
 void sceMidiSongSetLoopCount(sceMidiTrack_t *trk, int val);
-void sceMidiSongSetFlags(sceMidiTrack_t *trk, int val);
+void sceMidiSongSetBpm(sceMidiTrack_t *trk, int val);
 int sceMidiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo);
 int sceMidiSongRepeat(sceMidiSlot_t *slot, u8 count);
 void sceMidiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot);

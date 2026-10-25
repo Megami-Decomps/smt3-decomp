@@ -107,10 +107,10 @@ int modmidi_sceMidi_Init(sceMidiWork_t *work, int interval)
     return 0;
 }
 /* ENDF modmidi_sceMidi_Init */
-/* FUNC sceMidiParseHeader */
+/* FUNC sceMidiTagMatch */
 /* Not a parser: a 4+4 character chunk tag comparator, with both tags passed
  * as words and both strings read backwards. */
-int sceMidiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
+int sceMidiTagMatch(u32 tag0, u32 tag1, const char *magic, const char *name)
 {
     char *p0;
     char *p1;
@@ -129,7 +129,7 @@ int sceMidiParseHeader(u32 tag0, u32 tag1, const char *magic, const char *name)
     }
     return 1;
 }
-/* ENDF sceMidiParseHeader */
+/* ENDF sceMidiTagMatch */
 /* FUNC modmidi_sceMidi_Load */
 #ifdef NON_MATCHING
 /* Equivalent, same size. Four pointers land one callee-saved register off
@@ -178,17 +178,17 @@ int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo)
     if (vers == NULL) {
         return -1;
     }
-    if (sceMidiParseHeader(*(u32 *)vers->magic, *(u32 *)vers->name, magic, name) == 0) {
+    if (sceMidiTagMatch(*(u32 *)vers->magic, *(u32 *)vers->name, magic, name) == 0) {
         return -1;
     }
     sequ = (sceMidiSequ_t *)((u8 *)vers + vers->size);
-    if (sceMidiParseHeader(*(u32 *)sequ->magic, *(u32 *)sequ->name, magic, aSequ) == 0) {
+    if (sceMidiTagMatch(*(u32 *)sequ->magic, *(u32 *)sequ->name, magic, aSequ) == 0) {
         return -1;
     }
     ofs = sequ->songOfs;
     song = (sceMidiSongChunk_t *)((u8 *)vers + ofs);
     if (ofs == -1 ||
-        sceMidiParseHeader(*(u32 *)song->magic, *(u32 *)song->name, magic, aSong) == 0) {
+        sceMidiTagMatch(*(u32 *)song->magic, *(u32 *)song->name, magic, aSong) == 0) {
         song = NULL;
     }
     ofs = sequ->midiOfs;
@@ -196,7 +196,7 @@ int modmidi_sceMidi_Load(sceMidiWork_t *work, int slotNo)
         return -1;
     }
     midi = (sceMidiMidiChunk_t *)((u8 *)vers + ofs);
-    if (sceMidiParseHeader(*(u32 *)midi->magic, *(u32 *)midi->name, magic,
+    if (sceMidiTagMatch(*(u32 *)midi->magic, *(u32 *)midi->name, magic,
                         (const char *)aMidi) == 0) {
         return -1;
     }
@@ -302,8 +302,8 @@ int modmidi_e5(sceMidiWork_t *work)
 }
 /* ENDF modmidi_e5 */
 INCLUDE_ASM("MODMIDI", D_00000784);
-/* FUNC sceMidiLoopTableAdd */
-sceMidiLoop_t *sceMidiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
+/* FUNC sceMidiLoopFind */
+sceMidiLoop_t *sceMidiLoopFind(sceMidiLoop_t *tbl, u8 id)
 {
     int i;
 
@@ -314,7 +314,7 @@ sceMidiLoop_t *sceMidiLoopTableAdd(sceMidiLoop_t *tbl, u8 id)
     }
     return NULL;
 }
-/* ENDF sceMidiLoopTableAdd */
+/* ENDF sceMidiLoopFind */
 /* FUNC sceMidiScanLoops */
 #ifdef NON_MATCHING
 /* 40 bytes long: gcc keeps the four control-change arms and the many
@@ -354,7 +354,7 @@ void sceMidiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc
         if (trk->ctlLoopId == 0xFF) {
             break;
         }
-        e = sceMidiLoopTableAdd(trk->loop, trk->ctlLoopId);
+        e = sceMidiLoopFind(trk->loop, trk->ctlLoopId);
         if (e == NULL) {
             e = trk->loop;
             for (i = 7; i != -1; i--, e++) {
@@ -385,7 +385,7 @@ void sceMidiScanLoops(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 status, u8 cc
             r++;
             break;
         }
-        e = sceMidiLoopTableAdd(trk->loop, trk->ctlLoopId);
+        e = sceMidiLoopFind(trk->loop, trk->ctlLoopId);
         if (e == NULL) {
             if (sceMidiDebug != 0) {
                 stdio_printf(aNotFoundLoopSt, trk->ctlLoopId);
@@ -577,15 +577,15 @@ int sceMidiParseMetaEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk, u8 type)
 INCLUDE_ASM("MODMIDI", sceMidiParseMetaEvent);
 #endif
 /* ENDF sceMidiParseMetaEvent */
-/* FUNC sceMidiOutputPush */
-sceMidiVoice_t *sceMidiOutputPush(u32 index, sceMidiVoiceTbl_t *vt)
+/* FUNC sceMidiVoiceLookup */
+sceMidiVoice_t *sceMidiVoiceLookup(u32 index, sceMidiVoiceTbl_t *vt)
 {
     if (index >= vt->nVoiceWord) {
         return NULL;
     }
     return &vt->voice[index];
 }
-/* ENDF sceMidiOutputPush */
+/* ENDF sceMidiVoiceLookup */
 /* FUNC sceMidiParseExcEvent */
 void sceMidiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                        sceMidiVoiceTbl_t *vt)
@@ -611,7 +611,7 @@ void sceMidiParseExcEvent(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
                 do {
                     shift = 1;
                     if (mask & shift) {
-                        v = sceMidiOutputPush(index, vt);
+                        v = sceMidiVoiceLookup(index, vt);
                         if (v != NULL) {
                             buf = v->buf;
                             if (buf != NULL) {
@@ -682,7 +682,7 @@ void sceMidiSendChMsg(sceMidiSlot_t *slot, sceMidiTrack_t *trk,
     do {
         shift = 1;
         if (mask & shift) {
-            v = sceMidiOutputPush(index, vt);
+            v = sceMidiVoiceLookup(index, vt);
             if (v != NULL) {
                 buf = v->buf;
                 if (buf != NULL) {
@@ -1508,8 +1508,8 @@ int modmidi_sceMidi_SelectSong(sceMidiWork_t *work, int slotNo, u32 songNo)
     return 0;
 }
 /* ENDF modmidi_sceMidi_SelectSong */
-/* FUNC sceMidiSongSetTempo */
-void sceMidiSongSetTempo(sceMidiTrack_t *trk, int val)
+/* FUNC sceMidiSongSetVolume */
+void sceMidiSongSetVolume(sceMidiTrack_t *trk, int val)
 {
     if (val < 0) {
         val = 0;
@@ -1518,7 +1518,7 @@ void sceMidiSongSetTempo(sceMidiTrack_t *trk, int val)
     }
     trk->curMidi = val;
 }
-/* ENDF sceMidiSongSetTempo */
+/* ENDF sceMidiSongSetVolume */
 /* FUNC sceMidiSongSetLoopCount */
 void sceMidiSongSetLoopCount(sceMidiTrack_t *trk, int val)
 {
@@ -1530,8 +1530,8 @@ void sceMidiSongSetLoopCount(sceMidiTrack_t *trk, int val)
     trk->loopCount = val;
 }
 /* ENDF sceMidiSongSetLoopCount */
-/* FUNC sceMidiSongSetFlags */
-void sceMidiSongSetFlags(sceMidiTrack_t *trk, int val)
+/* FUNC sceMidiSongSetBpm */
+void sceMidiSongSetBpm(sceMidiTrack_t *trk, int val)
 {
     if (val < 0xA) {
         val = 0xA;
@@ -1540,7 +1540,7 @@ void sceMidiSongSetFlags(sceMidiTrack_t *trk, int val)
     }
     trk->unk133 = val;
 }
-/* ENDF sceMidiSongSetFlags */
+/* ENDF sceMidiSongSetBpm */
 /* FUNC sceMidiSongApplyState */
 int sceMidiSongApplyState(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot, u32 midiNo)
 {
@@ -1689,13 +1689,13 @@ void sceMidiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
             trk->songFlags &= 0xFB;
             break;
         case 1:
-            sceMidiSongSetTempo(trk, arg);
+            sceMidiSongSetVolume(trk, arg);
             break;
         case 2:
-            sceMidiSongSetTempo(trk, arg + trk->curMidi);
+            sceMidiSongSetVolume(trk, arg + trk->curMidi);
             break;
         case 3:
-            sceMidiSongSetTempo(trk, trk->curMidi - arg);
+            sceMidiSongSetVolume(trk, trk->curMidi - arg);
             break;
         case 4:
             sceMidiSongSetLoopCount(trk, arg);
@@ -1718,7 +1718,7 @@ void sceMidiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
             if (trk->fadeLeft != 0) {
                 trk->nextMidi = arg;
             } else {
-                sceMidiSongSetTempo(trk, arg);
+                sceMidiSongSetVolume(trk, arg);
             }
             break;
         case 0x11:
@@ -1739,13 +1739,13 @@ void sceMidiPlaySong(sceMidiWork_t *work, int slotNo, sceMidiSlot_t *slot)
             }
             break;
         case 0x21:
-            sceMidiSongSetFlags(trk, arg);
+            sceMidiSongSetBpm(trk, arg);
             break;
         case 0x22:
-            sceMidiSongSetFlags(trk, arg + trk->unk133);
+            sceMidiSongSetBpm(trk, arg + trk->unk133);
             break;
         case 0x23:
-            sceMidiSongSetFlags(trk, trk->unk133 - arg);
+            sceMidiSongSetBpm(trk, trk->unk133 - arg);
             break;
         case 0x7F:
             switch (arg) {
@@ -1897,7 +1897,7 @@ int modmidi_e10(sceMidiWork_t *work, int slotNo, u8 val)
     if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
-    sceMidiSongSetTempo(trk, val);
+    sceMidiSongSetVolume(trk, val);
     if (slot->flags & 0x200) {
         sceMidiSongApplyVolume(work, slotNo, trk);
     }
@@ -1913,7 +1913,7 @@ int modmidi_e11(sceMidiWork_t *work, int slotNo, u8 val)
     if (sceMidiSongLookup(work, slotNo, &slot, &trk) == 0) {
         return -1;
     }
-    sceMidiSongSetFlags(trk, val);
+    sceMidiSongSetBpm(trk, val);
     if (slot->flags & 0x200) {
         modmidi_e19(work, slotNo, trk->unk133);
     }

@@ -66,7 +66,7 @@ function by hand: the remaining difference is usually one of them.
 - **A repeated literal rematerialises; a named local gets its own register.**
   `v->tag = 0xFF; ... return 0xFF;` lets gcc hoist the constant into a branch
   delay slot, lose it to the body, and build it again, which is what retail does
-  twice in `sceHsynVoiceMaskUpdate`. An `int r = 0xFF` gets a callee-saved register
+  twice in `sceHsynVoiceFree`. An `int r = 0xFF` gets a callee-saved register
   and costs a copy at the return instead.
 - **An `s8` stack parameter passed on without a prototype is loaded before the
   guard.** `func_000021B8` declares its ninth argument `s8` and hands it to an
@@ -77,11 +77,11 @@ function by hand: the remaining difference is usually one of them.
   re-extended.** gcc does not track that an incoming `s8` already arrives
   sign-extended, so `s8` to `s8` costs `sll`/`sra` while `s8` to `int` is a
   plain move. `sceHsynVoiceUpdatePass` forwards its status byte with a `move`,
-  which is what made `sceHsynVoiceEngineStep`'s third parameter `int`.
+  which is what made `sceHsynChannelNoteOn`'s third parameter `int`.
 - **`(x << 8) / 254` and `(x << 7) / 127` are not the same code.** An even
   divisor sends gcc through its pre-shift path, which folds the shift and picks
   the single-word magic retail has; the odd form picks a 33-bit magic and three
-  extra instructions. `func_00000E40` scales a 0..127 controller and needs the
+  extra instructions. `sceHsynChannelSetExpressionDirect` scales a 0..127 controller and needs the
   `<< 8` over 254 spelling.
 - **Force reassociation with a local.** `msg = (vol << 16) | 0x7B0; ... ch | msg`
   holds where the same expression in parentheses does not.
@@ -105,8 +105,8 @@ function by hand: the remaining difference is usually one of them.
 - **`heads[i]` against an explicit `head` pointer decides where a hoisted loop
   invariant lands.** When the body also needs a constant such as
   `1 << v->index`, the indexed form puts the strength-reduced pointer after the
-  invariant in the preheader, which `sceHsynVoiceStop` needs and
-  `sceHsynVoiceSetPitch` does not.
+  invariant in the preheader, which `sceHsynChannelAllSoundOff` needs and
+  `sceHsynChannelSetPitchBend` does not.
 - **Let gcc strength-reduce `out[n]`** rather than keeping your own cursor: the
   reduced induction variable is born in the inner preheader, after the guard.
 - **Drop a redundant `if (n > 0)` around a `for (j = 0; j < n; j++)`**, or gcc
@@ -114,7 +114,7 @@ function by hand: the remaining difference is usually one of them.
 - **`ch = 0;` before the loop with an empty `for` init** reorders two preheader
   initialisations, which is what `modhsyn_e23` wanted.
 - **Two walks over the same head array want two cursors, or none.** In
-  `sceHsynLfoStep` the indexed form `end = heads[i]` gives each loop its own
+  `sceHsynChannelLimitByPitch` the indexed form `end = heads[i]` gives each loop its own
   strength-reduced pointer *and* puts it after the hoisted loop invariant in the
   preheader, which is the order retail has; a shared `head` cursor merges the
   two and reverses that order.
@@ -172,7 +172,7 @@ function by hand: the remaining difference is usually one of them.
   to `sym[n]`, `sym[n-1]`, ... keep the symbol itself as the `%lo` base only if
   the address comes from a local pointer; writing `sym[1] = 0; sym[0] = 0;`
   directly makes gcc base them on `sym+4`. `sceHsynInitCores` clears six arrays
-  that way and `func_00000050` one.
+  that way and `modhsyn_sceHSyn_Init` one.
 - **Indexing a cached base beats a self-incrementing pointer when the uses are
   at two offsets.** `entry[slotNo].seq` and `entry[slotNo].slot` reduce to one
   pointer based at the entry; `entry++` with the same two uses biases the
@@ -222,7 +222,7 @@ function by hand: the remaining difference is usually one of them.
   shared tail, which is exactly what retail's layout is.
 - **Walk the list with one `v = next` after the if-else chain.** gcc copies that
   single `move` into each arm's branch delay slot, which is what retail's three
-  copies in `sceHsynVoiceAllocScan` are; writing it in every arm also matches the
+  copies in `sceHsynChannelNoteOff` are; writing it in every arm also matches the
   count but changes which pseudo wins a callee-saved register.
 
 ## What is not fixable from the C
@@ -232,8 +232,8 @@ table cannot be written at all: the assembly `.rodata` already holds the
 function's `L_<address>` case labels, so replacing the body leaves them
 undefined and the link fails. Eight functions are in that position, two in
 MODMIDI (`sceMidiPlaySong`, `sceMidiPlayEnv`) and six in MODHSYN
-(`sceHsynEffectDispatch`, `sceHsynVoiceEventDispatch`, `sceHsynSeqInterpretA`,
-`sceHsynSeqInterpretB`, `func_0000273C`, `func_0000AB90`). Write the C, guard it
+(`sceHsynLfoStep`, `sceHsynVoiceEventDispatch`, `sceHsynLfoSetupA`,
+`sceHsynLfoSetupB`, `sceHsynCmdDispatch`, `sceHsynVoiceSetParamRamp`). Write the C, guard it
 and move on.
 
 **gcc's cross-jumping.** Where two paths end in the same few instructions,
@@ -253,8 +253,8 @@ short. `func_00004614` (`envB.level` across a branch) and
 cases; a local for the first read, a pointer local for the stores and
 reordering the arms all leave the CSE in place.
 
-**A heavily spilled body.** `sceHsynVoiceEngineStep`, `func_000078D4` and
-`func_00007F54` each park a dozen values in frame slots and reload them every
+**A heavily spilled body.** `sceHsynChannelNoteOn`, `sceHsynVoiceStartPathA` and
+`sceHsynVoiceStartPathB` each park a dozen values in frame slots and reload them every
 time. A C body with the same locals keeps them in registers instead, and the
 spill pattern is not reachable from the source.
 

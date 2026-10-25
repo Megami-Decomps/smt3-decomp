@@ -21,8 +21,8 @@ int modhsyn_e30()
 }
 /* ENDF modhsyn_e30 */
 INCLUDE_ASM("MODHSYN", D_00000044);
-/* FUNC func_00000050 */
-int func_00000050(sceHSynWork_t *work, int interval)
+/* FUNC modhsyn_sceHSyn_Init */
+int modhsyn_sceHSyn_Init(sceHSynWork_t *work, int interval)
 {
     sceHSynTbl_t *tbl;
     sceHSynEntry_t *entry;
@@ -100,7 +100,7 @@ int func_00000050(sceHSynWork_t *work, int interval)
     sceHsynActiveCount = 0;
     return 0;
 }
-/* ENDF func_00000050 */
+/* ENDF modhsyn_sceHSyn_Init */
 /* FUNC modhsyn_e7 */
 int modhsyn_e7(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)
 {
@@ -118,10 +118,10 @@ int modhsyn_e7(s16 core, u8 *iopAddr, u32 spuAddr, u32 size)
 }
 /* ENDF modhsyn_e7 */
 INCLUDE_ASM("MODHSYN", D_000002D4);
-/* FUNC sceHsynLoadBank */
+/* FUNC sceHsynTagMatch */
 /* Not a loader: a 4+4 character chunk tag comparator, with both tags passed
  * as words and both strings read backwards. */
-int sceHsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name)
+int sceHsynTagMatch(u32 tag0, u32 tag1, const char *magic, const char *name)
 {
     char *p0;
     char *p1;
@@ -136,7 +136,7 @@ int sceHsynLoadBank(u32 tag0, u32 tag1, const char *magic, const char *name)
     }
     return 1;
 }
-/* ENDF sceHsynLoadBank */
+/* ENDF sceHsynTagMatch */
 #ifdef NON_MATCHING
 /* Six instructions short: gcc cross-jumps the two identical bank-clearing
  * blocks that retail keeps twice. */
@@ -194,37 +194,37 @@ load:
             bank->setb = (sceSmgSetb_t *)((u8 *)img + bank->head->setbOfs);
         }
     }
-    if (sceHsynLoadBank(*(u32 *)img->magic, *(u32 *)img->name, magic, name) == 0) {
+    if (sceHsynTagMatch(*(u32 *)img->magic, *(u32 *)img->name, magic, name) == 0) {
         goto fail;
     }
     head = bank->head;
-    if (sceHsynLoadBank(*(u32 *)head->magic, *(u32 *)head->name, magic, aHead) == 0) {
+    if (sceHsynTagMatch(*(u32 *)head->magic, *(u32 *)head->name, magic, aHead) == 0) {
         goto fail;
     }
     if (bank->prog != NULL) {
-        if (sceHsynLoadBank(*(u32 *)bank->prog->magic, *(u32 *)bank->prog->name, magic, aProg) == 0) {
+        if (sceHsynTagMatch(*(u32 *)bank->prog->magic, *(u32 *)bank->prog->name, magic, aProg) == 0) {
             goto fail;
         }
     }
     if (bank->sset != NULL) {
-        if (sceHsynLoadBank(*(u32 *)bank->sset->magic, *(u32 *)bank->sset->name, magic, aSset) == 0) {
+        if (sceHsynTagMatch(*(u32 *)bank->sset->magic, *(u32 *)bank->sset->name, magic, aSset) == 0) {
             goto fail;
         }
     }
     if (bank->smpl != NULL) {
-        if (sceHsynLoadBank(*(u32 *)bank->smpl->magic, *(u32 *)bank->smpl->name, magic, aSmpl) == 0) {
+        if (sceHsynTagMatch(*(u32 *)bank->smpl->magic, *(u32 *)bank->smpl->name, magic, aSmpl) == 0) {
             goto fail;
         }
     }
     if (bank->vagi != NULL) {
-        if (sceHsynLoadBank(*(u32 *)bank->vagi->magic, *(u32 *)bank->vagi->name, magic, aVagi) == 0) {
+        if (sceHsynTagMatch(*(u32 *)bank->vagi->magic, *(u32 *)bank->vagi->name, magic, aVagi) == 0) {
             goto fail;
         }
     }
     if (bank->setb == NULL) {
         goto ok;
     }
-    if (sceHsynLoadBank(*(u32 *)bank->setb->magic, *(u32 *)bank->setb->name, magic, aSetb) != 0) {
+    if (sceHsynTagMatch(*(u32 *)bank->setb->magic, *(u32 *)bank->setb->name, magic, aSetb) != 0) {
         goto ok;
     }
 fail:
@@ -320,8 +320,8 @@ void sceHsynResetState(sceHSynChannel_t *chan, sceHSynSlot_t *slot)
     chan->unk35 = 0xFF;
 }
 /* ENDF sceHsynResetState */
-/* FUNC sceHsynVoiceParamReset */
-void sceHsynVoiceParamReset(sceHSynChanSet_t *set, sceHSynChannel_t *chan, u8 prog)
+/* FUNC sceHsynChannelSetProgram */
+void sceHsynChannelSetProgram(sceHSynChanSet_t *set, sceHSynChannel_t *chan, u8 prog)
 {
     sceSmgProgEnt_t *ent;
     sceHSynBank_t *bank;
@@ -346,12 +346,12 @@ void sceHsynVoiceParamReset(sceHSynChanSet_t *set, sceHSynChannel_t *chan, u8 pr
         chan->bank = NULL;
     }
 }
-/* ENDF sceHsynVoiceParamReset */
+/* ENDF sceHsynChannelSetProgram */
 #ifdef NON_MATCHING
 /* Two instructions swapped: gcc schedules the head pointer ahead of the
  * saved bend value. */
-/* FUNC sceHsynVoiceSetPitch */
-void sceHsynVoiceSetPitch(sceHSynChannel_t *chan, u8 hi, u8 lo)
+/* FUNC sceHsynChannelSetPitchBend */
+void sceHsynChannelSetPitchBend(sceHSynChannel_t *chan, u8 hi, u8 lo)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -375,12 +375,12 @@ void sceHsynVoiceSetPitch(sceHSynChannel_t *chan, u8 hi, u8 lo)
         }
     }
 }
-/* ENDF sceHsynVoiceSetPitch */
+/* ENDF sceHsynChannelSetPitchBend */
 #else
-INCLUDE_ASM("MODHSYN", sceHsynVoiceSetPitch);
+INCLUDE_ASM("MODHSYN", sceHsynChannelSetPitchBend);
 #endif
-/* FUNC sceHsynVoiceEnvelopeApply */
-void sceHsynVoiceEnvelopeApply(sceHSynChannel_t *chan, int copyRelease)
+/* FUNC sceHsynChannelApplyVolume */
+void sceHsynChannelApplyVolume(sceHSynChannel_t *chan, int copyRelease)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -401,31 +401,31 @@ void sceHsynVoiceEnvelopeApply(sceHSynChannel_t *chan, int copyRelease)
         }
     }
 }
-/* ENDF sceHsynVoiceEnvelopeApply */
-/* FUNC sceHsynVoiceSetAttack */
-void sceHsynVoiceSetAttack(sceHSynChannel_t *chan, u8 val)
+/* ENDF sceHsynChannelApplyVolume */
+/* FUNC sceHsynChannelSetVolume */
+void sceHsynChannelSetVolume(sceHSynChannel_t *chan, u8 val)
 {
     u8 n;
 
     n = (val << 7) / 127;
     if (chan->vol != n) {
         chan->vol = n;
-        sceHsynVoiceEnvelopeApply(chan, 0);
+        sceHsynChannelApplyVolume(chan, 0);
     }
 }
-/* ENDF sceHsynVoiceSetAttack */
-/* FUNC sceHsynVoiceSetRelease */
-void sceHsynVoiceSetRelease(sceHSynChannel_t *chan, u8 val)
+/* ENDF sceHsynChannelSetVolume */
+/* FUNC sceHsynChannelSetExpression */
+void sceHsynChannelSetExpression(sceHSynChannel_t *chan, u8 val)
 {
     u8 n;
 
     n = (val << 7) / 127;
     if (chan->pan != n) {
         chan->pan = n;
-        sceHsynVoiceEnvelopeApply(chan, 1);
+        sceHsynChannelApplyVolume(chan, 1);
     }
 }
-/* ENDF sceHsynVoiceSetRelease */
+/* ENDF sceHsynChannelSetExpression */
 /* FUNC sceHsynVoiceSetVolumeLeft */
 void sceHsynVoiceSetVolumeLeft(sceHSynChannel_t *chan, u8 val)
 {
@@ -478,14 +478,14 @@ void sceHsynVoiceSetVolumeRight(sceHSynChannel_t *chan, u8 val)
     }
 }
 /* ENDF sceHsynVoiceSetVolumeRight */
-/* FUNC sceHsynVoiceFlagsGet */
-int sceHsynVoiceFlagsGet(sceHSynChannel_t *chan, u8 semitones)
+/* FUNC sceHsynChannelSetBendRange */
+int sceHsynChannelSetBendRange(sceHSynChannel_t *chan, u8 semitones)
 {
     chan->bendRange = semitones * 20;
 }
-/* ENDF sceHsynVoiceFlagsGet */
-/* FUNC sceHsynVoiceFlagsSet */
-void sceHsynVoiceFlagsSet(sceHSynChannel_t *chan, u8 on)
+/* ENDF sceHsynChannelSetBendRange */
+/* FUNC sceHsynChannelSetPortamento */
+void sceHsynChannelSetPortamento(sceHSynChannel_t *chan, u8 on)
 {
     if (on != 0) {
         if (chan->priority == 0xFF) {
@@ -496,18 +496,18 @@ void sceHsynVoiceFlagsSet(sceHSynChannel_t *chan, u8 on)
         chan->priority = 0xFF;
     }
 }
-/* ENDF sceHsynVoiceFlagsSet */
-/* FUNC sceHsynVoiceIndexGet */
-void sceHsynVoiceIndexGet(sceHSynChannel_t *chan, u8 val)
+/* ENDF sceHsynChannelSetPortamento */
+/* FUNC sceHsynChannelSetPortamentoNote */
+void sceHsynChannelSetPortamentoNote(sceHSynChannel_t *chan, u8 val)
 {
     chan->unk34 = val;
 }
-/* ENDF sceHsynVoiceIndexGet */
+/* ENDF sceHsynChannelSetPortamentoNote */
 #ifdef NON_MATCHING
-/* Two instructions swapped, as in sceHsynVoiceSetPitch: gcc schedules the head
+/* Two instructions swapped, as in sceHsynChannelSetPitchBend: gcc schedules the head
  * pointer ahead of the saved value the loop passes on. */
-/* FUNC func_00000C58 */
-void func_00000C58(sceHSynChannel_t *chan, u8 val)
+/* FUNC sceHsynChannelSetPan */
+void sceHsynChannelSetPan(sceHSynChannel_t *chan, u8 val)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -530,19 +530,19 @@ void func_00000C58(sceHSynChannel_t *chan, u8 val)
     for (i = 0, head = heads; i < 3; i++, head++) {
         end = *head;
         for (v = end->chNext; v != end; v = v->chNext) {
-            func_00004AE4(v, n);
+            sceHsynVoiceSetPan(v, n);
         }
     }
 }
-/* ENDF func_00000C58 */
+/* ENDF sceHsynChannelSetPan */
 #else
-INCLUDE_ASM("MODHSYN", func_00000C58);
+INCLUDE_ASM("MODHSYN", sceHsynChannelSetPan);
 #endif
 #ifdef NON_MATCHING
 /* Same instructions, two registers swapped: retail keeps the clamped pan in
    $2 and the sign-extended test value in the argument register. */
-/* FUNC func_00000D24 */
-void func_00000D24(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)
+/* FUNC sceHsynChannelSetPanDirect */
+void sceHsynChannelSetPanDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -569,19 +569,19 @@ void func_00000D24(sceHSynChannel_t *chan, u8 ch, u32 tag, int val)
             if (all == 0 && v->ch != ch) {
                 continue;
             }
-            func_00004AE4(v, (s8)pan);
+            sceHsynVoiceSetPan(v, (s8)pan);
         }
     }
 }
-/* ENDF func_00000D24 */
+/* ENDF sceHsynChannelSetPanDirect */
 #else
-INCLUDE_ASM("MODHSYN", func_00000D24);
+INCLUDE_ASM("MODHSYN", sceHsynChannelSetPanDirect);
 #endif
 #ifdef NON_MATCHING
 /* One instruction short: retail forms the unsigned high half of the divide
    with a signed multiply plus a correction, where gcc here uses multu. */
-/* FUNC func_00000E40 */
-void func_00000E40(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 val)
+/* FUNC sceHsynChannelSetExpressionDirect */
+void sceHsynChannelSetExpressionDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 val)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -609,9 +609,9 @@ void func_00000E40(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 val)
         }
     }
 }
-/* ENDF func_00000E40 */
+/* ENDF sceHsynChannelSetExpressionDirect */
 #else
-INCLUDE_ASM("MODHSYN", func_00000E40);
+INCLUDE_ASM("MODHSYN", sceHsynChannelSetExpressionDirect);
 #endif
 /* FUNC sceHsynVoiceSetPitchDirect */
 void sceHsynVoiceSetPitchDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 hi, u8 lo)
@@ -641,19 +641,19 @@ void sceHsynVoiceSetPitchDirect(sceHSynChannel_t *chan, u8 ch, u32 tag, u8 hi, u
 }
 /* ENDF sceHsynVoiceSetPitchDirect */
 INCLUDE_ASM("MODHSYN", D_0000106C);
-/* FUNC sceHsynVoiceApplyAll */
-void sceHsynVoiceApplyAll(sceHSynChannel_t *chan)
+/* FUNC sceHsynChannelResetControllers */
+void sceHsynChannelResetControllers(sceHSynChannel_t *chan)
 {
-    sceHsynVoiceAllocByPriority(chan, 0);
-    sceHsynVoiceSetPitch(chan, 0x40, 0);
+    sceHsynChannelSetHold(chan, 0);
+    sceHsynChannelSetPitchBend(chan, 0x40, 0);
     sceHsynVoiceSetVolumeLeft(chan, 0);
     sceHsynVoiceSetVolumeRight(chan, 0);
-    sceHsynVoiceSetAttack(chan, 0x7F);
-    func_00000C58(chan, 0x40);
-    sceHsynVoiceSetRelease(chan, 0x7F);
-    sceHsynVoiceFlagsSet(chan, 0);
+    sceHsynChannelSetVolume(chan, 0x7F);
+    sceHsynChannelSetPan(chan, 0x40);
+    sceHsynChannelSetExpression(chan, 0x7F);
+    sceHsynChannelSetPortamento(chan, 0);
 }
-/* ENDF sceHsynVoiceApplyAll */
+/* ENDF sceHsynChannelResetControllers */
 #ifdef NON_MATCHING
 /* The switch on the controller number compiles to a jump table, and the
  * assembly .rodata already holds its case labels, so a C body here will not
@@ -672,34 +672,34 @@ void sceHsynVoiceEventDispatch(int set, sceHSynChannel_t *chan, u8 cc, u8 val)
         sceHsynVoiceSetVolumeLeft(chan, val);
         break;
     case 5:
-        sceHsynVoiceFlagsGet(chan, val);
+        sceHsynChannelSetBendRange(chan, val);
         break;
     case 7:
-        sceHsynVoiceSetAttack(chan, val);
+        sceHsynChannelSetVolume(chan, val);
         break;
     case 10:
-        func_00000C58(chan, val);
+        sceHsynChannelSetPan(chan, val);
         break;
     case 11:
-        sceHsynVoiceSetRelease(chan, val);
+        sceHsynChannelSetExpression(chan, val);
         break;
     case 64:
-        sceHsynVoiceAllocByPriority(chan, val);
+        sceHsynChannelSetHold(chan, val);
         break;
     case 65:
-        sceHsynVoiceFlagsSet(chan, val);
+        sceHsynChannelSetPortamento(chan, val);
         break;
     case 84:
-        sceHsynVoiceIndexGet(chan, val);
+        sceHsynChannelSetPortamentoNote(chan, val);
         break;
     case 120:
-        sceHsynVoiceStop(chan);
+        sceHsynChannelAllSoundOff(chan);
         break;
     case 121:
-        sceHsynVoiceApplyAll(chan);
+        sceHsynChannelResetControllers(chan);
         break;
     case 123:
-        sceHsynVoiceAllocByChannel(chan);
+        sceHsynChannelAllNotesOff(chan);
         break;
     case 99:
         chan->unk35 = val;
@@ -743,13 +743,13 @@ void sceHsynVoiceUpdatePass(sceHSynSlot_t *slot, int status, char sel, u8 note, 
     cmd = sel & 0xF0;
     switch (cmd) {
     case 0x80:
-        sceHsynVoiceAllocScan(chan, note, 0xFF);
+        sceHsynChannelNoteOff(chan, note, 0xFF);
         break;
     case 0x90:
         if (vel != 0) {
-            sceHsynVoiceEngineStep(slot, chan, status, note, vel, 0xFF);
+            sceHsynChannelNoteOn(slot, chan, status, note, vel, 0xFF);
         } else {
-            sceHsynVoiceAllocScan(chan, note, 0xFF);
+            sceHsynChannelNoteOff(chan, note, 0xFF);
         }
         break;
     case 0xA0:
@@ -758,12 +758,12 @@ void sceHsynVoiceUpdatePass(sceHSynSlot_t *slot, int status, char sel, u8 note, 
         sceHsynVoiceEventDispatch((int)set, chan, note, vel);
         break;
     case 0xC0:
-        sceHsynVoiceParamReset(set, chan, note);
+        sceHsynChannelSetProgram(set, chan, note);
         break;
     case 0xD0:
         break;
     case 0xE0:
-        sceHsynVoiceSetPitch(chan, vel, note);
+        sceHsynChannelSetPitchBend(chan, vel, note);
         break;
     }
 }
@@ -817,16 +817,16 @@ void sceHsynVoiceDirectPass(sceHSynSlot_t *slot, int status, u8 sel, u8 *p)
             vel = val & 0xFF;
             note &= 0x7F;
             if (vel != 0) {
-                sceHsynVoiceEngineStep(slot, chan, status, note, vel, tag);
+                sceHsynChannelNoteOn(slot, chan, status, note, vel, tag);
             } else {
-                sceHsynVoiceAllocScan(chan, note, tag);
+                sceHsynChannelNoteOff(chan, note, tag);
             }
             break;
         case 0:
-            func_00000E40(chan, note, tag, val);
+            sceHsynChannelSetExpressionDirect(chan, note, tag, val);
             break;
         case 1:
-            func_00000D24(chan, note, tag, val);
+            sceHsynChannelSetPanDirect(chan, note, tag, val);
             break;
         case 2:
             sceHsynVoiceSetPitchDirect(chan, note, tag, *p, val);
@@ -936,7 +936,7 @@ void sceHsynServiceTick(sceHSynEntry_t *entry, int nEntryWord)
                     sceHsynVoiceRefresh((sceHSynSlot_t *)seg[1], i, data, end);
                     break;
                 case 1:
-                    func_0000273C((sceHSynSlot_t *)seg[1], i, data, end);
+                    sceHsynCmdDispatch((sceHSynSlot_t *)seg[1], i, data, end);
                     break;
                 }
             }
@@ -981,7 +981,7 @@ int func_000017EC(sceHSynWork_t *work)
     tbl = work->tbl;
     sceHsynServiceTick(tbl->entry, tbl->nEntryWord);
     nActive = sceHsynServiceVoices();
-    nFree = func_00004D90();
+    nFree = sceHsynUpdateVoiceState();
     if (sceHsynStat != NULL) {
         sceHsynStat->nActive = nActive;
         sceHsynStat->nFree = nFree;
@@ -1007,15 +1007,15 @@ int modhsyn_e8(int *masks)
         mask = masks[i];
         sceHsynVoiceMask[i] = mask;
         for (v = relEnd->next; v != relEnd; v = relEnd->next) {
-            sceHsynVoiceMaskGet(v);
-            sceHsynCoreIndexSet(v, freeEnd);
+            sceHsynVoiceUnlink(v);
+            sceHsynVoiceInsertBefore(v, freeEnd);
             (*cnt)++;
         }
         for (v = freeEnd->next; v != freeEnd; v = v->next) {
             if (mask & (1 << v->index)) {
                 next = v->prev;
-                sceHsynVoiceMaskGet(v);
-                sceHsynCoreIndexGet(v, relEnd);
+                sceHsynVoiceUnlink(v);
+                sceHsynVoiceInsertAfter(v, relEnd);
                 (*cnt)--;
                 v = next;
             }
@@ -1096,7 +1096,7 @@ int modhsyn_e12(sceHSynWork_t *work, int slotNo)
         return -1;
     }
     for (i = 0; i < 16; i++) {
-        sceHsynVoiceAllocByChannel(&set->chan[i]);
+        sceHsynChannelAllNotesOff(&set->chan[i]);
     }
     return 0;
 }
@@ -1112,7 +1112,7 @@ int modhsyn_e13(sceHSynWork_t *work, int slotNo)
         return -1;
     }
     for (i = 0; i < 16; i++) {
-        sceHsynVoiceStop(&set->chan[i]);
+        sceHsynChannelAllSoundOff(&set->chan[i]);
     }
     return 0;
 }
@@ -1128,7 +1128,7 @@ int modhsyn_e14(sceHSynWork_t *work, int slotNo)
         return -1;
     }
     for (i = 0; i < 16; i++) {
-        sceHsynVoiceApplyAll(&set->chan[i]);
+        sceHsynChannelResetControllers(&set->chan[i]);
     }
     return 0;
 }
@@ -1342,7 +1342,7 @@ void func_000021B8(int base, int unused, u32 a3, int a4, int state, u8 note, u8 
                 if (v->ch != ch) {
                     continue;
                 }
-                func_0000AB90(v, a3, a4, a8, a9, a10);
+                sceHsynVoiceSetParamRamp(v, a3, a4, a8, a9, a10);
             }
         }
     }
@@ -1516,8 +1516,8 @@ INCLUDE_ASM("MODHSYN", sceHsynCmdVoiceAlloc);
 /* The switch on the system-exclusive command byte compiles to a jump table,
  * and the assembly .rodata already holds its case labels, so a C body here
  * will not link. */
-/* FUNC func_0000273C */
-void func_0000273C(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
+/* FUNC sceHsynCmdDispatch */
+void sceHsynCmdDispatch(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
 {
     u8 *cur;
     u8 *q;
@@ -1577,11 +1577,11 @@ void func_0000273C(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
             hi = *cur++;
             val = lo | (hi << 7);
             if ((sub & 0xF0) == 0x90) {
-                func_00008350(slot, idx, ch, b0, b1, b2, (s8)b3, val, tag);
+                sceHsynVoiceStart(slot, idx, ch, b0, b1, b2, (s8)b3, val, tag);
             } else if (b2 == 0) {
-                sceHsynVoiceAllocForCmd((int)slot, idx, ch, b0, b1, 0, tag);
+                sceHsynChannelNoteOffMatch((int)slot, idx, ch, b0, b1, 0, tag);
             } else {
-                func_00008350(slot, idx, ch, b0, b1, b2, (s8)b3, val, tag);
+                sceHsynVoiceStart(slot, idx, ch, b0, b1, b2, (s8)b3, val, tag);
             }
             break;
         case 0xB0:
@@ -1676,10 +1676,10 @@ void func_0000273C(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
                 w0 = q[1] | (q[2] << 8) | (q[3] << 16) | (q[4] << 24);
                 w1 = q[5] | (q[6] << 8) | (q[7] << 16) | (q[8] << 24);
                 cur = q + 9;
-                sceHsynVoiceAllocPathCEntry((int)slot, tag, w0, w1);
+                sceHsynChannelKeyOffByTagMaskEntry((int)slot, tag, w0, w1);
                 break;
             case 0x1F:
-                sceHsynVoiceAllocPathBEntry((int)slot, tag);
+                sceHsynChannelKeyOffByTagEntry((int)slot, tag);
                 break;
             case 0x00:
             case 0x11:
@@ -1705,9 +1705,9 @@ void func_0000273C(sceHSynSlot_t *slot, int idx, u8 *p, u8 *end)
         }
     } while (cur < end);
 }
-/* ENDF func_0000273C */
+/* ENDF sceHsynCmdDispatch */
 #else
-INCLUDE_ASM("MODHSYN", func_0000273C);
+INCLUDE_ASM("MODHSYN", sceHsynCmdDispatch);
 #endif
 /* FUNC modhsyn_e19 */
 int modhsyn_e19(u8 val)
@@ -1731,7 +1731,7 @@ int modhsyn_e20(sceHSynWork_t *work, int slotNo)
     if ((slot->flags & 1) == 0) {
         return -1;
     }
-    sceHsynVoiceAllocExport20(&set->chan[0]);
+    sceHsynChannelKeyOffAll(&set->chan[0]);
     return 0;
 }
 /* ENDF modhsyn_e20 */
@@ -1747,7 +1747,7 @@ int modhsyn_e21(sceHSynWork_t *work, int slotNo)
     if ((slot->flags & 1) == 0) {
         return -1;
     }
-    sceHsynVoiceReleaseExport21(&set->chan[0]);
+    sceHsynChannelStopVoices(&set->chan[0]);
     return 0;
 }
 /* ENDF modhsyn_e21 */
@@ -2009,7 +2009,7 @@ void sceHsynInitCores(void)
             sceHsynCoreStateGet(v);
             sceHsynCoreStateSet(v);
             sceHsynChannelStateGet(v);
-            sceHsynCoreIndexSet(v, (sceHSynVoice_t *)sceHsynFreeList[core]);
+            sceHsynVoiceInsertBefore(v, (sceHSynVoice_t *)sceHsynFreeList[core]);
         }
     }
     cnt = sceHsynFreeCount;
@@ -2039,8 +2039,8 @@ void sceHsynInitCores(void)
 INCLUDE_ASM("MODHSYN", sceHsynInitCores);
 #endif
 /* ENDF sceHsynInitCores */
-/* FUNC sceHsynCoreIndexGet */
-void sceHsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t *at)
+/* FUNC sceHsynVoiceInsertAfter */
+void sceHsynVoiceInsertAfter(sceHSynVoice_t *v, sceHSynVoice_t *at)
 {
     sceHSynVoice_t *p;
 
@@ -2050,9 +2050,9 @@ void sceHsynCoreIndexGet(sceHSynVoice_t *v, sceHSynVoice_t *at)
     at->next = v;
     p->prev = v;
 }
-/* ENDF sceHsynCoreIndexGet */
-/* FUNC sceHsynCoreIndexSet */
-void sceHsynCoreIndexSet(sceHSynVoice_t *v, sceHSynVoice_t *at)
+/* ENDF sceHsynVoiceInsertAfter */
+/* FUNC sceHsynVoiceInsertBefore */
+void sceHsynVoiceInsertBefore(sceHSynVoice_t *v, sceHSynVoice_t *at)
 {
     sceHSynVoice_t *p;
 
@@ -2062,16 +2062,16 @@ void sceHsynCoreIndexSet(sceHSynVoice_t *v, sceHSynVoice_t *at)
     at->prev = v;
     p->next = v;
 }
-/* ENDF sceHsynCoreIndexSet */
-/* FUNC sceHsynVoiceMaskGet */
-void sceHsynVoiceMaskGet(sceHSynVoice_t *v)
+/* ENDF sceHsynVoiceInsertBefore */
+/* FUNC sceHsynVoiceUnlink */
+void sceHsynVoiceUnlink(sceHSynVoice_t *v)
 {
     v->next->prev = v->prev;
     v->prev->next = v->next;
 }
-/* ENDF sceHsynVoiceMaskGet */
-/* FUNC sceHsynVoiceSlotGet */
-void sceHsynVoiceSlotGet(sceHSynVoice_t *v, sceHSynVoice_t **head)
+/* ENDF sceHsynVoiceUnlink */
+/* FUNC sceHsynVoiceChLink */
+void sceHsynVoiceChLink(sceHSynVoice_t *v, sceHSynVoice_t **head)
 {
     sceHSynVoice_t *n;
 
@@ -2082,15 +2082,15 @@ void sceHsynVoiceSlotGet(sceHSynVoice_t *v, sceHSynVoice_t **head)
     head[0] = v;
     n->chPrev = v;
 }
-/* ENDF sceHsynVoiceSlotGet */
+/* ENDF sceHsynVoiceChLink */
 INCLUDE_ASM("MODHSYN", D_00003734);
-/* FUNC sceHsynVoiceSlotSet */
-void sceHsynVoiceSlotSet(sceHSynVoice_t *v)
+/* FUNC sceHsynVoiceChUnlink */
+void sceHsynVoiceChUnlink(sceHSynVoice_t *v)
 {
     v->chNext->chPrev = v->chPrev;
     v->chPrev->chNext = v->chNext;
 }
-/* ENDF sceHsynVoiceSlotSet */
+/* ENDF sceHsynVoiceChUnlink */
 /* FUNC sceHsynServiceVoices */
 int sceHsynServiceVoices(void)
 {
@@ -2127,8 +2127,8 @@ int sceHsynServiceVoices(void)
                 sceHsynVoiceKeyOnPathB(v);
                 break;
             }
-            sceHsynVoiceMaskGet(v);
-            sceHsynCoreIndexGet(v, (sceHSynVoice_t *)sceHsynCoreList[core]);
+            sceHsynVoiceUnlink(v);
+            sceHsynVoiceInsertAfter(v, (sceHSynVoice_t *)sceHsynCoreList[core]);
             v = next;
             continue;
         skip2:
@@ -2254,14 +2254,14 @@ void sceHsynVoiceUpdatePathA(sceHSynVoice_t *v)
     tone = v->tone;
     key = v->key;
     slot = chan->slot;
-    sceHsynSeqInterpretA(&v->envA, (int)prog, (u8 *)slot->unk08, slot->unk04,
+    sceHsynLfoSetupA(&v->envA, (int)prog, (u8 *)slot->unk08, slot->unk04,
                       tone->unk28 & 7, tone->unk20, tone->unk22,
                       sceHsynTickScale, 0);
     bias = ((v->ch - key->unk0B) * key->unk0A) / 12;
     base = sceHsynSdSetParamVolume(v, (s8)tone->unk05, tone->flags, tone->unk07);
     v->unk24 = sceHsynEnvRateLookup(prog->unk18, bias, base);
     v->unk26 = sceHsynEnvRateLookup(prog->unk1A, bias, base);
-    sceHsynSeqInterpretA(&v->envB, (int)prog, (u8 *)slot->unk08, slot->unk04,
+    sceHsynLfoSetupA(&v->envB, (int)prog, (u8 *)slot->unk08, slot->unk04,
                       tone->unk28 & 0x70, tone->unk24, tone->unk26,
                       sceHsynTickScale, 1);
     bias = ((v->ch - key->unk0D) * key->unk0C) / 12;
@@ -2287,7 +2287,7 @@ void sceHsynVoiceUpdatePathA(sceHSynVoice_t *v)
             pan = -0x3F;
         }
     }
-    func_00004AE4(v, pan);
+    sceHsynVoiceSetPan(v, pan);
     if (v->unk55 != 0xFF) {
         e = v->unk55;
     } else {
@@ -2663,12 +2663,12 @@ void sceHsynSdSetParamAdsr(sceHSynVoice_t *v, s32 bias)
 #else
 INCLUDE_ASM("MODHSYN", sceHsynSdSetParamAdsr);
 #endif
-/* FUNC func_00004AE4 */
+/* FUNC sceHsynVoiceSetPan */
 #ifdef NON_MATCHING
 /* Same size and the same instructions: gcc fills the sceHsynEnabled branch's
  * delay slot with the sign extension and retail with the `p = pan` copy, so
  * the four instructions of the clamp come out in a different order. */
-void func_00004AE4(sceHSynVoice_t *v, s8 pan)
+void sceHsynVoiceSetPan(sceHSynVoice_t *v, s8 pan)
 {
     s8 p;
     int n;
@@ -2724,9 +2724,9 @@ void func_00004AE4(sceHSynVoice_t *v, s8 pan)
     v->unk5A = n;
 }
 #else
-INCLUDE_ASM("MODHSYN", func_00004AE4);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceSetPan);
 #endif
-/* ENDF func_00004AE4 */
+/* ENDF sceHsynVoiceSetPan */
 /* FUNC sceHsynSdSetParamBend */
 u32 sceHsynSdSetParamBend(sceHSynVoice_t *v)
 {
@@ -2796,8 +2796,8 @@ u32 sceHsynSdSetParamBend(sceHSynVoice_t *v)
     return r;
 }
 /* ENDF sceHsynSdSetParamBend */
-/* FUNC func_00004D90 */
-int func_00004D90(void)
+/* FUNC sceHsynUpdateVoiceState */
+int sceHsynUpdateVoiceState(void)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -2843,7 +2843,7 @@ int func_00004D90(void)
                 }
             release:
                 next = v->next;
-                sceHsynVoiceRelease(v);
+                sceHsynVoiceChFree(v);
                 if (sceHsynStat != NULL) {
                     st = sceHsynStat->state[v->core];
                     st[v->index] &= 0x8F;
@@ -2873,13 +2873,13 @@ int func_00004D90(void)
                         }
                     }
                 }
-                sceHsynEffectDispatch(&v->envA);
+                sceHsynLfoStep(&v->envA);
                 if (v->unk57 == 1) {
                     sceHsynEffectDepthSet(&v->lfoA);
                 }
                 sceHsynVoicePitchCommit(v);
             }
-            sceHsynEffectDispatch(&v->envB);
+            sceHsynLfoStep(&v->envB);
             if (v->unk57 == 1) {
                 func_0000A9FC(v);
                 sceHsynEffectFeedbackSet(v);
@@ -2891,7 +2891,7 @@ int func_00004D90(void)
     sceHsynSdSyncFlag = 1;
     return n;
 }
-/* ENDF func_00004D90 */
+/* ENDF sceHsynUpdateVoiceState */
 /* FUNC sceHsynVoiceKeyOff */
 int sceHsynVoiceKeyOff(void)
 {
@@ -2938,7 +2938,7 @@ int sceHsynVoiceKeyOff(void)
             }
         release:
             next = v->next;
-            sceHsynVoiceRelease(v);
+            sceHsynVoiceChFree(v);
             if (sceHsynStat != NULL) {
                 st = sceHsynStat->state[v->core];
                 st[v->index] &= 0x8F;
@@ -2988,13 +2988,13 @@ void sceHsynVoiceUpdatePathB(sceHSynVoice_t *v)
     prog = v->prog;
     chan = v->chan;
     slot = chan->slot;
-    sceHsynSeqInterpretB(&v->envA, (int)prog, (u8 *)slot->unk08, slot->unk04,
+    sceHsynLfoSetupB(&v->envA, (int)prog, (u8 *)slot->unk08, slot->unk04,
                       prog->unk31 & 7, *(u16 *)&prog->unk22, prog->unk26,
                       sceHsynTickScale, 0);
     base = sceHsynSdSetParamVolume(v, prog->unk2A, prog->unk2C, prog->unk2E);
     v->unk24 = sceHsynEnvRateLookup(prog->unk1C, 0, base);
     v->unk26 = sceHsynEnvRateLookup(prog->unk1E, 0, base);
-    sceHsynSeqInterpretB(&v->envB, (int)prog, (u8 *)slot->unk08, slot->unk04,
+    sceHsynLfoSetupB(&v->envB, (int)prog, (u8 *)slot->unk08, slot->unk04,
                       prog->unk31 & 0x70, prog->unk24, prog->unk28,
                       sceHsynTickScale, 1);
     base = sceHsynSdSetParamVolume(v, prog->unk2B, prog->unk2D, prog->unk2F);
@@ -3015,7 +3015,7 @@ void sceHsynVoiceUpdatePathB(sceHSynVoice_t *v)
             pan = -0x3F;
         }
     }
-    func_00004AE4(v, pan);
+    sceHsynVoiceSetPan(v, pan);
     v->unk54 = chan->pan;
     sceHsynSdSetParamEnvelope(v);
     v->unk1C = 0xFFFF;
@@ -3183,7 +3183,7 @@ void func_00005AA0(sceHSynVoice_t *v, u16 scale)
  * sceHsynSdSetParamAdsr. */
 /* FUNC func_00005B4C */
 /* The +4 byte of the program entry is read signed here and unsigned as a key
- * count in sceHsynVoiceParamReset, so the cast stands in for a field the struct
+ * count in sceHsynChannelSetProgram, so the cast stands in for a field the struct
  * cannot hold both ways. */
 void func_00005B4C(sceHSynVoice_t *v)
 {
@@ -3239,8 +3239,8 @@ int sceHsynSpu2SettleDelay()
     return usec >= 0x15;
 }
 /* ENDF sceHsynSpu2SettleDelay */
-/* FUNC sceHsynVoiceAllocScan */
-void sceHsynVoiceAllocScan(sceHSynChannel_t *chan, u8 ch, u32 tag)
+/* FUNC sceHsynChannelNoteOff */
+void sceHsynChannelNoteOff(sceHSynChannel_t *chan, u8 ch, u32 tag)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -3260,19 +3260,19 @@ void sceHsynVoiceAllocScan(sceHSynChannel_t *chan, u8 ch, u32 tag)
             continue;
         }
         next = v->chNext;
-        sceHsynVoiceSlotSet(v);
+        sceHsynVoiceChUnlink(v);
         flags = v->flags;
         v->flags = flags & 0xFCFF;
         if (chan->unk32 != 0) {
             v->flags = (flags & 0xFCFF) | 0x100;
-            sceHsynVoiceSlotGet(v, &chan->relNext);
+            sceHsynVoiceChLink(v, &chan->relNext);
         } else if ((flags & 8) != 0) {
-            sceHsynVoiceMaskUpdate(v);
+            sceHsynVoiceFree(v);
         } else {
-            sceHsynSeqStart(&v->envA);
-            sceHsynSeqStart(&v->envB);
+            sceHsynLfoKeyOff(&v->envA);
+            sceHsynLfoKeyOff(&v->envB);
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
-            sceHsynVoiceSlotGet(v, &chan->offNext);
+            sceHsynVoiceChLink(v, &chan->offNext);
             if (sceHsynStat != NULL) {
                 st = &sceHsynStat->state[v->core][v->index];
                 *st = (*st & 0x8F) | 0x30;
@@ -3281,9 +3281,9 @@ void sceHsynVoiceAllocScan(sceHSynChannel_t *chan, u8 ch, u32 tag)
         v = next;
     }
 }
-/* ENDF sceHsynVoiceAllocScan */
-/* FUNC sceHsynVoiceMaskUpdate */
-int sceHsynVoiceMaskUpdate(sceHSynVoice_t *v)
+/* ENDF sceHsynChannelNoteOff */
+/* FUNC sceHsynVoiceFree */
+int sceHsynVoiceFree(sceHSynVoice_t *v)
 {
     sceHSynChanSet_t *set;
     u8 *st;
@@ -3306,9 +3306,9 @@ int sceHsynVoiceMaskUpdate(sceHSynVoice_t *v)
             sceHsynRelCount = n - 1;
         }
     }
-    sceHsynVoiceMaskGet(v);
+    sceHsynVoiceUnlink(v);
     sceHsynFreeCount[v->core]++;
-    sceHsynCoreIndexGet(v, (sceHSynVoice_t *)sceHsynFreeList[v->core]);
+    sceHsynVoiceInsertAfter(v, (sceHSynVoice_t *)sceHsynFreeList[v->core]);
     if (sceHsynStat != NULL) {
         st = &sceHsynStat->state[v->core][v->index];
         *st &= 0x8F;
@@ -3318,9 +3318,9 @@ int sceHsynVoiceMaskUpdate(sceHSynVoice_t *v)
     v->unk58 = 0xFF;
     return 0xFF;
 }
-/* ENDF sceHsynVoiceMaskUpdate */
-/* FUNC sceHsynVoiceAllocByPriority */
-void sceHsynVoiceAllocByPriority(sceHSynChannel_t *chan, u8 val)
+/* ENDF sceHsynVoiceFree */
+/* FUNC sceHsynChannelSetHold */
+void sceHsynChannelSetHold(sceHSynChannel_t *chan, u8 val)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -3332,14 +3332,14 @@ void sceHsynVoiceAllocByPriority(sceHSynChannel_t *chan, u8 val)
         chan->unk32 = val;
         end = (sceHSynVoice_t *)chan;
         for (v = end->chNext; v != end; v = end->chNext) {
-            sceHsynVoiceSlotSet(v);
+            sceHsynVoiceChUnlink(v);
             if ((v->flags & 8) != 0) {
-                sceHsynVoiceMaskUpdate(v);
+                sceHsynVoiceFree(v);
             } else {
-                sceHsynSeqStart(&v->envA);
-                sceHsynSeqStart(&v->envB);
+                sceHsynLfoKeyOff(&v->envA);
+                sceHsynLfoKeyOff(&v->envB);
                 sceHsynKeyOffPending[v->core] |= 1 << v->index;
-                sceHsynVoiceSlotGet(v, &chan->offNext);
+                sceHsynVoiceChLink(v, &chan->offNext);
                 v->flags &= 0xFCFF;
                 if (sceHsynStat != NULL) {
                     st = &sceHsynStat->state[v->core][v->index];
@@ -3349,9 +3349,9 @@ void sceHsynVoiceAllocByPriority(sceHSynChannel_t *chan, u8 val)
         }
     }
 }
-/* ENDF sceHsynVoiceAllocByPriority */
-/* FUNC sceHsynVoiceAllocByChannel */
-void sceHsynVoiceAllocByChannel(sceHSynChannel_t *chan)
+/* ENDF sceHsynChannelSetHold */
+/* FUNC sceHsynChannelAllNotesOff */
+void sceHsynChannelAllNotesOff(sceHSynChannel_t *chan)
 {
     sceHSynVoice_t *heads[2];
     sceHSynVoice_t *end;
@@ -3365,14 +3365,14 @@ void sceHsynVoiceAllocByChannel(sceHSynChannel_t *chan)
     for (i = 0; i < 2; i++) {
         end = heads[i];
         for (v = end->chPrev; v != end; v = end->chPrev) {
-            sceHsynVoiceSlotSet(v);
+            sceHsynVoiceChUnlink(v);
             flags = v->flags;
             if ((flags & 8) != 0) {
-                sceHsynVoiceMaskUpdate(v);
+                sceHsynVoiceFree(v);
             } else {
                 v->flags = flags & 0xFCFF;
                 sceHsynKeyOffPending[v->core] |= 1 << v->index;
-                sceHsynVoiceSlotGet(v, &chan->offNext);
+                sceHsynVoiceChLink(v, &chan->offNext);
                 if (sceHsynStat != NULL) {
                     st = &sceHsynStat->state[v->core][v->index];
                     *st = (*st & 0x8F) | 0x30;
@@ -3381,9 +3381,9 @@ void sceHsynVoiceAllocByChannel(sceHSynChannel_t *chan)
         }
     }
 }
-/* ENDF sceHsynVoiceAllocByChannel */
-/* FUNC sceHsynVoiceStop */
-void sceHsynVoiceStop(sceHSynChannel_t *chan)
+/* ENDF sceHsynChannelAllNotesOff */
+/* FUNC sceHsynChannelAllSoundOff */
+void sceHsynChannelAllSoundOff(sceHSynChannel_t *chan)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -3398,19 +3398,19 @@ void sceHsynVoiceStop(sceHSynChannel_t *chan)
         for (v = end->chPrev; v != end; v = end->chPrev) {
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
             sceHsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
-            sceHsynVoiceRelease(v);
+            sceHsynVoiceChFree(v);
         }
     }
 }
-/* ENDF sceHsynVoiceStop */
-/* FUNC sceHsynVoiceRelease */
-int sceHsynVoiceRelease(sceHSynVoice_t *v)
+/* ENDF sceHsynChannelAllSoundOff */
+/* FUNC sceHsynVoiceChFree */
+int sceHsynVoiceChFree(sceHSynVoice_t *v)
 {
     sceHSynChanSet_t *set;
     u8 *st;
     int n;
 
-    sceHsynVoiceSlotSet(v);
+    sceHsynVoiceChUnlink(v);
     set = v->slotp;
     v->flags = 0;
     n = set->nActive;
@@ -3428,9 +3428,9 @@ int sceHsynVoiceRelease(sceHSynVoice_t *v)
             sceHsynRelCount = n - 1;
         }
     }
-    sceHsynVoiceMaskGet(v);
+    sceHsynVoiceUnlink(v);
     sceHsynFreeCount[v->core]++;
-    sceHsynCoreIndexGet(v, (sceHSynVoice_t *)sceHsynFreeList[v->core]);
+    sceHsynVoiceInsertAfter(v, (sceHSynVoice_t *)sceHsynFreeList[v->core]);
     if (sceHsynStat != NULL) {
         st = &sceHsynStat->state[v->core][v->index];
         *st &= 0x8F;
@@ -3443,7 +3443,7 @@ int sceHsynVoiceRelease(sceHSynVoice_t *v)
     *(u32 *)v->param = 0;
     return 0xFF;
 }
-/* ENDF sceHsynVoiceRelease */
+/* ENDF sceHsynVoiceChFree */
 /* FUNC sceHsynVoiceStealScan */
 int sceHsynVoiceStealScan(sceHSynChanSet_t *cs, u16 vnum)
 {
@@ -3488,15 +3488,15 @@ int sceHsynVoiceStealScan(sceHSynChanSet_t *cs, u16 vnum)
     }
     sceHsynKeyOffPending[best->core] |= 1 << best->index;
     sceHsynSdSetParam((best->core | (best->index << 1)) | 0x400, 0xC021);
-    sceHsynVoiceRelease(best);
+    sceHsynVoiceChFree(best);
     return 1;
 }
 /* ENDF sceHsynVoiceStealScan */
 #ifdef NON_MATCHING
 /* Equivalent but not matching: the retail body spills a dozen values to the
  * frame and a C body of this shape keeps them in registers. */
-/* FUNC sceHsynVoiceEngineStep */
-void sceHsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int status, u8 note, u8 vel, u32 tag)
+/* FUNC sceHsynChannelNoteOn */
+void sceHsynChannelNoteOn(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int status, u8 note, u8 vel, u32 tag)
 {
     sceHSynChanSet_t *set;
     sceSmgProgEnt_t *prog;
@@ -3562,7 +3562,7 @@ void sceHsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int sta
                 }
             }
             if (tone->voiceOfs != 0) {
-                sceHsynVoiceRetrigger(chan, tone->voiceOfs);
+                sceHsynChannelKeyOffByPitch(chan, tone->voiceOfs);
             }
             vnum = tone->pitch + slot->voiceBase;
             if (set->nActive >= slot->maxVoice) {
@@ -3570,18 +3570,18 @@ void sceHsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int sta
                     return;
                 }
             }
-            v = sceHsynVoiceMaskClear(tone->allocHint);
+            v = sceHsynVoiceAlloc(tone->allocHint);
             if (v == NULL) {
                 if (sceHsynSdSyncFlag != 0) {
                     sceHsynSdSyncFlag = 0;
                     if (sceHsynVoiceKeyOff() != 0) {
-                        v = sceHsynVoiceMaskClear(tone->allocHint);
+                        v = sceHsynVoiceAlloc(tone->allocHint);
                     }
                 }
                 if (v == NULL) {
-                    v = sceHsynVoiceEnvelopeAdvance(vnum, tone->allocHint);
+                    v = sceHsynVoiceStealByEnvPhase(vnum, tone->allocHint);
                     if (v == NULL) {
-                        v = sceHsynVoiceVolumeAdvance(vnum, tone->allocHint);
+                        v = sceHsynVoiceStealByVnumActive(vnum, tone->allocHint);
                         if (v == NULL) {
                             continue;
                         }
@@ -3615,13 +3615,13 @@ void sceHsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int sta
             sceHsynChannelStateGet(v);
             set->nActive++;
             sceHsynActiveCount++;
-            sceHsynVoiceSlotGet(v, (sceHSynVoice_t **)chan);
+            sceHsynVoiceChLink(v, (sceHSynVoice_t **)chan);
             started = 1;
             if ((chan->priority & 0x80) == 0 && chan->bendRange != 0) {
                 sceHsynVoiceStateClear(v);
             }
             sceHsynVoiceUpdatePathA(v);
-            sceHsynCoreIndexGet(v, (sceHSynVoice_t *)sceHsynActiveList[v->core]);
+            sceHsynVoiceInsertAfter(v, (sceHSynVoice_t *)sceHsynActiveList[v->core]);
             if (sceHsynStat != NULL) {
                 st = sceHsynStat->state[v->core];
                 st[v->index] = stateByte;
@@ -3637,12 +3637,12 @@ void sceHsynVoiceEngineStep(sceHSynSlot_t *slot, sceHSynChannel_t *chan, int sta
         chan->unk30 = -1;
     }
 }
-/* ENDF sceHsynVoiceEngineStep */
+/* ENDF sceHsynChannelNoteOn */
 #else
-INCLUDE_ASM("MODHSYN", sceHsynVoiceEngineStep);
+INCLUDE_ASM("MODHSYN", sceHsynChannelNoteOn);
 #endif
-/* FUNC sceHsynVoiceMaskClear */
-sceHSynVoice_t *sceHsynVoiceMaskClear(u8 allocHint)
+/* FUNC sceHsynVoiceAlloc */
+sceHSynVoice_t *sceHsynVoiceAlloc(u8 allocHint)
 {
     sceHSynVoice_t *v;
     int idx;
@@ -3665,12 +3665,12 @@ sceHSynVoice_t *sceHsynVoiceMaskClear(u8 allocHint)
     }
     sceHsynFreeCount[idx] = n - 1;
     v = sceHsynFreeList[idx][1];
-    sceHsynVoiceMaskGet(v);
+    sceHsynVoiceUnlink(v);
     return v;
 }
-/* ENDF sceHsynVoiceMaskClear */
-/* FUNC sceHsynVoiceEnvelopeAdvance */
-sceHSynVoice_t *sceHsynVoiceEnvelopeAdvance(u16 vnum, s8 coreMask)
+/* ENDF sceHsynVoiceAlloc */
+/* FUNC sceHsynVoiceStealByEnvPhase */
+sceHSynVoice_t *sceHsynVoiceStealByEnvPhase(u16 vnum, s8 coreMask)
 {
     sceHSynVoice_t *best;
     sceHSynVoice_t *end;
@@ -3742,8 +3742,8 @@ sceHSynVoice_t *sceHsynVoiceEnvelopeAdvance(u16 vnum, s8 coreMask)
                 sceHsynRelCount = n - 1;
             }
         }
-        sceHsynVoiceSlotSet(best);
-        sceHsynVoiceMaskGet(best);
+        sceHsynVoiceChUnlink(best);
+        sceHsynVoiceUnlink(best);
         best->flags = 0;
         best->tag = 0xFF;
         best->unk57 = 0xFF;
@@ -3751,9 +3751,9 @@ sceHSynVoice_t *sceHsynVoiceEnvelopeAdvance(u16 vnum, s8 coreMask)
     }
     return best;
 }
-/* ENDF sceHsynVoiceEnvelopeAdvance */
-/* FUNC sceHsynVoiceVolumeAdvance */
-sceHSynVoice_t *sceHsynVoiceVolumeAdvance(s16 vnum0, s8 coreMask)
+/* ENDF sceHsynVoiceStealByEnvPhase */
+/* FUNC sceHsynVoiceStealByVnumActive */
+sceHSynVoice_t *sceHsynVoiceStealByVnumActive(s16 vnum0, s8 coreMask)
 {
     sceHSynVoice_t *best;
     sceHSynVoice_t *end;
@@ -3800,8 +3800,8 @@ sceHSynVoice_t *sceHsynVoiceVolumeAdvance(s16 vnum0, s8 coreMask)
                 sceHsynRelCount = n - 1;
             }
         }
-        sceHsynVoiceSlotSet(best);
-        sceHsynVoiceMaskGet(best);
+        sceHsynVoiceChUnlink(best);
+        sceHsynVoiceUnlink(best);
         best->flags = 0;
         best->tag = 0xFF;
         best->unk57 = 0xFF;
@@ -3809,9 +3809,9 @@ sceHSynVoice_t *sceHsynVoiceVolumeAdvance(s16 vnum0, s8 coreMask)
     }
     return best;
 }
-/* ENDF sceHsynVoiceVolumeAdvance */
-/* FUNC sceHsynVoiceRetrigger */
-void sceHsynVoiceRetrigger(sceHSynChannel_t *chan, u8 pitch)
+/* ENDF sceHsynVoiceStealByVnumActive */
+/* FUNC sceHsynChannelKeyOffByPitch */
+void sceHsynChannelKeyOffByPitch(sceHSynChannel_t *chan, u8 pitch)
 {
     sceHSynVoice_t *heads[3];
     sceHSynVoice_t *end;
@@ -3830,41 +3830,41 @@ void sceHsynVoiceRetrigger(sceHSynChannel_t *chan, u8 pitch)
             }
             next = v->chNext;
             if ((v->flags & 8) != 0) {
-                sceHsynVoiceSlotSet(v);
-                sceHsynVoiceMaskUpdate(v);
+                sceHsynVoiceChUnlink(v);
+                sceHsynVoiceFree(v);
             } else {
                 if (i < 2) {
                     sceHsynKeyOffPending[v->core] |= 1 << v->index;
                 }
                 sceHsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
-                sceHsynVoiceRelease(v);
+                sceHsynVoiceChFree(v);
             }
             v = next;
         }
     }
 }
-/* ENDF sceHsynVoiceRetrigger */
-/* FUNC sceHsynLfoApply */
-sceHSynVoice_t *sceHsynLfoApply(sceHSynVoice_t *v, int keyOff)
+/* ENDF sceHsynChannelKeyOffByPitch */
+/* FUNC sceHsynVoiceKeyOffOne */
+sceHSynVoice_t *sceHsynVoiceKeyOffOne(sceHSynVoice_t *v, int keyOff)
 {
     sceHSynVoice_t *next;
 
     next = v->chNext;
     if ((v->flags & 8) != 0) {
-        sceHsynVoiceSlotSet(v);
-        sceHsynVoiceMaskSet(v);
+        sceHsynVoiceChUnlink(v);
+        sceHsynVoiceFreeEntry(v);
         return next;
     }
     if (keyOff == 1) {
         sceHsynKeyOffPending[v->core] |= keyOff << v->index;
     }
     sceHsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
-    sceHsynVoiceReleaseOne(v);
+    sceHsynVoiceChFreeEntry(v);
     return next;
 }
-/* ENDF sceHsynLfoApply */
-/* FUNC sceHsynVoiceAllocForCmd */
-void sceHsynVoiceAllocForCmd(int base, int unused1, int state, u8 note, u8 ch, int unused2, u32 tag)
+/* ENDF sceHsynVoiceKeyOffOne */
+/* FUNC sceHsynChannelNoteOffMatch */
+void sceHsynChannelNoteOffMatch(int base, int unused1, int state, u8 note, u8 ch, int unused2, u32 tag)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -3889,16 +3889,16 @@ void sceHsynVoiceAllocForCmd(int base, int unused1, int state, u8 note, u8 ch, i
             continue;
         }
         next = v->chNext;
-        sceHsynVoiceSlotSet(v);
+        sceHsynVoiceChUnlink(v);
         flags = v->flags;
         v->flags = flags & 0xFCFF;
         if ((flags & 8) != 0) {
-            sceHsynVoiceMaskSet(v);
+            sceHsynVoiceFreeEntry(v);
         } else {
-            sceHsynSeqStart(&v->envA);
-            sceHsynSeqStart(&v->envB);
+            sceHsynLfoKeyOff(&v->envA);
+            sceHsynLfoKeyOff(&v->envB);
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
-            sceHsynVoiceSlotGet(v, (sceHSynVoice_t **)(chanp + 16));
+            sceHsynVoiceChLink(v, (sceHSynVoice_t **)(chanp + 16));
             if (sceHsynStat != NULL) {
                 st = &sceHsynStat->state[v->core][v->index];
                 *st = (*st & 0x8F) | 0x30;
@@ -3907,15 +3907,15 @@ void sceHsynVoiceAllocForCmd(int base, int unused1, int state, u8 note, u8 ch, i
         v = next;
     }
 }
-/* ENDF sceHsynVoiceAllocForCmd */
-/* FUNC sceHsynVoiceMaskSet */
-int sceHsynVoiceMaskSet(sceHSynVoice_t *v)
+/* ENDF sceHsynChannelNoteOffMatch */
+/* FUNC sceHsynVoiceFreeEntry */
+int sceHsynVoiceFreeEntry(sceHSynVoice_t *v)
 {
-    return sceHsynVoiceMaskUpdate(v);
+    return sceHsynVoiceFree(v);
 }
-/* ENDF sceHsynVoiceMaskSet */
-/* FUNC sceHsynVoiceAllocExport20 */
-void sceHsynVoiceAllocExport20(sceHSynChannel_t *chan)
+/* ENDF sceHsynVoiceFreeEntry */
+/* FUNC sceHsynChannelKeyOffAll */
+void sceHsynChannelKeyOffAll(sceHSynChannel_t *chan)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -3924,14 +3924,14 @@ void sceHsynVoiceAllocExport20(sceHSynChannel_t *chan)
 
     end = (sceHSynVoice_t *)((char *)chan - 8);
     for (v = end->chPrev; v != end; v = end->chPrev) {
-        sceHsynVoiceSlotSet(v);
+        sceHsynVoiceChUnlink(v);
         flags = v->flags;
         if ((flags & 8) != 0) {
-            sceHsynVoiceMaskSet(v);
+            sceHsynVoiceFreeEntry(v);
         } else {
             v->flags = flags & 0xFCFF;
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
-            sceHsynVoiceSlotGet(v, &chan->offNext);
+            sceHsynVoiceChLink(v, &chan->offNext);
             if (sceHsynStat != NULL) {
                 st = &sceHsynStat->state[v->core][v->index];
                 *st = (*st & 0x8F) | 0x30;
@@ -3939,9 +3939,9 @@ void sceHsynVoiceAllocExport20(sceHSynChannel_t *chan)
         }
     }
 }
-/* ENDF sceHsynVoiceAllocExport20 */
-/* FUNC sceHsynVoiceAllocPathB */
-void sceHsynVoiceAllocPathB(int base, u32 tag)
+/* ENDF sceHsynChannelKeyOffAll */
+/* FUNC sceHsynChannelKeyOffByTag */
+void sceHsynChannelKeyOffByTag(int base, u32 tag)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -3955,16 +3955,16 @@ void sceHsynVoiceAllocPathB(int base, u32 tag)
             continue;
         }
         next = v->chNext;
-        sceHsynVoiceSlotSet(v);
+        sceHsynVoiceChUnlink(v);
         flags = v->flags;
         v->flags = flags & 0xFCFF;
         if ((flags & 8) != 0) {
-            sceHsynVoiceMaskSet(v);
+            sceHsynVoiceFreeEntry(v);
         } else {
-            sceHsynSeqStart(&v->envA);
-            sceHsynSeqStart(&v->envB);
+            sceHsynLfoKeyOff(&v->envA);
+            sceHsynLfoKeyOff(&v->envB);
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
-            sceHsynVoiceSlotGet(v, (sceHSynVoice_t **)(base + 16));
+            sceHsynVoiceChLink(v, (sceHSynVoice_t **)(base + 16));
             if (sceHsynStat != NULL) {
                 st = &sceHsynStat->state[v->core][v->index];
                 *st = (*st & 0x8F) | 0x30;
@@ -3973,15 +3973,15 @@ void sceHsynVoiceAllocPathB(int base, u32 tag)
         v = next;
     }
 }
-/* ENDF sceHsynVoiceAllocPathB */
-/* FUNC sceHsynVoiceAllocPathBEntry */
-void sceHsynVoiceAllocPathBEntry(int chan, u32 tag)
+/* ENDF sceHsynChannelKeyOffByTag */
+/* FUNC sceHsynChannelKeyOffByTagEntry */
+void sceHsynChannelKeyOffByTagEntry(int chan, u32 tag)
 {
-    sceHsynVoiceAllocPathB(chan + 0x18, tag);
+    sceHsynChannelKeyOffByTag(chan + 0x18, tag);
 }
-/* ENDF sceHsynVoiceAllocPathBEntry */
-/* FUNC sceHsynVoiceAllocPathC */
-void sceHsynVoiceAllocPathC(int base, int unused, u32 tag, u32 mask)
+/* ENDF sceHsynChannelKeyOffByTagEntry */
+/* FUNC sceHsynChannelKeyOffByTagMask */
+void sceHsynChannelKeyOffByTagMask(int base, int unused, u32 tag, u32 mask)
 {
     sceHSynVoice_t *end;
     sceHSynVoice_t *v;
@@ -3997,16 +3997,16 @@ void sceHsynVoiceAllocPathC(int base, int unused, u32 tag, u32 mask)
             continue;
         }
         next = v->chNext;
-        sceHsynVoiceSlotSet(v);
+        sceHsynVoiceChUnlink(v);
         flags = v->flags;
         v->flags = flags & 0xFCFF;
         if ((flags & 8) != 0) {
-            sceHsynVoiceMaskSet(v);
+            sceHsynVoiceFreeEntry(v);
         } else {
-            sceHsynSeqStart(&v->envA);
-            sceHsynSeqStart(&v->envB);
+            sceHsynLfoKeyOff(&v->envA);
+            sceHsynLfoKeyOff(&v->envB);
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
-            sceHsynVoiceSlotGet(v, (sceHSynVoice_t **)(base + 16));
+            sceHsynVoiceChLink(v, (sceHSynVoice_t **)(base + 16));
             if (sceHsynStat != NULL) {
                 st = &sceHsynStat->state[v->core][v->index];
                 *st = (*st & 0x8F) | 0x30;
@@ -4015,15 +4015,15 @@ void sceHsynVoiceAllocPathC(int base, int unused, u32 tag, u32 mask)
         v = next;
     }
 }
-/* ENDF sceHsynVoiceAllocPathC */
-/* FUNC sceHsynVoiceAllocPathCEntry */
-void sceHsynVoiceAllocPathCEntry(int chan, int unused, u32 tag, u32 mask)
+/* ENDF sceHsynChannelKeyOffByTagMask */
+/* FUNC sceHsynChannelKeyOffByTagMaskEntry */
+void sceHsynChannelKeyOffByTagMaskEntry(int chan, int unused, u32 tag, u32 mask)
 {
-    sceHsynVoiceAllocPathC(chan + 0x18, unused, tag, mask);
+    sceHsynChannelKeyOffByTagMask(chan + 0x18, unused, tag, mask);
 }
-/* ENDF sceHsynVoiceAllocPathCEntry */
-/* FUNC sceHsynVoiceReleaseExport21 */
-void sceHsynVoiceReleaseExport21(sceHSynChannel_t *chan)
+/* ENDF sceHsynChannelKeyOffByTagMaskEntry */
+/* FUNC sceHsynChannelStopVoices */
+void sceHsynChannelStopVoices(sceHSynChannel_t *chan)
 {
     sceHSynVoice_t *heads[2];
     sceHSynVoice_t *end;
@@ -4037,19 +4037,19 @@ void sceHsynVoiceReleaseExport21(sceHSynChannel_t *chan)
         for (v = end->chPrev; v != end; v = end->chPrev) {
             sceHsynKeyOffPending[v->core] |= 1 << v->index;
             sceHsynSdSetParam((v->core | (v->index << 1)) | 0x400, 0xC021);
-            sceHsynVoiceReleaseOne(v);
+            sceHsynVoiceChFreeEntry(v);
         }
     }
 }
-/* ENDF sceHsynVoiceReleaseExport21 */
-/* FUNC sceHsynVoiceReleaseOne */
-int sceHsynVoiceReleaseOne(sceHSynVoice_t *v)
+/* ENDF sceHsynChannelStopVoices */
+/* FUNC sceHsynVoiceChFreeEntry */
+int sceHsynVoiceChFreeEntry(sceHSynVoice_t *v)
 {
-    return sceHsynVoiceRelease(v);
+    return sceHsynVoiceChFree(v);
 }
-/* ENDF sceHsynVoiceReleaseOne */
-/* FUNC sceHsynVoiceReleaseGroup */
-int sceHsynVoiceReleaseGroup(int chan, u16 vnum)
+/* ENDF sceHsynVoiceChFreeEntry */
+/* FUNC sceHsynVoiceStealFromChannel */
+int sceHsynVoiceStealFromChannel(int chan, u16 vnum)
 {
     sceHSynVoice_t *best;
     sceHSynVoice_t *end;
@@ -4077,15 +4077,15 @@ int sceHsynVoiceReleaseGroup(int chan, u16 vnum)
     }
     sceHsynKeyOffPending[best->core] |= 1 << best->index;
     sceHsynSdSetParam((best->core | (best->index << 1)) | 0x400, 0xC021);
-    sceHsynVoiceReleaseOne(best);
+    sceHsynVoiceChFreeEntry(best);
     return 1;
 }
-/* ENDF sceHsynVoiceReleaseGroup */
+/* ENDF sceHsynVoiceStealFromChannel */
 #ifdef NON_MATCHING
 /* Equivalent but not matching: the retail body spills a dozen values to the
  * frame and a C body of this shape keeps them in registers. */
-/* FUNC func_000078D4 */
-int func_000078D4(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, int a6, s8 a7, int a8, u32 a9)
+/* FUNC sceHsynVoiceStartPathA */
+int sceHsynVoiceStartPathA(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, int a6, s8 a7, int a8, u32 a9)
 {
     sceHSynChanSet_t *set;
     sceHSynChannel_t *chan;
@@ -4166,29 +4166,29 @@ int func_000078D4(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, int a6, s8 
                 }
             }
             if (tone->voiceOfs != 0) {
-                sceHsynVoiceRetrigger(chan, tone->voiceOfs);
+                sceHsynChannelKeyOffByPitch(chan, tone->voiceOfs);
             }
             vnum = tone->pitch + slot->voiceBase;
             if (set->nActive >= slot->maxVoice) {
-                if (sceHsynVoiceReleaseGroup((int)set, vnum) == 0) {
+                if (sceHsynVoiceStealFromChannel((int)set, vnum) == 0) {
                     return -1;
                 }
             }
             if (sceHsynModDisable != 0 && sceHsynRelCount >= sceHsynModDisable) {
-                v = sceHsynModulationApply(vnum, tone->allocHint, 1, 1);
+                v = sceHsynVoiceStealByEnvPhaseEx(vnum, tone->allocHint, 1, 1);
             } else {
-                v = sceHsynVoiceMaskClear(tone->allocHint);
+                v = sceHsynVoiceAlloc(tone->allocHint);
                 if (v == NULL) {
                     if (sceHsynSdSyncFlag != 0) {
                         sceHsynSdSyncFlag = 0;
                         if (sceHsynVoiceKeyOff() != 0) {
-                            v = sceHsynVoiceMaskClear(tone->allocHint);
+                            v = sceHsynVoiceAlloc(tone->allocHint);
                         }
                     }
                     if (v == NULL) {
-                        v = (sceHSynVoice_t *)sceHsynModulationStep(vnum, tone->allocHint);
+                        v = (sceHSynVoice_t *)sceHsynVoiceSteal(vnum, tone->allocHint);
                         if (v == NULL) {
-                            v = sceHsynPanApply(vnum, tone->allocHint);
+                            v = sceHsynVoiceStealByVnum(vnum, tone->allocHint);
                         }
                     }
                 }
@@ -4228,13 +4228,13 @@ int func_000078D4(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, int a6, s8 
             sceHsynChannelStateGet(v);
             set->nActive++;
             sceHsynRelCount++;
-            sceHsynVoiceSlotGet(v, (sceHSynVoice_t **)chan);
+            sceHsynVoiceChLink(v, (sceHSynVoice_t **)chan);
             started = 1;
             if ((chan->priority & 0x80) == 0 && chan->bendRange != 0) {
                 sceHsynVoiceStateClear(v);
             }
             sceHsynVoiceUpdatePathA(v);
-            sceHsynCoreIndexGet(v, (sceHSynVoice_t *)sceHsynActiveList[v->core]);
+            sceHsynVoiceInsertAfter(v, (sceHSynVoice_t *)sceHsynActiveList[v->core]);
             if (sceHsynStat != NULL) {
                 st = sceHsynStat->state[v->core];
                 st[v->index] = stateByte;
@@ -4252,15 +4252,15 @@ tail:
     }
     return 0;
 }
-/* ENDF func_000078D4 */
+/* ENDF sceHsynVoiceStartPathA */
 #else
-INCLUDE_ASM("MODHSYN", func_000078D4);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceStartPathA);
 #endif
 #ifdef NON_MATCHING
 /* Equivalent but not matching: the retail body keeps its narrow parameters in
  * frame slots and a C body of this shape keeps them in registers. */
-/* FUNC func_00007F54 */
-int func_00007F54(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, int a5, int a6, s8 a7, int a8, u32 a9)
+/* FUNC sceHsynVoiceStartPathB */
+int sceHsynVoiceStartPathB(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, int a5, int a6, s8 a7, int a8, u32 a9)
 {
     sceHSynChanSet_t *set;
     sceHSynChannel_t *chan;
@@ -4312,26 +4312,26 @@ int func_00007F54(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, int a5, int a6, s8
         }
     }
     if (ent[7] != 0) {
-        sceHsynLfoStep((int)chan, ent[7], ent[8]);
+        sceHsynChannelLimitByPitch((int)chan, ent[7], ent[8]);
     }
     vnum = ent[9] + slot->voiceBase;
     if (set->nActive >= slot->maxVoice) {
-        if (sceHsynVoiceReleaseGroup((int)set, vnum) == 0) {
+        if (sceHsynVoiceStealFromChannel((int)set, vnum) == 0) {
             return -1;
         }
     }
-    v = sceHsynVoiceMaskClearOne(ent[0xD]);
+    v = sceHsynVoiceAllocEntry(ent[0xD]);
     if (v == NULL) {
         if (sceHsynSdSyncFlag != 0) {
             sceHsynSdSyncFlag = 0;
             if (sceHsynVoiceKeyOff() != 0) {
-                v = sceHsynVoiceMaskClearOne(ent[0xD]);
+                v = sceHsynVoiceAllocEntry(ent[0xD]);
             }
         }
         if (v == NULL) {
-            v = (sceHSynVoice_t *)sceHsynModulationStep(vnum, ent[0xD]);
+            v = (sceHSynVoice_t *)sceHsynVoiceSteal(vnum, ent[0xD]);
             if (v == NULL) {
-                v = sceHsynPanApply(vnum, ent[0xD]);
+                v = sceHsynVoiceStealByVnum(vnum, ent[0xD]);
                 if (v == NULL) {
                     return -1;
                 }
@@ -4370,45 +4370,45 @@ int func_00007F54(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, int a5, int a6, s8
     sceHsynChannelStateGet(v);
     set->nActive++;
     sceHsynRelCount++;
-    sceHsynVoiceSlotGet(v, (sceHSynVoice_t **)chan);
+    sceHsynVoiceChLink(v, (sceHSynVoice_t **)chan);
     sceHsynVoiceUpdatePathB(v);
-    sceHsynCoreIndexGet(v, (sceHSynVoice_t *)sceHsynActiveList[v->core]);
+    sceHsynVoiceInsertAfter(v, (sceHSynVoice_t *)sceHsynActiveList[v->core]);
     if (sceHsynStat != NULL) {
         st = sceHsynStat->state[v->core];
         st[v->index] = a2 | 0x90;
     }
     return 0;
 }
-/* ENDF func_00007F54 */
+/* ENDF sceHsynVoiceStartPathB */
 #else
-INCLUDE_ASM("MODHSYN", func_00007F54);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceStartPathB);
 #endif
 #ifdef NON_MATCHING
 /* Byte-identical apart from one register pair: gcc gives a8 the lower
  * call-clobbered register where retail gives it to a7. */
-/* FUNC func_00008350 */
-int func_00008350(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, u8 a6, int a7, u16 a8, u32 a9)
+/* FUNC sceHsynVoiceStart */
+int sceHsynVoiceStart(sceHSynSlot_t *slot, int a2, u32 a3, u8 a4, u8 a5, u8 a6, int a7, u16 a8, u32 a9)
 {
     switch (slot->path) {
     case 0:
-        return func_000078D4(slot, a2, a3, a4, a5, a6, a7, a8, a9);
+        return sceHsynVoiceStartPathA(slot, a2, a3, a4, a5, a6, a7, a8, a9);
     case 1:
-        return func_00007F54(slot, a2, a3, a4, a5, a6, a7, a8, a9);
+        return sceHsynVoiceStartPathB(slot, a2, a3, a4, a5, a6, a7, a8, a9);
     }
     return -1;
 }
 #else
-INCLUDE_ASM("MODHSYN", func_00008350);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceStart);
 #endif
-/* ENDF func_00008350 */
-/* FUNC sceHsynVoiceMaskClearOne */
-sceHSynVoice_t *sceHsynVoiceMaskClearOne(u8 allocHint)
+/* ENDF sceHsynVoiceStart */
+/* FUNC sceHsynVoiceAllocEntry */
+sceHSynVoice_t *sceHsynVoiceAllocEntry(u8 allocHint)
 {
-    return sceHsynVoiceMaskClear(allocHint);
+    return sceHsynVoiceAlloc(allocHint);
 }
-/* ENDF sceHsynVoiceMaskClearOne */
-/* FUNC sceHsynModulationApply */
-sceHSynVoice_t *sceHsynModulationApply(u16 vnum, u8 coreMask, int on, int done)
+/* ENDF sceHsynVoiceAllocEntry */
+/* FUNC sceHsynVoiceStealByEnvPhaseEx */
+sceHSynVoice_t *sceHsynVoiceStealByEnvPhaseEx(u16 vnum, u8 coreMask, int on, int done)
 {
     sceHSynVoice_t *best;
     sceHSynVoice_t *end;
@@ -4486,8 +4486,8 @@ sceHSynVoice_t *sceHsynModulationApply(u16 vnum, u8 coreMask, int on, int done)
                 sceHsynRelCount = n - 1;
             }
         }
-        sceHsynVoiceSlotSet(best);
-        sceHsynVoiceMaskGet(best);
+        sceHsynVoiceChUnlink(best);
+        sceHsynVoiceUnlink(best);
         best->flags = 0;
         best->tag = 0xFF;
         best->unk57 = 0xFF;
@@ -4495,9 +4495,9 @@ sceHSynVoice_t *sceHsynModulationApply(u16 vnum, u8 coreMask, int on, int done)
     }
     return best;
 }
-/* ENDF sceHsynModulationApply */
-/* FUNC sceHsynModulationStep */
-int sceHsynModulationStep(u16 a, u8 b)
+/* ENDF sceHsynVoiceStealByEnvPhaseEx */
+/* FUNC sceHsynVoiceSteal */
+int sceHsynVoiceSteal(u16 a, u8 b)
 {
     u8 limit;
     int on;
@@ -4511,11 +4511,11 @@ int sceHsynModulationStep(u16 a, u8 b)
     } else if (sceHsynRelCount >= limit) {
         done = 1;
     }
-    return (int)sceHsynModulationApply(a, b, on, done);
+    return (int)sceHsynVoiceStealByEnvPhaseEx(a, b, on, done);
 }
-/* ENDF sceHsynModulationStep */
-/* FUNC sceHsynPanApply */
-sceHSynVoice_t *sceHsynPanApply(s16 vnum0, char allocHint)
+/* ENDF sceHsynVoiceSteal */
+/* FUNC sceHsynVoiceStealByVnum */
+sceHSynVoice_t *sceHsynVoiceStealByVnum(s16 vnum0, char allocHint)
 {
     sceHSynVoice_t *best;
     sceHSynVoice_t *end;
@@ -4562,8 +4562,8 @@ sceHSynVoice_t *sceHsynPanApply(s16 vnum0, char allocHint)
                 sceHsynRelCount = n - 1;
             }
         }
-        sceHsynVoiceSlotSet(best);
-        sceHsynVoiceMaskGet(best);
+        sceHsynVoiceChUnlink(best);
+        sceHsynVoiceUnlink(best);
         best->flags = 0;
         best->tag = 0xFF;
         best->unk57 = 0xFF;
@@ -4571,9 +4571,9 @@ sceHSynVoice_t *sceHsynPanApply(s16 vnum0, char allocHint)
     }
     return best;
 }
-/* ENDF sceHsynPanApply */
-/* FUNC sceHsynLfoStep */
-int sceHsynLfoStep(int chan, u8 pitch, u8 min)
+/* ENDF sceHsynVoiceStealByVnum */
+/* FUNC sceHsynChannelLimitByPitch */
+int sceHsynChannelLimitByPitch(int chan, u8 pitch, u8 min)
 {
     sceHSynVoice_t *heads[2];
     sceHSynVoice_t *end;
@@ -4599,13 +4599,13 @@ int sceHsynLfoStep(int chan, u8 pitch, u8 min)
         end = heads[i];
         for (v = end->chPrev; v != end; v = v->chPrev) {
             if (v->pitch == pitch) {
-                v = sceHsynLfoApply(v, i == 1);
+                v = sceHsynVoiceKeyOffOne(v, i == 1);
             }
         }
     }
     return 1;
 }
-/* ENDF sceHsynLfoStep */
+/* ENDF sceHsynChannelLimitByPitch */
 INCLUDE_ASM("MODHSYN", D_00008914);
 /* FUNC sceHsynUnrefParamGetA */
 int sceHsynUnrefParamGetA(u8 a, u8 b)
@@ -4856,23 +4856,23 @@ u8 sceHsynVolumeScale(u8 val, u8 sel, u8 *tbl, int n)
 #else
 INCLUDE_ASM("MODHSYN", sceHsynVolumeScale);
 #endif
-/* FUNC sceHsynSeqByteRead */
-int sceHsynSeqByteRead(sceHSynEnv_t *env, int wrapped)
+/* FUNC sceHsynLfoSawUp */
+int sceHsynLfoSawUp(sceHSynEnv_t *env, int wrapped)
 {
     return (s16)((env->phase - 0x8000) >> 1);
 }
-/* ENDF sceHsynSeqByteRead */
-/* FUNC sceHsynSeqWordRead */
-int sceHsynSeqWordRead(sceHSynEnv_t *env, int wrapped)
+/* ENDF sceHsynLfoSawUp */
+/* FUNC sceHsynLfoSawDown */
+int sceHsynLfoSawDown(sceHSynEnv_t *env, int wrapped)
 {
     u32 t;
 
     t = 0xFFFF - env->phase;
     return (s16)((t - 0x8000) >> 1);
 }
-/* ENDF sceHsynSeqWordRead */
-/* FUNC sceHsynSeqVarLenRead */
-int sceHsynSeqVarLenRead(sceHSynEnv_t *env, int wrapped)
+/* ENDF sceHsynLfoSawDown */
+/* FUNC sceHsynLfoTriangle */
+int sceHsynLfoTriangle(sceHSynEnv_t *env, int wrapped)
 {
     int v;
 
@@ -4884,9 +4884,9 @@ int sceHsynSeqVarLenRead(sceHSynEnv_t *env, int wrapped)
     }
     return (s16)v;
 }
-/* ENDF sceHsynSeqVarLenRead */
-/* FUNC sceHsynSeqSkip */
-int sceHsynSeqSkip(sceHSynEnv_t *env, int wrapped)
+/* ENDF sceHsynLfoTriangle */
+/* FUNC sceHsynLfoSquare */
+int sceHsynLfoSquare(sceHSynEnv_t *env, int wrapped)
 {
     int v;
 
@@ -4896,9 +4896,9 @@ int sceHsynSeqSkip(sceHSynEnv_t *env, int wrapped)
     }
     return v;
 }
-/* ENDF sceHsynSeqSkip */
-/* FUNC sceHsynSeqSeek */
-int sceHsynSeqSeek(sceHSynEnv_t *env, int wrapped)
+/* ENDF sceHsynLfoSquare */
+/* FUNC sceHsynLfoSine */
+int sceHsynLfoSine(sceHSynEnv_t *env, int wrapped)
 {
     u32 *mask;
     u32 n;
@@ -4921,25 +4921,25 @@ int sceHsynSeqSeek(sceHSynEnv_t *env, int wrapped)
     a += ((b - a) * (int)(prod & 0xFFFF)) >> 16;
     return (s16)(a / 2);
 }
-/* ENDF sceHsynSeqSeek */
-/* FUNC sceHsynSeqEmit */
-int sceHsynSeqEmit(sceHSynEnv_t *env, int wrapped)
+/* ENDF sceHsynLfoSine */
+/* FUNC sceHsynLfoNoise */
+int sceHsynLfoNoise(sceHSynEnv_t *env, int wrapped)
 {
     int v;
 
     if (wrapped != 0) {
-        v = (s16)sceHsynSeqEmitTail() >> 2;
+        v = (s16)sceHsynRand() >> 2;
     } else {
         v = env->level;
     }
     return v;
 }
-/* ENDF sceHsynSeqEmit */
+/* ENDF sceHsynLfoNoise */
 #ifdef NON_MATCHING
 /* The switch on the state byte compiles to a jump table, and the assembly
  * .rodata already holds its case labels, so a C body here will not link. */
-/* FUNC sceHsynEffectDispatch */
-int sceHsynEffectDispatch(sceHSynEnv_t *env)
+/* FUNC sceHsynLfoStep */
+int sceHsynLfoStep(sceHSynEnv_t *env)
 {
     u32 ph;
     int state;
@@ -5013,12 +5013,12 @@ out:
     env->level = lvl;
     return (s16)lvl;
 }
-/* ENDF sceHsynEffectDispatch */
+/* ENDF sceHsynLfoStep */
 #else
-INCLUDE_ASM("MODHSYN", sceHsynEffectDispatch);
+INCLUDE_ASM("MODHSYN", sceHsynLfoStep);
 #endif
-/* FUNC sceHsynSeqStateReset */
-void sceHsynSeqStateReset(sceHSynEnv_t *lfo)
+/* FUNC sceHsynLfoStart */
+void sceHsynLfoStart(sceHSynEnv_t *lfo)
 {
     if (lfo->unk02 != 0) {
         lfo->unk00 = 1;
@@ -5030,12 +5030,12 @@ void sceHsynSeqStateReset(sceHSynEnv_t *lfo)
         lfo->unk00 = 3;
     }
 }
-/* ENDF sceHsynSeqStateReset */
+/* ENDF sceHsynLfoStart */
 #ifdef NON_MATCHING
 /* The switch on the mode byte compiles to a jump table, and the assembly
  * .rodata already holds its case labels, so a C body here will not link. */
-/* FUNC sceHsynSeqInterpretA */
-void sceHsynSeqInterpretA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)
+/* FUNC sceHsynLfoSetupA */
+void sceHsynLfoSetupA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)
 {
     u8 *b;
     int i;
@@ -5062,24 +5062,24 @@ void sceHsynSeqInterpretA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
     if (k == 0) {
         switch (w & 0xFF) {
         case 1:
-            env->wave = sceHsynSeqByteRead;
+            env->wave = sceHsynLfoSawUp;
             break;
         case 2:
-            env->wave = sceHsynSeqWordRead;
+            env->wave = sceHsynLfoSawDown;
             break;
         case 3:
-            env->wave = sceHsynSeqVarLenRead;
+            env->wave = sceHsynLfoTriangle;
             break;
         case 4:
-            env->wave = sceHsynSeqSkip;
+            env->wave = sceHsynLfoSquare;
             break;
         case 5:
-            env->wave = sceHsynSeqEmit;
+            env->wave = sceHsynLfoNoise;
             break;
         case 6:
             env->tbl = sceHsynSineTable;
             env->nTbl = 200;
-            env->wave = sceHsynSeqSeek;
+            env->wave = sceHsynLfoSine;
             break;
         default:
             return;
@@ -5089,7 +5089,7 @@ void sceHsynSeqInterpretA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
             if (seg[0] == k) {
                 env->tbl = *(s16 **)(seg + 4);
                 env->nTbl = *(u16 *)(seg + 2);
-                env->wave = sceHsynSeqSeek;
+                env->wave = sceHsynLfoSine;
                 break;
             }
         }
@@ -5108,14 +5108,14 @@ void sceHsynSeqInterpretA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
     env->unk0C = d;
     if (which != 0) {
         env->phase = b[0x13] << 8;
-        ph = (int)(env->phase * (s16)sceHsynSeqEmitTail()) / 0x10000;
+        ph = (int)(env->phase * (s16)sceHsynRand()) / 0x10000;
         env->phase = ph;
         ph = ph + (b[0x11] << 8);
         env->phase = ph;
         step = *(u16 *)(b + 0x16) << 8;
     } else {
         env->phase = b[0x12] << 8;
-        ph = (int)(env->phase * (s16)sceHsynSeqEmitTail()) / 0x10000;
+        ph = (int)(env->phase * (s16)sceHsynRand()) / 0x10000;
         env->phase = ph;
         ph = ph + (b[0x10] << 8);
         env->phase = ph;
@@ -5132,22 +5132,22 @@ void sceHsynSeqInterpretA(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
         env->unk01 = 1;
     }
     if ((sel & 0x55) != 0) {
-        sceHsynSeqStateReset(env);
+        sceHsynLfoStart(env);
     }
 }
-/* ENDF sceHsynSeqInterpretA */
+/* ENDF sceHsynLfoSetupA */
 #else
-INCLUDE_ASM("MODHSYN", sceHsynSeqInterpretA);
+INCLUDE_ASM("MODHSYN", sceHsynLfoSetupA);
 #endif
-/* FUNC sceHsynSeqStart */
-void sceHsynSeqStart(sceHSynEnv_t *env)
+/* FUNC sceHsynLfoKeyOff */
+void sceHsynLfoKeyOff(sceHSynEnv_t *env)
 {
     if (env->unk01 == 0) {
         return;
     }
     switch (env->unk00) {
     case 0:
-        sceHsynSeqStateReset(env);
+        sceHsynLfoStart(env);
         break;
     case 1:
         env->unk00 = 6;
@@ -5169,12 +5169,12 @@ void sceHsynSeqStart(sceHSynEnv_t *env)
         break;
     }
 }
-/* ENDF sceHsynSeqStart */
+/* ENDF sceHsynLfoKeyOff */
 #ifdef NON_MATCHING
 /* The switch on the mode byte compiles to a jump table, and the assembly
  * .rodata already holds its case labels, so a C body here will not link. */
-/* FUNC sceHsynSeqInterpretB */
-void sceHsynSeqInterpretB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)
+/* FUNC sceHsynLfoSetupB */
+void sceHsynLfoSetupB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel, u16 period, u16 depth, unsigned int tick, int which)
 {
     u8 *b;
     int i;
@@ -5201,24 +5201,24 @@ void sceHsynSeqInterpretB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
     if (k == 0) {
         switch (w & 0xFF) {
         case 1:
-            env->wave = sceHsynSeqByteRead;
+            env->wave = sceHsynLfoSawUp;
             break;
         case 2:
-            env->wave = sceHsynSeqWordRead;
+            env->wave = sceHsynLfoSawDown;
             break;
         case 3:
-            env->wave = sceHsynSeqVarLenRead;
+            env->wave = sceHsynLfoTriangle;
             break;
         case 4:
-            env->wave = sceHsynSeqSkip;
+            env->wave = sceHsynLfoSquare;
             break;
         case 5:
-            env->wave = sceHsynSeqEmit;
+            env->wave = sceHsynLfoNoise;
             break;
         case 6:
             env->tbl = sceHsynSineTable;
             env->nTbl = 200;
-            env->wave = sceHsynSeqSeek;
+            env->wave = sceHsynLfoSine;
             break;
         default:
             return;
@@ -5228,7 +5228,7 @@ void sceHsynSeqInterpretB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
             if (seg[0] == k) {
                 env->tbl = *(s16 **)(seg + 4);
                 env->nTbl = *(u16 *)(seg + 2);
-                env->wave = sceHsynSeqSeek;
+                env->wave = sceHsynLfoSine;
                 break;
             }
         }
@@ -5247,14 +5247,14 @@ void sceHsynSeqInterpretB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
     env->unk0C = d;
     if (which != 0) {
         env->phase = b[0x17] << 8;
-        ph = (int)(env->phase * (s16)sceHsynSeqEmitTail()) / 0x10000;
+        ph = (int)(env->phase * (s16)sceHsynRand()) / 0x10000;
         env->phase = ph;
         ph = ph + (b[0x15] << 8);
         env->phase = ph;
         step = *(u16 *)(b + 0x1A) << 8;
     } else {
         env->phase = b[0x16] << 8;
-        ph = (int)(env->phase * (s16)sceHsynSeqEmitTail()) / 0x10000;
+        ph = (int)(env->phase * (s16)sceHsynRand()) / 0x10000;
         env->phase = ph;
         ph = ph + (b[0x14] << 8);
         env->phase = ph;
@@ -5271,16 +5271,16 @@ void sceHsynSeqInterpretB(sceHSynEnv_t *env, int prog, u8 *seg, int n, char sel,
         env->unk01 = 1;
     }
     if ((sel & 0x55) != 0) {
-        sceHsynSeqStateReset(env);
+        sceHsynLfoStart(env);
     }
 }
-/* ENDF sceHsynSeqInterpretB */
+/* ENDF sceHsynLfoSetupB */
 #else
-INCLUDE_ASM("MODHSYN", sceHsynSeqInterpretB);
+INCLUDE_ASM("MODHSYN", sceHsynLfoSetupB);
 #endif
 INCLUDE_ASM("MODHSYN", D_00009AC4);
-/* FUNC sceHsynSeqEmitTail */
-int sceHsynSeqEmitTail()
+/* FUNC sceHsynRand */
+int sceHsynRand()
 {
     int seed;
 
@@ -5288,7 +5288,7 @@ int sceHsynSeqEmitTail()
     sceHsynRandSeed = seed;
     return seed >> 16;
 }
-/* ENDF sceHsynSeqEmitTail */
+/* ENDF sceHsynRand */
 INCLUDE_ASM("MODHSYN", D_00009AFC);
 #ifdef NON_MATCHING
 /* One nop long: gas will not move the second half of the `sw w, sym` macro
@@ -5307,10 +5307,10 @@ int modhsyn_e16(sceHSynSdLog_t *w)
 #else
 INCLUDE_ASM("MODHSYN", modhsyn_e16);
 #endif
-/* FUNC sceHsynSdLockAcquire */
+/* FUNC sceHsynSdLogNext */
 /* The work area is a ring of 28-byte call records; +0 holds the opcode with
  * bit 31 set while the call is outstanding, +4 its result. */
-sceHSynSdLogEnt_t *sceHsynSdLockAcquire()
+sceHSynSdLogEnt_t *sceHsynSdLogNext()
 {
     sceHSynSdLog_t *w;
     u32 i;
@@ -5328,9 +5328,9 @@ sceHSynSdLogEnt_t *sceHsynSdLockAcquire()
     }
     return e;
 }
-/* ENDF sceHsynSdLockAcquire */
-/* FUNC sceHsynSdLockRelease */
-void sceHsynSdLockRelease(sceHSynSdLogEnt_t *e, int op, u32 a0, u32 a1, u32 a2, u32 a3, u32 a4)
+/* ENDF sceHsynSdLogNext */
+/* FUNC sceHsynSdLogCall */
+void sceHsynSdLogCall(sceHSynSdLogEnt_t *e, int op, u32 a0, u32 a1, u32 a2, u32 a3, u32 a4)
 {
     if (e != NULL) {
         e->op = op | 0x80000000;
@@ -5341,26 +5341,26 @@ void sceHsynSdLockRelease(sceHSynSdLogEnt_t *e, int op, u32 a0, u32 a1, u32 a2, 
         e->arg[4] = a4;
     }
 }
-/* ENDF sceHsynSdLockRelease */
-/* FUNC sceHsynSdLockWait */
-void sceHsynSdLockWait(sceHSynSdLogEnt_t *e, int result)
+/* ENDF sceHsynSdLogCall */
+/* FUNC sceHsynSdLogResult */
+void sceHsynSdLogResult(sceHSynSdLogEnt_t *e, int result)
 {
     if (e != NULL) {
         e->result = result;
         e->op &= 0x7FFFFFFF;
     }
 }
-/* ENDF sceHsynSdLockWait */
+/* ENDF sceHsynSdLogResult */
 /* FUNC sceHsynSdInit */
 int sceHsynSdInit(u32 flag)
 {
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 0, flag, 0, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 0, flag, 0, 0, 0, 0);
     ret = libsd_sceSdInit(flag);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdInit */
@@ -5369,10 +5369,10 @@ int sceHsynSdSetParam(u16 entry, u16 value)
 {
     sceHSynSdLogEnt_t *e;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 1, entry, value, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 1, entry, value, 0, 0, 0);
     libsd_sceSdSetParam(entry, value);
-    sceHsynSdLockWait(e, 0);
+    sceHsynSdLogResult(e, 0);
 }
 /* ENDF sceHsynSdSetParam */
 /* FUNC sceHsynSdGetParam */
@@ -5381,10 +5381,10 @@ int sceHsynSdGetParam(u16 entry)
     sceHSynSdLogEnt_t *e;
     u16 ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 2, entry, 0, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 2, entry, 0, 0, 0, 0);
     ret = libsd_sceSdGetParam(entry);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdGetParam */
@@ -5393,10 +5393,10 @@ int sceHsynSdSetSwitch(u16 entry, u32 value)
 {
     sceHSynSdLogEnt_t *e;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 3, entry, value, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 3, entry, value, 0, 0, 0);
     libsd_sceSdSetSwitch(entry, value);
-    sceHsynSdLockWait(e, 0);
+    sceHsynSdLogResult(e, 0);
 }
 /* ENDF sceHsynSdSetSwitch */
 /* FUNC sceHsynSdGetSwitch */
@@ -5405,10 +5405,10 @@ u32 sceHsynSdGetSwitch(u16 entry)
     sceHSynSdLogEnt_t *e;
     u32 ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 4, entry, 0, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 4, entry, 0, 0, 0, 0);
     ret = libsd_sceSdGetSwitch(entry);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdGetSwitch */
@@ -5417,10 +5417,10 @@ int sceHsynSdSetAddr(u16 entry, u32 value)
 {
     sceHSynSdLogEnt_t *e;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 5, entry, value, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 5, entry, value, 0, 0, 0);
     libsd_sceSdSetAddr(entry, value);
-    sceHsynSdLockWait(e, 0);
+    sceHsynSdLogResult(e, 0);
 }
 /* ENDF sceHsynSdSetAddr */
 /* FUNC sceHsynSdGetAddr */
@@ -5429,10 +5429,10 @@ u32 sceHsynSdGetAddr(u16 entry)
     sceHSynSdLogEnt_t *e;
     u32 ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 6, entry, 0, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 6, entry, 0, 0, 0, 0);
     ret = libsd_sceSdGetAddr(entry);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdGetAddr */
@@ -5441,10 +5441,10 @@ int sceHsynSdSetCoreAttr(u16 entry, u16 value)
 {
     sceHSynSdLogEnt_t *e;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 7, entry, value, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 7, entry, value, 0, 0, 0);
     libsd_sceSdSetCoreAttr(entry, value);
-    sceHsynSdLockWait(e, 0);
+    sceHsynSdLogResult(e, 0);
 }
 /* ENDF sceHsynSdSetCoreAttr */
 /* FUNC sceHsynSdNote2Pitch */
@@ -5453,10 +5453,10 @@ int sceHsynSdNote2Pitch(u16 center, u16 fine, u16 note, s16 bend)
     sceHSynSdLogEnt_t *e;
     u16 ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 9, center, fine, note, bend, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 9, center, fine, note, bend, 0);
     ret = libsd_sceSdNote2Pitch(center, fine, note, bend);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdNote2Pitch */
@@ -5466,10 +5466,10 @@ int sceHsynSdPitch2Note(u16 center, u16 fine, u16 pitch)
     sceHSynSdLogEnt_t *e;
     u16 ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 10, center, fine, pitch, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 10, center, fine, pitch, 0, 0);
     ret = libsd_sceSdPitch2Note(center, fine, pitch);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdPitch2Note */
@@ -5479,10 +5479,10 @@ int sceHsynSdProcBatch(u32 *cmds, u32 *rets, u32 count)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 11, (u32)cmds, (u32)rets, count, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 11, (u32)cmds, (u32)rets, count, 0, 0);
     ret = libsd_sceSdProcBatch(cmds, rets, count);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdProcBatch */
@@ -5492,10 +5492,10 @@ int sceHsynSdProcBatchEx(u32 *cmds, u32 *rets, u32 count, u32 flags)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 12, (u32)cmds, (u32)rets, count, flags, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 12, (u32)cmds, (u32)rets, count, flags, 0);
     ret = libsd_sceSdProcBatchEx(cmds, rets, count, flags);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdProcBatchEx */
@@ -5505,10 +5505,10 @@ int sceHsynSdVoiceTrans(s16 chan, u16 mode, u8 *iopAddr, u32 spuAddr, u32 size)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 13, chan, mode, (u32)iopAddr, spuAddr, size);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 13, chan, mode, (u32)iopAddr, spuAddr, size);
     ret = libsd_sceSdVoiceTrans(chan, mode, iopAddr, spuAddr, size);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdVoiceTrans */
@@ -5518,10 +5518,10 @@ int sceHsynSdBlockTrans(s16 chan, u16 mode, u8 *iopAddr, u32 size)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 14, chan, mode, (u32)iopAddr, size, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 14, chan, mode, (u32)iopAddr, size, 0);
     ret = libsd_sceSdBlockTrans(chan, mode, iopAddr, size);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdBlockTrans */
@@ -5531,10 +5531,10 @@ int sceHsynSdVoiceTransStatus(s16 chan, s16 flag)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 15, chan, flag, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 15, chan, flag, 0, 0, 0);
     ret = libsd_sceSdVoiceTransStatus(chan, flag);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdVoiceTransStatus */
@@ -5544,10 +5544,10 @@ int sceHsynSdBlockTransStatus(s16 chan, s16 flag)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 16, chan, flag, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 16, chan, flag, 0, 0, 0);
     ret = libsd_sceSdBlockTransStatus(chan, flag);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdBlockTransStatus */
@@ -5557,10 +5557,10 @@ int sceHsynSdSetEffectAttr(int core, sceSdEffectAttr_t *attr)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 19, core, (u32)attr, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 19, core, (u32)attr, 0, 0, 0);
     ret = libsd_sceSdSetEffectAttr(core, attr);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdSetEffectAttr */
@@ -5569,10 +5569,10 @@ void sceHsynSdGetEffectAttr(int core, sceSdEffectAttr_t *attr)
 {
     sceHSynSdLogEnt_t *e;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 20, core, (u32)attr, 0, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 20, core, (u32)attr, 0, 0, 0);
     libsd_sceSdGetEffectAttr(core, attr);
-    sceHsynSdLockWait(e, 0);
+    sceHsynSdLogResult(e, 0);
 }
 /* ENDF sceHsynSdGetEffectAttr */
 /* FUNC sceHsynSdClearEffectWorkArea */
@@ -5581,10 +5581,10 @@ int sceHsynSdClearEffectWorkArea(int core, int channel, int effectMode)
     sceHSynSdLogEnt_t *e;
     int ret;
 
-    e = sceHsynSdLockAcquire();
-    sceHsynSdLockRelease(e, 21, core, channel, effectMode, 0, 0);
+    e = sceHsynSdLogNext();
+    sceHsynSdLogCall(e, 21, core, channel, effectMode, 0, 0);
     ret = libsd_sceSdClearEffectWorkArea(core, channel, effectMode);
-    sceHsynSdLockWait(e, ret);
+    sceHsynSdLogResult(e, ret);
     return ret;
 }
 /* ENDF sceHsynSdClearEffectWorkArea */
@@ -5869,8 +5869,8 @@ int sceHsynChannelStateGet(sceHSynVoice_t *v)
 /* The switch on the parameter selector compiles to a jump table, and the
  * assembly .rodata already holds its case labels, so a C body here will not
  * link. */
-/* FUNC func_0000AB90 */
-int func_0000AB90(sceHSynVoice_t *v, u32 a3, int a4, u8 a8, s8 a9, int a10)
+/* FUNC sceHsynVoiceSetParamRamp */
+int sceHsynVoiceSetParamRamp(sceHSynVoice_t *v, u32 a3, int a4, u8 a8, s8 a9, int a10)
 {
     int *p;
     int rate;
@@ -6058,9 +6058,9 @@ int func_0000AB90(sceHSynVoice_t *v, u32 a3, int a4, u8 a8, s8 a9, int a10)
     p[13] = (s8)v->unk53;
     return 0;
 }
-/* ENDF func_0000AB90 */
+/* ENDF sceHsynVoiceSetParamRamp */
 #else
-INCLUDE_ASM("MODHSYN", func_0000AB90);
+INCLUDE_ASM("MODHSYN", sceHsynVoiceSetParamRamp);
 #endif
 INCLUDE_ASM("MODHSYN", hsynLibraryTable);
 /* FUNC sceHsynRetnStub */
