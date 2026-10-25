@@ -24,10 +24,14 @@
  * the retail code computes them.
  */
 
-/* One base each, so a host build can aim these at a register file of its
- * own by redefining just these two. */
+/* One base each, so a host build can aim these at a register file of its own
+ * by defining just these two ahead of this header. */
+#ifndef SPU2_BASE
 #define SPU2_BASE           0xBF900000
+#endif
+#ifndef IOP_HW_BASE
 #define IOP_HW_BASE         0xBF800000
+#endif
 #define SPU2_CORE_STRIDE    0x400
 #define SPU2_COEF_STRIDE    40
 
