@@ -120,7 +120,8 @@ Two details the retail files forced:
 
 - `.text` is not all functions. The IRX import and export tables sit between
   the stub functions, so anything no function covers is emitted as data. They
-  are the `D_<address>` chunks in the module's C file.
+  are the `D_<address>` chunks in the module's C file. The import tables are no
+  longer among them; see below.
 - Jump table entries get a `L_<address>` label rather than gas's local `.L_`
   form, because they have to resolve from `.rodata`.
 
@@ -128,6 +129,65 @@ Two details the retail files forced:
 script folds into `.bss`, byte aligned so gas cannot round its size up, with
 the empty `.bss` beside it giving the output section its alignment of 16. See
 the container section above for why the rounding matters.
+
+## The import tables are source, not chunks
+
+An imported function is reached through an 8-byte stub that the loader rewrites
+into a jump to the resolved export:
+
+    jr    $31
+    addiu $0, $0, <ordinal>
+
+The ordinal says which export, so the stub is fully determined by the library
+and the ordinal, and `IRX_IMPORT(intrman, CpuSuspendIntr, 0x11)` in `irx.h`
+emits it. The table around it is just as determined: a 20-byte header of the
+magic `0x41e00000`, a zero, the version, and an eight byte name field, then the
+stubs, then an 8-byte zero entry. So a whole table reads as
+
+    IRX_IMPORT_TABLE(intrman, 1, 2);
+    IRX_IMPORT(intrman, CpuSuspendIntr, 0x11);
+    IRX_IMPORT(intrman, CpuResumeIntr, 0x12);
+    IRX_IMPORT_TABLE_END;
+
+with `ALIGN_TEXT(4)` in front, because the first table in a module is aligned to
+16. This replaced 152 stubs and 46 tables across the seven modules and left
+`SDFIOP` with no `INCLUDE_ASM` at all. It is the same design as ps2sdk's
+`DECLARE_IMPORT`, and the symbol keeps its library prefix so two libraries
+exporting the same short name stay distinct.
+
+Writing the ordinal in the source is what makes a wrong import name visible,
+because a stub's name can then be checked against the table that contains it.
+Doing that once found two mislabelled imports that had been invisible for as
+long as the tables were opaque data; both are in `docs/idb-corrections.md`.
+
+Three notes on gas 2.8, which assembles these. It rejects `. - label` inside
+`.rept` and inside `.if`, accepts it in `.space` but warns when the count comes
+out zero, and accepts it silently in `.fill`. The name field therefore pads with
+`.fill`, since an eight character library name such as `loadcore` needs no
+padding at all.
+
+The export table is still a `D_<address>` chunk. It holds relocated function
+pointers rather than ordinals, so it is a larger job than the import side.
+
+## Names
+
+A module's exports carry its own prefix and its internals do not:
+
+| Form | Meaning | Example |
+| --- | --- | --- |
+| `<module>_sce<Lib><Name>` | an export whose Sony name is known | `libsd_sceSdVoiceTrans`, `modhsyn_sceHSyn_Init` |
+| `<module>_e<N>` | an export whose purpose is not known yet, by ordinal | `modhsyn_e19` |
+| `sce<Lib><Name>` | an internal function, named for what it does | `sceHsynCmdNoteOn`, `sceSdTransferOp` |
+| `<library>_<Name>` | an import stub, named for the library it calls | `intrman_CpuSuspendIntr` |
+
+So a bare `sce` name is internal and a prefixed one is exported, which reads
+backwards until you know it. LIBSD follows it with `sceSd`: `libsd_sceSdInit` is
+exported, `sceSdInitCores` is not. Note that `sceSd` is the Sound Device
+library; `sceCd` is Sony's unrelated CD/DVD prefix and appears nowhere here.
+
+Names ported from the Persona 3 FES `LIB31` builds are evidence, not fact, since
+those are a later version of the same libraries. Verify against the retail code
+before applying one, and never run those binaries against this driver.
 
 ## Writing C
 
