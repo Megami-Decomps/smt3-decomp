@@ -1,6 +1,8 @@
 #ifndef IRX_IOP_H
 #define IRX_IOP_H
 
+#include "spu2.h"
+
 /* The IOP library calls the three modules import. Every module links its own
  * stubs, so a name declared here only resolves in the modules that import it.
  * The stub chunks live in asm/irx/<module>/text/. */
