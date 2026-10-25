@@ -33,6 +33,24 @@ function by hand: the remaining difference is usually one of them.
   unit had no prototype in scope, so the call result is int-width and the mask
   needs a register. `libsd_sceSdSetCoreAttr` is two instructions short for that
   reason and the header is right, so it stays guarded.
+- **A division's quotient and remainder want `/` and `%`.**
+  `q = (b >= 0 ? b : b + 0x7F) >> 7` duplicates the shift into both arms;
+  `b / 128` with `b % 128` gives retail's single `bgez`/`addiu 0x7F`/`sra` plus
+  the `subu`.
+- **`x < 9 && x >= 7` becomes a range check; nested `if`s keep the two
+  `slti`s.** gcc turns the `&&` into `addiu -7` plus `sltiu 2`, one instruction
+  shorter than retail's two compares, and then propagates the result into a
+  second identical gate and deletes it where retail re-tests.
+- **`a - (b - 1)` folds to `a + 1 - b`.** Retail's `addiu -1` then `subu` needs
+  `b - 1` in its own block-scoped local; a function-scoped one becomes a single
+  pseudo whose live range spans a call and takes a callee-saved register.
+- **A sum of two disjoint fields returned through a `u16` local keeps the
+  `addu`.** Written inline, gcc proves `(f & 0x7E) + (note << 8)` cannot carry,
+  emits `or`, and narrows the following mask; an intermediate `u16` blocks the
+  deduction and leaves retail's `addu` plus `andi 0xFFFE`.
+- **`all = mask < 1;` as its own statement wins the lower callee-saved
+  register.** `s32 all = mask == 0;` as an initializer gives the parameter the
+  lower register instead, which `sceSdApplyEffectAttrMask`'s 32 arms needed.
 - **Unsigned shifts and divides need an unsigned operand, not a cast on the
   result.** A `u32` local for the product, `60000000U` for the literal.
 - `x / 128` on a signed value gives `bgez / addiu 0x7F / sra 7`;
@@ -179,6 +197,36 @@ function by hand: the remaining difference is usually one of them.
   `base = tbl[entry >> 8] + ...;  reg = (volatile u16 *)(((entry & 0x3E) << 3) + base);`
   gives. `libsd_sceSdSetParam`, the same function with a store, wants the plain
   left-to-right sum.
+- **A `volatile` global is the only way to get a reload after a store.** gcc
+  2.8's `cse_insn` records the stored register as equivalent to the MEM, so
+  `g[i]++; if (g[i] ...)` reuses the register where retail loads again. Ten of
+  LIBSD's globals are volatile for that reason: the chunk queue, the transfer
+  and clean callbacks, `sceSdTransIdle`, `sceSdBlockHalf`, `sceSdBlockSize` and
+  `sceSdSpdifMode`, all shared with the DMA and IRQ handlers. It has to be the
+  declaration: a cast through the symbol (`*(volatile s32 *)&sym`) makes the
+  address a CSE'd value and costs a `la` plus an `addu`. The qualifier belongs
+  in the database, where `tools/irx_headers.py` picks it up on its own.
+- **Through a register-held pointer, though, a volatile read is free.**
+  `s32 *ev = sym; ev[0] = f(); if (*(volatile s32 *)&ev[0] <= 0)` gives retail's
+  store-then-reload with no extra instruction, which is how `libsd_sceSdQuit`
+  and `sceSdInitState` reach `sceSdTransEventFlag`. `*(u32 *)&sym = v` defeats
+  the CSE for an indexed array element but not for a scalar.
+- **A hardware register's `volatile` pointer local must be block-scoped.** A
+  function-scoped one is computed in the prologue and burns a callee-saved
+  register; declared in the block that uses it, the whole constant is built
+  there with `lui`/`ori`. Where the assignment sits also decides how the
+  prologue interleaves: `libsd_sceSdSetEffectMode` and `libsd_sceSdSetEffectAttr`
+  only matched once the pointer's assignment moved out of its declaration and
+  below the other zero initialisations.
+- **Two registers read back to back want both addresses built first.** Retail
+  materialises each `lui`/`ori` pair before either `lhu`; two pointer locals
+  then two dereferences is as close as the C gets, and `sceSdSetSpdifMode` still
+  comes out permuted because the scheduler owns that block.
+- **A save/restore pair wants a `volatile` local array.** A plain `void *saved[2]`
+  gets the right frame slots but the scheduler sinks the stores past the
+  following global stores and retail's load-delay nops vanish.
+- **A struct copy from a `volatile` global becomes a `memcpy` call.** Drop the
+  qualifier for the copy to get the inline 16-byte block loop back.
 - **A dead `sw` to a frame of 8 is a `volatile` local read back after a global
   is written.** Six LIBSD setters end `theGlobal = func; sync = theGlobal;` with
   a `volatile` local, which is the whole reason for their frame; `sceSdStubNoOp`
@@ -221,6 +269,10 @@ function by hand: the remaining difference is usually one of them.
 
 ## Switches
 
+- **How many arguments a callback is called with can decide cross-jumping.**
+  `sceSdIrqHandler` calls its SPU2 handler as `handler(flags, arg)`; written
+  one-argument, gcc merges the two indirect calls and the function comes out
+  four instructions short.
 - **Case bodies come out in source order; the compare chain does not.** gcc
   builds the comparison tree from the case *values*, so reordering the cases
   only moves the bodies. `sceMidiParseMetaEvent` needed `case 0x51` written

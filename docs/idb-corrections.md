@@ -835,3 +835,44 @@ declaration is gone, since nothing in the build imports ordinal 7.
 
 Found the same way as the stdio correction above, by checking each import
 stub's name against its ordinal once `IRX_IMPORT` made the ordinal visible.
+
+## Applied on 2026-10-25: LIBSD's volatile globals, and two types
+
+Writing C for all 60 of LIBSD's functions settled twelve things in the
+`SOUNDIRX/LIBSD` database. Every one of them is proved by a byte-identical
+build, and all seven IRX modules still verify.
+
+### Ten globals are `volatile`
+
+`sceSdTransIdle`, `sceSdBlockHalf`, `sceSdBlockSize`, `sceSdSpdifMode`,
+`sceSdTransCallback`, `sceSdTransIntrHandler`, `sceSdCleanStepCallback`,
+`sceSdCleanChunk`, `sceSdCleanChunkIndex` and `sceSdCleanChunkCount` were all
+plain. Every one of them is shared with the DMA or IRQ handler, and retail
+reloads each one after writing it, where gcc's CSE keeps the stored register.
+`sceSdCleanEffectStep` is eleven instructions short without the qualifier;
+`sceSdSetSpdifMode`, `libsd_sceSdSetTransCallback` and `libsd_sceSdQuit` are
+each one or three short.
+
+`tools/irx_headers.py` carries the qualifier out of the database on its own, so
+the fix was the type and a regenerate. Three agents reached the same conclusion
+independently from three different parts of the module, which is what made it
+worth applying rather than working around in the C.
+
+`sceSdTransEventFlag` is deliberately *not* volatile: its store-then-reload
+matches through a register-held pointer at no cost.
+
+### `sceSdTransferOp` takes no declared parameters
+
+It was `s32 sceSdTransferOp(s32 op, u32 addr, u32 size)`. The op word says how
+many arguments are really passed, and retail calls it with one
+(`libsd_sceSdQuit`, `libsd_sceSdStopTrans`, both effect-clear functions), two
+(`sceSdCleanEffectStep`) and three. Only an unprototyped `s32 sceSdTransferOp()`
+allows that, the same deliberate `()` the database already had for
+`sceSdDelayUnit`. Its definition in `LIBSD.c` is old-style for the same reason:
+a prototyped definition would reject the one-argument calls that follow it.
+
+### `sceSdTransIntrArg_t.arg` is a pointer
+
+It was `u32`. `libsd_sceSdSetTransIntrHandler` stores the caller's argument
+there and `libsd_sceSdGetTransIntrHandlerArgument` returns it as a pointer, so
+`void *` is what it holds. Codegen is unchanged; the C is honest instead.
