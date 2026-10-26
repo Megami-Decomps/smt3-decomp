@@ -424,3 +424,17 @@ Why not splat itself: splat cannot read an IRX, so the container work in
 `tools/irx.py` is needed either way, and spimdisasm would infer symbols where
 the relocation table states them. The symbol file format is shared, which is
 the part worth sharing.
+
+## Compiling this C for the host
+
+`IRX_HOST` makes `include/irx/irx.h` usable off the IOP: the typedefs stay,
+`va_list` comes from the platform's stdarg, and `INCLUDE_ASM`, `IRX_IMPORT`,
+`IRX_IMPORT_TABLE`, `IRX_IMPORT_TABLE_END` and `ALIGN_TEXT` expand to nothing,
+since there is no loader to patch an import stub and nothing depends on .text
+alignment. `ASM_ROOT` is then not required either.
+
+`SPU2_BASE` and `IOP_HW_BASE` in `include/irx/spu2.h` are already defined only
+if absent, so such a build points every register macro at a register file of
+its own by defining those two first. Together that is enough for the register
+accessors to be used unchanged off the target, which keeps a host build from
+restating the address arithmetic and drifting from this one.
