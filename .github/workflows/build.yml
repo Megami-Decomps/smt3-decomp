@@ -57,6 +57,12 @@ jobs:
             python3 "$test"
           done
 
+      # The build never defines NON_MATCHING, so a draft behind that guard is
+      # not compiled by it: a struct rename elsewhere breaks drafts silently.
+      # Needs cc1 but not the retail executable.
+      - name: Compile the non-matching drafts
+        run: python3 tools/check_nonmatching.py
+
       # The retail executable is copyrighted and is never committed here. A
       # fork or a public clone has no way to obtain it, so the build, checksum
       # and report steps below are skipped instead of pretending to verify
