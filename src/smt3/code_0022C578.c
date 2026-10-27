@@ -1749,7 +1749,25 @@ void campDrawSetPhase(void)
     campWork->drawPhase = 2;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawStockCursor);
+void campDrawStockCursor(void)
+{
+    switch (campWork->page[0].cursor.unk_22 + (u8)campWork->page[0].cursor.unk_24) {
+    case 1:
+        campDrawText(0x10, 0);
+        break;
+    case 0:
+        campDrawText(7, 0);
+        break;
+    case 2:
+        campDrawText(8, 0);
+        break;
+    case 3:
+        campDrawText(9, 0);
+        break;
+    }
+    campWork->drawPhase = 0;
+}
+
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawNumber);
 
