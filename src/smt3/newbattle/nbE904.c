@@ -438,9 +438,7 @@ typedef struct
     u32 unknown18;
     u32 unknown1C;
     u32 unknown20;
-    u32 unknown24;
-    u32 unknown28;
-    u32 unknown2C;
+    u8 reserve[0xC];
 } effBTL_SkillLight_t;
 
 typedef struct

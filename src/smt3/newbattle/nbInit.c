@@ -23,7 +23,7 @@ typedef struct
     u8 unk_00[0x1C];
     u16 stagemajor;
     u16 stageminor;
-    u8 unk_20[0x6];
+    u8 reserve[0x6];
 } nbEncountForm_t;
 
 extern nbEncountForm_t nbEncountFormTable[];
