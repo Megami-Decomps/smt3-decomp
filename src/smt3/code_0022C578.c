@@ -2274,7 +2274,7 @@ extern campInfoWork_t *cmpinitDH();
 
 extern void camp_calc_dh_Process();
 
-extern void camp_draw_dh_Process();
+extern s32 camp_draw_dh_Process();
 
 extern void camp_update_dh_Process();
 
@@ -2443,13 +2443,39 @@ void campDhDrawHearts(void)
                        4, 4, 0);
 }
 
+extern void campDhDrawIcon(void);
+
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDC0);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDD8);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FDE8);
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_draw_dh_Process);
+s32 camp_draw_dh_Process(s32 id)
+{
+    campInfoWork_t *work = dds3GetProcessData(id);
+
+    campDhDrawWork = (campDhWork_t *)work;
+    if ((work->unk_00 & 0x20) != 0) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)work);
+        return -1;
+    }
+    if ((work->unk_00 & 2) != 0) {
+        switch (work->unk_01) {
+        case 0:
+        case 3:
+            campDhDrawIcon();
+            break;
+        case 1:
+        case 2:
+        case 4:
+            campDhDrawHearts();
+            break;
+        }
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhApplyEntry);
 
