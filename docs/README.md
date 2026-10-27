@@ -44,6 +44,9 @@ quickstart.
   function is close but not exact, and what has been ruled out.
 - [Non-matching drafts](nonmatching.md): the reconstructions kept behind
   `#ifdef NON_MATCHING`, how close each is, and what has been ruled out.
+- [Matching by analogy](matching-harness.md): how far a matched function's C
+  serves as a template for an unmatched one, with the measured reach of
+  `tools/find_similar.py`.
 - `config/smt3/claims.tsv`: who is working on which unit, so the same one is
   not reconstructed twice.
 - [Reading progress](progress.md): how progress would be measured and what
