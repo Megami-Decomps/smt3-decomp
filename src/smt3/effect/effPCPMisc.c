@@ -93,9 +93,7 @@ struct effResourceRectDrawParams_t;
 struct EffSpawnParams;
 struct effPCPThunderSpherePolyParam_t;
 struct effPCP_ThunderPolyParam_t;
-union EffThunderParameterHead;
 struct effPCPThunderSpherePolyPart_t;
-struct EffThunderVectorParams;
 struct effPCPThunderSpherePoly_t;
 struct effTrackPolyParams_t;
 struct sdfIpuDmaRegs_t;
@@ -179,8 +177,6 @@ typedef struct effPCPRadiateBED_tag effPCPRadiateBED_tag;
 typedef struct effPCPHelperBEDParam_t effPCPHelperBEDParam_t;
 typedef struct EffPCPEventPlace EffPCPEventPlace;
 typedef struct effPCPThunderSpherePolyParam_t effPCPThunderSpherePolyParam_t;
-typedef struct EffThunderVectorParams EffThunderVectorParams;
-typedef union EffThunderParameterHead EffThunderParameterHead;
 typedef struct effPCPThunderSpherePolyPart_t effPCPThunderSpherePolyPart_t;
 typedef struct parCell_t parCell_t;
 typedef struct parSystem_t parSystem_t;
@@ -1124,6 +1120,10 @@ struct EffPCPEventPlace {
 };
 
 /* Alpha-system parameters supply three packed words to the particle system. */
+/* The sphere-poly parameters, 0x4C bytes the constructors copy whole. The tail
+ * is the thunder family's six fields: a width and a colour for the centre, the
+ * border and the edge. The decomp read it twice, once for the widths and once
+ * for the colours, which is why the two views agreed on everything before. */
 struct effPCPThunderSpherePolyParam_t {
     f32 origin[4];
     u16 systemParam;
@@ -1136,41 +1136,16 @@ struct effPCPThunderSpherePolyParam_t {
     u32 startDelayRange;
     u32 activeFrameRange;
     u16 perCell;
-    u8 pad32[6];
-    u32 centerAlphaWord;
-    u32 reserved3C;
-    u32 middleAlphaWord;
-    u32 reserved44;
-    u32 edgeAlphaWord;
+    u8 pad32[2];
+    f32 width_center; /* 0x34: nothing reads it */
+    u32 color_center;
+    f32 width_border;
+    u32 color_border;
+    f32 width_edge;
+    u32 color_edge;
 };
 
 /* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
-struct EffThunderVectorParams {
-    f32 origin[4];
-    u16 systemParam;
-    u8 pad12[2];
-    u32 cellCount;
-    u8 pad18[4];
-    f32 radiusScale;
-    f32 heightScale;
-    f32 rotationScale;
-    u32 startDelayRange;
-    u32 activeFrameRange;
-    u16 perCell;
-    u8 pad32[0xA];
-    f32 bandWidth;
-    void *dispatchArg;
-    f32 edgeWidth;
-    u8 pad48[4];
-};
-
-/* Constructors copy all 0x4C bytes. The vector updater reads the retained
- * geometry bytes through the vector view for both constructor variants. */
-union EffThunderParameterHead {
-    EffThunderVectorParams vector;
-    effPCPThunderSpherePolyParam_t alpha;
-};
-
 struct effPCPThunderSpherePolyPart_t {
     u32 wait;
     u32 refresh;
@@ -1209,7 +1184,7 @@ struct parSystem_t {
 
 /* The complete work is followed by cellCount cells in the same allocation. */
 struct effPCPThunderSpherePoly_t {
-    EffThunderParameterHead head;
+    effPCPThunderSpherePolyParam_t head;
     effPCPThunderSpherePolyPart_t *pPart;
     u32 abgr;
     f32 width_base;
