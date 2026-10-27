@@ -3773,7 +3773,7 @@ void cmpModelFreeResource(void)
     }
 }
 
-void cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
+s32 cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 {
     D_0054FEE0 = mdlPrepare(group, id, blocking);
 }
@@ -3887,33 +3887,32 @@ s32 cmpModelSetup(u16 id, s32 blocking)
 INCLUDE_ASM(const s32, "code_0022C578", cmpModelSetup);
 #endif
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+extern char D_00540090[];
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+extern s32 mdlLoad(s32 group, s32 id);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+extern void cmpGetStatusModelMotion();
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540058);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540070);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
-
-INCLUDE_ASM(const s32, "code_0022C578", cmpLoadStatusModel);
+s32 cmpLoadStatusModel(void)
+{
+    if (cmpModelInitFlag != 0)
+    {
+        if (cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle) != 0)
+        {
+            if (cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle) != -1)
+            {
+                cmpModelFreeResource();
+                cmpEncycWork = mdlLoad(D_0054FEEE, cmpStatusModelId);
+                cmpGetStatusModelMotion(cmpEncycWork);
+                printf(D_00540090, D_0054FEEE, cmpStatusModelId);
+                cmpModelInitFlag = 0;
+                return 2;
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
 
 #include "motion.h"
 
@@ -4045,6 +4044,34 @@ s8 cmpGetParamGaugeColor(s8 index)
 {
     return D_00349380[index];
 }
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540058);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540070);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540090);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_005400B0);
 
