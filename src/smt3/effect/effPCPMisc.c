@@ -11,9 +11,9 @@ struct P2A_TEXANIM_tag;
 struct billRenderPair_t;
 struct BillTextureQuad;
 struct effBTL_SkillPositionPtr_t;
-struct EffBattleEntry;
-struct EffBattleEntryList;
-union EffBattleParameterValue;
+struct effBTL_SkillPartsList_t;
+struct effBTL_SkillCutTable_t;
+union effBTLPartValue_t;
 struct effPCPSparkleSphereParam_t;
 struct effPCPSparkleSphere_tag;
 struct dds3Effect_Blur_t;
@@ -30,7 +30,7 @@ struct effPCPRingPolyExp2_tag;
 struct dds3RingPolyExpList_tag;
 struct effPCPRingPolyExpParam_t;
 struct effPCPRingPolyExp_tag;
-struct EffPCPBlockSet;
+struct effPCPAgiFireballPartList_t;
 struct effPCPAgiFireballParam_t;
 struct effPCPAgiFireball_tag;
 struct effPCPEyeThunder_tag;
@@ -85,8 +85,8 @@ struct effPCPAgiraoFireParam_t;
 struct effPCPAgiraoFire_tag;
 struct effPCPHama01_tag;
 struct effDebugPolyParams_t;
-struct EffParamTable;
-struct EffParamTableRecord;
+struct dds3EffectPCPData_t;
+struct dds3EffectPCPData_Part_t;
 struct effRandState_t;
 struct effResourceRectBounds_t;
 struct effResourceRectDrawParams_t;
@@ -120,7 +120,7 @@ struct sdfMotionNodeDef_t;
 struct sdfIpuDecodeCb_t;
 struct SdfStreamInputDmaTag;
 struct sdfGsMemSlice_t;
-struct SoundBank;
+struct effBTLBank_t;
 
 typedef struct BillTextureQuad BillTextureQuad;
 typedef struct BillPacketWork BillPacketWork;
@@ -149,7 +149,7 @@ typedef struct dds3RingPolyExpList_tag dds3RingPolyExpList_tag;
 typedef struct effPCPRingPolyExp2_tag effPCPRingPolyExp2_tag;
 typedef struct effPCPRingPolyExpParam_t effPCPRingPolyExpParam_t;
 typedef struct effPCPRingPolyExp_tag effPCPRingPolyExp_tag;
-typedef struct EffPCPBlockSet EffPCPBlockSet;
+typedef struct effPCPAgiFireballPartList_t effPCPAgiFireballPartList_t;
 typedef struct effPCPAgiFireballParam_t effPCPAgiFireballParam_t;
 typedef struct effPartHandle_t effPartHandle_t;
 typedef struct effPCPAgiFireball_tag effPCPAgiFireball_tag;
@@ -175,10 +175,10 @@ typedef struct effPCPMHanma01_tag effPCPMHanma01_tag;
 typedef struct effPCPRadiateBEDPart_tag effPCPRadiateBEDPart_tag;
 typedef struct effPCPRadiateBEDParam_t effPCPRadiateBEDParam_t;
 typedef struct effBTL_SkillPositionPtr_t effBTL_SkillPositionPtr_t;
-typedef union EffBattleParameterValue EffBattleParameterValue;
-typedef struct EffBattleEntryList EffBattleEntryList;
-typedef struct SoundBank SoundBank;
-typedef struct SoundMixer SoundMixer;
+typedef union effBTLPartValue_t effBTLPartValue_t;
+typedef struct effBTL_SkillCutTable_t effBTL_SkillCutTable_t;
+typedef struct effBTLBank_t effBTLBank_t;
+typedef struct effBTL_t effBTL_t;
 typedef struct effPCPRadiateBED_tag effPCPRadiateBED_tag;
 typedef struct effPCPHelperBEDParam_t effPCPHelperBEDParam_t;
 typedef struct EffPCPEventPlace EffPCPEventPlace;
@@ -261,8 +261,8 @@ typedef struct mdlEffectResrcItem_t mdlEffectResrcItem_t;
 typedef struct mdlMarkPos_t mdlMarkPos_t;
 typedef struct dds3ModelEffectCtrlr_t dds3ModelEffectCtrlr_t;
 typedef struct effDebugPolyParams_t effDebugPolyParams_t;
-typedef struct EffParamTableRecord EffParamTableRecord;
-typedef struct EffParamTable EffParamTable;
+typedef struct dds3EffectPCPData_Part_t dds3EffectPCPData_Part_t;
+typedef struct dds3EffectPCPData_t dds3EffectPCPData_t;
 
 #define EFF_DEG2RAD 0.017453292f
 
@@ -671,14 +671,12 @@ struct effPCPRingPolyExp_tag {
     dds3RingPolyExpList_tag *hPoly;
 };
 
-struct EffPCPBlockSet {
-    void *block1;
-    void *group[5];
-    void *block7;
-    void *block8;
-    void *block9;
-    void *tail[5];
-    void *block15;
+struct effPCPAgiFireballPartList_t {
+    void *pHelper;
+    void *pAttach[5];
+    void *pTrack[3];
+    void *pStart[5];
+    void *pOkSmoke;
 };
 
 /* The serialized parameter block copied into each block-set work record. */
@@ -897,7 +895,7 @@ struct effPCPDistortionBlurExpParam_t {
 
 
 struct effPCPAnalyzeBED_tag {
-    struct SoundMixer *hBED;
+    struct effBTL_t *hBED;
     struct effEveBEDCutHandle_t *hBEDCut;
     f32 scale;
     u32 abgr;
@@ -1019,7 +1017,7 @@ struct effPCPRadiateBEDParam_t {
     u8 pad84[0x80];
 };
 
-struct SoundMixer;
+struct effBTL_t;
 
 struct BattleEffect;
 
@@ -1035,23 +1033,23 @@ struct effBTL_SkillPositionPtr_t {
     s32 radius;    /* 0x04: zero uses the source range */
 };
 
-union EffBattleParameterValue {
+union effBTLPartValue_t {
     u32 sourceOffset;
     struct effPartHandle_t *work;
 };
 
-typedef struct EffBattleEntry {
-    u16 paramKind;                 /* 0x00 */
+typedef struct effBTL_SkillPartsList_t {
+    u16 type;                 /* 0x00 */
     u8 pad02[2];
-    EffBattleParameterValue value; /* 0x04 */
-    effBTL_SkillPositionPtr_t aimParams;        /* 0x08 */
-    u32 zeroKindCount;             /* 0x10 */
-    u8 kind;                       /* 0x14 */
+    effBTLPartValue_t value; /* 0x04 */
+    effBTL_SkillPositionPtr_t pos_ptr;        /* 0x08 */
+    u32 timing;             /* 0x10 */
+    u8 reverberations;                       /* 0x14 */
     u8 pad15[3];
-} EffBattleEntry; /* 0x18 */
+} effBTL_SkillPartsList_t; /* 0x18 */
 
-struct EffBattleEntryList {
-    s32 triggerFrame;              /* 0x00 */
+struct effBTL_SkillCutTable_t {
+    s32 frame;              /* 0x00 */
     u8 pad04[2];
     u16 shake;                     /* 0x06: screen-shake amount; 31 or more logs and caps at 300 frames */
     u16 shakeFrame;                /* 0x08: frame at which the shake starts */
@@ -1065,12 +1063,12 @@ struct EffBattleEntryList {
     s32 colorRampEndFrame;         /* 0x70 */
     u8 actorScaleEnabled;          /* 0x74 */
     u8 pad75[3];
-    EffBattleEntry entries[1];     /* 0x78 */
+    effBTL_SkillPartsList_t entries[1];     /* 0x78 */
 };
 
 struct BattleEffect {
     void *owner; /* 0x00 */
-    SoundMixer *state; /* 0x04 */
+    effBTL_t *state; /* 0x04 */
     u32 color; /* 0x08 */
     u16 flags; /* 0x0C */
     u8 pad0E[2];
@@ -1080,7 +1078,7 @@ struct BattleEffect {
     u16 kind; /* 0x1C */
     u8 pad1E[2];
     s32 unk20;
-    struct EffBattleEntryList *list; /* 0x24 */
+    struct effBTL_SkillCutTable_t *list; /* 0x24 */
     struct effPartHandle_t *parameterWorks[0x3C]; /* 0x28 */
     BattleEffectCallback sourceFrameCallback; /* 0x118 */
     BattleEffectCallback triggerFrameCallback; /* 0x11C */
@@ -1088,14 +1086,14 @@ struct BattleEffect {
     BattleEffect *next; /* 0x124 */
 };
 
-struct SoundBank {
+struct effBTLBank_t {
     u8 pad00[8];
-    EffBattleEntryList list;       /* 0x08 */
+    effBTL_SkillCutTable_t list;       /* 0x08 */
     u8 pad98[0x580];
 };
 
-struct SoundMixer {
-    SoundBank banks[2];
+struct effBTL_t {
+    effBTLBank_t banks[2];
     u8 pad0C30[8];
     struct sdfMemHandle_t *resource; /* 0xC38: owns the mixer allocation. */
     u32 active;
@@ -1105,7 +1103,7 @@ struct SoundMixer {
 struct effPCPRadiateBED_tag {
     effPCPRadiateBEDParam_t param;
     effPCPRadiateBEDPart_tag *pPart;
-    SoundMixer *owner;
+    effBTL_t *owner;
     u8 original;
     u8 pad10D[3];
     f32 scale;
@@ -1330,7 +1328,7 @@ struct effPCPHelperBED_tag {
     effPCPHelperBEDParam_t param;
     effPCPHelperBEDPart_tag *pPart;
     struct sdfMemHandle_t *entriesHandle;
-    struct SoundMixer *owner;
+    struct effBTL_t *owner;
     struct effPartHandle_t *hHelper;
     f32 scale;
     s32 frame;
@@ -1368,7 +1366,7 @@ struct effPCPRadiateTBParam_t {
 struct effPCPRadiateTB_tag {
     effPCPRadiateTBParam_t param;
     effPCPRadiateTBPart_tag *pPart;
-    SoundMixer *hBED, *ownerB;
+    effBTL_t *hBED, *ownerB;
     u8 original;
     u8 pad99[3];
     u32 abgr;
@@ -1481,7 +1479,7 @@ struct effPCPSpiralBEDParam_t {
 struct effPCPSpiralBED_tag {
     effPCPSpiralBEDParam_t param;
     effPCPSpiralBEDPart_tag *pPart;
-    struct SoundMixer *hBED;
+    struct effBTL_t *hBED;
     u8 original;
     u8 pad9D[3];
     f32 scale;
@@ -2253,15 +2251,15 @@ void dds3EffectPartDelete(effPartHandle_t *hEffPart);
 void dds3EffectPartialMultiBlurDraw(dds3Effect_PartialMultiBlur_t *owner);
 
 /* Clone a mixer owner or release all of its active voices. */
-struct SoundMixer *effEveBEDCreate(struct SoundMixer *pData);
+struct effBTL_t *effEveBEDCreate(struct effBTL_t *pData);
 
 /* The event constructor copies a serialized, caller-specific 0x30-byte
  * parameter record. Its retained work owner is opaque to external users. */
-effEveBEDCutHandle_t *effEveBEDCutCreate(struct SoundMixer *hEveBED, u16 CutNum, const void *pParams);
+effEveBEDCutHandle_t *effEveBEDCutCreate(struct effBTL_t *hEveBED, u16 CutNum, const void *pParams);
 
 void effEveBEDCutDelete(effEveBEDCutHandle_t *hEveBEDCut);
 
-void effEveBEDDelete(struct SoundMixer *hEveBED);
+void effEveBEDDelete(struct effBTL_t *hEveBED);
 
 extern u8 effPCP_ShockWave01_ThunderSpherePoly_Param[];
 
@@ -2290,24 +2288,27 @@ extern u8 D_0031FDF0[];
 
 extern u8 D_0031FE50[];
 
-/* The table starts with 0x10 bytes of header, followed by 0x10-byte records.
- * Each blockOffset is signed and relative to the start of the whole table. */
-struct EffParamTableRecord {
-    u32 word0;
-    s32 blockOffset;
-    u32 kindAndFlags;
-    u32 wordC;
+/* The table starts with four header words, followed by 0x10-byte parts. Each
+ * offset is relative to the start of the whole table. */
+struct dds3EffectPCPData_Part_t {
+    u32 size;
+    u32 offset;
+    u32 type;
+    u32 reserve;
 };
 
-struct EffParamTable {
-    u8 header[0x10];
-    EffParamTableRecord records[1];
+struct dds3EffectPCPData_t {
+    u32 kateg;
+    u32 param;
+    u32 part;
+    u32 reserve;
+    dds3EffectPCPData_Part_t pcpData[1];
 };
 
-effPartHandle_t *dds3EffectPCPDataPartCreate(const EffParamTable *table, s32 recordIndex);
+effPartHandle_t *dds3EffectPCPDataPartCreate(dds3EffectPCPData_t *hPCPData, u32 number);
 
-/* Return a borrowed block at the selected record's signed relative offset. */
-void *dds3EffectPCPDataGetData(const EffParamTable *table, s32 recordIndex);
+/* Return a borrowed block at the selected part's relative offset. */
+void *dds3EffectPCPDataGetData(dds3EffectPCPData_t *hPCPData, u32 number);
 
 /* Optional source and matrix operations retain their generic pointer domains. */
 void dds3EffectPartSetPosition(effPartHandle_t *hEffPart, void *pPos);
@@ -2356,7 +2357,7 @@ void effPCPAgiFireballSetRotateMatrix(effPCPAgiFireball_tag *hData, const void *
 void effPCPAgiFireballSetPosition(effPCPAgiFireball_tag *hData, const void *pPos);
 
 effPCPAgiFireball_tag *effPCPAgiFireballCreate(
-    const effPCPAgiFireballParam_t *pParam, const EffPCPBlockSet *pPart);
+    const effPCPAgiFireballParam_t *pParam, const effPCPAgiFireballPartList_t *pPart);
 
 effPCPRadiateThunder_tag *effPCPRadiateThunderCreate(const effPCPRadiateThunderParam_t *pParam, void *pData);
 
@@ -2548,7 +2549,7 @@ static inline void ShiftThunderHandles(effPCPZiodin01_tag *work, s32 count) {
 /* Three selectable heads precede the shared block-set inputs. */
 typedef struct {
     void *head[3];
-    EffPCPBlockSet selected;
+    effPCPAgiFireballPartList_t selected;
 } effPCPBlockSetInputs_t;
 extern u16 D_0031F560[8];
 extern f32 D_0031F570[8];
@@ -4989,22 +4990,22 @@ void effPCPAgiraoFireSetColor(effPCPAgiraoFire_tag *hData, u32 abgr) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreate);
 
 effPCPAgiFireball_tag *effPCPAgiFireballCreatePCF(void *parameterTable) {
-    EffPCPBlockSet set;
+    effPCPAgiFireballPartList_t set;
     effPCPAgiFireballParam_t *first;
     u32 i;
 
     first = dds3EffectPCPDataGetData(parameterTable, 0);
-    set.block1 = dds3EffectPCPDataGetData(parameterTable, 1);
+    set.pHelper = dds3EffectPCPDataGetData(parameterTable, 1);
     for (i = 0; i < 5; i++) {
-        set.group[i] = dds3EffectPCPDataGetData(parameterTable, 2 + i);
+        set.pAttach[i] = dds3EffectPCPDataGetData(parameterTable, 2 + i);
     }
-    set.block7 = dds3EffectPCPDataGetData(parameterTable, 7);
-    set.block8 = dds3EffectPCPDataGetData(parameterTable, 8);
-    set.block9 = dds3EffectPCPDataGetData(parameterTable, 9);
+    set.pTrack[0] = dds3EffectPCPDataGetData(parameterTable, 7);
+    set.pTrack[1] = dds3EffectPCPDataGetData(parameterTable, 8);
+    set.pTrack[2] = dds3EffectPCPDataGetData(parameterTable, 9);
     for (i = 0; i < 5; i++) {
-        set.tail[i] = dds3EffectPCPDataGetData(parameterTable, 10 + i);
+        set.pStart[i] = dds3EffectPCPDataGetData(parameterTable, 10 + i);
     }
-    set.block15 = dds3EffectPCPDataGetData(parameterTable, 15);
+    set.pOkSmoke = dds3EffectPCPDataGetData(parameterTable, 15);
     return effPCPAgiFireballCreate(first, &set);
 }
 
@@ -5153,7 +5154,7 @@ effPCPAgiFireball2_tag *effPCPAgiFireball2Create(effPCPAgiFireball2Param_t *pAFB
     sub = pAFB2Param->group;
     work->frame = 0;
     for (i = 0; i < 3; i++) {
-        pAFB2Part->selected.block1 = pAFB2Part->head[i];
+        pAFB2Part->selected.pHelper = pAFB2Part->head[i];
         work->blockSets[i] = effPCPAgiFireballCreate(sub, &pAFB2Part->selected);
         sub++;
     }
