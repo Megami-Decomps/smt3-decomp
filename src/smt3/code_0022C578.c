@@ -3291,7 +3291,20 @@ s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
     return cmpDrawBoxG(a, b, c, d, e, f, 0, g);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmp_23A360);
+void cmp_23A360(s32 x, s32 y, s32 z, s32 w, s32 h, s32 g, s32 col)
+{
+    s32 right = x + w * 16;
+
+    cmpDrawPanelEffCell(x, y, z, right, y, z, g, col);
+    {
+        s32 bottom = y + h * 8;
+
+        cmpDrawPanelEffCell(x, y, z, x, bottom, z, g, col);
+        cmpDrawPanelEffCell(right, y, z, right, bottom, z, g, col);
+        cmpDrawPanelEffCell(x, bottom, z, x + ((w + 1) << 4), bottom, z, g, col);
+    }
+}
+
 
 void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
 {
