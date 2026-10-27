@@ -923,24 +923,6 @@ the free, which costs 58 more words; the same local stored before the free;
 a local holding `file[j]` for both calls, equally bad; the two `if`s folded
 into one `&&`; and `file[j] = NULL` moved in front of the free.
 
-## Chk_ENHOJOMAX, Chk_FRHOJOMAX (newbattle/nbMakePacket, 0xDC each)
-
-54 of 55 words each match, at the exact 220-byte size.
-
-Both are the established `Chk_*` shape of this unit: a `one = 1;` local above
-the loop, `a->data->party[i]` subscripted at every use so the base reloads
-after the call, and a `continue` per flag test. The one differing word is the
-third flag test: retail emits a plain `bnez $2, .L00286134` and duplicates
-`slti $2, $18, 4` into all four predecessors of the loop-continue block, while
-ee-gcc makes that one branch `bnel` and annuls the `slti` instead. The other
-two flag tests come out plain in both.
-
-Ruled out: `!= 0` written explicitly on the `0x20` test, fusing it with the
-`ChkAiHojoMax` call into one `||`, and nesting the last two tests instead of
-`continue`. All three give the identical one-word diff, as do the matching
-siblings' shapes (`Chk_ENCNT` and `Chk_FRCNT`, which have no call in the loop,
-match exactly).
-
 ## Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
 
 18 of 29 words each differ, two words short of retail's 124.

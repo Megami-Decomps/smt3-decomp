@@ -282,6 +282,10 @@ extern s32 nbAiChkJoken(nbActionProcessData_t *a, u32 jo);
 
 extern s32 nbGetHojoCounter(s32 formindex, s32 type);
 
+extern s32 nbGetHojoCounterMax(s32 hojotype);
+
+extern s32 nbGetHojoCounterMin(s32 hojotype);
+
 extern void nbRunAi(nbActionProcessData_t *a);
 
 extern void nbRunAiSub(nbActionProcessData_t *a, s32 tbl);
@@ -754,7 +758,97 @@ s32 ChkAiHojo(s32 formindex, s32 n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbAi", ChkAiHojoMax);
+s32 ChkAiHojoMax(s32 formindex, s32 n)
+{
+    switch (n) {
+    case 0:
+        if (nbGetHojoCounter(formindex, 4) >= nbGetHojoCounterMax(4)) {
+            return 1;
+        }
+        break;
+    case 1:
+        if (nbGetHojoCounter(formindex, 4) <= nbGetHojoCounterMin(4)) {
+            return 1;
+        }
+        break;
+    case 2:
+        if (nbGetHojoCounter(formindex, 5) >= nbGetHojoCounterMax(5)) {
+            return 1;
+        }
+        break;
+    case 3:
+        if (nbGetHojoCounter(formindex, 5) <= nbGetHojoCounterMin(5)) {
+            return 1;
+        }
+        break;
+    case 4:
+        if (nbGetHojoCounter(formindex, 6) >= nbGetHojoCounterMax(6)) {
+            return 1;
+        }
+        break;
+    case 5:
+        if (nbGetHojoCounter(formindex, 6) <= nbGetHojoCounterMin(6)) {
+            return 1;
+        }
+        break;
+    case 6:
+        if (nbGetHojoCounter(formindex, 7) >= nbGetHojoCounterMax(7)) {
+            return 1;
+        }
+        break;
+    case 7:
+        if (nbGetHojoCounter(formindex, 7) <= nbGetHojoCounterMin(7)) {
+            return 1;
+        }
+        break;
+    case 8:
+        if (nbGetHojoCounter(formindex, 8) >= nbGetHojoCounterMax(8)) {
+            return 1;
+        }
+        break;
+    case 9:
+        if (nbGetHojoCounter(formindex, 8) <= nbGetHojoCounterMin(8)) {
+            return 1;
+        }
+        break;
+    case 11:
+        if (nbGetHojoCounter(formindex, 9) >= nbGetHojoCounterMax(9)) {
+            return 1;
+        }
+        break;
+    case 12:
+        if (nbGetHojoCounter(formindex, 10) >= nbGetHojoCounterMax(10)) {
+            return 1;
+        }
+        break;
+    case 13:
+        if (nbGetHojoCounter(formindex, 11) >= nbGetHojoCounterMax(11)) {
+            return 1;
+        }
+        break;
+    case 14:
+        if (nbGetHojoCounter(formindex, 12) >= nbGetHojoCounterMax(12)) {
+            return 1;
+        }
+        break;
+    case 15:
+        if (nbGetHojoCounter(formindex, 13) >= nbGetHojoCounterMax(13)) {
+            return 1;
+        }
+        break;
+    case 16:
+        if (nbGetHojoCounter(formindex, 14) >= nbGetHojoCounterMax(14)) {
+            return 1;
+        }
+        break;
+    case 17:
+        if (nbGetHojoCounter(formindex, 15) >= nbGetHojoCounterMax(15)) {
+            return 1;
+        }
+        break;
+    }
+    return 0;
+}
 
 s32 Chk_ENHOJO(nbActionProcessData_t *a, s32 n)
 {
@@ -808,8 +902,6 @@ s32 Chk_FRHOJO(nbActionProcessData_t *a, s32 n)
     return a->aiselect != 0;
 }
 
-/* NON_MATCHING: 1 of 55 words differ (first at +0x6C). */
-#ifdef NON_MATCHING
 s32 Chk_ENHOJOMAX(nbActionProcessData_t *a, s32 n)
 {
     s32 i;
@@ -829,19 +921,13 @@ s32 Chk_ENHOJOMAX(nbActionProcessData_t *a, s32 n)
         if (a->data->party[i].flag & 0x20) {
             continue;
         }
-        if (ChkAiHojoMax(a->data->party[i].formindex, n) == 0) {
-            continue;
+        if (ChkAiHojoMax(a->data->party[i].formindex, n)) {
+            a->aiselect |= one << a->data->party[i].formindex;
         }
-        a->aiselect |= one << a->data->party[i].formindex;
     }
     return a->aiselect != 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", Chk_ENHOJOMAX);
-#endif
 
-/* NON_MATCHING: 1 of 55 words differ (first at +0x6C). */
-#ifdef NON_MATCHING
 s32 Chk_FRHOJOMAX(nbActionProcessData_t *a, s32 n)
 {
     s32 i;
@@ -861,16 +947,12 @@ s32 Chk_FRHOJOMAX(nbActionProcessData_t *a, s32 n)
         if (a->data->party[i].flag & 0x20) {
             continue;
         }
-        if (ChkAiHojoMax(a->data->party[i].formindex, n) == 0) {
-            continue;
+        if (ChkAiHojoMax(a->data->party[i].formindex, n)) {
+            a->aiselect |= one << a->data->party[i].formindex;
         }
-        a->aiselect |= one << a->data->party[i].formindex;
     }
     return a->aiselect != 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", Chk_FRHOJOMAX);
-#endif
 
 s32 Chk_BA_286248(nbActionProcessData_t *a, s32 n)
 {
