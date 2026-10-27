@@ -1780,3 +1780,20 @@
   exact on the macro alone. A second `sdfVector4_t *` local for the calls does
   not reach it, and neither does splitting the `dds3AllocObjectId` call out of
   the argument list.
+- A `.data` word retail addresses with `lui`/`%lo` rather than gp-relative is
+  an unsized `extern` array, not a scalar. `extern char *D_00330914;` puts the
+  read in the small-data section and costs the `lui`; `extern char
+  *D_00330914[];` with `D_00330914[0]` gives retail's two instructions.
+  `cmpCalcDestroyItem` turned on that one line.
+- `mult rd, rs, rt` against a constant materialised with `addiu`, where a
+  literal gives a shift-and-add chain, comes from a local holding the factor:
+  `s32 scale = 0x66; x = alpha * scale / 0x100;`. `synth_mult` runs at expand
+  time off the tree, so a variable is enough to stop it, and RTL cse then
+  leaves the `addiu`. The same trick does **not** hold an `and` against a mask
+  constant: that folds later in combine whatever the source says.
+- An `and` against a mask that combine folds away, because the value's bits are
+  known ((x & 0xFF) | C masked with ~0xFF is just C), reads the value back out
+  of the array slot it was just stored to: `corner[0] = color; dim = corner[0] &
+  0xFFFFFF00;`. The store/load pair forwards the register but loses the known
+  expression. `campDhDrawBox` needed that plus the store order `corner[1]`,
+  `[2]`, `[3]`, `[0]` for the second group, swept over the permutations.
