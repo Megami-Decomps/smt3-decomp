@@ -473,7 +473,50 @@ s32 Model1Wait_2(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE904", nbE905_Model2Start);
+extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
+
+extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+
+extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
+
+extern void nbSetModelHandleOnce(nbFormation_t *form, NB_FILEHANDLE_T *packh);
+
+extern struct nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, nbActionProcessData_t *uniqueid,
+                                                    nbFormation_t *form, s32 sw);
+
+extern struct nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, nbActionProcessData_t *uniqueid,
+                                                     nbFormation_t *form, s32 a, s32 frame);
+
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+
+extern void nbSetMaeFlag(s32 flag);
+
+s32 nbE905_Model2Start(nbEventProcessData_t *ed)
+{
+    nbFormation_t *p;
+    s32 i;
+
+    p = ed->data->form + 4;
+    nbAddUnitStock(ed->data, 1, nbAppendEnemyDevilWork(ed->data, 0x102, p->formindex),
+                   p->formindex);
+    nbInitUnitEffect(p, 0, 0);
+    if (evtBitCheck(0xC0F) != 0) {
+        nbSetModelHandleOnce(p, ed->pfile);
+        ed->pfile = NULL;
+    }
+    for (i = 4; i < 9; i++) {
+        ed->data->party[p->partyindex].count[i] = D_00575520[i];
+    }
+    nbAddFormOnOffPacket(0, 0, p, 1);
+    nbAddUnitAKoukaPacket(0, 0, p, 0, 0);
+    nbAddUnitAKoukaPacket(0, 0, p, 0x80000000, 0);
+    dds3DrawFlag |= 0x2000000;
+    nbSetEnemyFormation(ed->data);
+    ed->data->encno = 0x3E0;
+    nbSetMaeFlag(0);
+    nbFreeEffectSlot(ed);
+    return 0;
+}
 
 s32 func_002930E8(nbEventProcessData_t *e)
 {
