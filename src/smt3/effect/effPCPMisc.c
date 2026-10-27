@@ -125,7 +125,7 @@ struct SoundBank;
 typedef struct BillTextureQuad BillTextureQuad;
 typedef struct BillPacketWork BillPacketWork;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
-typedef struct BillChildPayload BillChildPayload;
+typedef struct dds3BillResource_tag dds3BillResource_tag;
 typedef struct P2A_ANIMATION_tag P2A_ANIMATION_tag;
 typedef struct dds3BillAnimResource_tag dds3BillAnimResource_tag;
 typedef struct P2A_TEXANIM_tag P2A_TEXANIM_tag;
@@ -268,7 +268,7 @@ typedef struct EffParamTable EffParamTable;
 
 struct billHandle_t;
 
-struct BillChildPayload;
+struct dds3BillResource_tag;
 
 /* Native billboard UVs are four ordered U/V corners, not a float vector. */
 struct BillTextureQuad {
@@ -318,22 +318,22 @@ typedef u8 SdfTextureClampMode;
 
 
 /* Child manager at retained allocation +0x400; shared by resource and draw owners. */
-struct BillChildPayload {
-    sdfTexHandle_t *texHandle; /* 0x00: acquired texture reference. */
-    u16 variant; /* Child variant bits; signed inputs narrow on assignment. */
+struct dds3BillResource_tag {
+    sdfTexHandle_t *hTex; /* 0x00: acquired texture reference. */
+    u16 type; /* Child type bits; signed inputs narrow on assignment. */
     u8 pad06[2];
-    s32 refCount;      /* 0x08 */
+    s32 count;      /* 0x08 */
     BillTextureQuad uv; /* 0x0C */
-    f32 x;             /* 0x1C */
-    f32 y;             /* 0x20 */
-    f32 halfWidth;  /* 0x24 */
-    f32 halfHeight; /* 0x28 */
-    sdfDrawTag_t *pendingLists[5]; /* 0x2C */
-    u16 packetListIndex; /* 0x40 */
+    f32 cx;             /* 0x1C */
+    f32 cy;             /* 0x20 */
+    f32 width;  /* 0x24 */
+    f32 height; /* 0x28 */
+    sdfDrawTag_t *pBillTag[5]; /* 0x2C */
+    u16 current_mode; /* 0x40 */
     u8 pad42[2];
-    struct sdfMemHandle_t *allocation; /* 0x44: allocation descriptor released with this child. */
-    BillPacketWork *work; /* 0x48: retained packet-buffer address */
-    struct BillChildPayload *next; /* 0x4C */
+    struct sdfMemHandle_t *hMem; /* 0x44: hMem descriptor released with this child. */
+    BillPacketWork *batch; /* 0x48: retained packet-buffer address */
+    struct dds3BillResource_tag *next; /* 0x4C */
 };
 
 struct dds3BillAnimResource_tag;
@@ -354,7 +354,7 @@ struct dds3BillAnimResource_tag {
     s32 AnimNum;
     s32 TexNum;
     s32 count;
-    struct BillChildPayload **pResList;
+    struct dds3BillResource_tag **pResList;
 };
 
 struct dds3BillAnim_tag;
@@ -387,7 +387,7 @@ struct dds3BillAnim_tag {
 
 /* Two-child draw descriptor at +0x34 in animation-list objects; child allocations end before it. */
 struct billRenderPair_t {
-    struct BillChildPayload *children[2];
+    struct dds3BillResource_tag *children[2];
     u16 cameraFacingMode; /* 0x08: value 1 builds a view-facing matrix; other values use identity. */
     u16 kind;
     u32 colors[2];
@@ -409,7 +409,7 @@ struct billHandle_t {
     u16 mode; /* 0x2E: selected child packet-list pool */
     union {
         void *payload; /* 0x30: type-discriminated payload when its type is unknown */
-        struct BillChildPayload *child; /* child kinds */
+        struct dds3BillResource_tag *child; /* child kinds */
         struct dds3BillAnimResource_tag *animationData; /* type 1 */
     };
     billRenderPair_t pair; /* 0x34: used by the mode-0x80 entry renderer */

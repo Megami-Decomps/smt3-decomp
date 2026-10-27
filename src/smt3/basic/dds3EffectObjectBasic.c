@@ -107,8 +107,8 @@ void *memset(void *a, s32 b, u32 c);
 void *sdfDevLoadFileEx(void *resource, u32 *id, s32 mode);
 
 
-struct BillChildPayload;
-typedef struct BillChildPayload BillChildPayload;
+struct dds3BillResource_tag;
+typedef struct dds3BillResource_tag dds3BillResource_tag;
 struct dds3BillAnimResource_tag;
 typedef struct dds3BillAnimResource_tag dds3BillAnimResource_tag;
 struct dds3BillAnim_tag;
