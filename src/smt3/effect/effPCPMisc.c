@@ -3,8 +3,8 @@
 #include "sdf_resource.h"
 #include "sdf_types.h"
 
-struct BattleGroupNode;
-struct BattleGroupSlot;
+struct dds3ModelResrc_t;
+struct dds3ModelResrcPlayBook_t;
 struct P2A_ANIMATION_tag;
 struct BillPacketWork;
 struct P2A_TEXANIM_tag;
@@ -104,9 +104,9 @@ struct effTrackPolyParams_t;
 struct IpuDmaState;
 struct MdlDevList;
 struct MdlDevSlot;
-struct MdlObjectAttachment;
+struct mdlIpuAttachment_t;
 struct MdlRecord;
-struct MdlResourceItem;
+struct dds3ModelEffectCtrlr_t;
 struct sdfMotionCutDef_t;
 struct MovLinearStream;
 union movieDecodeCtx_t;
@@ -237,13 +237,13 @@ typedef struct EffSpawnParams EffSpawnParams;
 typedef struct sdfMotionCutDef_t sdfMotionCutDef_t;
 typedef struct sdfMotionNodeDef_t sdfMotionNodeDef_t;
 typedef struct sdfMotionPlayBook_t sdfMotionPlayBook_t;
-typedef struct BattleGroupSlot BattleGroupSlot;
+typedef struct dds3ModelResrcPlayBook_t dds3ModelResrcPlayBook_t;
 typedef struct DevRequest DevRequest;
 typedef struct MdlRecord MdlRecord;
 typedef struct SdfChunkHeader SdfChunkHeader;
 typedef struct sdfModelNodeDef_t sdfModelNodeDef_t;
 typedef struct SdfItemListRef SdfItemListRef;
-typedef struct BattleGroupNode BattleGroupNode;
+typedef struct dds3ModelResrc_t dds3ModelResrc_t;
 typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
 typedef struct sdfModelPacketHeader_tag sdfModelPacketHeader_tag;
 typedef struct sdfModelNode_t sdfModelNode_t;
@@ -252,7 +252,7 @@ typedef struct MdlDevSlot MdlDevSlot;
 typedef struct MdlDevList MdlDevList;
 typedef struct EffTrackPolyData EffTrackPolyData;
 typedef struct effTrackPolyParams_t effTrackPolyParams_t;
-typedef struct EffTrackPolyWork EffTrackPolyWork;
+typedef struct mdlTrackWork_t mdlTrackWork_t;
 typedef struct IpuDmaState IpuDmaState;
 typedef struct sdfFileCmdHandle_t sdfFileCmdHandle_t;
 typedef struct MovLinearStream MovLinearStream;
@@ -261,11 +261,11 @@ typedef union movieDecodeCtx_t movieDecodeCtx_t;
 typedef struct sdfIpuDecodeCb_t sdfIpuDecodeCb_t;
 typedef struct movieStream_t movieStream_t;
 typedef struct SdfStreamInputDmaTag SdfStreamInputDmaTag;
-typedef struct MdlObj MdlObj;
-typedef struct MdlObjectAttachment MdlObjectAttachment;
+typedef struct mdlEffectResrc_IPU_t mdlEffectResrc_IPU_t;
+typedef struct mdlIpuAttachment_t mdlIpuAttachment_t;
 typedef struct mdlEffectResrcItem_t mdlEffectResrcItem_t;
 typedef struct mdlMarkPos_t mdlMarkPos_t;
-typedef struct MdlResourceItem MdlResourceItem;
+typedef struct dds3ModelEffectCtrlr_t dds3ModelEffectCtrlr_t;
 typedef struct effDebugPolyParams_t effDebugPolyParams_t;
 typedef struct EffParamTableRecord EffParamTableRecord;
 typedef struct EffParamTable EffParamTable;
@@ -1667,7 +1667,7 @@ struct sdfMotionPlayBook_t {
     sdfMotionNodeDef_t nodeDefList[1];
 };
 
-struct BattleGroupSlot {
+struct dds3ModelResrcPlayBook_t {
     s32 flags;
     s16 motionSlotIndex;
     s16 motionIndex;
@@ -1768,9 +1768,9 @@ struct SdfItemListRef {
 };
 
 /* Group owners allocate 0xB4 bytes and retain eight resource records. */
-struct BattleGroupNode {
-    struct BattleGroupNode *next;
-    struct BattleGroupNode *prev;
+struct dds3ModelResrc_t {
+    struct dds3ModelResrc_t *next;
+    struct dds3ModelResrc_t *prev;
     u16 group;
     u16 type;
     u8 ownsResources;
@@ -1779,7 +1779,7 @@ struct BattleGroupNode {
     DevRequest *resourceList;
     struct SdfItemListRef *itemList;
     struct sdfMemHandle_t *requestAllocation;
-    BattleGroupSlot slots[8];
+    dds3ModelResrcPlayBook_t slots[8];
     struct sdfMemHandle_t *resourceHandle;
     struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
     DevRequest *partList;
@@ -1898,7 +1898,7 @@ struct MdlDevList {
     f32 colorStep[4];
 };
 
-struct EffTrackPolyWork;
+struct mdlTrackWork_t;
 
 struct EffTrackPolyData;
 
@@ -1930,13 +1930,13 @@ struct effTrackPolyParams_t {
     u32 gradientColors[4];
 };
 
-struct EffTrackPolyWork {
+struct mdlTrackWork_t {
     effTrackPolyParams_t params;
     u32 updateCount;
     struct EffTrackPolyData *data;
 };
 
-struct MdlObj;
+struct mdlEffectResrc_IPU_t;
 
 /* IPU register state saved across stream callbacks (0x24 bytes). */
 struct IpuDmaState {
@@ -2104,7 +2104,7 @@ struct SdfStreamInputDmaTag {
 };
 
 /* The model-object allocation ends with its complete embedded stream node. */
-struct MdlObj {
+struct mdlEffectResrc_IPU_t {
     u8 *sourceAddress; /* 0x00: frame data passed to sdfIpuSetDecodeParams */
     sdfMemHandle_t *backingAllocation; /* 0x04: released by mdlDeleteEffectResrc_IPU */
     u8 inUse; /* 0x08: claimed by a model resource item */
@@ -2115,9 +2115,9 @@ struct MdlObj {
     sdfIpuDecodeCb_t soundNode; /* 0x20: complete 0x8C embedded node */
 };
 
-struct MdlObjectAttachment {
+struct mdlIpuAttachment_t {
     dds3ModelHandle_t *owner;
-    struct MdlObj *object; /* Borrowed from the owner's heterogeneous part list. */
+    struct mdlEffectResrc_IPU_t *object; /* Borrowed from the owner's heterogeneous part list. */
     struct sdfTexHandle_t *texture; /* Borrowed texture-list node used for stream creation. */
     s32 minimumTime;
     u8 attributes[8];
@@ -2146,8 +2146,8 @@ struct mdlMarkPos_t {
 
 /* The paired viewer allocators clear 0x20 bytes and prepend this tagged item
  * to dds3ModelHandle_t's list at +0x14. The part and object payloads share that allocation. */
-struct MdlResourceItem {
-    struct MdlResourceItem *next;
+struct dds3ModelEffectCtrlr_t {
+    struct dds3ModelEffectCtrlr_t *next;
     u16 type; /* dds3ModelEffectType value, with native halfword storage. */
     s16 motionSlotIndex; /* Owning Motion.slotIndex; -1 tags context-wide entries. */
     union {
@@ -2155,14 +2155,14 @@ struct MdlResourceItem {
             /* Type 2 stores a track; other part kinds store their created instance. */
             union {
                 void *instance;
-                struct EffTrackPolyWork *track;
+                struct mdlTrackWork_t *track;
             };
             struct mdlEffectResrcItem_t *slot;
             struct mdlMarkPos_t *mapPositionRecord;
             f32 anchorScale;
             u8 pad18[8];
         } part;
-        MdlObjectAttachment object;
+        mdlIpuAttachment_t object;
     } payload;
 };
 
@@ -2171,7 +2171,7 @@ struct dds3ModelHandle_t {
     u32 flags;
     dds3ModelHandle_t *next;
     dds3ModelHandle_t *previous;
-    BattleGroupNode *sub;
+    dds3ModelResrc_t *sub;
     union {
         u32 word;
         struct {
@@ -2179,7 +2179,7 @@ struct dds3ModelHandle_t {
             s16 motionIndex; /* Entry index passed to sdfMotionChangeBlend. */
         } h;
     } current;
-    MdlResourceItem *resourceItems;
+    dds3ModelEffectCtrlr_t *resourceItems;
     sdfModelRootNode_t *modelRoot;
     sdfMotionCtrlr_t *first;
     sdfMotionCtrlr_t *slots[4];

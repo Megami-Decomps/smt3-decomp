@@ -7,13 +7,11 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 92 types, 926 members, 506 adopted constants.
+# 75 types, 918 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
 type BattleEffect
-type BattleGroupNode
-type BattleGroupSlot
 type BillChildPayload
 type BillColorWork
 type BillDrawBank
@@ -51,15 +49,11 @@ type EffThunderSparkParams
 type EffThunderSparkWork
 type EffThunderVectorParams
 type EffTrackPolyData
-type EffTrackPolyWork
 type EffectObjectData
 type IpuDmaState
 type MdlDevList
 type MdlDevSlot
-type MdlObj
-type MdlObjectAttachment
 type MdlRecord
-type MdlResourceItem
 type MovLinearStream
 type MovOpenParam
 type MovPacStream
@@ -73,33 +67,22 @@ type PcpScatterRadialParams
 type PcpScatterSpinParams
 type SdfCamera
 type SdfChunkHeader
-type SdfDmaReferenceChainPacket
-type SdfDmaTagHeader
-type SdfDrawPacket
 type SdfDrawTransform
 type SdfGeneratedLookupTexture
-type SdfGraphCopyPacket
 type SdfGsGouraudTexturedVertex
 type SdfGsGouraudVertex
 type SdfGsTextureStateValues
 type SdfGsTexturedVertex
 type SdfGsTwoVertexPacket
-type SdfItem
-type SdfItemList
 type SdfItemListRef
 type SdfObjectRefCommand
-type SdfPacket
-type SdfPatchableResourcePacket
 type SdfStreamInputDmaTag
 type SdfStreamReadRequest
 type SdfStreamState
-type SdfTextureDrawPacket
 type SdfUnpacked
 type SdfUnpackedD
-type SdfVuColorTransform
 type SoundBank
 type SoundMixer
-type VuBlendNode
 type VuIndexedTriangleCount
 
 member AtExitEntry.unk00
@@ -108,7 +91,7 @@ member AtExitEntry.unk0C
 member AtExitEntry.unk10
 member BattleEffect.unk120
 member BattleEffect.unk20
-member BattleGroupNode.unk_AC
+member dds3ModelResrc_t.unk_AC
 member BillPluralRecord.unk08
 member GParam.unk0
 member GParam.unk4
@@ -121,14 +104,6 @@ member MovOpenParam.unk10
 member MovOpenParam.unk11
 member MovOpenParam.unk12
 member MovPacStream.unk6C
-member SdfGraphCopyPacket.unk0C
-member SdfItem.unk04
-member SdfPacket.unk0
-member SdfPacket.unk10
-member SdfPacket.unk18
-member SdfPacket.unk8
-member SdfPatchableResourcePacket.unk08
-member SdfPatchableResourcePacket.unk0C
 member _FRQ.unk00
 member _FRQ.unk_00
 member arg.unk4
