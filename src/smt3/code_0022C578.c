@@ -3768,7 +3768,48 @@ void campInitPanelPos(void *panel, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetAfterCrossFunc);
 
-INCLUDE_ASM(const s32, "code_0022C578", campRunPanelCallback);
+typedef struct
+{
+    /* 0x00 */ void (*func)();
+    /* 0x04 */ u8 pos[0x14];
+    /* 0x18 */ cmpPadStopWork_t *cursor;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ s32 alpha;
+    /* 0x24 */ s8 flag;
+    /* 0x25 */ u8 unk_25[7];
+} campCrossPanel_t;
+
+void campRunPanelCallback(campCrossPanel_t *panel)
+{
+    if (panel[1].func != NULL) {
+        panel[1].func(panel[1].pos, panel[1].cursor, panel[1].unk_1C, panel[1].flag,
+                      panel[1].alpha, 0x47);
+        if (panel[1].alpha < 0x100) {
+            panel[1].alpha = panel[1].alpha + 0x40;
+        }
+        if (panel[1].alpha >= 0x101) {
+            panel[1].alpha = 0x100;
+        }
+    }
+    if (panel[0].func != NULL) {
+        panel[0].func(panel[0].pos, panel[0].cursor, panel[0].unk_1C, panel[0].flag,
+                      panel[0].alpha, 0x47);
+        if (panel[0].alpha < 0x200) {
+            panel[0].alpha = panel[0].alpha + 0x40;
+        } else {
+            panel[0].func = NULL;
+        }
+        if (panel[0].alpha >= 0x201) {
+            panel[0].alpha = 0x200;
+        }
+        if (panel[0].func == NULL) {
+            panel[0].cursor->unk_38 = 0;
+            panel[0].cursor->cursor.unk_30 = 0;
+            cmpClearCursorSlots(&panel[0].cursor->cursor);
+        }
+    }
+}
+
 
 void fclInitCursorWindow(void *work, s32 flag, u8 count)
 {
