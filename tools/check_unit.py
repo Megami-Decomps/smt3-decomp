@@ -1436,7 +1436,9 @@ def main():
     if full.exists() and not args.func:
         source = unit.read_text()
         for name in re.findall(r"^glabel (\w+)", full.read_text(), re.M):
-            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$", source, re.M):
+            # A C definition may carry the retail name through an asm("") alias, which
+            # is how a function called main avoids cc1's __main call.
+            if not re.search(rf"^INCLUDE_ASM\([^\n]*\b{name}\);|^[ \t]*(?:[A-Za-z_][^;\n]*\b)?{name}\s*\([^;]*$|\basm\s*\(\s*\"{name}\"\s*\)", source, re.M):
                 bad += 1
                 print(f"MISSING {name}: neither C nor INCLUDE_ASM in the unit")
     # A func_XXXXXXXX whose address symbol_addrs now names differently fails a fresh link
