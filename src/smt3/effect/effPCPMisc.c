@@ -1012,11 +1012,11 @@ struct effPCPRadiateBEDParam_t {
 
 struct effBTL_t;
 
-struct BattleEffect;
+struct effBTLCut_t;
 
-typedef struct BattleEffect BattleEffect;
+typedef struct effBTLCut_t effBTLCut_t;
 
-typedef void (*BattleEffectCallback)(BattleEffect *effect);
+typedef void (*effBTLCallback_t)(effBTLCut_t *effect);
 
 struct effBTL_SkillPositionPtr_t {
     u8 target;
@@ -1059,7 +1059,9 @@ struct effBTL_SkillCutTable_t {
     effBTL_SkillPartsList_t entries[1];     /* 0x78 */
 };
 
-struct BattleEffect {
+/* One cut in effBTL_t's list. effBattle.h reads the same record without the
+ * colour and flag words at +8, and neither reading is exercised here. */
+struct effBTLCut_t {
     void *owner; /* 0x00 */
     effBTL_t *state; /* 0x04 */
     u32 color; /* 0x08 */
@@ -1073,10 +1075,10 @@ struct BattleEffect {
     s32 unk20;
     struct effBTL_SkillCutTable_t *list; /* 0x24 */
     struct effPartHandle_t *parameterWorks[0x3C]; /* 0x28 */
-    BattleEffectCallback sourceFrameCallback; /* 0x118 */
-    BattleEffectCallback triggerFrameCallback; /* 0x11C */
+    effBTLCallback_t sourceFrameCallback; /* 0x118 */
+    effBTLCallback_t triggerFrameCallback; /* 0x11C */
     u32 unk120;
-    BattleEffect *next; /* 0x124 */
+    effBTLCut_t *next; /* 0x124 */
 };
 
 struct effBTLBank_t {
@@ -1090,7 +1092,7 @@ struct effBTL_t {
     u8 pad0C30[8];
     struct sdfMemHandle_t *resource; /* 0xC38: owns the mixer allocation. */
     u32 active;
-    BattleEffect *voiceList;
+    effBTLCut_t *voiceList;
 };
 
 struct effPCPRadiateBED_tag {
