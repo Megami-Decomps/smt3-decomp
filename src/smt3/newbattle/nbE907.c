@@ -365,7 +365,126 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 nbFormation_t *nbGetEventForm();
 
-INCLUDE_ASM(const s32, "newbattle/nbE907", nbE907Process_1);
+extern s32 (*D_005274D0[])(nbEventProcessData_t *e);
+
+extern void dds3DeleteSceneBasicData(void *basic);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
+
+extern void nbCameraHelperModelSet(dds3Basic_t *hModel);
+
+extern void nbCameraSetState(s32 state);
+
+extern void nbAllFormDispOn(void);
+
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
+
+extern void nbCameraBoss_Bsnet_E907_Set(void);
+
+extern void nbCameraBoss_Bsnet_E907_Run(void);
+
+extern void nbCameraBoss_Bsnet_E907_2_Set(void);
+
+extern void nbCameraBoss_Bsnet_E907_2_Run(void);
+
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
+
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
+
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+extern dds3Basic_t *D_00551604;
+
+extern dds3Basic_t *D_00551608;
+
+extern dds3Basic_t *D_0055160C;
+
+s32 nbE907Process_1(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+    evtUnitHandle_t *unit;
+    s32 serial;
+
+    e = dds3GetProcessData(id);
+    if (D_005274D0[e->seq](e) != 0) {
+        D_00551604 = NULL;
+        if (D_00551608 != NULL) {
+            dds3DeleteSceneBasicData(D_00551608);
+            D_00551608 = NULL;
+        }
+        if (D_0055160C != NULL) {
+            dds3DeleteSceneBasicData(D_0055160C);
+            D_0055160C = NULL;
+        }
+        return -1;
+    }
+    if (e->time > 0 && D_00551604 != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(D_00551604);
+        if (unit->basic != NULL) {
+            nbCameraHelperModelSet(unit->basic);
+        }
+    }
+    switch (e->time) {
+    case 0:
+        nbCameraSetState(0x17);
+        D_00551604 = NULL;
+        D_00551608 = NULL;
+        D_0055160C = NULL;
+        nbAllFormDispOn();
+        nbSetEnemyFormation(e->data);
+        nbSetPlayerFormation(e->data, 0);
+        nbCameraBoss_Bsnet_E907_Set();
+        break;
+    case 0x98:
+        nbCameraSetState(0x17);
+        serial = evtInitMotionSeProcess(e->eventrid, 3);
+        D_00551608 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551608), 0, 0, 0, 2);
+        D_00551604 = D_00551608;
+        break;
+    case 0xEB:
+        D_00551604 = NULL;
+        break;
+    case 0xED:
+        nbCameraBoss_Bsnet_E907_2_Set();
+        nbCameraBoss_Bsnet_E907_2_Run();
+        break;
+    default:
+        if (e->time >= 0x87 && e->time <= 0x97) {
+            nbCameraBoss_Bsnet_E907_Run();
+        }
+        if (e->time >= 0xED) {
+            nbCameraBoss_Bsnet_E907_2_Run();
+        }
+        break;
+    }
+    switch (e->time) {
+    case 0:
+        dds3PadVibrationSet(0, 0, 0x14);
+        dds3PadVibrationSet(1, 0x50, 0x14);
+        break;
+    case 0x14:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0x78, 0xA0);
+        break;
+    case 0x8C:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0xDC, 0x5C);
+        break;
+    case 0xE6:
+        effPadVibeFadeOUT(0, 0, 0);
+        effPadVibeFadeOUT(1, 0xDC, 0x46);
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 nbE908_Test(nbEventProcessData_t *e)
 {
