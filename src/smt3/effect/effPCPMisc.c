@@ -112,8 +112,6 @@ struct sdfVector3_t;
 struct sdfMatPacket_t;
 struct sdfModelPacketHeader_tag;
 struct sdfModelNode_t;
-union SdfDrawTransform;
-struct SdfGsTextureStateValues;
 struct sdfModelNodeDef_t;
 struct sdfModelNodeDefList_t;
 struct sdfMotionNodeDef_t;
@@ -141,8 +139,6 @@ typedef struct dds3Effect_PartialMultiBlur_t dds3Effect_PartialMultiBlur_t;
 typedef struct effHandle_t effHandle_t;
 typedef struct effPCPAgiraoFirePartList_t effPCPAgiraoFirePartList_t;
 typedef struct effPCPRingPolyExp2Param_t effPCPRingPolyExp2Param_t;
-typedef union SdfDrawTransform SdfDrawTransform;
-typedef struct SdfGsTextureStateValues SdfGsTextureStateValues;
 typedef struct sdfMatPacket_t sdfMatPacket_t;
 typedef union sdfMatUvwParm_t sdfMatUvwParm_t;
 typedef struct dds3RingPolyExpList_tag dds3RingPolyExpList_tag;
@@ -550,18 +546,13 @@ struct effPCPRingPolyExp2Param_t {
 
 struct sdfMat_t;
 
-/* Draw entries store six transform floats and expose the same bytes as three qwords. */
-union SdfDrawTransform {
+/* A texture coordinate transform in a material packet. sdfMatSetUvwParm fills
+ * it either as six floats or, for the identity case, as three quadword halves. */
+typedef union {
     f32 m[6];
-    u64 words[3];
-};
+    u64 q[3];
+} sdfMatTexTm_t;
 
-/* The cached GS TEX1, TEX0 and CLAMP values shared by texture draw records. */
-struct SdfGsTextureStateValues {
-    u64 sampling;
-    u64 texture;
-    u64 clamp;
-};
 
 /* Native 0xA0-byte draw-entry block allocated by SDF_ASSET_DRAW_ENTRY_BYTES. */
 /* Names from the IDB, which include/libsdf.h also carries. The three
@@ -581,9 +572,15 @@ struct sdfMatPacket_t {
     f32 fdBias;            /* 0x28 */
     f32 fdSoften;          /* 0x2C */
     u8 pad30[8];           /* 0x30: pad and vifcode2 */
-    SdfGsTextureStateValues primaryTextureState; /* 0x38: tex1Data, tex0Data, clampData */
-    SdfGsTextureStateValues secondaryTextureState; /* 0x50: the mtex trio */
-    SdfDrawTransform transforms[2]; /* 0x68: texTm and mtexTexTm */
+    u64 tex1Data;          /* 0x38 */
+    u64 tex0Data;
+    u64 clampData;
+    u64 mtexTex1Data;      /* 0x50 */
+    u64 mtexTex0Data;
+    u64 mtexClampData;
+    /* sdfMatSetUvwParm writes one transform per texture: a 2x2 then an offset. */
+    sdfMatTexTm_t texTm;   /* 0x68 */
+    sdfMatTexTm_t mtexTexTm;
     u32 cmd_call_spec;          /* 0x98: VIF ITOP with immediate 0xC */
     u32 cmd_call_kind;          /* 0x9C: VIF MSCAL with microprogram index zero */
 };
