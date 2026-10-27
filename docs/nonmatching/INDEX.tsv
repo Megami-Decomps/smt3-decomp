@@ -157,6 +157,7 @@ nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	d
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
 dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	Six of 270 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	5
 dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	44
+nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/nonmatching/newbattle/nbCameraPress.md	5
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/nonmatching/newbattle/nbCameraSkill.md	5
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
 nbCameraState_SkillAttack_Calc	newbattle/nbCameraSkill	0x170	85 of 91 words match	docs/nonmatching/newbattle/nbCameraSkill.md	51

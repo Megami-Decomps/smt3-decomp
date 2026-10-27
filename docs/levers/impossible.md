@@ -56,3 +56,13 @@ by C:
 `subu`, `addu` and `addiu`. It also jumps into the middle of an eight-`sq`
 unrolled block through `jr $2` on a computed label address, which no C
 construct reaches.
+
+`newbattle/nbCameraPress`'s `nbCameraPressProcessInit` is frameless and ends
+`beqz $2, nbCameraPressStart`, a conditional branch into the next symbol's
+entry. ee-gcc 2.96 does sibling-call a trailing `void` call, but it keeps the
+prologue while doing so: `kernel/dds3StartMenu`'s `InitTitleProcess` has
+`sd $31`, `ld $31` and then `j dds3AdminiCallSequence`. Every spelling here
+(if/else, an early `return` either way round, an explicit `return;` after the
+call, and a `goto`) emits the same 60-byte framed `jal`. The two symbols are
+one routine with a second entry point, the same shape as `fldSetTerminalState`
+above; `nbCameraPressStart`'s matching two-store body is what `beqz` reaches.
