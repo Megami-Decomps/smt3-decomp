@@ -1178,7 +1178,49 @@ s32 cmpFindItemMsgIndex(s32 which, u16 id)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCreateLocalItem);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartSkillTokusyuMsg);
+extern s32 fldEsutoMaChk(void);
+extern s32 fldRiberaMaChk(void);
+extern s32 fldRifutoMaChk(void);
+extern s32 fldLightMaChk(void);
+
+s32 cmpStartSkillTokusyuMsg(u16 skill)
+{
+    s32 msg = 0x20;
+
+    switch (skill) {
+    case 0x49:
+        if (fldEsutoMaChk() != 0) {
+            msg = 0x21;
+        }
+        break;
+    case 0x4A:
+        if (fldRiberaMaChk() != 0) {
+            msg = 0x21;
+        }
+        break;
+    case 0x4B:
+        if (fldRifutoMaChk() != 0) {
+            msg = 0x21;
+        }
+        break;
+    case 0x4C:
+        switch (fldLightMaChk()) {
+        case -1:
+            msg = 0x22;
+            break;
+        case 1:
+            msg = 0x21;
+            break;
+        }
+        break;
+    }
+    if (msg != 0x20) {
+        fclStartMessage(msg);
+        return 1;
+    }
+    return 0;
+}
+
 
 void cmpStartItemTokusyuMsg(u16 item)
 {
@@ -5069,7 +5111,44 @@ s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user)
     } while (0);
 }
 
+extern void fldEsutoMaStart(void);
+extern void fldRiberaMaStart(void);
+extern void fldRifutoMaStart(void);
+extern void fldLightMaStart(void);
+
+/* NON_MATCHING: 55 of 57 words match, exact size; the switch root compares
+   against 0x4A out of $2 instead of $3. */
+#ifdef NON_MATCHING
+s32 cmpUseSkillTokusyu(u16 skill, datUnitWork_t *user, s32 unused)
+{
+    s32 se = 0x10;
+
+    if (cmpGetSkillTargetArea(skill) == 0) {
+        datExecSkill(skill, user, NULL);
+        switch (skill) {
+        case 0x49:
+            fldEsutoMaStart();
+            se = 0x1A;
+            break;
+        case 0x4A:
+            fldRiberaMaStart();
+            se = 0x1B;
+            break;
+        case 0x4B:
+            fldRifutoMaStart();
+            break;
+        case 0x4C:
+            fldLightMaStart();
+            break;
+        }
+        p2sdPlaySE(se, 0x7F, 0x3F);
+        return 4;
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkillTokusyu);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpRecover);
 
