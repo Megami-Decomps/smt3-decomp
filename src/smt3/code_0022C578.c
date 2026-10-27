@@ -2783,7 +2783,55 @@ void campDhScanEntries(void)
 INCLUDE_ASM(const s32, "code_0022C578", campDhScanEntries);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhFindVisibleIcon);
+typedef struct
+{
+    /* 0x00 */ s32 visible;
+    /* 0x04 */ s32 alpha;
+    /* 0x08 */ s8 step;
+    /* 0x09 */ s8 id;
+    /* 0x0A */ u8 unk_0A[2];
+    /* 0x0C */ s32 unk_0C;
+    /* 0x10 */ s32 unk_10;
+} campDhIconGauge_t;
+
+void campDhFindVisibleIcon(void)
+{
+    campDhIconGauge_t *gauge = (campDhIconGauge_t *)((u8 *)campDhUpdateWork + 0x1F78);
+    s8 id;
+
+    if (campDhIconIsReady() == 0) {
+        return;
+    }
+    id = cmpGetHeartsIconId(campDhUpdateWork->unk_31);
+    if (cmpHeartsIconIsVisible(id) != 0) {
+        gauge->id = id;
+        gauge->visible = 1;
+    } else {
+        gauge->visible = 0;
+    }
+    if (gauge->visible != 0) {
+        if (gauge->alpha < 0x100) {
+            gauge->alpha = gauge->alpha + gauge->step;
+        }
+        if (gauge->alpha >= 0x101) {
+            gauge->alpha = 0x100;
+        }
+    } else {
+        if (gauge->alpha > 0) {
+            gauge->alpha = gauge->alpha - gauge->step;
+        }
+        if (gauge->alpha < 0) {
+            gauge->alpha = 0;
+        }
+    }
+    if (gauge->unk_0C < 0x100) {
+        gauge->unk_0C = gauge->unk_0C + gauge->unk_10;
+    }
+    if (gauge->unk_0C >= 0x101) {
+        gauge->unk_0C = 0x100;
+    }
+}
+
 
 s32 camp_update_dh_Process(s32 id)
 {
