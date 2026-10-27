@@ -240,7 +240,7 @@ typedef struct sdfModelNode_t sdfModelNode_t;
 typedef struct sdfModelRootNode_t sdfModelRootNode_t;
 typedef struct dds3ModelBlurInstance_t dds3ModelBlurInstance_t;
 typedef struct dds3ModelBlurCb_t dds3ModelBlurCb_t;
-typedef struct EffTrackPolyData EffTrackPolyData;
+typedef struct dds3HermitianTrackPoly_tag dds3HermitianTrackPoly_tag;
 typedef struct effTrackPolyParams_t effTrackPolyParams_t;
 typedef struct mdlTrackWork_t mdlTrackWork_t;
 typedef struct sdfIpuDmaRegs_t sdfIpuDmaRegs_t;
@@ -1870,20 +1870,20 @@ struct dds3ModelBlurCb_t {
 
 struct mdlTrackWork_t;
 
-struct EffTrackPolyData;
+struct dds3HermitianTrackPoly_tag;
 
 /* Owner record stored after the track's point and gradient buffers. */
-struct EffTrackPolyData {
-    u32 kind;                   /* 0x00: draw-target selector */
-    u32 color;                  /* 0x04 */
-    s32 count;                  /* 0x08: slots, including the reserved pair */
-    s32 activePointCount;       /* 0x0C */
-    s32 position;               /* 0x10 */
-    s32 step;                   /* 0x14 */
-    u128 *points;                /* 0x18 */
-    u32 *colors;                 /* 0x1C: gradient entries after points */
-    sdfMat_t *nodeHandle;        /* 0x20: owned draw asset */
-    sdfMemHandle_t *resourceHandle; /* 0x24: containing allocation */
+struct dds3HermitianTrackPoly_tag {
+    u32 blend;            /* 0x00: draw-target selector */
+    u32 abgr;             /* 0x04 */
+    s32 point;            /* 0x08: slots, including the reserved pair */
+    s32 count;            /* 0x0C: of those, the live ones */
+    s32 current;          /* 0x10 */
+    s32 split;            /* 0x14 */
+    u128 *pVertex;        /* 0x18 */
+    u32 *pVC;             /* 0x1C: gradient entries after pVertex */
+    sdfMat_t *pMat;       /* 0x20: owned draw asset */
+    sdfMemHandle_t *hMem; /* 0x24: containing allocation */
 };
 
 /* Thirteen copied words, followed by an update counter and owned history. */
@@ -1903,7 +1903,7 @@ struct effTrackPolyParams_t {
 struct mdlTrackWork_t {
     effTrackPolyParams_t params;
     u32 updateCount;
-    struct EffTrackPolyData *data;
+    struct dds3HermitianTrackPoly_tag *data;
 };
 
 struct mdlEffectResrc_IPU_t;
