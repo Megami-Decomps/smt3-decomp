@@ -99,10 +99,10 @@ struct EffThunderVectorParams;
 struct effPCPThunderSpherePoly_t;
 struct effTrackPolyParams_t;
 struct IpuDmaState;
-struct MdlDevList;
-struct MdlDevSlot;
+struct dds3ModelBlurCb_t;
+struct dds3ModelBlurInstance_t;
 struct mdlIpuAttachment_t;
-struct MdlRecord;
+struct pibChunkItem_t;
 struct dds3ModelEffectCtrlr_t;
 struct sdfMotionCutDef_t;
 struct MovLinearStream;
@@ -229,17 +229,17 @@ typedef struct sdfMotionNodeDef_t sdfMotionNodeDef_t;
 typedef struct sdfMotionPlayBook_t sdfMotionPlayBook_t;
 typedef struct dds3ModelResrcPlayBook_t dds3ModelResrcPlayBook_t;
 typedef struct sdfItemArray_t sdfItemArray_t;
-typedef struct MdlRecord MdlRecord;
+typedef struct pibChunkItem_t pibChunkItem_t;
 typedef struct SdfChunkHeader SdfChunkHeader;
 typedef struct sdfModelNodeDef_t sdfModelNodeDef_t;
-typedef struct SdfItemListRef SdfItemListRef;
+typedef struct sdfModelDef_t sdfModelDef_t;
 typedef struct dds3ModelResrc_t dds3ModelResrc_t;
 typedef struct sdfMotionCtrlr_t sdfMotionCtrlr_t;
 typedef struct sdfModelPacketHeader_tag sdfModelPacketHeader_tag;
 typedef struct sdfModelNode_t sdfModelNode_t;
 typedef struct sdfModelRootNode_t sdfModelRootNode_t;
-typedef struct MdlDevSlot MdlDevSlot;
-typedef struct MdlDevList MdlDevList;
+typedef struct dds3ModelBlurInstance_t dds3ModelBlurInstance_t;
+typedef struct dds3ModelBlurCb_t dds3ModelBlurCb_t;
 typedef struct EffTrackPolyData EffTrackPolyData;
 typedef struct effTrackPolyParams_t effTrackPolyParams_t;
 typedef struct mdlTrackWork_t mdlTrackWork_t;
@@ -1656,9 +1656,9 @@ struct sdfItemArray_t {
 /* Relative-linked viewer records share packed payload and parameter words.
  * Kinds 1/2 use the count and part-index halfwords at 0x0C/0x0E; kind 3
  * reads the whole parameter word. Kind 4 reads both selector halfwords at 0x08/0x0A. */
-struct MdlRecord {
-    s32 kind;       /* 0x00: 0xFFFF terminates the record chain */
-    s32 nextOffset; /* 0x04: relative byte offset to next record */
+struct pibChunkItem_t {
+    s32 type;       /* 0x00: 0xFFFF terminates the record chain */
+    s32 size; /* 0x04: relative byte offset to next record */
     union {
         u32 word;               /* 0x08 */
         struct {
@@ -1674,7 +1674,7 @@ struct MdlRecord {
         } part;
     } parameter;
     union {
-        u32 word10; /* 0x10: kind-four stream parameter */
+        u32 word10; /* 0x10: type-four stream parameter */
         struct {
             u16 slotCount; /* Kind 1/2 group records: following entity-slot packets. */
             u16 unk12;
@@ -1682,7 +1682,7 @@ struct MdlRecord {
     } tail;
 };
 
-struct SdfItemListRef;
+struct sdfModelDef_t;
 
 struct SdfChunkHeader;
 
@@ -1727,11 +1727,11 @@ struct sdfModelNodeDefList_t {
     u8 pad[0x0C];
 };
 
-struct SdfItemListRef {
-    sdfModelNodeDefList_t *items; /* 0x00 */
-    u32 *serializedAssetData; /* 0x04: count followed by flag-driven asset records */
-    s32 slotPairCount; /* 0x08: passed to sdfModelMakeMorphList */
-    struct SdfChunkHeader *chunkTable; /* 0x0C: borrowed by SdfModel */
+struct sdfModelDef_t {
+    sdfModelNodeDefList_t *modelDef; /* 0x00 */
+    u32 *matDef_New; /* 0x04: count followed by flag-driven asset records */
+    s32 morphCount; /* 0x08: passed to sdfModelMakeMorphList */
+    struct SdfChunkHeader *extraData; /* 0x0C: borrowed by SdfModel */
 };
 
 /* Group owners allocate 0xB4 bytes and retain eight resource records. */
@@ -1744,11 +1744,11 @@ struct dds3ModelResrc_t {
     u8 pad0D[3];
     dds3ModelHandle_t *modelContext;
     sdfItemArray_t *resourceList;
-    struct SdfItemListRef *itemList;
+    struct sdfModelDef_t *itemList;
     struct sdfMemHandle_t *requestAllocation;
     dds3ModelResrcPlayBook_t slots[8];
     struct sdfMemHandle_t *resourceHandle;
-    struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
+    struct pibChunkItem_t *partInfo; /* Borrowed relative-linked record-list view. */
     sdfItemArray_t *partList;
     f32 unk_AC;
     f32 objectRadius; /* Copied into the model context and object radius. */
@@ -1847,22 +1847,22 @@ struct sdfModelRootNode_t {
     u8 pad99[3];
 };
 
-struct MdlDevSlot {
-    struct MdlDevSlot *next;
-    sdfModelRootNode_t *model;
-    s32 remaining;
+struct dds3ModelBlurInstance_t {
+    struct dds3ModelBlurInstance_t *next;
+    sdfModelRootNode_t *modelobj;
+    s32 keepCount;
 };
 
 /* This owner has inline color interpolation data, not a request buffer at +0xC. */
-struct MdlDevList {
-    MdlDevSlot *first;
-    s16 usedCount;
-    u16 capacity;
-    s16 stride;
-    s16 growStep;
-    s32 byteCount;
-    f32 color[4];
-    f32 colorStep[4];
+struct dds3ModelBlurCb_t {
+    dds3ModelBlurInstance_t *instants;
+    s16 spawnCount;
+    u16 count;
+    s16 interval;
+    s16 intervalCount;
+    s32 keepCount;
+    f32 colorBase[4];
+    f32 colorDelta[4];
 };
 
 struct mdlTrackWork_t;
@@ -2150,7 +2150,7 @@ struct dds3ModelHandle_t {
     sdfModelRootNode_t *modelRoot;
     sdfMotionCtrlr_t *first;
     sdfMotionCtrlr_t *slots[4];
-    MdlDevList *devList;
+    dds3ModelBlurCb_t *devList;
     f32 objectRadius; /* Propagated to the rebuilt object's modelRoot radius. */
 };
 
