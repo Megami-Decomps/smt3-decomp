@@ -399,7 +399,6 @@ s32 func_0028FA30(nbEventProcessData_t *e)
 /* NON_MATCHING: exact on its own; its presence turns the bnel of three
    nbFreeEffectSlot callers (Wait1_nbE901, PartsWait, nbE912_Wait1) and of
    EffDel into a bne. */
-#ifdef NON_MATCHING
 void nbFreeEffectSlot(nbEventProcessData_t *e)
 {
     if (e != NULL) {
@@ -407,9 +406,6 @@ void nbFreeEffectSlot(nbEventProcessData_t *e)
         e->seqtime = 0;
     }
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbEventProcess", nbFreeEffectSlot);
-#endif
 
 void func_0028FA68(nbEventProcessData_t *e, s32 step)
 {

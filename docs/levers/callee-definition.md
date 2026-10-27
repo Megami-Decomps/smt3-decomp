@@ -24,3 +24,10 @@ can cost more than it earns, so check the whole unit's result after adding
 one, not just the function you wrote. This is the same mechanism as the CONTEXT row below,
 seen from the other side: what the compiler can see of the rest of the unit
 changes the code it emits for one function.
+
+A function retail calls `main` cannot be written as C named `main`: cc1 compares
+the declaration's name string in `expand_function_start` and emits a leading
+`jal __main` for it, which is two instructions retail does not have. Name the C
+function something else and carry the retail name with an assembler alias,
+`s32 sdfDefaultMain(void) asm("main");`, declared above the definition.
+`sdf/sdfDefaultMain` is exact that way and 8 bytes long without it.

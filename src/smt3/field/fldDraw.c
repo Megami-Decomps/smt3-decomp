@@ -393,16 +393,10 @@ void fldPoint3To2_B(f32 *x3, f32 *y3, f32 z3, f32 x2, f32 y2) {
 
 extern void rsetOtOfs(s32 otofs);
 
-/* NON_MATCHING: exact on its own; its presence turns two bnel of encDrawProc
-   into bne. */
-#ifdef NON_MATCHING
 void rsetOtOfs(s32 otofs)
 {
     rsetFrameMaskOtOffset = otofs;
 }
-#else
-INCLUDE_ASM(const s32, "field/fldDraw", rsetOtOfs);
-#endif
 
 void rsetTexa(s32 ta0, s32 aem, u64 ta1) {
     sdfDrawTag_t *command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);

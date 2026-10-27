@@ -122,14 +122,13 @@ fldCamUpdateChase	field/fldDraw	0x250	120 of 148 words match	docs/nonmatching/fi
 resetCamTgtPlayer	field/fldDraw	0x1F8	90 of 126 words match	docs/nonmatching/field/fldDraw.md	74
 fldPlayerCalcHasigo	field/fldDraw	0xE8	14 of 58 words differ	docs/nonmatching/field/fldDraw.md	113
 fldCamGetPhokanParam	field/fldDraw	0x17C	92 of 95 words match	docs/nonmatching/field/fldDraw.md	145
-rsetOtOfs	field/fldDraw	0x8		docs/nonmatching/field/fldDraw.md	175
-fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/nonmatching/field/fldDraw.md	196
-fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/nonmatching/field/fldDraw.md	238
-fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/nonmatching/field/fldDraw.md	287
-fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/nonmatching/field/fldDraw.md	311
-fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/nonmatching/field/fldDraw.md	349
-fldHitChkUnitElv	field/fldDraw	0x184	63 of 97 words match	docs/nonmatching/field/fldDraw.md	400
-fldInfChkFastPanel	field/fldDraw	0x2E0	183 of 184 words differ	docs/nonmatching/field/fldDraw.md	431
+fldEveHit_ChkDir2	field/fldDraw	0x264	121 of 153 words match	docs/nonmatching/field/fldDraw.md	175
+fldEveHit_AddEveHitNpc	field/fldDraw	0x184	86 of 97 words match	docs/nonmatching/field/fldDraw.md	217
+fldEveHit_AddEveHitItemBox	field/fldDraw	0x1F8	101 of 126 words match	docs/nonmatching/field/fldDraw.md	266
+fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/nonmatching/field/fldDraw.md	290
+fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/nonmatching/field/fldDraw.md	328
+fldHitChkUnitElv	field/fldDraw	0x184	63 of 97 words match	docs/nonmatching/field/fldDraw.md	379
+fldInfChkFastPanel	field/fldDraw	0x2E0	183 of 184 words differ	docs/nonmatching/field/fldDraw.md	410
 fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words match	docs/nonmatching/field/fld_Npc.md	5
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/nonmatching/field/fld_Npc.md	37
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fld_Npc.md	71
@@ -157,6 +156,7 @@ nbCameraBoss_Lusi_Cut1_Set	newbattle/nbCameraBoss	0x1F4	21 of 125 words differ	d
 nbCameraBoss_Cut2_Run	newbattle/nbCameraBoss	0x230	92 of 138 words differ	docs/nonmatching/newbattle/nbCameraBoss.md	77
 dds3EffectFileListCreate	newbattle/nbCameraHelper	1080 bytes	Six of 270 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	5
 dds3EffectFileListWindowDrawSprite	newbattle/nbCameraHelper	280 bytes	Two of 70 words differ	docs/nonmatching/newbattle/nbCameraHelper.md	44
+nbCameraPressProcessRun	newbattle/nbCameraPress	0xF4	2 of 61 words differ	docs/nonmatching/newbattle/nbCameraPress.md	5
 nbCameraShot_PullOne_Init	newbattle/nbCameraSkill	0xE8	56 of 58 words match	docs/nonmatching/newbattle/nbCameraSkill.md	5
 nbCameraState_SkillStart_Init	newbattle/nbCameraSkill	0x78	29 of 30 words match	docs/nonmatching/newbattle/nbCameraSkill.md	28
 nbCameraState_SkillAttack_Calc	newbattle/nbCameraSkill	0x170	85 of 91 words match	docs/nonmatching/newbattle/nbCameraSkill.md	51
@@ -164,6 +164,7 @@ nbCameraShot_All_Set2	newbattle/nbCameraSkill	0x248	16 of 125 words match	docs/n
 nbCameraState_SkillAttack_Init	newbattle/nbCameraSkill	0x224	117 of 137 words match	docs/nonmatching/newbattle/nbCameraSkill.md	118
 nbCameraShot_InvokeTarget_Set2	newbattle/nbCameraSkill	0x2C0	171 of 176 words match	docs/nonmatching/newbattle/nbCameraSkill.md	145
 nbCameraShot_InvokeTargetReverse_Set2	newbattle/nbCameraSkill	0x2B8	160 of 171 words differ	docs/nonmatching/newbattle/nbCameraSkill.md	168
+nbCallNewBattle	newbattle/nbInit	0xA0	29 of 40 words differ	docs/nonmatching/newbattle/nbInit.md	5
 nbMainProcess1	newbattle/nbMainProcess	0x420	113 of 263 words match	docs/nonmatching/newbattle/nbMainProcess.md	5
 Flow6_36	newbattle/nbMakePacket	0xA8	24 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	5
 Flow2_13	newbattle/nbMakePacket	0xC8	44 of 50 words match	docs/nonmatching/newbattle/nbMakePacket.md	21

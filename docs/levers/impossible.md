@@ -50,3 +50,35 @@ by C:
 - `fclDrawSpriteEx`'s split assembly holds two symbols, so writing C for one
   would drop the other's bytes. That is a boundary problem, not a matching
   one.
+
+`sdf/sdfDev9`'s `sdf_2BFC58` is a hand-written quadword clear. Its body carries
+`neg $2, $3`, `add $2, $2, $3` and `addi $3, $3, -0x8`, and cc1 only ever emits
+`subu`, `addu` and `addiu`. It also jumps into the middle of an eight-`sq`
+unrolled block through `jr $2` on a computed label address, which no C
+construct reaches.
+
+`newbattle/nbCameraPress`'s `nbCameraPressProcessInit` is frameless and ends
+`beqz $2, nbCameraPressStart`, a conditional branch into the next symbol's
+entry. ee-gcc 2.96 does sibling-call a trailing `void` call, but it keeps the
+prologue while doing so: `kernel/dds3StartMenu`'s `InitTitleProcess` has
+`sd $31`, `ld $31` and then `j dds3AdminiCallSequence`. Every spelling here
+(if/else, an early `return` either way round, an explicit `return;` after the
+call, and a `goto`) emits the same 60-byte framed `jal`. The two symbols are
+one routine with a second entry point, the same shape as `fldSetTerminalState`
+above; `nbCameraPressStart`'s matching two-store body is what `beqz` reaches.
+
+Two more are epilogue-only symbols, which makes the function above each of them
+unwritable too until the split is corrected:
+
+- `sdf/sdfPrint`'s `sdf_2BD3E8` is three instructions, `ld $31, 0x70($29)`,
+  `jr $31`, `addiu $29, $29, 0x80`, with no prologue. It is the epilogue of
+  `sdfPrintRpcThread` directly above it, whose own 0x50 bytes end on
+  `jal sceSifRpcLoop` and its delay slot and whose frame is exactly 0x80 with
+  `$31` at 0x70. One C function covers both symbols' bytes, so neither can be
+  written while the boundary stands.
+- `sdf/sdfTmx`'s `sdf_2C7BC4` is the same thing for
+  `SdfFileRpcServerThreadProc`: `ld $16/$17/$18/$31` at 0xB0, 0xB8, 0xC0, 0xC8
+  and `addiu $29, $29, 0xD0`, matching that function's prologue exactly.
+
+Both are `docs/tu-recovery.md` work, not matching work: drop the epilogue symbol
+from the split and the function above it compiles as one piece.

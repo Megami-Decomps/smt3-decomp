@@ -10,7 +10,7 @@ page and line to open. Conventions are in
 | 48 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 34 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
-| 14 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
+| 13 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
 | 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
@@ -54,6 +54,8 @@ page and line to open. Conventions are in
 | 1 | script/scrParameterCommand | [script/scrParameterCommand.md](script/scrParameterCommand.md) |
 | 1 | rstupdate | [result/rstupdate.md](result/rstupdate.md) |
 | 1 | newbattle/nbMainProcess | [newbattle/nbMainProcess.md](newbattle/nbMainProcess.md) |
+| 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
+| 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3KernelCore | [kernel/dds3KernelCore.md](kernel/dds3KernelCore.md) |
 | 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
