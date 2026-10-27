@@ -4241,41 +4241,25 @@ s8 cmpGetParamGaugeColor(s8 index)
     return D_00349380[index];
 }
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+extern char D_005400E0[];
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+extern void datExecSkill(u16 skill, datUnitWork_t *user, datUnitWork_t *target);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+void cmpExecRecover(u16 skill, datUnitWork_t *user, datUnitWork_t *target)
+{
+    datUnitWork_t saveUser;
+    datUnitWork_t saveTarget;
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540058);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540070);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540090);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400B0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400C0);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_005400D0);
-
-INCLUDE_ASM(const s32, "code_0022C578", cmpExecRecover);
+    cmbCopyCustomDevilToStock(&saveUser, user);
+    cmbCopyCustomDevilToStock(&saveTarget, target);
+    datExecSkill(skill, user, target);
+    printf(D_005400E0, skill, target->flag);
+    if ((target->badstatus & 0x800) != 0)
+    {
+        cmbCopyCustomDevilToStock(user, &saveUser);
+        cmbCopyCustomDevilToStock(target, &saveTarget);
+    }
+}
 
 s32 cmp_240C10(void)
 {
@@ -4354,6 +4338,42 @@ s32 cmpGetSkillTargetArea(u16 skillId)
     }
     return 0;
 }
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540058);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540070);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0054007C);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540090);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_005400B0);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_005400C0);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_005400D0);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_005400E0);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemKou);
 
