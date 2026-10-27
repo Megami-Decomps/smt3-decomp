@@ -50,3 +50,9 @@ by C:
 - `fclDrawSpriteEx`'s split assembly holds two symbols, so writing C for one
   would drop the other's bytes. That is a boundary problem, not a matching
   one.
+
+`sdf/sdfDev9`'s `sdf_2BFC58` is a hand-written quadword clear. Its body carries
+`neg $2, $3`, `add $2, $2, $3` and `addi $3, $3, -0x8`, and cc1 only ever emits
+`subu`, `addu` and `addiu`. It also jumps into the middle of an eight-`sq`
+unrolled block through `jr $2` on a computed label address, which no C
+construct reaches.

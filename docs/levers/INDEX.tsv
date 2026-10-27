@@ -401,7 +401,7 @@ docs/levers/impossible.md	16		nbLoadMotionByIndex has two byte-identical arms th
 docs/levers/impossible.md	19	$4	A call with no argument to a function the unit defines with a prototype, as Hatudo and nbE915_Test do to nbGetEventForm.
 docs/levers/impossible.md	32		nbMakaDispOn needs GetMakaProcessData to take an argument, as the HD reconstruction shows, but it is defined (void) in this unit.
 docs/levers/impossible.md	45	mult mult1	func_00213DF0 uses mult1, the EE's second multiply pipe, in a way no C expression reaches.
-docs/levers/impossible.md	50		fclDrawSpriteEx's split assembly holds two symbols, so writing C for one would drop the other's bytes.
+docs/levers/impossible.md	50	$2 $3 add addi addiu addu jr subu	fclDrawSpriteEx's split assembly holds two symbols, so writing C for one would drop the other's bytes.
 docs/levers/stores.md	12	sw	Two unrelated member stores in front of an expression that loads a gp global decide the whole block's schedule, and the winning order is not the one the…
 docs/levers/stores.md	20	$0 jal sw	Where retail's last store before a jal is a constant store rather than the argument setup, hoist the argument into a local above the stores.
 docs/levers/stores.md	26	$0 sw	Two adjacent struct stores only reverse when neither value is a reload.

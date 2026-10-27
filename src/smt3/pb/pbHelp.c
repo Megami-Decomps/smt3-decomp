@@ -107,6 +107,32 @@ pbProcHandle_t *func_001DB020(pbProcHandle_t *parent) {
     return pbStartHelp(parent, 0);
 }
 
-INCLUDE_ASM(const s32, "pb/pbHelp", pbResetKeyState);
+extern u8 keyActMode;
+
+extern u8 keyAct[4][5];
+
+void pbResetKeyState(void) {
+    keyActMode = 0;
+    keyAct[0][0] = 0;
+    keyAct[0][1] = 1;
+    keyAct[0][2] = 2;
+    keyAct[0][3] = 3;
+    keyAct[0][4] = 4;
+    keyAct[1][0] = 3;
+    keyAct[1][1] = 0;
+    keyAct[1][2] = 1;
+    keyAct[1][3] = 2;
+    keyAct[1][4] = 4;
+    keyAct[2][0] = 2;
+    keyAct[2][1] = 3;
+    keyAct[2][2] = 0;
+    keyAct[2][3] = 1;
+    keyAct[2][4] = 4;
+    keyAct[3][0] = 1;
+    keyAct[3][1] = 2;
+    keyAct[3][2] = 3;
+    keyAct[3][3] = 0;
+    keyAct[3][4] = 4;
+}
 
 
