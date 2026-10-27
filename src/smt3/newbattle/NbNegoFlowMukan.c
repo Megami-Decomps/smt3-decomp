@@ -281,6 +281,18 @@ extern u8 D_003E2470[];
 
 extern s32 datGetParam(datUnitWork_t *work, s32 paratype);
 
+extern s32 datGetRace(datUnitWork_t *work);
+
+extern s32 datSearchDevilStock(s32 id);
+
+extern s32 datCheckStockFull(void);
+
+extern s32 datGetPlayerLevel(void);
+
+extern s32 printf(const char *format, ...);
+
+extern char D_00545218[];
+
 /* The nb event script work; only the fields this unit touches are named. */
 typedef struct nbEventProcessData_t {
     nbMainProcessData_t *data;
@@ -390,8 +402,6 @@ s32 Flow12_2(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 73 of 97 words differ (first at +0x34). */
-#ifdef NON_MATCHING
 s32 Flow12_3(nbNegoProcessData_t *n)
 {
     s32 plevel;
@@ -419,17 +429,19 @@ s32 Flow12_3(nbNegoProcessData_t *n)
         eparam = datGetParam(n->ework, 1);
         if (plevel >= elevel) {
             if (pparam < eparam) {
-                rate = 0x28;
-            } else {
-                rate = 0x50;
+                goto low;
             }
+            rate = 0x50;
         } else {
             if (pparam < eparam) {
-                rate = 0x14;
-            } else {
-                rate = 0x3C;
+                goto low;
             }
+            rate = 0x3C;
         }
+        goto got;
+    low:
+        rate = (plevel < elevel) == 0 ? 0x28 : 0x14;
+    got:
         if (n->nowselect == 0) {
             if (dds3GetRandIntA(0, 0x64) < rate) {
                 next = n->nextkouho[0];
@@ -448,12 +460,7 @@ s32 Flow12_3(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowMukan", Flow12_3);
-#endif
 
-/* NON_MATCHING: 73 of 97 words differ (first at +0x34). */
-#ifdef NON_MATCHING
 s32 Flow12_4(nbNegoProcessData_t *n)
 {
     s32 plevel;
@@ -481,17 +488,19 @@ s32 Flow12_4(nbNegoProcessData_t *n)
         eparam = datGetParam(n->ework, 1);
         if (plevel >= elevel) {
             if (pparam < eparam) {
-                rate = 0x28;
-            } else {
-                rate = 0x50;
+                goto low;
             }
+            rate = 0x50;
         } else {
             if (pparam < eparam) {
-                rate = 0x14;
-            } else {
-                rate = 0x3C;
+                goto low;
             }
+            rate = 0x3C;
         }
+        goto got;
+    low:
+        rate = (plevel < elevel) == 0 ? 0x28 : 0x14;
+    got:
         if (n->nowselect == 0) {
             if (dds3GetRandIntA(0, 0x64) < rate) {
                 next = n->nextkouho[0];
@@ -510,53 +519,6 @@ s32 Flow12_4(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-/* NON_MATCHING: 73 of 97 words differ (first at +0x34); four words short. */
-#ifdef NON_MATCHING
-s32 Flow12_4(nbNegoProcessData_t *n)
-{
-    s32 plv;
-    s32 elv;
-    s32 ppar;
-    s32 epar;
-    s32 ritu;
-
-    switch (n->nownegophase) {
-    case 0:
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xEC, 0);
-        break;
-    case 1:
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xD6, 1);
-        break;
-    case 2:
-        nbAddNegoIdKouho(n, 0xC0014);
-        nbAddNegoIdKouho(n, 0xC0015);
-        nbAddNegoIdKouho(n, 0xC0016);
-        nbAddNegoIdKouho(n, 0xC0017);
-        plv = n->pwork->level;
-        ppar = datGetParam(n->pwork, 1);
-        elv = n->ework->level;
-        epar = datGetParam(n->ework, 1);
-        if (plv < elv) {
-            ritu = ppar < epar ? 0x14 : 0x3C;
-        } else {
-            ritu = ppar < epar ? 0x28 : 0x50;
-        }
-        if (n->nowselect == 0) {
-            n->nextnegoid =
-                dds3GetRandIntA(0, 0x64) < ritu ? n->nextkouho[0] : n->nextkouho[1];
-        } else {
-            n->nextnegoid = dds3GetRandIntA(0, 0x64) < 0x64 - ritu ? n->nextkouho[2]
-                                                                   : n->nextkouho[3];
-        }
-        break;
-    }
-    return 0;
-}
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowMukan", Flow12_4);
-#endif
-#endif
 
 s32 Flow12_24(nbNegoProcessData_t *n)
 {
@@ -697,7 +659,37 @@ s32 Flow12_26(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowMukan", Flow12_27);
+s32 Flow12_27(nbNegoProcessData_t *n)
+{
+    nbAddNegoIdKouho(n, 0xC001C);
+    nbAddNegoIdKouho(n, 0xC0023);
+    nbAddNegoIdKouho(n, 0xC0028);
+    nbAddNegoIdKouho(n, 0xC002B);
+    n->nextnegoid = n->nextkouho[dds3GetRandIntA(0, 4)];
+    if (datGetRace(n->ework) == 0x15 || datGetRace(n->ework) == 0x16 ||
+        datGetRace(n->ework) == 0x17) {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    if (datGetRace(n->ework) == 0x13 || datGetRace(n->ework) == 0x12 ||
+        n->ework->id == 0x9A) {
+        n->nextnegoid = n->nextkouho[2];
+    }
+    if (n->nextnegoid == n->nextkouho[0]) {
+        if (datSearchDevilStock(n->ework->id) >= 0) {
+            n->nextnegoid = n->nextkouho[2];
+        }
+        if (datCheckStockFull() != 0) {
+            n->nextnegoid = n->nextkouho[2];
+        }
+    }
+    printf(D_00545218, datGetPlayerLevel(), n->ework->level);
+    if (n->nextnegoid == n->nextkouho[0]) {
+        if (datGetPlayerLevel() < n->ework->level) {
+            n->nextnegoid = n->nextkouho[2];
+        }
+    }
+    return 0;
+}
 
 s32 Flow12_28(nbNegoProcessData_t *n)
 {
@@ -900,3 +892,6 @@ s32 nbNegoFlowMukan(nbNegoProcessData_t *n)
 {
     return D_004EF960[(u16)n->nownegoid](n);
 }
+
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowMukan", D_00545218);
+
