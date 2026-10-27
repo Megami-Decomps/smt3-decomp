@@ -773,7 +773,7 @@ void fldEveHit_AddEveHitItemBox(s32 idx, f32 x, f32 y, f32 z, f32 r)
         fldEveHit_AddEveData((fldEventDataHeader_t *)&D_002FCFA0[i].event, event);
     D_002FCFA0[i].put.visible = 1;
     D_002FCFA0[i].hit.put = &D_002FCFA0[i].put;
-    D_002FCFA0[i].ball.type = 0;
+    D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.type = 1;
     D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
@@ -818,7 +818,7 @@ void fldEveHit_AddEveHitNpc(char *resname, s32 eveidx, f32 x, f32 y, f32 z, f32 
     dds3Basic_t *point;
     fldResourcePoint_t *sisei;
     D_002FCFA0[i].put.ball = &D_002FCFA0[i].ball;
-    D_002FCFA0[i].ball.type = 0;
+    D_002FCFA0[i].ball.Type = 0;
     D_002FCFA0[i].hit.put = &D_002FCFA0[i].put;
     D_002FCFA0[i].ball.r = r;
     D_002FCFA0[i].put.eveIndex = eveidx;

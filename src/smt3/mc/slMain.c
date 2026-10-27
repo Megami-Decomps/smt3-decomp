@@ -1876,17 +1876,17 @@ s32 slSaveData_writeFile(void) {
     SL_FILE_HEAD->verstr[1] = 'E';
     SL_FILE_HEAD->verstr[2] = 'R';
     SL_FILE_HEAD->ver = 5;
-    SL_FILE_HEAD->tmnlMode = DDS3_GBWK->previewX;
-    SL_FILE_HEAD->tmnlId = DDS3_GBWK->previewY;
-    SL_FILE_HEAD->level = datGetPlayerLevel();
-    SL_FILE_HEAD->playTime = DDS3_GBWK->unk3C;
+    SL_FILE_HEAD->TmnlMode = DDS3_GBWK->previewX;
+    SL_FILE_HEAD->TmnlId = DDS3_GBWK->previewY;
+    SL_FILE_HEAD->Lv = datGetPlayerLevel();
+    SL_FILE_HEAD->PlayTime = DDS3_GBWK->playtime;
     if (evtBitCheck(0xAF2) != 0) {
         SL_FILE_HEAD->mode = 1;
     } else {
         SL_FILE_HEAD->mode = 0;
     }
     SL_FILE_HEAD->work = *(slFileWork_t *)((u8 *)DDS3_GBWK + 0x6604);
-    SL_FILE_HEAD->mapOpen = *((u8 *)DDS3_GBWK + 0x6654);
+    SL_FILE_HEAD->autoMapOpen = *((u8 *)DDS3_GBWK + 0x6654);
     hdr = SL_FILE_HEAD;
     rec = SL_REC[slot];
     rec[0] = hdr->verstr[0];

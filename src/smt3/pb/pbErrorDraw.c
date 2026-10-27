@@ -92,7 +92,7 @@ pbProcHandle_t *pbStartErrorDraw(pbProcHandle_t *parent, s32 eCode, s32 frame) {
         dds3LinkProcess(parent->id, panel->id);
     }
     work = sdfChipAllocDirect(0xC);
-    work->bgm = eCode;
+    work->code = eCode;
     work->timer = frame;
     work->unk04 = 0;
     panel->flags = 0x10000;

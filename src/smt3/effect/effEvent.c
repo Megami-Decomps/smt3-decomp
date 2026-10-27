@@ -826,7 +826,7 @@ void effEveBEDCutDraw(effEveBEDCut_t *hEveBEDCut) {
     SDF_VU0_STOREMATRIX(&base);
     entry = list->entries;
     count = list->count;
-    color = hEveBEDCut->init.color;
+    color = hEveBEDCut->init.abgr;
     if (count != 0) {
         remaining = count;
         works = cut->parameterWorks;
@@ -1414,7 +1414,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
             SDF_VU0_COPYVECTOR_RWSRC(&batch1.centre[n], op);
             batch1.color[n] = color1;
             uvWidth = (s16)((u16)tex1->width << 4);
-            uvHeight = (s16)((u16)tex1->h << 4);
+            uvHeight = (s16)((u16)tex1->height << 4);
             batch1.uv[n][0] = 0;
             batch1.uv[n][1] = 0;
             batch1.uv[n][2] = uvWidth;
@@ -1449,7 +1449,7 @@ void effEVECombParSmokeDraw(effEVECombParSmoke_t *pCombParSmoke) {
             SDF_VU0_COPYVECTOR_RWSRC(&batch2.centre[n], op);
             batch2.color[n] = color2;
             uvWidth = (s16)((u16)tex2->width << 4);
-            uvHeight = (s16)((u16)tex2->h << 4);
+            uvHeight = (s16)((u16)tex2->height << 4);
             batch2.uv[n][0] = 0;
             batch2.uv[n][1] = 0;
             batch2.uv[n][2] = uvWidth;
