@@ -1491,7 +1491,30 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053F500);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSkill);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcDestroyItem);
+extern char *D_00330914[];
+
+extern char D_0054FE40[];
+
+extern char *pStr[];
+
+s32 cmpCalcDestroyItem(void)
+{
+    char buf[16];
+    u16 id = campWork->itemId[campWork->itemCursor + campWork->itemScroll];
+
+    if (cmpItemHasFlag(id, 1) == 0)
+    {
+        return 0;
+    }
+    campWork->unk_0018[0] = 0;
+    fclSetMessageVar_20743088(2, pStr[id]);
+    sprintf(buf, D_0054FE40, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
+    fclSetMessageVar_20743088(0xB, buf);
+    fclSetMessageInvalid(0);
+    fclStartMessage(9);
+    fclStartSelMessage(0xB);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
 
