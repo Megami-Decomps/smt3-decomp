@@ -3132,13 +3132,13 @@ s32 cmpDrawBoxGDefault(s32 a, s32 b, s32 c, s32 d, s32 e, s32 *f, s32 g)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23A360);
 
-void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
+void cmpDrawPanelEffCell(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h)
 {
     s32 pair[2];
 
     pair[1] = g;
     pair[0] = g;
-    cmpDrawBoxLine(a, b, c, d, e, f, pair);
+    cmpDrawBoxLine(a, b, c, d, e, f, pair, h);
 }
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawBoxLine);
@@ -3707,9 +3707,33 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawInfoText);
 #endif
 
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_23CC70);
+void camp_23CC70(s32 x, s32 y, s32 z, s32 h, s32 n, s32 f, s32 g, s32 col)
+{
+    cmpDrawBoxF(x, y, z, h, n, f, col);
+    if (g != 0) {
+        s32 right = x + h * 16;
+        s32 bottom;
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_23CDB8);
+        cmpDrawPanelEffCell(x, y, z, right, y, z, g, col);
+        bottom = y + n * 8;
+        cmpDrawPanelEffCell(x, y, z, x, bottom, z, g, col);
+        cmpDrawPanelEffCell(right, y, z, right, bottom, z, g, col);
+        cmpDrawPanelEffCell(x, bottom, z, right, bottom, z, g, col);
+    }
+}
+
+
+void camp_23CDB8(s32 x, s32 y, s32 z, s32 h, s32 n, s32 f, s32 g, s32 col)
+{
+    cmpDrawBoxF(x, y, z, h, n, f, col);
+    if (g != 0) {
+        s32 right = x + h * 16;
+
+        cmpDrawPanelEffCell(x, y, z, right, y, z, g, col);
+        cmpDrawPanelEffCell(x, y + n * 8, z, right, y + n * 8, z, g, col);
+    }
+}
+
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow1);
 
