@@ -1,7 +1,7 @@
 page	line	mnemonics	tell
 docs/levers/README.md	7		| Levers | Page | Section | |---|---|---|
 docs/levers/README.md	9		| 245 | [addressing-and-types.md](addressing-and-types.md) | Addressing and types |
-docs/levers/README.md	10		| 120 | [control-flow.md](control-flow.md) | Control flow |
+docs/levers/README.md	10		| 121 | [control-flow.md](control-flow.md) | Control flow |
 docs/levers/README.md	11		| 10 | [when-to-stop.md](when-to-stop.md) | When to stop, and keeping the draft |
 docs/levers/README.md	12		| 10 | [stores.md](stores.md) | Stores |
 docs/levers/README.md	13		| 8 | [impossible.md](impossible.md) | Functions that cannot be written in C |
@@ -380,13 +380,14 @@ docs/levers/control-flow.md	115		| a loop whose back edge assigns the one parame
 docs/levers/control-flow.md	116	$18 j jal nop sll sllv	| jal and a full epilogue for **one** call where every other call in the function must keep its j | wrap that one call in a loop:
 docs/levers/control-flow.md	141	$0 $16 $17 $6 daddu jal	A message or result local that retail holds in a **callee-saved** register, where the C gets a caller-saved one or coalesces it into the argument register, is…
 docs/levers/control-flow.md	150	movn movz	A two-constant movn from a ternary needs the **== 0 ? low :
-docs/levers/control-flow.md	156		The **source order of a switch's arms** is a lever in its own right and is cheap to sweep:
-docs/levers/control-flow.md	164	$4 jal nop	A jal with a bare nop in its delay slot and no argument setup is **not** evidence of an unprototyped call.
-docs/levers/control-flow.md	173	j jal	An explicit **return;
-docs/levers/control-flow.md	185	beq	**Three cases over 0, 1 and 2 come out tested 1, 0, 2, and the arms are laid out in source order.** balance_case_nodes splits three singleton cases at the…
-docs/levers/control-flow.md	193	$0 $2 bne bnel daddu	**A guard whose early return is the else of the real body gets retail's branch-likely.** if (x != K) { return 0;
-docs/levers/control-flow.md	201	beq bne	**Where retail branches *to* an if's body, the test is inverted and the body is last.** fldPlayerCalc's world-map guard is beq fldWmWarpMode, 1 into a…
-docs/levers/control-flow.md	209	$0 addiu addu and beq bgez bltz sb sh slti sltiu	| beq against zero, then bltz, then slti on one value, where your if chain folds to a single sltiu | a switch with an **empty case 0:**, the real range as…
+docs/levers/control-flow.md	156	li movn	A **four-leaf constant tree whose two leaves on one side are merged by a movn on the *outer* condition** is a goto funnel, not a nested if.
+docs/levers/control-flow.md	171		The **source order of a switch's arms** is a lever in its own right and is cheap to sweep:
+docs/levers/control-flow.md	179	$4 jal nop	A jal with a bare nop in its delay slot and no argument setup is **not** evidence of an unprototyped call.
+docs/levers/control-flow.md	188	j jal	An explicit **return;
+docs/levers/control-flow.md	200	beq	**Three cases over 0, 1 and 2 come out tested 1, 0, 2, and the arms are laid out in source order.** balance_case_nodes splits three singleton cases at the…
+docs/levers/control-flow.md	208	$0 $2 bne bnel daddu	**A guard whose early return is the else of the real body gets retail's branch-likely.** if (x != K) { return 0;
+docs/levers/control-flow.md	216	beq bne	**Where retail branches *to* an if's body, the test is inverted and the body is last.** fldPlayerCalc's world-map guard is beq fldWmWarpMode, 1 into a…
+docs/levers/control-flow.md	224	$0 addiu addu and beq bgez bltz sb sh slti sltiu	| beq against zero, then bltz, then slti on one value, where your if chain folds to a single sltiu | a switch with an **empty case 0:**, the real range as…
 docs/levers/cross-jumping.md	8	lui ori	Where retail computes a value in both arms of an if but converts or stores it once at the join, the source most likely duplicates the whole tail in both arms…
 docs/levers/cross-jumping.md	15	and div nop	The merge stops as soon as one register differs, which is why retail can keep two of three float-to-int conversions inside the arms and share only the third.
 docs/levers/float-literals.md	39	abs.s lh lhu lwc1 mtc1	Where retail loads every field of one struct before storing any of them into another, and the two pointed-to types are different alias sets so the scheduler…

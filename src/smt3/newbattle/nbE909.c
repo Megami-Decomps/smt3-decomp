@@ -320,7 +320,84 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-INCLUDE_ASM(const s32, "newbattle/nbE909", nbE909Process_1);
+extern s32 (*D_005274F8[])(nbEventProcessData_t *e);
+
+extern void nbCameraSetState(s32 state);
+
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
+
+extern void nbCameraBoss_Kagu_E909_Set(void);
+
+extern void nbCameraBoss_Kagu_E909_Run(void);
+
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
+
+extern void effPadVibeFadeOUT(s32 mode, s32 power, s32 frame);
+
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+s32 nbE909Process_1(dds3ProcessID_t *id)
+{
+    nbEventProcessData_t *e;
+
+    e = dds3GetProcessData(id);
+    if (D_005274F8[e->seq](e) != 0) {
+        return -1;
+    }
+    if (e->time == 0) {
+        nbCameraSetState(0x17);
+        nbSetEnemyFormation(e->data);
+        nbSetPlayerFormation(e->data, 0);
+        nbCameraBoss_Kagu_E909_Set();
+    }
+    nbCameraBoss_Kagu_E909_Run();
+    switch (e->time) {
+    case 0x14:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0x6E, 7);
+        break;
+    case 0x28:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0x96, 7);
+        break;
+    case 0x3C:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0xBE, 7);
+        break;
+    case 0x50:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0xD2, 0xA);
+        break;
+    case 0x64:
+        effPadVibeFadeOUT(0, 0, 0);
+        effPadVibeFadeOUT(1, 0xFF, 0x28);
+        break;
+    case 0x90:
+        dds3PadVibrationSet(0, 1, 5);
+        dds3PadVibrationSet(1, 0xC8, 5);
+        break;
+    case 0x96:
+        dds3PadVibrationSet(0, 1, 0xC);
+        dds3PadVibrationSet(1, 0xDC, 0xC);
+        break;
+    case 0xA6:
+        dds3PadVibrationSet(0, 0, 0);
+        dds3PadVibrationSet(1, 0x78, 0x3C);
+        break;
+    case 0xCA:
+        dds3PadVibrationSet(0, 1, 5);
+        dds3PadVibrationSet(1, 0xFF, 5);
+        break;
+    case 0xCF:
+        effPadVibeFadeOUT(0, 1, 0x1E);
+        effPadVibeFadeOUT(1, 0xFF, 0x1E);
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 nbE910_Test(nbEventProcessData_t *e)
 {

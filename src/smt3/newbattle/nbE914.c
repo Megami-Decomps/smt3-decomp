@@ -369,7 +369,142 @@ nbKoukaPacket_t *nbAddSkillEffectKoukaPacket3(s32 startframe, s32 uniqueid, u8 *
 
 nbFormation_t *nbGetEventForm();
 
-INCLUDE_ASM(const s32, "newbattle/nbE914", nbE914Process_1);
+extern s32 (*D_00527690[])(nbEventProcessData_t *e);
+
+extern void dds3DeleteSceneBasicData(void *basic);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
+
+extern void nbCameraHelperModelSet(dds3Basic_t *hModel);
+
+extern nbFormation_t *nbGetEventForm(void);
+
+extern void nbCameraSetState(s32 state);
+
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
+
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
+
+extern void dds3CrossfadeStart(s32 frames);
+
+extern void nbCameraBoss_BSMETA_E914_1_Set(void);
+
+extern void effBTLSkillStart(s32 skillid, s32 arg1);
+
+typedef struct
+{
+    u8 type;
+    u8 unknown01;
+    u8 unknown02;
+    u8 unknown03;
+    u32 unknown04;
+    u32 diffuse;
+    u32 ambient;
+    u32 color_anim;
+    u32 unknown14;
+    u32 unknown18;
+    u32 unknown1C;
+    u32 unknown20;
+    u8 reserve[0xC];
+} effBTL_SkillLight_t;
+
+typedef struct
+{
+    u32 unknown00;
+    u32 unknown04;
+    u32 unknown08;
+    u32 unknown0C;
+    u32 unknown10;
+    u32 unknown14;
+    u32 unknown18;
+} effBTLModelColorParam_t;
+
+extern void effBTLPointLightSet(effBTL_SkillLight_t *pLight, nbFormation_t *pFormation);
+
+extern void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormation);
+
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+extern dds3Basic_t *D_0055163C;
+
+extern dds3Basic_t *D_00551640;
+
+s32 nbE914Process_1(dds3ProcessID_t *id)
+{
+    u8 reserve[0x10];
+    effBTL_SkillLight_t light;
+    effBTLModelColorParam_t color;
+    nbEventProcessData_t *e;
+    evtUnitHandle_t *unit;
+    nbFormation_t *form;
+    s32 serial;
+
+    e = dds3GetProcessData(id);
+    if (D_00527690[e->seq](e) != 0) {
+        D_0055163C = NULL;
+        if (D_00551640 != NULL) {
+            dds3DeleteSceneBasicData(D_00551640);
+            D_00551640 = NULL;
+        }
+        return -1;
+    }
+    if (e->time > 0 && D_0055163C != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(D_0055163C);
+        if (unit->basic != NULL) {
+            nbCameraHelperModelSet(unit->basic);
+        }
+    }
+    switch (e->time) {
+    case 0:
+        nbSingleFormExceptedDispOff(nbGetEventForm());
+        nbCameraSetState(0x17);
+        serial = evtInitMotionSeProcess(e->eventrid, 2);
+        D_00551640 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_00551640), 0, 0, 0, 2);
+        D_0055163C = D_00551640;
+        nbSetEnemyFormation(e->data);
+        nbSetPlayerFormation(e->data, 0);
+        break;
+    case 0x6E:
+        dds3CrossfadeStart(0xC);
+        nbCameraBoss_BSMETA_E914_1_Set();
+        D_0055163C = NULL;
+        break;
+    }
+    switch (e->time) {
+    case 0:
+        effBTLSkillStart(0x202, 0);
+        break;
+    case 1:
+        form = nbGetEventForm();
+        light.type = 2;
+        light.unknown01 = 1;
+        light.unknown02 = 0;
+        light.unknown04 = 0;
+        light.diffuse = 0x80E6FFFF;
+        light.ambient = 0x80321E28;
+        light.color_anim = 0;
+        light.unknown14 = 0;
+        light.unknown18 = 0x2710;
+        light.unknown1C = 0;
+        color.unknown00 = 0x80829696;
+        color.unknown04 = 0;
+        color.unknown08 = 0;
+        color.unknown0C = 0x2710;
+        color.unknown10 = 0;
+        effBTLPointLightSet(&light, form);
+        effBTLModelColorSet(&color, form);
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 nbE915_Test(nbEventProcessData_t *e)
 {

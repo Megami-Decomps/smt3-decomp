@@ -253,5 +253,5 @@ src/smt3/code_0022C578.c	z10	done	2026-10-21	236 match / 214 asm / 23 drafts	mat
 src/smt3/code_0022C578.c	z11	done	2026-10-27	171 real / 26 drafts	second pass, killed by a 503; 17 matched, three drafts written up after
 src/smt3/code_0022C578.c	z12	done	2026-10-27	153 real / 29 drafts	16 matched, 268 match / 0 differ; 3 new drafts parked
 src/smt3/code_0022C578.c	z13	done	2026-10-27	290 match / 32 drafts	fourth pass matched 22 and parked 3; 128 bare INCLUDE_ASM left
-coverage sweep (58 units)	z14	done	2026-10-27	104 fn / 53856 B	16 units to zero; 3 Model2Start siblings, sdfPrintIopInit, nb_2468B0; nbCallNewBattle and nbCameraPressProcessRun parked; sdf_2BFC58, nbCameraPressProcessInit, sdf_2BD3E8, sdf_2C7BC4 recorded impossible
+coverage sweep (58 units)	z14	done	2026-10-27	104 fn / 53856 B	two sessions ran this concurrently in one worktree; combined: 28 units to zero (sdfDevFile NbNegoFlowFight NbNegoFlowMukan nbE904-909 nbE914 pipeModel fldDraw nbE915 NbNegoFlowDouchara dds3StartMenu Nme_Update pbHelp fclTerminalDraw fclRecoverDraw pipeMain sdfDefaultMain sdfMisc mviManager sdfPrint); sdfQuat nbCallNewBattle nbCameraPressProcessRun parked; sdf_2BFC58 nbCameraPressProcessInit sdf_2BD3E8 sdf_2C7BC4 recorded impossible
 tools/find_similar.py	z15	done	2026-10-27	6 fn / 1940 B	harness work: template search, 6 functions as validation

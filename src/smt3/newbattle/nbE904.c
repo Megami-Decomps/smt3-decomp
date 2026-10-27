@@ -404,7 +404,187 @@ void nbBgmFadeOut(void);
 
 nbFormation_t *nbGetEventForm();
 
-INCLUDE_ASM(const s32, "newbattle/nbE904", nbE904Process_1);
+extern s32 (*D_005274A0[])(nbEventProcessData_t *e);
+
+extern void dds3DeleteSceneBasicData(void *basic);
+
+extern evtUnitHandle_t *dds3GetUnitHandleObjectBasic(dds3Basic_t *b);
+
+extern void nbCameraHelperModelSet(dds3Basic_t *hModel);
+
+extern void nbCameraSetState(s32 state);
+
+extern s32 evtInitMotionSeProcess(s32 eventId, s32 resourceId);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *pBasic, u32 serialID, s32 type);
+
+extern void effBTLSkillEnd(void);
+
+extern void effBTLSkillStart(s32 skillid, s32 arg1);
+
+typedef struct
+{
+    u8 type;
+    u8 unknown01;
+    u8 unknown02;
+    u8 unknown03;
+    u32 unknown04;
+    u32 diffuse;
+    u32 ambient;
+    u32 color_anim;
+    u32 unknown14;
+    u32 unknown18;
+    u32 unknown1C;
+    u32 unknown20;
+    u8 reserve[0xC];
+} effBTL_SkillLight_t;
+
+typedef struct
+{
+    u32 unknown00;
+    u32 unknown04;
+    u32 unknown08;
+    u32 unknown0C;
+    u32 unknown10;
+    u32 unknown14;
+    u32 unknown18;
+} effBTLModelColorParam_t;
+
+extern void effBTLPointLightSet(effBTL_SkillLight_t *pLight, nbFormation_t *pFormation);
+
+extern void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormation);
+
+extern void dds3PadVibrationSet(s32 port, s32 power, s32 frame);
+
+extern void nbUpdateEventProcessData(dds3ProcessID_t *id);
+
+extern dds3Basic_t *D_005515D4;
+
+extern dds3Basic_t *D_005515D8;
+
+extern dds3Basic_t *D_005515DC;
+
+s32 nbE904Process_1(dds3ProcessID_t *id)
+{
+    effBTL_SkillLight_t light;
+    effBTLModelColorParam_t color;
+    nbEventProcessData_t *e;
+    evtUnitHandle_t *unit;
+    nbFormation_t *form;
+    s32 serial;
+
+    e = dds3GetProcessData(id);
+    if (D_005274A0[e->seq](e) != 0) {
+        D_005515D4 = NULL;
+        if (D_005515D8 != NULL) {
+            dds3DeleteSceneBasicData(D_005515D8);
+            D_005515D8 = NULL;
+        }
+        if (D_005515DC != NULL) {
+            dds3DeleteSceneBasicData(D_005515DC);
+            D_005515DC = NULL;
+        }
+        effBTLSkillEnd();
+        return -1;
+    }
+    if (e->time > 0 && D_005515D4 != NULL) {
+        unit = dds3GetUnitHandleObjectBasic(D_005515D4);
+        if (unit->basic != NULL) {
+            nbCameraHelperModelSet(unit->basic);
+        }
+    }
+    switch (e->time) {
+    case 0:
+        nbCameraSetState(0x17);
+        D_005515D4 = NULL;
+        D_005515D8 = NULL;
+        D_005515DC = NULL;
+        serial = evtInitMotionSeProcess(e->eventrid, 3);
+        D_005515D8 = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515D8), 0, 0, 0, 2);
+        D_005515D4 = D_005515D8;
+        break;
+    case 0x14:
+        serial = evtInitMotionSeProcess(e->eventrid, 4);
+        D_005515DC = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+        evtSetUnitMotion(dds3GetUnitHandleObjectBasic(D_005515DC), 0, 0, 0, 2);
+        D_005515D4 = D_005515DC;
+        break;
+    }
+    switch (e->time) {
+    case 0:
+        effBTLSkillStart(0x201, 0);
+        break;
+    case 1:
+        form = &e->data->form[5];
+        light.type = 0;
+        light.unknown01 = 2;
+        light.unknown02 = 0;
+        light.unknown04 = 0;
+        light.diffuse = 0x80FFE6FF;
+        light.ambient = 0x801E1E1E;
+        light.color_anim = 0x19;
+        light.unknown14 = 1;
+        light.unknown18 = 0xB4;
+        light.unknown1C = 1;
+        color.unknown00 = 0x803C3C3C;
+        color.unknown04 = 0x78;
+        color.unknown08 = 3;
+        color.unknown0C = 0xC8;
+        color.unknown10 = 0;
+        effBTLPointLightSet(&light, form);
+        effBTLModelColorSet(&color, form);
+        break;
+    }
+    switch (e->time) {
+    case 50:
+        dds3PadVibrationSet(0, 1, 4);
+        dds3PadVibrationSet(1, 0xC8, 3);
+        break;
+    case 70:
+        dds3PadVibrationSet(0, 1, 4);
+        dds3PadVibrationSet(1, 0xC8, 3);
+        break;
+    case 100:
+        dds3PadVibrationSet(0, 1, 4);
+        dds3PadVibrationSet(1, 0xC8, 3);
+        break;
+    case 122:
+        dds3PadVibrationSet(0, 1, 4);
+        dds3PadVibrationSet(1, 0xC8, 3);
+        break;
+    case 0:
+    case 23:
+    case 43:
+    case 53:
+    case 63:
+    case 73:
+    case 93:
+    case 103:
+    case 113:
+    case 125:
+        dds3PadVibrationSet(0, 0, 0x14);
+        dds3PadVibrationSet(1, 0x6E, 0x14);
+        break;
+    case 20:
+    case 40:
+    case 60:
+    case 90:
+    case 110:
+    case 140:
+        dds3PadVibrationSet(0, 1, 4);
+        dds3PadVibrationSet(1, 0xFF, 3);
+        break;
+    case 143:
+        dds3PadVibrationSet(0, 0, 0x14);
+        effPadVibeFadeOUT(1, 0x6E, 0x32);
+        break;
+    }
+    nbUpdateEventProcessData(id);
+    return 0;
+}
 
 s32 Model1Start(nbEventProcessData_t *ed)
 {
