@@ -3023,7 +3023,29 @@ void cmpExpandColor(u64 *dst, u32 color)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSetup3DView);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSpriteFlag);
+s32 cmpDrawSpriteFlag(u8 id, s32 flag, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *packet;
+    u64 *prim;
+    void *tag;
+
+    packet = sdfGrAllocPacketBuff(sdf2DGetPrimPacketSize(1, 1));
+    sdf2DMakePrimPacketHeader(packet, 0, 1, 0xE, 1);
+    prim = sdf2DGetPrimPtr(packet);
+    prim[0] = id != 0;
+    if (flag == 0) {
+        prim[1] = 0x4A;
+    } else {
+        prim[1] = 0x4B;
+    }
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+}
+
 
 s32 func_00239C08(u8 id, s32 arg)
 {
