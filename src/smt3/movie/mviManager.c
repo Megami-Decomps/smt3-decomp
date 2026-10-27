@@ -216,11 +216,82 @@ void movieViewerFree(void)
     }
 }
 
-INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3C8);
+typedef struct
+{
+    u32 mode;
+    u8 stat[0x3C];
+    char name[0x100];
+    u32 privateWords[2];
+} mviDirectoryEntry_t;
 
-INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3D8);
+extern u8 sdfHddValid;
 
-INCLUDE_ASM(const s32, "movie/mviManager", movieViewerScanDir);
+extern char D_0053F3E8[];
+
+extern char D_0054FD98[];
+
+extern char D_0054FDA0[];
+
+extern movieViewerChip_t *movieViewerFileList[];
+
+extern u16 movieViewerFileCount[];
+
+extern s32 sceDopen(const char *name);
+
+extern s32 sceDread(s32 handle, mviDirectoryEntry_t *entry);
+
+extern s32 sceDclose(s32 handle);
+
+extern char *strrchr(const char *text, s32 character);
+
+extern s32 strcasecmp(const char *first, const char *second);
+
+extern void *sdfChipAllocDirect(s32 aSize);
+
+extern void *memcpy(void *destination, const void *source, u32 bytes);
+
+void movieViewerScanDir(void)
+{
+    mviDirectoryEntry_t entry;
+    movieViewerChip_t **link;
+    movieViewerChip_t *chip;
+    char *ext;
+    s32 handle;
+    s32 length;
+    s32 count;
+
+    movieViewerFree();
+    if (sdfHddValid == 0) {
+        return;
+    }
+    handle = sceDopen(D_0053F3E8);
+    if (handle < 0) {
+        return;
+    }
+    count = 0;
+    link = movieViewerFileList;
+    while ((length = sceDread(handle, &entry)) > 0) {
+        if ((entry.mode & 0xF000) == 0x1000) {
+            continue;
+        }
+        ext = strrchr(entry.name, '.');
+        if (ext == NULL) {
+            continue;
+        }
+        if (strcasecmp(ext, D_0054FD98) != 0 && strcasecmp(ext, D_0054FDA0) != 0) {
+            continue;
+        }
+        count++;
+        chip = sdfChipAllocDirect(length + 8);
+        memcpy(chip->path, entry.name, length);
+        chip->path[length] = '\0';
+        *link = chip;
+        link = &chip->next;
+    }
+    *link = NULL;
+    movieViewerFileCount[0] = count;
+    sceDclose(handle);
+}
 
 /* The entry the cursor sits on, walked from the head. */
 void *movieViewerStep(void)
@@ -284,6 +355,12 @@ void movieDebugDrawInfo(void)
                       0xFF0080, 0);
     }
 }
+INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3C8);
+
+INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3D8);
+
+INCLUDE_RODATA(const s32, "movie/mviManager", D_0053F3E8);
+
 INCLUDE_SDATA(const s32, "movie/mviManager", PlayingNo);
 
 INCLUDE_SDATA(const s32, "movie/mviManager", D_0054FD98);
