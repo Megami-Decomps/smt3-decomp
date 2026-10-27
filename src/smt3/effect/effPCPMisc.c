@@ -23,7 +23,7 @@ struct effBlurScaleWork_t;
 struct dds3Effect_DistortionBlurParam_t;
 struct effBlurScatterSlot_t;
 struct effBlurScatterWork_t;
-struct EffBlurTemplateBody;
+struct dds3Effect_PartialMultiBlurParam_t;
 struct effPCPAgiraoFirePartList_t;
 struct effPCPRingPolyExp2Param_t;
 struct effPCPRingPolyExp2_tag;
@@ -64,7 +64,6 @@ struct effPCPHelperBED_tag;
 struct effPCPRadiateTBParam_t;
 struct effPCPRadiateTBPart_tag;
 struct effPCPRadiateTB_tag;
-struct EffPCPRingWork;
 struct effPCPAgiFireball2Param_t;
 struct effPCPAgiFireball2_tag;
 struct effPCPThunderSphereExpParam_t;
@@ -137,7 +136,7 @@ typedef struct sdfGrOt_t sdfGrOt_t;
 typedef struct effPCPSparkleSphereParam_t effPCPSparkleSphereParam_t;
 typedef struct effPCPSparkleSphere_tag effPCPSparkleSphere_tag;
 typedef struct dds3Effect_Blur_t dds3Effect_Blur_t;
-typedef struct EffBlurTemplateBody EffBlurTemplateBody;
+typedef struct dds3Effect_PartialMultiBlurParam_t dds3Effect_PartialMultiBlurParam_t;
 typedef struct dds3Effect_PartialMultiBlur_t dds3Effect_PartialMultiBlur_t;
 typedef struct effHandle_t effHandle_t;
 typedef struct effPCPAgiraoFirePartList_t effPCPAgiraoFirePartList_t;
@@ -208,7 +207,6 @@ typedef struct effPCPHelperBED_tag effPCPHelperBED_tag;
 typedef struct effPCPRadiateTBPart_tag effPCPRadiateTBPart_tag;
 typedef struct effPCPRadiateTBParam_t effPCPRadiateTBParam_t;
 typedef struct effPCPRadiateTB_tag effPCPRadiateTB_tag;
-typedef struct EffPCPRingWork EffPCPRingWork;
 typedef struct effPCPAgiFireball2Param_t effPCPAgiFireball2Param_t;
 typedef struct effPCPAgiFireball2_tag effPCPAgiFireball2_tag;
 typedef struct effPCPThunderSphereExpParam_t effPCPThunderSphereExpParam_t;
@@ -493,13 +491,13 @@ struct dds3Effect_Blur_t {
 
 /* The textured blur allocation stores this copied body followed by a
  * separately acquired source texture. */
-struct EffBlurTemplateBody {
-    s32 extent;
-    dds3Effect_Blur_t source;
+struct dds3Effect_PartialMultiBlurParam_t {
+    s32 area;
+    dds3Effect_Blur_t Blur;
 };
 
 struct dds3Effect_PartialMultiBlur_t {
-    EffBlurTemplateBody param;
+    dds3Effect_PartialMultiBlurParam_t param;
     struct sdfTexHandle_t *texture;
 };
 
@@ -897,7 +895,6 @@ struct effPCPDistortionBlurExpParam_t {
     dds3Effect_DistortionBlurParam_t res;
 };
 
-typedef EffBlurTemplateBody EffPCPTexturedBlurParams;
 
 struct effPCPAnalyzeBED_tag {
     struct SoundMixer *hBED;
@@ -908,8 +905,8 @@ struct effPCPAnalyzeBED_tag {
 
 /* The FLEACH blur interpolates the two template bodies across the timeline. */
 struct effPCPFLEACHBlurParam_t {
-    EffPCPTexturedBlurParams start;
-    EffPCPTexturedBlurParams end;
+    dds3Effect_PartialMultiBlurParam_t start;
+    dds3Effect_PartialMultiBlurParam_t end;
     s32 duration;
     s32 fadeIn;
     s32 fadeOut;
@@ -924,7 +921,7 @@ struct effPCPFLEACHBlur_tag {
 
 struct effPCPMultiBlurExp2Param_t {
     EffPCPCompactTimelineParams type;
-    EffPCPTexturedBlurParams MultiBlur;
+    dds3Effect_PartialMultiBlurParam_t MultiBlur;
 };
 
 struct effBlurScaleSlot_t {
@@ -1378,14 +1375,6 @@ struct effPCPRadiateTB_tag {
     struct sdfMemHandle_t *hMem;
 };
 
-struct EffPCPRingWork {
-    f32 pos[4];
-    u32 color10;
-    u32 color14;
-    f32 scale;
-    billHandle_t *handle;
-};
-
 struct effPCPAgiFireball2Param_t {
     s32 startFrame[3];
     effPCPAgiFireballParam_t group[3];
@@ -1549,7 +1538,7 @@ struct effPCPBlinkMultiBlurParam_t {
     u32 colors[2];
     f32 scale;
     s32 minSize;
-    EffPCPTexturedBlurParams res;
+    dds3Effect_PartialMultiBlurParam_t res;
 };
 
 struct effPCPMultiBlurExp_tag {
@@ -2212,7 +2201,7 @@ extern u8 D_0031FD30[];
 
 extern u8 D_0031FD90[];
 
-dds3Effect_PartialMultiBlur_t *dds3EffectPartialMultiBlurCreate(const EffBlurTemplateBody *pParam);
+dds3Effect_PartialMultiBlur_t *dds3EffectPartialMultiBlurCreate(const dds3Effect_PartialMultiBlurParam_t *pParam);
 
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 
@@ -2611,7 +2600,7 @@ void effPCPSparkleSphereDelete(effPCPSparkleSphere_tag *hData) {
     sdfChipFreeDirect(hData);
 }
 
-void effPCPSparkleSphereDraw(EffPCPRingWork *hData) {
+void effPCPSparkleSphereDraw(effPCPSparkleSphere_tag *hData) {
     f32 pos[4];
     f32 dir[4];
     f32 size[4];
@@ -2625,10 +2614,10 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *hData) {
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(dir);
-    handle = hData->handle;
-    size[0] = hData->scale;
-    size[1] = hData->scale;
-    size[2] = hData->scale;
+    handle = hData->hBill;
+    size[0] = hData->area;
+    size[1] = hData->area;
+    size[2] = hData->area;
     SDF_VU0_LOADVECTOR(size);
     SDF_VU0_LOADVECTOR_B(dir);
     SDF_VU0_MULVECTOR();
@@ -2636,12 +2625,12 @@ void effPCPSparkleSphereDraw(EffPCPRingWork *hData) {
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(pos);
     dds3BillboardSetPosition(handle, pos);
-    scale = hData->scale;
+    scale = hData->area;
     color = 0x10808080;
     for (i = 0; i < 10; i++) {
         dds3BillboardSetScale(handle, scale, scale);
         scale *= 0.975f;
-        dds3BillboardSetRGBA(handle, effMagaCylinderCalcColor(effMagaCylinderCalcColor(color, hData->color14), hData->color10));
+        dds3BillboardSetRGBA(handle, effMagaCylinderCalcColor(effMagaCylinderCalcColor(color, hData->abgr), hData->param));
         color += 0x05000000;
         dds3BillboardDraw(handle);
     }
@@ -4047,7 +4036,7 @@ effPCPBlinkMultiBlur_tag *effPCPBlinkMultiBlurCreate(effPCPBlinkMultiBlurParam_t
     if (BlinkMultiBlurCount == 0) {
         pBlinkMultiBlurBase = sdfChipAllocDirect(sizeof(effPCPBlinkMultiBlurBase_tag));
         pBlinkMultiBlurBase->hBlur = dds3EffectPartialMultiBlurCreate(&params->res);
-        pBlinkMultiBlurBase->color = params->res.source.abgr;
+        pBlinkMultiBlurBase->color = params->res.Blur.abgr;
         pBlinkMultiBlurBase->frame = 0;
         pBlinkMultiBlurBase->abgr = 0x80808080;
         pBlinkMultiBlurBase->pos[0] = 0;
@@ -4099,14 +4088,14 @@ void effPCPBlinkMultiBlurDraw(ref)
     if (work->frame < work->blink) {
         work->color = work->blink_abgr[work->frame & 1];
         SDF_VU0_LOADVECTOR(work);
-        obj->param.extent = (s32)((f32)effPCPBlurScreenOffset(pBlinkMultiBlurBase->area) * pBlinkMultiBlurBase->ratio);
+        obj->param.area = (s32)((f32)effPCPBlurScreenOffset(pBlinkMultiBlurBase->area) * pBlinkMultiBlurBase->ratio);
         SDF_VU0_STOREVECTOR(pos);
-        obj->param.source.center[0] = (s32)pos[0] - 0x800;
-        obj->param.source.center[1] = ((s32)pos[1] - 0x800) << 1;
-        if (obj->param.extent < pBlinkMultiBlurBase->area_min) {
-            obj->param.extent = pBlinkMultiBlurBase->area_min;
+        obj->param.Blur.center[0] = (s32)pos[0] - 0x800;
+        obj->param.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+        if (obj->param.area < pBlinkMultiBlurBase->area_min) {
+            obj->param.area = pBlinkMultiBlurBase->area_min;
         }
-        obj->param.source.abgr = effMagaCylinderCalcColor(pBlinkMultiBlurBase->abgr, pBlinkMultiBlurBase->color);
+        obj->param.Blur.abgr = effMagaCylinderCalcColor(pBlinkMultiBlurBase->abgr, pBlinkMultiBlurBase->color);
         dds3EffectPartialMultiBlurDraw(obj);
         pBlinkMultiBlurBase->frame++;
     }
@@ -4128,7 +4117,7 @@ effPCPMultiBlurExp_tag *effPCPMultiBlurExpCreate(effPCPBlinkMultiBlurParam_t *pa
     effPCPMultiBlurExp_tag *work = sdfChipAllocDirect(sizeof(effPCPMultiBlurExp_tag));
 
     work->hBlur = dds3EffectPartialMultiBlurCreate(&params->res);
-    work->abgr_base = params->res.source.abgr;
+    work->abgr_base = params->res.Blur.abgr;
     work->frame = 0;
     work->abgr = 0x80808080;
     work->pos[0] = 0.0f;
@@ -4154,12 +4143,12 @@ void effPCPMultiBlurExpDraw(effPCPMultiBlurExp_tag *hData) {
 
     obj = hData->hBlur;
     SDF_VU0_LOADVECTOR(hData->pos);
-    obj->param.extent = (s32)((f32)effPCPBlurScreenOffset(hData->area) * hData->ratio);
+    obj->param.area = (s32)((f32)effPCPBlurScreenOffset(hData->area) * hData->ratio);
     SDF_VU0_STOREVECTOR(pos);
-    obj->param.source.center[0] = (s32)pos[0] - 0x800;
-    obj->param.source.center[1] = ((s32)pos[1] - 0x800) << 1;
-    if (obj->param.extent < hData->area_min) {
-        obj->param.extent = hData->area_min;
+    obj->param.Blur.center[0] = (s32)pos[0] - 0x800;
+    obj->param.Blur.center[1] = ((s32)pos[1] - 0x800) << 1;
+    if (obj->param.area < hData->area_min) {
+        obj->param.area = hData->area_min;
     }
     if (hData->frame < hData->blink) {
         hData->abgr_base = hData->blink_abgr[hData->frame & 1];
@@ -4167,7 +4156,7 @@ void effPCPMultiBlurExpDraw(effPCPMultiBlurExp_tag *hData) {
         hData->abgr_base = hData->blink_abgr[0];
     }
     hData->frame++;
-    obj->param.source.abgr = effMagaCylinderCalcColor(hData->abgr, hData->abgr_base);
+    obj->param.Blur.abgr = effMagaCylinderCalcColor(hData->abgr, hData->abgr_base);
     dds3EffectPartialMultiBlurDraw(obj);
 }
 
@@ -4287,7 +4276,7 @@ effPCPMultiBlurExp2_tag *effPCPMultiBlurExp2Create(effPCPMultiBlurExp2Param_t *p
     work->fadeOut = pParam->type.fadeOut;
     work->startExtent = pParam->type.startExtent;
     work->endExtent = pParam->type.endExtent;
-    work->baseColor = pParam->MultiBlur.source.abgr;
+    work->baseColor = pParam->MultiBlur.Blur.abgr;
     return work;
 }
 
@@ -4330,13 +4319,13 @@ void effPCPMultiBlurExp2Draw(effPCPMultiBlurExp2_tag *hData) {
             SDF_VU0_LOADVECTOR(hData->position);
             effScreenOffset();
             SDF_VU0_STOREVECTOR(projected);
-            rect->param.source.center[0] = (s32)projected[0] - 2048;
-            rect->param.source.center[1] = ((s32)projected[1] - 2048) << 1;
+            rect->param.Blur.center[0] = (s32)projected[0] - 2048;
+            rect->param.Blur.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->param.source.center[0] = 0;
-            rect->param.source.center[1] = 0;
+            rect->param.Blur.center[0] = 0;
+            rect->param.Blur.center[1] = 0;
         }
-        rect->param.extent = InterpolateCompactExtent(
+        rect->param.area = InterpolateCompactExtent(
             hData->startExtent, hData->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -4346,7 +4335,7 @@ void effPCPMultiBlurExp2Draw(effPCPMultiBlurExp2_tag *hData) {
             opacity = 1.0f;
         }
         color = hData->color;
-        rect->param.source.abgr = effMagaCylinderCalcColor(
+        rect->param.Blur.abgr = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), hData->baseColor);
         dds3EffectPartialMultiBlurDraw(rect);
         hData->frame++;
