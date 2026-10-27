@@ -438,7 +438,7 @@ extern void cmpBuildStockNameList(cmpLocalStock_t *stock);
 
 extern void cmpInitStockCursorPos(void);
 
-extern void cmpStartSkillTokusyuMsg(u16 skill);
+extern s32 cmpStartSkillTokusyuMsg(u16 skill);
 
 extern void cmpModelInitCore2(void);
 
@@ -1110,7 +1110,49 @@ void cmpStartItemTokusyuMsg(u16 item)
     cmpStartSkillTokusyuMsg(datItemTable[item].skill);
 }
 
+// 19 of 40 words match at the exact size; retail calls the tokusyu
+// message before deciding the mode, this decides it first.
+#ifdef NON_MATCHING
+s32 cmpStartSkillMsg(u16 skill)
+{
+    s32 guide = cmpClearButtonGuide(skill);
+    s32 mode;
+    s32 index;
+
+    if (guide >= 5)
+    {
+        goto zero;
+    }
+    if (guide > 0)
+    {
+        mode = 1;
+        goto have_mode;
+    }
+zero:
+    mode = 0;
+have_mode:
+    if (cmpStartSkillTokusyuMsg(skill) != 0)
+    {
+        return 2;
+    }
+    index = cmpFindSkillMsgIndex(mode, skill);
+    if (index <= 0)
+    {
+        return mode;
+    }
+    if (mode == 0)
+    {
+        fclStartMessage(index + 0xC);
+    }
+    else
+    {
+        fclStartMessage(index + 0x20);
+    }
+    return mode;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartSkillMsg);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
 
@@ -3248,6 +3290,8 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
 
 /* NON_MATCHING: 2 of 42 words differ, exact size: the argument-register copy and
  * the `slt` are swapped. */
+// 40 of 42 words match at the exact size; one adjacent pair is scheduled
+// in the opposite order.
 #ifdef NON_MATCHING
 void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2, s32 flag)
 {
@@ -3744,6 +3788,8 @@ void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
 
 /* NON_MATCHING: 4 of 46 words differ, exact size: the two constant-1 pseudos
  * swap $2 and $3. */
+// 42 of 46 words match at the exact size; two constants land in swapped
+// registers and the branch between them moves with them.
 #ifdef NON_MATCHING
 s32 cmpModelSetup(u16 id, s32 blocking)
 {

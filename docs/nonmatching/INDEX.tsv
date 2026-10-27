@@ -43,6 +43,9 @@ campDhCheckTextures	code_0022C578	0x8C	7 of 35 words match	docs/nonmatching/code
 cmpItemIsUsable	code_0022C578	0x8C	15 of 28 words match	docs/nonmatching/code_0022C578.md	454
 cmpSetStockRemoveEff	code_0022C578	0x8C	26 of 35 words match	docs/nonmatching/code_0022C578.md	477
 cmpCursorSlotIsSelectable	code_0022C578	0x98	22 of 38 words match	docs/nonmatching/code_0022C578.md	498
+cmpStartSkillMsg	code_0022C578	0xA0	19 of 40 words match	docs/nonmatching/code_0022C578.md	522
+cmp_23C918	code_0022C578	0xA8	40 of 42 words match	docs/nonmatching/code_0022C578.md	543
+cmpModelSetup	code_0022C578	0xB8	42 of 46 words match	docs/nonmatching/code_0022C578.md	557
 getPartsType	code_0029B780	0x5C	15 of 24 words differ	docs/nonmatching/code_0029B780.md	5
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0029B780.md	23
 pipeGetObjData	code_0029B780	0x120	9 of 71 words differ	docs/nonmatching/code_0029B780.md	49
