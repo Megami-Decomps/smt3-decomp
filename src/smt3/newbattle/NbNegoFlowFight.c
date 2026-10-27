@@ -364,8 +364,6 @@ s32 Flow8_6(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
 s32 Flow8_7(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
@@ -378,25 +376,6 @@ s32 Flow8_7(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
-s32 Flow8_7(nbNegoProcessData_t *n)
-{
-    switch (n->nownegophase) {
-    case 0:
-        n->waitframe = nbSetNegoNoMotion(n, n->eform);
-        break;
-    case 1:
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA1, 0);
-        return 2;
-    }
-    return 0;
-}
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFight", Flow8_7);
-#endif
-#endif
 
 s32 Flow8_8(nbNegoProcessData_t *n)
 {
@@ -453,8 +432,6 @@ s32 Flow8_14(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
 s32 Flow8_15(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
@@ -467,25 +444,6 @@ s32 Flow8_15(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
-s32 Flow8_15(nbNegoProcessData_t *n)
-{
-    switch (n->nownegophase) {
-    case 0:
-        n->waitframe = nbSetNegoNoMotion(n, n->eform);
-        break;
-    case 1:
-        nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0xA3, 0);
-        return 1;
-    }
-    return 0;
-}
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFight", Flow8_15);
-#endif
-#endif
 
 s32 Flow8_16(nbNegoProcessData_t *n)
 {
