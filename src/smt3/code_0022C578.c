@@ -3461,9 +3461,34 @@ void camp_update_status_Shutdown(void)
     }
 }
 
+extern campStatusPanel_t *cmpInitStatus(s8 arg);
+
+extern s32 camp_calc_status_Process(s32 id);
+extern s32 camp_draw_status_Process(s32 id);
+extern s32 camp_update_status_Process(s32 id);
+
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FEB8);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartProcessStatus);
+void *cmpStartProcessStatus(s8 arg)
+{
+    void *proc = NULL;
+
+    cmpStatusPhase = cmpInitStatus(arg);
+    cmpSetStockVisible(0);
+    if (cmpStatusWindowHidden == 0) {
+        proc = dds3StartProcess("camp_calc_status", 0x3F1, 1, 1, camp_calc_status_Process, NULL,
+                                cmpStatusPhase);
+        dds3StartProcess("camp_draw_status", 0x2B06, 1, 1, camp_draw_status_Process, NULL,
+                         cmpStatusPhase);
+        dds3StartProcess("camp_update_status", 0x520A, 1, 1, camp_update_status_Process,
+                         camp_update_status_Shutdown, cmpStatusPhase);
+    }
+    if (cmpStatusWindowHidden != 0) {
+        cmpStatusWindowHidden = 2;
+    }
+    return proc;
+}
+
 
 void cmpSetStatusWindowHidden(void)
 {
