@@ -72,15 +72,27 @@ extern sdfGrOt_t sdfGrOtTable[];
 extern f32 dds3BillboardTagParam[4];
 extern f32 D_00317030[4];
 
-typedef struct BillScreenParam {
-    u8 pad00[0x30];
-    f32 matrix[16];
-    f32 scale[4];
-    f32 offset[4];
-    u8 pad90[0x10];
-} BillScreenParam;
+/* The camera, as sdf3DMakeScreenParam derives it. Same record as draw3d.h's. */
+typedef struct {
+    u32 flags;
+    f32 aspect;
+    f32 projDist;
+    f32 fovy;
+    f32 ox;
+    f32 oy;
+    f32 width;
+    f32 height;
+    f32 zMin;
+    f32 zMax;
+    f32 nearClip;
+    f32 farClip;
+    sdfMatrix4_t TM;
+    sdfVector4_t scale;
+    sdfVector4_t trans;
+    sdfVector4_t cameraPos;
+} sdf3DScreenParam_t;
 
-extern BillScreenParam dds3ScreenParam;
+extern sdf3DScreenParam_t dds3ScreenParam;
 extern f32 D_002FA240[16];
 extern void MultMatrixRev(f32 *aMatrix);
 extern f32 func_002CF748(f32 y, f32 x);
@@ -1300,14 +1312,14 @@ f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
     f32 tip[4];
 
     SDF_VU0_LOADMATRIX(D_002FA240);
-    MultMatrixRev(dds3ScreenParam.matrix);
+    MultMatrixRev(&dds3ScreenParam.TM);
     SDF_VU0_LOADVECTOR(pPos);
     SDF_VU0_COPYVECTOR_A_TO_C();
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    SDF_VU0_LOADVECTOR_B(dds3ScreenParam.scale);
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_LOADVECTOR_B(dds3ScreenParam.offset);
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(origin);
     SDF_VU0_LOADVECTOR(pVec);
@@ -1317,9 +1329,9 @@ f32 dds3BillboardGetDirectionRotate(void *pPos, f32 *pVec) {
     SDF_VU0_ADDVECTOR();
     SDF_VU0_APPLYMATRIX_XYZ1();
     SDF_VU0_PERSVECTOR();
-    SDF_VU0_LOADVECTOR_B(dds3ScreenParam.scale);
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.scale);
     SDF_VU0_MULVECTOR();
-    SDF_VU0_LOADVECTOR_B(dds3ScreenParam.offset);
+    SDF_VU0_LOADVECTOR_B(&dds3ScreenParam.trans);
     SDF_VU0_ADDVECTOR();
     SDF_VU0_STOREVECTOR(tip);
     delta[0] = origin[0] - tip[0];

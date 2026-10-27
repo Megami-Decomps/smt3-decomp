@@ -64,8 +64,6 @@ struct effPCPHelperBED_tag;
 struct effPCPRadiateTBParam_t;
 struct effPCPRadiateTBPart_tag;
 struct effPCPRadiateTB_tag;
-struct EffPCPRectBounds;
-struct EffPCPRectParams;
 struct EffPCPRingWork;
 struct effPCPAgiFireball2Param_t;
 struct effPCPAgiFireball2_tag;
@@ -162,8 +160,6 @@ typedef struct effResourceRectBounds_t effResourceRectBounds_t;
 typedef struct effResourceRectDrawParams_t effResourceRectDrawParams_t;
 typedef struct effPCPMultiBlurExp2_tag effPCPMultiBlurExp2_tag;
 typedef struct EffPCPCompactTimelineParams EffPCPCompactTimelineParams;
-typedef struct EffPCPRectBounds EffPCPRectBounds;
-typedef struct EffPCPRectParams EffPCPRectParams;
 typedef struct effPCPMultiFilterExpParam_t effPCPMultiFilterExpParam_t;
 typedef struct dds3Effect_RippleBlurParam_t dds3Effect_RippleBlurParam_t;
 typedef struct effPCPRippleBlurExpParam_t effPCPRippleBlurExpParam_t;
@@ -782,16 +778,16 @@ struct effResourceRectDrawParams_t {
 
 /* Nine copied words; the selected source texture belongs to the owner. */
 typedef struct {
-    s32 extent;
+    s32 area;
     /* The native movie blender interpolates both center coordinates in one loop. */
     s32 center[2];
-    effResourceRectDrawParams_t draw;
-} EffResourceRectParams; /* 0x24 */
+    effResourceRectDrawParams_t Filter;
+} dds3Effect_PartialMultiFilterParam_t; /* 0x24 */
 
 typedef struct {
-    EffResourceRectParams params;
-    sdfTexHandle_t *texture;
-} EffResourceRectWork; /* 0x28 */
+    dds3Effect_PartialMultiFilterParam_t param;
+    sdfTexHandle_t *hAlphaTex;
+} dds3Effect_PartialMultiFilter_t; /* 0x28 */
 
 /* Both compact-fade lifecycles use the same 0x3C chip allocation. The
  * resource union is selected by the short rectangle or long textured-blur
@@ -840,7 +836,7 @@ struct effPCPMultiBlurExp2_tag {
     s32 endExtent;
     f32 area;
     union {
-        EffResourceRectWork *rectangle;
+        dds3Effect_PartialMultiFilter_t *rectangle;
         dds3Effect_PartialMultiBlur_t *blur;
     } resource;
 };
@@ -856,22 +852,9 @@ struct EffPCPCompactTimelineParams {
     s32 endExtent;
 };
 
-struct EffPCPRectBounds {
-    u32 left, top, right, bottom;
-};
-
-struct EffPCPRectParams {
-    u32 extent;
-    u32 centerX;
-    u32 centerY;
-    u32 color;
-    u32 blendControl;
-    EffPCPRectBounds bounds;
-};
-
 struct effPCPMultiFilterExpParam_t {
     EffPCPCompactTimelineParams timeline;
-    EffPCPRectParams res;
+    dds3Effect_PartialMultiFilterParam_t res;
 };
 
 /* Phase-driven blur parameters and the scale-slot allocation they own. */
@@ -2233,9 +2216,9 @@ dds3Effect_PartialMultiBlur_t *dds3EffectPartialMultiBlurCreate(const EffBlurTem
 
 effBlurScaleWork_t *dds3EffectRippleBlurCreate(dds3Effect_RippleBlurParam_t *pParam);
 
-EffResourceRectWork *dds3EffectPartialMultiFilterCreate(EffResourceRectParams *pParam);
+dds3Effect_PartialMultiFilter_t *dds3EffectPartialMultiFilterCreate(dds3Effect_PartialMultiFilterParam_t *pParam);
 
-void dds3EffectPartialMultiFilterDelete(EffResourceRectWork *hPartialMultiFilter);
+void dds3EffectPartialMultiFilterDelete(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
 
 void dds3EffectDistortionBlurDelete(effBlurScatterWork_t *hDistortionBlur);
 
@@ -2594,7 +2577,7 @@ void dds3EffectRippleBlurDraw(effBlurScaleWork_t *work);
 void mdlSetScale(dds3ModelHandle_t *aHandle);
 void dds3BillboardSetAnimKey(billHandle_t *hBillboard, u32 frame);
 void effPCP_ThunderPolySetColor(effPCP_ThunderPoly_t *hData, u32 abgr);
-void dds3EffectPartialMultiFilterDraw(EffResourceRectWork *hPartialMultiFilter);
+void dds3EffectPartialMultiFilterDraw(dds3Effect_PartialMultiFilter_t *hPartialMultiFilter);
 void SetRotateMatrixY_B(f32 aAngle);
 void effEveBEDCutSetScale(effEveBEDCutHandle_t *hEveBEDCut, f32 scale);
 void effEveBEDCutSetParams(effEveBEDCutHandle_t *hEveBEDCut, const void *pParams);
@@ -4204,7 +4187,7 @@ effPCPMultiBlurExp2_tag *effPCPMultiFilterExpCreate(effPCPMultiFilterExpParam_t 
     effPCPMultiBlurExp2_tag *work;
 
     work = sdfChipAllocDirect(sizeof(effPCPMultiBlurExp2_tag));
-    work->resource.rectangle = dds3EffectPartialMultiFilterCreate((EffResourceRectParams *)&params->res);
+    work->resource.rectangle = dds3EffectPartialMultiFilterCreate(&params->res);
     work->frame = 0;
     work->color = 0x80808080;
     work->flags = params->timeline.flags;
@@ -4213,7 +4196,7 @@ effPCPMultiBlurExp2_tag *effPCPMultiFilterExpCreate(effPCPMultiFilterExpParam_t 
     work->fadeOut = params->timeline.fadeOut;
     work->startExtent = params->timeline.startExtent;
     work->endExtent = params->timeline.endExtent;
-    work->baseColor = params->res.color;
+    work->baseColor = params->res.Filter.rgba;
     return work;
 }
 
@@ -4230,7 +4213,7 @@ void effPCPMultiFilterExpCopy(effPCPMultiBlurExp2_tag *work) {
     params.timeline.fadeOut = work->fadeOut;
     params.timeline.startExtent = work->startExtent;
     params.timeline.endExtent = work->endExtent;
-    memcpy(&params.res, &work->resource.rectangle->params, sizeof(params.res));
+    memcpy(&params.res, &work->resource.rectangle->param, sizeof(params.res));
     effPCPMultiFilterExpCreate(&params);
 }
 
@@ -4243,7 +4226,7 @@ void effPCPMultiFilterExpDraw(effPCPMultiBlurExp2_tag *hData) {
     f32 projected[4];
     s32 frame = hData->frame;
     s32 duration = hData->duration;
-    EffResourceRectWork *rect = hData->resource.rectangle;
+    dds3Effect_PartialMultiFilter_t *rect = hData->resource.rectangle;
     s32 fadeIn;
     s32 fadeOut;
     f32 opacity;
@@ -4256,13 +4239,13 @@ void effPCPMultiFilterExpDraw(effPCPMultiBlurExp2_tag *hData) {
             SDF_VU0_LOADVECTOR(hData->position);
             effScreenOffset();
             SDF_VU0_STOREVECTOR(projected);
-            rect->params.center[0] = (s32)projected[0] - 2048;
-            rect->params.center[1] = ((s32)projected[1] - 2048) << 1;
+            rect->param.center[0] = (s32)projected[0] - 2048;
+            rect->param.center[1] = ((s32)projected[1] - 2048) << 1;
         } else {
-            rect->params.center[0] = 0;
-            rect->params.center[1] = 0;
+            rect->param.center[0] = 0;
+            rect->param.center[1] = 0;
         }
-        rect->params.extent = InterpolateCompactExtent(
+        rect->param.area = InterpolateCompactExtent(
             hData->startExtent, hData->endExtent, frame, duration);
         if (frame < fadeIn && fadeIn != 0) {
             opacity = (f32)frame / (f32)fadeIn;
@@ -4272,7 +4255,7 @@ void effPCPMultiFilterExpDraw(effPCPMultiBlurExp2_tag *hData) {
             opacity = 1.0f;
         }
         color = hData->color;
-        *(u32 *)rect->params.draw.color = effMagaCylinderCalcColor(
+        *(u32 *)rect->param.Filter.color = effMagaCylinderCalcColor(
             effColorBlend(color & 0xFFFFFF, color, opacity), hData->baseColor);
         dds3EffectPartialMultiFilterDraw(rect);
         hData->frame++;
