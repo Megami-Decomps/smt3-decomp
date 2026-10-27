@@ -3211,7 +3211,31 @@ cmpSeqFunc_t cmp_23AAF8(s32 value)
     return func_0023AA90;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawDebugPrint);
+typedef struct
+{
+    s32 x;
+    s32 y;
+    s32 z;
+    u32 color;
+} cmpPrintControl_t;
+
+extern void sdfDevSetPrintCB(cmpPrintControl_t *cb, s32 x, s32 y, s32 z, u32 attr);
+
+extern void *sdfDevPrintfEx(cmpPrintControl_t *cb, const char *str, ...);
+
+s32 cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
+{
+    cmpPrintControl_t cb;
+    sdfGrOt_t *otp;
+    void *tag;
+
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    sdfDevSetPrintCB(&cb, x * 16 + 0x7000, y * 8 + 0x7900, z, attr);
+    sdfDrawTagLink(tag, sdfDevPrintfEx(&cb, str));
+    otp = &sdfGrOtTable[ot];
+    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawFrameRect);
 
@@ -3438,7 +3462,24 @@ s32 camp_calc_info_Process(s32 id)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_draw_info_Process);
+extern s32 campDrawInfoText(s32 a, s32 b, s32 color, s32 d, s32 e, s32 f, s32 g);
+
+s32 camp_draw_info_Process(s32 id)
+{
+    void *frq;
+
+    cmpInfoWindow = dds3GetProcessData(id);
+    if ((cmpInfoWindow->flags & 0x20) != 0)
+    {
+        cmpUpdateTerminate(cmpInfoWindow);
+        return -1;
+    }
+    frq = frwGetSmallFontFRQ2(0x100, 0xA0, 0xFFFFF, 0xA09DC380, (char *)cmpInfoWindow->unk_18, 0);
+    campDrawInfoText(0, 0x80, 0xFFFFF, *(s32 *)((u8 *)frq + 0xC) + 0x10, 0x18, 0x30303080, 0x47);
+    func_001C7E38(frq, 1, 0x47);
+    frDestroyFontRequestAfter(frq);
+    return 0;
+}
 
 s32 camp_update_info_Process(s32 id)
 {
