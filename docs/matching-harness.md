@@ -195,3 +195,42 @@ the instruction count the split assembly reports, and raises if it does not.
 The same class of error is the one `docs/nonmatching.md` warns about from the
 other direction: count instructions, never the `/* ... */` comment lines, since
 a `.s` file's `.rodata` jump table shares that comment format.
+
+## Where the work actually goes
+
+Measured over 432 agent transcripts of this project's own decompilation rounds,
+24,224 shell calls in total:
+
+| what | calls |
+|---|---|
+| `grep` | 9732 |
+| `sed -n` | 4651 |
+| `check_unit.py` | 6028 |
+| `configure.py` | 1965 |
+| `git` | 1846 |
+| `ninja` | 1654 |
+| `revert_differing.py` | 227 |
+| `decompile.py` (m2c drafts) | 38 |
+| `dds_reuse.py` | 26 |
+| `perm_unit.py` (permuter) | 19 |
+
+Two things follow, and they are the ones worth acting on.
+
+**Reading is the cost, not compiling.** 14,383 of the 24,224 calls, 59%, are
+`grep` and `sed -n`: finding the lever, the draft entry, the sibling, the
+assembly. Anything that turns a grep hunt into one answer is worth more than
+another lever page. That is the case for `--for NAME --body`, which replaces a
+grep for the sibling, a `sed -n` into its source, and a read of the assembly.
+
+**The compile-check loop is brute-forced.** 169 transcripts call
+`check_unit.py`, a median of 37 times each and up to 87, and of the results
+3226 reported a differ against 1940 reporting `0 differ`. Nearly two thirds of
+compile checks are misses. The output says which words differ but not which
+compiler decision produced them, so the next attempt is a guess from the lever
+list. Making `check_unit.py` name the responsible decision, even coarsely
+(annul bit, register allocation, literal pool slot, frame offset, instruction
+scheduling), would attack the largest cost after reading. That is judgement,
+not measurement.
+
+The permuter and the m2c draft path are, by these counts, unused: 19 and 38
+calls out of 24,224. Importing more search machinery is not the gap.
