@@ -433,13 +433,32 @@ typedef struct {
 } nbPanelProcess_nbPanelXYZ_t;
 
 typedef struct {
+    s32 u;
+    s32 v;
+    u8 pad08[8];
+    s32 x;
+    s32 y;
+    s32 mask;
+    s16 flag;
+    u8 pad1E[2];
+} nbSpriteCorner_t;
+
+typedef struct {
+    s32 r;
+    s32 g;
+    s32 b;
+    s32 a;
+    nbSpriteCorner_t corner[2];
+} nbSpriteVertex_t;
+
+typedef struct {
     s32 u0;
     s32 v0;
     s32 u1;
     s32 v1;
 } nbPanelProcess_nbPanelTMXuv_t;
 
-extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
                         sdfTexHandle_t *th);
 
 extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
@@ -689,7 +708,41 @@ void nbPnl_rsetAlpha(s32 mode)
     ot->regFunc(ot, list);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPnlSprite);
+void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, s32 rgba,
+                 sdfTexHandle_t *th)
+{
+    void *handle = sdf2DAllocSprite(1);
+    nbSpriteVertex_t *vtx = (nbSpriteVertex_t *)sdf2DGetPrimPtr((s32)handle);
+    s32 ubase = u * 16;
+    s32 xl = x * 16 + 0x7000;
+    s32 vbase = v * 16;
+    s32 yt = y * 8 + 0x7900;
+    sdfDrawTag_t *command;
+    sdfGrOt_t *ot;
+
+    vtx->r = rgba & 0xFF;
+    vtx->g = (rgba >> 8) & 0xFF;
+    vtx->b = (rgba >> 16) & 0xFF;
+    vtx->a = (rgba >> 24) & 0xFF;
+    vtx->corner[0].u = ubase;
+    vtx->corner[0].v = vbase;
+    vtx->corner[0].x = xl;
+    vtx->corner[0].y = yt;
+    vtx->corner[0].mask = -1;
+    vtx->corner[0].flag = 0;
+    vtx->corner[1].u = ubase + uw * 16;
+    vtx->corner[1].v = vbase + vh * 16;
+    vtx->corner[1].x = xl + w * 16;
+    vtx->corner[1].y = yt + h * 8;
+    vtx->corner[1].mask = -1;
+    vtx->corner[1].flag = 0;
+    command = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(command);
+    sdf2DLinkTexPacket(command, th, 0);
+    sdfDrawTagLink(command, (u32)handle);
+    ot = &sdfGrOtTable[gnbPnlOtOfs];
+    ot->regFunc(ot, command);
+}
 
 void nbPanelBaseColorSet(u32 abgr)
 {
