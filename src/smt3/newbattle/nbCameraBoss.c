@@ -595,18 +595,15 @@ s32 nbCameraBoss_BSARUS_Command_Set(nbCamera_t *pNbCamera)
 }
 
 
-/* NON_MATCHING: 25 of 115 words; ee-gcc CSEs an address retail recomputes. */
-#ifdef NON_MATCHING
 s32 nbCameraBoss_BSSAMA_Command_Set(nbCamera_t *pNbCamera)
 {
     nbMainProcessData_t *pData;
     nbFormation_t *pBase;
     nbFormation_t *pForm;
     sdfVector4_t pos;
-    sdfVector4_t target;
+    sdfVector4_t base;
     sdfVector4_t center;
     sdfVector4_t dir;
-    f32 length;
 
     pData = nbGetMainProcessData();
     if (pData == NULL) {
@@ -618,14 +615,14 @@ s32 nbCameraBoss_BSSAMA_Command_Set(nbCamera_t *pNbCamera)
     pBase = &pData->form[4];
     pForm = &pData->form[pData->party[pData->order[pData->orderindex]].formindex];
     effBTLModelGetSphereCenter(pBase);
-    SDF_VU0_STOREVECTOR(&target);
-    target.y += pBase->h * pBase->scl * 0.35f;
-    SDF_VU0_COPYVECTOR(&pNbCamera->target, &target);
+    SDF_VU0_STOREVECTOR_NOMEM(&base);
+    base.y = base.y + pBase->h * pBase->scl * 0.35f;
+    SDF_VU0_COPYVECTOR(pNbCamera, &base);
     effBTLModelGetSphereCenter(pForm);
-    SDF_VU0_STOREVECTOR(&center);
+    SDF_VU0_STOREVECTOR_NOMEM(&center);
     center.y = -effBTLModelGetHeight(pForm);
     SDF_VU0_LOADVECTOR(&center);
-    SDF_VU0_LOADVECTOR_B(&target);
+    SDF_VU0_LOADVECTOR_B(&base);
     SDF_VU0_SUBVECTOR();
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(&dir);
@@ -635,20 +632,16 @@ s32 nbCameraBoss_BSSAMA_Command_Set(nbCamera_t *pNbCamera)
     if (pos.y > -10.0f) {
         pos.y = -10.0f;
     }
-    SDF_VU0_LOADVECTOR(&pNbCamera->target);
+    SDF_VU0_LOADVECTOR(pNbCamera);
     SDF_VU0_LOADVECTOR_B(&pos);
     SDF_VU0_SUBVECTOR();
-    SDF_VU0_GETLENGTH(length);
-    pNbCamera->distance = length;
+    SDF_VU0_GETLENGTH(pNbCamera->distance);
     SDF_VU0_NORMALIZE();
     SDF_VU0_STOREVECTOR(&pNbCamera->direction);
     pNbCamera->fovy = 0.69813163f;
     effBTLModelLook(pForm, &pNbCamera->target);
     return 1;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSSAMA_Command_Set);
-#endif
 
 
 s32 nbCameraBoss_Samael_AKUI_Set(nbCamera_t *pNbCamera)
