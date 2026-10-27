@@ -7,14 +7,12 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 12 types, 902 members, 506 adopted constants.
+# 10 types, 902 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
 type BattleEffect
-type BillPacketWork
 type BillPluralRecord
-type Dds3AdminModeDispatch
 type EffPCPCompactTimelineParams
 type EffPCPEventPlace
 type EffSpawnParams

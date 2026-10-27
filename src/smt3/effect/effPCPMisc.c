@@ -6,7 +6,7 @@
 struct dds3ModelResrc_t;
 struct dds3ModelResrcPlayBook_t;
 struct P2A_ANIMATION_tag;
-struct BillPacketWork;
+struct sdfBillBoardBatch_t;
 struct P2A_TEXANIM_tag;
 struct billRenderPair_t;
 struct billUvQuad_t;
@@ -119,7 +119,7 @@ struct sdfGsMemSlice_t;
 struct effBTLBank_t;
 
 typedef struct billUvQuad_t billUvQuad_t;
-typedef struct BillPacketWork BillPacketWork;
+typedef struct sdfBillBoardBatch_t sdfBillBoardBatch_t;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
 typedef struct dds3BillResource_tag dds3BillResource_tag;
 typedef struct P2A_ANIMATION_tag P2A_ANIMATION_tag;
@@ -268,11 +268,11 @@ struct billUvQuad_t {
 };
 
 /* Fifteen billboard quads precede the child manager in its 0x450 allocation. */
-struct BillPacketWork {
-    f32 positions[15][4]; /* 0x000 */
-    u32 colors[15];       /* 0x0F0 */
+struct sdfBillBoardBatch_t {
+    f32 centre[15][4]; /* 0x000 */
+    u32 color[15];       /* 0x0F0 */
     billUvQuad_t uv[15]; /* 0x12C */
-    f32 offsets[15][8];   /* 0x21C: four X/Y corner offsets per quad */
+    f32 offset[15][8];   /* 0x21C: four X/Y corner offset per quad */
     s32 count;           /* 0x3FC */
 };
 
@@ -324,7 +324,7 @@ struct dds3BillResource_tag {
     u16 current_mode; /* 0x40 */
     u8 pad42[2];
     struct sdfMemHandle_t *hMem; /* 0x44: hMem descriptor released with this child. */
-    BillPacketWork *batch; /* 0x48: retained packet-buffer address */
+    sdfBillBoardBatch_t *batch; /* 0x48: retained packet-buffer address */
     struct dds3BillResource_tag *next; /* 0x4C */
 };
 
