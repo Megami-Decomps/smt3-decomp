@@ -7,7 +7,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 50 types, 918 members, 506 adopted constants.
+# 49 types, 905 members, 506 adopted constants.
 
 type AtExitEntry
 type AtExitList
@@ -39,7 +39,6 @@ type MdlDevList
 type MdlDevSlot
 type MdlRecord
 type MovLinearStream
-type MovOpenParam
 type MovPacStream
 type PcpFlashColorSlot
 type PcpFlashQuadColorSlot
@@ -70,14 +69,6 @@ member dds3ModelResrc_t.unk_AC
 member BillPluralRecord.unk08
 member GParam.unk0
 member GParam.unk4
-member MovOpenParam.unk00
-member MovOpenParam.unk02
-member MovOpenParam.unk04
-member MovOpenParam.unk08
-member MovOpenParam.unk0A
-member MovOpenParam.unk10
-member MovOpenParam.unk11
-member MovOpenParam.unk12
 member MovPacStream.unk6C
 member _FRQ.unk00
 member _FRQ.unk_00
@@ -680,11 +671,6 @@ member motionWork_t.unk_00
 member motionWork_t.unk_54
 member movieDecodeWork_t.unk_00
 member movieDecodeWork_t.unk_68
-member movieStream_t.unk04
-member movieStream_t.unk06
-member movieStream_t.unk08
-member movieStream_t.unk0C
-member movieStream_t.unk0E
 member movieViewerChipList_t.unk_00
 member movieViewerChipList_t.unk_0C
 member mselGlobalWork_t.unk_00
