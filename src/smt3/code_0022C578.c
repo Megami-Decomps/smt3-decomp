@@ -454,7 +454,7 @@ extern s32 cmpModelHandle;
 
 extern fclRibbon_t *g_pdebug;
 
-extern s32 cmpDrawBoxLine(s32 a, s32 b, s32 c, s32 d, s32 e, s32 f, s32 *g);
+extern s32 cmpDrawBoxLine();
 
 extern s32 cmpGetCursorSlotValue(s8 index, cmpCursorSlot_t *slot);
 
@@ -3672,7 +3672,18 @@ INCLUDE_ASM(const s32, "code_0022C578", cmp_23C918);
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_23C9C0);
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_23CAF8);
+void camp_23CAF8(s32 x, s32 y, s32 a, s32 b, s32 color, s32 g)
+{
+    s32 pair[2];
+    s32 right = x + 0x200;
+
+    pair[0] = color;
+    pair[1] = color;
+    cmpDrawBoxLine(right, a, b, y, a, b, pair, g);
+    pair[0] = pair[0] & 0xFFFFFF00;
+    cmpDrawBoxLine(x, a, b, right, a, b, pair, g);
+}
+
 
 /* NON_MATCHING: 17 of 47 words differ (first at +0x1C), exact size; the five
    parameters land in a different callee-saved order. */
