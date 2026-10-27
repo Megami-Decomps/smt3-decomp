@@ -13,13 +13,13 @@ typedef struct dds3P2APolygon_tag {
     sdfMat_t *pMat;
 } dds3P2APolygon_tag;
 
-typedef struct BillKindFuncs {
-    struct billHandle_t *(*func)();
-    void (*callback)();
+typedef struct dds3EffectFunc3_t {
+    struct billHandle_t *(*create)();
+    void (*draw)();
     void (*destroy)();
-} BillKindFuncs;
+} dds3EffectFunc3_t;
 
-extern BillKindFuncs dds3BillboardFuncTable[];
+extern dds3EffectFunc3_t dds3BillboardFuncTable[];
 extern struct billHandle_t *hGeneralBillboard[];
 
 s32 printf(const char *fmt, ...);
@@ -995,10 +995,10 @@ void dds3BillboardCopyO(billHandle_t *obj, s32 *out) {
 billHandle_t *dds3BillboardCreate(s32 index, u32 data) {
     billHandle_t *newobj;
 
-    newobj = dds3BillboardFuncTable[index].func(data);
+    newobj = dds3BillboardFuncTable[index].create(data);
     dds3Billboard_BasicInit(newobj);
     newobj->type = index;
-    newobj->callback = dds3BillboardFuncTable[index].callback;
+    newobj->callback = dds3BillboardFuncTable[index].draw;
     return newobj;
 }
 
