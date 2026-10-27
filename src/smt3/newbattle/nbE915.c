@@ -502,8 +502,6 @@ nbFormation_t *nbGetEventForm();
 
 void nbUpdateEventProcessData(dds3ProcessID_t *id);
 
-/* NON_MATCHING: 13 of 69 words differ (first at +0x38). */
-#ifdef NON_MATCHING
 s32 nbE915Process_1(dds3ProcessID_t *id)
 {
     nbEventProcessData_t *e;
@@ -537,7 +535,4 @@ s32 nbE915Process_1(dds3ProcessID_t *id)
     nbUpdateEventProcessData(id);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbE915", nbE915Process_1);
-#endif
 

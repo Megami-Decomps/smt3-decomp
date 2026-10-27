@@ -364,8 +364,6 @@ s32 Flow2_4(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 2 of 84 words differ (first at +0x44); the annul bit of two branches. */
-#ifdef NON_MATCHING
 s32 Flow2_5(nbNegoProcessData_t *n)
 {
     s32 mes;
@@ -412,9 +410,6 @@ s32 Flow2_5(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_5);
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowFullMoon", Flow2_6);
 

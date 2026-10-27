@@ -525,8 +525,6 @@ s32 End(nbEventProcessData_t *ed)
     return 1;
 }
 
-/* NON_MATCHING: 1 of 51 words differ (first at +0x54). */
-#ifdef NON_MATCHING
 s32 nbE901Process_1(dds3ProcessID_t *id)
 {
     nbEventProcessData_t *e;
@@ -548,9 +546,6 @@ s32 nbE901Process_1(dds3ProcessID_t *id)
     nbUpdateEventProcessData(id);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbE901", nbE901Process_1);
-#endif
 INCLUDE_SDATA(const s32, "newbattle/nbE901", D_005515B4);
 
 INCLUDE_SDATA(const s32, "newbattle/nbE901", bedbasic);

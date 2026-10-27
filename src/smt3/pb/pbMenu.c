@@ -171,8 +171,6 @@ void func_001D4E70(pbProcHandle_t *panel) {
 }
 
 
-/* NON_MATCHING: 21 of 22 words; retail annuls the trailing lui in a beql delay slot. */
-#ifdef NON_MATCHING
 void func_001D4EB0(pbProcHandle_t *panel) {
     dds3ResetProcessFlag(panel->id, 0x10, 1);
     if (pbGetMoveChar() != 0) {
@@ -180,9 +178,6 @@ void func_001D4EB0(pbProcHandle_t *panel) {
     }
     panel->flags = 0x50000;
 }
-#else
-INCLUDE_ASM(const s32, "pb/pbMenu", func_001D4EB0);
-#endif
 
 
 void func_001D4F08(void) {

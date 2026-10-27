@@ -518,8 +518,6 @@ s32 nbE902_End(nbEventProcessData_t *e)
     return 0;
 }
 
-/* NON_MATCHING: 2 of 36 words differ (first at +0x50). */
-#ifdef NON_MATCHING
 s32 nbE902Process_1(dds3ProcessID_t *id)
 {
     nbEventProcessData_t *e;
@@ -537,9 +535,6 @@ s32 nbE902Process_1(dds3ProcessID_t *id)
     nbUpdateEventProcessData(id);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbE902", nbE902Process_1);
-#endif
 
 s32 Hatudo(nbEventProcessData_t *ed)
 {

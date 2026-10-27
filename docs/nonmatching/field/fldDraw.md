@@ -172,27 +172,6 @@ rather than closer. A `struct { f32 distance, height, targetHeight, fovy; }`
 declaration is the untried lever, and needs the unit's two later
 `extern f32 fldCamParamTable[][4];` declarations changed with it.
 
-## rsetOtOfs (field/fldDraw, 0x8)
-
-Byte-exact on its own, and parked anyway. Its two instructions set
-`rsetFrameMaskOtOffset`, but having them in the unit as C turns the two `bnel`
-of `encDrawProc` into `bne`: the `gencMode == 0` guard at `+0x18` and the
-`encDrawState` box-draw guard at `+0xE8`, both of whose arms call it. With
-`rsetOtOfs` reduced to the `extern` the file already needs, `encDrawProc`
-(0x1D8, 472 bytes) is exact, so the trade is 8 bytes for 472 and the unit's
-match count is unchanged.
-
-This is the callee-visibility mechanism in `docs/matching-levers.md`, measured
-here: hiding `rsetTest`, `rsetAlpha`, `fldDrawBokasi` or `aDrawBoxF` instead
-leaves `encDrawProc` at the same two words, and hiding `fldDrawFrameSpriteAlpha`
-makes it worse (5 words). Only `rsetOtOfs` moves it.
-
-Five functions still in assembly here call it (`fldSkyDrawFilter`,
-`fldEveHit_ChkEveHit`, `fldHitChkUnit`, `fldHitChkUnitVWM`, `fldHitWM_Mask`), so
-whoever converts one of those should re-measure both ways before restoring the
-definition. The other three drafts in this unit do not call it and are unchanged
-by the parking.
-
 ## fldEveHit_ChkDir2 (field/fldDraw, 0x264)
 
 121 of 153 words match, at the exact 612-byte size. Its sibling

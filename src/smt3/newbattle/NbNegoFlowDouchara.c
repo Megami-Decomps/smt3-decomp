@@ -377,8 +377,6 @@ u32 nbGetPrevNegoId(nbNegoProcessData_t *n);
 
 void nbSetMesMakka(s32 msgid, s32 i);
 
-/* NON_MATCHING: 1 of 210 words differ (first at +0x38). */
-#ifdef NON_MATCHING
 s32 Flow4_1(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x40002);
@@ -439,9 +437,6 @@ s32 Flow4_1(nbNegoProcessData_t *n)
     nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x31, 0);
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowDouchara", Flow4_1);
-#endif
 
 s32 Flow4_2(nbNegoProcessData_t *n)
 {
