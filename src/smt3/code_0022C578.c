@@ -2270,11 +2270,30 @@ void camp_update_dh_Shutdown(void)
     }
 }
 
+extern campInfoWork_t *cmpinitDH();
+
+extern void camp_calc_dh_Process();
+
+extern void camp_draw_dh_Process();
+
+extern void camp_update_dh_Process();
+
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD60);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD78);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStartProcessDH);
+void *cmpStartProcessDH(void)
+{
+    void *proc;
+
+    campInfoWork = cmpinitDH();
+    cmpSetStockVisible(0);
+    proc = dds3StartProcess("camp_calc_dh", 0x3F0, 1, 1, camp_calc_dh_Process, NULL, campInfoWork);
+    dds3StartProcess("camp_draw_dh", 0x2B05, 1, 1, camp_draw_dh_Process, NULL, campInfoWork);
+    dds3StartProcess("camp_update_dh", 0x5209, 1, 1, camp_update_dh_Process, camp_update_dh_Shutdown,
+                     campInfoWork);
+    return proc;
+}
 
 s32 campInfoWorkExists(void)
 {
