@@ -4001,7 +4001,8 @@ typedef struct
 {
     /* 0x0000 */ u8 unk_0000[8];
     /* 0x0008 */ u8 state;
-    /* 0x0009 */ u8 unk_0009[2];
+    /* 0x0009 */ u8 step;
+    /* 0x000A */ u8 delay;
     /* 0x000B */ u8 kind;
     /* 0x000C */ u8 unk_000C[0x2D8];
 } cmpPanelEffView_t;
@@ -4106,7 +4107,50 @@ INCLUDE_RODATA(const s32, "code_0022C578", D_0053FF60);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindPanelEffSlot);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdatePanelEffSlots);
+void cmpUpdatePanelEffSlots(void)
+{
+    s32 i;
+
+    if (cmpPanelEffList == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x20; i++) {
+        s32 off = i * 0x2E4 + 0x10;
+        cmpPanelEffView_t *eff = (cmpPanelEffView_t *)((u8 *)cmpPanelEffList + off);
+        s32 *alpha;
+        s32 value;
+
+        if (eff->state == 0) {
+            continue;
+        }
+        if (eff->delay != 0) {
+            eff->delay = eff->delay - 1;
+            continue;
+        }
+        alpha = (s32 *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x34);
+        value = *alpha + eff->step;
+        if (value >= 0x101) {
+            eff->state = 0;
+        } else {
+            *alpha = value;
+            switch (eff->kind) {
+            case 3:
+                break;
+            case 4:
+                break;
+            case 0:
+            case 1:
+            case 2:
+            case 5:
+            case 6:
+                cmpUpdatePanelEffEntry(
+                    (cmpPanelEffState_t *)((u8 *)&cmpPanelEffList[i] + 0x18));
+                break;
+            }
+        }
+    }
+}
+
 
 s32 camp_update_paneleff_Process(void)
 {
