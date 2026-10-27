@@ -4201,9 +4201,47 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffRing);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffQuad);
 
+extern void cmpDrawPanelEffBox(void *entry, s32 arg);
+extern void cmpDrawPanelEffRing(void *entry, s32 arg);
+extern void cmpDrawPanelEffQuad(void *entry, s32 arg);
+
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FF60);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpFindPanelEffSlot);
+void cmpFindPanelEffSlot(s32 arg)
+{
+    s32 i;
+
+    if (cmpPanelEffList == NULL) {
+        return;
+    }
+    for (i = 0; i < 0x20; i++) {
+        s32 off = i * 0x2E4 + 0x10;
+        cmpPanelEffView_t *eff = (cmpPanelEffView_t *)((u8 *)cmpPanelEffList + off);
+
+        if (eff->state == 0) {
+            continue;
+        }
+        if (eff->delay != 0) {
+            continue;
+        }
+        switch (eff->kind) {
+        case 0:
+        case 1:
+        case 2:
+        case 5:
+        case 6:
+            cmpDrawPanelEffBox((void *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x18), arg);
+            break;
+        case 3:
+            cmpDrawPanelEffRing((void *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x18), arg);
+            break;
+        case 4:
+            cmpDrawPanelEffQuad((void *)(i * 0x2E4 + (s32)cmpPanelEffList + 0x18), arg);
+            break;
+        }
+    }
+}
+
 
 void cmpUpdatePanelEffSlots(void)
 {
