@@ -2311,7 +2311,25 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpSetStatusStartEff);
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_calc_dh_Process);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBox);
+void campDhDrawBox(s32 alpha)
+{
+    s32 corner[4];
+    s32 scale = 0x66;
+    s32 color = ((alpha * scale / 0x100) & 0xFF) | 0x11D2500;
+    s32 dim;
+
+    corner[0] = color;
+    dim = corner[0] & 0xFFFFFF00;
+    corner[1] = color;
+    corner[2] = color;
+    corner[3] = color;
+    cmpDrawBoxGDefault(0, 0, 0, 0x200, 0x82, corner, 0x47);
+    corner[1] = color;
+    corner[2] = dim;
+    corner[3] = dim;
+    corner[0] = color;
+    cmpDrawBoxGDefault(0, 0x410, 0, 0x200, 0x8C, corner, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBoxSprite);
 
