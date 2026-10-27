@@ -2276,7 +2276,7 @@ extern void camp_calc_dh_Process();
 
 extern s32 camp_draw_dh_Process();
 
-extern void camp_update_dh_Process();
+extern s32 camp_update_dh_Process();
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FD60);
 
@@ -2713,7 +2713,41 @@ INCLUDE_ASM(const s32, "code_0022C578", campDhScanEntries);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhFindVisibleIcon);
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_update_dh_Process);
+s32 camp_update_dh_Process(s32 id)
+{
+    campInfoWork_t *work = dds3GetProcessData(id);
+    s8 state = work->unk_01;
+
+    campDhUpdateWork = (campStatusPanel_t *)work;
+    if ((work->unk_00 & 0x40) != 0) {
+        return campDhCheckReady() != 0 ? 0 : -1;
+    }
+    switch (state) {
+    case 0:
+        campDhUpdateCursor();
+        break;
+    case 1:
+        cmpUpdateHeartsAttachStatus();
+        break;
+    case 2:
+        cmpUpdateHeartsAttachConfirm();
+        break;
+    case 3:
+        cmpUpdateHeartsRemoveConfirm();
+        break;
+    case 4:
+        campDhWaitMessageEnd();
+        break;
+    }
+    campDhScanEntries();
+    campDhFindVisibleIcon();
+    campDhUpdateIcons();
+    campDhAdvanceAnim();
+    campDhFadeAlpha();
+    cmpUpdateSeqInfo(campDhUpdateWork, state);
+    return 0;
+}
+
 
 extern void cmpSetSkillListRows(s32 rows);
 
@@ -3488,7 +3522,7 @@ s32 camp_calc_info_Process(s32 id)
     return 0;
 }
 
-extern s32 campDrawInfoText(s32 a, s32 b, s32 color, s32 d, s32 e, s32 f, s32 g);
+extern void campDrawInfoText(s32 a, s32 b, s32 color, s32 d, s32 e, s32 f, s32 g);
 
 s32 camp_draw_info_Process(s32 id)
 {
@@ -3640,7 +3674,27 @@ INCLUDE_ASM(const s32, "code_0022C578", camp_23C9C0);
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_23CAF8);
 
+/* NON_MATCHING: 17 of 47 words differ (first at +0x1C), exact size; the five
+   parameters land in a different callee-saved order. */
+#ifdef NON_MATCHING
+void campDrawInfoText(s32 x, s32 y, s32 z, s32 h, s32 e, s32 color, s32 g)
+{
+    s32 corner[4];
+    s32 inner = h - 0x10;
+
+    corner[3] = color;
+    corner[1] = color;
+    corner[2] = color;
+    corner[0] = color;
+    cmpDrawBoxGDefault(x, y, z, inner, e, corner, g);
+    corner[1] = corner[1] & 0xFFFFFF00;
+    corner[3] = corner[3] & 0xFFFFFF00;
+    cmpDrawBoxGDefault(x + inner * 16, y, z, 0x20, e, corner, g);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDrawInfoText);
+#endif
+
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_23CC70);
 
