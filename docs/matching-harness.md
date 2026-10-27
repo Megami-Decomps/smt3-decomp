@@ -1,172 +1,197 @@
-# Matching by analogy: what the numbers say
+# Matching by analogy: tools/find_similar.py
 
-`tools/find_similar.py` answers one question: is some function already written
-in C close enough to an unmatched one that its body is a template? Every
-matched function is a solved (assembly, C) pair, so where the shapes agree the
-work drops to substituting constants, offsets and callees.
+Every function already in C is a solved (assembly, C) pair. When an unmatched
+function's instruction sequence is close to a matched one, that match's C body
+is a template and the work drops to substituting constants, offsets and
+callees. `tools/find_similar.py` runs that search over the whole image, and
+also groups the unmatched functions among themselves, which is the per-unit
+sibling search generalised across unit boundaries.
 
-This page is the measurement, including the parts that do not pay. Rerun the
-tool rather than quoting the counts; they fall as work lands.
+This page is what it measured. The short version: the technique is sharp but
+small. It is worth running at the start of a round because it costs half a
+minute and sometimes hands over a 460-byte function for a three-line edit, not
+because it will clear the tail.
+
+## Using it
 
     python3 tools/find_similar.py                      # ranked worklist
-    python3 tools/find_similar.py --for NAME [--body]   # templates for one function
-    python3 tools/find_similar.py --clusters            # unmatched functions of the same shape
-    python3 tools/find_similar.py --stats               # the per-tier counts below
+    python3 tools/find_similar.py --for NAME --body    # templates for one function, plus the C
+    python3 tools/find_similar.py --clusters           # unmatched functions sharing a shape
+    python3 tools/find_similar.py --stats              # the per-tier counts below
+    python3 tools/find_similar.py --unit field/fldDraw
 
-## Method
+The worklist's `sub` column is the number of instructions the template does
+*not* already supply. Read that, not the ratio. `--for NAME` prints those
+substitutions one per line, so a three-substitution row says which three
+constants to change before you open the assembly at all.
 
-Both sides come from one `objdump -d -z` of the retail `.text`, cached under
-`build/find_similar/`. That is the point: a function written in C and one still
-in assembly normalise through the same printer, so they compare without an
-asymmetry. The inventory is the one `tools/progress.py` counts, 9694 functions,
-and the tool refuses to run if the disassembly does not cover it instruction
-for instruction.
+Both sides of every comparison come from one `objdump` of the retail `.text`,
+cached under `build/find_similar/`, so a function written in C and one still in
+assembly normalise identically. The cache is keyed on the retail image and the
+`src/` timestamps and rebuilds itself; `--force` forces it.
 
-Four tiers, coarsening in this order:
+### The four tiers
 
-| tier | keeps |
-|---|---|
-| `exact` | mnemonic, registers, immediates |
-| `noimm` | mnemonic, registers |
-| `noreg` | mnemonic, immediates |
-| `mnem` | mnemonic |
+| tier | keeps | finds |
+|---|---|---|
+| `exact` | mnemonic, registers, immediates | the substitution list |
+| `noimm` | mnemonic, registers | siblings differing only in constants |
+| `noreg` | mnemonic, immediates | siblings whose allocation differs |
+| `mnem` | mnemonic | the default for neighbour search |
 
 A `jal` target is wildcarded at every tier, because two siblings call different
-functions; the callee names are resolved against the inventory and compared
-separately. Branch and intra-`.text` jump targets become offsets relative to
-the instruction, which is control-flow shape rather than an address.
+functions; the callee names are compared separately and reported as
+substitutions. Branch and intra-`.text` jump targets become offsets relative to
+the instruction, so the same control flow at two addresses compares equal.
 
-`-z` is not optional. Without it objdump prints `...` for a run of zero words
-and silently drops the nops inside 1609 of this image's functions, which
-corrupts every sequence that contains one.
+## What it measured
 
-## Identical shapes are nearly spent
+Measured 2026-10-27, after the six conversions below had taken the cheapest
+rows, with 2130 functions and 989,396 bytes still assembly. Rerun the tool
+rather than quoting these.
 
-Measured 2026-10-27, 2131 functions still assembly:
+Identical-sequence clustering, over all 9694 functions:
 
 | tier | unmatched with an identical matched twin | with unmatched siblings only |
 |---|---|---|
 | `exact` | 8 (124B) | 56 (2600B) |
-| `noimm` | 22 (1388B) | 249 (16096B) |
+| `noimm` | 21 (1012B) | 249 (16096B) |
 | `noreg` | 10 (180B) | 58 (2736B) |
-| `mnem` | 32 (1656B) | 246 (16092B) |
+| `mnem` | 31 (1280B) | 246 (16092B) |
 
-So exact-sequence matching against the 7563 solved functions reaches 32
-functions and 1656 bytes, under 0.2% of the 989,772 bytes left. **The
-"match every remaining function by analogy from a matched one" idea does not
-scale.** That is the headline, and it is measured.
+So **exact sibling identity is nearly spent**: 31 functions and 1280 bytes,
+0.13% of the remaining code. The 246-function sibling column is 162 sixteen-byte
+SDK syscall stubs plus 84 real functions; the tool drops anything under eight
+instructions, which leaves 34 clusters holding 83 unmatched functions, 7596
+bytes of which follow from converting the first of each. Six of those clusters
+cross a unit boundary, which a per-unit search cannot see: `nbE905_Model2Start`
+against `nbE907_Model2Start` sits one unit apart.
 
-The tiers rank as expected except `noreg`, which is useless: dropping register
-numbers while keeping immediates finds fewer twins than keeping both. Register
-allocation is what varies between siblings, so a tier that discards it and
-keeps the constants discards the signal and keeps the noise. Use `mnem` or
-`noimm`.
+Approximate neighbours are the larger pool, and the useful measure is
+substitutions, not ratio:
 
-The sibling column is the per-unit cluster search generalised. Filtered to
-functions of at least eight instructions, so the 162 identical 16-byte SDK
-syscall stubs drop out, it is 34 clusters holding 83 unmatched functions, of
-which 7596 bytes follow from converting the first of each. Six clusters cross
-a unit boundary, which a per-unit search cannot see: `nbE905_Model2Start`
-against `nbE907_Model2Start` is one unit apart, and `nbPnlSprite` took its
-template from `field/fldDraw` while sitting in `newbattle`.
+| template within | functions | bytes | share of the remaining bytes |
+|---|---|---|---|
+| 1 substitution | 2 | 132 | 0.01% |
+| 3 substitutions | 13 | 700 | 0.07% |
+| 8 substitutions | 52 | 3072 | 0.31% |
+| 20 substitutions | 151 | 10368 | 1.05% |
+| 40 substitutions | 373 | 40600 | 4.10% |
 
-## Approximate similarity: the ratio is a bad signal, the substitution count is good
+**The sequence ratio is a bad proxy for the work left.** By ratio band, against
+how many instructions the best template still does not supply:
 
-Widening from identity to a sequence ratio finds more candidates, and most of
-them are worthless. For every unmatched function, the closest matched function
-by `mnem` ratio (size band plus name family, see below), against how many
-instructions the template still does not supply:
+| ratio | functions | median substitutions | median share of the function |
+|---|---|---|---|
+| 0.95 - 1.00 | 15 | 6 | 22% |
+| 0.90 - 0.95 | 23 | 11 | 44% |
+| 0.80 - 0.90 | 73 | 19 | 64% |
+| 0.70 - 0.80 | 89 | 29 | 90% |
+| 0.60 - 0.70 | 185 | 41 | 105% |
+| below 0.60 | 1527 | 129 | 135% |
 
-| ratio | functions | bytes | median substitutions | median share of the function |
-|---|---|---|---|---|
-| 0.95 - 1.00 | 15 | 2156 | 6 | 22% |
-| 0.90 - 0.95 | 23 | 4232 | 11 | 44% |
-| 0.80 - 0.90 | 73 | 12228 | 19 | 64% |
-| 0.70 - 0.80 | 89 | 17136 | 29 | 90% |
-| 0.60 - 0.70 | 185 | 38184 | 41 | 105% |
-| below 0.60 | 1527 | 863004 | 129 | 135% |
+In the 0.75 to 0.85 band the median template differs in 26 instructions and not
+one of those 60 functions is within three substitutions. That is a rewrite with
+a misleading head start. So the worklist floors at ratio 0.90, where 37
+functions and 6012 bytes sit, and ranks on retail bytes per substitution. A
+floor of 0.75 shows 136 functions and 23,552 bytes, which is worth quoting only
+to show how fast the quality falls off.
 
-At a ratio of 0.8 the median template differs in two thirds of its
-instructions. That is a rewrite with a misleading head start, not a template.
-A plausible-looking row such as `cmpSetAfterCrossFunc` against `effBTLCreate`
-at 0.818 pairs a battle-effect constructor with a cross-fade setter: the same
-instruction mix, unrelated work.
+Name families are a separate signal worth keeping. A size band cannot see the
+variant that grew: `effBTLModelLook2` is 272 bytes against `effBTLModelLook`'s
+172, so the sequence search never offers it and scores an unrelated function
+0.379 while the real template sits at 0.739. Measured over the remaining set,
+81 functions have a shared-prefix candidate at ratio 0.6 or better and 38 of
+those score higher than the size-banded search does. Family membership is only
+a candidate generator, since `effBTLModelHide` shares the same stem and is a
+different function; the results are ranked by sequence ratio and the junk sinks.
 
-So the worklist floors at 0.90 and ranks by **retail bytes per substitution**,
-not by ratio, and prints the substitution count instead of the score. 38
-functions and 6388 bytes clear that floor. Dropping the floor to 0.75 shows
-137 functions and 23,928 bytes, which is the number to quote only if someone
-wants to see how fast the quality falls off.
+## Why it pays despite the small numbers
 
-The substitution count is also the whole payload: `--for NAME` prints the
-exact-tier differences and the callee substitutions, which is the list of
-edits, and `--body` prints the template's C with its file and line.
+Three of the six functions converted here were **parked `NON_MATCHING` drafts
+whose write-ups had diagnosed the cause wrongly**, and in each case a matched
+sibling settled it in one reading.
 
-## A name family beats a size band when the variant grew
+`nbCameraBoss_BSSAMA_Command_Set`, 460B, was parked at 25 of 115 words with the
+conclusion that ee-gcc CSEs an address retail recomputes and that "nothing in
+the source appears to break it". Its sibling `nbCameraBoss_BSARI_Command_Set`,
+already matched, 390 lines further down the same file, has an identical
+mnemonic sequence and differs in three words, all `.lit4` loads. What the draft
+had wrong was the spelling of the camera pointer: the sibling passes
+`pNbCamera` where the draft wrote `&pNbCamera->target`, stores through
+`SDF_VU0_STOREVECTOR_NOMEM`, and takes the length into `pNbCamera->distance`
+directly instead of through a local. Copying the sibling and changing 950.0f to
+550.0f matched on the first compile.
 
-The sequence search only looks within 15% of the target's instruction count,
-which is what makes it fast, and that band hides the variant that got longer.
-`effBTLModelLook2` is 272 bytes against `effBTLModelLook`'s 172, so the
-sequence search scores it 0.379 against an unrelated function while the real
-template sits at 0.739. A shared name prefix of eight characters or more finds
-it regardless of size.
+`Chk_ENHOJOMAX` and `Chk_FRHOJOMAX`, 220B each, were parked at 54 of 55 words
+each, blaming a branch-annul decision and ruling out three source shapes. At
+the exact tier both are **identical** to the matched `Chk_ENHOJO` and
+`Chk_FRHOJO` except for one callee name, which is
+[callee visibility](levers/callee-visibility.md) and nothing else. Writing that
+callee, `ChkAiHojoMax`, in C closed both without touching them.
 
-Measured: 38 unmatched functions have a name-family relative scoring 0.6 or
-better, 10,212 bytes, and 15 of those the size-banded search scores lower.
-It is only a candidate generator, not a claim of relatedness, since
-`effBTLModelHide` shares the same stem and is a different function. Rank what
-comes back by sequence ratio and read the top of it.
+The lesson is about where to spend a draft's budget. **A draft one or two words
+out, in a unit that holds a matched sibling of the same shape, is almost never
+a codegen mystery.** Diff it against the sibling at the exact tier first: the
+answer is a constant, an argument spelling, or the callee.
 
-## Validated end to end
+## The six converted, as end-to-end validation
 
-Six functions, 1940 bytes, every one picked off this tool's output. Three had
-been parked as `NON_MATCHING` drafts whose write-ups named the wrong cause.
+1940 bytes, every one picked off this tool's output.
 
-- **`nbCameraBoss_BSSAMA_Command_Set`**, 460B, from `nbCameraBoss_BSARI_Command_Set`
-  in the same unit at `mnem` 1.000, three exact-tier differences, all of them
-  `.lit4` slots. The parked draft was 25 of 115 words in and blamed a CSE of a
-  frame address that "nothing in the source appears to break"; the template
-  shows the real difference is `SDF_VU0_STOREVECTOR_NOMEM` against
-  `SDF_VU0_STOREVECTOR` plus passing `pNbCamera` where the draft passed
-  `&pNbCamera->target`. Matched on the first compile.
-- **`ChkAiHojoMax`**, 404B, from `ChkAiHojo` in the same unit. The sequence
-  search missed it (best 0.400, the `Max` variant is 404B against 336B); the
+- **`nbCameraBoss_BSSAMA_Command_Set`** 460B, from
+  `nbCameraBoss_BSARI_Command_Set`, same unit, three substitutions.
+- **`ChkAiHojoMax`** 404B, from `ChkAiHojo`, same unit. The sequence search
+  missed it, best 0.400, because the `Max` variant is 404B against 336B; the
   name family found it. The case ladder is the same, testing the counter
   against `nbGetHojoCounterMax`/`Min` where `ChkAiHojo` tests its sign.
-- **`Chk_ENHOJOMAX`** and **`Chk_FRHOJOMAX`**, 220B each, identical to
-  `Chk_ENHOJO` and `Chk_FRHOJO` at the `exact` tier with a single differing
-  callee. Both were parked at 54 of 55 words with a `bnel` for retail's `bne`,
-  and both closed by themselves once `ChkAiHojoMax` became C, exactly as
-  [callee visibility](levers/callee-visibility.md) predicts. Worth noting for
-  the ranking: a one-word annul miss whose callee is still `INCLUDE_ASM` is
-  not 54/55 of the way done, it is a dependency, and this tool's cluster output
-  is where that callee's own template turns up.
-- **`nbPnl_rsetAlpha`**, 260B, from `eglLinkAlpha` in `kernel/dds3KernelDraw`,
-  three exact-tier differences: its own jump table, and `gnbPnlOtOfs` where the
-  template reads `egl_OT_Offset`. A cross-unit, cross-module template.
-- **`nbPnlSprite`**, 376B, from `DrwSprite2D` in `field/fldDraw`, one
-  substitution: `gnbPnlOtOfs` for `rsetFrameMaskOtOffset`. It also needed
+- **`Chk_ENHOJOMAX`** and **`Chk_FRHOJOMAX`** 220B each, identical to
+  `Chk_ENHOJO` and `Chk_FRHOJO` but for the callee.
+- **`nbPnl_rsetAlpha`** 260B, from `eglLinkAlpha` in `kernel/dds3KernelDraw`,
+  three substitutions: its own jump table, and `gnbPnlOtOfs` where the template
+  reads `egl_OT_Offset`. Cross-unit and cross-module.
+- **`nbPnlSprite`** 376B, from `DrwSprite2D` in `field/fldDraw`, one
+  substitution, `gnbPnlOtOfs` for `rsetFrameMaskOtOffset`. It also needed
   `fldDraw`'s two-corner sprite vertex struct, copied under `newbattle` names
   on the pattern `fldSpriteCorner_t` and `dds3EffectSpriteCorner_t` already
   set; if the IDB carries a name for that layout, take that one instead.
 
-`python3 tools/check_unit.py` ends in `0 differ` on all three units, and
-`ninja` reaches `check config/smt3/checksum.sha1`.
+`tools/check_unit.py` ends in `0 differ` on `newbattle/nbCameraBoss` (100
+match), `newbattle/nbAi` (42 match) and `newbattle/nbPanelProcess` (53 match),
+and `ninja` reaches `check config/smt3/checksum.sha1`. Two of the six are
+unreachable from the per-unit sequence search the method started as: one came
+only from the name family, one only from a cross-unit pairing.
 
-One of the six, `ChkAiHojoMax`, came only from the name family, and one,
-`nbPnlSprite`, only from a cross-unit pairing. Neither is reachable from the
-per-unit sequence search the method started as.
+## What did not pay
 
-## What this does not do
+- **Bulk conversion from matched templates.** The expectation behind this work
+  was that the 7558 matched functions would serve a large share of the tail.
+  They do not. Over all 1928 remaining functions of eight instructions or more,
+  the best matched neighbour has a median mnemonic-sequence ratio of 0.454, and
+  37 reach 0.90. At 0.60 the pool is 363 functions and 6.4% of the remaining
+  bytes, but at that distance the template is a structural lead, not a
+  substitution, and reading it is no cheaper than reading the assembly.
+- **Sibling clusters with no matched member.** `ragBuildList2` and
+  `ragBuildList3` have an identical mnemonic sequence and both carry a draft 22
+  of 93 words out; the nearest matched function scores 0.486. The cluster says
+  they are stuck for the same reason, which stops two people paying for one
+  investigation, but it solves neither. 34 of the 42 clusters with two or more
+  unmatched members have no matched member at all.
+- **Control-flow-shape-only matching.** Not built. The `noreg` tier is already
+  a coarser view than `noimm` and finds strictly fewer twins, 10 against 21,
+  which says register identity carries more signal here than immediate
+  identity. A basic-block-graph tier would be coarser still, and the
+  substitutions table says coarse matches are not worth reading.
 
-- It cannot find a template for a function that has none, which is 1527 of the
-  1929 remaining functions over eight instructions and 87% of the bytes left.
-  Those need the ordinary method.
-- A cluster whose members are all unmatched tells you the members are stuck
-  identically, which saves one of two investigations but solves neither.
-  `ragBuildList2` and `ragBuildList3` are byte-shape identical, both parked at
-  22 of 93 words, and the nearest matched function scores 0.486.
-- The `jal` wildcard means a sibling pair that differs only in a callee reads
-  as identical. That is usually what you want and it is why the callee list is
-  printed separately, but a pair reported as identical can still be two
-  different functions over the same helper.
+## One trap in building anything like this
+
+`objdump -d` prints `...` for a run of zero words and silently drops them.
+Without `-z` that corrupts the instruction sequence of 1609 of this image's
+functions, and the corruption is invisible: the sequences still compare, just
+wrongly. `corpus()` therefore asserts that every function's token count equals
+the instruction count the split assembly reports, and raises if it does not.
+`tools/test_find_similar.py` pins that invariant.
+
+The same class of error is the one `docs/nonmatching.md` warns about from the
+other direction: count instructions, never the `/* ... */` comment lines, since
+a `.s` file's `.rodata` jump table shares that comment format.
