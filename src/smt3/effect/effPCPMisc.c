@@ -230,7 +230,7 @@ typedef struct sdfMotionPlayBook_t sdfMotionPlayBook_t;
 typedef struct dds3ModelResrcPlayBook_t dds3ModelResrcPlayBook_t;
 typedef struct sdfItemArray_t sdfItemArray_t;
 typedef struct pibChunkItem_t pibChunkItem_t;
-typedef struct SdfChunkHeader SdfChunkHeader;
+typedef struct sdfModelExtraChunk_t sdfModelExtraChunk_t;
 typedef struct sdfModelNodeDef_t sdfModelNodeDef_t;
 typedef struct sdfModelDef_t sdfModelDef_t;
 typedef struct dds3ModelResrc_t dds3ModelResrc_t;
@@ -1684,14 +1684,17 @@ struct pibChunkItem_t {
 
 struct sdfModelDef_t;
 
-struct SdfChunkHeader;
+struct sdfModelExtraChunk_t;
 
-/* Variable-size serialized chunk streams share only this eight-byte header.
- * The word at +8 belongs to each chunk's payload. */
-struct SdfChunkHeader {
-    u32 id;   /* 0x00: zero terminates the chunk stream */
-    u32 size; /* 0x04: byte extent to the next chunk */
-};
+/* One serialized model extra chunk: the id and size, then the payload words
+ * the chunk kind defines. sdfModelDef_t.extraData points at the first. */
+typedef struct sdfModelExtraChunk_t {
+    u32 chunkId; /* 0x00: zero terminates the chunk stream */
+    u32 size;    /* 0x04: byte extent to the next chunk */
+    u32 data0;
+    u32 data1;
+    s32 sPos;
+} sdfModelExtraChunk_t;
 
 /* Native model constructor reference: AMB roots and the FLD model wrapper's
  * four-word subrecord. The list has a variable-length body of node
@@ -1731,7 +1734,7 @@ struct sdfModelDef_t {
     sdfModelNodeDefList_t *modelDef; /* 0x00 */
     u32 *matDef_New; /* 0x04: count followed by flag-driven asset records */
     s32 morphCount; /* 0x08: passed to sdfModelMakeMorphList */
-    struct SdfChunkHeader *extraData; /* 0x0C: borrowed by SdfModel */
+    struct sdfModelExtraChunk_t *extraData; /* 0x0C: borrowed by SdfModel */
 };
 
 /* Group owners allocate 0xB4 bytes and retain eight resource records. */
@@ -1840,7 +1843,7 @@ struct sdfModelRootNode_t {
     sdfDmaTag_t *secondaryLighting; /* Borrowed second DMA reference prefix. */
     f32 scalarOverrideFirst;
     f32 scalarOverrideSecond;
-    struct SdfChunkHeader *chunkTable; /* Borrowed from the model resource data. */
+    struct sdfModelExtraChunk_t *chunkTable; /* Borrowed from the model resource data. */
 
     f32 modelScale;
     u8 lodIndex; /* Native model-viewer and MODEL_LOD_CHG setters use byte 0x98. */
