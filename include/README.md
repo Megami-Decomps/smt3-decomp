@@ -487,10 +487,10 @@ script effect placement. `basic.h` supplies the complete, 0xAC-byte
 `dds3ObjectBaseControl_t`, including its control-basic array at +0x10 and mover
 in slot 1. Stage, script and field consumers use that same layout rather than
 independent prefix types. Path consumers likewise share the 36-byte
-`dds3PathBasicControl_t` and its typed channel-key union; direction is at +0,
-and the spline handle is at +0x10. Their public declarations live beside the
-types. The serialized scene texture-offset table remains an opaque shared
-pointer type in `libsdf.h`; these ports only forward it.
+`dds3PathBasicControl_t` and its typed channel-key union; `mode` is at +0 and
+`pSplineHandle` at +0x10. Their public declarations live beside the types. The
+serialized scene texture-offset table remains an opaque shared pointer type in
+`libsdf.h`; these ports only forward it.
 
 The upstream native path implementation supplies the canonical transform
 channel: quaternion +0, XYZ position +0x10 and XYZ scale +0x1C, in 0x28-byte

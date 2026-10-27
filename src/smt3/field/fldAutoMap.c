@@ -29,7 +29,7 @@ typedef struct
     char *name;
     fldMapItem_t *items;
     u32 nSB;
-    void *model;
+    void *pMdl;
     fldMapPoint_t *pPos;
 } fldAmAreaData_t;
 
@@ -967,7 +967,7 @@ void fldAutoMapSeqStart(void) {
     for (i = 0; i < fldAutoMapData; i++, rec++) {
         fldMapPoint_t *pos;
 
-        D_00312150[i] = sdfModelMakeEarly(0, rec->model);
+        D_00312150[i] = sdfModelMakeEarly(0, rec->pMdl);
         pos = rec->pPos;
         fldAutoMapModelPos[i].x = pos->x;
         fldAutoMapModelPos[i].y = pos->y;

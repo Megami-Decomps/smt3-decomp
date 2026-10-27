@@ -409,9 +409,9 @@ union EffThunderParameterHead {
 struct effPCPThunderSpherePoly_t {
     EffThunderParameterHead head;
     effPCPThunderSpherePolyPart_t *pPart;
-    u32 tintColor;
-    f32 baseRadiusScale;
-    f32 baseHeightScale;
+    u32 abgr;
+    f32 width_base;
+    f32 height_base;
     struct parSystem_t *hPoly;
     struct sdfMemHandle_t *allocationHandle;
 };
@@ -503,8 +503,8 @@ effPCPThunderSpherePoly_t *effPCPThunderSpherePolyCreate(effPCPThunderSpherePoly
 
     work->head.alpha = *source;
     work->pPart = (effPCPThunderSpherePolyPart_t *)(work + 1);
-    work->baseRadiusScale = source->width;
-    work->baseHeightScale = source->height;
+    work->width_base = source->width;
+    work->height_base = source->height;
     work->allocationHandle = allocation;
     work->hPoly = dds3TrackPolyCreate(work->head.alpha.cellCount, work->head.alpha.perCell, 0, PAR_CELL_TOPOLOGY_FIVE_VECTOR);
     dds3TrackPolyVC5Set_AcuteW(work->hPoly, work->head.alpha.centerAlphaWord, work->head.alpha.middleAlphaWord, work->head.alpha.edgeAlphaWord);
@@ -514,7 +514,7 @@ effPCPThunderSpherePoly_t *effPCPThunderSpherePolyCreate(effPCPThunderSpherePoly
         work->pPart[cellIndex].refresh = 0;
         work->pPart[cellIndex].abgr = 0;
     }
-    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
+    work->abgr = EFF_THUNDER_NEUTRAL_COLOR;
     return work;
 }
 
@@ -539,12 +539,12 @@ void effPCPThunderSpherePolySetPosition(void *hData, void *pPos) {
 }
 
 void effPCPThunderSpherePolySetColor(effPCPThunderSpherePoly_t *hData, u32 abgr) {
-    hData->tintColor = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPThunderSpherePolySetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
-    scale->head.vector.radiusScale = scale->baseRadiusScale * hData;
-    scale->head.vector.heightScale = scale->baseHeightScale * hData;
+    scale->head.vector.radiusScale = scale->width_base * hData;
+    scale->head.vector.heightScale = scale->height_base * hData;
 }
 
 EffThunderParameterHead *effPCPThunderSpherePolyGetParam(effPCPThunderSpherePoly_t *pThunderPoly) {
@@ -734,7 +734,7 @@ void effPCPThunderSpherePolyDraw(effPCPThunderSpherePoly_t *hData) {
     s32 i = 0;
     parSystem_t *renderSystem = hData->hPoly;
     s32 cellCount = hData->head.vector.cellCount;
-    u32 tintColor = hData->tintColor;
+    u32 tintColor = hData->abgr;
     effPCPThunderSpherePolyPart_t *cell = hData->pPart;
     parCell_t *renderCells = renderSystem->cells;
     u32 *renderColor;
@@ -773,8 +773,8 @@ effPCPThunderSpherePoly_t *effBTLBindCreateTrack(EffThunderVectorParams *paramet
 
     work->head.vector = *parameters;
     work->pPart = (effPCPThunderSpherePolyPart_t *)(work + 1);
-    work->baseRadiusScale = parameters->radiusScale;
-    work->baseHeightScale = parameters->heightScale;
+    work->width_base = parameters->radiusScale;
+    work->height_base = parameters->heightScale;
     work->allocationHandle = allocationHandle;
     work->hPoly = dds3TrackPolyCreate(work->head.vector.cellCount, work->head.vector.perCell, 0, PAR_CELL_TOPOLOGY_PAIR);
     dds3TrackPolyVCSet(work->hPoly, 2, (u32)work->head.vector.dispatchArg, (u32)work->head.vector.dispatchArg);
@@ -784,7 +784,7 @@ effPCPThunderSpherePoly_t *effBTLBindCreateTrack(EffThunderVectorParams *paramet
         work->pPart[cellIndex].refresh = 0;
         work->pPart[cellIndex].abgr = 0;
     }
-    work->tintColor = EFF_THUNDER_NEUTRAL_COLOR;
+    work->abgr = EFF_THUNDER_NEUTRAL_COLOR;
     return work;
 }
 
@@ -809,12 +809,12 @@ void effPCPThunderSpherePolyLowSetPosition(void *hData, void *pPos) {
 }
 
 void effPCPThunderSpherePolyLowSetColor(effPCPThunderSpherePoly_t *hData, u32 abgr) {
-    hData->tintColor = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPThunderSpherePolyLowSetScale(f32 hData, effPCPThunderSpherePoly_t *scale) {
-    scale->head.vector.radiusScale = scale->baseRadiusScale * hData;
-    scale->head.vector.heightScale = scale->baseHeightScale * hData;
+    scale->head.vector.radiusScale = scale->width_base * hData;
+    scale->head.vector.heightScale = scale->height_base * hData;
 }
 
 u32 effPCPThunderSpherePolyLowGetParam(u32 pThunderPoly) {
@@ -975,7 +975,7 @@ void effPCPThunderSpherePolyLowDraw(effPCPThunderSpherePoly_t *hData) {
     s32 i = 0;
     parSystem_t *renderSystem = hData->hPoly;
     s32 cellCount = hData->head.vector.cellCount;
-    u32 tintColor = hData->tintColor;
+    u32 tintColor = hData->abgr;
     effPCPThunderSpherePolyPart_t *cell = hData->pPart;
     parCell_t *renderCells = renderSystem->cells;
     u32 *renderColor;

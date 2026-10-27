@@ -56,7 +56,7 @@ dds3Basic_t *dds3AddModelRangeBasicNew(s32 serialID, s32 pData, s32 pos, char *p
 }
 
 void dds3SetPathBasicSpline(dds3Basic_t *basic, s32 spline) {
-    ((dds3PathBasicControl_t *)basic->workdata)->spline = spline;
+    ((dds3PathBasicControl_t *)basic->workdata)->pSplineHandle = spline;
 }
 
 s32 dds3SearchSceneBasicWorkData(u32 id) {

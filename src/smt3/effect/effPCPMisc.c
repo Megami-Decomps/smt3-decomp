@@ -630,10 +630,10 @@ struct effPCPRingPolyExp2_tag {
     effPCPRingPolyExp2Param_t head;
     s32 frame;
     u32 abgr;
-    f32 rotationA;
-    f32 rotationB;
-    f32 rotationStep;
-    u8 pad70[4];
+    f32 rotate_z;
+    f32 rotate_y;
+    f32 rotate_s;
+    u8 rotate_a[4];
     f32 radius;
     f32 radius_s;
     dds3RingPolyExpList_tag *hPoly;
@@ -664,7 +664,7 @@ struct effPCPRingPolyExp_tag {
     effPCPRingPolyExpParam_t param;
     s32 frame;
     u32 abgr;
-    u32 vertexCount;
+    u32 point_max;
     dds3RingPolyExpList_tag *hPoly;
 };
 
@@ -705,9 +705,9 @@ struct effPartHandle_t {
    A non-NULL source borrows its resources; NULL owns the listed handles. */
 struct effPCPAgiFireball_tag {
     f32 matrix[16];
-    f32 previousPosition[4];
-    f32 currentPosition[4];
-    effPCPAgiFireballParam_t params;
+    f32 pos_old[4];
+    f32 pos[4];
+    effPCPAgiFireballParam_t param;
     u32 frame;
     u32 count;
     u32 color;
@@ -978,7 +978,7 @@ struct effPCPHamaon_tag {
  * unknown. */
 struct effPCPMHanma01_tag {
     f32 pos[4];
-    u32 color;
+    u32 abgr;
     f32 scale;
     effPartHandle_t *handle[12];
     u32 remainingDelay[6];
@@ -1211,9 +1211,9 @@ struct parSystem_t {
 struct effPCPThunderSpherePoly_t {
     EffThunderParameterHead head;
     effPCPThunderSpherePolyPart_t *pPart;
-    u32 tintColor;
-    f32 baseRadiusScale;
-    f32 baseHeightScale;
+    u32 abgr;
+    f32 width_base;
+    f32 height_base;
     struct parSystem_t *hPoly;
     struct sdfMemHandle_t *allocationHandle;
 };
@@ -1324,8 +1324,8 @@ struct effPCPHelperBEDPart_tag {
 struct effPCPHelperBED_tag {
     effPCPHelperBEDParam_t param;
     effPCPHelperBEDPart_tag *pPart;
-    struct sdfMemHandle_t *entriesHandle;
-    struct effBTL_t *owner;
+    struct sdfMemHandle_t *hPartMem;
+    struct effBTL_t *hBED;
     struct effPartHandle_t *hHelper;
     f32 scale;
     s32 frame;
@@ -1394,7 +1394,7 @@ struct effPCPThunderSphereExpParam_t {
 struct effPCPBlinkMultiBlurBase_tag {
     f32 pos[4];
     u32 abgr;
-    u32 color;
+    u32 abgr_base;
     u32 frame;
     f32 area; /* 0x1C: converted to the rendered extent by the camera helper. */
     u32 blink;
@@ -1501,8 +1501,8 @@ struct effPCPBufuIce_tag {
 typedef struct effPCPMakka_tag {
     f32 pos[4];       /* 0x00 vector loaded by the pulse updater */
     f32 scale;        /* 0x10 */
-    u32 color;        /* 0x14 */
-    u32 count;        /* 0x18 particle count */
+    u32 abgr;        /* 0x14 */
+    u32 number;        /* 0x18 particle number */
     s32 frame;        /* 0x1C current update frame */
     s32 startFrame[10]; /* 0x20 */
     f32 rotationY[10];  /* 0x48 random start angles */
@@ -1567,7 +1567,7 @@ struct effPCPAgiraoFire_tag {
  * slot, and per-slot state/countdowns. Its constructors allocate 0xBC bytes. */
 struct effPCPHama01_tag {
     f32 pos[4];
-    u32 color;
+    u32 abgr;
     u32 frame;
     f32 scale;
     effPartHandle_t *pair[8][2];
@@ -1930,22 +1930,22 @@ typedef s8 SdfDevStateCode;
 /* Complete 0x40-byte owner allocated by sdfFileCmdNewHandle. */
 struct sdfFileCmdHandle_t {
     struct sdfFileCmdHandle_t *next; /* 0x00 */
-    struct sdfFileCmdHandle_t *previous; /* 0x04 */
-    struct sdfFileCmdHandle_t *workerNext; /* 0x08 */
-    struct sdfFileCmdHandle_t *workerPrev; /* 0x0C */
+    struct sdfFileCmdHandle_t *prev; /* 0x04 */
+    struct sdfFileCmdHandle_t *deviceNext; /* 0x08 */
+    struct sdfFileCmdHandle_t *devicePrev; /* 0x0C */
     char *filename; /* 0x10 */
     u8 device; /* 0x14 */
     SdfDevOperationCode cmd; /* 0x15 */
     SdfDevStateCode stat; /* 0x16 */
-    u8 pad17; /* 0x17 */
+    u8 phase; /* 0x17 */
     s32 offset; /* 0x18 */
     s32 length; /* 0x1C */
     void *buffer; /* 0x20 */
     s32 cmdParm; /* 0x24 */
     s32 fd; /* 0x28 */
-    s32 result; /* 0x2C */
+    s32 errorCode; /* 0x2C */
     s32 currentOffset; /* 0x30 */
-    u8 pad34[4]; /* 0x34 */
+    u8 remainder[4]; /* 0x34 */
     void (*callback)(struct sdfFileCmdHandle_t *, s32, s32, s32, s32); /* 0x38 */
     s32 userData; /* 0x3C: opaque callback-context word */
 };
@@ -2682,7 +2682,7 @@ effPCPHama01_tag *effPCPHama01Create(void *src) {
         work->state[slotIndex] = 0;
     }
     work->pos[0] = 0.0f;
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->scale = 1.0f;
     work->pos[1] = 0.0f;
     work->pos[2] = 0.0f;
@@ -2719,7 +2719,7 @@ effPCPHama01_tag *effPCPHama01Copy(effPCPHama01_tag *src) {
         effPCPHama01PartInit(work, slotIndex);
     }
     work->pos[0] = 0.0f;
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->scale = 1.0f;
     work->pos[1] = 0.0f;
     work->pos[2] = 0.0f;
@@ -2744,7 +2744,7 @@ void effPCPHama01Draw(effPCPHama01_tag *hData) {
         mdlSetPosition(obj[0]);
         dds3EffectPartSetScale(hData->pair[slotIndex][0], hData->scale * 1.5f);
         dds3EffectPartSetScale(hData->pair[slotIndex][1], 1.75f);
-        mdlSetColor(obj[1], hData->color);
+        mdlSetColor(obj[1], hData->abgr);
         mdlLink(obj[0], D_002F69B8);
         sdfModelGetMarkPos(obj[0]->modelRoot, 1);
         posp = &pos;
@@ -2768,7 +2768,7 @@ void effPCPHama01SetScale(effPCPHama01_tag *hData, f32 scale) {
 }
 
 void effPCPHama01SetColor(effPCPHama01_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPHama02PartInit(effPCPHama02_tag *pPCPHama02, s32 number) {
@@ -3021,7 +3021,7 @@ effPCPMHanma01_tag *effPCPMHanma01Create(void *source) {
         handle += 2;
         effPCPMHanma01PartInit(work, i);
     }
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->scale = 1.0f;
     work->pos[0] = 0.0f;
     work->pos[1] = 0.0f;
@@ -3056,7 +3056,7 @@ effPCPMHanma01_tag *effPCPMHanma01Copy(effPCPMHanma01_tag *source) {
         workHandle += 2;
         effPCPMHanma01PartInit(work, i);
     }
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->scale = 1.0f;
     work->pos[0] = 0.0f;
     work->pos[1] = 0.0f;
@@ -3077,7 +3077,7 @@ void effPCPMHanma01Draw(effPCPMHanma01_tag *hData) {
             obj[1] = dds3EffectPartGetHandle(hData->handle[i * 2 + 1]);
             SDF_VU0_LOADVECTOR(hData);
             mdlSetPosition(obj[0]);
-            mdlSetColor(obj[1], hData->color);
+            mdlSetColor(obj[1], hData->abgr);
             mdlLink(obj[0], D_002F69B8);
             sdfModelGetMarkPos(obj[0]->modelRoot, 1);
             SDF_VU0_STOREVECTOR_NOMEM(&vec);
@@ -3096,7 +3096,7 @@ void effPCPMHanma01SetScale(effPCPMHanma01_tag *hData, f32 scale) {
 }
 
 void effPCPMHanma01SetColor(effPCPMHanma01_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPMudoPartInit(effPCPMudo_tag *pPCPMudo) {
@@ -4034,7 +4034,7 @@ effPCPBlinkMultiBlur_tag *effPCPBlinkMultiBlurCreate(effPCPBlinkMultiBlurParam_t
     if (BlinkMultiBlurCount == 0) {
         pBlinkMultiBlurBase = sdfChipAllocDirect(sizeof(effPCPBlinkMultiBlurBase_tag));
         pBlinkMultiBlurBase->hBlur = dds3EffectPartialMultiBlurCreate(&params->res);
-        pBlinkMultiBlurBase->color = params->res.Blur.abgr;
+        pBlinkMultiBlurBase->abgr_base = params->res.Blur.abgr;
         pBlinkMultiBlurBase->frame = 0;
         pBlinkMultiBlurBase->abgr = 0x80808080;
         pBlinkMultiBlurBase->pos[0] = 0;
@@ -4084,7 +4084,7 @@ void effPCPBlinkMultiBlurDraw(ref)
     obj = work->hBlur;
     ref->frame = ref->frame + 1;
     if (work->frame < work->blink) {
-        work->color = work->blink_abgr[work->frame & 1];
+        work->abgr_base = work->blink_abgr[work->frame & 1];
         SDF_VU0_LOADVECTOR(work);
         obj->param.area = (s32)((f32)effPCPBlurScreenOffset(pBlinkMultiBlurBase->area) * pBlinkMultiBlurBase->ratio);
         SDF_VU0_STOREVECTOR(pos);
@@ -4093,7 +4093,7 @@ void effPCPBlinkMultiBlurDraw(ref)
         if (obj->param.area < pBlinkMultiBlurBase->area_min) {
             obj->param.area = pBlinkMultiBlurBase->area_min;
         }
-        obj->param.Blur.abgr = effMagaCylinderCalcColor(pBlinkMultiBlurBase->abgr, pBlinkMultiBlurBase->color);
+        obj->param.Blur.abgr = effMagaCylinderCalcColor(pBlinkMultiBlurBase->abgr, pBlinkMultiBlurBase->abgr_base);
         dds3EffectPartialMultiBlurDraw(obj);
         pBlinkMultiBlurBase->frame++;
     }
@@ -5019,8 +5019,8 @@ void effPCPAgiFireballCopySub(effPCPAgiFireball_tag *pPCPAgiFireball, effPCPAgiF
     headModel = dds3EffectPartGetHandle(pPCPAgiFireball->headHandle);
     pPCPAgiFireball->count = headModel->first->frameCount;
     for (groupIndex = 0; groupIndex < ARRAY_COUNT(pPCPAgiFireball->list); groupIndex++) {
-        if (pPCPAgiFireball->params.TrackCount[groupIndex] > 0) {
-            groupHandleCount = pPCPAgiFireball->count * pPCPAgiFireball->params.TrackCount[groupIndex];
+        if (pPCPAgiFireball->param.TrackCount[groupIndex] > 0) {
+            groupHandleCount = pPCPAgiFireball->count * pPCPAgiFireball->param.TrackCount[groupIndex];
             pPCPAgiFireball->alloc[groupIndex] = sdfMemAllocDirect(groupHandleCount * 4);
             pPCPAgiFireball->list[groupIndex] = (effPartHandle_t **)sdfMemLock(pPCPAgiFireball->alloc[groupIndex]);
             pPCPAgiFireball->list[groupIndex][0] = dds3EffectPartCopy(pPCPAgiFireballSrc->list[groupIndex][0]);
@@ -5042,7 +5042,7 @@ effPCPAgiFireball_tag *effPCPAgiFireballCopy(effPCPAgiFireball_tag *src) {
 
     work = sdfChipAllocDirect(sizeof(effPCPAgiFireball_tag));
     memset(work, 0, 0x10C);
-    work->params = src->params;
+    work->param = src->param;
     work->frame = 0;
     work->color = 0x80808080;
     work->mode = 0;
@@ -5064,7 +5064,7 @@ void effPCPAgiFireballDelete(effPCPAgiFireball_tag *hData) {
         }
         for (groupIndex = 0; groupIndex < 3; groupIndex++) {
             if (hData->alloc[groupIndex] != 0) {
-                groupHandleCount = hData->count * hData->params.TrackCount[groupIndex];
+                groupHandleCount = hData->count * hData->param.TrackCount[groupIndex];
                 for (handleIndex = 0; handleIndex < groupHandleCount; handleIndex++) {
                     if (hData->list[groupIndex][handleIndex] != 0) {
                         dds3EffectPartDelete(hData->list[groupIndex][handleIndex]);
@@ -5084,7 +5084,7 @@ void effPCPAgiFireballDelete(effPCPAgiFireball_tag *hData) {
 INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballDraw);
 
 void effPCPAgiFireballSetPosition(effPCPAgiFireball_tag *hData, const void *pPos) {
-    SDF_VU0_COPYVECTOR(hData->params.pos, pPos);
+    SDF_VU0_COPYVECTOR(hData->param.pos, pPos);
 }
 
 void effPCPAgiFireballSetColor(effPCPAgiFireball_tag *hData, u32 abgr) {
@@ -5110,7 +5110,7 @@ effPCPAgiFireball_tag *effPCPAgiFireballSpCopy(effPCPAgiFireball_tag *src) {
 
     work = sdfChipAllocDirect(sizeof(effPCPAgiFireball_tag));
     memset(work, 0, 0x10C);
-    work->params = src->params;
+    work->param = src->param;
     work->color = 0x80808080;
     work->mode = 1;
     work->frame = 0;
@@ -5132,7 +5132,7 @@ effPCPAgiFireball_tag *effPCPAgiFireballSp2Copy(effPCPAgiFireball_tag *src) {
 
     work = sdfChipAllocDirect(sizeof(effPCPAgiFireball_tag));
     memset(work, 0, 0x10C);
-    work->params = src->params;
+    work->param = src->param;
     work->color = 0x80808080;
     work->mode = 2;
     work->frame = 0;
@@ -5171,8 +5171,8 @@ effPCPAgiFireball2_tag *effPCPAgiFireball2Copy(effPCPAgiFireball2_tag *src) {
     for (i = 0; i < 3; i++) {
         work->blockSets[i] = sdfChipAllocDirect(sizeof(effPCPAgiFireball_tag));
         memset(work->blockSets[i], 0, 0x10C);
-        memcpy(&work->blockSets[i]->params, &src->blockSets[i]->params,
-               sizeof(work->blockSets[i]->params));
+        memcpy(&work->blockSets[i]->param, &src->blockSets[i]->param,
+               sizeof(work->blockSets[i]->param));
         sub = work->blockSets[i];
         sub->frame = 0;
         sub->color = 0x80808080;
@@ -5940,7 +5940,7 @@ effPCPRingPolyExp_tag *effPCPRingPolyExpCreate(effPCPRingPolyExpParam_t *pParam)
     node = dds3RingPolyExpListCreate(segments);
     i = 0;
     work->hPoly = node;
-    work->vertexCount = node->vertexCount;
+    work->point_max = node->vertexCount;
     groups = (s32)node->vertexCount >> 2;
     entry = node->pVC;
     for (i = 0; i < groups; i++) {
@@ -5988,10 +5988,10 @@ void effPCPRingPolyExpDraw(effPCPRingPolyExp_tag *hData) {
     if (frame < vertexFrames) {
         u32 groups;
         t = (f32)frame / (f32)vertexFrames;
-        groups = (u32)((f32)(hData->vertexCount >> 2) * t);
+        groups = (u32)((f32)(hData->point_max >> 2) * t);
         hData->hPoly->vertexCount = groups << 2;
     } else {
-        hData->hPoly->vertexCount = hData->vertexCount;
+        hData->hPoly->vertexCount = hData->point_max;
     }
     if (frame < hData->param.life_r) {
         t = (f32)hData->frame / (f32)hData->param.life_r;
@@ -6071,11 +6071,11 @@ void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 r
         LookAtMatrix(aViewTarget, aViewEye, aViewDown);
         ReverseMatrix();
     } else {
-        SetRotateMatrixZ(pPCPRingPolyExp2->rotationA);
-        SetRotateMatrixY_B(pPCPRingPolyExp2->rotationB);
+        SetRotateMatrixZ(pPCPRingPolyExp2->rotate_z);
+        SetRotateMatrixY_B(pPCPRingPolyExp2->rotate_y);
         MultMatrixRevNoArg();
-        pPCPRingPolyExp2->rotationB += pPCPRingPolyExp2->rotationStep;
-        pPCPRingPolyExp2->rotationStep *= pPCPRingPolyExp2->head.rotate_a;
+        pPCPRingPolyExp2->rotate_y += pPCPRingPolyExp2->rotate_s;
+        pPCPRingPolyExp2->rotate_s *= pPCPRingPolyExp2->head.rotate_a;
     }
     for (i = 0; i < n; i++) {
         if (pPCPRingPolyExp2->head.mode == 0) {
@@ -6109,9 +6109,9 @@ void effPCPRingPolyExp2SetVertex(effPCPRingPolyExp2_tag *pPCPRingPolyExp2, f32 r
 }
 
 void effPCPRingPolyExp2Init(effPCPRingPolyExp2_tag *pPCPRingPolyExp2) {
-    pPCPRingPolyExp2->rotationA = pPCPRingPolyExp2->head.incline * 0.017453291f;
-    pPCPRingPolyExp2->rotationB = pPCPRingPolyExp2->head.rotate * 0.017453291f;
-    pPCPRingPolyExp2->rotationStep = pPCPRingPolyExp2->head.rotate_s * 0.017453291f;
+    pPCPRingPolyExp2->rotate_z = pPCPRingPolyExp2->head.incline * 0.017453291f;
+    pPCPRingPolyExp2->rotate_y = pPCPRingPolyExp2->head.rotate * 0.017453291f;
+    pPCPRingPolyExp2->rotate_s = pPCPRingPolyExp2->head.rotate_s * 0.017453291f;
     pPCPRingPolyExp2->radius = pPCPRingPolyExp2->head.radius;
     pPCPRingPolyExp2->radius_s = pPCPRingPolyExp2->head.radius_s;
     effPCPRingPolyExp2SetVertex(pPCPRingPolyExp2, pPCPRingPolyExp2->head.radius);
@@ -6401,10 +6401,10 @@ effPCPMakka_tag *effPCPMakkaCreat(void *src) {
     u32 i;
 
     work->scale = 1.0f;
-    work->color = 0x80808080;
-    work->count = 10;
+    work->abgr = 0x80808080;
+    work->number = 10;
     work->frame = 0;
-    for (i = 0; i < work->count; i++) {
+    for (i = 0; i < work->number; i++) {
         work->handle[i] = 0;
         work->startFrame[i] = i;
         work->rotationY[i] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
@@ -6419,9 +6419,9 @@ effPCPMakka_tag *effPCPMakkaCopy(effPCPMakka_tag *src) {
 
     work->frame = 0;
     work->scale = src->scale;
-    work->count = src->count;
-    work->color = 0x80808080;
-    for (i = 0; i < work->count; i++) {
+    work->number = src->number;
+    work->abgr = 0x80808080;
+    for (i = 0; i < work->number; i++) {
         work->handle[i] = 0;
         work->startFrame[i] = i;
         work->rotationY[i] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.87266457f + 3.14159265f;
@@ -6433,7 +6433,7 @@ effPCPMakka_tag *effPCPMakkaCopy(effPCPMakka_tag *src) {
 void effPCPMakkaDelete(effPCPMakka_tag *hData) {
     u32 i = 0;
 
-    if (hData->count != 0) {
+    if (hData->number != 0) {
         effPartHandle_t **handle = hData->handle;
         do {
             if (*handle != 0) {
@@ -6441,7 +6441,7 @@ void effPCPMakkaDelete(effPCPMakka_tag *hData) {
             }
             handle++;
             i++;
-        } while (i < hData->count);
+        } while (i < hData->number);
     }
     sdfChipFreeDirect(hData);
 }
@@ -6472,7 +6472,7 @@ void effPCPMakkaDraw(effPCPMakka_tag *hData) {
     f32 s;
 
     effBTLSkillGetTargetFormation(0);
-    count = hData->count;
+    count = hData->number;
     for (i = 0; i < count; i++) {
         if (hData->startFrame[i] == hData->frame && hData->handle[i] == NULL) {
             hData->handle[i] = dds3EffectPartCopy(hData->handle[0]);
@@ -6495,7 +6495,7 @@ void effPCPMakkaDraw(effPCPMakka_tag *hData) {
             scaleVec[2] = s;
             SDF_VU0_LOADVECTOR_MEMOPS(scaleVec[0]);
             mdlSetScale(model);
-            mdlSetColor(model, hData->color);
+            mdlSetColor(model, hData->abgr);
             SDF_VU0_LOADVECTOR(hData);
             mdlSetPosition(model);
             slot = model->slots;
@@ -6529,7 +6529,7 @@ void effPCPMakkaSetPosition(effPCPMakka_tag *hData, const void *pPos) {
 }
 
 void effPCPMakkaSetColor(effPCPMakka_tag *hData, u32 abgr) {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 void effPCPMakkaSetScale(effPCPMakka_tag *hData, f32 scale) {
@@ -7205,8 +7205,8 @@ void effPCPHelperInit(effPCPHelperBED_tag *pHelperBED) {
     pHelperBED->frameLimit = model->first->frameCount;
     count = sdfModelGetMarkPosCount(model->modelRoot);
     pHelperBED->count = count;
-    pHelperBED->entriesHandle = sdfMemAllocDirect(count << 5);
-    entry = (void *)sdfMemLock(pHelperBED->entriesHandle);
+    pHelperBED->hPartMem = sdfMemAllocDirect(count << 5);
+    entry = (void *)sdfMemLock(pHelperBED->hPartMem);
     pHelperBED->pPart = entry;
     place.payload[0] = 0;
     place.payload[1] = 0;
@@ -7224,7 +7224,7 @@ void effPCPHelperInit(effPCPHelperBED_tag *pHelperBED) {
         entry->move = 0;
         entry->frame = 0;
         entry->life = 0;
-        entry->hBEDCut = effEveBEDCutCreate(pHelperBED->owner, 2, &place);
+        entry->hBEDCut = effEveBEDCutCreate(pHelperBED->hBED, 2, &place);
         entry++;
     }
 }
@@ -7235,7 +7235,7 @@ effPCPHelperBED_tag *effPCPHelperBEDCreate(effPCPHelperBEDParam_t *pParam, void 
     work->param = *pParam;
     work->color = 0x80808080;
     work->scale = 1.0f;
-    work->owner = 0;
+    work->hBED = 0;
     work->pPart = 0;
     work->hHelper = 0;
     work->frame = 0;
@@ -7243,9 +7243,9 @@ effPCPHelperBED_tag *effPCPHelperBEDCreate(effPCPHelperBEDParam_t *pParam, void 
         work->hHelper = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, pPBData);
     }
     if (pBEDData != 0) {
-        work->owner = effEveBEDCreate(pBEDData);
+        work->hBED = effEveBEDCreate(pBEDData);
     }
-    if (work->owner != 0) {
+    if (work->hBED != 0) {
         effPCPHelperInit(work);
     }
     return work;
@@ -7263,7 +7263,7 @@ effPCPHelperBED_tag *effPCPHelperBEDCopy(effPCPHelperBED_tag *src) {
 
     work = effPCPHelperBEDCreate(&src->param, 0, 0);
     work->hHelper = dds3EffectPartCopy(src->hHelper);
-    work->owner = src->owner;
+    work->hBED = src->hBED;
     effPCPHelperInit(work);
     return work;
 }
@@ -7282,10 +7282,10 @@ void effPCPHelperBEDDelete(effPCPHelperBED_tag *hData) {
         }
         entry++;
     }
-    if (hData->owner->active == 0) {
-        effEveBEDDelete(hData->owner);
+    if (hData->hBED->active == 0) {
+        effEveBEDDelete(hData->hBED);
     }
-    sdfMemFreeDirect(hData->entriesHandle);
+    sdfMemFreeDirect(hData->hPartMem);
     sdfChipFreeDirect(hData);
 }
 

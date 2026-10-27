@@ -634,7 +634,7 @@ OFF(p04, dds3UnitObjectBasicWorkData_t, EL_serialID, 0x10);
 OFF(p05, dds3UnitObjectBasicWorkData_t, ot, 0x14);
 SZ(p06, fldResourcePathData_t, 0xC);
 SZ(p07, dds3PathBasicControl_t, 0x24);
-OFF(p08, dds3PathBasicControl_t, spline, 0x10);
+OFF(p08, dds3PathBasicControl_t, pSplineHandle, 0x10);
 OFF(p09, dds3GlobalWork_t, integers, 0x40);
 OFF(p10, dds3GlobalWork_t, floats, 0x440);
 OFF(p11, dds3GlobalWork_t, EventBit, 0x840);

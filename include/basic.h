@@ -129,7 +129,7 @@ typedef struct
     dds3SceneBasicTable_t *basictable;            /* 0x08 */
     dds3Basic_t *activecamera;               /* 0x0C */
     dds3Basic_t *activeunit;                 /* 0x10 */
-    u32 fieldHandle;                  /* 0x14 */
+    u32 hFileHandle;                  /* 0x14 */
     sdfMemHandle_t *hScrFileHandle;      /* 0x18 */
     void *pScrFileData;                     /* 0x1C */
     s32 visible;                      /* 0x20 */
@@ -149,7 +149,7 @@ typedef struct
     void *pModel;
     dds3Basic_t *pBasic[8];
     void *pUserValue;
-    struct sdfModelRootNode_t *modelRoot;
+    struct sdfModelRootNode_t *pModelRangeRootNode;
     struct sdfMotionCtrlr_t *pMot;
     s32 MotMode;
     f32 MotSpeed;
@@ -240,7 +240,7 @@ struct dds3PathBasicControl_t
     u32 flag;
     f32 frameMax;
     f32 frame;
-    s32 spline;
+    s32 pSplineHandle;
     fldResourcePathData_t *pTransrate;
     fldResourcePathData_t *pRotation;
     fldResourcePathData_t *pFovy;

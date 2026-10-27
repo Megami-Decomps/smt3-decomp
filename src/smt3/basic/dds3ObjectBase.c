@@ -140,8 +140,8 @@ void dds3ObjectBaseFreeControlWorkData(dds3ObjectBaseControlWorkData_t *pControl
         }
     }
     dds3ObjectBaseFreeModelHandle(owner);
-    if (pControl->modelRoot != NULL) {
-        sdfModelRootFree(pControl->modelRoot, 1, 1);
+    if (pControl->pModelRangeRootNode != NULL) {
+        sdfModelRootFree(pControl->pModelRangeRootNode, 1, 1);
     }
     dds3FreeBasicArrayHandle(pControl->hEventBasicArray);
     sdfChipFreeDirect(pControl);

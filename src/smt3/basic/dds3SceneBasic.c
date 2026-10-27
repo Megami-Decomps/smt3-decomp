@@ -48,7 +48,7 @@ s32 sceneconstructor(dds3Basic_t *basic)
     work->basictable = NULL;
     work->activecamera = NULL;
     work->activeunit = NULL;
-    work->fieldHandle = 0;
+    work->hFileHandle = 0;
     work->hScrFileHandle = NULL;
     work->pScrFileData = NULL;
     work->mem_hndl = sdfMemAllocDirect(BASIC_TYPE_MAX * sizeof(dds3SceneBasicTable_t));
@@ -277,7 +277,7 @@ void dds3SceneBasicMakeScene(dds3Basic_t *scene, const char *name)
 
     work = scene->workdata;
     handle = fldLoadFile(name);
-    work->fieldHandle = handle;
+    work->hFileHandle = handle;
 }
 
 void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area,
@@ -289,7 +289,7 @@ void dds3SceneBasicMakeScene_FromMemory(dds3Basic_t *pBasic, u32 field, u32 area
 
     work = pBasic->workdata;
     handle = fldLoadFile_FromMemory(field, area, pF1, pF2, pTB, pBF);
-    work->fieldHandle = handle;
+    work->hFileHandle = handle;
 }
 
 void dds3SceneBasicFreeScene(dds3Basic_t *pBasic)
@@ -298,7 +298,7 @@ void dds3SceneBasicFreeScene(dds3Basic_t *pBasic)
 
     work = pBasic->workdata;
     fldFreeFile();
-    work->fieldHandle = 0;
+    work->hFileHandle = 0;
 }
 
 s32 dds3SceneBasicLoadScriptFile(dds3Basic_t *scene, char *name)

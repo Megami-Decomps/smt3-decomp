@@ -4,7 +4,7 @@
 typedef struct dds3AdminiWork
 {
     u32 Stat;
-    u32 value;
+    u32 RunTimer;
     s8 NowSequence;
     s8 NextSequence;
     u8 HistoryPointer;
@@ -85,7 +85,7 @@ u32 dds3_102828(void)
     dds3AdminiData_t *work;
 
     work = GetAdminiProcessData();
-    return work->value;
+    return work->RunTimer;
 }
 
 /* Requests retain byte-sized sequence/size storage: 256 bytes records zero.
@@ -193,7 +193,7 @@ s32 dds3AdminiStartSequence(dds3ProcessID_t *id)
             nextflag &= ~1;
             nextflag &= ~2;
             work->Stat = nextflag;
-            work->value = 0;
+            work->RunTimer = 0;
             if (flag & 4) {
                 work->FlagHistory[work->HistoryPointer] |= 1;
                 work->Stat &= ~4;
@@ -265,7 +265,7 @@ s32 dds3AdminiNeoProcess(dds3ProcessID_t *id)
                     work->Stat |= 2;
                 }
             }
-            work->value++;
+            work->RunTimer++;
         }
     }
     if (work->Stat & 2) {
@@ -323,7 +323,7 @@ void dds3InitAdmini(void)
     if (dds3SearchProcessName(D_0054E8C8) == NULL) {
         work = sdfChipAllocDirect(sizeof(dds3AdminiData_t));
         work->Stat = 0;
-        work->value = 0;
+        work->RunTimer = 0;
         work->NowSequence = -1;
         work->NextSequence = -1;
         work->HistoryPointer = 0;

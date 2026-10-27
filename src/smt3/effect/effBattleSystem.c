@@ -254,7 +254,7 @@ typedef struct
 {
     nbFormation_t *pFormation;
     u32 frame;
-    effPartHandle_t *hPart;
+    effPartHandle_t *hPartD3P;
     mdlObj_t *hModel;
 } effBattleSystem_effBTLSystem_Poison_tag;
 
@@ -272,8 +272,8 @@ typedef struct
 {
     nbFormation_t *pFormation;
     u32 frame;
-    effPartHandle_t *hPart;
-    effPartHandle_t *hPart2;
+    effPartHandle_t *hPartD3P0;
+    effPartHandle_t *hPartD3P1;
     mdlObj_t *hModel;
 } effBattleSystem_effBTLSystem_Close_tag;
 
@@ -817,33 +817,33 @@ effBattleSystem_effBTLSystem_Close_tag *effBTLSys_Close_Create(nbFormation_t *pF
     } else {
         hEffect->hModel = NULL;
     }
-    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Bind_PartList[0].hPart);
-    hEffect->hPart2 = dds3EffectPartCopy(effBTLSystem_Bind_PartList[1].hPart);
+    hEffect->hPartD3P0 = dds3EffectPartCopy(effBTLSystem_Bind_PartList[0].hPart);
+    hEffect->hPartD3P1 = dds3EffectPartCopy(effBTLSystem_Bind_PartList[1].hPart);
     scale = effBTLSystem_GetScalePtr(hEffect->pFormation);
-    dds3EffectPartSetScale(hEffect->hPart, scale);
-    dds3EffectPartSetScale(hEffect->hPart2, scale);
+    dds3EffectPartSetScale(hEffect->hPartD3P0, scale);
+    dds3EffectPartSetScale(hEffect->hPartD3P1, scale);
     return hEffect;
 }
 
 void effBTLSys_Close_Delete(effBattleSystem_effBTLSystem_Close_tag *hData)
 {
     effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hData->hPart2);
-    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPartD3P1);
+    dds3EffectPartDelete(hData->hPartD3P0);
     sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Close_Delete2(effBattleSystem_effBTLSystem_Close_tag *hData)
 {
-    dds3EffectPartDelete(hData->hPart);
-    dds3EffectPartDelete(hData->hPart2);
+    dds3EffectPartDelete(hData->hPartD3P0);
+    dds3EffectPartDelete(hData->hPartD3P1);
     sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Close_SetColor(effBattleSystem_effBTLSystem_Close_tag *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hData->hPart, abgr);
-    dds3EffectPartSetColor(hData->hPart2, abgr);
+    dds3EffectPartSetColor(hData->hPartD3P0, abgr);
+    dds3EffectPartSetColor(hData->hPartD3P1, abgr);
 }
 
 void effBTLSys_Close_Draw(effBattleSystem_effBTLSystem_Close_tag *hData)
@@ -855,12 +855,12 @@ void effBTLSys_Close_Draw(effBattleSystem_effBTLSystem_Close_tag *hData)
     }
     effBTLModelGetMarkPosition3(hData->hModel, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hData->hPart, &position);
-    dds3EffectPartSetPosition(hData->hPart2, &position);
-    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hData->hPart))->pHandle);
-    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hData->hPart2))->pHandle);
-    dds3EffectPartDraw(hData->hPart);
-    dds3EffectPartDraw(hData->hPart2);
+    dds3EffectPartSetPosition(hData->hPartD3P0, &position);
+    dds3EffectPartSetPosition(hData->hPartD3P1, &position);
+    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hData->hPartD3P0))->pHandle);
+    dds3SpPoly_RollRingSetEndless(((dds3EffectPCP_t *)dds3EffectPartGetHandle(hData->hPartD3P1))->pHandle);
+    dds3EffectPartDraw(hData->hPartD3P0);
+    dds3EffectPartDraw(hData->hPartD3P1);
     hData->frame++;
 }
 
@@ -901,27 +901,27 @@ effBattleSystem_effBTLSystem_Poison_tag *effBTLSys_Poison_Create(nbFormation_t *
     } else {
         hEffect->hModel = NULL;
     }
-    hEffect->hPart = dds3EffectPartCopy(effBTLSystem_Poison_PartList[0].hPart);
-    dds3EffectPartSetScale(hEffect->hPart, effBTLSystem_GetScalePtr(hEffect->pFormation));
+    hEffect->hPartD3P = dds3EffectPartCopy(effBTLSystem_Poison_PartList[0].hPart);
+    dds3EffectPartSetScale(hEffect->hPartD3P, effBTLSystem_GetScalePtr(hEffect->pFormation));
     return hEffect;
 }
 
 void effBTLSys_Poison_Delete(effBattleSystem_effBTLSystem_Poison_tag *hData)
 {
     effBTLSystem_SetUnitColorRGB(hData->pFormation, 4, 0x80808080);
-    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPartD3P);
     sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Poison_Delete2(effBattleSystem_effBTLSystem_Poison_tag *hData)
 {
-    dds3EffectPartDelete(hData->hPart);
+    dds3EffectPartDelete(hData->hPartD3P);
     sdfChipFreeDirect(hData);
 }
 
 void effBTLSys_Poison_SetColor(effBattleSystem_effBTLSystem_Poison_tag *hData, u32 abgr)
 {
-    dds3EffectPartSetColor(hData->hPart, abgr);
+    dds3EffectPartSetColor(hData->hPartD3P, abgr);
 }
 
 void effBTLSys_Poison_Draw(effBattleSystem_effBTLSystem_Poison_tag *hData)
@@ -933,8 +933,8 @@ void effBTLSys_Poison_Draw(effBattleSystem_effBTLSystem_Poison_tag *hData)
     }
     effBTLModelGetMarkPosition3(hData->hModel, 2);
     SDF_VU0_STOREVECTOR_MEMOPS(position);
-    dds3EffectPartSetPosition(hData->hPart, &position);
-    dds3EffectPartDraw(hData->hPart);
+    dds3EffectPartSetPosition(hData->hPartD3P, &position);
+    dds3EffectPartDraw(hData->hPartD3P);
     hData->frame++;
 }
 

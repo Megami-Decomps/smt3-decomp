@@ -42,17 +42,17 @@ struct collision_s {
     f32 normal[4];
     f32 num;
     f32 e_normal[4][4];
-    f32 limit[4];
-    f32 bound[4];
-    f32 vertices[4][4];
-    f32 elv[3];
-    u32 unkC4;
+    f32 e_num[4];
+    f32 min[4];
+    f32 max[4][4];
+    f32 point[3];
+    u32 elv;
     u16 blockID;
     u16 hitflag;
-    s32 id;
+    s32 resID;
     dds3Basic_t *matter;
     fldCollisionFace_t *pFace;
-    void *stopData;
+    void *pTome;
     s32 hojiID;
     s32 npcID;
 };
@@ -142,7 +142,7 @@ dds3Basic_t *fldFindMatterIndex(s32 id) {
     if (D_0054EDA0 > 0) {
         collision_s *record = (collision_s *)fldMatterTable;
         do {
-            if (record->id == id) {
+            if (record->resID == id) {
                 return record->matter;
             }
             index++;
@@ -156,7 +156,7 @@ void fldFindMatterIndexFrom(s32 id, dds3Basic_t *worldNode) {
     s32 index;
 
     for (index = 0; index < D_0054EDA0; index++) {
-        if (((collision_s *)fldMatterTable)[index].id == id) {
+        if (((collision_s *)fldMatterTable)[index].resID == id) {
             ((collision_s *)fldMatterTable)[index].matter = worldNode;
         }
     }
@@ -221,14 +221,14 @@ s32 HitPositionInside2(f32 *fret, s32 mode2D, s32 numE, f32 *pos, collision_s *r
         planar[1] = pos[1];
     }
     for (planeIndex = 0; planeIndex < numE; planeIndex++) {
-        dist = fldVecDot((sdfVector4_t *)probe, (sdfVector4_t *)r->e_normal[planeIndex]) - r->limit[planeIndex];
+        dist = fldVecDot((sdfVector4_t *)probe, (sdfVector4_t *)r->e_normal[planeIndex]) - r->e_num[planeIndex];
         slack = dist + collision;
         if (slack < 0.0f) {
             *fret = -1.0f;
             return -1;
         }
-        if (planar[0] < r->bound[0] - collision || planar[1] < r->bound[1] - collision ||
-            r->bound[2] + collision < planar[0] || r->bound[3] + collision < planar[1]) {
+        if (planar[0] < r->min[0] - collision || planar[1] < r->min[1] - collision ||
+            r->min[2] + collision < planar[0] || r->min[3] + collision < planar[1]) {
             *fret = -1.0f;
             return -1;
         }
@@ -329,11 +329,11 @@ void fldHitChkUnitElvOnly(f32 *phys_pos) {
             }
             if (inside == 1 && ((collision_s *)fldMatterTable)[index].matter != NULL) {
                 fldGlobalBase.hitMatterIndex = index;
-                ((collision_s *)fldMatterTable)[index].elv[0] =
+                ((collision_s *)fldMatterTable)[index].point[0] =
                     ((collision_s *)fldMatterTable)[index].matter->poseset->pos.x;
-                ((collision_s *)fldMatterTable)[index].elv[1] =
+                ((collision_s *)fldMatterTable)[index].point[1] =
                     ((collision_s *)fldMatterTable)[index].matter->poseset->pos.y;
-                ((collision_s *)fldMatterTable)[index].elv[2] =
+                ((collision_s *)fldMatterTable)[index].point[2] =
                     ((collision_s *)fldMatterTable)[index].matter->poseset->pos.z;
             }
         }
@@ -373,12 +373,12 @@ void fldHitChkUnitElv(f32 *phys_pos) {
     }
     record = &((collision_s *)fldMatterTable)[index];
     if (record->matter != NULL) {
-        delta[0] = record->matter->poseset->pos.x - record->elv[0];
-        delta[1] = record->matter->poseset->pos.y - record->elv[1];
-        delta[2] = record->matter->poseset->pos.z - record->elv[2];
-        record->elv[0] = record->matter->poseset->pos.x;
-        record->elv[1] = record->matter->poseset->pos.y;
-        record->elv[2] = record->matter->poseset->pos.z;
+        delta[0] = record->matter->poseset->pos.x - record->point[0];
+        delta[1] = record->matter->poseset->pos.y - record->point[1];
+        delta[2] = record->matter->poseset->pos.z - record->point[2];
+        record->point[0] = record->matter->poseset->pos.x;
+        record->point[1] = record->matter->poseset->pos.y;
+        record->point[2] = record->matter->poseset->pos.z;
     }
     if (fldGbChkHit(fldGlobalBase.area, fldGlobalBase.floor + 1,
                     record->hojiID) != 0) {
@@ -453,10 +453,10 @@ f32 HitPositionInside3(s32 mode2D, s32 numE, f32 pos, f32 *r, collision_s *colli
         planarPosition[1] = r[1];
     }
     for (planeIndex = 0; planeIndex < numE; planeIndex++) {
-        planeDistance = fldVecDot((sdfVector4_t *)projectedPosition, (sdfVector4_t *)collision->e_normal[planeIndex]) - collision->limit[planeIndex];
+        planeDistance = fldVecDot((sdfVector4_t *)projectedPosition, (sdfVector4_t *)collision->e_normal[planeIndex]) - collision->e_num[planeIndex];
         marginDistance = planeDistance + pos;
-        if (marginDistance < 0.0f || planarPosition[0] < collision->bound[0] - pos || planarPosition[1] < collision->bound[1] - pos ||
-            collision->bound[2] + pos < planarPosition[0] || collision->bound[3] + pos < planarPosition[1]) {
+        if (marginDistance < 0.0f || planarPosition[0] < collision->min[0] - pos || planarPosition[1] < collision->min[1] - pos ||
+            collision->min[2] + pos < planarPosition[0] || collision->min[3] + pos < planarPosition[1]) {
             return -1.0f;
         }
         if (planeDistance < 0.0f) {

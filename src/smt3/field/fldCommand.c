@@ -29,7 +29,7 @@ typedef struct
     char *name;
     fldMapItem_t *items;
     u32 nSB;
-    void *model;
+    void *pMdl;
     fldMapPoint_t *pPos;
 } fldAmAreaData_t;
 

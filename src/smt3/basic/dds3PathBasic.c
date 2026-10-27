@@ -53,7 +53,7 @@ INCLUDE_ASM(const s32, "basic/dds3PathBasic", dds3AllocPathBasicWorkData);
 
 void dds3DeletePathControl(dds3PathBasicControl_t *work)
 {
-    dds3FreeSplineHandle(work->spline);
+    dds3FreeSplineHandle(work->pSplineHandle);
     sdfChipFreeDirect(work);
 }
 

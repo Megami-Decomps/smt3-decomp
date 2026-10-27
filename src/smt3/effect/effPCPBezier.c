@@ -52,7 +52,7 @@ typedef struct effPCPBezierBillPart_tag {
     s32 frame;                                /* 0x10: negative delay, then elapsed frames */
     f32 alpha;                          /* 0x14 */
     dds3BezierTrackPoly_tag *hBztp;/* 0x18 */
-    effBezierCurve_t curve;           /* 0x1C */
+    effBezierCurve_t Bezier7P;           /* 0x1C */
     struct effBezierCut_t *hBEDCut;          /* 0x7C */
 } effPCPBezierBillPart_tag;
 
@@ -166,9 +166,9 @@ effPCPBezierBill_tag *effPCPBezierBillCreate(const effPCPBezierBillParam_t *pPar
         dds3BezierTrackPolyCreate(slot->hBztp, palette);
         slot->frame = 0;
         slot->alpha = 1.0f;
-        slot->curve.pointIndex = 0;
-        slot->curve.t = 0;
-        slot->curve.parameterStep = 0;
+        slot->Bezier7P.pointIndex = 0;
+        slot->Bezier7P.t = 0;
+        slot->Bezier7P.parameterStep = 0;
         slot->hBEDCut = effEveBEDCutCreate(work->hBED, 2, &place);
     }
     return work;
@@ -233,9 +233,9 @@ effPCPBezierBill_tag *effPCPBezierBillCopy(effPCPBezierBill_tag *src) {
         dds3BezierTrackPolyCreate(slot->hBztp, palette);
         slot->frame = 0;
         slot->alpha = 1.0f;
-        slot->curve.pointIndex = 0;
-        slot->curve.t = 0;
-        slot->curve.parameterStep = 0;
+        slot->Bezier7P.pointIndex = 0;
+        slot->Bezier7P.t = 0;
+        slot->Bezier7P.parameterStep = 0;
         slot->hBEDCut = effEveBEDCutCreate(work->hBED, 2, &place);
     }
     return work;
@@ -362,7 +362,7 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
     i = 0;
     if (count != 0) {
         do {
-        if (slot->curve.parameterStep == 0.0f) {
+        if (slot->Bezier7P.parameterStep == 0.0f) {
             bias = 0.5f;
             drop = -hData->param.height * dds3GetRandFloatA(dds3EffectBase);
             drift = hData->param.spreadZ * ((dds3GetRandFloatA(dds3EffectBase) - bias) * 2.0f);
@@ -385,66 +385,66 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
                 SetRotateMatrixAxis((dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f * 0.5235987f, axis);
                 scale = 50.0f;
-                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
-                if (-50.0f < slot->curve.controlPoints[0].y) {
-                    slot->curve.controlPoints[0].y = -50.0f;
+                slot->Bezier7P.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[0].z = spin[2] * scale + center[2];
+                if (-50.0f < slot->Bezier7P.controlPoints[0].y) {
+                    slot->Bezier7P.controlPoints[0].y = -50.0f;
                 }
                 scale = 200.0f;
                 bend = 150.0f;
-                slot->curve.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
-                slot->curve.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
-                slot->curve.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
-                if (-30.0f < slot->curve.controlPoints[1].y) {
-                    slot->curve.controlPoints[1].y = -30.0f;
+                slot->Bezier7P.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
+                slot->Bezier7P.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
+                slot->Bezier7P.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
+                if (-30.0f < slot->Bezier7P.controlPoints[1].y) {
+                    slot->Bezier7P.controlPoints[1].y = -30.0f;
                 }
                 scale = 300.0f;
-                slot->curve.controlPoints[2].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[2].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[2].z = spin[2] * scale + center[2];
-                if (-20.0f < slot->curve.controlPoints[2].y) {
-                    slot->curve.controlPoints[2].y = -20.0f;
+                slot->Bezier7P.controlPoints[2].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[2].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[2].z = spin[2] * scale + center[2];
+                if (-20.0f < slot->Bezier7P.controlPoints[2].y) {
+                    slot->Bezier7P.controlPoints[2].y = -20.0f;
                 }
                 reach = radius * 0.25f;
                 scale = 200.0f;
                 SDF_VU0_LOADVECTOR(spin);
                 SDF_VU0_APPLYMATRIX_XYZ();
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
-                slot->curve.controlPoints[3].x = scale * spin[0] + reach * axis[0] + center[0];
-                slot->curve.controlPoints[3].y = scale * spin[1] + reach * axis[1] + center[1];
-                slot->curve.controlPoints[3].z = scale * spin[2] + reach * axis[2] + center[2];
-                if (-10.0f < slot->curve.controlPoints[3].y) {
-                    slot->curve.controlPoints[3].y = -10.0f;
+                slot->Bezier7P.controlPoints[3].x = scale * spin[0] + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[3].y = scale * spin[1] + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[3].z = scale * spin[2] + reach * axis[2] + center[2];
+                if (-10.0f < slot->Bezier7P.controlPoints[3].y) {
+                    slot->Bezier7P.controlPoints[3].y = -10.0f;
                 }
                 reach = radius * 0.5f;
                 scale = 150.0f;
                 SDF_VU0_LOADVECTOR(spin);
                 SDF_VU0_APPLYMATRIX_XYZ();
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
-                slot->curve.controlPoints[4].x = scale * spin[0] + reach * axis[0] + center[0];
-                slot->curve.controlPoints[4].y = scale * spin[1] + reach * axis[1] + center[1];
-                slot->curve.controlPoints[4].z = scale * spin[2] + reach * axis[2] + center[2];
-                if (-10.0f < slot->curve.controlPoints[4].y) {
-                    slot->curve.controlPoints[4].y = -10.0f;
+                slot->Bezier7P.controlPoints[4].x = scale * spin[0] + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[4].y = scale * spin[1] + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[4].z = scale * spin[2] + reach * axis[2] + center[2];
+                if (-10.0f < slot->Bezier7P.controlPoints[4].y) {
+                    slot->Bezier7P.controlPoints[4].y = -10.0f;
                 }
                 reach = radius * 0.75f;
                 scale = 65.0f;
                 SDF_VU0_LOADVECTOR(spin);
                 SDF_VU0_APPLYMATRIX_XYZ();
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
-                slot->curve.controlPoints[5].x = scale * spin[0] + reach * axis[0] + center[0];
-                slot->curve.controlPoints[5].y = scale * spin[1] + reach * axis[1] + center[1];
-                slot->curve.controlPoints[5].z = scale * spin[2] + reach * axis[2] + center[2];
-                if (-10.0f < slot->curve.controlPoints[5].y) {
-                    slot->curve.controlPoints[5].y = -10.0f;
+                slot->Bezier7P.controlPoints[5].x = scale * spin[0] + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[5].y = scale * spin[1] + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[5].z = scale * spin[2] + reach * axis[2] + center[2];
+                if (-10.0f < slot->Bezier7P.controlPoints[5].y) {
+                    slot->Bezier7P.controlPoints[5].y = -10.0f;
                 }
                 reach = radius;
-                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
-                if (-10.0f < slot->curve.controlPoints[6].y) {
-                    slot->curve.controlPoints[6].y = -10.0f;
+                slot->Bezier7P.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[6].z = reach * axis[2] + center[2];
+                if (-10.0f < slot->Bezier7P.controlPoints[6].y) {
+                    slot->Bezier7P.controlPoints[6].y = -10.0f;
                 }
                 break;
             case 1:
@@ -455,37 +455,37 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
                 scale = 25.0f;
-                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                slot->Bezier7P.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[0].z = spin[2] * scale + center[2];
                 scale = 100.0f;
                 bend = 150.0f;
-                slot->curve.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
-                slot->curve.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
-                slot->curve.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
+                slot->Bezier7P.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
+                slot->Bezier7P.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
+                slot->Bezier7P.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
                 scale = 400.0f;
-                slot->curve.controlPoints[2].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[2].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[2].z = spin[2] * scale + center[2];
+                slot->Bezier7P.controlPoints[2].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[2].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[2].z = spin[2] * scale + center[2];
                 reach = radius * 0.25f;
                 scale = 450.0f;
-                slot->curve.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.5f;
                 scale = 500.0f;
-                slot->curve.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.75f;
                 scale = 300.0f;
-                slot->curve.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius;
-                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[6].z = reach * axis[2] + center[2];
                 break;
             case 2:
                 spin[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
@@ -495,38 +495,38 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
                 scale = 20.0f;
-                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                slot->Bezier7P.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[0].z = spin[2] * scale + center[2];
                 reach = radius * 0.15f;
                 scale = 50.0f;
-                slot->curve.controlPoints[1].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[1].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[1].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[1].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[1].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[1].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.3f;
                 scale = 80.0f;
-                slot->curve.controlPoints[2].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[2].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[2].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[2].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[2].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[2].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.45f;
                 scale = 60.0f;
-                slot->curve.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.6f;
                 scale = 40.0f;
-                slot->curve.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.75f;
                 scale = 20.0f;
-                slot->curve.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius;
-                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[6].z = reach * axis[2] + center[2];
                 break;
             case 3:
                 spin[0] = (dds3GetRandFloatA(dds3EffectBase) - 0.5f) * 2.0f;
@@ -536,80 +536,80 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_NORMALIZE();
                 SDF_VU0_STOREVECTOR_NOMEM(spin);
                 scale = 25.0f;
-                slot->curve.controlPoints[0].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[0].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[0].z = spin[2] * scale + center[2];
+                slot->Bezier7P.controlPoints[0].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[0].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[0].z = spin[2] * scale + center[2];
                 scale = 100.0f;
                 bend = 150.0f;
-                slot->curve.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
-                slot->curve.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
-                slot->curve.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
+                slot->Bezier7P.controlPoints[1].x = spin[0] * scale - axis[0] * bend + center[0];
+                slot->Bezier7P.controlPoints[1].y = spin[1] * scale - axis[1] * bend + center[1];
+                slot->Bezier7P.controlPoints[1].z = spin[2] * scale - axis[2] * bend + center[2];
                 scale = 400.0f;
-                slot->curve.controlPoints[2].x = spin[0] * scale + center[0];
-                slot->curve.controlPoints[2].y = spin[1] * scale + center[1];
-                slot->curve.controlPoints[2].z = spin[2] * scale + center[2];
+                slot->Bezier7P.controlPoints[2].x = spin[0] * scale + center[0];
+                slot->Bezier7P.controlPoints[2].y = spin[1] * scale + center[1];
+                slot->Bezier7P.controlPoints[2].z = spin[2] * scale + center[2];
                 reach = radius * 0.25f;
                 scale = 450.0f;
-                slot->curve.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[3].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[3].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[3].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.5f;
                 scale = 500.0f;
-                slot->curve.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[4].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[4].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[4].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius * 0.75f;
                 scale = 300.0f;
-                slot->curve.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
-                slot->curve.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
-                slot->curve.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[5].x = spin[0] * scale + reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[5].y = spin[1] * scale + reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[5].z = spin[2] * scale + reach * axis[2] + center[2];
                 reach = radius;
-                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[6].z = reach * axis[2] + center[2];
                 break;
             case 4:
                 reach = radius * 0.14f;
-                slot->curve.controlPoints[0].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[0].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[0].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[0].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[0].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[0].z = reach * axis[2] + center[2];
                 reach = radius * 0.28f;
-                slot->curve.controlPoints[1].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[1].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[1].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[1].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[1].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[1].z = reach * axis[2] + center[2];
                 reach = radius * 0.42f;
-                slot->curve.controlPoints[2].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[2].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[2].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[2].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[2].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[2].z = reach * axis[2] + center[2];
                 reach = radius * 0.56f;
-                slot->curve.controlPoints[3].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[3].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[3].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[3].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[3].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[3].z = reach * axis[2] + center[2];
                 reach = radius * 0.7f;
-                slot->curve.controlPoints[4].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[4].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[4].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[4].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[4].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[4].z = reach * axis[2] + center[2];
                 reach = radius * 0.84f;
-                slot->curve.controlPoints[5].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[5].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[5].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[5].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[5].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[5].z = reach * axis[2] + center[2];
                 reach = radius;
-                slot->curve.controlPoints[6].x = reach * axis[0] + center[0];
-                slot->curve.controlPoints[6].y = reach * axis[1] + center[1];
-                slot->curve.controlPoints[6].z = reach * axis[2] + center[2];
+                slot->Bezier7P.controlPoints[6].x = reach * axis[0] + center[0];
+                slot->Bezier7P.controlPoints[6].y = reach * axis[1] + center[1];
+                slot->Bezier7P.controlPoints[6].z = reach * axis[2] + center[2];
                 break;
             }
-            slot->curve.pointIndex = 0;
-            slot->curve.t = 0.0f;
-            slot->curve.parameterStep = 3.0f / (frames * (f32)(segments + 1));
-            effPCPBezierEval(&slot->curve, point);
+            slot->Bezier7P.pointIndex = 0;
+            slot->Bezier7P.t = 0.0f;
+            slot->Bezier7P.parameterStep = 3.0f / (frames * (f32)(segments + 1));
+            effPCPBezierEval(&slot->Bezier7P, point);
             slot->pos[0] = point[0];
             slot->pos[1] = point[1];
             slot->pos[2] = point[2];
             slot->frame = -(s32)(dds3GetRandA(dds3EffectBase) % delayRange);
             dds3BezierTrackPolyReset(slot->hBztp);
         } else if (slot->frame++ >= 0) {
-            if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
+            if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
                 if (fadeStep < slot->alpha) {
                     fade = slot->alpha - fadeStep;
                     slot->alpha = fade;
@@ -625,7 +625,7 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 prev[2] = slot->pos[2];
                 if (segments != 0) {
                     do {
-                        effPCPBezierEval(&slot->curve, point);
+                        effPCPBezierEval(&slot->Bezier7P, point);
                         SDF_VU0_LOADVECTOR(point);
                         SDF_VU0_COPYVECTOR_A_TO_C();
                         SDF_VU0_LOADVECTOR_B(prev);
@@ -648,7 +648,7 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                         j++;
                     } while (j < segments);
                 }
-                effPCPBezierEval(&slot->curve, point);
+                effPCPBezierEval(&slot->Bezier7P, point);
                 SDF_VU0_LOADVECTOR(point);
                 SDF_VU0_COPYVECTOR_A_TO_C();
                 SDF_VU0_LOADVECTOR_B(prev);
@@ -723,7 +723,7 @@ void effPCPBezierBillDraw(effPCPBezierBill_tag *hData)
                 SDF_VU0_ADDVECTOR_A_C();
                 SDF_VU0_STOREVECTOR(&endPoints[6]);
             }
-            if (slot->curve.t >= 1.0f && slot->curve.pointIndex >= 3) {
+            if (slot->Bezier7P.t >= 1.0f && slot->Bezier7P.pointIndex >= 3) {
                 place.payload[0] = slot->pos[0];
                 place.payload[1] = slot->pos[1];
                 place.payload[2] = slot->pos[2];

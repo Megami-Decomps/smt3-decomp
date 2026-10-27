@@ -31,8 +31,8 @@ typedef struct tagPipeObject {
     f32 vpos[2];
     s8 id;
     u8 action;
+    u8 enabled;
     u8 mdl;
-    u8 unk1B;
     s16 count;
     u16 flags;
 } tagPipeObject;
@@ -170,7 +170,7 @@ void objMyLoad(tagPipeObject *objPtr)
     objPtr->id = -0x80;
     objPtr->pos[0] = 0.0f;
     objPtr->offset = offsetCount;
-    objPtr->mdl = 1;
+    objPtr->enabled = 1;
     objPtr->pos[1] = 0.0f;
     objPtr->vpos[0] = 0.0f;
     objPtr->vpos[1] = 0.0f;

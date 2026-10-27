@@ -82,9 +82,9 @@ s32 fmInitFontMemControl(s32 unused, s32 columns, s32 rows, s32 cellWidth, s32 c
             node->uv.u0 = (column * cellWidth) << 4;
             node->uv.u1 = ((column * cellWidth) << 4) + (cellWidth << 4);
             if (records != NULL) {
-                node->item = (GsFont_t *)(records + i * recordBytes);
+                node->user_data = (GsFont_t *)(records + i * recordBytes);
             } else {
-                node->item = NULL;
+                node->user_data = NULL;
             }
             node->uv.v0 = (row * cellHeight) << 4;
             node->uv.v1 = ((row * cellHeight) << 4) + (cellHeight << 4);

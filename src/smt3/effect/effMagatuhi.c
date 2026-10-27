@@ -292,7 +292,7 @@ typedef struct effMagaSpiralPart_tag {
 /* Work is followed by the orbit slots in the same retained allocation. */
 typedef struct effMagaSpiral_tag {
     f32 matrix[16];
-    effMagaSpiralParam_t head;
+    effMagaSpiralParam_t param;
     effMagaSpiralPart_tag *pPart;
     effMagatuhiOwner_t *pMagatuhi;
     u32 abgr;
@@ -333,7 +333,7 @@ typedef struct effMagaCylinderPart_tag {
 /* Work precedes its array of 0x18-byte ring states (0x12C). */
 typedef struct {
     f32 matrix[EFF_MAGATUHI_MATRIX_WORD_COUNT];
-    effMagaCylinderParam_t head;
+    effMagaCylinderParam_t param;
     effMagaCylinderPart_tag *pPart;
     effMagatuhiOwner_t *pMagatuhi;
     u32 abgr;
@@ -357,7 +357,7 @@ typedef struct {
 
 typedef struct {
     effMagaPoint4Param_t param;
-    s32 *delays;           /* 0x180 */
+    s32 *pPart;           /* 0x180 */
     effArrHdr_t *pBezier4P;    /* 0x184 */
     effMagatuhiOwner_t *pMagatuhi; /* 0x188 */
     sdfMemHandle_t *hMem; /* 0x18C backing allocation, not the work address */
@@ -1271,7 +1271,7 @@ effMagaPoint4_tag *effMagaPoint4Create(effMagaPoint4Param_t *src) {
 
     work->param = *src;
     work->hMem = allocation;
-    work->delays = delays;
+    work->pPart = delays;
     if (work->param.timing <= 0) {
         work->param.timing = 1;
     }
@@ -1391,7 +1391,7 @@ void effMagaPoint4PartInit(effMagaPoint4_tag *pMagaPoint4, s32 index) {
 void effMagaPoint4Draw(effMagaPoint4_tag *pData) {
     effArrHdr_t *slots = pData->pBezier4P;
     dds3MagatuhiBill_tag *valueWork = pData->pMagatuhi->valueWork;
-    s32 *delays = pData->delays;
+    s32 *delays = pData->pPart;
     u8 respawn = pData->param.loop;
     u32 count = pData->param.reserve;
     s32 life = pData->param.life;
@@ -1453,7 +1453,7 @@ void effMagaP4Randomize(effMagatuhiCallback_t *hEffect) {
     u32 historyFrames = work->param.duration;
     s32 lifetimeFrames = work->param.life;
     u32 count = work->param.reserve;
-    s32 *ages = work->delays;
+    s32 *ages = work->pPart;
     f32 samplePosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 startPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
     f32 endPosition[EFF_MAGATUHI_VECTOR_WORD_COUNT];
@@ -1502,16 +1502,16 @@ effMagaCylinder_tag *effMagaCylinderCreate(effMagaCylinderParam_t *src) {
     s32 spread;
     u32 i;
 
-    work->head = *src;
+    work->param = *src;
     work->pPart = particle;
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
-    if (work->head.timing <= 0) {
-        work->head.timing = 1;
+    if (work->param.timing <= 0) {
+        work->param.timing = 1;
     }
-    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
-    spread = work->head.timing;
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->param.particleCount);
+    spread = work->param.timing;
     for (i = 0; i < count; i++) {
         particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
@@ -1532,15 +1532,15 @@ void effMagaCylinderPartInit(effMagaCylinder_tag *pMagaCylinder, s32 index) {
     f32 t;
 
     elem->frame = 0;
-    elem->height = -pMagaCylinder->head.height * dds3GetRandFloatA(dds3EffectBase);
+    elem->height = -pMagaCylinder->param.height * dds3GetRandFloatA(dds3EffectBase);
     elem->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
-    blend = pMagaCylinder->head.rotate_r;
-    elem->rotate_s = pMagaCylinder->head.rotate_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    blend = pMagaCylinder->head.radius_s_r;
-    elem->radius = pMagaCylinder->head.radius_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    blend = pMagaCylinder->head.endJitter;
+    blend = pMagaCylinder->param.rotate_r;
+    elem->rotate_s = pMagaCylinder->param.rotate_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaCylinder->param.radius_s_r;
+    elem->radius = pMagaCylinder->param.radius_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaCylinder->param.endJitter;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    elem->radius_s = (pMagaCylinder->head.radius_e * t - elem->radius) / (f32)pMagaCylinder->head.life;
+    elem->radius_s = (pMagaCylinder->param.radius_e * t - elem->radius) / (f32)pMagaCylinder->param.life;
     effMagaSmokeInitPart(pMagaCylinder->pMagatuhi->valueWork, index);
     effMagaCylinderSetPart(pMagaCylinder->pMagatuhi->valueWork, index, 0);
 }
@@ -1560,16 +1560,16 @@ void effMagaCylinderDraw(effMagaCylinder_tag *pData) {
     s32 age;
     u32 i;
 
-    count = pData->head.particleCount;
+    count = pData->param.particleCount;
     valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
-    respawn = pData->head.loop;
+    respawn = pData->param.loop;
     tintColor = pData->abgr;
-    life = pData->head.life;
-    spread = pData->head.timing;
-    fadeIn = pData->head.fade_in;
-    fadeOut = pData->head.fade_out;
-    SDF_VU0_COPYVECTOR(origin, pData->head.origin);
+    life = pData->param.life;
+    spread = pData->param.timing;
+    fadeIn = pData->param.fade_in;
+    fadeOut = pData->param.fade_out;
+    SDF_VU0_COPYVECTOR(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->frame;
@@ -1614,7 +1614,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaCylinderDraw);
 
 /* Copy the ring origin as one quadword, including its fourth component. */
 void effMagaCylinderSetPosition(effMagaCylinder_tag *pData, void *pPos) {
-    SDF_VU0_COPYVECTOR(pData->head.origin, pPos);
+    SDF_VU0_COPYVECTOR(pData->param.origin, pPos);
 }
 
 /* The historical symbol names a resource, but this slot is packed color. */
@@ -1650,12 +1650,12 @@ void effMagaCylinderRandomize(effMagatuhiCallback_t *hEffect) {
     if (hEffect->type == EFF_MAGATUHI_CALLBACK_TYPE) {
         if (dds3MagatuhiGetType(hEffect->effect) == EFF_MAGATUHI_REPLAY_RING) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
-            count = work->head.particleCount;
+            count = work->param.particleCount;
             valueWork = work->pMagatuhi->valueWork;
-            maxSteps = work->head.reserve;
-            frames = work->head.life;
+            maxSteps = work->param.reserve;
+            frames = work->param.life;
             particle = work->pPart;
-            SDF_VU0_COPYVECTOR(origin, work->head.origin);
+            SDF_VU0_COPYVECTOR(origin, work->param.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaCylinderPartInit(work, i);
@@ -1705,16 +1705,16 @@ effMagaSpiral_tag *effMagaSpiralCreate(effMagaSpiralParam_t *src) {
     s32 spread;
     u32 i;
 
-    work->head = *src;
+    work->param = *src;
     work->pPart = particle;
     work->abgr = EFF_MAGATUHI_NEUTRAL_COLOR;
     work->hMem = allocation;
     SDF_VU0_STOREIDENTITY(work->matrix);
-    if (work->head.timing <= 0) {
-        work->head.timing = 1;
+    if (work->param.timing <= 0) {
+        work->param.timing = 1;
     }
-    work->pMagatuhi = effMagaCylinderAllocPart(&work->head.particleCount);
-    spread = work->head.timing;
+    work->pMagatuhi = effMagaCylinderAllocPart(&work->param.particleCount);
+    spread = work->param.timing;
     for (i = 0; i < count; i++) {
         particle->frame = -(dds3GetRandA((u8 *)dds3EffectBase) % spread);
         particle++;
@@ -1736,16 +1736,16 @@ void effMagaSpiralPartInit(effMagaSpiral_tag *pMagaSpiral, s32 index) {
 
     elem->frame = 0;
     elem->up = 0;
-    blend = pMagaSpiral->head.up_r;
-    elem->up_s = pMagaSpiral->head.up_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaSpiral->param.up_r;
+    elem->up_s = pMagaSpiral->param.up_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
     elem->rotate = dds3GetRandFloatA(dds3EffectBase) * (EFF_MAGATUHI_HALF_TURN * 2.0f);
-    blend = pMagaSpiral->head.rotate_r;
-    elem->rotate_s = pMagaSpiral->head.rotate_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    blend = pMagaSpiral->head.radius_s_r;
-    elem->radius = pMagaSpiral->head.radius_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
-    blend = pMagaSpiral->head.endJitter;
+    blend = pMagaSpiral->param.rotate_r;
+    elem->rotate_s = pMagaSpiral->param.rotate_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaSpiral->param.radius_s_r;
+    elem->radius = pMagaSpiral->param.radius_s * (dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend));
+    blend = pMagaSpiral->param.endJitter;
     t = dds3GetRandFloatA(dds3EffectBase) * blend + (1.0f - blend);
-    elem->radius_s = (pMagaSpiral->head.radius_e * t - elem->radius) / (f32)pMagaSpiral->head.life;
+    elem->radius_s = (pMagaSpiral->param.radius_e * t - elem->radius) / (f32)pMagaSpiral->param.life;
     effMagaSmokeInitPart(pMagaSpiral->pMagatuhi->valueWork, index);
     effMagaCylinderSetPart(pMagaSpiral->pMagatuhi->valueWork, index, 0);
 }
@@ -1765,16 +1765,16 @@ void effMagaSpiralDraw(effMagaSpiral_tag *pData) {
     s32 age;
     u32 i;
 
-    count = pData->head.particleCount;
+    count = pData->param.particleCount;
     valueWork = pData->pMagatuhi->valueWork;
     particle = pData->pPart;
-    respawn = pData->head.loop;
+    respawn = pData->param.loop;
     tintColor = pData->abgr;
-    life = pData->head.life;
-    spread = pData->head.timing;
-    fadeIn = pData->head.fade_in;
-    fadeOut = pData->head.fade_out;
-    SDF_VU0_COPYVECTOR(origin, pData->head.origin);
+    life = pData->param.life;
+    spread = pData->param.timing;
+    fadeIn = pData->param.fade_in;
+    fadeOut = pData->param.fade_out;
+    SDF_VU0_COPYVECTOR(origin, pData->param.origin);
     SDF_VU0_LOADMATRIX(pData->matrix);
     for (i = 0; i < count; i++, particle++) {
         age = particle->frame;
@@ -1820,7 +1820,7 @@ INCLUDE_ASM(const s32, "effect/effMagatuhi", effMagaSpiralDraw);
 
 /* Copy the orbit origin as one quadword, preserving the source w. */
 void effMagaSpiralSetPosition(effMagaSpiral_tag *pData, void *pPos) {
-    SDF_VU0_COPYVECTOR(pData->head.origin, pPos);
+    SDF_VU0_COPYVECTOR(pData->param.origin, pPos);
 }
 
 /* This callback sets the packed orbit color, not an allocation handle. */
@@ -1857,12 +1857,12 @@ void effMagaSpiralRandomize(effMagatuhiCallback_t *hEffect) {
     if (hEffect->type == EFF_MAGATUHI_CALLBACK_TYPE) {
         if (dds3MagatuhiGetType(hEffect->effect) == EFF_MAGATUHI_REPLAY_ORBIT) {
             work = dds3MagatuhiGetHandle(hEffect->effect);
-            count = work->head.particleCount;
+            count = work->param.particleCount;
             valueWork = work->pMagatuhi->valueWork;
-            maxSteps = work->head.reserve;
-            frames = work->head.life;
+            maxSteps = work->param.reserve;
+            frames = work->param.life;
             particle = work->pPart;
-            SDF_VU0_COPYVECTOR(origin, work->head.origin);
+            SDF_VU0_COPYVECTOR(origin, work->param.origin);
             SDF_VU0_LOADMATRIX(work->matrix);
             for (i = 0; i < count; i += EFF_MAGATUHI_REPLAY_GROUP_STRIDE, particle += EFF_MAGATUHI_REPLAY_GROUP_STRIDE) {
                 effMagaSpiralPartInit(work, i);

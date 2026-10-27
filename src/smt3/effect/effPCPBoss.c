@@ -142,7 +142,7 @@ typedef struct effPCPBossBael_t
     f32 target[4];
     effBaelHead_t param;
     s32 frame;
-    u32 color;
+    u32 abgr;
     s32 hPB;
     s32 hPCF;
 } effPCPBossBael_t;
@@ -263,8 +263,8 @@ typedef struct effPCPBossThunderbolt_t
 typedef struct effPCPBossKAGUInvoke_t
 {
     u8 param[0x3C0];
-    s32 point;
-    void *polyLists[26];
+    s32 pTPList;
+    void *point[26];
     s32 frame;
     u32 color;
     void *handle;
@@ -434,8 +434,8 @@ typedef struct effPCPDANTE_ShowTime_tag
 {
     u8 position[0x10];
     s32 param;
-    u8 panels[3][0x38];
-    void *textures[2];
+    u8 flash[3][0x38];
+    void *hTex[2];
     s32 frame;
     u8 frameParts[0xC];
     u8 texLoaded;
@@ -1063,7 +1063,7 @@ effPCPBossBael_t *effPCPBossBaelCreate(void *pParam, void *pPB, void *pPCF)
 
     work = sdfChipAllocDirect(sizeof(effPCPBossBael_t));
     memcpy(&work->param, pParam, 0x10);
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->frame = 0;
     work->hPB = dds3EffectPartCreate(3, pPB);
     work->hPCF = dds3EffectPartCreate(6, pPCF);
@@ -1089,7 +1089,7 @@ effPCPBossBael_t *effPCPBossBaelCopy(effPCPBossBael_t *hData, s32 bPos, s32 tbld
 
     memcpy(&work->param, &hData->param, 0x10);
     work->frame = 0;
-    work->color = 0x80808080;
+    work->abgr = 0x80808080;
     work->hPB = dds3EffectPartCopy(hData->hPB);
     work->hPCF = dds3EffectPartCopy(hData->hPCF);
     return work;
@@ -1130,8 +1130,8 @@ void effPCPBossBaelDraw(effPCPBossBael_t *hData)
     dds3EffectPartSetRotateMatrix(hData->hPCF, matrix);
     dds3EffectPartSetPosition(hData->hPB, &hData->param);
     dds3EffectPartSetPosition(hData->hPCF, &hData->param);
-    dds3EffectPartSetColor(hData->hPB, hData->color);
-    dds3EffectPartSetColor(hData->hPCF, hData->color);
+    dds3EffectPartSetColor(hData->hPB, hData->abgr);
+    dds3EffectPartSetColor(hData->hPCF, hData->abgr);
     dds3EffectPartDraw(hData->hPB);
     dds3EffectPartDraw(hData->hPCF);
     hData->frame++;
@@ -1144,7 +1144,7 @@ void effPCPBossBaelSetPosition(effPCPBossBael_t *hData, const void *pPos)
 
 void effPCPBossBaelSetColor(effPCPBossBael_t *hData, u32 abgr)
 {
-    hData->color = abgr;
+    hData->abgr = abgr;
 }
 
 effPCPBossDengeki_t *effPCPBossDengekiCreate(effPCPBossDengeki_t *pParam, void *pBEDData)
@@ -1509,10 +1509,10 @@ effPCPBossKAGUInvoke_t *effPCPBossKAGUInvokeCreate(effPCPBossKAGUInvoke_t *pPara
     memcpy(&thunder.head, &work->param[0x360], 0x54);
     thunder.head.fragmentCount = 1;
     thunder.count = 9;
-    count = work->point * 6;
+    count = work->pTPList * 6;
     if (count > 0) {
         i = count;
-        list = work->polyLists;
+        list = work->point;
         do {
             *list++ = effPCP_ThunderPolyListCreate(&thunder);
             i--;
@@ -1537,10 +1537,10 @@ void effPCPBossKAGUInvokeDelete(effPCPBossKAGUInvoke_t *hData)
     s32 count;
     s32 i;
 
-    count = hData->point * 6;
+    count = hData->pTPList * 6;
     if (count > 0) {
         i = count;
-        list = hData->polyLists;
+        list = hData->point;
         do {
             effPCP_ThunderPolyListDelete(*list++);
             i--;
@@ -2777,8 +2777,8 @@ effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Create(effPCPDANTE_ShowTime_Param
     work->param = pParam->reserve;
     work->frame = 0;
     if (pTMX0 != NULL && pTMX1 != NULL) {
-        work->textures[0] = sdfTexSet(pTMX0);
-        work->textures[1] = sdfTexSet(pTMX1);
+        work->hTex[0] = sdfTexSet(pTMX0);
+        work->hTex[1] = sdfTexSet(pTMX1);
         work->texLoaded = 1;
     }
     return work;
@@ -2800,8 +2800,8 @@ effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Copy(effPCPDANTE_ShowTime_tag *hD
     effPCPDANTE_ShowTime_tag *work =
         effPCPDANTE_ShowTime_Create((effPCPDANTE_ShowTime_Param_t *)&hData->param, NULL, NULL);
 
-    work->textures[0] = hData->textures[0];
-    work->textures[1] = hData->textures[1];
+    work->hTex[0] = hData->hTex[0];
+    work->hTex[1] = hData->hTex[1];
     work->texLoaded = 0;
     return work;
 }
@@ -2809,8 +2809,8 @@ effPCPDANTE_ShowTime_tag *effPCPDANTE_ShowTime_Copy(effPCPDANTE_ShowTime_tag *hD
 void effPCPDANTE_ShowTime_Delete(effPCPDANTE_ShowTime_tag *hData)
 {
     if (hData->texLoaded != 0) {
-        sdfTexFreeDelayed(hData->textures[1]);
-        sdfTexFreeDelayed(hData->textures[0]);
+        sdfTexFreeDelayed(hData->hTex[1]);
+        sdfTexFreeDelayed(hData->hTex[0]);
     }
     sdfChipFreeDirect(hData);
 }
@@ -2849,20 +2849,20 @@ void effPCPDANTE_ShowTime_Draw(effPCPDANTE_ShowTime_tag *hData)
     s32 frame = hData->frame;
 
     if (frame == 0) {
-        nbPanelFlashInit(hData->panels[0], 0x43BBFF, 0x12A2F5, 0xA0, 0.45f, 0.35f, 0x5C);
-        nbPanelFlashInit(hData->panels[1], 0x3664FF, 0x3CF0, -0x8C, 0.55f, 0.45f, -0x3C);
-        nbPanelFlashInit(hData->panels[2], 0x31109F, 0x8D64C8, 0, 1.5f, 2.0f, 0x14);
+        nbPanelFlashInit(hData->flash[0], 0x43BBFF, 0x12A2F5, 0xA0, 0.45f, 0.35f, 0x5C);
+        nbPanelFlashInit(hData->flash[1], 0x3664FF, 0x3CF0, -0x8C, 0.55f, 0.45f, -0x3C);
+        nbPanelFlashInit(hData->flash[2], 0x31109F, 0x8D64C8, 0, 1.5f, 2.0f, 0x14);
     }
     if (frame >= 0) {
-        nbPanelFlashDraw(hData->panels[0], 0x80808080);
+        nbPanelFlashDraw(hData->flash[0], 0x80808080);
         effPCPDANTE_ShowTime_Bingo_Draw(hData);
     }
     if (frame >= 0x16) {
-        nbPanelFlashDraw(hData->panels[1], 0x80808080);
+        nbPanelFlashDraw(hData->flash[1], 0x80808080);
         effPCPDANTE_ShowTime_AreYouReady_Draw(hData);
     }
     if (frame >= 0x5C) {
-        nbPanelFlashDraw(hData->panels[2], 0x80808080);
+        nbPanelFlashDraw(hData->flash[2], 0x80808080);
         effPCPDANTE_ShowTime_ShowTime_Draw(hData);
     }
     hData->frame++;

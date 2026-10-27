@@ -921,7 +921,7 @@ GsFont_t *frTranslateUserData(s32 Width, s32 Height, void *pData, s8 DataFreeMod
     GsFont_t *cachedItem;
 
     atlasNode = fmRentFontMem();
-    cachedItem = atlasNode->item;
+    cachedItem = atlasNode->user_data;
     /* Convert fixed-point atlas placement to integer image coordinates. */
     imagePosition[0] = atlasNode->uv.u0 >> FR_FONT_ATLAS_POSITION_SHIFT;
     imagePosition[1] = atlasNode->uv.v0 >> FR_FONT_ATLAS_POSITION_SHIFT;

@@ -40,7 +40,7 @@ typedef struct
 {
     effBTL_SkillLight_t param;
     u32 light_frame;
-    effBTLModelColorParam_t color;
+    effBTLModelColorParam_t model;
     u32 model_frame;
 } effBattleLight_effBTLPointLight_tag;
 
@@ -174,7 +174,7 @@ void effBTLModelColorSet(effBTLModelColorParam_t *pModel, nbFormation_t *pFormat
     id = effBTLModelGetID(pFormation);
     if (id != 0x125 && id != 0x108) {
         pLight = &effBTLPointLight[pFormation->formindex];
-        pLight->color = *pModel;
+        pLight->model = *pModel;
         pLight->model_frame = 0;
     }
 }
