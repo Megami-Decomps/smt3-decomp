@@ -4,7 +4,12 @@
 
 extern void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
-INCLUDE_ASM(const s32, "kernel/dds3StartMenu", InitTitleProcess);
+extern s32 D_0054E918;
+
+void InitTitleProcess(void) {
+    D_0054E918 = 0;
+    dds3AdminiCallSequence(0x2, 0, 0, 0);
+}
 
 void InitNewBattleTestProcess(void) {
     dds3AdminiCallSequence(0x13, 0, 0, 0);
@@ -103,4 +108,7 @@ void InitTgsProcess(void) {
     dds3AdminiCallSequence(0x2A, 0, 0, 0);
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3StartMenu", dds3StartMenuProcess);
+s32 dds3StartMenuProcess(dds3ProcessID_t *id) {
+    while (1) {
+    }
+}
