@@ -29,3 +29,9 @@ looking at rather than reading a page end to end.
 
 Add a lever to the section page it belongs in, then run
 `python3 tools/docs_index.py` to rebuild the index.
+
+Before working through the levers on a draft that is one or two words out,
+check whether the unit holds a matched sibling of the same shape:
+`python3 tools/find_similar.py --for NAME`. Three drafts whose write-ups named
+the wrong cause were settled that way.
+[Matching by analogy](matching-harness.md) has the method and its numbers.
