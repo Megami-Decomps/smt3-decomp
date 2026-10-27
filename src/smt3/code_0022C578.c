@@ -1039,7 +1039,27 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpSetIniStockRecoverEff);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRecoverEff);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDestroyItem);
+extern void datAddItem(s32 id, s32 num);
+
+extern s32 datCheckItem(s32 id, s32 num);
+
+s32 cmpDestroyItem(s8 all)
+{
+    u16 id = campWork->itemId[campWork->itemCursor + campWork->itemScroll];
+
+    if (all == 0)
+    {
+        if ((datItemTable[id].flags2 & 4) != 0)
+        {
+            datAddItem(id, -1);
+        }
+    }
+    else
+    {
+        datAddItem(id, -DDS3_GBWK->stocklist[id + 4]);
+    }
+    return datCheckItem(id, 1) != 0;
+}
 
 datUnitWork_t *cmpGetSelectSrcStock(void)
 {
