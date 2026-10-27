@@ -153,6 +153,21 @@ end marked, so expect the body to sit one word early.
   which is the `Flow2_13` row below read from the matching side:
   `n->nowselect == 0 ? 0xD : 0xF` is exact where `!= 0 ? 0xF : 0xD` is not.
   Four functions in `newbattle/nbMakePacket` turned on it.
+- A **four-leaf constant tree whose two leaves on one side are merged by a
+  `movn` on the *outer* condition** is a `goto` funnel, not a nested `if`.
+  `Flow12_3` and `Flow12_4` in `newbattle/NbNegoFlowMukan` pick a rate from
+  `plevel >= elevel` and `pparam < eparam`: retail branches on the level test
+  first, keeps each `pparam >= eparam` leaf as its own `li`, and reaches one
+  shared block for both `pparam < eparam` leaves that ends
+  `li rate, 0x28` / `movn rate, 0x14, levelLess`. Write the two `pparam <
+  eparam` arms as `goto low;` and put
+  `low: rate = (plevel < elevel) == 0 ? 0x28 : 0x14;` after a `goto got;`.
+  The nested `if`/`else` with the four constants written out is 43 of 99 words
+  and eight bytes short; a ternary on either condition inside an `if`/`else if`
+  chain reaches 33 but keeps the branch order wrong; the `goto` funnel is exact.
+  The half that no source shape reaches on its own is one `movn` where the
+  sibling leaves stay branches, so look for the funnel whenever a cmov's
+  condition is the *outer* test rather than the one next to it.
 - The **source order of a `switch`'s arms** is a lever in its own right and is
   cheap to sweep: `Flow6_40`'s three arms over `requesttype` 0, 1 and 3 are
   exact written 1, 3, 0 and 3, 1, 0, two words over written 0, 1, 3 or 1, 0, 3,
