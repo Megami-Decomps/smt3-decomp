@@ -4514,7 +4514,23 @@ u16 cmpGetStatusModelId(void)
     return cmpStatusModelId;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmp_23F8F0);
+extern s32 mdlGetNumOfCut(s32 work, s32 index);
+
+void cmp_23F8F0(u16 id, s32 delta)
+{
+    if (delta < 0) {
+        if (cmpModelParamTable[id].motionId == 0) {
+            return;
+        }
+    } else {
+        if (cmpModelParamTable[id].motionId >= mdlGetNumOfCut(cmpEncycWork, 0) - 1) {
+            return;
+        }
+    }
+    cmpModelParamTable[id].motionId = cmpModelParamTable[id].motionId + delta;
+    cmpGetStatusModelMotion(cmpEncycWork);
+}
+
 
 void func_0023F9F8(u16 id, f32 delta)
 {
