@@ -61,12 +61,12 @@ typedef struct BillOtLink {
 
 extern BillOtLink *D_00317050[];
 
-typedef struct BillDrawBank {
+typedef struct effBlurDrawBank_t {
     u8 pad0000[0x1300];
     u8 frameMaskSource[0x8E0];
-} BillDrawBank;
+} effBlurDrawBank_t;
 
-extern BillDrawBank dds3DrawEnv[];
+extern effBlurDrawBank_t dds3DrawEnv[];
 extern billRenderPair_t *D_00551D78;
 extern sdfGrOt_t sdfGrOtTable[];
 extern f32 dds3BillboardTagParam[4];

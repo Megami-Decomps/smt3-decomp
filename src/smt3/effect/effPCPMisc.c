@@ -228,7 +228,7 @@ typedef struct sdfMotionCutDef_t sdfMotionCutDef_t;
 typedef struct sdfMotionNodeDef_t sdfMotionNodeDef_t;
 typedef struct sdfMotionPlayBook_t sdfMotionPlayBook_t;
 typedef struct dds3ModelResrcPlayBook_t dds3ModelResrcPlayBook_t;
-typedef struct DevRequest DevRequest;
+typedef struct sdfItemArray_t sdfItemArray_t;
 typedef struct MdlRecord MdlRecord;
 typedef struct SdfChunkHeader SdfChunkHeader;
 typedef struct sdfModelNodeDef_t sdfModelNodeDef_t;
@@ -1642,15 +1642,15 @@ struct dds3ModelResrcPlayBook_t {
     struct sdfMemHandle_t *resourceHandle;
 };
 
-struct DevRequest;
+struct sdfItemArray_t;
 
-struct DevRequest {
-    struct sdfMemHandle_t *backingAllocation;
-    s16 usedCount;
-    u16 capacity;
-    s16 stride;
+struct sdfItemArray_t {
+    struct sdfMemHandle_t *memHandle;
+    s16 count;
+    s16 capacity;
+    s16 elemSize;
     s16 growStep;
-    void *buffer;
+    void *items;
 };
 
 /* Relative-linked viewer records share packed payload and parameter words.
@@ -1743,13 +1743,13 @@ struct dds3ModelResrc_t {
     u8 ownsResources;
     u8 pad0D[3];
     dds3ModelHandle_t *modelContext;
-    DevRequest *resourceList;
+    sdfItemArray_t *resourceList;
     struct SdfItemListRef *itemList;
     struct sdfMemHandle_t *requestAllocation;
     dds3ModelResrcPlayBook_t slots[8];
     struct sdfMemHandle_t *resourceHandle;
     struct MdlRecord *partInfo; /* Borrowed relative-linked record-list view. */
-    DevRequest *partList;
+    sdfItemArray_t *partList;
     f32 unk_AC;
     f32 objectRadius; /* Copied into the model context and object radius. */
 };
@@ -1768,7 +1768,7 @@ struct sdfMotionCtrlr_t {
     sdfModelRootNode_t *owner;
     sdfMotionPlayBook_t *motionTable;
     s32 playbookMemHandle;
-    DevRequest *request;
+    sdfItemArray_t *request;
     f32 blendDurationFrames;
     f32 blendStartFrame;
     f32 currentFrame;
@@ -1823,11 +1823,11 @@ struct sdfModelNode_t {
 
 /* The buffered-transform constructor allocates and clears all 0x9C bytes. */
 struct sdfModelRootNode_t {
-    DevRequest *list;
+    sdfItemArray_t *list;
     sdfModelNode_t *rootNode;
     void *assetData;
-    DevRequest *resources;
-    DevRequest *slotPairs;
+    sdfItemArray_t *resources;
+    sdfItemArray_t *slotPairs;
     struct sdfMotionCtrlr_t *motionList;
     u8 complexNodeId;
     u8 flags;
