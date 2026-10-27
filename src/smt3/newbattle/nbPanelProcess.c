@@ -643,7 +643,51 @@ INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545270);
 
 INCLUDE_RODATA(const s32, "newbattle/nbPanelProcess", D_00545290);
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPnl_rsetAlpha);
+void nbPnl_rsetAlpha(s32 mode)
+{
+    sdfDrawTag_t *list;
+    u64 *buff;
+    u64 *packet;
+    sdfGrOt_t *ot;
+
+    list = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    buff = sdfGrAllocPacketBuff(0x30);
+    packet = sdf2DMakeStdPacket(buff, 0x30);
+    switch (mode) {
+    case 1:
+        packet[4] = 0x48;
+        break;
+    case 2:
+        packet[4] = 0x42;
+        break;
+    case 3:
+        packet[4] = 0x84;
+        break;
+    case 4:
+        packet[4] = 0x06;
+        break;
+    case 5:
+        packet[4] = 0x89;
+        break;
+    case 6:
+        packet[4] = 0x42;
+        break;
+    case 10:
+        packet[4] = 0x2A;
+        break;
+    case 20:
+        packet[4] = 0x4A;
+        break;
+    default:
+        packet[4] = 0x44;
+        break;
+    }
+    packet[5] = 0x42;
+    sdfDrawTagLink(list, buff);
+    ot = &sdfGrOtTable[gnbPnlOtOfs];
+    ot->regFunc(ot, list);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPnlSprite);
 
