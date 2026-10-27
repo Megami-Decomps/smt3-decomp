@@ -10,8 +10,7 @@ fldCommand_DIR_HIT_CNTR	code_00144798	0xC0	32 of 42 words differ	docs/nonmatchin
 fldSnowInit	code_00144798	0x1B4	28 of 110 words match	docs/nonmatching/code_00144798.md	55
 fldAmModelLoadFile	code_00144798	0x174	24 of 91 words match	docs/nonmatching/code_00144798.md	82
 nbCameraBoss_BSKAGU_EP_IT_Set	code_001B0858	0x144	19 of 79 words before the first difference	docs/nonmatching/code_001B0858.md	5
-nbCameraBoss_BSSAMA_Command_Set	code_001B0858	0x1CC	25 of 115 words before the first difference	docs/nonmatching/code_001B0858.md	25
-nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/nonmatching/code_001B0858.md	45
+nbCameraBoss_Sukady_DAIJIS_Set	code_001B0858	0x134	4 of 77 words differ	docs/nonmatching/code_001B0858.md	25
 pbSetPanelModel	code_001D1470	0x60	2 of 23 words match	docs/nonmatching/code_001D1470.md	5
 moveBlock	code_001D1470	0x8C	30 of 31 words differ	docs/nonmatching/code_001D1470.md	25
 pbInitGameCamera	code_001D1470	0x94	26 of 38 words differ	docs/nonmatching/code_001D1470.md	48
@@ -209,12 +208,11 @@ Flow1_32	newbattle/nbMakePacket	0x400	231 of 252 words match	docs/nonmatching/ne
 nbCollectBadCurseUnits	newbattle/nbMakePacket	0xA4	30 of 41 words match	docs/nonmatching/newbattle/nbMakePacket.md	866
 ChkCost	newbattle/nbMakePacket	0xC8	34 of 49 words match	docs/nonmatching/newbattle/nbMakePacket.md	883
 nbCheckPackLoad	newbattle/nbMakePacket	0x100	62 of 64 words match	docs/nonmatching/newbattle/nbMakePacket.md	904
-Chk_ENHOJOMAX, Chk_FRHOJOMAX	newbattle/nbMakePacket	0xDC each	54 of 55 words each match	docs/nonmatching/newbattle/nbMakePacket.md	926
-Flow8_7, Flow8_15	newbattle/nbMakePacket	0x7C each	18 of 29 words each differ	docs/nonmatching/newbattle/nbMakePacket.md	944
-nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	969
-nbE915Process_1	newbattle/nbMakePacket	0x118	56 of 69 words match	docs/nonmatching/newbattle/nbMakePacket.md	997
-nbMakeNegoBackPacket	newbattle/nbMakePacket	0x104	63 of 65 words match	docs/nonmatching/newbattle/nbMakePacket.md	1017
-nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	1051
+Flow8_7, Flow8_15	newbattle/nbMakePacket	0x7C each	18 of 29 words each differ	docs/nonmatching/newbattle/nbMakePacket.md	926
+nbSetActionCommand	newbattle/nbMakePacket	0x100	38 of 62 words match	docs/nonmatching/newbattle/nbMakePacket.md	951
+nbE915Process_1	newbattle/nbMakePacket	0x118	56 of 69 words match	docs/nonmatching/newbattle/nbMakePacket.md	979
+nbMakeNegoBackPacket	newbattle/nbMakePacket	0x104	63 of 65 words match	docs/nonmatching/newbattle/nbMakePacket.md	999
+nbPickAiAction	newbattle/nbMakePacket	0x118	68 of 70 words match	docs/nonmatching/newbattle/nbMakePacket.md	1033
 nbAddOrder	newbattle/nbStageProcess	0x9C	17 of 37 words match	docs/nonmatching/newbattle/nbStageProcess.md	5
 nbSetNextOrder	newbattle/nbStageProcess	0xAC	10 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	21
 nbGetRandamStock	newbattle/nbStageProcess	0xB4	4 of 44 words match	docs/nonmatching/newbattle/nbStageProcess.md	36

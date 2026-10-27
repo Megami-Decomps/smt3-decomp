@@ -7,7 +7,7 @@ page and line to open. Conventions are in
 
 | Drafts | Unit | Page |
 |---|---|---|
-| 49 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
+| 48 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 34 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 14 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
@@ -38,7 +38,6 @@ page and line to open. Conventions are in
 | 3 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
 | 3 | effect/billManager | [effect/billManager.md](effect/billManager.md) |
 | 3 | code_0029B780 | [code_0029B780.md](code_0029B780.md) |
-| 3 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 2 |  | [sdk/libpad.md](sdk/libpad.md) |
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
@@ -48,6 +47,7 @@ page and line to open. Conventions are in
 | 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
+| 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
 | 1 |  | [sdk/libdma.md](sdk/libdma.md) |
 | 1 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 1 | sdf/sdfGraph | [sdf/sdfGraph.md](sdf/sdfGraph.md) |
