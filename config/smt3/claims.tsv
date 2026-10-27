@@ -250,4 +250,5 @@ src/smt3/newbattle/nbMakePacket.c	y11	open	2026-10-20	158 real / 49 drafts	fifth
 src/smt3/newbattle/nbStageProcess.c	y12	open	2026-10-20	52 real / 11 drafts	second pass
 src/smt3/code_00116AD0.c	y13	open	2026-10-20	28 real / 6 drafts	fourth pass, five IDB renames since applied
 src/smt3/code_0022C578.c	z10	done	2026-10-21	236 match / 214 asm / 23 drafts	matched 10, parked 9 new drafts; 191 bare INCLUDE_ASM left
-src/smt3/code_0022C578.c	z11	open	2026-10-21	191 real / 23 drafts	second pass, z10 left three typed structs and nine ruled-out lists
+src/smt3/code_0022C578.c	z11	done	2026-10-27	171 real / 26 drafts	second pass, killed by a 503; 17 matched, three drafts written up after
+src/smt3/code_0022C578.c	z12	open	2026-10-27	171 real / 26 drafts	third pass; two drafts sit 2 and 4 words out at exact size

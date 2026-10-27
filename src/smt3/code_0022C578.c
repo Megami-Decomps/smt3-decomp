@@ -99,9 +99,12 @@ typedef struct
 {
     /* 0x0000 */ u8 unk_00;
     /* 0x0001 */ s8 unk_01;
-    /* 0x0002 */ u8 unk_0002[0x12];
+    /* 0x0002 */ u8 unk_0002[2];
+    /* 0x0004 */ s8 unk_04;
+    /* 0x0005 */ u8 unk_0005[0xF];
     /* 0x0014 */ void *allocation;
-    /* 0x0018 */ u8 unk_0018[0x18];
+    /* 0x0018 */ s8 unk_18;
+    /* 0x0019 */ u8 unk_0019[0x17];
     /* 0x0030 */ s8 unk_30;
     /* 0x0031 */ s8 unk_31;
     /* 0x0032 */ u8 unk_0032[0x112E];
@@ -342,7 +345,8 @@ typedef struct
     /* 0x24 */ s8 unk_24;
     /* 0x25 */ s8 unk_25;
     /* 0x26 */ u8 unk_26;
-    /* 0x27 */ u8 unk_27[5];
+    /* 0x27 */ u8 unk_27;
+    /* 0x28 */ s32 unk_28;
     /* 0x2C */ s32 unk_2C;
     /* 0x30 */ s32 unk_30;
     /* 0x34 */ s32 unk_34;
@@ -434,7 +438,7 @@ extern void cmpBuildStockNameList(cmpLocalStock_t *stock);
 
 extern void cmpInitStockCursorPos(void);
 
-extern void cmpStartSkillTokusyuMsg(u16 skill);
+extern s32 cmpStartSkillTokusyuMsg(u16 skill);
 
 extern void cmpModelInitCore2(void);
 
@@ -486,7 +490,7 @@ typedef struct
     /* 0x18 */ void *owner;
 } cmpSeqInfo_t;
 
-extern void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s32 mode);
+extern void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode);
 
 extern void cmpSetInfoWindowHidden(void);
 
@@ -781,7 +785,7 @@ extern char D_0054FB60[];
 extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
                                   s32 mode, s32 b, s32 id);
 
-extern s32 cmpModelSetup(s32 a, s32 b);
+extern s32 cmpModelSetup(u16 a, s32 b);
 
 extern s32 cmpChkPadPressUpDown(void);
 
@@ -831,7 +835,7 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 /* Called above its definition, where ee-gcc assumed int. */
 u16 cmpGetStatusModelId(void);
 
-extern s32 cmpModelSetup(s32 a, s32 b);
+extern s32 cmpModelSetup(u16 a, s32 b);
 
 extern void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src);
 
@@ -913,7 +917,23 @@ void cmpInitDrawList(void)
     cmpBuildStockNameList(&campWork->drawStock);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitStockTable);
+void cmpInitStockTable(void)
+{
+    s32 i;
+
+    for (i = 0; i < 4; i++)
+    {
+        campWork->stockAlpha[i] = 0;
+        campWork->stockStep[i] = 0x10;
+        campWork->stockDelay[i] = 0;
+    }
+    for (i = 0; i < 12; i++)
+    {
+        campWork->stockAlpha[i + 4] = 0;
+        campWork->stockStep[i + 4] = 0x20;
+        campWork->stockDelay[i + 4] = i;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpinit);
 
@@ -1090,7 +1110,49 @@ void cmpStartItemTokusyuMsg(u16 item)
     cmpStartSkillTokusyuMsg(datItemTable[item].skill);
 }
 
+// 19 of 40 words match at the exact size; retail calls the tokusyu
+// message before deciding the mode, this decides it first.
+#ifdef NON_MATCHING
+s32 cmpStartSkillMsg(u16 skill)
+{
+    s32 guide = cmpClearButtonGuide(skill);
+    s32 mode;
+    s32 index;
+
+    if (guide >= 5)
+    {
+        goto zero;
+    }
+    if (guide > 0)
+    {
+        mode = 1;
+        goto have_mode;
+    }
+zero:
+    mode = 0;
+have_mode:
+    if (cmpStartSkillTokusyuMsg(skill) != 0)
+    {
+        return 2;
+    }
+    index = cmpFindSkillMsgIndex(mode, skill);
+    if (index <= 0)
+    {
+        return mode;
+    }
+    if (mode == 0)
+    {
+        fclStartMessage(index + 0xC);
+    }
+    else
+    {
+        fclStartMessage(index + 0x20);
+    }
+    return mode;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartSkillMsg);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
 
@@ -1226,12 +1288,12 @@ void cmpReCalcStockCursorPos(s8 index)
 {
     if (index == 0 || index == 2) {
         cmpChangeCursorListNums(
-            (campWork->stock[0].unk_02 + campWork->stock[0].unk_03[0]) & 0xFF,
+            (campWork->stock[0].PartyCnt + campWork->stock[0].unk_03[0]) & 0xFF,
             &campWork->unk_6230[0]);
     }
     if (index == 1 || index == 2) {
         cmpChangeCursorListNums(
-            (campWork->stock[1].unk_02 + campWork->stock[1].unk_03[0]) & 0xFF,
+            (campWork->stock[1].PartyCnt + campWork->stock[1].unk_03[0]) & 0xFF,
             &campWork->unk_6230[0x103C]);
     }
 }
@@ -1321,7 +1383,34 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItem);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetPartyDSL);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCalcStockControl);
+s32 cmpCalcStockControl(void)
+{
+    switch (campWork->page[1].cursor.unk_22 + (u8)campWork->page[1].cursor.unk_24)
+    {
+    case 0:
+        cmpApplyStockRecover();
+        if (cmpStartStockMsg(0) == 0)
+        {
+            return 0;
+        }
+        campWork->stock[0].count = 0xA;
+        cmpBuildStockNameList(&campWork->stock[0]);
+        cmpReCalcStockCursorPos(2);
+        cmpInitDrawList();
+        break;
+    case 1:
+        cmpApplyStockRemove();
+        if (camp_H_cmpLocalStock_t__ctor() == 0)
+        {
+            return 0;
+        }
+        break;
+    case 2:
+        break;
+    }
+    cmpMoveStockCursor(0, 0, (u8 *)&campWork->stock[0]);
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcParty);
 
@@ -1580,7 +1669,30 @@ void campShowStock(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateLoad);
+void cmpUpdateLoad(void)
+{
+    if (fmProcessChk() != 0)
+    {
+        return;
+    }
+    switch (slGetExitMode())
+    {
+    case 2:
+        dds3FadeIn(0, 0, 0, 0xF);
+        cmpSetLoadState(1);
+        campWork->unk_0000 |= 0x10;
+        cmpDisableInfoWindow();
+        return;
+    case 0:
+        dds3FadeIn(0, 0, 0, 0);
+        cmpSetStockVisible(1);
+        cmpSetAfterCrossFunc((u8 *)campWork + 0x8448, 0, 0, cmpUpdateListSelection,
+                             (u8 *)campWork + 0x1C, 0, 0);
+        campWork->unk_0001 = 0;
+        campWork->unk_0004 = 1;
+        break;
+    }
+}
 
 void campUpdateEffectStep(void)
 {
@@ -1938,7 +2050,32 @@ s32 func_00232C08(void)
     return campInfoWork->unk_01 == 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetHeartsSequenceRemove);
+extern u32 pstr[];
+
+extern u32 pstr[];
+
+s32 cmpSetHeartsSequenceRemove(void)
+{
+    if (cmbGlobalWork->equipHearts == 0)
+    {
+        return 0;
+    }
+    if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
+    {
+        campInfoWork->unk_18 = 0;
+        fclSetMessageVar_20743088(0xC, pstr[cmbGlobalWork->equipHearts]);
+        fclSetMessageInvalid(0);
+        fclStartMessage(4);
+        campInfoWork->unk_01 = 3;
+        campInfoWork->unk_04 = 1;
+        return 1;
+    }
+    fclSetMessageInvalid(1);
+    fclStartMessage(1);
+    campInfoWork->unk_01 = 4;
+    campInfoWork->unk_04 = 1;
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitHeartsIcon);
 
@@ -2117,7 +2254,38 @@ INCLUDE_ASM(const s32, "code_0022C578", camp_draw_dh_Process);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhApplyEntry);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhFindEntry);
+s32 campDhFindEntry(void)
+{
+    s8 id = cmpGetHeartsIconId(campDhUpdateWork->unk_31);
+    s8 i;
+
+    if (cmpHeartsIconIsVisible(id) == 0)
+    {
+        return 1;
+    }
+    if (cmbGlobalWork->equipHearts != 0)
+    {
+        if (id == cmbGlobalWork->equipHearts)
+        {
+            return 2;
+        }
+        for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++)
+        {
+            if (id == cmbGlobalWork->unk_01CFB[i])
+            {
+                if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) != 0)
+                {
+                    return 4;
+                }
+            }
+        }
+    }
+    else if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
+    {
+        return 3;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpReturnParamDH);
 
@@ -2151,7 +2319,53 @@ s32 cmpUnloadStatusModel(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachStatus);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpStepHeartsAttachCursor);
+/* campDhUpdateWork, as this unit's animation and icon code reads it. The two
+ * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
+ * A third view, campStatusPanel_t *campDhUpdateWork, is declared above: the
+ * alias is what lets both spellings of the one object coexist, and unifying
+ * them is type recovery on the real allocation, not a rename. */
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x1C];
+    /* 0x001C */ s32 unk_1C;
+    /* 0x0020 */ s32 unk_20;
+    /* 0x0024 */ s32 unk_24;
+    /* 0x0028 */ s32 unk_28;
+    /* 0x002C */ u8 unk_002C[0x114C];
+    /* 0x1178 */ s32 iconTimer[64];
+} campDhTimerWork_t;
+
+extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
+
+void cmpStepHeartsAttachCursor(s32 step)
+{
+    s32 period = 20;
+    s32 phase;
+    s32 parts;
+
+    if (step == 0)
+    {
+        campDhTimerWork->unk_28 = 0;
+    }
+    else
+    {
+        if (campDhTimerWork->unk_28 >= 0x13)
+        {
+            return;
+        }
+        campDhTimerWork->unk_28++;
+    }
+    phase = campDhTimerWork->unk_28 % period;
+    if (phase == 0)
+    {
+        dds3PadVibrationSet(1, 0x80, 0x14);
+    }
+    parts = 3;
+    if (phase == period / parts)
+    {
+        dds3PadVibrationSet(1, 0x40, 0x14);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachConfirm);
 
@@ -2168,22 +2382,6 @@ s32 campDhWaitMessageEnd(void)
     return cmpUnloadStatusModel();
 }
 
-/* campDhUpdateWork, as this unit's animation and icon code reads it. The two
- * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
- * A third view, campStatusPanel_t *campDhUpdateWork, is declared above: the
- * alias is what lets both spellings of the one object coexist, and unifying
- * them is type recovery on the real allocation, not a rename. */
-typedef struct
-{
-    /* 0x0000 */ u8 unk_0000[0x1C];
-    /* 0x001C */ s32 unk_1C;
-    /* 0x0020 */ s32 unk_20;
-    /* 0x0024 */ s32 unk_24;
-    /* 0x0028 */ u8 unk_0028[0x1150];
-    /* 0x1178 */ s32 iconTimer[64];
-} campDhTimerWork_t;
-
-extern campDhTimerWork_t *campDhTimerWork asm("campDhUpdateWork");
 
 void campDhAdvanceAnim(void)
 {
@@ -3090,7 +3288,25 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollThumb);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
 
+/* NON_MATCHING: 2 of 42 words differ, exact size: the argument-register copy and
+ * the `slt` are swapped. */
+// 40 of 42 words match at the exact size; one adjacent pair is scheduled
+// in the opposite order.
+#ifdef NON_MATCHING
+void cmp_23C918(fclPanelPos_t *pos, s32 full, s32 total, s32 color1, s32 color2, s32 flag)
+{
+    if (total < full)
+    {
+        full = total;
+    }
+    cmpDrawBoxF(pos->unk_00, pos->unk_04, pos->unk_08, (u16)pos->unk_0C, (u16)pos->unk_0E, color2,
+                flag);
+    cmpDrawBoxF(pos->unk_00, pos->unk_04, pos->unk_08, (u16)pos->unk_0C * full / total,
+                (u16)pos->unk_0E, color1, flag);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23C918);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_23C9C0);
 
@@ -3187,7 +3403,19 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindFreeStockSlot);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpScaleColorByPhase);
+void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale)
+{
+    if ((phase == 1) || (phase == 3))
+    {
+        colors[2] = (colors[2] & 0xFFFFFF00) | (((colors[2] & 0xFF) * scale) >> 8);
+        colors[3] = (colors[3] & 0xFFFFFF00) | (((colors[3] & 0xFF) * scale) >> 8);
+    }
+    if ((phase == 2) || (phase == 3))
+    {
+        colors[0] = (colors[0] & 0xFFFFFF00) | (((colors[0] & 0xFF) * scale) >> 8);
+        colors[1] = (colors[1] & 0xFFFFFF00) | (((colors[1] & 0xFF) * scale) >> 8);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockHighlight);
 
@@ -3495,23 +3723,44 @@ void cmpPrepareStatusModel(s32 group, s32 id, s32 blocking)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCreateBadEffect);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+extern void *hCAMPBadEffect;
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+extern u8 D_00349300[];
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+extern char D_00540040[];
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+extern void *effCAMPBadCreate(u8 *work, s32 kind);
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+s32 cmpBadEffSetup(u16 id, u32 flag)
+{
+    s32 kind;
 
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
-
-INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
-
-INCLUDE_ASM(const s32, "code_0022C578", cmpBadEffSetup);
+    if (cmpEncycWork == 0)
+    {
+        return 0;
+    }
+    switch (flag)
+    {
+    case 0x100:
+        kind = 9;
+        break;
+    case 0x40:
+        kind = 7;
+        break;
+    case 0x20:
+        kind = 6;
+        break;
+    case 0x8000:
+        kind = 0xD;
+        break;
+    default:
+        return 0;
+    }
+    cmpCreateBadEffect(id, cmpEncycWork, D_00349300);
+    hCAMPBadEffect = effCAMPBadCreate(D_00349300, kind);
+    printf(D_00540040);
+    return 1;
+}
 
 extern void *hCAMPBadEffect;
 
@@ -3537,7 +3786,67 @@ void rstPrepareStatusModel(s32 group, s32 id, s32 blocking)
     printf(D_00540070, group, id);
 }
 
+/* NON_MATCHING: 4 of 46 words differ, exact size: the two constant-1 pseudos
+ * swap $2 and $3. */
+// 42 of 46 words match at the exact size; two constants land in swapped
+// registers and the branch between them moves with them.
+#ifdef NON_MATCHING
+s32 cmpModelSetup(u16 id, s32 blocking)
+{
+    s32 group;
+    s32 model;
+
+    if (cmpModelInitFlag != 0)
+    {
+        return 0;
+    }
+    if (id == 0)
+    {
+        group = 6;
+        model = 0;
+    }
+    else
+    {
+        group = 6;
+        model = id;
+    }
+    if ((group == D_0054FEEE) && (model == cmpStatusModelId) && (cmpEncycWork != 0))
+    {
+        return 2;
+    }
+    cmpModelFreeResource();
+    D_0054FEEE = group;
+    cmpStatusModelId = model;
+    cmpModelHandle = blocking;
+    cmpPrepareStatusModel(D_0054FEEE, cmpStatusModelId, cmpModelHandle);
+    cmpModelInitFlag = 1;
+    if (blocking == 1)
+    {
+        cmpLoadStatusModel();
+    }
+    return 1;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpModelSetup);
+#endif
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFE8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_0053FFF8);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540000);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540008);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540018);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540020);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540028);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540030);
+
+INCLUDE_RODATA(const s32, "code_0022C578", D_00540040);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_00540054);
 
@@ -3723,7 +4032,30 @@ s32 cmpGetSkillEntry(u16 id, datUnitWork_t *unit)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpAddCost);
+s32 cmpAddCost(u16 skill, datUnitWork_t *unit)
+{
+    datNormalSkill_t *entry = &datSkillTable.normal[skill];
+    u16 cost = entry->cost;
+
+    switch (entry->costtype)
+    {
+    case 1:
+        if (unit->hp < cost)
+        {
+            return 0;
+        }
+        datAddHp(unit, -cost);
+        break;
+    case 2:
+        if (unit->mp < cost)
+        {
+            return 0;
+        }
+        datAddMp(unit, -cost);
+        break;
+    }
+    return 1;
+}
 
 s32 cmpGetSkillTargetArea(u16 skillId)
 {
@@ -3745,7 +4077,24 @@ s32 cmpGetSkillTargetArea(u16 skillId)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemKou);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUseItemTokusyu);
+s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user)
+{
+    if (cmpUseItemKou(item, user) >= 0)
+    {
+        p2sdPlaySE(0x10, 0x7F, 0x3F);
+        return 3;
+    }
+    if (item == 0x3A)
+    {
+        p2sdPlaySE(0x11, 0x7F, 0x3F);
+        return 5;
+    }
+    /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+    do
+    {
+        return cmpUseSkillTokusyu(datItemTable[item].skill, target, user);
+    } while (0);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUseSkillTokusyu);
 
@@ -3793,7 +4142,35 @@ s32 func_002415D8(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpAllocEffectSlot);
+s32 cmpAllocEffectSlot(s32 color, s8 a, s8 b, cmpCursorSlot_t *slot)
+{
+    s32 alpha = cmpGetCursorSlotValue(0, slot);
+
+    if (cmpGetCursorSlotState(0, slot) == 3)
+    {
+        return 0x89FEFF80;
+    }
+    if (alpha > 0)
+    {
+        if (alpha < 0x100)
+        {
+            /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+            do
+            {
+                return fclBlendColor(color, 0x5B50E080, alpha);
+            } while (0);
+        }
+        return color;
+    }
+    if (a != 0)
+    {
+        if (b == 0)
+        {
+            return 0x89FEFF80;
+        }
+    }
+    return color;
+}
 
 /* NON_MATCHING: 18 of 21 words differ (first at +0x0). */
 #ifdef NON_MATCHING
@@ -3890,9 +4267,62 @@ void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode)
 INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorLayout);
 #endif
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitCursorRange);
+void cmpInitCursorRange(void *cursor, u8 index, u8 rows, s32 flag)
+{
+    cmpPadStopWork_t *work = cursor;
+    s32 last;
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateCursorScroll);
+    memset(&work->cursor.unk_20, 0, 0x101C);
+    last = (index < rows) ? index : rows;
+    work->cursor.unk_20 = index;
+    work->cursor.unk_26 = last;
+    work->cursor.unk_22 = 0;
+    work->cursor.unk_24 = 0;
+    work->cursor.unk_25 = 0;
+    work->cursor.unk_28 = flag;
+    work->cursor.unk_2C = 0;
+    work->cursor.unk_30 = 0;
+    work->cursor.unk_34 = 0;
+    work->unk_38 = 0;
+    work->cursor.StopFlag = 0;
+    cmpClearCursorSlots(&work->cursor);
+}
+
+void cmpUpdateCursorScroll(cmpCursorInfo_t *cursor, s8 mode)
+{
+    u8 *flags;
+    s32 idx;
+    s32 step;
+    s32 count;
+    s32 i;
+    u8 row;
+
+    flags = (u8 *)cursor->unk_2C;
+    if (flags == NULL)
+    {
+        return;
+    }
+    step = (mode >= 0) ? 1 : -1;
+    row = cursor->unk_24;
+    idx = cursor->unk_22 + row;
+    if (!(flags[idx] & 2))
+    {
+        return;
+    }
+    count = cursor->unk_20;
+    cursor->unk_24 = row + mode;
+    i = 1;
+    while (i < count)
+    {
+        idx += step;
+        if (!(flags[idx] & 2))
+        {
+            return;
+        }
+        cursor->unk_24 = (u8)cursor->unk_24 + mode;
+        i++;
+    }
+}
 
 void cmpSetCursorFlag(cmpCursorInfo_t *cur, s32 flag)
 {
@@ -4011,7 +4441,38 @@ no:
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpCursorAtLastEnabled);
+s32 cmpCursorAtLastEnabled(cmpCursorInfo_t *cursor)
+{
+    u8 *flags;
+    s32 idx;
+    s32 count;
+    s32 n;
+    s32 i;
+
+    flags = (u8 *)cursor->unk_2C;
+    idx = cursor->unk_22 + (u8)cursor->unk_24;
+    n = 0;
+    if (flags != NULL)
+    {
+        count = cursor->unk_20;
+        for (i = idx + 1; i < count; i++)
+        {
+            if (flags[i] & 2)
+            {
+                n++;
+            }
+        }
+        if (idx >= count - n - 1)
+        {
+            return 1;
+        }
+    }
+    else if (idx == cursor->unk_20 - 1)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpFindNextCursorItem);
 
@@ -4048,7 +4509,43 @@ s32 cmpGetCursorMoveMode(cmpCursorInfo_t *cursor)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpMoveCursor2);
+s32 cmpMoveCursor2(cmpCursorInfo_t *cursor, s8 dir)
+{
+    s32 mode = cmpGetCursorMoveMode(cursor);
+
+    if (dir != 0)
+    {
+        if ((mode == 0) || (mode == 2))
+        {
+            cursor->unk_34 = 0;
+        }
+    }
+    else
+    {
+        cmpAdvanceCursorPhase(cursor);
+    }
+    if (mode == 1)
+    {
+        cursor->StopFlag = 2;
+        return 0;
+    }
+    if ((dir == 0) && (mode == 2))
+    {
+        if (dds3PadButtonState[0x26] != 0)
+        {
+            return 0;
+        }
+        if (dds3PadButtonState[0x27] != 0)
+        {
+            return 0;
+        }
+    }
+    /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+    do
+    {
+        return cmpFindNextCursorItem(cursor, dir, 1);
+    } while (0);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpChangeCursorListNums);
 
@@ -4174,7 +4671,31 @@ s8 cmpGetStockCount(void)
     return cmbGlobalWork->stockCount;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSortStockList);
+void cmpSortStockList(void)
+{
+    s32 i;
+    s32 k;
+    s8 j;
+    s8 cur;
+
+    for (i = 0; i < cmbGlobalWork->stockCount; i++)
+    {
+        j = 0;
+        cur = cmbGlobalWork->stock[i];
+        for (k = 0; k < cmbGlobalWork->stockCount; k++)
+        {
+            if ((i != k) && (cur == (u8)cmbGlobalWork->stock[k]))
+            {
+                cmbGlobalWork->stock[k] = 0;
+                cmbGlobalWork->stockCount--;
+            }
+            else
+            {
+                cmbGlobalWork->stock[j++] = cmbGlobalWork->stock[k];
+            }
+        }
+    }
+}
 
 s8 func_002426F0(void)
 {
@@ -4240,7 +4761,37 @@ s32 cmpChkSeqInfo(cmbGbWork_t *work)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSeqInfo);
+s32 cmpUpdateSeqInfo(cmbGbWork_t *work, s8 value)
+{
+    s32 stat = cmpChkSeqInfo(work);
+
+    if ((s8)work->unk_00002 >= 0)
+    {
+        if (stat == 1)
+        {
+            return 0;
+        }
+        if (work->unk_00004 > 0)
+        {
+            work->unk_00003 = (u8)work->unk_00001;
+        }
+        work->unk_00001 = (u8)work->unk_00002;
+        work->unk_00002 = -1;
+        return 1;
+    }
+    if (value >= 0)
+    {
+        if (work->unk_00004 > 0)
+        {
+            work->unk_00003 = value;
+        }
+    }
+    if (stat != 1)
+    {
+        work->unk_00005 = 0;
+    }
+    return 0;
+}
 
 void cmpUpdateTerminate(cmpInfoWindow_t *window)
 {
