@@ -9,7 +9,7 @@ struct P2A_ANIMATION_tag;
 struct BillPacketWork;
 struct P2A_TEXANIM_tag;
 struct billRenderPair_t;
-struct BillTextureQuad;
+struct billUvQuad_t;
 struct effBTL_SkillPositionPtr_t;
 struct effBTL_SkillPartsList_t;
 struct effBTL_SkillCutTable_t;
@@ -120,7 +120,7 @@ struct sdfIpuDmaTag_t;
 struct sdfGsMemSlice_t;
 struct effBTLBank_t;
 
-typedef struct BillTextureQuad BillTextureQuad;
+typedef struct billUvQuad_t billUvQuad_t;
 typedef struct BillPacketWork BillPacketWork;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
 typedef struct dds3BillResource_tag dds3BillResource_tag;
@@ -267,7 +267,7 @@ struct billHandle_t;
 struct dds3BillResource_tag;
 
 /* Native billboard UVs are four ordered U/V corners, not a float vector. */
-struct BillTextureQuad {
+struct billUvQuad_t {
     u16 components[8];
 };
 
@@ -275,7 +275,7 @@ struct BillTextureQuad {
 struct BillPacketWork {
     f32 positions[15][4]; /* 0x000 */
     u32 colors[15];       /* 0x0F0 */
-    BillTextureQuad uv[15]; /* 0x12C */
+    billUvQuad_t uv[15]; /* 0x12C */
     f32 offsets[15][8];   /* 0x21C: four X/Y corner offsets per quad */
     s32 count;           /* 0x3FC */
 };
@@ -319,7 +319,7 @@ struct dds3BillResource_tag {
     u16 type; /* Child type bits; signed inputs narrow on assignment. */
     u8 pad06[2];
     s32 count;      /* 0x08 */
-    BillTextureQuad uv; /* 0x0C */
+    billUvQuad_t uv; /* 0x0C */
     f32 cx;             /* 0x1C */
     f32 cy;             /* 0x20 */
     f32 width;  /* 0x24 */

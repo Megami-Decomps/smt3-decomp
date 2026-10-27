@@ -24,42 +24,37 @@ extern struct billHandle_t *hGeneralBillboard[];
 
 s32 printf(const char *fmt, ...);
 
-typedef struct BillGeneralEntry {
+typedef struct billGeneralEntry_t {
     s16 kind;
     u8 pad02[6];
-} BillGeneralEntry;
+} billGeneralEntry_t;
 
-typedef struct BillGeneralRow {
+typedef struct billGeneralRow_t {
     u8 pad00[4];
     s16 kind;
     u8 pad06[2];
-} BillGeneralRow;
+} billGeneralRow_t;
 
-typedef struct BillPacRequest {
+typedef struct fileRequest_t {
     u8 pad00[0x60];
     sdfPacDecodeResrc_t *queueHead;
-} BillPacRequest;
+} fileRequest_t;
 
-extern BillGeneralEntry BillboardTable[];
-extern BillGeneralRow D_00316FF0[];
+extern billGeneralEntry_t BillboardTable[];
+extern billGeneralRow_t D_00316FF0[];
 extern struct dds3BillResource_tag *dds3BillboardTag;
 
 extern void sdfMemFreeDirect(struct sdfMemHandle_t *aHandle);
 extern void sdfTexFreeDelayed(sdfTexHandle_t *aHandle);
 extern void *sdfMemGetPtr(struct sdfMemHandle_t *aHandle);
 extern sdfMemHandle_t *sdfDevLoadFileEx(const char *name, u32 *address, s32 flags);
-extern BillPacRequest *pacLoad(const char *filename);
-extern void pacSync(BillPacRequest *pacFileHandle);
+extern fileRequest_t *pacLoad(const char *filename);
+extern void pacSync(fileRequest_t *pacFileHandle);
 extern void pacFileHandleFree_(void *pacHandle);
 
 billHandle_t *dds3BillboardGeneral(s32 number);
 
-typedef struct BillOtLink {
-    u8 pad00[0x10];
-    void (*link)(struct BillOtLink *param, sdfDrawTag_t *tag);
-} BillOtLink;
-
-extern BillOtLink *D_00317050[];
+extern sdfGrOt_t *D_00317050[];
 
 typedef struct effBlurDrawBank_t {
     u8 pad0000[0x1300];
@@ -124,10 +119,10 @@ struct billHandle_t *dds3Billboard_NormalCreate(void *data);
 u32 dds3Billboard_P2AColorMul(u32 color0, u32 color1);
 
 
-typedef struct BillColorWork {
+typedef struct billColorWork_t {
     u32 word;
     u8 pad04[12];
-} BillColorWork;
+} billColorWork_t;
 
 
 typedef struct P2A_ANIMATION_tag {
@@ -274,7 +269,7 @@ u32 dds3BillboardGeneralNumber(void);
 void dds3BillboardSetPosition(void *hBillboard, const void *pPos);
 void dds3BillboardSetRotate(billHandle_t *hBillboard, float rot);
 void dds3BillboardSetRGBA(billHandle_t *hBillboard, u32 abgr);
-void func_0015D050(billHandle_t *effect, const BillTextureQuad *textureQuad);
+void func_0015D050(billHandle_t *effect, const billUvQuad_t *textureQuad);
 void dds3BillboardSetCondition(billHandle_t *hBillboard, s32 condition);
 u16 dds3BillboardGetType(billHandle_t *hBillboard);
 u16 dds3BillboardGetDrawType(billHandle_t *hBillboard);
@@ -294,9 +289,9 @@ void dds3P2APolygonSetDirection(void *hData, void *pMatrix);
 /* NON_MATCHING: 2 of 46 words differ (first at +0x40). */
 #ifdef NON_MATCHING
 void dds3BillboardManagerInit(void) {
-    BillPacRequest *request;
+    fileRequest_t *request;
     sdfPacDecodeResrc_t *work;
-    BillGeneralRow *row;
+    billGeneralRow_t *row;
     billHandle_t **slot;
 
     dds3BillboardTag = NULL;
@@ -462,7 +457,7 @@ void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
     count = batch->count;
     SDF_VU0_COPYVECTOR(&batch->centre[count], obj->pos);
     batch->color[count] = obj->abgr;
-    *(BillTextureQuad *)batch->uv[count] = child->uv;
+    *(billUvQuad_t *)batch->uv[count] = child->uv;
     corner = batch->offset[count];
     hwx = child->width * obj->childScaleX;
     hhy = child->height * obj->childScaleY;
@@ -522,7 +517,7 @@ void dds3BillboardLinkOt(void) {
             for (i = 0; i < 4; i++) {
                 sdfDrawTag_t *tag = res->pBillTag[i];
                 if (tag != NULL) {
-                    D_00317050[i]->link(D_00317050[i], tag);
+                    D_00317050[i]->regFunc(D_00317050[i], tag);
                     res->pBillTag[i] = NULL;
                 }
             }
@@ -759,7 +754,7 @@ INCLUDE_ASM(const s32, "effect/billManager", dds3Billboard_P2AAnimDraw);
 
 /* vu0 routine: unpack two colours, multiply the lanes and pack. */
 u32 dds3Billboard_P2AColorMul(u32 color0, u32 color1) {
-    BillColorWork work[3];
+    billColorWork_t work[3];
     u32 unit = 0x3C000000;
     u32 out;
 
@@ -1087,7 +1082,7 @@ void dds3BillboardSetRGBA(billHandle_t *hBillboard, u32 abgr) {
     hBillboard->abgr = abgr;
 }
 
-void func_0015D050(billHandle_t *effect, const BillTextureQuad *textureQuad) {
+void func_0015D050(billHandle_t *effect, const billUvQuad_t *textureQuad) {
     if (effect->type == 0) {
         memcpy(&effect->u.child->uv, textureQuad, sizeof(*textureQuad));
     }
