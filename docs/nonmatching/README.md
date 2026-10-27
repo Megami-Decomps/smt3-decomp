@@ -8,7 +8,7 @@ page and line to open. Conventions are in
 | Drafts | Unit | Page |
 |---|---|---|
 | 49 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
-| 31 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
+| 33 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 14 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |

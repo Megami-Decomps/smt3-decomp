@@ -227,3 +227,41 @@ arm differently, and retail's source order is the same in all seven: the two
 globals first, then the two struct fields. Sweeping the first arm's 24 orders
 found it in 24 compiles and the other six arms, including the six-statement one
 with two more array stores appended, then matched with no further search.
+
+Whether a `switch` becomes a jump table or a comparison tree is decided by the
+number of case *nodes*, after `group_case_nodes` merges adjacent cases that
+share a label; below four nodes gcc emits comparisons. So a seven-value switch
+whose arms are `0,1,2,5,6` to one body and `3,4` to nothing collapses to two
+nodes and comes out as a tree. Writing the two empty cases first, with the five
+sharing one label after them, keeps the nodes at four and gives retail's table
+with the same label repeated in five slots:
+
+```c
+switch (eff->kind) {
+case 3:
+    break;
+case 4:
+    break;
+case 0:
+case 1:
+case 2:
+case 5:
+case 6:
+    f(...);
+    break;
+}
+```
+
+Writing the five arms out separately also gives a table, but the duplicated
+bodies are not cross-jumped and the function is eight instructions long.
+`cmpUpdatePanelEffSlots` and `cmpFindPanelEffSlot` both need this.
+
+Where a value computed from a parameter lands in the callee-saved register the
+parameter's own prologue copy occupies, and the copy is a separate `daddu`
+before the shift that overwrites it, the parameter is live across the call: the
+computation belongs **inside** the guarded block after it, not before.
+`camp_23CDB8` and `camp_23CC70` compute `x + h * 16` inside
+`if (g != 0) { ... }`, after the `cmpDrawBoxF` call that still reads `h`; with
+it hoisted above the call the scheduler produces the same instruction count but
+a different register for every local, 47 of 60 words out.
+

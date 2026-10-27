@@ -23,3 +23,16 @@ the result register only when the load and the add are separate statements.
 adds out of place, which costs `SelectHpMp` nine words across its two arms,
 two of them in the `movz`/`movn` clamp that follows.
 
+`(x + K) * 2**n` and `(x + K) << n` are not the same source. fold distributes
+the multiply over the constant addend and emits `sll` plus `addiu K << n`; the
+shift is left alone and gives retail's `addiu rd, x, K` followed by `sll`.
+`campCheckStockFree` was two words out until `(x + 0xCE) * 16` became
+`(x + 0xCE) << 4`. A non-constant addend never distributes, so `(y + off) * 8`
+beside it is already right.
+
+A wide constant that retail materialises in the entry block but only uses
+inside an `if` is the initialiser of the local the `if` updates:
+`s32 color = 0x80808000;` then `color = alpha / 8 | color;` inside the branch.
+Computing the whole value inside the branch leaves the `lui`/`ori` there and
+costs `campDrawFade` 20 of its 58 words.
+

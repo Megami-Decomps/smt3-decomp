@@ -2789,9 +2789,9 @@ typedef struct
     /* 0x04 */ s32 alpha;
     /* 0x08 */ s8 step;
     /* 0x09 */ s8 id;
-    /* 0x0A */ u8 unk_0A[2];
-    /* 0x0C */ s32 unk_0C;
-    /* 0x10 */ s32 unk_10;
+    /* 0x0A */ u8 pad[2];
+    /* 0x0C */ s32 fade;
+    /* 0x10 */ s32 fadeStep;
 } campDhIconGauge_t;
 
 void campDhFindVisibleIcon(void)
@@ -2824,11 +2824,11 @@ void campDhFindVisibleIcon(void)
             gauge->alpha = 0;
         }
     }
-    if (gauge->unk_0C < 0x100) {
-        gauge->unk_0C = gauge->unk_0C + gauge->unk_10;
+    if (gauge->fade < 0x100) {
+        gauge->fade = gauge->fade + gauge->fadeStep;
     }
-    if (gauge->unk_0C >= 0x101) {
-        gauge->unk_0C = 0x100;
+    if (gauge->fade >= 0x101) {
+        gauge->fade = 0x100;
     }
 }
 

@@ -252,4 +252,4 @@ src/smt3/code_00116AD0.c	y13	open	2026-10-20	28 real / 6 drafts	fourth pass, fiv
 src/smt3/code_0022C578.c	z10	done	2026-10-21	236 match / 214 asm / 23 drafts	matched 10, parked 9 new drafts; 191 bare INCLUDE_ASM left
 src/smt3/code_0022C578.c	z11	done	2026-10-27	171 real / 26 drafts	second pass, killed by a 503; 17 matched, three drafts written up after
 src/smt3/code_0022C578.c	z12	done	2026-10-27	153 real / 29 drafts	16 matched, 268 match / 0 differ; 3 new drafts parked
-src/smt3/code_0022C578.c	z13	open	2026-10-27	153 real / 29 drafts	fourth pass; three passes have averaged 14 matches each
+src/smt3/code_0022C578.c	z13	done	2026-10-27	285 match / 31 drafts	fourth pass matched 17 and parked 2; 136 bare INCLUDE_ASM left

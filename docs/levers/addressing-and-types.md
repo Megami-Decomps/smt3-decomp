@@ -1797,3 +1797,26 @@
   0xFFFFFF00;`. The store/load pair forwards the register but loses the known
   expression. `campDhDrawBox` needed that plus the store order `corner[1]`,
   `[2]`, `[3]`, `[0]` for the second group, swept over the permutations.
+- **The operand order of the `addu` that forms `base + index` follows whether
+  the source spells the address as pointer or as integer arithmetic.**
+  `(u8 *)list + i * 0x2E4 + 0x34` gives `addu rd, list, prod`, while
+  `i * 0x2E4 + (s32)list + 0x34` gives retail's `addu rd, prod, list`. Only the
+  integer form puts the product first; parenthesising the pointer form, writing
+  the product first inside it, or going through `&list[i].field` all canonicalise
+  back. `cmpUpdatePanelEffSlots` was one word out on this alone.
+- **Which subexpression cse keeps decides how many address instructions there
+  are.** Two accesses into the same strided element share whatever the first one
+  built: spelling the first as `(u8 *)list + off` with `off = i * stride + 0x10`
+  keeps `prod` as the shared value and lets the second access build
+  `prod + list + 0x34` from scratch, which is retail; spelling it
+  `(u8 *)&list[i] + 0x10` keeps `list + prod` instead and the second access
+  reuses it, six instructions short in `cmpUpdatePanelEffSlots`.
+- **A clamped accumulator that retail copies with a `daddu` at the merge is
+  read back through the struct, not held in a local.**
+  `if (p->alpha < 0x100) { p->alpha = p->alpha + p->step; }` followed by
+  `if (p->alpha >= 0x101) { p->alpha = 0x100; }` gives
+  `addu rd, acc, step` / `sw` / `daddu acc, rd` because the compare after the
+  merge has two reaching definitions; `alpha = alpha + p->step; p->alpha = alpha;`
+  coalesces the copy away and is one instruction short per ramp.
+  `campDhFindVisibleIcon` has two of them and went from 26 of 60 words to exact.
+
