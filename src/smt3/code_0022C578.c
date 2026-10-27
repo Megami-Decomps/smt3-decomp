@@ -3471,7 +3471,22 @@ s32 cmpDrawDebugPrint(s32 x, s32 y, s32 z, u32 attr, const char *str, s32 ot)
     return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawFrameRect);
+extern void *dds3PrimFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g);
+
+s32 cmpDrawFrameRect(s32 x, s32 y, s32 c, s32 w, s32 h, s32 f, s32 g, s32 ot)
+{
+    sdfGrOt_t *otp;
+    void *tag;
+    void *packet;
+
+    tag = (void *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    packet = dds3PrimFrameRect(x * 16 + 0x7000, y * 8 + 0x7900, c, w * 16, h * 8, f, g);
+    sdfDrawTagLink(tag, packet);
+    otp = &sdfGrOtTable[ot];
+    return ((s32 (*)(sdfGrOt_t *, void *))otp->regFunc)(otp, tag);
+}
+
 
 s8 cmpGetStatusModelFlag(void)
 {
