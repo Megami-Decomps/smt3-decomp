@@ -175,13 +175,16 @@ enum {
     BILL_ANIMATION_FLAG_PLURAL_ENTRIES = 0x10000000
 };
 
-typedef struct BillPluralRecord {
-    s16 entryIndex;  
-    s16 delay;       
-    s16 x;           
-    s16 y;           
+/* One row of the plural-entry table a P2A animation points at: the sprite
+ * animation to run, its start delay, and the centre the quad is drawn at.
+ * The remaster models the table as raw data, so this name is the tree's own. */
+typedef struct billPluralEntry_t {
+    s16 entryIndex;
+    s16 delay;
+    s16 x;
+    s16 y;
     u8 unk08[0x10];
-} BillPluralRecord;
+} billPluralEntry_t;
 
 #define BILL_VARIANT_MASK 0xFFFF
 
@@ -781,12 +784,12 @@ void dds3Billboard_P2ADraw(billHandle_t *hData) {
     if (modeFlags & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
         dds3BillAnimResource_tag *data = hData->u.animationData;
         P2A_ANIMATION_tag *entry = data->pAnimTable + hData->animationEntryIndex;
-        BillPluralRecord *records;
+        billPluralEntry_t *records;
         u32 i;
 
         savedColor = hData->abgr;
         savedRotation = hData->rot;
-        records = (BillPluralRecord *)(data->pHeader + entry->spranm);
+        records = (billPluralEntry_t *)(data->pHeader + entry->spranm);
         for (i = 0; i < hData->entryCount; i++) {
             dds3BillAnim_tag *out = (dds3BillAnim_tag *)((u8 *)(i * sizeof(dds3BillAnim_tag)) + (u32)hData->resolvedEntries);
             s32 frameIndex = out->key;
@@ -883,14 +886,14 @@ void dds3Billboard_P2ASetNumber(billHandle_t *pP2A, s32 number) {
         return;
     }
     if (entry->mode & BILL_ANIMATION_FLAG_PLURAL_ENTRIES) {
-        BillPluralRecord *records;
+        billPluralEntry_t *records;
         u32 i = 0;
 
         printf("billAnim..PLURAL SET\n");
         pP2A->modeFlags = 0x10000000;
         pP2A->animationEntryIndex = number;
         pP2A->entryCount = entry->times;
-        records = (BillPluralRecord *)(data->pHeader + entry->spranm);
+        records = (billPluralEntry_t *)(data->pHeader + entry->spranm);
         for (; i < entry->times; i++) {
             dds3Billboard_P2ASetAnim(data, records[i].entryIndex, pP2A->resolvedEntries + i);
             (pP2A->resolvedEntries)[i].key = -records[i].delay;
