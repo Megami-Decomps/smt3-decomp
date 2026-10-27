@@ -774,7 +774,7 @@ extern s32 cmpPlayCursorSE(s32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
-extern s32 cmpUpdateStatusModelLoad(u16 id);
+extern void cmpUpdateStatusModelLoad(u16 id);
 
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 
@@ -953,7 +953,32 @@ void camp_update_Shutdown(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpProcessStart);
+extern char D_0054FE38[];
+
+extern char D_0053F4F0[];
+
+extern char D_0053F500[];
+
+extern void cmpinit();
+
+extern void cmpCalcSequence();
+
+extern void camp_draw_Process();
+
+extern void camp_update_Process();
+
+void cmpProcessStart(void)
+{
+    cmpinit();
+    dds3StartProcess(D_0054FE38, 0x3F2, 1, 0, cmpCalcSequence, NULL, NULL);
+    dds3StartProcess(D_0053F4F0, 0x2B07, 1, 0, camp_draw_Process, NULL, NULL);
+    dds3StartProcess(D_0053F500, 0x520B, 1, 0, camp_update_Process, camp_update_Shutdown, NULL);
+    cmpStartProcessStock(&campWork->stock[0], 0);
+    cmpInitLocalStock();
+    cmpInitDrawList();
+    cmpStartProcessPanelEff(0);
+    campExitState = 1;
+}
 
 extern char D_0054FE38[];
 
@@ -3273,7 +3298,41 @@ void campFreeStatusModel(void)
     flag = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateStatusModelLoad);
+void cmpUpdateStatusModelLoad(u16 id)
+{
+    s32 flag = cmpGetStatusModelFlag();
+
+    switch (flag)
+    {
+    case 0:
+        break;
+    case 1:
+        if (cmpLoadStatusModel() == 0)
+        {
+            if (cmpGetStatusModelLoadState() != 0)
+            {
+                cmpSetStatusModelFlag(0);
+            }
+            else
+            {
+                cmpModelSetup(id, 0);
+                cmpSetStatusModelFlag(2);
+            }
+        }
+        break;
+    case 2:
+        if (cmpLoadStatusModel() == 0)
+        {
+            cmpSetStatusModelFlag(3);
+        }
+        break;
+    case 3:
+        cmpSetStatusModelFlag(0);
+        /* Dead store: blocks the sibcall this arm alone does not take. */
+        flag = 0;
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", camp_update_status_Process);
 
