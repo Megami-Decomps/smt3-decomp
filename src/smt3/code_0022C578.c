@@ -391,7 +391,8 @@ typedef struct
     /* 0x8468 */ s32 unk_8468;
     /* 0x846C */ u8 unk_846C[0x34];
     /* 0x84A0 */ s32 effectStep;
-    /* 0x84A4 */ u8 unk_84A4[0xC];
+    /* 0x84A4 */ u8 unk_84A4[8];
+    /* 0x84AC */ s32 fadeStep;
     /* 0x84B0 */ s32 stockAlpha[16];
     /* 0x84F0 */ s8 stockStep[16];
     /* 0x8500 */ s32 stockDelay[16];
@@ -779,6 +780,8 @@ extern void cmpUpdateStatusModelLoad(u16 id);
 extern void func_001C7E38(void *frq, s32 mode, s32 arg);
 
 extern s32 D_00345D88[];
+
+extern fclSpriteTbl_t fclSpriteTable[];
 
 extern char D_0054FB60[];
 
@@ -1771,7 +1774,31 @@ void campDrawStockCursor(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawNumber);
 
-INCLUDE_ASM(const s32, "code_0022C578", campDrawFade);
+extern void fclDrawSpriteFull(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode, s32 *color, s32 id,
+                              u16 spriteId, s32 *texList, fclSpriteTbl_t *table, s32 OtNo);
+
+void campDrawFade(void)
+{
+    s32 colors[4];
+    s32 color = 0x80808000;
+    s32 alpha = 0x100 - campWork->fadeStep;
+    s32 step;
+
+    if (alpha != 0) {
+        color = alpha / 8 | color;
+        colors[0] = color;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = color;
+        fclDrawSpriteFull(0, 0, 0xFFFFF, 0x200, 0x1C0, 2, colors, 0, 0, D_00345D88,
+                          fclSpriteTable, 0x47);
+    }
+    step = campWork->fadeStep + 0x20;
+    campWork->fadeStep = step;
+    if (step >= 0x101) {
+        campWork->fadeStep = 0x100;
+    }
+}
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FB28);
 
@@ -1801,7 +1828,34 @@ s32 campDebugCheckPad(s8 key)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateRoot);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateItem);
+void cmpUpdateItem(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    switch (button) {
+    case 1:
+        campWork->unk_0001 = button;
+        campWork->unk_0004 = button;
+        break;
+    case 2:
+        campWork->unk_0001 = 0;
+        campWork->unk_0004 = button;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor(&campWork->page[0].cursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&campWork->page[0].cursor, 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&campWork->page[0].cursor, 0);
+    }
+    cmpPlayCursorSE(
+        (u16)cmpDisablePadBitStop((cmpPadStopWork_t *)&campWork->page[0], button, 0x30));
+}
+
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateParty);
 
@@ -3727,8 +3781,6 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
 
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
-
-extern fclSpriteTbl_t fclSpriteTable[];
 
 void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s8 kind)
 {
