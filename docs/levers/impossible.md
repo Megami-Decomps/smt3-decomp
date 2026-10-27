@@ -66,3 +66,19 @@ prologue while doing so: `kernel/dds3StartMenu`'s `InitTitleProcess` has
 call, and a `goto`) emits the same 60-byte framed `jal`. The two symbols are
 one routine with a second entry point, the same shape as `fldSetTerminalState`
 above; `nbCameraPressStart`'s matching two-store body is what `beqz` reaches.
+
+Two more are epilogue-only symbols, which makes the function above each of them
+unwritable too until the split is corrected:
+
+- `sdf/sdfPrint`'s `sdf_2BD3E8` is three instructions, `ld $31, 0x70($29)`,
+  `jr $31`, `addiu $29, $29, 0x80`, with no prologue. It is the epilogue of
+  `sdfPrintRpcThread` directly above it, whose own 0x50 bytes end on
+  `jal sceSifRpcLoop` and its delay slot and whose frame is exactly 0x80 with
+  `$31` at 0x70. One C function covers both symbols' bytes, so neither can be
+  written while the boundary stands.
+- `sdf/sdfTmx`'s `sdf_2C7BC4` is the same thing for
+  `SdfFileRpcServerThreadProc`: `ld $16/$17/$18/$31` at 0xB0, 0xB8, 0xC0, 0xC8
+  and `addiu $29, $29, 0xD0`, matching that function's prologue exactly.
+
+Both are `docs/tu-recovery.md` work, not matching work: drop the epilogue symbol
+from the split and the function above it compiles as one piece.
