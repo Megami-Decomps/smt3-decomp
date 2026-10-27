@@ -2941,7 +2941,26 @@ void cmpDrawItemListHeader(s32 x, s32 y, s32 c, u16 index)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListScrollBar);
 
+/* NON_MATCHING: 2 of 46 words differ (first at +0x90), exact size; the last
+   call's two argument setups are scheduled the other way round. */
+#ifdef NON_MATCHING
+void cmpDrawItemListRow(s32 x, s32 y, s32 z, s32 row, s32 ot)
+{
+    s32 colors[4];
+    s32 color = row * 38 / 0x100;
+
+    colors[2] = 0;
+    colors[3] = 0;
+    colors[0] = color;
+    colors[1] = color;
+    fclDrawPanelSprite(0x1003, ot);
+    cmpDrawBoxGDefault(x, y, z, 0x95, 0xB6, colors, ot);
+    fclDrawPanelSprite(0x5101B, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListRow);
+#endif
+
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcItemEntry);
 
