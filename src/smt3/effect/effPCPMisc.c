@@ -98,14 +98,14 @@ struct effPCPThunderSpherePolyPart_t;
 struct EffThunderVectorParams;
 struct effPCPThunderSpherePoly_t;
 struct effTrackPolyParams_t;
-struct IpuDmaState;
+struct sdfIpuDmaRegs_t;
 struct dds3ModelBlurCb_t;
 struct dds3ModelBlurInstance_t;
 struct mdlIpuAttachment_t;
 struct pibChunkItem_t;
 struct dds3ModelEffectCtrlr_t;
 struct sdfMotionCutDef_t;
-struct MovLinearStream;
+struct sdfMovieStrmLinear_t;
 union movieDecodeCtx_t;
 struct parCell_t;
 struct sdfVector3_t;
@@ -116,7 +116,7 @@ struct sdfModelNodeDef_t;
 struct sdfModelNodeDefList_t;
 struct sdfMotionNodeDef_t;
 struct sdfIpuDecodeCb_t;
-struct SdfStreamInputDmaTag;
+struct sdfIpuDmaTag_t;
 struct sdfGsMemSlice_t;
 struct effBTLBank_t;
 
@@ -243,14 +243,14 @@ typedef struct dds3ModelBlurCb_t dds3ModelBlurCb_t;
 typedef struct EffTrackPolyData EffTrackPolyData;
 typedef struct effTrackPolyParams_t effTrackPolyParams_t;
 typedef struct mdlTrackWork_t mdlTrackWork_t;
-typedef struct IpuDmaState IpuDmaState;
+typedef struct sdfIpuDmaRegs_t sdfIpuDmaRegs_t;
 typedef struct sdfFileCmdHandle_t sdfFileCmdHandle_t;
-typedef struct MovLinearStream MovLinearStream;
-typedef struct MovPacStream MovPacStream;
+typedef struct sdfMovieStrmLinear_t sdfMovieStrmLinear_t;
+typedef struct sdfMovieStrmPac_t sdfMovieStrmPac_t;
 typedef union movieDecodeCtx_t movieDecodeCtx_t;
 typedef struct sdfIpuDecodeCb_t sdfIpuDecodeCb_t;
 typedef struct movieStream_t movieStream_t;
-typedef struct SdfStreamInputDmaTag SdfStreamInputDmaTag;
+typedef struct sdfIpuDmaTag_t sdfIpuDmaTag_t;
 typedef struct mdlEffectResrc_IPU_t mdlEffectResrc_IPU_t;
 typedef struct mdlIpuAttachment_t mdlIpuAttachment_t;
 typedef struct mdlEffectResrcItem_t mdlEffectResrcItem_t;
@@ -1909,7 +1909,7 @@ struct mdlTrackWork_t {
 struct mdlEffectResrc_IPU_t;
 
 /* IPU register state saved across stream callbacks (0x24 bytes). */
-struct IpuDmaState {
+struct sdfIpuDmaRegs_t {
     u32 inputAddress;
     u32 inputTagAddress;
     u32 inputQwords;
@@ -1956,10 +1956,10 @@ struct sdfFileCmdHandle_t {
 /* The +0x1C movie work pointer selects one of two separately allocated records.
  * isPac at +3 chooses the active arm; the variant payload types live in
  * sdf_movie_stream.h. */
-struct MovLinearStream;
+struct sdfMovieStrmLinear_t;
 
 /* Chip-heap work record for the linear movie stream (0x14 bytes). */
-struct MovLinearStream {
+struct sdfMovieStrmLinear_t {
     struct sdfMemHandle_t *allocation;
     u8 *bufferStart;
     u8 *readCursor;
@@ -1967,11 +1967,11 @@ struct MovLinearStream {
     s32 bufferedBytes;
 };
 
-struct MovPacStream;
+struct sdfMovieStrmPac_t;
 
 /* Chip-heap work record for movie-PAC streaming (0x78 bytes). The
  * block-mask allocation and the backing ring allocation are separate owners. */
-struct MovPacStream {
+struct sdfMovieStrmPac_t {
     u8 pad00[0x18];
     s32 packetBytes;
     s32 blockBytes;
@@ -1993,8 +1993,8 @@ struct MovPacStream {
 };
 
 union movieDecodeCtx_t {
-    struct MovLinearStream *linear;
-    struct MovPacStream *pac;
+    struct sdfMovieStrmLinear_t *linear;
+    struct sdfMovieStrmPac_t *pac;
 };
 
 struct sdfIpuDecodeCb_t {
@@ -2028,7 +2028,7 @@ struct sdfIpuDecodeCb_t {
     u32 frameCount;
     u32 tickCount;
     s32 frame;
-    struct SdfStreamInputDmaTag *inputDmaChain;
+    struct sdfIpuDmaTag_t *inputDmaChain;
     u8 headerReady;
     u8 done;
     u8 filledSlots;
@@ -2040,7 +2040,7 @@ struct sdfIpuDecodeCb_t {
     u8 inputFeedDmaInFlight;
     u8 strmToIpuDmaStep;
     u8 pad66[2];
-    IpuDmaState dma;
+    sdfIpuDmaRegs_t dma;
 };
 
 struct movieStream_t {
@@ -2065,10 +2065,12 @@ struct movieStream_t {
 };
 
 /* One 0x8C allocation owns the stream/sound links and IPU transfer state. */
-struct SdfStreamInputDmaTag;
+struct sdfIpuDmaTag_t;
 
 /* One 16-byte tag in the IPU input DMA chain. */
-struct SdfStreamInputDmaTag {
+/* One tag in the to-IPU chain. Written as two quadword halves rather than by
+ * field, which is what the single 64-bit store in sdfIpuSetStreamChunk needs. */
+struct sdfIpuDmaTag_t {
     u64 control;
     u64 reserved;
 };
