@@ -3195,7 +3195,24 @@ s32 camp_calc_status_Process(s32 id)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", camp_draw_status_Process);
+s32 camp_draw_status_Process(s32 id)
+{
+    datUnitWork_t *unit =
+        (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + cmpStatusPhase->slot[cmpStatusPhase->slotCursor];
+
+    cmpStatusPhase = dds3GetProcessData(id);
+    if (cmpStatusWindowHidden != 0)
+    {
+        return 0;
+    }
+    if ((cmpStatusPhase->flags & 0x20) != 0)
+    {
+        cmpUpdateTerminate((cmpInfoWindow_t *)cmpStatusPhase);
+        return -1;
+    }
+    cmpDrawStatusCom((s32)unit, 0, 0, 0);
+    return 0;
+}
 
 void campFreeStatusModel(void)
 {
@@ -3768,7 +3785,15 @@ u16 cmpGetStatusModelId(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmp_23F8F0);
 
-INCLUDE_ASM(const s32, "code_0022C578", func_0023F9F8);
+void func_0023F9F8(u16 id, f32 delta)
+{
+    if (delta < 0.0f && cmpModelParamTable[id].scale - delta < 0.0f)
+    {
+        return;
+    }
+    cmpModelParamTable[id].scale += delta;
+    cmpGetStatusModelMotion(cmpEncycWork);
+}
 
 void func_0023FA98(u16 id, s32 x, s32 y, s32 z)
 {
