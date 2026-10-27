@@ -6,7 +6,7 @@
 struct dds3ModelResrc_t;
 struct dds3ModelResrcPlayBook_t;
 struct P2A_ANIMATION_tag;
-struct BillPacketWork;
+struct sdfBillBoardBatch_t;
 struct P2A_TEXANIM_tag;
 struct billRenderPair_t;
 struct billUvQuad_t;
@@ -93,9 +93,7 @@ struct effResourceRectDrawParams_t;
 struct EffSpawnParams;
 struct effPCPThunderSpherePolyParam_t;
 struct effPCP_ThunderPolyParam_t;
-union EffThunderParameterHead;
 struct effPCPThunderSpherePolyPart_t;
-struct EffThunderVectorParams;
 struct effPCPThunderSpherePoly_t;
 struct effTrackPolyParams_t;
 struct sdfIpuDmaRegs_t;
@@ -121,7 +119,7 @@ struct sdfGsMemSlice_t;
 struct effBTLBank_t;
 
 typedef struct billUvQuad_t billUvQuad_t;
-typedef struct BillPacketWork BillPacketWork;
+typedef struct sdfBillBoardBatch_t sdfBillBoardBatch_t;
 typedef struct sdfTexPacket_t sdfTexPacket_t;
 typedef struct dds3BillResource_tag dds3BillResource_tag;
 typedef struct P2A_ANIMATION_tag P2A_ANIMATION_tag;
@@ -179,8 +177,6 @@ typedef struct effPCPRadiateBED_tag effPCPRadiateBED_tag;
 typedef struct effPCPHelperBEDParam_t effPCPHelperBEDParam_t;
 typedef struct EffPCPEventPlace EffPCPEventPlace;
 typedef struct effPCPThunderSpherePolyParam_t effPCPThunderSpherePolyParam_t;
-typedef struct EffThunderVectorParams EffThunderVectorParams;
-typedef union EffThunderParameterHead EffThunderParameterHead;
 typedef struct effPCPThunderSpherePolyPart_t effPCPThunderSpherePolyPart_t;
 typedef struct parCell_t parCell_t;
 typedef struct parSystem_t parSystem_t;
@@ -272,11 +268,11 @@ struct billUvQuad_t {
 };
 
 /* Fifteen billboard quads precede the child manager in its 0x450 allocation. */
-struct BillPacketWork {
-    f32 positions[15][4]; /* 0x000 */
-    u32 colors[15];       /* 0x0F0 */
+struct sdfBillBoardBatch_t {
+    f32 centre[15][4]; /* 0x000 */
+    u32 color[15];       /* 0x0F0 */
     billUvQuad_t uv[15]; /* 0x12C */
-    f32 offsets[15][8];   /* 0x21C: four X/Y corner offsets per quad */
+    f32 offset[15][8];   /* 0x21C: four X/Y corner offset per quad */
     s32 count;           /* 0x3FC */
 };
 
@@ -328,7 +324,7 @@ struct dds3BillResource_tag {
     u16 current_mode; /* 0x40 */
     u8 pad42[2];
     struct sdfMemHandle_t *hMem; /* 0x44: hMem descriptor released with this child. */
-    BillPacketWork *batch; /* 0x48: retained packet-buffer address */
+    sdfBillBoardBatch_t *batch; /* 0x48: retained packet-buffer address */
     struct dds3BillResource_tag *next; /* 0x4C */
 };
 
@@ -1016,11 +1012,11 @@ struct effPCPRadiateBEDParam_t {
 
 struct effBTL_t;
 
-struct BattleEffect;
+struct effBTLCut_t;
 
-typedef struct BattleEffect BattleEffect;
+typedef struct effBTLCut_t effBTLCut_t;
 
-typedef void (*BattleEffectCallback)(BattleEffect *effect);
+typedef void (*effBTLCallback_t)(effBTLCut_t *effect);
 
 struct effBTL_SkillPositionPtr_t {
     u8 target;
@@ -1063,7 +1059,9 @@ struct effBTL_SkillCutTable_t {
     effBTL_SkillPartsList_t entries[1];     /* 0x78 */
 };
 
-struct BattleEffect {
+/* One cut in effBTL_t's list. effBattle.h reads the same record without the
+ * colour and flag words at +8, and neither reading is exercised here. */
+struct effBTLCut_t {
     void *owner; /* 0x00 */
     effBTL_t *state; /* 0x04 */
     u32 color; /* 0x08 */
@@ -1077,10 +1075,10 @@ struct BattleEffect {
     s32 unk20;
     struct effBTL_SkillCutTable_t *list; /* 0x24 */
     struct effPartHandle_t *parameterWorks[0x3C]; /* 0x28 */
-    BattleEffectCallback sourceFrameCallback; /* 0x118 */
-    BattleEffectCallback triggerFrameCallback; /* 0x11C */
+    effBTLCallback_t sourceFrameCallback; /* 0x118 */
+    effBTLCallback_t triggerFrameCallback; /* 0x11C */
     u32 unk120;
-    BattleEffect *next; /* 0x124 */
+    effBTLCut_t *next; /* 0x124 */
 };
 
 struct effBTLBank_t {
@@ -1094,7 +1092,7 @@ struct effBTL_t {
     u8 pad0C30[8];
     struct sdfMemHandle_t *resource; /* 0xC38: owns the mixer allocation. */
     u32 active;
-    BattleEffect *voiceList;
+    effBTLCut_t *voiceList;
 };
 
 struct effPCPRadiateBED_tag {
@@ -1124,6 +1122,10 @@ struct EffPCPEventPlace {
 };
 
 /* Alpha-system parameters supply three packed words to the particle system. */
+/* The sphere-poly parameters, 0x4C bytes the constructors copy whole. The tail
+ * is the thunder family's six fields: a width and a colour for the centre, the
+ * border and the edge. The decomp read it twice, once for the widths and once
+ * for the colours, which is why the two views agreed on everything before. */
 struct effPCPThunderSpherePolyParam_t {
     f32 origin[4];
     u16 systemParam;
@@ -1136,41 +1138,16 @@ struct effPCPThunderSpherePolyParam_t {
     u32 startDelayRange;
     u32 activeFrameRange;
     u16 perCell;
-    u8 pad32[6];
-    u32 centerAlphaWord;
-    u32 reserved3C;
-    u32 middleAlphaWord;
-    u32 reserved44;
-    u32 edgeAlphaWord;
+    u8 pad32[2];
+    f32 width_center; /* 0x34: nothing reads it */
+    u32 color_center;
+    f32 width_border;
+    u32 color_border;
+    f32 width_edge;
+    u32 color_edge;
 };
 
 /* Indexed-vector parameters retain a dispatch pointer and geometry widths. */
-struct EffThunderVectorParams {
-    f32 origin[4];
-    u16 systemParam;
-    u8 pad12[2];
-    u32 cellCount;
-    u8 pad18[4];
-    f32 radiusScale;
-    f32 heightScale;
-    f32 rotationScale;
-    u32 startDelayRange;
-    u32 activeFrameRange;
-    u16 perCell;
-    u8 pad32[0xA];
-    f32 bandWidth;
-    void *dispatchArg;
-    f32 edgeWidth;
-    u8 pad48[4];
-};
-
-/* Constructors copy all 0x4C bytes. The vector updater reads the retained
- * geometry bytes through the vector view for both constructor variants. */
-union EffThunderParameterHead {
-    EffThunderVectorParams vector;
-    effPCPThunderSpherePolyParam_t alpha;
-};
-
 struct effPCPThunderSpherePolyPart_t {
     u32 wait;
     u32 refresh;
@@ -1209,7 +1186,7 @@ struct parSystem_t {
 
 /* The complete work is followed by cellCount cells in the same allocation. */
 struct effPCPThunderSpherePoly_t {
-    EffThunderParameterHead head;
+    effPCPThunderSpherePolyParam_t head;
     effPCPThunderSpherePolyPart_t *pPart;
     u32 abgr;
     f32 width_base;
