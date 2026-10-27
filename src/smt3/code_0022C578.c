@@ -3943,7 +3943,31 @@ void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockHighlight);
 
-INCLUDE_ASM(const s32, "code_0022C578", campCheckStockFree);
+extern void campDrawStockHighlight(s32 x, s32 y, s32 c, s32 d, s32 e, s32 f, s8 g, s32 h,
+                                   s32 ot);
+
+s32 campCheckStockFree(s32 x, s32 y, s8 index, s8 room, s8 known, s32 f, s8 g)
+{
+    s32 slot;
+    s32 off;
+
+    if (index < 0) {
+        return 0;
+    }
+    if (known == 0) {
+        slot = cmpFindFreeStockSlot(index, room);
+    } else {
+        slot = index;
+    }
+    if (room != 0) {
+        off = slot * 24 + 0x24;
+    } else {
+        off = slot * 24 + 0x8F;
+    }
+    campDrawStockHighlight((x + 0xCE) << 4, (y + off) * 8, 0, 0, 0, f, g, 0, 0x47);
+    return off * 8;
+}
+
 
 /* NON_MATCHING: 14 of 39 words differ at the exact size: retail keeps a second
  * register holding work + ofs that the C coalesces away. */
