@@ -7,21 +7,13 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 8 types, 900 members, 506 adopted constants.
+# 4 types, 896 members, 506 adopted constants.
 
-type AtExitEntry
-type AtExitList
 type BillPluralRecord
 type EffPCPCompactTimelineParams
 type EffPCPEventPlace
 type EffSpawnParams
-type SdfUnpacked
-type SdfUnpackedD
 
-member AtExitEntry.unk00
-member AtExitEntry.unk04
-member AtExitEntry.unk0C
-member AtExitEntry.unk10
 member dds3ModelResrc_t.unk_AC
 member BillPluralRecord.unk08
 member GParam.unk0

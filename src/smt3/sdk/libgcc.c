@@ -162,19 +162,22 @@ typedef struct _glue {
     FILE *iobs;
 } _glue;
 
-typedef struct AtExitEntry {
-    void *unk00;
-    void *unk04;
-    void *fn;
-    void *unk0C;
-    void *unk10;
-    struct AtExitEntry *next;
-} AtExitEntry;
+/* libgcc frame-dwarf2.c's object list node. __register_frame_info stores the
+ * FDE base and clears the rest; __register_frame allocates one of these. */
+typedef struct object {
+    void *pc_begin;
+    void *pc_end;
+    void *fde_begin;
+    void *fde_array;
+    void *count;
+    struct object *next;
+} object;
 
-typedef struct AtExitList {
-    u32 **entries;
+/* libgcc's fde_vector, as add_fdes fills it. */
+typedef struct fde_vector {
+    u32 **array;
     s32 count;
-} AtExitList;
+} fde_vector;
 
 typedef struct _atexit {
     struct _atexit *_next;
@@ -333,18 +336,18 @@ extern void (*D_002F5600[])(void) __attribute__((section(".data")));
 
 extern s32 D_0059AD58 __attribute__((section(".data")));
 
-extern AtExitEntry *D_0059AD60 __attribute__((section(".data")));
+extern object *D_0059AD60 __attribute__((section(".data")));
 
-typedef struct SdfUnpacked {
-    s32 kind;
+typedef struct fp_number_type {
+    s32 class;
     s32 sign;
-    s32 exp;
-    u32 mant;
-} SdfUnpacked;
+    s32 normal_exp;
+    u32 fraction;
+} fp_number_type;
 
-extern void sdfUnpackFloat(const void *x, SdfUnpacked *u);
+extern void sdfUnpackFloat(const void *x, fp_number_type *u);
 
-extern f32 sdfPackFloat(const SdfUnpacked *u);
+extern f32 sdfPackFloat(const fp_number_type *u);
 
 extern long dptoul(s32 kind, s32 sign, s32 exp, long mant);
 
@@ -357,20 +360,21 @@ typedef union f32_bits {
     u32 u;
 } f32_bits;
 
-typedef struct SdfUnpackedD {
-    s32 kind;
+/* The same record from the double-precision build of fp-bit.c. */
+typedef struct fp_number_type_df {
+    s32 class;
     s32 sign;
-    s32 exp;
-    long mant;
-} SdfUnpackedD;
+    s32 normal_exp;
+    long fraction;
+} fp_number_type_df;
 
-extern long libc_2D34A0(const SdfUnpackedD *u);
+extern long libc_2D34A0(const fp_number_type_df *u);
 
-extern void sdfUnpackDouble(const double *x, SdfUnpackedD *u);
+extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
-extern SdfUnpackedD *libc_2D1590(const SdfUnpackedD *a, const SdfUnpackedD *b, SdfUnpackedD *r);
+extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
 
-extern long libc_2D3638(const SdfUnpackedD *a, const SdfUnpackedD *b);
+extern long libc_2D3638(const fp_number_type_df *a, const fp_number_type_df *b);
 
 
 void runAtExitList(void) {
@@ -397,18 +401,18 @@ void initFloatOnce(void) {
 }
 
 long sdfFloatToULong(f32 x) {
-    SdfUnpacked u;
+    fp_number_type u;
 
     sdfUnpackFloat(&x, &u);
-    return dptoul(u.kind, u.sign, u.exp, (long)u.mant << 30);
+    return dptoul(u.class, u.sign, u.normal_exp, (long)u.fraction << 30);
 }
 
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1590);
 
 long dpadd(double a, double b) {
-    SdfUnpackedD ua;
-    SdfUnpackedD ub;
-    SdfUnpackedD r;
+    fp_number_type_df ua;
+    fp_number_type_df ub;
+    fp_number_type_df r;
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
@@ -416,9 +420,9 @@ long dpadd(double a, double b) {
 }
 
 long dpsub(double a, double b) {
-    SdfUnpackedD ua;
-    SdfUnpackedD ub;
-    SdfUnpackedD r;
+    fp_number_type_df ua;
+    fp_number_type_df ub;
+    fp_number_type_df r;
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
@@ -429,8 +433,8 @@ long dpsub(double a, double b) {
 INCLUDE_ASM(const s32, "sdk/libgcc", dpmul);
 
 long dpdiv(double a, double b) {
-    SdfUnpackedD ua;
-    SdfUnpackedD ub;
+    fp_number_type_df ua;
+    fp_number_type_df ub;
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
@@ -442,12 +446,12 @@ INCLUDE_ASM(const s32, "sdk/libgcc", litodp);
 INCLUDE_ASM(const s32, "sdk/libgcc", dptoli);
 
 long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
-    SdfUnpackedD u;
+    fp_number_type_df u;
 
-    u.kind = kind;
+    u.class = kind;
     u.sign = sign;
-    u.exp = exp;
-    u.mant = mant;
+    u.normal_exp = exp;
+    u.fraction = mant;
     return libc_2D34A0(&u);
 }
 
@@ -456,12 +460,12 @@ f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant);
 #endif
 
 u32 sdfDoubleToULong(double x) {
-    SdfUnpackedD u;
+    fp_number_type_df u;
     u32 m;
 
     sdfUnpackDouble(&x, &u);
-    m = u.mant >> 30;
-    if (u.mant & 0x3FFFFFFF) {
+    m = u.fraction >> 30;
+    if (u.fraction & 0x3FFFFFFF) {
         m |= 1;
     }
     /* BUG: sdfPackQuad returns f32, which this target returns in $f0, but
@@ -469,7 +473,7 @@ u32 sdfDoubleToULong(double x) {
      * $v0. So what comes back is not the packed value at all. Retail does
      * this, and declaring the function moves the image, so the behaviour is
      * kept and the declaration sits behind FIX_BUGS. */
-    return sdfPackQuad(u.kind, u.sign, u.exp, m);
+    return sdfPackQuad(u.class, u.sign, u.normal_exp, m);
 }
 
 INCLUDE_ASM(const s32, "sdk/libgcc", sdfDoubleToUInt);
@@ -512,13 +516,13 @@ INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1EA8);
 INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D1FA0);
 
 s32 registerAtExit(void *fn, void *entry) {
-    AtExitEntry *e = entry;
+    object *e = entry;
 
-    e->fn = fn;
-    e->unk04 = NULL;
-    e->unk00 = NULL;
-    e->unk0C = NULL;
-    e->unk10 = NULL;
+    e->fde_begin = fn;
+    e->pc_end = NULL;
+    e->pc_begin = NULL;
+    e->fde_array = NULL;
+    e->count = NULL;
     WaitSema(D_0052C37C);
     e->next = D_0059AD60;
     D_0059AD60 = e;
@@ -533,13 +537,13 @@ s32 libc_2D2580(void *fn) {
 }
 
 s32 libc_2D25B0(void *fn, void *entry) {
-    AtExitEntry *e = entry;
+    object *e = entry;
 
-    e->fn = fn;
-    e->unk0C = fn;
-    e->unk04 = NULL;
-    e->unk00 = NULL;
-    e->unk10 = NULL;
+    e->fde_begin = fn;
+    e->fde_array = fn;
+    e->pc_end = NULL;
+    e->pc_begin = NULL;
+    e->count = NULL;
     WaitSema(D_0052C37C);
     e->next = D_0059AD60;
     D_0059AD60 = e;
@@ -571,7 +575,7 @@ s32 libc_2D2728(u32 *p) {
     return n;
 }
 
-void libc_2D2768(u32 *p, AtExitList *list, u32 *pmin, u32 *pmax) {
+void libc_2D2768(u32 *p, fde_vector *list, u32 *pmin, u32 *pmax) {
     u32 lo = *pmin;
     u32 hi = *pmax;
 
@@ -580,8 +584,8 @@ void libc_2D2768(u32 *p, AtExitList *list, u32 *pmin, u32 *pmax) {
             u32 a = p[2];
 
             if (a != 0) {
-                if (list->entries != NULL) {
-                    list->entries[list->count++] = p;
+                if (list->array != NULL) {
+                    list->array[list->count++] = p;
                 }
                 if (a < lo) {
                     lo = a;
@@ -628,12 +632,12 @@ INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D3398);
 INCLUDE_ASM(const s32, "sdk/libgcc", sdfUnpackFloat);
 
 f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
-    SdfUnpacked u;
+    fp_number_type u;
 
-    u.kind = kind;
+    u.class = kind;
     u.sign = sign;
-    u.exp = exp;
-    u.mant = mant;
+    u.normal_exp = exp;
+    u.fraction = mant;
     return sdfPackFloat(&u);
 }
 
