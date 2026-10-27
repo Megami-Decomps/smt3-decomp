@@ -66,7 +66,7 @@ MIN_INSNS = 8
 SIZE_BAND = 0.15
 # Sequence comparison is the expensive step; only the best of the cheap score run it.
 RERANK = 40
-# Shortest shared name prefix that makes two IDB names variants of one another.
+# Shortest shared name prefix worth offering as a same-family candidate.
 FAMILY_PREFIX = 8
 
 
@@ -227,10 +227,13 @@ class Index:
 
 
 def family(funcs: dict[str, dict], name: str) -> list[dict]:
-    """Matched functions whose IDB name is a variant of this one.
+    """Matched functions sharing a long name prefix with this one.
 
     A size band hides the variant that grew: effBTLModelLook2 is 272 bytes
-    against effBTLModelLook's 172. The shared name prefix does not care.
+    against effBTLModelLook's 172, so the sequence search never offers it. A
+    shared prefix does not care about size. It is only a candidate generator,
+    since effBTLModelHide shares the same stem and is a different function:
+    rank what comes back by sequence ratio and read the top of that.
     """
     if len(name) < FAMILY_PREFIX or name.startswith(("func_", "D_")):
         return []
@@ -241,8 +244,7 @@ def family(funcs: dict[str, dict], name: str) -> list[dict]:
         i = 0
         while i < min(len(name), len(g["name"])) and name[i] == g["name"][i]:
             i += 1
-        if i >= FAMILY_PREFIX and (i in (len(name), len(g["name"]))
-                                   or i >= 0.66 * max(len(name), len(g["name"]))):
+        if i >= FAMILY_PREFIX:
             out.append(g)
     return out
 
@@ -308,29 +310,46 @@ def asm_path(f: dict, version: str = VERSION) -> str:
 
 # --- reporting -------------------------------------------------------------------
 
-def row(ratio: float, t: dict, c: dict) -> str:
-    return (f"{ratio:.3f} {t['name']:<36} {t['n'] * 4:>5}B {t['unit']:<30} "
+def row(ratio: float, t: dict, c: dict, diffs: int | None = None) -> str:
+    left = f"{diffs:>4} sub" if diffs is not None else f"{ratio:.3f}   "
+    return (f"{left} {t['name']:<36} {t['n'] * 4:>5}B {t['unit']:<30} "
             f"<- {c['name']:<36} {c['n'] * 4:>5}B {c['unit']}")
+
+
+def best_template(funcs: dict[str, dict], index: Index,
+                  t: dict) -> tuple[float, dict] | None:
+    """The closest matched function by sequence, or by name family if that is closer."""
+    near = index.nearest(t, top=1)
+    fam = sorted(((index.ratio(t, g), g) for g in family(funcs, t["name"])),
+                 key=lambda x: -x[0])[:1]
+    return max(near + fam, key=lambda x: x[0]) if near or fam else None
 
 
 def worklist(funcs: dict[str, dict], tier: int, unit: str | None, count: int,
              floor: float) -> None:
+    """Unmatched functions ranked by retail bytes per substitution left to make.
+
+    The ranking reads the exact-tier difference count, not the sequence ratio:
+    at a ratio of 0.8 the median template still differs in two thirds of its
+    instructions, which is a rewrite rather than a substitution.
+    """
     index = Index(funcs, tier)
     targets = [f for f in funcs.values() if f["state"] == "asm" and f["n"] >= MIN_INSNS
                and (unit is None or f["unit"].startswith(unit))]
     rows = []
     for t in targets:
-        near = index.nearest(t, top=1)
-        if near and near[0][0] >= floor:
-            ratio, c = near[0]
-            # Bytes landed per unit of shape left to close.
-            rows.append((t["n"] * 4 * ratio / max(1.0 - ratio, 0.02), ratio, t, c))
+        best = best_template(funcs, index, t)
+        if best is None or best[0] < floor:
+            continue
+        diffs = len(differences(t, best[1]))
+        rows.append((t["n"] * 4 / (diffs + 1), diffs, best[0], t, best[1]))
     rows.sort(key=lambda r: -r[0])
     print(f"{len(rows)} of {len(targets)} unmatched functions have a matched "
-          f"{TIERS[tier]} neighbour at {floor:.2f} or better "
-          f"({sum(r[2]['n'] * 4 for r in rows)} retail bytes)")
-    for _, ratio, t, c in rows[:count]:
-        print(row(ratio, t, c))
+          f"{TIERS[tier]} template at ratio {floor:.2f} or better "
+          f"({sum(r[3]['n'] * 4 for r in rows)} retail bytes). "
+          f"'sub' is how many instructions the template does not already supply.")
+    for _, diffs, ratio, t, c in rows[:count]:
+        print(row(ratio, t, c, diffs))
 
 
 def main() -> None:
@@ -343,7 +362,8 @@ def main() -> None:
                     help="groups of unmatched functions with the same shape")
     ap.add_argument("--unit", help="restrict to units whose path starts with this")
     ap.add_argument("--tier", choices=TIERS, default="mnem")
-    ap.add_argument("--floor", type=float, default=0.75, help="lowest ratio to report")
+    ap.add_argument("--floor", type=float, default=0.9,
+                    help="lowest sequence ratio to report (below 0.9 a template is a rewrite)")
     ap.add_argument("-n", "--count", type=int, default=40)
     ap.add_argument("--force", action="store_true", help="rebuild the disassembly cache")
     ap.add_argument("--stats", action="store_true", help="per-tier cluster and neighbour counts")
@@ -416,7 +436,7 @@ def show_one(funcs: dict[str, dict], tier: int, name: str, want_body: bool) -> N
             best = near[0]
     fam = sorted(((index.ratio(t, g), g) for g in family(funcs, name)), key=lambda x: -x[0])
     seen = {c["name"] for _, c in index.nearest(t, top=3)}
-    fam = [(r, g) for r, g in fam if g["name"] not in seen]
+    fam = [(r, g) for r, g in fam if g["name"] not in seen][:3]
     if fam:
         print("  matched name-family variants:")
         for ratio, g in fam[:3]:
