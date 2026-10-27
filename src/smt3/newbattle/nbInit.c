@@ -45,9 +45,12 @@ void nbExit(void)
     nbKillMainProcess();
 }
 
+/* NON_MATCHING: 29 of 40 words differ, at the exact 160-byte size. */
+#ifdef NON_MATCHING
 void nbCallNewBattle(s32 encpackno, s32 code)
 {
     s32 encno = (u16)code;
+    nbEncountForm_t *form = &nbEncountFormTable[encno];
     s32 stagemajor;
     s32 stageminor;
 
@@ -55,8 +58,8 @@ void nbCallNewBattle(s32 encpackno, s32 code)
         stagemajor = nbEncountTable[encpackno].stagemajor;
         stageminor = nbEncountTable[encpackno].stageminor;
     } else {
-        stagemajor = nbEncountFormTable[encno].stagemajor;
-        stageminor = nbEncountFormTable[encno].stageminor;
+        stagemajor = form->stagemajor;
+        stageminor = form->stageminor;
         if (stagemajor == 0 && stageminor == 0) {
             stagemajor = 0xC9;
             stageminor = 1;
@@ -65,3 +68,6 @@ void nbCallNewBattle(s32 encpackno, s32 code)
     nbInitMainProcess(encpackno, (u32)code >> 24, (code >> 16) & 0xFF, encno, stagemajor,
                       stageminor);
 }
+#else
+INCLUDE_ASM(const s32, "newbattle/nbInit", nbCallNewBattle);
+#endif
