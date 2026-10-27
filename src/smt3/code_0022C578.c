@@ -1067,7 +1067,34 @@ u16 cmpGetSelectItemID(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetItSkMessageVar);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetItSkErrSelFlag);
+extern s32 cmpGetSkillTargetArea(u16 skillId);
+
+s32 cmpGetItSkErrSelFlag(u16 skillId)
+{
+    s32 flags = 0;
+    s32 area = cmpGetSkillTargetArea(skillId);
+    datUnitWork_t *unit;
+    s32 i;
+
+    switch (area)
+    {
+    case 1:
+        flags = 1 << cmpGetSelectedStockIndex();
+        break;
+    case 2:
+        unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+        for (i = 0; i < 16; i++)
+        {
+            if ((unit->flag & 2) != 0)
+            {
+                flags |= 1 << i;
+            }
+            unit++;
+        }
+        break;
+    }
+    return flags;
+}
 
 s32 cmpFindSkillMsgIndex(s32 which, u16 id)
 {
@@ -1316,7 +1343,28 @@ void cmp_22E258(void *work)
     memset(work, 0, 0x2128);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitSkillCursor);
+s32 cmpInitSkillCursor(datUnitWork_t *unit)
+{
+    s32 n = 0;
+    u16 *skill;
+
+    if (unit->skillcnt != 0)
+    {
+        skill = &unit->skill[0];
+        do
+        {
+            if (cmpChkDoNotUseSkill(*skill++) == 0)
+            {
+                return 1;
+            }
+            n++;
+            cmpMoveCursor((cmpCursorInfo_t *)campWork->unk_410C, 1);
+        } while (n < unit->skillcnt);
+    }
+    cmpMoveCursor((cmpCursorInfo_t *)campWork->unk_410C, 0);
+    cmpMoveCursor((cmpCursorInfo_t *)campWork->unk_410C, 1);
+    return 0;
+}
 
 void cmpInitStockCursorPos(void)
 {
@@ -3478,7 +3526,28 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockHighlight);
 
 INCLUDE_ASM(const s32, "code_0022C578", campCheckStockFree);
 
+/* NON_MATCHING: 14 of 39 words differ at the exact size: retail keeps a second
+ * register holding work + ofs that the C coalesces away. */
+#ifdef NON_MATCHING
+s32 campCheckStockRoom(s8 index, s8 listIndex, s8 *pRoom, u8 *pFlag, cmpStockWork_t *work, s8 skip)
+{
+    s32 ofs = index * 0x103C + 0xD0;
+    u8 *p = (u8 *)work + ofs;
+    s32 ret = *(s32 *)(p + 0xC);
+    s8 room;
+
+    *pFlag = p[0x14];
+    if (skip == 0)
+    {
+        room = cmpStockHasRoom(work, index);
+        *pRoom = room;
+        cmpFindFreeStockSlot(listIndex, room);
+    }
+    return ret;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campCheckStockRoom);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockSlots);
 
