@@ -82,3 +82,41 @@ unwritable too until the split is corrected:
 
 Both are `docs/tu-recovery.md` work, not matching work: drop the epilogue symbol
 from the split and the function above it compiles as one piece.
+
+## Handwritten assembly, found by an instruction cc1 never emits
+
+ee-gcc 2.96 materialises a small constant with `addiu`, never `addi`, so an
+`addi rd, $0, imm` in a body means the body was written by hand. The split
+asm already marks each one `/* handwritten instruction */`; this is the list,
+so nobody spends a pass on one. Re-derive it with:
+
+    grep -rlE '\*/\s+(addi|subi) ' asm/smt3/nonmatchings/
+
+21 functions, 3864 bytes. Nineteen are the `corePkt*`
+VU1 packet builders in `sdf/sdfVu1`, which hand-assemble the DMA tags they emit.
+
+`sdf/sdfDev9`:
+- `sdf_2BFC58` (148 B)
+`sdf/sdfMovie`:
+- `release_movieobj2` (604 B)
+`sdf/sdfTex`:
+- `sdfTexSetPacket` (364 B)
+`sdf/sdfVu1`:
+- `corePktVu0Run` (308 B)
+- `corePktEmitRefMapPass` (292 B)
+- `corePktXfmLightClipUV` (252 B)
+- `corePktXfmLightClipUVPB` (212 B)
+- `corePktSkinPointsAccum` (204 B)
+- `corePktXfmLightClip` (204 B)
+- `corePktXfmLightClipPB` (164 B)
+- `corePktApplyFaceDivColor` (156 B)
+- `corePktRelightBackFaces` (144 B)
+- `corePktSkinPointsFirst` (140 B)
+- `corePktMorphVertsNorms` (116 B)
+- `corePktSkinVertAccum` (100 B)
+- `corePktXfmUV` (100 B)
+- `corePktSkinVertFirst` (92 B)
+- `corePktLoadVertsNorms` (76 B)
+- `corePktMorphVerts` (76 B)
+- `corePktNormalizeNorms` (60 B)
+- `corePktLoadVerts` (52 B)
