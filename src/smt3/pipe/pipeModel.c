@@ -52,7 +52,51 @@ extern void dds3SetRotPoseSet(void *pBasic, f32 *rot);
 extern void dds3SetSclPoseSet(void *pBasic, f32 *scl);
 
 
-INCLUDE_ASM(const s32, "pipe/pipeModel", InitModel);
+extern s32 dds3AllocObjectId(void);
+
+extern dds3Basic_t *dds3AddUnitObjectBasic(s32 serialID, void *aPos, void *aRot);
+
+extern dds3Basic_t *dds3GetControlScene(void);
+
+extern dds3Basic_t *dds3SetActiveUnitSceneBasic(dds3Basic_t *pSceneBasic,
+                                                dds3Basic_t *pUnitBasic);
+
+extern void dds3ObjectBaseMakeUnit(dds3Basic_t *pObjectBasic, s32 major, s32 minor);
+
+extern mdlObj_t *dds3ObjectBaseGetModelHandle(dds3Basic_t *pObjectBasic);
+
+extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
+                                f32 aSmoothLeng);
+
+extern void dds3GetRadiusPoseSet(dds3Basic_t *basic, f32 radius);
+
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *pObjectBasic, s32 flag);
+
+void InitModel(tagpipeBasic *pWork, s32 major, s32 minor, s32 motion, f32 aBeforeLeng,
+               f32 aSmoothLeng, f32 aSpeed)
+{
+    mdlObj_t *mdl;
+
+    pWork->base = dds3AddUnitObjectBasic(dds3AllocObjectId(), pWork->pos, pWork->rot);
+    dds3SetActiveUnitSceneBasic(dds3GetControlScene(), pWork->base);
+    dds3ObjectBaseMakeUnit(pWork->base, major, minor);
+    mdl = dds3ObjectBaseGetModelHandle(pWork->base);
+    pWork->mdl = mdl;
+    if (motion != -1) {
+        mdl->first->speed = aSpeed;
+        mdlSmoothLoopMotion(mdl, 0, motion, aBeforeLeng, aSmoothLeng);
+        dds3GetRadiusPoseSet(pWork->base, 60.0f);
+        dds3ObjectBaseOffFlag(pWork->base, 0x400);
+        if (pWork->enabled == 0) {
+            dds3ObjectBaseOnFlag(pWork->base, 1);
+        }
+    }
+    dds3SetSclPoseSet(pWork->base, pWork->scl);
+    /* The nesting is what keeps ee-gcc from turning this into a sibling call. */
+    do {
+        dds3SetRotPoseSet(pWork->base, pWork->rot);
+    } while (0);
+}
 
 s32 mymdlAddObject(tagpipeBasic *pWork, u16 mdlSize)
 {
