@@ -3638,7 +3638,27 @@ s32 cmpGetBlinkOffset(s32 kind, cmpPanelEff_t *eff)
     return phase;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRowBox);
+extern void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale);
+
+void cmpDrawListRowBox(s32 x, s32 y, s32 z, u16 w, u16 h2, u16 h, s32 c0, s32 c1, s32 c2,
+                       s8 phase, s32 scale, s32 ot)
+{
+    u32 colors[4];
+
+    colors[0] = c0;
+    colors[1] = c1;
+    colors[3] = c1;
+    colors[2] = c0;
+    cmpScaleColorByPhase(phase, colors, scale);
+    cmpDrawBoxGDefault(x, y, z, w, h, (s32 *)colors, ot);
+    colors[0] = c1;
+    colors[1] = c2;
+    colors[2] = c1;
+    colors[3] = c2;
+    cmpScaleColorByPhase(phase, colors, scale);
+    cmpDrawBoxGDefault(x + w * 16, y, z, h2, h, (s32 *)colors, ot);
+}
+
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRows);
 
@@ -3646,7 +3666,35 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListColumn);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollThumb);
+extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
+                             fclSpriteTbl_t *table, s32 OtNo);
+
+extern fclSpriteTbl_t fclSpriteTable[];
+
+void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s8 kind)
+{
+    s32 clip[4];
+
+    clip[0] = color;
+    clip[1] = color;
+    clip[2] = color;
+    clip[3] = color;
+    switch (kind) {
+    case 0:
+        fclDrawSpriteRes(x, y, 0x10, clip, 7, 0, D_00345D88, fclSpriteTable, 0x47);
+        break;
+    case 1:
+        fclDrawSpriteRes(x, y, 0x10, clip, 7, 1, D_00345D88, fclSpriteTable, 0x47);
+        break;
+    case 2:
+        fclDrawSpriteRes(x, y, 0x10, clip, 7, 0xC, D_00345D88, fclSpriteTable, 0x47);
+        break;
+    case 3:
+        fclDrawSpriteRes(x, y, 0x10, clip, 7, 0xD, D_00345D88, fclSpriteTable, 0x47);
+        break;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateListSelection);
 
