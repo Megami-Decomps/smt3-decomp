@@ -182,37 +182,19 @@ enum {
 
 #define EFF_OBJ_FLAG_OWNER_BILL_ENTRY 8
 
-typedef struct EffOwnerBillPayloadView {
+typedef struct effOwnerBillPayload_t {
     u8 pad00[8];
     u32 state;
     void *params;
-} EffOwnerBillPayloadView;
+} effOwnerBillPayload_t;
 
 #define EFF_OBJ_OWNER_BILL_KIND 5
 
-typedef struct EffectObjectData {
-    dds3ObjectBaseControlWorkData_t *handle;
-    s32 word04;
-    struct EvtUnit *transitionWork;
-    dds3ObjectBaseControlWorkData_t *modelHolder;
-    s32 activeId;
-    u32 followParameterIndex;
-    u32 word18;
-    s32 pendingTargetKey;
-    s32 angleReturnDelayFrames;
-    u32 word24;
-    f32 angle;
-    f32 limitMin2C;
-    f32 limitMax30;
-    f32 word34;
-    f32 limitMin38;
-    f32 limitMax3C;
-} EffectObjectData;
 
-typedef struct EffOwnerBillParamView {
+typedef struct effOwnerBillParam_t {
     u8 pad00[0x18];
      sdfModelRootNode_t *model;
-} EffOwnerBillParamView;
+} effOwnerBillParam_t;
 
 void dds3EffectDelete(effHandle_t *pData);
 void dds3BillboardDelete(struct billHandle_t *hData);
@@ -1010,17 +992,17 @@ s32 dds3EffectObjectBasicLinkObject(dds3Basic_t *basic, dds3Basic_t *target) {
 void dds3EffectObjectBasicGetObjectIndex(dds3Basic_t *basic) {
     dds3EffectObjectBasicWorkData_t *data;
     dds3Basic_t *owner;
-    EffOwnerBillPayloadView *bill;
+    effOwnerBillPayload_t *bill;
 
     data = basic->workdata;
     if (data->stat & EFF_OBJ_FLAG_OWNER_BILL_ENTRY) {
         owner = data->linkbasic;
         if (((u8 *)&owner->type)[3] == EFF_OBJ_OWNER_BILL_KIND) {
-            bill = (EffOwnerBillPayloadView *)((EffectObjectData *)owner->workdata)->modelHolder;
+            bill = (effOwnerBillPayload_t *)((dds3EffectObjectBasicWorkData_t *)owner->workdata)->handle;
             if (bill->state != 0) {
                 return;
             }
-            sdfModelGetMarkPosMatrix(((EffOwnerBillParamView *)bill->params)->model, data->linkindex);
+            sdfModelGetMarkPosMatrix(((effOwnerBillParam_t *)bill->params)->model, data->linkindex);
         }
     }
 }
