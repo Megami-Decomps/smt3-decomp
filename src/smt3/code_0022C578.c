@@ -4073,8 +4073,6 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockSlots);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpRandomizePanelEff);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffBar);
-
 typedef struct
 {
     /* 0x00 */ s32 pos;
@@ -4082,7 +4080,9 @@ typedef struct
     /* 0x08 */ s32 start;
     /* 0x0C */ s32 unk_0C;
     /* 0x10 */ s32 target;
-    /* 0x14 */ u8 unk_14[0xC];
+    /* 0x14 */ s32 unk_14;
+    /* 0x18 */ s32 width;
+    /* 0x1C */ s32 unk_1C;
     /* 0x20 */ s32 total;
     /* 0x24 */ s32 left;
     /* 0x28 */ s32 unk_28;
@@ -4090,9 +4090,32 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0x24];
+    /* 0x00 */ u8 unk_00[0xC];
+    /* 0x0C */ s32 x;
+    /* 0x10 */ s32 y;
+    /* 0x14 */ s32 z;
+    /* 0x18 */ u16 width;
+    /* 0x1A */ u8 unk_1A[0xA];
     /* 0x24 */ cmpPanelEffAnim_t anim[16];
 } cmpPanelEffState_t;
+
+void cmpDrawPanelEffBar(cmpPanelEffState_t *state, s32 ot)
+{
+    cmpPanelEffAnim_t *anim = state->anim;
+    s32 x = state->x + (state->width >> 1) * 16;
+    s32 z = state->z;
+    s32 y = state->y;
+    s32 i;
+
+    for (i = 0xF; i >= 0; i--) {
+        s32 level = (anim->left << 7) / anim->total;
+
+        cmpDrawPanelEffCell(x + anim->pos, y + anim->unk_04, z, x + anim->pos + anim->width,
+                            y + anim->unk_04, z, (anim->unk_28 & 0xFFFFFF00) | (level & 0xFF),
+                            ot);
+        anim++;
+    }
+}
 
 void cmpUpdatePanelEffEntry(cmpPanelEffState_t *state)
 {
