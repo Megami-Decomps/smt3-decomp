@@ -1154,7 +1154,53 @@ have_mode:
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartSkillMsg);
 #endif
 
+/* NON_MATCHING: 22 of 40 words differ at the exact size: msg lands in $2
+ * instead of $8 and the whole register numbering shifts with it. */
+#ifdef NON_MATCHING
+extern s32 cmpFindKugatatiMsgEntry(datUnitWork_t *unit);
+extern s32 cmbChkDevilEvo(datUnitWork_t *unit);
+
+s32 cmpGetKugatatiMsg(void)
+{
+    datUnitWork_t *stock = cmpGetSelectDstStock();
+    s32 entry = cmpFindKugatatiMsgEntry(stock);
+    s32 evo = cmbChkDevilEvo(stock);
+    s32 diff;
+    s32 lvl;
+    s32 msg;
+
+    if (entry < 0)
+    {
+        return 27;
+    }
+    diff = entry - stock->level;
+    lvl = ((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54))->level;
+    msg = 0;
+    if (diff < 2)
+    {
+        msg = 26;
+    }
+    if (diff == 2)
+    {
+        msg = 28;
+    }
+    if (diff == 3)
+    {
+        msg = 29;
+    }
+    if (diff >= 4)
+    {
+        msg = 30;
+    }
+    if (lvl + 6 >= evo)
+    {
+        return msg;
+    }
+    return 31;
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetKugatatiMsg);
+#endif
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 
@@ -2676,7 +2722,18 @@ void campDrawInfoPanel(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawSeq3);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawSkillListHeader);
+extern char *text1[];
+
+void cmpDrawSkillListHeader(s32 x, s32 y, s32 c, u16 index)
+{
+    void *frq;
+
+    cmpSetSkillListRows(0x12);
+    frq = frwGetSmallFontFRQ2(x, y, 0xFFFFFF, c, text1[index], 0);
+    func_001C7E38(frq, 1, 0x47);
+    frDestroyFontRequestAfter(frq);
+    cmpSetSkillListRows(-1);
+}
 
 u8 cmpGetSkillIcon(u16 skill)
 {
