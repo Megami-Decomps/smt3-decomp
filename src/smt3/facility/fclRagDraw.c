@@ -94,7 +94,7 @@ extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
 extern s32 fclChkDbgProcess(void);
 
-extern s32 cmpUpdateTerminate(void);
+extern void cmpUpdateTerminate(void *work);
 
 void ragDrawSeqStatus(void)
 {
@@ -173,11 +173,10 @@ void ragDrawSeqErr(void)
     }
 }
 
-/* NON_MATCHING: 69 of 72 words match at the exact size; three words are only a
- * register name, retail reusing the work pointer's register for the sequence. */
-#ifdef NON_MATCHING
 s32 ragDraw(dds3ProcessID_t *id)
 {
+    ragDrawWork_t *work;
+
     ragDrawWork = dds3GetProcessData(id);
     if (fclChkDbgProcess() != 0) {
         return 0;
@@ -185,34 +184,35 @@ s32 ragDraw(dds3ProcessID_t *id)
     if (fclGetFlag(1) == 0) {
         return 0;
     }
-    if (ragDrawWork->flags & 0x20) {
-        cmpUpdateTerminate();
+    work = ragDrawWork;
+    if (work->flags & 0x20) {
+        cmpUpdateTerminate(work);
         return -1;
     }
-    if (ragDrawWork->flags & 2) {
-        switch (ragDrawWork->seq) {
-    case 0:
-        ragDrawSeqRoot(1);
-        break;
-    case 1:
-        ragDrawHeartsList(fclGetFlag(0) == 0);
-        break;
-    case 2:
-        ragDrawList2(fclGetFlag(0) == 0);
-        break;
-    case 3:
-        ragDrawList3(fclGetFlag(0) == 0);
-        break;
-    case 4:
-    case 5:
-        ragDrawSeqRoot(0);
-        break;
-    case 6:
-        ragDrawSeqErr();
-        break;
-    case 7:
-        ragDrawSeqStatus();
-        break;
+    if (work->flags & 2) {
+        switch (work->seq) {
+        case 0:
+            ragDrawSeqRoot(1);
+            break;
+        case 1:
+            ragDrawHeartsList(fclGetFlag(0) == 0);
+            break;
+        case 2:
+            ragDrawList2(fclGetFlag(0) == 0);
+            break;
+        case 3:
+            ragDrawList3(fclGetFlag(0) == 0);
+            break;
+        case 4:
+        case 5:
+            ragDrawSeqRoot(0);
+            break;
+        case 6:
+            ragDrawSeqErr();
+            break;
+        case 7:
+            ragDrawSeqStatus();
+            break;
         case 8:
             ragDrawSeqConfirm();
             break;
@@ -220,6 +220,3 @@ s32 ragDraw(dds3ProcessID_t *id)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclRagDraw", ragDraw);
-#endif
