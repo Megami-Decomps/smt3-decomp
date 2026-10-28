@@ -427,11 +427,15 @@ typedef struct
     /* 0x16514 */ u8 *scriptArg;
     /* 0x16518 */ void *resourceHandle_16518;
     /* 0x1651C */ void *explainData;
-    /* 0x16520 */ u8 unk_16520[0x2C];
-    /* 0x1654C */ cmbActionData_t actionModel;
-    /* 0x16560 */ u8 unk_16560[0x70];
+    /* 0x16520 */ u8 unk_16520[4];
+    /* 0x16524 */ cmbActionData_t actionData[5];
+    /* 0x16588 */ u8 reserved16588[0x48];
     /* 0x165D0 */ s32 smoke[3];
-    /* 0x165DC */ u8 unk_165DC[0x11];
+    /* 0x165DC */ s32 actionTargetIndex;
+    /* 0x165E0 */ s32 actionPhase;
+    /* 0x165E4 */ s32 actionFrame;
+    /* 0x165E8 */ f32 actionZoom;
+    /* 0x165EC */ s8 introductionFlag;
     /* 0x165ED */ u8 stockCursorCount;
     /* 0x165EE */ u8 unk_165EE[0x1052];
     /* 0x17640 */ cmpCursorInfo_t menuCursor;
@@ -2860,7 +2864,53 @@ datUnitWork_t *cmbGetBirthDevilPanel(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateTimeTable);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartSmokeEffect);
+typedef struct effEVECombParSmokeParam_t {
+    f32 position[4];
+    u32 number;
+    s32 duration;
+    s32 wait;
+    s32 motionDelaySpread;
+    f32 spawnRadius;
+    u32 color;
+    s16 drawMode;
+    u8 pad2A[2];
+    s32 fade_in;
+    s32 fade_out;
+    u8 repeat;
+    u8 pad35[3];
+    f32 baseScale;
+    f32 scaleRandomness;
+    f32 scaleAmplitudeX;
+    f32 scaleAmplitudeY;
+    f32 scalePhaseStep;
+    f32 angularSpeed;
+    f32 verticalSpeed;
+    f32 verticalSpeedRandomness;
+    f32 lateralSpeed;
+    f32 lateralSpeedRandomness;
+    f32 accelerationPercent;
+    f32 swayPhaseStep;
+    f32 swayAmplitude;
+    f32 swayAmplitudeStep;
+    f32 swayRandomness;
+    s32 colorStartAge;
+    s32 colorTransitionFrames;
+} effEVECombParSmokeParam_t;
+typedef struct effEVECombParSmoke_t effEVECombParSmoke_t;
+extern effEVECombParSmoke_t *effEVECombParSmokeCreate(effEVECombParSmokeParam_t *params);
+
+s32 cmbStartSmokeEffect(u16 devilId)
+{
+    effEVECombParSmokeParam_t params;
+    f32 modelSize = datModelParamTable[devilId].formsize / 50.0f;
+
+    params = *(effEVECombParSmokeParam_t *)CMB_GBWK->table;
+    params.spawnRadius = cmbGetSmokeScale(devilId);
+    params.number = cmbGetSmokeColor(devilId);
+    params.number = (u32)((f32)params.number * modelSize);
+    params.spawnRadius *= modelSize * 0x1.333332p+0f;
+    return (s32)effEVECombParSmokeCreate(&params);
+}
 
 void cmbSetActionWorkValues(void)
 {
@@ -2909,7 +2959,77 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbActionBGM);
 void func_00205AB8(void) {
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbInitAction);
+typedef struct {
+    datUnitWork_t unit;
+    s32 reservedEC;
+    u16 secondModelId;
+} cmbBirthModelInfo_t;
+
+extern f32 cmbActionTargetModel[3];
+extern f32 cmbTargetModelId;
+extern s8 cmbActionMode;
+extern s8 cmbActionStep;
+extern char D_0053CEE0[];
+extern char D_0053CEF8[];
+
+void cmbInitAction(void)
+{
+    cmpModelFreeResource();
+    cmpResetDrawEnv();
+    fclCombineTexFree();
+    fclFreeStage();
+
+    cmbLoadActionModel(CMB_GBWK->stockSlot[0].id,
+                       &CMB_GBWK->actionData[0]);
+    cmbUpdateIntroduceModel(&CMB_GBWK->actionData[0]);
+    cmbLoadActionModel(CMB_GBWK->stockSlot[1].id,
+                       &CMB_GBWK->actionData[1]);
+    cmbUpdateIntroduceModel(&CMB_GBWK->actionData[1]);
+    if (CMB_GBWK->stockSlot[2].index >= 0) {
+        cmbLoadActionModel(CMB_GBWK->stockSlot[2].id,
+                           &CMB_GBWK->actionData[2]);
+        cmbUpdateIntroduceModel(&CMB_GBWK->actionData[2]);
+    } else {
+        cmbInitActionData(0, &CMB_GBWK->actionData[2]);
+    }
+
+    if (((cmbBirthModelInfo_t *)CMB_GBWK->birthPanel)->secondModelId != 0) {
+        cmbInitActionData(((datUnitWork_t *)CMB_GBWK->birthPanel)->id,
+                          &CMB_GBWK->actionData[3]);
+        cmbLoadActionModel(((cmbBirthModelInfo_t *)CMB_GBWK->birthPanel)->secondModelId,
+                           &CMB_GBWK->actionData[4]);
+    } else {
+        cmbLoadActionModel(((datUnitWork_t *)CMB_GBWK->birthPanel)->id,
+                           &CMB_GBWK->actionData[3]);
+        cmbInitActionData(0, &CMB_GBWK->actionData[4]);
+    }
+
+    CMB_GBWK->smoke[0] = cmbStartSmokeEffect(CMB_GBWK->stockSlot[0].id);
+    CMB_GBWK->smoke[1] = cmbStartSmokeEffect(CMB_GBWK->stockSlot[1].id);
+    CMB_GBWK->smoke[2] = cmbStartSmokeEffect(CMB_GBWK->stockSlot[2].id);
+    cmbSetActionWorkValues();
+    evtStartEvent(0x327);
+    dds3FadeOut(0, 0, 0, 0);
+
+    {
+        cmbGbWork_t *work = CMB_GBWK;
+        work->actionZoom = 0.0f;
+        work->actionTargetIndex = 0;
+        if (work->stockSlot[2].index >= 0) {
+            cmbActionMode = 1;
+        } else {
+            cmbActionMode = 0;
+        }
+    }
+    cmbActionStep = 0;
+    CMB_GBWK->introductionFlag = 0;
+    cmbActionTargetModel[0] = 0.0f;
+    cmbActionTargetModel[1] = 0.0f;
+    cmbActionTargetModel[2] = 0.0f;
+    cmbTargetModelId = 0.0f;
+    printf(D_0053CEE0);
+    printf(D_0053CEF8, cmbActionMode);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmb_205CE8);
 
@@ -2918,7 +3038,7 @@ void func_00205DB8(void)
     if (CMB_GBWK->stockSlot[2].index < 0) {
         return;
     }
-    func_002043E0(&CMB_GBWK->actionModel);
+    func_002043E0(&CMB_GBWK->actionData[2]);
 }
 
 extern void effEVECombParSmokeSetZtest(s32 pCombParSmoke, s32 test);
@@ -2934,16 +3054,16 @@ void cmb_205DF0(void)
 
 void cmb_205E68(void)
 {
-    mdlSmoothLoopMotion(CMB_GBWK->actionModel.model, 0, 1, 0.0f, 1.0f);
+    mdlSmoothLoopMotion(CMB_GBWK->actionData[2].model, 0, 1, 0.0f, 1.0f);
 }
 
 extern f32 cmbTargetModelId;
 
 void func_00205EA0(void)
 {
-    sdfMotionCtrlr_t *motion = CMB_GBWK->actionModel.model->first;
+    sdfMotionCtrlr_t *motion = CMB_GBWK->actionData[2].model->first;
 
-    if ((f32)datModelParamTable[(u16)CMB_GBWK->actionModel.id].badframe - 1.0f <= motion->frame) {
+    if ((f32)datModelParamTable[(u16)CMB_GBWK->actionData[2].id].badframe - 1.0f <= motion->frame) {
         motion->speed = 0.0f;
     }
     /* Native ramp: one float below 25, with the rounded 25/3 step. */
@@ -3086,6 +3206,10 @@ s32 shopStartEvent(s8 value)
     fclClearFlag(1);
     return evtStartEvent(0x322);
 }
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEE0);
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEF8);
 
 INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CF10);
 
