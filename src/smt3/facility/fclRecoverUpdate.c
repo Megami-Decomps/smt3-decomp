@@ -83,7 +83,12 @@ typedef struct
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ u8 unk_000C[0x14];
     /* 0x0020 */ cmpCursorInfo_t listCursor;
-    /* 0x0058 */ u8 unk_0058[0x106B];
+    /* 0x0058 */ u8 unk_0058[0x1004];
+    /* 0x105C */ s32 recoverPrices[16];
+    /* 0x109C */ u8 reserved109C[0x24];
+    /* 0x10C0 */ s8 partyCount;
+    /* 0x10C1 */ s8 reserveCount;
+    /* 0x10C2 */ u8 reserved10C2;
     /* 0x10C3 */ s8 targetStock[16];
     /* 0x10D3 */ u8 reserved10D3[0x33F9];
     /* 0x44CC */ s32 script;
@@ -149,7 +154,7 @@ extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern s32 cmpGetPressedButton(s32 mask);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
@@ -448,7 +453,57 @@ void rcvUpdatePanelAnim(void)
 }
 
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateSeqRoot);
+extern s32 rcvRootHasItems(void *work);
+extern s32 cmpMoveCursor(cmpCursorInfo_t *cursor, s8 direction);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 printf(const char *fmt, ...);
+
+void rcvUpdateSeqRoot(void)
+{
+    u32 button = cmpGetPressedButton(0x33);
+    s8 selection = (u8)rcvUpdateWork->listCursor.unk_22 +
+                   (u8)rcvUpdateWork->listCursor.unk_24 + 1;
+    s32 i;
+
+    fclSetWorkValue(2, 0);
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (rcvRootHasItems(&rcvUpdateWork->listCursor) == 0) {
+            button = 0x8000;
+        } else {
+            rcvUpdateCallSeq(selection);
+            rcvUpdateWork->unk_0004 = button;
+            for (i = 0; i < rcvUpdateWork->partyCount; i++) {
+                printf("P : %d %d\n", rcvUpdateWork->targetStock[i],
+                       rcvUpdateWork->recoverPrices[i]);
+            }
+            for (i = 0; i < rcvUpdateWork->reserveCount; i++) {
+                printf("S : %d %d\n",
+                       rcvUpdateWork->targetStock[rcvUpdateWork->partyCount + i],
+                       rcvUpdateWork->recoverPrices[i]);
+            }
+            printf("\n");
+        }
+        break;
+    case 2:
+        rcvExit();
+        break;
+    case 0x10:
+        cmpMoveCursor(&rcvUpdateWork->listCursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&rcvUpdateWork->listCursor, 1);
+        break;
+    }
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&rcvUpdateWork->listCursor, 0);
+    }
+    cmpPlayCursorSE(cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&rcvUpdateWork->listCursor, button, 0x30));
+}
 
 extern s32 rcvUpdateCallSeq(s32 SeqNo);
 
@@ -480,6 +535,4 @@ INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D518);
 INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D528);
 
 INCLUDE_RODATA(const s32, "facility/fclRecoverUpdate", D_0053D538);
-
-INCLUDE_SDATA(const s32, "facility/fclRecoverUpdate", D_0054FBF8);
 
