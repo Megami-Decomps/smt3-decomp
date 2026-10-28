@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "model.h"
 
 typedef struct {
     /* 0x00 */ dds3ObjectBaseControlWorkData_t *pObjectBaseControlWorkData;
@@ -129,4 +130,47 @@ void dds3MatterObjectBasicDestructor(dds3Basic_t *aPtr) {
 
 INCLUDE_ASM(const s32, "basic/dds3MatterObjectBasic", dds3MatterObjectBasicMainProcedure);
 
-INCLUDE_ASM(const s32, "basic/dds3MatterObjectBasic", dds3MatterObjectBasicDrawProcedure);
+extern sdfModelOt_t D_002F69B8[];
+extern sdfModelOt_t dds3MatterDrawParam;
+extern dds3Basic_t *D_0054EAE8;
+extern void dds3ObjectBaseModelLinkOt(sdfModelOt_t *ot, dds3Basic_t *basic);
+extern u8 dds3ObjectBaseCheckFlag(dds3Basic_t *basic, u32 flag);
+extern void rsetOtOfs(s32 offset);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+
+s32 dds3MatterObjectBasicDrawProcedure(dds3Basic_t *basic)
+{
+    dds3MatterObjectBasicWorkData_t *work = basic->workdata;
+
+    if (work->OtLinkIdx == -1) {
+        rsetOtOfs(0x27);
+        rsetTest(1, 5, 0x60, 1, 0, 0, 1, 2);
+        dds3ObjectBaseModelLinkOt(&D_002F69B8[0], basic);
+        rsetOtOfs(0x27);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    } else {
+        rsetOtOfs(0x22);
+        rsetTest(1, 5, 0x60, 1, 0, 0, 1, 2);
+        switch (work->alpmode) {
+        case 3:
+        case 4:
+            if (basic->color != 0x80808080) {
+                if (dds3ObjectBaseCheckFlag(D_0054EAE8, 1)) {
+                    u32 color = basic->color;
+                    basic->color = 0x80808080;
+                    dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
+                    basic->color = color;
+                } else {
+                    dds3ObjectBaseModelLinkOt(&dds3MatterDrawParam, basic);
+                }
+            } else {
+                dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
+            }
+            break;
+        }
+        dds3ObjectBaseModelLinkOt(&D_002F69B8[work->OtLinkIdx], basic);
+        rsetOtOfs(0x22);
+        rsetTest(1, 5, 0x80, 1, 0, 0, 1, 2);
+    }
+    return 1;
+}
