@@ -72,7 +72,9 @@ extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[0x18];
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ u8 phase;
+    /* 0x0002 */ u8 reserved02[0x16];
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
     /* 0x001A */ s8 StartLevel;
@@ -94,7 +96,8 @@ typedef struct
     /* 0x1299 */ u8 unk_1299;
     /* 0x129A */ u16 commentId;
     /* 0x129C */ u8 commentMessage;
-    /* 0x129D */ u8 unk_129D[2];
+    /* 0x129D */ u8 unk_129D;
+    /* 0x129E */ u8 unk_129E;
     /* 0x129F */ u8 bonusParam[6];
     /* 0x12A5 */ u8 reserved12A5[0x1040];
     /* 0x22E5 */ s8 unk_22E5;
@@ -404,7 +407,34 @@ s32 rstCalcSeqPlayerLevelUp(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalcSeqDevilLevelUp);
+extern s32 rstSetCurrentDevil(void);
+extern void rstAutoAsignDevilParam(void);
+extern void rstSetLevelUpFlag(void);
+extern s32 p2sdStopSe(s32 id);
+extern void p2sdPlayBGM(s32 id);
+extern void dds3FadeOut(s32, s32, s32, s32);
+extern void fclSetMessageVar_20743088(s8 index, s32 str);
+extern char *text2[];
+
+s32 rstCalcSeqDevilLevelUp(void)
+{
+    if (rstSetCurrentDevil() != 0) {
+        cmpStatSetTimer(0, 0);
+        EventStart->unk_129E = 0;
+        rstAutoAsignDevilParam();
+        rstAdvanceLevelUpStep();
+        cmpModelSetup(EventStart->unit->id, 0);
+        rstSetMotionReqFromTbl(0);
+        p2sdStopSe(0x2B0000);
+        p2sdPlayBGM(0x2B0000);
+        fclSetMessageVar_20743088(1, (s32)text2[EventStart->unit->id]);
+    } else {
+        EventStart->phase = 0x13;
+        rstSetLevelUpFlag();
+        dds3FadeOut(0, 0, 0, 15);
+    }
+    return 0;
+}
 
 typedef struct
 {
