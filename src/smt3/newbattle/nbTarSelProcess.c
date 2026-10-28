@@ -81,7 +81,34 @@ INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbSetSelectOkMark);
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", SetCursor);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbSetTargetProcess);
+extern s32 nbSetSelectOkMark(s32 partyindex, s32 ctype, s32 crule, s32 carea);
+extern void SetCursor(nbTarSelProcessData_t *process);
+extern void UpdateSelect(nbTarSelProcessData_t *process);
+
+s32 nbSetTargetProcess(void *act, s32 partyindex, s32 ctype, s32 crule, s32 carea)
+{
+    nbTarSelProcessData_t *process = GetTarSelProcessData();
+
+    if (!nbSetSelectOkMark(partyindex, ctype, crule, carea)) {
+        return 0;
+    }
+
+    process->alpha_a = 0x80;
+    process->alpha_b = 0x80;
+    process->scale_a = 1.0f;
+    process->scale_b = 1.0f;
+    process->act = act;
+    process->partyindex = partyindex;
+    process->ctype = ctype;
+    process->crule = crule;
+    process->carea = carea;
+    process->statusTime = 0;
+    process->time = 0;
+    SetCursor(process);
+    UpdateSelect(process);
+    process->stat = 1;
+    return 1;
+}
 
 s32 CheckFriend(nbTarSelProcessData_t *t, s32 formindex)
 {
