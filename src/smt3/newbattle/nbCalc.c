@@ -1235,7 +1235,39 @@ INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DA8);
 
 INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DE0);
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbCheckRenzokuEncount);
+extern const char D_00544DF0[];
+INCLUDE_RODATA(const s32, "newbattle/nbCalc", D_00544DF0);
+extern void nbSetMainPhase(s32 encno);
+
+s32 nbCheckRenzokuEncount(nbMainProcessData_t *data)
+{
+    s32 rate;
+    s32 nextIndex;
+    u32 mode;
+
+    if ((nbEncountFormTable[data->encno].senseiFlags & 0x10) != 0) {
+        data->packindex = 1;
+        data->encno = 0x149;
+    } else {
+        if (data->encpackno <= 0) {
+            return 0;
+        }
+        mode = DDS3_GBWK->maFlags;
+        rate = nbEncountTable[data->encpackno].enctable[data->packno].ritu[data->packindex].renzokuritu;
+        nextIndex = nbEncountTable[data->encpackno].enctable[data->packno].ritu[data->packindex].renzokuindex;
+        if ((mode & 2) != 0) {
+            rate *= 5;
+        }
+        printf(D_00544DF0, rate, nextIndex);
+        if (dds3GetRandIntA(0, 100) >= rate) {
+            return 0;
+        }
+        data->packindex = nextIndex;
+        data->encno = nbEncountTable[data->encpackno].enctable[data->packno].ritu[nextIndex].encountid;
+    }
+    nbSetMainPhase(data->encno);
+    return 1;
+}
 
 s32 nbCheckKuisibariSkill(s32 formindex)
 {
