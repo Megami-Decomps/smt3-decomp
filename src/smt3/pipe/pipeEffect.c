@@ -60,7 +60,7 @@ extern PIPE_EFF_t *pipe_CELL01_D3P, *pipe_BREAK01_D3P, *pipe_BREAK02_D3P;
 
 extern PIPE_EFF_t *pipe_DAMAGE01_D3P, *pipe_DAMAGE03_D3P, *pipe_ATTACK01_D3P;
 
-extern void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize);
+extern void pipeGetObjData(PIPE_EFF_t *effect, u8 type);
 
 extern void pipeEffDraw2Doffset(PIPE_EFF_t *pEffect, u8 maxSize);
 
@@ -219,17 +219,12 @@ void pipeEffCal(void)
     maxSize = 0;
 }
 
-/* NON_MATCHING: 9 of 71 words, exact size; the third arm materialises its
- * constants in a different order. */
-
-
-#ifdef NON_MATCHING
-void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
+void pipeGetObjData(PIPE_EFF_t *effect, u8 type)
 {
     PIPE_EFF_t *pEff = effect;
     u8 i;
 
-    if ((u8)maxSize == 2) {
+    if (type == 2) {
         s32 offset = offsetCount;
 
         for (i = 9; i != 0xFF; i--) {
@@ -238,18 +233,20 @@ void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
             }
             pEff++;
         }
-    } else if ((u8)maxSize == 4) {
+    } else if (type == 4) {
         for (i = 9; i != 0xFF; i--) {
             if (pEff->d3p != NULL) {
                 pEff->offset += 6;
             }
             pEff++;
         }
-    } else if ((u8)maxSize == 6) {
+    } else if (type == 6) {
         tagPipeObject *objPtr = objMyData();
-        s32 offset = offsetCount + 4;
+        s32 offset;
 
-        for (i = 4; i != 0xFF; i--) {
+        i = 4;
+        offset = offsetCount + 4;
+        for (; i != 0xFF; i--) {
             if (pEff->d3p != NULL) {
                 pEff->offset = offset;
                 pEff->pos2[0] = objPtr->pos[0] - 16.0f;
@@ -259,9 +256,6 @@ void pipeGetObjData(PIPE_EFF_t *effect, s32 maxSize)
         }
     }
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeGetObjData);
-#endif
 
 
 void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y);
