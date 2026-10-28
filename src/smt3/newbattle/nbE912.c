@@ -384,6 +384,23 @@ extern s32 evtUnitRotationTarget(evtUnitHandle_t *h, f32 *pos, f32 radio);
 extern void evtSetUnitMove1(evtUnitHandle_t *work, s32 motionSubmode, s128 *vector, s32 unused,
                             s32 frames, s32 directionOffset, void *callback, s32 unusedLast);
 
+extern nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                               s32 motion);
+
+extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                             s32 sw);
+
+extern nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                              u32 a, s32 frame);
+
+extern u32 effBTLCutGetFrame(effBTLCutHandle_t *hBTLCutEffect);
+
+extern void effBTLCutSetDrawEndFrame(effBTLCutHandle_t *hBTLCutEffect, u32 frame);
+
+extern nbKoukaPacket_t *D_00527660[];
+
+extern nbKoukaPacket_t *D_00527664[];
+
 nbFormation_t *nbGetEventForm();
 
 void MoveSub(nbEventProcessData_t *ed)
@@ -444,7 +461,45 @@ s32 Move1(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE912", nbE912_Effect1);
+s32 nbE912_Effect1(nbEventProcessData_t *e)
+{
+    nbFormation_t *form;
+    s32 i;
+    s32 no;
+
+    form = &e->data->form[6];
+    switch (e->seqtime) {
+    case 1:
+        for (i = 0; i < 4; i++) {
+            no = D_00527530[i];
+            if (e->data->form[no].stat & 1) {
+                nbAddMotionKoukaPacket(0, 0, &e->data->form[no], 0x10);
+            }
+        }
+        nbAddFormOnOffPacket(1, 0, form, 1);
+        nbAddUnitAKoukaPacket(0, 0, form, 0, 0);
+        break;
+    case 2:
+        D_00527660[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 1), 2, form);
+        break;
+    case 0x27:
+        D_00527664[0] = nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 2), 2, form);
+        break;
+    case 0x36:
+        nbAddUnitAKoukaPacket(1, 0, form, 0x80000000, 0);
+        evtSetUnitMotion(form->hunit, 0x11, 0, 0, 0);
+        break;
+    case 0x6D:
+        effBTLCutSetDrawEndFrame(D_00527660[0]->cuteff,
+                                 effBTLCutGetFrame(D_00527660[0]->cuteff) + 0x20);
+        effBTLCutSetDrawEndFrame(D_00527660[1]->cuteff,
+                                 effBTLCutGetFrame(D_00527660[1]->cuteff) + 0x20);
+        nbAddSkillEffectKoukaPacket3(0, 0, evtGetResorceData(0x390, 3), 2, form);
+        nbFreeEffectSlot(e);
+        break;
+    }
+    return 0;
+}
 
 s32 nbE912_End(nbEventProcessData_t *e)
 {
