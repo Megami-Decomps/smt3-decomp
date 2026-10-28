@@ -950,7 +950,49 @@ s32 Flow6_27(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_28);
+s32 Flow6_28(nbNegoProcessData_t *n)
+{
+    s32 count;
+    s32 playerLevel;
+    s32 enemyLevel;
+
+    nbAddNegoIdKouho(n, 0x90001);
+    nbAddNegoIdKouho(n, 0x60024);
+
+    if (n->cnt6_36 < 2) {
+        if (evtBitCheck(8) != 0) {
+            n->nextnegoid = n->nextkouho[1];
+            return 0;
+        }
+    }
+
+    count = n->cnt6_36;
+    playerLevel = n->pwork->level;
+    enemyLevel = n->ework->level;
+    if (count == 3) {
+        if (evtBitCheck(8) != 0 && !(playerLevel - 17 < enemyLevel)) {
+            n->nextnegoid = n->nextkouho[0];
+            return 0;
+        }
+    }
+
+    count = n->cnt6_36;
+    playerLevel = n->pwork->level;
+    enemyLevel = n->ework->level;
+    if (count < 3) {
+        if (evtBitCheck(8) != 0 && !(enemyLevel < playerLevel - 10)) {
+            n->nextnegoid = n->nextkouho[1];
+            return 0;
+        }
+    }
+
+    if ((u32)dds3GetRandIntA(NULL, 10) >= 2) {
+        n->nextnegoid = n->nextkouho[1];
+    } else {
+        n->nextnegoid = n->nextkouho[0];
+    }
+    return 0;
+}
 
 s32 Flow6_29(nbNegoProcessData_t *n)
 {

@@ -593,3 +593,4 @@ src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	0 matches / 1 guarded dra
 src/smt3/code_0029B780.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	configuration cursor gradients and cap sprites at native 716-byte size; 19 coordinate allocation/setup words remain
 src/smt3/event/evtCommand.c	redthing1	done	2026-10-28	1 fn / 188 B	RGB setter with qualified one-pass command block after duration read; final fallback removed, owner 162 match, 0 differ
 src/smt3/code_0029B780.c	redthing1	done	2026-10-28	0 matches / guarded draft improved	configuration cursor depth lifetime closes Y/Z allocation; native-size draft now 172/179 words match with seven setup-scheduling differences
+src/smt3/newbattle/NbNegoFlowTwo.c	redthing1	done	2026-10-28	1 fn / 284 B	Flow6_28 level and event eligibility with callback-sensitive snapshots; owner 68 match, 0 differ
