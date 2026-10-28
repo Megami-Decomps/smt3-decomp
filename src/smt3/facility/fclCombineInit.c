@@ -1899,7 +1899,35 @@ void cmbDrawStockList(s32 x, s32 y, s32 z, s32 color, s8 count, u8 mode, s32 ot)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawDevilStats);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawDevilNameLevel);
+extern char D_0054FB10[];
+extern s32 sprintf(char *out, const char *fmt, ...);
+
+extern void *frGetCNameFRQ(s8 targetNo, s8 style, void *previous, s32 firstOption);
+extern void frSetDrawPosition(void *request, u32 x, u32 y);
+extern void frSetPriority(void *request, u32 priority);
+extern void frSetFontColor(void *request, u32 color);
+extern s32 func_001C7E38(void *request, s8 mode, u32 ot);
+extern void *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                              const char *text, void *previous);
+extern u16 datGetLevelForDraw(datUnitWork_t *work);
+
+void cmbDrawDevilNameLevel(s32 x, s32 y, s32 priority, datUnitWork_t *work, s32 ot)
+{
+    void *request;
+    char text[64];
+
+    request = frGetCNameFRQ(0, 1, NULL, 0);
+    frSetDrawPosition(request, 0x1340, 0x1D0);
+    frSetPriority(request, priority << 4);
+    frSetFontColor(request, 0xA09DC380);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+
+    sprintf(text, D_0054FB10, datGetLevelForDraw(work));
+    request = frwGetNumFontFRQ(0x1D30, 0x1C0, priority, 0xA09DC380, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawResultIcon);
 
