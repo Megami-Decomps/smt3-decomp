@@ -2939,22 +2939,29 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRunActionSe);
 
 extern void fclCombineBGM(s8 Mode);
 
-/* NON_MATCHING: 3 of 25 words differ (first at +0x54). */
-#ifdef NON_MATCHING
+extern const char D_0053CEB0[];
+extern const char D_0053CEC8[];
+
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEB0);
+INCLUDE_RODATA(const s32, "facility/fclCombineInit", D_0053CEC8);
+
 s32 cmbActionBGM(s32 mode)
 {
+    s32 result;
+
     if (mode == 0) {
         p2sdStopBGM(0x380000);
         fclCombineBGM(0);
-        return printf("ACT BGM END ...\n");
+        return printf(D_0053CEB0);
     }
     fclCombineBGM(mode);
     p2sdPlayBGM(0x380000);
-    printf("ACT BGM START!!!\n");
+    result = printf(D_0053CEC8);
+    /* Use fclCombineBGM's qualified consumed-selector reset pattern to keep
+     * the native final diagnostic call and epilogue. */
+    mode = 0;
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbActionBGM);
-#endif
 
 void func_00205AB8(void) {
 }

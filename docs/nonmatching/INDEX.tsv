@@ -78,7 +78,6 @@ func_00206308, func_002065C8	fclCombineInit	0x2C0 each	35 of 176 words differ	do
 cmbFindCameraPoint	fclCombineInit	0x64	9 of 25 words differ	docs/nonmatching/facility/fclCombineInit.md	43
 cmbDrawFullScreenPanel	fclCombineInit	0x68	20 of 26 words match	docs/nonmatching/facility/fclCombineInit.md	66
 cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/nonmatching/facility/fclCombineInit.md	85
-cmbActionBGM	fclCombineInit	0x68	22 of 25 words match	docs/nonmatching/facility/fclCombineInit.md	106
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/nonmatching/facility/fclPanel.md	5
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each	10 of 84 words differ	docs/nonmatching/facility/fclRagCalc.md	5
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/nonmatching/facility/fclRagInit.md	5

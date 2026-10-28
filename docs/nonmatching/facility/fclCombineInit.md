@@ -102,25 +102,3 @@ Ruled out: the mask written `color & 0xFFFFFF00`; an `s32 dark` local for it,
 which hoists the `and` above the first call and runs one word long;
 `corner[2] = corner[0]; corner[3] = corner[1];` in place of re-reading `color`;
 and the `void` callee above.
-
-## cmbActionBGM (fclCombineInit, 0x68)
-
-22 of 25 words match and every instruction up to the last call is identical,
-but the draft is one word short of the 104-byte size. Stops or starts the
-combine BGM and prints which it did.
-
-The three remaining words are the final `printf`. Retail calls it with `jal`
-and then runs the epilogue, where this turns it into the tail call
-`ld $31` / `j printf` / `addiu $29` and so saves a word. The first branch's
-`printf` is a tail call in retail too and reproduces exactly, so the shape is
-right for one of the two and wrong for the other.
-
-The parameter is `s32`, not `s8`: retail tests the incoming register raw with
-`bnez` and sign-extends separately for `fclCombineBGM`, which needs a prototype
-with an `s8` parameter ahead of this function. That half is settled.
-
-Ruled out: `void` with `printf(...); return;` in the first branch; `s32` with
-`return printf(...)` in the first branch and a plain `printf(...)` at the end;
-`return printf(...)` in both; an `if`/`else` instead of an early return; and a
-`switch (mode)` with `case 0` and `default`. All five tail-call the last
-`printf`, so nothing in the statement shape reaches the choice.
