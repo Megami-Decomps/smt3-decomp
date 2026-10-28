@@ -245,8 +245,6 @@ s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBar);
-
 typedef struct fclSpriteRes_t fclSpriteRes_t;
 typedef struct fclSpriteEntry_t fclSpriteEntry_t;
 typedef struct {
@@ -261,8 +259,46 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 extern void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+extern const s32 D_00548888[3][4];
+extern void *memcpy(void *destination, const void *source, u32 size);
+
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 extern s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+
+/* NON_MATCHING: 4 of 113 words differ; exact 452-byte size. */
+#ifdef NON_MATCHING
+void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot)
+{
+    s32 colors[4];
+    s32 selected[2];
+    s32 spriteIds[3][4];
+    s32 zScaled = z << 4;
+    u32 alpha;
+
+    memcpy(spriteIds, D_00548888, sizeof(spriteIds));
+    alpha = dds3GetConfigFadeAlpha() | 0x80808000;
+
+    colors[0] = alpha;
+    colors[1] = alpha;
+    colors[2] = alpha;
+    colors[3] = alpha;
+    if (value == 0) {
+        selected[0] = spriteIds[index][0];
+        selected[1] = spriteIds[index][3];
+    } else {
+        selected[0] = spriteIds[index][1];
+        selected[1] = spriteIds[index][2];
+    }
+    fclDrawSpriteRes(x, y + 0x18, zScaled, colors, 0, (u16)selected[0],
+                     D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(x, y + 0x18, zScaled, colors, 0, (u16)selected[1],
+                     D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(0x1130, y + 0x18, zScaled, colors, 0, 0x10,
+                     D_00345D88, dds3ConfigLayoutTable, ot);
+}
+#else
+INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBar);
+#endif
 
 typedef struct frFontRequest_t frFontRequest_t;
 typedef struct {
