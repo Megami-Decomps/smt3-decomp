@@ -359,7 +359,46 @@ s32 dds3DrawConfigBackground(s32 flags)
     fclDrawBG(sprite, flags);
 }
 
+extern s32 fclDrawPanelSprite(s32 id, s32 ot);
+extern s32 dds3DrawConfigSlider(s32 x, s32 y, s32 z, s32 ot);
+extern void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot);
+
+/* NON_MATCHING: 5 of 150 words differ; exact 600-byte size. */
+#ifdef NON_MATCHING
+s32 dds3DrawConfigPanel(s32 ot)
+{
+    s32 colors[4];
+    s32 color;
+
+    fclDrawPanelSprite(0x3000F, ot);
+    if (((dds3ConfigWork_t *)GBWK)->textureHandle != NULL) {
+        dds3DrawConfigBackground(ot);
+    }
+    dds3DrawConfigSlider(0, -0x48, 0, ot);
+    dds3DrawConfigText(0, 0x268, 0, 2, 0,
+                        dds3GetConfigFlag(0, (s32 *)(DDS3_GBWK + 0x11AB8)), ot);
+    dds3DrawConfigText(0, 0x4B0, 0, 3, 1,
+                        dds3GetConfigFlag(1, (s32 *)(DDS3_GBWK + 0x11AB8)), ot);
+    dds3DrawConfigText(0, 0x7A8, 0, 3, 2,
+                        dds3GetConfigFlag(2, (s32 *)(DDS3_GBWK + 0x11AB8)), ot);
+    dds3DrawConfigText(0, 0xAB0, 0, 1, 3, -1, ot);
+    color = dds3GetConfigFadeAlpha() | 0x80808000;
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    fclDrawSpriteRes(0, -0x110, 0, colors, 0, 2, D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(0, -0x110, 0, colors, 0, 3, D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(0, -0x110, 0, colors, 0, 4, D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(0, -0x80, 0, colors, 0, 5, D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(0, -0x80, 0, colors, 0, 6, D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(0, -0x80, 0, colors, 0, 7, D_00345D88, dds3ConfigLayoutTable, ot);
+    return dds3DrawConfigItem(0, 0x1D8, 0, ot);
+}
+
+#else
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigPanel);
+#endif
 
 void *cfgTexLoad(void)
 {
