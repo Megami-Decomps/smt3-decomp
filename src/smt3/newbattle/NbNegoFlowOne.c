@@ -839,7 +839,50 @@ s32 Flow1_23(nbNegoProcessData_t *n)
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_23);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_24);
+s32 Flow1_24(nbNegoProcessData_t *n)
+{
+    datUnitWork_t *work;
+    s32 chance;
+    s32 i;
+
+    nbAddNegoIdKouho(n, 0x1001B);
+    nbAddNegoIdKouho(n, 0x10019);
+    n->nextnegoid = n->nextkouho[0];
+    chance = 0x32 / (n->data->enemypcnt - 1);
+
+    for (i = 4; i < 14; i++) {
+        nbParty_t *party = &n->data->party[i];
+        u16 flags = party->flag;
+
+        if ((flags & 1) == 0) {
+            continue;
+        }
+        if ((flags & 2) == 0) {
+            continue;
+        }
+        if (flags & 0x38) {
+            continue;
+        }
+        if (i == n->epartyindex) {
+            continue;
+        }
+
+        work = nbGetUnitWorkPointer(n->data, party);
+        if (datCheckTalk(work) == 0) {
+            continue;
+        }
+        if (master_text[work->id].phase == 2) {
+            continue;
+        }
+        if (dds3GetRandIntA(0, 100) >= chance) {
+            continue;
+        }
+        n->nextnegoid = n->nextkouho[1];
+        n->boupartyindex = i;
+        break;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_25);
 
