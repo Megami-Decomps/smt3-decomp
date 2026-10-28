@@ -110,7 +110,14 @@ typedef struct nbMainProcessData_t
     u8 unk_38[0x8];
     s32 actionstackp;
     u32 endtype;
-    u8 unk_48[0x18];
+    s8 order[12];
+    s8 orderindex;
+    u8 orderPadding;
+    s16 previndex;
+    u16 prevcommand;
+    u16 prevcommind;
+    u16 prevflag;
+    u16 debug;
     u32 stat;
     u8 unk_64[0x4];
     u8 turn;
