@@ -67,6 +67,8 @@ typedef struct
     /* 0x90 */ s32 unk_90;
     /* 0x94 */ s32 unk_94[5];
     /* 0xA8 */ s32 unk_A8;
+    /* 0xAC */ u32 cur_alpha;
+    /* 0xB0 */ u32 cur_alphacnt;
 } mselGlobalWork_t;
 
 extern mselGlobalWork_t *gGlobal;
@@ -154,7 +156,54 @@ void mselUpdateCursor(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselDrawTitleAnim);
+extern f32 sdfSin(f32 angle);
+extern char *D_00342FF8[];
+extern char *D_00343008[];
+
+void mselDrawTitleAnim(void)
+{
+    u32 color;
+
+    eglSetOt(0x47);
+    eglLinkTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    eglLinkAlpha(0);
+    eglLinkSprite(0, 0, 512, 448, 0, 0, 512, 448,
+                  0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                  gGlobal->unk_40);
+    gGlobal->cur_alphacnt = (gGlobal->cur_alphacnt + 10) % 360;
+    gGlobal->cur_alpha = (u32)((sdfSin((f32)((gGlobal->cur_alphacnt + 90) % 360) /
+                                     180.0f * 0x1.921f9ep+1f) + 1.0f) *
+                              0.5f * 88.0f + 104.0f);
+    color = 0x80808000 | (u8)gGlobal->cur_alpha;
+    switch (gGlobal->cursor) {
+    case 0:
+        eglLinkSprite(38, 162, 132, 30, 249, 455, 132, 30,
+                      color, color, color, color, gGlobal->unk_40);
+        eglLinkSprite(38, 198, 99, 30, 146, 455, 99, 30,
+                      0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                      gGlobal->unk_40);
+        break;
+    case 1:
+        eglLinkSprite(38, 162, 132, 30, 10, 455, 132, 30,
+                      0x80808080, 0x80808080, 0x80808080, 0x80808080,
+                      gGlobal->unk_40);
+        eglLinkSprite(38, 198, 99, 30, 385, 455, 99, 30,
+                      color, color, color, color, gGlobal->unk_40);
+        break;
+    }
+    switch (gGlobal->cursor) {
+    case 0:
+        mselDrawMenuText(239, 82, 0x64618780, (s32)D_00342FF8[0]);
+        mselDrawMenuText(239, 94, 0x64618780, (s32)D_00342FF8[1]);
+        mselDrawMenuText(239, 106, 0x64618780, (s32)D_00342FF8[2]);
+        return;
+    case 1:
+        mselDrawMenuText(239, 82, 0x64618780, (s32)D_00343008[0]);
+        mselDrawMenuText(239, 94, 0x64618780, (s32)D_00343008[1]);
+        mselDrawMenuText(239, 106, 0x64618780, (s32)D_00343008[2]);
+        break;
+    }
+}
 
 void mselDrawBackground(void)
 {
