@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -226,11 +227,31 @@ void shop_update_Shutdown(void)
     p2sdStopBGM(0x310000);
 }
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFD0);
+extern char D_0053D010[];
+extern cmbWork_t *fclAllocShopWork(s8 type, s32 sequence);
+extern s8 FclDebug(s8 mode, void *work);
+extern s32 shop_Process(dds3ProcessID_t *id);
+extern s32 shop_draw_Process(dds3ProcessID_t *id);
+extern s32 shop_update_Process(dds3ProcessID_t *id);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
+    s32 startTimer, s32 shutdownTimer, dds3ProcessFunc_t process,
+    dds3ProcessFunc_t shutdown, void *work);
 
-INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFF0);
-
-INCLUDE_ASM(const s32, "facility/fclShopInit", fclShopProcessStart);
+void fclShopProcessStart(s8 *argument)
+{
+    s8 type = 0;
+    if (argument != NULL) type = *argument;
+    printf(D_0053D010, type);
+    if (D_0054FB20 == NULL) {
+        D_0054FB20 = fclAllocShopWork(type, 0);
+        FclDebug(3, D_0054FB20);
+        dds3StartProcess(D_0054FB48, 0x402, 1, 1, shop_Process, NULL, D_0054FB20);
+        dds3StartProcess(D_0053D028, 0x2B12, 1, 1, shop_draw_Process, NULL, D_0054FB20);
+        dds3StartProcess(D_0053D038, 0x520E, 1, 1, shop_update_Process,
+                        (dds3ProcessFunc_t)shop_update_Shutdown, D_0054FB20);
+        shpProcessStat = 1;
+    }
+}
 
 void fclShopProcessEnd(void)
 {
@@ -359,6 +380,12 @@ void shpFindItemSlot(shpUpdateWork_t *work)
 }
 
 INCLUDE_ASM(const s32, "facility/fclShopInit", shpGetSellPrice);
+
+INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFD0);
+
+INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053CFF0);
+
+INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053D010);
 
 INCLUDE_RODATA(const s32, "facility/fclShopInit", D_0053D028);
 
