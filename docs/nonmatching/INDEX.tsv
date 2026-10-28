@@ -194,6 +194,7 @@ deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
 pbRebuildOutline	pb/pbGameDraw	0x188	16 of 95 words match	docs/nonmatching/pb/pbGameDraw.md	5
+pb_draw_error_Process	pb/pbMCard	540 bytes	27 of 135 words	docs/nonmatching/pb/pbMCard.md	5
 pbEditInitProc	pb/pbMain	0x148	79 of 82 words match	docs/nonmatching/pb/pbMain.md	5
 pipeFileLoad	pipe/pipePosTable	424 bytes	103 of 106 words match	docs/nonmatching/pipe/pipePosTable.md	5
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/nonmatching/result/rstcalc.md	5
