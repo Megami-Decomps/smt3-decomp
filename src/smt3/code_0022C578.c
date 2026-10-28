@@ -523,7 +523,8 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00000 */ u8 unk_00000[0xA54];
+    /* 0x00000 */ u8 unk_00000[0xA50];
+    /* 0x00A50 */ s32 maxstock;
     /* 0x00A54 */ dds3PartyUnit_t party[16];
     /* 0x01914 */ s8 stock[0x10];
     /* 0x01924 */ s32 stockCount;
@@ -907,7 +908,90 @@ void camp_22C610(void)
 void func_0022C658(void) {
 }
 
+/* NON_MATCHING: 6 of 271 words differ at the exact 1084-byte size. */
+#ifdef NON_MATCHING
+typedef dds3PartyUnit_t cmbUnit_t;
+extern void cmbClearStockEntry(cmbUnit_t *unit);
+extern s32 cmbAddDevilToStock(u16 devilId, cmbUnit_t *list, u8 count);
+extern void fclEncycDebugRegist(void);
+extern void evtBitOn(s32 bit);
+
+void campDebugRegistAll(void)
+{
+    s32 slot;
+    s32 i;
+    u16 lastDevil;
+    u32 registered;
+    cmbUnit_t *nextList;
+
+    if (dds3PadButtonState[0x28] != 0) {
+        return;
+    }
+
+    cmbGlobalWork->maxstock = 12;
+    for (i = 1; i < 16; i++) {
+        cmbClearStockEntry(&cmbGlobalWork->party[i]);
+        cmbGlobalWork->stock[i] = 0;
+    }
+    registered = 1;
+    cmbGlobalWork->stockCount = 1;
+
+    if (cmbGlobalWork->party[0].unit.skillcnt == 0) {
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 1;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 2;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 3;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 4;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 5;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 6;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 7;
+        cmbGlobalWork->party[0].unit.skill[cmbGlobalWork->party[0].unit.skillcnt++] = 8;
+    }
+
+    if (dds3PadButtonState[0x2A] != 0) {
+        slot = cmbAddDevilToStock(0x4B, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x1F, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x01, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x8A, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x8B, &cmbGlobalWork->party[4], 12);
+        nextList = &cmbGlobalWork->party[4];
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        lastDevil = 0x6D;
+    } else {
+        slot = cmbAddDevilToStock(0x35, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x4E, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x35, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x01, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x50, &cmbGlobalWork->party[4], 12);
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        slot = cmbAddDevilToStock(0x0B, &cmbGlobalWork->party[4], 12);
+        nextList = &cmbGlobalWork->party[4];
+        cmbGlobalWork->party[4 + slot].unit.flag = registered;
+        lastDevil = 0x9A;
+    }
+
+    slot = cmbAddDevilToStock(lastDevil, nextList, 12);
+    cmbGlobalWork->party[4 + slot].unit.flag = registered;
+    fclEncycDebugRegist();
+
+    if (dds3PadButtonState[0x29] != 0) {
+        return;
+    }
+    evtBitOn(0xA);
+    evtBitOn(0x25);
+    evtBitOn(0x28);
+    evtBitOn(0x915);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", campDebugRegistAll);
+#endif
 
 void dds3ClearStockTable(void)
 {
