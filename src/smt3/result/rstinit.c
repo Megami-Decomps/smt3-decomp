@@ -199,7 +199,36 @@ void rstChkResult2Process(u8 *work)
     memset(&work[0x129F], 0, 6);
 }
 
-INCLUDE_ASM(const s32, "result/rstinit", rstCreateTargetList);
+extern void rstPrepareStatusModel(s32 group, s32 id, s32 blocking);
+
+void rstCreateTargetList(evtStartWork_t *work)
+{
+    s32 useFirstUnit = 1;
+    s32 i;
+
+    if (rstChkLevelUpTarget(&cmbGlobalWork->party[0].unit) != 0) {
+        rstPrepareStatusModel(6, 0, 1);
+        useFirstUnit = 0;
+    }
+
+    work->levelUpCount = 0;
+    work->levelUpStep = 0;
+    i = 1;
+    while (i < cmbGlobalWork->stockCount) {
+        u8 stockIndex = (u8)cmbGlobalWork->stock[i];
+        datUnitWork_t *unit = &cmbGlobalWork->party[stockIndex].unit;
+        i++;
+
+        if (rstChkLevelUpTarget(unit) != 0) {
+            work->levelUpUnit[work->levelUpCount++] = unit;
+        }
+    }
+
+    if (useFirstUnit != 0 && work->levelUpCount != 0) {
+        datUnitWork_t *unit = work->levelUpUnit[work->levelUpStep++];
+        rstPrepareStatusModel(6, unit->id, 1);
+    }
+}
 
 INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
 
