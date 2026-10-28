@@ -189,7 +189,6 @@ CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/no
 SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/nonmatching/newbattle/nbStageProcess.md	279
 StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/newbattle/nbStageProcess.md	308
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
-datPartyDamagePipe	newdata/datCalc	0x114	54 of 68 words differ	docs/nonmatching/newdata/datCalc.md	23
 gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
 pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md	59

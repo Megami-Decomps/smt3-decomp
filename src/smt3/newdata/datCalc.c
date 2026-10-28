@@ -938,7 +938,34 @@ void datPartyDamagePipe(s32 big, s32 sml)
     }
 }
 #else
-INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamagePipe);
+void datPartyDamagePipe(s32 big, s32 sml)
+{
+    s32 i;
+
+    if (big == 0 && sml == 0) {
+        return;
+    }
+    for (i = 0; i < 16; i++) {
+        if ((DDS3_GBWK->akuma[i].flag & 2) != 0 && DDS3_GBWK->akuma[i].hp != 0) {
+            s32 hp = DDS3_GBWK->akuma[i].hp;
+            s32 smlDamage = hp * 3 / 100 * sml;
+            s32 bigDamage = hp / 10 * big;
+            s32 damage = bigDamage + smlDamage;
+
+            if (evtBitCheck(0xAF2) == 0) {
+                damage *= 3;
+            }
+            if (damage == 0) {
+                damage = 1;
+            }
+            hp -= damage;
+            if (hp <= 0) {
+                hp = 1;
+            }
+            DDS3_GBWK->akuma[i].hp = hp;
+        }
+    }
+}
 #endif
 
 void datPartyKaifuku(void)

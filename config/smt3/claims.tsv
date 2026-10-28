@@ -458,3 +458,4 @@ src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 300 B	player templat
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 196 B	devil level-up sequence setup and exhausted-stock fade transition; owner 74 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 180 B	automatic devil parameter bonus assignment with signed selection and native cap; owner 75 match, 0 differ
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 196 B	ascending active-companion scan, death status and party-flag removal
+src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 276 B	pipe damage components, event scaling and nonfatal HP clamp
