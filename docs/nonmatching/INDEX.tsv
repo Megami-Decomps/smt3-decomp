@@ -88,6 +88,7 @@ ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/nonmatching/facility/f
 ragCheckHeartsChoice	fclRagUpdate	0x80	22 of 29 words match	docs/nonmatching/facility/fclRagUpdate.md	5
 fclDrawSpriteAngleCore	fclShare	0x4A8	212 of 298 words match	docs/nonmatching/facility/fclShare.md	5
 fclDrawSpriteCore	fclShare	0x2D8	69 of 180 words match	docs/nonmatching/facility/fclShare.md	50
+shop_Process	facility/fclShopCalc	256 bytes	37 of 64 words match	docs/nonmatching/facility/fclShopCalc.md	5
 fclTerminalLoadTextures	fclTerminalInit	0x70	16 of 27 words match	docs/nonmatching/facility/fclTerminalInit.md	5
 trmStartEvent	facility/fclTerminalInit	0x84	25 of 33 words match	docs/nonmatching/facility/fclTerminalInit.md	37
 trmGetJumpTerminalNo	fclTerminalUpdate	0x44	8 of 17 words differ	docs/nonmatching/facility/fclTerminalUpdate.md	5
