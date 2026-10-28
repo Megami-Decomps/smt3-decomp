@@ -1,4 +1,5 @@
 #include "common.h"
+#include "font.h"
 #include "libsdf.h"
 #include "kernel.h"
 
@@ -16,7 +17,16 @@ INCLUDE_ASM(const s32, "interface/frName", frGetName1NFRQ);
 
 INCLUDE_ASM(const s32, "interface/frName", frGetName2NFRQ);
 
-INCLUDE_ASM(const s32, "interface/frName", frGetNameFRQ);
+extern frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
+extern frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
+
+frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
+{
+    frFontHandle_t *name = frGetName2NFRQ(target, chain, firstOption);
+    name->advance += 8;
+    name->lastChild->advance += 8;
+    return frGetName1NFRQ(target, name, firstOption);
+}
 
 INCLUDE_ASM(const s32, "interface/frName", frGetCNameFRQ);
 

@@ -448,11 +448,11 @@ extern s32 frFindTagCode(u16 code);
 
 extern s32 frFindTagCode2(u16 code);
 
-extern frFontHandle_t *frGetNameFRQ(s8 TargetNo, frFontHandle_t *Style, s8 pFRQ);
+extern frFontHandle_t *frGetNameFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 
-extern frFontHandle_t *frGetName1NFRQ(s8 TargetNo, frFontHandle_t *Style, s8 pFRQ);
+extern frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 
-extern frFontHandle_t *frGetName2NFRQ(s8 TargetNo, frFontHandle_t *Style, s8 pFRQ);
+extern frFontHandle_t *frGetName2NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption);
 
 extern frFontHandle_t *frGetCNameFRQ(s8 nameIndex, s8 fontIndex, frFontHandle_t *chain, s8 firstOption);
 
