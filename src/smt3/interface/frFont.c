@@ -393,6 +393,8 @@ s32 frDrawFont(frFontHandle_t *pFRQ);
 
 extern s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode);
 
+s32 func_001C7E38(frFontHandle_t *pFRQ, s8 Mode, u32 Ot);
+
 s32 frFlipPacketBuf(dds3ProcessID_t *id);
 
 void frSetExtDic(u8 *pExtFontData);
@@ -1305,7 +1307,11 @@ s32 frDrawFont(frFontHandle_t *pFRQ) {
     return frDrawFontEx(pFRQ, 0);
 }
 
-INCLUDE_ASM(const s32, "interface/frFont", frDrawFontEx);
+s32 frDrawFontEx(frFontHandle_t *pFRQ, s8 Mode) {
+    return func_001C7E38(pFRQ, Mode, gFontDrawOT);
+}
+
+INCLUDE_ASM(const s32, "interface/frFont", func_001C7E38);
 
 /* Release queue slot 1 when the draw-buffer index's low byte is zero, otherwise
  * slot 0; return 0. This is buffer selection, not a current-font selection. */
