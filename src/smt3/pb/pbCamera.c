@@ -70,12 +70,53 @@ extern void mdlFree(mdlObj_t *aHandle);
 extern pbProcHandle_t *blockDB;
 
 extern sdfVector4_t aViewEye, aViewTarget;
+extern f32 sdfCos(f32 angle);
+extern f32 sdfSin(f32 angle);
 
-INCLUDE_ASM(const s32, "pb/pbCamera", pbRotateXCamera);
+void pbRotateXCamera(f32 angle)
+{
+    sdfVector4_t offset __attribute__((aligned(16)));
+    f32 rotatedA;
+    f32 rotatedB;
 
-INCLUDE_ASM(const s32, "pb/pbCamera", pbRotateYCamera);
+    SDF_VU0_COPYVECTOR(&offset, &aViewEye);
+    offset.y -= aViewTarget.y;
+    offset.z -= aViewTarget.z;
+    rotatedA = sdfCos(angle) * offset.y + sdfSin(angle) * offset.z;
+    rotatedB = -sdfSin(angle) * offset.y + sdfCos(angle) * offset.z;
+    aViewEye.y = rotatedA + aViewTarget.y;
+    aViewEye.z = rotatedB + aViewTarget.z;
+}
 
-INCLUDE_ASM(const s32, "pb/pbCamera", pb_1D2838);
+void pbRotateYCamera(f32 angle)
+{
+    sdfVector4_t offset __attribute__((aligned(16)));
+    f32 rotatedA;
+    f32 rotatedB;
+
+    SDF_VU0_COPYVECTOR(&offset, &aViewEye);
+    offset.x -= aViewTarget.x;
+    offset.z -= aViewTarget.z;
+    rotatedA = sdfCos(angle) * offset.x + sdfSin(angle) * offset.z;
+    rotatedB = -sdfSin(angle) * offset.x + sdfCos(angle) * offset.z;
+    aViewEye.x = rotatedA + aViewTarget.x;
+    aViewEye.z = rotatedB + aViewTarget.z;
+}
+
+void pb_1D2838(f32 angle)
+{
+    sdfVector4_t offset __attribute__((aligned(16)));
+    f32 rotatedA;
+    f32 rotatedB;
+
+    SDF_VU0_COPYVECTOR(&offset, &aViewEye);
+    offset.x -= aViewTarget.x;
+    offset.y -= aViewTarget.y;
+    rotatedA = sdfCos(angle) * offset.x + sdfSin(angle) * offset.y;
+    rotatedB = -sdfSin(angle) * offset.x + sdfCos(angle) * offset.y;
+    aViewEye.x = rotatedA + aViewTarget.x;
+    aViewEye.y = rotatedB + aViewTarget.y;
+}
 
 extern void SetRotateMatrixY(f32 angle);
 extern void SetRotateMatrixX_B(f32 angle);
