@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1116 members, 506 adopted constants.
+# 0 types, 1114 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -22,6 +22,7 @@ member billHandle_t.unk1C
 member billPluralEntry_t.unk08
 member campCrossPanel_t.unk_1C
 member campCrossPanel_t.unk_25
+member campDhEntryWork_t.unk_0000
 member campDhEntry_t.unk_00
 member campDhEntry_t.unk_01
 member campDhEntry_t.unk_02
@@ -96,6 +97,8 @@ member cmbGbWork_t.unk_00008
 member cmbGbWork_t.unk_0000C
 member cmbGbWork_t.unk_00054
 member cmbGbWork_t.unk_0410C
+member cmbGbWork_t.unk_04505
+member cmbGbWork_t.unk_04746
 member cmbGbWork_t.unk_1650A
 member cmbGbWork_t.unk_1650B
 member cmbGbWork_t.unk_16518
@@ -119,6 +122,8 @@ member cmbMitamaEntry_t.unk_04
 member cmbMitamaEntry_t.unk_05
 member cmbPairResult_t.unk_02
 member cmbRaceSortEntry_t.unk_02
+member cmbSceneModelOwner_t.unk_00
+member cmbSceneModel_t.unk_00
 member cmbSlotParam_t.unk_00
 member cmbSlotParam_t.unk_04
 member cmbSmokeParam_t.unk_01
@@ -192,7 +197,6 @@ member cmpPanelEff_t.unk_1C
 member cmpPanelEff_t.unk_34
 member cmpPanelEff_t.unk_38
 member cmpPanelEff_t.unk_3C
-member cmpSeqInfo_t.unk06
 member cmpSeqInfo_t.unk_00
 member cmpSeqInfo_t.unk_01
 member cmpSeqInfo_t.unk_02
@@ -485,11 +489,6 @@ member fclRagTex_t.unk_10
 member fclRagTex_t.unk_14
 member fclRagTex_t.unk_18
 member fclRagTex_t.unk_1C
-member fclRagWork_t.unk_0001
-member fclRagWork_t.unk_0018
-member fclRagWork_t.unk_4644
-member fclRagWork_t.unk_4648
-member fclRagWork_t.unk_464C
 member fclRecoverWork_t.unk_0000
 member fclRibbon_t.unk_04
 member fclRibbon_t.unk_06
@@ -720,7 +719,6 @@ member nbTextBox_t.unk_00
 member nbUnitMotion_t.unk00
 member nbUnitMotion_t.unk04
 member nbUnitMotion_t.unk18
-member nmeWork_t.unk107D
 member nmeWork_t.unk1B
 member nmeWork_t.unk1C
 member nmeWork_t.unk310C
