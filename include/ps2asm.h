@@ -1474,4 +1474,8 @@ __asm__ volatile ( \
  * own, after declaring sdfFloatToULong. */
 #define EQUATE_FPTODP() __asm__("fptodp = sdfFloatToULong")
 
+/* The reverse conversion is named dptofp by ee-gcc; the native routine
+ * returns its float in $f0 despite the inherited sdfDoubleToULong name. */
+#define EQUATE_DPTOFP() __asm__("dptofp = sdfDoubleToULong")
+
 #endif /* PS2ASM_H */

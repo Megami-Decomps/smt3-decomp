@@ -1,8 +1,13 @@
 #include "common.h"
 #include "datCalc.h"
+#include "ps2asm.h"
 
 extern s32 evtBitCheck(s32 no);
 extern s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza);
+extern f64 sdfFloatToULong(f32 value);
+extern f32 sdfDoubleToULong(f64 value);
+EQUATE_DPTOFP();
+EQUATE_FPTODP();
 extern u32 datGetAisyo(datUnitWork_t *work, s32 attr);
 extern void func_0022E168(u16 devilId);
 typedef struct
@@ -202,14 +207,69 @@ s32 datGetSakePow(datUnitWork_t *work)
     return (sk + 5) * 1.5 + (lu + 5) + (work->level + 5);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", GetButuriAttack);
+s32 GetButuriAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
+{
+    s32 param;
+    f32 value;
+
+    datGetNormalAtkPow(s);
+    datGetDefPow(d);
+
+    if (s->flag & 0x20) {
+        if (nskill == 0) {
+            param = datGetParam(s, 0);
+            value = ((f32)s->level * 2.0f + (f32)param * 2.0f) * 1.33f * 0.6f -
+                    (48 / (s->level + 10));
+        } else {
+            param = datGetParam(s, 0);
+            value = ((f32)s->level * 2.0f + (f32)param * 2.0f) * (f32)waza / 23.2f * 0.6f -
+                    (50 / (s->level + 10));
+        }
+    } else if (nskill == 0) {
+        param = datGetParam(s, 0);
+        value = ((f32)s->level * 2.0f + (f32)param * 2.0f) * 1.33f * 0.8f;
+    } else {
+        param = datGetParam(s, 0);
+        value = ((f32)s->level * 2.0f + (f32)param * 2.0f) * (f32)waza / 23.2f * 0.8f;
+    }
+    return value;
+}
 
 s32 GetButuriKaifuku(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
 {
     return GetButuriAttack(nskill, s, d, waza);
 }
 
-INCLUDE_ASM(const s32, "newdata/datCalc", GetMagicAttack);
+s32 GetMagicAttack(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
+{
+    f32 value;
+    f32 modifier;
+    f32 result;
+    s32 param;
+    s32 level;
+    s32 power;
+    f32 magicBase;
+    f32 magicLimit;
+
+    magicLimit = (f32)datSkillTable.normal[nskill].magiclimit;
+    magicBase = (f32)datSkillTable.normal[nskill].magicbase;
+    power = s->level * waza;
+    value = magicBase + (f32)(power * 2) / 21.0f;
+    if (value > magicLimit) {
+        value = magicLimit;
+    }
+
+    param = datGetParam(s, 2);
+    level = s->level;
+    modifier = ((f32)param - ((f32)level / 5.0f + 4.0f)) * 2.5f;
+    level += 10;
+    result = (f32)((f64)(value + (value / 100.0f) * modifier) * 0.8);
+
+    if (s->flag & 0x20) {
+        result = result * 0.75f - 50.0f / level;
+    }
+    return result;
+}
 
 s32 GetMagicKaifuku(s32 nskill, datUnitWork_t *s, datUnitWork_t *d, s32 waza)
 {
@@ -243,8 +303,6 @@ f32 GetAisyoRitu(s32 nskill, datUnitWork_t *s, datUnitWork_t *d)
     }
     return ritu;
 }
-
-INCLUDE_RODATA(const s32, "newdata/datCalc", D_005430C0);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillKouka);
 
