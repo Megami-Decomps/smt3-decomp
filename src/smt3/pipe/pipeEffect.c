@@ -114,7 +114,36 @@ void pipeBulrLimit(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffCreateLoadFile);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+
+void pipeEffCreateLoadFile(PIPE_EFF_t *effect, const char *path, u8 maxSize)
+{
+    PIPE_EFF_t *entry;
+    u8 i = maxSize - 1;
+
+    effect->mhFile = NULL;
+    effect->d3p = NULL;
+    effect->x = effect->y = effect->z = 0.0f;
+    effect->size = 0;
+    effect->ptr = NULL;
+    effect->mhFile = sdfDevLoadFileEx(path, (u32 *)&effect->ptr, (u32 *)&effect->size);
+
+    effect++;
+    entry = effect;
+    if (--i != 0xFF) {
+        do {
+            entry->mhFile = NULL;
+            entry->size = effect->size;
+            entry->d3p = NULL;
+            entry->x = entry->y = entry->z = 0.0f;
+            entry->ptr = NULL;
+            entry->pos2[0] = 0.0f;
+            entry->pos2[1] = 0.0f;
+            entry->offset = 0;
+            entry++;
+        } while (--i != 0xFF);
+    }
+}
 
 void pipeEffLoad(void)
 {
