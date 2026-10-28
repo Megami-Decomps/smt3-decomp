@@ -1820,3 +1820,12 @@
   coalesces the copy away and is one instruction short per ramp.
   `campDhFindVisibleIcon` has two of them and went from 26 of 60 words to exact.
 
+
+- An independent symbol view and an array-derived pointer can both be needed
+  for one global span. `effEVECombParSmokeDraw` first submits state through the
+  named view of ordering-table entry 48, then uses a pointer to entry 49 and
+  its predecessor for the remaining links. Two independent aliases lose the
+  native `-0x20` address derivation; making every access an index into the whole
+  table adds two words. The mixed views preserve the real adjacent-entry
+  relation and close the call scheduling too: the complete unit is 85 match,
+  zero differ.

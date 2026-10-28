@@ -45,7 +45,6 @@ page and line to open. Conventions are in
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
 | 2 | event/evtPolygonMovie | [event/evtPolygonMovie.md](event/evtPolygonMovie.md) |
 | 2 | effect/parManager | [effect/parManager.md](effect/parManager.md) |
-| 2 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 2 | effect/effBattleMisc | [effect/effBattleMisc.md](effect/effBattleMisc.md) |
 | 2 | effect/effBattle | [effect/effBattle.md](effect/effBattle.md) |
 | 2 | code_001B0858 | [code_001B0858.md](code_001B0858.md) |
@@ -74,4 +73,5 @@ page and line to open. Conventions are in
 | 1 | event/evtCommand | [event/evtCommand.md](event/evtCommand.md) |
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
+| 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
 | 1 | basic/dds3PathBasic | [basic/dds3PathBasic.md](basic/dds3PathBasic.md) |
