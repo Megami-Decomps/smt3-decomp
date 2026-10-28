@@ -437,7 +437,7 @@ typedef struct
     /* 0x17640 */ cmpCursorInfo_t menuCursor;
     /* 0x17678 */ u8 unk_17678[0x3060];
     /* 0x1A6D8 */ s32 texHandle[7];
-    /* 0x1A6F4 */ u8 unk_1A6F4[0x24];
+    /* 0x1A6F4 */ fclSprite_t backgroundSprite;
     /* 0x1A718 */ u8 *table;
     /* 0x1A71C */ void *panel;
     /* 0x1A720 */ fclRibbon_t *ribbon;
@@ -573,7 +573,22 @@ void fclCombineInitWork(void)
     fclSetWorkValue(1, 100);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", fclCombineLoadTextures);
+extern char *D_0032CB80[];
+extern s32 fclLoadTexture(char *filename);
+extern void fclSetPanelTex(fclPanel_t *panel, s32 u0, s32 v0, s32 u1, s32 v1, s32 texture);
+
+void fclCombineLoadTextures(void)
+{
+    s8 i;
+
+    for (i = 0; (u8)i < 7; i++) {
+        CMB_GBWK->texHandle[i] = fclLoadTexture(D_0032CB80[i]);
+    }
+    fclSetPanelTex(CMB_GBWK->panel, 0, 0, 0x100, 0x80, CMB_GBWK->texHandle[5]);
+    fclSetSprite(&CMB_GBWK->backgroundSprite, 0x200, 0x1C0, 0, 5, 5,
+                 0x1FB, 0xFB, 0x80808080, CMB_GBWK->texHandle[6]);
+    printf("COMBINE : Tex load.\n");
+}
 
 void fclCombineTexFree(void)
 {

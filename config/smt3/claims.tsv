@@ -375,6 +375,7 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 348 B	random
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 484 B	stock display background rows, cells, rails and sprite strips; owner 141 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 284 B	information panel sprite group with repeated overlay pairs; owner 142 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 520 B	result icon tint array and mode-dependent filtered/direct sprites; owner 143 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 252 B	texture batch loading, panel texture and background sprite setup; owner 144 match, 0 differ
 src/smt3/facility/fclRecoverUpdate.c	redthing1	done	2026-10-28	1 fn / 168 B	panel animation state callback; switch fallthrough and qualified reorg trace; whole-unit 8 match, 0 differ
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 404 B	list initialization and work allocator; recovered prefix bytes and script data output; whole-unit 22 match, 0 differ
 src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	1 fn / 160 B	free effect slot allocation with typed initialization and qualified scheduler evidence; whole-unit 8 match, 0 differ
