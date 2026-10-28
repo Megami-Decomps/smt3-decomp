@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 s32 fclGetFlag(s8 index);
 
@@ -49,17 +50,75 @@ extern s32 cmpUpdateListSelection(fclPanelPos_t *pos, u8 *list, s32 a,
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_00[3];
+    /* 0x0000 */ u8 flags;
+    /* 0x0001 */ s8 seq;
+    /* 0x0002 */ u8 unk_02;
     /* 0x0003 */ s8 unk_03;
-    /* 0x0004 */ u8 unk_0004[0x4650];
-    /* 0x4654 */ s32 texHandle[1];
+    /* 0x0004 */ u8 unk_0004[0x4C];
+    /* 0x0050 */ u8 customSource[4];
+    /* 0x0054 */ u16 devilId;
+    /* 0x0056 */ u8 unk_0056[0x4606];
+    /* 0x465C */ s32 bgTexHandle[1];
+    /* 0x4660 */ u8 unk_4660[0x14];
+    /* 0x4674 */ s32 boxColor;
 } ragDrawWork_t;
 
 extern ragDrawWork_t *ragDrawWork;
 
-INCLUDE_ASM(const s32, "facility/fclRagDraw", ragDrawSeqStatus);
+extern void ragDrawList2(s32 mode);
 
-extern void ragDrawSeqStatus(void);
+extern void ragDrawList3(s32 mode);
+
+extern void ragDrawSeqErr(void);
+
+extern s32 ragDrawSeqRoot(s32 Mode);
+
+extern void cmpModelInitCore2(void);
+
+extern void fclDrawBG(s32 *texHandle, s32 ot);
+
+extern void cmpDrawBoxF(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 ot);
+
+extern void cmbCopyDefaultDevilToStock(s32 id, datUnitWork_t *work);
+
+extern void cmbCopyCustomDevilToStock(datUnitWork_t *work, u8 *source);
+
+extern s32 datGetParam(datUnitWork_t *work, s32 index);
+
+extern void cmbSetBirthPanel(datUnitWork_t *work);
+
+extern void cmpDrawStatusComEx(datUnitWork_t *work, s32 a2, s32 a3, s32 a4, s8 *delta,
+                               s32 a6, u32 a7, s32 a8, s32 a9, s32 a10);
+
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+
+extern s32 fclChkDbgProcess(void);
+
+extern s32 cmpUpdateTerminate(void);
+
+void ragDrawSeqStatus(void)
+{
+    s8 delta[6];
+    datUnitWork_t custom;
+    datUnitWork_t base;
+    s32 i;
+
+    cmpModelInitCore2();
+    fclDrawBG(ragDrawWork->bgTexHandle, 7);
+    cmpDrawBoxF(0, 0x198, ragDrawWork->boxColor, 0x200, 0x168, 0x33, 7);
+    cmbCopyDefaultDevilToStock(ragDrawWork->devilId, &base);
+    cmbCopyCustomDevilToStock(&custom, ragDrawWork->customSource);
+    custom.hp = custom.maxhp;
+    custom.mp = custom.maxmp;
+    for (i = 0; i < 6; i++) {
+        delta[i] = datGetParam(&custom, i) - base.param[i];
+        custom.param[i] -= delta[i];
+    }
+    cmbSetBirthPanel(&base);
+    cmpDrawStatusComEx(&custom, 0x80, -1, 2, delta, 0, 0xA09DC380, 3, 2, 2);
+    cmbSetBirthPanel(NULL);
+}
+
 
 extern void ragDrawHeartsList(s32 mode);
 
@@ -96,6 +155,71 @@ s32 ragDrawSeqRoot(s32 Mode)
     cmpUpdateListSelection(&pos, (u8 *)ragDrawWork + 0x140, 0, mode, 0x100, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagDraw", ragDrawSeqErr);
+void ragDrawSeqErr(void)
+{
+    switch (ragDrawWork->unk_03) {
+    case 1:
+        ragDrawHeartsList(1);
+        return;
+    case 2:
+        ragDrawList2(1);
+        return;
+    case 3:
+        ragDrawList3(1);
+        return;
+    case 7:
+        ragDrawSeqStatus();
+        break;
+    }
+}
 
+/* NON_MATCHING: 69 of 72 words match at the exact size; three words are only a
+ * register name, retail reusing the work pointer's register for the sequence. */
+#ifdef NON_MATCHING
+s32 ragDraw(dds3ProcessID_t *id)
+{
+    ragDrawWork = dds3GetProcessData(id);
+    if (fclChkDbgProcess() != 0) {
+        return 0;
+    }
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+    if (ragDrawWork->flags & 0x20) {
+        cmpUpdateTerminate();
+        return -1;
+    }
+    if (ragDrawWork->flags & 2) {
+        switch (ragDrawWork->seq) {
+    case 0:
+        ragDrawSeqRoot(1);
+        break;
+    case 1:
+        ragDrawHeartsList(fclGetFlag(0) == 0);
+        break;
+    case 2:
+        ragDrawList2(fclGetFlag(0) == 0);
+        break;
+    case 3:
+        ragDrawList3(fclGetFlag(0) == 0);
+        break;
+    case 4:
+    case 5:
+        ragDrawSeqRoot(0);
+        break;
+    case 6:
+        ragDrawSeqErr();
+        break;
+    case 7:
+        ragDrawSeqStatus();
+        break;
+        case 8:
+            ragDrawSeqConfirm();
+            break;
+        }
+    }
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclRagDraw", ragDraw);
+#endif

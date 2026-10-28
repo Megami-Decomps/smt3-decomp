@@ -65,6 +65,7 @@ page and line to open. Conventions are in
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
 | 1 | fclTerminalUpdate | [facility/fclTerminalUpdate.md](facility/fclTerminalUpdate.md) |
 | 1 | fclRagUpdate | [facility/fclRagUpdate.md](facility/fclRagUpdate.md) |
+| 1 | facility/fclRagDraw | [facility/fclRagDraw.md](facility/fclRagDraw.md) |
 | 1 | fclRagCalc | [facility/fclRagCalc.md](facility/fclRagCalc.md) |
 | 1 | fclPanel | [facility/fclPanel.md](facility/fclPanel.md) |
 | 1 | event/evtUnitManager | [event/evtUnitManager.md](event/evtUnitManager.md) |

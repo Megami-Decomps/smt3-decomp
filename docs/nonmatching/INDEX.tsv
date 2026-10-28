@@ -101,6 +101,7 @@ cmbDrawResultFooter	fclCombineInit	0x74	25 of 29 words match	docs/nonmatching/fa
 cmbActionBGM	fclCombineInit	0x68	22 of 25 words match	docs/nonmatching/facility/fclCombineInit.md	106
 fclDrawPanel	fclPanel	0x54	8 of 21 words differ	docs/nonmatching/facility/fclPanel.md	5
 ragDrawList2, ragDrawList3	fclRagCalc	0x150 each	10 of 84 words differ	docs/nonmatching/facility/fclRagCalc.md	5
+ragDraw	facility/fclRagDraw	0x120	69 of 72 words match	docs/nonmatching/facility/fclRagDraw.md	5
 ragBuildList2, ragBuildList3	fclRagInit	0x174 each	22 of 93 words differ	docs/nonmatching/facility/fclRagInit.md	5
 ragGetListItem2	fclRagInit	0xCC	29 of 51 words match	docs/nonmatching/facility/fclRagInit.md	49
 ragGetListItem3	fclRagInit	0xCC	29 of 51 words match	docs/nonmatching/facility/fclRagInit.md	76
