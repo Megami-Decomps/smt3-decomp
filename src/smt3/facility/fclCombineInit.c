@@ -3507,7 +3507,41 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbRotateModelPanel);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelPoly);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawModelAt);
+typedef struct effEVECombParSmoke_t effEVECombParSmoke_t;
+extern void effEVECombParSmokeSetPosition(void *smoke, void *position);
+extern void effEVECombParSmokeDraw(effEVECombParSmoke_t *smoke);
+extern s8 dds3PadButtonState[];
+
+void cmbDrawModelAt(u8 index, f32 *position, f32 firstOffset, f32 secondOffset)
+{
+    sdfVector4_t smokePosition __attribute__((aligned(16)));
+    sdfVector4_t debugPositions[6] __attribute__((aligned(16)));
+    u32 debugColors[6];
+    s32 i;
+
+    SDF_VU0_COPYVECTOR(&smokePosition, position);
+    smokePosition.y += -firstOffset * 2.5f + secondOffset * 2.5f - 40.0f + 20.0f;
+    effEVECombParSmokeSetPosition((void *)CMB_GBWK->smoke[index], &smokePosition);
+    effEVECombParSmokeDraw((effEVECombParSmoke_t *)CMB_GBWK->smoke[index]);
+
+    if (dds3PadButtonState[0x20] != 0) {
+        for (i = 5; i >= 0; i--) {
+            debugColors[i] = 0x80808080;
+        }
+        SDF_VU0_COPYVECTOR(&debugPositions[0], &smokePosition);
+        SDF_VU0_COPYVECTOR(&debugPositions[1], &smokePosition);
+        debugPositions[0].x += 50.0f;
+        debugPositions[1].x -= 50.0f;
+        SDF_VU0_COPYVECTOR(&debugPositions[2], &smokePosition);
+        SDF_VU0_COPYVECTOR(&debugPositions[3], &smokePosition);
+        debugPositions[2].y += 50.0f;
+        debugPositions[3].y -= 50.0f;
+        SDF_VU0_COPYVECTOR(&debugPositions[4], &smokePosition);
+        SDF_VU0_COPYVECTOR(&debugPositions[5], &smokePosition);
+        debugPositions[4].z += 50.0f;
+        debugPositions[5].z -= 50.0f;
+    }
+}
 
 extern dds3Basic_t *dds3GetControlScene(void);
 extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
