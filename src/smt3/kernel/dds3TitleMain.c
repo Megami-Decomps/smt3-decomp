@@ -244,8 +244,6 @@ void mselDrawTitleAnim2(s32 animate)
     mselMakeSaveText(gGlobal->unk_94, gGlobal->unk_8C, gGlobal->unk_8C);
 }
 
-/* NON_MATCHING: 13 of 27 words differ (first at +0x14). */
-#ifdef NON_MATCHING
 void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
 {
     s32 v;
@@ -261,18 +259,9 @@ void mselToggleFlag(u8 *toggle, s32 *value, s8 dir)
         v = level;
         level = (v & 0xFF) - 0x10;
     }
-    if (level > 0) {
-        if (level > 0x80) {
-            level = 0x80;
-        }
-    } else {
-        level = 0;
-    }
+    level = level <= 0 ? 0 : (level <= 0x80 ? level : 0x80);
     *value = (v & ~0xFF) | level;
 }
-#else
-INCLUDE_ASM(const s32, "kernel/dds3TitleMain", mselToggleFlag);
-#endif
 
 /* Layout recovered from facility/fclEncyc.c; native indexes these rows with
  * a 0xB0 stride from offset 0x10 of the handle's data. */

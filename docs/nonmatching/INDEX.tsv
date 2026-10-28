@@ -127,7 +127,6 @@ stfLoadUITexture	kernel/dds3CreateData	0x8C	12 of 35 words differ	docs/nonmatchi
 dds3InitZClearDrawTag	kernel/dds3KernelDraw	0x15C	Sixty-six of 87 words match	docs/nonmatching/kernel/dds3KernelDraw.md	5
 dds3DrawFade	kernel/dds3KernelDraw	0x2A8	eighteen of 170 words match	docs/nonmatching/kernel/dds3KernelDraw.md	48
 dds3SceneLightUpdateFirst	kernel/dds3KernelDraw	0x5FC	forty-five of 383 words match	docs/nonmatching/kernel/dds3KernelDraw.md	88
-mselToggleFlag	dds3TitleMain	0x6C	13 of 27 words differ	docs/nonmatching/kernel/dds3TitleMain.md	5
 slSaveData_writeFile	mc/slMain	0x238	106 of 142 words match	docs/nonmatching/mc/slMain.md	5
 MovieViewerProc	movie/MovieViewer	0x24C	6 of 144 words match	docs/nonmatching/movie/MovieViewer.md	5
 SetKoudou	newbattle/nbAi	0x1C8	110 of 114 words match	docs/nonmatching/newbattle/nbAi.md	5
