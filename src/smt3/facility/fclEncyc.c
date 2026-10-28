@@ -451,7 +451,25 @@ s32 fclEncycCheckRegistable(void)
     return GetValidUnitIndex(0);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", fclEncycDebugRegist);
+void fclEncycDebugRegist(void)
+{
+    s32 i;
+    s32 count = encycSaveWork->stockCount;
+
+    for (i = 0; i < count; i++) {
+        s32 slot = (u8)encycSaveWork->stock[i];
+        datUnitWork_t *source = &encycSaveWork->party[slot].unit;
+        datUnitWork_t unit;
+
+        if ((source->flag & 4) == 0) {
+            unit = *source;
+            if (unit.param[0] > 0) {
+                unit.param[0]--;
+            }
+            fclEncycRegist(&unit, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", fclEncycDebugProc);
 
