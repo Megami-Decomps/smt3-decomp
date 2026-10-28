@@ -1148,7 +1148,117 @@ void fldRunDanteDoin(void)
     FroFtoI(fldRun_Dante.x, fldRun_Dante.z, &fldRun_Dante.ix, &fldRun_Dante.iz);
 }
 
-INCLUDE_ASM(const s32, "field/fldTest", fldRunDanteMove);
+extern s32 fldHitChkEnemy(f32 *position, f32 *target, f32 *hitPosition);
+extern void fldRunAiCng(s32 mode);
+extern s32 printf(const char *format, ...);
+
+void fldRunDanteMove(void)
+{
+    f32 originX = (f32)fldRun_MAP_OX;
+    f32 originZ = (f32)fldRun_MAP_OZ;
+    f32 targetX;
+    f32 targetZ;
+    f32 distance;
+    f32 angle;
+    f32 position[4];
+    f32 target[4];
+    f32 hitPosition[3];
+    u8 *routeEntry;
+
+    if (fldRun_Dante.cnt_ex < 300) {
+        fldRun_Dante.cnt_ex++;
+    }
+    if (fldRun_Dante.nextframe > 0) {
+        fldRun_Dante.nextframe--;
+    }
+
+    routeEntry = fldRun_Dante.RouteDataTop;
+    if (routeEntry != NULL && fldRun_Dante.goal >= fldRun_Dante.now + 2) {
+        routeEntry += fldRun_Dante.now * 4 + 8;
+        fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
+
+        position[0] = fldRun_Dante.x;
+        position[1] = 0.0f;
+        position[2] = fldRun_Dante.z;
+        position[3] = 1.0f;
+        target[0] = targetX;
+        target[1] = 0.0f;
+        target[2] = targetZ;
+        target[3] = 1.0f;
+        if (fldHitChkEnemy(position, target, hitPosition) == -1) {
+            printf("PRUN_TIKAMITI!!!\n");
+            fldRun_Dante.tikamiti = 1;
+            fldMapIndexToPos(routeEntry[0], routeEntry[1], &targetX, &targetZ);
+            fldGetDistAngleTo(&distance, &angle, targetX, targetZ);
+            {
+                s32 frames = (s32)(distance / fldRun_Dante.speed);
+                fldRun_Dante.now++;
+                fldRun_Dante.angleToPlayer = angle;
+                fldRun_Dante.nextframe = frames;
+            }
+        }
+    }
+
+    if (fldRun_Dante.nextframe <= 0) {
+        if (fldRun_Dante.now < fldRun_Dante.goal) {
+            fldRun_Dante.now++;
+            fldRun_Dante.nextframe = 30;
+        }
+
+        routeEntry = fldRun_Dante.RouteDataTop;
+        if (routeEntry != NULL) {
+            routeEntry += fldRun_Dante.now * 4;
+            fldRun_Dante.ix = routeEntry[0];
+            fldRun_Dante.iz = routeEntry[1];
+            fldRun_Dante.x = originX + (f32)routeEntry[0] * (f32)fldRun_MAP_BX;
+            fldRun_Dante.z = originZ + (f32)routeEntry[1] * (f32)-fldRun_MAP_BZ;
+        }
+
+        if ((s16)fldRunDanteStartX[0] == fldRun_Dante.ix &&
+            (s16)fldRunDanteStartX[1] == fldRun_Dante.iz) {
+            fldRun_Dante.nextframe = 20;
+            fldRun_Dante.RouteIdx = 0;
+            fldRun_Dante.RouteDataTop = NULL;
+            fldRun_Dante.now = 0;
+            fldRun_Dante.goal = 0;
+            /* Stop after resetting the route. Qualified cc1 sched1 traces
+             * (hooked/unhooked output equal) give this final address use a
+             * reg_weight of -1 versus 0 for the other reset stores, selecting
+             * it first and preserving the native store order. */
+            fldRun_Dante.speed = 0.0f;
+        } else {
+            fldRunAiCng(6);
+        }
+    } else {
+        f32 angleForSin = fldRun_Dante.angleToPlayer;
+        f32 sinValue = sdfSin(angleForSin * 3.14f / 180.0f);
+        f32 speed = fldRun_Dante.speed;
+        f32 angleForCos = fldRun_Dante.angleToPlayer;
+        f32 x = fldRun_Dante.x;
+        f32 z;
+        f32 cosSpeed;
+        f32 cosValue;
+
+        fldRun_Dante.x = x + sinValue * speed;
+        cosValue = sdfCos(angleForCos * 3.14f / 180.0f);
+        cosSpeed = fldRun_Dante.speed;
+        z = fldRun_Dante.z;
+        fldRun_Dante.z = z + cosValue * cosSpeed;
+        fldRun_Dante.turn = fldTurnToward(fldRun_Dante.turn, 180.0f - fldRun_Dante.angleToPlayer, 10.0f, 1.0f);
+    }
+
+    fldRunDanteGetDistAngle(&distance, &angle);
+    if (distance < 3000.0f) {
+        if (fldRun_Dante.bgm_mode != 1) {
+            fldRun_Dante.bgm_mode = 1;
+            fldRun_Dante.flag |= 4;
+        }
+    } else if (fldRun_Dante.bgm_mode != 0) {
+        fldRun_Dante.bgm_mode = 0;
+        fldRun_Dante.flag |= 4;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "field/fldTest", fldRunDantePwak);
 
