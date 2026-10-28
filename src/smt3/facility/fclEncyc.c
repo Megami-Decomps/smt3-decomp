@@ -560,7 +560,43 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseRegistConfirm);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistConfirm);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseRegistConfirm);
+typedef struct fclEncycConfirmDrawWork_t {
+    fclEncyc_registconfirmwork_tag phase;
+    datUnitWork_t units[2];
+    fclRibbon_t *ribbon;
+} fclEncycConfirmDrawWork_t;
+
+typedef struct fclEncycModelLink_t {
+    sdfGrOt_t *tables[4];
+} fclEncycModelLink_t;
+
+extern fclEncycModelLink_t D_002F69B8[];
+extern void cmpDrawStatusComEx2(datUnitWork_t *unit, s32 x, s32 y, u8 alpha,
+    s8 kind, s8 detail, s32 delta, s8 mode, u32 color, s8 show,
+    s8 option, s8 extra, s32 full);
+extern s32 cmpDrawStatusModel(void *links);
+extern void fclRbnDraw(fclRibbon_t *ribbon, s32 x, s32 y, u32 z,
+    s32 alpha, s32 mode, s32 width, s32 ot);
+extern void DrawRegistKeyHelp(fclEncyc_instance_tag *pinst);
+
+void DrawPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
+{
+    fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
+    s32 alpha = work->phase.statusAlpha;
+
+    if (alpha < 0x80) {
+        cmpDrawStatusComEx2(&work->units[0], work->phase.xRecord, 0,
+            (u8)(0x80 - alpha), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
+    }
+    if (alpha > 0x20) {
+        cmpDrawStatusComEx2(&work->units[1], work->phase.xNow, 0,
+            (u8)(alpha - 0x20), -1, 0, 0, 0, 0xA09DC380, 1, 0, 0, 0);
+    }
+    cmpDrawStatusModel(D_002F69B8);
+    fclRbnDraw(work->ribbon, 0, 0x58, 0xFFFFF0, 0x80, 0, -0x80, 0x47);
+    DrawRegistKeyHelp(pinst);
+}
+
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
 

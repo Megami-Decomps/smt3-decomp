@@ -5216,7 +5216,7 @@ extern void cmpSetStatusModelParam(void);
 
 extern void effCAMPBadDraw(void *hCAMPBadEffect);
 
-s32 cmpDrawStatusModel(s32 scene)
+s32 cmpDrawStatusModel(void *scene)
 {
     s32 err = cmpLoadStatusModel();
 
