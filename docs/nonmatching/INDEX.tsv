@@ -106,6 +106,7 @@ fldPlayerFastSet	field/fldDraw	0x24C	23 of 148 words match	docs/nonmatching/fiel
 fldPlayerCalc	field/fldDraw	0x2A4	152 of 169 words match	docs/nonmatching/field/fldDraw.md	259
 fldHitChkUnitElv	field/fldDraw	0x184	63 of 97 words match	docs/nonmatching/field/fldDraw.md	310
 fldInfChkFastPanel	field/fldDraw	0x2E0	183 of 184 words differ	docs/nonmatching/field/fldDraw.md	341
+fldSkyDrawFilter	field/fldSky	0xAD8	682 of 694 words match	docs/nonmatching/field/fldSky.md	5
 fldNpcLightSet	field/fld_Npc	0x28C	125 of 163 words match	docs/nonmatching/field/fld_Npc.md	5
 fldDrawEATexQuad	field/fld_Npc	0x340	143 of 208 words match	docs/nonmatching/field/fld_Npc.md	37
 fldSibukiStart	field/fld_Npc	0x98	28 of 38 words match	docs/nonmatching/field/fld_Npc.md	71
