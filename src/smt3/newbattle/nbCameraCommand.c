@@ -106,6 +106,12 @@ extern void nbCameraCommand_GroundCollision(nbCamera_t *pNbCamera);
 
 extern void nbCameraState_Command_KORONZCheck(void);
 
+extern s32 effBTLModelGetID(nbFormation_t *formation);
+extern void effBTLModelShow(nbFormation_t *formation);
+extern void effBTLModelCheckBoundsHide(nbFormation_t *formation, sdfVector4_t *target,
+    sdfVector4_t *eye, sdfVector4_t *up, f32 radius, f32 height);
+extern sdfVector4_t aViewDown;
+
 extern nbCamera_t pNbCamera;
 
 extern s32 nbCameraState_CommandRoot_OrderIndex;
@@ -371,6 +377,53 @@ void nbCameraState_CommandTargetSel_Init(void)
 void nbCameraState_CommandTargetSel_Calc(void) {
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraState_Command_KORONZCheck);
+void nbCameraState_Command_KORONZCheck(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbFormation_t *active;
+    nbFormation_t *formation;
+    /* Qualified ee-gcc allocation traces: uid73 loads the selected index into
+     * pseudo87; uid116 resets it for the scan and uid242 increments it.
+     * Sharing that live index gives $17; separate indices give $2/$18.
+     * Both allocation traces passed hooked/unhooked/plain output parity. */
+    u32 i;
+    sdfVector4_t eye;
+    sdfVector4_t target;
+    /* VU0 alone observes the component stores through the bare address. */
+    volatile sdfVector4_t scale;
+
+    if (data == NULL || data->orderindex == -1) {
+        return;
+    }
+    i = data->party[data->order[data->orderindex]].formindex;
+    if (i >= 16) {
+        return;
+    }
+    active = &data->form[i];
+    if (active->stat & 0x200) {
+        return;
+    }
+    formation = data->form;
+    for (i = 0; i < 32; i++, formation++) {
+        if ((formation->stat & 0x103) == 0x103 && formation != active) {
+            if (effBTLModelGetID(formation) == 0x82) {
+                effBTLModelShow(formation);
+                scale.z = -pNbCamera.distance;
+                scale.x = -pNbCamera.distance;
+                scale.y = -pNbCamera.distance;
+                SDF_VU0_LOADVECTOR(&pNbCamera.direction);
+                SDF_VU0_LOADVECTOR_B(&scale);
+                SDF_VU0_MULVECTOR();
+                SDF_VU0_LOADVECTOR_B(&pNbCamera);
+                SDF_VU0_ADDVECTOR();
+                /* The following eye store supplies the memory boundary for both outputs. */
+                SDF_VU0_STOREVECTOR_B_NOMEM(&target);
+                SDF_VU0_STOREVECTOR(&eye);
+                effBTLModelCheckBoundsHide(formation, &target, &eye, &aViewDown,
+                    115.0f, -(formation->center.y - formation->h * formation->scl * 0.5f));
+            }
+        }
+    }
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbCameraCommand", D_00534BB8);
