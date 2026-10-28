@@ -40,6 +40,12 @@ extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
 extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
 extern sdfTexHandle_t *sdfTexSet(void *texture);
 extern void frwFreeStaffFont(void);
+extern void *frwGetStaffFontFRQ(u32 x, u32 y, s32 priority, s32 alternate,
+                               s32 spacing, s32 width, u32 color,
+                               const char *text, void *previous);
+extern u32 frGetStrWidth2(void *request);
+extern s32 frDrawFont(void *request);
+extern s32 frDestroyFontRequestAfter(void *request);
 
 typedef struct
 {
@@ -116,9 +122,36 @@ void stfFreeFont(void)
     frwFreeStaffFont();
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfDrawStaffText);
+s32 stfDrawStaffText(f32 x, f32 y, s32 style, u32 color, const char *text)
+{
+    void *request;
 
-INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfDrawText);
+    if (style == 0) {
+        request = frwGetStaffFontFRQ((s32)(x * 16.0f), (s32)(y * 8.0f),
+                                   0, 1, 1, 10, color, text, NULL);
+    } else {
+        request = frwGetStaffFontFRQ((s32)(x * 16.0f), (s32)(y * 8.0f),
+                                   0, 0, 1, 8, color, text, NULL);
+    }
+    frGetStrWidth2(request);
+    frDrawFont(request);
+    return frDestroyFontRequestAfter(request);
+}
+
+u32 stfDrawText(s32 style, u32 color, const char *text)
+{
+    void *request;
+    u32 width;
+
+    if (style == 0) {
+        request = frwGetStaffFontFRQ(0, 0, 0, 0, 1, 10, color, text, NULL);
+    } else {
+        request = frwGetStaffFontFRQ(0, 0, 0, style, 1, 8, color, text, NULL);
+    }
+    width = frGetStrWidth2(request);
+    frDestroyFontRequestAfter(request);
+    return width;
+}
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: 12 of 35 words differ (first at +0x4). */

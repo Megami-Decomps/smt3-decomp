@@ -99,7 +99,8 @@ typedef struct { u8 unk00[0x10]; u32 headerWord; } frPackedHeader_t;
 
 #define ITF_ALLOCATION_HANDLE_BYTES 4
 
-frFontRequest_t *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, s32 entryFlag, u32 colors, void *source) {
+/* Staff callers supply a trailing request; this wrapper creates a fresh chain. */
+frFontRequest_t *frwGetStaffFontFRQ(u32 x, u32 y, s32 depth, s32 alt, s32 measureFlag, s32 entryFlag, u32 colors, void *source, void *unusedRequest) {
     frFontRequest_t *glyph;
     s32 kind = 4;
 
