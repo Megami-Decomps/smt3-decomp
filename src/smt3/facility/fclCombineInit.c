@@ -1106,9 +1106,44 @@ void rstClearSkillSlot(cmbUnit_t *unit, u8 slot)
     sortSkillList(unit);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbReplaceSkill);
+s8 rstAddSkillToSlot(u16 skill, datUnitWork_t *unit);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", rstAddSkillToSlot);
+void cmbReplaceSkill(u16 skill, cmbUnit_t *unit)
+{
+    s32 slot;
+    u16 selected;
+
+    for (slot = 0; slot < 24; slot++) {
+        if (unit->unit.keisyoskill[slot] == skill) {
+            break;
+        }
+    }
+    selected = unit->unit.keisyoskill[slot];
+    rstClearSkillSlot(unit, slot);
+    rstAddSkillToSlot(selected, &unit->unit);
+    /* Qualified cc1probe: reset uid120 survives sibling-call selection and
+     * is deleted in life analysis, preserving retail's jal and epilogue. */
+    slot = 0;
+}
+
+s8 cmbChkSkillOwner(u16 skill, datUnitWork_t *unit);
+
+s8 rstAddSkillToSlot(u16 skill, datUnitWork_t *unit)
+{
+    s32 slot;
+
+    if (cmbChkSkillOwner(skill, unit) >= 0) {
+        return -2;
+    }
+    for (slot = 0; slot < 8; slot++) {
+        if (unit->skill[slot] == 0) {
+            unit->skill[slot] = skill;
+            unit->skillcnt++;
+            return slot;
+        }
+    }
+    return -1;
+}
 
 s8 cmbChkSkillOwner(u16 skill, datUnitWork_t *unit)
 {
