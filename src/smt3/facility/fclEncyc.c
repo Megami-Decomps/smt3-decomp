@@ -1837,7 +1837,7 @@ void ResetReadMainRibbon(fclEncyc_readmainwork_tag *pwork)
     pwork->ribbon_accel = 0x100;
 }
 
-extern void ApplyChangeListIndex(void *work, s16 *indices, s32 recordIndex);
+extern void ApplyChangeListIndex(lstListWindow_t *work, s16 *indices, s32 recordIndex);
 extern void CreateFontListRead(void *work, s32 sort, s16 *indices);
 extern void cmpClearCursorSlots(void *cursor);
 
@@ -1852,10 +1852,10 @@ s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
         pinst->unk_6C ^= 1;
         position = work->list.cursorPos.Index + work->list.cursorPos.Shift;
         if (pinst->unk_6C == 0) {
-            ApplyChangeListIndex(work, pinst->entries.read.sorted[0],
+            ApplyChangeListIndex(&work->list, pinst->entries.read.sorted[0],
                                  pinst->entries.read.sorted[1][position]);
         } else {
-            ApplyChangeListIndex(work, pinst->entries.read.sorted[1],
+            ApplyChangeListIndex(&work->list, pinst->entries.read.sorted[1],
                                  pinst->entries.read.sorted[0][position]);
         }
         changed = 1;
@@ -1870,7 +1870,44 @@ s32 AcceptKeyChangeSort(fclEncyc_instance_tag *pinst)
     return changed;
 }
 
+#ifdef NON_MATCHING
+/* Native size; eighteen words differ. See docs/nonmatching/facility/fclEncyc.md. */
+void ApplyEdgeListCursor(lstListWindow_t *list);
+void ApplyChangeListIndex(lstListWindow_t *list, s16 *indices, s32 recordIndex)
+{
+    s32 count = fclEncycGetNum();
+    s32 i;
+    s32 position;
+    s32 original;
+    s32 *stepY = &list->StepY;
+    cmpCursorPos_t *cursor = &list->cursorPos;
+    cmpCursorSize_t *size = &list->cursorSize;
+    for (i = 0; i < count; i++) {
+        if (indices[i] == recordIndex) {
+            break;
+        }
+    }
+    if (i < count) {
+        position = i - cursor->Shift;
+        original = position;
+        if (position < 0) {
+            position = 0;
+        } else if (position > cursor->ListNums - cursor->ShiftMax) {
+            position = cursor->ListNums < cursor->ShiftMax
+                           ? 0 : cursor->ListNums - cursor->ShiftMax;
+        }
+        cursor->Index = position;
+        if (position != original) {
+            cursor->DrawShift = cursor->Shift + original - position;
+            cursor->Shift = cursor->DrawShift;
+            size->Y = cursor->Shift * *stepY + size->DefY;
+        }
+        ApplyEdgeListCursor(list);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyChangeListIndex);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", ApplyEdgeListCursor);
 

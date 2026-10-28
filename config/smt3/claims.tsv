@@ -550,3 +550,4 @@ src/smt3/facility/fclRibbon.c	redthing1	done	2026-10-28	1 fn / 492 B	opaque or a
 src/smt3/facility/fclRibbon.c	redthing1	done	2026-10-28	1 fn / 372 B	four background rectangles with native UV and texture selection; owner 12 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 608 B	fusion allocation, script/message loading, cursor/panel initialization and event setup; owner 159 match, 0 differ
 src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	1 fn / 76 B	camera dispatcher separated from independently framed tail target
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	native-size list-selection clamp, truthful cursor subobjects and eighteen instruction-word residual
