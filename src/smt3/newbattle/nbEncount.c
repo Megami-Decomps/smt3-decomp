@@ -308,6 +308,24 @@ extern void *nbEncountCalc(s32 id, f32 length);
 
 extern s32 nbEncountMax;
 
+extern s32 D_0054FF1C;
+
+extern const char D_00545BA0[];
+
+extern s32 evtGetAgeOfMoon(void);
+
+extern s32 evtBitCheck(s32 no);
+
+extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+
+extern s32 nbGetEncountJoken(s32 id);
+
+extern s32 nbGetEncountMax(s32 id);
+
+extern s32 nbCheckEncountLevel(s32 tbl);
+
+extern void fclClearTerminalState(void);
+
 extern s32 func_0028CFC8(s32 tableno, s32 encno);
 
 extern s32 nbGetUnitID(datUnitWork_t *work);
@@ -328,8 +346,32 @@ typedef struct nbEventProcessData_t {
     void *mem;
 } nbEventProcessData_t;
 
-/* 420-byte entries; only the field this unit reads is named. */
-typedef struct { u8 unk_00[0x4]; u16 unk_04; u8 pad[0x19E]; } nbEncountEntry_t;
+/* 8 bytes; only the form id and its weight are named. */
+typedef struct { u16 id; u16 cnt; u8 unk_04[0x4]; } nbEncountJokenSlot_t;
+
+/* 100 bytes, four per table entry, selected by nbGetEncountJoken. */
+typedef struct
+{
+    s32 unk_00;
+    nbEncountJokenSlot_t slot[12];
+} nbEncountJokenData_t;
+
+/* 420-byte entries; only the fields this unit touches are named. */
+typedef struct
+{
+    u8 unk_00[0x4];
+    u16 unk_04;
+    u16 moonbit;
+    u16 unk_08;
+    u16 unk_0A;
+    u16 unk_0C;
+    u8 unk_0E;
+    u8 unk_0F;
+    u8 unk_10;
+    u8 unk_11;
+    u8 unk_12[0x2];
+    nbEncountJokenData_t joken[4];
+} nbEncountEntry_t;
 
 extern nbEncountEntry_t nbEncountTable[];
 
@@ -377,16 +419,133 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountJoken);
+/* NON_MATCHING: 24 of 66 words; 264 bytes against 372. gcc keeps
+ * &nbEncountTable[id] in a saved register instead of rebuilding it per block. */
+#ifdef NON_MATCHING
+s32 nbGetEncountJoken(s32 id)
+{
+    s32 a;
+    s32 b;
 
-INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountMax);
+    if (nbEncountTable[id].moonbit != 0) {
+        if ((nbEncountTable[id].moonbit >> evtGetAgeOfMoon()) & 1) {
+            return nbEncountTable[id].unk_08;
+        }
+    }
+    a = 0;
+    if (nbEncountTable[id].unk_0A != 0) {
+        a = evtBitCheck(nbEncountTable[id].unk_0A);
+    }
+    b = 0;
+    if (nbEncountTable[id].unk_0C != 0) {
+        b = evtBitCheck(nbEncountTable[id].unk_0C);
+    }
+    if (a != 0) {
+        if (b != 0) {
+            return nbEncountTable[id].unk_11;
+        }
+        return nbEncountTable[id].unk_0F;
+    }
+    if (b != 0) {
+        return nbEncountTable[id].unk_10;
+    }
+    return nbEncountTable[id].unk_0E;
+}
+#else
+INCLUDE_ASM(const s32, "newbattle/nbEncount", nbGetEncountJoken);
+#endif
+
+s32 nbGetEncountMax(s32 id)
+{
+    s32 joken;
+    s32 sum;
+    s32 i;
+    s32 base;
+    s32 kyori;
+
+    if (id == 0) {
+        return 0;
+    }
+    joken = nbGetEncountJoken(id);
+    sum = 0;
+    for (i = 0; i < 12; i++) {
+        sum += nbEncountTable[id].joken[joken].slot[i].cnt;
+    }
+    if (sum == 0) {
+        return 0;
+    }
+    if (nbEncountMax > 0) {
+        return nbEncountMax;
+    }
+    base = 100;
+    kyori = D_0054FF1C - nbEncountTable[id].joken[joken].unk_00 * 48 / base;
+    nbEncountMax = dds3GetRandIntA(0, kyori * 2 - 32) + 16;
+    printf(D_00545BA0, nbEncountMax, kyori);
+    return nbEncountMax;
+}
 
 u16 nbGetEncountCnt(void)
 {
     return DDS3_GBWK->encountCount;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbEncount", nbEncountCalc);
+void *nbEncountCalc(s32 id, f32 length)
+{
+    s32 joken;
+    s32 max;
+    s32 rnd;
+    s32 acc;
+    s32 sum;
+    s32 n;
+    s32 i;
+    f32 total;
+
+    if (id != 0 && length != 0.0f) {
+    joken = nbGetEncountJoken(id);
+    max = nbGetEncountMax(id);
+    if (max == 0) {
+        return 0;
+    }
+    total = DDS3_GBWK->encountkyori + length;
+    DDS3_GBWK->encountkyori = total;
+    if (total < 100.0f) {
+        return 0;
+    }
+    n = total / 100.0f;
+    DDS3_GBWK->encountkyori = total - n * 100.0f;
+    for (i = 0; i < n; i++) {
+        if (DDS3_GBWK->maFlags & 2) {
+            DDS3_GBWK->encountCount = DDS3_GBWK->encountCount + dds3GetRandIntA(0, 7) + 6;
+        } else {
+            DDS3_GBWK->encountCount = DDS3_GBWK->encountCount + dds3GetRandIntA(0, 3) + 2;
+        }
+    }
+    if (DDS3_GBWK->encountCount > 0xFDE8) {
+        DDS3_GBWK->encountCount = 0xFDE8;
+    }
+    if (DDS3_GBWK->encountCount < max) {
+        return 0;
+    }
+    rnd = dds3GetRandIntA(0, 1000);
+    acc = 0;
+    for (i = 0; i < 12; i++) {
+        if (nbEncountTable[id].joken[joken].slot[i].id != 0) {
+            sum = acc + nbEncountTable[id].joken[joken].slot[i].cnt;
+            if (rnd < sum) {
+                acc = nbEncountTable[id].joken[joken].slot[i].id;
+                if ((DDS3_GBWK->maFlags & 1) && nbCheckEncountLevel(acc) == 0) {
+                    fclClearTerminalState();
+                    return 0;
+                }
+                nbEncountMax = 0;
+                return (void *)((joken << 24) | (i << 16) | acc);
+            }
+            acc = sum;
+        }
+    }
+    }
+    return 0;
+}
 
 s32 nbCheckEncountLevel(s32 tbl)
 {
