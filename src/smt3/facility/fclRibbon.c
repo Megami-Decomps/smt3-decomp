@@ -58,6 +58,22 @@ typedef struct
     /* 0x24 */ fclribbon_elem_t pelem[0];
 } fclRibbon_t;
 
+typedef struct
+{
+    s32 pm[3];
+} sdfIVector3_t;
+
+typedef struct
+{
+    s32 x;
+    s32 y;
+} itfVertex_t;
+
+typedef struct
+{
+    u32 components[4];
+} itfColor_t;
+
 extern void sdfMemFreeDirect(void *aHandle);
 
 extern void MoveActive(fclRibbon_t *phandle);
@@ -65,6 +81,13 @@ extern void MoveActive(fclRibbon_t *phandle);
 extern void MoveDeactive(fclRibbon_t *phandle);
 
 extern void fclRbnRelease(fclRibbon_t *phandle);
+
+extern itfColor_t D_00332438;
+
+extern itfColor_t D_00332448;
+
+extern void itfMiscDrawSpritePrim2(itfVertex_t *pos, itfColor_t *uv, itfColor_t *color,
+                                   u32 z, s32 context, sdfDrawTag_t *pdrawtag);
 
 extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
 
@@ -202,7 +225,24 @@ INCLUDE_ASM(const s32, "facility/fclRibbon", DrawBack);
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawHexagon);
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", DrawHexagonElem);
+void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTag_t *pdrawtag)
+{
+    itfVertex_t pos[2];
+
+    pos[0].x = std_pos->pm[0] - 320;
+    pos[0].y = std_pos->pm[2];
+    pos[1].x = std_pos->pm[0];
+    pos[1].y = std_pos->pm[2] + 160;
+    itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
+
+    pos[0].x = std_pos->pm[0];
+    pos[1].x = std_pos->pm[1];
+    itfMiscDrawSpritePrim2(pos, &D_00332448, color, z, 0, pdrawtag);
+
+    pos[0].x = std_pos->pm[1] + 320;
+    pos[1].x = std_pos->pm[1];
+    itfMiscDrawSpritePrim2(pos, &D_00332438, color, z, 0, pdrawtag);
+}
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawElem);
 
