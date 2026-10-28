@@ -246,29 +246,3 @@ combinations), the two `nameD`/`nameU` arm orders, `&&` against nested `if`s
 for the 0.99/0.01 range, three spellings of `x + 0x1EC - w`, the counter read
 before, inside and after the switch, and the handle and width as one local
 with casts.
-
-## fldAutoMapClear (field/fldAutoMap, 0x9C)
-
-37 of 39 words match, at the exact 156-byte size.
-
-Two loops zero 30 and 8 rows of 32 quadwords in `DDS3_GBWK`. The second loop
-matches exactly from `u64 *row = (u64 *)(gb + 0x19D10 + i * 256);` and
-`*row++ = 0;`, which is what gives retail's ascending inner pointer and its
-strength-reduced outer base. The first loop differs in those two words only:
-retail starts the row at `0xFC58` and bumps the pointer by `+8`, while the
-draft starts at `0xFD50` (`0xFC58 + 31 * 8`) and bumps by `-8`, because
-ee-gcc reverses the inner loop when the address is derived from the index
-rather than walked.
-
-Writing the first loop as a `*row++` walk does fix the direction but then
-ee-gcc strength-reduces its outer base too, dropping the `sll $2, $4, 8`
-recompute retail keeps and landing 34 words out at 148 bytes. Also measured
-for the first loop: `row[j]`, a `u64 (*)[32]` cast, `(u64 *)(gb + C)[i*32+j]`,
-`i * 256 + j * 8`, a `u32` index on either loop variable, `j != 32`,
-`j = 31; j--`, a pointer walked across both loops, and the base cast as
-`(u8 *)ofs + (u32)gb`. None reaches below 2 words, and only the ones that keep
-the derived address keep the 156-byte size.
-
-Caching `DDS3_GBWK` in a `u8 *` local, separately for each loop, is required:
-without it ee-gcc reloads the pointer inside the inner loop, since the `u64`
-store may alias it. That alone took the function from 35 differing words to 6.

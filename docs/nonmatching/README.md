@@ -7,22 +7,21 @@ page and line to open. Conventions are in
 
 | Drafts | Unit | Page |
 |---|---|---|
-| 48 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
+| 37 | newbattle/nbMakePacket | [newbattle/nbMakePacket.md](newbattle/nbMakePacket.md) |
 | 34 | code_0022C578 | [code_0022C578.md](code_0022C578.md) |
 | 17 | sdfVu1 | [sdf/sdfVu1.md](sdf/sdfVu1.md) |
 | 17 | newbattle/nbStageProcess | [newbattle/nbStageProcess.md](newbattle/nbStageProcess.md) |
 | 13 | field/fldDraw | [field/fldDraw.md](field/fldDraw.md) |
 | 8 | rstcalc | [result/rstcalc.md](result/rstcalc.md) |
 | 8 | effect/effPCPBoss | [effect/effPCPBoss.md](effect/effPCPBoss.md) |
-| 7 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
-| 7 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
+| 6 | field/fldAutoMap | [field/fldAutoMap.md](field/fldAutoMap.md) |
 | 6 | code_001D1470 | [code_001D1470.md](code_001D1470.md) |
 | 6 | code_00116AD0 | [code_00116AD0.md](code_00116AD0.md) |
 | 5 | sdf/sdfModel | [sdf/sdfModel.md](sdf/sdfModel.md) |
 | 5 | newdata/datCalc | [newdata/datCalc.md](newdata/datCalc.md) |
+| 5 | newbattle/nbCameraSkill | [newbattle/nbCameraSkill.md](newbattle/nbCameraSkill.md) |
 | 5 | fclCombineInit | [facility/fclCombineInit.md](facility/fclCombineInit.md) |
 | 4 | pb/pbGame | [pb/pbGame.md](pb/pbGame.md) |
-| 4 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 4 | interface/itfMesManager | [interface/itfMesManager.md](interface/itfMesManager.md) |
 | 4 | event/evtPolygonMovie | [event/evtPolygonMovie.md](event/evtPolygonMovie.md) |
 | 4 | event/evtEventViewerMenu | [event/evtEventViewerMenu.md](event/evtEventViewerMenu.md) |
@@ -61,6 +60,7 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbInit | [newbattle/nbInit.md](newbattle/nbInit.md) |
 | 1 | newbattle/nbCameraPress | [newbattle/nbCameraPress.md](newbattle/nbCameraPress.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
+| 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
 | 1 | dds3TitleMain | [kernel/dds3TitleMain.md](kernel/dds3TitleMain.md) |
 | 1 | kernel/dds3KernelCore | [kernel/dds3KernelCore.md](kernel/dds3KernelCore.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |

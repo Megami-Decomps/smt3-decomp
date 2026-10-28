@@ -26,10 +26,18 @@ ROOT = Path(__file__).resolve().parent.parent
 GUARD = "#ifdef NON_MATCHING"
 WRITEUP_DIR = ROOT / "docs/nonmatching"
 WRITEUP_INTRO = ROOT / "docs/nonmatching.md"
-# The INCLUDE_ASM in a draft's #else names the function the draft is for.
-DRAFT = re.compile(
-    r'#ifdef NON_MATCHING\b.*?#else\b(?:(?!#endif).)*?'
-    r'INCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)', re.S)
+# A draft is a guarded block whose #else holds the asm fallback; the
+# INCLUDE_ASM names there name the functions the drafts are for. One block can
+# carry several, so every name in the #else counts: reading only the first made
+# four drafted functions in sdf/sdfVu1 look absent.
+BLOCK = re.compile(r'#ifdef NON_MATCHING\b(?:(?!#endif).)*?#else\b'
+                   r'((?:(?!#endif).)*)', re.S)
+ASM_NAME = re.compile(r'INCLUDE_ASM\([^,]+,\s*"[^"]+"\s*,\s*(\w+)\s*\)')
+
+
+def draft_names(text: str) -> list[str]:
+    """Every function drafted in this unit, across all guarded blocks."""
+    return [n for block in BLOCK.findall(text) for n in ASM_NAME.findall(block)]
 
 
 def units(args):
@@ -44,7 +52,7 @@ def draft_functions(version: str = "smt3") -> dict[str, set[str]]:
     src = ROOT / "src" / version
     drafts = {}
     for path in sorted(src.rglob("*.c")):
-        names = set(DRAFT.findall(path.read_text()))
+        names = set(draft_names(path.read_text()))
         if names:
             drafts[path.relative_to(src).with_suffix("").as_posix()] = names
     return drafts
@@ -73,6 +81,34 @@ def compile_unit(path: Path) -> str:
                      if re.search(r":\d+: ", l) and "warning:" not in l)
 
 
+# An entry whose function is matched everywhere describes work that is already
+# done, and reads as if it were still open. The draft-to-entry check cannot see
+# these, because it only ever asks the question the other way round.
+HEADING = re.compile(r"^## (.+)$", re.M)
+
+
+def stale_entries() -> int:
+    """Report entries naming only functions no INCLUDE_ASM mentions any more."""
+    in_asm = set()
+    for path in (ROOT / "src").rglob("*.c"):
+        in_asm.update(ASM_NAME.findall(path.read_text()))
+    stale = 0
+    for page in sorted(WRITEUP_DIR.rglob("*.md")):
+        for i, line in enumerate(page.read_text().split("\n"), 1):
+            m = HEADING.match(line)
+            if not m:
+                continue
+            title = re.sub(r"\s*\(.*\)$", "", m.group(1))
+            names = [n.strip() for n in re.split(r"[,/]| and ", title)
+                     if re.fullmatch(r"\w+", n.strip())]
+            # A shared entry still earns its place while one sibling is unmatched.
+            if names and all(n not in in_asm for n in names):
+                stale += 1
+                print(f"{page.relative_to(ROOT)}:{i}: {', '.join(names)} "
+                      "match now, so this entry is stale")
+    return stale
+
+
 if __name__ == "__main__":
     todo = units(sys.argv[1:])
     if not todo:
@@ -86,7 +122,7 @@ if __name__ == "__main__":
     bad = 0
     for path in todo:
         text = path.read_text()
-        names = DRAFT.findall(text)
+        names = draft_names(text)
         err = compile_unit(path)
         rel = path.relative_to(ROOT) if path.is_absolute() else path
         if err:
@@ -99,4 +135,5 @@ if __name__ == "__main__":
             if not re.search(r"^#+ .*\b" + re.escape(name) + r"\b", writeup, re.M):
                 bad += 1
                 print(f"{rel}: {name} has no entry under docs/nonmatching/")
+    bad += stale_entries()
     sys.exit(1 if bad else 0)

@@ -2,22 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## Flow6_36 (newbattle/nbMakePacket, 0xA8)
-
-24 of 41 words match, one word short of retail's 168.
-
-ee-gcc allocates the `nextkouho` temp to `$2`, which forces it to materialise
-the `return 0` once at the tail. Retail keeps that temp in `$3` and emits
-`daddu $2, $0, $0` only on the else path, reusing the zero that
-`evtBitCheck`'s tested return already left in `$2` on the taken path. Every
-differing word is that register number or a branch offset shifted by the
-missing instruction.
-
-Ruled out: a ternary for the select; `s32` and `u32` for the temp; a store in
-each arm instead of one at the tail; `!evtBitCheck(8)` and `!n->negoreqtype`
-instead of `== 0`; and `n->cnt6_36 > 2` for `>= 3`. All five give the same
-allocation.
-
 ## Flow2_13 (newbattle/nbMakePacket, 0xC8)
 
 44 of 50 words match, at the exact 200-byte size.
@@ -105,28 +89,6 @@ Confirmed on the way: `nbStatWork_t` carries `void *file[26]` at `+0x08`,
 which fills the former `pad[0xD8]` exactly and keeps the 224-byte stride that
 `&data->statwork[index]` needs.
 
-## nbEventProcess1 (newbattle/nbMakePacket, 0x7C)
-
-23 of 31 words match, at the exact 124-byte size and with the same instruction
-multiset.
-
-Retail schedules `addiu $2, $2, %lo(nbEventProcess3)` into the load-delay
-slot after `lw $4, 0x88($17)`, four words after its `lui`. ee-gcc leaves the
-`lui` in the same place but emits the `addiu` last, where the return value is
-used, so the eight words from there on sit one slot late. Nothing else
-differs.
-
-Ruled out: a `void *` local holding the return value, which costs a saved
-register and adds four words; an early `return nbEventProcess3;` for the
-`rid <= 0` case, which duplicates the `lui`/`addiu` pair; and swapping the
-two `rid` stores, which only moves the stores.
-
-Confirmed on the way: `nbEventEntry_t` +0x00 is an `s32` resource id, not a
-pointer. Retail stores it into `data->eventrid` after a signed `blez`, and
-`nbStartEventPacks` still matches with the field as an `s32` and
-`evtLoadEventPack` taking one. A local for the field is needed because the
-store to `data->eventrid` otherwise aliases the table and forces a reload.
-
 ## Flow13_8 (newbattle/nbMakePacket, 0xB8)
 
 42 of 46 words match, at the exact 184-byte size.
@@ -205,23 +167,6 @@ declaration orders leave it unchanged. This is the ruled-out
 register-permutation class, kept only so the next reader does not redo the
 decode.
 
-## nbE901Process_1 (newbattle/nbMakePacket, 0xCC)
-
-50 of 51 words match, at the exact 204-byte size.
-
-The dispatch, both vibration arms and the `D_00527420[e->step](e)` call are
-identical. The one differing word is the second equality test: retail emits
-`beql $4, $2, .L002919A0` with the `0xDE` arm's `daddu $4, $0, $0` annulled
-into the slot, and ee-gcc emits a plain `beq` with the same instruction
-unconditional. `$4` is dead on the fall-through path either way, so both are
-correct; only the annul bit differs.
-
-Ruled out: the two `case` labels in the other order and as an `if`/`else if`
-chain (both reshape the dispatch and are much worse), an explicit
-`default: break;`, a `u32` switch index, and an early `return 0` per arm with
-the `nbUpdateEventProcessData` tail duplicated. The last three reach this same
-one word.
-
 ## nbRunAi (newbattle/nbMakePacket, 0xBC)
 
 46 of 47 words match, at the exact 188-byte size.
@@ -261,22 +206,6 @@ labels here, so `case_values_threshold` is not 10 for this shape. The switch
 needs an explicit empty `case 0:` alongside 1 to 5; without it ee-gcc builds
 a five-node compare tree instead of the table. `nbMaeFlag`, `nbMaeState`,
 `nbMaeCounter` and `D_00551540` are all `s32` sdata.
-
-## nbE902Process_1 (newbattle/nbMakePacket, 0x90)
-
-2 of 36 words differ, at the exact 144-byte size.
-
-The whole body is right: the `nbE902Table[e->step](e)` dispatch, the `return -1`
-arm, the `unk_08 == 0x25` test and both `dds3PadVibrationSet` calls. The two
-words are the argument setup of the first call, which retail orders `addiu $5,
-$0, 1` (in the `bne`'s delay slot) then `daddu $4, $0, $0`, and ee-gcc the
-other way round. Nothing else moves.
-
-Ruled out: a `switch` with and without an explicit `default: break;`, a plain
-`if`, an `s32` local for `unk_08`, and inverting the test so the vibration arm
-is the fall-through with the `nbUpdateEventProcessData` tail duplicated. All
-five give the identical two-word swap, which puts this in the
-instruction-scheduling class.
 
 ## Flow5_2 (newbattle/nbMakePacket, 0x98)
 
@@ -335,36 +264,6 @@ into the `else` arm as well as setting it before the dispatch, and materialises
 `else` arm's values as defaults before the test instead reaches only 23 of 32
 words, because the `flowmsg` load then happens before the stores.
 
-## nbFreeEffectSlot (newbattle/nbMakePacket, 0x2C)
-
-Byte-exact on its own. It is kept behind the fallback because its presence as a
-C definition costs four other functions in the unit: `Wait1_nbE901`,
-`PartsWait` and `nbE912_Wait1` each go from exact to one differing word, and
-`EffDel` from exact to four. All four then emit a plain `bne`/`beq` where
-retail annuls the epilogue's `ld $31` into a branch-likely delay slot. With
-nbFreeEffectSlot reduced to the `extern` declaration the unit already carries
-at the top of the file, all four match and only nbFreeEffectSlot itself is
-lost, so the fallback is worth three functions and unblocks the other nineteen
-callers still in assembly.
-
-This is the `slDrawWindow` mechanism of
-[matching levers](matching-levers.md) with the sign reversed, and the second
-instance in this unit after `nbMaeCheckDone`: what the compiler can see of the
-rest of the unit changes its delay-slot decisions, and here seeing the callee
-makes them worse.
-
-Ruled out for keeping both: a K&R definition of nbFreeEffectSlot, deleting the
-`extern` prototype above it, and every spelling of the callers' own guard
-(inverted test, `> 0x3C` for `>= 0x3D`, a `goto`, a local for `e->frame`, a
-nested `return 0`, and a `s32 dummy; s32 *p = &dummy;` sibcall blocker). The
-callers' source shape does not reach this bit; only the callee's visibility
-does. Twenty unused `extern` declarations added above the callee leave it
-unchanged too, so it is the decl's identity and not cc1's heap layout.
-
-The four discriminating callers all sit above nbFreeEffectSlot's `0x0028FA48`
-in address order, which is evidence for a retail translation-unit boundary
-between them; see [TU recovery](tu-recovery.md).
-
 ## nbCheckBattleSkillError1 (newbattle/nbMakePacket, 0x48)
 
 1 of 18 words differ, at the exact 72-byte size.
@@ -405,28 +304,6 @@ other or both accesses (one address and no copy, four bytes short); a
 between them; `*(s32 *)p` for the `step` store; `nbBadCurseTimer++` in place of
 the index local; and both store orders, which only swap the registers the
 timer and the table base get.
-
-## EffDel (newbattle/nbMakePacket, 0xB8)
-
-42 of 46 words match, at the exact 184-byte size, and with the same instruction
-multiset.
-
-The whole body, both `bnel` field tests and the `effBTLCutGetFrame` block are
-identical. The four differing words are one rotation in the loop preheader:
-retail leaves the `beqz $16` that guards the packet walk with a `nop` in its
-delay slot and then materialises the two compare constants, while ee-gcc moves
-`addiu $19, $0, 1` into the slot and the assembler pads the 8-byte loop
-alignment with the `nop` instead. That is a delay-slot fill, not a source
-difference: the three preheader instructions and their order are the same.
-
-Ruled out: a `for` loop, a `while`, an explicit `if` plus `do`/`while` guard,
-three nested `if`s in place of the `&&` chain, a local for `p->cuteff`, and
-dropping the `nbKoukaProcessData_t *` local so the list head is subscripted
-straight off the call. All six give the identical four-word rotation.
-
-Confirmed on the way: `nbMainProcessData_t` carries the kouka process id at
-`+0xF4`, inside what was `unk_E0`, and `dds3GetProcessData` of it yields the
-same `nbKoukaProcessData_t` whose `first` sits at `+0x08`.
 
 ## Flow1_23 (newbattle/nbMakePacket, 0xD8)
 
@@ -568,44 +445,6 @@ branch offset after it.
 Ruled out: nested `if`s in place of the `&&` chain (identical), and the two
 `nbDispNegoMessage` calls shared through a `mes` local, which hoists the
 argument setup above the test.
-
-## Flow12_3, Flow12_4 (newbattle/nbMakePacket, 0x194 each)
-
-24 of 97 words match each, four words short of retail's 404.
-
-The two are the same body with different `nbAddNegoIdKouho` ids and message
-numbers. The whole `case 2` arm, from the four `nbAddNegoIdKouho` calls through
-the two `datGetParam` results, the 2x2 rate table and the two
-`dds3GetRandIntA(0, 0x64)` tests, reproduces retail word for word but **one
-word early**, so the positional count understates it badly: the real difference
-is the switch's default arms plus the `plevel`/`elevel` register pair.
-
-Retail's three-case dispatch over `nownegophase` reaches its default from two
-compare-tree edges, and each edge carries its own `ld $16` (in the preceding
-branch's delay slot), `b` and `daddu $2, $0, $0`, two words per edge that the
-draft does not emit: ee-gcc instead makes the `beqz` a `beql`, annuls `case 0`'s
-`lw $2, 0x184($18)` into it, and sends both default edges to the shared zero at
-the tail. That is the same annul-selection residual as the `Flow8_7` and
-`Flow13_8` entries.
-
-The rate table is `pparam < eparam` crossed with `plevel < elevel`, giving
-`0x14`, `0x28`, `0x3C` and `0x50`; retail if-converts the two
-`pparam < eparam` arms into one `movn $16, $2, $17` selecting `0x14` over
-`0x28`. Seven spellings were measured: `plevel` outer written `<` or `>=`,
-with nested `if`s or a ternary on `pparam`, all give 73 of 97 with `n` correctly
-in `$18`; `pparam` outer, either polarity, nested or ternary, gives 63 of 99 but
-moves `n` into `$17` and rewrites the prologue, so the `plevel`-outer form is
-the one kept.
-
-Also ruled out on the dispatch: `default: return 0;`, `return 0` in place of
-`break` in every arm, an extra `case 3:` with a dead store, and an explicit
-`default: break;`. All four leave the `beql` and three of them reshape the
-compare tree.
-
-Confirmed on the way: `datGetParam(work, 1)` is what the rate test compares,
-`datUnitWork_t + 0x14` is the level both sides read, and the four
-`nextkouho` slots are selected `[0]`/`[1]` when `nowselect` is zero and
-`[2]`/`[3]` when it is not, against `rate` and `0x64 - rate`.
 
 ## Flow7_20 (newbattle/nbMakePacket, 0x130)
 
@@ -778,25 +617,6 @@ ee-gcc annuls each arm's first instruction into those slots instead
 
 Ruled out: all six orders of the three case arms.
 
-## Flow12_4 (newbattle/nbMakePacket, 0x194)
-
-73 of 97 words differ, four words short.
-
-The `case 2` body is right: the four `nbAddNegoIdKouho` calls, `plv` and
-`elv` as named locals assigned in front of the two `datGetParam` calls so
-they get callee-saved registers, the nested ternaries giving retail's
-`movn $16, $2, $17`, and the two `dds3GetRandIntA` ternaries over
-`nowselect`.
-
-Two residuals remain. The `nownegophase` dispatch is the Flow1_29 shape
-again: retail pulls `ld $16, 0x0($29)` into both dispatch delay slots and
-leaves `daddu $2, $0, $0` for the following `b`, where ee-gcc annuls each
-arm's first instruction instead. And the allocator puts `plv` in `$16` and
-`elv` in `$17`, which is retail's pair swapped.
-
-Ruled out for the register pair: `elv` declared before `plv`; the test
-written `elv > plv`; and the two names exchanged throughout.
-
 ## Flow6_65 (newbattle/nbMakePacket, 0x190)
 
 79 of 100 words differ, four words long.
@@ -817,25 +637,6 @@ inside the `if`, and declared in the other order; and the second arm
 written as a braced `else` block rather than a flattened `else if`. The
 documented rule that declaration order is inert for register allocation
 holds here.
-
-## Flow4_1 (newbattle/nbMakePacket, 0x348)
-
-1 of 210 words differ, at the exact 840-byte size.
-
-Thirteen `n->ework->id == <id> && n->pwork->id == n->ework->id` arms in
-retail's order, each setting `waitframe` to 0xF, displaying
-`n->flowmsg[n->ekucyo]` with its own message id and returning 2, then a
-shared 0x31 arm returning 0. Every word matches except a single annul bit:
-the second test of the first arm is `beql` where retail has `bne`. Both
-branches carry the same delay slot, `addiu $2, $0, 0x38`, which is the
-second arm's compare constant; retail leaves it unannulled in the first arm
-and annuls it in all the later ones.
-
-Ruled out: the chain written as twelve plain `if`s instead of `else if`; the
-first arm alone written plain, or nested as two `if`s, or with
-`n->pwork->id == <id>` against the constant instead of against
-`n->ework->id`; and `n->ework->id == n->pwork->id` with the operands
-exchanged, in the first arm and throughout.
 
 ## Flow1_32 (newbattle/nbMakePacket, 0x400)
 
@@ -923,31 +724,6 @@ the free, which costs 58 more words; the same local stored before the free;
 a local holding `file[j]` for both calls, equally bad; the two `if`s folded
 into one `&&`; and `file[j] = NULL` moved in front of the free.
 
-## Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
-
-18 of 29 words each differ, two words short of retail's 124.
-
-The two-case `switch` over `nownegophase`, both arms, the `0xA1`/`0xA3`
-message constants and the `return 2`/`return 1` are all right: the dispatch is
-retail's `beqz 0` then `beq 1` with no bound test, and the arms' bodies are
-word for word identical. The single difference is that ee-gcc makes the second
-dispatch test a `beql` and annuls `case 1`'s `lw $2, 0x184($16)` into its slot,
-where retail keeps a plain `beq` with the default arm's `daddu $2, $0, $0` in
-the slot and gives the default its own `b` to an exit placed after the shared
-`ld $16`. Every later word is that one-instruction shift.
-
-`Flow8_12` next door matches with the identical source shape, because its
-`case 1` body starts with a `jal dds3GetRandIntA` that cannot be annulled, so
-the shape is confirmed and only the annul bit is wrong. This is the same class
-as the `Flow13_8` entry below.
-
-Ruled out: a `default: return 0;` arm, a `ret` local with `break` in each arm,
-a `goto zero` for the shared exit, the two cases in the other order, and an
-extra empty `case 2`, `case 3` or `case 4`. The empty case reaches the exact
-124-byte size and 11 differing words, but it does so by building a three-node
-tree with an `slt 2` bound test that retail does not have, so it is further
-from the retail source rather than nearer.
-
 ## nbSetActionCommand (newbattle/nbMakePacket, 0x100)
 
 38 of 62 words match, two words short of retail's 256.
@@ -975,26 +751,6 @@ before the product; and the word-indexed forms
 `((f32 *)datModelParamTable)[command * 196 + 4]` and
 `(command * 196 + 4) * 4`. All seven give the identical 24-word diff, so the
 fold is not reachable from the address expression.
-
-## nbE915Process_1 (newbattle/nbMakePacket, 0x118)
-
-56 of 69 words match, one word short of retail's 280.
-
-The whole body is retail's, including the `e->unk_08` chain
-(`< 0x6E` with a nested `== 0`, then `== 0x6E`, then `>= 0xFA` with a nested
-`== 0xFA`) and the three `e->unk_08` reloads it forces. The single difference is
-the branch in front of `effBTLSkillStart(0x203, 0)`: retail leaves its delay
-slot a `nop` and ee-gcc fills it with the `addiu $4, $0, 0x203` from the
-fall-through. Every later word is that same instruction one slot early, and the
-two branch offsets at +0x38 and +0xE4 are off by one as a result.
-
-`$4` is dead on the taken path in both, since the shared tail sets it for
-`nbUpdateEventProcessData`, so nothing in the function blocks the fill.
-
-Ruled out: `!e->unk_08`; `!= 0` with an empty arm and the call in the `else`;
-a `switch` over `e->unk_08` with only `case 0`; and duplicating the
-`nbUpdateEventProcessData` tail into an early-return arm so the two tails
-cross-jump. All five give the identical 13-word diff.
 
 ## nbMakeNegoBackPacket (newbattle/nbMakePacket, 0x104)
 
