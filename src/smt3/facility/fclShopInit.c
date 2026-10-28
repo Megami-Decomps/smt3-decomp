@@ -165,7 +165,7 @@ void fclShopInitItemList(void *list)
 extern char D_0053CF80[];
 
 extern char *D_0032F638[];
-extern void *fclLoadTexture(char *pFileName);
+extern s32 fclLoadTexture(char *pFileName);
 extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
 
 void fclShopTexLoad(void *workp)
@@ -174,7 +174,7 @@ void fclShopTexLoad(void *workp)
     s8 i;
 
     for (i = 0; (u8)i < 2; i++) {
-        work->texHandle[i] = (s32)fclLoadTexture(D_0032F638[i]);
+        work->texHandle[i] = fclLoadTexture(D_0032F638[i]);
     }
     fclSetPanelTex((u8 *)work + 0x23DC, 0, 0, 0x100, 0x80, work->texHandle[1]);
     printf(D_0053CF80);
