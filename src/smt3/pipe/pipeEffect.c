@@ -235,7 +235,33 @@ INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeGetObjData);
 #endif
 
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffSet);
+void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y);
+
+void pipeEffSet(tagPipeObject *object, s32 type)
+{
+    switch ((s32)(u8)type) {
+    case 2:
+        pipeLoadEffect(object->offset, pipe_DAMAGE01_D3P, 10, object->pos[0], object->pos[1]);
+        pipeLoadEffect(object->offset, pipe_DAMAGE03_D3P, 10, object->pos[0], object->pos[1]);
+        break;
+    case 4:
+        pipeLoadEffect(object->offset + 5, pipe_BREAK01_D3P, 10, object->pos[0], object->pos[1]);
+        pipeLoadEffect(object->offset + 5, pipe_BREAK02_D3P, 10, object->pos[0], object->pos[1]);
+        pipeLoadEffect(object->offset + 5, pipe_CELL01_D3P, 10, object->pos[0], object->pos[1]);
+        break;
+    case 6: {
+        f32 x = object->pos[0] - 16.0f;
+        f32 y = object->pos[1] - 48.0f;
+        pipeLoadEffect(object->offset, pipe_ATTACK01_D3P, 5, x, y);
+        /* Like pipeEffLoad's maxSize reset, consume the local selector after
+         * the final load. Retail keeps jal and the common epilogue here. */
+        type = 0;
+        break;
+    }
+    default:
+        break;
+    }
+}
 
 void pipeLoadEffect(s32 effectID, PIPE_EFF_t *effects, u8 maxSize, f32 x, f32 y)
 {
