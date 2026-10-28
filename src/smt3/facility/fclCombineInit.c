@@ -103,6 +103,8 @@ extern cmbPairEntry_t D_0032DB90[];
 
 extern datDevilInfo_t datDevilTable[];
 
+extern u8 D_0032DBD8[][4];
+
 extern u32 dds3GetRandA(void *state);
 
 extern u32 datGetMaxHp(datUnitWork_t *work);
@@ -1285,7 +1287,33 @@ s32 cmbGetEvoTable(u16 devilId, datUnitWork_t *unit)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetCombineRace);
+s32 cmbGetCombineRace(u16 devilA, u16 devilB, u16 devilC)
+{
+    datDevilInfo_t *table = datDevilTable;
+    u8 race[3];
+    s8 swap;
+
+    race[0] = table[devilA].race;
+    race[1] = table[devilB].race;
+    race[2] = table[devilC].race;
+    for (swap = 0; swap < 2; swap++) {
+        u32 j = 0;
+        do {
+            if ((D_0032DBD8[j][0] == race[0]) &&
+                (D_0032DBD8[j][1] == race[1]) &&
+                (D_0032DBD8[j][2] == race[2])) {
+                return (s8)D_0032DBD8[j][3];
+            }
+            j++;
+        } while (j < 1);
+        {
+            u8 temp = race[0];
+            race[0] = race[1];
+            race[1] = temp;
+        }
+    }
+    return 0;
+}
 
 s32 cmbIsSpecialPair(s32 devilA, s32 devilB, s32 race)
 {
