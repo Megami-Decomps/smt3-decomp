@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "draw3d.h"
 
 #include "libsdf.h"
 #include "ps2asm.h"
@@ -66,26 +67,6 @@ extern billRenderPair_t *D_00551D78;
 extern sdfGrOt_t sdfGrOtTable[];
 extern f32 dds3BillboardTagParam[4];
 extern f32 D_00317030[4];
-
-/* The camera, as sdf3DMakeScreenParam derives it. Same record as draw3d.h's. */
-typedef struct {
-    u32 flags;
-    f32 aspect;
-    f32 projDist;
-    f32 fovy;
-    f32 ox;
-    f32 oy;
-    f32 width;
-    f32 height;
-    f32 zMin;
-    f32 zMax;
-    f32 nearClip;
-    f32 farClip;
-    sdfMatrix4_t TM;
-    sdfVector4_t scale;
-    sdfVector4_t trans;
-    sdfVector4_t cameraPos;
-} sdf3DScreenParam_t;
 
 extern sdf3DScreenParam_t dds3ScreenParam;
 extern f32 D_002FA240[16];
@@ -385,7 +366,8 @@ void BillboardFreeTex(dds3BillResource_tag *hResource) {
 /* NON_MATCHING: 255 of 271 words differ (first at +0x28). */
 #ifdef NON_MATCHING
 void dds3BillboardTagLink(billHandle_t *obj, dds3BillResource_tag *child) {
-    f32 matrix[4][4];
+    /* VU0 scratch is reloaded after its translation row is replaced. */
+    volatile f32 matrix[4][4] __attribute__((aligned(16)));
     f32 viewDir[4];
     sdfBillBoardBatch_t *batch;
     u16 listIndex;
@@ -1391,26 +1373,178 @@ void dds3P2APolygonSetDirection(void *hData, void *pMatrix) {
     VU0_COPY_MATRIX(hData, pMatrix);
 }
 
-void dds3P2APolygonGetResource(dds3P2APolygon_tag *hP2APoly, s32 *pP2APolyRes) {
+typedef struct {
+    s32 mode;
+    dds3BillResource_tag *primary;
+    dds3BillResource_tag *secondary;
+} dds3P2APolygonResource_t;
+
+void dds3P2APolygonGetResource(dds3P2APolygon_tag *hP2APoly, dds3P2APolygonResource_t *pP2APolyRes) {
     billHandle_t *billboard = hP2APoly->hBillboard;
 
     if (billboard->type == 1) {
         u32 modeFlags = billboard->modeFlags;
 
         if (modeFlags & 0x40) {
-            pP2APolyRes[0] = 2;
-            pP2APolyRes[2] = (s32)dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries);
-            pP2APolyRes[1] = (s32)dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries + 1);
+            pP2APolyRes->mode = 2;
+            pP2APolyRes->secondary = dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries);
+            pP2APolyRes->primary = dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries + 1);
         } else if (modeFlags & 0x80) {
-            pP2APolyRes[0] = 3;
-            pP2APolyRes[2] = (s32)dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries);
-            pP2APolyRes[1] = (s32)dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries + 1);
+            pP2APolyRes->mode = 3;
+            pP2APolyRes->secondary = dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries);
+            pP2APolyRes->primary = dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries + 1);
         } else {
-            pP2APolyRes[0] = 0;
-            pP2APolyRes[1] = (s32)dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries);
+            pP2APolyRes->mode = 0;
+            pP2APolyRes->primary = dds3Billboard_P2AAnimDraw(billboard, billboard->resolvedEntries);
         }
     }
 }
 
-INCLUDE_ASM(const s32, "effect/billManager", dds3P2APolygonDraw);
+
+extern u32 D_003170B0[];
+extern u32 D_003170C0[];
+extern sdfGrOt_t *D_003170D0[];
+extern void MultMatrixNoArg(void);
+extern void sdf3DPrimLinkTm(sdfDrawTag_t *, s32 (*)(s32));
+extern void sdf3DPrimLinkMat(sdfDrawTag_t *, sdfMat_t *, s32 (*)(s32));
+extern void sdfMatSetTex(sdfMat_t *, sdfTexHandle_t *);
+extern void sdfMatSetMultiTex(sdfMat_t *, sdfTexHandle_t *);
+extern void *effPkt3DPrimMakePoly(sdf3DPrimPolyParm_t *);
+
+void dds3P2APolygonDraw(dds3P2APolygon_tag *instance) {
+    sdf3DPrimPolyParm_t params;
+    dds3P2APolygonResource_t resources;
+    /* VU0 scratch is reloaded after its translation row is replaced. */
+    volatile f32 matrix[4][4] __attribute__((aligned(16)));
+    f32 positions[4][4];
+    f32 uv[4][2];
+    f32 secondaryUv[4][2];
+    sdfDrawTag_t *list;
+    dds3BillResource_tag *child;
+    sdfTexHandle_t *texture;
+    sdfGrOt_t *surface;
+    f32 x, y;
+    f32 scaleX, scaleY;
+    f32 cornerX, cornerY;
+    f32 cosine, sine;
+    f32 width, height;
+
+    if (!dds3BillboardGetAnimState(instance->hBillboard)) {
+        return;
+    }
+    dds3P2APolygonGetResource(instance, &resources);
+    list = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(list);
+    SDF_VU0_LOADMATRIX(instance->rot);
+    SDF_VU0_LOADMATRIX_B(instance->dir);
+    MultMatrixNoArg();
+    SDF_VU0_STOREMATRIX_NOMEM(matrix);
+    matrix[3][0] = instance->hBillboard->pos[0];
+    matrix[3][1] = instance->hBillboard->pos[1];
+    matrix[3][2] = instance->hBillboard->pos[2];
+    SDF_VU0_LOADMATRIX(matrix);
+    sdf3DPrimLinkTm(list, 0);
+    memset(&params, 0, sizeof(params));
+    params.attr = 0x4000;
+    params.faceIndex = D_003170B0;
+    params.vertex = (sdfVector4_t *)positions;
+    params.vertexColor = D_003170C0;
+    params.uv = (sdfVector2_t *)uv;
+    params.color = instance->hBillboard->abgr;
+    params.faceCount = 2;
+    params.pointCount = 4;
+    child = resources.primary;
+    scaleX = instance->hBillboard->childScaleX;
+    scaleY = instance->hBillboard->childScaleY;
+    x = child->cx * scaleX;
+    y = child->cy * scaleY;
+    width = child->width * scaleX;
+    height = child->height * scaleY;
+    cosine = sdfCos(instance->hBillboard->rot);
+    sine = sdfSin(instance->hBillboard->rot);
+    cornerX = x - width;
+    cornerY = y - height;
+    positions[0][0] = cornerX * cosine - cornerY * sine;
+    positions[0][1] = cornerX * sine + cornerY * cosine;
+    positions[0][2] = 0.0f;
+    cornerX = x + width;
+    cornerY = y - height;
+    positions[1][0] = cornerX * cosine - cornerY * sine;
+    positions[1][1] = cornerX * sine + cornerY * cosine;
+    positions[1][2] = 0.0f;
+    cornerX = x + width;
+    cornerY = y + height;
+    positions[3][0] = cornerX * cosine - cornerY * sine;
+    positions[3][1] = cornerX * sine + cornerY * cosine;
+    positions[3][2] = 0.0f;
+    cornerX = x - width;
+    cornerY = y + height;
+    positions[2][0] = cornerX * cosine - cornerY * sine;
+    positions[2][1] = cornerX * sine + cornerY * cosine;
+    positions[2][2] = 0.0f;
+    width = 1.0f / (f32)(child->hTex->width * 16);
+    height = 1.0f / (f32)(child->hTex->height * 16);
+    texture = child->hTex;
+    uv[0][0] = child->uv.components[0] * width;
+    uv[0][1] = child->uv.components[1] * height;
+    uv[1][0] = child->uv.components[2] * width;
+    uv[1][1] = child->uv.components[3] * height;
+    uv[2][0] = child->uv.components[6] * width;
+    uv[2][1] = child->uv.components[7] * height;
+    uv[3][0] = child->uv.components[4] * width;
+    uv[3][1] = child->uv.components[5] * height;
+    sdfMatSetTex(instance->pMat, texture);
+    switch ((u32)resources.mode) {
+    case 2:
+    case 3:
+        child = resources.secondary;
+        scaleX = instance->hBillboard->childScaleX;
+        scaleY = instance->hBillboard->childScaleY;
+        x = child->cx * scaleX;
+        y = child->cy * scaleY;
+        width = child->width * scaleX;
+        height = child->height * scaleY;
+        params.attr |= 0x1000;
+        params.multiUv = (sdfVector2_t *)secondaryUv;
+        cosine = sdfCos(instance->hBillboard->rot);
+        sine = sdfSin(instance->hBillboard->rot);
+        cornerX = x - width;
+        cornerY = y - height;
+        positions[0][0] = cornerX * cosine - cornerY * sine;
+        positions[0][1] = cornerX * sine + cornerY * cosine;
+        positions[0][2] = 0.0f;
+        cornerX = x + width;
+        cornerY = y - height;
+        positions[1][0] = cornerX * cosine - cornerY * sine;
+        positions[1][1] = cornerX * sine + cornerY * cosine;
+        positions[1][2] = 0.0f;
+        cornerX = x + width;
+        cornerY = y + height;
+        positions[3][0] = cornerX * cosine - cornerY * sine;
+        positions[3][1] = cornerX * sine + cornerY * cosine;
+        positions[3][2] = 0.0f;
+        cornerX = x - width;
+        cornerY = y + height;
+        positions[2][0] = cornerX * cosine - cornerY * sine;
+        positions[2][1] = cornerX * sine + cornerY * cosine;
+        positions[2][2] = 0.0f;
+        texture = child->hTex;
+        width = (f32)(texture->width * 16);
+        height = (f32)(texture->height * 16);
+        secondaryUv[0][0] = child->uv.components[0] / width;
+        secondaryUv[0][1] = child->uv.components[1] / height;
+        secondaryUv[1][0] = child->uv.components[2] / width;
+        secondaryUv[1][1] = child->uv.components[3] / height;
+        secondaryUv[2][0] = child->uv.components[6] / width;
+        secondaryUv[2][1] = child->uv.components[7] / height;
+        secondaryUv[3][0] = child->uv.components[4] / width;
+        secondaryUv[3][1] = child->uv.components[5] / height;
+        sdfMatSetMultiTex(instance->pMat, texture);
+        break;
+    }
+    sdf3DPrimLinkMat(list, instance->pMat, 0);
+    sdfDrawTagLink(list, (u32)effPkt3DPrimMakePoly(&params));
+    surface = D_003170D0[instance->hBillboard->mode];
+    surface->regFunc(surface, list);
+}
 
