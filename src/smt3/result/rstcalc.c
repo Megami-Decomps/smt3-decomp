@@ -332,7 +332,29 @@ INCLUDE_ASM(const s32, "result/rstcalc", rstCalcSeqDevilLevelUp);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstPickRandomComment);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstGetDefaultSkill);
+extern s32 rstCalcEventInfo(u8 *eventInfo);
+s32 rstGetDefaultSkill(void)
+{
+    s32 eventType;
+    s32 canAdd;
+    while ((eventType = rstCalcEventInfo(&EventStart->unk_21[1])) >= 0) {
+        if (eventType != 1 && eventType != 6) {
+            continue;
+        }
+        if (eventType == 6 && EventStart->unit->hensinmae == 0) {
+            continue;
+        }
+        if (eventType == 1 && EventStart->unit->hensinmae != 0) {
+            continue;
+        }
+        canAdd = rstChkAddSkill(*(u16 *)&EventStart->unk_21[1]);
+        if (canAdd != 0) {
+            return (s8)canAdd;
+        }
+        EventStart->LevelUpCnt--;
+    }
+    return 0;
+}
 
 s32 rstChkSkillPowerUp1(void)
 {
