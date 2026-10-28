@@ -72,7 +72,7 @@ INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitLabels);
 
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultDrawPC1);
 
-void nbResultInitTimer(void)
+void nbResultInitTimer(nbMainProcessData_t *data)
 {
     s32 i;
     s32 oldLevel;
@@ -99,7 +99,7 @@ void nbResultInitTimer(void)
     nbResultCounter = 0;
 }
 
-s32 nbResultFindBestScore(void)
+s32 nbResultFindBestScore(nbMainProcessData_t *data)
 {
     nbResultScore_t *entry;
     s32 pending;
@@ -262,15 +262,81 @@ void nbResultAddExp(void)
 
 
 
-INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultProcess2);
+extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
+extern void dds3FadeIn2(s32 frame);
+extern struct dds3Basic_t *dds3GetActiveScene(void);
+extern s32 fldLoadNextFile_BtlRet(void);
+extern s32 fldLoadNextTask(void);
+extern u32 fldLoadNextGetStatus(void);
+extern s8 dds3PadButtonState[];
+extern s32 nbResultStep;
+extern s32 nbResultState;
+extern void nbFindTobiwarpLabel(nbMainProcessData_t *data);
+extern void nbBgmFadeOut(void);
+extern void nbIncResultCounter(void);
+extern char D_005435F8[];
+
+/* Qualified reorg traces: the preceding C reward routine removes $2 from
+ * the fall-through live set, preserving the final plain loading-state branch. */
+s32 nbResultProcess2(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data;
+
+    if (dds3GetProcessRunTime(id) == 3) {
+        dds3FadeIn2(10);
+    }
+    if (dds3GetProcessRunTime(id) >= 16) {
+        if (dds3GetActiveScene() != NULL) {
+            nbResultUpdateUnits();
+        }
+    }
+    data = nbGetMainProcessData();
+    if (dds3GetProcessRunTime(id) == 20) {
+        nbResultStep = fldLoadNextFile_BtlRet();
+    }
+    if (nbResultStep != 0) {
+        fldLoadNextTask();
+        if (fldLoadNextGetStatus() == 0) {
+            nbResultStep = 0;
+            printf(D_005435F8);
+        }
+    }
+    if (dds3GetProcessRunTime(id) >= 21) {
+        if (dds3PadButtonState[0x21] != 0 || dds3PadButtonState[0x23] != 0) {
+            nbResultInitTimer(data);
+        }
+        if (nbResultFindBestScore(data) >= 15) {
+            if (dds3PadButtonState[0x21] != 0 || dds3PadButtonState[0x23] != 0) {
+                if (nbResultState == 0) {
+                    nbResultState = 1;
+                }
+            }
+        }
+    }
+    nbFindTobiwarpLabel(data);
+    if (nbResultState > 0) {
+        if (nbResultState < 100) {
+            nbResultState++;
+        }
+        if (nbResultState >= 16 && nbResultStep == 0) {
+            nbResultAddExp();
+            nbBgmFadeOut();
+            if (data->battletime >= 0x367) {
+                nbIncResultCounter();
+            }
+            return -1;
+        }
+    }
+    return 0;
+}
+
+INCLUDE_RODATA(const s32, "newbattle/nbResultProcess", D_005435F8);
 
 extern void ShutdownProcess(void);
 extern s32 nbGetKakutokuExp(nbMainProcessData_t *data);
-extern s32 nbResultStep;
 extern s32 nbTobiwarpLabelIdx;
 extern s32 D_005510E8;
 extern s32 nbResultBestScore;
-extern s32 nbResultProcess2(dds3ProcessID_t *id);
 
 dds3ProcessFunc_t nb_result_Process(dds3ProcessID_t *id)
 {
