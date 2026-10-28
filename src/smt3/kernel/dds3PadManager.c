@@ -36,7 +36,31 @@ INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3PadInitialize);
 
 INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3RunProcessList);
 
-INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3GetVibrationLevel);
+extern u8 dds3PadVibrationLevel;
+extern u8 D_00551B91;
+extern s32 printf(const char *format, ...);
+
+void dds3GetVibrationLevel(void)
+{
+    u8 target = dds3PadVibrationLevel;
+    u8 *level = dds3PadVibrationState + 1;
+    if (target > *level) {
+        if (target - *level > 0x20) {
+            *level += 0x20;
+        } else {
+            *level = target;
+        }
+    } else if (target < *level) {
+        if (*level - target > 0x20) {
+            *level -= 0x20;
+        } else {
+            *level = target;
+        }
+    } else {
+        *level = target;
+    }
+    printf("PadActPow:%02x/%02x\n", D_00551B91, target);
+}
 
 void dds3PadVibrationSet(u32 motor, u8 level, s32 duration) {
     if (dds3GetGlobalConfigFlag(0) == 0) {
