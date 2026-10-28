@@ -87,7 +87,56 @@ INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", CheckFormCursor);
 
 INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbSetSelectOkMark);
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", SetCursor);
+extern s32 dds3GetGlobalConfigFlag(s32 index);
+
+void SetCursor(nbTarSelProcessData_t *process)
+{
+    datUnitWork_t *work;
+    s32 previousArea;
+    s32 previousForm;
+    s32 i;
+
+    if (process->friendcnt > 0) {
+        process->nowcarea = 1;
+    } else {
+        process->nowcarea = 2;
+    }
+    process->nowno = 0;
+    work = nbGetUnitWorkPointer(process->data,
+                                &process->data->party[process->partyindex]);
+    previousArea = work->prevtarea;
+    previousForm = work->prevtform;
+    if (process->act != NULL && dds3GetGlobalConfigFlag(1) == 0 &&
+        (process->act->stat & 0x80) == 0) {
+        previousArea = -1;
+        previousForm = -1;
+    }
+    switch (previousArea) {
+    case 1:
+        if (process->friendcnt > 0) {
+            process->nowcarea = previousArea;
+            for (i = 0; i < process->friendcnt; i++) {
+                if (process->friendno[i] == previousForm) {
+                    process->nowno = i;
+                    break;
+                }
+            }
+        }
+        break;
+    case 2:
+        if (process->enemycnt > 0) {
+            process->nowcarea = previousArea;
+            for (i = 0; i < process->enemycnt; i++) {
+                if (process->enemyno[i] == previousForm) {
+                    process->nowno = i;
+                    break;
+                }
+            }
+        }
+        break;
+    }
+}
+
 
 extern s32 nbSetSelectOkMark(s32 partyindex, s32 ctype, s32 crule, s32 carea);
 extern void SetCursor(nbTarSelProcessData_t *process);
