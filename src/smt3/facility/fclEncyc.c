@@ -1127,7 +1127,72 @@ void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
     pwork->registAlpha = alpha;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcMoveReadMainHelp);
+typedef struct fclEncycHelpPanel_t {
+    s32 x;
+    s32 y;
+    s32 speed;
+    s16 alpha;
+    u8 unk0E[2];
+} fclEncycHelpPanel_t;
+
+typedef struct fclEncycReadHelpWork_t {
+    u8 unk00[2];
+    u16 flags;
+    u8 unk04[0x5C];
+    fclEncycHelpPanel_t panels[2];
+} fclEncycReadHelpWork_t;
+
+void CalcMoveReadMainHelp(fclEncycReadHelpWork_t *work)
+{
+    u16 flags = work->flags;
+    s32 secondaryAlpha = work->panels[1].alpha;
+    s32 primaryAlpha;
+
+    if (flags & 0x10) {
+        secondaryAlpha += 0x10;
+        if (secondaryAlpha > 0x80) {
+            secondaryAlpha = 0x80;
+        } else {
+            work->panels[1].y -= work->panels[1].speed;
+            work->panels[1].speed -= 4;
+        }
+    } else {
+        secondaryAlpha -= 0x10;
+        if (secondaryAlpha < 0) {
+            work->panels[1].x = 0x1370;
+            work->panels[1].y = 0xD20;
+            work->panels[1].speed = 0x20;
+            secondaryAlpha = 0;
+        } else {
+            work->panels[1].speed += 4;
+            work->panels[1].y += work->panels[1].speed;
+        }
+    }
+    work->panels[1].alpha = secondaryAlpha;
+    primaryAlpha = work->panels[0].alpha;
+    if (flags & 8) {
+        primaryAlpha += 0x10;
+        if (primaryAlpha > 0x80) {
+            primaryAlpha = 0x80;
+        } else {
+            work->panels[0].y -= work->panels[0].speed;
+            work->panels[0].speed -= 4;
+        }
+    } else {
+        primaryAlpha -= 0x10;
+        if (primaryAlpha < 0) {
+            work->panels[0].y = 0xCE8;
+            work->panels[0].speed = 0x20;
+            primaryAlpha = 0;
+            work->panels[0].x = 0;
+        } else {
+            work->panels[0].speed += 4;
+            work->panels[0].y += work->panels[0].speed;
+        }
+    }
+    work->panels[0].alpha = primaryAlpha;
+}
+
 
 void CalcMoveViewModeRibbon(fclEncyc_readmainwork_tag *pwork)
 {
