@@ -6270,12 +6270,19 @@ typedef struct
 
 typedef struct
 {
-    /* 0x00 */ u8 unk_00[0xC];
+    /* 0x00 */ u8 state;
+    /* 0x01 */ u8 step;
+    /* 0x02 */ u8 delay;
+    /* 0x03 */ u8 kind;
+    /* 0x04 */ u32 color4;
+    /* 0x08 */ u32 color8;
     /* 0x0C */ s32 x;
     /* 0x10 */ s32 y;
     /* 0x14 */ s32 z;
     /* 0x18 */ u16 width;
-    /* 0x1A */ u8 unk_1A[0xA];
+    /* 0x1A */ u16 height;
+    /* 0x1C */ s32 frame;
+    /* 0x20 */ s32 value;
     /* 0x24 */ cmpPanelEffAnim_t anim[16];
 } cmpPanelEffState_t;
 
@@ -6425,12 +6432,52 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpAddQuePanelEff);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffBox);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffRing);
+void cmpDrawPanelEffRing(cmpPanelEffState_t *state, s32 ot)
+{
+    s32 frame = state->frame;
+    s32 frameOffset = frame * 2 - 0x100;
+    s32 neutralColor = 0x80;
+    u32 colorA = state->color8;
+    u32 colorB = state->color4;
+    s32 spriteIndex;
+    s32 square;
+    s32 yOffset;
+    s32 colors[4];
+
+    if (frame >= 0x81) {
+        colorA = fclBlendColor(neutralColor, colorA, frameOffset);
+        colorB = fclBlendColor(neutralColor, colorB, frameOffset);
+    }
+
+    spriteIndex = (s32)(fsqrtf(50.0f) * (f32)frame * (1.0f / 256.0f));
+    fclDrawPanelSprite2(0x48, ot);
+    /* Keep the evolving color live across both blends; see
+       docs/levers/cross-block-locals.md. */
+    colorA = fclBlendColor(colorA, colorB, frame);
+
+    square = spriteIndex * spriteIndex;
+    yOffset = square * 8;
+
+    colors[0] = neutralColor;
+    colors[1] = neutralColor;
+    colors[2] = neutralColor;
+    colors[3] = (s32)colorA;
+    cmpDrawBoxGDefault(state->x, state->y - yOffset, state->z, 0x14,
+                       state->height + square, colors, ot);
+
+    colors[0] = neutralColor;
+    colors[1] = neutralColor;
+    colors[2] = colorA;
+    colors[3] = (s32)colorA;
+    cmpDrawBoxGDefault(state->x + 0x140, state->y - yOffset, state->z,
+                       state->width - 0x14, state->height + square, colors, ot);
+    fclDrawPanelSprite2(0x44, ot);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffQuad);
 
 extern void cmpDrawPanelEffBox(void *entry, s32 arg);
-extern void cmpDrawPanelEffRing(void *entry, s32 arg);
+extern void cmpDrawPanelEffRing(cmpPanelEffState_t *entry, s32 arg);
 extern void cmpDrawPanelEffQuad(void *entry, s32 arg);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FF60);

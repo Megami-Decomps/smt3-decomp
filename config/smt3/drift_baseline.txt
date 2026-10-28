@@ -181,8 +181,6 @@ member cmpPanelEffAnim_t.unk_0C
 member cmpPanelEffAnim_t.unk_14
 member cmpPanelEffAnim_t.unk_1C
 member cmpPanelEffAnim_t.unk_28
-member cmpPanelEffState_t.unk_00
-member cmpPanelEffState_t.unk_1A
 member cmpPanelEffView_t.unk_0000
 member cmpPanelEffView_t.unk_000C
 member cmpPanelEff_t.unk_01
