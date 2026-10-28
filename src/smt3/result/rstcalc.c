@@ -76,11 +76,11 @@ typedef struct
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
     /* 0x001A */ s8 StartLevel;
-    /* 0x001B */ s8 unk_1B;
+    /* 0x001B */ s8 LevelUpCnt;
     /* 0x001C */ u8 unk_1C[4];
     /* 0x0020 */ u8 EventNums;
     /* 0x0021 */ u8 unk_21[6];
-    /* 0x0027 */ s8 unk_27;
+    /* 0x0027 */ s8 HeartsSkFlag;
     /* 0x0028 */ u8 unk_28[8];
     /* 0x0030 */ datUnitWork_t *levelUpUnit[16];
     /* 0x0070 */ s8 levelUpCount;
@@ -436,7 +436,26 @@ s32 rstCalcSeqDestroySkill(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstChkHeartsSkill);
+extern u16 rstCheckHeartsSlot(u8 id, datUnitWork_t *unit);
+
+u16 rstChkHeartsSkill(datUnitWork_t *unit)
+{
+    datUnitWork_t copy;
+    u16 skill;
+
+    cmbCopyCustomDevilToStock(&copy, unit);
+    skill = rstCheckHeartsSlot(DDS3_GBWK->heartsequip, &copy);
+    if (skill == 0x165 && evtBitCheck(0x8C1) == 0) {
+        return 0;
+    }
+    if (skill == 0) {
+        return 0;
+    }
+    if (cmbChkSkillOwner(skill, unit) >= 0) {
+        return 0;
+    }
+    return EventStart->HeartsSkFlag < EventStart->LevelUpCnt ? skill : 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstRecalcHeartsSkill);
 
