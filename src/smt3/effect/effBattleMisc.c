@@ -13,7 +13,8 @@ extern u32 D_00317740[]; /* 0, 5, 15, 30 frames */
 extern void (*GetPositionPtrTable[])(void *owner, effBTLAimParams_t *request);
 extern u32 effBTLSkillGetInvokeParty(void);
 extern u32 effBTLSkillGetTargetParty(void);
-extern void effBTLPartGetPartyPositionPtr(u32 group, void *pPosPtr);
+extern void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr);
+extern void effBTLPartPtrModelGroupGetCenterAndHeight(u32 group, sdfVector4_t *center, f32 *heightAverage, f32 *heightMax, f32 *frontMax);
 extern f32 aViewTarget[4];
 extern f32 aViewEye[4];
 extern f32 aViewDown[4];
@@ -968,7 +969,78 @@ void effBTLPartGetPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPos
 
 INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetModelPositionPtr);
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLPartGetPartyPositionPtr);
+void effBTLPartGetPartyPositionPtr(u32 group, effBTLAimParams_t *pPosPtr) {
+    /* The native scratch vectors leave w untouched. */
+    sdfVector4_t result;
+    sdfVector4_t direction;
+    sdfVector4_t center;
+    f32 heightAverage;
+    f32 heightMax;
+    f32 frontMax;
+    f32 radius;
+    f32 vertical;
+    u32 aimMode = pPosPtr->aimMode;
+    u32 directionMode = pPosPtr->directionMode;
+
+    radius = 500.0f;
+    (void)nbGetMainProcessData();
+    effBTLPartPtrModelGroupGetCenterAndHeight(group, &center, &heightAverage,
+                                               &heightMax, &frontMax);
+    if (pPosPtr->rangeOverride != 0) {
+        radius = (f32)pPosPtr->rangeOverride;
+    }
+
+    switch (aimMode) {
+    case 5:
+        if (directionMode == 8 || directionMode == 10) {
+            vertical = -1.0f;
+            if (pPosPtr->rangeOverride != 0) {
+                vertical = -radius;
+            }
+        } else {
+            vertical = -1.0f;
+        }
+        break;
+    case 0:
+    case 1:
+        vertical = center.y;
+        break;
+    case 2:
+        vertical = heightAverage;
+        break;
+    case 3:
+        vertical = heightMax;
+        break;
+    case 4:
+        vertical = 0.0f;
+        break;
+    default:
+        vertical = 0.0f;
+        break;
+    }
+
+    if (directionMode == 8) {
+        result.x = center.x;
+        result.y = vertical;
+        result.z = frontMax;
+    } else if (directionMode == 10) {
+        result.x = center.x;
+        result.y = vertical;
+        result.z = center.z;
+    } else {
+        direction.x = 0.0f;
+        direction.y = 0.0f;
+        direction.z = (group & 0x100) ? 1.0f : -1.0f;
+        SetRotateMatrixY(effBTL_Ptr_D[directionMode]);
+        SDF_VU0_LOADVECTOR(&direction);
+        SDF_VU0_APPLYMATRIX_XYZ();
+        SDF_VU0_STOREVECTOR(&direction);
+        result.x = center.x + radius * direction.x;
+        result.y = vertical + radius * direction.y;
+        result.z = frontMax + radius * direction.z;
+    }
+    SDF_VU0_LOADVECTOR_MEMOPS(result);
+}
 
 void effBTLPartGetInvokePartyPositionPtr(u32 pFormation, void *pPosPtr) {
     effBTLPartGetPartyPositionPtr(effBTLSkillGetInvokeParty(), pPosPtr);
