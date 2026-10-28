@@ -2477,7 +2477,7 @@ s32 camp_update_stock_Process(s32 id)
 INCLUDE_ASM(const s32, "code_0022C578", camp_update_stock_Process);
 #endif
 
-void cmpSetDHEntry(void) {
+void cmpSetDHEntry(s8 id) {
 }
 
 extern s32 cmpHeartsIconIsVisible(s8 index);
@@ -2818,10 +2818,13 @@ typedef struct
     /* 0x00 */ u8 flags;
     /* 0x01 */ u8 unk_01[0x1B];
     /* 0x1C */ s32 unk_1C;
-    /* 0x20 */ u8 unk_20[0xC];
+    /* 0x20 */ s32 entryStep;
+    /* 0x24 */ u8 reserved24[8];
     /* 0x2C */ s32 fadeAlpha;
     /* 0x30 */ s8 unk_30;
     /* 0x31 */ s8 iconIndex;
+    /* 0x32 */ u8 reserved32[0x1146];
+    /* 0x1178 */ s32 cursorAlpha[64];
 } campDhWork_t;
 
 extern campDhWork_t *campDhDrawWork;
@@ -2901,7 +2904,64 @@ s32 camp_draw_dh_Process(s32 id)
 }
 
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhApplyEntry);
+void campDhApplyEntry(s32 button)
+{
+    s8 index = ((campDhWork_t *)campDhUpdateWork)->iconIndex;
+    s32 visible;
+
+    ((campDhWork_t *)campDhUpdateWork)->cursorAlpha[index] = 0x80;
+    visible = cmpHeartsIconIsVisible(cmpGetHeartsIconId(0x18)) != 0;
+    if (index != 0x18) {
+        if (button & 0x10) {
+            if (index / 8 == 0) {
+                if (visible != 0 && (u32)(index - 3) < 2) {
+                    index = 0x18;
+                } else {
+                    index += 0x10;
+                }
+            } else {
+                index -= 8;
+            }
+        }
+        if (button & 0x20) {
+            if ((s8)(index / 8) == 2) {
+                if (visible != 0 && (u8)(index - 0x13) < 2) {
+                    index = 0x18;
+                } else {
+                    index -= 0x10;
+                }
+            } else {
+                index += 8;
+            }
+        }
+        if (button & 0x40) {
+            if ((index & 7) == 0) {
+                index += 7;
+            } else {
+                index--;
+            }
+        }
+        if (button & 0x80) {
+            if ((s8)(index % 8) == 7) {
+                index -= 7;
+            } else {
+                index++;
+            }
+        }
+    } else {
+        if (button & 0x10) index = 0x13;
+        if (button & 0x20) index = 3;
+        if (button & 0x40) index = 0x13;
+        if (button & 0x80) index = 0x14;
+    }
+    {
+        campDhWork_t *work = (campDhWork_t *)campDhUpdateWork;
+        work->cursorAlpha[index] = 0;
+        work->iconIndex = index;
+        work->entryStep = 0;
+    }
+    cmpSetDHEntry(*(s8 *)((u8 *)campDhUpdateWork + ((campDhWork_t *)campDhUpdateWork)->iconIndex * 0x34 + 0x1280));
+}
 
 s32 campDhFindEntry(void)
 {
