@@ -35,15 +35,28 @@ extern void func_00116BB8(void);
 
 extern s32 dds3GlobalWorkInit(void);
 
-extern void sdfTexFree(s32 aHandle);
+extern void sdfTexFree(sdfTexHandle_t *handle);
+extern void sdfTexFreeDelayed(sdfTexHandle_t *handle);
+extern void sdfMemFreeDirect(sdfMemHandle_t *handle);
+extern sdfTexHandle_t *sdfTexSet(void *texture);
+extern void frwFreeStaffFont(void);
 
 typedef struct
 {
     /* 0x0000 */ void *allocation;
-    /* 0x0004 */ s32 unk_0004;
-    /* 0x0008 */ s32 unk_0008;
-    /* 0x000C */ s32 unk_000C;
-    /* 0x0010 */ u8 unk_0010[0xEC];
+    /* 0x0004 */ sdfTexHandle_t *textureHandleA;
+    /* 0x0008 */ sdfTexHandle_t *textureHandleB;
+    /* 0x000C */ sdfTexHandle_t *textureHandleC;
+    /* 0x0010 */ sdfTexHandle_t *fontTexture;
+    /* 0x0014 */ sdfMemHandle_t *fontMemoryA[4];
+    /* 0x0024 */ void *uiTextureInputsA[4];
+    /* 0x0034 */ sdfMemHandle_t *fontMemoryB[4];
+    /* 0x0044 */ void *uiTextureInputsB[4];
+    /* 0x0054 */ sdfMemHandle_t *fontMemoryC[15];
+    /* 0x0090 */ void *uiTextureInputsC[15];
+    /* 0x00CC */ u8 padCC[0x10];
+    /* 0x00DC */ sdfMemHandle_t *fontMemoryD;
+    /* 0x00E0 */ u8 padE0[0x1C];
     /* 0x00FC */ s32 unk_00FC;
     /* 0x0100 */ s32 unk_0100;
     /* 0x0104 */ s32 unk_0104;
@@ -57,6 +70,8 @@ typedef struct
 extern stfUiWork_t *oStaff_UI;
 
 extern void stfFreeTextures(void);
+extern void stfResetUI(void);
+extern void stfLoadUITexture(s32 index);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
@@ -69,31 +84,85 @@ s32 dds3CreateGameData(void)
 
 INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfFreeFiles);
 
-INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfFreeFont);
+void stfFreeFont(void)
+{
+    s32 i;
+    for (i = 0; i < 4; i++) {
+        if (oStaff_UI->fontMemoryA[i] != NULL) {
+            sdfMemFreeDirect(oStaff_UI->fontMemoryA[i]);
+            oStaff_UI->fontMemoryA[i] = NULL;
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        if (oStaff_UI->fontMemoryB[i] != NULL) {
+            sdfMemFreeDirect(oStaff_UI->fontMemoryB[i]);
+            oStaff_UI->fontMemoryB[i] = NULL;
+        }
+    }
+    for (i = 0; i < 15; i++) {
+        if (oStaff_UI->fontMemoryC[i] != NULL) {
+            sdfMemFreeDirect(oStaff_UI->fontMemoryC[i]);
+            oStaff_UI->fontMemoryC[i] = NULL;
+        }
+    }
+    if (oStaff_UI->fontTexture != NULL) {
+        sdfTexFreeDelayed(oStaff_UI->fontTexture);
+    }
+    oStaff_UI->fontTexture = NULL;
+    if (oStaff_UI->fontMemoryD != NULL) {
+        sdfMemFreeDirect(oStaff_UI->fontMemoryD);
+        oStaff_UI->fontMemoryD = NULL;
+    }
+    frwFreeStaffFont();
+}
 
 INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfDrawStaffText);
 
 INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfDrawText);
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: 12 of 35 words differ (first at +0x4). */
+void stfLoadUITexture(s32 index)
+{
+    s32 slot = index % 4;
+    oStaff_UI->textureHandleA = sdfTexSet(oStaff_UI->uiTextureInputsA[slot]);
+    oStaff_UI->textureHandleB = sdfTexSet(oStaff_UI->uiTextureInputsB[slot]);
+    oStaff_UI->textureHandleC = sdfTexSet(oStaff_UI->uiTextureInputsC[index]);
+}
+#else
 INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfLoadUITexture);
+#endif
 
 void stfFreeTextures(void)
 {
-    if (oStaff_UI->unk_0004 != 0) {
-        sdfTexFree(oStaff_UI->unk_0004);
+    if (oStaff_UI->textureHandleA != 0) {
+        sdfTexFree(oStaff_UI->textureHandleA);
     }
-    if (oStaff_UI->unk_0008 != 0) {
-        sdfTexFree(oStaff_UI->unk_0008);
+    if (oStaff_UI->textureHandleB != 0) {
+        sdfTexFree(oStaff_UI->textureHandleB);
     }
-    if (oStaff_UI->unk_000C != 0) {
-        sdfTexFree(oStaff_UI->unk_000C);
+    if (oStaff_UI->textureHandleC != 0) {
+        sdfTexFree(oStaff_UI->textureHandleC);
     }
-    oStaff_UI->unk_0004 = 0;
-    oStaff_UI->unk_0008 = 0;
-    oStaff_UI->unk_000C = 0;
+    oStaff_UI->textureHandleA = 0;
+    oStaff_UI->textureHandleB = 0;
+    oStaff_UI->textureHandleC = 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfGetUIField);
+void stfGetUIField(s32 arg0, s32 arg1, s32 arg2)
+{
+    if (oStaff_UI->unk_0118 == 1) {
+        stfResetUI();
+    }
+    oStaff_UI->unk_010C = arg2;
+    oStaff_UI->unk_0108 = arg1;
+    oStaff_UI->unk_00FC = arg0;
+    oStaff_UI->unk_0104 = 0;
+    oStaff_UI->unk_0114 = 0;
+    oStaff_UI->unk_0100 = 0;
+    stfLoadUITexture(arg0);
+    oStaff_UI->unk_0118 = 1;
+}
 
 void stfResetUI(void)
 {
