@@ -65,7 +65,7 @@ typedef struct
     /* 0x0000 */ u8 unk_0000;
     /* 0x0001 */ s8 unk_0001;
     /* 0x0002 */ s8 unk_0002;
-    /* 0x0003 */ u8 unk_0003;
+    /* 0x0003 */ s8 unk_0003;
     /* 0x0004 */ s8 unk_0004;
     /* 0x0005 */ s8 unk_0005;
     /* 0x0006 */ u8 unk_0006[2];
@@ -384,7 +384,26 @@ void ragUpdateSeq3(void)
         0xFFFF);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateReturn);
+void ragUpdateReturn(void)
+{
+    s32 last = ragUpdateWork->unk_0003;
+
+    switch (last) {
+    case 1:
+        fclScriptStart(ragUpdateWork->script, 1, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = last;
+        break;
+    case 2:
+        fclScriptStart(ragUpdateWork->script, 2, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = last;
+        break;
+    case 3:
+        fclScriptStart(ragUpdateWork->script, 3, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = last;
+        break;
+    }
+    ragUpdateWork->unk_0004 = 1;
+}
 
 INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqStatus);
 
