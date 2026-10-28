@@ -634,7 +634,44 @@ s32 rstCalcSkillPowerUp(void)
     return result;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstChkEvoEvent);
+typedef struct
+{
+    u8 level;
+    u8 kind;
+    u16 skillId;
+} datLevelUpEntry_t;
+
+typedef struct
+{
+    u8 head[6];
+    datLevelUpEntry_t entry[24];
+} datLevelUp_t;
+
+extern s32 rstCalcEvoLevelDiff(datUnitWork_t *, datUnitWork_t *, datUnitWork_t *, s32);
+extern s32 cmbChkEvoNeedFlag(u16 devilId);
+extern u8 datLevelUpTable[];
+
+s32 rstChkEvoEvent(datUnitWork_t *stock, datUnitWork_t *evo, s32 index)
+{
+    s32 diff;
+    s32 result;
+    s32 level;
+
+    if (index >= 0) {
+        /* Byte-table view, with the six-byte header and entry offset first;
+         * see docs/levers/addressing-and-types.md. */
+        level = datLevelUpTable[index * sizeof(datLevelUpEntry_t) +
+                               stock->id * sizeof(datLevelUp_t) + 6];
+    } else {
+        level = -1;
+    }
+    diff = rstCalcEvoLevelDiff((datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54),
+                               stock, evo, level);
+    if (diff > 0)
+        return diff < 3 ? 1 : 2;
+    result = cmbChkEvoNeedFlag(evo->id) != 0 ? 3 : 0;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEvo);
 
@@ -1473,19 +1510,6 @@ s32 rstRollComment(void)
     }
     return D_00339D10[0].devilId;
 }
-
-typedef struct
-{
-    u8 level;
-    u8 kind;
-    u16 skillId;
-} datLevelUpEntry_t;
-
-typedef struct
-{
-    u8 head[6];
-    datLevelUpEntry_t entry[24];
-} datLevelUp_t;
 
 s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
 {
