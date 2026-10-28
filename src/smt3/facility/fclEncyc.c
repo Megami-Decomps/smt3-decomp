@@ -2013,7 +2013,29 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcViewkey);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugProcDispBound);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DebugRemoveRecord);
+extern void *memmove(void *dest, const void *source, unsigned int size);
+
+void DebugRemoveRecord(s32 id)
+{
+    s32 index = fclEncycSearch(id);
+    fclencyceelem_t *dest;
+    fclencyceelem_t *source;
+    s32 remaining;
+
+    if (index < 0) return;
+    dest = (fclencyceelem_t *)((u8 *)encycSaveWork + index * (s32)sizeof(*dest) + 0x11E90);
+    source = dest + 1;
+    remaining = encycSaveWork->encycNum - index - 1;
+    if (remaining > 0) {
+        memmove(dest, source, remaining * (s32)sizeof(*dest));
+    }
+    encycSaveWork->encycNum--;
+    if (fclEncycGetRatio() >= 100) {
+        evtBitOn(0x913);
+    } else {
+        evtBitOff(0x913);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", DebugUpdateListwin);
 INCLUDE_SDATA(const s32, "facility/fclEncyc", g_pinst);
