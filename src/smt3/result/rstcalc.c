@@ -1472,7 +1472,15 @@ INCLUDE_ASM(const s32, "result/rstcalc", cmbGetLevelUpCount);
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstDrawGetCursorRow);
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusRow);
+extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d,
+                               s8 e, s32 color, s8 f, s8 g, s8 h);
+
+void rstDrawStatusRow(s8 mode, s8 row, s8 flags)
+{
+    cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, rstDrawWork->unk_22E4,
+                       -1, 0, (s32)rstDrawWork->unk_129F, mode,
+                       0xA09DC380, 2, row, flags);
+}
 
 INCLUDE_ASM(const s32, "result/rstcalc", rstDrawStatusRow2);
 
