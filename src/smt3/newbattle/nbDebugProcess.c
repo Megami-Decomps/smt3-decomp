@@ -90,7 +90,9 @@ typedef struct
 typedef struct nbMainProcessData_t
 {
     nbFormation_t *form;
-    u8 unk_04[0xC];
+    sdfMemHandle_t *form_hndl;
+    datUnitWork_t *enemyunit;
+    sdfMemHandle_t *enemyunit_hndl;
     nbParty_t *party;
     u8 unk_14[0x4];
     s16 playerpcnt;
@@ -605,7 +607,74 @@ void SetSelect(void)
     nbSetTargetProcess(0, 0, 0, 0, 3);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SetDvlChange);
+typedef struct
+{
+    /* 0x00 */ u32 flag;
+    /* 0x04 */ u8 race;
+    /* 0x05 */ u8 level;
+    /* 0x06 */ u16 hp;
+    /* 0x08 */ u16 maxhp;
+    /* 0x0A */ u16 mp;
+    /* 0x0C */ u16 maxmp;
+    /* 0x0E */ s16 aisyoid;
+    /* 0x10 */ s8 param[6];
+    /* 0x16 */ u16 skill[8];
+    /* 0x26 */ s16 keisyotype;
+    /* 0x28 */ u16 keisyoform;
+    /* 0x2A */ u16 dropmakka;
+    /* 0x2C */ u16 dropexp;
+    /* 0x2E */ u8 dropitem[2];
+    /* 0x30 */ u8 droppoint[2];
+    /* 0x32 */ u16 specialbit;
+    /* 0x34 */ u8 specialitem;
+    /* 0x35 */ u8 specialpoint;
+    /* 0x36 */ u8 hougyokupoint;
+    /* 0x37 */ u8 masekipoint;
+    /* 0x38 */ s8 attackattr;
+    /* 0x39 */ u8 attackcnt;
+    /* 0x3A */ u8 attackinterval;
+    /* 0x3B */ u8 reserve1;
+} datDevilFormat_t;
+
+extern datDevilFormat_t datDevilTable[];
+extern s32 devilbase;
+extern s32 devilcur;
+extern void nbReturnUnit(s32 partyindex, s32 lost, s32 dead);
+extern u64 sdfDelayedResrcCheck(void);
+extern void datSetDevilWork(s32 id, datUnitWork_t *work);
+extern void nbSummonUnit(s32 side, s32 stockno, s32 formindex);
+extern void nbSetEnemyFormation(nbMainProcessData_t *data);
+extern void nbSetPlayerFormation(nbMainProcessData_t *data, s32 empty);
+
+void SetDvlChange(nbDebugProcessData_t *d)
+{
+    datUnitWork_t *work;
+
+    nbReturnUnit(d->partyindex, 0, 0);
+    while (sdfDelayedResrcCheck() != 0) {
+    }
+    if (d->side == 1) {
+        work = &d->data->enemyunit[d->stockno];
+    } else {
+        work = (datUnitWork_t *)((u8 *)DDS3_GBWK + d->stockno * sizeof(datUnitWork_t) + 0xA54);
+    }
+    datSetDevilWork(devilbase + devilcur, work);
+    work->hp = work->maxhp = datDevilTable[devilbase + devilcur].maxhp;
+    work->mp = work->maxmp = datDevilTable[devilbase + devilcur].maxmp;
+    nbSummonUnit(d->side, d->stockno, d->formindex);
+    switch (d->side) {
+    case 1:
+        nbSetEnemyFormation(d->data);
+        break;
+    case 0:
+        nbSetPlayerFormation(d->data, 0);
+        /* Retail keeps jal and a shared epilogue. This dead local reset
+         * survives cc1 sibling selection and is deleted in the life pass
+         * (qualified trace with compiler output parity). */
+        work = NULL;
+        break;
+    }
+}
 
 void SetTarget_nbDebugProcess(nbDebugProcessData_t *a)
 {
