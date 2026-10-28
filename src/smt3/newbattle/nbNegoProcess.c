@@ -1035,7 +1035,52 @@ void nbNegoDebugPrint(nbNegoProcessData_t *n)
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544E98);
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EA8);
 
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoDebugPrint2);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EB8);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544ED8);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544EF0);
+INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F00);
+
+extern char D_00544EB8[];
+extern char D_00544ED8[];
+extern char D_00544EF0[];
+extern char D_00544F00[];
+extern char D_00551158[];
+
+void nbNegoDebugPrint2(nbNegoProcessData_t *n)
+{
+    sdfDrawTag_t *tag;
+    u32 packet;
+    s32 i;
+    u32 id;
+
+    tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    if (n->endid == 0) {
+        packet = (u32)sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544EB8,
+                                  (s32)(n->nownegoid >> 16), (s32)(n->nownegoid & 0xFFFF));
+        sdfDrawTagLink(tag, packet);
+    } else {
+        packet = (u32)sdfDevPrintf(0x7A00, 0x7C80, 0xFFFF80, 0xE, D_00544ED8);
+        sdfDrawTagLink(tag, packet);
+    }
+    if (n->endid == 0) {
+        for (i = 0; i < n->nextkouhocnt; i++) {
+            id = n->nextkouho[i];
+            packet = (u32)sdfDevPrintf(0x7A00 + i * 0x480, 0x7D40, 0xFFFF80,
+                                      i == n->selectcur ? 4 : 0, D_00551150,
+                                      (s32)(id >> 16), (s32)(id & 0xFFFF));
+            sdfDrawTagLink(tag, packet);
+        }
+    } else {
+        packet = (u32)sdfDevPrintf(0x7A00, 0x7D40, 0xFFFF80, 4, D_00551158);
+        sdfDrawTagLink(tag, packet);
+    }
+    packet = (u32)sdfDevPrintf(0x7A00, 0x7E60, 0xFFFF80, 0, D_00544EF0);
+    sdfDrawTagLink(tag, packet);
+    packet = (u32)sdfDevPrintf(0x7A00, 0x7EC0, 0xFFFF80, 0, D_00544F00);
+    sdfDrawTagLink(tag, packet);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
 
 s32 NegoDebug(nbNegoProcessData_t *n)
 {

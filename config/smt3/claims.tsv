@@ -556,3 +556,4 @@ src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	1 fn / 768 B	pbDumpRecordData n
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	2 fn / 948 B	fusion calculation dispatch and stock insertion with native state tables, party snapshots and callback reloads; owner 161 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 404 B	arrow cursor dispatch with native helper argument contracts and signed alpha division; owner 342 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 432 B	two-phase arrow target highlighting with native blend weights and callback-sensitive texture reloads; owner 343 match, 0 differ
+src/smt3/newbattle/nbNegoProcess.c	redthing1	done	2026-10-28	1 fn / 508 B	next-negotiation diagnostic with callback-sensitive candidate reloads and indexed text coordinates; owner 40 match, 0 differ
