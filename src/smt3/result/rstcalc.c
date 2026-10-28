@@ -672,7 +672,25 @@ s32 datFindCommentEntry(u16 devilId)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", datGetPlayerLNDLevel);
+s32 datGetPlayerLNDLevel(void)
+{
+    u8 list;
+    s32 type = datGetPlayerLNDList(&list);
+    u8 result;
+
+    if (list == 0) {
+        return 0;
+    }
+    list--;
+    if (type == 1) {
+        result = (list * 3) + 1;
+    } else if (type == 4) {
+        result = (list * 3) + 3;
+    } else {
+        result = (list * 3) + 2;
+    }
+    return result;
+}
 
 s32 datGetDevilRace(s8 index)
 {
