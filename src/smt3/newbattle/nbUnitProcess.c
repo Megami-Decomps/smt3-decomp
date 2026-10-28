@@ -747,7 +747,83 @@ s32 nbCheckLoadGroup(s32 side)
     return 0;
 }
 
+/* NON_MATCHING: 14 of 152 words differ; see docs/nonmatching/newbattle/nbUnitProcess.md. */
+#ifdef NON_MATCHING
+void UpdateFormAnime(nbMainProcessData_t *data, nbFormation_t *form, datUnitWork_t *work)
+{
+    u32 anime;
+    u32 phaseBits;
+    f32 phase;
+    f32 inversePhase;
+    f32 blend;
+    f32 power;
+    f32 step;
+    s32 motionIndex;
+
+    if ((form->stat & 2) != 0 && (data->stat & 0x1000) == 0 &&
+        mdlGetNumOfCut(form->hunit->owner, 0) >= 0x17) {
+        if (datCheckDying(work) != 0) {
+            motionIndex = form->hunit->owner->current.h.motionIndex;
+            if (motionIndex != 0x16 && (motionIndex == 0 || motionIndex == 2)) {
+                nbSetWaitMotion(form, 0, 1.0f);
+                nbSetUnitMotion(form, 0, 1, 1.0f);
+            }
+        } else if (form->hunit->owner->current.h.motionIndex == 0x16) {
+            nbSetWaitMotion(form, 0, 1.0f);
+            nbSetUnitMotion(form, 0, 1, 1.0f);
+        }
+    }
+
+    anime = form->anime;
+    if ((anime & 0x60) != 0) {
+        phase = form->range;
+        power = form->shakePower;
+        step = (1.0f - phase) * power;
+        form->shakePower = power + 0.02f;
+        if (step < 0.01f) {
+            step = 0.01f;
+        }
+        form->range = phase + step;
+        if (form->range > 1.0f) {
+            form->range = 1.0f;
+        }
+        SDF_VU0_LOADVECTOR(&form->startpos);
+        blend = form->range;
+        inversePhase = 1.0f - blend;
+        PS2_FLOAT_BITS(phaseBits, inversePhase);
+        SDF_VU0_SCALEVECTOR_BITS(phaseBits);
+        SDF_VU0_COPYVECTOR_A_TO_B();
+        if ((anime & 0x20) != 0) {
+            SDF_VU0_LOADVECTOR(&form->tarpos);
+        } else {
+            SDF_VU0_LOADVECTOR(&form->orgpos);
+        }
+        PS2_FLOAT_BITS(phaseBits, blend);
+        SDF_VU0_SCALEVECTOR_BITS(phaseBits);
+        SDF_VU0_ADDVECTOR();
+        SDF_VU0_VECTOR_W_SET_ZERO();
+        SDF_VU0_STOREVECTOR(&form->pos);
+        if (form->basic != NULL) {
+            dds3SetPosPoseSet(form->basic, &form->pos);
+            anime = form->anime;
+            blend = form->range;
+        }
+        if (blend >= 1.0f) {
+            if ((anime & 0x40) != 0) {
+                form->stat &= ~0x10;
+            }
+            form->anime = anime & ~0x20;
+            form->anime &= ~0x40;
+            anime = form->anime;
+        }
+    }
+    if ((anime & 0x400) != 0) {
+        nbSetHpScale(form);
+    }
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", UpdateFormAnime);
+#endif
 
 void UpdateFormPosRot(nbFormation_t *form)
 {

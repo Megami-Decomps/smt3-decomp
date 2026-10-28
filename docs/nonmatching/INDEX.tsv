@@ -181,6 +181,7 @@ RunSake	newbattle/nbStageProcess	0x104	45 of 65 words match	docs/nonmatching/new
 CheckAction_TARSEL	newbattle/nbStageProcess	0x1CC	111 of 115 words match	docs/nonmatching/newbattle/nbStageProcess.md	224
 SetDamagePacket	newbattle/nbStageProcess	0x1E0	116 of 120 words match	docs/nonmatching/newbattle/nbStageProcess.md	248
 StageLoad	newbattle/nbStageProcess	0x1B4	97 of 109 words match	docs/nonmatching/newbattle/nbStageProcess.md	277
+UpdateFormAnime	newbattle/nbUnitProcess	0x260	138 of 152 words match	docs/nonmatching/newbattle/nbUnitProcess.md	5
 datGetPlayerParam	newdata/datCalc	0x50	7 of 20 words differ	docs/nonmatching/newdata/datCalc.md	5
 gameKey1	pb/pbGame	0x2A8	150 of 168 words differ	docs/nonmatching/pb/pbGame.md	5
 deleteMoveBlock	pb/pbGame	0x144	46 of 77 words differ	docs/nonmatching/pb/pbGame.md	34
