@@ -108,24 +108,6 @@ the switch as an `if`; and reaching one message block through a `goto`, both
 from a label inside the switch (which loses the plain `beq`) and from one
 after it.
 
-## Flow9_20 (newbattle/nbMakePacket, 0xAC)
-
-35 of 43 words match, at the exact 172-byte size.
-
-The `switch` over 0, 1 and 2 gives retail's dispatch tree exactly, `beq 1`,
-`slti 2`, `beqz`, `beq 2`, and the `movn` in the `case 2` arm needs the phase
-read into an `s32` local so the ternary reuses that register. What is left is
-one delay slot: retail fills the `beqz` that enters `case 0` with the
-`ld $31` of the fall-through return path and keeps a plain `beq`, while
-ee-gcc annuls `case 0`'s first load into it as a `beql`, which shifts the
-four words of that arm and leaves a trailing `nop`.
-
-Ruled out: all six source orders of the three arms (only ascending reaches
-this close, the rest run over size); every mix of `break` and `return 0` in
-the arms, all eight of which are worse; `default: return 0;` and a `goto` to
-a trailing label; a `u32` phase, which reshapes the tree; and the ternary
-written against the field or the literal 2 instead of the local.
-
 ## nbGetAiEntry (newbattle/nbMakePacket, 0xE0)
 
 43 of 54 words match, two words short of retail's 216.
@@ -472,59 +454,6 @@ three words. Writing the selection out in both arms is what should produce the
 merge and does not here; a `use_hi` flag local and a `goto` funnel were not
 tried and are the next things to measure.
 
-## Flow1_29, Flow8_7, Flow8_15 (newbattle/nbMakePacket, 0x7C each)
-
-11 of 29 words match, two words short of retail's 31.
-
-The three are the same function with different message ids and return
-values: a `switch` over `nownegophase` whose case 0 calls
-`nbSetNegoNoMotion` and whose case 1 displays a message and returns a
-non-zero code. Because case 1 returns a different value from the default,
-retail materialises `return 0` twice: once in the second dispatch test's
-delay slot and once at a shared tail. ee-gcc instead annuls the case 1
-arm's `lw ekucyo` into that slot (`beql` where retail has `beq`), which
-leaves the default's `return 0` for the following `b` and collapses
-retail's three exit labels into two, so the whole epilogue shifts.
-
-The same `switch` shape over phases 0 and 1 matches in `Flow1_15` and
-`Flow12_30`, where every arm returns 0 and the shared tail needs no second
-zero, so the shape itself is fine; the differing return value is what
-exposes the delay-slot choice.
-
-Ruled out: case 1 written first; an explicit `default: return 0;`; a
-`ret` local assigned in each arm and returned once; `if`/`else if` in
-place of the `switch`; a phase local; and `return 0;` per arm instead of
-`break`. Adding an empty `case 2:` reaches retail's three-label exit and
-31 words with 11 differing, but it also turns the dispatch into
-`beq 1`/`slti 2`/`bnezl`, which retail does not have.
-
-## Flow6_33 (newbattle/nbMakePacket, 0xE0)
-
-35 of 56 words differ positionally; aligned, every instruction matches and
-only the six dispatch delay slots and the branch offsets are wrong. The
-draft is six words long at 62.
-
-The dead `sltiu $2, $2, 0x5` after `dds3GetRandIntA(0, 0xA)` is reproduced
-by writing both arms of `if ((u32)dds3GetRandIntA(0, 0xA) < 5)` with the
-identical body `n->nextnegoid = n->nextkouho[1];`: ee-gcc cross-jumps the
-two blocks, deletes the now-pointless branch and leaves the comparison
-dead. The cast is required, since the signed form gives `slti`. The
-message arm needs its own `return 0` so the `nextkouho[2]` value lands in
-`$3` and the store does not cross-jump with the random arm's.
-
-What is left is the six-term `||` chain over `n->ework->id`. Retail fills
-each `beq` delay slot from the fall-through with the next comparison's
-constant; ee-gcc annuls the target arm's `lw 0x184` instead, giving six
-`beql` and six duplicated loads.
-
-Ruled out: storing before the call in the message arm; a `u16` id local;
-an `ekucyo` local; the `hojoskillid` test as a nested `if`; and a `switch`
-over the id, which sorts the cases and so cannot give retail's
-0x3A, 0x3C, 0x3D, 0x5B, 0x5A, 0x5C order. Inverting the whole condition so
-the random arm is written first does give plain `beq` with retail's
-fall-through slots (28 of 56 differ), but it also mirrors the block
-layout, which cannot reach zero.
-
 ## Flow15_6 (newbattle/nbMakePacket, 0x100)
 
 19 of 62 words differ, two words short of retail's 64. Every instruction
@@ -583,26 +512,6 @@ returns 1. Nothing in the source reaches the difference.
 
 Ruled out: `case 1` written first; `return 0;` instead of `break` in
 `case 0`; and `if`/`else if` in place of the `switch`.
-
-## Flow7_11, Flow2_5 (newbattle/nbMakePacket, 0x150 each)
-
-Flow7_11 is 1 of 84 words differing, Flow2_5 is 2 of 84, both at the exact
-size and with every instruction in place.
-
-Each differing word is the annul bit of the inner `switch`'s range test:
-retail emits `beql $2, $0` where the reconstruction emits `beq $2, $0` with
-the identical `addiu $2, $0, <next case>` in the slot. gcc only annuls when
-the slot insn sets a register the fall-through thread still needs, and here
-`$2` is dead on that path, so nothing in the source reaches the bit.
-Flow2_5 hits it once in each of its two phase arms.
-
-Case order is otherwise decisive and is already right: 1, 2, 3 in both of
-Flow7_11's inner switches, 0, 1, 2, 3 in Flow2_5's. Any other order costs
-seven words or more.
-
-Ruled out: a separate `mes` local per phase arm; `default: break;` in the
-inner switches; a `qtype` local; and `if`/`else if` for the outer phase
-test.
 
 ## Flow9_16 (newbattle/nbMakePacket, 0x168)
 

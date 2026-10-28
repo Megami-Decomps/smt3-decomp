@@ -898,8 +898,6 @@ s32 Flow1_28(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 18 of 29 words differ (first at +0x1C). */
-#ifdef NON_MATCHING
 s32 Flow1_29(nbNegoProcessData_t *n)
 {
     switch (n->nownegophase) {
@@ -912,9 +910,6 @@ s32 Flow1_29(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowOne", Flow1_29);
-#endif
 
 s32 Flow1_30(nbNegoProcessData_t *n)
 {

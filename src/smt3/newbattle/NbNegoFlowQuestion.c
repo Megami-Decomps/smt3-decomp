@@ -357,8 +357,6 @@ s32 Flow7_3(nbNegoProcessData_t *n)
     return 0;
 }
 
-/* NON_MATCHING: 1 of 84 words differs (first at +0xC8); the annul bit of one branch. */
-#ifdef NON_MATCHING
 s32 Flow7_11(nbNegoProcessData_t *n)
 {
     s32 mes;
@@ -397,9 +395,6 @@ s32 Flow7_11(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowQuestion", Flow7_11);
-#endif
 
 s32 Flow7_15(nbNegoProcessData_t *n)
 {

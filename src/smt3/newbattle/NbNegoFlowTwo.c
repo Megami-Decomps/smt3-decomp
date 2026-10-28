@@ -851,8 +851,6 @@ s32 Flow6_32(nbNegoProcessData_t *n)
 INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_32);
 #endif
 
-/* NON_MATCHING: 35 of 56 words differ (first at +0x44); six words long. */
-#ifdef NON_MATCHING
 s32 Flow6_33(nbNegoProcessData_t *n)
 {
     nbAddNegoIdKouho(n, 0x90001);
@@ -865,6 +863,8 @@ s32 Flow6_33(nbNegoProcessData_t *n)
         n->nextnegoid = n->nextkouho[2];
         return 0;
     }
+    /* Retail retains the dead sltiu at 0x00270D68 after these identical
+     * random-selection arms fold. Flow6_80 shows the live selection form. */
     if ((u32)dds3GetRandIntA(0, 0xA) < 5) {
         n->nextnegoid = n->nextkouho[1];
     } else {
@@ -872,9 +872,6 @@ s32 Flow6_33(nbNegoProcessData_t *n)
     }
     return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_33);
-#endif
 
 s32 Flow6_34(nbNegoProcessData_t *n)
 {
