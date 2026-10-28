@@ -165,9 +165,9 @@ s32 pipe_Section(void)
     return ret;
 }
 
+extern const sdfVector4_t D_00548910;
 INCLUDE_RODATA(const s32, "pipe/pipeSection", D_00548910);
 
-extern const sdfVector4_t D_00548910;
 const char D_00548920[16] = "pipeArea";
 extern s32 pipeIndex;
 extern dds3Basic_t *dds3AddScene(void);
@@ -623,9 +623,62 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", ActionKey);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", HITCHECK_CUR);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ObjectDraw);
+typedef struct tagMakaObject {
+    s32 maka;
+    s8 count;
+    s8 resv[3];
+    s32 pos[2];
+    void *makaObject;
+} tagMakaObject;
 
-void MyDraw(void) {
+extern tagMakaObject *makaWork;
+extern void MyDraw(tagPipeObject *object);
+extern void makaDraw(tagMakaObject *makaPtr);
+extern void pipeEffDraw(void);
+
+void ObjectDraw(void)
+{
+    tagMakaObject *maka = makaWork;
+    tagPipeObject *object = ObjWork;
+    tagMakaObject *deferred = NULL;
+    s32 i;
+
+    for (i = 149; i != -1; i--) {
+        if (((u8)object->id & 0xF0) == 0x80) {
+            MyDraw(object);
+        }
+        object++;
+    }
+    pipeEffDraw();
+    eglSetOt(0x47);
+    eglLinkTest(1, 3, 0x80, 0, 0, 0, 1, 1);
+    for (i = 14; i != -1; i--) {
+        if (maka->maka != 0) {
+            if (maka->count == 7) {
+                if (deferred == NULL) {
+                    deferred = maka;
+                } else {
+                    makaDraw(maka);
+                }
+            } else {
+                makaDraw(maka);
+            }
+        }
+        maka++;
+    }
+    if (deferred != NULL) {
+        makaDraw(deferred);
+    }
+    eglSetOt(0x27);
+    eglLinkAlpha(0);
+    eglLinkTest(1, 5, 0x80, 1, 0, 0, 1, 3);
+    /* Like pipeDrawSection, reset the local after the final call to retain
+     * the native jal and epilogue (CONTRIBUTING matching-rule exception). */
+    i = 0;
+}
+
+
+void MyDraw(tagPipeObject *object) {
 }
 
 s8 ObjectSound(void)
