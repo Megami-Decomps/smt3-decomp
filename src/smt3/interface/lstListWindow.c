@@ -51,8 +51,8 @@ extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Sty
 
 extern void lstMoveCursor2(lstWork_t *pListWindow, s8 Dir);
 
-extern void fclInitPanel(lstWork_t *work, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 a7, s8 a8,
-                         s8 a9);
+extern void fclInitPanel(lstWork_t *work, s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 color, s8 type,
+                         s8 speed);
 
 extern void fclInitPanelPos(s32 X, s32 Y, s32 Z, u16 W, u16 H, s32 Work, void *pPanelPos);
 

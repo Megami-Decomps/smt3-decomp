@@ -183,19 +183,57 @@ void fclSetPanelTex(fclPanel_t *pPanel, s32 UV1, s32 UV2, s32 UV3, s32 UV4, s32 
     pPanel->TexHandle = TexHandle;
 }
 
-extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
-                         s32 h, s32 color, s8 speed, s8 type);
+extern void fclDrawPanelType0(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanelType1(fclPanel_t *panel, s32 ot);
+extern void fclDrawPanelType3(fclPanel_t *panel, s32 ot);
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclInitPanel);
+void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
+                  s32 h, s32 color, s8 type, s8 speed)
+{
+    memset(panel, 0, sizeof(*panel));
+    panel->X = x;
+    panel->Y = y;
+    panel->Z = z;
+    panel->W = w;
+    panel->H = h;
+    panel->Col = color;
+    panel->Spd = speed;
+    panel->Timer = 0;
+    panel->Timer2 = 0;
+    panel->TexHandle = 0;
+
+    switch (type) {
+    case 0:
+        panel->draw = fclDrawPanelType0;
+        panel->update = fclUpdatePanelType0;
+        break;
+    case 1:
+        panel->draw = fclDrawPanelType1;
+        panel->update = fclUpdatePanelType1;
+        break;
+    case 2:
+        panel->draw = fclDrawPanelType2;
+        panel->update = fclUpdatePanelType2;
+        break;
+    case 3:
+        panel->draw = fclDrawPanelType3;
+        panel->update = fclUpdatePanelType3;
+        break;
+    default:
+        panel->draw = fclDrawPanelTypeDef;
+        panel->update = fclUpdatePanelTypeDef;
+        break;
+    }
+}
 
 extern void *sdfChipAllocDirect(s32 size);
 
 fclPanel_t *fclCreatePanel(s32 x, s32 y, s32 z, s32 w, s32 h, s32 color,
-                           s8 speed, s8 type)
+                           s8 type, s8 speed)
 {
     fclPanel_t *panel = sdfChipAllocDirect(sizeof(*panel));
 
-    fclInitPanel(panel, x, y, z, w, h, color, speed, type);
+    fclInitPanel(panel, x, y, z, w, h, color, type, speed);
     return panel;
 }
 

@@ -457,7 +457,7 @@ extern void *sdfDevLoadFileEx(const char *name, u32 *data, u32 *size);
 extern void cmpInitSeqInfo(void *work, s32 seq);
 extern void fclRagUpdateInit(s8 type, fclRagWork_t *work);
 extern void fclInitPanel(ragPanel_t *panel, s32 x, s32 y, s32 z, s32 w,
-                         s32 h, s32 color, s8 speed, s8 type);
+                         s32 h, s32 color, s8 type, s8 speed);
 extern void evtDisableMoonCalc(void);
 extern void cmpModelInit(void);
 extern void cmpResetDrawEnv(void);
