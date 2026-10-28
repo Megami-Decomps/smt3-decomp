@@ -1341,7 +1341,36 @@ u16 cmbCalcCombineResult(cmbUnit_t *unitA, cmbUnit_t *unitB, s8 flag, s8 levelFl
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetCombineResultEx);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcIkenieExp);
+extern s32 cmbGetLevelUpCount(datUnitWork_t *work, u32 exp);
+
+void cmbCalcIkenieExp(datUnitWork_t *work, datUnitWork_t *otherA,
+                      datUnitWork_t *otherB, datUnitWork_t *expSource)
+{
+    u32 exp = (u32)((f32)expSource->exp * 1.5f + 0.0f);
+    s32 levelUpCount;
+    s32 newLevel;
+
+    work->exp += datCopyDevilWorkEntry(work, work->level);
+    levelUpCount = cmbGetLevelUpCount(work, exp);
+    work->exp += exp;
+    newLevel = work->level + levelUpCount;
+    if (newLevel >= 0x100) {
+        levelUpCount = 0xFF - work->level;
+    }
+    work->level += levelUpCount;
+
+    while (levelUpCount-- > 0) {
+        s8 param = cmbAddLevelUpParamEx(work, 1);
+        if (param >= 0) {
+            work->param[(s32)param]++;
+        }
+    }
+
+    work->flag |= 0x200;
+    if (work->level == 0xFF) {
+        work->exp = datCopyDevilWorkEntry(work, 0xFF);
+    }
+}
 
 s32 cmbDevilCanBirth(u16 devilId)
 {
