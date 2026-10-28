@@ -601,7 +601,35 @@ void evtSetUnitKutiMotion(evtUnit_t *h, s32 group, s32 motion) {
     h->secondSlot = motion;
 }
 
-INCLUDE_ASM(const s32, "event/evtUnitManager", evtRunUnitKutiMotion);
+void func_001E3C30(evtUnit_t *h, s32 slot, s32 firstValue, s32 secondValue, s32 thirdValue,
+                   s32 mode);
+
+void evtRunUnitKutiMotion(evtUnit_t *h)
+{
+    func_001E3C30(h, h->firstSlot, h->secondSlot, 0, 0, 2);
+}
+
+void func_001E3C30(evtUnit_t *h, s32 slot, s32 firstValue, s32 secondValue, s32 thirdValue,
+                   s32 mode)
+{
+    h->slotFlags[slot] = 3;
+    h->slotA[slot] = firstValue;
+    h->slotB[slot] = secondValue;
+    h->slotC[slot] = thirdValue;
+
+    switch (mode) {
+    case 0:
+        h->slotFlags[slot] |= 4;
+        break;
+    case 1:
+        h->slotFlags[slot] |= 8;
+        break;
+    case 2:
+        h->slotFlags[slot] |= 0x10;
+        break;
+    }
+}
+
 
 void evtSetUnitMotion(evtUnit_t *h, s32 motion, s32 before, s32 smooth, s32 mode) {
     h->flags &= ~0x1;
