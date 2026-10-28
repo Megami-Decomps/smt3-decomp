@@ -33,22 +33,6 @@ Ruled out: `data->orderindex` used directly in the loop rather than an `s8`
 local; an `s32` local, which drops the `sll 24`/`sra 24` pair retail has; and
 a `do`/`while` on `data->order[data->orderindex] < 0`.
 
-## nbGetRandamStock (newbattle/nbStageProcess, 0xB4)
-
-4 of 44 words match, 176 bytes against the native 180.
-
-The same mechanism as `fldStatusSet` above, over the same records. Retail
-keeps one induction variable holding the byte offset into `dds3GlobalWork_t`,
-starting at `0xA50` and stepping `0xEC`, plus two base registers, `DDS3_GBWK`
-for the `badstatus` and `hp` reads and `DDS3_GBWK + 4` for the flag, and adds
-a base per use. Every source shape tried folds the base into the induction
-variable instead, giving two induction pointers and one `addu` fewer.
-
-Ruled out: all accesses inline through `DDS3_GBWK->akuma[i]`; all accesses
-through a `fldAnahoriAkuma_t *` local; the flag inline with the other two
-through a local, which is the split retail's two bases suggest; and a
-`dds3GlobalWork_t *` local for the whole loop.
-
 ## nbSetBadstatMotion (newbattle/nbStageProcess, 0xA8)
 
 6 of 42 words differ, at the exact 168-byte size.
