@@ -567,3 +567,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 224 B	eligib
 src/smt3/facility/fclTerminalUpdate.c	redthing1	done	2026-10-28	1 fn / 68 B	terminal-number lookup with shared result and native signed table/list loads; owner 14 match, 0 differ
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	1 fn / 132 B	mode/event dispatch with per-path shared result and complete signed default behavior; owner 30 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 252 B	help-gradient bars with signed alpha scaling and three native color-corner patterns; owner 344 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 280 B	help message drawing with native backdrop gate, signed alpha and real font-provider contracts; owner 345 match, 0 differ

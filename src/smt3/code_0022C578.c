@@ -6,6 +6,9 @@
 #include "event.h"
 #include "draw3d.h"
 
+typedef struct frFontHandle_t frFontHandle_t;
+typedef struct frFontRequest_t frFontRequest_t;
+
 extern sdfGrPacketHeader_t *sdf2DMakePrimPacketHeader(sdfGrPacketHeader_t *packet, s32 prim, s32 count, s64 registers, s32 loops);
 
 typedef struct
@@ -774,7 +777,7 @@ extern void cmpMoveCursorListEnd(cmpCursorInfo_t *cursor);
 
 extern void cmpUpdateTerminate(cmpInfoWindow_t *window);
 
-extern void frDestroyFontRequestAfter(void *pFRQ);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *pFRQ);
 
 extern void func_0023B500(s32 value);
 
@@ -788,7 +791,7 @@ extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
 extern void cmpUpdateStatusModelLoad(u16 id);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern s32 D_00345D88[];
 
@@ -813,7 +816,7 @@ extern char D_0054FC20[];
 
 extern void *frwGetSmallFontFRQ2(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern s32 func_001C7E38(frFontHandle_t *frq, s8 mode, u32 arg);
 
 extern void fmProcTrigSequence(s32 mode);
 
@@ -2024,7 +2027,29 @@ void nmeDrawFrame(s32 type, s32 frame)
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendText);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawHelp);
+extern frFontRequest_t *frwGetHelpFRQ(s32 x, s32 y, s32 priority, s8 bank, u16 index, s8 mode);
+extern void frSetFontColor(frFontHandle_t *request, u32 color);
+
+void cmpDrawHelp(fclPanelPos_t *pos, u16 index, s8 bank, s8 skipBackground, s32 alpha, u32 ot)
+{
+    s32 colors[4];
+    s32 halfAlpha = (alpha / 2) | 0x80808000;
+    u32 fontColor;
+    void *font;
+
+    colors[0] = halfAlpha;
+    colors[1] = halfAlpha;
+    colors[2] = halfAlpha;
+    colors[3] = halfAlpha;
+    if (skipBackground == 0) {
+        fclDrawSpriteRes(0, 0, 0, colors, 7, 0xB, D_00345D88, fclSpriteTable, 0x47);
+    }
+    fontColor = fclBlendColor(0xA09DC380, 0xA09DC300, alpha);
+    font = frwGetHelpFRQ(pos->unk_00, pos->unk_04, pos->unk_08, bank, index, 0);
+    frSetFontColor(font, fontColor);
+    func_001C7E38(font, 1, ot);
+    frDestroyFontRequestAfter(font);
+}
 
 extern s32 cmpMenuTextTable[];
 
@@ -2732,9 +2757,9 @@ s32 func_00232C08(void)
     return campInfoWork->unk_01 == 0;
 }
 
-extern u32 pstr[];
+extern char *pstr[];
 
-extern u32 pstr[];
+extern char *pstr[];
 
 s32 cmpSetHeartsSequenceRemove(void)
 {
