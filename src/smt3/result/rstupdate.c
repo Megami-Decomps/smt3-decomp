@@ -96,7 +96,8 @@ typedef struct
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ s8 evoPhase;
     /* 0x007D */ u8 unk_7D;
-    /* 0x007E */ u8 unk_7E[2];
+    /* 0x007E */ s8 evoResult;
+    /* 0x007F */ u8 reserved7F;
     /* 0x0080 */ datUnitWork_t evoWork;
     /* 0x016C */ datUnitWork_t *pCurrentStock;
     /* 0x0170 */ u8 unk_170[0x1128];
@@ -587,7 +588,63 @@ void rstUpdateSeqEvoAct(void)
         (dds3ScreenParam[4] - 2048.0f) / 0x1.333332p+0f + 2048.0f;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqEvo);
+extern void fclFreeStage(void);
+extern void rstSetEvoState(void);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern void func_0023FCC0(void);
+
+void rstUpdateSeqEvo(void)
+{
+    s32 state = startPos->Flag;
+
+    if (state > 0) {
+        switch (state) {
+        case 1:
+            fclStartMessage(0x16);
+            startPos->unk_0005[0] = state;
+            break;
+        case 2:
+            fclSetMessageVar_20743088(1, (s32)text2[startPos->pCurrentStock->id]);
+            fclStartMessage(0x17);
+            startPos->unk_0005[0] = 1;
+            break;
+        case 3:
+            if (fclChkMessage() != 0 || rstChkEvoAct() != 0)
+                return;
+            fclFreeStage();
+            startPos->evoResult = -1;
+            startPos->unk_0004 = 1;
+            return;
+        }
+        startPos->Flag = 3;
+    }
+
+    if (fclChkSelMessage() != 0) {
+        return;
+    }
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        fclEndMessage();
+        rstSetEvoState();
+        startPos->unk_0001 = 0x14;
+        startPos->unk_0004 = 1;
+        fclSetWorkValue(1, 0);
+        fclSetWorkValue(2, 0);
+        startPos->Flag = 1;
+        break;
+    case 2:
+        break;
+    case 1:
+        fclEndMessage();
+        fclSetWorkValue(1, 1);
+        fclSetWorkValue(2, 0);
+        func_0023FCC0();
+        startPos->Flag = 2;
+        break;
+    }
+}
 
 extern s32 rstChkEvoAct(void);
 extern void evtFreeStage(void);
