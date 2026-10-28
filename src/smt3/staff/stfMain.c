@@ -46,7 +46,8 @@ typedef struct
     /* 0x0004 */ s32 unk_0004;
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ s32 unk_000C;
-    /* 0x0010 */ u8 unk_0010[0xD4];
+    /* 0x0010 */ sdfTexHandle_t *textureHandle;
+    /* 0x0014 */ u8 unk_0014[0xD0];
     /* 0x00E4 */ s32 unk_00E4;
     /* 0x00E8 */ s32 unk_00E8;
     /* 0x00EC */ s32 unk_00EC;
@@ -71,7 +72,51 @@ extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 INCLUDE_ASM(const s32, "staff/stfMain", stfMain2);
 
-INCLUDE_ASM(const s32, "staff/stfMain", GetoStaffUI);
+extern void stfGetUIField(s32, s32, s32);
+extern void ObjDispOff(void);
+extern void rsetOtOfs(u32);
+extern void rsetTest(s32, s32, s32, s32, s32, s32, s32, s32);
+extern void rsetAlpha(s32);
+extern void DrwSprite2D(s32, s32, s32, s32, s32, s32, s32, s32, u32, sdfTexHandle_t *);
+
+void GetoStaffUI(void) {
+    s32 elapsed;
+    s32 field;
+    s32 fieldCount = oStaff_UI->unk_0110;
+    s32 drawY;
+
+    if (fieldCount < 15) {
+        elapsed = oStaff_UI->unk_00EC - 0x780;
+        if (elapsed >= 0) {
+            field = elapsed / 0x450;
+            if (field >= fieldCount) {
+                field = 1;
+                if ((fieldCount & 1) == 0) {
+                    field = -1;
+                }
+                stfGetUIField(fieldCount, 0, field);
+                oStaff_UI->unk_0110++;
+            }
+        }
+    }
+
+    ObjDispOff();
+    drawY = oStaff_UI->unk_00EC;
+    if (drawY < 0x1CB9) {
+        return;
+    }
+    drawY -= 0x1CB8;
+    drawY = 0x1C0 - (drawY / 2);
+    if (drawY < -0x3F) {
+        return;
+    }
+
+    rsetOtOfs(0x47);
+    rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    rsetAlpha(0);
+    DrwSprite2D(0x108, drawY, 0x100, 0x80, 0, 0, 0x100, 0x80, 0x80808080,
+                oStaff_UI->textureHandle);
+}
 
 INCLUDE_ASM(const s32, "staff/stfMain", ObjDispOff);
 
