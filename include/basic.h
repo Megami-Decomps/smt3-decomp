@@ -169,7 +169,7 @@ typedef struct
     s32 EL_serialID;
     s32 ot;
     u32 rotationFlags; /* Bit 0 applies the additional model rotation. */
-    u8 unk1C[4];
+    u8 reserved1C[4]; /* Constructor-cleared tail with no recovered access. */
 } dds3UnitObjectBasicWorkData_t;
 
 /* Camera payload, 0x90 bytes: local eye/up vectors, their world-space
