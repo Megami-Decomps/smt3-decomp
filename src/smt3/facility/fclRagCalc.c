@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 typedef struct fclPanel
 {
@@ -120,7 +121,93 @@ extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
 
 extern void fclDrawPhaseHeader(u8 *work, s32 color, s32 mode, s32 id);
 
-INCLUDE_ASM(const s32, "facility/fclRagCalc", ragCalc);
+typedef struct
+{
+    u8 flags;
+    s8 sequenceFlag;
+    u8 reserved02[2];
+    s8 workStatus;
+    u8 reserved05[0x13];
+    s8 eventStarted;
+    s8 ragType;
+    u8 reserved1A[0x462A];
+    void *messageFile;
+    u32 script;
+    s32 scriptArg;
+    s32 backgroundTexture;
+    s32 texture[2];
+    u8 reserved465C[0x24];
+    fclPanel_t panel[3];
+} ragCalcWork_t;
+
+extern ragCalcWork_t *ragCalcWork;
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern void fclRagEventStart(s8 signal);
+extern s32 cmpLoadStatusModel(void);
+extern s32 fclGetFlag(s8 index);
+extern u32 dds3GetProcessStat(dds3ProcessID_t *id);
+extern s32 fclScriptStart(s32 script, s32 entry, void *process);
+extern void *dds3GetActiveScene(void);
+extern void dds3VisibleSceneBasic(void *basic, s32 visible);
+extern void cmpModelFreeResource(void);
+extern void cmpResetDrawEnv(void);
+extern void ragUpdateScene(void);
+extern void cmpUpdateTerminate(void *work);
+
+s32 ragCalc(dds3ProcessID_t *id)
+{
+    ragCalcWork = dds3GetProcessData(id);
+    if (fclChkDbgProcess() != 0) {
+        return 0;
+    }
+    if (ragCalcWork->eventStarted == 0) {
+        fclRagEventStart(1);
+        ragCalcWork->eventStarted = 1;
+    }
+    if (fclGetFlag(1) == 0) {
+        return 0;
+    }
+
+    switch (ragCalcWork->sequenceFlag) {
+    case 0:
+        ragCalcWork->panel[2].Timer = 0;
+        if (ragCalcWork->workStatus == 1) {
+            dds3ProcessID_t *process = (dds3ProcessID_t *)(u32)ragCalcWork->scriptArg;
+
+            if (dds3GetProcessStat(process) != 2) {
+                ragCalcWork->scriptArg = fclScriptStart(ragCalcWork->script, 0, NULL);
+            }
+        }
+        break;
+    case 8:
+        if (ragCalcWork->workStatus != 0) {
+            fclClearFlag(2);
+        }
+        break;
+    case 2:
+    case 3: {
+        void *scene = dds3GetActiveScene();
+
+        if (scene != NULL) {
+            dds3VisibleSceneBasic(scene, 1);
+        }
+        cmpModelFreeResource();
+        cmpResetDrawEnv();
+        break;
+    }
+    case 7:
+        ragUpdateScene();
+        break;
+    }
+    ragCalcWork->workStatus = 0;
+
+    if (ragCalcWork->flags & 0x10) {
+        cmpUpdateTerminate(ragCalcWork);
+        return -1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "facility/fclRagCalc", ragDrawFrameEdge);
 
