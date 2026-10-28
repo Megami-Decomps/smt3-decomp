@@ -370,7 +370,48 @@ void updateMotion(void) {
 
 INCLUDE_ASM(const s32, "pb/pbGame", hitCheck);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pushCheck);
+extern void *pbSearchGroupDB(pbProcHandle_t *p, u32 grpID);
+extern s32 pbFindProcHandle(s16 px, s16 py);
+
+u32 pushCheck(s32 direction, u32 grpID, pbGroupData_t **pGroup)
+{
+    pbGroupData_t *group;
+    s16 baseX, baseY;
+    s32 x, y;
+    u32 status = 3;
+    u32 i;
+    u16 block;
+
+    group = pbSearchGroupDB(blockDB, grpID);
+    *pGroup = group;
+    baseX = (s16)(group->cellX + pbKeyTable[direction][0]);
+    baseY = (s16)(group->cellY + pbKeyTable[direction][1]);
+    i = 0;
+    if (group->num != 0) {
+        do {
+            x = (s16)((*pGroup)->blk[i].x + baseX);
+            y = (s16)((*pGroup)->blk[i].y + baseY);
+            if ((u16)x >= 20 || y < 0 || y >= 20) {
+                status = 2;
+                break;
+            }
+            if (pbFindProcHandle(x, y) == 1) {
+                status = 2;
+                break;
+            }
+            block = D_0054F5C4->area.map.blk[y][x];
+            if ((block >> 13) == 1) {
+                status = 2;
+            } else if ((block >> 13) >= 2) {
+                if ((block & 0x7FF) != (*pGroup)->grpID) {
+                    status = 2;
+                }
+            }
+            i++;
+        } while (i < (*pGroup)->num);
+    }
+    return status;
+}
 
 INCLUDE_ASM(const s32, "pb/pbGame", roundCheck);
 
