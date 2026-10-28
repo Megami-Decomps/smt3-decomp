@@ -586,7 +586,185 @@ f32 nbGetAisyoRitu(s32 nskill, s32 sformindex, s32 dformindex)
     return ritu;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetKoukaHp);
+s32 nbGetKoukaHp(s32 sw, s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 cnt)
+{
+    datUnitWork_t *swork;
+    datUnitWork_t *dwork;
+    s32 hpbase;
+    s32 hpn;
+    s32 result;
+    s32 adjusted;
+    s32 amount;
+    s32 status;
+
+    swork = nbGetUnitWorkFromFormindex(sformindex);
+    dwork = nbGetUnitWorkFromFormindex(dformindex);
+    hpn = datSkillTable.normal[nskill].hpn;
+    hpbase = datSkillTable.normal[nskill].hpbase;
+    result = -1;
+    adjusted = -1;
+    amount = 0;
+
+    switch (datSkillTable.normal[nskill].hptype) {
+    case 0:
+        break;
+    case 5:
+        result = hpn + hpbase;
+        break;
+    case 15:
+        result = dds3GetRandIntA(0, hpn) + hpbase;
+        break;
+    case 9:
+        result = (dwork->hp * hpn) / 100 + hpbase;
+        if (result <= 0) {
+            result = 1;
+        }
+        break;
+    case 11:
+        result = (dwork->maxhp * hpn) / 100 + hpbase;
+        if (result <= 0) {
+            result = 1;
+        }
+        break;
+    case 2:
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            amount = nbGetButuriKaifuku(nskill, sformindex, dformindex, hpn);
+            break;
+        case 1:
+            amount = nbGetMagicKaifuku(nskill, sformindex, dformindex, hpn);
+            break;
+        }
+        result = amount + hpbase;
+        break;
+    case 7:
+        result = nbGetMaxHpWazaPoint(nskill, sformindex, dformindex, hpn) + hpbase;
+        break;
+    case 4:
+    case 13:
+        adjusted = hpn + hpbase;
+        break;
+    case 8:
+        adjusted = (dwork->hp * hpn) / 100 + hpbase;
+        break;
+    case 10:
+        adjusted = (dwork->maxhp * hpn) / 100 + hpbase;
+        break;
+    case 1:
+    case 12:
+    case 14:
+        switch (datSkillTable.normal[nskill].koukatype) {
+        case 0:
+            amount = nbGetButuriAttack(nskill, sformindex, dformindex, hpn);
+            status = swork->badstatus & 0xFFF;
+            switch (status) {
+            case 0x40:
+                amount /= 2;
+                break;
+            case 0x200:
+                amount /= 10;
+                break;
+            }
+            break;
+        case 1:
+            amount = nbGetMagicAttack(nskill, sformindex, dformindex, hpn);
+            break;
+        }
+        adjusted = amount + hpbase;
+        if (datSkillTable.normal[nskill].hptype == 14 && cnt >= 2) {
+            adjusted /= cnt;
+        }
+        break;
+    case 6:
+        adjusted = nbGetMaxHpWazaPoint(nskill, sformindex, dformindex, hpn);
+        status = swork->badstatus & 0xFFF;
+        switch (status) {
+        case 0x40:
+            adjusted /= 2;
+            break;
+        case 0x200:
+            adjusted /= 10;
+            break;
+        }
+        adjusted += hpbase;
+        break;
+    case 3:
+        {
+            s32 remaining;
+
+            remaining = hpn + hpbase;
+            if (remaining < dwork->hp) {
+                adjusted = dwork->hp - remaining;
+            }
+        }
+        break;
+    }
+
+    switch (datSkillTable.normal[nskill].hptype) {
+    case 1:
+    case 2:
+    case 6:
+    case 7:
+    case 12:
+    case 14:
+        if (adjusted > 0) {
+            switch (datSkillTable.normal[nskill].koukatype) {
+            case 0:
+                {
+                    f32 spread;
+                    f32 base;
+
+                    spread = dds3GetRandFloatA(0);
+                    base = (f32)adjusted;
+                    spread -= 0.5f;
+                    spread += spread;
+                    spread *= 0.04999999702f;
+                    adjusted = (s32)(base + base * spread);
+                }
+                break;
+            case 1:
+                {
+                    f32 spread;
+                    f32 base;
+
+                    spread = dds3GetRandFloatA(0);
+                    base = (f32)adjusted;
+                    spread -= 0.5f;
+                    spread += spread;
+                    spread *= 0.09999999404f;
+                    adjusted = (s32)(base + base * spread);
+                }
+                break;
+            }
+            if (adjusted < 0) {
+                adjusted = 0;
+            }
+            adjusted = (s32)((f32)adjusted * ritu);
+            if (evtBitCheck(0xAF2) != 0 && nbCheckFormationPlayerSide(sformindex) == 0) {
+                adjusted = (s32)((f32)adjusted * 0.6999999881f);
+            }
+        }
+        break;
+    }
+
+    if (adjusted == 0) {
+        adjusted = 1;
+    }
+    if (sw != 0) {
+        s32 hptype;
+
+        hptype = datSkillTable.normal[nskill].hptype;
+        if (hptype < 14) {
+            if (hptype >= 12) {
+                if (dwork->maxhp < adjusted) {
+                    adjusted = dwork->maxhp;
+                }
+            }
+        }
+        return adjusted;
+    }
+    return result;
+}
 
 s32 nbGetKoukaMp(s32 sw, s32 nskill, s32 sformindex, s32 dformindex, f32 ritu, s32 cnt)
 {

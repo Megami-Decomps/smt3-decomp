@@ -757,7 +757,78 @@ s32 Flow6_21(nbNegoProcessData_t *n)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/NbNegoFlowTwo", Flow6_70);
+INCLUDE_RODATA(const s32, "newbattle/NbNegoFlowTwo", D_00545018);
+
+extern char D_00545018[];
+extern void nbMakaDispOff(void);
+
+s32 Flow6_70(nbNegoProcessData_t *n)
+{
+    u32 previous;
+
+    switch (n->nownegophase) {
+    case 0:
+        switch (n->requesttype) {
+        case 4:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x3C, 1);
+            break;
+        case 3:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x3B, 1);
+            break;
+        case 5:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x3D, 1);
+            break;
+        case 1:
+            previous = nbGetPrevNegoId(n);
+            switch (previous) {
+            case 0x6003C:
+            case 0x6003D:
+            case 0x6003E:
+            case 0x60040:
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x52, 1);
+                break;
+            default:
+                nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x39, 1);
+                break;
+            }
+            break;
+        case 2:
+            break;
+        case 0:
+            nbDispNegoMessage(n, n->flowmsg[n->ekucyo], 0x3A, 1);
+            break;
+        }
+        break;
+    case 1:
+        printf(D_00545018, n->nowselect);
+        nbAddNegoIdKouho(n, 0x60030);
+        switch (n->requesttype) {
+        case 4:
+            nbAddNegoIdKouho(n, 0x80001);
+            break;
+        case 3:
+            nbAddNegoIdKouho(n, 0xB0001);
+            break;
+        case 1:
+        case 5:
+            nbAddNegoIdKouho(n, 0x60016);
+            break;
+        case 2:
+            break;
+        case 0:
+            nbAddNegoIdKouho(n, 0x60016);
+            break;
+        }
+        if (n->nowselect == 0) {
+            n->nextnegoid = n->nextkouho[1];
+        } else {
+            n->nextnegoid = n->nextkouho[0];
+        }
+        nbMakaDispOff();
+        break;
+    }
+    return 0;
+}
 
 s32 Flow6_22(nbNegoProcessData_t *n)
 {
