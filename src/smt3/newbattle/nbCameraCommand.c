@@ -112,6 +112,12 @@ extern void effBTLModelCheckBoundsHide(nbFormation_t *formation, sdfVector4_t *t
     sdfVector4_t *eye, sdfVector4_t *up, f32 radius, f32 height);
 extern sdfVector4_t aViewDown;
 
+extern f32 effBTLModelGetHeight(nbFormation_t *formation);
+extern void effBTLGetGroupPos(nbFormation_t *formation, sdfVector4_t *position);
+extern void effBTLModelSetPosition(nbFormation_t *formation, sdfVector4_t *position);
+extern void nbCameraShot_GroundCollision(nbCamera_t *camera);
+extern sdfVector4_t D_00325960;
+
 extern nbCamera_t pNbCamera;
 
 extern s32 nbCameraState_CommandRoot_OrderIndex;
@@ -219,7 +225,115 @@ void nbCameraShot_CommandFixPos_Set(nbCamera_t *pNbCamera)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraCommand", nbCameraShot_AllParty_Set);
+void nbCameraShot_AllParty_Set(nbCamera_t *pNbCamera)
+{
+    sdfVector4_t enemy;
+    sdfVector4_t player;
+    sdfVector4_t position;
+    nbMainProcessData_t *data;
+    nbFormation_t *formation;
+    u32 i = 0;
+    s32 first = 1;
+    f32 enemyMax, enemyMin;
+    f32 playerMax, playerMin, playerRadius;
+    f32 height, radius, length, blend, projection;
+
+    effBTLModelAllShow();
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    nbCameraState_InvokeTargetSelect_SearchSet();
+    data = nbGetMainProcessData();
+    enemyMax = enemyMin = 0.0f;
+    formation = &data->form[4];
+    for (; i < 10; i++, formation++) {
+        if ((formation->stat & 3) == 3) {
+            height = effBTLModelGetHeight(formation);
+            if (first) {
+                enemyMax = height;
+                first = 0;
+                enemyMin = enemyMax;
+            } else {
+                if (height > enemyMax) enemyMax = height;
+                if (height < enemyMin) enemyMin = height;
+            }
+        }
+    }
+    /* This repeats the enemy extrema scan. Retail retains the minimum-height
+     * comparison/update too, although only maximum height and radius are used. */
+    playerRadius = 0.0f;
+    playerMax = 0.0f;
+    playerMin = 0.0f;
+    first = 1;
+    formation = data->form;
+    for (i = 0; i < 4; i++, formation++) {
+        if ((formation->stat & 3) == 3) {
+            radius = formation->r * formation->scl;
+            height = effBTLModelGetHeight(formation);
+            if (first) {
+                playerMax = height;
+                playerRadius = radius;
+                playerMin = playerMax;
+                first = 0;
+            } else {
+                if (radius > playerRadius) playerRadius = radius;
+                if (height > playerMax) playerMax = height;
+                if (height < playerMin) playerMin = height;
+            }
+        }
+    }
+    if (playerMax >= 300.0f && enemyMax < 450.0f) {
+        formation = data->form;
+        for (i = 0; i < 4; i++, formation++) {
+            if ((formation->stat & 3) == 3) {
+                effBTLGetGroupPos(formation, &position);
+                position.z -= 250.0f;
+                effBTLModelSetPosition(formation, &position);
+            }
+        }
+    }
+    effBTLModelGroupGetSphere(0x100);
+    SDF_VU0_STOREVECTOR(&player);
+    player.y = 0.0f;
+    player.z -= playerRadius;
+    effBTLModelGroupGetSphere(0x200);
+    SDF_VU0_STOREVECTOR(&enemy);
+    enemy.x = player.x;
+    enemy.y = -enemyMin * 0.5f;
+    if (enemyMax < 450.0f) {
+        blend = 0x1.53b644p-1f;
+        if (enemyMin > 150.0f) blend = 0x1.4cccccp-1f;
+    } else {
+        blend = 0x1.6e147ap-1f;
+        if (!(enemyMax > 800.0f)) blend = 0x1.4cccccp-1f;
+    }
+    SDF_VU0_LOADVECTOR(&enemy);
+    SDF_VU0_LOADVECTOR_B(&player);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(length);
+    length *= 0.5f;
+    length -= playerRadius * 0.5f;
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_COPYVECTOR_A_TO_C();
+    SDF_VU0_LOADVECTOR_B(&D_00325960);
+    SDF_VU0_OUTERPRODUCT();
+    SDF_VU0_COPYVECTOR_C_TO_B();
+    VU0_LERP_VF10_VF11(blend);
+    SDF_VU0_STOREVECTOR(&pNbCamera->direction);
+    SDF_VU0_LOADVECTOR(&enemy);
+    SDF_VU0_LOADVECTOR_B(&player);
+    VU0_LERP_VF10_VF11(0.5f);
+    SDF_VU0_STOREVECTOR(pNbCamera);
+    pNbCamera->fovy = 0x1.657182p-1f;
+    projection = sdfAtan(0x1.1504c4p-1f);
+    pNbCamera->distance = length / projection;
+    /* Qualified allocation trace: the two length phases share pseudo96 ($f20).
+     * Its division result is separate (uid522); separate length/radius locals
+     * instead coalesce that result with the first length, changing two words. */
+    length = effBTLModelGroupGetSphere(0x100);
+    if (length < 480.0f) length = 480.0f;
+    pNbCamera->distance += length / projection;
+    nbCameraShot_GroundCollision(pNbCamera);
+}
 
 void nbCameraShot_FriendParty_Set(nbCamera_t *pNbCamera)
 {
