@@ -619,3 +619,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 480 B	stock cursor rou
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 672 B	camp number display and signed RootTimer fade state with live callback reads; owner 360 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	debug registration setup at native 1084-byte size; six final argument/store scheduling words remain
 src/smt3/pb/pbGame.c	redthing1	done	2026-10-28	1 fn / 456 B	panel collision dispatch with wrapped coordinates, native early guards and fresh map reads in push and round handlers
+src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / debug field recovery	native registration callback identifies signed first displayed unit ID and in-page row; owner 102 match, 0 differ

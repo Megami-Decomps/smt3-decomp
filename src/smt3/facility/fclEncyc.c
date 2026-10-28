@@ -153,8 +153,8 @@ typedef struct
     void *allocation;
     s16 state;
     s16 selection;
-    s16 reserved08;
-    s16 reserved0A;
+    s16 firstId; /* First displayed unit ID; sixteen rows follow. */
+    s16 row;
 } fclEncycDebugWork_t;
 
 extern fclEncycDebugWork_t *g_pdebug;
@@ -3132,8 +3132,8 @@ void InitializeDebug_fclEncyc(void)
     work->allocation = buf;
     work->state = 0;
     work->selection = 0;
-    work->reserved08 = 0;
-    work->reserved0A = 0;
+    work->firstId = 0;
+    work->row = 0;
     g_pdebug = work;
 }
 
