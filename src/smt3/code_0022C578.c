@@ -4424,7 +4424,20 @@ void campInitPanelPos(void *panel, s32 b, s32 c, s32 d, s32 e, s32 f, s32 g)
     work[0x24] = 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetAfterCrossFunc);
+void cmpSetAfterCrossFunc(void *panel, s32 x, s32 y, void *func, void *data, s32 value, s32 alpha)
+{
+    u8 *work = panel;
+    if (*(void **)(work + 0x44) != data) {
+        memcpy(work, work + 0x2C, 0x58);
+        work[0x24] = -1;
+        fclInitPanelPos(x, y, 0x10, 0, 0, 0, (fclPanelPos_t *)(work + 0x30));
+        *(void **)(work + 0x2C) = func;
+        *(s32 *)(work + 0x4C) = alpha;
+        *(void **)(work + 0x44) = data;
+        *(s32 *)(work + 0x48) = value;
+        work[0x50] = 0;
+    }
+}
 
 typedef struct
 {
