@@ -4,14 +4,7 @@
 #include "scr.h"
 #include "ps2asm.h"
 #include "newdata.h"
-
-typedef struct evtUnitHandle_t
-{
-    u8 unk_00[0x8C];
-    dds3Basic_t *basic;
-    u8 unk_90[0x14];
-    u32 flags;
-} evtUnitHandle_t;
+#include "event.h"
 
 typedef struct effBTLSysHandle_t effBTLSysHandle_t;
 
@@ -39,7 +32,7 @@ typedef struct
     u32 anime;
     dds3Basic_t *basic;
     s32 serial;
-    evtUnitHandle_t *hunit;
+    evtUnit_t *hunit;
     s16 partyindex;
     s16 formindex;
     u32 autotime;
@@ -318,6 +311,16 @@ extern void SetDvlChange(nbDebugProcessData_t *d);
 
 extern void DispHpMpBad2(nbDebugProcessData_t *d, nbFormation_t *form);
 
+extern s32 mdlGetNumOfCut(mdlObj_t *model, s32 group);
+extern void nbSetUnitMotion(nbFormation_t *form, s32 motion, s32 mode, f32 rate);
+extern s32 nbMemoryLoadNegoSe(nbFormation_t *form);
+extern s32 nbPlayMotionSe(nbFormation_t *form);
+extern s32 nbMemoryLoadMotionSe(nbFormation_t *form, s32 motion);
+extern s32 nbGetUnitFromAction(nbFormation_t *form, s32 motion);
+extern void nbDelAllUniqueIDKoukaPacket(s32 uniqueID);
+struct nbKoukaPacket_t;
+extern struct nbKoukaPacket_t *nbAddSePacketLock(s32 frame, s32 uniqueID, s32 sound);
+
 extern s32 (*D_00527420[])(nbEventProcessData_t *e);
 
 extern s32 (*D_004F0788[])(nbActionProcessData_t *a, s32 joken);
@@ -360,7 +363,40 @@ extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
-INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", SetMotion);
+void SetMotion(nbMainProcessData_t *data, nbFormation_t *form, s32 motion, s32 mode)
+{
+    s32 sound = 0;
+
+    if (motion < mdlGetNumOfCut(form->hunit->owner, 0)) {
+        nbSetUnitMotion(form, motion, mode, 1.0f);
+        switch (motion) {
+        case 14:
+            if (nbMemoryLoadNegoSe(form) != 0) {
+                sound = nbPlayMotionSe(form);
+            }
+            break;
+        case 15:
+            if (nbMemoryLoadNegoSe(form) != 0) {
+                sound = nbPlayMotionSe(form) + 1;
+            }
+            break;
+        default:
+            if (nbMemoryLoadMotionSe(form, motion) != 0) {
+                sound = nbGetUnitFromAction(form, motion);
+            }
+            break;
+        }
+        if (sound > 0) {
+            data->stat &= ~0x200;
+            nbDelAllUniqueIDKoukaPacket(0x3039);
+            nbAddSePacketLock(1, 0x3039, sound);
+            /* Retail keeps a normal call and shared epilogue. This dead local
+             * reset survives cc1's sibling pass and is removed in the life pass
+             * (verified with compiler output parity). */
+            sound = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbDebugProcess", nbDebugStockSelect);
 
