@@ -536,3 +536,4 @@ src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 260 B	negotia
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 148 B	debug result dispatch, script cleanup and fusion-state reset; owner 151 match, 0 differ
 src/smt3/newbattle/nbE903.c	redthing1	done	2026-10-28	1 fn / 720 B	part effect creation, load completion and mark-position callbacks; all 9 functions match
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	3 fn / 800 B	fusion confirmation script transitions and phase-dependent panel animation; owner 154 match, 0 differ
+src/smt3/newbattle/nbEncProcess.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	bad-curse dispatch with recovered context calls and forced retry termination; native size, thirteen scan-register differences

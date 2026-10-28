@@ -797,7 +797,8 @@ s32 nbBadCurseStep7(nbActionProcessData_t *a)
     return 0;
 }
 
-s32 nbGetBadCurseStep(void)
+/* The dispatcher passes its action context; selection uses only the weighted table. */
+s32 nbGetBadCurseStep(nbActionProcessData_t *a)
 {
     s32 i;
     s32 total;
@@ -840,7 +841,74 @@ INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbInitBadCurseState);
 
 INCLUDE_RODATA(const s32, "newbattle/nbEncProcess", D_00545D40);
 
+extern void nbInitBadCurseState(nbActionProcessData_t *a);
+
+/* NON_MATCHING: 13 of 93 words differ; see docs/nonmatching/newbattle/nbEncProcess.md. */
+#ifdef NON_MATCHING
+s32 nbApplyBadCurse(nbActionProcessData_t *a)
+{
+    nbBadCurseEntry_t *entry;
+    s32 result;
+    s32 step;
+    s32 i;
+    s32 retry;
+
+    retry = 0;
+    result = 1;
+    nbInitBadCurseState(a);
+    do {
+        step = nbGetBadCurseStep(a);
+        if ((u32)step < 10) {
+            switch (step) {
+            case 1:
+                result = nbBadCurseStep1(a);
+                break;
+            case 2:
+                result = nbBadCurseStep2(a);
+                break;
+            case 3:
+                result = nbBadCurseStep3(a);
+                break;
+            case 4:
+                result = nbBadCurseStep4(a);
+                break;
+            case 5:
+                result = nbBadCurseStep5(a);
+                break;
+            case 6:
+                result = nbBadCurseStep6(a);
+                break;
+            case 0:
+            case 9:
+                result = nbBadCurseStep0(a);
+                break;
+            case 7:
+                result = nbBadCurseStep7(a);
+                break;
+            }
+        } else {
+            result = 1;
+        }
+        if (step >= 0 && result != 0) {
+            for (i = 0; i < nbBadCurseTimer; i++) {
+                entry = &nbBadCurseTable[i];
+                if (entry->step == step) {
+                    entry->weight = 0;
+                    break;
+                }
+            }
+        }
+        retry++;
+        if (retry >= 11) {
+            nbBadCurseStep0(a);
+            result = 0;
+        }
+    } while (result != 0);
+    return 0;
+}
+#else
 INCLUDE_ASM(const s32, "newbattle/nbEncProcess", nbApplyBadCurse);
+#endif
 INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readbasetime);
 
 INCLUDE_SDATA(const s32, "newbattle/nbEncProcess", readtime);
