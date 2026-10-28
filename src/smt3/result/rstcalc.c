@@ -73,6 +73,19 @@ extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 typedef struct
 {
+    u8 level;
+    u8 kind;
+    u16 value;
+} datLevelUpEntry_t;
+
+typedef struct
+{
+    u8 head[6];
+    datLevelUpEntry_t entry[24];
+} datLevelUp_t;
+
+typedef struct
+{
     /* 0x0000 */ u8 flags;
     /* 0x0001 */ u8 phase;
     /* 0x0002 */ u8 reserved02[0x16];
@@ -80,9 +93,11 @@ typedef struct
     /* 0x0019 */ s8 unk_19;
     /* 0x001A */ s8 StartLevel;
     /* 0x001B */ s8 LevelUpCnt;
-    /* 0x001C */ u8 unk_1C[4];
-    /* 0x0020 */ u8 EventNums;
-    /* 0x0021 */ u8 unk_21[5];
+    /* 0x001C */ datLevelUpEntry_t *eventEntries;
+    /* 0x0020 */ s8 EventNums;
+    /* 0x0021 */ s8 eventIndex;
+    /* 0x0022 */ u16 eventValue;
+    /* 0x0024 */ u16 heartsSkill;
     /* 0x0026 */ s8 RecoverFlag;
     /* 0x0027 */ s8 HeartsSkFlag;
     /* 0x0028 */ u8 unk_28[8];
@@ -259,8 +274,8 @@ void rstSetDestroySkillMaxHpMp(void)
 {
     datUnitWork_t *unit = EventStart->unit;
     datUnitWork_t work;
-    u16 skill = unit->id == 0 ? *(u16 *)&EventStart->unk_21[3] :
-                               *(u16 *)&EventStart->unk_21[1];
+    u16 skill = unit->id == 0 ? EventStart->heartsSkill :
+                               EventStart->eventValue;
     s32 hpChange;
     s32 mpChange;
 
@@ -417,7 +432,35 @@ void rstAutoAsignDevilParam(void)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstCalcEventInfo);
+extern datLevelUpEntry_t *datFindKugatatiEntry(datUnitWork_t *unit, s8 *count);
+
+s32 rstCalcEventInfo(u8 *eventInfo)
+{
+    do {
+        if (EventStart->unit->level < EventStart->workStock.level) {
+            break;
+        }
+        if (EventStart->EventNums == 0) {
+            EventStart->eventIndex = 0;
+            EventStart->eventEntries = datFindKugatatiEntry(&EventStart->workStock,
+                                                           &EventStart->EventNums);
+        }
+        if (EventStart->eventEntries == NULL ||
+            EventStart->EventNums == EventStart->eventIndex) {
+            EventStart->EventNums = 0;
+            if (EventStart->workStock.level >= 99) {
+                break;
+            }
+            rstAddExp(1, &EventStart->workStock);
+        } else {
+            if (eventInfo != NULL) {
+                *(u16 *)eventInfo = EventStart->eventEntries[EventStart->eventIndex].value;
+            }
+            return (s8)EventStart->eventEntries[EventStart->eventIndex++].kind;
+        }
+    } while (EventStart->EventNums == 0);
+    return -1;
+}
 
 extern s32 rstSetLevelUpCount(datUnitWork_t *pStock);
 
@@ -511,7 +554,7 @@ s32 rstGetDefaultSkill(void)
 {
     s32 eventType;
     s32 canAdd;
-    while ((eventType = rstCalcEventInfo(&EventStart->unk_21[1])) >= 0) {
+    while ((eventType = rstCalcEventInfo((u8 *)&EventStart->eventValue)) >= 0) {
         if (eventType != 1 && eventType != 6) {
             continue;
         }
@@ -521,7 +564,7 @@ s32 rstGetDefaultSkill(void)
         if (eventType == 1 && EventStart->unit->hensinmae != 0) {
             continue;
         }
-        canAdd = rstChkAddSkill(*(u16 *)&EventStart->unk_21[1]);
+        canAdd = rstChkAddSkill(EventStart->eventValue);
         if (canAdd != 0) {
             return (s8)canAdd;
         }
@@ -633,19 +676,6 @@ s32 rstCalcSkillPowerUp(void)
     }
     return result;
 }
-
-typedef struct
-{
-    u8 level;
-    u8 kind;
-    u16 skillId;
-} datLevelUpEntry_t;
-
-typedef struct
-{
-    u8 head[6];
-    datLevelUpEntry_t entry[24];
-} datLevelUp_t;
 
 extern s32 rstCalcEvoLevelDiff(datUnitWork_t *, datUnitWork_t *, datUnitWork_t *, s32);
 extern s32 cmbChkEvoNeedFlag(u16 devilId);
@@ -1119,21 +1149,23 @@ typedef struct
 
 extern u8 datLevelUpTable[];
 
-/* NON_MATCHING: 28 of 28 words differ (first at +0x0). */
+/* NON_MATCHING: the native lookup retains a table offset and a separate
+ * address for the first matching entry. */
 #ifdef NON_MATCHING
-s8 *datFindKugatatiEntry(datUnitWork_t *unit, u8 *outcount)
+datLevelUpEntry_t *datFindKugatatiEntry(datUnitWork_t *unit, s8 *outcount)
 {
-    cmpKugatatiEntry_t *entry = (cmpKugatatiEntry_t *)&datLevelUpTable[unit->id * 0x66];
+    datLevelUp_t *table = (datLevelUp_t *)datLevelUpTable;
+    datLevelUpEntry_t *entry = table[unit->id].entry;
     u8 level = unit->level;
-    s8 *found = NULL;
+    datLevelUpEntry_t *found = NULL;
     u8 count = 0;
     s32 i;
 
     for (i = 23; i >= 0; i--) {
-        if ((u8)entry[1].value == level) {
+        if (entry->level == level) {
             count++;
             if (count == 1) {
-                found = &entry[1].value;
+                found = entry;
             }
         }
         entry++;

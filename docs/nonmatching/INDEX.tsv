@@ -194,11 +194,11 @@ pbGetBlockAt	pb/pbGame	0x120	60 of 68 words differ	docs/nonmatching/pb/pbGame.md
 roundBlock	pb/pbGame	0x8C	12 of 34 words differ	docs/nonmatching/pb/pbGame.md	79
 cmpFindKugatatiMsgEntry	rstcalc	0x60	12 of 24 words differ	docs/nonmatching/result/rstcalc.md	5
 cmbChkDevilEvo	rstcalc	0x74	25 of 29 words match	docs/nonmatching/result/rstcalc.md	27
-datFindKugatatiEntry	rstcalc	0x74	28 of 28 words differ	docs/nonmatching/result/rstcalc.md	49
-cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/result/rstcalc.md	74
-cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	97
-cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	123
-rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	152
+datFindKugatatiEntry	rstcalc	0x74	two of 29 words	docs/nonmatching/result/rstcalc.md	49
+cmbGetHeartsParamByIndex	rstcalc	0x58	8 of 22 words differ	docs/nonmatching/result/rstcalc.md	72
+cmbCountEvoReady	rstcalc	0x84	9 of 34 words match	docs/nonmatching/result/rstcalc.md	95
+cmbGetLevelUpCount	rstcalc	0x84	22 of 32 words match	docs/nonmatching/result/rstcalc.md	121
+rstFindEvoEntryType5, rstFindEvoEntryType7	rstcalc	0x6C each	24 of 27 words each match	docs/nonmatching/result/rstcalc.md	150
 rstDraw	result/rstdraw	0x1D0	103 of 116 words match	docs/nonmatching/result/rstdraw.md	5
 sdfFileCmdAnalyzeFileName	sdf/sdfFileIO	0x120	65 of 72 words matching	docs/nonmatching/sdf/sdfFileIO.md	3
 sdfGrSetFrameSetMode	sdf/sdfGraph	0x58	Eleven of twenty-two words differ	docs/nonmatching/sdf/sdfGraph.md	5
