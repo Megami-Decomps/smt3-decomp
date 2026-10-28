@@ -857,7 +857,35 @@ s32 nbGetMagicKaifuku(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetMaxHpWazaPoint);
+s32 nbGetMaxHpWazaPoint(s32 nskill, s32 sformindex, s32 dformindex, s32 waza)
+{
+    datUnitWork_t *swork;
+    datUnitWork_t *dwork;
+    f32 sritu;
+    f32 dritu;
+    f32 value;
+    f32 base;
+    f32 penalty;
+
+    swork = nbGetUnitWorkFromFormindex(sformindex);
+    dwork = nbGetUnitWorkFromFormindex(dformindex);
+    sritu = nbGetHojoRitu(sformindex, 4);
+    dritu = nbGetHojoRitu(dformindex, 7);
+    if (swork->flag & 0x20) {
+        base = (f32)datGetBaseMaxHp(swork) / 0x1.166666p+6f;
+        penalty = 50.0f / (swork->level + 10);
+        base = base * (f32)waza;
+        base = base * 0x1.333332p-1f;
+        value = base - penalty;
+        if (!evtBitCheck(0xAF2)) {
+            value = value * 0x1.570a3cp+0f;
+        }
+    } else {
+        value = ((f32)swork->maxhp / 0x1.166666p+6f) * (f32)waza * 0x1.999998p-1f;
+    }
+    value = (value * sritu) * dritu;
+    return value;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetVirtualAisyo);
 

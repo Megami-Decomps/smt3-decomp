@@ -421,3 +421,4 @@ src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 152 B	debug s
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 136 B	integer pulse interpolation; owner 314 match, 0 differ
 src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	1 fn / 236 B	help display and dismissal callback; owner 7 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 204 B	evolution-stat lookup using native signed table keys and byte result; owner 65 match, 0 differ
+src/smt3/newbattle/nbCalc.c	redthing1	done	2026-10-28	1 fn / 344 B	maximum-HP skill power with native floating constants and ordered rate scaling; owner 45 match, 0 differ
