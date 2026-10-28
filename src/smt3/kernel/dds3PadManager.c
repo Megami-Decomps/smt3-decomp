@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 #include "libsdf.h"
+#include "ps2asm.h"
 
 extern u8 dds3PadVibrationState[2];
 
@@ -72,7 +73,143 @@ void dds3PadInitialize(void) {
     dds3PadVibrationTable[1] = 0;
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3PadManager", dds3RunProcessList);
+extern s8 dds3PadBitTable[32];
+extern u8 D_005518E0[8];
+extern void dds3UpdateVibrationSlots(void);
+extern void effPadVibeFadeUpdate(void);
+extern f32 __ieee754_acosf(f32 x);
+
+void dds3RunProcessList(void)
+{
+    s8 button[2][16];
+    u8 stick[4];
+    sdfVector4_t dir;
+    sdfVector4_t ref;
+    s32 pad;
+    s32 half;
+    s32 key;
+    f32 len;
+    f32 dot;
+    f32 angle;
+    u32 count;
+    f32 sticklen;
+    u32 stickcount;
+
+    memset(&ref, 0, sizeof(ref));
+    ref.z = -1.0f;
+    for (pad = 0; pad < 2; pad++) {
+        for (key = 0; key < 16; key++) {
+            if (dds3PadBitTable[pad * 16 + key] != 0) {
+                button[0][key] = 1;
+                button[1][key] = 1;
+            } else {
+                button[0][key] = 0;
+                button[1][key] = 0;
+            }
+        }
+        for (key = 0; key < 2; key++) {
+            stick[key * 2] = D_005518E0[pad * 4 + key * 2];
+            stick[key * 2 + 1] = D_005518E0[pad * 4 + key * 2 + 1];
+        }
+        for (key = 0; key < 2; key++) {
+            dds3PadStickPrev[pad * 4 + key * 2] = stick[key * 2];
+            dds3PadStickPrev[pad * 4 + key * 2 + 1] = stick[key * 2 + 1];
+        }
+        dir.x = stick[2] - 0x80;
+        dir.y = 0.0f;
+        dir.z = stick[3] - 0x80;
+        dir.w = 0.0f;
+        SDF_VU0_LOADVECTOR(&dir);
+        SDF_VU0_GETLENGTH(len);
+        if (len >= 64.0f) {
+            SDF_VU0_NORMALIZE();
+            SDF_VU0_LOADVECTOR_B(&ref);
+            SDF_VU0_INNERPRODUCT(dot);
+            if (dot < -1.0f) {
+                dot = -1.0f;
+            }
+            if (1.0f < dot) {
+                dot = 1.0f;
+            }
+            angle = __ieee754_acosf(dot);
+            if (dir.x < 0.0f) {
+                angle = 0x1.921fb4p+2f - angle;
+            }
+            switch (((s32)(angle * 0x1.ca5dcp+5f) + 22) / 45 % 8) {
+            case 0:
+                button[1][6] = 1;
+                break;
+            case 1:
+                button[1][6] = 1;
+                button[1][5] = 1;
+                break;
+            case 2:
+                button[1][5] = 1;
+                break;
+            case 3:
+                button[1][5] = 1;
+                button[1][7] = 1;
+                break;
+            case 4:
+                button[1][7] = 1;
+                break;
+            case 5:
+                button[1][7] = 1;
+                button[1][4] = 1;
+                break;
+            case 6:
+                button[1][4] = 1;
+                break;
+            case 7:
+                button[1][4] = 1;
+                button[1][6] = 1;
+                break;
+            }
+        }
+        for (half = 0; half < 2; half++) {
+            for (key = 0; key < 16; key++) {
+                if (button[half][key] != 0) {
+                    dds3PadButtonPrev[pad * 16 + half * 32 + key] = 1;
+                    D_002F56C0[pad * 16 + half * 32 + key]++;
+                    if (D_002F56C0[pad * 16 + half * 32 + key] == 1) {
+                        dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0x83;
+                    }
+                } else {
+                    dds3PadButtonPrev[pad * 16 + half * 32 + key] = 0;
+                    D_002F56C0[pad * 16 + half * 32 + key] = 0;
+                }
+                count = D_002F56C0[pad * 16 + half * 32 + key];
+                if (count >= 8 && (count & 1) == 0) {
+                    dds3PadButtonPrev[pad * 16 + half * 32 + key] |= 2;
+                }
+            }
+        }
+        for (key = 0; key < 2; key++) {
+            dir.x = stick[key * 2] - 0x80;
+            dir.y = 0.0f;
+            dir.z = stick[key * 2 + 1] - 0x80;
+            dir.w = 0.0f;
+            SDF_VU0_LOADVECTOR(&dir);
+            SDF_VU0_GETLENGTH(sticklen);
+            if (sticklen >= 64.0f) {
+                dds3PadStickStatusPrev[pad * 2 + key] = 1;
+                D_002F57C0[pad * 2 + key]++;
+                if (D_002F57C0[pad * 2 + key] == 1) {
+                    dds3PadStickStatusPrev[pad * 2 + key] = 0x83;
+                }
+            } else {
+                dds3PadStickStatusPrev[pad * 2 + key] = 0;
+                D_002F57C0[pad * 2 + key] = 0;
+            }
+            stickcount = D_002F57C0[pad * 2 + key];
+            if (stickcount >= 8 && (stickcount & 1) == 0) {
+                dds3PadStickStatusPrev[pad * 2 + key] |= 2;
+            }
+        }
+    }
+    dds3UpdateVibrationSlots();
+    effPadVibeFadeUpdate();
+}
 
 extern u8 dds3PadVibrationLevel;
 extern u8 D_00551B91;
