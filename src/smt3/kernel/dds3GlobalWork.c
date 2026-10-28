@@ -36,6 +36,24 @@ extern void fldGbInit_System(s32 mode);
 
 extern void evtBitOn(s32 no);
 
+extern void *sdfMemLock(sdfMemHandle_t *aHandle);
+
+extern void sdfMemUnlock(sdfMemHandle_t *aHandle);
+
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 v2, s32 v3,
+                                         dds3ProcessFunc_t processfunc,
+                                         dds3ProcessFunc_t shutdownfunc, void *p);
+
+extern void dds3KillProcessName(char *name, s32 shutdowntimer);
+
+extern void dds3GlobalWorkUserInit(void);
+
+extern char D_0054EA08[];
+
+static void func_00116C30(void);
+
+static s32 func_00116C08(dds3ProcessID_t *id);
+
 typedef void (*sdfGrOtRegFunc_t)(sdfGrOt_t *ot, sdfDrawTag_t *tag);
 
 /* The font node frFont hands back. It accumulates the drawn string's width at
@@ -134,7 +152,53 @@ extern void frSetDrawPosition(_FRQ *pFRQ, s32 X, s32 Y);
 
 extern _FRQ *frDestroyFontRequestAfter(_FRQ *pFRQ);
 
-INCLUDE_ASM(const s32, "kernel/dds3GlobalWork", dds3GlobalWorkInit);
+void dds3GlobalWorkInit(void) {
+    sdfMemHandle_t *handle;
+    dds3GlobalWork_t *gbwk;
+
+    handle = sdfMemAllocDirect(0x1A510);
+    gbwk = sdfMemLock(handle);
+    memset(gbwk, 0, 0x1A510);
+    gbwk->memHandle = (s32)handle;
+    gbwk->unk38 = 0;
+    gbwk->playtime = 0;
+    dds3StartProcess(D_0054EA08, 1, 0, 0, func_00116C08, NULL, gbwk);
+    DDS3_GBWK = gbwk;
+    func_00116C30();
+}
+
+void func_00116BB8(void) {
+    sdfMemHandle_t *handle;
+
+    dds3KillProcessName(D_0054EA08, 0);
+    dds3GlobalWorkUserInit();
+    handle = (sdfMemHandle_t *)DDS3_GBWK->memHandle;
+    sdfMemUnlock(handle);
+    sdfMemFreeDirect(handle);
+    DDS3_GBWK = NULL;
+}
+
+static s32 func_00116C08(dds3ProcessID_t *id) {
+    dds3GlobalWork_t *gbwk = DDS3_GBWK;
+
+    gbwk->unk38++;
+    gbwk->playtime++;
+    return 0;
+}
+
+static void func_00116C30(void) {
+    dds3GlobalWorkClearFlags();
+    evtInitGlobalWork();
+    DDS3_GBWK->akuma[0].unk00 = 8;
+    datInitPlayer();
+    datInitBossPress();
+    dds3ClearStockTable();
+    DDS3_GBWK->heartsequip = 0;
+    DDS3_GBWK->heartscnt = 0;
+    frInitNameData();
+    fldGbInit_System(0);
+    fclEncycInitRecord(0);
+}
 
 void dds3GlobalWorkUserInit(void) {
 }
