@@ -1269,7 +1269,7 @@ void FillIndex(s16 *pout, s32 num)
     }
 }
 
-extern void *memset(void *dst, s32 value, s32 size);
+extern void *memset(void *dst, int value, unsigned int size);
 
 void SetElem(fclencyceelem_t *pelem, datUnitWork_t *punit)
 {
@@ -1300,17 +1300,41 @@ void SetElem2(fclencyceelem_t *pelem, fclencyceelem_t *pelemsrc)
 
 extern s32 fclEncycSearch(s32 id);
 
-extern void SetRecordToUnitCore(void *punit, void *pelem);
+extern void SetRecordToUnitCore(datUnitWork_t *punit, fclencyceelem_t *pelem);
 
 void SetRecordToUnit(datUnitWork_t *punit, s32 id)
 {
     u8 *base = (u8 *)DDS3_GBWK + 0x11E80;
     s32 index = fclEncycSearch(id);
 
-    SetRecordToUnitCore(punit, base + index * 0xB0 + 0x10);
+    SetRecordToUnitCore(punit, (fclencyceelem_t *)(base + index * 0xB0 + 0x10));
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", SetRecordToUnitCore);
+extern void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst);
+
+void SetRecordToUnitCore(datUnitWork_t *punit, fclencyceelem_t *pelem)
+{
+    memset(punit, 0, sizeof(*punit));
+    cmbCopyDefaultDevilToStock(pelem->id, punit);
+    punit->hp = pelem->maxhp;
+    punit->exp = pelem->exp;
+    punit->maxhp = pelem->maxhp;
+    punit->mp = pelem->maxmp;
+    punit->maxmp = pelem->maxmp;
+    punit->level = pelem->level;
+    __builtin_memcpy(punit->param, pelem->param, sizeof(punit->param));
+    __builtin_memcpy(punit->skill, pelem->skill, sizeof(punit->skill));
+    __builtin_memcpy(punit->skillparam, pelem->skillparam, sizeof(punit->skillparam));
+    punit->skillcnt = pelem->skillcnt;
+    __builtin_memcpy(punit->mitamaparam, pelem->mitamaparam, sizeof(punit->mitamaparam));
+    __builtin_memcpy(punit->levelupparam, pelem->levelupparam, sizeof(punit->levelupparam));
+    __builtin_memcpy(punit->keisyoskill, pelem->keisyoskill, sizeof(punit->keisyoskill));
+    __builtin_memcpy(punit->keiattr, pelem->keiattr, sizeof(punit->keiattr));
+    punit->flag &= ~0x240;
+    punit->hensinmae = pelem->hensinmae;
+    punit->flag |= pelem->flag;
+    punit->hensinmaeexp = pelem->hensinmaeexp;
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CompareUnitToRecord);
 
@@ -1318,10 +1342,10 @@ extern s32 datAddDevil(u16 id, s32 sw);
 
 void ExecSummon(s32 recindex)
 {
-    u16 *record = (u16 *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
-    s32 slot = datAddDevil(*record, 0);
+    fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
+    s32 slot = datAddDevil(record->id, 0);
 
-    SetRecordToUnitCore(&encycSaveWork->party[slot], record);
+    SetRecordToUnitCore(&encycSaveWork->party[slot].unit, record);
 }
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", drawRegistList);
@@ -1584,11 +1608,11 @@ extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
 void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
     s32 base = pinst->pwork;
-    u16 *record = (u16 *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
+    fclencyceelem_t *record = (fclencyceelem_t *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
 
     *(u16 *)base = recindex;
-    RequestModelLoad(pinst, *record);
-    SetRecordToUnitCore((void *)(base + 0x90), record);
+    RequestModelLoad(pinst, record->id);
+    SetRecordToUnitCore((datUnitWork_t *)(base + 0x90), record);
 }
 
 void CalcMoveRegistKeyHelp(fclEncyc_registconfirmwork_tag *pwork)
