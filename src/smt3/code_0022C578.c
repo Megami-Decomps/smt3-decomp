@@ -774,7 +774,7 @@ extern s32 cmpGetPressedButton(s32 mask);
 
 extern s32 cmpLoadStatusModel(void);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
 extern s32 cmpChkSeqInfo(cmbGbWork_t *work);
 
@@ -5474,7 +5474,15 @@ char *cmpGetParamName(s8 index)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetPressedButton);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpPlayCursorSE);
+void func_002413B8(u32 button, s8 mode);
+
+/* This UI entry fixes the shared cursor-sound helper's mode at zero. */
+void cmpPlayCursorSE(u32 button)
+{
+    func_002413B8(button, 0);
+}
+
+INCLUDE_ASM(const s32, "code_0022C578", func_002413B8);
 
 s32 cmpChkPadPressUpDown(void)
 {
