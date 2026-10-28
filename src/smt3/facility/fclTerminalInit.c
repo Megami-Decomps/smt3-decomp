@@ -283,7 +283,36 @@ extern trmUpdateWork_t *trmUpdateWork;
 
 INCLUDE_RODATA(const s32, "facility/fclTerminalInit", D_0053D5B0);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalScanCommands);
+extern s32 D_002FC120[32];
+extern s16 D_002FC1A2[][2];
+extern s32 evtBitCheck(s32 no);
+
+void fclTerminalScanCommands(trmTerminalWork_t *work)
+{
+    s32 terminalNo;
+    s32 i;
+    s32 *terminal = D_002FC120;
+
+    work->terminalCommandCount = 0;
+    for (i = 31; i >= 0; i--) {
+        s16 eventNo;
+
+        terminalNo = *terminal++;
+
+        if (work->terminalType == 0 && work->terminalNo == terminalNo) {
+            continue;
+        }
+
+        eventNo = D_002FC1A2[terminalNo][0];
+        if (eventNo == 0 || evtBitCheck(eventNo) == 0) {
+            continue;
+        }
+
+        work->terminalList[work->terminalCommandCount++] = terminalNo;
+    }
+
+    printf("Transport count = %d\n", work->terminalCommandCount);
+}
 
 extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style, void *work);
 extern void fclSetPanelTex(void *panel, s32 a2, s32 a3, s32 a4, s32 a5, s32 tex);
@@ -401,7 +430,7 @@ void fclTerminalFreeTextures(void *work)
     printf("TERMINAL : Tex free.\n");
 }
 
-extern void fclTerminalScanCommands(void *work);
+extern void fclTerminalScanCommands(trmTerminalWork_t *work);
 
 extern void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work);
 
