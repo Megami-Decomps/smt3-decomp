@@ -2097,7 +2097,41 @@ void cmpUpdateItem(void)
 }
 
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateParty);
+extern void cmpSetCrossGeneralVal(u8 *work, s8 value);
+
+void cmpUpdateParty(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    switch (button) {
+    case 1:
+        cmpInitStockCursorPos();
+        if (cmpSetPartyDSL() != 0) {
+            cmpSetCrossGeneralVal((u8 *)campWork + 0x8448, 1);
+            campWork->unk_0001 = 8;
+        } else {
+            button = 0x8000;
+        }
+        break;
+    case 2:
+        campWork->unk_0001 = 0;
+        campWork->unk_0004 = button;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor(&campWork->page[1].cursor, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor(&campWork->page[1].cursor, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        cmpMoveCursor(&campWork->page[1].cursor, 0);
+    }
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)&campWork->page[1], button, 0x30));
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockSelect);
 
