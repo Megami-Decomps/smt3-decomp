@@ -3264,7 +3264,45 @@ s32 func_00235E60(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpGetGaugeBlinkAlpha);
+void cmpGetGaugeBlinkAlpha(s32 frame, s8 state, u32 *colors)
+{
+    s32 ratio = 0;
+    u32 color;
+    if (frame % 0x30 < 0x18) {
+        switch (state) {
+        case 0:
+        case 3:
+            break;
+        case 1:
+        case 4:
+        case 5:
+            ratio = 0x100 - (frame % 0x18) * 10;
+            break;
+        case 2:
+            ratio = (frame % 0x18) * 10;
+            break;
+        }
+    } else {
+        switch (state) {
+        case 0:
+        case 3:
+            break;
+        case 1:
+        case 4:
+        case 5:
+            ratio = 0x100 - (0x18 - cmpStatusAnimCount[0] % 0x18) * 10;
+            break;
+        case 2:
+            ratio = (0x18 - frame % 0x18) * 10;
+            break;
+        }
+    }
+    color = fclBlendColor(0x80808080, 0x80808000, ratio);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+}
 
 s32 cmpGetPanelAlphaOrDefault(u8 *alpha, s32 color)
 {
