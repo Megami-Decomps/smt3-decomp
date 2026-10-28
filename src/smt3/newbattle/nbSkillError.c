@@ -326,7 +326,7 @@ extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
 extern s32 mdlPrepare(s32 aMajor, s32 aMinor, s32 aBlockMode);
 
-extern void nbLoadMidiFile(s32 no);
+extern s32 nbLoadMidiFile(s32 no);
 
 extern s32 (*D_004EF4B0[])(nbNegoProcessData_t *n);
 
@@ -625,8 +625,11 @@ s32 nbMakeModelPackName(s32 no)
     return h;
 }
 
-/* s32 with no return blocks the sibling call retail does not take. */
-s32 nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
+/* The local parameter reset retains retail's jal and shared epilogue.
+ * Qualified cc1 trace: reset insn92 survives sibling-call selection and is
+ * removed in life analysis; hooked, dump and plain assembly agree.
+ * See the post-call-reset rule in docs/CONTRIBUTING.md. */
+void nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
 {
     if (form->packh == NULL) {
         if (evtBitCheck(0xC0F)) {
@@ -634,6 +637,7 @@ s32 nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no)
         } else {
             mdlPrepare(group, no, 0);
             nbLoadMidiFile(no);
+            form = NULL;
         }
     }
 }

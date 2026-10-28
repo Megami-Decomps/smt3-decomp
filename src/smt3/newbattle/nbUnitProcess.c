@@ -10,6 +10,7 @@
 extern void Mult(void);
 
 extern f32 D_00543720[];
+extern char D_00543730[];
 
 extern f32 D_003FA7A0[];
 
@@ -204,6 +205,17 @@ extern void nbFormDispOff(s32 formindex);
 extern u32 nbGetModelColor(nbFormation_t *form);
 
 extern void mdlSetEffectScale(mdlObj_t *model, f32 scale);
+
+extern void nbLoadModelPackIfEnabled(nbFormation_t *form, s32 group, s32 no);
+extern s32 nbCheckModelPackLoaded(nbFormation_t *form, s32 group, s32 id);
+extern s32 nbLoadMidiFile(s32 no);
+extern void sdfMotionSeek(sdfMotionCtrlr_t *ctrlr, f32 frame);
+extern struct nbKoukaPacket_t *nbAddBadEffKoukaPacket(s32 startframe, s32 uniqueid,
+                                                   nbFormation_t *form, u32 bad);
+extern struct nbKoukaPacket_t *nbAddBadMotKoukaPacket(s32 startframe, s32 uniqueid,
+                                                   nbFormation_t *form, s32 badstat);
+extern s32 dds3GetRandIntA(s32 minimum, s32 range);
+extern s32 printf(const char *format, ...);
 
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 
@@ -984,9 +996,9 @@ void RegistUnit(nbMainProcessData_t *data, s32 major, s32 minor, nbFormation_t *
     form->flag = (form->flag & ~2u) | 4;
 }
 
-s32 CheckLoad_nbUnitProcess(pmdProcessWork_t *wdata)
+s32 CheckLoad_nbUnitProcess(nbMainProcessData_t *data)
 {
-    nbFormation_t *form = wdata->form;
+    nbFormation_t *form = data->form;
     s32 i;
 
     for (i = 0; i < 16; i++) {
@@ -998,7 +1010,63 @@ s32 CheckLoad_nbUnitProcess(pmdProcessWork_t *wdata)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RunLoad);
+void RunLoad(nbMainProcessData_t *data, nbFormation_t *form)
+{
+    datUnitWork_t *work;
+    s32 unitid;
+    u32 flag;
+    u32 random;
+    f32 frame;
+    u32 badstatus;
+
+    work = nbGetUnitWorkFromFormindex(form->formindex);
+    unitid = nbGetUnitID(work);
+    flag = form->flag;
+    if ((flag & 1) != 0) {
+        if (CheckLoad_nbUnitProcess(data) != 0) {
+            return;
+        }
+        if (nbCheckModelLoad(data, 1, unitid) != 0) {
+            printf(D_00543730);
+            form->flag &= ~1;
+            RegistUnit(data, 1, unitid, form, work);
+            nbLoadMidiFile(unitid);
+            flag = form->flag;
+        } else {
+            form->flag = (form->flag & ~1) | 0x12;
+            flag = form->flag;
+        }
+    }
+
+    if ((flag & 2) != 0) {
+        if ((flag & 0x10) != 0) {
+            nbLoadModelPackIfEnabled(form, 1, unitid);
+            form->flag &= ~0x10;
+        }
+        if (nbCheckModelPackLoaded(form, 1, unitid) != 0) {
+            RegistUnit(data, 1, unitid, form, work);
+        }
+    }
+
+    if ((form->flag & 0xC) == 4) {
+        random = dds3GetRandIntA(0, form->hunit->owner->first->frameLength);
+        frame = (f32)random;
+        sdfMotionSeek(form->hunit->owner->first, frame);
+        if ((form->anime & 0x200) != 0) {
+            nbFormDispOff(form->formindex);
+            form->anime &= ~0x200;
+        } else {
+            nbMakeUnitFadeInPacket(0, 0, form, 0, 0xF, 0xF, 0x14);
+        }
+        badstatus = work->badstatus & 0xFFF;
+        if (badstatus != 0) {
+            nbAddBadEffKoukaPacket(1, 0, form, badstatus);
+            nbAddBadMotKoukaPacket(1, 0, form, work->badstatus & 0xFFF);
+        }
+        form->type = 0;
+        form->flag &= ~4;
+    }
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbUnitProcess", D_00543720);
 
