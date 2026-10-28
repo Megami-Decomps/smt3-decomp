@@ -233,7 +233,41 @@ void pb_proc_menu_Shutdown(dds3ProcessID_t *id) {
     D_0054F5C4->menuState = 0;
 }
 
-INCLUDE_ASM(const s32, "pb/pbMenu", pb_load_mapdata_Process);
+extern void *memcpy(void *dst, const void *src, u32 size);
+typedef struct { u16 cells[20][20]; } pbMapBlock_t;
+extern pbMapBlock_t D_00327458;
+
+s32 pb_load_mapdata_Process(dds3ProcessID_t *id) {
+    s32 result = 0;
+    pbProcHandle_t *parent;
+    pbPanelValue_t *panelValue;
+
+    if (id->parent != NULL) {
+        s8 loadState;
+        parent = id->parent->workdata;
+        loadState = pbLoadState;
+        panelValue = parent->data.value;
+        if (loadState == 1) {
+            dds3ResetProcessFlag(parent->id, 0x10, 1);
+            parent->flags = 0x50000;
+            if (pbGetMoveChar() != 0) {
+                ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
+            }
+            if (panelValue->value == loadState) {
+                memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
+            }
+            result = -1;
+        }
+    } else if (pbLoadState == 1) {
+        if (pbGetMoveChar() != 0) {
+            ((pbProcHandle_t *)pbGetMoveChar())->flags = 0x10000;
+        }
+        memcpy(&D_00327458, D_0054F5C4->unk01C, 0x320);
+        result = -1;
+    }
+
+    return result;
+}
 
 void pb_load_mapdata_Shutdown(dds3ProcessID_t *id) {
     sdfChipFreeDirect(id->workdata);
