@@ -1593,7 +1593,47 @@ s32 cmbGetSpecialItemId(void)
     return 0x8D;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbGetMoonBonus);
+extern u8 D_0032DDD0[5][2];
+extern u8 D_0032DDE0[];
+extern u16 D_0032DDE8[4][5];
+extern s32 datCheckItem(s32 id, s32 count);
+
+s32 cmbGetMoonBonus(u16 devilId)
+{
+    s32 moon = evtGetAgeOfMoon();
+    s32 moonIndex = -1;
+    s32 raceIndex = -1;
+    u8 race = datDevilTable[devilId].race;
+    u32 i;
+    u16 itemId;
+
+    for (i = 0; i < 5; i++) {
+        if (moon >= D_0032DDD0[i][0] && moon <= D_0032DDD0[i][1]) {
+            moonIndex = i;
+        }
+    }
+
+    {
+        u32 j;
+        for (j = 0; j < 4; j++) {
+            if (D_0032DDE0[j] == race) {
+                raceIndex = j;
+            }
+        }
+    }
+
+    if (datCheckItem(0x8D, 1) != 0) {
+        if (moonIndex < 0 || raceIndex < 0) {
+            return 0;
+        }
+        itemId = D_0032DDE8[raceIndex][moonIndex];
+        if (cmbDevilIsUnlocked(itemId) != 0) {
+            return 0;
+        }
+        return itemId;
+    }
+    return 0;
+}
 
 s32 cmbCheckDevilPair(datUnitWork_t *a, datUnitWork_t *b, datUnitWork_t *c)
 {
