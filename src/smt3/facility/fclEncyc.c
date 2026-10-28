@@ -800,7 +800,32 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadView);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyRegistConfirm);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcConfirmStatus);
+void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
+{
+    if (work->flag == 0) {
+        work->statusAlpha += 0x10;
+        if (work->statusAlpha >= 0xA1) {
+            work->statusAlpha = 0xA0;
+            return;
+        }
+        work->incNow += 4;
+        work->xNow -= work->incNow;
+        work->xRecord += work->incRecord;
+        work->incRecord += 4;
+    } else {
+        work->statusAlpha -= 0x10;
+        if (work->statusAlpha < 0) {
+            work->statusAlpha = 0;
+            return;
+        }
+        work->incRecord -= 4;
+        work->xNow += work->incNow;
+        work->xRecord -= work->incRecord;
+        work->incNow -= 4;
+    }
+}
+
+
 INCLUDE_ASM(const s32, "facility/fclEncyc", GetValidUnitIndex);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", RegistAll);
