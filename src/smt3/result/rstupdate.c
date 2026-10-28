@@ -7,6 +7,32 @@
 
 typedef struct
 {
+    /* 0x00 */ u8 StepY[4];
+    /* 0x04 */ s8 StopFlag;
+    /* 0x05 */ u8 unk_05[3];
+    /* 0x08 */ s32 CursorSize;
+    /* 0x0C */ s32 CursorPos;
+    /* 0x10 */ u16 unk_10;
+    /* 0x12 */ u16 unk_12;
+    /* 0x14 */ u16 unk_14;
+    /* 0x16 */ u16 unk_16;
+    /* 0x18 */ s32 unk_18;
+    /* 0x1C */ s32 unk_1C;
+    /* 0x20 */ u8 unk_20;
+    /* 0x21 */ u8 unk_21;
+    /* 0x22 */ s16 unk_22;
+    /* 0x24 */ s8 unk_24;
+    /* 0x25 */ s8 unk_25;
+    /* 0x26 */ u8 unk_26;
+    /* 0x27 */ u8 unk_27;
+    /* 0x28 */ s32 unk_28;
+    /* 0x2C */ s32 unk_2C;
+    /* 0x30 */ s32 unk_30;
+    /* 0x34 */ s32 unk_34;
+} cmpCursorInfo_t;
+
+typedef struct
+{
     /* 0x00 */ u8 unk_00[0x38];
     /* 0x38 */ u16 skillCount;
     /* 0x3A */ u16 skill[12];
@@ -66,14 +92,18 @@ typedef struct
     /* 0x001C */ u8 unk_1C[6];
     /* 0x0022 */ u16 EventParam;
     /* 0x0024 */ u16 GetHeartsSkill;
-    /* 0x0026 */ u8 unk_26[0x52];
+    /* 0x0026 */ u8 unk_26[2];
+    /* 0x0028 */ s8 unk_28;
+    /* 0x0029 */ u8 unk_29[0x4F];
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ u8 unk_7C[0xF0];
     /* 0x016C */ datUnitWork_t *pCurrentStock;
     /* 0x0170 */ u8 unk_170[0x112E];
     /* 0x129E */ s8 Flag;
     /* 0x129F */ u8 unk_129F[6];
-    /* 0x12A5 */ u8 unk_12A5[0x103F];
+    /* 0x12A5 */ u8 unk_12A5[3];
+    /* 0x12A8 */ cmpCursorInfo_t cursorInfo;
+    /* 0x12E0 */ u8 unk_12E0[0x1004];
     /* 0x22E4 */ u8 unk_22E4;
     /* 0x22E5 */ u8 unk_22E5[0x23];
     /* 0x2308 */ s32 unk_2308;
@@ -82,7 +112,7 @@ typedef struct
     /* 0x2314 */ u32 evoBgFade;
 } rstWork_t;
 
-extern void rstSetMaxHpMp(s32 Mode, s32 pStock);
+extern void rstSetMaxHpMp(s8 Mode, datUnitWork_t *pStock);
 
 extern void func_00224230(datUnitWork_t *unit);
 
@@ -133,6 +163,7 @@ s32 fclStartMessage(s32 MsgNo);
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
 void rstChkResult2Process(u8 *work);
+extern void rstClearFlag(s8 index);
 
 void rstOverWriteSkill(u16 *pSkill, u16 NewSkillID)
 {
@@ -345,7 +376,42 @@ INCLUDE_ASM(const s32, "result/rstupdate", rstGetHeartsSkill);
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDestroyConfirm);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqHeartsSkill);
+extern s32 rstWaitConfirmButton(void);
+extern s32 fclChkMessage(void);
+extern s8 fclEndMessage(void);
+extern char *text1[];
+extern void cmpResetCursorInfo(cmpCursorInfo_t *cursor);
+extern s8 rstGetHeartsSkill(s8 mode);
+
+void rstUpdateSeqHeartsSkill(void)
+{
+    s32 state = rstWaitConfirmButton();
+
+    if (state == 1) {
+        return;
+    }
+    if (state == 2) {
+        fclSetMessageVar_20743088(10, (s32)text1[startPos->GetHeartsSkill]);
+        fclStartMessage(6);
+        rstClearFlag(1);
+        return;
+    }
+    if (fclChkMessage() != 0) {
+        return;
+    }
+    if (startPos->unk_28 == 2) {
+        fclEndMessage();
+        fclStartMessage(7);
+        cmpResetCursorInfo(&startPos->cursorInfo);
+        startPos->cursorInfo.unk_24 = 8;
+        startPos->unk_0001 = 0x15;
+        startPos->unk_0004 = 1;
+    } else {
+        rstGetHeartsSkill(0);
+        rstSetMaxHpMp(1, startPos->pCurrentStock);
+        startPos->unk_0004 = 1;
+    }
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsAddPoint);
 

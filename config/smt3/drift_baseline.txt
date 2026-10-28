@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1104 members, 506 adopted constants.
+# 0 types, 1107 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -834,6 +834,7 @@ member rstWork_t.unk_0004
 member rstWork_t.unk_0005
 member rstWork_t.unk_129F
 member rstWork_t.unk_12A5
+member rstWork_t.unk_12E0
 member rstWork_t.unk_170
 member rstWork_t.unk_1A
 member rstWork_t.unk_1C
@@ -843,6 +844,8 @@ member rstWork_t.unk_2308
 member rstWork_t.unk_230C
 member rstWork_t.unk_2310
 member rstWork_t.unk_26
+member rstWork_t.unk_28
+member rstWork_t.unk_29
 member rstWork_t.unk_78
 member rstWork_t.unk_7C
 member sceHSynChanSet_t.unk00
