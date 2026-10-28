@@ -1343,9 +1343,9 @@ extern s32 cmpGetPressedButton(s32 mask);
 
 extern s32 cmpLoadStatusModel(void);
 
-extern s32 cmpPlayCursorSE(s32 button);
+extern void cmpPlayCursorSE(u32 button);
 
-s32 cmbWaitCancelButton(void)
+void cmbWaitCancelButton(void)
 {
     s32 button = cmpGetPressedButton(2) & 0xFFFF;
 
@@ -1359,7 +1359,8 @@ s32 cmbWaitCancelButton(void)
             button = 0x8000;
         }
     }
-    return cmpPlayCursorSE(button);
+    /* The native caller discards this sound helper's incidental return value. */
+    cmpPlayCursorSE(button);
 }
 
 extern void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index);
