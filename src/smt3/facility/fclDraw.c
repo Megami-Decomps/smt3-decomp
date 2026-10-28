@@ -30,7 +30,7 @@ extern frFontHandle_t *frwGetSmallFontFRQ2(s32 x, s32 y, s32 priority, s32 color
 extern frFontHandle_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                                   const char *text, frFontHandle_t *previous);
 extern void frSetDrawPosition(frFontHandle_t *request, u32 x, u32 y);
-extern void func_001C7E38(frFontHandle_t *request, s32 mode, s32 kind);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
 extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 extern void sortSkillList(cmbUnit_t *unit);
@@ -285,7 +285,7 @@ void fcl_2129A0(s32 a, s32 b, cmpCursorInfo_t *cursor, s32 d)
                      cursor->unk_14, 0x80808080, 0x100, 0, cursor, 0, d);
 }
 
-void fcl_2129F8(s32 x, s32 y, s32 priority, u32 color, s32 value, s32 kind)
+void fcl_2129F8(s32 x, s32 y, s32 priority, u32 color, s32 value, s32 ot)
 {
     char text[0x80];
     frFontHandle_t *request;
@@ -293,19 +293,19 @@ void fcl_2129F8(s32 x, s32 y, s32 priority, u32 color, s32 value, s32 kind)
     sprintf(text, "%d", value);
     request = frwGetSmallNumFontFRQ(x, y, priority, color, text, NULL);
     frSetDrawPosition(request, x - ((request->advance >> 1) << 4), y);
-    func_001C7E38(request, 1, kind);
+    func_001C7E38(request, 1, ot);
     frDestroyFontRequestAfter(request);
 }
 
 s32 fclDrawStrCenterTarget(s32 x, s32 y, s32 priority, u16 width, u16 unused1, u32 unused2,
-                           const char *text, s32 kind)
+                           const char *text, s32 ot)
 {
     frFontHandle_t *request;
 
     request = frwGetSmallCaptionFontFRQ(x, y, priority, 0xDEFFA180, text, NULL);
     frSetDrawPosition(request, x + (((s32)width - request->advance) >> 1) * 16,
                       y);
-    func_001C7E38(request, 1, kind);
+    func_001C7E38(request, 1, ot);
     return frDestroyFontRequestAfter(request);
 }
 
@@ -344,7 +344,40 @@ INCLUDE_ASM(const s32, "facility/fclDraw", trm_212CB8);
 
 INCLUDE_ASM(const s32, "facility/fclDraw", fclDrawPriceText);
 
-INCLUDE_ASM(const s32, "facility/fclDraw", shopDrawItemCount);
+extern fclSpriteTbl_t fclSpriteTable[];
+extern s32 D_00345D88[];
+extern char D_0054FC48[]; /* Shared, padded "%7d" format. */
+extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                         const char *text, frFontHandle_t *previous);
+
+void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 ot)
+{
+    s32 colors[4];
+    char text[16];
+    frFontHandle_t *request;
+
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    fclDrawSpriteFilter(pos->unk_00 + 0x10D0, pos->unk_04 + 0x78,
+                        pos->unk_08 << 4, 1, colors, 10, 0, D_00345D88,
+                        fclSpriteTable, ot);
+    fclDrawSpriteFilter(pos->unk_00 + 0x10D0, pos->unk_04 + 0x78,
+                        pos->unk_08 << 4, 1, colors, 10, 0xC, D_00345D88,
+                        fclSpriteTable, ot);
+    fclDrawSpriteFilter(pos->unk_00 + 0x1E40, pos->unk_04 + 0xB0,
+                        pos->unk_08 << 4, 1, colors, 10, 1, D_00345D88,
+                        fclSpriteTable, ot);
+
+    color = (color & 0xFF) | 0xA09DC300;
+    sprintf(text, D_0054FC48, DDS3_GBWK->maka);
+    /* The numeric baseline uses the X coordinate. */
+    request = frwGetNumFontFRQ(pos->unk_00 + 0x1840, pos->unk_00 + 0x90,
+                               pos->unk_08, color, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+}
 
 s32 func_00213148(const void *a, const void *b)
 {
@@ -498,4 +531,3 @@ void cmbSetRaceResult(cmbRaceSortEntry_t *list, u16 count)
 INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC40);
 
 INCLUDE_SDATA(const s32, "facility/fclDraw", D_0054FC48);
-
