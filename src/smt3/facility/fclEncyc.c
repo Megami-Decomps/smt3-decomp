@@ -30,7 +30,9 @@ typedef struct
 
 typedef struct
 {
-    /* 0x0000 */ u8 unk_0000[0x15C];
+    /* 0x0000 */ u8 unk_0000[0x20];
+    /* 0x0020 */ s32 flags;
+    /* 0x0024 */ u8 unk_0024[0x138];
     /* 0x015C */ s32 StepY;
     /* 0x0160 */ u32 unk_160;
     /* 0x0164 */ cmpCursorSize_t cursorSize;
@@ -1211,7 +1213,28 @@ s32 RegistAll(fclEncyc_instance_tag *pinst)
     return registered;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitListWindow);
+extern void lstInitListWindow(s32 x, s32 y, s32 z, s32 width, s32 height,
+                              s32 color, s8 style, lstListWindow_t *work);
+extern void cmpInitCursorLayout(void *cursor, s32 x, s32 y, s32 width,
+                                s32 height, s32 mode);
+extern void cmpInitCursorRange(void *cursor, u8 index, u8 visible, s32 layout);
+extern void fclInitPanel(fclPanel_t *panel, s32 x, s32 y, s32 z, s32 width,
+                         s32 height, s32 color, s8 type, s8 speed);
+
+void InitListWindow(lstListWindow_t *work, fclPanel_t *panel,
+                    const s32 listGeometry[4], const s32 cursorLayout[4],
+                    const s32 panelAndRange[4], s32 cursorIndex,
+                    s32 visibleCount, s32 cursorLayoutMode)
+{
+    lstInitListWindow(listGeometry[0] << 4, listGeometry[1] << 3, 0x00FFFFF0,
+                      listGeometry[2], listGeometry[3], 0x80808080, 0, work);
+    cmpInitCursorLayout((u8 *)work + 0x15C, cursorLayout[0], cursorLayout[1],
+                        cursorLayout[2], cursorLayout[3], cursorLayoutMode);
+    cmpInitCursorRange((u8 *)work + 0x15C, (u8)cursorIndex, (u8)visibleCount, 0);
+    fclInitPanel(panel, panelAndRange[0] << 4, panelAndRange[1] << 3, 0xFFFFF,
+                 panelAndRange[2], panelAndRange[3], 0x80808080, 0, 0x10);
+    work->flags = 0x10000;
+}
 
 void PushListwinCursor(fclEncyc_instance_tag *pinst, lstListWindow_t *plistwin, s32 Stack)
 {
