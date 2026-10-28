@@ -939,7 +939,59 @@ s32 rstStandbyHeartsAddPoint(void)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsSkillPowerUp);
+extern void rstInitSkillAct(s8 Pos);
+
+s32 rstStandbyHeartsSkillPowerUp(void)
+{
+    s8 result;
+
+    switch (rstWaitConfirmButton()) {
+    case 1:
+        return 0;
+    case 2:
+        switch (startPos->powerState) {
+        case 1:
+            fclStartMessage(31);
+            break;
+        case 2:
+            fclStartMessage(32);
+            break;
+        }
+        rstClearFlag(1);
+        startPos->powerState = -1;
+        return 1;
+    default:
+        break;
+    }
+
+    fclSetMessageVar_20743088(
+        15, (s32)text1[startPos->pCurrentStock->skill[startPos->powerSlot]]);
+    fclSetMessageVar_20743088(16, (s32)text1[startPos->powerSkill]);
+
+    result = startPos->powerState;
+    switch (result) {
+    case 1:
+        rstOverWriteSkill(
+            &startPos->pCurrentStock->skill[startPos->powerSlot],
+            startPos->powerSkill);
+        cmbGlobalWork->hearts_sk[cmbGlobalWork->heartsequip]
+                               [startPos->powerSlot] = startPos->powerSkill;
+        rstInitSkillAct(startPos->powerSlot);
+        return 0;
+    case 2:
+        rstOverWriteSkill(
+            &startPos->pCurrentStock->skill[startPos->powerSlot],
+            startPos->powerSkill);
+        cmbGlobalWork->hearts_sk[cmbGlobalWork->heartsequip]
+                               [startPos->powerSlot] = startPos->powerSkill;
+        rstInitSkillAct(startPos->powerSlot);
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
 
 void rstSetHeartsRecover(void)
 {
