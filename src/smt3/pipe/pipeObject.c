@@ -641,7 +641,57 @@ void pipeMyMakaSubRate(f32 subMakaRate)
     myMaka = myMaka - myMaka * subMakaRate;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMyStatusChange);
+extern u8 attackCount;
+extern u8 CameraAction;
+extern u16 myStatus;
+extern void pipeEffSet(tagPipeObject *object, s32 type);
+extern void pipeBulrSetLimit(s32 frame);
+
+const char D_00548CE0[32] = "player-motion NORMAL_MOTION\n";
+const char D_00548D00[32] = "player-motion DAMAGE_MOTION\n";
+const char D_00548D20[32] = "player-motion ATTACK_MOTION\n";
+
+void objMyStatusChange(tagPipeObject *object, u8 status)
+{
+    if (object == NULL) {
+        object = objMyData();
+    }
+    switch (status) {
+    case 0:
+        objMdlMotion(object, 1, 1.0f);
+        object->action = 0;
+        object->count = 0;
+        object->flags &= 0xF8FF;
+        attackCount = 0;
+        return DEBUG_PRINT(D_00548CE0);
+    case 2: {
+        CameraAction = 6;
+        objMdlMotion(object, 3, 1.0f);
+        object->action = status;
+        object->flags |= 0x208;
+        object->count = 30;
+        object->flags &= 0xFEFF;
+        pipeEffSet(object, 2);
+        attackCount = 0;
+        pipeBulrSetLimit(10);
+        return DEBUG_PRINT(D_00548D00);
+    }
+    case 1:
+        if ((myStatus & 0xF) == 0) {
+            objMdlMotion(object, 2, 1.0f);
+        } else {
+            objMdlMotion(object, 4, 1.0f);
+        }
+        object->action = 1;
+        object->count = 27;
+        object->flags |= 0x240;
+        return DEBUG_PRINT(D_00548D20);
+    case 10:
+        pipeEffSet(object, 4);
+        break;
+    }
+}
+
 
 void objVisibleAll(s8 value)
 {
