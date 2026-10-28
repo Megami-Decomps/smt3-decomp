@@ -251,7 +251,90 @@ s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
     return frDestroyFontRequestAfter(font);
 }
 
+typedef struct fclSpriteRes_t fclSpriteRes_t;
+typedef struct fclSpriteEntry_t fclSpriteEntry_t;
+typedef struct {
+    fclSpriteRes_t *res;
+    fclSpriteEntry_t *entries;
+} fclSpriteTbl_t;
+
+extern fclSpriteTbl_t dds3ConfigLayoutTable[];
+extern s32 D_00345D88[];
+extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+extern void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
+extern s32 cmpDrawBoxGDefault(s32 x, s32 y, s32 z, s32 width, s32 height, s32 *colors, s32 ot);
+extern void fclDrawSpriteAlpha(s32 x, s32 y, s32 z, u8 mode, s32 *colors,
+    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+
+/* NON_MATCHING: 19 of 179 words differ, at the native 716-byte size. */
+#ifdef NON_MATCHING
+void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height, s32 selected, s32 ot)
+{
+    s32 colors[4];
+    s32 phase = ((dds3ConfigWork_t *)GBWK)->animationPhase;
+    u32 half;
+    s32 blended;
+
+    if (phase > 0x100) {
+        phase = 0x200 - phase;
+    }
+    switch (selected) {
+    case 1: {
+        s32 fadedColor;
+        s32 pulseColor;
+        s32 depth = z << 4;
+        half = width >> 1;
+        blended = fclBlendColor(0x75FFFA2C, 0x2200842C, phase);
+        fclDrawPanelSprite2(0x48, ot);
+        colors[0] = blended;
+        colors[1] = 0x2200842C;
+        colors[2] = blended;
+        colors[3] = 0x2200842C;
+        cmpDrawBoxGDefault(x, y, z, half, height, colors, ot);
+        colors[0] = 0x2200842C;
+        colors[1] = blended;
+        colors[2] = 0x2200842C;
+        colors[3] = blended;
+        cmpDrawBoxGDefault(x + (half << 4), y, z, half, height, colors, ot);
+        fclDrawPanelSprite2(0x44, ot);
+        fadedColor = dds3GetConfigFadeAlpha() | 0x80808000;
+        colors[0] = fadedColor;
+        colors[1] = fadedColor;
+        colors[2] = fadedColor;
+        colors[3] = fadedColor;
+        fclDrawSpriteRes(0x1A0, y, depth, colors, 0, 0xE, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0x1D40, y, depth, colors, 0, 0xF, D_00345D88, dds3ConfigLayoutTable, ot);
+        pulseColor = fclBlendColor(0x80808000, 0, phase);
+        colors[0] = pulseColor;
+        colors[1] = pulseColor;
+        colors[2] = pulseColor;
+        colors[3] = pulseColor;
+        fclDrawSpriteAlpha(0x1A0, y, depth, 1, colors, 0, 0xE, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteAlpha(0x1D40, y, depth, 1, colors, 0, 0xF, D_00345D88, dds3ConfigLayoutTable, ot);
+        break;
+    }
+    case 0: {
+        s32 color;
+        s32 depth;
+        color = dds3GetConfigFadeAlpha() | 0x80808000;
+        colors[0] = color;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = color;
+        depth = z << 4;
+        fclDrawSpriteRes(0x1A0, y, depth, colors, 0, 0xD, D_00345D88, dds3ConfigLayoutTable, ot);
+        fclDrawSpriteRes(0x1DC0, y, depth, colors, 0, 0xD, D_00345D88, dds3ConfigLayoutTable, ot);
+        break;
+    }
+    }
+}
+#else
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigCursor);
+#endif
 
 extern u32 fclBlendColor(u32 firstColor, u32 secondColor, u32 weight);
 extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
@@ -275,20 +358,6 @@ s32 dds3DrawConfigItem(s32 x, s32 y, s32 z, s32 ot)
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
 
-typedef struct fclSpriteRes_t fclSpriteRes_t;
-typedef struct fclSpriteEntry_t fclSpriteEntry_t;
-typedef struct {
-    fclSpriteRes_t *res;
-    fclSpriteEntry_t *entries;
-} fclSpriteTbl_t;
-
-extern fclSpriteTbl_t dds3ConfigLayoutTable[];
-extern s32 D_00345D88[];
-extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
-    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
-extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
-    s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
-extern void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
 extern const s32 D_00548888[3][4];
 extern void *memcpy(void *destination, const void *source, u32 size);
 
@@ -335,7 +404,7 @@ typedef struct {
     s32 optionCount;
 } configValueLabel_t;
 extern configValueLabel_t D_00528F28[];
-extern s32 dds3DrawConfigCursor(s32 x, s32 y, s32 z, s32 index, s32 mode,
+extern void dds3DrawConfigCursor(s32 x, s32 y, s32 z, u32 width, s32 height,
                                 s32 selected, s32 ot);
 extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
                                          const char *text, frFontRequest_t *previous);

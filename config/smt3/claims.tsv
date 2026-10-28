@@ -590,3 +590,4 @@ src/smt3/newbattle/NbNegoFlowFullMoon.c	redthing1	done	2026-10-28	1 fn / 204 B	F
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 428 B	camp allocation and four cursor-page initialization with native data-backed tables and flag storage; owner 349 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 352 B	camp phase dispatch with signed entry snapshot, native negative skip return and exact jump table; owner 350 match, 0 differ
 src/smt3/effect/effPCPBoss.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	KAGU invoke poly-list reconstruction at native 736-byte size with three remaining address-form words
+src/smt3/code_0029B780.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	configuration cursor gradients and cap sprites at native 716-byte size; 19 coordinate allocation/setup words remain

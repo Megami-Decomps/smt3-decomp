@@ -48,6 +48,7 @@ pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/nonmatching/code_0029B780.md	32
 dds3DrawConfigPanel	code_0029B780	0x258		docs/nonmatching/code_0029B780.md	56
 dds3DrawConfigBar	code_0029B780	0x1C4		docs/nonmatching/code_0029B780.md	70
+dds3DrawConfigCursor	code_0029B780	0x2CC		docs/nonmatching/code_0029B780.md	87
 dds3BillboardManagerInit	effect/billManager	0xB8	44 of 46 words match	docs/nonmatching/effect/billManager.md	5
 dds3BillboardTagLink	effect/billManager	0x49C	16 of 271 words match	docs/nonmatching/effect/billManager.md	38
 dds3Billboard_P2AAnimDraw	effect/billManager	0x1D0	1 of 174 words differing	docs/nonmatching/effect/billManager.md	85
