@@ -1407,7 +1407,19 @@ void cmbCopyDefaultDevilToStock(u16 devilId, datUnitWork_t *dst)
     cmbInitStockUnit(devilId, dst);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCopyCustomDevilToStock);
+void cmbCopyCustomDevilToStock(datUnitWork_t *dst, datUnitWork_t *src)
+{
+    memcpy(dst, src, sizeof(*dst));
+    dst->maxhp = datGetMaxHp(dst);
+    dst->maxmp = datGetMaxMp(dst);
+    if (dst->hp > dst->maxhp) {
+        dst->hp = dst->maxhp;
+    }
+    if (dst->mp > dst->maxmp) {
+        dst->mp = dst->maxmp;
+    }
+    dst->flag |= 1;
+}
 
 void cmbClearStockEntry(cmbUnit_t *unit)
 {
