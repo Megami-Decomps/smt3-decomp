@@ -333,3 +333,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	cmbGet
 src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	1 fallback / 92 B	fclDrawSpriteEx wrapper and local sprite-core helper
 src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	4 new fn / 732 B	caption allocation, level-up timer, shutdown and unit cleanup; recover EXP row types for published completion check; owner 11 match, 0 differ
 src/smt3/facility/fclDraw.c	redthing1	done	2026-10-28	4 fn / 652 B	sprite wrapper, centered number/caption and list text; owner 25 match, 0 differ
+src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 112 B	typed fusion result matrices and reset; owner 100 match, 0 differ

@@ -388,7 +388,11 @@ typedef struct
     /* 0x01058 */ cmbStockCursorGroup_t stockCursorGroup[3];
     /* 0x0410C */ u8 unk_0410C[4];
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
-    /* 0x0411C */ u8 birthPanel[0x123EE];
+    /* 0x0411C */ u8 birthPanel[0x2C9];
+    /* 0x043E5 */ s8 resultIndex[2][12][12];
+    /* 0x04505 */ u8 unk_04505;
+    /* 0x04506 */ u16 resultId[2][12][12];
+    /* 0x04746 */ u8 unk_04746[0x11DC4];
     /* 0x1650A */ s8 unk_1650A;
     /* 0x1650B */ u8 unk_1650B[5];
     /* 0x16510 */ s32 script;
@@ -636,7 +640,18 @@ s32 cmbBirthDevilIsAvailable(void)
     return flag != 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbBuildResultRow);
+void cmbBuildResultRow(s32 mode)
+{
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 12; i++) {
+        for (j = 0; j < 12; j++) {
+            CMB_GBWK->resultIndex[mode][j][i] = -1;
+            CMB_GBWK->resultId[mode][j][i] = 0;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCreateCombineResultTable);
 
