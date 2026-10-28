@@ -1677,7 +1677,31 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTopText);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockRow);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawStockScrollBar);
+/* Same native row callback contract as cmpDrawListRowBox. */
+typedef void (*cmbDrawRow_t)(s32, s32, s32, u16, u16, u16,
+    s32, s32, s32, s8, s32, s32);
+extern void cmbDrawStockRow(s32, s32, s32, u16, u16, u16,
+    s32, s32, s32, s8, s32, s32);
+extern void cmpDrawScrollBar(s32 x, s32 y, s32 z, s32 width, s32 height,
+    s32 color, s32 scale, s8 phase, cmpCursorInfo_t *cursor, cmbDrawRow_t draw, s32 ot);
+
+void cmbDrawStockScrollBar(s8 mode, s32 z, s32 unused, cmpCursorInfo_t *cursor, s32 ot)
+{
+    s32 x = cursor->CursorSize << 4;
+    s32 y = cursor->CursorPos << 3;
+    u16 width = cursor->unk_10;
+    u16 height = cursor->unk_14;
+
+    if (mode == 0) {
+        cmpDrawScrollBar(x, y, z,
+            width, height, 0x80808080, 0x100, 0,
+            cursor, cmbDrawStockRow, ot);
+    } else {
+        cmpDrawScrollBar(x, y, z,
+            width, height, 0x80808080, 0x100, 0,
+            cursor, NULL, ot);
+    }
+}
 
 /* NON_MATCHING: 25 of 29 words match, exact size; the `color & ~0xFF` value
  * takes $3 where retail uses $2. */
@@ -1708,7 +1732,7 @@ void cmbDrawStockPanel1(void)
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
                       (u8 *)CMB_GBWK + 0x1058, 0, 0x47);
     if (*(s8 *)((u8 *)CMB_GBWK + 0x43E4) >= *(s8 *)((u8 *)CMB_GBWK + 0x165ED)) {
-        cmbDrawStockScrollBar(0, 0xFFFFF, 0x50807080, (u8 *)CMB_GBWK + 0x1058,
+        cmbDrawStockScrollBar(0, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[0].cursor,
                               0x47);
     }
 }
@@ -1719,9 +1743,6 @@ extern void cmbDrawStockList(s32 x, s32 y, s32 color, s32 a, s8 count, s32 b,
 extern void cmbDrawStockEntry(s32 x, s32 y, s32 color, s8 count, s32 color2,
                               u8 *rows, s32 mode, s32 flags);
 
-extern void cmbDrawStockScrollBar(s32 mode, s32 color, s32 color2, u8 *rows,
-                                  s32 flags);
-
 void cmbDrawStockPanel2(void)
 {
     s8 count = *((u8 *)CMB_GBWK + 0x20b6) + *((u8 *)CMB_GBWK + 0x20b8);
@@ -1729,7 +1750,7 @@ void cmbDrawStockPanel2(void)
     cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 1, 0x47);
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
                       (u8 *)CMB_GBWK + 0x2094, 1, 0x47);
-    cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, (u8 *)CMB_GBWK + 0x2094,
+    cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[1].cursor,
                           0x47);
 }
 
@@ -1740,7 +1761,7 @@ void cmbDrawStockPanel3(void)
     cmbDrawStockList(0x180, 0x3F0, 0xFFFF, 0, count, 1, 0x47);
     cmbDrawStockEntry(0x300, 0x408, 0xFFFFF, count, 0x89FEFF80,
                       (u8 *)CMB_GBWK + 0x30d0, 2, 0x47);
-    cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, (u8 *)CMB_GBWK + 0x30d0,
+    cmbDrawStockScrollBar(1, 0xFFFFF, 0x50807080, &CMB_GBWK->stockCursorGroup[2].cursor,
                           0x47);
 }
 
