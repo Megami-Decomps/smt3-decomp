@@ -56,7 +56,9 @@ typedef struct {
     s8 primaryCursorActive;
     u8 reserved30D1[3];
     cmpCursorInfo_t cursor;
-    u8 reserved310C[0x2040];
+    u8 reserved310C[0x1004];
+    cmpCursorInfo_t wrapCursor;
+    u8 reserved4148[0x1004];
     s8 alternateCursorActive;
     s8 inputRowEnabled[3];
     s8 inputPos;

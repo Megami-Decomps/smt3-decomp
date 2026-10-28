@@ -87,9 +87,25 @@ INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameCursor);
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitCursor);
 
-INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
+extern char D_00548780[];
+extern char D_00548798[];
+extern char D_005487B0[];
+extern char *nmeCharTexFile[4];
+extern char *D_005276B0 __attribute__((section(".data")));
+extern s32 fclLoadTexture(char *filename);
+extern s32 evtBitCheck(s32 bit);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeTexLoad);
+void nmeTexLoad(s8 mode, nmeWork_t *work)
+{
+    work->textures[0] = (sdfTexHandle_t *)fclLoadTexture(D_00548780);
+    work->textures[1] = (sdfTexHandle_t *)fclLoadTexture(D_00548798);
+    work->textures[2] = (sdfTexHandle_t *)fclLoadTexture(D_005487B0);
+    if (evtBitCheck(0x8B0) != 0 && mode == 0) {
+        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(D_005276B0);
+    } else {
+        work->textures[3] = (sdfTexHandle_t *)fclLoadTexture(nmeCharTexFile[mode]);
+    }
+}
 
 void nmeFreeNameTextures(nmeWork_t *work) {
     s32 textureIndex;
@@ -180,6 +196,14 @@ void func_00298678(void)
 }
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nme_298698);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548768);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548780);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_00548798);
+
+INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487B0);
 
 INCLUDE_RODATA(const s32, "nme/Nme_Init", D_005487C8);
 

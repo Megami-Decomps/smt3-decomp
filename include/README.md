@@ -1421,3 +1421,7 @@ texture handles. The shared layout checks these boundaries as well.
 `nmeInitNameBuffer` initializes the mode cursor at `0x1C` and clears the
 primary movement-handler flag at `0x30D0`. Input dispatch tests that flag
 before calling `nmeMoveCursor`; `0x514C` selects `nmeMoveCursor2` instead.
+
+Cursor wrapping uses a fifth cursor prefix at `0x4110`, with its scroll/row
+fields at `0x4132`/`0x4134`. Each prefix remains separate from the unrecovered
+slot storage that follows it; no layout for those slots is inferred here.

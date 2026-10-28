@@ -828,3 +828,4 @@ OFF(nm11, nmeWork_t, alternateCursorActive, 0x514C);
 OFF(nm12, nmeWork_t, inputChars, 0x5152);
 OFF(nm13, nmeWork_t, modeCursor, 0x1C);
 OFF(nm14, nmeWork_t, primaryCursorActive, 0x30D0);
+OFF(nm15, nmeWork_t, wrapCursor, 0x4110);

@@ -353,3 +353,6 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 176 B	cmpSetItSkMessag
 src/smt3/nme/Nme_Init.c	redthing1	open	2026-10-28	1 fn / 240 B	work allocation matched; cursor initialization and startup follow-up
 src/smt3/nme/Nme_Draw.c	redthing1	open	2026-10-28	cursor editing and movement	shared name work and actual helper contracts
 src/smt3/nme/Nme_Calc.c	redthing1	open	2026-10-28	3 fn / 588 B	character symbol and tab drawing; typed textures and data descriptor
+src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	2 fn / 396 B	work allocation and texture loading; initialization and startup residuals stay assembly
+src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	0 matches	input-mode and editing residuals retain assembly
+src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	3 fn / 588 B	character symbol and tab drawing; typed textures and data descriptor
