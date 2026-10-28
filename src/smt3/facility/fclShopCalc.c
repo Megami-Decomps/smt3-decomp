@@ -93,7 +93,7 @@ extern char D_0053D028[];
 
 extern char D_0053D038[];
 
-extern void frDestroyFontRequestAfter(void *pFRQ);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
 
 extern s32 sprintf(char *out, const char *fmt, ...);
 
@@ -220,9 +220,9 @@ extern s32 fclGetPanelAnimPhase(fclPanelAnim_t *anim);
 extern void fclDrawSpriteFilter(s32 x, s32 y, s32 d, u8 filter, s32 *color, s32 id, s32 idx,
                                 s32 *texs, fclSpriteTbl_t *table, s32 OtNo);
 
-extern void *frwGetNumFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, char *pStr, s32 pFRQ);
+extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color, const char *text, frFontHandle_t *previous);
 
-extern void func_001C7E38(void *frq, s32 mode, s32 arg);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
 
 extern fclSpriteTbl_t fclSpriteTable[];
 
@@ -261,7 +261,52 @@ void shopDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     frDestroyFontRequestAfter(frq);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawPrice);
+extern char D_0054FB68[];
+
+void shopDrawPrice(fclPanelPos_t *pos, s32 count, s8 drawMode, s32 ot)
+{
+    char text[16];
+    frFontHandle_t *request;
+
+    if (count == 0) {
+        return;
+    }
+
+    sprintf(text, D_0054FB68, count);
+    if (drawMode == 0) {
+        request = frwGetSmallNumFontFRQ(pos->unk_00 + 0x10A0, pos->unk_04 + 0xA0,
+                                        pos->unk_08, 0x89FEFF80, text, NULL);
+    } else {
+        request = frwGetNumFontFRQ(pos->unk_00 + 0x1070, pos->unk_04 + 0x70,
+                                   pos->unk_08, 0x89FEFF80, text, NULL);
+
+        if (drawMode == 1 || drawMode == 3) {
+            fclDrawSpriteRes(pos->unk_00 + 0x1140, pos->unk_04 + 0x10,
+                             pos->unk_08 << 4, NULL, 0, 0xB,
+                             ((shopDrawWork_t *)shopDrawWork)->texHandle,
+                             shopSpriteTable, ot);
+        }
+        if (drawMode == 2 || drawMode == 3) {
+            fclDrawSpriteRes(pos->unk_00 + 0x1140, pos->unk_04 + 0x140,
+                             pos->unk_08 << 4, NULL, 0, 0xC,
+                             ((shopDrawWork_t *)shopDrawWork)->texHandle,
+                             shopSpriteTable, ot);
+        }
+        if (drawMode != 4) {
+            fclDrawSpriteRes(pos->unk_00 + 0x1140, pos->unk_04 + 0x130,
+                             pos->unk_08 << 4, NULL, 0, 0xD,
+                             ((shopDrawWork_t *)shopDrawWork)->texHandle,
+                             shopSpriteTable, ot);
+        }
+    }
+
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+    fclDrawSpriteRes(pos->unk_00 + 0xF90, pos->unk_04 + 0xB0,
+                     pos->unk_08 << 4, NULL, 0, 4,
+                     ((shopDrawWork_t *)shopDrawWork)->texHandle,
+                     shopSpriteTable, ot);
+}
 
 extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
