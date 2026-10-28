@@ -461,3 +461,4 @@ src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 196 B	ascending acti
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	1 fn / 276 B	pipe damage components, event scaling and nonfatal HP clamp
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	2 fn / 668 B	Hearts attachment status and confirmation with qualified local resets; owner 333 match, 0 differ
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 220 B	message-state status rendering with signed cursor row and native display-mode argument; owner 76 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 284 B	animated frame interpolation and drawing; owner 334 match, 0 differ

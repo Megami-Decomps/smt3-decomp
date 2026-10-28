@@ -1980,7 +1980,21 @@ s32 nmeLerp2(s32 scale, s32 value, s32 range)
     return scale * rem / quarter;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeDrawFrame);
+extern void nmeDrawGradQuad(s32 x, s32 alpha, s32 ot);
+extern void nmeDrawQuadPanel(s32 color0, s32 color1, s32 alpha, s32 ot);
+
+void nmeDrawFrame(s32 type, s32 frame)
+{
+    s32 move = nmeLerp(0x12C, frame % 0x300, 0x300);
+    s32 pulse = nmeLerp(0x32, frame % 0x100, 0x100);
+    s32 alpha = nmeLerp2(0x100, frame % 0x300, 0x300);
+
+    nmeDrawSizedSprite(0, 0, D_00345D88, fclSpriteTable, 0x80808040, 0, 7);
+    nmeDrawBox(0x40, pulse, 7);
+    nmeDrawBlendQuad(pulse, 7);
+    nmeDrawGradQuad(move, 0x100 - alpha, 7);
+    nmeDrawQuadPanel(0x9192FF4C, 0x88D8FC33, pulse, 7);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", nmeDrawBlendText);
 
