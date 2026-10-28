@@ -7118,7 +7118,7 @@ no:
 INCLUDE_ASM(const s32, "code_0022C578", cmpCursorSlotIsSelectable);
 #endif
 
-/* NON_MATCHING: 6 of 32 words differ (first at +0x5C). */
+/* NON_MATCHING: 3 of 32 words differ (first at +0x5C). */
 #ifdef NON_MATCHING
 s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
 {
@@ -7126,11 +7126,13 @@ s8 cmpGetStockInfoIndex(cmpLocalStock_t *stock, s8 index, s8 flag)
     cmpStockInfo_t *info = (cmpStockInfo_t *)((u8 *)stock + ofs);
     s8 slot = *(u8 *)&info->unk_0E + info->unk_10;
 
+    s8 result;
     if (flag == 0) {
-        return ((s8 *)stock)[slot + index * 0x56 + 5];
+        result = ((s8 *)stock)[slot + index * 0x56 + 5];
     } else {
-        return ((s8 *)stock)[slot + index * 0x56 + 0x15];
+        result = ((s8 *)stock)[slot + index * 0x56 + 0x15];
     }
+    return result;
 }
 #else
 INCLUDE_ASM(const s32, "code_0022C578", cmpGetStockInfoIndex);
