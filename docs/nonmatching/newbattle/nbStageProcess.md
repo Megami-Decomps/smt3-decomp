@@ -33,25 +33,6 @@ Ruled out: `data->orderindex` used directly in the loop rather than an `s8`
 local; an `s32` local, which drops the `sll 24`/`sra 24` pair retail has; and
 a `do`/`while` on `data->order[data->orderindex] < 0`.
 
-## nbSetBadstatMotion (newbattle/nbStageProcess, 0xA8)
-
-6 of 42 words differ, at the exact 168-byte size.
-
-Retail holds `data` in `$4` and `data->party` in `$6`, computing the party
-address as `addu $5, $6, $5` with the two `nbGetUnitWorkPointer` arguments in
-their final registers before the four constant stores are emitted. The draft
-loads `data->party` into `$4` first, so the `daddu $4, $2, $0` that moves
-`data` into place lands one instruction later and the three following stores
-shift with it. The instruction multiset is identical; only the order and two
-register numbers differ.
-
-Ruled out: the party argument inlined at the call; a `struct nbParty_t *`
-local assigned just before the call rather than at its declaration; and all
-24 orders of the four constant stores in each of those three shapes.
-`nbSetBadstatMotion2`, which is the same shape without the float argument and
-the `work` local, matches with the argument hoisted into a local above the
-stores, so the difference is register pressure from `$17` holding `work`.
-
 ## DispComm1PanelComm (newbattle/nbStageProcess, 0xE0)
 
 53 of 56 words match, at the exact 224-byte size.
