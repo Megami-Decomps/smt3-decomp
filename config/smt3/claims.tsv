@@ -349,3 +349,4 @@ src/smt3/code_0029B780.c	redthing1	done	2026-10-28	1 fn / 212 B	dds3AllocConfigW
 src/smt3/facility/fclShopInit.c	redthing1	done	2026-10-28	1 fn / 220 B	shpFindItemSlot; signed item count and corrected count-helper contract
 src/smt3/newbattle/nbEncount.c	redthing1	done	2026-10-28	2 fn / 872 B	encounter threshold and distance/weighted selection; owner 9 match, 0 differ; packed integer consumer corrected
 src/smt3/newdata/datCalc.c	redthing1	done	2026-10-28	2 fn / 852 B	physical/magic attack formulas, true conversion helpers and literal ownership; owner 67 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 176 B	cmpSetItSkMessageVar; dynamic encoded-name buffer and real message value contract

@@ -1116,7 +1116,29 @@ u16 cmpGetSelectItemID(void)
     return campWork->itemId[campWork->itemCursor + campWork->itemScroll];
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpSetItSkMessageVar);
+/* Encoded player name and glyph count written by frInitNameData. */
+typedef struct {
+    u8 reserved00[0x6604];
+    u8 nameBytes[0x50];
+    u8 nameLength;
+} cmpSavedNameView_t;
+
+extern char *text2[];
+extern void fclSetMessageVar_20743088(s8 index, s32 value);
+
+void cmpSetItSkMessageVar(datUnitWork_t *unit)
+{
+    char name[((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2 + 1];
+
+    memcpy(name, ((cmpSavedNameView_t *)DDS3_GBWK)->nameBytes,
+           ((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2);
+    name[((cmpSavedNameView_t *)DDS3_GBWK)->nameLength * 2] = 0;
+    if (unit->id != 0) {
+        fclSetMessageVar_20743088(0, (s32)text2[unit->id]);
+    } else {
+        fclSetMessageVar_20743088(0, (s32)name);
+    }
+}
 
 extern s32 cmpGetSkillTargetArea(u16 skillId);
 
@@ -1580,9 +1602,9 @@ s32 cmpCalcDestroyItem(void)
         return 0;
     }
     campWork->unk_0018[0] = 0;
-    fclSetMessageVar_20743088(2, pStr[id]);
+    fclSetMessageVar_20743088(2, (s32)pStr[id]);
     sprintf(buf, D_0054FE40, D_00330914[0], DDS3_GBWK->stocklist[id + 4]);
-    fclSetMessageVar_20743088(0xB, buf);
+    fclSetMessageVar_20743088(0xB, (s32)buf);
     fclSetMessageInvalid(0);
     fclStartMessage(9);
     fclStartSelMessage(0xB);
@@ -2337,7 +2359,7 @@ s32 cmpSetHeartsSequenceRemove(void)
     if ((cmbGlobalWork->party[0].unit.badstatus & 0x8000) == 0)
     {
         campInfoWork->unk_18 = 0;
-        fclSetMessageVar_20743088(0xC, pstr[cmbGlobalWork->equipHearts]);
+        fclSetMessageVar_20743088(0xC, (s32)pstr[cmbGlobalWork->equipHearts]);
         fclSetMessageInvalid(0);
         fclStartMessage(4);
         campInfoWork->unk_01 = 3;
