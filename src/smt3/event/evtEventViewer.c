@@ -779,7 +779,105 @@ void SetActiveCamera(void)
     }
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame1);
+extern void evtEffectLoopControl(dds3Basic_t *effect, s32 sw);
+extern s32 evtPlaySe(s32 eventNo, s32 soundNo);
+extern void dds3SetQuake(s32 frame, s32 range);
+extern void dds3StopQuake(void);
+
+void RunFrame1(evtViewerObject_s *track, evtFrameInfo_t *frameInfo, s32 nowFrame)
+{
+    switch (track->type) {
+    /* Other viewer track kinds do no work in this frame pass. */
+    case 0:
+    case 1:
+    case 2:
+    case 4:
+    case 6:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 19:
+    case 22:
+    case 23:
+        break;
+    case 3:
+    case 20:
+    case 21: {
+        dds3Basic_t *effect;
+
+        if (nowFrame >= frameInfo->frame) {
+            if (frameInfo->param.sb[0] < 0) {
+                frameInfo->param.sb[0] = AddEffectTable2(nowFrame, track, frameInfo);
+            }
+        }
+        if (frameInfo->param.sb[0] < 0) {
+            break;
+        }
+        effect = viewerinfo->effectBasic[frameInfo->param.sb[0]];
+        if (effect == NULL) {
+            return;
+        }
+
+        if (nowFrame >= frameInfo->index && frameInfo->index != 0) {
+            evtEffectLoopControl(effect, 0);
+            frameInfo->param.sw[2] = 1;
+        } else if (frameInfo->param.sw[2] == 1) {
+            DelEffectTable_evtEventViewer(frameInfo->param.sb[0]);
+            frameInfo->param.sb[0] = -1;
+            frameInfo->param.sb[0] = AddEffectTable2(nowFrame, track, frameInfo);
+            frameInfo->param.sw[2] = 0;
+        }
+
+        if (track->type == 21) {
+            dds3Basic_t *part0;
+            dds3Basic_t *part1;
+            dds3Basic_t *part2;
+            dds3Basic_t *part3;
+
+            effect = viewerinfo->effectBasic[frameInfo->param.sb[0]];
+            if (effect == NULL) {
+                return;
+            }
+            part0 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[4]);
+            part1 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[5]);
+            part2 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[6]);
+            part3 = SearchBasicFromNameIndex_evtEventViewer(frameInfo->param.sb[7]);
+            dds3EffectObjectSetMG12Pos(effect, part0, part1, part2, part3);
+            return;
+        }
+        break;
+    }
+    case 18:
+        if (nowFrame == frameInfo->frame) {
+            DelBED(frameInfo);
+            frameInfo->work = AddBED(track->effect.effectData, frameInfo->param.sb[4],
+                                     (s16)frameInfo->param.sh[1], -1,
+                                     frameInfo->frame);
+        }
+        break;
+    case 5:
+        evtPlaySe(D_0054F824, (s16)frameInfo->param.sh[0]);
+        return;
+    case 7:
+        if (frameInfo->index == 0 && (s16)frameInfo->param.sh[0] == 0) {
+            viewerinfo->flags &= ~2;
+            dds3StopQuake();
+            return;
+        }
+        if (nowFrame == frameInfo->frame) {
+            viewerinfo->flags |= 2;
+            dds3SetQuake(frameInfo->index, (s16)frameInfo->param.sh[0]);
+        }
+        break;
+    }
+}
 
 void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node)
 {
