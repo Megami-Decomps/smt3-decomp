@@ -422,7 +422,34 @@ void rstUpdateSeqEvoAt(void)
     }
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqConfirm);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+
+s32 rstUpdateSeqConfirm(void)
+{
+    if (fclChkSelMessage() != 0)
+        return 0;
+    switch (fclGetSelMessagePos()) {
+    case 0:
+        rstAddAsignParam();
+        rstChkResult2Process((u8 *)startPos);
+        fclEndMessage();
+        startPos->unk_0001 = 1;
+        startPos->unk_0004 = 1;
+        break;
+    /* The third case preserves the native three-node dispatch.
+     * See docs/levers/control-flow.md. */
+    case 2:
+        break;
+    case 1:
+        rstResetAsignParam();
+        fclEndMessage();
+        startPos->unk_0001 = 0;
+        startPos->unk_0004 = 2;
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDestroySkill);
 
