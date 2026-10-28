@@ -281,7 +281,37 @@ s32 nbCameraCheckNiidaCamera(void)
     return dds3GetActiveCameraSceneBasic(dds3GetActiveScene()) == pData->niidacamera;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraCheckStateChange);
+void nbCameraCheckStateChange(void)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    dds3ProcessID_t *process = data->ActionProcessID[data->NowActionProcess];
+    s32 actionSeq;
+
+    if (process == NULL) {
+        return;
+    }
+    actionSeq = nbGetActionSeq(process);
+    if (data->orderindex != -1) {
+        nbFormation_t *form = &data->form[data->party[data->order[data->orderindex]].formindex];
+
+        if ((form->stat & 0x100) != 0) {
+            if (actionSeq == 1) {
+                nbCameraSetState(2);
+            } else if (actionSeq == 4) {
+                pNbCamera.state = 2;
+                nbCameraSetState(3);
+            } else if (actionSeq == 5) {
+                nbCameraSetState(4);
+            }
+        } else if (actionSeq == 1) {
+            effBTLModelAllShow();
+        }
+    }
+    if (actionSeq == 10) {
+        nbCameraSetState(17);
+        return;
+    }
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraProcess_nbCameraProcess);
 
