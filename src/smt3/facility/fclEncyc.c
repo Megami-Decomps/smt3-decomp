@@ -668,7 +668,46 @@ s32 DRAW_ENCYC_Process(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", UPDT_ENCYC_Process);
+extern void SetScreenOffset(fclEncyc_instance_tag *pinst, s32 flag);
+extern void (*DestPhaseTable[])(fclEncyc_instance_tag *pinst);
+
+s32 UPDT_ENCYC_Process(void)
+{
+    fclEncyc_instance_tag *pinst = g_pinst;
+    s32 phaseChanged = 0;
+
+    if (pinst == NULL) return 0;
+    if ((pinst->stat & 0x20) != 0) {
+
+        if ((pinst->stat & 0x100) != 0) {
+            SetScreenOffset(pinst, 0);
+            pinst->stat &= ~0x118;
+        }
+
+        if ((pinst->stat & 2) != 0) {
+            void (*dest)(fclEncyc_instance_tag *pinst) = DestPhaseTable[(s16)pinst->unk_58];
+            if (dest != NULL) {
+                dest(pinst);
+            }
+            pinst->stat &= ~2;
+            phaseChanged = 1;
+        }
+
+        if ((s16)pinst->unk_58 != (s16)pinst->unk_5A) {
+            pinst->unk_58 = pinst->unk_5A;
+            if (phaseChanged != 0) {
+                pinst->stat &= ~1;
+            }
+        }
+
+        pinst->unk_364++;
+        if ((s16)pinst->unk_58 == 8) {
+            fclEncycKillProcess();
+        }
+        return 0;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseRegistTop);
 
