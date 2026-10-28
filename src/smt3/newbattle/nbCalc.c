@@ -356,6 +356,8 @@ extern u32 nbGetKoukaBadKaifuku(s32 nskill, s32 sformindex, s32 dformindex, f32 
 
 extern s32 nbSetHojoKouka(s32 formindex, u32 hojotype, s32 hojopoint, s32 nvirtual);
 
+extern s32 abs(s32 value);
+
 extern s32 datCheckSyojiSkill(datUnitWork_t *work, s32 skill);
 
 extern s32 nbHatudoCheckSkill(datUnitWork_t *work, s32 skill);
@@ -1200,7 +1202,154 @@ s32 nbSetHojoAddCounter(s32 formindex, s32 type, s32 point, s32 nvirtual)
     return n - old;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbSetHojoKouka);
+s32 nbSetHojoKouka(s32 formindex, u32 hojotype, s32 hojopoint, s32 nvirtual)
+{
+    s32 total;
+    s32 change;
+    s32 count;
+
+    total = 0;
+    if ((hojotype & 0x1) != 0) {
+        change = nbSetHojoAddCounter(formindex, 4, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x2) != 0) {
+        change = nbSetHojoAddCounter(formindex, 4, -hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x4) != 0) {
+        change = nbSetHojoAddCounter(formindex, 5, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x8) != 0) {
+        change = nbSetHojoAddCounter(formindex, 5, -hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x10) != 0) {
+        change = nbSetHojoAddCounter(formindex, 6, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x20) != 0) {
+        change = nbSetHojoAddCounter(formindex, 6, -hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x40) != 0) {
+        change = nbSetHojoAddCounter(formindex, 7, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x80) != 0) {
+        change = nbSetHojoAddCounter(formindex, 7, -hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x100) != 0) {
+        change = nbSetHojoAddCounter(formindex, 8, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x200) != 0) {
+        change = nbSetHojoAddCounter(formindex, 8, -hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x1000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 9, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x2000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 10, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x4000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 11, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x8000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 12, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x10000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 13, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x20000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 14, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x1000000) != 0) {
+        change = nbSetHojoAddCounter(formindex, 15, hojopoint, nvirtual);
+        change = abs(change);
+        total += change;
+    }
+    if ((hojotype & 0x400) != 0) {
+        count = nbGetHojoCounter(formindex, 4);
+        if (count > 0) {
+            total += count;
+            nbSetHojoCounter(formindex, 4, 0);
+        }
+        count = nbGetHojoCounter(formindex, 5);
+        if (count > 0) {
+            total += count;
+            nbSetHojoCounter(formindex, 5, 0);
+        }
+        count = nbGetHojoCounter(formindex, 6);
+        if (count > 0) {
+            total += count;
+            nbSetHojoCounter(formindex, 6, 0);
+        }
+        count = nbGetHojoCounter(formindex, 7);
+        if (count > 0) {
+            total += count;
+            nbSetHojoCounter(formindex, 7, 0);
+        }
+        count = nbGetHojoCounter(formindex, 8);
+        if (count > 0) {
+            total += count;
+            nbSetHojoCounter(formindex, 8, 0);
+        }
+    }
+    if ((hojotype & 0x40000) != 0) {
+        count = nbGetHojoCounter(formindex, 4);
+        if (count < 0) {
+            total -= count;
+            nbSetHojoCounter(formindex, 4, 0);
+        }
+        count = nbGetHojoCounter(formindex, 5);
+        if (count < 0) {
+            total -= count;
+            nbSetHojoCounter(formindex, 5, 0);
+        }
+        count = nbGetHojoCounter(formindex, 6);
+        if (count < 0) {
+            total -= count;
+            nbSetHojoCounter(formindex, 6, 0);
+        }
+        count = nbGetHojoCounter(formindex, 7);
+        if (count < 0) {
+            total -= count;
+            nbSetHojoCounter(formindex, 7, 0);
+        }
+        count = nbGetHojoCounter(formindex, 8);
+        if (count < 0) {
+            total -= count;
+            nbSetHojoCounter(formindex, 8, 0);
+        }
+    }
+    return total;
+}
 
 f32 nbGetHojoRitu(s32 formindex, s32 type)
 {
