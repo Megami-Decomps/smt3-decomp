@@ -390,7 +390,19 @@ void shopDrawChoiceCount(s8 mode)
 }
 
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawPricePanel);
+void shopDrawPricePanel(s8 mode)
+{
+    fclPanelPos_t pos;
+    shopChoiceCursor_t *cursor;
+    if (mode == 0) shopDrawPanelMode0(2);
+    else shopDrawPanelMode1(2);
+    cursor = &((shopDrawWork_t *)shopDrawWork)->choiceCursor;
+    fclInitPanelPos(((shopDrawWork_t *)shopDrawWork)->panelOriginX,
+        ((shopDrawWork_t *)shopDrawWork)->panelOriginY + cursor->selectionOffset * cursor->stride * 8,
+        0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    shopDrawPrice(&pos, ((shopDrawWork_t *)shopDrawWork)->choiceCount, 4, 0x47);
+}
+
 
 s32 shopDrawPhase7(void)
 {
