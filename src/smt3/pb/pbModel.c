@@ -349,7 +349,23 @@ INCLUDE_ASM(const s32, "pb/pbModel", func_001D35F0);
 
 INCLUDE_ASM(const s32, "pb/pbModel", pbDrawMapPoly);
 
-INCLUDE_ASM(const s32, "pb/pbModel", pb_1D3940);
+extern void pbDrawMapPoly(sdfVector4_t *base, sdfDrawTag_t *tag);
+
+void pb_1D3940(s32 x, s32 y, sdfDrawTag_t *tag)
+{
+    sdfVector4_t rotation __attribute__((aligned(16)));
+    sdfVector4_t position __attribute__((aligned(16)));
+    sdfVector4_t geometry __attribute__((aligned(16)));
+
+    memset(&rotation, 0, 0x10);
+    memset(&position, 0, 0x10);
+    memset(&geometry, 0, 0x10);
+    geometry.y = 20.0f;
+    position.x = x * 40 - 380;
+    position.z = y * 40 - 380;
+    pbSetPrimMatrix(&rotation, &position.x, tag);
+    pbDrawMapPoly(&geometry, tag);
+}
 
 INCLUDE_RODATA(const s32, "pb/pbModel", D_00535C80);
 
