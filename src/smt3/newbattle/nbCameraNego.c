@@ -41,6 +41,8 @@ struct nbParty_t {
 
 extern void effBTLModelGetSphereCenter(nbFormation_t *pFormation);
 
+extern void effBTLModelAllHide(void);
+
 extern s32 effBTLModelGetMarkPosition(nbFormation_t *pFormation, s32 mark);
 
 extern nbFormation_t *effBTLSkillGetTargetFormation(s32 number);
@@ -66,6 +68,10 @@ extern u128 nbCameraNegoBougaiVec;
 extern f32 nbCamera_NegoBougai_Rate;
 
 extern f32 nbCamera_NegoBougai_Distance;
+
+extern void ToMatrix(void);
+
+extern f32 sdfAtan(f32 value);
 
 extern u32 nbCamera_NegoBougai_Frame;
 
@@ -106,7 +112,33 @@ void nbCameraState_NegoTaizi_Init(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoTaizi_Calc);
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraNego", nbCameraState_NegoTarget_Init);
+void nbCameraState_NegoTarget_Init(void)
+{
+    nbFormation_t *pForm;
+    nbCamera_t *pCamera;
+
+    effBTLModelAllHide();
+    func_0016E1F8();
+    pCamera = &pNbCamera;
+    pForm = effBTLSkillGetTargetFormation(0);
+    if ((pForm->stat & 3) == 3) {
+        pCamera->direction.x = 0.0f;
+        pCamera->direction.y = 0.0f;
+        pCamera->direction.z = -1.0f;
+        SDF_VU0_LOADVECTOR(&pForm->rot);
+        ToMatrix();
+        SDF_VU0_LOADVECTOR(&pCamera->direction);
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_APPLYMATRIX();
+        SDF_VU0_STOREVECTOR(&pCamera->direction);
+        pCamera->fovy = 0x1.657182p-1f;
+        pCamera->distance = pForm->oneshotr * pForm->scl / sdfAtan(0x1.657182p-2f);
+        if (effBTLModelGetMarkPosition(pForm, 1) == 0) {
+            effBTLModelGetSphereCenter(pForm);
+        }
+        SDF_VU0_STOREVECTOR(pCamera);
+    }
+}
 
 void nbCameraState_NegoTarget_Calc(void)
 {
