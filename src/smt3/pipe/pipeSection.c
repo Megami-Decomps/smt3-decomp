@@ -442,7 +442,52 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", PipeMain);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", pipeLoadObjects);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", MyTask);
+extern void MyAction(tagPipeObject *object);
+extern void objMdlAlphaSet(tagPipeObject *object, u8 alpha);
+extern f32 vecNormalize(f32 *vector);
+extern void vecScale(f32 *vector, f32 scale);
+extern void objMdlPosSet(tagPipeObject *object);
+
+void MyTask(tagPipeObject *object)
+{
+    f32 vector[3];
+    tagPipeObject temporary;
+    s32 eventOffset = offsetCount;
+    s32 speed = 500;
+    f32 radiusSquared;
+
+    if (object->offset != eventOffset) {
+        object->offset = eventOffset;
+    }
+    if (eventOffset >= 681) {
+        MyAction(object);
+        eventOffset = offsetCount;
+        if (eventOffset < 709) {
+            s32 remaining = 708 - eventOffset;
+            f32 alpha = (1.0f - (f32)remaining / 28.0f) * 128.0f;
+
+            temporary.id = 0x81;
+            objMdlAlphaSet(&temporary, (u8)(u32)alpha);
+            eventOffset = offsetCount;
+        }
+    }
+    if (eventOffset < 800) {
+        speed = 490;
+    }
+    radiusSquared = object->pos[0] * object->pos[0] +
+                    object->pos[1] * object->pos[1];
+    if (!(radiusSquared <= (f32)(speed * speed))) {
+        vector[0] = object->pos[0];
+        vector[1] = object->pos[1];
+        vector[2] = 0.0f;
+        vecNormalize(vector);
+        vecScale(vector, (f32)speed);
+        object->pos[0] = vector[0];
+        object->pos[1] = vector[1];
+    }
+    objMdlPosSet(object);
+}
+
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", MyAction);
 
