@@ -2823,7 +2823,41 @@ void DrawBackBlackBoard(s32 y, s32 ratio)
     ot->regFunc(ot, tag);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawRegistAllHelp);
+extern fclEncycColor_t g_uv_summon_back[];
+extern fclEncycColor_t D_003309B0[];
+extern void itfMiscDrawSpritePrim(void *pos, void *uv, void *color, s32 tail,
+                                  sdfTexHandle_t *texture, s32 flag, sdfDrawTag_t *tag);
+extern void itfMiscDrawSpritePrim2(fclEncycVertex_t *pos, fclEncycColor_t *uv,
+                                   fclEncycColor_t *color, u32 z, s32 context,
+                                   sdfDrawTag_t *tag);
+
+void DrawRegistAllHelp(fclEncyc_instance_tag *pinst)
+{
+    fclEncycVertex_t pos[2];
+    fclEncycColor_t uv;
+    sdfDrawTag_t *tag = sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    pos[0].x = 0x1370; pos[0].y = 0xA0;
+    pos[1].x = 0x2000; pos[1].y = 0x190;
+    itfMiscDrawSpritePrim(pos, D_003309B0, g_uv_summon_back, 0xFFFFF0,
+                         (sdfTexHandle_t *)pinst->texHandle[3], 0, tag);
+    uv.components[0] = 0x60; uv.components[1] = 0x4B0;
+    uv.components[2] = 0x190; uv.components[3] = 0x5F0;
+    pos[0].x = 0x18D0; pos[0].y = 0xC8;
+    pos[1].x = 0x1A00; pos[1].y = 0x168;
+    itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
+    uv.components[0] = 0xCE0; uv.components[1] = 0x610;
+    uv.components[2] = 0xF60; uv.components[3] = 0x750;
+    pos[0].x = 0x1C20; pos[1].x = 0x1ED0;
+    itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
+    uv.components[0] = 0x2D0; uv.components[1] = 0x4B0;
+    uv.components[2] = 0x550; uv.components[3] = 0x5F0;
+    pos[0].x = 0x19F0; pos[1].x = 0x1D10;
+    itfMiscDrawSpritePrim2(pos, &uv, g_uv_summon_back, 0xFFFFF0, 0, tag);
+    D_002F67F8.regFunc(&D_002F67F8, tag);
+}
+
+
 
 typedef struct {
     fclEncycVertex_t pos[2];
