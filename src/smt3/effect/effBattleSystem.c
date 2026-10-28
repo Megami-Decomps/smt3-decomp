@@ -2731,7 +2731,31 @@ INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C00);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533C10);
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLDebugPrintDistance);
+typedef struct
+{
+    char *label;
+    u8 type;
+    u8 pad5[3];
+    void *value;
+    void *value2;
+    s32 unk16;
+    s32 unk20;
+} effDebugMenuItem_t;
+
+extern effDebugMenuItem_t D_0031CF88[5];
+extern char D_0056A920[0x20];
+extern char D_0056A940[0x20];
+extern f32 effBTLModelGroupGetSphereOld(u32 group);
+extern f64 sdfFloatToULong(f32 value);
+EQUATE_FPTODP();
+
+void effBTLDebugPrintDistance(void)
+{
+    sprintf(D_0056A920, "PLAYER:%-4.3f", effBTLModelGroupGetSphereOld(0x100) * 0.02f);
+    sprintf(D_0056A940, " ENEMY:%-4.3f", effBTLModelGroupGetSphereOld(0x200) * 0.02f);
+    D_0031CF88[3].label = D_0056A920;
+    D_0031CF88[4].label = D_0056A940;
+}
 
 void eff_175768(void)
 {
