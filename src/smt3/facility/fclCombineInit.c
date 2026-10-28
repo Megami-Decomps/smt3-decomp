@@ -1306,7 +1306,23 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawBirthDevil);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00201FB0);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawPhase3);
+s32 cmbDrawPhase3(s32 active)
+{
+    fclPanelPos_t pos;
+    s32 mode = 1;
+
+    if (active != 0) {
+        mode = 0;
+        if (fclGetFlag(0) == 0) {
+            mode = 2;
+            if (*(s8 *)((u8 *)CMB_GBWK + 3) == 0x10) {
+                mode = 1;
+            }
+        }
+    }
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x64, 0, 0, (fclPanel_t *)&pos);
+    cmpUpdateListSelection(&pos, &CMB_GBWK->menuCursor, 0, mode, 0x100, 0x47);
+}
 
 s32 cmbDrawPhasePanel(void)
 {
