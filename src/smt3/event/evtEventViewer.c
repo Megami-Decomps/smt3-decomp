@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "event.h"
 
 /* The viewer's current menu, which EnterMain switches on to decide what Enter does
  * from each one. Names from the IDB. */
@@ -139,7 +140,7 @@ extern evtViewerInfo_t *viewerinfo;
 extern void *memset(void *a, s32 b, u32 c);
 extern void *sdfChipAllocDirect(u32 aSize);
 extern void evtFreePolygonMovieWorkData(void *wdata);
-extern void *dds3SceneBasicSearchNameAndType(void *scene, s32 type, const char *name);
+extern dds3Basic_t *dds3SceneBasicSearchNameAndType(dds3Basic_t *scene, s32 type, const char *name);
 extern void *dds3AddBEDEffectObjectBasic2(void *data, f32 *pos, f32 *rot);
 extern void dds3EffectObjectBasicStatOn(void *basic, s32 s);
 extern void dds3StartBEDEffectObjectBasic(void *basic, s32 cutno);
@@ -731,7 +732,85 @@ void OutFrame1(evtViewerObject_s *track, evtFrameInfo_t *node)
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame2);
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrame3);
+extern evtUnit_t *evtGetUnitHandle2(dds3Basic_t *basic);
+extern void evtLinkLightObjectBasic(evtUnit_t *unit, dds3Basic_t *light,
+                                    s32 frame);
+extern void evtUnlinkLightObjectBasic(evtUnit_t *unit, s32 frame);
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+void RunFrame3(s32 nowframe) {
+    dds3Basic_t *scene;
+    dds3SceneBasic_t *sceneWork;
+    dds3Basic_t *outerBasic;
+    evtViewerObject_s *track;
+    evtFrameInfo_t *frameInfo;
+    evtFrameInfo_t *bestFrame;
+    dds3Basic_t *lightBasic;
+    evtUnit_t *unit;
+    s32 bestFrameNumber;
+
+    if (dds3GetActiveScene() == NULL) {
+        return;
+    }
+    scene = dds3GetActiveScene();
+    sceneWork = scene->workdata;
+    for (outerBasic = sceneWork->basictable[BASIC_TYPE_UNITOBJECT].firstbasic;
+         outerBasic != NULL; outerBasic = outerBasic->next) {
+        if (outerBasic->name == NULL) {
+            continue;
+        }
+        bestFrame = NULL;
+        lightBasic = NULL;
+        bestFrameNumber = -1;
+        for (track = viewerinfo->firstobjinfo; track != NULL;
+             track = track->next) {
+            if (track->type != 9) {
+                continue;
+            }
+            for (frameInfo = track->p; frameInfo != NULL;
+                 frameInfo = frameInfo->next) {
+                dds3Basic_t *namedBasic;
+
+                if (nowframe < (s32)frameInfo->frame ||
+                    (s16)frameInfo->param.sh[0] < 0) {
+                    continue;
+                }
+                scene = dds3GetActiveScene();
+                namedBasic = dds3SceneBasicSearchNameAndType(
+                    scene, BASIC_TYPE_UNITOBJECT,
+                    viewerinfo->nametable[
+                        (s16)frameInfo->param.sh[0]]);
+                if (outerBasic != namedBasic ||
+                    (s32)frameInfo->frame <= bestFrameNumber) {
+                    continue;
+                }
+                bestFrameNumber = frameInfo->frame;
+                bestFrame = frameInfo;
+                lightBasic = (dds3Basic_t *)track->unitHandle;
+            }
+        }
+
+        unit = evtGetUnitHandle2(outerBasic);
+        if (bestFrame != NULL) {
+            if ((s16)bestFrame->param.sh[1] != 0) {
+                if (unit->currentTransitionValue != (s32)lightBasic ||
+                    (unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION) == 0) {
+                    evtLinkLightObjectBasic(unit, lightBasic, bestFrame->index);
+                }
+            } else {
+                if ((unit->flags & EVT_UNIT_FLAG_TARGET_TRANSITION) == 0) {
+                    continue;
+                }
+                if ((unit->flags & EVT_UNIT_FLAG_TARGET_BLEND_OUT) != 0) {
+                    continue;
+                }
+                evtUnlinkLightObjectBasic(unit, bestFrame->index);
+            }
+        } else if (unit->currentTransitionValue != 0) {
+            evtUnlinkLightObjectBasic(unit, 0);
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "event/evtEventViewer", RunFrameUnit);
 
