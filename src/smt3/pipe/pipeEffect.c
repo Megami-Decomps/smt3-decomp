@@ -51,6 +51,7 @@ typedef struct PIPE_EFF_t {
 
 
 extern void dds3EffectDelete(void *pData);
+void pipeEffCreateLoadFile(PIPE_EFF_t *effect, const char *path, u8 maxSize);
 
 extern s32 offsetCount;
 
@@ -114,7 +115,22 @@ void pipeBulrLimit(void)
 
 INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffCreateLoadFile);
 
-INCLUDE_ASM(const s32, "pipe/pipeEffect", pipeEffLoad);
+void pipeEffLoad(void)
+{
+    s32 maxSize = 10;
+
+    pipeEffCreateLoadFile(pipe_CELL01_D3P, "/pipe/CEL01.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_BREAK01_D3P, "/pipe/BRAKE01.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_BREAK02_D3P, "/pipe/BRAKE02.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_DAMAGE01_D3P, "/pipe/DAMAGE01.D3P", maxSize);
+    pipeEffCreateLoadFile(pipe_DAMAGE03_D3P, "/pipe/DAMAGE03.D3P", maxSize);
+    maxSize = 5;
+    pipeEffCreateLoadFile(pipe_ATTACK01_D3P, "/pipe/FPS3.D3P", maxSize);
+    /* Retail keeps a jal and epilogue after the final call. The same dead
+     * reset is present in pipeEffDraw and pipeEffCal; both sibling bodies
+     * match exactly with their native jal-plus-return sequences. */
+    maxSize = 0;
+}
 
 void pipeFreeEffects(PIPE_EFF_t *effect, u8 maxSize)
 {
