@@ -1,5 +1,13 @@
 #include "common.h"
 #include "ps2asm.h"
+#include "model.h"
+#include "draw3d.h"
+
+typedef struct
+{
+    u16 type;
+    void *pHandle;
+} effPartHandle_t;
 
 typedef struct effPCPBossBED_t
 {
@@ -90,7 +98,7 @@ typedef struct effPCPCrack_t
     s32 frame;
     u32 abgr;
     void *system;
-    struct effPartHandle_t *part;
+    effPartHandle_t *part;
 } effPCPCrack_t;
 
 /* The parameter block effPCPCrackCreate copies into the work head; the two
@@ -143,8 +151,8 @@ typedef struct effPCPBossBael_t
     effBaelHead_t param;
     s32 frame;
     u32 abgr;
-    struct effPartHandle_t *hPB;
-    struct effPartHandle_t *hPCF;
+    effPartHandle_t *hPB;
+    effPartHandle_t *hPCF;
 } effPCPBossBael_t;
 
 typedef struct effPCPBossONGYParam_t
@@ -335,7 +343,7 @@ typedef struct effPCPBossMETATOBeam_t
 typedef struct effPCPScreenCrackModel_t
 {
     s32 param;
-    s32 hModel;
+    effPartHandle_t *hModel;
     s32 frame;
     u32 abgr;
 } effPCPScreenCrackModel_t;
@@ -516,7 +524,7 @@ extern void LookAtMatrix(const void *aTarget, const void *aEye, const void *aDow
 extern void ReverseMatrix(void);
 extern void sdf3DPrimLinkTm(void *aTag, s32 aAllocator);
 extern void *effPkt3DPrimMakePoly(effPCPBossWork_t *aParm);
-extern void sdfDrawTagLink(void *aTag, u32 aPacket);
+extern void sdfDrawTagLink(sdfDrawTag_t *aTag, u32 aPacket);
 extern u8 D_002F5C20[], D_002F5C30[];
 extern u8 effPCPBossTexRect[];
 extern u8 D_0031FF80[];
@@ -534,10 +542,10 @@ extern void *sdfMemLock(void *aHandle);
 extern void sdfMemFreeDirect(void *aHandle);
 extern u32 dds3GetRandA(u8 *name);
 extern f32 dds3GetRandFloatA(u8 *name);
-extern struct effPartHandle_t *dds3EffectPartCreate(s32 type, void *pData);
-extern struct effPartHandle_t *dds3EffectPartCopy(struct effPartHandle_t *hEffPartSrc);
-extern void dds3EffectPartDelete(struct effPartHandle_t *hEffPart);
-extern effCrackModel_t *dds3EffectPartGetHandle(s32 hEffPart);
+extern effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
+extern effPartHandle_t *dds3EffectPartCopy(effPartHandle_t *hEffPartSrc);
+extern void dds3EffectPartDelete(effPartHandle_t *hEffPart);
+extern void *dds3EffectPartGetHandle(effPartHandle_t *hEffPart);
 extern void mdlSingleMotion(effCrackModel_t *aHandle, s32 aGroup, s32 aNumber);
 extern s32 sdfModelGetMarkPosCount(void *aRoot);
 extern void *dds3TrackPolyCreate(s32 number, s32 face, s32 rec, s32 type);
@@ -587,7 +595,18 @@ extern void effPCPCrackDraw(effPCPCrack_t *hData);
 extern void dds3KillProcess(s32 id, s32 shutdowntimer);
 extern void effPCP_ThunderPolyDelete(void *hData);
 extern void sdfTexFreeDelayed(void *aHandle);
-extern void mdlSetRotate(void *aHandle);
+extern void mdlSetRotate(mdlObj_t *aHandle);
+extern void FromEuler(f32 x, f32 y, f32 z);
+extern f32 func_002CF748(f32 y, f32 x);
+extern f32 tanf(f32 x);
+extern f32 __ieee754_acosf(f32 x);
+extern void mdlSetPosition(mdlObj_t *aHandle);
+extern void mdlLink(mdlObj_t *aHandle, void *aModelOt);
+extern void sdfDrawTagInit(sdfDrawTag_t *aTag);
+extern s32 sdfGrAllocPacketBuff(s32 aSize);
+extern sdfModelOt_t D_002F69B8[];
+extern f32 aViewEye[4], aViewTarget[4];
+extern sdf3DScreenParam_t dds3ScreenParam;
 extern void effPCP_BED_MatrixToQuaternion(const void *pMatrix);
 extern void *effPCPHelperBEDGetModel(void *pHelperBED);
 extern void effPCPHelperBEDDelete(void *hData);
@@ -2375,7 +2394,66 @@ void effPCPScreenCrackModelDelete(effPCPScreenCrackModel_t *hData)
     sdfChipFreeDirect(hData);
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPScreenCrackModelDraw);
+void effPCPScreenCrackModelDraw(effPCPScreenCrackModel_t *hData)
+{
+    f32 view[4] __attribute__((aligned(16)));
+    f32 angle;
+    f32 halfFovy;
+    f32 distance;
+    f32 pi;
+    mdlObj_t *model = dds3EffectPartGetHandle(hData->hModel);
+    sdfDrawTag_t *tag;
+    u64 *packet;
+    sdfGrOt_t *ot;
+
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_LOADVECTOR_B(aViewTarget);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(view);
+    pi = 3.141592503f;
+    angle = pi - __ieee754_acosf(view[1]);
+    FromEuler(angle, func_002CF748(view[0], view[2]) + pi, 0.0f);
+    mdlSetRotate(model);
+
+    halfFovy = tanf(dds3ScreenParam.fovy * 0.5f);
+    distance = 384.0f / (halfFovy + halfFovy);
+    SDF_VU0_LOADVECTOR_B(view);
+    /* Transfer the binary32 scalar through a GPR to the second VU vector. */
+    SDF_VU0_SCALEVECTOR_B_BITS(-distance);
+    SDF_VU0_LOADVECTOR(aViewEye);
+    SDF_VU0_ADDVECTOR();
+    mdlSetPosition(model);
+
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+    packet[4] = 0x31801;
+    packet[0] = 2;
+    packet[1] = 0x5000000210000000ULL;
+    packet[2] = 0x1000000000008001ULL;
+    packet[3] = 0xE;
+    packet[5] = 0x47;
+    sdfDrawTagLink(tag, (u32)packet);
+    ot = D_002F69B8[7].ot[1];
+    ot->regFunc(ot, tag);
+    mdlLink(model, &D_002F69B8[7]);
+
+    tag = (sdfDrawTag_t *)sdfGrAllocPacketBuff(0x20);
+    sdfDrawTagInit(tag);
+    packet = (u64 *)sdfGrAllocPacketBuff(0x30);
+    packet[4] = 0x717FB;
+    packet[0] = 2;
+    packet[1] = 0x5000000210000000ULL;
+    packet[2] = 0x1000000000008001ULL;
+    packet[3] = 0xE;
+    packet[5] = 0x47;
+    sdfDrawTagLink(tag, (u32)packet);
+    ot = D_002F69B8[7].ot[1];
+    ot->regFunc(ot, tag);
+    hData->frame++;
+}
+
 
 void effPCPScreenCrackModelSetColor(effPCPScreenCrackModel_t *hData, u32 abgr)
 {
