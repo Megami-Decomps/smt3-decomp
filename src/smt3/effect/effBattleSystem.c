@@ -34,6 +34,16 @@ void *sdfChipAllocDirect(s32 aSize);
 
 void sdfChipFreeDirect(void *aPtr);
 
+extern void *sdfFileOpen(const char *path);
+extern u32 sdfFileLength(void *handle);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern s32 sdfFileRead(void *handle, void *dst, s32 size);
+extern void sdfFileClose(void *handle);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+extern s32 printf(const char *format, ...);
+extern char D_00533300[];
+
 void dds3AdminiCallSequence(s32 sequence, void *data, s32 datasize, s32 restore);
 
 effPartHandle_t *dds3EffectPartCreate(u16 type, void *pData);
@@ -408,7 +418,34 @@ f32 effBTLSystem_GetScalePtr(nbFormation_t *pFormation)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSystem_Part_DataLoad);
+void effBTLSystem_Part_DataLoad(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
+{
+    u32 i;
+
+    for (i = 0; i < count; i++) {
+        if (pPartList->type == 3) {
+            void *file = sdfFileOpen(pPartList->fileName);
+            u32 fileSize = sdfFileLength(file);
+            /* Retail copies the 16-byte header with only its length initialized. */
+            struct {
+                u32 fileSize;
+                u8 reserved[0xC];
+            } header;
+
+            header.fileSize = fileSize;
+            pPartList->hMem = sdfMemAllocDirect(fileSize + 0x10);
+            pPartList->pData = sdfMemLock(pPartList->hMem);
+            memcpy(pPartList->pData, &header, sizeof(header));
+            sdfFileRead(file, (u8 *)pPartList->pData + 0x10, header.fileSize);
+            sdfFileClose(file);
+        } else {
+            pPartList->hMem = sdfDevLoadFileEx(pPartList->fileName, (u32 *)&pPartList->pData, NULL);
+        }
+        pPartList->refCount = 0;
+        printf(D_00533300, pPartList->fileName);
+        pPartList++;
+    }
+}
 
 void effBTLSystem_Part_DataFree(effBattleSystem_effBTLSystem_Part_tag *pPartList, u32 count)
 {
@@ -2081,6 +2118,8 @@ void effBTLSystemCut1DataFree(void)
         }
     }
 }
+
+INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533300);
 
 INCLUDE_RODATA(const s32, "effect/effBattleSystem", D_00533318);
 
