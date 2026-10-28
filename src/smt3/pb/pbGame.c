@@ -1151,10 +1151,48 @@ void pbSetGameCamera2(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera3);
+extern s32 pbGetMyCharcterRot(pbProcHandle_t *character);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera4);
+void pbSetGameCamera3(void)
+{
+    f32 eye[4];
+    f32 target[4];
+    s32 direction;
 
+    if (mychar[current_char] != NULL) {
+        memset(&eye, 0, sizeof(eye));
+        memset(&target, 0, sizeof(target));
+        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        SDF_VU0_COPYVECTOR(&eye, &target);
+        direction = pbGetMyCharcterRot(mychar[current_char]);
+        eye[0] += (f32)pbKeyTable[direction][0] * 160.0f;
+        eye[2] += (f32)pbKeyTable[direction][1] * 160.0f;
+        eye[1] -= 60.0f;
+        target[1] -= 40.0f;
+        SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+    }
+}
+
+void pbSetGameCamera4(s16 x, s16 y)
+{
+    f32 eye[4];
+    f32 target[4];
+    u32 i;
+
+    memset(&eye, 0, sizeof(eye));
+    memset(&target, 0, sizeof(target));
+    target[0] = x * 40 - 380;
+    target[2] = y * 40 - 380;
+    for (i = 0; i < 4; i++) {
+        target[i] += pbCameraVec[1][i];
+    }
+    for (i = 0; i < 4; i++) {
+        eye[i] = aViewEye[i] - aViewTarget[i] + target[i];
+    }
+    SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+}
 
 /* NON_MATCHING: 26 of 38 words; gcc range-tests case 0 where retail compares it. */
 #ifdef NON_MATCHING
