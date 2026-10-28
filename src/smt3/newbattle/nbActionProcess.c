@@ -294,7 +294,7 @@ extern void nbSetTarSelJyokyoTime(s32 time);
 
 extern s32 GetEndTime(nbActionProcessData_t *a, s32 formindex);
 
-extern s32 nbGetExpMakaItem(datUnitWork_t *w);
+extern void nbGetExpMakaItem(datUnitWork_t *w);
 
 extern s32 nbMakeDeadPacket(s32 startframe, nbActionProcessData_t *uniqueid, nbFormation_t *form,
                             s32 deadchk);

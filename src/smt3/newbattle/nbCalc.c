@@ -1741,7 +1741,90 @@ void nbGetEncountTableItem(nbMainProcessData_t *data)
     data->itemcnt[0] = itemcnt;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCalc", nbGetExpMakaItem);
+extern s32 datGetPlayerLevel(void);
+
+void nbGetExpMakaItem(datUnitWork_t *unit)
+{
+    nbMainProcessData_t *data;
+    datDevilFormat_t *devil;
+    s32 isBoss;
+    s32 playerLevel;
+    s32 levelGap;
+    s32 exp;
+    s32 maka;
+    u8 item = 0;
+    s32 i;
+
+    if ((unit->flag & 4) != 0) {
+        return;
+    }
+
+    data = nbGetMainProcessData();
+    isBoss = datBossRashChk(data->encno);
+    devil = &datDevilTable[unit->id];
+    exp = devil->dropexp;
+    playerLevel = datGetPlayerLevel();
+    levelGap = playerLevel - unit->level;
+
+    if (unit->level < 0x46) {
+        if ((u32)(levelGap - 6) < 6) {
+            exp = (s32)((f32)exp / 1.3f);
+        } else if (levelGap >= 12) {
+            exp = (s32)((f32)exp / 1.8f);
+        }
+    } else if (levelGap >= 6) {
+        exp = (s32)((f32)exp / 1.3f);
+    }
+    maka = devil->dropmakka;
+
+    if (isBoss != 0) {
+        exp /= 10;
+        maka /= 10;
+    }
+    data->exp += exp;
+    data->maka += maka;
+
+    if (isBoss != 0) {
+        return;
+    }
+
+    if (devil->specialbit == 0 || evtBitCheck(devil->specialbit) != 0) {
+        if (devil->specialitem != 0 &&
+            (s32)dds3GetRandIntA(NULL, 100) < devil->specialpoint) {
+            item = devil->specialitem;
+        }
+    }
+
+    for (i = 0; i < 2 && item == 0; i++) {
+        if (devil->dropitem[i] != 0 &&
+            (s32)dds3GetRandIntA(NULL, 100) < devil->droppoint[i]) {
+            item = devil->dropitem[i];
+        }
+    }
+
+    if ((s32)dds3GetRandIntA(NULL, 100) < devil->hougyokupoint && item == 0) {
+        item = 4;
+    }
+    if ((s32)dds3GetRandIntA(NULL, 100) < devil->masekipoint && item == 0) {
+        item = 3;
+    }
+
+    if (item != 0) {
+        for (i = 0; i < 4; i++) {
+            if (data->item[i] == item) {
+                data->itemcnt[i]++;
+                return;
+            }
+        }
+        for (i = 0; i < 4; i++) {
+            if (data->item[i] == 0) {
+                data->item[i] = item;
+                data->itemcnt[i] = 1;
+                return;
+            }
+        }
+    }
+}
 
 s32 nbGetLvAvg(nbMainProcessData_t *data, s32 side)
 {
