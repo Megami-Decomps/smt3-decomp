@@ -102,7 +102,8 @@ struct evtViewerInfo_t {
     s32 sp;                      /* 0x227C */
     s32 nowmenu;                     /* 0x2280 */
     s32 menusw;                   /* 0x2284 */
-    u8 unk2288[8];
+    u32 word2288;
+    u8 unk228C[4];
     s32 drawblur2;                      /* 0x2290 */
     s32 drawmblur;                      /* 0x2294 */
     s32 drawdblur;                 /* 0x2298 */
@@ -1198,7 +1199,94 @@ s32 EnterMain(void)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "event/evtEventViewer", EnterSelect);
+s32 EnterSelect(s32 unused, s32 menuMode)
+{
+    s32 completed = 0;
+    evtFrameInfo_t *node;
+    switch (menuMode) {
+    case 1:
+        switch (viewerinfo->fileMode) {
+        case 3:
+            if (viewerinfo->select_y == 0) {
+                completed = 1;
+                evtSetFirstFrame();
+            } else {
+                PopMenu();
+            }
+            break;
+        case 4:
+            if (viewerinfo->select_y == 0) {
+                completed = 1;
+                evtSetLastFrame();
+            } else {
+                PopMenu();
+            }
+            break;
+        }
+        break;
+    case 5:
+        node = evtGetSelectFrameInfo();
+        switch (viewerinfo->framelist_type) {
+        case -1:
+            if (viewerinfo->select_y == 0) DelFrameInfo2();
+            break;
+        case 5:
+            switch (viewerinfo->framelist_target->type) {
+            case 8:
+                node->param.sh[2] = viewerinfo->select_y;
+                break;
+            case 10:
+                node->nameIndex = viewerinfo->select_y;
+                break;
+            case 11: case 13: case 14: case 15: case 16: case 17: case 23:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        case 11:
+            switch (viewerinfo->framelist_target->type) {
+            case 9:
+                node->param.sh[1] = viewerinfo->select_y;
+                break;
+            case 22:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        case 16:
+            switch (viewerinfo->framelist_target->type) {
+            case 3:
+                node->param.sb[4] = viewerinfo->select_y;
+                break;
+            case 20: case 21:
+                node->param.sb[1] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        case 12:
+            switch (viewerinfo->framelist_target->type) {
+            case 6:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            case 12:
+                node->param.sh[0] = viewerinfo->select_y;
+                viewerinfo->word2288 = 0;
+                break;
+            case 19:
+                node->param.sh[0] = viewerinfo->select_y;
+                break;
+            case 1:
+                node->param.sb[0] = viewerinfo->select_y;
+                break;
+            }
+            break;
+        }
+        evtRunFrame(viewerinfo->nowframe);
+        PopMenu();
+        break;
+    }
+    return completed ? -1 : 0;
+}
 
 s32 EnterObjList(void)
 {
