@@ -344,3 +344,4 @@ src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	2 fn / 328 B	staff dr
 src/smt3/facility/fclRagUpdate.c	redthing1	done	2026-10-28	1 fn / 320 B	Rag selection dispatch and sequence state writes; whole-unit 12 match, 0 differ
 src/smt3/pipe/pipeSection.c	redthing1	done	2026-10-28	1 fn / 212 B	death-action effect lifecycle and alpha update; whole-unit 15 match, 0 differ
 src/smt3/kernel/dds3CreateData.c	redthing1	done	2026-10-28	1 fn / 708 B	staff asset initialization; paired texture arrays and padded path pool preserved; whole-unit 8 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 216 B	cmpFindFreeStockSlot; actual signed-byte args and list index

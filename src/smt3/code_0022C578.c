@@ -1042,7 +1042,7 @@ s32 cmpSetStockRemoveEff(u8 *work)
 INCLUDE_ASM(const s32, "code_0022C578", cmpSetStockRemoveEff);
 #endif
 
-extern s32 cmpFindFreeStockSlot(s32 index, s32 room);
+extern s32 cmpFindFreeStockSlot(s8 index, s8 room);
 
 /* NON_MATCHING: 12 of 32 words differ (first at +0x50). */
 #ifdef NON_MATCHING
@@ -4356,7 +4356,28 @@ INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow1);
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStockRow2);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpFindFreeStockSlot);
+s32 cmpFindFreeStockSlot(s8 index, s8 room)
+{
+    s8 slot = 0;
+
+    if (index < 0) {
+        return -1;
+    }
+    if (room != 0) {
+        while (campWork->drawStock.ListIdx[slot] != index) {
+            slot++;
+        }
+    } else {
+        while (campWork->drawStock.ListIdx[slot] != index) {
+            slot++;
+        }
+        slot -= campWork->drawStock.PartyCnt;
+        if (slot < 0) {
+            slot = 0;
+        }
+    }
+    return slot;
+}
 
 void cmpScaleColorByPhase(s8 phase, u32 *colors, s32 scale)
 {
