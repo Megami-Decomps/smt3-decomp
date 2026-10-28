@@ -3483,7 +3483,26 @@ void cmpDrawItemListHeader(s32 x, s32 y, s32 c, u16 index)
     frDestroyFontRequestAfter(frq);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawItemListScrollBar);
+/* Called before its definition without a parameter prototype. */
+extern void cmpDrawScrollThumb();
+
+void cmpDrawItemListScrollBar(s32 alpha, cmpCursorInfo_t *cursor)
+{
+    if (cursor->unk_20 != 0) {
+        if (cursor->unk_22 != 0) {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 0, alpha, 0x47);
+        } else {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 2, alpha, 0x47);
+        }
+        if (cursor->unk_22 + cursor->unk_26 != cursor->unk_20) {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 1, alpha, 0x47);
+        } else {
+            cmpDrawScrollThumb(0, 0, 0x10, 0x80808080, 3, alpha, 0x47);
+        }
+        cmpDrawScrollBar(0, 0x280, 0x10, 0xA4, 0x16, 0x80808080, alpha,
+                         cursor->unk_24, cursor, 0, 0x47);
+    }
+}
 
 /* NON_MATCHING: 2 of 46 words differ (first at +0x90), exact size; the last
    call's two argument setups are scheduled the other way round. */
@@ -4567,7 +4586,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
 extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
                              fclSpriteTbl_t *table, s32 OtNo);
 
-void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s8 kind)
+void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 {
     s32 clip[4];
 
@@ -4575,7 +4594,7 @@ void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s8 kind)
     clip[1] = color;
     clip[2] = color;
     clip[3] = color;
-    switch (kind) {
+    switch ((s8)kind) {
     case 0:
         fclDrawSpriteRes(x, y, 0x10, clip, 7, 0, D_00345D88, fclSpriteTable, 0x47);
         break;

@@ -437,3 +437,4 @@ src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 200 B	weighted commen
 src/smt3/result/rstcalc.c	redthing1	done	2026-10-28	1 fn / 252 B	result comment source and message setup with native random gate and work fields; owner 67 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 372 B	root menu input and process dispatch; owner 320 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 372 B	cross-panel callback transition and native record copy; owner 321 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 292 B	item-list scrollbar and arrow input records; owner 322 match, 0 differ
