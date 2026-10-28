@@ -2,6 +2,7 @@
 #include "nme.h"
 
 extern s32 nmeGetInputMode(nmeWork_t *work);
+extern s8 nmeGetModeFlag(nmeWork_t *work);
 extern void cmpSetCursorRow(s32 row, cmpCursorInfo_t *cursor);
 
 
@@ -169,7 +170,42 @@ s32 nmeGetCursorPos(nmeWork_t *work) {
 
 INCLUDE_ASM(const s32, "nme/Nme_Draw", func_0029A108);
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeStepCursor);
+void nmeStepCursor(s8 delta)
+{
+    s32 cursorPos = nmeGetCursorPos(nmeUpdateWork);
+    s32 mode = nmeGetInputMode(nmeUpdateWork);
+
+    switch (mode) {
+    case 0:
+        if (delta > 0) {
+            nmeUpdateWork->inputPos++;
+        }
+        if (delta < 0 && cursorPos > 0) {
+            nmeUpdateWork->inputPos--;
+        }
+        break;
+    case 1:
+        if (delta > 0) {
+            if (cursorPos < nmeGetModeFlag(nmeUpdateWork) - 1) {
+                nmeUpdateWork->inputPos++;
+            }
+        }
+        if (delta < 0) {
+            nmeUpdateWork->inputPos--;
+        }
+        break;
+    case 2:
+        if (delta > 0) {
+            if (cursorPos < nmeGetModeFlag(nmeUpdateWork) - 1) {
+                nmeUpdateWork->inputPos++;
+            }
+        }
+        if (delta < 0 && cursorPos > 0) {
+            nmeUpdateWork->inputPos--;
+        }
+        break;
+    }
+}
 
 void nmeDeleteChar(s8 delta)
 {
