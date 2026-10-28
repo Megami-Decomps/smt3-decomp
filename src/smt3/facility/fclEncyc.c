@@ -1121,7 +1121,105 @@ void DestPhaseReadTop(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadStatus);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadStatus);
+typedef struct fclEncycReadStatusWork_t {
+    fclEncyc_readmainwork_tag phase;
+    u8 reserved0030[0x10];
+    s32 reserved040;
+    s32 reserved044;
+    u8 reserved0048[0x10];
+    s32 boardY;
+    s16 boardAlpha;
+    s16 explainAlpha;
+    u8 reserved0060[0x0E];
+    s16 viewIdleTimer;
+    u8 reserved0070[0x10];
+    fclRibbon_t *ribbon;
+    void *countFont;
+    void *explainFont;
+    void *messageProcess;
+    datUnitWork_t unit;
+} fclEncycReadStatusWork_t;
+
+struct fclEncycReadHelpWork_t;
+extern void FadeInRibbon(fclEncyc_readmainwork_tag *work);
+extern void fclRbnCalc(fclRibbon_t *ribbon);
+extern s32 CalcFadeAlpha(s16 *alpha, s32 mode, s32 maximum, s32 step);
+extern void CalcMoveReadMainHelp(struct fclEncycReadHelpWork_t *work);
+extern void MoveScreenOffset(fclEncyc_instance_tag *pinst);
+extern void ResetReadMainRibbon(fclEncyc_readmainwork_tag *work);
+extern s32 PrepSummon(fclEncyc_readmainwork_tag *work);
+extern void fclRbnSwitchActive(fclRibbon_t *ribbon, s32 index);
+extern void InitCameraForViewMode(fclEncyc_instance_tag *pinst);
+extern void SetBoundControl(fclEncyc_instance_tag *pinst);
+extern void RequestChangeMotion(motionWork_t *pinst, s32 flag);
+extern void CirculateDevilObject(fclEncyc_instance_tag *pinst, s32 direction);
+extern void CreateFontExplain(fclEncyc_instance_tag *pinst);
+extern s32 cmpGetPressedButton(s32 mask);
+extern void cmpPlayCursorSE(u32 button);
+extern s32 dds3KernelDebugSign;
+
+void CalcPhaseReadStatus(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+    u32 button;
+
+    if (work->phase.ribbonAlpha < 0x80) {
+        FadeInRibbon(&work->phase);
+    }
+    fclRbnCalc(work->ribbon);
+    CalcFadeAlpha(&work->phase.statusAlpha, 1, 0x80, 0x10);
+    CalcFadeAlpha(&work->boardAlpha, 0, 0x80, 8);
+    CalcFadeAlpha(&work->explainAlpha, 0, 0x80, 8);
+    CalcMoveReadMainHelp((struct fclEncycReadHelpWork_t *)work);
+    MoveScreenOffset(pinst);
+    button = cmpGetPressedButton(0x30033);
+    switch (button) {
+    case 1:
+        if (PrepSummon(&work->phase) != 0) {
+            work->phase.flags |= 1;
+        }
+        work->phase.flags &= ~0x10;
+        pinst->unk_5A = 5;
+        break;
+    case 2:
+        work->phase.flags &= ~0x10;
+        pinst->stat |= 2;
+        pinst->unk_5A = 3;
+        break;
+    case 0x10000:
+        ResetReadMainRibbon(&work->phase);
+        fclRbnSwitchActive(work->ribbon, 0);
+        CreateFontExplain(pinst);
+        work->boardY = 0xD70;
+        work->phase.flags &= ~0x10;
+        pinst->unk_5A = 6;
+        break;
+    case 0x20000:
+        ResetReadMainRibbon(&work->phase);
+        InitCameraForViewMode(pinst);
+        SetBoundControl(pinst);
+        work->reserved040 = 0;
+        work->reserved044 = 0;
+        fclRbnSwitchActive(work->ribbon, 2);
+        pinst->stat |= 8;
+        dds3KernelDebugSign = 0;
+        work->phase.flags |= 8;
+        work->boardY = 0xC00;
+        RequestChangeMotion((motionWork_t *)pinst, 1);
+        work->phase.flags &= ~0x10;
+        pinst->unk_5A = 7;
+        break;
+    case 0x10:
+        CirculateDevilObject(pinst, 0);
+        break;
+    case 0x20:
+        CirculateDevilObject(pinst, 1);
+        break;
+    default:
+        break;
+    }
+    cmpPlayCursorSE(button);
+}
 
 void DrawPhaseReadStatus(fclEncyc_instance_tag *pinst)
 {
@@ -1160,25 +1258,6 @@ void DestPhaseReadStatus(fclEncyc_instance_tag *pinst)
     }
     ReleaseWork(pinst);
 }
-
-typedef struct fclEncycReadStatusWork_t {
-    fclEncyc_readmainwork_tag phase;
-    u8 reserved0030[0x10];
-    s32 reserved040;
-    s32 reserved044;
-    u8 reserved0048[0x10];
-    s32 boardY;
-    s16 boardAlpha;
-    s16 explainAlpha;
-    u8 reserved0060[0x0E];
-    s16 viewIdleTimer;
-    u8 reserved0070[0x10];
-    fclRibbon_t *ribbon;
-    void *countFont;
-    void *explainFont;
-    void *messageProcess;
-    datUnitWork_t unit;
-} fclEncycReadStatusWork_t;
 
 struct fclEncycReadHelpWork_t;
 extern void FadeOutRibbon(fclEncyc_readmainwork_tag *work);
