@@ -174,7 +174,39 @@ void trmActInitMisc(void)
     p2sdStopAllSe();
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqConfirm);
+extern s32 fclGetFlag(s8 index);
+extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frames);
+
+s32 trmUpdateSeqConfirm(void)
+{
+    if (dds3GetProcessStat((void *)trmUpdateWork->ScriptPID) == 2) {
+        return 0;
+    }
+    switch (fclGetFlag(2)) {
+    case 0:
+        trmActInitMisc();
+        dds3FadeOut(0, 0, 0, 20);
+        trmUpdateWork->unk_0001 = 6;
+        trmUpdateWork->unk_0004 = 1;
+        fclScriptForcedEnd((u8 *)trmUpdateWork->ScriptPID);
+        trmUpdateWork->ScriptPID = 0;
+        break;
+    case 1:
+        if (trmUpdateWork->TerminalType == 0) {
+            fclScriptStart(trmUpdateWork->scriptData, 2, &trmUpdateWork->ScriptPID);
+            trmUpdateWork->unk_0001 = 1;
+            trmUpdateWork->unk_0004 = 2;
+        } else {
+            fclScriptStart(trmUpdateWork->scriptData, 1, &trmUpdateWork->ScriptPID);
+            trmUpdateWork->unk_0001 = 0;
+            trmUpdateWork->unk_0004 = 2;
+        }
+        break;
+    case 2:
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqRoot);
 
@@ -384,7 +416,72 @@ void trmUpdateSaveActOut(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdate);
+extern void *dds3GetProcessData(dds3ProcessID_t *id);
+extern s32 fclChkDbgProcess(void);
+extern s32 trmChkEventWait(void);
+extern s8 trmGetCallMode(void);
+extern void trmSetProcessTerm(void);
+extern void trmUpdateSeqRoot(void);
+extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
+
+s32 trmUpdate(dds3ProcessID_t *id)
+{
+    s8 previous;
+    u8 flags;
+
+    trmUpdateWork = dds3GetProcessData(id);
+    previous = trmUpdateWork->unk_0001;
+    if (fclChkDbgProcess() != 0) {
+        return 0;
+    }
+    if (trmChkEventWait() != 0) {
+        return 0;
+    }
+
+    flags = trmUpdateWork->unk_0000;
+    if (flags & 0x40) {
+        return -1;
+    }
+    if ((flags & 2) && (flags & 1)) {
+        switch (trmUpdateWork->unk_0001) {
+        case 0:
+            trmUpdateSeqRoot();
+            break;
+        case 1:
+            trmUpdateSeqTrans();
+            break;
+        case 2:
+            trmUpdateSave();
+            break;
+        case 3:
+            break;
+        case 4:
+            if (trmGetCallMode() == 0 && dds3FadeCheck() != 0) {
+                break;
+            }
+            trmSetProcessTerm();
+            trmUpdateWork->unk_0000 |= 0x10;
+            break;
+        case 5:
+            if (trmUpdateSeqConfirm() == 0) {
+                return 0;
+            }
+            break;
+        case 6:
+            trmUpdateAct();
+            break;
+        case 7:
+            trmUpdateSaveActIn();
+            break;
+        case 8:
+            trmUpdateSaveActOut();
+            break;
+        }
+    }
+
+    cmpUpdateSeqInfo(trmUpdateWork, previous);
+    return 0;
+}
 
 s32 fcl_2120B0(s16 x, s16 y, s16 w, s16 h, s16 mode, void *cursor)
 {
