@@ -212,7 +212,7 @@ extern void nbSetPressMaePhase(nbMainProcessData_t *data);
 
 extern s8 dds3PadButtonState[64];
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern struct nbKoukaPacket_t *nbAddDeadPcmPacket(s32 startframe, s32 uniqueid,
                                                   nbFormation_t *form);
