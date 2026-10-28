@@ -318,7 +318,10 @@ extern u8 pbRotRKeyAct(void);
 
 extern pbProcHandle_t *moveViewCamera;
 
-extern sdfVector4_t aViewEye, aViewTarget, pbGameCameraParam, pbCameraVec;
+extern f32 aViewEye[4], aViewTarget[4];
+extern sdfVector4_t pbGameCameraParam;
+/* Two target-offset rows; pbCameraVec2 names the second row. */
+extern f32 pbCameraVec[][4];
 
 extern sdfVector4_t pbInitCameraParam, pbCameraVec2;
 
@@ -1101,12 +1104,52 @@ void pbRoundCamera(s32 dir) {
 
 void pbSetGameCamera0(void) {
     SDF_VU0_COPYVECTOR(&aViewEye, &pbGameCameraParam);
-    SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec);
+    SDF_VU0_COPYVECTOR(&aViewTarget, &pbCameraVec[0]);
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera1);
+extern void pbGetMyCharcterPos(pbProcHandle_t *character, sdfVector4_t *position);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera2);
+void pbSetGameCamera1(void)
+{
+    f32 eye[4];
+    f32 target[4];
+    u32 i;
+
+    if (mychar[current_char] != NULL) {
+        memset(&eye, 0, sizeof(eye));
+        memset(&target, 0, sizeof(target));
+        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        for (i = 0; i < 4; i++) {
+            target[i] += pbCameraVec[1][i];
+        }
+        for (i = 0; i < 4; i++) {
+            eye[i] = aViewEye[i] - aViewTarget[i] + target[i];
+        }
+        SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+    }
+}
+
+void pbSetGameCamera2(void)
+{
+    f32 eye[4];
+    f32 target[4];
+    u32 i;
+
+    if (mychar[current_char] != NULL) {
+        memset(&eye, 0, sizeof(eye));
+        memset(&target, 0, sizeof(target));
+        pbGetMyCharcterPos(mychar[current_char], (sdfVector4_t *)target);
+        for (i = 0; i < 4; i++) {
+            target[i] += pbCameraVec[1][i];
+        }
+        for (i = 0; i < 4; i++) {
+            eye[i] = aViewEye[i] - aViewTarget[i] + target[i];
+        }
+        SDF_VU0_COPYVECTOR(&aViewEye, &eye);
+        SDF_VU0_COPYVECTOR(&aViewTarget, &target);
+    }
+}
 
 INCLUDE_ASM(const s32, "pb/pbGame", pbSetGameCamera3);
 
