@@ -339,3 +339,4 @@ src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	2 fn / 404 B	list 
 src/smt3/pipe/pipeEffect.c	redthing1	done	2026-10-28	1 fn / 160 B	free effect slot allocation with typed initialization and qualified scheduler evidence; whole-unit 8 match, 0 differ
 src/smt3/effect/effEvent.c	redthing1	done	2026-10-28	1 fn / 2868 B	effEVECombParSmokeDraw; current batched smoke sibling and adjacent OT views
 src/smt3/newbattle/nbCameraHelper.c	redthing1	done	2026-10-28	0 matches; draft 269/270 words	dds3EffectFileListCreate; only loop annul bit remains, ASM fallback retained
+src/smt3/field/fldHit.c	redthing1	done	2026-10-28	1 fn / 5360 B	fldMakePlane; five collision passes and typed plane records
