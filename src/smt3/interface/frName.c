@@ -13,7 +13,30 @@ INCLUDE_ASM(const s32, "interface/frName", frRestoreNameImage);
 
 INCLUDE_ASM(const s32, "interface/frName", frCreateNameHandle);
 
-INCLUDE_ASM(const s32, "interface/frName", frGetName1NFRQ);
+typedef struct
+{
+    u8 unk_00000[0x657C];
+    u8 nameCounts[4][2];
+} frNameGlobalWork_t;
+
+extern frNameGlobalWork_t *frNameGlobalWork asm("DDS3_GBWK");
+
+extern void frTransNameImage(s8 target, s8 type);
+extern frFontHandle_t *frCreateNameHandle(s8 target, s8 glyph, frFontHandle_t *chain);
+
+frFontHandle_t *frGetName1NFRQ(s8 target, frFontHandle_t *chain, s32 firstOption)
+{
+    s8 glyph = 0;
+    s32 i = 0;
+
+    frTransNameImage(target, 0);
+    for (; i < frNameGlobalWork->nameCounts[target][0]; i++, glyph++) {
+        chain = frCreateNameHandle(target, glyph, chain);
+        chain->lastChild->renderValueOrSetupOrShade.setupBytes.firstOption = firstOption;
+    }
+    return chain;
+}
+
 
 INCLUDE_ASM(const s32, "interface/frName", frGetName2NFRQ);
 

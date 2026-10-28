@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1125 members, 506 adopted constants.
+# 0 types, 1126 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -587,6 +587,7 @@ member frFontChild_t.unk14
 member frFontRequest_t.unk00
 member frFontRequest_t.unk0C
 member frFontRequest_t.unk28
+member frNameGlobalWork_t.unk_00000
 member frPackedHeader_t.unk00
 member frRelativeImage_t.unk08
 member frTextIndex_t.unk00
