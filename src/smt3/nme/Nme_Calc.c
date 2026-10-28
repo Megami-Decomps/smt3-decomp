@@ -98,7 +98,27 @@ void nmeDrawTextBox(s32 x, s32 y, s32 z)
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawColoredText);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawButtonGuide);
+extern void nmeDrawNameText(s32 x, s32 y, s32 width, s32 height, u32 color, s32 mode);
+extern void nmeDrawNameString(s32 x, s32 y, u32 color, s32 mode);
+extern void nmeDrawEditIcons(void);
+extern void nmeDrawColoredText(s8 color);
+
+void nmeDrawButtonGuide(void)
+{
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x17,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x1D,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    nmeDrawNameText(0x2A, 0x64, 0xF4, 0x64, 0xFFD19280, 1);
+    if (namelist_buttonAnim_end->entryMode == 0) {
+        fclDrawSpriteRes(0, 0, 0, 0, 3, 0x18,
+                         (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+        nmeDrawNameString(0x83, 0x9A, 0xFFD19280, 1);
+    }
+    nmeDrawEditIcons();
+    nmeDrawColoredText((s8)((u8)namelist_buttonAnim_end->wrapCursor.unk_22 +
+                            (u8)namelist_buttonAnim_end->wrapCursor.unk_24));
+}
 
 void nmeDrawPanelSprites(void)
 {
