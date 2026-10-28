@@ -2,29 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## effPCPBossBaelCopy (effect/effPCPBoss, 128 bytes)
-
-21 of 32 words match, at the exact 128-byte size.
-
-Pure scheduling. Retail splits the `lui`/`ori` pair that builds `0x80808080`
-around the eight-instruction `ldl`/`ldr`/`sdl`/`sdr` block that copies the
-16-byte parameter vector: `lui` right after the allocation, the copy, then
-`ori` and the colour store. The draft keeps `lui` and `ori` adjacent and emits
-them before the copy, which rotates the eight copy words by two and also swaps
-which instruction fills the first `dds3EffectPartCopy` delay slot: retail takes
-`sw $0, 0x20` (the frame reset), the draft takes `lw $4, 0x28`.
-
-The sibling `effPCPBossBaelCreate` matches with the same statement order, so
-the trigger is the one-argument `dds3EffectPartCopy` rather than the stores.
-
-Ruled out: all six orderings of the vector copy, the colour store and the frame
-store, each with the copy written both as `memcpy` and as a struct assignment
-(twelve compiles, every one 11 or 12 words off); the colour in a `u32` local
-initialised at its declaration; the two `dds3EffectPartCopy` results through
-named locals; `sizeof` instead of a literal allocation size. Caching
-`src->modelResource` and `src->auxResource` in locals first is far worse, 31 of
-32.
-
 ## effPCPBossKAGUThunderboltCopy (effect/effPCPBoss, 176 bytes)
 
 21 of 44 words match, at the exact 176-byte size.
@@ -74,23 +51,6 @@ Worth knowing: the five sibling `Create` routines in this unit that set both a
 work colour and a placement colour all match with one shared constant, so
 whatever forces the second materialisation here is local to this function, not
 the family.
-
-## effPCPCrackCopy (effect/effPCPBoss, 292 bytes)
-
-63 of 73 words match, at the exact 292-byte size.
-
-Scheduling of the `0x80808080` materialisation. `effPCPCrackCreate` next to it
-matches with the identical body, so the 0x8C-byte head copy as one struct
-assignment and the store order are right. In the copy, ee-gcc builds the colour
-into `$2` before the tail of the block copy, so the tail's two temporaries land
-in `$5` and `$6`; retail uses `$2` and `$5` and builds the colour after the tail
-stores. The other six words follow from that: the `src->part` load and the
-colour store swap sides of the `dds3EffectPartCopy` delay slot, the same way
-`effPCPBossBaelCopy` does, and both are one-argument calls.
-
-Ruled out: all six orderings of the head copy, the colour store and the
-`unk9C` store (four of them are far worse, two land on 10); `unk9C` as an `f32`
-written `0.0f`, which reaches 11.
 
 ## effPCPDANTE_ShowTime_Draw (effect/effPCPBoss, 300 bytes)
 

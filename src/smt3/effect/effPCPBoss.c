@@ -90,7 +90,7 @@ typedef struct effPCPCrack_t
     s32 frame;
     u32 abgr;
     void *system;
-    s32 part;
+    struct effPartHandle_t *part;
 } effPCPCrack_t;
 
 /* The parameter block effPCPCrackCreate copies into the work head; the two
@@ -143,8 +143,8 @@ typedef struct effPCPBossBael_t
     effBaelHead_t param;
     s32 frame;
     u32 abgr;
-    s32 hPB;
-    s32 hPCF;
+    struct effPartHandle_t *hPB;
+    struct effPartHandle_t *hPCF;
 } effPCPBossBael_t;
 
 typedef struct effPCPBossONGYParam_t
@@ -534,9 +534,9 @@ extern void *sdfMemLock(void *aHandle);
 extern void sdfMemFreeDirect(void *aHandle);
 extern u32 dds3GetRandA(u8 *name);
 extern f32 dds3GetRandFloatA(u8 *name);
-extern s32 dds3EffectPartCreate(s32 type, void *pData);
-extern s32 dds3EffectPartCopy(s32 hEffPartSrc);
-extern void dds3EffectPartDelete(s32 hEffPart);
+extern struct effPartHandle_t *dds3EffectPartCreate(s32 type, void *pData);
+extern struct effPartHandle_t *dds3EffectPartCopy(struct effPartHandle_t *hEffPartSrc);
+extern void dds3EffectPartDelete(struct effPartHandle_t *hEffPart);
 extern effCrackModel_t *dds3EffectPartGetHandle(s32 hEffPart);
 extern void mdlSingleMotion(effCrackModel_t *aHandle, s32 aGroup, s32 aNumber);
 extern s32 sdfModelGetMarkPosCount(void *aRoot);
@@ -1013,22 +1013,18 @@ void effPCPCrackCreatePCF(void *parameterTable) {
     effPCPCrackCreate(bossParams, effectParams);
 }
 
-/* NON_MATCHING: 10 of 73 words differ (first at +0xD0). */
-#ifdef NON_MATCHING
 effPCPCrack_t *effPCPCrackCopy(effPCPCrack_t *src)
 {
-    effPCPCrack_t *work = sdfChipAllocDirect(0xAC);
+    effPCPCrack_t *work;
 
-    *(effCrackHead_t *)work = *(effCrackHead_t *)src;
-    work->abgr = 0x80808080;
+    work = sdfChipAllocDirect(sizeof(effPCPCrack_t));
+    memcpy(work, src, sizeof(effCrackHead_t));
     work->frame = 0;
+    work->abgr = 0x80808080;
     work->part = dds3EffectPartCopy(src->part);
     effPCPCrackInit(work);
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPCrackCopy);
-#endif
 
 void effPCPCrackDelete(effPCPCrack_t *hData)
 {
@@ -1081,12 +1077,11 @@ void effPCPBossBaelCreatePCF(void *parameterTable) {
     effPCPBossBaelCreate(firstBlock, secondBlock, thirdBlock);
 }
 
-/* NON_MATCHING: 11 of 32 words differ (first at +0x24). */
-#ifdef NON_MATCHING
 effPCPBossBael_t *effPCPBossBaelCopy(effPCPBossBael_t *hData, s32 bPos, s32 tbldata)
 {
-    effPCPBossBael_t *work = sdfChipAllocDirect(0x30);
+    effPCPBossBael_t *work;
 
+    work = sdfChipAllocDirect(sizeof(effPCPBossBael_t));
     memcpy(&work->param, &hData->param, 0x10);
     work->frame = 0;
     work->abgr = 0x80808080;
@@ -1094,10 +1089,6 @@ effPCPBossBael_t *effPCPBossBaelCopy(effPCPBossBael_t *hData, s32 bPos, s32 tbld
     work->hPCF = dds3EffectPartCopy(hData->hPCF);
     return work;
 }
-#else
-INCLUDE_ASM(const s32, "effect/effPCPBoss", effPCPBossBaelCopy);
-#endif
-
 void effPCPBossBaelDelete(effPCPBossBael_t *hData)
 {
     dds3EffectPartDelete(hData->hPCF);
