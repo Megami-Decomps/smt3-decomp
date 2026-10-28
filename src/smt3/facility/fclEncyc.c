@@ -1053,10 +1053,6 @@ void CalcPhaseRegistAll(fclEncyc_instance_tag *pinst)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadTop);
-
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
-
 typedef struct fclEncycReadTopWork_t {
     lstListWindow_t list;
     u8 reserved0184[0x1014];
@@ -1064,7 +1060,99 @@ typedef struct fclEncycReadTopWork_t {
     fclRibbon_t *ribbon;
     frFontHandle_t *requests[3];
     void *fontList[8];
+    u8 reserved1208[8];
 } fclEncycReadTopWork_t;
+
+extern const char *D_00330A14[];
+extern void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious);
+extern void drawEncycRatio(frFontHandle_t **font, s32 releasePrevious);
+extern void CreateFontListRead(void *work, s32 sort, s16 *indices);
+
+void InitPhaseReadTop(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadTopWork_t *work = allocPhaseBuffer(pinst, 0x1210);
+    s32 geometry[4];
+    s32 cursor[4];
+    s32 panelRange[4];
+    sdfIVector4_t vectors[4];
+    s32 count;
+    s32 i;
+
+    work->ribbon = fclRbnInit(2, (s8)pinst->unk_6C,
+        (sdfTexHandle_t *)pinst->texHandle[2],
+        (sdfTexHandle_t *)pinst->texHandle[3]);
+
+    vectors[0].pm[0] = 0x980;
+    vectors[0].pm[1] = 0x18;
+    vectors[0].pm[2] = 0xD30;
+    vectors[0].pm[3] = 0x110;
+    vectors[1].pm[0] = 0x9E0;
+    vectors[1].pm[1] = 0x48;
+    vectors[1].pm[2] = 0xCC0;
+    vectors[1].pm[3] = 0xE8;
+    vectors[2].pm[0] = 0x10;
+    vectors[2].pm[1] = 0x160;
+    vectors[2].pm[2] = 0x3C0;
+    vectors[2].pm[3] = 0x350;
+    vectors[3].pm[0] = 0x10;
+    vectors[3].pm[1] = 0x10;
+    vectors[3].pm[2] = 0x2F0;
+    vectors[3].pm[3] = 0x150;
+    fclRbnSetPara(work->ribbon, 0, &vectors[0], &vectors[1],
+                  &vectors[2], &vectors[3],
+                  (sdfTexHandle_t *)pinst->texHandle[3],
+                  (sdfTexHandle_t *)pinst->texHandle[3]);
+
+    vectors[0].pm[0] = 0x1260;
+    vectors[0].pm[1] = 0x18;
+    vectors[0].pm[2] = 0x1700;
+    vectors[0].pm[3] = 0x110;
+    vectors[1].pm[0] = 0x12E0;
+    vectors[1].pm[1] = 0x48;
+    vectors[1].pm[2] = 0x1690;
+    vectors[1].pm[3] = 0xE8;
+    vectors[2].pm[0] = 0x3D0;
+    vectors[2].pm[1] = 0x160;
+    vectors[2].pm[2] = 0x870;
+    vectors[2].pm[3] = 0x350;
+    vectors[3].pm[0] = 0x300;
+    vectors[3].pm[1] = 0x10;
+    vectors[3].pm[2] = 0x6B0;
+    vectors[3].pm[3] = 0x150;
+    fclRbnSetPara(work->ribbon, 1, &vectors[0], &vectors[1],
+                  &vectors[2], &vectors[3],
+                  (sdfTexHandle_t *)pinst->texHandle[3],
+                  (sdfTexHandle_t *)pinst->texHandle[3]);
+
+    for (i = 7; i >= 0; i--) work->fontList[i] = NULL;
+    work->requests[0] = frwGetSmallFontFRQ2(0x290, 0x90, 0xFFFFF0,
+                         0xA09DC380, D_00330A14[0], NULL);
+    work->requests[1] = NULL;
+    drawSummonCount((void **)&work->requests[1], 0x1840, 0x130, 0);
+    work->requests[2] = NULL;
+    drawEncycRatio(&work->requests[2], 0);
+    geometry[0] = 0x18;
+    geometry[1] = 0x88;
+    geometry[2] = 0x1D0;
+    geometry[3] = 0xED;
+    cursor[0] = 0x46;
+    cursor[1] = 0xB;
+    cursor[2] = 0x15D;
+    cursor[3] = 0x15;
+    panelRange[0] = 0x0;
+    panelRange[1] = 0x68;
+    panelRange[2] = 0x200;
+    panelRange[3] = 0x133;
+    count = fclEncycGetNum();
+    InitListWindow(&work->list, &work->listPanel, geometry, cursor, panelRange,
+                   count, 8, 0x1C);
+    PopListwinCursor(pinst, &work->list, 1);
+    CreateFontListRead(work, (s8)pinst->unk_6C, (s8)pinst->unk_6C != 0
+                      ? pinst->entries.read.sorted[1] : pinst->entries.read.sorted[0]);
+    SetScreenOffset(pinst, 0);
+}
+
+INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadTop);
 
 extern void DrawListWindowBack(void *obj, fclPanel_t *panel);
 
