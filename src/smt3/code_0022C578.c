@@ -2677,7 +2677,67 @@ void cmpUpdateParty(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockSelect);
 
-INCLUDE_ASM(const s32, "code_0022C578", campUpdateStockCursor);
+void campUpdateStockCursor(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    u16 item = campWork->itemId[campWork->itemCursor + campWork->itemScroll];
+    s32 category;
+    s32 currentCategory;
+
+    if (fclChkMessage() != 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1:
+        if (campWork->unk_8302 != 0) {
+            category = campWork->page[0].cursor.unk_22;
+            category += (u8)campWork->page[0].cursor.unk_24;
+            switch (category) {
+            case 0:
+                if (cmpItemIsUsable(item) != 0) {
+                    button = 0x8000;
+                }
+                break;
+            case 1:
+                if (cmpItemHasFlag(item, 1) == 0) {
+                    button = 0x8000;
+                }
+                break;
+            }
+            if (button != 0x8000) {
+                campWork->unk_0001 = 1;
+                campWork->unk_0004 = 1;
+            }
+        }
+        currentCategory = campWork->page[0].cursor.unk_22 +
+                          (u8)campWork->page[0].cursor.unk_24;
+        if (currentCategory < 4) {
+            if (currentCategory >= 2) {
+                button = 0;
+            }
+        }
+        break;
+    case 2:
+        campWork->unk_0001 = 1;
+        campWork->unk_0004 = button;
+        cmpDisableInfoWindow();
+        break;
+    case 0x10:
+        cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_410C, -1);
+        break;
+    case 0x20:
+        cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_410C, 1);
+        break;
+    }
+
+    if (campWork->unk_410C[0x20] == 0 && button != 2) {
+        button = 0;
+    }
+    cmpMoveCursor2((cmpCursorInfo_t *)campWork->unk_410C, 0);
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop(
+        (cmpPadStopWork_t *)campWork->unk_410C, button, 0x30));
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateSkillSelect);
 
