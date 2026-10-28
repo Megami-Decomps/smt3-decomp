@@ -32,7 +32,7 @@ typedef struct
 {
     /* 0x0000 */ u8 unk_0000[0x20];
     /* 0x0020 */ s32 flags;
-    /* 0x0024 */ u8 unk_0024[0x138];
+    /* 0x0024 */ u8 reserved0024[0x138];
     /* 0x015C */ s32 StepY;
     /* 0x0160 */ u32 unk_160;
     /* 0x0164 */ cmpCursorSize_t cursorSize;
