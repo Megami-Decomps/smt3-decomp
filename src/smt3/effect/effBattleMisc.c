@@ -785,11 +785,80 @@ void effBTLModelTargetHide(void)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokeGroupHide);
+void effBTLModelInvokeGroupHide(void) {
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    nbFormation_t *invokeForm;
+    u32 invokeParty;
+    u32 stat;
+    s32 i;
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelTargetGroupHide);
+    data = nbGetMainProcessData();
+    invokeParty = effBTLSkillGetInvokeParty();
+    if (data->formationtype == 4 && invokeParty == 0x200) {
+        effBTLModelInvokePartyShow();
+        return;
+    }
 
-INCLUDE_ASM(const s32, "effect/effBattleMisc", effBTLModelInvokePartyShow);
+    invokeForm = effBTLSkillGetInvokeFormation();
+    form = data->form;
+    for (i = 0; i < 32; i++) {
+        stat = form->stat;
+        if ((stat & invokeParty) != 0 && (stat & 1) != 0 && (stat & 2) != 0) {
+            if (form != invokeForm) {
+                effBTLModelHide(form);
+            } else {
+                effBTLModelShow(form);
+            }
+        }
+        form++;
+    }
+}
+
+void effBTLModelTargetGroupHide(void) {
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    u32 targetParty;
+    u32 targetBit;
+    u32 stat;
+    s32 i;
+
+    targetParty = effBTLSkillGetTargetParty();
+    targetBit = effBTLSkillGetTargetBit();
+    data = nbGetMainProcessData();
+    form = data->form;
+    for (i = 0; i < 32; i++) {
+        stat = form->stat;
+        if ((stat & targetParty) != 0 && (stat & 1) != 0 && (stat & 2) != 0) {
+            if ((targetBit & 1) != 0) {
+                effBTLModelShow(form);
+            } else {
+                effBTLModelHide(form);
+            }
+        }
+        targetBit >>= 1;
+        form++;
+    }
+}
+
+void effBTLModelInvokePartyShow(void) {
+    nbMainProcessData_t *data;
+    nbFormation_t *form;
+    u32 invokeParty;
+    u32 stat;
+    s32 i;
+
+    invokeParty = effBTLSkillGetInvokeParty();
+    data = nbGetMainProcessData();
+    form = data->form;
+    for (i = 0; i < 32; i++) {
+        stat = form->stat;
+        if ((stat & invokeParty) != 0 && (stat & 1) != 0 && (stat & 2) != 0) {
+            effBTLModelShow(form);
+        }
+        form++;
+    }
+}
 
 void effBTLModelTargetPartyShow(void) {
     nbFormation_t *form;
