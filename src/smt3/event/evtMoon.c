@@ -54,7 +54,77 @@ s32 evtMoonProcess1(dds3ProcessID_t *id);
 extern s32 evtMoonProcess2(dds3ProcessID_t *id);
 void evtMoonShutdown(dds3ProcessID_t *id);
 
-INCLUDE_ASM(const s32, "event/evtMoon", evtDeadMoonDraw);
+extern sdfTexHandle_t *DeadMoonTmx;
+extern s32 evtDeadMoonDraw_total_cnt;
+extern s32 evtDeadMoonDraw_a_cnt;
+extern void rsetOtOfs(s32 otofs);
+extern void rsetAlpha(s32 mode);
+extern void rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte, s32 ztst);
+extern void DrwSprite2D(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba, sdfTexHandle_t *th);
+extern void evtDrawDeadMoonSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh,
+                                  s32 rgb, sdfTexHandle_t *th, s32 ox, s32 oy,
+                                  f32 cnt, f32 alpha0, f32 alpha1, f32 scale0, f32 scale1);
+
+void evtDeadMoonDraw(evtMoonProcessData_t *data)
+{
+    s32 ox;
+    s32 oy;
+    s32 total_cnt;
+    f32 alpha;
+
+    if (DeadMoonTmx == NULL) {
+        return;
+    }
+    ox = (gMoonCnt * 0.0f) + ((1.0f - gMoonCnt) * -250.0f);
+    oy = (gMoonCnt * 0.0f) + ((1.0f - gMoonCnt) * 0.0f);
+
+    if ((DDS3_GBWK->moonFlags & 2) != 0) {
+
+        rsetOtOfs(0x47);
+        rsetAlpha(0);
+        rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+        DrwSprite2D(ox + 12, oy + 14, 108, 54, 1, 1, 108, 54, 0x80808080, DeadMoonTmx);
+        rsetAlpha(1);
+
+        if (evtDeadMoonDraw_a_cnt <= 23) {
+            alpha = 80.0f - (((f32)evtDeadMoonDraw_a_cnt * 60.0f) / 24.0f);
+        } else {
+            alpha = ((f32)(evtDeadMoonDraw_a_cnt - 24) * 60.0f) / 24.0f + 20.0f;
+        }
+        if (alpha > 100.0f) alpha = 100.0f;
+        if (alpha < 0.0f) alpha = 0.0f;
+        evtDrawDeadMoonSprite(ox + 36, oy + 16, 33, 31, 59, 21, 33, 31, 0x808080,
+                              data->MoonTmx3, ox, oy, 0.0f, alpha, alpha, 100.0f, 100.0f);
+
+        if (evtDeadMoonDraw_a_cnt <= 23) {
+            alpha = ((f32)evtDeadMoonDraw_a_cnt * 60.0f) / 24.0f;
+        } else {
+            alpha = 60.0f - (((f32)(evtDeadMoonDraw_a_cnt - 24) * 60.0f) / 24.0f);
+        }
+        if (alpha > 100.0f) alpha = 100.0f;
+        if (alpha < 0.0f) alpha = 0.0f;
+        evtDrawDeadMoonSprite(ox + 38, oy + 16, 35, 31, 93, 21, 35, 31, 0x808080,
+                              data->MoonTmx3, ox, oy, 0.0f, alpha, alpha, 100.0f, 100.0f);
+
+        total_cnt = evtDeadMoonDraw_total_cnt;
+        if (total_cnt < 18) {
+            alpha = 0.0f;
+        } else {
+            if (total_cnt < 48) {
+                alpha = ((f32)(total_cnt - 18) * 80.0f) / 30.0f;
+            } else {
+                alpha = ((f32)(74 - total_cnt) * 80.0f) / 30.0f;
+            }
+        }
+        if (alpha > 100.0f) alpha = 100.0f;
+        if (alpha < 0.0f) alpha = 0.0f;
+        evtDrawDeadMoonSprite(ox + 38, oy + 16, 37, 29, 110, 1, 17, 14, 0x808080,
+                              DeadMoonTmx, ox, oy, 0.0f, alpha, alpha, 100.0f, 100.0f);
+        rsetAlpha(0);
+        evtDeadMoonDraw_total_cnt = (evtDeadMoonDraw_total_cnt + 1) % 74;
+        evtDeadMoonDraw_a_cnt = (evtDeadMoonDraw_a_cnt + 1) % 48;
+    }
+}
 
 /* Fold phases 9-15 back toward zero for the symmetric solar animation. */
 s32 evtGetAgeOfMoon(void)
