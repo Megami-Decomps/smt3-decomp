@@ -4,6 +4,7 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 extern void dds3KillProcessName(char *name, s32 shutdowntimer);
 
@@ -426,7 +427,29 @@ void fclDestroyRag(void)
     p2sdStopBGM(0x390000);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagProcessStart);
+extern u8 *fclAllocRagWork(s8 type, void *arg);
+extern void FclDebug(s32 mode, void *work);
+extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority,
+                                          s32 startTimer, s32 shutdownTimer,
+                                          dds3ProcessFunc_t process,
+                                          dds3ProcessFunc_t shutdown,
+                                          void *work);
+extern s32 ragCalc(dds3ProcessID_t *id);
+extern s32 ragDraw(dds3ProcessID_t *id);
+extern s32 ragUpdate(dds3ProcessID_t *id);
+
+void fclRagProcessStart(s8 Signal)
+{
+    if (GBWK_0 == NULL) {
+        GBWK_0 = fclAllocRagWork(Signal, NULL);
+        FclDebug(2, GBWK_0);
+        dds3StartProcess(D_0054FB98, 0x403, 1, 1, ragCalc, NULL, GBWK_0);
+        dds3StartProcess(D_0053D1F0, 0x2B13, 1, 1, ragDraw, NULL, GBWK_0);
+        dds3StartProcess(D_0053D200, 0x520F, 1, 1, ragUpdate,
+                         (dds3ProcessFunc_t)fclDestroyRag, GBWK_0);
+        gProcessStat_1 = 1;
+    }
+}
 
 void fclRagProcessEnd(void)
 {
@@ -457,7 +480,19 @@ void func_0020ADE0(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", ragGetConfirmEntry);
+u16 *ragGetConfirmEntry(s8 kind, u8 index)
+{
+    switch (kind) {
+    case 0:
+        return (u16 *)(ragHeartsTable + 0x2 + index * 0xE);
+    case 1:
+        return (u16 *)(ragHeartsTable + 0x180 + index * 0x2C);
+    case 2:
+        return (u16 *)(ragHeartsTable + 0x520 + index * 0x2C);
+    default:
+        return NULL;
+    }
+}
 
 typedef struct
 {
