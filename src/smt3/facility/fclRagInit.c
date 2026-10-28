@@ -384,7 +384,7 @@ typedef struct {
     u8 list3[2];
 } ragListConfig_t;
 extern ragListConfig_t gCommandFlag_0[];
-extern u8 ragListFlags[3];
+extern u8 ragListFlags[5];
 extern s32 ragBuildHeartsList(u8 type, u8 *work);
 extern s8 ragBuildList2(u8 type, u8 *work);
 extern s8 ragBuildList3(u8 type, u8 *work);
@@ -528,8 +528,6 @@ INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D170);
 
 INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D188);
 
-INCLUDE_ASM(const s32, "facility/fclRagInit", fclRagUpdateInit);
-
 typedef struct ragPanel
 {
     s32 X;
@@ -586,6 +584,60 @@ typedef struct fclRagWork
     /* 0x4680 */ ragPanel_t panel[3];
     /* 0x4740 */ fclRagTex_t textureCalc[2];
 } fclRagWork_t;
+
+extern void fclInitCursorWindow(void *work, void *data, u8 count);
+extern void fclSetCursorList(void *work, s32 mode);
+extern char D_0054FB88[];
+extern char D_0054FB90[];
+extern char D_0053D1A0[];
+extern char D_0053D1B0[];
+extern char D_0053D1C0[];
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1A0);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1B0);
+
+INCLUDE_RODATA(const s32, "facility/fclRagInit", D_0053D1C0);
+
+void fclRagUpdateInit(s8 type, fclRagWork_t *owner)
+{
+    ragListWork_t *work = (ragListWork_t *)owner;
+    u8 *items;
+    s32 i;
+
+    ragCreateAllList(0, type, work);
+    fclInitCursorWindow((u8 *)work + 0x13C, ragHeartsTable + 0x8A0, 5);
+    fclSetCursorList((u8 *)work + 0x13C, 0x19);
+    memset(ragListFlags, 0, sizeof(ragListFlags));
+    printf(D_0054FB88);
+    printf(D_0053D1A0);
+    items = (u8 *)work->heartItems;
+    for (i = 31; i >= 0; i--) {
+        printf(D_0054FB90, *items++);
+    }
+    printf(D_0054FB88);
+    i = 0;
+    printf(D_0053D1B0);
+    if (work->list2Count > 0) {
+        items = (u8 *)work->list2;
+        do {
+            printf(D_0054FB90, *items++);
+            i++;
+        } while (i < work->list2Count);
+    }
+    printf(D_0054FB88);
+    i = 0;
+    printf(D_0053D1C0);
+    if (work->list3Count > 0) {
+        items = (u8 *)work->list3;
+        do {
+            printf(D_0054FB90, *items++);
+            i++;
+        } while (i < work->list3Count);
+    }
+    printf(D_0054FB88);
+    printf(D_0054FB88);
+}
 
 extern void *sdfMemAllocDirect(s32 size);
 extern void *sdfMemLock(void *handle);
