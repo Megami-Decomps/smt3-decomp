@@ -115,7 +115,25 @@ s32 trmCreateEventProcessName(s32 Type, char *pBuf)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", trmCreateTerminalList);
+extern void p2sdPlayBGM(s32 id);
+
+void trmCreateTerminalList(s32 type, s32 no)
+{
+    s32 event = trmGetEventNo(0, GBWK_3);
+
+    if (type == 0) {
+        switch (no) {
+        case 1:
+        case 3:
+        case 9:
+            if (event != 0x324) {
+                return;
+            }
+            break;
+        }
+    }
+    p2sdPlayBGM(0x20001);
+}
 
 void trmEndBGM(void)
 {
