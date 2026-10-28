@@ -219,11 +219,55 @@ void MoveDeactive(fclRibbon_t *phandle)
     }
 }
 
+INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9D8);
+
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawBackFrame);
+
+INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9E8);
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawBack);
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", DrawHexagon);
+extern void DrawHexagonElem(sdfIVector3_t *position, itfColor_t *color,
+                            u32 z, sdfDrawTag_t *tag);
+extern s32 sdf2DLinkTexPacket(sdfDrawTag_t *tag, sdfTexHandle_t *texture, s32 context);
+
+void DrawHexagon(fclRibbon_t *handle, s32 x, s32 y, u32 z, s32 alpha,
+                 s32 width, s32 fixed, sdfDrawTag_t *tag)
+{
+    itfColor_t color = {{128, 128, 128, 128}};
+    sdfIVector3_t position;
+    fclribbon_elem_t *element;
+    s32 count;
+    s32 halfWidth;
+
+    color.components[3] = (128 * alpha) >> 7;
+    sdf2DLinkTexPacket(tag, handle->tex[1], 0);
+
+    count = handle->num;
+    element = handle->pelem;
+    if (count > 0) {
+        s32 height = y + 0x48;
+        s32 remaining = count;
+        halfWidth = width >> 1;
+        do {
+            if (fixed != 0) {
+                s32 left = element->pos_deact.pm[0];
+                s32 right = element->pos_deact.pm[2];
+                s32 center = x + left + ((right - left) >> 1);
+
+                position.pm[2] = height;
+                position.pm[0] = center - halfWidth;
+                position.pm[1] = center + halfWidth;
+            } else {
+                position.pm[2] = height;
+                position.pm[0] = x + element->pos_deact.pm[0] - width;
+                position.pm[1] = x + element->pos_deact.pm[2] + width;
+            }
+            DrawHexagonElem(&position, &color, z, tag);
+            element++;
+        } while (--remaining != 0);
+    }
+}
 
 void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTag_t *pdrawtag)
 {
@@ -246,11 +290,8 @@ void DrawHexagonElem(sdfIVector3_t *std_pos, itfColor_t *color, u32 z, sdfDrawTa
 
 INCLUDE_ASM(const s32, "facility/fclRibbon", DrawElem);
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9D8);
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9E8);
 
-INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053D9F8);
 
 INCLUDE_RODATA(const s32, "facility/fclRibbon", D_0053DA08);
 
