@@ -648,7 +648,47 @@ s32 rstSetHeartsEvent(void)
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqHeartsEvent);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqHeartsMaster);
+extern char *pstr[];
+extern s32 datGetPlayerLNDLevel(datUnitWork_t *unit);
+extern void rstSetDevilRegistered(s8 id);
+extern void rstSetHeartsMasterPhase(void);
+extern char D_0053DC40[]; /* Format occupies a padded 32-byte span. */
+
+INCLUDE_RODATA(const s32, "result/rstupdate", D_0053DC40);
+
+void rstUpdateSeqHeartsMaster(void)
+{
+    s32 before;
+    s32 after;
+    s32 i;
+
+    if (fclChkMessage() != 0)
+        return;
+    switch (startPos->Flag) {
+    case 0:
+        fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->heartsequip]);
+        fclStartMessage(39);
+        before = datGetPlayerLNDLevel(startPos->pCurrentStock);
+        rstSetDevilRegistered((s8)cmbGlobalWork->heartsequip);
+        after = datGetPlayerLNDLevel(startPos->pCurrentStock);
+        if (before != after) {
+            printf(D_0053DC40, after);
+            if (after != 0)
+                rstSetHeartsMasterPhase();
+        }
+        break;
+    case 1:
+        for (i = 0; i < 6; i++)
+            startPos->pCurrentStock->param[i] += startPos->unk_129F[i];
+        rstSetMaxHpMp(0, startPos->pCurrentStock);
+        rstChkResult2Process((u8 *)startPos);
+        startPos->heartsEvent = -1;
+        startPos->unk_0004 = 1;
+        return;
+    }
+    startPos->Flag = (u8)startPos->Flag + 1;
+}
+
 
 void rstUpdateBgTimer(void)
 {

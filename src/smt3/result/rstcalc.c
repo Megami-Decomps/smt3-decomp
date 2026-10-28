@@ -878,7 +878,8 @@ s32 datFindCommentEntry(u16 devilId)
     return 0;
 }
 
-s32 datGetPlayerLNDLevel(void)
+/* Callers supply a unit; the classification currently uses global state. */
+s32 datGetPlayerLNDLevel(datUnitWork_t *unit)
 {
     u8 list;
     s32 type = datGetPlayerLNDList(&list);
