@@ -83,7 +83,9 @@ typedef struct
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ u8 unk_000C[0x14];
     /* 0x0020 */ cmpCursorInfo_t listCursor;
-    /* 0x0058 */ u8 unk_0058[0x4474];
+    /* 0x0058 */ u8 unk_0058[0x106B];
+    /* 0x10C3 */ s8 targetStock[16];
+    /* 0x10D3 */ u8 reserved10D3[0x33F9];
     /* 0x44CC */ s32 script;
     /* 0x44D0 */ s32 scriptArg;
     /* 0x44D4 */ u8 unk_44D4[0x4C];
@@ -164,7 +166,61 @@ void rcvExit(void)
     rcvUpdateWork->unk_01 = 7;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateData);
+extern s32 rcvAppAllRecover(datUnitWork_t *work);
+extern void rcvClearStatusBits(datUnitWork_t *work);
+extern void rcvReviveUnit(datUnitWork_t *work);
+extern void rcvClearDeadFlag(datUnitWork_t *work);
+extern void sfply_AdjustPrepEnd(datUnitWork_t *work);
+extern void p2sdPlaySE(s32 trackId, s32 volume, s32 pan);
+
+s32 rcvUpdateData(void)
+{
+    rcvUpdateWork_t *work = rcvUpdateWork;
+    s32 slot;
+    datUnitWork_t *unit;
+    s32 price;
+    s32 maka;
+
+    if (*((u8 *)work + 0x10BC) != 0) {
+        s8 unitIndex;
+
+        slot = (s8)(*((u8 *)work + 0x12AE) + *((u8 *)work + 0x12B0));
+        unitIndex = work->targetStock[slot];
+        unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54) + unitIndex;
+    } else {
+        slot = 0;
+        unit = (datUnitWork_t *)((u8 *)DDS3_GBWK + 0xA54);
+    }
+
+    price = *(s32 *)((u8 *)work + 0x105C + slot * 4);
+    maka = DDS3_GBWK->maka;
+    if (maka < price) {
+        return 0;
+    }
+    DDS3_GBWK->maka = maka - price;
+
+    switch (*((u8 *)work + 0x10BC)) {
+    case 1:
+        rcvAppAllRecover(unit);
+        break;
+    case 2:
+        rcvClearStatusBits(unit);
+        break;
+    case 4:
+        rcvReviveUnit(unit);
+        p2sdPlaySE(0x300002, 0x7F, 0x3F);
+        break;
+    case 7:
+        sfply_AdjustPrepEnd(unit);
+        p2sdPlaySE(0x300001, 0x7F, 0x3F);
+        break;
+    default:
+        rcvClearDeadFlag(unit);
+        p2sdPlaySE(0x300003, 0x7F, 0x3F);
+        break;
+    }
+    return 1;
+}
 
 INCLUDE_ASM(const s32, "facility/fclRecoverUpdate", rcvUpdateCallSeq);
 
