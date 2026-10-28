@@ -5585,7 +5585,27 @@ void camp_23CDB8(s32 x, s32 y, s32 z, s32 h, s32 n, s32 f, s32 g, s32 col)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow1);
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpDrawStatusBadge);
+void cmpDrawStatusBadge(s32 x, s32 y, s32 *colors, u16 statusFlags)
+{
+    u32 flags = statusFlags;
+    s32 xOffset = 0;
+
+    if ((flags & 0x100) != 0) {
+        fclDrawSpriteRes(x, y, 0, colors, 3, 0, D_00345D88, fclSpriteTable, 0x47);
+        xOffset = 0x180;
+    }
+    if ((flags & 0x800) != 0) {
+        fclDrawSpriteRes(x + xOffset, y, 0, colors, 3, 1, D_00345D88, fclSpriteTable, 0x47);
+        xOffset += 0x180;
+    }
+    if ((flags & 0x40) != 0) {
+        fclDrawSpriteRes(x + xOffset, y, 0, colors, 3, 2, D_00345D88, fclSpriteTable, 0x47);
+        xOffset += 0x180;
+    }
+    if ((flags & 0x20) != 0) {
+        fclDrawSpriteRes(x + xOffset, y, 0, colors, 3, 3, D_00345D88, fclSpriteTable, 0x47);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDrawStatusRow2);
 
