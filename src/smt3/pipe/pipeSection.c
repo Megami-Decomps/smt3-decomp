@@ -19,7 +19,7 @@ typedef struct tagPipeObject {
     f32 vpos[2];
     u8 id;
     u8 action;
-    u8 enabled;
+    s8 enabled;
     u8 mdl;
     s16 count;
     u16 flags;
@@ -438,7 +438,79 @@ void pipeEnd(void)
     objPtr = NULL;
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", PipeMain);
+typedef struct tagpipeParts {
+    s32 offset;
+    u8 id;
+    u8 unk05;
+    u8 mdl;
+    s8 resv[5];
+} tagpipeParts;
+
+typedef struct tagMakaObject {
+    s32 maka;
+    s8 count;
+    s8 resv[3];
+    s32 pos[2];
+    void *makaObject;
+} tagMakaObject;
+
+extern tagpipeParts *PartsWork;
+extern tagMakaObject *makaWork;
+extern void pipeLoadObjects(void);
+extern void MyTask(tagPipeObject *object);
+extern void EmTask(tagPipeObject *object);
+extern void MyHitAction(tagPipeObject *object);
+extern void partsDel(tagpipeParts *parts);
+extern void pipeEffCal(void);
+
+void PipeMain(void)
+{
+    tagMakaObject *maka = makaWork;
+    tagPipeObject *object = ObjWork;
+    tagpipeParts *parts = PartsWork;
+    tagPipeObject *lastMyObject = NULL;
+    s32 i;
+
+    pipeLoadObjects();
+    for (i = 0x95; i != -1; i--) {
+        switch (object->id & 0xF0) {
+        case 0x10:
+            break;
+        case 0x80:
+            MyTask(object);
+            lastMyObject = object;
+            break;
+        case 0:
+            EmTask(object);
+            break;
+        }
+        if (object->id != 0xFF && (s8)object->enabled == 0) {
+            objDel(object);
+        }
+        object++;
+    }
+    if (lastMyObject != NULL) {
+        MyHitAction(lastMyObject);
+    }
+    pipeEffCal();
+
+    for (i = 0x13; i != -1; i--) {
+        if (parts->id != 0xFF && parts->offset < offsetCount - 0x190) {
+            partsDel(parts);
+        }
+        parts++;
+    }
+
+    for (i = 0x0E; i != -1; i--) {
+        if (maka->maka != 0) {
+            maka->count--;
+            if (maka->count == 0) {
+                maka->maka = 0;
+            }
+        }
+        maka++;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", pipeLoadObjects);
 
@@ -720,13 +792,7 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", ActionKey);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", HITCHECK_CUR);
 
-typedef struct tagMakaObject {
-    s32 maka;
-    s8 count;
-    s8 resv[3];
-    s32 pos[2];
-    void *makaObject;
-} tagMakaObject;
+
 
 extern tagMakaObject *makaWork;
 extern void MyDraw(tagPipeObject *object);
