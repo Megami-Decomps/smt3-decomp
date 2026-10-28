@@ -41,7 +41,7 @@ extern s32 datCopyDevilWorkEntry(datUnitWork_t *work, s32 level);
 typedef struct
 {
     /* 0x0000 */ u8 flags;
-    /* 0x0001 */ u8 unk_01[0x17];
+    /* 0x0001 */ u8 reserved01[0x17];
     /* 0x0018 */ s8 unk_18;
     /* 0x0019 */ s8 unk_19;
     /* 0x001A */ u8 unk_1A[0x16];
@@ -49,10 +49,10 @@ typedef struct
     /* 0x0070 */ s8 levelUpCount;
     /* 0x0071 */ s8 levelUpStep;
     /* 0x0072 */ u8 unk_72[0x0B];
-    /* 0x007D */ u8 unk_7D;
-    /* 0x007E */ u8 unk_7E[6];
+    /* 0x007D */ u8 reserved7D;
+    /* 0x007E */ u8 reserved7E[6];
     /* 0x0084 */ u16 evoID;
-    /* 0x0086 */ u8 unk_86[0xE6];
+    /* 0x0086 */ u8 reserved86[0xE6];
     /* 0x016C */ datUnitWork_t *unit;
     /* 0x0170 */ u8 unk_170[0x2175];
     /* 0x22E5 */ s8 unk_22E5;
@@ -127,7 +127,7 @@ void rstInitEvoAct(void)
     modelParam[1] *= datModelParamTable[GBWK_1->evoID].formscale;
     fclSetWorkValue(6, (s32)modelParam[1]);
     evtStartEvent(0x329);
-    GBWK_1->unk_7D = 0;
+    GBWK_1->reserved7D = 0;
 }
 
 s32 rstChkEvoAct(void)
