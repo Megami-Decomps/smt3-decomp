@@ -492,3 +492,4 @@ src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 444 B	evolution con
 src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	terminal event mode dispatch; exact-size eight-word scheduling/control-flow residual
 src/smt3/effect/effBattleSystem.c	redthing1	done	2026-10-28	1 fn / 264 B	battle debug flag snapshot with typed signed status extraction and native byte outputs; owner 285 match, 0 differ
 src/smt3/code_001C55F8.c	redthing1	done	2026-10-28	1 fn / 224 B	camera helper file load and effect-part creation; owner 11 match, 0 differ
+src/smt3/code_001C55F8.c	redthing1	done	2026-10-28	1 fn / 252 B	PB file selection and viewer callback replacement; owner 12 match, 0 differ

@@ -284,7 +284,59 @@ s32 nbCameraHelperViewer_PB_Init(s32 pData)
     return pData;
 }
 
-INCLUDE_ASM(const s32, "code_001C55F8", nbCameraHelperViewer_PB_Draw);
+/* Callback slots follow the viewer record used by func_001AA310. */
+typedef struct effDebugViewer_t {
+    u8 reserved00[0x18];
+    struct effDebugViewer_t *replacement;
+    void *createParam;
+    u8 reserved20[0xC];
+    s32 (*create)(void *);
+    u8 reserved30[4];
+    void (*destroy)(void *);
+    s32 *handle;
+} effDebugViewer_t;
+
+extern effDebugViewer_t nbCameraHelperViewerPBParam;
+extern char D_0056B470[];
+extern void dds3EffectFileListWindowDraw(void *window);
+extern u32 dds3EffectFileListWindowGetState(void *window);
+extern u32 dds3EffectFileListWindowGetFilename(void *window, char *filename);
+extern void nbSetHelperViewer(void *viewer);
+
+void nbCameraHelperViewer_PB_Draw(void *pData)
+{
+    effDebugViewer_t *viewer = NULL;
+
+    dds3EffectFileListWindowDraw(nbCameraHelperViewerPBWork);
+    if (dds3EffectFileListWindowGetState(nbCameraHelperViewerPBWork) == 1) {
+        void (*destroy)(void *);
+        s32 (*create)(void *);
+
+        dds3EffectFileListWindowGetFilename(nbCameraHelperViewerPBWork, D_0056B470);
+        nbCameraHelperViewerMode = D_0056B470;
+        destroy = nbCameraHelperViewerPBParam.destroy;
+        if (destroy != NULL) {
+            if (nbCameraHelperViewerPBParam.handle != NULL) {
+                destroy((void *)*nbCameraHelperViewerPBParam.handle);
+            } else {
+                destroy(NULL);
+            }
+        }
+        if (nbCameraHelperViewerPBParam.replacement != NULL) {
+            viewer = nbCameraHelperViewerPBParam.replacement;
+        }
+        create = viewer->create;
+        if (create != NULL) {
+            if (viewer->createParam != NULL) {
+                *viewer->handle = create(viewer->createParam);
+            } else {
+                create(NULL);
+            }
+        }
+        nbSetHelperViewer(viewer);
+    }
+}
+
 
 void nbCameraHelperViewer_PB_End(void *pData)
 {
