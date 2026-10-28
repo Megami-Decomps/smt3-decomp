@@ -17,6 +17,18 @@ extern s32 dds3FadeCheck(void);
 
 extern void fclScriptForcedEnd(u8 *PID);
 
+extern s32 trmGetJumpTerminalNo(void);
+
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
+
+extern s32 cmpMoveCursor(void *cursor, s8 direction);
+
+extern s32 fclBlendColor(s32 color, s32 mask, s32 alpha);
+
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 ot);
+
 typedef struct
 {
     /* 0x0000 */ u8 unk_0000;
@@ -31,9 +43,11 @@ typedef struct
     /* 0x11D9 */ u8 unk_11D9[0x1018];
     /* 0x21F1 */ s8 TerminalType;
     /* 0x21F2 */ u16 TerminalNo;
-    /* 0x21F4 */ s8 TerminalList[0x21];
+    /* 0x21F4 */ s8 TerminalList[0x20];
+    /* 0x2214 */ s8 previousTerminalType;
     /* 0x2215 */ s8 unk_2215;
-    /* 0x2216 */ u8 unk_2216[0xA];
+    /* 0x2216 */ s8 cursor;
+    /* 0x2217 */ u8 pad2217[9];
     /* 0x2220 */ s32 ScriptPID;
     /* 0x2224 */ u8 unk_2224[0xC];
     /* 0x2230 */ s32 saveProcess;
@@ -42,6 +56,8 @@ typedef struct
 } trmUpdateWork_t;
 
 extern trmUpdateWork_t *trmUpdateWork;
+
+extern void fclTerminalSetMode(s32 mode, s32 id, trmUpdateWork_t *work);
 
 s32 trmEndEvent(s32 BgmMode);
 
@@ -90,7 +106,23 @@ INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateActLearge);
 
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateActSmall);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateAct);
+void trmUpdateAct(void)
+{
+    if (trmUpdateWork->cursor < 0 && dds3FadeCheck() == 0) {
+        trmEndEvent(1);
+        trmUpdateWork->TerminalNo = trmGetJumpTerminalNo();
+        trmUpdateWork->previousTerminalType = trmUpdateWork->TerminalType;
+        trmUpdateWork->TerminalType = 0;
+        fclTerminalSetMode(trmUpdateWork->TerminalType, trmUpdateWork->TerminalNo, trmUpdateWork);
+        trmUpdateWork->cursor = 0;
+        return;
+    }
+    if (trmUpdateWork->previousTerminalType == 0) {
+        trmUpdateActLearge();
+    } else {
+        trmUpdateActSmall();
+    }
+}
 
 extern s32 fmProcessChk(void);
 
@@ -138,9 +170,20 @@ void trmUpdateSaveActOut(void)
 
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdate);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", fcl_2120B0);
+s32 fcl_2120B0(s16 x, s16 y, s16 w, s16 h, s16 mode, void *cursor)
+{
+    cmpInitCursorRange(cursor, 2, 2, 0);
+    cmpInitCursorLayout(cursor, x, y, w, h, mode);
+    return cmpMoveCursor(cursor, 1);
+}
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", fclDrawListSprite);
+s32 fclDrawListSprite(s32 x, s32 y, s32 color, s32 w, s32 h, s32 arg6, s32 blend, s32 ot)
+{
+    if (blend != 0) {
+        arg6 = fclBlendColor(arg6, arg6 & 0xFF, 0x80);
+    }
+    return cmpDrawBoxF(x, y, color, w, h, arg6, ot);
+}
 
 INCLUDE_RODATA(const s32, "facility/fclTerminalUpdate", D_0053D6D8);
 
