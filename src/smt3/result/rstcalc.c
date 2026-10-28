@@ -1539,10 +1539,29 @@ s32 cmbGetLevelUpCount(datUnitWork_t *unit, u32 exp)
 INCLUDE_ASM(const s32, "result/rstcalc", cmbGetLevelUpCount);
 #endif
 
-INCLUDE_ASM(const s32, "result/rstcalc", rstDrawGetCursorRow);
-
+extern void rstDrawNumber(s32 x, s32 y, s32 number);
+extern s32 fclChkMessage(void);
 extern void cmpDrawStatusComEx(s32 a, u8 alpha, s8 b, s8 c, s32 d,
                                s8 e, s32 color, s8 f, s8 g, s8 h);
+
+void rstDrawGetCursorRow(void)
+{
+    rstDrawWork_t *work;
+    s32 row;
+
+    work = rstDrawWork;
+    row = (s8)(work->unk_170[0x10E] + work->unk_170[0x110]);
+    if ((s8)work->unk_0000[0x18] != 0) {
+        rstDrawNumber(0, 0, (s8)work->unk_0000[0x19]);
+    }
+    if (fclChkMessage() != 0 || (s8)rstDrawWork->unk_0000[0x18] == 0) {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 0,
+                           (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
+    } else {
+        cmpDrawStatusComEx((s32)rstDrawWork->unk_16C, 0x80, row, 2,
+                           (s32)rstDrawWork->unk_129F, 0, 0xA09DC380, 2, 0, 0);
+    }
+}
 
 void rstDrawStatusRow(s8 mode, s8 row, s8 flags)
 {
