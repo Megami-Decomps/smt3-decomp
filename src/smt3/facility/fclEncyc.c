@@ -148,12 +148,12 @@ typedef struct
     /* 0x01D3B */ u8 devilSlot[0x100];
     /* 0x01E3B */ u8 unk_01E3B[0x10045];
     /* 0x11E80 */ s32 encycNum;
-} cmbGlobalWork_t;
+} encycSaveWork_t;
 
 /* newdata.h declares the same symbol dds3GlobalWork_t *DDS3_GBWK, and this
  * unit reads it through a different member set at the same offsets. Both are
- * partial views; the alias holds them apart until one covers the object. */
-extern cmbGlobalWork_t *cmbGlobalWork asm("DDS3_GBWK");
+ * partial views, distinct from transient CMB_GBWK; the alias holds them apart until one covers the object. */
+extern encycSaveWork_t *encycSaveWork asm("DDS3_GBWK");
 
 extern s32 printf(const char *fmt, ...);
 
@@ -347,8 +347,8 @@ extern s32 evtBitOff(s32 no);
 
 s32 fclEncycRegist2(fclencyceelem_t *pelemsrc, s32 overwrite)
 {
-    s32 *num = &cmbGlobalWork->encycNum;
-    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    s32 *num = &encycSaveWork->encycNum;
+    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
     s32 index = fclEncycSearch(*(u16 *)((u8 *)pelemsrc + 0x0));
     s32 known = 1;
     s32 count;
@@ -380,8 +380,8 @@ s32 fclEncycRegist2(fclencyceelem_t *pelemsrc, s32 overwrite)
 
 s32 fclEncycRegist(fclencyceelem_t *entry, s32 store)
 {
-    s32 *num = &cmbGlobalWork->encycNum;
-    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)cmbGlobalWork + 0x11E90);
+    s32 *num = &encycSaveWork->encycNum;
+    fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
     s32 index = fclEncycSearch(*(u16 *)((u8 *)entry + 0x4));
     s32 known = 1;
     s32 count;
@@ -413,8 +413,8 @@ s32 fclEncycRegist(fclencyceelem_t *entry, s32 store)
 
 s32 fclEncycSearch(s32 id)
 {
-    fclencyceelem_t *entry = (fclencyceelem_t *)((u8 *)cmbGlobalWork + 0x11E90);
-    s32 count = cmbGlobalWork->encycNum;
+    fclencyceelem_t *entry = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
+    s32 count = encycSaveWork->encycNum;
     s32 i;
 
     for (i = 0; i < count; i++) {
@@ -428,7 +428,7 @@ s32 fclEncycSearch(s32 id)
 
 s32 fclEncycGetNum(void)
 {
-    return cmbGlobalWork->encycNum;
+    return encycSaveWork->encycNum;
 }
 
 s32 fclEncycGetRatio(void)
@@ -576,7 +576,53 @@ void DestPhaseRegistConfirm(fclEncyc_instance_tag *pinst)
     ReleaseWork(pinst);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseRegistAll);
+typedef struct
+{
+    u8 unk0000;
+    u8 unk0001[3];
+    lstListWindow_t listWindow;
+    u8 unk0188[0x1058];
+    frFontHandle_t *fonts[7];
+    void *process;
+} fclEncycRegistAllWork_t;
+
+typedef struct
+{
+    u8 unk0000[0x16510];
+    s32 script;
+} fclEncycRegistAllGlobalWork_t;
+
+extern fclEncycRegistAllGlobalWork_t *CMB_GBWK;
+
+extern s32 fclChkMessageDraw(void *PID);
+extern s32 fclGetFlag(s8 index);
+extern void fclClearFlag(s8 index);
+extern s32 fclScriptStart(s32 pScriptData, s32 StartNo, void *pPID);
+extern s32 RegistAll(fclEncyc_instance_tag *pinst);
+
+void CalcPhaseRegistAll(fclEncyc_instance_tag *pinst)
+{
+    fclEncycRegistAllWork_t *work = (fclEncycRegistAllWork_t *)pinst->pwork;
+
+    CalcListElemColor(&work->listWindow, work->fonts, 7, 2);
+    if (fclChkMessageDraw(work->process) != 0) {
+        return;
+    }
+
+    work->process = 0;
+    if (fclGetFlag(0) != 0) {
+        RegistAll(pinst);
+        pinst->stat |= 2;
+        pinst->unk_5A = 8;
+    } else {
+        work->unk0000 = 0;
+        fclClearFlag(0);
+        work->process = 0;
+        fclScriptStart(CMB_GBWK->script, 0xF, &work->process);
+        pinst->unk_5A = 0;
+    }
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", InitPhaseReadTop);
 
@@ -800,7 +846,7 @@ void ExecSummon(s32 recindex)
     u16 *record = (u16 *)((u8 *)DDS3_GBWK + recindex * 0xB0 + 0x11E90);
     s32 slot = datAddDevil(*record, 0);
 
-    SetRecordToUnitCore(&cmbGlobalWork->party[slot], record);
+    SetRecordToUnitCore(&encycSaveWork->party[slot], record);
 }
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", drawRegistList);
