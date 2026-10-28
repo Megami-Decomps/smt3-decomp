@@ -292,13 +292,13 @@ typedef struct fp_number_type_df {
     long fraction;
 } fp_number_type_df;
 
-extern long libc_2D34A0(const fp_number_type_df *u);
+extern long __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
 extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
 
-extern long libc_2D3638(const fp_number_type_df *a, const fp_number_type_df *b);
+extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sceGsResetGraph);
 
@@ -657,7 +657,7 @@ long dpadd(double a, double b) {
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
-    return libc_2D34A0(libc_2D1590(&ua, &ub, &r));
+    return __pack_df(libc_2D1590(&ua, &ub, &r));
 }
 
 long dpsub(double a, double b) {
@@ -668,7 +668,7 @@ long dpsub(double a, double b) {
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
     ub.sign ^= 1;
-    return libc_2D34A0(libc_2D1590(&ua, &ub, &r));
+    return __pack_df(libc_2D1590(&ua, &ub, &r));
 }
 
 INCLUDE_ASM(const s32, "code_002C81A8", dpmul);
@@ -679,7 +679,7 @@ long dpdiv(double a, double b) {
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
-    return libc_2D3638(&ua, &ub);
+    return __fpcmp_parts_df(&ua, &ub);
 }
 
 INCLUDE_ASM(const s32, "code_002C81A8", litodp);
@@ -693,7 +693,7 @@ long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
     u.sign = sign;
     u.normal_exp = exp;
     u.fraction = mant;
-    return libc_2D34A0(&u);
+    return __pack_df(&u);
 }
 
 #ifdef FIX_BUGS
@@ -878,11 +878,11 @@ f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
     return sdfPackFloat(&u);
 }
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2D34A0);
+INCLUDE_ASM(const s32, "code_002C81A8", __pack_df);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sdfUnpackDouble);
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2D3638);
+INCLUDE_ASM(const s32, "code_002C81A8", __fpcmp_parts_df);
 
 INCLUDE_ASM(const s32, "code_002C81A8", sdfPackFloat);
 
@@ -2329,17 +2329,17 @@ INCLUDE_ASM(const s32, "code_002C81A8", libc_2E52FC);
 
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2E5320);
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2E59B8);
+INCLUDE_ASM(const s32, "code_002C81A8", __moddi3);
 
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2E6048);
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2E65C8);
+INCLUDE_ASM(const s32, "code_002C81A8", __umoddi3);
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2E6B30);
+INCLUDE_ASM(const s32, "code_002C81A8", __fixunsdfdi);
 
 INCLUDE_ASM(const s32, "code_002C81A8", libc_2E6C48);
 
-INCLUDE_ASM(const s32, "code_002C81A8", libc_2E6D88);
+INCLUDE_ASM(const s32, "code_002C81A8", __floatdidf);
 
 INCLUDE_ASM(const s32, "code_002C81A8", __errno_8);
 

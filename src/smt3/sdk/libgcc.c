@@ -368,13 +368,13 @@ typedef struct fp_number_type_df {
     long fraction;
 } fp_number_type_df;
 
-extern long libc_2D34A0(const fp_number_type_df *u);
+extern long __pack_df(const fp_number_type_df *u);
 
 extern void sdfUnpackDouble(const double *x, fp_number_type_df *u);
 
 extern fp_number_type_df *libc_2D1590(const fp_number_type_df *a, const fp_number_type_df *b, fp_number_type_df *r);
 
-extern long libc_2D3638(const fp_number_type_df *a, const fp_number_type_df *b);
+extern long __fpcmp_parts_df(const fp_number_type_df *a, const fp_number_type_df *b);
 
 
 void runAtExitList(void) {
@@ -416,7 +416,7 @@ long dpadd(double a, double b) {
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
-    return libc_2D34A0(libc_2D1590(&ua, &ub, &r));
+    return __pack_df(libc_2D1590(&ua, &ub, &r));
 }
 
 long dpsub(double a, double b) {
@@ -427,7 +427,7 @@ long dpsub(double a, double b) {
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
     ub.sign ^= 1;
-    return libc_2D34A0(libc_2D1590(&ua, &ub, &r));
+    return __pack_df(libc_2D1590(&ua, &ub, &r));
 }
 
 INCLUDE_ASM(const s32, "sdk/libgcc", dpmul);
@@ -438,7 +438,7 @@ long dpdiv(double a, double b) {
 
     sdfUnpackDouble(&a, &ua);
     sdfUnpackDouble(&b, &ub);
-    return libc_2D3638(&ua, &ub);
+    return __fpcmp_parts_df(&ua, &ub);
 }
 
 INCLUDE_ASM(const s32, "sdk/libgcc", litodp);
@@ -452,7 +452,7 @@ long dptoul(s32 kind, s32 sign, s32 exp, long mant) {
     u.sign = sign;
     u.normal_exp = exp;
     u.fraction = mant;
-    return libc_2D34A0(&u);
+    return __pack_df(&u);
 }
 
 #ifdef FIX_BUGS
@@ -641,10 +641,10 @@ f32 sdfPackQuad(s32 kind, s32 sign, s32 exp, u32 mant) {
     return sdfPackFloat(&u);
 }
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D34A0);
+INCLUDE_ASM(const s32, "sdk/libgcc", __pack_df);
 
 INCLUDE_ASM(const s32, "sdk/libgcc", sdfUnpackDouble);
 
-INCLUDE_ASM(const s32, "sdk/libgcc", libc_2D3638);
+INCLUDE_ASM(const s32, "sdk/libgcc", __fpcmp_parts_df);
 
 INCLUDE_ASM(const s32, "sdk/libgcc", sdfPackFloat);

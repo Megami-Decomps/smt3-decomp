@@ -926,3 +926,39 @@ controller 0, value 0x80.
 `nbMaeFlag` is left alone. It is the state machine's own variable, taking 0, 1,
 3, 4 and 5, so "flag" is loose rather than wrong, and `nbSetMaeFlag` anchors
 the spelling.
+
+## Applied on 2026-10-28: six libgcc helpers named from their archive object
+
+`config/smt3/sdk_objects.tsv` says which archive object each function in the SDK
+region was compiled into, and the `bytes` rule is strong evidence: same length
+and the same instruction words once jump targets and immediate low halves are
+cleared. Where such an object exports exactly one symbol, the object names the
+function, because libgcc's object file name *is* its symbol: `fp-bit.c` and
+`libgcc2.c` are compiled once per entry point with `-DL_<name>` into `_<name>.o`.
+
+| Address | Old | New | Object | Prototype agrees |
+| --- | --- | --- | --- | --- |
+| 0x002D34A0 | `libc_2D34A0` | `__pack_df` | `_pack_df.o` | `(int *) -> u64`, called by `dptoul` with an `fp_number_type_df *` |
+| 0x002D3638 | `libc_2D3638` | `__fpcmp_parts_df` | `_fpcmp_parts_df.o` | `(int *, int *) -> s64` |
+| 0x002E59B8 | `libc_2E59B8` | `__moddi3` | `_moddi3.o` | `(s64, s64) -> s64` |
+| 0x002E65C8 | `libc_2E65C8` | `__umoddi3` | `_umoddi3.o` | `(u64, u64) -> u64` |
+| 0x002E6B30 | `libc_2E6B30` | `__fixunsdfdi` | `_fixunsdfdi.o` | `(double) -> u64` |
+| 0x002E6D88 | `libc_2E6D88` | `__floatdidf` | `_floatdidf.o` | `(s64) -> double` |
+
+Not applied, and why. `_div_df.o`, `_df_to_usi.o`, `_addsub_df.o` and `__main.o`
+each account for two functions in the region, so the object no longer fixes the
+symbol: `dpdiv` at 0x002D1B38 and `libc_2E6C48` are both `_div_df.o`, and a
+second copy of the same object's code gives no way to choose between its name
+and a GNU alias. `_addsub_df.o`'s pair is fine because that object really does
+export two symbols, `dpadd` and `dpsub`, and both are already named.
+
+Sony's `dp*` spellings stay where they are. `dptoul` is attributed by the `name`
+rule, which means the recovered name is itself a symbol of `_df_to_usi.o`: the
+EE libgcc exports Sony's aliases for the double arithmetic and conversions, so
+`dpadd`, `dpsub`, `dpmul`, `dpdiv`, `dptoli` and `dptoul` are correct as they
+stand. The six above are fp-bit and libgcc2 helpers that Sony did not alias.
+
+The same evidence fixed four record names in the C, which needed no IDB change:
+`frame-dwarf2.o` makes `AtExitEntry` that file's `struct object` and `AtExitList`
+its `fde_vector`, and `_df_to_usi.o` makes the soft-float pair `fp-bit.c`'s
+`fp_number_type`.

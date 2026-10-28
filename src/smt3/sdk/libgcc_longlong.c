@@ -4,17 +4,17 @@ INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E52FC);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E5320);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E59B8);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __moddi3);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E6048);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E65C8);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __umoddi3);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E6B30);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __fixunsdfdi);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E6C48);
 
-INCLUDE_ASM(const s32, "sdk/libgcc_longlong", libc_2E6D88);
+INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __floatdidf);
 
 INCLUDE_ASM(const s32, "sdk/libgcc_longlong", __errno_8);
 
