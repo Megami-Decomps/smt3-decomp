@@ -2,7 +2,52 @@
 #include "nb.h"
 #include "effBattle.h"
 
-INCLUDE_ASM(const s32, "newdata/datDebugUnit", DispList);
+const char D_005431A8[] = "STOCKCNT :%d";
+const char D_005431B8[] = "STOCKLIST:";
+
+extern s32 sdfGrAllocPacketBuff(s32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern void sdfDrawTagLink(sdfDrawTag_t *tag, u32 packet);
+extern void *sdfDevPrintf(s32 x, s32 y, s32 z, s32 attr, const char *format, ...);
+extern const char D_00550EB0[];
+
+typedef struct {
+    u8 unk0000[0x1914];
+    u8 stock[16];
+    s32 stockCount;
+} datDebugStockWorkView_t;
+
+void DispList(s32 listX, s32 listY, sdfDrawTag_t *tag)
+{
+    s32 x = listX;
+    s32 y = listY;
+    s32 count = ((datDebugStockWorkView_t *)DDS3_GBWK)->stockCount;
+    s32 i;
+
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + x * 0xC0,
+                                           0x7900 + y * 0x60,
+                                           0xFEFFFF, 0, D_005431A8, count));
+    y++;
+    sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + x * 0xC0,
+                                           0x7900 + y * 0x60,
+                                           0xFEFFFF, 0, D_005431B8));
+    y++;
+
+    for (i = 0; i < 16; i++) {
+        u8 item = ((datDebugStockWorkView_t *)DDS3_GBWK)->stock[i];
+        s32 attr = i < count ? 5 : 0xE;
+
+        sdfDrawTagLink(tag, (u32)sdfDevPrintf(0x7000 + x * 0xC0,
+                                               0x7900 + y * 0x60,
+                                               0xFEFFFF, attr, D_00550EB0, item));
+        item = ((datDebugStockWorkView_t *)DDS3_GBWK)->stock[i];
+        if (item >= 10) {
+            x += 3;
+        } else {
+            x += 2;
+        }
+    }
+}
 
 INCLUDE_ASM(const s32, "newdata/datDebugUnit", DispUnit1);
 
