@@ -316,6 +316,31 @@ extern s32 (*D_004EFA28[])(nbNegoProcessData_t *n);
 
 extern s32 (*D_004EFA60[])(nbNegoProcessData_t *n);
 
+extern void *memset(void *a, s32 b, u32 c);
+
+extern void nbPanelAllHide(void);
+
+extern char *text1[];
+
+extern s8 D_00527530[];
+
+extern sdfVector4_t D_00527640;
+
+extern struct nbKoukaPacket_t *nbAddMotionKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                               s32 motion);
+
+extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
+
+extern void nbSetFormPosRot(nbFormation_t *form, sdfVector4_t *pos, sdfVector4_t *rot);
+
+extern void nbDispText(char *text, char *text2, s32 type, s32 time, u32 color);
+
+extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
+
+extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+
+extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
+
 extern s32 (*D_004EFAC0[])(nbNegoProcessData_t *n);
 
 INCLUDE_ASM(const s32, "newbattle/nbE911", Effect2);
@@ -331,7 +356,32 @@ s32 nbE911_End(nbEventProcessData_t *e)
 
 INCLUDE_ASM(const s32, "newbattle/nbE911", nbE911Process_1);
 
-INCLUDE_ASM(const s32, "newbattle/nbE911", nbE912_Hatudo);
+s32 nbE912_Hatudo(nbEventProcessData_t *e)
+{
+    sdfVector4_t rot;
+    nbFormation_t *form;
+    s32 stockno;
+    s32 i;
+
+    memset(&rot, 0, sizeof(rot));
+    rot.w = 1.0f;
+    nbPanelAllHide();
+    for (i = 0; i < 4; i++) {
+        if (e->data->form[D_00527530[i]].stat & 1) {
+            nbAddMotionKoukaPacket(0, 0, &e->data->form[D_00527530[i]], 4);
+            form = &e->data->form[D_00527530[i]];
+            nbSetFormRot(form, &form->orgrot);
+        }
+    }
+    nbDispText(text1[0xFB], NULL, 0, 0x5A, 0x89FEFF80);
+    form = &e->data->form[6];
+    nbSetFormPosRot(form, &D_00527640, &rot);
+    stockno = nbAppendEnemyDevilWork(e->data, 0x116, form->formindex);
+    nbAddUnitStock(e->data, 1, stockno, form->formindex);
+    nbInitUnitEffect(form, 0, 0);
+    nbFreeEffectSlot(e);
+    return 0;
+}
 
 s32 nbE912_Wait1(nbEventProcessData_t *e)
 {
