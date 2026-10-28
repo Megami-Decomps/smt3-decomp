@@ -92,8 +92,9 @@ typedef struct
     /* 0x001C */ u8 unk_1C[6];
     /* 0x0022 */ u16 EventParam;
     /* 0x0024 */ u16 GetHeartsSkill;
-    /* 0x0026 */ u8 unk_26[2];
-    /* 0x0028 */ s8 unk_28;
+    /* 0x0026 */ s8 RecoverFlag;
+    /* 0x0027 */ s8 HeartsSkFlag;
+    /* 0x0028 */ s8 HeartsSkillResult;
     /* 0x0029 */ u8 unk_29[0x4F];
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ u8 unk_7C[0xF0];
@@ -134,10 +135,13 @@ typedef struct
     /* 0x01928 */ u8 unk_01928[0x3D];
     /* 0x01965 */ u8 unk_1965;
     /* 0x01966 */ u8 unk_01966[0x394];
-    /* 0x01CFA */ u8 equipHearts;
+    /* 0x01CFA */ u8 heartsequip;
     /* 0x01CFB */ u8 unk_01CFB[0x40];
-    /* 0x01D3B */ u8 devilSlot[0x100];
-    /* 0x01E3B */ u8 unk_01E3B[0x10045];
+    /* 0x01D3B */ u8 heartsskcnt[64];
+    /* 0x01D7B */ u8 unk_01D7B[0xC0];
+    /* 0x01E3B */ u8 unk_01E3B[0xFC85];
+    /* 0x11AC0 */ u16 hearts_sk[32][12];
+    /* 0x11DC0 */ u8 hearts_up_param[32][6];
     /* 0x11E80 */ s32 encycNum;
 } cmbGlobalWork_t;
 
@@ -403,7 +407,32 @@ INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqConfirm);
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDestroySkill);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstGetHeartsSkill);
+extern u16 rstChkHeartsSkill(datUnitWork_t *unit);
+extern s32 datGetDevilSlotState(u8 devilId);
+extern s32 printf(const char *format, ...);
+
+static const char D_0053DBD8[] = "New hearts skill ID : %02x\n";
+
+s8 rstGetHeartsSkill(s8 type)
+{
+    datUnitWork_t *player = &cmbGlobalWork->party[0].unit;
+    u16 skill = rstChkHeartsSkill(player);
+
+    if (skill != 0) {
+        if (type == 0) {
+            player->skill[player->skillcnt++] = skill;
+        }
+        cmbGlobalWork->hearts_sk[cmbGlobalWork->heartsequip]
+                                  [datGetDevilSlotState(cmbGlobalWork->heartsequip)] = skill;
+        cmbGlobalWork->heartsskcnt[cmbGlobalWork->heartsequip]++;
+        if (type == 0) {
+            startPos->HeartsSkFlag++;
+        }
+        printf(D_0053DBD8, skill);
+        return 1;
+    }
+    return 0;
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqDestroyConfirm);
 
@@ -430,7 +459,7 @@ void rstUpdateSeqHeartsSkill(void)
     if (fclChkMessage() != 0) {
         return;
     }
-    if (startPos->unk_28 == 2) {
+    if (startPos->HeartsSkillResult == 2) {
         fclEndMessage();
         fclStartMessage(7);
         cmpResetCursorInfo(&startPos->cursorInfo);
