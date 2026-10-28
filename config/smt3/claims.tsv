@@ -331,3 +331,4 @@ src/smt3/newbattle/nbSound.c	redthing1	done	2026-10-28	1 fn / 260 B	MIDI motion-
 src/smt3/field/fldCommand.c	redthing1	done	2026-10-28	1 fn / 544 B	model-OFF command with existing model-ON contracts; whole-unit 87 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 132 B	cmbGetSceneModel; typed scene and unit model lookup
 src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	1 fallback / 92 B	fclDrawSpriteEx wrapper and local sprite-core helper
+src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	4 new fn / 732 B	caption allocation, level-up timer, shutdown and unit cleanup; recover EXP row types for published completion check; owner 11 match, 0 differ
