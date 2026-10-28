@@ -2505,7 +2505,37 @@ void effBTLCutSetMax(u8 cut, u32 max)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLCutDebugPrint);
+extern void effDebugStringDraw(s32 x, s32 y, s32 commandIndex, const char *text);
+extern char *D_0054F0F8;
+extern char D_0054F110[];
+extern char D_0054F118[];
+extern char D_0054F120[];
+extern char D_0054F128[];
+
+void effBTLCutDebugPrint(void)
+{
+    char text[0x70];
+    nbMainProcessData_t *mainData;
+
+    if (effBTLSkillActive == 0) {
+        return;
+    }
+    mainData = nbGetMainProcessData();
+    if (mainData->debug != 0) {
+        sprintf(text, D_0054F110, effBTLCutCount);
+        effDebugStringDraw(0x20, 0x166, 0, text);
+        sprintf(text, D_0054F118, effBTLCutMaxTable[0]);
+        effDebugStringDraw(0x20, 0x172, 0, text);
+        sprintf(text, D_0054F120, effBTLCutMaxTable[1]);
+        effDebugStringDraw(0x20, 0x17E, 0, text);
+        sprintf(text, D_0054F128, effBTLCutMaxTable[2]);
+        effDebugStringDraw(0x20, 0x18A, 0, text);
+        effDebugStringDraw(0x20, 0x1A2, 0,
+            effBTLFieldColorIsOn() ? D_0054F0F8 : effBedNameBuf);
+    }
+    effBTLCutCount++;
+}
+
 
 extern s32 effBTLModelGetMarkPosition(nbFormation_t *formation, s32 mark);
 extern void effDebugPointDraw2(sdfVector4_t *point, u32 color);
