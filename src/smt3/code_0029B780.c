@@ -3,6 +3,7 @@
 #include "ps2asm.h"
 #include "basic.h"
 #include "motion.h"
+#include "font.h"
 
 extern void (*D_00551828)(void);
 
@@ -246,10 +247,6 @@ INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigSlider);
 
 INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigBar);
 
-INCLUDE_ASM(const s32, "code_0029B780", dds3DrawConfigValue);
-
-/* NON_MATCHING: 41 of 145 words differ, first at +0x50; exact 580-byte size. */
-#ifdef NON_MATCHING
 typedef struct fclSpriteRes_t fclSpriteRes_t;
 typedef struct fclSpriteEntry_t fclSpriteEntry_t;
 typedef struct {
@@ -263,10 +260,54 @@ extern void fclDrawSpriteFilter(s32 x, s32 y, s32 z, u8 filter, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *colors,
     s32 page, s32 sprite, s32 *textures, fclSpriteTbl_t *table, s32 ot);
-extern s32 dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
+extern void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
 extern void dds3DrawConfigBar(s32 x, s32 y, s32 z, s32 index, s32 value, s32 ot);
 extern s32 dds3DrawConfigLabel(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot);
 
+typedef struct frFontRequest_t frFontRequest_t;
+typedef struct {
+    const char *text;
+    s32 optionCount;
+} configValueLabel_t;
+extern configValueLabel_t D_00528F28[];
+extern s32 dds3DrawConfigCursor(s32 x, s32 y, s32 z, s32 index, s32 mode,
+                                s32 selected, s32 ot);
+extern frFontRequest_t *frwGetSmallFontFRQ(s32 x, s32 y, s32 priority, s32 color,
+                                         const char *text, frFontRequest_t *previous);
+extern s32 func_001C7E38(frFontHandle_t *request, s8 mode, u32 ot);
+extern s32 frDestroyFontRequestAfter(frFontHandle_t *request);
+
+void dds3DrawConfigValue(s32 x, s32 y, s32 z, s32 index, s32 selected, s32 ot)
+{
+    s32 color[4];
+    s32 textColor;
+    s32 alphaColor;
+    s32 zScaled = z << 4;
+    s32 selectedTextColor = 0x8A8AB380;
+    u8 fadeAlpha;
+    frFontRequest_t *font;
+
+    fadeAlpha = dds3GetConfigFadeAlpha();
+    if (selected != 0) {
+        selectedTextColor = 0xA9F3FF80;
+    }
+    textColor = (selectedTextColor & ~0xFF) | fadeAlpha;
+    alphaColor = dds3GetConfigFadeAlpha() | 0x80808000;
+    color[0] = alphaColor;
+    color[1] = alphaColor;
+    color[2] = alphaColor;
+    color[3] = alphaColor;
+    fclDrawSpriteRes(x, y, zScaled, color, 0, 8, D_00345D88, dds3ConfigLayoutTable, ot);
+    fclDrawSpriteRes(x, y, zScaled, color, 0, 9, D_00345D88, dds3ConfigLayoutTable, ot);
+    dds3DrawConfigCursor(0x1B0, y + 0x30, z, 0x1CA, 9, selected, ot);
+    font = frwGetSmallFontFRQ(x + 0x340, y + 8, z, textColor,
+                              D_00528F28[index].text, NULL);
+    func_001C7E38((frFontHandle_t *)font, 1, ot);
+    frDestroyFontRequestAfter((frFontHandle_t *)font);
+}
+
+/* NON_MATCHING: 41 of 145 words differ, first at +0x50; exact 580-byte size. */
+#ifdef NON_MATCHING
 void dds3DrawConfigText(s32 x, s32 y, s32 z, s32 count, s32 index, s32 value, s32 ot)
 {
     s32 drawOptions = index < 3;
