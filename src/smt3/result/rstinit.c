@@ -230,21 +230,92 @@ void rstCreateTargetList(evtStartWork_t *work)
     }
 }
 
-INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
-
-INCLUDE_ASM(const s32, "result/rstinit", rstInit);
-
-/* Resource prefix: allocations and texture are installed by rstInit. */
+/* Allocations, cursors and the texture are installed by rstInit. */
 typedef struct {
-    u8 reserved00[0x14];
-    sdfMemHandle_t *allocation;
-    u8 reserved18[0x22E0];
-    sdfMemHandle_t *scriptAllocation;
-    void *script;
-    sdfMemHandle_t *messageAllocation;
-    u8 reserved2304[8];
-    sdfTexHandle_t *texture;
+    /* 0x0000 */ u8 reserved0000;
+    /* 0x0001 */ s8 unk_0001;
+    /* 0x0002 */ u8 reserved0002;
+    /* 0x0003 */ s8 unk_0003;
+    /* 0x0004 */ s8 unk_0004;
+    /* 0x0005 */ u8 reserved0005[0x0F];
+    /* 0x0014 */ sdfMemHandle_t *allocation;
+    /* 0x0018 */ u8 reserved0018[3];
+    /* 0x001B */ s8 unk_001B;
+    /* 0x001C */ u8 reserved001C[0x56];
+    /* 0x0072 */ s8 unk_0072;
+    /* 0x0073 */ u8 reserved0073[0x1E9];
+    /* 0x025C */ u8 listCursor[0x104C];
+    /* 0x12A8 */ u8 stockCursor[0x103C];
+    /* 0x22E4 */ s8 unk_22E4;
+    /* 0x22E5 */ s8 unk_22E5;
+    /* 0x22E6 */ u8 reserved22E6[0x12];
+    /* 0x22F8 */ sdfMemHandle_t *scriptAllocation;
+    /* 0x22FC */ void *script;
+    /* 0x2300 */ sdfMemHandle_t *messageAllocation;
+    /* 0x2304 */ void *message;
+    /* 0x2308 */ s32 messageSize;
+    /* 0x230C */ sdfTexHandle_t *texture;
+    /* 0x2310 */ s32 unk_2310;
+    /* 0x2314 */ u8 reserved2314[4];
 } rstResourceWork_t;
+
+extern char D_0053DA40[]; /* "/result2/scr/message.bf" */
+extern char D_0053DA58[]; /* "/result2/mes_data.bmd" */
+extern char D_0053DA70[]; /* "/result2/tmx/lvup_02.tmx" */
+
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void cmpInitSeqInfo(void *work, void *parent);
+extern void cmpInitCursorLayout(void *cur, s32 a, s32 b, s32 c, s32 d, s32 mode);
+extern void cmpInitCursorRange(void *cur, u8 count, u8 visible, s32 layout);
+extern void cmpModelInit(void);
+extern void rstClearHeartsMasterPhase(void);
+extern void *sdfDevLoadFileEx(char *name, void **data, s32 *size);
+extern void fclInitMessage(void *message);
+extern void fclSetSelMessagePos(s32 pos);
+extern void cmpStartProcessPanelEff(s32 mode);
+extern void rstSetStatusModelReady(s32 ready);
+extern sdfTexHandle_t *fclLoadTexture(char *pFileName);
+extern void rstSetResultWork(sdfTexHandle_t *texture);
+extern void dds3FadeIn(s32 a, s32 b, s32 c, s32 frames);
+extern s32 p2sdPlayBGM(s32 id);
+
+evtStartWork_t *rstInit(s32 parent)
+{
+    sdfMemHandle_t *allocation = sdfMemAllocDirect(0x2318);
+    rstResourceWork_t *work = sdfMemLock(allocation);
+
+    memset(work, 0, 0x2318);
+    work->allocation = allocation;
+    cmpInitSeqInfo(work, (void *)parent);
+    work->unk_0001 = 0;
+    work->unk_22E5 = -1;
+    work->unk_22E4 = -0x80;
+    work->unk_0004 = 1;
+    work->unk_0072 = 1;
+    work->unk_0003 = 0;
+    work->unk_001B = 0;
+    cmpInitCursorLayout(work->listCursor, 0, 0, 0, 0, 0);
+    cmpInitCursorRange(work->listCursor, 5, 5, 0);
+    cmpInitCursorRange(work->stockCursor, 8, 8, 0);
+    cmpModelInit();
+    rstChkResult2Process((u8 *)work);
+    rstClearHeartsMasterPhase();
+    work->scriptAllocation = sdfDevLoadFileEx(D_0053DA40, &work->script, 0);
+    work->messageAllocation = sdfDevLoadFileEx(D_0053DA58, &work->message, 0);
+    fclInitMessage(work->message);
+    fclSetSelMessagePos(0);
+    cmpStartProcessPanelEff(0);
+    rstSetStatusModelReady(1);
+    work->texture = fclLoadTexture(D_0053DA70);
+    rstSetResultWork(work->texture);
+    rstCreateTargetList((evtStartWork_t *)work);
+    work->unk_2310 = 0x2B3;
+    dds3FadeIn(0, 0, 0, 0xF);
+    p2sdPlayBGM(0x2B0000);
+    return (evtStartWork_t *)work;
+}
+
 
 extern void rstClearResultWork(void);
 extern void sdfTexFree(sdfTexHandle_t *texture);
@@ -395,6 +466,14 @@ void rstSetEvoState(void)
 {
     EventStart->unk_22E6 = 2;
 }
+
+INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA28);
+
+INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA40);
+
+INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA58);
+
+INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA70);
 
 INCLUDE_RODATA(const s32, "result/rstinit", D_0053DA90);
 
