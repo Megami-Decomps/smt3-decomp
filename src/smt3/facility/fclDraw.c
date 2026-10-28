@@ -342,13 +342,60 @@ s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *texList,
 
 INCLUDE_ASM(const s32, "facility/fclDraw", trm_212CB8);
 
-INCLUDE_ASM(const s32, "facility/fclDraw", fclDrawPriceText);
+/* Quantity layout shared by datAddItem and datCheckItem. */
+typedef struct
+{
+    u8 reserved[0x1928];
+    u8 itemQuantity[0xA0];
+} fclInventoryView_t;
 
+extern void fclInitPanelPos(s32 x, s32 y, s32 z, s16 width, s16 height,
+                             s32 work, fclPanelPos_t *pos);
+extern void frSetMessageStepY(u32 step);
+extern void frSetMessageDefStepY(void);
+extern s32 cmpDrawHelp(fclPanelPos_t *pos, u16 item, s8 mode, s8 hideSprite,
+                        s32 alpha, s32 ot);
+extern s32 datGetItemSlotIndex(u16 item);
+extern s32 cmbChkGetHearts(s32 id);
 extern fclSpriteTbl_t fclSpriteTable[];
 extern s32 D_00345D88[];
-extern char D_0054FC48[]; /* Shared, padded "%7d" format. */
+extern char D_0054FC40[];
 extern frFontHandle_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
                                          const char *text, frFontHandle_t *previous);
+
+void fclDrawPriceText(fclPanelPos_t *pos, u16 item, s32 ot)
+{
+    char text[16];
+    fclPanelPos_t panel;
+    fclPanelPos_t *panelPtr = &panel;
+    s32 x = pos->unk_00;
+    s32 y = pos->unk_04;
+    s32 spriteY = y + 0x238;
+    s32 slot, quantity;
+    frFontHandle_t *request;
+
+    fclInitPanelPos(x, y, pos->unk_08, 0, 0, 0, panelPtr);
+    frSetMessageStepY(0x15);
+    cmpDrawHelp(panelPtr, item, 1, 1, 0x100, 0x47);
+    frSetMessageDefStepY();
+    fclDrawSpriteFilter(x + 0x390, spriteY, pos->unk_08 << 4, 1, NULL,
+                        10, 10, D_00345D88, fclSpriteTable, ot);
+    fclDrawSpriteFilter(x + 0x960, spriteY, pos->unk_08 << 4, 1, NULL,
+                        10, 11, D_00345D88, fclSpriteTable, ot);
+    slot = datGetItemSlotIndex(item);
+    if (slot != 0) {
+        quantity = cmbChkGetHearts((s8)slot) != 0;
+    } else {
+        quantity = ((fclInventoryView_t *)DDS3_GBWK)->itemQuantity[item];
+    }
+    sprintf(text, D_0054FC40, quantity);
+    request = frwGetNumFontFRQ(x + 0x7B0, y + 0x218, pos->unk_08,
+                               0xA0F0EB80, text, NULL);
+    func_001C7E38(request, 1, ot);
+    frDestroyFontRequestAfter(request);
+}
+
+extern char D_0054FC48[]; /* Shared, padded "%7d" format. */
 
 void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 ot)
 {
