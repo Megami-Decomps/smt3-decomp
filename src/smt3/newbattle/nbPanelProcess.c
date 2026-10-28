@@ -1100,7 +1100,58 @@ void nbPanelStockFadeOUT(void)
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelStockSelectInit);
 
-INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelStockSelectCtrl);
+extern s8 dds3PadButtonState[];
+extern s32 StockIDListCount;
+extern s32 StockIDListCursor;
+extern s32 StockIDListTop;
+extern u32 StockIDList[];
+
+s32 nbPanelStockSelectCtrl(void)
+{
+    if (nbPanelStockFrame < 8) {
+        return -1;
+    }
+
+    if (((u8)dds3PadButtonState[0x26] & 2) != 0) {
+        if (StockIDListTop > 0) {
+            if (StockIDListCursor == 1) {
+                StockIDListTop = StockIDListTop - 1;
+            } else {
+                StockIDListCursor = StockIDListCursor - 1;
+            }
+        } else if (StockIDListCursor > 0) {
+            StockIDListCursor = StockIDListCursor - 1;
+        } else if (dds3PadButtonState[0x26] < 0 && StockIDListCursor == 0) {
+            if (StockIDListCount >= 4) {
+                StockIDListTop = StockIDListCount - 4;
+                StockIDListCursor = 3;
+            } else {
+                StockIDListTop = 0;
+                StockIDListCursor = StockIDListCount - 1;
+            }
+        }
+    } else if (((u8)dds3PadButtonState[0x27] & 2) != 0) {
+        if (StockIDListTop < StockIDListCount - 4) {
+            if (StockIDListCursor == 2) {
+                StockIDListTop = StockIDListTop + 1;
+            } else {
+                StockIDListCursor = StockIDListCursor + 1;
+            }
+        } else if (StockIDListCursor < StockIDListCount - 1 && StockIDListCursor < 3) {
+            StockIDListCursor = StockIDListCursor + 1;
+        } else if (dds3PadButtonState[0x27] < 0) {
+            StockIDListTop = 0;
+            StockIDListCursor = 0;
+        }
+    } else if (dds3PadButtonState[0x23] < 0) {
+        nbPanelStockPad = 0;
+        return -2;
+    } else if (dds3PadButtonState[0x21] < 0) {
+        nbPanelStockPad = 0;
+        return StockIDList[StockIDListTop + StockIDListCursor];
+    }
+    return -1;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbPanelProcess", nbPanelStockSelect);
 
