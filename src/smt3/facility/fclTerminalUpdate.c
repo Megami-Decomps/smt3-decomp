@@ -4,10 +4,11 @@
 #include "newdata.h"
 #include "ps2asm.h"
 #include "event.h"
+#include "kernel.h"
 
 void fclFreeStage(void);
 
-extern s32 dds3GetProcessStat(void *id);
+extern u32 dds3GetProcessStat(dds3ProcessID_t *id);
 
 extern void p2sdStopBGM(s32 id);
 
@@ -45,13 +46,13 @@ typedef struct
     /* 0x2214 */ s8 previousTerminalType;
     /* 0x2215 */ s8 unk_2215;
     /* 0x2216 */ s8 cursor;
-    /* 0x2217 */ u8 pad2217;
+    /* 0x2217 */ s8 movieState;
     /* 0x2218 */ void *scriptAllocationHandle;
     /* 0x221C */ u32 scriptData;
     /* 0x2220 */ s32 ScriptPID;
     /* 0x2224 */ u8 unk_2224[0xC];
     /* 0x2230 */ s32 saveProcess;
-    /* 0x2234 */ u8 unk_2234[4];
+    /* 0x2234 */ dds3ProcessID_t *secondaryMovieProcess;
     /* 0x2238 */ s32 texHandle[1];
 } trmUpdateWork_t;
 
@@ -177,9 +178,149 @@ INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqConfirm);
 
 INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateSeqRoot);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateActLearge);
+extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frames);
+extern s32 dds3PlayMovieByIndex(s32 index);
+extern s32 dds3WaitMovieEnd(void);
+extern void movieStop(void);
+extern dds3ProcessID_t *evtStartPolygonMovie2(s32 priority, s32 eventno, s32 cutno);
+extern void evtSetPolygonMovieFlag(dds3ProcessID_t *id, s32 flag);
+extern void evtResetPolygonMovieFlag(dds3ProcessID_t *id, s32 flag);
+extern u8 dds3PadButtonState[2][2][16];
 
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmUpdateActSmall);
+void trmUpdateActLearge(void)
+{
+    s32 done = 0;
+
+    switch (trmUpdateWork->cursor) {
+    case 0: {
+        dds3ProcessID_t *movieProcess;
+
+        movieProcess = evtStartPolygonMovie2(0x3E8, 0x324, 0x1E);
+        trmUpdateWork->saveProcess = (s32)movieProcess;
+        evtSetPolygonMovieFlag(movieProcess, 1);
+        dds3PlayMovieByIndex(3);
+        dds3FadeIn(0, 0, 0, 0);
+        trmUpdateWork->cursor = 1;
+        break;
+    }
+    case 2:
+        movieStop();
+        evtResetPolygonMovieFlag((dds3ProcessID_t *)trmUpdateWork->saveProcess, 1);
+        trmUpdateWork->cursor = 3;
+        break;
+    default: {
+        s8 phase = trmUpdateWork->cursor;
+
+        switch (phase) {
+        case 1:
+            done = dds3WaitMovieEnd() != 0;
+            if ((s8)dds3PadButtonState[1][0][1] < 0) {
+                done = 1;
+            }
+            if ((s8)dds3PadButtonState[1][0][3] < 0) {
+                done = 1;
+            }
+            break;
+        case 3:
+            done = dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == phase;
+            if (dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 0) {
+                done = 1;
+            }
+            break;
+        }
+        break;
+    }
+    }
+    if (done != 0) {
+        switch (trmUpdateWork->cursor) {
+        case 1:
+            trmUpdateWork->cursor = 2;
+            break;
+        case 3:
+            fclFreeStage();
+            trmUpdateWork->unk_0001 = 0;
+            trmUpdateWork->unk_0004 = 1;
+            break;
+        }
+    }
+}
+
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 shutdownTimer);
+extern s32 evtCheckPolygonMovieRun(dds3ProcessID_t *id);
+
+void trmUpdateActSmall(void)
+{
+    s8 phase = trmUpdateWork->cursor;
+    s32 done = 0;
+
+    switch (phase) {
+    case 0:
+        trmUpdateWork->secondaryMovieProcess = evtStartPolygonMovie2(0x3E8, 0x324, 0x1E);
+        trmUpdateWork->saveProcess = (s32)evtStartPolygonMovie2(0x3E8, 0x325, 0x32);
+        evtSetPolygonMovieFlag((dds3ProcessID_t *)trmUpdateWork->saveProcess, 1);
+        evtSetPolygonMovieFlag(trmUpdateWork->secondaryMovieProcess, 1);
+        trmUpdateWork->cursor = 1;
+        break;
+    case 2:
+        if (dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 1 ||
+            dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 2) {
+            dds3KillProcess((dds3ProcessID_t *)trmUpdateWork->saveProcess, 0);
+            fclFreeStage();
+            p2sdStopAllSe();
+        }
+        evtResetPolygonMovieFlag(trmUpdateWork->secondaryMovieProcess, 1);
+        trmUpdateWork->cursor = 3;
+        break;
+    default:
+        switch (phase) {
+        case 1:
+            done = dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 3;
+            if (dds3GetProcessStat((void *)trmUpdateWork->saveProcess) == 0) {
+                done = 1;
+            }
+            if ((s8)dds3PadButtonState[1][0][1] < 0) {
+                done = 1;
+            }
+            if ((s8)dds3PadButtonState[1][0][3] < 0) {
+                done = 1;
+            }
+            if (trmUpdateWork->movieState == 2) {
+                done = 1;
+            }
+            if (done != 0) {
+                trmUpdateWork->movieState = 2;
+            }
+            if (evtCheckPolygonMovieRun((dds3ProcessID_t *)trmUpdateWork->saveProcess) == 0) {
+                return;
+            }
+            if (trmUpdateWork->movieState == 0) {
+                evtResetPolygonMovieFlag((dds3ProcessID_t *)trmUpdateWork->saveProcess, 1);
+                dds3FadeIn(0, 0, 0, 0);
+                trmUpdateWork->movieState = 1;
+            }
+            break;
+        case 3:
+            done = dds3GetProcessStat(trmUpdateWork->secondaryMovieProcess) == phase;
+            if (dds3GetProcessStat(trmUpdateWork->secondaryMovieProcess) == 0) {
+                done = 1;
+            }
+            break;
+        }
+        break;
+    }
+    if (done != 0) {
+        switch (trmUpdateWork->cursor) {
+        case 1:
+            trmUpdateWork->cursor = 2;
+            break;
+        case 3:
+            fclFreeStage();
+            trmUpdateWork->unk_0001 = 0;
+            trmUpdateWork->unk_0004 = 1;
+            break;
+        }
+    }
+}
 
 void trmUpdateAct(void)
 {
