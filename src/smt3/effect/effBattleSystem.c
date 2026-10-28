@@ -2083,7 +2083,38 @@ void effBTLSystemDelete2(effBTLSystemHandle_t *hEffBTLSys)
     sdfChipFreeDirect(hEffBTLSys);
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", effBTLSystemDraw);
+void effBTLSystemDraw(effBTLSystemHandle_t *hEffBTLSys)
+{
+    s32 family = hEffBTLSys->family;
+    evtUnit_t *unit;
+    u32 color;
+
+    if (family != 0x14) {
+        if ((((nbFormation_t *)hEffBTLSys->pFormation)->stat & 1) == 0) {
+            return;
+        }
+        unit = ((nbFormation_t *)hEffBTLSys->pFormation)->hunit;
+        if (unit == NULL) {
+            return;
+        }
+        if (family != 0xE && (unit->owner->flags & 1) != 0) {
+            return;
+        }
+    }
+
+    if (D_0031BF00[family].setColor != NULL &&
+        (((nbFormation_t *)hEffBTLSys->pFormation)->stat & 2) != 0 &&
+        ((nbFormation_t *)hEffBTLSys->pFormation)->hunit->owner != NULL) {
+        color = (mdlGetColor(((nbFormation_t *)hEffBTLSys->pFormation)->hunit->owner) &
+                 0xFF000000) |
+            0x00808080;
+        D_0031BF00[family].setColor(hEffBTLSys->hEffect, color);
+    }
+
+    if (D_0031BF00[family].draw != NULL) {
+        D_0031BF00[family].draw(hEffBTLSys->hEffect);
+    }
+}
 
 u32 effBTLSystemGetLength(effBTLSystemHandle_t *hEffBTLSys)
 {
