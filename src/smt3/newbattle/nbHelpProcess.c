@@ -366,6 +366,16 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
                                          s32 v3, void *drawExit,
                                          void *deleteExit, void *p);
 
+extern void nbPnl_setOt(s32 otofs);
+
+extern void nbPnl_rsetTest(s32 ate, s32 atst, s32 aref, s32 afail, s32 date, s32 datm, s32 zte,
+                           s32 ztst);
+
+extern void nbPnl_rsetAlpha(s32 mode);
+
+extern void nbPnlSprite(s32 x, s32 y, s32 w, s32 h, s32 u, s32 v, s32 uw, s32 vh, u32 rgba,
+                        void *hTex);
+
 extern s32 nbHelpProcess1(dds3ProcessID_t *id);
 
 /* The nb event script work; only the fields this unit touches are named. */
@@ -584,7 +594,32 @@ void nbHelpOff(void)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbHelpProcess", nbDrawHelpPanel);
+void nbDrawHelpPanel(nbHelpProcessData_t *w)
+{
+    nbMainProcessData_t *data;
+    s32 cx;
+    s32 hw;
+    s32 ex;
+    u32 col;
+
+    cx = 0x100;
+    data = nbGetMainProcessData();
+    nbPnl_setOt(0x47);
+    nbPnl_rsetTest(1, 0, 0x80, 3, 0, 0, 1, 1);
+    nbPnl_rsetAlpha(0);
+    hw = w->textwidth / 2 + 0x60;
+    col = (w->msgid << 24) | 0x808080;
+    if (hw < 0x88) {
+        hw = 0x88;
+    }
+    ex = hw - 0x88;
+    if (hw < 0x89) {
+        ex = 0;
+    }
+    nbPnlSprite(cx - hw, 0x4D, 0x88, 0x21, 1, 0x5F, 0x88, 0x21, col, data->pnltex[0]);
+    nbPnlSprite(hw + cx, 0x6E, -0x88, -0x21, 1, 0x5F, 0x88, 0x21, col, data->pnltex[0]);
+    nbPnlSprite(cx - ex, 0x4D, ex * 2, 0x21, 0x87, 0x5F, 1, 0x21, col, data->pnltex[0]);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbHelpProcess", nbHelpProcess1);
 
