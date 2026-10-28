@@ -362,7 +362,7 @@ extern s32 pacFileCheckEnd(void *pacFileHandle);
 
 extern void *fileGetMemHandle(void *fileHandle);
 
-extern void fileHandleFree(void *fileHandle);
+extern s32 fileHandleFree(void *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
@@ -634,7 +634,39 @@ s32 nbFindFormIndex(s32 id)
     return -1;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbFreeFormResources);
+void nbFreeFormResources(nbMainProcessData_t *data, s32 index)
+{
+    nbStatWork_t *stat = &data->statwork[index];
+    s32 i;
+
+    if (stat->id == 0) {
+        return;
+    }
+    for (i = 0; i < 0x1A; i++) {
+        void *file;
+
+        if (stat->buf[i] != NULL) {
+            sdfMemFreeDirect(stat->buf[i]);
+        }
+        file = stat->file[i];
+        stat->buf[i] = NULL;
+        if (file != NULL) {
+            fileHandleFree(file);
+        }
+        stat->file[i] = NULL;
+    }
+    if (stat->motbuf != NULL) {
+        sdfMemFreeDirect(stat->motbuf);
+    }
+    stat->motbuf = NULL;
+    if (stat->motfile != NULL) {
+        fileHandleFree(stat->motfile);
+    }
+    stat->motfile = NULL;
+    stat->unk_02 = 0;
+    stat->id = 0;
+    stat->refcnt = 0;
+}
 
 void nbFreeAllFormResources(nbMainProcessData_t *data)
 {

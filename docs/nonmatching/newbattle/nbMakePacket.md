@@ -67,28 +67,6 @@ The `stagemajor` range test needs an `s32` local: used directly, the `u16`
 field gives `ori 0xFF10`, `addu`, `andi 0xFFFF`, `sltiu 7` instead of
 retail's `addiu -0xF0`, `sltiu 7`.
 
-## nbFreeFormResources (newbattle/nbMakePacket, 0xD8)
-
-51 of 54 words match, at the exact 216-byte size.
-
-The three remaining words are one rotation inside the loop. Retail emits
-`lw w->file[i]`, then `w->buf[i] = NULL`, then the `buf` pointer bump; the
-draft emits the store and the bump before the load. Every other word,
-including both induction pointers and the four tail stores, is identical.
-
-The four tail stores have to be written `motfile`, `unk_02`, `id`, `refcnt`
-to come out in retail's `refcnt`, `motfile`, `unk_02`, `id` order; that was
-found by walking all 24 permutations, and only that one reaches three words.
-
-Ruled out for the loop: `w->buf[i] = NULL` moved into both arms of the
-`w->file[i]` test; both stores moved after the `file` test; and a
-`w->buf[i] = NULL` duplicated into each arm of the `buf` test.
-
-Confirmed on the way: `nbStatWork_t` carries `void *file[26]` at `+0x08`,
-`void *buf[26]` at `+0x70`, `motfile` at `+0xD8` and `motbuf` at `+0xDC`,
-which fills the former `pad[0xD8]` exactly and keeps the 224-byte stride that
-`&data->statwork[index]` needs.
-
 ## Flow13_8 (newbattle/nbMakePacket, 0xB8)
 
 42 of 46 words match, at the exact 184-byte size.
