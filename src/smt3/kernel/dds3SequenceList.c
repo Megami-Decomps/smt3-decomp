@@ -36,7 +36,7 @@ extern s32 fmProcessChk(void);
 extern void frTestFontInit(void);
 extern void func_0022C658(void);
 extern void itfDebugMesMngInitialize(void);
-extern void mselExit(u32 mode);
+extern s32 mselExit(u32 mode);
 extern void mselInit(void);
 extern void nbExitBattleTest(void);
 extern s32 nmeCheckProcessStat(void);

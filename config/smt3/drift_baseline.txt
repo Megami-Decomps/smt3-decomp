@@ -633,6 +633,7 @@ member mselGlobalWork_t.unk_40
 member mselGlobalWork_t.unk_44
 member mselGlobalWork_t.unk_48
 member mselGlobalWork_t.unk_4C
+member mselGlobalWork_t.unk_50
 member mselGlobalWork_t.unk_58
 member mselGlobalWork_t.unk_5C
 member mselGlobalWork_t.unk_60
@@ -1082,7 +1083,6 @@ member shpUpdateWork_t.unk_0005
 member shpUpdateWork_t.unk_0006
 member shpUpdateWork_t.unk_0008
 member shpUpdateWork_t.unk_000C
-member shpUpdateWork_t.unk_0018
 member shpUpdateWork_t.unk_0064
 member shpUpdateWork_t.unk_2388
 member shpUpdateWork_t.unk_239C
