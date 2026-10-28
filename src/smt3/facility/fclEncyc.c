@@ -884,10 +884,10 @@ extern u32 cmpDrawListItemBox(void *work, s32 item, s32 index, u32 color, s32 he
 
 extern void frSetFontColor(frFontHandle_t *font, u32 color);
 
-void CalcListElemColor(fclEncyc_instance_tag *pinst, frFontHandle_t **fonts, s32 count, u32 color)
+void CalcListElemColor(lstListWindow_t *plistwin, frFontHandle_t **fonts, s32 count, u32 color)
 {
     s32 i;
-    void *work = (u8 *)pinst + 0x15C;
+    void *work = &plistwin->StepY;
 
     for (i = 0; i < count && *fonts != NULL; i++, fonts++) {
         u32 itemColor = cmpDrawListItemBox(work, i, i, color, 0x100);
