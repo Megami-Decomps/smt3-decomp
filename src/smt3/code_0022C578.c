@@ -1349,7 +1349,7 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpStartItemMsg);
 extern s32 datGetItemSkillNo(s32 itemid);
 extern s32 cmpStartItemMsg(u16 item, s32 errorFlags);
 extern s32 cmpUseItemTokusyu(u16 item, s32 target, s32 user);
-extern s32 cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
+extern void cmpRecover(u16 skill, datUnitWork_t *stock, datUnitWork_t *target);
 extern void cmpSetStockRecoverEff(s32 effect, s32 skill, cmpLocalStock_t *stock);
 extern void p2sdPlaySE(s32 id, s32 volume, s32 pan);
 
