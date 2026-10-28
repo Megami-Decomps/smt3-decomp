@@ -47,6 +47,7 @@ campDhDrawHelpText	code_0022C578	0x158	82 of 86 words match	docs/nonmatching/cod
 camp_draw_Process	code_0022C578	0x1A0	102 of 104 words match	docs/nonmatching/code_0022C578.md	565
 campDrawStatusRow2	code_0022C578	0x134	69 of 77 words match	docs/nonmatching/code_0022C578.md	581
 campDebugRegistAll	code_0022C578	0x43C	265 of 271 words match	docs/nonmatching/code_0022C578.md	596
+cmpDrawPanelEffQuad	code_0022C578	0x20C	128 of 131 words match	docs/nonmatching/code_0022C578.md	617
 pipeMakeNodeLink	code_0029B780	0x80	7 of 32 words differ	docs/nonmatching/code_0029B780.md	5
 dds3DrawConfigText	code_0029B780	0x244	41 of 145 words differ	docs/nonmatching/code_0029B780.md	32
 dds3DrawConfigPanel	code_0029B780	0x258		docs/nonmatching/code_0029B780.md	56

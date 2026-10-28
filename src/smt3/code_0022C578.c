@@ -6693,11 +6693,57 @@ void cmpDrawPanelEffRing(cmpPanelEffState_t *state, s32 ot)
     fclDrawPanelSprite2(0x44, ot);
 }
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: 128 of 131 words match at the native 524-byte size. */
+extern const s32 D_0053FF60[];
+
+void cmpDrawPanelEffQuad(cmpPanelEffState_t *state, s32 ot)
+{
+    s32 frame = state->frame;
+    s32 offset = (frame << 8) - 0x2000;
+    s32 neutralColor = 0x80;
+    u32 colorA;
+    u32 colorB;
+    u32 coords[12];
+    u32 corners[3];
+    s32 radius;
+
+    memcpy(coords, D_0053FF60, sizeof(coords));
+    colorA = state->color8;
+    colorB = state->color4;
+    if (frame >= 0x21) {
+        colorA = fclBlendColor(neutralColor, colorA,
+                               offset / 0xE0);
+        colorB = fclBlendColor(neutralColor, colorB,
+                               offset / 0xE0);
+    }
+
+    /* One geometry scalar retains the native conversion/square allocation.
+     * Qualified control and remaining stores: docs/nonmatching/code_0022C578.md. */
+    radius = (s32)(fsqrtf(3200.0f) * (f32)(0x100 - frame) * 0.00390625f);
+    radius = 0xC80 - radius * radius;
+    fclDrawPanelSprite2(0x48, ot);
+    colorA = fclBlendColor(colorA, colorB, frame);
+
+    coords[1] -= radius * 2;
+    coords[5] -= radius;
+    corners[0] = colorA;
+    corners[1] = neutralColor;
+    corners[2] = neutralColor;
+    cmpDrawTriG(coords, coords + 3, state->z, corners, ot);
+
+    coords[7] += radius * 2;
+    coords[11] += radius;
+    cmpDrawTriG(coords + 6, coords + 9, state->z, corners, ot);
+    fclDrawPanelSprite2(0x44, ot);
+}
+#else
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawPanelEffQuad);
+#endif
 
 extern void cmpDrawPanelEffBox(void *entry, s32 arg);
 extern void cmpDrawPanelEffRing(cmpPanelEffState_t *entry, s32 arg);
-extern void cmpDrawPanelEffQuad(void *entry, s32 arg);
+extern void cmpDrawPanelEffQuad(cmpPanelEffState_t *entry, s32 arg);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FF60);
 
