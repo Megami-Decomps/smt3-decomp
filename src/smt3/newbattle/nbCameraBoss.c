@@ -4,6 +4,7 @@
 #include "nb.h"
 #include "model.h"
 #include "motion.h"
+#include "effBattle.h"
 
 typedef struct nbCameraAnim_t {
     s32 rotate_f;
@@ -1888,7 +1889,117 @@ void nbCameraBoss_BSBERU_E915_2_Set(void)
     nbCameraBoss_BSBERU_E915_Frame++;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_Beru_HAENO1_Set);
+extern void effBTLModelLoadRotate(nbFormation_t *form);
+
+extern void nbSetFormRot(nbFormation_t *form, sdfVector4_t *rot);
+
+extern void FromEuler(f32 aRotateX, f32 aRotateY, f32 aRotateZ);
+
+extern void Mult(void);
+
+extern void effBTLPartGetPositionPtr(nbFormation_t *pFormation, effBTLAimParams_t *pPosPtr, sdfVector4_t *pPos);
+
+s32 nbCameraBoss_Beru_HAENO1_Set(nbCamera_t *pNbCamera)
+{
+    nbFormation_t *pFormation;
+    u32 type;
+    effBTLAimParams_t aim;
+    sdfVector4_t rot;
+    sdfVector4_t pos;
+    sdfVector4_t aimpos;
+    sdfVector4_t from;
+    sdfVector4_t to;
+
+    if (pNbCamera->frame == 0) {
+        pFormation = effBTLSkillGetInvokeFormation();
+        aim.scaleKind = 2;
+        aim.aimMode = 5;
+        aim.directionMode = 8;
+        aim.rangeOverride = 0;
+        effBTLPartGetPositionPtr(pFormation, &aim, &aimpos);
+        effBTLModelLook(pFormation, &aimpos);
+        effBTLModelLoadRotate(pFormation);
+        SDF_VU0_STOREVECTOR_NOMEM(&rot);
+        FromEuler(0.0f, -0.13962634f, 0.0f);
+        SDF_VU0_LOADVECTOR_B(&rot);
+        Mult();
+        SDF_VU0_STOREVECTOR_NOMEM(&rot);
+        nbSetFormRot(pFormation, &rot);
+        effBTLGetGroupPos(pFormation, &pos);
+        SDF_VU0_LOADVECTOR(&aimpos);
+        SDF_VU0_COPYVECTOR_A_TO_C();
+        SDF_VU0_LOADVECTOR_B(&pos);
+        SDF_VU0_SUBVECTOR();
+        SDF_VU0_NORMALIZE();
+        SDF_VU0_SCALEVECTOR(-950.0f);
+        SDF_VU0_ADDVECTOR_A_C();
+        SDF_VU0_STOREVECTOR_NOMEM(&pos);
+        effBTLModelSetPosition(pFormation, &pos);
+        if (pNbCamera->frame == 0) {
+            pNbCamera->type = dds3GetRandIntA(0, 2);
+            effBTLModelAllHide();
+            effBTLModelInvokeShow();
+            pNbCamera->direction.x = -0.3f;
+            pNbCamera->direction.y = -0.0f;
+            pNbCamera->direction.z = 0.96f;
+            pNbCamera->target.x = 319.26996f;
+            pNbCamera->target.y = -169.19f;
+            pNbCamera->target.z = -938.23993f;
+            pNbCamera->distance = 1.0f;
+            pNbCamera->fovy = 0.69813163f;
+        }
+    }
+    pNbCamera->type = 1;
+    if (pNbCamera->frame >= 15) {
+        if (pNbCamera->frame == 15) {
+            effBTLModelAllShow();
+            type = dds3GetRandIntA(0, 4);
+            switch (type) {
+            case 0:
+                pNbCamera->direction.x = 0.31f;
+                pNbCamera->direction.y = 0.46f;
+                pNbCamera->direction.z = 0.83f;
+                pNbCamera->target.x = -505.86997f;
+                pNbCamera->target.y = -813.35993f;
+                pNbCamera->target.z = -1240.1099f;
+                pNbCamera->distance = 1.0f;
+                pNbCamera->fovy = 0.78539807f;
+                break;
+            case 1:
+                pNbCamera->direction.x = -0.44f;
+                pNbCamera->direction.y = 0.34f;
+                pNbCamera->direction.z = 0.83f;
+                pNbCamera->target.x = 653.83f;
+                pNbCamera->target.y = -687.92994f;
+                pNbCamera->target.z = -1195.29f;
+                pNbCamera->distance = 1.0f;
+                pNbCamera->fovy = 0.78539807f;
+                break;
+            case 2:
+                pNbCamera->direction.x = 0.04f;
+                pNbCamera->direction.y = 0.47f;
+                pNbCamera->direction.z = 0.88f;
+                pNbCamera->target.x = -73.889992f;
+                pNbCamera->target.y = -873.48993f;
+                pNbCamera->target.z = -1426.12f;
+                pNbCamera->distance = 1.0f;
+                pNbCamera->fovy = 0.78539807f;
+                break;
+            case 3:
+                pNbCamera->direction.x = 0.5f;
+                pNbCamera->direction.y = -0.1f;
+                pNbCamera->direction.z = -0.86f;
+                pNbCamera->target.x = -783.63f;
+                pNbCamera->target.y = -51.34f;
+                pNbCamera->target.z = 928.72992f;
+                pNbCamera->distance = 1.0f;
+                pNbCamera->fovy = 0.78539807f;
+                break;
+            }
+        }
+    }
+    return 1;
+}
 
 s32 nbCameraBoss_BSLUSI_Command_Set(nbCamera_t *pNbCamera)
 {
