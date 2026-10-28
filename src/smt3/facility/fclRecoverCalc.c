@@ -133,8 +133,8 @@ extern s32 sprintf(char *out, const char *fmt, ...);
 
 void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pPanelPos);
 
-extern void trmDrawListText(fclPanelPos_t *panel, s32 msg, s32 *tex, char *str,
-                            s32 arg);
+extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex,
+                            fclSpriteTbl_t *table, s32 ot);
 
 extern void shopDrawItemCount(fclPanelPos_t *pos, s32 color, s32 id);
 
@@ -325,15 +325,15 @@ extern rcvDrawWork_t *rcvDrawWork;
 
 extern void rcvDrawPanelAt(lstWork_t *list, s32 flag, s32 arg);
 
-extern s32 D_003306F0[];
+extern char *D_003306F0[];
 
-extern s32 D_003306F4[];
+extern char *D_003306F4[];
 
-extern s32 D_003306F8[];
+extern char *D_003306F8[];
 
-extern s32 D_003306FC[];
+extern char *D_003306FC[];
 
-extern char D_00330800[];
+extern fclSpriteTbl_t D_00330800[];
 
 extern char D_0054FBF0[];
 
@@ -353,9 +353,9 @@ void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     colors[2] = color;
     colors[3] = color;
     fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
-                        colors, 0, 1, rcvDrawWork->texHandle, (fclSpriteTbl_t *)D_00330800, ot);
+                        colors, 0, 1, rcvDrawWork->texHandle, D_00330800, ot);
     fclDrawSpriteFilter(pos->unk_00 + target + 0x10D0, pos->unk_04 + 0x168, pos->unk_08 << 4, 1,
-                        colors, 0, 0xA, rcvDrawWork->texHandle, (fclSpriteTbl_t *)D_00330800, ot);
+                        colors, 0, 0xA, rcvDrawWork->texHandle, D_00330800, ot);
     fclDrawSpriteFilter(pos->unk_00 + target + 0x1E40, pos->unk_04 + 0x1A0, pos->unk_08 << 4, 1,
                         colors, 0xA, 1, D_00345D88, fclSpriteTable, ot);
     color = (color & 0xFF) | 0xA09DC300;
@@ -366,7 +366,26 @@ void rcvDrawPanelRow(fclPanelPos_t *pos, s32 color, s32 num, s32 ot)
     frDestroyFontRequestAfter(frq);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowBox);
+extern s32 cmpDrawBoxF(s32 x, s32 y, s32 z, s32 width, s32 height, s32 color, s32 ot);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page,
+                            s32 spriteId, s32 *textures, fclSpriteTbl_t *table, s32 ot);
+
+void rcvDrawRowBox(fclPanelPos_t *panel, s32 ot)
+{
+    cmpDrawBoxF(0x400, 0x308, panel->unk_08, 0x74, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 6,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+    cmpDrawBoxF(0xBA0, 0x308, panel->unk_08, 0x52, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 7,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+    cmpDrawBoxF(0x1180, 0x308, panel->unk_08, 0x52, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 8,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+    cmpDrawBoxF(0x1740, 0x308, panel->unk_08, 0x64, 9, 0x19191E59, ot);
+    fclDrawSpriteRes(0, 0, panel->unk_08 << 4, NULL, 0, 9,
+                     rcvDrawWork->texHandle, D_00330800, ot);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawRowText);
 
@@ -408,7 +427,19 @@ void rcvDrawSeq4(void)
     trmDrawListText(&panel, D_003306FC[0], rcvDrawWork->texHandle, D_00330800, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclRecoverCalc", rcvDrawItemList);
+extern char *D_00330700[];
+
+void rcvDrawItemList(void)
+{
+    fclPanelPos_t panel;
+
+    fclGetFlag(0);
+    fclInitPanelPos(0, 0, 0xFFFFF, 0x80, 0, 0, (fclPanel_t *)&panel);
+    shopDrawItemCount(&panel, 0x80808080, 0x47);
+    fclInitPanelPos(0, 0xB0, 0xFFFFF, 0, 0, 0, (fclPanel_t *)&panel);
+    trmDrawListText(&panel, D_00330700[0], rcvDrawWork->texHandle, D_00330800, 0x47);
+}
+
 
 void rcvUpdateItemList(s32 active)
 {
