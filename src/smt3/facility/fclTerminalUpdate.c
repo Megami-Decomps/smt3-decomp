@@ -113,18 +113,16 @@ s32 trmCheckSaveAct(void)
     return 0;
 }
 
-/* NON_MATCHING: 8 of 17 words differ (first at +0x10). */
-#ifdef NON_MATCHING
 s32 trmGetJumpTerminalNo(void)
 {
+    s32 terminal;
     if (trmUpdateWork->TerminalType != 0) {
-        return fldAllCnt[trmUpdateWork->TerminalNo][1];
+        terminal = fldAllCnt[trmUpdateWork->TerminalNo][1];
+    } else {
+        terminal = trmUpdateWork->TerminalList[trmUpdateWork->unk_11D6 + trmUpdateWork->unk_11D8];
     }
-    return trmUpdateWork->TerminalList[trmUpdateWork->unk_11D8 + trmUpdateWork->unk_11D6];
+    return terminal;
 }
-#else
-INCLUDE_ASM(const s32, "facility/fclTerminalUpdate", trmGetJumpTerminalNo);
-#endif
 
 extern s32 cmpGetPressedButton(s32 mask);
 extern s32 fclSetWorkValue(s8 index, s32 value);
