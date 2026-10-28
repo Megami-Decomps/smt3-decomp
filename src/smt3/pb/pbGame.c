@@ -42,7 +42,7 @@ typedef struct
     u8 *giveupScript;
     s16 level, stage;
     u8 unk35C[4];
-    s32 menuState;
+    struct pbProcHandle_t *menuProc;
     struct pbProcHandle_t *helpProc;
 } pbMapWork_t;
 
@@ -591,7 +591,50 @@ s32 moveChar(dds3ProcessID_t *id) {
     return ((u16)step < 4) ? 0 : -1;
 }
 
-INCLUDE_ASM(const s32, "pb/pbGame", deleteMoveChar);
+extern void pbMoveMyCharcter2(pbProcHandle_t *p, s16 x, s16 y);
+extern void pbSetPanelValue(pbProcHandle_t *panel, s8 value);
+extern pbProcHandle_t *pbStartClear(pbProcHandle_t *parent);
+extern void pbClearRecord(pbProcHandle_t *panel);
+extern void pbNextCharacter(void);
+extern void func_001D2D00(pbProcHandle_t *panel, s32 arg);
+extern s32 getCharacterNum(void);
+extern s32 p2sdPlaySE(s32 id, s32 volume, s32 pan);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
+extern pbProcHandle_t *pbGetMoveChar(void);
+extern pbProcHandle_t *moveC;
+extern u32 pbMoveCharList;
+extern pbMapWork_t *D_0054F5C4;
+extern pbProcHandle_t *record;
+
+void deleteMoveChar(dds3ProcessID_t *id)
+{
+    pbProcHandle_t *panel = id->workdata;
+    pbMoveCharWork_t *work = panel->data.moveChar;
+    s16 position[2];
+    s16 deltaX = (s16)((f32)pbKeyTable[work->dir][0] * work->speed);
+    s16 deltaY = (s16)((f32)pbKeyTable[work->dir][1] * work->speed);
+
+    pbMoveMyCharcter2(mychar[current_char], deltaX, deltaY);
+    pbGetMyCharcterPos2(mychar[current_char], &position[0], &position[1]);
+    if (goalHitCheck(position[0], position[1])) {
+        p2sdPlaySE(0x34000A, 0x7F, 0x3F);
+        if ((u32)getCharacterNum() < 2) {
+            if (D_0054F5C4->menuProc != NULL) {
+                dds3KillProcess(D_0054F5C4->menuProc->id, 0);
+            }
+            pbMoveCharList = 1;
+            func_001D2D00(mychar[current_char], 0);
+            pbStartClear(pbGetMoveChar());
+            pbClearRecord(record);
+        } else {
+            pbSetPanelValue(mychar[current_char], 0);
+            pbNextCharacter();
+        }
+    }
+    sdfChipFreeDelayedDirect(work);
+    sdfChipFreeDelayedDirect(panel);
+    moveC = NULL;
+}
 
 void setMoveBlockData(pbGroupData_t *grp, s32 dir) {
     u32 i = 0;
