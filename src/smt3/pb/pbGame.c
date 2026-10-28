@@ -1178,7 +1178,30 @@ INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FA8);
 
 INCLUDE_RODATA(const s32, "pb/pbGame", D_00535FC8);
 
-INCLUDE_ASM(const s32, "pb/pbGame", pbGotoNewStage);
+extern s32 dds3KillProcess(dds3ProcessID_t *id, s32 timer);
+extern void evtBitOn(s32 no);
+extern s32 printf(const char *format, ...);
+extern pbProcHandle_t *pbGetMoveChar(void);
+
+void pbGotoNewStage(void)
+{
+    s32 number = GetStageNumber();
+
+    if (scr_msg != NULL) {
+        dds3KillProcess(scr_msg, 0);
+        dds3ResetProcessFlag(dds3SearchProcessName(D_00535EF8), 0x10, 2);
+        scr_msg = NULL;
+    }
+    if (number < 0) {
+        evtBitOn(GetAllStageClearBit());
+        printf("****** CONGRATULATIONS !! ******\n");
+        if (pbGetMoveChar() != NULL) {
+            pbGetMoveChar()->flags = 0x60000;
+        }
+    } else {
+        pbLoadSystemData(number);
+    }
+}
 
 void pbRoundStageNext(s16 *plevel, s16 *pstage) {
     pbLevel_t *lv = pbLevelTable[*plevel];
