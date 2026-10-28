@@ -325,7 +325,60 @@ INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillKouka);
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datGetSkillBadKouka);
 
-INCLUDE_ASM(const s32, "newdata/datCalc", datExecSkill);
+extern s32 datGetSkillKouka(s32 nskill, s32 kind, datUnitWork_t *s, datUnitWork_t *d);
+extern s32 datGetSkillBadKouka(s32 nskill, datUnitWork_t *s, datUnitWork_t *d);
+extern void datResetBadStat(datUnitWork_t *work, s32 badstat);
+extern void datSetBadStat(datUnitWork_t *work, u32 badstat);
+extern s32 datAddMp(datUnitWork_t *work, s32 amount);
+
+s32 datExecSkill(s32 nskill, datUnitWork_t *s, datUnitWork_t *d)
+{
+    s32 skillKouka;
+    s32 mpKouka;
+    s32 badKouka;
+    u8 badType;
+
+    if (s != NULL && d != NULL) {
+
+        skillKouka = datGetSkillKouka(nskill, 0, s, d);
+        mpKouka = datGetSkillKouka(nskill, 1, s, d);
+        badKouka = datGetSkillBadKouka(nskill, s, d);
+        if (skillKouka || mpKouka || badKouka) {
+            if (badKouka != 0) {
+                badType = datSkillTable.normal[nskill].badtype;
+                if (badType == 1 || badType == 3) {
+                    datSetBadStat(d, badKouka);
+                } else {
+                    datResetBadStat(d, badKouka);
+                }
+            }
+            if (mpKouka != 0)
+                datAddMp(d, mpKouka);
+            if (skillKouka != 0) {
+                datAddHp(d, skillKouka);
+                if (d->hp == 0)
+                    datSetBadStat(d, 0x800);
+            }
+        } else {
+            return 0;
+        }
+    }
+    switch (datSkillTable.normal[nskill].program) {
+    case 8:
+        DDS3_GBWK->maFlags |= 1;
+        break;
+    case 9:
+        DDS3_GBWK->maFlags |= 2;
+        break;
+    case 10:
+        DDS3_GBWK->maFlags |= 4;
+        break;
+    case 11:
+        DDS3_GBWK->maFlags |= 8;
+        break;
+    }
+    return 1;
+}
 
 void datOverwriteBadStat(datUnitWork_t *work, u32 badstat)
 {
