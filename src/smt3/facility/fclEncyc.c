@@ -776,6 +776,7 @@ typedef struct fclEncycConfirmDrawWork_t {
     fclEncyc_registconfirmwork_tag phase;
     datUnitWork_t units[2];
     fclRibbon_t *ribbon;
+    void *messageProcess;
 } fclEncycConfirmDrawWork_t;
 
 typedef struct fclEncycModelLink_t {
@@ -1259,7 +1260,42 @@ void DrawPhaseReadView(fclEncyc_instance_tag *pinst)
     DrawReadMainHelp(pinst);
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", AcceptKeyRegistConfirm);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+
+void AcceptKeyRegistConfirm(fclEncyc_instance_tag *pinst)
+{
+    fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
+    u32 button = cmpGetPressedButton(0x30033);
+
+    switch (button) {
+    case 1:
+        fclRbnSwitchActive(work->ribbon, 1);
+        work->phase.flag = 0;
+        fclClearFlag(0);
+        fclSetWorkValue(8, pinst->unk_70 < 2);
+        work->messageProcess = NULL;
+        fclScriptStart(CMB_GBWK->script, 0x10, &work->messageProcess);
+        work->phase.dispregist = 0;
+        work->phase.period = 1;
+        break;
+    case 2:
+        pinst->unk_5A = 0;
+        pinst->stat |= 2;
+        break;
+    case 0x10000:
+    case 0x20000:
+        work->phase.flag ^= 1;
+        fclRbnSwitchActive(work->ribbon, work->phase.flag ^ 1);
+        break;
+    case 0x10:
+        CirculateDevilObject(pinst, 0);
+        break;
+    case 0x20:
+        CirculateDevilObject(pinst, 1);
+        break;
+    }
+    cmpPlayCursorSE(button);
+}
 
 void CalcConfirmStatus(fclEncyc_registconfirmwork_tag *work)
 {
