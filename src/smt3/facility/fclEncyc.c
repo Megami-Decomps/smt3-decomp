@@ -879,7 +879,29 @@ void DrawPhaseReadSummon(fclEncyc_instance_tag *pinst)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadExplain);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", DrawPhaseReadExplain);
+extern s32 cmpGetEncycWork(void);
+extern void cmpDrawStatusComEx(s32 unit, u8 alpha, s8 kind, s8 mode,
+    s32 value, s8 option, s32 color, s8 show, s8 extra, s8 full);
+extern void DrawExplainBack(s32 alpha);
+extern void DrawReadMainHelp(fclEncyc_instance_tag *pinst);
+extern s32 func_001C7E38(void *font, s32 mode, s32 ot);
+
+void DrawPhaseReadExplain(fclEncyc_instance_tag *pinst)
+{
+    fclEncycReadStatusWork_t *work = (fclEncycReadStatusWork_t *)pinst->pwork;
+
+    DrawBackBlackBoard(work->boardY, work->boardAlpha);
+    if (cmpGetEncycWork() != 0) {
+        pinst->stat |= 0x400;
+    }
+    cmpDrawStatusComEx((s32)&work->unit, (u8)work->phase.statusAlpha, -1, 0, 0, 0,
+                       0xA09DC380, 1, 0, 0);
+    DrawExplainBack(work->explainAlpha);
+    fclRbnDraw(work->ribbon, work->phase.ribbonX, work->phase.ribbonY,
+               0xFFFFF0, work->phase.ribbonAlpha, 4, 0x3A0, 0x47);
+    DrawReadMainHelp(pinst);
+    func_001C7E38(work->explainFont, 0, 0x47);
+}
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CalcPhaseReadView);
 
