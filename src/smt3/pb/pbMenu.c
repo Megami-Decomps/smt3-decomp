@@ -110,6 +110,8 @@ extern void pb_load_mapdata_Shutdown(dds3ProcessID_t *id);
 
 extern u8 pbMapPathIdx, pbMenuIndex, pbMenuState;
 
+extern u8 pbMapNo;
+
 extern void *memset(void *a, s32 b, u32 c);
 
 extern s32 pb_proc_menu_Process(dds3ProcessID_t *id);
@@ -148,7 +150,21 @@ extern dds3ProcessID_t *dds3StartProcess(char *v1, u32 dDS3_PRIORITY_DRAW_PB, s3
 extern char D_00535E10[], D_00535EC8[];
 
 
-INCLUDE_ASM(const s32, "pb/pbMenu", pbMakeMapPath);
+void pbMakeMapPath(pbProcHandle_t *parent) {
+    if (pbMapPathIdx == 3) {
+        dds3FadeOut(0, 0, 0, 1);
+        if (pbMapNo < 30) {
+            sprintf(pbMapPathBuf, D_00535E40, pbMapNo);
+        } else {
+            sprintf(pbMapPathBuf, D_00535E68, pbMapNo);
+        }
+        sdfFileCmdReadFile(pbMapPathBuf, D_0054F5C4, -1, pbLoadSystemDataDone, 0);
+        pbLoadState = 0;
+        pbWaitLoadMapData(parent);
+    } else {
+        pbMapPathIdx = 3;
+    }
+}
 
 void func_001D4E08(void) {
 }
