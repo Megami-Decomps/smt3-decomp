@@ -38,6 +38,7 @@ page and line to open. Conventions are in
 | 2 |  | [sdk/libcdvd.md](sdk/libcdvd.md) |
 | 2 | sdf/sdfMovie | [sdf/sdfMovie.md](sdf/sdfMovie.md) |
 | 2 | newbattle/nbCameraHelper | [newbattle/nbCameraHelper.md](newbattle/nbCameraHelper.md) |
+| 2 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 2 | interface/frName | [interface/frName.md](interface/frName.md) |
 | 2 | fclTerminalInit | [facility/fclTerminalInit.md](facility/fclTerminalInit.md) |
 | 2 | fclShare | [facility/fclShare.md](facility/fclShare.md) |
@@ -68,7 +69,6 @@ page and line to open. Conventions are in
 | 1 | newbattle/nbAi | [newbattle/nbAi.md](newbattle/nbAi.md) |
 | 1 | movie/MovieViewer | [movie/MovieViewer.md](movie/MovieViewer.md) |
 | 1 | mc/slMain | [mc/slMain.md](mc/slMain.md) |
-| 1 | kernel/dds3KernelProcess | [kernel/dds3KernelProcess.md](kernel/dds3KernelProcess.md) |
 | 1 | kernel/dds3CreateData | [kernel/dds3CreateData.md](kernel/dds3CreateData.md) |
 | 1 | kernel/dds3ConfigMain | [kernel/dds3ConfigMain.md](kernel/dds3ConfigMain.md) |
 | 1 | interface/lstListWindow | [interface/lstListWindow.md](interface/lstListWindow.md) |
