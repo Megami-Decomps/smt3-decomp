@@ -330,7 +330,7 @@ extern void sdfMemFreeDirect(void *aHandle);
 
 extern void p2sdSetPcmBuffer(void *buf, u32 size);
 
-extern void datDebugPrintf(const char *format);
+extern void datDebugPrintf(const char *format, ...);
 
 extern char D_00545BC0[];
 
@@ -366,7 +366,7 @@ extern void fileHandleFree(void *fileHandle);
 
 extern s32 (*nbE902Table[])(nbEventProcessData_t *e);
 
-extern void nbLoadMidiFile(s32 no);
+extern s32 nbLoadMidiFile(s32 no);
 
 extern u32 sdfMemGetSize(void *aHandle);
 
@@ -533,13 +533,40 @@ nbStatWork_t *nbSetFormEntry(s32 id)
     return stat;
 }
 
+extern char D_00575450[];
+extern s32 sprintf(char *str, const char *format, ...);
+extern void *fileLoad(const char *path);
+
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BC0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BD0);
 
 INCLUDE_RODATA(const s32, "newbattle/nbSound", D_00545BE0);
 
-INCLUDE_ASM(const s32, "newbattle/nbSound", nbLoadMidiFile);
+s32 nbLoadMidiFile(s32 no)
+{
+    nbStatWork_t *stat;
+    s32 i;
+    s32 id;
+
+    (void)nbGetMainProcessData();
+    stat = nbSetFormEntry(no);
+    if (stat == NULL) {
+        return 1;
+    }
+    for (i = 0; i < 0x1A; i++) {
+        id = nbLoadMotionByIndex(no, i);
+        if (id != 0) {
+            sprintf(D_00575450, "/sound/MIDI%04X.SMG", (u32)id >> 16);
+            stat->file[i] = fileLoad(D_00575450);
+            datDebugPrintf("load %s\n", D_00575450);
+        }
+    }
+    id = nbMakeSeId(no);
+    sprintf(D_00575450, "/sound/MIDI%04X.SMG", (u32)id >> 16);
+    stat->motfile = fileLoad(D_00575450);
+    return 1;
+}
 
 /* NON_MATCHING: 2 of 64 words differ (first at +0x74). */
 #ifdef NON_MATCHING
