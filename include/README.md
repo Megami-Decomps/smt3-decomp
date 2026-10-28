@@ -1400,3 +1400,14 @@ To compile one header on its own, which is also worth doing when adding a type:
 printf '#include "model.h"\nconst int ok = 1;\n' > /tmp/only_model.c
 tools/cc.sh -Wall /tmp/only_model.c -o /tmp/only_model.o
 ```
+
+### Name entry work (`nme.h`)
+
+`nmeWork_t` shares the existing `Nme_Init` work view with `Nme_Draw`.
+The initializer and cleanup establish the allocation handle at `0x14`, target
+at `0x18`, cursor at `0x30D4`, input position at `0x5150` and texture handles
+at `0x51B4`. The input cursor is at `0x1058`, confirmed by `nmeSyncCursor` calling
+`cmpSetCursorRow`; `nmeInitNameCursor` initializes another at `0x2094`. The animation helper
+reads and writes its signed timing value at `0x51C4`. Draw callbacks use
+`nmeUpdateWork`, distinct from the persistent `nmeProcessId` pointer. Unrecovered spans remain padding. `tools/header_layout.c` checks
+these offsets with the EE compiler.

@@ -17,6 +17,7 @@
 #include "nb.h"
 #include "effect.h"
 #include "field.h"
+#include "nme.h"
 
 #define ASSERT_AT(line, cond) typedef char static_assert_##line[(cond) ? 1 : -1]
 #define SZ(line, type, bytes) ASSERT_AT(line, sizeof(type) == (bytes))
@@ -811,3 +812,14 @@ OFF(p105, nbMainProcessData_t, light, 0xA8);
 
 /* Keep the object non-empty so ee-as has something to assemble. */
 const s32 headerCheck = 1;
+
+/* Shared name-entry work, verified by its init and draw access offsets. */
+OFF(nm01, nmeWork_t, memHandle, 0x14);
+OFF(nm02, nmeWork_t, targetNo, 0x18);
+OFF(nm03, nmeWork_t, cursor, 0x30D4);
+OFF(nm04, nmeWork_t, inputPos, 0x5150);
+OFF(nm05, nmeWork_t, textures, 0x51B4);
+OFF(nm06, nmeWork_t, baseRate, 0x51C4);
+OFF(nm07, nmeWork_t, inputCursor, 0x1058);
+OFF(nm08, nmeWork_t, nameCursor, 0x2094);
+SZ(nm09, nmeWork_t, 0x51C8);
