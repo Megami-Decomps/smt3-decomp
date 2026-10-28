@@ -172,8 +172,21 @@ void fclInitPanelPos(s32 X, s32 Y, s32 Z, s16 W, s16 H, s32 Work, fclPanel_t *pP
 extern s32 trmDrawListText(fclPanelPos_t *panel, char *text, s32 *tex,
                            fclSpriteTbl_t *table, s32 ot);
 
+typedef struct {
+    s32 stride;
+    u8 reserved04[0x20];
+    u8 selectionOffset;
+    u8 reserved25[0x13];
+} shopChoiceCursor_t;
 typedef struct shopDrawWork_t {
-    u8 reserved0000[0x2394];
+    u8 reserved0000[0x24];
+    s8 choiceCount;
+    u8 reserved0025[0x1083];
+    s32 panelOriginX;
+    s32 panelOriginY;
+    u8 reserved10B0[0x114];
+    shopChoiceCursor_t choiceCursor;
+    u8 reserved11FC[0x1198];
     s32 texHandle[2];
 } shopDrawWork_t;
 
@@ -349,7 +362,33 @@ s32 shopDrawPanelMode1(s8 mode)
     fclDrawPhaseHeader(shopDrawWork + 0x1068, 0x80808080, 0, 0x47);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawChoiceCount);
+extern void shopDrawPrice(fclPanelPos_t *pos, s32 count, s8 drawMode, s32 ot);
+
+void shopDrawChoiceCount(s8 mode)
+{
+    fclPanelPos_t pos;
+    s8 drawMode;
+    s8 maxChoice;
+    s8 choiceCount;
+    shopChoiceCursor_t *cursor;
+    if (mode == 0) shopDrawPanelMode0(1);
+    else shopDrawPanelMode1(1);
+    choiceCount = ((shopDrawWork_t *)shopDrawWork)->choiceCount;
+    drawMode = choiceCount == 1;
+    if (choiceCount == 99) drawMode = 2;
+    maxChoice = shpChkChoiceMax(-1, mode, 1);
+    if (((shopDrawWork_t *)shopDrawWork)->choiceCount >= maxChoice) {
+        if (drawMode == 1) drawMode = 4;
+        else drawMode = 2;
+    }
+    if (drawMode == 0) drawMode = 3;
+    cursor = &((shopDrawWork_t *)shopDrawWork)->choiceCursor;
+    fclInitPanelPos(((shopDrawWork_t *)shopDrawWork)->panelOriginX,
+        ((shopDrawWork_t *)shopDrawWork)->panelOriginY + cursor->selectionOffset * cursor->stride * 8,
+        0xFFFFF, 0, 0, 0, (fclPanel_t *)&pos);
+    shopDrawPrice(&pos, ((shopDrawWork_t *)shopDrawWork)->choiceCount, drawMode, 0x47);
+}
+
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shopDrawPricePanel);
 
