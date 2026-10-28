@@ -957,7 +957,45 @@ void cmpInitStockTable(void)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpinit);
+extern u8 itfMesEmbedded_345160[];
+extern char *D_00343F08[];
+extern char *D_00343F28[];
+extern char *D_00343F38[];
+extern char *D_00343F48[];
+/* Four-byte cursor-flag storage in small BSS. */
+extern u8 D_00551F98[4];
+extern void cmpInitSeqInfo(cmpSeqInfo_t *work, cmpSeqInfo_t *parent);
+extern s8 fclInitMessage(void *data);
+extern void cmpSetCursorFlag(cmpCursorInfo_t *cursor, s32 flags);
+extern void cmpDebugDumpCount(void);
+extern void camp_H_cmpGlobalWork_t__ctor(void);
+
+void cmpinit(void)
+{
+    void *allocation = sdfMemAllocDirect(0x8540);
+    campWork = sdfMemLock(allocation);
+    memset(campWork, 0, 0x8540);
+    campWork->allocation = allocation;
+    cmpInitSeqInfo((cmpSeqInfo_t *)campWork, NULL);
+    fclInitMessage(itfMesEmbedded_345160);
+    fclSetSelMessagePos(1);
+    campWork->unk_0001 = 0;
+    campWork->unk_0004 = 1;
+    cmpInitCursorRange((u8 *)campWork + 0x1C, 7, 7, (s32)D_00343F08);
+    cmpInitCursorLayout((u8 *)campWork + 0x1C, 0, 0, 0, 0, 0x17);
+    cmpInitCursorRange(&campWork->page[0].cursor, 4, 4, (s32)D_00343F28);
+    cmpInitCursorLayout(&campWork->page[0].cursor, 0, 0, 0, 0, 0x17);
+    cmpInitCursorRange(&campWork->page[1].cursor, 3, 3, (s32)D_00343F38);
+    cmpInitCursorLayout(&campWork->page[1].cursor, 0, 0, 0, 0, 0x17);
+    cmpInitCursorRange(&campWork->page[2].cursor, 2, 2, (s32)D_00343F48);
+    cmpInitCursorLayout(&campWork->page[2].cursor, 0, 0, 0, 0, 0x17);
+    cmpSetCursorFlag(&campWork->page[2].cursor, (s32)D_00551F98);
+    cmpDebugDumpCount();
+    camp_H_cmpGlobalWork_t__ctor();
+    campWork->effectStep = 0x2B3;
+    cmpInitStockTable();
+    cmpLoadState = 0;
+}
 
 extern void rstSetPanelEffFlag(void);
 
