@@ -62,7 +62,7 @@ typedef struct
 
 typedef struct
 {
-    u8 unk_00000[0x15C];
+    u8 reserved00000[0x15C];
     cmpCursorInfo_t listCursor;
 } ragListWindow_t;
 
@@ -84,17 +84,17 @@ typedef struct
     /* 0x0043 */ s8 itemList2Count;
     /* 0x0044 */ s8 itemList3[8];
     /* 0x004C */ s8 itemList3Count;
-    /* 0x004D */ u8 unk_004D[7];
+    /* 0x004D */ u8 reserved004D[7];
     /* 0x0054 */ u16 unk_0054;
     /* 0x0056 */ u8 unk_0056[0xEA];
     /* 0x0140 */ cmpCursorInfo_t listCursor;
     /* 0x0178 */ u8 unk_0178[0x1004];
     /* 0x117C */ ragListWindow_t heartListWindow;
-    /* 0x1310 */ u8 unk_1310[0x1004];
+    /* 0x1310 */ u8 reserved1310[0x1004];
     /* 0x2314 */ ragListWindow_t itemList2Window;
-    /* 0x24A8 */ u8 unk_24A8[0x1004];
+    /* 0x24A8 */ u8 reserved24A8[0x1004];
     /* 0x34AC */ ragListWindow_t itemList3Window;
-    /* 0x3640 */ u8 unk_3640[0x1008];
+    /* 0x3640 */ u8 reserved3640[0x1008];
     /* 0x4648 */ s32 script;
     /* 0x464C */ s32 scriptArg;
     /* 0x4650 */ s32 unk_4650;
