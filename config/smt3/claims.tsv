@@ -318,3 +318,4 @@ src/smt3/field/fldTitle.c	redthing1	open	2026-10-28	1 fn / 300 B	four texture re
 src/smt3/nme/Nme_Init.c	redthing1	done	2026-10-28	1 fn / 80 B	nmeGetRowCount; sparse input-mode switch
 src/smt3/nme/Nme_Draw.c	redthing1	done	2026-10-28	2 fn / 88 B	backspace dispatch and name animation step
 src/smt3/nme/Nme_Calc.c	redthing1	done	2026-10-28	1 fn / 80 B	nmeCalc; fade gate and sequence termination flag
+src/smt3/newbattle/nbResultProcess.c	redthing1	done	2026-10-28	1 fn / 108 B	nbResultFindBestScore; four result records and capped global score

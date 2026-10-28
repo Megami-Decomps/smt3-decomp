@@ -27,7 +27,43 @@ INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultDrawPC1);
 
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultInitTimer);
 
-INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbResultFindBestScore);
+typedef struct nbResultScoreEntry_t {
+    u32 occupied;
+    u32 bestScore;
+    u32 unknown08[3];
+    u32 *work;
+    u32 unknown18[5];
+    u32 scoreOffset;
+    u32 unknown30;
+} nbResultScoreEntry_t;
+
+extern nbResultScoreEntry_t nbResultScoreTable[];
+extern s32 nbResultBestScore;
+
+s32 nbResultFindBestScore(void)
+{
+    s32 found;
+    nbResultScoreEntry_t *entry;
+    s32 one;
+    s32 index;
+
+    found = 0;
+    entry = nbResultScoreTable;
+    one = 1;
+    index = 3;
+    do {
+        if (entry->occupied != 0) {
+            if (entry->bestScore < entry->work[4] + entry->scoreOffset) {
+                found = one;
+            }
+        }
+        entry++;
+    } while (--index >= 0);
+    if (found == 0 && nbResultBestScore < 0x3C) {
+        nbResultBestScore++;
+    }
+    return nbResultBestScore;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbResultProcess", nbFindTobiwarpLabel);
 
