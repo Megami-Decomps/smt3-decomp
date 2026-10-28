@@ -337,7 +337,7 @@ extern s32 fclEncycSearch(s32 id);
 
 extern s32 fclEncycGetRatio(void);
 
-extern void SetElem(fclencyceelem_t *pelem, fclencyceelem_t *punit);
+extern void SetElem(fclencyceelem_t *pelem, datUnitWork_t *punit);
 
 extern void SetElem2(fclencyceelem_t *pelem, fclencyceelem_t *pelemsrc);
 
@@ -380,7 +380,7 @@ s32 fclEncycRegist2(fclencyceelem_t *pelemsrc, s32 overwrite)
     return known;
 }
 
-s32 fclEncycRegist(fclencyceelem_t *entry, s32 store)
+s32 fclEncycRegist(datUnitWork_t *entry, s32 store)
 {
     s32 *num = &encycSaveWork->encycNum;
     fclencyceelem_t *table = (fclencyceelem_t *)((u8 *)encycSaveWork + 0x11E90);
@@ -1251,7 +1251,28 @@ void FillIndex(s16 *pout, s32 num)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", SetElem);
+extern void *memset(void *dst, s32 value, s32 size);
+
+void SetElem(fclencyceelem_t *pelem, datUnitWork_t *punit)
+{
+    memset(pelem, 0, sizeof(*pelem));
+    pelem->id = punit->id;
+    pelem->maxhp = punit->maxhp;
+    pelem->maxmp = punit->maxmp;
+    pelem->exp = punit->exp;
+    pelem->level = punit->level;
+    __builtin_memcpy(pelem->param, punit->param, sizeof(pelem->param));
+    __builtin_memcpy(pelem->skill, punit->skill, sizeof(pelem->skill));
+    __builtin_memcpy(pelem->skillparam, punit->skillparam, sizeof(pelem->skillparam));
+    pelem->skillcnt = punit->skillcnt;
+    __builtin_memcpy(pelem->mitamaparam, punit->mitamaparam, sizeof(pelem->mitamaparam));
+    __builtin_memcpy(pelem->levelupparam, punit->levelupparam, sizeof(pelem->levelupparam));
+    __builtin_memcpy(pelem->keisyoskill, punit->keisyoskill, sizeof(pelem->keisyoskill));
+    __builtin_memcpy(pelem->keiattr, punit->keiattr, sizeof(pelem->keiattr));
+    pelem->hensinmae = punit->hensinmae;
+    pelem->flag = punit->flag & 0x240;
+    pelem->hensinmaeexp = punit->hensinmaeexp;
+}
 
 void SetElem2(fclencyceelem_t *pelem, fclencyceelem_t *pelemsrc)
 {
