@@ -4828,17 +4828,17 @@ void campRunPanelCallback(campCrossPanel_t *panel)
 }
 
 
-void fclInitCursorWindow(void *work, s32 flag, u8 count)
+void fclInitCursorWindow(void *work, void *data, u8 count)
 {
     cmpCursorInfo_t *cursor = (cmpCursorInfo_t *)((u8 *)work + 4);
 
-    cmpInitCursorRange(cursor, count, count, flag);
+    cmpInitCursorRange(cursor, count, count, (s32)data);
     cmpInitCursorLayout(cursor, 0, 0, 0, 0, 0x17);
 }
 
-void fclSetCursorList(void **work, void *list)
+void fclSetCursorList(void *work, s32 mode)
 {
-    work[1] = list;
+    *(s32 *)((u8 *)work + 4) = mode;
 }
 
 s32 cmpCursorBlinkColor(s32 timer)
