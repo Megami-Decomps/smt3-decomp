@@ -328,7 +328,31 @@ void ActionCrush(tagPipeObject *object) {
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionBound);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionAbsorp);
+void ActionAbsorp(tagPipeObject *objPtr)
+{
+    tagPipeObject *data = objMyData();
+    s32 count = objPtr->count;
+    s32 complement = 100 - count;
+    f32 countWeight;
+    f32 complementWeight;
+
+    if (count < 0) {
+        return;
+    }
+    countWeight = (f32)count;
+    complementWeight = (f32)complement;
+    objPtr->offset = data->offset;
+    objPtr->pos[0] = (objPtr->pos[0] * countWeight +
+                      data->pos[0] * complementWeight) / 100.0f;
+    objPtr->pos[1] = (objPtr->pos[1] * countWeight +
+                      data->pos[1] * complementWeight) / 100.0f;
+    if (count > 0) {
+        objPtr->count = (s16)((f32)count - 0x1.0aaaaap+4f);
+    }
+    if (objPtr->count < 0) {
+        objPtr->count = 0;
+    }
+}
 
 extern void pipeEffSet(tagPipeObject *object, s32 type);
 extern u8 objMake(tagPipeObject *object, s32 offset, u8 id, u8 way, u8 action, u8 value);
