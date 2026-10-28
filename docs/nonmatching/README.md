@@ -80,3 +80,4 @@ page and line to open. Conventions are in
 | 1 | effect/effPCPBezier | [effect/effPCPBezier.md](effect/effPCPBezier.md) |
 | 1 | effect/effMagatuhi | [effect/effMagatuhi.md](effect/effMagatuhi.md) |
 | 1 | effect/effEvent | [effect/effEvent.md](effect/effEvent.md) |
+| 1 | code_001C55F8 | [code_001C55F8.md](code_001C55F8.md) |
