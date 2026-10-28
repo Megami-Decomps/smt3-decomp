@@ -8,7 +8,7 @@
 #
 # `enum`: HD enum members the tree has adopted. One of these going MISSING
 # fails, so a named constant cannot quietly go back to being a literal.
-# 0 types, 1108 members, 506 adopted constants.
+# 0 types, 1109 members, 506 adopted constants.
 
 
 member GParam.unk0
@@ -403,6 +403,7 @@ member effTrackPolyParams_t.unk1C
 member evtStartWork_t.unk_00
 member evtStartWork_t.unk_1299
 member evtStartWork_t.unk_129D
+member evtStartWork_t.unk_129E
 member evtStartWork_t.unk_170
 member evtStartWork_t.unk_18
 member evtStartWork_t.unk_19
