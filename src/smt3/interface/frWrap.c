@@ -54,6 +54,10 @@ typedef struct
 } frFontRing_t;
 
 extern u32 frFontRowBuf;
+extern char D_0054F448[]; /* Shared empty font-chain seed. */
+extern frFontRequest_t *frSetFontString(const char *, s8, s8, s8, frFontRequest_t *, s32);
+extern void frSetFontSize(frFontRequest_t *, s32, s32);
+extern frFontRequest_t *frCombineFontRequestEx(frFontRequest_t *, frFontRequest_t *, s32);
 
 extern u32 strlen(const char *text);
 
@@ -128,7 +132,16 @@ void frwFreeStaffFont(void) {
     frDelFontStyle(5);
 }
 
-INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallFont1FRQ);
+frFontRequest_t *frwGetSmallFont1FRQ(s32 x, s32 y, s32 priority, u32 color,
+                                      const char *text, frFontRequest_t *previous)
+{
+    frFontRequest_t *request = frLinkFontString(text, 0, 0, 0, NULL);
+    frSetFontSize(request, 16, 18);
+    frSetDrawPosition(request, x, y);
+    frSetPriority(request, priority << 4);
+    frSetFontColor(request, color);
+    return frCombineFontRequestEx(previous, request, 0);
+}
 
 frFontRequest_t *frwGetFontEx(s32 x, s32 y, s32 depth, u32 colors, const char *text,
                          s8 glyphMode, s8 sharedFlag, frFontRequest_t *previousGlyph) {
@@ -190,16 +203,48 @@ frFontRequest_t *frwGetSmallFontFRQ(s32 X, s32 Y, s32 Pri, s32 Color, const char
 INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallFontFRQ2);
 
 frFontRequest_t *frwGetSmallFontNoPropFRQ(s32 x, s32 y, s32 depth, u32 colors,
-                                        const char *text, frFontRequest_t *previous)
+                                       const char *text, frFontRequest_t *previous)
 {
     return frwGetFontEx(x, y, depth, colors, text, 3, 1, previous);
 }
 
-INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallNumFontFRQ);
+frFontRequest_t *frwGetSmallNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                        const char *text, frFontRequest_t *previous)
+{
+    frFontRequest_t *request = frLinkFontString(D_0054F448, 0, 0, 0, previous);
+    frDisableMode(2);
+    request = frSetFontString(text, 2, 0, 0, request, 0);
+    frEnableMode(2);
+    frSetDrawPosition(request, x, y);
+    frSetPriority(request, priority << 4);
+    frSetFontColor(request, color);
+    return request;
+}
 
-INCLUDE_ASM(const s32, "interface/frWrap", frwGetNumFontFRQ);
+frFontRequest_t *frwGetNumFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                        const char *text, frFontRequest_t *previous)
+{
+    frFontRequest_t *request = frLinkFontString(D_0054F448, 0, 0, 0, previous);
+    frDisableMode(2);
+    request = frSetFontString(text, 3, 0, 0, request, 0);
+    frEnableMode(2);
+    frSetDrawPosition(request, x, y);
+    frSetPriority(request, priority << 4);
+    frSetFontColor(request, color);
+    return request;
+}
 
-INCLUDE_ASM(const s32, "interface/frWrap", frwGetSmallCaptionFontFRQ);
+frFontRequest_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color,
+                                           const char *text, frFontRequest_t *previous)
+{
+    frFontRequest_t *request = frSetFontString(text, 0, 0, 0, NULL, 0);
+    frSetFontSize(request, 12, 16);
+    frSetFontSpace(request, 3);
+    frSetDrawPosition(request, x, y);
+    frSetPriority(request, priority << 4);
+    frSetFontColor(request, color);
+    return frCombineFontRequestEx(previous, request, 0);
+}
 
 INCLUDE_ASM(const s32, "interface/frWrap", frwGetHelpFRQ);
 
