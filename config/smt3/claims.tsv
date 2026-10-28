@@ -543,3 +543,4 @@ src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	2 fn / 620 B	introd
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 260 B	arrow cursor box with triangular alpha, normalized mode and rotated sprite drawing; owner 338 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 320 B	arrow cursor entry geometry and native post-draw angle/color reloads; owner 339 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 460 B	fusion state dispatch with preserved phase snapshot and conditional sequence-info publication; owner 157 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 256 B	arrow cursor icon ownership and registration sprite states with signed provider ID; owner 340 match, 0 differ

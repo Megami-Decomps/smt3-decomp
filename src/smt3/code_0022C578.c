@@ -2885,8 +2885,6 @@ void fclCalcArrowCursorOffset(s8 index, s32 *x, s32 *y)
 
 INCLUDE_ASM(const s32, "code_0022C578", fclGetArrowCursorTarget);
 
-INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursorIcon);
-
 typedef struct
 {
     /* 0x00 */ u8 flags;
@@ -2902,6 +2900,29 @@ typedef struct
 } campDhWork_t;
 
 extern campDhWork_t *campDhDrawWork;
+
+extern s32 datDevilIsRegistered(u8 devilId);
+extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *color, s32 page, s32 spriteId,
+    s32 *texList, fclSpriteTbl_t *table, s32 ot);
+
+void fclDrawArrowCursorIcon(s32 x, s32 y, s32 z, s8 index)
+{
+    s8 id;
+
+    id = cmpGetHeartsIconId(index);
+    if (cmpHeartsIconIsVisible(id) != 0) {
+        if (datDevilIsRegistered(id) != 0) {
+            fclDrawSpriteRes(x, y, 0, NULL, 8, 2,
+                (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+        } else {
+            fclDrawSpriteRes(x, y, 0, NULL, 8, 1,
+                (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+        }
+    } else {
+        fclDrawSpriteRes(x, y, 0, NULL, 8, 0,
+            (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
+    }
+}
 
 extern void fclDrawSpriteSizeAlphaFilter(s32 x, s32 y, s32 d, s32 w, s32 h, u8 mode,
     s32 *color, s32 id, f32 angle, u16 idx, s32 *texs, fclSpriteTbl_t *tbl, s32 ot);
@@ -4987,9 +5008,6 @@ INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListRows);
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawListColumn);
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpDrawScrollBar);
-
-extern void fclDrawSpriteRes(s32 X, s32 Y, s32 Z, s32 *pClip, s32 page, s32 spriteId, s32 *texList,
-                             fclSpriteTbl_t *table, s32 OtNo);
 
 void cmpDrawScrollThumb(s32 x, s32 y, s32 z, s32 color, s32 kind)
 {
