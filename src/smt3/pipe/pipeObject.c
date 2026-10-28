@@ -322,7 +322,59 @@ tagPipeObject *objMyData(void)
 
 INCLUDE_RODATA(const s32, "pipe/pipeObject", D_00548B50);
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlAdd);
+extern s32 mymdlAddObject(tagpipeBasic *work, u16 count);
+extern void mymdlSetMotion(tagpipeBasic *work, f32 frame);
+extern void mymdlAlphaSet(tagpipeBasic *work, u8 alpha);
+extern tagpipeBasic *MyLine;
+
+const char D_00548B60[24] = "EML %d ADD OBJECT\n";
+const char D_00548B78[24] = "EMS %d ADD OBJECT\n";
+const char D_00548B90[24] = "DRBOX %d ADD OBJECT\n";
+const char D_00548BA8[24] = "DMaka %d ADD OBJECT\n";
+const char D_00548BC0[24] = "Maka1 %d ADD OBJECT\n";
+const char D_00548BD8[24] = "ZMaka %d ADD OBJECT\n";
+const char D_00548BF0[24] = "RBOX %d ADD OBJECT\n";
+const char D_00548C08[24] = "MY %d ADD OBJECT\n";
+
+void objMdlAdd(tagPipeObject *objPtr)
+{
+    switch ((u8)objPtr->id) {
+    case 1:
+        objPtr->mdl = mymdlAddObject(PipeEML, 50);
+        return DEBUG_PRINT(D_00548B60, (u8)objPtr->mdl);
+    case 5:
+    case 6:
+        objPtr->mdl = mymdlAddObject(PipeMaka1, 50);
+        return DEBUG_PRINT(D_00548BC0, (u8)objPtr->mdl);
+    case 2:
+        objPtr->mdl = mymdlAddObject(PipeEMS, 50);
+        return DEBUG_PRINT(D_00548B78, (u8)objPtr->mdl);
+    case 12:
+        objPtr->mdl = mymdlAddObject(PipeDRBOX, 2);
+        if ((u8)objPtr->mdl != 0xFF) {
+            mymdlSetMotion(&PipeDRBOX[(u8)objPtr->mdl], 0.0f);
+        }
+        return DEBUG_PRINT(D_00548B90, (u8)objPtr->mdl);
+    case 11:
+        objPtr->mdl = mymdlAddObject(PipeDMaka, 4);
+        if ((u8)objPtr->mdl != 0xFF) {
+            mymdlSetMotion(&PipeDMaka[(u8)objPtr->mdl], 0.0f);
+        }
+        return DEBUG_PRINT(D_00548BA8, (u8)objPtr->mdl);
+    case 9:
+        objPtr->mdl = mymdlAddObject(PipeZMaka, 2);
+        return DEBUG_PRINT(D_00548BD8, (u8)objPtr->mdl);
+    case 10:
+        objPtr->mdl = mymdlAddObject(PipeRBOX, 10);
+        return DEBUG_PRINT(D_00548BF0, (u8)objPtr->mdl);
+    case 128:
+        objPtr->mdl = mymdlAddObject(basicMy, 1);
+        mymdlAddObject(MyLine, 1);
+        mymdlAlphaSet(MyLine, 0);
+        DEBUG_PRINT(D_00548C08, (u8)objPtr->mdl);
+        break;
+    }
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeObject", objMdlDel);
 
