@@ -96,7 +96,50 @@ extern void frDestroyFontRequestAfter(void *pFRQ);
 
 extern s32 sprintf(char *out, const char *fmt, ...);
 
-INCLUDE_ASM(const s32, "facility/fclShopCalc", shpCalcPayOfMoney);
+typedef struct {
+    u8 reserved00[0x1C];
+    s32 paymentTotal;
+    u8 reserved20[4];
+    s8 quantity;
+    u8 reserved25[0x11C1];
+    s16 itemTop;
+    u8 itemOffset;
+} shpPaymentWork_t;
+
+typedef struct {
+    u8 reserved0000[0xA48];
+    s32 money;
+    u8 reserved0A4C[0xEDC];
+    u8 items[0xA0];
+} shpPaymentGlobal_t;
+extern shpPaymentWork_t *shopProcWork;
+extern shpPaymentGlobal_t *shopMoneyGlobal asm("DDS3_GBWK");
+extern u32 shpGetSellPrice(s32 index, s8 kind);
+extern u16 shpGetItemPrice(s32 index, s8 kind);
+
+s8 shpCalcPayOfMoney(s32 index, s8 kind)
+{
+    s32 selected;
+    s32 price;
+    s32 maxQuantity = -1;
+    if (index < 0) {
+        selected = shopProcWork->itemTop + shopProcWork->itemOffset;
+    } else {
+        selected = index;
+    }
+    price = shpGetSellPrice(selected, kind);
+    if (index < 0) shopProcWork->paymentTotal = shopProcWork->quantity * price;
+    if (kind == 0 && price > 0) {
+        u16 item;
+        s32 owned;
+        maxQuantity = shopMoneyGlobal->money / price;
+        if (maxQuantity >= 100) maxQuantity = 99;
+        item = shpGetItemPrice(selected, 0);
+        owned = shopMoneyGlobal->items[item];
+        if (owned + maxQuantity >= 100) maxQuantity -= owned + maxQuantity - 99;
+    }
+    return maxQuantity;
+}
 
 INCLUDE_ASM(const s32, "facility/fclShopCalc", shpChkChoiceMax);
 
