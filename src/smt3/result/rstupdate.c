@@ -95,7 +95,7 @@ typedef struct
     /* 0x0026 */ s8 RecoverFlag;
     /* 0x0027 */ s8 HeartsSkFlag;
     /* 0x0028 */ s8 HeartsSkillResult;
-    /* 0x0029 */ u8 reserved29;
+    /* 0x0029 */ s8 heartsEvent;
     /* 0x002A */ u16 bonusParamIndex;
     /* 0x002C */ u8 reserved2C[0x4C];
     /* 0x0078 */ s32 unk_78;
@@ -528,7 +528,40 @@ void rstSetHeartsRecoverPlayer(void)
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsEvent);
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstSetHeartsEvent);
+extern void datOverwriteBadStat(datUnitWork_t *work, u32 badstatus);
+
+s32 rstSetHeartsEvent(void)
+{
+    s32 result = -1;
+
+    switch (startPos->heartsEvent) {
+    case 0:
+        rstChkResult2Process((u8 *)startPos);
+        cmbGlobalWork->party[0].unit.levelupparam[startPos->bonusParamIndex]++;
+        cmbGlobalWork->party[0].unit.param[startPos->bonusParamIndex]++;
+        break;
+    case 2:
+        datOverwriteBadStat(&cmbGlobalWork->party[0].unit, 0x40);
+        break;
+    case 3:
+        datOverwriteBadStat(&cmbGlobalWork->party[0].unit, 0x100);
+        break;
+    case 4:
+        datOverwriteBadStat(&cmbGlobalWork->party[0].unit, 0x8000);
+        break;
+    case 5:
+        rstSetHeartsRecover();
+        break;
+    case 6:
+        rstSetHeartsRecoverPlayer();
+        break;
+    case 1:
+    case 7:
+        break;
+    }
+    startPos->heartsEvent = result;
+    return result;
+}
 
 INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqHeartsEvent);
 
