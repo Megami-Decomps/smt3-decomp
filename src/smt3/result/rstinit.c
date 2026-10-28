@@ -179,13 +179,13 @@ INCLUDE_ASM(const s32, "result/rstinit", rstInit);
 
 /* Resource prefix: allocations and texture are installed by rstInit. */
 typedef struct {
-    u8 unknown00[0x14];
+    u8 reserved00[0x14];
     sdfMemHandle_t *allocation;
-    u8 unknown18[0x22E0];
+    u8 reserved18[0x22E0];
     sdfMemHandle_t *scriptAllocation;
     void *script;
     sdfMemHandle_t *messageAllocation;
-    u8 unknown2304[8];
+    u8 reserved2304[8];
     sdfTexHandle_t *texture;
 } rstResourceWork_t;
 
