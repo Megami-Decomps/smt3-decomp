@@ -1253,7 +1253,11 @@ void FillIndex(s16 *pout, s32 num)
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", SetElem);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", SetElem2);
+void SetElem2(fclencyceelem_t *pelem, fclencyceelem_t *pelemsrc)
+{
+    memset(pelem, 0, sizeof(*pelem));
+    *pelem = *pelemsrc;
+}
 
 extern s32 fclEncycSearch(s32 id);
 
