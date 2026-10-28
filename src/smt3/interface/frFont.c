@@ -460,7 +460,7 @@ extern s32 frAnalyzeTag(s32 code, frMsgInfo_t *mi);
 
 extern u8 frSetFontString_style;
 
-extern void frGetMessageCode(u32 code);
+extern void frGetMessageCode(u16 code);
 
 frTextHandle_t *frSetFont(u16 glyphCode, u8 fontIndex, u8 firstOption, u8 secondOption, s32 shiftFlag);
 
@@ -1155,7 +1155,7 @@ frFontHandle_t *frSetFontString(u8 *text, s8 style, s8 firstOption, s8 secondOpt
     glyph = NULL;
     if (length != 0) {
         do {
-            u32 code = (u8)text[i];
+            u16 code = (u8)text[i];
 
             if (code >= 0x80) {
                 i++;
