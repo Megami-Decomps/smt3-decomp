@@ -11,6 +11,8 @@ extern void Mult(void);
 
 extern f32 D_00543720[];
 
+extern f32 D_003FA7A0[];
+
 extern u8 D_003493A0[];
 
 extern u8 D_0034F1C0[];
@@ -178,6 +180,30 @@ extern u32 datGetMaxHp(datUnitWork_t *work);
 extern u32 datGetMaxMp(datUnitWork_t *work);
 
 extern void datClearCommMemory(datUnitWork_t *work);
+
+extern s32 evtSetRegistUnit(s32 major, s32 minor);
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3SearchSceneBasic(dds3Basic_t *scene, u32 serial, s32 type);
+
+extern void dds3LinkLightObjectToUnitObject(dds3Basic_t *light, dds3Basic_t *unit, s32 flag);
+
+extern void dds3SetRotPoseSet(dds3Basic_t *basic, u128 *rot);
+
+extern void dds3ObjectBaseOffFlag(dds3Basic_t *basic, s32 flag);
+
+extern void dds3ObjectBaseOnFlag(dds3Basic_t *basic, s32 flag);
+
+extern void evtSetUnitColorRGB(struct evtUnit_t *unit, s32 frame, u32 rgb);
+
+extern void evtSetUnitColorA(struct evtUnit_t *unit, s32 frame, u32 alpha);
+
+extern void nbFormDispOff(s32 formindex);
+
+extern u32 nbGetModelColor(nbFormation_t *form);
+
+extern void mdlSetEffectScale(mdlObj_t *model, f32 scale);
 
 datUnitVisual_t *nbGetUnitVisual(datUnitWork_t *work);
 
@@ -897,7 +923,66 @@ s32 nbCheckModelLoad(nbMainProcessData_t *data, s32 major, s32 minor)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", RegistUnit);
+void RegistUnit(nbMainProcessData_t *data, s32 major, s32 minor, nbFormation_t *form,
+                datUnitWork_t *work)
+{
+    dds3Basic_t *basic;
+    datUnitVisual_t *visual;
+    f32 radius = 50.0f;
+    s32 serial;
+
+    serial = evtSetRegistUnit(major, minor);
+    form->stat |= 2;
+    basic = dds3SearchSceneBasic(dds3GetActiveScene(), serial, 5);
+    form->serial = serial;
+    form->basic = basic;
+    form->hunit = ((dds3UnitObjectBasicWorkData_t *)basic->workdata)->hUnit;
+    form->hunit->flags |= 0x200000;
+    if (data->light[0] != NULL) {
+        dds3LinkLightObjectToUnitObject(data->light[0], basic, 1);
+    }
+    nbSetWaitMotion(form, 0, 1.0f);
+    nbSetUnitMotion(form, 0, 1, 1.0f);
+    form->modelcol = nbGetModelColor(form);
+    if (minor == 0x129) {
+        form->anime |= 0x400;
+    }
+    dds3SetPosPoseSet(basic, &form->pos);
+    if (form->partyindex < 4) {
+        dds3SetRotPoseSet(basic, (u128 *)D_003FA7A0);
+    }
+    if ((form->anime & 0x200) == 0) {
+        evtSetUnitColorRGB(form->hunit, 0, 0);
+        evtSetUnitColorA(form->hunit, 0, 0);
+    } else {
+        nbFormDispOff(form->formindex);
+    }
+    visual = nbGetUnitVisual(work);
+    if (visual->shadowsize == 0) {
+        dds3ObjectBaseOffFlag(basic, 0x400);
+    } else {
+        dds3ObjectBaseOnFlag(basic, 0x400);
+        switch (visual->shadowsize) {
+        case 1:
+            radius = 50.0f;
+            break;
+        case 2:
+            radius = 100.0f;
+            break;
+        case 3:
+            radius = 200.0f;
+            break;
+        case 4:
+            radius = 300.0f;
+            break;
+        }
+        basic->poseset->r = radius;
+    }
+    if (form->scl != 1.0f) {
+        mdlSetEffectScale(form->hunit->owner, form->scl);
+    }
+    form->flag = (form->flag & ~2u) | 4;
+}
 
 s32 CheckLoad_nbUnitProcess(pmdProcessWork_t *wdata)
 {
