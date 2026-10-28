@@ -1213,26 +1213,28 @@ u32 evtHokanUInt(s32 hokan, f32 ratio, u32 i1, u32 i2)
 }
 
 /* vu0 routine: blend two RGBA8888 colours by t */
-/* NON_MATCHING: 9 of 49 words differ (first at +0x4). */
-#ifdef NON_MATCHING
 u32 evtHokanColor(s32 hokan, f32 ratio, u32 c1, u32 c2)
 {
-    u32 color = c1;
+    s32 color1[4];
+    s32 color2[4];
+    s32 blended[4];
+    u32 packed;
 
     if (hokan) {
-        eeUnpackRGBAWordFloat(c1, 1.0f / 128.0f);
+        color1[0] = c1;
+        MMI_RGBA_UNPACK(color1, 1.0f / 128.0f);
         SDF_VU0_SCALEVECTOR_BITS(1.0f - ratio);
         SDF_VU0_COPYVECTOR_A_TO_B();
-        eeUnpackRGBAWordFloat(c2, 1.0f / 128.0f);
+        color2[0] = c2;
+        MMI_RGBA_UNPACK(color2, 1.0f / 128.0f);
         SDF_VU0_SCALEVECTOR_BITS(ratio);
         SDF_VU0_ADDVECTOR();
-        color = eePackRGBAWord(128.0f);
+        MMI_RGBA_PACK_UNIT(packed, 128.0f);
+        blended[0] = packed;
+        return blended[0];
     }
-    return color;
+    return c1;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanColor);
-#endif
 
 /* vu0 routine: blend three rows of vectors a and b by t into out (missing input = default rows) */
 void evtHokanSceneLight(s32 hokan, f32 ratio, f32 *key1, f32 *key2, f32 *d)
@@ -1399,8 +1401,6 @@ void evtHokanMultBlur(s32 hokan, f32 ratio, dds3Effect_PartialMultiBlurParam_t *
 
 void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d);
 
-/* NON_MATCHING: 1 of 72 words differ (first at +0xC0). */
-#ifdef NON_MATCHING
 void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_Filter_t *key2, dds3Effect_Filter_t *d)
 {
     s32 cornerIndex;
@@ -1423,9 +1423,6 @@ void evtHokanFilter(s32 hokan, f32 ratio, dds3Effect_Filter_t *key1, dds3Effect_
     d->abgr = evtHokanColor(hokan, ratio, key1->abgr, key2->abgr);
     d->blend = key1->blend;
 }
-#else
-INCLUDE_ASM(const s32, "event/evtPolygonMovie", evtHokanFilter);
-#endif
 
 void evtHokanMultFilter(s32 hokan, f32 ratio, dds3Effect_PartialMultiFilterParam_t *key1, dds3Effect_PartialMultiFilterParam_t *key2, dds3Effect_PartialMultiFilterParam_t *d)
 {

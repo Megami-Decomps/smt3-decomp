@@ -2,47 +2,6 @@
 
 Conventions and the reason these are kept: [../nonmatching.md](../nonmatching.md).
 
-## evtHokanColor (event/evtPolygonMovie, 0xC8)
-
-40 of 49 words match; 196 emitted bytes against retail's 200.
-
-The body is correct: the first forty words, both `EE_MMI_RGBA_UNPACK` blocks
-with their frame slots at `0x0` and `0x10`, the `1.0f - t` and `t` scales, the
-`COPYVECTOR_A_TO_B` and the `ADDVECTOR` are byte-identical. What differs is one
-register at the tail. Retail puts the `128.0f` unit in `$4` and the
-`MMI_RGBA_PACK_UNIT` output in `$3`, stores `$3` to the pack slot at `0x20` and
-ends `daddu $2, $3, $0`; the draft puts the unit in `$3` and the output in `$2`,
-so the copy into the return register does not exist and the function is one word
-short. `$2` already holds `a` from the entry `beqz`'s delay slot on both sides,
-so the shape of the early exit is not the lever.
-
-Ruled out: an early `return a;` with `return eePackRGBAWord(128.0f);` (10 words
-differ), an `if`/`else` setting one `color` in each arm (10 differ and one word
-over), a `goto` to a trailing `return color;`, an `s32` rather than `u32` result
-local, a second local between the pack and the return, a `f32 unit = 128.0f;`
-local (46 differ), dead stores to `t` and to `b` after the pack, and writing
-`MMI_RGBA_PACK_UNIT` inline on a `u32 rgba[4]` at function scope (43 of 50) or
-in an inner block after the unpacks (unchanged at 9). Every one of those leaves
-the output register coalesced with `$2`.
-
-## evtHokanFilter (event/evtPolygonMovie, 0x120)
-
-71 of 72 words match, exact size. The one differing word is the outer corner
-loop's backedge: the draft emits `bnel $2, $0` where retail has `bne`.
-
-This one is **not a source problem**. It closes the moment `evtHokanColor` is a
-C definition in the unit, measured directly by compiling the `evtHokanColor`
-draft unguarded: `evtHokanFilter` then came out byte-exact while
-`evtHokanColor` itself stayed 9 words out. So the two are a pair, and cracking
-`evtHokanColor`'s last register banks this function with it. Do not permute
-this function; see the `evtHokanColor` entry above.
-
-The body is otherwise confirmed: the `corners[2][2]` double loop comes first
-(gcc strength-reduces it to one flat `addiu 4` offset reset per outer
-iteration, the same shape `evtHokanBlur2` already matches), then
-`out->color = evtHokanColor(...)`, then `out->blendControl = a->blendControl;`.
-Writing `blendControl` before `color` runs one word over and 30 words out.
-
 ## evtGetPolygonMovieWorkData2 (event/evtPolygonMovie, 0xF0)
 
 58 of 60 words match, exact size. Two adjacent words are swapped: retail fills
