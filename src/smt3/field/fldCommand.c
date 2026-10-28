@@ -1608,7 +1608,52 @@ s32 fldCommand_FLD_MODEL_LIGHT(void) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "field/fldCommand", fldCommand_FLD_SAGASI_AKUMA);
+typedef struct {
+    u16 item;
+    u16 par;
+} datTakaraSagasiItem_t;
+
+typedef struct {
+    u32 flag;
+    datTakaraSagasiItem_t itemtbl[8];
+} datTakaraSagasiTable_t;
+
+typedef struct {
+    u32 flag;
+    datTakaraSagasiTable_t tbl[4];
+} datTakaraSagasi_t;
+
+extern datTakaraSagasi_t datSagasiSkillTable;
+extern u32 fldEncountSagasiFlag;
+
+s32 fldCommand_FLD_SAGASI_AKUMA(void)
+{
+    if (scrGetIntPara(0) == 0) {
+        scrSetIntReturnValue(fldEncountSagasiFlag);
+    } else {
+        s32 groupIndex;
+
+        for (groupIndex = 0; groupIndex < 4; groupIndex++) {
+            s32 itemIndex;
+            s32 random;
+
+            if (datSagasiSkillTable.tbl[groupIndex].flag != 0 &&
+                evtBitCheck(datSagasiSkillTable.tbl[groupIndex].flag) == 0) {
+                continue;
+            }
+            random = dds3GetRandIntA(
+                0, datSagasiSkillTable.tbl[groupIndex].itemtbl[7].par);
+            for (itemIndex = 0; itemIndex < 8; itemIndex++) {
+                if (datSagasiSkillTable.tbl[groupIndex].itemtbl[itemIndex].par >= random) {
+                    scrSetIntReturnValue(datSagasiSkillTable.tbl[groupIndex].itemtbl[itemIndex].item);
+                    return 1;
+                }
+            }
+        }
+        scrSetIntReturnValue(3);
+    }
+    return 1;
+}
 
 u32 fldCommand_FLD_ANAHORI_INIT(void) {
     fldAnahoriSelectInit();
