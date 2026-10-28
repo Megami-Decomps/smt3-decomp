@@ -496,7 +496,7 @@ void frPushTagChar(frMsgInfo_t *ctx, u16 code);
 
 s32 frGetTagArgCount(s32 tagCode);
 
-frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText);
+frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, frFontHandle_t *unusedPrevious);
 
 /* Select by the low byte of slotId; enable the entry and store value + 1 as a byte. */
 void frSetWhiteSpaceW(s32 StyleNo, s32 Width) {
@@ -1941,7 +1941,7 @@ frFontHandle_t *MessageRequestEx2(s32 X, s32 Y, s32 Z, s32 Style, s32 ColNo, s32
     return frAnalyzeMessage(&args);
 }
 
-frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText) {
+frFontHandle_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 channel0, s32 channel1, s32 channel2, s32 channel3, u8 *encodedText, frFontHandle_t *unusedPrevious) {
     s8 savedSpacing = gMessageSpaceX;
     frFontHandle_t *chain = MessageRequestEx2(x, y, depth, channel0 & 0xFF, channel1 & 0xFF, channel2 & 0xFF, channel3 & 0xFF, encodedText, NULL);
 

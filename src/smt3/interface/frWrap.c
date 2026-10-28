@@ -247,9 +247,89 @@ frFontRequest_t *frwGetSmallCaptionFontFRQ(s32 x, s32 y, s32 priority, u32 color
     return frCombineFontRequestEx(previous, request, 0);
 }
 
-INCLUDE_ASM(const s32, "interface/frWrap", frwGetHelpFRQ);
+typedef struct frTextBank_t frTextBank_t;
+extern frTextBank_t itfMesEmbedded_3E8CA8, itfMesEmbedded_3F39E0, itfMesEmbedded_3F7350;
+extern u8 *MessageNumSearch(s32 index, frTextBank_t *bank, s32 size);
+extern frFontRequest_t *MessageRequestNS(s32 x, s32 y, s32 depth, s32 style,
+    s32 color, s32 type, s32 speed, u8 *text, frFontRequest_t *unusedPrevious);
 
-INCLUDE_ASM(const s32, "interface/frWrap", frGetHelpPos);
+frFontRequest_t *frwGetHelpFRQ(s32 x, s32 y, s32 priority, s8 bank, u16 index, s8 mode)
+{
+    u8 *text = NULL;
+    frFontRequest_t *request;
+
+    switch (bank) {
+    case 0:
+        text = MessageNumSearch(index, &itfMesEmbedded_3E8CA8, 0);
+        break;
+    case 1:
+        text = MessageNumSearch(index, &itfMesEmbedded_3F39E0, 0);
+        break;
+    case 2:
+        text = MessageNumSearch(index, &itfMesEmbedded_3F7350, 0);
+        break;
+    }
+    switch (mode) {
+    case 1:
+        frDisableMode(4);
+    case 3:
+        frEnableMode(8);
+        break;
+    case 2:
+        frDisableMode(4);
+        break;
+    }
+    request = MessageRequestNS(x, y, priority, 1, 0, 0, 0x80, text, NULL);
+    switch (mode) {
+    case 1:
+        frEnableMode(4);
+    case 3:
+        frDisableMode(8);
+        break;
+    case 2:
+        frEnableMode(4);
+        break;
+    }
+    return request;
+}
+
+extern s32 D_0054F44C, D_0054F458, frHelpPosX, frHelpPosY;
+extern s8 D_0056BD60[];
+extern s32 frCalcStringHash(s8 *text);
+extern void frCopyTagArgs(s8 *text, s8 *destination, s32 line);
+
+frFontRequest_t *frGetHelpPos(s32 x, s32 y, s32 priority, s32 bank, s32 index)
+{
+    u8 *text;
+
+    switch (bank) {
+    case 0:
+        text = MessageNumSearch(index, &itfMesEmbedded_3E8CA8, 0);
+        break;
+    case 1:
+        text = MessageNumSearch(index, &itfMesEmbedded_3F39E0, 0);
+        break;
+    default:
+        text = MessageNumSearch(index, &itfMesEmbedded_3F7350, 0);
+        break;
+    }
+    if (index != D_0054F44C) {
+        D_0054F44C = index;
+        frHelpPosX = 0;
+        frHelpPosY = 0;
+        D_0054F458 = frCalcStringHash((s8 *)text);
+    }
+    frHelpPosX++;
+    if (frHelpPosX >= 31) {
+        frHelpPosX = 0;
+        frHelpPosY++;
+        if (frHelpPosY >= D_0054F458) {
+            frHelpPosY = 0;
+        }
+    }
+    frCopyTagArgs((s8 *)text, D_0056BD60, frHelpPosY);
+    return MessageRequestNS(x, y, priority, 1, 0, 0, 0x80, (u8 *)D_0056BD60, NULL);
+}
 
 s32 fr_1CA990(void) {
     return 0;
@@ -397,7 +477,36 @@ u32 frFreeFontTable(frFontNode_t *ringBase) {
     return 1;
 }
 
-INCLUDE_ASM(const s32, "interface/frWrap", fr_1CAC50);
+extern s32 D_0054F460, D_0054F464;
+extern s8 D_0054F468;
+extern s8 dds3PadBitTable[];
+extern frFontRequest_t *frTestFontHandle;
+extern char D_005359F8[];
+extern void frSetDrawSpeed(frFontRequest_t *request, s32 speed);
+
+void fr_1CAC50(void)
+{
+    frFontRequest_t *request;
+
+    request = frwGetSmallFontFRQ((D_0054F460 + 64) << 4,
+                               (D_0054F464 + 32) << 3,
+                               0xFFFFFF, 0x80808000, D_005359F8,
+                               frTestFontHandle);
+    frTestFontHandle = request;
+    frSetDrawSpeed(request, 6);
+    if (dds3PadBitTable[6] != 0) {
+        if (D_0054F468 >= 0) {
+            D_0054F468++;
+        }
+    }
+    if (dds3PadBitTable[7] != 0) {
+        u8 *alpha = (u8 *)&D_0054F468;
+        if (*alpha != 0) {
+            (*alpha)--;
+        }
+    }
+    frSetFontColor(frTestFontHandle, 0x80808000 | (u8)D_0054F468);
+}
 
 INCLUDE_RODATA(const s32, "interface/frWrap", D_005359F8);
 
