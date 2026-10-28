@@ -211,7 +211,65 @@ s32 nmeCheckInputMode(u8 mode)
 }
 
 
-INCLUDE_ASM(const s32, "nme/Nme_Draw", nmeUpdateInput);
+extern s32 cmpGetPressedButton(s32 mask);
+extern void cmpPlayCursorSE(u32 button);
+extern void nmeMoveCursorWrap(void);
+extern void nmeMoveCursor2(void);
+extern s32 nmeMoveCursor(void);
+extern void nmeFindNextChar(void);
+extern void nmeInitNameBuffer(s8 mode, nmeWork_t *work);
+extern void nmeInitNameRows(s8 mode, nmeWork_t *work);
+extern void cmpInitCursorRange(void *cursor, u8 count, u8 visible, s32 layout);
+extern void cmpInitCursorLayout(void *cursor, s32 a, s32 b, s32 c, s32 d, s32 mode);
+
+void nmeUpdateInput(void)
+{
+    u32 button = (u16)cmpGetPressedButton(0x1000);
+    s32 moved = 0;
+    s32 cursorSource = 0;
+
+    if ((s8)nmeUpdateWork->unk1B == 1) {
+        nmeMoveCursorWrap();
+        cursorSource = 2;
+    }
+    if ((s8)nmeUpdateWork->unk1B != 0) return;
+    if (cursorSource == 0) {
+        if (nmeUpdateWork->alternateCursorActive != 0) {
+            nmeMoveCursor2();
+            cursorSource = 1;
+        }
+    }
+    if (cursorSource == 0) {
+        if (nmeUpdateWork->primaryCursorActive != 0) {
+            moved = nmeMoveCursor() != 0;
+            cursorSource = 1;
+        }
+    }
+    if (cursorSource == 0) nmeFindNextChar();
+    if (button == 0x1000) moved = 1;
+    if (moved != 0) {
+        if (nmeUpdateWork->inputMode == 0) {
+            if (nmeCheckInputMode(0) != 0) {
+                if (nmeUpdateWork->entryMode == 0) nmeInitNameBuffer(2, nmeUpdateWork);
+                else nmeUpdateWork->unk1B = 1;
+            } else if (nmeUpdateWork->targetNo == 0) {
+                button = 0x8000;
+            } else {
+                nmeInitNameRows(nmeUpdateWork->targetNo, nmeUpdateWork);
+                nmeUpdateWork->unk1B = 1;
+            }
+        } else if (nmeCheckInputMode(2) != 0) {
+            nmeUpdateWork->unk1B = 1;
+        } else {
+            button = 0x8000;
+        }
+        if ((s8)nmeUpdateWork->unk1B != 0) {
+            cmpInitCursorRange(&nmeUpdateWork->wrapCursor, 2, 2, 0);
+            cmpInitCursorLayout(&nmeUpdateWork->wrapCursor, 0, 0, 0, 0, 0);
+        }
+    }
+    cmpPlayCursorSE(button);
+}
 
 void nmeAdvanceAnim(void)
 {
