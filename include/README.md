@@ -800,6 +800,7 @@ record scalar also preserves upstream's matched packet constructors.
 | `sdfModelDrawEnvSet_t` | 96 | `sdfModelSetDrawEnv` strides the four sets by 0x60 |
 | `sdfModelDrawEnvTerm_t` | 48 | the same function's tail, a draw tag then a DMA tag at +0x20 |
 | `sdfModelDrawEnv_t` | 432 | four sets then the terminator at +0x180 |
+| `dds3DrawBank_t` | 7136 | `dds3FirstProcess` strides frame banks by 0x1BE0 and initializes 11 contiguous 432-byte model environments at +0x40 |
 
 `sdfGrFrameSet_t` is confirmed field by field three times over.
 `sdfGrSetFrameSetMode` writes `w` +0, `h` +2 and `buffH` +4 as `sh` and
