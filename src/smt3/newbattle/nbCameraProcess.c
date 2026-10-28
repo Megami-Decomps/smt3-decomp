@@ -308,7 +308,44 @@ void nbInitCameraProcess(nbMainProcessData_t *data)
     nbCameraInit();
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", func_001B2158);
+void func_001B2158(u32 mask)
+{
+    sdfVector4_t sum;
+    sdfVector4_t scale;
+    nbFormation_t *pForm;
+    u32 count;
+    u32 stat;
+    s32 i;
+    f32 zero;
+
+    count = 0;
+    pForm = nbGetMainProcessData()->form;
+    zero = 0.0f;
+    sum.z = zero;
+    sum.y = zero;
+    sum.x = zero;
+    for (i = 0; i < 32; i++) {
+        stat = pForm->stat;
+        if ((stat & mask) != 0 && (stat & 1) != 0) {
+            effBTLModelGetSphereCenter(pForm);
+            SDF_VU0_LOADVECTOR_B_MEMOPS(sum);
+            SDF_VU0_ADDVECTOR_B_A();
+            SDF_VU0_STOREVECTOR_B_MEMOPS(sum);
+            count++;
+        }
+        pForm++;
+    }
+    if (count != 0) {
+        scale.x = 1.0f / count;
+    } else {
+        scale.x = 1.0f;
+    }
+    scale.y = scale.x;
+    scale.z = scale.x;
+    SDF_VU0_LOADVECTOR_MEMOPS(sum);
+    SDF_VU0_LOADVECTOR_B(&scale);
+    SDF_VU0_MULVECTOR();
+}
 
 f32 func_001B2270(sdfVector4_t *pCenter, u32 mask)
 {
