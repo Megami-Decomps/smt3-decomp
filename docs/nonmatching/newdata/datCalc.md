@@ -20,25 +20,6 @@ arm; duplicating `return param - bonus` in both arms to invite cross-jumping;
 36 combinations of declaration order and initialisation order of the three
 locals.
 
-## datDeadNakama (newdata/datCalc, 0xC4)
-
-28 of 48 words differ and the draft is one word short. The loop body, the
-`fldAnahoriAkuma_t` view at `DDS3_GBWK + ofs + 0xA50` and the `u32` offset
-local that keeps `ofs + 0xA50` in a saved register are all right. Two things
-are not. Retail copies the record address with `daddu $5, $3, $0` in the
-`flag & 1` branch's delay slot so `$3` can be reused, and it forms the second
-read of the same flag as `(DDS3_GBWK + 4) + ofs` with displacement 0 where
-the draft forms `(DDS3_GBWK + ofs) + 4`. The two are the same instruction
-count, so this is an association ee-gcc canonicalises.
-
-Ruled out for the association: explicit parentheses around
-`((u8 *)DDS3_GBWK + 4)`; the same through a `datUnitWork_t *` cast; the
-index-first cast `(u8 *)aofs + ((u32)DDS3_GBWK + 4)`; an address derived from
-`&DDS3_GBWK->akuma[0].flag`; and `s32` instead of `u32` for the offset local.
-Ruled out for the copy: a named `fldAnahoriAkuma_t *` local for the record,
-with the second access written through it, through the global, and through the
-`+ 4` form.
-
 ## datPartyDamagePipe (newdata/datCalc, 0x114)
 
 54 of 68 words differ, one word short, and every instruction retail emits is

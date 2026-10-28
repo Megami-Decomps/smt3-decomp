@@ -879,7 +879,24 @@ void datDeadNakama(s32 did)
     }
 }
 #else
-INCLUDE_ASM(const s32, "newdata/datCalc", datDeadNakama);
+void datDeadNakama(s32 did)
+{
+    s32 i;
+
+    for (i = 1; i < 16; i++) {
+        if ((DDS3_GBWK->akuma[i].flag & 1) != 0) {
+            if (DDS3_GBWK->akuma[i].devilId == did) {
+                if (DDS3_GBWK->akuma[i].hp != 0) {
+                    DDS3_GBWK->akuma[i].hp = 0;
+                    datSetBadStat((datUnitWork_t *)&DDS3_GBWK->akuma[i].flag, 0x800);
+                }
+                if ((DDS3_GBWK->akuma[i].flag & 2) != 0) {
+                    DDS3_GBWK->akuma[i].flag &= ~2;
+                }
+            }
+        }
+    }
+}
 #endif
 
 INCLUDE_ASM(const s32, "newdata/datCalc", datPartyDamage);
