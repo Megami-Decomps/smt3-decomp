@@ -110,6 +110,24 @@ changes nothing here either way.
 `P2ADraw`'s own four levers are recorded here because the draft they came from
 is now in the build.
 
+Paired current-provider reorg probes confirm the same residual. Both the
+parked source and the same unit with only the animation body unwrapped passed
+`verify: OK` with `tools/cc1probe.sh --func dds3Billboard_P2ADraw --reorg
+--no-dumps` (the candidate also uses `--as-unit src/smt3/effect/billManager.c`).
+Hooked and unhooked assembly had output parity.
+
+The branch at instruction UID227 has `REG_BR_PROB=3999` and
+`mostly_true_jump=0` in both compiles. The later `0x80` mask, UID389, changes
+ordinary delay-slot eligibility when the animation definition is visible;
+the visible-body run selects it with flags `0x11`. The observed difference is
+eligibility, rather than the branch-probability classification. Which liveness
+input causes that difference remains unresolved.
+
+Destructively narrowing the existing local flags for the final `0x80` dispatch
+worsens the caller to three differing words. Early returns after selected modes
+and a one-pass dispatch block with breaks both leave the original single-word
+residual. None of these forms qualified the full unit, so they were discarded.
+
 The rest of the function needed four separate levers and they are all in the
 draft: the plural loop's `out` pointer has to be the index-cast form
 `(BillOut *)((u8 *)(i * sizeof(BillOut)) + (u32)obj->resolvedEntries)` for

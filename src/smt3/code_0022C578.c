@@ -1252,12 +1252,14 @@ void cmpStartItemTokusyuMsg(u16 item)
     cmpStartSkillTokusyuMsg(datItemTable[item].skill);
 }
 
-// 19 of 40 words match at the exact size; retail calls the tokusyu
-// message before deciding the mode, this decides it first.
+// NON_MATCHING: 19 of 40 words match at the exact size; argument setup
+// and default-mode scheduling differ before the tokusyu message call.
 #ifdef NON_MATCHING
-s32 cmpStartSkillMsg(u16 skill)
+extern s32 cmpClearButtonGuide(s32 skill, s32 errorFlags);
+
+s32 cmpStartSkillMsg(u16 skill, s32 errorFlags)
 {
-    s32 guide = cmpClearButtonGuide(skill);
+    s32 guide = cmpClearButtonGuide(skill, errorFlags);
     s32 mode;
     s32 index;
 
