@@ -60,7 +60,7 @@ extern void dds3FadeIn(s32 r, s32 g, s32 b, s32 frame);
 
 extern u8 debugMode, pipeInitDone;
 
-extern s32 pipeInitSection(void);
+extern void pipeInitSection(void);
 
 extern void pipeFreeLink(tagPipeLinkInfo *pInfo);
 
@@ -166,7 +166,80 @@ s32 pipe_Section(void)
 
 INCLUDE_RODATA(const s32, "pipe/pipeSection", D_00548910);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", pipeInitSection);
+extern const sdfVector4_t D_00548910;
+const char D_00548920[16] = "pipeArea";
+extern s32 pipeIndex;
+extern dds3Basic_t *dds3AddScene(void);
+extern void dds3SetControlScene(dds3Basic_t *);
+extern void dds3SetActiveScene(dds3Basic_t *);
+extern dds3Basic_t *dds3AddAreaBasic(u32, char *);
+extern void AddCamera(void);
+extern void mymdlStartUp(void);
+extern s32 PipeTexLoad(void);
+extern void PlayerStatusSetUp(void);
+extern void pipeEffLoad(void);
+extern void dds3SetLightColor(s32, s32, f32 *);
+extern void dds3SetLightDir(s32, s32, f32 *);
+extern void dds3SetAmbientColor(s32, f32 *);
+extern void dds3SetFogColor(s32, f32 *);
+extern void dds3SetFogPara(s32, f32, f32, f32, f32);
+
+void pipeInitSection(void)
+{
+    sdfVector4_t color = D_00548910;
+    sdfVector4_t direction;
+    dds3Basic_t *scene;
+
+    memset(&direction, 0, sizeof(direction));
+    direction.w = 1.0f;
+    dds3BackColor = 0x80000000;
+    scene = dds3AddScene();
+    dds3SetControlScene(scene);
+    dds3SetActiveScene(scene);
+    AddCamera();
+    dds3AddAreaBasic(0, (char *)D_00548920);
+    pipeIndex = 0;
+    mymdlStartUp();
+    PipeTexLoad();
+    PlayerStatusSetUp();
+    pipeEffLoad();
+
+    color.x = 1.0f;
+    color.y = 0x1.666666p-1f;
+    color.z = 0x1.999998p-2f;
+    dds3SetLightColor(0, 0, &color.x);
+    color.x = 0.0f;
+    color.y = 0.0f;
+    color.z = 0.0f;
+    dds3SetLightColor(0, 1, &color.x);
+    color.x = 0.0f;
+    color.y = 0.0f;
+    color.z = 0.0f;
+    dds3SetLightColor(0, 2, &color.x);
+
+    direction.x = 0.0f;
+    direction.y = 1.0f;
+    direction.z = 0.5f;
+    dds3SetLightDir(0, 0, &direction.x);
+    direction.x = 1.0f;
+    direction.y = 0.0f;
+    direction.z = 0.0f;
+    dds3SetLightDir(0, 1, &direction.x);
+    direction.x = 0.0f;
+    direction.y = 0.0f;
+    direction.z = 0.1f;
+    dds3SetLightDir(0, 2, &direction.x);
+
+    color.x = 0.3f;
+    color.y = 0.3f;
+    color.z = 0.2f;
+    dds3SetAmbientColor(0, &color.x);
+    color.x = 0.0f;
+    color.y = 0.0f;
+    color.z = 0.0f;
+    dds3SetFogColor(0, &color.x);
+    dds3SetFogPara(0, 255.0f, 0.0f, 3000.0f, 100000.0f);
+}
 
 void pipeEndSection(void)
 {

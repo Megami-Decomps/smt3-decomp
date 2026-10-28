@@ -17,7 +17,7 @@ extern u8 pipeInitDone;
 
 extern s32 MainPipe(void *aProcId);
 
-extern s32 pipeInitSection(void);
+extern void pipeInitSection(void);
 
 extern s32 pipeCheckLevel(s32 level, s32 type);
 
