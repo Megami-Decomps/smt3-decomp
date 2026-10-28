@@ -1630,9 +1630,18 @@ INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeModelMotion);
 
 INCLUDE_ASM(const s32, "facility/fclEncyc", CirculateDevilObject);
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", ChangeDevilObjectRegistConfirm);
-
 extern void RequestModelLoad(fclEncyc_instance_tag *pinst, s32 id);
+
+void ChangeDevilObjectRegistConfirm(s32 unitIndex, fclEncyc_instance_tag *pinst)
+{
+    datUnitWork_t *unit = &encycSaveWork->party[unitIndex].unit;
+    fclEncycConfirmDrawWork_t *work = (fclEncycConfirmDrawWork_t *)pinst->pwork;
+
+    work->phase.unitIndex = unitIndex;
+    RequestModelLoad(pinst, unit->id);
+    work->units[1] = *unit;
+    SetRecordToUnit(&work->units[0], encycSaveWork->party[unitIndex].unit.id);
+}
 
 void ChangeDevilObjectReadMain(s32 recindex, fclEncyc_instance_tag *pinst)
 {
