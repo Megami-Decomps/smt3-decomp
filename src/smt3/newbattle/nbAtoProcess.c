@@ -2,6 +2,8 @@
 #include "nb.h"
 #include "effBattle.h"
 #include "newdata.h"
+#include "event.h"
+#include "motion.h"
 
 nbMainProcessData_t *nbGetMainProcessData(void);
 
@@ -41,7 +43,35 @@ s32 nbAtoStoneProcess(dds3ProcessID_t *id)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoGameoverProcess);
+extern void nbSingleFormExceptedDispOff(nbFormation_t *form);
+extern void evtSetUnitColorRGB(evtUnit_t *unit, s32 frames, u32 color);
+extern void evtSetUnitColorA(evtUnit_t *unit, s32 frames, u32 color);
+extern void evtSetUnitMotion(evtUnit_t *unit, s32 motion, s32 before, s32 smooth, s32 mode);
+extern void nbCameraSetBougai(nbFormation_t *form);
+
+s32 nbAtoGameoverProcess(dds3ProcessID_t *id)
+{
+    s32 runtime = dds3GetProcessRunTime(id);
+    nbMainProcessData_t *data = nbGetMainProcessData();
+    nbFormation_t *form = data->form;
+
+    switch (runtime) {
+    case 1:
+        nbSingleFormExceptedDispOff(form);
+        evtSetUnitColorRGB(form->hunit, 0, 0x80808080);
+        evtSetUnitColorA(form->hunit, 0, 0x80808080);
+        form->hunit->owner->first->speed = 1.0f;
+        evtSetUnitMotion(form->hunit, 0x17, 0, 0, 2);
+        nbCameraSetBougai(form);
+        break;
+    case 50:
+        dds3FadeOut(255, 255, 255, 30);
+        break;
+    case 80:
+        return -1;
+    }
+    return 0;
+}
 
 s32 nbAtoGameover2Process(dds3ProcessID_t *id)
 {
