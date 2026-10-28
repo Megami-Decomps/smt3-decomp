@@ -390,9 +390,9 @@ typedef struct
     /* 0x04110 */ cmbStockSlot_t stockSlot[3];
     /* 0x0411C */ u8 birthPanel[0x2C9];
     /* 0x043E5 */ s8 resultIndex[2][12][12];
-    /* 0x04505 */ u8 unk_04505;
+    /* 0x04505 */ u8 reserved04505;
     /* 0x04506 */ u16 resultId[2][12][12];
-    /* 0x04746 */ u8 unk_04746[0x11DC4];
+    /* 0x04746 */ u8 reserved04746[0x11DC4];
     /* 0x1650A */ s8 unk_1650A;
     /* 0x1650B */ u8 unk_1650B[5];
     /* 0x16510 */ s32 script;
@@ -1726,13 +1726,13 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawTargetModel);
 
 typedef struct
 {
-    u8 unk_00[0x80];
+    u8 reserved00[0x80];
     u32 modelValue;
 } cmbSceneModel_t;
 
 typedef struct
 {
-    u8 unk_00[0x18];
+    u8 reserved00[0x18];
     cmbSceneModel_t *model;
 } cmbSceneModelOwner_t;
 

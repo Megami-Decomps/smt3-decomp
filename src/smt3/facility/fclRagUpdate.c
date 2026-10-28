@@ -71,8 +71,8 @@ typedef struct
     /* 0x0006 */ u8 unk_0006[2];
     /* 0x0008 */ s32 unk_0008;
     /* 0x000C */ u8 unk_000C[0x0D];
-    /* 0x0019 */ s8 unk_0019;
-    /* 0x001A */ u8 unk_001A[0x3A];
+    /* 0x0019 */ s8 ragType;
+    /* 0x001A */ u8 reserved001A[0x3A];
     /* 0x0054 */ u16 unk_0054;
     /* 0x0056 */ u8 unk_0056[0xEA];
     /* 0x0140 */ cmpCursorInfo_t listCursor;
@@ -286,7 +286,7 @@ s32 ragUpdateCallSeq(s32 SeqNo)
 {
     u32 phase;
 
-    ragCreateAllList(1, ragUpdateWork->unk_0019, ragUpdateWork);
+    ragCreateAllList(1, ragUpdateWork->ragType, ragUpdateWork);
     phase = (s32)ragUpdateWork->listCursor.unk_22 +
             (u8)ragUpdateWork->listCursor.unk_24;
     if (phase < 5) {
