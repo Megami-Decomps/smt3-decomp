@@ -2581,7 +2581,75 @@ void eff_175070(void)
     }
 }
 
-INCLUDE_ASM(const s32, "effect/effBattleSystem", func_001750D0);
+typedef struct fldResourceLight_t {
+    u32 resv;
+    u32 Flag;
+    u32 AnimeType;
+    f32 InsideR;
+    f32 OutsideR;
+    f32 Soften;
+    f32 Bias;
+    f32 DiffuseR;
+    f32 DiffuseG;
+    f32 DiffuseB;
+    f32 AmbientR;
+    f32 AmbientG;
+    f32 AmbientB;
+} fldResourceLight_t;
+
+extern u8 D_0054F18B;
+extern u32 D_0054F18C;
+extern u32 D_0054F190;
+extern fldResourceLight_t D_0056AC60;
+extern dds3Effect_Filter_t D_0031CA90;
+extern void dds3SetLightObjectResoruce(dds3Basic_t *basic, fldResourceLight_t *resource);
+extern void dds3LinkSceneLight(dds3Basic_t *basic, s32 frame);
+extern void dds3EffectFilter(dds3Effect_Filter_t *params);
+
+void func_001750D0(s32 param)
+{
+    nbMainProcessData_t *mainData;
+    u32 color;
+    u32 redChannel;
+    u32 greenChannel;
+    u32 blueChannel;
+    f32 red;
+    f32 green;
+    f32 blue;
+    f32 scaleRed;
+    f32 scaleGreen;
+    f32 scaleBlue;
+
+    if (D_0054F18B != 0) {
+        color = D_0054F18C;
+        blueChannel = (color >> 16) & 0xFF;
+        blue = (f32)blueChannel / 255.0f;
+        greenChannel = (color >> 8) & 0xFF;
+        green = (f32)greenChannel / 255.0f;
+        redChannel = color & 0xFF;
+        red = (f32)redChannel / 255.0f;
+
+        color = D_0054F190;
+        blueChannel = (color >> 16) & 0xFF;
+        scaleBlue = (f32)blueChannel * 0.0078125f;
+        greenChannel = (color >> 8) & 0xFF;
+        scaleGreen = (f32)greenChannel * 0.0078125f;
+        redChannel = color & 0xFF;
+        scaleRed = (f32)redChannel * 0.0078125f;
+
+        D_0056AC60.DiffuseR = red * scaleRed;
+        D_0056AC60.DiffuseG = green * scaleGreen;
+        D_0056AC60.DiffuseB = blue * scaleBlue;
+        D_0056AC60.AmbientR = red * scaleRed;
+        D_0056AC60.AmbientG = green * scaleGreen;
+        D_0056AC60.AmbientB = blue * scaleBlue;
+
+        mainData = nbGetMainProcessData();
+        dds3SetLightObjectResoruce(mainData->light[1], &D_0056AC60);
+        dds3LinkSceneLight(mainData->light[1], 0);
+        dds3EffectFilter(&D_0031CA90);
+    }
+}
 
 u32 effBTLDebug_CameraAllEditCheck(void)
 {
