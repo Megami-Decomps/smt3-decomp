@@ -2883,6 +2883,8 @@ void fclCalcArrowCursorOffset(s8 index, s32 *x, s32 *y)
     }
 }
 
+void fclGetArrowCursorTarget(s32 x, s32 y, s32 z, u32 color, s32 extra);
+
 INCLUDE_ASM(const s32, "code_0022C578", fclGetArrowCursorTarget);
 
 typedef struct
@@ -2905,7 +2907,7 @@ extern s32 datDevilIsRegistered(u8 devilId);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *color, s32 page, s32 spriteId,
     s32 *texList, fclSpriteTbl_t *table, s32 ot);
 
-void fclDrawArrowCursorIcon(s32 x, s32 y, s32 z, s8 index)
+void fclDrawArrowCursorIcon(s32 x, s32 y, s32 z, s8 index, s32 extra)
 {
     s8 id;
 
@@ -2971,7 +2973,7 @@ typedef struct
     /* 0x30 */ s32 unk_30;
 } campDhEntry_t;
 
-void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index)
+void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index, s32 extra)
 {
     campDhEntry_t *entry;
     s32 inset;
@@ -3002,7 +3004,7 @@ void fclGetArrowCursorEntry(s32 x, s32 y, s32 z, s8 index)
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawBackground);
 
-void fclDrawArrowCursorLabel(s32 x, s32 y, s32 z, s8 index, s32 *color, s32 alpha)
+void fclDrawArrowCursorLabel(s32 x, s32 y, s32 z, s32 index, s32 *color, s32 alpha)
 {
     s32 colors[4];
     s32 offsetX;
@@ -3034,7 +3036,39 @@ void fclDrawArrowCursorLabel(s32 x, s32 y, s32 z, s8 index, s32 *color, s32 alph
         (s32 *)((u8 *)campDhDrawWork + 0x1160), fclSpriteTable, 0x47);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", fclDrawArrowCursor);
+void fclDrawArrowCursor(s32 x, s32 y, s32 z, s32 extra)
+{
+    s32 visible;
+    s32 count;
+    s32 i;
+    s32 xOffset;
+    s32 yOffset;
+
+    visible = cmpGetHeartsIconId(0x18);
+    visible = cmpHeartsIconIsVisible((s8)visible) != 0;
+    count = visible + 0x18;
+    for (i = 0; i < count; i++) {
+        s32 colors[4];
+        s8 index = (s8)i;
+        s32 alpha;
+        s32 color;
+
+        fclCalcArrowCursorOffset((s8)index, &xOffset, &yOffset);
+        fclDrawArrowCursorIcon(x + (xOffset << 4), y + (yOffset << 3), 0, (s8)index, extra);
+        fclGetArrowCursorEntry(x + (xOffset << 4), y + (yOffset << 3), 0, (s8)index, extra);
+        if (cmpGetHeartsIconId((s8)index) == DDS3_GBWK->heartsequip) {
+            fclGetArrowCursorTarget(x + (xOffset << 4), y + (yOffset << 3), 0, 0x80808080, 0x100);
+        }
+        alpha = campDhDrawWork->cursorAlpha[i];
+        color = (alpha / 2) & 0xFF;
+        color |= 0x80808000;
+        colors[0] = color;
+        colors[1] = color;
+        colors[2] = color;
+        colors[3] = color;
+        fclDrawArrowCursorLabel(x, y, 0, i, colors, -1);
+    }
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawPanel);
 

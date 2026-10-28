@@ -554,3 +554,4 @@ src/smt3/facility/fclEncyc.c	redthing1	done	2026-10-28	0 matches / 1 guarded dra
 src/smt3/newbattle/NbNegoFlowOne.c	redthing1	done	2026-10-28	2 fn / 508 B	Flow1_23 and Flow1_25 selected-unit message dispatch with typed message offsets
 src/smt3/pb/pbRecord.c	redthing1	done	2026-10-28	1 fn / 768 B	pbDumpRecordData native block-name rows and callback-sensitive snapshot diagnostics
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	2 fn / 948 B	fusion calculation dispatch and stock insertion with native state tables, party snapshots and callback reloads; owner 161 match, 0 differ
+src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 404 B	arrow cursor dispatch with native helper argument contracts and signed alpha division; owner 342 match, 0 differ
