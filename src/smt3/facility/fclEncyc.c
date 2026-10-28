@@ -1562,7 +1562,26 @@ void drawSummonCount(void **font, s32 x, s32 y, s32 releasePrevious)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclEncyc", drawEncycRatio);
+extern char D_0054FCC0[];
+
+void drawEncycRatio(frFontHandle_t **font, s32 releasePrevious)
+{
+    char text[16];
+    s32 ratio;
+    u32 color;
+
+    if (releasePrevious != 0) {
+        if (*font != NULL) {
+            frDestroyFontRequestAfter(*font);
+        }
+        *font = NULL;
+    }
+
+    ratio = fclEncycGetRatio();
+    sprintf(text, D_0054FCC0, ratio);
+    color = ratio >= 100 ? 0xD7D78080 : 0xA09DC380;
+    *font = frwGetNumFontFRQ(0x1A40, 0x0BD0, 0x00FFFFF0, color, text, *font);
+}
 
 s32 CalcFadeAlpha(s16 *pval, s32 mode, s32 max_alpha, s32 speed)
 {
