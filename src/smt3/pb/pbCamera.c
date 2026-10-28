@@ -141,7 +141,39 @@ void pbSetViewRotation(f32 angle, f32 radius, f32 degree)
     aViewEye.z = offset.z + aViewTarget.z;
 }
 
-INCLUDE_ASM(const s32, "pb/pbCamera", pb_draw_mycharacter_Process);
+extern void *memset(void *dst, s32 value, u32 size);
+extern void pbSetModelPos(mdlObj_t *model, const f32 *pos);
+extern void mdlLink(mdlObj_t *model, void *ot);
+extern void mdlGetPosition(mdlObj_t *model);
+extern void fldDrawMaruKage(u32 fade, f32 x, f32 y, f32 z, f32 radius);
+extern u8 D_002F69B8[];
+
+s32 pb_draw_mycharacter_Process(dds3ProcessID_t *id)
+{
+    sdfVector4_t pos;
+    pbProcHandle_t *panel = id->workdata;
+    pbMyChar_t *chara = panel->data.chara;
+
+    memset(&pos, 0, sizeof(pos));
+    pos.w = 1.0f;
+    switch (panel->state) {
+    case 1:
+        if (panel != NULL) {
+            panel->flags = 0;
+        }
+        break;
+    case 5:
+        return -1;
+    }
+    if (chara->flg != 0) {
+        pbSetModelPos(chara->model, &chara->pos.x);
+        mdlLink(chara->model, D_002F69B8);
+        mdlGetPosition(chara->model);
+        SDF_VU0_STOREVECTOR(&pos);
+        fldDrawMaruKage(0x80, pos.x, pos.y - 1.0f, pos.z, 20.0f);
+    }
+    return 0;
+}
 
 void pb_draw_mycharacter_Shutdown(dds3ProcessID_t *id) {
     pbProcHandle_t *panel = id->workdata;
