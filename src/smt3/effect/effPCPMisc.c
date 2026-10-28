@@ -4967,7 +4967,53 @@ void effPCPAgiraoFireSetColor(effPCPAgiraoFire_tag *hData, u32 abgr) {
     hData->color = abgr;
 }
 
-INCLUDE_ASM(const s32, "effect/effPCPMisc", effPCPAgiFireballCreate);
+effPCPAgiFireball_tag *effPCPAgiFireballCreate(
+    const effPCPAgiFireballParam_t *pParam, const effPCPAgiFireballPartList_t *pPart)
+{
+    effPCPAgiFireball_tag *work;
+    dds3ModelHandle_t *model;
+    u32 i;
+    u32 j;
+    u32 n;
+
+    work = sdfChipAllocDirect(sizeof(effPCPAgiFireball_tag));
+    memset(work, 0, 0x10C);
+    work->param = *pParam;
+    work->frame = 0;
+    work->color = 0x80808080;
+    work->mode = 0;
+    SDF_VU0_STOREIDENTITY(work->matrix);
+    work->headHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, pPart->pHelper);
+    work->handleA[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[0]);
+    work->handleA[1] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[1]);
+    work->handleA[2] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[2]);
+    work->handleA[3] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pAttach[3]);
+    work->handleA[4] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_VIEWER_CONTEXT, pPart->pAttach[4]);
+    model = dds3EffectPartGetHandle(work->headHandle);
+    work->count = model->first->frameCount;
+    for (i = 0; i < 3; i++) {
+        if (work->param.TrackCount[i] > 0) {
+            n = work->count * work->param.TrackCount[i];
+            work->alloc[i] = sdfMemAllocDirect(n * 4);
+            work->list[i] = (effPartHandle_t **)sdfMemLock(work->alloc[i]);
+            work->list[i][0] = dds3EffectPartCreate(
+                EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pTrack[i]);
+            for (j = 1; j < n; j++) {
+                work->list[i][j] = NULL;
+            }
+        } else {
+            work->alloc[i] = NULL;
+        }
+    }
+    work->handleB[0] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[0]);
+    work->handleB[1] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[1]);
+    work->handleB[2] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[2]);
+    work->handleB[3] = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pStart[3]);
+    work->handleB[4] = dds3EffectPartCreate(
+        EFF_PARAM_WORK_KIND_EXTENDED_WORK_WITH_MATRIX_CALLBACK, pPart->pStart[4]);
+    work->tailHandle = dds3EffectPartCreate(EFF_PARAM_WORK_KIND_EFFECT_NODE, pPart->pOkSmoke);
+    return work;
+}
 
 effPCPAgiFireball_tag *effPCPAgiFireballCreatePCF(void *parameterTable) {
     effPCPAgiFireballPartList_t set;
