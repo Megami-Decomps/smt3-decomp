@@ -3133,7 +3133,28 @@ void campDhDrawQuadGauge(s32 ratio)
     cmpDrawTriG(coordinates, coordinates + 3, 0, colors, 0x47);
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpTextAlt);
+void campDhDrawHelpTextAlt(s32 x, s32 y, s32 z, s32 alpha)
+{
+    s32 colors[4];
+    s32 color;
+
+    color = 0x4D618900 | ((256 - alpha) * 51 / 256);
+    colors[0] = 0;
+    colors[1] = color;
+    colors[2] = 0;
+    colors[3] = color;
+    cmpDrawBoxGDefault(x + 0xDD0, y + 0xAF8, 0, 52, 5, colors, 0x47);
+    colors[0] = color;
+    colors[1] = color;
+    colors[2] = color;
+    colors[3] = color;
+    cmpDrawBoxGDefault(x + 0x1110, y + 0xAF8, 0, 96, 5, colors, 0x47);
+    colors[0] = color;
+    colors[1] = 0;
+    colors[2] = color;
+    colors[3] = 0;
+    cmpDrawBoxGDefault(x + 0x1710, y + 0xAF8, 0, 52, 5, colors, 0x47);
+}
 
 INCLUDE_ASM(const s32, "code_0022C578", campDhDrawHelpText);
 
