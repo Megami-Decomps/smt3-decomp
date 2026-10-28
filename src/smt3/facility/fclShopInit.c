@@ -370,7 +370,7 @@ s32 shpCountUnlockedItems(s32 itemType)
 }
 
 extern s32 datGetItemSlotIndex(u16 id);
-extern s32 cmbChkGetHearts(s8 id);
+extern s32 cmbChkGetHearts(s32 id);
 extern s32 fclSetWorkValue(s8 index, s32 value);
 
 void shpFindItemSlot(shpUpdateWork_t *work)

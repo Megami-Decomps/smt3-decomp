@@ -647,8 +647,9 @@ s8 func_00221DB0(s8 index)
     return D_00339E00[index].unk_19;
 }
 
-s32 cmbChkGetHearts(s8 id)
+s32 cmbChkGetHearts(s32 rawId)
 {
+    s8 id = rawId;
     s32 i;
 
     for (i = 0; i < ((u8 *)cmbGlobalWork)[0x1D7B]; i++) {

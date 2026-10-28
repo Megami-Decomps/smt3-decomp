@@ -196,7 +196,62 @@ void shpExit(void)
     shopUpdateWork->unk_0001 = 4;
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopUpdate", shpUpdateSeqBuy);
+typedef struct {
+    u8 reserved0000[0x1928];
+    u8 items[0xA0];
+} shopInventory_t;
+extern shopInventory_t *shopInventory asm("DDS3_GBWK");
+extern s32 datGetItemSlotIndex(u16 item);
+extern s32 cmbChkGetHearts(s32 id);
+extern s8 shpChkChoiceMax(s32 index, s8 kind, s8 preserveTotal);
+extern s32 cmpGetPressedButton(s32 mask);
+extern s32 fclGetFlag(s8 index);
+extern u16 shpGetItemPrice(s32 index, s8 kind);
+extern void lstMoveCursor2(shpSellListWindow_t *list, s8 direction);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+extern void cmpPlayCursorSE(u32 button);
+
+void shpUpdateSeqBuy(void)
+{
+    u16 button = (u16)cmpGetPressedButton(0x33);
+    if (fclGetFlag(0) == 0) return;
+    switch (button) {
+    case 1: {
+        u16 item = shpGetItemPrice(shopUpdateWork->sellList.listCursor.unk_22 +
+            (u8)shopUpdateWork->sellList.listCursor.unk_24, 0);
+        s8 maxChoice = shpChkChoiceMax(-1, 0, 0);
+        if (maxChoice <= 0) {
+            if (shopInventory->items[item] < 99) {
+                button = 0x8000;
+            } else {
+                shopUpdateWork->unk_0005 = button;
+                shopUpdateWork->unk_0008 = fclScriptStart(shopUpdateWork->script, 5, &shopUpdateWork->scriptArg);
+                shopUpdateWork->unk_0001 = 7;
+                shopUpdateWork->unk_0002 = button;
+            }
+        } else {
+            s32 slot = datGetItemSlotIndex(item);
+            if (slot != 0 && cmbChkGetHearts(slot) != 0) {
+                button = 0x8000;
+            } else {
+                fclScriptStart(shopUpdateWork->script, 2, &shopUpdateWork->scriptArg);
+                shopUpdateWork->unk_0001 = 5;
+                shopUpdateWork->unk_0004 = 1;
+            }
+        }
+        break;
+    }
+    case 2:
+        fclScriptStart(shopUpdateWork->script, 8, &shopUpdateWork->scriptArg);
+        shopUpdateWork->unk_0001 = 0;
+        shopUpdateWork->unk_0004 = button;
+        break;
+    case 0x10: lstMoveCursor2(&shopUpdateWork->sellList, -1); break;
+    case 0x20: lstMoveCursor2(&shopUpdateWork->sellList, 1); break;
+    }
+    lstMoveCursor2(&shopUpdateWork->sellList, 0);
+    cmpPlayCursorSE((u16)cmpDisablePadBitStop((cmpPadStopWork_t *)&shopUpdateWork->sellList.listCursor, button, 0x30));
+}
 
 extern s32 cmpGetPressedButton(s32 mask);
 extern s32 fclGetFlag(s8 index);
@@ -380,7 +435,7 @@ extern s32 fclGetFlag(s8 index);
 extern void fclClearFlag(s8 index);
 extern s32 cmpUpdateSeqInfo(void *work, s8 previous);
 extern s32 shpUpdateSeqRoot(void);
-extern s32 shpUpdateSeqBuy(void);
+extern void shpUpdateSeqBuy(void);
 extern void shpUpdateSeqSell(void);
 extern s32 shpUpdateSeqBuyNums(void);
 extern s32 shpUpdateSeqSellNums(void);
