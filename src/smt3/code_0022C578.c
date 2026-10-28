@@ -224,11 +224,17 @@ typedef struct
     /* 0x04 */ s8 unk_04;
     /* 0x05 */ u8 unk_05[0xF];
     /* 0x14 */ void *allocation;
-    /* 0x18 */ u16 slot[10];
-    /* 0x2C */ s32 fadeAlpha;
-    /* 0x30 */ s8 unk_30;
-    /* 0x31 */ s8 unk_31;
-    /* 0x32 */ u8 unk_32[7];
+    union {
+        /* 0x18 */ u16 slot[16];
+        struct {
+            u16 reserved0018[10];
+            /* 0x2C */ s32 fadeAlpha;
+            /* 0x30 */ s8 unk_30;
+            /* 0x31 */ s8 unk_31;
+            /* 0x32 */ u8 unk_32[6];
+        };
+    };
+    /* 0x38 */ s8 slotCount;
     /* 0x39 */ s8 slotCursor;
 } campStatusPanel_t;
 
@@ -830,11 +836,11 @@ s32 fclLoadTexture(char *pFileName);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *aHandle);
+extern void *sdfMemLock(void *aHandle);
 
 extern void *sdfMemAllocDirect(s32 aSize);
 
-extern s32 sdfMemLock(void *aHandle);
+extern void *sdfMemLock(void *aHandle);
 
 extern void (*DrawPhaseTable[])(fclEncyc_instance_tag *work);
 
@@ -4067,7 +4073,44 @@ s32 func_0023AD30(void)
     return cmbGlobalWork->party[panel->slot[panel->slotCursor]].unit.id;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpInitStatus);
+extern void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, cmpSeqInfo_t *pParent);
+extern void cmpModelInit(void);
+
+campStatusPanel_t *cmpInitStatus(s8 arg, cmpSeqInfo_t *pParent)
+{
+    campStatusPanel_t *work;
+    void *allocation;
+    s32 i;
+
+    if (cmpStatusWindowHidden == 0) {
+        allocation = sdfMemAllocDirect(sizeof(*work));
+        work = sdfMemLock(allocation);
+        work->allocation = allocation;
+    } else {
+        work = cmpStatusPhase;
+    }
+
+    cmpInitSeqInfo((cmpSeqInfo_t *)work, pParent);
+    work->slotCount = 0;
+    work->slotCursor = 0;
+    for (i = 0; i < 16; i++) {
+        if (DDS3_GBWK->akuma[i].flag & 1) {
+            if (i == arg) {
+                work->slotCursor = work->slotCount;
+            }
+            work->slot[work->slotCount++] = i;
+        }
+    }
+
+    if (cmpStatusWindowHidden == 0) {
+        cmpSetStatusModelFlag(1);
+        cmpModelInit();
+    }
+    cmpModelInitCore2();
+    cmpClearStatusModelLoadState();
+    return work;
+}
+
 
 void camp_update_status_Shutdown(void)
 {
@@ -4080,7 +4123,7 @@ void camp_update_status_Shutdown(void)
     }
 }
 
-extern campStatusPanel_t *cmpInitStatus(s8 arg);
+extern campStatusPanel_t *cmpInitStatus(s8 arg, cmpSeqInfo_t *pParent);
 
 extern s32 camp_calc_status_Process(s32 id);
 extern s32 camp_draw_status_Process(s32 id);
@@ -4088,11 +4131,11 @@ extern s32 camp_update_status_Process(s32 id);
 
 INCLUDE_RODATA(const s32, "code_0022C578", D_0053FEB8);
 
-void *cmpStartProcessStatus(s8 arg)
+void *cmpStartProcessStatus(s8 arg, cmpSeqInfo_t *pParent)
 {
     void *proc = NULL;
 
-    cmpStatusPhase = cmpInitStatus(arg);
+    cmpStatusPhase = cmpInitStatus(arg, pParent);
     cmpSetStockVisible(0);
     if (cmpStatusWindowHidden == 0) {
         proc = dds3StartProcess("camp_calc_status", 0x3F1, 1, 1, camp_calc_status_Process, NULL,
@@ -6413,13 +6456,13 @@ void cmpDebugDumpCount(void)
     }
 }
 
-void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, s32 pParent)
+void cmpInitSeqInfo(cmpSeqInfo_t *pSeq, cmpSeqInfo_t *pParent)
 {
     pSeq->unk_00 = 3;
     pSeq->unk_02 = -1;
     pSeq->unk_05 = 0;
     pSeq->unk_0C = 0;
-    pSeq->unk_10 = pParent;
+    pSeq->unk_10 = (s32)pParent;
 }
 
 s32 cmpChkSeqInfo(cmbGbWork_t *work)
