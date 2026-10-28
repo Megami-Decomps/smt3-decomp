@@ -92,7 +92,11 @@ typedef struct
     /* 0x0029 */ s8 heartsEvent;
     /* 0x002A */ u16 bonusParamIndex;
     /* 0x002C */ s8 DefaultSkillResult;
-    /* 0x002D */ u8 reserved2D[0x4B];
+    /* 0x002D */ u8 reserved2D[0x46];
+    /* 0x0073 */ s8 powerState;
+    /* 0x0074 */ s8 powerSlot;
+    /* 0x0075 */ u8 reserved75;
+    /* 0x0076 */ u16 powerSkill;
     /* 0x0078 */ s32 unk_78;
     /* 0x007C */ s8 evoPhase;
     /* 0x007D */ u8 unk_7D;
@@ -457,7 +461,79 @@ void rstUpdateSeqDefaultSkill(void)
 }
 
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstUpdateSeqSkillPowerUp);
+extern void rstInitSkillAct(s8 Pos);
+
+void rstUpdateSeqSkillPowerUp(void)
+{
+    s8 phase;
+    if (startPos->powerState < 0) {
+        s32 button = rstWaitConfirmButton();
+        if (button == 1) {
+            return;
+        }
+        if (button == 2) {
+            if (startPos->Flag > 0) {
+                switch (startPos->Flag) {
+                case 1:
+                    fclStartMessage(15);
+                    break;
+                case 2:
+                    fclStartMessage(16);
+                    break;
+                }
+            }
+            rstClearFlag(1);
+            startPos->Flag = 0;
+        } else {
+            if (startPos->Flag == 3) {
+                fclStartMessage(17);
+                startPos->Flag = 0;
+            } else if (startPos->Flag == 4) {
+                fclStartMessage(14);
+                startPos->Flag = 0;
+            } else if (fclChkMessage() == 0) {
+                startPos->unk_0001 = (u8)startPos->unk_0001 + 1;
+                startPos->unk_0004 = 1;
+            }
+        }
+    } else if (fclChkSelMessage() == 0) {
+        switch (fclGetSelMessagePos()) {
+        case 0:
+            fclEndMessage();
+            phase = startPos->powerState;
+            /* Separate cases retain the native shared completion after
+             * the skill callbacks; grouped labels select a range test. */
+            switch (phase) {
+            case 1:
+                rstOverWriteSkill(&startPos->pCurrentStock->skill[startPos->powerSlot], startPos->powerSkill);
+                rstSetMotionReqFromTbl(2);
+                rstInitSkillAct(startPos->powerSlot);
+                startPos->Flag = phase;
+                break;
+            case 2:
+                rstOverWriteSkill(&startPos->pCurrentStock->skill[startPos->powerSlot], startPos->powerSkill);
+                rstSetMotionReqFromTbl(2);
+                rstInitSkillAct(startPos->powerSlot);
+                startPos->Flag = phase;
+                break;
+            default:
+                startPos->Flag = 3;
+                break;
+            }
+            startPos->powerState = -1;
+            break;
+        case 2:
+            break;
+        case 1:
+            fclEndMessage();
+            rstSetMotionReqFromTbl(3);
+            startPos->Flag = 4;
+            startPos->powerState = -1;
+            break;
+        }
+    }
+}
+
 
 typedef struct
 {

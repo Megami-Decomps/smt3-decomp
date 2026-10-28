@@ -576,3 +576,4 @@ src/smt3/facility/fclRagCalc.c	redthing1	done	2026-10-28	1 fn / 272 B	rag list f
 src/smt3/interface/frWrap.c	redthing1	done	2026-10-28	0 / 0	small-font conversion closes final fallback
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 260 B	gradient color scaling with consumed two-row aggregate, native float conversions and signed channel arithmetic; owner 346 match, 0 differ
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 352 B	status-bar sprite pairs with exact unsigned half-alpha and 51/128 alpha scaling; owner 347 match, 0 differ
+src/smt3/result/rstupdate.c	redthing1	done	2026-10-28	1 fn / 476 B	skill-power-up message state machine with signed phase/slot fields, native switch cases and callback reloads; owner 36 match, 0 differ
