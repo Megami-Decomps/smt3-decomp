@@ -276,7 +276,26 @@ INCLUDE_ASM(const s32, "pipe/pipeSection", MyHitAction);
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", EmTask);
 
-INCLUDE_ASM(const s32, "pipe/pipeSection", ActionRot);
+extern void vecRotate2D(f32 *vector, f32 angle);
+
+void ActionRot(tagPipeObject *objPtr) {
+    sdfVector4_t vector = (sdfVector4_t){objPtr->pos[0], objPtr->pos[1], 0.0f, 0.0f};
+    f32 angle;
+    u8 action = objPtr->action;
+
+    if (action < 3) {
+        angle = -4.0f;
+    } else {
+        angle = 8.0f;
+    }
+    if ((action & 1) == 0) {
+        angle = -angle;
+    }
+    angle *= 0x1.1df46ap-6f;
+    vecRotate2D((f32 *)&vector, angle);
+    objPtr->pos[0] = vector.x;
+    objPtr->pos[1] = vector.y;
+}
 
 INCLUDE_ASM(const s32, "pipe/pipeSection", ActionHm);
 
