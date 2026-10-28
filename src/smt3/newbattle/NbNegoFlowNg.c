@@ -285,7 +285,7 @@ typedef struct nbKoukaPacket_t
     sdfVector4_t v;
 } nbKoukaPacket_t;
 
-extern s32 dds3GetRandIntA(s32 aLimit, s32 name);
+extern u32 dds3GetRandIntA(void *state, u32 limit);
 
 extern u32 f;
 
@@ -642,7 +642,7 @@ s32 Flow10_12(nbNegoProcessData_t *n)
     }
     if (n->cnt6_36 == 0) {
         n->nextnegoid = n->nextkouho[1];
-    } else if (dds3GetRandIntA(0, 100) < rate) {
+    } else if ((s32)dds3GetRandIntA(0, 100) < rate) {
         n->nextnegoid = n->nextkouho[0];
     } else {
         n->nextnegoid = n->nextkouho[1];
