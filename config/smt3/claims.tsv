@@ -383,3 +383,6 @@ src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	7 fn / 792 B	visibilit
 src/smt3/effect/effBattleMisc.c	redthing1	done	2026-10-28	3 fn / 100 B	sphere wrappers and corrected helper pairings; bounds core remains assembly; owner 77 match, 0 differ
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	1 fn / 228 B	message-state switch and actual narrow provider result; owner 41 match, 0 differ
 src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	normal skill setup remains assembly; owner 28 match, 0 differ
+src/smt3/facility/fclShare.c	redthing1	done	2026-10-28	0 matches	pad wrapper remains assembly
+src/smt3/newbattle/nbMisc.c	redthing1	done	2026-10-28	0 matches	next-order helper remains assembly; signed cursor and full-width increment recovered
+src/smt3/facility/fclTerminalInit.c	redthing1	done	2026-10-28	1 fn / 220 B	command reset and command-window flag; owner 23 match, 0 differ

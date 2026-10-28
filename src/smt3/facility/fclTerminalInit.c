@@ -200,22 +200,24 @@ void fclTerminalInitList(void *list, s8 count, s32 handle)
 
 
 extern u32 trmMenuTextTable[];
+extern void fclInitCursorWindow(void *cursor, void *data, u8 count);
+extern void fclSetCursorList(void *cursor, s32 count);
 
 /* NON_MATCHING: 4 of 31 words differ (first at +0x54). */
 #ifdef NON_MATCHING
-void fclTerminalInitMenu(s32 a, void *work, s32 slot)
+void fclTerminalInitMenu(s32 id, void *commands, void *work)
 {
     u32 *table;
 
-    if (trmGetEventNo(1, slot) == 0x296) {
+    if (trmGetEventNo(1, work) == 0x296) {
         table = &trmMenuTextTable[4];
     } else {
         table = trmMenuTextTable;
     }
-    fclInitCursorWindow(work, table, 4);
-    fclSetCursorList(work, 0x19);
+    fclInitCursorWindow(commands, table, 4);
+    fclSetCursorList(commands, 0x19);
     fclTerminalCommandCount[0] |= 2;
-    *((s8 *)work + 0x25) = 1;
+    *((s8 *)commands + 0x25) = 1;
 }
 #else
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalInitMenu);
@@ -223,7 +225,27 @@ INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalInitMenu);
 
 INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalDumpJump);
 
-INCLUDE_ASM(const s32, "facility/fclTerminalInit", fclTerminalResetCommands);
+extern void *memset(void *dst, s32 value, u32 size);
+extern s32 fclTerminalDumpJump(void *work);
+extern void cmpSetCursorFlag(void *cursor, u8 *flags);
+extern void fclTerminalInitMenu(s32 id, void *commands, void *work);
+
+void fclTerminalResetCommands(s8 mode, u16 id, void *commands, void *work)
+{
+    memset(gCommandFlag, 0, 4);
+    if (mode == 0) {
+        fclTerminalInitMenu(id, commands, work);
+    } else {
+        fclInitCursorWindow(commands, &trmMenuTextTable[8], 4);
+        fclSetCursorList(commands, 0x19);
+        if (fclTerminalDumpJump(work) == 0) {
+            gCommandFlag[0] |= 1;
+        }
+        gCommandFlag[2] |= 2;
+        *((u8 *)commands + 0x25) = 1;
+    }
+    cmpSetCursorFlag((u8 *)commands + 4, gCommandFlag);
+}
 
 extern char *D_00330808[];
 
