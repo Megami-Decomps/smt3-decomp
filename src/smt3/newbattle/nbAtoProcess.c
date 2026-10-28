@@ -12,7 +12,7 @@ extern dds3ProcessID_t *dds3StartProcess(char *name, u32 priority, s32 startTime
                                          dds3ProcessFunc_t processFunc,
                                          dds3ProcessFunc_t shutdownFunc, void *workData);
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
-extern s32 nbAtoProcess1(dds3ProcessID_t *id);
+extern dds3ProcessFunc_t nbAtoProcess1(dds3ProcessID_t *id);
 extern char D_005510C8[];
 extern u32 dds3GetProcessRunTime(dds3ProcessID_t *id);
 extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
@@ -88,7 +88,49 @@ s32 nbAtoGameover2Process(dds3ProcessID_t *id)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbAtoProcess", nbAtoProcess1);
+extern void datBossRashUpdRec(s32 encounter, s32 presses);
+extern void nbPanelDraw(s32 flag);
+extern void nbBgmFadeOut(void);
+extern void fldPlayerAFree(void);
+extern s32 mdlGetMinorNum(mdlObj_t *model);
+
+dds3ProcessFunc_t nbAtoProcess1(dds3ProcessID_t *id)
+{
+    nbMainProcessData_t *data = nbGetMainProcessData();
+
+    if (data->endtype == 1) {
+        datBossRashUpdRec(data->encno, data->unk140);
+    }
+    switch (data->endtype) {
+    case 2:
+    case 6:
+        nbPanelDraw(0);
+        nbBgmFadeOut();
+        break;
+    case 3:
+        break;
+    }
+    switch (data->endtype) {
+    case 6:
+        fldPlayerAFree();
+        return nbAtoStoneProcess;
+    case 2:
+        fldPlayerAFree();
+        if (mdlGetMinorNum(data->form->hunit->owner) == 0) {
+            return nbAtoGameoverProcess;
+        }
+        return nbAtoGameover2Process;
+    case 1:
+    case 3:
+    case 4:
+    case 5:
+    case 7:
+    case 8:
+    case 9:
+        break;
+    }
+    return (dds3ProcessFunc_t)(dds3GetProcessRunTime(id) != 0 ? -1 : 0);
+}
 
 void nbAtoShutdown(void)
 {
@@ -99,7 +141,7 @@ void nbInitAtoProcess(nbMainProcessData_t *data)
 {
     dds3ProcessID_t *id;
 
-    id = dds3StartProcess(D_005510C8, 0x3F9, 1, 1, nbAtoProcess1,
+    id = dds3StartProcess(D_005510C8, 0x3F9, 1, 1, (dds3ProcessFunc_t)nbAtoProcess1,
                           (dds3ProcessFunc_t)nbAtoShutdown, NULL);
     dds3LinkProcess(data->MainProcessID, id);
     data->AtoProcessID = id;
