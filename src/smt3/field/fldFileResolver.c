@@ -256,7 +256,7 @@ extern void fldInitBlurEffect(void);
 
 extern s32 sdfDevLoadTexList(const char *aFilename);
 
-extern s32 sdfDevLoadFileEx(const char *path, void **destination, s32 mode);
+extern sdfMemHandle_t *sdfDevLoadFileEx(const char *path, void **destination, u32 *size);
 
 extern void fldSetupDoorScenes(void);
 
@@ -342,7 +342,27 @@ extern char D_0054EC30[]; /* "%d" */
 
 extern u32 gFldFileResetMode;
 
-extern void fldFileResolverFL1(void *info);
+typedef struct fldFileAreaDataFL1_t {
+    u32 fileID;
+    u32 SkyTblIdx;
+    char *filename0;
+    char *filename1;
+    char *filename2;
+    char *filename3;
+} fldFileAreaDataFL1_t;
+
+typedef struct fldFileInfoHeaderFL1_t {
+    u32 nResourceTypeTable;
+    void *pResourceTypeTable;
+    fldFileAreaDataFL1_t *pAreaData;
+} fldFileInfoHeaderFL1_t;
+
+extern void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info);
+extern void fldSetFileResolverIdx(u32 index);
+extern char *fldResolverFL1Data[4];
+extern char D_0054EBC0[]; /* "%s%s", shared with fldMakeResouceBasicFL1. */
+extern void *memset(void *buffer, s32 value, u32 size);
+extern void fldMakeResouceBasicFL1(void *typeTable, u32 typeCount);
 
 u32 fldLoadFile_FromMemory(s32 field, s32 area, u8 *fl1Buffer, u8 *fl2Buffer, void *textureBuffer);
 
@@ -622,7 +642,67 @@ s32 fldMakeObjectBasic3(void) {
     }
 }
 
-INCLUDE_ASM(const s32, "field/fldFileResolver", fldFileResolverFL1);
+void fldFileResolverFL1(fldFileInfoHeaderFL1_t *info)
+{
+    char directory[32];
+    fldFileAreaDataFL1_t *areaData;
+    char **files;
+    char path[64];
+    char name[24];
+    s32 field;
+    s32 i;
+    s32 j;
+    s32 inserted;
+    char *filename;
+    char *filename0;
+    char *filename1;
+    char *filename2;
+    char *filename3;
+
+    fldSetFileResolverIdx(info->pAreaData->SkyTblIdx);
+    files = fldResolverFL1Data;
+    areaData = info->pAreaData;
+    field = fldGlobalBase.area;
+    filename0 = areaData->filename0;
+    filename1 = areaData->filename1;
+    filename2 = areaData->filename2;
+    filename3 = areaData->filename3;
+    files[0] = filename0;
+    files[1] = filename1;
+    files[2] = filename2;
+    files[3] = filename3;
+    if (field == 24 && evtBitCheck(0x4F)) {
+        for (i = 0; i < 4; i++) {
+            inserted = 0;
+            memset(name, 0, sizeof(name));
+            filename = files[i];
+            if (filename != NULL) {
+                for (j = 0; j < 16 && filename[j] != '\0'; j++) {
+                    if (filename[j] == '.') {
+                        name[j + inserted] = 'b';
+                        inserted = 1;
+                    }
+                    name[j + inserted] = filename[j];
+                }
+                strcpy(filename, name);
+            }
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        D_0055DA98[i] = NULL;
+        D_0055DAA8[i] = NULL;
+    }
+    if (fldGlobalBase.area < 500) {
+        for (i = 0; i < 4; i++) {
+            if (fldResolverFL1Data[i] != NULL) {
+                fldMakeFilePath(directory, fldGlobalBase.area, fldGlobalBase.floor + 1);
+                sprintf(path, D_0054EBC0, directory, fldResolverFL1Data[i]);
+                D_0055DA98[i] = sdfDevLoadFileEx(path, &D_0055DAA8[i], NULL);
+            }
+        }
+    }
+    fldMakeResouceBasicFL1(info->pResourceTypeTable, info->nResourceTypeTable);
+}
 
 void fldFileResolverFL2(fldFileInfoHeaderFL2_t *info) {
     fldMakeBlockBasicFL2(info->pAreaTable, info->nArea);
