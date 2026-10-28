@@ -432,7 +432,8 @@ typedef struct
     /* 0x16588 */ u8 reserved16588[0x48];
     /* 0x165D0 */ s32 smoke[3];
     /* 0x165DC */ s32 actionTargetIndex;
-    /* 0x165E0 */ s32 actionPhase;
+    /* 0x165E0 */ s8 actionPhase;
+    u8 reserved165E1[3];
     /* 0x165E4 */ s32 actionFrame;
     /* 0x165E8 */ f32 actionZoom;
     /* 0x165EC */ s8 introductionFlag;
@@ -3401,7 +3402,96 @@ s32 cmbChkPolygonMovie(void)
     return dds3GetProcessStat(proc) != 3 ? 2 : 0;
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateAction);
+extern s8 cmbActionStep;
+extern s32 cmpLoadStatusModel(void);
+extern s32 sdfDelayedResrcCheck(void);
+extern s8 fclGetWorkValue(s8 index);
+extern void cmbUpdateTimeTable(void);
+
+void cmbUpdateAction(void)
+{
+    void *event;
+    void *movie;
+    s32 allowSkip = 0;
+
+    if (CMB_GBWK->actionPhase == 0) {
+        if (cmpLoadStatusModel() != 0) {
+            return;
+        }
+        cmbInitAction();
+        {
+            cmbGbWork_t *work = CMB_GBWK;
+            work->actionPhase = 1;
+            work->actionFrame = 0;
+        }
+        return;
+    }
+    if (cmbActionStep != 0) {
+        if (cmbActionStep == 2) {
+            dds3KillProcessName(D_0053CF20, 0);
+            while (sdfDelayedResrcCheck() != 0) {
+            }
+            fclFilterOFF();
+        }
+        cmbFreeActionModels();
+        cmbRunActionSe(0, 0);
+        if (cmbActionStep == 2) {
+            p2sdPlaySE(0x380004, 0x7F, 0x3F);
+        }
+        if ((s8)CMB_GBWK->birthPanel[0x2C5] != 0) {
+            cmbUpdateIntroduceModel(&CMB_GBWK->actionData[4]);
+            cmbActionExists(&CMB_GBWK->actionData[3]);
+            cmbRunActionSe(1, 1);
+        } else {
+            cmbUpdateIntroduceModel(&CMB_GBWK->actionData[3]);
+        }
+        {
+            cmbGbWork_t *work = CMB_GBWK;
+            work->actionPhase = 0;
+            work->actionFrame = 0;
+        }
+        CMB_GBWK->unk_00001 = 14;
+        CMB_GBWK->unk_00004 = 1;
+        return;
+    }
+    event = dds3SearchProcessName(D_0053CF10);
+    movie = dds3SearchProcessName(D_0053CF20);
+    if (CMB_GBWK->actionFrame == 0) {
+        if (fclCombineChkEventStat() != 0 || event == NULL || movie == NULL) {
+            return;
+        }
+        if ((*(u32 *)dds3GetProcessData((s32)movie) & 8) == 0) {
+            return;
+        }
+        if (fclGetFlag(4) == 0) {
+            return;
+        }
+        cmbActionBGM(1);
+        cmbRunActionSe(1, 0);
+        dds3FadeIn(0, 0, 0, 0);
+    }
+    cmbUpdateTimeTable();
+    if (fclGetFlag(3) != 0) {
+        cmbActionStep = 1;
+    } else {
+        if (fclGetWorkValue(2) != 0) {
+            if (CMB_GBWK->actionFrame < 780) {
+                allowSkip = 1;
+            }
+        } else {
+            allowSkip = CMB_GBWK->actionFrame < 580;
+        }
+        if (allowSkip != 0) {
+            if (dds3PadButtonState[0x21] < 0 || dds3PadButtonState[0x23] < 0) {
+                if (CMB_GBWK->unk_0410C[0] == 0) {
+                    if (dds3GetActiveScene() != NULL) {
+                        cmbActionStep = 2;
+                    }
+                }
+            }
+        }
+    }
+}
 
 typedef struct
 {
