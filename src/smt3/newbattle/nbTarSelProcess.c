@@ -12,9 +12,17 @@ struct nbParty_t {
     u16 hojoskill[8];
 };
 
+/* Target selection is started with an nbActionProcessData_t from the normal
+ * action path; the debug path passes NULL. Only its leading state word is
+ * read here. */
+typedef struct nbActionProcessData_t {
+    nbMainProcessData_t *data;
+    u32 stat;
+} nbActionProcessData_t;
+
 typedef struct nbTarSelProcessData_t {
     nbMainProcessData_t *data;
-    void *act;
+    nbActionProcessData_t *act;
     u8 stat;
     s8 ctype;
     u8 crule;
@@ -185,7 +193,36 @@ void CursorSelectAuto(nbTarSelProcessData_t *process)
     }
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbTarSelProcess", nbTarSelProcess1);
+extern void CursorSelect(nbTarSelProcessData_t *process);
+extern void AnimeTargetCursor(nbTarSelProcessData_t *process);
+extern void OnOffTargetCursor(nbTarSelProcessData_t *process);
+
+s32 nbTarSelProcess1(dds3ProcessID_t *id)
+{
+    nbTarSelProcessData_t *process = dds3GetProcessData(id);
+    s32 automatic = 0;
+    s32 resetState = 0;
+
+    if (process->act != NULL && (process->act->stat & 0x80) != 0) {
+        automatic = 1;
+    }
+    if (automatic != 0) {
+        CursorSelectAuto(process);
+    } else if (process->stat == 1) {
+        CursorSelect(process);
+        if (process->stat == 0) {
+            process->stat = 1;
+            resetState = 1;
+        }
+    }
+    AnimeTargetCursor(process);
+    OnOffTargetCursor(process);
+    DispTargetHelp(process);
+    if (resetState != 0) {
+        process->stat = 0;
+    }
+    return 0;
+}
 
 void nbTarSelShutdown(dds3ProcessID_t *id)
 {
