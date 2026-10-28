@@ -68,7 +68,17 @@ void fclUpdatePanelType1(fclPanel_t *pPanel)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType2);
+void fclDrawPanelType2(fclPanel_t *panel, s32 ot)
+{
+    s32 color = panel->Col;
+
+    fclDrawPanelSprite2(0x44, ot);
+    cmpDrawBoxF(panel->X, panel->Y, panel->Z, (u16)panel->W,
+                (u16)panel->H - 0x1A, color, ot);
+    cmpDrawBoxF(panel->X,
+                       panel->Y + (s32)((u32)((u16)panel->H - 0x1A) << 3), panel->Z,
+                       (u16)panel->W, 0x1A, 0x3151A40, ot);
+}
 
 void fclUpdatePanelType2(fclPanel_t *pPanel)
 {
