@@ -309,6 +309,15 @@ typedef struct
     /* 0x34 */ s32 unk_34;
 } cmpCursorInfo_t;
 
+typedef struct
+{
+    /* 0x0000 */ u8 unk_0000[0x15C];
+    /* 0x015C */ cmpCursorInfo_t listCursor;
+} cmbListWork_t;
+
+extern void lstInitListWindow(s32 X, s32 Y, s32 Z, s32 W, s32 H, s32 Col, s8 Style,
+                              cmbListWork_t *work);
+
 extern void cmpModelInitCore2(void);
 
 extern s8 dds3PadButtonState[];
@@ -1983,7 +1992,12 @@ void func_002065C8(u8 *dst, u8 *src)
 INCLUDE_ASM(const s32, "facility/fclCombineInit", func_002065C8);
 #endif
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00206888);
+void func_00206888(s32 a0, s32 a1, s32 a2, s8 cursorCount, s32 a4, cmbListWork_t *work)
+{
+    lstInitListWindow(0x100, 0x2E0, 0xFFFFF, 0x109, 0xCA, 0x30303060, 0, work);
+    cmpInitCursorLayout(&work->listCursor, 0x1A, 0xC, 0xC4, 0x16, 0x16);
+    cmpInitCursorRange(&work->listCursor, cursorCount, 8, 0);
+}
 
 s32 func_00206910(datUnitWork_t *unit)
 {
