@@ -676,7 +676,74 @@ void slNextPageDraw(void) {
                  0x80808080, slProcPtr);
 }
 
-INCLUDE_ASM(const s32, "mc/slMain", slMcAccessDraw);
+extern f32 slMcAccessDraw_fc;
+extern void aDrawBoxF(s32 x, s32 y, s32 w, s32 h, u32 r, u32 g, u32 b, u32 a);
+extern void aDrawBoxGF(f32 x, f32 y, f32 w, f32 h,
+                       u32 r0, u32 g0, u32 b0, u32 a0,
+                       u32 r1, u32 g1, u32 b1, u32 a1,
+                       u32 r2, u32 g2, u32 b2, u32 a2,
+                       u32 r3, u32 g3, u32 b3, u32 a3);
+
+void slMcAccessDraw(void)
+{
+    f32 offset = 0.0f;
+    s32 alpha;
+    s32 color;
+    rsetOtOfs(0x4A);
+    rsetAlpha(0);
+    if (gSlMcAccessCnt < 10) {
+        alpha = (gSlMcAccessCnt * 128) / 10;
+        aDrawBoxF(0, 0x89, 0x200, 0xC, 0, 0, 0, alpha / 5);
+        color = ((u32)alpha << 24) | 0x808080;
+        DrwSprite2D(0x47, 0x113, 0xBB, 0x13, 0x41, 0x6C, 0xBB, 0x13, color, slProcPtr);
+        DrwSprite2D(0x102, 0x113, 0xBB, 0x13, 0xFB, 0x6C, -0xBB, 0x13, color, slProcPtr);
+        slMcAccessDraw_fc = 0.0f;
+    } else {
+        slMcAccessDraw_fc += 0.4f;
+        sdfSin(slMcAccessDraw_fc);
+        aDrawBoxF(0, 0x89, 0x200, 0xC, 0, 0, 0, 0x19);
+        DrwSprite2D(0x47, 0x113, 0xBB, 0x13, 0x41, 0x6C, 0xBB, 0x13, 0x80808080, slProcPtr);
+        DrwSprite2D(0x102, 0x113, 0xBB, 0x13, 0xFB, 0x6C, -0xBB, 0x13, 0x80808080, slProcPtr);
+    }
+    if (gSlMcAccessCnt >= 10) {
+        s32 phase = (gSlMcAccessCnt - 10) % 30;
+        s32 i;
+        offset = 0.0f;
+        alpha = 128;
+        if (phase < 10) {
+            alpha = (phase * 128) / 10;
+        } else {
+            f32 speed = 2.0f;
+            for (i = 0; i < phase - 10; i++) {
+                offset += speed;
+                speed += 3.0f;
+            }
+        }
+        offset = -offset;
+        aDrawBoxGF(offset + 338.0f, 282.0f, 144.0f, 2.0f,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, 0,
+                   100, 118, 255, 0,
+                   100, 118, 255, (alpha * 70) / 100);
+        aDrawBoxGF(offset + 0.0f, 282.0f, 338.0f, 2.0f,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100);
+        offset = -offset;
+        aDrawBoxGF(offset + 30.0f, 286.0f, 144.0f, 2.0f,
+                   100, 118, 255, 0,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, 0);
+        aDrawBoxGF(offset + 174.0f, 286.0f, 338.0f, 2.0f,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100,
+                   100, 118, 255, (alpha * 70) / 100);
+    }
+    gSlMcAccessCnt++;
+}
 
 s32 slChkWindowOpenDone(void) {
     if (gSlWindowCnt < 7) {
