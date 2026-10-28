@@ -2,6 +2,7 @@
 #include "newdata.h"
 #include "kernel.h"
 #include "libsdf.h"
+#include "basic.h"
 
 typedef void (*evtOtRegFunc_t)(sdfGrOt_t *, sdfDrawTag_t *);
 
@@ -44,9 +45,79 @@ extern void evtBitAllOff(void);
 
 extern void evtDebugPrintCamera(void);
 
+extern s32 evtDebugCameraPage;
+
+extern char *D_0054F788;
+
+extern char D_0054F790[];
+
+extern dds3Basic_t *dds3GetActiveScene(void);
+
+extern dds3Basic_t *dds3GetActiveCameraSceneBasic(dds3Basic_t *pBasic);
+
+extern void dds3SetActiveCameraSceneBasic(dds3Basic_t *pSceneBasic, dds3Basic_t *pCameraBasic);
+
+extern f32 dds3CameraObjectBasicGetFovy(dds3Basic_t *pBasic);
+
+extern void dds3SetScreenFovy(f32 fovy);
+
+extern sdfDrawTag_t *dds3FontReqAllocDrawTag(void);
+
 s32 EventDebugProcess1(dds3ProcessID_t *id);
 
-INCLUDE_ASM(const s32, "event/evtDebug", evtDebugPrintCamera);
+void evtDebugPrintCamera(void)
+{
+    dds3Basic_t *scene = dds3GetActiveScene();
+    dds3Basic_t *camera;
+    char *name;
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *ot;
+
+    if (scene == NULL) {
+        return;
+    }
+    if ((s8)dds3PadButtonState[0x2D] < 0) {
+        if (evtDebugCameraPage != 0) {
+            evtDebugCameraPage = 0;
+        } else {
+            evtDebugCameraPage = 1;
+        }
+    }
+    if (evtDebugCameraPage == 0) {
+        return;
+    }
+    camera = dds3GetActiveCameraSceneBasic(scene);
+    if (camera == NULL) {
+        return;
+    }
+    if ((s8)dds3PadButtonState[0x20] < 0) {
+        if (camera->next != NULL) {
+            camera = camera->next;
+        } else {
+            camera = ((dds3SceneBasic_t *)scene->workdata)
+                         ->basictable[BASIC_TYPE_CAMERAOBJECT].firstbasic;
+        }
+        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+        dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
+    } else if ((s8)dds3PadButtonState[0x22] < 0) {
+        if (camera->prev != NULL) {
+            camera = camera->prev;
+        } else {
+            camera = ((dds3SceneBasic_t *)scene->workdata)
+                         ->basictable[BASIC_TYPE_CAMERAOBJECT].lastbasic;
+        }
+        dds3SetActiveCameraSceneBasic(dds3GetActiveScene(), camera);
+        dds3SetScreenFovy(dds3CameraObjectBasicGetFovy(camera));
+    }
+    name = D_0054F788;
+    if (camera->name != NULL) {
+        name = camera->name;
+    }
+    tag = dds3FontReqAllocDrawTag();
+    sdfDrawTagLink(tag, sdfDevPrintf(0x8680, 0x79C0, 0xFF0000, 5, D_0054F790, name));
+    ot = &sdfGrOtTable[83];
+    ((evtOtRegFunc_t)ot->regFunc)(ot, tag);
+}
 
 /* After launching a test script, keep the test task idle and return 0. */
 s32 evtDebugCameraStep(dds3ProcessID_t *id)
