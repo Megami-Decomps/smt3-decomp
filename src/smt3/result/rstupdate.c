@@ -891,7 +891,65 @@ void rstSetHeartsRecoverPlayer(void)
     pu->unit.badstatus &= 0x8000;
 }
 
-INCLUDE_ASM(const s32, "result/rstupdate", rstStandbyHeartsEvent);
+extern s32 rstStandbyHeartsSkillPowerUp(void);
+extern s32 cmpBadEffSetup(u16 id, u32 flag);
+extern s32 cmpAddQuePanelEff(s32 a1, s32 a2, s32 a3, u16 a4, u16 a5,
+                             u8 a6, u8 a7, s32 a8, s32 a9, u8 a10);
+extern char D_0054FD08[];
+
+s32 rstStandbyHeartsEvent(s8 event)
+{
+    startPos->panelEffectIndex = -1;
+
+    switch (event) {
+        case 0:
+            if (rstStandbyHeartsAddPoint() == 0) {
+                event = 7;
+            } else {
+                fclSetMessageVar_20743088(12, (s32)pstr[cmbGlobalWork->heartsequip]);
+                fclSetMessageVar_20743088(8, (s32)cmpGetParamName((s8)startPos->bonusParamIndex));
+                fclSetMessageVar_20743088(9, (s32)D_0054FD08);
+                fclStartMessage(0x1E);
+            }
+            break;
+        case 1:
+            if (rstStandbyHeartsSkillPowerUp() == 0) {
+                return 0;
+            }
+            break;
+        case 2:
+            fclStartMessage(0x21);
+            cmpBadEffSetup(startPos->pCurrentStock->id, 0x40);
+            break;
+        case 3:
+            fclStartMessage(0x22);
+            cmpBadEffSetup(startPos->pCurrentStock->id, 0x100);
+            break;
+        case 4:
+            fclStartMessage(0x23);
+            cmpBadEffSetup(startPos->pCurrentStock->id, 0x8000);
+            break;
+        case 5:
+            fclStartMessage(0x24);
+            p2sdPlaySE(0x10, 0x7F, 0x3F);
+            startPos->panelEffectIndex = cmpAddQuePanelEff(
+                0, 0, 0, 0, 0, 8, 0, 0x41263080, 0x41263080, 4);
+            break;
+        case 6:
+            fclStartMessage(0x25);
+            p2sdPlaySE(0x10, 0x7F, 0x3F);
+            startPos->panelEffectIndex = cmpAddQuePanelEff(
+                0, 0, 0, 0, 0, 8, 0, 0x41263080, 0x41263080, 4);
+            break;
+        default:
+            break;
+    }
+    if (event == 7) {
+        fclStartMessage(0x26);
+    }
+    startPos->unk_0005[0] = 1;
+    return 1;
+}
 
 extern void datOverwriteBadStat(datUnitWork_t *work, u32 badstatus);
 
