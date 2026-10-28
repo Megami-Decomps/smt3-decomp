@@ -40,27 +40,17 @@ tagPipePartsInfo *getPartsInfo(s16 partsID)
 }
 
 
-/* NON_MATCHING: 15 of 24 words; retail keeps the result in $2, this needs a move. */
-#ifdef NON_MATCHING
 s32 getPartsType(s32 id)
 {
-    tagPipePartsInfo *pInfo = getPartsInfo(id);
-    s32 ret = (s32)pInfo;
+    s32 shiftedId = id >> 6;
+    tagPipePartsInfo *pInfo = getPartsInfo((s16)id);
+    s32 base = (s8)(shiftedId * 2);
 
-    if (pInfo != NULL) {
-        s32 base = (s8)((id >> 6) << 1);
-
-        if (pInfo->inWay + pInfo->goWay == 7) {
-            ret = base + 1;
-        } else {
-            ret = base + 2;
-        }
+    if (pInfo == NULL) {
+        return (s32)pInfo;
     }
-    return ret;
+    return base + ((pInfo->goWay + pInfo->inWay == 7) ? 1 : 2);
 }
-#else
-INCLUDE_ASM(const s32, "pipe/pipePosTable", getPartsType);
-#endif
 
 
 s32 pipe_2A2F38(void)
