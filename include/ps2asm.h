@@ -1328,6 +1328,69 @@ __asm__ volatile ( \
     ".set noreorder\n\tmfc1 $2, %0\n\tqmtc2.ni $2, vf2\n\t" \
     "vaddx.y vf10, vf0, vf2x\n\t.set reorder" \
     : : "f" (f))
+/* Packed-palette tinting used by sdfTexSetClutColor and the DDS counterpart.
+ * vf2x holds the blend amount, vf3.xyz the tint normalized by 255; the loop
+ * primitives preserve source alpha in vf6w. Scalar C cannot emit the packed
+ * byte expansion, VU accumulator blend, or PPAC5. Loops and palette addressing
+ * remain C; these primitives cover only the native COP2/MMI conversion.
+ */
+#define MMI_PALETTE_TINT_SETUP(amount, tint, unit) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "qmtc2.ni %0, vf2\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf3\n\t" \
+    "vitof0.xyzw vf3, vf3\n\t" \
+    "qmtc2.ni %2, vf4\n\t" \
+    "vmulx.xyz vf3, vf3, vf4x\n\t" \
+    ".set reorder" \
+    : : "r"(amount), "r"(tint), "r"(unit) : "$2")
+
+#define MMI_PALETTE_TINT_RGBA(value, color) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pextlb $2, $0, %1\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf5\n\t" \
+    "vitof0.xyzw vf5, vf5\n\t" \
+    "qmtc2.ni %0, vf4\n\t" \
+    "vitof0.xyzw vf4, vf4\n\t" \
+    "vmove.w vf6, vf5\n\t" \
+    "vmulx.xyz vf4, vf3, vf4x\n\t" \
+    "vmulaw.xyz ACC, vf5, vf0w\n\t" \
+    "vmaddax.xyz ACC, vf4, vf2x\n\t" \
+    "vmsubx.xyz vf6, vf5, vf2x\n\t" \
+    "vftoi0.xyzw vf6, vf6\n\t" \
+    "qmfc2.ni $2, vf6\n\t" \
+    "ppach $2, $0, $2\n\t" \
+    "ppacb %0, $0, $2\n\t" \
+    ".set reorder" \
+    : "+r"(value) : "r"(color) : "$2")
+
+#define MMI_PALETTE_TINT_RGB5(color, value, mask) __asm__ volatile ( \
+    ".set noreorder\n\t" \
+    "pext5 $2, %0\n\t" \
+    "srl $3, $2, 5\n\t" \
+    "and $3, $3, %2\n\t" \
+    "or $2, $2, $3\n\t" \
+    "pextlb $2, $0, $2\n\t" \
+    "pextlh $2, $0, $2\n\t" \
+    "qmtc2.ni $2, vf5\n\t" \
+    "vitof0.xyzw vf5, vf5\n\t" \
+    "qmtc2.ni %1, vf4\n\t" \
+    "vitof0.xyzw vf4, vf4\n\t" \
+    "vmove.w vf6, vf5\n\t" \
+    "vmulx.xyz vf4, vf3, vf4x\n\t" \
+    "vmulaw.xyz ACC, vf5, vf0w\n\t" \
+    "vmaddax.xyz ACC, vf4, vf2x\n\t" \
+    "vmsubx.xyz vf6, vf5, vf2x\n\t" \
+    "vftoi0.xyzw vf6, vf6\n\t" \
+    "qmfc2.ni $2, vf6\n\t" \
+    "ppach $2, $0, $2\n\t" \
+    "ppacb $2, $0, $2\n\t" \
+    "ppac5 %0, $2\n\t" \
+    ".set reorder" \
+    : "+r"(color) : "r"(value), "r"(mask) : "$2", "$3")
+
 /* ---- sequences that units wrote out in place ---- */
 
 /* ---- sequences that units wrote out in place ---- */
