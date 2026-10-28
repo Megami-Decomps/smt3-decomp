@@ -1,6 +1,7 @@
 #include "common.h"
 #include "kernel.h"
 #include "nme.h"
+#include "font.h"
 
 /* Name-entry work is 0x51C8 bytes; its sequence flag is the first byte. */
 typedef struct {
@@ -21,6 +22,7 @@ typedef struct {
 /* This descriptor is in .data, outside the GP-relative range. */
 extern nmeSpriteTable_t GBWK_2 __attribute__((section(".data")));
 extern nmeWork_t *namelist_buttonAnim_end;
+extern void frSetFontColor(frFontHandle_t *font, u32 color);
 extern void fclDrawSpriteRes(s32 x, s32 y, s32 z, s32 *clip, s32 page, s32 spriteId,
                              s32 *texList, nmeSpriteTable_t *table, s32 ot);
 
@@ -102,7 +104,37 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawPanelSprites);
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNamePanel);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCharCell);
+void nmeDrawCharCell(s32 x, s32 y, u16 index, s8 row, frFontHandle_t *font)
+{
+    nmeWork_t *work = namelist_buttonAnim_end;
+    s32 drawX = x;
+    s32 drawY = y;
+    s32 modeSelection;
+    s32 spriteId;
+
+    if ((s8)work->unk1B != 0) {
+        goto done;
+    }
+    if (work->primaryCursorActive != 0) {
+        goto done;
+    }
+    if (work->alternateCursorActive != 0) {
+        goto done;
+    }
+    modeSelection = work->modeCursor.unk_22 + (u8)work->modeCursor.unk_24;
+    spriteId = (modeSelection == 3) ? 0x48 : 0x47;
+    if (index != work->inputCursor.unk_22 + (u8)work->inputCursor.unk_24) {
+        goto done;
+    }
+    if (row != work->nameCursor.unk_22 + (u8)work->nameCursor.unk_24) {
+        goto done;
+    }
+    fclDrawSpriteRes(drawX << 4, drawY << 3, 0, 0, 0, spriteId,
+                     (s32 *)work->textures, &GBWK_2, 0x47);
+    frSetFontColor(font, 0xFFD19280);
+done:
+    return;
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawCursorAt);
 
