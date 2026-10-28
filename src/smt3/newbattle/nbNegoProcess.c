@@ -326,6 +326,10 @@ extern datDevilFormat_t datDevilTable[];
 
 extern void *dds3GetProcessData(dds3ProcessID_t *id);
 
+extern void itfMesMngRelease(s32 id);
+extern void sdfChipFreeDirect(void *ptr);
+extern s32 p2sdBgmVolUp(void);
+
 extern void dds3LinkProcess(dds3ProcessID_t *parent, dds3ProcessID_t *target);
 
 extern u32 f;
@@ -995,7 +999,55 @@ s32 nbNegoSetProcessData(dds3ProcessID_t *id)
 
 INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoProcess1);
 
-INCLUDE_ASM(const s32, "newbattle/nbNegoProcess", nbNegoShutdown);
+void nbNegoShutdown(dds3ProcessID_t *id)
+{
+    nbNegoProcessData_t *process = dds3GetProcessData(id);
+    s32 i;
+
+    for (i = 0; i < 31; i++) {
+        if (process->flowmsg[i] >= 0) {
+            itfMesMngRelease(process->flowmsg[i]);
+            process->flowmsg[i] = -1;
+        }
+    }
+    if (process->questionmsg >= 0) {
+        itfMesMngRelease(process->questionmsg);
+        process->questionmsg = -1;
+    }
+    for (i = 0; i < 31; i++) {
+        if (process->infomsg[i] >= 0) {
+            itfMesMngRelease(process->infomsg[i]);
+            process->infomsg[i] = -1;
+        }
+    }
+    for (i = 0; i < 31; i++) {
+        if (process->aisyomsg[i] >= 0) {
+            itfMesMngRelease(process->aisyomsg[i]);
+            process->aisyomsg[i] = -1;
+        }
+    }
+    if (process->bossmsg >= 0) {
+        itfMesMngRelease(process->bossmsg);
+        process->bossmsg = -1;
+    }
+    if (process->helpmsg >= 0) {
+        itfMesMngRelease(process->helpmsg);
+        process->helpmsg = -1;
+    }
+    if (process->helpmsg2 >= 0) {
+        itfMesMngRelease(process->helpmsg2);
+        process->helpmsg2 = -1;
+    }
+    if (process->innenmsg >= 0) {
+        itfMesMngRelease(process->innenmsg);
+        process->innenmsg = -1;
+    }
+    if (process->data->negoproc != NULL) {
+        process->data->negoproc = NULL;
+    }
+    sdfChipFreeDirect(process);
+    p2sdBgmVolUp();
+}
 
 INCLUDE_RODATA(const s32, "newbattle/nbNegoProcess", D_00544F10);
 
