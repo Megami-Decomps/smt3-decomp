@@ -1156,8 +1156,6 @@ s32 nbAiChkJoken(nbActionProcessData_t *a, u32 jo)
     return 1;
 }
 
-/* NON_MATCHING: 11 of 54 words differ (first at +0x78). */
-#ifdef NON_MATCHING
 s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
 {
     u32 j1;
@@ -1167,20 +1165,16 @@ s32 nbGetAiEntry(nbActionProcessData_t *a, s32 index)
     j1 = D_003989E0[a->work->id].entry[index].joken[0];
     j2 = D_003989E0[a->work->id].entry[index].joken[1];
     a->aijokentbl = index;
-    if (nbAiChkJoken(a, j1) == 0) {
-        return 0;
+    if (nbAiChkJoken(a, j1) != 0) {
+        if (nbAiChkJoken(a, j2) != 0) {
+            if ((j1 >> 16) == 4 || (j2 >> 16) == 4) {
+                nbSetHojoCounter(a->form->formindex, index + 1, 0);
+            }
+            return 1;
+        }
     }
-    if (nbAiChkJoken(a, j2) == 0) {
-        return 0;
-    }
-    if ((j1 >> 16) == 4 || (j2 >> 16) == 4) {
-        nbSetHojoCounter(a->form->formindex, index + 1, 0);
-    }
-    return 1;
+    return 0;
 }
-#else
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbGetAiEntry);
-#endif
 
 /* NON_MATCHING: 2 of 70 words differ (first at +0xB8). */
 #ifdef NON_MATCHING

@@ -86,26 +86,6 @@ the switch as an `if`; and reaching one message block through a `goto`, both
 from a label inside the switch (which loses the plain `beq`) and from one
 after it.
 
-## nbGetAiEntry (newbattle/nbMakePacket, 0xE0)
-
-43 of 54 words match, two words short of retail's 216.
-
-The table address, both `nbAiChkJoken` calls, the two `>> 16` tests and the
-`nbSetHojoCounter` call are identical. Retail places the cross-jumped
-`return 0` block *after* the `nbSetHojoCounter` arm, so its tail reads
-`b .L0028686C` with `addiu $2, $0, 1` annulled, then `daddu $2, $0, $0`, then
-the epilogue. ee-gcc puts the `1` immediately before the epilogue and reaches
-the zero from earlier, which costs the `b` and the zero block and shifts
-three branch offsets.
-
-Ruled out: a `goto fail;` with a trailing `fail: return 0;` label (runs over
-size), `return 1` duplicated into the `nbSetHojoCounter` arm, and the two
-`>> 16` tests as nested `if`s instead of `||`.
-
-Confirmed on the way: `datDevilAI_t`'s 164-byte row holds thirteen 12-byte AI
-entries at `+0x04`, each `{u32 joken[2]; s32 no;}`. `D_003989EC`, which
-`nbRunAi` reads with a `[41]` stride, is the `no` of the same rows.
-
 ## nbClearActionFlags (newbattle/nbMakePacket, 0xE0)
 
 18 of 56 words match, at the exact 224-byte size and with the same instruction
