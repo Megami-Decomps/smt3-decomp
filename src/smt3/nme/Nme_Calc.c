@@ -100,7 +100,37 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawColoredText);
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawButtonGuide);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawPanelSprites);
+void nmeDrawPanelSprites(void)
+{
+    s32 colors[4];
+
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x5,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x6,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x7,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x8,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0x9,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0xA,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0xB,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0xC,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+
+    colors[0] = 0x80808053;
+    colors[1] = 0x80808053;
+    colors[2] = 0x80808053;
+    colors[3] = 0x80808053;
+
+    fclDrawSpriteRes(0, 0, 0, colors, 3, 0xD,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+    fclDrawSpriteRes(0, 0, 0, colors, 3, 0xE,
+                     (s32 *)namelist_buttonAnim_end->textures, &GBWK_2, 0x47);
+}
 
 void nmeDrawNamePanel(void)
 {
