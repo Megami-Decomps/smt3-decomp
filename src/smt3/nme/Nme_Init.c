@@ -17,7 +17,11 @@ extern char D_005487D8[];
 
 extern s8 gProcessStat;
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeCharToIndex);
+u8 nmeCharToIndex(u8 lead, u8 trail) {
+    s32 value = (((s32)lead << 8) | trail) - 0x8080;
+    s32 index = ((u32)(value & 0xFF00) >> 1) + (value & 0x7F);
+    return (u8)(index - 0x4A);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeDecodeChar);
 
@@ -35,7 +39,12 @@ INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetModeFlag);
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRow);
 
-INCLUDE_ASM(const s32, "nme/Nme_Init", nmeInitNameRows);
+extern void nmeInitNameRow(s8 mode, s32 row, void *data);
+void nmeInitNameRows(s8 mode, void *data) {
+    nmeInitNameRow(mode, 0, data);
+    nmeInitNameRow(mode, 1, data);
+    nmeInitNameRow(mode, 2, data);
+}
 
 INCLUDE_ASM(const s32, "nme/Nme_Init", nmeGetRowCount);
 
