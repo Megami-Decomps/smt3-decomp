@@ -3601,7 +3601,19 @@ void cmbInitAction(void)
     printf(D_0053CEF8, cmbActionMode);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmb_205CE8);
+void cmb_205CE8(void)
+{
+    s32 i;
+    if (CMB_GBWK->actionZoom < 2.0f) {
+        CMB_GBWK->actionZoom += 0.007f;
+    }
+    for (i = 0; i < 2; i++) {
+        cmbActionTargetModel[i] += func_00204018((u16)CMB_GBWK->actionData[i].id);
+        if (cmbActionTargetModel[i] > 256.0f) {
+            cmbActionTargetModel[i] = 256.0f;
+        }
+    }
+}
 
 void func_00205DB8(void)
 {
