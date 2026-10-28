@@ -271,7 +271,38 @@ void objInit(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeObject", objAdd);
+extern s32 pipeObjList;
+extern s32 pipeObjTail;
+extern void objMdlAdd(tagPipeObject *object);
+
+s32 objAdd(tagPipeObject *object)
+{
+    tagPipeObject *slot = ObjWork;
+    s32 remaining = 150;
+
+    if ((u8)object->id == 5) {
+        if (object->action == 0x1A) {
+            pipeObjList += 5;
+        } else {
+            pipeObjList++;
+        }
+    }
+    if ((object->flags & 0x4000) != 0) {
+        pipeObjTail++;
+    }
+    while (--remaining != -1) {
+        if ((u8)slot->id == 0xFF) {
+            objMdlAdd(object);
+            if (object->mdl == 0xFF) {
+                break;
+            }
+            *slot = *object;
+            return 1;
+        }
+        slot++;
+    }
+    return 0;
+}
 
 void objDel(tagPipeObject *objPtr)
 {
