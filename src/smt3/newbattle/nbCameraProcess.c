@@ -83,7 +83,7 @@ extern nbCamera_t pNbCamera;
 
 extern nbCameraStateEntry_t nbCameraStateTable[];
 
-extern void effBTLSkillSetFormationInfo(u32 InvokeID, u32 TargetBit);
+extern void effBTLSkillSetFormationInfo(s32 InvokeID, u32 TargetBit);
 
 extern void effBTLModelAllPopPosition(void);
 
@@ -261,7 +261,97 @@ void nbCameraScriptSet1Shot(nbFormation_t *pTargetForm)
     nbCameraSetState(0x1A);
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraScriptSetBougai);
+extern f32 nbCameraGetBossDistance(void);
+extern f32 effBTLModelGetHeight(nbFormation_t *pFormation);
+extern void effBTLModelTargetPartyShow(void);
+extern f32 sdfAtan(f32 value);
+
+void nbCameraScriptSetBougai(nbFormation_t *pTargetForm)
+{
+    nbMainProcessData_t *pData;
+    nbFormation_t *pForm;
+    nbFormation_t *pInvokeForm;
+    sdfVector4_t position;
+    sdfVector4_t target;
+    nbCamera_t *pCamera;
+    u32 targetParty;
+    u32 partyMask = 0x200;
+    u32 partyCount = 0;
+    u32 i = 0;
+    f32 radiusSum;
+    f32 maxHeight;
+    f32 height;
+    f32 radius;
+    f32 angle;
+    f32 fovy;
+    f32 cameraDistance;
+
+    pInvokeForm = effBTLSkillGetInvokeFormation();
+    targetParty = 1 << pTargetForm->formindex;
+    maxHeight = 0.0f;
+    effBTLSkillSetFormationInfo(pInvokeForm->formindex, targetParty);
+    radiusSum = 0.0f;
+    effBTLModelAllPopPosition();
+    effBTLModelAllPopRotate();
+    effBTLModelAllHide();
+    effBTLModelTargetPartyShow();
+
+    pCamera = &pNbCamera;
+    pData = nbGetMainProcessData();
+    pForm = pData->form;
+    if ((pTargetForm->stat & 0x200) == 0) {
+        partyMask = 0x100;
+    }
+    do {
+        if ((pForm->stat & partyMask) != 0 && (pForm->stat & 1) != 0) {
+            radius = pForm->r * pForm->scl;
+            radius += radius;
+            radiusSum += radius;
+            height = effBTLModelGetHeight(pForm);
+            if (maxHeight < height) {
+                maxHeight = height;
+            }
+            partyCount++;
+        }
+        i++;
+        pForm++;
+    } while (i < 32);
+    if (partyCount == 0) {
+        return;
+    }
+
+    fovy = 0.69813163f;
+    if (partyCount >= 2) {
+        fovy = 0.9308421016f;
+    }
+    angle = sdfAtan(fovy * 0.5f);
+    if (radiusSum < maxHeight) {
+        radiusSum = maxHeight * 0.5f;
+    } else {
+        radiusSum *= 0.5f;
+    }
+    if (radiusSum < 400.0f) {
+        radiusSum = 400.0f;
+    }
+    radiusSum /= angle;
+
+    target.x = 0.0f;
+    target.y = -(maxHeight * 0.5f);
+    cameraDistance = nbCameraGetBossDistance() * 0.5f;
+    position.x = target.x;
+    position.y = -160.0f;
+    target.z = cameraDistance;
+    position.z = cameraDistance - radiusSum;
+
+    SDF_VU0_LOADVECTOR(&target);
+    SDF_VU0_STOREVECTOR(pCamera);
+    SDF_VU0_LOADVECTOR_B(&position);
+    SDF_VU0_SUBVECTOR();
+    SDF_VU0_GETLENGTH(pCamera->distance);
+    SDF_VU0_NORMALIZE();
+    SDF_VU0_STOREVECTOR(&pCamera->direction);
+    nbCameraSetState(0x1B);
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbCameraProcess", nbCameraScriptSet);
 
