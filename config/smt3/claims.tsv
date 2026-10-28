@@ -534,3 +534,4 @@ src/smt3/newbattle/nbCameraBoss.c	redthing1	done	2026-10-28	1 fn / 264 B	E915 ca
 src/smt3/facility/fclRagInit.c	redthing1	done	2026-10-28	1 fn / 196 B	custom unit setup with shared 0x2C offer records and single-read skill publication; owners 23 and 18 match, 0 differ
 src/smt3/newbattle/nbMakePacket.c	redthing1	done	2026-10-28	1 fn / 260 B	negotiation retreat packet promotion with qualified SDK VU0 scalar scratch; owner 74 match, 0 differ
 src/smt3/facility/fclCombineInit.c	redthing1	done	2026-10-28	1 fn / 148 B	debug result dispatch, script cleanup and fusion-state reset; owner 151 match, 0 differ
+src/smt3/newbattle/nbE903.c	redthing1	done	2026-10-28	1 fn / 720 B	part effect creation, load completion and mark-position callbacks; all 9 functions match

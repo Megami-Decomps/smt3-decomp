@@ -397,7 +397,81 @@ s32 Parts1(nbEventProcessData_t *ed)
     return 0;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbE903", PartsEffect1);
+extern const s32 D_00546518[4];
+extern const s32 D_00546528[4];
+extern void *memcpy(void *dst, const void *src, u32 size);
+extern s32 nbAppendEnemyDevilWork(nbMainProcessData_t *data, s32 id, s32 formindex);
+extern void nbAddUnitStock(nbMainProcessData_t *data, s32 side, s32 stockno, s32 formindex);
+extern void nbInitUnitEffect(nbFormation_t *form, s32 kage, s32 noeffect);
+extern s32 nbCheckLoadGroup(s32 side);
+extern nbKoukaPacket_t *nbAddFormOnOffPacket(s32 startframe, s32 uniqueid, nbFormation_t *form, s32 sw);
+extern nbKoukaPacket_t *nbAddUnitAKoukaPacket(s32 startframe, s32 uniqueid, nbFormation_t *form,
+                                              u32 a, s32 frame);
+extern s32 sdfModelGetMarkPos(sdfModelRootNode_t *root, s32 mark);
+
+s32 PartsEffect1(nbEventProcessData_t *ed)
+{
+    sdfVector4_t markPosition;
+    s32 stockIds[4];
+    s32 formIndices[4];
+    nbFormation_t *form;
+    nbFormation_t *groupForm;
+    s32 seqtime;
+    s32 mark;
+    s32 i;
+    s32 stockno;
+
+    memcpy(stockIds, D_00546518, sizeof(stockIds));
+    memcpy(formIndices, D_00546528, sizeof(formIndices));
+    seqtime = ed->seqtime;
+    form = NULL;
+    mark = 0;
+    if (seqtime == 1) {
+        for (i = 0; i < 4; i++) {
+            form = &ed->data->form[4 + formIndices[i]];
+            stockno = nbAppendEnemyDevilWork(ed->data, stockIds[i], form->formindex);
+            nbAddUnitStock(ed->data, 1, stockno, form->formindex);
+            nbInitUnitEffect(form, 0, 0);
+        }
+        return 0;
+    }
+    switch (seqtime) {
+    case 0x22:
+        form = &ed->data->form[4];
+        break;
+    case 0x3D:
+        form = &ed->data->form[5];
+        mark = 1;
+        break;
+    case 0x58:
+        form = &ed->data->form[7];
+        mark = 2;
+        break;
+    case 0x6F:
+        form = &ed->data->form[8];
+        mark = 3;
+        break;
+    }
+    if (seqtime >= 0x88 && nbCheckLoadGroup(1) == 0) {
+        for (i = 0; i < 4; i++) {
+            groupForm = &ed->data->form[4 + formIndices[i]];
+            nbAddFormOnOffPacket(1, 0, groupForm, 1);
+            nbAddUnitAKoukaPacket(0, 0, groupForm, 0, 0);
+            nbAddUnitAKoukaPacket(1, 0, groupForm, 0x80000000, 0);
+            evtSetUnitMotion(groupForm->hunit, 0x11, 0, 0, 0);
+        }
+        nbFreeEffectSlot(ed);
+    }
+    if (form != NULL) {
+        sdfModelGetMarkPos(ed->data->form[6].hunit->owner->inner, mark + 0x1E);
+        SDF_VU0_STOREVECTOR(&markPosition);
+        markPosition.y = 0.0f;
+        nbSetFormPos(form, &markPosition);
+        nbAddSkillEffectKoukaPacket3(0, 1,
+                                     evtGetResorceData(0x387, mark + 1), 2, form);
+    }
+    return 0;
+}
 
 s32 PartsWait(nbEventProcessData_t *ed)
 {
