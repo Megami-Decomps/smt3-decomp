@@ -463,7 +463,110 @@ s32 nbCheckBattleSkillError1(s32 nskill)
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError1);
 #endif
 
-INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError2);
+s32 nbCheckBattleSkillError2(s32 nskill, u32 select)
+{
+    datUnitWork_t *unitList[32];
+    nbParty_t *partyList[32];
+    nbMainProcessData_t *data;
+    datUnitWork_t *unit;
+    nbParty_t *party;
+    s32 unitCount;
+    s32 partyCount;
+    s32 i;
+    s32 result = 0;
+
+    data = nbGetMainProcessData();
+    if ((data->stat & 0x08000000) != 0) {
+        return 0;
+    }
+    unitCount = 0;
+    partyCount = 0;
+    for (i = 0; i < 16; i++) {
+        if ((select & (1 << i)) != 0) {
+            unit = nbGetUnitWorkFromFormindex(i);
+            if (unit != NULL) {
+                unitList[unitCount++] = unit;
+            }
+            party = nbGetPartyFromFormindex(i);
+            if (party != NULL) {
+                partyList[partyCount++] = party;
+            }
+        }
+    }
+    if (unitCount == 0) {
+        return 0;
+    }
+
+    switch (nskill) {
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 40:
+    case 41:
+    case 81:
+    case 94:
+        if (cmpButtonGuideShowDone(unitList, unitCount) != 0) {
+            result = 1;
+        }
+        break;
+    case 43:
+    case 44:
+    case 45:
+    case 46:
+    case 47:
+    case 48:
+    case 88:
+        if (cmpFindButtonGuideByFlag(unitList, unitCount,
+                                     datSkillTable.normal[nskill].basstatus) == 0) {
+            result = 1;
+        }
+        break;
+    case 51:
+    case 85:
+    case 86:
+    case 92:
+    case 237:
+    case 238:
+    case 239:
+    case 240:
+    case 246:
+    case 248:
+        if (cmpButtonGuideShowDone(unitList, unitCount) == 0) {
+            break;
+        }
+        /* fall through */
+    case 42:
+    case 82:
+    case 83:
+    case 84:
+    case 93:
+        if (cmpButtonGuideHideDone(unitList, unitCount) != 0) {
+            result = 1;
+        }
+        break;
+    case 68:
+    case 69:
+    case 70:
+    case 224:
+        if (CheckHojo(partyList, partyCount,
+                      datSkillTable.normal[nskill].hojotype) == 0) {
+            result = 4;
+        }
+        break;
+    case 218:
+        if (cmpButtonGuideShowDone(unitList, unitCount) != 0) {
+            if (cmpFindButtonGuideByFlag(unitList, unitCount,
+                                         datSkillTable.normal[nskill].basstatus) == 0) {
+                result = 1;
+            }
+        }
+        break;
+    default:
+        break;
+    }
+    return result;
+}
 
 INCLUDE_ASM(const s32, "newbattle/nbSkillError", nbCheckBattleSkillError3);
 
