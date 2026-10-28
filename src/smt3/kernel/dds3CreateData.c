@@ -62,7 +62,8 @@ typedef struct
     /* 0x0090 */ void *uiTextureInputsC[15];
     /* 0x00CC */ u8 padCC[0x10];
     /* 0x00DC */ sdfMemHandle_t *fontMemoryD;
-    /* 0x00E0 */ u8 padE0[0x1C];
+    /* 0x00E0 */ void *fontTextureInput;
+    /* 0x00E4 */ u8 padE4[0x18];
     /* 0x00FC */ s32 unk_00FC;
     /* 0x0100 */ s32 unk_0100;
     /* 0x0104 */ s32 unk_0104;
@@ -88,7 +89,75 @@ s32 dds3CreateGameData(void)
     return dds3GlobalWorkInit();
 }
 
-INCLUDE_ASM(const s32, "kernel/dds3CreateData", stfFreeFiles);
+extern s32 evtBitCheck(s32 eventNo);
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+extern char *stfMpicFileTable[];
+extern char *stfPicFileTable[];
+/* Padded shared asset-path pool remains in its native data owner. */
+extern char D_0053EFB8[], D_0053EFD0[], D_0053EFE8[], D_0053F000[];
+extern char D_0053F078[], D_0053F090[], D_0053F0A8[], D_0053F0C0[];
+extern char D_0053F018[], D_0053F030[], D_0053F048[], D_0053F060[];
+extern void frwLoadStaffFont(void);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053EFB8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053EFD0);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053EFE8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F000);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F018);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F030);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F048);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F060);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F078);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F090);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F0A8);
+
+INCLUDE_RODATA(const s32, "kernel/dds3CreateData", D_0053F0C0);
+
+/* Load the selected staff-roll texture set and shared font resources. */
+void stfFreeFiles(void)
+{
+    s32 i;
+
+    if (evtBitCheck(0x12C)) {
+        oStaff_UI->fontMemoryA[0] = sdfDevLoadFileEx(D_0053EFB8, (u32 *)&oStaff_UI->uiTextureInputsA[0], NULL);
+        oStaff_UI->fontMemoryA[1] = sdfDevLoadFileEx(D_0053EFD0, (u32 *)&oStaff_UI->uiTextureInputsA[1], NULL);
+        oStaff_UI->fontMemoryA[2] = sdfDevLoadFileEx(D_0053EFE8, (u32 *)&oStaff_UI->uiTextureInputsA[2], NULL);
+        oStaff_UI->fontMemoryA[3] = sdfDevLoadFileEx(D_0053F000, (u32 *)&oStaff_UI->uiTextureInputsA[3], NULL);
+        oStaff_UI->fontMemoryB[0] = sdfDevLoadFileEx(D_0053F018, (u32 *)&oStaff_UI->uiTextureInputsB[0], NULL);
+        oStaff_UI->fontMemoryB[1] = sdfDevLoadFileEx(D_0053F030, (u32 *)&oStaff_UI->uiTextureInputsB[1], NULL);
+        oStaff_UI->fontMemoryB[2] = sdfDevLoadFileEx(D_0053F048, (u32 *)&oStaff_UI->uiTextureInputsB[2], NULL);
+        oStaff_UI->fontMemoryB[3] = sdfDevLoadFileEx(D_0053F060, (u32 *)&oStaff_UI->uiTextureInputsB[3], NULL);
+        for (i = 0; i < 15; i++) {
+            oStaff_UI->fontMemoryC[i] = sdfDevLoadFileEx(stfMpicFileTable[i], (u32 *)&oStaff_UI->uiTextureInputsC[i], NULL);
+        }
+    } else {
+        oStaff_UI->fontMemoryA[0] = sdfDevLoadFileEx(D_0053F078, (u32 *)&oStaff_UI->uiTextureInputsA[0], NULL);
+        oStaff_UI->fontMemoryA[1] = sdfDevLoadFileEx(D_0053F090, (u32 *)&oStaff_UI->uiTextureInputsA[1], NULL);
+        oStaff_UI->fontMemoryA[2] = sdfDevLoadFileEx(D_0053F0A8, (u32 *)&oStaff_UI->uiTextureInputsA[2], NULL);
+        oStaff_UI->fontMemoryA[3] = sdfDevLoadFileEx(D_0053F0C0, (u32 *)&oStaff_UI->uiTextureInputsA[3], NULL);
+        oStaff_UI->fontMemoryB[0] = sdfDevLoadFileEx(D_0053F018, (u32 *)&oStaff_UI->uiTextureInputsB[0], NULL);
+        oStaff_UI->fontMemoryB[1] = sdfDevLoadFileEx(D_0053F030, (u32 *)&oStaff_UI->uiTextureInputsB[1], NULL);
+        oStaff_UI->fontMemoryB[2] = sdfDevLoadFileEx(D_0053F048, (u32 *)&oStaff_UI->uiTextureInputsB[2], NULL);
+        oStaff_UI->fontMemoryB[3] = sdfDevLoadFileEx(D_0053F060, (u32 *)&oStaff_UI->uiTextureInputsB[3], NULL);
+        for (i = 0; i < 15; i++) {
+            oStaff_UI->fontMemoryC[i] = sdfDevLoadFileEx(stfPicFileTable[i], (u32 *)&oStaff_UI->uiTextureInputsC[i], NULL);
+        }
+    }
+    oStaff_UI->fontMemoryD = sdfDevLoadFileEx("/staff/capcom_logo.tmx", (u32 *)&oStaff_UI->fontTextureInput, NULL);
+    oStaff_UI->fontTexture = NULL;
+    oStaff_UI->fontTexture = sdfTexSet(oStaff_UI->fontTextureInput);
+    frwLoadStaffFont();
+}
 
 void stfFreeFont(void)
 {
