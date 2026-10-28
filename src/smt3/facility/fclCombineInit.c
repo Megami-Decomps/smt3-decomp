@@ -1,5 +1,6 @@
 #include "common.h"
 #include "basic.h"
+#include "motion.h"
 #include "fpu.h"
 #include "libsdf.h"
 #include "newdata.h"
@@ -393,6 +394,16 @@ typedef struct
 
 typedef struct
 {
+    /* 0x00 */ s32 handle;
+    /* 0x04 */ void *lock;
+    /* 0x08 */ s32 size;
+    /* 0x0C */ s16 id;
+    /* 0x0E */ u8 unk_0E[2];
+    /* 0x10 */ struct mdlObj_t *model;
+} cmbActionData_t;
+
+typedef struct
+{
     /* 0x00000 */ u8 unk_00000;
     /* 0x00001 */ s8 unk_00001;
     /* 0x00002 */ u8 unk_00002;
@@ -422,7 +433,7 @@ typedef struct
     /* 0x16518 */ void *resourceHandle_16518;
     /* 0x1651C */ void *explainData;
     /* 0x16520 */ u8 unk_16520[0x2C];
-    /* 0x1654C */ u32 *unk_1654C[5];
+    /* 0x1654C */ cmbActionData_t actionModel;
     /* 0x16560 */ u8 unk_16560[0x70];
     /* 0x165D0 */ s32 smoke[3];
     /* 0x165DC */ u8 unk_165DC[0x11];
@@ -455,7 +466,7 @@ extern void cmpClearCursorSlots(cmpCursorInfo_t *cursor);
 
 extern void cmbCreateLocalStock(void);
 
-extern s32 func_002043E0(u32 **work);
+extern s32 func_002043E0(cmbActionData_t *work);
 
 extern void mdlSmoothLoopMotion(void *aHandle, s32 aGroup, s32 aNumber, f32 aBeforeLeng,
                                 f32 aSmoothLeng);
@@ -467,16 +478,6 @@ extern void dds3FadeOut(s32 r, s32 g, s32 b, s32 frame);
 extern void fclScriptForcedEnd(u8 *PID);
 
 extern u32 fclBlendColor(u32 color, u32 mask, u32 alpha);
-
-typedef struct
-{
-    /* 0x00 */ s32 handle;
-    /* 0x04 */ void *lock;
-    /* 0x08 */ s32 size;
-    /* 0x0C */ s16 id;
-    /* 0x0E */ u8 unk_0E[2];
-    /* 0x10 */ struct mdlObj_t *model;
-} cmbActionData_t;
 
 typedef struct
 {
@@ -2069,14 +2070,14 @@ void *cmbUpdateIntroduceModel(cmbActionData_t *work)
     return model;
 }
 
-s32 func_002043E0(u32 **work)
+s32 func_002043E0(cmbActionData_t *work)
 {
-    u32 *flags = work[4];
+    mdlObj_t *model = work->model;
 
-    if (flags == NULL) {
+    if (model == NULL) {
         return 0;
     }
-    *flags |= 1;
+    model->flags |= 1;
     return 0;
 }
 
@@ -2316,7 +2317,7 @@ void func_00205DB8(void)
     if (CMB_GBWK->stockSlot[2].index < 0) {
         return;
     }
-    func_002043E0(CMB_GBWK->unk_1654C);
+    func_002043E0(&CMB_GBWK->actionModel);
 }
 
 extern void effEVECombParSmokeSetZtest(s32 pCombParSmoke, s32 test);
@@ -2325,17 +2326,30 @@ void cmb_205DF0(void)
 {
     effEVECombParSmokeSetZtest(CMB_GBWK->smoke[0], 1);
     effEVECombParSmokeSetZtest(CMB_GBWK->smoke[1], 1);
-    func_002043E0((u32 **)((u8 *)CMB_GBWK + 0x16524));
-    func_002043E0((u32 **)((u8 *)CMB_GBWK + 0x16538));
+    func_002043E0((cmbActionData_t *)((u8 *)CMB_GBWK + 0x16524));
+    func_002043E0((cmbActionData_t *)((u8 *)CMB_GBWK + 0x16538));
     func_00205DB8();
 }
 
 void cmb_205E68(void)
 {
-    mdlSmoothLoopMotion(CMB_GBWK->unk_1654C[4], 0, 1, 0.0f, 1.0f);
+    mdlSmoothLoopMotion(CMB_GBWK->actionModel.model, 0, 1, 0.0f, 1.0f);
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", func_00205EA0);
+extern f32 cmbTargetModelId;
+
+void func_00205EA0(void)
+{
+    sdfMotionCtrlr_t *motion = CMB_GBWK->actionModel.model->first;
+
+    if ((f32)datModelParamTable[(u16)CMB_GBWK->actionModel.id].badframe - 1.0f <= motion->frame) {
+        motion->speed = 0.0f;
+    }
+    /* Native ramp: one float below 25, with the rounded 25/3 step. */
+    if (cmbTargetModelId < 0x1.8ffffep+4f) {
+        cmbTargetModelId += 0x1.0aaaaap+3f;
+    }
+}
 
 extern void cmbFreeActionModel(void *model);
 
