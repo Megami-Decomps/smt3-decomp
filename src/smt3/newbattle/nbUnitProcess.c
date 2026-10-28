@@ -455,31 +455,20 @@ f32 nbGetMotionSpeed(nbFormation_t *form, s32 motion, f32 ritu)
     return motspeed;
 }
 
-/* NON_MATCHING: 23 of 46 words differ (first at +0x5C). */
-
-#ifdef NON_MATCHING
-
 s32 nbGetMotionNo(nbFormation_t *form, s32 motion)
 {
     datUnitWork_t *work = nbGetUnitWorkFromFormindex(form->formindex);
     s32 id = nbGetUnitID(work);
-    datUnitVisual_t *visual = nbGetUnitVisual(work);
-    u32 ofs = motion * sizeof(nbUnitMotion_t) + 0x30;
+    nbUnitVisualMotions_t *visual = (nbUnitVisualMotions_t *)nbGetUnitVisual(work);
 
-    form->cr = *(f32 *)((u8 *)(motion * sizeof(nbUnitMotion_t)) + (u32)visual + 0x38) * form->scl;
-    form->movey = *(f32 *)((u8 *)visual + ofs + 0xC);
-    form->movez = *(f32 *)((u8 *)visual + ofs + 0x10);
+    form->cr = visual->motions[motion].atarisize * form->scl;
+    form->movey = visual->motions[motion].movey;
+    form->movez = visual->motions[motion].movez;
     if (id == 0) {
         return D_003493A0[motion];
     }
     return D_0034F1C0[motion];
 }
-
-#else
-
-INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbGetMotionNo);
-
-#endif
 
 INCLUDE_ASM(const s32, "newbattle/nbUnitProcess", nbAddUnitStock);
 

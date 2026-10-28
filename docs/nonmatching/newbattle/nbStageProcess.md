@@ -118,30 +118,6 @@ two y values; a separate local for the depth `-1`; a named local for the
 second quad's right edge; an `x` local copied from `ox`; computing `ox` after
 the `if`; and all declaration orders of the locals, which change nothing.
 
-## nbGetMotionNo (newbattle/nbStageProcess, 0xC0)
-
-23 of 46 words differ, 184 bytes against the native 192, and every differing word is
-the shift caused by one missing register copy.
-
-Retail builds three address pseudos for the three reads out of the motion
-record: `$4 = 28 * mot + visual` with the `cr` field's whole `0x38` in the load
-displacement, `$5 = visual + (28 * mot + 0x30)` for `movey` at `0xC`, and
-`$2 = $5` for `movez` at `0x10`. The draft reaches the first two, so the two
-associations (`(index + base) + const` against `(index + const) + base`) are
-right, but the third read shares `$5` and the `daddu $2, $5, $0` is missing,
-which also drops the `nop` `ee-as` pads the first arm with.
-
-Ruled out: both cast orders of the second address, a `u8 *` pointer local for
-one read and the expression for the other, two distinct `u32` offset locals,
-two distinct pointer locals, a second `nbGetUnitVisual(work)` call at the third
-read (which reloads and runs over), the two reads in the other source order,
-`0x3C`/`0x40` displacements off a bare `28 * mot` offset (which merges all
-three into one base and is two words shorter), and an `s32` offset local.
-
-The 0x1C-byte motion records at `datUnitVisual_t + 0x2C` are named here by a
-unit-local `nbUnitMotion_t`, since the shared header splits the same bytes as
-`part[]` six bytes later. `nbGetMotionActframe` matches through the same view.
-
 ## nbDrawKoukaSprite (newbattle/nbStageProcess, 0x108)
 
 24 of 66 words differ, at the exact 264-byte size and with the same instruction
