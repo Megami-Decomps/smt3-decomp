@@ -227,7 +227,49 @@ void fclShopGetTexPath(void *work, s32 mode)
     *(s32 *)((u8 *)work + 0x2388) = (s32)sdfDevLoadFileEx(path, (u8 *)work + 0x238C, 0);
 }
 
-INCLUDE_ASM(const s32, "facility/fclShopInit", fclAllocShopWork);
+extern sdfMemHandle_t *sdfMemAllocDirect(s32 size);
+extern void *sdfMemLock(sdfMemHandle_t *handle);
+extern void cmpInitSeqInfo(void *work, void *parent);
+extern void fclInitCursorWindow(void *cursor, void *data, u8 count);
+extern void fclSetCursorList(void *cursor, s32 mode);
+extern void fclInitPanel(void *panel, s32 x, s32 y, s32 z, s32 width,
+                         s32 height, s32 color, s8 type, s8 speed);
+extern void evtDisableMoonCalc(void);
+extern void p2sdPlayBGM(s32 id);
+extern s32 fclSetWorkValue(s8 index, s32 value);
+extern char D_0032F640[];
+
+cmbWork_t *fclAllocShopWork(s8 type, void *parent)
+{
+    sdfMemHandle_t *allocation;
+    shpUpdateWork_t *work;
+
+    allocation = sdfMemAllocDirect(0x2464);
+    work = sdfMemLock(allocation);
+    memset(work, 0, 0x2464);
+    work->allocation = allocation;
+    cmpInitSeqInfo(work, parent);
+    work->unk_0001 = 0;
+    work->itemType = type;
+    work->unk_0004 = 1;
+    work->unk_0003 = 0;
+    work->scriptArg = 0;
+    fclInitCursorWindow((u8 *)work + 0x28, D_0032F640, 4);
+    fclSetCursorList((u8 *)work + 0x28, 0x19);
+    fclShopInitItemList((u8 *)work + 0x1068);
+    fclInitPanel((u8 *)work + 0x239C, 0x13E0, 0x388, 0xFFFFF, 0xBD, 0x62,
+                 0x161E2766, 2, 0x10);
+    fclInitPanel((u8 *)work + 0x23DC, 0, 0x298, 0xFFFFF, 0x200, 0xE4,
+                 0, 0, 0x1D);
+    fclShopGetTexPath(work, type);
+    evtDisableMoonCalc();
+    fclShopTexLoad(work);
+    fclShopInitRagTex((u8 *)work);
+    p2sdPlayBGM(0x310000);
+    fclSetWorkValue(2, 0);
+    fclSetWorkValue(3, type);
+    return (cmbWork_t *)work;
+}
 
 void shop_update_Shutdown(void)
 {
@@ -246,7 +288,7 @@ void shop_update_Shutdown(void)
 }
 
 extern char D_0053D010[];
-extern cmbWork_t *fclAllocShopWork(s8 type, s32 sequence);
+extern cmbWork_t *fclAllocShopWork(s8 type, void *parent);
 extern s8 FclDebug(s8 mode, void *work);
 extern s32 shop_Process(dds3ProcessID_t *id);
 extern s32 shop_draw_Process(dds3ProcessID_t *id);
