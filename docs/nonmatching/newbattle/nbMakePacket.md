@@ -429,24 +429,6 @@ Ruled out: the ternary as an `if`/`else` pair of stores; no early return
 in the first two arms (33 of 60 differ); and the ternary without an early
 return.
 
-## Flow1_4 (newbattle/nbMakePacket, 0x120)
-
-46 of 72 words differ, at the exact size.
-
-The outer `switch` over `nownegophase` comes out exactly, retail's
-three-label exit included, and so does `case 0`. What fails is the
-twelve-term `&&` chain over `n->ework->id` ending in
-`evtGetAgeOfMoon() == 8`: ee-gcc annuls the target arm's `lw 0x184` into
-every `beq` slot, where retail fills each from the fall-through with the
-next comparison's constant.
-
-The identical chain in `Flow16_2` matches, so the chain itself is right;
-there it is the whole function body and here it is a `switch` arm that
-returns 1. Nothing in the source reaches the difference.
-
-Ruled out: `case 1` written first; `return 0;` instead of `break` in
-`case 0`; and `if`/`else if` in place of the `switch`.
-
 ## Flow9_16 (newbattle/nbMakePacket, 0x168)
 
 45 of 89 words differ, one word short of retail's 90.
