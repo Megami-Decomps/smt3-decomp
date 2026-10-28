@@ -102,7 +102,18 @@ INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawButtonGuide);
 
 INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawPanelSprites);
 
-INCLUDE_ASM(const s32, "nme/Nme_Calc", nmeDrawNamePanel);
+void nmeDrawNamePanel(void)
+{
+    nmeSpriteTable_t *table = &GBWK_2;
+    s32 ot = 0x47;
+
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 0,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 1,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+    fclDrawSpriteRes(0, 0, 0, 0, 3, 2,
+                     (s32 *)namelist_buttonAnim_end->textures, table, ot);
+}
 
 void nmeDrawCharCell(s32 x, s32 y, u16 index, s8 row, frFontHandle_t *font)
 {
