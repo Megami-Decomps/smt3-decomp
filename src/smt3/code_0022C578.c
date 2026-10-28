@@ -1877,7 +1877,18 @@ void cmpUpdateList(void)
 
 INCLUDE_ASM(const s32, "code_0022C578", cmpCalcSequence);
 
-INCLUDE_ASM(const s32, "code_0022C578", nmeMakeGradColors);
+void nmeMakeGradColors(s32 *color0, s32 *color1, s32 red, s32 green, s32 blue)
+{
+    s32 scale[2][3] = {
+        { (s32)((f32)red * 2.0f), (s32)((f32)green * 2.0f), (s32)((f32)blue * 2.0f) },
+        { (s32)(f32)red, (s32)(f32)green, (s32)(f32)blue }
+    };
+    s32 i;
+    for (i = 0; i < 3; i++) {
+        color0[i] += color0[i] * scale[0][i] / 0xA00;
+        color1[i] += color1[i] * scale[1][i] / 0xA00;
+    }
+}
 
 extern const s32 D_0053F6E8[];
 extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
