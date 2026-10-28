@@ -455,7 +455,7 @@ typedef struct
     /* 0x1A6D8 */ s32 texHandle[7];
     /* 0x1A6F4 */ fclSprite_t backgroundSprite;
     /* 0x1A718 */ u8 *table;
-    /* 0x1A71C */ void *panel;
+    /* 0x1A71C */ fclPanel_t *panel;
     /* 0x1A720 */ fclRibbon_t *ribbon;
     /* 0x1A724 */ u8 resultPanelAnim[0x24];
     /* 0x1A748 */ u8 sacrificePanelAnim[0x24];
@@ -2303,7 +2303,21 @@ void cmbDrawStockBg(s32 x, s32 y, s32 z, u8 mode, s32 ot)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbDrawListPanel);
+extern s32 D_00345D88[];
+extern s32 fclDrawPanel(fclPanel_t *panel, s32 ot);
+extern void fclUpdatePanel(fclPanel_t *panel);
+
+void cmbDrawListPanel(s32 unusedX, s32 unusedY, s32 z, s32 ot)
+{
+    cmbGbWork_t *work = CMB_GBWK;
+    fclDrawPanel(work->panel, 0x47);
+    work = CMB_GBWK;
+    fclUpdatePanel(work->panel);
+    fclDrawSpriteRes(0, 0, z << 4, 0, 0, 0x24, D_00345D88, cmbSpriteTable, ot);
+    fclDrawSpriteRes(0, 0, z << 4, 0, 0, 0x25, D_00345D88, cmbSpriteTable, ot);
+    fclDrawSpriteRes(0, 0, z << 4, 0, 0, 0x21, CMB_GBWK->texHandle, cmbSpriteTable, ot);
+    fclDrawSpriteRes(0, 0, z << 4, 0, 0, 0x22, CMB_GBWK->texHandle, cmbSpriteTable, ot);
+}
 
 extern void cmbDrawListPanel(s32 x, s32 y, s32 z, s32 ot);
 extern void cmbDrawStockBox(s32 x, s32 y, s32 z, s32 color, s8 count, s32 ot);
