@@ -3,7 +3,7 @@
 
 Unlike tools/dds_reuse.py, which aligns the two games on function sizes, this reads
 both split asm trees and compares instruction words directly, masking only the fields
-the linker fills in: j/jal targets and %hi/%lo immediates. An equal body means
+the linker fills in: j/jal targets and %hi/%lo/%gp_rel immediates. An equal body means
 dds-decomp's C compiles to the same instructions, and the masked operands line up
 positionally, so the donor's symbol at each slot names the smt3 symbol at that slot.
 
@@ -27,7 +27,7 @@ MIN_WORDS = 16
 INSN = re.compile(r"^\s*/\* [0-9A-Fa-f]+ [0-9A-Fa-f]+ ([0-9A-Fa-f]{8}) \*/\s+(.*?)\s*$")
 GLABEL = re.compile(r"^\s*glabel\s+(\S+)")
 INCLUDE_ASM = re.compile(r'INCLUDE_ASM\(\s*[^,]+,\s*"([^"]+)"\s*,\s*(\w+)\s*\)')
-RELOC = re.compile(r"%(hi|lo)\(([^)]+)\)")
+RELOC = re.compile(r"%(hi|lo|gp_rel)\(([^)]+)\)")
 # A C definition at column zero: return type, name, open paren.
 C_DEF = re.compile(r"^\w[\w \*]*?(\w+)\(", re.M)
 
