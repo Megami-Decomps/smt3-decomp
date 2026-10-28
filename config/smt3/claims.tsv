@@ -270,6 +270,7 @@ src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 380 B	follow-camera 
 src/smt3/field/fldCamera.c	redthing1	done	2026-10-28	1 fn / 504 B	player target reset using provider vector types and native eye/target dataflow
 src/smt3/interface/frName.c	redthing1	done	2026-10-28	1 fn / 252 B	lazy image translation through four targets and sixteen inline glyph bitmaps
 src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 188 B	three-entry AI selection and native script dispatch; exact provider context
+src/smt3/newbattle/nbAi.c	redthing1	done	2026-10-28	1 fn / 336 B	AI target selection; skill-specific random dispatch, selection marks and fallback command
 src/smt3/newbattle/nbHelpProcess.c	redthing1	done	2026-10-28	1 fn / 336 B	three-part help panel geometry with signed width, opacity and typed sprite resources
 src/smt3/sdf/sdfSound.c	redthing1	done	2026-10-28	19 functions / 5244 B	sdfFileRpcHandleCmd matched from address-paired C donor
 src/smt3/facility/fclMisc.c	redthing1	done	2026-10-28	2 fn / 256 B	fclBlendColor and func_00213DF0; unsigned packed color arithmetic

@@ -1527,7 +1527,56 @@ s32 ChkClose(nbActionProcessData_t *a)
     return ret;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbAi", nbSetAiTarget);
+extern s32 nbSetActionCommand(nbMainProcessData_t *data, s32 command);
+extern void nbSetTargetSkill(nbActionProcessData_t *a, datUnitWork_t *work, s32 *ctype,
+                             s32 *crule, s32 *carea, s32 mode);
+extern s32 nbSetSelectOkMark(s32 partyindex, s32 ctype, s32 crule, s32 carea);
+extern s32 SetSingleTarget2(nbActionProcessData_t *a, s32 code, s32 n);
+
+s32 nbSetAiTarget(nbActionProcessData_t *a, s32 code, s32 n)
+{
+    s32 ctype;
+    s32 crule;
+    s32 carea;
+    s32 result = 0;
+    switch (a->work->nowcommand) {
+    case 0:
+    case 1:
+    case 5:
+        if (a->work->nowcommand == 1) {
+            switch (a->work->nowindex) {
+            case 0xDE:
+            case 0xE2:
+            case 0xE3:
+            case 0xE4:
+            case 0xE5:
+            case 0xE6:
+            case 0xFC:
+                nbSetActionCommand(a->data, a->aisummonid);
+                code = TAR_CODE_RND;
+                break;
+            }
+        }
+        nbSetTargetSkill(a, a->work, &ctype, &crule, &carea, 0);
+        nbSetSelectOkMark(a->partyindex, ctype, crule, carea);
+        switch (ctype) {
+        case 0:
+            result = SetSingleTarget2(a, code, n);
+            break;
+        case 1:
+        case 2:
+            result = SetGroupTarget2(a, code, n);
+            break;
+        }
+        break;
+    }
+    if (result != 0) {
+        a->work->nowcommand = 3;
+        a->work->nowindex = 0;
+    }
+    return result;
+}
+
 
 INCLUDE_ASM(const s32, "newbattle/nbAi", nbRunAiSub);
 
