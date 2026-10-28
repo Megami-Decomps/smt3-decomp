@@ -65,8 +65,21 @@ typedef struct
     /* 0x02 */ s16 param;
     /* 0x04 */ u8 unk_04[0x15];
     /* 0x19 */ s8 unk_19;
-    /* 0x1A */ u8 unk_1A[2];
-    /* 0x1C */ datHeartsSkill_t heartsSkill[8];
+    /* The same eight records expose condition bytes before each skill. */
+    union {
+        struct {
+            u8 unk_1A[2];
+            datHeartsSkill_t heartsSkill[8];
+        };
+        struct {
+            struct {
+                u8 condition;
+                u8 reserved;
+                u16 skill;
+            } heartConditions[8];
+            u8 unk_3A[2];
+        };
+    };
     /* 0x3C */ u8 unk_3C[6];
 } datRaceEntry_t;
 
@@ -1252,35 +1265,25 @@ void datAddHeartsSlot(s8 id, u16 value)
     (*(u8 *)(id + (s32)gbwk + 0x1D3B))++;
 }
 
-/* NON_MATCHING: 5 of 48 words differ; see docs/nonmatching/result/rstcalc.md. */
-#ifdef NON_MATCHING
-typedef struct datHeartsEntry_t {
-    u8 condition;
-    u16 skill;
-} datHeartsEntry_t;
-
 s32 datAddHeartsEntry(u8 id, datUnitWork_t *work)
 {
-    datHeartsEntry_t *entry;
+    s32 result = 0;
     s32 i;
 
-    if (id == 0) {
-        return 0;
-    }
-    entry = (datHeartsEntry_t *)&D_00339E00[id].unk_1A[0];
-    for (i = 7; i >= 0; i--) {
-        u16 skill = entry->skill;
-        if (skill != 0 && entry->condition == 0) {
-            work->skill[work->skillcnt++] = skill;
-            datAddHeartsSlot((s8)id, skill);
+    if (id > 0) {
+        for (i = 0; i < 8; i++) {
+            datRaceEntry_t *race = &D_00339E00[id];
+            u16 skill = race->heartConditions[i].skill;
+
+            if (skill != 0 && race->heartConditions[i].condition == 0) {
+                work->skill[work->skillcnt++] = skill;
+                datAddHeartsSlot((s8)id, skill);
+            }
         }
-        entry++;
+        result = (s8)work->skillcnt;
     }
-    return (s8)work->skillcnt;
+    return result;
 }
-#else
-INCLUDE_ASM(const s32, "result/rstcalc", datAddHeartsEntry);
-#endif
 
 INCLUDE_ASM(const s32, "result/rstcalc", func_00222610);
 
