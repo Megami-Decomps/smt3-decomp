@@ -397,9 +397,70 @@ s32 ragUpdateCallSeq(s32 SeqNo)
     return 1;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRagUpdate", ragUpdateSeqItem);
-
 extern ragItemReq_t *ragGetConfirmEntry(s32 kind, u8 flag);
+extern u16 ragCheckHeartsChoice(s8 index);
+extern s32 datGetItemSlotIndex(u16 id);
+extern s32 cmbChkGetHearts(s32 rawId);
+extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
+extern s32 cmpChkPadPressUpDown(void);
+extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
+
+void ragUpdateSeqItem(void)
+{
+    s32 button = cmpGetPressedButton(0x33) & 0xFFFF;
+    ragItemReq_t *entry = ragGetConfirmEntry(0, ragGetHeartsFlag(1));
+
+    if (fclGetFlag(0) == 0) {
+        return;
+    }
+
+    switch (button) {
+    case 1: {
+        const u8 *heartTable = ragHeartsTable;
+        s32 blocked = ragFindItemSlot(entry) == 0;
+        s32 heartFlag = ragGetHeartsFlag(1);
+        u16 item = *(u16 *)(heartTable + heartFlag * 14);
+        s32 slot = datGetItemSlotIndex(item);
+
+        if (slot != 0 && cmbChkGetHearts(slot) != 0) {
+            blocked = button;
+        }
+        if (blocked != 0) {
+            button = 0x8000;
+            break;
+        }
+        if (ragChkItemErr(ragCheckHeartsChoice(1)) != 0) {
+            break;
+        }
+        fclSetWorkValue(8, ragCheckHeartsChoice(1));
+        fclSetWorkValue(9, 0);
+        fclScriptStart(ragUpdateWork->script, 8, &ragUpdateWork->scriptArg);
+        ragUpdateWork->unk_0001 = 8;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    }
+    case 2:
+        fclScriptStart(ragUpdateWork->script, 0xA, &ragUpdateWork->scriptArg);
+        cmpResetCursorInfo(&ragUpdateWork->heartListWindow.listCursor);
+        ragUpdateWork->unk_0001 = 0;
+        ragUpdateWork->unk_0004 = button;
+        break;
+    case 0x10:
+        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, -1);
+        break;
+    case 0x20:
+        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, 1);
+        break;
+    }
+
+    if (cmpChkPadPressUpDown() == 0) {
+        lstMoveCursor((lstWork_t *)&ragUpdateWork->heartListWindow, 0);
+    }
+    button = cmpDisablePadBitStop((cmpPadStopWork_t *)&ragUpdateWork->heartListWindow.listCursor,
+                                  button, 0x30);
+    cmpPlayCursorSE((u16)button);
+}
+
 
 extern void ragSetSeqPhase(s8 phase);
 
@@ -407,11 +468,8 @@ extern s32 ragCheckItemUse(u16 item);
 
 extern s32 cmpModelSetup(s32 a, s32 b);
 
-extern void lstMoveCursor(lstWork_t *pListWindow, s8 Dir);
 
-extern s32 cmpChkPadPressUpDown(void);
 
-extern s32 cmpDisablePadBitStop(cmpPadStopWork_t *work, s32 bits, s32 stop);
 
 void ragUpdateSeq2(void)
 {
