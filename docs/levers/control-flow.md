@@ -305,3 +305,16 @@ path keeps `$16` live, so that target fill must annul. Both equality branches
 have the same probability 3999 and `mostly_true_jump` result 0: prediction
 annotations are not needed. The ordinary fallthrough reproduces all 168 bytes;
 the complete unit and retail-image checksum remain the qualification.
+
+In camp `cmpUpdateHeartsAttachConfirm`, the cancellation path restores the
+previous parameters and resets its local choice with `cancelled = 0`. Retail
+has `jal cmpReturnParamDH` plus the shared epilogue; omitting the reset instead
+emits a sibling call and changes four words. The qualified compiler trace
+retains the reset through `rtl.01.sibling` and `rtl.11.cfg`, then deletes it in
+`rtl.13.life`. Hooked and unhooked output and dump/plain assembly agree. The
+result matches all 272 bytes. Reproduce with
+`tools/cc1probe.sh src/smt3/code_0022C578.c --func cmpUpdateHeartsAttachConfirm --reorg`.
+The same-unit `cmpUpdateHeartsAttachStatus` resets its handled button after
+`cmpPlayCursorSE` and preserves its native `jal` plus epilogue at 396 bytes.
+Both resets update their own completed local state, under the contributing
+rules' qualified post-call-statement exception.

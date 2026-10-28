@@ -3108,7 +3108,59 @@ s32 cmpUnloadStatusModel(void)
     campDhUpdateWork->unk_04 = 1;
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachStatus);
+extern s8 cmpGetStatusModelFlag(void);
+extern s32 fclStartSelMessage(s32 message);
+extern void fclSetMessageInvalid(s8 mode);
+extern s32 fclStartMessage(s32 message);
+
+void cmpUpdateHeartsAttachStatus(void)
+{
+    u16 button = cmpGetPressedButton(0x33);
+
+    if (cmpGetStatusModelFlag() != 1) {
+        cmpUpdateStatusModelLoad(0);
+    }
+    if (cmpLoadStatusModel() != 0) {
+        return;
+    }
+    switch (button) {
+    case 1:
+        if (((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts != 0) {
+            if (DDS3_GBWK->heartsequip == ((campDhSavedUnit_t *)campDhUpdateWork)->equipHearts) {
+                fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+                fclSetMessageInvalid(1);
+                fclStartMessage(0);
+                campDhUpdateWork->unk_01[0] = 4;
+                campDhUpdateWork->unk_04 = button;
+                break;
+            } else if ((*(u16 *)((u8 *)DDS3_GBWK + 0xA62) & 0x8000) != 0) {
+                fclSetMessageInvalid(1);
+                fclStartMessage(1);
+                campDhUpdateWork->unk_01[0] = 4;
+                campDhUpdateWork->unk_04 = button;
+                break;
+            }
+        }
+        fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+        fclSetMessageInvalid(0);
+        fclStartMessage(2);
+        fclStartSelMessage(0xB);
+        campDhUpdateWork->unk_01[0] = 2;
+        campDhUpdateWork->unk_04 = 1;
+        break;
+    case 2:
+        cmpReturnParamDH();
+        cmpUnloadStatusModel();
+        break;
+    case 0x10:
+    case 0x20:
+        return;
+    }
+    cmpPlayCursorSE(button);
+    /* Like cmpUpdateHeartsAttachConfirm, resetting the handled input retains
+     * the native jal plus epilogue; the reset is deleted later. */
+    button = 0;
+}
 
 /* campDhUpdateWork, as this unit's animation and icon code reads it. The two
  * were separate structs whose 0x28-byte prefixes agreed, so they are one here.
@@ -3158,7 +3210,51 @@ void cmpStepHeartsAttachCursor(s32 step)
     }
 }
 
-INCLUDE_ASM(const s32, "code_0022C578", cmpUpdateHeartsAttachConfirm);
+extern s32 fclChkSelMessage(void);
+extern s8 fclGetSelMessagePos(void);
+extern s8 fclEndMessage(void);
+extern void fclSetMessageInvalid(s8 mode);
+extern s32 fclStartMessage(s32 message);
+
+extern void cmpStepHeartsAttachCursor(s32 step);
+
+void cmpUpdateHeartsAttachConfirm(void)
+{
+    s32 cancelled = 1;
+
+    if (((s8 *)campDhUpdateWork)[0x18] > 0) {
+        if (((s8 *)campDhUpdateWork)[0x18] == 1) {
+            cmpStepHeartsAttachCursor(0);
+            p2sdPlaySE(0x18, 0x7F, 0x3F);
+            fclSetMessageVar_20743088(0xC, (s32)pstr[DDS3_GBWK->heartsequip]);
+            fclSetMessageInvalid(1);
+            fclStartMessage(3);
+            ((s8 *)campDhUpdateWork)[0x18] = 2;
+        }
+        cmpStepHeartsAttachCursor(1);
+        if (fclChkMessage() == 0) {
+            cmpUnloadStatusModel();
+        }
+    } else if (fclChkSelMessage() == 0) {
+        switch (fclGetSelMessagePos()) {
+        case 0:
+            cancelled = 0;
+            /* fall through */
+        case 1:
+            fclEndMessage();
+            if (cancelled != 0) {
+                cmpUnloadStatusModel();
+                cmpReturnParamDH();
+                /* The qualified cc1 trace retains this choice reset through
+                 * sibling-call selection and deletes it in the life pass. */
+                cancelled = 0;
+            } else {
+                ((s8 *)campDhUpdateWork)[0x18] = 1;
+            }
+            break;
+        }
+    }
+}
 
 extern s32 fclChkSelMessage(void);
 extern s8 fclGetSelMessagePos(void);
