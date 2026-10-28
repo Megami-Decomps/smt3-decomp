@@ -959,7 +959,39 @@ INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbSetupBirthPanel);
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcBirthDevil);
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbAddBirthDevilToStock);
+extern s32 cmbAddCustomDevilToStock(datUnitWork_t *custom, cmbUnit_t *list, u8 count);
+extern s32 cmbGetSpecialItemId(void);
+extern s32 fclEncycRegist(datUnitWork_t *unit, s32 mode);
+
+void cmbAddBirthDevilToStock(datUnitWork_t *units, u8 count)
+{
+    datUnitWork_t *first = &cmbGlobalWork->party[CMB_GBWK->stockSlot[0].index].unit;
+    datUnitWork_t *second = &cmbGlobalWork->party[CMB_GBWK->stockSlot[1].index].unit;
+    datUnitWork_t *third = NULL;
+
+    if (CMB_GBWK->stockSlot[2].index >= 0) {
+        third = &cmbGlobalWork->party[CMB_GBWK->stockSlot[2].index].unit;
+    }
+    cmbStoreBirthDevil(first->id, (cmbUnit_t *)units, count);
+    cmbStoreBirthDevil(second->id, (cmbUnit_t *)units, count);
+    if (third != NULL) {
+        cmbStoreBirthDevil(third->id, (cmbUnit_t *)units, count);
+    }
+    cmbCopyCustomDevilToStock((datUnitWork_t *)CMB_GBWK->birthPanel + 1,
+                            (datUnitWork_t *)CMB_GBWK->birthPanel);
+    if ((s8)CMB_GBWK->birthPanel[0x2C5] == 0) {
+        ((datUnitWork_t *)CMB_GBWK->birthPanel + 1)->id = 0;
+    } else {
+        cmbCopyCustomDevilToStock((datUnitWork_t *)CMB_GBWK->birthPanel,
+                                (datUnitWork_t *)CMB_GBWK->birthPanel + 2);
+    }
+    cmbAddCustomDevilToStock((datUnitWork_t *)CMB_GBWK->birthPanel, (cmbUnit_t *)units, count);
+    fclEncycRegist((datUnitWork_t *)CMB_GBWK->birthPanel, 0);
+    if (datDevilTable[((datUnitWork_t *)CMB_GBWK->birthPanel)->id].race == 0x26 &&
+        (s8)CMB_GBWK->birthPanel[0x2C4] != 2) {
+        datAddItem(cmbGetSpecialItemId(), -1);
+    }
+}
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbStartResultScript);
 
@@ -1052,7 +1084,113 @@ void cmbSeqSetPhase(void)
     }
 }
 
-INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbCalcSequence);
+extern s32 cmbCalcRoot(void);
+extern void cmbCalcDevSel1st(void);
+extern void cmbInitStockCursor(void);
+extern s32 cmbRunBirthDevilStep(void);
+extern s32 cmbCalcBirthDevil(void);
+extern void cmbSeqBuildResultTable(void);
+extern s32 cmbCalcIntroduce(void);
+extern void cmbStartResultScript(void);
+extern void fclRbnCalc(fclRibbon_t *ribbon);
+
+s32 cmbCalcSequence(void)
+{
+    switch ((s8)CMB_GBWK->unk_00001) {
+    case 0:
+    case 1:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 8:
+    case 13:
+    case 14:
+    case 16:
+        cmpResetDrawEnv();
+        break;
+    case 2:
+        break;
+    default:
+        cmpModelInitCore2();
+        break;
+    }
+    cmbSeqSetPhase();
+    switch ((s8)CMB_GBWK->unk_00001) {
+    case 0:
+        if (cmbCalcRoot() != 0) {
+            return 0;
+        }
+        break;
+    case 1:
+        CMB_GBWK->unk_00001 = 5;
+    case 5:
+        cmbCalcDevSel1st();
+        break;
+    case 3:
+        if (CMB_GBWK->unk_00004 != 0) {
+            s32 script;
+            cmbGbWork_t *work;
+            cmbEnableMenuEntry2();
+            cmbEnableMenuEntry6();
+            cmbEnableMenuEntry5();
+            CMB_GBWK->unk_00005 = 1;
+            script = fclScriptStart(CMB_GBWK->script, 10, &CMB_GBWK->scriptArg);
+            work = CMB_GBWK;
+            work->unk_00001 = 3;
+            work->unk_00008 = script;
+            CMB_GBWK->unk_00002 = 0;
+        }
+        break;
+    case 2:
+        if (cmbSeqStartScript() != 0) {
+            return 0;
+        }
+        break;
+    case 6:
+        cmbInitStockCursor();
+        break;
+    case 9:
+        cmbRunBirthDevilStep();
+        break;
+    case 10:
+        if (cmbCalcBirthDevil() != 0) {
+            return 0;
+        }
+        break;
+    case 8:
+        cmbSeqBuildResultTable();
+        break;
+    case 7:
+    case 11:
+        if (CMB_GBWK->unk_00004 != 0) {
+            fclClearFlag(2);
+        }
+        break;
+    case 14:
+        if (cmbCalcIntroduce() == 0) {
+            return 0;
+        }
+        break;
+    case 15:
+        cmbStartResultScript();
+        break;
+    case 4:
+    case 12:
+    case 13:
+    case 16:
+        break;
+    }
+    if (CMB_GBWK->ribbon != NULL) {
+        fclRbnCalc(CMB_GBWK->ribbon);
+    }
+    CMB_GBWK->unk_00004 = 0;
+    if (CMB_GBWK->unk_00000 & 0x10) {
+        cmpUpdateTerminate((cmpInfoWindow_t *)CMB_GBWK);
+        return -1;
+    }
+    return 0;
+}
 
 s32 cmbDevilIsUnlocked(u16 devilId)
 {
@@ -2444,7 +2582,7 @@ s32 cmbChkIkenieEnable(void)
 
 INCLUDE_ASM(const s32, "facility/fclCombineInit", cmbUpdateBirthDevil);
 
-extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, s32 count);
+extern void cmbAddBirthDevilToStock(datUnitWork_t *unit, u8 count);
 
 void cmbSetAction(void)
 {
