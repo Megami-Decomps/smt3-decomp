@@ -558,3 +558,4 @@ src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 404 B	arrow cursor dis
 src/smt3/code_0022C578.c	redthing1	done	2026-10-28	1 fn / 432 B	two-phase arrow target highlighting with native blend weights and callback-sensitive texture reloads; owner 343 match, 0 differ
 src/smt3/newbattle/nbNegoProcess.c	redthing1	done	2026-10-28	1 fn / 508 B	next-negotiation diagnostic with callback-sensitive candidate reloads and indexed text coordinates; owner 40 match, 0 differ
 src/smt3/newbattle/nbFormation.c	redthing1	done	2026-10-28	1 fn / 404 B	two-pass motion restart with recovered model owner and visual records; owner 28 match, 0 differ
+src/smt3/facility/fclPanel.c	redthing1	done	2026-10-28	0 matches / 1 guarded draft	type-zero gradient at native size with six-word color scheduling residual

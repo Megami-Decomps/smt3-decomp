@@ -46,7 +46,47 @@ void fclUpdatePanelTypeDef(fclPanel_t *pPanel)
     }
 }
 
+extern s32 fclDrawPanelSprite2(s32 id, s32 ot);
+extern void cmpDrawTriG(const u32 *xs, const u32 *ys, u32 z, const u32 *colors, u32 ot);
+
+/* NON_MATCHING: 6 of 64 words differ in the second color-constant schedule. */
+#ifdef NON_MATCHING
+void fclDrawPanelType0Grad(fclPanel_t *panel, u32 ot)
+{
+    u32 coords[2][3];
+    u32 colors[3];
+
+    fclDrawPanelSprite2(0x48, ot);
+
+    colors[0] = 0x546D8B33;
+    colors[1] = 0x33;
+    colors[2] = colors[0] & 0xFF;
+    coords[0][0] = 0;
+    coords[1][0] = 0;
+    coords[0][1] = 0x30C0;
+    coords[1][1] = 0;
+    coords[0][2] = 0;
+    coords[1][2] = 0xC80;
+
+    cmpDrawTriG(coords[0], coords[1], panel->Z, colors, ot);
+
+    colors[0] = 0x31486366;
+    colors[1] = 0x66;
+    colors[2] = colors[0] & 0xFF;
+    coords[0][0] = 0x2000;
+    coords[1][0] = 0xF00;
+    coords[0][1] = (u32)-0x10C0;
+    coords[1][1] = 0xF00;
+    coords[0][2] = 0x2000;
+    coords[1][2] = 0x280;
+
+    cmpDrawTriG(coords[0], coords[1], panel->Z, colors, ot);
+
+    fclDrawPanelSprite2(0x44, ot);
+}
+#else
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0Grad);
+#endif
 
 INCLUDE_ASM(const s32, "facility/fclPanel", fclDrawPanelType0);
 

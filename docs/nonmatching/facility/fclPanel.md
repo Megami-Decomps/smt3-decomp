@@ -23,3 +23,18 @@ to be measured across all of them at once.
 Also settled: the `draw` field at `+0x38` takes two parameters, the panel and
 the id, which is why `fclPanel_t` declares it that way; `panel->draw(panel)`
 does not compile to retail's `$5` setup.
+
+## fclDrawPanelType0Grad (facility/fclPanel, 0x100)
+
+6 of 64 words differ at the exact 256-byte size. Two gradient triangles sit
+between sprite passes 0x48 and 0x44. Each triangle reloads panel Z after the
+preceding callback; the third vertex keeps the first color's low-byte alpha.
+
+The paired `coords[2][3]` array preserves contiguous X/Y triples. Colors precede
+vertex assignments, and coordinates are assigned by vertex. Only the second
+color's `ori` differs in scheduling: retail places it at +0x98, while the draft
+places it at +0xAC after five argument/constant moves. All stored values agree.
+
+Separate X/Y arrays change the stack layout. Chained tail-color assignments
+swap two stores; a byte cast reloads the alpha and adds eight bytes. The word
+mask preserves the native size and the six-word scheduling residual.
