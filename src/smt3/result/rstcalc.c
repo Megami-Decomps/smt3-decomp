@@ -1376,7 +1376,44 @@ s32 rstRollComment(void)
     return D_00339D10[0].devilId;
 }
 
-INCLUDE_ASM(const s32, "result/rstcalc", func_00223890);
+typedef struct
+{
+    u8 level;
+    u8 kind;
+    u16 skillId;
+} datLevelUpEntry_t;
+
+typedef struct
+{
+    u8 head[6];
+    datLevelUpEntry_t entry[24];
+} datLevelUp_t;
+
+s8 func_00223890(datUnitWork_t *unit, s32 rawLevel)
+{
+    u16 id = unit->id;
+    s32 count = 0;
+    s32 level;
+    s32 i;
+    datLevelUp_t *table;
+
+    /* The override is interpreted as a signed low byte before selection. */
+    if ((s8)rawLevel > 0) {
+        level = (s8)rawLevel;
+    } else {
+        level = (s8)unit->level;
+    }
+    table = (datLevelUp_t *)datLevelUpTable;
+    for (i = 0; i < 24; i++) {
+        if (level < table[id].entry[i].level) {
+            return count;
+        }
+        if (table[id].entry[i].kind == 3) {
+            count++;
+        }
+    }
+    return count;
+}
 
 
 /* NON_MATCHING: 10 of 32 words differ, 128 against retail's 132 bytes; the
