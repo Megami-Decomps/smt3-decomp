@@ -103,7 +103,37 @@ void mselCountSaves(void)
     }
 }
 
-INCLUDE_ASM(const s32, "kernel/ModeSelect", mselFindSaveSlot);
+void mselFindSaveSlot(s32 *first, s32 *second, u32 start, u32 end, s8 reverse)
+{
+    u32 i;
+
+    if (reverse != 0) {
+        i = start;
+        if (start < end) {
+            for (; i < end; i++) {
+                if (first != NULL) {
+                    first[i - 1] = first[i];
+                }
+                if (second != NULL) {
+                    second[i - 1] = second[i];
+                }
+            }
+        }
+    } else {
+        i = end - 1;
+        if (i >= start) {
+            do {
+                if (first != NULL) {
+                    first[i] = first[i - 1];
+                }
+                if (second != NULL) {
+                    second[i] = second[i - 1];
+                }
+                i--;
+            } while (i >= start);
+        }
+    }
+}
 
 extern char D_0053DEC0[];
 
