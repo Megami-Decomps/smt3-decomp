@@ -111,7 +111,39 @@ void fclRbnCalc(fclRibbon_t *phandle)
     phandle->ctr = (phandle->ctr - 2) & 0x7F;
 }
 
-INCLUDE_ASM(const s32, "facility/fclRibbon", fclRbnDraw);
+extern void *sdfGrAllocPacketBuff(u32 size);
+extern void sdfDrawTagInit(sdfDrawTag_t *tag);
+extern sdfGrOt_t sdfGrOtTable[85];
+extern void DrawBackFrame(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, s32 flag, sdfDrawTag_t *tag);
+extern void DrawBack(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, sdfDrawTag_t *tag);
+extern void DrawHexagon(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, s32 width, s32 fixed, sdfDrawTag_t *tag);
+extern void DrawElem(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, sdfDrawTag_t *tag);
+
+void fclRbnDraw(fclRibbon_t *handle, s32 x, s32 y, u32 z,
+    s32 alpha, s32 flag, s32 width, s32 ot)
+{
+    sdfDrawTag_t *tag;
+    sdfGrOt_t *entry;
+
+    if (alpha != 0 || (flag & 1) != 0) {
+        tag = sdfGrAllocPacketBuff(sizeof(*tag));
+        sdfDrawTagInit(tag);
+        DrawBackFrame(handle, x, y, z, alpha, flag, tag);
+        if (alpha > 0) {
+            if ((flag & 2) == 0) {
+                DrawBack(handle, x, y, z, alpha, tag);
+            }
+            DrawHexagon(handle, x, y, z, alpha, width, flag & 4, tag);
+            DrawElem(handle, x, y, z, alpha, tag);
+        }
+        entry = &sdfGrOtTable[ot];
+        entry->regFunc(entry, tag);
+    }
+}
 
 void fclRbnSwitchActive(fclRibbon_t *phandle, s32 index)
 {
