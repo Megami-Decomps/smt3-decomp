@@ -29,7 +29,7 @@ typedef struct
     s32 pcharNum;
     u8 unk004[0x14];
     s16 exitX, exitY;
-    u8 unk01C[0x320];
+    u16 map[20][20];
     s32 charIndex;
     void *baseTex;
     void *tex344, *tex348, *tex34C;
@@ -56,13 +56,28 @@ typedef struct { f32 scale; u8 unk04[0xC]; sdfVector4_t eye, target; } pbViewCam
 
 typedef struct { u8 unk00[8]; s32 modelIndex; } pbPanelModel_t;
 
-typedef struct { s32 value; u8 unk04[0xC0]; f32 x, y, z; } pbGroupData_t;
+typedef struct { u16 kind; s16 x, y; u8 unk06[0x8A]; } pbBlockEntry_t;
+typedef struct
+{
+    s32 value;
+    u16 groupID;
+    u16 count;
+    u8 unk08[0xA];
+    s16 cellX, cellY;
+    u8 unk16[0x9A];
+    pbBlockEntry_t *blockEntries;
+    u8 unkB4[4];
+    f32 rotation;
+    u8 unkBC[8];
+    f32 x, y, z;
+} pbGroupData_t;
+typedef struct { s16 x, y; u16 status; } pbRecordCell_t;
 
 typedef struct { s16 index; u16 step; u8 unk04[4]; pbGroupData_t *block; } pbRoundBlock_t;
 
 typedef struct { u32 count; pbGroupEntry_t *entry[0x40]; sdfMat_t *mat; } pbBlockDB_t;
 
-typedef struct { u8 flag[4]; void *block, *floor, *chara; } pbRecordSlot_t;
+typedef struct { u8 flag[4]; void *characters, *blocks, *floors; } pbRecordSlot_t;
 
 typedef struct { s32 pos; pbRecordSlot_t *slot; } pbRecord_t;
 
@@ -155,17 +170,42 @@ u32 pbPushRecord(pbProcHandle_t *p) {
 s8 pbCheckPopRecord(pbProcHandle_t *p) {
     pbRecord_t *rec = p->data.record;
     pbRecordSlot_t *slot = &rec->slot[(rec->pos + 29) % 30];
-    return slot->block != NULL;
+    return slot->characters != NULL;
 }
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbPopRecord);
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_blk);
 
-INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_flor);
+s32 pbAddRecord_flor(pbProcHandle_t *panel, pbGroupData_t *group)
+{
+    pbRecord_t *rec = panel->data.record;
+    pbRecordCell_t *cells;
+    pbBlockEntry_t *entry;
+    s32 position;
+    u32 i;
+
+    rec->slot[rec->pos].flag[3] = group->count;
+    if (rec->slot[rec->pos].floors != NULL) {
+        sdfChipFreeDelayedDirect(rec->slot[rec->pos].floors);
+    }
+    cells = sdfChipAllocDirect(group->count * sizeof(*cells));
+    position = rec->pos;
+    rec->slot[position].floors = cells;
+    i = 0;
+    if (group->count != 0) {
+        entry = group->blockEntries;
+        do {
+            cells[i].x = group->cellX + entry->x;
+            cells[i].y = group->cellY + entry->y;
+            cells[i].status = D_0054F5C4->map[cells[i].y][cells[i].x] & 0x800;
+            entry++;
+        } while (++i < group->count);
+    }
+    return position;
+}
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbAddRecord_char);
-
 
 INCLUDE_ASM(const s32, "pb/pbRecord", pbDumpRecordData);
 
