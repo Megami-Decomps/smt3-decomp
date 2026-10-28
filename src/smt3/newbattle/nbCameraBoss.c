@@ -1652,7 +1652,40 @@ void nbCameraBoss_BSBERU_E915_Init(void)
     nbCameraBoss_BSBERU_E915_Rate = 1.0f;
 }
 
-INCLUDE_ASM(const s32, "newbattle/nbCameraBoss", nbCameraBoss_BSBERU_E915_0_Set);
+void nbCameraBoss_BSBERU_E915_0_Set(void)
+{
+    sdfVector4_t from, to;
+    /* Both VU interpolations consume the same binary32 factor. */
+    union { f32 value; u32 bits; } blend;
+    nbCamera_t *camera;
+
+    effBTLModelAllShow();
+    camera = &pNbCamera;
+    blend.value = (s32)nbCameraBoss_BSBERU_E915_Frame / 200.0f;
+    from.x = -1028.459839f;
+    from.y = -172.94f;
+    from.z = -927.7399292f;
+    to.x = 621.57f;
+    to.y = -810.81f;
+    to.z = -849.51f;
+    SDF_VU0_LOADVECTOR_MEMOPS(from);
+    SDF_VU0_LOADVECTOR_B(&to);
+    SDF_VU0_INTERPOLATE(blend.bits);
+    SDF_VU0_STOREVECTOR(camera);
+    from.x = 0.67f;
+    from.y = -0.14f;
+    from.z = 0.73f;
+    to.x = -0.36f;
+    to.y = 0.44f;
+    to.z = 0.82f;
+    SDF_VU0_LOADVECTOR_MEMOPS(from);
+    SDF_VU0_LOADVECTOR_B(&to);
+    SDF_VU0_INTERPOLATE(blend.bits);
+    SDF_VU0_STOREVECTOR(&camera->direction);
+    camera->distance = 1.0f;
+    camera->fovy = 0.69813163f;
+    nbCameraBoss_BSBERU_E915_Frame++;
+}
 
 void nbCameraBoss_BSBERU_E915_1_Set(void)
 {
