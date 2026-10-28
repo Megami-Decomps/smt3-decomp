@@ -141,7 +141,48 @@ void pipeMessStartIdx(void)
     }
 }
 
-INCLUDE_ASM(const s32, "pipe/pipeResult", pipeMessInit);
+extern void *pipeMessData;
+extern s8 pipeMessCount, messCount, pipeMessMax;
+extern u8 messIdx;
+extern s32 mapIndex, pipeObjList, pipeObjTail, myMaka;
+extern u32 D_00551810;
+extern s32 D_00551818;
+extern void *sdfDevLoadFileEx(const char *path, u32 *data, u32 *size);
+extern s8 fclInitMessage(void *data);
+extern void DEBUG_PRINT(const char *format, ...);
+
+const char D_00548F18[24] = "/pipe/pipemes.bmd";
+const char D_00548F30[24] = "MAKA ALL Complete!!\n";
+
+void pipeMessInit(void) {
+    pipeMessData = sdfDevLoadFileEx(D_00548F18, &D_00551810, NULL);
+    fclInitMessage((void *)D_00551810);
+    if (pipeObjTail < 8) {
+        D_00551818 = pipeObjList * 5 + (100 << pipeObjTail) - 100;
+    } else {
+        s32 value = 9999;
+        D_00551818 = value * pipeObjTail + pipeObjList * 5 - 57293;
+    }
+    if (D_00551818 == myMaka) {
+        DEBUG_PRINT(D_00548F30);
+        pipeMessCount = 1;
+        messIdx = 0;
+    } else {
+        pipeMessCount = 0;
+        messIdx = 1;
+    }
+    messCount = 0;
+    if (mapIndex == 1) {
+        pipeMessMax = 1;
+    } else if (mapIndex < 10) {
+        pipeMessMax = mapIndex / 2 + 1;
+    } else if (mapIndex == 10) {
+        pipeMessMax = 6;
+    } else if (mapIndex == 11) {
+        pipeMessMax = 7;
+    }
+}
+
 
 void pipeFreeMessage(void)
 {
